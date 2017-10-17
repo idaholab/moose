@@ -49,6 +49,8 @@
 []
 
 [Outputs]
+  csv = true
+  console = true
   [./out]
     type = Exodus
   [../]
@@ -161,7 +163,7 @@
 [Materials]
   [./const]
     type = GenericConstantMaterial
-    block = 0
+    block = 'volume'
     prop_names = 'rho mu'
     prop_values = '1  1'
   [../]
@@ -171,5 +173,24 @@
   [./inlet_func]
     type = ParsedFunction
     value = '-4 * x^2 + 1'
+  [../]
+[]
+
+[Postprocessors]
+  [./flow_in]
+    type = VolumetricFlowRate
+    vel_x = vel_x
+    vel_y = vel_y
+    boundary = 'bottom'
+    outputs = 'console csv'
+    execute_on = 'timestep_end'
+  [../]
+  [./flow_out]
+    type = VolumetricFlowRate
+    vel_x = vel_x
+    vel_y = vel_y
+    boundary = 'top'
+    outputs = 'console csv'
+    execute_on = 'timestep_end'
   [../]
 []

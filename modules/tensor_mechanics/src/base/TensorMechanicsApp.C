@@ -84,6 +84,7 @@
 #include "ComputeThermalExpansionEigenstrain.h"
 #include "ComputeMeanThermalExpansionFunctionEigenstrain.h"
 #include "ComputeInstantaneousThermalExpansionFunctionEigenstrain.h"
+#include "ComputeReducedOrderEigenstrain.h"
 #include "ComputeVolumetricEigenstrain.h"
 #include "ComputeConcentrationDependentElasticityTensor.h"
 #include "FiniteStrainHyperElasticViscoPlastic.h"
@@ -308,6 +309,7 @@ TensorMechanicsApp::registerObjects(Factory & factory)
   registerMaterial(ComputeThermalExpansionEigenstrain);
   registerMaterial(ComputeMeanThermalExpansionFunctionEigenstrain);
   registerMaterial(ComputeInstantaneousThermalExpansionFunctionEigenstrain);
+  registerMaterial(ComputeReducedOrderEigenstrain);
   registerMaterial(ComputeVolumetricEigenstrain);
   registerMaterial(ComputeConcentrationDependentElasticityTensor);
   registerMaterial(FiniteStrainHyperElasticViscoPlastic);

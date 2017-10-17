@@ -139,6 +139,7 @@
     input = 'hex20.i'
     csvdiff = 'hex20_out.csv'
     copy_files = meshes
+    compiler = 'GCC CLANG' # this may not be related to superlu_dist, but we need to move forward #10084 
   [../]
 
   [./rz_quad8]
