@@ -78,6 +78,23 @@ StiffenedGasFluidProperties::s(Real v, Real u) const
 }
 
 void
+StiffenedGasFluidProperties::s_from_h_p(Real h, Real p, Real & s, Real & ds_dh, Real & ds_dp) const
+{
+  const Real aux = (p + _p_inf) * std::pow((h - _q) / (_gamma * _cv), -_gamma / (_gamma - 1));
+  if (aux <= 0.0)
+    mooseError(name(), ": Non-positive argument in the ln() function.");
+
+  const Real daux_dh = (p + _p_inf) *
+                       std::pow((h - _q) / (_gamma * _cv), -_gamma / (_gamma - 1) - 1) *
+                       (-_gamma / (_gamma - 1)) / (_gamma * _cv);
+  const Real daux_dp = std::pow((h - _q) / (_gamma * _cv), -_gamma / (_gamma - 1));
+
+  s = _q_prime - (_gamma - 1) * _cv * std::log(aux);
+  ds_dh = -(_gamma - 1) * _cv / aux * daux_dh;
+  ds_dp = -(_gamma - 1) * _cv / aux * daux_dp;
+}
+
+void
 StiffenedGasFluidProperties::dp_duv(
     Real v, Real u, Real & dp_dv, Real & dp_du, Real & dT_dv, Real & dT_du) const
 {
