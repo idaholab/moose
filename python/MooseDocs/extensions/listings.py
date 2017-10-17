@@ -99,8 +99,8 @@ class ListingPattern(MooseMarkdownCommon, Pattern):
     def defaultSettings():
         settings = MooseMarkdownCommon.defaultSettings()
         settings['strip-header'] = (True, "When True the MOOSE header is removed for display.")
-        settings['caption'] = (None, "The text caption, if an empty string is provided a link to " \
-                                     "the filename is created, if None is provided no caption is " \
+        settings['caption'] = (None, "The text caption, if an empty string is provided a link to "
+                                     "the filename is created, if None is provided no caption is "
                                      "applied, otherwise the text given is used.")
         settings['language'] = (None, "The language to utilize for providing syntax highlighting.")
         settings['link'] = (True, "Include a link to the filename in the caption.")
@@ -108,18 +108,20 @@ class ListingPattern(MooseMarkdownCommon, Pattern):
         settings['prefix'] = ('', "Text to include prior to the included text.")
         settings['suffix'] = ('', "Text to include after to the included text.")
         settings['indent'] = (0, "The level of indenting to apply to the included text.")
-        settings['strip-leading-whitespace'] = (False, "When True leading white-space is removed " \
+        settings['strip-leading-whitespace'] = (False, "When True leading white-space is removed "
                                                        "from the included text.")
         settings['counter'] = ('listing', "The counter group to associate wit this command.")
-        settings['line'] = (None, "A portion of text that unique identifies a single line to " \
+        settings['line'] = (None, "A portion of text that unique identifies a single line to "
                                   "include.")
-        settings['start'] = (None, "A portion of text that unique identifies the starting " \
-                                   "location for including text, if not provided the beginning " \
+        settings['start'] = (None, "A portion of text that unique identifies the starting "
+                                   "location for including text, if not provided the beginning "
                                    "of the file is utilized.")
-        settings['end'] = (None, "A portion of text that unique identifies the ending location " \
-                                 "for including text, if not provided the end of the file is " \
+        settings['end'] = (None, "A portion of text that unique identifies the ending location "
+                                 "for including text, if not provided the end of the file is "
                                  "used. By default this line is not included in the display.")
-        settings['include-end'] = (False, "When True the texted captured by the 'end' setting is " \
+        settings['include-start'] = (True, "When False the texted captured by the 'start' setting "
+                                           "is excluded in the displayed text.")
+        settings['include-end'] = (False, "When True the texted captured by the 'end' setting is "
                                           "included in the displayed text.")
         settings['pre-style'] = ("overflow-y:scroll;max-height:350px",
                                  "Style attributes to apply to the code area.")
@@ -270,6 +272,7 @@ class ListingPattern(MooseMarkdownCommon, Pattern):
             content = self.extractLineRange(filename,
                                             settings['start'],
                                             settings['end'],
+                                            settings['include-start'],
                                             settings['include-end'])
 
         else:
@@ -300,7 +303,7 @@ class ListingPattern(MooseMarkdownCommon, Pattern):
         return content
 
     @staticmethod
-    def extractLineRange(filename, start, end, include_end):
+    def extractLineRange(filename, start, end, include_start, include_end):
         """
         Function for extracting content between start/end strings.
 
@@ -308,6 +311,7 @@ class ListingPattern(MooseMarkdownCommon, Pattern):
           filename[str]: The name of the file to examine.
           start[str|None]: The starting line (when None is provided the beginning is used).
           end[str|None]: The ending line (when None is provided the end is used).
+          include-start[bool]: If True then the start string is included
           include-end[bool]: If True then the end string is included
         """
 
@@ -322,7 +326,7 @@ class ListingPattern(MooseMarkdownCommon, Pattern):
         if start:
             for i in range(end_idx):
                 if start in lines[i]:
-                    start_idx = i
+                    start_idx = i if include_start else i+1
                     break
         if end:
             for i in range(start_idx, end_idx):

@@ -19,6 +19,7 @@
 #include "MooseTypes.h"
 #include "MooseUtils.h"
 #include "MultiMooseEnum.h"
+#include "ExecFlagEnum.h"
 
 #include "pcrecpp.h"
 
@@ -244,6 +245,8 @@ InputParameters::isParamValid(const std::string & name) const
     return get<MooseEnum>(name).isValid();
   else if (have_parameter<MultiMooseEnum>(name))
     return get<MultiMooseEnum>(name).isValid();
+  else if (have_parameter<ExecFlagEnum>(name))
+    return get<ExecFlagEnum>(name).isValid();
   else
     return _params.count(name) > 0 && _params.at(name)._valid;
 }
@@ -638,6 +641,7 @@ InputParameters::applySpecificParameters(const InputParameters & common,
   // Loop through the common parameters
   for (const auto & it : common)
   {
+
     // Common parameter name
     const std::string & common_name = it.first;
 

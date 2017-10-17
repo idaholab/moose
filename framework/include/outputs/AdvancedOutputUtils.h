@@ -17,7 +17,7 @@
 
 // MOOSE includes
 #include "MooseError.h"
-#include "MultiMooseEnum.h"
+#include "ExecFlagEnum.h"
 
 // Forward declarations
 class InputParameters;
@@ -48,7 +48,7 @@ struct OutputData
 /**
  * In newer versions of Clang calling operator[] on a map with a component that
  * has a default constructor is an error, thus utilizing a map directly to store
- * a MultiMooseEnum is not possible.
+ * a ExecFlagEnum is not possible.
  *
  * This template class is a map wrapper that provides the basic map-like functionality
  * for accessing map types with operator[] by using find internally. It also produces
@@ -117,17 +117,17 @@ protected:
  * the output types (e.g., execute_postprocessors_on) are stored in a map.
  *
  * This allows for iterative access to these parameters, which makes creating
- * generic code (e.g., AdvancedOutput::shouldOutput) possible. However, MultiMooseEnum
+ * generic code (e.g., AdvancedOutput::shouldOutput) possible. However, ExecFlagEnum
  * has a private constructor, so calling operator[] on the map is a compile time error.
  *
  * To get around this and to provide a more robust storage structure, one that will error
  * if the wrong output name is given, this warehouse was created. For the purposes of the
  * AdvancedOutput object this warehouse functions exactly like a std::map, but provides
- * an operator[] that works with MultiMooseEnum and errors if called on an invalid key.
+ * an operator[] that works with ExecFlagEnum and errors if called on an invalid key.
  *
  * @see OutputMapWrapper OutputDataWarehouse
  */
-class OutputOnWarehouse : public OutputMapWrapper<MultiMooseEnum>
+class OutputOnWarehouse : public OutputMapWrapper<ExecFlagEnum>
 {
 public:
   /**
@@ -135,7 +135,7 @@ public:
    * @param execute_on The general "execute_on" settings for the object.
    * @param parameters The parameters object holding data for the class to use.
    */
-  OutputOnWarehouse(const MultiMooseEnum & execute_on, const InputParameters & parameters);
+  OutputOnWarehouse(const ExecFlagEnum & execute_on, const InputParameters & parameters);
 };
 
 /**

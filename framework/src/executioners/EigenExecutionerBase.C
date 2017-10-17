@@ -96,21 +96,20 @@ EigenExecutionerBase::init()
   _eigen_sys.initSystemSolutionOld(MooseEigenSystem::EIGEN, 0.0);
 
   // check when the postprocessors are evaluated
-  ExecFlagType bx_execflag =
-      _problem.getUserObject<UserObject>(getParam<PostprocessorName>("bx_norm")).execBitFlags();
-  if ((bx_execflag & EXEC_LINEAR) == EXEC_NONE)
+  const ExecFlagEnum & bx_exec =
+      _problem.getUserObject<UserObject>(getParam<PostprocessorName>("bx_norm")).getExecuteOnEnum();
+  if (!bx_exec.contains(EXEC_LINEAR))
     mooseError("Postprocessor " + getParam<PostprocessorName>("bx_norm") +
                " requires execute_on = 'linear'");
 
   if (isParamValid("normalization"))
-    _norm_execflag =
-        _problem.getUserObject<UserObject>(getParam<PostprocessorName>("normalization"))
-            .execBitFlags();
+    _norm_exec = _problem.getUserObject<UserObject>(getParam<PostprocessorName>("normalization"))
+                     .getExecuteOnEnum();
   else
-    _norm_execflag = bx_execflag;
+    _norm_exec = bx_exec;
 
   // check if _source_integral has been evaluated during initialSetup()
-  if ((bx_execflag & EXEC_INITIAL) == EXEC_NONE)
+  if (!bx_exec.contains(EXEC_INITIAL))
     _problem.execute(EXEC_LINEAR);
 
   if (_source_integral == 0.0)
@@ -179,11 +178,11 @@ EigenExecutionerBase::inversePowerIteration(unsigned int min_iter,
 
   // obtain the solution diff
   const PostprocessorValue * solution_diff = NULL;
-  if (xdiff != "")
+  if (!xdiff.empty())
   {
     solution_diff = &getPostprocessorValueByName(xdiff);
-    ExecFlagType xdiff_execflag = _problem.getUserObject<UserObject>(xdiff).execBitFlags();
-    if ((xdiff_execflag & EXEC_LINEAR) == EXEC_NONE)
+    const ExecFlagEnum & xdiff_exec = _problem.getUserObject<UserObject>(xdiff).getExecuteOnEnum();
+    if (!xdiff_exec.contains(EXEC_LINEAR))
       mooseError("Postprocessor " + xdiff + " requires execute_on = 'linear'");
   }
 
@@ -380,14 +379,15 @@ EigenExecutionerBase::postExecute()
   }
 
   Real s = 1.0;
-  if (_norm_execflag & EXEC_CUSTOM)
+  if (_norm_exec.contains(EXEC_CUSTOM))
   {
     _console << " Cannot let the normalization postprocessor on custom.\n";
     _console << " Normalization is abandoned!" << std::endl;
   }
   else
   {
-    s = normalizeSolution(_norm_execflag & (EXEC_TIMESTEP_END | EXEC_LINEAR));
+    bool force = _norm_exec.contains(EXEC_TIMESTEP_END) || _norm_exec.contains(EXEC_LINEAR);
+    s = normalizeSolution(force);
     if (!MooseUtils::absoluteFuzzyEqual(s, 1.0))
       _console << " Solution is rescaled with factor " << s << " for normalization!" << std::endl;
   }
@@ -420,14 +420,13 @@ EigenExecutionerBase::normalizeSolution(bool force)
     // FIXME: we assume linear scaling here!
     _eigen_sys.scaleSystemSolution(MooseEigenSystem::EIGEN, scaling);
     // update all aux variables and user objects
-    for (unsigned int i = 0; i < Moose::exec_types.size(); i++)
-    {
-      // EXEC_CUSTOM is special, should be treated only by specifically designed executioners.
-      if (Moose::exec_types[i] == EXEC_CUSTOM)
-        continue;
 
-      _problem.execute(Moose::exec_types[i]);
-    }
+    _problem.execute(EXEC_INITIAL);
+    _problem.execute(EXEC_TIMESTEP_BEGIN);
+    _problem.execute(EXEC_NONLINEAR);
+    _problem.execute(EXEC_LINEAR);
+    _problem.execute(EXEC_TIMESTEP_END);
+    _problem.execute(EXEC_SUBDOMAIN);
   }
   return scaling;
 }

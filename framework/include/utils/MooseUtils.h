@@ -18,6 +18,7 @@
 #include "HashMap.h"
 #include "MaterialProperty.h" // MaterialProperties
 #include "InfixIterator.h"
+#include "MooseEnumItem.h"
 
 // C++ includes
 #include <string>
@@ -27,6 +28,9 @@
 #include <iterator>
 
 // Forward Declarations
+class InputParameters;
+class ExecFlagEnum;
+
 namespace libMesh
 {
 class Elem;
@@ -35,6 +39,7 @@ namespace Parallel
 class Communicator;
 }
 }
+class MultiMooseEnum;
 
 namespace MooseUtils
 {
@@ -53,6 +58,11 @@ void escape(std::string & str);
  * Standard scripting language trim function
  */
 std::string trim(const std::string & str, const std::string & white_space = " \t\n\v\f\r");
+
+/**
+ * Python like join method.
+ */
+std::string join(const std::vector<std::string> & values, const std::string & sep = ", ");
 
 /**
  * This function tokenizes a path and checks to see if it contains the string to look for
@@ -446,6 +456,11 @@ numDigits(const T & num)
 {
   return num > 9 ? static_cast<int>(std::log10(static_cast<double>(num))) + 1 : 1;
 }
+
+/**
+ * Return the default ExecFlagEnum for MOOSE.
+ */
+ExecFlagEnum getDefaultExecFlagEnum(const std::vector<ExecFlagType> & current = {});
 }
 
 #endif // MOOSEUTILS_H

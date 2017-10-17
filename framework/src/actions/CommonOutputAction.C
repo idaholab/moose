@@ -99,11 +99,9 @@ validParams<CommonOutputAction>()
       "(may include Variables, ScalarVariables, and Postprocessor names).");
 
   // Add the 'execute_on' input parameter
-  params.addParam<MultiMooseEnum>(
-      "execute_on",
-      Output::getExecuteOptions("initial timestep_end"),
-      "Set to (initial|linear|nonlinear|timestep_end|timestep_begin|final|failed|custom) to "
-      "execute only at that moment (default: 'initial timestep_end')");
+  ExecFlagEnum exec_enum = MooseUtils::getDefaultExecFlagEnum({EXEC_INITIAL, EXEC_TIMESTEP_END});
+  exec_enum.addAvailableFlags({EXEC_FINAL, EXEC_FAILED});
+  params.addParam<ExecFlagEnum>("execute_on", exec_enum, exec_enum.getDocString());
 
   // Add special Console flags
   params.addParam<bool>(

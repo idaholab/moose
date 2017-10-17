@@ -28,8 +28,9 @@ validParams<CavityPressureUOAction>()
       0,
       "The amount of time during which the pressure will ramp from zero to its true value");
   params.addParam<std::string>("output", "The name to use for the cavity pressure value");
-  params += validParams<SetupInterface>();
-  params.set<MultiMooseEnum>("execute_on") = "linear";
+
+  ExecFlagEnum exec_enum = MooseUtils::getDefaultExecFlagEnum({EXEC_LINEAR});
+  params.addParam<ExecFlagEnum>("execute_on", exec_enum, exec_enum.getDocString());
   return params;
 }
 
@@ -50,7 +51,7 @@ CavityPressureUOAction::act()
   std::string name = _name + "UserObject";
 
   InputParameters params = _factory.getValidParams("CavityPressureUserObject");
-  params.set<MultiMooseEnum>("execute_on") = getParam<MultiMooseEnum>("execute_on");
+  params.set<ExecFlagEnum>("execute_on") = getParam<ExecFlagEnum>("execute_on");
   params.set<Real>("initial_pressure") = _initial_pressure;
   params.set<std::vector<PostprocessorName>>("material_input") = _material_input;
   params.set<Real>("R") = _R;

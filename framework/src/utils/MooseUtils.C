@@ -16,6 +16,9 @@
 #include "MooseUtils.h"
 #include "MooseError.h"
 #include "MaterialProperty.h"
+#include "MultiMooseEnum.h"
+#include "InputParameters.h"
+#include "ExecFlagEnum.h"
 
 #include "libmesh/elem.h"
 
@@ -99,6 +102,14 @@ trim(const std::string & str, const std::string & white_space)
     return ""; // no content
   const auto end = str.find_last_not_of(white_space);
   return str.substr(begin, end - begin + 1);
+}
+
+std::string
+join(const std::vector<std::string> & values, const std::string & sep)
+{
+  std::ostringstream oss;
+  std::copy(values.begin(), values.end(), infix_ostream_iterator<std::string>(oss, sep.c_str()));
+  return oss.str();
 }
 
 bool
@@ -559,6 +570,21 @@ toUpper(const std::string & name)
   std::string upper(name);
   std::transform(upper.begin(), upper.end(), upper.begin(), ::toupper);
   return upper;
+}
+
+ExecFlagEnum
+getDefaultExecFlagEnum(const std::vector<ExecFlagType> & current)
+{
+  ExecFlagEnum exec_enum = ExecFlagEnum();
+  exec_enum.addAvailableFlags({EXEC_NONE,
+                               EXEC_INITIAL,
+                               EXEC_LINEAR,
+                               EXEC_NONLINEAR,
+                               EXEC_TIMESTEP_END,
+                               EXEC_TIMESTEP_BEGIN,
+                               EXEC_CUSTOM});
+  exec_enum = current;
+  return exec_enum;
 }
 
 } // MooseUtils namespace

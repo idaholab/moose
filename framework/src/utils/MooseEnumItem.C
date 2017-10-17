@@ -64,15 +64,15 @@ MooseEnumItem::operator!=(const std::string & value) const
 }
 
 bool
-MooseEnumItem::operator==(const MooseEnumItem &) const
+MooseEnumItem::operator==(const MooseEnumItem & item) const
 {
-  mooseError("Direct comparison between MooseEnumItems is not supported.");
+  return _id == item.id() && _name == MooseUtils::toUpper(item.name());
 }
 
 bool
-MooseEnumItem::operator!=(const MooseEnumItem &) const
+MooseEnumItem::operator!=(const MooseEnumItem & item) const
 {
-  mooseError("Direct comparison between MooseEnumItems is not supported.");
+  return _id != item.id() && _name != MooseUtils::toUpper(item.name());
 }
 
 std::ostream &

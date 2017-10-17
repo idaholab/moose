@@ -106,7 +106,7 @@ PorousFlowActionBase::addSaturationAux(unsigned phase)
     params.set<MaterialPropertyName>("property") = "PorousFlow_saturation_qp";
     params.set<unsigned>("index") = phase;
     params.set<AuxVariableName>("variable") = "saturation" + phase_str;
-    params.set<MultiMooseEnum>("execute_on") = "timestep_end";
+    params.set<ExecFlagEnum>("execute_on") = EXEC_TIMESTEP_END;
     _problem->addAuxKernel(aux_kernel_type, aux_kernel_name, params);
   }
 }
@@ -134,7 +134,7 @@ PorousFlowActionBase::addDarcyAux(const RealVectorValue & gravity)
 
     params.set<RealVectorValue>("gravity") = gravity;
     params.set<UserObjectName>("PorousFlowDictator") = _dictator_name;
-    params.set<MultiMooseEnum>("execute_on") = "timestep_end";
+    params.set<ExecFlagEnum>("execute_on") = EXEC_TIMESTEP_END;
 
     std::string aux_kernel_name = "PorousFlowActionBase_Darcy_x_Aux";
     params.set<MooseEnum>("component") = "x";
@@ -193,7 +193,7 @@ PorousFlowActionBase::addStressAux()
     InputParameters params = _factory.getValidParams(aux_kernel_type);
 
     params.set<MaterialPropertyName>("rank_two_tensor") = "stress";
-    params.set<MultiMooseEnum>("execute_on") = "timestep_end";
+    params.set<ExecFlagEnum>("execute_on") = EXEC_TIMESTEP_END;
 
     std::string aux_kernel_name = "PorousFlowAction_stress_xx";
     params.set<AuxVariableName>("variable") = "stress_xx";

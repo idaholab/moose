@@ -65,8 +65,8 @@ AddNodalNormalsAction::act()
   }
 
   // Set the execute options
-  MultiMooseEnum execute_options(SetupInterface::getExecuteOptions());
-  execute_options = "initial timestep_begin";
+  ExecFlagEnum execute_options =
+      MooseUtils::getDefaultExecFlagEnum({EXEC_INITIAL, EXEC_TIMESTEP_BEGIN});
 
   // Create the NodalNormalsPreprocessor UserObject
   if (_current_task == "add_postprocessor")
@@ -74,7 +74,7 @@ AddNodalNormalsAction::act()
     InputParameters pars = _factory.getValidParams("NodalNormalsPreprocessor");
     pars.set<Order>("fe_order") = order;
     pars.set<FEFamily>("fe_family") = family;
-    pars.set<MultiMooseEnum>("execute_on") = execute_options;
+    pars.set<ExecFlagEnum>("execute_on") = execute_options;
     pars.set<std::vector<BoundaryName>>("surface_boundary") = _boundary;
 
     if (_has_corners)
@@ -89,7 +89,7 @@ AddNodalNormalsAction::act()
     if (_has_corners)
     {
       InputParameters pars = _factory.getValidParams("NodalNormalsCorner");
-      pars.set<MultiMooseEnum>("execute_on") = execute_options;
+      pars.set<ExecFlagEnum>("execute_on") = execute_options;
       pars.set<std::vector<BoundaryName>>("boundary") = _boundary;
       pars.set<BoundaryName>("corner_boundary") = _corner_boundary;
       _problem->addUserObject("NodalNormalsCorner", "nodal_normals_corner", pars);
@@ -98,7 +98,7 @@ AddNodalNormalsAction::act()
     /// Create the NodalNormalsEvaluator UserObject
     {
       InputParameters pars = _factory.getValidParams("NodalNormalsEvaluator");
-      pars.set<MultiMooseEnum>("execute_on") = execute_options;
+      pars.set<ExecFlagEnum>("execute_on") = execute_options;
       pars.set<std::vector<BoundaryName>>("boundary") = _boundary;
       _problem->addUserObject("NodalNormalsEvaluator", "nodal_normals_evaluator", pars);
     }

@@ -36,7 +36,7 @@ protected:
   virtual void takeStep();
 
   /// name of the postprocessor for evaluating |x-xprevious|; empty means that no postprocessor is provided and power iteration will not check convergence based on it
-  std::string _solution_diff_name;
+  const PostprocessorName & _solution_diff_name;
   /// postprocessor for evaluating |x-xprevious|
   const PostprocessorValue * _solution_diff;
   /// minimum number of power iterations

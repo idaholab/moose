@@ -481,6 +481,25 @@
 
 #include <unistd.h>
 
+// Define the available execute flags for MOOSE. The flags using a hex value are setup to retain
+// the same numbers that were utilized with the ExecFlagType was a proper enum. This was done for
+// keeping existing applications working using the deprecated flags. In the future, as in the
+// EXEC_SAME_AS_MULTIAPP flag, there is no reason to keep these flags bitwise comparable because
+// the MultiMooseEnum that is used to store these (see SetupInterface) has convenience methods for
+// determining the what flags are active.
+const ExecFlagType EXEC_NONE("NONE", 0x00);                     // 0
+const ExecFlagType EXEC_INITIAL("INITIAL", 0x01);               // 1
+const ExecFlagType EXEC_LINEAR("LINEAR", 0x02);                 // 2
+const ExecFlagType EXEC_NONLINEAR("NONLINEAR", 0x04);           // 4
+const ExecFlagType EXEC_TIMESTEP_END("TIMESTEP_END", 0x08);     // 8
+const ExecFlagType EXEC_TIMESTEP_BEGIN("TIMESTEP_BEGIN", 0x10); // 16
+const ExecFlagType EXEC_FINAL("FINAL", 0x20);                   // 32
+const ExecFlagType EXEC_FORCED("FORCED", 0x40);                 // 64
+const ExecFlagType EXEC_FAILED("FAILED", 0x80);                 // 128
+const ExecFlagType EXEC_CUSTOM("CUSTOM", 0x100);                // 256
+const ExecFlagType EXEC_SUBDOMAIN("SUBDOMAIN", 0x200);          // 512
+const ExecFlagType EXEC_SAME_AS_MULTIAPP("SAME_AS_MULTIAPP", 1000);
+
 namespace Moose
 {
 
@@ -1288,5 +1307,7 @@ bool _warnings_are_errors = false;
 bool _deprecated_is_error = false;
 
 bool _throw_on_error = false;
+
+ExecFlagEnum execute_flags = ExecFlagEnum();
 
 } // namespace Moose

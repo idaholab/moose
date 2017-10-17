@@ -23,9 +23,11 @@ validParams<Control>()
   params += validParams<TransientInterface>();
   params += validParams<SetupInterface>();
   params += validParams<FunctionInterface>();
+
+  params.set<ExecFlagEnum>("execute_on", true) =
+      std::vector<ExecFlagType>({EXEC_INITIAL, EXEC_TIMESTEP_END});
   params.registerBase("Control");
 
-  params.set<MultiMooseEnum>("execute_on") = Control::getExecuteOptions();
   params.addParam<std::vector<std::string>>(
       "depends_on",
       "The Controls that this control relies upon (i.e. must execute before this one)");
@@ -50,7 +52,8 @@ Control::Control(const InputParameters & parameters)
 MultiMooseEnum
 Control::getExecuteOptions()
 {
-  return MultiMooseEnum("none=0x00 initial=0x01 linear=0x02 nonlinear=0x04 timestep_end=0x08 "
-                        "timestep_begin=0x10 custom=0x100 subdomain=0x200",
-                        "initial timestep_end");
+  ::mooseDeprecated("The 'getExecuteOptions' was replaced by the ExecFlagEnum class because MOOSE "
+                    "was updated to use this for the execute flags and the new function provides "
+                    "additional arguments for modification of the enum.");
+  return MooseUtils::getDefaultExecFlagEnum({EXEC_INITIAL, EXEC_TIMESTEP_END});
 }

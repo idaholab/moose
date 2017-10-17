@@ -278,7 +278,8 @@ DomainIntegralAction::act()
     const std::string uo_type_name("CrackFrontDefinition");
 
     InputParameters params = _factory.getValidParams(uo_type_name);
-    params.set<MultiMooseEnum>("execute_on") = "initial timestep_end";
+    params.set<ExecFlagEnum>("execute_on") =
+        std::vector<ExecFlagType>({EXEC_INITIAL, EXEC_TIMESTEP_END});
     params.set<MooseEnum>("crack_direction_method") = _direction_method_moose_enum;
     params.set<MooseEnum>("crack_end_direction_method") = _end_direction_method_moose_enum;
     if (_have_crack_direction_vector)
@@ -376,7 +377,8 @@ DomainIntegralAction::act()
     }
 
     InputParameters params = _factory.getValidParams(ak_type_name);
-    params.set<MultiMooseEnum>("execute_on") = "initial timestep_end";
+    params.set<ExecFlagEnum>("execute_on") =
+        std::vector<ExecFlagType>({EXEC_INITIAL, EXEC_TIMESTEP_END});
     params.set<UserObjectName>("crack_front_definition") = uo_name;
     params.set<bool>("use_displaced_mesh") = _use_displaced_mesh;
 
@@ -428,7 +430,7 @@ DomainIntegralAction::act()
         pp_base_name = "J";
       const std::string pp_type_name("JIntegral");
       InputParameters params = _factory.getValidParams(pp_type_name);
-      params.set<MultiMooseEnum>("execute_on") = "timestep_end";
+      params.set<ExecFlagEnum>("execute_on") = EXEC_TIMESTEP_END;
       params.set<UserObjectName>("crack_front_definition") = uo_name;
       params.set<bool>("convert_J_to_K") = _convert_J_to_K;
       if (_convert_J_to_K)
@@ -486,7 +488,7 @@ DomainIntegralAction::act()
         pp_type_name = "InteractionIntegralSM";
 
       InputParameters params = _factory.getValidParams(pp_type_name);
-      params.set<MultiMooseEnum>("execute_on") = "timestep_end";
+      params.set<ExecFlagEnum>("execute_on") = EXEC_TIMESTEP_END;
       params.set<UserObjectName>("crack_front_definition") = uo_name;
       params.set<bool>("use_displaced_mesh") = _use_displaced_mesh;
       if (_has_symmetry_plane)
@@ -579,7 +581,7 @@ DomainIntegralAction::act()
       const std::string ov_base_name(_output_variables[i]);
       const std::string pp_type_name("CrackFrontData");
       InputParameters params = _factory.getValidParams(pp_type_name);
-      params.set<MultiMooseEnum>("execute_on") = "timestep_end";
+      params.set<ExecFlagEnum>("execute_on") = EXEC_TIMESTEP_END;
       params.set<UserObjectName>("crack_front_definition") = uo_name;
       if (_treat_as_2d)
       {
@@ -605,7 +607,7 @@ DomainIntegralAction::act()
       std::string pp_base_name("Keq");
       const std::string pp_type_name("MixedModeEquivalentK");
       InputParameters params = _factory.getValidParams(pp_type_name);
-      params.set<MultiMooseEnum>("execute_on") = "timestep_end";
+      params.set<ExecFlagEnum>("execute_on") = EXEC_TIMESTEP_END;
       params.set<Real>("poissons_ratio") = _poissons_ratio;
       for (unsigned int ring_index = 0; ring_index < _ring_vec.size(); ++ring_index)
       {
@@ -677,7 +679,7 @@ DomainIntegralAction::act()
         }
         const std::string vpp_type_name("CrackDataSampler");
         InputParameters params = _factory.getValidParams(vpp_type_name);
-        params.set<MultiMooseEnum>("execute_on") = "timestep_end";
+        params.set<ExecFlagEnum>("execute_on") = EXEC_TIMESTEP_END;
         params.set<UserObjectName>("crack_front_definition") = uo_name;
         params.set<MooseEnum>("sort_by") = "id";
         params.set<MooseEnum>("position_type") = _position_type;
@@ -701,7 +703,7 @@ DomainIntegralAction::act()
       {
         const std::string vpp_type_name("VectorOfPostprocessors");
         InputParameters params = _factory.getValidParams(vpp_type_name);
-        params.set<MultiMooseEnum>("execute_on") = "timestep_end";
+        params.set<ExecFlagEnum>("execute_on") = EXEC_TIMESTEP_END;
         std::ostringstream vpp_name_stream;
         vpp_name_stream << _output_variables[i] << "_crack";
         std::vector<PostprocessorName> postprocessor_names;
@@ -720,7 +722,7 @@ DomainIntegralAction::act()
       std::string pp_base_name("Keq");
       const std::string vpp_type_name("CrackDataSampler");
       InputParameters params = _factory.getValidParams(vpp_type_name);
-      params.set<MultiMooseEnum>("execute_on") = "timestep_end";
+      params.set<ExecFlagEnum>("execute_on") = EXEC_TIMESTEP_END;
       params.set<UserObjectName>("crack_front_definition") = uo_name;
       params.set<MooseEnum>("sort_by") = "id";
       params.set<MooseEnum>("position_type") = _position_type;

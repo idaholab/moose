@@ -12,31 +12,7 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-// STL includes
-#include <vector>
+#include "MooseTestAppTypes.h"
+#include "MooseEnumItem.h"
 
-// MOOSE includes
-#include "MooseTypes.h"
-
-namespace Moose
-{
-
-// Currently there are 7 exec types (See MooseTypes.h)
-const std::vector<ExecFlagType>
-populateExecTypes()
-{
-  std::vector<ExecFlagType> exec_types(8);
-  exec_types[0] = EXEC_INITIAL;
-  exec_types[1] = EXEC_TIMESTEP_BEGIN;
-  exec_types[2] = EXEC_NONLINEAR;
-  exec_types[3] = EXEC_LINEAR;
-  exec_types[4] = EXEC_TIMESTEP_END;
-  exec_types[5] = EXEC_CUSTOM;
-  exec_types[6] = EXEC_SUBDOMAIN;
-  exec_types[7] = EXEC_FINAL;
-  return exec_types;
-}
-
-const std::vector<ExecFlagType> exec_types = populateExecTypes();
-
-} // namespace Moose
+const ExecFlagType EXEC_JUST_GO("JUST_GO", 12345);

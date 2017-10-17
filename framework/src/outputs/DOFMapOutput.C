@@ -41,7 +41,7 @@ validParams<DOFMapOutput>()
   params.addParam<std::string>("system_name", "nl0", "System to output");
 
   // By default this only executes on the initial timestep
-  params.set<MultiMooseEnum>("execute_on") = "initial";
+  params.set<ExecFlagEnum>("execute_on", true) = EXEC_INITIAL;
 
   return params;
 }

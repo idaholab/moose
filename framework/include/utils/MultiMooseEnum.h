@@ -16,15 +16,25 @@
 #define MULTIMOOSEENUM_H
 
 // MOOSE includes
+#include "Moose.h"
 #include "MooseEnumBase.h"
 
 // C++ includes
 #include <vector>
 
 // Forward declarations
+class MultiMooseEnum;
+class ExecFlagEnum;
 namespace libMesh
 {
 class Parameters;
+}
+
+namespace MooseUtils
+{
+MultiMooseEnum createExecuteOnEnum(const std::set<ExecFlagType> &,
+                                   const std::set<ExecFlagType> &,
+                                   const std::set<ExecFlagType> &);
 }
 
 typedef std::vector<MooseEnumItem>::const_iterator MooseEnumIterator;
@@ -93,6 +103,8 @@ public:
   MultiMooseEnum & operator=(const std::string & names);
   MultiMooseEnum & operator=(const std::vector<std::string> & names);
   MultiMooseEnum & operator=(const std::set<std::string> & names);
+  MultiMooseEnum & operator=(const std::vector<MooseEnumItem> & items);
+  MultiMooseEnum & operator=(const MooseEnumItem & item);
   ///@}
 
   ///@{
@@ -128,10 +140,9 @@ public:
 
   /**
    * Indexing operator
-   * Operator to retrieve an item from the MultiMooseEnum. The reference may not be used to change
-   * the item.
+   * Operator to retrieve an item from the MultiMooseEnum.
    * @param i index
-   * @returns a read/read-write reference to the item as an unsigned int.
+   * @returns the id of the MooseEnumItem at the supplied index
    */
   unsigned int get(unsigned int i) const;
 
@@ -163,6 +174,7 @@ public:
   // InputParameters and Output is allowed to create an empty enum but is responsible for
   // filling it in after the fact
   friend class libMesh::Parameters;
+  friend class SetupInterface;
 
   /// Operator for printing to iostreams
   friend std::ostream & operator<<(std::ostream & out, const MultiMooseEnum & obj);
@@ -170,18 +182,6 @@ public:
 protected:
   /// Check whether any of the current values are deprecated when called
   virtual void checkDeprecated() const override;
-
-private:
-  /**
-   * Private constructor for use by libmesh::Parameters
-   */
-  MultiMooseEnum();
-
-  /**
-   * Private constructor that can accept a MooseEnumBase for ::withOptionsFrom()
-   * @param other_enum - MooseEnumBase type to copy names and out-of-range data from
-   */
-  MultiMooseEnum(const MooseEnumBase & other_enum);
 
   /**
    * Helper method for all inserts and assignment operators
@@ -195,8 +195,24 @@ private:
   template <typename InputIterator>
   void remove(InputIterator first, InputIterator last);
 
+  /**
+   * Set the current items.
+   */
+  void setCurrentItems(const std::vector<MooseEnumItem> & current);
+
   /// The current id
   std::vector<MooseEnumItem> _current;
+
+  /**
+   * Protected constructor for use by libmesh::Parameters
+   */
+  MultiMooseEnum();
+
+  /**
+   * Protected constructor that can accept a MooseEnumBase for ::withOptionsFrom()
+   * @param other_enum - MooseEnumBase type to copy names and out-of-range data from
+   */
+  MultiMooseEnum(const MooseEnumBase & other_enum);
 };
 
 #endif // MULTIMOOSEENUM_H

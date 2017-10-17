@@ -25,7 +25,8 @@ validParams<ControlOutput>()
 {
   // Get the base class parameters
   InputParameters params = validParams<Output>();
-  params.set<MultiMooseEnum>("execute_on") = "initial timestep_begin";
+  params.set<ExecFlagEnum>("execute_on", true) =
+      std::vector<ExecFlagType>({EXEC_INITIAL, EXEC_TIMESTEP_BEGIN});
   params.addParam<bool>(
       "clear_after_output", true, "Clear the active control display after each output.");
   params.addParam<bool>("show_active_objects", true, "List active MooseObjects.");
@@ -44,14 +45,10 @@ ControlOutput::ControlOutput(const InputParameters & parameters)
 void
 ControlOutput::output(const ExecFlagType & type)
 {
-  switch (type)
-  {
-    case EXEC_INITIAL:
-      outputControls();
-      break;
-    default:
-      outputChangedControls();
-  }
+  if (type == EXEC_INITIAL)
+    outputControls();
+  else
+    outputChangedControls();
 
   if (_show_active_objects)
     outputActiveObjects();

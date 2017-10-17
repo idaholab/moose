@@ -35,7 +35,7 @@ ExampleConvection::ExampleConvection(const InputParameters & parameters)
     // over the domain.
     Kernel(parameters),
 
-    // This is the "Intialization List" it sets the values of class variables
+    // This is the "initialization List" it sets the values of class variables
     // Here we are grabbing the values of Parameters to use for a velocity vector
     _x(getParam<Real>("x")),
     _y(getParam<Real>("y")),

@@ -37,7 +37,8 @@ NodalAreaAction::act()
   _moose_object_pars.set<std::vector<VariableName>>("variable") = {"nodal_area_" + _name};
 
   mooseAssert(_problem, "Problem pointer is NULL");
-  _moose_object_pars.set<MultiMooseEnum>("execute_on") = "initial timestep_begin";
+  _moose_object_pars.set<ExecFlagEnum>("execute_on", true) =
+      std::vector<ExecFlagType>({EXEC_INITIAL, EXEC_TIMESTEP_BEGIN});
   _moose_object_pars.set<bool>("use_displaced_mesh") = true;
 
   _problem->addUserObject(

@@ -16,6 +16,8 @@
 
 #include "MooseEnum.h"
 #include "MultiMooseEnum.h"
+#include "ExecFlagEnum.h"
+#include "MooseUtils.h"
 
 #include <algorithm> // std::set_symmetric_difference
 
@@ -119,25 +121,24 @@ TEST(MooseEnum, multiTestOne)
 TEST(MooseEnum, testDeprecate)
 {
   // Intentionally misspelling
-  MooseEnum me1("one too three four", "too");
-
   try
   {
-    me1.deprecate("too", "two");
+    MooseEnum me("one too three four", "too");
+    me.deprecate("too", "two");
     FAIL() << "missing expected error";
   }
   catch (const std::exception & e)
   {
     std::string msg(e.what());
-
-    ASSERT_NE(msg.find("is deprecated, consider using"), std::string::npos)
+    ASSERT_NE(msg.find("Cannot deprecate the enum item too, since the replaced"), std::string::npos)
         << "failed with unexpected error: " << msg;
   }
 
-  me1 = "one";
   try
   {
-    me1 = "too";
+    MooseEnum me("one too two three four", "one");
+    me.deprecate("too", "two");
+    me = "too";
     FAIL() << "missing expected error";
   }
   catch (const std::exception & e)
@@ -147,13 +148,12 @@ TEST(MooseEnum, testDeprecate)
         << "failed with unexpected error: " << msg;
   }
 
-  MultiMooseEnum mme1("one too three four");
-  mme1.deprecate("too", "two");
-
-  mme1.push_back("one");
   try
   {
-    me1 = "too";
+    MultiMooseEnum mme("one too two three four");
+    mme.deprecate("too", "two");
+    mme.push_back("one");
+    mme = "too";
     FAIL() << "missing expected error";
   }
   catch (const std::exception & e)
@@ -192,6 +192,98 @@ TEST(MooseEnum, testErrors)
     ASSERT_NE(msg.find("You cannot place whitespace around the '=' character"), std::string::npos)
         << "failed with unexpected error: " << msg;
   }
+
+  // Duplicate IDs
+  try
+  {
+    MultiMooseEnum error_check("one=1 two=1");
+    FAIL() << "missing expected error";
+  }
+  catch (const std::exception & e)
+  {
+    std::string msg(e.what());
+    ASSERT_NE(
+        msg.find("The supplied id 1 already exists in the enumeration, cannot not add 'two'."),
+        std::string::npos)
+        << "failed with unexpected error: " << msg;
+  }
+
+  // Duplicate name
+  try
+  {
+    MultiMooseEnum error_check("one=1 two=2 one=3");
+    FAIL() << "missing expected error";
+  }
+  catch (const std::exception & e)
+  {
+    std::string msg(e.what());
+    ASSERT_NE(msg.find("The name 'ONE' already exists in the enumeration."), std::string::npos)
+        << "failed with unexpected error: " << msg;
+  }
+}
+
+TEST(MultiMooseEnum, testExecuteOn)
+{
+  ExecFlagEnum exec_enum = MooseUtils::getDefaultExecFlagEnum({EXEC_INITIAL});
+
+  // Checks that names are added and removed
+  EXPECT_EQ(exec_enum.getRawNames(),
+            "NONE INITIAL LINEAR NONLINEAR TIMESTEP_END TIMESTEP_BEGIN CUSTOM");
+  std::vector<std::string> opts = {
+      "NONE", "INITIAL", "LINEAR", "NONLINEAR", "TIMESTEP_END", "TIMESTEP_BEGIN", "CUSTOM"};
+  EXPECT_EQ(exec_enum.getNames(), opts);
+
+  // Check that added names can be used
+  EXPECT_TRUE(exec_enum.contains("initial"));
+  EXPECT_TRUE(exec_enum.contains(EXEC_INITIAL));
+
+  exec_enum.addAvailableFlags({EXEC_FINAL});
+  EXPECT_FALSE(exec_enum.contains("final"));
+  EXPECT_FALSE(exec_enum.contains(EXEC_FINAL));
+
+  exec_enum = "final";
+  EXPECT_TRUE(exec_enum.contains("final"));
+  EXPECT_TRUE(exec_enum.contains(EXEC_FINAL));
+
+  EXPECT_EQ(exec_enum.size(), 1);
+  EXPECT_EQ(exec_enum[0], "FINAL");
+  EXPECT_EQ(exec_enum.get(0), EXEC_FINAL);
+
+  // Error when bad name is removed
+  try
+  {
+    ExecFlagType WRONG("wrong", 99);
+    exec_enum.removeAvailableFlags({WRONG});
+    FAIL() << "missing expected error";
+  }
+  catch (const std::exception & e)
+  {
+    std::string msg(e.what());
+    ASSERT_NE(msg.find("The supplied item 'wrong' is not an available enum item for the "
+                       "MultiMooseEnum object"),
+              std::string::npos)
+        << "failed with unexpected error: " << msg;
+  }
+
+  try
+  {
+    exec_enum.removeAvailableFlags({EXEC_FINAL});
+    FAIL() << "missing expected error";
+  }
+  catch (const std::exception & e)
+  {
+    std::string msg(e.what());
+    ASSERT_NE(msg.find("The supplied item 'FINAL' is a selected item, thus it can not be removed."),
+              std::string::npos)
+        << "failed with unexpected error: " << msg;
+  }
+
+  // MultiMooseEnum doc string generation
+  std::string doc = exec_enum.getDocString();
+  EXPECT_EQ(doc,
+            "The list of flag(s) indicating when this object should be executed, the "
+            "available options include 'NONE', 'INITIAL', 'LINEAR', 'NONLINEAR', 'TIMESTEP_END', "
+            "'TIMESTEP_BEGIN', 'FINAL', 'CUSTOM').");
 }
 
 TEST(MooseEnum, compareCurrent)

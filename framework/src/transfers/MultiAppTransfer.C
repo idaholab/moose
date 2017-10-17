@@ -37,10 +37,10 @@ validParams<MultiAppTransfer>()
 
   // MultiAppTransfers by default will execute with their associated MultiApp. These flags will be
   // added by FEProblemBase when the transfer is added.
-  MultiMooseEnum multi_transfer_execute_on(params.get<MultiMooseEnum>("execute_on").getRawNames() +
-                                               " same_as_multiapp",
-                                           "same_as_multiapp");
-  params.set<MultiMooseEnum>("execute_on") = multi_transfer_execute_on;
+  ExecFlagEnum & exec_enum = params.set<ExecFlagEnum>("execute_on", true);
+  exec_enum.addAvailableFlags({EXEC_SAME_AS_MULTIAPP});
+  exec_enum = EXEC_SAME_AS_MULTIAPP;
+  params.setDocString("execute_on", exec_enum.getDocString());
 
   params.addParam<bool>(
       "check_multiapp_execute_on",
@@ -56,33 +56,17 @@ validParams<MultiAppTransfer>()
   return params;
 }
 
-// Free function to clear special execute_on option before initializing SetupInterface
-const InputParameters &
-removeSpecialOption(const InputParameters & parameters)
-{
-  InputParameters * params = const_cast<InputParameters *>(&parameters);
-  params->set<MultiMooseEnum>("execute_on").erase("SAME_AS_MULTIAPP");
-  return *params;
-}
-
 MultiAppTransfer::MultiAppTransfer(const InputParameters & parameters)
-  : /**
-     * Here we need to remove the special option that indicates to the user that this object will
-     * follow it's associated
-     * Multiapp execute_on. This non-standard option is not understood by SetupInterface. In the
-     * absence of any execute_on
-     * parameters, will populate the execute_on MultiMooseEnum with the values from the associated
-     * MultiApp (see execFlags).
-     */
-    Transfer(removeSpecialOption(parameters)),
+  : Transfer(parameters),
     _multi_app(_fe_problem.getMultiApp(getParam<MultiAppName>("multi_app"))),
     _direction(getParam<MooseEnum>("direction")),
     _displaced_source_mesh(false),
     _displaced_target_mesh(false)
 {
-  if (getParam<bool>("check_multiapp_execute_on") && (execFlags() != _multi_app->execFlags()))
-    mooseDoOnce(mooseWarning(
-        "MultiAppTransfer execute_on flags do not match associated Multiapp execute_on flags"));
+  bool check = getParam<bool>("check_multiapp_execute_on");
+  if (check && (getExecuteOnEnum() != _multi_app->getExecuteOnEnum()))
+    mooseDoOnce(mooseWarning("MultiAppTransfer execute_on flags do not match associated Multiapp "
+                             "execute_on flags"));
 }
 
 void
@@ -96,10 +80,11 @@ MultiAppTransfer::variableIntegrityCheck(const AuxVariableName & var_name) const
 const std::vector<ExecFlagType> &
 MultiAppTransfer::execFlags() const
 {
-  if (Transfer::execFlags().empty())
-    return _multi_app->execFlags();
-  else
-    return Transfer::execFlags();
+  mooseDeprecated("The execFlags() methos is being removed because MOOSE has been updated to use a "
+                  "ExecFlagEnum for execute flags. The current flags should be retrieved from "
+                  "the \"exeucte_on\" parameters of your object or by using the \"_execute_enum\" "
+                  "reference to the parameter or the getExecuteOnEnum() method.");
+  return _exec_flags;
 }
 
 void

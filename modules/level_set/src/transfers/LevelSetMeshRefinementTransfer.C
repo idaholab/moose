@@ -12,6 +12,7 @@
 #include "FEProblem.h"
 #include "MooseVariable.h"
 #include "MultiApp.h"
+#include "LevelSetTypes.h"
 
 template <>
 InputParameters
@@ -24,9 +25,11 @@ validParams<LevelSetMeshRefinementTransfer>()
   params.set<MooseEnum>("direction") = "TO_MULTIAPP";
   params.suppressParameter<MooseEnum>("direction");
 
-  params.set<MultiMooseEnum>("execute_on") = "CUSTOM";
+  ExecFlagEnum & exec = params.set<ExecFlagEnum>("execute_on");
+  exec.addAvailableFlags({LevelSet::EXEC_ADAPT_MESH});
+  exec = LevelSet::EXEC_ADAPT_MESH;
   params.set<bool>("check_multiapp_execute_on") = false;
-  params.suppressParameter<MultiMooseEnum>("execute_on");
+  params.suppressParameter<ExecFlagEnum>("execute_on");
 
   return params;
 }

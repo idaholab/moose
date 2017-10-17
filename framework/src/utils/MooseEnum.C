@@ -48,14 +48,11 @@ MooseEnum::operator=(const std::string & name)
     return *this;
   }
 
-  std::string upper(MooseUtils::toUpper(name));
-  checkDeprecatedBase(upper);
-
-  std::set<MooseEnumItem>::const_iterator iter = find(upper);
+  std::set<MooseEnumItem>::const_iterator iter = find(name);
   if (iter == _items.end())
   {
     if (_out_of_range_index == 0) // Are out of range values allowed?
-      mooseError(std::string("Invalid option \"") + upper +
+      mooseError(std::string("Invalid option \"") + name +
                  "\" in MooseEnum.  Valid options (not case-sensitive) are \"" + getRawNames() +
                  "\".");
     else
@@ -66,6 +63,8 @@ MooseEnum::operator=(const std::string & name)
   }
   else
     _current = *iter;
+
+  checkDeprecated();
 
   return *this;
 }
@@ -131,7 +130,7 @@ MooseEnum::compareCurrent(const MooseEnum & other, CompareMode mode) const
 bool
 MooseEnum::operator==(const MooseEnum & value) const
 {
-  mooseDeprecated("This method will be removed becuase the meaning is not well defined, please use "
+  mooseDeprecated("This method will be removed because the meaning is not well defined, please use "
                   "the 'compareCurrent' method instead.");
   return value._current.name() == _current.name();
 }
@@ -139,7 +138,7 @@ MooseEnum::operator==(const MooseEnum & value) const
 bool
 MooseEnum::operator!=(const MooseEnum & value) const
 {
-  mooseDeprecated("This method will be removed becuase the meaning is not well defined, please use "
+  mooseDeprecated("This method will be removed because the meaning is not well defined, please use "
                   "the 'compareCurrent' method instead.");
   return value._current.name() != _current.name();
 }
@@ -147,5 +146,5 @@ MooseEnum::operator!=(const MooseEnum & value) const
 void
 MooseEnum::checkDeprecated() const
 {
-  checkDeprecatedBase(_current.name());
+  MooseEnumBase::checkDeprecated(_current);
 }

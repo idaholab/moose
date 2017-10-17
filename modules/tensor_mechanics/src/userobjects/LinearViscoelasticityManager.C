@@ -23,8 +23,9 @@ validParams<LinearViscoelasticityManager>()
       "elastic_strain_name",
       "elastic_strain",
       "name of the elastic strain tensor used for the viscoelastic update");
-  params.set<MultiMooseEnum>("execute_on") = "timestep_begin timestep_end";
-  params.suppressParameter<MultiMooseEnum>("execute_on");
+  params.set<ExecFlagEnum>("execute_on") =
+      std::vector<ExecFlagType>({EXEC_TIMESTEP_BEGIN, EXEC_TIMESTEP_END});
+  params.suppressParameter<ExecFlagEnum>("execute_on");
   return params;
 }
 

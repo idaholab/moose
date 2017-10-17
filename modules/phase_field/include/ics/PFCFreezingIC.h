@@ -16,7 +16,7 @@ template <>
 InputParameters validParams<PFCFreezingIC>();
 
 /**
- * PFCFreezingIC creates an intial density for a PFC model that has one area of a set
+ * PFCFreezingIC creates an initial density for a PFC model that has one area of a set
  * crystal structure (initialized using sinusoids) and all the rest with a random structure.
  * The random values will fall between 0 and 1.
  * \todo For the FCC this returns 0. This cannot be right, yet it satisfies the (probably bogus)
