@@ -27,7 +27,11 @@ import MooseDocs
 from MooseMarkdownExtension import MooseMarkdownExtension
 from MooseMarkdownCommon import MooseMarkdownCommon
 
-from FactorySystem import ParseGetPot
+# pylint runs during the precheck before the hit python bindings have been build
+# so we need to disable import error checking here.
+# pylint: disable=import-error
+import hit
+# pylint: enable=import-error
 
 LOG = logging.getLogger(__name__)
 
@@ -359,10 +363,13 @@ class ListingInputPattern(ListingPattern):
         if not settings['block']:
             return super(ListingInputPattern, self).extractContent(filename, settings)
 
-        parser = ParseGetPot(filename)
-        node = parser.root_node.getNode(settings['block'])
+        with open(filename) as f:
+            content = f.read()
+
+        root = hit.parse(filename, content)
+        node = root.find(settings['block'])
         if node is not None:
-            return node.createString()
+            return node.render()
 
         return super(ListingInputPattern, self).extractContent(filename, settings)
 
