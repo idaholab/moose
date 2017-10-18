@@ -263,6 +263,9 @@
     rel_err = 1.0E-4
     abs_zero = 1.0E-4
     cli_args = '--no-trap-fpe Mesh/nx=1 Mesh/ny=12 Mesh/xmax=1 Mesh/ymax=12'
+# Run in serial so RandomIC gets fixed PRNG results
+    max_parallel = 1
+    max_threads  = 1
   [../]
   [./paper5]
     type = CSVDiff
@@ -280,6 +283,9 @@
     rel_err = 1.0E-4
     abs_zero = 1.0E-4
     cli_args = '--no-trap-fpe Mesh/nx=1 Mesh/ny=125 Mesh/xmax=1 Mesh/ymax=125'
+# Run in serial so RandomIC gets fixed PRNG results
+    max_parallel = 1
+    max_threads  = 1
   [../]
   [./special_joint1]
     type = CSVDiff
@@ -288,6 +294,9 @@
     rel_err = 1.0E-4
     abs_zero = 1.0E-4
     cli_args = '--no-trap-fpe Mesh/nx=1 Mesh/ny=125 Mesh/xmax=1 Mesh/ymax=125'
+# Run in serial so RandomIC gets fixed PRNG results
+    max_parallel = 1
+    max_threads  = 1
   [../]
     
 []
