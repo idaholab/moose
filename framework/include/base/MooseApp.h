@@ -464,6 +464,15 @@ public:
   const MeshModifier & getMeshModifier(const std::string & name) const;
 
   /**
+   * Get names of all mesh modifiers
+   * Note: This function should be called after all mesh modifiers are added with the
+   * 'add_mesh_modifier' task. The returned value will be undefined and depends on the ordering that
+   * mesh modifiers are added by MOOSE if the function is called during the 'add_mesh_modifier'
+   * task.
+   */
+  std::vector<std::string> getMeshModifierNames() const;
+
+  /**
    * Clear all mesh modifers
    */
   void clearMeshModifiers();
