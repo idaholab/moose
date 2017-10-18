@@ -46,6 +46,57 @@ SubProblem::SubProblem(const InputParameters & parameters)
 
 SubProblem::~SubProblem() {}
 
+TagID
+SubProblem::addVectorTag(TagName tag_name)
+{
+  std::cout<<"addVectorTag" << addVectorTag <<std::endl;
+  if (_vector_tag_name_to_tag_id.find(tag_name) == _vector_tag_name_to_tag_id.end())
+  {
+    auto tag_id = _vector_tag_name_to_tag_id[tag_name] = _vector_tag_name_to_tag_id.size();
+    _vector_tag_id_to_tag_name[tag_id] = tag_name;
+
+    std::cout<<"tag_id" << tag_id <<std::endl;
+  }
+
+  return _vector_tag_name_to_tag_id.at(tag_name);
+}
+
+TagID
+SubProblem::getVectorTag(TagName tag_name)
+{
+  return _vector_tag_name_to_tag_id.at(tag_name);
+}
+
+TagName
+SubProblem::vectorTagName(TagID tag)
+{
+  return _vector_tag_id_to_tag_name[tag];
+}
+
+TagID
+SubProblem::addMatrixTag(TagName tag_name)
+{
+  if (_matrix_tag_name_to_tag_id.find(tag_name) == _matrix_tag_name_to_tag_id.end())
+  {
+    auto tag_id = _matrix_tag_name_to_tag_id[tag_name] = _matrix_tag_name_to_tag_id.size();
+    _matrix_tag_id_to_tag_name[tag_id] = tag_name;
+  }
+
+  return _matrix_tag_name_to_tag_id.at(tag_name);
+}
+
+TagID
+SubProblem::getMatrixTag(TagName tag_name)
+{
+  return _matrix_tag_name_to_tag_id.at(tag_name);
+}
+
+TagName
+SubProblem::matrixTagName(TagID tag)
+{
+  return _matrix_tag_id_to_tag_name[tag];
+}
+
 void
 SubProblem::setActiveElementalMooseVariables(const std::set<MooseVariable *> & moose_vars,
                                              THREAD_ID tid)

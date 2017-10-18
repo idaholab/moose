@@ -506,6 +506,12 @@ public:
   {
     return _sub_Re[static_cast<unsigned int>(type)][var_num];
   }
+
+  DenseVector<Number> & residualBlock(unsigned int var_num, TagID type)
+  {
+    return _sub_Re[static_cast<unsigned int>(type)][var_num];
+  }
+
   DenseVector<Number> & residualBlockNeighbor(unsigned int var_num,
                                               Moose::KernelType type = Moose::KT_NONTIME)
   {
@@ -513,6 +519,9 @@ public:
   }
 
   DenseMatrix<Number> & jacobianBlock(unsigned int ivar, unsigned int jvar);
+
+  DenseMatrix<Number> & jacobianBlock(unsigned int ivar, unsigned int jvar, TagID tag);
+
   DenseMatrix<Number> & jacobianBlockNonlocal(unsigned int ivar, unsigned int jvar);
   DenseMatrix<Number> &
   jacobianBlockNeighbor(Moose::DGJacobianType type, unsigned int ivar, unsigned int jvar);
@@ -820,7 +829,7 @@ protected:
   DenseVector<Number> _tmp_Re;
 
   /// jacobian contributions
-  std::vector<std::vector<DenseMatrix<Number>>> _sub_Kee;
+  std::vector<std::vector<std::vector<DenseMatrix<Number>>>> _sub_Kee;
   std::vector<std::vector<DenseMatrix<Number>>> _sub_Keg;
 
   /// jacobian contributions from the element and neighbor

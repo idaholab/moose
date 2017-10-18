@@ -77,6 +77,8 @@ typedef unsigned int InterfaceID;
 typedef subdomain_id_type SubdomainID;
 typedef unsigned int MooseObjectID;
 typedef unsigned int THREAD_ID;
+typedef unsigned int TagID;
+typedef std::string TagName;
 
 typedef StoredRange<std::vector<dof_id_type>::iterator, dof_id_type> NodeIdRange;
 typedef StoredRange<std::vector<const Elem *>::iterator, const Elem *> ConstElemPointerRange;
@@ -161,8 +163,8 @@ enum VarKindType
 
 enum KernelType
 {
-  KT_TIME = 0,
-  KT_NONTIME = 1,
+  KT_NONTIME = 0,
+  KT_TIME = 1,
   KT_NONEIGEN = 2,
   KT_EIGEN = 3,
   KT_ALL
