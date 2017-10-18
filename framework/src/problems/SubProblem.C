@@ -57,7 +57,10 @@ SubProblem::addVectorTag(TagName tag_name)
 {
   if (_vector_tag_name_to_tag_id.find(tag_name) == _vector_tag_name_to_tag_id.end())
   {
-    auto tag_id = _vector_tag_name_to_tag_id[tag_name] = _vector_tag_name_to_tag_id.size();
+    auto tag_id = _vector_tag_name_to_tag_id.size();
+
+    _vector_tag_name_to_tag_id[tag_name] = tag_id;
+
     _vector_tag_id_to_tag_name[tag_id] = tag_name;
   }
 
@@ -81,7 +84,10 @@ SubProblem::addMatrixTag(TagName tag_name)
 {
   if (_matrix_tag_name_to_tag_id.find(tag_name) == _matrix_tag_name_to_tag_id.end())
   {
-    auto tag_id = _matrix_tag_name_to_tag_id[tag_name] = _matrix_tag_name_to_tag_id.size();
+    auto tag_id = _matrix_tag_name_to_tag_id.size();
+
+    _matrix_tag_name_to_tag_id[tag_name] = tag_id;
+
     _matrix_tag_id_to_tag_name[tag_id] = tag_name;
   }
 
