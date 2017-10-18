@@ -111,10 +111,15 @@
   [../]
   [./strain]
     type = ComputeCosseratIncrementalSmallStrain
+    eigenstrain_names = ini_stress
+  [../]
+  [./ini_stress]
+    type = ComputeEigenstrainFromInitialStress
+    initial_stress = '10 0 0  0 10 0  0 0 10'
+    eigenstrain_name = ini_stress
   [../]
   [./admissible]
     type = ComputeMultipleInelasticCosseratStress
-    initial_stress = '10 0 0  0 10 0  0 0 10'
     inelastic_models = stress
     perform_finite_strain_rotations = false
   [../]

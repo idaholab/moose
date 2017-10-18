@@ -31,9 +31,6 @@
 # where gravity = 10 m.s^-2 = 1E-5 MPa m^2/kg.  The maximum and minimum
 # principal horizontal stresses are assumed to be equal to 0.8*stress_zz.
 #
-# Below you will see weak-plane parameters and AuxVariables, etc.
-# These are not actally used in this example.
-#
 # Material properties:
 # Young's modulus = 8 GPa
 # Poisson's ratio = 0.25
@@ -45,6 +42,11 @@
 # MC dilation angle = 8 deg
 # MC tensile strength = 1 MPa
 # MC compressive strength = 100 MPa, varying down to 1 MPa when tensile strain = 1
+# WeakPlane cohesion = 0.1 MPa
+# WeakPlane friction angle = 30 deg
+# WeakPlane dilation angle = 10 deg
+# WeakPlane tensile strength = 0.1 MPa
+# WeakPlane compressive strength = 100 MPa softening to 1 MPa at strain = 1
 #
 [Mesh]
   type = GeneratedMesh
@@ -401,7 +403,6 @@
 []
 
 [Materials]
-  active = 'elasticity_tensor mc wp density strain stress'
   [./elasticity_tensor]
     type = ComputeLayeredCosseratElasticityTensor
     young = 8E3 # MPa
@@ -411,16 +412,14 @@
     joint_shear_stiffness = 1E3
   [../]
 
-  [./elastic_strain]
-    type = ComputeSmallStrain
-  [../]
-  [./elastic_stress]
-    type = ComputeLinearElasticStress
-    initial_stress = 'ini_xx 0 0  0 ini_xx 0  0 0 ini_zz'
-  [../]
-
   [./strain]
     type = ComputeCosseratIncrementalSmallStrain
+    eigenstrain_names = ini_stress
+  [../]
+  [./ini_stress]
+    type = ComputeEigenstrainFromInitialStress
+    initial_stress = 'ini_xx 0 0  0 ini_xx 0  0 0 ini_zz'
+    eigenstrain_name = ini_stress
   [../]
 
   [./stress]
@@ -432,7 +431,6 @@
     absolute_tolerance = 1E6
     max_iterations = 1
     tangent_operator = nonlinear
-    initial_stress = 'ini_xx 0 0  0 ini_xx 0  0 0 ini_zz'
     perform_finite_strain_rotations = false
   [../]
   [./mc]

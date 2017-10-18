@@ -408,7 +408,6 @@
 []
 
 [Materials]
-  active = 'elasticity_tensor dp wp density strain stress'
   [./elasticity_tensor]
     type = ComputeLayeredCosseratElasticityTensor
     young = 8E3 # MPa
@@ -418,16 +417,14 @@
     joint_shear_stiffness = 1E3
   [../]
 
-  [./elastic_strain]
-    type = ComputeSmallStrain
-  [../]
-  [./elastic_stress]
-    type = ComputeLinearElasticStress
-    initial_stress = 'ini_xx 0 0  0 ini_xx 0  0 0 ini_zz'
-  [../]
-
   [./strain]
     type = ComputeCosseratIncrementalSmallStrain
+    eigenstrain_names = ini_stress
+  [../]
+  [./ini_stress]
+    type = ComputeEigenstrainFromInitialStress
+    initial_stress = 'ini_xx 0 0  0 ini_xx 0  0 0 ini_zz'
+    eigenstrain_name = ini_stress
   [../]
 
   [./stress]
@@ -438,7 +435,6 @@
     absolute_tolerance = 1E6
     max_iterations = 1
     tangent_operator = nonlinear
-    initial_stress = 'ini_xx 0 0  0 ini_xx 0  0 0 ini_zz'
     perform_finite_strain_rotations = false
   [../]
   [./dp]

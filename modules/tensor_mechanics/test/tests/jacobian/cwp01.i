@@ -85,11 +85,16 @@
   [./strain]
     type = ComputeIncrementalSmallStrain
     displacements = 'disp_x disp_y disp_z'
+    eigenstrain_names = ini_stress
+  [../]
+  [./ini_stress]
+    type = ComputeEigenstrainFromInitialStress
+    initial_stress = '1 2 3  2 -4 -5  3 -5 2'
+    eigenstrain_name = ini_stress
   [../]
   [./admissible]
     type = ComputeMultipleInelasticStress
     inelastic_models = mc
-    initial_stress = '1 2 3  2 -4 -5  3 -5 2'
   [../]
   [./mc]
     type = CappedWeakPlaneStressUpdate

@@ -163,7 +163,7 @@
     DP_model = dp
     tensile_strength = ts
     compressive_strength = cs
-    yield_function_tol = 1E-5
+    yield_function_tol = 1E-8
     tip_smoother = 4
     smoothing_tol = 1E-5
   [../]

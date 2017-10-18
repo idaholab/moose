@@ -64,6 +64,12 @@
   [./strain]
     type = ComputeIncrementalSmallStrain
     displacements = 'disp_x disp_y disp_z'
+    eigenstrain_names = ini_stress
+  [../]
+  [./ini_stress]
+    type = ComputeEigenstrainFromInitialStress
+    initial_stress = '3 0 0  0 3 0  0 0 1.5'
+    eigenstrain_name = ini_stress
   [../]
   [./cmc]
     type = CappedMohrCoulombStressUpdate
@@ -79,7 +85,6 @@
     type = ComputeMultipleInelasticStress
     inelastic_models = cmc
     perform_finite_strain_rotations = false
-    initial_stress = '3 0 0  0 3 0  0 0 1.5'
   [../]
 []
 

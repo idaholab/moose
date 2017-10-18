@@ -95,10 +95,6 @@
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./yield_fcn]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
 []
 
 [AuxKernels]
@@ -144,12 +140,6 @@
     index_i = 2
     index_j = 2
   [../]
-  [./yield_fcn_auxk]
-    type = MaterialStdVectorAux
-    property = plastic_yield_function
-    index = 0
-    variable = yield_fcn
-  [../]
 []
 
 
@@ -164,38 +154,23 @@
   [../]
 []
 
-[UserObjects]
-  [./ts]
-    type = TensorMechanicsHardeningConstant
-    value = 1E6
-  [../]
-  [./mc]
-    type = TensorMechanicsPlasticTensile
-    tensile_strength = ts
-    yield_function_tolerance = 1E-6
-    tensile_tip_smoother = 1.0
-    internal_constraint_tolerance = 1E-5
-  [../]
-[]
-
 [Materials]
   [./elasticity_tensor]
-    type = ComputeElasticityTensor
-    fill_method = symmetric_isotropic
-    C_ijkl = '0.4 0.4' # young = 1, poisson = 0.25
+    type = ComputeIsotropicElasticityTensor
+    youngs_modulus = 1
+    poissons_ratio = 0.25
   [../]
   [./strain]
-    type = ComputeIncrementalSmallStrain
+    type = ComputeSmallStrain
+    eigenstrain_names = ini_stress
   [../]
-  [./mc]
-    type = ComputeMultiPlasticityStress
-    block = 0
+  [./strain_from_initial_stress]
+    type = ComputeEigenstrainFromInitialStress
     initial_stress = 'kxx 0 0  0 kxx 0  0 0 weight'
-
-    # the rest of this stuff is irrelevant for this test
-    ep_plastic_tolerance = 1E-5
-    plastic_models = mc
-    debug_fspb = crash
+    eigenstrain_name = ini_stress
+  [../]
+  [./stress]
+    type = ComputeLinearElasticStress
   [../]
 []
 

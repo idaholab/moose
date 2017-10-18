@@ -37,9 +37,6 @@ ComputeMultipleInelasticCosseratStress::initQpStatefulProperties()
 {
   ComputeMultipleInelasticStress::initQpStatefulProperties();
   _couple_stress[_qp].zero();
-
-  if (!_is_elasticity_tensor_guaranteed_constant_in_time)
-    mooseError("The Cosserat stress classes assume constant elasticity tensors");
 }
 
 void

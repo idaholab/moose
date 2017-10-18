@@ -64,11 +64,16 @@
   [./strain]
     type = ComputeIncrementalSmallStrain
     displacements = 'disp_x disp_y disp_z'
+    eigenstrain_names = ini_stress
+  [../]
+  [./ini_stress]
+    type = ComputeEigenstrainFromInitialStress
+    initial_stress = '0 0 1  0 0 10  1 10 0'
+    eigenstrain_name = ini_stress
   [../]
   [./admissible]
     type = ComputeMultipleInelasticStress
     inelastic_models = mc
-    initial_stress = '0 0 1  0 0 10  1 10 0'
     tangent_operator = nonlinear
   [../]
   [./mc]
