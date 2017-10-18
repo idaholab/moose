@@ -120,6 +120,7 @@
     type = 'CSVDiff'
     input = 'small_deform_hard22.i'
     csvdiff = 'small_deform_hard22.csv'
+    abs_zero = 1.0E-9
   [../]
 
   [./random1]

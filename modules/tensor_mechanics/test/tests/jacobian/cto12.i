@@ -74,13 +74,18 @@
   [./strain]
     type = ComputeIncrementalSmallStrain
     displacements = 'disp_x disp_y disp_z'
+    eigenstrain_names = ini_stress
+  [../]
+  [./ini_stress]
+    type = ComputeEigenstrainFromInitialStress
+    initial_stress = '3 0 0  0 3 0  0 0 1.5'
+    eigenstrain_name = ini_stress
   [../]
   [./mc]
     type = ComputeMultiPlasticityStress
     ep_plastic_tolerance = 1E-11
     plastic_models = mc
     tangent_operator = nonlinear
-    initial_stress = '3 0 0  0 3 0  0 0 1.5'
     min_stepsize = 1
   [../]
 []

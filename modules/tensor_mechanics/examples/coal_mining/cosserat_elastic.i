@@ -458,6 +458,12 @@
   [../]
   [./strain]
     type = ComputeCosseratIncrementalSmallStrain
+    eigenstrain_names = ini_stress
+  [../]
+  [./ini_stress]
+    type = ComputeEigenstrainFromInitialStress
+    initial_stress = 'ini_xx 0 0  0 ini_xx 0  0 0 ini_zz'
+    eigenstrain_name = ini_stress
   [../]
 
   [./stress]
@@ -469,7 +475,6 @@
     absolute_tolerance = 1E6
     max_iterations = 1
     tangent_operator = nonlinear
-    initial_stress = 'ini_xx 0 0  0 ini_xx 0  0 0 ini_zz'
     perform_finite_strain_rotations = false
   [../]
   [./dp]

@@ -83,13 +83,18 @@
   [./strain]
     type = ComputeIncrementalSmallStrain
     displacements = 'disp_x disp_y disp_z'
+    eigenstrain_names = ini_stress
+  [../]
+  [./ini_stress]
+    type = ComputeEigenstrainFromInitialStress
+    initial_stress = '0 0 0  0 1 0  0 0 1'
+    eigenstrain_name = ini_stress
   [../]
   [./multi]
     type = ComputeMultiPlasticityStress
     block = 0
     ep_plastic_tolerance = 1E-9
     plastic_models = 'simple0 simple1 simple2'
-    initial_stress = '0 0 0  0 1 0  0 0 1'
     tangent_operator = linear
   [../]
 []

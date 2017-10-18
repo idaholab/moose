@@ -67,10 +67,15 @@
   [./strain]
     type = ComputeIncrementalSmallStrain
     displacements = 'disp_x disp_y disp_z'
+    eigenstrain_names = ini_stress
+  [../]
+  [./ini_stress]
+    type = ComputeEigenstrainFromInitialStress
+    initial_stress = '1 2 3  2 -4 -5  3 -5 2'
+    eigenstrain_name = ini_stress
   [../]
   [./mc]
     type = ComputeMultiPlasticityStress
-    initial_stress = '1 2 3  2 -4 -5  3 -5 2'
     tangent_operator = linear
     plastic_models = wpt
     transverse_direction = '0 0 1'

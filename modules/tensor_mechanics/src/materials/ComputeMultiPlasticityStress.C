@@ -160,7 +160,8 @@ ComputeMultiPlasticityStress::ComputeMultiPlasticityStress(const InputParameters
     _my_strain_increment(RankTwoTensor()),
     _my_flexural_rigidity_tensor(RankFourTensor()),
     _my_curvature(RankTwoTensor()),
-    _step_one(declareRestartableData<bool>("step_one", true))
+    _step_one(
+        declareRestartableData<bool>("step_one", true)) // InitialStress Deprecation: remove this
 {
   if (_epp_tol <= 0)
     mooseError("ComputeMultiPlasticityStress: ep_plastic_tolerance must be positive");
@@ -436,7 +437,7 @@ ComputeMultiPlasticityStress::quickStep(const RankTwoTensor & stress_old,
           for (unsigned surface = 0; surface < _f[custom_model]->numberSurfaces(); ++surface)
             custom_model_pm.push_back(cumulative_pm[_surfaces_given_model[custom_model][surface]]);
           consistent_tangent_operator =
-              _f[custom_model]->consistentTangentOperator(stress_old,
+              _f[custom_model]->consistentTangentOperator(stress_old + E_ijkl * strain_increment,
                                                           intnl_old[custom_model],
                                                           stress,
                                                           intnl[custom_model],
@@ -495,6 +496,7 @@ ComputeMultiPlasticityStress::plasticStep(const RankTwoTensor & stress_old,
   Real step_size = 1.0;
   Real time_simulated = 0.0;
 
+  // InitialStress Deprecation: remove the following 2 lines
   if (_t_step >= 2)
     _step_one = false;
 
@@ -510,6 +512,7 @@ ComputeMultiPlasticityStress::plasticStep(const RankTwoTensor & stress_old,
   // Following is necessary because I want strain_increment to be "const"
   // but I also want to be able to subdivide an initial_stress
   RankTwoTensor this_strain_increment = strain_increment;
+  // InitialStress Deprecation: remove following 6 lines
   if (isParamValid("initial_stress") && _step_one)
   {
     RankFourTensor E_inv = E_ijkl.invSymm();

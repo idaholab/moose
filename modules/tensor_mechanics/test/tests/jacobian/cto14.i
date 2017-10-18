@@ -362,18 +362,21 @@
 [Materials]
   [./elasticity_tensor]
     type = ComputeElasticityTensor
-    block = 0
     fill_method = symmetric_isotropic
     C_ijkl = '1.0E3 1.3E3'
   [../]
   [./strain]
     type = ComputeIncrementalSmallStrain
-    block = 0
     displacements = 'disp_x disp_y disp_z'
+    eigenstrain_names = ini_stress
+  [../]
+  [./ini_stress]
+    type = ComputeEigenstrainFromInitialStress
+    initial_stress = '10 12 -14  12 5 20  -14 20 8'
+    eigenstrain_name = ini_stress
   [../]
   [./multi]
     type = ComputeMultiPlasticityStress
-    block = 0
     ep_plastic_tolerance = 1E-7
 
     plastic_models = 'tensile mc'
@@ -382,7 +385,6 @@
     deactivation_scheme = 'safe'
     min_stepsize = 1
     tangent_operator = nonlinear
-    initial_stress = '10 12 -14  12 5 20  -14 20 8'
   [../]
 []
 

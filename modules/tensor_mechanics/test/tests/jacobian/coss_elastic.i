@@ -88,12 +88,16 @@
     joint_shear_stiffness = 2.0
   [../]
   [./strain]
-    type = ComputeCosseratIncrementalSmallStrain
+    type = ComputeCosseratSmallStrain
+    eigenstrain_names = ini_stress
+  [../]
+  [./ini_stress]
+    type = ComputeEigenstrainFromInitialStress
+    initial_stress = '5 1 2  1 4 3  2.1 3.1 1'
+    eigenstrain_name = ini_stress
   [../]
   [./admissible]
-    type = ComputeMultipleInelasticCosseratStress
-    inelastic_models = ''
-    initial_stress = '5 1 2  1 4 3  2.1 3.1 1'
+    type = ComputeCosseratLinearElasticStress
   [../]
 []
 

@@ -171,18 +171,6 @@
   [../]
 []
 
-
-[UserObjects]
-  [./fake_plasticity]
-    type = TensorMechanicsPlasticSimpleTester
-    a = 0
-    b = 0
-    strength = 1
-    yield_function_tolerance = 1E-6
-    internal_constraint_tolerance = 1E-6
-  [../]
-[]
-
 [Materials]
   [./elasticity_tensor]
     type = ComputeElasticityTensor
@@ -193,12 +181,15 @@
   [./strain]
     type = ComputeFiniteStrain
     displacements = 'disp_x disp_y disp_z'
+    eigenstrain_names = ini_stress
+  [../]
+  [./ini_stress]
+    type = ComputeEigenstrainFromInitialStress
+    initial_stress = '-1.35E6 0 0  0 -3.35E6 0  0 0 0' # remember this is the effective stress
+    eigenstrain_name = ini_stress
   [../]
   [./no_plasticity]
-    type = ComputeMultiPlasticityStress
-    initial_stress = '-1.35E6 0 0  0 -3.35E6 0  0 0 0' # remember this is the effective stress
-    ep_plastic_tolerance = 1E-6
-    plastic_models = fake_plasticity
+    type = ComputeFiniteStrainElasticStress
   [../]
   [./poro_material]
     type = PoroFullSatMaterial

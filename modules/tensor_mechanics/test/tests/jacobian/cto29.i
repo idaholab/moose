@@ -132,11 +132,16 @@
   [../]
   [./strain]
     type = ComputeCosseratIncrementalSmallStrain
+    eigenstrain_names = ini_stress
+  [../]
+  [./ini_stress]
+    type = ComputeEigenstrainFromInitialStress
+    initial_stress = '6 5 4  5.1 7 2  4 2.1 2'
+    eigenstrain_name = ini_stress
   [../]
   [./admissible]
     type = ComputeMultipleInelasticCosseratStress
     inelastic_models = dp
-    initial_stress = '6 5 4  5.1 7 2  4 2.1 2'
   [../]
   [./dp]
     type = CappedDruckerPragerCosseratStressUpdate

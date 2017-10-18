@@ -238,21 +238,23 @@
 [Materials]
   [./elasticity_tensor]
     type = ComputeElasticityTensor
-    block = 0
     fill_method = symmetric_isotropic
     C_ijkl = '0 1E7'
   [../]
   [./strain]
     type = ComputeFiniteStrain
-    block = 0
     displacements = 'disp_x disp_y disp_z'
+    eigenstrain_names = ini_stress
+  [../]
+  [./ini_stress]
+    type = ComputeEigenstrainFromInitialStress
+    initial_stress = '8E6 4E6 -18E6 4E6 -40E6 -2E6 -18E6 -2E6 -34E6'
+    eigenstrain_name = ini_stress
   [../]
   [./mc]
     type = ComputeMultiPlasticityStress
-    block = 0
     ep_plastic_tolerance = 1E-9
     plastic_models = 'pt mc'
-    initial_stress = '8E6 4E6 -18E6 4E6 -40E6 -2E6 -18E6 -2E6 -34E6'
     deactivation_scheme = safe
     max_NR_iterations = 100
     min_stepsize = 0.1

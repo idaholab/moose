@@ -142,11 +142,16 @@
   [../]
   [./strain]
     type = ComputeCosseratIncrementalSmallStrain
+    eigenstrain_names = ini_stress
+  [../]
+  [./ini_stress]
+    type = ComputeEigenstrainFromInitialStress
+    initial_stress = '1 0.1 0  0.1 2 0  11 12 10' # note unsymmetric
+    eigenstrain_name = ini_stress
   [../]
   [./admissible]
     type = ComputeMultipleInelasticCosseratStress
     inelastic_models = 'dp wp'
-    initial_stress = '1 0.1 0  0.1 2 0  11 12 10' # note unsymmetric
     relative_tolerance = 2.0
     absolute_tolerance = 1E6
     max_iterations = 1

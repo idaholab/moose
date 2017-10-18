@@ -89,13 +89,13 @@
     type = Exodiff
     input = 'pull_push.i'
     exodiff = 'pull_push.e'
-    abs_zero = 1E-4
+    abs_zero = 1E-2
   [../]
   [./pull_push_h]
     type = Exodiff
     input = 'pull_push_h.i'
     exodiff = 'pull_push_h.e'
-    abs_zero = 1E-4
+    abs_zero = 1E-2
   [../]
 
   [./cwp_beam]

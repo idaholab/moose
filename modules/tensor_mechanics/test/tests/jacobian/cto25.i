@@ -76,11 +76,16 @@
   [./strain]
     type = ComputeIncrementalSmallStrain
     displacements = 'disp_x disp_y disp_z'
+    eigenstrain_names = ini_stress
+  [../]
+  [./ini_stress]
+    type = ComputeEigenstrainFromInitialStress
+    initial_stress = '6 5 4  5 7 2  4 2 2'
+    eigenstrain_name = ini_stress
   [../]
   [./admissible]
     type = ComputeMultipleInelasticStress
     inelastic_models = dp
-    initial_stress = '6 5 4  5 7 2  4 2 2'
   [../]
   [./dp]
     type = CappedDruckerPragerStressUpdate

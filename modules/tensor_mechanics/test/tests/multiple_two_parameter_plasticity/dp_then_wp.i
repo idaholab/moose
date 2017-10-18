@@ -33,6 +33,7 @@
   [./all]
     add_variables = true
     incremental = true
+    eigenstrain_names = ini_stress
     generate_output = 'stress_xx stress_xy stress_xz stress_yy stress_yz stress_zz'
   [../]
 []
@@ -185,13 +186,17 @@
     poissons_ratio = 0.2
     youngs_modulus = 1E7
   [../]
+  [./ini_stress]
+    type = ComputeEigenstrainFromInitialStress
+    initial_stress = '1E3 0 0  0 1E3 0  0 0 1E3'
+    eigenstrain_name = ini_stress
+  [../]
   [./admissible]
     type = ComputeMultipleInelasticStress
     relative_tolerance = 1E4
     absolute_tolerance = 2
     inelastic_models = 'cdp cwp'
     perform_finite_strain_rotations = false
-    initial_stress = '1E3 0 0  0 1E3 0  0 0 1E3'
   [../]
   [./cdp]
     type = CappedDruckerPragerStressUpdate
