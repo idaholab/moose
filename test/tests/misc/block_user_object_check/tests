@@ -1,0 +1,18 @@
+[Tests]
+  [./run]
+    type = RunApp
+    input = block_check.i
+    cli_args = 'Postprocessors/obj/block=1'
+  [../]
+  [./error_block_set]
+    type = RunException
+    input = block_check.i
+    cli_args = "Postprocessors/obj/block='1 2'"
+    expect_err = 'must be a subset'
+  [../]
+  [./error_block_any]
+    type = RunException
+    input = block_check.i
+    expect_err = 'must be a subset'
+  [../]
+[]

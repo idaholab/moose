@@ -80,6 +80,7 @@
   [./norm]
     type = ElementL2Norm
     variable = u
+    block = 1
   [../]
 []
 

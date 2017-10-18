@@ -20,6 +20,9 @@
 #include "MooseVariable.h"
 #include "Problem.h"
 #include "SubProblem.h"
+#include "BlockRestrictable.h"
+#include "MooseMesh.h"
+#include "Conversion.h"
 
 MooseVariableInterface::MooseVariableInterface(const MooseObject * moose_object,
                                                bool nodal,
@@ -42,6 +45,27 @@ MooseVariableInterface::MooseVariableInterface(const MooseObject * moose_object,
   _variable = &problem.getVariable(tid, variable_name);
 
   _mvi_assembly = &problem.assembly(tid);
+
+  // Check for subdomain consistency
+  const BlockRestrictable * blk_ptr = dynamic_cast<const BlockRestrictable *>(moose_object);
+  if (blk_ptr && !blk_ptr->isBlockSubset(_variable->activeSubdomains()))
+  {
+    std::string var_ids = Moose::stringify(_variable->activeSubdomains());
+    std::string obj_ids = Moose::stringify(blk_ptr->blockRestricted() ? blk_ptr->blockIDs()
+                                                                      : blk_ptr->meshBlockIDs());
+    mooseError("The 'block' parameter of the object '",
+               moose_object->name(),
+               "' must be a subset of the 'block' parameter of the variable '",
+               variable_name,
+               "':\n    ",
+               moose_object->name(),
+               ": ",
+               obj_ids,
+               "\n    ",
+               variable_name,
+               ": ",
+               var_ids);
+  }
 }
 
 MooseVariableInterface::~MooseVariableInterface() {}
