@@ -43,19 +43,19 @@ protected:
   virtual void computeQpProperties() override;
 
   /// Returns "a" at the quadpoint (porosity = a + (b - a) * exp(decay))
-  virtual Real atNegInfinityQp() const;
+  virtual Real atNegInfinityQp() const = 0;
 
   /// Returns "b" at the quadpoint (porosity = a + (b - a) * exp(decay))
-  virtual Real atZeroQp() const;
+  virtual Real atZeroQp() const = 0;
 
   /// Returns "decay" at the quadpoint (porosity = a + (b - a) * exp(decay))
-  virtual Real decayQp() const;
+  virtual Real decayQp() const = 0;
 
   /// d(decay)/d(porous-flow variable pvar)
-  virtual Real ddecayQp_dvar(unsigned pvar) const;
+  virtual Real ddecayQp_dvar(unsigned pvar) const = 0;
 
   /// d(decay)/d(grad(porous-flow variable pvar))
-  virtual RealGradient ddecayQp_dgradvar(unsigned pvar) const;
+  virtual RealGradient ddecayQp_dgradvar(unsigned pvar) const = 0;
 
   /// When calculating nodal porosity, use the strain at the nearest quadpoint to the node
   const bool _strain_at_nearest_qp;
