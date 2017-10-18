@@ -17,8 +17,6 @@ enum ContactModel
   CM_FRICTIONLESS,
   CM_GLUED,
   CM_COULOMB,
-  CM_COULOMB_MP // Coulomb contact enforced with a "model problem" strategy where slip is computed
-                // after the nonlinear solve is converged
 };
 
 enum ContactFormulation

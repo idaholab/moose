@@ -69,17 +69,6 @@
     superlu = true
     prereq = 'mu_0_0_pen_sm'
   [../]
-#  [./mu_1_0_kin]
-#    type = 'CSVDiff'
-#    input = 'single_point_2d_frictional.i'
-#    csvdiff = 'single_point_2d_out_fric_1_0_kin.csv'
-#    cli_args = 'Executioner/end_time=0.002 Executioner/nl_rel_tol=1e-7 Executioner/nl_abs_tol=1e-9
-#    Contact/leftright/model=coulomb Contact/leftright/formulation=kinematic Contact/leftright/friction_coefficient=1.0e2 Outputs/file_base=single_point_2d_out_fric_1_0_kin'
-#    rel_err = 1e-4
-#    abs_zero = 1e-5
-#    max_parallel = 1
-#    superlu = true
-#  [../]
   [./mu_0_2_kin]
     type = 'CSVDiff'
     input = 'single_point_2d_frictional.i'
@@ -166,17 +155,6 @@
     max_parallel = 1
     superlu = true
   [../]
-#  [./mu_1_0_kin]
-#    type = 'CSVDiff'
-#    input = 'single_point_2d_frictional.i'
-#    csvdiff = 'single_point_2d_out_fric_1_0_kin.csv'
-#    cli_args = 'Executioner/end_time=0.002 Executioner/nl_rel_tol=1e-7 Executioner/nl_abs_tol=1e-9
-#    Contact/leftright/model=coulomb Contact/leftright/formulation=kinematic Contact/leftright/friction_coefficient=1.0e2 Outputs/file_base=single_point_2d_out_fric_1_0_kin'
-#    rel_err = 1e-4
-#    abs_zero = 1e-5
-#    max_parallel = 1
-#    superlu = true
-#  [../]
   [./mu_0_2_kin_sm]
     type = 'CSVDiff'
     input = 'single_point_2d_frictional_sm.i'

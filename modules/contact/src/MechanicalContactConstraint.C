@@ -11,7 +11,6 @@
 #include "PenetrationLocator.h"
 #include "Assembly.h"
 #include "MooseMesh.h"
-#include "FrictionalContactProblem.h"
 #include "Executioner.h"
 #include "AddVariableAction.h"
 
@@ -151,29 +150,10 @@ MechanicalContactConstraint::MechanicalContactConstraint(const InputParameters &
     _penetration_locator.setNormalSmoothingMethod(
         parameters.get<std::string>("normal_smoothing_method"));
 
-  // The CM_COULOMB_MP option for the contact model is for use only for kinematic
-  // enforcement in an iteration scheme in which a series of "model problems"
-  // are solved where the constraints are treated as glued during the nonlinear
-  // iterations, and then slip is updated after convergence. This is done using
-  // FrictionalContactProblem. Use this option if FrictionalContactProblem is used.
-  FEProblemBase * fe_problem = getParam<FEProblemBase *>("_fe_problem_base");
-  if (dynamic_cast<FrictionalContactProblem *>(fe_problem) != NULL)
-  {
-    if (_model == CM_COULOMB && _formulation == CF_KINEMATIC)
-      _model = CM_COULOMB_MP;
-    if (_model == CM_COULOMB_MP && _formulation != CF_KINEMATIC)
-      mooseError("The coulomb_mp contact model is for use only with the kinematic formulation");
-  }
-  else
-  {
-    if (_model == CM_COULOMB_MP)
-      mooseError("The coulomb_mp contact model is for use only with FrictionalContactProblem");
-  }
-
   if (_formulation == CF_TANGENTIAL_PENALTY && _model != CM_COULOMB)
     mooseError("The 'tangential_penalty' formulation can only be used with the 'coulomb' model");
 
-  if (_model == CM_GLUED || (_model == CM_COULOMB_MP && _formulation == CF_KINEMATIC))
+  if (_model == CM_GLUED)
     _penetration_locator.setUpdate(false);
 
   if (_friction_coefficient < 0)
@@ -487,7 +467,6 @@ MechanicalContactConstraint::computeContactForce(PenetrationInfo * pinfo)
       }
       break;
 
-    case CM_COULOMB_MP:
     case CM_GLUED:
       switch (_formulation)
       {
@@ -551,7 +530,7 @@ MechanicalContactConstraint::computeQpResidual(Moose::ConstraintType type)
           else
             resid += pen_force(_component);
         }
-        else if (_model == CM_GLUED || _model == CM_COULOMB_MP)
+        else if (_model == CM_GLUED)
           resid += pen_force(_component);
       }
       else if (_formulation == CF_TANGENTIAL_PENALTY && _model == CM_COULOMB)
@@ -666,7 +645,6 @@ MechanicalContactConstraint::computeQpJacobian(Moose::ConstraintJacobianType typ
               mooseError("Invalid contact formulation");
           }
 
-        case CM_COULOMB_MP:
         case CM_GLUED:
           switch (_formulation)
           {
@@ -785,7 +763,6 @@ MechanicalContactConstraint::computeQpJacobian(Moose::ConstraintJacobianType typ
             default:
               mooseError("Invalid contact formulation");
           }
-        case CM_COULOMB_MP:
         case CM_GLUED:
           switch (_formulation)
           {
@@ -893,7 +870,6 @@ MechanicalContactConstraint::computeQpJacobian(Moose::ConstraintJacobianType typ
               mooseError("Invalid contact formulation");
           }
 
-        case CM_COULOMB_MP:
         case CM_GLUED:
           switch (_formulation)
           {
@@ -935,7 +911,6 @@ MechanicalContactConstraint::computeQpJacobian(Moose::ConstraintJacobianType typ
           }
 
         case CM_COULOMB:
-        case CM_COULOMB_MP:
         case CM_GLUED:
           switch (_formulation)
           {
@@ -1044,7 +1019,6 @@ MechanicalContactConstraint::computeQpOffDiagJacobian(Moose::ConstraintJacobianT
           }
         }
 
-        case CM_COULOMB_MP:
         case CM_GLUED:
         {
           const Real curr_jac = (*_jacobian)(_current_node->dof_number(0, _vars[_component], 0),
@@ -1112,7 +1086,6 @@ MechanicalContactConstraint::computeQpOffDiagJacobian(Moose::ConstraintJacobianT
           else
             return 0.0;
 
-        case CM_COULOMB_MP:
         case CM_GLUED:
           return 0;
 
@@ -1202,7 +1175,6 @@ MechanicalContactConstraint::computeQpOffDiagJacobian(Moose::ConstraintJacobianT
               mooseError("Invalid contact formulation");
           }
 
-        case CM_COULOMB_MP:
         case CM_GLUED:
           switch (_formulation)
           {
@@ -1244,7 +1216,6 @@ MechanicalContactConstraint::computeQpOffDiagJacobian(Moose::ConstraintJacobianT
           }
 
         case CM_COULOMB:
-        case CM_COULOMB_MP:
         case CM_GLUED:
           if ((_formulation == CF_PENALTY || _formulation == CF_AUGMENTED_LAGRANGE) &&
               (pinfo->_mech_status == PenetrationInfo::MS_SLIPPING ||

@@ -7,7 +7,6 @@
 
 // MOOSE includes
 #include "ContactMaster.h"
-#include "FrictionalContactProblem.h"
 #include "NodalArea.h"
 #include "SystemBase.h"
 #include "PenetrationInfo.h"
@@ -424,8 +423,6 @@ ContactMaster::contactModel(std::string name)
     model = CM_GLUED;
   else if ("coulomb" == name)
     model = CM_COULOMB;
-  else if ("coulomb_mp" == name)
-    model = CM_COULOMB_MP;
   else
     ::mooseError("Invalid contact model found: ", name);
 
