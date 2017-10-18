@@ -26,7 +26,7 @@ protected:
   virtual void computeQpStress() override;
 
   /**
-   * InitialStress TODO: remove this method
+   * InitialStress Deprecation: remove this method
    *
    * Rotates initial_stress via rotation_increment.
    * In large-strain scenarios this must be used before addQpInitialStress
@@ -42,9 +42,6 @@ protected:
    * of variable elasticity tensors
    */
   const MaterialProperty<RankTwoTensor> & _elastic_strain_old;
-
-  /// flag for if the elasticity tensor does NOT change value over time
-  bool _is_elasticity_tensor_guaranteed_constant_in_time;
 };
 
 #endif // COMPUTEFINITESTRAINELASTICSTRESS_H

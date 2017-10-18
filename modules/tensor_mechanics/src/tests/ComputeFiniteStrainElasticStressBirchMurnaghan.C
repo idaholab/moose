@@ -37,14 +37,6 @@ ComputeFiniteStrainElasticStressBirchMurnaghan::initialSetup()
     mooseError("ComputeFiniteStrainElasticStressBirchMurnaghan can only be used with elasticity "
                "tensor materials "
                "that guarantee isotropic tensors.");
-
-  _is_elasticity_tensor_guaranteed_constant_in_time =
-      hasGuaranteedMaterialProperty(_elasticity_tensor_name, Guarantee::CONSTANT_IN_TIME);
-  if ((isParamValid("initial_stress")) && !_is_elasticity_tensor_guaranteed_constant_in_time)
-    mooseError("A finite stress material cannot both have an initial stress and an elasticity "
-               "tensor with varying values; please use a defined constant elasticity tensor, "
-               "such as ComputeIsotropicElasticityTensor, if your model defines an initial "
-               "stress, or apply an initial strain instead.");
 }
 
 void
@@ -60,11 +52,8 @@ ComputeFiniteStrainElasticStressBirchMurnaghan::computeQpStress()
   RankTwoTensor intermediate_stress;
 
   // Check if the elasticity tensor has changed values
-  if (!_is_elasticity_tensor_guaranteed_constant_in_time)
-    intermediate_stress =
-        _elasticity_tensor[_qp] * (_elastic_strain_old[_qp] + _strain_increment[_qp]);
-  else
-    intermediate_stress = _stress_old[_qp] + _elasticity_tensor[_qp] * _strain_increment[_qp];
+  intermediate_stress =
+      _elasticity_tensor[_qp] * (_elastic_strain_old[_qp] + _strain_increment[_qp]);
 
   // Rotate the stress state to the current configuration
   _stress[_qp] =

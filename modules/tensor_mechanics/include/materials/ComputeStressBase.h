@@ -27,7 +27,7 @@ protected:
   virtual void computeQpStress() = 0;
 
   /**
-   * InitialStress TODO: remove this method
+   * InitialStress Deprecation: remove this method
    *
    * Adds initial stress, if it is provided, to _stress[_qp].  This
    * function should NOT be used if you calculate stress using
@@ -67,13 +67,13 @@ protected:
   /// Parameter which decides whether to store old stress. This is required for HHT time integration and Rayleigh damping
   const bool _store_stress_old;
 
-  /// Whether initial stress was provided.  InitialStress TODO: remove this.
+  /// Whether initial stress was provided.  InitialStress Deprecation: remove this.
   const bool _initial_stress_provided;
 
-  /// Initial stress, if provided. InitialStress TODO: remove this.
+  /// Initial stress, if provided. InitialStress Deprecation: remove this.
   MaterialProperty<RankTwoTensor> * _initial_stress;
 
-  /// Old value of initial stress, which is needed to correctly implement finite-strain rotations.  InitialStress TODO: remove this.
+  /// Old value of initial stress, which is needed to correctly implement finite-strain rotations.  InitialStress Deprecation: remove this.
   const MaterialProperty<RankTwoTensor> * _initial_stress_old;
 };
 

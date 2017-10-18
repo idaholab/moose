@@ -36,9 +36,9 @@
 
 [Materials]
   [./elasticity_tensor]
-    type = ComputeElasticityTensor
-    fill_method = symmetric_isotropic
-    C_ijkl = '0.4 0.4' # young = 1, poisson = 0.25
+    type = ComputeIsotropicElasticityTensor
+    youngs_modulus = 1
+    poissons_ratio = 0.25
   [../]
   [./strain]
     type = ComputeIncrementalSmallStrain

@@ -109,9 +109,6 @@ ComputeMultipleInelasticStress::initialSetup()
   _is_elasticity_tensor_guaranteed_isotropic =
       hasGuaranteedMaterialProperty(_elasticity_tensor_name, Guarantee::ISOTROPIC);
 
-  _is_elasticity_tensor_guaranteed_constant_in_time =
-      hasGuaranteedMaterialProperty(_elasticity_tensor_name, Guarantee::CONSTANT_IN_TIME);
-
   std::vector<MaterialName> models = getParam<std::vector<MaterialName>>("inelastic_models");
   for (unsigned int i = 0; i < _num_models; ++i)
   {
@@ -152,7 +149,7 @@ ComputeMultipleInelasticStress::computeQpStressIntermediateConfiguration()
     if (_is_elasticity_tensor_guaranteed_isotropic)
     {
       _stress[_qp] = _elasticity_tensor[_qp] * (_elastic_strain_old[_qp] + _strain_increment[_qp]);
-      // InitialStress TODO: remove these lines
+      // InitialStress Deprecation: remove these lines
       if (_perform_finite_strain_rotations)
         rotateQpInitialStress();
       addQpInitialStress();
@@ -231,7 +228,7 @@ ComputeMultipleInelasticStress::updateQpState(RankTwoTensor & elastic_strain_inc
       {
         _stress[_qp] =
             _elasticity_tensor[_qp] * (_elastic_strain_old[_qp] + elastic_strain_increment);
-        // InitialStress TODO: remove these lines
+        // InitialStress Deprecation: remove these lines
         if (_perform_finite_strain_rotations)
           rotateQpInitialStress();
         addQpInitialStress();
@@ -341,7 +338,7 @@ ComputeMultipleInelasticStress::updateQpStateSingleModel(
   if (_is_elasticity_tensor_guaranteed_isotropic)
   {
     _stress[_qp] = _elasticity_tensor[_qp] * (_elastic_strain_old[_qp] + elastic_strain_increment);
-    // InitialStress TODO: remove these lines
+    // InitialStress Deprecation: remove these lines
     if (_perform_finite_strain_rotations)
       rotateQpInitialStress();
     addQpInitialStress();

@@ -45,7 +45,7 @@ ComputeStressBase::ComputeStressBase(const InputParameters & parameters)
     _extra_stress(getDefaultMaterialProperty<RankTwoTensor>(_base_name + "extra_stress")),
     _Jacobian_mult(declareProperty<RankFourTensor>(_base_name + "Jacobian_mult")),
     _store_stress_old(getParam<bool>("store_stress_old")),
-    // InitialStress TODO: remove the following
+    // InitialStress Deprecation: remove the following
     _initial_stress_provided(getParam<std::vector<FunctionName>>("initial_stress").size() ==
                              LIBMESH_DIM * LIBMESH_DIM),
     _initial_stress(_initial_stress_provided
@@ -59,7 +59,7 @@ ComputeStressBase::ComputeStressBase(const InputParameters & parameters)
   if (getParam<bool>("use_displaced_mesh"))
     mooseError("The stress calculator needs to run on the undisplaced mesh.");
 
-  // InitialStress TODO: remove following initial stress stuff
+  // InitialStress Deprecation: remove following initial stress stuff
   const std::vector<FunctionName> & fcn_names(
       getParam<std::vector<FunctionName>>("initial_stress"));
   const unsigned num = fcn_names.size();
@@ -81,7 +81,7 @@ ComputeStressBase::initQpStatefulProperties()
 {
   _elastic_strain[_qp].zero();
   _stress[_qp].zero();
-  // InitialStress TODO: remove the following
+  // InitialStress Deprecation: remove the following
   if (_initial_stress_provided)
   {
     for (unsigned i = 0; i < LIBMESH_DIM; ++i)
@@ -95,7 +95,7 @@ ComputeStressBase::initQpStatefulProperties()
 void
 ComputeStressBase::computeQpProperties()
 {
-  // InitialStress TODO: remove the following 2 lines
+  // InitialStress Deprecation: remove the following 2 lines
   if (_initial_stress_provided)
     (*_initial_stress)[_qp] = (*_initial_stress_old)[_qp];
 

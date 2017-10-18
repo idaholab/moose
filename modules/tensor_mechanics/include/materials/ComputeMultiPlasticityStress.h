@@ -582,7 +582,7 @@ protected:
                                            const std::vector<Real> & cumulative_pm);
 
 private:
-  // InitialStress TODO: remove _step_one parameter
+  // InitialStress Deprecation: remove _step_one parameter
   /// True if this is the first timestep (timestep < 2). In the first timestep,
   /// an initial stress is needed to subdivide.  This boolean variable
   /// eliminates the use of the _app.isRestarting() in this class.

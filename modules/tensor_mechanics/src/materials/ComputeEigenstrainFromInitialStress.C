@@ -15,12 +15,12 @@ validParams<ComputeEigenstrainFromInitialStress>()
 {
   InputParameters params = validParams<ComputeEigenstrainBase>();
   params.addClassDescription("Computes an eigenstrain from an initial stress");
-  params.addParam<std::vector<FunctionName>>(
+  params.addRequiredParam<std::vector<FunctionName>>(
       "initial_stress",
       "A list of functions describing the initial stress.  If provided, there "
       "must be 9 of these, corresponding to the xx, yx, zx, xy, yy, zy, xz, yz, "
-      "zz components respectively.  If not provided, all components of the "
-      "initial stress will be zero");
+      "zz components respectively.  To compute the eigenstrain correctly, your "
+      "elasticity tensor should not be time-varying in the first timestep");
   params.addParam<std::string>("base_name",
                                "The base_name for the elasticity tensor that will be "
                                "used to compute strain from stress.  Do not provide "

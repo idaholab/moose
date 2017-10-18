@@ -33,9 +33,6 @@ ComputeFiniteStrainElasticStress::initialSetup()
   if (!hasGuaranteedMaterialProperty(_elasticity_tensor_name, Guarantee::ISOTROPIC))
     mooseError("ComputeFiniteStrainElasticStress can only be used with elasticity tensor materials "
                "that guarantee isotropic tensors.");
-
-  _is_elasticity_tensor_guaranteed_constant_in_time =
-      hasGuaranteedMaterialProperty(_elasticity_tensor_name, Guarantee::CONSTANT_IN_TIME);
 }
 
 void
@@ -57,7 +54,7 @@ ComputeFiniteStrainElasticStress::computeQpStress()
   _stress[_qp] =
       _rotation_increment[_qp] * intermediate_stress * _rotation_increment[_qp].transpose();
 
-  // InitialStress TODO: remove the following 2 lines
+  // InitialStress Deprecation: remove the following 2 lines
   rotateQpInitialStress();
   addQpInitialStress();
 
