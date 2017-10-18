@@ -3,7 +3,8 @@ import os, sys
 import subprocess
 import json
 import unittest
-from FactorySystem.ParseGetPot import readInputFile
+from FactorySystem.Parser import DupWalker
+import hit
 
 def find_app():
     """
@@ -152,12 +153,23 @@ class TestJSON(unittest.TestCase):
         """
         Does a dump and uses the GetPotParser to parse the output.
         """
-        args = ["--dump"] + extra
+        args = ["--disable-refcount-printing", "--dump"] + extra
         output = run_app(args)
         self.assertNotEqual(len(output), 0)
-        with open("dump.i", "w") as f:
-            f.write(output)
-        return readInputFile("dump.i")
+        root = hit.parse("dump.i", output)
+        hit.explode(root)
+        w = DupWalker("dump.i")
+        root.walk(w, hit.NodeType.All)
+        if w.errors:
+            print("\n".join(w.errors))
+        self.assertEqual(len(w.errors), 0)
+        return root
+
+    def getBlockSections(self, node):
+        return {c.path(): c for c in node.children(node_type=hit.NodeType.Section)}
+
+    def getBlockParams(self, node):
+        return {c.path(): c for c in node.children(node_type=hit.NodeType.Field)}
 
     def testInputFileFormat(self):
         """
@@ -165,46 +177,58 @@ class TestJSON(unittest.TestCase):
         is there and is in the right location.
         """
         root = self.getInputFileFormat()
-        self.assertIn("Executioner", root.children_list)
-        self.assertIn("BCs", root.children_list)
-        bcs = root.children["BCs"]
-        self.assertIn("Periodic", bcs.children_list)
-        self.assertIn("*", bcs.children_list)
-        star = bcs.children["*"]
-        self.assertIn("active", star.params_list)
-        self.assertIn("<DirichletBC>", star.children["<types>"].children_list)
-        self.assertEqual(bcs.children["Periodic"].children_list, ["*"])
+        root_sections = self.getBlockSections(root)
+        self.assertIn("Executioner", root_sections)
+        self.assertIn("BCs", root_sections)
+        bcs_sections = self.getBlockSections(root_sections["BCs"])
+        self.assertIn("Periodic", bcs_sections)
+        self.assertIn("*", bcs_sections)
+        star = bcs_sections["*"]
+        bcs_star_params = self.getBlockParams(star)
+        bcs_star_sections = self.getBlockSections(star)
+        self.assertIn("active", bcs_star_params)
+        self.assertIn("<types>", bcs_star_sections)
+        bcs_star_types_sections = self.getBlockSections(bcs_star_sections["<types>"])
+        self.assertIn("<DirichletBC>", bcs_star_types_sections)
+        periodic_children = self.getBlockSections(bcs_sections["Periodic"])
+        self.assertEqual(len(periodic_children.keys()), 1)
+        self.assertIn("*", periodic_children)
 
-        self.assertNotIn("<types>", bcs.children_list)
+        self.assertNotIn("<types>", bcs_sections)
 
-        exe = root.children["Executioner"]
-        self.assertIn("<types>", exe.children_list)
-        self.assertIn("<Transient>", exe.children["<types>"].children_list)
+        exe_sections = self.getBlockSections(root_sections["Executioner"])
+        self.assertIn("<types>", exe_sections)
+        exe_types_sections = self.getBlockSections(exe_sections["<types>"])
+        self.assertIn("<Transient>", exe_types_sections)
 
         # Preconditioning has a Preconditioning/*/* syntax which is unusual
-        self.assertIn("Preconditioning", root.children_list)
-        p = root.children["Preconditioning"]
-        split = p.children["*"].children["*"].children["<types>"].children["<Split>"]
-        self.assertIn("splitting_type", split.params_list)
-        # There is a problem with the GetPotParser parsing this because
-        # the comments got split and there is a unmatched " on a line of the comment.
-        # This breaks the parser and it doesn't read in all the parameters.
-        # self.assertIn("petsc_options", split.params_list)
+        self.assertIn("Preconditioning", root_sections)
+        p = root_sections["Preconditioning"]
+        pc_sections = self.getBlockSections(p)
+        pc_star_sections = self.getBlockSections(pc_sections["*"])
+        pc_star_star_sections = self.getBlockSections(pc_star_sections["*"])
+        pc_star_star_types_sections = self.getBlockSections(pc_star_star_sections["<types>"])
+        split_params = self.getBlockParams(pc_star_star_types_sections["<Split>"])
+        self.assertIn("splitting_type", split_params)
+        self.assertIn("petsc_options", split_params)
 
         # Make sure the default dump has test objects
-        self.assertIn("ApplyInputParametersTest", root.children)
+        self.assertIn("ApplyInputParametersTest", root_sections)
 
     def testInputFileFormatSearch(self):
         """
         Make sure parameter search works
         """
         root = self.getInputFileFormat(["initial_steps"])
-        self.assertNotIn("Executioner", root.children_list)
-        self.assertNotIn("BCs", root.children_list)
-        self.assertIn("Adaptivity", root.children_list)
-        self.assertEqual(len(root.children_list), 1)
-        self.assertIn("initial_steps", root.children["Adaptivity"].params_list)
-        self.assertEqual(len(root.children["Adaptivity"].params_list), 1)
+        section_map = {c.path(): c for c in root.children(node_type=hit.NodeType.Section)}
+        self.assertNotIn("Executioner", section_map)
+        self.assertNotIn("BCs", section_map)
+        self.assertIn("Adaptivity", section_map)
+        self.assertEqual(len(section_map.keys()), 1)
+        adaptivity = section_map["Adaptivity"]
+        params = {c.path(): c for c in adaptivity.children(node_type=hit.NodeType.Field)}
+        self.assertIn("initial_steps", params)
+        self.assertEqual(len(params.keys()), 1)
 
     def testLineInfo(self):
         """
