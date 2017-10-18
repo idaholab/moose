@@ -33,13 +33,9 @@ hit_deps      := $(patsubst %.cc, %.$(obj-suffix).d, $(hit_srcfiles))
 pyhit_srcfiles  := $(hit_DIR)/hit.cpp $(hit_DIR)/lex.cc $(hit_DIR)/parse.cc
 pyhit_LIB       := $(hit_DIR)/hit.so
 
-# the sed to remove arch i386 from flags is because on macs the system python is built with
-# (some?) 32 bit support and those flags cause problems when linking on systems that don't
-# have 32 bit libraries to link in for the whole stack (i.e. stdlib, etc.).  Apple - why you
-# do that?
 $(pyhit_LIB): $(pyhit_srcfiles)
 	@echo "Linking Library "$@"..."
-	@bash -c '(cd "$(hit_DIR)" && $(libmesh_CXX) -std=c++11 -w -fPIC -lstdc++ -shared -L`python-config --prefix`/lib `python-config --cflags | sed "s/-arch i386//"` `python-config --ldflags` $^ -o $@)'
+	@bash -c '(cd "$(hit_DIR)" && $(libmesh_CXX) -std=c++11 -w -fPIC -lstdc++ -shared -L`python-config --prefix`/lib `python-config --includes` `python-config --ldflags` $^ -o $@)'
 	@cp $@ $(FRAMEWORK_DIR)/../python/
 
 #
