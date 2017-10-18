@@ -49,10 +49,13 @@ SubProblem::~SubProblem() {}
 TagID
 SubProblem::addVectorTag(TagName tag_name)
 {
+  std::cout<<"addVectorTag" << addVectorTag <<std::endl;
   if (_vector_tag_name_to_tag_id.find(tag_name) == _vector_tag_name_to_tag_id.end())
   {
     auto tag_id = _vector_tag_name_to_tag_id[tag_name] = _vector_tag_name_to_tag_id.size();
     _vector_tag_id_to_tag_name[tag_id] = tag_name;
+
+    std::cout<<"tag_id" << tag_id <<std::endl;
   }
 
   return _vector_tag_name_to_tag_id.at(tag_name);
