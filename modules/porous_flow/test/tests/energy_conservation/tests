@@ -45,4 +45,9 @@
     csvdiff = 'heat04_fullysat_action.csv'
     rel_err = 1.0E-5
   [../]
+  [./heat05]
+    type = 'CSVDiff'
+    input = 'heat05.i'
+    csvdiff = 'heat05.csv'
+  [../]
 []
