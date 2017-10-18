@@ -1,6 +1,7 @@
 [GlobalParams]
   order = FIRST
   family = LAGRANGE
+  displacements = 'disp_x disp_y disp_z'
 []
 
 [XFEM]
@@ -22,7 +23,6 @@
   zmin = 0.0
   zmax = 0.2
   elem_type = HEX8
-  displacements = 'disp_x disp_y disp_z'
 []
 
 [UserObjects]
@@ -69,9 +69,6 @@
 
 [DomainIntegral]
   integrals = 'Jintegral InteractionIntegralKI'
-  disp_x = disp_x
-  disp_y = disp_y
-  disp_z = disp_z
   crack_front_points = '0.4 0.5 0.0
                         0.4 0.5 0.1
                         0.4 0.5 0.2'
@@ -82,6 +79,7 @@
   poissons_ratio = 0.3
   youngs_modulus = 207000
   block = 0
+  solid_mechanics = true
 []
 
 [SolidMechanics]

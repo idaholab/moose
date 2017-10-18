@@ -23,8 +23,6 @@ validParams<EshelbyTensor>()
                                "multiple mechanics material systems on the same "
                                "block, i.e. for multiple phases");
   params.addCoupledVar("temperature", "Coupled temperature");
-  params.addParam<std::vector<MaterialPropertyName>>(
-      "eigenstrain_names", "List of eigenstrains to be applied in this strain calculation");
   return params;
 }
 
@@ -39,10 +37,11 @@ EshelbyTensor::EshelbyTensor(const InputParameters & parameters)
     _strain_increment(getMaterialProperty<RankTwoTensor>(_base_name + "strain_increment")),
     _grad_disp(3),
     _J_thermal_term_vec(declareProperty<RealVectorValue>("J_thermal_term_vec")),
-    _eigenstrain_names(getParam<std::vector<MaterialPropertyName>>("eigenstrain_names")),
-    _deigenstrain_dT(_eigenstrain_names.size()),
     _has_temp(isCoupled("temperature")),
-    _grad_temp(coupledGradient("temperature"))
+    _grad_temp(coupledGradient("temperature")),
+    _total_deigenstrain_dT(hasMaterialProperty<RankTwoTensor>("total_deigenstrain_dT")
+                               ? &getMaterialProperty<RankTwoTensor>("total_deigenstrain_dT")
+                               : nullptr)
 {
   unsigned int ndisp = coupledComponents("displacements");
 
@@ -59,18 +58,10 @@ EshelbyTensor::EshelbyTensor(const InputParameters & parameters)
   for (unsigned i = ndisp; i < 3; ++i)
     _grad_disp[i] = &_grad_zero;
 
-  // Get the materials containing the derivatives of the eigenstrains wrt temperature
-  if (_has_temp)
-  {
-    VariableName temp_name = getVar("temperature", 0)->name();
-    if (_eigenstrain_names.size() == 0)
-      mooseWarning(
-          "No 'eigenstrain_names' specified for EshelbyTensor when 'temperature' is specified");
-
-    for (unsigned int i = 0; i < _deigenstrain_dT.size(); ++i)
-      _deigenstrain_dT[i] = &getMaterialPropertyDerivative<RankTwoTensor>(
-          _base_name + _eigenstrain_names[i], temp_name);
-  }
+  if (_has_temp && !_total_deigenstrain_dT)
+    mooseError("EshelbyTensor Error: To include thermal strain term in Fracture integral "
+               "calculation, must both couple temperature in DomainIntegral block and compute "
+               "total_deigenstrain_dT using ThermalFractureIntegral material model.");
 }
 
 void
@@ -103,16 +94,9 @@ EshelbyTensor::computeQpProperties()
 
   _eshelby_tensor[_qp] = WI - FTP;
 
-  if (_has_temp && _deigenstrain_dT.size() > 0)
+  if (_has_temp)
   {
-    Real sigma_alpha = 0.0;
-
-    RankTwoTensor total_deigenstrain_dT((*_deigenstrain_dT[0])[_qp]);
-    for (unsigned int i = 1; i < _deigenstrain_dT.size(); ++i)
-      total_deigenstrain_dT += (*_deigenstrain_dT[i])[_qp];
-
-    sigma_alpha += _stress[_qp].doubleContraction(total_deigenstrain_dT);
-
+    Real sigma_alpha = _stress[_qp].doubleContraction((*_total_deigenstrain_dT)[_qp]);
     _J_thermal_term_vec[_qp] = sigma_alpha * _grad_temp[_qp];
   }
   else
