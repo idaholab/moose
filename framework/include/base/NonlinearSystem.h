@@ -93,6 +93,8 @@ private:
   * method.
   */
   void setupColoringFiniteDifferencedPreconditioner();
+
+  bool _use_coloring_finite_difference;
 };
 
 #endif /* NONLINEARSYSTEM_H */

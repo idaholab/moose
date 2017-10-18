@@ -98,7 +98,8 @@ compute_postcheck(const NumericVector<Number> & old_soln,
 NonlinearSystem::NonlinearSystem(FEProblemBase & fe_problem, const std::string & name)
   : NonlinearSystemBase(
         fe_problem, fe_problem.es().add_system<TransientNonlinearImplicitSystem>(name), name),
-    _transient_sys(fe_problem.es().get_system<TransientNonlinearImplicitSystem>(name))
+    _transient_sys(fe_problem.es().get_system<TransientNonlinearImplicitSystem>(name)),
+    _use_coloring_finite_difference(false)
 {
   nonlinearSolver()->residual = Moose::compute_residual;
   nonlinearSolver()->jacobian = Moose::compute_jacobian;
@@ -173,7 +174,7 @@ NonlinearSystem::solve()
 #endif
 
 #ifdef LIBMESH_HAVE_PETSC
-  if (_use_finite_differenced_preconditioner)
+  if (_use_coloring_finite_difference)
 #if PETSC_VERSION_LESS_THAN(3, 2, 0)
     MatFDColoringDestroy(_fdcoloring);
 #else
@@ -221,9 +222,16 @@ NonlinearSystem::setupFiniteDifferencedPreconditioner()
                "block with type = fdp");
 
   if (fdp->finiteDifferenceType() == "coloring")
+  {
     setupColoringFiniteDifferencedPreconditioner();
+    _use_coloring_finite_difference = true;
+  }
+
   else if (fdp->finiteDifferenceType() == "standard")
+  {
     setupStandardFiniteDifferencedPreconditioner();
+    _use_coloring_finite_difference = false;
+  }
   else
     mooseError("Unknown finite difference type");
 }
