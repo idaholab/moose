@@ -21,7 +21,7 @@ class InputFileEditorWithMesh(QWidget, PluginManager, TabPlugin):
     """
     numTimeStepsChanged = pyqtSignal(int)
     inputFileChanged = pyqtSignal(str)
-    updateView = pyqtSignal(object)
+    updateView = pyqtSignal(object, bool)
 
     @staticmethod
     def commandLineArgs(parser):
@@ -93,7 +93,7 @@ class InputFileEditorWithMesh(QWidget, PluginManager, TabPlugin):
             path[str]: path to new input file.
         """
         self.inputFileChanged.emit(path)
-        self.updateView.emit(self.InputFileEditorPlugin.tree)
+        self.updateView.emit(self.InputFileEditorPlugin.tree, True)
         if not self.InputFileEditorPlugin.tree.app_info.valid() or not self.InputFileEditorPlugin.tree.input_filename:
             self.numTimeStepsChanged.emit(0)
             return
@@ -128,7 +128,7 @@ class InputFileEditorWithMesh(QWidget, PluginManager, TabPlugin):
             exe_info[ExecutableInfo]: new information from the executable
         """
         self.InputFileEditorPlugin.executableInfoChanged(exe_info)
-        self.updateView.emit(self.InputFileEditorPlugin.tree)
+        self.updateView.emit(self.InputFileEditorPlugin.tree, True)
 
     def blockChanged(self, block):
         """
@@ -139,7 +139,7 @@ class InputFileEditorWithMesh(QWidget, PluginManager, TabPlugin):
         if block.path.startswith("/BCs/"):
             self.highlightChanged(block)
         elif block.path == "/Mesh" or block.path.startswith("/Mesh/"):
-            self.updateView.emit(self.InputFileEditorPlugin.tree)
+            self.updateView.emit(self.InputFileEditorPlugin.tree, False)
         elif block.path == "/Executioner" or block.path.startswith("/Executioner/"):
             num_steps = TimeStepEstimate.findTimeSteps(self.InputFileEditorPlugin.tree)
             self.numTimeStepsChanged.emit(num_steps)
@@ -168,7 +168,7 @@ class InputFileEditorWithMesh(QWidget, PluginManager, TabPlugin):
         Input:
             path[str]: New working directory
         """
-        self.updateView.emit(self.InputFileEditorPlugin.tree)
+        self.updateView.emit(self.InputFileEditorPlugin.tree, True)
 
     def canClose(self):
         """
