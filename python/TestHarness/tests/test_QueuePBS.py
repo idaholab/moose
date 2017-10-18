@@ -78,6 +78,11 @@ class HarnessAndDAG(object):
     def close(self):
         """ shutdown the scheduler's thread pools """
         if self.harness:
+            # Force zero job count, to handle the possibility a unittest failed
+            # without the TestHarness knowing about the failure (unittest bombed
+            # out while partially scheduling jobs). Basically, everywhere you see
+            # self.fail('why'), is why this is needed.
+            self.harness.scheduler.job_queue_count = 0
             self.harness.scheduler.waitFinish()
 
 class TestHarnessTestCase(unittest.TestCase):
@@ -90,6 +95,9 @@ class TestHarnessTestCase(unittest.TestCase):
         self.pbs_session_file = os.path.join(os.getenv('MOOSE_DIR'), 'test', 'unittesting_pbs')
         self.test_file = os.path.join(os.getenv('MOOSE_DIR'), 'test','tests', 'test_harness', 'queue_job')
         self.session_dir = os.path.join(os.path.dirname(self.test_file), 'job_' + os.path.basename(self.pbs_session_file))
+
+        with open('qstat_output.txt', 'r') as qstat_stdout_file:
+            self.qstat_output = qstat_stdout_file.read()
 
         try:
             # remove previous session data and the session file
@@ -167,6 +175,10 @@ class TestHarnessTestCase(unittest.TestCase):
 
         return result_output_list
 
+    def getQstatOutput(self, job_id, job_state):
+        """ return valid qstat output """
+        return self.qstat_output.replace('<JOB_ID>', str(job_id)).replace('<JOB_STATE>', str(job_state))
+
     def yieldJobs(self, job_dag):
         """ return each job in the dag with an id """
         jobs = job_dag.topological_sort()
@@ -199,7 +211,7 @@ class TestHarnessTestCase(unittest.TestCase):
                 if len(result_list) == 1:
                     self.assertRegexpMatches(result_list[0], 'LAUNCHED %d' % (job_id))
                 else:
-                    raise Exception('Failed: QueueManager launched one job, but received several results')
+                    self.fail('Failed: QueueManager launched one job, but received several results')
 
     def testPBSBadLaunch(self):
         """
@@ -220,7 +232,7 @@ class TestHarnessTestCase(unittest.TestCase):
 
                 # We _should_ actually have no results
                 elif job_id == 1 and result_list != None:
-                    raise Exception('Failed: A job that should not have launched attempted to do so')
+                    self.fail('Failed: A job that should not have launched attempted to do so')
 
     def testPBSBadQstat(self):
         """
@@ -246,7 +258,7 @@ class TestHarnessTestCase(unittest.TestCase):
 
                 # We _should_ actually have no results
                 elif job_id == 1 and result_list != None:
-                    raise Exception('Failed: A job that should not have launched attempted to do so')
+                    self.fail('Failed: A job that should not have launched attempted to do so')
 
     def testPBSUnknownQstat(self):
         """
@@ -260,7 +272,7 @@ class TestHarnessTestCase(unittest.TestCase):
             (harness, job_dag) = harness_dag
 
             for job_id, job in self.yieldJobs(job_dag):
-                qstat_return = 'job_state = gibberish'
+                qstat_return = self.getQstatOutput(job_id, 'gibberish')
                 result_list = self._mockSinglePBSLaunch(harness, job, qstat_return)
 
                 # Join the results, because the TestHarness receives them out-of-order
@@ -271,7 +283,7 @@ class TestHarnessTestCase(unittest.TestCase):
 
                 # We _should_ actually have no results
                 elif job_id == 1 and result_list != None:
-                    raise Exception('Failed: A job that should not have launched attempted to do so')
+                    self.fail('Failed: A job that should not have launched attempted to do so')
 
     def testPBSProcessResults(self):
         """
@@ -290,7 +302,7 @@ class TestHarnessTestCase(unittest.TestCase):
             (harness, job_dag) = harness_dag
 
             for job_id, job in self.yieldJobs(job_dag):
-                qstat_return = 'job_state = F\nJob Id: %d' % (job_id)
+                qstat_return = self.getQstatOutput(job_id, 'F')
                 result_list = self._mockSinglePBSLaunch(harness, job, qstat_return)
 
                 # Join the results, because the TestHarness receives them out-of-order
@@ -301,7 +313,7 @@ class TestHarnessTestCase(unittest.TestCase):
 
                 # We _should_ actually have no results
                 elif job_id == 1 and result_list != None:
-                    raise Exception('Failed: A job that should not have launched attempted to do so')
+                    self.fail('Failed: A job that should not have launched attempted to do so')
 
     def testPBSGoodQstat(self):
         """
@@ -319,12 +331,12 @@ class TestHarnessTestCase(unittest.TestCase):
                 (harness, job_dag) = harness_dag
 
                 for job_id, job in self.yieldJobs(job_dag):
-                    qstat_return = 'job_state = %s' % (status[0])
+                    qstat_return = self.getQstatOutput(job_id, status[0])
                     result_list = self._mockSinglePBSLaunch(harness, job, qstat_return)
                     if len(result_list) == 1:
                         self.assertRegexpMatches(result_list[0], status)
                     else:
-                        raise Exception('Failed: QueueManager launched one job, but received several results')
+                        self.fail('Failed: QueueManager launched one job, but received several results')
 
             # Secondary checks; lets verify the session file is saving
             # the results properly
@@ -332,7 +344,7 @@ class TestHarnessTestCase(unittest.TestCase):
                 with open(self.pbs_session_file, 'r') as session_file:
                     session = json.load(session_file)
             else:
-                raise Exception('Failed: Session File was not created')
+                self.fail('Failed: Session File was not created')
 
             for key, value in session.iteritems():
                 if key != 'QUEUEMANAGER':
@@ -350,11 +362,11 @@ class TestHarnessTestCase(unittest.TestCase):
             with open(self.pbs_session_file, 'r') as session_file:
                 session = json.load(session_file)
         else:
-            raise Exception('Failed: Session File was not created')
+            self.fail('Failed: Session File was not created')
 
         # Iterate over the session file and do some checks
         if 'QUEUEMANAGER' not in session.keys():
-            raise Exception('Failed: QUEUEMANAGER configuration key not found')
+            self.fail('Failed: QUEUEMANAGER configuration key not found')
 
         checks = ['job_id',
                   'queue_script',
@@ -388,11 +400,11 @@ class TestHarnessTestCase(unittest.TestCase):
 
                 # we should not have extra files copied after queueing the first job
                 if job_id == 0 and os.path.exists(os.path.join(self.session_dir, 'queue_job_copy_file_test')):
-                    raise Exception('Failed: A file was copied that should not have been')
+                    self.fail('Failed: A file was copied that should not have been')
 
                 # but our second job should have copied some extra stuff over
                 elif job_id == 1 and not os.path.exists(os.path.join(self.session_dir, 'queue_job_copy_file_test')):
-                    raise Exception('Failed: A file was not copied that should have been')
+                    self.fail('Failed: A file was not copied that should have been')
 
     def testCleanup(self):
         """
@@ -409,10 +421,10 @@ class TestHarnessTestCase(unittest.TestCase):
             # Perform the clean up code
             harness.scheduler.cleanUp()
             if os.path.exists(os.path.join(self.session_dir)):
-                raise Exception('Failed to perform session cleanup')
+                self.fail('Failed to perform session cleanup')
 
         else:
-            raise Exception('Failed to create session: %s' % (self.session_dir))
+            self.fail('Failed to create session: %s' % (self.session_dir))
 
 if __name__ == '__main__':
     unittest.main(verbosity=2)
