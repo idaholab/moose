@@ -6,6 +6,10 @@ from PyQt5 import QtWidgets
 class Tests(Testing.PeacockTester):
     qapp = QtWidgets.QApplication([])
 
+    def tearDown(self):
+        if self.input:
+            self.input.MeshViewerPlugin.reset()
+
     def create_app(self, args):
         self.createPeacockApp(args)
         self.postprocessor = self.app.main_widget.tab_plugin.PostprocessorViewer

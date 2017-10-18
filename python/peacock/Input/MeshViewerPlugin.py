@@ -39,11 +39,14 @@ class MeshViewerPlugin(VTKWindowPlugin):
         """
         self._use_test_objects = use_test_objs
 
-    def meshChanged(self, tree):
+    def meshChanged(self, tree, reset=False):
         """
         The parameters of the mesh has changed.
         We need to update the view of the mesh by generating a new mesh file.
         """
+        if reset:
+            self.reset()
+
         self.meshEnabled.emit(False)
         if not tree.app_info.valid():
             return
