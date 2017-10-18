@@ -111,39 +111,39 @@ class RunPBS(QueueManager):
         session storage file.
         """
         tester = job.getTester()
-        output_value = re.search(r'job_state = (\w)', output)
+        job_state = re.search(r'job_state = (\w)', output)
+        job_id = re.search(r'Job Id: (\w+)', output)
 
         # Default bucket
         bucket = tester.bucket_queued
         job_info = {}
 
-        if output_value:
+        if job_state and job_id:
             # Job is finished
-            if output_value.group(1) == 'F':
+            if job_state.group(1) == 'F':
                 reason = 'WAITING'
 
                 # Set the std_out path
-                job_id = re.search(r'Job Id: (\w+)', output).group(1)
                 session_data = self.getData(job.getUniqueIdentifier(), job_name=True)
-                job_info['std_out'] = session_data['job_name'] + '.o' + job_id
+                job_info['std_out'] = session_data['job_name'] + '.o' + job_id.group(1)
 
                 # Set the bucket that allows processResults to commence
                 bucket = tester.bucket_waiting_processing
 
             # Job is currently running
-            elif output_value.group(1) == 'R':
+            elif job_state.group(1) == 'R':
                 reason = 'RUNNING'
 
             # Job is exiting
-            elif output_value.group(1) == 'E':
+            elif job_state.group(1) == 'E':
                 reason = 'EXITING'
 
             # Job is currently queued
-            elif output_value.group(1) == 'Q':
+            elif job_state.group(1) == 'Q':
                 reason = 'QUEUED'
 
             # Job is waiting for other jobs
-            elif output_value.group(1) == 'H':
+            elif job_state.group(1) == 'H':
                 reason = 'HOLDING'
 
             # Unknown statuses should be treated as failures
