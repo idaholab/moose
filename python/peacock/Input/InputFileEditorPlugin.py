@@ -54,7 +54,7 @@ class InputFileEditorPlugin(InputFileEditor, Plugin):
         self.has_changed = True
 
     def _askToSave(self, app_info, reason):
-        if self.has_changed and app_info.valid():
+        if self.has_changed and app_info.valid() and self.tree and self.tree.input_filename:
             msg = "%s\nYou have unsaved changes in your input file, do you want to save?" % reason
             reply = QMessageBox.question(self, "Save?", msg, QMessageBox.Save, QMessageBox.Discard)
             if reply == QMessageBox.Save:
