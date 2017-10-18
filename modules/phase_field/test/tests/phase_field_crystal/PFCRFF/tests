@@ -3,17 +3,26 @@
     type = 'Exodiff'
     input = 'PFCRFF_tolerance_test.i'
     exodiff = 'PFCRFF_tolerance_test_out.e'
+# Run in serial so RandomIC gets fixed PRNG results
+    max_parallel = 1
+    max_threads  = 1
   [../]
 
   [./cancelation_test]
     type = 'Exodiff'
     input = 'PFCRFF_cancelation_test.i'
     exodiff = 'PFCRFF_cancelation_test_out.e'
+# Run in serial so RandomIC gets fixed PRNG results
+    max_parallel = 1
+    max_threads  = 1
   [../]
 
   [./expansion_test]
     type = 'Exodiff'
     input = 'PFCRFF_expansion_test.i'
     exodiff = 'PFCRFF_expansion_test_out.e'
+# Run in serial so RandomIC gets fixed PRNG results
+    max_parallel = 1
+    max_threads  = 1
   [../]
 []
