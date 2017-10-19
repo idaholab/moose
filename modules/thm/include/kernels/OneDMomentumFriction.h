@@ -12,7 +12,7 @@ InputParameters validParams<OneDMomentumFriction>();
 /**
  * Computes wall friction term
  *
- * Equation (230) {eq:wall_friction_force_2phase}
+ * See RELAP-7 Theory Manual, pg. 71, Equation (230) {eq:wall_friction_force_2phase}
  */
 class OneDMomentumFriction : public DerivativeMaterialInterfaceRelap<Kernel>
 {
