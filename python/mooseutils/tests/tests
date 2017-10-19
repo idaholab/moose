@@ -28,4 +28,8 @@
     separate = True
   [../]
 
+  [./camel]
+    type = PythonUnitTest
+    input = test_camel_to_space.py
+  [../]
 []
