@@ -19,9 +19,9 @@ InputParameters
 validParams<SideAverageValue>()
 {
   InputParameters params = validParams<SideIntegralVariablePostprocessor>();
-  params.addClassDescription("Computes the integral of an variable on a sideset using an area or "
-                             "volume weighted average. Note this postprocessor cannot be used in "
-                             "cases where a coordinate have a value of zero.");
+  params.addClassDescription("Computes the average value of a variable on a "
+                             "sideset. Note that this cannot be used on the "
+                             "centerline of an axisymmetric model.");
   return params;
 }
 

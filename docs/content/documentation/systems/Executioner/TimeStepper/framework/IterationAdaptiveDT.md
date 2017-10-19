@@ -2,9 +2,8 @@
 !syntax description /Executioner/TimeStepper/IterationAdaptiveDT
 
 ## Description
-
-The `IterationAdaptiveDT` type of `TimeStepper` provides a means to adapt the time step size
-based on the difficulty of the solution.
+The `IterationAdaptiveDT` Time Stepper provides a means to adapt the time step
+size based on the difficulty of the solution.
 
 `IterationAdaptiveDT` grows or shrinks the time step based on the number of iterations taken
 to obtain a converged solution in the last converged step. The required `optimal_iterations`

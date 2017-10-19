@@ -1,7 +1,9 @@
 # MaxIncrement
 !syntax description /Dampers/MaxIncrement
 
-The `MaxIncrement` damper limits the change of a variable from one nonlinear step to the next.
+The `MaxIncrement` damper limits the change of a variable from one nonlinear
+iteration to the following iteration. A smaller value set as the `max_increment`
+will results in more nonlinear steps.
 
 ## Example Input Syntax
 

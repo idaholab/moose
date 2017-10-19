@@ -5,8 +5,6 @@ This can be useful in preventing the solver from changing the solution dramatica
 step to the next. This may prevent, for example, the solver from attempting to evaluate negative
 temperatures.
 
-The `MaxIncrement` damper is commonly used.
-
 !syntax objects /Dampers
 
 !syntax subsystems /Dampers

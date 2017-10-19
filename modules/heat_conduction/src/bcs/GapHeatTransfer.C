@@ -21,8 +21,8 @@ InputParameters
 validParams<GapHeatTransfer>()
 {
   InputParameters params = validParams<IntegratedBC>();
-  params.addClassDescription("Calculates the amount of heat transfer across a gap between two "
-                             "boundaries dependant on the gap geometry specified.");
+  params.addClassDescription("Transfers heat across a gap between two "
+                             "surfaces dependant on the gap geometry specified.");
   params.addParam<std::string>(
       "appended_property_name", "", "Name appended to material properties to make them unique");
 

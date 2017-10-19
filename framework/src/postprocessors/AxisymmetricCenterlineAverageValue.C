@@ -20,9 +20,10 @@ InputParameters
 validParams<AxisymmetricCenterlineAverageValue>()
 {
   InputParameters params = validParams<SideAverageValue>();
-  params.addClassDescription("Computes the integral of an variable on a sideset using an area or "
-                             "volume weighted average along the centerline of an axissymmetric "
-                             "simulation.");
+  params.addClassDescription("Computes the average value of a variable on a "
+                             "sideset located along the centerline of an "
+                             "axisymmetric model.");
+
   return params;
 }
 
