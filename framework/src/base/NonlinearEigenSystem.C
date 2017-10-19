@@ -63,6 +63,9 @@ assemble_matrix(EquationSystems & es, const std::string & system_name)
     PetscObjectCompose((PetscObject)petsc_mat_A, "formFunctionCtx", nullptr);
     PetscObjectCompose((PetscObject)petsc_mat_A, "formFunctionCtx", (PetscObject)container);
     PetscContainerDestroy(&container);
+
+    // Let libmesh do not close matrices before solve
+    eigen_system.eigen_solver->set_close_matrix_before_solve(false);
   }
   if (eigen_system.generalized())
   {
@@ -119,6 +122,12 @@ NonlinearEigenSystem::solve()
   // Initialize the solution vector using a predictor and known values from nodal bcs
   setInitialSolution();
 
+// In DEBUG mode, Libmesh will check the residual automatically. This may cause
+// an error because B does not need to assembly by default.
+#ifdef DEBUG
+  if (_eigen_problem.isGeneralizedEigenvalueProblem())
+    sys().matrix_B->close();
+#endif
   // Solve the transient problem if we have a time integrator; the
   // steady problem if not.
   if (_time_integrator)
