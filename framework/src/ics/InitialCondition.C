@@ -47,7 +47,7 @@ validParams<InitialCondition>()
 
 InitialCondition::InitialCondition(const InputParameters & parameters)
   : MooseObject(parameters),
-    BlockRestrictable(parameters),
+    BlockRestrictable(this),
     Coupleable(this,
                getParam<SystemBase *>("_sys")
                    ->getVariable(parameters.get<THREAD_ID>("_tid"),

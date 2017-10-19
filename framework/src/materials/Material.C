@@ -73,7 +73,7 @@ validParams<Material>()
 
 Material::Material(const InputParameters & parameters)
   : MooseObject(parameters),
-    BlockRestrictable(parameters),
+    BlockRestrictable(this),
     BoundaryRestrictable(parameters, blockIDs(), false), // false for being _not_ nodal
     SetupInterface(this),
     Coupleable(this, false),

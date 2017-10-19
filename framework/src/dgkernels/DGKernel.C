@@ -27,7 +27,7 @@ validParams<DGKernel>()
 
 DGKernel::DGKernel(const InputParameters & parameters)
   : DGKernelBase(parameters),
-    BlockRestrictable(parameters),
+    BlockRestrictable(this),
     TwoMaterialPropertyInterface(this, blockIDs(), boundaryIDs())
 {
 }

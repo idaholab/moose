@@ -18,7 +18,7 @@ validParams<ElementLoopUserObject>()
 
 ElementLoopUserObject::ElementLoopUserObject(const InputParameters & parameters)
   : GeneralUserObject(parameters),
-    BlockRestrictable(parameters),
+    BlockRestrictable(this),
     Coupleable(this, false),
     MooseVariableDependencyInterface(),
     ZeroInterface(parameters),

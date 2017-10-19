@@ -70,7 +70,7 @@ public:
    * Populates the 'block' input parameters, see the general class documentation for details.
    * @param parameters The input parameters (see the detailed help for additional information)
    */
-  BlockRestrictable(const InputParameters & parameters);
+  BlockRestrictable(const MooseObject * moose_object);
 
   /**
    * Class constructor
@@ -79,7 +79,7 @@ public:
    * @param parameters The input parameters (see the detailed help for additional information)
    * @param boundary_ids The boundary ids that the object is restricted to
    */
-  BlockRestrictable(const InputParameters & parameters, const std::set<BoundaryID> & boundary_ids);
+  BlockRestrictable(const MooseObject * moose_object, const std::set<BoundaryID> & boundary_ids);
 
   /**
    * Destructor: does nothing but needs to be marked as virtual since
@@ -212,7 +212,7 @@ protected:
   /**
    * An initialization routine needed for dual constructors
    */
-  void initializeBlockRestrictable(const InputParameters & parameters);
+  void initializeBlockRestrictable(const MooseObject * moose_object);
 
   /**
    * Check if the blocks this object operates on all have the same coordinate system,
