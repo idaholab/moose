@@ -98,21 +98,21 @@ public:
    * @param name A BoundaryName to check
    * @return True if the given id is valid for this object
    */
-  bool hasBoundary(BoundaryName name) const;
+  bool hasBoundary(const BoundaryName & name) const;
 
   /**
    * Test if the supplied vector of boundary names are valid for this object
    * @param names A vector of BoundaryNames to check
    * @return True if the given ids are valid for this object
    */
-  bool hasBoundary(std::vector<BoundaryName> names) const;
+  bool hasBoundary(const std::vector<BoundaryName> & names) const;
 
   /**
    * Test if the supplied boundary ids are valid for this object
    * @param id A BoundaryID to check
    * @return True if the given id is valid for this object
    */
-  bool hasBoundary(BoundaryID id) const;
+  bool hasBoundary(const BoundaryID & id) const;
 
   /**
    * Test if the supplied vector boundary ids are valid for this object
@@ -122,7 +122,7 @@ public:
    * match those of the object
    * @return True if the all of the given ids are found within the ids for this object
    */
-  bool hasBoundary(std::vector<BoundaryID> ids, TEST_TYPE type = ALL) const;
+  bool hasBoundary(const std::vector<BoundaryID> & ids, TEST_TYPE type = ALL) const;
 
   /**
    * Test if the supplied set of boundary ids are valid for this object
@@ -134,7 +134,7 @@ public:
    * @return True if the all of the given ids are found within the ids for this object
    * \see isSubset
    */
-  bool hasBoundary(std::set<BoundaryID> ids, TEST_TYPE type = ALL) const;
+  bool hasBoundary(const std::set<BoundaryID> & ids, TEST_TYPE type = ALL) const;
 
   /**
    * Test if the class boundary ids are a subset of the supplied objects
@@ -143,7 +143,7 @@ public:
    * of hasBoundary)
    * \see hasBoundary
    */
-  bool isBoundarySubset(std::set<BoundaryID> ids) const;
+  bool isBoundarySubset(const std::set<BoundaryID> & ids) const;
 
   /*
    * Test if the class boundary ids are a subset of the supplied objects
@@ -152,7 +152,7 @@ public:
    * of hasBoundary)
    * \see hasBoundary
    */
-  bool isBoundarySubset(std::vector<BoundaryID> ids) const;
+  bool isBoundarySubset(const std::vector<BoundaryID> & ids) const;
 
   /**
    * Check if a material property is valid for all boundaries of this object

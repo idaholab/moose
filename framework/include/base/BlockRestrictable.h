@@ -114,28 +114,28 @@ public:
    * @param name A SubdomainName to check
    * @return True if the given id is valid for this object
    */
-  bool hasBlocks(SubdomainName name) const;
+  bool hasBlocks(const SubdomainName & name) const;
 
   /**
    * Test if the supplied vector of block names are valid for this object
    * @param names A vector of SubdomainNames to check
    * @return True if the given ids are valid for this object
    */
-  bool hasBlocks(std::vector<SubdomainName> names) const;
+  bool hasBlocks(const std::vector<SubdomainName> & names) const;
 
   /**
    * Test if the supplied block ids are valid for this object
    * @param id A SubdomainID to check
    * @return True if the given id is valid for this object
    */
-  bool hasBlocks(SubdomainID id) const;
+  bool hasBlocks(const SubdomainID & id) const;
 
   /**
    * Test if the supplied vector block ids are valid for this object
    * @param ids A vector of SubdomainIDs ids to check
    * @return True if the all of the given ids are found within the ids for this object
    */
-  bool hasBlocks(std::vector<SubdomainID> ids) const;
+  bool hasBlocks(const std::vector<SubdomainID> & ids) const;
 
   /**
    * Test if the supplied set of block ids are valid for this object
@@ -143,7 +143,7 @@ public:
    * @return True if the all of the given ids are found within the ids for this object
    * \see isSubset
    */
-  bool hasBlocks(std::set<SubdomainID> ids) const;
+  bool hasBlocks(const std::set<SubdomainID> & ids) const;
 
   /**
    * Test if the class block ids are a subset of the supplied objects
@@ -152,7 +152,7 @@ public:
    * hasBlocks)
    * \see hasBlocks
    */
-  bool isBlockSubset(std::set<SubdomainID> ids) const;
+  bool isBlockSubset(const std::set<SubdomainID> & ids) const;
 
   /**
    * Test if the class block ids are a subset of the supplied objects
@@ -161,7 +161,7 @@ public:
    * hasBlocks)
    * \see hasBlocks
    */
-  bool isBlockSubset(std::vector<SubdomainID> ids) const;
+  bool isBlockSubset(const std::vector<SubdomainID> & ids) const;
 
   /**
    * Check if a material property is valid for all blocks of this object

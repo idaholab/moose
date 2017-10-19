@@ -178,7 +178,7 @@ BoundaryRestrictable::restricted(const std::set<BoundaryID> & ids)
 }
 
 bool
-BoundaryRestrictable::hasBoundary(BoundaryName name) const
+BoundaryRestrictable::hasBoundary(const BoundaryName & name) const
 {
   // Create a vector and utilize the getBoundaryIDs function, which
   // handles the ANY_BOUNDARY_ID (getBoundaryID does not)
@@ -186,13 +186,13 @@ BoundaryRestrictable::hasBoundary(BoundaryName name) const
 }
 
 bool
-BoundaryRestrictable::hasBoundary(std::vector<BoundaryName> names) const
+BoundaryRestrictable::hasBoundary(const std::vector<BoundaryName> & names) const
 {
   return hasBoundary(_bnd_mesh->getBoundaryIDs(names));
 }
 
 bool
-BoundaryRestrictable::hasBoundary(BoundaryID id) const
+BoundaryRestrictable::hasBoundary(const BoundaryID & id) const
 {
   if (_bnd_ids.empty() || _bnd_ids.find(Moose::ANY_BOUNDARY_ID) != _bnd_ids.end())
     return true;
@@ -201,14 +201,14 @@ BoundaryRestrictable::hasBoundary(BoundaryID id) const
 }
 
 bool
-BoundaryRestrictable::hasBoundary(std::vector<BoundaryID> ids, TEST_TYPE type) const
+BoundaryRestrictable::hasBoundary(const std::vector<BoundaryID> & ids, TEST_TYPE type) const
 {
   std::set<BoundaryID> ids_set(ids.begin(), ids.end());
   return hasBoundary(ids_set, type);
 }
 
 bool
-BoundaryRestrictable::hasBoundary(std::set<BoundaryID> ids, TEST_TYPE type) const
+BoundaryRestrictable::hasBoundary(const std::set<BoundaryID> & ids, TEST_TYPE type) const
 {
   // An empty input is assumed to be ANY_BOUNDARY_ID
   if (ids.empty() || ids.find(Moose::ANY_BOUNDARY_ID) != ids.end())
@@ -240,7 +240,7 @@ BoundaryRestrictable::hasBoundary(std::set<BoundaryID> ids, TEST_TYPE type) cons
 }
 
 bool
-BoundaryRestrictable::isBoundarySubset(std::set<BoundaryID> ids) const
+BoundaryRestrictable::isBoundarySubset(const std::set<BoundaryID> & ids) const
 {
   // An empty input is assumed to be ANY_BOUNDARY_ID
   if (ids.empty() || ids.find(Moose::ANY_BOUNDARY_ID) != ids.end())
@@ -256,7 +256,7 @@ BoundaryRestrictable::isBoundarySubset(std::set<BoundaryID> ids) const
 }
 
 bool
-BoundaryRestrictable::isBoundarySubset(std::vector<BoundaryID> ids) const
+BoundaryRestrictable::isBoundarySubset(const std::vector<BoundaryID> & ids) const
 {
   std::set<BoundaryID> ids_set(ids.begin(), ids.end());
   return isBoundarySubset(ids_set);

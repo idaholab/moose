@@ -206,7 +206,7 @@ BlockRestrictable::numBlocks() const
 }
 
 bool
-BlockRestrictable::hasBlocks(SubdomainName name) const
+BlockRestrictable::hasBlocks(const SubdomainName & name) const
 {
   // Create a vector and utilize the getSubdomainIDs function, which
   // handles the ANY_BLOCK_ID (getSubdomainID does not)
@@ -216,13 +216,13 @@ BlockRestrictable::hasBlocks(SubdomainName name) const
 }
 
 bool
-BlockRestrictable::hasBlocks(std::vector<SubdomainName> names) const
+BlockRestrictable::hasBlocks(const std::vector<SubdomainName> & names) const
 {
   return hasBlocks(_blk_mesh->getSubdomainIDs(names));
 }
 
 bool
-BlockRestrictable::hasBlocks(SubdomainID id) const
+BlockRestrictable::hasBlocks(const SubdomainID & id) const
 {
   mooseAssert(_initialized, "BlockRestrictable not initialized");
 
@@ -233,14 +233,14 @@ BlockRestrictable::hasBlocks(SubdomainID id) const
 }
 
 bool
-BlockRestrictable::hasBlocks(std::vector<SubdomainID> ids) const
+BlockRestrictable::hasBlocks(const std::vector<SubdomainID> & ids) const
 {
   std::set<SubdomainID> ids_set(ids.begin(), ids.end());
   return hasBlocks(ids_set);
 }
 
 bool
-BlockRestrictable::hasBlocks(std::set<SubdomainID> ids) const
+BlockRestrictable::hasBlocks(const std::set<SubdomainID> & ids) const
 {
   mooseAssert(_initialized, "BlockRestrictable not initialized");
 
@@ -251,7 +251,7 @@ BlockRestrictable::hasBlocks(std::set<SubdomainID> ids) const
 }
 
 bool
-BlockRestrictable::isBlockSubset(std::set<SubdomainID> ids) const
+BlockRestrictable::isBlockSubset(const std::set<SubdomainID> & ids) const
 {
   mooseAssert(_initialized, "BlockRestrictable not initialized");
 
@@ -269,7 +269,7 @@ BlockRestrictable::isBlockSubset(std::set<SubdomainID> ids) const
 }
 
 bool
-BlockRestrictable::isBlockSubset(std::vector<SubdomainID> ids) const
+BlockRestrictable::isBlockSubset(const std::vector<SubdomainID> & ids) const
 {
   std::set<SubdomainID> ids_set(ids.begin(), ids.end());
   return isBlockSubset(ids_set);
