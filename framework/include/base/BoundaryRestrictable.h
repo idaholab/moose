@@ -50,7 +50,7 @@ public:
    * @param parameters The input parameters
    * @param nodal True indicates that the object is operating on nodesets, false for sidesets
    */
-  BoundaryRestrictable(const InputParameters & parameters, bool nodal);
+  BoundaryRestrictable(const MooseObject * moose_object, bool nodal);
 
   /**
    * Class constructor
@@ -60,7 +60,7 @@ public:
    * @param block_ids The block ids that the object is restricted to
    * @param nodal True indicates that the object is operating on nodesets, false for sidesets
    */
-  BoundaryRestrictable(const InputParameters & parameters,
+  BoundaryRestrictable(const MooseObject * moose_object,
                        const std::set<SubdomainID> & block_ids,
                        bool nodal);
 
@@ -213,7 +213,7 @@ private:
   /**
    * An initialization routine needed for dual constructors
    */
-  void initializeBoundaryRestrictable(const InputParameters & parameters);
+  void initializeBoundaryRestrictable(const MooseObject * moose_object);
 
 protected:
   /**

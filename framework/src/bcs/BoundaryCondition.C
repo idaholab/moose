@@ -45,7 +45,7 @@ validParams<BoundaryCondition>()
 
 BoundaryCondition::BoundaryCondition(const InputParameters & parameters, bool nodal)
   : MooseObject(parameters),
-    BoundaryRestrictableRequired(parameters, nodal),
+    BoundaryRestrictableRequired(this, nodal),
     SetupInterface(this),
     FunctionInterface(this),
     DistributionInterface(this),

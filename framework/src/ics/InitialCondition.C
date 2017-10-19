@@ -55,7 +55,7 @@ InitialCondition::InitialCondition(const InputParameters & parameters)
                    .isNodal()),
     FunctionInterface(this),
     UserObjectInterface(this),
-    BoundaryRestrictable(parameters, _c_nodal),
+    BoundaryRestrictable(this, _c_nodal),
     DependencyResolverInterface(),
     Restartable(parameters, "InitialConditions"),
     ZeroInterface(parameters),

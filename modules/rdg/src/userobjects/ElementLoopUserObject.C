@@ -39,7 +39,7 @@ ElementLoopUserObject::ElementLoopUserObject(const InputParameters & parameters)
 
 ElementLoopUserObject::ElementLoopUserObject(ElementLoopUserObject & x, Threads::split /*split*/)
   : GeneralUserObject(x.parameters()),
-    BlockRestrictable(x.parameters()),
+    BlockRestrictable(&x),
     Coupleable(this, false),
     MooseVariableDependencyInterface(),
     ZeroInterface(x.parameters()),

@@ -68,7 +68,7 @@ Threads::spin_mutex DGKernelBase::_jacoby_vars_mutex;
 
 DGKernelBase::DGKernelBase(const InputParameters & parameters)
   : MooseObject(parameters),
-    BoundaryRestrictable(parameters, false), // false for _not_ nodal
+    BoundaryRestrictable(this, false), // false for _not_ nodal
     SetupInterface(this),
     TransientInterface(this),
     FunctionInterface(this),
