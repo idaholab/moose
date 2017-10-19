@@ -854,8 +854,11 @@ colorAdjacencyMatrix(PetscScalar * adjacency_matrix,
 #endif
              &A);
 
-  MatColoring mc;
   ISColoring iscoloring;
+#if PETSC_VERSION_LESS_THAN(3, 5, 0)
+  MatGetColoring(A, coloring_algorithm, &iscoloring);
+#else
+  MatColoring mc;
   MatColoringCreate(A, &mc);
   MatColoringSetType(mc, coloring_algorithm);
   MatColoringSetMaxColors(mc, static_cast<PetscInt>(colors));
@@ -864,6 +867,7 @@ colorAdjacencyMatrix(PetscScalar * adjacency_matrix,
   MatColoringSetDistance(mc, 1);
   MatColoringSetFromOptions(mc);
   MatColoringApply(mc, &iscoloring);
+#endif
 
   PetscInt nn;
   IS * is;
@@ -885,7 +889,9 @@ colorAdjacencyMatrix(PetscScalar * adjacency_matrix,
   }
 
   MatDestroy(&A);
+#if !PETSC_VERSION_LESS_THAN(3, 5, 0)
   MatColoringDestroy(&mc);
+#endif
   ISColoringDestroy(&iscoloring);
 }
 
