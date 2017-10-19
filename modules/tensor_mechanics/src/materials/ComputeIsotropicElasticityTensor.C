@@ -39,9 +39,10 @@ ComputeIsotropicElasticityTensor::ComputeIsotropicElasticityTensor(
   if (num_elastic_constants != 2)
     mooseError("Exactly two elastic constants must be defined for material '" + name() + "'.");
 
-  // all tensors created by this class are always isotropic and constant in time
+  // all tensors created by this class are always isotropic
   issueGuarantee(_elasticity_tensor_name, Guarantee::ISOTROPIC);
-  issueGuarantee(_elasticity_tensor_name, Guarantee::CONSTANT_IN_TIME);
+  if (!isParamValid("elasticity_tensor_prefactor"))
+    issueGuarantee(_elasticity_tensor_name, Guarantee::CONSTANT_IN_TIME);
 
   if (_bulk_modulus_set && _bulk_modulus <= 0.0)
     mooseError("Bulk modulus must be positive in material '" + name() + "'.");
