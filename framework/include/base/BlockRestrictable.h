@@ -227,8 +227,6 @@ private:
   /// Vector the block names supplied by the user via the input file
   std::vector<SubdomainName> _blocks;
 
-  bool _initialized;
-
   /// Flag for allowing dual restriction
   const bool _blk_dual_restrictable;
 
