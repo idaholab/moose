@@ -13,6 +13,9 @@
 /****************************************************************/
 #include "CoupledConvection.h"
 
+#include "Conversion.h"
+#include "MooseVariable.h"
+
 template <>
 InputParameters
 validParams<CoupledConvection>()

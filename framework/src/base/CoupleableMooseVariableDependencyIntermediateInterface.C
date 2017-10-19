@@ -12,28 +12,21 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef DGKERNEL_H
-#define DGKERNEL_H
+#include "CoupleableMooseVariableDependencyIntermediateInterface.h"
+#include "MooseVariable.h"
+#include "FEProblemBase.h"
+#include "MooseMesh.h"
+#include "Conversion.h"
 
-// local includes
-#include "DGKernelBase.h"
-#include "BlockRestrictable.h"
-#include "TwoMaterialPropertyInterface.h"
-#include "NeighborCoupleableMooseVariableDependencyIntermediateInterface.h"
-
-class DGKernel;
-
-template <>
-InputParameters validParams<DGKernel>();
-
-/**
- * The DGKernel class is responsible for calculating the residuals for various
- * physics on internal sides (edges/faces).
- */
-class DGKernel : public DGKernelBase, public BlockRestrictable, public TwoMaterialPropertyInterface
+CoupleableMooseVariableDependencyIntermediateInterface::
+    CoupleableMooseVariableDependencyIntermediateInterface(const MooseObject * moose_object,
+                                                           bool nodal)
+  : Coupleable(moose_object, nodal),
+    ScalarCoupleable(moose_object),
+    MooseVariableInterface(moose_object, nodal)
 {
-public:
-  DGKernel(const InputParameters & parameters);
-};
+  for (MooseVariable * coupled_var : getCoupledMooseVars())
+    addMooseVariableDependency(coupled_var);
 
-#endif
+  addMooseVariableDependency(mooseVariable());
+}

@@ -102,30 +102,36 @@
   [./diff]
     type = Diffusion
     variable = c
+    block = 0
   [../]
   [./dt]
     type = TimeDerivative
     variable = c
+    block = 0
   [../]
 
   # the un-constrained concentration
   [./diff2]
     type = Diffusion
     variable = v
+    block = 0
   [../]
   [./dt2]
     type = TimeDerivative
     variable = v
+    block = 0
   [../]
 
   # the value periodic concentration
   [./diff3]
     type = Diffusion
     variable = p
+    block = 0
   [../]
   [./dt3]
     type = TimeDerivative
     variable = p
+    block = 0
   [../]
 []
 
@@ -217,6 +223,7 @@
     variable = diff_constraint
     function = 'c-v'
     args = 'c v'
+    block = 0
   [../]
 
   # difference between the periodic gradient constrained diffusion and the flat
@@ -229,6 +236,7 @@
     variable = diff_periodic
     function = 'c-p-slope'
     args = 'c p slope'
+    block = 0
   [../]
 
   # subtract the constant slope from the gradient periodic simulation (should yield
@@ -238,6 +246,7 @@
     variable = diff_slope
     function = 'c-slope'
     args = 'c slope'
+    block = 0
   [../]
 []
 

@@ -100,16 +100,19 @@
     implicit = true
     type = TimeDerivative
     variable = u
+    block = 0
   [../]
   [./diff_v]
     implicit = true
     type = Diffusion
     variable = v
+    block = 1
   [../]
   [./time_v]
     implicit = true
     type = TimeDerivative
     variable = v
+    block = 1
   [../]
 []
 ############################################################
@@ -119,6 +122,7 @@
     variable = u
     component = 'concentration'
     flux = internal_side_flux
+    block = 0
   [../]
 []
 ############################################################

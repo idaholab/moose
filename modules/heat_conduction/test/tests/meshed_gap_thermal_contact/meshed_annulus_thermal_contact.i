@@ -45,7 +45,7 @@
 [Materials]
   [./hcm]
     type = HeatConductionMaterial
-    block = '1 2 3'
+    block = '1 3'
     temp = temp
     thermal_conductivity = 1
   [../]
@@ -54,6 +54,7 @@
 [Problem]
   type = FEProblem
   kernel_coverage_check = false
+  material_coverage_check = false
 []
 
 [Executioner]

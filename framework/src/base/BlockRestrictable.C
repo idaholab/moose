@@ -21,6 +21,7 @@
 #include "MooseVariable.h"
 #include "SystemBase.h"
 #include "Conversion.h"
+#include "MooseVariableInterface.h"
 
 template <>
 InputParameters
@@ -89,7 +90,6 @@ BlockRestrictable::initializeBlockRestrictable(const MooseObject * moose_object)
   if (_blk_feproblem != NULL)
     _blk_material_data = _blk_feproblem->getMaterialData(Moose::BLOCK_MATERIAL_DATA, _blk_tid);
 
-
   // The 'block' input is defined
   if (moose_object->isParamValid("block"))
   {
@@ -104,29 +104,15 @@ BlockRestrictable::initializeBlockRestrictable(const MooseObject * moose_object)
       _blk_ids.insert(Moose::ANY_BLOCK_ID);
     else
       _blk_ids.insert(vec_ids.begin(), vec_ids.end());
-
-    // Check that supplied blocks are within the variable domain
-    if (parameters.isParamValid("variable") &&
-        (parameters.have_parameter<NonlinearVariableName>("variable") ||
-         parameters.have_parameter<AuxVariableName>("variable")))
-    {
-      // A pointer to the variable class
-      std::set<SubdomainID> var_ids = variableSubdomainIDs(parameters);
-
-      // Test if the variable blockIDs are valid for this object
-      if (!isBlockSubset(var_ids))
-        mooseError("In object ",
-                   _blk_name,
-                   " the defined blocks are outside of the domain of the variable");
-    }
   }
 
-  // The 'block' input parameter is undefined, if the object contains a variable, set the subdomain
-  // ids to those of the variable
-  else if (parameters.isParamValid("variable") &&
-           (parameters.have_parameter<NonlinearVariableName>("variable") ||
-            parameters.have_parameter<AuxVariableName>("variable")))
-    _blk_ids = variableSubdomainIDs(parameters);
+  // When 'blocks' is not set and there is a "variable", use the blocks from the variable
+  else if (moose_object->isParamValid("variable"))
+  {
+    std::string variable_name = moose_object->parameters().getMooseType("variable");
+    if (!variable_name.empty())
+      _blk_ids = _blk_feproblem->getVariable(_blk_tid, variable_name).activeSubdomains();
+  }
 
   // Produce error if the object is not allowed to be both block and boundary restricted
   if (!_blk_dual_restrictable && !_boundary_ids.empty() && !_boundary_ids.empty())
@@ -254,35 +240,6 @@ BlockRestrictable::isBlockSubset(const std::vector<SubdomainID> & ids) const
   return isBlockSubset(ids_set);
 }
 
-std::set<SubdomainID>
-BlockRestrictable::variableSubdomainIDs(const InputParameters & parameters) const
-{
-  // This method may be called before initializing the object. It doesn't use
-  // any information from the class state.
-
-  // Return an empty set if _sys is not defined
-  if (!parameters.isParamValid("_sys"))
-    return std::set<SubdomainID>();
-
-  // Get the SystemBase and the thread id
-  SystemBase * sys = parameters.get<SystemBase *>("_sys");
-  THREAD_ID tid = parameters.get<THREAD_ID>("_tid");
-
-  // Pointer to MooseVariable
-  MooseVariable * var = NULL;
-
-  // Get the variable based on the type
-  if (parameters.have_parameter<NonlinearVariableName>("variable"))
-    var = &_blk_feproblem->getVariable(tid, parameters.get<NonlinearVariableName>("variable"));
-  else if (parameters.have_parameter<AuxVariableName>("variable"))
-    var = &_blk_feproblem->getVariable(tid, parameters.get<AuxVariableName>("variable"));
-  else
-    mooseError("Unknown variable.");
-
-  // Return the block ids for the variable
-  return sys->getSubdomainsForVar(var->number());
-}
-
 const std::set<SubdomainID> &
 BlockRestrictable::meshBlockIDs() const
 {
@@ -352,19 +309,19 @@ BlockRestrictable::checkVariable(const MooseVariable & variable) const
 {
   if (!isBlockSubset(variable.activeSubdomains()))
   {
-    std::string var_ids = Moose::stringify(variable.activeSubdomains());
-    std::string obj_ids = Moose::stringify(blockRestricted() ? blockIDs() : meshBlockIDs());
+    std::string var_ids = Moose::stringify(variable.activeSubdomains(), ", ");
+    std::string obj_ids = Moose::stringify(blockRestricted() ? _blk_ids : meshBlockIDs(), ", ");
     mooseError("The 'block' parameter of the object '",
                _blk_name,
                "' must be a subset of the 'block' parameter of the variable '",
                variable.name(),
-               "':\n    ",
+               "':\n    Object '",
                _blk_name,
-               ": ",
+               "': ",
                obj_ids,
-               "\n    ",
+               "\n    Variable '",
                variable.name(),
-               ": ",
+               "': ",
                var_ids);
   }
 }

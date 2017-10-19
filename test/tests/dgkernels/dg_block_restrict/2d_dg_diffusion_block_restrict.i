@@ -44,12 +44,10 @@
   [./diff]
     type = Diffusion
     variable = u
-    block = 1
   [../]
   [./source]
     type = BodyForce
     variable = u
-    block = 1
   [../]
 []
 
@@ -59,7 +57,6 @@
     variable = u
     sigma = 4
     epsilon = 1
-    block = 1
   [../]
 []
 

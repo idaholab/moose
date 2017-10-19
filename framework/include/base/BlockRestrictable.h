@@ -247,12 +247,6 @@ private:
 
   /// Name of the object
   const std::string & _blk_name;
-
-  /**
-   * A helper function for extracting the subdomain IDs for a variable
-   * @param parameters A reference to the input parameters supplied to the object
-   */
-  std::set<SubdomainID> variableSubdomainIDs(const InputParameters & parameters) const;
 };
 
 template <typename T>

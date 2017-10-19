@@ -37,9 +37,6 @@ Coupleable::Coupleable(const MooseObject * moose_object, bool nodal)
 
   THREAD_ID tid = _c_parameters.get<THREAD_ID>("_tid");
 
-  // Convert to BlockRestrictable to check variable block ids
-  const BlockRestrictable * blk_ptr = dynamic_cast<const BlockRestrictable *>(moose_object);
-
   // Coupling
   for (std::set<std::string>::const_iterator iter = _c_parameters.coupledVarsBegin();
        iter != _c_parameters.coupledVarsEnd();
@@ -56,9 +53,6 @@ Coupleable::Coupleable(const MooseObject * moose_object, bool nodal)
           MooseVariable * moose_var = &problem.getVariable(tid, coupled_var_name);
           _coupled_vars[name].push_back(moose_var);
           _coupled_moose_vars.push_back(moose_var);
-
-          if (blk_ptr)
-            blk_ptr->checkVariable(*moose_var);
         }
         else if (problem.hasScalarVariable(coupled_var_name))
           ; // ignore scalar variables

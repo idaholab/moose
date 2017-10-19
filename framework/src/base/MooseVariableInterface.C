@@ -45,11 +45,6 @@ MooseVariableInterface::MooseVariableInterface(const MooseObject * moose_object,
   _variable = &problem.getVariable(tid, variable_name);
 
   _mvi_assembly = &problem.assembly(tid);
-
-  // Check for subdomain consistency
-  const BlockRestrictable * blk_ptr = dynamic_cast<const BlockRestrictable *>(moose_object);
-  if (blk_ptr)
-    blk_ptr->checkVariable(*_variable);
 }
 
 MooseVariableInterface::~MooseVariableInterface() {}
