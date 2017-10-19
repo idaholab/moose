@@ -25,7 +25,7 @@ template <>
 InputParameters
 validParams<InterfaceKernel>()
 {
-  InputParameters params = validParams<DGKernel>();
+  InputParameters params = validParams<DGKernelBase>();
   params.addRequiredCoupledVar("neighbor_var", "The variable on the other side of the interface.");
   params.set<std::string>("_moose_base") = "InterfaceKernel";
   params.addParam<std::vector<AuxVariableName>>(
@@ -57,7 +57,8 @@ validParams<InterfaceKernel>()
 }
 
 InterfaceKernel::InterfaceKernel(const InputParameters & params)
-  : DGKernel(params),
+  : DGKernelBase(params),
+    TwoMaterialPropertyInterface(this, boundaryIDs()),
     _neighbor_var(*getVar("neighbor_var", 0)),
     _neighbor_value(_neighbor_var.slnNeighbor()),
     _grad_neighbor_value(_neighbor_var.gradSlnNeighbor()),
