@@ -89,7 +89,7 @@ class TestTemplateDisplay(MarkdownTestCase):
         root = moose_docs_file_tree({'framework': config})
         node = root.findall('/KKSMultiComponentExample')[0]
         html = self.parser.convert(node)
-        self.assertIn('<a class="breadcrumb" href="index.html">KKS Multi Component Example</a>',
+        self.assertIn('<a class="breadcrumb" href="index.html">KKSMulti Component Example</a>',
                       html)
 
 

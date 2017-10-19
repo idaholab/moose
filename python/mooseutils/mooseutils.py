@@ -220,3 +220,15 @@ def check_file_size(base=os.getcwd(), size=1, ignore=None):
             if result.st_size > size:
                 output.append(FileInfo(name=filename, size=result.st_size/(1024.**2)))
     return output
+
+def camel_to_space(text):
+    """
+    Converts the supplied camel case text to space separated words.
+    """
+    out = []
+    index = 0
+    for match in re.finditer(r'(?<=[a-z])(?=[A-Z])', text):
+        out.append(text[index:match.start(0)])
+        index = match.start(0)
+    out.append(text[index:])
+    return ' '.join(out)
