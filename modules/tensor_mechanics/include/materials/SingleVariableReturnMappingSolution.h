@@ -86,8 +86,11 @@ protected:
   bool _check_range;
 
 private:
-  /// Maximum number of return mapping iterations
+  /// Maximum number of return mapping iterations (used only in legacy return mapping)
   unsigned int _max_its;
+
+  /// Maximum number of return mapping iterations used in current procedure. Not settable by user.
+  const unsigned int _fixed_max_its;
 
   /// Whether to output iteration information all the time (regardless of whether iterations converge)
   const bool _output_iteration_info;
@@ -98,6 +101,9 @@ private:
   /// Absolute convergence tolerance
   Real _absolute_tolerance;
 
+  /// Multiplier applied to relative and absolute tolerances for acceptable convergence
+  Real _acceptable_multiplier;
+
   /// Whether to use line searches to improve convergence
   bool _line_search;
 
@@ -105,7 +111,10 @@ private:
   /// those bounds if outside them
   bool _bracket_solution;
 
-  /// History of residuals used for stubborn problems
+  /// Number of residuals to be stored in history
+  const std::size_t _num_resids;
+
+  /// History of residuals used to check whether progress is still being made on decreasing the residual
   std::vector<Real> _residual_history;
 
   /**
@@ -137,6 +146,17 @@ private:
    * @return Whether the model converged
    */
   bool converged(const Real & residual, const Real & reference);
+
+  /**
+   * Check to see whether the residual is within acceptable convergence limits.
+   * This will only return true if it has been determined that progress is no
+   * longer being made and that the residual is within the acceptable limits.
+   * @param residual  Current iteration count
+   * @param residual  Current value of the residual
+   * @param reference Current value of the reference quantity
+   * @return Whether the model converged
+   */
+  bool convergedAcceptable(const unsigned int & it, const Real & residual, const Real & reference);
 
   /**
    * Output information about convergence history of the model
