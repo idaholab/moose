@@ -45,10 +45,10 @@ InputParameters validParams<InitialCondition>();
  * InitialConditions are objects that set the initial value of variables.
  */
 class InitialCondition : public MooseObject,
+                         public BlockRestrictable,
                          public Coupleable,
                          public FunctionInterface,
                          public UserObjectInterface,
-                         public BlockRestrictable,
                          public BoundaryRestrictable,
                          public DependencyResolverInterface,
                          public Restartable,

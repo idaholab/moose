@@ -48,24 +48,8 @@ MooseVariableInterface::MooseVariableInterface(const MooseObject * moose_object,
 
   // Check for subdomain consistency
   const BlockRestrictable * blk_ptr = dynamic_cast<const BlockRestrictable *>(moose_object);
-  if (blk_ptr && !blk_ptr->isBlockSubset(_variable->activeSubdomains()))
-  {
-    std::string var_ids = Moose::stringify(_variable->activeSubdomains());
-    std::string obj_ids = Moose::stringify(blk_ptr->blockRestricted() ? blk_ptr->blockIDs()
-                                                                      : blk_ptr->meshBlockIDs());
-    mooseError("The 'block' parameter of the object '",
-               moose_object->name(),
-               "' must be a subset of the 'block' parameter of the variable '",
-               variable_name,
-               "':\n    ",
-               moose_object->name(),
-               ": ",
-               obj_ids,
-               "\n    ",
-               variable_name,
-               ": ",
-               var_ids);
-  }
+  if (blk_ptr)
+    blk_ptr->checkVariable(*_variable);
 }
 
 MooseVariableInterface::~MooseVariableInterface() {}

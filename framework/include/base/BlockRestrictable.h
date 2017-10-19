@@ -25,6 +25,7 @@
 class BlockRestrictable;
 class FEProblemBase;
 class MooseMesh;
+class MooseVariable;
 
 template <>
 InputParameters validParams<BlockRestrictable>();
@@ -189,6 +190,14 @@ public:
    */
   virtual bool blockRestricted() const;
 
+  /**
+   * Helper for checking that the ids for this object are in agreement with the variables
+   * on the supplied variable.
+   *
+   * @param variable The variable to check against.
+   */
+  void checkVariable(const MooseVariable & variable) const;
+
 protected:
   /// Pointer to the MaterialData class for this object
   std::shared_ptr<MaterialData> _blk_material_data;
@@ -212,7 +221,7 @@ protected:
   Moose::CoordinateSystemType getBlockCoordSystem();
 
 private:
-  /// Set of block ids supplied by the user via the input file
+  /// Set of block ids supplied by the user via the input file (for error reporting)
   std::set<SubdomainID> _blk_ids;
 
   /// Vector the block names supplied by the user via the input file
@@ -237,6 +246,9 @@ private:
 
   /// Thread id for this object
   THREAD_ID _blk_tid;
+
+  /// Name of the object
+  const std::string & _blk_name;
 
   /**
    * A helper function for extracting the subdomain IDs for a variable

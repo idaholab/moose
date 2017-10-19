@@ -47,6 +47,7 @@ validParams<InitialCondition>()
 
 InitialCondition::InitialCondition(const InputParameters & parameters)
   : MooseObject(parameters),
+    BlockRestrictable(parameters),
     Coupleable(this,
                getParam<SystemBase *>("_sys")
                    ->getVariable(parameters.get<THREAD_ID>("_tid"),
@@ -54,8 +55,7 @@ InitialCondition::InitialCondition(const InputParameters & parameters)
                    .isNodal()),
     FunctionInterface(this),
     UserObjectInterface(this),
-    BlockRestrictable(parameters),
-    BoundaryRestrictable(parameters, true), // true for being nodal
+    BoundaryRestrictable(parameters, _c_nodal),
     DependencyResolverInterface(),
     Restartable(parameters, "InitialConditions"),
     ZeroInterface(parameters),
