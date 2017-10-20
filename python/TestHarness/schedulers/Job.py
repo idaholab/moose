@@ -1,4 +1,4 @@
-import re
+import re, os
 from timeit import default_timer as clock
 
 
@@ -39,12 +39,13 @@ class Job(object):
         self.__tester = tester
         self.timer = Timer()
         self.__dag = tester_dag
-        self.__dag_clone = None
         self.__outfile = None
         self.__start_time = clock()
         self.__end_time = None
         self.__std_out = ''
         self.report_timer = None
+        self.__processors = None
+        self.__unique_identifier = os.path.join(tester.getTestDir(), tester.getTestName())
 
     def getTester(self):
         """ Return the tester object """
@@ -55,29 +56,27 @@ class Job(object):
         return self.__dag
 
     def getOriginalDAG(self):
-        """
-        Retreive the DAG object from the state it was when setOriginalDAG was called or the current
-        state it is in now, if setOriginalDAG was never called.
-        """
-
-        return self.setOriginalDAG()
-
-    def setOriginalDAG(self):
-        """
-        Create a soft clone of the working DAG for what ever state it is currently in. This method
-        should only be called once, and once the working DAG is properly set up.
-
-        This is to protect the DAG from further tampering.
-        """
-
-        if self.__dag_clone == None:
-            self.__dag_clone = self.__dag.clone()
-        return self.__dag_clone
+        """ Return the DAG object as it was in its original form """
+        return self.__dag.getOriginalDAG()
 
     def getTestName(self):
         """ Wrapper method to return the testers test name """
         return self.__tester.getTestName()
 
+    def getUniqueIdentifier(self):
+        """ A unique identifier for this job object """
+        return self.__unique_identifier
+
+    def getProcessors(self):
+        """ Return the number of processors this job consumes """
+        if self.__processors == None:
+            return self.setProcessors(self.__tester.getProcs(self.options))
+        return self.__processors
+
+    def setProcessors(self, procs):
+        """ Set the number of processors this job consumes """
+        self.__processors = int(procs)
+        return self.__processors
 
     def run(self):
         """
@@ -114,8 +113,8 @@ class Job(object):
         return self.__std_out
 
     def setOutput(self, output):
-        """ Method to allow testers to overwrite the output if certain conditions are met """
-        if self.__tester.outfile is not None and not self.__tester.outfile.closed:
+        """ Method to allow schedulers to overwrite the output if certain conditions are met """
+        if not self.__tester.outfile is None and not self.__tester.outfile.closed:
             return
         self.__std_out = output
 
