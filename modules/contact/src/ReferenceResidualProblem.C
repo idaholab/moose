@@ -18,6 +18,9 @@ InputParameters
 validParams<ReferenceResidualProblem>()
 {
   InputParameters params = validParams<FEProblem>();
+  params.addClassDescription("Problem that checks for convergence relative to "
+                             "a user-supplied reference quantity rather than "
+                             "the initial residual");
   params.addParam<std::vector<std::string>>(
       "solution_variables", "Set of solution variables to be checked for relative convergence");
   params.addParam<std::vector<std::string>>(

@@ -22,6 +22,7 @@ validParams<SideFluxIntegral>()
   params.addRequiredParam<MaterialPropertyName>(
       "diffusivity",
       "The name of the diffusivity material property that will be used in the flux computation.");
+  params.addClassDescription("Computes the integral of the flux over the specified boundary");
   return params;
 }
 
