@@ -14,12 +14,15 @@ InputParameters
 validParams<ComputeStressBase>()
 {
   InputParameters params = validParams<Material>();
-  params.addParam<std::vector<FunctionName>>(
+  params.addDeprecatedParam<std::vector<FunctionName>>(
       "initial_stress",
       "A list of functions describing the initial stress.  If provided, there "
       "must be 9 of these, corresponding to the xx, yx, zx, xy, yy, zy, xz, yz, "
       "zz components respectively.  If not provided, all components of the "
-      "initial stress will be zero");
+      "initial stress will be zero",
+      "This functionality was deprecated on 12 October 2017 and is set to be"
+      "removed on 12 March 2018.  Please use ComputeEigenstrainFromInitialStress"
+      "instead");
   params.addParam<std::string>("base_name",
                                "Optional parameter that allows the user to define "
                                "multiple mechanics material systems on the same "
