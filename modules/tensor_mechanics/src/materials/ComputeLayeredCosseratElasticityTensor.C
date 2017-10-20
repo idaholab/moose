@@ -38,8 +38,8 @@ ComputeLayeredCosseratElasticityTensor::ComputeLayeredCosseratElasticityTensor(
         declareProperty<RankFourTensor>("elastic_flexural_rigidity_tensor")),
     _compliance(declareProperty<RankFourTensor>(_base_name + "compliance_tensor"))
 {
-  // all tensors created by this class are always constant in time
-  issueGuarantee(_elasticity_tensor_name, Guarantee::CONSTANT_IN_TIME);
+  if (!isParamValid("elasticity_tensor_prefactor"))
+    issueGuarantee(_elasticity_tensor_name, Guarantee::CONSTANT_IN_TIME);
 
   const Real E = getParam<Real>("young");
   const Real nu = getParam<Real>("poisson");

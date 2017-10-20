@@ -24,8 +24,8 @@ ComputeElasticityTensor::ComputeElasticityTensor(const InputParameters & paramet
     _Cijkl(getParam<std::vector<Real>>("C_ijkl"),
            (RankFourTensor::FillMethod)(int)getParam<MooseEnum>("fill_method"))
 {
-  // all tensors created by this class are always constant in time
-  issueGuarantee(_elasticity_tensor_name, Guarantee::CONSTANT_IN_TIME);
+  if (!isParamValid("elasticity_tensor_prefactor"))
+    issueGuarantee(_elasticity_tensor_name, Guarantee::CONSTANT_IN_TIME);
 
   if (_Cijkl.isIsotropic())
     issueGuarantee(_elasticity_tensor_name, Guarantee::ISOTROPIC);
