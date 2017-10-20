@@ -6,7 +6,7 @@ template <>
 InputParameters
 validParams<WallFrictionChurchillMaterial>()
 {
-  InputParameters params = validParams<Material>();
+  InputParameters params = validParams<WallFriction3EqnBaseMaterial>();
   params.addRequiredCoupledVar("rhoA", "Mass equation variable: rho*A");
   params.addRequiredCoupledVar("rhouA", "Momentum equation variable: rho*u*A");
   params.addRequiredCoupledVar("rhoEA", "Total energy equation variable: rho*E*A");
@@ -22,18 +22,7 @@ validParams<WallFrictionChurchillMaterial>()
 }
 
 WallFrictionChurchillMaterial::WallFrictionChurchillMaterial(const InputParameters & parameters)
-  : DerivativeMaterialInterfaceRelap<Material>(parameters),
-    _Cw_name(getParam<MaterialPropertyName>("Cw")),
-    _Cw(declareProperty<Real>(_Cw_name)),
-    _dCw_drhoA(declarePropertyDerivativeRelap<Real>(_Cw_name, "rhoA")),
-    _dCw_drhouA(declarePropertyDerivativeRelap<Real>(_Cw_name, "rhouA")),
-    _dCw_drhoEA(declarePropertyDerivativeRelap<Real>(_Cw_name, "rhoEA")),
-
-    _mu(getMaterialProperty<Real>("mu")),
-    _rho(coupledValue("rho")),
-    _vel(coupledValue("vel")),
-    _D_h(coupledValue("D_h")),
-    _roughness(getParam<Real>("roughness"))
+  : WallFriction3EqnBaseMaterial(parameters)
 {
 }
 
