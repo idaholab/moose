@@ -15,6 +15,8 @@ InputParameters
 validParams<IsotropicPlasticity>()
 {
   InputParameters params = validParams<ReturnMappingModel>();
+  params.addClassDescription("Calculates the stress and plastic strain in the general isotropic "
+                             "linear strain hardening plasticity model");
 
   // Linear strain hardening parameters
   params.addParam<Real>("yield_stress", "The point at which plastic strain begins accumulating");

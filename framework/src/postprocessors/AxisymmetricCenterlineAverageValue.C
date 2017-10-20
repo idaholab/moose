@@ -20,6 +20,10 @@ InputParameters
 validParams<AxisymmetricCenterlineAverageValue>()
 {
   InputParameters params = validParams<SideAverageValue>();
+  params.addClassDescription("Computes the average value of a variable on a "
+                             "sideset located along the centerline of an "
+                             "axisymmetric model.");
+
   return params;
 }
 

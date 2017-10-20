@@ -1,7 +1,39 @@
-<!-- MOOSE Documentation Stub: Remove this when content is added. -->
-
 # InternalVolume
 !syntax description /Postprocessors/InternalVolume
+
+## Description
+`InternalVolume` computes the volume of an enclosed space. The complete boundary
+ of the enclosed space must be represented by the user specified side set. The
+ volume of the domain is calculated as the integral over the surface of the
+ domain, where the domain surface is specified by the boundary.
+
+If the given side set points outward, `InternalVolume` will report a negative
+volume.
+
+As an example, consider
+$$
+\int_V div(F) dV = \int_{dS} F \cdot \hat{n} dS
+$$
+where F is a field, $\hat{n}$ is the normal of the surface, V is the volume of
+ the domain, and S is the surface of the domain.
+
+For simplicity in this example, we choose
+$$
+F = \left[ x, 0, 0 \right]^T \quad then \quad div(F) = 1
+$$
+
+such that the integral becomes
+
+$$
+\int_V dV = int_{dS} x \cdot n[0] dS
+$$
+
+The volume of the domain is the integral over the surface of the domain of the x
+ position of the surface times the x-component of the normal of the surface.
+
+
+## Example Input Syntax
+!listing /modules/combined/test/tests/internal_volume/hex8.i start=internalVolume end=dispZ
 
 !syntax parameters /Postprocessors/InternalVolume
 
