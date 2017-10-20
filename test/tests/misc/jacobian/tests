@@ -22,4 +22,23 @@
     expect_out = "No errors detected. :-\)"
     recover = false
   [../]
+
+  [./no_negative_jacobian]
+    type = RunApp
+    input = no_negative_jacobian.i
+  [../]
+  [./jacobian_zero]
+    type = RunException
+    input = no_negative_jacobian.i
+    prereq = no_negative_jacobian
+    cli_args = 'Kernels/diff/use_displaced_mesh=true'
+    expect_err = 'ERROR: negative Jacobian 0 at point \(x,y,z\)=\(       0, 0.211325, 0.211325\) in element 0'
+  [../]
+  [./jacobian_negative]
+    type = RunException
+    input = no_negative_jacobian.i
+    prereq = no_negative_jacobian
+    cli_args = 'Kernels/diff/use_displaced_mesh=true Executioner/dt=0.8'
+    expect_err = 'ERROR: negative Jacobian -0.0625 at point \(x,y,z\)=\(-0.105662, 0.211325, 0.211325\) in element 0'
+  [../]
 []
