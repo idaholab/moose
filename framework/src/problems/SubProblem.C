@@ -68,6 +68,16 @@ SubProblem::addVectorTag(TagName tag_name)
   return _vector_tag_name_to_tag_id.at(tag_name);
 }
 
+void
+SubProblem::removeVectorTag(TagName tag_name)
+{
+  auto tag_id = _vector_tag_name_to_tag_id[tag_name];
+
+  _vector_tag_name_to_tag_id.erase(tag_name);
+
+  _vector_tag_id_to_tag_name.erase(tag_id);
+}
+
 TagID
 SubProblem::getVectorTag(TagName tag_name)
 {
@@ -94,6 +104,16 @@ SubProblem::addMatrixTag(TagName tag_name)
   }
 
   return _matrix_tag_name_to_tag_id.at(tag_name);
+}
+
+void
+SubProblem::removeMatrixTag(TagName tag_name)
+{
+  auto tag_id = _vector_tag_name_to_tag_id[tag_name];
+
+  _vector_tag_name_to_tag_id.erase(tag_name);
+
+  _vector_tag_id_to_tag_name.erase(tag_id);
 }
 
 TagID

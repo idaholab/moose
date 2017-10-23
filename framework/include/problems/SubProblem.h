@@ -79,6 +79,13 @@ public:
   virtual TagID addVectorTag(TagName tag_name);
 
   /**
+   * Remove a vector Tag
+   *
+   * @param tag_name The name of the tag to remove, the TagID will be also removed
+   */
+  virtual void removeVectorTag(TagName tag_name);
+
+  /**
    * Get a TagID from a TagName.
    */
   virtual TagID getVectorTag(TagName tag_name);
@@ -107,6 +114,13 @@ public:
    * @param tag_name The name of the tag to create, the TagID will get automatically generated
    */
   virtual TagID addMatrixTag(TagName tag_name);
+
+  /**
+   * Remove Tag ID and its Name
+   *
+   * @param tag_name The name of the tag to remove, the TagID will be also deleted
+   */
+  virtual void removeMatrixTag(TagName tag_name);
 
   /**
    * Get a TagID from a TagName.

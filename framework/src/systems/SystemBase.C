@@ -507,12 +507,28 @@ SystemBase::addVector(TagID tag, const bool project, const ParallelType type)
 
   NumericVector<Number> * vec = &system().add_vector(vector_name, project, type);
 
-  if (tag + 1 >= _tagged_vectors.size())
-    _tagged_vectors.resize(tag + 1);
-
   _tagged_vectors[tag] = vec;
 
   return *vec;
+}
+
+void
+SystemBase::removeVector(TagID tag_id)
+{
+  if (!_subproblem.vectorTagExists(tag_id))
+    mooseError("Cannot remove an unexisting tag or its associated vector, ",
+               tag_id,
+               ", that tag does not exist in System ",
+               name());
+
+  if (hasVector(tag_id))
+  {
+    auto vector_name = _subproblem.vectorTagName(tag_id);
+    system().remove_vector(vector_name);
+    _tagged_vectors.erase(tag_id);
+
+    _subproblem.removeVectorTag(vector_name);
+  }
 }
 
 void

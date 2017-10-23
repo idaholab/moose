@@ -27,6 +27,8 @@ public:
 
   virtual SparseMatrix<Number> & addMatrix(TagID tag) override;
 
+  virtual void removeMatrix(TagID tag) override;
+
   virtual void solve() override;
 
   /**

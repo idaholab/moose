@@ -126,14 +126,30 @@ NonlinearSystem::addMatrix(TagID tag)
 
   auto matrix_name = _subproblem.matrixTagName(tag);
 
-  SparseMatrix<Number> * vec = &_transient_sys.add_matrix(matrix_name);
+  SparseMatrix<Number> * mat = &_transient_sys.add_matrix(matrix_name);
 
-  if (tag + 1 >= _tagged_matrices.size())
-    _tagged_matrices.resize(tag + 1);
+  _tagged_matrices[tag] = mat;
 
-  _tagged_matrices[tag] = vec;
+  return *mat;
+}
 
-  return *vec;
+void
+NonlinearSystem::removeMatrix(TagID tag_id)
+{
+  if (!_subproblem.matrixTagExists(tag_id))
+    mooseError("Cannot remove a tagged matrix with matrix_tag, ",
+               tag_id,
+               ", that tag does not exist in System ",
+               name());
+
+  if (hasMatrix(tag_id))
+  {
+    auto matrix_name = _subproblem.matrixTagName(tag_id);
+    _transient_sys.remove_matrix(matrix_name);
+    _tagged_matrices.erase(tag_id);
+
+    _subproblem.removeMatrixTag(matrix_name);
+  }
 }
 
 void
