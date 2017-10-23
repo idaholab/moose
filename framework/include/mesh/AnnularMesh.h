@@ -66,6 +66,12 @@ protected:
 
   /// Whether a full annulus (as opposed to a sector) will needs to generate
   const bool _full_annulus;
+
+  /// Subdomain ID of created quad elements
+  const SubdomainID _quad_subdomain_id;
+
+  /// Subdomain ID of created tri elements (that only exist if rmin=0)
+  const SubdomainID _tri_subdomain_id;
 };
 
 #endif /* ANNULARMESH_H */

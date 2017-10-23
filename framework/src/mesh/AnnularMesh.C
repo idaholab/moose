@@ -25,7 +25,7 @@ validParams<AnnularMesh>()
   params.addRangeCheckedParam<unsigned int>(
       "nr", 1, "nr>0", "Number of elements in the radial direction");
   params.addRequiredRangeCheckedParam<unsigned int>(
-      "nt", "nt>1", "Number of elements in the angular direction");
+      "nt", "nt>0", "Number of elements in the angular direction");
   params.addRequiredRangeCheckedParam<Real>(
       "rmin",
       "rmin>=0.0",
@@ -39,6 +39,13 @@ validParams<AnnularMesh>()
                         "Otherwise, only a sector of an annulus is created");
   params.addRangeCheckedParam<Real>(
       "growth_r", 1.0, "growth_r>0.0", "The ratio of radial sizes of successive rings of elements");
+  params.addParam<SubdomainID>(
+      "quad_subdomain_id", 0, "The subdomain ID given to the QUAD4 elements");
+  params.addParam<SubdomainID>("tri_subdomain_id",
+                               1,
+                               "The subdomain ID given to the TRI3 elements "
+                               "(these exist only if rmin=0, and they exist "
+                               "at the center of the disc");
   params.addClassDescription("For rmin>0: creates an annular mesh of QUAD4 elements.  For rmin=0: "
                              "creates a disc mesh of QUAD4 and TRI3 elements.  Boundary sidesets "
                              "are created at rmax and rmin, and given these names.  If tmin!=0 and "
@@ -59,13 +66,22 @@ AnnularMesh::AnnularMesh(const InputParameters & parameters)
     _growth_r(getParam<Real>("growth_r")),
     _len(_growth_r == 1.0 ? (_rmax - _rmin) / _nr
                           : (_rmax - _rmin) * (1.0 - _growth_r) / (1.0 - std::pow(_growth_r, _nr))),
-    _full_annulus(_tmin == 0.0 && _tmax == 2 * M_PI)
+    _full_annulus(_tmin == 0.0 && _tmax == 2 * M_PI),
+    _quad_subdomain_id(getParam<SubdomainID>("quad_subdomain_id")),
+    _tri_subdomain_id(getParam<SubdomainID>("tri_subdomain_id"))
 {
   // catch likely user errors
   if (_rmax <= _rmin)
     mooseError("AnnularMesh: rmax must be greater than rmin");
   if (_tmax <= _tmin)
     mooseError("AnnularMesh: tmax must be greater than tmin");
+  if (_tmax - _tmin > 2 * M_PI)
+    mooseError("AnnularMesh: tmax - tmin must be <= 2 Pi");
+  if (_nt <= (_tmax - _tmin) / M_PI)
+    mooseError("AnnularMesh: nt must be greater than (tmax - tmin) / Pi in order to avoid inverted "
+               "elements");
+  if (_quad_subdomain_id == _tri_subdomain_id)
+    mooseError("AnnularMesh: quad_subdomain_id must not equal tri_subdomain_id");
 }
 
 Real
@@ -158,6 +174,7 @@ AnnularMesh::buildMesh()
       elem->set_node(1) = nodes[node_id - 1];
       elem->set_node(2) = nodes[node_id - num_angular_nodes - 1];
       elem->set_node(3) = nodes[node_id - num_angular_nodes];
+      elem->subdomain_id() = _quad_subdomain_id;
       node_id++;
 
       if (layer_num == _nr)
@@ -181,6 +198,7 @@ AnnularMesh::buildMesh()
       elem->set_node(1) = nodes[node_id - 1];
       elem->set_node(2) = nodes[node_id - num_angular_nodes - 1];
       elem->set_node(3) = nodes[node_id - 2 * num_angular_nodes];
+      elem->subdomain_id() = _quad_subdomain_id;
 
       if (layer_num == _nr)
         // add outer boundary (boundary_id = 1)
@@ -202,7 +220,7 @@ AnnularMesh::buildMesh()
       elem->set_node(0) = nodes[node_id];
       elem->set_node(1) = nodes[node_id - num_angular_nodes + angle_num];
       elem->set_node(2) = nodes[node_id - num_angular_nodes + angle_num + 1];
-      elem->subdomain_id() = 1;
+      elem->subdomain_id() = _tri_subdomain_id;
     }
     if (_full_annulus)
     {
@@ -210,7 +228,7 @@ AnnularMesh::buildMesh()
       elem->set_node(0) = nodes[node_id];
       elem->set_node(1) = nodes[node_id - 1];
       elem->set_node(2) = nodes[node_id - num_angular_nodes];
-      elem->subdomain_id() = 1;
+      elem->subdomain_id() = _tri_subdomain_id;
     }
   }
 
