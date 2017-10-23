@@ -45,7 +45,6 @@
     type = 'Exodiff'
     input = 'RegularSolutionFreeEnergy_const_T.i'
     exodiff = 'RegularSolutionFreeEnergy_const_T_out.e'
-    Materials/free_energy/T=301
   [../]
 
   [./RegularSolutionFreeEnergy_const_T_specified]
