@@ -6,7 +6,6 @@
 []
 
 [Variables]
-  active = 'u v'
   [./u]
     order = FIRST
     family = LAGRANGE
@@ -18,7 +17,6 @@
 []
 
 [Kernels]
-  active = 'diff_u conv_v diff_v'
   [./diff_u]
     type = Diffusion
     variable = u
@@ -35,7 +33,7 @@
 []
 
 [BCs]
-  active = 'left_u right_u left_v'
+  inactive = 'right_v'
   [./left_u]
     type = DirichletBC
     variable = u
@@ -71,7 +69,6 @@
 []
 
 [Preconditioning]
-  active = 'FSP'
   [./FSP]
     # It is the starting point of splitting
     type = FSP

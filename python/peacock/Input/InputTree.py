@@ -88,14 +88,59 @@ class InputTree(object):
             self._copyDefaultTree()
             self.root.comments = self._getComments(self.input_file.root_node)
 
+            active = self._readParameters(self.input_file.root_node, "/")
             for root_node in self.input_file.root_node.children(node_type=hit.NodeType.Section):
-                self._addInputFileNode(root_node)
+                self._addInputFileNode(root_node, root_node.path() in active)
                 if root_node.path() not in self.root.children_write_first:
                     self.root.children_write_first.append(root_node.path())
             return True
         return False
 
-    def _addInputFileNode(self, input_node):
+    def _readParameters(self, input_node, path):
+        """
+        Read the parameters set on a block.
+        We special case the "active" and "inactive" parameters and
+        convert them directly into whether we include the block or
+        not. Peacock will write out the "inactive" parameter for
+        those blocks that are deselected and we don't want to have
+        any problems with existing active or inactive parameters.
+        Input:
+            input_node[hit.Node]: Input node to read parameters from
+            path[str]: Full path of the input_node
+        Return:
+            list[str]: Children of this node that are active
+        """
+        active = []
+        for child_node in input_node.children(node_type=hit.NodeType.Section):
+            active.append(child_node.path())
+
+        for param_node in input_node.children(node_type=hit.NodeType.Field):
+            param_info = self.getParamInfo(path, param_node.path())
+            if not param_info:
+                # must be a user added param
+                param_info = self.addUserParam(path, param_node.path(), param_node.raw())
+            else:
+                param_info.value = param_node.raw()
+            if param_info.name == "active":
+                active = param_info.value.split()
+                param_info.parent.removeUserParam("active")
+            elif param_info.name == "inactive":
+                for inactive in param_info.value.split():
+                    try:
+                        active.remove(inactive)
+                    except ValueError:
+                        pass
+                # We don't want to write this out by default
+                param_info.parent.removeUserParam("inactive")
+            else:
+                param_info.set_in_input_file = True
+                param_info.parent.changed_by_user = True
+                if param_info.name not in param_info.parent.parameters_write_first:
+                    param_info.parent.parameters_write_first.append(param_info.name)
+                param_info.comments = self._getComments(param_node)
+        return active
+
+    def _addInputFileNode(self, input_node, included):
         """
         This adds a node from the input file.
         Input:
@@ -112,7 +157,7 @@ class InputTree(object):
                 return
 
         entry.comments = self._getComments(input_node)
-        entry.included = True
+        entry.included = included
         entry.hard = True
 
         in_type = input_node.find("type")
@@ -123,21 +168,10 @@ class InputTree(object):
             if "type" not in entry.parameters_list:
                 entry.parameters_list.insert(0, "type")
 
-        for param_node in input_node.children(node_type=hit.NodeType.Field):
-            param_info = self.getParamInfo(path, param_node.path())
-            if not param_info:
-                # must be a user added param
-                param_info = self.addUserParam(path, param_node.path(), param_node.raw())
-            else:
-                param_info.value = param_node.raw()
-            param_info.set_in_input_file = True
-            param_info.parent.changed_by_user = True
-            if param_info.name not in param_info.parent.parameters_write_first:
-                param_info.parent.parameters_write_first.append(param_info.name)
-            param_info.comments = self._getComments(param_node)
+        active = self._readParameters(input_node, path)
 
         for child_node in input_node.children(node_type=hit.NodeType.Section):
-            self._addInputFileNode(child_node)
+            self._addInputFileNode(child_node, child_node.path() in active)
             if child_node.path() not in entry.children_write_first:
                 entry.children_write_first.append(child_node.path())
 

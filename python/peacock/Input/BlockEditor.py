@@ -202,7 +202,6 @@ class BlockEditor(QWidget, MooseWidget):
         """
         self.editingFinished.emit()
 
-
 if __name__ == "__main__":
     from PyQt5.QtWidgets import QApplication, QMainWindow
     from InputTree import InputTree
