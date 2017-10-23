@@ -126,18 +126,6 @@ MooseEnum getHeatStructureType(const std::string & name = "PLATE");
 
 // ----------------------------------------------------------------------------
 
-/// Closures type
-enum EClosuresType
-{
-  CLOSURES_SIMPLE = 0,
-  CLOSURES_TRACE = 1
-};
-
-template <>
-EClosuresType stringToEnum<EClosuresType>(const std::string & s);
-
-// ----------------------------------------------------------------------------
-
 enum EFlowRegimeNamesType
 {
   FR_DISPERSEDBUBBLE, ///< Weight of DispersedBubble Correlations  PreCHF
