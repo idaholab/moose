@@ -55,7 +55,8 @@ SubProblem::~SubProblem() {}
 TagID
 SubProblem::addVectorTag(TagName tag_name)
 {
-  if (_vector_tag_name_to_tag_id.find(tag_name) == _vector_tag_name_to_tag_id.end())
+  auto existing_tag = _vector_tag_name_to_tag_id.find(tag_name);
+  if (existing_tag == _vector_tag_name_to_tag_id.end())
   {
     auto tag_id = _vector_tag_name_to_tag_id.size();
 
@@ -82,7 +83,8 @@ SubProblem::vectorTagName(TagID tag)
 TagID
 SubProblem::addMatrixTag(TagName tag_name)
 {
-  if (_matrix_tag_name_to_tag_id.find(tag_name) == _matrix_tag_name_to_tag_id.end())
+  auto existing_tag = _matrix_tag_name_to_tag_id.find(tag_name);
+  if (existing_tag == _matrix_tag_name_to_tag_id.end())
   {
     auto tag_id = _matrix_tag_name_to_tag_id.size();
 
