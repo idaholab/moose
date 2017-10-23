@@ -451,7 +451,7 @@ class Tester(MooseObject):
 
         # Check for deleted tests
         if self.specs.isValid('deleted'):
-            reasons['deleted'] = 'deleted (' + self.specs['deleted'] + ')'
+            reasons['deleted'] = 'deleted ({})'.format(self.specs['deleted'])
 
         # Check for skipped tests
         if self.specs.type('skip') is bool and self.specs['skip']:
