@@ -1,6 +1,12 @@
 [Mesh]
-  type = FileMesh
-  file = quarter_hole.e
+  type = AnnularMesh
+  nr = 40
+  nt = 16
+  rmin = 0.1
+  rmax = 1
+  tmin = 0.0
+  tmax = 1.570796326795
+  growth_r = 1.1
 []
 
 [MeshModifiers]
@@ -47,53 +53,55 @@
     type = PresetBC
     variable = disp_y
     value = 0
-    boundary = 3
+    boundary = tmin
   [../]
   [./xmin]
     type = PresetBC
     variable = disp_x
     value = 0
-    boundary = 4
+    boundary = tmax
   [../]
 
   [./cavity_temperature]
     type = DirichletBC
     variable = temperature
     value = 1000
-    boundary = 2
+    boundary = rmin
   [../]
   [./cavity_porepressure]
     type = DirichletBC
     variable = porepressure
     value = 1E6
-    boundary = 2
+    boundary = rmin
   [../]
   [./cavity_zero_effective_stress_x]
     type = Pressure
     component = 0
     variable = disp_x
     function = 1E6
-    boundary = 2
+    boundary = rmin
+    use_displaced_mesh = false
   [../]
   [./cavity_zero_effective_stress_y]
     type = Pressure
     component = 1
     variable = disp_y
     function = 1E6
-    boundary = 2
+    boundary = rmin
+    use_displaced_mesh = false
   [../]
 
   [./outer_temperature]
     type = PresetBC
     variable = temperature
     value = 0
-    boundary = 1
+    boundary = rmax
   [../]
   [./outer_pressure]
     type = PresetBC
     variable = porepressure
     value = 0
-    boundary = 1
+    boundary = rmax
   [../]
 []
 

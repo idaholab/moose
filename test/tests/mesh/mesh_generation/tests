@@ -20,4 +20,55 @@
     exodiff = 'mesh_bias_quadratic_in.e'
     recover = false
   [../]
+
+  [./annular_except1]
+    type = RunException
+    input = annular_except1.i
+    expect_err = 'AnnularMesh: rmax must be greater than rmin'
+  [../]
+  [./annular_except2]
+    type = RunException
+    input = annular_except2.i
+    expect_err = 'AnnularMesh: tmax must be greater than tmin'
+  [../]
+  [./annular_except3]
+    type = RunException
+    input = annular_except3.i
+    expect_err = 'AnnularMesh: tmax - tmin must be <= 2 Pi'
+  [../]
+  [./annular_except4]
+    type = RunException
+    input = annular_except4.i
+    expect_err = 'AnnularMesh: nt must be greater than \(tmax - tmin\) / Pi in order to avoid inverted elements'
+  [../]
+  [./annular_except5]
+    type = RunException
+    input = annular_except5.i
+    expect_err = 'AnnularMesh: nt must be greater than \(tmax - tmin\) / Pi in order to avoid inverted elements'
+  [../]
+  [./annular_except6]
+    type = RunException
+    input = annular_except6.i
+    expect_err = 'AnnularMesh: quad_subdomain_id must not equal tri_subdomain_id'
+  [../]
+  [./annulus]
+    type = Exodiff
+    input = annulus.i
+    exodiff = 'annulus_out.e'
+  [../]
+  [./annulus_sector]
+    type = Exodiff
+    input = annulus_sector.i
+    exodiff = 'annulus_sector_out.e'
+  [../]
+  [./disc]
+    type = Exodiff
+    input = disc.i
+    exodiff = 'disc_out.e'
+  [../]
+  [./disc_sector]
+    type = Exodiff
+    input = disc_sector.i
+    exodiff = 'disc_sector_out.e'
+  [../]
 []
