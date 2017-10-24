@@ -32,6 +32,7 @@
 #include "ImageMesh.h"
 #include "PatternedMesh.h"
 #include "StitchedMesh.h"
+#include "AnnularMesh.h"
 
 // MeshModifiers
 #include "MeshExtruder.h"
@@ -489,6 +490,7 @@ registerObjects(Factory & factory)
   registerMesh(ImageMesh);
   registerMesh(PatternedMesh);
   registerMesh(StitchedMesh);
+  registerMesh(AnnularMesh);
 
   // mesh modifiers
   registerMeshModifier(MeshExtruder);
