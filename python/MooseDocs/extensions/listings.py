@@ -144,7 +144,7 @@ class ListingPattern(MooseMarkdownCommon, Pattern):
         rel_filename = match.group('filename').lstrip('/')
         filename = os.path.join(self.markdown.current.root_directory, rel_filename)
         if not os.path.exists(filename):
-            msg = "Unable to locate file: {}".format(rel_filename)
+            msg = "Unable to locate file {}".format(rel_filename)
             msg += " in {}".format(self.markdown.current.filename)
             return self.createErrorElement(msg)
 
