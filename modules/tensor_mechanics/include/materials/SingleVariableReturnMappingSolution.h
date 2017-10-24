@@ -86,8 +86,11 @@ protected:
   bool _check_range;
 
 private:
-  /// Maximum number of return mapping iterations
+  /// Maximum number of return mapping iterations (used only in legacy return mapping)
   unsigned int _max_its;
+
+  /// Maximum number of return mapping iterations used in current procedure. Not settable by user.
+  const unsigned int _fixed_max_its;
 
   /// Whether to output iteration information all the time (regardless of whether iterations converge)
   const bool _output_iteration_info;
@@ -98,12 +101,21 @@ private:
   /// Absolute convergence tolerance
   Real _absolute_tolerance;
 
+  /// Multiplier applied to relative and absolute tolerances for acceptable convergence
+  Real _acceptable_multiplier;
+
   /// Whether to use line searches to improve convergence
   bool _line_search;
 
   /// Whether to save upper and lower bounds of root for scalar, and set solution to the midpoint between
   /// those bounds if outside them
   bool _bracket_solution;
+
+  /// Number of residuals to be stored in history
+  const std::size_t _num_resids;
+
+  /// History of residuals used to check whether progress is still being made on decreasing the residual
+  std::vector<Real> _residual_history;
 
   /**
    * Method called from within this class to perform the actual return mappping iterations.
@@ -133,7 +145,18 @@ private:
    * @param reference Current value of the reference quantity
    * @return Whether the model converged
    */
-  bool converged(const Real & residual, const Real & reference);
+  bool converged(const Real residual, const Real reference);
+
+  /**
+   * Check to see whether the residual is within acceptable convergence limits.
+   * This will only return true if it has been determined that progress is no
+   * longer being made and that the residual is within the acceptable limits.
+   * @param residual  Current iteration count
+   * @param residual  Current value of the residual
+   * @param reference Current value of the reference quantity
+   * @return Whether the model converged
+   */
+  bool convergedAcceptable(const unsigned int it, const Real residual, const Real reference);
 
   /**
    * Output information about convergence history of the model
@@ -145,11 +168,11 @@ private:
    * @param reference              Current value of the reference quantity
    */
   void outputIterInfo(std::stringstream * iter_output,
-                      const unsigned int & it,
-                      const Real & effective_trial_stress,
-                      const Real & scalar,
-                      const Real & residual,
-                      const Real & reference_residual);
+                      const unsigned int it,
+                      const Real effective_trial_stress,
+                      const Real scalar,
+                      const Real residual,
+                      const Real reference_residual);
 
   /**
    * Check to see whether solution is within admissible range, and set it within that range
@@ -174,16 +197,14 @@ private:
    * @param residual               Current value of the residual
    * @param init_resid_sign        Sign of the initial value of the residual
    * @param scalar_upper_bound     Upper bound value of scalar
-   * @param scalar_lowr_bound      Lower bound value of scalar
-   * @param max_permissible_scalar Maximum permissible value of scalar
+   * @param scalar_lower_bound     Lower bound value of scalar
    * @param iter_output            Output stream
    */
-  void updateBounds(const Real & scalar,
-                    const Real & residual,
-                    const Real & init_resid_sign,
+  void updateBounds(const Real scalar,
+                    const Real residual,
+                    const Real init_resid_sign,
                     Real & scalar_upper_bound,
                     Real & scalar_lower_bound,
-                    const Real & max_permissible_scalar,
                     std::stringstream * iter_output);
 };
 

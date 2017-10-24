@@ -26,6 +26,7 @@ protected:
   virtual Real computeDerivative(const Real effectiveTrialStress, const Real scalar) override;
   virtual void iterationFinalize(Real scalar) override;
   virtual void computeStressFinalize(const SymmTensor & plasticStrainIncrement) override;
+  Real computeHardeningValue(const Real scalar);
 
   const Real _yield_stress;
   const Real _hardening_constant;

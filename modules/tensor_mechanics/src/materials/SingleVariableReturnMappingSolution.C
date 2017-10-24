@@ -17,11 +17,7 @@ validParams<SingleVariableReturnMappingSolution>()
   InputParameters params = emptyInputParameters();
 
   // Newton iteration control parameters
-  params.addParam<unsigned int>("max_its", 300, "Maximum number of Newton iterations");
-  params.addParam<unsigned int>(
-      "maximum_iterations",
-      300,
-      "Maximum number of Newton iterations with old tensor mechanics parameter");
+  params.addParam<unsigned int>("max_its", 30, "Maximum number of Newton iterations");
   params.addParam<bool>(
       "output_iteration_info", false, "Set true to output Newton iteration information");
   params.addDeprecatedParam<bool>(
@@ -33,10 +29,15 @@ validParams<SingleVariableReturnMappingSolution>()
       "relative_tolerance", 1e-8, "Relative convergence tolerance for Newton iteration");
   params.addParam<Real>(
       "absolute_tolerance", 1e-11, "Absolute convergence tolerance for Newton iteration");
+  params.addParam<Real>("acceptable_multiplier",
+                        10,
+                        "Factor applied to relative and absolute "
+                        "tolerance for acceptable convergence if "
+                        "iterations are no longer making progress");
   params.addParam<bool>("legacy_return_mapping",
                         false,
                         "Perform iterations and compute residual "
-                        "the same way the same way as the previous "
+                        "the same way as the previous "
                         "algorithm. Also use same old defaults for relative_tolerance, "
                         "absolute_tolerance, and max_its.");
 
@@ -47,14 +48,16 @@ SingleVariableReturnMappingSolution::SingleVariableReturnMappingSolution(
     const InputParameters & parameters)
   : _legacy_return_mapping(false),
     _check_range(false),
-    _max_its(parameters.isParamSetByUser("max_iterations")
-                 ? parameters.get<unsigned int>("max_iterations")
-                 : parameters.get<unsigned int>("max_its")),
+    _max_its(parameters.get<unsigned int>("max_its")),
+    _fixed_max_its(1000), // Far larger than ever expected to be needed
     _output_iteration_info(parameters.get<bool>("output_iteration_info")),
     _relative_tolerance(parameters.get<Real>("relative_tolerance")),
     _absolute_tolerance(parameters.get<Real>("absolute_tolerance")),
+    _acceptable_multiplier(parameters.get<Real>("acceptable_multiplier")),
     _line_search(true),
-    _bracket_solution(true)
+    _bracket_solution(true),
+    _num_resids(30),
+    _residual_history(_num_resids, std::numeric_limits<Real>::max())
 {
   if (parameters.get<bool>("legacy_return_mapping") == true)
   {
@@ -68,6 +71,12 @@ SingleVariableReturnMappingSolution::SingleVariableReturnMappingSolution(
     _bracket_solution = false;
     _check_range = false;
     _legacy_return_mapping = true;
+  }
+  else
+  {
+    if (parameters.isParamSetByUser("max_its"))
+      mooseWarning("Please remove the parameter 'max_its', as it is no longer used in the return "
+                   "mapping procedure.");
   }
 }
 
@@ -155,7 +164,11 @@ SingleVariableReturnMappingSolution::internalSolve(const Real effective_trial_st
     return true;
   }
 
-  while (it < _max_its && !converged(residual, reference_residual))
+  _residual_history.assign(_num_resids, std::numeric_limits<Real>::max());
+  _residual_history[0] = residual;
+
+  while (it < _fixed_max_its && !converged(residual, reference_residual) &&
+         !convergedAcceptable(it, residual, reference_residual))
   {
     scalar_increment = -residual / computeDerivative(effective_trial_stress, scalar);
     scalar = scalar_old + scalar_increment;
@@ -173,13 +186,8 @@ SingleVariableReturnMappingSolution::internalSolve(const Real effective_trial_st
     iterationFinalize(scalar);
 
     if (_bracket_solution)
-      updateBounds(scalar,
-                   residual,
-                   init_resid_sign,
-                   scalar_upper_bound,
-                   scalar_lower_bound,
-                   max_permissible_scalar,
-                   iter_output);
+      updateBounds(
+          scalar, residual, init_resid_sign, scalar_upper_bound, scalar_lower_bound, iter_output);
 
     if (converged(residual, reference_residual))
     {
@@ -247,7 +255,6 @@ SingleVariableReturnMappingSolution::internalSolve(const Real effective_trial_st
                        init_resid_sign,
                        scalar_upper_bound,
                        scalar_lower_bound,
-                       max_permissible_scalar,
                        iter_output);
       }
     }
@@ -257,6 +264,7 @@ SingleVariableReturnMappingSolution::internalSolve(const Real effective_trial_st
     ++it;
     residual_old = residual;
     scalar_old = scalar;
+    _residual_history[it % _num_resids] = residual;
   }
 
   bool has_converged = true;
@@ -267,7 +275,7 @@ SingleVariableReturnMappingSolution::internalSolve(const Real effective_trial_st
       *iter_output << "Encountered inf or nan in material return mapping iterations." << std::endl;
   }
 
-  if (it == _max_its)
+  if (it == _fixed_max_its)
   {
     has_converged = false;
     if (iter_output)
@@ -336,19 +344,42 @@ SingleVariableReturnMappingSolution::internalSolveLegacy(const Real effective_tr
 }
 
 bool
-SingleVariableReturnMappingSolution::converged(const Real & residual, const Real & reference)
+SingleVariableReturnMappingSolution::converged(const Real residual, const Real reference)
 {
   return (std::abs(residual) <= _absolute_tolerance ||
           (std::abs(residual) / reference) <= _relative_tolerance);
 }
 
+bool
+SingleVariableReturnMappingSolution::convergedAcceptable(const unsigned int it,
+                                                         const Real residual,
+                                                         const Real reference)
+{
+  // Require that we have at least done _num_resids evaluations before we allow for
+  // acceptable convergence
+  if (it < _num_resids)
+    return false;
+
+  // Check to see whether the residual has dropped by convergence_history_factor over
+  // the last _num_resids iterations. If it has (which means it's still making progress),
+  // don't consider it to be converged within the acceptable limits.
+  const Real convergence_history_factor = 10.0;
+  if (std::abs(residual * convergence_history_factor) <
+      std::abs(_residual_history[(it + 1) % _num_resids]))
+    return false;
+
+  // Now that it's determined that progress is not being made, treat it as converged if
+  // we're within the acceptable convergence limits
+  return converged(residual / _acceptable_multiplier, reference);
+}
+
 void
 SingleVariableReturnMappingSolution::outputIterInfo(std::stringstream * iter_output,
-                                                    const unsigned int & it,
-                                                    const Real & effective_trial_stress,
-                                                    const Real & scalar,
-                                                    const Real & residual,
-                                                    const Real & reference_residual)
+                                                    const unsigned int it,
+                                                    const Real effective_trial_stress,
+                                                    const Real scalar,
+                                                    const Real residual,
+                                                    const Real reference_residual)
 {
   if (iter_output)
   {
@@ -390,12 +421,11 @@ SingleVariableReturnMappingSolution::checkPermissibleRange(Real & scalar,
 }
 
 void
-SingleVariableReturnMappingSolution::updateBounds(const Real & scalar,
-                                                  const Real & residual,
-                                                  const Real & init_resid_sign,
+SingleVariableReturnMappingSolution::updateBounds(const Real scalar,
+                                                  const Real residual,
+                                                  const Real init_resid_sign,
                                                   Real & scalar_upper_bound,
                                                   Real & scalar_lower_bound,
-                                                  const Real & max_permissible_value,
                                                   std::stringstream * iter_output)
 {
   // Update upper/lower bounds as applicable
@@ -415,16 +445,4 @@ SingleVariableReturnMappingSolution::updateBounds(const Real & scalar,
   else if (residual * init_resid_sign > 0.0 && scalar > scalar_lower_bound &&
            scalar < scalar_upper_bound)
     scalar_lower_bound = scalar;
-
-  if ((scalar_lower_bound > 0 &&
-       (scalar_upper_bound - scalar_lower_bound) / (PETSC_MACHINE_EPSILON * scalar_lower_bound) <=
-           10.0))
-  {
-    // Reset lower/upper bounds.  They're too close together and solution hasn't converged, so the
-    // solution is likely outside those bounds
-    scalar_lower_bound = 0.0;
-    scalar_upper_bound = max_permissible_value;
-    if (iter_output)
-      *iter_output << "  Reset lower/upper bounds because they're too close together" << std::endl;
-  }
 }
