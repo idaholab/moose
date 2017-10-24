@@ -1,20 +1,13 @@
 import cStringIO
 
-def mergeWriteFirstLists(first, complete):
-    """
-    Add in elements from the list "complete" to the end
-    of the "first" if they are not already in "first"
-    Input:
-        first[list]: These elements will be first in the returned list
-        complete[list]: These elements will come after first
-    Return:
-        list: The elements in "complete" with elements in "first" first.
-    """
-    l = first[:]
-    for x in complete:
-        if x not in l:
-            l.append(x)
-    return l
+def writeInactive(output, parent, children, indent, sep):
+    inactive = []
+    for child in children:
+        entry = parent.children.get(child, None)
+        if entry and entry.checkInactive():
+            inactive.append(entry.name)
+    if inactive:
+        output.write("%sinactive = '%s'\n" % (indent*sep, ' '.join(inactive)))
 
 def inputTreeToString(root, sep="  "):
     """
@@ -27,11 +20,12 @@ def inputTreeToString(root, sep="  "):
     output = cStringIO.StringIO()
     if root.comments:
         commentString(output, root.comments, 0, sep)
-    children = mergeWriteFirstLists(root.children_write_first, root.children_list)
+    children = root.getChildNames()
     last_child = children[-1]
+    writeInactive(output, root, children, 0, sep)
     for child in children:
         entry = root.children.get(child, None)
-        if entry and entry.included:
+        if entry and entry.wantsToSave():
             writeToString(output, entry, 0, sep, child == last_child)
     return output.getvalue()
 
@@ -46,10 +40,11 @@ def writeToString(output, entry, indent, sep="  ", is_last=False):
     """
     nodeHeaderString(output, entry, indent, sep)
     nodeParamsString(output, entry, indent+1, sep)
-    children = mergeWriteFirstLists(entry.children_write_first, entry.children_list)
+    children = entry.getChildNames()
+    writeInactive(output, entry, children, indent+1, sep)
     for child in children:
         child_entry = entry.children.get(child, None)
-        if child_entry and child_entry.included:
+        if child_entry and child_entry.wantsToSave():
             writeToString(output, child_entry, indent+1, sep)
     nodeCloseString(output, entry, indent, sep, is_last)
 
@@ -87,7 +82,7 @@ def nodeCloseString(output, entry, indent, sep, is_last):
         output.write("[]\n\n")
 
 def nodeParamsString(output, entry, indent, sep, ignore_type=False):
-    params = mergeWriteFirstLists(entry.parameters_write_first, entry.parameters_list)
+    params = entry.getParamNames()
     for name in params:
         if ignore_type and name == "type":
             continue

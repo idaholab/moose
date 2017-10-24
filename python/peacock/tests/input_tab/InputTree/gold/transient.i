@@ -17,7 +17,6 @@
 []
 
 [Variables]
-  active = 'u'
   [./u]
     order = FIRST
     family = LAGRANGE
@@ -41,7 +40,6 @@
 []
 
 [Kernels]
-  active = 'diff ie ffn'
   [./ie]
     type = TimeDerivative
     variable = u
@@ -58,7 +56,7 @@
 []
 
 [BCs]
-  active = 'all'
+  inactive = 'left right'
   [./all]
     type = FunctionDirichletBC
     variable = u
