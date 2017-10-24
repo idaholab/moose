@@ -200,7 +200,10 @@ class Scheduler(MooseObject):
                 # Skipped Dependencies
                 except dag.DAGEdgeIndError:
                     if not self.skipPrereqs():
-                        tester.setStatus('skipped dependency', tester.bucket_skip)
+                        if self.options.reg_exp:
+                            tester.setStatus('dependency does not match re', tester.bucket_skip)
+                        else:
+                            tester.setStatus('skipped dependency', tester.bucket_skip)
                         failed_or_skipped_testers.add(tester)
 
                     # Add the parent node / dependency edge to create a functional DAG now that we have caught
