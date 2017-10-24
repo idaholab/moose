@@ -6,7 +6,7 @@
 /****************************************************************/
 #include "FiniteStrainUObasedCP.h"
 #include "petscblaslapack.h"
-
+#include "MooseException.h"
 #include "CrystalPlasticitySlipRate.h"
 #include "CrystalPlasticitySlipResistance.h"
 #include "CrystalPlasticityStateVariable.h"
@@ -256,7 +256,7 @@ FiniteStrainUObasedCP::computeQpStress()
       }
     }
     if (substep_iter > _max_substep_iter && _err_tol)
-      mooseError("FiniteStrainUObasedCP: Constitutive failure");
+      throw MooseException("FiniteStrainUObasedCP: Constitutive failure.");
   } while (_err_tol);
 
   _dt = dt_original;
