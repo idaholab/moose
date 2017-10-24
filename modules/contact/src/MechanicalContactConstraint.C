@@ -53,10 +53,6 @@ validParams<MechanicalContactConstraint>()
       "penalty",
       1e8,
       "The penalty to apply.  This can vary depending on the stiffness of your materials");
-  params.addParam<Real>("penalty_slip",
-                        1e8,
-                        "The penalty to apply on sliping direction.  This can vary depending on "
-                        "the stiffness of your materials");
   params.addParam<Real>("friction_coefficient", 0, "The friction coefficient");
   params.addParam<Real>("tangential_tolerance",
                         "Tangential distance to extend edges of contact surfaces");
@@ -120,7 +116,6 @@ MechanicalContactConstraint::MechanicalContactConstraint(const InputParameters &
     _formulation(ContactMaster::contactFormulation(getParam<std::string>("formulation"))),
     _normalize_penalty(getParam<bool>("normalize_penalty")),
     _penalty(getParam<Real>("penalty")),
-    _penalty_slip(getParam<Real>("penalty_slip")),
     _friction_coefficient(getParam<Real>("friction_coefficient")),
     _tension_release(getParam<Real>("tension_release")),
     _capture_tolerance(getParam<Real>("capture_tolerance")),
@@ -178,17 +173,18 @@ MechanicalContactConstraint::MechanicalContactConstraint(const InputParameters &
   if (_friction_coefficient < 0)
     mooseError("The friction coefficient must be nonnegative");
 
-  if (parameters.isParamValid("penalty_slip"))
-    _penalty_slip = parameters.get<Real>("penalty_slip");
-  else
-    _penalty_slip = parameters.get<Real>("penalty");
+  // set _penalty_tangential to the value of _penalty for now
+  _penalty_tangential = _penalty;
 
   if (_formulation == CF_AUGMENTED_LAGRANGE)
   {
+    if (_model == CM_GLUED)
+      mooseError("The Augmented Lagrangian contact formulation does not support GLUED case.");
+
     FEProblemBase * fe_problem = getParam<FEProblemBase *>("_fe_problem_base");
     if (dynamic_cast<AugmentedLagrangianContactProblem *>(fe_problem) == NULL)
-      mooseError(
-          "Augmented Lagrangian contact formulation must use AugmentedLagrangianContactProblem.");
+      mooseError("The Augmented Lagrangian contact formulation must use "
+                 "AugmentedLagrangianContactProblem.");
 
     if (!parameters.isParamValid("al_penetration_tolerance"))
       mooseError("For Augmented Lagrangian contact, al_penetration_tolerance must be provided.");
@@ -200,7 +196,7 @@ MechanicalContactConstraint::MechanicalContactConstraint(const InputParameters &
       if (!parameters.isParamValid("al_incremental_slip_tolerance") ||
           !parameters.isParamValid("al_frictional_force_tolerance"))
       {
-        mooseError("For Augmented Lagrangian frictional contact formualton, "
+        mooseError("For the Augmented Lagrangian frictional contact formualton, "
                    "al_incremental_slip_tolerance and "
                    "al_frictional_force_tolerance must be provided.");
       }
@@ -282,7 +278,7 @@ MechanicalContactConstraint::updateAugmentedLagrangianMultiplier(bool beginning_
               pinfo->_incremental_slip -
               (pinfo->_incremental_slip * pinfo->_normal) * pinfo->_normal;
 
-          Real penalty_slip = getSlipPenalty(*pinfo);
+          Real penalty_slip = getTangentialPenalty(*pinfo);
 
           RealVectorValue inc_pen_force_tangential =
               pinfo->_lagrange_multiplier_slip + penalty_slip * tangential_inc_slip;
@@ -293,7 +289,7 @@ MechanicalContactConstraint::updateAugmentedLagrangianMultiplier(bool beginning_
           RealVectorValue contact_force_tangential = inc_pen_force_tangential + tau_old;
           const Real tan_mag(contact_force_tangential.norm());
 
-          if (MooseUtils::absoluteFuzzyGreaterThan(tan_mag, capacity, 1.0e-5))
+          if (tan_mag > capacity * (_al_frictional_force_tolerance + 1.0))
           {
             pinfo->_lagrange_multiplier_slip =
                 -tau_old + capacity * contact_force_tangential / tan_mag;
@@ -317,8 +313,7 @@ bool
 MechanicalContactConstraint::AugmentedLagrangianContactConverged()
 {
   Real contactResidual = 0.0;
-
-  Real converged = 0.0;
+  unsigned int converged = 0;
 
   for (auto & pinfo_pair : _penetration_locator._penetration_info)
   {
@@ -333,14 +328,12 @@ MechanicalContactConstraint::AugmentedLagrangianContactConverged()
 
     if (pinfo->isCaptured())
     {
-
       if (contactResidual < std::abs(distance))
         contactResidual = std::abs(distance);
 
       // penetration < tol
       if (contactResidual > _al_penetration_tolerance)
       {
-        _console << "Augmented Lagrangian contact penetration enforcement is NOT satisfied \n";
         converged = 1;
         break;
       }
@@ -377,20 +370,15 @@ MechanicalContactConstraint::AugmentedLagrangianContactConverged()
           if (MooseUtils::absoluteFuzzyGreaterThan(tangential_inc_slip_mag,
                                                    _al_incremental_slip_tolerance))
           {
-            _console << "Augmented Lagrangian contact tangential sliding enforcement is NOT "
-                        "satisfied \n";
             converged = 2;
             break;
           }
         }
 
-        // for all pinfo_pair, tag_mag < (1 + tol) * (capacity + tol)
-        if (MooseUtils::absoluteFuzzyGreaterThan(tan_mag,
-                                                 (1 + _al_frictional_force_tolerance) *
-                                                     (capacity + _al_frictional_force_tolerance)))
+        // for all pinfo_pair, tag_mag should be less than (1 + tol) * (capacity + tol)
+        if (tan_mag >
+            (1 + _al_frictional_force_tolerance) * (capacity + _al_frictional_force_tolerance))
         {
-          _console
-              << "Augmented Lagrangian contact frictional force enforcement is NOT satisfied \n";
           converged = 3;
           break;
         }
@@ -400,10 +388,18 @@ MechanicalContactConstraint::AugmentedLagrangianContactConverged()
 
   _communicator.max(converged);
 
-  if (converged > 0.0)
-    return false;
+  if (converged == 1)
+    _console
+        << "The Augmented Lagrangian contact tangential sliding enforcement is NOT satisfied \n";
+  else if (converged == 2)
+    _console
+        << "The Augmented Lagrangian contact tangential sliding enforcement is NOT satisfied \n";
+  else if (converged == 3)
+    _console << "The Augmented Lagrangian contact frictional force enforcement is NOT satisfied \n";
+  else
+    return true;
 
-  return true;
+  return false;
 }
 
 void
@@ -441,7 +437,6 @@ MechanicalContactConstraint::updateContactSet(bool beginning_of_step)
       pinfo->_starting_elem = pinfo->_elem;
       pinfo->_starting_side_num = pinfo->_side_num;
       pinfo->_starting_closest_point_ref = pinfo->_closest_point_ref;
-      // updateLagMul(true);
     }
     pinfo->_incremental_slip_prev_iter = pinfo->_incremental_slip;
 
@@ -508,7 +503,7 @@ MechanicalContactConstraint::computeContactForce(PenetrationInfo * pinfo)
 
   RealVectorValue distance_vec(_mesh.nodeRef(node->id()) - pinfo->_closest_point);
   const Real penalty = getPenalty(*pinfo);
-  const Real penalty_slip = getSlipPenalty(*pinfo);
+  const Real penalty_slip = getTangentialPenalty(*pinfo);
 
   RealVectorValue pen_force(penalty * distance_vec);
 
@@ -591,7 +586,7 @@ MechanicalContactConstraint::computeContactForce(PenetrationInfo * pinfo)
               else // treat as frictionless
                 pinfo->_contact_force = contact_force_normal;
             }
-            if (MooseUtils::absoluteFuzzyEqual(capacity, 0))
+            if (capacity == 0)
               pinfo->_mech_status = PenetrationInfo::MS_SLIPPING;
             else
               pinfo->_mech_status = PenetrationInfo::MS_SLIPPING_FRICTION;
@@ -800,7 +795,7 @@ MechanicalContactConstraint::computeQpJacobian(Moose::ConstraintJacobianType typ
   PenetrationInfo * pinfo = _penetration_locator._penetration_info[_current_node->id()];
 
   const Real penalty = getPenalty(*pinfo);
-  const Real penalty_slip = getSlipPenalty(*pinfo);
+  const Real penalty_slip = getTangentialPenalty(*pinfo);
 
   switch (type)
   {
@@ -1249,7 +1244,7 @@ MechanicalContactConstraint::computeQpOffDiagJacobian(Moose::ConstraintJacobianT
   PenetrationInfo * pinfo = _penetration_locator._penetration_info[_current_node->id()];
 
   const Real penalty = getPenalty(*pinfo);
-  const Real penalty_slip = getSlipPenalty(*pinfo);
+  const Real penalty_slip = getTangentialPenalty(*pinfo);
 
   unsigned int coupled_component;
   Real normal_component_in_coupled_var_dir = 1.0;
@@ -1624,9 +1619,9 @@ MechanicalContactConstraint::getPenalty(PenetrationInfo & pinfo)
 }
 
 Real
-MechanicalContactConstraint::getSlipPenalty(PenetrationInfo & pinfo)
+MechanicalContactConstraint::getTangentialPenalty(PenetrationInfo & pinfo)
 {
-  Real penalty = _penalty_slip;
+  Real penalty = _penalty_tangential;
   if (_normalize_penalty)
     penalty *= nodalArea(pinfo);
 
@@ -1723,8 +1718,7 @@ MechanicalContactConstraint::getConnectedDofIndices(unsigned int var_num)
   }
 
   _phi_slave.resize(_connected_dof_indices.size());
-  // dof_id_type current_node_var_dof_index = _sys.getVariable(0,
-  // _vars[component]).nodalDofIndex();
+
   dof_id_type current_node_var_dof_index = _sys.getVariable(0, var_num).nodalDofIndex();
   _qp = 0;
 

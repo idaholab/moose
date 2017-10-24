@@ -11,9 +11,6 @@
   solution_variables = 'disp_x disp_y'
   reference_residual_variables = 'saved_x saved_y'
   maximum_lagrangian_update_iterations = 100
-  penetration_tolerance = 1e-4
-  tangential_increment_stick_tolerance = 1e-2
-  tangential_friction_force_tolerance =  1e-2
 []
 
 [Variables]
@@ -384,5 +381,8 @@
     model = coulomb
     friction_coefficient = 0.0
     tangential_tolerance = 1e-3
+    al_penetration_tolerance = 1e-4
+    al_incremental_slip_tolerance = 1e-2
+    al_frictional_force_tolerance = 1e-2
   [../]
 []

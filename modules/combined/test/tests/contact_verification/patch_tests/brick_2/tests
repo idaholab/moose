@@ -45,7 +45,7 @@
   [../]
   [./frictionless_aug]
     type = 'CSVDiff'
-    input = 'brick2_aug.i'
+    input = 'brick2_template2.i'
     csvdiff = 'brick2_frictionless_aug_check.csv brick2_frictionless_aug_check_cont_press_0001.csv brick2_frictionless_aug_check_x_disp_0001.csv brick2_frictionless_aug_check_y_disp_0001.csv'
     cli_args = 'Contact/leftright/model=frictionless Contact/leftright/formulation=augmented_lagrange Outputs/file_base=brick2_frictionless_aug_out Outputs/chkfile/file_base=brick2_frictionless_aug_check'
     rel_err = 1e-5
@@ -96,9 +96,49 @@
   [../]
   [./frictionless_aug_sm]
     type = 'CSVDiff'
-    input = 'brick2_aug_sm.i'
+    input = 'brick2_template2_sm.i'
     csvdiff = 'brick2_frictionless_aug_check.csv brick2_frictionless_aug_check_cont_press_0001.csv brick2_frictionless_aug_check_x_disp_0001.csv brick2_frictionless_aug_check_y_disp_0001.csv'
     cli_args = 'Contact/leftright/model=frictionless Contact/leftright/formulation=augmented_lagrange Outputs/file_base=brick2_frictionless_aug_out Outputs/chkfile/file_base=brick2_frictionless_aug_check'
+    rel_err = 1e-5
+    abs_zero = 1e-8
+    max_parallel = 1
+    superlu = true
+  [../]
+  [./mu_0_2_aug]
+    type = 'CSVDiff'
+    input = 'brick2_template2.i'
+    csvdiff = 'brick2_mu_0_2_aug_check.csv brick2_mu_0_2_aug_check_cont_press_0001.csv brick2_mu_0_2_aug_check_x_disp_0001.csv'
+    cli_args = 'Contact/leftright/model=coulomb Contact/leftright/formulation=augmented_lagrange Contact/leftright/friction_coefficient=0.2 Contact/leftright/al_incremental_slip_tolerance=1e-6 Contact/leftright/al_frictional_force_tolerance=5e-2 Outputs/file_base=brick2_mu_0_2_aug_out Outputs/chkfile/file_base=brick2_mu_0_2_aug_check'
+    rel_err = 1e-5
+    abs_zero = 1e-8
+    max_parallel = 1
+    superlu = true
+    prereq = 'mu_0_2_aug_sm'
+  [../]
+  [./mu_0_2_aug_sm]
+    type = 'CSVDiff'
+    input = 'brick2_template2_sm.i'
+    csvdiff = 'brick2_mu_0_2_aug_check.csv brick2_mu_0_2_aug_check_cont_press_0001.csv brick2_mu_0_2_aug_check_x_disp_0001.csv'
+    cli_args = 'Contact/leftright/model=coulomb Contact/leftright/formulation=augmented_lagrange Contact/leftright/friction_coefficient=0.2 Contact/leftright/al_incremental_slip_tolerance=1e-6 Contact/leftright/al_frictional_force_tolerance=5e-2 Outputs/file_base=brick2_mu_0_2_aug_out Outputs/chkfile/file_base=brick2_mu_0_2_aug_check'
+    rel_err = 1e-5
+    abs_zero = 1e-8
+    max_parallel = 1
+    superlu = true
+  [../]
+  [./mu_0_2_pen]
+    type = 'CSVDiff'
+    input = 'brick2_mu_0_2_pen.i'
+    csvdiff = 'brick2_mu_0_2_pen_check.csv brick2_mu_0_2_pen_check_cont_press_0001.csv brick2_mu_0_2_pen_check_x_disp_0001.csv'
+    rel_err = 1e-5
+    abs_zero = 1e-8
+    max_parallel = 1
+    superlu = true
+    prereq = 'mu_0_2_pen_sm'
+  [../]
+  [./mu_0_2_pen_sm]
+    type = 'CSVDiff'
+    input = 'brick2_mu_0_2_pen_sm.i'
+    csvdiff = 'brick2_mu_0_2_pen_check.csv brick2_mu_0_2_pen_check_cont_press_0001.csv brick2_mu_0_2_pen_check_x_disp_0001.csv'
     rel_err = 1e-5
     abs_zero = 1e-8
     max_parallel = 1

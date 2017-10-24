@@ -45,7 +45,7 @@
   [../]
   [./frictionless_aug]
     type = 'CSVDiff'
-    input = 'plane4_template1.i'
+    input = 'plane4_template2.i'
     csvdiff = 'plane4_frictionless_aug_check.csv plane4_frictionless_aug_check_cont_press_0001.csv plane4_frictionless_aug_check_x_disp_0001.csv'
     cli_args = 'Contact/leftright/model=frictionless Contact/leftright/formulation=augmented_lagrange Outputs/file_base=plane4_frictionless_aug_out Outputs/chkfile/file_base=plane4_frictionless_aug_check'
     rel_err = 1e-5
@@ -53,7 +53,6 @@
     max_parallel = 1
     superlu = true
     prereq = 'frictionless_aug_sm'
-    skip = 'waiting for alm merge'
   [../]
   [./glued_kin_sm]
     type = 'CSVDiff'
@@ -97,13 +96,52 @@
   [../]
   [./frictionless_aug_sm]
     type = 'CSVDiff'
-    input = 'plane4_template1_sm.i'
+    input = 'plane4_template2_sm.i'
     csvdiff = 'plane4_frictionless_aug_check.csv plane4_frictionless_aug_check_cont_press_0001.csv plane4_frictionless_aug_check_x_disp_0001.csv'
     cli_args = 'Contact/leftright/model=frictionless Contact/leftright/formulation=augmented_lagrange Outputs/file_base=plane4_frictionless_aug_out Outputs/chkfile/file_base=plane4_frictionless_aug_check'
     rel_err = 1e-5
     abs_zero = 1e-8
     max_parallel = 1
     superlu = true
-    skip = 'waiting for alm merge'
+  [../]
+  [./mu_0_2_aug]
+    type = 'CSVDiff'
+    input = 'plane4_template2.i'
+    csvdiff = 'plane4_mu_0_2_aug_check.csv plane4_mu_0_2_aug_check_cont_press_0001.csv plane4_mu_0_2_aug_check_x_disp_0001.csv'
+    cli_args = 'Contact/leftright/model=coulomb Contact/leftright/formulation=augmented_lagrange Contact/leftright/friction_coefficient=0.2 Contact/leftright/al_incremental_slip_tolerance=1e-6 Contact/leftright/al_frictional_force_tolerance=5e-2 Outputs/file_base=plane4_mu_0_2_aug_out Outputs/chkfile/file_base=plane4_mu_0_2_aug_check'
+    rel_err = 1e-5
+    abs_zero = 1e-8
+    max_parallel = 1
+    superlu = true
+    prereq = 'mu_0_2_aug_sm'
+  [../]
+  [./mu_0_2_aug_sm]
+    type = 'CSVDiff'
+    input = 'plane4_template2_sm.i'
+    csvdiff = 'plane4_mu_0_2_aug_check.csv plane4_mu_0_2_aug_check_cont_press_0001.csv plane4_mu_0_2_aug_check_x_disp_0001.csv'
+    cli_args = 'Contact/leftright/model=coulomb Contact/leftright/formulation=augmented_lagrange Contact/leftright/friction_coefficient=0.2 Contact/leftright/al_incremental_slip_tolerance=1e-6 Contact/leftright/al_frictional_force_tolerance=5e-2 Outputs/file_base=plane4_mu_0_2_aug_out Outputs/chkfile/file_base=plane4_mu_0_2_aug_check'
+    rel_err = 1e-5
+    abs_zero = 1e-8
+    max_parallel = 1
+    superlu = true
+  [../]
+  [./mu_0_2_pen]
+    type = 'CSVDiff'
+    input = 'plane4_mu_0_2_pen.i'
+    csvdiff = 'plane4_mu_0_2_pen_check.csv plane4_mu_0_2_pen_check_cont_press_0001.csv plane4_mu_0_2_pen_check_x_disp_0001.csv'
+    rel_err = 1e-5
+    abs_zero = 1e-8
+    max_parallel = 1
+    superlu = true
+    prereq = 'mu_0_2_pen_sm'
+  [../]
+  [./mu_0_2_pen_sm]
+    type = 'CSVDiff'
+    input = 'plane4_mu_0_2_pen_sm.i'
+    csvdiff = 'plane4_mu_0_2_pen_check.csv plane4_mu_0_2_pen_check_cont_press_0001.csv plane4_mu_0_2_pen_check_x_disp_0001.csv'
+    rel_err = 1e-5
+    abs_zero = 1e-8
+    max_parallel = 1
+    superlu = true
   [../]
 []

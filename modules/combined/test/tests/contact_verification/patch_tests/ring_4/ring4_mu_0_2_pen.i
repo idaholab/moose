@@ -285,7 +285,7 @@
   end_time = 1.0
   num_steps = 10
   dtmin = 1.0
-  l_tol = 1e-5
+  l_tol = 1e-3
 []
 
 [VectorPostprocessors]

@@ -80,6 +80,7 @@
     heavy = true
     superlu = true
     prereq = 'frictionless_aug_sm'
+    skip = 'this will be fixed in #10165'
   [../]
   [./mu_0_pen]
     type = 'CSVDiff'
@@ -141,6 +142,7 @@
     heavy = true
     superlu = true
     prereq = 'mu_0_aug_sm'
+    skip = 'this will be fixed in #10165'
   [../]
   [./mu_0_2_aug]
     type = 'CSVDiff'
@@ -172,6 +174,7 @@
     heavy = true
     superlu = true
     prereq = 'mu_1_0_aug_sm'
+    skip = 'this will be fixed in #10165'
   [../]
   [./glued_kin_sm]
     type = 'CSVDiff'
@@ -307,6 +310,7 @@
     max_parallel = 1
     heavy = true
     superlu = true
+    skip = 'this will be fixed in #10165'
   [../]
   [./mu_0_2_aug_sm]
     type = 'CSVDiff'
@@ -324,6 +328,7 @@
     max_parallel = 1
     heavy = true
     superlu = true
+    skip = 'this will be fixed in #10165'
   [../]
   [./mu_1_0_aug_sm]
     type = 'CSVDiff'
@@ -340,5 +345,6 @@
     max_parallel = 1
     heavy = true
     superlu = true
+    skip = 'this will be fixed in #10165'
   [../]
 []

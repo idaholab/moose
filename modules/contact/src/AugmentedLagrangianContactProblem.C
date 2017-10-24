@@ -23,12 +23,6 @@
 #include "AddVariableAction.h"
 #include "ConstraintWarehouse.h"
 
-// libMesh includes
-#include "libmesh/string_to_enum.h"
-#include "libmesh/sparse_matrix.h"
-
-#include <limits>
-
 template <>
 InputParameters
 validParams<AugmentedLagrangianContactProblem>()
@@ -144,21 +138,21 @@ AugmentedLagrangianContactProblem::checkNonlinearConvergence(std::string & msg,
         }
       }
 
-      // if (_augLM_repeat_step || _num_lagmul_iterations == 0)
       if (_augLM_repeat_step)
-      { // force it to keep iterating
+      {
+        // force it to keep iterating
         reason = MOOSE_NONLINEAR_ITERATING;
-        _console << "Augmented Lagrangian Multiplier needs updating\n " << std::endl;
+        _console << "Augmented Lagrangian Multiplier needs updating." << std::endl;
         _num_lagmul_iterations++;
       }
       else
-      {
-        _console << "Augmented Lagrangian contact constraint enforcement is satisfied" << std::endl;
-      }
+        _console << "Augmented Lagrangian contact constraint enforcement is satisfied."
+                 << std::endl;
     }
     else
-    { // maxed out
-      _console << "Maximum Augmented Lagrangian contact iterations have been reached" << std::endl;
+    {
+      // maxed out
+      _console << "Maximum Augmented Lagrangian contact iterations have been reached." << std::endl;
       reason = MOOSE_DIVERGED_FUNCTION_COUNT;
     }
   }

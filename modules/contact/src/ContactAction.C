@@ -37,10 +37,6 @@ validParams<ContactAction>()
       "penalty",
       1e8,
       "The penalty to apply.  This can vary depending on the stiffness of your materials");
-  params.addParam<Real>("penalty_slip",
-                        1e8,
-                        "The penalty to apply on sliping direction.  This can "
-                        "vary depending on the stiffness of your materials");
   params.addParam<Real>("friction_coefficient", 0, "The friction coefficient");
   params.addParam<Real>("tension_release",
                         0.0,

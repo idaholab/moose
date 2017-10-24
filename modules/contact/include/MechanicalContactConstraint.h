@@ -87,7 +87,7 @@ protected:
   MooseSharedPointer<DisplacedProblem> _displaced_problem;
   Real nodalArea(PenetrationInfo & pinfo);
   Real getPenalty(PenetrationInfo & pinfo);
-  Real getSlipPenalty(PenetrationInfo & pinfo);
+  Real getTangentialPenalty(PenetrationInfo & pinfo);
 
   const unsigned int _component;
   ContactModel _model;
@@ -95,7 +95,7 @@ protected:
   const bool _normalize_penalty;
 
   const Real _penalty;
-  Real _penalty_slip;
+  Real _penalty_tangential;
   const Real _friction_coefficient;
   const Real _tension_release;
   const Real _capture_tolerance;
@@ -127,9 +127,6 @@ protected:
   Real _al_incremental_slip_tolerance;
   /// The tolerance of the frictional force for augmented Lagrangian method
   Real _al_frictional_force_tolerance;
-
-  typedef std::map<std::pair<unsigned int, unsigned int>, PenetrationLocator *>::iterator
-      pl_iterator;
 };
 
 #endif
