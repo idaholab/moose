@@ -9,13 +9,14 @@
 
 #include "Kernel.h"
 #include "Assembly.h"
+#include "DerivativeMaterialInterface.h"
 
 class ALEKernel;
 
 template <>
 InputParameters validParams<ALEKernel>();
 
-class ALEKernel : public Kernel
+class ALEKernel : public DerivativeMaterialInterface<Kernel>
 {
 public:
   ALEKernel(const InputParameters & parameters);

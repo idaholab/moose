@@ -28,7 +28,14 @@ validParams<StressDivergenceTensors>()
                                         "1 for y, 2 for z)");
   params.addRequiredCoupledVar("displacements",
                                "The string of displacements suitable for the problem statement");
-  params.addCoupledVar("temperature", "The temperature");
+  params.addCoupledVar("temperature",
+                       "The name of the temperature variable used in the "
+                       "ComputeThermalExpansionEigenstrain.  (Not required for "
+                       "simulations without temperature coupling.)");
+  params.addParam<std::string>(
+      "thermal_eigenstrain_name",
+      "thermal_eigenstrain",
+      "The eigenstrain_name used in the ComputeThermalExpansionEigenstrain.");
   params.addParam<std::string>("base_name", "Material property base name");
   params.set<bool>("use_displaced_mesh") = false;
   params.addParam<bool>(
@@ -50,6 +57,11 @@ StressDivergenceTensors::StressDivergenceTensors(const InputParameters & paramet
     _disp_var(_ndisp),
     _temp_coupled(isCoupled("temperature")),
     _temp_var(_temp_coupled ? coupled("temperature") : 0),
+    _deigenstrain_dT(_temp_coupled
+                         ? &getMaterialPropertyDerivative<RankTwoTensor>(
+                               getParam<std::string>("thermal_eigenstrain_name"),
+                               getVar("temperature", 0)->name())
+                         : nullptr),
     _avg_grad_test(_test.size(), std::vector<Real>(3, 0.0)),
     _avg_grad_phi(_phi.size(), std::vector<Real>(3, 0.0)),
     _volumetric_locking_correction(getParam<bool>("volumetric_locking_correction"))
@@ -279,10 +291,8 @@ StressDivergenceTensors::computeQpOffDiagJacobian(unsigned int jvar)
 
   // off-diagonal Jacobian with respect to a coupled temperature variable
   if (_temp_coupled && jvar == _temp_var)
-  {
-    // return _d_stress_dT[_qp].rowDot(_component, _grad_test[_i][_qp]) * _phi[_j][_qp];
-    return 0.0;
-  }
+    return -((_Jacobian_mult[_qp] * (*_deigenstrain_dT)[_qp]) *
+             _grad_test[_i][_qp])(_component)*_phi[_j][_qp];
 
   return 0.0;
 }
