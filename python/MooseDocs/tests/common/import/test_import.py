@@ -135,7 +135,7 @@ class TestMooseDocsImport(LogTestCase):
 
     def testFilename(self):
         items = moose_docs_import(include=['docs/content/utilities/moose_docs/*',
-                                           'docs/content/getting_started/*'],
+                                           'docs/content/getting_started/**'],
                                   exclude=['docs/content/utilities/memory_logger/*',
                                            'docs/**/moose_markdown/*'],
                                   base='docs/content',
@@ -154,7 +154,7 @@ class TestMooseDocsImport(LogTestCase):
                format(MooseDocs.ROOT_DIR)
         self.assertNotIn(gold, items)
 
-        gold = '{}/docs/content/getting_started/create_an_app.md'. \
+        gold = '{}/docs/content/getting_started/installation/create_an_app.md'. \
                format(MooseDocs.ROOT_DIR)
         self.assertIn(gold, items)
 

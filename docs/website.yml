@@ -44,8 +44,15 @@
         logo: docs/media/moose_logo_small.png
         navigation:
             - Getting Started:
-                - Installation: docs/content/getting_started/installation/index.md
-                - Create an Application: docs/content/getting_started/create_an_app.md
+                - Mac OS: docs/content/getting_started/installation/mac_os.md
+                - Ubuntu: docs/content/getting_started/installation/ubuntu.md
+                - Mint: docs/content/getting_started/installation/mint.md
+                - OpenSUSE: docs/content/getting_started/installation/opensuse.md
+                - Fedora: docs/content/getting_started/installation/fedora.md
+                - CentOS: docs/content/getting_started/installation/centos.md
+                - Windows 10: docs/content/getting_started/installation/windows10.md
+                - HPC Cluster: docs/content/getting_started/installation/cluster.md
+                - Manual Install: docs/content/getting_started/installation/manual_installation.md
             - Documentation:
                 - Systems: docs/content/documentation/systems/index.md
                 - Interfaces: docs/content/documentation/interfaces/index.md
