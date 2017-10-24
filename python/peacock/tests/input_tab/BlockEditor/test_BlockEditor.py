@@ -204,8 +204,8 @@ class Tests(Testing.PeacockTester):
         self.checkAddParam("/GlobalParams", False, False)
         # Has types
         self.checkAddParam("/Mesh", True, True)
-        # Is star node, has an existing 'active' parameter
-        self.checkAddParam("/Kernels", False, True)
+        # Is star node, had an 'active' parameter but we get rid of it
+        self.checkAddParam("/Kernels", False, False)
         # Is user block
         self.checkAddParam("/Kernels/diff_u", True, True, True)
 

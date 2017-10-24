@@ -34,6 +34,19 @@ class BlockInfo(object):
         self.hard = hard
         self.description = ""
         self.parent = parent
+        self.changed_by_user = False
+
+    def checkInactive(self):
+        return not self.included and self.wantsToSave()
+
+    def wantsToSave(self):
+        return self.changed_by_user or self.user_added or self.included or self.childrenWantToSave()
+
+    def childrenWantToSave(self):
+        for key in self.children_list:
+            if self.children[key].wantsToSave():
+                return True
+        return False
 
     def getParamInfo(self, param):
         """
@@ -369,3 +382,41 @@ class BlockInfo(object):
         for t in self.types.values():
             o.write(t.dump(indent+1, sep))
         return o.getvalue()
+
+    def getParamNames(self):
+        """
+        Get the parameter names in the required order.
+        Parameter names specified in the input file are printed
+        out in the same order as in the original input file,
+        followed by any other parameters that were changed.
+        Return:
+            list[str]: List of parameter names
+        """
+        return self._orderedNames(self.parameters_write_first, self.parameters_list)
+
+    def getChildNames(self):
+        """
+        Get the child names in the required order.
+        Child names specified in the input file are printed
+        out in the same order as in the original input file,
+        followed by any other children that were changed.
+        Return:
+            list[str]: List of child names
+        """
+        return self._orderedNames(self.children_write_first, self.children_list)
+
+    def _orderedNames(self, first, complete):
+        """
+        Add in elements from the list "complete" to the end
+        of the "first" if they are not already in "first"
+        Input:
+            first[list]: These elements will be first in the returned list
+            complete[list]: These elements will come after first
+        Return:
+            list: The elements in "complete" with elements in "first" first.
+        """
+        l = first[:]
+        for x in complete:
+            if x not in l:
+                l.append(x)
+        return l

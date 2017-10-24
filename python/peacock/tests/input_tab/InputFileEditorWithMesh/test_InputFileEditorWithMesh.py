@@ -212,18 +212,21 @@ class Tests(BaseTests):
 
         b = tree.getBlockInfo("/AuxVariables")
         self.assertNotEqual(b, None)
+        self.assertFalse(b.wantsToSave())
         w.InputFileEditorPlugin.block_tree.copyBlock(b)
+        self.assertTrue(b.wantsToSave())
         self.assertEqual(w.InputFileEditorPlugin.has_changed, True)
         self.assertEqual(w.canClose(), False)
 
         mock_q.return_value = QMessageBox.Yes # The user wants to ignore changes
         self.assertEqual(w.canClose(), True)
 
+        new_block = "[AuxVariables]\n  [./New_0]\n  [../]\n[]\n\n"
         s = tree.getInputFileString()
-        self.assertEqual("", s) # AuxVariables isn't included
+        self.assertEqual("inactive = 'AuxVariables'\n%s" % new_block, s) # AuxVariables is inactive
         b.included = True
         s = tree.getInputFileString()
-        self.assertEqual("[AuxVariables]\n  [./New_0]\n  [../]\n[]\n\n", s)
+        self.assertEqual(new_block, s)
 
     def testBlockHighlight(self):
         main_win, w = self.newWidget()

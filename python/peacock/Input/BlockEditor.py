@@ -168,6 +168,7 @@ class BlockEditor(QWidget, MooseWidget):
         """
         self.block.comments = self.comment_edit.getComments()
         self.param_editor.save()
+        self.block.changed_by_user = True
         self._blockChanged(enabled=False)
         self.blockChanged.emit(self.block)
 
@@ -200,7 +201,6 @@ class BlockEditor(QWidget, MooseWidget):
         The user is done editing.
         """
         self.editingFinished.emit()
-
 
 if __name__ == "__main__":
     from PyQt5.QtWidgets import QApplication, QMainWindow
