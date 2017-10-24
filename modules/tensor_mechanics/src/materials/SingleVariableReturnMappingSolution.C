@@ -17,7 +17,10 @@ validParams<SingleVariableReturnMappingSolution>()
   InputParameters params = emptyInputParameters();
 
   // Newton iteration control parameters
-  params.addParam<unsigned int>("max_its", 300, "Maximum number of Newton iterations");
+  params.addDeprecatedParam<unsigned int>("max_its",
+                                          300,
+                                          "Maximum number of Newton iterations",
+                                          "Maximum number of iterations no longer needed");
   params.addParam<unsigned int>(
       "maximum_iterations",
       300,
@@ -36,7 +39,7 @@ validParams<SingleVariableReturnMappingSolution>()
   params.addParam<bool>("legacy_return_mapping",
                         false,
                         "Perform iterations and compute residual "
-                        "the same way the same way as the previous "
+                        "the same way as the previous "
                         "algorithm. Also use same old defaults for relative_tolerance, "
                         "absolute_tolerance, and max_its.");
 
@@ -155,7 +158,15 @@ SingleVariableReturnMappingSolution::internalSolve(const Real effective_trial_st
     return true;
   }
 
-  while (it < _max_its && !converged(residual, reference_residual))
+  const unsigned num_resids = 30;
+  _residual_history.resize(num_resids, std::numeric_limits<Real>::max());
+  _residual_history[0] = residual;
+
+  while (it < _max_its && !converged(residual, reference_residual) &&
+         (it < num_resids ||
+          std::abs(_residual_history[it % num_resids] * 10.0) <
+              std::abs(_residual_history[(it + 1) % num_resids]) ||
+          !converged(0.1 * residual, reference_residual)))
   {
     scalar_increment = -residual / computeDerivative(effective_trial_stress, scalar);
     scalar = scalar_old + scalar_increment;
@@ -173,13 +184,8 @@ SingleVariableReturnMappingSolution::internalSolve(const Real effective_trial_st
     iterationFinalize(scalar);
 
     if (_bracket_solution)
-      updateBounds(scalar,
-                   residual,
-                   init_resid_sign,
-                   scalar_upper_bound,
-                   scalar_lower_bound,
-                   max_permissible_scalar,
-                   iter_output);
+      updateBounds(
+          scalar, residual, init_resid_sign, scalar_upper_bound, scalar_lower_bound, iter_output);
 
     if (converged(residual, reference_residual))
     {
@@ -247,7 +253,6 @@ SingleVariableReturnMappingSolution::internalSolve(const Real effective_trial_st
                        init_resid_sign,
                        scalar_upper_bound,
                        scalar_lower_bound,
-                       max_permissible_scalar,
                        iter_output);
       }
     }
@@ -257,6 +262,7 @@ SingleVariableReturnMappingSolution::internalSolve(const Real effective_trial_st
     ++it;
     residual_old = residual;
     scalar_old = scalar;
+    _residual_history[it % num_resids] = residual;
   }
 
   bool has_converged = true;
@@ -395,7 +401,6 @@ SingleVariableReturnMappingSolution::updateBounds(const Real & scalar,
                                                   const Real & init_resid_sign,
                                                   Real & scalar_upper_bound,
                                                   Real & scalar_lower_bound,
-                                                  const Real & max_permissible_value,
                                                   std::stringstream * iter_output)
 {
   // Update upper/lower bounds as applicable
@@ -415,16 +420,4 @@ SingleVariableReturnMappingSolution::updateBounds(const Real & scalar,
   else if (residual * init_resid_sign > 0.0 && scalar > scalar_lower_bound &&
            scalar < scalar_upper_bound)
     scalar_lower_bound = scalar;
-
-  if ((scalar_lower_bound > 0 &&
-       (scalar_upper_bound - scalar_lower_bound) / (PETSC_MACHINE_EPSILON * scalar_lower_bound) <=
-           10.0))
-  {
-    // Reset lower/upper bounds.  They're too close together and solution hasn't converged, so the
-    // solution is likely outside those bounds
-    scalar_lower_bound = 0.0;
-    scalar_upper_bound = max_permissible_value;
-    if (iter_output)
-      *iter_output << "  Reset lower/upper bounds because they're too close together" << std::endl;
-  }
 }
