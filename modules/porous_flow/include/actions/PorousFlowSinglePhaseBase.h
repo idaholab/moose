@@ -52,6 +52,12 @@ protected:
 
   /// add AuxVariables for stress
   const bool _add_stress_aux;
+
+  /// use PorousFlowBrine material
+  const bool _use_brine;
+
+  /// index of NaCl in list of fluid components
+  const unsigned _nacl_index;
 };
 
 #endif // POROUSFLOWSINGLEPHASEBASE_H

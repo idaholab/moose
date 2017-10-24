@@ -14,6 +14,7 @@ validParams<ComputeThermalExpansionEigenstrainBase>()
   InputParameters params = validParams<ComputeEigenstrainBase>();
   params.addCoupledVar("temperature", "Coupled temperature");
   params.addCoupledVar("stress_free_temperature",
+                       0.0,
                        "Reference temperature at which there is no "
                        "thermal expansion for thermal eigenstrain "
                        "calculation");

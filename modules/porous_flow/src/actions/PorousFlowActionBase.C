@@ -349,6 +349,35 @@ PorousFlowActionBase::addSingleComponentFluidMaterial(bool at_nodes,
 }
 
 void
+PorousFlowActionBase::addBrineMaterial(VariableName nacl_brine,
+                                       bool at_nodes,
+                                       unsigned phase,
+                                       bool compute_density_and_viscosity,
+                                       bool compute_internal_energy,
+                                       bool compute_enthalpy)
+{
+  if (_current_task == "add_material")
+  {
+    std::string material_type = "PorousFlowBrine";
+    InputParameters params = _factory.getValidParams(material_type);
+
+    params.set<std::vector<VariableName>>("xnacl") = {nacl_brine};
+    params.set<UserObjectName>("PorousFlowDictator") = _dictator_name;
+    params.set<unsigned int>("phase") = phase;
+    params.set<bool>("compute_density_and_viscosity") = compute_density_and_viscosity;
+    params.set<bool>("compute_internal_energy") = compute_internal_energy;
+    params.set<bool>("compute_enthalpy") = compute_enthalpy;
+
+    std::string material_name = "PorousFlowActionBase_FluidProperties_qp";
+    if (at_nodes)
+      material_name = "PorousFlowActionBase_FluidProperties";
+
+    params.set<bool>("at_nodes") = at_nodes;
+    _problem->addMaterial(material_type, material_name, params);
+  }
+}
+
+void
 PorousFlowActionBase::addRelativePermeabilityCorey(
     bool at_nodes, unsigned phase, Real n, Real s_res, Real sum_s_res)
 
