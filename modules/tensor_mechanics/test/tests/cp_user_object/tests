@@ -4,6 +4,12 @@
     input = 'crysp.i'
     exodiff = 'out.e'
   [../]
+  [./test_cp_moose_exception]
+    type = 'Exodiff'
+    input = 'crysp_exception.i'
+    exodiff = 'crysp_exception_out.e'
+    allow_warnings = 'true'
+  [../]
   [./test_fileread]
     type = 'Exodiff'
     input = 'crysp_fileread.i'
