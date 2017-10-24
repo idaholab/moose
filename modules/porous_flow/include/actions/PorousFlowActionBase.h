@@ -127,6 +127,22 @@ protected:
                                        const UserObjectName & fp);
 
   /**
+   * Adds a brine fluid Material
+   * @param xnacl the variable containing the mass fraction of NaCl in the fluid
+   * @param phase the phase number of the fluid
+   * @param compute_density_and_viscosity compute the density and viscosity of the fluid
+   * @param compute_internal_energy compute the fluid internal energy
+   * @param compute_enthalpy compute the fluid enthalpy
+   * @param at_nodes add a nodal material
+   */
+  void addBrineMaterial(const VariableName xnacl,
+                        bool at_nodes,
+                        unsigned phase,
+                        bool compute_density_and_viscosity,
+                        bool compute_internal_energy,
+                        bool compute_enthalpy);
+
+  /**
    * Adds a relative-permeability Material of the Corey variety
    * @param phase the phase number of the fluid
    * @param n The Corey exponent

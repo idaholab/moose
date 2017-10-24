@@ -18,8 +18,9 @@ validParams<PorousFlowFullySaturated>()
   params.addClassDescription("Adds Kernels and fluid-property Materials necessary to simulate a "
                              "single-phase fully-saturated flow problem.  No upwinding of fluid "
                              "flow is used, so the results may differ slightly from the "
-                             "Unsaturated Action.  To run a simulation you will also need to "
-                             "provide various other Materials for each mesh "
+                             "Unsaturated Action.  No Kernels for diffusion and dispersion of "
+                             "fluid components are added.  To run a simulation you will also "
+                             "need to provide various other Materials for each mesh "
                              "block, depending on your simulation type, viz: permeability, "
                              "porosity, elasticity tensor, strain calculator, stress calculator, "
                              "matrix internal energy, thermal conductivity, diffusivity");
