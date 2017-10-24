@@ -20,7 +20,7 @@ validParams<ALEKernel>()
 }
 
 ALEKernel::ALEKernel(const InputParameters & parameters)
-  : Kernel(parameters),
+  : DerivativeMaterialInterface<Kernel>(parameters),
     _assembly_undisplaced(_fe_problem.assembly(_tid)),
     _var_undisplaced(
         _fe_problem.getVariable(_tid, parameters.get<NonlinearVariableName>("variable"))),
