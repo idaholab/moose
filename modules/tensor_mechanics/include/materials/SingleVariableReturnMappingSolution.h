@@ -145,7 +145,7 @@ private:
    * @param reference Current value of the reference quantity
    * @return Whether the model converged
    */
-  bool converged(const Real & residual, const Real & reference);
+  bool converged(const Real residual, const Real reference);
 
   /**
    * Check to see whether the residual is within acceptable convergence limits.
@@ -156,7 +156,7 @@ private:
    * @param reference Current value of the reference quantity
    * @return Whether the model converged
    */
-  bool convergedAcceptable(const unsigned int & it, const Real & residual, const Real & reference);
+  bool convergedAcceptable(const unsigned int it, const Real residual, const Real reference);
 
   /**
    * Output information about convergence history of the model
@@ -168,11 +168,11 @@ private:
    * @param reference              Current value of the reference quantity
    */
   void outputIterInfo(std::stringstream * iter_output,
-                      const unsigned int & it,
-                      const Real & effective_trial_stress,
-                      const Real & scalar,
-                      const Real & residual,
-                      const Real & reference_residual);
+                      const unsigned int it,
+                      const Real effective_trial_stress,
+                      const Real scalar,
+                      const Real residual,
+                      const Real reference_residual);
 
   /**
    * Check to see whether solution is within admissible range, and set it within that range
@@ -200,9 +200,9 @@ private:
    * @param scalar_lower_bound     Lower bound value of scalar
    * @param iter_output            Output stream
    */
-  void updateBounds(const Real & scalar,
-                    const Real & residual,
-                    const Real & init_resid_sign,
+  void updateBounds(const Real scalar,
+                    const Real residual,
+                    const Real init_resid_sign,
                     Real & scalar_upper_bound,
                     Real & scalar_lower_bound,
                     std::stringstream * iter_output);

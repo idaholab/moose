@@ -344,16 +344,16 @@ SingleVariableReturnMappingSolution::internalSolveLegacy(const Real effective_tr
 }
 
 bool
-SingleVariableReturnMappingSolution::converged(const Real & residual, const Real & reference)
+SingleVariableReturnMappingSolution::converged(const Real residual, const Real reference)
 {
   return (std::abs(residual) <= _absolute_tolerance ||
           (std::abs(residual) / reference) <= _relative_tolerance);
 }
 
 bool
-SingleVariableReturnMappingSolution::convergedAcceptable(const unsigned int & it,
-                                                         const Real & residual,
-                                                         const Real & reference)
+SingleVariableReturnMappingSolution::convergedAcceptable(const unsigned int it,
+                                                         const Real residual,
+                                                         const Real reference)
 {
   // Require that we have at least done _num_resids evaluations before we allow for
   // acceptable convergence
@@ -375,11 +375,11 @@ SingleVariableReturnMappingSolution::convergedAcceptable(const unsigned int & it
 
 void
 SingleVariableReturnMappingSolution::outputIterInfo(std::stringstream * iter_output,
-                                                    const unsigned int & it,
-                                                    const Real & effective_trial_stress,
-                                                    const Real & scalar,
-                                                    const Real & residual,
-                                                    const Real & reference_residual)
+                                                    const unsigned int it,
+                                                    const Real effective_trial_stress,
+                                                    const Real scalar,
+                                                    const Real residual,
+                                                    const Real reference_residual)
 {
   if (iter_output)
   {
@@ -421,9 +421,9 @@ SingleVariableReturnMappingSolution::checkPermissibleRange(Real & scalar,
 }
 
 void
-SingleVariableReturnMappingSolution::updateBounds(const Real & scalar,
-                                                  const Real & residual,
-                                                  const Real & init_resid_sign,
+SingleVariableReturnMappingSolution::updateBounds(const Real scalar,
+                                                  const Real residual,
+                                                  const Real init_resid_sign,
                                                   Real & scalar_upper_bound,
                                                   Real & scalar_lower_bound,
                                                   std::stringstream * iter_output)
