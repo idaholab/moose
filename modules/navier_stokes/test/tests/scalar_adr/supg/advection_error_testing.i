@@ -26,11 +26,6 @@ velocity=1
     type = Advection
     variable = u
   [../]
-  [./frc]
-    type = BodyForce
-    variable = u
-    function = 'ffn'
-  [../]
   [./adv_supg]
     type = AdvectionSUPG
     variable = u

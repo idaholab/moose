@@ -70,17 +70,6 @@ rho=2.5
     forcing_func = vel_y_source_func
   [../]
 
-  [./vel_x_source]
-    type = BodyForce
-    function = vel_x_source_func
-    variable = vel_x
-  [../]
-  [./vel_y_source]
-    type = BodyForce
-    function = vel_y_source_func
-    variable = vel_y
-  [../]
-
   [./p_source]
     type = BodyForce
     function = p_source_func
