@@ -15,7 +15,7 @@ velocity=1
 []
 
 [Variables]
-  [./u]
+  [./c]
     family = LAGRANGE
     order = FIRST
   [../]
@@ -24,7 +24,7 @@ velocity=1
 [Kernels]
   [./adv]
     type = Advection
-    variable = u
+    variable = c
     forcing_func = 'ffn'
   [../]
 []
@@ -32,7 +32,7 @@ velocity=1
 [BCs]
   [./left]
     type = DirichletBC
-    variable = u
+    variable = c
     boundary = left
     value = 0
   [../]
@@ -51,7 +51,7 @@ velocity=1
     type = ParsedFunction
     value = '1-x^2'
   [../]
-  [./u_func]
+  [./c_func]
     type = ParsedFunction
     value = 'x-x^3/3'
   [../]
@@ -73,16 +73,16 @@ velocity=1
 []
 
 [Postprocessors]
-  [./L2u]
+  [./L2c]
     type = ElementL2Error
-    variable = u
-    function = u_func
+    variable = c
+    function = c_func
     outputs = 'console csv'
     execute_on = 'timestep_end'
   [../]
-  [./L2ux]
+  [./L2cx]
     type = ElementL2Error
-    variable = ux
+    variable = cx
     function = ffn
     outputs = 'console csv'
     execute_on = 'timestep_end'
@@ -90,17 +90,17 @@ velocity=1
 []
 
 [AuxVariables]
-  [./ux]
+  [./cx]
     family = MONOMIAL
     order = FIRST
   [../]
 []
 
 [AuxKernels]
-  [./ux]
+  [./cx]
     type = VariableGradientComponent
     component = x
-    variable = ux
-    gradient_variable = u
+    variable = cx
+    gradient_variable = c
   [../]
 []
