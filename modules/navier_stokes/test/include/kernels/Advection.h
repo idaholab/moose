@@ -16,7 +16,8 @@ template <>
 InputParameters validParams<Advection>();
 
 /**
- * This class adds and advection term
+ * This class is responsible for solving the scalar advection
+ * equation, possibly with a forcing function.
  */
 class Advection : public INSBase
 {
@@ -29,6 +30,8 @@ protected:
   virtual Real computeQpResidual();
   virtual Real computeQpJacobian();
   virtual Real computeQpOffDiagJacobian(unsigned /*jvar*/) { return 0; }
+  Function & _ffn;
+  MooseEnum _tau_type;
 };
 
 #endif
