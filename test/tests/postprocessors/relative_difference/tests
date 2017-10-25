@@ -1,0 +1,13 @@
+[Tests]
+  [./relative_difference]
+    type = 'CSVDiff'
+    input = 'relative_difference.i'
+    csvdiff = 'relative_difference_out.csv'
+  [../]
+  [./relative_difference_zero]
+    type = 'CSVDiff'
+    input = 'relative_difference.i'
+    csvdiff = 'relative_difference_zero_out.csv'
+    cli_args = 'Postprocessors/relative_difference/value2=zero Outputs/out/file_base=relative_difference_zero_out'
+  [../]
+[]
