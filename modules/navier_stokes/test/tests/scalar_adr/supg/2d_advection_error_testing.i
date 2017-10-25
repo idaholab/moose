@@ -20,7 +20,7 @@ ay=1
 []
 
 [Variables]
-  [./u]
+  [./c]
     family = LAGRANGE
     order = SECOND
   [../]
@@ -29,25 +29,17 @@ ay=1
 [Kernels]
   [./adv]
     type = Advection
-    variable = u
-  [../]
-  [./adv_supg]
-    type = AdvectionSUPG
-    variable = u
-  [../]
-  [./body_force_supg]
-    type = BodyForceSUPG
-    variable = u
-    function = 'ffn'
+    variable = c
+    forcing_func = 'ffn'
   [../]
 []
 
 [BCs]
   [./all]
     type = FunctionDirichletBC
-    variable = u
+    variable = c
     boundary = 'left right top bottom'
-    function = 'u_func'
+    function = 'c_func'
   [../]
 []
 
@@ -64,11 +56,11 @@ ay=1
     type = ParsedFunction
     value = '${ax}*(0.14*pi*y*cos(0.2*pi*x*y) + 0.2*pi*cos(0.5*pi*x)) + ${ay}*(0.14*pi*x*cos(0.2*pi*x*y) + 0.4*pi*cos(pi*y))'
   [../]
-  [./u_func]
+  [./c_func]
     type = ParsedFunction
     value = '0.4*sin(0.5*pi*x) + 0.4*sin(pi*y) + 0.7*sin(0.2*pi*x*y) + 0.5'
   [../]
-  [./ux_func]
+  [./cx_func]
     type = ParsedFunction
     value = '0.14*pi*y*cos(0.2*pi*x*y) + 0.2*pi*cos(0.5*pi*x)'
   [../]
@@ -111,34 +103,34 @@ ay=1
 []
 
 [Postprocessors]
-  [./L2u]
+  [./L2c]
     type = ElementL2Error
-    variable = u
-    function = u_func
+    variable = c
+    function = c_func
     outputs = 'console csv'
     execute_on = 'timestep_end'
   [../]
-  [./L2ux]
+  [./L2cx]
     type = ElementL2Error
-    variable = ux
-    function = ux_func
+    variable = cx
+    function = cx_func
     outputs = 'console csv'
     execute_on = 'timestep_end'
   [../]
 []
 
 [AuxVariables]
-  [./ux]
+  [./cx]
     family = MONOMIAL
     order = FIRST
   [../]
 []
 
 [AuxKernels]
-  [./ux]
+  [./cx_aux]
     type = VariableGradientComponent
     component = x
-    variable = ux
-    gradient_variable = u
+    variable = cx
+    gradient_variable = c
   [../]
 []

@@ -14,35 +14,22 @@ velocity=1
 []
 
 [Variables]
-  [./u]
+  [./c]
   [../]
 []
 
 [Kernels]
   [./adv]
     type = Advection
-    variable = u
-  [../]
-  [./frc]
-    type = BodyForce
-    variable = u
-    function = 'ffn'
-  [../]
-  [./adv_supg]
-    type = AdvectionSUPG
-    variable = u
-  [../]
-  [./body_force_supg]
-    type = BodyForceSUPG
-    variable = u
-    function = 'ffn'
+    variable = c
+    forcing_func = 'ffn'
   [../]
 []
 
 [BCs]
   [./left]
     type = DirichletBC
-    variable = u
+    variable = c
     boundary = left
     value = 0
   [../]
@@ -50,6 +37,7 @@ velocity=1
 
 [Materials]
   [./mat]
+    # These Materials are required by the INSBase class; we don't use them for anything.
     type = GenericConstantMaterial
     prop_names = 'mu rho'
     prop_values = '0 1'
