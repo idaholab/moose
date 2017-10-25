@@ -1,0 +1,26 @@
+[Tests]
+  [./recover_1]
+    type = Exodiff
+    input = recover.i
+    exodiff = recover_out.e
+    superlu = true
+  [../]
+
+  [./recover_2]
+    type = RunApp
+    input = recover.i
+    prereq = recover_1
+    cli_args = 'Outputs/checkpoint=true Executioner/num_steps=5'
+    superlu = true
+  [../]
+
+  [./recover_3]
+    type = Exodiff
+    input = recover.i
+    exodiff = recover_out.e
+    prereq = recover_2
+    delete_output_before_running = false
+    cli_args = '--recover recover_out_cp/0005'
+    superlu = true
+  [../]
+[]
