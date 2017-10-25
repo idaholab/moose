@@ -230,6 +230,7 @@
 #include "ElementExtremeValue.h"
 #include "DifferencePostprocessor.h"
 #include "ScalePostprocessor.h"
+#include "LinearCombinationPostprocessor.h"
 #include "NumPicardIterations.h"
 #include "FunctionSideIntegral.h"
 #include "ExecutionerAttributeReporter.h"
@@ -686,6 +687,7 @@ registerObjects(Factory & factory)
   registerPostprocessor(ElementExtremeValue);
   registerPostprocessor(DifferencePostprocessor);
   registerPostprocessor(ScalePostprocessor);
+  registerPostprocessor(LinearCombinationPostprocessor);
   registerPostprocessor(FunctionValuePostprocessor);
   registerPostprocessor(NumPicardIterations);
   registerPostprocessor(FunctionSideIntegral);
