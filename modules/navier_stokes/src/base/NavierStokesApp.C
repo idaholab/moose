@@ -147,12 +147,7 @@
 #include "CNSFVIdealGasTotalEnthalpyL2Error.h"
 #include "CNSFVTimeStepLimit.h"
 
-//
-// Scalar Advection-diffusion-reaction
-//
-
-#include "AdvectionSUPG.h"
-#include "BodyForceSUPG.h"
+// Scalar advection equation stabilized by SUPG.
 #include "Advection.h"
 
 template <>
@@ -335,9 +330,7 @@ NavierStokesApp::registerObjects(Factory & factory)
   registerPostprocessor(CNSFVIdealGasTotalEnthalpyL2Error);
   registerPostprocessor(CNSFVTimeStepLimit);
 
-  // Scalar advection-diffusion-reaction
-  registerKernel(AdvectionSUPG);
-  registerKernel(BodyForceSUPG);
+  // Scalar advection equation stabilized by SUPG.
   registerKernel(Advection);
 }
 

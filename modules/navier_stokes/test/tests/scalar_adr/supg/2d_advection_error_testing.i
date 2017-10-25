@@ -30,15 +30,7 @@ ay=1
   [./adv]
     type = Advection
     variable = u
-  [../]
-  [./adv_supg]
-    type = AdvectionSUPG
-    variable = u
-  [../]
-  [./body_force_supg]
-    type = BodyForceSUPG
-    variable = u
-    function = 'ffn'
+    forcing_func = 'ffn'
   [../]
 []
 

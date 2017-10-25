@@ -3,19 +3,12 @@
     type = 'Exodiff'
     input = 'tauOpt.i'
     exodiff = 'tauOpt_out.e'
-    cli_args = "Kernels/active='adv adv_supg body_force_supg'"
   [../]
   [./tauMod]
     type = 'Exodiff'
     input = 'tauOpt.i'
     exodiff = 'tauMod_out.e'
-    cli_args = "Kernels/active='adv adv_supg body_force_supg' GlobalParams/tau_type=mod Outputs/file_base=tauMod_out"
-  [../]
-  [./inconsistent]
-    type = 'Exodiff'
-    input = 'tauOpt.i'
-    exodiff = 'inconsistent.e'
-    cli_args = "Kernels/active='adv frc adv_supg' Outputs/file_base=inconsistent"
+    cli_args = "GlobalParams/tau_type=mod Outputs/file_base=tauMod_out"
   [../]
   [./1d_error_test_supg]
     type = 'Exodiff'
