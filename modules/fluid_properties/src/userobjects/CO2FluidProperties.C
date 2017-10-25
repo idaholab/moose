@@ -508,6 +508,25 @@ CO2FluidProperties::rho_dpT(
 }
 
 Real
+CO2FluidProperties::mu(Real pressure, Real temperature) const
+{
+  Real rho = this->rho(pressure, temperature);
+  return this->mu_from_rho_T(rho, temperature);
+}
+
+void
+CO2FluidProperties::mu_dpT(
+    Real pressure, Real temperature, Real & mu, Real & dmu_dp, Real & dmu_dT) const
+{
+  Real rho, drho_dp, drho_dT;
+  this->rho_dpT(pressure, temperature, rho, drho_dp, drho_dT);
+
+  Real dmu_drho;
+  mu_drhoT_from_rho_T(rho, temperature, drho_dT, mu, dmu_drho, dmu_dT);
+  dmu_dp = dmu_drho * drho_dp;
+}
+
+Real
 CO2FluidProperties::mu_from_rho_T(Real density, Real temperature) const
 {
   // Check that the input parameters are within the region of validity
@@ -700,6 +719,20 @@ CO2FluidProperties::cv(Real pressure, Real temperature) const
   Real tau = _critical_temperature / temperature;
 
   return -_Rco2 * tau * tau * d2phiSW_dt2(delta, tau);
+}
+
+Real
+CO2FluidProperties::k(Real pressure, Real temperature) const
+{
+  Real rho = this->rho(pressure, temperature);
+  return this->k_from_rho_T(rho, temperature);
+}
+
+void
+CO2FluidProperties::k_dpT(
+    Real /*pressure*/, Real /*temperature*/, Real & /*k*/, Real & /*dk_dp*/, Real & /*dk_dT*/) const
+{
+  mooseError(name(), "k_dpT() is not implemented");
 }
 
 Real

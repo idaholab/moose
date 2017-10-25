@@ -109,6 +109,13 @@ TEST_F(CO2FluidPropertiesTest, thermalConductivity)
   REL_TEST("thermal conductivity", _fp->k_from_rho_T(11.899, 450.0), 29.377e-3, 1.0e-3);
 }
 
+TEST_F(CO2FluidPropertiesTest, thermalConductivity2)
+{
+  REL_TEST("thermal conductivity", _fp->k(1.0e6, 250.0), 1.34504e-2, 1.0e-6);
+  REL_TEST("thermal conductivity", _fp->k(1.0e6, 300.0), 1.72483e-2, 3.0e-6);
+  REL_TEST("thermal conductivity", _fp->k(1.0e6, 450.0), 2.93767e-2, 1.0e-6);
+}
+
 /**
  * Verify calculation of viscosity using data from
  * Fenghour et al., The viscosity of carbon dioxide,
@@ -119,6 +126,13 @@ TEST_F(CO2FluidPropertiesTest, viscosity)
   REL_TEST("viscosity", _fp->mu_from_rho_T(20.199, 280.0), 14.15e-6, 1.0e-3);
   REL_TEST("viscosity", _fp->mu_from_rho_T(15.105, 360.0), 17.94e-6, 1.0e-3);
   REL_TEST("viscosity", _fp->mu_from_rho_T(10.664, 500.0), 24.06e-6, 1.0e-3);
+}
+
+TEST_F(CO2FluidPropertiesTest, viscosity2)
+{
+  REL_TEST("viscosity", _fp->mu(1.0e6, 280.0), 1.41505e-05, 3.0e-6);
+  REL_TEST("viscosity", _fp->mu(1.0e6, 360.0), 1.79395e-05, 2.0e-6);
+  REL_TEST("viscosity", _fp->mu(1.0e6, 500.0), 2.40643e-05, 1.0e-6);
 }
 
 /**
@@ -217,7 +231,7 @@ TEST_F(CO2FluidPropertiesTest, derivatives)
   _fp->mu_drhoT_from_rho_T(rho, T, drho_dT, mu, dmu_drho, dmu_dT);
 
   ABS_TEST("mu", mu, _fp->mu_from_rho_T(rho, T), 1.0e-15);
-  REL_TEST("dmu_dp", dmu_drho, dmu_drho_fd, 1.0e-6);
+  REL_TEST("dmu_drho", dmu_drho, dmu_drho_fd, 1.0e-6);
 
   // To properly test derivative wrt temperature, use p and T and calculate density,
   // so that the change in density wrt temperature is included
@@ -227,6 +241,18 @@ TEST_F(CO2FluidPropertiesTest, derivatives)
   Real dmu_dT_fd = (_fp->mu_from_rho_T(_fp->rho(p, T + dT), T + dT) -
                     _fp->mu_from_rho_T(_fp->rho(p, T - dT), T - dT)) /
                    (2.0 * dT);
+
+  REL_TEST("dmu_dT", dmu_dT, dmu_dT_fd, 1.0e-6);
+
+  Real dmu_dp_fd = (_fp->mu(p + dp, T) - _fp->mu(p - dp, T)) / (2.0 * dp);
+  Real dmu_dp = 0.0;
+  _fp->mu_dpT(p, T, mu, dmu_dp, dmu_dT);
+
+  ABS_TEST("mu", mu, _fp->mu(p, T), 1.0e-15);
+  REL_TEST("dmu_dp", dmu_dp, dmu_dp_fd, 1.0e-6);
+
+  _fp->mu_dpT(p, T, mu, dmu_dp, dmu_dT);
+  dmu_dT_fd = (_fp->mu(p, T + dT) - _fp->mu(p, T - dT)) / (2.0 * dT);
 
   REL_TEST("dmu_dT", dmu_dT, dmu_dT_fd, 1.0e-6);
 

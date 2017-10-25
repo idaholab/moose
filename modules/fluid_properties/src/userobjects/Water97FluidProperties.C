@@ -471,6 +471,24 @@ Water97FluidProperties::cv(Real pressure, Real temperature) const
 }
 
 Real
+Water97FluidProperties::mu(Real pressure, Real temperature) const
+{
+  Real rho = this->rho(pressure, temperature);
+  return this->mu_from_rho_T(rho, temperature);
+}
+
+void
+Water97FluidProperties::mu_dpT(
+    Real pressure, Real temperature, Real & mu, Real & dmu_dp, Real & dmu_dT) const
+{
+  Real rho, drho_dp, drho_dT;
+  this->rho_dpT(pressure, temperature, rho, drho_dp, drho_dT);
+  Real dmu_drho;
+  this->mu_drhoT_from_rho_T(rho, temperature, drho_dT, mu, dmu_drho, dmu_dT);
+  dmu_dp = dmu_drho * drho_dp;
+}
+
+Real
 Water97FluidProperties::mu_from_rho_T(Real density, Real temperature) const
 {
   // Constants from Release on the IAPWS Formulation 2008 for the Viscosity of
@@ -560,6 +578,20 @@ Water97FluidProperties::mu_drhoT_from_rho_T(Real density,
   mu = mu_star * mu0 * mu1;
   dmu_drho = mu_star * mu0 * dmu1_drho * drhobar_drho;
   dmu_dT = mu_star * (dmu0_dTbar * mu1 + mu0 * dmu1_dTbar) * dTbar_dT + dmu_drho * ddensity_dT;
+}
+
+Real
+Water97FluidProperties::k(Real pressure, Real temperature) const
+{
+  Real rho = this->rho(pressure, temperature);
+  return this->k_from_rho_T(rho, temperature);
+}
+
+void
+Water97FluidProperties::k_dpT(
+    Real /*pressure*/, Real /*temperature*/, Real & /*k*/, Real & /*dk_dp*/, Real & /*dk_dT*/) const
+{
+  mooseError(name(), "k_dpT() is not implemented");
 }
 
 Real

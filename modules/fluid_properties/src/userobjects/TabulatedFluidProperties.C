@@ -273,6 +273,24 @@ TabulatedFluidProperties::h_dpT(
 }
 
 Real
+TabulatedFluidProperties::mu(Real pressure, Real temperature) const
+{
+  Real rho = this->rho(pressure, temperature);
+  return this->mu(rho, temperature);
+}
+
+void
+TabulatedFluidProperties::mu_dpT(
+    Real pressure, Real temperature, Real & mu, Real & dmu_dp, Real & dmu_dT) const
+{
+  Real rho, drho_dp, drho_dT;
+  this->rho_dpT(pressure, temperature, rho, drho_dp, drho_dT);
+  Real dmu_drho;
+  this->mu_drhoT_from_rho_T(rho, temperature, drho_dT, mu, dmu_drho, dmu_dT);
+  dmu_dp = dmu_drho * drho_dp;
+}
+
+Real
 TabulatedFluidProperties::mu_from_rho_T(Real density, Real temperature) const
 {
   return _fp.mu_from_rho_T(density, temperature);
@@ -305,6 +323,20 @@ Real
 TabulatedFluidProperties::cv(Real pressure, Real temperature) const
 {
   return _fp.cv(pressure, temperature);
+}
+
+Real
+TabulatedFluidProperties::k(Real pressure, Real temperature) const
+{
+  Real rho = this->rho(pressure, temperature);
+  return this->k_from_rho_T(rho, temperature);
+}
+
+void
+TabulatedFluidProperties::k_dpT(
+    Real /*pressure*/, Real /*temperature*/, Real & /*k*/, Real & /*dk_dp*/, Real & /*dk_dT*/) const
+{
+  mooseError(name(), "k_dpT() is not implemented");
 }
 
 Real

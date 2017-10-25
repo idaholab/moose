@@ -57,6 +57,11 @@ public:
   /// Adiabatic index - ratio of specific heats (-)
   virtual Real gamma(Real pressure, Real temperature) const;
   /// Dynamic viscosity (Pa s)
+  virtual Real mu(Real pressure, Real temperature) const = 0;
+  /// Dynamic viscosity and its derivatives wrt pressure and temperature
+  virtual void
+  mu_dpT(Real pressure, Real temperature, Real & mu, Real & dmu_dp, Real & dmu_dT) const = 0;
+  /// Dynamic viscosity (Pa s)
   virtual Real mu_from_rho_T(Real density, Real temperature) const = 0;
   /// Dynamic viscosity and its derivatives wrt density and temperature
   virtual void mu_drhoT_from_rho_T(Real density,
@@ -65,6 +70,11 @@ public:
                                    Real & mu,
                                    Real & dmu_drho,
                                    Real & dmu_dT) const = 0;
+  /// Thermal conductivity (W/m/K)
+  virtual Real k(Real pressure, Real temperature) const = 0;
+  /// Thermal conductivity and its derivatives wrt pressure and temperature
+  virtual void
+  k_dpT(Real pressure, Real temperature, Real & k, Real & dk_dp, Real & dk_dT) const = 0;
   /// Thermal conductivity (W/m/K)
   virtual Real k_from_rho_T(Real density, Real temperature) const = 0;
   /// Specific entropy (J/kg/K)

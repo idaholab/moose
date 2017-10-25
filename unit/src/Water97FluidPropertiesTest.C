@@ -419,12 +419,27 @@ TEST_F(Water97FluidPropertiesTest, properties)
   REL_TEST("mu", _fp->mu_from_rho_T(100.0, 1173.15), 47.640433e-6, 1.0e-8);
   REL_TEST("mu", _fp->mu_from_rho_T(400.0, 1173.15), 64.154608e-6, 1.0e-8);
 
+  ABS_TEST("mu", _fp->mu(1e6, 298.15), 889.898581797e-6, 2e-8);
+  ABS_TEST("mu", _fp->mu(2e6, 298.15), 889.763899645e-6, 1e-8);
+  ABS_TEST("mu", _fp->mu(1e6, 373.15), 281.825180491e-6, 1e-8);
+  ABS_TEST("mu", _fp->mu(2e6, 373.15), 282.09550632e-6, 1e-8);
+  ABS_TEST("mu", _fp->mu(1e6, 433.15), 170.526801634e-6, 1e-8);
+  ABS_TEST("mu", _fp->mu(2e6, 433.15), 170.780193827e-6, 1e-8);
+  ABS_TEST("mu", _fp->mu(1e6, 873.15), 3.2641885983e-5, 1e-12);
+  ABS_TEST("mu", _fp->mu(2e6, 873.15), 3.26820969808e-5, 1e-12);
+  ABS_TEST("mu", _fp->mu(1e6, 1173.15), 4.42374919686e-5, 1e-12);
+  ABS_TEST("mu", _fp->mu(2e6, 1173.15), 4.42823959629e-5, 1e-12);
+
   // Thermal conductivity
   // Note: data is given for pressure and temperature, but k requires density
   // and temperature
   REL_TEST("k", _fp->k_from_rho_T(_fp->rho(1.0e6, 323.15), 323.15), 0.641, 1.0e-4);
   REL_TEST("k", _fp->k_from_rho_T(_fp->rho(20.0e6, 623.15), 623.15), 0.4541, 1.0e-4);
   REL_TEST("k", _fp->k_from_rho_T(_fp->rho(50.0e6, 773.15), 773.15), 0.2055, 1.0e-4);
+
+  ABS_TEST("k", _fp->k(1.0e6, 323.15), 0.640972, 5e-7);
+  ABS_TEST("k", _fp->k(20.0e6, 623.15), 0.454131, 7e-7);
+  ABS_TEST("k", _fp->k(50.0e6, 773.15), 0.205485, 5e-7);
 
   // Backwards equation T(p,h)
   // Region 1

@@ -148,6 +148,24 @@ MethaneFluidProperties::cv(Real pressure, Real temperature) const
 }
 
 Real
+MethaneFluidProperties::mu(Real pressure, Real temperature) const
+{
+  Real rho = this->rho(pressure, temperature);
+  return this->mu_from_rho_T(rho, temperature);
+}
+
+void
+MethaneFluidProperties::mu_dpT(
+    Real pressure, Real temperature, Real & mu, Real & dmu_dp, Real & dmu_dT) const
+{
+  Real rho, drho_dp, drho_dT;
+  this->rho_dpT(pressure, temperature, rho, drho_dp, drho_dT);
+  Real dmu_drho;
+  this->mu_drhoT_from_rho_T(rho, temperature, drho_dT, mu, dmu_drho, dmu_dT);
+  dmu_dp = dmu_drho * drho_dp;
+}
+
+Real
 MethaneFluidProperties::mu_from_rho_T(Real /*density*/, Real temperature) const
 {
   // Check the temperature is in the range of validity (200 K <= T <= 1000 K)
@@ -186,6 +204,20 @@ MethaneFluidProperties::mu_drhoT_from_rho_T(Real density,
   for (std::size_t i = 0; i < a.size(); ++i)
     dmudt += i * a[i] * std::pow(temperature, i - 1.0);
   dmu_dT = dmudt * 1.e-6;
+}
+
+Real
+MethaneFluidProperties::k(Real pressure, Real temperature) const
+{
+  Real rho = this->rho(pressure, temperature);
+  return this->k_from_rho_T(rho, temperature);
+}
+
+void
+MethaneFluidProperties::k_dpT(
+    Real /*pressure*/, Real /*temperature*/, Real & /*k*/, Real & /*dk_dp*/, Real & /*dk_dT*/) const
+{
+  mooseError(name(), "k_dpT() is not implemented");
 }
 
 Real

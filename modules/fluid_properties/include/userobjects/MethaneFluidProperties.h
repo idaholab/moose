@@ -149,6 +149,11 @@ public:
    */
   virtual Real cv(Real pressure, Real temperature) const override;
 
+  virtual Real mu(Real pressure, Real temperature) const override;
+
+  virtual void
+  mu_dpT(Real pressure, Real temperature, Real & mu, Real & dmu_dp, Real & dmu_dT) const override;
+
   /**
    * Methane gas viscosity as a function of density and temperature.
    * From Irvine Jr, T. F. and Liley, P. E. (1984) Steam and Gas Tables with
@@ -177,6 +182,12 @@ public:
                                    Real & mu,
                                    Real & dmu_drho,
                                    Real & dmu_dT) const override;
+
+  /// Thermal conductivity (W/m/K)
+  virtual Real k(Real pressure, Real temperature) const override;
+  /// Thermal conductivity and its derivatives wrt pressure and temperature
+  virtual void
+  k_dpT(Real pressure, Real temperature, Real & k, Real & dk_dp, Real & dk_dT) const override;
 
   /**
    * Thermal conductivity as a function of density and temperature.

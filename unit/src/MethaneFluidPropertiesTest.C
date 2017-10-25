@@ -104,7 +104,16 @@ TEST_F(MethaneFluidPropertiesTest, derivatives)
   _fp->mu_drhoT_from_rho_T(rho, T, drho_dT, mu, dmu_drho, dmu_dT);
 
   ABS_TEST("mu", mu, _fp->mu_from_rho_T(rho, T), 1.0e-15);
-  ABS_TEST("dmu_dp", dmu_drho, dmu_drho_fd, 1.0e-15);
+  ABS_TEST("dmu_drho", dmu_drho, dmu_drho_fd, 1.0e-15);
+  REL_TEST("dmu_dT", dmu_dT, dmu_dT_fd, 1.0e-6);
+
+  Real dmu_dp_fd = (_fp->mu(p + dp, T) - _fp->mu(p - dp, T)) / (2.0 * dp);
+  dmu_dT_fd = (_fp->mu(p, T + dT) - _fp->mu(p, T - dT)) / (2.0 * dT);
+  Real dmu_dp = 0.0;
+  _fp->mu_dpT(p, T, mu, dmu_dp, dmu_dT);
+
+  ABS_TEST("mu", mu, _fp->mu(p, T), 1.0e-15);
+  ABS_TEST("dmu_dp", dmu_dp, dmu_dp_fd, 1.0e-15);
   REL_TEST("dmu_dT", dmu_dT, dmu_dT_fd, 1.0e-6);
 
   // Henry's constant

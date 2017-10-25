@@ -80,6 +80,20 @@ SimpleFluidProperties::c(Real pressure, Real temperature) const
   return std::sqrt(_bulk_modulus / rho(pressure, temperature));
 }
 
+Real SimpleFluidProperties::k(Real /*pressure*/, Real /*temperature*/) const
+{
+  return _thermal_conductivity;
+}
+
+void
+SimpleFluidProperties::k_dpT(
+    Real /*pressure*/, Real /*temperature*/, Real & k, Real & dk_dp, Real & dk_dT) const
+{
+  k = _thermal_conductivity;
+  dk_dp = 0;
+  dk_dT = 0;
+}
+
 Real SimpleFluidProperties::k_from_rho_T(Real /*density*/, Real /*temperature*/) const
 {
   return _thermal_conductivity;
@@ -141,6 +155,17 @@ SimpleFluidProperties::rho_e_dpT(Real pressure,
   e = energy;
   de_dp = denergy_dp;
   de_dT = denergy_dT;
+}
+
+Real SimpleFluidProperties::mu(Real /*pressure*/, Real /*temperature*/) const { return _viscosity; }
+
+void
+SimpleFluidProperties::mu_dpT(
+    Real pressure, Real temperature, Real & mu, Real & dmu_dp, Real & dmu_dT) const
+{
+  mu = this->mu(pressure, temperature);
+  dmu_dp = 0.0;
+  dmu_dT = 0.0;
 }
 
 Real SimpleFluidProperties::mu_from_rho_T(Real /*density*/, Real /*temperature*/) const
