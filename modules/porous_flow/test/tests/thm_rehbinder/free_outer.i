@@ -39,6 +39,10 @@
 []
 
 [BCs]
+  # sideset 1 = outer
+  # sideset 2 = cavity
+  # sideset 3 = ymin
+  # sideset 4 = xmin
   [./plane_strain]
     type = PresetBC
     variable = disp_z
@@ -96,18 +100,6 @@
   [./outer_pressure]
     type = PresetBC
     variable = porepressure
-    value = 0
-    boundary = rmax
-  [../]
-  [./fixed_outer_x]
-    type = PresetBC
-    variable = disp_x
-    value = 0
-    boundary = rmax
-  [../]
-  [./fixed_outer_y]
-    type = PresetBC
-    variable = disp_y
     value = 0
     boundary = rmax
   [../]
@@ -179,19 +171,10 @@
     type = ComputeSmallStrain
     eigenstrain_names = thermal_contribution
   [../]
-  [./var_dependence]
-    type = DerivativeParsedMaterial
-    function = temperature
-    args = temperature
-    f_name = var_dep
-    enable_jit = true
-    derivative_order = 2
-  [../]
   [./thermal_contribution]
-    type = ComputeVariableEigenstrain
-    eigen_base = '1E-6 1E-6 1E-6 0 0 0' # thermal expansion = 1E-6
-    prefactor = var_dep
-    args = temperature
+    type = ComputeThermalExpansionEigenstrain
+    temperature = temperature
+    thermal_expansion_coeff = 1E-6
     eigenstrain_name = thermal_contribution
   [../]
   [./stress]
@@ -263,7 +246,7 @@
 []
 
 [Outputs]
-  file_base = fixed_outer
+  file_base = free_outer
   execute_on = timestep_end
   csv = true
 []
