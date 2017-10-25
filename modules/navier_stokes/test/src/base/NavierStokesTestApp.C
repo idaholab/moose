@@ -4,6 +4,9 @@
 #include "AppFactory.h"
 #include "MooseSyntax.h"
 
+// Scalar advection equation stabilized by SUPG.
+#include "Advection.h"
+
 template <>
 InputParameters
 validParams<NavierStokesTestApp>()
@@ -52,8 +55,10 @@ NavierStokesTestApp__registerObjects(Factory & factory)
   NavierStokesTestApp::registerObjects(factory);
 }
 void
-NavierStokesTestApp::registerObjects(Factory & /*factory*/)
+NavierStokesTestApp::registerObjects(Factory & factory)
 {
+  // Scalar advection equation stabilized by SUPG.
+  registerKernel(Advection);
 }
 
 // External entry point for dynamic syntax association
