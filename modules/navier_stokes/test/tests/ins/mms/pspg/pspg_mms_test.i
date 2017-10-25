@@ -60,6 +60,7 @@ rho=2.5
     type = INSMomentumLaplaceForm
     variable = vel_x
     component = 0
+    forcing_func = vel_x_source_func
   [../]
 
   # y-momentum, space
@@ -67,18 +68,7 @@ rho=2.5
     type = INSMomentumLaplaceForm
     variable = vel_y
     component = 1
-  [../]
-
-  [./vel_x_source]
-    type = BodyForce
-    function = vel_x_source_func
-    variable = vel_x
-  [../]
-
-  [./vel_y_source]
-    type = BodyForce
-    function = vel_y_source_func
-    variable = vel_y
+    forcing_func = vel_y_source_func
   [../]
 
   [./p_source]
