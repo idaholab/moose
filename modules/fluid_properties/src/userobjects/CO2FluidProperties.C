@@ -508,7 +508,7 @@ CO2FluidProperties::rho_dpT(
 }
 
 Real
-CO2FluidProperties::mu(Real density, Real temperature) const
+CO2FluidProperties::mu_from_rho_T(Real density, Real temperature) const
 {
   // Check that the input parameters are within the region of validity
   if (temperature < 216.0 || temperature > 1000.0 || density > 1400.0)
@@ -536,12 +536,12 @@ CO2FluidProperties::mu(Real density, Real temperature) const
 }
 
 void
-CO2FluidProperties::mu_drhoT(Real density,
-                             Real temperature,
-                             Real ddensity_dT,
-                             Real & mu,
-                             Real & dmu_drho,
-                             Real & dmu_dT) const
+CO2FluidProperties::mu_drhoT_from_rho_T(Real density,
+                                        Real temperature,
+                                        Real ddensity_dT,
+                                        Real & mu,
+                                        Real & dmu_drho,
+                                        Real & dmu_dT) const
 {
   // Check that the input parameters are within the region of validity
   if (temperature < 216.0 || temperature > 1000.0 || density > 1400.0)
@@ -703,7 +703,7 @@ CO2FluidProperties::cv(Real pressure, Real temperature) const
 }
 
 Real
-CO2FluidProperties::k(Real density, Real temperature) const
+CO2FluidProperties::k_from_rho_T(Real density, Real temperature) const
 {
   // Check the temperature is in the range of validity (216.592 K <= T <= 1000 K)
   if (temperature <= _triple_point_temperature || temperature >= 1000.0)

@@ -121,14 +121,14 @@ public:
   virtual void
   h_dpT(Real pressure, Real temperature, Real & h, Real & dh_dp, Real & dh_dT) const override;
   /// Viscosity
-  virtual Real mu(Real density, Real temperature) const override;
+  virtual Real mu_from_rho_T(Real density, Real temperature) const override;
   /// Derivatives of viscosity wrt density and temperature
-  virtual void mu_drhoT(Real density,
-                        Real temperature,
-                        Real ddensity_dT,
-                        Real & mu,
-                        Real & dmu_drho,
-                        Real & dmu_dT) const override;
+  virtual void mu_drhoT_from_rho_T(Real density,
+                                   Real temperature,
+                                   Real ddensity_dT,
+                                   Real & mu,
+                                   Real & dmu_drho,
+                                   Real & dmu_dT) const override;
   /// Specific isobaric heat capacity
   virtual Real cp(Real pressure, Real temperature) const override;
   /// Specific isochoric heat capacity
@@ -136,7 +136,7 @@ public:
   /// Speed of sound
   virtual Real c(Real pressure, Real temperature) const override;
   /// Thermal conductivity
-  virtual Real k(Real density, Real temperature) const override;
+  virtual Real k_from_rho_T(Real density, Real temperature) const override;
   /// Specific entropy
   virtual Real s(Real pressure, Real temperature) const override;
   /// Thermal expansion coefficient

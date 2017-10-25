@@ -161,25 +161,25 @@ NaClFluidProperties::cv(Real pressure, Real temperature) const
   return e(pressure, temperature) / temperature;
 }
 
-Real NaClFluidProperties::mu(Real /*density*/, Real /*temperature*/) const
+Real NaClFluidProperties::mu_from_rho_T(Real /*density*/, Real /*temperature*/) const
 {
   mooseError("NaClFluidProperties::mu not implemented");
   return 0.0;
 }
 
 void
-NaClFluidProperties::mu_drhoT(Real /*density*/,
-                              Real /*temperature*/,
-                              Real /*ddensity_dT*/,
-                              Real & /*mu*/,
-                              Real & /*dmu_drho*/,
-                              Real & /*dmu_dT*/) const
+NaClFluidProperties::mu_drhoT_from_rho_T(Real /*density*/,
+                                         Real /*temperature*/,
+                                         Real /*ddensity_dT*/,
+                                         Real & /*mu*/,
+                                         Real & /*dmu_drho*/,
+                                         Real & /*dmu_dT*/) const
 {
   mooseError("NaClFluidProperties::mu_drhoT not implemented");
 }
 
 Real
-NaClFluidProperties::k(Real /*density*/, Real temperature) const
+NaClFluidProperties::k_from_rho_T(Real /*density*/, Real temperature) const
 {
   // Correlation requires temperature in Celcius
   Real Tc = temperature - _T_c2k;

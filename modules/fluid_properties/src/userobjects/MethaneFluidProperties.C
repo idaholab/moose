@@ -148,11 +148,15 @@ MethaneFluidProperties::cv(Real pressure, Real temperature) const
 }
 
 Real
-MethaneFluidProperties::mu(Real /*density*/, Real temperature) const
+MethaneFluidProperties::mu_from_rho_T(Real /*density*/, Real temperature) const
 {
   // Check the temperature is in the range of validity (200 K <= T <= 1000 K)
   if (temperature <= 200.0 || temperature >= 1000.0)
-    mooseError("Temperature ", temperature, "K out of range (200K, 1000K) in ", name(), ":mu()");
+    mooseError("Temperature ",
+               temperature,
+               "K out of range (200K, 1000K) in ",
+               name(),
+               ":mu_from_rho_T()");
 
   const std::vector<Real> a{
       2.968267e-1, 3.711201e-2, 1.218298e-5, -7.02426e-8, 7.543269e-11, -2.7237166e-14};
@@ -165,17 +169,17 @@ MethaneFluidProperties::mu(Real /*density*/, Real temperature) const
 }
 
 void
-MethaneFluidProperties::mu_drhoT(Real density,
-                                 Real temperature,
-                                 Real /*ddensity_dT*/,
-                                 Real & mu,
-                                 Real & dmu_drho,
-                                 Real & dmu_dT) const
+MethaneFluidProperties::mu_drhoT_from_rho_T(Real density,
+                                            Real temperature,
+                                            Real /*ddensity_dT*/,
+                                            Real & mu,
+                                            Real & dmu_drho,
+                                            Real & dmu_dT) const
 {
   const std::vector<Real> a{
       2.968267e-1, 3.711201e-2, 1.218298e-5, -7.02426e-8, 7.543269e-11, -2.7237166e-14};
 
-  mu = this->mu(density, temperature);
+  mu = this->mu_from_rho_T(density, temperature);
   dmu_drho = 0.0;
 
   Real dmudt = 0.0;
@@ -185,7 +189,7 @@ MethaneFluidProperties::mu_drhoT(Real density,
 }
 
 Real
-MethaneFluidProperties::k(Real /*density*/, Real temperature) const
+MethaneFluidProperties::k_from_rho_T(Real /*density*/, Real temperature) const
 {
   // Check the temperature is in the range of validity (200 K <= T <= 1000 K)
   if (temperature <= 200.0 || temperature >= 1000.0)

@@ -471,7 +471,7 @@ Water97FluidProperties::cv(Real pressure, Real temperature) const
 }
 
 Real
-Water97FluidProperties::mu(Real density, Real temperature) const
+Water97FluidProperties::mu_from_rho_T(Real density, Real temperature) const
 {
   // Constants from Release on the IAPWS Formulation 2008 for the Viscosity of
   // Ordinary Water Substance
@@ -506,12 +506,12 @@ Water97FluidProperties::mu(Real density, Real temperature) const
 }
 
 void
-Water97FluidProperties::mu_drhoT(Real density,
-                                 Real temperature,
-                                 Real ddensity_dT,
-                                 Real & mu,
-                                 Real & dmu_drho,
-                                 Real & dmu_dT) const
+Water97FluidProperties::mu_drhoT_from_rho_T(Real density,
+                                            Real temperature,
+                                            Real ddensity_dT,
+                                            Real & mu,
+                                            Real & dmu_drho,
+                                            Real & dmu_dT) const
 {
   // Constants from Release on the IAPWS Formulation 2008 for the Viscosity of
   // Ordinary Water Substance
@@ -563,7 +563,7 @@ Water97FluidProperties::mu_drhoT(Real density,
 }
 
 Real
-Water97FluidProperties::k(Real density, Real temperature) const
+Water97FluidProperties::k_from_rho_T(Real density, Real temperature) const
 {
   // Scale the density and temperature. Note that the scales are slightly
   // different to the critical values used in IAPWS-IF97

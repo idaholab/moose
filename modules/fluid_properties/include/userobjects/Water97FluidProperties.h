@@ -183,7 +183,7 @@ public:
    * @param temperature fluid temperature (K)
    * @return viscosity (Pa.s)
    */
-  virtual Real mu(Real density, Real temperature) const override;
+  virtual Real mu_from_rho_T(Real density, Real temperature) const override;
 
   /**
    * Water viscosity and derivatives wrt density and temperature
@@ -195,12 +195,12 @@ public:
    * @param[out] dmu_drho derivative of viscosity wrt density
    * @param[out] dmu_dT derivative of viscosity wrt temperature
    */
-  virtual void mu_drhoT(Real density,
-                        Real temperature,
-                        Real ddensity_dT,
-                        Real & mu,
-                        Real & dmu_drho,
-                        Real & dmu_dT) const override;
+  virtual void mu_drhoT_from_rho_T(Real density,
+                                   Real temperature,
+                                   Real ddensity_dT,
+                                   Real & mu,
+                                   Real & dmu_drho,
+                                   Real & dmu_dT) const override;
 
   /**
    * Thermal conductivity as a function of density and temperature
@@ -210,7 +210,7 @@ public:
    * @param temperature fluid temperature (K)
    * @return k (W/m/K)
    */
-  virtual Real k(Real density, Real temperature) const override;
+  virtual Real k_from_rho_T(Real density, Real temperature) const override;
 
   /**
    * Specific entropy as a function of pressure and temperature
