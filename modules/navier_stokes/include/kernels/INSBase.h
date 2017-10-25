@@ -49,8 +49,7 @@ protected:
   virtual RealVectorValue dStrongPressureDPressure();
   virtual Real dWeakPressureDPressure();
 
-  virtual RealVectorValue bodyForcesTerm();
-  virtual RealVectorValue gravity();
+  virtual RealVectorValue gravityTerm();
 
   virtual RealVectorValue timeDerivativeTerm();
   virtual RealVectorValue dTimeDerivativeDUComp(unsigned comp);

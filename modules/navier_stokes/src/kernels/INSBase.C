@@ -233,13 +233,7 @@ INSBase::dWeakPressureDPressure()
 }
 
 RealVectorValue
-INSBase::bodyForcesTerm()
-{
-  return gravity();
-}
-
-RealVectorValue
-INSBase::gravity()
+INSBase::gravityTerm()
 {
   return -_rho[_qp] * _gravity;
 }

@@ -33,10 +33,11 @@ Real
 BodyForceSUPG::computeQpResidual()
 {
   RealVectorValue U(_u_vel[_qp], _v_vel[_qp], _w_vel[_qp]);
+  Real r = -_test[_i][_qp] * _function.value(_t, _q_point[_qp]);
   if (_tau_type == "opt")
-    return -tauNodal() * U * _grad_test[_i][_qp] * _function.value(_t, _q_point[_qp]);
+    return r - tauNodal() * U * _grad_test[_i][_qp] * _function.value(_t, _q_point[_qp]);
   else
-    return -tau() * U * _grad_test[_i][_qp] * _function.value(_t, _q_point[_qp]);
+    return r - tau() * U * _grad_test[_i][_qp] * _function.value(_t, _q_point[_qp]);
 }
 
 Real
