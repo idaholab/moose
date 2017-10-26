@@ -123,9 +123,17 @@ PorousFlowSinglePhaseBase::act()
     {
       std::string kernel_name = "PorousFlowUnsaturated_grad_stress" + Moose::stringify(i);
       std::string kernel_type = "StressDivergenceTensors";
+      if (_coord_system == Moose::COORD_RZ)
+        kernel_type = "StressDivergenceRZTensors";
       InputParameters params = _factory.getValidParams(kernel_type);
       params.set<NonlinearVariableName>("variable") = _displacements[i];
       params.set<std::vector<VariableName>>("displacements") = _coupled_displacements;
+      if (_coupling_type == CouplingTypeEnum::ThermoHydroMechanical)
+      {
+        params.set<std::vector<VariableName>>("temperature") = _temperature_var;
+        params.set<std::string>("thermal_eigenstrain_name") =
+            getParam<std::string>("thermal_eigenstrain_name");
+      }
       params.set<unsigned>("component") = i;
       _problem->addKernel(kernel_type, kernel_name, params);
 
