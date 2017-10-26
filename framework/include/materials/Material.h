@@ -11,7 +11,7 @@
 
 // MOOOSE includes
 #include "MaterialBase.h"
-#include "Coupleable.h"
+#include "NeighborCoupleable.h"
 #include "MaterialPropertyInterface.h"
 
 // forward declarations
@@ -23,7 +23,7 @@ InputParameters validParams<Material>();
 /**
  * Materials compute MaterialProperties.
  */
-class Material : public MaterialBase, public Coupleable, public MaterialPropertyInterface
+class Material : public MaterialBase, public NeighborCoupleable, public MaterialPropertyInterface
 {
 public:
   static InputParameters validParams();
