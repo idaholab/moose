@@ -45,7 +45,7 @@ ContactPenetrationAuxAction::act()
 
   {
     InputParameters params = _factory.getValidParams("PenetrationAux");
-    params.set<ExecFlagEnum>("execute_on") = std::vector<ExecFlagType>({EXEC_INITIAL, EXEC_LINEAR});
+    params.set<ExecFlagEnum>("execute_on") = {EXEC_INITIAL, EXEC_LINEAR};
 
     // Extract global params
     if (isParamValid("parser_syntax"))

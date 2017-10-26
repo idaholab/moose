@@ -573,7 +573,7 @@ toUpper(const std::string & name)
 }
 
 ExecFlagEnum
-getDefaultExecFlagEnum(const std::vector<ExecFlagType> & current)
+getDefaultExecFlagEnum(const std::initializer_list<ExecFlagType> & current)
 {
   ExecFlagEnum exec_enum = ExecFlagEnum();
   exec_enum.addAvailableFlags({EXEC_NONE,

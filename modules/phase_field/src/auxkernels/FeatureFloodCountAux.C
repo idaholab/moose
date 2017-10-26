@@ -34,8 +34,7 @@ validParams<FeatureFloodCountAux>()
                              "(UNIQUE_REGION and VARIABLE_COLORING are nodal, CENTROID is "
                              "elemental, default: UNIQUE_REGION)");
 
-  params.set<ExecFlagEnum>("execute_on") =
-      std::vector<ExecFlagType>({EXEC_INITIAL, EXEC_TIMESTEP_END});
+  params.set<ExecFlagEnum>("execute_on") = {EXEC_INITIAL, EXEC_TIMESTEP_END};
 
   return params;
 }

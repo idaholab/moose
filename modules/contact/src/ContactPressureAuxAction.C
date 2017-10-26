@@ -65,8 +65,8 @@ ContactPressureAuxAction::act()
     name << "_contact_pressure_";
     name << counter++;
 
-    params.set<ExecFlagEnum>("execute_on", true) =
-        std::vector<ExecFlagType>({EXEC_NONLINEAR, EXEC_TIMESTEP_END, EXEC_TIMESTEP_BEGIN});
+    params.set<ExecFlagEnum>("execute_on",
+                             true) = {EXEC_NONLINEAR, EXEC_TIMESTEP_END, EXEC_TIMESTEP_BEGIN};
     _problem->addAuxKernel("ContactPressureAux", name.str(), params);
   }
 }

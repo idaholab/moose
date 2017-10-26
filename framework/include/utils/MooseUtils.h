@@ -460,7 +460,7 @@ numDigits(const T & num)
 /**
  * Return the default ExecFlagEnum for MOOSE.
  */
-ExecFlagEnum getDefaultExecFlagEnum(const std::vector<ExecFlagType> & current = {});
+ExecFlagEnum getDefaultExecFlagEnum(const std::initializer_list<ExecFlagType> & current = {});
 }
 
 #endif // MOOSEUTILS_H

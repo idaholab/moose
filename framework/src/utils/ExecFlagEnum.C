@@ -50,3 +50,33 @@ ExecFlagEnum::getDocString() const
   doc += "').";
   return doc;
 }
+
+ExecFlagEnum &
+ExecFlagEnum::operator=(const std::initializer_list<ExecFlagType> & flags)
+{
+  clear();
+  for (const ExecFlagType & flag : flags)
+    appendCurrent(flag);
+  checkDeprecated();
+  return *this;
+}
+
+ExecFlagEnum &
+ExecFlagEnum::operator=(const ExecFlagType & flag)
+{
+  clear();
+  appendCurrent(flag);
+  checkDeprecated();
+  return *this;
+}
+
+void
+ExecFlagEnum::appendCurrent(const ExecFlagType & item)
+{
+  if (find(item) == _items.end())
+    mooseError("The supplied item '",
+               item,
+               "' is not an available item for the "
+               "ExecFlagEnum object, thus it cannot be set as current.");
+  _current.push_back(item);
+}

@@ -124,31 +124,6 @@ MultiMooseEnum::operator=(const std::set<std::string> & names)
   return assign(names.begin(), names.end(), false);
 }
 
-MultiMooseEnum &
-MultiMooseEnum::operator=(const std::vector<MooseEnumItem> & items)
-{
-  setCurrentItems(items);
-  return *this;
-}
-
-MultiMooseEnum &
-MultiMooseEnum::operator=(const MooseEnumItem & item)
-{
-  setCurrentItems({item});
-  return *this;
-}
-
-void
-MultiMooseEnum::setCurrentItems(const std::vector<MooseEnumItem> & current)
-{
-  for (const auto & item : current)
-    if (find(item) == _items.end())
-      mooseError("The supplied item '",
-                 item,
-                 "' is not an available enum item for the MultiMooseEnum object.");
-  _current.assign(current.begin(), current.end());
-}
-
 void
 MultiMooseEnum::erase(const std::string & names)
 {

@@ -55,7 +55,7 @@ validParams<Output>()
   // Update the 'execute_on' input parameter for output
   ExecFlagEnum & exec_enum = params.set<ExecFlagEnum>("execute_on", true);
   exec_enum.addAvailableFlags({EXEC_FINAL, EXEC_FAILED});
-  exec_enum = std::vector<ExecFlagType>({EXEC_INITIAL, EXEC_TIMESTEP_END});
+  exec_enum = {EXEC_INITIAL, EXEC_TIMESTEP_END};
   params.setDocString("execute_on", exec_enum.getDocString());
 
   // Add ability to append to the 'execute_on' list

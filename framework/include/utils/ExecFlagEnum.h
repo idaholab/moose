@@ -30,8 +30,6 @@ class ExecFlagEnum;
 class ExecFlagEnum : public MultiMooseEnum
 {
 public:
-  // This is required to get the assignment operators to work correctly.
-  using MultiMooseEnum::operator=;
 
   ExecFlagEnum();
 
@@ -42,6 +40,15 @@ public:
    * making flags current.
    */
   void addAvailableFlags(const std::set<ExecFlagType> & flags);
+
+  ///@{
+  /**
+   * Assignment operators for setting the current flags.
+   */
+  using MultiMooseEnum::operator=; // use parent methods
+  ExecFlagEnum & operator=(const std::initializer_list<ExecFlagType> & flags);
+  ExecFlagEnum & operator=(const ExecFlagType & flags);
+  ///@}
 
   /**
    * Remove flags from being available.
@@ -57,6 +64,12 @@ public:
    * Reference the all the available items.
    */
   const std::set<ExecFlagType> & items() const { return _items; }
+
+protected:
+  /**
+   *  Append the list of current flags.
+   */
+  void appendCurrent(const ExecFlagType & current);
 };
 
 #endif

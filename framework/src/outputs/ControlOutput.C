@@ -25,8 +25,7 @@ validParams<ControlOutput>()
 {
   // Get the base class parameters
   InputParameters params = validParams<Output>();
-  params.set<ExecFlagEnum>("execute_on", true) =
-      std::vector<ExecFlagType>({EXEC_INITIAL, EXEC_TIMESTEP_BEGIN});
+  params.set<ExecFlagEnum>("execute_on", true) = {EXEC_INITIAL, EXEC_TIMESTEP_BEGIN};
   params.addParam<bool>(
       "clear_after_output", true, "Clear the active control display after each output.");
   params.addParam<bool>("show_active_objects", true, "List active MooseObjects.");

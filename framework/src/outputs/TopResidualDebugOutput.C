@@ -36,8 +36,7 @@ validParams<TopResidualDebugOutput>()
       "num_residuals", 0, "The number of top residuals to print out (0 = no output)");
 
   // By default operate on both nonlinear and linear residuals
-  params.set<ExecFlagEnum>("execute_on", true) =
-      std::vector<ExecFlagType>({EXEC_LINEAR, EXEC_NONLINEAR, EXEC_TIMESTEP_END});
+  params.set<ExecFlagEnum>("execute_on", true) = {EXEC_LINEAR, EXEC_NONLINEAR, EXEC_TIMESTEP_END};
   return params;
 }
 

@@ -24,8 +24,7 @@ validParams<Control>()
   params += validParams<SetupInterface>();
   params += validParams<FunctionInterface>();
 
-  params.set<ExecFlagEnum>("execute_on", true) =
-      std::vector<ExecFlagType>({EXEC_INITIAL, EXEC_TIMESTEP_END});
+  params.set<ExecFlagEnum>("execute_on", true) = {EXEC_INITIAL, EXEC_TIMESTEP_END};
   params.registerBase("Control");
 
   params.addParam<std::vector<std::string>>(

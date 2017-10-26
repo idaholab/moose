@@ -72,8 +72,7 @@ EulerAngle2RGBAction::act()
       params.set<UserObjectName>("euler_angle_provider") =
           getParam<UserObjectName>("euler_angle_provider");
       params.set<UserObjectName>("grain_tracker") = getParam<UserObjectName>("grain_tracker");
-      params.set<ExecFlagEnum>("execute_on") =
-          std::vector<ExecFlagType>({EXEC_INITIAL, EXEC_TIMESTEP_END});
+      params.set<ExecFlagEnum>("execute_on") = {EXEC_INITIAL, EXEC_TIMESTEP_END};
       params.set<Point>("no_grain_color") = getParam<Point>("no_grain_color");
       _problem->addAuxKernel("EulerAngleProvider2RGBAux", var_name, params);
     }

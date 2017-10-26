@@ -136,16 +136,16 @@ validParams<Console>()
 
   // Change the default behavior of 'execute_on' to included nonlinear iterations and failed
   // timesteps
-  params.set<ExecFlagEnum>("execute_on", /*quiet_mode=*/true) = std::vector<ExecFlagType>(
-      {EXEC_INITIAL, EXEC_TIMESTEP_BEGIN, EXEC_LINEAR, EXEC_NONLINEAR, EXEC_FAILED});
+  params.set<ExecFlagEnum>("execute_on", /*quiet_mode=*/true) = {
+      EXEC_INITIAL, EXEC_TIMESTEP_BEGIN, EXEC_LINEAR, EXEC_NONLINEAR, EXEC_FAILED};
 
   // By default postprocessors and scalar are only output at the end of a timestep
-  params.set<ExecFlagEnum>("execute_postprocessors_on", /*quiet_mode=*/true) =
-      "initial timestep_end";
-  params.set<ExecFlagEnum>("execute_vector_postprocessors_on", /*quiet_mode=*/true) =
-      "initial timestep_end";
-  params.set<ExecFlagEnum>("execute_scalars_on", /*quiet_mode=*/true) =
-      std::vector<ExecFlagType>({EXEC_INITIAL, EXEC_TIMESTEP_END});
+  params.set<ExecFlagEnum>("execute_postprocessors_on", /*quiet_mode=*/true) = {EXEC_INITIAL,
+                                                                                EXEC_TIMESTEP_END};
+  params.set<ExecFlagEnum>("execute_vector_postprocessors_on",
+                           /*quiet_mode=*/true) = {EXEC_INITIAL, EXEC_TIMESTEP_END};
+  params.set<ExecFlagEnum>("execute_scalars_on", /*quiet_mode=*/true) = {EXEC_INITIAL,
+                                                                         EXEC_TIMESTEP_END};
 
   return params;
 }

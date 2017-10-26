@@ -103,8 +103,6 @@ public:
   MultiMooseEnum & operator=(const std::string & names);
   MultiMooseEnum & operator=(const std::vector<std::string> & names);
   MultiMooseEnum & operator=(const std::set<std::string> & names);
-  MultiMooseEnum & operator=(const std::vector<MooseEnumItem> & items);
-  MultiMooseEnum & operator=(const MooseEnumItem & item);
   ///@}
 
   ///@{

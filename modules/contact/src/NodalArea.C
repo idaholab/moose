@@ -19,7 +19,7 @@ InputParameters
 validParams<NodalArea>()
 {
   InputParameters params = validParams<SideIntegralVariableUserObject>();
-  params.set<ExecFlagEnum>("execute_on") = std::vector<ExecFlagType>({EXEC_LINEAR});
+  params.set<ExecFlagEnum>("execute_on") = EXEC_LINEAR;
   return params;
 }
 
