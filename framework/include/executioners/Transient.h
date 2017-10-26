@@ -301,6 +301,20 @@ protected:
   NumericVector<Number> & _sln_diff;
 
   void setupTimeIntegrator();
+
+  /// Relaxation factor for Picard Iteration
+  Real _relax_factor;
+
+  /// The _time when this app solved last.
+  /// This allows a sub-app to know if this is the first
+  /// Picard iteration or not.
+  Real _prev_time;
+
+  /// The transferred variables that are going to be relaxed
+  std::vector<std::string> _relaxed_vars;
+
+  /// The DoFs associates with all of the relaxed variables
+  std::set<dof_id_type> _relaxed_dofs;
 };
 
 #endif // TRANSIENTEXECUTIONER_H
