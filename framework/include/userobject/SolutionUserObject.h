@@ -192,7 +192,7 @@ public:
   Real directValue(const Node * node, const std::string & var_name) const;
 
   /**
-   * Retrun a value from the centroid of an element
+   * Return a value from the centroid of an element
    * @param elem A pointer to the element at which a value is desired
    * @param var_name The variable from which to extract a value
    * @return The desired value for the given element and variable name
@@ -220,6 +220,12 @@ public:
     return MooseEnum("found_first=1 average=2 smallest_element_id=4 largest_element_id=8",
                      "found_first");
   }
+
+  /**
+   * Return the spatial dimension of the mesh file
+   * @return The spatial dimension of the mesh file
+   */
+  unsigned int getMeshFileDimension() const { return _mesh->spatial_dimension(); }
 
 protected:
   /**
