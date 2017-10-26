@@ -231,6 +231,7 @@
 #include "DifferencePostprocessor.h"
 #include "RelativeDifferencePostprocessor.h"
 #include "ScalePostprocessor.h"
+#include "LinearCombinationPostprocessor.h"
 #include "NumPicardIterations.h"
 #include "FunctionSideIntegral.h"
 #include "ExecutionerAttributeReporter.h"
@@ -688,6 +689,7 @@ registerObjects(Factory & factory)
   registerPostprocessor(DifferencePostprocessor);
   registerPostprocessor(RelativeDifferencePostprocessor);
   registerPostprocessor(ScalePostprocessor);
+  registerPostprocessor(LinearCombinationPostprocessor);
   registerPostprocessor(FunctionValuePostprocessor);
   registerPostprocessor(NumPicardIterations);
   registerPostprocessor(FunctionSideIntegral);
