@@ -48,6 +48,8 @@ validParams<PorousFlowActionBase>()
                                "The eigenstrain_name used in the "
                                "ComputeThermalExpansionEigenstrain.  Only needed for "
                                "thermally-coupled simulations with thermal expansion.");
+  params.addParam<bool>(
+      "use_displaced_mesh", false, "Use displaced mesh computations in mechanical kernels");
   return params;
 }
 
@@ -76,7 +78,7 @@ PorousFlowActionBase::act()
   if (all_subdomains.empty())
     mooseError("No subdomains found");
   _coord_system = _problem->getCoordSystem(*all_subdomains.begin());
-  for (auto subdomain : all_subdomains)
+  for (const auto & subdomain : all_subdomains)
     if (_problem->getCoordSystem(subdomain) != _coord_system)
       mooseError(
           "The PorousFlow Actions require all subdomains to have the same coordinate system.");

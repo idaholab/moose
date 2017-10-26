@@ -135,6 +135,7 @@ PorousFlowSinglePhaseBase::act()
             getParam<std::string>("thermal_eigenstrain_name");
       }
       params.set<unsigned>("component") = i;
+      params.set<bool>("use_displaced_mesh") = getParam<bool>("use_displaced_mesh");
       _problem->addKernel(kernel_type, kernel_name, params);
 
       if (_gravity(i) != 0)
@@ -144,6 +145,7 @@ PorousFlowSinglePhaseBase::act()
         params = _factory.getValidParams(kernel_type);
         params.set<NonlinearVariableName>("variable") = _displacements[i];
         params.set<Real>("value") = _gravity(i);
+        params.set<bool>("use_displaced_mesh") = getParam<bool>("use_displaced_mesh");
         _problem->addKernel(kernel_type, kernel_name, params);
       }
 
@@ -154,6 +156,7 @@ PorousFlowSinglePhaseBase::act()
       params.set<NonlinearVariableName>("variable") = _displacements[i];
       params.set<Real>("biot_coefficient") = _biot_coefficient;
       params.set<unsigned>("component") = i;
+      params.set<bool>("use_displaced_mesh") = getParam<bool>("use_displaced_mesh");
       _problem->addKernel(kernel_type, kernel_name, params);
     }
   }
