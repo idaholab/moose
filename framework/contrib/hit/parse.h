@@ -412,8 +412,9 @@ void merge(Node * from, Node * into);
 /// explode walks the tree converting/exploding any fields that have path separators into them into
 /// actually sections/subsections/etc. with the final path element as the field name.  For example,
 /// "foo/bar=42" becomes nodes with the structure "[foo] bar=42 []".  If nodes for sections already
-/// exist in the tree, the fields will be moved into them rather than new sections created.
-void explode(Node * n);
+/// exist in the tree, the fields will be moved into them rather than new sections created.  The
+/// returned node is the root of the exploded tree.
+Node * explode(Node * n);
 
 } // namespace hit
 
