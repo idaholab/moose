@@ -64,7 +64,12 @@ CavityPressureUserObject::getValue(const std::string & quantity) const
 {
   Real value = 0;
   if ("initial_moles" == quantity)
+  {
+    if (_n0 < 0.0)
+      mooseError("Negative number of moles calculated as an input for the cavity pressure");
+
     value = _n0;
+  }
   else if ("cavity_pressure" == quantity)
     value = _cavity_pressure;
   else
