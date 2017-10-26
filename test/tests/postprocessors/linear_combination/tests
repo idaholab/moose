@@ -1,0 +1,7 @@
+[Tests]
+  [./linear_combination]
+    type = 'CSVDiff'
+    input = 'linear_combination.i'
+    csvdiff = 'linear_combination_out.csv'
+  [../]
+[]
