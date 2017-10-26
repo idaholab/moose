@@ -38,4 +38,10 @@
     exodiff = 'cavity_pressure_rz_out.e'
     delete_output_before_running = false
   [../]
+
+  [./rz_negative_moles_check]
+    type = RunException
+    input = 'cavity_pressure_negative_volume.i'
+    expect_err = 'Negative number of moles calculated as an input for the cavity pressure'
+  [../]
 []
