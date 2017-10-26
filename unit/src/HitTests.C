@@ -253,3 +253,76 @@ TEST(ExpandWalkerTests, All)
              << strkind(f->kind()) << "', want '" << strkind(test.kind) << "'\n";
   }
 }
+
+TEST(HitTests, RenderParentlessSection)
+{
+  auto n = new hit::Section("mypath");
+  try
+  {
+    std::string got = n->render();
+    EXPECT_EQ("[mypath]\n[]", got);
+  }
+  catch (std::exception & err)
+  {
+    FAIL() << "failed with unexpected error: " << err.what();
+  }
+}
+
+TEST(HitTests, RenderSubsection)
+{
+  auto root = hit::parse("TESTCASE", "[hello][world]foo=42[][]");
+  auto n = root->find("hello/world");
+  try
+  {
+    n->render();
+    std::string got = n->render();
+    EXPECT_EQ("[world]\n  foo = 42\n[]", n->render());
+  }
+  catch (std::exception & err)
+  {
+    FAIL() << "failed with unexpected error: " << err.what();
+  }
+}
+
+struct RenderCase
+{
+  std::string name;
+  std::string input;
+  std::string output;
+};
+
+TEST(HitTests, RenderCases)
+{
+  RenderCase cases[] = {
+      {"root level fields", "foo=bar boo=far", "foo = bar\nboo = far"},
+      {"single section", "[foo]bar=baz[../]", "[foo]\n  bar = baz\n[]"},
+      {"remove leading newline", "\n[foo]bar=baz[../]", "[foo]\n  bar = baz\n[]"},
+      {"preserve consecutive newline", "[foo]\n\nbar=baz[../]", "[foo]\n\n  bar = baz\n[]"},
+  };
+
+  for (size_t i = 0; i < sizeof(cases) / sizeof(RenderCase); i++)
+  {
+    auto test = cases[i];
+    hit::Node * root = nullptr;
+    std::string got;
+    try
+    {
+      root = hit::parse("TESTCASE", test.input);
+      got = root->render();
+    }
+    catch (std::exception & err)
+    {
+      FAIL() << "case " << i + 1 << " FAIL (" << test.name << "): unexpected error: " << err.what();
+    }
+    EXPECT_EQ(test.output, got) << "case " << i + 1 << " FAIL";
+  }
+}
+
+TEST(HitTests, MergeTree)
+{
+  auto root1 = hit::parse("TESTCASE", "[foo]bar=42[]");
+  auto root2 = hit::parse("TESTCASE", "foo/baz/boo=42");
+  hit::explode(root2);
+  hit::merge(root2, root1);
+  EXPECT_EQ("[foo]\n  bar = 42\n  [baz]\n    boo = 42\n  []\n[]", root1->render());
+}
