@@ -375,17 +375,19 @@ std::string
 Section::render(int indent)
 {
   std::string s;
-  if (root() != this)
+  if (path() != "")
     s = "\n" + strRepeat(indentString, indent) + "[" + _path + "]";
-  else
-    indent--; // don't indent the root section contents extra
 
   for (auto child : children())
-    s += child->render(indent + 1);
+    if (path() == "")
+      s += child->render(indent);
+    else
+      s += child->render(indent + 1);
 
-  if (root() != this)
+  if (path() != "")
     s += "\n" + strRepeat(indentString, indent) + "[]";
-  else
+
+  if (indent == 0 && s[0] == '\n')
     s = s.substr(1);
   return s;
 }
