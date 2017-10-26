@@ -39,7 +39,7 @@ public:
                         Real & drho_dT,
                         Real & drho_dx) const = 0;
   /// Dynamic viscosity (Pa s)
-  virtual Real mu(Real density, Real temperature, Real xmass) const = 0;
+  virtual Real mu_from_rho_T(Real density, Real temperature, Real xmass) const = 0;
   /// Dynamic viscosity and its derivatives wrt pressure, temperature and mass fraction
   virtual void mu_drhoTx(Real density,
                          Real temperature,
@@ -72,7 +72,7 @@ public:
                       Real & de_dT,
                       Real & de_dx) const = 0;
   /// Thermal conductivity (W/m/K)
-  virtual Real k(Real density, Real temperature, Real xmass) const = 0;
+  virtual Real k_from_rho_T(Real density, Real temperature, Real xmass) const = 0;
   /// Get UserObject for specified component
   virtual const SinglePhaseFluidPropertiesPT & getComponent(unsigned int component) const = 0;
 

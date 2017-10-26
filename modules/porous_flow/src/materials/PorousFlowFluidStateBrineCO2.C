@@ -150,7 +150,7 @@ PorousFlowFluidStateBrineCO2::thermophysicalProperties()
     dgas_density_dz = 0.0;
 
     Real co2_viscosity, dco2_viscosity_drho, dco2_viscosity_dT;
-    _co2_fp.mu_drhoT(
+    _co2_fp.mu_drhoT_from_rho_T(
         co2_density, Tk, dco2_density_dT, co2_viscosity, dco2_viscosity_drho, dco2_viscosity_dT);
 
     // Assume that the viscosity of the gas phase is a weighted sum of the

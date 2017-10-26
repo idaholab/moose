@@ -157,6 +157,11 @@ public:
    */
   virtual Real cv(Real pressure, Real temperature) const override;
 
+  virtual Real mu(Real pressure, Real temperature) const override;
+
+  virtual void
+  mu_dpT(Real pressure, Real temperature, Real & mu, Real & dmu_dp, Real & dmu_dT) const override;
+
   /**
    * NaCl viscosity
    *
@@ -164,7 +169,7 @@ public:
    * @param temperature fluid temperature (K)
    * @return viscosity (Pa.s)
    */
-  virtual Real mu(Real density, Real temperature) const override;
+  virtual Real mu_from_rho_T(Real density, Real temperature) const override;
 
   /**
    * NaCl viscosity and derivatives wrt density and temperature
@@ -175,12 +180,18 @@ public:
    * @param[out] dmu_drho derivative of viscosity wrt density
    * @param[out] dmu_dT derivative of viscosity wrt temperature
    */
-  virtual void mu_drhoT(Real density,
-                        Real temperature,
-                        Real ddensity_dT,
-                        Real & mu,
-                        Real & dmu_drho,
-                        Real & dmu_dT) const override;
+  virtual void mu_drhoT_from_rho_T(Real density,
+                                   Real temperature,
+                                   Real ddensity_dT,
+                                   Real & mu,
+                                   Real & dmu_drho,
+                                   Real & dmu_dT) const override;
+
+  /// Thermal conductivity (W/m/K)
+  virtual Real k(Real pressure, Real temperature) const override;
+  /// Thermal conductivity and its derivatives wrt pressure and temperature
+  virtual void
+  k_dpT(Real pressure, Real temperature, Real & k, Real & dk_dp, Real & dk_dT) const override;
 
   /**
    * Thermal conductivity
@@ -194,7 +205,7 @@ public:
    * @param temperature fluid temperature (K)
    * @return k (W/m/K)
    */
-  virtual Real k(Real density, Real temperature) const override;
+  virtual Real k_from_rho_T(Real density, Real temperature) const override;
 
   /**
    * Specific entropy as a function of pressure and temperature

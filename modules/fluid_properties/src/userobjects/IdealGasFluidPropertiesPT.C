@@ -69,7 +69,21 @@ IdealGasFluidPropertiesPT::c(Real /*pressure*/, Real temperature) const
   return std::sqrt(_cp * _R * temperature / (_cv * _molar_mass));
 }
 
-Real IdealGasFluidPropertiesPT::k(Real /*density*/, Real /*temperature*/) const
+Real IdealGasFluidPropertiesPT::k(Real /*pressure*/, Real /*temperature*/) const
+{
+  return _thermal_conductivity;
+}
+
+void
+IdealGasFluidPropertiesPT::k_dpT(
+    Real pressure, Real temperature, Real & k, Real & dk_dp, Real & dk_dT) const
+{
+  k = this->k(pressure, temperature);
+  dk_dp = 0;
+  dk_dT = 0;
+}
+
+Real IdealGasFluidPropertiesPT::k_from_rho_T(Real /*density*/, Real /*temperature*/) const
 {
   return _thermal_conductivity;
 }
@@ -132,20 +146,34 @@ IdealGasFluidPropertiesPT::rho_e_dpT(Real pressure,
   de_dT = denergy_dT;
 }
 
-Real IdealGasFluidPropertiesPT::mu(Real /*density*/, Real /*temperature*/) const
+Real IdealGasFluidPropertiesPT::mu(Real /*pressure*/, Real /*temperature*/) const
 {
   return _viscosity;
 }
 
 void
-IdealGasFluidPropertiesPT::mu_drhoT(Real density,
-                                    Real temperature,
-                                    Real /*ddensity_dT*/,
-                                    Real & mu,
-                                    Real & dmu_drho,
-                                    Real & dmu_dT) const
+IdealGasFluidPropertiesPT::mu_dpT(
+    Real pressure, Real temperature, Real & mu, Real & dmu_dp, Real & dmu_dT) const
 {
-  mu = this->mu(density, temperature);
+  mu = this->mu(pressure, temperature);
+  dmu_dp = 0.0;
+  dmu_dT = 0.0;
+}
+
+Real IdealGasFluidPropertiesPT::mu_from_rho_T(Real /*density*/, Real /*temperature*/) const
+{
+  return _viscosity;
+}
+
+void
+IdealGasFluidPropertiesPT::mu_drhoT_from_rho_T(Real density,
+                                               Real temperature,
+                                               Real /*ddensity_dT*/,
+                                               Real & mu,
+                                               Real & dmu_drho,
+                                               Real & dmu_dT) const
+{
+  mu = this->mu_from_rho_T(density, temperature);
   dmu_drho = 0.0;
   dmu_dT = 0.0;
 }
