@@ -192,7 +192,7 @@ SolutionUserObject::readXda()
 
   // This should never occur, just in case produce an error
   else
-    mooseError("Faild to determine proper read method for XDA/XDR equation system file: ",
+    mooseError("Failed to determine proper read method for XDA/XDR equation system file: ",
                _es_file);
 
   // Update and store the EquationSystems name locally

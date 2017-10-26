@@ -229,6 +229,7 @@
 #include "NodalExtremeValue.h"
 #include "ElementExtremeValue.h"
 #include "DifferencePostprocessor.h"
+#include "RelativeDifferencePostprocessor.h"
 #include "ScalePostprocessor.h"
 #include "NumPicardIterations.h"
 #include "FunctionSideIntegral.h"
@@ -685,6 +686,7 @@ registerObjects(Factory & factory)
   registerPostprocessor(NodalExtremeValue);
   registerPostprocessor(ElementExtremeValue);
   registerPostprocessor(DifferencePostprocessor);
+  registerPostprocessor(RelativeDifferencePostprocessor);
   registerPostprocessor(ScalePostprocessor);
   registerPostprocessor(FunctionValuePostprocessor);
   registerPostprocessor(NumPicardIterations);
