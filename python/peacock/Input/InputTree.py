@@ -22,6 +22,7 @@ class InputTree(object):
         self._copyDefaultTree()
         self.root = None
         self.path_map = {}
+        self.input_has_errors = False
         if self.app_info.valid():
             self._copyDefaultTree()
 
@@ -65,29 +66,54 @@ class InputTree(object):
 
         return '\n'.join(comments)
 
+    def setInputFileData(self, input_str, filename="String"):
+        """
+        Set a new input file based on a existing string
+        Input:
+            input_str[str]: The input file data to parse
+        Return:
+            bool: If it was a valid input file
+        """
+        try:
+            new_input_file = InputFile()
+            new_input_file.readInputData(input_str, filename)
+            return self._setInputFile(new_input_file)
+        except Exception as e:
+            mooseutils.mooseWarning("setInputFileData exception: %s" % e)
+            return False
+
     def setInputFile(self, input_filename):
         """
-        The input file has changed.
+        Set a new input file
         Input:
             input_filename[str]: The name of the input file
         Return:
             bool: If it was a valid input file
         """
         try:
-            # if the user passes in a bad input file, then leave
-            # things untouched
             new_input_file = InputFile(input_filename)
-            if not new_input_file.root_node:
-                return False
-            self.input_file = new_input_file
-        except Exception:
+            return self._setInputFile(new_input_file)
+        except Exception as e:
+            mooseutils.mooseWarning("setInputFile exception: %s" % e)
             return False
 
-        self.input_filename = input_filename
+    def _setInputFile(self, input_file):
+        """
+        Copies the nodes of an input file into the tree
+        Input:
+            input_file[InputFile]: Input file to copy
+        Return:
+            bool: True if successfull
+        """
+        self.input_has_errors = False
+        if not input_file.root_node:
+            return False
+        self.input_file = input_file
+        self.input_filename = input_file.filename
+
         if self.app_info.valid():
             self._copyDefaultTree()
             self.root.comments = self._getComments(self.input_file.root_node)
-
             active = self._readParameters(self.input_file.root_node, "/")
             for root_node in self.input_file.root_node.children(node_type=hit.NodeType.Section):
                 self._addInputFileNode(root_node, root_node.path() in active)
@@ -154,6 +180,7 @@ class InputTree(object):
             entry = self.addUserBlock(parent_path, name)
             if not entry:
                 mooseutils.mooseWarning("Could not create %s" % path)
+                self.input_has_errors = True
                 return
 
         entry.comments = self._getComments(input_node)
@@ -181,6 +208,8 @@ class InputTree(object):
         Return:
             str of the entire input file.
         """
+        if not self.root:
+            return ""
         return InputTreeWriter.inputTreeToString(self.root)
 
     def addUserBlock(self, parent, name):
@@ -262,6 +291,30 @@ class InputTree(object):
         pinfo = self.path_map.get(path)
         if pinfo:
             pinfo.parent.moveChildBlock(pinfo.name, new_index)
+
+    def incompatibleChanges(self, app_info):
+        """
+        Tries to detect if there are any incompatible changes
+        in the syntax with the current working input file.
+        Input:
+            app_info[ExecutableInfo]: The executable info to compare against
+        Return:
+            bool: True if errors occurred loading the current input file with the new syntax
+        """
+
+        if not self.app_info.json_data:
+            return False
+        if self.app_info.json_data and not app_info.json_data:
+            return True
+
+        try:
+            old_input = self.getInputFileString()
+            new_tree = InputTree(app_info)
+            read_data = new_tree.setInputFileData(old_input)
+            return not read_data or new_tree.input_has_errors
+        except Exception as e:
+            mooseutils.mooseWarning("Caught exception: %s" % e)
+            return True
 
 if __name__ == '__main__':
     import sys

@@ -60,8 +60,11 @@ class InputFile(object):
 
         with open(filename, 'r') as f:
             data = f.read()
+        self.readInputData(data, filename)
 
+    def readInputData(self, data, filename):
         try:
+            self.filename = os.path.abspath(filename)
             root = hit.parse(os.path.abspath(filename), data)
             hit.explode(root)
             w = DupWalker(os.path.abspath(filename))
