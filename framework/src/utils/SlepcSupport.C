@@ -522,6 +522,32 @@ mooseSlepcEigenFormFunctionB(SNES snes, Vec x, Vec r, void * ctx)
   moosePetscSNESFormFunction(snes, x, r, ctx, Moose::KT_EIGEN);
   PetscFunctionReturn(0);
 }
+
+PetscErrorCode
+mooseSlepcEigenFormFunctionAB(SNES /*snes*/, Vec x, Vec Ax, Vec Bx, void * ctx)
+{
+  PetscFunctionBegin;
+
+  EigenProblem * eigen_problem = static_cast<EigenProblem *>(ctx);
+  NonlinearSystemBase & nl = eigen_problem->getNonlinearSystemBase();
+  System & sys = nl.system();
+
+  PetscVector<Number> X_global(x, sys.comm()), AX(Ax, sys.comm()), BX(Bx, sys.comm());
+
+  // update local solution
+  X_global.localize(*sys.current_local_solution.get());
+
+  AX.zero();
+  BX.zero();
+
+  eigen_problem->computeResidualABType(*sys.current_local_solution.get(), AX, BX, Moose::KT_ALL);
+
+  AX.close();
+  BX.close();
+
+  PetscFunctionReturn(0);
+}
+
 } // namespace SlepcSupport
 } // namespace moose
 

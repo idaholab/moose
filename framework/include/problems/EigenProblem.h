@@ -60,6 +60,11 @@ public:
                            NumericVector<Number> & residual,
                            Moose::KernelType type) override;
 
+  void computeResidualABType(const NumericVector<Number> & soln,
+                             NumericVector<Number> & Ax,
+                             NumericVector<Number> & Bx,
+                             Moose::KernelType type);
+
   virtual void checkProblemIntegrity() override;
 #if LIBMESH_HAVE_SLEPC
   void setEigenproblemType(Moose::EigenProblemType eigen_problem_type);

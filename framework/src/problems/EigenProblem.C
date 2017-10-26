@@ -187,3 +187,15 @@ EigenProblem::computeResidualType(const NumericVector<Number> & soln,
       _is_residual_initialed = true;
   }
 }
+
+void
+EigenProblem::computeResidualABType(const NumericVector<Number> & soln,
+                                    NumericVector<Number> & Ax,
+                                    NumericVector<Number> & Bx,
+                                    Moose::KernelType type)
+{
+  FEProblemBase::computeResidualType(soln, Ax, type);
+#if LIBMESH_HAVE_SLEPC
+  _nl_eigen->computeResidualClose(Ax, Bx);
+#endif
+}

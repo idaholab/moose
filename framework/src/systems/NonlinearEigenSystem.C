@@ -106,6 +106,12 @@ NonlinearEigenSystem::NonlinearEigenSystem(EigenProblem & eigen_problem, const s
     _n_eigen_pairs_required(eigen_problem.getNEigenPairsRequired())
 {
   sys().attach_assemble_function(Moose::assemble_matrix);
+
+  /*_Ax_tag = eigen_problem.addVectorTag("Ax_tag");
+  addVector(_Ax_tag, false, GHOSTED);
+
+  _Bx_tag = eigen_problem.addVectorTag("Bx_tag");
+  addVector(_Bx_tag, false, GHOSTED); */
 }
 
 void
@@ -222,6 +228,13 @@ NonlinearEigenSystem::getNthConvergedEigenvalue(dof_id_type n)
   if (n >= n_converged_eigenvalues)
     mooseError(n, " not in [0, ", n_converged_eigenvalues, ")");
   return _transient_sys.get_eigenpair(n);
+}
+
+void
+NonlinearEigenSystem::computeResidualClose(NumericVector<Number> & Ax, NumericVector<Number> & Bx)
+{
+  Ax = getVector(this->_Ax_tag);
+  Bx = getVector(this->_Bx_tag);
 }
 
 #else
