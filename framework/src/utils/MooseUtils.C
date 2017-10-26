@@ -576,13 +576,13 @@ ExecFlagEnum
 getDefaultExecFlagEnum(const std::initializer_list<ExecFlagType> & current)
 {
   ExecFlagEnum exec_enum = ExecFlagEnum();
-  exec_enum.addAvailableFlags({EXEC_NONE,
-                               EXEC_INITIAL,
-                               EXEC_LINEAR,
-                               EXEC_NONLINEAR,
-                               EXEC_TIMESTEP_END,
-                               EXEC_TIMESTEP_BEGIN,
-                               EXEC_CUSTOM});
+  exec_enum.addAvailableFlags(EXEC_NONE,
+                              EXEC_INITIAL,
+                              EXEC_LINEAR,
+                              EXEC_NONLINEAR,
+                              EXEC_TIMESTEP_END,
+                              EXEC_TIMESTEP_BEGIN,
+                              EXEC_CUSTOM);
   exec_enum = current;
   return exec_enum;
 }

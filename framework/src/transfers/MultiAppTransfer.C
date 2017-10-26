@@ -38,7 +38,7 @@ validParams<MultiAppTransfer>()
   // MultiAppTransfers by default will execute with their associated MultiApp. These flags will be
   // added by FEProblemBase when the transfer is added.
   ExecFlagEnum & exec_enum = params.set<ExecFlagEnum>("execute_on", true);
-  exec_enum.addAvailableFlags({EXEC_SAME_AS_MULTIAPP});
+  exec_enum.addAvailableFlags(EXEC_SAME_AS_MULTIAPP);
   exec_enum = EXEC_SAME_AS_MULTIAPP;
   params.setDocString("execute_on", exec_enum.getDocString());
 

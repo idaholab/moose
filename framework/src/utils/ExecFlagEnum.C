@@ -17,26 +17,33 @@
 
 ExecFlagEnum::ExecFlagEnum() : MultiMooseEnum() {}
 
+/*
 void
-ExecFlagEnum::addAvailableFlags(const std::set<ExecFlagType> & flags)
+ExecFlagEnum::addAvailableFlags(const std::initializer_list<ExecFlagType> & flags)
 {
   for (const ExecFlagType & flag : flags)
     addEnumerationName(flag);
 }
+*/
 
 void
-ExecFlagEnum::removeAvailableFlags(const std::set<ExecFlagType> & flags)
+ExecFlagEnum::addAvailableFlags(const ExecFlagType & flag)
 {
-  for (const auto & item : flags)
-    if (find(item) == _items.end())
-      mooseError("The supplied item '",
-                 item,
-                 "' is not an available enum item for the "
-                 "MultiMooseEnum object, thus it cannot be removed.");
-    else if (contains(item))
-      mooseError("The supplied item '", item, "' is a selected item, thus it can not be removed.");
+  addEnumerationName(flag);
+}
 
-  _items.erase(flags.begin(), flags.end());
+void
+ExecFlagEnum::removeAvailableFlags(const ExecFlagType & flag)
+{
+  if (find(flag) == _items.end())
+    mooseError("The supplied item '",
+               flag,
+               "' is not an available enum item for the "
+               "MultiMooseEnum object, thus it cannot be removed.");
+  else if (contains(flag))
+    mooseError("The supplied item '", flag, "' is a selected item, thus it can not be removed.");
+
+  _items.erase(flag);
 }
 
 std::string

@@ -30,16 +30,21 @@ class ExecFlagEnum;
 class ExecFlagEnum : public MultiMooseEnum
 {
 public:
-
   ExecFlagEnum();
 
+  ///@{
   /**
    * Add additional execute_on flags to the list of possible flags.
    *
-   * This does not set the supplied, the MultiMooseEnum::setCurrent() method should be used for
-   * making flags current.
+   * Use a recursive variadic template function to allow for an arbitrary
+   * number arguments:
+   *     addAvaiableFlags(EXEC_INITIAL);
+   *     addAvaiableFlags(EXEC_INITIAL, EXEC_TIMESTEP_END);
    */
-  void addAvailableFlags(const std::set<ExecFlagType> & flags);
+  template <typename... Args>
+  void addAvailableFlags(const ExecFlagType & flag, Args... flags);
+  void addAvailableFlags(const ExecFlagType & flag);
+  ///@}
 
   ///@{
   /**
@@ -50,10 +55,14 @@ public:
   ExecFlagEnum & operator=(const ExecFlagType & flags);
   ///@}
 
+  ///@{
   /**
    * Remove flags from being available.
    */
-  void removeAvailableFlags(const std::set<ExecFlagType> & flags);
+  template <typename... Args>
+  void removeAvailableFlags(const ExecFlagType & flag, Args... flags);
+  void removeAvailableFlags(const ExecFlagType & flag);
+  ///@}
 
   /**
    * Generate a documentation string for the "execute_on" parameter.
@@ -69,7 +78,23 @@ protected:
   /**
    *  Append the list of current flags.
    */
-  void appendCurrent(const ExecFlagType & current);
+  void appendCurrent(const ExecFlagType & item);
 };
+
+template <typename... Args>
+void
+ExecFlagEnum::addAvailableFlags(const ExecFlagType & flag, Args... flags)
+{
+  addAvailableFlags(flag);
+  addAvailableFlags(flags...);
+}
+
+template <typename... Args>
+void
+ExecFlagEnum::removeAvailableFlags(const ExecFlagType & flag, Args... flags)
+{
+  removeAvailableFlags(flag);
+  removeAvailableFlags(flags...);
+}
 
 #endif

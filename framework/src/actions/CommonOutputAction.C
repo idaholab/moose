@@ -100,7 +100,7 @@ validParams<CommonOutputAction>()
 
   // Add the 'execute_on' input parameter
   ExecFlagEnum exec_enum = MooseUtils::getDefaultExecFlagEnum({EXEC_INITIAL, EXEC_TIMESTEP_END});
-  exec_enum.addAvailableFlags({EXEC_FINAL, EXEC_FAILED});
+  exec_enum.addAvailableFlags(EXEC_FINAL, EXEC_FAILED);
   params.addParam<ExecFlagEnum>("execute_on", exec_enum, exec_enum.getDocString());
 
   // Add special Console flags
