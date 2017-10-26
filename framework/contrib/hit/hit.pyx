@@ -178,7 +178,7 @@ cdef class Node:
             child.walk(walker, node_type);
 
     def clone(self):
-        return _initpynode(self._cnode.clone(), self._own)
+        return _initpynode(self._cnode.clone(), own=self._own)
     def root(self):
         return _initpynode(self._cnode.root())
     def parent(self):
@@ -205,7 +205,8 @@ def parse(fname, input):
     return _initpynode(node, own=True)
 
 cpdef explode(Node n):
-    chit.explode(n._cnode)
+    n._cnode = chit.explode(n._cnode)
+    return n
 
 cpdef merge(Node src, Node dst):
     chit.merge(src._cnode, dst._cnode)

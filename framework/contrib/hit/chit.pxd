@@ -41,8 +41,8 @@ cdef extern from "parse.h" namespace "hit":
         Node * find(const string & path)
         #template <typename T> T param(std::string path = "")
 
-    Node* parse(string fname, string input) except +
-    void explode(Node * n) except +
+    Node * parse(string fname, string input) except +
+    Node * explode(Node * n) except +
     void merge(Node * src, Node * dst) except +
 
 cdef extern from "parse.h" namespace "hit::Field":

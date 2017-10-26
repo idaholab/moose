@@ -842,7 +842,7 @@ merge(Node * from, Node * into)
   from->walk(&sw, NodeType::Section);
 }
 
-void
+Node *
 explode(Node * n)
 {
   if (n->type() == NodeType::Field || n->type() == NodeType::Section)
@@ -852,7 +852,9 @@ explode(Node * n)
     {
       auto prefix = n->path().substr(0, pos);
       auto postfix = n->path().substr(pos + 1, n->path().size() - pos - 1);
-      auto existing = n->parent()->find(prefix);
+      hit::Node * existing = nullptr;
+      if (n->parent())
+        existing = n->parent()->find(prefix);
 
       Node * newnode = nullptr;
       if (n->type() == NodeType::Field)
@@ -872,17 +874,19 @@ explode(Node * n)
       else
       {
         auto newsec = new Section(prefix);
-        n->parent()->addChild(newsec);
+        if (n->parent())
+          n->parent()->addChild(newsec);
         newsec->addChild(newnode);
       }
       explode(newnode);
       delete n;
-      return;
+      return newnode->root();
     }
   }
 
   for (auto child : n->children())
     explode(child);
+  return n->root();
 }
 
 #define EOF TMPEOF
