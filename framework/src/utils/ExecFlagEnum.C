@@ -62,9 +62,7 @@ ExecFlagEnum &
 ExecFlagEnum::operator=(const std::initializer_list<ExecFlagType> & flags)
 {
   clear();
-  for (const ExecFlagType & flag : flags)
-    appendCurrent(flag);
-  checkDeprecated();
+  (*this) += flags;
   return *this;
 }
 
@@ -72,6 +70,22 @@ ExecFlagEnum &
 ExecFlagEnum::operator=(const ExecFlagType & flag)
 {
   clear();
+  (*this) += flag;
+  return *this;
+}
+
+ExecFlagEnum &
+ExecFlagEnum::operator+=(const std::initializer_list<ExecFlagType> & flags)
+{
+  for (const ExecFlagType & flag : flags)
+    appendCurrent(flag);
+  checkDeprecated();
+  return *this;
+}
+
+ExecFlagEnum &
+ExecFlagEnum::operator+=(const ExecFlagType & flag)
+{
   appendCurrent(flag);
   checkDeprecated();
   return *this;

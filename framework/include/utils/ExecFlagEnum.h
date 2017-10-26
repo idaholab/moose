@@ -53,6 +53,8 @@ public:
   using MultiMooseEnum::operator=; // use parent methods
   ExecFlagEnum & operator=(const std::initializer_list<ExecFlagType> & flags);
   ExecFlagEnum & operator=(const ExecFlagType & flags);
+  ExecFlagEnum & operator+=(const std::initializer_list<ExecFlagType> & flags);
+  ExecFlagEnum & operator+=(const ExecFlagType & flags);
   ///@}
 
   ///@{

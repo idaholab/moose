@@ -284,6 +284,22 @@ TEST(MultiMooseEnum, testExecuteOn)
             "The list of flag(s) indicating when this object should be executed, the "
             "available options include 'NONE', 'INITIAL', 'LINEAR', 'NONLINEAR', 'TIMESTEP_END', "
             "'TIMESTEP_BEGIN', 'FINAL', 'CUSTOM').");
+
+  // Tests with ExecFlagType assignment operators
+  exec_enum = EXEC_FINAL;
+  EXPECT_TRUE(exec_enum.contains(EXEC_FINAL));
+
+  exec_enum = {EXEC_FINAL, EXEC_LINEAR};
+  EXPECT_TRUE(exec_enum.contains(EXEC_LINEAR));
+
+  exec_enum += EXEC_CUSTOM;
+  EXPECT_TRUE(exec_enum.contains(EXEC_LINEAR));
+  EXPECT_TRUE(exec_enum.contains(EXEC_CUSTOM));
+
+  exec_enum += {EXEC_TIMESTEP_END, EXEC_TIMESTEP_BEGIN};
+  EXPECT_TRUE(exec_enum.contains(EXEC_CUSTOM));
+  EXPECT_TRUE(exec_enum.contains(EXEC_TIMESTEP_END));
+  EXPECT_TRUE(exec_enum.contains(EXEC_TIMESTEP_BEGIN));
 }
 
 TEST(MooseEnum, compareCurrent)
