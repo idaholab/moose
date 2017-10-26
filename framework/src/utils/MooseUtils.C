@@ -104,14 +104,6 @@ trim(const std::string & str, const std::string & white_space)
   return str.substr(begin, end - begin + 1);
 }
 
-std::string
-join(const std::vector<std::string> & values, const std::string & sep)
-{
-  std::ostringstream oss;
-  std::copy(values.begin(), values.end(), infix_ostream_iterator<std::string>(oss, sep.c_str()));
-  return oss.str();
-}
-
 bool
 pathContains(const std::string & expression,
              const std::string & string_to_find,

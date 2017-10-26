@@ -30,13 +30,6 @@ namespace libMesh
 class Parameters;
 }
 
-namespace MooseUtils
-{
-MultiMooseEnum createExecuteOnEnum(const std::set<ExecFlagType> &,
-                                   const std::set<ExecFlagType> &,
-                                   const std::set<ExecFlagType> &);
-}
-
 typedef std::vector<MooseEnumItem>::const_iterator MooseEnumIterator;
 
 /**

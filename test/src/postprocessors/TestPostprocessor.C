@@ -26,7 +26,7 @@ validParams<TestPostprocessor>()
   params.addParam<PostprocessorName>("report_name",
                                      "The name of the postprocessor value to report");
   ExecFlagEnum & exec = params.set<ExecFlagEnum>("execute_on");
-  exec.addAvailableFlags({EXEC_JUST_GO});
+  exec.addAvailableFlags(EXEC_JUST_GO);
   params.setDocString("execute_on", exec.getDocString());
   return params;
 }
@@ -64,7 +64,7 @@ TestPostprocessor::getValue()
   else if (_test_type == "custom_execute_on")
   {
     _console << "Flag Name: " << EXEC_JUST_GO << std::endl;
-    return _execute_count++;
+    return ++_execute_count;
   }
   // This should not be attainable
   else

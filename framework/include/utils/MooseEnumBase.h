@@ -110,7 +110,7 @@ protected:
   void addEnumerationNames(const std::string & names);
   void addEnumerationName(const std::string & raw_name);
   void addEnumerationName(const std::string & name, const int & value);
-  void addEnumerationName(const MooseEnumItem & item);
+  void addEnumerationItem(const MooseEnumItem & item);
   ///@}
 
   /**

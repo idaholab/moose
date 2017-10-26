@@ -60,11 +60,6 @@ void escape(std::string & str);
 std::string trim(const std::string & str, const std::string & white_space = " \t\n\v\f\r");
 
 /**
- * Python like join method.
- */
-std::string join(const std::vector<std::string> & values, const std::string & sep = ", ");
-
-/**
  * This function tokenizes a path and checks to see if it contains the string to look for
  */
 bool pathContains(const std::string & expression,

@@ -23,6 +23,7 @@
 #include <limits>
 #include <string>
 #include <iostream>
+#include <cstdlib>
 
 const int MooseEnumBase::INVALID_ID = std::numeric_limits<int>::min();
 
@@ -97,7 +98,7 @@ MooseEnumBase::addEnumerationName(const std::string & raw_name)
   // strtol allows for proper conversions of both int and hex strings
   int value;
   if (name_value.size() == 2)
-    value = strtol(name_value[1].c_str(), NULL, 0);
+    value = std::strtol(name_value[1].c_str(), NULL, 0);
   else
   {
     value = -1; // Use -1 so if no values exist the first will be zero
@@ -111,11 +112,11 @@ MooseEnumBase::addEnumerationName(const std::string & raw_name)
 void
 MooseEnumBase::addEnumerationName(const std::string & name, const int & value)
 {
-  addEnumerationName(MooseEnumItem(name, value));
+  addEnumerationItem(MooseEnumItem(name, value));
 }
 
 void
-MooseEnumBase::addEnumerationName(const MooseEnumItem & item)
+MooseEnumBase::addEnumerationItem(const MooseEnumItem & item)
 {
   if (find(item.id()) != _items.end())
     mooseError("The supplied id ",

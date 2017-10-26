@@ -29,7 +29,7 @@ ExecFlagEnum::addAvailableFlags(const std::initializer_list<ExecFlagType> & flag
 void
 ExecFlagEnum::addAvailableFlags(const ExecFlagType & flag)
 {
-  addEnumerationName(flag);
+  addEnumerationItem(flag);
 }
 
 void
