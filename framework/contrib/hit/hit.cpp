@@ -4808,7 +4808,7 @@ static PyObject *__pyx_pf_3hit_4Node_34walk(struct __pyx_obj_3hit_Node *__pyx_v_
  *             child.walk(walker, node_type);
  * 
  *     def clone(self):             # <<<<<<<<<<<<<<
- *         return _initpynode(self._cnode.clone(), self._own)
+ *         return _initpynode(self._cnode.clone(), own=self._own)
  *     def root(self):
  */
 
@@ -4836,7 +4836,7 @@ static PyObject *__pyx_pf_3hit_4Node_36clone(struct __pyx_obj_3hit_Node *__pyx_v
   /* "hit.pyx":181
  * 
  *     def clone(self):
- *         return _initpynode(self._cnode.clone(), self._own)             # <<<<<<<<<<<<<<
+ *         return _initpynode(self._cnode.clone(), own=self._own)             # <<<<<<<<<<<<<<
  *     def root(self):
  *         return _initpynode(self._cnode.root())
  */
@@ -4856,7 +4856,7 @@ static PyObject *__pyx_pf_3hit_4Node_36clone(struct __pyx_obj_3hit_Node *__pyx_v
  *             child.walk(walker, node_type);
  * 
  *     def clone(self):             # <<<<<<<<<<<<<<
- *         return _initpynode(self._cnode.clone(), self._own)
+ *         return _initpynode(self._cnode.clone(), own=self._own)
  *     def root(self):
  */
 
@@ -4874,7 +4874,7 @@ static PyObject *__pyx_pf_3hit_4Node_36clone(struct __pyx_obj_3hit_Node *__pyx_v
 
 /* "hit.pyx":182
  *     def clone(self):
- *         return _initpynode(self._cnode.clone(), self._own)
+ *         return _initpynode(self._cnode.clone(), own=self._own)
  *     def root(self):             # <<<<<<<<<<<<<<
  *         return _initpynode(self._cnode.root())
  *     def parent(self):
@@ -4900,7 +4900,7 @@ static PyObject *__pyx_pf_3hit_4Node_38root(struct __pyx_obj_3hit_Node *__pyx_v_
   __Pyx_RefNannySetupContext("root", 0);
 
   /* "hit.pyx":183
- *         return _initpynode(self._cnode.clone(), self._own)
+ *         return _initpynode(self._cnode.clone(), own=self._own)
  *     def root(self):
  *         return _initpynode(self._cnode.root())             # <<<<<<<<<<<<<<
  *     def parent(self):
@@ -4915,7 +4915,7 @@ static PyObject *__pyx_pf_3hit_4Node_38root(struct __pyx_obj_3hit_Node *__pyx_v_
 
   /* "hit.pyx":182
  *     def clone(self):
- *         return _initpynode(self._cnode.clone(), self._own)
+ *         return _initpynode(self._cnode.clone(), own=self._own)
  *     def root(self):             # <<<<<<<<<<<<<<
  *         return _initpynode(self._cnode.root())
  *     def parent(self):
@@ -5428,41 +5428,53 @@ static PyObject *__pyx_pf_3hit_8parse(CYTHON_UNUSED PyObject *__pyx_self, PyObje
  *     return _initpynode(node, own=True)
  * 
  * cpdef explode(Node n):             # <<<<<<<<<<<<<<
- *     chit.explode(n._cnode)
- * 
+ *     n._cnode = chit.explode(n._cnode)
+ *     return n
  */
 
 static PyObject *__pyx_pw_3hit_11explode(PyObject *__pyx_self, PyObject *__pyx_v_n); /*proto*/
 static PyObject *__pyx_f_3hit_explode(struct __pyx_obj_3hit_Node *__pyx_v_n, CYTHON_UNUSED int __pyx_skip_dispatch) {
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
+  hit::Node *__pyx_t_1;
   __Pyx_RefNannySetupContext("explode", 0);
 
   /* "hit.pyx":208
  * 
  * cpdef explode(Node n):
- *     chit.explode(n._cnode)             # <<<<<<<<<<<<<<
+ *     n._cnode = chit.explode(n._cnode)             # <<<<<<<<<<<<<<
+ *     return n
  * 
- * cpdef merge(Node src, Node dst):
  */
   try {
-    hit::explode(__pyx_v_n->_cnode);
+    __pyx_t_1 = hit::explode(__pyx_v_n->_cnode);
   } catch(...) {
     __Pyx_CppExn2PyErr();
     __PYX_ERR(0, 208, __pyx_L1_error)
   }
+  __pyx_v_n->_cnode = __pyx_t_1;
+
+  /* "hit.pyx":209
+ * cpdef explode(Node n):
+ *     n._cnode = chit.explode(n._cnode)
+ *     return n             # <<<<<<<<<<<<<<
+ * 
+ * cpdef merge(Node src, Node dst):
+ */
+  __Pyx_XDECREF(__pyx_r);
+  __Pyx_INCREF(((PyObject *)__pyx_v_n));
+  __pyx_r = ((PyObject *)__pyx_v_n);
+  goto __pyx_L0;
 
   /* "hit.pyx":207
  *     return _initpynode(node, own=True)
  * 
  * cpdef explode(Node n):             # <<<<<<<<<<<<<<
- *     chit.explode(n._cnode)
- * 
+ *     n._cnode = chit.explode(n._cnode)
+ *     return n
  */
 
   /* function exit code */
-  __pyx_r = Py_None; __Pyx_INCREF(Py_None);
-  goto __pyx_L0;
   __pyx_L1_error:;
   __Pyx_AddTraceback("hit.explode", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = 0;
@@ -5513,8 +5525,8 @@ static PyObject *__pyx_pf_3hit_10explode(CYTHON_UNUSED PyObject *__pyx_self, str
   return __pyx_r;
 }
 
-/* "hit.pyx":210
- *     chit.explode(n._cnode)
+/* "hit.pyx":211
+ *     return n
  * 
  * cpdef merge(Node src, Node dst):             # <<<<<<<<<<<<<<
  *     chit.merge(src._cnode, dst._cnode)
@@ -5527,7 +5539,7 @@ static PyObject *__pyx_f_3hit_merge(struct __pyx_obj_3hit_Node *__pyx_v_src, str
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("merge", 0);
 
-  /* "hit.pyx":211
+  /* "hit.pyx":212
  * 
  * cpdef merge(Node src, Node dst):
  *     chit.merge(src._cnode, dst._cnode)             # <<<<<<<<<<<<<<
@@ -5537,11 +5549,11 @@ static PyObject *__pyx_f_3hit_merge(struct __pyx_obj_3hit_Node *__pyx_v_src, str
     hit::merge(__pyx_v_src->_cnode, __pyx_v_dst->_cnode);
   } catch(...) {
     __Pyx_CppExn2PyErr();
-    __PYX_ERR(0, 211, __pyx_L1_error)
+    __PYX_ERR(0, 212, __pyx_L1_error)
   }
 
-  /* "hit.pyx":210
- *     chit.explode(n._cnode)
+  /* "hit.pyx":211
+ *     return n
  * 
  * cpdef merge(Node src, Node dst):             # <<<<<<<<<<<<<<
  *     chit.merge(src._cnode, dst._cnode)
@@ -5591,11 +5603,11 @@ static PyObject *__pyx_pw_3hit_13merge(PyObject *__pyx_self, PyObject *__pyx_arg
         case  1:
         if (likely((values[1] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_dst)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("merge", 1, 2, 2, 1); __PYX_ERR(0, 210, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("merge", 1, 2, 2, 1); __PYX_ERR(0, 211, __pyx_L3_error)
         }
       }
       if (unlikely(kw_args > 0)) {
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "merge") < 0)) __PYX_ERR(0, 210, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "merge") < 0)) __PYX_ERR(0, 211, __pyx_L3_error)
       }
     } else if (PyTuple_GET_SIZE(__pyx_args) != 2) {
       goto __pyx_L5_argtuple_error;
@@ -5608,14 +5620,14 @@ static PyObject *__pyx_pw_3hit_13merge(PyObject *__pyx_self, PyObject *__pyx_arg
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("merge", 1, 2, 2, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 210, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("merge", 1, 2, 2, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 211, __pyx_L3_error)
   __pyx_L3_error:;
   __Pyx_AddTraceback("hit.merge", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
-  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_src), __pyx_ptype_3hit_Node, 1, "src", 0))) __PYX_ERR(0, 210, __pyx_L1_error)
-  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_dst), __pyx_ptype_3hit_Node, 1, "dst", 0))) __PYX_ERR(0, 210, __pyx_L1_error)
+  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_src), __pyx_ptype_3hit_Node, 1, "src", 0))) __PYX_ERR(0, 211, __pyx_L1_error)
+  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_dst), __pyx_ptype_3hit_Node, 1, "dst", 0))) __PYX_ERR(0, 211, __pyx_L1_error)
   __pyx_r = __pyx_pf_3hit_12merge(__pyx_self, __pyx_v_src, __pyx_v_dst);
 
   /* function exit code */
@@ -5633,7 +5645,7 @@ static PyObject *__pyx_pf_3hit_12merge(CYTHON_UNUSED PyObject *__pyx_self, struc
   PyObject *__pyx_t_1 = NULL;
   __Pyx_RefNannySetupContext("merge", 0);
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = __pyx_f_3hit_merge(__pyx_v_src, __pyx_v_dst, 0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 210, __pyx_L1_error)
+  __pyx_t_1 = __pyx_f_3hit_merge(__pyx_v_src, __pyx_v_dst, 0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 211, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_r = __pyx_t_1;
   __pyx_t_1 = 0;
