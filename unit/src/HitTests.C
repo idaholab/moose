@@ -109,6 +109,21 @@ struct ValCase
   hit::Field::Kind kind;
 };
 
+TEST(HitTests, ExplodeParentless)
+{
+  hit::Node * n = new hit::Section("foo/bar");
+
+  try
+  {
+    n = hit::explode(n);
+    EXPECT_EQ("[foo]\n  [bar]\n  []\n[]", n->render());
+  }
+  catch (std::exception & err)
+  {
+    FAIL() << "unexpected error: " << err.what();
+  }
+}
+
 TEST(HitTests, ParseFields)
 {
   ValCase cases[] = {
