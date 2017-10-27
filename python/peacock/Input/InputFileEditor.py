@@ -112,10 +112,12 @@ class InputFileEditor(QWidget, MooseWidget):
         """
         if app_info.valid():
             self._closeBlockEditor()
-            input_filename = self.tree.input_filename
-            input_tree = InputTree(app_info)
-            self.tree = input_tree
-            self.tree.setInputFile(input_filename)
+            old_tree = self.tree
+            self.tree = InputTree(app_info)
+            if old_tree.root:
+                self.tree.setInputFileData(old_tree.getInputFileString(), old_tree.input_filename)
+            else:
+                self.tree.setInputFile(old_tree.input_filename)
             self.block_tree.setInputTree(self.tree)
 
     def setInputFile(self, input_file):

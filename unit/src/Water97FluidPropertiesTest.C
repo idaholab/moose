@@ -407,24 +407,39 @@ TEST_F(Water97FluidPropertiesTest, properties)
   REL_TEST("c", _fp->c(p2, T2), 1067.36948, 1.0e-8);
 
   // Viscosity
-  REL_TEST("mu", _fp->mu(998.0, 298.15), 889.735100e-6, 1.0e-8);
-  REL_TEST("mu", _fp->mu(1200.0, 298.15), 1437.649467e-6, 1.0e-8);
-  REL_TEST("mu", _fp->mu(1000.0, 373.15), 307.883622e-6, 1.0e-8);
-  REL_TEST("mu", _fp->mu(1.0, 433.15), 14.538324e-6, 1.0e-7);
-  REL_TEST("mu", _fp->mu(1000.0, 433.15), 217.685358e-6, 1.0e-8);
-  REL_TEST("mu", _fp->mu(1.0, 873.15), 32.619287e-6, 1.0e-8);
-  REL_TEST("mu", _fp->mu(100.0, 873.15), 35.802262e-6, 1.0e-8);
-  REL_TEST("mu", _fp->mu(600.0, 873.15), 77.430195e-6, 1.0e-8);
-  REL_TEST("mu", _fp->mu(1.0, 1173.15), 44.217245e-6, 1.0e-7);
-  REL_TEST("mu", _fp->mu(100.0, 1173.15), 47.640433e-6, 1.0e-8);
-  REL_TEST("mu", _fp->mu(400.0, 1173.15), 64.154608e-6, 1.0e-8);
+  REL_TEST("mu", _fp->mu_from_rho_T(998.0, 298.15), 889.735100e-6, 1.0e-8);
+  REL_TEST("mu", _fp->mu_from_rho_T(1200.0, 298.15), 1437.649467e-6, 1.0e-8);
+  REL_TEST("mu", _fp->mu_from_rho_T(1000.0, 373.15), 307.883622e-6, 1.0e-8);
+  REL_TEST("mu", _fp->mu_from_rho_T(1.0, 433.15), 14.538324e-6, 1.0e-7);
+  REL_TEST("mu", _fp->mu_from_rho_T(1000.0, 433.15), 217.685358e-6, 1.0e-8);
+  REL_TEST("mu", _fp->mu_from_rho_T(1.0, 873.15), 32.619287e-6, 1.0e-8);
+  REL_TEST("mu", _fp->mu_from_rho_T(100.0, 873.15), 35.802262e-6, 1.0e-8);
+  REL_TEST("mu", _fp->mu_from_rho_T(600.0, 873.15), 77.430195e-6, 1.0e-8);
+  REL_TEST("mu", _fp->mu_from_rho_T(1.0, 1173.15), 44.217245e-6, 1.0e-7);
+  REL_TEST("mu", _fp->mu_from_rho_T(100.0, 1173.15), 47.640433e-6, 1.0e-8);
+  REL_TEST("mu", _fp->mu_from_rho_T(400.0, 1173.15), 64.154608e-6, 1.0e-8);
+
+  ABS_TEST("mu", _fp->mu(1e6, 298.15), 889.898581797e-6, 2e-8);
+  ABS_TEST("mu", _fp->mu(2e6, 298.15), 889.763899645e-6, 1e-8);
+  ABS_TEST("mu", _fp->mu(1e6, 373.15), 281.825180491e-6, 1e-8);
+  ABS_TEST("mu", _fp->mu(2e6, 373.15), 282.09550632e-6, 1e-8);
+  ABS_TEST("mu", _fp->mu(1e6, 433.15), 170.526801634e-6, 1e-8);
+  ABS_TEST("mu", _fp->mu(2e6, 433.15), 170.780193827e-6, 1e-8);
+  ABS_TEST("mu", _fp->mu(1e6, 873.15), 3.2641885983e-5, 1e-12);
+  ABS_TEST("mu", _fp->mu(2e6, 873.15), 3.26820969808e-5, 1e-12);
+  ABS_TEST("mu", _fp->mu(1e6, 1173.15), 4.42374919686e-5, 1e-12);
+  ABS_TEST("mu", _fp->mu(2e6, 1173.15), 4.42823959629e-5, 1e-12);
 
   // Thermal conductivity
   // Note: data is given for pressure and temperature, but k requires density
   // and temperature
-  REL_TEST("k", _fp->k(_fp->rho(1.0e6, 323.15), 323.15), 0.641, 1.0e-4);
-  REL_TEST("k", _fp->k(_fp->rho(20.0e6, 623.15), 623.15), 0.4541, 1.0e-4);
-  REL_TEST("k", _fp->k(_fp->rho(50.0e6, 773.15), 773.15), 0.2055, 1.0e-4);
+  REL_TEST("k", _fp->k_from_rho_T(_fp->rho(1.0e6, 323.15), 323.15), 0.641, 1.0e-4);
+  REL_TEST("k", _fp->k_from_rho_T(_fp->rho(20.0e6, 623.15), 623.15), 0.4541, 1.0e-4);
+  REL_TEST("k", _fp->k_from_rho_T(_fp->rho(50.0e6, 773.15), 773.15), 0.2055, 1.0e-4);
+
+  ABS_TEST("k", _fp->k(1.0e6, 323.15), 0.640972, 5e-7);
+  ABS_TEST("k", _fp->k(20.0e6, 623.15), 0.454131, 7e-7);
+  ABS_TEST("k", _fp->k(50.0e6, 773.15), 0.205485, 5e-7);
 
   // Backwards equation T(p,h)
   // Region 1
@@ -499,11 +514,12 @@ TEST_F(Water97FluidPropertiesTest, derivatives)
   T = 298.15;
   Real drho = 1.0e-4;
 
-  Real dmu_drho_fd = (_fp->mu(rho + drho, T) - _fp->mu(rho - drho, T)) / (2.0 * drho);
+  Real dmu_drho_fd =
+      (_fp->mu_from_rho_T(rho + drho, T) - _fp->mu_from_rho_T(rho - drho, T)) / (2.0 * drho);
   Real mu = 0.0, dmu_drho = 0.0, dmu_dT = 0.0;
-  _fp->mu_drhoT(rho, T, drho_dT, mu, dmu_drho, dmu_dT);
+  _fp->mu_drhoT_from_rho_T(rho, T, drho_dT, mu, dmu_drho, dmu_dT);
 
-  ABS_TEST("mu", mu, _fp->mu(rho, T), 1.0e-15);
+  ABS_TEST("mu", mu, _fp->mu_from_rho_T(rho, T), 1.0e-15);
   REL_TEST("dmu_dp", dmu_drho, dmu_drho_fd, 1.0e-6);
 
   // To properly test derivative wrt temperature, use p and T and calculate density,
@@ -511,9 +527,10 @@ TEST_F(Water97FluidPropertiesTest, derivatives)
   p = 1.0e6;
   dT = 1.0e-4;
   _fp->rho_dpT(p, T, rho, drho_dp, drho_dT);
-  _fp->mu_drhoT(rho, T, drho_dT, mu, dmu_drho, dmu_dT);
-  Real dmu_dT_fd =
-      (_fp->mu(_fp->rho(p, T + dT), T + dT) - _fp->mu(_fp->rho(p, T - dT), T - dT)) / (2.0 * dT);
+  _fp->mu_drhoT_from_rho_T(rho, T, drho_dT, mu, dmu_drho, dmu_dT);
+  Real dmu_dT_fd = (_fp->mu_from_rho_T(_fp->rho(p, T + dT), T + dT) -
+                    _fp->mu_from_rho_T(_fp->rho(p, T - dT), T - dT)) /
+                   (2.0 * dT);
 
   REL_TEST("dmu_dT", dmu_dT, dmu_dT_fd, 1.0e-6);
 }

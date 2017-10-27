@@ -57,6 +57,11 @@ public:
   virtual void rho_dpT(
       Real pressure, Real temperature, Real & rho, Real & drho_dp, Real & drho_dT) const override;
 
+  virtual Real mu(Real pressure, Real temperature) const override;
+
+  virtual void
+  mu_dpT(Real pressure, Real temperature, Real & mu, Real & dmu_dp, Real & dmu_dT) const override;
+
   /**
    * CO2 viscosity
    * From Fenghour et al., The viscosity of carbon dioxide, J. Phys. Chem. Ref.
@@ -68,7 +73,7 @@ public:
    * @param temperature fluid temperature (K)
    * @return viscosity (Pa.s)
    */
-  virtual Real mu(Real density, Real temperature) const override;
+  virtual Real mu_from_rho_T(Real density, Real temperature) const override;
 
   /**
    * CO2 viscosity and derivatives wrt density and temperature
@@ -84,12 +89,12 @@ public:
    * @param[out] dmu_drho derivative of viscosity wrt density
    * @param[out] dmu_dT derivative of viscosity wrt temperature
    */
-  virtual void mu_drhoT(Real density,
-                        Real temperature,
-                        Real ddensity_dT,
-                        Real & mu,
-                        Real & dmu_drho,
-                        Real & dmu_dT) const override;
+  virtual void mu_drhoT_from_rho_T(Real density,
+                                   Real temperature,
+                                   Real ddensity_dT,
+                                   Real & mu,
+                                   Real & dmu_drho,
+                                   Real & dmu_dT) const override;
 
   /**
    * Fluid name
@@ -347,6 +352,11 @@ public:
    */
   virtual Real cv(Real pressure, Real temperature) const override;
 
+  virtual Real k(Real pressure, Real temperature) const override;
+
+  virtual void
+  k_dpT(Real pressure, Real temperature, Real & k, Real & dk_dp, Real & dk_dT) const override;
+
   /**
    * Thermal conductivity
    * From Scalabrin et al., A Reference Multiparameter Thermal Conductivity
@@ -357,7 +367,7 @@ public:
    * @param temperature CO2 temperature (K)
    * @return thermal conductivity (W/m/K)
    */
-  virtual Real k(Real density, Real temperature) const override;
+  virtual Real k_from_rho_T(Real density, Real temperature) const override;
 
   /**
    * Specific entropy

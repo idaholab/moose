@@ -30,34 +30,40 @@ TEST_F(SimpleFluidPropertiesTest, properties)
   const Real henry = 0.0;
   const Real pp_coef = 0.0;
 
-  Real P, T;
+  Real P, T, rho;
 
   P = 1E3;
   T = 200;
+  rho = _fp->rho(P, T);
   REL_TEST("beta", _fp->beta(P, T), thermal_exp, 1.0E-8);
   REL_TEST("cp", _fp->cp(P, T), cp, 1.0E-8);
   REL_TEST("cv", _fp->cv(P, T), cv, 1.0E-8);
   REL_TEST("c", _fp->c(P, T), std::sqrt(bulk_modulus / _fp->rho(P, T)), 1.0E-8);
   REL_TEST("k", _fp->k(P, T), thermal_cond, 1.0E-8);
+  REL_TEST("k", _fp->k_from_rho_T(rho, T), thermal_cond, 1.0E-8);
   REL_TEST("s", _fp->s(P, T), entropy, 1.0E-8);
   REL_TEST("rho", _fp->rho(P, T), density0 * std::exp(P / bulk_modulus - thermal_exp * T), 1.0E-8);
   REL_TEST("e", _fp->e(P, T), cv * T, 1.0E-8);
   REL_TEST("mu", _fp->mu(P, T), visc, 1.0E-8);
+  REL_TEST("mu", _fp->mu_from_rho_T(rho, T), visc, 1.0E-8);
   REL_TEST("h", _fp->h(P, T), cv * T + P / _fp->rho(P, T), 1.0E-8);
   REL_TEST("h2", _fp2->h(P, T), cv * T + P * pp_coef / _fp2->rho(P, T), 1.0E-8);
   ABS_TEST("henry", _fp->henryConstant(T), henry, 1.0E-8);
 
   P = 1E7;
   T = 300;
+  rho = _fp->rho(P, T);
   REL_TEST("beta", _fp->beta(P, T), thermal_exp, 1.0E-8);
   REL_TEST("cp", _fp->cp(P, T), cp, 1.0E-8);
   REL_TEST("cv", _fp->cv(P, T), cv, 1.0E-8);
   REL_TEST("c", _fp->c(P, T), std::sqrt(bulk_modulus / _fp->rho(P, T)), 1.0E-8);
   REL_TEST("k", _fp->k(P, T), thermal_cond, 1.0E-8);
+  REL_TEST("k", _fp->k_from_rho_T(rho, T), thermal_cond, 1.0E-8);
   REL_TEST("s", _fp->s(P, T), entropy, 1.0E-8);
   REL_TEST("rho", _fp->rho(P, T), density0 * std::exp(P / bulk_modulus - thermal_exp * T), 1.0E-8);
   REL_TEST("e", _fp->e(P, T), cv * T, 1.0E-8);
   REL_TEST("mu", _fp->mu(P, T), visc, 1.0E-8);
+  REL_TEST("mu", _fp->mu_from_rho_T(rho, T), visc, 1.0E-8);
   REL_TEST("h", _fp->h(P, T), cv * T + P / _fp->rho(P, T), 1.0E-8);
   REL_TEST("h2", _fp2->h(P, T), cv * T + P * pp_coef / _fp2->rho(P, T), 1.0E-8);
   ABS_TEST("henry", _fp->henryConstant(T), henry, 1.0E-8);
@@ -113,19 +119,45 @@ TEST_F(SimpleFluidPropertiesTest, derivatives)
   Real mu, dmu_drho, dmu_dT;
   dens = 1000;
   T = 10;
-  _fp->mu_drhoT(dens, T, drho_dT, mu, dmu_drho, dmu_dT);
-  fd = (_fp->mu(dens + ddens, T) - _fp->mu(dens - ddens, T)) / (2.0 * ddens);
+  _fp->mu_drhoT_from_rho_T(dens, T, drho_dT, mu, dmu_drho, dmu_dT);
+  fd = (_fp->mu_from_rho_T(dens + ddens, T) - _fp->mu_from_rho_T(dens - ddens, T)) / (2.0 * ddens);
   ABS_TEST("dmu_ddens", dmu_drho, fd, 1.0E-8);
-  fd = (_fp->mu(dens, T + dT) - _fp->mu(dens, T - dT)) / (2.0 * dT);
+  fd = (_fp->mu_from_rho_T(dens, T + dT) - _fp->mu_from_rho_T(dens, T - dT)) / (2.0 * dT);
   ABS_TEST("dmu_dT", dmu_dT, fd, 1.0E-8);
+
+  Real dmu_dp;
+  _fp->mu_dpT(P, T, mu, dmu_dp, dmu_dT);
+  fd = (_fp->mu(P + dP, T) - _fp->mu(P - dP, T)) / (2.0 * dP);
+  ABS_TEST("dmu_dp", dmu_dp, fd, 1.0E-8);
+  fd = (_fp->mu(P, T + dT) - _fp->mu(P, T - dT)) / (2.0 * dT);
+  ABS_TEST("dmu_dT", dmu_dT, fd, 1.0E-8);
+
+  Real k, dk_dp, dk_dT;
+  _fp->k_dpT(P, T, k, dk_dp, dk_dT);
+  fd = (_fp->k(P + dP, T) - _fp->k(P - dP, T)) / (2.0 * dP);
+  ABS_TEST("dk_dp", dk_dp, fd, 1.0E-8);
+  fd = (_fp->k(P, T + dT) - _fp->k(P, T - dT)) / (2.0 * dT);
+  ABS_TEST("dk_dT", dk_dT, fd, 1.0E-8);
 
   dens = 2000;
   T = 80;
-  _fp->mu_drhoT(dens, T, drho_dT, mu, dmu_drho, dmu_dT);
-  fd = (_fp->mu(dens + ddens, T) - _fp->mu(dens - ddens, T)) / (2.0 * ddens);
+  _fp->mu_drhoT_from_rho_T(dens, T, drho_dT, mu, dmu_drho, dmu_dT);
+  fd = (_fp->mu_from_rho_T(dens + ddens, T) - _fp->mu_from_rho_T(dens - ddens, T)) / (2.0 * ddens);
   ABS_TEST("dmu_ddens", dmu_drho, fd, 1.0E-8);
-  fd = (_fp->mu(dens, T + dT) - _fp->mu(dens, T - dT)) / (2.0 * dT);
+  fd = (_fp->mu_from_rho_T(dens, T + dT) - _fp->mu_from_rho_T(dens, T - dT)) / (2.0 * dT);
   ABS_TEST("dmu_dT", dmu_dT, fd, 1.0E-8);
+
+  _fp->mu_dpT(P, T, mu, dmu_dp, dmu_dT);
+  fd = (_fp->mu(P + dP, T) - _fp->mu(P - dP, T)) / (2.0 * dP);
+  ABS_TEST("dmu_dp", dmu_dp, fd, 1.0E-8);
+  fd = (_fp->mu(P, T + dT) - _fp->mu(P, T - dT)) / (2.0 * dT);
+  ABS_TEST("dmu_dT", dmu_dT, fd, 1.0E-8);
+
+  _fp->k_dpT(P, T, k, dk_dp, dk_dT);
+  fd = (_fp->k(P + dP, T) - _fp->k(P - dP, T)) / (2.0 * dP);
+  ABS_TEST("dk_dp", dk_dp, fd, 1.0E-8);
+  fd = (_fp->k(P, T + dT) - _fp->k(P, T - dT)) / (2.0 * dT);
+  ABS_TEST("dk_dT", dk_dT, fd, 1.0E-8);
 
   Real h, dh_dp, dh_dT;
   P = 1E6;

@@ -471,7 +471,25 @@ Water97FluidProperties::cv(Real pressure, Real temperature) const
 }
 
 Real
-Water97FluidProperties::mu(Real density, Real temperature) const
+Water97FluidProperties::mu(Real pressure, Real temperature) const
+{
+  Real rho = this->rho(pressure, temperature);
+  return this->mu_from_rho_T(rho, temperature);
+}
+
+void
+Water97FluidProperties::mu_dpT(
+    Real pressure, Real temperature, Real & mu, Real & dmu_dp, Real & dmu_dT) const
+{
+  Real rho, drho_dp, drho_dT;
+  this->rho_dpT(pressure, temperature, rho, drho_dp, drho_dT);
+  Real dmu_drho;
+  this->mu_drhoT_from_rho_T(rho, temperature, drho_dT, mu, dmu_drho, dmu_dT);
+  dmu_dp = dmu_drho * drho_dp;
+}
+
+Real
+Water97FluidProperties::mu_from_rho_T(Real density, Real temperature) const
 {
   // Constants from Release on the IAPWS Formulation 2008 for the Viscosity of
   // Ordinary Water Substance
@@ -506,12 +524,12 @@ Water97FluidProperties::mu(Real density, Real temperature) const
 }
 
 void
-Water97FluidProperties::mu_drhoT(Real density,
-                                 Real temperature,
-                                 Real ddensity_dT,
-                                 Real & mu,
-                                 Real & dmu_drho,
-                                 Real & dmu_dT) const
+Water97FluidProperties::mu_drhoT_from_rho_T(Real density,
+                                            Real temperature,
+                                            Real ddensity_dT,
+                                            Real & mu,
+                                            Real & dmu_drho,
+                                            Real & dmu_dT) const
 {
   // Constants from Release on the IAPWS Formulation 2008 for the Viscosity of
   // Ordinary Water Substance
@@ -563,7 +581,21 @@ Water97FluidProperties::mu_drhoT(Real density,
 }
 
 Real
-Water97FluidProperties::k(Real density, Real temperature) const
+Water97FluidProperties::k(Real pressure, Real temperature) const
+{
+  Real rho = this->rho(pressure, temperature);
+  return this->k_from_rho_T(rho, temperature);
+}
+
+void
+Water97FluidProperties::k_dpT(
+    Real /*pressure*/, Real /*temperature*/, Real & /*k*/, Real & /*dk_dp*/, Real & /*dk_dT*/) const
+{
+  mooseError(name(), "k_dpT() is not implemented");
+}
+
+Real
+Water97FluidProperties::k_from_rho_T(Real density, Real temperature) const
 {
   // Scale the density and temperature. Note that the scales are slightly
   // different to the critical values used in IAPWS-IF97

@@ -96,7 +96,7 @@ public:
    * @param xnacl salt mass fraction (-)
    * @return viscosity (Pa.s)
    */
-  virtual Real mu(Real water_density, Real temperature, Real xnacl) const override;
+  virtual Real mu_from_rho_T(Real water_density, Real temperature, Real xnacl) const override;
 
   /**
    * Viscosity of brine and derivatives wrt pressure, temperature and mass fraction
@@ -214,7 +214,7 @@ public:
    * @param xnacl NaCl mass fraction (-)
    * @return thermal conductivity (W/m/K)
    */
-  virtual Real k(Real water_density, Real temperature, Real xnacl) const override;
+  virtual Real k_from_rho_T(Real water_density, Real temperature, Real xnacl) const override;
 
   /**
    * Brine vapour pressure
