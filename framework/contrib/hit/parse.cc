@@ -878,9 +878,9 @@ explode(Node * n)
           n->parent()->addChild(newsec);
         newsec->addChild(newnode);
       }
-      explode(newnode);
+      auto newroot = explode(newnode);
       delete n;
-      return newnode->root();
+      return newroot->root();
     }
   }
 
