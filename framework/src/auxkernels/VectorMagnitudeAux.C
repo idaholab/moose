@@ -21,6 +21,8 @@ InputParameters
 validParams<VectorMagnitudeAux>()
 {
   InputParameters params = validParams<AuxKernel>();
+  params.addClassDescription("Creates a field representing the magnitude of three coupled "
+                             "variables using an Euclidean norm.");
   params.addRequiredCoupledVar("x", "x-component of the vector");
   params.addCoupledVar("y", "y-component of the vector");
   params.addCoupledVar("z", "z-component of the vector");

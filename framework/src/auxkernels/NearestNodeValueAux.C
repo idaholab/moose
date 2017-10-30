@@ -22,6 +22,8 @@ InputParameters
 validParams<NearestNodeValueAux>()
 {
   InputParameters params = validParams<AuxKernel>();
+  params.addClassDescription("Retrieves a field value from the closest node on the paired boundary "
+                             "and stores it on this boundary or block.");
   params.set<bool>("_dual_restrictable") = true;
   params.addRequiredParam<BoundaryName>("paired_boundary", "The boundary to get the value from.");
   params.addRequiredCoupledVar("paired_variable", "The variable to get the value of.");

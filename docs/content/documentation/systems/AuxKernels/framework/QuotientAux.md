@@ -1,6 +1,9 @@
-<!-- MOOSE Documentation Stub: Remove this when content is added. -->
-
 # QuotientAux
+
+Divides one field by another field on a node by node or element by element basis.
+
+!!!note This AuxKernel does not check for division by zero.
+
 !syntax description /AuxKernels/QuotientAux
 
 !syntax parameters /AuxKernels/QuotientAux

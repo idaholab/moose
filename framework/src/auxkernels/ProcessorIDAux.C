@@ -19,6 +19,7 @@ InputParameters
 validParams<ProcessorIDAux>()
 {
   InputParameters params = validParams<AuxKernel>();
+  params.addClassDescription("Creates a field showing the processors and partitioning.");
   return params;
 }
 

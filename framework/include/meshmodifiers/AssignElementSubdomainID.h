@@ -30,10 +30,6 @@ InputParameters validParams<AssignElementSubdomainID>();
 class AssignElementSubdomainID : public MeshModifier
 {
 public:
-  /**
-   * Class constructor
-   * @param parameters The input parameters
-   */
   AssignElementSubdomainID(const InputParameters & parameters);
 
 protected:

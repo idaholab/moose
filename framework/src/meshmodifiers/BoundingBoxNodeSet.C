@@ -22,6 +22,8 @@ validParams<BoundingBoxNodeSet>()
   MooseEnum location("INSIDE OUTSIDE", "INSIDE");
 
   InputParameters params = validParams<MeshModifier>();
+  params.addClassDescription(
+      "Assigns all of the nodes either inside or outside of a bounding box to a new nodeset.");
   params.addRequiredParam<std::vector<BoundaryName>>("new_boundary",
                                                      "The name of the nodeset to create");
   params.addRequiredParam<RealVectorValue>(

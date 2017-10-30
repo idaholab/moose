@@ -24,7 +24,8 @@ class SolutionUserObject;
 template <>
 InputParameters validParams<SolutionAux>();
 
-/** AuxKernal for reading a solution from file
+/**
+ * AuxKernel for reading a solution from file.
  * Creates a function that extracts values from a solution read from a file,
  * via a SolutionUserObject. It is possible to scale and add a constant to the
  * solution read.
@@ -32,9 +33,6 @@ InputParameters validParams<SolutionAux>();
 class SolutionAux : public AuxKernel
 {
 public:
-  /** Constructor
-   * @param parameters The input parameters for the kernel
-   */
   SolutionAux(const InputParameters & parameters);
 
   /**
@@ -43,7 +41,7 @@ public:
   virtual void initialSetup() override;
 
 protected:
-  /** Compute the value for the kernel
+  /**
    * Computes a value for a node or element depending on the type of kernel,
    * it also uses the 'direct' flag to extract values based on the dof if the
    * flag is set to true.

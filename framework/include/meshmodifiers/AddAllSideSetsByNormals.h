@@ -26,8 +26,8 @@ InputParameters validParams<AddAllSideSetsByNormals>();
 /**
  * This class will add sidesets to the entire mesh based on unique normals.  This
  * information will be made available through the MooseMesh interface.
- * Note: This algorithm will not work well with meshes containing curved faces.
- * Several sidesets will be created in that case.  Use sensibly!
+ * Note: This algorithm may not work well with meshes containing curved faces.
+ * Several sidesets may be created in that case.  Use sensibly!
  */
 class AddAllSideSetsByNormals : public AddSideSetsBase
 {
