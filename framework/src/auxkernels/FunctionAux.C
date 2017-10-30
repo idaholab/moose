@@ -20,6 +20,8 @@ InputParameters
 validParams<FunctionAux>()
 {
   InputParameters params = validParams<AuxKernel>();
+  params.addClassDescription("Auxiliary Kernel that creates and updates a field variable by "
+                             "sampling a function through space and time.");
   params.addRequiredParam<FunctionName>("function", "The function to use as the value");
   return params;
 }

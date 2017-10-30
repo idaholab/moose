@@ -25,6 +25,8 @@ InputParameters
 validParams<MeshExtruder>()
 {
   InputParameters params = validParams<MeshModifier>();
+  params.addClassDescription("Takes a 1D or 2D mesh and extrudes the entire structure along the "
+                             "specified axis increasing the dimensionality of the mesh.");
   params.addRequiredParam<RealVectorValue>("extrusion_vector",
                                            "The direction and length of the extrusion");
   params.addParam<unsigned int>("num_layers", 1, "The number of layers in the extruded mesh");

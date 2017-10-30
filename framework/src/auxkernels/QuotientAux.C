@@ -19,6 +19,7 @@ InputParameters
 validParams<QuotientAux>()
 {
   InputParameters params = validParams<AuxKernel>();
+  params.addClassDescription("Divides two coupled variables.");
   params.addCoupledVar("numerator", "The upstairs of the quotient variable");
   params.addCoupledVar("denominator", "The downstairs of the quotient variable");
   return params;

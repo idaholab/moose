@@ -21,6 +21,7 @@ InputParameters
 validParams<SolutionAux>()
 {
   InputParameters params = validParams<AuxKernel>();
+  params.addClassDescription("Creates fields by using information from a SolutionUserObject.");
   params.addRequiredParam<UserObjectName>("solution", "The name of the SolutionUserObject");
   params.addParam<std::string>("from_variable",
                                "The name of the variable to extract from the file");

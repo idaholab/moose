@@ -1,6 +1,6 @@
-<!-- MOOSE Documentation Stub: Remove this when content is added. -->
-
 # ConstantAux
+
+The Constant AuxKernel creates a constant field over the domain. Truly constant field variables can likely be replaced with a [Postprocessor](/Postprocessors/index.md).
 !syntax description /AuxKernels/ConstantAux
 
 !syntax parameters /AuxKernels/ConstantAux
