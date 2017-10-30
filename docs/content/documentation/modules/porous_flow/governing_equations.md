@@ -199,6 +199,10 @@ the longitudinal and transverse dispersivities.  It is common to set the
 hydrodynamic dispersion to zero by setting $\alpha_{\beta, T} = 0 =
 \alpha_{\beta, L}$.
 
+!!!note:
+    Multiple definitions of tortuosity appear in the literature. In PorousFlow, tortuosity
+    is defined as the ratio of the shortest path to the effective path, so that $0 < \tau \leq 1$. 
+
 ##Heat flow
 
 Energy conservation for heat is described by the continuity

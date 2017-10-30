@@ -118,7 +118,7 @@
     type = PorousFlowDiffusivityConst
     at_nodes = false
     diffusion_coeff = '1e-2 1e-1'
-    tortuosity = '0'
+    tortuosity = 1
   [../]
   [./permeability]
     type = PorousFlowPermeabilityConst
