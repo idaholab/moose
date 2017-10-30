@@ -241,6 +241,66 @@ DisplacedProblem::updateMesh(const NumericVector<Number> & soln,
   Moose::perf_log.pop("updateDisplacedMesh()", "Execution");
 }
 
+TagID
+DisplacedProblem::addVectorTag(TagName tag_name)
+{
+  return _mproblem.addVectorTag(tag_name);
+}
+
+TagID
+DisplacedProblem::getVectorTag(TagName tag_name)
+{
+  return _mproblem.getVectorTag(tag_name);
+}
+
+TagName
+DisplacedProblem::vectorTagName(TagID tag)
+{
+  return _mproblem.vectorTagName(tag);
+}
+
+bool
+DisplacedProblem::vectorTagExists(TagID tag)
+{
+  return _mproblem.vectorTagExists(tag);
+}
+
+unsigned int
+DisplacedProblem::numVectorTags()
+{
+  return _mproblem.numVectorTags();
+}
+
+TagID
+DisplacedProblem::addMatrixTag(TagName tag_name)
+{
+  return _mproblem.addMatrixTag(tag_name);
+}
+
+TagID
+DisplacedProblem::getMatrixTag(TagName tag_name)
+{
+  return _mproblem.getMatrixTag(tag_name);
+}
+
+TagName
+DisplacedProblem::matrixTagName(TagID tag)
+{
+  return _mproblem.matrixTagName(tag);
+}
+
+bool
+DisplacedProblem::matrixTagExists(TagID tag)
+{
+  return _mproblem.matrixTagExists(tag);
+}
+
+unsigned int
+DisplacedProblem::numMatrixTags()
+{
+  return _mproblem.numMatrixTags();
+}
+
 bool
 DisplacedProblem::hasVariable(const std::string & var_name)
 {

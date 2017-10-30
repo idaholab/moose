@@ -33,6 +33,18 @@ validParams<KernelBase>()
   params += validParams<MeshChangedInterface>();
   params += validParams<MaterialPropertyInterface>();
 
+  // These are the default names for tags, but users will be able to add their own
+  MultiMooseEnum vtags("nontime time", "nontime", true);
+  MultiMooseEnum mtags("nontime time", "nontime", true);
+
+  params.addParam<MultiMooseEnum>(
+      "vector_tags", vtags, "The tag for the vectors this Kernel should fill");
+
+  params.addParam<MultiMooseEnum>(
+      "matrix_tags", mtags, "The tag for the matrices this Kernel should fill");
+
+  params.addParamNamesToGroup("vector_tags matrix_tags", "Advanced");
+
   params.addRequiredParam<NonlinearVariableName>(
       "variable", "The name of the variable that this Kernel operates on");
   params.addParam<std::vector<AuxVariableName>>(

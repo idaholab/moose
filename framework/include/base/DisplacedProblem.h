@@ -103,6 +103,18 @@ public:
   virtual void updateMesh(const NumericVector<Number> & soln,
                           const NumericVector<Number> & aux_soln);
 
+  virtual TagID addVectorTag(TagName tag_name) override;
+  virtual TagID getVectorTag(TagName tag_name) override;
+  virtual TagName vectorTagName(TagID tag) override;
+  virtual bool vectorTagExists(TagID tag) override;
+  virtual unsigned int numVectorTags() override;
+
+  virtual TagID addMatrixTag(TagName tag_name) override;
+  virtual TagID getMatrixTag(TagName tag_name) override;
+  virtual TagName matrixTagName(TagID tag) override;
+  virtual bool matrixTagExists(TagID tag) override;
+  virtual unsigned int numMatrixTags() override;
+
   virtual bool isTransient() const override;
   virtual Moose::CoordinateSystemType getCoordSystem(SubdomainID sid) override;
 
