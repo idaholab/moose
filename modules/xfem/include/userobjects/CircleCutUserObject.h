@@ -26,7 +26,9 @@ public:
   virtual void finalize() override{};
 
 protected:
-  std::vector<Real> _cut_data;
+  Point _centroid;
+  Point _edge_point1;
+  Point _edge_point2;
 
 private:
   std::vector<Point> _vertices;

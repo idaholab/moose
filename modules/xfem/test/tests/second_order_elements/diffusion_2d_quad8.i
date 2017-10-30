@@ -24,7 +24,8 @@
 [UserObjects]
   [./line_seg_cut_uo]
     type = LineSegmentCutUserObject
-    cut_data = '0.35 1.0 0.35 0.2'
+    start_point = '0.35 1.0'
+    end_point = '0.35 0.2'
     time_start_cut = 0.0
     time_end_cut = 2.0
   [../]

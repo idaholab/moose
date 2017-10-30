@@ -25,13 +25,15 @@
 [UserObjects]
   [./line_seg_cut_uo0]
     type = LineSegmentCutUserObject
-    cut_data = '0.0000e+00   6.3330e-01   3.9000e-01   6.3330e-01'
+    start_point = '0.0000e+00   6.3330e-01'
+    end_point = '3.9000e-01   6.3330e-01'
     time_start_cut = 0.0
     time_end_cut = 0.0
   [../]
   [./line_seg_cut_uo1]
     type = LineSegmentCutUserObject
-    cut_data = '3.9000e-01   6.3330e-01   6.8000e-01   6.3330e-01'
+    start_point = '3.9000e-01   6.3330e-01'
+    end_point = '6.8000e-01   6.3330e-01'
     time_start_cut = 0.0
     time_end_cut = 0.0
   [../]

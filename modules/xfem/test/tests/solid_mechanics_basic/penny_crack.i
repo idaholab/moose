@@ -17,9 +17,9 @@
 [UserObjects]
   [./circle_cut_uo]
     type = CircleCutUserObject
-    cut_data = '-0.5 -0.5 0
-                0.0 -0.5 0
-                -0.5 0 0'
+    centroid = '-0.5 -0.5 0'
+    edge_point1 = '0.0 -0.5 0'
+    edge_point2 = '-0.5 0 0'
   [../]
 []
 

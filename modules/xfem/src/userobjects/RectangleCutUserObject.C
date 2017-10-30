@@ -21,8 +21,14 @@ validParams<RectangleCutUserObject>()
   InputParameters params = validParams<GeometricCut3DUserObject>();
 
   // Add required parameters
-  params.addRequiredParam<std::vector<Real>>("cut_data",
-                                             "Vector of Real values providing cut information");
+  params.addRequiredParam<Point>(
+      "vertex_point1", "Coordinates of the first of four vertices defining the rectangular cut");
+  params.addRequiredParam<Point>(
+      "vertex_point2", "Coordinates of the second of four vertices defining the rectangular cut");
+  params.addRequiredParam<Point>(
+      "vertex_point3", "Coordinates of the third of four vertices defining the rectangular cut");
+  params.addRequiredParam<Point>(
+      "vertex_point4", "Coordinates of the last of four vertices defining the rectangular cut");
   // Class description
   params.addClassDescription("Creates a UserObject for planar cuts on 3D meshes for XFEM");
   // Return the parameters
@@ -30,27 +36,23 @@ validParams<RectangleCutUserObject>()
 }
 
 RectangleCutUserObject::RectangleCutUserObject(const InputParameters & parameters)
-  : GeometricCut3DUserObject(parameters), _cut_data(getParam<std::vector<Real>>("cut_data"))
+  : GeometricCut3DUserObject(parameters),
+    _vertex_point1(getParam<Point>("vertex_point1")),
+    _vertex_point2(getParam<Point>("vertex_point2")),
+    _vertex_point3(getParam<Point>("vertex_point3")),
+    _vertex_point4(getParam<Point>("vertex_point4"))
 {
-  // Set up constant parameters
-  const int cut_data_len = 12;
-  const int num_vertices = 4;
-
-  // Throw error if length of cut_data is incorrect
-  if (_cut_data.size() != cut_data_len)
-    mooseError("Length of RectangleCutUserObject cut_data must be 12");
-
   // Assign cut_data to vars used to construct cuts
-  _vertices.push_back(Point(_cut_data[0], _cut_data[1], _cut_data[2]));
-  _vertices.push_back(Point(_cut_data[3], _cut_data[4], _cut_data[5]));
-  _vertices.push_back(Point(_cut_data[6], _cut_data[7], _cut_data[8]));
-  _vertices.push_back(Point(_cut_data[9], _cut_data[10], _cut_data[11]));
+  _vertices.push_back(_vertex_point1);
+  _vertices.push_back(_vertex_point2);
+  _vertices.push_back(_vertex_point3);
+  _vertices.push_back(_vertex_point4);
 
-  for (unsigned int i = 0; i < num_vertices; ++i)
+  for (unsigned int i = 0; i < _vertices.size(); ++i)
     _center += _vertices[i];
   _center *= 0.25;
 
-  for (unsigned int i = 0; i < num_vertices; ++i)
+  for (unsigned int i = 0; i < _vertices.size(); ++i)
   {
     unsigned int iplus1(i < 3 ? i + 1 : 0);
     std::pair<Point, Point> rays =
@@ -64,11 +66,9 @@ RectangleCutUserObject::RectangleCutUserObject(const InputParameters & parameter
 bool
 RectangleCutUserObject::isInsideCutPlane(Point p) const
 {
-  const int num_vertices = 4;
-
   bool inside = false;
   unsigned int counter = 0;
-  for (unsigned int i = 0; i < num_vertices; ++i)
+  for (unsigned int i = 0; i < _vertices.size(); ++i)
   {
     unsigned int iplus1 = (i < 3 ? i + 1 : 0);
     Point middle2p = p - 0.5 * (_vertices[i] + _vertices[iplus1]);
@@ -79,7 +79,7 @@ RectangleCutUserObject::isInsideCutPlane(Point p) const
     if (middle2p * side_norm <= 0.0)
       counter += 1;
   }
-  if (counter == num_vertices)
+  if (counter == _vertices.size())
     inside = true;
   return inside;
 }
