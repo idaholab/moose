@@ -81,3 +81,5 @@ operator<<(std::ostream & out, const MooseEnumItem & item)
   out << item.rawName();
   return out;
 }
+
+const int MooseEnumItem::INVALID_ID = std::numeric_limits<int>::min();

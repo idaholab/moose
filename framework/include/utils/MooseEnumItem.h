@@ -18,13 +18,17 @@
 // STL includes
 #include <string>
 
+// Forward declarations
+class MooseApp;
+
 /**
  * Class for containing MooseEnum item information.
  */
 class MooseEnumItem
 {
 public:
-  MooseEnumItem(const std::string & name, const int & id);
+  static const int INVALID_ID;
+  MooseEnumItem(const std::string & name, const int & id = INVALID_ID);
   ~MooseEnumItem() = default;
   MooseEnumItem(const MooseEnumItem & other);
   MooseEnumItem(MooseEnumItem && other) = default;
@@ -80,6 +84,9 @@ public:
    */
   friend std::ostream & operator<<(std::ostream & out, const MooseEnumItem & item);
 
+  // MooseApp::registerExecFlag is allowed to set the id
+  friend MooseApp;
+
 private:
   /// The name as provided in constructor
   std::string _raw_name;
@@ -88,7 +95,7 @@ private:
   std::string _name;
 
   /// The numeric value for item
-  int _id;
+  mutable int _id; // MooseApp::registerExecFlag can change this for ExecFlagTypesg
 };
 
 #endif

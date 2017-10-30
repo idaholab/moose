@@ -86,7 +86,7 @@ new flag (`EXEC_JUST_GO`).
 !listing test/include/base/MooseTestAppTypes.h
 
 This new global must be defined, which occurs in the corresponding source file. When
-defining the new flags both a name and integer must be assigned to the flag.
+defining the new flags with a name and optionally an integer value.
 
 !listing test/src/base/MooseTestAppTypes.C
 

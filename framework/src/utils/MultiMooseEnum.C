@@ -195,7 +195,7 @@ MultiMooseEnum::assign(InputIterator first, InputIterator last, bool append)
     const auto iter = find(*it);
     if (iter == _items.end())
     {
-      if (_out_of_range_index == 0) // Are out of range values allowed?
+      if (!_allow_out_of_range) // Are out of range values allowed?
         mooseError("Invalid option \"",
                    *it,
                    "\" in MultiMooseEnum.  Valid options (not case-sensitive) are \"",
@@ -203,9 +203,9 @@ MultiMooseEnum::assign(InputIterator first, InputIterator last, bool append)
                    "\".");
       else
       {
-        MooseEnumItem created(*it, _out_of_range_index++);
+        MooseEnumItem created(*it, getNextValidID());
+        addEnumerationItem(created);
         _current.push_back(created);
-        _items.insert(created);
       }
     }
     else

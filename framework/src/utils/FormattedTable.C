@@ -247,7 +247,21 @@ FormattedTable::printTable(std::ostream & out,
   else if (suggested_term_width == "AUTO")
     term_width = getTermWidth(false);
   else
-    term_width = suggested_term_width;
+  {
+    try
+    {
+      // convert the name into a number, without this conversion the id is used which
+      // is assigned automatically and is not related to the name
+      term_width = std::stoi(suggested_term_width);
+    }
+    catch (const std::invalid_argument &)
+    {
+      mooseError(
+          "The supplied enumeration value must be 'ENVIRONMENT', 'AUTO', or an integer, but '",
+          suggested_term_width,
+          "' was provided.");
+    }
+  }
 
   if (term_width < _min_pps_width)
     term_width = _min_pps_width;

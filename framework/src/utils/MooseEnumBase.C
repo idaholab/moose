@@ -25,10 +25,8 @@
 #include <iostream>
 #include <cstdlib>
 
-const int MooseEnumBase::INVALID_ID = std::numeric_limits<int>::min();
-
 MooseEnumBase::MooseEnumBase(std::string names, bool allow_out_of_range)
-  : _out_of_range_index(allow_out_of_range ? INVALID_ID + 1 : 0)
+  : _allow_out_of_range(allow_out_of_range)
 {
   if (names.find(',') != std::string::npos)
     mooseError("Spaces are required to separate options, comma support has been removed.");
@@ -39,14 +37,14 @@ MooseEnumBase::MooseEnumBase(std::string names, bool allow_out_of_range)
 MooseEnumBase::MooseEnumBase(const MooseEnumBase & other_enum)
   : _items(other_enum._items),
     _deprecated_items(other_enum._deprecated_items),
-    _out_of_range_index(other_enum._out_of_range_index)
+    _allow_out_of_range(other_enum._allow_out_of_range)
 {
 }
 
 /**
  * Private constuctor for use by libmesh::Parameters
  */
-MooseEnumBase::MooseEnumBase() {}
+MooseEnumBase::MooseEnumBase() : _allow_out_of_range(false) {}
 
 void
 MooseEnumBase::deprecate(const std::string & name, const std::string & raw_name)
@@ -100,13 +98,18 @@ MooseEnumBase::addEnumerationName(const std::string & raw_name)
   if (name_value.size() == 2)
     value = std::strtol(name_value[1].c_str(), NULL, 0);
   else
-  {
-    value = -1; // Use -1 so if no values exist the first will be zero
-    for (const auto & item : _items)
-      value = std::max(value, item.id());
-    value++;
-  }
+    value = getNextValidID();
+
   addEnumerationName(name_value[0], value);
+}
+
+int
+MooseEnumBase::getNextValidID() const
+{
+  int value = -1; // Use -1 so if no values exist the first will be zero
+  for (const auto & item : _items)
+    value = std::max(value, item.id());
+  return ++value;
 }
 
 void

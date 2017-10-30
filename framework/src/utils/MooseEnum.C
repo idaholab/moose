@@ -24,7 +24,7 @@
 #include <iostream>
 
 MooseEnum::MooseEnum(std::string names, std::string default_name, bool allow_out_of_range)
-  : MooseEnumBase(names, allow_out_of_range), _current("", INVALID_ID)
+  : MooseEnumBase(names, allow_out_of_range), _current("", MooseEnumItem::INVALID_ID)
 {
   *this = default_name;
 }
@@ -37,27 +37,27 @@ MooseEnum::MooseEnum(const MooseEnum & other_enum)
 /**
  * Private constuctor for use by libmesh::Parameters
  */
-MooseEnum::MooseEnum() : _current("", INVALID_ID) {}
+MooseEnum::MooseEnum() : _current("", MooseEnumItem::INVALID_ID) {}
 
 MooseEnum &
 MooseEnum::operator=(const std::string & name)
 {
   if (name == "")
   {
-    _current = MooseEnumItem("", INVALID_ID);
+    _current = MooseEnumItem("", MooseEnumItem::INVALID_ID);
     return *this;
   }
 
   std::set<MooseEnumItem>::const_iterator iter = find(name);
   if (iter == _items.end())
   {
-    if (_out_of_range_index == 0) // Are out of range values allowed?
+    if (!_allow_out_of_range) // Are out of range values allowed?
       mooseError(std::string("Invalid option \"") + name +
                  "\" in MooseEnum.  Valid options (not case-sensitive) are \"" + getRawNames() +
                  "\".");
     else
     {
-      _current = MooseEnumItem(name, _out_of_range_index++);
+      _current = MooseEnumItem(name, getNextValidID());
       _items.insert(_current);
     }
   }
@@ -74,7 +74,7 @@ MooseEnum::operator==(const char * name) const
 {
   std::string upper(MooseUtils::toUpper(name));
 
-  mooseAssert(_out_of_range_index != 0 || find(upper) != _items.end(),
+  mooseAssert(_allow_out_of_range || find(upper) != _items.end(),
               std::string("Invalid string comparison \"") + upper +
                   "\" in MooseEnum.  Valid options (not case-sensitive) are \"" + getRawNames() +
                   "\".");
