@@ -403,17 +403,24 @@ TensorMechanicsAction::actGatherActionParameters()
 std::string
 TensorMechanicsAction::getKernelType()
 {
-  std::map<Moose::CoordinateSystemType, std::string> type_map = {
-      {Moose::COORD_XYZ, "StressDivergenceTensors"},
-      {Moose::COORD_RZ, "StressDivergenceRZTensors"},
-      {Moose::COORD_RSPHERICAL, "StressDivergenceRSphericalTensors"}};
-
-  // choose kernel type based on coordinate system
-  auto type_it = type_map.find(_coord_system);
-  if (type_it != type_map.end())
-    return type_it->second;
+  if (_ndisp == 2 && _coord_system == Moose::COORD_XYZ)
+  {
+    return "StressDivergence2DTensors";
+  }
   else
-    mooseError("Unsupported coordinate system");
+  {
+    std::map<Moose::CoordinateSystemType, std::string> type_map = {
+        {Moose::COORD_XYZ, "StressDivergenceTensors"},
+        {Moose::COORD_RZ, "StressDivergenceRZTensors"},
+        {Moose::COORD_RSPHERICAL, "StressDivergenceRSphericalTensors"}};
+
+    // choose kernel type based on coordinate system
+    auto type_it = type_map.find(_coord_system);
+    if (type_it != type_map.end())
+      return type_it->second;
+    else
+      mooseError("Unsupported coordinate system");
+  }
 }
 
 InputParameters

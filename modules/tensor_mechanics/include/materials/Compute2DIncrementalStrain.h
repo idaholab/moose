@@ -22,6 +22,8 @@ public:
   Compute2DIncrementalStrain(const InputParameters & parameters);
 
 protected:
+  virtual void computeProperties() override;
+
   /// Computes the current and old deformation gradients with the assumptions for
   /// 2D geometries, including plane strain, generalized plane strain, and axisymmetric,
   /// and returns the total strain increment tensor
@@ -34,6 +36,9 @@ protected:
   /// Computes the old out-of-plane displacement gradient; as a virtual function, this function is
   /// overwritten for the specific geometries defined by inheriting classes
   virtual Real computeGradDispZZOld() = 0;
+
+  /// Whether to average the out of plane strain
+  bool _ave_strain_zz;
 };
 
 #endif // COMPUTE2DINCREMENTALSTRAIN_H

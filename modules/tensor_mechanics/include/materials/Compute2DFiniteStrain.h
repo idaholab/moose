@@ -31,6 +31,9 @@ protected:
   /// Computes the old out-of-plane displacement gradient; as a virtual function, this function is
   /// overwritten for the specific geometries defined by inheriting classes
   virtual Real computeGradDispZZOld() = 0;
+
+  /// Whether to average the out of plane strain
+  bool _ave_strain_zz;
 };
 
 #endif // COMPUTE2DFINITESTRAIN_H

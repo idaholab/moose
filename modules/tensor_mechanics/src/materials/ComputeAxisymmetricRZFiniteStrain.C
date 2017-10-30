@@ -8,7 +8,6 @@
 #include "ComputeAxisymmetricRZFiniteStrain.h"
 #include "Assembly.h"
 #include "FEProblem.h"
-#include "MooseMesh.h"
 
 template <>
 InputParameters
