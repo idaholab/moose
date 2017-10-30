@@ -13,7 +13,7 @@ InputParameters
 validParams<ComputeSmearedCrackingStress>()
 {
   InputParameters params = validParams<ComputeMultipleInelasticStress>();
-  params.addClassDescription("Compute stress using elasticity for finite strains");
+  params.addClassDescription("Compute stress using a fixed smeared cracking model");
   params.addParam<std::string>(
       "cracking_release",
       "abrupt",

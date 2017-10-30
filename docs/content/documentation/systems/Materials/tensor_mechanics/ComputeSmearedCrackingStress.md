@@ -9,11 +9,11 @@ In this model, principal stresses are compared to a critical stress.  If one of 
 
 This class derives from [ComputeMultipleInelasticStrain](ComputeMultipleInelasticStress.md), and prior to cracking, allows multiple inelastic models to be active. Once cracking occurs, the inelastic strains at that material point are preserved, but those models are no longer called for the duration of the simulation, and inelastic strains from those other models are no longer permitted to evolve.
 
-The orientation of the principal coordinate system is determined from the eigenvectors of the elastic strain tensor.  However, once a crack direction is determined, that direction remains fixed and further cracks are considered in directions perpendicular to the original crack direction.  Note that for axisymmetric problems, one crack direction is known \emph{a priori}.  The theta or out-of-plane direction is not coupled to the $$r$$ and $$z$$ directions (i.e., no $$r\theta$$ or $$z\theta$$ shear strain/stress exists) and is therefore a known or principal direction.
+The orientation of the principal coordinate system is determined from the eigenvectors of the elastic strain tensor.  However, once a crack direction is determined, that direction remains fixed and further cracks are considered in directions perpendicular to the original crack direction.  Note that for axisymmetric problems, one crack direction is known \emph{a priori}.  The theta or out-of-plane direction is not coupled to the $r$ and $z$ directions (i.e., no $r\theta$ or $z\theta$ shear strain/stress exists) and is therefore a known or principal direction.
 
-If we store a scalar value, $$c_i$$, for each of the three possible crack directions at a material point, these in combination with the principal directions (eigenvectors or rotation tensor) provide a convenient way to eliminate stress in cracked directions.  A value of 1 for $$c_i$$ indicates that the material point has not cracked in that direction.  A value very close to zero (not zero for numerical reasons) indicates that cracking has occurred.
+If we store a scalar value, $c_i$, for each of the three possible crack directions at a material point, these in combination with the principal directions (eigenvectors or rotation tensor) provide a convenient way to eliminate stress in cracked directions.  A value of 1 for $c_i$ indicates that the material point has not cracked in that direction.  A value very close to zero (not zero for numerical reasons) indicates that cracking has occurred.
 
-We define a cracking tensor in the cracked orientation as $$\mathbf{c}$$:
+We define a cracking tensor in the cracked orientation as $\mathbf{c}$:
 $$
 \mathbf{c}=
 \begin{bmatrix}
@@ -22,19 +22,19 @@ c_1 & & \\
 & & c_3
 \end{bmatrix}.
 $$
-The rotation tensor $$\mathbf{R}$$ is defined in terms of the eigenvectors $$e_i$$:
+The rotation tensor $\mathbf{R}$ is defined in terms of the eigenvectors $e_i$:
 $$
 \mathbf{R}=
 \begin{bmatrix}
 e_1 & e_2 & & e_3
 \end{bmatrix}.
 $$
-This leads to a transformation operator $$\mathbf{T}$$:
+This leads to a transformation operator $\mathbf{T}$:
 $$
 \mathbf{T}=\mathbf{R}\mathbf{c}\mathbf{R}^T.
 $$
 
-$$\mathbf{T}$$ is useful for transforming uncracked tensors in the global frame to cracked tensors in the same frame.  For example, the cracked stress $$\mathbf{\sigma}_{cg}$$ in terms of the stress $$\mathbf{\sigma}_g$$ is (subscript $$c$$ indicates cracked, $$l$$ local frame, and $$g$$ global frame):
+$\mathbf{T}$ is useful for transforming uncracked tensors in the global frame to cracked tensors in the same frame.  For example, the cracked stress $\mathbf{\sigma}_{cg}$ in terms of the stress $\mathbf{\sigma}_g$ is (subscript $c$ indicates cracked, $l$ local frame, and $g$ global frame):
 $$
 \begin{aligned}
 \mathbf{\sigma}_{cg} &= \mathbf{T}\mathbf{\sigma}_g\mathbf{T}^T \\
