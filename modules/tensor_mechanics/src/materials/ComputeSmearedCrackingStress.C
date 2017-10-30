@@ -176,7 +176,7 @@ ComputeSmearedCrackingStress::computeQpStress()
     updateElasticityTensor();
 
     // Calculate stress in intermediate configuration
-    _stress[_qp] = _local_elasticity_tensor * (_elastic_strain_old[_qp] + _strain_increment[_qp]);
+    _stress[_qp] = _local_elasticity_tensor * _elastic_strain[_qp];
     // InitialStress Deprecation: remove these lines
     if (_perform_finite_strain_rotations)
       rotateQpInitialStress();
@@ -190,7 +190,11 @@ ComputeSmearedCrackingStress::computeQpStress()
   crackingStressRotation();
 
   if (_perform_finite_strain_rotations)
+  {
     finiteStrainRotation(force_elasticity_rotation);
+    _crack_rotation[_qp] =
+        _rotation_increment[_qp] * _crack_rotation[_qp] * _rotation_increment[_qp].transpose();
+  }
 }
 
 void
@@ -215,7 +219,7 @@ ComputeSmearedCrackingStress::updateElasticityTensor()
       // Update elasticity tensor based on crack status of the end of last time step
       if (_crack_flags_old[_qp](i) < 1.0)
       {
-        if (_cracking_neg_fraction == 0 && ePrime(i, i) < 0)
+        if (_cracking_neg_fraction == 0 && MooseUtils::absoluteFuzzyLessThan(ePrime(i, i), 0.0))
           crack_flags_local(i) = 1.0;
         else if (_cracking_neg_fraction > 0 &&
                  ePrime(i, i) < _crack_strain_old[_qp](i) * _cracking_neg_fraction &&
@@ -300,7 +304,7 @@ ComputeSmearedCrackingStress::crackingStressRotation()
       _crack_flags[_qp](i) = _crack_flags_old[_qp](i);
     }
 
-    // Compute crack orientations: updated _crack_rotation[_qp] based on current sstrain
+    // Compute crack orientations: updated _crack_rotation[_qp] based on current strain
     RealVectorValue principal_strain;
     computeCrackStrainAndOrientation(principal_strain);
 

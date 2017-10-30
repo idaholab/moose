@@ -101,7 +101,7 @@
     cracking_stress = 120
     cracking_residual_stress = 0.1
     cracking_beta = 0.1
-    #compute_method = ShearRetention
+    shear_retention_factor = 0.1
     inelastic_models = ''
   [../]
 []
@@ -118,7 +118,7 @@
 
   l_max_its = 100
   nl_max_its = 100
-  nl_rel_tol = 1e-8
+  nl_rel_tol = 1e-12
   nl_abs_tol = 1e-8
   l_tol = 1e-5
   start_time = 0.0

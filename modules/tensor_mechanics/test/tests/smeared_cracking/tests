@@ -21,7 +21,7 @@
     type = Exodiff
     input = cracking_exponential.i
     exodiff = cracking_exponential_out.e
-    custom_cmp = cracking_exp.cmp
+    custom_cmp = cracking_exponential.cmp
     use_old_floor = true
   [../]
   [./rz_exponential]
@@ -42,5 +42,13 @@
     input = cracking_plane_stress.i
     exodiff = cracking_plane_stress_out.e
     custom_cmp = cracking_pln_str.cmp
+  [../]
+  [./cracking_rotation]
+    type = Exodiff
+    input = cracking_rotation.i
+    exodiff = cracking_rotation_out.e
+    use_old_floor = true
+    custom_cmp = cracking_rotation.cmp
+    max_parallel = 1
   [../]
 []
