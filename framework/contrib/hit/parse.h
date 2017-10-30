@@ -108,7 +108,11 @@ std::string pathNorm(const std::string & path);
 /// pathJoin a joined version of the given hit (relative) paths as single hit path.
 std::string pathJoin(const std::vector<std::string> & paths);
 
-/// Node represents an object in a parsed hit tree.
+/// Node represents an object in a parsed hit tree.  Each node manages the memory for its child
+/// nodes.  It is safe to delete any node in the tree; doing so will also delete that node's
+/// children recursively.  It is not safe to place a single node in multiple trees.  Instead, use
+/// the node's clone function (which operates recursively) to create a new (sub)tree for placement
+/// in alternate trees.
 class Node
 {
 public:
