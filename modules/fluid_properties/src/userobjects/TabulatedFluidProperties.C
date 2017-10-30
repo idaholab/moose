@@ -276,7 +276,7 @@ Real
 TabulatedFluidProperties::mu(Real pressure, Real temperature) const
 {
   Real rho = this->rho(pressure, temperature);
-  return this->mu(rho, temperature);
+  return this->mu_from_rho_T(rho, temperature);
 }
 
 void
