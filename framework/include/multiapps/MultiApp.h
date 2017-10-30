@@ -384,6 +384,9 @@ protected:
 
   /// Backups for each local App
   SubAppBackups & _backups;
+
+private:
+  bool _setup_done = false;
 };
 
 template <>
