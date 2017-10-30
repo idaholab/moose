@@ -27,6 +27,14 @@ PorousFlowDiffusivityConst::PorousFlowDiffusivityConst(const InputParameters & p
   if (_input_tortuosity.size() != _num_phases)
     mooseError("The number of tortuosity values entered is not equal to the number of phases "
                "specified in the Dictator");
+
+  // Check that all tortuosities are (0, 1]
+  for (unsigned int i = 0; i < _num_phases; ++i)
+    if (_input_tortuosity[i] <= 0.0 || _input_tortuosity[i] > 1)
+      mooseError("All tortuosities must be greater than zero and less than (or equal to) one in ",
+                 _name,
+                 ".\nNote: the definition of tortuosity used is l/le, where l is the straight line "
+                 "length and le is the effective flow length");
 }
 
 void
