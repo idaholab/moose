@@ -78,7 +78,7 @@ ConstraintWarehouse::getActiveNodalConstraints() const
 }
 
 const std::vector<std::shared_ptr<NodeFaceConstraint>> &
-ConstraintWarehouse::getActiveNodeFaceConstraints(BoundaryID boundary_id, bool displaced)
+ConstraintWarehouse::getActiveNodeFaceConstraints(BoundaryID boundary_id, bool displaced) const
 {
   std::map<BoundaryID, MooseObjectWarehouse<NodeFaceConstraint>>::const_iterator it, end_it;
 

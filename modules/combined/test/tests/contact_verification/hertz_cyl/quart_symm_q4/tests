@@ -58,6 +58,7 @@
     heavy = true
     superlu = true
     prereq = 'frictionless_aug_sm'
+    skip = 'this will be fixed by #10165'
   [../]
   [./glued_kin_sm]
     type = 'CSVDiff'
@@ -113,5 +114,6 @@
     max_parallel = 1
     heavy = true
     superlu = true
+    skip = 'this will be fixed by #10165'
   [../]
 []
