@@ -39,6 +39,10 @@ protected:
   const Real _m;
   /// van Genuchten capillary coefficient alpha
   const Real _alpha;
+  /// capillary pressure = f(Seff * s_scale) - pc_sscale, where f is the van Genuchten function.  For almost all simulations s_scale=1 will be appropriate
+  const Real _s_scale;
+  /// pc_sscale = f(s_scale), where f is the van Genuchten function
+  const Real _pc_sscale;
 };
 
 #endif // POROUSFLOWCAPILLARYPRESSUREVG_H

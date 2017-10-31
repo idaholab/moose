@@ -19,4 +19,9 @@
     input = 'vangenuchten2.i'
     csvdiff = 'vangenuchten2_out_vpp_0001.csv'
   [../]
+  [./vangenuchten3]
+    type = 'CSVDiff'
+    input = 'vangenuchten3.i'
+    csvdiff = 'vangenuchten3_out_vpp_0001.csv'
+  [../]
 []
