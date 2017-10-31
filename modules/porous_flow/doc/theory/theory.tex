@@ -1524,6 +1524,14 @@ I encourage users to set $m>0.5$.
 \label{van_genuchten_pc.fig}
 \end{figure}
 
+A modification of Eqn~(\ref{vg.cap.eqn}) is available where
+$S_{\mathrm{eff}}$ is replaced by $S_{\mathrm{eff}}r$ and $P_{c}$ by
+$P_{c} - P_{c}(r)$.  Here $0<r\leq 1$ is a scale factor.  This means
+the derivative $\mathrm{d}S_{\mathrm{eff}}/\mathrm{d}P_{c}\neq 0$ as
+$S_{\mathrm{eff}}\rightarrow 1$.  Occasionally setting $r<1$ is
+advantageous in fully-saturated 2-phase simulations that have the two
+porepressures as their independent nonlinear variables.
+
 \subsection{Broadbridge-White}
 
 The Broadbridge-White\footnote{P Broadbridge, I White ``Constant rate rainfall
