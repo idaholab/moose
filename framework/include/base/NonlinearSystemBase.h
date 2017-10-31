@@ -507,6 +507,7 @@ public:
     return _element_dampers;
   }
   const MooseObjectWarehouse<NodalDamper> & getNodalDamperWarehouse() { return _nodal_dampers; }
+  const ConstraintWarehouse & getConstraintWarehouse() { return _constraints; };
   //@}
 
   /**

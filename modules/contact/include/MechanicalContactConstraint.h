@@ -28,41 +28,46 @@ public:
   MechanicalContactConstraint(const InputParameters & parameters);
   virtual ~MechanicalContactConstraint() {}
 
-  virtual void timestepSetup();
-  virtual void jacobianSetup();
+  virtual void timestepSetup() override;
+  virtual void jacobianSetup() override;
+
+  virtual bool AugmentedLagrangianContactConverged();
+
+  virtual void updateAugmentedLagrangianMultiplier(bool beginning_of_step = false);
 
   virtual void updateContactSet(bool beginning_of_step = false);
 
-  virtual Real computeQpSlaveValue();
+  virtual Real computeQpSlaveValue() override;
 
-  virtual Real computeQpResidual(Moose::ConstraintType type);
+  virtual Real computeQpResidual(Moose::ConstraintType type) override;
 
   /**
    * Computes the jacobian for the current element.
    */
-  virtual void computeJacobian();
+  virtual void computeJacobian() override;
 
   /**
    * Compute off-diagonal Jacobian entries
    * @param jvar The index of the coupled variable
    */
-  virtual void computeOffDiagJacobian(unsigned int jvar);
+  virtual void computeOffDiagJacobian(unsigned int jvar) override;
 
-  virtual Real computeQpJacobian(Moose::ConstraintJacobianType type);
+  virtual Real computeQpJacobian(Moose::ConstraintJacobianType type) override;
 
   /**
    * Compute off-diagonal Jacobian entries
    * @param type The type of coupling
    * @param jvar The index of the coupled variable
    */
-  virtual Real computeQpOffDiagJacobian(Moose::ConstraintJacobianType type, unsigned int jvar);
+  virtual Real computeQpOffDiagJacobian(Moose::ConstraintJacobianType type,
+                                        unsigned int jvar) override;
 
   /**
    * Get the dof indices of the nodes connected to the slave node for a specific variable
    * @param var_num The number of the variable for which dof indices are gathered
    * @return bool indicating whether the coupled variable is one of the displacement variables
    */
-  virtual void getConnectedDofIndices(unsigned int var_num);
+  virtual void getConnectedDofIndices(unsigned int var_num) override;
 
   /**
    * Determine whether the coupled variable is one of the displacement variables,
@@ -73,14 +78,16 @@ public:
    */
   bool getCoupledVarComponent(unsigned int var_num, unsigned int & component);
 
-  virtual bool addCouplingEntriesToJacobian() { return _master_slave_jacobian; }
+  virtual bool addCouplingEntriesToJacobian() override { return _master_slave_jacobian; }
 
-  bool shouldApply();
+  bool shouldApply() override;
   void computeContactForce(PenetrationInfo * pinfo);
 
 protected:
+  MooseSharedPointer<DisplacedProblem> _displaced_problem;
   Real nodalArea(PenetrationInfo & pinfo);
   Real getPenalty(PenetrationInfo & pinfo);
+  Real getTangentialPenalty(PenetrationInfo & pinfo);
 
   const unsigned int _component;
   ContactModel _model;
@@ -88,6 +95,7 @@ protected:
   const bool _normalize_penalty;
 
   const Real _penalty;
+  Real _penalty_tangential;
   const Real _friction_coefficient;
   const Real _tension_release;
   const Real _capture_tolerance;
@@ -112,6 +120,13 @@ protected:
   const bool _connected_slave_nodes_jacobian;
   /// Whether to include coupling terms with non-displacement variables in the Jacobian
   const bool _non_displacement_vars_jacobian;
+
+  /// The tolerance of the penetration for augmented Lagrangian method
+  Real _al_penetration_tolerance;
+  /// The tolerance of the incremental slip for augmented Lagrangian method
+  Real _al_incremental_slip_tolerance;
+  /// The tolerance of the frictional force for augmented Lagrangian method
+  Real _al_frictional_force_tolerance;
 };
 
 #endif
