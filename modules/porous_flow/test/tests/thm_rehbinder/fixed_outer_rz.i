@@ -1,34 +1,28 @@
+# A version of fixed_outer.i that uses the RZ cylindrical coordinate system
 [Mesh]
-  type = AnnularMesh
-  nr = 40
-  nt = 16
-  rmin = 0.1
-  rmax = 1
-  tmin = 0.0
-  tmax = 1.570796326795
-  growth_r = 1.1
+  type = GeneratedMesh
+  dim = 2
+  nx = 40 # this is the r direction
+  ny = 1 # this is the height direction
+  xmin = 0.1
+  xmax = 1
+  bias_x = 1.1
+  ymin = 0.0
+  ymax = 1.0
 []
 
-[MeshModifiers]
-  [./make3D]
-    type = MeshExtruder
-    bottom_sideset = bottom
-    top_sideset = top
-    extrusion_vector = '0 0 1'
-    num_layers = 1
-  [../]
+[Problem]
+  coord_type = RZ
 []
 
 [GlobalParams]
-  displacements = 'disp_x disp_y disp_z'
+  displacements = 'disp_r disp_z'
   PorousFlowDictator = dictator
   biot_coefficient = 1.0
 []
 
 [Variables]
-  [./disp_x]
-  [../]
-  [./disp_y]
+  [./disp_r]
   [../]
   [./disp_z]
   [../]
@@ -39,55 +33,31 @@
 []
 
 [BCs]
-  # sideset 1 = outer
-  # sideset 2 = cavity
-  # sideset 3 = ymin
-  # sideset 4 = xmin
   [./plane_strain]
     type = PresetBC
     variable = disp_z
     value = 0
     boundary = 'top bottom'
   [../]
-  [./ymin]
-    type = PresetBC
-    variable = disp_y
-    value = 0
-    boundary = tmin
-  [../]
-  [./xmin]
-    type = PresetBC
-    variable = disp_x
-    value = 0
-    boundary = tmax
-  [../]
 
   [./cavity_temperature]
     type = DirichletBC
     variable = temperature
     value = 1000
-    boundary = rmin
+    boundary = left
   [../]
   [./cavity_porepressure]
     type = DirichletBC
     variable = porepressure
     value = 1E6
-    boundary = rmin
+    boundary = left
   [../]
   [./cavity_zero_effective_stress_x]
     type = Pressure
     component = 0
-    variable = disp_x
+    variable = disp_r
     function = 1E6
-    boundary = rmin
-    use_displaced_mesh = false
-  [../]
-  [./cavity_zero_effective_stress_y]
-    type = Pressure
-    component = 1
-    variable = disp_y
-    function = 1E6
-    boundary = rmin
+    boundary = left
     use_displaced_mesh = false
   [../]
 
@@ -95,13 +65,19 @@
     type = PresetBC
     variable = temperature
     value = 0
-    boundary = rmax
+    boundary = right
   [../]
   [./outer_pressure]
     type = PresetBC
     variable = porepressure
     value = 0
-    boundary = rmax
+    boundary = right
+  [../]
+  [./fixed_outer_disp]
+    type = PresetBC
+    variable = disp_r
+    value = 0
+    boundary = right
   [../]
 []
 
@@ -118,20 +94,18 @@
 
 [AuxKernels]
   [./stress_rr]
-    type = RankTwoScalarAux
+    type = RankTwoAux
     rank_two_tensor = stress
     variable = stress_rr
-    scalar_type = RadialStress
-    point1 = '0 0 0'
-    point2 = '0 0 1'
+    index_i = 0
+    index_j = 0
   [../]
-  [./stress_pp]
-    type = RankTwoScalarAux
+  [./stress_pp] # hoop stress
+    type = RankTwoAux
     rank_two_tensor = stress
     variable = stress_pp
-    scalar_type = HoopStress
-    point1 = '0 0 0'
-    point2 = '0 0 1'
+    index_i = 2
+    index_j = 2
   [../]
 []
 
@@ -169,7 +143,7 @@
     poissons_ratio = 0.2
   [../]
   [./strain]
-    type = ComputeSmallStrain
+    type = ComputeAxisymmetricRZSmallStrain
     eigenstrain_names = thermal_contribution
   [../]
   [./thermal_contribution]
@@ -192,7 +166,7 @@
   [../]
   [./permeability]
     type = PorousFlowPermeabilityConst
-    permeability = '1E-12 0 0   0 1E-12 0   0 0 1E-12'
+    permeability = '1E-12 0 0   0 1E-12 0   0 0 1E-12' # note this is ordered: rr, zz, angle-angle
   [../]
   [./thermal_expansion]
     type = PorousFlowConstantThermalExpansionCoefficient
@@ -201,7 +175,7 @@
   [../]
   [./thermal_conductivity]
     type = PorousFlowThermalConductivityIdeal
-    dry_thermal_conductivity = '1E6 0 0  0 1E6 0  0 0 1E6'
+    dry_thermal_conductivity = '1E6 0 0  0 1E6 0  0 0 1E6' # note this is ordered: rr, zz, angle-angle
   [../]
 []
 
@@ -228,7 +202,7 @@
     end_point = '1.0 0 0'
     num_points = 10
     sort_by = x
-    variable = disp_x
+    variable = disp_r
   [../]
 []
 
@@ -247,7 +221,7 @@
 []
 
 [Outputs]
-  file_base = free_outer
+  file_base = fixed_outer_rz
   execute_on = timestep_end
   csv = true
 []

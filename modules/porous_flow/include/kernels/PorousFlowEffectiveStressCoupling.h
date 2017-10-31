@@ -46,6 +46,9 @@ protected:
 
   /// d(effective porepressure)/(d porflow variable)
   const MaterialProperty<std::vector<Real>> & _dpf_dvar;
+
+  /// Whether an RZ coordinate system is being used
+  const bool _rz;
 };
 
 #endif // POROUSFLOWEFFECTIVESTRESSCOUPLING_H

@@ -165,6 +165,7 @@
   simulation_type = steady
   porepressure = porepressure
   temperature = temperature
+  thermal_eigenstrain_name = thermal_contribution
   gravity = '0 0 0'
   fp = the_simple_fluid
 []

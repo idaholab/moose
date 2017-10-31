@@ -61,6 +61,9 @@ protected:
   /// displacement Variable names
   std::vector<VariableName> _coupled_displacements;
 
+  /// Coordinate system of the simulation (eg RZ, XYZ, etc)
+  Moose::CoordinateSystemType _coord_system;
+
   /**
    * add the PorousFlowDictator object
    */
