@@ -93,40 +93,29 @@ InterfaceKernel::InterfaceKernel(const InputParameters & parameters)
     _assembly(_subproblem.assembly(_tid)),
     _var(_sys.getVariable(_tid, parameters.get<NonlinearVariableName>("variable"))),
     _mesh(_subproblem.mesh()),
-
     _current_elem(_assembly.elem()),
     _current_elem_volume(_assembly.elemVolume()),
-
     _neighbor_elem(_assembly.neighbor()),
-
     _current_side(_assembly.side()),
     _current_side_elem(_assembly.sideElem()),
     _current_side_volume(_assembly.sideElemVolume()),
-
     _coord_sys(_assembly.coordSystem()),
     _q_point(_assembly.qPointsFace()),
     _qrule(_assembly.qRuleFace()),
     _JxW(_assembly.JxWFace()),
     _coord(_assembly.coordTransformation()),
-
     _u(_is_implicit ? _var.sln() : _var.slnOld()),
     _grad_u(_is_implicit ? _var.gradSln() : _var.gradSlnOld()),
-
     _phi(_assembly.phiFace()),
     _grad_phi(_assembly.gradPhiFace()),
-
     _test(_var.phiFace()),
     _grad_test(_var.gradPhiFace()),
-
     _normals(_var.normals()),
-
     _neighbor_var(*getVar("neighbor_var", 0)),
     _neighbor_value(_neighbor_var.slnNeighbor()),
     _grad_neighbor_value(_neighbor_var.gradSlnNeighbor()),
-
     _phi_neighbor(_assembly.phiFaceNeighbor()),
     _grad_phi_neighbor(_assembly.gradPhiFaceNeighbor()),
-
     _test_neighbor(_neighbor_var.phiFaceNeighbor()),
     _grad_test_neighbor(_neighbor_var.gradPhiFaceNeighbor()),
     _save_in_var_side(parameters.get<MultiMooseEnum>("save_in_var_side")),
