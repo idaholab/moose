@@ -151,6 +151,9 @@ protected:
    */
   std::map<Real, std::map<std::string, Real>> _data;
 
+  /// Alignment widths (only used if asked to print aligned to CSV output)
+  std::map<std::string, unsigned int> _align_widths;
+
   /// The set of column names updated when data is inserted through the setter methods
   std::vector<std::string> _column_names;
 
@@ -164,14 +167,22 @@ private:
   /// Close the underlying output file stream if any. This is idempotent.
   void close();
 
-  /// Open or switch the underlying file stream to point to file_name. This is
-  /// idempotent.
+  /// Open or switch the underlying file stream to point to file_name. This is idempotent.
   void open(const std::string & file_name);
+
+  void printRow(std::pair<const Real, std::map<std::string, Real>> & row_data, bool align);
 
   /// The optional output file stream
   std::string _output_file_name;
+
+  /// The stream handle (corresponds to _output_file_name)
   std::ofstream _output_file;
+
+  /// Keeps track of whether the current stream is open or not.
   bool _stream_open;
+
+  /// Keeps track of whether or not the header has been printed to the current stream.
+  bool _header_printed;
 
   /// The last key value inserted
   Real _last_key;

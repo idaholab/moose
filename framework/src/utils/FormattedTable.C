@@ -34,11 +34,7 @@ dataStore(std::ostream & stream, FormattedTable & table, void * context)
 {
   storeHelper(stream, table._data, context);
   storeHelper(stream, table._column_names, context);
-
-  // Don't store these
-  // _output_file
-  // _stream_open
-
+  storeHelper(stream, table._header_printed, context);
   storeHelper(stream, table._last_key, context);
 }
 
@@ -47,13 +43,12 @@ void
 dataLoad(std::istream & stream, FormattedTable & table, void * context)
 {
   loadHelper(stream, table._data, context);
-
   loadHelper(stream, table._column_names, context);
-
-  table._stream_open = false;
-  // table.close();
-
+  loadHelper(stream, table._header_printed, context);
   loadHelper(stream, table._last_key, context);
+
+  // Don't assume that the stream is open if we've restored.
+  table._stream_open = false;
 }
 
 void
@@ -70,16 +65,22 @@ FormattedTable::close()
 void
 FormattedTable::open(const std::string & file_name)
 {
-  if (!_stream_open && _output_file_name == file_name)
+  if (_stream_open && _output_file_name == file_name)
     return;
   close();
   _output_file_name = file_name;
   _output_file.open(file_name.c_str(), std::ios::trunc | std::ios::out);
   _stream_open = true;
+  _header_printed = false;
 }
 
 FormattedTable::FormattedTable()
-  : _stream_open(false), _last_key(-1), _output_time(true), _csv_delimiter(","), _csv_precision(14)
+  : _stream_open(false),
+    _header_printed(false),
+    _last_key(-1),
+    _output_time(true),
+    _csv_delimiter(","),
+    _csv_precision(14)
 {
 }
 
@@ -87,6 +88,7 @@ FormattedTable::FormattedTable(const FormattedTable & o)
   : _column_names(o._column_names),
     _output_file_name(""),
     _stream_open(o._stream_open),
+    _header_printed(o._header_printed),
     _last_key(o._last_key),
     _output_time(o._output_time),
     _csv_delimiter(","),
@@ -284,107 +286,121 @@ void
 FormattedTable::printCSV(const std::string & file_name, int interval, bool align)
 {
   open(file_name);
-  _output_file.seekp(0, std::ios::beg);
 
-  /* When the alignment option is set to true, the widths of the columns needs to be computed based
-   * on
-   * longest of the column name of the data supplied. This is done here by creating a map of the
-   * widths for each of the columns, including time */
-  std::map<std::string, unsigned int> width;
-  if (align)
+  if (!_header_printed)
   {
-    // Set the initial width to the names of the columns
-    width["time"] = 4;
-
-    for (const auto & col_name : _column_names)
-      width[col_name] = col_name.size();
-
-    // Loop through the various times
-    for (const auto & it : _data)
+    /**
+     * When the alignment option is set to true, the widths of the columns needs to be computed
+     * based on longest of the column name of the data supplied. This is done here by creating a map
+     * of the widths for each of the columns, including time
+     */
+    if (align)
     {
-      // Update the time width
+      // Set the initial width to the names of the columns
+      _align_widths["time"] = 4;
+
+      for (const auto & col_name : _column_names)
+        _align_widths[col_name] = col_name.size();
+
+      // Loop through the various times
+      for (const auto & it : _data)
       {
-        std::ostringstream oss;
-        oss << std::setprecision(_csv_precision) << it.first;
-        unsigned int w = oss.str().size();
-        width["time"] = std::max(width["time"], w);
+        // Update the time _align_width
+        {
+          std::ostringstream oss;
+          oss << std::setprecision(_csv_precision) << it.first;
+          unsigned int w = oss.str().size();
+          _align_widths["time"] = std::max(_align_widths["time"], w);
+        }
+
+        // Loop through the data for the current time and update the _align_widths
+        for (const auto & jt : it.second)
+        {
+          std::ostringstream oss;
+          oss << std::setprecision(_csv_precision) << jt.second;
+          unsigned int w = oss.str().size();
+          _align_widths[jt.first] = std::max(_align_widths[jt.first], w);
+        }
       }
-
-      // Loop through the data for the current time and update the widths
-      for (const auto & jt : it.second)
-      {
-        std::ostringstream oss;
-        oss << std::setprecision(_csv_precision) << jt.second;
-        unsigned int w = oss.str().size();
-        width[jt.first] = std::max(width[jt.first], w);
-      }
-    }
-  }
-
-  { // Output Header
-    bool first = true;
-
-    if (_output_time)
-    {
-      if (align)
-        _output_file << std::setw(width["time"]) << "time";
-      else
-        _output_file << "time";
-      first = false;
     }
 
-    for (const auto & col_name : _column_names)
-    {
-      if (!first)
-        _output_file << _csv_delimiter;
-
-      if (align)
-        _output_file << std::right << std::setw(width[col_name]) << col_name;
-      else
-        _output_file << col_name;
-      first = false;
-    }
-  }
-
-  _output_file << "\n";
-
-  int counter = 0;
-  for (auto & i : _data)
-  {
-    if (counter++ % interval == 0)
-    {
+    { // Output Header
       bool first = true;
 
       if (_output_time)
       {
         if (align)
-          _output_file << std::setprecision(_csv_precision) << std::right
-                       << std::setw(width["time"]) << i.first;
+          _output_file << std::setw(_align_widths["time"]) << "time";
         else
-          _output_file << std::setprecision(_csv_precision) << i.first;
+          _output_file << "time";
         first = false;
       }
 
       for (const auto & col_name : _column_names)
       {
-        std::map<std::string, Real> & tmp = i.second;
-
         if (!first)
           _output_file << _csv_delimiter;
-        else
-          first = false;
 
         if (align)
-          _output_file << std::setprecision(_csv_precision) << std::right
-                       << std::setw(width[col_name]) << tmp[col_name];
+          _output_file << std::right << std::setw(_align_widths[col_name]) << col_name;
         else
-          _output_file << std::setprecision(_csv_precision) << tmp[col_name];
+          _output_file << col_name;
+        first = false;
       }
-      _output_file << "\n";
+    }
+
+    _output_file << "\n";
+    _header_printed = true;
+  }
+
+  if (false)
+  {
+    int counter = 0;
+    for (auto & i : _data)
+    {
+      if (counter++ % interval == 0)
+        printRow(i, align);
     }
   }
-  _output_file << "\n";
+  else
+  {
+    printRow(*(_data.rbegin()), align);
+  }
+
   _output_file.flush();
+}
+
+void
+FormattedTable::printRow(std::pair<const Real, std::map<std::string, Real>> & row_data, bool align)
+{
+  bool first = true;
+
+  if (_output_time)
+  {
+    if (align)
+      _output_file << std::setprecision(_csv_precision) << std::right
+                   << std::setw(_align_widths["time"]) << row_data.first;
+    else
+      _output_file << std::setprecision(_csv_precision) << row_data.first;
+    first = false;
+  }
+
+  for (const auto & col_name : _column_names)
+  {
+    std::map<std::string, Real> & tmp = row_data.second;
+
+    if (!first)
+      _output_file << _csv_delimiter;
+    else
+      first = false;
+
+    if (align)
+      _output_file << std::setprecision(_csv_precision) << std::right
+                   << std::setw(_align_widths[col_name]) << tmp[col_name];
+    else
+      _output_file << std::setprecision(_csv_precision) << tmp[col_name];
+  }
+  _output_file << "\n";
 }
 
 // const strings that the gnuplot generator needs
