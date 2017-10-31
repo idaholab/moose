@@ -3,7 +3,6 @@
   dim = 1
   nx = 10
   xmax = 2
-  elem_type = EDGE3
 []
 
 [MeshModifiers]
@@ -38,8 +37,8 @@
 
 
   [./v]
-    order = SECOND
-    family = LAGRANGE
+    order = FIRST
+    family = MONOMIAL
     block = '1'
   [../]
 []
@@ -61,24 +60,34 @@
     type = BodyForce
     variable = u
     block = 0
-    function = 'x'
+    function = 'x^3+x^2+x+1'
   [../]
   [./body_v]
     type = BodyForce
     variable = v
     block = 1
-    function = 'x'
+    function = 'x^3+x^2+x+1'
+  [../]
+[]
+
+[DGKernels]
+  [./dg_diff_v]
+    type = DGDiffusion
+    variable = v
+    block = 1
+    diff = 2
+    sigma = 6
+    epsilon = -1
   [../]
 []
 
 [InterfaceKernels]
   [./interface]
-    type = InterfaceDiffusion
+    type = OneSideDiffusion
     variable = u
     neighbor_var = v
     boundary = master0_interface
     D = 4
-    D_neighbor = 2
   [../]
 []
 
@@ -89,17 +98,25 @@
     boundary = 'left'
     value = 1
   [../]
+  # [./right]
+  #   type = DirichletBC
+  #   variable = v
+  #   boundary = 'right'
+  #   value = 0
+  # [../]
   [./right]
-    type = DirichletBC
+    type = DGFunctionDiffusionDirichletBC
     variable = v
     boundary = 'right'
-    value = 0
+    function = 0
+    epsilon = -1
+    sigma = 6
   [../]
   [./middle]
-    type = MatchedValueBC
-    variable = v
+    type = NeumannBC
+    variable = u
     boundary = 'master0_interface'
-    v = u
+    value = '.5'
   [../]
 []
 
