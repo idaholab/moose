@@ -193,6 +193,8 @@
     biot_coefficient = 0.5
     solid_bulk = 1
     thermal_expansion_coeff = 0.1
+    reference_temperature = 0.1
+    reference_porepressure = 0.2
   [../]
   [./rock_heat]
     type = PorousFlowMatrixInternalEnergy
