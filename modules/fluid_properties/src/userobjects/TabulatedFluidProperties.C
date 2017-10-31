@@ -22,20 +22,16 @@ validParams<TabulatedFluidProperties>()
                             "Name of the csv file containing the tabulated fluid property data");
   params.addRangeCheckedParam<Real>("temperature_min",
                                     300.0,
-                                    "temperature_min >= 273.15",
+                                    "temperature_min > 0",
                                     "Minimum temperature for tabulated data. Default is 300 K)");
-  params.addRangeCheckedParam<Real>("temperature_max",
-                                    500.0,
-                                    "temperature_max <= 1000.0",
-                                    "Maximum temperature for tabulated data. Default is 500 K");
+  params.addParam<Real>(
+      "temperature_max", 500.0, "Maximum temperature for tabulated data. Default is 500 K");
   params.addRangeCheckedParam<Real>("pressure_min",
                                     1.0e5,
-                                    "pressure_min >= 1.0e5",
+                                    "pressure_min > 0",
                                     "Minimum pressure for tabulated data. Default is 0.1 MPa)");
-  params.addRangeCheckedParam<Real>("pressure_max",
-                                    50.0e6,
-                                    "pressure_max <= 800.0e6",
-                                    "Maximum pressure for tabulated data. Default is 50 MPa");
+  params.addParam<Real>(
+      "pressure_max", 50.0e6, "Maximum pressure for tabulated data. Default is 50 MPa");
   params.addRangeCheckedParam<unsigned int>(
       "num_T", 100, "num_T > 0", "Number of points to divide temperature range. Default is 100");
   params.addRangeCheckedParam<unsigned int>(
