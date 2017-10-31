@@ -35,7 +35,8 @@ PorousFlowEffectiveStressCoupling::PorousFlowEffectiveStressCoupling(
     _component(getParam<unsigned int>("component")),
     _pf(getMaterialProperty<Real>("PorousFlow_effective_fluid_pressure_qp")),
     _dpf_dvar(
-        getMaterialProperty<std::vector<Real>>("dPorousFlow_effective_fluid_pressure_qp_dvar"))
+        getMaterialProperty<std::vector<Real>>("dPorousFlow_effective_fluid_pressure_qp_dvar")),
+    _rz(getBlockCoordSystem() == Moose::COORD_RZ)
 {
   if (_component >= _mesh.dimension())
     mooseError("PorousFlowEffectiveStressCoupling: component should not be greater than the mesh "
@@ -45,6 +46,8 @@ PorousFlowEffectiveStressCoupling::PorousFlowEffectiveStressCoupling(
 Real
 PorousFlowEffectiveStressCoupling::computeQpResidual()
 {
+  if (_rz && _component == 0)
+    return -_coefficient * _pf[_qp] * (_grad_test[_i][_qp](0) + _test[_i][_qp] / _q_point[_qp](0));
   return -_coefficient * _pf[_qp] * _grad_test[_i][_qp](_component);
 }
 
@@ -54,6 +57,9 @@ PorousFlowEffectiveStressCoupling::computeQpJacobian()
   if (_dictator.notPorousFlowVariable(_var.number()))
     return 0.0;
   const unsigned int pvar = _dictator.porousFlowVariableNum(_var.number());
+  if (_rz && _component == 0)
+    return -_coefficient * _phi[_j][_qp] * _dpf_dvar[_qp][pvar] *
+           (_grad_test[_i][_qp](0) + _test[_i][_qp] / _q_point[_qp](0));
   return -_coefficient * _phi[_j][_qp] * _dpf_dvar[_qp][pvar] * _grad_test[_i][_qp](_component);
 }
 
@@ -63,5 +69,8 @@ PorousFlowEffectiveStressCoupling::computeQpOffDiagJacobian(unsigned int jvar)
   if (_dictator.notPorousFlowVariable(jvar))
     return 0.0;
   const unsigned int pvar = _dictator.porousFlowVariableNum(jvar);
+  if (_rz && _component == 0)
+    return -_coefficient * _phi[_j][_qp] * _dpf_dvar[_qp][pvar] *
+           (_grad_test[_i][_qp](0) + _test[_i][_qp] / _q_point[_qp](0));
   return -_coefficient * _phi[_j][_qp] * _dpf_dvar[_qp][pvar] * _grad_test[_i][_qp](_component);
 }

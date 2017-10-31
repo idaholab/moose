@@ -7,6 +7,7 @@
 #include "PorousFlowActionBase.h"
 
 #include "FEProblem.h"
+#include "MooseMesh.h"
 #include "libmesh/string_to_enum.h"
 #include "Conversion.h"
 
@@ -42,6 +43,13 @@ validParams<PorousFlowActionBase>()
       "displacements",
       "The name of the displacement variables (relevant only for "
       "mechanically-coupled simulations)");
+  params.addParam<std::string>("thermal_eigenstrain_name",
+                               "thermal_eigenstrain",
+                               "The eigenstrain_name used in the "
+                               "ComputeThermalExpansionEigenstrain.  Only needed for "
+                               "thermally-coupled simulations with thermal expansion.");
+  params.addParam<bool>(
+      "use_displaced_mesh", false, "Use displaced mesh computations in mechanical kernels");
   return params;
 }
 
@@ -66,6 +74,15 @@ PorousFlowActionBase::PorousFlowActionBase(const InputParameters & params)
 void
 PorousFlowActionBase::act()
 {
+  const auto & all_subdomains = _problem->mesh().meshSubdomains();
+  if (all_subdomains.empty())
+    mooseError("No subdomains found");
+  _coord_system = _problem->getCoordSystem(*all_subdomains.begin());
+  for (const auto & subdomain : all_subdomains)
+    if (_problem->getCoordSystem(subdomain) != _coord_system)
+      mooseError(
+          "The PorousFlow Actions require all subdomains to have the same coordinate system.");
+
   if (_current_task == "add_user_object")
     addDictator();
 }

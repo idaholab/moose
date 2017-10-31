@@ -103,6 +103,14 @@ problems rarely explore the $S_{\mathrm{eff}}\sim 0$ region.
 
 !media media/porous_flow/van_genuchten_pc.png width=80% margin-left=10px caption=Three values of $m$ are shown: 0.5, 0.7 and 0.9 id=van_genuchten_pc
 
+A modification of Eq \eqref{eq:vg_cap} is available where
+$S_{\mathrm{eff}}$ is replaced by $S_{\mathrm{eff}}r$ and $P_{c}$ by
+$P_{c} - P_{c}(r)$.  Here $0<r\leq 1$ is a scale factor.  This means
+the derivative $\mathrm{d}S_{\mathrm{eff}}/\mathrm{d}P_{c}\neq 0$ as
+$S_{\mathrm{eff}}\rightarrow 1$.  Occasionally setting $r<1$ is
+advantageous in fully-saturated 2-phase simulations that have the two
+porepressures as their independent nonlinear variables.
+
 ##Brooks-Corey
 [`PorousFlowCapillaryPressureBC`](/porous_flow/PorousFlowCapillaryPressureBC.md)
 
