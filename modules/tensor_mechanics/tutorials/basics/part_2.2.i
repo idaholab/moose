@@ -4,7 +4,6 @@
 
 [GlobalParams]
   displacements = 'disp_r disp_z'
-  use_displaced_mesh = true
 []
 
 [Problem]
@@ -28,6 +27,7 @@
 
 [Kernels]
   [./TensorMechanics]
+    use_displaced_mesh = true
   [../]
 []
 
