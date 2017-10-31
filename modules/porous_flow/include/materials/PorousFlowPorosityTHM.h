@@ -18,8 +18,9 @@ InputParameters validParams<PorousFlowPorosityTHM>();
 
 /**
  * Material designed to provide the porosity in thermo-hydro-mechanical simulations
- * biot + (phi0 - biot)*exp(-vol_strain + coeff * effective_pressure + thermal_exp_coeff *
- * temperature)
+ * biot + (phi0 - biot) * exp(-vol_strain
+ *    + coeff * (effective_pressure - reference_pressure)
+ *    + thermal_exp_coeff * (temperature - reference_temperature))
  */
 class PorousFlowPorosityTHM : public PorousFlowPorosityExponentialBase
 {
@@ -47,6 +48,12 @@ protected:
 
   /// short-hand number (biot-1)/solid_bulk
   const Real _coeff;
+
+  /// reference temperature
+  const VariableValue & _t_reference;
+
+  /// reference porepressure
+  const VariableValue & _p_reference;
 
   /// number of displacement variables
   const unsigned int _ndisp;

@@ -13,8 +13,9 @@ validParams<PorousFlowPorosityTHM>()
 {
   InputParameters params = validParams<PorousFlowPorosityExponentialBase>();
   params.addRequiredCoupledVar("porosity_zero",
-                               "The porosity at zero volumetric strain and zero "
-                               "temperature and zero effective porepressure");
+                               "The porosity at zero volumetric strain and "
+                               "reference temperature and reference effective "
+                               "porepressure");
   params.addRequiredParam<Real>(
       "thermal_expansion_coeff",
       "Thermal expansion coefficient of the drained porous solid skeleton");
@@ -23,6 +24,12 @@ validParams<PorousFlowPorosityTHM>()
   params.addRequiredRangeCheckedParam<Real>(
       "solid_bulk", "solid_bulk>0", "Bulk modulus of the drained porous solid skeleton");
   params.addRequiredCoupledVar("displacements", "The solid-mechanics displacement variables");
+  params.addCoupledVar("reference_temperature",
+                       0.0,
+                       "porosity = porosity_zero at reference temperature and pressure");
+  params.addCoupledVar("reference_porepressure",
+                       0.0,
+                       "porosity = porosity_zero at reference temperature and pressure");
   params.addClassDescription(
       "This Material calculates the porosity for hydro-mechanical simulations");
   return params;
@@ -36,6 +43,11 @@ PorousFlowPorosityTHM::PorousFlowPorosityTHM(const InputParameters & parameters)
     _exp_coeff(getParam<Real>("thermal_expansion_coeff")),
     _solid_bulk(getParam<Real>("solid_bulk")),
     _coeff((_biot - 1.0) / _solid_bulk),
+
+    _t_reference(_nodal_material ? coupledNodalValue("reference_temperature")
+                                 : coupledValue("reference_temperature")),
+    _p_reference(_nodal_material ? coupledNodalValue("reference_porepressure")
+                                 : coupledValue("reference_porepressure")),
 
     _ndisp(coupledComponents("displacements")),
     _disp_var_num(_ndisp),
@@ -84,7 +96,8 @@ PorousFlowPorosityTHM::decayQp() const
   const unsigned qp_to_use =
       (_nodal_material && (_bnd || _strain_at_nearest_qp) ? nearestQP(_qp) : _qp);
 
-  return -_vol_strain_qp[qp_to_use] + _coeff * _pf[_qp] + _exp_coeff * _temperature[_qp];
+  return -_vol_strain_qp[qp_to_use] + _coeff * (_pf[_qp] - _p_reference[_qp]) +
+         _exp_coeff * (_temperature[_qp] - _t_reference[_qp]);
 }
 
 Real

@@ -13,13 +13,13 @@ validParams<PorousFlowPorosityTM>()
 {
   InputParameters params = validParams<PorousFlowPorosityExponentialBase>();
   params.addRequiredCoupledVar("porosity_zero",
-                               "The porosity at zero volumetric strain and zero temperature");
+                               "The porosity at zero volumetric strain and reference temperature");
   params.addRequiredParam<Real>(
       "thermal_expansion_coeff",
       "Thermal expansion coefficient of the drained porous solid skeleton");
-  params.addRequiredRangeCheckedParam<Real>(
-      "solid_bulk", "solid_bulk>0", "Bulk modulus of the drained porous solid skeleton");
   params.addRequiredCoupledVar("displacements", "The solid-mechanics displacement variables");
+  params.addCoupledVar(
+      "reference_temperature", 0.0, "porosity = porosity_zero at reference temperature");
   params.addClassDescription(
       "This Material calculates the porosity for hydro-mechanical simulations");
   return params;
@@ -30,7 +30,9 @@ PorousFlowPorosityTM::PorousFlowPorosityTM(const InputParameters & parameters)
 
     _phi0(_nodal_material ? coupledNodalValue("porosity_zero") : coupledValue("porosity_zero")),
     _exp_coeff(getParam<Real>("thermal_expansion_coeff")),
-    _solid_bulk(getParam<Real>("solid_bulk")),
+
+    _t_reference(_nodal_material ? coupledNodalValue("reference_temperature")
+                                 : coupledValue("reference_temperature")),
 
     _ndisp(coupledComponents("displacements")),
     _disp_var_num(_ndisp),
@@ -70,7 +72,7 @@ PorousFlowPorosityTM::decayQp() const
   // is OK for LINEAR elements, as strain is constant over the element anyway.
   const unsigned qp_to_use =
       (_nodal_material && (_bnd || _strain_at_nearest_qp) ? nearestQP(_qp) : _qp);
-  return -_vol_strain_qp[qp_to_use] + _exp_coeff * _temperature[_qp];
+  return -_vol_strain_qp[qp_to_use] + _exp_coeff * (_temperature[_qp] - _t_reference[_qp]);
 }
 
 Real

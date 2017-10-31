@@ -18,7 +18,8 @@ InputParameters validParams<PorousFlowPorosityHM>();
 
 /**
  * Material designed to provide the porosity in hydro-mechanical simulations
- * biot + (phi0 - biot)*exp(-vol_strain + (biot-1)effective_porepressure/solid_bulk)
+ * biot + (phi0 - biot)*exp(-vol_strain +
+ * (biot-1)*(effective_porepressure-reference_pressure)/solid_bulk)
  */
 class PorousFlowPorosityHM : public PorousFlowPorosityExponentialBase
 {
@@ -43,6 +44,9 @@ protected:
 
   /// short-hand number (biot-1)/solid_bulk
   const Real _coeff;
+
+  /// reference porepressure
+  const VariableValue & _p_reference;
 
   /// number of displacement variables
   const unsigned int _ndisp;
