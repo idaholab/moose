@@ -541,13 +541,10 @@ NonlinearSystemBase::computeResidual(NumericVector<Number> & residual, Moose::Ke
   try
   {
     residual.zero();
-    if (_Re_time)
-      _Re_time->zero();
-    _Re_non_time->zero();
+    zeroTaggedVectors();
     computeResidualInternal(type);
-    if (_Re_time)
-      _Re_time->close();
-    _Re_non_time->close();
+    closeTaggedVectors();
+
     if (_time_integrator)
       _time_integrator->postResidual(residual);
     else
@@ -555,6 +552,7 @@ NonlinearSystemBase::computeResidual(NumericVector<Number> & residual, Moose::Ke
     residual.close();
 
     computeNodalBCs(residual, type);
+    closeTaggedVectors();
 
     // If we are debugging residuals we need one more assignment to have the ghosted copy up to date
     if (_need_residual_ghosted && _debugging_residuals)

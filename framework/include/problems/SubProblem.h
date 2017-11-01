@@ -95,10 +95,17 @@ public:
    */
   virtual TagName vectorTagName(TagID tag);
 
+  std::map<TagName, TagID> & getVectorTag() { return _vector_tag_name_to_tag_id; }
+
   /**
    * Check to see if a particular Tag exists
    */
   virtual bool vectorTagExists(TagID tag) { return tag < _vector_tag_name_to_tag_id.size(); }
+
+  /**
+   * Check to see if a particular Tag exists by using Tag name
+   */
+  virtual bool vectorTagExists(const TagName & tag_name);
 
   /**
    * The total number of tags

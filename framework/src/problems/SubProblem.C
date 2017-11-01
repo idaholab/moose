@@ -55,17 +55,26 @@ SubProblem::~SubProblem() {}
 TagID
 SubProblem::addVectorTag(TagName tag_name)
 {
-  auto existing_tag = _vector_tag_name_to_tag_id.find(tag_name);
+  auto tag_name_upper = MooseUtils::toUpper(tag_name);
+  auto existing_tag = _vector_tag_name_to_tag_id.find(tag_name_upper);
   if (existing_tag == _vector_tag_name_to_tag_id.end())
   {
     auto tag_id = _vector_tag_name_to_tag_id.size();
 
-    _vector_tag_name_to_tag_id[tag_name] = tag_id;
+    _vector_tag_name_to_tag_id[tag_name_upper] = tag_id;
 
-    _vector_tag_id_to_tag_name[tag_id] = tag_name;
+    _vector_tag_id_to_tag_name[tag_id] = tag_name_upper;
   }
 
-  return _vector_tag_name_to_tag_id.at(tag_name);
+  return _vector_tag_name_to_tag_id.at(tag_name_upper);
+}
+
+bool
+SubProblem::vectorTagExists(const TagName & tag_name)
+{
+  auto tag_name_upper = MooseUtils::toUpper(tag_name);
+
+  return _vector_tag_name_to_tag_id.find(tag_name_upper) != _vector_tag_name_to_tag_id.end();
 }
 
 void
@@ -93,17 +102,18 @@ SubProblem::vectorTagName(TagID tag)
 TagID
 SubProblem::addMatrixTag(TagName tag_name)
 {
-  auto existing_tag = _matrix_tag_name_to_tag_id.find(tag_name);
+  auto tag_name_upper = MooseUtils::toUpper(tag_name);
+  auto existing_tag = _matrix_tag_name_to_tag_id.find(tag_name_upper);
   if (existing_tag == _matrix_tag_name_to_tag_id.end())
   {
     auto tag_id = _matrix_tag_name_to_tag_id.size();
 
-    _matrix_tag_name_to_tag_id[tag_name] = tag_id;
+    _matrix_tag_name_to_tag_id[tag_name_upper] = tag_id;
 
-    _matrix_tag_id_to_tag_name[tag_id] = tag_name;
+    _matrix_tag_id_to_tag_name[tag_id] = tag_name_upper;
   }
 
-  return _matrix_tag_name_to_tag_id.at(tag_name);
+  return _matrix_tag_name_to_tag_id.at(tag_name_upper);
 }
 
 void

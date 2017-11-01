@@ -50,6 +50,12 @@ protected:
   /// Value of the unknown variable this BC is acting on
   const VariableValue & _u;
 
+  /// The vectors this Kernel will contribute to
+  std::vector<TagID> _vector_tags;
+
+  /// The matrices this Kernel will contribute to
+  std::vector<TagID> _matrix_tags;
+
   virtual Real computeQpResidual() = 0;
 
   /**

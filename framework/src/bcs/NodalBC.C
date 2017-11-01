@@ -12,12 +12,38 @@
 #include "Assembly.h"
 #include "MooseVariableFEImpl.h"
 #include "SystemBase.h"
+#include "NonlinearSystemBase.h"
 
 template <>
 InputParameters
 validParams<NodalBC>()
 {
-  return validParams<NodalBCBase>();
+  InputParameters params = validParams<NodalBCBase>();
+  params += validParams<RandomInterface>();
+  params.addParam<std::vector<AuxVariableName>>(
+      "save_in",
+      "The name of auxiliary variables to save this BC's residual contributions to.  "
+      "Everything about that variable must match everything about this variable (the "
+      "type, what blocks it's on, etc.)");
+  params.addParam<std::vector<AuxVariableName>>(
+      "diag_save_in",
+      "The name of auxiliary variables to save this BC's diagonal jacobian "
+      "contributions to.  Everything about that variable must match everything "
+      "about this variable (the type, what blocks it's on, etc.)");
+
+  // These are the default names for tags, but users will be able to add their own
+  MultiMooseEnum vtags("nontime time", "nontime", true);
+  MultiMooseEnum mtags("nontime time", "nontime", true);
+
+  params.addParam<MultiMooseEnum>(
+      "vector_tags", vtags, "The tag for the vectors this Kernel should fill");
+
+  params.addParam<MultiMooseEnum>(
+      "matrix_tags", mtags, "The tag for the matrices this Kernel should fill");
+
+  params.addParamNamesToGroup("vector_tags matrix_tags", "Advanced");
+
+  return params;
 }
 
 NodalBC::NodalBC(const InputParameters & parameters)
@@ -65,6 +91,42 @@ NodalBC::NodalBC(const InputParameters & parameters)
   }
 
   _has_diag_save_in = _diag_save_in.size() > 0;
+
+  auto & vector_tag_names = getParam<MultiMooseEnum>("vector_tags");
+
+  if (!vector_tag_names.isValid())
+    mooseError("MUST provide at least one vector_tag for Kernel: ", name());
+
+  for (auto & vector_tag_name : vector_tag_names)
+  {
+    if (!_fe_problem.vectorTagExists(vector_tag_name.name()))
+      mooseError("Kernel, ",
+                 name(),
+                 ", was assigned an invalid vector_tag: '",
+                 vector_tag_name,
+                 "'.  If this is a TimeKernel then this may have happened because you didn't "
+                 "specify a Transient Executioner.");
+
+    _vector_tags.push_back(_fe_problem.getVectorTag(vector_tag_name));
+  }
+
+  auto & matrix_tag_names = getParam<MultiMooseEnum>("matrix_tags");
+
+  if (!matrix_tag_names.isValid())
+    mooseError("MUST provide at least one matrix_tag for Kernel: ", name());
+
+  for (auto & matrix_tag_name : matrix_tag_names)
+  {
+    if (!_fe_problem.matrixTagExists(matrix_tag_name))
+      mooseError("Kernel, ",
+                 name(),
+                 ", was assigned an invalid matrix_tag: '",
+                 matrix_tag_name,
+                 "'.  If this is a TimeKernel then this may have happened because you didn't "
+                 "specify a Transient Executioner.");
+
+    _matrix_tags.push_back(_fe_problem.getMatrixTag(matrix_tag_name));
+  }
 }
 
 void
@@ -80,6 +142,9 @@ NodalBC::computeResidual(NumericVector<Number> & residual)
       res = computeQpResidual();
 
     residual.set(dof_idx, res);
+
+    for (auto tag_id : _vector_tags)
+      _fe_problem.getNonlinearSystemBase().getVector(tag_id).set(dof_idx, res);
 
     if (_has_save_in)
     {

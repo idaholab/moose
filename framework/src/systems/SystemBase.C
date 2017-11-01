@@ -513,6 +513,20 @@ SystemBase::addVector(TagID tag, const bool project, const ParallelType type)
 }
 
 void
+SystemBase::closeTaggedVectors()
+{
+  for (auto tag_vec = _tagged_vectors.begin(); tag_vec != _tagged_vectors.end(); ++tag_vec)
+    tag_vec->second->close();
+}
+
+void
+SystemBase::zeroTaggedVectors()
+{
+  for (auto tag_vec = _tagged_vectors.begin(); tag_vec != _tagged_vectors.end(); ++tag_vec)
+    tag_vec->second->zero();
+}
+
+void
 SystemBase::removeVector(TagID tag_id)
 {
   if (!_subproblem.vectorTagExists(tag_id))

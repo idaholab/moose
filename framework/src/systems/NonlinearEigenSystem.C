@@ -50,6 +50,10 @@ assemble_matrix(EquationSystems & es, const std::string & system_name)
                                "formFunction",
                                Moose::SlepcSupport::mooseSlepcEigenFormFunctionA);
 
+    PetscObjectComposeFunction((PetscObject)petsc_mat_A,
+                               "formFunctionAB",
+                               Moose::SlepcSupport::mooseSlepcEigenFormFunctionAB);
+
     PetscContainer container;
     PetscContainerCreate(eigen_system.comm().get(), &container);
     PetscContainerSetPointer(container, p);
@@ -107,11 +111,11 @@ NonlinearEigenSystem::NonlinearEigenSystem(EigenProblem & eigen_problem, const s
 {
   sys().attach_assemble_function(Moose::assemble_matrix);
 
-  /*_Ax_tag = eigen_problem.addVectorTag("Ax_tag");
+  _Ax_tag = eigen_problem.addVectorTag("Ax_tag");
   addVector(_Ax_tag, false, GHOSTED);
 
   _Bx_tag = eigen_problem.addVectorTag("Bx_tag");
-  addVector(_Bx_tag, false, GHOSTED); */
+  addVector(_Bx_tag, false, GHOSTED);
 }
 
 void
@@ -233,8 +237,12 @@ NonlinearEigenSystem::getNthConvergedEigenvalue(dof_id_type n)
 void
 NonlinearEigenSystem::computeResidualClose(NumericVector<Number> & Ax, NumericVector<Number> & Bx)
 {
-  Ax = getVector(this->_Ax_tag);
-  Bx = getVector(this->_Bx_tag);
+  auto & tagged_Ax = getVector(_Ax_tag);
+  auto & tagged_Bx = getVector(_Bx_tag);
+  tagged_Ax.close();
+  tagged_Bx.close();
+  Ax = tagged_Ax;
+  Bx = tagged_Bx;
 }
 
 #else

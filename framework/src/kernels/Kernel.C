@@ -92,7 +92,7 @@ Kernel::Kernel(const InputParameters & parameters)
 
   for (auto & vector_tag_name : vector_tag_names)
   {
-    if (!_fe_problem.vectorTagExists(vector_tag_name))
+    if (!_fe_problem.vectorTagExists(vector_tag_name.name()))
       mooseError("Kernel, ",
                  name(),
                  ", was assigned an invalid vector_tag: '",

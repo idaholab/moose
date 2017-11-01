@@ -500,6 +500,10 @@ public:
    */
   virtual NumericVector<Number> & addVector(TagID tag, const bool project, const ParallelType type);
 
+  virtual void closeTaggedVectors();
+
+  virtual void zeroTaggedVectors();
+
   /**
    * Remove a solution length vector from the system with the specified TagID
    *
