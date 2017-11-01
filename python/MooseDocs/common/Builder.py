@@ -129,7 +129,11 @@ class Builder(object):
         """
         Converts the supplied page to html.
         """
-        return self._parser.convert(page)
+        try:
+            return self._parser.convert(page)
+        except UnicodeDecodeError as e:
+            LOG.error("Encountered a problem with a unicode character in %s", page.filename)
+            raise e
 
     def write(self, page, content):
         """
