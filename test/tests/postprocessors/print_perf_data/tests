@@ -29,4 +29,11 @@
     #   Make sure that you don't cross lines by not allowing the throwaway content to have newlines.
     absent_out = '(\s(\S+)\s\|\n)[^\n]*\1'
   [../]
+
+  [./check_more_values]
+    type = RunApp
+    input = print_perf_data.i
+    cli_args = 'Outputs/exodus=false Outputs/csv=false'
+    absent_out = '(\s(\S+)\s\|\n)[^\n]*\1'
+  [../]
 []
