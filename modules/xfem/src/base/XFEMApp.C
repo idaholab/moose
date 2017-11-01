@@ -21,6 +21,9 @@
 #include "XFEMAction.h"
 #include "XFEMSingleVariableConstraint.h"
 #include "XFEMPressure.h"
+#include "CrackTipEnrichmentStressDivergenceTensors.h"
+#include "CrackTipEnrichmentCutOffBC.h"
+#include "ComputeCrackTipEnrichmentSmallStrain.h"
 
 #include "GeometricCutUserObject.h"
 #include "LineSegmentCutUserObject.h"
@@ -101,6 +104,15 @@ XFEMApp::registerObjects(Factory & factory)
 
   // DiracKernels
   registerDiracKernel(XFEMPressure);
+
+  // Kernels
+  registerKernel(CrackTipEnrichmentStressDivergenceTensors);
+
+  // Materials
+  registerMaterial(ComputeCrackTipEnrichmentSmallStrain);
+
+  // BC's
+  registerBoundaryCondition(CrackTipEnrichmentCutOffBC);
 }
 
 void
@@ -124,6 +136,9 @@ XFEMApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
   syntax.addDependency("setup_xfem", "setup_adaptivity");
   registerAction(XFEMAction, "add_aux_variable");
   registerAction(XFEMAction, "add_aux_kernel");
+  registerAction(XFEMAction, "add_variable");
+  registerAction(XFEMAction, "add_kernel");
+  registerAction(XFEMAction, "add_bc");
 
   registerSyntax("XFEMAction", "XFEM");
 }
