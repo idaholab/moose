@@ -1085,6 +1085,14 @@ CrackFrontDefinition::rotateToCrackFrontCoords(const RealVectorValue vector,
   return _rot_matrix[point_index] * vector;
 }
 
+RealVectorValue
+CrackFrontDefinition::rotateFromCrackFrontCoordsToGlobal(const RealVectorValue vector,
+                                                         const unsigned int point_index) const
+{
+  RealVectorValue vec = _rot_matrix[point_index].transpose() * vector;
+  return vec;
+}
+
 RankTwoTensor
 CrackFrontDefinition::rotateToCrackFrontCoords(const RankTwoTensor tensor,
                                                const unsigned int point_index) const
@@ -1206,6 +1214,32 @@ CrackFrontDefinition::calculateRThetaToCrackFront(const Point qp,
     theta = 0;
   else
     mooseError("Invalid distance r in CrackFrontDefinition::calculateRThetaToCrackFront");
+}
+
+unsigned int
+CrackFrontDefinition::calculateRThetaToCrackFront(const Point qp, Real & r, Real & theta) const
+{
+  unsigned int num_points = getNumCrackFrontPoints();
+
+  // Loop over crack front points to find the one closest to the point qp
+  Real min_dist = std::numeric_limits<Real>::max();
+  unsigned int point_index = 0;
+  for (unsigned int pit = 0; pit != num_points; ++pit)
+  {
+    const Point * crack_front_point = getCrackFrontPoint(pit);
+    RealVectorValue crack_point_to_current_point = qp - *crack_front_point;
+    Real dist = crack_point_to_current_point.norm();
+
+    if (dist < min_dist)
+    {
+      min_dist = dist;
+      point_index = pit;
+    }
+  }
+
+  calculateRThetaToCrackFront(qp, point_index, r, theta);
+
+  return point_index;
 }
 
 bool

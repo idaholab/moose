@@ -31,6 +31,12 @@ protected:
   bool _xfem_cut_plane;
   bool _xfem_use_crack_growth_increment;
   Real _xfem_crack_growth_increment;
+  bool _use_crack_tip_enrichment;
+  UserObjectName _crack_front_definition;
+  std::vector<VariableName> _enrich_displacements;
+  std::vector<VariableName> _displacements;
+  std::vector<BoundaryName> _cut_off_bc;
+  Real _cut_off_radius;
 };
 
 #endif // XFEMACTION_H

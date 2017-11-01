@@ -54,10 +54,28 @@ public:
                                            const unsigned int point_index) const;
   RankTwoTensor rotateToCrackFrontCoords(const RankTwoTensor tensor,
                                          const unsigned int point_index) const;
+
+  /** rotate a vector from crack front cartesian coordinate to global cartesian coordinate
+   * @param point_index the crack front point index
+   */
+  RealVectorValue rotateFromCrackFrontCoordsToGlobal(const RealVectorValue vector,
+                                                     const unsigned int point_index) const;
+
+  /** calculate r and theta in the crack front polar cooridnate
+   * @param qp the point cooridnate
+   * @param point_index the crack front point index
+   */
   void calculateRThetaToCrackFront(const Point qp,
                                    const unsigned int point_index,
                                    Real & r,
                                    Real & theta) const;
+  /** calculate r and theta in the crack front polar cooridnate relatively to the closest crack
+   * front point. It does additional loop over all crack front points to find the one closest to the
+   * point qp.
+   * @return The closest crack front point index
+   */
+  unsigned int calculateRThetaToCrackFront(const Point qp, Real & r, Real & theta) const;
+
   bool isNodeOnIntersectingBoundary(const Node * const node) const;
   bool isPointWithIndexOnIntersectingBoundary(const unsigned int point_index) const;
   Real getCrackFrontTangentialStrain(const unsigned int node_index) const;

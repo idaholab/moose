@@ -216,7 +216,6 @@
     master = 2
     model = coulomb
     penalty = 1e+7
-    penalty_slip = 1e+7
     friction_coefficient = 0.2
     formulation = augmented_lagrange
     system = constraint
