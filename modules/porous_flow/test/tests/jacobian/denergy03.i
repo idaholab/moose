@@ -158,7 +158,6 @@
     at_nodes = true
     porosity_zero = 0.7
     thermal_expansion_coeff = 0.5
-    solid_bulk = 1
   [../]
   [./p_eff]
     type = PorousFlowEffectiveFluidPressure

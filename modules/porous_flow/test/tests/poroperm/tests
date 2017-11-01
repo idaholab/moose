@@ -29,4 +29,21 @@
     csvdiff = 'PermFromPoro05.csv'
     rel_err = 1.0E-5
   [../]
+
+  [./poro_thm]
+    type = CSVDiff
+    input = poro_thm.i
+    csvdiff = poro_thm_out.csv
+  [../]
+  [./poro_tm]
+    type = CSVDiff
+    input = poro_tm.i
+    csvdiff = poro_tm_out.csv
+  [../]
+  [./poro_hm]
+    type = CSVDiff
+    input = poro_hm.i
+    csvdiff = poro_hm_out.csv
+  [../]
+
 []

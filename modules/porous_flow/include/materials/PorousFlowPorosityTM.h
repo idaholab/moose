@@ -18,7 +18,7 @@ InputParameters validParams<PorousFlowPorosityTM>();
 
 /**
  * Material designed to provide the porosity in thermo-mechanical simulations
- * biot + (phi0 - biot)*exp(-vol_strain + thermal_exp_coeff * temperature)
+ * biot + (phi0 - biot)*exp(-vol_strain + thermal_exp_coeff * (temperature - reference_temperature))
  */
 class PorousFlowPorosityTM : public PorousFlowPorosityExponentialBase
 {
@@ -38,8 +38,8 @@ protected:
   /// thermal expansion coefficient of the solid porous skeleton
   const Real _exp_coeff;
 
-  /// drained bulk modulus of the porous skeleton
-  const Real _solid_bulk;
+  /// reference temperature
+  const VariableValue & _t_reference;
 
   /// number of displacement variables
   const unsigned int _ndisp;

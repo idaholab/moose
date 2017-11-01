@@ -30,10 +30,10 @@ The evolution of the porosity is governed by \citep{chen2009}
 \label{eq:phi_dog}
 \end{equation}
 Here $K$ is the bulk modulus of the drained porous skeleton: $1/K
-= \delta_{ij}\delta_{kl}C_{ijkl}$.  This has solution
+= \delta_{ij}\delta_{kl}C_{ijkl}$.  Also $\alpha_{T}$ is the volumetric coefficient of thermal expansion.  This has solution
 \begin{equation}
 \phi = \alpha_{B} + (\phi_{0} - \alpha_{B})\times \exp \left( \frac{\alpha_{B}
-  - 1}{K}P_{f} - \epsilon^{\mathrm{total}}_{ii} + \alpha_{T}T \right) \ ,
+  - 1}{K}(P_{f} - P_{f}^{\mathrm{ref}}) - \epsilon^{\mathrm{total}}_{ii} + \alpha_{T}(T - T^{\mathrm{ref}}) \right) \ ,
 \label{eq:poro_evolve}
 \end{equation}
 where $\phi_{0}$ is the porosity at zero porepressure, zero elastic
@@ -44,7 +44,7 @@ Without porepressure effects, the correct expression for porosity as a
 function of volumetric strain and temperature is
 \begin{equation}
 \phi = 1 + (\phi_{0} - 1)\times \exp \left(-
-\epsilon^{\mathrm{total}}_{ii} + \alpha_{T}T \right) \ .
+\epsilon^{\mathrm{total}}_{ii} + \alpha_{T}(T - T^{\mathrm{ref}}) \right) \ .
 \label{eq:poroTM_evolve}
 \end{equation}
 
