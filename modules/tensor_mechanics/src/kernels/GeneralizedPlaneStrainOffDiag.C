@@ -56,15 +56,16 @@ GeneralizedPlaneStrainOffDiag::GeneralizedPlaneStrainOffDiag(const InputParamete
                        : 0),
     _temp_var(isParamValid("temperature")
                   ? &_subproblem.getVariable(_tid, getParam<NonlinearVariableName>("temperature"))
-                  : NULL)
+                  : NULL),
+    _num_disp_var(getParam<std::vector<NonlinearVariableName>>("displacements").size())
 {
   const std::vector<NonlinearVariableName> & nl_vnames(
       getParam<std::vector<NonlinearVariableName>>("displacements"));
-  if (nl_vnames.size() > 2)
+  if (_num_disp_var > 2)
     mooseError("GeneralizedPlaneStrainOffDiag only works for 1D axisymmetric or 2D Cartesian "
                "generalized plane strain cases!");
 
-  for (unsigned int i = 0; i < nl_vnames.size(); ++i)
+  for (unsigned int i = 0; i < _num_disp_var; ++i)
     _disp_var.push_back(&_subproblem.getVariable(_tid, nl_vnames[i]));
 
   for (unsigned int i = 0; i < _deigenstrain_dT.size(); ++i)
@@ -92,7 +93,7 @@ GeneralizedPlaneStrainOffDiag::computeOffDiagJacobianScalar(unsigned int jvar)
 
     if (_var.number() == _disp_var[0]->number())
       computeDispOffDiagJacobianScalar(0, jvar);
-    else if (_var.number() == _disp_var[1]->number())
+    else if (_num_disp_var == 2 && _var.number() == _disp_var[1]->number())
       computeDispOffDiagJacobianScalar(1, jvar);
     else if (isParamValid("temperature") ? _var.number() == _temp_var->number() : 0)
       computeTempOffDiagJacobianScalar(jvar);
