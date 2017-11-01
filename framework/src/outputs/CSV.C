@@ -51,7 +51,8 @@ CSV::CSV(const InputParameters & parameters)
     _delimiter(_set_delimiter ? getParam<std::string>("delimiter") : ""),
     _write_all_table(false),
     _write_vector_table(false),
-    _sort_columns(getParam<bool>("sort_columns"))
+    _sort_columns(getParam<bool>("sort_columns")),
+    _recovering(_app.isRecovering())
 {
 }
 
@@ -67,6 +68,9 @@ CSV::initialSetup()
 
   // Set the precision
   _all_data_table.setPrecision(_precision);
+
+  if (_recovering)
+    _all_data_table.append(true);
 }
 
 std::string

@@ -94,6 +94,9 @@ private:
 
   /// Flag for sorting column names
   const bool _sort_columns;
+
+  /// Flag indicating MOOSE is recovering via --recover command-line option
+  bool _recovering;
 };
 
 #endif /* CSV_H */
