@@ -120,7 +120,6 @@
     at_nodes = true
     porosity_zero = 0.3
     thermal_expansion_coeff = 1.3
-    solid_bulk = 2.2
   [../]
   [./volstrain]
     type = PorousFlowVolumetricStrain
