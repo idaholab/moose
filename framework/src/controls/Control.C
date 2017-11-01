@@ -54,5 +54,7 @@ Control::getExecuteOptions()
   ::mooseDeprecated("The 'getExecuteOptions' was replaced by the ExecFlagEnum class because MOOSE "
                     "was updated to use this for the execute flags and the new function provides "
                     "additional arguments for modification of the enum.");
-  return MooseUtils::getDefaultExecFlagEnum({EXEC_INITIAL, EXEC_TIMESTEP_END});
+  ExecFlagEnum execute_on = MooseUtils::getDefaultExecFlagEnum();
+  execute_on = {EXEC_INITIAL, EXEC_TIMESTEP_END};
+  return execute_on;
 }

@@ -65,8 +65,8 @@ AddNodalNormalsAction::act()
   }
 
   // Set the execute options
-  ExecFlagEnum execute_options =
-      MooseUtils::getDefaultExecFlagEnum({EXEC_INITIAL, EXEC_TIMESTEP_BEGIN});
+  ExecFlagEnum execute_options = MooseUtils::getDefaultExecFlagEnum();
+  execute_options = {EXEC_INITIAL, EXEC_TIMESTEP_BEGIN};
 
   // Create the NodalNormalsPreprocessor UserObject
   if (_current_task == "add_postprocessor")

@@ -42,8 +42,10 @@ OutputOnWarehouse::OutputOnWarehouse(const ExecFlagEnum & execute_on,
     _map.insert(std::make_pair("input", MooseUtils::getDefaultExecFlagEnum()));
 
   if (parameters.have_parameter<ExecFlagEnum>("execute_system_information_on"))
-    _map.insert(
-        std::make_pair("system_information", MooseUtils::getDefaultExecFlagEnum({EXEC_INITIAL})));
+  {
+    _map.insert(std::make_pair("system_information", MooseUtils::getDefaultExecFlagEnum()));
+    _map["system_information"] = EXEC_INITIAL;
+  }
 }
 
 // Constructor of OutputDataWarehouse; initializes the OutputData structures for 'variable' based

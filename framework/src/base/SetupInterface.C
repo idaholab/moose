@@ -23,7 +23,8 @@ validParams<SetupInterface>()
   InputParameters params = emptyInputParameters();
 
   // Add the 'execute_on' input parameter for users to set
-  ExecFlagEnum execute_options = MooseUtils::getDefaultExecFlagEnum({EXEC_LINEAR});
+  ExecFlagEnum execute_options = MooseUtils::getDefaultExecFlagEnum();
+  execute_options = EXEC_LINEAR;
   params.addParam<ExecFlagEnum>("execute_on", execute_options, execute_options.getDocString());
   return params;
 }
@@ -76,7 +77,7 @@ SetupInterface::getExecuteOnEnum() const
 const std::vector<ExecFlagType> &
 SetupInterface::execFlags() const
 {
-  mooseDeprecated("The execFlags() methos is being removed because MOOSE has been updated to use a "
+  mooseDeprecated("The execFlags() method is being removed because MOOSE has been updated to use a "
                   "ExecFlagEnum for execute flags. The current flags should be retrieved from "
                   "the \"exeucte_on\" parameters of your object or by using the \"_execute_enum\" "
                   "reference to the parameter or the getExecuteOnEnum() method.");

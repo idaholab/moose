@@ -224,7 +224,8 @@ TEST(MooseEnum, testErrors)
 
 TEST(MultiMooseEnum, testExecuteOn)
 {
-  ExecFlagEnum exec_enum = MooseUtils::getDefaultExecFlagEnum({EXEC_INITIAL});
+  ExecFlagEnum exec_enum = MooseUtils::getDefaultExecFlagEnum();
+  exec_enum = EXEC_INITIAL;
 
   // Checks that names are added and removed
   EXPECT_EQ(exec_enum.getRawNames(),
@@ -253,7 +254,7 @@ TEST(MultiMooseEnum, testExecuteOn)
   try
   {
     ExecFlagType WRONG("wrong", 99);
-    exec_enum.removeAvailableFlags({WRONG});
+    exec_enum.removeAvailableFlags(WRONG);
     FAIL() << "missing expected error";
   }
   catch (const std::exception & e)
@@ -267,7 +268,7 @@ TEST(MultiMooseEnum, testExecuteOn)
 
   try
   {
-    exec_enum.removeAvailableFlags({EXEC_FINAL});
+    exec_enum.removeAvailableFlags(EXEC_FINAL);
     FAIL() << "missing expected error";
   }
   catch (const std::exception & e)

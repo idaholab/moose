@@ -40,7 +40,8 @@ validParams<PolycrystalUserObjectBase>()
   params.set<bool>("allow_duplicate_execution_on_initial") = true;
 
   // This object should only be executed _before_ the initial condition
-  ExecFlagEnum execute_options = MooseUtils::getDefaultExecFlagEnum({EXEC_INITIAL});
+  ExecFlagEnum execute_options = MooseUtils::getDefaultExecFlagEnum();
+  execute_options = EXEC_INITIAL;
   params.set<ExecFlagEnum>("execute_on") = execute_options;
 
   return params;

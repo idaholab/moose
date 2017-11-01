@@ -50,7 +50,8 @@ CHPFCRFFSplitVariablesAction::CHPFCRFFSplitVariablesAction(const InputParameters
 void
 CHPFCRFFSplitVariablesAction::act()
 {
-  ExecFlagEnum execute_options = MooseUtils::getDefaultExecFlagEnum({EXEC_TIMESTEP_BEGIN});
+  ExecFlagEnum execute_options = MooseUtils::getDefaultExecFlagEnum();
+  execute_options = EXEC_TIMESTEP_BEGIN;
 
   // Setup MultiApp
   InputParameters poly_params = _factory.getValidParams("TransientMultiApp");
