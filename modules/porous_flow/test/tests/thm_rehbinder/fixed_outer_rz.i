@@ -151,6 +151,7 @@
     temperature = temperature
     thermal_expansion_coeff = 1E-6
     eigenstrain_name = thermal_contribution
+    stress_free_temperature = 0.0
   [../]
   [./stress]
     type = ComputeLinearElasticStress
