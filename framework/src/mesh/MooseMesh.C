@@ -1251,12 +1251,12 @@ MooseMesh::detectOrthogonalDimRanges(Real tol)
 
     for (unsigned int i = 0; i < dim; ++i)
     {
-      if (std::abs((*node)(i) - min[i]) < tol)
+      if (std::abs((*node)(i)-min[i]) < tol)
       {
         comp_map[i] = MIN;
         ++coord_match;
       }
-      else if (std::abs((*node)(i) - max[i]) < tol)
+      else if (std::abs((*node)(i)-max[i]) < tol)
       {
         comp_map[i] = MAX;
         ++coord_match;
