@@ -859,11 +859,8 @@ MooseMesh::addUniqueNode(const Point & p, Real tol)
   {
     _node_map.clear();
     _node_map.reserve(getMesh().n_nodes());
-    const libMesh::MeshBase::node_iterator end = getMesh().nodes_end();
-    for (libMesh::MeshBase::node_iterator i = getMesh().nodes_begin(); i != end; ++i)
-    {
-      _node_map.push_back(*i);
-    }
+    for (const auto & node : getMesh().node_ptr_range())
+      _node_map.push_back(node);
   }
 
   Node * node = nullptr;
@@ -1231,18 +1228,14 @@ MooseMesh::detectOrthogonalDimRanges(Real tol)
   unsigned int dim = getMesh().mesh_dimension();
 
   // Find the bounding box of our mesh
-  const MeshBase::node_iterator nd_end = getMesh().nodes_end();
-  for (MeshBase::node_iterator nd = getMesh().nodes_begin(); nd != nd_end; ++nd)
-  {
-    Node & node = **nd;
+  for (const auto & node : getMesh().node_ptr_range())
     for (unsigned int i = 0; i < dim; ++i)
     {
-      if (node(i) < min[i])
-        min[i] = node(i);
-      if (node(i) > max[i])
-        max[i] = node(i);
+      if ((*node)(i) < min[i])
+        min[i] = (*node)(i);
+      if ((*node)(i) > max[i])
+        max[i] = (*node)(i);
     }
-  }
 
   this->comm().max(max);
   this->comm().min(min);
@@ -1251,20 +1244,19 @@ MooseMesh::detectOrthogonalDimRanges(Real tol)
   // Now make sure that there are actual nodes at all of the extremes
   std::vector<bool> extreme_matches(8, false);
   std::vector<unsigned int> comp_map(3);
-  for (MeshBase::node_iterator nd = getMesh().nodes_begin(); nd != nd_end; ++nd)
+  for (const auto & node : getMesh().node_ptr_range())
   {
     // See if the current node is located at one of the extremes
-    Node & node = **nd;
     unsigned int coord_match = 0;
 
     for (unsigned int i = 0; i < dim; ++i)
     {
-      if (std::abs(node(i) - min[i]) < tol)
+      if (std::abs((*node)(i) - min[i]) < tol)
       {
         comp_map[i] = MIN;
         ++coord_match;
       }
-      else if (std::abs(node(i) - max[i]) < tol)
+      else if (std::abs((*node)(i) - max[i]) < tol)
       {
         comp_map[i] = MAX;
         ++coord_match;
@@ -1273,7 +1265,7 @@ MooseMesh::detectOrthogonalDimRanges(Real tol)
 
     if (coord_match == dim) // Found a coordinate at one of the extremes
     {
-      _extreme_nodes[comp_map[X] * 4 + comp_map[Y] * 2 + comp_map[Z]] = &node;
+      _extreme_nodes[comp_map[X] * 4 + comp_map[Y] * 2 + comp_map[Z]] = node;
       extreme_matches[comp_map[X] * 4 + comp_map[Y] * 2 + comp_map[Z]] = true;
     }
   }
