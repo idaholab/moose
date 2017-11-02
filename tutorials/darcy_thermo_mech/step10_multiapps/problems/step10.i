@@ -17,10 +17,6 @@
   [./temperature]
     initial_condition = 300 # Start at room temperature
   [../]
-  [./disp_r]
-  [../]
-  [./disp_z]
-  [../]
 []
 
 [AuxVariables]
@@ -42,6 +38,15 @@
   [../]
 []
 
+[Modules/TensorMechanics/Master]
+  [./all]
+    # This block adds all of the proper Kernels, strain calculators, and Variables
+    # for TensorMechanics in the correct coordinate system (autodetected)
+    add_variables = true
+    strain = FINITE
+  [../]
+[]
+
 [Kernels]
   [./darcy_pressure]
     type = DarcyPressure
@@ -59,11 +64,6 @@
     type = DarcyConvection
     variable = temperature
     darcy_pressure = pressure
-  [../]
-  [./TensorMechanics]
-    # This block adds all of the proper Kernels for TensorMechanics in RZ
-    use_displaced_mesh = true
-    displacements = 'disp_r disp_z'
   [../]
 []
 
@@ -153,12 +153,7 @@
     youngs_modulus = 200e9 # (Pa) from wikipedia
     poissons_ratio = .3 # from wikipedia
   [../]
-
-  [./small_strain_arz]
-    type = ComputeAxisymmetricRZFiniteStrain
-  [../]
-
-  [./elastic_strain]
+  [./elastic_stress]
     type = ComputeFiniteStrainElasticStress
   [../]
 []
