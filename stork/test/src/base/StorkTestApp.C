@@ -3,6 +3,7 @@
 #include "Moose.h"
 #include "AppFactory.h"
 #include "MooseSyntax.h"
+#include "ModulesApp.h"
 
 template <>
 InputParameters
@@ -15,10 +16,12 @@ validParams<StorkTestApp>()
 StorkTestApp::StorkTestApp(InputParameters parameters) : MooseApp(parameters)
 {
   Moose::registerObjects(_factory);
+  ModulesApp::registerObjects(_factory);
   StorkApp::registerObjectDepends(_factory);
   StorkApp::registerObjects(_factory);
 
   Moose::associateSyntax(_syntax, _action_factory);
+  ModulesApp::associateSyntax(_syntax, _action_factory);
   StorkApp::associateSyntaxDepends(_syntax, _action_factory);
   StorkApp::associateSyntax(_syntax, _action_factory);
 
