@@ -69,7 +69,6 @@
     variable = temperature
     boundary = right
     value = 100 # prescribed flux
-
   [../]
 []
 
