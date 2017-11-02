@@ -14,7 +14,7 @@ may be possible to take larger time steps to obtain a solution more quickly.
 
 A second parameter, `iteration_window`, is used to control the size of the region in which
 the time step is held constant. As shown in \ref{fig:adaptive_dt_criteria}, if the number of nonlinear iterations
-for convergence is lower than (`optimal_iterations−iteration_window`), the time step is
+for convergence is lower than (`optimal_iterations-iteration_window`), the time step is
 increased, while if more than (`optimal_iterations+iteration_window`), iterations are required,
 the time step is decreased. The `iteration_window` parameter is optional. If it is not
 specified, it defaults to 1/5 the value specified for `optimal_iterations`.
