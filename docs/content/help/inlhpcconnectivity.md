@@ -34,7 +34,7 @@ localhost:5555
 We say **least** favorite, because once you adjust this setting that web browser will be unable to browse anything when your SSH tunnel is inactive. Requiring you to change it constantly if its your favorite browser.
 
 !!! note
-    If you do not know how to do that, look up “Change socks proxy settings for [insert the name of your web browser here]” on google.com or some other search engine.
+    If you do not know how to do that, look up "Change socks proxy settings for [insert the name of your web browser here]" on google.com or some other search engine.
 
 ### Log in to HPC Gitlab
 Go to the following link: [https://hpcgitlab.inl.gov](https://hpcgitlab.inl.gov)

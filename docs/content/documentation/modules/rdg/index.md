@@ -163,7 +163,7 @@ b & \text{ if } |b| < |a| \text{ and } ab>0,\\
 \end{equation}
 If $a$ and $b$ have the same sign, then this selects the one that is smaller in modulus, else it returns zero.
 
-Rather than defining the slope on the $i$-th cell by always using the downwind difference (which would give the LaxâWendroff method), or by always using the upwind difference (which would give the BeamâWarming method), the minmod method compares the two slopes and chooses the one that is smaller in magnitude. If the two slopes have different sign, then the value $\psi_i$ must be a local maximum or minimum, and it is easy to check in this case that
+Rather than defining the slope on the $i$-th cell by always using the downwind difference (which would give the Lax-Wendroff method), or by always using the upwind difference (which would give the Beam-Warming method), the minmod method compares the two slopes and chooses the one that is smaller in magnitude. If the two slopes have different sign, then the value $\psi_i$ must be a local maximum or minimum, and it is easy to check in this case that
 we must set $\phi_i = 0$ in order to satisfy the TVD condition. The minmod method does a fairly good job of maintaining good accuracy in the smooth hump and also sharp discontinuities in the square wave, with no oscillations. Sharper resolution of discontinuities can be achieved with other limiters that do not reduce the slope as severely as minmod near a discontinuity.
 
 ###Superbee Slope Limiter

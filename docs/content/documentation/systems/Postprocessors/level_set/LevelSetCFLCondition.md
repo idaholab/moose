@@ -1,5 +1,5 @@
 # LevelSetCFLCondition
-Computes the minimum timestep based on the CourantâFriedrichsâLewy (CFL) condition. The CFL condition, is defined as
+Computes the minimum timestep based on the Courant-Friedrichs-Lewy (CFL) condition. The CFL condition, is defined as
 
 \begin{equation}
 C = \Delta t \sum_{i=1}^{n}\frac{u_{x_i}}{\Delta x_i} \leq C_{max},

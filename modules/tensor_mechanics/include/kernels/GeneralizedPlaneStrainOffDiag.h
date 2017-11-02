@@ -51,6 +51,7 @@ protected:
 
   MooseVariable * _temp_var;
 
+  const unsigned int _num_disp_var;
   std::vector<MooseVariable *> _disp_var;
 
   unsigned int _scalar_out_of_plane_strain_direction;
