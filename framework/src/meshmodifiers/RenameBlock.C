@@ -89,12 +89,10 @@ RenameBlock::modify()
     if (_new_block_id.size() != _old_block_id.size())
       mooseError("RenameBlock: The vector of old_block information must have the same length as "
                  "the vector of new_block information\n");
-    for (MeshBase::element_iterator el = _mesh_ptr->getMesh().active_elements_begin();
-         el != _mesh_ptr->getMesh().active_elements_end();
-         ++el)
+    for (const auto & elem : _mesh_ptr->getMesh().active_element_ptr_range())
       for (unsigned i = 0; i < _old_block_id.size(); ++i)
-        if ((*el)->subdomain_id() == _old_block_id[i])
-          (*el)->subdomain_id() = _new_block_id[i];
+        if (elem->subdomain_id() == _old_block_id[i])
+          elem->subdomain_id() = _new_block_id[i];
   }
   else // must have supplied new_block_name
   {

@@ -685,12 +685,9 @@ MooseMesh::nodeToElemMap()
     Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
     if (!_node_to_elem_map_built)
     {
-      MeshBase::const_element_iterator el = getMesh().active_elements_begin();
-      const MeshBase::const_element_iterator end = getMesh().active_elements_end();
-
-      for (; el != end; ++el)
-        for (unsigned int n = 0; n < (*el)->n_nodes(); n++)
-          _node_to_elem_map[(*el)->node(n)].push_back((*el)->id());
+      for (const auto & elem : getMesh().active_element_ptr_range())
+        for (unsigned int n = 0; n < elem->n_nodes(); n++)
+          _node_to_elem_map[elem->node(n)].push_back(elem->id());
 
       _node_to_elem_map_built = true; // MUST be set at the end for double-checked locking to work!
     }
@@ -1136,8 +1133,6 @@ MooseMesh::buildPeriodicNodeMap(std::multimap<dof_id_type, dof_id_type> & period
 
   periodic_node_map.clear();
 
-  MeshBase::const_element_iterator it = getMesh().active_elements_begin();
-  MeshBase::const_element_iterator it_end = getMesh().active_elements_end();
   std::unique_ptr<PointLocatorBase> point_locator = getMesh().sub_point_locator();
 
   // Get a const reference to the BoundaryInfo object that we will use several times below...
@@ -1149,9 +1144,7 @@ MooseMesh::buildPeriodicNodeMap(std::multimap<dof_id_type, dof_id_type> & period
   // Container to catch IDs passed back from the BoundaryInfo object
   std::vector<boundary_id_type> bc_ids;
 
-  for (; it != it_end; ++it)
-  {
-    const Elem * elem = *it;
+  for (const auto & elem : getMesh().active_element_ptr_range())
     for (unsigned int s = 0; s < elem->n_sides(); ++s)
     {
       if (elem->neighbor_ptr(s))
@@ -1198,7 +1191,6 @@ MooseMesh::buildPeriodicNodeMap(std::multimap<dof_id_type, dof_id_type> & period
         }
       }
     }
-  }
 }
 
 void

@@ -84,28 +84,26 @@ AddSideSetsFromBoundingBox::modify()
   if (!_boundary_id_overlap)
   {
     // Loop over the elements
-    for (MeshBase::element_iterator el = mesh.active_elements_begin();
-         el != mesh.active_elements_end();
-         ++el)
+    for (const auto & elem : mesh.active_element_ptr_range())
     {
       // boolean if element centroid is in bounding box
-      bool contains = _bounding_box.contains_point((*el)->centroid());
+      bool contains = _bounding_box.contains_point(elem->centroid());
 
       // check if active elements are found in the bounding box
       if (contains)
       {
         found_element = true;
         // loop over sides of elements within bounding box
-        for (unsigned int side = 0; side < (*el)->n_sides(); side++)
+        for (unsigned int side = 0; side < elem->n_sides(); side++)
           // loop over provided boundary vector to check all side sets for all boundary ids
           for (unsigned int boundary_id_number = 0; boundary_id_number < _boundary_id_old.size();
                boundary_id_number++)
             // check if side has same boundary id that you are looking for
             if (boundary_info.has_boundary_id(
-                    *el, side, boundary_info.get_id_by_name(_boundary_id_old[boundary_id_number])))
+                    elem, side, boundary_info.get_id_by_name(_boundary_id_old[boundary_id_number])))
             {
               // assign new boundary value to boundary which meets meshmodifier criteria
-              boundary_info.add_side(*el, side, _boundary_id_new);
+              boundary_info.add_side(elem, side, _boundary_id_new);
               found_side_sets = true;
             }
       }
