@@ -54,7 +54,7 @@ public:
   /**
    * Density of brine
    * From Driesner, The system H2O-NaCl. Part II: Correlations for molar volume,
-   * enthalpy, and isobaric heat capacity from 0 to 1000 C, 1 to 500 bar, and 0
+   * enthalpy, and isobaric heat capacity from 0 to 1000 C, 1 to 5000 bar, and 0
    * to 1 Xnacl, Geochimica et Cosmochimica Acta 71, 4902-4919 (2007).
    *
    * @param pressure fluid pressure (Pa)
@@ -67,7 +67,7 @@ public:
   /**
    * Density of brine and derivatives wrt pressure, temperature and mass fraction
    * From Driesner, The system H2O-NaCl. Part II: Correlations for molar volume,
-   * enthalpy, and isobaric heat capacity from 0 to 1000 C, 1 to 500 bar, and 0
+   * enthalpy, and isobaric heat capacity from 0 to 1000 C, 1 to 5000 bar, and 0
    * to 1 Xnacl, Geochimica et Cosmochimica Acta 71, 4902-4919 (2007).
    *
    * @param pressure fluid pressure (Pa)
@@ -124,7 +124,7 @@ public:
   /**
    * Enthalpy of brine
    * From Driesner, The system H2O-NaCl. Part II: Correlations for molar volume,
-   * enthalpy, and isobaric heat capacity from 0 to 1000 C, 1 to 500 bar, and 0
+   * enthalpy, and isobaric heat capacity from 0 to 1000 C, 1 to 5000 bar, and 0
    * to 1 Xnacl, Geochimica et Cosmochimica Acta 71, 4902-4919 (2007).
    *
    * @param pressure fluid pressure (Pa)
@@ -137,7 +137,7 @@ public:
   /**
    * Enthalpy of brine and derivatives wrt pressure, temperature and mass fraction
    * From Driesner, The system H2O-NaCl. Part II: Correlations for molar volume,
-   * enthalpy, and isobaric heat capacity from 0 to 1000 C, 1 to 500 bar, and 0
+   * enthalpy, and isobaric heat capacity from 0 to 1000 C, 1 to 5000 bar, and 0
    * to 1 Xnacl, Geochimica et Cosmochimica Acta 71, 4902-4919 (2007).
    *
    * @param pressure fluid pressure (Pa)
@@ -159,7 +159,7 @@ public:
   /**
    * Isobaric heat capacity of brine
    * From Driesner, The system H2O-NaCl. Part II: Correlations for molar volume,
-   * enthalpy, and isobaric heat capacity from 0 to 1000 C, 1 to 500 bar, and 0
+   * enthalpy, and isobaric heat capacity from 0 to 1000 C, 1 to 5000 bar, and 0
    * to 1 Xnacl, Geochimica et Cosmochimica Acta 71, 4902-4919 (2007).
    *
    * @param pressure fluid pressure (Pa)
@@ -183,7 +183,7 @@ public:
   /**
    * Internal energy of brine and derivatives wrt pressure, temperature and mass fraction
    * From Driesner, The system H2O-NaCl. Part II: Correlations for molar volume,
-   * enthalpy, and isobaric heat capacity from 0 to 1000 C, 1 to 500 bar, and 0
+   * enthalpy, and isobaric heat capacity from 0 to 1000 C, 1 to 5000 bar, and 0
    * to 1 Xnacl, Geochimica et Cosmochimica Acta 71, 4902-4919 (2007).
    *
    * @param pressure fluid pressure (Pa)
@@ -271,7 +271,7 @@ protected:
   /// Water97FluidProperties UserObject
   const SinglePhaseFluidPropertiesPT * _water_fp;
   /// NaClFluidProperties UserObject
-  const SinglePhaseFluidPropertiesPT * _halite_fp;
+  const SinglePhaseFluidPropertiesPT * _nacl_fp;
 
   /// Molar mass of NaCl (kg/mol)
   Real _Mnacl;

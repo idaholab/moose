@@ -38,16 +38,16 @@ BrineFluidProperties::BrineFluidProperties(const InputParameters & parameters)
   _water_fp = &_fe_problem.getUserObject<SinglePhaseFluidPropertiesPT>(water_name);
 
   // SinglePhaseFluidPropertiesPT UserObject for NaCl to provide to getComponent
-  std::string halite_name = name() + ":halite";
+  std::string nacl_name = name() + ":nacl";
   {
     std::string class_name = "NaClFluidProperties";
     InputParameters params = _app.getFactory().getValidParams(class_name);
-    _fe_problem.addUserObject(class_name, halite_name, params);
+    _fe_problem.addUserObject(class_name, nacl_name, params);
   }
-  _halite_fp = &_fe_problem.getUserObject<SinglePhaseFluidPropertiesPT>(halite_name);
+  _nacl_fp = &_fe_problem.getUserObject<SinglePhaseFluidPropertiesPT>(nacl_name);
 
   // Molar mass of NaCl and H20
-  _Mnacl = _halite_fp->molarMass();
+  _Mnacl = _nacl_fp->molarMass();
   _Mh2o = _water_fp->molarMass();
 }
 
@@ -62,7 +62,7 @@ BrineFluidProperties::getComponent(unsigned int component) const
       return *_water_fp;
 
     case NACL:
-      return *_halite_fp;
+      return *_nacl_fp;
 
     default:
       mooseError("BrineFluidProperties::getComponent has been provided an incorrect component");
