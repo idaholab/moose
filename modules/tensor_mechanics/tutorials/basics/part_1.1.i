@@ -2,21 +2,18 @@
 #Step 1, part 1
 #2D simulation of uniaxial tension with linear elasticity
 
+[GlobalParams]
+  displacements = 'disp_x disp_y'
+[]
+
 [Mesh]
   file = necking_quad4.e
 []
 
-[Variables]
-  [./disp_x]
-  [../]
-  [./disp_y]
-  [../]
-[]
-
-[Kernels]
-  [./TensorMechanics] #Small linearized strain
-    displacements = 'disp_x disp_y'
-    use_displaced_mesh = false
+[Modules/TensorMechanics/Master]
+  [./block1]
+    strain = SMALL #Small linearized strain, automatically set to XY coordinates
+    add_variables = true #Add the variables from the displacement string in GlobalParams
   [../]
 []
 
@@ -25,10 +22,6 @@
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 2.1e5
     poissons_ratio = 0.3
-  [../]
-  [./strain]
-    type = ComputeSmallStrain
-    displacements = 'disp_x disp_y'
   [../]
   [./stress]
     type = ComputeLinearElasticStress
