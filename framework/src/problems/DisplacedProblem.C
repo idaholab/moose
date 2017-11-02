@@ -248,6 +248,12 @@ DisplacedProblem::numVectorTags()
   return _mproblem.numVectorTags();
 }
 
+std::map<TagName, TagID> &
+DisplacedProblem::getVectorTag()
+{
+  return _mproblem.getVectorTag();
+}
+
 TagID
 DisplacedProblem::addMatrixTag(TagName tag_name)
 {

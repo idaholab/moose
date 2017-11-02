@@ -523,7 +523,7 @@ public:
    *
    * Note that this will also clear the cache.
    */
-  void addCachedResidual(NumericVector<Number> & residual, Moose::KernelType type);
+  void addCachedResidual(NumericVector<Number> & residual, TagID tag_id);
 
   void setResidual(NumericVector<Number> & residual, Moose::KernelType type = Moose::KT_NONTIME);
   void setResidualNeighbor(NumericVector<Number> & residual,
@@ -582,9 +582,9 @@ public:
     return _sub_Re[static_cast<unsigned int>(type)][var_num];
   }
 
-  DenseVector<Number> & residualBlock(unsigned int var_num, TagID type)
+  DenseVector<Number> & residualBlock(unsigned int var_num, TagID tag_id)
   {
-    return _sub_Re[static_cast<unsigned int>(type)][var_num];
+    return _sub_Re[static_cast<unsigned int>(tag_id)][var_num];
   }
 
   DenseVector<Number> & residualBlockNeighbor(unsigned int var_num,

@@ -34,6 +34,11 @@ public:
     return _undisplaced_system.hasResidualVector(type);
   }
 
+  virtual NumericVector<Number> & getVector(TagID tag_id) override
+  {
+    return _undisplaced_system.getVector(tag_id);
+  }
+
   virtual NumericVector<Number> & residualVector(Moose::KernelType type) override
   {
     return _undisplaced_system.residualVector(type);
@@ -112,6 +117,8 @@ public:
   {
     _undisplaced_system.zeroVariables(vars_to_be_zeroed);
   }
+
+  virtual bool hasVector(TagID tag_id) override { return _undisplaced_system.hasVector(tag_id); }
 
   virtual NumericVector<Number> & solutionOld() override { return *_sys.old_local_solution; }
 

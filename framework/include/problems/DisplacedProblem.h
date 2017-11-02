@@ -96,6 +96,7 @@ public:
   virtual TagName vectorTagName(TagID tag) override;
   virtual bool vectorTagExists(TagID tag) override;
   virtual unsigned int numVectorTags() override;
+  virtual std::map<TagName, TagID> & getVectorTag() override;
 
   virtual TagID addMatrixTag(TagName tag_name) override;
   virtual TagID getMatrixTag(TagName tag_name) override;

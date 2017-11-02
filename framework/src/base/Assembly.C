@@ -1038,6 +1038,9 @@ Assembly::init(const CouplingMatrix * cm)
     _sub_Rn[i].resize(n_vars);
   }
 
+  _cached_residual_values.resize(num_vector_tags);
+  _cached_residual_rows.resize(num_vector_tags);
+
   _sub_Kee.resize(num_matrix_tags);
   for (auto i = beginIndex(_sub_Kee); i < _sub_Kee.size(); i++)
     _sub_Kee[i].resize(n_vars);
@@ -1470,15 +1473,24 @@ Assembly::addResidualScalar(NumericVector<Number> & residual,
 void
 Assembly::cacheResidual()
 {
+  auto & tag_name_to_tag_id = _sys.subproblem().getVectorTag();
+  auto tag_it = tag_name_to_tag_id.begin();
+
+  mooseAssert(tag_name_to_tag_id.size() == _sub_Re.size(),
+              "the number of tags does not equal to the number of residuals ");
+
   const std::vector<MooseVariableFEBase *> & vars = _sys.getVariables(_tid);
   for (const auto & var : vars)
-    for (unsigned int i = 0; i < _sub_Re.size(); i++)
-      if (_sys.hasResidualVector((Moose::KernelType)i))
+  {
+    tag_it = tag_name_to_tag_id.begin();
+    for (unsigned int i = 0; tag_it != tag_name_to_tag_id.end(); i++, ++tag_it)
+      if (_sys.hasVector(tag_it->second))
         cacheResidualBlock(_cached_residual_values[i],
                            _cached_residual_rows[i],
                            _sub_Re[i][var->number()],
                            var->dofIndices(),
                            var->scalingFactor());
+  }
 }
 
 void
@@ -1519,31 +1531,36 @@ Assembly::cacheResidualNodes(DenseVector<Number> & res, std::vector<dof_id_type>
 void
 Assembly::addCachedResiduals()
 {
-  for (unsigned int i = 0; i < _sub_Re.size(); i++)
+  auto & tag_name_to_tag_id = _sys.subproblem().getVectorTag();
+  auto tag_it = tag_name_to_tag_id.begin();
+
+  mooseAssert(tag_name_to_tag_id.size() == _sub_Re.size(),
+              "the number of tags does not equal to the number of residuals ");
+
+  for (unsigned int i = 0; tag_it != tag_name_to_tag_id.end(); i++, ++tag_it)
   {
-    Moose::KernelType type = (Moose::KernelType)i;
-    if (!_sys.hasResidualVector(type))
+    if (!_sys.hasVector(tag_it->second))
     {
       _cached_residual_values[i].clear();
       _cached_residual_rows[i].clear();
       continue;
     }
-    addCachedResidual(_sys.residualVector(type), type);
+    addCachedResidual(_sys.getVector(tag_it->second), tag_it->second);
   }
 }
 
 void
-Assembly::addCachedResidual(NumericVector<Number> & residual, Moose::KernelType type)
+Assembly::addCachedResidual(NumericVector<Number> & residual, TagID tag_id)
 {
-  if (!_sys.hasResidualVector(type))
+  if (!_sys.hasVector(tag_id))
   {
-    _cached_residual_values[type].clear();
-    _cached_residual_rows[type].clear();
+    _cached_residual_values[tag_id].clear();
+    _cached_residual_rows[tag_id].clear();
     return;
   }
 
-  std::vector<Real> & cached_residual_values = _cached_residual_values[type];
-  std::vector<dof_id_type> & cached_residual_rows = _cached_residual_rows[type];
+  std::vector<Real> & cached_residual_values = _cached_residual_values[tag_id];
+  std::vector<dof_id_type> & cached_residual_rows = _cached_residual_rows[tag_id];
 
   mooseAssert(cached_residual_values.size() == cached_residual_rows.size(),
               "Number of cached residuals and number of rows must match!");

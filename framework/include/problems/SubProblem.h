@@ -95,7 +95,7 @@ public:
    */
   virtual TagName vectorTagName(TagID tag);
 
-  std::map<TagName, TagID> & getVectorTag() { return _vector_tag_name_to_tag_id; }
+  virtual std::map<TagName, TagID> & getVectorTag() { return _vector_tag_name_to_tag_id; }
 
   /**
    * Check to see if a particular Tag exists
