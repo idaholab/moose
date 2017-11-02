@@ -82,8 +82,7 @@ private:
   /// Decimal digits per number in the CSV file
   unsigned int _precision;
 
-  /// Overwrite the default delimiter?
-  bool _set_delimiter;
+  /// The delimiter used when writing the CSV file
   std::string _delimiter;
 
   /// Flag for writting scalar and/or postprocessor data

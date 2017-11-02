@@ -28,7 +28,9 @@
 
 const unsigned short FormattedTable::_column_width = 15;
 const unsigned short FormattedTable::_min_pps_width = 40;
+
 const unsigned short DEFAULT_CSV_PRECISION = 14;
+const std::string DEFAULT_CSV_DELIMITER = ",";
 
 template <>
 void
@@ -90,7 +92,7 @@ FormattedTable::FormattedTable()
     _stream_open(false),
     _append(false),
     _output_time(true),
-    _csv_delimiter(","),
+    _csv_delimiter(DEFAULT_CSV_DELIMITER),
     _csv_precision(DEFAULT_CSV_PRECISION)
 {
 }
@@ -102,7 +104,7 @@ FormattedTable::FormattedTable(const FormattedTable & o)
     _stream_open(o._stream_open),
     _append(o._append),
     _output_time(o._output_time),
-    _csv_delimiter(","),
+    _csv_delimiter(o._csv_delimiter),
     _csv_precision(o._csv_precision),
     _column_names_unsorted(o._column_names_unsorted)
 {
