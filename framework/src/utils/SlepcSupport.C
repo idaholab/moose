@@ -351,6 +351,9 @@ setWhichEigenPairsOptions(SolverParams & solver_params)
 void
 setEigenSolverOptions(SolverParams & solver_params, const InputParameters & params)
 {
+  // Avoid unused variable warnings when you have SLEPc but not PETSc-dev.
+  libmesh_ignore(params);
+
   switch (solver_params._eigen_solve_type)
   {
     case Moose::EST_POWER:
