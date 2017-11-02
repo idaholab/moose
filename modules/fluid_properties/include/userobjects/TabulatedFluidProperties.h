@@ -92,21 +92,20 @@ public:
 
   virtual void initialSetup() override;
 
-  /// Fluid name
   virtual std::string fluidName() const override;
-  /// Molar mass
+
   virtual Real molarMass() const override;
-  /// Density
+
   virtual Real rho(Real pressure, Real temperature) const override;
-  /// Density and its derivatives wrt pressure and temperature
+
   virtual void rho_dpT(
       Real pressure, Real temperature, Real & rho, Real & drho_dp, Real & drho_dT) const override;
-  /// Internal energy
+
   virtual Real e(Real pressure, Real temperature) const override;
-  /// Internal energy and its derivatives wrt pressure and temperature
+
   virtual void
   e_dpT(Real pressure, Real temperature, Real & e, Real & de_dp, Real & de_dT) const override;
-  /// Density and internal energy, and derivatives wrt pressure and temperature
+
   virtual void rho_e_dpT(Real pressure,
                          Real temperature,
                          Real & rho,
@@ -115,9 +114,9 @@ public:
                          Real & e,
                          Real & de_dp,
                          Real & de_dT) const override;
-  /// Enthalpy
+
   virtual Real h(Real p, Real T) const override;
-  /// Enthalpy and its derivatives wrt pressure and temperature
+
   virtual void
   h_dpT(Real pressure, Real temperature, Real & h, Real & dh_dp, Real & dh_dT) const override;
 
@@ -125,35 +124,35 @@ public:
 
   virtual void
   mu_dpT(Real pressure, Real temperature, Real & mu, Real & dmu_dp, Real & dmu_dT) const override;
-  /// Viscosity
+
   virtual Real mu_from_rho_T(Real density, Real temperature) const override;
-  /// Derivatives of viscosity wrt density and temperature
+
   virtual void mu_drhoT_from_rho_T(Real density,
                                    Real temperature,
                                    Real ddensity_dT,
                                    Real & mu,
                                    Real & dmu_drho,
                                    Real & dmu_dT) const override;
-  /// Specific isobaric heat capacity
+
   virtual Real cp(Real pressure, Real temperature) const override;
-  /// Specific isochoric heat capacity
+
   virtual Real cv(Real pressure, Real temperature) const override;
-  /// Speed of sound
+
   virtual Real c(Real pressure, Real temperature) const override;
-  /// Thermal conductivity (W/m/K)
+
   virtual Real k(Real pressure, Real temperature) const override;
-  /// Thermal conductivity and its derivatives wrt pressure and temperature
+
   virtual void
   k_dpT(Real pressure, Real temperature, Real & k, Real & dk_dp, Real & dk_dT) const override;
-  /// Thermal conductivity
+
   virtual Real k_from_rho_T(Real density, Real temperature) const override;
-  /// Specific entropy
+
   virtual Real s(Real pressure, Real temperature) const override;
-  /// Thermal expansion coefficient
+
   virtual Real beta(Real pressure, Real temperature) const override;
-  /// Henry's law constant for dissolution in water
+
   virtual Real henryConstant(Real temperature) const override;
-  /// Henry's law constant for dissolution in water and derivative wrt temperature
+
   virtual void henryConstant_dT(Real temperature, Real & Kh, Real & dKh_dT) const override;
 
 protected:
