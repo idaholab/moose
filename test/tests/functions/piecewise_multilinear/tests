@@ -2,7 +2,7 @@
   [./except1]
     type = 'RunException'
     input = 'except1.i'
-    expect_err = "Error opening file 'except1.txt' from GriddedData."
+    expect_err = "Error opening file .* from GriddedData."
     max_parallel = 1
   [../]
   [./except2]

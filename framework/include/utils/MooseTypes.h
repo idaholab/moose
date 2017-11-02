@@ -373,7 +373,10 @@ enum MffdType
 
 // Instantiate new Types
 
-/// This type is for expected filenames, it can be used to trigger open file dialogs in the GUI
+/// This type is for expected (i.e. input) file names or paths that your simulation needs.  If
+/// relative paths are assigned to this type, they are treated/modified to be relative to the
+/// location of the simulation's main input file's directory.  It can be used to trigger open file
+/// dialogs in the GUI.
 DerivativeStringClass(FileName);
 
 /// This type is for expected filenames where the extension is unwanted, it can be used to trigger open file dialogs in the GUI
