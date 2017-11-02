@@ -4,7 +4,7 @@
 ##Description
 This material implements the phase field fracture model from Chakraborty et al., calculating the stress and the free energy derivatives required for the model. It works with the standard phase field kernels for nonconserved variables. In the model, a nonconserved order parameter $c$ defines the crack, where $c = 0$ in undamaged material and $c = 1$ in cracked material. Cracked material can sustain a compressive stress, but not a tensile one. $c$ evolves to minimize the elastic free energy of the system.
 
-This model assumes linear elastic mechanical deformation with an isotropic elasticity tensor, where $\lambda$ and $\mu$ are the first and second Lamé constants.
+This model assumes linear elastic mechanical deformation with an isotropic elasticity tensor, where $\lambda$ and $\mu$ are the first and second Lam&egrave; constants.
 
 ###Free energy definition
 The total strain energy density is defined as
