@@ -365,11 +365,9 @@ MooseMesh::prepare(bool force)
   }
 
   // Collect (local) subdomain IDs
-  const MeshBase::element_iterator el_end = getMesh().elements_end();
-
   _mesh_subdomains.clear();
-  for (MeshBase::element_iterator el = getMesh().elements_begin(); el != el_end; ++el)
-    _mesh_subdomains.insert((*el)->subdomain_id());
+  for (const auto & elem : getMesh().element_ptr_range())
+    _mesh_subdomains.insert(elem->subdomain_id());
 
   // Make sure nodesets have been generated
   buildNodeListFromSideList();
@@ -787,13 +785,9 @@ MooseMesh::getBoundaryElementRange()
 void
 MooseMesh::cacheInfo()
 {
-  const MeshBase::element_iterator end = getMesh().elements_end();
-
   // TODO: Thread this!
-  for (MeshBase::element_iterator el = getMesh().elements_begin(); el != end; ++el)
+  for (const auto & elem : getMesh().element_ptr_range())
   {
-    Elem * elem = *el;
-
     SubdomainID subdomain_id = elem->subdomain_id();
 
     for (unsigned int side = 0; side < elem->n_sides(); side++)
@@ -1530,16 +1524,12 @@ MooseMesh::getPairedBoundaryMapping(unsigned int component)
 void
 MooseMesh::buildRefinementAndCoarseningMaps(Assembly * assembly)
 {
-  MeshBase::const_element_iterator el = getMesh().elements_begin();
-  const MeshBase::const_element_iterator end_el = getMesh().elements_end();
-
   std::map<ElemType, Elem *> canonical_elems;
 
   // First, loop over all elements and find a canonical element for each type
   // Doing it this way guarantees that this is going to work in parallel
-  for (; el != end_el; ++el) // TODO: Thread this
+  for (const auto & elem : getMesh().element_ptr_range()) // TODO: Thread this
   {
-    Elem * elem = *el;
     ElemType type = elem->type();
 
     if (canonical_elems.find(type) ==

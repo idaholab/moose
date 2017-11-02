@@ -58,12 +58,7 @@ AddAllSideSetsByNormals::modify()
 
   // We'll need to loop over all of the elements to find ones that match this normal.
   // We can't rely on flood catching them all here...
-  MeshBase::const_element_iterator el = _mesh_ptr->getMesh().elements_begin();
-  const MeshBase::const_element_iterator end_el = _mesh_ptr->getMesh().elements_end();
-  for (; el != end_el; ++el)
-  {
-    const Elem * elem = *el;
-
+  for (const auto & elem : _mesh_ptr->getMesh().element_ptr_range())
     for (unsigned int side = 0; side < elem->n_sides(); ++side)
     {
       if (elem->neighbor_ptr(side))
@@ -83,16 +78,15 @@ AddAllSideSetsByNormals::modify()
           }
 
         if (item)
-          flood(*el, normals[0], item->first);
+          flood(elem, normals[0], item->first);
         else
         {
           BoundaryID id = getNextBoundaryID();
           (*boundary_map)[id] = normals[0];
-          flood(*el, normals[0], id);
+          flood(elem, normals[0], id);
         }
       }
     }
-  }
 
   finalize();
 

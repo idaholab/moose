@@ -32,15 +32,6 @@ AssignSubdomainID::AssignSubdomainID(const InputParameters & parameters)
 void
 AssignSubdomainID::modify()
 {
-  auto & mesh = _mesh_ptr->getMesh();
-
-  auto elem_it = mesh.elements_begin();
-  const auto end_it = mesh.elements_end();
-
-  for (; elem_it != end_it; ++elem_it)
-  {
-    auto elem = *elem_it;
-
+  for (auto & elem : _mesh_ptr->getMesh().element_ptr_range())
     elem->subdomain_id() = _subdomain_id;
-  }
 }

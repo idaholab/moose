@@ -49,10 +49,8 @@ ElementDeleterBase::modify()
   std::set<Elem *> deleteable_elems;
 
   // First let's figure out which elements need to be deleted
-  const MeshBase::const_element_iterator end = mesh.elements_end();
-  for (MeshBase::const_element_iterator elem_it = mesh.elements_begin(); elem_it != end; ++elem_it)
+  for (auto & elem : mesh.element_ptr_range())
   {
-    Elem * elem = *elem_it;
     if (shouldDelete(elem))
       deleteable_elems.insert(elem);
   }
@@ -135,11 +133,8 @@ ElementDeleterBase::modify()
     // The ghost_elements iterators in libMesh need to be updated
     // before we can use them safely here, so we'll test for
     // ghost-vs-local manually.
-    for (MeshBase::const_element_iterator el = mesh.elements_begin(), end_el = mesh.elements_end();
-         el != end_el;
-         ++el)
+    for (const auto & elem : mesh.element_ptr_range())
     {
-      const Elem * elem = *el;
       const processor_id_type pid = elem->processor_id();
       if (pid == my_proc_id)
         continue;
