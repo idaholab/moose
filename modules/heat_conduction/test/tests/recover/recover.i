@@ -8,7 +8,7 @@
 []
 
 [Mesh]
-  file = restart.e
+  file = recover_in.e
 []
 
 [Variables]
@@ -90,8 +90,8 @@
   l_max_its = 100
 
   nl_max_its = 50
-  nl_rel_tol = 1e-4
-  nl_abs_tol = 1e-8
+  nl_rel_tol = 1e-6
+  nl_abs_tol = 1e-9
 
   start_time = -200
   n_startup_steps = 1
