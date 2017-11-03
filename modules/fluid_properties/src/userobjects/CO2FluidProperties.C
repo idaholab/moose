@@ -72,7 +72,7 @@ CO2FluidProperties::meltingPressure(Real temperature) const
 {
   if (temperature < _triple_point_temperature)
     mooseError(
-        "Temperature is below the triple point temperature in CO2FLuidProperties::meltingPressure");
+        "Temperature is below the triple point temperature in ", name(), ": meltingPressure()");
 
   Real Tstar = temperature / _triple_point_temperature;
 
@@ -84,8 +84,8 @@ Real
 CO2FluidProperties::sublimationPressure(Real temperature) const
 {
   if (temperature > _triple_point_temperature)
-    mooseError("Temperature is above the triple point temperature in "
-               "CO2FLuidProperties::sublimationPressure");
+    mooseError(
+        "Temperature is above the triple point temperature in ", name(), ": sublimationPressure()");
 
   Real Tstar = temperature / _triple_point_temperature;
 
@@ -101,7 +101,7 @@ Real
 CO2FluidProperties::vaporPressure(Real temperature) const
 {
   if (temperature < _triple_point_temperature || temperature > _critical_temperature)
-    mooseError("Temperature is out of range in CO2FLuidProperties::vaporPressure");
+    mooseError("Temperature is out of range in ", name(), ": vaporPressure()");
 
   Real Tstar = temperature / _critical_temperature;
 
@@ -117,7 +117,7 @@ Real
 CO2FluidProperties::saturatedLiquidDensity(Real temperature) const
 {
   if (temperature < _triple_point_temperature || temperature > _critical_temperature)
-    mooseError("Temperature is out of range in CO2FLuidProperties::saturatedLiquiDensity");
+    mooseError("Temperature is out of range in ", name(), ": saturatedLiquiDensity()");
 
   Real Tstar = temperature / _critical_temperature;
 
@@ -133,7 +133,7 @@ Real
 CO2FluidProperties::saturatedVaporDensity(Real temperature) const
 {
   if (temperature < _triple_point_temperature || temperature > _critical_temperature)
-    mooseError("Temperature is out of range in CO2FLuidProperties::saturatedVaporDensity");
+    mooseError("Temperature is out of range in ", name(), ": saturatedVaporDensity()");
 
   Real Tstar = temperature / _critical_temperature;
 
@@ -441,7 +441,7 @@ CO2FluidProperties::pressure(Real density, Real temperature) const
 {
   // Check that the input parameters are within the region of validity
   if (temperature < 216.0 || temperature > 1100.0 || density <= 0.0)
-    mooseError("Parameters out of range in CO2FLuidProperties::pressure");
+    mooseError("Parameters out of range in ", name(), ": pressure()");
 
   Real pressure = 0.0;
 
@@ -466,13 +466,13 @@ CO2FluidProperties::rho(Real pressure, Real temperature) const
 {
   // Check that the input parameters are within the region of validity
   if (temperature < 216.0 || temperature > 1100.0 || pressure <= 0.0)
-    mooseError("Parameters out of range in CO2FLuidProperties::rho");
+    mooseError("Parameters out of range in ", name(), ": rho()");
 
   // Also check that the pressure and temperature are not in the solid phase region
   if (((temperature > _triple_point_temperature) && (pressure > meltingPressure(temperature))) ||
       ((temperature < _triple_point_temperature) && (pressure > sublimationPressure(temperature))))
     mooseError(
-        "Input pressure and temperature in CO2FLuidProperties::rho correspond to solid CO2 phase");
+        "Input pressure and temperature in ", name(), ": rho() correspond to solid CO2 phase");
 
   Real density;
   // Initial estimate of a bracketing interval for the density
@@ -531,7 +531,7 @@ CO2FluidProperties::mu_from_rho_T(Real density, Real temperature) const
 {
   // Check that the input parameters are within the region of validity
   if (temperature < 216.0 || temperature > 1000.0 || density > 1400.0)
-    mooseError("Parameters out of range in CO2FLuidProperties::mu");
+    mooseError("Parameters out of range in ", name(), ": mu()");
 
   Real Tstar = temperature / 251.196;
   const std::vector<Real> a{0.235156, -0.491266, 5.211155e-2, 5.347906e-2, -1.537102e-2};
@@ -564,7 +564,7 @@ CO2FluidProperties::mu_drhoT_from_rho_T(Real density,
 {
   // Check that the input parameters are within the region of validity
   if (temperature < 216.0 || temperature > 1000.0 || density > 1400.0)
-    mooseError("Parameters out of range in CO2FLuidProperties::mu_drhoT");
+    mooseError("Parameters out of range in ", name(), ": mu_drhoT()");
 
   Real Tstar = temperature / 251.196;
   Real dTstar_dT = 1.0 / 251.196;
@@ -732,7 +732,7 @@ void
 CO2FluidProperties::k_dpT(
     Real /*pressure*/, Real /*temperature*/, Real & /*k*/, Real & /*dk_dp*/, Real & /*dk_dT*/) const
 {
-  mooseError(name(), "k_dpT() is not implemented");
+  mooseError(name(), ": k_dpT() is not implemented");
 }
 
 Real
@@ -740,7 +740,7 @@ CO2FluidProperties::k_from_rho_T(Real density, Real temperature) const
 {
   // Check the temperature is in the range of validity (216.592 K <= T <= 1000 K)
   if (temperature <= _triple_point_temperature || temperature >= 1000.0)
-    mooseError("Temperature ", temperature, "K out of range (200K, 1000K) in ", name(), ":k()");
+    mooseError("Temperature ", temperature, "K out of range (200K, 1000K) in ", name(), ": k()");
 
   const std::vector<Real> g1{0.0, 0.0, 1.5};
   const std::vector<Real> g2{0.0, 1.0, 1.5, 1.5, 1.5, 3.5, 5.5};
@@ -825,6 +825,5 @@ CO2FluidProperties::h_dpT(
 
 Real CO2FluidProperties::beta(Real /*pressure*/, Real /*temperature*/) const
 {
-  mooseError("CO2FluidProperties::beta not implemented yet");
-  return 0.0;
+  mooseError(name(), ": beta() not implemented yet");
 }

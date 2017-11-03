@@ -71,11 +71,7 @@ Real IdealGasFluidProperties::mu(Real, Real) const { return _mu; }
 
 Real IdealGasFluidProperties::k(Real, Real) const { return _k; }
 
-Real IdealGasFluidProperties::s(Real, Real) const
-{
-  mooseError(name(), ": s() not implemented.");
-  return 0.0;
-}
+Real IdealGasFluidProperties::s(Real, Real) const { mooseError(name(), ": s() not implemented."); }
 
 void
 IdealGasFluidProperties::s_from_h_p(Real h, Real p, Real & s, Real & ds_dh, Real & ds_dp) const
@@ -192,19 +188,16 @@ IdealGasFluidProperties::h_dpT(
 Real IdealGasFluidProperties::p_from_h_s(Real /*h*/, Real /*s*/) const
 {
   mooseError(name(), ": p_from_h_s() not implemented.");
-  return 0.0;
 }
 
 Real IdealGasFluidProperties::dpdh_from_h_s(Real /*h*/, Real /*s*/) const
 {
   mooseError(name(), ": dpdh_from_h_s() not implemented.");
-  return 0.0;
 }
 
 Real IdealGasFluidProperties::dpds_from_h_s(Real /*h*/, Real /*s*/) const
 {
   mooseError(name(), ": dpds_from_h_s() not implemented.");
-  return 0;
 }
 
 Real
