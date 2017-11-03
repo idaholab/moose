@@ -211,6 +211,7 @@ protected:
   void setFilePathParam(const std::string & full_name,
                         const std::string & short_name,
                         InputParameters::Parameter<T> * param,
+                        InputParameters & params,
                         bool in_global,
                         GlobalParamsAction * global_block);
 
@@ -222,6 +223,7 @@ protected:
   void setVectorFilePathParam(const std::string & full_name,
                               const std::string & short_name,
                               InputParameters::Parameter<std::vector<T>> * param,
+                              InputParameters & params,
                               bool in_global,
                               GlobalParamsAction * global_block);
   /**

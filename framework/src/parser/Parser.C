@@ -1025,6 +1025,7 @@ Parser::extractParams(const std::string & prefix, InputParameters & p)
       setFilePathParam<ptype>(full_name,                                                           \
                               short_name,                                                          \
                               dynamic_cast<InputParameters::Parameter<ptype> *>(par),              \
+                              p,                                                                   \
                               in_global,                                                           \
                               global_params_block)
 #define setvector(ptype, base)                                                                     \
@@ -1041,6 +1042,7 @@ Parser::extractParams(const std::string & prefix, InputParameters & p)
           full_name,                                                                               \
           short_name,                                                                              \
           dynamic_cast<InputParameters::Parameter<std::vector<ptype>> *>(par),                     \
+          p,                                                                                       \
           in_global,                                                                               \
           global_params_block)
 #define setvectorvector(ptype)                                                                     \
@@ -1296,6 +1298,7 @@ void
 Parser::setFilePathParam(const std::string & full_name,
                          const std::string & short_name,
                          InputParameters::Parameter<T> * param,
+                         InputParameters & params,
                          bool in_global,
                          GlobalParamsAction * global_block)
 {
@@ -1305,6 +1308,7 @@ Parser::setFilePathParam(const std::string & full_name,
   if (pos != std::string::npos && postfix[0] != '/' && !postfix.empty())
     prefix = _input_filename.substr(0, pos + 1);
 
+  params.set<std::string>("_raw_" + short_name) = postfix;
   param->set() = prefix + postfix;
 
   if (in_global)
@@ -1363,10 +1367,12 @@ void
 Parser::setVectorFilePathParam(const std::string & full_name,
                                const std::string & short_name,
                                InputParameters::Parameter<std::vector<T>> * param,
+                               InputParameters & params,
                                bool in_global,
                                GlobalParamsAction * global_block)
 {
   std::vector<T> vec;
+  std::vector<std::string> rawvec;
   if (_root->find(full_name))
   {
     auto tmp = _root->param<std::vector<std::string>>(full_name);
@@ -1377,10 +1383,12 @@ Parser::setVectorFilePathParam(const std::string & full_name,
       size_t pos = _input_filename.find_last_of('/');
       if (pos != std::string::npos && postfix[0] != '/')
         prefix = _input_filename.substr(0, pos + 1);
+      rawvec.push_back(postfix);
       vec.push_back(prefix + postfix);
     }
   }
 
+  params.set<std::vector<std::string>>("_raw_" + short_name) = rawvec;
   param->set() = vec;
 
   if (in_global)
