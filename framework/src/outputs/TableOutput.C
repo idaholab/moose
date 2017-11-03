@@ -121,9 +121,7 @@ TableOutput::outputVectorPostprocessors()
       for (const auto & vec_it : vectors)
       {
         const auto & vector = *vec_it.second.current;
-
-        for (auto i = beginIndex(vector); i < vector.size(); ++i)
-          table.addData(vec_it.first, vector[i], i);
+        table.addData(vec_it.first, vector);
       }
 
       if (_time_data)
