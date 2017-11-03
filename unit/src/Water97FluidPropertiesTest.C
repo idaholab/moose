@@ -53,8 +53,7 @@ TEST_F(Water97FluidPropertiesTest, inRegion)
   catch (const std::exception & e)
   {
     std::string msg(e.what());
-    ASSERT_NE(msg.find("Pressure 1.01e+08 is out of range in Water97FluidProperties::inRegion"),
-              std::string::npos)
+    ASSERT_NE(msg.find("Pressure 1.01e+08 is out of range in fp: inRegion()"), std::string::npos)
         << "failed with unexpected error: " << msg;
   }
 
@@ -67,8 +66,7 @@ TEST_F(Water97FluidPropertiesTest, inRegion)
   catch (const std::exception & e)
   {
     std::string msg(e.what());
-    ASSERT_NE(msg.find("Pressure 5.1e+07 is out of range in Water97FluidProperties::inRegion"),
-              std::string::npos)
+    ASSERT_NE(msg.find("Pressure 5.1e+07 is out of range in fp: inRegion()"), std::string::npos)
         << "failed with unexpected error: " << msg;
   }
 
@@ -82,8 +80,7 @@ TEST_F(Water97FluidPropertiesTest, inRegion)
   catch (const std::exception & e)
   {
     std::string msg(e.what());
-    ASSERT_NE(msg.find("Temperature 2001 is out of range in Water97FluidProperties::inRegion"),
-              std::string::npos)
+    ASSERT_NE(msg.find("Temperature 2001 is out of range in fp: inRegion()"), std::string::npos)
         << "failed with unexpected error: " << msg;
   }
 }

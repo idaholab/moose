@@ -54,8 +54,8 @@ method names) are:
 * Internal energy (J/kg): `e(pressure, temperature)`
 * Enthalpy (J/kg): `h(pressure, temperature)`
 * Specific entropy (J/kg/K): `s(pressure, temperature)`
-* Dynamic viscosity (Pa.s): `mu(density, temperature)`
-* Thermal conductivity (W/m/K): `k(density, temperature)`
+* Dynamic viscosity (Pa.s): `mu(pressure, temperature)` or `mu(density, temperature)`
+* Thermal conductivity (W/m/K): `k(pressure, temperature)` or `k(density, temperature)`
 * Isobaric specific heat (J/kg/K): `cp(pressure, temperature)`
 * Isochoric specific heat (J/kg/K): `cv(pressure, temperature)`
 * Ratio of heat capacites (-): `gamma(pressure, temperature)`
@@ -72,6 +72,7 @@ Available fluids are:
 * [NaCl](/NaClFluidProperties.md)
 * [Brine (water and salt)](/BrineFluidProperties.md)
 * [Tabulated](/TabulatedFluidProperties.md)
+* [Sodium](/SodiumProperties.md)
 
 These fluid properties can be used directly in the [Porous Flow](modules/porous_flow/index.md) module.
 

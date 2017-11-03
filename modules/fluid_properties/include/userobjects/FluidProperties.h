@@ -22,9 +22,9 @@ public:
   FluidProperties(const InputParameters & parameters);
   virtual ~FluidProperties();
 
-  virtual void execute();
-  virtual void initialize();
-  virtual void finalize();
+  virtual void execute() final {}
+  virtual void initialize() final {}
+  virtual void finalize() final {}
 };
 
 #endif /* FLUIDPROPERTIES_H */
