@@ -32,13 +32,13 @@ std::string
 SystemInfo::getInfo() const
 {
   std::stringstream oss;
-  oss << std::left;
-  oss << "Framework Information:\n";
-  oss << std::setw(25) << "MOOSE version: " << MOOSE_REVISION << "\n";
+  oss << std::left << "Framework Information:\n"
+      << std::setw(25) << "MOOSE Version: " << MOOSE_REVISION << '\n'
+      << std::setw(25) << "LibMesh Version: " << LIBMESH_BUILD_VERSION << '\n';
 #ifdef LIBMESH_DETECTED_PETSC_VERSION_MAJOR
   oss << std::setw(25) << "PETSc Version: " << LIBMESH_DETECTED_PETSC_VERSION_MAJOR << '.'
       << LIBMESH_DETECTED_PETSC_VERSION_MINOR << '.' << LIBMESH_DETECTED_PETSC_VERSION_SUBMINOR
-      << "\n";
+      << '\n';
 #endif
 
   // Current Time
