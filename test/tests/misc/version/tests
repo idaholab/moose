@@ -1,0 +1,14 @@
+[Tests]
+  [./print_version_long]
+    type = 'RunApp'
+    input = 'IGNORED'
+    expect_out = '^Application Version: \S+'
+    cli_args = '--version'
+  [../]
+  [./print_version_short]
+    type = 'RunApp'
+    input = 'IGNORED'
+    expect_out = '^Application Version: \S+'
+    cli_args = '-v'
+  [../]
+[]

@@ -61,10 +61,18 @@ public:
   virtual ~MooseApp();
 
   /**
-   * Get the name of the object
+   * Get the name of the object. In the case of MooseApp, the name of the object is *NOT* the name
+   * of the application. It's the name of the created application which is usually "main". If you
+   * have subapps, then each individual subapp will have a unique name which typically comes from
+   * the input file (e.g. sub0, sub1, etc...).
    * @return The name of the object
    */
-  const std::string & name() { return _name; }
+  const std::string & name() const { return _name; }
+
+  /**
+   * Get printable name of the application.
+   */
+  virtual std::string getPrintableName() const { return "Application"; }
 
   /**
    * Get the parameters of the object
@@ -73,7 +81,8 @@ public:
   InputParameters & parameters() { return _pars; }
 
   /**
-   * Get the type of this object as a string
+   * Get the type of this object as a string. This is a string version of the class name (e.g.
+   * MooseTestApp).
    * @return The the type of the object
    */
   const std::string & type() const { return _type; }
@@ -97,6 +106,21 @@ public:
    * Run the application
    */
   virtual void run();
+
+  /**
+   * Returns the framework version.
+   */
+  std::string getFrameworkVersion() const;
+
+  /**
+   * Returns the current version of the framework or application (default: framework version).
+   */
+  virtual std::string getVersion() const;
+
+  /**
+   * Non-virtual method for printing out the version string in a consistent format.
+   */
+  std::string getPrintableVersion() const;
 
   /**
    * Setup options based on InputParameters.
@@ -604,7 +628,7 @@ protected:
   bool _use_eigen_value;
 
   /// System Information
-  std::shared_ptr<SystemInfo> _sys_info;
+  std::unique_ptr<SystemInfo> _sys_info;
 
   /// Indicates whether warnings, errors, or no output is displayed when unused parameters are detected
   enum UNUSED_CHECK
