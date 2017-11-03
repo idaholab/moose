@@ -18,7 +18,7 @@ Solubility of solid salt (halite) in water is given by \citet{potter1977}.
 The BrineFluidProperties UserObject is valid for:
 
 - 273.15 K $\le$ T $\le$ 1273.15 K,
-- 0.1 MPa $\le$ p $\le$ 50 MPa,
+- 0.1 MPa $\le$ p $\le$ 500 MPa,
 - 0 $\le$ x$_{\mathrm{nacl}}$ $\le$ 1
 
 !syntax parameters /Modules/FluidProperties/BrineFluidProperties

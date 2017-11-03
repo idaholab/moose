@@ -82,61 +82,16 @@ public:
    */
   virtual Real triplePointTemperature() const;
 
-  /**
-   * Density as a function of pressure and temperature
-   *
-   * @param pressure fluid pressure (Pa)
-   * @param temperature fluid temperature (K)
-   * @return density (kg/m^3)
-   */
   virtual Real rho(Real pressure, Real temperature) const override;
 
-  /**
-   * Density as a function of pressure and temperature, and
-   * derivatives wrt pressure and temperature
-   *
-   * @param pressure fluid pressure (Pa)
-   * @param temperature fluid temperature (K)
-   * @param[out] rho density (kg/m^3)
-   * @param[out] drho_dp derivative of density wrt pressure
-   * @param[out] drho_dT derivative of density wrt temperature
-   */
   virtual void rho_dpT(
       Real pressure, Real temperature, Real & rho, Real & drho_dp, Real & drho_dT) const override;
 
-  /**
-   * Internal energy from pressure and temperature
-   *
-   * @param pressure fluid pressure (Pa)
-   * @param temperature fluid temperature (K)
-   * @return internal enerygy (J/kg)
-   */
   virtual Real e(Real pressure, Real temperature) const override;
 
-  /**
-   * Internal energy and its derivatives wrt pressure and temperature
-   *
-   * @param pressure fluid pressure (Pa)
-   * @param temperature fluid temperature (K)
-   * @param[out] e internal energy (J/kg)
-   * @param[out] de_dp derivative of internal energy wrt pressure
-   * @param[out] de_dT derivative of internal energy wrt temperature
-   */
   virtual void
   e_dpT(Real pressure, Real temperature, Real & e, Real & de_dp, Real & de_dT) const override;
 
-  /**
-   * Density and internal energy and their derivatives wrt pressure and temperature
-   *
-   * @param pressure fluid pressure (Pa)
-   * @param temperature fluid temperature (K)
-   * @param[out] rho density (kg/m^3)
-   * @param[out] drho_dp derivative of density wrt pressure
-   * @param[out] drho_dT derivative of density wrt temperature
-   * @param[out] e internal energy (J/kg)
-   * @param[out] de_dp derivative of internal energy wrt pressure
-   * @param[out] de_dT derivative of internal energy wrt temperature
-   */
   virtual void rho_e_dpT(Real pressure,
                          Real temperature,
                          Real & rho,
@@ -146,31 +101,10 @@ public:
                          Real & de_dp,
                          Real & de_dT) const override;
 
-  /**
-   * Speed of sound
-   *
-   * @param pressure fluid pressure (Pa)
-   * @param temperature fluid temperature (K)
-   * @return speed of sound (m/s)
-   */
   virtual Real c(Real pressure, Real temperature) const override;
 
-  /**
-   * Isobaric specific heat capacity as a function of pressure and temperature
-   *
-   * @param pressure fluid pressure (Pa)
-   * @param temperature fluid temperature (K)
-   * @return cp (J/kg/K)
-   */
   virtual Real cp(Real pressure, Real temperature) const override;
 
-  /**
-   * Isochoric specific heat
-   *
-   * @param pressure fluid pressure (Pa)
-   * @param temperature fluid temperature (K)
-   * @return cv (J/kg/K)
-   */
   virtual Real cv(Real pressure, Real temperature) const override;
 
   virtual Real mu(Real pressure, Real temperature) const override;
@@ -178,28 +112,8 @@ public:
   virtual void
   mu_dpT(Real pressure, Real temperature, Real & mu, Real & dmu_dp, Real & dmu_dT) const override;
 
-  /**
-   * Water viscosity as a function of density and temperature.
-   * Eq. (10) from Release on the IAPWS Formulation 2008 for the
-   * Viscosity of Ordinary Water Substance.
-   * Note: critical enhancement is NOT implemented
-   *
-   * @param density fluid density (kg/m^3)
-   * @param temperature fluid temperature (K)
-   * @return viscosity (Pa.s)
-   */
   virtual Real mu_from_rho_T(Real density, Real temperature) const override;
 
-  /**
-   * Water viscosity and derivatives wrt density and temperature
-   *
-   * @param density fluid density (kg/m^3)
-   * @param temperature fluid temperature (K)
-   * @param ddensity_dT derivative of density wrt temperature
-   * @param[out] mu viscosity (Pa.s)
-   * @param[out] dmu_drho derivative of viscosity wrt density
-   * @param[out] dmu_dT derivative of viscosity wrt temperature
-   */
   virtual void mu_drhoT_from_rho_T(Real density,
                                    Real temperature,
                                    Real ddensity_dT,
@@ -207,63 +121,24 @@ public:
                                    Real & dmu_drho,
                                    Real & dmu_dT) const override;
 
-  /// Thermal conductivity (W/m/K)
   virtual Real k(Real pressure, Real temperature) const override;
-  /// Thermal conductivity and its derivatives wrt pressure and temperature
+
   virtual void
   k_dpT(Real pressure, Real temperature, Real & k, Real & dk_dp, Real & dk_dT) const override;
 
-  /**
-   * Thermal conductivity as a function of density and temperature
-   * From: Release on the IAPWS formulation 2011 for the Thermal Conductivity of Ordinary
-   *
-   * @param density fluid density (kg/m^3)
-   * @param temperature fluid temperature (K)
-   * @return k (W/m/K)
-   */
   virtual Real k_from_rho_T(Real density, Real temperature) const override;
 
-  /**
-   * Specific entropy as a function of pressure and temperature
-   *
-   * @param pressure fluid pressure (Pa)
-   * @param temperature fluid temperature (K)
-   * @return s (J/kg/K)
-   */
   virtual Real s(Real pressure, Real temperature) const override;
 
-  /**
-   * Enthalpy as a function of pressure and temperature
-   *
-   * @param pressure fluid pressure (Pa)
-   * @param temperature fluid temperature (K)
-   * @return h (J/kg)
-   */
   virtual Real h(Real pressure, Real temperature) const override;
 
-  /**
-   * Enthalpy and its derivatives wrt pressure and temperature
-   *
-   * @param pressure fluid pressure (Pa)
-   * @param temperature fluid temperature (K)
-   * @param[out] h (J/kg)
-   * @param[out] dh_dp derivative of enthalpy wrt pressure
-   * @param[out] dh_dT derivative of enthalpy wrt temperature
-   */
   virtual void
   h_dpT(Real pressure, Real temperature, Real & h, Real & dh_dp, Real & dh_dT) const override;
 
-  /**
-   * Thermal expansion coefficient
-   *
-   * @param pressure fluid pressure (Pa)
-   * @param temperature fluid temperature (K)
-   * @return beta (1/K)
-   */
   virtual Real beta(Real pressure, Real temperature) const override;
 
   /**
-   * Saturation pressure as a function of temperature.
+   * Saturation pressure as a function of temperature
    *
    * Eq. (30) from Revised Release on the IAPWS Industrial
    * Formulation 1997 for the Thermodynamic Properties of Water
@@ -278,7 +153,7 @@ public:
 
   /**
    * Saturation pressure as a function of temperature and derivative
-   * wrt temperature.
+   * wrt temperature
    *
    * Eq. (30) from Revised Release on the IAPWS Industrial
    * Formulation 1997 for the Thermodynamic Properties of Water
@@ -293,7 +168,7 @@ public:
   void vaporPressure_dT(Real temperature, Real & psat, Real & dpsat_dT) const;
 
   /**
-   * Saturation temperature as a function of pressure.
+   * Saturation temperature as a function of pressure
    *
    * Eq. (31) from Revised Release on the IAPWS Industrial
    * Formulation 1997 for the Thermodynamic Properties of Water
@@ -307,7 +182,7 @@ public:
   Real vaporTemperature(Real pressure) const;
 
   /**
-   * Auxillary equation for the boundary between regions 2 and 3.
+   * Auxillary equation for the boundary between regions 2 and 3
    *
    * Eq. (5) from Revised Release on the IAPWS Industrial
    * Formulation 1997 for the Thermodynamic Properties of Water
@@ -319,7 +194,7 @@ public:
   Real b23p(Real temperature) const;
 
   /**
-   * Auxillary equation for the boundary between regions 2 and 3.
+   * Auxillary equation for the boundary between regions 2 and 3
    *
    * Eq. (6) from Revised Release on the IAPWS Industrial
    * Formulation 1997 for the Thermodynamic Properties of Water
@@ -332,7 +207,7 @@ public:
 
   /**
    * Determines the phase region that the given pressure and temperature values
-   * lie in.
+   * lie in
    *
    * @param pressure water pressure (Pa)
    * @param temperature water temperature (K)
@@ -380,16 +255,8 @@ public:
    */
   Real densityRegion3(Real pressure, Real temperature) const;
 
-  /**
-   * Henry's law constant
-   * Note: not implemented in this fluid property
-   */
   virtual Real henryConstant(Real temperature) const override;
 
-  /**
-   * Henry's law constant and derivative wrt temperature
-   * Note: not implemented in this fluid property
-   */
   virtual void henryConstant_dT(Real temperature, Real & Kh, Real & dKh_dT) const override;
 
   /**
