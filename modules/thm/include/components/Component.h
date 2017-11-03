@@ -140,7 +140,10 @@ protected:
   const Real & _zero;
 
   virtual unsigned int getNextSubdomainId();
-  virtual unsigned int getNextBCId();
+
+  /// Gets the next nodeset or sideset ID
+  virtual unsigned int getNextBoundaryId();
+
   /// Sets the coordinate system for block_id sudomain
   virtual void setSubdomainCoordSystem(unsigned int block_id,
                                        Moose::CoordinateSystemType coord_type);

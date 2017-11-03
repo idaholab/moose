@@ -120,7 +120,7 @@ Component::getNextSubdomainId()
 }
 
 unsigned int
-Component::getNextBCId()
+Component::getNextBoundaryId()
 {
   unsigned int id = bc_ids++;
   return id;
