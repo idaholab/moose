@@ -112,7 +112,7 @@ FormattedTable::FormattedTable(const FormattedTable & o)
     mooseError("Copying a FormattedTable with an open stream is not supported");
 
   for (const auto & it : o._data)
-    _data.emplace_back(std::make_pair(it.first, it.second));
+    _data.emplace_back(it.first, it.second);
 }
 
 FormattedTable::~FormattedTable() { close(); }
@@ -142,7 +142,7 @@ FormattedTable::addData(const std::string & name, Real value, Real time)
   // See if the current "row" is already in the table
   if (back_it == _data.rend() || !MooseUtils::absoluteFuzzyEqual(time, back_it->first))
   {
-    _data.emplace_back(std::make_pair(time, std::map<std::string, Real>()));
+    _data.emplace_back(time, std::map<std::string, Real>());
     back_it = _data.rbegin();
   }
   // Insert or update value
@@ -159,7 +159,7 @@ FormattedTable::addData(const std::string & name, const std::vector<Real> & vect
   for (auto i = beginIndex(vector); i < vector.size(); ++i)
   {
     if (i == _data.size())
-      _data.emplace_back(std::make_pair(i, std::map<std::string, Real>()));
+      _data.emplace_back(i, std::map<std::string, Real>());
 
     mooseAssert(MooseUtils::absoluteFuzzyEqual(_data[i].first, i),
                 "Inconsistent indexing in VPP vector");
