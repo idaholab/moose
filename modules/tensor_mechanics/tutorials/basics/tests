@@ -1,0 +1,38 @@
+[Tests]
+  [./part1_1]
+    type = 'RunApp'
+    input = 'part_1.1.i'
+  [../]
+  [./part1_2]
+    type = 'RunApp'
+    input = 'part_1.2.i'
+  [../]
+  [./part2_1]
+    type = 'RunApp'
+    input = 'part_2.1.i'
+  [../]
+  [./part2_2]
+    type = 'RunApp'
+    input = 'part_2.2.i'
+    check_input = True
+    method = opt
+  [../]
+  [./part2_3]
+    type = 'RunApp'
+    input = 'part_2.3.i'
+    check_input = True
+    method = opt
+  [../]
+  [./part2_4]
+    type = 'RunApp'
+    input = 'part_2.4.i'
+    check_input = True
+    method = opt
+  [../]
+  [./part3_1]
+    type = 'RunApp'
+    input = 'part_3_1.i'
+    check_input = True
+    method = opt
+  [../]
+[]
