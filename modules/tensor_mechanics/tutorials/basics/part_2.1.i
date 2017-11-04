@@ -3,7 +3,7 @@
 #2D axisymmetric RZ simulation of uniaxial tension linear elasticity
 
 [GlobalParams]
-  displacements = 'disp_r disp_z'
+  displacements = 'disp_r disp_z' #change the variable names for the coordinate system
 []
 
 [Problem]
@@ -15,42 +15,11 @@
   uniform_refine = 1
 []
 
-[Variables]
-  [./disp_r]
-  [../]
-  [./disp_z]
-  [../]
-[]
-
-[Kernels]
-  [./TensorMechanics]
-  [../]
-[]
-
-[AuxVariables]
-  [./stress_tt]
-    family = MONOMIAL
-    order = CONSTANT
-  [../]
-  [./Von_Mises_stress]
-    family = MONOMIAL
-    order = CONSTANT
-  [../]
-[]
-
-[AuxKernels]
-  [./stress_xx]
-    type = RankTwoAux
-    variable = stress_tt
-    rank_two_tensor = stress
-    index_i = 2
-    index_j = 2
-  [../]
-  [./Von_Mises_stress]
-    type = RankTwoScalarAux
-    variable = Von_Mises_stress
-    rank_two_tensor = stress
-    scalar_type = VonMisesStress
+[Modules/TensorMechanics/Master]
+  [./block1]
+    strain = SMALL #detects the change in coordinate system and automatically sets the correct strain class
+    add_variables = true
+    generate_output = 'stress_zz vonmises_stress' #use stress_zz to get stress_theta quantity
   [../]
 []
 
@@ -60,9 +29,6 @@
     youngs_modulus = 2.1e5
     poissons_ratio = 0.3
   [../]
-  [./strain]
-    type = ComputeAxisymmetricRZSmallStrain
-  [../]
   [./stress]
     type = ComputeLinearElasticStress
   [../]
@@ -71,19 +37,19 @@
 [BCs]
   [./left]
     type = PresetBC
-    variable = disp_r
+    variable = disp_r #change the variable to reflect the new displacement names
     boundary = left
     value = 0.0
   [../]
   [./bottom]
     type = PresetBC
-    variable = disp_z
+    variable = disp_z #change the variable to reflect the new displacement names
     boundary = bottom
     value = 0.0
   [../]
   [./top]
     type = PresetBC
-    variable = disp_z
+    variable = disp_z #change the variable to reflect the new displacement names
     boundary = top
     value = 0.0035
   [../]
