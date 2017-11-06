@@ -13,6 +13,7 @@
 /****************************************************************/
 
 #include "TabulatedFluidPropertiesTest.h"
+#include "Utils.h"
 
 // Test data for unordered data
 TEST_F(TabulatedFluidPropertiesTest, unorderedData)
@@ -84,4 +85,18 @@ TEST_F(TabulatedFluidPropertiesTest, missingData)
                                 "by the number of unique temperature values 3");
     ASSERT_TRUE(pos != std::string::npos);
   }
+}
+
+// Test tabulated fluid properties read from file including comments
+TEST_F(TabulatedFluidPropertiesTest, fromFile)
+{
+  Real p = 1.5e6;
+  Real T = 450.0;
+
+  // Read the data file
+  const_cast<TabulatedFluidProperties *>(_tab_fp)->initialSetup();
+
+  REL_TEST("density", _tab_fp->rho(p, T), _co2_fp->rho(p, T), 1.0e-4);
+  REL_TEST("enthalpy", _tab_fp->h(p, T), _co2_fp->h(p, T), 1.0e-4);
+  REL_TEST("internal_energy", _tab_fp->e(p, T), _co2_fp->e(p, T), 1.0e-4);
 }
