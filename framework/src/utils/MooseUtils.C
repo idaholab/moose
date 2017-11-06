@@ -33,6 +33,10 @@
 #include <sys/stat.h>
 #include <numeric>
 
+std::string getLatestCheckpointFileHelper(const std::list<std::string> & checkpoint_files,
+                                          const std::vector<std::string> extensions,
+                                          bool keep_extension);
+
 namespace MooseUtils
 {
 
@@ -488,61 +492,19 @@ getFilesInDirs(const std::list<std::string> & directory_list)
 }
 
 std::string
-getRecoveryFileBase(const std::list<std::string> & checkpoint_files)
+getLatestMeshCheckpointFile(const std::list<std::string> & checkpoint_files)
 {
-  // Create storage for newest restart files
-  // Note that these might have the same modification time if the simulation was fast.
-  // In that case we're going to save all of the "newest" files and sort it out momentarily
-  time_t newest_time = 0;
-  std::list<std::string> newest_restart_files;
+  const static std::vector<std::string> extensions{"cpr"};
 
-  // Loop through all possible files and store the newest
-  for (const auto & cp_file : checkpoint_files)
-  {
-    // Only look at the main checkpoint file, not the mesh, or restartable data files
-    if (hasExtension(cp_file, "xdr") || hasExtension(cp_file, "xda"))
-    {
-      struct stat stats;
-      stat(cp_file.c_str(), &stats);
+  return getLatestCheckpointFileHelper(checkpoint_files, extensions, true);
+}
 
-      time_t mod_time = stats.st_mtime;
-      if (mod_time > newest_time)
-      {
-        newest_restart_files.clear(); // If the modification time is greater, clear the list
-        newest_time = mod_time;
-      }
+std::string
+getLatestAppCheckpointFileBase(const std::list<std::string> & checkpoint_files)
+{
+  const static std::vector<std::string> extensions{"xda", "xdr"};
 
-      if (mod_time == newest_time)
-        newest_restart_files.push_back(cp_file);
-    }
-  }
-
-  // Loop through all of the newest files according the number in the file name
-  int max_file_num = -1;
-  std::string max_base;
-  pcrecpp::RE re_base_and_file_num(
-      "(.*?(\\d+))\\..*"); // Will pull out the full base and the file number simultaneously
-
-  // Now, out of the newest files find the one with the largest number in it
-  for (const auto & res_file : newest_restart_files)
-  {
-    std::string the_base;
-    int file_num = 0;
-
-    re_base_and_file_num.FullMatch(res_file, &the_base, &file_num);
-
-    if (file_num > max_file_num)
-    {
-      max_file_num = file_num;
-      max_base = the_base;
-    }
-  }
-
-  // Error if nothing was located
-  if (max_file_num == -1)
-    max_base.clear();
-
-  return max_base;
+  return getLatestCheckpointFileHelper(checkpoint_files, extensions, false);
 }
 
 bool
@@ -598,3 +560,70 @@ toUpper(const std::string & name)
 }
 
 } // MooseUtils namespace
+
+std::string
+getLatestCheckpointFileHelper(const std::list<std::string> & checkpoint_files,
+                              const std::vector<std::string> extensions,
+                              bool keep_extension)
+{
+  // Create storage for newest restart files
+  // Note that these might have the same modification time if the simulation was fast.
+  // In that case we're going to save all of the "newest" files and sort it out momentarily
+  time_t newest_time = 0;
+  std::list<std::string> newest_restart_files;
+
+  // Loop through all possible files and store the newest
+  for (const auto & cp_file : checkpoint_files)
+  {
+    if (find_if(extensions.begin(), extensions.end(), [cp_file](std::string ext) {
+          return MooseUtils::hasExtension(cp_file, ext);
+        }) != extensions.end())
+    {
+      struct stat stats;
+      stat(cp_file.c_str(), &stats);
+
+      time_t mod_time = stats.st_mtime;
+      if (mod_time > newest_time)
+      {
+        newest_restart_files.clear(); // If the modification time is greater, clear the list
+        newest_time = mod_time;
+      }
+
+      if (mod_time == newest_time)
+        newest_restart_files.push_back(cp_file);
+    }
+  }
+
+  // Loop through all of the newest files according the number in the file name
+  int max_file_num = -1;
+  std::string max_base;
+  std::string max_file;
+
+  pcrecpp::RE re_file_num(".*?(\\d+)(?:_mesh)?$"); // Pull out the embedded number from the file
+
+  // Now, out of the newest files find the one with the largest number in it
+  for (const auto & res_file : newest_restart_files)
+  {
+    auto dot_pos = res_file.find_first_of(".");
+    auto the_base = res_file.substr(0, dot_pos);
+    int file_num = 0;
+
+    re_file_num.FullMatch(the_base, &file_num);
+
+    if (file_num > max_file_num)
+    {
+      max_file_num = file_num;
+      max_base = the_base;
+      max_file = res_file;
+    }
+  }
+
+  // Error if nothing was located
+  if (max_file_num == -1)
+  {
+    max_base.clear();
+    max_file.clear();
+  }
+
+  return keep_extension ? max_file : max_base;
+}
