@@ -419,7 +419,8 @@ MooseApp::setupOptions()
     JsonSyntaxTree tree(param_search);
     _parser.buildJsonSyntaxTree(tree);
     JsonInputFileFormatter formatter;
-    Moose::out << formatter.toString(tree.getRoot()) << "\n";
+    Moose::out << "### START DUMP DATA ###\n"
+               << formatter.toString(tree.getRoot()) << "\n### END DUMP DATA ###\n";
     _ready_to_exit = true;
   }
   else if (isParamValid("definition"))

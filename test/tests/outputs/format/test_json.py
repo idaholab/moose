@@ -155,6 +155,12 @@ class TestJSON(unittest.TestCase):
         """
         args = ["--disable-refcount-printing", "--dump"] + extra
         output = run_app(args)
+        self.assertIn("### START DUMP DATA ###\n", output)
+        self.assertIn("### END DUMP DATA ###\n", output)
+
+        output = output.split('### START DUMP DATA ###\n')[1]
+        output = output.split('### END DUMP DATA ###')[0]
+
         self.assertNotEqual(len(output), 0)
         root = hit.parse("dump.i", output)
         hit.explode(root)
