@@ -69,12 +69,12 @@ public:
   const ExecFlagEnum & getExecuteOnEnum() const;
 
   /**
-   * Get the execution flag for the object
+   * (DEPRECATED) Get the execution flag for the object
    */
   virtual const std::vector<ExecFlagType> & execFlags() const;
 
   /**
-   * Build and return the execution flags as a bitfield
+   * (DEPRECATED) Build and return the execution flags as a bitfield
    */
   ExecFlagType execBitFlags() const;
 
@@ -90,9 +90,10 @@ private:
   ExecFlagEnum _empty_execute_enum;
 
 protected:
+  /// Execute settings for this oejct.
   const ExecFlagEnum & _execute_enum;
 
-  /// execution flag (when is the object executed/evaluated) (deprecated)
+  /// (DEPRECATED) execution flag (when is the object executed/evaluated)
   const std::vector<ExecFlagType> _exec_flags;
 
   /// Reference to FEProblemBase

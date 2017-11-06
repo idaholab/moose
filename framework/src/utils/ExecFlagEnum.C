@@ -16,15 +16,8 @@
 #include "MooseError.h"
 
 ExecFlagEnum::ExecFlagEnum() : MultiMooseEnum() {}
-
-/*
-void
-ExecFlagEnum::addAvailableFlags(const std::initializer_list<ExecFlagType> & flags)
-{
-  for (const ExecFlagType & flag : flags)
-    addEnumerationName(flag);
-}
-*/
+ExecFlagEnum::ExecFlagEnum(const MultiMooseEnum & other) : MultiMooseEnum(other) {}
+ExecFlagEnum::ExecFlagEnum(const ExecFlagEnum & other) : MultiMooseEnum(other) {}
 
 void
 ExecFlagEnum::addAvailableFlags(const ExecFlagType & flag)

@@ -79,10 +79,12 @@ validParams<Output>()
 MultiMooseEnum
 Output::getExecuteOptions(std::string default_type)
 {
+  /*
   ::mooseDeprecated("The 'getExecuteOptions' was replaced by the ExecFlagEnum class because MOOSE "
                     "was updated to use this for the execute flags and the new function provides "
                     "additional arguments for modification of the enum.");
-  ExecFlagEnum exec_enum;
+  */
+  ExecFlagEnum exec_enum = MooseUtils::getDefaultExecFlagEnum();
   exec_enum.addAvailableFlags(EXEC_FINAL, EXEC_FAILED);
   exec_enum = default_type;
   return exec_enum;

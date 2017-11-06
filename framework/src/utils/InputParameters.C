@@ -941,6 +941,9 @@ InputParameters::getParamHelper<MultiMooseEnum>(const std::string & name,
                                                 const InputParameters & pars,
                                                 const MultiMooseEnum *)
 {
+  if (name == "execute_on" && pars.have_parameter<ExecFlagEnum>(name))
+    return pars.get<ExecFlagEnum>(name);
+
   return pars.get<MultiMooseEnum>(name);
 }
 
@@ -965,4 +968,63 @@ InputParameters::checkParamName(const std::string & name) const
   const static pcrecpp::RE valid("[\\w:/]+");
   if (!valid.FullMatch(name))
     mooseError("Invalid parameter name: '", name, "'");
+}
+
+// This is temporary specialization to allow applications to utilize MultiMooseEnum for
+// "execute_on" parameter, after our tested applications are updated this method will be
+// deprecated and then removed.
+template <>
+MultiMooseEnum &
+InputParameters::set(const std::string & name, bool quiet_mode)
+{
+  if (have_parameter<ExecFlagEnum>(name))
+    return InputParameters::set<ExecFlagEnum>(name, quiet_mode);
+  else
+  {
+    checkParamName(name);
+    checkConsistentType<MultiMooseEnum>(name);
+
+    if (!this->have_parameter<MultiMooseEnum>(name))
+      _values[name] = new Parameter<MultiMooseEnum>;
+
+    set_attributes(name, false);
+
+    if (quiet_mode)
+      _set_by_add_param.insert(name);
+
+    return cast_ptr<Parameter<MultiMooseEnum> *>(_values[name])->set();
+  }
+}
+
+// This is temporary specialization to allow applications to utilize MultiMooseEnum for
+// "execute_on" parameter, after our tested applications are updated this method will be
+// deprecated and then removed.
+template <>
+void
+InputParameters::addParam<MultiMooseEnum, MultiMooseEnum>(const std::string & name,
+                                                          const MultiMooseEnum & value,
+                                                          const std::string & doc_string)
+{
+  if (name == "execute_on")
+  {
+    ExecFlagEnum execute_enum(value);
+    addParam<ExecFlagEnum>(name, execute_enum, doc_string);
+  }
+
+  else
+  {
+
+    checkParamName(name);
+    checkConsistentType<MultiMooseEnum>(name);
+
+    MultiMooseEnum & l_value = InputParameters::set<MultiMooseEnum>(name);
+    _doc_string[name] = doc_string;
+
+    // Set the parameter now
+    setParamHelper(name, l_value, value);
+
+    // Indicate the default value, as set via addParam, is being used. The parameter is removed from
+    // the list whenever it changes, see set_attributes
+    _set_by_add_param.insert(name);
+  }
 }

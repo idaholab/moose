@@ -88,7 +88,7 @@ SetupInterface::execFlags() const
 ExecFlagType
 SetupInterface::execBitFlags() const
 {
-  mooseDeprecated("The execBitFlags method is beeing removed because MOOSE was updated to use a "
+  mooseDeprecated("The execBitFlags method is being removed because MOOSE was updated to use a "
                   "ExecFlagEnum for execute flags. This method maintains the behavior of the "
                   "original method but the use of this method should be removed from your "
                   "application. The ExecFlagEnum should be inspected directly via the "
@@ -103,8 +103,10 @@ SetupInterface::execBitFlags() const
 ExecFlagEnum
 SetupInterface::getExecuteOptions()
 {
+  /*
   ::mooseDeprecated("The 'getExecuteOptions' was replaced by the ExecFlagEnum class because MOOSE "
                     "was updated to use this for the execute flags and the new function provides "
                     "additional arguments for modification of the enum.");
+  */
   return MooseUtils::getDefaultExecFlagEnum();
 }

@@ -31,6 +31,8 @@ class ExecFlagEnum : public MultiMooseEnum
 {
 public:
   ExecFlagEnum();
+  ExecFlagEnum(const ExecFlagEnum & other);
+  ExecFlagEnum(const MultiMooseEnum & other);
 
   ///@{
   /**
