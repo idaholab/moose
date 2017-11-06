@@ -58,7 +58,7 @@ protected:
 
     InputParameters tab_uo_params = _factory->getValidParams("TabulatedFluidProperties");
     tab_uo_params.set<UserObjectName>("fp") = "co2_fp";
-    tab_uo_params.set<FileName>("fluid_property_file") = "data/csv/fluid_properties.csv";
+    tab_uo_params.set<FileName>("fluid_property_file") = "data/csv/fluid_props.csv";
     _fe_problem->addUserObject("TabulatedFluidProperties", "tab_fp", tab_uo_params);
     _tab_fp = &_fe_problem->getUserObject<TabulatedFluidProperties>("tab_fp");
 

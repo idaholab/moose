@@ -1,3 +1,4 @@
+# Sample fluid properties for CO2
 pressure, temperature, density, enthalpy, internal_energy
 1e+06, 400, 13.4775, 85939.4, 11741.5
 1e+06, 450, 11.8993, 134995, 50956.9
