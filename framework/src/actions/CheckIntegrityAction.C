@@ -15,9 +15,6 @@
 #include "CheckIntegrityAction.h"
 #include "ActionWarehouse.h"
 #include "FEProblem.h"
-#include "BlockRestrictable.h"
-#include "Coupleable.h"
-#include "MooseVariableInterface.h"
 
 template <>
 InputParameters

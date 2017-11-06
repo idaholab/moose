@@ -20,9 +20,6 @@
 #include "MooseVariable.h"
 #include "Problem.h"
 #include "SubProblem.h"
-#include "BlockRestrictable.h"
-#include "MooseMesh.h"
-#include "Conversion.h"
 
 MooseVariableInterface::MooseVariableInterface(const MooseObject * moose_object,
                                                bool nodal,

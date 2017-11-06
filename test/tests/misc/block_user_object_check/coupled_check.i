@@ -51,6 +51,3 @@
 [Executioner]
   type = Steady
 []
-
-[Outputs]
-[]

@@ -41,9 +41,6 @@
   type = Steady
 []
 
-[Outputs]
-[]
-
 [Postprocessors]
   [./obj]
     type = NodalMaxValue

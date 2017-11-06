@@ -497,10 +497,7 @@ public:
   /**
    * Return the coupled variable parameter names.
    */
-  inline const std::set<std::string> & getCoupledVariableParamNames() const
-  {
-    return _coupled_vars;
-  }
+  const std::set<std::string> & getCoupledVariableParamNames() const { return _coupled_vars; }
 
   /**
    * Return whether or not the coupled variable exists

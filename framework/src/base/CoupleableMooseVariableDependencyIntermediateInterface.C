@@ -13,10 +13,6 @@
 /****************************************************************/
 
 #include "CoupleableMooseVariableDependencyIntermediateInterface.h"
-#include "MooseVariable.h"
-#include "FEProblemBase.h"
-#include "MooseMesh.h"
-#include "Conversion.h"
 
 CoupleableMooseVariableDependencyIntermediateInterface::
     CoupleableMooseVariableDependencyIntermediateInterface(const MooseObject * moose_object,
