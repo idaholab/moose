@@ -194,6 +194,7 @@
 [Kernels]
   # Set up stress divergence kernels
   [./TensorMechanics]
+    block = 0
   [../]
 
   # Cahn-Hilliard kernels
@@ -201,6 +202,7 @@
     type = CoupledTimeDerivative
     variable = w
     v = c
+    block = 0
   [../]
   [./c_res]
     type = SplitCHParsed
@@ -208,11 +210,13 @@
     f_name = F
     kappa_name = kappa_c
     w = w
+    block = 0
   [../]
   [./w_res]
     type = SplitCHWRes
     variable = w
     mob_name = M
+    block = 0
   [../]
 []
 

@@ -20,6 +20,7 @@
 #include "FEProblem.h"
 #include "MooseVariable.h"
 #include "NonlinearSystemBase.h"
+#include "Conversion.h"
 
 template <>
 InputParameters
@@ -50,6 +51,7 @@ SetupResidualDebugAction::act()
   {
     // add aux-variable
     MooseVariable & var = _problem->getVariable(0, var_name);
+    InputParameters params = _factory.getValidParams("DebugResidualAux");
     const std::set<SubdomainID> & subdomains = var.activeSubdomains();
 
     std::stringstream aux_var_ss;
@@ -59,14 +61,20 @@ SetupResidualDebugAction::act()
     if (subdomains.empty())
       _problem->addAuxVariable(aux_var_name, FEType(FIRST, LAGRANGE));
     else
+    {
       _problem->addAuxVariable(aux_var_name, FEType(FIRST, LAGRANGE), &subdomains);
+      std::vector<SubdomainName> block_names;
+      block_names.reserve(subdomains.size());
+      for (const SubdomainID & id : subdomains)
+        block_names.push_back(Moose::stringify(id));
+      params.set<std::vector<SubdomainName>>("block") = block_names;
+    }
 
     // add aux-kernel
     std::stringstream kern_ss;
     kern_ss << "residual_" << var.name() << "_kernel";
     std::string kern_name = kern_ss.str();
 
-    InputParameters params = _factory.getValidParams("DebugResidualAux");
     params.set<AuxVariableName>("variable") = aux_var_name;
     params.set<NonlinearVariableName>("debug_variable") = var.name();
     params.set<MultiMooseEnum>("execute_on") = "linear timestep_end";

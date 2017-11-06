@@ -25,12 +25,14 @@
     type = ConstantAux
     variable = disp_x
     value = 0.1
+    block = '1'
   [../]
 
   [./disp_y_kernel]
     type = ConstantAux
     variable = disp_y
     value = 0
+    block = '1'
   [../]
 []
 
@@ -69,6 +71,7 @@
     type = HeatConduction
     variable = temp
     use_displaced_mesh = true
+    block = '1 2'
   [../]
 []
 

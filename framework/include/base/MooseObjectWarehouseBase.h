@@ -20,6 +20,8 @@
 #include "BoundaryRestrictable.h"
 #include "BlockRestrictable.h"
 #include "TransientInterface.h"
+#include "Coupleable.h"
+#include "MooseVariableInterface.h"
 
 // Forward declarations
 class MooseVariable;
@@ -262,6 +264,17 @@ MooseObjectWarehouseBase<T>::addObject(std::shared_ptr<T> object, THREAD_ID tid 
       if (enabled)
         _active_block_objects[tid][*it].push_back(object);
     }
+
+    // Check variables
+    std::shared_ptr<Coupleable> c_ptr = std::dynamic_pointer_cast<Coupleable>(object);
+    if (c_ptr)
+      for (MooseVariable * var : c_ptr->getCoupledMooseVars())
+        blk->checkVariable(*var);
+
+    std::shared_ptr<MooseVariableInterface> mvi_ptr =
+        std::dynamic_pointer_cast<MooseVariableInterface>(object);
+    if (mvi_ptr)
+      blk->checkVariable(*(mvi_ptr->mooseVariable()));
   }
 }
 

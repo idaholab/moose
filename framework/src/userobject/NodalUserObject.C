@@ -36,8 +36,8 @@ validParams<NodalUserObject>()
 
 NodalUserObject::NodalUserObject(const InputParameters & parameters)
   : UserObject(parameters),
-    BlockRestrictable(parameters),
-    BoundaryRestrictable(parameters, blockIDs(), true), // true for applying to nodesets
+    BlockRestrictable(this),
+    BoundaryRestrictable(this, blockIDs(), true), // true for applying to nodesets
     UserObjectInterface(this),
     Coupleable(this, true),
     MooseVariableDependencyInterface(),

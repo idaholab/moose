@@ -35,8 +35,8 @@ validParams<BoundaryRestrictableRequired>()
   return params;
 }
 
-BoundaryRestrictableRequired::BoundaryRestrictableRequired(const InputParameters & parameters,
+BoundaryRestrictableRequired::BoundaryRestrictableRequired(const MooseObject * moose_object,
                                                            bool nodal)
-  : BoundaryRestrictable(parameters, nodal)
+  : BoundaryRestrictable(moose_object, nodal)
 {
 }

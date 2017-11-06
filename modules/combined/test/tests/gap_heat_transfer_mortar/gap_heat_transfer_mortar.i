@@ -46,6 +46,7 @@
     type = HeatConduction
     variable = temp
     use_displaced_mesh = false
+    block = '1 2'
   [../]
 []
 

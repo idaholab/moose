@@ -182,7 +182,7 @@ MooseVariable::~MooseVariable()
 }
 
 const std::set<SubdomainID> &
-MooseVariable::activeSubdomains()
+MooseVariable::activeSubdomains() const
 {
   return _sys.system().variable(_var_num).active_subdomains();
 }

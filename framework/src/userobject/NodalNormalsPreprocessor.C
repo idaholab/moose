@@ -41,7 +41,7 @@ validParams<NodalNormalsPreprocessor>()
 
 NodalNormalsPreprocessor::NodalNormalsPreprocessor(const InputParameters & parameters)
   : ElementUserObject(parameters),
-    BoundaryRestrictable(parameters, true), // true for applying to nodesets
+    BoundaryRestrictable(this, true), // true for applying to nodesets
     _aux(_fe_problem.getAuxiliarySystem()),
     _fe_type(getParam<Order>("fe_order"), getParam<FEFamily>("fe_family")),
     _has_corners(isParamValid("corner_boundary")),

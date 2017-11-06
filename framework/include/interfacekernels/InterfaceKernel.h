@@ -16,6 +16,7 @@
 #define INTERFACEKERNEL_H
 
 #include "DGKernel.h"
+#include "TwoMaterialPropertyInterface.h"
 
 // Forward Declarations
 class InterfaceKernel;
@@ -27,7 +28,7 @@ InputParameters validParams<InterfaceKernel>();
  * InterfaceKernel is responsible for interfacing physics across subdomains
  */
 
-class InterfaceKernel : public DGKernel
+class InterfaceKernel : public DGKernelBase, public TwoMaterialPropertyInterface
 {
 public:
   InterfaceKernel(const InputParameters & parameters);

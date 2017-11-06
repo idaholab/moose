@@ -324,7 +324,7 @@ protected:
   std::vector<MooseVariable *> _coupled_moose_vars;
 
   /// True if we provide coupling to nodal values
-  bool _nodal;
+  bool _c_nodal;
 
   /// True if implicit value is required
   bool _c_is_implicit;
