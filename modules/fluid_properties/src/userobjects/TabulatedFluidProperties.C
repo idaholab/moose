@@ -11,6 +11,7 @@
 
 // C++ includes
 #include <fstream>
+#include <ctime>
 
 template <>
 InputParameters
@@ -59,6 +60,9 @@ TabulatedFluidProperties::TabulatedFluidProperties(const InputParameters & param
     mooseError("temperature_max must be greater than temperature_min in ", name());
   if (_pressure_max <= _pressure_min)
     mooseError("pressure_max must be greater than pressure_min in ", name());
+
+  // Lines starting with # are treated as comments
+  _csv_reader.setComment("#");
 }
 
 TabulatedFluidProperties::~TabulatedFluidProperties() {}
@@ -373,6 +377,11 @@ TabulatedFluidProperties::writeTabulatedData(std::string file_name)
     MooseUtils::checkFileWriteable(file_name);
 
     std::ofstream file_out(file_name.c_str());
+
+    // Write out date and fluid type
+    time_t now = time(&now);
+    file_out << "# " << _fp.fluidName() << " properties created by TabulatedFluidProperties on "
+             << ctime(&now) << "\n";
 
     std::string column_names{"pressure, temperature, density, enthalpy, internal_energy"};
 
