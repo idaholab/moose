@@ -12,22 +12,17 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "DGKernel.h"
+#include "CoupleableMooseVariableDependencyIntermediateInterface.h"
 
-template <>
-InputParameters
-validParams<DGKernel>()
+CoupleableMooseVariableDependencyIntermediateInterface::
+    CoupleableMooseVariableDependencyIntermediateInterface(const MooseObject * moose_object,
+                                                           bool nodal)
+  : Coupleable(moose_object, nodal),
+    ScalarCoupleable(moose_object),
+    MooseVariableInterface(moose_object, nodal)
 {
-  InputParameters params = validParams<DGKernelBase>();
-  params += validParams<BlockRestrictable>();
-  params += validParams<TwoMaterialPropertyInterface>();
-  params.registerBase("DGKernel");
-  return params;
-}
+  for (MooseVariable * coupled_var : getCoupledMooseVars())
+    addMooseVariableDependency(coupled_var);
 
-DGKernel::DGKernel(const InputParameters & parameters)
-  : DGKernelBase(parameters),
-    BlockRestrictable(this),
-    TwoMaterialPropertyInterface(this, blockIDs(), boundaryIDs())
-{
+  addMooseVariableDependency(mooseVariable());
 }

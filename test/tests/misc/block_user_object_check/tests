@@ -1,0 +1,40 @@
+[Tests]
+  [./variable_interface_run]
+    type = RunApp
+    input = block_check.i
+    cli_args = 'Postprocessors/obj/block=1'
+  [../]
+  [./variable_interface_error_block_set]
+    type = RunException
+    input = block_check.i
+    cli_args = "Postprocessors/obj/block='1 2'"
+    expect_err = 'must be a subset'
+  [../]
+  [./variable_interface_error_block_any]
+    type = RunException
+    input = block_check.i
+    expect_err = 'must be a subset'
+  [../]
+  [./coupleable_run]
+    type = RunApp
+    input = block_check.i
+    cli_args = 'Postprocessors/obj/block=1'
+  [../]
+  [./coupleable_error_block_set]
+    type = RunException
+    input = coupled_check.i
+    cli_args = 'Kernels/obj/block=2'
+    expect_err = 'must be a subset'
+  [../]
+  [./coupleable_error_block_set2]
+    type = RunException
+    input = coupled_check.i
+    cli_args = 'Kernels/obj/variable=var_2'
+    expect_err = 'must be a subset'
+  [../]
+  [./coupleable_error_block_any]
+    type = RunException
+    input = coupled_check.i
+    expect_err = 'must be a subset'
+  [../]
+[]

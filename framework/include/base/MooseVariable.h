@@ -70,7 +70,7 @@ public:
   void reinitNodes(const std::vector<dof_id_type> & nodes);
   void reinitNodesNeighbor(const std::vector<dof_id_type> & nodes);
 
-  const std::set<SubdomainID> & activeSubdomains();
+  const std::set<SubdomainID> & activeSubdomains() const;
 
   /**
    * Is the variable active on the subdomain?

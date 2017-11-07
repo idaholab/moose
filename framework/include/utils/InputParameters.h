@@ -495,6 +495,11 @@ public:
   }
 
   /**
+   * Return the coupled variable parameter names.
+   */
+  const std::set<std::string> & getCoupledVariableParamNames() const { return _coupled_vars; }
+
+  /**
    * Return whether or not the coupled variable exists
    * @param coupling_name The name of the coupled variable to test for
    * @return True if the variable exists in the coupled variables for this InputParameters object

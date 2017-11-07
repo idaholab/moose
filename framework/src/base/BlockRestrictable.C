@@ -20,6 +20,8 @@
 #include "MooseMesh.h"
 #include "MooseVariable.h"
 #include "SystemBase.h"
+#include "Conversion.h"
+#include "MooseVariableInterface.h"
 
 template <>
 InputParameters
@@ -32,8 +34,6 @@ validParams<BlockRestrictable>()
   params.addParam<std::vector<SubdomainName>>(
       "block", "The list of block ids (SubdomainID) that this object will be applied");
 
-  params.addPrivateParam<bool>("delay_initialization", false);
-
   // A parameter for disabling error message for objects restrictable by boundary and block,
   // if the parameter is valid it was already set so don't do anything
   if (!params.isParamValid("_dual_restrictable"))
@@ -44,44 +44,39 @@ validParams<BlockRestrictable>()
 }
 
 // Standard constructor
-BlockRestrictable::BlockRestrictable(const InputParameters & parameters)
-  : _initialized(false),
-    _blk_dual_restrictable(parameters.get<bool>("_dual_restrictable")),
-    _blk_feproblem(parameters.isParamValid("_fe_problem_base")
-                       ? parameters.get<FEProblemBase *>("_fe_problem_base")
+BlockRestrictable::BlockRestrictable(const MooseObject * moose_object)
+  : _blk_dual_restrictable(moose_object->getParam<bool>("_dual_restrictable")),
+    _blk_feproblem(moose_object->isParamValid("_fe_problem_base")
+                       ? moose_object->getParam<FEProblemBase *>("_fe_problem_base")
                        : NULL),
-    _blk_mesh(parameters.isParamValid("_mesh") ? parameters.get<MooseMesh *>("_mesh") : NULL),
+    _blk_mesh(moose_object->isParamValid("_mesh") ? moose_object->getParam<MooseMesh *>("_mesh")
+                                                  : NULL),
     _boundary_ids(_empty_boundary_ids),
-    _blk_tid(parameters.isParamValid("_tid") ? parameters.get<THREAD_ID>("_tid") : 0)
+    _blk_tid(moose_object->isParamValid("_tid") ? moose_object->getParam<THREAD_ID>("_tid") : 0),
+    _blk_name(moose_object->getParam<std::string>("_object_name"))
 {
-  if (!parameters.get<bool>("delay_initialization"))
-    initializeBlockRestrictable(parameters);
+  initializeBlockRestrictable(moose_object);
 }
 
 // Dual restricted constructor
-BlockRestrictable::BlockRestrictable(const InputParameters & parameters,
+BlockRestrictable::BlockRestrictable(const MooseObject * moose_object,
                                      const std::set<BoundaryID> & boundary_ids)
-  : _initialized(false),
-    _blk_dual_restrictable(parameters.get<bool>("_dual_restrictable")),
-    _blk_feproblem(parameters.isParamValid("_fe_problem_base")
-                       ? parameters.get<FEProblemBase *>("_fe_problem_base")
+  : _blk_dual_restrictable(moose_object->getParam<bool>("_dual_restrictable")),
+    _blk_feproblem(moose_object->isParamValid("_fe_problem_base")
+                       ? moose_object->getParam<FEProblemBase *>("_fe_problem_base")
                        : NULL),
-    _blk_mesh(parameters.isParamValid("_mesh") ? parameters.get<MooseMesh *>("_mesh") : NULL),
+    _blk_mesh(moose_object->isParamValid("_mesh") ? moose_object->getParam<MooseMesh *>("_mesh")
+                                                  : NULL),
     _boundary_ids(boundary_ids),
-    _blk_tid(parameters.isParamValid("_tid") ? parameters.get<THREAD_ID>("_tid") : 0)
+    _blk_tid(moose_object->isParamValid("_tid") ? moose_object->getParam<THREAD_ID>("_tid") : 0),
+    _blk_name(moose_object->getParam<std::string>("_object_name"))
 {
-  if (!parameters.get<bool>("delay_initialization"))
-    initializeBlockRestrictable(parameters);
+  initializeBlockRestrictable(moose_object);
 }
 
 void
-BlockRestrictable::initializeBlockRestrictable(const InputParameters & parameters)
+BlockRestrictable::initializeBlockRestrictable(const MooseObject * moose_object)
 {
-  mooseAssert(!_initialized, "BlockRestrictable already initialized");
-
-  // The name and id of the object
-  const std::string name = parameters.get<std::string>("_object_name");
-
   // If the mesh pointer is not defined, but FEProblemBase is, get it from there
   if (_blk_feproblem != NULL && _blk_mesh == NULL)
     _blk_mesh = &_blk_feproblem->mesh();
@@ -95,17 +90,11 @@ BlockRestrictable::initializeBlockRestrictable(const InputParameters & parameter
   if (_blk_feproblem != NULL)
     _blk_material_data = _blk_feproblem->getMaterialData(Moose::BLOCK_MATERIAL_DATA, _blk_tid);
 
-  /**
-   * The _initialized value needs to be set early so that calls to helper functions during
-   * initialization may succeed.
-   */
-  _initialized = true;
-
   // The 'block' input is defined
-  if (parameters.isParamValid("block"))
+  if (moose_object->isParamValid("block"))
   {
     // Extract the blocks from the input
-    _blocks = parameters.get<std::vector<SubdomainName>>("block");
+    _blocks = moose_object->getParam<std::vector<SubdomainName>>("block");
 
     // Get the IDs from the supplied names
     std::vector<SubdomainID> vec_ids = _blk_mesh->getSubdomainIDs(_blocks);
@@ -115,34 +104,21 @@ BlockRestrictable::initializeBlockRestrictable(const InputParameters & parameter
       _blk_ids.insert(Moose::ANY_BLOCK_ID);
     else
       _blk_ids.insert(vec_ids.begin(), vec_ids.end());
-
-    // Check that supplied blocks are within the variable domain
-    if (parameters.isParamValid("variable") &&
-        (parameters.have_parameter<NonlinearVariableName>("variable") ||
-         parameters.have_parameter<AuxVariableName>("variable")))
-    {
-      // A pointer to the variable class
-      std::set<SubdomainID> var_ids = variableSubdomainIDs(parameters);
-
-      // Test if the variable blockIDs are valid for this object
-      if (!isBlockSubset(var_ids))
-        mooseError(
-            "In object ", name, " the defined blocks are outside of the domain of the variable");
-    }
   }
 
-  // The 'block' input parameter is undefined, if the object contains a variable, set the subdomain
-  // ids to those of the variable
-  else if (parameters.isParamValid("variable") &&
-           (parameters.have_parameter<NonlinearVariableName>("variable") ||
-            parameters.have_parameter<AuxVariableName>("variable")))
-    _blk_ids = variableSubdomainIDs(parameters);
+  // When 'blocks' is not set and there is a "variable", use the blocks from the variable
+  else if (moose_object->isParamValid("variable"))
+  {
+    std::string variable_name = moose_object->parameters().getMooseType("variable");
+    if (!variable_name.empty())
+      _blk_ids = _blk_feproblem->getVariable(_blk_tid, variable_name).activeSubdomains();
+  }
 
   // Produce error if the object is not allowed to be both block and boundary restricted
   if (!_blk_dual_restrictable && !_boundary_ids.empty() && !_boundary_ids.empty())
     if (!_boundary_ids.empty() && _boundary_ids.find(Moose::ANY_BOUNDARY_ID) == _boundary_ids.end())
       mooseError("Attempted to restrict the object '",
-                 name,
+                 _blk_name,
                  "' to a block, but the object is already restricted by boundary");
 
   // If no blocks were defined above, specify that it is valid on all blocks
@@ -167,7 +143,7 @@ BlockRestrictable::initializeBlockRestrictable(const InputParameters & parameter
     if (!diff.empty())
     {
       std::ostringstream msg;
-      msg << "The object '" << name
+      msg << "The object '" << _blk_name
           << "' contains the following block ids that do not exist on the mesh:";
       for (const auto & id : diff)
         msg << " " << id;
@@ -179,37 +155,29 @@ BlockRestrictable::initializeBlockRestrictable(const InputParameters & parameter
 bool
 BlockRestrictable::blockRestricted() const
 {
-  mooseAssert(_initialized, "BlockRestrictable not initialized");
-
   return _blk_ids.find(Moose::ANY_BLOCK_ID) == _blk_ids.end();
 }
 
 const std::vector<SubdomainName> &
 BlockRestrictable::blocks() const
 {
-  mooseAssert(_initialized, "BlockRestrictable not initialized");
-
   return _blocks;
 }
 
 const std::set<SubdomainID> &
 BlockRestrictable::blockIDs() const
 {
-  mooseAssert(_initialized, "BlockRestrictable not initialized");
-
   return _blk_ids;
 }
 
 unsigned int
 BlockRestrictable::numBlocks() const
 {
-  mooseAssert(_initialized, "BlockRestrictable not initialized");
-
   return (unsigned int)_blk_ids.size();
 }
 
 bool
-BlockRestrictable::hasBlocks(SubdomainName name) const
+BlockRestrictable::hasBlocks(const SubdomainName & name) const
 {
   // Create a vector and utilize the getSubdomainIDs function, which
   // handles the ANY_BLOCK_ID (getSubdomainID does not)
@@ -219,16 +187,14 @@ BlockRestrictable::hasBlocks(SubdomainName name) const
 }
 
 bool
-BlockRestrictable::hasBlocks(std::vector<SubdomainName> names) const
+BlockRestrictable::hasBlocks(const std::vector<SubdomainName> & names) const
 {
   return hasBlocks(_blk_mesh->getSubdomainIDs(names));
 }
 
 bool
-BlockRestrictable::hasBlocks(SubdomainID id) const
+BlockRestrictable::hasBlocks(const SubdomainID & id) const
 {
-  mooseAssert(_initialized, "BlockRestrictable not initialized");
-
   if (_blk_ids.empty() || _blk_ids.find(Moose::ANY_BLOCK_ID) != _blk_ids.end())
     return true;
   else
@@ -236,17 +202,15 @@ BlockRestrictable::hasBlocks(SubdomainID id) const
 }
 
 bool
-BlockRestrictable::hasBlocks(std::vector<SubdomainID> ids) const
+BlockRestrictable::hasBlocks(const std::vector<SubdomainID> & ids) const
 {
   std::set<SubdomainID> ids_set(ids.begin(), ids.end());
   return hasBlocks(ids_set);
 }
 
 bool
-BlockRestrictable::hasBlocks(std::set<SubdomainID> ids) const
+BlockRestrictable::hasBlocks(const std::set<SubdomainID> & ids) const
 {
-  mooseAssert(_initialized, "BlockRestrictable not initialized");
-
   if (_blk_ids.empty() || _blk_ids.find(Moose::ANY_BLOCK_ID) != _blk_ids.end())
     return true;
   else
@@ -254,10 +218,8 @@ BlockRestrictable::hasBlocks(std::set<SubdomainID> ids) const
 }
 
 bool
-BlockRestrictable::isBlockSubset(std::set<SubdomainID> ids) const
+BlockRestrictable::isBlockSubset(const std::set<SubdomainID> & ids) const
 {
-  mooseAssert(_initialized, "BlockRestrictable not initialized");
-
   // An empty input is assumed to be ANY_BLOCK_ID
   if (ids.empty() || ids.find(Moose::ANY_BLOCK_ID) != ids.end())
     return true;
@@ -272,46 +234,15 @@ BlockRestrictable::isBlockSubset(std::set<SubdomainID> ids) const
 }
 
 bool
-BlockRestrictable::isBlockSubset(std::vector<SubdomainID> ids) const
+BlockRestrictable::isBlockSubset(const std::vector<SubdomainID> & ids) const
 {
   std::set<SubdomainID> ids_set(ids.begin(), ids.end());
   return isBlockSubset(ids_set);
 }
 
-std::set<SubdomainID>
-BlockRestrictable::variableSubdomainIDs(const InputParameters & parameters) const
-{
-  // This method may be called before initializing the object. It doesn't use
-  // any information from the class state.
-
-  // Return an empty set if _sys is not defined
-  if (!parameters.isParamValid("_sys"))
-    return std::set<SubdomainID>();
-
-  // Get the SystemBase and the thread id
-  SystemBase * sys = parameters.get<SystemBase *>("_sys");
-  THREAD_ID tid = parameters.get<THREAD_ID>("_tid");
-
-  // Pointer to MooseVariable
-  MooseVariable * var = NULL;
-
-  // Get the variable based on the type
-  if (parameters.have_parameter<NonlinearVariableName>("variable"))
-    var = &_blk_feproblem->getVariable(tid, parameters.get<NonlinearVariableName>("variable"));
-  else if (parameters.have_parameter<AuxVariableName>("variable"))
-    var = &_blk_feproblem->getVariable(tid, parameters.get<AuxVariableName>("variable"));
-  else
-    mooseError("Unknown variable.");
-
-  // Return the block ids for the variable
-  return sys->getSubdomainsForVar(var->number());
-}
-
 const std::set<SubdomainID> &
 BlockRestrictable::meshBlockIDs() const
 {
-  mooseAssert(_initialized, "BlockRestrictable not initialized");
-
   return _blk_mesh->meshSubdomains();
 }
 
@@ -371,4 +302,26 @@ BlockRestrictable::getBlockCoordSystem()
       mooseError("This object requires all subdomains to have the same coordinate system.");
 
   return coord_system;
+}
+
+void
+BlockRestrictable::checkVariable(const MooseVariable & variable) const
+{
+  if (!isBlockSubset(variable.activeSubdomains()))
+  {
+    std::string var_ids = Moose::stringify(variable.activeSubdomains(), ", ");
+    std::string obj_ids = Moose::stringify(blockRestricted() ? _blk_ids : meshBlockIDs(), ", ");
+    mooseError("The 'block' parameter of the object '",
+               _blk_name,
+               "' must be a subset of the 'block' parameter of the variable '",
+               variable.name(),
+               "':\n    Object '",
+               _blk_name,
+               "': ",
+               obj_ids,
+               "\n    Variable '",
+               variable.name(),
+               "': ",
+               var_ids);
+  }
 }

@@ -62,8 +62,8 @@ validParams<NodalKernel>()
 
 NodalKernel::NodalKernel(const InputParameters & parameters)
   : MooseObject(parameters),
-    BlockRestrictable(parameters),
-    BoundaryRestrictable(parameters, true), // true for applying to nodesets
+    BlockRestrictable(this),
+    BoundaryRestrictable(this, true), // true for applying to nodesets
     SetupInterface(this),
     FunctionInterface(this),
     UserObjectInterface(this),

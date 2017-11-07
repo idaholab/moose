@@ -62,8 +62,8 @@ validParams<AuxKernel>()
 
 AuxKernel::AuxKernel(const InputParameters & parameters)
   : MooseObject(parameters),
-    BlockRestrictable(parameters),
-    BoundaryRestrictable(parameters,
+    BlockRestrictable(this),
+    BoundaryRestrictable(this,
                          parameters.get<AuxiliarySystem *>("_aux_sys")
                              ->getVariable(parameters.get<THREAD_ID>("_tid"),
                                            parameters.get<AuxVariableName>("variable"))
