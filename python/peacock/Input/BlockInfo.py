@@ -217,14 +217,14 @@ class BlockInfo(object):
         self.addParameter(pinfo)
         return pinfo
 
-    def removeUserParam(self, name):
+    def removeUserParam(self, name, force=False):
         """
         Remove a user added parameter.
         Input:
             name[str]: Name of the parameter to remove.
         """
         pinfo = self.getParamInfo(name)
-        if pinfo and pinfo.user_added:
+        if pinfo and (pinfo.user_added or force):
             del self.parameters[pinfo.name]
             self.parameters_list.remove(name)
             pinfo.parent = None
