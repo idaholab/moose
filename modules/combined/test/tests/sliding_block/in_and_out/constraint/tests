@@ -1,5 +1,4 @@
 [Tests]
-
   [./frictional_mu02_penalty]
     type = 'Exodiff'
     input = 'frictional_02_penalty.i'
@@ -10,7 +9,6 @@
     max_time = 800
     deleted = '#6139'
   [../]
-
   [./frictional_mu04_penalty]
     type = 'Exodiff'
     input = 'frictional_04_penalty.i'
@@ -21,7 +19,6 @@
     max_time = 800
     deleted = '#6139'
   [../]
-
   [./frictionless_kinematic]
     type = 'Exodiff'
     input = 'frictionless_kinematic.i'
@@ -31,12 +28,12 @@
     abs_zero = 1e-7
     max_time = 800
   [../]
-
   [./frictionless_penalty]
     type = 'Exodiff'
     input = 'frictionless_penalty.i'
     exodiff = 'frictionless_penalty_out.e'
     heavy = true
+    superlu = true
     min_parallel = 4
     abs_zero = 1e-7
     max_time = 800
