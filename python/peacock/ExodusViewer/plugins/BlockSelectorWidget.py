@@ -52,19 +52,23 @@ class BlockSelectorWidget(peacock.base.MooseWidget, QtWidgets.QWidget):
         state = dict()
         for i in range(self.ListWidget.count()):
             item = self.ListWidget.item(i)
-            state[item.text()] = item.checkState()
+            state[item.data(QtCore.Qt.UserRole)] = item.checkState()
 
         self.ListWidget.clear()
         blocks = reader.getBlockInformation()[self._type]
         for i, block in enumerate(blocks.itervalues()):
             item = QtWidgets.QListWidgetItem(self.ListWidget)
+            item.setData(QtCore.Qt.UserRole, block.name)
             if  block.name in state:
                 item.setCheckState(state[block.name])
             elif self.ListHeader.checkState() == QtCore.Qt.Checked:
                 item.setCheckState(QtCore.Qt.Checked)
             else:
                 item.setCheckState(QtCore.Qt.Unchecked)
-            item.setText(block.name)
+            if block.name.isdigit():
+                item.setText(block.name)
+            else:
+                item.setText('{} ({})'.format(block.name, block.number))
             self.ListWidget.insertItem(i, item)
 
         w = max(100, self.ListWidget.sizeHintForColumn(0) + 2 * self.ListWidget.frameWidth())
@@ -81,7 +85,7 @@ class BlockSelectorWidget(peacock.base.MooseWidget, QtWidgets.QWidget):
             for i in range(self.ListWidget.count()):
                 item = self.ListWidget.item(i)
                 if item.checkState() == QtCore.Qt.Checked:
-                    blocks.append(str(item.text()))
+                    blocks.append(str(item.data(QtCore.Qt.UserRole)))
         return blocks if blocks else None
 
     def _setupListHeader(self, qobject):
