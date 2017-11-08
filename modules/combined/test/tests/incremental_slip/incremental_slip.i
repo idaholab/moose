@@ -93,6 +93,7 @@
     master = 2
     slave = 3
     penalty = 1e7
+    system = Constraint
   [../]
 []
 

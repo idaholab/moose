@@ -39,6 +39,7 @@
     slave = 2
     penalty = 1e5
     formulation = kinematic
+    system = Constraint
   [../]
 []
 
