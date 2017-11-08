@@ -103,7 +103,7 @@ class ExodusReader(base.ChiggerObject):
 
     # Information data structures
     BlockInformation = collections.namedtuple('BlockInformation', ['name', 'object_type',
-                                                                   'object_index',
+                                                                   'object_index', 'number',
                                                                    'multiblock_index'])
     VariableInformation = collections.namedtuple('VariableInformation', ['name', 'object_type',
                                                                          'num_components'])
@@ -474,7 +474,7 @@ class ExodusReader(base.ChiggerObject):
                 if name.startswith('Unnamed'):
                     name = vtkid
 
-                binfo = ExodusReader.BlockInformation(object_type=obj_type, name=name,
+                binfo = ExodusReader.BlockInformation(object_type=obj_type, name=name, number=vtkid,
                                                       object_index=j, multiblock_index=index)
                 self.__blockinfo[obj_type][vtkid] = binfo
 
