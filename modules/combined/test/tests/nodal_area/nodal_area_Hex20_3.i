@@ -81,6 +81,7 @@
     formulation = penalty
     penalty = 1e9
     tangential_tolerance = 1e-5
+    system = Constraint
   [../]
 []
 

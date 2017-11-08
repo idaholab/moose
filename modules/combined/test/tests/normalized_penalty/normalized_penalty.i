@@ -55,6 +55,7 @@
     normalize_penalty = true
     formulation = penalty
     tangential_tolerance = 1e-3
+    system = Constraint
   [../]
 []
 
