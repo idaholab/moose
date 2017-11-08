@@ -115,7 +115,7 @@ ComputeReducedOrderEigenstrain::prepareEigenstrain()
 {
   // The eigenstrains can either be constant in an element or linear in x, y, z
   // If constant, do volume averaging.
-  if (!_second_order)
+  if (!_second_order || _qrule->n_points() == 1)
   {
     // Volume average
     _adjusted_eigenstrain.zero();
