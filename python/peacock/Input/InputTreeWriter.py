@@ -91,7 +91,7 @@ def nodeParamsString(output, entry, indent, sep, ignore_type=False):
         if not val and name != 'active': # we generally don't want to write out empty strings
             continue
         comments = info.comments
-        if info.value != info.default or info.user_added or info.set_in_input_file:
+        if info.hasChanged() or info.user_added or info.set_in_input_file:
             paramToString(output, info.name, val, comments, indent, sep)
 
     type_info = entry.parameters.get("type")

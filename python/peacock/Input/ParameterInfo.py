@@ -102,6 +102,9 @@ class ParameterInfo(object):
     def toolTip(self):
         return self.description + "\nDefault: %s" % self.default
 
+    def hasChanged(self):
+        return self.value != self.default or self.comments
+
     def dump(self, o, indent=0, sep='  '):
         o.write("%sName: %s\n" % (indent*sep, self.name))
         o.write("%sValue: %s\n" % (indent*sep, self.value))
