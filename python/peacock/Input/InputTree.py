@@ -149,7 +149,7 @@ class InputTree(object):
                 param_info.value = param_node.raw()
             if param_info.name == "active":
                 active = param_info.value.split()
-                param_info.parent.removeUserParam("active")
+                param_info.parent.removeUserParam("active", True)
             elif param_info.name == "inactive":
                 for inactive in param_info.value.split():
                     try:
@@ -157,7 +157,7 @@ class InputTree(object):
                     except ValueError:
                         pass
                 # We don't want to write this out by default
-                param_info.parent.removeUserParam("inactive")
+                param_info.parent.removeUserParam("inactive", True)
             else:
                 param_info.set_in_input_file = True
                 param_info.parent.changed_by_user = True
