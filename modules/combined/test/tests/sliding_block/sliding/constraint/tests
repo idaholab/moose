@@ -5,10 +5,10 @@
     input = 'frictional_02_penalty.i'
     exodiff = 'frictional_02_penalty_out.e'
     heavy = true
+    superlu = true
     min_parallel = 4
     abs_zero = 1e-7
     max_time = 800
-    skip = 'see #8649'
   [../]
 
   [./frictional_mu04_penalty]
@@ -38,6 +38,7 @@
     input = 'frictionless_penalty.i'
     exodiff = 'frictionless_penalty_out.e'
     heavy = true
+    superlu = true
     min_parallel = 4
     abs_zero = 1e-7
     max_time = 800
@@ -48,6 +49,7 @@
     input = 'frictionless_aug.i'
     exodiff = 'frictionless_aug_out.e'
     heavy = true
+    superlu = true
     min_parallel = 4
     abs_zero = 1e-7
     max_time = 800
@@ -58,6 +60,7 @@
     input = 'frictional_02_aug.i'
     exodiff = 'frictional_02_aug_out.e'
     heavy = true
+    superlu = true
     min_parallel = 4
     abs_zero = 1e-5
     max_time = 800
