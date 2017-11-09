@@ -4918,16 +4918,13 @@ FEProblemBase::checkDependMaterialsHelper(
 void
 FEProblemBase::checkCoordinateSystems()
 {
-  MeshBase::const_element_iterator it = _mesh.getMesh().elements_begin();
-  MeshBase::const_element_iterator it_end = _mesh.getMesh().elements_end();
-
-  for (; it != it_end; ++it)
+  for (const auto & elem : _mesh.getMesh().element_ptr_range())
   {
-    SubdomainID sid = (*it)->subdomain_id();
-    if (_coord_sys[sid] == Moose::COORD_RZ && (*it)->dim() == 3)
+    SubdomainID sid = elem->subdomain_id();
+    if (_coord_sys[sid] == Moose::COORD_RZ && elem->dim() == 3)
       mooseError("An RZ coordinate system was requested for subdomain " + Moose::stringify(sid) +
                  " which contains 3D elements.");
-    if (_coord_sys[sid] == Moose::COORD_RSPHERICAL && (*it)->dim() > 1)
+    if (_coord_sys[sid] == Moose::COORD_RSPHERICAL && elem->dim() > 1)
       mooseError("An RSPHERICAL coordinate system was requested for subdomain " +
                  Moose::stringify(sid) + " which contains 2D or 3D elements.");
   }

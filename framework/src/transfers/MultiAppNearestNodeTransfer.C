@@ -565,19 +565,18 @@ MultiAppNearestNodeTransfer::getNearestNode(const Point & p,
   }
   else
   {
-    MeshBase::const_node_iterator nodes_begin =
-        local ? mesh->localNodesBegin() : mesh->getMesh().nodes_begin();
-    MeshBase::const_node_iterator nodes_end =
-        local ? mesh->localNodesEnd() : mesh->getMesh().nodes_end();
+    SimpleRange<MeshBase::const_node_iterator> range(
+        local ? mesh->localNodesBegin() : mesh->getMesh().nodes_begin(),
+        local ? mesh->localNodesEnd() : mesh->getMesh().nodes_end());
 
-    for (MeshBase::const_node_iterator node_it = nodes_begin; node_it != nodes_end; ++node_it)
+    for (auto & node : range)
     {
-      Real current_distance = (p - *(*node_it)).norm();
+      Real current_distance = (p - *node).norm();
 
       if (current_distance < distance)
       {
         distance = current_distance;
-        nearest = *node_it;
+        nearest = node;
       }
     }
   }

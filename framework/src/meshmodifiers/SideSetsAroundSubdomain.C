@@ -90,12 +90,8 @@ SideSetsAroundSubdomain::modify()
   std::vector<vec_type> queries(my_n_proc);
 
   // Loop over the elements
-  for (MeshBase::const_element_iterator el = mesh.active_elements_begin(),
-                                        end_el = mesh.active_elements_end();
-       el != end_el;
-       ++el)
+  for (const auto & elem : mesh.active_element_ptr_range())
   {
-    const Elem * elem = *el;
     SubdomainID curr_subdomain = elem->subdomain_id();
 
     // We only need to loop over elements in the source subdomain
