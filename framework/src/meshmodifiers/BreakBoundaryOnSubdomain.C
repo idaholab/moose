@@ -59,13 +59,10 @@ BreakBoundaryOnSubdomain::modify()
       this->comm().set_union(breaking_boundary_ids);
   }
 
-  auto end_el = mesh.active_elements_end();
-
   // create a list of new boundary names
   std::set<std::string> new_boundary_name_set;
-  for (auto el = mesh.active_elements_begin(); el != end_el; ++el)
+  for (const auto & elem : mesh.active_element_ptr_range())
   {
-    auto elem = *el;
     auto subdomain_id = elem->subdomain_id();
     auto subdomain_name = mesh.subdomain_name(subdomain_id);
     if (subdomain_name == "")
@@ -100,9 +97,8 @@ BreakBoundaryOnSubdomain::modify()
   }
 
   // add sides into the side sets
-  for (auto el = mesh.active_elements_begin(); el != end_el; ++el)
+  for (const auto & elem : mesh.active_element_ptr_range())
   {
-    auto elem = *el;
     auto subdomain_id = elem->subdomain_id();
     auto subdomain_name = mesh.subdomain_name(subdomain_id);
     if (subdomain_name == "")

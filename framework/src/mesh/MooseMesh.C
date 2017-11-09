@@ -365,11 +365,9 @@ MooseMesh::prepare(bool force)
   }
 
   // Collect (local) subdomain IDs
-  const MeshBase::element_iterator el_end = getMesh().elements_end();
-
   _mesh_subdomains.clear();
-  for (MeshBase::element_iterator el = getMesh().elements_begin(); el != el_end; ++el)
-    _mesh_subdomains.insert((*el)->subdomain_id());
+  for (const auto & elem : getMesh().element_ptr_range())
+    _mesh_subdomains.insert(elem->subdomain_id());
 
   // Make sure nodesets have been generated
   buildNodeListFromSideList();
@@ -687,12 +685,9 @@ MooseMesh::nodeToElemMap()
     Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
     if (!_node_to_elem_map_built)
     {
-      MeshBase::const_element_iterator el = getMesh().active_elements_begin();
-      const MeshBase::const_element_iterator end = getMesh().active_elements_end();
-
-      for (; el != end; ++el)
-        for (unsigned int n = 0; n < (*el)->n_nodes(); n++)
-          _node_to_elem_map[(*el)->node(n)].push_back((*el)->id());
+      for (const auto & elem : getMesh().active_element_ptr_range())
+        for (unsigned int n = 0; n < elem->n_nodes(); n++)
+          _node_to_elem_map[elem->node(n)].push_back(elem->id());
 
       _node_to_elem_map_built = true; // MUST be set at the end for double-checked locking to work!
     }
@@ -787,13 +782,9 @@ MooseMesh::getBoundaryElementRange()
 void
 MooseMesh::cacheInfo()
 {
-  const MeshBase::element_iterator end = getMesh().elements_end();
-
   // TODO: Thread this!
-  for (MeshBase::element_iterator el = getMesh().elements_begin(); el != end; ++el)
+  for (const auto & elem : getMesh().element_ptr_range())
   {
-    Elem * elem = *el;
-
     SubdomainID subdomain_id = elem->subdomain_id();
 
     for (unsigned int side = 0; side < elem->n_sides(); side++)
@@ -868,11 +859,8 @@ MooseMesh::addUniqueNode(const Point & p, Real tol)
   {
     _node_map.clear();
     _node_map.reserve(getMesh().n_nodes());
-    const libMesh::MeshBase::node_iterator end = getMesh().nodes_end();
-    for (libMesh::MeshBase::node_iterator i = getMesh().nodes_begin(); i != end; ++i)
-    {
-      _node_map.push_back(*i);
-    }
+    for (const auto & node : getMesh().node_ptr_range())
+      _node_map.push_back(node);
   }
 
   Node * node = nullptr;
@@ -1142,8 +1130,6 @@ MooseMesh::buildPeriodicNodeMap(std::multimap<dof_id_type, dof_id_type> & period
 
   periodic_node_map.clear();
 
-  MeshBase::const_element_iterator it = getMesh().active_elements_begin();
-  MeshBase::const_element_iterator it_end = getMesh().active_elements_end();
   std::unique_ptr<PointLocatorBase> point_locator = getMesh().sub_point_locator();
 
   // Get a const reference to the BoundaryInfo object that we will use several times below...
@@ -1155,9 +1141,7 @@ MooseMesh::buildPeriodicNodeMap(std::multimap<dof_id_type, dof_id_type> & period
   // Container to catch IDs passed back from the BoundaryInfo object
   std::vector<boundary_id_type> bc_ids;
 
-  for (; it != it_end; ++it)
-  {
-    const Elem * elem = *it;
+  for (const auto & elem : getMesh().active_element_ptr_range())
     for (unsigned int s = 0; s < elem->n_sides(); ++s)
     {
       if (elem->neighbor_ptr(s))
@@ -1204,7 +1188,6 @@ MooseMesh::buildPeriodicNodeMap(std::multimap<dof_id_type, dof_id_type> & period
         }
       }
     }
-  }
 }
 
 void
@@ -1245,18 +1228,14 @@ MooseMesh::detectOrthogonalDimRanges(Real tol)
   unsigned int dim = getMesh().mesh_dimension();
 
   // Find the bounding box of our mesh
-  const MeshBase::node_iterator nd_end = getMesh().nodes_end();
-  for (MeshBase::node_iterator nd = getMesh().nodes_begin(); nd != nd_end; ++nd)
-  {
-    Node & node = **nd;
+  for (const auto & node : getMesh().node_ptr_range())
     for (unsigned int i = 0; i < dim; ++i)
     {
-      if (node(i) < min[i])
-        min[i] = node(i);
-      if (node(i) > max[i])
-        max[i] = node(i);
+      if ((*node)(i) < min[i])
+        min[i] = (*node)(i);
+      if ((*node)(i) > max[i])
+        max[i] = (*node)(i);
     }
-  }
 
   this->comm().max(max);
   this->comm().min(min);
@@ -1265,20 +1244,19 @@ MooseMesh::detectOrthogonalDimRanges(Real tol)
   // Now make sure that there are actual nodes at all of the extremes
   std::vector<bool> extreme_matches(8, false);
   std::vector<unsigned int> comp_map(3);
-  for (MeshBase::node_iterator nd = getMesh().nodes_begin(); nd != nd_end; ++nd)
+  for (const auto & node : getMesh().node_ptr_range())
   {
     // See if the current node is located at one of the extremes
-    Node & node = **nd;
     unsigned int coord_match = 0;
 
     for (unsigned int i = 0; i < dim; ++i)
     {
-      if (std::abs(node(i) - min[i]) < tol)
+      if (std::abs((*node)(i)-min[i]) < tol)
       {
         comp_map[i] = MIN;
         ++coord_match;
       }
-      else if (std::abs(node(i) - max[i]) < tol)
+      else if (std::abs((*node)(i)-max[i]) < tol)
       {
         comp_map[i] = MAX;
         ++coord_match;
@@ -1287,7 +1265,7 @@ MooseMesh::detectOrthogonalDimRanges(Real tol)
 
     if (coord_match == dim) // Found a coordinate at one of the extremes
     {
-      _extreme_nodes[comp_map[X] * 4 + comp_map[Y] * 2 + comp_map[Z]] = &node;
+      _extreme_nodes[comp_map[X] * 4 + comp_map[Y] * 2 + comp_map[Z]] = node;
       extreme_matches[comp_map[X] * 4 + comp_map[Y] * 2 + comp_map[Z]] = true;
     }
   }
@@ -1530,16 +1508,12 @@ MooseMesh::getPairedBoundaryMapping(unsigned int component)
 void
 MooseMesh::buildRefinementAndCoarseningMaps(Assembly * assembly)
 {
-  MeshBase::const_element_iterator el = getMesh().elements_begin();
-  const MeshBase::const_element_iterator end_el = getMesh().elements_end();
-
   std::map<ElemType, Elem *> canonical_elems;
 
   // First, loop over all elements and find a canonical element for each type
   // Doing it this way guarantees that this is going to work in parallel
-  for (; el != end_el; ++el) // TODO: Thread this
+  for (const auto & elem : getMesh().element_ptr_range()) // TODO: Thread this
   {
-    Elem * elem = *el;
     ElemType type = elem->type();
 
     if (canonical_elems.find(type) ==

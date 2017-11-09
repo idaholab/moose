@@ -55,19 +55,14 @@ SubdomainBoundingBox::modify()
   if (!_mesh_ptr)
     mooseError("_mesh_ptr must be initialized before calling SubdomainBoundingBox::modify()");
 
-  // Reference the the libMesh::MeshBase
-  MeshBase & mesh = _mesh_ptr->getMesh();
-
   // Loop over the elements
-  for (MeshBase::element_iterator el = mesh.active_elements_begin();
-       el != mesh.active_elements_end();
-       ++el)
+  for (const auto & elem : _mesh_ptr->getMesh().active_element_ptr_range())
   {
-    bool contains = _bounding_box.contains_point((*el)->centroid());
+    bool contains = _bounding_box.contains_point(elem->centroid());
     if (contains && _location == "INSIDE")
-      (*el)->subdomain_id() = _block_id;
+      elem->subdomain_id() = _block_id;
     else if (!contains && _location == "OUTSIDE")
-      (*el)->subdomain_id() = _block_id;
+      elem->subdomain_id() = _block_id;
   }
 
   // Assign block name, if provided

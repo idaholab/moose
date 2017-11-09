@@ -84,23 +84,18 @@ ParsedSubdomainMeshModifier::modify()
     mooseError(
         "_mesh_ptr must be initialized before calling ParsedSubdomainMeshModifier::modify()");
 
-  // Reference the the libMesh::MeshBase
-  MeshBase & mesh = _mesh_ptr->getMesh();
-
   // Loop over the elements
-  for (MeshBase::element_iterator el = mesh.active_elements_begin();
-       el != mesh.active_elements_end();
-       ++el)
+  for (const auto & elem : _mesh_ptr->getMesh().active_element_ptr_range())
   {
-    _func_params[0] = (*el)->centroid()(0);
-    _func_params[1] = (*el)->centroid()(1);
-    _func_params[2] = (*el)->centroid()(2);
+    _func_params[0] = elem->centroid()(0);
+    _func_params[1] = elem->centroid()(1);
+    _func_params[2] = elem->centroid()(2);
     bool contains = evaluate(_func_F);
 
     if (contains &&
-        std::find(_excluded_ids.begin(), _excluded_ids.end(), (*el)->subdomain_id()) ==
+        std::find(_excluded_ids.begin(), _excluded_ids.end(), elem->subdomain_id()) ==
             _excluded_ids.end())
-      (*el)->subdomain_id() = _block_id;
+      elem->subdomain_id() = _block_id;
   }
 
   // Assign block name, if provided

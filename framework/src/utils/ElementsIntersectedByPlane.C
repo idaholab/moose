@@ -31,11 +31,8 @@ findElementsIntersectedByPlane(const Plane & plane,
                                std::vector<const Elem *> & intersected_elems)
 {
   // Loop over all elements to find elements intersected by the plane
-  MeshBase::const_element_iterator el = mesh.elements_begin();
-  const MeshBase::const_element_iterator end_el = mesh.elements_end();
-  for (; el != end_el; ++el)
+  for (const auto & elem : mesh.element_ptr_range())
   {
-    const Elem * elem = *el;
     bool intersected = false;
 
     // Check whether the first node of this element is below or above the plane

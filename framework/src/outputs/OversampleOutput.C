@@ -124,10 +124,8 @@ OversampleOutput::initOversample()
 
   // Re-position the oversampled mesh
   if (_change_position)
-    for (MeshBase::node_iterator nd = _mesh_ptr->getMesh().nodes_begin();
-         nd != _mesh_ptr->getMesh().nodes_end();
-         ++nd)
-      *(*nd) += _position;
+    for (auto & node : _mesh_ptr->getMesh().node_ptr_range())
+      *node += _position;
 
   // Perform the mesh refinement
   if (_oversample)

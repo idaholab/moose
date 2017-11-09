@@ -64,12 +64,8 @@ SideSetsBetweenSubdomains::modify()
   typedef std::vector<std::pair<dof_id_type, unsigned int>> vec_type;
   std::vector<vec_type> queries(my_n_proc);
 
-  MeshBase::const_element_iterator el = mesh.active_elements_begin();
-  const MeshBase::const_element_iterator end_el = mesh.active_elements_end();
-
-  for (; el != end_el; ++el)
+  for (const auto & elem : mesh.active_element_ptr_range())
   {
-    const Elem * elem = *el;
     SubdomainID curr_subdomain = elem->subdomain_id();
 
     // We only need to loop over elements in the master subdomain

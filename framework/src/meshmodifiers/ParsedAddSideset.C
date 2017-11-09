@@ -100,12 +100,8 @@ ParsedAddSideset::modify()
   std::vector<BoundaryID> boundary_ids = _mesh_ptr->getBoundaryIDs({_sideset_name}, true);
   mooseAssert(boundary_ids.size() == 1, "Length of boundary_ids should be one");
 
-  MeshBase::const_element_iterator el = mesh.active_elements_begin();
-  const MeshBase::const_element_iterator end_el = mesh.active_elements_end();
-
-  for (; el != end_el; ++el)
+  for (const auto & elem : mesh.active_element_ptr_range())
   {
-    const Elem * elem = *el;
     SubdomainID curr_subdomain = elem->subdomain_id();
 
     // check if the element is included

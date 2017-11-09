@@ -233,12 +233,9 @@ GeneratedMesh::buildMesh()
     }
 
     // Loop over the nodes and move them to the desired location
-    MeshBase::node_iterator node_it = mesh.nodes_begin();
-    const MeshBase::node_iterator node_end = mesh.nodes_end();
-
-    for (; node_it != node_end; ++node_it)
+    for (auto & node_ptr : mesh.node_ptr_range())
     {
-      Node & node = **node_it;
+      Node & node = *node_ptr;
 
       for (unsigned int dir = 0; dir < LIBMESH_DIM; ++dir)
       {
