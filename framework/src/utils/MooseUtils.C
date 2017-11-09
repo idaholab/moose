@@ -575,7 +575,7 @@ getLatestCheckpointFileHelper(const std::list<std::string> & checkpoint_files,
   // Loop through all possible files and store the newest
   for (const auto & cp_file : checkpoint_files)
   {
-    if (find_if(extensions.begin(), extensions.end(), [cp_file](std::string ext) {
+    if (find_if(extensions.begin(), extensions.end(), [cp_file](const std::string & ext) {
           return MooseUtils::hasExtension(cp_file, ext);
         }) != extensions.end())
     {

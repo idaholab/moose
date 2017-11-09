@@ -327,7 +327,6 @@ std::list<std::string> getFilesInDirs(const std::list<std::string> & directory_l
  * Returns the most recent checkpoint or mesh file given a list of files.
  * If a suitable file isn't found the empty string is returned
  * @param checkpoint_files the list of files to analyze
- * @param
  */
 std::string getLatestMeshCheckpointFile(const std::list<std::string> & checkpoint_files);
 
