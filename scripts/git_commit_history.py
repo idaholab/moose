@@ -11,6 +11,11 @@ import itertools
 import math
 import os
 
+##############################
+# Favorite plots
+# $ ./git_commit_history.py --open-source --moose-dev --unique
+# $ ./git_commit_history.py --unique --additions --moose-dev --days=7 --open-source
+##############################
 
 from matplotlib import rc
 rc('font',**{'family':'sans-serif','sans-serif':['Helvetica']})
@@ -55,7 +60,7 @@ def getContributors(options, **kwargs):
     # Limit to the supplied number of authors
     n = len(contributors)
     if num_authors == 'moose':
-        contributors = ['Derek Gaston', 'Cody Permann', 'David Andrs', 'John W. Peterson', 'Andrew E. Slaughter', 'Brain Alger', 'Fande Kong']
+        contributors = ['Derek Gaston', 'Cody Permann', 'David Andrs', 'John W. Peterson', 'Andrew E. Slaughter', 'Brain Alger', 'Fande Kong', 'Robert Carlsen', 'Alex Lindsay', 'Jason M. Miller']
         contributors += ['Other (' + str(n-len(contributors)) + ')']
 
     elif num_authors:
