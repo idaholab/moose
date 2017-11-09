@@ -9,6 +9,11 @@
   file = pressure.e
 []
 
+[Problem]
+  type = AugmentedLagrangianContactProblem
+  maximum_lagrangian_update_iterations = 200
+[]
+
 [Variables]
   [./disp_x]
   [../]
@@ -38,7 +43,9 @@
     slave = 10
     penalty = 1e7
     formulation = augmented_lagrange
+    al_penetration_tolerance = 1e-8
     tangential_tolerance = 1e-3
+    system = Constraint
   [../]
 []
 

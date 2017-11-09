@@ -168,5 +168,6 @@
     model = frictionless
     formulation = default
     penalty = 1e+6
+    system = Constraint
   [../]
 []

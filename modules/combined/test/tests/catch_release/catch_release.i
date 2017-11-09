@@ -62,6 +62,7 @@
     slave = 3
     penalty = 1e6
     model = frictionless
+    system = Constraint
   [../]
 []
 
