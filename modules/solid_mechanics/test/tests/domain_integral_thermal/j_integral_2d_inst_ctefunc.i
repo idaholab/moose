@@ -168,7 +168,7 @@
     youngs_modulus = 207000
     poissons_ratio = 0.3
 #    thermal_expansion = 1.35e-5
-    formulation = PlaneStrain
+    formulation = NonlinearPlaneStrain
     compute_JIntegral = true
     temp = temp
     stress_free_temperature = 0.0
@@ -207,7 +207,6 @@
 
 [Outputs]
   execute_on = 'timestep_end'
-  file_base = inst_out
   csv = true
 []
 

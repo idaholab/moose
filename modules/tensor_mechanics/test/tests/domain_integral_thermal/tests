@@ -15,4 +15,19 @@
     input = 'interaction_integral_2d_rot.i'
     csvdiff = 'interaction_integral_2d_rot_out.csv'
   [../]
+  [./test_jthermal_ctefunc]
+    type = 'CSVDiff'
+    input = 'j_integral_2d_ctefunc.i'
+    csvdiff = 'j_integral_2d_ctefunc_out.csv'
+  [../]
+  [./test_jthermal_mean_ctefunc]
+    type = 'CSVDiff'
+    input = 'j_integral_2d_mean_ctefunc.i'
+    csvdiff = 'j_integral_2d_mean_ctefunc_out.csv'
+  [../]
+  [./test_jthermal_inst_ctefunc]
+    type = 'CSVDiff'
+    input = 'j_integral_2d_inst_ctefunc.i'
+    csvdiff = 'j_integral_2d_inst_ctefunc_out.csv'
+  [../]
 []
