@@ -113,7 +113,7 @@ CreateProblemAction::act()
       {
         std::list<std::string> dir_list(1, path);
         std::list<std::string> files = MooseUtils::getFilesInDirs(dir_list);
-        restart_file_base = MooseUtils::getRecoveryFileBase(files);
+        restart_file_base = MooseUtils::getLatestAppCheckpointFileBase(files);
 
         if (restart_file_base == "")
           mooseError("Unable to find suitable restart file");

@@ -324,11 +324,13 @@ std::string & removeColor(std::string & msg);
 std::list<std::string> getFilesInDirs(const std::list<std::string> & directory_list);
 
 /**
- * Returns the most recent checkpoint file given a list of files.
+ * Returns the most recent checkpoint or mesh file given a list of files.
  * If a suitable file isn't found the empty string is returned
  * @param checkpoint_files the list of files to analyze
  */
-std::string getRecoveryFileBase(const std::list<std::string> & checkpoint_files);
+std::string getLatestMeshCheckpointFile(const std::list<std::string> & checkpoint_files);
+
+std::string getLatestAppCheckpointFileBase(const std::list<std::string> & checkpoint_files);
 
 /*
  * Checks to see if a string matches a search string
