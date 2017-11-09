@@ -4,6 +4,11 @@
    input = 'j_integral_2d.i'
    csvdiff = 'j_integral_2d_out.csv'
  [../]
+ [./j_2d_small_strain]
+   type = 'CSVDiff'
+   input = 'j_integral_2d_small_strain.i'
+   csvdiff = 'j_integral_2d_small_strain_out.csv'
+ [../]
  [./j_2d_points]
    type = 'CSVDiff'
    input = 'j_integral_2d_points.i'
