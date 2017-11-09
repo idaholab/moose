@@ -95,10 +95,41 @@ class ParamsByGroup(QTabWidget, MooseWidget):
             t.reset()
 
     def findTable(self, group):
-        return self.group_table_map.get(group)
+        return self.group_table_map.get(group, None)
 
     def paramValue(self, name):
         for i in range(self.count()):
             t = self.widget(i)
             if t.paramValue(name):
                 return t.paramValue(name)
+
+    def getParamData(self):
+        """
+        Get the current parameter information.
+        This is what is shown in the widget and is
+        not necessarily the same values that would
+        be in the ParameterInfo since the values
+        might not have been saved yet.
+        """
+        param_data = {}
+        for group, t in self.group_table_map.iteritems():
+            param_data.update(t.getCurrentParamData())
+        return param_data
+
+    def syncParamsFrom(self, prev):
+        """
+        Sync changes from another ParamsByGroup object to this one.
+        Intended for use by ParamsByType. When the type changes
+        we want to copy edited parameter values and comments from
+        the previous type to this one.
+        Input:
+            prev[ParamsByGroup]: parameters to sync from
+        """
+        ignore = ["Name", "type"]
+        for name, prev_p in prev.getParamData().iteritems():
+            if name in ignore:
+                continue
+            if prev_p["changed"] and not prev_p["user_added"]:
+                t = self.findTable(prev_p["group"])
+                if t:
+                    t.setParamValue(name, prev_p["value"], prev_p["comments"])

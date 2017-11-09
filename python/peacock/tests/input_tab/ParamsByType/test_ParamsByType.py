@@ -42,7 +42,9 @@ class Tests(Testing.PeacockTester):
 
     def createParams(self, b):
         b.addParameter(self.createParam("%s_p0" % b.name))
+        b.addParameter(self.createParam("common"))
         b.addParameter(self.createParam("%s_p1" % b.name, group="Group1"))
+        b.addParameter(self.createParam("common_group1", group="Group1"))
         b.addParameter(self.createParam("%s_p2" % b.name, group="Group2"))
         b.addParameter(self.createParam("%s_p3" % b.name, group="Group1"))
         b.addParameter(self.createParam("%s_p4" % b.name, group="Group2"))
@@ -114,6 +116,47 @@ class Tests(Testing.PeacockTester):
         t = self.createWidget(b)
         self.assertEqual(t.combo.count(), 0)
         self.assertEqual(t.table_stack.count(), 0)
+
+    def testChangeType(self):
+        t = self.createWidget(self.createTypes(), "")
+        self.assertEqual(t.combo.count(), 4)
+        self.assertEqual(t.table_stack.count(), 1)
+
+        p0_name = "common"
+        p1_name = "common_group1"
+        data = t.getTable().getParamData()
+        self.assertIn(p0_name, data)
+        self.assertEqual(data[p0_name]["group"], "Main")
+        self.assertIn(p1_name, data)
+        self.assertEqual(data[p1_name]["group"], "Group1")
+        p0_val = "something else 0"
+        p0_comment = "some comment 0"
+        p1_val = "something else 1"
+        p1_comment = "some comment 1"
+        current = t.getTable().findTable("Main")
+        current.setParamValue(p0_name, p0_val, p0_comment)
+        current = t.getTable().findTable("Group1")
+        current.setParamValue(p1_name, p1_val, p1_comment)
+
+        data = t.getTable().getParamData()
+        self.assertEqual(data[p0_name]["value"], p0_val)
+        self.assertEqual(data[p0_name]["comments"], p0_comment)
+        self.assertEqual(data[p0_name]["changed"], True)
+        self.assertEqual(data[p1_name]["value"], p1_val)
+        self.assertEqual(data[p1_name]["comments"], p1_comment)
+        self.assertEqual(data[p1_name]["changed"], True)
+
+        # Make sure that when we switch types we copy
+        # over the values and comments from common parameters.
+        t.setBlockType("type_3")
+
+        data = t.getTable().getParamData()
+        self.assertEqual(data[p0_name]["value"], p0_val)
+        self.assertEqual(data[p0_name]["comments"], p0_comment)
+        self.assertEqual(data[p0_name]["changed"], True)
+        self.assertEqual(data[p1_name]["value"], p1_val)
+        self.assertEqual(data[p1_name]["comments"], p1_comment)
+        self.assertEqual(data[p1_name]["changed"], True)
 
 if __name__ == '__main__':
     Testing.run_tests()

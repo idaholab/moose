@@ -270,17 +270,20 @@ class ParamsTable(QtWidgets.QTableWidget, MooseWidget):
                 return i
         return -1
 
+    def _paramValue(self, row):
+        w = self.cellWidget(row, 1)
+        if w:
+            if w.checkState() == Qt.Checked:
+                return "true"
+            else:
+                return "false"
+        item = self.item(row, 1)
+        return item.text()
+
     def paramValue(self, name):
         row = self.findRow(name)
         if row >= 0:
-            w = self.cellWidget(row, 1)
-            if w:
-                if w.checkState() == Qt.Checked():
-                    return "true"
-                else:
-                    return "false"
-            item = self.item(row, 1)
-            return item.text()
+            return self._paramValue(row)
 
     def _openFileDialog(self, param, text, use_extension):
         (file_name, filter_name) = QtWidgets.QFileDialog.getOpenFileName(self, text, os.getcwd(), "File (*)")
@@ -320,6 +323,51 @@ class ParamsTable(QtWidgets.QTableWidget, MooseWidget):
             else:
                 current_val = val
         item.setText(current_val)
+
+    def getCurrentParamData(self):
+        """
+        Get a dctionary of the current state of all parameters.
+        This can be different then what the actual ParameterInfo
+        objects hold since the user might not have saved yet.
+        """
+        param_data = {}
+        for i in range(self.rowCount()):
+            name_item = self.item(i, 0)
+            name = name_item.text()
+            p = name_item.data(Qt.UserRole)
+            comments_item = self.item(i, 3)
+            data = {"name": name,
+                    "value": self._paramValue(i),
+                    "comments": comments_item.text(),
+                    "group": p.group_name,
+                    "user_added": p.user_added,
+                    }
+            data["changed"] = data["value"] != p.default or data["comments"]
+            param_data[name] = data
+        return param_data
+
+    def setParamValue(self, name, val, comments=None):
+        """
+        Set the value (and optionally comments) for a parameter.
+        Input:
+            name[str]: Name of the parameter
+            val[str]: New value of the parameter
+            comments[str]: New comments
+        """
+        row = self.findRow(name)
+        if row >= 0:
+            w = self.cellWidget(row, 1)
+            if w:
+                if val == "true":
+                    w.setCheckState(Qt.Checked)
+                else:
+                    w.setCheckState(Qt.Unchecked)
+            else:
+                item = self.item(row, 1)
+                item.setText(val)
+            if comments is not None:
+                item = self.item(row, 3)
+                item.setText(comments)
 
     def _optionSelected(self, param_name, append, text):
         row = self.findRow(param_name)
