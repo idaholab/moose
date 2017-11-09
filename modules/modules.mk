@@ -7,9 +7,11 @@ ifeq ($(ALL_MODULES),yes)
         CONTACT                   := yes
         FLUID_PROPERTIES          := yes
         HEAT_CONDUCTION           := yes
+        LEVEL_SET                 := yes
         MISC                      := yes
         NAVIER_STOKES             := yes
         PHASE_FIELD               := yes
+        POROUS_FLOW               := yes
         RDG                       := yes
         RICHARDS                  := yes
         SOLID_MECHANICS           := yes
@@ -17,8 +19,6 @@ ifeq ($(ALL_MODULES),yes)
         TENSOR_MECHANICS          := yes
         WATER_STEAM_EOS           := yes
         XFEM                      := yes
-        POROUS_FLOW               := yes
-        LEVEL_SET                 := yes
 endif
 
 ifeq ($(XFEM),yes)
@@ -45,7 +45,7 @@ ifeq ($(PHASE_FIELD),yes)
 endif
 
 # The master list of all moose modules
-MODULE_NAMES := "chemical_reactions contact fluid_properties heat_conduction linear_elasticity misc navier_stokes phase_field richards solid_mechanics tensor_mechanics water_steam_eos xfem porous_flow rdg level_set"
+MODULE_NAMES := "chemical_reactions contact fluid_properties heat_conduction level_set misc navier_stokes phase_field porous_flow rdg richards solid_mechanics stochastic_tools tensor_mechanics water_steam_eos xfem"
 
 ###############################################################################
 ########################## MODULE REGISTRATION ################################
