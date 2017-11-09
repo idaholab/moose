@@ -1,0 +1,18 @@
+[Tests]
+  [./except1]
+    type = RunException
+    input = except1.i
+    expect_err = 'StickyBC: min_value must not be greater than max_value'
+  [../]
+
+  [./push_up]
+    type = Exodiff
+    input = push_up.i
+    exodiff = push_up_out.e
+  [../]
+  [./push_down]
+    type = Exodiff
+    input = push_down.i
+    exodiff = push_down_out.e
+  [../]
+[]
