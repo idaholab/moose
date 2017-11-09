@@ -8,8 +8,17 @@ import matplotlib.pyplot as plt
 import multiprocessing
 import argparse
 import itertools
+import math
 import os
 
+##############################
+# Favorite plots
+# $ ./git_commit_history.py --open-source --moose-dev --unique
+# $ ./git_commit_history.py --unique --additions --moose-dev --days=7 --open-source
+##############################
+
+from matplotlib import rc
+rc('font',**{'family':'sans-serif','sans-serif':['Helvetica']})
 
 # A helper function for running git commands
 def run(*args, **kwargs):
@@ -51,7 +60,7 @@ def getContributors(options, **kwargs):
     # Limit to the supplied number of authors
     n = len(contributors)
     if num_authors == 'moose':
-        contributors = ['Derek Gaston', 'Cody Permann', 'David Andrs', 'John W. Peterson', 'Andrew E. Slaughter', 'Brain Alger', 'Fande Kong']
+        contributors = ['Derek Gaston', 'Cody Permann', 'David Andrs', 'John W. Peterson', 'Andrew E. Slaughter', 'Brain Alger', 'Fande Kong', 'Robert Carlsen', 'Alex Lindsay', 'Jason M. Miller']
         contributors += ['Other (' + str(n-len(contributors)) + ')']
 
     elif num_authors:
@@ -197,7 +206,7 @@ if __name__ == '__main__':
     # Show unique contributors
     if options.unique:
         ax2 = ax1.twinx()
-        ax2.plot(dates, contrib, linewidth=4, linestyle='-', color='k', label='Unique Contributors')
+        ax2.plot(dates, contrib, linewidth=2, linestyle='-', color='k', label='Unique Contributors')
         ax2.set_ylabel('Unique Contributors', color='k', fontsize=options.font)
         for tick in ax2.yaxis.get_ticklabels():
             tick.set_fontsize(options.font)
@@ -220,12 +229,11 @@ if __name__ == '__main__':
             handles[i].set_label(contributors[i])
 
     elif options.additions: #additions/deletions plot
-        factor = 1000.
-        y_label = 'Additions / Deletions (x1000)'
+        y_label = 'Additions / Deletions'
         n = len(contributors)
-        for i in range(n):
+        for i in reversed(range(n)):
             x = numpy.array(dates)
-            y = numpy.array(data['in'][i,:])/factor
+            y = numpy.log10(numpy.array(data['in'][i,:]))
 
             if n == 1:
                 label = 'Additions'
@@ -233,16 +241,28 @@ if __name__ == '__main__':
                 label = contributors[i] + '(Additions)'
 
             clr = color.next()
-            ax1.fill_between(x, 0, y, label=label, linewidth=2, edgecolor=clr, facecolor=clr, alpha=1.0)
+            ax1.fill_between(x, 0, y, label=label, alpha=0.4)
 
-            y = -numpy.array(data['out'][i,:])/factor
+            y = -numpy.log10(numpy.array(data['out'][i,:]))
 
             if n == 1:
                 label = 'Deletions'
             else:
                 label = contributors[i] + '(Deletions)'
             clr = color.next()
-            ax1.fill_between(x, 0, y, label=label, linewidth=2, edgecolor=clr, facecolor=clr, alpha=1.0)
+            ax1.fill_between(x, 0, y, label=label, alpha=0.4)
+
+        fig.canvas.draw()
+
+        labels = []
+        for tick in ax1.yaxis.get_major_ticks():
+            value = tick.get_loc()
+            if value < 0:
+                labels.append('$-10^{}$'.format(numpy.abs(int(value))))
+            else:
+                labels.append('$10^{}$'.format(int(value)))
+
+        ax1.set_yticklabels(labels)
 
         if not options.disable_legend:
             handles, labels = ax1.get_legend_handles_labels()
@@ -280,10 +300,10 @@ if __name__ == '__main__':
     # Show open-source region
     if options.open_source:
         os = datetime.date(2014,3,10)
-        x_lim = ax2.get_xlim()
-        y_lim = ax1.get_ylim()
+        x_lim = ax1.get_xlim()
+        y_lim = ax2.get_ylim()
         delta = x_lim[1] - os.toordinal()
-        plt.gca().add_patch(plt.Rectangle((os.toordinal(), y_lim[0]), delta, y_lim[1]-y_lim[0], facecolor='green', alpha=0.2))
+        plt.gca().add_patch(plt.Rectangle((os.toordinal(), y_lim[0]), delta, y_lim[1]-y_lim[0], facecolor='green', alpha=0.1))
         ax1.annotate('Open-source ', xy=(x_lim[1] - (delta/2.), y_lim[0]), ha='center', va='bottom', size=options.font)
 
 
