@@ -154,13 +154,13 @@
     type = 'RunException'
     input = 'st01.i'
     cli_args = 'DiracKernels/stream/point_file=does_not_exist Outputs/file_base=except01'
-    expect_err = 'Error opening file \'does_not_exist\' from RichardsPolyLineSink.'
+    expect_err = 'Error opening file \'.*does_not_exist\' from RichardsPolyLineSink.'
   [../]
   [./except02]
     type = 'RunException'
     input = 'bh02.i'
     cli_args = 'DiracKernels/bh/point_file=does_not_exist Outputs/file_base=except02'
-    expect_err = 'Error opening file \'does_not_exist\' from a Peaceman-type Borehole.'
+    expect_err = 'Error opening file \'.*does_not_exist\' from a Peaceman-type Borehole.'
   [../]
   [./except03]
     type = 'RunException'
