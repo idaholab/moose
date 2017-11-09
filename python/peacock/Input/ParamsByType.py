@@ -62,10 +62,11 @@ class ParamsByType(QWidget, MooseWidget):
         tot = to.findTable("Main")
         if not ct or not tot or ct == tot:
             return
-        # first remove user params in tot
         tot.removeUserParams()
         params = ct.getUserParams()
         tot.addUserParams(params)
+        to.syncParamsFrom(current)
+        # Make sure the name parameter stays the same
         idx = ct.findRow("Name")
         if idx >= 0:
             name = ct.item(idx, 1).text()
