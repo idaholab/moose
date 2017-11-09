@@ -73,12 +73,6 @@ protected:
   /// Derivative of u_dot with respect to u
   const VariableValue & _du_dot_du;
 
-  /// The vectors this Kernel will contribute to
-  std::vector<TagID> _vector_tags;
-
-  /// The matrices this Kernel will contribute to
-  std::vector<TagID> _matrix_tags;
-
   /// Residual blocks Vectors For each Tag
   std::vector<DenseVector<Number> *> _re_blocks;
 

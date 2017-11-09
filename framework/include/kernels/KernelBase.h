@@ -24,6 +24,7 @@
 #include "GeometricSearchInterface.h"
 #include "Restartable.h"
 #include "MeshChangedInterface.h"
+#include "TaggingInterface.h"
 
 class MooseMesh;
 class SubProblem;
@@ -54,7 +55,8 @@ class KernelBase : public MooseObject,
                    public RandomInterface,
                    protected GeometricSearchInterface,
                    public Restartable,
-                   public MeshChangedInterface
+                   public MeshChangedInterface,
+                   public TaggingInterface
 {
 public:
   KernelBase(const InputParameters & parameters);

@@ -27,18 +27,7 @@ validParams<KernelBase>()
   params += validParams<RandomInterface>();
   params += validParams<MeshChangedInterface>();
   params += validParams<MaterialPropertyInterface>();
-
-  // These are the default names for tags, but users will be able to add their own
-  MultiMooseEnum vtags("nontime time", "nontime", true);
-  MultiMooseEnum mtags("nontime time", "nontime", true);
-
-  params.addParam<MultiMooseEnum>(
-      "vector_tags", vtags, "The tag for the vectors this Kernel should fill");
-
-  params.addParam<MultiMooseEnum>(
-      "matrix_tags", mtags, "The tag for the matrices this Kernel should fill");
-
-  params.addParamNamesToGroup("vector_tags matrix_tags", "Advanced");
+  params += validParams<TaggingInterface>();
 
   params.addRequiredParam<NonlinearVariableName>(
       "variable", "The name of the variable that this Kernel operates on");
@@ -87,8 +76,9 @@ KernelBase::KernelBase(const InputParameters & parameters)
     GeometricSearchInterface(this),
     Restartable(this, "Kernels"),
     MeshChangedInterface(parameters),
+    TaggingInterface(*getCheckedPointerParam<FEProblemBase *>("_fe_problem_base"), *this),
     _subproblem(*getCheckedPointerParam<SubProblem *>("_subproblem")),
-    _fe_problem(*getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")),
+    _fe_problem(*parameters.get<FEProblemBase *>("_fe_problem_base")),
     _sys(*getCheckedPointerParam<SystemBase *>("_sys")),
     _tid(parameters.get<THREAD_ID>("_tid")),
     _assembly(_subproblem.assembly(_tid)),
