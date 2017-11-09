@@ -20,6 +20,7 @@ validParams<BoundaryCondition>()
   InputParameters params = validParams<MooseObject>();
   params += validParams<TransientInterface>();
   params += validParams<BoundaryRestrictableRequired>();
+  params += validParams<TaggingInterface>();
 
   params.addRequiredParam<NonlinearVariableName>(
       "variable", "The name of the variable that this boundary condition applies to");
@@ -51,6 +52,7 @@ BoundaryCondition::BoundaryCondition(const InputParameters & parameters, bool no
     GeometricSearchInterface(this),
     Restartable(this, "BCs"),
     MeshChangedInterface(parameters),
+    TaggingInterface(*getCheckedPointerParam<FEProblemBase *>("_fe_problem_base"), *this),
     _subproblem(*getCheckedPointerParam<SubProblem *>("_subproblem")),
     _fe_problem(*getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")),
     _sys(*getCheckedPointerParam<SystemBase *>("_sys")),
