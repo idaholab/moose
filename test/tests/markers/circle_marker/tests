@@ -1,0 +1,32 @@
+[Tests]
+  [./circle_marker]
+    type = 'Exodiff'
+    input = 'circle_marker.i'
+    exodiff = 'circle_marker_out.e-s004'
+  [../]
+  [./circle_marker_coarsen]
+    type = 'Exodiff'
+    input = 'circle_marker_coarsen.i'
+    exodiff = 'circle_marker_coarsen_out.e-s003'
+  [../]
+  [./circle_marker_periodic]
+    type = 'Exodiff'
+    input = 'circle_marker_periodic.i'
+    exodiff = 'circle_marker_periodic_out.e-s004'
+  [../]
+  [./circle_marker_periodic_coarsen]
+    type = 'Exodiff'
+    input = 'circle_marker_periodic_coarsen.i'
+    exodiff = 'circle_marker_periodic_coarsen_out.e-s003'
+  [../]
+  [./circle_marker_periodic_multiple_cycles]
+    type = 'Exodiff'
+    input = 'circle_marker_periodic_multiple_cycles.i'
+    exodiff = 'circle_marker_periodic_multiple_cycles_out.e-s002'
+  [../]
+  [./circle_marker_periodic_multiple_cycles_coarsen]
+    type = 'Exodiff'
+    input = 'circle_marker_periodic_multiple_cycles_coarsen.i'
+    exodiff = 'circle_marker_periodic_multiple_cycles_coarsen_out.e-s002'
+  [../]
+[]    

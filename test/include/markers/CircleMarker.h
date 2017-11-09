@@ -16,6 +16,7 @@
 #define CIRCLEMARKER_H
 
 #include "Marker.h"
+#include "Coupleable.h"
 
 #include "libmesh/mesh_tools.h"
 
@@ -24,7 +25,7 @@ class CircleMarker;
 template <>
 InputParameters validParams<CircleMarker>();
 
-class CircleMarker : public Marker
+class CircleMarker : public Marker, public Coupleable
 {
 public:
   CircleMarker(const InputParameters & parameters);
@@ -38,6 +39,8 @@ protected:
 
   Point _p;
   Real _r;
+
+  int _periodic_variable;
 };
 
 #endif /* CIRCLEMARKER_H */

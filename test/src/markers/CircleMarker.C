@@ -13,6 +13,7 @@
 /****************************************************************/
 
 #include "CircleMarker.h"
+#include "MooseMesh.h"
 
 template <>
 InputParameters
@@ -22,6 +23,9 @@ validParams<CircleMarker>()
   params.addRequiredParam<Point>("point", "The center of the circle.");
   params.addRequiredParam<Real>("radius",
                                 "Distance from the center of the circle to mark elements");
+  params.addCoupledVar(
+      "periodic_variable",
+      "Use periodicity settings of this variable to calculate distance from the element.");
 
   MooseEnum marker_states = Marker::markerStates();
 
@@ -35,10 +39,13 @@ validParams<CircleMarker>()
 
 CircleMarker::CircleMarker(const InputParameters & parameters)
   : Marker(parameters),
+    Coupleable(this, false),
     _inside((MarkerValue)(int)parameters.get<MooseEnum>("inside")),
     _outside((MarkerValue)(int)parameters.get<MooseEnum>("outside")),
     _p(getParam<Point>("point")),
-    _r(getParam<Real>("radius"))
+    _r(getParam<Real>("radius")),
+    _periodic_variable(isCoupled("periodic_variable") ? coupled("periodic_variable") : -1)
+
 {
 }
 
@@ -47,7 +54,11 @@ CircleMarker::computeElementMarker()
 {
   Point centroid = _current_elem->centroid();
 
-  if ((centroid - _p).size() < _r)
+  Real distance = _periodic_variable < 0
+                      ? (centroid - _p).norm()
+                      : _mesh.minPeriodicDistance(_periodic_variable, centroid, _p);
+
+  if (distance < _r)
     return _inside;
 
   return _outside;
