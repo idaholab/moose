@@ -1,0 +1,2 @@
+app_name = misc
+cli_args = '--error'

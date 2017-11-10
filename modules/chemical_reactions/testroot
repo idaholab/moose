@@ -1,0 +1,2 @@
+app_name = chemical_reactions
+cli_args = '--error'

@@ -1,0 +1,2 @@
+app_name = phase_field
+cli_args = '--error'
