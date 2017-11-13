@@ -420,10 +420,14 @@ class Tester(MooseObject):
                 return False
 
         # Check if we only want to run syntax tests
-        if options.check_input:
-            if not self.specs['check_input']:
-                self.setStatus('not check_input', self.bucket_silent)
-                return False
+        if options.check_input and not self.specs['check_input']:
+            self.setStatus('not check_input', self.bucket_silent)
+            return False
+
+        # Check if we want to exclude syntax tests
+        if options.no_check_input and self.specs['check_input']:
+            self.setStatus('is check_input', self.bucket_silent)
+            return False
 
         # Are we running only tests in a specific group?
         if options.group <> 'ALL' and options.group not in self.specs['group']:
