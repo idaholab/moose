@@ -313,7 +313,8 @@ PorousFlowLineSink::jac(unsigned int jvar)
   {
     const Real internal_energy_prime = (_i != _j ? 0.0 : (*_dinternal_energy_dvar)[_i][_ph][pvar]);
     outflowp = (*_internal_energy)[_i][_ph] * outflowp + internal_energy_prime * outflow;
-    outflow *= (*_internal_energy)[_i][_ph];
+    // this multiplication was performed, but the code does not need to know: outflow *=
+    // (*_internal_energy)[_i][_ph];
   }
 
   return outflowp;
