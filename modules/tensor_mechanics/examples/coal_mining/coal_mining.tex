@@ -83,8 +83,10 @@ effect the results.
 \chapter{The model setup}
 \label{m.d.chap}
 
+\section{Geometry}
+
 A 2D model representing a transverse section of overburden above a
-longwall panel is studied in this Example.  It is shown in
+longwall panel is primarily studied in this Example.  It is shown in
 Figure~\ref{model_setup.fig}.  The longwall panel is 300\,m wide and the height of
 extraction is 3\,m.  The transverse section describes only half
 (150\,m) of the panel and it assumed that the situation is symmetric
@@ -102,12 +104,114 @@ subsequent analysis.
 \end{center}
 \end{figure}
 
+\section{Material properties}
+
 The overburden is assumed homogeneous (but
 anisotropic).  Boundary conditions are described below.  The
 overburden's density is 2500\,kg.m$^{-3}$.
 
+A number of different elasto-plastic models are used in the chapters
+below, and their moduli are specified in those chapters.
 
-\chapter{Elastic simulations}
+\section{Boundary conditions}
+
+All models use the following boundary conditions: roller on
+$y_{\mathrm{min}}$ and $y_{\mathrm{max}}$; no rotation around the $x$
+axis on $y_{\mathrm{min}}$; stress-free on the model's top; fixed
+displacement on $z_{\mathrm{min}}$
+where there is no excavation.
+
+There are a number of different boundary conditions that may be
+appropriate to use for the roof of the excavation.
+
+\subsection{Roof: free}
+\label{free.roof.sec}
+
+The roof of the excavation is stress-free.  Therefore, the
+overburden is free to move vertically under the action of gravity.
+This simulates the case where there is no ``floor'' of the excavation.
+
+\subsection{Prescribed roof displacements}
+\label{prescribed.roof.defn.sec}
+
+The free roof typically produces impossibly high displacements
+because the floor of the excavation constrains
+$u_{z}^{\mathrm{max}}\geq -3$\,m.  In fact, the floor strata ``heave''
+--- they move slightly upwards --- so usually the maximum downwards
+displacement might be between 2.5\,m and 2.9\,m in the case at hand.
+
+A sophisticated approach for modelling the roof would be to use
+MOOSE's Constrain system, but I have found that MOOSE's constraints
+exhibit poor convergence in the case at hand.  An alternative option
+is to prescribed displacements of the roof.  In this Example, the
+prescribed boundary condition takes one of two forms:
+\begin{eqnarray}
+u_{z} & = & \left\{
+\begin{array}{ll}
+u_{z}^{\mathrm{max}} \max\left( \min\left( \left(
+\frac{t}{t_{\mathrm{end}}}(y_{\mathrm{max}} - y_{\mathrm{min}}) +
+y_{\mathrm{min}} - y \right) / d_{\mathrm{closure}}, 1 \right),
+0\right) & \mbox{ or} \\
+u_{z}^{\mathrm{max}} \frac{t}{t_{\mathrm{end}}} \max\left( \min\left(
+(y_{\mathrm{max}} - y)/d_{\mathrm{closure}}, 1 \right), 0\right)
+\end{array}
+\right.
+\end{eqnarray}
+The following parameters are chosen: $u_{z}^{\mathrm{max}} = -3$\,m,
+$y_{\mathrm{min}} = 0$, $y_{\mathrm{max}}=150$\,m and
+$d_{\mathrm{closure}}=15$\,m.  These two forms correspond physically
+to the following.
+\begin{enumerate}
+\item ``Sideways excavation'', where the coal is excavated from
+  $y_{\mathrm{min}}$ to $y_{\mathrm{max}}$ during the time $0\leq
+  t\leq t_{\mathrm{max}}$.  At time $t$, the excavation has reached $y_{t}
+  = y_{\mathrm{min}} + t(y_{\mathrm{max}} -
+    y_{\mathrm{min}})/t_{\mathrm{end}}$.  For $y$ less than this
+    amount, the roof is allowed to displace a maximum
+  of $u^{z}_{\mathrm{max}}$.  For $y$ greater than this amount, the
+  roof has zero displacement.  There is a small region between
+  $y_{t}-d_{\mathrm{closure}}$ and $y_{t}$ where the roof displacement
+  is between zero and $u_{z}^{\mathrm{max}}$, but for
+  $y<y_{t}-d_{\mathrm{closure}}$, $u = u_{z}^{\mathrm{max}}$.
+\item ``Downwards excavation''.  The roof is gradually lowered.  At
+  $t=0$ the displacement is zero, while at $t=t_{\mathrm{end}}$ the
+  displacement is equal to $u_{z}^{\mathrm{max}}$ for most of the
+  roof.  There is a small region between $y_{\mathrm{max}}$ and
+  $y_{\mathrm{max}} - d_{\mathrm{closure}}$ where the displacement
+  varies between zero and $u_{z}^{\mathrm{max}}$.
+\end{enumerate}
+A quasi-static solution is sought at each timestep, and no dynamics is
+used, so ``time'' has no real physical meaning, except that it allows
+the roof to be gradually lowered.
+
+\subsection{Constrained roof}
+\label{sitckybc.defn.}
+
+Although MOOSE's full-blown Constraint system produces only very slow
+convergence, TensorMechanics offers a ``StickyBC'' boundary condition
+that may be used in the case at hand.  This boundary condition is: if
+$u_{z}^{\mathrm{old}}<-3.0$\,m then fix $u_{z}$ forever more in the simulation.  This
+does not allow for floor heave, otherwise the condition might be
+$-2.5$\,m, for instance.  This type of boundary condition may only be
+used in simulations with multiple excavation steps, since for just one
+step $u^{\mathrm{old}}=0$ and the ``constrained roof'' boundary
+condition becomes irrelevant.
+
+In conjuction with this boundary condition, a time-varying Young's
+modulus is used for the coal:
+\begin{equation}
+E = E_{\mathrm{full}}\max\left( \min\left( \left(
+\frac{t}{t_{\mathrm{end}}}(y_{\mathrm{max}} - y_{\mathrm{min}}) +
+y_{\mathrm{min}} - y \right) / d_{\mathrm{closure}}, 1 \right),
+10^{-9} \right) \ .
+\end{equation}
+This simulates a ``sideways'' excavation, and enables the roof to
+collapse under the overburden's weight.  The material with young's
+modulus $E_{\mathrm{full}}\times 10^{-9}$ may be considered to be
+mined and irrelevant to this Example.
+
+
+\chapter{Elastic simulations with a free roof}
 \label{elastic.chap}
 
 The simulation results quoted in this section are derived using the
@@ -120,13 +224,9 @@ deformation is purely elastic.  Of course this is unphysical, but it
 is interesting from a theoretical viewpoint.  An example deformation
 is shown in Figure~\ref{cosserat_elastic_fig}.
 
-The boundary conditions in this Chapter are: roller on
-$y_{\mathrm{min}}$ and $y_{\mathrm{max}}$; no rotation around the $x$
-axis on $y_{\mathrm{min}}$; fixed on $z_{\mathrm{min}}$
-where there is no excavation; stress-free on the top and the roof of
-the excavation.  Therefore, the overburden is free to move vertically
-under the action of gravity, and this models half of an excavation
-that is 300\,m wide.
+The roof boundary condition is chosen to be ``free''
+(Section~\ref{free.roof.sec}) to simplify the analysis.  This models
+half of an excavation that is 300\,m wide.
 
 \begin{figure}[htbp]
   \begin{center}
@@ -362,20 +462,12 @@ etc) are so poorly constrained by observation\footnote{For instance,
 approach that is usually taken is to fix the mesh and vary the input
 parameters so the results (subsidence, etc) match observation.
 
-\section{An unconstrained roof, and constraining boundary conditions}
-\label{bc.constrain.sec}
+\section{A free roof}
 
 The elastic parameters in Table~\ref{wp.params.tab} match those used
 to generate Figure~\ref{cosserat_elastic_fig}.  Adding the weak-plane
 plasticity produces dramatically higher deformations, as shown in
-Figure~\ref{wp.no.floow}.  Such high displacements are not possible
-because the floor of the excavation constrains
-$u_{z}^{\mathrm{max}}\geq -3$\,m.  In fact, the floor strata ``heave''
---- they move slightly upwards --- so usually the maximum downwards
-displacement might be between 2.5\,m and 2.9\,m in the case at hand.
-I have found MOOSE's constraints to exhibit poor convergence in the
-case at hand, therefore, a prescribed boundary condition on the roof
-of the excavation is used in this Example.
+Figure~\ref{wp.no.floow}. 
 
 \begin{figure}[p]
 \begin{center}
@@ -395,49 +487,10 @@ of the excavation is used in this Example.
 \end{center}
 \end{figure}
 
-The prescribed boundary condition takes one of two forms:
-\begin{eqnarray}
-u_{z} & = & \left\{
-\begin{array}{ll}
-u_{z}^{\mathrm{max}} \max\left( \min\left( \left(
-\frac{t}{t_{\mathrm{end}}}(y_{\mathrm{max}} - y_{\mathrm{min}}) +
-y_{\mathrm{min}} - y \right) / d_{\mathrm{closure}}, 1 \right),
-0\right) & \mbox{ or} \\
-u_{z}^{\mathrm{max}} \frac{t}{t_{\mathrm{end}}} \max\left( \min\left(
-(y_{\mathrm{max}} - y)/d_{\mathrm{closure}}, 1 \right), 0\right)
-\end{array}
-\right.
-\end{eqnarray}
-The following parameters are chosen: $u_{z}^{\mathrm{max}} = -3$\,m,
-$y_{\mathrm{min}} = 0$, $y_{\mathrm{max}}=150$\,m and
-$d_{\mathrm{closure}}=15$\,m.  These two forms correspond physically
-to the following.
-\begin{enumerate}
-\item ``Sideways excavation'', where the coal is excavated from
-  $y_{\mathrm{min}}$ to $y_{\mathrm{max}}$ during the time $0\leq
-  t\leq t_{\mathrm{max}}$.  At time $t$, the excavation has reached $y_{t}
-  = y_{\mathrm{min}} + t(y_{\mathrm{max}} -
-    y_{\mathrm{min}})/t_{\mathrm{end}}$.  For $y$ less than this
-    amount, the roof is allowed to displace a maximum
-  of $u^{z}_{\mathrm{max}}$.  For $y$ greater than this amount, the
-  roof has zero displacement.  There is a small region between
-  $y_{t}-d_{\mathrm{closure}}$ and $y_{t}$ where the roof displacement
-  is between zero and $u_{z}^{\mathrm{max}}$, but for
-  $y<y_{t}-d_{\mathrm{closure}}$, $u = u_{z}^{\mathrm{max}}$.
-\item ``Downwards excavation''.  The roof is gradually lowered.  At
-  $t=0$ the displacement is zero, while at $t=t_{\mathrm{end}}$ the
-  displacement is equal to $u_{z}^{\mathrm{max}}$ for most of the
-  roof.  There is a small region between $y_{\mathrm{max}}$ and
-  $y_{\mathrm{max}} - d_{\mathrm{closure}}$ where the displacement
-  varies between zero and $u_{z}^{\mathrm{max}}$.
-\end{enumerate}
-A quasi-static solution is sought at each timestep, and no dynamics is
-used, so ``time'' has no real physical meaning, except that it allows
-the roof to be gradually lowered.
+\section{A single excavation step with prescribed roof displacements}
 
 For a single timestep, both ``sideways'' and ``downwards'' excavation
 produce the same result.  This is shown in Figure~\ref{wp.one_step}.
-
 
 \begin{figure}[p]
 \begin{center}
@@ -457,17 +510,18 @@ produce the same result.  This is shown in Figure~\ref{wp.one_step}.
 \end{center}
 \end{figure}
 
-\section{Multiple excavation steps}
 
-However, the results are markedly different when using multiple
-steps.  Figure~\ref{wp.10_step} shows the displacement when using 10
-steps.  In the ``sideways'' excavation, only the bottom row of
-elements is actually deforming!  They have very large plastic shear
-and tensile strain.  This is not physically realistic.  However, in
-the ``downwards'' excavation, there is very little dilation of the
-elements in the near roof, which is also probably not realistic.  This
-is because no substantial shear failure is activated by this type of
-boundary condition.
+\section{Multiple excavation steps with prescribed roof displacements}
+
+The results are markedly different when using multiple steps and
+prescribed roof displacements.  Figure~\ref{wp.10_step} shows the
+displacement when using 10 steps.  In the ``sideways'' excavation,
+only the bottom row of elements is actually deforming!  They have very
+large plastic shear and tensile strain.  This is not physically
+realistic.  However, in the ``downwards'' excavation, there is very
+little dilation of the elements in the near roof, which is also
+probably not realistic.  This is because no substantial shear failure
+is activated by this type of boundary condition.
 
 \begin{figure}[htb]
 \begin{center}
@@ -481,7 +535,8 @@ boundary condition.
 \end{center}
 \end{figure}
 
-\section{Softening the compressive strength}
+
+\section{Softening the compressive strength with prescribed roof displacements}
 
 Consider now an alternate plastic model with a softening weak-plane
 compressive strength.  At zero (or negative) plastic tensile strain it
@@ -534,7 +589,7 @@ One-step excavation & 350 \\
 \end{table}
 
 
-\chapter{Capped Mohr-Coulomb plasticity}
+\chapter{Capped Mohr-Coulomb plasticity with prescribed roof displacements}
 \label{mc.chap}
 
 \section{Introduction}
@@ -567,10 +622,10 @@ Mohr-Coulomb compressive strength & 100\,MPa (softening)
 
 As discussed in detail in Chapter~\ref{wp.chap}, the mesh is kept
 fixed (at $N=1000$) in the following simulations.   The
-``constraining'' boundary conditions specified in
-Section~\ref{bc.constrain.sec} are used.
+prescribed-displacement boundary conditions specified in
+Section~\ref{prescribed.roof.defn.sec} are used.
 
-\section{A single step}
+\section{A single step with prescribed roof displacements}
 
 For a single timestep, both ``sideways'' and ``downwards'' excavation
 produce the same result.  This is shown in Figure~\ref{mc.one_step}.
@@ -594,7 +649,7 @@ produce the same result.  This is shown in Figure~\ref{mc.one_step}.
 \end{center}
 \end{figure}
 
-\section{Multiple excavation steps}
+\section{Multiple excavation steps with prescribed roof displacements}
 
 However, the results are markedly different when using multiple
 steps.  Figure~\ref{mc.10_step} shows the displacement when using 10
@@ -615,7 +670,7 @@ and tensile strain.  This is not physically realistic.  The
 \end{center}
 \end{figure}
 
-\section{Softening the compressive strength}
+\section{Softening the compressive strength with prescribed roof displacements}
 
 In the weak-plane case, substantially different results were obtained
 when softening the compressive strength.  In the Mohr-Coulomb case,
@@ -659,7 +714,8 @@ One-step excavation & 352 \\
 \end{center}
 \end{table}
 
-\chapter{Capped Mohr-Coulomb plasticity combined with weak-plane plasticity}
+\chapter{Capped Mohr-Coulomb plasticity combined with weak-plane
+  plasticity with prescribed roof displacements}
 
 In sedementary rock systems it is common to employ Mohr-Coulomb
 plasticity to model the solid-rock response, combined with weak-plane
@@ -674,9 +730,10 @@ packages\footnote{For example, Itasca Consulting Group, Inc (2012)
   Inc. (2011) FLAC - Fast Lagrangian Analysis of Continua, Ver. 7.0.
   Minneapolis: Itasca.}.
 
-Using the ``constraining'' boundary conditions specified in
-Section~\ref{bc.constrain.sec}, and a single step results in
-Figure~\ref{mc_wp.one_step}.
+Using the prescribed-displacement boundary conditions specified in
+Section~\ref{prescribed.roof.defn.sec}, and a single step results in
+Figure~\ref{mc_wp.one_step}.  The results are encouragingly quite
+realistic compared with previous chapters.
 
 \begin{figure}[p]
 \begin{center}
@@ -700,7 +757,9 @@ Figure~\ref{mc_wp.one_step}.
 \end{figure}
 
 
-\chapter{Sticky roof boundary conditions}
+\chapter{Capped Mohr-Coulomb plasticity combined with weak-plane
+  plasticity with constrained roof boundary conditions}
+
 
 The exposition thus far has concentrated on two categories of roof
 boundary condition: (1) where the roof is completely free to displace
@@ -711,18 +770,92 @@ example, Figure~\ref{wp.one_step}.  Both of these boundary conditions
 are physically incorrect.  The former yields very large
 displacements, while the latter typically pulls the roof too severely,
 causing large plastic strains to accumulate in the immediately roof.
-In this section, a more realistic boundary condition is applied to the
-roof.
 
-This will be added in the future.
+In this section, the more realistic boundary condition employing
+``sticky'' boundary conditions is used (see the definition in
+Section~\ref{sitckybc.defn.}).   The
+parameters used are listed in Tables~\ref{wp.params.tab}
+and~\ref{mc.params.tab}.  The plastic models are
+cycled.  100 excavation steps are used to
+produce Figure~\ref{mc_wp_sticky}.     The MOOSE input file
+is named {\tt cosserat\_mc\_wp\_sticky.i}  The results are what is expected
+physically for the moduli used.
 
 
+\begin{figure}[p]
+\begin{center}
+\begin{tabular}{cc}
+\multicolumn{2}{c}{\includegraphics[width=8cm]{mc_wp_sticky_disp.pdf}}
+  \\
+\includegraphics[width=6cm]{mc_wp_sticky_mc_shear.pdf} &
+\includegraphics[width=6cm]{mc_wp_sticky_mc_tensile.pdf} \\
+\includegraphics[width=6cm]{mc_wp_sticky_wp_shear.pdf} &
+\includegraphics[width=6cm]{mc_wp_sticky_wp_tensile.pdf} \\
+\includegraphics[width=6cm]{mc_wp_sticky_subsidence.pdf} &
+\includegraphics[width=6cm]{mc_wp_sticky_extensometer.pdf}
+\end{tabular}
+\caption{Deformation and plastic strain in the combined Mohr-Coulomb-weak-plane model with
+  $u_{z}^{\mathrm{max}} = 3$\,m enforced by a StickyBC.  Top:
+  vertical displacement.  Next: Mohr-Coulomb shear and tensile plastic
+  strain.  Next: Weak-plane shear and tensile plastic strain.
+  Bottom: subsidence and extensomenter displacement.}
+\label{mc_wp_sticky}
+\end{center}
+\end{figure}
 
 
-\chapter{Porepressures}
+\chapter{A longitudinal model}
+\label{long.model.setup}
 
-This will be added in the future.  Illustrates the effect of
-porepressures and subsequent fluid flow.
+So far this Example has used a transverse model, but in this section a
+longitudinal model is studied.  It is illustrated in
+Figure~\ref{long_model.fig}.  1500\,m of coal excavation is simulated,
+with an excavation height of 3\,m and depth 400\,m.  The longitudinal direction is
+meshed with 15\,m elements.  The displacements are fixed to zero in
+the transverse direction (plane strain).
+
+\begin{figure}[htb]
+\begin{center}
+\includegraphics[width=8cm]{longitudinal_model_seup.pdf}
+\caption{A graphic of the 2D longitudinal model used in Section~\ref{long.model.setup}.  All
+  dimensions are in metres.  The geometry is described in the text.}
+\label{long_model.fig}
+\end{center}
+\end{figure}
+
+
+Capped Mohr-Coulomb plus weak-plane plasticity is used
+(Tables~\ref{wp.params.tab} and~\ref{mc.params.tab}).  The plastic
+models are cycled.  100 time steps are used, which means that 1
+element is excavated every time step.  ``Sticky'' roof boundary
+conditions are used (Section~\ref{sitckybc.defn.}).    The MOOSE input file
+is named {\tt cosserat\_mc\_wp\_sticky\_longitudinal.i}
+
+This model is interesting because cyclic behaviour is evident in the
+results (Figure~\ref{mc_wp_sticky_longitudinal}).  The
+roof holds up for some time, then collapses all-of-a-sudden.  Coal
+excavation then continues while the roof holds up, and then it
+suddenly collapses.  This occurs in real coal mines.  In this model
+(mesh and material properties) the period is around
+90\,m.
+
+
+\begin{figure}[p]
+\begin{center}
+\includegraphics[width=15cm]{mc_wp_sticky_longitudinal_disp.pdf} \\
+\includegraphics[width=15cm]{mc_wp_sticky_longitudinal_mc_shear.pdf} \\
+\includegraphics[width=15cm]{mc_wp_sticky_longitudinal_mc_tensile.pdf} \\
+\includegraphics[width=15cm]{mc_wp_sticky_longitudinal_wp_shear.pdf} \\
+\includegraphics[width=15cm]{mc_wp_sticky_longitudinal_wp_tensile.pdf}
+\caption{Deformation and plastic strain in the combined
+  Mohr-Coulomb-weak-plane longitudinal model with
+  $u_{z}^{\mathrm{max}} = 3$\,m enforced by a StickyBC.  Top to
+  bottom: vertical displacement, Mohr-Coulomb shear plastic strain,
+  Mohr-Coulomb tensile plastic strain; weak-plane shear plastic
+  strain; weak-plane tensile plastic strain.}
+\label{mc_wp_sticky_longitudinal}
+\end{center}
+\end{figure}
 
 
 \end{document}
