@@ -689,20 +689,13 @@ FEProblemBase::initialSetup()
     backupMultiApps(EXEC_INITIAL);
     Moose::perf_log.pop("execMultiApps()", "Setup");
 
-    // Yak is currently relying on doing this after initial Transfers
-    Moose::setup_perf_log.push("computeUserObjects()", "Setup");
-
     // TODO: user object evaluation could fail.
     computeUserObjects(EXEC_INITIAL, Moose::PRE_AUX);
 
-    Moose::setup_perf_log.push("computeAux()", "Setup");
     _aux->compute(EXEC_INITIAL);
-    Moose::setup_perf_log.pop("computeAux()", "Setup");
 
     // The only user objects that should be computed here are the initial UOs
     computeUserObjects(EXEC_INITIAL, Moose::POST_AUX);
-
-    Moose::setup_perf_log.pop("computeUserObjects()", "Setup");
 
     _current_execute_on_flag = EXEC_NONE;
   }

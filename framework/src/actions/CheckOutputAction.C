@@ -129,7 +129,6 @@ CheckOutputAction::checkPerfLogOutput()
   if (!has_console)
   {
     Moose::perf_log.disable_logging();
-    Moose::setup_perf_log.disable_logging();
     libMesh::perflog.disable_logging();
   }
 
@@ -137,7 +136,6 @@ CheckOutputAction::checkPerfLogOutput()
   if (_app.getParam<bool>("timing"))
   {
     Moose::perf_log.enable_logging();
-    Moose::setup_perf_log.enable_logging();
     libMesh::perflog.enable_logging();
   }
 }
