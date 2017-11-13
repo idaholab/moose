@@ -22,6 +22,15 @@ INSMomentumTractionFormRZ::INSMomentumTractionFormRZ(const InputParameters & par
 {
 }
 
+RealVectorValue
+INSMomentumTractionFormRZ::strongViscousTermTraction()
+{
+  // const Real & r = _q_point[_qp](0);
+  // return INSBase::strongViscousTermTraction() +
+  //        RealVectorValue(2. * _mu[_qp] * _u_vel[_qp] / (r * r), 0, 0);
+  return INSBase::strongViscousTermTraction();
+}
+
 Real
 INSMomentumTractionFormRZ::computeQpResidual()
 {

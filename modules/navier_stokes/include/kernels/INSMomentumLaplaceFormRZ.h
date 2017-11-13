@@ -29,9 +29,10 @@ public:
   virtual ~INSMomentumLaplaceFormRZ() {}
 
 protected:
-  virtual Real computeQpResidual();
-  virtual Real computeQpJacobian();
-  virtual Real computeQpOffDiagJacobian(unsigned jvar);
+  virtual RealVectorValue strongViscousTermLaplace() override;
+  virtual Real computeQpResidual() override;
+  virtual Real computeQpJacobian() override;
+  virtual Real computeQpOffDiagJacobian(unsigned jvar) override;
 };
 
 #endif
