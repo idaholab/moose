@@ -35,17 +35,33 @@ StorkTestApp::StorkTestApp(InputParameters parameters) : MooseApp(parameters)
 
 StorkTestApp::~StorkTestApp() {}
 
-// External entry point for dynamic application loading
-extern "C" void
-StorkTestApp__registerApps()
-{
-  StorkTestApp::registerApps();
-}
 void
 StorkTestApp::registerApps()
 {
   registerApp(StorkApp);
   registerApp(StorkTestApp);
+}
+
+void
+StorkTestApp::registerObjects(Factory & /*factory*/)
+{
+  /* Uncomment Factory parameter and register your new test objects here! */
+}
+
+void
+StorkTestApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & /*action_factory*/)
+{
+  /* Uncomment Syntax and ActionFactory parameters and register your new test objects here! */
+}
+
+/***************************************************************************************************
+ *********************** Dynamic Library Entry Points - DO NOT MODIFY ******************************
+ **************************************************************************************************/
+// External entry point for dynamic application loading
+extern "C" void
+StorkTestApp__registerApps()
+{
+  StorkTestApp::registerApps();
 }
 
 // External entry point for dynamic object registration
@@ -54,18 +70,10 @@ StorkTestApp__registerObjects(Factory & factory)
 {
   StorkTestApp::registerObjects(factory);
 }
-void
-StorkTestApp::registerObjects(Factory & /*factory*/)
-{
-}
 
 // External entry point for dynamic syntax association
 extern "C" void
 StorkTestApp__associateSyntax(Syntax & syntax, ActionFactory & action_factory)
 {
   StorkTestApp::associateSyntax(syntax, action_factory);
-}
-void
-StorkTestApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & /*action_factory*/)
-{
 }

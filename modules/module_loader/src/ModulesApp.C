@@ -23,8 +23,8 @@
 #ifdef HEAT_CONDUCTION_ENABLED
 #include "HeatConductionApp.h"
 #endif
-#ifdef LINEAR_ELASTICITY_ENABLED
-#include "LinearElasticityApp.h"
+#ifdef LEVEL_SET_ENABLED
+#include "LevelSetApp.h"
 #endif
 #ifdef MISC_ENABLED
 #include "MiscApp.h"
@@ -38,11 +38,17 @@
 #ifdef POROUS_FLOW_ENABLED
 #include "PorousFlowApp.h"
 #endif
+#ifdef RDG_ENABLED
+#include "RdgApp.h"
+#endif
 #ifdef RICHARDS_ENABLED
 #include "RichardsApp.h"
 #endif
 #ifdef SOLID_MECHANICS_ENABLED
 #include "SolidMechanicsApp.h"
+#endif
+#ifdef STOCHASTIC_TOOLS_ENABLED
+#include "StochasticToolsApp.h"
 #endif
 #ifdef TENSOR_MECHANICS_ENABLED
 #include "TensorMechanicsApp.h"
@@ -53,6 +59,20 @@
 #ifdef XFEM_ENABLED
 #include "XFEMApp.h"
 #endif
+
+///@{
+/**
+ * Dummy methods to clear unused parameter warnings from compiler
+ */
+void
+clearUnusedWarnings(Factory & /*factory*/)
+{
+}
+void
+clearUnusedWarnings(Syntax & /*syntax*/, ActionFactory & /*action_factory*/)
+{
+}
+///@}
 
 template <>
 InputParameters
@@ -110,8 +130,8 @@ ModulesApp::registerObjects(Factory & factory)
   HeatConductionApp::registerObjects(factory);
 #endif
 
-#ifdef LINEAR_ELASTICITY_ENABLED
-  LinearElasticityApp::registerObjects(factory);
+#ifdef LEVEL_SET_ENABLED
+  LevelSetApp::registerObjects(factory);
 #endif
 
 #ifdef MISC_ENABLED
@@ -130,12 +150,20 @@ ModulesApp::registerObjects(Factory & factory)
   PorousFlowApp::registerObjects(factory);
 #endif
 
+#ifdef RDG_ENABLED
+  RdgApp::registerObjects(factory);
+#endif
+
 #ifdef RICHARDS_ENABLED
   RichardsApp::registerObjects(factory);
 #endif
 
 #ifdef SOLID_MECHANICS_ENABLED
   SolidMechanicsApp::registerObjects(factory);
+#endif
+
+#ifdef STOCHASTIC_TOOLS_ENABLED
+  StochasticToolsApp::registerObjects(factory);
 #endif
 
 #ifdef TENSOR_MECHANICS_ENABLED
@@ -149,6 +177,8 @@ ModulesApp::registerObjects(Factory & factory)
 #ifdef XFEM_ENABLED
   XFEMApp::registerObjects(factory);
 #endif
+
+  clearUnusedWarnings(factory);
 }
 
 // External entry point for dynamic syntax association
@@ -176,8 +206,8 @@ ModulesApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
   HeatConductionApp::associateSyntax(syntax, action_factory);
 #endif
 
-#ifdef LINEAR_ELASTICITY_ENABLED
-  LinearElasticityApp::associateSyntax(syntax, action_factory);
+#ifdef LEVEL_SET_ENABLED
+  LevelSetApp::associateSyntax(syntax, action_factory);
 #endif
 
 #ifdef MISC_ENABLED
@@ -196,12 +226,20 @@ ModulesApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
   PorousFlowApp::associateSyntax(syntax, action_factory);
 #endif
 
+#ifdef RDG_ENABLED
+  RdgApp::associateSyntax(syntax, action_factory);
+#endif
+
 #ifdef RICHARDS_ENABLED
   RichardsApp::associateSyntax(syntax, action_factory);
 #endif
 
 #ifdef SOLID_MECHANICS_ENABLED
   SolidMechanicsApp::associateSyntax(syntax, action_factory);
+#endif
+
+#ifdef STOCHASTIC_TOOLS_ENABLED
+  StochasticToolsApp::associateSyntax(syntax, action_factory);
 #endif
 
 #ifdef TENSOR_MECHANICS_ENABLED
@@ -215,4 +253,6 @@ ModulesApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
 #ifdef XFEM_ENABLED
   XFEMApp::associateSyntax(syntax, action_factory);
 #endif
+
+  clearUnusedWarnings(syntax, action_factory);
 }
