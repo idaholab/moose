@@ -56,7 +56,7 @@ TaggingInterface::TaggingInterface(SubProblem & subproblem, const MooseObject & 
                  "'.  If this is a TimeKernel then this may have happened because you didn't "
                  "specify a Transient Executioner.");
 
-    _vector_tags.push_back(_subproblem.getVectorTag(vector_tag_name));
+    _vector_tags.insert(_subproblem.getVectorTag(vector_tag_name.name()));
   }
 
   auto & matrix_tag_names = parameters.get<MultiMooseEnum>("matrix_tags");
@@ -66,7 +66,7 @@ TaggingInterface::TaggingInterface(SubProblem & subproblem, const MooseObject & 
 
   for (auto & matrix_tag_name : matrix_tag_names)
   {
-    if (!_subproblem.matrixTagExists(matrix_tag_name))
+    if (!_subproblem.matrixTagExists(matrix_tag_name.name()))
       mooseError("Kernel, ",
                  moose_object.name(),
                  ", was assigned an invalid matrix_tag: '",
@@ -74,8 +74,44 @@ TaggingInterface::TaggingInterface(SubProblem & subproblem, const MooseObject & 
                  "'.  If this is a TimeKernel then this may have happened because you didn't "
                  "specify a Transient Executioner.");
 
-    _matrix_tags.push_back(_subproblem.getMatrixTag(matrix_tag_name));
+    _matrix_tags.insert(_subproblem.getMatrixTag(matrix_tag_name.name()));
   }
+}
+
+void
+TaggingInterface::addVectorTag(TagName & tag_name)
+{
+  if (!_subproblem.vectorTagExists(tag_name))
+    mooseError("Vector tag ", tag_name, " does not exsit in system");
+
+  _vector_tags.insert(_subproblem.getVectorTag(tag_name));
+}
+
+void
+TaggingInterface::addMatrixTag(TagName & tag_name)
+{
+  if (!_subproblem.matrixTagExists(tag_name))
+    mooseError("Matrix tag ", tag_name, " does not exsit in system");
+
+  _matrix_tags.insert(_subproblem.getMatrixTag(tag_name));
+}
+
+void
+TaggingInterface::addVectorTag(TagID tag_id)
+{
+  if (!_subproblem.vectorTagExists(tag_id))
+    mooseError("Vector tag ", tag_id, " does not exsit in system");
+
+  _vector_tags.insert(tag_id);
+}
+
+void
+TaggingInterface::addMatrixTag(TagID tag_id)
+{
+  if (!_subproblem.matrixTagExists(tag_id))
+    mooseError("Matrix tag ", tag_id, " does not exsit in system");
+
+  _matrix_tags.insert(tag_id);
 }
 
 TaggingInterface::~TaggingInterface() {}

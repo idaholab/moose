@@ -273,9 +273,15 @@ DisplacedProblem::matrixTagName(TagID tag)
 }
 
 bool
-DisplacedProblem::matrixTagExists(TagID tag)
+DisplacedProblem::matrixTagExists(const TagName & tag_name)
 {
-  return _mproblem.matrixTagExists(tag);
+  return _mproblem.matrixTagExists(tag_name);
+}
+
+bool
+DisplacedProblem::matrixTagExists(TagID tag_id)
+{
+  return _mproblem.matrixTagExists(tag_id);
 }
 
 unsigned int

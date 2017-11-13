@@ -142,7 +142,12 @@ public:
   /**
    * Check to see if a particular Tag exists
    */
-  virtual bool matrixTagExists(TagID tag) { return tag < _matrix_tag_name_to_tag_id.size(); }
+  virtual bool matrixTagExists(const TagName & tag_name);
+
+  /**
+   * Check to see if a particular Tag exists
+   */
+  virtual bool matrixTagExists(TagID tag_id);
 
   /**
    * The total number of tags

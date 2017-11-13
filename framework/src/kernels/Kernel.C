@@ -85,42 +85,6 @@ Kernel::Kernel(const InputParameters & parameters)
 
   _has_diag_save_in = _diag_save_in.size() > 0;
 
-  auto & vector_tag_names = getParam<MultiMooseEnum>("vector_tags");
-
-  if (!vector_tag_names.isValid())
-    mooseError("MUST provide at least one vector_tag for Kernel: ", name());
-
-  for (auto & vector_tag_name : vector_tag_names)
-  {
-    if (!_fe_problem.vectorTagExists(vector_tag_name.name()))
-      mooseError("Kernel, ",
-                 name(),
-                 ", was assigned an invalid vector_tag: '",
-                 vector_tag_name,
-                 "'.  If this is a TimeKernel then this may have happened because you didn't "
-                 "specify a Transient Executioner.");
-
-    _vector_tags.push_back(_fe_problem.getVectorTag(vector_tag_name));
-  }
-
-  auto & matrix_tag_names = getParam<MultiMooseEnum>("matrix_tags");
-
-  if (!matrix_tag_names.isValid())
-    mooseError("MUST provide at least one matrix_tag for Kernel: ", name());
-
-  for (auto & matrix_tag_name : matrix_tag_names)
-  {
-    if (!_fe_problem.matrixTagExists(matrix_tag_name))
-      mooseError("Kernel, ",
-                 name(),
-                 ", was assigned an invalid matrix_tag: '",
-                 matrix_tag_name,
-                 "'.  If this is a TimeKernel then this may have happened because you didn't "
-                 "specify a Transient Executioner.");
-
-    _matrix_tags.push_back(_fe_problem.getMatrixTag(matrix_tag_name));
-  }
-
   _re_blocks.resize(_vector_tags.size());
   _ke_blocks.resize(_matrix_tags.size());
 }
@@ -128,8 +92,9 @@ Kernel::Kernel(const InputParameters & parameters)
 void
 Kernel::computeResidual()
 {
-  for (auto i = beginIndex(_vector_tags); i < _vector_tags.size(); i++)
-    _re_blocks[i] = &_assembly.residualBlock(_var.number(), _vector_tags[i]);
+  auto vector_tag = _vector_tags.begin();
+  for (auto i = beginIndex(_vector_tags); i < _vector_tags.size(); i++, ++vector_tag)
+    _re_blocks[i] = &_assembly.residualBlock(_var.number(), *vector_tag);
 
   _local_re.resize(_re_blocks[0]->size());
   _local_re.zero();
@@ -153,8 +118,9 @@ Kernel::computeResidual()
 void
 Kernel::computeJacobian()
 {
-  for (auto i = beginIndex(_matrix_tags); i < _matrix_tags.size(); i++)
-    _ke_blocks[i] = &_assembly.jacobianBlock(_var.number(), _var.number(), _matrix_tags[i]);
+  auto mat_vector = _matrix_tags.begin();
+  for (auto i = beginIndex(_matrix_tags); i < _matrix_tags.size(); i++, ++mat_vector)
+    _ke_blocks[i] = &_assembly.jacobianBlock(_var.number(), _var.number(), *mat_vector);
 
   _local_ke.resize(_ke_blocks[0]->m(), _ke_blocks[0]->n());
   _local_ke.zero();

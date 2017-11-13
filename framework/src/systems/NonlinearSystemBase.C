@@ -375,6 +375,8 @@ NonlinearSystemBase::addBoundaryCondition(const std::string & bc_name,
     std::shared_ptr<PresetNodalBC> pnbc = std::dynamic_pointer_cast<PresetNodalBC>(bc);
     if (pnbc)
       _preset_nodal_bcs.addObject(pnbc);
+
+    addEigenBoundaryCondition(nbc, tid);
   }
 
   // IntegratedBCBase
@@ -402,6 +404,8 @@ NonlinearSystemBase::addBoundaryCondition(const std::string & bc_name,
       _integrated_bcs.addObject(ibc, tid);
       _vars[tid].addBoundaryVars(boundary_ids, ibc->getCoupledVars());
     }
+
+    addEigenBoundaryCondition(ibc, tid);
   }
 
   else

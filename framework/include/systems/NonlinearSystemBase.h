@@ -37,6 +37,7 @@ class DiracKernel;
 class NodalKernel;
 class Split;
 class KernelBase;
+class BoundaryCondition;
 
 // libMesh forward declarations
 namespace libMesh
@@ -152,6 +153,9 @@ public:
   void addBoundaryCondition(const std::string & bc_name,
                             const std::string & name,
                             InputParameters parameters);
+
+  virtual void addEigenBoundaryCondition(std::shared_ptr<BoundaryCondition> /*bc*/,
+                                         THREAD_ID /*tid*/){};
 
   /**
    * Adds a Constraint

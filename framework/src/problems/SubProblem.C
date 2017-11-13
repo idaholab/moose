@@ -116,6 +116,20 @@ SubProblem::addMatrixTag(TagName tag_name)
   return _matrix_tag_name_to_tag_id.at(tag_name_upper);
 }
 
+bool
+SubProblem::matrixTagExists(const TagName & tag_name)
+{
+  auto tag_name_upper = MooseUtils::toUpper(tag_name);
+
+  return _matrix_tag_name_to_tag_id.find(tag_name_upper) != _matrix_tag_name_to_tag_id.end();
+}
+
+bool
+SubProblem::matrixTagExists(TagID tag_id)
+{
+  return _matrix_tag_id_to_tag_name.find(tag_id) != _matrix_tag_id_to_tag_name.end();
+}
+
 void
 SubProblem::removeMatrixTag(TagName tag_name)
 {

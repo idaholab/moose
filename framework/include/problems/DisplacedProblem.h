@@ -101,7 +101,8 @@ public:
   virtual TagID addMatrixTag(TagName tag_name) override;
   virtual TagID getMatrixTag(TagName tag_name) override;
   virtual TagName matrixTagName(TagID tag) override;
-  virtual bool matrixTagExists(TagID tag) override;
+  virtual bool matrixTagExists(const TagName & tag_name) override;
+  virtual bool matrixTagExists(TagID tag_id) override;
   virtual unsigned int numMatrixTags() override;
 
   virtual bool isTransient() const override;

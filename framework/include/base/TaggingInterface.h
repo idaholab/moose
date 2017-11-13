@@ -36,12 +36,20 @@ public:
   TaggingInterface(SubProblem & subproblem, const MooseObject & moose_object);
   virtual ~TaggingInterface();
 
+  void addVectorTag(TagName & tag_name);
+
+  void addMatrixTag(TagName & tag_name);
+
+  void addVectorTag(TagID tag_id);
+
+  void addMatrixTag(TagID tag_id);
+
 protected:
   /// The vectors this Kernel will contribute to
-  std::vector<TagID> _vector_tags;
+  std::set<TagID> _vector_tags;
 
   /// The matrices this Kernel will contribute to
-  std::vector<TagID> _matrix_tags;
+  std::set<TagID> _matrix_tags;
 
   SubProblem & _subproblem;
 
