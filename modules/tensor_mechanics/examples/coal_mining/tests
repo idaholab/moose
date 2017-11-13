@@ -37,4 +37,22 @@
     csvdiff = 'cosserat_mc_wp.csv'
     heavy = true
   [../]
+
+  [./cosserat_mc_wp_sticky_run]
+    type = RunApp
+    input = 'cosserat_mc_wp_sticky.i'
+    check_input = True
+  [../]
+  [./cosserat_mc_wp_sticky_csv]
+    type = CSVDiff
+    input = 'cosserat_mc_wp_sticky.i'
+    csvdiff = 'cosserat_mc_wp_sticky.csv'
+    cli_args = 'Executioner/end_time=0.02'
+    heavy = true
+  [../]
+  [./cosserat_mc_wp_sticky_longitudinal_run]
+    type = RunApp
+    input = 'cosserat_mc_wp_sticky_longitudinal.i'
+    check_input = True
+  [../]
 []
