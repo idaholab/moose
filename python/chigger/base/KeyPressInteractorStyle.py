@@ -32,4 +32,5 @@ class KeyPressInteractorStyle(vtk.vtkInteractorStyleMultiTouchCamera):
         """
         key = obj.GetInteractor().GetKeySym()
         if key == 'c':
-            print '\n'.join(utils.print_camera(self.GetDefaultRenderer().GetActiveCamera()))
+
+            print '\n'.join(utils.print_camera(self.GetCurrentRenderer().GetActiveCamera()))
