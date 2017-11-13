@@ -344,6 +344,16 @@ class TestHarness:
         else:
             return True
 
+    # Method contianing logic on whether or not we should print results of given tester
+    def canPrint(self, tester):
+        if tester.isSkipped() and self.options.report_skipped is False:
+            return False
+
+        elif tester.isSilent() or (tester.isDeleted() and not self.options.extra_info):
+            return False
+
+        return True
+
     # Format the status message to make any caveats easy to read when they are printed
     def formatCaveats(self, tester):
         caveats = []
@@ -383,12 +393,10 @@ class TestHarness:
     def printResult(self, tester_data):
         """ Method to print a testers status to the screen """
         tester = tester_data.getTester()
+        caveat_formatted_results = None
 
-        # The test has no status to print
-        if tester.isSilent() or (tester.isDeleted() and not self.options.extra_info):
-            caveat_formatted_results = None
         # Print what ever status the tester has at the time
-        else:
+        if self.canPrint(tester):
             if self.options.verbose or (tester.didFail() and not self.options.quiet):
                 output = 'Working Directory: ' + tester.getTestDir() + '\nRunning command: ' + tester.getCommand(self.options) + '\n'
 
@@ -604,6 +612,7 @@ class TestHarness:
         parser.add_argument('--re', action='store', type=str, dest='reg_exp', help='Run tests that match --re=regular_expression')
         parser.add_argument('--failed-tests', action='store_true', dest='failed_tests', help='Run tests that previously failed')
         parser.add_argument('--check-input', action='store_true', dest='check_input', help='Run check_input (syntax) tests only')
+        parser.add_argument('--no-check-input', action='store_true', dest='no_check_input', help='Do not run check_input (syntax) tests')
 
         # Options that pass straight through to the executable
         parser.add_argument('--parallel-mesh', action='store_true', dest='parallel_mesh', help='Deprecated, use --distributed-mesh instead')
@@ -684,6 +693,9 @@ class TestHarness:
             sys.exit(1)
         if opts.queue_cleanup and opts.pbs:
             print('ERROR: --queue-cleanup and --pbs can not be used together')
+            sys.exit(1)
+        if opts.check_input and opts.no_check_input:
+            print('ERROR: --check-input and --no-check-input can not be used together')
             sys.exit(1)
 
         # Update any keys from the environment as necessary

@@ -67,4 +67,8 @@
     type = PythonUnitTest
     input = test_QueuePBS.py
   [../]
+  [./report_skipped]
+    type = PythonUnitTest
+    input = test_ReportSkipped.py
+  [../]
 []
