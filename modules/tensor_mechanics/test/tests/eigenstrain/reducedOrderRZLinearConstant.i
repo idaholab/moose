@@ -1,15 +1,9 @@
 #
 # This test checks whether the ComputeReducedOrderEigenstrain is functioning properly.
 #
-# If instead of 'reduced_eigenstrain', 'thermal_eigenstrain' is given to
+# If instead of 'fred', 'thermal_eigenstrain' is given to
 # eigenstrain_names in the Modules/TensorMechanics/Master/all block, the output will be
-# quite different.
-#
-# Open the reducedOrderRZLinear_out_hydro_0001.csv file and plot the hydro variables as
-# a function of x.  For the reduced order case, the values are smooth across each of the
-# two elements with a jump upward from the left element to the right element.  However,
-# when not using 'reduced_order_eigenstrain', a jump downward appears from the left
-# element to the right element.
+# identical since the thermal strain is constant in the elements.
 #
 
 [GlobalParams]
@@ -30,21 +24,12 @@
   xmin = 1
   ymax = 1
   ymin = 0
-  #second_order = true
 []
 
 [Functions]
-  [./tempLinear]
+  [./tempBC]
     type = ParsedFunction
-    value = '715-5*x'
-  [../]
-  [./tempQuadratic]
-    type = ParsedFunction
-    value = '2.5*x*x-15*x+722.5'
-  [../]
-  [./tempCubic]
-    type = ParsedFunction
-    value = '-1.25*x*x*x+11.25*x*x-33.75*x+733.75'
+    value = '700+2*t*t'
   [../]
 []
 
@@ -93,11 +78,6 @@
     order = SECOND
     family = MONOMIAL
   [../]
-  [./temp2]
-    order = FIRST
-    family = LAGRANGE
-    initial_condition = 700
-  [../]
 []
 
 [Modules]
@@ -107,8 +87,8 @@
         add_variables = true
         strain = SMALL
         incremental = true
-        temperature = temp2
-        eigenstrain_names = 'reduced_eigenstrain' #'thermal_eigenstrain'
+        temperature = temp
+        eigenstrain_names = 'fred' #'thermal_eigenstrain'
       [../]
     [../]
   [../]
@@ -182,12 +162,6 @@
     index_i = 2
     index_j = 2
   [../]
-  [./temp2]
-    type = FunctionAux
-    variable = temp2
-    function = tempLinear
-    execute_on = timestep_begin
-  [../]
 []
 
 [BCs]
@@ -205,16 +179,16 @@
   [../]
 
   [./temp_right]
-    type = DirichletBC
+    type = FunctionDirichletBC
     variable = temp
     boundary = right
-    value = 700
+    function = tempBC
   [../]
   [./temp_left]
-    type = DirichletBC
+    type = FunctionDirichletBC
     variable = temp
     boundary = left
-    value = 710
+    function = tempBC
   [../]
 []
 
@@ -230,8 +204,8 @@
   [../]
   [./fuel_thermal_expansion]
     type = ComputeThermalExpansionEigenstrain
-    thermal_expansion_coeff = 1
-    temperature = temp2
+    thermal_expansion_coeff = 1e-6
+    temperature = temp
     stress_free_temperature = 700.0
     incremental_form = true
     eigenstrain_name = 'thermal_eigenstrain'
@@ -239,7 +213,7 @@
   [./reduced_order_eigenstrain]
     type = ComputeReducedOrderEigenstrain
     input_eigenstrain_names = 'thermal_eigenstrain'
-    eigenstrain_name = 'reduced_eigenstrain'
+    eigenstrain_name = 'fred'
     incremental_form = true
   [../]
 []
@@ -260,8 +234,9 @@
   petsc_options_iname = '-ksp_gmres_restart -pc_type -pc_hypre_type'
   petsc_options_value = '70 hypre boomeramg'
 
-  num_steps = 1
-  nl_rel_tol = 1e-8 #1e-12
+  dt = 1
+  num_steps = 10
+  nl_rel_tol = 1e-8
 []
 
 [Postprocessors]
@@ -270,18 +245,6 @@
   [../]
 []
 
-[VectorPostprocessors]
-  [./hydro]
-    type = LineValueSampler
-    num_points = 100
-    start_point = '1 0.07e-3 0'
-    end_point = '3 0.07e-3 0'
-    sort_by = x
-    variable = 'hydro_constant hydro_first hydro_second temp2 disp_x disp_y'
-  [../]
-[]
-
 [Outputs]
   exodus = true
-  csv = true
 []
