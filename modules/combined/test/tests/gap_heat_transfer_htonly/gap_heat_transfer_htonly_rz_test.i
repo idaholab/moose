@@ -159,7 +159,7 @@
     type = HeatConductionMaterial
     block = '1 2'
     specific_heat = 1.0
-    thermal_conductivity = 100000000.0
+    thermal_conductivity = 1e6
   [../]
   [./density]
     type = Density
@@ -183,7 +183,7 @@
 #  petsc_options_iname = '-ksp_gmres_restart -pc_type -pc_hypre_type -pc_hypre_boomeramg_max_iter'
 #  petsc_options_value = '201                hypre    boomeramg      4'
 
-  nl_abs_tol = 5e-2
+  nl_abs_tol = 1e-3
   nl_rel_tol = 1e-8
 
   l_tol = 1e-6
@@ -191,6 +191,7 @@
 
   start_time = 0.0
   dt = 1e-1
+  dtmin = 1e-1
   end_time = 2.0
 []
 
@@ -215,7 +216,6 @@
     variable = temp
     boundary = 2
     diffusivity = thermal_conductivity
-    execute_on = 'initial timestep_end'
   [../]
 
   [./flux_right]
@@ -223,7 +223,6 @@
     variable = temp
     boundary = 3
     diffusivity = thermal_conductivity
-    execute_on = 'initial timestep_end'
   [../]
 
   [./temp_left2]
@@ -245,7 +244,6 @@
     variable = temp2
     boundary = 2
     diffusivity = thermal_conductivity
-    execute_on = 'initial timestep_end'
   [../]
 
   [./flux_right2]
@@ -253,7 +251,6 @@
     variable = temp2
     boundary = 3
     diffusivity = thermal_conductivity
-    execute_on = 'initial timestep_end'
   [../]
 
 []
