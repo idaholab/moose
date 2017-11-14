@@ -802,28 +802,31 @@ SolidModel::computeEshelby()
   // Deformation gradient (F):
   ColumnMajorMatrix F;
   _element->computeDeformationGradient(_qp, F);
+  // Displacement gradient (H):
+  ColumnMajorMatrix H(F);
+  H.addDiag(-1.0);
   Real detF = _element->detMatrix(F);
   ColumnMajorMatrix Finv;
   _element->invertMatrix(F, Finv);
   ColumnMajorMatrix FinvT;
   FinvT = Finv.transpose();
-  ColumnMajorMatrix FT;
-  FT = F.transpose();
+  ColumnMajorMatrix HT;
+  HT = H.transpose();
 
   // 1st Piola-Kirchoff Stress (P):
   ColumnMajorMatrix piola;
   piola = stress_CMM * FinvT;
   piola *= detF;
 
-  // FTP = F^T * P = F^T * detF * sigma * FinvT;
-  ColumnMajorMatrix FTP;
-  FTP = FT * piola;
+  // HTP = H^T * P = H^T * detF * sigma * FinvT;
+  ColumnMajorMatrix HTP;
+  HTP = HT * piola;
 
   ColumnMajorMatrix WI;
   WI.identity();
   WI *= (*_SED)[_qp];
   WI *= detF;
-  (*_Eshelby_tensor)[_qp] = WI - FTP;
+  (*_Eshelby_tensor)[_qp] = WI - HTP;
 }
 
 ////////////////////////////////////////////////////////////////////////
