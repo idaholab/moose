@@ -128,7 +128,7 @@ class TestHarness:
               (self.options.cli_args != None and \
                (self.options.cli_args.find('--parallel-mesh') != -1 or self.options.cli_args.find('--distributed-mesh') != -1)):
 
-            option_set = set(['ALL', 'PARALLEL'])
+            option_set = set(['ALL', 'DISTRIBUTED'])
             checks['mesh_mode'] = option_set
 
         method = set(['ALL', self.options.method.upper()])
