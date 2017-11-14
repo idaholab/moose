@@ -67,3 +67,22 @@ CircleCutUserObject::isInsideCutPlane(Point p) const
     return true;
   return false;
 }
+
+const std::vector<Point>
+CircleCutUserObject::getCrackFrontPoints(unsigned int number_crack_front_points) const
+{
+  std::vector<Point> crack_front_points(number_crack_front_points);
+  Point v1 = _vertices[0] - _center;
+  Point v2 = _normal.cross(v1);
+  v1 /= v1.norm();
+  v2 /= v2.norm();
+  // parametric circle in 3D: center + r * cos(theta) * v1 + r * sin(theta) * v2
+  for (unsigned int i = 0; i < number_crack_front_points; ++i)
+  {
+    Real theta = 2.0 * libMesh::pi / number_crack_front_points * i;
+    crack_front_points[i] =
+        _center + _radius * std::cos(theta) * v1 + _radius * std::sin(theta) * v2;
+  }
+
+  return crack_front_points;
+}
