@@ -9,4 +9,16 @@
     input = 'RZ_cone_by_parts.i'
     exodiff = 'RZ_cone_by_parts_out.e'
   [../]
+  [./high_re]
+    type = 'Exodiff'
+    input = 'RZ_cone_high_reynolds.i'
+    exodiff = 'steady_linear.e'
+    cli_args = 'Outputs/out/file_base=steady_linear'
+  [../]
+  [./jac]
+    type = 'PetscJacobianTester'
+    input = 'RZ_cone_stab_jac_test.i'
+    ratio_tol = 1e-7
+    difference_tol = 1e-5
+  [../]
 []
