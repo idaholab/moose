@@ -604,7 +604,7 @@ getLatestCheckpointFileHelper(const std::list<std::string> & checkpoint_files,
   // Now, out of the newest files find the one with the largest number in it
   for (const auto & res_file : newest_restart_files)
   {
-    auto dot_pos = res_file.find_first_of(".");
+    auto dot_pos = res_file.find_last_of(".");
     auto the_base = res_file.substr(0, dot_pos);
     int file_num = 0;
 
