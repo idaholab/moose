@@ -172,6 +172,7 @@
 #include "CoupledKernelGradBC.h"
 
 #include "InterfaceDiffusion.h"
+#include "OneSideDiffusion.h"
 
 #include "ExplicitODE.h"
 #include "ImplicitODEx.h"
@@ -428,6 +429,7 @@ MooseTestApp::registerObjects(Factory & factory)
 
   // Interface kernels
   registerInterfaceKernel(InterfaceDiffusion);
+  registerInterfaceKernel(OneSideDiffusion);
 
   // Boundary Conditions
   registerBoundaryCondition(ChannelGradientBC);
