@@ -157,7 +157,7 @@ Console::Console(const InputParameters & parameters)
     _write_file(getParam<bool>("output_file")),
     _write_screen(getParam<bool>("output_screen")),
     _verbose(getParam<bool>("verbose")),
-    _perf_log(getParam<bool>("perf_log")),
+    _perf_log(getParam<bool>("perf_log") || _app.getParam<bool>("timing")),
     _perf_log_interval(getParam<unsigned int>("perf_log_interval")),
     _solve_log(isParamValid("solve_log") ? getParam<bool>("solve_log") : _perf_log),
     _libmesh_log(getParam<bool>("libmesh_log")),
@@ -166,7 +166,6 @@ Console::Console(const InputParameters & parameters)
     _outlier_variable_norms(getParam<bool>("outlier_variable_norms")),
     _outlier_multiplier(getParam<std::vector<Real>>("outlier_multiplier")),
     _precision(isParamValid("time_precision") ? getParam<unsigned int>("time_precision") : 0),
-    _timing(_app.getParam<bool>("timing")),
     _console_buffer(_app.getOutputWarehouse().consoleBuffer()),
     _old_linear_norm(std::numeric_limits<Real>::max()),
     _old_nonlinear_norm(std::numeric_limits<Real>::max()),
@@ -243,24 +242,16 @@ Console::~Console()
   // Write the file output stream
   writeStreamToFile();
 
-  /* If --timing was not used disable the logging b/c the destructor of these
-   * object does the output, if --timing was used do nothing because all other
-   * screen related output was disabled above */
-  if (!_timing && _app.name() == "main")
-  {
-    /* Disable the logs, without this the logs will be printed
-       during the destructors of the logs themselves */
-    Moose::perf_log.disable_logging();
-    libMesh::perflog.disable_logging();
-  }
+  // Disable logging so that the destructor in libMesh doesn't print
+  Moose::perf_log.disable_logging();
+  libMesh::perflog.disable_logging();
 }
 
 void
 Console::initialSetup()
 {
-  // If --timing was used from the command-line, do nothing, all logs are enabled
-  // Also, only allow the main app to change the perf_log settings.
-  if (!_timing && _app.name() == "main")
+  // Only allow the main app to change the perf_log settings.
+  if (_app.name() == "main")
   {
     if (_perf_log || _solve_log || _perf_header)
       _app.getOutputWarehouse().setLoggingRequested();

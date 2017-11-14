@@ -216,9 +216,6 @@ private:
    */
   void mooseConsole(const std::string & message);
 
-  /// State of the --timing command line argument from MooseApp
-  bool _timing;
-
   /// Reference to cached messages from calls to _console
   const std::ostringstream & _console_buffer;
 
