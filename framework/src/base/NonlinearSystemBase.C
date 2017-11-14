@@ -156,8 +156,6 @@ NonlinearSystemBase::~NonlinearSystemBase()
 void
 NonlinearSystemBase::init()
 {
-  Moose::setup_perf_log.push("NonlinerSystem::init()", "Setup");
-
   if (_fe_problem.hasDampers())
     setupDampers();
 
@@ -168,8 +166,6 @@ NonlinearSystemBase::init()
 
   if (_need_residual_copy)
     _residual_copy.init(_sys.n_dofs(), false, SERIAL);
-
-  Moose::setup_perf_log.pop("NonlinerSystem::init()", "Setup");
 }
 
 void

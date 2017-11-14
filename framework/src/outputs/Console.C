@@ -72,19 +72,6 @@ validParams<Console>()
                         "individual log settings will override this option.");
   params.addParam<unsigned int>(
       "perf_log_interval", 0, "If set, the performance log will be printed every n time steps");
-  params.addDeprecatedParam<bool>("setup_log_early",
-                                  false,
-                                  "Specifies whether or not the Setup Performance log should be "
-                                  "printed before the first time step.  It will still be printed "
-                                  "at the end if "
-                                  "perf_log"
-                                  " is also enabled and likewise disabled if "
-                                  "perf_log"
-                                  " is false",
-                                  "This parameter is being removed due to lack of usage.");
-  params.addDeprecatedParam<bool>("setup_log",
-                                  "Toggles the printing of the 'Setup Performance' log",
-                                  "This parameter is being removed due to lack of usage.");
   params.addParam<bool>("solve_log", "Toggles the printing of the 'Moose Test Performance' log");
   params.addParam<bool>(
       "perf_header", "Print the libMesh performance log header (requires that 'perf_log = true')");
@@ -131,8 +118,7 @@ validParams<Console>()
   params.addParamNamesToGroup("max_rows verbose show_multiapp_name system_info", "Advanced");
 
   // Performance log group
-  params.addParamNamesToGroup("perf_log setup_log_early setup_log solve_log perf_header",
-                              "Perf Log");
+  params.addParamNamesToGroup("perf_log solve_log perf_header", "Perf Log");
   params.addParamNamesToGroup("libmesh_log", "Performance Log");
 
   // Variable norms group
@@ -171,18 +157,15 @@ Console::Console(const InputParameters & parameters)
     _write_file(getParam<bool>("output_file")),
     _write_screen(getParam<bool>("output_screen")),
     _verbose(getParam<bool>("verbose")),
-    _perf_log(getParam<bool>("perf_log")),
+    _perf_log(getParam<bool>("perf_log") || _app.getParam<bool>("timing")),
     _perf_log_interval(getParam<unsigned int>("perf_log_interval")),
     _solve_log(isParamValid("solve_log") ? getParam<bool>("solve_log") : _perf_log),
-    _setup_log(isParamValid("setup_log") ? getParam<bool>("setup_log") : _perf_log),
     _libmesh_log(getParam<bool>("libmesh_log")),
-    _setup_log_early(getParam<bool>("setup_log_early")),
     _perf_header(isParamValid("perf_header") ? getParam<bool>("perf_header") : _perf_log),
     _all_variable_norms(getParam<bool>("all_variable_norms")),
     _outlier_variable_norms(getParam<bool>("outlier_variable_norms")),
     _outlier_multiplier(getParam<std::vector<Real>>("outlier_multiplier")),
     _precision(isParamValid("time_precision") ? getParam<unsigned int>("time_precision") : 0),
-    _timing(_app.getParam<bool>("timing")),
     _console_buffer(_app.getOutputWarehouse().consoleBuffer()),
     _old_linear_norm(std::numeric_limits<Real>::max()),
     _old_nonlinear_norm(std::numeric_limits<Real>::max()),
@@ -209,19 +192,15 @@ Console::Console(const InputParameters & parameters)
   {
     _perf_log = true;
     _solve_log = true;
-    _setup_log = true;
   }
 
   if (_app.name() != "main" &&
       (_pars.isParamSetByUser("perf_log") || _pars.isParamSetByUser("perf_log_interval") ||
-       _pars.isParamSetByUser("setup_log") || _pars.isParamSetByUser("solve_log") ||
-       _pars.isParamSetByUser("perf_header") || _pars.isParamSetByUser("libmesh_log") ||
+       _pars.isParamSetByUser("solve_log") || _pars.isParamSetByUser("perf_header") ||
+       _pars.isParamSetByUser("libmesh_log") ||
        common_action->parameters().isParamSetByUser("print_perf_log")))
     mooseWarning("Performance logging cannot currently be controlled from a Multiapp, please set "
                  "all performance options in the main input file");
-
-  // Deprecate the setup perf log
-  Moose::setup_perf_log.disable_logging();
 
   // Append the common 'execute_on' to the setting for this object
   // This is unique to the Console object, all other objects inherit from the common options
@@ -263,26 +242,18 @@ Console::~Console()
   // Write the file output stream
   writeStreamToFile();
 
-  /* If --timing was not used disable the logging b/c the destructor of these
-   * object does the output, if --timing was used do nothing because all other
-   * screen related output was disabled above */
-  if (!_timing && _app.name() == "main")
-  {
-    /* Disable the logs, without this the logs will be printed
-       during the destructors of the logs themselves */
-    Moose::perf_log.disable_logging();
-    libMesh::perflog.disable_logging();
-  }
+  // Disable logging so that the destructor in libMesh doesn't print
+  Moose::perf_log.disable_logging();
+  libMesh::perflog.disable_logging();
 }
 
 void
 Console::initialSetup()
 {
-  // If --timing was used from the command-line, do nothing, all logs are enabled
-  // Also, only allow the main app to change the perf_log settings.
-  if (!_timing && _app.name() == "main")
+  // Only allow the main app to change the perf_log settings.
+  if (_app.name() == "main")
   {
-    if (_perf_log || _setup_log || _solve_log || _perf_header || _setup_log_early)
+    if (_perf_log || _solve_log || _perf_header)
       _app.getOutputWarehouse().setLoggingRequested();
 
     // Disable performance logging if nobody needs logging
