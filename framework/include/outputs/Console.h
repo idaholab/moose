@@ -185,14 +185,8 @@ protected:
   /// State for solve performance log
   bool _solve_log;
 
-  /// State for setup performance log
-  bool _setup_log;
-
   /// Control the display libMesh performance log
   bool _libmesh_log;
-
-  /// State for early setup log printing
-  bool _setup_log_early;
 
   /// State for the performance log header information
   bool _perf_header;
@@ -221,9 +215,6 @@ private:
    * output stream buffer is cleaned up correctly. Thus, it is a private method.
    */
   void mooseConsole(const std::string & message);
-
-  /// State of the --timing command line argument from MooseApp
-  bool _timing;
 
   /// Reference to cached messages from calls to _console
   const std::ostringstream & _console_buffer;
