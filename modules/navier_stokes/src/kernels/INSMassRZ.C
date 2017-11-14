@@ -17,9 +17,38 @@ validParams<INSMassRZ>()
   return params;
 }
 
-INSMassRZ::INSMassRZ(const InputParameters & parameters)
-  : INSMass(parameters), _u_vel(coupledValue("u"))
+INSMassRZ::INSMassRZ(const InputParameters & parameters) : INSMass(parameters) {}
+
+RealVectorValue
+INSMassRZ::strongViscousTermLaplace()
 {
+  const Real & r = _q_point[_qp](0);
+  return INSBase::strongViscousTermLaplace() +
+         RealVectorValue(_mu[_qp] * _u_vel[_qp] / (r * r), 0, 0);
+}
+
+RealVectorValue
+INSMassRZ::dStrongViscDUCompLaplace(unsigned comp)
+{
+  const Real & r = _q_point[_qp](0);
+  return INSBase::dStrongViscDUCompLaplace(comp) +
+         RealVectorValue(comp == 0 ? _mu[_qp] * _phi[_j][_qp] / (r * r) : 0, 0, 0);
+}
+
+RealVectorValue
+INSMassRZ::strongViscousTermTraction()
+{
+  const Real & r = _q_point[_qp](0);
+  return INSBase::strongViscousTermTraction() +
+         RealVectorValue(2. * _mu[_qp] * _u_vel[_qp] / (r * r), 0, 0);
+}
+
+RealVectorValue
+INSMassRZ::dStrongViscDUCompTraction(unsigned comp)
+{
+  const Real & r = _q_point[_qp](0);
+  return INSBase::dStrongViscDUCompTraction(comp) +
+         RealVectorValue(comp == 0 ? 2. * _mu[_qp] * _phi[_j][_qp] / (r * r) : 0, 0, 0);
 }
 
 Real

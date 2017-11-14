@@ -29,6 +29,7 @@ public:
 
 protected:
   virtual RealVectorValue strongViscousTermTraction() override;
+  virtual RealVectorValue dStrongViscDUCompTraction(unsigned comp) override;
   virtual Real computeQpResidual() override;
   virtual Real computeQpJacobian() override;
   virtual Real computeQpOffDiagJacobian(unsigned jvar) override;

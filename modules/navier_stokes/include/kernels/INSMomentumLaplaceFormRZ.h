@@ -30,6 +30,7 @@ public:
 
 protected:
   virtual RealVectorValue strongViscousTermLaplace() override;
+  virtual RealVectorValue dStrongViscDUCompLaplace(unsigned comp) override;
   virtual Real computeQpResidual() override;
   virtual Real computeQpJacobian() override;
   virtual Real computeQpOffDiagJacobian(unsigned jvar) override;

@@ -25,10 +25,17 @@ INSMomentumTractionFormRZ::INSMomentumTractionFormRZ(const InputParameters & par
 RealVectorValue
 INSMomentumTractionFormRZ::strongViscousTermTraction()
 {
-  // const Real & r = _q_point[_qp](0);
-  // return INSBase::strongViscousTermTraction() +
-  //        RealVectorValue(2. * _mu[_qp] * _u_vel[_qp] / (r * r), 0, 0);
-  return INSBase::strongViscousTermTraction();
+  const Real & r = _q_point[_qp](0);
+  return INSBase::strongViscousTermTraction() +
+         RealVectorValue(2. * _mu[_qp] * _u_vel[_qp] / (r * r), 0, 0);
+}
+
+RealVectorValue
+INSMomentumTractionFormRZ::dStrongViscDUCompTraction(unsigned comp)
+{
+  const Real & r = _q_point[_qp](0);
+  return INSBase::dStrongViscDUCompTraction(comp) +
+         RealVectorValue(comp == 0 ? 2. * _mu[_qp] * _phi[_j][_qp] / (r * r) : 0, 0, 0);
 }
 
 Real

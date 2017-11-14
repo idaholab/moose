@@ -26,10 +26,17 @@ INSMomentumLaplaceFormRZ::INSMomentumLaplaceFormRZ(const InputParameters & param
 RealVectorValue
 INSMomentumLaplaceFormRZ::strongViscousTermLaplace()
 {
-  // const Real & r = _q_point[_qp](0);
-  // return INSBase::strongViscousTermLaplace() +
-  //        RealVectorValue(_mu[_qp] * _u_vel[_qp] / (r * r), 0, 0);
-  return INSBase::strongViscousTermLaplace();
+  const Real & r = _q_point[_qp](0);
+  return INSBase::strongViscousTermLaplace() +
+         RealVectorValue(_mu[_qp] * _u_vel[_qp] / (r * r), 0, 0);
+}
+
+RealVectorValue
+INSMomentumLaplaceFormRZ::dStrongViscDUCompLaplace(unsigned comp)
+{
+  const Real & r = _q_point[_qp](0);
+  return INSBase::dStrongViscDUCompLaplace(comp) +
+         RealVectorValue(comp == 0 ? _mu[_qp] * _phi[_j][_qp] / (r * r) : 0, 0, 0);
 }
 
 Real
