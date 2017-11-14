@@ -86,7 +86,7 @@ public:
    * Nodal or elemental kernel?
    * @return true if this is a nodal kernel, otherwise false
    */
-  bool isNodal();
+  bool isNodal() { return _nodal; }
 
   const std::set<std::string> & getDependObjects() const { return _depend_uo; }
 
