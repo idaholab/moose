@@ -19,34 +19,31 @@ Page header including the top and sidebar navigation.
   {% endfor %}
 {%- endmacro %}
 
+<ul class="side-nav" id="mobile-nav">
+  {{nav_items('dropdown-side')}}
+</ul>
+
 <nav>
   <div class="nav-wrapper container">
-      <a href="{{relpath('index.html', current.destination)}}" class="page-title">{{title|default("MOOSE")}}</a>
+    <div class="row">
       <a href="#" data-activates="mobile-nav" class="button-collapse"><i class="material-icons">menu</i></a>
-      <ul class="right hide-on-med-and-down">
-        {{nav_items('dropdown-top')}}
-        <li>
-          <form>
-            <div class="input-field search-wrapper">
-              <input id="search" type="search" required>
-              <label for="search"><i class="material-icons">search</i></label>
-              <i class="material-icons">close</i>
-              <div class="search-results"></div>
-            </div>
-          </form>
-        </li>
-        <li>
-          <a class="github-mark-label" href="{{repo_url}}">
-            {% if 'gitlab' in repo_url %}
+      <div class="col s2">
+        <a href="{{relpath('index.html', current.destination)}}" class="page-title">{{title|default("MOOSE")}}</a>
+      </div>
+      <div class="col s10 hide-on-med-and-down">
+        <ul>
+          {{nav_items('dropdown-top')}}
+          <li>
+            <a class="github-mark-label" href="{{repo_url}}">
+              {% if 'gitlab' in repo_url %}
               <img class="github-mark" src=media/gitlab-logo.png>GitLab
-            {% else %}
+              {% else %}
               <img class="github-mark" src=media/github-mark-light.png>GitHub
-            {% endif %}
-          </a>
-        </li>
-      </ul>
-      <ul class="side-nav" id="mobile-nav">
-        {{nav_items('dropdown-side')}}
-      </ul>
+              {% endif %}
+            </a>
+          </li>
+        </ul>
+      </div>
+    </div>
   </div>
 </nav>

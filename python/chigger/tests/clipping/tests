@@ -5,6 +5,12 @@
     imagediff = 'clip.png'
   [../]
 
+  [./plane_elem_var]
+    type = ImageDiff
+    command = clip_elem.py
+    imagediff = 'clip_elem.png'
+  [../]
+
   [./clip_z]
     type = ImageDiff
     command = clip_z.py

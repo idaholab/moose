@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 #pylint: disable=missing-docstring
 #################################################################
 #                   DO NOT MODIFY THIS HEADER                   #
@@ -13,23 +14,18 @@
 #              See COPYRIGHT for full restrictions              #
 #################################################################
 import vtk
-from .. import utils
+import chigger
 
-class KeyPressInteractorStyle(vtk.vtkInteractorStyleMultiTouchCamera):
-    """
-    An interactor style for capturing key press events in VTK window.
-    """
-    def __init__(self, parent=None, **kwargs):
-        self.AddObserver("KeyPressEvent", self.keyPress)
-        super(KeyPressInteractorStyle, self).__init__(parent, **kwargs)
+camera = vtk.vtkCamera()
+camera.SetViewUp(0.4606, 0.6561, 0.5978)
+camera.SetPosition(-5.8760, -5.4091, 11.0314)
+camera.SetFocalPoint(0.6561, -0.1441, 0.2210)
 
-    def keyPress(self, obj, event): #pylint: disable=unused-argument
-        """
-        Executes when a key is pressed.
+clip = chigger.filters.PlaneClipper()
 
-        Inputs:
-            obj, event: Required by VTK.
-        """
-        key = obj.GetInteractor().GetKeySym()
-        if key == 'c':
-            print '\n'.join(utils.print_camera(self.GetCurrentRenderer().GetActiveCamera()))
+reader = chigger.exodus.ExodusReader('../input/mug_blocks_out.e')
+mug = chigger.exodus.ExodusResult(reader, variable='aux_elem', camera=camera, cmap='viridis', filters=[clip])
+
+window = chigger.RenderWindow(mug, size=[300,300], test=True)
+window.write('clip_elem.png')
+window.start()
