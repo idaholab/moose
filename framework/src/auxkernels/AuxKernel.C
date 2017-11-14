@@ -250,12 +250,6 @@ AuxKernel::compute()
   }
 }
 
-bool
-AuxKernel::isNodal()
-{
-  return _nodal;
-}
-
 const VariableValue &
 AuxKernel::coupledDot(const std::string & var_name, unsigned int comp)
 {
