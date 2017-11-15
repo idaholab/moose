@@ -4489,16 +4489,20 @@ FEProblemBase::adaptMesh()
 
   Moose::perf_log.push("Adaptivity: adaptMesh()", "Execution");
 
+  bool mesh_changed = false;
+
   for (unsigned int i = 0; i < cycles_per_step; ++i)
   {
     _console << "Adaptivity step " << i + 1 << " of " << cycles_per_step << '\n';
     // Markers were already computed once by Executioner
     if (_adaptivity.getRecomputeMarkersFlag() && i > 0)
       computeMarkers();
+
     if (_adaptivity.adaptMesh())
     {
-      meshChanged();
+      meshChangedHelper(true);  // This may be an intermediate change
       _cycles_completed++;
+      mesh_changed = true;
     }
     else
     {
@@ -4509,6 +4513,11 @@ FEProblemBase::adaptMesh()
     // Show adaptivity progress
     _console << std::flush;
   }
+
+  // We're done with all intermediate changes; now get systems ready
+  // for real if necessary.
+  if (mesh_changed)
+    _eq.reinit_systems();
 
   Moose::perf_log.pop("Adaptivity: adaptMesh()", "Execution");
 }
