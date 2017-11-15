@@ -4500,7 +4500,7 @@ FEProblemBase::adaptMesh()
 
     if (_adaptivity.adaptMesh())
     {
-      meshChangedHelper(true);  // This may be an intermediate change
+      meshChangedHelper(true); // This may be an intermediate change
       _cycles_completed++;
       mesh_changed = true;
     }
