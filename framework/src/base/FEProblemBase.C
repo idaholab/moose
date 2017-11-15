@@ -4553,6 +4553,12 @@ FEProblemBase::updateMeshXFEM()
 void
 FEProblemBase::meshChanged()
 {
+  this->meshChangedHelper();
+}
+
+void
+FEProblemBase::meshChangedHelper(bool intermediate_change)
+{
   if (_material_props.hasStatefulProperties() || _bnd_material_props.hasStatefulProperties())
     _mesh.cacheChangedLists(); // Currently only used with adaptivity and stateful material
                                // properties
@@ -4566,11 +4572,18 @@ FEProblemBase::meshChanged()
   // callbacks (e.g. for sparsity calculations) triggered by the
   // EquationSystems reinit may require up-to-date MooseMesh caches.
   _mesh.meshChanged();
-  _eq.reinit();
 
-  // But that breaks other adaptivity code, unless we then *again*
-  // update the MooseMesh caches.  E.g. the definition of "active" and
-  // "local" may be *changed* by EquationSystems::reinit().
+  // If we're just going to alter the mesh again, all we need to
+  // handle here is AMR and projections, not full system reinit
+  if (intermediate_change)
+    _eq.reinit_solutions();
+  else
+    _eq.reinit();
+
+  // Updating MooseMesh first breaks other adaptivity code, unless we
+  // then *again* update the MooseMesh caches.  E.g. the definition of
+  // "active" and "local" may have been *changed* by refinement and
+  // repartitioning done in EquationSystems::reinit().
   _mesh.meshChanged();
 
   // Since the Mesh changed, update the PointLocator object used by DiracKernels.

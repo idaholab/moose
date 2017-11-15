@@ -1433,6 +1433,15 @@ protected:
   /// Objects to be notified when the mesh changes
   std::vector<MeshChangedInterface *> _notify_when_mesh_changes;
 
+  /**
+   * Helper method to update some or all data after a mesh change.
+   *
+   * Iff intermediate_change is true, only perform updates as
+   * necessary to prepare for another mesh change
+   * immediately-subsequent.
+   */
+  void meshChangedHelper(bool intermediate_change = false);
+
   /// Helper to check for duplicate variable names across systems or within a single system
   bool duplicateVariableCheck(const std::string & var_name, const FEType & type, bool is_aux);
 
