@@ -331,7 +331,10 @@ Transient::execute()
   }
 
   if (!_app.halfTransient())
+  {
     _problem.outputStep(EXEC_FINAL);
+    _problem.execute(EXEC_FINAL);
+  }
 
   // This method is to finalize anything else we want to do on the problem side.
   _problem.postExecute();

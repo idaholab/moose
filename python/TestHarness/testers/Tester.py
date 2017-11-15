@@ -31,6 +31,7 @@ class Tester(MooseObject):
         params.addParam('allow_test_objects', False, "Allow the use of test objects by adding --allow-test-objects to the command line.")
 
         params.addParam('valgrind', 'NONE', "Set to (NONE, NORMAL, HEAVY) to determine which configurations where valgrind will run.")
+        params.addParam('tags',      [], "A list of strings")
 
         # Test Filters
         params.addParam('platform',      ['ALL'], "A list of platforms for which this test will run on. ('ALL', 'DARWIN', 'LINUX', 'SL', 'LION', 'ML')")
@@ -81,6 +82,7 @@ class Tester(MooseObject):
         self.std_out = ''
         self.exit_code = 0
         self.process = None
+        self.tags = params['tags']
 
         # Bool if test can run
         self._runnable = None
@@ -286,7 +288,7 @@ class Tester(MooseObject):
         reason is left blank, this tester will be treated as silent (no status
         will be printed and will not be counted among the skipped tests).
         """
-        return (True, '')
+        return True
 
     def shouldExecute(self):
         """
@@ -312,9 +314,9 @@ class Tester(MooseObject):
 
     def getCommand(self, options):
         """ return the executable command that will be executed by the tester """
-        return
+        return ''
 
-    def runCommand(self, timer, options):
+    def runCommand(self, cmd, cwd, timer, options):
         """
         Helper method for running external (sub)processes as part of the tester's execution.  This
         uses the tester's getCommand and getTestDir methods to run a subprocess.  The timer must
@@ -374,7 +376,10 @@ class Tester(MooseObject):
         if needed. The run method is responsible to call the start+stop methods on timer to record
         the time taken to run the actual test.  start+stop can be called multiple times.
         """
-        self.runCommand(timer, options)
+        cmd = self.getCommand(options)
+        cwd = self.getTestDir()
+
+        self.runCommand(cmd, cwd, timer, options)
 
     def processResultsCommand(self, moose_dir, options):
         """ method to return the commands (list) used for processing results """
@@ -401,6 +406,15 @@ class Tester(MooseObject):
         """
         reasons = {}
         checks = options._checks
+
+        tag_match = False
+        for t in self.tags:
+            if t in options.runtags:
+                tag_match = True
+                break
+        if len(options.runtags) > 0 and not tag_match:
+            self.setStatus('no tag', self.bucket_silent)
+            return False
 
         # If the something has already deemed this test a failure, return now
         if self.didFail():
