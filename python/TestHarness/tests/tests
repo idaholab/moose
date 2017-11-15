@@ -71,4 +71,8 @@
     type = PythonUnitTest
     input = test_ReportSkipped.py
   [../]
+  [./distributed_mesh]
+    type = PythonUnitTest
+    input = test_DistributedMesh.py
+  [../]
 []
