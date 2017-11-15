@@ -26,6 +26,7 @@
     type = PHarmonic
     variable = u
     p = 3
+    vector_tags = 'nontime Ax_tag'
   [../]
 
   [./rhs]
@@ -33,6 +34,7 @@
     eigen_kernel = true
     variable = u
     p = 3
+    vector_tags = 'nontime Bx_tag'
   [../]
 []
 
@@ -42,6 +44,15 @@
     variable = u
     boundary = '0 2'
     value = 0
+    vector_tags = 'nontime Ax_tag'
+  [../]
+  [./eigen]
+    type = DirichletBC
+    variable = u
+    boundary = '0 2'
+    value = 0
+    zero_residual = true
+    vector_tags = 'Bx_tag'
   [../]
 []
 

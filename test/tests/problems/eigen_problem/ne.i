@@ -41,7 +41,15 @@
     variable = u
     boundary = '0 1 2 3'
     value = 0
-    vector_tags = 'nontime Ax_tag Bx_tag'
+    vector_tags = 'nontime Ax_tag'
+  [../]
+  [./eigen]
+    type = DirichletBC
+    variable = u
+    boundary = '0 1 2 3'
+    value = 0
+    zero_residual = true
+    vector_tags = 'Bx_tag'
   [../]
 []
 

@@ -50,11 +50,9 @@ protected:
   /// Value of the unknown variable this BC is acting on
   const VariableValue & _u;
 
-  /// The vectors this Kernel will contribute to
-  std::vector<TagID> _vector_tags;
-
-  /// The matrices this Kernel will contribute to
-  std::vector<TagID> _matrix_tags;
+  /// Indicate if or not we set the residual be zero at the boundary.
+  /// Certain application require to zero the residual for boundary dofs.
+  bool _zero_residual;
 
   virtual Real computeQpResidual() = 0;
 
