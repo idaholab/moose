@@ -1,0 +1,7 @@
+[Tests]
+  [./distributed_mesh]
+    type = RunApp
+    input = good.i
+    mesh_mode = distributed
+  [../]
+[]
