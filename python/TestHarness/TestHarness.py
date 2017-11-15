@@ -47,6 +47,7 @@ class TestHarness:
         # Finally load the plugins!
         self.factory.loadPlugins(dirs, 'testers', "IS_TESTER")
 
+        self._infiles = ['tests', 'speedtests']
         self.parse_errors = []
         self.test_table = []
         self.num_passed = 0
@@ -150,6 +151,8 @@ class TestHarness:
         self.preRun()
         self.start_time = clock()
         launched_tests = []
+        if self.options.input_file_name != '':
+            self._infiles = self.options.input_file_name.split(',')
 
         try:
             self.base_dir = os.getcwd()
@@ -162,7 +165,7 @@ class TestHarness:
                 if "contrib" not in os.path.relpath(dirpath, os.getcwd()):
                     for file in filenames:
                         # See if there were other arguments (test names) passed on the command line
-                        if file == self.options.input_file_name \
+                        if file in self._infiles \
                                and os.path.abspath(os.path.join(dirpath, file)) not in launched_tests:
 
                             if self.prunePath(file):
@@ -273,7 +276,10 @@ class TestHarness:
         test_dir = os.path.abspath(os.path.dirname(filename))
         relative_path = test_dir.replace(self.run_tests_dir, '')
         first_directory = relative_path.split(os.path.sep)[1] # Get first directory
-        relative_path = relative_path.replace('/' + self.options.input_file_name + '/', ':')
+        for infile in self._infiles:
+            if infile in relative_path:
+                relative_path = relative_path.replace('/' + infile + '/', ':')
+                break
         relative_path = re.sub('^[/:]*', '', relative_path)  # Trim slashes and colons
         formatted_name = relative_path + '.' + tester.name()
 
@@ -584,6 +590,7 @@ class TestHarness:
         parser.add_argument('--devel', action='store_const', dest='method', const='devel', help='test the app_name-devel binary')
         parser.add_argument('--oprof', action='store_const', dest='method', const='oprof', help='test the app_name-oprof binary')
         parser.add_argument('--pro', action='store_const', dest='method', const='pro', help='test the app_name-pro binary')
+        parser.add_argument('--run', type=str, default='', dest='run', help='only run tests of the specified of tag(s)')
         parser.add_argument('--ignore', nargs='?', action='store', metavar='caveat', dest='ignored_caveats', const='all', type=str, help='ignore specified caveats when checking if a test should run: (--ignore "method compiler") Using --ignore with out a conditional will ignore all caveats')
         parser.add_argument('-j', '--jobs', nargs='?', metavar='int', action='store', type=int, dest='jobs', const=1, help='run test binaries in parallel')
         parser.add_argument('-e', action='store_true', dest='extra_info', help='Display "extra" information including all caveats and deleted tests')
@@ -597,7 +604,7 @@ class TestHarness:
         parser.add_argument('-l', '--load-average', action='store', type=float, dest='load', help='Do not run additional tests if the load average is at least LOAD')
         parser.add_argument('-t', '--timing', action='store_true', dest='timing', help='Report Timing information for passing tests')
         parser.add_argument('-s', '--scale', action='store_true', dest='scaling', help='Scale problems that have SCALE_REFINE set')
-        parser.add_argument('-i', nargs=1, action='store', type=str, dest='input_file_name', default='tests', help='The default test specification file to look for (default="tests").')
+        parser.add_argument('-i', nargs=1, action='store', type=str, dest='input_file_name', default='', help='The default test specification file to look for (default="tests").')
         parser.add_argument('--libmesh_dir', nargs=1, action='store', type=str, dest='libmesh_dir', help='Currently only needed for bitten code coverage')
         parser.add_argument('--skip-config-checks', action='store_true', dest='skip_config_checks', help='Skip configuration checks (all tests will run regardless of restrictions)')
         parser.add_argument('--parallel', '-p', nargs='?', action='store', type=int, dest='parallel', const=1, help='Number of processors to use when running mpiexec')
@@ -654,6 +661,8 @@ class TestHarness:
         self.options = parser.parse_args(argv[1:])
         self.tests = self.options.test_name
         self.options.code = code
+
+        self.options.runtags = [tag for tag in self.options.run.split(',') if tag != '']
 
         # Convert all list based options of length one to scalars
         for key, value in vars(self.options).items():
