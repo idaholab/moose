@@ -10,13 +10,8 @@ import collections
 import matplotlib.pyplot as plt
 import jinja2
 
-defaultdir = os.path.abspath(os.path.dirname(sys.argv[0]))
-MOOSE_DIR = os.path.abspath(os.path.join(defaultdir, '..', 'python'))
-if "MOOSE_DIR" in os.environ:
-  MOOSE_DIR = os.environ['MOOSE_DIR']
-else:
-  os.environ['MOOSE_DIR'] = MOOSE_DIR
-
+MOOSE_DIR = os.environ.get('MOOSE_DIR', os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+os.environ['MOOSE_DIR'] = MOOSE_DIR
 sys.path.append(os.path.join(MOOSE_DIR, 'python'))
 os.environ['PYTHONPATH'] = os.environ.get('PYTHONPATH', '') + ':' + os.path.join(MOOSE_DIR, 'python')
 
