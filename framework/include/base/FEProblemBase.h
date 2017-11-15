@@ -1094,6 +1094,9 @@ public:
   /// Update the mesh due to changing XFEM cuts
   virtual bool updateMeshXFEM();
 
+  /**
+   * Update data after a mesh change.
+   */
   virtual void meshChanged() override;
 
   /**
