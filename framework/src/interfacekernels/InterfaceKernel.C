@@ -25,7 +25,22 @@ template <>
 InputParameters
 validParams<InterfaceKernel>()
 {
-  InputParameters params = validParams<DGKernelBase>();
+  InputParameters params = validParams<MooseObject>();
+  params += validParams<TransientInterface>();
+  params += validParams<BoundaryRestrictable>();
+  params += validParams<MeshChangedInterface>();
+  params.addRequiredParam<NonlinearVariableName>(
+      "variable", "The name of the variable that this boundary condition applies to");
+  params.addParam<bool>("use_displaced_mesh",
+                        false,
+                        "Whether or not this object should use the "
+                        "displaced mesh for computation. Note that in "
+                        "the case this is true but no displacements "
+                        "are provided in the Mesh block the "
+                        "undisplaced mesh will still be used.");
+  params.addParamNamesToGroup("use_displaced_mesh", "Advanced");
+
+  params.declareControllable("enable");
   params.addRequiredCoupledVar("neighbor_var", "The variable on the other side of the interface.");
   params.set<std::string>("_moose_base") = "InterfaceKernel";
   params.addParam<std::vector<AuxVariableName>>(
@@ -56,22 +71,64 @@ validParams<InterfaceKernel>()
   return params;
 }
 
-InterfaceKernel::InterfaceKernel(const InputParameters & params)
-  : DGKernelBase(params),
+// Static mutex definitions
+Threads::spin_mutex InterfaceKernel::_resid_vars_mutex;
+Threads::spin_mutex InterfaceKernel::_jacoby_vars_mutex;
+
+InterfaceKernel::InterfaceKernel(const InputParameters & parameters)
+  : MooseObject(parameters),
+    BoundaryRestrictable(this, false), // false for _not_ nodal
+    SetupInterface(this),
+    TransientInterface(this),
+    FunctionInterface(this),
+    UserObjectInterface(this),
+    NeighborCoupleableMooseVariableDependencyIntermediateInterface(this, false, false),
+    Restartable(parameters, "InterfaceKernels"),
+    ZeroInterface(parameters),
+    MeshChangedInterface(parameters),
     TwoMaterialPropertyInterface(this, boundaryIDs()),
+    _subproblem(*parameters.get<SubProblem *>("_subproblem")),
+    _sys(*parameters.get<SystemBase *>("_sys")),
+    _tid(parameters.get<THREAD_ID>("_tid")),
+    _assembly(_subproblem.assembly(_tid)),
+    _var(_sys.getVariable(_tid, parameters.get<NonlinearVariableName>("variable"))),
+    _mesh(_subproblem.mesh()),
+    _current_elem(_assembly.elem()),
+    _current_elem_volume(_assembly.elemVolume()),
+    _neighbor_elem(_assembly.neighbor()),
+    _current_side(_assembly.side()),
+    _current_side_elem(_assembly.sideElem()),
+    _current_side_volume(_assembly.sideElemVolume()),
+    _coord_sys(_assembly.coordSystem()),
+    _q_point(_assembly.qPointsFace()),
+    _qrule(_assembly.qRuleFace()),
+    _JxW(_assembly.JxWFace()),
+    _coord(_assembly.coordTransformation()),
+    _u(_is_implicit ? _var.sln() : _var.slnOld()),
+    _grad_u(_is_implicit ? _var.gradSln() : _var.gradSlnOld()),
+    _phi(_assembly.phiFace()),
+    _grad_phi(_assembly.gradPhiFace()),
+    _test(_var.phiFace()),
+    _grad_test(_var.gradPhiFace()),
+    _normals(_var.normals()),
     _neighbor_var(*getVar("neighbor_var", 0)),
     _neighbor_value(_neighbor_var.slnNeighbor()),
     _grad_neighbor_value(_neighbor_var.gradSlnNeighbor()),
-    _save_in_var_side(params.get<MultiMooseEnum>("save_in_var_side")),
-    _save_in_strings(params.get<std::vector<AuxVariableName>>("save_in")),
-    _diag_save_in_var_side(params.get<MultiMooseEnum>("diag_save_in_var_side")),
-    _diag_save_in_strings(params.get<std::vector<AuxVariableName>>("diag_save_in"))
+    _phi_neighbor(_assembly.phiFaceNeighbor()),
+    _grad_phi_neighbor(_assembly.gradPhiFaceNeighbor()),
+    _test_neighbor(_neighbor_var.phiFaceNeighbor()),
+    _grad_test_neighbor(_neighbor_var.gradPhiFaceNeighbor()),
+    _save_in_var_side(parameters.get<MultiMooseEnum>("save_in_var_side")),
+    _save_in_strings(parameters.get<std::vector<AuxVariableName>>("save_in")),
+    _diag_save_in_var_side(parameters.get<MultiMooseEnum>("diag_save_in_var_side")),
+    _diag_save_in_strings(parameters.get<std::vector<AuxVariableName>>("diag_save_in"))
+
 {
-  if (!params.isParamValid("boundary"))
+  if (!parameters.isParamValid("boundary"))
     mooseError(
         "In order to use an interface kernel, you must specify a boundary where it will live.");
 
-  if (params.isParamSetByUser("save_in"))
+  if (parameters.isParamSetByUser("save_in"))
   {
     if (_save_in_strings.size() != _save_in_var_side.size())
       mooseError("save_in and save_in_var_side must be the same length");
@@ -115,7 +172,7 @@ InterfaceKernel::InterfaceKernel(const InputParameters & params)
   _has_master_residuals_saved_in = _master_save_in_residual_variables.size() > 0;
   _has_slave_residuals_saved_in = _slave_save_in_residual_variables.size() > 0;
 
-  if (params.isParamSetByUser("diag_save_in"))
+  if (parameters.isParamSetByUser("diag_save_in"))
   {
     if (_diag_save_in_strings.size() != _diag_save_in_var_side.size())
       mooseError("diag_save_in and diag_save_in_var_side must be the same length");
@@ -160,12 +217,6 @@ InterfaceKernel::InterfaceKernel(const InputParameters & params)
   _has_slave_jacobians_saved_in = _slave_save_in_jacobian_variables.size() > 0;
 }
 
-const MooseVariable &
-InterfaceKernel::neighborVariable() const
-{
-  return _neighbor_var;
-}
-
 void
 InterfaceKernel::computeElemNeighResidual(Moose::DGResidualType type)
 {
@@ -202,6 +253,16 @@ InterfaceKernel::computeElemNeighResidual(Moose::DGResidualType type)
     for (const auto & var : _slave_save_in_residual_variables)
       var->sys().solution().add_vector(_local_re, var->dofIndicesNeighbor());
   }
+}
+
+void
+InterfaceKernel::computeResidual()
+{
+  // Compute the residual for this element
+  computeElemNeighResidual(Moose::Element);
+
+  // Compute the residual for the neighbor
+  computeElemNeighResidual(Moose::Neighbor);
 }
 
 void
@@ -339,4 +400,28 @@ Real
 InterfaceKernel::computeQpOffDiagJacobian(Moose::DGJacobianType /*type*/, unsigned int /*jvar*/)
 {
   return 0.;
+}
+
+MooseVariable &
+InterfaceKernel::variable() const
+{
+  return _var;
+}
+
+const MooseVariable &
+InterfaceKernel::neighborVariable() const
+{
+  return _neighbor_var;
+}
+
+SubProblem &
+InterfaceKernel::subProblem()
+{
+  return _subproblem;
+}
+
+const Real &
+InterfaceKernel::getNeighborElemVolume()
+{
+  return _assembly.neighborVolume();
 }

@@ -4,10 +4,24 @@
     input = 'coupled_value_coupled_flux.i'
     exodiff = 'coupled_value_coupled_flux_out.e'
   [../]
-
+  # This test ensures that shape functions for the NEIGHBORING variable are used in test_neighbor
+  # and phi_neighbor; this is relevant when _var and _neighbor_var use a different space of shape
+  # functions
+  [./mixed_shapes_test]
+    type = 'Exodiff'
+    input = 'mixed_shapes.i'
+    exodiff = 'mixed_shapes_out.e'
+  [../]
   [./jacobian_test]
     type = AnalyzeJacobian
     input = coupled_value_coupled_flux.i
+    expect_out = '\nNo errors detected. :-\)\n'
+    recover = false
+    cli_args = 'Outputs/exodus=false'
+  [../]
+  [./mixed_shapes_jacobian_test]
+    type = AnalyzeJacobian
+    input = mixed_shapes.i
     expect_out = '\nNo errors detected. :-\)\n'
     recover = false
     cli_args = 'Outputs/exodus=false'
