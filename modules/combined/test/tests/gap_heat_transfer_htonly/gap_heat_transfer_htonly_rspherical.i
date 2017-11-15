@@ -110,7 +110,7 @@
     type = HeatConductionMaterial
     block = '1 2'
     specific_heat = 1.0
-    thermal_conductivity = 100000000.0
+    thermal_conductivity = 1e6
   [../]
   [./density]
     type = Density
@@ -129,7 +129,7 @@
   # loose nl_abs_tol... after timestep 10 the residual basically can't
   # be reduced much beyond the initial residual.  The test probably
   # needs to be revisited to determine why.
-  nl_abs_tol = 5e-2
+  nl_abs_tol = 1e-3
   nl_rel_tol = 1e-10
   l_tol = 1e-6
   l_max_its = 100
@@ -162,7 +162,6 @@
     variable = temp
     boundary = 2
     diffusivity = thermal_conductivity
-    execute_on = 'initial timestep_end'
   [../]
 
   [./flux_right]
@@ -170,7 +169,6 @@
     variable = temp
     boundary = 3
     diffusivity = thermal_conductivity
-    execute_on = 'initial timestep_end'
   [../]
 []
 
