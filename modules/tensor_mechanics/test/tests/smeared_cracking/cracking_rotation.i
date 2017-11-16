@@ -135,7 +135,6 @@
     cracking_release = exponential
     shear_retention_factor = 0.1
     cracking_stress = 3.e9
-    inelastic_models = ''
   [../]
 []
 

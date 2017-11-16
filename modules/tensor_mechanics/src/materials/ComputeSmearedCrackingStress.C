@@ -51,6 +51,7 @@ validParams<ComputeSmearedCrackingStress>()
       0.0,
       "shear_retention_factor>=0 & shear_retention_factor<=1.0",
       "Fraction of original shear stiffness to be retained after cracking");
+  params.set<std::vector<MaterialName>>("inelastic_models") = {};
 
   return params;
 }

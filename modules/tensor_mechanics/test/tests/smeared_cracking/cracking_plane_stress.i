@@ -102,7 +102,6 @@
     cracking_residual_stress = 0.1
     cracking_beta = 0.1
     shear_retention_factor = 0.1
-    inelastic_models = ''
   [../]
 []
 
