@@ -8,7 +8,7 @@ GLOBAL VARIABLES relative 1.e-6 floor 1.e-10
 	elem_stress_xx      # min:               0 @ t1	max:       999750.08 @ t21
 
 NODAL VARIABLES relative 1.e-6 floor 1.e-10
-	disp_x  # min:               0 @ t1,n1	max:           0.001 @ t41,n7
+	disp_x  floor 1.e-9 # min:               0 @ t1,n1	max:           0.001 @ t41,n7
 	disp_y  # min:               0 @ t1,n1	max:   7.4709978e-20 @ t23,n8
 
 ELEMENT VARIABLES relative 1.e-6 floor 1.e-10

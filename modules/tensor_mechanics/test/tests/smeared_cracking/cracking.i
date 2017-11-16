@@ -62,7 +62,6 @@
   [./elastic_stress]
     type = ComputeSmearedCrackingStress
     cracking_stress = 1.68e6
-    inelastic_models = ''
   [../]
 []
 

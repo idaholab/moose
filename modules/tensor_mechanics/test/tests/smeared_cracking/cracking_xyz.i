@@ -85,7 +85,6 @@
     type = ComputeSmearedCrackingStress
     cracking_release = exponential
     cracking_stress = 119.3e6
-    inelastic_models = ''
   [../]
 []
 
