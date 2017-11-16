@@ -574,6 +574,7 @@ getDefaultExecFlagEnum()
                               EXEC_NONLINEAR,
                               EXEC_TIMESTEP_END,
                               EXEC_TIMESTEP_BEGIN,
+                              EXEC_FINAL,
                               EXEC_CUSTOM);
   return exec_enum;
 }

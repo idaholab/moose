@@ -22,7 +22,7 @@ InputParameters
 validParams<PerflogDumper>()
 {
   InputParameters params = validParams<GeneralUserObject>();
-  params.set<MultiMooseEnum>("execute_on") = "final";
+  params.set<ExecFlagEnum>("execute_on") = EXEC_FINAL;
   params.addParam<std::string>("outfile", "perflog.csv", "name of perf log output file");
   params.addClassDescription("Dumps perlog information to a csv file for further analysis.");
   return params;

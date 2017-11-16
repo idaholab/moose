@@ -54,7 +54,7 @@ validParams<Output>()
 
   // Update the 'execute_on' input parameter for output
   ExecFlagEnum & exec_enum = params.set<ExecFlagEnum>("execute_on", true);
-  exec_enum.addAvailableFlags(EXEC_FINAL, EXEC_FAILED);
+  exec_enum.addAvailableFlags(EXEC_FAILED);
   exec_enum = {EXEC_INITIAL, EXEC_TIMESTEP_END};
   params.setDocString("execute_on", exec_enum.getDocString());
 
@@ -85,7 +85,7 @@ Output::getExecuteOptions(std::string default_type)
                     "additional arguments for modification of the enum.");
   */
   ExecFlagEnum exec_enum = MooseUtils::getDefaultExecFlagEnum();
-  exec_enum.addAvailableFlags(EXEC_FINAL, EXEC_FAILED);
+  exec_enum.addAvailableFlags(EXEC_FAILED);
   exec_enum = default_type;
   return exec_enum;
 }

@@ -229,26 +229,32 @@ TEST(MultiMooseEnum, testExecuteOn)
 
   // Checks that names are added and removed
   EXPECT_EQ(exec_enum.getRawNames(),
-            "NONE INITIAL LINEAR NONLINEAR TIMESTEP_END TIMESTEP_BEGIN CUSTOM");
-  std::vector<std::string> opts = {
-      "NONE", "INITIAL", "LINEAR", "NONLINEAR", "TIMESTEP_END", "TIMESTEP_BEGIN", "CUSTOM"};
+            "NONE INITIAL LINEAR NONLINEAR TIMESTEP_END TIMESTEP_BEGIN FINAL CUSTOM");
+  std::vector<std::string> opts = {"NONE",
+                                   "INITIAL",
+                                   "LINEAR",
+                                   "NONLINEAR",
+                                   "TIMESTEP_END",
+                                   "TIMESTEP_BEGIN",
+                                   "FINAL",
+                                   "CUSTOM"};
   EXPECT_EQ(exec_enum.getNames(), opts);
 
   // Check that added names can be used
   EXPECT_TRUE(exec_enum.contains("initial"));
   EXPECT_TRUE(exec_enum.contains(EXEC_INITIAL));
 
-  exec_enum.addAvailableFlags({EXEC_FINAL});
-  EXPECT_FALSE(exec_enum.contains("final"));
-  EXPECT_FALSE(exec_enum.contains(EXEC_FINAL));
+  exec_enum.addAvailableFlags(EXEC_FAILED);
+  EXPECT_FALSE(exec_enum.contains("failed"));
+  EXPECT_FALSE(exec_enum.contains(EXEC_FAILED));
 
-  exec_enum = "final";
-  EXPECT_TRUE(exec_enum.contains("final"));
-  EXPECT_TRUE(exec_enum.contains(EXEC_FINAL));
+  exec_enum = "failed";
+  EXPECT_TRUE(exec_enum.contains("failed"));
+  EXPECT_TRUE(exec_enum.contains(EXEC_FAILED));
 
   EXPECT_EQ(exec_enum.size(), 1);
-  EXPECT_EQ(exec_enum[0], "FINAL");
-  EXPECT_EQ(exec_enum.get(0), EXEC_FINAL);
+  EXPECT_EQ(exec_enum[0], "FAILED");
+  EXPECT_EQ(exec_enum.get(0), EXEC_FAILED);
 
   // Error when bad name is removed
   try
@@ -268,14 +274,15 @@ TEST(MultiMooseEnum, testExecuteOn)
 
   try
   {
-    exec_enum.removeAvailableFlags(EXEC_FINAL);
+    exec_enum.removeAvailableFlags(EXEC_FAILED);
     FAIL() << "missing expected error";
   }
   catch (const std::exception & e)
   {
     std::string msg(e.what());
-    ASSERT_NE(msg.find("The supplied item 'FINAL' is a selected item, thus it can not be removed."),
-              std::string::npos)
+    ASSERT_NE(
+        msg.find("The supplied item 'FAILED' is a selected item, thus it can not be removed."),
+        std::string::npos)
         << "failed with unexpected error: " << msg;
   }
 
@@ -284,7 +291,7 @@ TEST(MultiMooseEnum, testExecuteOn)
   EXPECT_EQ(doc,
             "The list of flag(s) indicating when this object should be executed, the "
             "available options include 'NONE', 'INITIAL', 'LINEAR', 'NONLINEAR', 'TIMESTEP_END', "
-            "'TIMESTEP_BEGIN', 'FINAL', 'CUSTOM').");
+            "'TIMESTEP_BEGIN', 'FINAL', 'FAILED', 'CUSTOM').");
 
   // Tests with ExecFlagType assignment operators
   exec_enum = EXEC_FINAL;
