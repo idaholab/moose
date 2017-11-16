@@ -1,0 +1,10 @@
+[Tests]
+  [./allocation_test]
+    type = RunApp
+    input = good.i
+    max_parallel = 3
+    min_parallel = 2
+    max_threads = 3
+    min_threads = 2
+  [../]
+[]

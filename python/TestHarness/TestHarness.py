@@ -362,11 +362,8 @@ class TestHarness:
 
     # Format the status message to make any caveats easy to read when they are printed
     def formatCaveats(self, tester):
-        caveats = []
         result = ''
-
-        if tester.specs.isValid('caveats'):
-            caveats = tester.specs['caveats']
+        caveats = list(tester.getCaveats())
 
         # PASS and DRY_RUN fall into this catagory
         if tester.didPass():
