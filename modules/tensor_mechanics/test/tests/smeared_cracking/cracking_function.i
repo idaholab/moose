@@ -91,7 +91,6 @@
     type = ComputeSmearedCrackingStress
     cracking_stress = cracking_stress_fn
     cracking_residual_stress = 0.0
-    inelastic_models = ''
   [../]
 []
 
