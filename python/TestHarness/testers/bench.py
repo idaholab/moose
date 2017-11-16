@@ -2,7 +2,6 @@
 
 import subprocess
 import time
-from scipy.stats import mannwhitneyu
 import numpy
 import sqlite3
 import os
@@ -121,7 +120,7 @@ class SpeedTest(Tester):
 
         self.params = params
         self.benchmark = None
-        self.db = 'speedtests.sqlite'
+        self.db = os.environ.get('MOOSE_SPEED_DB', 'speedtests.sqlite')
 
     # override
     def getMaxTime(self):
@@ -193,6 +192,8 @@ class BenchComp:
 
         self.iqr_old = _iqr(self.old)
         self.iqr_new = _iqr(self.new)
+
+        from scipy.stats import mannwhitneyu
         try:
             result = mannwhitneyu(self.iqr_old, self.iqr_new, alternative='two-sided')
             self.pvalue = result.pvalue
