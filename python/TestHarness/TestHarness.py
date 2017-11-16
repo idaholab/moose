@@ -27,9 +27,10 @@ def findTestRoot(start=os.getcwd(), method=os.environ.get('METHOD', 'opt')):
             args = []
             if root.find('cli_args'):
                 args = shlex.split(root.param('cli_args'))
-            appname = root.param('app_name') + '-' + method
-            if os.path.exists(os.path.join(rootdir, appname)) or appname.startswith('moose_python'):
-                return rootdir, root.param('app_name'), args
+            # TODO: add check to see if the binary exists before returning. This can be used to
+            # allow users to control fallthrough for e.g. individual module binaries vs. the
+            # combined binary.
+            return rootdir, root.param('app_name'), args
         rootdir = os.path.dirname(rootdir)
     raise RuntimeError('test root directory not found')
 
