@@ -26,7 +26,6 @@ ComputeReducedOrderEigenstrain::ComputeReducedOrderEigenstrain(const InputParame
         getParam<std::vector<MaterialPropertyName>>("input_eigenstrain_names")),
     _eigenstrains(_input_eigenstrain_names.size()),
     _eigenstrains_old(_input_eigenstrain_names.size()),
-    _eigenstrain(declareProperty<RankTwoTensor>(_base_name + "reduced_order_eigenstrain")),
     _subproblem(*parameters.get<SubProblem *>("_subproblem")),
     _ncols(1 + _subproblem.mesh().dimension()),
     _second_order(_subproblem.mesh().hasSecondOrderElements()),
@@ -57,10 +56,7 @@ ComputeReducedOrderEigenstrain::initQpStatefulProperties()
 void
 ComputeReducedOrderEigenstrain::computeProperties()
 {
-  if (_incremental_form)
-    sumEigenstrainIncremental();
-  else
-    sumEigenstrainTotal();
+  sumEigenstrain();
 
   prepareEigenstrain();
 
@@ -84,7 +80,7 @@ ComputeReducedOrderEigenstrain::computeQpEigenstrain()
 }
 
 void
-ComputeReducedOrderEigenstrain::sumEigenstrainTotal()
+ComputeReducedOrderEigenstrain::sumEigenstrain()
 {
   _eigsum.resize(_qrule->n_points());
   for (_qp = 0; _qp < _qrule->n_points(); ++_qp)
@@ -92,21 +88,6 @@ ComputeReducedOrderEigenstrain::sumEigenstrainTotal()
     _eigsum[_qp].zero();
     for (auto es : _eigenstrains)
       _eigsum[_qp] += (*es)[_qp];
-  }
-}
-
-void
-ComputeReducedOrderEigenstrain::sumEigenstrainIncremental()
-{
-  _eigsum.resize(_qrule->n_points());
-  for (_qp = 0; _qp < _qrule->n_points(); ++_qp)
-  {
-    _eigsum[_qp].zero();
-    for (unsigned i = 0; i < _eigenstrains.size(); ++i)
-    {
-      _eigsum[_qp] += (*_eigenstrains[i])[_qp];
-      _eigsum[_qp] -= (*_eigenstrains_old[i])[_qp];
-    }
   }
 }
 
