@@ -32,7 +32,7 @@ validParams<BoundaryCondition>()
                         "displacements are provided in the Mesh block "
                         "the undisplaced mesh will still be used.");
   params.addParamNamesToGroup("use_displaced_mesh", "Advanced");
-
+  params.addParam<bool>("eigen_bc", false, "Whether or not this BC will be used as an eigen BC");
   params.declareControllable("enable");
   params.registerBase("BoundaryCondition");
 
@@ -58,7 +58,8 @@ BoundaryCondition::BoundaryCondition(const InputParameters & parameters, bool no
     _sys(*getCheckedPointerParam<SystemBase *>("_sys")),
     _tid(parameters.get<THREAD_ID>("_tid")),
     _assembly(_subproblem.assembly(_tid)),
-    _mesh(_subproblem.mesh())
+    _mesh(_subproblem.mesh()),
+    _eigen_BC(getParam<bool>("eigen_bc"))
 {
 }
 

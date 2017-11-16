@@ -91,6 +91,8 @@ public:
    */
   virtual bool shouldApply();
 
+  virtual bool isEigenBC() const { return _eigen_BC; }
+
 protected:
   /// Reference to SubProblem
   SubProblem & _subproblem;
@@ -109,6 +111,8 @@ protected:
 
   /// Mesh this BC is defined on
   MooseMesh & _mesh;
+
+  bool _eigen_BC;
 };
 
 #endif /* BOUNDARYCONDITION_H */

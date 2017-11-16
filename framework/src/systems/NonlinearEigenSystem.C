@@ -199,9 +199,27 @@ void
 NonlinearEigenSystem::addEigenKernels(std::shared_ptr<KernelBase> kernel, THREAD_ID tid)
 {
   if (kernel->isEigenKernel())
+  {
     _eigen_kernels.addObject(kernel, tid);
+    kernel->addVectorTag(_Re_non_time_tag);
+    kernel->addVectorTag(_Bx_tag);
+  }
   else
+  {
     _non_eigen_kernels.addObject(kernel, tid);
+    kernel->addVectorTag(_Re_non_time_tag);
+    kernel->addVectorTag(_Ax_tag);
+  }
+}
+
+void
+NonlinearEigenSystem::addEigenBoundaryCondition(std::shared_ptr<BoundaryCondition> bc,
+                                                THREAD_ID /*tid*/)
+{
+  if (bc->isEigenBC())
+    bc->addVectorTag(_Bx_tag);
+  else
+    bc->addVectorTag(_Ax_tag);
 }
 
 void

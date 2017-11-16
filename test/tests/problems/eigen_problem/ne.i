@@ -24,14 +24,12 @@
   [./diff]
     type = Diffusion
     variable = u
-    vector_tags = 'nontime Ax_tag'
   [../]
 
   [./rhs]
     type = Reaction
     variable = u
     eigen_kernel = true
-    vector_tags = 'nontime Bx_tag'
   [../]
 []
 
@@ -41,15 +39,13 @@
     variable = u
     boundary = '0 1 2 3'
     value = 0
-    vector_tags = 'nontime Ax_tag'
   [../]
   [./eigen]
     type = DirichletBC
     variable = u
     boundary = '0 1 2 3'
     value = 0
-    zero_residual = true
-    vector_tags = 'Bx_tag'
+    eigen_bc = true
   [../]
 []
 

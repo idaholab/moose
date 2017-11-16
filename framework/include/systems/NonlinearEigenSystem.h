@@ -57,6 +57,9 @@ public:
 
   virtual void addEigenKernels(std::shared_ptr<KernelBase> kernel, THREAD_ID tid) override;
 
+  virtual void addEigenBoundaryCondition(std::shared_ptr<BoundaryCondition> bc,
+                                         THREAD_ID tid) override;
+
   /**
    * Get the number of converged eigenvalues
    *

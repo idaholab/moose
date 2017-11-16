@@ -58,6 +58,21 @@
     boundary = '0 1 2 3'
     value = 0
   [../]
+  [./eigenBC_u]
+    type = DirichletBC
+    variable = u
+    boundary = '0 1 2 3'
+    value = 0
+    eigen_bc = true
+  [../]
+  [./eigenBC_v]
+    type = DirichletBC
+    variable = v
+    boundary = '0 1 2 3'
+    value = 0
+    eigen_bc = true
+  [../]
+
 []
 
 [Preconditioning]

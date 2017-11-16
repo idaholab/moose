@@ -43,22 +43,12 @@ public:
   virtual bool isGeneralizedEigenvalueProblem() { return _generalized_eigenvalue_problem; }
   virtual bool isNonlinearEigenvalueSolver();
 
-  bool residualInitialed() { return _is_residual_initialed; }
-
   // silences warning in debug mode about the other computeJacobian signature being hidden
   using FEProblemBase::computeJacobian;
 
   virtual void computeJacobian(const NumericVector<Number> & soln,
                                SparseMatrix<Number> & jacobian,
                                Moose::KernelType kernel_type) override;
-
-  void computeResidualTypeBx(const NumericVector<Number> & soln,
-                             NumericVector<Number> & residual,
-                             Moose::KernelType type);
-
-  void computeResidualType(const NumericVector<Number> & soln,
-                           NumericVector<Number> & residual,
-                           Moose::KernelType type) override;
 
   void computeResidualABType(const NumericVector<Number> & soln,
                              NumericVector<Number> & Ax,
@@ -73,7 +63,6 @@ protected:
   unsigned int _n_eigen_pairs_required;
   bool _generalized_eigenvalue_problem;
   std::shared_ptr<NonlinearEigenSystem> _nl_eigen;
-  bool _is_residual_initialed;
 };
 
 #endif /* EIGENPROBLEM_H */

@@ -35,26 +35,22 @@
     variable = u
     mat_prop = diffusion
     offset = 0.0
-    vector_tags = 'nontime Ax_tag'
   [../]
 
   [./rhs]
     type = Reaction
     variable = u
     eigen_kernel = true
-    vector_tags = 'nontime Bx_tag'
   [../]
 
   [./diff_T]
     type = Diffusion
     variable = T
-    vector_tags = 'nontime Ax_tag'
   [../]
   [./src_T]
     type = CoupledForce
     variable = T
     v = power
-    vector_tags = 'nontime Ax_tag'
   [../]
 []
 
@@ -76,7 +72,6 @@
     variable = u
     boundary = '0 1 2 3'
     value = 0
-    vector_tags = 'nontime Ax_tag'
   [../]
 
   [./eigenU]
@@ -84,8 +79,7 @@
     variable = u
     boundary = '0 1 2 3'
     value = 0
-    zero_residual = true
-    vector_tags = 'Bx_tag'
+    eigen_bc = true
   [../]
 
   [./homogeneousT]
@@ -93,7 +87,6 @@
     variable = T
     boundary = '0 1 2 3'
     value = 0
-    vector_tags = 'nontime Ax_tag'
   [../]
 
   [./eigenT]
@@ -101,8 +94,7 @@
     variable = T
     boundary = '0 1 2 3'
     value = 0
-    zero_residual = true
-    vector_tags = 'Bx_tag'
+    eigen_bc = true
   [../]
 []
 

@@ -56,7 +56,7 @@ TaggingInterface::TaggingInterface(SubProblem & subproblem, const MooseObject & 
                  "'.  If this is a TimeKernel then this may have happened because you didn't "
                  "specify a Transient Executioner.");
 
-    _vector_tags.insert(_subproblem.getVectorTag(vector_tag_name.name()));
+    _vector_tags.insert(_subproblem.getVectorTag(vector_tag_name));
   }
 
   auto & matrix_tag_names = parameters.get<MultiMooseEnum>("matrix_tags");
@@ -74,7 +74,7 @@ TaggingInterface::TaggingInterface(SubProblem & subproblem, const MooseObject & 
                  "'.  If this is a TimeKernel then this may have happened because you didn't "
                  "specify a Transient Executioner.");
 
-    _matrix_tags.insert(_subproblem.getMatrixTag(matrix_tag_name.name()));
+    _matrix_tags.insert(_subproblem.getMatrixTag(matrix_tag_name));
   }
 }
 
