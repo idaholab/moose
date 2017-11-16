@@ -140,7 +140,7 @@ class SpeedTest(Tester):
     # override
     def run(self, timer, options):
         p = self.params
-        if options.method not in ['opt', 'oprof', 'dbg']:
+        if not self.check_only and options.method not in ['opt', 'oprof', 'dbg']:
             raise ValueError('cannot run benchmark with "' + options.method + '" build')
         t = Test(p['executable'], p['input'], args=p['cli_args'], rootdir=p['test_dir'], perflog=p['perflog'])
 
