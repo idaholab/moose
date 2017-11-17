@@ -4,32 +4,64 @@ if sys.version_info[0:2] != (2, 7):
     sys.exit(1)
 
 import os, re, inspect, errno, time, copy
+import shlex
 
 from socket import gethostname
 from FactorySystem.Factory import Factory
 from FactorySystem.Parser import Parser
 from FactorySystem.Warehouse import Warehouse
 import util
+import hit
 
 import argparse
 from timeit import default_timer as clock
+
+def findTestRoot(start=os.getcwd(), method=os.environ.get('METHOD', 'opt')):
+    rootdir = os.path.abspath(start)
+    while os.path.dirname(rootdir) != rootdir:
+        fname = os.path.join(rootdir, 'testroot')
+        if os.path.exists(fname):
+            with open(fname, 'r') as f:
+                data = f.read()
+            root = hit.parse(fname, data)
+            args = []
+            if root.find('cli_args'):
+                args = shlex.split(root.param('cli_args'))
+            # TODO: add check to see if the binary exists before returning. This can be used to
+            # allow users to control fallthrough for e.g. individual module binaries vs. the
+            # combined binary.
+            return rootdir, root.param('app_name'), args
+        rootdir = os.path.dirname(rootdir)
+    raise RuntimeError('test root directory not found')
 
 class TestHarness:
 
     @staticmethod
     def buildAndRun(argv, app_name, moose_dir):
         if '--store-timing' in argv:
-            harness = TestTimer(argv, app_name, moose_dir)
+            harness = TestTimer(argv, moose_dir, app_name=app_name)
         else:
-            harness = TestHarness(argv, app_name, moose_dir)
+            harness = TestHarness(argv, moose_dir, app_name=app_name)
 
         harness.findAndRunTests()
-
         sys.exit(harness.error_code)
 
+    def __init__(self, argv, moose_dir, app_name=None):
+        os.environ['MOOSE_DIR'] = moose_dir
+        os.environ['PYTHONPATH'] = os.path.join(moose_dir, 'python') + ':' + os.environ.get('PYTHONPATH', '')
 
-    def __init__(self, argv, app_name, moose_dir):
+        if app_name:
+            rootdir, app_name, args = '.', app_name, []
+        else:
+            rootdir, app_name, args = findTestRoot(start=os.getcwd())
+
+        orig_cwd = os.getcwd()
+        os.chdir(rootdir)
+        argv = argv[:1] + args + argv[1:]
+
         self.factory = Factory()
+
+        self.app_name = app_name
 
         # Build a Warehouse to hold the MooseObjects
         self.warehouse = Warehouse()
@@ -139,6 +171,8 @@ class TestHarness:
         self.options._checks = checks
 
         self.initialize(argv, app_name)
+
+        os.chdir(orig_cwd)
 
     """
     Recursively walks the current tree looking for tests to run
@@ -759,15 +793,14 @@ CREATE_TABLE = """create table timing
 );"""
 
 class TestTimer(TestHarness):
-    def __init__(self, argv, app_name, moose_dir):
-        TestHarness.__init__(self, argv, app_name, moose_dir)
+    def __init__(self, argv, moose_dir, app_name=None):
+        TestHarness.__init__(self, argv, app_name=app_name)
         try:
             from sqlite3 import dbapi2 as sqlite
             assert sqlite # silence pyflakes warning
         except:
             print('Error: --store-timing requires the sqlite3 python module.')
             sys.exit(1)
-        self.app_name = app_name
         self.db_file = self.options.dbFile
         if not self.db_file:
             home = os.environ['HOME']

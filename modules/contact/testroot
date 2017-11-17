@@ -1,0 +1,2 @@
+app_name = contact
+cli_args = '--error'

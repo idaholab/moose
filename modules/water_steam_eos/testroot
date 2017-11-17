@@ -1,0 +1,2 @@
+app_name = water_steam_eos
+cli_args = '--error'

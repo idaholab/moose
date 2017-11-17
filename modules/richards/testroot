@@ -1,0 +1,2 @@
+app_name = richards
+cli_args = '--error'
