@@ -39,7 +39,7 @@ find_moose_python()
 
 def build_args():
     p = argparse.ArgumentParser()
-    p.add_argument('--db', type=str, default='speedtests.sqlite', help='benchmark timings database')
+    p.add_argument('--db', type=str, default=os.environ.get('MOOSE_SPEED_DB', 'speedtests.sqlite'), help='benchmark timings database')
 
     # options for comparing benchmarks
     p.add_argument('--old', type=str, default='', help='compare benchmark runs from the given revision (default prev of most recent)')
