@@ -32,10 +32,9 @@ class BiharmonicLapBC : public IntegratedBC
 {
 public:
   BiharmonicLapBC(const InputParameters & parameters);
-  virtual ~BiharmonicLapBC() {}
 
 protected:
-  virtual Real computeQpResidual();
+  virtual Real computeQpResidual() override;
 
   /// User-provided function which computes the Laplacian.
   Function & _lap_u;
