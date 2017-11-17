@@ -26,6 +26,7 @@ validParams<NodalNormalsEvaluator>()
 {
   InputParameters params = validParams<NodalUserObject>();
   params.set<bool>("_dual_restrictable") = true;
+  params.set<std::vector<SubdomainName>>("block") = {"ANY_BLOCK_ID"};
   return params;
 }
 
