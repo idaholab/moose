@@ -1,0 +1,2 @@
+app_name = level_set
+cli_args = '--error'

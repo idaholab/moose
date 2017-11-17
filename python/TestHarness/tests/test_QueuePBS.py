@@ -41,7 +41,7 @@ class HarnessAndDAG(object):
         os.chdir(run_tests_dir)
 
         # Instance the TestHarness
-        self.harness = TestHarness(['foo', '--pbs', self.pbs_session_file], 'moose_test', os.getenv('MOOSE_DIR'))
+        self.harness = TestHarness(['foo', '--pbs', self.pbs_session_file], os.getenv('MOOSE_DIR'), app_name='moose_test')
 
         ### With the TestHarness properly instanced we now need to simulate
         ### what findAndRunTests does by changing into each tester directory
@@ -416,7 +416,7 @@ class TestHarnessTestCase(unittest.TestCase):
 
         # See if we actually made a mess, like we should have
         if os.path.exists(self.session_dir):
-            harness = TestHarness(['foo', '--queue-cleanup', self.pbs_session_file], 'moose', os.getenv('MOOSE_DIR'))
+            harness = TestHarness(['foo', '--queue-cleanup', self.pbs_session_file], os.getenv('MOOSE_DIR'), app_name='moose')
 
             # Perform the clean up code
             harness.scheduler.cleanUp()

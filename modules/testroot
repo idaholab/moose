@@ -1,0 +1,2 @@
+app_name = combined/combined
+cli_args = '--color-first-directory --error'
