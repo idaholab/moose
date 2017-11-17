@@ -7,6 +7,13 @@ import os
 import os.path
 import sys
 import collections
+
+# this is a hack to prevent matplotlib from trying to do interactive plot crap with e.g. Qt on
+# remote machines.  See:
+# https://stackoverflow.com/questions/21321292/using-matplotlib-when-display-is-undefined.
+import matplotlib
+matplotlib.use('Agg')
+
 import matplotlib.pyplot as plt
 import jinja2
 
