@@ -75,7 +75,7 @@ AddNodalNormalsAction::act()
     pars.set<Order>("fe_order") = order;
     pars.set<FEFamily>("fe_family") = family;
     pars.set<MultiMooseEnum>("execute_on") = execute_options;
-    pars.set<std::vector<BoundaryName>>("boundary") = _boundary;
+    pars.set<std::vector<BoundaryName>>("surface_boundary") = _boundary;
 
     if (_has_corners)
       pars.set<BoundaryName>("corner_boundary") = _corner_boundary;

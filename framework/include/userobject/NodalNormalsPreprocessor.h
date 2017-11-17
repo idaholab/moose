@@ -32,7 +32,7 @@ InputParameters validParams<NodalNormalsPreprocessor>();
  * An ElementUserObject that prepares MOOSE for computing nodal
  * normals.
  */
-class NodalNormalsPreprocessor : public ElementUserObject, public BoundaryRestrictable
+class NodalNormalsPreprocessor : public ElementUserObject
 {
 public:
   NodalNormalsPreprocessor(const InputParameters & parameters);
@@ -47,21 +47,19 @@ public:
    *
    * This object inherits from BoundaryRestrictable to utilize the "boundary" parameter and other
    * methods that come with this interface class. However, this object is an ElementUserObject and
-   * must
-   * execute on each element (see ComputeUserObjectsThread::onElement).
+   * must execute on each element (see ComputeUserObjectsThread::onElement).
    *
    * The MooseObjectWarehouseBase object that stores the objects uses this method to determine
-   * whether
-   * the object should be stored as boundary or block. Since this object needs to execute on
-   * elements, it must
-   * be stored as a block object, overloading this method to always return false has such effect.
+   * whether the object should be stored as boundary or block. Since this object needs to execute on
+   * elements, it must be stored as a block object, overloading this method to always return false
+   * has such effect.
    */
-  virtual bool boundaryRestricted() const override { return false; }
 
 protected:
   AuxiliarySystem & _aux;
   FEType _fe_type;
   bool _has_corners;
+  std::vector<BoundaryID> _boundaries;
   BoundaryID _corner_boundary_id;
 
   const VariablePhiGradient & _grad_phi;
