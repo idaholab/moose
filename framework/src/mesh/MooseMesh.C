@@ -66,16 +66,6 @@ validParams<MooseMesh>()
 {
   InputParameters params = validParams<MooseObject>();
 
-  MooseEnum mesh_distribution_type("PARALLEL=0 SERIAL DEFAULT", "DEFAULT");
-  params.addParam<MooseEnum>(
-      "distribution",
-      mesh_distribution_type,
-      "PARALLEL: Always use libMesh::DistributedMesh "
-      "SERIAL: Always use libMesh::ReplicatedMesh "
-      "DEFAULT: Use libMesh::ReplicatedMesh unless --distributed-mesh is specified on the command "
-      "line "
-      "The distribution flag is deprecated, use parallel_type={DISTRIBUTED,REPLICATED} instead.");
-
   MooseEnum mesh_parallel_type("DISTRIBUTED=0 REPLICATED DEFAULT", "DEFAULT");
   params.addParam<MooseEnum>("parallel_type",
                              mesh_parallel_type,
@@ -156,7 +146,6 @@ validParams<MooseMesh>()
 MooseMesh::MooseMesh(const InputParameters & parameters)
   : MooseObject(parameters),
     Restartable(parameters, "Mesh"),
-    _mesh_distribution_type(getParam<MooseEnum>("distribution")),
     _mesh_parallel_type(getParam<MooseEnum>("parallel_type")),
     _use_distributed_mesh(false),
     _distribution_overridden(false),
@@ -176,32 +165,6 @@ MooseMesh::MooseMesh(const InputParameters & parameters)
     _allow_recovery(true),
     _construct_node_list_from_side_list(getParam<bool>("construct_node_list_from_side_list"))
 {
-  // This flag is deprecated, but we still allow it to be used. It
-  // will still do the same thing as it did before, but now it will
-  // print a deprecated message.
-  switch (_mesh_distribution_type)
-  {
-    case 0: // PARALLEL
-      mooseDeprecated("Using 'distribution = PARALLEL' in the Mesh block is deprecated, use "
-                      "'parallel_type = DISTRIBUTED' instead.");
-      _use_distributed_mesh = true;
-      break;
-
-    case 1: // SERIAL
-      mooseDeprecated("Using 'distribution = SERIAL' in the Mesh block is deprecated, use "
-                      "'parallel_type = REPLICATED' instead.");
-      if (_app.getDistributedMeshOnCommandLine() || _is_nemesis)
-        _distribution_overridden = true;
-      break;
-
-    case 2: // DEFAULT
-      // If the user did not specify any 'distribution = foo' in his
-      // input file, there's nothing to do.  In particular, we do not
-      // want to allow the command line to override the default mesh
-      // type in this case.
-      break;
-  }
-
   switch (_mesh_parallel_type)
   {
     case 0: // PARALLEL
@@ -222,8 +185,7 @@ MooseMesh::MooseMesh(const InputParameters & parameters)
       // No default switch needed for MooseEnum
   }
 
-  // If the user specifies 'nemesis = true' in the Mesh block, we
-  // must use DistributedMesh.
+  // If the user specifies 'nemesis = true' in the Mesh block, we must use DistributedMesh.
   if (_is_nemesis)
     _use_distributed_mesh = true;
 
@@ -263,7 +225,6 @@ MooseMesh::MooseMesh(const InputParameters & parameters)
 MooseMesh::MooseMesh(const MooseMesh & other_mesh)
   : MooseObject(other_mesh._pars),
     Restartable(_pars, "Mesh"),
-    _mesh_distribution_type(other_mesh._mesh_distribution_type),
     _mesh_parallel_type(other_mesh._mesh_parallel_type),
     _use_distributed_mesh(other_mesh._use_distributed_mesh),
     _distribution_overridden(other_mesh._distribution_overridden),
@@ -2517,14 +2478,6 @@ MooseMesh::errorIfDistributedMesh(std::string name) const
                " with DistributedMesh!\n",
                "Consider specifying parallel_type = 'replicated' in your input file\n",
                "to prevent it from being run with DistributedMesh.");
-}
-
-void
-MooseMesh::errorIfParallelDistribution(std::string name) const
-{
-  mooseDeprecated(
-      "errorIfParallelDistribution() is deprecated, call errorIfDistributedMesh() instead.");
-  errorIfDistributedMesh(name);
 }
 
 MooseMesh::MortarInterface *

@@ -732,11 +732,6 @@ public:
   void errorIfDistributedMesh(std::string name) const;
 
   /**
-   * Deprecated.  Just calls errorIfDistributedMesh().
-   */
-  void errorIfParallelDistribution(std::string name) const;
-
-  /**
    * Returns the final Mesh distribution type.
    */
   bool isDistributedMesh() const { return _use_distributed_mesh; }
@@ -744,12 +739,6 @@ public:
   /**
    * Tell the user if the distribution was overriden for any reason
    */
-  bool isDistributionForced() const
-  {
-    mooseDeprecated("isDistributionForced() is deprecated, call isParallelTypeFoced() instead.");
-    return isParallelTypeForced();
-  }
-
   bool isParallelTypeForced() const { return _parallel_type_overridden; }
 
   /*
@@ -798,11 +787,13 @@ public:
    */
   void setCustomPartitioner(Partitioner * partitioner);
 
+  ///@{
   /**
    * Setter and getter for _custom_partitioner_requested
    */
   bool isCustomPartitionerRequested() const;
   void setIsCustomPartitionerRequested(bool cpr);
+  ///@}
 
   /// Getter to query if the mesh was detected to be regular and orthogonal
   bool isRegularOrthogonal() { return _regular_orthogonal_mesh; }
@@ -811,18 +802,13 @@ public:
   bool hasSecondOrderElements();
 
   /**
-   * Proxy function to get a (sub)PointLocator from either the underlying
-   * libmesh mesh (default), or to allow derived meshes to return a custom
-   * point locator
+   * Proxy function to get a (sub)PointLocator from either the underlying libMesh mesh (default), or
+   * to allow derived meshes to return a custom point locator.
    */
   virtual std::unique_ptr<PointLocatorBase> getPointLocator() const;
 
 protected:
   std::vector<std::unique_ptr<GhostingFunctor>> _ghosting_functors;
-
-  /// Can be set to PARALLEL, SERIAL, or DEFAULT.  Determines whether
-  /// the underlying libMesh mesh is a ReplicatedMesh or DistributedMesh.
-  MooseEnum _mesh_distribution_type;
 
   /// Can be set to DISTRIBUTED, REPLICATED, or DEFAULT.  Determines whether
   /// the underlying libMesh mesh is a ReplicatedMesh or DistributedMesh.
@@ -880,7 +866,11 @@ protected:
   /// The elements that were just coarsened.
   std::unique_ptr<ConstElemPointerRange> _coarsened_elements;
 
-  /// Map of Parent elements to child elements for elements that were just coarsened.  NOTE: the child element pointers ARE PROBABLY INVALID.  Only use them for indexing!
+  /**
+   * Map of Parent elements to child elements for elements that were just coarsened.
+   *
+   * NOTE: the child element pointers ARE PROBABLY INVALID.  Only use them for indexing!
+   */
   std::map<const Elem *, std::vector<const Elem *>> _coarsened_element_children;
 
   /// Used for generating the semilocal node range
@@ -908,18 +898,16 @@ protected:
   bool _node_to_active_semilocal_elem_map_built;
 
   /**
-   * A set of subdomain IDs currently present in the mesh.
-   * For parallel meshes, includes subdomains defined on other
-   * processors as well.
+   * A set of subdomain IDs currently present in the mesh. For parallel meshes, includes subdomains
+   * defined on other processors as well.
    */
   std::set<SubdomainID> _mesh_subdomains;
 
   ///@{
   /**
-   * A set of boundary IDs currently present in the mesh.
-   * In serial, this is equivalent to the values returned
-   * by _mesh.get_boundary_info().get_boundary_ids().  In parallel,
-   * it will contain off-processor boundary IDs as well.
+   * A set of boundary IDs currently present in the mesh. In serial, this is equivalent to the
+   * values returned by _mesh.get_boundary_info().get_boundary_ids(). In parallel, it will contain
+   * off-processor boundary IDs as well.
    */
   std::set<BoundaryID> _mesh_boundary_ids;
   std::set<BoundaryID> _mesh_sideset_ids;
