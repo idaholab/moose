@@ -3,9 +3,7 @@
 
 #include "Kernel.h"
 
-// Forward Declarations
 class OneDEnergyWallHeatFlux;
-class Function;
 
 template <>
 InputParameters validParams<OneDEnergyWallHeatFlux>();
@@ -21,7 +19,7 @@ protected:
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
 
   /// Heat flux function
-  Function & _q_wall;
+  const VariableValue & _q_wall;
   /// Heat flux perimeter
   const VariableValue & _P_hf;
 };
