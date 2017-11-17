@@ -2,7 +2,6 @@
 
 import subprocess
 import time
-import numpy
 import sqlite3
 import os
 import gc
@@ -233,6 +232,7 @@ class BenchComp:
 
 def _iqr(a, frac=1000):
     """return elements of a within frac*iqr of the the interquartile range (inclusive)"""
+    import numpy
     qup, qlow = numpy.percentile(a, [75 ,25])
 
     iqr = qup - qlow
