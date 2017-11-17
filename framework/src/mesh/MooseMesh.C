@@ -2014,20 +2014,6 @@ MooseMesh::getBlockOrBoundaryIDs() const
   return getBoundaryIDs();
 }
 
-template <>
-SubdomainID
-MooseMesh::getAnyID() const
-{
-  return Moose::ANY_BLOCK_ID;
-}
-
-template <>
-BoundaryID
-MooseMesh::getAnyID() const
-{
-  return Moose::ANY_BOUNDARY_ID;
-}
-
 void
 MooseMesh::buildNodeListFromSideList()
 {

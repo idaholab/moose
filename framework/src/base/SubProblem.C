@@ -29,8 +29,17 @@ validParams<SubProblem>()
   return params;
 }
 
-// SubProblem /////
+namespace
+{
+/**
+ * Templated helper that returns either the any block or any boundary ID depending on the template
+ * parameter.
+ */
+template <typename T>
+T getAnyID();
+}
 
+// SubProblem /////
 SubProblem::SubProblem(const InputParameters & parameters)
   : Problem(parameters),
     _factory(_app.getFactory()),
@@ -351,7 +360,7 @@ SubProblem::checkMatProps(std::map<T, std::set<std::string>> & props,
                           std::map<T, std::set<MaterialPropertyName>> & zero_props)
 {
   // Variable for storing the value for ANY_BLOCK_ID/ANY_BOUNDARY_ID
-  T any_id = mesh().getAnyID<T>();
+  T any_id = getAnyID<T>();
 
   // Variable for storing all available blocks/boundaries from the mesh
   std::set<T> all_ids(mesh().getBlockOrBoundaryIDs<T>());
@@ -417,4 +426,22 @@ void
 SubProblem::registerRecoverableData(std::string name)
 {
   _app.registerRecoverableData(this->name() + "/" + name);
+}
+
+// Anonymous namespace for local helper methods
+namespace
+{
+template <>
+SubdomainID
+getAnyID()
+{
+  return Moose::ANY_BLOCK_ID;
+}
+
+template <>
+BoundaryID
+getAnyID()
+{
+  return Moose::ANY_BOUNDARY_ID;
+}
 }
