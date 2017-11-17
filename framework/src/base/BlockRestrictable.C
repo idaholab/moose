@@ -122,7 +122,7 @@ BlockRestrictable::initializeBlockRestrictable(const MooseObject * moose_object)
                  "' to a block, but the object is already restricted by boundary");
 
   // If no blocks were defined above, specify that it is valid on all blocks
-  if (_blk_ids.empty())
+  if (_blk_ids.empty() && !moose_object->isParamValid("boundary"))
   {
     _blk_ids.insert(Moose::ANY_BLOCK_ID);
     _blocks = {"ANY_BLOCK_ID"};

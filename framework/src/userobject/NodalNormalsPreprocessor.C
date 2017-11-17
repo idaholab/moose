@@ -30,7 +30,8 @@ InputParameters
 validParams<NodalNormalsPreprocessor>()
 {
   InputParameters params = validParams<ElementUserObject>();
-  params += validParams<BoundaryRestrictable>();
+  params.addRequiredParam<std::vector<BoundaryName>>(
+      "surface_boundary", "The list of boundary IDs where nodal normals are computed");
   params.addParam<BoundaryName>("corner_boundary",
                                 "Node set ID which contains the nodes that are in 'corners'.");
   params.addPrivateParam<FEFamily>("fe_family", LAGRANGE);
@@ -39,12 +40,33 @@ validParams<NodalNormalsPreprocessor>()
   return params;
 }
 
+/**
+ * Local function to check to see if any intersection occurs between two vectors. Neither can be
+ * assumed to be sorted but both are generally very short (just 1 or 2 entries) so doing an explicit
+ * double loop is probably the easiest.
+ */
+bool
+hasBoundary(const std::vector<BoundaryID> & boundary_ids1,
+            const std::vector<BoundaryID> & boundary_ids2)
+{
+  for (auto id1 : boundary_ids1)
+  {
+    if (id1 == Moose::ANY_BOUNDARY_ID)
+      return true;
+
+    for (auto id2 : boundary_ids2)
+      if (id1 == id2 || id2 == Moose::ANY_BOUNDARY_ID)
+        return true;
+  }
+  return false;
+}
+
 NodalNormalsPreprocessor::NodalNormalsPreprocessor(const InputParameters & parameters)
   : ElementUserObject(parameters),
-    BoundaryRestrictable(this, true), // true for applying to nodesets
     _aux(_fe_problem.getAuxiliarySystem()),
     _fe_type(getParam<Order>("fe_order"), getParam<FEFamily>("fe_family")),
     _has_corners(isParamValid("corner_boundary")),
+    _boundaries(_mesh.getBoundaryIDs(getParam<std::vector<BoundaryName>>("surface_boundary"))),
     _corner_boundary_id(_has_corners
                             ? _mesh.getBoundaryID(getParam<BoundaryName>("corner_boundary"))
                             : static_cast<BoundaryID>(-1)),
@@ -89,7 +111,7 @@ NodalNormalsPreprocessor::execute()
       // Perform the calculation, the node must be:
       //    (1) On a boundary to which the object is restricted
       //    (2) Not on a corner of the boundary
-      if (hasBoundary(node_boundary_ids, ANY) &&
+      if (hasBoundary(node_boundary_ids, _boundaries) &&
           (!_has_corners || !boundary_info.has_boundary_id(node, _corner_boundary_id)))
       {
         // Perform the caluation of the normal
