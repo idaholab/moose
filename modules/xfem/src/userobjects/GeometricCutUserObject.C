@@ -15,7 +15,7 @@ InputParameters
 validParams<GeometricCutUserObject>()
 {
   // Get input parameters from parent class
-  InputParameters params = validParams<GeneralUserObject>();
+  InputParameters params = validParams<CrackFrontPointsProvider>();
 
   // Add optional parameters
   params.addParam<Real>("time_start_cut", 0.0, "Start time of geometric cut propagation");
@@ -28,7 +28,7 @@ validParams<GeometricCutUserObject>()
 
 GeometricCutUserObject::GeometricCutUserObject(const InputParameters & parameters)
     //: GeneralUserObject(parameters), _start_times(), _end_times()
-    : GeneralUserObject(parameters),
+    : CrackFrontPointsProvider(parameters),
       _cut_time_ranges()
 {
   _cut_time_ranges.push_back(

@@ -21,10 +21,6 @@ class GeometricCut2DUserObject : public GeometricCutUserObject
 public:
   GeometricCut2DUserObject(const InputParameters & parameters);
 
-  virtual void initialize() override{};
-  virtual void execute() override{};
-  virtual void finalize() override{};
-
   virtual bool active(Real time) const override;
 
   virtual bool cutElementByGeometry(const Elem * elem,

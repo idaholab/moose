@@ -8,6 +8,7 @@
 #define CRACKFRONTDEFINITION_H
 
 #include "GeneralUserObject.h"
+#include "CrackFrontPointsProvider.h"
 #include "BoundaryRestrictable.h"
 #include <set>
 
@@ -162,6 +163,8 @@ protected:
   std::vector<bool> _is_point_on_intersecting_boundary;
   std::vector<Real> _j_integral_radius_inner;
   std::vector<Real> _j_integral_radius_outer;
+  const CrackFrontPointsProvider * _crack_front_points_provider;
+  unsigned int _num_points_from_provider;
 
   void getCrackFrontNodes(std::set<dof_id_type> & nodes);
   void orderCrackFrontNodes(std::set<dof_id_type> & nodes);

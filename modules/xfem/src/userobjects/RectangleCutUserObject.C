@@ -83,3 +83,9 @@ RectangleCutUserObject::isInsideCutPlane(Point p) const
     inside = true;
   return inside;
 }
+
+const std::vector<Point>
+RectangleCutUserObject::getCrackFrontPoints(unsigned int /*num_crack_front_points*/) const
+{
+  mooseError("getCrackFrontPoints() is not implemented for this object.");
+};

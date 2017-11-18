@@ -68,6 +68,14 @@
     # XFEM requires --enable-unique-ids in libmesh
     unique_id = true
   [../]
+  [./penny_crack_cfp]
+    type = Exodiff
+    input = penny_crack_cfp.i
+    exodiff = 'penny_crack_cfp_out.e'
+    map = false
+    # XFEM requires --enable-unique-ids in libmesh
+    unique_id = true
+  [../]
   [./square_branch_quad_2d]
     type = Exodiff
     input = square_branch_quad_2d.i

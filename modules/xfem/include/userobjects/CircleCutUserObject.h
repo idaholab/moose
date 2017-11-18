@@ -21,9 +21,12 @@ class CircleCutUserObject : public GeometricCut3DUserObject
 public:
   CircleCutUserObject(const InputParameters & parameters);
 
+  virtual void initialSetup() override{};
   virtual void initialize() override{};
   virtual void execute() override{};
   virtual void finalize() override{};
+  virtual const std::vector<Point>
+  getCrackFrontPoints(unsigned int num_crack_front_points) const override;
 
 protected:
   std::vector<Real> _cut_data;

@@ -67,3 +67,9 @@ LineSegmentCutUserObject::LineSegmentCutUserObject(const InputParameters & param
 
   _cut_line_endpoints.push_back(std::make_pair(Point(x0, y0, 0.0), Point(x1, y1, 0.0)));
 }
+
+const std::vector<Point>
+LineSegmentCutUserObject::getCrackFrontPoints(unsigned int /*num_crack_front_points*/) const
+{
+  mooseError("getCrackFrontPoints() is not implemented for this object.");
+};
