@@ -84,6 +84,8 @@ validParams<DomainIntegralAction>()
 DomainIntegralAction::DomainIntegralAction(const InputParameters & params)
   : Action(params),
     _boundary_names(getParam<std::vector<BoundaryName>>("boundary")),
+    _number_crack_front_points(0),
+    _use_crack_front_points_provider(false),
     _order(getParam<std::string>("order")),
     _family(getParam<std::string>("family")),
     _direction_method_moose_enum(getParam<MooseEnum>("crack_direction_method")),
@@ -136,6 +138,20 @@ DomainIntegralAction::DomainIntegralAction(const InputParameters & params)
   {
     _crack_front_points = getParam<std::vector<Point>>("crack_front_points");
   }
+  if (isParamValid("crack_front_points_provider"))
+  {
+    if (!isParamValid("number_points_from_provider"))
+      mooseError("DomainIntegral error: when crack_front_points_provider is used, the "
+                 "number_points_from_provider must be "
+                 "provided.");
+    _use_crack_front_points_provider = true;
+    _crack_front_points_provider = getParam<UserObjectName>("crack_front_points_provider");
+    _number_crack_front_points = getParam<unsigned int>("number_points_from_provider");
+  }
+  else if (isParamValid("number_points_from_provider"))
+    mooseError("DomainIntegral error: number_points_from_provider is provided but "
+               "crack_front_points_provider cannot "
+               "be found.");
   if (isParamValid("crack_direction_vector"))
   {
     _crack_direction_vector = getParam<RealVectorValue>("crack_direction_vector");
@@ -285,6 +301,11 @@ DomainIntegralAction::act()
       params.set<std::vector<BoundaryName>>("boundary") = _boundary_names;
     if (_crack_front_points.size() != 0)
       params.set<std::vector<Point>>("crack_front_points") = _crack_front_points;
+    if (_use_crack_front_points_provider)
+    {
+      params.set<UserObjectName>("crack_front_points_provider") = _crack_front_points_provider;
+      params.set<unsigned int>("number_points_from_provider") = _number_crack_front_points;
+    }
     params.set<bool>("use_displaced_mesh") = _use_displaced_mesh;
     if (_integrals.count(INTERACTION_INTEGRAL_T) != 0)
     {
@@ -774,6 +795,8 @@ DomainIntegralAction::calcNumCrackFrontPoints()
   }
   else if (_crack_front_points.size() != 0)
     num_points = _crack_front_points.size();
+  else if (_use_crack_front_points_provider)
+    num_points = _number_crack_front_points;
   else
     mooseError("Must define either 'boundary' or 'crack_front_points'");
   return num_points;
