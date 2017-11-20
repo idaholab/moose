@@ -45,6 +45,12 @@ validParams<CreateProblemAction>()
   params.addParam<bool>("material_coverage_check",
                         true,
                         "Set to false to disable material->subdomain coverage check");
+  params.addParam<bool>("parallel_barrier_messaging",
+                        true,
+                        "Displays messaging from parallel "
+                        "barrier notifications when executing "
+                        "or transferring to/from Multiapps "
+                        "(default: true)");
 
   params.addParam<FileNameNoExtension>("restart_file_base",
                                        "File base name used for restart (e.g. "
@@ -96,6 +102,7 @@ CreateProblemAction::act()
     _problem->useFECache(_fe_cache);
     _problem->setKernelCoverageCheck(getParam<bool>("kernel_coverage_check"));
     _problem->setMaterialCoverageCheck(getParam<bool>("material_coverage_check"));
+    _problem->setParallelBarrierMessaging(getParam<bool>("parallel_barrier_messaging"));
 
     if (isParamValid("restart_file_base"))
     {

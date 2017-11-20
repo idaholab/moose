@@ -1128,6 +1128,11 @@ public:
   void setMaterialCoverageCheck(bool flag) { _material_coverage_check = flag; }
 
   /**
+   * Toggle parallel barrier messaging (defaults to on)
+   */
+  void setParallelBarrierMessaging(bool flag) { _parallel_barrier_messaging = flag; }
+
+  /**
    * Calls parentOutputPositionChanged() on all sub apps.
    */
   void parentOutputPositionChanged();
@@ -1511,6 +1516,9 @@ protected:
 
   /// Whether or not an exception has occurred
   bool _has_exception;
+
+  /// Whether or not information about how many transfers have completed is printed
+  bool _parallel_barrier_messaging;
 
   /// The error message to go with an exception
   std::string _exception_message;
