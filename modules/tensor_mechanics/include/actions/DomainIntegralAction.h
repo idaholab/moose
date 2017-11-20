@@ -49,8 +49,8 @@ protected:
   std::set<INTEGRAL> _integrals;
   const std::vector<BoundaryName> & _boundary_names;
   std::vector<Point> _crack_front_points;
+  bool _closed_loop;
   UserObjectName _crack_front_points_provider;
-  unsigned int _number_crack_front_points;
   bool _use_crack_front_points_provider;
   const std::string _order;
   const std::string _family;
