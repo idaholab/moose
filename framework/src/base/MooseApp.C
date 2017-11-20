@@ -67,7 +67,7 @@ validParams<MooseApp>()
   params.addCommandLineParam<std::string>(
       "mesh_only",
       "--mesh-only [mesh_file_name]",
-      "Setup and Output the input mesh only (Default: \"input_file_in.e\")");
+      "Setup and Output the input mesh only (Default: \"<input_file_name>_in.e\")");
 
   params.addCommandLineParam<bool>("show_input",
                                    "--show-input",
@@ -543,9 +543,8 @@ MooseApp::getOutputFileBase()
 void
 MooseApp::runInputFile()
 {
-
   std::string mesh_file_name;
-  if (isParamValid("mesh_only"))
+  if (!_ready_to_exit && isParamValid("mesh_only"))
   {
     meshOnly(getParam<std::string>("mesh_only"));
     _ready_to_exit = true;
