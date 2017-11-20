@@ -103,7 +103,7 @@ def extractTestedRequirements(args, data):
     from TestHarness import TestHarness
 
     # Build the TestHarness object here
-    harness = TestHarness([], test_app_name, args.moose_dir)
+    harness = TestHarness([], args.moose_dir, test_app_name)
 
     # Tell it to parse the test files only, not run them
     harness.findAndRunTests(find_only=True)
