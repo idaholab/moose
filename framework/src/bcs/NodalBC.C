@@ -80,13 +80,10 @@ NodalBC::computeResidual(NumericVector<Number> & residual)
     _qp = 0;
     Real res = 0;
 
-    if (!_is_eigen)
+    if (!_eigen_BC)
       res = computeQpResidual();
 
     residual.set(dof_idx, res);
-
-    if (_eigen_BC)
-      res = 0.0;
 
     for (auto tag_id : _vector_tags)
       _fe_problem.getNonlinearSystemBase().getVector(tag_id).set(dof_idx, res);

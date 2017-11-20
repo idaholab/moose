@@ -1270,7 +1270,7 @@ NonlinearSystemBase::computeResidualInternal(Moose::KernelType type)
 
 void
 NonlinearSystemBase::computeNodalBCs(NumericVector<Number> & residual,
-                                     Moose::KernelType kernel_type)
+                                     Moose::KernelType /*kernel_type*/)
 {
   // We need to close the diag_save_in variables on the aux system before NodalBCBases clear the
   // dofs on boundary nodes
@@ -1300,14 +1300,7 @@ NonlinearSystemBase::computeNodalBCs(NumericVector<Number> & residual,
             const auto & bcs = _nodal_bcs.getActiveBoundaryObjects(boundary_id);
             for (const auto & nbc : bcs)
               if (nbc->shouldApply())
-              {
-                if (kernel_type == Moose::KT_EIGEN)
-                  nbc->setBCOnEigen(true);
-                else
-                  nbc->setBCOnEigen(false);
-
                 nbc->computeResidual(residual);
-              }
           }
         }
       }

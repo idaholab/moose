@@ -167,3 +167,20 @@ EigenProblem::computeResidualABType(const NumericVector<Number> & soln,
   _nl_eigen->computeResidualClose(Ax, Bx);
 #endif
 }
+
+void
+EigenProblem::computeResidualType(const NumericVector<Number> & soln,
+                                  NumericVector<Number> & R,
+                                  Moose::KernelType type)
+{
+  FEProblemBase::computeResidualType(soln, R, type);
+
+#if LIBMESH_HAVE_SLEPC
+  if (type == Moose::KT_EIGEN)
+    _nl_eigen->computeResidualCloseB(R);
+  else if (type == Moose::KT_NONEIGEN)
+    _nl_eigen->computeResidualCloseA(R);
+  else
+    mooseError("Unsupported kernel type ", type);
+#endif
+}

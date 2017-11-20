@@ -112,6 +112,10 @@ public:
 
   void computeResidualClose(NumericVector<Number> & Ax, NumericVector<Number> & Bx);
 
+  void computeResidualCloseA(NumericVector<Number> & Ax);
+
+  void computeResidualCloseB(NumericVector<Number> & Bx);
+
 protected:
   TransientEigenSystem & _transient_sys;
   EigenProblem & _eigen_problem;

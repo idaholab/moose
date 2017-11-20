@@ -255,11 +255,23 @@ NonlinearEigenSystem::getNthConvergedEigenvalue(dof_id_type n)
 void
 NonlinearEigenSystem::computeResidualClose(NumericVector<Number> & Ax, NumericVector<Number> & Bx)
 {
+  computeResidualCloseA(Ax);
+  computeResidualCloseB(Bx);
+}
+
+void
+NonlinearEigenSystem::computeResidualCloseA(NumericVector<Number> & Ax)
+{
   auto & tagged_Ax = getVector(_Ax_tag);
-  auto & tagged_Bx = getVector(_Bx_tag);
   tagged_Ax.close();
-  tagged_Bx.close();
   Ax = tagged_Ax;
+}
+
+void
+NonlinearEigenSystem::computeResidualCloseB(NumericVector<Number> & Bx)
+{
+  auto & tagged_Bx = getVector(_Bx_tag);
+  tagged_Bx.close();
   Bx = tagged_Bx;
 }
 
