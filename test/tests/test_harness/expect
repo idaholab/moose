@@ -9,6 +9,11 @@
     type = RunApp
     input = good.i
     expect_out = 'Wrong Error'
-    foo = bar
+  [../]
+
+  [./absent_out]
+    type = RunApp
+    input = good.i
+    absent_out = 'Solve Converged!'
   [../]
 []

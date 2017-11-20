@@ -12,6 +12,7 @@ class TestHarnessTester(TestHarnessTestCase):
         e = cm.exception
         self.assertRegexpMatches(e.output, r'test_harness\.no_expect_err.*?FAILED \(EXPECTED ERROR MISSING\)')
         self.assertRegexpMatches(e.output, r'test_harness\.no_expect_out.*?FAILED \(EXPECTED OUTPUT MISSING\)')
+        self.assertRegexpMatches(e.output, r'test_harness\.absent_out.*?FAILED \(OUTPUT NOT ABSENT\)')
 
 
     def testExpectMissing(self):
