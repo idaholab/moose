@@ -62,7 +62,11 @@ FileOutput::FileOutput(const InputParameters & parameters)
 
   // Set the file base
   if (isParamValid("file_base"))
+  {
     _file_base = getParam<std::string>("file_base");
+    if (!_file_base.empty() && _file_base[0] == '/')
+      mooseError("absolute paths not allowed in output 'file_base' param");
+  }
   else if (getParam<bool>("_built_by_moose"))
     _file_base = getOutputFileBase(_app);
   else
@@ -130,7 +134,10 @@ FileOutput::getOutputFileBase(MooseApp & app, std::string suffix)
   mooseAssert(pos != std::string::npos, "Unable to determine suffix of input file name");
 
   // Append the "_out" to the name and return it
-  return input_filename.substr(0, pos) + suffix;
+  size_t start = 0;
+  if (input_filename.find_last_of('/') != std::string::npos)
+    start = input_filename.find_last_of('/') + 1;
+  return input_filename.substr(start, pos - start) + suffix;
 }
 
 bool
