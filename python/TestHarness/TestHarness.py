@@ -3,7 +3,7 @@ if sys.version_info[0:2] != (2, 7):
     print("python 2.7 is required to run the test harness")
     sys.exit(1)
 
-import os, re, inspect, errno, time, copy
+import os, re, inspect, errno, copy
 import shlex
 
 from socket import gethostname
@@ -38,11 +38,7 @@ class TestHarness:
 
     @staticmethod
     def buildAndRun(argv, app_name, moose_dir):
-        if '--store-timing' in argv:
-            harness = TestTimer(argv, moose_dir, app_name=app_name)
-        else:
-            harness = TestHarness(argv, moose_dir, app_name=app_name)
-
+        harness = TestHarness(argv, moose_dir, app_name=app_name)
         harness.findAndRunTests()
         sys.exit(harness.error_code)
 
@@ -676,9 +672,7 @@ class TestHarness:
         outputgroup.add_argument('-x', '--sep-files', action='store_true', dest='sep_files', help='Write the output of each test to a separate file. Only quiet output to terminal. This is equivalant to \'--sep-files-fail --sep-files-ok\'')
         outputgroup.add_argument('--sep-files-ok', action='store_true', dest='ok_files', help='Write the output of each passed test to a separate file')
         outputgroup.add_argument('-a', '--sep-files-fail', action='store_true', dest='fail_files', help='Write the output of each FAILED test to a separate file. Only quiet output to terminal.')
-        outputgroup.add_argument("--store-timing", action="store_true", dest="store_time", help="Store timing in the SQL database: $HOME/timingDB/timing.sqlite A parent directory (timingDB) must exist.")
         outputgroup.add_argument("--testharness-unittest", action="store_true", help="Run the TestHarness unittests that test the TestHarness.")
-        outputgroup.add_argument("--revision", nargs=1, action="store", type=str, dest="revision", help="The current revision being tested. Required when using --store-timing.")
         outputgroup.add_argument("--yaml", action="store_true", dest="yaml", help="Dump the parameters for the testers in Yaml Format")
         outputgroup.add_argument("--dump", action="store_true", dest="dump", help="Dump the parameters for the testers in GetPot Format")
         outputgroup.add_argument("--no-trimmed-output", action="store_true", dest="no_trimmed_output", help="Do not trim the output")
@@ -723,14 +717,6 @@ class TestHarness:
         if opts.group == opts.not_group:
             print('ERROR: The group and not_group options cannot specify the same group')
             sys.exit(1)
-        if opts.store_time and not (opts.revision):
-            print('ERROR: --store-timing is specified but no revision')
-            sys.exit(1)
-        if opts.store_time:
-            # timing returns Active Time, while store_timing returns Solve Time.
-            # Thus we need to turn off timing.
-            opts.timing = False
-            opts.scaling = True
         if opts.valgrind_mode and (opts.parallel > 1 or opts.nthreads > 1):
             print('ERROR: --parallel and/or --threads can not be used with --valgrind')
             sys.exit(1)
@@ -776,75 +762,3 @@ class TestHarness:
     def getOptions(self):
         return self.options
 
-#################################################################################################################################
-# The TestTimer TestHarness
-# This method finds and stores timing for individual tests.  It is activated with --store-timing
-#################################################################################################################################
-
-CREATE_TABLE = """create table timing
-(
-  app_name text,
-  test_name text,
-  revision text,
-  date int,
-  seconds real,
-  scale int,
-  load real
-);"""
-
-class TestTimer(TestHarness):
-    def __init__(self, argv, moose_dir, app_name=None):
-        TestHarness.__init__(self, argv, app_name=app_name)
-        try:
-            from sqlite3 import dbapi2 as sqlite
-            assert sqlite # silence pyflakes warning
-        except:
-            print('Error: --store-timing requires the sqlite3 python module.')
-            sys.exit(1)
-        self.db_file = self.options.dbFile
-        if not self.db_file:
-            home = os.environ['HOME']
-            self.db_file = os.path.join(home, 'timingDB/timing.sqlite')
-            if not os.path.exists(self.db_file):
-                print('Warning: creating new database at default location: ' + str(self.db_file))
-                self.createDB(self.db_file)
-            else:
-                print('Warning: Assuming database location ' + self.db_file)
-
-    def createDB(self, fname):
-        from sqlite3 import dbapi2 as sqlite
-        print('Creating empty database at ' + fname)
-        con = sqlite.connect(fname)
-        cr = con.cursor()
-        cr.execute(CREATE_TABLE)
-        con.commit()
-
-    def preRun(self):
-        from sqlite3 import dbapi2 as sqlite
-        # Delete previous data if app_name and repo revision are found
-        con = sqlite.connect(self.db_file)
-        cr = con.cursor()
-        cr.execute('delete from timing where app_name = ? and revision = ?', (self.app_name, self.options.revision))
-        con.commit()
-
-    # After the run store the results in the database
-    def postRun(self, test, timing):
-        from sqlite3 import dbapi2 as sqlite
-        con = sqlite.connect(self.db_file)
-        cr = con.cursor()
-
-        timestamp = int(time.time())
-        load = os.getloadavg()[0]
-
-        # accumulate the test results
-        data = []
-        sum_time = 0
-        num = 0
-        # Were only interested in storing scaled data
-        if timing != None and test['scale_refine'] != 0:
-            sum_time += float(timing)
-            num += 1
-            data.append( (self.app_name, test['test_name'].split('/').pop(), self.options.revision, timestamp, timing, test['scale_refine'], load) )
-        # Insert the data into the database
-        cr.executemany('insert into timing values (?,?,?,?,?,?,?)', data)
-        con.commit()

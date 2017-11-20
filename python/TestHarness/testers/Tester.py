@@ -478,7 +478,7 @@ class Tester(MooseObject):
         elif self.specs.type('skip') is not bool and self.specs.isValid('skip'):
             reasons['skip'] = self.specs['skip']
         # If were testing for SCALE_REFINE, then only run tests with a SCALE_REFINE set
-        elif (options.store_time or options.scaling) and self.specs['scale_refine'] == 0:
+        elif (options.scaling) and self.specs['scale_refine'] == 0:
             self.setStatus('silent', self.bucket_silent)
             return False
         # If we're testing with valgrind, then skip tests that require parallel or threads or don't meet the valgrind setting
@@ -540,10 +540,6 @@ class Tester(MooseObject):
                 reasons['heavy'] = 'NOT HEAVY'
         elif self.specs['heavy']:
             reasons['heavy'] = 'HEAVY'
-
-        # Check for positive scale refine values when using store timing options
-        if self.specs['scale_refine'] == 0 and options.store_time:
-            reasons['scale_refine'] = 'scale_refine==0 store_time=True'
 
         # There should only be one entry in self.specs['dof_id_bytes']
         for x in self.specs['dof_id_bytes']:
