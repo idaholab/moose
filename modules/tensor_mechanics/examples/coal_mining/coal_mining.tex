@@ -76,11 +76,12 @@ process, but this Example concentrates on the following.
 
 This Example does not seek to build a realistic model of a specific
 mine.  Instead, it explains how the TensorMechanics module can be used
-to build such a model, by exploring a very simplified and contrived 2D toy
-model.  Of particular interest are the input parameters used and how they
-effect the results.
+to build such a model, by exploring a very simplified and contrived 2D
+toy model, as well as a simple 3D model.  Of particular interest in
+the 2D model are the input parameters used and how they effect the
+results.
 
-\chapter{The model setup}
+\chapter{The 2D model setup}
 \label{m.d.chap}
 
 \section{Geometry}
@@ -856,6 +857,99 @@ suddenly collapses.  This occurs in real coal mines.  In this model
 \label{mc_wp_sticky_longitudinal}
 \end{center}
 \end{figure}
+
+\chapter{A 3D model}
+
+A 3D model is explored in this chapter.  The MOOSE input files are
+{\tt coarse.i} and {\tt fine.i}.  The results below are drawn from the
+{\tt fine.i} model, but it takes a few hours to complete on a computer
+cluster, so the {\tt coarse.i} model might be a better model to
+explore initially.  Essentially they differ only in their input mesh.
+Because it is too big for the MOOSE repository, the mesh for the {\tt
+  fine} model must be created by you using the {\tt fine.param.jou}
+cubit/trelis script and the {\tt create\_model.py} python script.
+
+Figure~\ref{3D.fig} shows the geometrical setup as well as the fine
+mesh.  The model represents  a single longwall
+panel of total width 300\,m and length 1000\,m.  Only half of the
+width is modelled, and appropriate boundary conditions used to
+simulate the full panel.  In the fine model, the panel is meshed with
+10\,m square elements.
+
+\begin{figure}[htb]
+\centering
+\includegraphics[width=12cm]{3D.pdf}
+\caption{\label{3D.fig}The geometry of the 3D model represents a single longwall
+  panel of total width 300\,m and length 1000\,m.}
+\end{figure}
+
+Capped Mohr-Coulomb plus weak-plane plasticity is used
+(Tables~\ref{wp.params.tab} and~\ref{mc.params.tab}).  The plastic
+models are cycled.  In the fine model, 200 time steps are used, which
+means that 1 element is excavated every two time steps.  ``Sticky''
+roof boundary conditions are used (Section~\ref{sitckybc.defn.}).  The
+initial conditions are gravitational weight in the $zz$ direction, and
+0.8 of this in the $xx$ and $yy$ directions.
+
+Some results are shown in Figures~\ref{3D_section.fig}
+and~\ref{3D_plan.fig}.  The results display many interesting
+features.  Some of these are:
+\begin{itemize}
+\item Initially the roof holds up before suddenly collapsing at around
+  100m of excavation.
+\item After this point, there is some periodicity in the plastic
+  strains and vertical stresses, although this may be an
+  artificat of the mesh rather than anything physical.
+\item The minimum displacement is actually $u_{z}=-4$\,m towards the
+  start of the panel in the region where the sudden collapse
+  occurs.  The StickyBC are not sufficient to prevent this.
+  Therefore, the results towards the panel's beginning shouldn't be
+  treated too seriously.  To avoid this, MOOSE's Constraint system
+  could be written, or CSIRO's private MOOSE module employed.
+\item There is significant rock fracture, indicated by the
+  Mohr-Coulomb plastic strains of greater than $0.1$\% in the
+  immediate 10\,m of the roof.
+\item Mohr-Coulomb shear failure is much more prevelant than
+  Mohr-Coulomb tensile failure throughout the model.
+\item Mohr-Coulomb shear failure also occurs in the unexcavated
+  material close to the panel (the ribs and roadways).
+\item Tensile opening of the joints occurs in the immediate $\approx
+  100$\,m of the roof, indicated by weak-plane tensile plasticity of
+  greater than $0.1$\%.
+\item Shear failure of the joints occurs throughout all regions of the
+  model above the goaf.  It is greater than 1\% in the immediate
+  $\approx 100$\,m of the roof.
+\item The surrounding unexcavated material experiences large vertical
+  loads, while there is an annular region on the outside and above the
+  excavation that is de-stressed.  The material above the goaf
+  therefore experiences de-stressing and then recompaction.
+\end{itemize}
+
+\begin{figure}[p]
+\centering
+\includegraphics[width=9cm]{3D_section_disp.png} \\~\\
+\includegraphics[width=9cm]{3D_section_mc_shear.png} \\~\\
+\includegraphics[width=9cm]{3D_section_mc_tensile.png} \\~\\
+\includegraphics[width=9cm]{3D_section_wp_shear.png} \\~\\
+\includegraphics[width=9cm]{3D_section_wp_tensile.png} \\~\\
+\includegraphics[width=9cm]{3D_section_vertical_stress.png}
+\caption{\label{3D_section.fig}Results on the central cross section of
+  the 3D model}
+\end{figure}
+
+
+\begin{figure}[p]
+\centering
+\includegraphics[width=9cm]{3D_plan_disp.png} \\~\\
+\includegraphics[width=9cm]{3D_plan_mc_shear.png} \\~\\
+\includegraphics[width=9cm]{3D_plan_mc_tensile.png} \\~\\
+\includegraphics[width=9cm]{3D_plan_wp_shear.png} \\~\\
+\includegraphics[width=9cm]{3D_plan_wp_tensile.png} \\~\\
+\includegraphics[width=9cm]{3D_plan_vertical_stress.png}
+\caption{\label{3D_plan.fig}Results viewed from below the model
+  looking upwards}
+\end{figure}
+
 
 
 \end{document}
