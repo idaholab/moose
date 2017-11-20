@@ -65,7 +65,9 @@ validParams<MooseApp>()
       "display_version", "-v --version", false, "Print application version");
   params.addCommandLineParam<std::string>("input_file", "-i <input_file>", "Specify an input file");
   params.addCommandLineParam<std::string>(
-      "mesh_only", "--mesh-only", "Setup and Output the input mesh only.");
+      "mesh_only",
+      "--mesh-only [mesh_file_name]",
+      "Setup and Output the input mesh only (Default: \"input_file_in.e\")");
 
   params.addCommandLineParam<bool>("show_input",
                                    "--show-input",
