@@ -46,11 +46,15 @@ class RunException(RunApp):
         # will handle them seperately
         if specs.isValid('expect_err'):
             if not util.checkOutputForPattern(output, specs['expect_err']):
-                reason = 'NO EXPECTED ERR'
+                reason = 'EXPECTED ERROR MISSING'
         elif specs.isValid('expect_assert'):
-            if options.method == 'dbg':  # Only check asserts in debug mode
+            if options.method in ['dbg', 'devel']:  # Only check asserts in debug and devel modes
                 if not util.checkOutputForPattern(output, specs['expect_assert']):
-                    reason = 'NO EXPECTED ASSERT'
+                    reason = 'EXPECTED ASSERT MISSING'
+
+        # If we've set a reason right here, we should report the pattern that we were unable to match.
+        if reason != '':
+            output += "#"*80 + "\n\nUnable to match the following pattern against the program's output:\n\n" + specs['expect_err'] + "\n"
 
         if reason == '':
             RunApp.testFileOutput(self, moose_dir, options, output)

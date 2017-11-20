@@ -10,7 +10,7 @@ class TestHarnessTester(TestHarnessTestCase):
             self.runTests('-i', 'expect')
 
         e = cm.exception
-        self.assertRegexpMatches(e.output, r'test_harness\.no_expect_err.*?FAILED \(NO EXPECTED ERR\)')
+        self.assertRegexpMatches(e.output, r'test_harness\.no_expect_err.*?FAILED \(EXPECTED ERROR MISSING\)')
         self.assertRegexpMatches(e.output, r'test_harness\.no_expect_out.*?FAILED \(EXPECTED OUTPUT MISSING\)')
 
 
