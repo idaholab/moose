@@ -102,6 +102,11 @@ Component::init()
 }
 
 void
+Component::initSecondary()
+{
+}
+
+void
 Component::check()
 {
 }

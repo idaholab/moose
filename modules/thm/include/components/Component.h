@@ -33,6 +33,12 @@ public:
   virtual void init();
 
   /**
+   * Perform secondary initialization, which relies on init() being called
+   * for all components.
+   */
+  virtual void initSecondary();
+
+  /**
    * Check the component integrity
    */
   virtual void check();
