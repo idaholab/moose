@@ -136,13 +136,6 @@ public:
   const std::set<T> & getBlockOrBoundaryIDs() const;
 
   /**
-   * Templated helper that returns either the ang block or any boundary ID
-   * depending on the template argument
-   */
-  template <typename T>
-  T getAnyID() const;
-
-  /**
    * Calls BoundaryInfo::build_node_list()/build_side_list() and *makes separate copies* of
    * Nodes/Elems in those lists.
    *
@@ -500,8 +493,7 @@ public:
    * we just keep track of these here in MooseMesh.
    *
    * QuadratureNodes are fictitious "Nodes" that are located at quadrature points.  This is useful
-   * for using
-   * the geometric search system to do searches based on quadrature point locations....
+   * for using the geometric search system to do searches based on quadrature point locations....
    *
    * @param elem The element
    * @param side The side number on which we want to add a quadrature node
@@ -614,28 +606,24 @@ public:
 
   /**
    * This routine determines whether the Mesh is a regular orthogonal mesh (i.e. square in 2D, cubic
-   * in 3D).
-   * If it is, then we can use a number of convenience functions when periodic boundary conditions
-   * are applied.  This routine populates the _range vector which is necessary for these convenience
-   * functions.
+   * in 3D). If it is, then we can use a number of convenience functions when periodic boundary
+   * conditions are applied.  This routine populates the _range vector which is necessary for these
+   * convenience functions.
+   *
    * Note:  This routine can potentially identify meshes with concave faces that still "fit" in the
-   * convex hull
-   * of the corresponding regular orthogonal mesh.  This case is highly unlikely in practice and if
-   * a user
-   * does this, well.... release the kicker!
+   * convex hull of the corresponding regular orthogonal mesh.  This case is highly unlikely in
+   * practice and if a user does this, well.... release the kicker!
    */
   bool detectOrthogonalDimRanges(Real tol = 1e-6);
 
   /**
-   * For "regular orthogonal" meshes, determine if variable var_num is
-   * periodic with respect to the primary and secondary BoundaryIDs,
-   * record this fact in the _periodic_dim data structure.
+   * For "regular orthogonal" meshes, determine if variable var_num is periodic with respect to the
+   * primary and secondary BoundaryIDs, record this fact in the _periodic_dim data structure.
    */
   void addPeriodicVariable(unsigned int var_num, BoundaryID primary, BoundaryID secondary);
 
   /**
-   * Returns whether this generated mesh is periodic in the given dimension
-   * for the given variable.
+   * Returns whether this generated mesh is periodic in the given dimension for the given variable.
    * @param nonlinear_var_num - The nonlinear variable number
    * @param component - An integer representing the desired component (dimension)
    */
@@ -643,8 +631,7 @@ public:
 
   /**
    * This function returns the minimum vector between two points on the mesh taking into account
-   * periodicity
-   * for the given variable number.
+   * periodicity for the given variable number.
    * @param nonlinear_var_num - The nonlinear variable number
    * @param p, q - The points between which to compute a minimum vector
    * @return RealVectorValue - The vector pointing from p to q
@@ -653,8 +640,7 @@ public:
 
   /**
    * This function returns the distance between two points on the mesh taking into account
-   * periodicity
-   * for the given variable number.
+   * periodicity for the given variable number.
    * @param nonlinear_var_num - The nonlinear variable number
    * @param p, q - The points for which to compute a minimum distance
    * @return Real - The L2 distance between p and q
@@ -671,8 +657,7 @@ public:
 
   /**
    * Create the refinement and coarsening maps necessary for projection of stateful material
-   * properties
-   * when using adaptivity.
+   * properties when using adaptivity.
    *
    * @param assembly Pointer to the Assembly object for this Mesh.
    */
@@ -701,9 +686,8 @@ public:
                                                                        int input_side);
 
   /**
-   * Change all the boundary IDs for a given side from old_id to
-   * new_id.  If delete_prev is true, also actually remove the side
-   * with old_id from the BoundaryInfo object.
+   * Change all the boundary IDs for a given side from old_id to new_id.  If delete_prev is true,
+   * also actually remove the side with old_id from the BoundaryInfo object.
    */
   void
   changeBoundaryId(const boundary_id_type old_id, const boundary_id_type new_id, bool delete_prev);
@@ -717,41 +701,35 @@ public:
   const std::set<BoundaryID> & getSubdomainBoundaryIds(SubdomainID subdomain_id) const;
 
   /**
-   * Returns true if the requested node is in the list of boundary
-   * nodes, false otherwise.
+   * Returns true if the requested node is in the list of boundary nodes, false otherwise.
    */
   bool isBoundaryNode(dof_id_type node_id) const;
 
   /**
-   * Returns true if the requested node is in the list of boundary
-   * nodes for the specified boundary, false otherwise.
+   * Returns true if the requested node is in the list of boundary nodes for the specified boundary,
+   * false otherwise.
    */
   bool isBoundaryNode(dof_id_type node_id, BoundaryID bnd_id) const;
 
   /**
-   * Returns true if the requested element is in the list of boundary
-   * elements, false otherwise.
+   * Returns true if the requested element is in the list of boundary elements, false otherwise.
    */
   bool isBoundaryElem(dof_id_type elem_id) const;
 
   /**
-   * Returns true if the requested element is in the list of boundary
-   * elements for the specified boundary, false otherwise.
+   * Returns true if the requested element is in the list of boundary elements for the specified
+   * boundary, false otherwise.
    */
   bool isBoundaryElem(dof_id_type elem_id, BoundaryID bnd_id) const;
 
   /**
-   * Generate a unified error message if the underlying libMesh mesh
-   * is a DistributedMesh.  Clients of MooseMesh can use this function to
-   * throw an error if they know they don't work with DistributedMesh.
+   * Generate a unified error message if the underlying libMesh mesh is a DistributedMesh.  Clients
+   * of MooseMesh can use this function to throw an error if they know they don't work with
+   * DistributedMesh.
+   *
    * See, for example, the NodalVariableValue class.
    */
   void errorIfDistributedMesh(std::string name) const;
-
-  /**
-   * Deprecated.  Just calls errorIfDistributedMesh().
-   */
-  void errorIfParallelDistribution(std::string name) const;
 
   /**
    * Returns the final Mesh distribution type.
@@ -761,12 +739,6 @@ public:
   /**
    * Tell the user if the distribution was overriden for any reason
    */
-  bool isDistributionForced() const
-  {
-    mooseDeprecated("isDistributionForced() is deprecated, call isParallelTypeFoced() instead.");
-    return isParallelTypeForced();
-  }
-
   bool isParallelTypeForced() const { return _parallel_type_overridden; }
 
   /*
@@ -815,11 +787,13 @@ public:
    */
   void setCustomPartitioner(Partitioner * partitioner);
 
+  ///@{
   /**
    * Setter and getter for _custom_partitioner_requested
    */
   bool isCustomPartitionerRequested() const;
   void setIsCustomPartitionerRequested(bool cpr);
+  ///@}
 
   /// Getter to query if the mesh was detected to be regular and orthogonal
   bool isRegularOrthogonal() { return _regular_orthogonal_mesh; }
@@ -828,18 +802,13 @@ public:
   bool hasSecondOrderElements();
 
   /**
-   * Proxy function to get a (sub)PointLocator from either the underlying
-   * libmesh mesh (default), or to allow derived meshes to return a custom
-   * point locator
+   * Proxy function to get a (sub)PointLocator from either the underlying libMesh mesh (default), or
+   * to allow derived meshes to return a custom point locator.
    */
   virtual std::unique_ptr<PointLocatorBase> getPointLocator() const;
 
 protected:
   std::vector<std::unique_ptr<GhostingFunctor>> _ghosting_functors;
-
-  /// Can be set to PARALLEL, SERIAL, or DEFAULT.  Determines whether
-  /// the underlying libMesh mesh is a ReplicatedMesh or DistributedMesh.
-  MooseEnum _mesh_distribution_type;
 
   /// Can be set to DISTRIBUTED, REPLICATED, or DEFAULT.  Determines whether
   /// the underlying libMesh mesh is a ReplicatedMesh or DistributedMesh.
@@ -897,7 +866,11 @@ protected:
   /// The elements that were just coarsened.
   std::unique_ptr<ConstElemPointerRange> _coarsened_elements;
 
-  /// Map of Parent elements to child elements for elements that were just coarsened.  NOTE: the child element pointers ARE PROBABLY INVALID.  Only use them for indexing!
+  /**
+   * Map of Parent elements to child elements for elements that were just coarsened.
+   *
+   * NOTE: the child element pointers ARE PROBABLY INVALID.  Only use them for indexing!
+   */
   std::map<const Elem *, std::vector<const Elem *>> _coarsened_element_children;
 
   /// Used for generating the semilocal node range
@@ -925,18 +898,16 @@ protected:
   bool _node_to_active_semilocal_elem_map_built;
 
   /**
-   * A set of subdomain IDs currently present in the mesh.
-   * For parallel meshes, includes subdomains defined on other
-   * processors as well.
+   * A set of subdomain IDs currently present in the mesh. For parallel meshes, includes subdomains
+   * defined on other processors as well.
    */
   std::set<SubdomainID> _mesh_subdomains;
 
   ///@{
   /**
-   * A set of boundary IDs currently present in the mesh.
-   * In serial, this is equivalent to the values returned
-   * by _mesh.get_boundary_info().get_boundary_ids().  In parallel,
-   * it will contain off-processor boundary IDs as well.
+   * A set of boundary IDs currently present in the mesh. In serial, this is equivalent to the
+   * values returned by _mesh.get_boundary_info().get_boundary_ids(). In parallel, it will contain
+   * off-processor boundary IDs as well.
    */
   std::set<BoundaryID> _mesh_boundary_ids;
   std::set<BoundaryID> _mesh_sideset_ids;
