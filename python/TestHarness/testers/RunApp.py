@@ -184,17 +184,23 @@ class RunApp(Tester):
         reason = ''
         specs = self.specs
         if specs.isValid('expect_out'):
+            mode = ""
             if specs['match_literal']:
                 have_expected_out = util.checkOutputForLiteral(output, specs['expect_out'])
+                mode = 'literal'
             else:
                 have_expected_out = util.checkOutputForPattern(output, specs['expect_out'])
+                mode = 'pattern'
+
             if (not have_expected_out):
                 reason = 'EXPECTED OUTPUT MISSING'
+                output += "#"*80 + "\n\nUnable to match the following " + mode + " against the program's output:\n\n" + specs['expect_out'] + "\n"
 
         if reason == '' and specs.isValid('absent_out'):
             have_absent_out = util.checkOutputForPattern(output, specs['absent_out'])
             if (have_absent_out):
                 reason = 'OUTPUT NOT ABSENT'
+                output += "#"*80 + "\n\nMatched the following pattern, which we did NOT expect:\n\n" + specs['absent_out'] + "\n"
 
         if reason == '':
             # We won't pay attention to the ERROR strings if EXPECT_ERR is set (from the derived class)
