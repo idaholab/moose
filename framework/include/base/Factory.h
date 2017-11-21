@@ -143,7 +143,7 @@ template <class T>
 MooseObjectPtr
 buildObject(const InputParameters & parameters)
 {
-  return MooseObjectPtr(new T(parameters));
+  return std::make_shared<T>(parameters);
 }
 
 /**
@@ -215,9 +215,7 @@ public:
    * Note: Params file and line are supplied by the macro
    */
   template <typename T>
-  void regDeprecated(const std::string & obj_name,
-                     const std::string & file,
-                     int line)
+  void regDeprecated(const std::string & obj_name, const std::string & file, int line)
   {
     // Register the name
     reg<T>(obj_name, file, line);

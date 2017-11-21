@@ -31,7 +31,7 @@ protected:
   void SetUp()
   {
     const char * argv[2] = {"foo", "\0"};
-    _app.reset(AppFactory::createApp("MooseUnitApp", 1, (char **)argv));
+    _app = AppFactory::createAppShared("MooseUnitApp", 1, (char **)argv);
     _factory = &_app->getFactory();
   }
 
@@ -73,7 +73,7 @@ protected:
     }
   }
 
-  std::unique_ptr<MooseApp> _app;
+  std::shared_ptr<MooseApp> _app;
   Factory * _factory;
 };
 

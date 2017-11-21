@@ -21,7 +21,7 @@
 TEST(MinimalApp, create)
 {
   const char * argv[1] = {"\0"};
-  std::unique_ptr<MooseApp> app(AppFactory::createApp("MooseUnitApp", 1, (char **)argv));
+  std::shared_ptr<MooseApp> app = AppFactory::createAppShared("MooseUnitApp", 1, (char **)argv);
   app->parameters().set<bool>("minimal") = true;
   app->run();
   EXPECT_EQ(app->executioner()->name(), "Executioner");
