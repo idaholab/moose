@@ -29,8 +29,8 @@
 [UserObjects]
   [./circle_cut_uo]
     type = CircleCutUserObject
-    cut_data = '-0.5 -0.5 0
-                0.0 -0.5 0
+    cut_data = '0  0 0
+                0 -0.5 0
                 -0.5 0 0'
   [../]
 []
@@ -72,11 +72,7 @@
   disp_x = disp_x
   disp_y = disp_y
   disp_z = disp_z
-  crack_end_direction_method = CrackDirectionVector
-  crack_direction_vector_end_1 = '0 1 0'
-  crack_direction_vector_end_2 = '1 0 0'
   crack_direction_method = CurvedCrackFront
-  intersecting_boundary = '3 4' #It would be ideal to use this, but can't use with XFEM yet
   radius_inner = '0.3'
   radius_outer = '0.6'
   poissons_ratio = 0.3
@@ -84,6 +80,8 @@
   block = 0
   crack_front_points_provider = circle_cut_uo
   number_points_from_provider = 10
+  convert_J_to_K = true
+  closed_loop = true
 []
 
 [SolidMechanics]
@@ -144,38 +142,26 @@
 [BCs]
   [./top_z]
     type = FunctionNeumannBC
-    boundary = 2
+    boundary = front
     variable = disp_z
     function = top_trac_z
   [../]
   [./bottom_x]
     type = PresetBC
-    boundary = 1
+    boundary = back
     variable = disp_x
     value = 0.0
   [../]
   [./bottom_y]
     type = PresetBC
-    boundary = 1
+    boundary = back
     variable = disp_y
     value = 0.0
   [../]
   [./bottom_z]
     type = PresetBC
-    boundary = 1
+    boundary = back
     variable = disp_z
-    value = 0.0
-  [../]
-  [./sym_y]
-    type = PresetBC
-    boundary = 3
-    variable = disp_y
-    value = 0.0
-  [../]
-  [./sym_x]
-    type = PresetBC
-    boundary = 4
-    variable = disp_x
     value = 0.0
   [../]
 []
