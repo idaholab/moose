@@ -22,7 +22,14 @@ public:
   GeometricalComponent(const InputParameters & parameters);
 
   virtual void setupMesh() override;
-  virtual void displaceMesh() override;
+
+  /**
+   * Method that moves the nodes from reference space into the physical space.
+   * Child classes are required to call this in addMooseObjects() if they want to perform such a
+   * transformation. Non-straight components can override this method to do their component-specific
+   * transformation
+   */
+  virtual void displaceMesh(const std::vector<unsigned int> & blocks);
 
   virtual Point getPosition() const { return _position; }
   virtual RealVectorValue getDirection() const { return _dir; }
@@ -36,10 +43,6 @@ public:
 protected:
   virtual void buildMesh() = 0;
   const FunctionName & getVariableFn(const FunctionName & fn_param_name);
-
-  /// Node IDs
-  unsigned int _first_node_id;
-  unsigned int _last_node_id;
 
   /// Physical position in the space
   Point _position;
@@ -70,6 +73,9 @@ protected:
 
   /// Number of elements in each subsection of the geometric component
   std::vector<unsigned int> _n_elems;
+
+  /// The name of the user object to displace nodes into the physical space
+  UserObjectName _displace_node_user_object_name;
 
   /// Number of nodes along the main axis
   unsigned int _n_nodes;

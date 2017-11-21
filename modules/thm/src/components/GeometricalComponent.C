@@ -29,7 +29,8 @@ GeometricalComponent::GeometricalComponent(const InputParameters & parameters)
     _rotation(getParam<Real>("rotation")),
     _2nd_order_mesh(_sim.getParam<bool>("2nd_order_mesh")),
     _lengths(getParam<std::vector<Real>>("length")),
-    _n_elems(getParam<std::vector<unsigned int>>("n_elems"))
+    _n_elems(getParam<std::vector<unsigned int>>("n_elems")),
+    _displace_node_user_object_name(genName(name(), "displace_node"))
 {
   validateNSectionsConsistent(_lengths.size(), _n_elems.size());
   _n_sections = _lengths.size();
@@ -70,49 +71,33 @@ void
 GeometricalComponent::setupMesh()
 {
   generateNodeLocations();
-  _first_node_id = _mesh.nNodes();
+  unsigned int first_node_id = _mesh.nNodes();
   buildMesh();
-  _last_node_id = _mesh.nNodes();
+  unsigned int last_node_id = _mesh.nNodes();
 
   // shift the component in z-direction so they do not overlap
   // NOTE: we are using 1D elements, so shifting each component by 1 is ok for now
   // When using 2D or even 3D meshes, this has to be way smarter
-  for (unsigned int node_id = _first_node_id; node_id < _last_node_id; node_id++)
+  for (unsigned int node_id = first_node_id; node_id < last_node_id; node_id++)
     _mesh.nodeRef(node_id)(2) += id();
 }
 
 void
-GeometricalComponent::displaceMesh()
+GeometricalComponent::displaceMesh(const std::vector<unsigned int> & blocks)
 {
-  Real rotation = M_PI * _rotation / 180.;
-  RealVectorValue z_offset(0, 0, id());
+  MultiMooseEnum execute_on(SetupInterface::getExecuteOptions());
+  execute_on = "initial timestep_begin";
 
-  // rows of rotation matrix to rotate about x-axis
-  RealVectorValue Rx_x(1, 0, 0);
-  RealVectorValue Rx_y(0, cos(rotation), -sin(rotation));
-  RealVectorValue Rx_z(0, sin(rotation), cos(rotation));
-  RealTensorValue Rx(Rx_x, Rx_y, Rx_z);
-
-  // figure out the rotation
-  Real r = _dir.norm();
-  Real theta = acos(_dir(2) / r);
-  Real aphi = atan2(_dir(1), _dir(0));
-  // rows of transformation matrix
-  RealVectorValue x(
-      cos(-aphi) * cos(M_PI / 2 - theta), sin(-aphi), -cos(-aphi) * sin(M_PI / 2 - theta));
-  RealVectorValue y(
-      -sin(-aphi) * cos(M_PI / 2 - theta), cos(-aphi), sin(-aphi) * sin(M_PI / 2 - theta));
-  RealVectorValue z(sin(M_PI / 2 - theta), 0.0, cos(M_PI / 2 - theta));
-  RealTensorValue R(x, y, z);
-
-  for (unsigned int node_id = _first_node_id; node_id < _last_node_id; ++node_id)
-  {
-    Node & current_node = _phys_mesh->nodeRef(node_id);
-    RealVectorValue p(current_node(0), current_node(1), current_node(2));
-    // move to the origin, rotate about x-axis, transform to follow the direction and move to its
-    // position
-    current_node = R * (Rx * (p + _offset - z_offset)) + _position;
-  }
+  std::string class_name = "DisplaceNodeUserObject";
+  InputParameters params = _factory.getValidParams(class_name);
+  params.set<std::vector<unsigned int>>("r7:block") = blocks;
+  params.set<MultiMooseEnum>("execute_on") = execute_on;
+  params.set<Point>("position") = _position;
+  params.set<RealVectorValue>("offset") = _offset;
+  params.set<RealVectorValue>("orientation") = _dir;
+  params.set<Real>("rotation") = _rotation;
+  params.set<unsigned int>("id") = id();
+  _sim.addUserObject(class_name, genName(name(), "displace_node"), params);
 }
 
 const std::vector<RELAP7::Connection> &
