@@ -1260,7 +1260,6 @@ public:
    */
   bool skipAdditionalRestartData() const { return _skip_additional_restart_data; }
 
-public:
   ///@{
   /**
    * Convenience zeros
