@@ -20,7 +20,7 @@ class TestHarnessTester(TestHarnessTestCase):
 
     def testOversizedCaveat(self):
         """
-        Scenario which trigger only the 'oversized' caveat.
+        Scenarios which trigger only the 'oversized' caveat.
         """
         # A test which has no min/max cpu parameters should print oversized
         # when subjected to -p 2
@@ -36,7 +36,7 @@ class TestHarnessTester(TestHarnessTestCase):
 
     def testCpuCaveats(self):
         """
-        Scenarios which trigger min/max CPU caveats.
+        Scenarios which trigger the min/max CPU caveat.
         Note: --n-threads is present to suppress the threading
               caveat for more accurate caveat detection.
         """
@@ -56,9 +56,9 @@ class TestHarnessTester(TestHarnessTestCase):
 
     def testThreadCaveats(self):
         """
-        Scenarios which trigger min/max threading caveats.
+        Scenarios which trigger the min/max threading caveat.
         Note: -j/p is present to suppress the min/max cpu oversize
-              caveat for more accurate treading caveat detection.
+              caveat for more accurate caveat detection.
         """
         # MIN Threads caveat
         # Note: 1*2 should be -j 2 but the test minimum is 2 threads, so we need
@@ -67,7 +67,7 @@ class TestHarnessTester(TestHarnessTestCase):
         output = self.runTests('-i', 'allocation_test', '-j', '4', '-p', '2', '--n-threads', '1')
         self.assertNotIn('CPUS', output)
         self.assertNotIn('OVERSIZED', output)
-        self.assertIn('MIN_THREADS', output)
+        self.assertIn('MIN_THREADS=2', output)
 
         # MAX Threads caveat
         # Note: 2*4 should be -j 8 but the test maximum is 3 threads, so we
@@ -77,12 +77,11 @@ class TestHarnessTester(TestHarnessTestCase):
         output = self.runTests('-i', 'allocation_test', '-j', '6', '-p', '2', '--n-threads', '4')
         self.assertNotIn('CPUS', output)
         self.assertNotIn('OVERSIZED', output)
-        self.assertIn('MAX_THREADS', output)
+        self.assertIn('MAX_THREADS=3', output)
 
     def testPerfectAllocation(self):
         """
-        Scenario which trigger no caveats in a test that otherwise
-        would have caveats due to incorrect allocations.
+        Scenario which trigger no caveats.
         """
         # Passing test triggering no caveats, as supplied allocations satisfies
         # the test's requirements

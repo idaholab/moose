@@ -167,7 +167,7 @@ class RunApp(Tester):
         elif ncpus < default_ncpus:
             caveats.append('max_cpus=' + str(ncpus))
 
-        self.addCaveats(caveats)
+        self.addCaveats(*caveats)
 
         if self.force_mpi or options.parallel or ncpus > 1 or nthreads > 1:
             command = self.mpi_command + ' -n ' + str(ncpus) + ' ' + specs['executable'] + ' --n-threads=' + str(nthreads) + ' ' + specs['input_switch'] + ' ' + specs['input'] + ' ' +  ' '.join(cli_args)

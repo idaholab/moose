@@ -315,7 +315,7 @@ class Tester(MooseObject):
 
     def getSlots(self, options):
         """ return number of slots to use for this tester """
-        return int(self.getThreads(options)) * int(self.getProcs(options))
+        return self.getThreads(options) * self.getProcs(options)
 
     def getCommand(self, options):
         """ return the executable command that will be executed by the tester """
@@ -402,12 +402,9 @@ class Tester(MooseObject):
         """ return a list of redirected output """
         return [os.path.join(self.getTestDir(), self.name() + '.processor.{}'.format(p)) for p in xrange(self.getProcs(options))]
 
-    def addCaveats(self, caveats):
+    def addCaveats(self, *kwargs):
         """ Add caveat(s) which will be displayed with the final test status """
-        if type(caveats) == type([]):
-            self.__caveats.update(caveats)
-        else:
-            self.__caveats.add(caveats)
+        self.__caveats.update(kwargs)
         return self.getCaveats()
 
     def getCaveats(self):
