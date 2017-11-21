@@ -33,7 +33,12 @@ class CSVDiff(FileTester):
             msg = differ.diff()
             output += 'Running CSVDiffer.py\n' + msg
             if msg != '':
-                self.setStatus('CSVDIFF', self.bucket_diff)
+                if msg.find("Gold file does not exist!") != -1:
+                    self.setStatus('MISSING GOLD FILE', self.bucket_fail)
+                elif msg.find("File does not exist!") != -1:
+                    self.setStatus('FILE DOES NOT EXIST', self.bucket_fail)
+                else:
+                    self.setStatus('CSVDIFF', self.bucket_diff)
                 return output
 
         self.setStatus(self.success_message, self.bucket_success)
