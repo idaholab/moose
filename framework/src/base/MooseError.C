@@ -14,11 +14,25 @@
 
 #include "MooseError.h"
 #include "MooseUtils.h"
+#include "MooseVariable.h"
+
+#include "libmesh/string_to_enum.h"
 
 namespace moose
 {
 namespace internal
 {
+
+std::string
+incompatVarMsg(MooseVariable & var1, MooseVariable & var2)
+{
+  std::stringstream ss;
+  ss << libMesh::Utility::enum_to_string<FEFamily>(var1.feType().family) << ",ORDER"
+     << var1.feType().order
+     << " != " << libMesh::Utility::enum_to_string<FEFamily>(var2.feType().family) << ",ORDER"
+     << var2.feType().order;
+  return ss.str();
+}
 
 std::string
 mooseMsgFmt(const std::string & msg, const std::string & title, const std::string & color)

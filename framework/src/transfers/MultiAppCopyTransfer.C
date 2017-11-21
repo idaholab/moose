@@ -82,23 +82,12 @@ MultiAppCopyTransfer::transfer(FEProblemBase & to_problem, FEProblemBase & from_
   MooseVariable & from_var = from_problem.getVariable(0, _from_var_name);
   MeshBase & from_mesh = from_problem.mesh().getMesh();
 
-  auto from = libMesh::Utility::enum_to_string<FEFamily>(from_var.feType().family);
-  auto to = libMesh::Utility::enum_to_string<FEFamily>(to_var.feType().family);
-  auto from_order = from_var.feType().order;
-  auto to_order = to_var.feType().order;
-
   // Check integrity
   if (to_var.feType() != from_var.feType())
     paramError("variable",
                "'variable' and 'source_variable' must be the same type (order and family): ",
-               to,
-               ",ORDER",
-               to_order,
-               " != ",
-               from,
-               ",ORDER",
-               from_order);
-  // mooseError("The variables must be the same type (order and family).");
+               libMesh::Utility::enum_to_string<FEFamily>(to_var.feType().family),
+               moose::internal::incompatVarMsg(to_var, from_var));
 
   if ((to_mesh.n_nodes() != from_mesh.n_nodes()) || (to_mesh.n_elem() != from_mesh.n_elem()))
     mooseError("The meshes must be identical to utilize MultiAppCopyTransfer.");

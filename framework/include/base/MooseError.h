@@ -104,10 +104,14 @@
 template <typename... Args>
 [[noreturn]] void mooseError(Args &&... args);
 
+class MooseVariable;
+
 namespace moose
 {
 namespace internal
 {
+
+std::string incompatVarMsg(MooseVariable & var1, MooseVariable & var2);
 
 std::string
 mooseMsgFmt(const std::string & msg, const std::string & title, const std::string & color);

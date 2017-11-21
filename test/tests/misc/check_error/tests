@@ -516,7 +516,7 @@
     type = 'RunException'
     input = 'check_syntax_error.i'
     cli_args = '--check-input'
-    expect_err = 'ced: The number of nodes has to be 2, but it is 3.'
+    expect_err = 'invalid number of nodes: want 2, got 3'
   [../]
 
   [./check_syntax_no_input]
