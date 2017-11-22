@@ -18,7 +18,6 @@
 // MOOSE includes
 #include "InputParameters.h"
 #include "ConsoleStreamInterface.h"
-#include "Parser.h"
 
 #include "libmesh/parallel_object.h"
 
@@ -30,6 +29,14 @@ InputParameters validParams<MooseObject>();
 
 // needed to avoid #include cycle with MooseApp and MooseObject
 [[noreturn]] void callMooseErrorRaw(std::string & msg, MooseApp * app);
+
+/// returns a string representing a special parameter name that the parser injects into object
+/// parameters holding the file+linenum for the parameter.
+std::string paramLocName(std::string param);
+
+/// returns a string representing a special parameter name that the parser injects into object
+/// parameters holding the file+linenum for the parameter.
+std::string paramPathName(std::string param);
 
 /**
  * Every object that can be built by the factory should be derived from this class.
@@ -79,10 +86,12 @@ public:
 
   /**
    * Emits an error prefixed with the file and line number of the given param (from the input
-   * file) with the given args as the message.
+   * file) along with the full parameter path+name followed by the given args as the message.
+   * If this object's parameters were not created directly by the Parser, then this function falls
+   * back to the normal behavior of mooseError - only printing a message using the given args.
    */
   template <typename... Args>
-  [[noreturn]] void paramError(std::string param, Args... args)
+  [[noreturn]] void paramError(const std::string & param, Args... args)
   {
     auto prefix = param + ": ";
     if (_pars.have_parameter<std::string>(paramLocName(param)))

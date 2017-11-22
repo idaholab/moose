@@ -52,18 +52,6 @@
 #include <algorithm>
 #include <cstdlib>
 
-std::string
-paramLocName(std::string param)
-{
-  return "_" + param + "_fileloc";
-}
-
-std::string
-paramPathName(std::string param)
-{
-  return "_" + param + "_fullpath";
-}
-
 Parser::Parser(MooseApp & app, ActionWarehouse & action_wh)
   : ConsoleStreamInterface(app),
     _app(app),
