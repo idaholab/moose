@@ -571,6 +571,7 @@ Transient::solveStep(Real input_dt)
       _console << "Picard converged!" << std::endl;
 
       _picard_converged = true;
+      _time_stepper->acceptStep();
       return;
     }
   }
