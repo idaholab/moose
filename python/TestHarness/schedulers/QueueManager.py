@@ -279,10 +279,10 @@ class QueueManager(Scheduler):
             template[param] = self.params[param]
 
         # Set CPU request count
-        # NOTE: we are calling tester.getProcs specifically, instead of through
+        # NOTE: we are calling tester.getSlots specifically, instead of through
         # the job class here, because we have altered each job to only require 1
-        # process.
-        template['mpi_procs'] = tester.getProcs(self.options)
+        # slot.
+        template['mpi_procs'] = tester.getSlots(self.options)
 
         # Set a path friendly job name
         template['job_name'] = ''.join(txt for txt in tester.specs['test_name'] if txt.isalnum() or txt in ['_', '-'])
@@ -324,7 +324,7 @@ class QueueManager(Scheduler):
         QueueManager only executes third party queueing commands. So
         modify every job to only require 1 process.
         """
-        job.setProcessors(1)
+        job.setSlots(1)
         return Scheduler.reserveSlots(self, job)
 
     def testOutput(self, job):

@@ -75,4 +75,12 @@
     type = PythonUnitTest
     input = test_DistributedMesh.py
   [../]
+  [./allocations]
+    type = PythonUnitTest
+    input = test_Allocations.py
+  [../]
+  [./exra_info]
+    type = PythonUnitTest
+    input = test_ExtraInfo.py
+  [../]
 []

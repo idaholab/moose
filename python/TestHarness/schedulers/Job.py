@@ -44,7 +44,7 @@ class Job(object):
         self.__end_time = None
         self.__std_out = ''
         self.report_timer = None
-        self.__processors = None
+        self.__slots = None
         self.__unique_identifier = os.path.join(tester.getTestDir(), tester.getTestName())
 
     def getTester(self):
@@ -67,16 +67,16 @@ class Job(object):
         """ A unique identifier for this job object """
         return self.__unique_identifier
 
-    def getProcessors(self):
-        """ Return the number of processors this job consumes """
-        if self.__processors == None:
-            return self.setProcessors(self.__tester.getProcs(self.options))
-        return self.__processors
+    def getSlots(self):
+        """ Return the number of slots this job consumes """
+        if self.__slots == None:
+            return self.setSlots(self.__tester.getSlots(self.options))
+        return self.__slots
 
-    def setProcessors(self, procs):
+    def setSlots(self, slots):
         """ Set the number of processors this job consumes """
-        self.__processors = int(procs)
-        return self.__processors
+        self.__slots = int(slots)
+        return self.__slots
 
     def run(self):
         """

@@ -367,7 +367,7 @@ class TestHarness:
                 part2_params['prereq'].append(part1.parameters()['test_name'])
                 part2_params['delete_output_before_running'] = False
                 part2_params['cli_args'].append('--recover --recoversuffix ' + self.options.recoversuffix)
-                part2_params.addParam('caveats', ['recover'], "")
+                part2.addCaveats('recover')
 
                 new_tests.append(part2)
 
@@ -390,23 +390,18 @@ class TestHarness:
 
         return True
 
-    # Format the status message to make any caveats easy to read when they are printed
+    # Format the caveats contained in tester so they are easy to read when printed
     def formatCaveats(self, tester):
-        caveats = []
         result = ''
-
-        if tester.specs.isValid('caveats'):
-            caveats = tester.specs['caveats']
 
         # PASS and DRY_RUN fall into this catagory
         if tester.didPass():
             if self.options.extra_info:
-                checks = ['platform', 'compiler', 'petsc_version', 'mesh_mode', 'method', 'library_mode', 'dtk', 'unique_ids']
-                for check in checks:
-                    if not 'ALL' in tester.specs[check]:
-                        caveats.append(', '.join(tester.specs[check]))
-            if len(caveats):
-                result = '[' + ', '.join(caveats).upper() + '] ' + tester.getSuccessMessage()
+                for check in self.options._checks.keys():
+                    if tester.specs.isValid(check) and not 'ALL' in tester.specs[check]:
+                        tester.addCaveats(check)
+            if tester.getCaveats():
+                result = '[' + ', '.join(tester.getCaveats()).upper() + '] ' + tester.getSuccessMessage()
             else:
                 result = tester.getSuccessMessage()
 
@@ -414,11 +409,10 @@ class TestHarness:
         elif tester.didFail() or tester.didDiff() or tester.isDeleted():
             result = 'FAILED (%s)' % tester.getStatusMessage()
 
+        # SKIPPED tests fall into this catagory
         elif tester.isSkipped():
-            # Include caveats in skipped messages? Usefull to know when a scaled long "RUNNING..." test completes
-            # but Exodiff is instructed to 'SKIP' on scaled tests.
-            if len(caveats):
-                result = '[' + ', '.join(caveats).upper() + '] skipped (' + tester.getStatusMessage() + ')'
+            if tester.getCaveats():
+                result = '[' + ', '.join(tester.getCaveats()).upper() + '] skipped (' + tester.getStatusMessage() + ')'
             else:
                 result = 'skipped (' + tester.getStatusMessage() + ')'
         else:
