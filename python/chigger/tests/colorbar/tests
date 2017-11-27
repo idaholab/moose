@@ -58,4 +58,10 @@
     command = dual_colorbar_horiz.py
     imagediff = 'dual_colorbar_horiz.png'
   [../]
+
+  [./font]
+    type = ImageDiff
+    command = colorbar_font.py
+    imagediff = 'colorbar_font.png'
+  [../]
 []
