@@ -11,46 +11,30 @@
   dim = 2
   nx = 120
   ny = 120
-  xmin = 0
   xmax = 500
-  ymin = 0
   ymax = 500
-  elem_type = QUAD4
+  elem_type = QUAD
 []
 
-[Variables]
-  [./c]
-    order = FIRST
-    family = LAGRANGE
-    [./InitialCondition]
-      type = RandomIC
-      min = 0.2
-      max = 0.21
+[Modules]
+  [./PhaseField]
+    [./Conserved]
+      [./c]
+        free_energy = F
+        mobility = M
+        kappa = kappa_c
+        solve_type = REVERSE_SPLIT
+      [../]
     [../]
   [../]
-  [./w]
-    order = FIRST
-    family = LAGRANGE
-  [../]
 []
 
-[Kernels]
-  [./c_res]
-    type = SplitCHParsed
+[ICs]
+  [./c_IC]
+    type = RandomIC
     variable = c
-    f_name = F
-    kappa_name = kappa_c
-    w = w
-  [../]
-  [./w_res]
-    type = SplitCHWRes
-    variable = w
-    mob_name = M
-  [../]
-  [./time]
-    type = CoupledTimeDerivative
-    variable = w
-    v = c
+    min = 0.2
+    max = 0.21
   [../]
 []
 
@@ -60,7 +44,6 @@
     prop_names  = 'M kappa_c'
     prop_values = '1 25'
   [../]
-
   [./chemical_free_energy]
     # simple double well free energy
     type = DerivativeParsedMaterial
@@ -94,7 +77,6 @@
     map = map
     outputs = exodus
   [../]
-
   [./free_energy]
     # add the chemical and nucleation free energy contributions together
     type = DerivativeSumMaterial
@@ -139,12 +121,20 @@
   [../]
 []
 
+[Postprocessors]
+  [./dt]
+    type = TimestepSize
+  [../]
+[]
+
 [Executioner]
   type = Transient
   scheme = bdf2
-  solve_type = 'NEWTON'
+  solve_type = 'PJFNK'
+  petsc_options_iname = '-pc_type -sub_pc_type'
+  petsc_options_value = 'asm      lu          '
 
-  nl_max_its = 15
+  nl_max_its = 20
   l_tol = 1.0e-4
   nl_rel_tol = 1.0e-10
   nl_abs_tol = 1.0e-10
@@ -156,6 +146,7 @@
     dt = 10
     growth_factor = 1.5
     cutback_factor = 0.5
+    optimal_iterations = 5
   [../]
 []
 
