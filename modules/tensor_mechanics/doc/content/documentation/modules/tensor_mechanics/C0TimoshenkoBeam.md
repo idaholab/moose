@@ -160,4 +160,48 @@ The strain energy is calculated as:
 
 As can be seen from the equation for $\epsilon_{1}(x)$, it depends only on $\frac{\partial u_1}{\partial x}$ if $A_y$ and $A_z$ are zero. But $\epsilon_{2}(x)$ depends on both $\frac{\partial u_1}{\partial x}$ and $\theta_3$. Therefore, $F_2(x) \delta \epsilon_{2}(x)$ would contribute to the residual of both the translational DOF in y direction and rotational DOF in the z direction. Similarly, $F_3(x) \delta \epsilon_{3}(x)$ would contribute to the residual of both the translational DOF in z direction and rotational DOF in the y direction. This accounts for the coupling between the shear and bending behavior of the beam. The stress-divergence calculation is performed in [StressDivergenceBeam](/StressDivergenceBeam.md).
 
+## Dynamic beam
+
+There are two main ways to include the inertial effects for the beam. The first method is to assign a uniform density to the beam and calculate a consistent mass/inertia matrix for the beam, and the second method assumes that the mass of the beam is concentrated at the ends of the beam, and represents the mass of the beam using point mass/inertia at the nodes at the end fo the beam.
+
+### Consistent mass matrix
+
+If $A_y$, $A_z$ and $J$ are zero in [InertialForceBeam](/InertialForceBeam.md), then there is no coupling between the different DOFs. The residual for the $j^{th}$ translational degree of freedom at node $i$ can be obtained as follows:
+$$
+R_j^0 = \int_{0}^{{}^0L} \rho A \left(\frac{x}{{}^0L} {\ddot{u}_j}^0 + \frac{{}^0L - x}{{}^0L} {\ddot{u}_j}^1 \right) \frac{x}{{}^0L} dx
+$$
+$$
+R_j^1 = \int_{0}^{{}^0L} \rho A \left(\frac{x}{{}^0L} {\ddot{u}_j}^0 + \frac{{}^0L - x}{{}^0L} {\ddot{u}_j}^1 \right) \frac{{}^0L - x}{{}^0L} dx
+$$
+where, $\rho$ is the density of the beam, which is assumed to be constant through the length of the beam, and ${\ddot{u}_j}^i$ is the translational acceleration at node $i$ in $j^{th}$ direction.  
+
+The residual for the $j^{th}$ rotational degree of freedom can be obtained as follows:
+$$
+R_j^0 = \int_{0}^{{}^0L} \rho I \left(\frac{x}{{}^0L} {\ddot{\theta}_j}^0 + \frac{{}^0L - x}{{}^0L} {\ddot{\theta}_j}^1 \right) \frac{x}{{}^0L} dx
+$$
+$$
+R_j^1 = \int_{0}^{{}^0L} \rho I \left(\frac{x}{{}^0L} {\ddot{\theta}_j}^0 + \frac{{}^0L - x}{{}^0L} {\ddot{\theta}_j}^1 \right) \frac{{}^0L - x}{{}^0L} dx
+$$
+where, $I = I_y + I_z$ for $j = 1$, $I = I_z$ for $j = 2$ and $I = I_y$ for $j = 3$.
+
+If $A_y$ and $A_z$ are non-zero, then there is coupling between $u_1$, $\theta_2$ and $\theta_3$, $u_2$ and $\theta_1$, and $u_3$ and $\theta_1$.
+
+### Point mass/inertia
+
+[NodalTranslationalInertia](/NodalTranslationalInertia.md) and [NodalRotationalInertia](/NodalRotationalInertia.md) are used to apply mass/inertia at a node. The mass and inertia terms contribute only to the residual of the node at which it is applied. Mass (m) behaves isotropically in all three coordinate directions resulting in the following $j^{th}$ translational nodal residual:
+$$
+R_j = m \ddot{u}_j
+$$
+
+[NodalRotationalInertia](/NodalRotationalInertia.md) takes 6 inertia components as input ($I_{xx}$, $I_{yy}$, $I_{zz}$, $I_{xy}$, $I_{xz}$, $I_{yz}$). If the coordinate system in which the moment of inertia components are provided is different from the global coordinate system, then `x_orientation` and `y_orientation` need to be provided as input so that a transformation matrix from the local coordinate system to the global coordinate system can be calculated.
+
+Once the moment of inertia tensor in the global coordinate system is obtained, the residual for the rotational DOF in the $j^{th}$ direction is:
+$$
+R_j = \sum_{i=1}^3 I_{ji} \; \ddot{\theta}_i
+$$
+
+### Time-integration and damping
+
+Rayleigh damping and Newmark and HHT time integration are calculated as in [Damping](http://mooseframework.org/wiki/PhysicsModules/TensorMechanics/Dynamics/) but with [StressDivergenceBeam](/StressDivergenceBeam.md) and [InertialForceBeam](/InertialForceBeam.md) for the consistent mass scenario and [StressDivergenceBeam](/StressDivergenceBeam.md), [NodalTranslationalInertia](/NodalTranslationalInertia.md) and [NodalRotationalInertia](/NodalRotationalInertia.md) for the point mass/inertia scenario.
+
 !bibtex bibliography
