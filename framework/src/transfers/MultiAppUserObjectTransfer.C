@@ -9,6 +9,8 @@
 
 #include "MultiAppUserObjectTransfer.h"
 
+#include <limits>
+
 // MOOSE includes
 #include "DisplacedProblem.h"
 #include "FEProblem.h"
@@ -37,14 +39,20 @@ validParams<MultiAppUserObjectTransfer>()
       "user_object",
       "The UserObject you want to transfer values from.  Note: This might be a "
       "UserObject from your MultiApp's input file!");
-
+  params.addParam<bool>("all_master_nodes_contained_in_sub_app",
+                        false,
+                        "Set to true if every master node is mapped to a distinct point on one of "
+                        "the subApps during a transfer from sub App to Master App. If master node "
+                        "cannot be found within bounding boxes of any of the subApps, an error is "
+                        "generated.");
   return params;
 }
 
 MultiAppUserObjectTransfer::MultiAppUserObjectTransfer(const InputParameters & parameters)
   : MultiAppTransfer(parameters),
     _to_var_name(getParam<AuxVariableName>("variable")),
-    _user_object_name(getParam<UserObjectName>("user_object"))
+    _user_object_name(getParam<UserObjectName>("user_object")),
+    _all_master_nodes_contained_in_sub_app(getParam<bool>("all_master_nodes_contained_in_sub_app"))
 {
   // This transfer does not work with DistributedMesh
   _fe_problem.mesh().errorIfDistributedMesh("MultiAppUserObjectTransfer");
@@ -171,6 +179,78 @@ MultiAppUserObjectTransfer::execute()
 
       bool is_nodal = to_sys.variable_type(to_var_num).family == LAGRANGE;
 
+      if (_all_master_nodes_contained_in_sub_app)
+      {
+        // check to see if master nodes or elements lies within any of the sub application bounding
+        // boxes
+        if (is_nodal)
+        {
+          for (auto & node : to_mesh->node_ptr_range())
+          {
+            if (node->n_dofs(to_sys_num, to_var_num) > 0)
+            {
+              unsigned int node_found_in_sub_app = 0;
+              for (unsigned int i = 0; i < _multi_app->numGlobalApps(); i++)
+              {
+                if (!_multi_app->hasLocalApp(i))
+                  continue;
+
+                BoundingBox app_box = _multi_app->getBoundingBox(i, _displaced_source_mesh);
+
+                if (app_box.contains_point(*node))
+                  ++node_found_in_sub_app;
+              }
+
+              if (node_found_in_sub_app == 0)
+              {
+                Point n = *node;
+                mooseError("MultiAppUserObjectTransfer: Master node ",
+                           n,
+                           " not found within the bounding box of any of the sub applications.");
+              }
+              else if (node_found_in_sub_app > 1)
+              {
+                Point n = *node;
+                mooseError("MultiAppUserObjectTransfer: Master node ",
+                           n,
+                           " found within the bounding box of two or more sub applications.");
+              }
+            }
+          }
+        }
+        else // elemental
+        {
+          for (auto & elem : as_range(to_mesh->elements_begin(), to_mesh->elements_end()))
+          {
+            if (elem->n_dofs(to_sys_num, to_var_num) > 0) // If this variable has dofs at this elem
+            {
+              unsigned int elem_found_in_sub_app = 0;
+              Point centroid = elem->centroid();
+
+              for (unsigned int i = 0; i < _multi_app->numGlobalApps(); i++)
+              {
+                if (!_multi_app->hasLocalApp(i))
+                  continue;
+
+                BoundingBox app_box = _multi_app->getBoundingBox(i, _displaced_source_mesh);
+
+                if (app_box.contains_point(centroid))
+                  ++elem_found_in_sub_app;
+              }
+
+              if (elem_found_in_sub_app == 0)
+                mooseError("MultiAppUserObjectTransfer: Master element with centroid at ",
+                           centroid,
+                           " not found within the bounding box of any of the sub applications.");
+              else if (elem_found_in_sub_app > 1)
+                mooseError("MultiAppUserObjectTransfer: Master element with centroid at ",
+                           centroid,
+                           " found within the bounding box of two or more sub applications.");
+            }
+          }
+        }
+      }
+
       for (unsigned int i = 0; i < _multi_app->numGlobalApps(); i++)
       {
         if (!_multi_app->hasLocalApp(i))
@@ -197,6 +277,13 @@ MultiAppUserObjectTransfer::execute()
                   from_value = user_object.spatialValue(*node - app_position);
                 }
 
+                if (from_value == std::numeric_limits<Real>::infinity())
+                {
+                  Point n = *node;
+                  mooseError("MultiAppUserObjectTransfer: Point corresponding to master node at (",
+                             n,
+                             ") not found in the sub application.");
+                }
                 to_solution->set(dof, from_value);
               }
             }
@@ -220,6 +307,12 @@ MultiAppUserObjectTransfer::execute()
                   Moose::ScopedCommSwapper swapper(_multi_app->comm());
                   from_value = user_object.spatialValue(centroid - app_position);
                 }
+
+                if (from_value == std::numeric_limits<Real>::infinity())
+                  mooseError(
+                      "MultiAppUserObjectTransfer: Point corresponding to element's centroid (",
+                      centroid,
+                      ") not found in sub application.");
 
                 to_solution->set(dof, from_value);
               }
