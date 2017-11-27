@@ -156,6 +156,21 @@ $$
 | $\left( -\kappa_i \nabla^2 c_i +  \frac{\partial f_{loc}}{\partial c_i} + \frac{\partial E_d}{\partial c_i} - \mu_i \right)$ | $c$ | $\kappa_i$ | $\frac{\partial f_{loc} }{\partial c_i}$, $\frac{\partial E_d }{\partial c_i}$ | [`SplitCHParsed`](/SplitCHParsed.md) |
 
 
+## Custom Phase Field Actions
+To simplify the formation of input files that use standard Allen-Cahn and Cahn-Hilliard equations, custom actions have been created that automatically create conserved  and nonconserved phase field field variables and all the corresponding kernels. Additional kernels can still be added using standard MOOSE syntax.
+
+The actions are in the phase field block, under the modules block. Nonconserved variables are created using [NonconservedAction](/NonconservedAction.md). For an example, see
+
+!listing modules/phase_field/test/tests/actions/Nonconserved_1var.i start=Modules end=ICs
+
+Conserved variables are created using [ConservedAction](/ConservedAction.md). For an example, See
+
+!listing modules/phase_field/test/tests/actions/conserved_split_1var.i start=Modules end=ICs
+
+and
+
+!listing modules/phase_field/test/tests/actions/conserved_direct_1var.i start=Modules end=ICs
+
 ## Free Energy Function Materials
 
 The free energy functional is the basis of the evolution of the phase field variables. However, the free energy itself is never used directly in the phase field equations, rather derivatives of the free energy are required. In the case of a free energies involving multiple coupled variables, different derivatives will be required for each residual equation.
