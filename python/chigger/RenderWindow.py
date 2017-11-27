@@ -246,14 +246,14 @@ class RenderWindow(base.ChiggerObject):
         for result in self._results:
             result.getVTKRenderer().ResetCamera()
 
-    def write(self, filename, dialog=False):
+    def write(self, filename, dialog=False, **kwargs):
         """
         Writes the VTKWindow to an image.
         """
         mooseutils.mooseDebug('RenderWindow.write()', color='MAGENTA')
 
-        if self.needsUpdate():
-            self.update()
+        if self.needsUpdate() or kwargs:
+            self.update(**kwargs)
 
         # Allowed extensions and the associated readers
         writers = dict()

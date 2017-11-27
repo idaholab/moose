@@ -22,7 +22,7 @@ def get_options():
     opt = Options()
     opt.add('num_ticks', 5, "The number of tick marks to place on the axis.", vtype=int)
     opt.add('lim', "The axis extents.", vtype=list)
-    opt.add('color', [1, 1, 1], "The color of the axis, ticks, and labels.")
+    opt.add('font_color', [1, 1, 1], "The color of the axis, ticks, and labels.")
     opt.add('title', "The axis label.", vtype=str)
     opt.add('font_size', "The axis title and label font sizes, in points.", vtype=int)
     opt.add('title_font_size', "The axis title font size, in points.", vtype=int)
@@ -65,8 +65,8 @@ def set_options(vtkaxis, opt):
         vtkaxis.SetBehavior(vtk.vtkAxis.AUTO)
 
     # Color
-    if opt.isOptionValid('color'):
-        clr = opt['color']
+    if opt.isOptionValid('font_color'):
+        clr = opt['font_color']
         vtkaxis.GetTitleProperties().SetColor(*clr)
         vtkaxis.GetLabelProperties().SetColor(*clr)
         vtkaxis.GetPen().SetColorF(*clr)
