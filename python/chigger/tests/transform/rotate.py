@@ -28,6 +28,6 @@ reader = chigger.exodus.ExodusReader('../input/mug_blocks_out.e')
 mug = chigger.exodus.ExodusResult(reader, filters=[transform])
 
 window = chigger.RenderWindow(mug, size=[300,300], test=True)
-
-window.write(args.name)
+window.update()
+window.write(args.name, antialiasing=5)
 window.start()

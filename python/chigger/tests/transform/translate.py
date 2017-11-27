@@ -32,5 +32,7 @@ mug2 = chigger.exodus.ExodusResult(reader, cmap='viridis', renderer=mug.getVTKRe
 
 window = chigger.RenderWindow(mug, mug2, size=[300,300], test=True)
 
-window.write(args.name)
+window.update()
+window.write(args.name, antialiasing=5)
+
 window.start()
