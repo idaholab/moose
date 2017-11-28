@@ -60,7 +60,7 @@ KKSGlobalFreeEnergy::computeValue()
   const Real h = _prop_h[_qp];
 
   // Include bulk energy and additional contributions
-  Real total_energy = _prop_fa[_qp] * h + _prop_fb[_qp] * (1.0 - h) + _w * _prop_g[_qp] +
+  Real total_energy = _prop_fa[_qp] * (1.0 - h) + _prop_fb[_qp] * h + _w * _prop_g[_qp] +
                       _additional_free_energy[_qp];
 
   // Calculate interfacial energy of each variable
