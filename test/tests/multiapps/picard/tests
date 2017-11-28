@@ -5,6 +5,11 @@
     exodiff = 'picard_master_out.e'
     rel_err = 5e-5  # Loosened for recovery tests
   [../]
+  [./iteration_adaptive]
+    type = 'Exodiff'
+    input = 'picard_adaptive_master.i'
+    exodiff = 'picard_adaptive_master_out.e'
+  [../]
 
   [./rel_tol]
     type = 'Exodiff'
