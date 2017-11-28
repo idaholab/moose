@@ -5,23 +5,23 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-#ifndef STATEFULMATERIALJUMP_H
-#define STATEFULMATERIALJUMP_H
+#ifndef MAXIMUMNORMALSEPARATION_H
+#define MAXIMUMNORMALSEPARATION_H
 
 #include "Material.h"
 
-class StatefulMaterialJump;
+class MaximumNormalSeparation;
 
 template <>
-InputParameters validParams<StatefulMaterialJump>();
+InputParameters validParams<MaximumNormalSeparation>();
 
 /**
  *
  */
-class StatefulMaterialJump : public Material
+class MaximumNormalSeparation : public Material
 {
 public:
-  StatefulMaterialJump(const InputParameters & parameters);
+  MaximumNormalSeparation(const InputParameters & parameters);
 
 protected:
   virtual void resetQpProperties() override;
@@ -29,11 +29,13 @@ protected:
   virtual void initQpStatefulProperties() override;
 
   const std::string _base_name;
-  MaterialProperty<Real> & _prop;
-  const MaterialProperty<Real> & _prop_old;
+  MaterialProperty<Real> & _max_normal_separation;
+  const MaterialProperty<Real> & _max_normal_separation_old;
 
-  const VariableValue & _u;
-  const VariableValue & _u_neighbor;
+  const VariableValue & _disp_x;
+  const VariableValue & _disp_x_neighbor;
+  const VariableValue & _disp_y;
+  const VariableValue & _disp_y_neighbor;
 };
 
-#endif // STATEFULMATERIALJUMP_H
+#endif // MAXIMUMNORMALSEPARATION_H
