@@ -85,9 +85,8 @@ validParams<Transient>()
   params.addParam<bool>(
       "abort_on_solve_fail", false, "abort if solve not converged rather than cut timestep");
   params.addParam<MooseEnum>("scheme", schemes, "Time integration scheme used.");
-  params.addParam<Real>("timestep_tolerance",
-                        2.0e-14,
-                        "the tolerance setting for final timestep size and sync times");
+  params.addParam<Real>(
+      "timestep_tolerance", 1.0e-8, "The tolerance setting for final timestep size and sync times");
 
   params.addParam<bool>("use_multiapp_dt",
                         false,
