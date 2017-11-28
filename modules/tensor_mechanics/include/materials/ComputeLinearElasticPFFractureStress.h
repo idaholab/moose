@@ -42,7 +42,6 @@ protected:
 
   MaterialProperty<RankTwoTensor> & _dH0_pos_dstrain;
 
-
   MaterialProperty<Real> & _H0_pos;
   const MaterialProperty<Real> & _H0_pos_old;
 };
