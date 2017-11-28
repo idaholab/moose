@@ -35,10 +35,10 @@ public:
   virtual void finalize() override;
 
   /// API call to swap in properties
-  void swapInProperties(dof_id_type pair_id);
-  void swapOutProperties(dof_id_type pair_id);
-  void swapInProperties(dof_id_type pair_id) const;
-  void swapOutProperties(dof_id_type pair_id) const;
+  void swapInProperties(const Elem * pair_id);
+  void swapOutProperties(const Elem * pair_id);
+  void swapInProperties(const Elem * pair_id) const;
+  void swapOutProperties(const Elem * pair_id) const;
 
   ///@{ API calls to fetch a materialProperty
   template <typename T>
@@ -66,7 +66,7 @@ protected:
   MaterialProperties _properties;
   ///@}
 
-  using HistoryStorage = std::map<dof_id_type, MaterialProperties>;
+  using HistoryStorage = std::map<const Elem *, MaterialProperties>;
 
   ///@{ storage for properties on all elements
   std::unique_ptr<HistoryStorage> _map;
@@ -75,12 +75,12 @@ protected:
   ///@}
 
   /// Extra QPs
-  std::map<dof_id_type, std::vector<Point>> _extra_qp_map;
+  std::map<const Elem *, std::vector<Point>> _extra_qp_map;
 
   /// map from property names to indes into _props etc.
   std::map<std::string, unsigned int> _managed_properties;
 
-  std::map<dof_id_type, std::pair<dof_id_type, dof_id_type>> _elem_pair_id;
+  std::map<const Elem *, const Elem *> _elem_pair_ptr;
 };
 
 template <>
