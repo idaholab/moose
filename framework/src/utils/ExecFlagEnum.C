@@ -23,6 +23,17 @@ ExecFlagEnum::ExecFlagEnum(const ExecFlagEnum & other) : MultiMooseEnum(other) {
 void
 ExecFlagEnum::addAvailableFlags(const ExecFlagType & flag)
 {
+  if (flag.id() == MooseEnumItem::INVALID_ID)
+  {
+    // It is desired that users when creating ExecFlagTypes should not worry about needing
+    // to assign a name and an ID. However, the ExecFlagTypes created by users are global constants
+    // and the ID to be assigned can't be known at construction time of this global constant, it is
+    // only known when it is added to this object (ExecFlagEnum). Therefore, this const cast allows
+    // the ID to be set after construction. This was the lesser of two evils: const_cast or
+    // friend class with mutable members.
+    ExecFlagType & non_const_flag = const_cast<ExecFlagType &>(flag);
+    non_const_flag.setID(Moose::execute_flags.getNextValidID());
+  }
   addEnumerationItem(flag);
 }
 

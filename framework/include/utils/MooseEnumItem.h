@@ -84,8 +84,14 @@ public:
    */
   friend std::ostream & operator<<(std::ostream & out, const MooseEnumItem & item);
 
-  // MooseApp::registerExecFlag is allowed to set the id
-  friend MooseApp;
+  /**
+   * Method to change the ID of the item, but only if it is an INVALID_ID. An error is produced
+   * if the ID is valid and this method is called.
+   *
+   * This is needed to allow ExecFlagType objects to be created without an ID being provided, the
+   * ID is assigned when ExecFlagEnum::addAvailableFlags is called.
+   */
+  void setID(const int & id);
 
 private:
   /// The name as provided in constructor
@@ -95,7 +101,7 @@ private:
   std::string _name;
 
   /// The numeric value for item
-  mutable int _id; // MooseApp::registerExecFlag can change this for ExecFlagTypesg
+  int _id;
 };
 
 #endif
