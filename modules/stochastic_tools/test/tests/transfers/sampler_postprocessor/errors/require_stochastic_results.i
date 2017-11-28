@@ -52,7 +52,7 @@
   [./data]
     type = SamplerPostprocessorTransfer
     multi_app = sub
-    results = storage
+    vector_postprocessor = storage
     postprocessor = avg
     execute_on = timestep_end
     check_multiapp_execute_on = false
