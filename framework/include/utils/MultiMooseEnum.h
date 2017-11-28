@@ -23,7 +23,6 @@
 #include <vector>
 
 // Forward declarations
-class MultiMooseEnum;
 class ExecFlagEnum;
 namespace libMesh
 {
@@ -165,7 +164,6 @@ public:
   // InputParameters and Output is allowed to create an empty enum but is responsible for
   // filling it in after the fact
   friend class libMesh::Parameters;
-  friend class SetupInterface;
 
   /// Operator for printing to iostreams
   friend std::ostream & operator<<(std::ostream & out, const MultiMooseEnum & obj);

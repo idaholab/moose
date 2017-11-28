@@ -35,7 +35,7 @@ public:
    * separate string to set a default for this instance.
    * @param names - a list of names for this enumeration
    * @param allow_out_of_range - determines whether this enumeration will accept values outside of
-   *                             it's range of defined values.
+   *                             its range of defined values.
    */
   MooseEnumBase(std::string names, bool allow_out_of_range = false);
 

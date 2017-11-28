@@ -14,6 +14,7 @@
 
 #include "ExecFlagEnum.h"
 #include "MooseError.h"
+#include "Conversion.h"
 
 ExecFlagEnum::ExecFlagEnum() : MultiMooseEnum() {}
 ExecFlagEnum::ExecFlagEnum(const MultiMooseEnum & other) : MultiMooseEnum(other) {}
@@ -43,11 +44,9 @@ std::string
 ExecFlagEnum::getDocString() const
 {
   std::string doc("The list of flag(s) indicating when this object should be executed, the "
-                  "available options include \'");
-  for (const std::string & name : getNames())
-    doc += name + "', '";
-  doc.erase(doc.end() - 4, doc.end());
-  doc += "').";
+                  "available options include ");
+  doc += Moose::stringify(getNames(), ", ");
+  doc += ".";
   return doc;
 }
 
@@ -55,7 +54,7 @@ ExecFlagEnum &
 ExecFlagEnum::operator=(const std::initializer_list<ExecFlagType> & flags)
 {
   clear();
-  (*this) += flags;
+  *this += flags;
   return *this;
 }
 
@@ -63,7 +62,7 @@ ExecFlagEnum &
 ExecFlagEnum::operator=(const ExecFlagType & flag)
 {
   clear();
-  (*this) += flag;
+  *this += flag;
   return *this;
 }
 

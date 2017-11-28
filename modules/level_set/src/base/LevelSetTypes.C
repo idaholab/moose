@@ -11,4 +11,4 @@
 // MOOSE includes
 #include "MooseEnumItem.h"
 
-const ExecFlagType LevelSet::EXEC_ADAPT_MESH("ADAPT_MESH", 8000);
+const ExecFlagType LevelSet::EXEC_ADAPT_MESH("ADAPT_MESH");

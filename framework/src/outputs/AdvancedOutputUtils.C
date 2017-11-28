@@ -43,8 +43,9 @@ OutputOnWarehouse::OutputOnWarehouse(const ExecFlagEnum & execute_on,
 
   if (parameters.have_parameter<ExecFlagEnum>("execute_system_information_on"))
   {
-    _map.insert(std::make_pair("system_information", MooseUtils::getDefaultExecFlagEnum()));
-    _map["system_information"] = EXEC_INITIAL;
+    ExecFlagEnum flags = MooseUtils::getDefaultExecFlagEnum();
+    flags = EXEC_INITIAL;
+    _map.insert(std::make_pair("system_information", flags));
   }
 }
 

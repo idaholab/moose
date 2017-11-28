@@ -290,8 +290,8 @@ TEST(MultiMooseEnum, testExecuteOn)
   std::string doc = exec_enum.getDocString();
   EXPECT_EQ(doc,
             "The list of flag(s) indicating when this object should be executed, the "
-            "available options include 'NONE', 'INITIAL', 'LINEAR', 'NONLINEAR', 'TIMESTEP_END', "
-            "'TIMESTEP_BEGIN', 'FINAL', 'FAILED', 'CUSTOM').");
+            "available options include NONE, INITIAL, LINEAR, NONLINEAR, TIMESTEP_END, "
+            "TIMESTEP_BEGIN, FINAL, FAILED, CUSTOM.");
 
   // Tests with ExecFlagType assignment operators
   exec_enum = EXEC_FINAL;
