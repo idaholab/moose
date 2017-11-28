@@ -410,22 +410,21 @@ class Scheduler(MooseObject):
 
         with self.slot_lock:
             can_run = False
-            if self.slots_in_use + job_container.getProcessors() <= self.available_slots:
+            if self.slots_in_use + job_container.getSlots() <= self.available_slots:
                 can_run = True
 
             # Check for insufficient slots -soft limit
-            # TODO: Create a unit test for this case
-            elif job_container.getProcessors() > self.available_slots and self.soft_limit:
-                tester.specs.addParam('caveats', ['OVERSIZED'], "")
+            elif job_container.getSlots() > self.available_slots and self.soft_limit:
+                tester.addCaveats('OVERSIZED')
                 can_run = True
 
             # Check for insufficient slots -hard limit (skip this job)
             # TODO: Create a unit test for this case
-            elif job_container.getProcessors() > self.available_slots and not self.soft_limit:
+            elif job_container.getSlots() > self.available_slots and not self.soft_limit:
                 tester.setStatus('insufficient slots', tester.bucket_skip)
 
             if can_run:
-                self.slots_in_use += job_container.getProcessors()
+                self.slots_in_use += job_container.getSlots()
 
         return can_run
 
@@ -484,7 +483,7 @@ class Scheduler(MooseObject):
                     self.harness.handleTestStatus(job_container)
 
                     # ...And then set the finished caveat now that the running status has printed
-                    tester.specs.addParam('caveats', ['FINISHED'], "")
+                    tester.addCaveats('FINISHED')
 
                     # Add this job to the reported container so it does not happen again
                     self.jobs_reported.add(job_container)
@@ -563,7 +562,7 @@ class Scheduler(MooseObject):
 
                 # Recover worker count before attempting to queue more jobs
                 with self.slot_lock:
-                    self.slots_in_use = max(0, self.slots_in_use - job_container.getProcessors())
+                    self.slots_in_use = max(0, self.slots_in_use - job_container.getSlots())
 
                 # Queue this new batch of runnable jobs
                 self.queueJobs(run_jobs=next_job_group)
