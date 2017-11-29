@@ -152,7 +152,7 @@
   nl_abs_tol = 1e-11 # Relative tolerance for nonlinear solves
   nl_rel_tol = 1e-10 # Absolute tolerance for nonlinear solves
   start_time = 0.0
-  num_steps = 50.0
+  num_steps = 50
   [./TimeStepper]
     type = IterationAdaptiveDT
     dt = 25 # Initial time step.  In this simulation it changes.

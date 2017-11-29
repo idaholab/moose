@@ -332,11 +332,12 @@ Parser::walkRaw(std::string /*fullpath*/, std::string /*nodepath*/, hit::Node * 
 
   if (iters.first == iters.second)
   {
-    mooseError(errormsg(getFileName(),
+    _errmsg += errormsg(getFileName(),
                         n,
                         "section '",
                         curr_identifier,
-                        "' does not have an associated \"Action\".\nDid you misspell it?"));
+                        "' does not have an associated \"Action\".\nDid you misspell it?");
+    return;
   }
 
   for (auto it = iters.first; it != iters.second; ++it)
@@ -531,9 +532,6 @@ Parser::parse(const std::string & input_filename)
   for (auto & msg : bw.errors)
     _errmsg += msg + "\n";
 
-  if (_errmsg.size() > 0)
-    mooseError(_errmsg);
-
   // There are a few order dependent actions that have to be built first in
   // order for the parser and application to function properly:
   //
@@ -562,6 +560,9 @@ Parser::parse(const std::string & input_filename)
       walkRaw(n->parent()->fullpath(), n->path(), n);
   }
   _root->walk(this, hit::NodeType::Section);
+
+  if (_errmsg.size() > 0)
+    mooseError(_errmsg);
 }
 
 // Checks the input and the way it has been used and emits any errors/warnings.
@@ -1250,6 +1251,9 @@ Parser::setScalarParameter(const std::string & full_name,
   }
   catch (hit::Error & err)
   {
+    auto strval = _root->param<std::string>(full_name);
+    size_t pos = 0;
+
     // handle the case where the user put a number inside quotes - we really shouldn't allow this,
     // but "backwards compatibility" :-(
     auto & t = typeid(T);
@@ -1258,34 +1262,40 @@ Parser::setScalarParameter(const std::string & full_name,
     {
       try
       {
-        auto v = std::stoi(_root->param<std::string>(full_name));
+        auto v = std::stoi(strval, &pos);
         param->set() = *reinterpret_cast<T *>(&v);
+        if (pos != strval.size())
+          throw std::runtime_error("dummy"); // catch below and emit error
       }
-      catch (...)
+      catch (...) // some std::exception's were slipping through with "catch(std::exception&)"
       {
-        mooseError(errormsg(_input_filename,
+        _errmsg += errormsg(_input_filename,
                             _root->find(full_name),
                             "invalid integer syntax for parameter: ",
                             full_name,
                             "=",
-                            _root->param<std::string>(full_name)));
+                            strval) +
+                   "\n";
       }
     }
     else if (t == typeid(double))
     {
       try
       {
-        auto v = std::stod(_root->param<std::string>(full_name));
+        auto v = std::stod(strval, &pos);
         param->set() = *reinterpret_cast<T *>(&v);
+        if (pos != strval.size())
+          throw std::runtime_error("dummy"); // catch below and emit error
       }
-      catch (...)
+      catch (...) // some std::exception's were slipping through with "catch(std::exception&)"
       {
-        mooseError(errormsg(_input_filename,
+        _errmsg += errormsg(_input_filename,
                             _root->find(full_name),
                             "invalid float syntax for parameter: ",
                             full_name,
                             "=",
-                            _root->param<std::string>(full_name)));
+                            strval) +
+                   "\n";
       }
     }
     else

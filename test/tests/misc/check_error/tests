@@ -558,4 +558,10 @@
     expect_out = "Function name 'x' could evaluate as a ParsedFunction"
     allow_warnings = true
   [../]
+
+  [./bad_number]
+    type = 'RunException'
+    input = 'bad_number.i'
+    expect_err = "invalid float syntax for parameter: BCs/right/value"
+  [../]
 []

@@ -73,7 +73,7 @@
     variable = pab
     v = 'a b'
     sto_v = '1 1'
-    log_k = '-2 -2'
+    log_k = -2
   [../]
 []
 

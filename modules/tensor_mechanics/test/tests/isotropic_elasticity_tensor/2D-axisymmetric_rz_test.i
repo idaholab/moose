@@ -108,7 +108,7 @@
     type = IterationAdaptiveDT
     dt = 1
     optimal_iterations = 6
-    iteration_window = 0.4
+    iteration_window = 0
     linear_iteration_ratio = 100
   [../]
 

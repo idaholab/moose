@@ -155,7 +155,7 @@
     type = DirichletBC
     variable = pgas
     boundary = right
-    value = 0+1000
+    value = 0
   [../]
 []
 
