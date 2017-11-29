@@ -93,7 +93,9 @@ class RunPBS(QueueManager):
             job_id = pattern.search(output).group(1)
             with self.dag_lock:
                 tester.setStatus('LAUNCHED %s' %(str(job_id)), tester.bucket_queued)
-            job_info = { 'job_id' : job_id }
+                session_data = self.getData(job.getUniqueIdentifier(), job_name=True)
+
+            job_info = { 'job_id' : job_id, 'std_out' : session_data['job_name'] + '.o' + job_id }
 
         # Failed to launch somehow. Set the tester output to command output. Hopefully something
         # useful in there to display to the user on why we failed
@@ -112,20 +114,14 @@ class RunPBS(QueueManager):
         """
         tester = job.getTester()
         job_state = re.search(r'job_state = (\w)', output)
-        job_id = re.search(r'Job Id: (\w+)', output)
 
         # Default bucket
         bucket = tester.bucket_queued
-        job_info = {}
 
-        if job_state and job_id:
+        if job_state:
             # Job is finished
             if job_state.group(1) == 'F':
                 reason = 'WAITING'
-
-                # Set the std_out path
-                session_data = self.getData(job.getUniqueIdentifier(), job_name=True)
-                job_info['std_out'] = session_data['job_name'] + '.o' + job_id.group(1)
 
                 # Set the bucket that allows processResults to commence
                 bucket = tester.bucket_waiting_processing
@@ -161,4 +157,4 @@ class RunPBS(QueueManager):
         with self.dag_lock:
             tester.setStatus(reason, bucket)
 
-        return job_info
+        return {}
