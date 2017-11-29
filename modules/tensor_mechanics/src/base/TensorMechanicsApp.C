@@ -113,7 +113,6 @@
 #include "ComputePlasticHeatEnergy.h"
 #include "ComputeInterfaceStress.h"
 #include "TensileStressUpdate.h"
-#include "ComputeFiniteStrainElasticStressBirchMurnaghan.h"
 #include "GeneralizedMaxwellModel.h"
 #include "GeneralizedKelvinVoigtModel.h"
 #include "LinearViscoelasticStressUpdate.h"
@@ -342,7 +341,6 @@ TensorMechanicsApp::registerObjects(Factory & factory)
   registerMaterial(ComputePlasticHeatEnergy);
   registerMaterial(ComputeInterfaceStress);
   registerMaterial(TensileStressUpdate);
-  registerMaterial(ComputeFiniteStrainElasticStressBirchMurnaghan);
   registerMaterial(EshelbyTensor);
   registerMaterial(GeneralizedMaxwellModel);
   registerMaterial(GeneralizedKelvinVoigtModel);

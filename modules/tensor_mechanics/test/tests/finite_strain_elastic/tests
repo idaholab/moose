@@ -52,9 +52,4 @@
     input = 'finite_strain_stress_errorcheck.i'
     expect_err = 'This linear elastic stress calculation only works for small strains; use ComputeFiniteStrainElasticStress for simulations using incremental and finite strains.'
   [../]
-  [./equation_of_state]
-    type = 'Exodiff'
-    input = 'equation_of_state.i'
-    exodiff = 'equation_of_state_out.e'
-  [../]
 []
