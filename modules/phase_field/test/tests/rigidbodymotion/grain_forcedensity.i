@@ -178,7 +178,7 @@
     type = BndsCalcAux
     variable = bnds
     var_name_base = eta
-    op_num = 2.0
+    op_num = 2
     v = 'eta0 eta1'
   [../]
   [./df01]

@@ -24,7 +24,7 @@
     radius = 6.0
     invalue = 1.0
     variation_invalue = 0.0
-    outvalue = -0.8;
+    outvalue = -0.8
     variation_outvalue = 0.2
     int_width = 5
   [../]

@@ -22,7 +22,7 @@
   [./cur_Sim]
     type = StateSimRunner
     model_path = 'path/to/model'
-    seed = 7;
+    seed = 7
   [../]
 []
 
