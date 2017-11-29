@@ -8,7 +8,6 @@
 []
 
 [Variables]
-  active = 'u'
 
   [./u]
     order = FIRST
@@ -17,8 +16,6 @@
 []
 
 [Kernels]
-  active = 'diff'
-
   [./diff]
     type = Diffusion
     variable = u
@@ -26,15 +23,12 @@
 []
 
 [BCs]
-  active = 'left right'
-
   [./left]
     type = DirichletBC
     variable = u
     boundary = 1
     value = 0
   [../]
-
   [./right]
     type = DirichletBC
     variable = u
@@ -43,23 +37,18 @@
   [../]
 []
 
-[MultiApps]
-  [./dummy]
-    type = TransientMultiApp
-    input_files = adaptiveDT.i
-    execute_on = timestep_end
-  [../]
-[]
-
 [Executioner]
   type = Transient
   start_time = 0
   end_time = 0.006
-  dt = 0.006
+  [./TimeStepper]
+    type = IterationAdaptiveDT
+    dt = 0.001
+    optimal_iterations = 6
+  [../]
   nl_abs_tol = 1.0e-8
 []
 
 [Outputs]
-  file_base = out
   exodus = true
 []

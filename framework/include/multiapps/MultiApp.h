@@ -92,12 +92,29 @@ public:
   virtual bool solveStep(Real dt, Real target_time, bool auto_advance = true) = 0;
 
   /**
-   * Actually advances time and causes output.
-   *
-   * If auto_advance=true was used in solveStep() then this function
-   * will do nothing.
+   * Advances the multi-apps time step which is important for dt selection.
+   * (Note this does not advance the *time*. That is done in Transient::endStep,
+   * which is called either directly from solveStep() for loose coupling cases
+   * or through finishStep() for Picard coupling cases)
    */
-  virtual void advanceStep() = 0;
+  virtual void incrementTStep() {}
+
+  /**
+   * Deprecated method. Use finishStep
+   */
+  virtual void advanceStep()
+  {
+    mooseDeprecated("advanceStep() is deprecated; please use finishStep() instead");
+    finishStep();
+  }
+
+  /**
+   * Calls multi-apps executioners' endStep and postStep methods which creates output and advances
+   * time (not the time step; see incrementTStep()) among other things. This method is only called
+   * for Picard calculations because for loosely coupled calculations the executioners' endStep and
+   * postStep methods are called from solveStep().
+   */
+  virtual void finishStep() {}
 
   /**
    * Save off the state of every Sub App
