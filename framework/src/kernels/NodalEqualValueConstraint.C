@@ -31,7 +31,7 @@ NodalEqualValueConstraint::NodalEqualValueConstraint(const InputParameters & par
   : NodalScalarKernel(parameters)
 {
   if (_node_ids.size() != 2)
-    mooseError(name(), ": The number of nodes has to be 2, but it is ", _node_ids.size(), ".");
+    paramError("nodes", "invalid number of nodes: want 2, got ", _node_ids.size());
 
   unsigned int n = coupledComponents("var");
   _value.resize(n);

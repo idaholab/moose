@@ -10,12 +10,12 @@
   [./test_soln_var_err]
     type = RunException
     input = 'save_in_soln_var_err_test.i'
-    expect_err = 'Trying to use solution variable u as a save_in variable in diff'
+    expect_err = 'diff/save_in\) cannot use solution variable as save-in variable'
   [../]
   [./test_diag_sol_var_err]
     type = RunException
     input = 'diag_save_in_soln_var_err_test.i'
-    expect_err = 'Trying to use solution variable u as a diag_save_in variable in diff'
+    expect_err = '\(.*diff/diag_save_in\) cannot use solution variable as diag save-in variable'
   [../]
   [./test_dg]
     type = 'Exodiff'

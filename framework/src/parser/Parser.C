@@ -956,6 +956,9 @@ Parser::extractParams(const std::string & prefix, InputParameters & p)
       _extracted_vars.insert(
           full_name); // Keep track of all variables extracted from the input file
       found = true;
+      p.set<std::string>(paramLocName(it.first)) =
+          _input_filename + ":" + std::to_string(_root->find(full_name)->line());
+      p.set<std::string>(paramPathName(it.first)) = full_name;
     }
     // Wait! Check the GlobalParams section
     else if (global_params_block)
@@ -968,6 +971,9 @@ Parser::extractParams(const std::string & prefix, InputParameters & p)
             full_name); // Keep track of all variables extracted from the input file
         found = true;
         in_global = true;
+        p.set<std::string>(paramLocName(it.first)) =
+            _input_filename + ":" + std::to_string(_root->find(full_name)->line());
+        p.set<std::string>(paramPathName(it.first)) = full_name;
       }
     }
 

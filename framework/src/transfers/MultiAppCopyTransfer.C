@@ -25,6 +25,7 @@
 
 #include "libmesh/system.h"
 #include "libmesh/id_types.h"
+#include "libmesh/string_to_enum.h"
 
 template <>
 InputParameters
@@ -83,7 +84,10 @@ MultiAppCopyTransfer::transfer(FEProblemBase & to_problem, FEProblemBase & from_
 
   // Check integrity
   if (to_var.feType() != from_var.feType())
-    mooseError("The variables must be the same type (order and family).");
+    paramError("variable",
+               "'variable' and 'source_variable' must be the same type (order and family): ",
+               libMesh::Utility::enum_to_string<FEFamily>(to_var.feType().family),
+               moose::internal::incompatVarMsg(to_var, from_var));
 
   if ((to_mesh.n_nodes() != from_mesh.n_nodes()) || (to_mesh.n_elem() != from_mesh.n_elem()))
     mooseError("The meshes must be identical to utilize MultiAppCopyTransfer.");

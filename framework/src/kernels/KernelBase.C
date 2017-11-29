@@ -114,13 +114,13 @@ KernelBase::KernelBase(const InputParameters & parameters)
     MooseVariable * var = &_subproblem.getVariable(_tid, _save_in_strings[i]);
 
     if (_fe_problem.getNonlinearSystemBase().hasVariable(_save_in_strings[i]))
-      mooseError("Trying to use solution variable " + _save_in_strings[i] +
-                 " as a save_in variable in " + name());
+      paramError("save_in", "cannot use solution variable as save-in variable");
 
     if (var->feType() != _var.feType())
-      mooseError("Error in " + name() + ". When saving residual values in an Auxiliary variable "
-                                        "the AuxVariable must be the same type as the nonlinear "
-                                        "variable the object is acting on.");
+      paramError(
+          "save_in",
+          "saved-in auxiliary variable is incompatible with the object's nonlinear variable: ",
+          moose::internal::incompatVarMsg(*var, _var));
 
     _save_in[i] = var;
     var->sys().addVariableToZeroOnResidual(_save_in_strings[i]);
@@ -134,13 +134,13 @@ KernelBase::KernelBase(const InputParameters & parameters)
     MooseVariable * var = &_subproblem.getVariable(_tid, _diag_save_in_strings[i]);
 
     if (_fe_problem.getNonlinearSystemBase().hasVariable(_diag_save_in_strings[i]))
-      mooseError("Trying to use solution variable " + _diag_save_in_strings[i] +
-                 " as a diag_save_in variable in " + name());
+      paramError("diag_save_in", "cannot use solution variable as diag save-in variable");
 
     if (var->feType() != _var.feType())
-      mooseError("Error in " + name() + ". When saving diagonal Jacobian values in an Auxiliary "
-                                        "variable the AuxVariable must be the same type as the "
-                                        "nonlinear variable the object is acting on.");
+      paramError(
+          "diag_save_in",
+          "saved-in auxiliary variable is incompatible with the object's nonlinear variable: ",
+          moose::internal::incompatVarMsg(*var, _var));
 
     _diag_save_in[i] = var;
     var->sys().addVariableToZeroOnJacobian(_diag_save_in_strings[i]);
