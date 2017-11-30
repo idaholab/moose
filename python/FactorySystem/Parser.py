@@ -7,7 +7,7 @@ import os, re, time, sys
 try:
     import hit
 except:
-    print('failed to import hit - you may need to (re)build moose.', file=sys.stderr)
+    print('failed to import hit - try running "make hit" in the $MOOSE_DIR/test directory.', file=sys.stderr)
     sys.exit(1)
 
 class DupWalker(object):
