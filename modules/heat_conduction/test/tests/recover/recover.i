@@ -8,7 +8,7 @@
 []
 
 [Mesh]
-  file = restart.e
+  file = recover_in.e
 []
 
 [Variables]
@@ -85,13 +85,9 @@
   petsc_options = '-snes_ksp_ew'
   petsc_options_iname = '-pc_type -pc_factor_mat_solver_package'
   petsc_options_value = ' lu       superlu_dist'
-  line_search = 'none'
 
-  l_max_its = 100
-
-  nl_max_its = 50
-  nl_rel_tol = 1e-4
-  nl_abs_tol = 1e-8
+  nl_rel_tol = 1e-9
+  nl_abs_tol = 1e-11
 
   start_time = -200
   n_startup_steps = 1
@@ -134,19 +130,8 @@
     diffusivity = thermal_conductivity
     execute_on = timestep_end
   [../]
-  [./flux_from_fuel]
-    type = SideFluxIntegral
-    variable = temp
-    boundary = 10
-    diffusivity = thermal_conductivity
-    execute_on = timestep_end
-  [../]
   [./_dt]
     type = TimestepSize
-    execute_on = timestep_end
-  [../]
-  [./nonlinear_its]
-    type = NumNonlinearIterations
     execute_on = timestep_end
   [../]
 []
