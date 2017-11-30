@@ -184,6 +184,7 @@
 #include "AverageElementSize.h"
 #include "AverageNodalVariableValue.h"
 #include "CumulativeValuePostprocessor.h"
+#include "ChangeOverTimePostprocessor.h"
 #include "ChangeOverTimestepPostprocessor.h"
 #include "NodalSum.h"
 #include "ElementAverageValue.h"
@@ -645,6 +646,7 @@ registerObjects(Factory & factory)
   registerPostprocessor(AverageElementSize);
   registerPostprocessor(AverageNodalVariableValue);
   registerPostprocessor(CumulativeValuePostprocessor);
+  registerPostprocessor(ChangeOverTimePostprocessor);
   registerPostprocessor(ChangeOverTimestepPostprocessor);
   registerPostprocessor(NodalSum);
   registerPostprocessor(ElementAverageValue);
