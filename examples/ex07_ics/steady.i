@@ -11,7 +11,7 @@
     # for which we want to apply this initial condition
     [./InitialCondition]
       type = ExampleIC
-      coefficient = 2.0;
+      coefficient = 2.0
     [../]
   [../]
 []
