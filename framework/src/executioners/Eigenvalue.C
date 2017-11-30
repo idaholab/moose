@@ -41,7 +41,7 @@ validParams<Eigenvalue>()
 
 Eigenvalue::Eigenvalue(const InputParameters & parameters)
   : Steady(parameters),
-    _eigen_problem(*parameters.getCheckedPointerParam<EigenProblem *>(
+    _eigen_problem(*getCheckedPointerParam<EigenProblem *>(
         "_eigen_problem", "This might happen if you don't have a mesh"))
 {
 // Extract and store SLEPc options

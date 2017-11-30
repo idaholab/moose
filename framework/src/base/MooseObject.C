@@ -45,12 +45,10 @@ validParams<MooseObject>()
 }
 
 MooseObject::MooseObject(const InputParameters & parameters)
-  : ConsoleStreamInterface(
-        *parameters.getCheckedPointerParam<MooseApp *>("_moose_app")),
-    ParallelObject(
-        *parameters.getCheckedPointerParam<MooseApp *>("_moose_app")),
-    _app(*parameters.getCheckedPointerParam<MooseApp *>("_moose_app")),
+  : ConsoleStreamInterface(*parameters.getCheckedPointerParam<MooseApp *>("_moose_app")),
+    ParallelObject(*parameters.getCheckedPointerParam<MooseApp *>("_moose_app")),
     _pars(parameters),
+    _app(*getCheckedPointerParam<MooseApp *>("_moose_app")),
     _name(getParam<std::string>("_object_name")),
     _enabled(getParam<bool>("enable")){}
 
