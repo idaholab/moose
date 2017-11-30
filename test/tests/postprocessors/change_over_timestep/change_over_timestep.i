@@ -1,7 +1,8 @@
 # This test tests the ChangeOverTimestepPostprocessor, which computes the change
-# in a postprocessor value over a timestep. This test creates a time-dependent
-# function postprocessor and then computes its change over a timestep. The
-# FE problem used here is a dummy problem and has no effect on the test.
+# in a postprocessor value with respect to the previous value or with respect to
+# the initial value. This test creates a time-dependent function postprocessor
+# and then computes its change over a timestep. The FE problem used here is a
+# dummy problem and has no effect on the test.
 
 [Mesh]
   type = GeneratedMesh
@@ -64,9 +65,12 @@
   [./change_over_timestep]
     type = ChangeOverTimestepPostprocessor
     postprocessor = my_postprocessor
+    change_with_respect_to_initial = false
+    execute_on = 'initial timestep_end'
   [../]
 []
 
 [Outputs]
+  file_base = 'change_over_timestep_previous'
   csv = true
 []

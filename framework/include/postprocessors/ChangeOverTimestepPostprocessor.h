@@ -36,14 +36,23 @@ public:
   virtual Real getValue() override;
 
 protected:
+  /// option to compute change with respect to initial value instead of previous time value
+  const bool _change_with_respect_to_initial;
+
   /// option to compute the magnitude of relative change instead of change
   const bool _compute_relative_change;
+
+  /// option to take the absolute value of the change
+  const bool _take_absolute_value;
 
   /// current post-processor value
   const PostprocessorValue & _pps_value;
 
   /// old post-processor value
   const PostprocessorValue & _pps_value_old;
+
+  /// initial post-processor value
+  Real _pps_value_initial;
 };
 
 #endif /* CHANGEOVERTIMESTEPPOSTPROCESSOR_H */
