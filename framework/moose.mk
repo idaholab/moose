@@ -31,12 +31,11 @@ hit_deps      := $(patsubst %.cc, %.$(obj-suffix).d, $(hit_srcfiles))
 # hit python bindings
 #
 pyhit_srcfiles  := $(hit_DIR)/hit.cpp $(hit_DIR)/lex.cc $(hit_DIR)/parse.cc
-pyhit_LIB       := $(hit_DIR)/hit.so
+pyhit_LIB       := $(FRAMEWORK_DIR)/../python/hit.so
 
-$(pyhit_LIB): $(pyhit_srcfiles)
-	@echo "Linking Library "$@"..."
-	@bash -c '(cd "$(hit_DIR)" && $(libmesh_CXX) -std=c++11 -w -fPIC -lstdc++ -shared -L`python-config --prefix`/lib `python-config --includes` `python-config --ldflags` $^ -o $@)'
-	@cp $@ $(FRAMEWORK_DIR)/../python/
+hit $(pyhit_LIB): $(pyhit_srcfiles)
+	@echo "Building and linking "$@"..."
+	@bash -c '(cd "$(hit_DIR)" && $(libmesh_CXX) -std=c++11 -w -fPIC -lstdc++ -shared -L`python-config --prefix`/lib `python-config --includes` `python-config --ldflags` $^ -o $(pyhit_LIB))'
 
 #
 # gtest
@@ -167,11 +166,11 @@ $(exodiff_APP): $(exodiff_objects)
 #
 # Clean targets
 #
-.PHONY: clean clobber cleanall echo_include echo_library libmesh_submodule_status
+.PHONY: clean clobber cleanall echo_include echo_library libmesh_submodule_status hit
 
 # Set up app-specific variables for MOOSE, so that it can use the same clean target as the apps
 app_EXEC := $(exodiff_APP)
-app_LIB  := $(moose_LIBS) $(pcre_LIB) $(gtest_LIB) $(hit_LIB)
+app_LIB  := $(moose_LIBS) $(pcre_LIB) $(gtest_LIB) $(hit_LIB) $(pyhit_LIB)
 app_objects := $(moose_objects) $(exodiff_objects) $(pcre_objects) $(gtest_objects) $(hit_objects)
 app_deps := $(moose_deps) $(exodiff_deps) $(pcre_deps) $(gtest_deps) $(hit_deps)
 
