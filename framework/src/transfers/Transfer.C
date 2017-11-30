@@ -54,9 +54,9 @@ Transfer::Transfer(const InputParameters & parameters)
   : MooseObject(parameters),
     SetupInterface(this),
     Restartable(parameters, "Transfers"),
-    _subproblem(*parameters.get<SubProblem *>("_subproblem")),
-    _fe_problem(*parameters.get<FEProblemBase *>("_fe_problem_base")),
-    _sys(*parameters.get<SystemBase *>("_sys")),
+    _subproblem(*parameters.getCheckedPointerParam<SubProblem *>("_subproblem")),
+    _fe_problem(*parameters.getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")),
+    _sys(*parameters.getCheckedPointerParam<SystemBase *>("_sys")),
     _tid(parameters.get<THREAD_ID>("_tid"))
 {
 }

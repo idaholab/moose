@@ -26,11 +26,11 @@ Restartable::Restartable(const InputParameters & parameters,
     _restartable_tid(parameters.isParamValid("_tid") ? parameters.get<THREAD_ID>("_tid") : 0)
 {
   _restartable_subproblem = parameters.isParamValid("_subproblem")
-                                ? parameters.get<SubProblem *>("_subproblem")
+                                ? parameters.getCheckedPointerParam<SubProblem *>("_subproblem")
                                 : (parameters.isParamValid("_fe_problem_base")
-                                       ? parameters.get<FEProblemBase *>("_fe_problem_base")
+                                       ? parameters.getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")
                                        : (parameters.isParamValid("_fe_problem")
-                                              ? parameters.get<FEProblem *>("_fe_problem")
+                                              ? parameters.getCheckedPointerParam<FEProblem *>("_fe_problem")
                                               : subproblem));
 }
 

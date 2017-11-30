@@ -28,7 +28,7 @@ MooseVariableInterface::MooseVariableInterface(const MooseObject * moose_object,
 {
   const InputParameters & parameters = moose_object->parameters();
 
-  SubProblem & problem = *parameters.get<SubProblem *>("_subproblem");
+  SubProblem & problem = *parameters.getCheckedPointerParam<SubProblem *>("_subproblem");
 
   THREAD_ID tid = parameters.get<THREAD_ID>("_tid");
 

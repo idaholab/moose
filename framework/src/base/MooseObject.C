@@ -46,9 +46,9 @@ validParams<MooseObject>()
 
 MooseObject::MooseObject(const InputParameters & parameters)
   : ConsoleStreamInterface(
-        *parameters.get<MooseApp *>("_moose_app")), // Can't call getParam before pars is set
+        *parameters.getCheckedPointerParam<MooseApp *>("_moose_app")),
     ParallelObject(
-        *parameters.get<MooseApp *>("_moose_app")), // Can't call getParam before pars is set
+        *parameters.getCheckedPointerParam<MooseApp *>("_moose_app")),
     _app(*parameters.getCheckedPointerParam<MooseApp *>("_moose_app")),
     _pars(parameters),
     _name(getParam<std::string>("_object_name")),

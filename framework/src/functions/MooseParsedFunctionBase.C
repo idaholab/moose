@@ -32,7 +32,7 @@ validParams<MooseParsedFunctionBase>()
 }
 
 MooseParsedFunctionBase::MooseParsedFunctionBase(const InputParameters & parameters)
-  : _pfb_feproblem(*parameters.get<FEProblemBase *>("_fe_problem_base")),
+  : _pfb_feproblem(*parameters.getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")),
     _vars(parameters.get<std::vector<std::string>>("vars")),
     _vals(parameters.get<std::vector<std::string>>("vals"))
 {

@@ -24,7 +24,7 @@
 
 GeometricSearchInterface::GeometricSearchInterface(const MooseObject * moose_object)
   : _geometric_search_data(
-        moose_object->parameters().get<SubProblem *>("_subproblem")->geomSearchData())
+        moose_object->parameters().getCheckedPointerParam<SubProblem *>("_subproblem")->geomSearchData())
 {
 }
 

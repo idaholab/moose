@@ -33,7 +33,7 @@ Coupleable::Coupleable(const MooseObject * moose_object, bool nodal)
                              : false),
     _coupleable_max_qps(_c_fe_problem.getMaxQps())
 {
-  SubProblem & problem = *_c_parameters.get<SubProblem *>("_subproblem");
+  SubProblem & problem = *_c_parameters.getCheckedPointerParam<SubProblem *>("_subproblem");
 
   THREAD_ID tid = _c_parameters.get<THREAD_ID>("_tid");
 
