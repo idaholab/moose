@@ -1,4 +1,4 @@
-# This test tests the ChangeOverTimestepPostprocessor, which computes the change
+# This test tests the ChangeOverTimePostprocessor, which computes the change
 # in a postprocessor value with respect to the previous value or with respect to
 # the initial value. This test creates a time-dependent function postprocessor
 # and then computes its change over a timestep. The FE problem used here is a
@@ -62,8 +62,8 @@
     function = my_function
     execute_on = 'initial timestep_end'
   [../]
-  [./change_over_timestep]
-    type = ChangeOverTimestepPostprocessor
+  [./change_over_time]
+    type = ChangeOverTimePostprocessor
     postprocessor = my_postprocessor
     change_with_respect_to_initial = false
     execute_on = 'initial timestep_end'
@@ -71,6 +71,6 @@
 []
 
 [Outputs]
-  file_base = 'change_over_timestep_previous'
+  file_base = 'change_over_time_previous'
   csv = true
 []

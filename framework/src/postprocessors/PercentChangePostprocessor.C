@@ -29,7 +29,7 @@ PercentChangePostprocessor::PercentChangePostprocessor(const InputParameters & p
     _postprocessor_old(getPostprocessorValueOld("postprocessor"))
 {
   mooseDeprecated("PercentChangePostprocessor is deprecated: instead, ",
-                  "please use ChangeOverTimestepPostprocessor using the parameter ",
+                  "please use ChangeOverTimePostprocessor using the parameter ",
                   "'compute_relative_change' set to 'true'");
 }
 
