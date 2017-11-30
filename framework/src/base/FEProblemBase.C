@@ -4391,15 +4391,19 @@ FEProblemBase::possiblyRebuildGeomSearchPatches()
   {
     switch (_mesh.getPatchUpdateStrategy())
     {
-      case 0: // Never
+      case Moose::Never:
         break;
-      case 3: // Nonlinear iteration
-        // This case is included in PenetrationLocator.C as the subset of slave nodes
-        // for which penetration is not detected at the current iteration is required.
+      case Moose::Iteration:
+        // Update the list of ghosted elements at the start of the time step
+        _geometric_search_data.updateGhostedElems();
+        _mesh.updateActiveSemiLocalNodeRange(_ghosted_elems);
+
+        _displaced_problem->geomSearchData().updateGhostedElems();
+        _displaced_mesh->updateActiveSemiLocalNodeRange(_ghosted_elems);
 
         // The commands below ensure that the sparsity of the Jacobian matrix is
         // augmented at the start of the time step using neighbor nodes from the end
-        // of previous time step
+        // of the previous time step.
 
         reinitBecauseOfGhostingOrNewGeomObjects();
 
@@ -4407,7 +4411,8 @@ FEProblemBase::possiblyRebuildGeomSearchPatches()
         initPetscOutput();
 
         break;
-      case 2: // Auto
+
+      case Moose::Auto:
       {
         Real max = _displaced_problem->geomSearchData().maxPatchPercentage();
         _communicator.max(max);
@@ -4419,7 +4424,7 @@ FEProblemBase::possiblyRebuildGeomSearchPatches()
 
       // Let this fall through if things do need to be updated...
 
-      case 1: // Always
+      case Moose::Always:
         // Flush output here to see the message before the reinitialization, which could take a
         // while
         _console << "\n\nUpdating geometric search patches\n" << std::endl;

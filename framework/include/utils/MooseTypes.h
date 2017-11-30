@@ -352,6 +352,17 @@ enum MffdType
   MFFD_WP,
   MFFD_DS
 };
+
+/**
+ * Type of patch update strategy for modeling node-face constraints or contact
+ */
+enum PatchUpdateType
+{
+  Never,
+  Always,
+  Auto,
+  Iteration
+};
 }
 
 /**

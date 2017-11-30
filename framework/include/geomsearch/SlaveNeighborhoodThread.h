@@ -34,7 +34,6 @@ public:
                           const std::vector<dof_id_type> & trial_master_nodes,
                           const std::map<dof_id_type, std::vector<dof_id_type>> & node_to_elem_map,
                           const unsigned int patch_size,
-                          const unsigned int patch_update_strategy,
                           KDTree & _kd_tree);
 
   /// Splitting Constructor
@@ -65,9 +64,6 @@ protected:
 
   /// The number of nodes to keep
   unsigned int _patch_size;
-
-  /// Patch update strategy
-  unsigned int _patch_update_strategy;
 };
 
 #endif // SLAVENEIGHBORHOODTHREAD_H

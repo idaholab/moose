@@ -103,9 +103,7 @@ protected:
                                    // perform normal smoothing
   NORMAL_SMOOTHING_METHOD _normal_smoothing_method;
 
-  const unsigned int _patch_update_strategy; // Contact patch update strategy
-
-  bool _first_warning; // Flag to check for first warning
+  const Moose::PatchUpdateType _patch_update_strategy; // Contact patch update strategy
 };
 
 /**

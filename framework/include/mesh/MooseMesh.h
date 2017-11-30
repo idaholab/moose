@@ -431,18 +431,23 @@ public:
   unsigned int getPatchSize() const;
 
   /**
+   * Getter for the ghosting_patch_size parameter.
+   */
+  unsigned int getGhostingPatchSize() const { return _ghosting_patch_size; };
+
+  /**
    * Getter for the maximum leaf size parameter.
    */
   unsigned int getMaxLeafSize() const { return _max_leaf_size; };
   /**
    * Set the patch size update strategy
    */
-  void setPatchUpdateStrategy(MooseEnum patch_update_strategy);
+  void setPatchUpdateStrategy(Moose::PatchUpdateType patch_update_strategy);
 
   /**
    * Get the current patch update strategy.
    */
-  const MooseEnum & getPatchUpdateStrategy() const;
+  const Moose::PatchUpdateType & getPatchUpdateStrategy() const;
 
   /**
    * Get a (slightly inflated) processor bounding box.
@@ -952,11 +957,14 @@ protected:
   /// The number of nodes to consider in the NearestNode neighborhood.
   unsigned int _patch_size;
 
+  /// The number of nearest neighbors to consider for ghosting purposes when iteration patch update strategy is used.
+  unsigned int _ghosting_patch_size;
+
   // The maximum number of points in each leaf of the KDTree used in the nearest neighbor search.
   unsigned int _max_leaf_size;
 
   /// The patch update strategy
-  MooseEnum _patch_update_strategy;
+  Moose::PatchUpdateType _patch_update_strategy;
 
   /// file_name iff this mesh was read from a file
   std::string _file_name;

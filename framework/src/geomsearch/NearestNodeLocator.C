@@ -47,7 +47,6 @@ NearestNodeLocator::NearestNodeLocator(SubProblem & subproblem,
     _boundary1(boundary1),
     _boundary2(boundary2),
     _first(true),
-    _ghost_elements(true),
     _patch_update_strategy(_mesh.getPatchUpdateStrategy())
 {
   /*
@@ -75,6 +74,7 @@ NearestNodeLocator::findNodes()
    * If this is the first time through we're going to build up a "neighborhood" of nodes
    * surrounding each of the slave nodes.  This will speed searching later.
    */
+  const std::map<dof_id_type, std::vector<dof_id_type>> & node_to_elem_map = _mesh.nodeToElemMap();
 
   if (_first)
   {
@@ -122,43 +122,6 @@ NearestNodeLocator::findNodes()
       }
     }
 
-    const std::map<dof_id_type, std::vector<dof_id_type>> & node_to_elem_map =
-        _mesh.nodeToElemMap();
-
-    // Ghost the entire master and slave boundary once when nonliner_iter patch update strategy is
-    // used
-    if (_ghost_elements && _patch_update_strategy == 3)
-    {
-      // The ghosting needs to be done only once during the simulation as the master
-      // and slave boundaries do not change during the simulation.
-      _ghost_elements = false;
-
-      // Ghost the elements connected to master boundary and slave boundary_id
-      for (unsigned int i = 0; i < trial_master_nodes.size(); ++i)
-      {
-        auto node_to_elem_pair = node_to_elem_map.find(trial_master_nodes[i]);
-
-        if (node_to_elem_pair != node_to_elem_map.end())
-        {
-          const std::vector<dof_id_type> & elems_connected_to_node = node_to_elem_pair->second;
-          for (const auto & dof : elems_connected_to_node)
-            _subproblem.addGhostedElem(dof);
-        }
-      }
-
-      for (unsigned int i = 0; i < trial_slave_nodes.size(); ++i)
-      {
-        auto node_to_elem_pair = node_to_elem_map.find(trial_slave_nodes[i]);
-
-        if (node_to_elem_pair != node_to_elem_map.end())
-        {
-          const std::vector<dof_id_type> & elems_connected_to_node = node_to_elem_pair->second;
-          for (const auto & dof : elems_connected_to_node)
-            _subproblem.addGhostedElem(dof);
-        }
-      }
-    }
-
     // Convert trial master nodes to a vector of Points. This will be used to
     // construct the Kdtree.
     std::vector<Point> master_points(trial_master_nodes.size());
@@ -174,25 +137,31 @@ NearestNodeLocator::findNodes()
 
     NodeIdRange trial_slave_node_range(trial_slave_nodes.begin(), trial_slave_nodes.end(), 1);
 
-    SlaveNeighborhoodThread snt(_mesh,
-                                trial_master_nodes,
-                                node_to_elem_map,
-                                _mesh.getPatchSize(),
-                                _patch_update_strategy,
-                                kd_tree);
+    SlaveNeighborhoodThread snt(
+        _mesh, trial_master_nodes, node_to_elem_map, _mesh.getPatchSize(), kd_tree);
 
     Threads::parallel_reduce(trial_slave_node_range, snt);
 
-    if (_patch_update_strategy == 3)
+    _slave_nodes = snt._slave_nodes;
+    _neighbor_nodes = snt._neighbor_nodes;
+
+    // If 'iteration' patch update strategy is used, a second neighborhood
+    // search using the ghosting_patch_size, which is larger than the regular
+    // patch_size used for contact search, is conducted. The ghosted element set
+    // given by this search is used for ghosting the elements connected to the
+    // slave and neighboring master nodes.
+    if (_patch_update_strategy == Moose::Iteration)
     {
-      _slave_nodes = trial_slave_nodes;
-      _neighbor_nodes = snt._neighbor_nodes;
+      SlaveNeighborhoodThread snt_ghosting(
+          _mesh, trial_master_nodes, node_to_elem_map, _mesh.getGhostingPatchSize(), kd_tree);
+
+      Threads::parallel_reduce(trial_slave_node_range, snt_ghosting);
+
+      for (const auto & dof : snt_ghosting._ghosted_elems)
+        _subproblem.addGhostedElem(dof);
     }
     else
     {
-      _slave_nodes = snt._slave_nodes;
-      _neighbor_nodes = snt._neighbor_nodes;
-
       for (const auto & dof : snt._ghosted_elems)
         _subproblem.addGhostedElem(dof);
     }
@@ -211,6 +180,31 @@ NearestNodeLocator::findNodes()
 
   _nearest_node_info = nnt._nearest_node_info;
 
+  if (_patch_update_strategy == Moose::Iteration)
+  {
+    // Get the set of elements that are currently being ghosted
+    std::set<dof_id_type> ghost = _subproblem.ghostedElems();
+
+    for (const auto & node_id : *_slave_node_range)
+    {
+      const Node * nearest_node = _nearest_node_info[node_id]._nearest_node;
+
+      // Check if the elements attached to the nearest node are within the ghosted
+      // set of elements. If not produce an error.
+      auto node_to_elem_pair = node_to_elem_map.find(nearest_node->id());
+
+      if (node_to_elem_pair != node_to_elem_map.end())
+      {
+        const std::vector<dof_id_type> & elems_connected_to_node = node_to_elem_pair->second;
+        for (const auto & dof : elems_connected_to_node)
+          if (std::find(ghost.begin(), ghost.end(), dof) == ghost.end() &&
+              _mesh.elemPtr(dof)->processor_id() != _mesh.processor_id())
+            mooseError("Error in NearestNodeLocator : The nearest neighbor lies outside the "
+                       "ghosted set of elements. Increase the ghosting_patch_size parameter in the "
+                       "mesh block and try again.");
+      }
+    }
+  }
   Moose::perf_log.pop("NearestNodeLocator::findNodes()", "Execution");
 }
 
@@ -226,6 +220,8 @@ NearestNodeLocator::reinit()
 
   _slave_nodes.clear();
   _neighbor_nodes.clear();
+
+  _new_ghosted_elems.clear();
 
   // Redo the search
   findNodes();
@@ -299,32 +295,76 @@ NearestNodeLocator::updatePatch(std::vector<dof_id_type> & slave_nodes)
 
   NodeIdRange slave_node_range(slave_nodes.begin(), slave_nodes.end(), 1);
 
-  SlaveNeighborhoodThread snt(_mesh,
-                              trial_master_nodes,
-                              node_to_elem_map,
-                              _mesh.getPatchSize(),
-                              _patch_update_strategy,
-                              kd_tree);
+  SlaveNeighborhoodThread snt(
+      _mesh, trial_master_nodes, node_to_elem_map, _mesh.getPatchSize(), kd_tree);
 
   Threads::parallel_reduce(slave_node_range, snt);
 
-  // Update the neighbor nodes (patch) for these slave nodes
-  for (const auto & node_id : slave_node_range)
+  // Calculate new ghosting patch for the slave_node_range
+  SlaveNeighborhoodThread snt_ghosting(
+      _mesh, trial_master_nodes, node_to_elem_map, _mesh.getGhostingPatchSize(), kd_tree);
+
+  Threads::parallel_reduce(slave_node_range, snt_ghosting);
+
+  // Add the new set of elements that need to be ghosted into _new_ghosted_elems
+  for (const auto & dof : snt_ghosting._ghosted_elems)
+    _new_ghosted_elems.push_back(dof);
+
+  std::vector<dof_id_type> tracked_slave_nodes = snt._slave_nodes;
+
+  // Update the neighbor nodes (patch) for these tracked slave nodes
+  for (const auto & node_id : tracked_slave_nodes)
     _neighbor_nodes[node_id] = snt._neighbor_nodes[node_id];
 
-  NearestNodeThread nnt(_mesh, _neighbor_nodes);
+  NodeIdRange tracked_slave_node_range(tracked_slave_nodes.begin(), tracked_slave_nodes.end(), 1);
 
-  Threads::parallel_reduce(slave_node_range, nnt);
+  NearestNodeThread nnt(_mesh, snt._neighbor_nodes);
+
+  Threads::parallel_reduce(tracked_slave_node_range, nnt);
 
   _max_patch_percentage = nnt._max_patch_percentage;
 
-  _nearest_node_info = nnt._nearest_node_info;
+  // Get the set of elements that are currently being ghosted
+  std::set<dof_id_type> ghost = _subproblem.ghostedElems();
 
-  // Update the nearest node information corresponding to these slave nodes
-  for (const auto & node_id : slave_node_range)
+  // Update the nearest node information corresponding to these tracked slave nodes
+  for (const auto & node_id : tracked_slave_node_range)
+  {
     _nearest_node_info[node_id] = nnt._nearest_node_info[node_id];
 
+    // Check if the elements attached to the nearest node are within the ghosted
+    // set of elements. If not produce an error.
+    const Node * nearest_node = nnt._nearest_node_info[node_id]._nearest_node;
+
+    auto node_to_elem_pair = node_to_elem_map.find(nearest_node->id());
+
+    if (node_to_elem_pair != node_to_elem_map.end())
+    {
+      const std::vector<dof_id_type> & elems_connected_to_node = node_to_elem_pair->second;
+      for (const auto & dof : elems_connected_to_node)
+        if (std::find(ghost.begin(), ghost.end(), dof) == ghost.end() &&
+            _mesh.elemPtr(dof)->processor_id() != _mesh.processor_id())
+          mooseError("Error in NearestNodeLocator : The nearest neighbor lies outside the ghosted "
+                     "set of elements. Increase the ghosting_patch_size parameter in the mesh "
+                     "block and try again.");
+    }
+  }
   Moose::perf_log.pop("NearestNodeLocator::updatePatch()", "Execution");
+}
+
+void
+NearestNodeLocator::updateGhostedElems()
+{
+  // When 'iteration' patch update strategy is used, add the elements in
+  // _new_ghosted_elems, which were accumulated in the nonlinear iterations
+  // during the previous time step, to the list of ghosted elements. Also clear
+  // the _new_ghosted_elems array for storing the ghosted elements from the
+  // nonlinear iterations in the current time step.
+
+  for (const auto & dof : _new_ghosted_elems)
+    _subproblem.addGhostedElem(dof);
+
+  _new_ghosted_elems.clear();
 }
 //===================================================================
 NearestNodeLocator::NearestNodeInfo::NearestNodeInfo()

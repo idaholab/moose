@@ -75,6 +75,12 @@ public:
   void updatePatch(std::vector<dof_id_type> & slave_nodes);
 
   /**
+   * Updates the ghosted elements at the start of the time step for iterion
+   * patch update strategy.
+   */
+  void updateGhostedElems();
+
+  /**
    * Data structure used to hold nearest node info.
    */
   class NearestNodeInfo
@@ -100,7 +106,6 @@ public:
   BoundaryID _boundary2;
 
   bool _first;
-  bool _ghost_elements;
   std::vector<dof_id_type> _slave_nodes;
 
   std::map<dof_id_type, std::vector<dof_id_type>> _neighbor_nodes;
@@ -109,10 +114,13 @@ public:
   static const unsigned int _patch_size;
 
   // Contact patch update strategy
-  const unsigned int _patch_update_strategy;
+  const Moose::PatchUpdateType _patch_update_strategy;
 
   // The furthest through the patch that had to be searched for any node last time
   Real _max_patch_percentage;
+
+  // The list of ghosted elements added during a time step for iteration patch update strategy
+  std::vector<dof_id_type> _new_ghosted_elems;
 };
 
 #endif // NEARESTNODELOCATOR_H

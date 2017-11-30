@@ -2,7 +2,7 @@
   file = sliding_update.e
   displacements = 'disp_x disp_y'
   patch_size = 5
-  patch_update_strategy = 'nonlinear_iter'
+  patch_update_strategy = 'iteration'
 []
 
 [Variables]
