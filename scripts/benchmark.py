@@ -292,7 +292,12 @@ def read_benchmarks(benchlist):
 
     root = hit.parse(benchlist, data)
     for child in root.find('benchmarks').children():
+        if not child.param('binary'):
+            raise ValueError('missing required "binary" field')
         ex = child.param('binary').strip()
+
+        if not child.param('input'):
+            raise ValueError('missing required "input" field')
         infile = child.param('input').strip()
         args = ''
         if child.find('cli_args'):
