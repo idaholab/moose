@@ -1,8 +1,41 @@
 #!/usr/bin/env python
 import sys, os, json, re, subprocess
 
+class Jobs:
+    """ Class to manage I/O to the supplied json file """
+    def __init__(self, json_file):
+        if os.path.exists(json_file):
+            self.__json_file = json_file
+        else:
+            raise Exception('File does not exist: %s' % (json_file))
+        self.__job_data = None
+
+    def getJobs(self):
+        if self.__job_data is None:
+            with open(self.__json_file, 'r') as f:
+                try:
+                    job_data = json.load(f)
+                except ValueError:
+                    raise Exception('Not a json file')
+
+            self.__job_data = job_data
+        return self.__job_data
+
+    def saveJobs(self):
+        if self.getJobs():
+            with open(self.__json_file, 'w') as f:
+                json.dump(self.__job_data, f, indent=2)
+
+def getQueuedJobIDs(jobs):
+    """ Return a list of queued job ids contained in jobs """
+    job_ids = []
+    for job, meta in jobs.getJobs().iteritems():
+        if 'job_id' in meta and meta['status_bucket']['status'] == 'QUEUED':
+            job_ids.append(meta['job_id'])
+    return job_ids
+
 def getJobStatus(job_ids):
-    """ run qstat and obtian job status for supplied job_ids """
+    """ run qstat and return tuple of (job_id, status) """
     qstat_cmd = ['qstat', '-x']
     qstat_cmd.extend(job_ids)
     process = subprocess.Popen(qstat_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
@@ -10,60 +43,31 @@ def getJobStatus(job_ids):
     if process.returncode != 0:
         sys.exit(1)
     else:
-        return results[0]
+        parsed_statuses = re.findall(r'(\d+).*\d+ (\w)', results[0])
+        return parsed_statuses
 
-def isFinished(queue_file, job_ids):
-    """
-    itemize qstat output, and return false if there are any
-    jobs that have yet to finish.
-    """
-    job_results = getJobStatus(job_ids)
-    result_list = re.findall(r'(\d+).*\d+ (\w)', job_results)
-    finished_job_ids = []
-    not_finished = False
-    for job_id, status in result_list:
-        if status != 'F':
-            not_finished = True
-            continue
-        finished_job_ids.append(job_id)
-
-    # Update the json file with any finished statuses
-    saveStatus(queue_file, finished_job_ids)
-
-    if not_finished:
-        return False
-    return True
-
-def getJobIDs(queue_file):
-    """ Open the supplied json queue file and return a list of queued job ids """
-    jobs = {}
-    job_ids = []
-    with open(queue_file, 'r') as f:
-        jobs = json.load(f)
-
-    for job, meta in jobs.iteritems():
-        if 'job_id' in meta and meta['status_bucket']['status'] == 'QUEUED':
-            job_ids.append(meta['job_id'])
-
-    return job_ids
-
-def saveStatus(queue_file, job_ids):
-    """
-    Allow this script to update the test's statuses to 'waiting' to speed up
-    the QueueManager (so the QueueManager doesn't need to ask qstat again, if
-    a test is 'waiting'). Only do this for tests that are 'queued'.
-    """
-    jobs = {}
-    with open(queue_file, 'r') as f:
-        jobs = json.load(f)
-
-    for job, meta in jobs.iteritems():
-        if 'job_id' in meta and meta['job_id'] in job_ids and meta['status_bucket']['status'] == 'QUEUED':
+def updateStatus(jobs, finished_jobs):
+    """ loop through jobs and adjust the status for those supplied in finished_jobs """
+    for job, meta in jobs.getJobs().iteritems():
+        if 'job_id' in meta and meta['job_id'] in finished_jobs and meta['status_bucket']['status'] == 'QUEUED':
             meta['status_bucket']['status'] = 'WAITING'
 
-    if jobs:
-        with open(queue_file, 'w') as f:
-            json.dump(jobs, f, indent=2)
+def isFinished(jobs):
+    """ Update job statuses, and return bool if all jobs are finished. """
+    is_finished = True
+    previously_queued_ids = getQueuedJobIDs(jobs)
+    if previously_queued_ids:
+        current_statuses = getJobStatus(previously_queued_ids)
+        finished_jobs = []
+        for job_id, status in current_statuses:
+            if status != 'F':
+                is_finished = False
+                continue
+            finished_jobs.append(job_id)
+        updateStatus(jobs, finished_jobs)
+
+    jobs.saveJobs()
+    return is_finished
 
 def usage():
     print('Supply a path to json queue file. Multiple files are supported, in which case all'
@@ -74,11 +78,8 @@ if __name__ == '__main__':
     args = sys.argv[1:]
     if len(args) == 0:
         usage()
+
     for queue_file in args:
-        if os.path.exists(queue_file):
-            job_ids = getJobIDs(queue_file)
-            if not isFinished(queue_file, job_ids):
-                sys.exit(1)
-        else:
-            print('Queue file does not exist: %s' %(queue_file))
+        jobs = Jobs(queue_file)
+        if not isFinished(jobs):
             sys.exit(1)
