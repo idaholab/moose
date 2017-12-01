@@ -2,6 +2,8 @@
 
 !include docs/content/getting_started/installation/mac_pre_req.md
 
+!include docs/content/getting_started/installation/post_package_install.md
+
 !include docs/content/getting_started/installation/clone_moose.md
 
 !include docs/content/getting_started/installation/build_libmesh.md
