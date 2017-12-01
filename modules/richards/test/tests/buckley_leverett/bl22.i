@@ -157,7 +157,7 @@
     type = DirichletBC
     variable = pgas
     boundary = left
-    value = 1E6+1000
+    value = 1E6
   [../]
   [./right_w]
     type = DirichletBC
@@ -169,7 +169,7 @@
     type = DirichletBC
     variable = pgas
     boundary = right
-    value = 0+1000
+    value = 0
   [../]
 []
 
