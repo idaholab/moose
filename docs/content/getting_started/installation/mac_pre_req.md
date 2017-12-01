@@ -14,8 +14,8 @@ If you do not have CLT installed, you will be presented with a dialog box allowi
 <p></p>
 
 ##### (3) MOOSE Environment package (choose one):
+  * High Sierra 10.13: !moosepackage arch=osx10.13 return=link!
   * Sierra 10.12: !moosepackage arch=osx10.12 return=link!
-  * El Capitan 10.11: !moosepackage arch=osx10.11 return=link!
 
 !!!warning "IMPORTANT: Close Open Terminals"
     If you have any opened terminals at this point, you must close and re-open them to use the MOOSE environment. The following instructions will ultimately fail if you do not.
