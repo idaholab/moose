@@ -58,8 +58,6 @@ protected:
 
   MooseMesh & _mesh;
 
-  AutoPtr<PointLocatorBase> _point_locator;
-
   MooseVariable & _variable;
 
   Real _amount;
