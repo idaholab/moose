@@ -39,17 +39,17 @@ along with any optional arguments.  The ``bench.list`` file has the following fo
 [benchmarks]
     [./simple_diffusion_refine3]
         binary = test/moose_test-opt
-        infile = test/tests/kernels/simple_diffusion/simple_diffusion.i
+        input = test/tests/kernels/simple_diffusion/simple_diffusion.i
         cli_args = 'Mesh/uniform_refine=3'
     [../]
     [./simple_diffusion_refine4]
         binary = test/moose_test-opt
-        infile = test/tests/kernels/simple_diffusion/simple_diffusion.i
+        input = test/tests/kernels/simple_diffusion/simple_diffusion.i
         cli_args = 'Mesh/uniform_refine=4'
     [../]
     [./simple_diffusion_ref5]
         binary = test/moose_test-opt
-        infile = test/tests/kernels/simple_diffusion/simple_diffusion.i
+        input = test/tests/kernels/simple_diffusion/simple_diffusion.i
         cli_args = 'Mesh/uniform_refine=5'
     [../]
     # ... add as many as you want
