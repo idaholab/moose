@@ -63,7 +63,7 @@ class ExodusSourceLineSampler(geometric.LineSource):
         self._exodus_source.checkUpdateState()
 
         if self.isOptionValid('resolution'):
-            n = self.getOption('resolution') + 1
+            n = self.getOption('resolution')
             p0 = self.getOption('point1')
             p1 = self.getOption('point2')
             dist = np.linalg.norm(np.array(p1) - np.array(p0))
@@ -95,4 +95,4 @@ class ExodusSourceLineSampler(geometric.LineSource):
             mooseutils.mooseError('Unable to locate the variable, ' + variable + \
                                   ', in the supplied source data.')
             return []
-        return [y.GetValue(i) for i in range(y.GetNumberOfTuples())]
+        return [y.GetValue(i) for i in range(y.GetNumberOfTuples() - 1)]
