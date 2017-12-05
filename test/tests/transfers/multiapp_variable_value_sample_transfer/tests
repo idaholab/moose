@@ -16,4 +16,11 @@
     input = 'master_quad.i'
     exodiff = 'master_quad_out.e master_quad_out_quad0.e master_quad_out_quad1.e master_quad_out_quad2.e master_quad_out_quad3.e'
   [../]
+
+  [./silence_barriers]
+    type = 'RunApp'
+    input = 'master.i'
+    prereq = 'test'
+    absent_out = "Jobs complete:"
+  [../]
 []
