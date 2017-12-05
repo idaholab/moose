@@ -1,0 +1,53 @@
+/****************************************************************/
+/*               DO NOT MODIFY THIS HEADER                      */
+/* MOOSE - Multiphysics Object Oriented Simulation Environment  */
+/*                                                              */
+/*           (c) 2010 Battelle Energy Alliance, LLC             */
+/*                   ALL RIGHTS RESERVED                        */
+/*                                                              */
+/*          Prepared by Battelle Energy Alliance, LLC           */
+/*            Under Contract No. DE-AC07-05ID14517              */
+/*            With the U. S. Department of Energy               */
+/*                                                              */
+/*            See COPYRIGHT for full restrictions               */
+/****************************************************************/
+
+#include "SemiconductorLinearConductivity.h"
+#include "libmesh/quadrature.h"
+
+template <>
+InputParameters
+validParams<SemiconductorLinearConductivity>()
+{
+  InputParameters params = validParams<Material>();
+  params.addRequiredCoupledVar("temp", "Variable for temperature in Kelvin.");
+  params.addParam<std::string>("base_name", "Material property base name");
+  params.addRequiredParam<Real>("sh_coeff_A", "Steinhart_Hart coefficient A of the material");
+  params.addRequiredRangeCheckedParam<Real>(
+      "sh_coeff_B", "sh_coeff_B != 0", "Steinhart_Hart coefficient B of the material.");
+  return params;
+}
+
+SemiconductorLinearConductivity::SemiconductorLinearConductivity(const InputParameters & parameters)
+  : DerivativeMaterialInterface<Material>(parameters),
+    _sh_coeff_A(getParam<Real>("sh_coeff_A")),
+    _sh_coeff_B(getParam<Real>("sh_coeff_B")),
+    _T(coupledValue("temp")),
+    _base_name(isParamValid("base_name") ? getParam<std::string>("base_name") + "_" : ""),
+    _electric_conductivity(declareProperty<Real>(_base_name + "electrical_conductivity")),
+    _delectric_conductivity_dT(declarePropertyDerivative<Real>(
+        _base_name + "electrical_conductivity", getVar("temp", 0)->name()))
+{
+}
+
+void
+SemiconductorLinearConductivity::computeQpProperties()
+{
+  mooseAssert(MooseUtils::absoluteFuzzyGreaterThan(_T[_qp], 0.0),
+              "Encountered zero or negative temperature in SemiconductorLinearConductivity");
+
+  mooseAssert(_sh_coeff_B != 0, "Divided by zero as _sh_coeff_B = 0");
+
+  _electric_conductivity[_qp] = exp((_sh_coeff_A - 1 / _T[_qp]) / _sh_coeff_B);
+  _delectric_conductivity_dT[_qp] = _electric_conductivity[_qp] / (_sh_coeff_B * _T[_qp] * _T[_qp]);
+}
