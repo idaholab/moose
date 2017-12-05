@@ -456,6 +456,13 @@ numDigits(const T & num)
  * Return the default ExecFlagEnum for MOOSE.
  */
 ExecFlagEnum getDefaultExecFlagEnum();
-}
+
+/**
+ * Robust string to integer conversion.
+ */
+template <typename T>
+T stringToNumber(const std::string & input);
+
+} // MooseUtils namespace
 
 #endif // MOOSEUTILS_H

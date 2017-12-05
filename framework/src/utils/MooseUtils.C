@@ -579,6 +579,31 @@ getDefaultExecFlagEnum()
   return exec_enum;
 }
 
+template <typename T>
+T
+stringToNumber(const std::string & input)
+{
+  T output;
+  std::istringstream ss(input);
+  if (!(ss >> output) || !ss.eof())
+    mooseError(
+        "Failed to convert '", input, "' to the supplied type of ", typeid(output).name(), ".");
+  return output;
+}
+
+// Explict instantiation of fundamental numeric types
+template short int stringToNumber<short int>(const std::string & input);
+template unsigned short int stringToNumber<unsigned short int>(const std::string & input);
+template int stringToNumber<int>(const std::string & input);
+template unsigned int stringToNumber<unsigned int>(const std::string & input);
+template long int stringToNumber<long int>(const std::string & input);
+template unsigned long int stringToNumber<unsigned long int>(const std::string & input);
+template long long int stringToNumber<long long int>(const std::string & input);
+template unsigned long long int stringToNumber<unsigned long long int>(const std::string & input);
+template float stringToNumber<float>(const std::string & input);
+template double stringToNumber<double>(const std::string & input);
+template long double stringToNumber<long double>(const std::string & input);
+
 } // MooseUtils namespace
 
 std::string
