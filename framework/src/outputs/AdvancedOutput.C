@@ -413,7 +413,7 @@ AdvancedOutput::initExecutionTypes(const std::string & name, ExecFlagEnum & inpu
 
   // If the parameter does not exists; set it to a state where no valid entries exists so nothing
   // gets executed
-  else if (!_pars.template have_parameter<ExecFlagEnum>(param_name))
+  else if (!_pars.have_parameter<ExecFlagEnum>(param_name))
   {
     input = _execute_on;
     input.clear();

@@ -70,16 +70,19 @@ public:
 
   /**
    * (DEPRECATED) Get the execution flag for the object
+   * TODO: ExecFlagType
    */
   virtual const std::vector<ExecFlagType> & execFlags() const;
 
   /**
    * (DEPRECATED) Build and return the execution flags as a bitfield
+   * TODO: ExecFlagType
    */
   ExecFlagType execBitFlags() const;
 
   /**
    * (DEPRECATED) Returns the available options for the 'execute_on' input parameters
+   * TODO: ExecFlagType
    * @return A MooseEnum with the available 'execute_on' options, the default is 'residual'
    */
   static ExecFlagEnum getExecuteOptions();
@@ -93,7 +96,7 @@ protected:
   /// Execute settings for this oejct.
   const ExecFlagEnum & _execute_enum;
 
-  /// (DEPRECATED) execution flag (when is the object executed/evaluated)
+  /// (DEPRECATED) execution flag (when is the object executed/evaluated) TODO: ExecFlagType
   const std::vector<ExecFlagType> _exec_flags;
 
   /// Reference to FEProblemBase
