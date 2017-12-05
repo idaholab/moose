@@ -258,6 +258,13 @@ def plot(revisions, benchmarks, subdir='.'):
         data.append(bench.realruns)
         labels.append(rev[:7])
 
+    median = sorted(data[0])[int(len(data[0])/2)]
+    plt.axhline(y=median*1.05, linestyle='--', linewidth=2, color='red', alpha=.5, label='+5%')
+    plt.axhline(y=median*1.01, linestyle=':', linewidth=2, color='red', label='+1%')
+    plt.axhline(y=median, dashes=[48, 4, 12, 4], color='black', alpha=.5)
+    plt.axhline(y=median*.99, linestyle=':', linewidth=2, color='green', label='-1%')
+    plt.axhline(y=median*.95, linestyle='--', linewidth=2, color='green', alpha=.5, label='-5%')
+
     plt.boxplot(data, labels=labels, whis=1.5)
     plt.xticks(rotation=90)
     plt.ylabel('Time (seconds)')
@@ -268,6 +275,8 @@ def plot(revisions, benchmarks, subdir='.'):
     labels = ax.get_xticklabels()
     for label in labels:
         label.set_url("https://github.com/idaholab/moose/commit/" + label.get_text())
+
+    legend = ax.legend(loc='upper right')
 
     fig.subplots_adjust(bottom=.15)
     fig.savefig(os.path.join(subdir, benchmarks[0].name + '.svg'))
