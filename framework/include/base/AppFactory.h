@@ -120,6 +120,10 @@ public:
                     const std::string & name,
                     InputParameters parameters,
                     MPI_Comm COMM_WORLD_IN);
+  std::shared_ptr<MooseApp> createShared(const std::string & app_type,
+                                         const std::string & name,
+                                         InputParameters parameters,
+                                         MPI_Comm COMM_WORLD_IN);
 
   ///@{
   /**

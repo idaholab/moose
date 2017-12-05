@@ -88,6 +88,15 @@ AppFactory::create(const std::string & app_type,
   return (*_name_to_build_pointer[app_type])(parameters);
 }
 
+std::shared_ptr<MooseApp>
+AppFactory::createShared(const std::string & app_type,
+                         const std::string & name,
+                         InputParameters parameters,
+                         MPI_Comm COMM_WORLD_IN)
+{
+  return std::shared_ptr<MooseApp>(create(app_type, name, parameters, COMM_WORLD_IN));
+}
+
 bool
 AppFactory::isRegistered(const std::string & app_name) const
 {
