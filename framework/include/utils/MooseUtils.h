@@ -84,7 +84,7 @@ bool checkFileWriteable(const std::string & filename, bool throw_on_unwritable =
  * This function implements a parallel barrier function but writes progress
  * to stdout.
  */
-void parallelBarrierNotify(const libMesh::Parallel::Communicator & comm);
+void parallelBarrierNotify(const libMesh::Parallel::Communicator & comm, bool messaging = true);
 
 /**
  * This function marks the begin of a section of code that is executed in serial

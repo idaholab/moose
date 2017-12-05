@@ -71,3 +71,7 @@
     multi_app = sub
   [../]
 []
+
+[Problem]
+  parallel_barrier_messaging = false
+[]

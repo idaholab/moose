@@ -1107,13 +1107,17 @@ public:
    */
   void notifyWhenMeshChanges(MeshChangedInterface * mci);
 
+  /**
+   * Method called to perform a series of sanity checks before a simulation is run. This method
+   * doesn't return when errors are found, instead it generally calls mooseError() directly.
+   */
   virtual void checkProblemIntegrity();
 
   void serializeSolution();
 
-  // debugging iface /////
-
   void setKernelTypeResidual(Moose::KernelType kt) { _kernel_type = kt; }
+
+  void registerRandomInterface(RandomInterface & random_interface, const std::string & name);
 
   /**
    * Set flag that Jacobian is constant (for optimization purposes)
@@ -1121,11 +1125,24 @@ public:
    */
   void setConstJacobian(bool state) { _const_jacobian = state; }
 
-  void registerRandomInterface(RandomInterface & random_interface, const std::string & name);
-
+  /**
+   * Set flag to indicate whether kernel coverage checks should be performed. This check makes
+   * sure that at least one kernel is active on all subdomains in the domain (default: true).
+   */
   void setKernelCoverageCheck(bool flag) { _kernel_coverage_check = flag; }
 
+  /**
+   * Set flag to indicate whether material coverage checks should be performed. This check makes
+   * sure that at least one material is active on all subdomains in the domain if any material is
+   * supplied. If no materials are supplied anywhere, a simulation is still considered OK as long as
+   * no properties are being requested anywhere.
+   */
   void setMaterialCoverageCheck(bool flag) { _material_coverage_check = flag; }
+
+  /**
+   * Toggle parallel barrier messaging (defaults to on).
+   */
+  void setParallelBarrierMessaging(bool flag) { _parallel_barrier_messaging = flag; }
 
   /**
    * Calls parentOutputPositionChanged() on all sub apps.
@@ -1255,7 +1272,6 @@ public:
    */
   bool skipAdditionalRestartData() const { return _skip_additional_restart_data; }
 
-public:
   ///@{
   /**
    * Convenience zeros
@@ -1511,6 +1527,9 @@ protected:
 
   /// Whether or not an exception has occurred
   bool _has_exception;
+
+  /// Whether or not information about how many transfers have completed is printed
+  bool _parallel_barrier_messaging;
 
   /// The error message to go with an exception
   std::string _exception_message;
