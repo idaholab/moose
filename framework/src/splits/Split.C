@@ -75,7 +75,7 @@ validParams<Split>()
 Split::Split(const InputParameters & parameters)
   : MooseObject(parameters),
     Restartable(parameters, "Splits"),
-    _fe_problem(*parameters.getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")),
+    _fe_problem(*getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")),
     _vars(getParam<std::vector<NonlinearVariableName>>("vars")),
     _blocks(getParam<std::vector<SubdomainName>>("blocks")),
     _sides(getParam<std::vector<BoundaryName>>("sides")),

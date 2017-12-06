@@ -26,7 +26,7 @@ validParams<DistributionInterface>()
 
 DistributionInterface::DistributionInterface(const MooseObject * moose_object)
   : _dni_params(moose_object->parameters()),
-    _dni_feproblem(*_dni_params.get<FEProblemBase *>("_fe_problem_base"))
+    _dni_feproblem(*_dni_params.getCheckedPointerParam<FEProblemBase *>("_fe_problem_base"))
 {
 }
 

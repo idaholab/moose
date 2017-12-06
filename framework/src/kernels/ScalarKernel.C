@@ -54,8 +54,8 @@ ScalarKernel::ScalarKernel(const InputParameters & parameters)
     ZeroInterface(parameters),
     MeshChangedInterface(parameters),
     VectorPostprocessorInterface(this),
-    _subproblem(*parameters.get<SubProblem *>("_subproblem")),
-    _sys(*parameters.get<SystemBase *>("_sys")),
+    _subproblem(*getCheckedPointerParam<SubProblem *>("_subproblem")),
+    _sys(*getCheckedPointerParam<SystemBase *>("_sys")),
 
     _tid(parameters.get<THREAD_ID>("_tid")),
     _assembly(_subproblem.assembly(_tid)),

@@ -69,6 +69,16 @@ public:
   const T & getParam(const std::string & name) const;
 
   /**
+   * Verifies that the requested parameter exists and is not NULL and returns it to the caller.
+   * The template parameter must be a pointer or an error will be thrown.
+   */
+  template <typename T>
+  T getCheckedPointerParam(const std::string & name, const std::string & error_string = "") const
+  {
+    return parameters().getCheckedPointerParam<T>(name, error_string);
+  }
+
+  /**
    * Test if the supplied parameter is valid
    * @param name The name of the parameter to test
    */
@@ -128,11 +138,11 @@ public:
   }
 
 protected:
-  /// The MooseApp this object is associated with
-  MooseApp & _app;
-
   /// Parameters of this object, references the InputParameters stored in the InputParametersWarehouse
   const InputParameters & _pars;
+
+  /// The MooseApp this object is associated with
+  MooseApp & _app;
 
   /// The name of this object, reference to value stored in InputParameters
   const std::string & _name;
