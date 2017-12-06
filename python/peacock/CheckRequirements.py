@@ -1,8 +1,7 @@
 def print_error(msg):
     print("\nError starting peacock: %s\n" % msg)
-    print("You need to use the miniconda-dev module.")
-    print("If you already have miniconda loaded you can run:")
-    print("\tmodule switch miniconda miniconda-dev")
+    print("You need to use the miniconda module. Run:")
+    print("\tmodule load miniconda")
 
 class ErrorObserver(object):
     """
@@ -44,7 +43,7 @@ def check_vtk():
             print("You can try upgrading to Mesa version 10.6.5 or later or update your video card driver.")
             print("If you are running in a virtual machine, you can try turning OFF 3D acceleration.")
             print("\nYou can also try to use an alternative VTK package in a conda environment.")
-            print("You can create a new conda environment by doing (with the miniconda-dev module loaded):")
+            print("You can create a new conda environment by doing (with the miniconda module loaded):")
             print("\n\tconda create --clone root -n <env_name>")
             print("\tsource activate <env_name>")
             print("\tconda install -c idaholab vtk=7.1.1.opengl")
@@ -80,5 +79,17 @@ def check_qt():
         return False
     return True
 
+def check_pandas():
+    """
+    Make sure that we can import pandas. This is required for VectorPostprocessorReader
+    """
+    try:
+        import pandas
+        assert pandas # silence pyflakes warning
+    except ImportError:
+        print_error("Could not import pandas")
+        return False
+    return True
+
 def has_requirements():
-    return check_qt() and check_vtk() and check_matplotlib()
+    return check_qt() and check_vtk() and check_matplotlib() and check_pandas()
