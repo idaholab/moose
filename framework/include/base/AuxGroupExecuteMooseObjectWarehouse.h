@@ -107,7 +107,9 @@ AuxGroupExecuteMooseObjectWarehouse<T>::updateDependObjects(
     }
 
     std::uint16_t remaining_flags = already_added ? not_initial_flag_mask : all_flags;
-    if (depend_aux.find(object_ptr->name()) != depend_aux.end() ||
+    if ((object_ptr->isParamValid("force_preaux") &&
+         object_ptr->template getParam<bool>("force_preaux")) ||
+        depend_aux.find(object_ptr->name()) != depend_aux.end() ||
         depend_ic.find(object_ptr->name()) != depend_ic.end())
       _group_objects[Moose::PRE_AUX].addObjectMask(object_ptr, tid, remaining_flags);
     else
