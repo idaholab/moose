@@ -1,25 +1,33 @@
-#ifndef JOULEHEATINGSOURCE_H
-#define JOULEHEATINGSOURCE_H
+// #ifndef JOULEHEATINGSOURCE_H
+// #define JOULEHEATINGSOURCE_H
+
+#ifndef MATGRADSQCOUPLED_H
+#define MATGRADSQCOUPLED_H
 
 // #include "HeatSource.h"
+#include "Kernel.h"
 #include "JvarMapInterface.h"
 #include "DerivativeMaterialInterface.h"
 
 // Forward Declarations
-class JouleHeatingSource;
+// class JouleHeatingSource;
+class MatGradSqCoupled;
 
 template <>
-InputParameters validParams<JouleHeatingSource>();
+// InputParameters validParams<JouleHeatingSource>();
+InputParameters validParams<MatGradSqCoupled>();
 
 /**
  * This kernel calculates the heat source term corresponding to joule heating,
  * Q = J * E = elec_cond * grad_phi * grad_phi, where phi is the electrical potenstial.
  */
 // class JouleHeatingSource : public DerivativeMaterialInterface<JvarMapKernelInterface<HeatSource>>
-class JouleHeatingSource : public DerivativeMaterialInterface<JvarMapKernelInterface<Kernel>>
+// class JouleHeatingSource : public DerivativeMaterialInterface<JvarMapKernelInterface<Kernel>>
+class MatGradSqCoupled : public DerivativeMaterialInterface<JvarMapKernelInterface<Kernel>>
 {
 public:
-  JouleHeatingSource(const InputParameters & parameters);
+//  JouleHeatingSource(const InputParameters & parameters);
+  MatGradSqCoupled(const InputParameters & parameters);
   virtual void initialSetup();
 
 protected:

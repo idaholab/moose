@@ -1,8 +1,10 @@
-#include "JouleHeatingSource.h"
+// #include "JouleHeatingSource.h"
+#include "MatGradSqCoupled.h"
 
 template <>
 InputParameters
-validParams<JouleHeatingSource>()
+// validParams<JouleHeatingSource>()
+validParams<MatGradSqCoupled>()
 {
 //  InputParameters params = validParams<HeatSource>();
   InputParameters params = validParams<Kernel>();
@@ -15,7 +17,8 @@ validParams<JouleHeatingSource>()
   return params;
 }
 
-JouleHeatingSource::JouleHeatingSource(const InputParameters & parameters)
+// JouleHeatingSource::JouleHeatingSource(const InputParameters & parameters)
+MatGradSqCoupled::MatGradSqCoupled(const InputParameters & parameters)
 //  : DerivativeMaterialInterface<JvarMapKernelInterface<HeatSource>>(parameters),
   : DerivativeMaterialInterface<JvarMapKernelInterface<Kernel>>(parameters),
     _grad_elec(coupledGradient("elec")),
@@ -30,25 +33,29 @@ JouleHeatingSource::JouleHeatingSource(const InputParameters & parameters)
 }
 
 void
-JouleHeatingSource::initialSetup()
+// JouleHeatingSource::initialSetup()
+MatGradSqCoupled::initialSetup()
 {
   validateNonlinearCoupling<Real>("electrical_conductivity");
 }
 
 Real
-JouleHeatingSource::computeQpResidual()
+// JouleHeatingSource::computeQpResidual()
+MatGradSqCoupled::computeQpResidual()
 {
   return -_elec_cond[_qp] * _grad_elec[_qp] * _grad_elec[_qp] * _test[_i][_qp];
 }
 
 Real
-JouleHeatingSource::computeQpJacobian()
+// JouleHeatingSource::computeQpJacobian()
+MatGradSqCoupled::computeQpJacobian()
 {
   return -_delec_cond_dT[_qp] * _grad_elec[_qp] * _grad_elec[_qp] * _phi[_j][_qp] * _test[_i][_qp];
 }
 
 Real
-JouleHeatingSource::computeQpOffDiagJacobian(unsigned int jvar)
+// JouleHeatingSource::computeQpOffDiagJacobian(unsigned int jvar)
+MatGradSqCoupled::computeQpOffDiagJacobian(unsigned int jvar)
 {
   const unsigned int cvar = mapJvarToCvar(jvar);
 
