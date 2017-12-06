@@ -77,6 +77,16 @@ public:
   const T & getParam(const std::string & name) const;
   ///@}
 
+  /**
+   * Verifies that the requested parameter exists and is not NULL and returns it to the caller.
+   * The template parameter must be a pointer or an error will be thrown.
+   */
+  template <typename T>
+  T getCheckedPointerParam(const std::string & name, const std::string & error_string = "") const
+  {
+    return parameters().getCheckedPointerParam<T>(name, error_string);
+  }
+
   inline bool isParamValid(const std::string & name) const { return _pars.isParamValid(name); }
 
   void appendTask(const std::string & task) { _all_tasks.insert(task); }

@@ -78,7 +78,7 @@ Executioner::Executioner(const InputParameters & parameters)
     UserObjectInterface(this),
     PostprocessorInterface(this),
     Restartable(parameters, "Executioners"),
-    _fe_problem(*parameters.getCheckedPointerParam<FEProblemBase *>(
+    _fe_problem(*getCheckedPointerParam<FEProblemBase *>(
         "_fe_problem_base", "This might happen if you don't have a mesh")),
     _initial_residual_norm(std::numeric_limits<Real>::max()),
     _old_initial_residual_norm(std::numeric_limits<Real>::max()),
@@ -181,7 +181,7 @@ Executioner::addAttributeReporter(const std::string & name,
                                   Real & attribute,
                                   const std::string execute_on)
 {
-  FEProblemBase * problem = parameters().getCheckedPointerParam<FEProblemBase *>(
+  FEProblemBase * problem = getCheckedPointerParam<FEProblemBase *>(
       "_fe_problem_base",
       "Failed to retrieve FEProblemBase when adding a attribute reporter in Executioner");
   InputParameters params = _app.getFactory().getValidParams("ExecutionerAttributeReporter");

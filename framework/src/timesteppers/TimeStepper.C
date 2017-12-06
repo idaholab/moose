@@ -36,7 +36,7 @@ TimeStepper::TimeStepper(const InputParameters & parameters)
     _fe_problem(parameters.have_parameter<FEProblemBase *>("_fe_problem_base")
                     ? *getParam<FEProblemBase *>("_fe_problem_base")
                     : *getParam<FEProblem *>("_fe_problem")),
-    _executioner(*parameters.getCheckedPointerParam<Transient *>("_executioner")),
+    _executioner(*getCheckedPointerParam<Transient *>("_executioner")),
     _time(_fe_problem.time()),
     _time_old(_fe_problem.timeOld()),
     _t_step(_fe_problem.timeStep()),

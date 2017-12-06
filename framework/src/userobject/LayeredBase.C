@@ -66,7 +66,7 @@ LayeredBase::LayeredBase(const InputParameters & parameters)
     _direction(_direction_enum),
     _sample_type(parameters.get<MooseEnum>("sample_type")),
     _average_radius(parameters.get<unsigned int>("average_radius")),
-    _layered_base_subproblem(*parameters.get<SubProblem *>("_subproblem")),
+    _layered_base_subproblem(*parameters.getCheckedPointerParam<SubProblem *>("_subproblem")),
     _cumulative(parameters.get<bool>("cumulative"))
 {
   if (_layered_base_params.isParamValid("num_layers") &&

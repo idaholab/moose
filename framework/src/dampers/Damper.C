@@ -37,8 +37,8 @@ Damper::Damper(const InputParameters & parameters)
     SetupInterface(this),
     Restartable(parameters, "Dampers"),
     MeshChangedInterface(parameters),
-    _subproblem(*parameters.get<SubProblem *>("_subproblem")),
-    _sys(*parameters.get<SystemBase *>("_sys")),
+    _subproblem(*getCheckedPointerParam<SubProblem *>("_subproblem")),
+    _sys(*getCheckedPointerParam<SystemBase *>("_sys")),
     _min_damping(getParam<Real>("min_damping"))
 {
 }
