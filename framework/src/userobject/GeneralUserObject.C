@@ -20,6 +20,9 @@ validParams<GeneralUserObject>()
 {
   InputParameters params = validParams<UserObject>();
   params += validParams<MaterialPropertyInterface>();
+  params.addParam<bool>(
+      "force_preaux", false, "Forces the GeneralUserObject to be executed in PREAUX");
+  params.addParamNamesToGroup("force_preaux", "Advanced");
   return params;
 }
 
