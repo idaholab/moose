@@ -124,7 +124,7 @@ OutputWarehouse::hasOutput(const std::string & name) const
 const std::set<OutputName> &
 OutputWarehouse::getOutputNames()
 {
-  if (_object_names.empty())
+  if (_object_names.empty() && _app.actionWarehouse().hasActions("add_output"))
   {
     const auto & actions = _app.actionWarehouse().getActionListByName("add_output");
     for (const auto & act : actions)
