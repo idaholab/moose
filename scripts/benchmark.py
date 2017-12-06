@@ -7,6 +7,7 @@ import os
 import os.path
 import sys
 import collections
+import urlparse
 
 # this is a hack to prevent matplotlib from trying to do interactive plot crap with e.g. Qt on
 # remote machines.  See:
@@ -55,6 +56,7 @@ def build_args():
     p.add_argument('--list-revs', action='store_true', help='list all benchmarked revisions in the db')
     p.add_argument('--trends', action='store_true', help='generate plots of historical trends of all benchmarks')
     p.add_argument('--psig', type=float, default=0.01, help='the p-value cutoffused to determine comparison significance')
+    p.add_argument('--baseurl', type=str, default='https://github.com/idaholab/moose/commit/', help='the url prefix for commit links in generated visualization/output')
     return p
 
 def main():
@@ -94,7 +96,7 @@ def main():
             if not os.path.exists(subdir):
                 os.mkdir(subdir)
             benchnames = db.bench_names(method=method)
-            buildpage(os.path.join(subdir, 'index.html'), benchnames, db, args.psig, method=method)
+            buildpage(os.path.join(subdir, 'index.html'), benchnames, db, args.psig, method=method, baseurl=args.baseurl)
             for bname in db.bench_names(method=method):
                 benches, revs = [], []
                 dbrevs, _ = db.revisions(method=method)
@@ -108,7 +110,7 @@ def main():
                 if len(revs) > 25:
                     revs = revs[-25:]
                     benches = benches[-25:]
-                plot(revs, benches, subdir=subdir)
+                plot(revs, benches, subdir=subdir, baseurl=args.baseurl)
 
     else: # compare two benchmarks
         with DB(args.db) as db:
@@ -126,7 +128,7 @@ def main():
                 print(cmp)
             print(BenchComp.footer())
 
-def buildpage(fname, plotnames, db, psig, lastn=60, method='opt'):
+def buildpage(fname, plotnames, db, psig, lastn=60, method='opt', baseurl='https://github.com/idaholab/moose/commit/'):
     figpage = """
 <!DOCTYPE html>
 <meta charset="utf-8">
@@ -201,8 +203,8 @@ def buildpage(fname, plotnames, db, psig, lastn=60, method='opt'):
 
             t1 = datetime.datetime.fromtimestamp(t1).strftime(tformat)
             t2 = datetime.datetime.fromtimestamp(t2).strftime(tformat)
-            link1 = "https://github.com/idaholab/moose/commit/" + rev1
-            link2 = "https://github.com/idaholab/moose/commit/" + rev2
+            link1 = urlparse.urljoin(baseurl, rev1)
+            link2 = urlparse.urljoin(baseurl, rev2)
             c = Comp(rev1, rev2, t1, t2, link1, link2, s)
             comparisons.append(c)
 
@@ -215,8 +217,8 @@ def buildpage(fname, plotnames, db, psig, lastn=60, method='opt'):
             s += '\n' + BenchComp.footer()
 
             t2 = datetime.datetime.fromtimestamp(t2).strftime(tformat)
-            link1 = "https://github.com/idaholab/moose/commit/" + rev1
-            link2 = "https://github.com/idaholab/moose/commit/" + rev2
+            link1 = urlparse.urljoin(baseurl, rev1)
+            link2 = urlparse.urljoin(baseurl, rev2)
             c = Comp(rev1, rev2, t1, t2, link1, link2, s)
             refcomparisons.append(c)
 
@@ -251,7 +253,7 @@ def compare(db, rev1, rev2, psig, method='opt'):
             cmps.append(cmp)
     return cmps
 
-def plot(revisions, benchmarks, subdir='.'):
+def plot(revisions, benchmarks, subdir='.', baseurl='https://github.com/idaholab/moose/commit/'):
     data = []
     labels = []
     for rev, bench in zip(revisions, benchmarks):
@@ -274,7 +276,7 @@ def plot(revisions, benchmarks, subdir='.'):
     ax = fig.axes[0]
     labels = ax.get_xticklabels()
     for label in labels:
-        label.set_url("https://github.com/idaholab/moose/commit/" + label.get_text())
+        label.set_url(urlparse.urljoin(baseurl, label.get_text()))
 
     legend = ax.legend(loc='upper right')
 
