@@ -84,9 +84,10 @@ Component::split(const std::string & rname)
 Component::Component(const InputParameters & parameters)
   : RELAP7Object(parameters),
     _id(comp_id++),
-    _parent(parameters.have_parameter<Component *>("_parent") ? getParam<Component *>("_parent")
-                                                              : nullptr),
-    _sim(*getParam<Simulation *>("_sim")),
+    _parent(parameters.have_parameter<Component *>("_parent")
+                ? getCheckedPointerParam<Component *>("_parent")
+                : nullptr),
+    _sim(*getCheckedPointerParam<Simulation *>("_sim")),
     _app(dynamic_cast<RELAP7App &>(MooseObject::_app)),
     _factory(_app.getFactory()),
     _mesh(_sim.mesh()),
