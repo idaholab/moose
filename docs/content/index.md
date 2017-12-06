@@ -23,7 +23,7 @@ An open source, parallel finite element framework
         Rapid Development
       </h5>
       <p class="light">
-        MOOSE is a finite-element framework that aids in application development by harnessing state-of-the-art fully-coupled, fully-implicit multiphysics solvers while providing automatic parallelization, mesh adaptivity, and an growing set of physics modules.
+        MOOSE is a finite-element framework that aids in application development by harnessing state-of-the-art fully-coupled, fully-implicit multiphysics solvers while providing automatic parallelization, mesh adaptivity, and a growing set of physics modules.
       </p>
     </div>
   </div>
@@ -35,10 +35,10 @@ An open source, parallel finite element framework
         </i>
       </h2>
       <h5 class="center">
-        User Focused
+        User-Focused
       </h5>
       <p class="light">
-        MOOSE includes ever-expanding set of physics modules including solid mechanics, phase-field, Navier-Stokes, and heat conduction. MOOSE natively supports multi-scale models allowing linking of MOOSE-based applications, thus fostering collaborations
+        MOOSE includes ever-expanding set of physics modules including solid mechanics, phase-field, Navier-Stokes, and heat conduction. MOOSE natively supports multi-scale models allowing linking of MOOSE-based applications, thus fostering collaborations.
       </p>
     </div>
   </div>
@@ -71,10 +71,10 @@ An open source, parallel finite element framework
         Reliability
       </h2>
       <p class="left-align light">
-        Within MOOSE code reliability is paramount, so it employs a
+        Within MOOSE, code reliability is paramount, so MOOSE employs a
         rigorous and well-documented development strategy.
         In order to accomplish this task, a comprehensive set of
-        tools for testing and documenting are continouly being developed
+        tools for testing and documentation are being developed continuously
         and included within the framework for use by application developers.
       </p>
       <p class="left-align light">

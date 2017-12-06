@@ -3,7 +3,7 @@
 The primary motivation behind the [MOOSE documentation system](utilities/moose_docs/index.md) was
 to create a customizable, maintainable web-site for the MOOSE framework and modules. However, it was
 important to the the MOOSE developers that this system be available to application developers as
-well to enable for MOOSE-based applications to be well-documented using a common syntax.
+well to enable MOOSE-based applications to be well-documented using a common syntax.
 
 The first step for creating a web-site is to document your code, which is detailed here:
 [Documenting Code](utilities/moose_docs/code.md). Once this is complete then you should continue with the steps listed below.
@@ -11,8 +11,8 @@ The first step for creating a web-site is to document your code, which is detail
 !include docs/content/utilities/moose_docs/config.md
 
 For example the file shown below is the website configuration file from [MOOSE]. The most important
-portion of this files the the "MooseDocs.extensions.template" entry. This provides the template for
-resulting html, which in this case is setup for website display.
+portion of this file is the "MooseDocs.extensions.template" entry. This provides the template for
+the resulting html, which in this case is setup for website display.
 
 !listing docs/website.yml
 
@@ -45,11 +45,11 @@ copied to an external server for hosting.
 ```
 
 ## Including App Documentation
-MooseDocs allows for the inclusion of documentation from other applications, this includes the
+MooseDocs allows for the inclusion of documentation from other applications. This includes the
 ability to include documentation from the framework and/or modules in your own application.
-To include other sources of markdown you must define a "contents" YAML file
-(see `./moosedocs.py build -h`). When building a list of files is gathered based on the content
-of this file and a complete website file tree is created from the combined content. This file
+To include other sources of markdown, you must define a "contents" YAML file
+(see `./moosedocs.py build -h`). When building, a list of files is gathered based on the content
+of this file, and a complete website file tree is created from the combined content. This file
 tree can be viewed by running the "build" command with the "--dump" option, which will show the
 tree but not actually perform a build.
 
