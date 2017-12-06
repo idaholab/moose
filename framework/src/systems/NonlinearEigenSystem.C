@@ -267,6 +267,9 @@ NonlinearEigenSystem::computeResidualCloseA(NumericVector<Number> & Ax)
   Ax = tagged_Ax;
 }
 
+/*
+get closeAndCopyTaggedAx
+*/
 void
 NonlinearEigenSystem::computeResidualCloseB(NumericVector<Number> & Bx)
 {

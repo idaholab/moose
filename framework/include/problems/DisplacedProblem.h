@@ -92,14 +92,14 @@ public:
                           const NumericVector<Number> & aux_soln);
 
   virtual TagID addVectorTag(TagName tag_name) override;
-  virtual TagID getVectorTag(TagName tag_name) override;
+  virtual TagID getVectorTagID(TagName tag_name) override;
   virtual TagName vectorTagName(TagID tag) override;
   virtual bool vectorTagExists(TagID tag) override;
   virtual unsigned int numVectorTags() override;
   virtual std::map<TagName, TagID> & getVectorTag() override;
 
   virtual TagID addMatrixTag(TagName tag_name) override;
-  virtual TagID getMatrixTag(TagName tag_name) override;
+  virtual TagID getMatrixTagID(TagName tag_name) override;
   virtual TagName matrixTagName(TagID tag) override;
   virtual bool matrixTagExists(const TagName & tag_name) override;
   virtual bool matrixTagExists(TagID tag_id) override;

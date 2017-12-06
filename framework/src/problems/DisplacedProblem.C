@@ -225,9 +225,9 @@ DisplacedProblem::addVectorTag(TagName tag_name)
 }
 
 TagID
-DisplacedProblem::getVectorTag(TagName tag_name)
+DisplacedProblem::getVectorTagID(TagName tag_name)
 {
-  return _mproblem.getVectorTag(tag_name);
+  return _mproblem.getVectorTagID(tag_name);
 }
 
 TagName
@@ -261,9 +261,9 @@ DisplacedProblem::addMatrixTag(TagName tag_name)
 }
 
 TagID
-DisplacedProblem::getMatrixTag(TagName tag_name)
+DisplacedProblem::getMatrixTagID(TagName tag_name)
 {
-  return _mproblem.getMatrixTag(tag_name);
+  return _mproblem.getMatrixTagID(tag_name);
 }
 
 TagName

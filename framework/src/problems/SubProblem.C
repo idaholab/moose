@@ -88,7 +88,7 @@ SubProblem::removeVectorTag(TagName tag_name)
 }
 
 TagID
-SubProblem::getVectorTag(TagName tag_name)
+SubProblem::getVectorTagID(TagName tag_name)
 {
   return _vector_tag_name_to_tag_id.at(tag_name);
 }
@@ -141,7 +141,7 @@ SubProblem::removeMatrixTag(TagName tag_name)
 }
 
 TagID
-SubProblem::getMatrixTag(TagName tag_name)
+SubProblem::getMatrixTagID(TagName tag_name)
 {
   return _matrix_tag_name_to_tag_id.at(tag_name);
 }
