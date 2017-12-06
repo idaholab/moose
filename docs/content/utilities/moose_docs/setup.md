@@ -1,7 +1,7 @@
 # MooseDocs Setup
 
 MOOSE contains a single-source documentation system for creating websites, slideshows, and pdfs
-using [markdown](https://en.wikipedia.org/wiki/Markdown) syntax, including a custom syntax aimed to simply the
+using [markdown](https://en.wikipedia.org/wiki/Markdown) syntax, including a custom syntax aimed to simplify the
 process: [Moose Flavored Markdown](moose_markdown/index.md).
 
 ## Dependencies
@@ -14,22 +14,21 @@ configure the documentation system to work properly for your application.
 
 
 ###### (1) Create "docs" Location
-Create a "docs" directory, this is a directory where you will utilize to store your
-documentation related files.
+Create a "docs" directory, where your documentation-related files will be stored.
 
 !!!info
-    Most existing applications will have a "doc" directory, this can be used if desired or another
+    Most existing applications will have a "doc" directory -- this can be used if desired, or another
     location can be created. The location and name of this directory is arbitrary.
 
 ###### (2) Add MooseDocs Executable
-To use MooseDocs an executable is required, this main executable is simply copied from the
+To use MooseDocs, an executable is required -- this main executable is simply copied from the
 executable within [MOOSE]:
 
 ```bash
 cp ~/projects/moose/docs/moosedocs.py ~/projects/your_application_name/docs
 ```
 
-This executable contains command-line base help, which can be accessed using the "-h" flag as
+This executable contains command-line based help, which can be accessed using the "-h" flag as
 follows.
 
 ```
@@ -46,7 +45,7 @@ of documentation that MooseDocs is capable of producing:
 
 
 ## Manual Setup
-If you are not using a MOOSE package, then the following packages must be installed, this can
+If you are not using a MOOSE package, then the following packages must be installed, which can
 be done using [pip](https://pip.pypa.io/en/stable/).
 
 ```bash

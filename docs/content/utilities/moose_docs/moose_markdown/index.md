@@ -1,9 +1,9 @@
 # MOOSE Flavored Markdown
 
-Documentation generated using MOOSE is generated using the [python-markdown] package,
-which includes the ability to use extensions from others as well as define custom extensions. The following pages outlines the
-outside extensions enabled as well as the custom extensions included with [MOOSE].
-extensions included as well as the custom syntax defined exclusively for documenting [MOOSE] source code.
+MOOSE generates documentation using the [python-markdown] package,
+which includes the ability to use extensions from others as well as define custom extensions. The following pages outline the
+outside extensions enabled, as well as the custom extensions included with [MOOSE],
+including the custom syntax defined exclusively for documenting [MOOSE] source code.
 
 ## MooseDocs Extensions
 Much of the capability that enables the MooseDocs system to be useful for creating documentation
@@ -12,9 +12,9 @@ begin with an exclamation point (!) and some number of arguments. Therefore, eac
 configuration options at the extension level and each command defined as a settings that can be
 applied.
 
-The \ref{moose-extensions} summarizes all of the available MooseDocs extensions and provides a link to
-another page that details the use and configuration of the extension as a well as a list of any
-commands add associated settings defined in the extension.
+\ref{moose-extensions} summarizes all of the available MooseDocs extensions and provides a link to
+another page that details the use and configuration of the extension as well as a list of any
+commands that add associated settings defined in the extension.
 
 !table id=moose-extensions caption=List of MooseDocs extensions for writing documentation.
 | Name | Description |
@@ -38,7 +38,7 @@ commands add associated settings defined in the extension.
 
 ## Python-Markdown Extensions
 
-The [python-markdown] package includes many useful, officially support extensions, as listed on the
+The [python-markdown] package includes many useful, officially-supported extensions, as listed on the
 [available extensions](https://pythonhosted.org/Markdown/extensions/) page.
 \ref{official-extensions} is a list the extensions that are utilized on this website and will
 likely be of use as you develop your own  website, reports, or presentations.
@@ -61,7 +61,7 @@ items to be highlighted, using the syntax detailed below and the package documen
     A detailed message paragraph that is indented by 4 spaces and can include any number of lines.
 ```
 
-The supported "types" for MOOSE are: "info", "note", "important, "warning", "danger", and "error."
+The supported "types" for MOOSE are: "info", "note", "important, "warning", "danger", and "error":
 
 !!! info "Optional Info Title"
     This is some information you want people to know about.
