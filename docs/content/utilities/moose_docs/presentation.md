@@ -1,13 +1,13 @@
 # Creating Presentations
 
-The documentation system for MOOSE includes the ability to create html based presentations from
+The documentation system for MOOSE includes the ability to create html-based presentations from
 [MOOSE flavored markdown](moose_markdown/index.md). The presentations are generated using the [reveal.js](http://lab.hakim.se/reveal-js/) framework.
 
 !include docs/content/utilities/moose_docs/config.md
 
 For example the file shown below is the presentation configuration file from MOOSE. The most important
-portion of this files the the "MooseDocs.extensions.template" entry. This provides the template for
-resulting html, which in this case is setup for an html presentation.
+portion of this file is the "MooseDocs.extensions.template" entry. This provides the template for
+the resulting html, which in this case is setup for an html presentation.
 
 !listing docs/presentation.yml
 
