@@ -375,7 +375,9 @@ std::string
 Section::render(int indent)
 {
   std::string s;
-  if (path() != "")
+  if (path() != "" && tokens().size() > 4)
+    s = "\n" + strRepeat(indentString, indent) + "[" + tokens()[1].val + "]";
+  else if (path() != "")
     s = "\n" + strRepeat(indentString, indent) + "[" + _path + "]";
 
   for (auto child : children())
@@ -384,10 +386,13 @@ Section::render(int indent)
     else
       s += child->render(indent + 1);
 
-  if (path() != "")
+  if (path() != "" && tokens().size() > 4)
+    s += "\n" + strRepeat(indentString, indent) + "[" + tokens()[4].val + "]";
+  else if (path() != "")
     s += "\n" + strRepeat(indentString, indent) + "[]";
 
-  if (indent == 0 && s[0] == '\n')
+  if (indent == 0 &&
+      ((root() == this && s[0] == '\n') || (parent() && parent()->children()[0] == this)))
     s = s.substr(1);
   return s;
 }
@@ -575,6 +580,7 @@ public:
 
   size_t start() { return _start; }
   size_t pos() { return _pos; }
+  std::vector<Token> & tokens() { return _tokens; }
 
   Token next()
   {
@@ -642,7 +648,7 @@ void parseEnterPath(Parser * p, Node * n);
 void parseExitPath(Parser * p, Node * n);
 
 void
-parseExitPath(Parser * p, Node *)
+parseExitPath(Parser * p, Node * n)
 {
   auto secOpenToks = p->scope()->tokens();
 
@@ -653,9 +659,15 @@ parseExitPath(Parser * p, Node *)
   auto path = p->require(TokType::Path, "malformed section close, expected PATH");
   p->require(TokType::RightBracket, "expected ']'");
 
+  auto s = n->children().back();
+  auto & toks = s->tokens();
+  for (size_t i = p->start(); i < p->pos(); i++)
+    s->tokens().push_back(p->tokens()[i]);
+
   if (path.val != "../" && path.val != "")
     p->error(path, "invalid closing path");
   p->ignore();
+
   p->scopeclose();
 }
 

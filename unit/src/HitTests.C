@@ -310,9 +310,9 @@ TEST(HitTests, RenderCases)
 {
   RenderCase cases[] = {
       {"root level fields", "foo=bar boo=far", "foo = bar\nboo = far"},
-      {"single section", "[foo]bar=baz[../]", "[foo]\n  bar = baz\n[]"},
-      {"remove leading newline", "\n[foo]bar=baz[../]", "[foo]\n  bar = baz\n[]"},
-      {"preserve consecutive newline", "[foo]\n\nbar=baz[../]", "[foo]\n\n  bar = baz\n[]"},
+      {"single section", "[foo]bar=baz[../]", "[foo]\n  bar = baz\n[../]"},
+      {"remove leading newline", "\n[foo]bar=baz[../]", "[foo]\n  bar = baz\n[../]"},
+      {"preserve consecutive newline", "[foo]\n\nbar=baz[../]", "[foo]\n\n  bar = baz\n[../]"},
   };
 
   for (size_t i = 0; i < sizeof(cases) / sizeof(RenderCase); i++)
