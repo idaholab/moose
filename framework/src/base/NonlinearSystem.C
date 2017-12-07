@@ -240,6 +240,9 @@ void
 NonlinearSystem::setupStandardFiniteDifferencedPreconditioner()
 {
 #if LIBMESH_HAVE_PETSC
+  // Make sure that libMesh isn't going to override our preconditioner
+  _transient_sys.nonlinear_solver->jacobian = nullptr;
+
   PetscNonlinearSolver<Number> * petsc_nonlinear_solver =
       static_cast<PetscNonlinearSolver<Number> *>(_transient_sys.nonlinear_solver.get());
 
@@ -262,7 +265,7 @@ NonlinearSystem::setupColoringFiniteDifferencedPreconditioner()
 {
 #ifdef LIBMESH_HAVE_PETSC
   // Make sure that libMesh isn't going to override our preconditioner
-  _transient_sys.nonlinear_solver->jacobian = NULL;
+  _transient_sys.nonlinear_solver->jacobian = nullptr;
 
   PetscNonlinearSolver<Number> & petsc_nonlinear_solver =
       dynamic_cast<PetscNonlinearSolver<Number> &>(*_transient_sys.nonlinear_solver);
