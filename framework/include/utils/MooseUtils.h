@@ -461,7 +461,16 @@ ExecFlagEnum getDefaultExecFlagEnum();
  * Robust string to integer conversion.
  */
 template <typename T>
-T stringToNumber(const std::string & input);
+T
+stringToNumber(const std::string & input)
+{
+  T output;
+  std::istringstream ss(input);
+  if (!(ss >> output) || !ss.eof())
+    mooseError(
+        "Failed to convert '", input, "' to the supplied type of ", typeid(output).name(), ".");
+  return output;
+}
 
 } // MooseUtils namespace
 
