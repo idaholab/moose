@@ -978,7 +978,6 @@ InputParameters::addParam(const std::string & name, const S & value, const std::
   // Set the parameter now
   setParamHelper(name, l_value, value);
 
-
   /* Indicate the default value, as set via addParam, is being used. The parameter is removed from
      the list whenever
      it changes, see set_attributes */

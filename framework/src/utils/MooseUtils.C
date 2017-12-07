@@ -578,6 +578,31 @@ getDefaultExecFlagEnum()
                               EXEC_CUSTOM);
   return exec_enum;
 }
+
+int
+stringToInteger(const std::string & input, bool throw_on_failure)
+{
+  int output;            // return value
+  std::size_t count = 0; // number of characters converted with stoi
+
+  // Attempt to use std::stoi, if it fails throw or produce a mooseError
+  try
+  {
+    output = std::stoi(input, &count);
+    if (input.size() != count)
+      throw std::invalid_argument("");
+  }
+  catch (const std::invalid_argument & e)
+  {
+    std::string msg = "Failed to convert '" + input + "' to an int.";
+    if (throw_on_failure)
+      throw std::invalid_argument(msg);
+    else
+      mooseError(msg);
+  }
+  return output;
+}
+
 } // MooseUtils namespace
 
 std::string

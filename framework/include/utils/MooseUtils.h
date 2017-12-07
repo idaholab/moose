@@ -458,19 +458,11 @@ numDigits(const T & num)
 ExecFlagEnum getDefaultExecFlagEnum();
 
 /**
- * Robust string to integer conversion.
+ * Robust string to integer conversion that fails for cases such at "1foo".
+ * @param input The string to convert.
+ * @param throw_on_failure Throw an invalid_argument exception instead of mooseError.
  */
-template <typename T>
-T
-stringToNumber(const std::string & input)
-{
-  T output;
-  std::istringstream ss(input);
-  if (!(ss >> output) || !ss.eof())
-    mooseError(
-        "Failed to convert '", input, "' to the supplied type of ", typeid(output).name(), ".");
-  return output;
-}
+int stringToInteger(const std::string & input, bool throw_on_failure = false);
 
 } // MooseUtils namespace
 

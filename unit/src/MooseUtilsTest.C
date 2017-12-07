@@ -106,125 +106,33 @@ TEST(MooseUtils, numDigits)
   EXPECT_EQ(MooseUtils::numDigits(69506060606), 11);
 }
 
-template <typename T>
-void
-stringToNumberHelper(const std::vector<std::string> & inputs)
+TEST(MooseUtils, stringToInteger)
 {
-  for (const std::string & str : inputs)
-  {
-    try
-    {
-      MooseUtils::stringToNumber<T>(str);
-    }
-    catch (const std::exception & e)
-    {
-      T item;
-      std::string msg(e.what());
-      std::string gold =
-          "Failed to convert '" + str + "' to the supplied type of " + typeid(item).name() + ".";
-      ASSERT_NE(msg.find(gold), std::string::npos) << "failed with unexpected error: " << msg;
-    }
-  }
+  EXPECT_EQ(MooseUtils::stringToInteger("42"), 42);
+  EXPECT_EQ(MooseUtils::stringToInteger("-42"), -42);
+  EXPECT_THROW(MooseUtils::stringToInteger("", true), std::invalid_argument);
+  EXPECT_THROW(MooseUtils::stringToInteger("42 ", true), std::invalid_argument);
+  EXPECT_THROW(MooseUtils::stringToInteger("42foo", true), std::invalid_argument);
+  EXPECT_THROW(MooseUtils::stringToInteger("42.1", true), std::invalid_argument);
 }
 
-TEST(MooseUtils, stringToNumber)
+struct TestCase
 {
+  std::string a;
+  std::string b;
+  int dist;
+};
+
+TEST(MooseUtilsTests, levenshteinDist)
+{
+  TestCase cases[] = {
+      {"hello", "hell", 1}, {"flood", "foods", 2}, {"fandango", "odanget", 5},
+  };
+
+  for (size_t i = 0; i < sizeof(cases) / sizeof(TestCase); i++)
   {
-    short int gold = 42;
-    EXPECT_EQ(MooseUtils::stringToNumber<short int>("42"), gold);
-
-    gold = -42;
-    EXPECT_EQ(MooseUtils::stringToNumber<short int>("-42"), gold);
+    auto test = cases[i];
+    int got = MooseUtils::levenshteinDist(test.a, test.b);
+    EXPECT_EQ(test.dist, got) << "case " << i + 1 << " FAILED: a=" << test.a << ", b=" << test.b;
   }
-
-  {
-    unsigned short int gold = 42;
-    EXPECT_EQ(MooseUtils::stringToNumber<unsigned short int>("42"), gold);
-  }
-
-  {
-    int gold = 42;
-    EXPECT_EQ(MooseUtils::stringToNumber<int>("42"), gold);
-
-    gold = -42;
-    EXPECT_EQ(MooseUtils::stringToNumber<int>("-42"), gold);
-  }
-
-  {
-    unsigned int gold = 42;
-    EXPECT_EQ(MooseUtils::stringToNumber<unsigned int>("42"), gold);
-  }
-
-  {
-    long int gold = 42;
-    EXPECT_EQ(MooseUtils::stringToNumber<long int>("42"), gold);
-
-    gold = -42;
-    EXPECT_EQ(MooseUtils::stringToNumber<long int>("-42"), gold);
-  }
-
-  {
-    unsigned long int gold = 42;
-    EXPECT_EQ(MooseUtils::stringToNumber<unsigned long int>("42"), gold);
-  }
-
-  {
-    long long int gold = 42;
-    EXPECT_EQ(MooseUtils::stringToNumber<long long int>("42"), gold);
-
-    gold = -42;
-    EXPECT_EQ(MooseUtils::stringToNumber<long long int>("-42"), gold);
-  }
-
-  {
-    unsigned long long int gold = 42;
-    EXPECT_EQ(MooseUtils::stringToNumber<unsigned long long int>("42"), gold);
-  }
-
-  {
-    float gold = 1.2;
-    EXPECT_EQ(MooseUtils::stringToNumber<float>("1.2"), gold);
-
-    gold = -1.2;
-    EXPECT_EQ(MooseUtils::stringToNumber<float>("-1.2"), gold);
-
-    gold = 1.2e5;
-    EXPECT_EQ(MooseUtils::stringToNumber<float>("1.2e5"), gold);
-
-    gold = -1.2e-5;
-    EXPECT_EQ(MooseUtils::stringToNumber<float>("-1.2e-5"), gold);
-  }
-
-  {
-    double gold = 1.2;
-    EXPECT_EQ(MooseUtils::stringToNumber<double>("1.2"), gold);
-
-    gold = -1.2;
-    EXPECT_EQ(MooseUtils::stringToNumber<double>("-1.2"), gold);
-  }
-
-  {
-    long double gold = 1.2L;
-    EXPECT_EQ(MooseUtils::stringToNumber<long double>("1.2"), gold);
-
-    gold = -1.2L;
-    EXPECT_EQ(MooseUtils::stringToNumber<long double>("-1.2"), gold);
-  }
-
-  std::vector<std::string> failures = {"", "42 ", "42foo", "42.1"};
-  stringToNumberHelper<short int>(failures);
-  stringToNumberHelper<int>(failures);
-  stringToNumberHelper<long int>(failures);
-  stringToNumberHelper<long long int>(failures);
-
-  failures = {"", "42 ", "42 ", "42.1", "-42"};
-  stringToNumberHelper<unsigned short int>(failures);
-  stringToNumberHelper<unsigned int>(failures);
-  stringToNumberHelper<unsigned long int>(failures);
-  stringToNumberHelper<unsigned long long int>(failures);
-
-  failures = {"", "42.1 ", "42.1foo"};
-  stringToNumberHelper<float>(failures);
-  stringToNumberHelper<double>(failures);
-  stringToNumberHelper<long double>(failures);
 }

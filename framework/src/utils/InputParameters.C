@@ -991,7 +991,7 @@ InputParameters::set(const std::string & name, bool quiet_mode)
     set_attributes(name, false);
 
     if (quiet_mode)
-      _set_by_add_param.insert(name);
+      _params[name]._set_by_add_param = true;
 
     return cast_ptr<Parameter<MultiMooseEnum> *>(_values[name])->set();
   }
@@ -1019,13 +1019,13 @@ InputParameters::addParam<MultiMooseEnum, MultiMooseEnum>(const std::string & na
     checkConsistentType<MultiMooseEnum>(name);
 
     MultiMooseEnum & l_value = InputParameters::set<MultiMooseEnum>(name);
-    _doc_string[name] = doc_string;
+    _params[name]._doc_string = doc_string;
 
     // Set the parameter now
     setParamHelper(name, l_value, value);
 
     // Indicate the default value, as set via addParam, is being used. The parameter is removed from
     // the list whenever it changes, see set_attributes
-    _set_by_add_param.insert(name);
+    _params[name]._set_by_add_param = true;
   }
 }

@@ -30,7 +30,7 @@ TEST(FormattedTable, printTableErrors)
   catch (const std::exception & e)
   {
     std::string msg(e.what());
-    ASSERT_NE(msg.find("Failed to convert 'foo' to the supplied type of"), std::string::npos)
+    ASSERT_NE(msg.find("Failed to convert 'foo' to an int."), std::string::npos)
         << "failed with unexpected error: " << msg;
   }
 
@@ -42,7 +42,7 @@ TEST(FormattedTable, printTableErrors)
   catch (const std::exception & e)
   {
     std::string msg(e.what());
-    ASSERT_NE(msg.find("Failed to convert '12345foo' to the supplied type of"), std::string::npos)
+    ASSERT_NE(msg.find("Failed to convert '12345foo' to an int."), std::string::npos)
         << "failed with unexpected error: " << msg;
   }
 }
