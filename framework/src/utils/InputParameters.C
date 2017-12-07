@@ -59,18 +59,8 @@ void
 InputParameters::clear()
 {
   Parameters::clear();
-  _doc_string.clear();
-  _custom_type.clear();
-  _group.clear();
-  _range_functions.clear();
-  _auto_build_vectors.clear();
-  _required_params.clear();
-  _valid_params.clear();
-  _private_params.clear();
+  _params.clear();
   _coupled_vars.clear();
-  _syntax.clear();
-  _default_coupled_value.clear();
-  _default_postprocessor_value.clear();
   _collapse_nesting = false;
   _moose_object_syntax_visibility = true;
   _show_deprecated_message = true;
@@ -80,7 +70,7 @@ InputParameters::clear()
 void
 InputParameters::addClassDescription(const std::string & doc_string)
 {
-  _doc_string["_class"] = doc_string;
+  _class_description = doc_string;
 }
 
 void
@@ -89,24 +79,22 @@ InputParameters::set_attributes(const std::string & name, bool inserted_only)
   if (!inserted_only)
   {
     /**
-     * "_set_by_add_param" and "_deprecated_params" are not populated until after
+     * ".set_by_add_param" and ".deprecated_params" are not populated until after
      * the default value has already been set in libMesh (first callback to this
      * method). Therefore if a variable is in/not in one of these sets, you can
      * be assured it was put there outside of the "addParam*()" calls.
      */
-    _set_by_add_param.erase(name);
+    _params[name].set_by_add_param = false;
 
     // valid_params don't make sense for MooseEnums
     if (!have_parameter<MooseEnum>(name) && !have_parameter<MultiMooseEnum>(name))
-      _valid_params.insert(name);
+      _params[name].valid = true;
 
     if (_show_deprecated_message)
     {
-      std::map<std::string, std::string>::const_iterator pos = _deprecated_params.find(name);
-      if (pos != _deprecated_params.end())
-      {
-        mooseDeprecated("The parameter ", name, " is deprecated.\n", pos->second);
-      }
+      if (_params.count(name) && !_params[name].deprecation_message.empty())
+        mooseDeprecated(
+            "The parameter ", name, " is deprecated.\n", _params[name].deprecation_message);
     }
   }
 }
@@ -114,11 +102,7 @@ InputParameters::set_attributes(const std::string & name, bool inserted_only)
 std::string
 InputParameters::getClassDescription() const
 {
-  std::map<std::string, std::string>::const_iterator pos = _doc_string.find("_class");
-  if (pos != _doc_string.end())
-    return pos->second;
-  else
-    return std::string();
+  return _class_description;
 }
 
 InputParameters &
@@ -141,25 +125,13 @@ InputParameters::operator=(const InputParameters & rhs)
 
   Parameters::operator=(rhs);
 
-  _doc_string = rhs._doc_string;
-  _custom_type = rhs._custom_type;
-  _group = rhs._group;
-  _range_functions = rhs._range_functions;
-  _auto_build_vectors = rhs._auto_build_vectors;
+  _params = rhs._params;
+
   _buildable_types = rhs._buildable_types;
   _collapse_nesting = rhs._collapse_nesting;
   _moose_object_syntax_visibility = rhs._moose_object_syntax_visibility;
-  _required_params = rhs._required_params;
-  _private_params = rhs._private_params;
-  _valid_params = rhs._valid_params;
   _coupled_vars = rhs._coupled_vars;
-  _syntax = rhs._syntax;
-  _default_coupled_value = rhs._default_coupled_value;
-  _default_postprocessor_value = rhs._default_postprocessor_value;
-  _set_by_add_param = rhs._set_by_add_param;
   _allow_copy = rhs._allow_copy;
-  _controllable_params = rhs._controllable_params;
-  _reserved_values = rhs._reserved_values;
 
   return *this;
 }
@@ -169,26 +141,15 @@ InputParameters::operator+=(const InputParameters & rhs)
 {
   Parameters::operator+=(rhs);
 
-  _doc_string.insert(rhs._doc_string.begin(), rhs._doc_string.end());
-  _custom_type.insert(rhs._custom_type.begin(), rhs._custom_type.end());
-  _group.insert(rhs._group.begin(), rhs._group.end());
-  _range_functions.insert(rhs._range_functions.begin(), rhs._range_functions.end());
-  _auto_build_vectors.insert(rhs._auto_build_vectors.begin(), rhs._auto_build_vectors.end());
+  // TODO: this is not a proper merge - if a particular parameter exists in both this and rhs,
+  // then we should actually smartly merge both metadata structs before storing in this.
+  for (auto it = rhs._params.begin(); it != rhs._params.end(); ++it)
+    _params[it->first] = it->second;
+
   _buildable_types.insert(
       _buildable_types.end(), rhs._buildable_types.begin(), rhs._buildable_types.end());
   // Collapse nesting and moose object syntax hiding are not modified with +=
-  _required_params.insert(rhs._required_params.begin(), rhs._required_params.end());
-  _private_params.insert(rhs._private_params.begin(), rhs._private_params.end());
-  _valid_params.insert(rhs._valid_params.begin(), rhs._valid_params.end());
   _coupled_vars.insert(rhs._coupled_vars.begin(), rhs._coupled_vars.end());
-  _syntax.insert(rhs._syntax.begin(), rhs._syntax.end());
-  _default_coupled_value.insert(rhs._default_coupled_value.begin(),
-                                rhs._default_coupled_value.end());
-  _default_postprocessor_value.insert(rhs._default_postprocessor_value.begin(),
-                                      rhs._default_postprocessor_value.end());
-  _set_by_add_param.insert(rhs._set_by_add_param.begin(), rhs._set_by_add_param.end());
-  _controllable_params.insert(rhs._controllable_params.begin(), rhs._controllable_params.end());
-  _reserved_values.insert(rhs._reserved_values.begin(), rhs._reserved_values.end());
   return *this;
 }
 
@@ -198,7 +159,8 @@ InputParameters::addCoupledVar(const std::string & name, Real value, const std::
   // std::vector<VariableName>(1, Moose::stringify(value)),
   addParam<std::vector<VariableName>>(name, doc_string);
   _coupled_vars.insert(name);
-  _default_coupled_value[name] = value;
+  _params[name].coupled_default = value;
+  _params[name].have_coupled_default = true;
 }
 
 void
@@ -216,7 +178,7 @@ InputParameters::addCoupledVarWithAutoBuild(const std::string & name,
 {
   addParam<std::vector<VariableName>>(name, doc_string);
   _coupled_vars.insert(name);
-  _auto_build_vectors[name] = std::make_pair(base_name, num_name);
+  _params[name].autobuild_vecs = std::make_pair(base_name, num_name);
 
   // Additionally there are two more parameters that need to be added:
   addParam<std::string>(base_name, doc_string + " (base_name)");
@@ -245,9 +207,9 @@ std::string
 InputParameters::getDocString(const std::string & name) const
 {
   std::string doc_string;
-  std::map<std::string, std::string>::const_iterator doc_string_it = _doc_string.find(name);
-  if (doc_string_it != _doc_string.end())
-    for (const auto & ch : doc_string_it->second)
+  auto it = _params.find(name);
+  if (it != _params.end())
+    for (const auto & ch : it->second.doc_string)
     {
       if (ch == '\n')
         doc_string += " ... ";
@@ -261,19 +223,18 @@ InputParameters::getDocString(const std::string & name) const
 void
 InputParameters::setDocString(const std::string & name, const std::string & doc)
 {
-  std::map<std::string, std::string>::iterator doc_string_it = _doc_string.find(name);
-  if (doc_string_it == _doc_string.end())
+  auto it = _params.find(name);
+  if (it == _params.end())
     mooseError("Unable to set the documentation string (using setDocString) for the \"",
                name,
                "\" parameter, the parameter does not exist.");
-  else
-    doc_string_it->second = doc;
+  it->second.doc_string = doc;
 }
 
 bool
 InputParameters::isParamRequired(const std::string & name) const
 {
-  return _required_params.find(name) != _required_params.end();
+  return _params.count(name) > 0 && _params.at(name).required;
 }
 
 bool
@@ -284,13 +245,13 @@ InputParameters::isParamValid(const std::string & name) const
   else if (have_parameter<MultiMooseEnum>(name))
     return get<MultiMooseEnum>(name).isValid();
   else
-    return _valid_params.find(name) != _valid_params.end();
+    return _params.count(name) > 0 && _params.at(name).valid;
 }
 
 bool
 InputParameters::isParamSetByAddParam(const std::string & name) const
 {
-  return _set_by_add_param.find(name) != _set_by_add_param.end();
+  return _params.count(name) > 0 && _params.at(name).set_by_add_param;
 }
 
 bool
@@ -305,7 +266,7 @@ InputParameters::areAllRequiredParamsValid() const
 bool
 InputParameters::isPrivate(const std::string & name) const
 {
-  return _private_params.find(name) != _private_params.end();
+  return _params.count(name) > 0 && _params.at(name).isprivate;
 }
 
 void
@@ -313,20 +274,21 @@ InputParameters::declareControllable(const std::string & input_names)
 {
   std::vector<std::string> names;
   MooseUtils::tokenize<std::string>(input_names, names, 1, " ");
-  _controllable_params.insert(names.begin(), names.end());
+  for (auto & name : names)
+    _params[name].controllable = true;
 }
 
 bool
 InputParameters::isControllable(const std::string & name)
 {
-  return _controllable_params.find(name) != _controllable_params.end();
+  return _params.count(name) > 0 && _params[name].controllable;
 }
 
 void
 InputParameters::registerBase(const std::string & value)
 {
   InputParameters::set<std::string>("_moose_base") = value;
-  _private_params.insert("_moose_base");
+  _params["_moose_base"].isprivate = true;
 }
 
 void
@@ -423,7 +385,7 @@ InputParameters::checkParams(const std::string & parsing_syntax)
     mooseError(oss.str());
 
   // Controllable parameters
-  for (const auto & param_name : _controllable_params)
+  for (const auto & param_name : getControllableParameters())
   {
     // Check that parameter is valid
     if (!isParamValid(param_name))
@@ -461,21 +423,23 @@ InputParameters::hasCoupledValue(const std::string & coupling_name) const
 bool
 InputParameters::hasDefaultCoupledValue(const std::string & coupling_name) const
 {
-  return _default_coupled_value.find(coupling_name) != _default_coupled_value.end();
+  return _params.count(coupling_name) > 0 && _params.at(coupling_name).have_coupled_default &&
+         _coupled_vars.count(coupling_name) > 0;
 }
 
 void
 InputParameters::defaultCoupledValue(const std::string & coupling_name, Real value)
 {
-  _default_coupled_value[coupling_name] = value;
+  _params[coupling_name].coupled_default = value;
+  _params[coupling_name].have_coupled_default = true;
 }
 
 Real
 InputParameters::defaultCoupledValue(const std::string & coupling_name) const
 {
-  std::map<std::string, Real>::const_iterator value_it = _default_coupled_value.find(coupling_name);
+  auto value_it = _params.find(coupling_name);
 
-  if (value_it == _default_coupled_value.end())
+  if (value_it == _params.end() || !value_it->second.have_coupled_default)
     mooseError("Attempted to retrieve default value for coupled variable '",
                coupling_name,
                "' when none was provided. \n\nThere are three reasons why this may have "
@@ -484,13 +448,19 @@ InputParameters::defaultCoupledValue(const std::string & coupling_name) const
                "variable added with params.addRequiredCoupledVar() \n 3. The call to get the "
                "coupled value should have been properly guarded with isCoupled()\n");
 
-  return value_it->second;
+  return value_it->second.coupled_default;
 }
 
-const std::map<std::string, std::pair<std::string, std::string>> &
+std::map<std::string, std::pair<std::string, std::string>>
 InputParameters::getAutoBuildVectors() const
 {
-  return _auto_build_vectors;
+  std::map<std::string, std::pair<std::string, std::string>> abv;
+  for (auto it = _params.begin(); it != _params.end(); ++it)
+  {
+    if (!it->second.autobuild_vecs.first.empty())
+      abv[it->first] = it->second.autobuild_vecs;
+  }
+  return abv;
 }
 
 std::string
@@ -498,10 +468,9 @@ InputParameters::type(const std::string & name)
 {
   if (_coupled_vars.find(name) != _coupled_vars.end())
     return "std::vector<VariableName>";
-  else if (_custom_type.find(name) != _custom_type.end())
-    return _custom_type[name];
-  else
-    return _values[name]->type();
+  else if (_params.count(name) > 0 && !_params[name].custom_type.empty())
+    return _params[name].custom_type;
+  return _values[name]->type();
 }
 
 std::string
@@ -579,8 +548,8 @@ InputParameters::addParamNamesToGroup(const std::string & space_delim_names,
     param_names.insert(it.first);
 
   for (const auto & param_name : elements)
-    if (param_names.find(param_name) != param_names.end())
-      _group[param_name] = group_name;
+    if (_params.count(param_name) > 0)
+      _params[param_name].group = group_name;
     else
       mooseError("Unable to find a parameter with name: ",
                  param_name,
@@ -592,44 +561,41 @@ InputParameters::addParamNamesToGroup(const std::string & space_delim_names,
 std::vector<std::string>
 InputParameters::getSyntax(const std::string & name)
 {
-  return _syntax[name];
+  return _params[name].cli_flag_names;
 }
 
 std::string
 InputParameters::getGroupName(const std::string & param_name) const
 {
-  std::map<std::string, std::string>::const_iterator it = _group.find(param_name);
-
-  if (it != _group.end())
-    return it->second;
-  else
-    return std::string();
+  auto it = _params.find(param_name);
+  if (it != _params.end())
+    return it->second.group;
+  return std::string();
 }
 
 const PostprocessorValue &
 InputParameters::getDefaultPostprocessorValue(const std::string & name, bool suppress_error) const
 {
   // Check that a default exists, error if it does not
-  std::map<std::string, PostprocessorValue>::const_iterator it =
-      _default_postprocessor_value.find(name);
-  if (!(suppress_error || it != _default_postprocessor_value.end()))
+  auto it = _params.find(name);
+  if (!suppress_error && (it == _params.end() || !it->second.have_default_postprocessor_val))
     mooseError("A default PostprcessorValue does not exist for the given name: ", name);
 
-  // Return the value
-  return it->second;
+  return it->second.default_postprocessor_val;
 }
 
 void
 InputParameters::setDefaultPostprocessorValue(const std::string & name,
                                               const PostprocessorValue & value)
 {
-  _default_postprocessor_value[name] = value;
+  _params[name].default_postprocessor_val = value;
+  _params[name].have_default_postprocessor_val = true;
 }
 
 bool
 InputParameters::hasDefaultPostprocessorValue(const std::string & name) const
 {
-  return _default_postprocessor_value.find(name) != _default_postprocessor_value.end();
+  return _params.count(name) > 0 && _params.at(name).have_default_postprocessor_val;
 }
 
 void
@@ -728,7 +694,7 @@ InputParameters::applyParameter(const InputParameters & common, const std::strin
 
   // Extract the properties from the local parameter for the current common parameter name
   const bool local_exist = _values.find(common_name) != _values.end();
-  const bool local_set = _set_by_add_param.find(common_name) == _set_by_add_param.end();
+  const bool local_set = _params.count(common_name) > 0 && !_params[common_name].set_by_add_param;
   const bool local_priv = isPrivate(common_name);
   const bool local_valid = isParamValid(common_name);
 
@@ -771,15 +737,15 @@ InputParameters::isParamSetByUser(const std::string & name) const
     return false;
   else
     // If the parameters is not located in the list, then it was set by the user
-    return _set_by_add_param.find(name) == _set_by_add_param.end();
+    return _params.count(name) > 0 && !_params.at(name).set_by_add_param;
 }
 
 const std::string &
 InputParameters::getDescription(const std::string & name)
 {
-  if (_doc_string.find(name) == _doc_string.end())
+  if (_params.count(name) == 0)
     mooseError("No parameter exists with the name ", name);
-  return _doc_string[name];
+  return _params[name].doc_string;
 }
 
 template <>
@@ -789,8 +755,8 @@ InputParameters::addRequiredParam<MooseEnum>(const std::string & name,
                                              const std::string & doc_string)
 {
   InputParameters::set<MooseEnum>(name) = moose_enum; // valid parameter is set by set_attributes
-  _required_params.insert(name);
-  _doc_string[name] = doc_string;
+  _params[name].required = true;
+  _params[name].doc_string = doc_string;
 }
 
 template <>
@@ -801,8 +767,8 @@ InputParameters::addRequiredParam<MultiMooseEnum>(const std::string & name,
 {
   InputParameters::set<MultiMooseEnum>(name) =
       moose_enum; // valid parameter is set by set_attributes
-  _required_params.insert(name);
-  _doc_string[name] = doc_string;
+  _params[name].required = true;
+  _params[name].doc_string = doc_string;
 }
 
 template <>
@@ -814,8 +780,8 @@ InputParameters::addRequiredParam<std::vector<MooseEnum>>(
 {
   InputParameters::set<std::vector<MooseEnum>>(name) =
       moose_enums; // valid parameter is set by set_attributes
-  _required_params.insert(name);
-  _doc_string[name] = doc_string;
+  _params[name].required = true;
+  _params[name].doc_string = doc_string;
 }
 
 template <>
@@ -883,7 +849,8 @@ InputParameters::setParamHelper<PostprocessorName, Real>(const std::string & nam
                                                          const Real & r_value)
 {
   // Store the default value
-  _default_postprocessor_value[name] = r_value;
+  _params[name].default_postprocessor_val = r_value;
+  _params[name].have_default_postprocessor_val = true;
 
   // Assign the default value so that it appears in the dump
   std::ostringstream oss;
@@ -898,7 +865,8 @@ InputParameters::setParamHelper<PostprocessorName, int>(const std::string & name
                                                         const int & r_value)
 {
   // Store the default value
-  _default_postprocessor_value[name] = r_value;
+  _params[name].default_postprocessor_val = r_value;
+  _params[name].have_default_postprocessor_val = true;
 
   // Assign the default value so that it appears in the dump
   std::ostringstream oss;
@@ -975,17 +943,16 @@ InputParameters::getParamHelper<MultiMooseEnum>(const std::string & name,
 void
 InputParameters::setReservedValues(const std::string & name, const std::set<std::string> & reserved)
 {
-  _reserved_values.insert(std::make_pair(name, reserved));
+  _params[name].reserved_values = reserved;
 }
 
 std::set<std::string>
 InputParameters::reservedValues(const std::string & name) const
 {
-  auto it = _reserved_values.find(name);
-  if (it == _reserved_values.end())
+  auto it = _params.find(name);
+  if (it == _params.end())
     return std::set<std::string>();
-  else
-    return it->second;
+  return it->second.reserved_values;
 }
 
 void
