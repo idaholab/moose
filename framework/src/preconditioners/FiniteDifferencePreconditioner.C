@@ -57,7 +57,8 @@ FiniteDifferencePreconditioner::FiniteDifferencePreconditioner(const InputParame
     _finite_difference_type(getParam<MooseEnum>("finite_difference_type"))
 {
   if (n_processors() > 1)
-    mooseError("Can't use the Finite Difference Preconditioner in parallel yet!");
+    mooseWarning("Finite differencing to assemble the Jacobian is MUCH MUCH slower than forming "
+                 "the Jacobian by hand, so don't complain about performance if you use it!");
 
   NonlinearSystemBase & nl = _fe_problem.getNonlinearSystemBase();
   unsigned int n_vars = nl.nVariables();
