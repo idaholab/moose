@@ -1,32 +1,25 @@
-// #ifndef JOULEHEATINGSOURCE_H
-// #define JOULEHEATINGSOURCE_H
-
 #ifndef MATGRADSQCOUPLED_H
 #define MATGRADSQCOUPLED_H
 
-// #include "HeatSource.h"
 #include "Kernel.h"
 #include "JvarMapInterface.h"
 #include "DerivativeMaterialInterface.h"
 
 // Forward Declarations
-// class JouleHeatingSource;
 class MatGradSqCoupled;
 
 template <>
-// InputParameters validParams<JouleHeatingSource>();
 InputParameters validParams<MatGradSqCoupled>();
 
-/**
- * This kernel calculates the heat source term corresponding to joule heating,
- * Q = J * E = elec_cond * grad_phi * grad_phi, where phi is the electrical potenstial.
+/*
+ * This kernel calculates the prefactor * nabla_psi term in A-C equation for phase field modeling of oxidation
+ * prefactor * grad_psi * grad_psi, where psi is the electrical field variable.
+ * prefactor = 0.5 * grad_permitivity(phi), described in [Materials] using [DerivativeParsedMaterials]
  */
-// class JouleHeatingSource : public DerivativeMaterialInterface<JvarMapKernelInterface<HeatSource>>
-// class JouleHeatingSource : public DerivativeMaterialInterface<JvarMapKernelInterface<Kernel>>
+
 class MatGradSqCoupled : public DerivativeMaterialInterface<JvarMapKernelInterface<Kernel>>
 {
 public:
-//  JouleHeatingSource(const InputParameters & parameters);
   MatGradSqCoupled(const InputParameters & parameters);
   virtual void initialSetup();
 
@@ -39,9 +32,9 @@ private:
   const VariableGradient & _grad_elec;
   const unsigned int _elec_var;
 
-  const MaterialProperty<Real> & _elec_cond;
-  const MaterialProperty<Real> & _delec_cond_dT;
-  std::vector<const MaterialProperty<Real> *> _delec_cond_darg;
+  const MaterialProperty<Real> & _prefactor;
+  const MaterialProperty<Real> & _dprefactor_dphi;
+  std::vector<const MaterialProperty<Real> *> _dprefactor_darg;
 };
 
-#endif // JOULEHEATINGSOURCE_H
+#endif // MATGRADSQCOUPLED_H
