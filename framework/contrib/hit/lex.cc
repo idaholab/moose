@@ -257,12 +257,16 @@ consumeToNewline(Lexer * l)
 void
 lexComments(Lexer * l)
 {
-  l->acceptRun(space);
-  l->ignore();
-  if (l->accept("#"))
+  // The first comment in a file can't be an inline comment.
+  if (l->start() > 0)
   {
-    consumeToNewline(l);
-    l->emit(TokType::InlineComment);
+    l->acceptRun(space);
+    l->ignore();
+    if (l->accept("#"))
+    {
+      consumeToNewline(l);
+      l->emit(TokType::InlineComment);
+    }
   }
 
   while (true)
