@@ -59,8 +59,6 @@ PorousFlowDarcyVelocityComponent::PorousFlowDarcyVelocityComponent(
 Real
 PorousFlowDarcyVelocityComponent::computeValue()
 {
-  // note that in the following, _relative_permeaility and _fluid_viscosity are upwinded (nodal)
-  // values
   return -(_permeability[_qp] * (_grad_p[_qp][_ph] - _fluid_density_qp[_qp][_ph] * _gravity) *
            _relative_permeability[_qp][_ph] / _fluid_viscosity[_qp][_ph])(_component);
 }
