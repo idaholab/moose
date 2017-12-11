@@ -1,0 +1,13 @@
+[Tests]
+  [./warning]
+  type = 'RunException'
+  input = 'failure_warning.i'
+  expect_err = "WARNING: Bad element quality in terms of "
+  [../]
+
+  [./error]
+  type = 'RunException'
+  input = 'failure_error.i'
+  expect_err = "ERROR: Bad element quality in terms of "
+  [../]
+[]
