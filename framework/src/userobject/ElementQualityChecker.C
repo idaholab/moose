@@ -148,10 +148,10 @@ ElementQualityChecker::finalize()
   for (std::set<Real>::iterator it = _m_values.begin(); it != _m_values.end(); ++it)
     m_sum += *it;
 
-  std::cout << libMesh::Quality::name(_m_type) << " Metric values:" << std::endl;
-  std::cout << "              Minimum: " << *_m_values.begin() << std::endl;
-  std::cout << "              Maximum: " << *_m_values.rbegin() << std::endl;
-  std::cout << "              Average: " << m_sum / _m_values.size() << std::endl;
+  Moose::out << libMesh::Quality::name(_m_type) << " Metric values:" << std::endl;
+  Moose::out << "              Minimum: " << *_m_values.begin() << std::endl;
+  Moose::out << "              Maximum: " << *_m_values.rbegin() << std::endl;
+  Moose::out << "              Average: " << m_sum / _m_values.size() << std::endl;
 
   if (!_elem_ids.empty())
   {
@@ -181,9 +181,9 @@ ElementQualityChecker::finalize()
         mooseError("Unknown failure type!");
     }
 
-    std::cout << "List of failed element IDs: " << std::endl;
+    Moose::out << "List of failed element IDs: " << std::endl;
     for (std::set<unsigned int>::iterator it = _elem_ids.begin(); it != _elem_ids.end(); ++it)
-      std::cout << "  " << *it << std::endl;
+      Moose::out << "  " << *it << std::endl;
   }
 }
 
