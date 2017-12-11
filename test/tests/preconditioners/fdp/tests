@@ -1,16 +1,27 @@
 [Tests]
-  [./test]
-    type = 'Exodiff'
-    input = 'fdp_test.i'
-    exodiff = 'out.e'
-    max_parallel = 1
+  [./jacobian_fdp_coloring_full_test]
+    type = AnalyzeJacobian
+    input = fdp_test.i
+    expect_out = '\nNo errors detected. :-\)\n'
+    recover = false
+    mesh_mode = REPLICATED
+    cli_args = 'Preconditioning/FDP/full=true'
   [../]
-  [./test_standard]
-    type = 'Exodiff'
-    input = 'fdp_test.i'
-    exodiff = 'out.e'
-    max_parallel = 1
-    prereq = 'test'
-    cli_args = "Preconditioning/FDP/finite_difference_type='standard'"
+  [./jacobian_fdp_standard_test]
+    type = AnalyzeJacobian
+    input = fdp_test.i
+    expect_out = '\nNo errors detected. :-\)\n'
+    recover = false
+    mesh_mode = REPLICATED
+    cli_args = 'Preconditioning/FDP/finite_difference_type=standard'
+    prereq = 'jacobian_fdp_coloring_full_test'
+  [../]
+  [./jacobian_fdp_coloring_diagonal_test_fail]
+    type = AnalyzeJacobian
+    input = fdp_test.i
+    expect_out = 'Off-diagonal Jacobian.*needs to be implemented'
+    recover = false
+    mesh_mode = REPLICATED
+    prereq = 'jacobian_fdp_standard_test'
   [../]
 []
