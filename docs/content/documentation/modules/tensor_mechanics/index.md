@@ -18,62 +18,57 @@ The tensor mechanics module provides a powerful system for solving solid mechani
 
 A material varies from its rest shape due to stress. This departure from the rest shape is called deformation or displacement, and the proportion of deformation to original size is called strain. To determine the deformed shape and the stress, a governing equation is solved to determine the displacement vector $\mathbf{u}$.
 
-The strong form of the governing equation on the domain $\Omega$ and boundary $\Gamma=\Gamma_{\mathit{\iota_i}}\cup\Gamma_{\mathit{g_i}}$
+The strong form of the governing equation on the domain $\Omega$ and boundary $\Gamma=\Gamma_{\mathit{t_i}}\cup\Gamma_{\mathit{g_i}}$
 can be stated as follows:
-$$
-\begin{eqnarray}
-\nabla \cdot (\boldsymbol{\sigma} + \boldsymbol{\sigma}_0) + \mathbf{b} &=& \mathbf{0} \;\mathrm{in}\;\Omega \\
-\mathbf{u} &=& \mathbf{g}\;\mathrm{in}\;\Gamma_{ \mathbf{g}} \\
-\boldsymbol{\sigma} \cdot \mathbf{n}&=&\boldsymbol{\iota}\;\mathrm{in}\;\Gamma_{ \boldsymbol{\iota}}
-\end{eqnarray}
-$$
-where $\boldsymbol{\sigma}$  is the Cauchy stress tensor, $\boldsymbol{\sigma}_0$ is an additional source of stress (such as pore pressure), $\mathbf{u}$ is the displacement vector, $\mathbf{b}$ is the body force, $\mathbf{n}$ is the unit normal to the boundary, $\mathbf{g}$ is the prescribed displacement on the boundary and $\boldsymbol{\iota}$ is the prescribed traction on the boundary. The weak form of the residual equation is expressed as:
-$$
-\begin{eqnarray}
-  \mathbb{R} = \left( \boldsymbol{\sigma} + \boldsymbol{\sigma}_0), \nabla \phi_m \right) - \left< \boldsymbol{\iota}, \phi_m \right> - \left( \mathbf{b}, \phi_m \right)  = \mathbf{0},
-\end{eqnarray}
-$$
+\begin{equation}
+\begin{aligned}
+\nabla \cdot (\mathbf{\sigma} + \mathbf{\sigma}_0) + \mathbf{b} =& \mathbf{0} \;\mathrm{in}\;\Omega \\
+\mathbf{u} =& \mathbf{g}\;\mathrm{in}\;\Gamma_{ \mathbf{g}} \\
+\mathbf{\sigma} \cdot \mathbf{n}=&\mathbf{t}\;\mathrm{in}\;\Gamma_{ \mathbf{t}}
+\end{aligned}
+\end{equation}
+where $\mathbf{\sigma}$  is the Cauchy stress tensor, $\mathbf{\sigma}_0$ is an additional source of stress (such as pore pressure), $\mathbf{u}$ is the displacement vector, $\mathbf{b}$ is the body force, $\mathbf{n}$ is the unit normal to the boundary, $\mathbf{g}$ is the prescribed displacement on the boundary and $\mathbf{t}$ is the prescribed traction on the boundary. The weak form of the residual equation is expressed as:
+\begin{equation}
+  \mathbb{R} = \left( \mathbf{\sigma} + \mathbf{\sigma}_0), \nabla \phi_m \right) - \left< \mathbf{t}, \phi_m \right> - \left( \mathbf{b}, \phi_m \right)  = \mathbf{0}
+\end{equation}
 where $(\cdot)$ and $\left< \cdot \right>$ represent volume and boundary integrals, respectively. The solution of the residual equation with Newton's method requires the Jacobian of the residual equation, which can be expressed as (ignoring boundary terms)
-$$
-\begin{eqnarray}
-  \mathbb{J} = \left( \frac{\partial \boldsymbol{\sigma}}{\partial \nabla \mathbf{u}} , \nabla \phi_m \right),
-\end{eqnarray}
-$$
-assuming $\boldsymbol{\sigma}_0$ is independent of the strain.
+\begin{equation}
+  \mathbb{J} = \left( \frac{\partial \mathbf{\sigma}}{\partial \nabla \mathbf{u}} , \nabla \phi_m \right),
+\end{equation}
+assuming $\mathbf{\sigma}_0$ is independent of the strain.
 
-The material stress response is described by the constitutive model, where the stress is determined as a function of the strain, i.e. $\tilde{\boldsymbol{\sigma}}( \boldsymbol{\epsilon} - \boldsymbol{\epsilon}_0)$, where $\boldsymbol{\epsilon}$ is the strain and $\boldsymbol{\epsilon}_0$ is a stress free strain. For example, in linear elasticity (only valid for small strains), the material response is linear, i.e.
-$\boldsymbol{\sigma} = \boldsymbol{\mathcal{C}}(\boldsymbol{\epsilon} - \boldsymbol{\epsilon}_0)$.
+The material stress response is described by the constitutive model, where the stress is determined as a function of the strain, i.e. $\tilde{\mathbf{\sigma}}( \mathbf{\epsilon} - \mathbf{\epsilon}_0)$, where $\mathbf{\epsilon}$ is the strain and $\mathbf{\epsilon}_0$ is a stress free strain. For example, in linear elasticity (only valid for small strains), the material response is linear, i.e.
+$\mathbf{\sigma} = \mathbf{\mathcal{C}}(\mathbf{\epsilon} - \mathbf{\epsilon}_0)$.
 
 The tensor mechanics system can handle linear elasticity and finite strain mechanics, including elasticity, plasticity, creep, and damage.
 
-##Using TensorMechanics Materials
+## Using Materials in Tensor Mechanics
 
 The tensor mechanics materials use a modular system where the main tensors used in the residual equation are defined in individual material classes in MOOSE. The plug-and-play approach used in the Tensor Mechanics module requires at least three separate classes to fully describe a material model.
 
 !!! info "Three Tensors Are Required for a Mechanics Problem"
-    The three tensors that must be defined for any mechanics problem are the the strain $\boldsymbol{\epsilon}$ or strain increment, elasticity tensor $\boldsymbol{\mathcal{C}}$, and the stress $\boldsymbol{\sigma}$. Optional tensors include stress-free strain (also known as an eigenstrain) $\boldsymbol{\epsilon}_0$ and additional stress $\boldsymbol{\sigma}_0$.
+    The three tensors that must be defined for any mechanics problem are the the strain $\mathbf{\epsilon}$ or strain increment, elasticity tensor $\mathbf{\mathcal{C}}$, and the stress $\mathbf{\sigma}$. Optional tensors include stress-free strain (also known as an eigenstrain) $\mathbf{\epsilon}_0$ and additional stress $\mathbf{\sigma}_0$.
 
 !media media/tensor_mechanics-IntroPlugNPlay.png width=800 float=right caption=Figure 1: Tensors required to fully describe a mechanics material.
 
 
 At times, a user may need to define multiple mechanics properties over a single block. For this reason, all material properties can be prepended by a name defined by the input parameter `base_name`.
 
-###Strain or Strain increment
-The base material class to create strains ($\boldsymbol{\epsilon}$) or strain increments is ComputeStrainBase](/ComputeStrainBase.md). `ComputeStrainBase` is a pure virtual class, requiring that all children override the `computeQpProperties()` method.
-
-For all strain this class defines the property `total_strain`.  For incremental strains, both finite and small, the compute strain base class defines the properties
+##Strain Materials
+The base material class to create strains ($\mathbf{\epsilon}$) or strain increments is `ComputeStrainBase`; this class is a pure virtual class, requiring that all children override the `computeQpProperties()` method.
+For all strains the base class defines the property `total_strain`.  For incremental strains, both finite and small, the compute strain base class defines the properties
 `strain_rate`, `strain_increment`, `rotation_increment`, and `deformation_gradient`. A discussion of the different types of strain formulations is available on the [Strains](tensor_mechanics/Strains.md) page.
 
-For small strains, use [ComputeSmallStrain](/ComputeSmallStrain.md) in which $\boldsymbol{\epsilon} = (\nabla \mathbf{u} + \nabla \mathbf{u}^T)/2$. For finite strains, use [ComputeFiniteStrain](/ComputeFiniteStrain.md) in which an incremental form is employed such that the strain_increment and rotation_increment are calculated. The input file syntax for a finite incremental strain material is
+For small strains, use [ComputeSmallStrain](/ComputeSmallStrain.md) in which $\mathbf{\epsilon} = (\nabla \mathbf{u} + \nabla \mathbf{u}^T)/2$. For finite strains, use [ComputeFiniteStrain](/ComputeFiniteStrain.md) in which an incremental form is employed such that the strain_increment and rotation_increment are calculated.
 
-!listing modules/tensor_mechanics/test/tests/finite_strain_elastic/finite_strain_elastic_new_test.i start=strain end=stress
+With the TensorMechanics master action, the strain formulation can be set with the `strain= SMALL | FINITE` parameter, as shown below.
+!listing modules/tensor_mechanics/test/tests/finite_strain_elastic/finite_strain_elastic_new_test.i block=Modules/TensorMechanics
 
 
-###Elasticity Tensor
+##Elasticity Tensor Materials
 
-The primary class for creating elasticity tensors ($\boldsymbol{\mathcal{C_{ijkl}}}$) is [ComputeElasticityTensor](/ComputeElasticityTensor.md). This class defines the property
-`_elasticity_tensor`. Given the elastic constants required for the applicable symmetry, such as `symmetric9`, this material calculates the elasticity tensor. If you wish to rotate the elasticity tensor, constant Euler angles can be provided. The elasticity tensor can also be scaled with a function, if desired. The input file syntax to create an elasticity tensor is
-
+The primary class for creating elasticity tensors ($\mathbf{\mathcal{C_{ijkl}}}$) is [ComputeElasticityTensor](/ComputeElasticityTensor.md). This class defines the property
+`_elasticity_tensor`. Given the elastic constants required for the applicable symmetry, such as `symmetric9`, this material calculates the elasticity tensor. If you wish to rotate the elasticity tensor, constant Euler angles can be provided. The elasticity tensor can also be scaled with a function, if desired.
 `ComputeElasticityTensor` also serves as a base class for specialized elasticity tensors, including:
 
 * An elasticity tensor for crystal plasticity, [ComputeElasticityTensorCP](/ComputeElasticityTensorCP.md),
@@ -82,54 +77,54 @@ The primary class for creating elasticity tensors ($\boldsymbol{\mathcal{C_{ijkl
 
 The input file syntax for the isotropic elasticity tensor is
 
-!listing modules/tensor_mechanics/tutorials/basics/part_1.1.i start=elasticity_tensor end=strain
+!listing modules/tensor_mechanics/tutorials/basics/part_1.1.i block=Materials/elasticity_tensor
 
 and for an orthotropic material, such as a metal crystal, is
 
-!listing modules/tensor_mechanics/test/tests/finite_strain_elastic/finite_strain_elastic_new_test.i start=elasticity_tensor end=strain
+!listing modules/tensor_mechanics/test/tests/finite_strain_elastic/finite_strain_elastic_new_test.i block=Materials/elasticity_tensor
 
-###Stress
-The base class for constitutive equations to compute a stress ($\boldsymbol{\sigma}$) is `ComputeStressBase`. The `ComputeStressBase` class defines the properties `stress` and `elastic_strain`. It is a pure virtual class, requiring all children to override the method `computeQpStress()`.
+##Stress Materials
+The base class for constitutive equations to compute a stress ($\mathbf{\sigma}$) is `ComputeStressBase`. The `ComputeStressBase` class defines the properties `stress` and `elastic_strain`. It is a pure virtual class, requiring all children to override the method `computeQpStress()`.
 
 Two elastic constitutive models have been developed, one that assumes small strains [ComputeLinearElasticStress](/ComputeLinearElasticStress.md), and a second which assumes finite strains and rotations increments [ComputeFiniteStrainElasticStress](/ComputeFiniteStrainElasticStress.md) The input file syntax for these materials is
 
-!listing modules/tensor_mechanics/test/tests/finite_strain_elastic/finite_strain_elastic_new_test.i block=stress
+!listing modules/tensor_mechanics/test/tests/finite_strain_elastic/finite_strain_elastic_new_test.i block=Materials/stress
 
 There are a number of other constitutive models that have been implemented to calculate more complex elasticity problems, plasticity, and creep.  An overview of these different materials is available on the [Stresses](tensor_mechanics/Stresses.md) page.
 
-### Stress-Free Strains (Eigenstrains)
+## Eigenstrain Materials
 
-Eigenstrain is the term given to a strain which does not result directly from an applied force. Eigenstrains are also referred to as residual strains, stress-free strains, or intrinsic strains; translated from German, [Eigen](http://dict.tu-chemnitz.de/deutsch-englisch/Eigen....html) means own or intrinsic in English.  The term eigenstrain was introduced by [T. Mura in 1982](http://link.springer.com/chapter/10.1007/978-94-011-9306-1_1):
+Eigenstrain is the term given to a strain which does not result directly from an applied force. The base class for eigenstrains is `ComputeEigenstrainBase`. It computes an eigenstrain, which is subtracted from the total strain in the Compute Strain classes.
+\begin{equation}
+\epsilon_{mechanical} = \epsilon_{total} - \epsilon_{eigen}
+\end{equation}
+[Chapter 3](http://onlinelibrary.wiley.com/doi/10.1002/9780470117835.ch3/pdf) of **Fundamentals of Micromechanics of Solids** describes the relationship between total, elastic, and eigen- strains and provides examples using thermal expansion and dislocations.
+
+Eigenstrains are also referred to as residual strains, stress-free strains, or intrinsic strains; translated from German, [Eigen](http://dict.tu-chemnitz.de/deutsch-englisch/Eigen....html) means own or intrinsic in English.  The term eigenstrain was introduced by [T. Mura in 1982](http://link.springer.com/chapter/10.1007/978-94-011-9306-1_1):
 
 > Eigenstrain is a generic name given to such nonelastic strains as thermal expansion, phase transformation, initial strains, plastic, misfit strains. Eigenstress is a generic name given to self-equilibrated internal stresses caused by one or several of these eigenstrains in bodies which are free from any other external force and surface constraint.  The eigenstress fields are created by the incompatibility of the eigenstrains.  This new English terminology was adapted from the German "Eigenspannungen and Eigenspannungsquellen," which is the title of H. Reissner's paper (1931) on residual stresses.
 
-The base class for eigenstrains is `ComputeEigenstrainBase`. It computes an eigenstrain, which is subtracted from the total strain in the Compute Strain classes. Eigenstrains are calculated separately from `mechanical_strains`: elastic, plastic, and creep strains are considered mechanical strains in Tensor Mechanics.
+Thermal strains are a volumetric change resulting from a change in temperature of the material.  The change in strains can be either a simple linear function of thermal change, e.g. ($\mathbf{\epsilon}_T = \alpha \Delta T$) or a more complex function of temperature.
+The thermal expansion class, [ComputeThermalExpansionEigenstrain](/ComputeThermalExpansionEigenstrain.md) computes the thermal strain  as a linear function of temperature.  The input file syntax is
+!listing modules/tensor_mechanics/test/tests/thermal_expansion/constant_expansion_coeff.i block=Materials/thermal_expansion_strain
 
-$$
-\epsilon_{mechanical} = \epsilon_{total} - \epsilon_{eigen}
-$$
+The eigenstrain material block name must also be added as an input parameter, `eigenstrain_names` to the strain material or TensorMechanics master action block. An example of the additional parameter in the TensorMechanics master action is shown below.
+!listing modules/tensor_mechanics/test/tests/thermal_expansion/constant_expansion_coeff.i block=Modules/TensorMechanics
 
-The mechanical strain is passed to the `Compute*Stress` methods to calculate the stress for the current iteration.  [Chapter 3](http://onlinelibrary.wiley.com/doi/10.1002/9780470117835.ch3/pdf) of **Fundamentals of Micromechanics of Solids** describes the relationship between total, elastic, and eigen strains and provides examples with thermal expansion and dislocations.
+Other eigenstrains could be caused by defects such as over-sized or under-sized second phase particles. Such an eigenstrain material is [ComputeVariableEigenstrain](/ComputeVariableEigenstrain.md). This class computes a lattice mismatch due to a secondary phase, where the form of the tensor is defined by an input vector, and the scalar dependence on a phase variable is defined in another material. The input file syntax is
 
-Thermal strains are a volumetric change resulting from a change in temperature of the material.  The change in strains can be either a simple linear function of thermal change, e.g. ($\boldsymbol{\epsilon}_T = \alpha \Delta T$) or a more complex function of temperature.   Besides thermal expansion, some models employ other stress-free strains ($\boldsymbol{\epsilon}_0$) to provide inherit strains in the material.
-
-The thermal expansion class, [ComputeThermalExpansionEigenstrain](/ComputeThermalExpansionEigenstrain.md) computes the thermal strains for both small total strains and for incremental strains as a linear function of temperature.  The input file syntax is
-
-!listing modules/tensor_mechanics/test/tests/thermal_expansion/constant_expansion_coeff.i block=thermal_expansion_strain
-
-Other eigenstrains could be caused by defects such as over-sized or under-sized second phase particles. Another stress-free strain material that has been implemented is [ComputeVariableEigenstrain](/ComputeVariableEigenstrain.md). This class computes a lattice mismatch due to a secondary phase, where the form of the tensor is defined by an input vector, and the scalar dependence on a phase variable is defined in another material. The input file syntax is
-
-!listing modules/combined/test/tests/eigenstrain/inclusion.i block=var_dependence
-
-!listing modules/combined/test/tests/eigenstrain/inclusion.i block=eigenstrain
+!listing modules/combined/test/tests/eigenstrain/inclusion.i block=Materials/eigenstrain
 
 Note the `DerivativeParsedMaterial`,  which evaluates an expression given in the input file, and its automatically generated derivatives, at each quadrature point.
+!listing modules/combined/test/tests/eigenstrain/inclusion.i block=Materials/var_dependence
 
-### Extra Stresses
+## Extra Stress Materials
 
-Extra stresses ($\boldsymbol{\sigma}_0$) can also be pulled into the residual calculation after the constitutive model calculation of the stress. The extra stress is added to the stress value
-```
-  _stress[_qp] += _extra_stress[_qp];
-```
+Extra stresses ($\mathbf{\sigma}_0$) can also be pulled into the residual calculation after the constitutive model calculation of the stress. The extra stress material property, `extra_stress` is defined in the `ComputeExtraStressBase` class and is added to the stress value.
+\begin{equation}
+  \sigma_{ij} = \sigma_{ij} + \sigma^{exta}_{ij}
+\end{equation}
 
- Though no base class has been created for this, it would be straight forward to do so and it would need to define the property `extra_stress`.
+An extra stress may be a residual stress, such as in large civil engineering simulations.
+An example of an extra stress material used in an input file is:
+!listing modules/combined/test/tests/linear_elasticity/extra_stress.i block=Materials/const_stress
