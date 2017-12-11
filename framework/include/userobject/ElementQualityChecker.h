@@ -1,9 +1,17 @@
 /****************************************************************/
+/*               DO NOT MODIFY THIS HEADER                      */
 /* MOOSE - Multiphysics Object Oriented Simulation Environment  */
 /*                                                              */
-/*          All contents are licensed under LGPL V2.1           */
-/*             See LICENSE for full restrictions                */
+/*           (c) 2010 Battelle Energy Alliance, LLC             */
+/*                   ALL RIGHTS RESERVED                        */
+/*                                                              */
+/*          Prepared by Battelle Energy Alliance, LLC           */
+/*            Under Contract No. DE-AC07-05ID14517              */
+/*            With the U. S. Department of Energy               */
+/*                                                              */
+/*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
+
 #ifndef ELEMENTQUALITYCHECKER_H
 #define ELEMENTQUALITYCHECKER_H
 
@@ -30,7 +38,8 @@ public:
   void finalize() override;
 
 protected:
-  bool checkMetricApplicability(ElemQuality elem_metric, std::vector<ElemQuality> elem_metrics);
+  bool checkMetricApplicability(const ElemQuality & elem_metric,
+                                const std::vector<ElemQuality> & elem_metrics);
 
   ElemQuality _m_type;
   const bool _has_upper_bound;
@@ -38,12 +47,18 @@ protected:
   Real _upper_bound;
   Real _lower_bound;
 
-  // set to save quality metric value for all elements
-  std::set<Real> _m_values;
+  // minimum, maximum and summation of quality metric values of all checked elements
+  Real _m_min;
+  Real _m_max;
+  Real _m_sum;
+  // number of checked elements
+  unsigned int _checked_elem_num;
   // set to save ids for all failed elements
-  std::set<unsigned int> _elem_ids;
+  std::set<dof_id_type> _elem_ids;
   // whether the element quality check is bypassed or not
   unsigned int _bypassed;
+  // set to save bypassed element type
+  std::set<std::string> _bypassed_elem_type;
 
 private:
   enum class FailureType

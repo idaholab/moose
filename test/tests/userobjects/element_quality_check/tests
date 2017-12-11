@@ -1,13 +1,19 @@
 [Tests]
-  [./warning]
+  [./failure_warning]
   type = 'RunException'
   input = 'failure_warning.i'
-  expect_err = "WARNING: Bad element quality in terms of "
+  expect_err = "Bad element quality in terms of "
   [../]
 
-  [./error]
+  [./failure_error]
   type = 'RunException'
   input = 'failure_error.i'
-  expect_err = "ERROR: Bad element quality in terms of "
+  expect_err = "Bad element quality in terms of "
+  [../]
+
+  [./bypass_warning]
+  type = 'RunException'
+  input = 'bypass_warning.i'
+  expect_err = "Provided quality metric doesn't apply to following element type: "
   [../]
 []
