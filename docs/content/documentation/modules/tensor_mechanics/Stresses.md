@@ -2,43 +2,44 @@
 
 ## Some Identities involving the Stress Tensor
 Denote the stress tensor by $\sigma_{ij}$.  Assume it is symmetric.  A useful quantity, called the "mean stress", is
-$$
-\sigma_{m} = \mbox{Tr}\sigma/3 = \sigma_{ii}/3 \ .
-$$
+\begin{equation}
+\sigma_{m} = Tr\left( \sigma/3 \right) = \sigma_{ii}/3 \ .
+\end{equation}
 Another useful quantity is the traceless part of $\sigma$, which is called the deviatoric stress, denoted by $s_{ij}$:
-$$
+\begin{equation}
 s_{ij} = \sigma_{ij} - \delta_{ij}\sigma_{m} = \sigma_{ij} - \delta_{ij}\sigma_{kk}/3 \ .
-$$
+\end{equation}
 In many calculations it is useful to use the invariants of $s$, which are
-$$
-\begin{array}{rcl}
-J_{2} & = & \frac{1}{2}s_{ij}s_{ij} \ , \\
-J_{3} & = & \mbox{det}s \ .
-\end{array}
-$$
+\begin{equation}
+\begin{aligned}
+J_1 = & Tr\left( s_{kk} \right) \\
+J_{2} = & \frac{1}{2}s_{ij}s_{ij} \\
+J_{3} = & det \left(s \right)
+\end{aligned}
+\end{equation}
 Clearly $J_{2} \geq 0$, and
 often the square-root of $J_{2}$ is written as:
-$$
-\bar{\sigma} = \sqrt{J_{2}} \ .
-$$
+\begin{equation}
+\bar{\sigma} = \sqrt{J_{2}}
+\end{equation}
 Alternative forms for $J_{3}$ are
-$$
-\begin{array}{rcl}
-J_{3} & = & \mbox{det}s \\
-& = & \frac{1}{6}\epsilon_{ijk}\epsilon_{mnp}s_{im}s_{jn}s_{kp} \\
-& = & \frac{1}{3}s_{ij}s_{jk}s_{ki}
-\end{array}
-$$
+\begin{equation}
+\begin{aligned}
+J_{3} = & det \left(s \right)\\
+      = & \frac{1}{6}\epsilon_{ijk}\epsilon_{mnp}s_{im}s_{jn}s_{kp} \\
+      = & \frac{1}{3}s_{ij}s_{jk}s_{ki}
+\end{aligned}
+\end{equation}
 All scalar functions of the stress tensor can be written in terms of its invariants.  For instance,
-$$
+\begin{equation}
 s_{ij}s_{jk}s_{kl}s_{li} = 2J_{2}^{2}
-$$
+\end{equation}
 
 ## Elasticity
 Elastic materials do not experience permanent deformation, and all elastic strain and elastic stress is recoverable.  Elastic stress is related to elastic strain through the elasticity tensor
-$$
+\begin{equation}
 \sigma_{ij} = C_{ijkl} \epsilon_{kl}
-$$.
+\end{equation}
 The two simplified elastic stress materials in Tensor Mechanics are
 
 1. [ComputeLinearElasticStress](/ComputeLinearElasticStress.md) for small total strain formulations, and
@@ -50,13 +51,13 @@ This approach to modeling plasticity problems uses as stress material to call se
 
 ### MultiSurface Plasticity
 In MOOSE, multi-surface plasticity is implemented through the [ComputeMultiPlasticityStress](/ComputeMultiPlasticityStress.md) Material. This assumes that there is exactly one internal parameter per single-surface plasticity model, and that the functions for single-surface plasticity model depend only on its internal parameter: there must not be 2 or more internal parameters per single-surface plasticity model.)  In this case
-$$
+\begin{equation}
 \begin{array}{rcll}
 f_{\alpha} & = & f_{\alpha}(\sigma, q_{\alpha}) & \text{yield functions} \\
 r^{\alpha}_{ij} & = & r^{\alpha}_{ij}(\sigma, q_{\alpha}) & \text{flow potentials} \\
 h^{\alpha}_{a} & = & \delta^{\alpha}_{a}h^{\alpha}(\sigma, q_{\alpha} & \text{hardening potentials})
 \end{array}
-$$
+\end{equation}
 where there is no sum on $\alpha$.
 
 The Newton-Raphson procedure attempts to solve three types of equation:
@@ -79,11 +80,9 @@ The `UserObject` based crystal plasticity system is designed to facilitate the i
 
 ### Hyperelastic Viscoplastic
 The Hyperelastic Viscoplastic model is based on the multiplicative decomposition of the total deformation ($\underline{F}$) gradient into an elastic ($\underline{F}^e$) and viscoplastic ($\underline{F}^{vp}$) component. The viscoplastic component of deformation is evolved in the intermediate configuration following
-
-$$
+\begin{equation}
 \dot{\underline{F}}^{vp}\underline{F}^{vp-1} = \sum_{i=1}^{N} \dot{\lambda^i}\underline{r}^i
-$$
-
+\end{equation}
 where $\dot{\lambda^i}$ and $\underline{r}^i$ are the flow rate and flow directions, respectively, and, $N$ is the number of flow rates. This representation allows different flow rates and directions to be superimposed to obtain an effective viscoplastic deformation of the material.
 
 
@@ -108,13 +107,13 @@ For **isotropic materials** the radial return approach offers distinct advantage
 
 
 The stress update materials each individually calculate, using the [Newton Method](http://mathworld.wolfram.com/NewtonsMethod.html), the amount of effective inelastic strain required to return the stress state to the yield surface.
-$$
+\begin{equation}
 \Delta p^{(t+1)} = \Delta p^t + d \Delta p
-$$
+\end{equation}
 where the change in the iterative effective inelastic strain is defined as the yield surface over the derivative of the yield surface with respect to the inelastic strain increment. In the case of isotropic linear hardening plasticity, with the hardening function $$ r = hp$$, the effective plastic strain increment has the form:
-$$
+\begin{equation}
  d \Delta p = \frac{\sigma^{trial}_{effective} - 3 G \Delta p - r - \sigma_{yield}}{3G + h}
-$$
-where G is the isotropic shear modulus, and $\sigma^{trial}_{effective}$ is the scalar von Mises trial stress.
+\end{equation}
+where $G$ is the isotropic shear modulus, and $\sigma^{trial}_{effective}$ is the scalar von Mises trial stress.
 
 When more than one stress update material is included in the simulation `ComputeMultipleInelasticStress` will iterate over the change in the calculated stress until the return stress has reached a stable value.

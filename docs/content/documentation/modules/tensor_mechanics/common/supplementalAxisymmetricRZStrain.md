@@ -7,18 +7,17 @@ Axisymmetric (cylindrical) materials are included in Tensor Mechanics for revolv
 
 The axisymmetric model employs the cylindrical coordinates, $r$, $z$, and $\theta$, where the planar cross section is rotated about the $z$ axis.  The cylindrical coordinate system strain tensor for axisymmetric problems has the form
 
-$$
+\begin{equation}
 \begin{bmatrix}
 \epsilon_{rr} & \epsilon_{rz} & 0 \\
 \epsilon_{zr} & \epsilon_{zz} & 0 \\
 0 & 0 & \epsilon_{\theta \theta}
 \end{bmatrix}
-$$
-
+\end{equation}
 where the value of the strain $\epsilon_{\theta \theta}$ depends on the displacement and position in the radial direction
-$$
+\begin{equation}
 \epsilon_{\theta \theta} = \frac{u_r}{X_r}.
-$$
+\end{equation}
 Although axisymmetric problems solve for 3D stress and strain fields, the problem is mathematically 2D. Using an appropriate set of geometry and boundary conditions, these types of problems have strain and stress fields which are not functions of the out of plane coordinate variable.  In the Cylindrical coordinate axisymmetric system, the values of stress and strain in the $\theta$ direction do not depend on the $\theta$ coordinate.
 
 !!! note
