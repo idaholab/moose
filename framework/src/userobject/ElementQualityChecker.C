@@ -61,6 +61,9 @@ ElementQualityChecker::ElementQualityChecker(const InputParameters & parameters)
     _has_lower_bound(isParamValid("lower_bound")),
     _upper_bound(_has_upper_bound ? getParam<Real>("upper_bound") : 0.0),
     _lower_bound(_has_lower_bound ? getParam<Real>("lower_bound") : 0.0),
+    _m_min(0),
+    _m_max(0),
+    _m_sum(0),
     _failure_type(getParam<MooseEnum>("failure_type").getEnum<FailureType>())
 {
 }
@@ -73,7 +76,7 @@ ElementQualityChecker::initialize()
   _m_sum = 0;
   _checked_elem_num = 0;
   _elem_ids.clear();
-  _bypassed = 0;
+  _bypassed = false;
   _bypassed_elem_type.clear();
 }
 
@@ -86,7 +89,7 @@ ElementQualityChecker::execute()
   // check whether the provided quality metric is applicable to current ElemType
   if (!checkMetricApplicability(_m_type, metrics_avail))
   {
-    _bypassed = 1;
+    _bypassed = true;
     _bypassed_elem_type.insert(Utility::enum_to_string(_current_elem->type()));
 
     return;
@@ -142,7 +145,7 @@ ElementQualityChecker::threadJoin(const UserObject & uo)
   const ElementQualityChecker & eqc = static_cast<const ElementQualityChecker &>(uo);
   _elem_ids.insert(eqc._elem_ids.begin(), eqc._elem_ids.end());
   _bypassed_elem_type.insert(eqc._bypassed_elem_type.begin(), eqc._bypassed_elem_type.end());
-  _bypassed += eqc._bypassed;
+  _bypassed |= eqc._bypassed;
   _m_sum += eqc._m_sum;
   _checked_elem_num += eqc._checked_elem_num;
 
@@ -160,27 +163,12 @@ ElementQualityChecker::finalize()
   _communicator.sum(_m_sum);
   _communicator.sum(_checked_elem_num);
   _communicator.set_union(_elem_ids);
-  _communicator.sum(_bypassed);
+  _communicator.max(_bypassed);
   _communicator.set_union(_bypassed_elem_type);
 
   if (_bypassed)
-  {
-    switch (_failure_type)
-    {
-      case FailureType::WARNING:
-        mooseWarning("Provided quality metric doesn't apply to following element type: " +
-                     Moose::stringify(_bypassed_elem_type));
-        break;
-
-      case FailureType::ERROR:
-        mooseError("Provided quality metric doesn't apply to following element type: " +
-                   Moose::stringify(_bypassed_elem_type));
-        break;
-
-      default:
-        mooseError("Unknown failure type!");
-    }
-  }
+    mooseWarning("Provided quality metric doesn't apply to following element type: " +
+                 Moose::stringify(_bypassed_elem_type));
 
   _console << libMesh::Quality::name(_m_type) << " Metric values:"
            << "\n";
@@ -194,31 +182,19 @@ ElementQualityChecker::finalize()
     {
       case FailureType::WARNING:
       {
-        mooseWarning("Bad element quality in terms of ",
-                     libMesh::Quality::name(_m_type),
-                     " quality metric for ",
-                     _elem_ids.size(),
-                     " elements.");
+        mooseWarning("List of failed element IDs: ", Moose::stringify(_elem_ids));
         break;
       }
 
       case FailureType::ERROR:
       {
-        mooseError("Bad element quality in terms of ",
-                   libMesh::Quality::name(_m_type),
-                   " quality metric for ",
-                   _elem_ids.size(),
-                   " elements.");
+        mooseError("List of failed element IDs: ", Moose::stringify(_elem_ids));
         break;
       }
 
       default:
         mooseError("Unknown failure type!");
     }
-
-    _console << "List of failed element IDs: "
-             << "\n";
-    _console << Moose::stringify(_elem_ids) << "\n";
   }
 }
 

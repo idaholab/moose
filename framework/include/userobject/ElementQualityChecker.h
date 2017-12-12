@@ -56,7 +56,7 @@ protected:
   // set to save ids for all failed elements
   std::set<dof_id_type> _elem_ids;
   // whether the element quality check is bypassed or not
-  unsigned int _bypassed;
+  bool _bypassed;
   // set to save bypassed element type
   std::set<std::string> _bypassed_elem_type;
 
