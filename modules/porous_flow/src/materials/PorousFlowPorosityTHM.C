@@ -18,7 +18,7 @@ validParams<PorousFlowPorosityTHM>()
                                "porepressure");
   params.addRequiredParam<Real>(
       "thermal_expansion_coeff",
-      "Thermal expansion coefficient of the drained porous solid skeleton");
+      "Volumetric thermal expansion coefficient of the drained porous solid skeleton");
   params.addRangeCheckedParam<Real>(
       "biot_coefficient", 1, "biot_coefficient>=0 & biot_coefficient<=1", "Biot coefficient");
   params.addRequiredRangeCheckedParam<Real>(

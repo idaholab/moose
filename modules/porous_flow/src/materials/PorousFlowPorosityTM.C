@@ -16,7 +16,7 @@ validParams<PorousFlowPorosityTM>()
                                "The porosity at zero volumetric strain and reference temperature");
   params.addRequiredParam<Real>(
       "thermal_expansion_coeff",
-      "Thermal expansion coefficient of the drained porous solid skeleton");
+      "Volumetric thermal expansion coefficient of the drained porous solid skeleton");
   params.addRequiredCoupledVar("displacements", "The solid-mechanics displacement variables");
   params.addCoupledVar(
       "reference_temperature", 0.0, "porosity = porosity_zero at reference temperature");
