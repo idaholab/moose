@@ -1,0 +1,19 @@
+[Tests]
+  [./failure_warning]
+    type = 'RunException'
+    input = 'failure_warning.i'
+    expect_err = "List of failed element IDs: "
+  [../]
+
+  [./failure_error]
+    type = 'RunException'
+    input = 'failure_error.i'
+    expect_err = "List of failed element IDs: "
+  [../]
+
+  [./bypass_warning]
+    type = 'RunException'
+    input = 'bypass_warning.i'
+    expect_err = "Provided quality metric doesn't apply to following element type: "
+  [../]
+[]
