@@ -7,7 +7,7 @@ Page header including the top and sidebar navigation.
     {% set drop_id=prefix + '-' + nav_key.replace(' ', '-') %}
     {% set nav_value=nav.values()[0] %}
     {% if nav_value is iterable and nav_value is not string %}
-      <li><a class="dropdown-button" href="#!" data-activates="{{drop_id}}">{{nav_key}}<i class="material-icons right">arrow_drop_down</i></a></li>
+      <li><a class="dropdown-button" href="#!" data-activates="{{drop_id}}" data-constrainwidth="false">{{nav_key}}<i class="material-icons right">arrow_drop_down</i></a></li>
       <ul id="{{drop_id}}" class="dropdown-content">
       {% for item in nav_value %}
         <li><a href="{{item.values()[0]}}">{{item.keys()[0]}}</a></li>
