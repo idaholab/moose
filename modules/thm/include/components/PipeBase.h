@@ -33,6 +33,9 @@ public:
   virtual UserObjectName getFluidPropertiesName() const;
   virtual const FlowModel & getFlowModel() const { return *_flow_model; }
   virtual const RELAP7::FlowModelID & getFlowModelID() const { return _model_id; }
+  virtual unsigned int getSubdomainID() const = 0;
+  virtual bool isHorizontal() const = 0;
+  virtual Real getInclinedAngle() const = 0;
 
 protected:
   /// The name of the user object that defines fluid properties

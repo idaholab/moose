@@ -1,7 +1,7 @@
 #include "FlowModelSinglePhase.h"
 #include "Simulation.h"
 #include "Factory.h"
-#include "Component.h"
+#include "PipeBase.h"
 
 const std::string FlowModelSinglePhase::DENSITY = "rho";
 const std::string FlowModelSinglePhase::DRAG_COEFFICIENT = "Cw";
@@ -34,10 +34,11 @@ FlowModelSinglePhase::init()
 }
 
 void
-FlowModelSinglePhase::addVariables(unsigned int subdomain_id)
+FlowModelSinglePhase::addVariables()
 {
-  FlowModel::addCommonVariables(subdomain_id);
+  FlowModel::addCommonVariables();
 
+  unsigned int subdomain_id = _pipe.getSubdomainID();
   std::vector<Real> scaling_factor = _sim.getParam<std::vector<Real>>("scaling_factor_1phase");
 
   // Nonlinear variables
@@ -61,11 +62,12 @@ FlowModelSinglePhase::addVariables(unsigned int subdomain_id)
 }
 
 void
-FlowModelSinglePhase::addMooseObjects(InputParameters & pars)
+FlowModelSinglePhase::addMooseObjects()
 {
-  FlowModel::addCommonMooseObjects(pars);
+  FlowModel::addCommonMooseObjects();
 
-  const std::vector<unsigned int> & blocks = pars.get<std::vector<unsigned int>>("r7:block");
+  const InputParameters & pars = _pipe.parameters();
+  const std::vector<unsigned int> & blocks = {_pipe.getSubdomainID()};
   const std::string fp_name = pars.get<UserObjectName>("fp");
 
   // coupling vectors

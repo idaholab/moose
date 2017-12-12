@@ -32,12 +32,18 @@ PipeBase::init()
   _model_id = _app.getFlowModelID(_sim.getUserObject<FluidProperties>(_fp_name));
   if (_model_id == RELAP7::FM_SINGLE_PHASE)
   {
-    _flow_model = new FlowModelSinglePhase(genName(name(), "flow_model"), parameters());
+    InputParameters pars = emptyInputParameters();
+    pars.set<Simulation *>("_sim") = &_sim;
+    pars.set<PipeBase *>("_pipe") = this;
+    _flow_model = new FlowModelSinglePhase(name(), pars);
     _flow_model->init();
   }
   else if (_model_id == RELAP7::FM_TWO_PHASE)
   {
-    _flow_model = new FlowModelTwoPhase(genName(name(), "flow_model"), parameters());
+    InputParameters pars = emptyInputParameters();
+    pars.set<Simulation *>("_sim") = &_sim;
+    pars.set<PipeBase *>("_pipe") = this;
+    _flow_model = new FlowModelTwoPhase(name(), pars);
     _flow_model->init();
   }
   else

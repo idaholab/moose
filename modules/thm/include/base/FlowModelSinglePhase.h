@@ -12,8 +12,8 @@ public:
   FlowModelSinglePhase(const std::string & name, const InputParameters & params);
 
   virtual void init() override;
-  virtual void addVariables(unsigned int subdomain_id) override;
-  virtual void addMooseObjects(InputParameters & pars) override;
+  virtual void addVariables() override;
+  virtual void addMooseObjects() override;
 
 public:
   static const std::string DENSITY;
