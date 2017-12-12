@@ -5,12 +5,12 @@ InputParameters
 validParams<MatGradSqCoupled>()
 {
   InputParameters params = validParams<Kernel>();
-  params.addCoupledVar("elec", "Electric field");
-  params.addCoupledVar("args", "Additional variable");
+  params.addCoupledVar("elec", "Electric potential");
+  params.addCoupledVar("args", "Vector of arguments to prefactor");
   params.addParam<MaterialPropertyName>(
       "prefactor",
       "prefactor",
-      "Material property providing a prefactor of electric field contribution");
+      "Material property providing a prefactor of electric potential contribution");
   return params;
 }
 
