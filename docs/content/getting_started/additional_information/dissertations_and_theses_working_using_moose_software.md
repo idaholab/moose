@@ -11,7 +11,7 @@
 1. J. Tolliver, "INCORPORATING ANISOTROPIC GRAIN BOUNDARY ENERGY INTO A
 PHASE FIELD MODEL OF URANIUM DIOXIDE.", Bachelor's Degree Thesis, Brigham Young University, 2016. [ https://www.byui.edu/Documents/physics/Theses/Jared_TolliverW16.pdf]( https://www.byui.edu/Documents/physics/Theses/Jared_TolliverW16.pdf).
 
-1. A.M. Jokisaari, "Multiphysics Phase Field Modeling of Hydrogen Diffusion and δ-Hydride Precipitation in α-Zirconium.", Ph.D. Dissertation, University of Michigan, 2016. [https://deepblue.lib.umich.edu/handle/2027.42/120781](https://deepblue.lib.umich.edu/handle/2027.42/120781).
+1. A.M. Jokisaari, "Multiphysics Phase Field Modeling of Hydrogen Diffusion and $\delta$-Hydride Precipitation in $\alpha$-Zirconium.", Ph.D. Dissertation, University of Michigan, 2016. [https://deepblue.lib.umich.edu/handle/2027.42/120781](https://deepblue.lib.umich.edu/handle/2027.42/120781).
 
 1. Z. Zhang, "Finite Element Methods for Interface Problems with Mesh Adaptivity.", Ph.D. Dissertation, Duke University , 2015. [http://dukespace.lib.duke.edu/dspace/handle/10161/11316](http://dukespace.lib.duke.edu/dspace/handle/10161/11316).
 

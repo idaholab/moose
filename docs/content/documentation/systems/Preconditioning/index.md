@@ -303,7 +303,7 @@ $$$
 - Set up a PBP object for a two variable system (consisting of variables "u" and "v").
 - Use ILU for the "u" block and AMG for "v".
 - Use the lower diagonal (v,u) block.
-- When using ‘`type=PBP`', MOOSE will set `solve_type = JFNK` automatically.
+- When using '`type=PBP`', MOOSE will set `solve_type = JFNK` automatically.
 
 ## Applying PBP
 ---
