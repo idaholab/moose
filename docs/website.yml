@@ -43,16 +43,22 @@
         title: 'MOOSE'
         logo: docs/media/moose_logo_small.png
         navigation:
+            - Install:
+                - Mac OS: docs/content/install/installation/mac_os.md
+                - Ubuntu: docs/content/install/installation/ubuntu.md
+                - Mint: docs/content/install/installation/mint.md
+                - OpenSUSE: docs/content/install/installation/opensuse.md
+                - Fedora: docs/content/install/installation/fedora.md
+                - CentOS: docs/content/install/installation/centos.md
+                - Windows 10: docs/content/install/installation/windows10.md
+                - HPC Cluster: docs/content/install/installation/cluster.md
+                - Manual Install: docs/content/install/installation/manual_installation.md
             - Getting Started:
-                - Mac OS: docs/content/getting_started/installation/mac_os.md
-                - Ubuntu: docs/content/getting_started/installation/ubuntu.md
-                - Mint: docs/content/getting_started/installation/mint.md
-                - OpenSUSE: docs/content/getting_started/installation/opensuse.md
-                - Fedora: docs/content/getting_started/installation/fedora.md
-                - CentOS: docs/content/getting_started/installation/centos.md
-                - Windows 10: docs/content/getting_started/installation/windows10.md
-                - HPC Cluster: docs/content/getting_started/installation/cluster.md
-                - Manual Install: docs/content/getting_started/installation/manual_installation.md
+                - Application Use: docs/content/getting_started/application_use/index.md
+                - Application Development: docs/content/getting_started/application_development/index.md
+                - MOOSE Development: docs/content/getting_started/moose_development/index.md
+                - Examples: docs/content/getting_started/application_development/examples/index.md
+                - Tutorials: docs/content/getting_started/application_development/tutorials/index.md
             - Documentation:
                 - Systems: docs/content/documentation/systems/index.md
                 - Application Development: docs/content/documentation/application_development/index.md
@@ -68,3 +74,4 @@
                 - Frequently Asked Questions: docs/content/help/faq.md
                 - INL HPC Connectivity: docs/content/help/inlhpcconnectivity.md
                 - Contact Us: docs/content/help/contact_us.md
+                - FAQ: docs/content/help/faq.md

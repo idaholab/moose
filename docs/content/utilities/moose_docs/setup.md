@@ -5,7 +5,7 @@ using [markdown](https://en.wikipedia.org/wiki/Markdown) syntax, including a cus
 process: [Moose Flavored Markdown](moose_markdown/index.md).
 
 ## Dependencies
-If you are using a current [MOOSE package](getting_started/installation/index.md) then the setup is
+If you are using a current [MOOSE package](install/installation/index.md) then the setup is
 complete.
 
 ## Configuration

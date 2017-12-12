@@ -1,0 +1,12 @@
+# MOOSE Development
+* [Code Standards](code_standards.md)
+* [Repository Structure](repository_structure.md)
+* [Contributing](contributing.md)
+* [How a Patch Becomes Code](how_a_patch_becomes_code.md)
+* [Creating a New Module](creating_a_new_module.md)
+* [Creating your own App](/stork.md)
+* [Build Status](https://www.moosebuild.com)
+* [Test Timing](http://mooseframework.org/docs/timing/)
+* Editors: [Emacs](editors_emacs.md), [Atom.io](editors_atom.md)
+* [Git](howto_git.md)
+* [Debugging](howto_debug.md)
