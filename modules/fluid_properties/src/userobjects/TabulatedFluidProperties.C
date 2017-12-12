@@ -8,6 +8,7 @@
 #include "TabulatedFluidProperties.h"
 #include "BicubicSplineInterpolation.h"
 #include "MooseUtils.h"
+#include "Conversion.h"
 
 // C++ includes
 #include <fstream>
@@ -455,20 +456,13 @@ void
 TabulatedFluidProperties::checkInputVariables(Real pressure, Real temperature) const
 {
   if (pressure < _pressure_min || pressure > _pressure_max)
-    mooseError("Pressure ",
-               pressure,
-               " is outside the range of tabulated pressure (",
-               _pressure_min,
-               ", ",
-               _pressure_max,
-               ".");
+    throw MooseException(
+        "Pressure " + Moose::stringify(pressure) + " is outside the range of tabulated pressure (" +
+        Moose::stringify(_pressure_min) + ", " + Moose::stringify(_pressure_max) + ".");
 
   if (temperature < _temperature_min || temperature > _temperature_max)
-    mooseError("Temperature ",
-               temperature,
-               " is outside the range of tabulated temperature (",
-               _temperature_min,
-               ", ",
-               _temperature_max,
-               ".");
+    throw MooseException("Temperature " + Moose::stringify(temperature) +
+                         " is outside the range of tabulated temperature (" +
+                         Moose::stringify(_temperature_min) + ", " +
+                         Moose::stringify(_temperature_max) + ".");
 }

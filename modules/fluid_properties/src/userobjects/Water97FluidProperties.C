@@ -6,6 +6,7 @@
 /****************************************************************/
 
 #include "Water97FluidProperties.h"
+#include "Conversion.h"
 
 template <>
 InputParameters
@@ -785,9 +786,8 @@ Water97FluidProperties::vaporPressure(Real temperature) const
   // Check whether the input temperature is within the region of validity of this equation.
   // Valid for 273.15 K <= t <= 647.096 K
   if (temperature < 273.15 || temperature > _T_critical)
-    mooseError(name(),
-               ": vaporPressure(): Temperature is outside range 273.15 K <= T "
-               "<= 647.096 K");
+    throw MooseException(name() + ": vaporPressure(): Temperature is outside range 273.15 K <= T "
+                                  "<= 647.096 K");
 
   // Constants for region 4 (the saturation curve up to the critical point)
   const std::vector<Real> n4{0.11670521452767e4,
@@ -818,9 +818,8 @@ Water97FluidProperties::vaporPressure_dT(Real temperature, Real & psat, Real & d
   // Check whether the input temperature is within the region of validity of this equation.
   // Valid for 273.15 K <= t <= 647.096 K
   if (temperature < 273.15 || temperature > _T_critical)
-    mooseError(name(),
-               ": vaporPressure_dT(): Temperature is outside range 273.15 K <= "
-               "T <= 647.096 K");
+    throw MooseException(name() + ": vaporPressure_dT(): Temperature is outside range 273.15 K <= "
+                                  "T <= 647.096 K");
 
   // Constants for region 4 (the saturation curve up to the critical point)
   const std::vector<Real> n4{0.11670521452767e4,
@@ -867,9 +866,8 @@ Water97FluidProperties::vaporTemperature(Real pressure) const
   // Check whether the input pressure is within the region of validity of this equation.
   // Valid for 611.213 Pa <= p <= 22.064 MPa
   if (pressure < 611.23 || pressure > _p_critical)
-    mooseError(name(),
-               ": vaporTemperature(): Pressure is outside range 611.213 Pa <= "
-               "p <= 22.064 MPa");
+    throw MooseException(name() + ": vaporTemperature(): Pressure is outside range 611.213 Pa <= "
+                                  "p <= 22.064 MPa");
 
   // Constants for region 4 (the saturation curve up to the critical point)
   const std::vector<Real> n4{0.11670521452767e4,
@@ -900,7 +898,8 @@ Water97FluidProperties::b23p(Real temperature) const
   // Check whether the input temperature is within the region of validity of this equation.
   // Valid for 623.15 K <= t <= 863.15 K
   if (temperature < 623.15 || temperature > 863.15)
-    mooseError(name(), ": b23p(): Temperature is outside range of 623.15 K <= T <= 863.15 K");
+    throw MooseException(name() +
+                         ": b23p(): Temperature is outside range of 623.15 K <= T <= 863.15 K");
 
   // Constants for the boundary between regions 2 and 3
   const std::vector<Real> n23{0.34805185628969e3,
@@ -918,7 +917,7 @@ Water97FluidProperties::b23T(Real pressure) const
   // Check whether the input pressure is within the region of validity of this equation.
   // Valid for 16.529 MPa <= p <= 100 MPa
   if (pressure < 16.529e6 || pressure > 100.0e6)
-    mooseError(name(), ": b23T(): Pressure is outside range 16.529 MPa <= p <= 100 MPa");
+    throw MooseException(name() + ": b23T(): Pressure is outside range 16.529 MPa <= p <= 100 MPa");
 
   // Constants for the boundary between regions 2 and 3
   const std::vector<Real> n23{0.34805185628969e3,
@@ -938,15 +937,18 @@ Water97FluidProperties::inRegion(Real pressure, Real temperature) const
   if (temperature >= 273.15 && temperature <= 1073.15)
   {
     if (pressure < vaporPressure(273.15) || pressure > 100.0e6)
-      mooseError("Pressure ", pressure, " is out of range in ", name(), ": inRegion()");
+      throw MooseException("Pressure " + Moose::stringify(pressure) + " is out of range in " +
+                           name() + ": inRegion()");
   }
   else if (temperature > 1073.15 && temperature <= 2273.15)
   {
     if (pressure < 0.0 || pressure > 50.0e6)
-      mooseError("Pressure ", pressure, " is out of range in ", name(), ": inRegion()");
+      throw MooseException("Pressure " + Moose::stringify(pressure) + " is out of range in " +
+                           name() + ": inRegion()");
   }
   else
-    mooseError("Temperature ", temperature, " is out of range in ", name(), ": inRegion()");
+    throw MooseException("Temperature " + Moose::stringify(temperature) + " is out of range in " +
+                         name() + ": inRegion()");
 
   // Determine the phase region that the (P, T) point lies in
   unsigned int region;
@@ -1662,7 +1664,8 @@ Water97FluidProperties::inRegionPH(Real pressure, Real enthalpy) const
     else if (enthalpy > h(pressure, 1073.15) && enthalpy <= h(pressure, 2273.15))
       region = 5;
     else
-      mooseError("Enthalpy ", enthalpy, " is out of range in ", name(), ": inRegionPH()");
+      throw MooseException("Enthalpy " + Moose::stringify(enthalpy) + " is out of range in " +
+                           name() + ": inRegionPH()");
   }
   else if (pressure > p623 && pressure <= 50.0e6)
   {
@@ -1675,7 +1678,8 @@ Water97FluidProperties::inRegionPH(Real pressure, Real enthalpy) const
     else if (enthalpy > h(pressure, 1073.15) && enthalpy <= h(pressure, 2273.15))
       region = 5;
     else
-      mooseError("Enthalpy ", enthalpy, " is out of range in ", name(), ": inRegionPH()");
+      throw MooseException("Enthalpy " + Moose::stringify(enthalpy) + " is out of range in " +
+                           name() + ": inRegionPH()");
   }
   else if (pressure > 50.0e6 && pressure <= 100.0e6)
   {
@@ -1686,10 +1690,12 @@ Water97FluidProperties::inRegionPH(Real pressure, Real enthalpy) const
     else if (enthalpy > h(pressure, b23T(pressure)) && enthalpy <= h(pressure, 1073.15))
       region = 2;
     else
-      mooseError("Enthalpy ", enthalpy, " is out of range in ", name(), ": inRegionPH()");
+      throw MooseException("Enthalpy " + Moose::stringify(enthalpy) + " is out of range in " +
+                           name() + ": inRegionPH()");
   }
   else
-    mooseError("Pressure ", pressure, " is out of range in ", name(), ": inRegionPH()");
+    throw MooseException("Pressure " + Moose::stringify(pressure) + " is out of range in " +
+                         name() + ": inRegionPH()");
 
   return region;
 }
@@ -1732,7 +1738,8 @@ Water97FluidProperties::b2bc(Real pressure) const
 {
   // Check whether the input pressure is within the region of validity of this equation.
   if (pressure < 6.5467e6 || pressure > 100.0e6)
-    mooseError(name(), ": b2bc(): Pressure is outside range of 6.5467 MPa <= p <= 100 MPa");
+    throw MooseException(name() +
+                         ": b2bc(): Pressure is outside range of 6.5467 MPa <= p <= 100 MPa");
 
   Real pi = pressure / 1.0e6;
 
@@ -1847,7 +1854,8 @@ Water97FluidProperties::b3ab(Real pressure) const
 {
   // Check whether the input pressure is within the region of validity of this equation.
   if (pressure < b23p(623.15) || pressure > 100.0e6)
-    mooseError(name(), ": b3ab(): Pressure is outside range of 16.529 MPa <= p <= 100 MPa");
+    throw MooseException(name() +
+                         ": b3ab(): Pressure is outside range of 16.529 MPa <= p <= 100 MPa");
 
   Real pi = pressure / 1.0e6;
   Real eta = 0.201464004206875e4 + 0.374696550136983e1 * pi - 0.219921901054187e-1 * pi * pi +
