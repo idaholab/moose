@@ -279,6 +279,7 @@
 #include "NodalNormalsPreprocessor.h"
 #include "SolutionUserObject.h"
 #include "PerflogDumper.h"
+#include "ElementQualityChecker.h"
 #ifdef LIBMESH_HAVE_FPARSER
 #include "Terminator.h"
 #endif
@@ -741,6 +742,7 @@ registerObjects(Factory & factory)
   registerUserObject(NodalNormalsEvaluator);
   registerUserObject(SolutionUserObject);
   registerUserObject(PerflogDumper);
+  registerUserObject(ElementQualityChecker);
 #ifdef LIBMESH_HAVE_FPARSER
   registerUserObject(Terminator);
 #endif
