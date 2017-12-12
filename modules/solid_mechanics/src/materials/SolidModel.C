@@ -838,9 +838,6 @@ SolidModel::computeConstitutiveModelStress()
   // the creep strain
   // stress = stressOld + stressIncrement
 
-  if (_step_zero)
-    return;
-
   const SubdomainID current_block = _current_elem->subdomain_id();
   MooseSharedPointer<ConstitutiveModel> cm = _constitutive_model[current_block];
 
