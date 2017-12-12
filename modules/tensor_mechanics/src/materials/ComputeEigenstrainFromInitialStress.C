@@ -26,7 +26,6 @@ validParams<ComputeEigenstrainFromInitialStress>()
                                "used to compute strain from stress.  Do not provide "
                                "any base_name if your elasticity tensor does not use "
                                "one.");
-  params.set<bool>("incremental_form") = true;
   return params;
 }
 
@@ -34,11 +33,9 @@ ComputeEigenstrainFromInitialStress::ComputeEigenstrainFromInitialStress(
     const InputParameters & parameters)
   : ComputeEigenstrainBase(parameters),
     _base_name(isParamValid("base_name") ? getParam<std::string>("base_name") + "_" : ""),
-    _elasticity_tensor(getMaterialPropertyByName<RankFourTensor>(_base_name + "elasticity_tensor"))
+    _elasticity_tensor(getMaterialPropertyByName<RankFourTensor>(_base_name + "elasticity_tensor")),
+    _eigenstrain_old(getMaterialPropertyOld<RankTwoTensor>(_eigenstrain_name))
 {
-  if (_incremental_form == false)
-    mooseError("ComputeEigenstrainFromInitialStress: incremental_form must be set to true");
-
   const std::vector<FunctionName> & fcn_names(
       getParam<std::vector<FunctionName>>("initial_stress"));
   const unsigned num = fcn_names.size();
@@ -68,5 +65,5 @@ ComputeEigenstrainFromInitialStress::computeQpEigenstrain()
     _eigenstrain[_qp] = -_elasticity_tensor[_qp].invSymm() * initial_stress;
   }
   else
-    _eigenstrain[_qp] = (*_eigenstrain_old)[_qp];
+    _eigenstrain[_qp] = _eigenstrain_old[_qp];
 }
