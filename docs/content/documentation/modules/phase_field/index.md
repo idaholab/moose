@@ -22,6 +22,8 @@ The MOOSE phase field module is a library for simplifying the implementation of 
 ## Multiple Phase Models
 ---
 
+!media media/phase_field/solutionrasterizer.png width=200px padding-left=20px float=right caption=Atomistic input file generated using the SolutionRasterizer.
+
 MOOSE provides capabilities that enable the easy development of multiphase field model. A free energy expression has to be provided for each individual phase. Different systems exist to combine those _phase free energies_ into a _global free energy_.
 
 * [Two-phase Models](MultiPhase/WBMTwoPhase.md) - Two phases, one phase order parameter

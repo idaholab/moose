@@ -45,10 +45,10 @@ LINEAR_ELASTICITY := yes
 ```
 
 
-## Modules: Solid Mechanics Example
+## Modules: Tensor Mechanics Example
 ---
 
-Available in: [moose/modules/solid_mechanics](https://github.com/idaholab/moose/tree/devel/modules/solid_mechanics)
+Available in: [moose/modules/tensor_mechanics](https://github.com/idaholab/moose/tree/devel/modules/tensor_mechanics)
 
 - Stats:
     - 127,650 elements, 25,227 nodes
@@ -74,7 +74,7 @@ Available in: [moose/modules/navier_stokes](https://github.com/idaholab/moose/tr
     - Euler equations
     - 8,232 elements, 9,675 nodes
 
-!media media/solid_mechanics/flow-velocity.png width=32% float=right caption=[velocity]
+!media media/large_media/solid_mechanics/flow-velocity.png width=32% float=right caption=[velocity]
 
 !media media/solid_mechanics/flow-streamlines.png width=32.5% float=right padding-left=.3% padding-right=.3% caption=[streamlines]
 
