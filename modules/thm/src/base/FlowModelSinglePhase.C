@@ -36,6 +36,8 @@ FlowModelSinglePhase::init()
 void
 FlowModelSinglePhase::addVariables(unsigned int subdomain_id)
 {
+  FlowModel::addCommonVariables(subdomain_id);
+
   std::vector<Real> scaling_factor = _sim.getParam<std::vector<Real>>("scaling_factor_1phase");
 
   // Nonlinear variables
