@@ -7,4 +7,12 @@
     abs_zero = 1e-8
     superlu = true
   [../]
+  [./test5a_lim_on_initial]
+    type = 'CSVDiff'
+    input = 'nafems_test5a_lim.i'
+    cli_args = 'Postprocessors/matl_ts_min/execute_on="initial timestep_end"
+    Outputs/file_base=nafems_test5a_lim_on_initial_out'
+    csvdiff = 'nafems_test5a_lim_on_initial_out.csv'
+    superlu = true
+  [../]
 []

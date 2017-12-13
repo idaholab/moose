@@ -4,4 +4,11 @@
     input = 'nafems_nl1_lim.i'
     exodiff = 'nafems_nl1_lim_out.e'
   [../]
+  [./nl1_lim_on_initial]
+    type = 'CSVDiff'
+    input = 'nafems_nl1_lim.i'
+    cli_args = 'Postprocessors/matl_ts_min/execute_on="initial timestep_end"
+    Outputs/file_base=nafems_nl1_lim_on_initial_out'
+    csvdiff = 'nafems_nl1_lim_on_initial_out.csv'
+  [../]
 []
