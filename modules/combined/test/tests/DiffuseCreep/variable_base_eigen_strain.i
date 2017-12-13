@@ -163,7 +163,6 @@
     type = ComputeVariableBaseEigenStrain
     base_tensor_property_name = aniso_tensor
     prefactor = eigenstrain_prefactor
-    incremental_form = true
     eigenstrain_name = eigenstrain
   [../]
   [./strain]

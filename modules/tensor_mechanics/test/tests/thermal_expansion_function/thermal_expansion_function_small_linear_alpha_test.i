@@ -89,7 +89,6 @@
     thermal_expansion_function_reference_temperature = 0.5
     stress_free_temperature = 0.0
     temperature = temp
-    incremental_form = false
     eigenstrain_name = eigenstrain
   [../]
   [./thermal_expansion_strain2]
@@ -98,7 +97,6 @@
     thermal_expansion_function = cte_func_inst
     stress_free_temperature = 0.0
     temperature = temp
-    incremental_form = false
     eigenstrain_name = eigenstrain
   [../]
 []
