@@ -4,6 +4,9 @@ CXX ?= g++
 hit: main.cc parse.cc lex.cc lex.h parse.h
 	$(CXX) -std=c++11 -g $(CXXFLAGS) $< parse.cc lex.cc -o $@
 
+rewrite: rewrite.cc parse.cc lex.cc lex.h parse.h
+	$(CXX) -std=c++11 -g $(CXXFLAGS) $< parse.cc lex.cc -o $@
+
 bindings: hit.so
 
 hit.so: parse.cc lex.cc hit.cpp
