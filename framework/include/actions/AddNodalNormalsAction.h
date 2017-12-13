@@ -11,6 +11,7 @@
 #define ADDNODALNORMALSACTION_H
 
 #include "Action.h"
+#include "MultiMooseEnum.h"
 
 class AddNodalNormalsAction;
 
@@ -21,10 +22,10 @@ InputParameters validParams<AddNodalNormalsAction>();
  * Action to setup computation of nodal normals.
  *
  * The machinery behind the normal computation is the following:
- * - NodalNormalsPreprocessor is ran over the elements and gather the \f$ \int \d grad_phi \over \d
+ * - NodalNormalsBoundaryNodes is ran over the elements and gather the \f$ \int \d grad_phi \over \d
  * {x|y|z} \d Omega \f$ into three separate vectors
  *   (that live on AuxiliarySystem) - each for one component of the normal.
- * - NodalNormalsEvaluator is than ran over the boundary nodes and takes the above computed
+ * - NodalNormalsUserObject is than ran over the boundary nodes and takes the above computed
  * integrals and normalizes it.
  *
  * NOTE: the auxiliary system has to have at least one variable on it, so that the vectors for nx,
@@ -38,6 +39,9 @@ public:
   virtual void act() override;
 
 protected:
+  /// The block the computation can be restricted to, especially when dealing with internal sidesets
+  std::vector<SubdomainName> _block;
+
   /// The supplied boundary name from the user
   std::vector<BoundaryName> _boundary;
 
@@ -46,6 +50,9 @@ protected:
 
   /// The supplied boundary name for the corner boundary
   BoundaryName _corner_boundary;
+
+  /// The execuyte options
+  ExecFlagEnum _execute_options;
 };
 
 #endif /* ADDNODALNORMALSACTION_H */

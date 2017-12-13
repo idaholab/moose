@@ -127,10 +127,7 @@ associateSyntax(Syntax & syntax, ActionFactory & action_factory)
   registerSyntax("AddControlAction", "Controls/*");
   registerSyntax("AddBoundsVectorsAction", "Bounds");
 
-  registerSyntax("AddNodalNormalsAction", "NodalNormals");
-  //  registerSyntaxTask("AddNodalNormalsAction", "NodalNormals", "add_aux_variable");
-  //  registerSyntaxTask("AddNodalNormalsAction", "NodalNormals", "add_postprocessor");
-  //  registerSyntaxTask("AddNodalNormalsAction", "NodalNormals", "add_user_object");
+  registerSyntax("AddNodalNormalsAction", "NodalNormals/*");
 
   // Indicator
   registerSyntax("AddElementalFieldAction", "Adaptivity/Indicators/*");

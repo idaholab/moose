@@ -125,6 +125,7 @@
 #include "ElementL2ErrorFunctionAux.h"
 #include "ElementH1ErrorFunctionAux.h"
 #include "DiffusionFluxAux.h"
+#include "NodalNormalAux.h"
 
 // dirac kernels
 #include "ConstantPointSource.h"
@@ -272,9 +273,9 @@
 #include "LayeredSideFluxAverage.h"
 #include "NearestPointLayeredAverage.h"
 #include "ElementIntegralVariableUserObject.h"
-#include "NodalNormalsEvaluator.h"
+#include "NodalNormalsUserObject.h"
 #include "NodalNormalsCorner.h"
-#include "NodalNormalsPreprocessor.h"
+#include "NodalNormalsBoundaryNodes.h"
 #include "SolutionUserObject.h"
 #include "PerflogDumper.h"
 #include "ElementQualityChecker.h"
@@ -625,6 +626,7 @@ registerObjects(Factory & factory)
   registerAux(ElementL2ErrorFunctionAux);
   registerAux(ElementH1ErrorFunctionAux);
   registerAux(DiffusionFluxAux);
+  registerAux(NodalNormalAux);
 
   // Initial Conditions
   registerInitialCondition(ConstantIC);
@@ -763,9 +765,9 @@ registerObjects(Factory & factory)
   registerUserObject(LayeredSideFluxAverage);
   registerUserObject(NearestPointLayeredAverage);
   registerUserObject(ElementIntegralVariableUserObject);
-  registerUserObject(NodalNormalsPreprocessor);
+  registerUserObject(NodalNormalsBoundaryNodes);
   registerUserObject(NodalNormalsCorner);
-  registerUserObject(NodalNormalsEvaluator);
+  registerUserObject(NodalNormalsUserObject);
   registerUserObject(SolutionUserObject);
   registerUserObject(PerflogDumper);
   registerUserObject(ElementQualityChecker);
@@ -1227,8 +1229,6 @@ registerActions(Syntax & syntax, ActionFactory & action_factory)
   registerAction(AddMarkerAction, "add_marker");
   registerAction(SetAdaptivityOptionsAction, "set_adaptivity_options");
 
-  registerAction(AddNodalNormalsAction, "add_aux_variable");
-  registerAction(AddNodalNormalsAction, "add_postprocessor");
   registerAction(AddNodalNormalsAction, "add_user_object");
 
 #ifdef LIBMESH_ENABLE_AMR
