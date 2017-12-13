@@ -19,7 +19,7 @@ InputParameters
 validParams<ImplicitODEx>()
 {
   InputParameters params = validParams<ODEKernel>();
-  params.addCoupledVar("y", "Y");
+  params.addRequiredsCoupledVar("y", "Y");
   return params;
 }
 
