@@ -22,6 +22,8 @@
     input = 'IGNORED'
     expect_out = 'START YAML DATA.*END YAML DATA'
     cli_args = '--yaml'
+    # suppress error checking, the word 'ERROR' shows up in the yaml dump
+    errors = 'zzzzzzzzzz'
   [../]
 
   [./no_double_executioner_output]
@@ -118,6 +120,8 @@
     input = 'IGNORED'
     expect_out = 'ExistsIn=\[\s*?EXTRA:"all"\s*?EXTRA:"none"\s*?"../../../../../Outputs/["*"]/decl"\s*?\]'
     cli_args = '--definition'
+    # suppress error checking, the word 'ERROR' shows up in the definition dump
+    errors = 'zzzzzzzzzz'
   [../]
 
   [./definition_childatleastone_test]
@@ -125,6 +129,8 @@
     input = 'IGNORED'
     expect_out = 'ChildAtLeastOne=\[\s*?"../../../GlobalParams/inside/value"\s*?"inside/value"\s*?\]'
     cli_args = '--definition'
+    # suppress error checking, the word 'ERROR' shows up in the definition dump
+    errors = 'zzzzzzzzzz'
   [../]
 
   [./definition_valenum_test]
@@ -132,6 +138,8 @@
     input = 'IGNORED'
     expect_out = '\'execute_on\'{.*?\'value\'{.*?ValEnums=\[ "none" "ini.*?nal" "custom" \].*}?.*?} % end parameter execute_on'
     cli_args = '--definition'
+    # suppress error checking, the word 'ERROR' shows up in the definition dump
+    errors = 'zzzzzzzzzz'
   [../]
 
   [./definition_active_parameter_test]
@@ -139,6 +147,8 @@
     input = 'IGNORED'
     expect_out = '\'active\'{.*?Description="If specified.*?made active".*?\'value\'{.*?InputDefault="__all__".*?} % end parameter active'
     cli_args = '--definition'
+    # suppress error checking, the word 'ERROR' shows up in the definition dump
+    errors = 'zzzzzzzzzz'
   [../]
 
   [./definition_normal_sub_test]
@@ -146,6 +156,8 @@
     input = 'IGNORED'
     expect_out = '\'Indicators\'{.*?InputTmpl=MooseBlock.*?InputName="Indicators".*?InputType=normal_sub.*?InputDefault="Indicators"'
     cli_args = '--definition'
+    # suppress error checking, the word 'ERROR' shows up in the definition dump
+    errors = 'zzzzzzzzzz'
   [../]
 
   [./definition_type_sub_test]
@@ -153,6 +165,8 @@
     input = 'IGNORED'
     expect_out = '\'CircleMarker_type\'{.*?InputType=type_sub.*?InputDefault="insert_name_here".*?} % end block CircleMarker_type'
     cli_args = '--definition'
+    # suppress error checking, the word 'ERROR' shows up in the definition dump
+    errors = 'zzzzzzzzzz'
   [../]
 
   [./definition_default_type_test]
@@ -160,6 +174,8 @@
     input = 'IGNORED'
     expect_out = '\'BoxMarker_type\'{.*?\'type\'{.*?\'value\'{.*?InputDefault="BoxMarker".*?}.*?} % end parameter type.*?} % end block BoxMarker_type'
     cli_args = '--definition'
+    # suppress error checking, the word 'ERROR' shows up in the definition dump
+    errors = 'zzzzzzzzzz'
   [../]
 
   [./definition_minvalinc_inputdefault_test]
@@ -167,6 +183,8 @@
     input = 'IGNORED'
     expect_out = '\'cycles_per_step\'{.*?\'value\'{.*?MinValInc=0.*?InputDefault="1".*?} % end parameter cycles_per_step'
     cli_args = '--definition'
+    # suppress error checking, the word 'ERROR' shows up in the definition dump
+    errors = 'zzzzzzzzzz'
   [../]
 
   [./definition_expressions_are_okay_test]
@@ -174,5 +192,7 @@
     input = 'IGNORED'
     expect_out = '\'function\'{.*\'value\'{.*ExistsIn=\[\s*EXTRA:"ExpressionsAreOkay"\s*"../../../../../Functions/["*"]/decl"\s*\].*}.*} % end parameter function'
     cli_args = '--definition'
+    # suppress error checking, the word 'ERROR' shows up in the definition dump
+    errors = 'zzzzzzzzzz'
   [../]
 []
