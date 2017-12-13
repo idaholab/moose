@@ -305,7 +305,14 @@ ComputeMultipleInelasticStress::updateQpState(RankTwoTensor & elastic_strain_inc
   for (unsigned i_rmm = 0; i_rmm < _num_models; ++i_rmm)
     _matl_timestep_limit[_qp] += 1.0 / _models[i_rmm]->computeTimeStepLimit();
 
-  _matl_timestep_limit[_qp] = 1.0 / _matl_timestep_limit[_qp];
+  if (MooseUtils::absoluteFuzzyEqual(_matl_timestep_limit[_qp], 0.0))
+  {
+    _matl_timestep_limit[_qp] = std::numeric_limits<Real>::max();
+  }
+  else
+  {
+    _matl_timestep_limit[_qp] = 1.0 / _matl_timestep_limit[_qp];
+  }
 }
 
 void
