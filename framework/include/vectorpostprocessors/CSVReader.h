@@ -12,6 +12,9 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
+#ifndef CSVREADER_H
+#define CSVREADER_H
+
 // MOOSE includes
 #include "GeneralVectorPostprocessor.h"
 #include "DelimitedFileReader.h"
@@ -37,3 +40,5 @@ protected:
   /// is possible for the file to change and add new vectors during the simulation.
   std::map<std::string, VectorPostprocessorValue *> _column_data;
 };
+
+#endif // CSVREADER_H
