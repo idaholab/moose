@@ -21,6 +21,7 @@
 // Forward declarations
 class InputParameters;
 class MooseVariable;
+class MooseVariableScalar;
 class MooseObject;
 namespace libMesh
 {
@@ -314,6 +315,9 @@ protected:
   // Reference to the interface's input parameters
   const InputParameters & _c_parameters;
 
+  /// The name of the object this interface is part of
+  const std::string & _c_name;
+
   // Reference to FEProblemBase
   FEProblemBase & _c_fe_problem;
 
@@ -343,6 +347,14 @@ protected:
 
   /// This will always be zero because the default values for optionally coupled variables is always constant
   VariableSecond _default_second;
+
+  /**
+   * Check that the right kind of variable is being coupled in
+   *
+   * @param var_name The name of the coupled variable
+   * @param comp The component of the coupled variable
+   */
+  void checkVar(const std::string & var_name, unsigned int comp);
 
   /**
    * Extract pointer to a coupled variable
@@ -376,6 +388,9 @@ private:
 
   /// Unique indices for optionally coupled vars that weren't provided
   std::map<std::string, unsigned int> _optional_var_index;
+
+  /// Scalar variables coupled into this object (for error checking)
+  std::map<std::string, std::vector<MooseVariableScalar *>> _c_coupled_scalar_vars;
 };
 
 #endif /* COUPLEABLE_H */
