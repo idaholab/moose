@@ -79,22 +79,22 @@ InputParameters::set_attributes(const std::string & name, bool inserted_only)
   if (!inserted_only)
   {
     /**
-     * ".set_by_add_param" and ".deprecated_params" are not populated until after
+     * "._set_by_add_param" and ".deprecated_params" are not populated until after
      * the default value has already been set in libMesh (first callback to this
      * method). Therefore if a variable is in/not in one of these sets, you can
      * be assured it was put there outside of the "addParam*()" calls.
      */
-    _params[name].set_by_add_param = false;
+    _params[name]._set_by_add_param = false;
 
     // valid_params don't make sense for MooseEnums
     if (!have_parameter<MooseEnum>(name) && !have_parameter<MultiMooseEnum>(name))
-      _params[name].valid = true;
+      _params[name]._valid = true;
 
     if (_show_deprecated_message)
     {
-      if (_params.count(name) && !_params[name].deprecation_message.empty())
+      if (_params.count(name) && !_params[name]._deprecation_message.empty())
         mooseDeprecated(
-            "The parameter ", name, " is deprecated.\n", _params[name].deprecation_message);
+            "The parameter ", name, " is deprecated.\n", _params[name]._deprecation_message);
     }
   }
 }
@@ -159,8 +159,8 @@ InputParameters::addCoupledVar(const std::string & name, Real value, const std::
   // std::vector<VariableName>(1, Moose::stringify(value)),
   addParam<std::vector<VariableName>>(name, doc_string);
   _coupled_vars.insert(name);
-  _params[name].coupled_default = value;
-  _params[name].have_coupled_default = true;
+  _params[name]._coupled_default = value;
+  _params[name]._have_coupled_default = true;
 }
 
 void
@@ -178,7 +178,7 @@ InputParameters::addCoupledVarWithAutoBuild(const std::string & name,
 {
   addParam<std::vector<VariableName>>(name, doc_string);
   _coupled_vars.insert(name);
-  _params[name].autobuild_vecs = std::make_pair(base_name, num_name);
+  _params[name]._autobuild_vecs = std::make_pair(base_name, num_name);
 
   // Additionally there are two more parameters that need to be added:
   addParam<std::string>(base_name, doc_string + " (base_name)");
@@ -209,7 +209,7 @@ InputParameters::getDocString(const std::string & name) const
   std::string doc_string;
   auto it = _params.find(name);
   if (it != _params.end())
-    for (const auto & ch : it->second.doc_string)
+    for (const auto & ch : it->second._doc_string)
     {
       if (ch == '\n')
         doc_string += " ... ";
@@ -228,13 +228,13 @@ InputParameters::setDocString(const std::string & name, const std::string & doc)
     mooseError("Unable to set the documentation string (using setDocString) for the \"",
                name,
                "\" parameter, the parameter does not exist.");
-  it->second.doc_string = doc;
+  it->second._doc_string = doc;
 }
 
 bool
 InputParameters::isParamRequired(const std::string & name) const
 {
-  return _params.count(name) > 0 && _params.at(name).required;
+  return _params.count(name) > 0 && _params.at(name)._required;
 }
 
 bool
@@ -245,13 +245,13 @@ InputParameters::isParamValid(const std::string & name) const
   else if (have_parameter<MultiMooseEnum>(name))
     return get<MultiMooseEnum>(name).isValid();
   else
-    return _params.count(name) > 0 && _params.at(name).valid;
+    return _params.count(name) > 0 && _params.at(name)._valid;
 }
 
 bool
 InputParameters::isParamSetByAddParam(const std::string & name) const
 {
-  return _params.count(name) > 0 && _params.at(name).set_by_add_param;
+  return _params.count(name) > 0 && _params.at(name)._set_by_add_param;
 }
 
 bool
@@ -266,7 +266,7 @@ InputParameters::areAllRequiredParamsValid() const
 bool
 InputParameters::isPrivate(const std::string & name) const
 {
-  return _params.count(name) > 0 && _params.at(name).isprivate;
+  return _params.count(name) > 0 && _params.at(name)._is_private;
 }
 
 void
@@ -275,20 +275,20 @@ InputParameters::declareControllable(const std::string & input_names)
   std::vector<std::string> names;
   MooseUtils::tokenize<std::string>(input_names, names, 1, " ");
   for (auto & name : names)
-    _params[name].controllable = true;
+    _params[name]._controllable = true;
 }
 
 bool
 InputParameters::isControllable(const std::string & name)
 {
-  return _params.count(name) > 0 && _params[name].controllable;
+  return _params.count(name) > 0 && _params[name]._controllable;
 }
 
 void
 InputParameters::registerBase(const std::string & value)
 {
   InputParameters::set<std::string>("_moose_base") = value;
-  _params["_moose_base"].isprivate = true;
+  _params["_moose_base"]._is_private = true;
 }
 
 void
@@ -423,15 +423,15 @@ InputParameters::hasCoupledValue(const std::string & coupling_name) const
 bool
 InputParameters::hasDefaultCoupledValue(const std::string & coupling_name) const
 {
-  return _params.count(coupling_name) > 0 && _params.at(coupling_name).have_coupled_default &&
+  return _params.count(coupling_name) > 0 && _params.at(coupling_name)._have_coupled_default &&
          _coupled_vars.count(coupling_name) > 0;
 }
 
 void
 InputParameters::defaultCoupledValue(const std::string & coupling_name, Real value)
 {
-  _params[coupling_name].coupled_default = value;
-  _params[coupling_name].have_coupled_default = true;
+  _params[coupling_name]._coupled_default = value;
+  _params[coupling_name]._have_coupled_default = true;
 }
 
 Real
@@ -439,7 +439,7 @@ InputParameters::defaultCoupledValue(const std::string & coupling_name) const
 {
   auto value_it = _params.find(coupling_name);
 
-  if (value_it == _params.end() || !value_it->second.have_coupled_default)
+  if (value_it == _params.end() || !value_it->second._have_coupled_default)
     mooseError("Attempted to retrieve default value for coupled variable '",
                coupling_name,
                "' when none was provided. \n\nThere are three reasons why this may have "
@@ -448,7 +448,7 @@ InputParameters::defaultCoupledValue(const std::string & coupling_name) const
                "variable added with params.addRequiredCoupledVar() \n 3. The call to get the "
                "coupled value should have been properly guarded with isCoupled()\n");
 
-  return value_it->second.coupled_default;
+  return value_it->second._coupled_default;
 }
 
 std::map<std::string, std::pair<std::string, std::string>>
@@ -457,8 +457,8 @@ InputParameters::getAutoBuildVectors() const
   std::map<std::string, std::pair<std::string, std::string>> abv;
   for (auto it = _params.begin(); it != _params.end(); ++it)
   {
-    if (!it->second.autobuild_vecs.first.empty())
-      abv[it->first] = it->second.autobuild_vecs;
+    if (!it->second._autobuild_vecs.first.empty())
+      abv[it->first] = it->second._autobuild_vecs;
   }
   return abv;
 }
@@ -468,8 +468,8 @@ InputParameters::type(const std::string & name)
 {
   if (_coupled_vars.find(name) != _coupled_vars.end())
     return "std::vector<VariableName>";
-  else if (_params.count(name) > 0 && !_params[name].custom_type.empty())
-    return _params[name].custom_type;
+  else if (_params.count(name) > 0 && !_params[name]._custom_type.empty())
+    return _params[name]._custom_type;
   return _values[name]->type();
 }
 
@@ -549,7 +549,7 @@ InputParameters::addParamNamesToGroup(const std::string & space_delim_names,
 
   for (const auto & param_name : elements)
     if (_params.count(param_name) > 0)
-      _params[param_name].group = group_name;
+      _params[param_name]._group = group_name;
     else
       mooseError("Unable to find a parameter with name: ",
                  param_name,
@@ -561,7 +561,7 @@ InputParameters::addParamNamesToGroup(const std::string & space_delim_names,
 std::vector<std::string>
 InputParameters::getSyntax(const std::string & name)
 {
-  return _params[name].cli_flag_names;
+  return _params[name]._cli_flag_names;
 }
 
 std::string
@@ -569,7 +569,7 @@ InputParameters::getGroupName(const std::string & param_name) const
 {
   auto it = _params.find(param_name);
   if (it != _params.end())
-    return it->second.group;
+    return it->second._group;
   return std::string();
 }
 
@@ -578,24 +578,24 @@ InputParameters::getDefaultPostprocessorValue(const std::string & name, bool sup
 {
   // Check that a default exists, error if it does not
   auto it = _params.find(name);
-  if (!suppress_error && (it == _params.end() || !it->second.have_default_postprocessor_val))
+  if (!suppress_error && (it == _params.end() || !it->second._have_default_postprocessor_val))
     mooseError("A default PostprcessorValue does not exist for the given name: ", name);
 
-  return it->second.default_postprocessor_val;
+  return it->second._default_postprocessor_val;
 }
 
 void
 InputParameters::setDefaultPostprocessorValue(const std::string & name,
                                               const PostprocessorValue & value)
 {
-  _params[name].default_postprocessor_val = value;
-  _params[name].have_default_postprocessor_val = true;
+  _params[name]._default_postprocessor_val = value;
+  _params[name]._have_default_postprocessor_val = true;
 }
 
 bool
 InputParameters::hasDefaultPostprocessorValue(const std::string & name) const
 {
-  return _params.count(name) > 0 && _params.at(name).have_default_postprocessor_val;
+  return _params.count(name) > 0 && _params.at(name)._have_default_postprocessor_val;
 }
 
 void
@@ -694,7 +694,7 @@ InputParameters::applyParameter(const InputParameters & common, const std::strin
 
   // Extract the properties from the local parameter for the current common parameter name
   const bool local_exist = _values.find(common_name) != _values.end();
-  const bool local_set = _params.count(common_name) > 0 && !_params[common_name].set_by_add_param;
+  const bool local_set = _params.count(common_name) > 0 && !_params[common_name]._set_by_add_param;
   const bool local_priv = isPrivate(common_name);
   const bool local_valid = isParamValid(common_name);
 
@@ -737,7 +737,7 @@ InputParameters::isParamSetByUser(const std::string & name) const
     return false;
   else
     // If the parameters is not located in the list, then it was set by the user
-    return _params.count(name) > 0 && !_params.at(name).set_by_add_param;
+    return _params.count(name) > 0 && !_params.at(name)._set_by_add_param;
 }
 
 const std::string &
@@ -745,7 +745,7 @@ InputParameters::getDescription(const std::string & name)
 {
   if (_params.count(name) == 0)
     mooseError("No parameter exists with the name ", name);
-  return _params[name].doc_string;
+  return _params[name]._doc_string;
 }
 
 template <>
@@ -755,8 +755,8 @@ InputParameters::addRequiredParam<MooseEnum>(const std::string & name,
                                              const std::string & doc_string)
 {
   InputParameters::set<MooseEnum>(name) = moose_enum; // valid parameter is set by set_attributes
-  _params[name].required = true;
-  _params[name].doc_string = doc_string;
+  _params[name]._required = true;
+  _params[name]._doc_string = doc_string;
 }
 
 template <>
@@ -767,8 +767,8 @@ InputParameters::addRequiredParam<MultiMooseEnum>(const std::string & name,
 {
   InputParameters::set<MultiMooseEnum>(name) =
       moose_enum; // valid parameter is set by set_attributes
-  _params[name].required = true;
-  _params[name].doc_string = doc_string;
+  _params[name]._required = true;
+  _params[name]._doc_string = doc_string;
 }
 
 template <>
@@ -780,8 +780,8 @@ InputParameters::addRequiredParam<std::vector<MooseEnum>>(
 {
   InputParameters::set<std::vector<MooseEnum>>(name) =
       moose_enums; // valid parameter is set by set_attributes
-  _params[name].required = true;
-  _params[name].doc_string = doc_string;
+  _params[name]._required = true;
+  _params[name]._doc_string = doc_string;
 }
 
 template <>
@@ -849,8 +849,8 @@ InputParameters::setParamHelper<PostprocessorName, Real>(const std::string & nam
                                                          const Real & r_value)
 {
   // Store the default value
-  _params[name].default_postprocessor_val = r_value;
-  _params[name].have_default_postprocessor_val = true;
+  _params[name]._default_postprocessor_val = r_value;
+  _params[name]._have_default_postprocessor_val = true;
 
   // Assign the default value so that it appears in the dump
   std::ostringstream oss;
@@ -865,8 +865,8 @@ InputParameters::setParamHelper<PostprocessorName, int>(const std::string & name
                                                         const int & r_value)
 {
   // Store the default value
-  _params[name].default_postprocessor_val = r_value;
-  _params[name].have_default_postprocessor_val = true;
+  _params[name]._default_postprocessor_val = r_value;
+  _params[name]._have_default_postprocessor_val = true;
 
   // Assign the default value so that it appears in the dump
   std::ostringstream oss;
@@ -943,7 +943,7 @@ InputParameters::getParamHelper<MultiMooseEnum>(const std::string & name,
 void
 InputParameters::setReservedValues(const std::string & name, const std::set<std::string> & reserved)
 {
-  _params[name].reserved_values = reserved;
+  _params[name]._reserved_values = reserved;
 }
 
 std::set<std::string>
@@ -952,7 +952,7 @@ InputParameters::reservedValues(const std::string & name) const
   auto it = _params.find(name);
   if (it == _params.end())
     return std::set<std::string>();
-  return it->second.reserved_values;
+  return it->second._reserved_values;
 }
 
 void
