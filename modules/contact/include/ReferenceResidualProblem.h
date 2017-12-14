@@ -73,6 +73,9 @@ protected:
   std::vector<Real> _refResid;
   std::vector<Real> _resid;
   ///@}
+
+  /// Local storage for the scaling factors applied to each of the variables to apply to _refResidVars.
+  std::vector<Real> _scaling_factors;
 };
 
 #endif /* REFERENCERESIDUALPROBLEM_H */
