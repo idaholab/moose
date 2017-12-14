@@ -22,6 +22,9 @@
 #ifdef FLUID_PROPERTIES_ENABLED
 #include "FluidPropertiesApp.h"
 #endif
+#ifdef FUNCTIONAL_EXPANSION_TOOLS_ENABLED
+#include "FunctionalExpansionToolsApp.h"
+#endif
 #ifdef HEAT_CONDUCTION_ENABLED
 #include "HeatConductionApp.h"
 #endif
@@ -131,6 +134,10 @@ ModulesApp::registerObjects(Factory & factory)
   FluidPropertiesApp::registerObjects(factory);
 #endif
 
+#ifdef FUNCTIONAL_EXPANSION_TOOLS_ENABLED
+  FunctionalExpansionToolsApp::registerObjects(factory);
+#endif
+
 #ifdef HEAT_CONDUCTION_ENABLED
   HeatConductionApp::registerObjects(factory);
 #endif
@@ -205,6 +212,10 @@ ModulesApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
 
 #ifdef FLUID_PROPERTIES_ENABLED
   FluidPropertiesApp::associateSyntax(syntax, action_factory);
+#endif
+
+#ifdef FUNCTIONAL_EXPANSION_TOOLS_ENABLED
+  FunctionalExpansionToolsApp::associateSyntax(syntax, action_factory);
 #endif
 
 #ifdef HEAT_CONDUCTION_ENABLED
