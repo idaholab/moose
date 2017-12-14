@@ -33,6 +33,26 @@ public:
 
 protected:
   virtual Real computeValue() override;
+
+  /**
+   * _tang_xi[i][qp] = dX/d(xi) = element's tangent vector in xi direction
+   * where X = (x, y, z) are the spatial coordinates, and
+   * i=0,...,LIBMESH_DIM is the dimensionality of the current element, and
+   * qp is the quadpoint, and
+   * xi is the element's isoparametric coordinate
+   * Only _tang_xi[_current_elem->dim()] is used
+   */
+  std::vector<const std::vector<RealGradient> *> _tang_xi;
+
+  /**
+   * _tang_eta[i][qp] = dX/d(eta) = element's tangent vector in eta direction
+   * where X = (x, y, z) are the spatial coordinates, and
+   * i=0,...,LIBMESH_DIM is the dimensionality of the current element, and
+   * qp is the quadpoint, and
+   * eta is the element's isoparametric coordinate
+   * Only _tang_eta[_current_elem->dim()] is used
+   */
+  std::vector<const std::vector<RealGradient> *> _tang_eta;
 };
 
 #endif // POROUSFLOWDARCYVELOCITYCOMPONENTLOWERDIMENSIONAL_H

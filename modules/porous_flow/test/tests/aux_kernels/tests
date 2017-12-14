@@ -10,4 +10,14 @@
     input = 'properties.i'
     exodiff = 'properties_out.e'
   [../]
+  [./darcy_velocity_lower]
+    type = 'CSVDiff'
+    input = 'darcy_velocity_lower.i'
+    csvdiff = 'darcy_velocity_lower_out.csv'
+  [../]
+  [./darcy_velocity_lower_except]
+    type = 'RunException'
+    input = 'darcy_velocity_lower_except.i'
+    expect_err = 'The variable fracture_vel_x must must be defined on lower-dimensional elements only since it employs PorousFlowDarcyVelocityComponentLowerDimensional'
+  [../]
 []
