@@ -14,7 +14,7 @@
   elem_type = QUAD4 # Type of elements used in the mesh
   uniform_refine = 1 # Initial uniform refinement of the mesh
 
-  parallel_type = replicated # required for advanced_op_assignment
+  num_ghosted_layers = 2 # Required for all distributed mesh runs with grain tracker
 []
 
 [GlobalParams]

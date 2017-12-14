@@ -756,6 +756,12 @@ public:
    */
   void allowRecovery(bool allow) { _allow_recovery = allow; }
 
+  /**
+   * Returns the number of geometrically ghosted element layers (Only applicable with Distributed
+   * Mesh).
+   */
+  unsigned short numGhostedLayers() const { return _num_ghosted_layers; }
+
   class MortarInterface
   {
   public:
@@ -1083,6 +1089,9 @@ private:
 
   /// Holds a map from subomdain ids to the boundary ids that are attached to it
   std::map<SubdomainID, std::set<BoundaryID>> _subdomain_boundary_ids;
+
+  /// Holds the number of ghosted layers requested by the user (default: 1)
+  unsigned short _num_ghosted_layers;
 
   /// Whether or not this Mesh is allowed to read a recovery file
   bool _allow_recovery;
