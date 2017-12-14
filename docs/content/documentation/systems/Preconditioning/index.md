@@ -11,21 +11,19 @@
 
 - Using right preconditioning, solve
 
-\begin{equation}
-\boldsymbol{R}'(\boldsymbol{u}_i) \boldsymbol{M}^{-1} (\boldsymbol{M} \delta \boldsymbol{u}_{i+1}) = -\boldsymbol{R}(\boldsymbol{u}_i)
-\end{equation}
+\begin{equation} \mathbf{R}'(\mathbf{u}_i)\mathbf{M}^{-1}(\mathbf{M}\delta \mathbf{u}_{i+1}) = -\mathbf{R}(\mathbf{u}_i) \end{equation}
 
-- $$\boldsymbol{M}$$ symbolically represents the preconditioning matrix or process
-- Inside GMRES, we only apply the action of $$\boldsymbol{M}^{-1}$$ on a vector
+- $\mathbf{M}$ symbolically represents the preconditioning matrix or process
+- Inside GMRES, we only apply the action of $\mathbf{M}^{-1}$ on a vector
 - Right preconditioned matrix free version
 
-    $$\boldsymbol{R}' (\boldsymbol{u}_i) \boldsymbol{M}^{-1}\boldsymbol{v} \approx \frac{\boldsymbol{R}(\boldsymbol{u}_i + \epsilon \boldsymbol{M}^{-1}\boldsymbol{v}) - \boldsymbol{R}(\boldsymbol{u}_i)}{\epsilon}$$
+\begin{equation} \mathbf{R}'(\mathbf{u}_i) \mathbf{M}^{-1}\mathbf{v} \approx \frac{\mathbf{R}(\mathbf{u}_i + \epsilon \mathbf{M}^{-1}\mathbf{v}) - \mathbf{R}(\mathbf{u}_i)}{\epsilon} \end{equation}
 
 ## Preconditioning Matrix vs Process
 ---
 
-- On the previous slide $$\boldsymbol{M}$$ represented the "Preconditioning Matrix".
-- The action of $$\boldsymbol{M}^{-1}$$ on a vector represents the "Preconditioner" or "Preconditioning Process".
+- On the previous slide $\mathbf{M}$ represented the "Preconditioning Matrix".
+- The action of $\mathbf{M}^{-1}$ on a vector represents the "Preconditioner" or "Preconditioning Process".
 - In MOOSE the "matrix to build" and the "process to apply" with that matrix are separated.
 - There are four different ways to build preconditioning matrices:
     - Default: Block Diagonal Preconditioning
@@ -59,12 +57,12 @@
 ## PETSc Specific Options (for Executioner)
 ---
 
-petsc_option | Description 
+petsc_option | Description
 ----------------|-------------
 `-snes_ksp_ew` | Variable linear solve tolerance -- useful for transient solves
 `-help` | Show PETSc options during the solve
 
-petsc_options_iname | petsc_options_value | Description 
+petsc_options_iname | petsc_options_value | Description
 ------|------|--------
 `-pc_type` | `ilu` | Default for serial
 | `bjacobi` | Default for parallel with `-sub_pc_type ilu`
@@ -82,39 +80,36 @@ petsc_options_iname | petsc_options_value | Description
 ## Default Preconditioning Matrix
 ---
 
--   Consider the fully coupled system of equations:
+- Consider the fully coupled system of equations:
 
-$$$
-- \nabla \cdot k(s,T) \nabla T  = 0 \\
-- \nabla \cdot D(s,T) \nabla s  = 0
-$$$
+\begin{equation} - \nabla \cdot k(s,T) \nabla T  = 0 \end{equation}
+\begin{equation} - \nabla \cdot D(s,T) \nabla s  = 0 \end{equation}
 
--   Fully coupled Jacobian approximation
+- Fully coupled Jacobian approximation
 
-$$$
-\boldsymbol{R}'(s,T) =
- \begin{bmatrix}
-   (\boldsymbol{R}_T)_T & (\boldsymbol{R}_T)_s
-   \\
-   (\boldsymbol{R}_s)_T & (\boldsymbol{R}_s)_s
- \end{bmatrix}
- \approx
- \begin{bmatrix}
-   (\boldsymbol{R}_T)_T & \boldsymbol{0}
-   \\
-   \boldsymbol{0}       & (\boldsymbol{R}_s)_s
- \end{bmatrix}
-$$$
-
--   For our example:
-
-$$$
-\boldsymbol{M} \equiv
+\begin{equation}
+    \mathbf{R}'(s,T) =
     \begin{bmatrix}
-      (k(s,T) \nabla \phi_j, \nabla \psi_i) & \boldsymbol{0} \\
-      \boldsymbol{0} & (D(s,T) \nabla \phi_j, \nabla\psi_i)
-    \end{bmatrix} \approx \boldsymbol{R}'(s,T)
-$$$
+        (\mathbf{R}_T)_T & (\mathbf{R}_T)_S \\
+        (\mathbf{R}_S)_T & (\mathbf{R}_S)_S
+    \end{bmatrix}
+    \approx
+    \begin{bmatrix}
+        (\mathbf{R}_T)_T & 0 \\
+        (0 & (\mathbf{R}_S)_S
+    \end{bmatrix}
+\end{equation}
+
+- For our example:
+
+\begin{equation}
+    \mathbf{M} \equiv
+    \begin{bmatrix}
+        (k(s,T) \nabla \phi_j, \nabla \psi_i) & \mathbf{0} \\
+        \mathbf{0} & (D(s,T) \nabla \phi_j, \nabla\psi_i)
+    \end{bmatrix}
+    \approx \mathbf{R}'(s,T)
+\end{equation}
 
 - This simple style of throwing away the off-diagonal blocks is the way MOOSE will precondition when using the default `solve_type`.
 
@@ -163,16 +158,16 @@ off_diag_row    = 's'
 off_diag_column = 'T'
 ```
 
-- Which would produce an $$\boldsymbol{M}$$ like this:
+- Which would produce an $\mathbf{M}$ like this:
 
-$$$
-\boldsymbol{M} \equiv
+\begin{equation}
+    \mathbf{M} \equiv
     \begin{bmatrix}
-      \left(k(s,T) \nabla \phi_j, \nabla \psi_i\right) & \boldsymbol{0}
-      \\[3pt]
-      \left(\frac{\partial D(s,T)}{\partial T_j} \nabla s, \nabla \psi_i\right) & \left(D(s,T) \nabla \phi_j, \nabla\psi_i\right)
-    \end{bmatrix} \approx \boldsymbol{R}'
-$$$
+        \left(k(s,T) \nabla \phi_j, \nabla \psi_i\right) & \mathbf{0} \\[3pt]
+        \left(\frac{\partial D(s,T)}{\partial T_j} \nabla s, \nabla \psi_i\right) & \left(D(s,T) \nabla \phi_j, \nabla\psi_i\right)
+    \end{bmatrix}
+    \approx \mathbf{R}'
+\end{equation}
 
 - In order for this to work you must provide a `computeQpOffDiagJacobian()` function in your Kernels that computes the required partial derivatives.
 - To use *all* off diagonal blocks, you can use the following input file syntax:
@@ -251,33 +246,32 @@ petsc_options_value = '1e-6                 ds'
 
 - The PBP works by partially inverting a preconditioning matrix (usually an approximation of the true Jacobian) by partially inverting each block row in a Block-Gauss-Seidel way.
 
-$$$
-\boldsymbol{R}(u,v) =
-  \begin{bmatrix}
-    \boldsymbol{R}_u
-    \\
-    \boldsymbol{R}_v
-  \end{bmatrix}
-$$$
+\begin{equation}
+    \mathbf{R}(u,v) =
+    \begin{bmatrix}
+        \mathbf{R}_u \\
+        \mathbf{R}_v
+    \end{bmatrix}
+\end{equation}
 
-$$$
-\boldsymbol{M} \equiv
-\begin{bmatrix}
-  (\boldsymbol{R}_u)_u & \boldsymbol{0}
-  \\
-  (\boldsymbol{R}_v)_u & (\boldsymbol{R}_v)_v
-\end{bmatrix} \approx \boldsymbol{R}'
-$$$
+\begin{equation}
+    \mathbf{M} \equiv
+    \begin{bmatrix}
+        (\mathbf{R}_u)_u & \mathbf{0} \\
+        (\mathbf{R}_v)_u & (\mathbf{R}_v)_v
+    \end{bmatrix}
+    \approx \mathbf{R}'
+\end{equation}
 
-$$$
-\boldsymbol{M} \boldsymbol{q} = \boldsymbol{p} \quad \Rightarrow \quad
-\left\{
-\begin{array}{rcl}
-(\boldsymbol{R}_u)_u \boldsymbol{q}_u &=& \boldsymbol{p}_u \\[6pt]
-(\boldsymbol{R}_v)_v \boldsymbol{q}_v &=& \boldsymbol{p}_v - (\boldsymbol{R}_v)_u \boldsymbol{q}_u
-\end{array}
-\right.
-$$$
+\begin{equation}
+    \mathbf{M} \mathbf{q} = \mathbf{p} \quad \Rightarrow \quad
+    \left\{
+    \begin{array}{rcl}
+    (\mathbf{R}_u)_u \mathbf{q}_u &=& \mathbf{p}_u \\[6pt]
+    (\mathbf{R}_v)_v \mathbf{q}_v &=& \mathbf{p}_v - (\mathbf{R}_v)_u \mathbf{q}_u
+    \end{array}
+    \right.
+\end{equation}
 
 ## Using the PBP
 ---
