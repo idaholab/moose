@@ -2,7 +2,7 @@
   [./input_file]
     type = 'RunException'
     input = 'check_error.i'
-    expect_err = 'The following required'
+    expect_err = 'missing required parameter'
   [../]
 
   [./unused_subapp_param]

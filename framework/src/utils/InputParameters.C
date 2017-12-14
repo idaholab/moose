@@ -51,6 +51,7 @@ InputParameters::InputParameters(const InputParameters & rhs)
 InputParameters::InputParameters(const Parameters & rhs)
   : _show_deprecated_message(true), _allow_copy(true)
 {
+  _params.clear();
   Parameters::operator=(rhs);
   _collapse_nesting = false;
   _moose_object_syntax_visibility = true;
@@ -66,6 +67,8 @@ InputParameters::clear()
   _moose_object_syntax_visibility = true;
   _show_deprecated_message = true;
   _allow_copy = true;
+  _block_fullpath = "";
+  _block_location = "";
 }
 
 void
@@ -133,6 +136,8 @@ InputParameters::operator=(const InputParameters & rhs)
   _moose_object_syntax_visibility = rhs._moose_object_syntax_visibility;
   _coupled_vars = rhs._coupled_vars;
   _allow_copy = rhs._allow_copy;
+  _block_fullpath = rhs._block_fullpath;
+  _block_location = rhs._block_location;
 
   return *this;
 }
@@ -346,29 +351,21 @@ InputParameters::mooseObjectSyntaxVisibility() const
 
 #define checkMooseType(param_type, name)                                                           \
   if (have_parameter<param_type>(name) || have_parameter<std::vector<param_type>>(name))           \
-  mooseError("Parameter '",                                                                        \
-             name,                                                                                 \
-             "' cannot be marked as controllable because its type (",                              \
-             this->type(name),                                                                     \
-             ") is not controllable.")
+    oss << inputLocation(param_name) << ": non-controllable type '" << type(name)                  \
+        << "' for parameter '" << paramFullpath(param_name) << "' marked controllable";
 
 void
 InputParameters::checkParams(const std::string & parsing_syntax)
 {
-  std::string l_prefix = this->have_parameter<std::string>("parser_syntax")
-                             ? this->get<std::string>("parser_syntax")
-                             : parsing_syntax;
-
+  std::string parampath = blockFullpath() != "" ? blockFullpath() : parsing_syntax;
   std::ostringstream oss;
   // Required parameters
   for (const auto & it : *this)
   {
     if (!isParamValid(it.first) && isParamRequired(it.first))
     {
-      // The parameter is required but missing
-      if (oss.str().empty())
-        oss << "The following required parameters are missing:" << std::endl;
-      oss << l_prefix << "/" << it.first << std::endl;
+      oss << blockLocation() << ": missing required parameter '" << parampath + "/" + it.first
+          << "'\n";
       oss << "\tDoc String: \"" + getDocString(it.first) + "\"" << std::endl;
     }
   }
@@ -376,7 +373,7 @@ InputParameters::checkParams(const std::string & parsing_syntax)
   // Range checked parameters
   for (const auto & it : *this)
   {
-    std::string long_name(l_prefix + "/" + it.first);
+    std::string long_name(parampath + "/" + it.first);
 
     dynamicCastRangeCheck(Real, Real, long_name, it.first, it.second, oss);
     dynamicCastRangeCheck(int, long, long_name, it.first, it.second, oss);
@@ -384,26 +381,16 @@ InputParameters::checkParams(const std::string & parsing_syntax)
     dynamicCastRangeCheck(unsigned int, long, long_name, it.first, it.second, oss);
   }
 
-  if (!oss.str().empty())
-    mooseError(oss.str());
-
   // Controllable parameters
   for (const auto & param_name : getControllableParameters())
   {
-    // Check that parameter is valid
     if (!isParamValid(param_name))
-      mooseError("The parameter '",
-                 param_name,
-                 "' is not a valid parameter for the object ",
-                 l_prefix,
-                 " thus cannot be marked as controllable.");
+      oss << inputLocation(param_name) << ": invalid parameter '" << paramFullpath(param_name)
+          << "' marked controllable";
 
     if (isPrivate(param_name))
-      mooseError("The parameter, '",
-                 param_name,
-                 "', in ",
-                 l_prefix,
-                 " is a private parameter and cannot be marked as controllable");
+      oss << inputLocation(param_name) << ": private parameter '" << paramFullpath(param_name)
+          << "' marked controllable";
 
     checkMooseType(NonlinearVariableName, param_name);
     checkMooseType(AuxVariableName, param_name);
@@ -415,6 +402,9 @@ InputParameters::checkParams(const std::string & parsing_syntax)
     checkMooseType(UserObjectName, param_name);
     checkMooseType(MaterialPropertyName, param_name);
   }
+
+  if (!oss.str().empty())
+    mooseError(oss.str());
 }
 
 bool

@@ -377,8 +377,8 @@ ActionWarehouse::printInputFile(std::ostream & out)
   for (const auto & act : ordered_actions)
   {
     std::string name;
-    if (act->isParamValid("parser_syntax"))
-      name = act->getParam<std::string>("parser_syntax");
+    if (act->parameters().blockFullpath() != "")
+      name = act->parameters().blockFullpath();
     else
       name = act->name();
     const std::set<std::string> & tasks = act->getAllTasks();

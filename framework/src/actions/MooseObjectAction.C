@@ -37,7 +37,5 @@ MooseObjectAction::MooseObjectAction(InputParameters params)
                            ? _factory.getValidParams(_type)
                            : validParams<MooseObject>())
 {
-  if (params.have_parameter<std::string>("parser_syntax"))
-    _moose_object_pars.addPrivateParam<std::string>("parser_syntax",
-                                                    params.get<std::string>("parser_syntax"));
+  _moose_object_pars.blockFullpath() = params.blockFullpath();
 }
