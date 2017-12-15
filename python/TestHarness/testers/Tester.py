@@ -430,8 +430,8 @@ class Tester(MooseObject):
             self.setStatus('no tag', self.bucket_silent)
             return False
 
-        # If the something has already deemed this test a failure, return now
-        if self.didFail():
+        # If something has already deemed this test a failure or is silent, return now
+        if self.didFail() or self.isSilent():
             return False
 
         # If --dry-run set the test status to pass and DO NOT return.
@@ -485,8 +485,11 @@ class Tester(MooseObject):
         if self.specs.isValid('deleted'):
             reasons['deleted'] = 'deleted ({})'.format(self.specs['deleted'])
 
-        # Check for skipped tests
-        if self.specs.type('skip') is bool and self.specs['skip']:
+        # Skipped by external means (example: TestHarness part2 with --check-input)
+        if self.isSkipped():
+            reasons['skip'] = self.getStatusMessage()
+        # Test is skipped
+        elif self.specs.type('skip') is bool and self.specs['skip']:
             # Backwards compatible (no reason)
             reasons['skip'] = 'no reason'
         elif self.specs.type('skip') is not bool and self.specs.isValid('skip'):
