@@ -18,6 +18,9 @@ validParams<ReturnMappingModel>()
   params.addParam<Real>("max_inelastic_increment",
                         1e-4,
                         "The maximum inelastic strain increment allowed in a time step");
+  params.addParam<bool>("compute_material_timestep_limit",
+                        false,
+                        "Whether to compute the matl_timestep_limit material property");
   return params;
 }
 
@@ -30,7 +33,10 @@ ReturnMappingModel::ReturnMappingModel(const InputParameters & parameters,
         declareProperty<Real>("effective_" + inelastic_strain_name + "_strain")),
     _effective_inelastic_strain_old(
         getMaterialPropertyOld<Real>("effective_" + inelastic_strain_name + "_strain")),
-    _max_inelastic_increment(parameters.get<Real>("max_inelastic_increment"))
+    _max_inelastic_increment(parameters.get<Real>("max_inelastic_increment")),
+    _compute_matl_timestep_limit(getParam<bool>("compute_material_timestep_limit")),
+    _matl_timestep_limit(
+        _compute_matl_timestep_limit ? &declareProperty<Real>("matl_timestep_limit") : NULL)
 {
 }
 
@@ -51,7 +57,11 @@ ReturnMappingModel::computeStress(const Elem & current_elem,
   // the creep strain
   // stress = stressOld + stressIncrement
   if (_t_step == 0 && !_app.isRestarting())
+  {
+    if (_compute_matl_timestep_limit)
+      (*_matl_timestep_limit)[_qp] = std::numeric_limits<Real>::max();
     return;
+  }
 
   stress_new = elasticityTensor * strain_increment;
   stress_new += stress_old;
@@ -125,6 +135,8 @@ ReturnMappingModel::computeStress(const Elem & /*current_elem*/,
   stress_new += stress_old;
 
   computeStressFinalize(inelastic_strain_increment);
+  if (_compute_matl_timestep_limit)
+    (*_matl_timestep_limit)[_qp] = computeTimeStepLimit();
 }
 
 Real
