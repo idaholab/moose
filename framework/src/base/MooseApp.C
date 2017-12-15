@@ -267,6 +267,9 @@ MooseApp::MooseApp(InputParameters parameters)
 
   if (getParam<bool>("error_deprecated") && getParam<bool>("allow_deprecated"))
     mooseError("Both error deprecated and allowed deprecated were set.");
+
+  if (_check_input && isParamValid("recover"))
+    mooseError("Cannot run --check-input with --recover. Recover files might not exist");
 }
 
 MooseApp::~MooseApp()
