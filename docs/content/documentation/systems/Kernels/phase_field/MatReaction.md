@@ -4,7 +4,7 @@
 Implements
 
 $$
--L(v,a,b,\dots)\cdot v,
+-L(v,a,b,...)\cdot v,
 $$
 
 where $L$ (`mob_name`) is a reaction rate, $v$ is either a coupled variable (`v`)

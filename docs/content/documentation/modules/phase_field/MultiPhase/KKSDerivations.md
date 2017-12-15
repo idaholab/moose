@@ -33,12 +33,12 @@ $\nabla \cdot M(c) \nabla \mu$, we use the [`CoupledTimeDerivative`](framework/C
 
 ## Residual
 
-In the residual routine we need to calculate the term $R= \frac{\partial F}{\partial c} - \mu$.
+In the residual routine we need to calculate the term $\mathcal{R} =  \frac{\partial F}{\partial c} - \mu$.
 We exploit the KKS identity $\frac{\partial F}{\partial c}=\frac{dF_a}{dc_a}=\frac{dF_b}{dc_b}$
 and arbitrarily use the a-phase instead.
 
 $$
-R = \frac{\partial F_a}{\partial c_a} - \mu
+\mathcal{R} = \frac{\partial F_a}{\partial c_a} - \mu
 $$
 
 ### Jacobian
@@ -56,19 +56,21 @@ with the $\frac{\partial c_a}{\partial u_j}\frac{\partial}{\partial c_a}=\phi_j 
 derivative.
 
 $$
-\begin{eqnarray*}
-J &=& \frac{\partial R}{\partial u_j} = \phi_j \frac{\partial}{\partial c_a} \left( \frac{\partial F}{\partial c_a} - \mu \right)\\
-&=& \phi_j  \frac{\partial^2F}{\partial c_a^2} \\
-\end{eqnarray*}
+J = \frac{\partial \mathcal{R}}{\partial u_j} = \phi_j \frac{\partial}{\partial c_a} \left( \frac{\partial F}{\partial c_a} - \mu \right)
+$$
+
+$$
+= \phi_j  \frac{\partial^2F}{\partial c_a^2}
 $$
 
 For $\mu$
 
 $$
-\begin{eqnarray*}
-J &=& \phi_j \frac{\partial}{\partial \mu} \left( \frac{\partial F}{\partial c_a} - \mu \right)\\
-&=& -\phi_j \\
-\end{eqnarray*}
+J = \phi_j \frac{\partial}{\partial \mu} \left( \frac{\partial F}{\partial c_a} - \mu \right)
+$$
+
+$$
+= -\phi_j
 $$
 
 ## KKSCHBulk
@@ -77,23 +79,23 @@ The non-linear variable for this Kernel is the concentration $c$.
 
 ### Residual
 
-In the residual routine we need to calculate the term $R=\nabla \frac{dF}{dc}$.
+In the residual routine we need to calculate the term $\mathcal{R} = \nabla \frac{dF}{dc}$.
 We exploit the KKS identity $\frac{dF}{dc}=\frac{dF_a}{dc_a}=\frac{dF_b}{dc_b}$
 and arbitrarily use the a-phase instead.
-The gradient can be calculated through the chain rule (note that $F_a(c_a, p_1,p_2,\dots,p_n)$
+The gradient can be calculated through the chain rule (note that $F_a(c_a, p_1,p_2,...,p_n)$
 is potentially a function of many variables).
 
 $$
-R = \nabla \frac{dF_a}{dc_a} = \frac{d^2F_a}{dc_a^2}\nabla c_a + \sum_i \frac{d^2F_a}{dc_adp_i}\nabla p_i
+\mathcal{R} = \nabla \frac{dF_a}{dc_a} = \frac{d^2F_a}{dc_a^2}\nabla c_a + \sum_i \frac{d^2F_a}{dc_adp_i}\nabla p_i
 $$
 
-With $a = \{c_a, p_1,p_2,\dots,p_n\}$ being the vector of all arguments to $F_a$ this simplifies to
+With $a = \{c_a, p_1,p_2,...,p_n\}$ being the vector of all arguments to $F_a$ this simplifies to
 
 $$
-R=\sum_i \frac{d^2F_a}{dc_ada_i}\nabla a_i  = \sum_i R_i \nabla a_i
+\mathcal{R} = \sum_i \frac{d^2F_a}{dc_ada_i}\nabla a_i  = \sum_i R_i \nabla a_i
 $$
 
-using $R_i$ as a shorthand for the term $\frac{d^2F_a}{dc_ada_i}$ (and represented
+using $\mathcal{R}_i$ as a shorthand for the term $\frac{d^2F_a}{dc_ada_i}$ (and represented
 in the code as the array `_second_derivatives[i]`). We do have access to the
 gradients of $a_i$ through MOOSE (stored in `_grad\_args[i]`).
 
@@ -131,7 +133,7 @@ $$
 With the rules for $\frac d{du_j}$ derivatives we get
 
 $$
-R_\text{jvar} \nabla \phi_j + \sum_i \nabla a_i \frac {dR_i}{da_\text{jvar}} \phi_j
+\mathcal{R}_\text{jvar} \nabla \phi_j + \sum_i \nabla a_i \frac {dR_i}{da_\text{jvar}} \phi_j
 $$
 
 where $j$ is `_j` in the code.
@@ -141,7 +143,7 @@ where $j$ is `_j` in the code.
 For the on diagonal terms we look at the derivative w.r.t. the components of the
 non-linear variable $c$ of this kernel. Note, that $F_a$ is only indirectly a
 function of $c$. We assume the dependence is given through $c(c_a)$. The chain
-rule will thus yield terms of this form  
+rule will thus yield terms of this form
 
 $$
 \frac{dc_a}{dc} = \frac{\frac{d^2F_b}{dc_b^2}}{[1-h(\eta)]\frac{d^2F_b}{dc_b^2}+h(\eta)\frac{d^2F_a}{dc_a^2}},
@@ -158,11 +160,15 @@ $$
 Let's get back to the original residual with $\frac{dF}{dc}$. Then
 
 $$
-\begin{eqnarray*}
-J &=& \phi_j \frac{d}{dc} \nabla \frac{dF}{dc}\\
-&=& \phi_j  \nabla \frac{d^2F}{dc^2} \quad,\quad \text{with (29) from [KKS]}\\
-&=& \phi_j  \nabla \frac{\frac{d^2F_b}{dc_b^2}\frac{d^2F_a}{dc_a^2}}{  [1-h(\eta)]\frac{d^2F_b}{dc_b^2}+h(\eta)\frac{d^2F_a}{dc_a^2} }\\
-\end{eqnarray*}
+J = \phi_j \frac{d}{dc} \nabla \frac{dF}{dc}
+$$
+
+$$
+= \phi_j  \nabla \frac{d^2F}{dc^2} \quad,\quad \text{with (29) from [KKS]}
+$$
+
+$$
+= \phi_j  \nabla \frac{\frac{d^2F_b}{dc_b^2}\frac{d^2F_a}{dc_a^2}}{  [1-h(\eta)]\frac{d^2F_b}{dc_b^2}+h(\eta)\frac{d^2F_a}{dc_a^2} }
 $$
 
 # Allen-Cahn  Kernels
@@ -170,15 +176,31 @@ $$
 For the bulk Allen-Cahn residual we need to calculate the term
 
 $$
-\begin{eqnarray*}
-R=\frac{dF}{d\eta}&=&\frac{d}{d\eta}\left([1-h(\eta)]F_a + h(\eta)F_b+wg(\eta) \right)\\
-&=& \frac{dF_a}{d\eta}+\frac{d}{d\eta}\left(h(\eta)F_b-h(\eta)F_a + wg(\eta)\right)\\
-&=& \frac{dF_a}{d\eta}+F_b\frac{dh}{d\eta}-F_a\frac{dh}{d\eta}+h(\eta)\frac{dF_b}{d\eta}-h(\eta)\frac{dF_a}{d\eta} +w\frac{dg}{d\eta}\\
-&=& \frac{dF_a}{d\eta}+\frac{dh}{d\eta}(F_b-F_a)+h(\eta)\left(\frac{dF_b}{d\eta}-\frac{dF_a}{d\eta}\right) +w\frac{dg}{d\eta}\\
-&=& \frac{dh}{d\eta}(F_b-F_a) + \underbrace{[1-h(\eta)]\frac{dF_a}{d\eta} + h(\eta)\frac{dF_b}{d\eta}}_{\text{chain rule term}} +w\frac{dg}{d\eta}\\
-&=& \frac{dh}{d\eta}(F_b-F_a) + [1-h(\eta)]\frac{dF_a}{dc_a}\frac{dc_a}{d\eta} + h(\eta)\frac{dF_b}{dc_b}\frac{dc_b}{d\eta} +w\frac{dg}{d\eta}\\
-&=& \frac{dh}{d\eta}(F_b-F_a) + \frac{dF_a}{dc_a}\left([1-h(\eta)]\frac{dc_a}{d\eta} + h(\eta)\frac{dc_b}{d\eta}\right) +w\frac{dg}{d\eta}
-\end{eqnarray*}
+\mathcal{R} = \frac{dF}{d\eta}=\frac{d}{d\eta}\left([1-h(\eta)]F_a + h(\eta)F_b+wg(\eta) \right)
+$$
+
+$$
+= \frac{dF_a}{d\eta}+\frac{d}{d\eta}\left(h(\eta)F_b-h(\eta)F_a + wg(\eta)\right)
+$$
+
+$$
+= \frac{dF_a}{d\eta}+F_b\frac{dh}{d\eta}-F_a\frac{dh}{d\eta}+h(\eta)\frac{dF_b}{d\eta}-h(\eta)\frac{dF_a}{d\eta} +w\frac{dg}{d\eta}
+$$
+
+$$
+= \frac{dF_a}{d\eta}+\frac{dh}{d\eta}(F_b-F_a)+h(\eta)\left(\frac{dF_b}{d\eta}-\frac{dF_a}{d\eta}\right) +w\frac{dg}{d\eta}
+$$
+
+$$
+= \frac{dh}{d\eta}(F_b-F_a) + \underbrace{[1-h(\eta)]\frac{dF_a}{d\eta} + h(\eta)\frac{dF_b}{d\eta}}_{\text{chain rule term}} +w\frac{dg}{d\eta}
+$$
+
+$$
+= \frac{dh}{d\eta}(F_b-F_a) + [1-h(\eta)]\frac{dF_a}{dc_a}\frac{dc_a}{d\eta} + h(\eta)\frac{dF_b}{dc_b}\frac{dc_b}{d\eta} +w\frac{dg}{d\eta}
+$$
+
+$$
+= \frac{dh}{d\eta}(F_b-F_a) + \frac{dF_a}{dc_a}\left([1-h(\eta)]\frac{dc_a}{d\eta} + h(\eta)\frac{dc_b}{d\eta}\right) +w\frac{dg}{d\eta}
 $$
 
 The _chain rule term_ results from the fact that $c_a$ and $c_b$ are dependent
@@ -186,24 +208,23 @@ on $\eta$ (see eqs. (25) and (26) in [KKS]). Setting
 $\lambda = [1-h(\eta)]\frac{d^2F_b}{dc_b^2}+h(\eta)\frac{d^2F_a}{dc_a^2}$ we get
 
 $$
-\begin{eqnarray*}
-\frac{dc_a}{d\eta} &=& \frac1\lambda \frac{dh}{d\eta}(c_a-c_b)\frac{d^2F_b}{dc_b^2}\\
-\frac{dc_b}{d\eta} &=& \frac1\lambda \frac{dh}{d\eta}(c_a-c_b)\frac{d^2F_a}{dc_a^2}.
-\end{eqnarray*}
+\frac{dc_a}{d\eta} = \frac1\lambda \frac{dh}{d\eta}(c_a-c_b)\frac{d^2F_b}{dc_b^2}
+$$
+
+$$
+\frac{dc_b}{d\eta} = \frac1\lambda \frac{dh}{d\eta}(c_a-c_b)\frac{d^2F_a}{dc_a^2}.
 $$
 
 Substituting this in we get
 
 $$
-\begin{eqnarray*}
-R &=& \frac{dh}{d\eta}(F_b-F_a) + \frac{dh}{d\eta}\frac{dF_a}{dc_a}(c_a-c_b)\frac1\lambda\underbrace{\left([1-h(\eta)] \frac{d^2F_b}{dc_b^2} + h(\eta)\frac{d^2F_a}{dc_a^2}\right)}_{=\lambda} +w\frac{dg}{d\eta}.
-\end{eqnarray*}
+\mathcal{R} = \frac{dh}{d\eta}(F_b-F_a) + \frac{dh}{d\eta}\frac{dF_a}{dc_a}(c_a-c_b)\frac1\lambda\underbrace{\left([1-h(\eta)] \frac{d^2F_b}{dc_b^2} + h(\eta)\frac{d^2F_a}{dc_a^2}\right)}_{=\lambda} +w\frac{dg}{d\eta}.
 $$
 
 This simplifies to
 
 $$
-R=-\frac{dh}{d\eta} \left(F_a-F_b-\frac{dF_a}{dc_a}(c_a-c_b)\right) + w\frac{dg}{d\eta}.
+\mathcal{R} = -\frac{dh}{d\eta} \left(F_a-F_b-\frac{dF_a}{dc_a}(c_a-c_b)\right) + w\frac{dg}{d\eta}.
 $$
 
 We split this residual into two kernels to allow for multiple phase concentrations
@@ -216,7 +237,7 @@ in a multi component system:
 ### Residual
 
 $$
-R=-\frac{dh}{d\eta}(F_a-F_b)+w\frac{dg}{d\eta}.
+\mathcal{R} = -\frac{dh}{d\eta}(F_a-F_b)+w\frac{dg}{d\eta}.
 $$
 
 ### Jacobian
@@ -229,10 +250,11 @@ with the $\frac{\partial \eta}{\partial u_j}\frac{\partial}{\partial \eta}=\phi_
 derivative.
 
 $$
-\begin{eqnarray*}
-J &=& -\phi_j \frac{\partial}{\partial \eta}\left( \frac{dh}{d\eta}(F_a-F_b) \right) + w \phi_j \frac{\partial}{\partial \eta}\frac{dg}{d\eta} \\
-&=&-\frac{d^2h}{d\eta^2}\phi_j(F_a-F_b) + w\frac{d^2g}{d\eta^2}\phi_j \\
-\end{eqnarray*}
+J = -\phi_j \frac{\partial}{\partial \eta}\left( \frac{dh}{d\eta}(F_a-F_b) \right) + w \phi_j \frac{\partial}{\partial \eta}\frac{dg}{d\eta}
+$$
+
+$$
+=-\frac{d^2h}{d\eta^2}\phi_j(F_a-F_b) + w\frac{d^2g}{d\eta^2}\phi_j
 $$
 
 (The implicit dependence of $F_a(c_a)$ and $F_b(c_a)$ on $\eta$ through $c_a(c,\eta)$
@@ -271,10 +293,11 @@ An instance of this kernel is needed for each compnent of the problem.
 ### Residual
 
 $$
-\begin{eqnarray*}
-R&=&-\frac{dh}{d\eta}\left(-\frac{dF_a}{dc_a}(c_a-c_b)\right)\\
-&=&\frac{dh}{d\eta}\frac{dF_a}{dc_a}(c_a-c_b)
-\end{eqnarray*}
+\mathcal{R} = -\frac{dh}{d\eta}\left(-\frac{dF_a}{dc_a}(c_a-c_b)\right)
+$$
+
+$$
+=\frac{dh}{d\eta}\frac{dF_a}{dc_a}(c_a-c_b)
 $$
 
 ### Jacobian
@@ -287,10 +310,11 @@ with the $\frac{\partial \eta}{\partial u_j}\frac{\partial}{\partial \eta} = \ph
 derivative.
 
 $$
-\begin{eqnarray*}
-J &=& \phi_j \frac{\partial}{\partial \eta} \left( \frac{dh}{d\eta}\frac{dF_a}{dc_a}(c_a-c_b) \right)\\
-&=& \frac{d^2h}{d\eta^2}\phi_j\frac{dF_a}{dc_a}(c_a-c_b)\\
-\end{eqnarray*}
+J = \phi_j \frac{\partial}{\partial \eta} \left( \frac{dh}{d\eta}\frac{dF_a}{dc_a}(c_a-c_b) \right)
+$$
+
+$$
+= \frac{d^2h}{d\eta^2}\phi_j\frac{dF_a}{dc_a}(c_a-c_b)
 $$
 
 #### Off-diagonal
@@ -303,27 +327,30 @@ $\frac{\partial c_a}{\partial u_j}\frac{\partial}{\partial c_a} = \phi_j \frac{\
 derivative.
 
 $$
-\begin{eqnarray*}
-J &=& \phi_j \frac{\partial}{\partial c_a} \left( \frac{dh}{d\eta}\frac{dF_a}{dc_a}(c_a-c_b) \right)\\
-&=& \frac{dh}{d\eta} \phi_j \left( \frac{d^2 F_a}{dc_a^2}(c_a-c_b) + \frac{d F_a}{d c_a}\right)\\
-\end{eqnarray*}
+J = \phi_j \frac{\partial}{\partial c_a} \left( \frac{dh}{d\eta}\frac{dF_a}{dc_a}(c_a-c_b) \right)
+$$
+
+$$
+= \frac{dh}{d\eta} \phi_j \left( \frac{d^2 F_a}{dc_a^2}(c_a-c_b) + \frac{d F_a}{d c_a}\right)
 $$
 
 Similarly for $c_b$,
 $$
-\begin{eqnarray*}
-J &=& \phi_j \frac{\partial}{\partial c_b} \left( \frac{dh}{d\eta}\frac{dF_a}{dc_a}(c_a-c_b) \right)\\
-&=& -\frac{dh}{d\eta} \phi_j  \frac{d F_a}{d c_a}\\
-\end{eqnarray*}
+J = \phi_j \frac{\partial}{\partial c_b} \left( \frac{dh}{d\eta}\frac{dF_a}{dc_a}(c_a-c_b) \right)
+$$
+
+$$
+= -\frac{dh}{d\eta} \phi_j  \frac{d F_a}{d c_a}
 $$
 
 For any variable other than $c_a$ or $c_b$, for example temperature $T$:
 
 $$
-\begin{eqnarray*}
-J &=& \phi_j \frac{\partial}{\partial T} \left( \frac{dh}{d\eta}\frac{dF_a}{dc_a}(c_a-c_b) \right)\\
-&=& \frac{dh}{d\eta} \phi_j  \frac{\partial}{\partial T}\left(\frac{d F_a}{d c_a}\right) ( c_a - c_b)\\
-\end{eqnarray*}
+J = \phi_j \frac{\partial}{\partial T} \left( \frac{dh}{d\eta}\frac{dF_a}{dc_a}(c_a-c_b) \right)
+$$
+
+$$
+= \frac{dh}{d\eta} \phi_j  \frac{\partial}{\partial T}\left(\frac{d F_a}{d c_a}\right) ( c_a - c_b)
 $$
 
 
@@ -347,7 +374,7 @@ The non-linear variable of this Kernel is $c_a$.
 ### Residual
 
 $$
-R=\frac{dF_a}{dc_a} - \frac{dF_b}{dc_b}
+\mathcal{R} = \frac{dF_a}{dc_a} - \frac{dF_b}{dc_b}
 $$
 
 ### Jacobian
@@ -393,7 +420,7 @@ $$
 ### Residual
 
 $$
-R=[1-h(\eta)]c_a + h(\eta)c_b - c
+\mathcal{R} = [1-h(\eta)]c_a + h(\eta)c_b - c
 $$
 
 ### Jacobian
@@ -403,7 +430,7 @@ $$
 Since the non-linear variable is $c_b$,
 
 $$
-J= \phi_j \frac{\partial R}{\partial c_b} = \phi_j h(\eta)
+J = \phi_j \frac{\partial \mathcal{R}}{\partial c_b} = \phi_j h(\eta)
 $$
 
 #### Off-Diagonal
@@ -411,19 +438,19 @@ $$
 For $c_a$
 
 $$
-J= \phi_j \frac{\partial R}{\partial c_a} = \phi_j [1-h(\eta)]
+J = \phi_j \frac{\partial \mathcal{R}}{\partial c_a} = \phi_j [1-h(\eta)]
 $$
 
 For $c$
 
 $$
-J= \phi_j \frac{\partial R}{\partial c} = -\phi_j
+J = \phi_j \frac{\partial \mathcal{R}}{\partial c} = -\phi_j
 $$
 
 For $\eta$
 
 $$
-J= \phi_j \frac{\partial R}{\partial \eta} = \phi_j \frac{dh}{d\eta}(c_b-c_a)
+J= \phi_j \frac{\partial \mathcal{R}}{\partial \eta} = \phi_j \frac{dh}{d\eta}(c_b-c_a)
 $$
 
 \bibliography{phase_field.bib}

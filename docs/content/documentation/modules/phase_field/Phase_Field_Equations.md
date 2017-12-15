@@ -15,7 +15,7 @@ $$
 where $c_i$ is a conserved variable and $M_i$ is the associated mobility.  The evolution of nonconserved order parameters is represented with an Allen-Cahn equation, according to
 
 $$
-\frac{\partial \eta_j}{\partial t} = - L_j \frac{\delta F}{\delta \eta_j}, \label{eq:AC}
+\frac{\partial \eta_j}{\partial t} = - L_j \frac{\delta F}{\delta \eta_j}
 $$
 
 where $\eta_j$ is an order parameter and $L_j$ is the order parameter mobility.
@@ -35,44 +35,45 @@ $$
 where $\kappa_i$ and $\kappa_j$ are gradient energy coefficients.  Finally, $E_d$ describes any additional sources of energy in the system, such as deformation or electrostatic energy.  By combining the equations listed above and evaluating the functional derivatives ([further explanations](Derivationexplanations)), the evolution of the variables is described as
 
 $$
-\begin{eqnarray}
-  \frac{\partial c_i}{\partial t} = &
-    \nabla \cdot M_i \nabla \left(
-        \frac{\partial f_{loc}}{\partial c_i}
-      + \frac{\partial E_{d}}{\partial c_i}
-      - \nabla\cdot (\kappa_i \nabla c_i)
-        \color{#AAAAAA}{\underbrace{
-          -\nabla \cdot \left(
-            \frac{\partial\kappa}{\partial\nabla c_i}
-            \frac12 |\nabla c_i|^2
-          \right)
-        }_{\text{for}\, \kappa(\nabla c)}}
-        \color{#AAAAAA}{\underbrace{
-          +\left(
-            \frac{\partial\kappa}{\partial c_i}
-            \frac12 |\nabla c_i|^2
-          \right)
-      }_{\text{for}\, \kappa(c_i)}}
-    \right) \label{eq:cons_residual_strong}\\
-  \frac{\partial \eta_j}{\partial t} = &
-    -L \left(
-        \frac{\partial f_{loc}}{\partial \eta_j}
-      + \frac{\partial E_{d}}{\partial \eta_j}
-      - \nabla\cdot (\kappa_j \nabla \eta_j)
-        \color{#AAAAAA}{\underbrace{
-          -\nabla \cdot \left(
-            \frac{\partial\kappa}{\partial\nabla\eta_j}
-            \frac12 |\nabla\eta_j|^2
-          \right)
-        }_{\text{for}\, \kappa(\nabla\eta_j)}}
-        \color{#AAAAAA}{\underbrace{
-          +\left(
-            \frac{\partial\kappa}{\partial\eta_j}
-            \frac12 |\nabla\eta_j|^2
-          \right)
-      }_{\text{for}\, \kappa(\eta)}}
-    \right).
-\end{eqnarray}
+\frac{\partial c_i}{\partial t} =
+  \nabla \cdot M_i \nabla \left(
+      \frac{\partial f_{loc}}{\partial c_i}
+    + \frac{\partial E_{d}}{\partial c_i}
+    - \nabla\cdot (\kappa_i \nabla c_i)
+      \color{#AAAAAA}{\underbrace{
+        -\nabla \cdot \left(
+          \frac{\partial\kappa}{\partial\nabla c_i}
+          \frac12 |\nabla c_i|^2
+        \right)
+      }_{\text{for}\, \kappa(\nabla c)}}
+      \color{#AAAAAA}{\underbrace{
+        +\left(
+          \frac{\partial\kappa}{\partial c_i}
+          \frac12 |\nabla c_i|^2
+        \right)
+    }_{\text{for}\, \kappa(c_i)}}
+  \right),
+$$
+
+$$
+\frac{\partial \eta_j}{\partial t} =
+  -L \left(
+      \frac{\partial f_{loc}}{\partial \eta_j}
+    + \frac{\partial E_{d}}{\partial \eta_j}
+    - \nabla\cdot (\kappa_j \nabla \eta_j)
+      \color{#AAAAAA}{\underbrace{
+        -\nabla \cdot \left(
+          \frac{\partial\kappa}{\partial\nabla\eta_j}
+          \frac12 |\nabla\eta_j|^2
+        \right)
+      }_{\text{for}\, \kappa(\nabla\eta_j)}}
+      \color{#AAAAAA}{\underbrace{
+        +\left(
+          \frac{\partial\kappa}{\partial\eta_j}
+          \frac12 |\nabla\eta_j|^2
+        \right)
+    }_{\text{for}\, \kappa(\eta)}}
+  \right).
 $$
 
 !!! warning
@@ -84,29 +85,29 @@ $$
 To prepare for the FEM discretization, we construct a residual equation (equal to zero) in weak form in the usual manner.  First, the weighted integral residual projection is constructed using test function $\psi_m$ and applying the divergence theorem to lower the derivative order. Thus, the Allen-Cahn equation yields
 
 $$
-\begin{eqnarray}
-	\boldsymbol{\mathcal{R}}_{\eta_i} &=& \left(  \frac{\partial \eta_j}{\partial t}, \psi_m \right) + \left( \nabla(\kappa_j\eta_j), \nabla (L\psi_m) \right) + L \left( \frac{\partial f_{loc}}{\partial \eta_j} + \frac{\partial E_d}{\partial \eta_j}, \psi_m \right) - \left<L\kappa_j \nabla \eta_j \cdot \vec{n}, \psi_m \right>,
-\end{eqnarray}
+\mathcal{R}_{\eta_i} = \left(  \frac{\partial \eta_j}{\partial t}, \psi_m \right) + \left( \nabla(\kappa_j\eta_j), \nabla (L\psi_m) \right) + L \left( \frac{\partial f_{loc}}{\partial \eta_j} + \frac{\partial E_d}{\partial \eta_j}, \psi_m \right) - \left<L\kappa_j \nabla \eta_j \cdot \vec{n}, \psi_m \right>,
 $$
 
 where the $(*,*)$ operator represents a volume integral with an inner product and the $\left<*,*\right>$ operator represents a surface integral with an inner product. Solving the Cahn-Hilliard equation with FEM is more difficult, due to the fourth order gradient. It can be solved in two ways.
 
 The first is to directly solve the equation according to
 $$
-\begin{eqnarray}
-	\boldsymbol{\mathcal{R}}_{c_i} &=& \left(  \frac{\partial c_i}{\partial t}, \psi_m \right) + \left( \kappa_i \nabla^2 c_i, \nabla \cdot (M_i \nabla \psi_m ) \right) + \left( M_i  \nabla \left( \frac{\partial f_{loc} }{\partial c_i} + \frac{\partial E_d}{\partial c_i} \right), \nabla \psi_m \right)  - \\
-	&& \left< M_i \nabla \left(  \kappa_i \nabla^2 c_i  \right)  \cdot \vec{n}, \psi_m \right>
+\mathcal{R}_{c_i} = \left(  \frac{\partial c_i}{\partial t}, \psi_m \right) + \left( \kappa_i \nabla^2 c_i, \nabla \cdot (M_i \nabla \psi_m ) \right) + \left( M_i  \nabla \left( \frac{\partial f_{loc} }{\partial c_i} + \frac{\partial E_d}{\partial c_i} \right), \nabla \psi_m \right)
+$$
+
+$$
+ -\left< M_i \nabla \left(  \kappa_i \nabla^2 c_i  \right)  \cdot \vec{n}, \psi_m \right>
 	+ \left< M_i \nabla \left( \frac{\partial f_{loc}}{\partial c_i} + \frac{\partial E_{d}}{\partial c_i } \right)  \cdot \vec{n}, \psi_m \right> -  \left< \kappa_i \nabla^2 c_i, M_i \nabla \psi_m \cdot \vec{n} \right>.
-\end{eqnarray}
 $$
 
 The second approach is to split the fourth order equation into two second order equations, such that two variables are solved, the concentration $c_i$ and the chemical potential $\mu_i$. In this case, the two residual equations are
 
 $$
-\begin{eqnarray}
-	\boldsymbol{\mathcal{R}}_{\mu_i} &=& \left(  \frac{\partial c_i}{\partial t}, \psi_m \right) + \left( M_i  \nabla \mu_i, \nabla \psi_m \right) - \left< M_i  \nabla \mu_i \cdot \vec{n}, \psi_m \right>\\
-  \boldsymbol{\mathcal{R}}_{c_i} &=& \left( \nabla c_i, \nabla(\kappa_i \psi_m) \right) -  \left< \nabla c_i\cdot \vec{n}, \kappa_i \psi_m \right> + \left( \left( \frac{\partial f_{loc}}{\partial c_i} + \frac{\partial E_d}{\partial c_i} - \mu_i \right), \psi_m \right)
-\end{eqnarray}
+\mathcal{R}_{\mu_i} = \left(  \frac{\partial c_i}{\partial t}, \psi_m \right) + \left( M_i  \nabla \mu_i, \nabla \psi_m \right) - \left< M_i  \nabla \mu_i \cdot \vec{n}, \psi_m \right>
+$$
+
+$$
+\mathcal{R}_{c_i} = \left( \nabla c_i, \nabla(\kappa_i \psi_m) \right) -  \left< \nabla c_i\cdot \vec{n}, \kappa_i \psi_m \right> + \left( \left( \frac{\partial f_{loc}}{\partial c_i} + \frac{\partial E_d}{\partial c_i} - \mu_i \right), \psi_m \right)
 $$
 
 Note that we have reversed which equation is used to solve for each variable from what might be expected. This change improves the solve convergence and does not impact the solution.
@@ -117,9 +118,7 @@ The goal of the MOOSE phase field module is to facilitate the development of adv
 
 The Allen-Cahn residual equation, without boundary terms, is shown here:
 $$
-\begin{eqnarray}
-\boldsymbol{\mathcal{R}}_{\eta_i} &=& \left(  \frac{\partial \eta_j}{\partial t}, \psi_m \right) + \left( \nabla(\kappa_j\eta_j), \nabla (L\psi_m) \right) + L \left( \frac{\partial f_{loc}}{\partial \eta_j} + \frac{\partial E_d}{\partial \eta_j}, \psi_m \right)
-\end{eqnarray}
+\mathcal{R}_{\eta_i} = \left(  \frac{\partial \eta_j}{\partial t}, \psi_m \right) + \left( \nabla(\kappa_j\eta_j), \nabla (L\psi_m) \right) + L \left( \frac{\partial f_{loc}}{\partial \eta_j} + \frac{\partial E_d}{\partial \eta_j}, \psi_m \right)
 $$
 It is divided into three pieces, each implemented in their own kernel, as shown below
 
@@ -132,7 +131,7 @@ $L \left( \frac{\partial f_{loc}}{\partial \eta_j} + \frac{\partial E_d}{\partia
 The residual for the direct solution of the Cahn-Hilliard equation (without boundary terms) is
 
 $$
-\boldsymbol{\mathcal{R}}_{c_i} = \left( \frac{\partial c_i}{\partial t}, \psi_m \right) + \left( \kappa_i \nabla^2 c_i, \nabla \cdot (M_i \nabla \psi_m ) \right) + \left( M_i \left( \nabla \frac{\partial f_{loc} }{\partial c_i} + \nabla  \frac{\partial E_d}{\partial c_i} \right), \nabla \psi_m \right)
+\mathcal{R}_{c_i} = \left( \frac{\partial c_i}{\partial t}, \psi_m \right) + \left( \kappa_i \nabla^2 c_i, \nabla \cdot (M_i \nabla \psi_m ) \right) + \left( M_i \left( \nabla \frac{\partial f_{loc} }{\partial c_i} + \nabla  \frac{\partial E_d}{\partial c_i} \right), \nabla \psi_m \right)
 $$
 
 | Residual term | Variable | Parameters | Energy derivative | Kernel |
@@ -143,10 +142,11 @@ $\left(M_i \left( \nabla \frac{\partial f_{loc} }{\partial c_i} + \nabla  \frac{
 
 In the split form of the Cahn-Hilliard solution, the two residual equations are
 $$
-\begin{eqnarray}
-	\boldsymbol{\mathcal{R}}_{\mu_i} &=& \left(  \frac{\partial c_i}{\partial t}, \psi_m \right) + \left( M_i  \nabla \mu_i, \nabla \psi_m \right) \\
-  \boldsymbol{\mathcal{R}}_{c_i} &=& \left( \left( -\kappa_i \nabla^2 c_i +  \frac{\partial f_{loc}}{\partial c_i} + \frac{\partial E_d}{\partial c_i} - \mu_i \right), \psi_m \right)
-\end{eqnarray}
+\mathcal{R}_{\mu_i} = \left(  \frac{\partial c_i}{\partial t}, \psi_m \right) + \left( M_i  \nabla \mu_i, \nabla \psi_m \right)
+$$
+
+$$
+\mathcal{R}_{c_i} = \left( \left( -\kappa_i \nabla^2 c_i +  \frac{\partial f_{loc}}{\partial c_i} + \frac{\partial E_d}{\partial c_i} - \mu_i \right), \psi_m \right)
 $$
 
 | Residual term | Variable | Parameters | Energy derivative | Kernel |
@@ -186,11 +186,15 @@ $$
 and its derivatives are
 
 $$
-\begin{eqnarray}
-  \frac{\partial f_{loc}}{\partial c} &=& c(c^2 - 1) \\
-  \frac{\partial^2 f_{loc}}{\partial c^2} &=& 3 c^2 - 1 \\
-  \frac{\partial^3 f_{loc}}{\partial c^3} &=& 6 c.
-\end{eqnarray}
+  \frac{\partial f_{loc}}{\partial c} = c(c^2 - 1)
+$$
+
+$$
+  \frac{\partial^2 f_{loc}}{\partial c^2} = 3 c^2 - 1
+$$
+
+$$
+  \frac{\partial^3 f_{loc}}{\partial c^3} = 6 c.
 $$
 
 The second and third derivatives would be required to use the direct solution method (via [`CahnHilliard`](/CahnHilliard.md)) and the first and second derivatives would be required to use the split solution method (via [`SplitCHParsed`](/SplitCHParsed.md)). This model has been implemented in the [`MathFreeEnergy`](/phase_field/MathFreeEnergy.md) material found in the phase field module of MOOSE, inheriting from `DerivativeFunctionMaterialBase`. The code from [`MathFreeEnergy`](/phase_field/MathFreeEnergy.md) is shown below:

@@ -17,12 +17,19 @@ idea and the procedures we follow is
 The following equations are used in this material:
 
 $$
-\begin{eqnarray}
-  \psi = [(1-c)^2 + k]{\psi}^{+}_{0} - {\psi}^{-}_{0} \\
-  {\psi}^{\pm}_{0} = \lambda \langle \epsilon_1 + \epsilon_2 + \epsilon_3 \rangle^{2}_{\pm} +\mu(\langle \epsilon_1 \rangle^{2}_{\pm} +\langle \epsilon_2 \rangle^{2}_{\pm} +\langle \epsilon_3 \rangle^{2}_{\pm}) \\
-  {\sigma}^{\pm}_{0} = \frac{\partial {\psi}^{\pm}_{0}}{\partial \epsilon} = \sum \limits_{a=1}^3 [\lambda \langle \epsilon_1 + \epsilon_2 + \epsilon_3 \rangle_{\pm} + 2\mu \langle \epsilon_a \rangle_{\pm} ]n_a \otimes n_a \\
-  \sigma = [(1-c)^2 + k]{\sigma}^{+}_{0} - {\sigma}^{-}_{0}
-\end{eqnarray}
+\psi = [(1-c)^2 + k]{\psi}^{+}_{0} - {\psi}^{-}_{0}
+$$
+
+$$
+{\psi}^{\pm}_{0} = \lambda \langle \epsilon_1 + \epsilon_2 + \epsilon_3 \rangle^{2}_{\pm} +\mu(\langle \epsilon_1 \rangle^{2}_{\pm} +\langle \epsilon_2 \rangle^{2}_{\pm} +\langle \epsilon_3 \rangle^{2}_{\pm})
+$$
+
+$$
+{\sigma}^{\pm}_{0} = \frac{\partial {\psi}^{\pm}_{0}}{\partial \epsilon} = \sum \limits_{a=1}^3 [\lambda \langle \epsilon_1 + \epsilon_2 + \epsilon_3 \rangle_{\pm} + 2\mu \langle \epsilon_a \rangle_{\pm} ]n_a \otimes n_a
+$$
+
+$$
+\sigma = [(1-c)^2 + k]{\sigma}^{+}_{0} - {\sigma}^{-}_{0}
 $$
 
 Where

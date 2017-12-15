@@ -32,19 +32,21 @@ with the $\frac{\partial c_a}{\partial u_j}\frac{\partial}{\partial c_a}=\phi_j 
 derivative.
 
 $$
-\begin{eqnarray*}
-J &=& \frac{\partial R}{\partial u_j} = \phi_j \frac{\partial}{\partial c_a} \left( \frac{\partial F}{\partial c_a} - \mu \right)\\
-&=& \phi_j  \frac{\partial^2F}{\partial c_a^2} \\
-\end{eqnarray*}
+J = \frac{\partial R}{\partial u_j} = \phi_j \frac{\partial}{\partial c_a} \left( \frac{\partial F}{\partial c_a} - \mu \right)
+$$
+
+$$
+= \phi_j  \frac{\partial^2F}{\partial c_a^2}
 $$
 
 For $\mu$
 
 $$
-\begin{eqnarray*}
-J &=& \phi_j \frac{\partial}{\partial \mu} \left( \frac{\partial F}{\partial c_a} - \mu \right)\\
-&=& -\phi_j \\
-\end{eqnarray*}
+J = \phi_j \frac{\partial}{\partial \mu} \left( \frac{\partial F}{\partial c_a} - \mu \right)
+$$
+
+$$
+= -\phi_j
 $$
 
 !syntax parameters /Kernels/KKSSplitCHCRes
