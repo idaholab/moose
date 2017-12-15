@@ -59,6 +59,9 @@ protected:
   // Reference to the interface's input parameters
   const InputParameters & _sc_parameters;
 
+  /// The name of the object this interface is part of
+  const std::string & _sc_name;
+
   /**
    * Returns true if a variables has been coupled_as name.
    * @param var_name The of the coupled variable
@@ -158,12 +161,24 @@ protected:
   VariableValue * getDefaultValue(const std::string & var_name);
 
   /**
+   * Check that the right kind of variable is being coupled in
+   *
+   * @param var_name The name of the coupled variable
+   * @param comp The component of the coupled variable
+   */
+  void checkVar(const std::string & var_name, unsigned int comp);
+
+  /**
    * Extract pointer to a scalar coupled variable
    * @param var_name Name of parameter desired
    * @param comp Component number of multiple coupled variables
    * @return Pointer to the desired variable
    */
   MooseVariableScalar * getScalarVar(const std::string & var_name, unsigned int comp);
+
+private:
+  /// Field variables coupled into this object (for error checking)
+  std::map<std::string, std::vector<MooseVariable *>> _sc_coupled_vars;
 };
 
 #endif // SCALARCOUPLEABLE_H
