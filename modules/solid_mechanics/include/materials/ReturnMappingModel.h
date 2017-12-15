@@ -83,6 +83,8 @@ protected:
   MaterialProperty<Real> & _effective_inelastic_strain;
   const MaterialProperty<Real> & _effective_inelastic_strain_old;
   Real _max_inelastic_increment;
+  const bool _compute_matl_timestep_limit;
+  MaterialProperty<Real> * _matl_timestep_limit;
 };
 
 template <>
