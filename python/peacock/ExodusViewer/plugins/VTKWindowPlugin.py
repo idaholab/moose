@@ -292,6 +292,9 @@ class VTKWindowPlugin(QtWidgets.QFrame, ExodusPlugin):
             return
 
         if self._window.needsUpdate():
+            # Update the result first to avoid another when colorbar updates:
+            if self._result.needsUpdate():
+                self._result.update()
             self._window.update()
             self.windowUpdated.emit()
 
