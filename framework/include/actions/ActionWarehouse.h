@@ -188,6 +188,8 @@ public:
   MooseApp & mooseApp() { return _app; }
   const std::string & getCurrentTaskName() const { return _current_task; }
 
+  std::string getCurrentActionName() const;
+
 protected:
   /**
    * This method auto-builds all Actions that needs to be built and adds them to ActionWarehouse.
@@ -242,6 +244,9 @@ protected:
 
   /// Problem class
   std::shared_ptr<FEProblemBase> _problem;
+
+private:
+  ActionIterator _act_iter;
 };
 
 #endif // ACTIONWAREHOUSE_H
