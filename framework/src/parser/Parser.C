@@ -1207,7 +1207,7 @@ Parser::extractParams(const std::string & prefix, InputParameters & p)
     mooseError(error_stream.str());
 
   // Here we will see if there are any auto build vectors that need to be created
-  const std::map<std::string, std::pair<std::string, std::string>> & auto_build_vectors =
+  std::map<std::string, std::pair<std::string, std::string>> auto_build_vectors =
       p.getAutoBuildVectors();
   for (const auto & it : auto_build_vectors)
   {
