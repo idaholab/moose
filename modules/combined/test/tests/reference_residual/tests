@@ -15,4 +15,14 @@
     scale_refine = 2
     prereq = test
   [../]
+    [./test_scaling]
+      type = 'Exodiff'
+      input = 'reference_residual.i'
+      exodiff = 'reference_residual_out.e'
+      cli_args = 'Variables/disp_x/scaling=2
+                  Variables/disp_y/scaling=0.1
+                  Variables/disp_z/scaling=30
+                  Variables/temp/scaling=0.001'
+      prereq = test_sm
+    [../]
 []
