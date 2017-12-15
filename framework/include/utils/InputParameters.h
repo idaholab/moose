@@ -82,11 +82,11 @@ public:
    * Returns a writable reference to the named parameters.  Note: This is not a virtual
    * function! Use caution when comparing to the parent class implementation
    * @param name The name of the parameter to set
-   * @param quiet_mode When true the parameter is not removed from the _set_by_add_param list,
+   * @param quiet_mode When true the parameter is kept with set_by_add_param=true,
    * this is generally not needed.
    *
-   * "quite_mode" returns a writable reference to the named parameter, without removing it from the
-   * _set_by_add_param list. Using this method of set will make the parameter to continue to
+   * "quite_mode" returns a writable reference to the named parameter, without setting
+   * set_by_add_param to false. Using this method of set will make the parameter to continue to
    * behave if its value where set ONLY by addParam and not by any other method.
    *
    * This was added for handling parameters in the Output objects that have behavior dependent
@@ -215,21 +215,6 @@ public:
                            const std::string & syntax,
                            const T & value,
                            const std::string & doc_string);
-
-  /**
-   * Add and mark a parameter for deprecation.  This will allow us to assist users as API changes
-   * are made.  If the user
-   * supplies a value or even uses the default, a warning will be printed.
-   *
-   * @param name The name of the parameter
-   * @param doc_string Documentation.  This will be shown for --help
-   * @param deprecation_message The message that will will print about why this param was
-   * deprecated.  It might mention the "new way".
-   */
-  template <typename T>
-  void addRequiredDeprecatedParam(const std::string & name,
-                                  const std::string & doc_string,
-                                  const std::string & deprecation_message);
 
   /**
    * @param name The name of the parameter
@@ -531,7 +516,7 @@ public:
   /**
   * Returns the auto build vectors for all parameters.
   */
-  const std::map<std::string, std::pair<std::string, std::string>> & getAutoBuildVectors() const;
+  std::map<std::string, std::pair<std::string, std::string>> getAutoBuildVectors() const;
 
   /**
    * Get the default value for a postprocessor added with addPostprocessor
@@ -651,7 +636,14 @@ public:
   /**
    * Return list of controllable parameters
    */
-  const std::set<std::string> & getControllableParameters() const { return _controllable_params; }
+  std::set<std::string> getControllableParameters() const
+  {
+    std::set<std::string> controllable;
+    for (auto it = _params.begin(); it != _params.end(); ++it)
+      if (it->second._controllable)
+        controllable.insert(it->first);
+    return controllable;
+  }
 
   /**
    * Provide a set of reserved values for a parameter. These are values that are in addition
@@ -687,24 +679,54 @@ private:
   template <typename T, typename S>
   void setParamHelper(const std::string & name, T & l_value, const S & r_value);
 
-  /// The documentation strings for each parameter
-  std::map<std::string, std::string> _doc_string;
+  struct Metadata
+  {
+    std::string _doc_string;
+    /// The custom type that will be printed in the YAML dump for a parameter if supplied
+    std::string _custom_type;
+    std::vector<std::string> _cli_flag_names;
+    /// The names of the parameters organized into groups
+    std::string _group;
+    /// The map of functions used for range checked parameters
+    std::string _range_function;
+    /// directions for auto build vectors (base_, 5) -> "base_0 base_1 base_2 base_3 base_4")
+    std::pair<std::string, std::string> _autobuild_vecs;
+    /// True for parameters that are required (i.e. will cause an abort if not supplied)
+    bool _required = false;
+    /**
+     * Whether the parameter is either explicitly set or provided a default value when added
+     * Note: We do not store MooseEnum names in valid params, instead we ask MooseEnums whether
+     *       they are valid or not.
+     */
+    bool _valid = false;
+    /// The set of parameters that will NOT appear in the the dump of the parser tree
+    bool _is_private = false;
+    bool _have_coupled_default = false;
+    /// The default value for optionally coupled variables
+    Real _coupled_default = 0;
+    bool _have_default_postprocessor_val = false;
+    PostprocessorValue _default_postprocessor_val = 0;
+    /// True if a parameters value was set by addParam, and not set again.
+    bool _set_by_add_param = false;
+    bool _controllable = false;
+    /// The reserved option names for a parameter
+    std::set<std::string> _reserved_values;
+    /// If non-empty, this parameter is deprecated.
+    std::string _deprecation_message;
+    /// original location of parameter (i.e. filename,linenum) - used for nice error messages.
+    std::string _input_location;
+    /// full HIT path of the parameter from the input file - used for nice error messages.
+    std::string _param_fullpath;
+    /// raw token text for a parameter - usually only set for filepath type params.
+    std::string _raw_val;
+  };
 
-  /// The custom type that will be printed in the YAML dump for a parameter if supplied
-  std::map<std::string, std::string> _custom_type;
+  std::map<std::string, Metadata> _params;
 
-  /// Syntax for command-line parameters
-  std::map<std::string, std::vector<std::string>> _syntax;
+  /// The coupled variables set
+  std::set<std::string> _coupled_vars;
 
-  /// The names of the parameters organized into groups
-  std::map<std::string, std::string> _group;
-
-  /// The map of functions used for range checked parameters
-  std::map<std::string, std::string> _range_functions;
-
-  /// The map of auto build vectors (base_, 5 -> "base_0 base_1 base_2 base_3 base_4")
-  std::map<std::string, std::pair<std::string, std::string>> _auto_build_vectors;
-
+  std::string _class_description;
   /// The parameter is used to restrict types that can be built.  Typically this
   /// is used for MooseObjectAction derived Actions.
   std::vector<std::string> _buildable_types;
@@ -715,40 +737,6 @@ private:
 
   /// This parameter hides derived MOOSE object types from appearing in syntax dumps
   bool _moose_object_syntax_visibility;
-
-  /// The set of parameters that are required (i.e. will cause an abort if not supplied)
-  std::set<std::string> _required_params;
-
-  /**
-   * The set of parameters either explicitly set or provided a default value when added
-   * Note: We do not store MooseEnum names in valid params, instead we ask MooseEnums whether
-   *       they are valid or not.
-   */
-  std::set<std::string> _valid_params;
-
-  /// The set of parameters that will NOT appear in the the dump of the parser tree
-  std::set<std::string> _private_params;
-
-  /// The coupled variables set
-  std::set<std::string> _coupled_vars;
-
-  /// The list of deprecated params
-  std::map<std::string, std::string> _deprecated_params;
-
-  /// The default value for optionally coupled variables
-  std::map<std::string, Real> _default_coupled_value;
-
-  /// The default value for postprocessors
-  std::map<std::string, PostprocessorValue> _default_postprocessor_value;
-
-  /// If a parameters value was set by addParam, and not set again, it will appear in this list (see applyParameters)
-  std::set<std::string> _set_by_add_param;
-
-  /// A list of parameters declared as controllable
-  std::set<std::string> _controllable_params;
-
-  /// The reserved option names for a parameter
-  std::map<std::string, std::set<std::string>> _reserved_values;
 
   /// Flag for disabling deprecated parameters message, this is used by applyParameters to avoid dumping messages
   bool _show_deprecated_message;
@@ -779,7 +767,7 @@ InputParameters::set(const std::string & name, bool quiet_mode)
   set_attributes(name, false);
 
   if (quiet_mode)
-    _set_by_add_param.insert(name);
+    _params[name]._set_by_add_param = true;
 
   return cast_ptr<Parameter<T> *>(_values[name])->set();
 }
@@ -793,7 +781,7 @@ InputParameters::rangeCheck(const std::string & full_name,
 {
   mooseAssert(param, "Parameter is NULL");
 
-  if (_range_functions.count(short_name) == 0 || !isParamValid(short_name))
+  if (!isParamValid(short_name) || _params[short_name]._range_function.empty())
     return;
 
   /**
@@ -809,9 +797,9 @@ InputParameters::rangeCheck(const std::string & full_name,
    */
   FunctionParserBase<UP_T> fp;
   std::vector<std::string> vars;
-  if (fp.ParseAndDeduceVariables(_range_functions[short_name], vars) != -1) // -1 for success
+  if (fp.ParseAndDeduceVariables(_params[short_name]._range_function, vars) != -1) // -1 for success
   {
-    oss << "Error parsing expression: " << _range_functions[short_name] << '\n';
+    oss << "Error parsing expression: " << _params[short_name]._range_function << '\n';
     return;
   }
 
@@ -833,7 +821,7 @@ InputParameters::rangeCheck(const std::string & full_name,
       {
         if (value.size() == 0)
         {
-          oss << "Range checking empty vector: " << _range_functions[short_name] << '\n';
+          oss << "Range checking empty vector: " << _params[short_name]._range_function << '\n';
           return;
         }
 
@@ -846,7 +834,7 @@ InputParameters::rangeCheck(const std::string & full_name,
       {
         if (vars[j].substr(0, short_name.size() + 1) != short_name + "_")
         {
-          oss << "Error parsing expression: " << _range_functions[short_name] << '\n';
+          oss << "Error parsing expression: " << _params[short_name]._range_function << '\n';
           return;
         }
         std::istringstream iss(vars[j]);
@@ -857,7 +845,7 @@ InputParameters::rangeCheck(const std::string & full_name,
         {
           if (index >= value.size())
           {
-            oss << "Error parsing expression: " << _range_functions[short_name]
+            oss << "Error parsing expression: " << _params[short_name]._range_function
                 << "\nOut of range variable " << vars[j] << '\n';
             return;
           }
@@ -865,7 +853,7 @@ InputParameters::rangeCheck(const std::string & full_name,
         }
         else
         {
-          oss << "Error parsing expression: " << _range_functions[short_name]
+          oss << "Error parsing expression: " << _params[short_name]._range_function
               << "\nInvalid variable " << vars[j] << '\n';
           return;
         }
@@ -882,14 +870,14 @@ InputParameters::rangeCheck(const std::string & full_name,
     // test function using the parameters determined above
     if (fp.EvalError())
     {
-      oss << "Error evaluating expression: " << _range_functions[short_name] << '\n';
+      oss << "Error evaluating expression: " << _params[short_name]._range_function << '\n';
       return;
     }
 
     if (!result)
     {
       oss << "Range check failed for parameter " << full_name
-          << "\n\tExpression: " << _range_functions[short_name] << "\n";
+          << "\n\tExpression: " << _params[short_name]._range_function << "\n";
       if (need_to_iterate)
         oss << "\t Component: " << i << '\n';
     }
@@ -906,14 +894,14 @@ InputParameters::rangeCheck(const std::string & full_name,
 {
   mooseAssert(param, "Parameter is NULL");
 
-  if (_range_functions.find(short_name) == _range_functions.end() || !isParamValid(short_name))
+  if (!isParamValid(short_name) || _params[short_name]._range_function.empty())
     return;
 
   // Parse the expression
   FunctionParserBase<UP_T> fp;
-  if (fp.Parse(_range_functions[short_name], short_name) != -1) // -1 for success
+  if (fp.Parse(_params[short_name]._range_function, short_name) != -1) // -1 for success
   {
-    oss << "Error parsing expression: " << _range_functions[short_name] << '\n';
+    oss << "Error parsing expression: " << _params[short_name]._range_function << '\n';
     return;
   }
 
@@ -928,14 +916,15 @@ InputParameters::rangeCheck(const std::string & full_name,
 
   if (fp.EvalError())
   {
-    oss << "Error evaluating expression: " << _range_functions[short_name]
+    oss << "Error evaluating expression: " << _params[short_name]._range_function
         << "\nPerhaps you used the wrong variable name?\n";
     return;
   }
 
   if (!result)
     oss << "Range check failed for parameter " << full_name
-        << "\n\tExpression: " << _range_functions[short_name] << "\n\tValue: " << value[0] << '\n';
+        << "\n\tExpression: " << _params[short_name]._range_function << "\n\tValue: " << value[0]
+        << '\n';
 }
 
 template <typename T>
@@ -960,8 +949,8 @@ InputParameters::addRequiredParam(const std::string & name, const std::string & 
   checkConsistentType<T>(name);
 
   InputParameters::insert<T>(name);
-  _required_params.insert(name);
-  _doc_string[name] = doc_string;
+  _params[name]._required = true;
+  _params[name]._doc_string = doc_string;
 }
 
 template <typename T>
@@ -982,7 +971,7 @@ InputParameters::addParam(const std::string & name, const S & value, const std::
   checkConsistentType<T>(name);
 
   T & l_value = InputParameters::set<T>(name);
-  _doc_string[name] = doc_string;
+  _params[name]._doc_string = doc_string;
 
   // Set the parameter now
   setParamHelper(name, l_value, value);
@@ -990,7 +979,7 @@ InputParameters::addParam(const std::string & name, const S & value, const std::
   /* Indicate the default value, as set via addParam, is being used. The parameter is removed from
      the list whenever
      it changes, see set_attributes */
-  _set_by_add_param.insert(name);
+  _params[name]._set_by_add_param = true;
 }
 
 template <typename T>
@@ -1001,7 +990,7 @@ InputParameters::addParam(const std::string & name, const std::string & doc_stri
   checkConsistentType<T>(name);
 
   InputParameters::insert<T>(name);
-  _doc_string[name] = doc_string;
+  _params[name]._doc_string = doc_string;
 }
 
 template <typename T, typename S>
@@ -1018,7 +1007,7 @@ InputParameters::addRequiredRangeCheckedParam(const std::string & name,
                                               const std::string & doc_string)
 {
   addRequiredParam<T>(name, doc_string);
-  _range_functions[name] = parsed_function;
+  _params[name]._range_function = parsed_function;
 }
 
 template <typename T>
@@ -1029,7 +1018,7 @@ InputParameters::addRangeCheckedParam(const std::string & name,
                                       const std::string & doc_string)
 {
   addParam<T>(name, value, doc_string);
-  _range_functions[name] = parsed_function;
+  _params[name]._range_function = parsed_function;
 }
 
 template <typename T>
@@ -1039,7 +1028,7 @@ InputParameters::addRangeCheckedParam(const std::string & name,
                                       const std::string & doc_string)
 {
   addParam<T>(name, doc_string);
-  _range_functions[name] = parsed_function;
+  _params[name]._range_function = parsed_function;
 }
 
 template <typename T>
@@ -1049,7 +1038,7 @@ InputParameters::addRequiredCustomTypeParam(const std::string & name,
                                             const std::string & doc_string)
 {
   addRequiredParam<T>(name, doc_string);
-  _custom_type[name] = custom_type;
+  _params[name]._custom_type = custom_type;
 }
 
 template <typename T>
@@ -1060,7 +1049,7 @@ InputParameters::addCustomTypeParam(const std::string & name,
                                     const std::string & doc_string)
 {
   addParam<T>(name, value, doc_string);
-  _custom_type[name] = custom_type;
+  _params[name]._custom_type = custom_type;
 }
 
 template <typename T>
@@ -1070,7 +1059,7 @@ InputParameters::addCustomTypeParam(const std::string & name,
                                     const std::string & doc_string)
 {
   addParam<T>(name, doc_string);
-  _custom_type[name] = custom_type;
+  _params[name]._custom_type = custom_type;
 }
 
 template <typename T>
@@ -1081,7 +1070,7 @@ InputParameters::addPrivateParam(const std::string & name)
   checkConsistentType<T>(name);
 
   InputParameters::insert<T>(name);
-  _private_params.insert(name);
+  _params[name]._is_private = true;
 }
 
 template <typename T>
@@ -1092,8 +1081,8 @@ InputParameters::addPrivateParam(const std::string & name, const T & value)
   checkConsistentType<T>(name);
 
   InputParameters::set<T>(name) = value;
-  _private_params.insert(name);
-  _set_by_add_param.insert(name);
+  _params[name]._is_private = true;
+  _params[name]._set_by_add_param = true;
 }
 
 template <typename T>
@@ -1103,7 +1092,7 @@ InputParameters::addRequiredCommandLineParam(const std::string & name,
                                              const std::string & doc_string)
 {
   addRequiredParam<T>(name, doc_string);
-  MooseUtils::tokenize(syntax, _syntax[name], 1, " \t\n\v\f\r");
+  MooseUtils::tokenize(syntax, _params[name]._cli_flag_names, 1, " \t\n\v\f\r");
 }
 
 template <typename T>
@@ -1113,7 +1102,7 @@ InputParameters::addCommandLineParam(const std::string & name,
                                      const std::string & doc_string)
 {
   addParam<T>(name, doc_string);
-  MooseUtils::tokenize(syntax, _syntax[name], 1, " \t\n\v\f\r");
+  MooseUtils::tokenize(syntax, _params[name]._cli_flag_names, 1, " \t\n\v\f\r");
 }
 
 template <typename T>
@@ -1124,7 +1113,7 @@ InputParameters::addCommandLineParam(const std::string & name,
                                      const std::string & doc_string)
 {
   addParam<T>(name, value, doc_string);
-  MooseUtils::tokenize(syntax, _syntax[name], 1, " \t\n\v\f\r");
+  MooseUtils::tokenize(syntax, _params[name]._cli_flag_names, 1, " \t\n\v\f\r");
 }
 
 template <typename T>
@@ -1150,21 +1139,8 @@ InputParameters::suppressParameter(const std::string & name)
   if (!this->have_parameter<T>(name))
     mooseError("Unable to suppress nonexistent parameter: ", name);
 
-  _required_params.erase(name);
-  _private_params.insert(name);
-}
-
-template <typename T>
-void
-InputParameters::addRequiredDeprecatedParam(const std::string & name,
-                                            const std::string & doc_string,
-                                            const std::string & deprecation_message)
-{
-  _show_deprecated_message = false;
-  addRequiredParam<T>(name, doc_string);
-
-  _deprecated_params.insert(std::make_pair(name, deprecation_message));
-  _show_deprecated_message = true;
+  _params[name]._required = false;
+  _params[name]._is_private = true;
 }
 
 template <typename T>
@@ -1177,7 +1153,7 @@ InputParameters::addDeprecatedParam(const std::string & name,
   _show_deprecated_message = false;
   addParam<T>(name, value, doc_string);
 
-  _deprecated_params.insert(std::make_pair(name, deprecation_message));
+  _params[name]._deprecation_message = deprecation_message;
   _show_deprecated_message = true;
 }
 
@@ -1190,7 +1166,7 @@ InputParameters::addDeprecatedParam(const std::string & name,
   _show_deprecated_message = false;
   addParam<T>(name, doc_string);
 
-  _deprecated_params.insert(std::make_pair(name, deprecation_message));
+  _params[name]._deprecation_message = deprecation_message;
   _show_deprecated_message = true;
 }
 
