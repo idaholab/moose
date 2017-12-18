@@ -121,7 +121,7 @@ Coupleable::coupledComponents(const std::string & var_name)
 }
 
 void
-Coupleable::checkVar(const std::string & var_name, unsigned int)
+Coupleable::checkVar(const std::string & var_name)
 {
   auto it = _c_coupled_scalar_vars.find(var_name);
   if (it != _c_coupled_scalar_vars.end())
@@ -156,7 +156,7 @@ Coupleable::getVar(const std::string & var_name, unsigned int comp)
 unsigned int
 Coupleable::coupled(const std::string & var_name, unsigned int comp)
 {
-  checkVar(var_name, comp);
+  checkVar(var_name);
 
   if (!isCoupled(var_name))
     return _optional_var_index[var_name];
@@ -189,7 +189,7 @@ Coupleable::getDefaultValue(const std::string & var_name)
 const VariableValue &
 Coupleable::coupledValue(const std::string & var_name, unsigned int comp)
 {
-  checkVar(var_name, comp);
+  checkVar(var_name);
   if (!isCoupled(var_name))
     return *getDefaultValue(var_name);
 
@@ -221,7 +221,7 @@ Coupleable::writableCoupledValue(const std::string & var_name, unsigned int comp
 const VariableValue &
 Coupleable::coupledValueOld(const std::string & var_name, unsigned int comp)
 {
-  checkVar(var_name, comp);
+  checkVar(var_name);
   if (!isCoupled(var_name))
     return *getDefaultValue(var_name);
 
@@ -248,7 +248,7 @@ Coupleable::coupledValueOld(const std::string & var_name, unsigned int comp)
 const VariableValue &
 Coupleable::coupledValueOlder(const std::string & var_name, unsigned int comp)
 {
-  checkVar(var_name, comp);
+  checkVar(var_name);
   if (!isCoupled(var_name))
     return *getDefaultValue(var_name);
 
@@ -295,7 +295,7 @@ Coupleable::coupledValueOlder(const std::string & var_name, unsigned int comp)
 const VariableValue &
 Coupleable::coupledValuePreviousNL(const std::string & var_name, unsigned int comp)
 {
-  checkVar(var_name, comp);
+  checkVar(var_name);
   if (!isCoupled(var_name))
     return *getDefaultValue(var_name);
 
@@ -322,7 +322,7 @@ Coupleable::coupledValuePreviousNL(const std::string & var_name, unsigned int co
 const VariableValue &
 Coupleable::coupledDot(const std::string & var_name, unsigned int comp)
 {
-  checkVar(var_name, comp);
+  checkVar(var_name);
   if (!isCoupled(var_name)) // Return default 0
     return _default_value_zero;
 
@@ -347,7 +347,7 @@ Coupleable::coupledDot(const std::string & var_name, unsigned int comp)
 const VariableValue &
 Coupleable::coupledDotDu(const std::string & var_name, unsigned int comp)
 {
-  checkVar(var_name, comp);
+  checkVar(var_name);
   if (!isCoupled(var_name)) // Return default 0
     return _default_value_zero;
 
@@ -372,7 +372,7 @@ Coupleable::coupledDotDu(const std::string & var_name, unsigned int comp)
 const VariableGradient &
 Coupleable::coupledGradient(const std::string & var_name, unsigned int comp)
 {
-  checkVar(var_name, comp);
+  checkVar(var_name);
   if (!isCoupled(var_name)) // Return default 0
     return _default_gradient;
 
@@ -391,7 +391,7 @@ Coupleable::coupledGradient(const std::string & var_name, unsigned int comp)
 const VariableGradient &
 Coupleable::coupledGradientOld(const std::string & var_name, unsigned int comp)
 {
-  checkVar(var_name, comp);
+  checkVar(var_name);
   if (!isCoupled(var_name)) // Return default 0
     return _default_gradient;
 
@@ -411,7 +411,7 @@ Coupleable::coupledGradientOld(const std::string & var_name, unsigned int comp)
 const VariableGradient &
 Coupleable::coupledGradientOlder(const std::string & var_name, unsigned int comp)
 {
-  checkVar(var_name, comp);
+  checkVar(var_name);
   if (!isCoupled(var_name)) // Return default 0
     return _default_gradient;
 
@@ -436,7 +436,7 @@ Coupleable::coupledGradientOlder(const std::string & var_name, unsigned int comp
 const VariableGradient &
 Coupleable::coupledGradientPreviousNL(const std::string & var_name, unsigned int comp)
 {
-  checkVar(var_name, comp);
+  checkVar(var_name);
   if (!isCoupled(var_name)) // Return default 0
     return _default_gradient;
 
@@ -456,7 +456,7 @@ Coupleable::coupledGradientPreviousNL(const std::string & var_name, unsigned int
 const VariableSecond &
 Coupleable::coupledSecond(const std::string & var_name, unsigned int comp)
 {
-  checkVar(var_name, comp);
+  checkVar(var_name);
   if (!isCoupled(var_name)) // Return default 0
     return _default_second;
 
@@ -475,7 +475,7 @@ Coupleable::coupledSecond(const std::string & var_name, unsigned int comp)
 const VariableSecond &
 Coupleable::coupledSecondOld(const std::string & var_name, unsigned int comp)
 {
-  checkVar(var_name, comp);
+  checkVar(var_name);
   if (!isCoupled(var_name)) // Return default 0
     return _default_second;
 
@@ -494,7 +494,7 @@ Coupleable::coupledSecondOld(const std::string & var_name, unsigned int comp)
 const VariableSecond &
 Coupleable::coupledSecondOlder(const std::string & var_name, unsigned int comp)
 {
-  checkVar(var_name, comp);
+  checkVar(var_name);
   if (!isCoupled(var_name)) // Return default 0
     return _default_second;
 
@@ -518,7 +518,7 @@ Coupleable::coupledSecondOlder(const std::string & var_name, unsigned int comp)
 const VariableSecond &
 Coupleable::coupledSecondPreviousNL(const std::string & var_name, unsigned int comp)
 {
-  checkVar(var_name, comp);
+  checkVar(var_name);
   if (!isCoupled(var_name)) // Return default 0
     return _default_second;
 
@@ -537,7 +537,7 @@ Coupleable::coupledSecondPreviousNL(const std::string & var_name, unsigned int c
 const VariableValue &
 Coupleable::coupledNodalValue(const std::string & var_name, unsigned int comp)
 {
-  checkVar(var_name, comp);
+  checkVar(var_name);
   if (!isCoupled(var_name))
     return *getDefaultValue(var_name);
 
@@ -553,7 +553,7 @@ Coupleable::coupledNodalValue(const std::string & var_name, unsigned int comp)
 const VariableValue &
 Coupleable::coupledNodalValueOld(const std::string & var_name, unsigned int comp)
 {
-  checkVar(var_name, comp);
+  checkVar(var_name);
   if (!isCoupled(var_name))
     return *getDefaultValue(var_name);
 
@@ -570,7 +570,7 @@ Coupleable::coupledNodalValueOld(const std::string & var_name, unsigned int comp
 const VariableValue &
 Coupleable::coupledNodalValueOlder(const std::string & var_name, unsigned int comp)
 {
-  checkVar(var_name, comp);
+  checkVar(var_name);
   if (!isCoupled(var_name))
     return *getDefaultValue(var_name);
 
@@ -591,7 +591,7 @@ Coupleable::coupledNodalValueOlder(const std::string & var_name, unsigned int co
 const VariableValue &
 Coupleable::coupledNodalValuePreviousNL(const std::string & var_name, unsigned int comp)
 {
-  checkVar(var_name, comp);
+  checkVar(var_name);
   if (!isCoupled(var_name))
     return *getDefaultValue(var_name);
 
@@ -608,7 +608,7 @@ Coupleable::coupledNodalValuePreviousNL(const std::string & var_name, unsigned i
 const VariableValue &
 Coupleable::coupledNodalDot(const std::string & var_name, unsigned int comp)
 {
-  checkVar(var_name, comp);
+  checkVar(var_name);
   if (!isCoupled(var_name)) // Return default 0
     return _default_value_zero;
 
@@ -624,7 +624,7 @@ Coupleable::coupledNodalDot(const std::string & var_name, unsigned int comp)
 const DenseVector<Number> &
 Coupleable::coupledSolutionDoFs(const std::string & var_name, unsigned int comp)
 {
-  checkVar(var_name, comp);
+  checkVar(var_name);
   // default coupling is not available for elemental solutions
   if (!isCoupled(var_name))
     mooseError(_c_name, ": invalid variable name for coupledSolutionDoFs");
@@ -644,7 +644,7 @@ Coupleable::coupledSolutionDoFs(const std::string & var_name, unsigned int comp)
 const DenseVector<Number> &
 Coupleable::coupledSolutionDoFsOld(const std::string & var_name, unsigned int comp)
 {
-  checkVar(var_name, comp);
+  checkVar(var_name);
   // default coupling is not available for elemental solutions
   if (!isCoupled(var_name))
     mooseError(_c_name, ": invalid variable name for coupledSolutionDoFsOld");
@@ -665,7 +665,7 @@ Coupleable::coupledSolutionDoFsOld(const std::string & var_name, unsigned int co
 const DenseVector<Number> &
 Coupleable::coupledSolutionDoFsOlder(const std::string & var_name, unsigned int comp)
 {
-  checkVar(var_name, comp);
+  checkVar(var_name);
   // default coupling is not available for elemental solutions
   if (!isCoupled(var_name))
     mooseError(_c_name, ": invalid variable name for coupledSolutionDoFsOlder");
