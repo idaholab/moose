@@ -61,7 +61,7 @@ template <class T>
 std::shared_ptr<Action>
 buildAction(InputParameters parameters)
 {
-  return std::shared_ptr<Action>(new T(parameters));
+  return std::make_shared<T>(parameters);
 }
 
 /**
