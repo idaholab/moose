@@ -31,7 +31,7 @@ public:
 
   // Pipe specific interface ----
   virtual UserObjectName getFluidPropertiesName() const;
-  virtual const FlowModel & getFlowModel() const { return *_flow_model; }
+  virtual std::shared_ptr<const FlowModel> getFlowModel() const { return _flow_model; }
   virtual const RELAP7::FlowModelID & getFlowModelID() const { return _model_id; }
   virtual unsigned int getSubdomainID() const = 0;
   virtual bool isHorizontal() const = 0;
@@ -41,7 +41,7 @@ protected:
   /// The name of the user object that defines fluid properties
   UserObjectName _fp_name;
   /// The flow model used by this pipe
-  FlowModel * _flow_model;
+  std::shared_ptr<FlowModel> _flow_model;
   /// The flow model type used by this pipe
   RELAP7::FlowModelID _model_id;
 

@@ -16,7 +16,7 @@ validParams<PipeBase>()
 }
 
 PipeBase::PipeBase(const InputParameters & params)
-  : GeometricalComponent(params), _fp_name(getParam<UserObjectName>("fp")), _flow_model(NULL)
+  : GeometricalComponent(params), _fp_name(getParam<UserObjectName>("fp")), _flow_model(nullptr)
 {
 }
 
@@ -35,7 +35,7 @@ PipeBase::init()
     InputParameters pars = emptyInputParameters();
     pars.set<Simulation *>("_sim") = &_sim;
     pars.set<PipeBase *>("_pipe") = this;
-    _flow_model = new FlowModelSinglePhase(name(), pars);
+    _flow_model = std::make_shared<FlowModelSinglePhase>(name(), pars);
     _flow_model->init();
   }
   else if (_model_id == RELAP7::FM_TWO_PHASE)
@@ -43,7 +43,7 @@ PipeBase::init()
     InputParameters pars = emptyInputParameters();
     pars.set<Simulation *>("_sim") = &_sim;
     pars.set<PipeBase *>("_pipe") = this;
-    _flow_model = new FlowModelTwoPhase(name(), pars);
+    _flow_model = std::make_shared<FlowModelTwoPhase>(name(), pars);
     _flow_model->init();
   }
   else
