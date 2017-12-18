@@ -32,14 +32,8 @@ protected:
   ///Material property name for the eigenstrain tensor
   std::string _eigenstrain_name;
 
-  ///Whether the eigenstrain model should compute the total or incremental eigenstrain
-  bool _incremental_form;
-
   ///Stores the current total eigenstrain
   MaterialProperty<RankTwoTensor> & _eigenstrain;
-
-  ///Stores the total eigenstrain in the previous step (only for incremental form)
-  const MaterialProperty<RankTwoTensor> * _eigenstrain_old;
 
   /**
    * Helper function for models that compute the eigenstrain based on a volumetric

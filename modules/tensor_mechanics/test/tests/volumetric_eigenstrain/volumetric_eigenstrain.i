@@ -73,7 +73,6 @@
   [../]
   [./thermal_expansion_strain1]
     type = ComputeVolumetricEigenstrain
-    incremental_form = true
     volumetric_materials = volumetric_change
     eigenstrain_name = eigenstrain
     args = ''

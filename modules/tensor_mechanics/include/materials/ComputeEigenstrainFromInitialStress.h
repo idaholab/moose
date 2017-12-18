@@ -27,6 +27,9 @@ protected:
   /// elasticity tensor used to convert stress to strain
   const MaterialProperty<RankFourTensor> & _elasticity_tensor;
 
+  ///Stores the total eigenstrain in the previous step
+  const MaterialProperty<RankTwoTensor> & _eigenstrain_old;
+
   /// initial stress components
   std::vector<Function *> _initial_stress_fcn;
 };

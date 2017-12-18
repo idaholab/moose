@@ -4,11 +4,6 @@
     input = 'except01.i'
     expect_err = 'ComputeEigenstrainFromInitialStress: 9 initial stress functions must be provided.  You supplied 3'
   [../]
-  [./except02]
-    type = 'RunException'
-    input = 'except02.i'
-    expect_err = 'ComputeEigenstrainFromInitialStress: incremental_form must be set to true'
-  [../]
   [./gravity]
     type = 'Exodiff'
     input = 'gravity.i'

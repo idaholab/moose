@@ -99,7 +99,6 @@
     type = ComputeThermalExpansionEigenstrain
     stress_free_temperature = 117.56
     thermal_expansion_coeff = 1e-6
-    incremental_form = true
     eigenstrain_name = eigenstrain
   [../]
   [./stress]
