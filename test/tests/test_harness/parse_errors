@@ -4,5 +4,6 @@
     input = good.i
     check_input = true
     check_input = true
+    allow_deprecated_until = 13/32/2000
   [../]
 []
