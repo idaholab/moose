@@ -19,6 +19,8 @@
   zmax = 0
   elem_type = QUAD4 # Type of elements used in the mesh
   uniform_refine = 4 # Initial uniform refinement of the mesh
+
+  parallel_type = replicated # Periodic BCs
 []
 
 [GlobalParams]

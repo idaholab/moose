@@ -2,7 +2,7 @@
   type = EBSDMesh
   filename = 'test.txt'
 
-  parallel_type = replicated # recon_var IC
+  num_ghosted_layers = 2
 []
 
 [GlobalParams]

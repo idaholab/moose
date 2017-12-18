@@ -2,6 +2,8 @@
   type = EBSDMesh
   filename = IN100_120x120.txt
   uniform_refine = 2
+
+  num_ghosted_layers = 2
 []
 
 [GlobalParams]
