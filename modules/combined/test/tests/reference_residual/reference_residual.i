@@ -151,7 +151,6 @@
     type = ComputeThermalExpansionEigenstrain
     block = 0
     eigenstrain_name = thermal_expansion
-    incremental_form = true
     temperature = temp
     thermal_expansion_coeff = 1e-5
     stress_free_temperature = 0.0

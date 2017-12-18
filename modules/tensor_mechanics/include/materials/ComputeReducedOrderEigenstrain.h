@@ -38,7 +38,6 @@ private:
 
   std::vector<MaterialPropertyName> _input_eigenstrain_names;
   std::vector<const MaterialProperty<RankTwoTensor> *> _eigenstrains;
-  std::vector<const MaterialProperty<RankTwoTensor> *> _eigenstrains_old;
 
   SubProblem & _subproblem;
   /// Number of columns in A matrix (1 plus mesh dimension)

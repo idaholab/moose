@@ -125,7 +125,6 @@
     stress_free_temperature = 117.56
     thermal_expansion_coeff = 1e-6
     eigenstrain_name = eigenstrain1
-    incremental_form = true
   [../]
   [./stress1]
     type = ComputeStrainIncrementBasedStress
@@ -145,7 +144,6 @@
     stress_free_temperature = 117.56
     thermal_expansion_coeff = 1e-6
     eigenstrain_name = eigenstrain2
-    incremental_form = true
   [../]
   [./stress2]
     type = ComputeStrainIncrementBasedStress
@@ -165,7 +163,6 @@
     stress_free_temperature = 117.56
     thermal_expansion_coeff = 1e-6
     eigenstrain_name = eigenstrain3
-    incremental_form = true
   [../]
   [./stress3]
     type = ComputeStrainIncrementBasedStress
@@ -185,7 +182,6 @@
     stress_free_temperature = 117.56
     thermal_expansion_coeff = 1e-6
     eigenstrain_name = eigenstrain4
-    incremental_form = true
   [../]
   [./stress4]
     type = ComputeStrainIncrementBasedStress
@@ -205,7 +201,6 @@
     stress_free_temperature = 117.56
     thermal_expansion_coeff = 1e-6
     eigenstrain_name = eigenstrain5
-    incremental_form = true
   [../]
   [./stress5]
     type = ComputeStrainIncrementBasedStress
@@ -225,7 +220,6 @@
     stress_free_temperature = 117.56
     thermal_expansion_coeff = 1e-6
     eigenstrain_name = eigenstrain6
-    incremental_form = true
   [../]
   [./stress6]
     type = ComputeStrainIncrementBasedStress
@@ -245,7 +239,6 @@
     stress_free_temperature = 117.56
     thermal_expansion_coeff = 1e-6
     eigenstrain_name = eigenstrain7
-    incremental_form = true
   [../]
   [./stress7]
     type = ComputeStrainIncrementBasedStress

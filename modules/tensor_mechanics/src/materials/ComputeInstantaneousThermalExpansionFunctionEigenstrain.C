@@ -19,8 +19,6 @@ validParams<ComputeInstantaneousThermalExpansionFunctionEigenstrain>()
   params.addRequiredParam<FunctionName>("thermal_expansion_function",
                                         "Function describing the instantaneous thermal expansion "
                                         "coefficient as a function of temperature");
-  params.set<bool>("incremental_form") = true;
-
   return params;
 }
 
