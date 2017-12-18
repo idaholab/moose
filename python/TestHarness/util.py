@@ -4,7 +4,7 @@ from mooseutils import colorText
 from collections import namedtuple
 import json
 
-TERM_COLS = 110
+TERM_COLS = int(os.getenv('MOOSE_TERM_COLS', '110'))
 
 LIBMESH_OPTIONS = {
   'mesh_mode' :    { 're_option' : r'#define\s+LIBMESH_ENABLE_PARMESH\s+(\d+)',

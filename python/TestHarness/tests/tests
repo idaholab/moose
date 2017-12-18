@@ -83,4 +83,8 @@
     type = PythonUnitTest
     input = test_ExtraInfo.py
   [../]
+  [./parser_errors]
+    type = PythonUnitTest
+    input = test_ParserErrors.py
+  [../]
 []

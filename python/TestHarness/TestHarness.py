@@ -338,7 +338,7 @@ class TestHarness:
         elif self.num_failed > self.options.max_fails:
             tester.setStatus('Max Fails Exceeded', tester.bucket_fail)
         elif tester.parameters().isValid('have_errors') and tester.parameters()['have_errors']:
-            tester.setStatus('Parser Error', tester.bucket_skip)
+            tester.setStatus('Parser Error', tester.bucket_fail)
 
     # This method splits a lists of tests into two pieces each, the first piece will run the test for
     # approx. half the number of timesteps and will write out a restart file.  The second test will
@@ -347,7 +347,7 @@ class TestHarness:
         new_tests = []
 
         for part1 in testers:
-            if part1.parameters()['recover'] == True:
+            if part1.parameters()['recover'] == True and not part1.parameters()['check_input']:
                 # Clone the test specs
                 part2 = copy.deepcopy(part1)
 
@@ -370,6 +370,9 @@ class TestHarness:
                 part2.addCaveats('recover')
 
                 new_tests.append(part2)
+
+            elif part1.parameters()['recover'] == True and part1.parameters()['check_input']:
+                part1.setStatus('SYNTAX ONLY TEST', part1.bucket_silent)
 
         testers.extend(new_tests)
         return testers
@@ -720,6 +723,9 @@ class TestHarness:
         if opts.check_input and opts.no_check_input:
             print('ERROR: --check-input and --no-check-input can not be used together')
             sys.exit(1)
+        if opts.check_input and opts.enable_recover:
+            print('ERROR: --check-input and --recover can not be used together')
+            sys.exit(1)
 
         # Update any keys from the environment as necessary
         if not self.options.method:
@@ -755,4 +761,3 @@ class TestHarness:
 
     def getOptions(self):
         return self.options
-
