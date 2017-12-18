@@ -246,9 +246,10 @@ public:
 
 protected:
   // indexing: [element][side]->material_properties
-  HashMap<const Elem *, HashMap<unsigned int, MaterialProperties>> * _props_elem;
-  HashMap<const Elem *, HashMap<unsigned int, MaterialProperties>> * _props_elem_old;
-  HashMap<const Elem *, HashMap<unsigned int, MaterialProperties>> * _props_elem_older;
+  std::unique_ptr<HashMap<const Elem *, HashMap<unsigned int, MaterialProperties>>> _props_elem;
+  std::unique_ptr<HashMap<const Elem *, HashMap<unsigned int, MaterialProperties>>> _props_elem_old;
+  std::unique_ptr<HashMap<const Elem *, HashMap<unsigned int, MaterialProperties>>>
+      _props_elem_older;
 
   /// mapping from property name to property ID
   /// NOTE: this is static so the property numbering is global within the simulation (not just FEProblemBase - should be useful when we will use material properties from

@@ -2,7 +2,6 @@
 
 import subprocess
 import time
-import sqlite3
 import os
 import gc
 import shutil
@@ -277,6 +276,10 @@ class DB:
         );'''
 
         self.fname = fname
+
+        # python might not have sqlite3 builtin, so do the import here so
+        # that the TestHarness can always import this file
+        import sqlite3
         self.conn = sqlite3.connect(fname)
         c = self.conn.cursor()
         c.execute(CREATE_BENCH_TABLE)
