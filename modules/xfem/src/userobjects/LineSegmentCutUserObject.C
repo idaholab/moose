@@ -72,4 +72,4 @@ const std::vector<Point>
 LineSegmentCutUserObject::getCrackFrontPoints(unsigned int /*num_crack_front_points*/) const
 {
   mooseError("getCrackFrontPoints() is not implemented for this object.");
-};
+}
