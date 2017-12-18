@@ -2,7 +2,7 @@
   type = EBSDMesh
   filename = EBSD_split_grain.txt
 
-  parallel_type = replicated # required for advanced_op_assignment
+  num_ghosted_layers = 2
 []
 
 [GlobalParams]

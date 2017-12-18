@@ -162,6 +162,7 @@ MooseMesh::MooseMesh(const InputParameters & parameters)
     _patch_size(getParam<unsigned int>("patch_size")),
     _patch_update_strategy(getParam<MooseEnum>("patch_update_strategy")),
     _regular_orthogonal_mesh(false),
+    _num_ghosted_layers(getParam<unsigned short>("num_ghosted_layers")),
     _allow_recovery(true),
     _construct_node_list_from_side_list(getParam<bool>("construct_node_list_from_side_list"))
 {
@@ -204,11 +205,10 @@ MooseMesh::MooseMesh(const InputParameters & parameters)
     if (getParam<bool>("ghost_point_neighbors"))
       _ghosting_functors.emplace_back(libmesh_make_unique<GhostPointNeighbors>(*_mesh));
 
-    auto num_ghosted_layers = getParam<unsigned short>("num_ghosted_layers");
-    if (num_ghosted_layers > 1)
+    if (_num_ghosted_layers > 1)
     {
       auto default_coupling = libmesh_make_unique<DefaultCoupling>();
-      default_coupling->set_n_levels(num_ghosted_layers);
+      default_coupling->set_n_levels(_num_ghosted_layers);
       _ghosting_functors.emplace_back(std::move(default_coupling));
     }
 

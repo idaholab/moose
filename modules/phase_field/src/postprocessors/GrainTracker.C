@@ -76,6 +76,14 @@ GrainTracker::GrainTracker(const InputParameters & parameters)
 {
   if (_tracking_step > 0 && _poly_ic_uo)
     mooseError("Can't start tracking after the initial condition when using a polycrystal_ic_uo");
+
+  if (_mesh.isDistributedMesh() && _halo_level > _mesh.numGhostedLayers())
+    mooseError("The GrainTracker requires additional ghosting when using DistributedMesh. Please "
+               "set the Mesh/num_ghosted_layers parameter to the number of requested halo "
+               "levels.\nNumber of Ghosted Levels: ",
+               _mesh.numGhostedLayers(),
+               "\nRequested Halo Level: ",
+               _halo_level);
 }
 
 GrainTracker::~GrainTracker() {}
@@ -1304,7 +1312,6 @@ GrainTracker::updateFieldInfo()
     _feature_maps[map_num].clear();
 
   std::map<dof_id_type, Real> tmp_map;
-  MeshBase & mesh = _mesh.getMesh();
 
   for (const auto & grain : _feature_sets)
   {
@@ -1317,7 +1324,7 @@ GrainTracker::updateFieldInfo()
       Real entity_value = std::numeric_limits<Real>::lowest();
       if (_is_elemental)
       {
-        const Elem * elem = mesh.elem(entity);
+        const Elem * elem = _mesh.elemPtr(entity);
         std::vector<Point> centroid(1, elem->centroid());
         if (_poly_ic_uo && _first_time)
         {
@@ -1331,8 +1338,8 @@ GrainTracker::updateFieldInfo()
       }
       else
       {
-        Node & node = mesh.node(entity);
-        entity_value = _vars[curr_var]->getNodalValue(node);
+        auto node_ptr = _mesh.nodePtr(entity);
+        entity_value = _vars[curr_var]->getNodalValue(*node_ptr);
       }
 
       if (entity_value != std::numeric_limits<Real>::lowest() &&
@@ -1392,7 +1399,6 @@ GrainTracker::communicateHaloMap()
       std::vector<std::vector<std::pair<std::size_t, dof_id_type>>> root_halo_ids(_n_procs);
       counts.resize(_n_procs);
 
-      auto & mesh = _mesh.getMesh();
       // Loop over the _halo_ids "field" and build minimal lists for all of the other ranks
       for (auto var_index = beginIndex(_halo_ids); var_index < _halo_ids.size(); ++var_index)
       {
@@ -1400,12 +1406,13 @@ GrainTracker::communicateHaloMap()
         {
           DofObject * halo_entity;
           if (_is_elemental)
-            halo_entity = mesh.elem(entity_pair.first);
+            halo_entity = _mesh.queryElemPtr(entity_pair.first);
           else
-            halo_entity = &mesh.node(entity_pair.first);
+            halo_entity = _mesh.queryNodePtr(entity_pair.first);
 
-          root_halo_ids[halo_entity->processor_id()].push_back(
-              std::make_pair(var_index, entity_pair.first));
+          if (halo_entity)
+            root_halo_ids[halo_entity->processor_id()].push_back(
+                std::make_pair(var_index, entity_pair.first));
         }
       }
 

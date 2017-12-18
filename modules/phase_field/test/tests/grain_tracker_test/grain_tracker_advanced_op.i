@@ -9,7 +9,8 @@
   zmax = 0
   elem_type = QUAD4
 
-  parallel_type = replicated # required for advanced_op_assignment
+  num_ghosted_layers = 2
+  parallel_type = replicated # Periodic BCs
 []
 
 [GlobalParams]
