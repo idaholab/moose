@@ -1,0 +1,10 @@
+[Tests]
+  [./duplicate_test_name]
+    type = RunApp
+    input = good.i
+  [../]
+  [./duplicate_test_name]
+    type = RunApp
+    input = good.i
+  [../]
+[]

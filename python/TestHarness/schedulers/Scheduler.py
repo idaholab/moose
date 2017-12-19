@@ -294,8 +294,12 @@ class Scheduler(MooseObject):
         # Create a local dictionary of tester names to job containers. Add this dictionary to a
         # set. We will use this set as a way to gain access to their methods.
         for tester in testers:
-            name_to_job_container[tester.getTestName()] = Job(tester, job_dag, self.options)
-            self.tester_datas.add(name_to_job_container[tester.getTestName()])
+            if tester.getTestName() in name_to_job_container:
+                tester.setStatus('duplicate test', tester.bucket_skip)
+                non_runnable_jobs.add(Job(tester, job_dag, self.options))
+            else:
+                name_to_job_container[tester.getTestName()] = Job(tester, job_dag, self.options)
+                self.tester_datas.add(name_to_job_container[tester.getTestName()])
 
         # Populate job_dag with testers. This method will also return any testers which caused failures
         # while building the DAG.
