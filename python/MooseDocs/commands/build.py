@@ -63,13 +63,18 @@ def build_options(parser):
                              "ignored for this case.")
     parser.add_argument('--no-livereload', action='store_true',
                         help="When --serve is used this flag disables the live reloading.")
+    parser.add_argument('--css', type=str, metavar='*.css',
+                        help="Path to custom CSS to use. Important: You should continue to "
+                             "import the default within your custom css file for best results. "
+                             "To do so, add the following line to the top of your css: @import "
+                             "url(\"moose.css\");")
 
 class WebsiteBuilder(common.Builder):
     """
     Builder object for creating websites.
     """
 
-    def __init__(self, content=None, **kwargs):
+    def __init__(self, content=None, custom_css=None, **kwargs):
         super(WebsiteBuilder, self).__init__(**kwargs)
 
         if (content is None) or (not os.path.isfile(content)):
@@ -81,6 +86,7 @@ class WebsiteBuilder(common.Builder):
             content = MooseDocs.yaml_load(content)
 
         self._content = content
+        self._custom_css = custom_css
 
     def buildNodes(self):
         return common.moose_docs_file_tree(self._content)
@@ -100,6 +106,8 @@ class WebsiteBuilder(common.Builder):
                     shutil.rmtree(dest)
                 shutil.copytree(loc, dest)
 
+        if self._custom_css and os.path.exists(self._custom_css):
+            shutil.copy(self._custom_css, os.path.join(self._site_dir, 'css'))
 
 class MooseDocsWatcher(livereload.watcher.Watcher):
     """
@@ -196,10 +204,22 @@ def build(config_file=None, site_dir=None, num_threads=None, no_livereload=False
 
     # Create the markdown parser
     config = MooseDocs.load_config(config_file, template=template, template_args=template_args)
+
+    # Add custom CSS to the config
+    if template_args['css']:
+        if os.path.exists(template_args['css']):
+            config['MooseDocs.extensions.template']['template_args']['moose_css'] = 'css/' +\
+                os.path.basename(template_args['css'])
+        else:
+            LOG.warning("supplied css file does not exist")
+
     parser = MooseMarkdown(config)
 
     # Create the builder object and build the pages
-    builder = WebsiteBuilder(parser=parser, site_dir=site_dir, content=content)
+    builder = WebsiteBuilder(parser=parser,
+                             site_dir=site_dir,
+                             content=content,
+                             custom_css=template_args['css'])
     builder.init()
     if dump:
         print builder
