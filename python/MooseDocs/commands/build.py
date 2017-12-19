@@ -208,14 +208,18 @@ def build(config_file=None, site_dir=None, num_threads=None, no_livereload=False
     # Add custom CSS to the config
     if template_args['css']:
         if os.path.exists(template_args['css']):
-            config['MooseDocs.extensions.template']['template_args']['moose_css'] = 'css/' + os.path.basename(template_args['css'])
+            config['MooseDocs.extensions.template']['template_args']['moose_css'] = 'css/' +\
+                os.path.basename(template_args['css'])
         else:
             LOG.warning("supplied css file does not exist")
 
     parser = MooseMarkdown(config)
 
     # Create the builder object and build the pages
-    builder = WebsiteBuilder(parser=parser, site_dir=site_dir, content=content, custom_css=template_args['css'])
+    builder = WebsiteBuilder(parser=parser,
+                             site_dir=site_dir,
+                             content=content,
+                             custom_css=template_args['css'])
     builder.init()
     if dump:
         print builder
