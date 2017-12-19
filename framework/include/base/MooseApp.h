@@ -553,8 +553,14 @@ protected:
   /// Constructor is protected so that this object is constructed through the AppFactory object
   MooseApp(InputParameters parameters);
 
+  /**
+   * Register tasks required by mesh-only
+   * Note: applications can override this function to add more tasks for mesh-only.
+   */
+  virtual void registerMeshOnlyTasks();
+
   /// Don't run the simulation, just complete all of the mesh preperation steps and exit
-  virtual void meshOnly(std::string mesh_file_name);
+  void meshOnly(std::string mesh_file_name);
 
   /**
    * NOTE: This is an internal function meant for MOOSE use only!

@@ -363,6 +363,29 @@ ActionWarehouse::executeActionsWithAction(const std::string & task)
 }
 
 void
+ActionWarehouse::registerMeshOnlyTasks(const std::vector<std::string> & tasks)
+{
+  for (auto & task : tasks)
+    _mesh_only_tasks.insert(task);
+}
+
+void
+ActionWarehouse::executeMeshOnlyActions()
+{
+  if (_show_actions)
+  {
+    _console << "[DBG][ACT] Action Dependency Sets:\n";
+    printActionDependencySets();
+
+    _console << "\n[DBG][ACT] Executing actions:" << std::endl;
+  }
+
+  for (const auto & task : _ordered_names)
+    if (_mesh_only_tasks.count(task) > 0)
+      executeActionsWithAction(task);
+}
+
+void
 ActionWarehouse::printInputFile(std::ostream & out)
 {
   InputFileFormatter tree(false);
