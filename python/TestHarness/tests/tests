@@ -87,4 +87,8 @@
     type = PythonUnitTest
     input = test_ParserErrors.py
   [../]
+  [./duplicate_test_names]
+    type = PythonUnitTest
+    input = test_DuplicateTestNames.py
+  [../]
 []
