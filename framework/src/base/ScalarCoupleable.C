@@ -104,14 +104,14 @@ ScalarCoupleable::isCoupledScalar(const std::string & var_name, unsigned int i)
 unsigned int
 ScalarCoupleable::coupledScalar(const std::string & var_name, unsigned int comp)
 {
-  checkVar(var_name, comp);
+  checkVar(var_name);
   return getScalarVar(var_name, comp)->number();
 }
 
 Order
 ScalarCoupleable::coupledScalarOrder(const std::string & var_name, unsigned int comp)
 {
-  checkVar(var_name, comp);
+  checkVar(var_name);
   if (!isCoupledScalar(var_name, comp))
     return _sc_fe_problem.getMaxScalarOrder();
 
@@ -135,7 +135,7 @@ ScalarCoupleable::getDefaultValue(const std::string & var_name)
 VariableValue &
 ScalarCoupleable::coupledScalarValue(const std::string & var_name, unsigned int comp)
 {
-  checkVar(var_name, comp);
+  checkVar(var_name);
   if (!isCoupledScalar(var_name, comp))
     return *getDefaultValue(var_name);
 
@@ -146,7 +146,7 @@ ScalarCoupleable::coupledScalarValue(const std::string & var_name, unsigned int 
 VariableValue &
 ScalarCoupleable::coupledScalarValueOld(const std::string & var_name, unsigned int comp)
 {
-  checkVar(var_name, comp);
+  checkVar(var_name);
   if (!isCoupledScalar(var_name, comp))
     return *getDefaultValue(var_name);
 
@@ -157,7 +157,7 @@ ScalarCoupleable::coupledScalarValueOld(const std::string & var_name, unsigned i
 VariableValue &
 ScalarCoupleable::coupledScalarValueOlder(const std::string & var_name, unsigned int comp)
 {
-  checkVar(var_name, comp);
+  checkVar(var_name);
   if (!isCoupledScalar(var_name, comp))
     return *getDefaultValue(var_name);
 
@@ -171,7 +171,7 @@ ScalarCoupleable::coupledScalarValueOlder(const std::string & var_name, unsigned
 VariableValue &
 ScalarCoupleable::coupledScalarDot(const std::string & var_name, unsigned int comp)
 {
-  checkVar(var_name, comp);
+  checkVar(var_name);
   MooseVariableScalar * var = getScalarVar(var_name, comp);
   return var->uDot();
 }
@@ -179,13 +179,13 @@ ScalarCoupleable::coupledScalarDot(const std::string & var_name, unsigned int co
 VariableValue &
 ScalarCoupleable::coupledScalarDotDu(const std::string & var_name, unsigned int comp)
 {
-  checkVar(var_name, comp);
+  checkVar(var_name);
   MooseVariableScalar * var = getScalarVar(var_name, comp);
   return var->duDotDu();
 }
 
 void
-ScalarCoupleable::checkVar(const std::string & var_name, unsigned int comp)
+ScalarCoupleable::checkVar(const std::string & var_name)
 {
   auto it = _sc_coupled_vars.find(var_name);
   if (it != _sc_coupled_vars.end())

@@ -352,9 +352,8 @@ protected:
    * Check that the right kind of variable is being coupled in
    *
    * @param var_name The name of the coupled variable
-   * @param comp The component of the coupled variable
    */
-  void checkVar(const std::string & var_name, unsigned int comp);
+  void checkVar(const std::string & var_name);
 
   /**
    * Extract pointer to a coupled variable
