@@ -63,10 +63,11 @@ def build_options(parser):
                              "ignored for this case.")
     parser.add_argument('--no-livereload', action='store_true',
                         help="When --serve is used this flag disables the live reloading.")
-    parser.add_argument('--css', type=str, metavar='*.css', help="Path to custom CSS to use. "
-                             "Important: You should continue to import the default within your "
-                             "custom css file for best results. To do so, add the following "
-                             "line to the top of your css: @import url(\"moose.css\");")
+    parser.add_argument('--css', type=str, metavar='*.css',
+                        help="Path to custom CSS to use. Important: You should continue to "
+                             "import the default within your custom css file for best results. "
+                             "To do so, add the following line to the top of your css: @import "
+                             "url(\"moose.css\");")
 
 class WebsiteBuilder(common.Builder):
     """
