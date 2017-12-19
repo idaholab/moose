@@ -393,40 +393,37 @@ class TestHarness:
 
         return True
 
-    # Format the caveats contained in tester so they are easy to read when printed
+    # Format results the way we want it
+    # TODO: refactore. It seems we only need it so the word FAILED
+    # appears before the status message.
     def formatCaveats(self, tester):
-        result = ''
-
         # PASS and DRY_RUN fall into this catagory
         if tester.didPass():
+            result = tester.success_message
             if self.options.extra_info:
                 for check in self.options._checks.keys():
                     if tester.specs.isValid(check) and not 'ALL' in tester.specs[check]:
                         tester.addCaveats(check)
-            if tester.getCaveats():
-                result = '[' + ', '.join(tester.getCaveats()).upper() + '] ' + tester.getSuccessMessage()
-            else:
-                result = tester.getSuccessMessage()
 
         # FAIL, DIFF and DELETED fall into this catagory
         elif tester.didFail() or tester.didDiff() or tester.isDeleted():
             result = 'FAILED (%s)' % tester.getStatusMessage()
 
-        # SKIPPED tests fall into this catagory
-        elif tester.isSkipped():
-            if tester.getCaveats():
-                result = '[' + ', '.join(tester.getCaveats()).upper() + '] skipped (' + tester.getStatusMessage() + ')'
-            else:
-                result = 'skipped (' + tester.getStatusMessage() + ')'
+        # Silent tests have no results
+        elif tester.isSilent():
+            result = ''
+
+        # Some other finished status... skipped, queued, etc
         else:
             result = tester.getStatusMessage()
+
         return result
 
     # Print and return formatted current tester status output
     def printResult(self, tester_data):
         """ Method to print a testers status to the screen """
         tester = tester_data.getTester()
-        caveat_formatted_results = None
+        formatted_results = None
 
         # Print what ever status the tester has at the time
         if self.canPrint(tester):
@@ -445,9 +442,9 @@ class TestHarness:
                     output = test_name + ("\n" + test_name).join(lines)
                     print(output)
 
-            caveat_formatted_results = self.formatCaveats(tester)
-            print(util.formatResult(tester_data, caveat_formatted_results, self.options))
-        return caveat_formatted_results
+            formatted_results = self.formatCaveats(tester)
+            print(util.formatResult(tester_data, formatted_results, self.options))
+        return formatted_results
 
     def handleTestStatus(self, tester_data):
         """ Method to handle a testers status """
@@ -457,7 +454,7 @@ class TestHarness:
         result = self.printResult(tester_data)
 
         # Test is finished and had some results to print
-        if result and tester.isFinished():
+        if tester.isFinished() and self.canPrint(tester):
             timing = tester_data.getTiming()
 
             # Store these results to a table we will use when we print final results
@@ -493,18 +490,18 @@ class TestHarness:
         # Print the results table again if a bunch of output was spewed to the screen between
         # tests as they were running
         if len(self.parse_errors) > 0:
-            print('\n\nParser Errors:\n' + ('-' * (util.TERM_COLS-1)))
+            print('\n\nParser Errors:\n' + ('-' * (util.TERM_COLS)))
             for err in self.parse_errors:
                 print(util.colorText(err, 'RED', html=True, colored=self.options.colored, code=self.options.code))
 
         if (self.options.verbose or (self.num_failed != 0 and not self.options.quiet)) and not self.options.dry_run:
-            print('\n\nFinal Test Results:\n' + ('-' * (util.TERM_COLS-1)))
+            print('\n\nFinal Test Results:\n' + ('-' * (util.TERM_COLS)))
             for (tester_data, result, timing) in sorted(self.test_table, key=lambda x: x[1], reverse=True):
                 print(util.formatResult(tester_data, result, self.options))
 
         time = clock() - self.start_time
 
-        print('-' * (util.TERM_COLS-1))
+        print('-' * (util.TERM_COLS))
 
         # Mask off TestHarness error codes to report parser errors
         fatal_error = ''

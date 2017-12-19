@@ -149,18 +149,21 @@ class TestHarnessTestCase(unittest.TestCase):
                 mock_next_jobs.return_value = []
                 tester = job.getTester()
 
+                # scheduler normally does this for us. But we are 'mocking'
+                # a run, so we must adjust the status manually.
                 if tester.isInitialized():
                     tester.setStatus('PENDING', tester.bucket_pending)
 
-                # Skipped jobs are sent to a different method and have already
-                # been processed during the iteration that created this
-                # condition in the first place (jobA fails and thus skips and
-                # never runs jobB, but _occurres_ during jobA's iteration).
+                # A different method may have adjusted this tester to be
+                # skipped (jobA fails and thus skips and never runs jobB,
+                # but _occurres_ during jobA's iteration).
                 elif tester.isSkipped():
                     return
 
-                # Launch the job and wait (non-blocking)
+                # Launch the job (non-blocking)
                 harness.scheduler.queueJobs(run_jobs=[job])
+
+                # Wait for test to finish
                 while tester.isPending():
                     time.sleep(.1)
 
@@ -171,6 +174,7 @@ class TestHarnessTestCase(unittest.TestCase):
                 result_output_list = []
                 for single_result in result_list:
                     (result_output, tmp_kwargs) = single_result
+                    # index 1 is the result variable in util.formatResult
                     result_output_list.append(result_output[1])
 
         return result_output_list
@@ -228,7 +232,7 @@ class TestHarnessTestCase(unittest.TestCase):
                 if job_id == 0:
                     join_results = ' '.join([result_list[0], result_list[1]])
                     self.assertRegexpMatches(join_results, 'FAILED \(QSUB FAILURE\)')
-                    self.assertRegexpMatches(join_results, 'skipped \(skipped dependency\)')
+                    self.assertRegexpMatches(join_results, 'SKIP')
 
                 # We _should_ actually have no results
                 elif job_id == 1 and result_list != None:
@@ -253,8 +257,9 @@ class TestHarnessTestCase(unittest.TestCase):
                 # Join the results, because the TestHarness receives them out-of-order
                 if job_id == 0:
                     join_results = ' '.join([result_list[0], result_list[1]])
+                    print join_results
                     self.assertRegexpMatches(join_results, 'FAILED \(INVALID QSTAT RESULTS\)')
-                    self.assertRegexpMatches(join_results, 'skipped \(skipped dependency\)')
+                    self.assertRegexpMatches(join_results, 'SKIP')
 
                 # We _should_ actually have no results
                 elif job_id == 1 and result_list != None:
@@ -279,7 +284,7 @@ class TestHarnessTestCase(unittest.TestCase):
                 if job_id == 0:
                     join_results = ' '.join([result_list[0], result_list[1]])
                     self.assertRegexpMatches(join_results, 'FAILED \(UNKNOWN PBS STATUS\)')
-                    self.assertRegexpMatches(join_results, 'skipped \(skipped dependency\)')
+                    self.assertRegexpMatches(join_results, 'SKIP')
 
                 # We _should_ actually have no results
                 elif job_id == 1 and result_list != None:
@@ -309,7 +314,7 @@ class TestHarnessTestCase(unittest.TestCase):
                 if job_id == 0:
                     join_results = ' '.join([result_list[0], result_list[1]])
                     self.assertRegexpMatches(join_results, 'FAILED \(NO STDOUT FILE\)')
-                    self.assertRegexpMatches(join_results, 'skipped \(skipped dependency\)')
+                    self.assertRegexpMatches(join_results, 'SKIP')
 
                 # We _should_ actually have no results
                 elif job_id == 1 and result_list != None:

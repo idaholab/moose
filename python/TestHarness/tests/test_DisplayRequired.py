@@ -11,8 +11,8 @@ class TestHarnessTester(TestHarnessTestCase):
         if display:
             os.unsetenv('DISPLAY')
 
-        output = self.runTests('-i', 'display_required')
-        self.assertRegexpMatches(output, r'test_harness\.display_required.*?skipped\s\(NO DISPLAY\)')
+        output = self.runTests('--no-color', '-i', 'display_required')
+        self.assertRegexpMatches(output, r'test_harness\.display_required.*? \[NO DISPLAY\] SKIP')
 
         if display:
             os.putenv('DISPLAY', display)

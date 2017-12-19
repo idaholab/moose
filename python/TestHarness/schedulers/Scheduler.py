@@ -158,7 +158,8 @@ class Scheduler(MooseObject):
 
             for failed_job in failed_job_containers:
                 failed_tester = failed_job.getTester()
-                failed_tester.setStatus('skipped dependency', failed_tester.bucket_skip)
+                failed_tester.addCaveats('skipped dependency')
+                failed_tester.setStatus(failed_tester.bucket_skip.status, failed_tester.bucket_skip)
 
         return failed_job_containers
 
@@ -201,9 +202,11 @@ class Scheduler(MooseObject):
                 except dag.DAGEdgeIndError:
                     if not self.skipPrereqs():
                         if self.options.reg_exp:
-                            tester.setStatus('dependency does not match re', tester.bucket_skip)
+                            tester.addCaveats('dependency does not match re')
+                            tester.setStatus(tester.bucket_skip.status, tester.bucket_skip)
                         else:
-                            tester.setStatus('skipped dependency', tester.bucket_skip)
+                            tester.addCaveats('skipped dependency')
+                            tester.setStatus(tester.bucket_skip.status, tester.bucket_skip)
                         failed_or_skipped_testers.add(tester)
 
                     # Add the parent node / dependency edge to create a functional DAG now that we have caught
@@ -425,7 +428,8 @@ class Scheduler(MooseObject):
             # Check for insufficient slots -hard limit (skip this job)
             # TODO: Create a unit test for this case
             elif job_container.getSlots() > self.available_slots and not self.soft_limit:
-                tester.setStatus('insufficient slots', tester.bucket_skip)
+                tester.addCaveats('insufficient slots')
+                tester.setStatus(tester.bucket_skip.status, tester.bucket_skip)
 
             if can_run:
                 self.slots_in_use += job_container.getSlots()

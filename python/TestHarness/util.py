@@ -5,6 +5,7 @@ from collections import namedtuple
 import json
 
 TERM_COLS = int(os.getenv('MOOSE_TERM_COLS', '110'))
+TERM_FORMAT = os.getenv('MOOSE_TERM_FORMAT', 'njcst')
 
 LIBMESH_OPTIONS = {
   'mesh_mode' :    { 're_option' : r'#define\s+LIBMESH_ENABLE_PARMESH\s+(\d+)',
@@ -125,43 +126,72 @@ def runCommand(cmd, cwd=None):
 #
 # The test will not be colored if
 # 1) options.colored is False,
-# 2) the environment variable BITTEN_NOCOLOR is true, or
-# 3) the color parameter is False.
+# 2) the color parameter is False.
 def formatResult(tester_data, result, options, color=True):
+    terminal_format = list(TERM_FORMAT)
     tester = tester_data.getTester()
-    timing = tester_data.getTiming()
-    f_result = ''
-    caveats = ''
-    first_directory = tester.specs['first_directory']
     test_name = tester.getTestName()
     status = tester.getStatus()
-
-    cnt = (TERM_COLS-2) - len(test_name + result)
     color_opts = {'code' : options.code, 'colored' : options.colored}
-    if color:
-        if options.color_first_directory:
-            test_name = colorText(first_directory, 'CYAN', **color_opts) + test_name.replace(first_directory, '', 1) # Strip out first occurence only
-        # Color the Caveats CYAN
-        m = re.search(r'(\[.*?\])', result)
-        if m:
-            caveats = m.group(1)
-            f_result = colorText(caveats, 'CYAN', **color_opts)
 
-        # Color test results based on status.
-        # Keep any caveats that may have been colored
-        if status:
-            f_result += colorText(result.replace(caveats, ''), tester.getColor(), **color_opts)
+    # If result is empty, default to using the testers status message as the result
+    if not result:
+        result = str(tester.getStatusMessage())
 
-        f_result = test_name + '.'*cnt + ' ' + f_result
-    else:
-        f_result = test_name + '.'*cnt + ' ' + result
+    # Format the caveats if any
+    f_caveats = ''
+    if tester.getCaveats():
+        f_caveats = '[' + ','.join(tester.getCaveats()).upper() + ']'
 
-    # Tack on the timing if it exists
+    # Decorate timing
+    f_time = ''
     if options.timing:
-        f_result += ' [' + '%0.3f' % float(timing) + 's]'
+        f_time = '[' + '%0.3f' % float(tester_data.getTiming()) + 's]'
+
+    # Set the justification text based on some dynamic situations
+    dynamic_text_length = len(test_name + result + f_caveats)
+    if 'p' in terminal_format:
+        pre_result = ' '*(8-len(status.status)) + status.status
+        cnt = (TERM_COLS - len(pre_result)) - dynamic_text_length
+    else:
+        pre_result = ''
+        cnt = TERM_COLS - dynamic_text_length
+
+    # Everything that can print should be set above
+    # Adjusting horizontal character count to compensate for all 'printable' items
+    items_to_print = [x for x in [pre_result, test_name, f_caveats, result] if x != '']
+    hr = '.'*(cnt-len(items_to_print))
+
+    # Decorate all things that should be colorful
+    if color:
+        hr = colorText(hr, 'GREY', **color_opts)
+        result = colorText(result, status.color, **color_opts)
+        if pre_result:
+            pre_result = colorText(pre_result, status.color, **color_opts)
+        if options.color_first_directory:
+            test_name = colorText(tester.specs['first_directory'], 'CYAN', **color_opts) +\
+                        test_name.replace(tester.specs['first_directory'], '', 1) # Strip out first occurence only
+        # Color the caveats based on status color (exception: pass and skipped are blue)
+        if f_caveats:
+            if tester.didPass() or tester.isSkipped():
+                f_caveats = colorText(f_caveats, 'CYAN', **color_opts)
+            else:
+                f_caveats = colorText(f_caveats, status.color, **color_opts)
+
+    # Put it all together
+    formated_result = { 'p' : pre_result,
+                        'n' : test_name,
+                        'c' : f_caveats,
+                        'j' : hr,
+                        's' : result,
+                        't' : f_time}
+    final_results = ' '.join([formated_result[x] for x in terminal_format if formated_result.get(x, '') != ''])
+
+    # Decorate debuging
     if options.debug_harness:
-        f_result += ' Start: ' + '%0.3f' % tester_data.getStartTime() + ' End: ' + '%0.3f' % tester_data.getEndTime()
-    return f_result
+        final_results += ' Start: ' + '%0.3f' % tester_data.getStartTime() + ' End: ' + '%0.3f' % tester_data.getEndTime()
+
+    return final_results
 
 ## Color the error messages if the options permit, also do not color in bitten scripts because
 # it messes up the trac output.
@@ -560,14 +590,14 @@ class TestStatus(object):
     ######
 
     test_status         = namedtuple('test_status', 'status color')
-    bucket_initialized  = test_status(status='INITIALIZED', color='CYAN')
-    bucket_success      = test_status(status='PASS', color='GREEN')
+    bucket_initialized  = test_status(status='INIT', color='CYAN')
+    bucket_success      = test_status(status='OK', color='GREEN')
     bucket_fail         = test_status(status='FAIL', color='RED')
     bucket_deleted      = test_status(status='DELETED', color='RED')
     bucket_diff         = test_status(status='DIFF', color='YELLOW')
     bucket_pending      = test_status(status='PENDING', color='CYAN')
     bucket_finished     = test_status(status='FINISHED', color='CYAN')
-    bucket_skip         = test_status(status='SKIP', color='RESET')
+    bucket_skip         = test_status(status='SKIP', color='GREY')
     bucket_silent       = test_status(status='SILENT', color='RESET')
     bucket_queued       = test_status(status='QUEUED', color='CYAN')
     bucket_waiting_processing = test_status(status='WAITING', color='CYAN')
