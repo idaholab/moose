@@ -247,7 +247,7 @@ FormattedTable::printTable(std::ostream & out,
   else if (suggested_term_width == "AUTO")
     term_width = getTermWidth(false);
   else
-    term_width = suggested_term_width;
+    term_width = MooseUtils::stringToInteger(suggested_term_width);
 
   if (term_width < _min_pps_width)
     term_width = _min_pps_width;

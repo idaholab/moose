@@ -51,8 +51,7 @@ AddOutputAction::act()
     mooseError("The name '", _name, "' is a reserved name for output objects");
 
   // Check that an object by the same name does not already exist; this must be done before the
-  // object
-  // is created to avoid getting misleading errors from the Parser
+  // object is created to avoid getting misleading errors from the Parser
   if (output_warehouse.hasOutput(_name))
     mooseError("An output object named '", _name, "' already exists");
 
@@ -67,7 +66,7 @@ AddOutputAction::act()
 
     // --show-input should enable the display of the input file on the screen
     if (_app.getParam<bool>("show_input") && _moose_object_pars.get<bool>("output_screen"))
-      _moose_object_pars.set<MultiMooseEnum>("execute_input_on") = "initial";
+      _moose_object_pars.set<ExecFlagEnum>("execute_input_on") = EXEC_INITIAL;
   }
 
   // Apply the common parameters

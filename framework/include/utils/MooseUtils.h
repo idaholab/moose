@@ -18,6 +18,7 @@
 #include "HashMap.h"
 #include "MaterialProperty.h" // MaterialProperties
 #include "InfixIterator.h"
+#include "MooseEnumItem.h"
 
 // C++ includes
 #include <string>
@@ -27,6 +28,9 @@
 #include <iterator>
 
 // Forward Declarations
+class InputParameters;
+class ExecFlagEnum;
+
 namespace libMesh
 {
 class Elem;
@@ -35,6 +39,7 @@ namespace Parallel
 class Communicator;
 }
 }
+class MultiMooseEnum;
 
 namespace MooseUtils
 {
@@ -446,6 +451,19 @@ numDigits(const T & num)
 {
   return num > 9 ? static_cast<int>(std::log10(static_cast<double>(num))) + 1 : 1;
 }
-}
+
+/**
+ * Return the default ExecFlagEnum for MOOSE.
+ */
+ExecFlagEnum getDefaultExecFlagEnum();
+
+/**
+ * Robust string to integer conversion that fails for cases such at "1foo".
+ * @param input The string to convert.
+ * @param throw_on_failure Throw an invalid_argument exception instead of mooseError.
+ */
+int stringToInteger(const std::string & input, bool throw_on_failure = false);
+
+} // MooseUtils namespace
 
 #endif // MOOSEUTILS_H

@@ -9,6 +9,7 @@
 #include "LevelSetApp.h"
 #include "AppFactory.h"
 #include "MooseSyntax.h"
+#include "LevelSetTypes.h"
 
 // Kernels
 #include "LevelSetAdvection.h"
@@ -96,4 +97,10 @@ LevelSetApp::registerObjects(Factory & factory)
 void
 LevelSetApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & /*action_factory*/)
 {
+}
+
+void
+LevelSetApp::registerExecFlags()
+{
+  registerExecFlag(LevelSet::EXEC_ADAPT_MESH);
 }

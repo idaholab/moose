@@ -758,6 +758,8 @@ void
 Transient::postExecute()
 {
   _time_stepper->postExecute();
+
+  _problem.execute(EXEC_FINAL);
 }
 
 void
@@ -809,7 +811,7 @@ Transient::setupTimeIntegrator()
         ti_str = "ExplicitTVDRK2";
         break;
       default:
-        mooseError("Unknown scheme");
+        mooseError("Unknown scheme: ", _time_scheme);
         break;
     }
 

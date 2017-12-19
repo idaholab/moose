@@ -105,3 +105,34 @@ TEST(MooseUtils, numDigits)
   EXPECT_EQ(MooseUtils::numDigits(1513253268), 10);
   EXPECT_EQ(MooseUtils::numDigits(69506060606), 11);
 }
+
+TEST(MooseUtils, stringToInteger)
+{
+  EXPECT_EQ(MooseUtils::stringToInteger("42"), 42);
+  EXPECT_EQ(MooseUtils::stringToInteger("-42"), -42);
+  EXPECT_THROW(MooseUtils::stringToInteger("", true), std::invalid_argument);
+  EXPECT_THROW(MooseUtils::stringToInteger("42 ", true), std::invalid_argument);
+  EXPECT_THROW(MooseUtils::stringToInteger("42foo", true), std::invalid_argument);
+  EXPECT_THROW(MooseUtils::stringToInteger("42.1", true), std::invalid_argument);
+}
+
+struct TestCase
+{
+  std::string a;
+  std::string b;
+  int dist;
+};
+
+TEST(MooseUtilsTests, levenshteinDist)
+{
+  TestCase cases[] = {
+      {"hello", "hell", 1}, {"flood", "foods", 2}, {"fandango", "odanget", 5},
+  };
+
+  for (size_t i = 0; i < sizeof(cases) / sizeof(TestCase); i++)
+  {
+    auto test = cases[i];
+    int got = MooseUtils::levenshteinDist(test.a, test.b);
+    EXPECT_EQ(test.dist, got) << "case " << i + 1 << " FAILED: a=" << test.a << ", b=" << test.b;
+  }
+}

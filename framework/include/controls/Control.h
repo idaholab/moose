@@ -66,7 +66,7 @@ public:
   virtual void execute() = 0;
 
   /**
-   * Return the valid "execute_on" options for Control objects
+   * (DEPRECATED) Return the valid "execute_on" options for Control objects
    */
   static MultiMooseEnum getExecuteOptions();
 

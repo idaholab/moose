@@ -34,7 +34,6 @@ protected:
 
     _app = AppFactory::createAppShared("MooseUnitApp", 1, (char **)argv);
     _factory = &_app->getFactory();
-
     registerObjects(*_factory);
     buildObjects();
   }

@@ -95,7 +95,7 @@ validParams<MultiApp>()
   params.addPrivateParam<MPI_Comm>("_mpi_comm");
 
   // Set the default execution time
-  params.set<MultiMooseEnum>("execute_on") = "timestep_begin";
+  params.set<ExecFlagEnum>("execute_on", true) = EXEC_TIMESTEP_BEGIN;
 
   params.addParam<unsigned int>("max_procs_per_app",
                                 std::numeric_limits<unsigned int>::max(),

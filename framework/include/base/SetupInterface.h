@@ -16,7 +16,9 @@
 #define SETUPINTERFACE_H
 
 #include "MooseTypes.h"
-#include "MultiMooseEnum.h"
+#include "ExecFlagEnum.h"
+#include "MooseEnum.h"
+#include "InputParameters.h"
 
 // Forward declarations
 class InputParameters;
@@ -62,24 +64,40 @@ public:
   virtual void subdomainSetup();
 
   /**
-   * Get the execution flag for the object
+   * Return the execute on MultiMooseEnum for this object.
+   */
+  const ExecFlagEnum & getExecuteOnEnum() const;
+
+  /**
+   * (DEPRECATED) Get the execution flag for the object
+   * TODO: ExecFlagType
    */
   virtual const std::vector<ExecFlagType> & execFlags() const;
 
   /**
-   * Build and return the execution flags as a bitfield
+   * (DEPRECATED) Build and return the execution flags as a bitfield
+   * TODO: ExecFlagType
    */
   ExecFlagType execBitFlags() const;
 
   /**
-   * Returns the available options for the 'execute_on' input parameters
+   * (DEPRECATED) Returns the available options for the 'execute_on' input parameters
+   * TODO: ExecFlagType
    * @return A MooseEnum with the available 'execute_on' options, the default is 'residual'
    */
-  static MultiMooseEnum getExecuteOptions();
+  static ExecFlagEnum getExecuteOptions();
+
+private:
+  /// Empty ExecFlagEnum for the case when the "execute_on" parameter is not included. This
+  /// is private because others should not be messing with it.
+  ExecFlagEnum _empty_execute_enum;
 
 protected:
-  /// execution flag (when is the object executed/evaluated)
-  std::vector<ExecFlagType> _exec_flags;
+  /// Execute settings for this oejct.
+  const ExecFlagEnum & _execute_enum;
+
+  /// (DEPRECATED) execution flag (when is the object executed/evaluated) TODO: ExecFlagType
+  const std::vector<ExecFlagType> _exec_flags;
 
   /// Reference to FEProblemBase
   const ExecFlagType & _current_execute_flag;

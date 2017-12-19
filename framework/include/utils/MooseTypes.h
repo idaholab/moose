@@ -81,37 +81,6 @@ typedef unsigned int THREAD_ID;
 typedef StoredRange<std::vector<dof_id_type>::iterator, dof_id_type> NodeIdRange;
 typedef StoredRange<std::vector<const Elem *>::iterator, const Elem *> ConstElemPointerRange;
 
-/// Execution flags - when is the object executed/evaluated
-// Note: If this enum is changed, make sure to modify:
-//   (1) the local function populateExecTypes in Moose.C.
-//   (2) the function in Conversion.C: initExecStoreType()
-//   (3) the method SetupInterface::getExecuteOptions
-//   (4) the function Output::getExecuteOptions
-enum ExecFlagType
-{
-  EXEC_NONE = 0x00, // 0
-  /// Object is evaluated only once at the beginning of the simulation
-  EXEC_INITIAL = 0x01, // 1
-  /// Object is evaluated in every residual computation
-  EXEC_LINEAR = 0x02, // 2
-  /// Object is evaluated in every jacobian computation
-  EXEC_NONLINEAR = 0x04, // 4
-  /// Object is evaluated at the end of every time step
-  EXEC_TIMESTEP_END = 0x08, // 8
-  /// Object is evaluated at the beginning of every time step
-  EXEC_TIMESTEP_BEGIN = 0x10, // 16
-  /// Object is evaluated at the end of the simulations (output only)
-  EXEC_FINAL = 0x20, // 32
-  /// Forces execution to occur (output only)
-  EXEC_FORCED = 0x40, // 64
-  /// Forces execution on failed solve (output only)
-  EXEC_FAILED = 0x80, // 128
-  /// For use with custom executioners that want to fire objects at a specific time
-  EXEC_CUSTOM = 0x100, // 256
-  /// Objects is evaluated on subdomain
-  EXEC_SUBDOMAIN = 0x200 // 512
-};
-
 namespace Moose
 {
 const SubdomainID ANY_BLOCK_ID = libMesh::Elem::invalid_subdomain_id - 1;
@@ -135,7 +104,7 @@ enum MaterialDataType
 };
 
 /**
- * Flag for AuxKernel related exeuction type.
+ * Flag for AuxKernel related execution type.
  */
 enum AuxGroup
 {
@@ -144,11 +113,6 @@ enum AuxGroup
   POST_AUX = 2,
   ALL = 3
 };
-
-/**
- * A static list of all the exec types.
- */
-extern const std::vector<ExecFlagType> exec_types;
 
 /**
  * Framework-wide stuff

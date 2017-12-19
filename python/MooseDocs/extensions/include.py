@@ -63,6 +63,7 @@ class MarkdownPreprocessor(MooseMarkdownCommon, Preprocessor):
         settings['start'] = l_settings['start']
         settings['end'] = l_settings['end']
         settings['include-end'] = l_settings['include-end']
+        settings['include-start'] = l_settings['include-start']
         return settings
 
     def __init__(self, markdown_instance=None, **kwargs):
@@ -84,7 +85,8 @@ class MarkdownPreprocessor(MooseMarkdownCommon, Preprocessor):
         settings = self.getSettings(match.group(2))
         if settings['start'] or settings['end']:
             content = ListingPattern.extractLineRange(filename, settings['start'],
-                                                      settings['end'], settings['include-end'])
+                                                      settings['end'], settings['include-start'],
+                                                      settings['include-end'])
         else:
             with open(filename, 'r') as fid:
                 content = fid.read()

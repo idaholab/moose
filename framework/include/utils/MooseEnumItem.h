@@ -18,13 +18,17 @@
 // STL includes
 #include <string>
 
+// Forward declarations
+class MooseApp;
+
 /**
  * Class for containing MooseEnum item information.
  */
 class MooseEnumItem
 {
 public:
-  MooseEnumItem(const std::string & name, const int & id);
+  static const int INVALID_ID;
+  MooseEnumItem(const std::string & name, const int & id = INVALID_ID);
   ~MooseEnumItem() = default;
   MooseEnumItem(const MooseEnumItem & other);
   MooseEnumItem(MooseEnumItem && other) = default;
@@ -79,6 +83,15 @@ public:
    * ostream operator for string printing.
    */
   friend std::ostream & operator<<(std::ostream & out, const MooseEnumItem & item);
+
+  /**
+   * Method to change the ID of the item, but only if it is an INVALID_ID. An error is produced
+   * if the ID is valid and this method is called.
+   *
+   * This is needed to allow ExecFlagType objects to be created without an ID being provided, the
+   * ID is assigned when ExecFlagEnum::addAvailableFlags is called.
+   */
+  void setID(const int & id);
 
 private:
   /// The name as provided in constructor

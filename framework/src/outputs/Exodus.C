@@ -58,7 +58,7 @@ validParams<Exodus>()
                         "existing file, so only a single timestep exists.");
 
   // Set outputting of the input to be on by default
-  params.set<MultiMooseEnum>("execute_input_on") = "initial";
+  params.set<ExecFlagEnum>("execute_input_on") = EXEC_INITIAL;
 
   // Return the InputParameters
   return params;

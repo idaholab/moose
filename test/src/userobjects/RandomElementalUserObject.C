@@ -19,10 +19,7 @@ InputParameters
 validParams<RandomElementalUserObject>()
 {
   InputParameters params = validParams<ElementUserObject>();
-
-  MultiMooseEnum setup_options(SetupInterface::getExecuteOptions());
-  setup_options = "timestep_begin";
-  params.set<MultiMooseEnum>("execute_on") = setup_options;
+  params.set<ExecFlagEnum>("execute_on") = EXEC_TIMESTEP_BEGIN;
   return params;
 }
 

@@ -16,6 +16,9 @@
 #include "MooseUtils.h"
 #include "MooseError.h"
 #include "MaterialProperty.h"
+#include "MultiMooseEnum.h"
+#include "InputParameters.h"
+#include "ExecFlagEnum.h"
 
 #include "libmesh/elem.h"
 
@@ -559,6 +562,45 @@ toUpper(const std::string & name)
   std::string upper(name);
   std::transform(upper.begin(), upper.end(), upper.begin(), ::toupper);
   return upper;
+}
+
+ExecFlagEnum
+getDefaultExecFlagEnum()
+{
+  ExecFlagEnum exec_enum = ExecFlagEnum();
+  exec_enum.addAvailableFlags(EXEC_NONE,
+                              EXEC_INITIAL,
+                              EXEC_LINEAR,
+                              EXEC_NONLINEAR,
+                              EXEC_TIMESTEP_END,
+                              EXEC_TIMESTEP_BEGIN,
+                              EXEC_FINAL,
+                              EXEC_CUSTOM);
+  return exec_enum;
+}
+
+int
+stringToInteger(const std::string & input, bool throw_on_failure)
+{
+  int output;            // return value
+  std::size_t count = 0; // number of characters converted with stoi
+
+  // Attempt to use std::stoi, if it fails throw or produce a mooseError
+  try
+  {
+    output = std::stoi(input, &count);
+    if (input.size() != count)
+      throw std::invalid_argument("");
+  }
+  catch (const std::invalid_argument & e)
+  {
+    std::string msg = "Failed to convert '" + input + "' to an int.";
+    if (throw_on_failure)
+      throw std::invalid_argument(msg);
+    else
+      mooseError(msg);
+  }
+  return output;
 }
 
 } // MooseUtils namespace

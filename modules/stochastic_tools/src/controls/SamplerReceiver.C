@@ -22,7 +22,7 @@ validParams<SamplerReceiver>()
 {
   InputParameters params = validParams<Control>();
   params.addClassDescription("Control for receiving data from a Sampler via SamplerTransfer.");
-  params.set<MultiMooseEnum>("execute_on") = "timestep_begin";
+  params.set<ExecFlagEnum>("execute_on") = EXEC_TIMESTEP_BEGIN;
   return params;
 }
 
