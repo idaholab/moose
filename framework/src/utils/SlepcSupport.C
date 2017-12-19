@@ -74,8 +74,7 @@ getSlepcEigenProblemValidParams()
 
   // We are solving a Non-Hermitian eigenvalue problem by default
   MooseEnum eigen_problem_type("HERMITIAN NON_HERMITIAN GEN_HERMITIAN GEN_NON_HERMITIAN "
-                               "GEN_INDEFINITE POS_GEN_NON_HERMITIAN "
-                               "NON_HERMITIAN SLEPC_DEFAULT");
+                               "GEN_INDEFINITE POS_GEN_NON_HERMITIAN SLEPC_DEFAULT");
   params.addParam<MooseEnum>(
       "eigen_problem_type",
       eigen_problem_type,
@@ -91,8 +90,7 @@ getSlepcEigenProblemValidParams()
   // Which eigenvalues are we interested in
   MooseEnum which_eigen_pairs("LARGEST_MAGNITUDE SMALLEST_MAGNITUDE LARGEST_REAL SMALLEST_REAL "
                               "LARGEST_IMAGINARY SMALLEST_IMAGINARY TARGET_MAGNITUDE TARGET_REAL "
-                              "TARGET_IMAGINARY ALL_EIGENVALUES "
-                              "SMALLEST_MAGNITUDE SLEPC_DEFAULT");
+                              "TARGET_IMAGINARY ALL_EIGENVALUES SLEPC_DEFAULT");
   params.addParam<MooseEnum>("which_eigen_pairs",
                              which_eigen_pairs,
                              "Which eigenvalue pairs to obtain from the solution "
