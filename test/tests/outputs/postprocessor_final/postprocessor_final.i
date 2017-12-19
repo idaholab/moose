@@ -59,7 +59,6 @@
 []
 
 [Outputs]
-  exodus = true
   [./test]
     type = CSV
     execute_on = final

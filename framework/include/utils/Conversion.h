@@ -33,9 +33,6 @@ template <typename T>
 T stringToEnum(const std::string & s);
 
 template <>
-ExecFlagType stringToEnum<ExecFlagType>(const std::string & s);
-
-template <>
 QuadratureType stringToEnum<QuadratureType>(const std::string & s);
 
 template <>
@@ -57,9 +54,6 @@ TimeIntegratorType stringToEnum<TimeIntegratorType>(const std::string & s);
 template <typename T>
 std::vector<T> vectorStringsToEnum(const MultiMooseEnum & v);
 
-template <>
-std::vector<ExecFlagType> vectorStringsToEnum<ExecFlagType>(const MultiMooseEnum & v);
-
 /// conversion to string
 template <typename T>
 std::string
@@ -72,9 +66,6 @@ stringify(const T & t)
 
 /// Convert solve type into human readable string
 std::string stringify(const SolveType & t);
-
-/// Convert execute flags type into human readable string
-std::string stringify(const ExecFlagType & t);
 
 /// Add no-op stringify if the argument already is a string (must use overloading)
 std::string stringify(const std::string & s);

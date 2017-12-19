@@ -43,7 +43,7 @@ validParams<CSVReader>()
                                "omitted it will read comma or space separated files.");
   params.addParam<bool>(
       "ignore_empty_lines", true, "When true new empty lines in the file are ignored.");
-  params.set<MultiMooseEnum>("execute_on") = "initial";
+  params.set<ExecFlagEnum>("execute_on", true) = EXEC_INITIAL;
   return params;
 }
 

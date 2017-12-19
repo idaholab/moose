@@ -17,6 +17,7 @@
 // MOOSE includes
 #include "MooseEnum.h"
 #include "MultiMooseEnum.h"
+#include "ExecFlagEnum.h"
 #include "Parser.h"
 #include "pcrecpp.h"
 
@@ -214,6 +215,15 @@ JsonSyntaxTree::buildOptions(const std::iterator_traits<InputParameters::iterato
     }
   }
   {
+    InputParameters::Parameter<ExecFlagEnum> * enum_type =
+        dynamic_cast<InputParameters::Parameter<ExecFlagEnum> *>(p.second);
+    if (enum_type)
+    {
+      out_of_range_allowed = enum_type->get().isOutOfRangeAllowed();
+      options = enum_type->get().getRawNames();
+    }
+  }
+  {
     InputParameters::Parameter<std::vector<MooseEnum>> * enum_type =
         dynamic_cast<InputParameters::Parameter<std::vector<MooseEnum>> *>(p.second);
     if (enum_type)
@@ -301,6 +311,7 @@ JsonSyntaxTree::basicCppType(const std::string & cpp_type)
     s = "Array:" + basicCppType(t);
   }
   else if (cpp_type.find("MultiMooseEnum") != std::string::npos ||
+           cpp_type.find("ExecFlagEnum") != std::string::npos ||
            cpp_type.find("VectorPostprocessorName") != std::string::npos)
     s = "Array:String";
   else if (cpp_type.find("libMesh::Point") != std::string::npos)

@@ -18,7 +18,7 @@ validParams<ContactPressureAux>()
   InputParameters params = validParams<AuxKernel>();
   params.addRequiredCoupledVar("nodal_area", "The nodal area");
   params.addRequiredParam<BoundaryName>("paired_boundary", "The boundary to be penetrated");
-  params.set<MultiMooseEnum>("execute_on") = "nonlinear";
+  params.set<ExecFlagEnum>("execute_on") = EXEC_NONLINEAR;
   return params;
 }
 

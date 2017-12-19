@@ -264,9 +264,9 @@ private:
    * Initialize the possible execution types
    * @param name The name of the supplied MultiMoose enum from the _execute_on std::map (e.g.,
    * scalars)
-   * @param input The MultiMooseEnum for output type flags to initialize
+   * @param input The ExecFlagEnum for output type flags to initialize
    */
-  void initExecutionTypes(const std::string & name, MultiMooseEnum & input);
+  void initExecutionTypes(const std::string & name, ExecFlagEnum & input);
 
   /**
    * Parses the user-supplied input for hiding and showing variables and postprocessors into
@@ -304,9 +304,9 @@ private:
    *
    * Each output object may have a varying set of supported output types (e.g., elemental
    * variables may not be supported). This private, static method populates the InputParameters
-   * object with the correct parameters based on the items contained in the MultiMooseEnum.
+   * object with the correct parameters based on the items contained in the ExecFlagEnum.
    *
-   * This method is private, users should utlize the Output::enableOutputTypes method
+   * This method is private, users should utilize the Output::enableOutputTypes method
    *
    * @see Output::enableOutputTypes
    */
@@ -398,8 +398,8 @@ AdvancedOutput::initPostprocessorOrVectorPostprocessorLists(const std::string & 
   // Produce the warning when 'outputs' is used, but postprocessor output is disabled
   if (has_limited_pps && isParamValid(execute_on_name))
   {
-    const MultiMooseEnum & pp_on = getParam<MultiMooseEnum>(execute_on_name);
-    if (pp_on.contains("none"))
+    const ExecFlagEnum & pp_on = getParam<ExecFlagEnum>(execute_on_name);
+    if (pp_on.contains(EXEC_NONE))
     {
       if (execute_on_name == "execute_postprocessors_on")
         mooseWarning("A Postprocessor utilizes the 'outputs' parameter; however, postprocessor "

@@ -46,7 +46,7 @@ public:
   const ExecuteMooseObjectWarehouse<T> & operator[](Moose::AuxGroup group) const;
 
   /**
-   * Call this to separate the stored objects into the various AuxGroup catagories.
+   * Call this to separate the stored objects into the various AuxGroup categories.
    *
    * @see FEProblemBase::initialSetup()
    */
@@ -93,9 +93,9 @@ AuxGroupExecuteMooseObjectWarehouse<T>::updateDependObjects(
 {
   checkThreadID(tid);
 
-  constexpr std::uint16_t initial_flag_mask = static_cast<std::uint16_t>(EXEC_INITIAL);
-  constexpr std::uint16_t not_initial_flag_mask = ~static_cast<std::uint16_t>(EXEC_INITIAL);
-  constexpr std::uint16_t all_flags = std::numeric_limits<std::uint16_t>::max();
+  const std::uint16_t initial_flag_mask = static_cast<std::uint16_t>(EXEC_INITIAL);
+  const std::uint16_t not_initial_flag_mask = ~static_cast<std::uint16_t>(EXEC_INITIAL);
+  const std::uint16_t all_flags = std::numeric_limits<std::uint16_t>::max();
 
   for (const auto & object_ptr : _all_objects[tid])
   {

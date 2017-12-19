@@ -16,6 +16,7 @@
 #define RANDOMINTERFACE_H
 
 #include "MooseTypes.h"
+#include "MooseEnumItem.h"
 
 // Forward declarations
 class Assembly;

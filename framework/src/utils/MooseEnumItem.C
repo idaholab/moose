@@ -64,15 +64,15 @@ MooseEnumItem::operator!=(const std::string & value) const
 }
 
 bool
-MooseEnumItem::operator==(const MooseEnumItem &) const
+MooseEnumItem::operator==(const MooseEnumItem & item) const
 {
-  mooseError("Direct comparison between MooseEnumItems is not supported.");
+  return _id == item.id() && _name == MooseUtils::toUpper(item.name());
 }
 
 bool
-MooseEnumItem::operator!=(const MooseEnumItem &) const
+MooseEnumItem::operator!=(const MooseEnumItem & item) const
 {
-  mooseError("Direct comparison between MooseEnumItems is not supported.");
+  return _id != item.id() && _name != MooseUtils::toUpper(item.name());
 }
 
 std::ostream &
@@ -81,3 +81,17 @@ operator<<(std::ostream & out, const MooseEnumItem & item)
   out << item.rawName();
   return out;
 }
+
+void
+MooseEnumItem::setID(const int & id)
+{
+  if (_id != INVALID_ID)
+    mooseError("The ID of a MooseEnumItem can not be changed if it is valid, the item ",
+               _name,
+               " has a valid id of ",
+               _id,
+               ".");
+  _id = id;
+}
+
+const int MooseEnumItem::INVALID_ID = std::numeric_limits<int>::min();

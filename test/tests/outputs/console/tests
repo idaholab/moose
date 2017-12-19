@@ -157,4 +157,10 @@
     expect_out = 'Time\sStep\s11'
     group = 'requirements'
   [../]
+  [./console_fit_width_error]
+    type = RunException
+    input = console.i
+    cli_args = Outputs/screen/fit_mode=foo
+    expect_err = "Failed to convert 'foo' to an int."
+  [../]
 []

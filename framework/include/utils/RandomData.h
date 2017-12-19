@@ -18,6 +18,7 @@
 // MOOSE includes
 #include "MooseRandom.h"
 #include "MooseTypes.h"
+#include "MooseEnumItem.h"
 
 #include <unordered_map>
 

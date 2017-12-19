@@ -80,3 +80,26 @@ TEST(MooseEnumItem, lessthan)
   EXPECT_NE(items.find(item4), items.end());
   EXPECT_EQ(items.find(MooseEnumItem("Edward", 1949)), items.end());
 }
+
+TEST(MooseEnumItem, setID)
+{
+  MooseEnumItem item("LuggageCombo");
+  EXPECT_EQ(item.id(), MooseEnumItem::INVALID_ID);
+
+  item.setID(12345);
+  EXPECT_EQ(item.id(), 12345);
+
+  try
+  {
+    item.setID(54321);
+    FAIL() << "missing expected error";
+  }
+  catch (const std::exception & e)
+  {
+    std::string msg(e.what());
+    ASSERT_NE(msg.find("The ID of a MooseEnumItem can not be changed if it is valid, the item "
+                       "LUGGAGECOMBO has a valid id of 12345."),
+              std::string::npos)
+        << "failed with unexpected error: " << msg;
+  }
+}

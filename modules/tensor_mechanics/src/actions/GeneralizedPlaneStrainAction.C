@@ -103,7 +103,7 @@ GeneralizedPlaneStrainAction::act()
     InputParameters params = _factory.getValidParams(uo_type);
 
     params.applyParameters(parameters());
-    params.set<MultiMooseEnum>("execute_on") = "linear";
+    params.set<ExecFlagEnum>("execute_on") = EXEC_LINEAR;
 
     _problem->addUserObject(uo_type, uo_name, params);
   }

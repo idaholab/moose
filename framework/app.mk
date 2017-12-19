@@ -194,7 +194,7 @@ endif
 
 BUILD_EXEC :=
 
-app_GIT_DIR := $(shell cd "$(APPLICATION_DIR)" && git rev-parse --show-toplevel)
+app_GIT_DIR := $(shell cd "$(APPLICATION_DIR)" && which git &> /dev/null && git rev-parse --show-toplevel)
 # Use wildcard in case the files don't exist
 app_HEADER_deps := $(wildcard $(app_GIT_DIR)/.git/HEAD $(app_GIT_DIR)/.git/index)
 # Target-specific Variable Values (See GNU-make manual)

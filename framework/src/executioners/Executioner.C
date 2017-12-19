@@ -187,6 +187,6 @@ Executioner::addAttributeReporter(const std::string & name,
   InputParameters params = _app.getFactory().getValidParams("ExecutionerAttributeReporter");
   params.set<Real *>("value") = &attribute;
   if (!execute_on.empty())
-    params.set<MultiMooseEnum>("execute_on") = execute_on;
+    params.set<ExecFlagEnum>("execute_on") = execute_on;
   problem->addPostprocessor("ExecutionerAttributeReporter", name, params);
 }

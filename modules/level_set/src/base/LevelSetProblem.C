@@ -6,6 +6,8 @@
 /****************************************************************/
 
 #include "LevelSetProblem.h"
+#include "LevelSetTypes.h"
+
 #include "MultiAppTransfer.h"
 
 template <>
@@ -32,7 +34,7 @@ LevelSetProblem::adaptMesh()
   for (unsigned int i = 0; i < cycles_per_step; ++i)
   {
 
-    execMultiAppTransfers(EXEC_CUSTOM, MultiAppTransfer::TO_MULTIAPP);
+    execMultiAppTransfers(LevelSet::EXEC_ADAPT_MESH, MultiAppTransfer::TO_MULTIAPP);
 
     _console << "Adaptivity step " << i + 1 << " of " << cycles_per_step << '\n';
     // Markers were already computed once by Executioner

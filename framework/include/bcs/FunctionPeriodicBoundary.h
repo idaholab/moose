@@ -71,7 +71,7 @@ protected:
   Function * _tr_z;
 
   /**
-   * An initialization method to make certain that intialSetup() of a function prior to value()
+   * An initialization method to make certain that initialSetup() of a function prior to value()
    */
   void init();
 };

@@ -12,6 +12,7 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 #include "MooseTestApp.h"
+#include "MooseTestAppTypes.h"
 #include "Moose.h"
 #include "Factory.h"
 #include "MooseSyntax.h"
@@ -646,4 +647,11 @@ MooseTestApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
   registerAction(AddMatAndKernel, "add_material");
   registerAction(AddMatAndKernel, "add_variable");
   registerSyntax("AddMatAndKernel", "AddMatAndKernel");
+}
+
+void
+MooseTestApp::registerExecFlags()
+{
+  MooseApp::registerExecFlags();
+  registerExecFlag(EXEC_JUST_GO);
 }
