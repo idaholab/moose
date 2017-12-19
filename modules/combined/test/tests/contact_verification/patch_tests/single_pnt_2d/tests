@@ -12,6 +12,7 @@
     prereq = 'glued_kin_sm'
     petsc_version = '>=3.7.6'
     compiler = 'GCC CLANG' #superlu bug, see MOOSE issue #10084
+    allow_warnings = true
   [../]
   [./glued_pen]
     type = 'CSVDiff'
@@ -24,6 +25,7 @@
     max_parallel = 1
     superlu = true
     prereq = 'glued_pen_sm'
+    allow_warnings = true
   [../]
   [./frictionless_kin]
     type = 'CSVDiff'
@@ -35,6 +37,7 @@
     max_parallel = 1
     superlu = true
     prereq = 'frictionless_kin_sm'
+    allow_warnings = true
   [../]
   [./frictionless_pen]
     type = 'CSVDiff'
@@ -46,6 +49,7 @@
     max_parallel = 1
     superlu = true
     prereq = 'frictionless_pen_sm'
+    allow_warnings = true
   [../]
   [./mu_0_0_kin]
     type = 'CSVDiff'
@@ -57,6 +61,7 @@
     max_parallel = 1
     superlu = true
     prereq = 'mu_0_0_kin_sm'
+    allow_warnings = true
   [../]
   [./mu_0_0_pen]
     type = 'CSVDiff'
@@ -68,6 +73,7 @@
     max_parallel = 1
     superlu = true
     prereq = 'mu_0_0_pen_sm'
+    allow_warnings = true
   [../]
   [./mu_0_2_kin]
     type = 'CSVDiff'
@@ -79,6 +85,7 @@
     max_parallel = 1
     superlu = true
     prereq = 'mu_0_2_kin_sm'
+    allow_warnings = true
   [../]
   [./mu_0_2_pen]
     type = 'CSVDiff'
@@ -91,6 +98,7 @@
     max_parallel = 1
     superlu = true
     prereq = 'mu_0_2_pen_sm'
+    allow_warnings = true
   [../]
   [./glued_kin_sm]
     type = 'CSVDiff'
@@ -103,6 +111,7 @@
     abs_zero = 3e-5
     max_parallel = 1
     superlu = true
+    allow_warnings = true
   [../]
   [./glued_pen_sm]
     type = 'CSVDiff'
@@ -114,6 +123,7 @@
     abs_zero = 3e-5
     max_parallel = 1
     superlu = true
+    allow_warnings = true
   [../]
   [./frictionless_kin_sm]
     type = 'CSVDiff'
@@ -124,6 +134,7 @@
     abs_zero = 5e-6
     max_parallel = 1
     superlu = true
+    allow_warnings = true
   [../]
   [./frictionless_pen_sm]
     type = 'CSVDiff'
@@ -134,6 +145,7 @@
     abs_zero = 1e-5
     max_parallel = 1
     superlu = true
+    allow_warnings = true
   [../]
   [./mu_0_0_kin_sm]
     type = 'CSVDiff'
@@ -144,6 +156,7 @@
     abs_zero = 5e-6
     max_parallel = 1
     superlu = true
+    allow_warnings = true
   [../]
   [./mu_0_0_pen_sm]
     type = 'CSVDiff'
@@ -154,6 +167,7 @@
     abs_zero = 1e-5
     max_parallel = 1
     superlu = true
+    allow_warnings = true
   [../]
   [./mu_0_2_kin_sm]
     type = 'CSVDiff'
@@ -164,6 +178,7 @@
     abs_zero = 3e-5
     max_parallel = 1
     superlu = true
+    allow_warnings = true
   [../]
   [./mu_0_2_pen_sm]
     type = 'CSVDiff'
@@ -175,5 +190,6 @@
     abs_zero = 3e-5
     max_parallel = 1
     superlu = true
+    allow_warnings = true
   [../]
 []

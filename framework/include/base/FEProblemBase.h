@@ -433,11 +433,6 @@ public:
   virtual bool computingInitialResidual() override;
 
   /**
-   * Returns true if we are currently computing Jacobian
-   */
-  virtual bool currentlyComputingJacobian() { return _currently_computing_jacobian; }
-
-  /**
    * Returns true if we are in or beyond the initialSetup stage
    */
   virtual bool startedInitialSetup() { return _started_initial_setup; }
@@ -1551,9 +1546,6 @@ private:
   bool _force_restart;
   bool _skip_additional_restart_data;
   bool _fail_next_linear_convergence_check;
-
-  /// Whether or not the system is currently computing the Jacobian matrix
-  bool _currently_computing_jacobian;
 
   /// At or beyond initialSteup stage
   bool _started_initial_setup;

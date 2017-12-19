@@ -69,6 +69,18 @@ public:
   NodeIdRange & slaveNodeRange() { return *_slave_node_range; }
 
   /**
+   * Reconstructs the KDtree, updates the patch for the nodes in slave_nodes,
+   * and updates the closest neighbor for these nodes in nearest node info.
+   */
+  void updatePatch(std::vector<dof_id_type> & slave_nodes);
+
+  /**
+   * Updates the ghosted elements at the start of the time step for iterion
+   * patch update strategy.
+   */
+  void updateGhostedElems();
+
+  /**
    * Data structure used to hold nearest node info.
    */
   class NearestNodeInfo
@@ -101,8 +113,14 @@ public:
   // The following parameter controls the patch size that is searched for each nearest neighbor
   static const unsigned int _patch_size;
 
+  // Contact patch update strategy
+  const Moose::PatchUpdateType _patch_update_strategy;
+
   // The furthest through the patch that had to be searched for any node last time
   Real _max_patch_percentage;
+
+  // The list of ghosted elements added during a time step for iteration patch update strategy
+  std::vector<dof_id_type> _new_ghosted_elems;
 };
 
 #endif // NEARESTNODELOCATOR_H

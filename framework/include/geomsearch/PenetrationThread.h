@@ -51,6 +51,9 @@ public:
 
   void join(const PenetrationThread & other);
 
+  /// List of slave nodes for which penetration was not detected in the current patch and for which patch has to be updated.
+  std::vector<dof_id_type> _recheck_slave_nodes;
+
 protected:
   SubProblem & _subproblem;
   // The Mesh
