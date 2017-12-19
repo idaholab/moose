@@ -1,0 +1,3 @@
+time,bulk_vel_x,bulk_vel_y,bulk_vel_z,fracture_vel_x,fracture_vel_y,fracture_vel_z
+0,0,0,0,0,0,0
+1,1,0.5,-0.3,2,0.69018593865353,0.25120713777896
