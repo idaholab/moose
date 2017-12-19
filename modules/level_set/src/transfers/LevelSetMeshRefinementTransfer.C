@@ -26,7 +26,7 @@ validParams<LevelSetMeshRefinementTransfer>()
   params.suppressParameter<MooseEnum>("direction");
 
   ExecFlagEnum & exec = params.set<ExecFlagEnum>("execute_on");
-  exec.addAvailableFlags({LevelSet::EXEC_ADAPT_MESH});
+  exec.addAvailableFlags(LevelSet::EXEC_ADAPT_MESH);
   exec = LevelSet::EXEC_ADAPT_MESH;
   params.set<bool>("check_multiapp_execute_on") = false;
   params.suppressParameter<ExecFlagEnum>("execute_on");
