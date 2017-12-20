@@ -23,7 +23,7 @@ MOOSE provides capabilities that enable the easy development of multiphase field
 * [Two-phase Models](MultiPhase/WBMTwoPhase.md) - Two phases, one phase order parameter
 * [Kim-Kim-Suzuki Model](MultiPhase/KKS.md) - per-phase concentrations, two phases
 * [Multiphase Models](MultiPhase/WBM.md) - _N_ phases, _N_ phase order parameters
-* Grand Potential Model - solving a Legendre transform of teh phase field equations, where the independent variable is the chemical potential
+* Grand Potential Model - solving a Legendre transform of the phase field equations, where the independent variable is the chemical potential
 
 !media media/phase_field/solutionrasterizer.png width=200px padding-left=20px float=right caption=Atomistic input file generated using the SolutionRasterizer.
 
