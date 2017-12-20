@@ -1,6 +1,7 @@
 #include "Component.h"
 #include "Simulation.h"
 #include "MooseApp.h"
+#include "ConstantFunction.h"
 
 unsigned int Component::subdomain_ids = 0;
 unsigned int Component::bc_ids = 0;
@@ -176,4 +177,14 @@ Component::connectObject(const InputParameters & params,
   MooseObjectParameterName par_value(
       MooseObjectName(params.get<std::string>("_moose_base"), mooseName), par_name);
   _app.getInputParameterWarehouse().addControllableParameterConnection(alias, par_value);
+}
+
+void
+Component::makeFunctionControllableIfConstant(const FunctionName & fn_name,
+                                              const std::string & control_name,
+                                              const std::string & param)
+{
+  Function & fn = _sim.getFunction(fn_name);
+  if (dynamic_cast<ConstantFunction *>(&fn) != nullptr)
+    connectObject(fn.parameters(), "", fn_name, control_name, param);
 }

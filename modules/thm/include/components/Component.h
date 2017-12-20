@@ -116,6 +116,17 @@ public:
   genName(const std::string & prefix, const std::string & middle, const std::string & suffix = "");
 
 protected:
+  /**
+   * Makes a function controllable if it is constant
+   *
+   * @param[in] fn_name  name of the function
+   * @param[in] control_name  name of control parameter
+   * @param[in] param  name of controlled parameter
+   */
+  void makeFunctionControllableIfConstant(const FunctionName & fn_name,
+                                          const std::string & control_name,
+                                          const std::string & param = "value");
+
   /// Unique ID of this component
   unsigned int _id;
   /// Pointer to a parent component (used in composed components)
