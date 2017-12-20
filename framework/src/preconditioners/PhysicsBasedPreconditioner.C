@@ -146,9 +146,6 @@ PhysicsBasedPreconditioner::PhysicsBasedPreconditioner(const InputParameters & p
 PhysicsBasedPreconditioner::~PhysicsBasedPreconditioner()
 {
   this->clear();
-
-  for (auto & pc : _preconditioners)
-    delete pc;
 }
 
 void
@@ -204,11 +201,11 @@ PhysicsBasedPreconditioner::init()
 
     if (!_preconditioners[system_var])
       _preconditioners[system_var] =
-          Preconditioner<Number>::build(MoosePreconditioner::_communicator);
+          Preconditioner<Number>::build_preconditioner(MoosePreconditioner::_communicator);
 
     // we have to explicitly set the matrix in the preconditioner, because h-adaptivity could have
     // changed it and we have to work with the current one
-    Preconditioner<Number> * preconditioner = _preconditioners[system_var];
+    Preconditioner<Number> * preconditioner = _preconditioners[system_var].get();
     preconditioner->set_matrix(*u_system.matrix);
     preconditioner->set_type(_pre_type[system_var]);
 
