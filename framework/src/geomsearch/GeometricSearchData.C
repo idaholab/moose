@@ -483,3 +483,13 @@ GeometricSearchData::reinitMortarNodes()
     generateMortarNodes(master_id, slave_id, 0);
   }
 }
+
+void
+GeometricSearchData::updateGhostedElems()
+{
+  for (const auto & nnl_it : _nearest_node_locators)
+  {
+    NearestNodeLocator * nnl = nnl_it.second;
+    nnl->updateGhostedElems();
+  }
+}

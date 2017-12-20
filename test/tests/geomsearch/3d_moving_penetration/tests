@@ -5,6 +5,7 @@
     exodiff = 'pl_test1q_out.e'
     group = 'geometric'
     custom_cmp = exclude_elem_id.cmp
+    allow_warnings = true
   [../]
 
   [./pl_test1qtt]
@@ -13,6 +14,7 @@
     exodiff = 'pl_test1qtt_out.e'
     group = 'geometric'
     custom_cmp = exclude_elem_id.cmp
+    allow_warnings = true
   [../]
 
   [./pl_test2qtt]
@@ -21,6 +23,7 @@
     exodiff = 'pl_test2qtt_out.e'
     group = 'geometric'
     custom_cmp = exclude_elem_id.cmp
+    allow_warnings = true
   [../]
 
   [./pl_test2q]
@@ -29,6 +32,7 @@
     exodiff = 'pl_test2q_out.e'
     group = 'geometric'
     custom_cmp = exclude_elem_id.cmp
+    allow_warnings = true
   [../]
 
   [./pl_test1tt]
@@ -37,6 +41,7 @@
     exodiff = 'pl_test1tt_out.e'
     group = 'geometric'
     custom_cmp = exclude_elem_id.cmp
+    allow_warnings = true
   [../]
 
   [./pl_test4q]
@@ -46,6 +51,7 @@
     abs_zero = 1e-09
     group = 'geometric'
     custom_cmp = exclude_elem_id.cmp
+    allow_warnings = true
   [../]
 
   [./pl_test1]
@@ -54,6 +60,7 @@
     exodiff = 'pl_test1_out.e'
     group = 'geometric'
     custom_cmp = exclude_elem_id.cmp
+    allow_warnings = true
   [../]
 
   [./pl_test2tt]
@@ -62,6 +69,7 @@
     exodiff = 'pl_test2tt_out.e'
     group = 'geometric'
     custom_cmp = exclude_elem_id.cmp
+    allow_warnings = true
   [../]
 
   [./pl_test3]
@@ -70,6 +78,7 @@
     exodiff = 'pl_test3_out.e'
     group = 'geometric'
     custom_cmp = exclude_elem_id.cmp
+    allow_warnings = true
   [../]
 
   [./pl_test2]
@@ -78,6 +87,7 @@
     exodiff = 'pl_test2_out.e'
     group = 'geometric'
     custom_cmp = exclude_elem_id.cmp
+    allow_warnings = true
   [../]
 
   [./pl_test4]
@@ -86,6 +96,7 @@
     exodiff = 'pl_test4_out.e'
     group = 'geometric'
     custom_cmp = exclude_elem_id.cmp
+    allow_warnings = true
   [../]
 
   [./pl_test3q]
@@ -95,6 +106,7 @@
     abs_zero = 1e-09
     group = 'geometric'
     custom_cmp = exclude_elem_id.cmp
+    allow_warnings = true
   [../]
 
   [./pl_test4tt]
@@ -103,6 +115,7 @@
     exodiff = 'pl_test4tt_out.e'
     group = 'geometric'
     custom_cmp = exclude_elem_id.cmp
+    allow_warnings = true
   [../]
 
   [./pl_test3tt]
@@ -111,5 +124,6 @@
     exodiff = 'pl_test3tt_out.e'
     group = 'geometric'
     custom_cmp = exclude_elem_id.cmp
+    allow_warnings = true
   [../]
 []

@@ -102,6 +102,8 @@ protected:
   Real _normal_smoothing_distance; // Distance from edge (in parametric coords) within which to
                                    // perform normal smoothing
   NORMAL_SMOOTHING_METHOD _normal_smoothing_method;
+
+  const Moose::PatchUpdateType _patch_update_strategy; // Contact patch update strategy
 };
 
 /**

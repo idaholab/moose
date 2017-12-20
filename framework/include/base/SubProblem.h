@@ -413,6 +413,11 @@ public:
   std::map<std::string, std::vector<dof_id_type>> _var_dof_map;
   const CouplingMatrix & nonlocalCouplingMatrix() const { return _nonlocal_cm; }
 
+  /**
+   * Returns true if the problem is in the process of computing Jacobian
+   */
+  virtual bool currentlyComputingJacobian() const { return _currently_computing_jacobian; };
+
 protected:
   /// The Factory for building objects
   Factory & _factory;
@@ -465,6 +470,9 @@ protected:
 
   /// Storage for RZ axis selection
   unsigned int _rz_coord_axis;
+
+  /// Flag to determine whether the problem is currently computing Jacobian
+  bool _currently_computing_jacobian;
 
 private:
   /**

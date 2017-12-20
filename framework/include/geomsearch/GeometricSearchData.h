@@ -97,6 +97,12 @@ public:
    */
   Real maxPatchPercentage();
 
+  /**
+   * Updates the list of ghosted elements at the start of each time step for the nonlinear
+   * iteration patch update strategy.
+   */
+  void updateGhostedElems();
+
   // protected:
   SubProblem & _subproblem;
   MooseMesh & _mesh;
