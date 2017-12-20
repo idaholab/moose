@@ -854,7 +854,7 @@ DMMooseGetEmbedding_Private(DM dm, IS * embedding)
             if (bc_id_set.find(boundary_id) == bc_id_set.end())
               continue;
 
-            UniquePtr<const Elem> side_bdry = elem_bdry->build_side_ptr(side, false);
+            std::unique_ptr<const Elem> side_bdry = elem_bdry->build_side_ptr(side, false);
             evindices.clear();
             dofmap.dof_indices(side_bdry.get(), evindices, v);
             for (const auto & edof : evindices)

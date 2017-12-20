@@ -81,7 +81,7 @@ protected:
   /// List of linear system that build up the preconditioner
   std::vector<LinearImplicitSystem *> _systems;
   /// Holds one Preconditioner object per small system to solve.
-  std::vector<Preconditioner<Number> *> _preconditioners;
+  std::vector<std::unique_ptr<Preconditioner<Number>>> _preconditioners;
   /// Holds the order the blocks are solved for.
   std::vector<unsigned int> _solve_order;
   /// Which preconditioner to use for each solve.

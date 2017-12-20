@@ -114,7 +114,7 @@ public:
 
 protected:
   PointListAdaptor<LIBMESH_DIM> _point_list_adaptor;
-  UniquePtr<KdTreeT> _kd_tree;
+  std::unique_ptr<KdTreeT> _kd_tree;
 };
 
 #endif // KDTREE_H

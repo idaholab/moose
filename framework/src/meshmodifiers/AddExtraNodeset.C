@@ -80,7 +80,7 @@ AddExtraNodeset::modify()
   unsigned int dim = _mesh_ptr->dimension();
   unsigned int n_nodes = coord.size() / dim;
 
-  UniquePtr<PointLocatorBase> locator = _mesh_ptr->getMesh().sub_point_locator();
+  std::unique_ptr<PointLocatorBase> locator = _mesh_ptr->getMesh().sub_point_locator();
   locator->enable_out_of_mesh_mode();
 
   for (unsigned int i = 0; i < n_nodes; ++i)
