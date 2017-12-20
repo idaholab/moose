@@ -102,6 +102,7 @@
 
 // AuxKernels
 #include "PorousFlowDarcyVelocityComponent.h"
+#include "PorousFlowDarcyVelocityComponentLowerDimensional.h"
 #include "PorousFlowPropertyAux.h"
 
 // Functions
@@ -248,6 +249,7 @@ PorousFlowApp::registerObjects(Factory & factory)
 
   // AuxKernels
   registerAuxKernel(PorousFlowDarcyVelocityComponent);
+  registerAuxKernel(PorousFlowDarcyVelocityComponentLowerDimensional);
   registerAuxKernel(PorousFlowPropertyAux);
 
   // Functions
