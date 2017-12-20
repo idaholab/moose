@@ -40,6 +40,34 @@ public:
 
   virtual const std::vector<RELAP7::Connection> & getConnections(RELAP7::EEndType id) const;
 
+  /**
+   * Gets the subdomain IDs for this component
+   *
+   * @return vector of subdomain IDs for this component
+   */
+  virtual const std::vector<unsigned int> & getSubdomainIds() const { return _subdomain_ids; }
+
+  /**
+   * Gets the subdomain names for this component
+   *
+   * @return vector of subdomain names for this component
+   */
+  virtual const std::vector<SubdomainName> & getSubdomainNames() const { return _subdomain_names; }
+
+  virtual const std::vector<Moose::CoordinateSystemType> & getCoordSysTypes() { return _coord_sys; }
+
+  /**
+   * Sets the next subdomain ID, name, and coordinate system
+   *
+   * @param[in] subdomain_id  subdomain index
+   * @param[in] subdomain_name  name of the new subdomain
+   * @param[in] coord_system  type of coordinate system
+   */
+  virtual void
+  setSubdomainInfo(unsigned int subdomain_id,
+                   const std::string & subdomain_name,
+                   const Moose::CoordinateSystemType & coord_system = Moose::COORD_XYZ);
+
 protected:
   virtual void buildMesh() = 0;
   const FunctionName & getVariableFn(const FunctionName & fn_param_name);
@@ -84,6 +112,13 @@ protected:
   std::vector<Real> _node_locations;
 
   std::map<RELAP7::EEndType, std::vector<RELAP7::Connection>> _connections;
+
+  /// List of subdomain IDs this components owns
+  std::vector<unsigned int> _subdomain_ids;
+  /// List of subdomain names this components owns
+  std::vector<SubdomainName> _subdomain_names;
+  /// List of coordinate system for each subdomain
+  std::vector<Moose::CoordinateSystemType> _coord_sys;
 
 private:
   void validateNSectionsConsistent(int n_lengths, int n_n_elems);

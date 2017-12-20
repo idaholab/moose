@@ -51,10 +51,6 @@ public:
 
   virtual const std::string & getType() = 0;
 
-  virtual const std::vector<unsigned int> & getSubdomainIds() const { return _subdomains; }
-
-  virtual const std::vector<Moose::CoordinateSystemType> & getCoordSysTypes() { return _coord_sys; }
-
   /**
    * Return a reference to a component via a parameter name
    * @tparam T the type of the component we are requesting
@@ -145,21 +141,13 @@ protected:
   /// Global physical mesh this component works on
   RELAP7Mesh *& _phys_mesh;
 
-  /// List of subdomain IDs this components owns
-  std::vector<unsigned int> _subdomains;
-  /// List of coordinate system per subdomain (the same length as _subdomains and items correspond to _subdomains entries)
-  std::vector<Moose::CoordinateSystemType> _coord_sys;
-
   const Real & _zero;
 
+  /// Gets the next subdomain ID
   virtual unsigned int getNextSubdomainId();
 
   /// Gets the next nodeset or sideset ID
   virtual unsigned int getNextBoundaryId();
-
-  /// Sets the coordinate system for block_id sudomain
-  virtual void setSubdomainCoordSystem(unsigned int block_id,
-                                       Moose::CoordinateSystemType coord_type);
 
   /**
    * Logs an error

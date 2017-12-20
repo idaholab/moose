@@ -176,3 +176,21 @@ GeometricalComponent::getVariableFn(const FunctionName & fn_param_name)
 
   return fn_name;
 }
+
+void
+GeometricalComponent::setSubdomainInfo(unsigned int subdomain_id,
+                                       const std::string & subdomain_name,
+                                       const Moose::CoordinateSystemType & coord_system)
+{
+  _subdomain_ids.push_back(subdomain_id);
+  _subdomain_names.push_back(subdomain_name);
+  _coord_sys.push_back(coord_system);
+  if (_parent)
+  {
+    GeometricalComponent * gc = dynamic_cast<GeometricalComponent *>(_parent);
+    gc->_subdomain_ids.push_back(subdomain_id);
+    gc->_subdomain_names.push_back(subdomain_name);
+    gc->_coord_sys.push_back(coord_system);
+  }
+  _mesh.setSubdomainName(subdomain_id, subdomain_name);
+}
