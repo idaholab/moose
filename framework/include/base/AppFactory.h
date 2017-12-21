@@ -29,10 +29,8 @@ class InputParameters;
 
 /**
  * alias to wrap shared pointer type
- * TODO: Convert to shared pointer by default in the future
- * using MooseAppPtr = std::shared_ptr<MooseApp>;
  */
-using MooseAppPtr = MooseApp *;
+using MooseAppPtr = std::shared_ptr<MooseApp>;
 
 /**
  * alias for validParams function
@@ -53,14 +51,8 @@ using registeredMooseAppIterator = std::map<std::string, paramsPtr>::iterator;
  * Build an object of type T
  */
 template <class T>
-MooseApp *
+MooseAppPtr
 buildApp(const InputParameters & parameters)
-{
-  return new T(parameters);
-}
-template <class T>
-MooseApp *
-buildAppSharedPtr(const InputParameters & parameters)
 {
   return std::make_shared<T>(parameters);
 }
@@ -82,11 +74,10 @@ public:
   /**
    * Helper function for creating a MooseApp from command-line arguments.
    */
-  static MooseApp *
-  createApp(std::string app_type, int argc, char ** argv, MPI_Comm COMM_WORLD_IN = MPI_COMM_WORLD);
-
-  static std::shared_ptr<MooseApp>
-  createAppShared(const std::string & app_type, int argc, char ** argv);
+  static MooseAppPtr createAppShared(const std::string & app_type,
+                                     int argc,
+                                     char ** argv,
+                                     MPI_Comm comm_word = MPI_COMM_WORLD);
 
   /**
    * Register a new object
@@ -116,14 +107,10 @@ public:
    * @param parameters Parameters this object should have
    * @return The created object
    */
-  MooseApp * create(const std::string & app_type,
-                    const std::string & name,
-                    InputParameters parameters,
-                    MPI_Comm COMM_WORLD_IN);
-  std::shared_ptr<MooseApp> createShared(const std::string & app_type,
-                                         const std::string & name,
-                                         InputParameters parameters,
-                                         MPI_Comm COMM_WORLD_IN);
+  MooseAppPtr createShared(const std::string & app_type,
+                           const std::string & name,
+                           InputParameters parameters,
+                           MPI_Comm COMM_WORLD_IN);
 
   ///@{
   /**
