@@ -9,6 +9,7 @@
     min_parallel = 4
     abs_zero = 1e-7
     max_time = 800
+    allow_warnings = true
   [../]
 
   [./frictional_mu04_penalty]
