@@ -15,10 +15,21 @@
 #include "libmesh/libmesh.h" // libMesh::invalid_uint
 #include "libmesh/elem.h"
 
+#include <array>
+
 using namespace libMesh;
+
+struct CutPoint
+{
+  CutPoint() {}
+  int id;
+  std::vector<unsigned int> neighbor;
+  std::array<Real, 3> coord;
+};
 
 struct CutEdge
 {
+  CutEdge() {}
   unsigned int id1;
   unsigned int id2;
   Real distance;

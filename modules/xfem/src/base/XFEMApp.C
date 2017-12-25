@@ -31,6 +31,7 @@
 #include "CircleCutUserObject.h"
 #include "EllipseCutUserObject.h"
 #include "RectangleCutUserObject.h"
+#include "MeshCut3DUserObject.h"
 
 template <>
 InputParameters
@@ -101,6 +102,7 @@ XFEMApp::registerObjects(Factory & factory)
   registerUserObject(CircleCutUserObject);
   registerUserObject(EllipseCutUserObject);
   registerUserObject(RectangleCutUserObject);
+  registerUserObject(MeshCut3DUserObject);
 
   // DiracKernels
   registerDiracKernel(XFEMPressure);
