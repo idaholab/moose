@@ -10,7 +10,7 @@ mechanics system setup. It performs
 * Optional: Add AuxVariables and AuxKernels for various tensor comonent and quantity outputs
 * Optional: Set up out-of-plane stress/strain consistently
 
-## Example
+## Example Input File Syntax
 
 !listing modules/tensor_mechanics/test/tests/action/two_block_new.i start=Modules/TensorMechanics/Master end=AuxVariables
 
@@ -45,9 +45,6 @@ can be used.
 
 Parameters supplied at the `[Modules/TensorMechanics/Master]` level act as
 defaults for the Master action subblocks.
-
-
-The following parameters are valid:
 
 !syntax objects /Modules/TensorMechanics/Master
 
