@@ -188,6 +188,16 @@ public:
   MooseApp & mooseApp() { return _app; }
   const std::string & getCurrentTaskName() const { return _current_task; }
 
+  /**
+   * Mark tasks as one of the mesh-only tasks
+   */
+  void registerMeshOnlyTasks(const std::vector<std::string> & tasks);
+
+  /**
+   * Execute mesh-only tasks in the correct order
+   */
+  void executeMeshOnlyActions();
+
 protected:
   /**
    * This method auto-builds all Actions that needs to be built and adds them to ActionWarehouse.
@@ -210,6 +220,8 @@ protected:
   std::map<std::string, std::list<Action *>> _action_blocks;
   /// Action blocks that have been requested
   std::map<std::string, std::vector<Action *>> _requested_action_blocks;
+  /// mesh-only tasks
+  std::set<std::string> _mesh_only_tasks;
   /// The container that holds the sorted action names from the DependencyResolver
   std::vector<std::string> _ordered_names;
   /// Use to store the current list of unsatisfied dependencies

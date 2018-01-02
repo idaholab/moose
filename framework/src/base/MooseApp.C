@@ -549,6 +549,7 @@ MooseApp::runInputFile()
   std::string mesh_file_name;
   if (!_ready_to_exit && isParamValid("mesh_only"))
   {
+    registerMeshOnlyTasks();
     meshOnly(getParam<std::string>("mesh_only"));
     _ready_to_exit = true;
   }
@@ -626,22 +627,31 @@ MooseApp::hasRecoverFileBase()
 }
 
 void
-MooseApp::meshOnly(std::string mesh_file_name)
+MooseApp::registerMeshOnlyTasks()
 {
   /**
-   * These actions should be the minimum set necessary to generate and output
-   * a Mesh.
+   * These actions should be the minimum set necessary to generate and output a Mesh.
    */
-  _action_warehouse.executeActionsWithAction("meta_action");
-  _action_warehouse.executeActionsWithAction("set_global_params");
-  _action_warehouse.executeActionsWithAction("setup_mesh");
-  _action_warehouse.executeActionsWithAction("add_partitioner");
-  _action_warehouse.executeActionsWithAction("init_mesh");
-  _action_warehouse.executeActionsWithAction("prepare_mesh");
-  _action_warehouse.executeActionsWithAction("add_mesh_modifier");
-  _action_warehouse.executeActionsWithAction("execute_mesh_modifiers");
-  _action_warehouse.executeActionsWithAction("uniform_refine_mesh");
-  _action_warehouse.executeActionsWithAction("setup_mesh_complete");
+  std::vector<std::string> tasks;
+
+  tasks.push_back("meta_action");
+  tasks.push_back("set_global_params");
+  tasks.push_back("setup_mesh");
+  tasks.push_back("add_partitioner");
+  tasks.push_back("init_mesh");
+  tasks.push_back("prepare_mesh");
+  tasks.push_back("add_mesh_modifier");
+  tasks.push_back("execute_mesh_modifiers");
+  tasks.push_back("uniform_refine_mesh");
+  tasks.push_back("setup_mesh_complete");
+
+  _action_warehouse.registerMeshOnlyTasks(tasks);
+}
+
+void
+MooseApp::meshOnly(std::string mesh_file_name)
+{
+  _action_warehouse.executeMeshOnlyActions();
 
   std::shared_ptr<MooseMesh> & mesh = _action_warehouse.mesh();
 
