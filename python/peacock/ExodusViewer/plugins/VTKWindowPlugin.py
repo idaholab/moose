@@ -110,6 +110,7 @@ class VTKWindowPlugin(QtWidgets.QFrame, ExodusPlugin):
         self._window.update()
         self._initialized = False
         self._reset_required = False
+        self._highlight = None
         self._adjustTimers(start=['initialize'], stop=['update'])
         self.windowReset.emit()
 
