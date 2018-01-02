@@ -75,6 +75,11 @@ public:
   void addItem(const T & value);
 
   /**
+   * Clear Items from the resolver
+   */
+  void clear();
+
+  /**
    * Returns a vector of sets that represent dependency resolved values.  Items in the same
    * subvector have no dependence upon one and other.
    */
@@ -215,6 +220,17 @@ DependencyResolver<T>::addItem(const T & value)
   _independent_items.push_back(value);
   if (std::find(_ordering_vector.begin(), _ordering_vector.end(), value) == _ordering_vector.end())
     _ordering_vector.push_back(value);
+}
+
+template <typename T>
+void
+DependencyResolver<T>::clear()
+{
+  _depends.clear();
+  _independent_items.clear();
+  _ordering_vector.clear();
+  _ordered_items.clear();
+  _ordered_items_vector.clear();
 }
 
 template <typename T>

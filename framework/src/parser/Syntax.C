@@ -77,6 +77,12 @@ Syntax::addDependencySets(const std::string & action_sets)
   }
 }
 
+void
+Syntax::clearTaskDependencies()
+{
+  _tasks.clear();
+}
+
 const std::vector<std::string> &
 Syntax::getSortedTask()
 {

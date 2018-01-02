@@ -1112,6 +1112,22 @@ addActionTypes(Syntax & syntax)
                            "(check_integrity)");
 }
 
+void
+populateMeshOnlyTasks(Syntax & syntax)
+{
+  syntax.addDependencySets("(meta_action)"
+                           "(set_global_params)"
+                           "(setup_mesh)"
+                           "(add_partitioner)"
+                           "(init_mesh)"
+                           "(prepare_mesh)"
+                           "(add_mesh_modifier)"
+                           "(execute_mesh_modifiers)"
+                           "(add_mortar_interface)"
+                           "(uniform_refine_mesh)"
+                           "(setup_mesh_complete)");
+}
+
 /**
  * Multiple Action class can be associated with a single input file section, in which case all
  * associated Actions
