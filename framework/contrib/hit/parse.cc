@@ -660,7 +660,6 @@ parseExitPath(Parser * p, Node * n)
   p->require(TokType::RightBracket, "expected ']'");
 
   auto s = n->children().back();
-  auto & toks = s->tokens();
   for (size_t i = p->start(); i < p->pos(); i++)
     s->tokens().push_back(p->tokens()[i]);
 
