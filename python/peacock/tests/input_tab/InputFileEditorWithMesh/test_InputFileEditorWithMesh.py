@@ -212,8 +212,10 @@ class Tests(BaseTests):
 
         b = tree.getBlockInfo("/AuxVariables")
         self.assertNotEqual(b, None)
+        self.assertEqual(b.included, False)
         self.assertFalse(b.wantsToSave())
         w.InputFileEditorPlugin.block_tree.copyBlock(b)
+        self.assertEqual(b.included, True)
         self.assertTrue(b.wantsToSave())
         self.assertEqual(w.InputFileEditorPlugin.has_changed, True)
         self.assertEqual(w.canClose(), False)
@@ -222,9 +224,6 @@ class Tests(BaseTests):
         self.assertEqual(w.canClose(), True)
 
         new_block = "[AuxVariables]\n  [./New_0]\n  [../]\n[]\n\n"
-        s = tree.getInputFileString()
-        self.assertEqual("inactive = 'AuxVariables'\n%s" % new_block, s) # AuxVariables is inactive
-        b.included = True
         s = tree.getInputFileString()
         self.assertEqual(new_block, s)
 
