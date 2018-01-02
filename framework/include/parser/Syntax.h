@@ -69,7 +69,7 @@ public:
                            int line = -1);
 
   /**
-   *  Registration a type with a block. For example, associate FunctionName with the Functions block
+   * Registration a type with a block. For example, associate FunctionName with the Functions block
    * @param syntax The target syntax to associate the type with
    * @param type The name of the type to associate with the syntax
    */

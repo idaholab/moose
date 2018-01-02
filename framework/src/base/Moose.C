@@ -481,13 +481,11 @@
 
 #include <unistd.h>
 
-// Define the available execute flags for MOOSE. The flags using a hex value are setup to retain
-// the same numbers that were utilized with older versions of MOOSE for keeping existing
-// applications
+// Define the available execute flags for MOOSE. The flags using a hex value are setup to retain the
+// same numbers that were utilized with older versions of MOOSE for keeping existing applications
 // working using the deprecated flags. In the future, as in the EXEC_SAME_AS_MULTIAPP flag, there is
-// no reason to keep these flags bitwise comparable or to assigned an id because
-// the MultiMooseEnum that is used to store these has convenience methods for
-// determining the what flags are active.
+// no reason to keep these flags bitwise comparable or to assigned an id because the MultiMooseEnum
+// that is used to store these has convenience methods for determining the what flags are active.
 const ExecFlagType EXEC_NONE("NONE", 0x00);                     // 0
 const ExecFlagType EXEC_INITIAL("INITIAL", 0x01);               // 1
 const ExecFlagType EXEC_LINEAR("LINEAR", 0x02);                 // 2
@@ -916,26 +914,23 @@ addActionTypes(Syntax & syntax)
   /**
    * The second param here indicates whether the task must be satisfied or not for a successful run.
    * If set to true, then the ActionWarehouse will attempt to create "Action"s automatically if they
-   * have
-   * not been explicitly created by the parser or some other mechanism.
+   * have not been explicitly created by the parser or some other mechanism.
    *
    * Note: Many of the actions in the "Minimal Problem" section are marked as false.  However, we
-   * can generally
-   * force creation of these "Action"s as needed by registering them to syntax that we expect to see
-   * even
-   * if those "Action"s  don't normally pick up parameters from the input file.
+   * can generally force creation of these "Action"s as needed by registering them to syntax that we
+   * expect to see even if those "Action"s  don't normally pick up parameters from the input file.
    */
 
   // clang-format off
   /**************************/
   /**** Register Actions ****/
   /**************************/
-  registerMooseObjectTask("create_problem",               Problem,                 false);
-  registerMooseObjectTask("setup_executioner",            Executioner,             true);
+  registerMooseObjectTask("create_problem",               Problem,                false);
+  registerMooseObjectTask("setup_executioner",            Executioner,            true);
 
   // This task does not construct an object, but it needs all of the parameters that
   // would normally be used to construct an object.
-  registerMooseObjectTask("determine_system_type",        Executioner,             true);
+  registerMooseObjectTask("determine_system_type",        Executioner,            true);
 
   registerMooseObjectTask("setup_mesh",                   MooseMesh,              false);
   registerMooseObjectTask("init_mesh",                    MooseMesh,              false);
@@ -1044,10 +1039,9 @@ addActionTypes(Syntax & syntax)
   /**************************/
   /**
    * The following is the default set of action dependencies for a basic MOOSE problem.  The
-   * formatting
-   * of this string is important.  Each line represents a set of dependencies that depend on the
-   * previous
-   * line.  Items on the same line have equal weight and can be executed in any order.
+   * formatting of this string is important.  Each line represents a set of dependencies that depend
+   * on the previous line.  Items on the same line have equal weight and can be executed in any
+   * order.
    *
    * Additional dependencies can be inserted later inside of user applications with calls to
    * ActionWarehouse::addDependency("task", "pre_req")
@@ -1130,8 +1124,9 @@ populateMeshOnlyTasks(Syntax & syntax)
 
 /**
  * Multiple Action class can be associated with a single input file section, in which case all
- * associated Actions
- * will be created and "acted" on when the associated input file section is seen.b *
+ * associated Actions will be created and "acted" on when the associated input file section is
+ * seen.b *
+ *
  * Example:
  *  "setup_mesh" <-----------> SetupMeshAction <---------
  *                                                        \
@@ -1141,8 +1136,7 @@ populateMeshOnlyTasks(Syntax & syntax)
  *
  *
  * Action classes can also be registered to act on more than one input file section for a different
- * task
- * if similar logic can work in multiple cases
+ * task if similar logic can work in multiple cases
  *
  * Example:
  * "add_variable" <-----                       -> [Variables/ *]
@@ -1153,10 +1147,8 @@ populateMeshOnlyTasks(Syntax & syntax)
  *
  *
  * Note: Placeholder "no_action" actions must be put in places where it is possible to match an
- * object
- *       with a star or a more specific parent later on. (i.e. where one needs to negate the '*'
- * matching
- *       prematurely)
+ *       object with a star or a more specific parent later on. (i.e. where one needs to negate the
+ *       '*' matching prematurely).
  */
 void
 registerActions(Syntax & syntax, ActionFactory & action_factory)

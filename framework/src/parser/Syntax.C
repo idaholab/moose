@@ -152,7 +152,7 @@ Syntax::getSyntaxByAction(const std::string & action, const std::string & task)
   /**
    * For now we don't have a data structure that maps Actions to Syntax but this routine
    * is only used by the build full tree routine so it doesn't need to be fast.  We
-   * will do a linear search for each call to this routine
+   * will do a linear search for each call to this routine.
    */
   for (const auto & iter : _associated_actions)
     if (iter.second._action == action && (iter.second._task == task || iter.second._task == ""))
@@ -166,12 +166,10 @@ Syntax::isAssociated(const std::string & real_id, bool * is_parent)
 {
   /**
    * This implementation assumes that wildcards can occur in the place of an entire token but not as
-   * part
-   * of a token (i.e.  'Variables/ * /InitialConditions' is valid but not 'Variables/Partial*
+   * part of a token (i.e.  'Variables/ * /InitialConditions' is valid but not 'Variables/Partial*
    * /InitialConditions'.
    * Since maps are ordered, a reverse traversal through the registered list will always select a
-   * more
-   * specific match before a wildcard match ('*' == char(42))
+   * more specific match before a wildcard match ('*' == char(42)).
    */
   bool local_is_parent;
   if (is_parent == NULL)
