@@ -298,7 +298,8 @@ class Scheduler(MooseObject):
         # set. We will use this set as a way to gain access to their methods.
         for tester in testers:
             if tester.getTestName() in name_to_job_container:
-                tester.setStatus('duplicate test', tester.bucket_skip)
+                tester.addCaveats('duplicate test')
+                tester.setStatus(tester.bucket_skip.status, tester.bucket_skip)
                 non_runnable_jobs.add(Job(tester, job_dag, self.options))
             else:
                 name_to_job_container[tester.getTestName()] = Job(tester, job_dag, self.options)
