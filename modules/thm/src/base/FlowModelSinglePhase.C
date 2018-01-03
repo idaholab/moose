@@ -67,7 +67,6 @@ FlowModelSinglePhase::addMooseObjects()
   FlowModel::addCommonMooseObjects();
 
   const InputParameters & pars = _pipe.parameters();
-  const std::vector<unsigned int> & blocks = {_pipe.getSubdomainID()};
   const std::string fp_name = pars.get<UserObjectName>("fp");
 
   // coupling vectors
@@ -99,7 +98,7 @@ FlowModelSinglePhase::addMooseObjects()
     std::string class_name = "TimeDerivative";
     InputParameters params = _factory.getValidParams(class_name);
     params.set<NonlinearVariableName>("variable") = RHOA;
-    params.set<std::vector<unsigned int>>("r7:block") = blocks;
+    params.set<std::vector<SubdomainName>>("block") = _pipe.getSubdomainNames();
     if (_lump_mass_matrix)
       params.set<bool>("lumping") = true;
     _sim.addKernel(class_name, Component::genName(_comp_name, "rho_ie"), params);
@@ -108,7 +107,7 @@ FlowModelSinglePhase::addMooseObjects()
     std::string class_name = "OneDMassFlux";
     InputParameters params = _factory.getValidParams(class_name);
     params.set<NonlinearVariableName>("variable") = RHOA;
-    params.set<std::vector<unsigned int>>("r7:block") = blocks;
+    params.set<std::vector<SubdomainName>>("block") = _pipe.getSubdomainNames();
     params.set<std::vector<VariableName>>("A") = cv_area;
     params.set<std::vector<VariableName>>("arhoA") = cv_rhoA;
     params.set<std::vector<VariableName>>("arhouA") = cv_rhouA;
@@ -124,7 +123,7 @@ FlowModelSinglePhase::addMooseObjects()
     std::string class_name = "TimeDerivative";
     InputParameters params = _factory.getValidParams(class_name);
     params.set<NonlinearVariableName>("variable") = RHOUA;
-    params.set<std::vector<unsigned int>>("r7:block") = blocks;
+    params.set<std::vector<SubdomainName>>("block") = _pipe.getSubdomainNames();
     if (_lump_mass_matrix)
       params.set<bool>("lumping") = true;
     _sim.addKernel(class_name, Component::genName(_comp_name, "rhou_ie"), params);
@@ -133,7 +132,7 @@ FlowModelSinglePhase::addMooseObjects()
     std::string class_name = "OneDMomentumFlux";
     InputParameters params = _factory.getValidParams(class_name);
     params.set<NonlinearVariableName>("variable") = RHOUA;
-    params.set<std::vector<unsigned int>>("r7:block") = blocks;
+    params.set<std::vector<SubdomainName>>("block") = _pipe.getSubdomainNames();
 
     params.set<std::vector<VariableName>>("A") = cv_area;
     params.set<std::vector<VariableName>>("arhoA") = cv_rhoA;
@@ -149,7 +148,7 @@ FlowModelSinglePhase::addMooseObjects()
     std::string class_name = "OneDMomentumAreaGradient";
     InputParameters params = _factory.getValidParams(class_name);
     params.set<NonlinearVariableName>("variable") = RHOUA;
-    params.set<std::vector<unsigned int>>("r7:block") = blocks;
+    params.set<std::vector<SubdomainName>>("block") = _pipe.getSubdomainNames();
     params.set<std::vector<VariableName>>("arhoA") = cv_rhoA;
     params.set<std::vector<VariableName>>("arhouA") = cv_rhouA;
     params.set<std::vector<VariableName>>("A") = cv_area;
@@ -162,7 +161,7 @@ FlowModelSinglePhase::addMooseObjects()
     std::string class_name = "OneDMomentumFriction";
     InputParameters params = _factory.getValidParams(class_name);
     params.set<NonlinearVariableName>("variable") = RHOUA;
-    params.set<std::vector<unsigned int>>("r7:block") = blocks;
+    params.set<std::vector<SubdomainName>>("block") = _pipe.getSubdomainNames();
     params.set<std::vector<VariableName>>("A") = cv_area;
     params.set<std::vector<VariableName>>("arhoA") = cv_rhoA;
     params.set<std::vector<VariableName>>("arhouA") = cv_rhouA;
@@ -176,7 +175,7 @@ FlowModelSinglePhase::addMooseObjects()
     std::string class_name = "OneDMomentumGravity";
     InputParameters params = _factory.getValidParams(class_name);
     params.set<NonlinearVariableName>("variable") = RHOUA;
-    params.set<std::vector<unsigned int>>("r7:block") = blocks;
+    params.set<std::vector<SubdomainName>>("block") = _pipe.getSubdomainNames();
     params.set<std::vector<VariableName>>("A") = cv_area;
     params.set<std::vector<VariableName>>("arhoA") = cv_rhoA;
     params.set<MaterialPropertyName>("alpha") = UNITY;
@@ -191,7 +190,7 @@ FlowModelSinglePhase::addMooseObjects()
     std::string class_name = "TimeDerivative";
     InputParameters params = _factory.getValidParams(class_name);
     params.set<NonlinearVariableName>("variable") = RHOEA;
-    params.set<std::vector<unsigned int>>("r7:block") = blocks;
+    params.set<std::vector<SubdomainName>>("block") = _pipe.getSubdomainNames();
     if (_lump_mass_matrix)
       params.set<bool>("lumping") = true;
     _sim.addKernel(class_name, Component::genName(_comp_name, "rhoE_ie"), params);
@@ -200,7 +199,7 @@ FlowModelSinglePhase::addMooseObjects()
     std::string class_name = "OneDEnergyFlux";
     InputParameters params = _factory.getValidParams(class_name);
     params.set<NonlinearVariableName>("variable") = RHOEA;
-    params.set<std::vector<unsigned int>>("r7:block") = blocks;
+    params.set<std::vector<SubdomainName>>("block") = _pipe.getSubdomainNames();
     params.set<std::vector<VariableName>>("A") = cv_area;
     params.set<std::vector<VariableName>>("arhoA") = cv_rhoA;
     params.set<std::vector<VariableName>>("arhouA") = cv_rhouA;
@@ -216,7 +215,7 @@ FlowModelSinglePhase::addMooseObjects()
     std::string class_name = "OneDEnergyGravity";
     InputParameters params = _factory.getValidParams(class_name);
     params.set<NonlinearVariableName>("variable") = RHOEA;
-    params.set<std::vector<unsigned int>>("r7:block") = blocks;
+    params.set<std::vector<SubdomainName>>("block") = _pipe.getSubdomainNames();
     params.set<std::vector<VariableName>>("A") = cv_area;
     params.set<std::vector<VariableName>>("arhoA") = cv_rhoA;
     params.set<std::vector<VariableName>>("arhouA") = cv_rhouA;
@@ -239,7 +238,7 @@ FlowModelSinglePhase::addMooseObjects()
     std::string class_name = "QuotientAux";
     InputParameters params = _factory.getValidParams(class_name);
     params.set<AuxVariableName>("variable") = VELOCITY;
-    params.set<std::vector<unsigned int>>("r7:block") = blocks;
+    params.set<std::vector<SubdomainName>>("block") = _pipe.getSubdomainNames();
     params.set<std::vector<VariableName>>("numerator") = cv_rhou;
     params.set<std::vector<VariableName>>("denominator") = cv_rho;
     _sim.addAuxKernel(class_name, Component::genName(_comp_name, "vel"), params);
@@ -249,7 +248,7 @@ FlowModelSinglePhase::addMooseObjects()
     // Computes rho = (rho*A)/A
     InputParameters params = _factory.getValidParams("QuotientAux");
     params.set<AuxVariableName>("variable") = DENSITY;
-    params.set<std::vector<unsigned int>>("r7:block") = blocks;
+    params.set<std::vector<SubdomainName>>("block") = _pipe.getSubdomainNames();
     params.set<std::vector<VariableName>>("numerator") = cv_rhoA;
     params.set<std::vector<VariableName>>("denominator") = cv_area;
     _sim.addAuxKernel("QuotientAux", Component::genName(_comp_name, "rho_auxkernel"), params);
@@ -258,7 +257,7 @@ FlowModelSinglePhase::addMooseObjects()
     // Computes rhou = (rho*u*A)/A
     InputParameters params = _factory.getValidParams("QuotientAux");
     params.set<AuxVariableName>("variable") = MOMENTUM_DENSITY;
-    params.set<std::vector<unsigned int>>("r7:block") = blocks;
+    params.set<std::vector<SubdomainName>>("block") = _pipe.getSubdomainNames();
     params.set<std::vector<VariableName>>("numerator") = cv_rhouA;
     params.set<std::vector<VariableName>>("denominator") = cv_area;
     _sim.addAuxKernel("QuotientAux", Component::genName(_comp_name, "rhou_auxkernel"), params);
@@ -268,7 +267,7 @@ FlowModelSinglePhase::addMooseObjects()
     std::string class_name = "SpecificVolumeAux";
     InputParameters params = _factory.getValidParams(class_name);
     params.set<AuxVariableName>("variable") = SPECIFIC_VOLUME;
-    params.set<std::vector<unsigned int>>("r7:block") = blocks;
+    params.set<std::vector<SubdomainName>>("block") = _pipe.getSubdomainNames();
     params.set<std::vector<VariableName>>("rhoA") = cv_rhoA;
     params.set<std::vector<VariableName>>("A") = cv_area;
     _sim.addAuxKernel(class_name, Component::genName(_comp_name, "v_aux"), params);
@@ -277,7 +276,7 @@ FlowModelSinglePhase::addMooseObjects()
     std::string class_name = "SpecificInternalEnergyAux";
     InputParameters params = _factory.getValidParams(class_name);
     params.set<AuxVariableName>("variable") = SPECIFIC_INTERNAL_ENERGY;
-    params.set<std::vector<unsigned int>>("r7:block") = blocks;
+    params.set<std::vector<SubdomainName>>("block") = _pipe.getSubdomainNames();
     params.set<std::vector<VariableName>>("rhoA") = cv_rhoA;
     params.set<std::vector<VariableName>>("rhouA") = cv_rhouA;
     params.set<std::vector<VariableName>>("rhoEA") = cv_rhoEA;
@@ -288,7 +287,7 @@ FlowModelSinglePhase::addMooseObjects()
     std::string class_name = "PressureVUAux";
     InputParameters params = _factory.getValidParams(class_name);
     params.set<AuxVariableName>("variable") = PRESSURE;
-    params.set<std::vector<unsigned int>>("r7:block") = blocks;
+    params.set<std::vector<SubdomainName>>("block") = _pipe.getSubdomainNames();
     params.set<std::vector<VariableName>>("e") = cv_internal_energy;
     params.set<std::vector<VariableName>>("v") = cv_v;
     params.set<UserObjectName>("fp") = fp_name;
@@ -298,7 +297,7 @@ FlowModelSinglePhase::addMooseObjects()
     std::string class_name = "TemperatureVUAux";
     InputParameters params = _factory.getValidParams(class_name);
     params.set<AuxVariableName>("variable") = TEMPERATURE;
-    params.set<std::vector<unsigned int>>("r7:block") = blocks;
+    params.set<std::vector<SubdomainName>>("block") = _pipe.getSubdomainNames();
     params.set<std::vector<VariableName>>("e") = cv_internal_energy;
     params.set<std::vector<VariableName>>("v") = cv_v;
     params.set<UserObjectName>("fp") = fp_name;
@@ -309,7 +308,7 @@ FlowModelSinglePhase::addMooseObjects()
     std::string class_name = "SpecificTotalEnthalpyAux";
     InputParameters params = _factory.getValidParams(class_name);
     params.set<AuxVariableName>("variable") = SPECIFIC_TOTAL_ENTHALPY;
-    params.set<std::vector<unsigned int>>("r7:block") = blocks;
+    params.set<std::vector<SubdomainName>>("block") = _pipe.getSubdomainNames();
     params.set<std::vector<VariableName>>("rhoA") = cv_rhoA;
     params.set<std::vector<VariableName>>("rhoEA") = cv_rhoEA;
     params.set<std::vector<VariableName>>("p") = cv_pressure;
@@ -320,7 +319,7 @@ FlowModelSinglePhase::addMooseObjects()
     // Computes rhoE = (rho*E*A)/A
     InputParameters params = _factory.getValidParams("QuotientAux");
     params.set<AuxVariableName>("variable") = TOTAL_ENERGY_DENSITY;
-    params.set<std::vector<unsigned int>>("r7:block") = blocks;
+    params.set<std::vector<SubdomainName>>("block") = _pipe.getSubdomainNames();
     params.set<std::vector<VariableName>>("numerator") = cv_rhoEA;
     params.set<std::vector<VariableName>>("denominator") = cv_area;
     _sim.addAuxKernel("QuotientAux", Component::genName(_comp_name, "rhoE_auxkernel"), params);

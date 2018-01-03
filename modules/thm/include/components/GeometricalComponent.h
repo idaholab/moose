@@ -29,7 +29,7 @@ public:
    * transformation. Non-straight components can override this method to do their component-specific
    * transformation
    */
-  virtual void displaceMesh(const std::vector<unsigned int> & blocks);
+  virtual void displaceMesh(const std::vector<SubdomainName> & blocks);
 
   virtual Point getPosition() const { return _position; }
   virtual RealVectorValue getDirection() const { return _dir; }
