@@ -32,6 +32,7 @@
 // forward declaration
 class MooseMesh;
 class Assembly;
+class RelationshipManager;
 
 // libMesh forward declarations
 namespace libMesh
@@ -450,6 +451,14 @@ public:
   const Moose::PatchUpdateType & getPatchUpdateStrategy() const;
 
   /**
+   * Method for adding Relationship managers (libMesh ghosting functors) to the Mesh object. The
+   * parameter is passed in via shared_ptr. It's expected that the Mesh object will assume ownership
+   * of the relationship manager since it's lifetime needs to last as long as the underlying
+   * MeshBase lasts.
+   */
+  void addRelationshipManager(std::shared_ptr<RelationshipManager> relationship_manager);
+
+  /**
    * Get a (slightly inflated) processor bounding box.
    *
    * @param inflation_multiplier This amount will be multiplied by the length of the diagonal of the
@@ -822,8 +831,17 @@ public:
    */
   virtual std::unique_ptr<PointLocatorBase> getPointLocator() const;
 
+  /**
+   * Returns the Relationship managers info suitable for printing.
+   */
+  std::vector<std::string> getRelationshipManagerInfo();
+
 protected:
+  /// Deprecated (DO NOT USE)
   std::vector<std::unique_ptr<GhostingFunctor>> _ghosting_functors;
+
+  /// The list of active geometric relationship managers (bound to the underlying MeshBase object).
+  std::vector<std::shared_ptr<RelationshipManager>> _relationship_managers;
 
   /// Can be set to DISTRIBUTED, REPLICATED, or DEFAULT.  Determines whether
   /// the underlying libMesh mesh is a ReplicatedMesh or DistributedMesh.

@@ -15,6 +15,9 @@
 #include "MooseObjectAction.h"
 #include "MooseUtils.h"
 #include "Factory.h"
+#include "RelationshipManager.h"
+#include "Conversion.h"
+#include "MooseMesh.h"
 
 template <>
 InputParameters
@@ -38,4 +41,40 @@ MooseObjectAction::MooseObjectAction(InputParameters params)
                            : validParams<MooseObject>())
 {
   _moose_object_pars.blockFullpath() = params.blockFullpath();
+}
+
+void
+MooseObjectAction::addRelationshipManagers(Moose::RelationshipManagerType rm_type)
+{
+  const auto & buildable_types = _moose_object_pars.getBuildableRelationshipManagerTypes();
+
+  for (const auto & buildable_type : buildable_types)
+  {
+    auto rm_params = _factory.getValidParams(buildable_type);
+    mooseAssert(rm_params.isParamValid("RelationshipManagerType"),
+                "RelationshipManagerType is not set for " + buildable_type);
+
+    if (rm_type != rm_params.get<Moose::RelationshipManagerType>("RelationshipManagerType"))
+      continue;
+
+    rm_params.applyParameters(_moose_object_pars);
+    rm_params.set<MooseMesh *>("mesh") = _mesh.get();
+
+    if (rm_params.areAllRequiredParamsValid())
+    {
+      auto rm_obj = _factory.create<RelationshipManager>(
+          buildable_type, name() + "_rm" + Moose::stringify(rm_type), rm_params);
+
+      rm_obj->init();
+
+      if (rm_obj->isActive())
+      {
+        if (rm_type == Moose::Geometric)
+          // Hand off ownership of the shared pointer to the Mesh
+          _mesh->addRelationshipManager(std::move(rm_obj));
+        //      else
+        //        _problem->getNonlinearSystemBase().dofMap().add_coupling_functor(std::move(rm_obj));
+      }
+    }
+  }
 }

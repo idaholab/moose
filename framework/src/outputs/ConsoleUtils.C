@@ -92,6 +92,15 @@ outputMeshInformation(FEProblemBase & problem, bool verbose)
     if (problem.n_processors() > 1)
       oss << std::setw(console_field_width) << "  Partitioner: " << moose_mesh.partitionerName()
           << (moose_mesh.isPartitionerForced() ? " (forced) " : "") << '\n';
+
+    auto info_strings = moose_mesh.getRelationshipManagerInfo();
+    if (info_strings.size())
+    {
+      oss << std::setw(console_field_width) << "  Relationship Manager(s): " << info_strings[0]
+          << '\n';
+      for (auto i = beginIndex(info_strings, 1); i < info_strings.size(); ++i)
+        oss << std::setw(console_field_width) << "" << info_strings[i] << '\n';
+    }
   }
 
   oss << '\n';

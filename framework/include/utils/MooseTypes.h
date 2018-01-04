@@ -327,6 +327,15 @@ enum PatchUpdateType
   Auto,
   Iteration
 };
+
+/**
+ * Main types of Relationship Managers
+ */
+enum RelationshipManagerType
+{
+  Geometric,
+  Algebriac
+};
 }
 
 /**

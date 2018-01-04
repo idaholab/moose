@@ -43,7 +43,16 @@ public:
 
   virtual ~Action() {}
 
+  /**
+   * Method to add objects to the simulation or perform other setup tasks.
+   */
   virtual void act() = 0;
+
+  /**
+   * Method to add a relationship manager for the objects being added to the system. The type
+   * eligible to be added is passed in as an argument.
+   */
+  virtual void addRelationshipManagers(Moose::RelationshipManagerType type);
 
   /**
    * The name of the action

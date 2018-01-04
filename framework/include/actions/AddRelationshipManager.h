@@ -12,41 +12,22 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef MOOSEOBJECTACTION_H
-#define MOOSEOBJECTACTION_H
+#ifndef ADDRELATIONSHIPMANAGER_H
+#define ADDRELATIONSHIPMANAGER_H
 
 #include "Action.h"
 
-#include <string>
-
-class MooseObjectAction;
+class AddRelationshipManager;
 
 template <>
-InputParameters validParams<MooseObjectAction>();
+InputParameters validParams<AddRelationshipManager>();
 
-class MooseObjectAction : public Action
+class AddRelationshipManager : public Action
 {
 public:
-  MooseObjectAction(InputParameters params);
+  AddRelationshipManager(InputParameters params);
 
-  virtual void addRelationshipManagers(Moose::RelationshipManagerType type) override;
-
-  /**
-   * Retreive the parameters of the object to be created by this action
-   */
-  InputParameters & getObjectParams() { return _moose_object_pars; }
-
-  /**
-   * Return the object type to be created
-   */
-  const std::string & getMooseObjectType() const { return _type; }
-
-protected:
-  /// The Object type that is being created
-  std::string _type;
-
-  /// The parameters for the object to be created
-  InputParameters _moose_object_pars;
+  virtual void act() override;
 };
 
-#endif // MOOSEOBJECTACTION_H
+#endif // ADDRELATIONSHIPMANAGER_H

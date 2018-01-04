@@ -132,6 +132,7 @@ InputParameters::operator=(const InputParameters & rhs)
   _params = rhs._params;
 
   _buildable_types = rhs._buildable_types;
+  _buildable_rm_types = rhs._buildable_rm_types;
   _collapse_nesting = rhs._collapse_nesting;
   _moose_object_syntax_visibility = rhs._moose_object_syntax_visibility;
   _coupled_vars = rhs._coupled_vars;
@@ -154,6 +155,9 @@ InputParameters::operator+=(const InputParameters & rhs)
 
   _buildable_types.insert(
       _buildable_types.end(), rhs._buildable_types.begin(), rhs._buildable_types.end());
+  _buildable_rm_types.insert(
+      _buildable_rm_types.end(), rhs._buildable_rm_types.begin(), rhs._buildable_rm_types.end());
+
   // Collapse nesting and moose object syntax hiding are not modified with +=
   _coupled_vars.insert(rhs._coupled_vars.begin(), rhs._coupled_vars.end());
   return *this;
@@ -306,10 +310,23 @@ InputParameters::registerBuildableTypes(const std::string & names)
   MooseUtils::tokenize(names, _buildable_types, 1, " \t\n\v\f\r"); // tokenize on whitespace
 }
 
+void
+InputParameters::registerRelationshipManagers(const std::string & names)
+{
+  _buildable_rm_types.clear();
+  MooseUtils::tokenize(names, _buildable_rm_types, 1, " \t\n\v\f\r"); // tokenize on whitespace
+}
+
 const std::vector<std::string> &
 InputParameters::getBuildableTypes() const
 {
   return _buildable_types;
+}
+
+const std::vector<std::string> &
+InputParameters::getBuildableRelationshipManagerTypes() const
+{
+  return _buildable_rm_types;
 }
 
 void
