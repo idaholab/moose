@@ -41,6 +41,7 @@ public:
 
   void addDependency(std::string task, std::string pre_req);
   void addDependencySets(const std::string & action_sets);
+  void clearTaskDependencies();
 
   const std::vector<std::string> & getSortedTask();
   const std::vector<std::vector<std::string>> & getSortedTaskSet();
@@ -68,7 +69,7 @@ public:
                            int line = -1);
 
   /**
-   *  Registration a type with a block. For example, associate FunctionName with the Functions block
+   * Register a type with a block. For example, associate FunctionName with the Functions block.
    * @param syntax The target syntax to associate the type with
    * @param type The name of the type to associate with the syntax
    */

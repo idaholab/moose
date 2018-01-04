@@ -516,6 +516,20 @@ MooseApp::setupOptions()
     }
 
     _parser.parse(_input_filename);
+
+    if (isParamValid("mesh_only"))
+    {
+      // Clear out the normal MOOSE tasks. We'll repopulate the syntax object with a subset
+      // of tasks necessary for processing the mesh.
+      _syntax.clearTaskDependencies();
+
+      // Call the global function in Moose.C to prepopulate mesh-only tasks
+      Moose::populateMeshOnlyTasks(_syntax);
+
+      // Call the user-definable callback
+      modifyMeshOnlyTasks(_syntax);
+    }
+
     _action_warehouse.build();
   }
   else
@@ -546,20 +560,18 @@ MooseApp::getOutputFileBase()
 void
 MooseApp::runInputFile()
 {
-  std::string mesh_file_name;
-  if (!_ready_to_exit && isParamValid("mesh_only"))
-  {
-    meshOnly(getParam<std::string>("mesh_only"));
-    _ready_to_exit = true;
-  }
-
   // If ready to exit has been set, then just return
   if (_ready_to_exit)
     return;
 
   _action_warehouse.executeAllActions();
 
-  if (getParam<bool>("list_constructed_objects"))
+  if (isParamValid("mesh_only"))
+  {
+    writeMeshOnly(getParam<std::string>("mesh_only"));
+    _ready_to_exit = true;
+  }
+  else if (getParam<bool>("list_constructed_objects"))
   {
     // TODO: ask multiapps for their constructed objects
     std::vector<std::string> obj_list = _factory.getConstructedObjects();
@@ -568,7 +580,6 @@ MooseApp::runInputFile()
       Moose::out << name << "\n";
     Moose::out << "**END OBJECT DATA**\n" << std::endl;
     _ready_to_exit = true;
-    return;
   }
 }
 
@@ -626,24 +637,9 @@ MooseApp::hasRecoverFileBase()
 }
 
 void
-MooseApp::meshOnly(std::string mesh_file_name)
+MooseApp::writeMeshOnly(std::string mesh_file_name)
 {
-  /**
-   * These actions should be the minimum set necessary to generate and output
-   * a Mesh.
-   */
-  _action_warehouse.executeActionsWithAction("meta_action");
-  _action_warehouse.executeActionsWithAction("set_global_params");
-  _action_warehouse.executeActionsWithAction("setup_mesh");
-  _action_warehouse.executeActionsWithAction("add_partitioner");
-  _action_warehouse.executeActionsWithAction("init_mesh");
-  _action_warehouse.executeActionsWithAction("prepare_mesh");
-  _action_warehouse.executeActionsWithAction("add_mesh_modifier");
-  _action_warehouse.executeActionsWithAction("execute_mesh_modifiers");
-  _action_warehouse.executeActionsWithAction("uniform_refine_mesh");
-  _action_warehouse.executeActionsWithAction("setup_mesh_complete");
-
-  std::shared_ptr<MooseMesh> & mesh = _action_warehouse.mesh();
+  auto & mesh_ptr = _action_warehouse.mesh();
 
   // If no argument specified or if the argument following --mesh-only starts
   // with a dash, try to build an output filename based on the input mesh filename.
@@ -665,8 +661,8 @@ MooseApp::meshOnly(std::string mesh_file_name)
   // that behavior here.
   if (mesh_file_name.find(".e") + 2 == mesh_file_name.size())
   {
-    ExodusII_IO exio(mesh->getMesh());
-    if (mesh->getMesh().mesh_dimension() != 1)
+    ExodusII_IO exio(mesh_ptr->getMesh());
+    if (mesh_ptr->getMesh().mesh_dimension() != 1)
       exio.use_mesh_dimension_instead_of_spatial_dimension(true);
 
     exio.write(mesh_file_name);
@@ -674,7 +670,7 @@ MooseApp::meshOnly(std::string mesh_file_name)
   else
   {
     // Just write the file using the name requested by the user.
-    mesh->getMesh().write(mesh_file_name);
+    mesh_ptr->getMesh().write(mesh_file_name);
   }
 }
 
