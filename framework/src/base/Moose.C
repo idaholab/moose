@@ -320,6 +320,7 @@
 #include "AnalyticalIndicator.h"
 #include "LaplacianJumpIndicator.h"
 #include "GradientJumpIndicator.h"
+#include "ValueJumpIndicator.h"
 
 // markers
 #include "ErrorToleranceMarker.h"
@@ -801,6 +802,7 @@ registerObjects(Factory & factory)
   registerIndicator(AnalyticalIndicator);
   registerIndicator(LaplacianJumpIndicator);
   registerIndicator(GradientJumpIndicator);
+  registerIndicator(ValueJumpIndicator);
 
   // markers
   registerMarker(ErrorToleranceMarker);
