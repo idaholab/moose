@@ -4476,14 +4476,14 @@ FEProblemBase::initialAdaptMesh()
   }
 }
 
-void
+bool
 FEProblemBase::adaptMesh()
 {
   // reset cycle counter
   _cycles_completed = 0;
 
   if (!_adaptivity.isAdaptivityDue())
-    return;
+    return false;
 
   unsigned int cycles_per_step = _adaptivity.getCyclesPerStep();
 
@@ -4500,6 +4500,8 @@ FEProblemBase::adaptMesh()
 
     if (_adaptivity.adaptMesh())
     {
+      mesh_changed = true;
+
       meshChangedHelper(true); // This may be an intermediate change
       _cycles_completed++;
       mesh_changed = true;
@@ -4520,6 +4522,8 @@ FEProblemBase::adaptMesh()
     _eq.reinit_systems();
 
   Moose::perf_log.pop("Adaptivity: adaptMesh()", "Execution");
+
+  return mesh_changed;
 }
 #endif // LIBMESH_ENABLE_AMR
 
