@@ -1125,7 +1125,7 @@ populateMeshOnlyTasks(Syntax & syntax)
 /**
  * Multiple Action class can be associated with a single input file section, in which case all
  * associated Actions will be created and "acted" on when the associated input file section is
- * seen.b *
+ * seen.*
  *
  * Example:
  *  "setup_mesh" <-----------> SetupMeshAction <---------
