@@ -7,6 +7,6 @@
   [./good_objects]
     type = RunApp
     input = good.i
-    required_objects = 'AnalyticalIndicator VolumeHistogram'
+    required_objects = 'AnalyticalIndicator VolumeHistogram Steady'
   [../]
 []
