@@ -422,6 +422,7 @@ def addObjectNames(objs, node):
 
     addObjectsFromBlock(objs, node, "subblocks")
     addObjectsFromBlock(objs, node, "subblock_types")
+    addObjectsFromBlock(objs, node, "types")
 
     star = node.get("star")
     if star:
