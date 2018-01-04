@@ -4494,6 +4494,7 @@ FEProblemBase::adaptMesh()
   for (unsigned int i = 0; i < cycles_per_step; ++i)
   {
     _console << "Adaptivity step " << i + 1 << " of " << cycles_per_step << '\n';
+
     // Markers were already computed once by Executioner
     if (_adaptivity.getRecomputeMarkersFlag() && i > 0)
       computeMarkers();
@@ -4504,7 +4505,6 @@ FEProblemBase::adaptMesh()
 
       meshChangedHelper(true); // This may be an intermediate change
       _cycles_completed++;
-      mesh_changed = true;
     }
     else
     {
