@@ -30,9 +30,6 @@ ValueJumpIndicator::ValueJumpIndicator(const InputParameters & parameters)
 Real
 ValueJumpIndicator::computeQpIntegral()
 {
-  if (_current_elem->subdomain_id() != _neighbor_elem->subdomain_id())
-    return 0;
-
   Real jump = _u[_qp] - _u_neighbor[_qp];
 
   return jump * jump;
