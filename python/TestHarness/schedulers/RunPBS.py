@@ -123,6 +123,9 @@ class RunPBS(QueueManager):
             if job_state.group(1) == 'F':
                 reason = 'WAITING'
 
+                # The exit code PBS recorded when the application exited
+                tester.exit_code = re.search(r'Exit_status = (\d+)', output)
+
                 # Set the bucket that allows processResults to commence
                 bucket = tester.bucket_waiting_processing
 
