@@ -1065,7 +1065,12 @@ public:
   // Adaptivity /////
   Adaptivity & adaptivity() { return _adaptivity; }
   virtual void initialAdaptMesh();
-  virtual void adaptMesh();
+
+  /**
+   * @returns Whether or not the mesh was changed
+   */
+  virtual bool adaptMesh();
+
   /**
    * @return The number of adaptivity cycles completed.
    */
