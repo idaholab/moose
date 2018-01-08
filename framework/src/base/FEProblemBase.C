@@ -1546,7 +1546,7 @@ void
 FEProblemBase::addFunction(std::string type, const std::string & name, InputParameters parameters)
 {
   setInputParametersFEProblem(parameters);
-  parameters.set<SubProblem *>("_subproblem") = this;
+  parameters.addPrivateParam<SubProblem *>("_subproblem", this);
 
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
   {
@@ -1732,7 +1732,7 @@ FEProblemBase::addKernel(const std::string & kernel_name,
   if (_displaced_problem != NULL && parameters.get<bool>("use_displaced_mesh"))
   {
     parameters.set<SubProblem *>("_subproblem") = _displaced_problem.get();
-    parameters.set<SystemBase *>("_sys") = &_displaced_problem->nlSys();
+    parameters.addPrivateParam<SystemBase *>("_sys", &_displaced_problem->nlSys());
     _reinit_displaced_elem = true;
   }
   else
@@ -1747,8 +1747,8 @@ FEProblemBase::addKernel(const std::string & kernel_name,
         parameters.set<bool>("use_displaced_mesh") = false;
     }
 
-    parameters.set<SubProblem *>("_subproblem") = this;
-    parameters.set<SystemBase *>("_sys") = _nl.get();
+    parameters.addPrivateParam<SubProblem *>("_subproblem", this);
+    parameters.addPrivateParam<SystemBase *>("_sys", _nl.get());
   }
 
   _nl->addKernel(kernel_name, name, parameters);
@@ -1763,7 +1763,7 @@ FEProblemBase::addNodalKernel(const std::string & kernel_name,
   if (_displaced_problem != NULL && parameters.get<bool>("use_displaced_mesh"))
   {
     parameters.set<SubProblem *>("_subproblem") = _displaced_problem.get();
-    parameters.set<SystemBase *>("_sys") = &_displaced_problem->nlSys();
+    parameters.addPrivateParam<SystemBase *>("_sys", &_displaced_problem->nlSys());
     _reinit_displaced_elem = true;
   }
   else
@@ -1778,8 +1778,8 @@ FEProblemBase::addNodalKernel(const std::string & kernel_name,
         parameters.set<bool>("use_displaced_mesh") = false;
     }
 
-    parameters.set<SubProblem *>("_subproblem") = this;
-    parameters.set<SystemBase *>("_sys") = _nl.get();
+    parameters.addPrivateParam<SubProblem *>("_subproblem", this);
+    parameters.addPrivateParam<SystemBase *>("_sys", _nl.get());
   }
   _nl->addNodalKernel(kernel_name, name, parameters);
 }
@@ -1793,7 +1793,7 @@ FEProblemBase::addScalarKernel(const std::string & kernel_name,
   if (_displaced_problem != NULL && parameters.get<bool>("use_displaced_mesh"))
   {
     parameters.set<SubProblem *>("_subproblem") = _displaced_problem.get();
-    parameters.set<SystemBase *>("_sys") = &_displaced_problem->nlSys();
+    parameters.addPrivateParam<SystemBase *>("_sys", &_displaced_problem->nlSys());
   }
   else
   {
@@ -1807,8 +1807,8 @@ FEProblemBase::addScalarKernel(const std::string & kernel_name,
         parameters.set<bool>("use_displaced_mesh") = false;
     }
 
-    parameters.set<SubProblem *>("_subproblem") = this;
-    parameters.set<SystemBase *>("_sys") = _nl.get();
+    parameters.addPrivateParam<SubProblem *>("_subproblem", this);
+    parameters.addPrivateParam<SystemBase *>("_sys", _nl.get());
   }
   _nl->addScalarKernel(kernel_name, name, parameters);
 }
@@ -1822,7 +1822,7 @@ FEProblemBase::addBoundaryCondition(const std::string & bc_name,
   if (_displaced_problem != NULL && parameters.get<bool>("use_displaced_mesh"))
   {
     parameters.set<SubProblem *>("_subproblem") = _displaced_problem.get();
-    parameters.set<SystemBase *>("_sys") = &_displaced_problem->nlSys();
+    parameters.addPrivateParam<SystemBase *>("_sys", &_displaced_problem->nlSys());
     _reinit_displaced_face = true;
   }
   else
@@ -1837,8 +1837,8 @@ FEProblemBase::addBoundaryCondition(const std::string & bc_name,
         parameters.set<bool>("use_displaced_mesh") = false;
     }
 
-    parameters.set<SubProblem *>("_subproblem") = this;
-    parameters.set<SystemBase *>("_sys") = _nl.get();
+    parameters.addPrivateParam<SubProblem *>("_subproblem", this);
+    parameters.addPrivateParam<SystemBase *>("_sys", _nl.get());
   }
   _nl->addBoundaryCondition(bc_name, name, parameters);
 }
@@ -1854,7 +1854,7 @@ FEProblemBase::addConstraint(const std::string & c_name,
   if (_displaced_problem != NULL && parameters.get<bool>("use_displaced_mesh"))
   {
     parameters.set<SubProblem *>("_subproblem") = _displaced_problem.get();
-    parameters.set<SystemBase *>("_sys") = &_displaced_problem->nlSys();
+    parameters.addPrivateParam<SystemBase *>("_sys", &_displaced_problem->nlSys());
     _reinit_displaced_face = true;
   }
   else
@@ -1863,8 +1863,8 @@ FEProblemBase::addConstraint(const std::string & c_name,
     if (parameters.have_parameter<bool>("use_displaced_mesh"))
       parameters.set<bool>("use_displaced_mesh") = false;
 
-    parameters.set<SubProblem *>("_subproblem") = this;
-    parameters.set<SystemBase *>("_sys") = _nl.get();
+    parameters.addPrivateParam<SubProblem *>("_subproblem", this);
+    parameters.addPrivateParam<SystemBase *>("_sys", _nl.get());
   }
   _nl->addConstraint(c_name, name, parameters);
 }
@@ -1909,7 +1909,7 @@ FEProblemBase::addAuxKernel(const std::string & kernel_name,
   if (_displaced_problem != NULL && parameters.get<bool>("use_displaced_mesh"))
   {
     parameters.set<SubProblem *>("_subproblem") = _displaced_problem.get();
-    parameters.set<SystemBase *>("_sys") = &_displaced_problem->auxSys();
+    parameters.addPrivateParam<SystemBase *>("_sys", &_displaced_problem->auxSys());
     parameters.set<SystemBase *>("_nl_sys") = &_displaced_problem->nlSys();
     if (!parameters.get<std::vector<BoundaryName>>("boundary").empty())
       _reinit_displaced_face = true;
@@ -1928,8 +1928,8 @@ FEProblemBase::addAuxKernel(const std::string & kernel_name,
         parameters.set<bool>("use_displaced_mesh") = false;
     }
 
-    parameters.set<SubProblem *>("_subproblem") = this;
-    parameters.set<SystemBase *>("_sys") = _aux.get();
+    parameters.addPrivateParam<SubProblem *>("_subproblem", this);
+    parameters.addPrivateParam<SystemBase *>("_sys", _aux.get());
     parameters.set<SystemBase *>("_nl_sys") = _nl.get();
   }
   _aux->addKernel(kernel_name, name, parameters);
@@ -1944,7 +1944,7 @@ FEProblemBase::addAuxScalarKernel(const std::string & kernel_name,
   if (_displaced_problem != NULL && parameters.get<bool>("use_displaced_mesh"))
   {
     parameters.set<SubProblem *>("_subproblem") = _displaced_problem.get();
-    parameters.set<SystemBase *>("_sys") = &_displaced_problem->auxSys();
+    parameters.addPrivateParam<SystemBase *>("_sys", &_displaced_problem->auxSys());
   }
   else
   {
@@ -1958,8 +1958,8 @@ FEProblemBase::addAuxScalarKernel(const std::string & kernel_name,
         parameters.set<bool>("use_displaced_mesh") = false;
     }
 
-    parameters.set<SubProblem *>("_subproblem") = this;
-    parameters.set<SystemBase *>("_sys") = _aux.get();
+    parameters.addPrivateParam<SubProblem *>("_subproblem", this);
+    parameters.addPrivateParam<SystemBase *>("_sys", _aux.get());
   }
   _aux->addScalarKernel(kernel_name, name, parameters);
 }
@@ -1973,7 +1973,7 @@ FEProblemBase::addDiracKernel(const std::string & kernel_name,
   if (_displaced_problem != NULL && parameters.get<bool>("use_displaced_mesh"))
   {
     parameters.set<SubProblem *>("_subproblem") = _displaced_problem.get();
-    parameters.set<SystemBase *>("_sys") = &_displaced_problem->nlSys();
+    parameters.addPrivateParam<SystemBase *>("_sys", &_displaced_problem->nlSys());
     _reinit_displaced_elem = true;
   }
   else
@@ -1988,8 +1988,8 @@ FEProblemBase::addDiracKernel(const std::string & kernel_name,
         parameters.set<bool>("use_displaced_mesh") = false;
     }
 
-    parameters.set<SubProblem *>("_subproblem") = this;
-    parameters.set<SystemBase *>("_sys") = _nl.get();
+    parameters.addPrivateParam<SubProblem *>("_subproblem", this);
+    parameters.addPrivateParam<SystemBase *>("_sys", _nl.get());
   }
   _nl->addDiracKernel(kernel_name, name, parameters);
 }
@@ -2005,7 +2005,7 @@ FEProblemBase::addDGKernel(const std::string & dg_kernel_name,
   if (_displaced_problem != NULL && parameters.get<bool>("use_displaced_mesh"))
   {
     parameters.set<SubProblem *>("_subproblem") = _displaced_problem.get();
-    parameters.set<SystemBase *>("_sys") = &_displaced_problem->nlSys();
+    parameters.addPrivateParam<SystemBase *>("_sys", &_displaced_problem->nlSys());
     _reinit_displaced_face = true;
   }
   else
@@ -2020,8 +2020,8 @@ FEProblemBase::addDGKernel(const std::string & dg_kernel_name,
         parameters.set<bool>("use_displaced_mesh") = false;
     }
 
-    parameters.set<SubProblem *>("_subproblem") = this;
-    parameters.set<SystemBase *>("_sys") = _nl.get();
+    parameters.addPrivateParam<SubProblem *>("_subproblem", this);
+    parameters.addPrivateParam<SystemBase *>("_sys", _nl.get());
   }
   _nl->addDGKernel(dg_kernel_name, name, parameters);
 }
@@ -2037,7 +2037,7 @@ FEProblemBase::addInterfaceKernel(const std::string & interface_kernel_name,
   if (_displaced_problem != NULL && parameters.get<bool>("use_displaced_mesh"))
   {
     parameters.set<SubProblem *>("_subproblem") = _displaced_problem.get();
-    parameters.set<SystemBase *>("_sys") = &_displaced_problem->nlSys();
+    parameters.addPrivateParam<SystemBase *>("_sys", &_displaced_problem->nlSys());
     _reinit_displaced_face = true;
   }
   else
@@ -2052,8 +2052,8 @@ FEProblemBase::addInterfaceKernel(const std::string & interface_kernel_name,
         parameters.set<bool>("use_displaced_mesh") = false;
     }
 
-    parameters.set<SubProblem *>("_subproblem") = this;
-    parameters.set<SystemBase *>("_sys") = _nl.get();
+    parameters.addPrivateParam<SubProblem *>("_subproblem", this);
+    parameters.addPrivateParam<SystemBase *>("_sys", _nl.get());
   }
   _nl->addInterfaceKernel(interface_kernel_name, name, parameters);
 }
@@ -2068,7 +2068,7 @@ FEProblemBase::addInitialCondition(const std::string & ic_name,
   parameters.checkParams(name);
 
   setInputParametersFEProblem(parameters);
-  parameters.set<SubProblem *>("_subproblem") = this;
+  parameters.addPrivateParam<SubProblem *>("_subproblem", this);
 
   const std::string & var_name = parameters.get<VariableName>("variable");
   // field IC
@@ -2077,7 +2077,7 @@ FEProblemBase::addInitialCondition(const std::string & ic_name,
     for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
     {
       MooseVariable & var = getVariable(tid, var_name);
-      parameters.set<SystemBase *>("_sys") = &var.sys();
+      parameters.addPrivateParam<SystemBase *>("_sys", &var.sys());
       std::shared_ptr<InitialCondition> ic =
           _factory.create<InitialCondition>(ic_name, name, parameters, tid);
       _ics.addObject(ic, tid);
@@ -2088,7 +2088,7 @@ FEProblemBase::addInitialCondition(const std::string & ic_name,
   else if (hasScalarVariable(var_name))
   {
     MooseVariableScalar & var = getScalarVariable(0, var_name);
-    parameters.set<SystemBase *>("_sys") = &var.sys();
+    parameters.addPrivateParam<SystemBase *>("_sys", &var.sys());
     std::shared_ptr<ScalarInitialCondition> ic =
         _factory.create<ScalarInitialCondition>(ic_name, name, parameters);
     _scalar_ics.addObject(ic);
@@ -2229,7 +2229,7 @@ FEProblemBase::addMaterial(const std::string & mat_name,
         parameters.set<bool>("use_displaced_mesh") = false;
     }
 
-    parameters.set<SubProblem *>("_subproblem") = this;
+    parameters.addPrivateParam<SubProblem *>("_subproblem", this);
   }
 
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
@@ -2552,7 +2552,7 @@ FEProblemBase::addUserObject(std::string user_object_name,
         parameters.set<bool>("use_displaced_mesh") = false;
     }
 
-    parameters.set<SubProblem *>("_subproblem") = this;
+    parameters.addPrivateParam<SubProblem *>("_subproblem", this);
   }
 
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
@@ -3024,8 +3024,8 @@ FEProblemBase::addDamper(std::string damper_name,
                          InputParameters parameters)
 {
   setInputParametersFEProblem(parameters);
-  parameters.set<SubProblem *>("_subproblem") = this;
-  parameters.set<SystemBase *>("_sys") = _nl.get();
+  parameters.addPrivateParam<SubProblem *>("_subproblem", this);
+  parameters.addPrivateParam<SystemBase *>("_sys", _nl.get());
 
   _has_dampers = true;
   _nl->addDamper(damper_name, name, parameters);
@@ -3046,7 +3046,7 @@ FEProblemBase::addIndicator(std::string indicator_name,
   if (_displaced_problem != NULL && parameters.get<bool>("use_displaced_mesh"))
   {
     parameters.set<SubProblem *>("_subproblem") = _displaced_problem.get();
-    parameters.set<SystemBase *>("_sys") = &_displaced_problem->auxSys();
+    parameters.addPrivateParam<SystemBase *>("_sys", &_displaced_problem->auxSys());
     _reinit_displaced_elem = true;
   }
   else
@@ -3061,8 +3061,8 @@ FEProblemBase::addIndicator(std::string indicator_name,
         parameters.set<bool>("use_displaced_mesh") = false;
     }
 
-    parameters.set<SubProblem *>("_subproblem") = this;
-    parameters.set<SystemBase *>("_sys") = _aux.get();
+    parameters.addPrivateParam<SubProblem *>("_subproblem", this);
+    parameters.addPrivateParam<SystemBase *>("_sys", _aux.get());
   }
 
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
@@ -3088,7 +3088,7 @@ FEProblemBase::addMarker(std::string marker_name,
   if (_displaced_problem != NULL && parameters.get<bool>("use_displaced_mesh"))
   {
     parameters.set<SubProblem *>("_subproblem") = _displaced_problem.get();
-    parameters.set<SystemBase *>("_sys") = &_displaced_problem->auxSys();
+    parameters.addPrivateParam<SystemBase *>("_sys", &_displaced_problem->auxSys());
     _reinit_displaced_elem = true;
   }
   else
@@ -3103,8 +3103,8 @@ FEProblemBase::addMarker(std::string marker_name,
         parameters.set<bool>("use_displaced_mesh") = false;
     }
 
-    parameters.set<SubProblem *>("_subproblem") = this;
-    parameters.set<SystemBase *>("_sys") = _aux.get();
+    parameters.addPrivateParam<SubProblem *>("_subproblem", this);
+    parameters.addPrivateParam<SystemBase *>("_sys", _aux.get());
   }
 
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
@@ -3126,7 +3126,7 @@ FEProblemBase::addMultiApp(const std::string & multi_app_name,
   if (_displaced_problem != NULL && parameters.get<bool>("use_displaced_mesh"))
   {
     parameters.set<SubProblem *>("_subproblem") = _displaced_problem.get();
-    parameters.set<SystemBase *>("_sys") = &_displaced_problem->auxSys();
+    parameters.addPrivateParam<SystemBase *>("_sys", &_displaced_problem->auxSys());
     _reinit_displaced_elem = true;
   }
   else
@@ -3141,8 +3141,8 @@ FEProblemBase::addMultiApp(const std::string & multi_app_name,
         parameters.set<bool>("use_displaced_mesh") = false;
     }
 
-    parameters.set<SubProblem *>("_subproblem") = this;
-    parameters.set<SystemBase *>("_sys") = _aux.get();
+    parameters.addPrivateParam<SubProblem *>("_subproblem", this);
+    parameters.addPrivateParam<SystemBase *>("_sys", _aux.get());
   }
 
   std::shared_ptr<MultiApp> multi_app = _factory.create<MultiApp>(multi_app_name, name, parameters);
@@ -3359,7 +3359,7 @@ FEProblemBase::addTransfer(const std::string & transfer_name,
   if (_displaced_problem != NULL && parameters.get<bool>("use_displaced_mesh"))
   {
     parameters.set<SubProblem *>("_subproblem") = _displaced_problem.get();
-    parameters.set<SystemBase *>("_sys") = &_displaced_problem->auxSys();
+    parameters.addPrivateParam<SystemBase *>("_sys", &_displaced_problem->auxSys());
     _reinit_displaced_elem = true;
   }
   else
@@ -3374,8 +3374,8 @@ FEProblemBase::addTransfer(const std::string & transfer_name,
         parameters.set<bool>("use_displaced_mesh") = false;
     }
 
-    parameters.set<SubProblem *>("_subproblem") = this;
-    parameters.set<SystemBase *>("_sys") = _aux.get();
+    parameters.addPrivateParam<SubProblem *>("_subproblem", this);
+    parameters.addPrivateParam<SystemBase *>("_sys", _aux.get());
   }
 
   // Handle the "SAME_AS_MULTIAPP" execute option
@@ -3936,7 +3936,7 @@ FEProblemBase::addTimeIntegrator(const std::string & type,
                                  InputParameters parameters)
 {
   setInputParametersFEProblem(parameters);
-  parameters.set<SubProblem *>("_subproblem") = this;
+  parameters.addPrivateParam<SubProblem *>("_subproblem", this);
   _aux->addTimeIntegrator(type, name + ":aux", parameters);
   _nl->addTimeIntegrator(type, name, parameters);
   _has_time_integrator = true;
@@ -3948,7 +3948,7 @@ FEProblemBase::addPredictor(const std::string & type,
                             InputParameters parameters)
 {
   setInputParametersFEProblem(parameters);
-  parameters.set<SubProblem *>("_subproblem") = this;
+  parameters.addPrivateParam<SubProblem *>("_subproblem", this);
   std::shared_ptr<Predictor> predictor = _factory.create<Predictor>(type, name, parameters);
   _nl->setPredictor(predictor);
 }

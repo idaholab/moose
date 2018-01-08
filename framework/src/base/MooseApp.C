@@ -107,6 +107,8 @@ validParams<MooseApp>()
                                    false,
                                    "Check the input file (i.e. requires -i <filename>) and quit.");
   params.addCommandLineParam<bool>(
+      "regurgitate", "--regurgitate", false, "Re-create the input file.");
+  params.addCommandLineParam<bool>(
       "list_constructed_objects",
       "--list-constructed-objects",
       false,
@@ -486,6 +488,7 @@ MooseApp::setupOptions()
     Moose::out << "**END SYNTAX DATA**\n" << std::endl;
     _ready_to_exit = true;
   }
+
   else if (_input_filename != "" ||
            isParamValid("input_file")) // They already specified an input filename
   {

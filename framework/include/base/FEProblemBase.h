@@ -569,7 +569,7 @@ public:
 
   virtual void setInputParametersFEProblem(InputParameters & parameters)
   {
-    parameters.set<FEProblemBase *>("_fe_problem_base") = this;
+    parameters.addPrivateParam<FEProblemBase *>("_fe_problem_base", this);
   }
 
   // Aux /////

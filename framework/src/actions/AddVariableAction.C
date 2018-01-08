@@ -124,6 +124,7 @@ AddVariableAction::createInitialConditionAction()
       _action_factory.create("AddInitialConditionAction", long_name, action_params));
 
   // Set the required parameters for the object to be created
+  action->getObjectParams().set<std::string>("type") = action_params.get<std::string>("type");
   action->getObjectParams().set<VariableName>("variable") = var_name;
   action->getObjectParams().set<Real>("value") = getParam<Real>("initial_condition");
 

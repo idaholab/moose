@@ -277,6 +277,9 @@ class TestHarness:
         if self.options.enable_recover:
             testers = self.appendRecoverableTests(testers)
 
+        if self.options.regurgitate:
+            testers = self.appendReguritateTests(testers)
+
         return testers
 
     def prunePath(self, filename):
@@ -376,6 +379,33 @@ class TestHarness:
 
         testers.extend(new_tests)
         return testers
+
+    def appendReguritateTests(self, testers):
+        """
+        The moose executable accepts the --regurgitate flag, which creates an exploded version of
+        the input file. This input file should yield the same result as the provided input file.
+        """
+        new_tests = []
+
+        for part1 in testers:
+            part2 = copy.deepcopy(part1)
+
+            # Part 1:
+            part1_params = part1.parameters()
+            part1_params['cli_args'].append('--regurgitate')
+
+            # Part 2:
+            part2_params = part2.parameters()
+            part2_params['test_name'] += '(regurgitate)'
+            part2_params['prereq'].append(part1.parameters()['test_name'])
+            part2_params['input'] += '.out'
+            part2_params['delete_output_before_running'] = False
+
+            new_tests.append(part2)
+
+        testers.extend(new_tests)
+        return testers
+
 
     def checkExpectError(self, output, expect_error):
         if re.search(expect_error, output, re.MULTILINE | re.DOTALL) == None:
@@ -638,6 +668,7 @@ class TestHarness:
         parser.add_argument('--n-threads', nargs=1, action='store', type=int, dest='nthreads', default=1, help='Number of threads to use when running mpiexec')
         parser.add_argument('-d', action='store_true', dest='debug_harness', help='Turn on Test Harness debugging')
         parser.add_argument('--recover', action='store_true', dest='enable_recover', help='Run a test in recover mode')
+        parser.add_argument('--regurgitate', action='store_true', help='Run test using regurgitated input file.')
         parser.add_argument('--recoversuffix', action='store', type=str, default='cpr', dest='recoversuffix', help='Set the file suffix for recover mode')
         parser.add_argument('--valgrind', action='store_const', dest='valgrind_mode', const='NORMAL', help='Run normal valgrind tests')
         parser.add_argument('--valgrind-heavy', action='store_const', dest='valgrind_mode', const='HEAVY', help='Run heavy valgrind tests')
@@ -726,6 +757,13 @@ class TestHarness:
         if opts.check_input and opts.enable_recover:
             print('ERROR: --check-input and --recover can not be used together')
             sys.exit(1)
+        if opts.regurgitate and opts.enable_recover:
+            print('ERROR: --regurgitate and --recover can not be used together')
+            sys.exit(1)
+        if opts.regurgitate and opts.check_input:
+            print('ERROR: --regurgitate and --check-input can not be used together')
+            sys.exit(1)
+
 
         # Update any keys from the environment as necessary
         if not self.options.method:

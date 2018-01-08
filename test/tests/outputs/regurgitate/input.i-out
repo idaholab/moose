@@ -1,0 +1,56 @@
+[Mesh]
+  dim = 2
+  nx = 10
+  ny = 10
+  type = GeneratedMesh
+[]
+[Problem]
+  type = FEProblem
+  use_nonlinear = true
+[]
+[Executioner]
+  petsc_options_iname = '-pc_type -pc_hypre_type'
+  petsc_options_value = 'hypre boomeramg'
+  solve_type = PJFNK
+  type = Steady
+[]
+[Variables]
+  [u]
+  []
+[]
+[BCs]
+  [left]
+    boundary = left
+    type = DirichletBC
+    value = 0
+    variable = u
+  []
+  [right]
+    boundary = right
+    type = DirichletBC
+    value = 1
+    variable = u
+  []
+[]
+[Kernels]
+  [diff]
+    type = Diffusion
+    variable = u
+  []
+[]
+[Outputs]
+  [out]
+    append_date = false
+    execute_input_on = INITIAL
+    execute_on = 'INITIAL TIMESTEP_END'
+    interval = 1
+    padding = 3
+    type = Exodus
+  []
+  [console]
+    append_date = false
+    interval = 1
+    print_mesh_changed_info = false
+    type = Console
+  []
+[]

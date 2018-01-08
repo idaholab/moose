@@ -85,7 +85,7 @@ public:
   ParseError(const std::string & msg);
 };
 
-/// Walker is an abstract interface that can be implemented to perform operations that traverse ag
+/// Walker is an abstract interface that can be implemented to perform operations that traverse a
 /// parsed hit node tree.  Implementing classes are passed to the Node::walk function.
 class Walker
 {

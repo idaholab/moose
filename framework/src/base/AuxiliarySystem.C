@@ -155,7 +155,7 @@ AuxiliarySystem::addTimeIntegrator(const std::string & type,
                                    const std::string & name,
                                    InputParameters parameters)
 {
-  parameters.set<SystemBase *>("_sys") = this;
+  parameters.addPrivateParam<SystemBase *>("_sys", this);
   _time_integrator = _factory.create<TimeIntegrator>(type, name, parameters);
 }
 

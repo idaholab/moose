@@ -86,6 +86,7 @@ public:
   /**
    * Convenience functions for determining if objects exist.
    */
+  bool hasObjects(THREAD_ID tid = 0) const;
   bool hasActiveObjects(THREAD_ID tid = 0) const;
   bool hasActiveBlockObjects(THREAD_ID tid = 0) const;
   bool hasActiveBlockObjects(SubdomainID id, THREAD_ID tid = 0) const;
@@ -368,6 +369,14 @@ MooseObjectWarehouseBase<T>::getActiveBlockObjects(SubdomainID id, THREAD_ID tid
   mooseAssert(iter != _active_block_objects[tid].end(),
               "Unable to located active block objects for the given id: " << id << ".");
   return iter->second;
+}
+
+template <typename T>
+bool
+MooseObjectWarehouseBase<T>::hasObjects(THREAD_ID tid /* = 0*/) const
+{
+  checkThreadID(tid);
+  return !_all_objects[tid].empty();
 }
 
 template <typename T>

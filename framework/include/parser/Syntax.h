@@ -96,6 +96,11 @@ public:
   // Retrieve the Syntax associated with the passed Action and task
   std::string getSyntaxByAction(const std::string & action, const std::string & task);
 
+  const std::multimap<std::string, Syntax::ActionInfo> & getActionSyntax()
+  {
+    return _associated_actions;
+  }
+
   /**
    * Method for determining whether a piece of syntax is associated with an Action
    * TODO: I need a better name

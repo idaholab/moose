@@ -72,7 +72,7 @@ AStableDirk4::AStableDirk4(const InputParameters & parameters)
     // getCheckedPointerParam() sanity checking is happy.  This is why
     // constructing MOOSE objects "manually" is generally frowned upon.
     params.set<FEProblemBase *>("_fe_problem_base") = &_fe_problem;
-    params.set<SystemBase *>("_sys") = &_sys;
+    params.addPrivateParam<SystemBase *>("_sys", &_sys);
 
     _bootstrap_method = factory.create<LStableDirk4>("LStableDirk4", name() + "_bootstrap", params);
   }

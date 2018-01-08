@@ -22,7 +22,7 @@ InputParameters
 validParams<AddFieldSplitAction>()
 {
   InputParameters params = validParams<MooseObjectAction>();
-  params.addParam<std::string>("type", "Split", "Classname of the split object");
+  params.set<std::string>("type") = "Split";
   params.addParam<std::vector<NonlinearVariableName>>("vars", "variables for this field");
   params.addParam<MultiMooseEnum>(
       "petsc_options", Moose::PetscSupport::getCommonPetscFlags(), "Singleton PETSc options");
