@@ -24,11 +24,10 @@ SolidWall::addVariables()
 void
 SolidWall::addMooseObjects1Phase()
 {
-  std::vector<unsigned int> bnd_id(1, getBoundaryId());
   {
     InputParameters params = _factory.getValidParams("DirichletBC");
     params.set<NonlinearVariableName>("variable") = FlowModelSinglePhase::RHOUA;
-    params.set<std::vector<unsigned int>>("r7:boundary") = bnd_id;
+    params.set<std::vector<BoundaryName>>("boundary") = getBoundaryNames();
     params.set<Real>("value") = 0.;
     _sim.addBoundaryCondition("DirichletBC", genName(name(), "rhou"), params);
   }
@@ -37,18 +36,17 @@ SolidWall::addMooseObjects1Phase()
 void
 SolidWall::addMooseObjects2Phase()
 {
-  std::vector<unsigned int> bnd_id(1, getBoundaryId());
   {
     InputParameters params = _factory.getValidParams("DirichletBC");
     params.set<NonlinearVariableName>("variable") = FlowModelTwoPhase::ALPHA_RHOU_A_LIQUID;
-    params.set<std::vector<unsigned int>>("r7:boundary") = bnd_id;
+    params.set<std::vector<BoundaryName>>("boundary") = getBoundaryNames();
     params.set<Real>("value") = 0.;
     _sim.addBoundaryCondition("DirichletBC", genName(name(), "arhouA_liquid"), params);
   }
   {
     InputParameters params = _factory.getValidParams("DirichletBC");
     params.set<NonlinearVariableName>("variable") = FlowModelTwoPhase::ALPHA_RHOU_A_VAPOR;
-    params.set<std::vector<unsigned int>>("r7:boundary") = bnd_id;
+    params.set<std::vector<BoundaryName>>("boundary") = getBoundaryNames();
     params.set<Real>("value") = 0.;
     _sim.addBoundaryCondition("DirichletBC", genName(name(), "arhouA_vapor"), params);
   }
