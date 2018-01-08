@@ -393,9 +393,7 @@ class TestHarness:
 
         return True
 
-    # Format results the way we want it
-    # TODO: refactore. It seems we only need it so the word FAILED
-    # appears before the status message.
+    # Format the caveats contained in tester so they are easy to read when printed
     def formatCaveats(self, tester):
         # PASS and DRY_RUN fall into this catagory
         if tester.didPass():

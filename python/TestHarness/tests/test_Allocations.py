@@ -8,7 +8,6 @@ class TestHarnessTester(TestHarnessTestCase):
         """
         # Subject a normally passing test to impossible cpu allocations
         output = self.runTests('--no-color', '-i', 'always_ok', '-p', '2', '-j', '1')
-        #self.assertIn('skipped (insufficient slots)', output)
         self.assertRegexpMatches(output, 'tests/test_harness.always_ok.*? \[INSUFFICIENT SLOTS\] SKIP')
 
         # Subject a normally passing test to impossible thread allocations

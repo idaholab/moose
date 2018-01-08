@@ -156,7 +156,7 @@ class TestHarnessTestCase(unittest.TestCase):
 
                 # A different method may have adjusted this tester to be
                 # skipped (jobA fails and thus skips and never runs jobB,
-                # but _occurres_ during jobA's iteration).
+                # but _occures_ during jobA's iteration).
                 elif tester.isSkipped():
                     return
 
@@ -257,7 +257,6 @@ class TestHarnessTestCase(unittest.TestCase):
                 # Join the results, because the TestHarness receives them out-of-order
                 if job_id == 0:
                     join_results = ' '.join([result_list[0], result_list[1]])
-                    print join_results
                     self.assertRegexpMatches(join_results, 'FAILED \(INVALID QSTAT RESULTS\)')
                     self.assertRegexpMatches(join_results, 'SKIP')
 
