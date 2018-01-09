@@ -12,6 +12,9 @@ InputParameters
 validParams<LinearViscoelasticityManager>()
 {
   InputParameters params = validParams<ElementUserObject>();
+  params.addClassDescription("Manages the updating of the semi-implicit "
+                             "single-step first-order finite difference "
+                             "time-stepping scheme");
   params.addRequiredParam<std::string>("viscoelastic_model",
                                        "name of the LinearViscoelasticityBase object to manage");
   params.addParam<std::string>(
