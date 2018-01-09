@@ -338,7 +338,7 @@ TEST_F(PorousFlowWaterNCGTest, liquidProperties)
   Real mu2 = fsp[0].viscosity;
 
   REL_TEST("ddensity_dp", ddensity_dp, (rho1 - rho2) / (2.0 * dp), 1.0e-6);
-  REL_TEST("dviscosity_dp", dviscosity_dp, (mu1 - mu2) / (2.0 * dp), 1.0e-6);
+  REL_TEST("dviscosity_dp", dviscosity_dp, (mu1 - mu2) / (2.0 * dp), 1.0e-5);
 
   const Real dT = 1.0e-4;
   _fp->liquidProperties(p, T + dT, fsp);

@@ -415,8 +415,8 @@ TEST_F(PorousFlowBrineCO2Test, liquidProperties)
   Real rho2 = fsp[0].density;
   Real mu2 = fsp[0].viscosity;
 
-  REL_TEST("ddensity_dp", ddensity_dp, (rho1 - rho2) / (2.0 * dp), 1.0e-5);
-  REL_TEST("dviscosity_dp", dviscosity_dp, (mu1 - mu2) / (2.0 * dp), 1.0e-6);
+  REL_TEST("ddensity_dp", ddensity_dp, (rho1 - rho2) / (2.0 * dp), 1.0e-4);
+  REL_TEST("dviscosity_dp", dviscosity_dp, (mu1 - mu2) / (2.0 * dp), 1.0e-5);
 
   const Real dT = 1.0e-4;
   _fp->liquidProperties(p, T + dT, xnacl, fsp);
@@ -469,8 +469,8 @@ TEST_F(PorousFlowBrineCO2Test, liquidProperties)
   rho2 = fsp[0].density;
   mu2 = fsp[0].viscosity;
 
-  REL_TEST("ddensity_dp", ddensity_dp, (rho1 - rho2) / (2.0 * dp), 1.0e-6);
-  REL_TEST("dviscosity_dp", dviscosity_dp, (mu1 - mu2) / (2.0 * dp), 1.0e-6);
+  REL_TEST("ddensity_dp", ddensity_dp, (rho1 - rho2) / (2.0 * dp), 1.0e-4);
+  REL_TEST("dviscosity_dp", dviscosity_dp, (mu1 - mu2) / (2.0 * dp), 1.0e-5);
 
   _fp->massFractions(p, T + dT, xnacl, z, phase_state, fsp);
   _fp->liquidProperties(p, T + dT, xnacl, fsp);
