@@ -14,7 +14,9 @@ InputParameters
 validParams<EshelbyTensor>()
 {
   InputParameters params = validParams<Material>();
-  params.addClassDescription("Stuff");
+  params.addClassDescription("Computes the Eshelby tensor as a function of "
+                             "strain energy density and the first "
+                             "Piola-Kirchoff stress");
   params.addRequiredCoupledVar(
       "displacements",
       "The displacements appropriate for the simulation geometry and coordinate system");
