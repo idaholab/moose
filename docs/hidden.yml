@@ -412,7 +412,6 @@ fluid_properties:
     - /AuxKernels/StagnationTemperatureAux
     - /Materials/FluidPropertiesMaterial
     - /Materials/FluidPropertiesMaterialPT
-    - /Materials/MultiComponentFluidPropertiesMaterialPT
     - /Modules/FluidProperties
     - /Modules/FluidProperties/AddFluidPropertiesAction
     - /Modules/FluidProperties/BrineFluidProperties
@@ -425,6 +424,8 @@ fluid_properties:
     - /Modules/FluidProperties/StiffenedGasFluidProperties
     - /Modules/FluidProperties/TabulatedFluidProperties
     - /Modules/FluidProperties/Water97FluidProperties
+fluid_properties_test:
+    - /Materials/MultiComponentFluidPropertiesMaterialPT
 heat_conduction:
     - /BCs/ConvectiveFluxFunction
     - /BCs/CoupledConvectiveFlux

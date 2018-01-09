@@ -16,7 +16,6 @@ validParams<MultiComponentFluidPropertiesMaterialPT>()
   params.addRequiredCoupledVar("temperature", "temperature (K)");
   params.addRequiredCoupledVar("xmass", "Solute mass fraction (-)");
   params.addRequiredParam<UserObjectName>("fp", "The name of the user object for fluid properties");
-  params.addParam<bool>("vapor", false, "Flag to calculate vapor pressure");
   params.addClassDescription(
       "Fluid properties of a multicomponent fluid using the (pressure, temperature) formulation");
   return params;
