@@ -4,6 +4,8 @@
 #include "AppFactory.h"
 #include "MooseSyntax.h"
 
+#include "MultiComponentFluidPropertiesMaterialPT.h"
+
 template <>
 InputParameters
 validParams<FluidPropertiesTestApp>()
@@ -50,8 +52,9 @@ FluidPropertiesTestApp__registerObjects(Factory & factory)
   FluidPropertiesTestApp::registerObjects(factory);
 }
 void
-FluidPropertiesTestApp::registerObjects(Factory & /*factory*/)
+FluidPropertiesTestApp::registerObjects(Factory & factory)
 {
+  registerMaterial(MultiComponentFluidPropertiesMaterialPT);
 }
 
 // External entry point for dynamic syntax association

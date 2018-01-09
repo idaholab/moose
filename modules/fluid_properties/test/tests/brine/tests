@@ -3,5 +3,6 @@
     type = CSVDiff
     input = 'brine.i'
     csvdiff = 'brine_out.csv'
+    allow_test_objects = true
   [../]
 []
