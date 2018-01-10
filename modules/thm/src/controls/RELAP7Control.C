@@ -5,7 +5,7 @@ InputParameters
 validParams<RELAP7Control>()
 {
   InputParameters params = validParams<Control>();
-  params.set<MultiMooseEnum>("execute_on") = "initial timestep_begin";
+  params.set<ExecFlagEnum>("execute_on") = {EXEC_INITIAL, EXEC_TIMESTEP_BEGIN};
   return params;
 }
 

@@ -85,13 +85,13 @@ GeometricalComponent::setupMesh()
 void
 GeometricalComponent::displaceMesh(const std::vector<SubdomainName> & blocks)
 {
-  MultiMooseEnum execute_on(SetupInterface::getExecuteOptions());
-  execute_on = "initial timestep_begin";
+  ExecFlagEnum execute_on(MooseUtils::getDefaultExecFlagEnum());
+  execute_on = {EXEC_INITIAL, EXEC_TIMESTEP_BEGIN};
 
   std::string class_name = "DisplaceNodeUserObject";
   InputParameters params = _factory.getValidParams(class_name);
   params.set<std::vector<SubdomainName>>("block") = blocks;
-  params.set<MultiMooseEnum>("execute_on") = execute_on;
+  params.set<ExecFlagEnum>("execute_on") = execute_on;
   params.set<Point>("position") = _position;
   params.set<RealVectorValue>("offset") = _offset;
   params.set<RealVectorValue>("orientation") = _dir;

@@ -230,8 +230,8 @@ FlowModelSinglePhase::addMooseObjects()
   // Adding auxiliary kernels
   //////////////////////////////////////
 
-  MultiMooseEnum ts_execute_on(SetupInterface::getExecuteOptions());
-  ts_execute_on = "timestep_begin";
+  ExecFlagEnum ts_execute_on(MooseUtils::getDefaultExecFlagEnum());
+  ts_execute_on = EXEC_TIMESTEP_BEGIN;
 
   // Velocity auxiliary kernel
   {
