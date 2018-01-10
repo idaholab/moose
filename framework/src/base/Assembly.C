@@ -217,7 +217,7 @@ Assembly::buildNeighborFE(FEType type)
       _fe_neighbor[dim][type] = FEBase::build(dim, type).release();
     _fe_neighbor[dim][type]->get_phi();
     _fe_neighbor[dim][type]->get_dphi();
-    if (_need_second_derivative.find(type) != _need_second_derivative.end())
+    if (_need_second_derivative_neighbor.find(type) != _need_second_derivative_neighbor.end())
       _fe_neighbor[dim][type]->get_d2phi();
   }
 }
@@ -235,7 +235,7 @@ Assembly::buildFaceNeighborFE(FEType type)
       _fe_face_neighbor[dim][type] = FEBase::build(dim, type).release();
     _fe_face_neighbor[dim][type]->get_phi();
     _fe_face_neighbor[dim][type]->get_dphi();
-    if (_need_second_derivative.find(type) != _need_second_derivative.end())
+    if (_need_second_derivative_neighbor.find(type) != _need_second_derivative_neighbor.end())
       _fe_face_neighbor[dim][type]->get_d2phi();
   }
 }
@@ -322,7 +322,7 @@ Assembly::feGradPhiNeighbor(FEType type)
 const VariablePhiSecond &
 Assembly::feSecondPhiNeighbor(FEType type)
 {
-  _need_second_derivative[type] = true;
+  _need_second_derivative_neighbor[type] = true;
   buildNeighborFE(type);
   return _fe_shape_data_neighbor[type]->_second_phi;
 }
@@ -344,7 +344,7 @@ Assembly::feGradPhiFaceNeighbor(FEType type)
 const VariablePhiSecond &
 Assembly::feSecondPhiFaceNeighbor(FEType type)
 {
-  _need_second_derivative[type] = true;
+  _need_second_derivative_neighbor[type] = true;
   buildFaceNeighborFE(type);
   return _fe_shape_data_face_neighbor[type]->_second_phi;
 }
@@ -556,7 +556,7 @@ Assembly::reinitFEFaceNeighbor(const Elem * neighbor, const std::vector<Point> &
         const_cast<std::vector<std::vector<Real>> &>(fe_face_neighbor->get_phi()));
     fesd->_grad_phi.shallowCopy(
         const_cast<std::vector<std::vector<RealGradient>> &>(fe_face_neighbor->get_dphi()));
-    if (_need_second_derivative.find(fe_type) != _need_second_derivative.end())
+    if (_need_second_derivative_neighbor.find(fe_type) != _need_second_derivative_neighbor.end())
       fesd->_second_phi.shallowCopy(
           const_cast<std::vector<std::vector<RealTensor>> &>(fe_face_neighbor->get_d2phi()));
   }
@@ -581,7 +581,7 @@ Assembly::reinitFENeighbor(const Elem * neighbor, const std::vector<Point> & ref
     fesd->_phi.shallowCopy(const_cast<std::vector<std::vector<Real>> &>(fe_neighbor->get_phi()));
     fesd->_grad_phi.shallowCopy(
         const_cast<std::vector<std::vector<RealGradient>> &>(fe_neighbor->get_dphi()));
-    if (_need_second_derivative.find(fe_type) != _need_second_derivative.end())
+    if (_need_second_derivative_neighbor.find(fe_type) != _need_second_derivative_neighbor.end())
       fesd->_second_phi.shallowCopy(
           const_cast<std::vector<std::vector<RealTensor>> &>(fe_neighbor->get_d2phi()));
   }
@@ -1251,18 +1251,18 @@ Assembly::copyNeighborShapes(unsigned int var)
 {
   MooseVariable & v = _sys.getVariable(_tid, var);
 
-  if (v.usesPhi())
+  if (v.usesPhiNeighbor())
     _phi_face_neighbor.shallowCopy(v.phiFaceNeighbor());
-  if (v.usesGradPhi())
+  if (v.usesGradPhiNeighbor())
     _grad_phi_face_neighbor.shallowCopy(v.gradPhiFaceNeighbor());
-  if (v.usesSecondPhi())
+  if (v.usesSecondPhiNeighbor())
     _second_phi_face_neighbor.shallowCopy(v.secondPhiFaceNeighbor());
 
-  if (v.usesPhi())
+  if (v.usesPhiNeighbor())
     _phi_neighbor.shallowCopy(v.phiNeighbor());
-  if (v.usesGradPhi())
+  if (v.usesGradPhiNeighbor())
     _grad_phi_neighbor.shallowCopy(v.gradPhiNeighbor());
-  if (v.usesSecondPhi())
+  if (v.usesSecondPhiNeighbor())
     _second_phi_neighbor.shallowCopy(v.secondPhiNeighbor());
 }
 

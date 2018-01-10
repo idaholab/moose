@@ -569,6 +569,7 @@ public:
   void invalidateCache();
 
   std::map<FEType, bool> _need_second_derivative;
+  std::map<FEType, bool> _need_second_derivative_neighbor;
 
   /**
    * Caches the Jacobian entry 'value', to eventually be

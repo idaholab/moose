@@ -450,6 +450,29 @@ public:
    */
   bool usesSecondPhi() { return _need_second || _need_second_old || _need_second_older; }
 
+  /**
+   * Whether or not this variable is actually using the shape function value.
+   *
+   * Currently hardcoded to true because we always compute the value.
+   */
+  bool usesPhiNeighbor() { return true; }
+
+  /**
+   * Whether or not this variable is actually using the shape function gradient.
+   *
+   * Currently hardcoded to true because we always compute the value.
+   */
+  bool usesGradPhiNeighbor() { return true; }
+
+  /**
+   * Whether or not this variable is actually using the shape function second derivative on a
+   * neighbor.
+   */
+  bool usesSecondPhiNeighbor()
+  {
+    return _need_second_neighbor || _need_second_old_neighbor || _need_second_older_neighbor;
+  }
+
 protected:
   /**
    * Get dof indices for the variable
