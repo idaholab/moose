@@ -460,8 +460,6 @@ misc:
 misc_test:
     - /Kernels/Convection
 navier_stokes:
-    - /AuxVariables/InitialCondition/CNSFVMachIC
-    - /AuxVariables/InitialCondition/CNSFVPressureIC
     - /AuxVariables/InitialCondition/NSInitialCondition
     - /Functions/WedgeFunction
     - /Modules/NavierStokes
@@ -476,8 +474,6 @@ navier_stokes:
     - /Modules/NavierStokes/Kernels/AddNavierStokesKernelsAction
     - /Modules/NavierStokes/Variables
     - /Modules/NavierStokes/Variables/AddNavierStokesVariablesAction
-    - /Variables/InitialCondition/CNSFVMachIC
-    - /Variables/InitialCondition/CNSFVPressureIC
     - /Variables/InitialCondition/NSInitialCondition
 phase_field:
     - /AuxKernels
