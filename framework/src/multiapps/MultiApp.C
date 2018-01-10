@@ -164,12 +164,6 @@ MultiApp::MultiApp(const InputParameters & parameters)
     _has_an_app(true),
     _backups(declareRestartableDataWithContext<SubAppBackups>("backups", this))
 {
-  if (_use_positions)
-  {
-    // Fill in the _positions vector and initialize
-    fillPositions();
-    init(_positions.size());
-  }
 }
 
 void
@@ -180,6 +174,16 @@ MultiApp::init(unsigned int num)
   _backups.reserve(_my_num_apps);
   for (unsigned int i = 0; i < _my_num_apps; i++)
     _backups.emplace_back(std::make_shared<Backup>());
+}
+
+void
+MultiApp::setupPositions()
+{
+  if (_use_positions)
+  {
+    fillPositions();
+    init(_positions.size());
+  }
 }
 
 void
