@@ -119,6 +119,11 @@ public:
   static MultiMooseEnum getExecuteOptions(std::string default_type = "");
 
   /**
+   * Return an ExecFlagEnum object with the available execution flags for Output objects.
+   */
+  static ExecFlagEnum getDefaultExecFlagEnum();
+
+  /**
    * Method for controlling the allow output state
    * @param state The state to set the allow flag to
    */

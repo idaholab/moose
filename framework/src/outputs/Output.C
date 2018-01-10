@@ -54,7 +54,7 @@ validParams<Output>()
 
   // Update the 'execute_on' input parameter for output
   ExecFlagEnum & exec_enum = params.set<ExecFlagEnum>("execute_on", true);
-  exec_enum.addAvailableFlags(EXEC_FAILED);
+  exec_enum = Output::getDefaultExecFlagEnum();
   exec_enum = {EXEC_INITIAL, EXEC_TIMESTEP_END};
   params.setDocString("execute_on", exec_enum.getDocString());
 
@@ -79,14 +79,22 @@ validParams<Output>()
 MultiMooseEnum
 Output::getExecuteOptions(std::string default_type)
 {
+  // TODO: ExecFlagType
   /*
-  ::mooseDeprecated("The 'getExecuteOptions' was replaced by the ExecFlagEnum class because MOOSE "
-                    "was updated to use this for the execute flags and the new function provides "
-                    "additional arguments for modification of the enum.");
+  ::mooseDeprecated("This version 'getExecuteOptions' was replaced by the "
+                    "Output::getDefaultExecFlagEnum() static function.");
   */
   ExecFlagEnum exec_enum = MooseUtils::getDefaultExecFlagEnum();
   exec_enum.addAvailableFlags(EXEC_FAILED);
   exec_enum = default_type;
+  return exec_enum;
+}
+
+ExecFlagEnum
+Output::getDefaultExecFlagEnum()
+{
+  ExecFlagEnum exec_enum = MooseUtils::getDefaultExecFlagEnum();
+  exec_enum.addAvailableFlags(EXEC_FAILED);
   return exec_enum;
 }
 
