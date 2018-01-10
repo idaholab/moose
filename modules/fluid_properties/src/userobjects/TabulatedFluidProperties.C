@@ -453,7 +453,7 @@ TabulatedFluidProperties::reshapeData2D(unsigned int nrow,
 }
 
 void
-TabulatedFluidProperties::checkInputVariables(Real pressure, Real temperature) const
+TabulatedFluidProperties::checkInputVariables(Real & pressure, Real & temperature) const
 {
   if (pressure < _pressure_min || pressure > _pressure_max)
     throw MooseException(
