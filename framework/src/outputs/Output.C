@@ -80,15 +80,8 @@ MultiMooseEnum
 Output::getExecuteOptions(std::string default_type)
 {
   // TODO: ExecFlagType
-<<<<<<< HEAD
-  /*
   ::mooseDeprecated("This version 'getExecuteOptions' was replaced by the "
                     "Output::getDefaultExecFlagEnum() static function.");
-  */
-=======
-  ::mooseDeprecated("This version 'getExecuteOptions' was replaced by the "
-                    "Output::getDefaultExecFlagEnum() static function.");
->>>>>>> Minor updates to execute options in support of updating applications to use the new ExecFlagEnum class
   ExecFlagEnum exec_enum = MooseUtils::getDefaultExecFlagEnum();
   exec_enum.addAvailableFlags(EXEC_FAILED);
   exec_enum = default_type;

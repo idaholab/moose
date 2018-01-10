@@ -99,8 +99,7 @@ validParams<CommonOutputAction>()
       "(may include Variables, ScalarVariables, and Postprocessor names).");
 
   // Add the 'execute_on' input parameter
-  ExecFlagEnum exec_enum = MooseUtils::getDefaultExecFlagEnum();
-  exec_enum.addAvailableFlags(EXEC_FAILED);
+  ExecFlagEnum exec_enum = Output::getDefaultExecFlagEnum();
   exec_enum = {EXEC_INITIAL, EXEC_TIMESTEP_END};
   params.addParam<ExecFlagEnum>("execute_on", exec_enum, exec_enum.getDocString());
 
