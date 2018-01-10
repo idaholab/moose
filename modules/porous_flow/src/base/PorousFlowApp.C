@@ -19,6 +19,8 @@
 #include "PorousFlowCapillaryPressureRSC.h"
 #include "PorousFlowCapillaryPressureBW.h"
 #include "PorousFlowCapillaryPressureBC.h"
+#include "PorousFlowWaterNCG.h"
+#include "PorousFlowBrineCO2.h"
 
 // DiracKernels
 #include "PorousFlowSquarePulsePointSource.h"
@@ -166,6 +168,8 @@ PorousFlowApp::registerObjects(Factory & factory)
   registerUserObject(PorousFlowCapillaryPressureRSC);
   registerUserObject(PorousFlowCapillaryPressureBW);
   registerUserObject(PorousFlowCapillaryPressureBC);
+  registerUserObject(PorousFlowWaterNCG);
+  registerUserObject(PorousFlowBrineCO2);
 
   // DiracKernels
   registerDiracKernel(PorousFlowSquarePulsePointSource);
