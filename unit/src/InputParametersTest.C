@@ -30,7 +30,7 @@ TEST(InputParameters, checkControlParamPrivateError)
   catch (const std::exception & e)
   {
     std::string msg(e.what());
-    ASSERT_TRUE(msg.find("is a private param") != std::string::npos)
+    ASSERT_TRUE(msg.find("private parameter '' marked controllable") != std::string::npos)
         << "failed with unexpected error: " << msg;
   }
 }
@@ -68,7 +68,7 @@ TEST(InputParameters, checkControlParamTypeError)
   catch (const std::exception & e)
   {
     std::string msg(e.what());
-    ASSERT_TRUE(msg.find("cannot be marked as controllable because its type") != std::string::npos)
+    ASSERT_TRUE(msg.find("non-controllable type") != std::string::npos)
         << "failed with unexpected error:" << msg;
   }
 }
@@ -85,7 +85,7 @@ TEST(InputParameters, checkControlParamValidError)
   catch (const std::exception & e)
   {
     std::string msg(e.what());
-    ASSERT_TRUE(msg.find("The parameter 'not_valid'") != std::string::npos)
+    ASSERT_TRUE(msg.find("invalid parameter '' marked controllable") != std::string::npos)
         << "failed with unexpected error: " << msg;
   }
 }

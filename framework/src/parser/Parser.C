@@ -357,7 +357,8 @@ Parser::walkRaw(std::string /*fullpath*/, std::string /*nodepath*/, hit::Node * 
     // Add the parsed syntax to the parameters object for consumption by the Action
     params.set<std::string>("task") = it->second._task;
     params.set<std::string>("registered_identifier") = registered_identifier;
-    params.addPrivateParam<std::string>("parser_syntax", curr_identifier);
+    params.blockLocation() = _input_filename + ":" + std::to_string(n->line());
+    params.blockFullpath() = n->fullpath();
 
     // Create the Action
     std::shared_ptr<Action> action_obj =
@@ -368,6 +369,8 @@ Parser::walkRaw(std::string /*fullpath*/, std::string /*nodepath*/, hit::Node * 
         std::dynamic_pointer_cast<MooseObjectAction>(action_obj);
     if (object_action)
     {
+      object_action->getObjectParams().blockLocation() = params.blockLocation();
+      object_action->getObjectParams().blockFullpath() = params.blockFullpath();
       extractParams(curr_identifier, object_action->getObjectParams());
       object_action->getObjectParams()
           .set<std::vector<std::string>>("control_tags")
@@ -965,9 +968,9 @@ Parser::extractParams(const std::string & prefix, InputParameters & p)
       _extracted_vars.insert(
           full_name); // Keep track of all variables extracted from the input file
       found = true;
-      p.set<std::string>(paramLocName(it.first)) =
+      p.inputLocation(it.first) =
           _input_filename + ":" + std::to_string(_root->find(full_name)->line());
-      p.set<std::string>(paramPathName(it.first)) = full_name;
+      p.paramFullpath(it.first) = full_name;
     }
     // Wait! Check the GlobalParams section
     else if (global_params_block)
@@ -980,9 +983,9 @@ Parser::extractParams(const std::string & prefix, InputParameters & p)
             full_name); // Keep track of all variables extracted from the input file
         found = true;
         in_global = true;
-        p.set<std::string>(paramLocName(it.first)) =
+        p.inputLocation(it.first) =
             _input_filename + ":" + std::to_string(_root->find(full_name)->line());
-        p.set<std::string>(paramPathName(it.first)) = full_name;
+        p.paramFullpath(it.first) = full_name;
       }
     }
 
@@ -1333,7 +1336,9 @@ Parser::setFilePathParam(const std::string & full_name,
   if (pos != std::string::npos && postfix[0] != '/' && !postfix.empty())
     prefix = _input_filename.substr(0, pos + 1);
 
+  // TODO: delete the following line after apps have been updated to use rawParamVal API:
   params.set<std::string>("_raw_" + short_name) = postfix;
+  params.rawParamVal(short_name) = postfix;
   param->set() = prefix + postfix;
 
   if (in_global)
@@ -1401,6 +1406,7 @@ Parser::setVectorFilePathParam(const std::string & full_name,
   if (_root->find(full_name))
   {
     auto tmp = _root->param<std::vector<std::string>>(full_name);
+    params.rawParamVal(short_name) = _root->param<std::string>(full_name);
     for (auto val : tmp)
     {
       std::string prefix;
@@ -1413,6 +1419,7 @@ Parser::setVectorFilePathParam(const std::string & full_name,
     }
   }
 
+  // TODO: delete the following line after apps have been updated to use rawParamVal API:
   params.set<std::vector<std::string>>("_raw_" + short_name) = rawvec;
   param->set() = vec;
 
