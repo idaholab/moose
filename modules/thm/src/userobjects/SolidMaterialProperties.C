@@ -9,7 +9,7 @@ validParams<SolidMaterialProperties>()
   params.addParam<FunctionName>("Cp", "Specific heat");
   params.addParam<FunctionName>("rho", "Density");
 
-  params.addPrivateParam<MultiMooseEnum>("execute_on");
+  params.addPrivateParam<ExecFlagEnum>("execute_on");
   params.addPrivateParam<bool>("use_displaced_mesh");
   params.registerBase("SolidMaterialProperties");
 
