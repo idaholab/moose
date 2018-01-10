@@ -9,6 +9,7 @@
 #define POROUSFLOWFLUIDSTATEFLASHBASE_H
 
 #include "PorousFlowVariableBase.h"
+#include "PorousFlowFluidStateBase.h"
 
 class PorousFlowFluidStateFlashBase;
 class PorousFlowCapillaryPressure;
@@ -54,28 +55,6 @@ protected:
   virtual void initQpStatefulProperties() override;
   virtual void computeQpProperties() override;
 
-  /// Data structure to pass calculated thermophysical properties
-  struct FluidStateProperties
-  {
-    Real pressure;
-    Real saturation;
-    Real fluid_density;
-    Real fluid_viscosity;
-    std::vector<Real> mass_fraction;
-    Real dsaturation_dp;
-    Real dsaturation_dT;
-    Real dsaturation_dz;
-    Real dfluid_density_dp;
-    Real dfluid_density_dT;
-    Real dfluid_density_dz;
-    Real dfluid_viscosity_dp;
-    Real dfluid_viscosity_dT;
-    Real dfluid_viscosity_dz;
-    std::vector<Real> dmass_fraction_dp;
-    std::vector<Real> dmass_fraction_dT;
-    std::vector<Real> dmass_fraction_dz;
-  };
-
   /// Size material property vectors and initialise with zeros
   void setMaterialVectorSize() const;
 
@@ -84,51 +63,6 @@ protected:
    * and fluid component. Must override in all derived classes.
    */
   virtual void thermophysicalProperties() = 0;
-
-  /**
-   * Rachford-Rice equation for vapor fraction. Can be solved analytically for two
-   * components in two phases, but must be solved iteratively using a root finding
-   * algorithm for more components. This equation has the nice property
-   * that it is monotonic in the interval [0,1], so that only a small number of
-   * iterations are typically required to find the root.
-   *
-   * The Rachford-Rice equation can also be used to check whether the phase state
-   * is two phase, single phase gas, or single phase liquid.
-   * Evaluate f(v), the Rachford-Rice equation evaluated at the vapor mass fraction.
-   *
-   * If f(0) < 0, then the mixture is below the bubble point, and only a single phase
-   * liquid can exist
-   *
-   * If f(1) > 0, then the mixture is above the dew point, and only a single phase gas exists.
-   *
-   * If f(0) >= 0 and f(1) <= 0, the mixture is between the bubble and dew points, and both
-   * gas and liquid phases exist.
-   *
-   * @param x vapor fraction
-   * @param Ki equilibrium constants
-   * @return f(x)
-   */
-  Real rachfordRice(Real x, std::vector<Real> & Ki) const;
-
-  /**
-   * Derivative of Rachford-Rice equation wrt vapor fraction.
-   * Has the nice property that it is strictly negative in the interval [0,1]
-   *
-   * @param x vapor fraction
-   * @param Ki equilibrium constants
-   * @return f'(x)
-   */
-  Real rachfordRiceDeriv(Real x, std::vector<Real> & Ki) const;
-
-  /**
-   * Solves Rachford-Rice equation to provide vapor mass fraction. For two components,
-   * the analytical solution is used, while for cases with more than two components,
-   * a Newton-Raphson iterative solution is calculated.
-   *
-   * @param Ki equilibrium constants
-   * @return vapor mass fraction
-   */
-  Real vaporMassFraction(std::vector<Real> & Ki) const;
 
   /// Porepressure
   const VariableValue & _gas_porepressure;

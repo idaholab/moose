@@ -108,6 +108,12 @@
     type = PorousFlowCapillaryPressureConst
     pc = 0
   [../]
+  [./fs]
+    type = PorousFlowWaterNCG
+    water_fp = water
+    gas_fp = tabulated
+    capillary_pressure = pc
+  [../]
 []
 
 [Modules]
@@ -138,20 +144,18 @@
     type = PorousFlowFluidStateWaterNCG
     gas_porepressure = pgas
     z = zi
-    gas_fp = tabulated
-    water_fp = water
     at_nodes = true
     temperature_unit = Celsius
     capillary_pressure = pc
+    fluid_state = fs
   [../]
   [./waterncg_qp]
     type = PorousFlowFluidStateWaterNCG
     gas_porepressure = pgas
     z = zi
-    gas_fp = tabulated
-    water_fp = water
     temperature_unit = Celsius
     capillary_pressure = pc
+    fluid_state = fs
   [../]
   [./porosity]
     type = PorousFlowPorosityConst

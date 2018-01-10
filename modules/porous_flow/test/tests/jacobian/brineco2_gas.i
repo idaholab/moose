@@ -77,6 +77,12 @@
     alpha = 1
     pc_max = 1e3
   [../]
+  [./fs]
+    type = PorousFlowBrineCO2
+    brine_fp = brine
+    co2_fp = co2
+    capillary_pressure = pc
+  [../]
 []
 
 [Modules]
@@ -107,22 +113,20 @@
     type = PorousFlowFluidStateBrineCO2
     gas_porepressure = pgas
     z = zi
-    co2_fp = co2
-    brine_fp = brine
     at_nodes = true
     temperature_unit = Celsius
     xnacl = xnacl
     capillary_pressure = pc
+    fluid_state = fs
   [../]
   [./brineco2_qp]
     type = PorousFlowFluidStateBrineCO2
     gas_porepressure = pgas
     z = zi
-    co2_fp = co2
-    brine_fp = brine
     temperature_unit = Celsius
     xnacl = xnacl
     capillary_pressure = pc
+    fluid_state = fs
   [../]
   [./permeability]
     type = PorousFlowPermeabilityConst
