@@ -168,7 +168,7 @@ protected:
    * @param pressure input pressure (Pa)
    * @param temperature input temperature (K)
    */
-  void checkInputVariables(Real pressure, Real temperature) const;
+  virtual void checkInputVariables(Real & pressure, Real & temperature) const;
 
   /**
    * Generates a table of fluid properties by looping over pressure and temperature
