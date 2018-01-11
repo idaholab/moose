@@ -14,6 +14,8 @@
 
 #include "CoupledForce.h"
 
+#include "MooseVariable.h"
+
 template <>
 InputParameters
 validParams<CoupledForce>()
@@ -32,6 +34,9 @@ validParams<CoupledForce>()
 CoupledForce::CoupledForce(const InputParameters & parameters)
   : Kernel(parameters), _v_var(coupled("v")), _v(coupledValue("v")), _coef(getParam<Real>("coef"))
 {
+  if (_var.number() == _v_var)
+    mooseError("Coupled variable 'v' needs to be different from 'variable' with CoupledForce, "
+               "consider using Reaction or somethig similar");
 }
 
 Real

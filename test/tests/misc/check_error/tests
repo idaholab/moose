@@ -588,4 +588,10 @@
     input = 'coupling_nonexistent_scalar.i'
     expect_err = "slm: Coupled variable 'b' was not found"
   [../]
+
+  [./coupling_itself]
+    type = 'RunException'
+    input = 'coupling_itself.i'
+    expect_err = "Coupled variable 'v' needs to be different from 'variable' with CoupledForce"
+  [../]
 []
