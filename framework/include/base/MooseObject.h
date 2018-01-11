@@ -30,14 +30,6 @@ InputParameters validParams<MooseObject>();
 // needed to avoid #include cycle with MooseApp and MooseObject
 [[noreturn]] void callMooseErrorRaw(std::string & msg, MooseApp * app);
 
-/// returns a string representing a special parameter name that the parser injects into object
-/// parameters holding the file+linenum for the parameter.
-std::string paramLocName(std::string param);
-
-/// returns a string representing a special parameter name that the parser injects into object
-/// parameters holding the file+linenum for the parameter.
-std::string paramPathName(std::string param);
-
 /**
  * Every object that can be built by the factory should be derived from this class.
  */
@@ -104,9 +96,8 @@ public:
   [[noreturn]] void paramError(const std::string & param, Args... args)
   {
     auto prefix = param + ": ";
-    if (_pars.have_parameter<std::string>(paramLocName(param)))
-      prefix = _pars.get<std::string>(paramLocName(param)) + ": (" +
-               _pars.get<std::string>(paramPathName(param)) + ") ";
+    if (!_pars.inputLocation(param).empty())
+      prefix = _pars.inputLocation(param) + ": (" + _pars.paramFullpath(param) + ") ";
     mooseError(prefix, args...);
   }
 

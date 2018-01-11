@@ -659,27 +659,54 @@ public:
    */
   std::set<std::string> reservedValues(const std::string & name) const;
 
+  /**
+   * Get/set a string representing the location (i.e. filename,linenum) in the input text for the
+   * block containing parameters for this object.
+   */
+  std::string & blockLocation() { return _block_location; };
+
+  ///@{
+  /**
+   * Get/set a string representing the full HIT parameter path from the input file (e.g.
+   * "Mesh/foo") for the block containing parameters for this object.
+   */
+  std::string & blockFullpath() { return _block_fullpath; }
+  const std::string & blockFullpath() const { return _block_fullpath; }
+  ///@}
+
+  ///@{
+  /**
+   * Get/set a string representing the location in the input text the parameter originated from
+   * (i.e. filename,linenum) for the given param.
+   */
+  const std::string & inputLocation(const std::string & param) const
+  {
+    return at(param)._input_location;
+  };
+  std::string & inputLocation(const std::string & param) { return at(param)._input_location; };
+  ///@}
+
+  ///@{
+  /**
+   * Get/set a string representing the full HIT parameter path from the input file (e.g.
+   * "Mesh/foo/bar" for param "bar") for the given param.
+   */
+  const std::string & paramFullpath(const std::string & param) const
+  {
+    return at(param)._param_fullpath;
+  };
+  std::string & paramFullpath(const std::string & param) { return at(param)._param_fullpath; };
+  ///@}
+
+  /**
+   * Get/set a string representing the raw, unmodified token text for the given param.  This is
+   * usually only set/useable for file-path type parameters.
+   */
+  std::string & rawParamVal(const std::string & param) { return _params[param]._raw_val; };
+
 private:
   // Private constructor so that InputParameters can only be created in certain places.
   InputParameters();
-
-  /**
-   * Toggle the availability of the copy constructor
-   *
-   * When MooseObject is created via the Factory this flag is set to false, so when a MooseObject is
-   * created if
-   * the constructor is not a const reference an error is produced. This method allows the
-   * InputParameterWarehouse
-   * to disable copying.
-   */
-  void allowCopy(bool status) { _allow_copy = status; }
-
-  /// Make sure the parameter name doesn't have any invalid characters.
-  void checkParamName(const std::string & name) const;
-
-  /// This method is called when adding a Parameter with a default value, can be specialized for non-matching types
-  template <typename T, typename S>
-  void setParamHelper(const std::string & name, T & l_value, const S & r_value);
 
   struct Metadata
   {
@@ -722,6 +749,42 @@ private:
     /// raw token text for a parameter - usually only set for filepath type params.
     std::string _raw_val;
   };
+
+  Metadata & at(const std::string & param)
+  {
+    if (_params.count(param) == 0)
+      mooseError("param '", param, "' not present in InputParams");
+    return _params[param];
+  }
+  const Metadata & at(const std::string & param) const
+  {
+    if (_params.count(param) == 0)
+      mooseError("param '", param, "' not present in InputParams");
+    return _params.at(param);
+  }
+
+  /**
+   * Toggle the availability of the copy constructor
+   *
+   * When MooseObject is created via the Factory this flag is set to false, so when a MooseObject is
+   * created if
+   * the constructor is not a const reference an error is produced. This method allows the
+   * InputParameterWarehouse
+   * to disable copying.
+   */
+  void allowCopy(bool status) { _allow_copy = status; }
+
+  /// Make sure the parameter name doesn't have any invalid characters.
+  void checkParamName(const std::string & name) const;
+
+  /// This method is called when adding a Parameter with a default value, can be specialized for non-matching types
+  template <typename T, typename S>
+  void setParamHelper(const std::string & name, T & l_value, const S & r_value);
+
+  /// original location of input block (i.e. filename,linenum) - used for nice error messages.
+  std::string _block_location;
+  /// full HIT path of the block from the input file - used for nice error messages.
+  std::string _block_fullpath;
 
   std::map<std::string, Metadata> _params;
 
@@ -1268,7 +1331,10 @@ template <typename T>
 const T &
 InputParameters::getParamHelper(const std::string & name, const InputParameters & pars, const T *)
 {
-  if (!pars.isParamValid(name))
+  // TODO: after updating apps (i.e. rattlesnake) remove the first if clause+body:
+  if (name == "parser_syntax")
+    return (const T &)pars.blockFullpath();
+  else if (!pars.isParamValid(name))
     mooseError("The parameter \"", name, "\" is being retrieved before being set.\n");
   return pars.get<T>(name);
 }

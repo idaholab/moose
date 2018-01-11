@@ -331,25 +331,25 @@
   [./missing_req_par_action_obj_test]
     type = 'RunException'
     input = 'missing_req_par_action_obj_test.i'
-    expect_err = "The following required parameters are missing:\n\s*ConvectionDiffusion/variables"
+    expect_err = "missing required parameter 'ConvectionDiffusion/variables'"
   [../]
 
   [./missing_req_par_mesh_block_test]
     type = 'RunException'
     input = 'missing_req_par_mesh_block_test.i'
-    expect_err = "The following required parameters are missing:\n\s*Mesh/stripes"
+    expect_err = "missing required parameter 'Mesh/stripes'"
   [../]
 
   [./missing_req_par_moose_obj_test]
     type = 'RunException'
     input = 'missing_req_par_moose_obj_test.i'
-    expect_err = "The following required parameters are missing:\n\s*Kernels/diff/variable"
+    expect_err = "missing required parameter 'Kernels/diff/variable'"
   [../]
 
   [./missing_required_coupled_test]
     type = 'RunException'
     input = 'missing_required_coupled.i'
-    expect_err = "The following required parameters are missing:\n\s*Kernels/conv_v/velocity_vector"
+    expect_err = "missing required parameter 'Kernels/conv_v/velocity_vector'"
   [../]
 
   [./multi_precond_test]
@@ -481,7 +481,7 @@
   [./ics_missing_variable]
     type = 'RunException'
     input = 'ic_variable_not_specified.i'
-    expect_err = "The following required parameters are missing:\n\s*ICs/u_ic/variable"
+    expect_err = "missing required parameter 'ICs/u_ic/variable'"
   [../]
 
   [./ic_bnd_for_non_nodal]

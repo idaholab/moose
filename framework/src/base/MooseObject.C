@@ -17,18 +17,6 @@
 #include "MooseApp.h"
 #include "MooseUtils.h"
 
-std::string
-paramLocName(std::string param)
-{
-  return "_" + param + "_fileloc";
-}
-
-std::string
-paramPathName(std::string param)
-{
-  return "_" + param + "_fullpath";
-}
-
 template <>
 InputParameters
 validParams<MooseObject>()

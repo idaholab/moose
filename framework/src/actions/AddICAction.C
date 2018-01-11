@@ -31,7 +31,7 @@ void
 AddICAction::act()
 {
   std::vector<std::string> elements;
-  MooseUtils::tokenize<std::string>(getParam<std::string>("parser_syntax"), elements);
+  MooseUtils::tokenize<std::string>(_pars.blockFullpath(), elements);
 
   // The variable name will be the second to last element in the path name
   std::string & var_name = elements[elements.size() - 2];
