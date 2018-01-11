@@ -215,6 +215,17 @@ public:
   void
   partialDensityCO2(Real temperature, Real & partial_density, Real & dpartial_density_dT) const;
 
+  /**
+   * Total mass fraction of CO2 summed over all phases in the two-phase state
+   *
+   * @param pressure gas pressure (Pa)
+   * @param temperature temperature (K)
+   * @param xnacl NaCl mass fraction (kg/kg)
+   * @param saturation gas saturation (-)
+   * @return total mass fraction z (-)
+   */
+  Real totalMassFraction(Real pressure, Real temperature, Real xnacl, Real saturation) const;
+
 protected:
   /// Check the input variables
   void checkVariables(Real pressure, Real temperature) const;

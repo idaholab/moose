@@ -110,6 +110,10 @@
 // Functions
 #include "MovingPlanarFront.h"
 
+// ICs
+#include "PorousFlowFluidStateWaterNCGIC.h"
+#include "PorousFlowFluidStateBrineCO2IC.h"
+
 template <>
 InputParameters
 validParams<PorousFlowApp>()
@@ -258,6 +262,10 @@ PorousFlowApp::registerObjects(Factory & factory)
 
   // Functions
   registerFunction(MovingPlanarFront);
+
+  // ICs
+  registerInitialCondition(PorousFlowFluidStateWaterNCGIC);
+  registerInitialCondition(PorousFlowFluidStateBrineCO2IC);
 }
 
 void

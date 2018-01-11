@@ -692,6 +692,47 @@ PorousFlowBrineCO2::partialDensityCO2(Real temperature,
   dpartial_density_dT = -1.0e6 * _Mco2 * dV_dT / V / V;
 }
 
+Real
+PorousFlowBrineCO2::totalMassFraction(Real pressure,
+                                      Real temperature,
+                                      Real xnacl,
+                                      Real saturation) const
+{
+  // Check whether the input pressure and temperature are within the region of validity
+  checkVariables(pressure, temperature);
+
+  // FluidStateProperties data structure
+  std::vector<FluidStateProperties> fsp(_num_phases, FluidStateProperties(_num_components));
+  FluidStateProperties & liquid = fsp[_aqueous_phase_number];
+  FluidStateProperties & gas = fsp[_gas_phase_number];
+
+  // Calculate equilibrium mass fractions in the two-phase state
+  Real Xco2, dXco2_dp, dXco2_dT, Yh2o, dYh2o_dp, dYh2o_dT;
+  equilibriumMassFractions(
+      pressure, temperature, xnacl, Xco2, dXco2_dp, dXco2_dT, Yh2o, dYh2o_dp, dYh2o_dT);
+
+  // Save the mass fractions in the FluidStateMassFractions object
+  Real Yco2 = 1.0 - Yh2o;
+  liquid.mass_fraction[_aqueous_fluid_component] = 1.0 - Xco2;
+  liquid.mass_fraction[_gas_fluid_component] = Xco2;
+  gas.mass_fraction[_aqueous_fluid_component] = Yh2o;
+  gas.mass_fraction[_gas_fluid_component] = Yco2;
+
+  // Gas properties
+  gasProperties(pressure, temperature, fsp);
+
+  // Liquid properties
+  Real liquid_saturation = 1.0 - saturation;
+  Real liquid_pressure = pressure - _pc_uo.capillaryPressure(liquid_saturation);
+  liquidProperties(liquid_pressure, temperature, xnacl, fsp);
+
+  // The total mass fraction of ncg (z) can now be calculated
+  Real z = (saturation * gas.density * Yco2 + liquid_saturation * liquid.density * Xco2) /
+           (saturation * gas.density + liquid_saturation * liquid.density);
+
+  return z;
+}
+
 void
 PorousFlowBrineCO2::checkVariables(Real pressure, Real temperature) const
 {
