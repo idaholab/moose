@@ -38,4 +38,14 @@
     csvdiff = "theis_brineco2_csvout.csv"
     heavy = true
   [../]
+  [./waterncg_ic]
+    type = 'CSVDiff'
+    input = 'waterncg_ic.i'
+    csvdiff = "waterncg_ic_out.csv"
+  [../]
+  [./brineco2_ic]
+    type = 'CSVDiff'
+    input = 'brineco2_ic.i'
+    csvdiff = "brineco2_ic_out.csv"
+  [../]
 []

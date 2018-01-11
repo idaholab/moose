@@ -13,6 +13,11 @@ The [`PorousFlowFluidStateBrineCO2`](/porous_flow/PorousFlowFluidStateBrineCO2.m
 `Material` provides all phase pressures, saturation, densities, viscosities etc, as well
 as all mass fractions of all fluid components in all fluid phases in a single material.
 
+To allow an initial saturation to be specified, the
+[`PorousFlowFluidStateBrineCO2IC`](/porous_flow/PorousFlowFluidStateBrineCO2IC.md) initial
+condition is provided. This initial condition calculates the total mass fraction of CO$_2$
+summed over all phases for a given saturation.
+
 ##References
 \bibliographystyle{unsrt}
 \bibliography{porous_flow.bib}

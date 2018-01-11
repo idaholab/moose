@@ -581,3 +581,29 @@ TEST_F(PorousFlowBrineCO2Test, saturationTwoPhase)
 
   REL_TEST("dgas_saturation_dz", dgas_saturation_dz, (gsat1 - gsat2) / (2.0 * dz), 1.0e-6);
 }
+
+/*
+ * Verify calculation of total mass fraction given a gas saturation
+ */
+TEST_F(PorousFlowBrineCO2Test, totalMassFraction)
+{
+  const Real p = 1.0e6;
+  const Real T = 350.0;
+  const Real xnacl = 0.1;
+  const Real s = 0.2;
+
+  Real z = _fp->totalMassFraction(p, T, xnacl, s);
+
+  // Test that the saturation calculated in this fluid state using z is equal to s
+  FluidStatePhaseEnum phase_state;
+  std::vector<FluidStateProperties> fsp(2, FluidStateProperties(2));
+
+  _fp->massFractions(p, T, xnacl, z, phase_state, fsp);
+  EXPECT_EQ(phase_state, FluidStatePhaseEnum::TWOPHASE);
+
+  _fp->gasProperties(p, T, fsp);
+  Real liquid_pressure = p + _pc->capillaryPressure(1.0 - s);
+  _fp->liquidProperties(liquid_pressure, T, xnacl, fsp);
+  _fp->saturationTwoPhase(p, T, xnacl, z, fsp);
+  ABS_TEST("gas saturation", fsp[1].saturation, s, 1.0e-8);
+}

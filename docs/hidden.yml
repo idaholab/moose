@@ -717,6 +717,8 @@ phase_field:
 phase_field_test:
     - /Kernels/GaussContForcing
 porous_flow:
+    - /AuxVariables/InitialCondition/PorousFlowFluidStateBrineCO2IC
+    - /AuxVariables/InitialCondition/PorousFlowFluidStateWaterNCGIC
     - /Functions/MovingPlanarFront
     - /Kernels/PorousFlowFullySaturatedDarcyBase
     - /Kernels/PorousFlowFullySaturatedDarcyFlow
@@ -729,6 +731,8 @@ porous_flow:
     - /PorousFlowFullySaturated/PorousFlowFullySaturated
     - /PorousFlowUnsaturated
     - /PorousFlowUnsaturated/PorousFlowUnsaturated
+    - /Variables/InitialCondition/PorousFlowFluidStateBrineCO2IC
+    - /Variables/InitialCondition/PorousFlowFluidStateWaterNCGIC
 richards:
     - /AuxKernels/DarcyFluxComponent
     - /AuxKernels/RichardsDensityAux

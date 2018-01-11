@@ -438,3 +438,41 @@ PorousFlowWaterNCG::enthalpyOfDissolution(Real temperature, Real Kh, Real dKh_dT
 {
   return -_R * temperature * temperature * _Mncg * dKh_dT / Kh;
 }
+
+Real
+PorousFlowWaterNCG::totalMassFraction(Real pressure, Real temperature, Real saturation) const
+{
+  // Check whether the input temperature is within the region of validity
+  checkVariables(temperature);
+
+  // FluidStateProperties data structure
+  std::vector<FluidStateProperties> fsp(_num_phases, FluidStateProperties(_num_components));
+  FluidStateProperties & liquid = fsp[_aqueous_phase_number];
+  FluidStateProperties & gas = fsp[_gas_phase_number];
+
+  // Calculate equilibrium mass fractions in the two-phase state
+  Real Xncg, dXncg_dp, dXncg_dT, Yh2o, dYh2o_dp, dYh2o_dT;
+  equilibriumMassFractions(
+      pressure, temperature, Xncg, dXncg_dp, dXncg_dT, Yh2o, dYh2o_dp, dYh2o_dT);
+
+  // Save the mass fractions in the FluidStateMassFractions object
+  Real Yncg = 1.0 - Yh2o;
+  liquid.mass_fraction[_aqueous_fluid_component] = 1.0 - Xncg;
+  liquid.mass_fraction[_gas_fluid_component] = Xncg;
+  gas.mass_fraction[_aqueous_fluid_component] = Yh2o;
+  gas.mass_fraction[_gas_fluid_component] = Yncg;
+
+  // Gas properties
+  gasProperties(pressure, temperature, fsp);
+
+  // Liquid properties
+  Real liquid_saturation = 1.0 - saturation;
+  Real liquid_pressure = pressure - _pc_uo.capillaryPressure(liquid_saturation);
+  liquidProperties(liquid_pressure, temperature, fsp);
+
+  // The total mass fraction of ncg (z) can now be calculated
+  Real z = (saturation * gas.density * Yncg + liquid_saturation * liquid.density * Xncg) /
+           (saturation * gas.density + liquid_saturation * liquid.density);
+
+  return z;
+}
