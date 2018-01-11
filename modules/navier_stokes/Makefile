@@ -17,9 +17,6 @@ FRAMEWORK_DIR      ?= $(MOOSE_DIR)/framework
 include $(FRAMEWORK_DIR)/build.mk
 include $(FRAMEWORK_DIR)/moose.mk
 
-# dependency on rDG module
-RDG              := yes
-
 # dependency on fluid_properties module
 FLUID_PROPERTIES := yes
 SKIP_LOADER      := yes
