@@ -186,7 +186,7 @@ def formatResult(tester_data, result, options, color=True):
 
     # Format the caveats if any
     if tester.getCaveats() and 'c' in terminal_format:
-        caveats = ','.join(tester.getCaveats()).upper()
+        caveats = ','.join(tester.getCaveats())
         if tester.didPass() or tester.isSkipped():
             caveat_color = 'CYAN'
         else:
@@ -195,17 +195,18 @@ def formatResult(tester_data, result, options, color=True):
         formatted_result['c'] = ('[' + caveats + ']', caveat_color)
         items_to_print = printableItems(formatted_result)
 
-        # Determine when/if/how we should trim the caveats to fit the screen
+        # Determine when/if/how we should trim the caveats to fit the screen.
+        # If extra_info, it just fits, or caveats will be printed last, we do not trim.
         if terminal_format[-1] != 'c' and len(' '.join(items_to_print)) > TERM_COLS \
            and not options.extra_info:
             over_by_amount = len(' '.join(items_to_print)) - TERM_COLS
-            caveats = '[' + caveats[:len(caveats) - (over_by_amount + 3)] + '...]'
-            formatted_result['c'] = (caveats, caveat_color)
+            formatted_result['c'] = ('[' + caveats[:len(caveats) - (over_by_amount + 3)] + '...]',
+                                     caveat_color)
 
     # Informational items created above, fill the rest with dots ' .... '
     if 'j' in terminal_format:
         items_to_print = printableItems(formatted_result)
-        character_count = len(' '.join(items_to_print)) + 1 # extra space created by joining hr
+        character_count = len(' '.join(items_to_print)) + 1 # extra space created by joining
         if character_count < TERM_COLS:
             formatted_result['j'] = ('.'*max(0, (TERM_COLS - character_count)), 'GREY')
 
