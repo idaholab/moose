@@ -1,7 +1,7 @@
 #ifndef SOLIDWALL_H
 #define SOLIDWALL_H
 
-#include "BoundaryBase.h"
+#include "PipeBoundary.h"
 
 class SolidWall;
 
@@ -12,7 +12,7 @@ InputParameters validParams<SolidWall>();
  * A simple component for solid wall BC
  *
  */
-class SolidWall : public BoundaryBase
+class SolidWall : public PipeBoundary
 {
 public:
   SolidWall(const InputParameters & params);

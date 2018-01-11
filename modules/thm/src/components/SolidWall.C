@@ -10,11 +10,11 @@ template <>
 InputParameters
 validParams<SolidWall>()
 {
-  InputParameters params = validParams<BoundaryBase>();
+  InputParameters params = validParams<PipeBoundary>();
   return params;
 }
 
-SolidWall::SolidWall(const InputParameters & params) : BoundaryBase(params) {}
+SolidWall::SolidWall(const InputParameters & params) : PipeBoundary(params) {}
 
 void
 SolidWall::addVariables()
