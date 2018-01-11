@@ -31,11 +31,11 @@ validParams<FunctionSeries>()
                              " series (functional expansion or FE) to create a"
                              " 3D function");
 
-  /* The available composite series types.
-     Cartesian:      1D, 2D, or 3D, depending on which of x, y, and z are present
-     CylindricalDuo: planar disc expansion and axial expansion
-  */
-
+  /*
+   * The available composite series types.
+   *   Cartesian:      1D, 2D, or 3D, depending on which of x, y, and z are present
+   *   CylindricalDuo: planar disc expansion and axial expansion
+   */
   MooseEnum SeriesTypes("Cartesian CylindricalDuo");
   MooseEnum SingleSeriesTypes1D("Legendre");
   MooseEnum SingleSeriesTypes2D("Zernike");
@@ -43,7 +43,7 @@ validParams<FunctionSeries>()
   params.addRequiredParam<MooseEnum>(
       "series_type", SeriesTypes, "The type of function series to construct.");
 
-  /**
+  /*
    * This needs to use `unsigned int` instead of `std::size_t` because otherwise
    * MOOSE errors at runtime
    */
@@ -71,9 +71,9 @@ validParams<FunctionSeries>()
 
 FunctionSeries::FunctionSeries(const InputParameters & parameters)
   : MutableCoefficientsFunctionInterface(parameters),
-    _series_type_name(getParam<MooseEnum>("series_type")),
     _orders(convertOrders(getParam<std::vector<unsigned int>>("orders"))),
     _physical_bounds(getParam<std::vector<Real>>("physical_bounds")),
+    _series_type_name(getParam<MooseEnum>("series_type")),
     _x(getParam<MooseEnum>("x")),
     _y(getParam<MooseEnum>("y")),
     _z(getParam<MooseEnum>("z")),
@@ -82,10 +82,13 @@ FunctionSeries::FunctionSeries(const InputParameters & parameters)
   std::vector<MooseEnum> domains;
   std::vector<MooseEnum> types;
 
-  // For Cartesian series, at least one of 'x', 'y', and 'z' must be specified.
-  // The individual series are always stored in x, y, z order (independent of
-  // the order in which they appear in the input file). Hence, the 'orders' and
-  // 'physical_bounds' vectors must always be specified in x, y, z order.
+  /*
+   * For Cartesian series, at least one of 'x', 'y', and 'z' must be specified.
+   *
+   * The individual series are always stored in x, y, z order (independent of the order in which
+   * they appear in the input file). Hence, the 'orders' and 'physical_bounds' vectors must always
+   * be specified in x, y, z order.
+   */
   if (_series_type_name == "Cartesian")
   {
     if (isParamValid("x"))
@@ -108,14 +111,15 @@ FunctionSeries::FunctionSeries(const InputParameters & parameters)
     _series_type = new Cartesian(domains, _orders, types);
   }
 
-  // CylindricalDuo represents a disc-axial expansion, where the disc is
-  // described by a single series, such as Zernike (as opposed to a series
-  // individually representing r and a second series independently representing
-  // theta. For CylindricalDuo series, the series are always stored in the
-  // axial, planar order, independent of which order the series appear in the
-  // input file. Therefore, the _orders and _physical_bounds vectors must
-  // always appear in axial, planar order. The first entry in _domains is
-  // interpreted as the axial direction, and the following two as the planar.
+  /*
+   * CylindricalDuo represents a disc-axial expansion, where the disc is described by a single
+   * series, such as Zernike (as opposed to a series individually representing r and a second series
+   * independently representing theta. For CylindricalDuo series, the series are always stored in
+   * the axial, planar order, independent of which order the series appear in the input file.
+   * Therefore, the _orders and _physical_bounds vectors must always appear in axial, planar order.
+   * The first entry in _domains is interpreted as the axial direction, and the following two as the
+   * planar.
+   */
   if (_series_type_name == "CylindricalDuo")
   {
     if (isParamValid("x"))
@@ -149,7 +153,7 @@ FunctionSeries::FunctionSeries(const InputParameters & parameters)
     _series_type = new CylindricalDuo(domains, _orders, types);
   }
 
-  // set the physical bounds of each of the single series if defined
+  // Set the physical bounds of each of the single series if defined
   if (isParamValid("physical_bounds"))
     _series_type->setPhysicalBounds(_physical_bounds);
 
@@ -174,8 +178,6 @@ FunctionSeries::getStandardizedFunctionVolume() const
   return _series_type->getStandardizedFunctionVolume();
 }
 
-// defined in CompositeSeriesBasisInterface, since this is independent of the
-// type of series, since it is set in the constructor for CSBI
 std::size_t
 FunctionSeries::getNumberOfTerms() const
 {
@@ -188,29 +190,33 @@ FunctionSeries::getOrders() const
   return _orders;
 }
 
-// getAllOrthonormal is defined in the FunctionalBasisInterface, which calls the
-// pure virtual evaluateOrthonormal() method of the CompositeSeriesBasisInterface
-// class, which then calls the getAllOrthonormal() method of each of the single
-// series.
+/*
+ * getAllOrthonormal() is defined in the FunctionalBasisInterface, which calls the pure virtual
+ * evaluateOrthonormal() method of the CompositeSeriesBasisInterface class, which then calls the
+ * getAllOrthonormal() method of each of the single series.
+ */
 const std::vector<Real> &
 FunctionSeries::getOrthonormal()
 {
   return _series_type->getAllOrthonormal();
 }
 
-// getAllStandard is defined in the FunctionalBasisInterface, which calls the
-// pure virtual evaluateStandard() method of the CompositeSeriesBasisInterface
-// class, which then calls the getAllStandard() method of each of the single
-// series.
+/*
+ * getAllStandard() is defined in the FunctionalBasisInterface, which calls the pure virtual
+ * evaluateStandard() method of the CompositeSeriesBasisInterface class, which then calls the
+ * getAllStandard() method of each of the single series.
+ */
 const std::vector<Real> &
 FunctionSeries::getStandard()
 {
   return _series_type->getAllStandard();
 }
 
-// isInPhysicalBounds is a pure virtual method of the FunctionalBasisInterface
-// that is defined in the CompositeSeriesBasisInterface class because it is
-// agnostic to the underlying types of the single series.
+/*
+ * isInPhysicalBounds() is a pure virtual method of the FunctionalBasisInterface that is defined in
+ * the CompositeSeriesBasisInterface class because it is agnostic to the underlying types of the
+ * single series.
+ */
 bool
 FunctionSeries::isInPhysicalBounds(const Point & point) const
 {
@@ -226,11 +232,11 @@ FunctionSeries::setLocation(const Point & point)
 Real
 FunctionSeries::evaluateValue(Real, const Point & point)
 {
-  // check that the point is within the physical bounds of the series
+  // Check that the point is within the physical bounds of the series
   if (!isInPhysicalBounds(point))
     return 0.0;
 
-  // set the location at which to evaluate the series
+  // Set the location at which to evaluate the series
   setLocation(point);
 
   return expand();
@@ -245,7 +251,7 @@ FunctionSeries::expand()
 Real
 FunctionSeries::expand(const std::vector<Real> & coefficients)
 {
-  // evaluate all of the terms in the series
+  // Evaluate all of the terms in the series
   const std::vector<Real> & terms = getStandard();
 
   return std::inner_product(terms.begin(), terms.end(), coefficients.begin(), 0.0);

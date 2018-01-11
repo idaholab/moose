@@ -29,16 +29,15 @@ template <>
 InputParameters validParams<MutableCoefficientsInterface>();
 
 /**
- * This class is designed to provide a uniform interface for any class that uses
- * an array of coefficients for any of its operations. In particular, the
- * MultiAppMutableCoefficientsTransfer mechanism transfers coefficients using
- * this interface. Any derived class of MutableCoefficientsInterface can easily
- * be used in any MultiAppMutableCoefficientsTransfer-based transfer.
+ * This class is designed to provide a uniform interface for any class that uses an array of
+ * coefficients for any of its operations. In particular, the MultiAppMutableCoefficientsTransfer
+ * mechanism transfers coefficients using this interface. Any derived class of
+ * MutableCoefficientsInterface can easily be used in any MultiAppMutableCoefficientsTransfer-
+ * based transfer.
  */
 class MutableCoefficientsInterface
 {
 public:
-  /// Default constructor
   MutableCoefficientsInterface(const InputParameters & parameters);
   /// Construct the class and copy the provided coefficients
   MutableCoefficientsInterface(const InputParameters & parameters,

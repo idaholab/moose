@@ -10,33 +10,32 @@
 /*            With the U. S. Department of Energy               */
 /*                                                              */
 /*            See COPYRIGHT for full restrictions               */
+/****************************************************************/
 
 // Module includes
-#include "CachedFunctionInterface.h"
+#include "MemoizedFunctionInterface.h"
 
 template <>
 InputParameters
-validParams<CachedFunctionInterface>()
+validParams<MemoizedFunctionInterface>()
 {
   InputParameters params = validParams<Function>();
 
-  params.addClassDescription("The function uses a cache to potentially reduce"
-                             " the computational burden of reusing a complex or"
-                             " costly function");
+  params.addClassDescription("The function uses a cache to potentially reduce the computational "
+                             "burden of reusing a complex or costly function");
 
   params.addParam<bool>("enable_cache",
                         false,
-                        "Enables cached function evaluations. Recommended only"
-                        " if this function is used directly in a BC or Kernel."
-                        " This will be enabled automatically if any of the"
-                        " FE-based BCs are used.");
+                        "Enables cached function evaluations. Recommended only if this function is "
+                        "used directly in a BC or Kernel. This will be enabled automatically if "
+                        "any of the FE-based BCs are used.");
 
   params.addParam<bool>("respect_time", false, "Enable to clear the cache at each new time step.");
 
   return params;
 }
 
-CachedFunctionInterface::CachedFunctionInterface(const InputParameters & parameters)
+MemoizedFunctionInterface::MemoizedFunctionInterface(const InputParameters & parameters)
   : Function(parameters),
     _enable_cache(getParam<bool>("enable_cache")),
     _respect_time(getParam<bool>("respect_time"))
@@ -45,14 +44,14 @@ CachedFunctionInterface::CachedFunctionInterface(const InputParameters & paramet
 }
 
 void
-CachedFunctionInterface::meshChanged()
+MemoizedFunctionInterface::meshChanged()
 {
   // The mesh has changed, which invalidates the cache
   invalidateCache();
 }
 
 Real
-CachedFunctionInterface::value(Real time, const Point & point)
+MemoizedFunctionInterface::value(Real time, const Point & point)
 {
   if (_enable_cache)
   {
@@ -75,7 +74,7 @@ CachedFunctionInterface::value(Real time, const Point & point)
 }
 
 void
-CachedFunctionInterface::useCache(bool use)
+MemoizedFunctionInterface::useCache(bool use)
 {
   _enable_cache = use;
 
@@ -84,7 +83,7 @@ CachedFunctionInterface::useCache(bool use)
 }
 
 void
-CachedFunctionInterface::invalidateCache()
+MemoizedFunctionInterface::invalidateCache()
 {
   _cache.clear();
 }

@@ -27,8 +27,8 @@ validParams<MutableCoefficientsInterface>()
 {
   InputParameters params = emptyInputParameters();
 
-  params.addClassDescription("This interface universalizes the communication"
-                             " standards for array-based coefficient transfers.");
+  params.addClassDescription("This interface universalizes the communication standards for "
+                             "array-based coefficient transfers.");
 
   params.addParam<bool>("print_when_set", false, "Print the array of coefficients when set");
 

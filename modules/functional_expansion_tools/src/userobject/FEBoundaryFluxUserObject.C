@@ -21,8 +21,8 @@ validParams<FEBoundaryFluxUserObject>()
 {
   InputParameters params = validParams<FEBoundaryBaseUserObject>();
 
-  params.addClassDescription("Generates an FE representation for a boundary flux"
-                             " condition using a 'FunctionSeries'-type Function");
+  params.addClassDescription("Generates an FE representation for a boundary flux condition using a "
+                             "'FunctionSeries'-type Function");
 
   params.addRequiredParam<std::string>(
       "diffusion_coefficient",
@@ -43,9 +43,4 @@ Real
 FEBoundaryFluxUserObject::computeQpIntegral()
 {
   return -_diffusion_coefficient[_qp] * _grad_u[_qp] * _normals[_qp];
-}
-
-FEBoundaryFluxUserObject::~FEBoundaryFluxUserObject()
-{
-  // Nothing here
 }

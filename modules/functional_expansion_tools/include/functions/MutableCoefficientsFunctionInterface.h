@@ -19,7 +19,7 @@
 #include "FunctionInterface.h"
 
 // Module lincludes
-#include "CachedFunctionInterface.h"
+#include "MemoizedFunctionInterface.h"
 #include "MutableCoefficientsInterface.h"
 
 // Forward declarations
@@ -28,10 +28,8 @@ class MutableCoefficientsFunctionInterface;
 template <>
 InputParameters validParams<MutableCoefficientsFunctionInterface>();
 
-/**
- * Interface for a type of functions using coefficients that may be changed before or after a solve
- */
-class MutableCoefficientsFunctionInterface : public CachedFunctionInterface,
+/// Interface for a type of functions using coefficients that may be changed before or after a solve
+class MutableCoefficientsFunctionInterface : public MemoizedFunctionInterface,
                                              protected FunctionInterface,
                                              public MutableCoefficientsInterface
 {
@@ -39,6 +37,7 @@ public:
   MutableCoefficientsFunctionInterface(const InputParameters & parameters);
 
 protected:
+  // Override from MemoizedFunctionInterface
   virtual void coefficientsChanged() override;
 };
 

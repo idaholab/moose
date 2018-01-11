@@ -16,18 +16,21 @@
 
 MooseEnum FunctionalBasisInterface::_domain_options("x=0 y=1 z=2");
 
-// The default constructor is used to initialize a series before knowing
-// the number of terms in the series. This is called from the CSBI, and in the
-// body of the CSBI constructor, setNumberOfTerms() is used to after-the-fact
-// perform the same initializations that would be done with the non-default
-// constructor.
+/*
+ * The default constructor is used to initialize a series before knowing the number of terms in the
+ * series. This is called from the CSBI, and in the body of the CSBI constructor, setNumberOfTerms()
+ * is used to after-the-fact perform the same initializations that would be done with the
+ * non-default constructor.
+ */
 FunctionalBasisInterface::FunctionalBasisInterface()
   : _is_cache_invalid(true), _is_orthonormal(false)
 {
 }
 
-// The non-default constructor should be used to initialize a series if the
-// number of terms is known, such as with a single series.
+/*
+ * The non-default constructor should be used to initialize a series if the number of terms is
+ * known, such as with a single series.
+ */
 FunctionalBasisInterface::FunctionalBasisInterface(const unsigned int number_of_terms)
   : _number_of_terms(number_of_terms),
     _is_cache_invalid(true),
@@ -142,9 +145,12 @@ FunctionalBasisInterface::save(std::size_t index, Real value)
   _basis_evaluation[index] = value;
 }
 
-// This method should really be made private, since it is modifying a private
-// variable. But, we need to be able to set the length of _basis_evaluation from
-// within the CSBI constructor (outside the FBI class)...
+void
+FunctionalBasisInterface::clearBasisEvaluation(const unsigned int & number_of_terms, SBIKey)
+{
+  clearBasisEvaluation(number_of_terms);
+}
+
 void
 FunctionalBasisInterface::clearBasisEvaluation(const unsigned int & number_of_terms)
 {

@@ -22,24 +22,26 @@ class Legendre final : public SingleSeriesBasisInterface
 public:
   Legendre();
   Legendre(const std::vector<MooseEnum> & domain, const std::vector<std::size_t> & order);
-  virtual ~Legendre() = default;
 
+  // Overrides from FunctionalBasisInterface
+  virtual Real getStandardizedFunctionVolume() const override;
+  virtual bool isInPhysicalBounds(const Point & point) const override;
+
+  // Overrides from SingleSeriesBasisInterface
   virtual std::size_t
-  calculatedNumberOfTermsBasedOnOrder(const std::vector<std::size_t> & order) const final;
-
-  // Return the standardized limits of a Legendre polynomial
-  virtual const std::vector<Real> & getStandardizedFunctionLimits() const final;
-  virtual Real getStandardizedFunctionVolume() const final;
-
-  // Provide pure virtual methods
-  virtual bool isInPhysicalBounds(const Point & point) const final;
+  calculatedNumberOfTermsBasedOnOrder(const std::vector<std::size_t> & order) const override;
+  virtual const std::vector<Real> & getStandardizedFunctionLimits() const override;
 
 protected:
   // Provide pure virtual methods
-  virtual void checkPhysicalBounds(const std::vector<Real> & bounds) const final;
-  virtual void evaluateOrthonormal() final;
-  virtual void evaluateStandard() final;
-  virtual std::vector<Real> getStandardizedLocation(const std::vector<Real> & location) const final;
+  // Overrides from FunctionalBasisInterface
+  virtual void evaluateOrthonormal() override;
+  virtual void evaluateStandard() override;
+
+  // Overrides from SingleSeriesBasisInterface
+  virtual void checkPhysicalBounds(const std::vector<Real> & bounds) const override;
+  virtual std::vector<Real>
+  getStandardizedLocation(const std::vector<Real> & location) const override;
 };
 
 #endif // LEGENDRE_H

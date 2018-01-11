@@ -24,7 +24,7 @@ CylindricalDuo::CylindricalDuo() : CompositeSeriesBasisInterface()
 CylindricalDuo::CylindricalDuo(const std::vector<MooseEnum> & domains,
                                const std::vector<std::size_t> & orders,
                                const std::vector<MooseEnum> & series_types)
-  : CompositeSeriesBasisInterface(domains, orders, series_types)
+  : CompositeSeriesBasisInterface(orders, series_types)
 {
   // Initialize the pointer to the axial series
   if (_series_types[0] == "Legendre")
@@ -38,9 +38,10 @@ CylindricalDuo::CylindricalDuo(const std::vector<MooseEnum> & domains,
   else
     mooseError("CylindricalDuo: No other disc series implemented except Zernike!");
 
-  // set the _number_of_terms for the composite series by looping over each
-  // of the single series. This also initializes _basis_evaluation with zero
-  // values and the appropriate length.
+  /*
+   * Set the _number_of_terms for the composite series by looping over each of the single series.
+   * This also initializes _basis_evaluation with zero values and the appropriate length.
+   */
   setNumberOfTerms();
 }
 

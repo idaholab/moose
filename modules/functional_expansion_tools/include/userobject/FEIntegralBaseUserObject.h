@@ -22,7 +22,7 @@
 #include "MooseVariable.h"
 #include "UserObject.h"
 
-// libmesh includes
+// libMesh includes
 #include "libmesh/quadrature.h"
 
 // Module includes
@@ -39,36 +39,31 @@ template <>
 InputParameters validParams<FEIntegralBaseUserObjectParameters>();
 
 /**
- * This class interacts with a MooseApp through functional expansions. It is
- * templated to allow the inheritance of two dual classes that operate in a
- * volume (FEVolumeUserObject) or on a boundary (FEBoundaryFluxUserObject and
- * FEBoundaryValueUserObject)
+ * This class interacts with a MooseApp through functional expansions. It is templated to allow the
+ * inheritance of two dual classes that operate in a volume (FEVolumeUserObject) or on a boundary
+ * (FEBoundaryFluxUserObject and FEBoundaryValueUserObject)
  *
- * It uses an instance of FunctionSeries to generate the orthonormal function
- * series required to generate the functional expansion coefficients.
+ * It uses an instance of FunctionSeries to generate the orthonormal function series required to
+ * generate the functional expansion coefficients.
  */
 template <class IntegralBaseVariableUserObject>
 class FEIntegralBaseUserObject : public IntegralBaseVariableUserObject,
                                  public MutableCoefficientsInterface
 {
 public:
-  /// Constructor
   FEIntegralBaseUserObject(const InputParameters & parameters);
 
-  /// Virtual destructor
-  virtual ~FEIntegralBaseUserObject();
+  /// Return a reference to the underlying function series
+  const FunctionSeries & getFunctionSeries() const;
 
-  // IntegralBaseVariableUserObject overrides
+  // Override from <IntegralBaseVariableUserObject>
   virtual Real getValue() final;
 
-  // UserObject overrides
+  // Overrides from UserObject
   virtual void finalize() final;
   virtual void initialize() final;
   virtual Real spatialValue(const Point & location) const final;
   virtual void threadJoin(const UserObject & sibling) final;
-
-  /// Return a reference to the underlying function series
-  const FunctionSeries & getFunctionSeries() const;
 
   /// Keep the expansion coefficients after each solve
   const bool _keep_history;
@@ -88,7 +83,7 @@ protected:
   using IntegralBaseVariableUserObject::getFunction;
   using IntegralBaseVariableUserObject::name;
 
-  /// IntegralBaseVariableUserObject overrides
+  /// Override from <IntegralBaseVariableUserObject>
   virtual Real computeIntegral() final;
 
   /// Pure virtual method to get the centroid of the evaluated unit
@@ -109,18 +104,13 @@ protected:
   /// Flag to prints the state of the zeroth instance in finalize()
   const bool _print_state;
 
-  /// Volume
-  Real _volume;
-
   /// Volume of the standardized functional space of integration
   const Real _standardized_function_volume;
+
+  /// Moose volume of evaluation
+  Real _volume;
 };
 
-/*
-////////////////////////////////////////\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
-|                            Template  Definitions                            |
-\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\///////////////////////////////////////
-*/
 
 template <class IntegralBaseVariableUserObject>
 FEIntegralBaseUserObject<IntegralBaseVariableUserObject>::FEIntegralBaseUserObject(
@@ -148,17 +138,13 @@ FEIntegralBaseUserObject<IntegralBaseVariableUserObject>::computeIntegral()
   Real sum = 0.0;
   const Point centroid = getCentroid();
 
-  // Check to see if this quadrature point is within the valid boundaries
+  // Check to see if this element/side is within the valid boundaries
   if (!_function_series.isInPhysicalBounds(centroid))
     return 0.0;
 
   // Loop over the quadrature points
   for (_qp = 0; _qp < _q_point.size(); ++_qp)
   {
-    // // Check to see if this quadrature point is within the valid boundaries
-    // if (!_function_series.isInPhysicalBounds(_q_point[_qp]))
-    //   continue;
-
     // Get the functional terms for a vectorized approach
     _function_series.setLocation(_q_point[_qp]);
     const std::vector<Real> & term_evaluations = _function_series.getOrthonormal();
@@ -185,12 +171,16 @@ FEIntegralBaseUserObject<IntegralBaseVariableUserObject>::finalize()
   _communicator.sum(_coefficient_partials);
   _communicator.sum(_volume);
 
+  // Normalize the volume of the functional expansion to the FE standard space
   const Real volume_normalization = _standardized_function_volume / _volume;
-  for (auto & coefficient : _coefficient_partials)
-    coefficient *= volume_normalization;
+  for (auto & partial : _coefficient_partials)
+    partial *= volume_normalization;
 
-  _integral_value = _coefficient_partials[0];
+  // We now have the completely evaluated coefficients
   _coefficients = _coefficient_partials;
+
+  // The average value is the same as the zeroth coefficient
+  _integral_value = _coefficient_partials[0];
 
   if (_keep_history)
     _coefficient_history.push_back(_coefficients);
@@ -249,12 +239,6 @@ FEIntegralBaseUserObject<IntegralBaseVariableUserObject>::spatialValue(const Poi
   _function_series.setLocation(location);
 
   return _function_series.expand(_coefficients);
-}
-
-template <class IntegralBaseVariableUserObject>
-FEIntegralBaseUserObject<IntegralBaseVariableUserObject>::~FEIntegralBaseUserObject()
-{
-  // Nothing here
 }
 
 #endif // FEINTEGRALBASEUSEROBJECT_H

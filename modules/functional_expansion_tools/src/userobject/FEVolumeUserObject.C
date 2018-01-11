@@ -23,8 +23,8 @@ validParams<FEVolumeUserObject>()
 
   params += validParams<FEIntegralBaseUserObjectParameters>();
 
-  params.addClassDescription("Generates an FE representation of a variable value over"
-                             " a volume using a 'FunctionSeries'-type Function");
+  params.addClassDescription("Generates an FE representation of a variable value over a volume "
+                             "using a 'FunctionSeries'-type Function");
 
   return params;
 }
@@ -50,9 +50,4 @@ Real
 FEVolumeUserObject::getVolume() const
 {
   return _current_elem_volume;
-}
-
-FEVolumeUserObject::~FEVolumeUserObject()
-{
-  // Nothing here
 }

@@ -3,7 +3,6 @@
 #include "Moose.h"
 #include "AppFactory.h"
 #include "MooseSyntax.h"
-#include "ModulesApp.h"
 
 template <>
 InputParameters
@@ -16,12 +15,10 @@ validParams<FunctionalExpansionToolsTestApp>()
 FunctionalExpansionToolsTestApp::FunctionalExpansionToolsTestApp(InputParameters parameters) : MooseApp(parameters)
 {
   Moose::registerObjects(_factory);
-  ModulesApp::registerObjects(_factory);
   FunctionalExpansionToolsApp::registerObjectDepends(_factory);
   FunctionalExpansionToolsApp::registerObjects(_factory);
 
   Moose::associateSyntax(_syntax, _action_factory);
-  ModulesApp::associateSyntax(_syntax, _action_factory);
   FunctionalExpansionToolsApp::associateSyntaxDepends(_syntax, _action_factory);
   FunctionalExpansionToolsApp::associateSyntax(_syntax, _action_factory);
 

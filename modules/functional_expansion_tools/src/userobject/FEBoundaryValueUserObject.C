@@ -21,19 +21,14 @@ validParams<FEBoundaryValueUserObject>()
 {
   InputParameters params = validParams<FEBoundaryBaseUserObject>();
 
-  params.addClassDescription("Generates an FE representation for a boundary value"
-                             " condition using a 'FunctionSeries'-type Function");
+  params.addClassDescription("Generates an FE representation for a boundary value condition using "
+                             "a 'FunctionSeries'-type Function");
 
   return params;
 }
 
 FEBoundaryValueUserObject::FEBoundaryValueUserObject(const InputParameters & parameters)
   : FEBoundaryBaseUserObject(parameters)
-{
-  // Nothing here
-}
-
-FEBoundaryValueUserObject::~FEBoundaryValueUserObject()
 {
   // Nothing here
 }

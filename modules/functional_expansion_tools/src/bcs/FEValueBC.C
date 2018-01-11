@@ -24,8 +24,7 @@ validParams<FEValueBC>()
   InputParameters params = validParams<FunctionDirichletBC>();
 
   params.addClassDescription(
-      "Imposes a fixed value boundary condition, evaluated using a FunctionSeries"
-      " instance.");
+      "Imposes a fixed value boundary condition, evaluated using a FunctionSeries instance.");
 
   return params;
 }

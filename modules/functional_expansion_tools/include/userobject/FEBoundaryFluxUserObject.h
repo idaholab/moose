@@ -28,18 +28,15 @@ InputParameters validParams<FEBoundaryFluxUserObject>();
 class FEBoundaryFluxUserObject final : public FEBoundaryBaseUserObject
 {
 public:
-  /// Constructor
   FEBoundaryFluxUserObject(const InputParameters & parameters);
 
-  /// Virtual destructor
-  virtual ~FEBoundaryFluxUserObject();
-
 protected:
-  // SideIntegralVariableUserObject overrides
+  // Override from SideIntegralVariableUserObject
   virtual Real computeQpIntegral() final;
 
   /// Name of the diffusion coefficient property in the local material
   const std::string _diffusion_coefficient_name;
+
   /// Value of the diffusion coefficient
   const MaterialProperty<Real> & _diffusion_coefficient;
 };

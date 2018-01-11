@@ -3,6 +3,17 @@
 #include "AppFactory.h"
 #include "MooseSyntax.h"
 
+// Module includes
+#include "FunctionSeries.h"
+#include "FunctionSeriesToAux.h"
+#include "FEBoundaryValueUserObject.h"
+#include "FEBoundaryFluxUserObject.h"
+#include "FEFluxBC.h"
+#include "FEValueBC.h"
+#include "FEValuePenaltyBC.h"
+#include "FEVolumeUserObject.h"
+#include "MultiAppMutableCoefficientsTransfer.h"
+
 template <>
 InputParameters
 validParams<FunctionalExpansionToolsApp>()
@@ -32,9 +43,22 @@ FunctionalExpansionToolsApp::registerApps()
 }
 
 void
-FunctionalExpansionToolsApp::registerObjects(Factory & /*factory*/)
+FunctionalExpansionToolsApp::registerObjects(Factory & factory)
 {
-  /* Uncomment Factory parameter and register your new objects here! */
+  registerAuxKernel(FunctionSeriesToAux);
+
+  registerBoundaryCondition(FEValueBC);
+  registerBoundaryCondition(FEValuePenaltyBC);
+  registerBoundaryCondition(FEFluxBC);
+
+  registerFunction(FunctionSeries);
+
+  registerUserObject(FEBoundaryValueUserObject);
+  registerUserObject(FEBoundaryFluxUserObject);
+  registerUserObject(FEVolumeUserObject);
+
+  // MultiAppFETransfer is a typedef of MultiAppMutableCoefficientsTransfer
+  registerTransfer(MultiAppFETransfer);
 }
 
 void

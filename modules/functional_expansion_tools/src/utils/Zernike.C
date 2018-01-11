@@ -43,12 +43,20 @@ Zernike::calculatedNumberOfTermsBasedOnOrder(const std::vector<std::size_t> & or
 void
 Zernike::checkPhysicalBounds(const std::vector<Real> & bounds) const
 {
-  // each single series is assumed to be a function of a single coordinate,
-  // which should only have two bounds.
+  /*
+   * Each single series is assumed to be a function of a single coordinate, which should only have
+   * two bounds.
+   */
   if (bounds.size() != 3)
     mooseError("Zernike: Invalid number of bounds specified for single series!");
 }
 
+/*
+ * 'clang-format' will try to change this. I have chosen to keep the formatting as is to make it
+ * easier to understand and follow the formulas. The formatting also is closely related to the FETs
+ * developed in Serpent, which I have developed simultaneously. Mirroring the development improves
+ * the maintanability of both codes.
+ */
 void
 Zernike::evaluateOrthonormal()
 {
@@ -195,8 +203,6 @@ Zernike::evaluateOrthonormal()
   }
 
   fillOutNegativeRankAndApplyAzimuthalComponent();
-  // for (std::size_t i = 0; i < _number_of_terms; ++i)
-  //   std::cout << COLOR_MAGENTA << i << ": " << load(i) << COLOR_DEFAULT << std::endl;
 }
 
 void

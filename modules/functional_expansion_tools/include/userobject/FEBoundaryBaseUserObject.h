@@ -29,14 +29,10 @@ InputParameters validParams<FEBoundaryBaseUserObject>();
 class FEBoundaryBaseUserObject : public FEIntegralBaseUserObject<SideIntegralVariableUserObject>
 {
 public:
-  /// Constructor
   FEBoundaryBaseUserObject(const InputParameters & parameters);
 
-  /// Virtual destructor
-  virtual ~FEBoundaryBaseUserObject();
-
 protected:
-  // FEIntegralBaseUserObject overrides
+  // Overrides from FEIntegralBaseUserObject
   virtual Point getCentroid() const final;
   virtual Real getVolume() const final;
 };

@@ -15,8 +15,8 @@
 #include "Legendre.h"
 
 /**
- * The highest order of Legendre polynomials calculated directly instead of via
- * the recurrence relation
+ * The highest order of Legendre polynomials calculated directly instead of via the recurrence
+ * relation
  */
 #define MAX_DIRECT_CALCULATION 12
 
@@ -45,6 +45,12 @@ Legendre::checkPhysicalBounds(const std::vector<Real> & bounds) const
     mooseError("Legend: Invalid number of bounds specified for single series!");
 }
 
+/*
+ * 'clang-format' will try to change this. I have chosen to keep the formatting as is to make it
+ * easier to understand and follow the formulas. The formatting also is closely related to the FETs
+ * developed in Serpent, which I have developed simultaneously. Mirroring the development improves
+ * the maintanability of both codes.
+ */
 void
 Legendre::evaluateOrthonormal()
 {
@@ -144,6 +150,12 @@ Legendre::evaluateOrthonormal()
             * (x * load(k - 1)  -  ((k - 1) / Real(k + k - 3)) * load(k - 2)));
 }
 
+/*
+ * 'clang-format' will try to change this. I have chosen to keep the formatting as is to make it
+ * easier to understand and follow the formulas. The formatting also is closely related to the FETs
+ * developed in Serpent, which I have developed simultaneously. Mirroring the development improves
+ * the maintanability of both codes.
+ */
 void
 Legendre::evaluateStandard()
 {

@@ -23,14 +23,12 @@ validParams<FunctionSeriesToAux>()
   InputParameters params = validParams<FunctionAux>();
 
   params.addClassDescription("AuxKernel to convert a functional expansion"
-                             " (Functions: FunctionSeries) to an AuxVariable");
+                             " (Functions object, type = FunctionSeries) to an AuxVariable");
 
   // Force this AuxKernel to execute at "timestep_begin"
-  MultiMooseEnum setup_options(SetupInterface::getExecuteOptions());
-  setup_options = "timestep_begin";
-  params.set<MultiMooseEnum>("execute_on") = setup_options;
+  params.set<ExecFlagEnum>("execute_on", true) = EXEC_TIMESTEP_BEGIN;
   // Don't let the user change the execution time
-  params.suppressParameter<MultiMooseEnum>("execute_on");
+  params.suppressParameter<ExecFlagEnum>("execute_on");
 
   return params;
 }
@@ -41,9 +39,5 @@ FunctionSeriesToAux::FunctionSeriesToAux(const InputParameters & parameters)
   FunctionSeries * validate = dynamic_cast<FunctionSeries *>(&_func);
 
   if (!validate)
-    mooseError("FunctionSeriesAux '",
-               name(),
-               "': Function '",
-               _func.name(),
-               "' is not a FunctionSeries type");
+    paramError("function", "'function' must be a FunctionSeries type");
 }

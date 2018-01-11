@@ -12,8 +12,8 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef CACHEDFUNCTIONINTERFACE_H
-#define CACHEDFUNCTIONINTERFACE_H
+#ifndef MEMOIZEFUNCTIONINTERFACE_H
+#define MEMOIZEFUNCTIONINTERFACE_H
 
 // C++ includes
 #include <map>
@@ -25,53 +25,53 @@
 #include "Hashing.h"
 
 // Forward declarations
-class CachedFunctionInterface;
+class MemoizedFunctionInterface;
 
 template <>
-InputParameters validParams<CachedFunctionInterface>();
+InputParameters validParams<MemoizedFunctionInterface>();
 
 /**
- * Implementation of Function that caches evaluations in an unordered map using
- * a hash of the evaluation locations as the key. The purpose is to allow for
- * quick evaluation of a complex function that may be reevaluated multiple times
- * without changing the actual outputs.
+ * Implementation of Function that memoizes (caches) former evaluations in an unordered map using a
+ * hash of the evaluation locations as the key. The purpose is to allow for quick evaluation of a
+ * complex function that may be reevaluated multiple times without changing the actual outputs.
  */
-class CachedFunctionInterface : public Function
+class MemoizedFunctionInterface : public Function
 {
 public:
-  CachedFunctionInterface(const InputParameters & parameters);
+  MemoizedFunctionInterface(const InputParameters & parameters);
 
-  /// Overriden member from MeshChangedInterface
-  virtual void meshChanged();
+  // Override from MeshChangedInterface
+  virtual void meshChanged() override;
 
-  /// Replaces Function::value in derived classes
-  virtual Real evaluateValue(Real time, const Point & point) = 0;
-
-  /// Use the cache
+  /// Enable/disable the cache
   void useCache(bool use);
 
-  /// Make this final so all derived classes cannot bypass the cache functionality
+  /*
+   * Make this implementation of Function::Value() final so derived classes cannot bypass the
+   * memoization functionality it implements. Instead, deriving classes should implement
+   * evaluateValue().
+   */
   virtual Real value(Real time, const Point & point) final;
 
 protected:
-  /**
-   * Called by derived classes to invalidate the cache, perhaps due to a state
-   * change
-   */
+  /// Used in derived classes, equivalent to Function::value()
+  virtual Real evaluateValue(Real time, const Point & point) = 0;
+
+  /// Called by derived classes to invalidate the cache, perhaps due to a state change
   void invalidateCache();
 
 private:
   /// Cached evaluations for each point
   std::unordered_map<hashing::HashValue, Real> _cache;
 
-  /// Flag whether to cache values
-  bool _enable_cache;
-
-  /// Flag whether changes in time invalidate the cache
-  bool _respect_time;
-
   /// Stores the time evaluation of the cache
   Real _current_time;
+
+  /// Flag for whether to cache values
+  bool _enable_cache;
+
+  /// Flag for whether changes in time invalidate the cache
+  bool _respect_time;
 };
 
-#endif // CACHEDFUNCTIONINTERFACE_H
+#endif // MEMOIZEFUNCTIONINTERFACE_H

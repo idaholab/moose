@@ -24,9 +24,8 @@ public:
   Cartesian(const std::vector<MooseEnum> & domain,
             const std::vector<std::size_t> & order,
             const std::vector<MooseEnum> & series_types);
-  virtual ~Cartesian() = default;
 
-  // Virtual overrides
+  // Overrides from FunctionalBasisInterface
   virtual void setPhysicalBounds(const std::vector<Real> & bounds) final;
 };
 

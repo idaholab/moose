@@ -48,8 +48,3 @@ FEBoundaryBaseUserObject::getVolume() const
 {
   return _current_side_volume;
 }
-
-FEBoundaryBaseUserObject::~FEBoundaryBaseUserObject()
-{
-  // Nothing here
-}

@@ -25,8 +25,8 @@ template <>
 InputParameters validParams<FunctionSeriesToAux>();
 
 /**
- * Specialization of FunctionAux that is designed to work specifically with FEs,
- * namely that it is always processed at timestep_begin
+ * Specialization of FunctionAux that is designed to work specifically with FEs, namely that it is
+ * always processed at timestep_begin
  */
 class FunctionSeriesToAux : public FunctionAux
 {

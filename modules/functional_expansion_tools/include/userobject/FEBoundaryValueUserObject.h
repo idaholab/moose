@@ -28,11 +28,7 @@ InputParameters validParams<FEBoundaryValueUserObject>();
 class FEBoundaryValueUserObject final : public FEBoundaryBaseUserObject
 {
 public:
-  /// Constructor
   FEBoundaryValueUserObject(const InputParameters & parameters);
-
-  /// Virtual destructor
-  virtual ~FEBoundaryValueUserObject();
 };
 
 #endif // FEBOUNDARYVALUEUSEROBJECT_H

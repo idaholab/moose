@@ -29,14 +29,10 @@ InputParameters validParams<FEVolumeUserObject>();
 class FEVolumeUserObject final : public FEIntegralBaseUserObject<ElementIntegralVariableUserObject>
 {
 public:
-  /// Constructor
   FEVolumeUserObject(const InputParameters & parameters);
 
-  /// Virtual destructor
-  virtual ~FEVolumeUserObject();
-
 protected:
-  // FEIntegralBaseUserObject overrides
+  // Overrides from FEIntegralBaseUserObject
   virtual Point getCentroid() const;
   virtual Real getVolume() const;
 };

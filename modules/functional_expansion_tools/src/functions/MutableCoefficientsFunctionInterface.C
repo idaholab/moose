@@ -18,13 +18,12 @@ template <>
 InputParameters
 validParams<MutableCoefficientsFunctionInterface>()
 {
-  InputParameters params = validParams<CachedFunctionInterface>();
+  InputParameters params = validParams<MemoizedFunctionInterface>();
 
   params += validParams<MutableCoefficientsInterface>();
 
-  params.addClassDescription("Interface based on MutableCoefficientsInterface"
-                             " for natively supporting operations based on an"
-                             " array of coefficients");
+  params.addClassDescription("Interface based on MutableCoefficientsInterface for natively "
+                             "supporting operations based on an array of coefficients");
 
   params.addParam<std::vector<Real>>("coefficients", "Coefficients required by the function.");
 
@@ -33,7 +32,7 @@ validParams<MutableCoefficientsFunctionInterface>()
 
 MutableCoefficientsFunctionInterface::MutableCoefficientsFunctionInterface(
     const InputParameters & parameters)
-  : CachedFunctionInterface(parameters),
+  : MemoizedFunctionInterface(parameters),
     FunctionInterface(this),
     MutableCoefficientsInterface(parameters)
 {

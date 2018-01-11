@@ -27,12 +27,9 @@ validParams<MultiAppMutableCoefficientsTransfer>()
 {
   InputParameters params = validParams<MultiAppTransfer>();
 
-  params.addClassDescription("Transfers coefficient arrays between objects that"
-                             " are derived from MutableCoefficientsInterface;"
-                             " currently includes the following types:"
-                             "\n - FunctionSeries"
-                             "\n - FEBoundaryUserObject"
-                             "\n - FEVolumeUserObject");
+  params.addClassDescription("Transfers coefficient arrays between objects that are derived from "
+                             "MutableCoefficientsInterface; currently includes the following "
+                             "types: FunctionSeries, FEBoundaryUserObject, and FEVolumeUserObject");
 
   params.addRequiredParam<std::string>(
       "this_app_object_name",
@@ -96,9 +93,8 @@ MultiAppMutableCoefficientsTransfer::scanProblemBaseForObject(FEProblemBase & ba
                                                               const std::string & app_name)
 {
   /*
-   * For now we are only considering Functions and UserObjects, as they are the
-   * only types currently implemented with MutableCoefficientsInterface. Others
-   * may be added later.
+   * For now we are only considering Functions and UserObjects, as they are the only types currently
+   * implemented with MutableCoefficientsInterface. Others may be added later.
    *
    * Functions:
    *   FunctionSeries
@@ -201,13 +197,14 @@ MultiAppMutableCoefficientsTransfer::execute()
       }
       break;
     }
+
     // MultiApp -> LocalApp
     case FROM_MULTIAPP:
     {
       /*
-       * For now we will assume that the transfers are 1:1 and the coefficients
-       * are synchronized among all instances, thus we only need to grab the set
-       * of coefficients from the first SubApp.
+       * For now we will assume that the transfers are 1:1 and the coefficients are synchronized
+       * among all instances, thus we only need to grab the set of coefficients from the first
+       * SubApp.
        */
       if (_multi_app->hasLocalApp(0))
       {

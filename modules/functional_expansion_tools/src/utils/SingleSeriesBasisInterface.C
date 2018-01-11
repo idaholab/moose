@@ -14,11 +14,12 @@
 
 #include "SingleSeriesBasisInterface.h"
 
-// The default constructor for a single series creates a single-term functional
-// basis of zero-th order. Although the _physical_bounds flag is set to false
-// anyways, we need to assign some value here in the constructor so that the
-// order of member variables in the include file doesn't give an error. Likewise,
-// the same holds for _standardized_location.
+/*
+ * The default constructor for a single series creates a single-term functional basis of zeroth
+ * order. Although the _physical_bounds flag is set to false anyways, we need to assign some value
+ * here in the constructor so that the order of member variables in the include file doesn't give an
+ * error. The same holds for _standardized_location.
+ */
 SingleSeriesBasisInterface::SingleSeriesBasisInterface()
   : FunctionalBasisInterface(1),
     _domains({_domain_options = "x"}),
@@ -55,19 +56,20 @@ SingleSeriesBasisInterface::setOrder(const std::vector<std::size_t> & orders)
   if (orders.size() != _orders.size())
     mooseError("SSBI: Invalid 'orders' use in setOrder()!");
 
-  // do nothing if the order isn't changed. Note that this only compares the
-  // first value - it is assumed that a single series only needs to be described
-  // using a single order.
+  /*
+   * Do nothing if the order isn't changed. Note that this only compares the first value - it is
+   * assumed that a single series only needs to be described using a single order.
+   */
   if (orders[0] == _orders[0])
     return;
 
   _orders = orders;
 
-  // set the new number of terms in the single series
+  // Set the new number of terms in the single series
   _number_of_terms = calculatedNumberOfTermsBasedOnOrder(_orders);
 
-  // zero the basis evaluation
-  clearBasisEvaluation(_number_of_terms);
+  // Zero the basis evaluation
+  clearBasisEvaluation(_number_of_terms, {});
   _is_cache_invalid = true;
 }
 
@@ -80,8 +82,10 @@ SingleSeriesBasisInterface::setPhysicalBounds(const std::vector<Real> & bounds)
   _physical_bounds = bounds;
   _are_physical_bounds_specified = true;
 
-  // once the physical bounds have been changed, the normalization of a point
-  // will change, so the cached values will also be incorrect
+  /*
+   * Once the physical bounds have been changed, the normalization of a point will change, so the
+   * cached values will also be incorrect
+   */
   _is_cache_invalid = true;
 }
 
@@ -99,7 +103,7 @@ SingleSeriesBasisInterface::setLocation(const Point & point)
   else
     _standardized_location = _location;
 
-  // once the location is changed, the cached values correspond to an old location
+  // Once the location is changed, the cached values correspond to an old location
   for (std::size_t i = 0; !_is_cache_invalid && (i < _location.size()); ++i)
     if (oldLocation[i] != _location[i])
       _is_cache_invalid = true;
