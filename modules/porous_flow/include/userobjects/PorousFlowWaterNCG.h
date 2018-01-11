@@ -120,6 +120,16 @@ public:
    */
   Real enthalpyOfDissolution(Real temperature, Real Kh, Real dKh_dT) const;
 
+  /**
+   * Total mass fraction of NCG summed over all phases in the two-phase state
+   *
+   * @param pressure gas pressure (Pa)
+   * @param temperature temperature (K)
+   * @param saturation gas saturation (-)
+   * @return total mass fraction z (-)
+   */
+  Real totalMassFraction(Real pressure, Real temperature, Real saturation) const;
+
 protected:
   /**
    * Convert mole fraction to mass fraction
