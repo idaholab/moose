@@ -123,6 +123,16 @@ def runCommand(cmd, cwd=None):
         output = 'ERROR: ' + output
     return output
 
+
+## formatResults uses this method to return what can currently be printed
+def printableItems(results_dict):
+    # { formatted_result_key : ( text, color ) }
+    printable_items = []
+    for result_key, printable in results_dict.iteritems():
+        if printable:
+            printable_items.append(printable[0])
+    return printable_items
+
 ## print an optionally colorified test result
 #
 # The test will not be colored if
@@ -135,77 +145,86 @@ def formatResult(tester_data, result, options, color=True):
     status = tester.getStatus()
     color_opts = {'code' : options.code, 'colored' : options.colored}
 
-    # Buffer pre-result (bucket name)
-    pre_result = ''
+    # container for every printable item
+    formatted_result = { 'p' : None,
+                         'n' : None,
+                         'c' : None,
+                         'j' : None,
+                         's' : None,
+                         't' : None}
+
+    # Decorate pre-result
     if 'p' in terminal_format:
         # 8 characters is the current max length of any of our statuses
-        pre_result = ' '*(8-len(status.status)) + status.status
+        formatted_result['p'] = (' '*(8-len(status.status)) + status.status, status.color)
 
     # Support the option of no result...
     if 's' in terminal_format:
         # If result is empty, default to using the testers status message as the result
         if not result:
-            result = str(tester.getStatusMessage())
-    else:
-        result = ''
+            formatted_result['s'] = (str(tester.getStatusMessage()), status.color)
+        else:
+            formatted_result['s'] = (result, status.color)
 
     # Support the option of no name...
-    test_name = ''
     if 'n' in terminal_format:
-        test_name = tester.getTestName()
+        formatted_result['n'] = (tester.getTestName(), None)
 
-    # Format the caveats if any
-    f_caveats = ''
-    if tester.getCaveats() and 'c' in terminal_format:
-        f_caveats = '[' + ','.join(tester.getCaveats()).upper() + ']'
-
-    # Decorate timing
-    f_time = ''
+    # Decorate and format timing
     if options.timing and 't' in terminal_format:
         actual = float(tester_data.getTiming())
         int_len = len(str(int(actual)))
         precision = min(3, max(0,(4-int_len)))
-        f_time = '[' + '{0: <6}'.format('%0.*fs' % (precision, actual)) + ']'
+        formatted_result['t'] = ('[' + '{0: <6}'.format('%0.*fs' % (precision, actual)) + ']', None)
 
     # Special Case: When printing a pre-status _and_ a status, strip out the status
     # if that status is identical to the pre-status. This is so we can support the
     # printing of TestHarness statuses like RUNNING... while not printing two 'OK's
-    if pre_result.replace(' ', '') == result.replace(' ', ''):
-        result = ''
+    if (formatted_result['p'] and formatted_result['s']) \
+       and (formatted_result['p'][0].replace(' ', '') == formatted_result['s'][0].replace(' ', '')):
+        formatted_result['s'] = None
 
-    # Informational items created above, fill the rest with '.'
-    hr = ''
+    # Format the caveats if any
+    if tester.getCaveats() and 'c' in terminal_format:
+        caveats = ','.join(tester.getCaveats()).upper()
+        if tester.didPass() or tester.isSkipped():
+            caveat_color = 'CYAN'
+        else:
+            caveat_color = status.color
+
+        formatted_result['c'] = ('[' + caveats + ']', caveat_color)
+        items_to_print = printableItems(formatted_result)
+
+        # Determine when/if/how we should trim the caveats to fit the screen
+        if terminal_format[-1] != 'c' and len(' '.join(items_to_print)) > TERM_COLS \
+           and not options.extra_info:
+            over_by_amount = len(' '.join(items_to_print)) - TERM_COLS
+            caveats = '[' + caveats[:len(caveats) - (over_by_amount + 3)] + '...]'
+            formatted_result['c'] = (caveats, caveat_color)
+
+    # Informational items created above, fill the rest with dots ' .... '
     if 'j' in terminal_format:
-        items_to_print = [x for x in [pre_result, test_name, f_caveats, result, f_time] if x != '']
+        items_to_print = printableItems(formatted_result)
         character_count = len(' '.join(items_to_print)) + 1 # extra space created by joining hr
-        hr = '.'*(TERM_COLS - character_count)
+        if character_count < TERM_COLS:
+            formatted_result['j'] = ('.'*max(0, (TERM_COLS - character_count)), 'GREY')
+
+        # No room for a space-dot-space created by join
+        elif character_count == TERM_COLS:
+            formatted_result['j'] = ('', 'GREY')
 
     # Printable items created. Now we decorate each item with color.
     if color:
-        if hr:
-            hr = colorText(hr, 'GREY', **color_opts)
-        if result:
-            result = colorText(result, status.color, **color_opts)
-        if pre_result:
-            pre_result = colorText(pre_result, status.color, **color_opts)
-        if options.color_first_directory:
-            test_name = colorText(tester.specs['first_directory'], 'CYAN', **color_opts) +\
-                        test_name.replace(tester.specs['first_directory'], '', 1) # Strip out first occurence only
-        # Color the caveats based on status color (exception: pass and skipped are blue)
-        if f_caveats:
-            if tester.didPass() or tester.isSkipped():
-                f_caveats = colorText(f_caveats, 'CYAN', **color_opts)
-            else:
-                f_caveats = colorText(f_caveats, status.color, **color_opts)
+        for format_rule, printable in formatted_result.iteritems():
+            if printable and (printable[0] and printable[1]):
+                formatted_result[format_rule] = (colorText(printable[0], printable[1], **color_opts), printable[1])
 
-    # Put it all together
-    formated_result = { 'p' : pre_result,
-                        'n' : test_name,
-                        'c' : f_caveats,
-                        'j' : hr,
-                        's' : result,
-                        't' : f_time}
-    final_results = ' '.join([formated_result[x] for x in terminal_format if formated_result.get(x, '') != ''])
+            # Do special coloring for first directory
+            if format_rule == 'n' and options.color_first_directory:
+                formatted_result[format_rule] = (colorText(tester.specs['first_directory'], 'CYAN', **color_opts) +\
+                                         formatted_result[format_rule][0].replace(tester.specs['first_directory'], '', 1), 'CYAN') # Strip out first occurence only
+
+    final_results = ' '.join([formatted_result[x][0] for x in terminal_format if formatted_result[x]])
 
     # Decorate debuging
     if options.debug_harness:

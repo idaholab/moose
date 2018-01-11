@@ -609,11 +609,7 @@ class Tester(MooseObject):
                 if key.lower() not in caveat_list:
                     tmp_reason.append(value)
 
-            # Format joined reason to better fit on the screen
-            if len(', '.join(tmp_reason)) >= int(util.TERM_COLS) - (len(self.specs['test_name'])+21):
-                flat_reason = (', '.join(tmp_reason))[:(util.TERM_COLS - (len(self.specs['test_name'])+24))] + '...'
-            else:
-                flat_reason = ', '.join(tmp_reason)
+            flat_reason = ', '.join(tmp_reason)
 
             # If the test is deleted we still need to treat this differently
             self.addCaveats(flat_reason)
