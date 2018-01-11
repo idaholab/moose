@@ -227,7 +227,7 @@ NonlinearSystemBase::timestepSetup()
     _nodal_dampers.timestepSetup(tid);
     _integrated_bcs.timestepSetup(tid);
   }
-  _scalar_kernels.initialSetup();
+  _scalar_kernels.timestepSetup();
   _constraints.timestepSetup();
   _general_dampers.timestepSetup();
   _nodal_bcs.timestepSetup();
