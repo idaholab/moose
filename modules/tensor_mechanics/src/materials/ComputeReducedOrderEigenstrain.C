@@ -15,7 +15,8 @@ InputParameters
 validParams<ComputeReducedOrderEigenstrain>()
 {
   InputParameters params = validParams<ComputeEigenstrainBase>();
-  params.addClassDescription("accepts eigenstrains and computes a reduced order eigenstrain for consistency in the order of strain and eigenstrains.");
+  params.addClassDescription("accepts eigenstrains and computes a reduced order eigenstrain for "
+                             "consistency in the order of strain and eigenstrains.");
   params.addRequiredParam<std::vector<MaterialPropertyName>>(
       "input_eigenstrain_names", "List of eigenstrains to be applied in this strain calculation");
   return params;
