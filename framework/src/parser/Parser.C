@@ -1336,8 +1336,6 @@ Parser::setFilePathParam(const std::string & full_name,
   if (pos != std::string::npos && postfix[0] != '/' && !postfix.empty())
     prefix = _input_filename.substr(0, pos + 1);
 
-  // TODO: delete the following line after apps have been updated to use rawParamVal API:
-  params.set<std::string>("_raw_" + short_name) = postfix;
   params.rawParamVal(short_name) = postfix;
   param->set() = prefix + postfix;
 
@@ -1419,8 +1417,6 @@ Parser::setVectorFilePathParam(const std::string & full_name,
     }
   }
 
-  // TODO: delete the following line after apps have been updated to use rawParamVal API:
-  params.set<std::vector<std::string>>("_raw_" + short_name) = rawvec;
   param->set() = vec;
 
   if (in_global)
