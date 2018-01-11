@@ -2,6 +2,7 @@ import platform, os, re
 import subprocess
 from mooseutils import colorText
 from collections import namedtuple
+from collections import OrderedDict
 import json
 
 TERM_COLS = int(os.getenv('MOOSE_TERM_COLS', '110'))
@@ -128,44 +129,63 @@ def runCommand(cmd, cwd=None):
 # 1) options.colored is False,
 # 2) the color parameter is False.
 def formatResult(tester_data, result, options, color=True):
-    terminal_format = list(TERM_FORMAT)
+    # Support only one instance of a format identifier, but obey the order
+    terminal_format = list(OrderedDict.fromkeys(list(TERM_FORMAT)))
     tester = tester_data.getTester()
-    test_name = tester.getTestName()
     status = tester.getStatus()
     color_opts = {'code' : options.code, 'colored' : options.colored}
 
-    # If result is empty, default to using the testers status message as the result
-    if not result:
-        result = str(tester.getStatusMessage())
+    # Buffer pre-result (bucket name)
+    pre_result = ''
+    if 'p' in terminal_format:
+        # 8 characters is the current max length of any of our statuses
+        pre_result = ' '*(8-len(status.status)) + status.status
+
+    # Support the option of no result...
+    if 's' in terminal_format:
+        # If result is empty, default to using the testers status message as the result
+        if not result:
+            result = str(tester.getStatusMessage())
+    else:
+        result = ''
+
+    # Support the option of no name...
+    test_name = ''
+    if 'n' in terminal_format:
+        test_name = tester.getTestName()
 
     # Format the caveats if any
     f_caveats = ''
-    if tester.getCaveats():
+    if tester.getCaveats() and 'c' in terminal_format:
         f_caveats = '[' + ','.join(tester.getCaveats()).upper() + ']'
 
     # Decorate timing
     f_time = ''
-    if options.timing:
-        f_time = '[' + '%0.3f' % float(tester_data.getTiming()) + 's]'
+    if options.timing and 't' in terminal_format:
+        actual = float(tester_data.getTiming())
+        int_len = len(str(int(actual)))
+        precision = min(3, max(0,(4-int_len)))
+        f_time = '[' + '{0: <6}'.format('%0.*fs' % (precision, actual)) + ']'
 
-    # Set the justification text based on some dynamic situations
-    dynamic_text_length = len(test_name + result + f_caveats)
-    if 'p' in terminal_format:
-        pre_result = ' '*(8-len(status.status)) + status.status
-        cnt = (TERM_COLS - len(pre_result)) - dynamic_text_length
-    else:
-        pre_result = ''
-        cnt = TERM_COLS - dynamic_text_length
+    # Special Case: When printing a pre-status _and_ a status, strip out the status
+    # if that status is identical to the pre-status. This is so we can support the
+    # printing of TestHarness statuses like RUNNING... while not printing two 'OK's
+    if pre_result.replace(' ', '') == result.replace(' ', ''):
+        result = ''
 
-    # Everything that can print should be set above
-    # Adjusting horizontal character count to compensate for all 'printable' items
-    items_to_print = [x for x in [pre_result, test_name, f_caveats, result] if x != '']
-    hr = '.'*(cnt-len(items_to_print))
+    # Informational items created above, fill the rest with '.'
+    hr = ''
+    if 'j' in terminal_format:
+        items_to_print = [x for x in [pre_result, test_name, f_caveats, result, f_time] if x != '']
+        character_count = len(' '.join(items_to_print)) + 1 # extra space created by joining hr
+        hr = '.'*(TERM_COLS - character_count)
 
-    # Decorate all things that should be colorful
+    # Printable items created. Now we decorate each item with color.
     if color:
-        hr = colorText(hr, 'GREY', **color_opts)
-        result = colorText(result, status.color, **color_opts)
+        if hr:
+            hr = colorText(hr, 'GREY', **color_opts)
+        if result:
+            result = colorText(result, status.color, **color_opts)
         if pre_result:
             pre_result = colorText(pre_result, status.color, **color_opts)
         if options.color_first_directory:
