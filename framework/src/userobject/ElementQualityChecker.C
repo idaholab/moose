@@ -49,7 +49,7 @@ validParams<ElementQualityChecker>()
   params.addParam<MooseEnum>("failure_type",
                              ElementQualityChecker::FailureMessageType(),
                              "The way how the failure of quality metric check should respond");
-  params.set<MultiMooseEnum>("execute_on") = "initial";
+  params.set<ExecFlagEnum>("execute_on") = EXEC_INITIAL;
 
   return params;
 }
