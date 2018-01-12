@@ -15,6 +15,7 @@ InputParameters
 validParams<Distribution>()
 {
   InputParameters params = validParams<MooseObject>();
+  params.addRequiredParam<std::string>("type", "class/type name identifying the distribution");
   params.registerBase("Distribution");
   return params;
 }

@@ -24,8 +24,9 @@ validParams<MeshModifier>()
                         "flag can be set on an individual modifier "
                         "to force preperation between modifiers where they might be needed.");
 
-  params.registerBase("MeshModifier");
+  params.addPrivateParam<MooseMesh *>("_mesh");
 
+  params.registerBase("MeshModifier");
   return params;
 }
 

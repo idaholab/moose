@@ -21,6 +21,7 @@ InputParameters
 validParams<SubProblem>()
 {
   InputParameters params = validParams<Problem>();
+  params.addPrivateParam<MooseMesh *>("mesh");
   return params;
 }
 
