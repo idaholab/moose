@@ -6,7 +6,7 @@ from collections import OrderedDict
 import json
 
 TERM_COLS = int(os.getenv('MOOSE_TERM_COLS', '110'))
-TERM_FORMAT = os.getenv('MOOSE_TERM_FORMAT', 'njCst')
+TERM_FORMAT = os.getenv('MOOSE_TERM_FORMAT', 'njcst')
 
 LIBMESH_OPTIONS = {
   'mesh_mode' :    { 're_option' : r'#define\s+LIBMESH_ENABLE_PARMESH\s+(\d+)',
@@ -154,9 +154,7 @@ def formatResult(tester_data, result, options, color=True):
     color_opts = {'code' : options.code, 'colored' : options.colored}
 
     # container for every printable item
-    formatted_results = {}
-    for format_key in terminal_format:
-        formatted_results[format_key] = None
+    formatted_results = dict.fromkeys(terminal_format)
 
     # Populate formatted_results for those we support, with requested items
     # specified by the user. Caveats and justifications are parsed outside of
@@ -189,6 +187,8 @@ def formatResult(tester_data, result, options, color=True):
         if str(f_key).lower() == 'n':
             formatCase(f_key, (tester.getTestName(), None), formatted_results)
 
+        # Adjust the precision of time, so we can justify the length. The higher the
+        # seconds, the lower the decimal point, ie: [0.000s] - [100.0s]. Max: [99999s]
         if str(f_key).lower() == 't' and options.timing:
             actual = float(tester_data.getTiming())
             int_len = len(str(int(actual)))
