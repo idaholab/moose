@@ -116,12 +116,6 @@ protected:
 
   /// Conversion from degrees Celsius to degrees Kelvin
   const Real _T_c2k;
-  /// Universal gas constant (J/mol/K)
-  const Real _R;
-  /// Maximum number of iterations for the Newton-Raphson iterations
-  const Real _nr_max_its;
-  /// Tolerance for Newton-Raphson iterations
-  const Real _nr_tol;
   /// Flag to indicate whether to calculate stateful properties
   bool _is_initqp;
   /// FluidStateProperties data structure

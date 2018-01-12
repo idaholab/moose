@@ -6,7 +6,6 @@
 /****************************************************************/
 
 #include "PorousFlowFluidStateBase.h"
-#include "PorousFlowDictator.h"
 
 template <>
 InputParameters
@@ -26,7 +25,6 @@ PorousFlowFluidStateBase::PorousFlowFluidStateBase(const InputParameters & param
   : PorousFlowFluidStateFlash(parameters),
     _num_phases(2),
     _num_components(2),
-    _num_z_vars(1),
     _aqueous_phase_number(getParam<unsigned int>("liquid_phase_number")),
     _gas_phase_number(1 - _aqueous_phase_number),
     _aqueous_fluid_component(getParam<unsigned int>("liquid_fluid_component")),
