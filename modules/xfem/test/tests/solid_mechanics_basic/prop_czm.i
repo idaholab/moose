@@ -14,19 +14,23 @@
     type = LineSegmentCutUserObject
     cut_data = '0.0 0.5 1.0 0.5'
     time_start_cut = 0.0
-    time_end_cut = 10.0
+    time_end_cut = 5.0
+  [../]
+  [./pair_qps]
+    type = XFEMElementPairQPProvider
   [../]
   [./manager]
     type = XFEMElemPairMaterialManager
     material_names = 'material1'
+    element_pair_qps = pair_qps
   [../]
 []
 
 [Mesh]
   type = GeneratedMesh
   dim = 2
-  nx = 30
-  ny = 29
+  nx = 5
+  ny = 5
   xmin = 0.0
   xmax = 1
   ymin = 0.0
@@ -88,7 +92,7 @@
     disp_y = disp_y
     save_in_disp_y = resid_y
     save_in_disp_x = resid_x
-    use_displaced_mesh = false
+    use_displaced_mesh = true
   [../]
 []
 
@@ -150,7 +154,7 @@
 [Functions]
   [./pull_up_and_down]
     type = ParsedFunction
-    value = 'if(t < 10, 0.0001 * t, -0.0001 * (t-10) + 0.001)'
+    value = 'if(t < 5, 0.0001 * t, -0.0001 * (t-5) + 0.0005)'
   [../]
 []
 
@@ -288,7 +292,7 @@
 # time control
   start_time = 0.0
   dt = 1
-  end_time = 30.0
+  end_time = 5
   num_steps = 5000
 
   max_xfem_update = 1

@@ -284,6 +284,9 @@ XFEM::update(Real time, NonlinearSystemBase & nl, AuxiliarySystem & aux)
     _mesh->skip_partitioning(true);
     _mesh->prepare_for_use();
 
+    //    _mesh->prepare_for_use(true,true); //doing this preserves the numbering, but generates
+    //    warning
+
     if (_displaced_mesh)
     {
       _displaced_mesh->allow_renumbering(false);
@@ -1173,6 +1176,8 @@ XFEM::cutMeshWithEFA(NonlinearSystemBase & nl, AuxiliarySystem & aux)
 
   // Add new elements
   std::map<unsigned int, std::vector<const Elem *>> temporary_parent_children_map;
+  std::map<unique_id_type, const Elem *> temp_elem_pair_unique_id_map;
+  _elem_pair_unique_id_map.clear();
 
   std::vector<boundary_id_type> parent_boundary_ids;
 
@@ -1182,16 +1187,36 @@ XFEM::cutMeshWithEFA(NonlinearSystemBase & nl, AuxiliarySystem & aux)
     unsigned int efa_child_id = new_elements[i]->id();
 
     Elem * parent_elem = _mesh->elem_ptr(parent_id);
+
+    if (new_elements[i]->getParent()->numChildren() == 1)
+      std::cout << "new_elements[i]->getParent()->numChildren() = "
+                << new_elements[i]->getParent()->numChildren() << std::endl;
+
+    // Elem * libmesh_elem = NULL;
+    // if (new_elements[i]->getParent()->numChildren() == 1)
+    // {
+    //   libmesh_elem = parent_elem;
+    //   libmesh_elem->set_old_dof_object();
+    // }
+    // else
+    //   libmesh_elem = Elem::build(parent_elem->type()).release();
+
     Elem * libmesh_elem = Elem::build(parent_elem->type()).release();
 
     for (unsigned int m = 0; m < _geometric_cuts.size(); ++m)
     {
       for (auto & it : _sibling_elems[_geometric_cuts[m]->getInterfaceID()])
       {
-        if (parent_elem == it.first)
-          it.first = libmesh_elem;
-        else if (parent_elem == it.second)
-          it.second = libmesh_elem;
+        if (parent_elem == it->first)
+        {
+          temp_elem_pair_unique_id_map[it->first->unique_id()] = libmesh_elem;
+          it->first = libmesh_elem;
+        }
+        else if (parent_elem == it->second)
+        {
+          temp_elem_pair_unique_id_map[it->second->unique_id()] = libmesh_elem;
+          it->second = libmesh_elem;
+        }
       }
     }
 
@@ -1204,6 +1229,13 @@ XFEM::cutMeshWithEFA(NonlinearSystemBase & nl, AuxiliarySystem & aux)
     if (_displaced_mesh)
     {
       parent_elem2 = _displaced_mesh->elem_ptr(parent_id);
+
+      // if (new_elements[i]->getParent()->numChildren() == 1)
+      // {
+      //   libmesh_elem2 = parent_elem2;
+      //   libmesh_elem2->set_old_dof_object();
+      // }
+      // else
       libmesh_elem2 = Elem::build(parent_elem2->type()).release();
 
       for (unsigned int m = 0; m < _geometric_cuts.size(); ++m)
@@ -1233,6 +1265,8 @@ XFEM::cutMeshWithEFA(NonlinearSystemBase & nl, AuxiliarySystem & aux)
         libmesh_node->processor_id() = parent_elem->processor_id();
 
       libmesh_elem->set_node(j) = libmesh_node;
+
+      libmesh_node->clear_old_dof_object();
 
       // Store solution for all nodes affected by XFEM (even existing nodes)
       if (parent_elem->is_semilocal(_mesh->processor_id()))
@@ -1278,18 +1312,58 @@ XFEM::cutMeshWithEFA(NonlinearSystemBase & nl, AuxiliarySystem & aux)
 
         libmesh_elem2->set_node(j) = libmesh_node;
 
+        libmesh_node->clear_old_dof_object();
+
         parent_node = parent_elem2->node_ptr(j);
         _displaced_mesh->get_boundary_info().boundary_ids(parent_node, parent_boundary_ids);
         _displaced_mesh->get_boundary_info().add_node(libmesh_node, parent_boundary_ids);
       }
     }
 
+    // if (new_elements[i]->getParent()->numChildren() > 1)
+    _mesh->add_elem(libmesh_elem);
+
     libmesh_elem->set_p_level(parent_elem->p_level());
     libmesh_elem->set_p_refinement_flag(parent_elem->p_refinement_flag());
-    _mesh->add_elem(libmesh_elem);
     libmesh_elem->set_n_systems(parent_elem->n_systems());
     libmesh_elem->subdomain_id() = parent_elem->subdomain_id();
     libmesh_elem->processor_id() = parent_elem->processor_id();
+
+    libmesh_elem->clear_old_dof_object();
+
+    // TODO: The 0 here is the thread ID.  Need to sort out how to do this correctly
+    // TODO: Also need to copy neighbor material data
+    if (parent_elem->processor_id() == _mesh->processor_id())
+    {
+      (*_material_data)[0]->copy(*libmesh_elem, *parent_elem, 0);
+      for (unsigned int side = 0; side < parent_elem->n_sides(); ++side)
+      {
+        std::vector<boundary_id_type> parent_elem_boundary_ids =
+            _mesh->boundary_info->boundary_ids(parent_elem, side);
+        std::vector<boundary_id_type>::iterator it_bd = parent_elem_boundary_ids.begin();
+        for (; it_bd != parent_elem_boundary_ids.end(); ++it_bd)
+        {
+          if (_fe_problem->needMaterialOnSide(*it_bd, 0))
+            (*_bnd_material_data)[0]->copy(*libmesh_elem, *parent_elem, side);
+        }
+      }
+    }
+
+    // Store solution for all elements affected by XFEM
+    storeSolutionForElement(libmesh_elem,
+                            parent_elem,
+                            nl,
+                            _cached_solution,
+                            current_solution,
+                            old_solution,
+                            older_solution);
+    storeSolutionForElement(libmesh_elem,
+                            parent_elem,
+                            aux,
+                            _cached_aux_solution,
+                            current_aux_solution,
+                            old_aux_solution,
+                            older_aux_solution);
 
     // The crack tip origin map is stored before cut, thus the elem should be updated with new
     // element.
@@ -1302,6 +1376,8 @@ XFEM::cutMeshWithEFA(NonlinearSystemBase & nl, AuxiliarySystem & aux)
       _elem_crack_origin_direction_map[libmesh_elem] = crack_data;
     }
 
+    // if (new_elements[i]->getParent()->numChildren() > 1)
+    // {
     if (_debug_output_level > 1)
       _console << "XFEM added new element: " << libmesh_elem->id() << std::endl;
 
@@ -1331,12 +1407,16 @@ XFEM::cutMeshWithEFA(NonlinearSystemBase & nl, AuxiliarySystem & aux)
 
     if (_displaced_mesh)
     {
+      // if (new_elements[i]->getParent()->numChildren() > 1)
+      _displaced_mesh->add_elem(libmesh_elem2);
+
       libmesh_elem2->set_p_level(parent_elem2->p_level());
       libmesh_elem2->set_p_refinement_flag(parent_elem2->p_refinement_flag());
-      _displaced_mesh->add_elem(libmesh_elem2);
       libmesh_elem2->set_n_systems(parent_elem2->n_systems());
       libmesh_elem2->subdomain_id() = parent_elem2->subdomain_id();
       libmesh_elem2->processor_id() = parent_elem2->processor_id();
+
+      libmesh_elem2->clear_old_dof_object();
     }
 
     unsigned int n_sides = parent_elem->n_sides();
@@ -1433,6 +1513,9 @@ XFEM::cutMeshWithEFA(NonlinearSystemBase & nl, AuxiliarySystem & aux)
   {
     Elem * elem_to_delete = _mesh->elem_ptr(delete_elements[i]->id());
 
+    // if (delete_elements[i]->numChildren() == 1)
+    //   continue;
+
     // delete the XFEMCutElem object for any elements that are to be deleted
     std::map<unique_id_type, XFEMCutElem *>::iterator cemit =
         _cut_elem_map.find(elem_to_delete->unique_id());
@@ -1461,6 +1544,21 @@ XFEM::cutMeshWithEFA(NonlinearSystemBase & nl, AuxiliarySystem & aux)
       _displaced_mesh->delete_elem(elem_to_delete2);
     }
   }
+
+  MeshBase::element_iterator elem_it = _mesh->elements_begin();
+  const MeshBase::element_iterator elem_end = _mesh->elements_end();
+
+  // for (elem_it = _mesh->elements_begin(); elem_it != elem_end; ++elem_it)
+  // {
+  //   Elem * elem = *elem_it;
+  //   std::cout << "elem id = " << elem->id() << std::endl;
+  //   for (unsigned int i = 0; i < 4; i++)
+  //   {
+  //     Node * node = elem->get_node(i);
+  //     std::cout << node->id() << ", node->old_dof_object = " << (node->old_dof_object == NULL)
+  //               << std::endl;
+  //   }
+  // }
 
   for (std::map<unsigned int, std::vector<const Elem *>>::iterator it =
            temporary_parent_children_map.begin();
@@ -1494,8 +1592,18 @@ XFEM::cutMeshWithEFA(NonlinearSystemBase & nl, AuxiliarySystem & aux)
     }
   }
 
+  for (std::map<unique_id_type, const Elem *>::iterator it = temp_elem_pair_unique_id_map.begin();
+       it != temp_elem_pair_unique_id_map.end();
+       ++it)
+  {
+    std::cout << "old unique id = " << it->first << ", new unique id = " << it->second->unique_id()
+              << std::endl;
+    _elem_pair_unique_id_map[it->first] = it->second->unique_id();
+  }
+
   // clear the temporary map
   temporary_parent_children_map.clear();
+  temp_elem_pair_unique_id_map.clear();
 
   // Store information about crack tip elements
   if (mesh_changed)

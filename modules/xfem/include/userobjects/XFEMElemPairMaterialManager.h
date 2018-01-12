@@ -9,9 +9,7 @@
 #define XFEMELEMPAIRMATERIALMANAGER_H
 
 #include "GeneralUserObject.h"
-#include "ElementPairLocator.h"
-
-class GeometricSearchData;
+#include "ElementPairQPProvider.h"
 
 /**
  * Manage the history of stateful extra QP material properties. This is sooper-dee-dooper
@@ -19,7 +17,9 @@ class GeometricSearchData;
  * The extra QP points are obtained from ElementPairLocator
  */
 
-class XFEMElemPairMaterialManager : public GeneralUserObject
+class XFEM;
+
+class XFEMElemPairMaterialManager : public GeneralUserObject, public ElementPairQPProvider
 {
 public:
   XFEMElemPairMaterialManager(const InputParameters & parameters);
@@ -35,10 +35,21 @@ public:
   virtual void finalize() override;
 
   /// API call to swap in properties
-  void swapInProperties(const Elem * pair_id);
-  void swapOutProperties(const Elem * pair_id);
-  void swapInProperties(const Elem * pair_id) const;
-  void swapOutProperties(const Elem * pair_id) const;
+  void swapInProperties(unique_id_type elem_id);
+  void swapOutProperties(unique_id_type elem_id);
+  void swapInProperties(unique_id_type elem_id) const;
+  void swapOutProperties(unique_id_type elem_id) const;
+
+  virtual const std::map<unique_id_type, std::vector<Point>> & getExtraQPMap() const override
+  {
+    return _extra_qp_map;
+  };
+
+  virtual const std::map<unique_id_type, std::pair<const Elem *, const Elem *>> &
+  getElementPairMap() const override
+  {
+    return _elem_pair_map;
+  };
 
   ///@{ API calls to fetch a materialProperty
   template <typename T>
@@ -55,6 +66,10 @@ protected:
   /// underlying libMesh mesh
   const MeshBase & _mesh;
 
+  MooseSharedPointer<XFEM> _xfem;
+
+  std::map<unique_id_type, unique_id_type> * _elem_pair_unique_id_map;
+
   ///@{ Convenience links to the MaterialData object. This is what materials see.
   MaterialProperties _props;
   MaterialProperties _props_old;
@@ -66,7 +81,7 @@ protected:
   MaterialProperties _properties;
   ///@}
 
-  using HistoryStorage = std::map<const Elem *, MaterialProperties>;
+  using HistoryStorage = std::map<unique_id_type, MaterialProperties>;
 
   ///@{ storage for properties on all elements
   std::unique_ptr<HistoryStorage> _map;
@@ -75,12 +90,13 @@ protected:
   ///@}
 
   /// Extra QPs
-  std::map<const Elem *, std::vector<Point>> _extra_qp_map;
+  const std::map<unique_id_type, std::vector<Point>> & _extra_qp_map;
+
+  /// Element Pair
+  const std::map<unique_id_type, std::pair<const Elem *, const Elem *>> & _elem_pair_map;
 
   /// map from property names to indes into _props etc.
-  std::map<std::string, unsigned int> _managed_properties;
-
-  std::map<const Elem *, const Elem *> _elem_pair_ptr;
+  std::map<std::string, unique_id_type> _managed_properties;
 };
 
 template <>

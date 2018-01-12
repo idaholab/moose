@@ -27,15 +27,15 @@ XFEMMaterialManagerConstraint::XFEMMaterialManagerConstraint(const InputParamete
 void
 XFEMMaterialManagerConstraint::computeResidual()
 {
-  _manager.swapInProperties(std::min(_current_elem, _neighbor_elem));
+  _manager.swapInProperties(std::min(_current_elem->unique_id(), _neighbor_elem->unique_id()));
   ElemElemConstraint::computeResidual();
-  _manager.swapOutProperties(std::min(_current_elem, _neighbor_elem));
+  _manager.swapOutProperties(std::min(_current_elem->unique_id(), _neighbor_elem->unique_id()));
 }
 
 void
 XFEMMaterialManagerConstraint::computeJacobian()
 {
-  _manager.swapInProperties(std::min(_current_elem, _neighbor_elem));
+  _manager.swapInProperties(std::min(_current_elem->unique_id(), _neighbor_elem->unique_id()));
   ElemElemConstraint::computeJacobian();
-  _manager.swapOutProperties(std::min(_current_elem, _neighbor_elem));
+  _manager.swapOutProperties(std::min(_current_elem->unique_id(), _neighbor_elem->unique_id()));
 }
