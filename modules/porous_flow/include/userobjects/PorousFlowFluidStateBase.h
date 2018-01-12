@@ -11,7 +11,6 @@
 #include "PorousFlowFluidStateFlash.h"
 #include "PorousFlowCapillaryPressure.h"
 
-class PorousFlowDictator;
 class PorousFlowFluidStateBase;
 
 /// Data structure to pass calculated thermophysical properties
@@ -78,8 +77,6 @@ protected:
   const unsigned int _num_phases;
   /// Number of components
   const unsigned int _num_components;
-  /// Number of mass fraction primary variables
-  const unsigned int _num_z_vars;
   /// Phase number of the aqueous phase
   const unsigned int _aqueous_phase_number;
   /// Phase number of the gas phase

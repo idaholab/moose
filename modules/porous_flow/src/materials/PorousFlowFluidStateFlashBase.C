@@ -85,12 +85,15 @@ PorousFlowFluidStateFlashBase::PorousFlowFluidStateFlashBase(const InputParamete
             : declareProperty<std::vector<std::vector<Real>>>("dPorousFlow_viscosity_qp_dvar")),
 
     _T_c2k(getParam<MooseEnum>("temperature_unit") == 0 ? 0.0 : 273.15),
-    _R(8.3144598),
-    _nr_max_its(42),
-    _nr_tol(1.0e-12),
     _is_initqp(false),
     _pc_uo(getUserObject<PorousFlowCapillaryPressure>("capillary_pressure"))
 {
+  // Only two phases are possible in the fluidstate classes
+  if (_num_phases != 2)
+    mooseError("Only two phases are allowed in ",
+               _name,
+               ". Please check the number of phases entered in the dictator is 2");
+
   // Check that the number of total mass fractions provided as primary variables is correct
   if (_num_z_vars != _num_components - 1)
     mooseError("The number of supplied mass fraction variables should be ",
