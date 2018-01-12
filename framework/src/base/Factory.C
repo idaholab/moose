@@ -111,14 +111,19 @@ Factory::reportUnregisteredError(const std::string & obj_name) const
   std::ostringstream oss;
   std::set<std::string> paths = _app.getLoadedLibraryPaths();
 
-  oss << "A '" + obj_name + "' is not a registered object.\n"
-      << "\nWe loaded objects from the following libraries and still couldn't find your "
-         "object:\n\t";
-  std::copy(paths.begin(), paths.end(), infix_ostream_iterator<std::string>(oss, "\n\t"));
-  if (paths.empty())
-    oss << "(NONE)\n";
-  oss << "\n\nMake sure you have compiled the library and either set the \"library_path\" variable "
-      << "in your input file or exported \"MOOSE_LIBRARY_PATH\".";
+  oss << "A '" + obj_name + "' is not a registered object.\n";
+
+  if (!paths.empty())
+  {
+    oss << "\nWe loaded objects from the following libraries and still couldn't find your "
+           "object:\n\t";
+    std::copy(paths.begin(), paths.end(), infix_ostream_iterator<std::string>(oss, "\n\t"));
+    oss << '\n';
+  }
+
+  oss << "\nIf you are trying to find this object in a dynamically linked library, make sure that\n"
+         "the library can be found either in your \"Problem/library_path\" parameter or in the\n"
+         "MOOSE_LIBRARY_PATH environment variable.";
 
   mooseError(oss.str());
 }
