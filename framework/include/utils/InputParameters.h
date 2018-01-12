@@ -1315,10 +1315,7 @@ template <typename T>
 const T &
 InputParameters::getParamHelper(const std::string & name, const InputParameters & pars, const T *)
 {
-  // TODO: after updating apps (i.e. rattlesnake) remove the first if clause+body:
-  if (name == "parser_syntax")
-    return (const T &)pars.blockFullpath();
-  else if (!pars.isParamValid(name))
+  if (!pars.isParamValid(name))
     mooseError("The parameter \"", name, "\" is being retrieved before being set.\n");
   return pars.get<T>(name);
 }
