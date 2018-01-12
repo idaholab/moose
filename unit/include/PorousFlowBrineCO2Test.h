@@ -36,7 +36,7 @@ protected:
   {
     const char * argv[] = {"foo", NULL};
 
-    _app.reset(AppFactory::createApp("MooseUnitApp", 1, (char **)argv));
+    _app = AppFactory::createAppShared("MooseUnitApp", 1, (char **)argv);
     _factory = &_app->getFactory();
 
     registerObjects(*_factory);
@@ -93,7 +93,7 @@ protected:
     _fp = &_fe_problem->getUserObject<PorousFlowBrineCO2>("fp");
   }
 
-  std::unique_ptr<MooseApp> _app;
+  MooseAppPtr _app;
   std::unique_ptr<MooseMesh> _mesh;
   std::unique_ptr<FEProblem> _fe_problem;
   Factory * _factory;
