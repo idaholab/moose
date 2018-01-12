@@ -290,6 +290,12 @@ public:
    */
   EFAElement3D * getEFAElem3D(const Elem * elem);
 
+  std::map<unique_id_type, unique_id_type> & getElemPairUniqueIDMap()
+  {
+    return _elem_pair_unique_id_map;
+  }
+
+private:
   void getFragmentEdges(const Elem * elem,
                         EFAElement2D * CEMElem,
                         std::vector<std::vector<Point>> & frag_edges) const;
@@ -323,6 +329,7 @@ private:
   std::vector<const GeometricCutUserObject *> _geometric_cuts;
 
   std::map<unique_id_type, XFEMCutElem *> _cut_elem_map;
+  std::map<unique_id_type, unique_id_type> _elem_pair_unique_id_map;
   std::set<const Elem *> _crack_tip_elems;
   std::set<const Elem *> _crack_tip_elems_to_be_healed;
   std::map<unsigned int, ElementPairLocator::ElementPairList> _sibling_elems;

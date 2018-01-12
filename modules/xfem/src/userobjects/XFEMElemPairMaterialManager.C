@@ -6,9 +6,10 @@
 /****************************************************************/
 
 #include "XFEMElemPairMaterialManager.h"
-
+#include "XFEM.h"
 #include "MooseMesh.h"
 #include "Material.h"
+#include "ElementPairQPProvider.h"
 
 #include "libmesh/mesh_base.h"
 
@@ -20,13 +21,20 @@ validParams<XFEMElemPairMaterialManager>()
   params.addClassDescription("Manage the execution of stateful materials on extra QPs");
   params.addRequiredParam<std::vector<std::string>>("material_names",
                                                     "List of recompute material objects manage");
+  params.addRequiredParam<UserObjectName>("element_pair_qps",
+                                          "Object that provides the extra QPs for element pair.");
   params.set<MultiMooseEnum>("execute_on") = "initial linear";
   return params;
 }
 
 XFEMElemPairMaterialManager::XFEMElemPairMaterialManager(const InputParameters & parameters)
-  : GeneralUserObject(parameters), _mesh(_fe_problem.mesh().getMesh())
+  : GeneralUserObject(parameters),
+    _mesh(_fe_problem.mesh().getMesh()),
+    _extra_qp_map(getUserObject<ElementPairQPProvider>("element_pair_qps").getExtraQPMap()),
+    _elem_pair_map(getUserObject<ElementPairQPProvider>("element_pair_qps").getElementPairMap())
 {
+  _xfem = MooseSharedNamespace::dynamic_pointer_cast<XFEM>(_fe_problem.getXFEM());
+  _elem_pair_unique_id_map = &(_xfem->getElemPairUniqueIDMap());
 }
 
 void
@@ -96,37 +104,48 @@ XFEMElemPairMaterialManager::rewind()
 void
 XFEMElemPairMaterialManager::initialize()
 {
-  _extra_qp_map.clear();
-  _elem_pair_ptr.clear();
-
-  std::map<unsigned int, std::shared_ptr<ElementPairLocator>> * element_pair_locators = nullptr;
-  GeometricSearchData & geom_search_data = _fe_problem.geomSearchData();
-  element_pair_locators = &geom_search_data._element_pair_locators;
-
-  for (const auto & it : *element_pair_locators)
+  std::cout << "============> BEFORE id = ";
+  for (auto key_id : *_map)
   {
-    ElementPairLocator & elem_pair_loc = *(it.second);
+    std::cout << key_id.first << ", ";
+  }
+  std::cout << std::endl;
 
-    // go over pair elements
-    const std::list<std::pair<const Elem *, const Elem *>> & elem_pairs =
-        elem_pair_loc.getElemPairs();
+  for (std::map<unique_id_type, unique_id_type>::iterator it = (*_elem_pair_unique_id_map).begin();
+       it != (*_elem_pair_unique_id_map).end();
+       ++it)
+  {
+    std::cout << "XFEMElemPairMaterialManager --> old unique id = " << it->first
+              << ", new unique id = " << it->second << std::endl;
 
-    for (const auto & pr : elem_pairs)
+    auto it_delete_map = (*_map).find(it->first);
+    if (it_delete_map != (*_map).end())
     {
-      const Elem * elem1 = pr.first;
-      const Elem * elem2 = pr.second;
+      std::cout << "MAP find item : " << it->first << std::endl;
+      std::swap((*_map)[it->second], it_delete_map->second);
+      (*_map).erase(it_delete_map);
+    }
 
-      if (elem1->processor_id() != processor_id())
-        continue;
+    auto it_delete_map_old = (*_map_old).find(it->first);
+    if (it_delete_map_old != (*_map_old).end())
+    {
+      std::swap((*_map_old)[it->second], it_delete_map_old->second);
+      (*_map_old).erase(it_delete_map_old);
+    }
 
-      const ElementPairInfo & info = elem_pair_loc.getElemPairInfo(pr);
-
-      for (unsigned int i = 0; i < (info._elem1_constraint_q_point).size(); ++i)
-        _extra_qp_map[std::min(elem1, elem2)].push_back((info._elem1_constraint_q_point)[i]);
-
-      _elem_pair_ptr[std::min(elem1, elem2)] = std::max(elem1, elem2);
+    auto it_delete_map_older = (*_map_older).find(it->first);
+    if (it_delete_map_older != (*_map_older).end())
+    {
+      std::swap((*_map_older)[it->second], it_delete_map_older->second);
+      (*_map_older).erase(it_delete_map_older);
     }
   }
+  std::cout << "============> AFTER id = ";
+  for (auto key_id : *_map)
+  {
+    std::cout << key_id.first << ", ";
+  }
+  std::cout << std::endl;
 }
 
 void
@@ -141,6 +160,16 @@ XFEMElemPairMaterialManager::execute()
   }
 
   _fe_problem.setActiveElementalMooseVariables(var_dependencies, 0);
+
+  std::cout << "XFEMElemPairMaterialManager map size = " << _map->size() << std::endl;
+  std::cout << "_extra_qp_map size = " << _extra_qp_map.size() << std::endl;
+
+  std::cout << "id = ";
+  for (auto key_id : *_map)
+  {
+    std::cout << key_id.first << ", ";
+  }
+  std::cout << std::endl;
 
   // loop over all elements that have extra QPs
   for (auto extra_qps : _extra_qp_map)
@@ -194,10 +223,21 @@ XFEMElemPairMaterialManager::execute()
     for (auto i = beginIndex(_props_older); i < _props_older.size(); ++i)
       _props_older[i]->swap(item_older[i]);
 
+    const Elem * elem1 = _elem_pair_map.at(extra_qps.first).first;
+    const Elem * elem2 = _elem_pair_map.at(extra_qps.first).second;
+
+    std::cout << "elem1 unique id = " << elem1->unique_id()
+              << ", elem 2 unique id = " << elem2->unique_id() << std::endl;
+
+    // std::cout << "elem 1 =========================================== " << *elem1 << std::endl;
+    // std::cout << "elem 2 =========================================== " << *elem2 << std::endl;
+
     // reinit the element
-    _fe_problem.reinitElemPhys(extra_qps.first, extra_qps.second, 0 /* tid */);
+    _fe_problem.setCurrentSubdomainID(elem1, 0 /* tid */);
+    _fe_problem.reinitElemPhys(elem1, extra_qps.second, 0 /* tid */);
     // reinit the neighbor element
-    _fe_problem.reinitNeighborPhys(_elem_pair_ptr[extra_qps.first], extra_qps.second, 0 /* tid */);
+    _fe_problem.setNeighborSubdomainID(elem2, 0 /* tid */);
+    _fe_problem.reinitNeighborPhys(elem2, extra_qps.second, 0 /* tid */);
 
     // loop over QPs
     for (unsigned int qp = 0; qp < extra_qps.second.size(); ++qp)
@@ -221,11 +261,11 @@ XFEMElemPairMaterialManager::finalize()
 }
 
 void
-XFEMElemPairMaterialManager::swapInProperties(const Elem * elem_ptr)
+XFEMElemPairMaterialManager::swapInProperties(unique_id_type elem_id)
 {
-  auto & item = (*_map)[elem_ptr];
-  auto & item_old = (*_map_old)[elem_ptr];
-  auto & item_older = (*_map_older)[elem_ptr];
+  auto & item = (*_map)[elem_id];
+  auto & item_old = (*_map_old)[elem_id];
+  auto & item_older = (*_map_older)[elem_id];
 
   // swap the history in for all properties
   for (auto i = beginIndex(_props); i < _props.size(); ++i)
@@ -237,11 +277,11 @@ XFEMElemPairMaterialManager::swapInProperties(const Elem * elem_ptr)
 }
 
 void
-XFEMElemPairMaterialManager::swapOutProperties(const Elem * elem_ptr)
+XFEMElemPairMaterialManager::swapOutProperties(unique_id_type elem_id)
 {
-  auto & item = (*_map)[elem_ptr];
-  auto & item_old = (*_map_old)[elem_ptr];
-  auto & item_older = (*_map_older)[elem_ptr];
+  auto & item = (*_map)[elem_id];
+  auto & item_old = (*_map_old)[elem_id];
+  auto & item_older = (*_map_older)[elem_id];
 
   // swap the history in for all properties
   for (auto i = beginIndex(_props); i < _props.size(); ++i)
@@ -253,15 +293,15 @@ XFEMElemPairMaterialManager::swapOutProperties(const Elem * elem_ptr)
 }
 
 void
-XFEMElemPairMaterialManager::swapInProperties(const Elem * elem_ptr) const
+XFEMElemPairMaterialManager::swapInProperties(unique_id_type elem_id) const
 {
-  const_cast<XFEMElemPairMaterialManager *>(this)->swapInProperties(elem_ptr);
+  const_cast<XFEMElemPairMaterialManager *>(this)->swapInProperties(elem_id);
 }
 
 void
-XFEMElemPairMaterialManager::swapOutProperties(const Elem * elem_ptr) const
+XFEMElemPairMaterialManager::swapOutProperties(unique_id_type elem_id) const
 {
-  const_cast<XFEMElemPairMaterialManager *>(this)->swapOutProperties(elem_ptr);
+  const_cast<XFEMElemPairMaterialManager *>(this)->swapOutProperties(elem_id);
 }
 
 unsigned int

@@ -17,9 +17,13 @@
     time_start_cut = 0.0
     time_end_cut = 0.0
   [../]
+  [./pair_qps]
+    type = XFEMElementPairQPProvider
+  [../]
   [./manager]
     type = XFEMElemPairMaterialManager
     material_names = 'material1'
+    element_pair_qps = pair_qps
   [../]
 []
 
