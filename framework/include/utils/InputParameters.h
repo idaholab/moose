@@ -1185,12 +1185,6 @@ template <typename T>
 void
 InputParameters::checkConsistentType(const std::string & name) const
 {
-  // Special case to allow MultiMooseEnum to work with "execute_on", this
-  // will be removed when applications are updated to use ExecFlagEnum
-  // TODO: ExecFlagType
-  if (typeid(T) == typeid(MultiMooseEnum) && have_parameter<ExecFlagEnum>(name))
-    return;
-
   // Do we have a paremeter with the same name but a different type?
   InputParameters::const_iterator it = _values.find(name);
   if (it != _values.end() && dynamic_cast<const Parameter<T> *>(it->second) == NULL)
@@ -1207,10 +1201,7 @@ template <typename T>
 void
 InputParameters::suppressParameter(const std::string & name)
 {
-  // The second term is temporary to allow MultiMooseEnum work with ExecFlagEnum
-  // TODO: ExecFlagType
-  if (!this->have_parameter<T>(name) &&
-      !(name == "execute_on" && this->have_parameter<ExecFlagEnum>(name)))
+  if (!this->have_parameter<T>(name))
     mooseError("Unable to suppress nonexistent parameter: ", name);
 
   _params[name]._required = false;
@@ -1269,13 +1260,6 @@ template <>
 void InputParameters::addParam<MultiMooseEnum>(const std::string & /*name*/,
                                                const std::string & /*doc_string*/);
 
-// For deprecated MultiMooseEnum support for "execute_on", this will be removed.
-// TODO: ExecFlagType
-template <>
-void InputParameters::addParam<MultiMooseEnum, MultiMooseEnum>(const std::string & name,
-                                                               const MultiMooseEnum & value,
-                                                               const std::string & doc_string);
-
 template <>
 void InputParameters::addParam<std::vector<MooseEnum>>(const std::string & /*name*/,
                                                        const std::string & /*doc_string*/);
@@ -1331,17 +1315,14 @@ template <typename T>
 const T &
 InputParameters::getParamHelper(const std::string & name, const InputParameters & pars, const T *)
 {
-  // TODO: after updating apps (i.e. rattlesnake) remove the first if clause+body:
-  if (name == "parser_syntax")
-    return (const T &)pars.blockFullpath();
-  else if (!pars.isParamValid(name))
+  if (!pars.isParamValid(name))
     mooseError("The parameter \"", name, "\" is being retrieved before being set.\n");
   return pars.get<T>(name);
 }
 
 // Declare specializations so we don't fall back on the generic
 // implementation, but the definition will be in InputParameters.C so
-// we won't need to bring in *MooseEnum header files here. TODO: ExecFlagType
+// we won't need to bring in *MooseEnum header files here.
 template <>
 const MooseEnum & InputParameters::getParamHelper<MooseEnum>(const std::string & name,
                                                              const InputParameters & pars,
@@ -1362,12 +1343,5 @@ InputParameters::getParamHelper(const std::string & name,
 }
 
 InputParameters emptyInputParameters();
-
-// This is temporary specialization to allow applications to utilize MultiMooseEnum for
-// "execute_on" parameter, after our tested applications are updated this method will be
-// deprecated and then removed.
-// TODO: ExecFlagType
-template <>
-MultiMooseEnum & InputParameters::set(const std::string & name, bool quiet_mode);
 
 #endif /* INPUTPARAMETERS_H */
