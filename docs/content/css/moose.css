@@ -43,10 +43,25 @@ html, body {
   height: 100%;
 }
 
+/* TABLE OF CONTENTS */
 .table-of-contents *,
 .moose-bibliography *{
   text-align: left;
 }
+
+.table-of-contents
+{
+  height: 95vh;
+  overflow-y: scroll;
+  overflow-x: hidden;
+}
+
+.table-of-contents a{
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 .nav ul:not(.browser-default) li{
   list-style-type: none;
 }
