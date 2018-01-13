@@ -565,11 +565,7 @@ Transient::solveStep(Real input_dt)
 
     _console << "Picard Norm after TIMESTEP_END MultiApps: " << _picard_timestep_end_norm << '\n';
 
-    Real max_norm = std::max(_picard_timestep_begin_norm, _picard_timestep_end_norm);
-
-    Real max_relative_drop = max_norm / _picard_initial_norm;
-
-    if (max_norm < _picard_abs_tol || max_relative_drop < _picard_rel_tol)
+    if (picardConverged())
     {
       _console << "Picard converged!" << std::endl;
 
@@ -581,6 +577,16 @@ Transient::solveStep(Real input_dt)
 
   _dt = current_dt; // _dt might be smaller than this at this point for multistep methods
   _time = _time_old;
+}
+
+bool
+Transient::picardConverged() const
+{
+  Real max_norm = std::max(_picard_timestep_begin_norm, _picard_timestep_end_norm);
+
+  Real max_relative_drop = max_norm / _picard_initial_norm;
+
+  return (max_norm < _picard_abs_tol || max_relative_drop < _picard_rel_tol);
 }
 
 void
