@@ -1138,12 +1138,100 @@ quantities
 \textcolor{red}{It is likely that multiplication by generalised
   concentrations will also be needed.}
 
-For example, a boundary condition corresponding to injection of fluid
-at a fixed temperature could involve: (1) using a Dirichlet condition
-for temperature; (2) using $f=-1$ without any multiplicative factors.
-More complicated examples with heat and fluid injection and production
-are detailed in the test suite documentation {\tt newton\_cooling} and
-{\tt sinks}.
+\subsection{Example: fixing fluid porepressures using the PorousFlowSink}
+
+Frequently in PorousFlow simulations fixing fluid porepressures using
+Dirichlet conditions is inappropriate.
+\begin{enumerate}
+\item Physically a Dirichlet condition corresponds to an environment
+  outside a model providing a limitless source (or sink) of fluid and
+  that does not happen in reality.
+\item The Variables used may not be porepressure, so a straightforward
+  translation to ``fixing porepressure'' is not easy.
+\item The Dirichlet condition can lead to extremely poor convergence
+  as it forces areas near the boundary close to unphysical or unlikely
+  regions in parameter space.
+\end{enumerate}
+It is advantageous to think of what the boundary condition
+is physically trying to represent before using Dirichlet conditions,
+and often a PorousFlowSink is more appropriate to use.
+For instance, at the top of a groundwater-gas model, gas can freely
+enter the model from the atmosphere, and escape the model to the
+atmosphere, which may be modelled using a PorousFlowSink.  Water can
+exit the model if the water porepressure increases above atmospheric
+pressure, but the recharge if porepressure is lowered may be zero.
+Again this may be modelled using a PorousFlowSink.
+
+When fixing porepressures (or temperatures) using a PorousFlowSink,
+what should the ``conductance'' be?  Consider an imaginary environment
+that sits at distance $L$ from the model.  The imaginary environment
+provides a limitless source or sink of fluid, but that fluid must
+travel through the distance $L$ between the model and the imaginary
+environment.  The flux of fluid from the model to this environment is
+(approximately)
+\begin{equation}
+  f = \frac{\rho k_{nn}
+    k_{\mathrm{r}}}{\mu}\frac{P-P_{\mathrm{e}}}{L} \ .
+  \label{eq.fix.pp.bc}
+\end{equation}
+A similar equation holds for temperature (but in PorousFlow
+simulations the heat is sometimes supplied by the fluid, in which case
+the appropriate equation to use for the heat may be the above equation
+multiplied by the enthalpy).  Here $k_{nn}$ is the permeability of the
+region between the model and the imaginary environment,
+$k_{\mathrm{r}}$ is the relative permeability in this region, $\rho$
+and $\mu$ are the fluid density and viscosity.  The environment
+porepressure is $P_{\mathrm{e}}$ and the boundary porepressure is
+$P$.
+
+If $L\sim 0$ this effectively fixes the porepressure to $P\sim
+P_{\mathrm{e}}$, since $f$ is very large otherwise (physically:
+fluid is rapidly removed or added to the system by the environment to
+ensure $P=P_{\mathrm{e}}$).  If $L\sim\infty$ the boundary flux is
+almost zero and does nothing.
+
+Eqn~(\ref{eq.fix.pp.bc}) may be implemented in a number of ways.  A
+{\tt PorousFlowPiecewiseLinearSink} may be constructed that models
+\begin{equation}
+  f = C (P - P_{\mathrm{e}}) \ ,
+\end{equation}
+that is, with {\tt pt\_vals = '-1E9+$P_{\mathrm{e}}$
+  $P_{\mathrm{e}}$ 1E9+$P_{\mathrm{e}}$'} and {\tt multipliers =
+  '-C$\times$1E9 0 C$\times$1E9'} (the {\tt 1E9} is just an example: the
+point is that it should be much greater than any expected
+porepressure).  The numerical value of the conductance, $C$, is $\rho
+k_{nn}k_{\mathrm{r}}/\mu/L$, must be set at an appropriate value for
+the model.
+
+Alternately, a {\tt PorousFlowPiecewiseLinearSink} may be constructed
+that has {\tt use\_mobility = true} and {\tt use\_relperm = true}, and
+then $C = 1/L$.  This has three advantages: (1) the MOOSE input file is
+simpler; (2) MOOSE automatically chooses the correct mobility and
+relative permeability to use; (3) these parameters are appropriate to
+the model so it reduces the potential for difficult numerical
+situations occuring.
+
+Finally, if $P_{\mathrm{e}}$ is varying over the boundary, the flux
+should be split
+\begin{equation}
+  f = CP - CP_{\mathrm{e}}\ .
+\end{equation}
+Two PorousFlowSinks may be used.  The first term is a {\tt
+  PorousFlowPiecewiseLinearSink} as just described (with
+$P_{\mathrm{e}} = 0$).  The second term is a plain {\tt
+  PorousFlowSink} with a {\tt flux\_function} that is exactly equal to
+$P_{\mathrm{e}}$.
+
+\subsection{Example: injection of fluid at a fixed temperature}
+
+A boundary condition corresponding to injection of fluid at a constant
+rate at a fixed temperature could involve: (1) using a Dirichlet
+condition for temperature; (2) using $f=-1$ without any multiplicative
+factors.  More complicated examples with heat and fluid injection and
+production are detailed in the test suite documentation {\tt
+  newton\_cooling} and {\tt sinks}.
+
+\subsection{Fluids that both enter and exit the boundary}
 
 Commonly, if fluid or heat is exiting the porous
 material, multiplication by relative permeaility, mobility, mass
