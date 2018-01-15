@@ -16,6 +16,8 @@ InputParameters
 validParams<JIntegral>()
 {
   InputParameters params = validParams<ElementIntegralPostprocessor>();
+  params.addClassDescription("Calculates the J-integral at a specified point "
+                             " along the crack front");
   params.addRequiredParam<UserObjectName>("crack_front_definition",
                                           "The CrackFrontDefinition user object name");
   params.addParam<unsigned int>(

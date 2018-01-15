@@ -12,7 +12,7 @@ The eigenstrain thus computed is added to the mechanical strain on the first tim
 !!!warning "Time-dependent elasticity tensors"
     The eigenstrain is computed on the first time step, using the elasticity tensor.  Hence the elasticity tensor should not be time-varying in the first timestep.
 
-## Example Syntax
+## Example Input File Syntax
 
 !listing modules/tensor_mechanics/test/tests/initial_stress/gravity.i block=Materials
 

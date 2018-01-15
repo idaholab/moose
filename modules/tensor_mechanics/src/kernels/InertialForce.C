@@ -12,9 +12,11 @@ InputParameters
 validParams<InertialForce>()
 {
   InputParameters params = validParams<Kernel>();
-  params.addClassDescription("Calculates the residual for the interial force (M*accel) and the "
-                             "contribution of mass dependent Rayleigh damping and HHT time "
-                             "integration scheme [eta*M*((1+alpha)vel-alpha*vel_old)]");
+  params.addClassDescription("Calculates the residual for the interial force "
+                             "(M $*$ acceleration) and the contribution of mass"
+                             " dependent Rayleigh damping and HHT time "
+                             " integration scheme [ eta $*$ M $*$"
+                             " ((1+alpha)velq2-alpha $*$ vel-old) ]");
   params.set<bool>("use_displaced_mesh") = true;
   params.addRequiredCoupledVar("velocity", "velocity variable");
   params.addRequiredCoupledVar("acceleration", "acceleration variable");
