@@ -14,7 +14,7 @@ where $L_{T}$ is the length of a body at the current temperature, and $L_{T_{ref
 It is important to emphasize that this reference temperature is tied to the definition of the thermal expansion function, and differs in general from the stress-free temperature for a specific simulation.  For the general case where the stress-free temperature, $T_{sf}$, differs from the reference temperature, the total thermal expansion eigenstrain is computed as:
 
 \begin{equation}
-\mathbf{\epsilon}^{th} = \frac{\bar{\alpha}_{(T_{ref},T)}(T-T_{ref}) - \bar{\alpha}_{(T_{ref},T_{sf})}(T_{sf}-T_{ref})}
+\boldsymbol{\epsilon}^{th} = \frac{\bar{\alpha}_{(T_{ref},T)}(T-T_{ref}) - \bar{\alpha}_{(T_{ref},T_{sf})}(T_{sf}-T_{ref})}
 {1 + \bar{\alpha}_{(T_{ref},T_{sf})}(T_{sf}-T_{ref})} \cdot \mathbf{I}
 \end{equation}
 

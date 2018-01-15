@@ -4,7 +4,7 @@
 ## Description
 This model computes the Eshelby energy-momentum tensor $\Sigma$ \cite{eshelby_energy_1999}, used in fracture integral calculations:
 \begin{equation}
-\mathbf{\Sigma} = W\mathbf{I} - \mathbf{H}^T\mathbf{P}
+\boldsymbol{\Sigma} = W\mathbf{I} - \mathbf{H}^T\mathbf{P}
 \end{equation}
 where W is the strain energy density in the original configuration, $\mathbf{I}$ is the identity matrix, $\mathbf{H}$ is the displacement gradient, and $\mathbf{P}$ is the first Piola-Kirchoff stress tensor.
 
