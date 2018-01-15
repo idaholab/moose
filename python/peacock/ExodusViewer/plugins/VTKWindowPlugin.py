@@ -324,6 +324,9 @@ class VTKWindowPlugin(QtWidgets.QFrame, ExodusPlugin):
             boundary[list]: List of boundary ids to highlight.
             nodeset[list]: List of nodeset ids to highlight.
         """
+        if not self._initialized:
+            return
+
         if not self._highlight:
             self._highlight = chigger.exodus.ExodusResult(self._reader, renderer=self._result.getVTKRenderer(), color=[1,0,0])
 
