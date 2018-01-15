@@ -20,8 +20,9 @@
 
 XFEMCutElem3D::XFEMCutElem3D(Elem * elem,
                              const EFAElement3D * const CEMelem,
-                             unsigned int n_qpoints)
-  : XFEMCutElem(elem, n_qpoints), _efa_elem3d(CEMelem, true)
+                             unsigned int n_qpoints,
+                             unsigned int n_sides)
+  : XFEMCutElem(elem, n_qpoints, n_sides), _efa_elem3d(CEMelem, true)
 {
   computePhysicalVolumeFraction();
   computeMomentFittingWeights();
@@ -99,6 +100,50 @@ XFEMCutElem3D::computePhysicalVolumeFraction()
   delete[] order;
   delete[] coord;
   delete[] node;
+}
+
+void
+XFEMCutElem3D::computePhysicalFaceAreaFraction(unsigned int side)
+{
+  Real frag_surf = 0.0;
+
+  std::vector<std::vector<unsigned int>> frag_face_indices;
+  std::vector<EFANode *> frag_nodes;
+  _efa_elem3d.getFragment(0)->getNodeInfo(frag_face_indices, frag_nodes);
+  int face_num = frag_face_indices.size();
+
+  EFAFace * efa_face = _efa_elem3d.getFace(side);
+  bool contains_all = true;
+
+  /// find a fragment surface which is covered by element side
+  for (int i = 0; i < face_num; ++i)
+  {
+    contains_all = true;
+    for (unsigned int j = 0; j < frag_face_indices[i].size(); ++j)
+    {
+      EFANode * efa_node = frag_nodes[frag_face_indices[i][j]];
+      if (!efa_face->containsNode(efa_node))
+      {
+        contains_all = false;
+        break;
+      }
+    }
+
+    if (contains_all)
+    {
+      for (unsigned int j = 0; j < frag_face_indices[i].size(); ++j)
+      {
+        unsigned int m = ((j + 1) == frag_face_indices[i].size()) ? 0 : j + 1;
+        Point edge_p1 = getNodeCoordinates(frag_nodes[frag_face_indices[i][j]]);
+        Point edge_p2 = getNodeCoordinates(frag_nodes[frag_face_indices[i][m]]);
+
+        frag_surf += 0.5 * (edge_p1(0) - edge_p2(0)) * (edge_p1(1) + edge_p2(1));
+      }
+      _physical_areafrac[side] = std::abs(frag_surf) / _elem_side_area[side];
+      return;
+    }
+  }
+  _physical_areafrac[side] = 1.0;
 }
 
 void

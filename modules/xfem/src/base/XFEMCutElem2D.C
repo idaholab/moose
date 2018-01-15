@@ -21,8 +21,9 @@
 
 XFEMCutElem2D::XFEMCutElem2D(Elem * elem,
                              const EFAElement2D * const CEMelem,
-                             unsigned int n_qpoints)
-  : XFEMCutElem(elem, n_qpoints), _efa_elem2d(CEMelem, true)
+                             unsigned int n_qpoints,
+                             unsigned int n_sides)
+  : XFEMCutElem(elem, n_qpoints, n_sides), _efa_elem2d(CEMelem, true)
 {
   computePhysicalVolumeFraction();
 }
@@ -71,6 +72,31 @@ XFEMCutElem2D::computePhysicalVolumeFraction()
     frag_vol += 0.5 * (edge_p1(0) - edge_p2(0)) * (edge_p1(1) + edge_p2(1));
   }
   _physical_volfrac = frag_vol / _elem_volume;
+}
+
+void
+XFEMCutElem2D::computePhysicalFaceAreaFraction(unsigned int side)
+{
+  Real frag_surf = 0.0;
+
+  EFAEdge * edge = _efa_elem2d.getEdge(side);
+
+  for (unsigned int i = 0; i < _efa_elem2d.getFragment(0)->numEdges(); ++i)
+  {
+    EFANode * node_1 = _efa_elem2d.getFragmentEdge(0, i)->getNode(0);
+    EFANode * node_2 = _efa_elem2d.getFragmentEdge(0, i)->getNode(1);
+
+    /// find a fragment edge which is covered by element side
+    if (edge->containsNode(node_1) && edge->containsNode(node_2))
+    {
+      Point edge_p1 = getNodeCoordinates(node_1);
+      Point edge_p2 = getNodeCoordinates(node_2);
+      frag_surf = (edge_p1 - edge_p2).norm();
+      _physical_areafrac[side] = frag_surf / _elem_side_area[side];
+      return;
+    }
+  }
+  _physical_areafrac[side] = 1.0;
 }
 
 void

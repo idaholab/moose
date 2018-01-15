@@ -144,6 +144,11 @@ public:
                               const Elem * elem,
                               QBase * qrule,
                               const MooseArray<Point> & q_points);
+  virtual bool getXFEMFaceWeights(MooseArray<Real> & weights,
+                                  const Elem * elem,
+                                  QBase * qrule,
+                                  const MooseArray<Point> & q_points,
+                                  unsigned int side);
   virtual const ElementPairLocator::ElementPairList * getXFEMCutElemPairs() const
   {
     return &_sibling_elems;

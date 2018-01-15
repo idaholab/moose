@@ -17,11 +17,27 @@
 #include "EFANode.h"
 #include "EFAElement.h"
 
-XFEMCutElem::XFEMCutElem(Elem * elem, unsigned int n_qpoints)
-  : _n_nodes(elem->n_nodes()), _n_qpoints(n_qpoints), _nodes(_n_nodes, NULL), _have_weights(false)
+XFEMCutElem::XFEMCutElem(Elem * elem, unsigned int n_qpoints, unsigned int n_sides)
+  : _n_nodes(elem->n_nodes()),
+    _n_qpoints(n_qpoints),
+    _n_sides(n_sides),
+    _nodes(_n_nodes, NULL),
+    _elem_side_area(n_sides),
+    _physical_areafrac(n_sides),
+    _have_weights(false),
+    _have_face_weights(n_sides),
+    _new_face_weights(n_sides)
 {
   for (unsigned int i = 0; i < _n_nodes; ++i)
     _nodes[i] = elem->get_node(i);
+
+  for (unsigned int i = 0; i < _n_sides; ++i)
+  {
+    _have_face_weights[i] = false;
+    _physical_areafrac[i] = 1.0;
+    _elem_side_area[i] = elem->side(i)->volume();
+  }
+
   _elem_volume = elem->volume();
 }
 
@@ -31,6 +47,12 @@ Real
 XFEMCutElem::getPhysicalVolumeFraction() const
 {
   return _physical_volfrac;
+}
+
+Real
+XFEMCutElem::getPhysicalFaceAreaFraction(unsigned int side) const
+{
+  return _physical_areafrac[side];
 }
 
 void
@@ -45,6 +67,38 @@ XFEMCutElem::getWeightMultipliers(MooseArray<Real> & weights,
   weights.resize(_new_weights.size());
   for (unsigned int qp = 0; qp < _new_weights.size(); ++qp)
     weights[qp] = _new_weights[qp];
+}
+
+void
+XFEMCutElem::getFaceWeightMultipliers(MooseArray<Real> & face_weights,
+                                      QBase * qrule,
+                                      Xfem::XFEM_QRULE xfem_qrule,
+                                      const MooseArray<Point> & q_points,
+                                      unsigned int side)
+{
+  if (!_have_face_weights[side])
+    computeXFEMFaceWeights(qrule, xfem_qrule, q_points, side);
+
+  face_weights.resize(_new_face_weights[side].size());
+  for (unsigned int qp = 0; qp < _new_face_weights[side].size(); ++qp)
+    face_weights[qp] = _new_face_weights[side][qp];
+}
+
+void
+XFEMCutElem::computeXFEMFaceWeights(QBase * qrule,
+                                    Xfem::XFEM_QRULE /*xfem_qrule*/,
+                                    const MooseArray<Point> & /*q_points*/,
+                                    unsigned int side)
+{
+  _new_face_weights[side].clear();
+  _new_face_weights[side].resize(qrule->n_points(), 1.0);
+
+  computePhysicalFaceAreaFraction(side);
+  Real surffrac = getPhysicalFaceAreaFraction(side);
+  for (unsigned qp = 0; qp < qrule->n_points(); ++qp)
+    _new_face_weights[side][qp] = surffrac;
+
+  _have_face_weights[side] = true;
 }
 
 void

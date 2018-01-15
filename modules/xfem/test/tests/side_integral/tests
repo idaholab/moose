@@ -1,0 +1,16 @@
+[Tests]
+  [./side_integral_xfem]
+    type = Exodiff
+    input = side_integral.i
+    exodiff = 'side_integral_out.e'
+    map = false
+    unique_id = true
+  [../]
+  [./side_integral_3d_xfem]
+    type = Exodiff
+    input = side_integral_3d.i
+    exodiff = 'side_integral_3d_out.e'
+    map = false
+    unique_id = true
+  [../]
+[]

@@ -23,7 +23,17 @@ class Node;
 class XFEMCutElem3D : public XFEMCutElem
 {
 public:
-  XFEMCutElem3D(Elem * elem, const EFAElement3D * const CEMelem, unsigned int n_qpoints);
+  /**
+   * Constructor initializes XFEMCutElem3D object
+   * @param elem The element on which XFEMCutElem3D is built
+   * @param CEMelem The EFAFragment3D object that belongs to XFEMCutElem3D
+   * @param n_qpoints The number of quadrature points
+   * @param n_sides The number of sides which the element has
+   */
+  XFEMCutElem3D(Elem * elem,
+                const EFAElement3D * const CEMelem,
+                unsigned int n_qpoints,
+                unsigned int n_sides);
   ~XFEMCutElem3D();
 
 private:
@@ -32,6 +42,7 @@ private:
 
 public:
   virtual void computePhysicalVolumeFraction();
+  virtual void computePhysicalFaceAreaFraction(unsigned int side);
   virtual void computeMomentFittingWeights();
   virtual Point getCutPlaneOrigin(unsigned int plane_id, MeshBase * displaced_mesh = NULL) const;
   virtual Point getCutPlaneNormal(unsigned int plane_id, MeshBase * displaced_mesh = NULL) const;
