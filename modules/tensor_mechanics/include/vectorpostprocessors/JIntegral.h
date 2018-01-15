@@ -9,48 +9,68 @@
 
 #pragma once
 
-#include "ElementIntegralPostprocessor.h"
+#include "ElementVectorPostprocessor.h"
 #include "CrackFrontDefinition.h"
 
 // Forward Declarations
 class JIntegral;
-template <typename>
-class RankTwoTensorTempl;
-typedef RankTwoTensorTempl<Real> RankTwoTensor;
 
 template <>
 InputParameters validParams<JIntegral>();
 
 /**
- * This postprocessor computes the J-Integral
+ * This vectorpostprocessor computes the J-Integral
  *
  */
-class JIntegral : public ElementIntegralPostprocessor
+class JIntegral : public ElementVectorPostprocessor
 {
 public:
   static InputParameters validParams();
 
   JIntegral(const InputParameters & parameters);
-  virtual Real getValue();
+
+  virtual void initialSetup() override;
+  virtual void initialize() override;
+  virtual void execute() override;
+  virtual void finalize() override;
+  virtual void threadJoin(const UserObject & y) override;
 
 protected:
-  virtual void initialSetup();
-  virtual Real computeQpIntegral();
-  virtual Real computeIntegral();
+  Real computeQpIntegral(const unsigned int crack_front_point_index, const Real scalar_q, const RealVectorValue & grad_of_scalar_q);
   const CrackFrontDefinition * const _crack_front_definition;
-  bool _has_crack_front_point_index;
-  const unsigned int _crack_front_point_index;
-  bool _treat_as_2d;
   const MaterialProperty<RankTwoTensor> & _Eshelby_tensor;
   const MaterialProperty<RealVectorValue> * _J_thermal_term_vec;
   bool _convert_J_to_K;
+  bool _treat_as_2d;
   bool _has_symmetry_plane;
   Real _poissons_ratio;
   Real _youngs_modulus;
   unsigned int _ring_index;
-  unsigned int _ring_first;
-  MooseEnum _q_function_type;
+
+  enum class QMethod
+  {
+    Geometry,
+    Topology
+  };
+
+  const QMethod _q_function_type;
+
+  enum class PositionType
+  {
+    Angle,
+    Distance
+  };
+
+  const PositionType _position_type;
+
   std::vector<Real> _q_curr_elem;
   const std::vector<std::vector<Real>> * _phi_curr_elem;
   const std::vector<std::vector<RealGradient>> * _dphi_curr_elem;
+  unsigned int _qp;
+
+  VectorPostprocessorValue & _x;
+  VectorPostprocessorValue & _y;
+  VectorPostprocessorValue & _z;
+  VectorPostprocessorValue & _position;
+  VectorPostprocessorValue & _j_integral;
 };

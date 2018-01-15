@@ -9,56 +9,55 @@
 
 #pragma once
 
-#include "ElementIntegralPostprocessor.h"
+#include "ElementVectorPostprocessor.h"
 #include "CrackFrontDefinition.h"
-#include "SymmTensor.h"
 
 // Forward Declarations
-class InteractionIntegralSM;
-template <typename>
-class RankTwoTensorTempl;
-typedef RankTwoTensorTempl<Real> RankTwoTensor;
+class InteractionIntegral;
 
 template <>
-InputParameters validParams<InteractionIntegralSM>();
+InputParameters validParams<InteractionIntegral>();
 
 /**
- * This postprocessor computes the Interaction Integral
+ * This vectorpostprocessor computes the Interaction Integral
  *
  */
-class InteractionIntegralSM : public ElementIntegralPostprocessor
+class InteractionIntegral : public ElementVectorPostprocessor
 {
 public:
-  InteractionIntegralSM(const InputParameters & parameters);
+  static InputParameters validParams();
 
-  virtual Real getValue();
+  InteractionIntegral(const InputParameters & parameters);
+
+  virtual void initialSetup() override;
+  virtual void initialize() override;
+  virtual void execute() override;
+  virtual void finalize() override;
+  virtual void threadJoin(const UserObject & y) override;
 
   static MooseEnum qFunctionType();
   static MooseEnum sifModeType();
 
 protected:
-  virtual void initialSetup();
-  virtual Real computeQpIntegral();
-  virtual Real computeIntegral();
+  Real computeQpIntegral(const unsigned int crack_front_point_index, const Real scalar_q, const RealVectorValue & grad_of_scalar_q);
   void computeAuxFields(RankTwoTensor & aux_stress, RankTwoTensor & grad_disp);
   void computeTFields(RankTwoTensor & aux_stress, RankTwoTensor & grad_disp);
-
   unsigned int _ndisp;
   const CrackFrontDefinition * const _crack_front_definition;
   bool _has_crack_front_point_index;
   const unsigned int _crack_front_point_index;
   bool _treat_as_2d;
-  const MaterialProperty<SymmTensor> & _stress;
-  const MaterialProperty<SymmTensor> & _strain;
+  const MaterialProperty<RankTwoTensor> * _stress;
+  const MaterialProperty<RankTwoTensor> * _strain;
   std::vector<const VariableGradient *> _grad_disp;
   const bool _has_temp;
   const VariableGradient & _grad_temp;
-  const MaterialProperty<Real> * _current_instantaneous_thermal_expansion_coef;
   Real _K_factor;
   bool _has_symmetry_plane;
   Real _poissons_ratio;
   Real _youngs_modulus;
   unsigned int _ring_index;
+  const MaterialProperty<RankTwoTensor> * _total_deigenstrain_dT;
   std::vector<Real> _q_curr_elem;
   const std::vector<std::vector<Real>> * _phi_curr_elem;
   const std::vector<std::vector<RealGradient>> * _dphi_curr_elem;
@@ -66,8 +65,8 @@ protected:
   Real _shear_modulus;
   Real _r;
   Real _theta;
+  unsigned int _qp;
 
-private:
   enum class QMethod
   {
     Geometry,
@@ -75,6 +74,14 @@ private:
   };
 
   const QMethod _q_function_type;
+
+  enum class PositionType
+  {
+    Angle,
+    Distance
+  };
+
+  const PositionType _position_type;
 
   enum class SifMethod
   {
@@ -85,5 +92,11 @@ private:
   };
 
   const SifMethod _sif_mode;
-};
 
+  VectorPostprocessorValue & _x;
+  VectorPostprocessorValue & _y;
+  VectorPostprocessorValue & _z;
+  VectorPostprocessorValue & _position;
+  VectorPostprocessorValue & _interaction_integral;
+
+};

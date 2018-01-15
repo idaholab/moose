@@ -400,7 +400,7 @@ CrackFrontDefinition::orderCrackFrontNodes(std::set<dof_id_type> & nodes)
     {
       const auto & node_to_elem_pair = node_to_elem_map.find(node_id);
       mooseAssert(node_to_elem_pair != node_to_elem_map.end(),
-                  "Could not find crack front node " << node_id << "in the node to elem map");
+                  "Could not find crack front node " << node_id << " in the node to elem map");
 
       const std::vector<dof_id_type> & connected_elems = node_to_elem_pair->second;
       for (unsigned int i = 0; i < connected_elems.size(); ++i)
@@ -1661,7 +1661,7 @@ CrackFrontDefinition::isNodeInRing(const unsigned int ring_index,
   if (nnmit == _crack_front_node_to_node_map.end())
     mooseError("Could not find crack front node ",
                _ordered_crack_front_nodes[node_index],
-               "in the crack front node to q-function ring-node map for ring ",
+               " in the crack front node to q-function ring-node map for ring ",
                ring_index);
 
   std::set<dof_id_type> q_func_nodes = nnmit->second;

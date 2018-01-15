@@ -7,12 +7,12 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-//  This post processor calculates the J-Integral
-//
 #include "JIntegral.h"
 #include "RankTwoTensor.h"
+#include "Conversion.h"
 #include "libmesh/string_to_enum.h"
 #include "libmesh/quadrature.h"
+#include "libmesh/utility.h"
 
 registerMooseObject("TensorMechanicsApp", JIntegral);
 
@@ -21,14 +21,14 @@ defineLegacyParams(JIntegral);
 InputParameters
 JIntegral::validParams()
 {
-  InputParameters params = ElementIntegralPostprocessor::validParams();
-  params.addClassDescription("Calculates the J-integral at a specified point "
-                             " along the crack front");
+  InputParameters params = ElementVectorPostprocessor::validParams();
   params.addRequiredParam<UserObjectName>("crack_front_definition",
                                           "The CrackFrontDefinition user object name");
-  params.addParam<unsigned int>(
-      "crack_front_point_index",
-      "The index of the point on the crack front corresponding to this q function");
+  MooseEnum position_type("Angle Distance", "Distance");
+  params.addParam<MooseEnum>("position_type",
+                             position_type,
+                             "The method used to calculate position along crack front.  Options are: " +
+                             position_type.getRawNames());
   params.addParam<bool>(
       "convert_J_to_K", false, "Convert J-integral to stress intensity factor K.");
   params.addParam<unsigned int>("symmetry_plane",
@@ -49,12 +49,8 @@ JIntegral::validParams()
 }
 
 JIntegral::JIntegral(const InputParameters & parameters)
-  : ElementIntegralPostprocessor(parameters),
+  : ElementVectorPostprocessor(parameters),
     _crack_front_definition(&getUserObject<CrackFrontDefinition>("crack_front_definition")),
-    _has_crack_front_point_index(isParamValid("crack_front_point_index")),
-    _crack_front_point_index(
-        _has_crack_front_point_index ? getParam<unsigned int>("crack_front_point_index") : 0),
-    _treat_as_2d(false),
     _Eshelby_tensor(getMaterialProperty<RankTwoTensor>("Eshelby_tensor")),
     _J_thermal_term_vec(hasMaterialProperty<RealVectorValue>("J_thermal_term_vec")
                             ? &getMaterialProperty<RealVectorValue>("J_thermal_term_vec")
@@ -64,41 +60,46 @@ JIntegral::JIntegral(const InputParameters & parameters)
     _poissons_ratio(isParamValid("poissons_ratio") ? getParam<Real>("poissons_ratio") : 0),
     _youngs_modulus(isParamValid("youngs_modulus") ? getParam<Real>("youngs_modulus") : 0),
     _ring_index(getParam<unsigned int>("ring_index")),
-    _q_function_type(getParam<MooseEnum>("q_function_type"))
+    _q_function_type(getParam<MooseEnum>("q_function_type").getEnum<QMethod>()),
+    _position_type(getParam<MooseEnum>("position_type").getEnum<PositionType>()),
+    _x(declareVector("x")),
+    _y(declareVector("y")),
+    _z(declareVector("z")),
+    _position(declareVector("id")),
+    _j_integral(declareVector((_convert_J_to_K ? "K_" : "J_") + Moose::stringify(_ring_index)))
 {
-  if (_q_function_type == "TOPOLOGY")
-    _ring_first = getParam<unsigned int>("ring_first");
 }
 
 void
 JIntegral::initialSetup()
 {
   _treat_as_2d = _crack_front_definition->treatAs2D();
-
   if (_convert_J_to_K && (!isParamValid("youngs_modulus") || !isParamValid("poissons_ratio")))
     mooseError("youngs_modulus and poissons_ratio must be specified if convert_J_to_K = true");
 }
 
-Real
-JIntegral::computeQpIntegral()
+void
+JIntegral::initialize()
 {
-  Real scalar_q = 0.0;
-  RealVectorValue grad_of_scalar_q(0.0, 0.0, 0.0);
+  unsigned int num_pts;
+  if (_treat_as_2d)
+    num_pts = 1;
+  else
+    num_pts = _crack_front_definition->getNumCrackFrontPoints();
 
-  const std::vector<std::vector<Real>> & phi_curr_elem = *_phi_curr_elem;
-  const std::vector<std::vector<RealGradient>> & dphi_curr_elem = *_dphi_curr_elem;
+  _x.assign(num_pts, 0.0);
+  _y.assign(num_pts, 0.0);
+  _z.assign(num_pts, 0.0);
+  _position.assign(num_pts, 0.0);
+  _j_integral.assign(num_pts, 0.0);
+}
 
-  for (unsigned int i = 0; i < _current_elem->n_nodes(); ++i)
-  {
-    scalar_q += phi_curr_elem[i][_qp] * _q_curr_elem[i];
-
-    for (unsigned int j = 0; j < _current_elem->dim(); ++j)
-      grad_of_scalar_q(j) += dphi_curr_elem[i][_qp](j) * _q_curr_elem[i];
-  }
-
+Real
+JIntegral::computeQpIntegral(const unsigned int crack_front_point_index, const Real scalar_q, const RealVectorValue & grad_of_scalar_q)
+{
   RankTwoTensor grad_of_vector_q;
   const RealVectorValue & crack_direction =
-      _crack_front_definition->getCrackDirection(_crack_front_point_index);
+      _crack_front_definition->getCrackDirection(crack_front_point_index);
   grad_of_vector_q(0, 0) = crack_direction(0) * grad_of_scalar_q(0);
   grad_of_vector_q(0, 1) = crack_direction(0) * grad_of_scalar_q(1);
   grad_of_vector_q(0, 2) = crack_direction(0) * grad_of_scalar_q(2);
@@ -123,8 +124,8 @@ JIntegral::computeQpIntegral()
   if (!_crack_front_definition->treatAs2D())
   {
     q_avg_seg =
-        (_crack_front_definition->getCrackFrontForwardSegmentLength(_crack_front_point_index) +
-         _crack_front_definition->getCrackFrontBackwardSegmentLength(_crack_front_point_index)) /
+        (_crack_front_definition->getCrackFrontForwardSegmentLength(crack_front_point_index) +
+         _crack_front_definition->getCrackFrontBackwardSegmentLength(crack_front_point_index)) /
         2.0;
   }
 
@@ -133,11 +134,9 @@ JIntegral::computeQpIntegral()
   return etot / q_avg_seg;
 }
 
-Real
-JIntegral::computeIntegral()
+void
+JIntegral::execute()
 {
-  Real sum = 0;
-
   // calculate phi and dphi for this element
   FEType fe_type(Utility::string_to_enum<Order>("first"),
                  Utility::string_to_enum<FEFamily>("lagrange"));
@@ -149,40 +148,76 @@ JIntegral::computeIntegral()
   fe->reinit(_current_elem);
 
   // calculate q for all nodes in this element
-  _q_curr_elem.clear();
-  unsigned int ring_base = (_q_function_type == "TOPOLOGY") ? 0 : 1;
+  unsigned int ring_base = (_q_function_type == QMethod::Topology) ? 0 : 1;
 
-  for (unsigned int i = 0; i < _current_elem->n_nodes(); ++i)
+  for (unsigned int icfp = 0; icfp < _j_integral.size(); icfp++)
   {
-    const Node * this_node = _current_elem->node_ptr(i);
-    Real q_this_node;
+    _q_curr_elem.clear();
+    for (unsigned int i = 0; i < _current_elem->n_nodes(); ++i)
+    {
+      const Node * this_node = _current_elem->node_ptr(i);
+      Real q_this_node;
 
-    if (_q_function_type == "GEOMETRY")
-      q_this_node = _crack_front_definition->DomainIntegralQFunction(
-          _crack_front_point_index, _ring_index - ring_base, this_node);
-    else if (_q_function_type == "TOPOLOGY")
-      q_this_node = _crack_front_definition->DomainIntegralTopologicalQFunction(
-          _crack_front_point_index, _ring_index - ring_base, this_node);
+      if (_q_function_type == QMethod::Geometry)
+        q_this_node = _crack_front_definition->DomainIntegralQFunction(
+                                                                       icfp, _ring_index - ring_base, this_node);
+      else if (_q_function_type == QMethod::Topology)
+        q_this_node = _crack_front_definition->DomainIntegralTopologicalQFunction(
+                                                                                  icfp, _ring_index - ring_base, this_node);
 
-    _q_curr_elem.push_back(q_this_node);
+      _q_curr_elem.push_back(q_this_node);
+    }
+
+    for (_qp = 0; _qp < _qrule->n_points(); _qp++)
+    {
+      Real scalar_q = 0.0;
+      RealVectorValue grad_of_scalar_q(0.0, 0.0, 0.0);
+
+      for (unsigned int i = 0; i < _current_elem->n_nodes(); ++i)
+      {
+        scalar_q += (*_phi_curr_elem)[i][_qp] * _q_curr_elem[i];
+
+        for (unsigned int j = 0; j < _current_elem->dim(); ++j)
+          grad_of_scalar_q(j) += (*_dphi_curr_elem)[i][_qp](j) * _q_curr_elem[i];
+      }
+
+      _j_integral[icfp] += _JxW[_qp] * _coord[_qp] * computeQpIntegral(icfp, scalar_q, grad_of_scalar_q);
+    }
   }
-
-  for (_qp = 0; _qp < _qrule->n_points(); _qp++)
-    sum += _JxW[_qp] * _coord[_qp] * computeQpIntegral();
-  return sum;
 }
 
-Real
-JIntegral::getValue()
+void
+JIntegral::finalize()
 {
-  gatherSum(_integral_value);
-  if (_has_symmetry_plane)
-    _integral_value *= 2.0;
+  gatherSum(_j_integral);
 
-  Real sign = (_integral_value > 0.0) ? 1.0 : ((_integral_value < 0.0) ? -1.0 : 0.0);
-  if (_convert_J_to_K)
-    _integral_value = sign * std::sqrt(std::abs(_integral_value) * _youngs_modulus /
-                                       (1 - std::pow(_poissons_ratio, 2)));
+  for (unsigned int i = 0; i < _j_integral.size(); ++i)
+  {
+    if (_has_symmetry_plane)
+      _j_integral[i] *= 2.0;
 
-  return _integral_value;
+    Real sign = (_j_integral[i] > 0.0) ? 1.0 : ((_j_integral[i] < 0.0) ? -1.0 : 0.0);
+    if (_convert_J_to_K)
+      _j_integral[i] = sign * std::sqrt(std::abs(_j_integral[i]) * _youngs_modulus /
+                                        (1.0 - Utility::pow<2>(_poissons_ratio)));
+
+    const auto cfp = _crack_front_definition->getCrackFrontPoint(i);
+    _x[i] = (*cfp)(0);
+    _y[i] = (*cfp)(1);
+    _z[i] = (*cfp)(2);
+
+    if (_position_type == PositionType::Angle)
+      _position[i] = _crack_front_definition->getAngleAlongFront(i);
+    else
+      _position[i] = _crack_front_definition->getDistanceAlongFront(i);
+  }
+}
+
+void
+JIntegral::threadJoin(const UserObject & y)
+{
+  const JIntegral & uo = static_cast<const JIntegral &>(y);
+
+  for (auto i = beginIndex(_j_integral); i < _j_integral.size(); ++i)
+    _j_integral[i] += uo._j_integral[i];
 }
