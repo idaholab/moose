@@ -9,14 +9,14 @@ The non-linear variable for this Kernel is the concentration $c$.
 In the residual routine we need to calculate the term $R=\nabla \frac{dF}{dc}$.
 We exploit the KKS identity $\frac{dF}{dc}=\frac{dF_a}{dc_a}=\frac{dF_b}{dc_b}$
 and arbitrarily use the a-phase instead.
-The gradient can be calculated through the chain rule (note that $F_a(c_a, p_1,p_2,\dots,p_n)$
+The gradient can be calculated through the chain rule (note that $F_a(c_a, p_1,p_2,...,p_n)$
 is potentially a function of many variables).
 
 $$
 R = \nabla \frac{dF_a}{dc_a} = \frac{d^2F_a}{dc_a^2}\nabla c_a + \sum_i \frac{d^2F_a}{dc_adp_i}\nabla p_i
 $$
 
-With $a = \{c_a, p_1,p_2,\dots,p_n\}$ being the vector of all arguments to $F_a$ this simplifies to
+With $a = \{c_a, p_1,p_2,...,p_n\}$ being the vector of all arguments to $F_a$ this simplifies to
 
 $$
 R=\sum_i \frac{d^2F_a}{dc_ada_i}\nabla a_i  = \sum_i R_i \nabla a_i
@@ -70,7 +70,7 @@ where $j$ is `_j` in the code.
 For the on diagonal terms we look at the derivative w.r.t. the components of the
 non-linear variable $c$ of this kernel. Note, that $F_a$ is only indirectly a
 function of $c$. We assume the dependence is given through $c(c_a)$. The chain
-rule will thus yield terms of this form  
+rule will thus yield terms of this form
 
 $$
 \frac{dc_a}{dc} = \frac{\frac{d^2F_b}{dc_b^2}}{[1-h(\eta)]\frac{d^2F_b}{dc_b^2}+h(\eta)\frac{d^2F_a}{dc_a^2}},
@@ -87,11 +87,15 @@ $$
 Let's get back to the original residual with $\frac{dF}{dc}$. Then
 
 $$
-\begin{eqnarray*}
-J &=& \phi_j \frac{d}{dc} \nabla \frac{dF}{dc}\\
-&=& \phi_j  \nabla \frac{d^2F}{dc^2} \quad,\quad \text{with (29) from [KKS]}\\
-&=& \phi_j  \nabla \frac{\frac{d^2F_b}{dc_b^2}\frac{d^2F_a}{dc_a^2}}{  [1-h(\eta)]\frac{d^2F_b}{dc_b^2}+h(\eta)\frac{d^2F_a}{dc_a^2} }\\
-\end{eqnarray*}
+J = \phi_j \frac{d}{dc} \nabla \frac{dF}{dc}
+$$
+
+$$
+= \phi_j  \nabla \frac{d^2F}{dc^2} \quad,\quad \text{with (29) from [KKS]}
+$$
+
+$$
+= \phi_j  \nabla \frac{\frac{d^2F_b}{dc_b^2}\frac{d^2F_a}{dc_a^2}}{  [1-h(\eta)]\frac{d^2F_b}{dc_b^2}+h(\eta)\frac{d^2F_a}{dc_a^2} }
 $$
 
 !syntax parameters /Kernels/KKSCHBulk

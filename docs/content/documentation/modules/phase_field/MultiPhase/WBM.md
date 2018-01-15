@@ -34,10 +34,13 @@ With $a_i(\vec\eta,\vec c,v)$ being the weak form (Allen-Cahn) residual for the
 $i$th non-conserved order parameter, we need to find $(\vec\eta,\lambda)$ satisfying
 the boundary conditions and such that
 
-$$\begin{align}
-a_i(\vec\eta,\vec c,v) + \underbrace{\int_\Omega\lambda\frac{\partial k}{\partial\eta_i} v\,dx}_{L_1(\eta_i)} &=& 0 \\
-\underbrace{\int_\Omega q\frac{\partial(\lambda k)}{\partial\lambda}\,dx}_{L_2(\lambda)} &=& 0
-\end{align}$$
+$$
+a_i(\vec\eta,\vec c,v) + \underbrace{\int_\Omega\lambda\frac{\partial k}{\partial\eta_i} v\,dx}_{L_1(\eta_i)} = 0
+$$
+
+$$
+\underbrace{\int_\Omega q\frac{\partial(\lambda k)}{\partial\lambda}\,dx}_{L_2(\lambda)} = 0
+$$
 
 holds for every test function $v$ and $q$.
 
