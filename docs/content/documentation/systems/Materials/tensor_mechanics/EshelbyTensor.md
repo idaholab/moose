@@ -1,17 +1,17 @@
-# EshelbyTensor
+# Eshelby Tensor
 !syntax description /Materials/EshelbyTensor
 
 ## Description
+This model computes the Eshelby energy-momentum tensor $\Sigma$ \cite{eshelby_energy_1999}, used in fracture integral calculations:
+\begin{equation}
+\boldsymbol{\Sigma} = W\mathbf{I} - \mathbf{H}^T\mathbf{P}
+\end{equation}
+where W is the strain energy density in the original configuration, $\mathbf{I}$ is the identity matrix, $\mathbf{H}$ is the displacement gradient, and $\mathbf{P}$ is the first Piola-Kirchoff stress tensor.
 
-This models computes the Eshelby energy-momentum tensor \cite{eshelby_energy_1999} $\Sigma$, used in fracture integral calculations:
+It is necessary to include this material within the input file when computing fracture integrals.
 
-$$
-\boldsymbol{\Sigma} = W\boldsymbol{I} - \boldsymbol{H}^T\boldsymbol{P}
-$$
-
-where W is the strain energy density in the original configuration, $\boldsymbol{I}$ is the identity matrix, $\boldsymbol{H}$ is the displacement gradient, and $\boldsymbol{P}$ is the first Piola-Kirchoff stress tensor.
-
-It is necessary to define this Material block when computing fracture integrals.
+## Example Input File Syntax
+!listing modules/tensor_mechanics/test/tests/j_integral/j_integral_2d.i block=Materials/eshelby
 
 !syntax parameters /Materials/EshelbyTensor
 
@@ -19,4 +19,5 @@ It is necessary to define this Material block when computing fracture integrals.
 
 !syntax children /Materials/EshelbyTensor
 
+## References
 \bibliography{tensor_mechanics.bib}

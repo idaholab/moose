@@ -12,6 +12,9 @@ InputParameters
 validParams<MixedModeEquivalentK>()
 {
   InputParameters params = validParams<GeneralPostprocessor>();
+  params.addClassDescription("Computes the mixed-mode stress intensity factor "
+                             "given the $K_I$, $K_{II}$, and $K_{III}$ stress "
+                             "intensity factors");
   params.addRequiredParam<PostprocessorName>("KI_name", "The name of the KI postprocessor");
   params.addRequiredParam<PostprocessorName>("KII_name", "The name of the KII postprocessor");
   params.addRequiredParam<PostprocessorName>("KIII_name", "The name of the KIII postprocessor");

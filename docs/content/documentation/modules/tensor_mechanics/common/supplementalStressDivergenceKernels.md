@@ -18,5 +18,6 @@ which is nonzero for $m == k$.
 If the solve type for the simulation is set to **NEWTON** the finite deformation Jacobian will need to be calculated.  Set the parameter `use_finite_deform_jacobian = true` in this case.
 
 
-!!! note "Settings for Finite Strain Simulations"
-    Set the use_displaced_mesh parameter equal to true for finite strain (large deformation) problems to ensure that the stress divergence residual is calculated correctly.  If you are unsure if your problem is finite strain or small strain, use the setting `use_displaced_mesh = true`.
+!!! info "Use of the Tensor Mechanics Master Action Recommended"
+    The _use_displaced_mesh_ parameter must be set correcting to ensure consistency in the equilibrium equation:  if the stress is calculated with respect to the deformed mesh, the test function gradients must also be calculated with respect to the deformed mesh. The [TensorMechanics Master Action](/systems/Modules/TensorMechanics/Master/index.md) is designed to automatically determine and set the parameter correctly for the selected strain formulation.
+    We recommend that users employ the [TensorMechanics Master Action](/systems/Modules/TensorMechanics/Master/index.md) whenever possible to ensure consistency between the test function gradients and the strain formulation selected.

@@ -5,7 +5,7 @@ Axisymmetric (cylindrical) materials are included in Tensor Mechanics for revolv
 
 ### Axisymmetric Model Assumptions
 
-The axisymmetric model employs the cylindrical coordinates, $r$, $z$, and $\theta$, where the planar cross section is rotated about the $z$ axis.  The cylindrical coordinate system strain tensor for axisymmetric problems has the form
+The axisymmetric model employs the cylindrical coordinates, $r$, $z$, and $\theta$, where the planar cross section formed by the $r$ and $z$ axes is rotated about the axial $z$ axis, along the length of the cylinder, in the $\theta$ direction.  The cylindrical coordinate system strain tensor for axisymmetric problems has the form
 
 \begin{equation}
 \begin{bmatrix}
@@ -18,7 +18,7 @@ where the value of the strain $\epsilon_{\theta \theta}$ depends on the displace
 \begin{equation}
 \epsilon_{\theta \theta} = \frac{u_r}{X_r}.
 \end{equation}
-Although axisymmetric problems solve for 3D stress and strain fields, the problem is mathematically 2D. Using an appropriate set of geometry and boundary conditions, these types of problems have strain and stress fields which are not functions of the out of plane coordinate variable.  In the Cylindrical coordinate axisymmetric system, the values of stress and strain in the $\theta$ direction do not depend on the $\theta$ coordinate.
+Although axisymmetric problems solve for 3D stress and strain fields, the problem is mathematically 2D. Using an appropriate set of geometry and boundary conditions, these types of problems have strain and stress fields which are not functions of the out of plane coordinate variable.  In the cylindrical coordinate axisymmetric system, the values of stress and strain in the $\theta$ direction do not depend on the $\theta$ coordinate.
 
 !!! note
-    The axisymmetric system changes the order of the displacements vector from $(u_r, u_{\theta}, u_z)$, usually seen in textbooks, to $(u_r, u_z, u_{\theta})$. Take care to follow this convention in your input files and when adding eigenstrains or extra stresses.
+    The axisymmetric system changes the order of the displacement vector from $(u_r, u_{\theta}, u_z)$, usually seen in textbooks, to $(u_r, u_z, u_{\theta})$. Take care to follow this convention in your input files and when adding eigenstrains or extra stresses.
