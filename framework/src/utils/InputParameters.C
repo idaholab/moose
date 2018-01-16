@@ -384,10 +384,6 @@ InputParameters::checkParams(const std::string & parsing_syntax)
   // Controllable parameters
   for (const auto & param_name : getControllableParameters())
   {
-    if (!isParamValid(param_name))
-      oss << inputLocation(param_name) << ": invalid parameter '" << paramFullpath(param_name)
-          << "' marked controllable";
-
     if (isPrivate(param_name))
       oss << inputLocation(param_name) << ": private parameter '" << paramFullpath(param_name)
           << "' marked controllable";
