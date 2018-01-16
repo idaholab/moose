@@ -195,9 +195,13 @@ endif
 BUILD_EXEC :=
 
 app_GIT_DIR := $(shell cd "$(APPLICATION_DIR)" && which git &> /dev/null && git rev-parse --show-toplevel)
+
 # Use wildcard in case the files don't exist
 app_HEADER_deps := $(wildcard $(app_GIT_DIR)/.git/HEAD $(app_GIT_DIR)/.git/index)
+
 # Target-specific Variable Values (See GNU-make manual)
+$(app_objects): app_INCLUDES := $(moose_INCLUDE) $(app_INCLUDES)
+
 $(app_HEADER): curr_dir    := $(APPLICATION_DIR)
 $(app_HEADER): curr_app    := $(APPLICATION_NAME)
 $(app_HEADER): $(app_HEADER_deps)
@@ -241,3 +245,9 @@ $(app_EXEC): $(app_LIBS) $(mesh_library) $(main_object) $(app_test_LIB) $(depend
 sa:: $(app_analyzer)
 
 compile_commands_all_srcfiles += $(srcfiles)
+
+# Publish this incase someone wants it
+$(APPLICATION_NAME)_INCLUDES := $(app_INCLUDES)
+
+# Restore app_INCLUDES and append the ones for this app
+app_INCLUDES := $(backup_app_INCLUDES) $(app_INCLUDES)

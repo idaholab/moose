@@ -52,6 +52,8 @@ MODULE_NAMES := "chemical_reactions contact fluid_properties heat_conduction lev
 ###############################################################################
 
 ifeq ($(CHEMICAL_REACTIONS),yes)
+  include            $(FRAMEWORK_DIR)/app_begin.mk
+
   APPLICATION_DIR    := $(MOOSE_DIR)/modules/chemical_reactions
   APPLICATION_NAME   := chemical_reactions
   SUFFIX             := cr
@@ -59,6 +61,8 @@ ifeq ($(CHEMICAL_REACTIONS),yes)
 endif
 
 ifeq ($(CONTACT),yes)
+  include            $(FRAMEWORK_DIR)/app_begin.mk
+
   APPLICATION_DIR    := $(MOOSE_DIR)/modules/contact
   APPLICATION_NAME   := contact
   SUFFIX             := con
@@ -66,6 +70,8 @@ ifeq ($(CONTACT),yes)
 endif
 
 ifeq ($(FLUID_PROPERTIES),yes)
+  include            $(FRAMEWORK_DIR)/app_begin.mk
+
   APPLICATION_DIR    := $(MOOSE_DIR)/modules/fluid_properties
   APPLICATION_NAME   := fluid_properties
   SUFFIX             := fp
@@ -73,6 +79,8 @@ ifeq ($(FLUID_PROPERTIES),yes)
 endif
 
 ifeq ($(RDG),yes)
+  include            $(FRAMEWORK_DIR)/app_begin.mk
+
   APPLICATION_DIR    := $(MOOSE_DIR)/modules/rdg
   APPLICATION_NAME   := rdg
   SUFFIX             := rdg
@@ -80,6 +88,8 @@ ifeq ($(RDG),yes)
 endif
 
 ifeq ($(HEAT_CONDUCTION),yes)
+  include            $(FRAMEWORK_DIR)/app_begin.mk
+
   APPLICATION_DIR    := $(MOOSE_DIR)/modules/heat_conduction
   APPLICATION_NAME   := heat_conduction
   SUFFIX             := hc
@@ -87,6 +97,8 @@ ifeq ($(HEAT_CONDUCTION),yes)
 endif
 
 ifeq ($(MISC),yes)
+  include            $(FRAMEWORK_DIR)/app_begin.mk
+
   APPLICATION_DIR    := $(MOOSE_DIR)/modules/misc
   APPLICATION_NAME   := misc
   SUFFIX             := misc
@@ -94,6 +106,8 @@ ifeq ($(MISC),yes)
 endif
 
 ifeq ($(NAVIER_STOKES),yes)
+  include            $(FRAMEWORK_DIR)/app_begin.mk
+
   APPLICATION_DIR    := $(MOOSE_DIR)/modules/navier_stokes
   APPLICATION_NAME   := navier_stokes
 
@@ -104,6 +118,8 @@ ifeq ($(NAVIER_STOKES),yes)
 endif
 
 ifeq ($(TENSOR_MECHANICS),yes)
+  include            $(FRAMEWORK_DIR)/app_begin.mk
+
   APPLICATION_DIR    := $(MOOSE_DIR)/modules/tensor_mechanics
   APPLICATION_NAME   := tensor_mechanics
   SUFFIX             := tm
@@ -111,6 +127,8 @@ ifeq ($(TENSOR_MECHANICS),yes)
 endif
 
 ifeq ($(PHASE_FIELD),yes)
+  include            $(FRAMEWORK_DIR)/app_begin.mk
+
   APPLICATION_DIR    := $(MOOSE_DIR)/modules/phase_field
   APPLICATION_NAME   := phase_field
 
@@ -122,6 +140,8 @@ ifeq ($(PHASE_FIELD),yes)
 endif
 
 ifeq ($(RICHARDS),yes)
+  include            $(FRAMEWORK_DIR)/app_begin.mk
+
   APPLICATION_DIR    := $(MOOSE_DIR)/modules/richards
   APPLICATION_NAME   := richards
   SUFFIX             := rich
@@ -129,6 +149,8 @@ ifeq ($(RICHARDS),yes)
 endif
 
 ifeq ($(SOLID_MECHANICS),yes)
+  include            $(FRAMEWORK_DIR)/app_begin.mk
+
   APPLICATION_DIR    := $(MOOSE_DIR)/modules/solid_mechanics
   APPLICATION_NAME   := solid_mechanics
 
@@ -139,6 +161,8 @@ ifeq ($(SOLID_MECHANICS),yes)
 endif
 
 ifeq ($(STOCHASTIC_TOOLS),yes)
+  include            $(FRAMEWORK_DIR)/app_begin.mk
+
   APPLICATION_DIR    := $(MOOSE_DIR)/modules/stochastic_tools
   APPLICATION_NAME   := stochastic_tools
   SUFFIX             := st
@@ -146,6 +170,8 @@ ifeq ($(STOCHASTIC_TOOLS),yes)
 endif
 
 ifeq ($(WATER_STEAM_EOS),yes)
+  include            $(FRAMEWORK_DIR)/app_begin.mk
+
   APPLICATION_DIR    := $(MOOSE_DIR)/modules/water_steam_eos
   APPLICATION_NAME   := water_steam_eos
   SUFFIX             := ws
@@ -153,6 +179,11 @@ ifeq ($(WATER_STEAM_EOS),yes)
 endif
 
 ifeq ($(XFEM),yes)
+  include            $(FRAMEWORK_DIR)/app_begin.mk
+
+  #Dependency on tensor mechanics
+  app_INCLUDES += $(solid_mechanics_INCLUDES)
+
   APPLICATION_DIR    := $(MOOSE_DIR)/modules/xfem
   APPLICATION_NAME   := xfem
 
@@ -163,6 +194,8 @@ ifeq ($(XFEM),yes)
 endif
 
 ifeq ($(POROUS_FLOW),yes)
+  include            $(FRAMEWORK_DIR)/app_begin.mk
+
   APPLICATION_DIR    := $(MOOSE_DIR)/modules/porous_flow
   APPLICATION_NAME   := porous_flow
 
@@ -173,6 +206,8 @@ ifeq ($(POROUS_FLOW),yes)
 endif
 
 ifeq ($(LEVEL_SET),yes)
+  include            $(FRAMEWORK_DIR)/app_begin.mk
+
   APPLICATION_DIR    := $(MOOSE_DIR)/modules/level_set
   APPLICATION_NAME   := level_set
   SUFFIX             := ls
@@ -181,6 +216,8 @@ endif
 
 ifeq ($(ALL_MODULES),yes)
   ifneq ($(INCLUDE_COMBINED),no)
+    include            $(FRAMEWORK_DIR)/app_begin.mk
+
     APPLICATION_DIR    := $(MOOSE_DIR)/modules/combined
     APPLICATION_NAME   := combined
     SUFFIX             := comb
@@ -191,6 +228,10 @@ endif
 # The loader should be used for all applications. We
 # only skip it when compiling individual modules
 ifneq ($(SKIP_LOADER),yes)
+  include            $(FRAMEWORK_DIR)/app_begin.mk
+
+  app_INCLUDES  := $(foreach i, $(MODULE_NAMES), -I$(MOOSE_DIR)/modules/$(i)/include/base)
+
   APPLICATION_DIR    := $(MOOSE_DIR)/modules/module_loader
   APPLICATION_NAME   := module_loader
   LIBRARY_SUFFIX     := yes
