@@ -1,143 +1,177 @@
 #include "gtest/gtest.h"
 
-#include "CylindricalDuo.h"
-#include "Zernike.h"
-
-const double tol = 1e-13;
-
-MooseEnum SingleSeriesTypes2D("Zernike");
-
+#include "Setup.h"
 
 TEST(FunctionalExpansionsTest, zernikeConstructor)
 {
   const unsigned int order = 5;
-  Zernike zernike({FBI::_domain_options = "x"}, {order});
+  Zernike zernike({FBI::_domain_options = "x", FBI::_domain_options = "y"}, {order});
   EXPECT_EQ(zernike.getOrder(0), order);
 }
 
-TEST(FunctionalExpansionsTest, zernikeSeriesEvaluation)
+TEST(FunctionalExpansionsTest, zernikeSeriesEvaluationXY)
 {
-  const unsigned int order = 15;
-  Real location = -0.90922108754014;
-  std::array<Real, order> truth = {{ 0.50000000000000,
-                                    -1.36383163131021,
-                                     1.85006119760378,
-                                    -1.80341832197563,
-                                     1.19175581122701,
-                                    -0.11669847057321,
-                                    -1.20462734483853,
-                                     2.48341349094950,
-                                    -3.41981864606651,
-                                     3.76808851494207,
-                                    -3.39261995754146,
-                                     2.30300489952095,
-                                    -0.66011244776270,
-                                    -1.24901920248131,
-                                     3.06342136027001}};
-  Zernike zernike({FBI::_domain_options = "x"}, {order});
+  const unsigned int order = 4;
+  const Point location(-0.90922108754014, 0.262698547343, 0.156796889218);
+  std::vector<Real> truth;
 
-  zernike.setLocation(Point(location));
+  Zernike zernike({FBI::_domain_options = "x", FBI::_domain_options = "y"}, {order});
+  zernike.setLocation(location);
+  truth = {{0.318309886183791,
+            -0.300628811510287,
+            -1.117940202314423,
+            0.791881706198328,
+            0.623918544603900,
+            1.365900806059890,
+            -1.357069098439213,
+            -0.288633095470502,
+            -1.073332058640328,
+            -1.349767446988918,
+            1.887803726543957,
+            0.404825692079851,
+            0.223343150486739,
+            0.698275682841869,
+            1.080889714660983}};
   auto& answer = zernike.getAllOrthonormal();
-  for (std::size_t i = 0; i < order; ++i)
+  for (std::size_t i = 0; i < zernike.getNumberOfTerms(); ++i)
     EXPECT_NEAR(answer[i], truth[i], tol);
 }
 
-TEST(FunctionalExpansionsTest, cartesianConstructor)
+TEST(FunctionalExpansionsTest, zernikeSeriesEvaluationXZ)
 {
-  std::vector<MooseEnum> domains;
-  std::vector<std::size_t> orders;
-  std::vector<MooseEnum> series;
+  const unsigned int order = 4;
+  const Point location(-0.90922108754014, 0.262698547343, 0.156796889218);
+  std::vector<Real> truth;
 
-  domains.push_back(FBI::_domain_options = "x");
-  orders = {19};
-  series.push_back(SingleSeriesTypes1D = "Zernike");
-  Cartesian zernikeOne(domains, orders, series);
-  EXPECT_EQ(zernikeOne.getNumberOfTerms(), orders[0] + 1);
-
-  domains.push_back(FBI::_domain_options = "y");
-  orders = {{13, 15}};
-  series.push_back(SingleSeriesTypes1D = "Zernike");
-  Cartesian zernikeTwo(domains, orders, series);
-  EXPECT_EQ(zernikeTwo.getNumberOfTerms(), (orders[0] + 1) * (orders[1] + 1));
-
-  domains.push_back(FBI::_domain_options = "z");
-  orders = {{14, 21, 22}};
-  series.push_back(SingleSeriesTypes1D = "Zernike");
-  Cartesian zernikeThree(domains, orders, series);
-  EXPECT_EQ(zernikeThree.getNumberOfTerms(), (orders[0] + 1) * (orders[1] + 1) * (orders[2] + 1));
+  Zernike zernike({FBI::_domain_options = "x", FBI::_domain_options = "z"}, {order});
+  zernike.setLocation(location);
+  truth = {{0.318309886183791,
+            -0.180774038043348,
+            -1.143454732567233,
+            0.487041727962393,
+            0.623918544603900,
+            1.501849527692451,
+            -0.867504286868072,
+            -0.173560777222340,
+            -1.097828505968007,
+            -1.706149176114187,
+            1.276644449771070,
+            0.248985426801565,
+            0.223343150486739,
+            0.767775375651402,
+            1.761335979897610}};
+  auto & answer = zernike.getAllOrthonormal();
+  for (std::size_t i = 0; i < zernike.getNumberOfTerms(); ++i)
+    EXPECT_NEAR(answer[i], truth[i], tol);
 }
 
-TEST(FunctionalExpansionsTest, Cartesian3D)
+TEST(FunctionalExpansionsTest, zernikeSeriesEvaluationYZ)
 {
-  std::vector<MooseEnum> domains;
-  std::vector<std::size_t> orders;
-  std::vector<MooseEnum> series;
+  const unsigned int order = 4;
+  const Point location(-0.90922108754014, 0.262698547343, 0.156796889218);
+  std::vector<Real> truth;
 
-  domains.push_back(FBI::_domain_options = "x");
-  orders.push_back(14);
-  series.push_back(SingleSeriesTypes1D = "Zernike");
+  Zernike zernike({FBI::_domain_options = "y", FBI::_domain_options = "z"}, {order});
+  zernike.setLocation(location);
+  truth = {{0.318309886183791,
+            0.052230505695590,
+            0.330374978445085,
+            0.040657672622662,
+            -0.823129261009826,
+            0.125372638358686,
+            0.020923587239414,
+            -0.187295294511344,
+            -1.184703806003468,
+            0.041151106306071,
+            0.008896570968308,
+            -0.184582980412102,
+            0.978025517529447,
+            -0.569182979683797,
+            0.012274247968574}};
+  auto & answer = zernike.getAllOrthonormal();
+  for (std::size_t i = 0; i < zernike.getNumberOfTerms(); ++i)
+    EXPECT_NEAR(answer[i], truth[i], tol);
+}
 
-  domains.push_back(FBI::_domain_options = "y");
-  orders.push_back(21);
-  series.push_back(SingleSeriesTypes1D = "Zernike");
+TEST(FunctionalExpansionsTest, cylindricalDuoConstructorAxialX)
+{
+  const std::vector<MooseEnum> domains = {
+      FBI::_domain_options = "x", FBI::_domain_options = "y", FBI::_domain_options = "z"};
+  const std::vector<std::size_t> orders = {5, 18};
+  const std::vector<MooseEnum> series = {SingleSeriesTypes1D = "Legendre",
+                                         SingleSeriesTypes2D = "Zernike"};
 
-  domains.push_back(FBI::_domain_options = "z");
-  orders.push_back(22);
-  series.push_back(SingleSeriesTypes1D = "Zernike");
+  CylindricalDuo cylindrical(domains, orders, series);
+  EXPECT_EQ(cylindrical.getNumberOfTerms(),
+            (orders[0] + 1) * ((orders[1] + 1) * (orders[1] + 2)) / 2);
+}
 
-  Cartesian zernike3D(domains, orders, series);
+TEST(FunctionalExpansionsTest, cylindricalDuoConstructorAxialY)
+{
+  const std::vector<MooseEnum> domains = {
+      FBI::_domain_options = "y", FBI::_domain_options = "x", FBI::_domain_options = "z"};
+  const std::vector<std::size_t> orders = {23, 8};
+  const std::vector<MooseEnum> series = {SingleSeriesTypes1D = "Legendre",
+                                         SingleSeriesTypes2D = "Zernike"};
 
+  CylindricalDuo cylindrical(domains, orders, series);
+  EXPECT_EQ(cylindrical.getNumberOfTerms(),
+            (orders[0] + 1) * ((orders[1] + 1) * (orders[1] + 2)) / 2);
+}
 
-  const unsigned int number_of_locations = 3;
-  std::vector<Point> locations;
-  std::array<Real, number_of_locations> standard_truth, orthogonal_truth;
+TEST(FunctionalExpansionsTest, cylindricalDuoConstructorAxialZ)
+{
+  const std::vector<MooseEnum> domains = {
+      FBI::_domain_options = "z", FBI::_domain_options = "x", FBI::_domain_options = "y"};
+  const std::vector<std::size_t> orders = {21, 23};
+  const std::vector<MooseEnum> series = {SingleSeriesTypes1D = "Legendre",
+                                         SingleSeriesTypes2D = "Zernike"};
 
-  locations.push_back(Point(-0.14854612627465, 0.60364074055275, 0.76978431165674));
-  standard_truth[0] =     1.32257143058688;
-  orthogonal_truth[0] =  -2.33043696271172;
+  CylindricalDuo cylindrical(domains, orders, series);
+  EXPECT_EQ(cylindrical.getNumberOfTerms(),
+            (orders[0] + 1) * ((orders[1] + 1) * (orders[1] + 2)) / 2);
+}
 
-  locations.push_back(Point(0.93801805187856, 0.74175118177279, 0.74211345600994));
-  standard_truth[1] =     3.68047786932034;
-  orthogonal_truth[1] =  74.48747654183713;
+TEST(FunctionalExpansionsTest, cylindricalDuoEvaluator)
+{
+  const std::vector<MooseEnum> domains = {
+      FBI::_domain_options = "x", FBI::_domain_options = "y", FBI::_domain_options = "z"};
+  const std::vector<std::size_t> orders = {15, 17};
+  const std::vector<MooseEnum> series = {SingleSeriesTypes1D = "Legendre",
+                                         SingleSeriesTypes2D = "Zernike"};
 
-  locations.push_back(Point(0.35423736896098, -0.83921049062126, -0.02231845586669));
-  standard_truth[2] =     0.17515811557416;
-  orthogonal_truth[2] = -14.48091828923379;
+  CylindricalDuo cylindrical(domains, orders, series);
 
+  const std::vector<Point> locations = {
+      Point(-0.14854612627465, 0.60364074055275, 0.76978431165674),
+      Point(0.93801805187856, 0.74175118177279, 0.45207131996044),
+      Point(0.35423736896098, -0.83921049062126, -0.02231845586669)};
+  const std::vector<Real> standard_truth = {
+      0.42889689399543629, 4.3724388003439207, 0.82275646257084989};
+  const std::vector<Real> orthogonal_truth = {
+      -10.386457517518826, -161.7959192066881, -3.9949571266605481};
 
-  for (std::size_t i = 0; i < number_of_locations; ++i)
+  for (std::size_t i = 0; i < locations.size(); ++i)
   {
-    zernike3D.setLocation(locations[i]);
-    EXPECT_NEAR(zernike3D.getStandardSeriesSum(), standard_truth[i], tol);
-    EXPECT_NEAR(zernike3D.getOrthonormalSeriesSum(), orthogonal_truth[i], tol);
+    cylindrical.setLocation(locations[i]);
+    EXPECT_NEAR(cylindrical.getStandardSeriesSum(), standard_truth[i], tol);
+    EXPECT_NEAR(cylindrical.getOrthonormalSeriesSum(), orthogonal_truth[i], tol);
   }
 }
 
-TEST(FunctionalExpansionsTest, functionalBasisInterface)
+TEST(FunctionalExpansionsTest, functionalBasisInterfaceCylindrical)
 {
-  std::vector<MooseEnum> domains;
-  std::vector<std::size_t> orders;
-  std::vector<MooseEnum> series;
+  const std::vector<MooseEnum> domains = {
+      FBI::_domain_options = "x", FBI::_domain_options = "y", FBI::_domain_options = "z"};
+  const std::vector<std::size_t> orders = {4, 5};
+  const std::vector<MooseEnum> series = {SingleSeriesTypes1D = "Legendre",
+                                         SingleSeriesTypes2D = "Zernike"};
 
-  domains.push_back(FBI::_domain_options = "x");
-  orders.push_back(4);
-  series.push_back(SingleSeriesTypes1D = "Zernike");
+  CylindricalDuo cylindrical(domains, orders, series);
 
-  domains.push_back(FBI::_domain_options = "y");
-  orders.push_back(5);
-  series.push_back(SingleSeriesTypes1D = "Zernike");
-
-  domains.push_back(FBI::_domain_options = "z");
-  orders.push_back(3);
-  series.push_back(SingleSeriesTypes1D = "Zernike");
-
-  Cartesian zernike3D(domains, orders, series);
-
-  const Point location(-0.38541903411291,
-                        0.61369802505416,
-                       -0.04539307255549);
-  const Real truth = 0.26458908225718;
-  FunctionalBasisInterface & interface = (FunctionalBasisInterface &)zernike3D;
+  const Point location(-0.38541903411291, 0.61369802505416, -0.04539307255549);
+  const Real truth = 0.10414963426362565;
+  FunctionalBasisInterface & interface = (FunctionalBasisInterface &)cylindrical;
 
   interface.setLocation(location);
   EXPECT_NEAR(interface.getStandardSeriesSum(), truth, tol);

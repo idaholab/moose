@@ -1,12 +1,6 @@
 #include "gtest/gtest.h"
 
-#include "Cartesian.h"
-#include "Legendre.h"
-
-const double tol = 1e-13;
-
-MooseEnum SingleSeriesTypes1D("Legendre");
-
+#include "Setup.h"
 
 TEST(FunctionalExpansionsTest, legendreConstructor)
 {
@@ -42,7 +36,7 @@ TEST(FunctionalExpansionsTest, legendreSeriesEvaluation)
     EXPECT_NEAR(answer[i], truth[i], tol);
 }
 
-TEST(FunctionalExpansionsTest, cartesianConstructor)
+TEST(FunctionalExpansionsTest, CartesianConstructor)
 {
   std::vector<MooseEnum> domains;
   std::vector<std::size_t> orders;
@@ -69,43 +63,24 @@ TEST(FunctionalExpansionsTest, cartesianConstructor)
 
 TEST(FunctionalExpansionsTest, Cartesian3D)
 {
-  std::vector<MooseEnum> domains;
-  std::vector<std::size_t> orders;
-  std::vector<MooseEnum> series;
-
-  domains.push_back(FBI::_domain_options = "x");
-  orders.push_back(14);
-  series.push_back(SingleSeriesTypes1D = "Legendre");
-
-  domains.push_back(FBI::_domain_options = "y");
-  orders.push_back(21);
-  series.push_back(SingleSeriesTypes1D = "Legendre");
-
-  domains.push_back(FBI::_domain_options = "z");
-  orders.push_back(22);
-  series.push_back(SingleSeriesTypes1D = "Legendre");
+  const std::vector<MooseEnum> domains = {
+      FBI::_domain_options = "x", FBI::_domain_options = "y", FBI::_domain_options = "z"};
+  const std::vector<std::size_t> orders = {14, 21, 22};
+  const std::vector<MooseEnum> series = {SingleSeriesTypes1D = "Legendre",
+                                         SingleSeriesTypes1D = "Legendre",
+                                         SingleSeriesTypes1D = "Legendre"};
 
   Cartesian legendre3D(domains, orders, series);
 
+  const std::vector<Point> locations = {
+      Point(-0.14854612627465, 0.60364074055275, 0.76978431165674),
+      Point(0.93801805187856, 0.74175118177279, 0.74211345600994),
+      Point(0.35423736896098, -0.83921049062126, -0.02231845586669)};
+  const std::vector<Real> standard_truth = {1.32257143058688, 3.68047786932034, 0.17515811557416};
+  const std::vector<Real> orthogonal_truth = {
+      -2.33043696271172, 74.48747654183713, -14.48091828923379};
 
-  const unsigned int number_of_locations = 3;
-  std::vector<Point> locations;
-  std::array<Real, number_of_locations> standard_truth, orthogonal_truth;
-
-  locations.push_back(Point(-0.14854612627465, 0.60364074055275, 0.76978431165674));
-  standard_truth[0] =     1.32257143058688;
-  orthogonal_truth[0] =  -2.33043696271172;
-
-  locations.push_back(Point(0.93801805187856, 0.74175118177279, 0.74211345600994));
-  standard_truth[1] =     3.68047786932034;
-  orthogonal_truth[1] =  74.48747654183713;
-
-  locations.push_back(Point(0.35423736896098, -0.83921049062126, -0.02231845586669));
-  standard_truth[2] =     0.17515811557416;
-  orthogonal_truth[2] = -14.48091828923379;
-
-
-  for (std::size_t i = 0; i < number_of_locations; ++i)
+  for (std::size_t i = 0; i < locations.size(); ++i)
   {
     legendre3D.setLocation(locations[i]);
     EXPECT_NEAR(legendre3D.getStandardSeriesSum(), standard_truth[i], tol);
@@ -113,29 +88,18 @@ TEST(FunctionalExpansionsTest, Cartesian3D)
   }
 }
 
-TEST(FunctionalExpansionsTest, functionalBasisInterface)
+TEST(FunctionalExpansionsTest, functionalBasisInterfaceCartesian)
 {
-  std::vector<MooseEnum> domains;
-  std::vector<std::size_t> orders;
-  std::vector<MooseEnum> series;
-
-  domains.push_back(FBI::_domain_options = "x");
-  orders.push_back(4);
-  series.push_back(SingleSeriesTypes1D = "Legendre");
-
-  domains.push_back(FBI::_domain_options = "y");
-  orders.push_back(5);
-  series.push_back(SingleSeriesTypes1D = "Legendre");
-
-  domains.push_back(FBI::_domain_options = "z");
-  orders.push_back(3);
-  series.push_back(SingleSeriesTypes1D = "Legendre");
+  const std::vector<MooseEnum> domains = {
+      FBI::_domain_options = "x", FBI::_domain_options = "y", FBI::_domain_options = "z"};
+  const std::vector<std::size_t> orders = {4, 5, 3};
+  const std::vector<MooseEnum> series = {SingleSeriesTypes1D = "Legendre",
+                                         SingleSeriesTypes1D = "Legendre",
+                                         SingleSeriesTypes1D = "Legendre"};
 
   Cartesian legendre3D(domains, orders, series);
 
-  const Point location(-0.38541903411291,
-                        0.61369802505416,
-                       -0.04539307255549);
+  const Point location(-0.38541903411291, 0.61369802505416, -0.04539307255549);
   const Real truth = 0.26458908225718;
   FunctionalBasisInterface & interface = (FunctionalBasisInterface &)legendre3D;
 

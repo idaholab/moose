@@ -14,6 +14,7 @@
 
 #include "FunctionalExpansionToolsApp.h"
 #include "gtest/gtest.h"
+#include "Setup.h"
 
 // Moose includes
 #include "Moose.h"
@@ -24,6 +25,9 @@
 #include <string>
 
 PerfLog Moose::perf_log("gtest");
+
+MooseEnum SingleSeriesTypes1D("Legendre");
+MooseEnum SingleSeriesTypes2D("Zernike");
 
 GTEST_API_ int
 main(int argc, char ** argv)
