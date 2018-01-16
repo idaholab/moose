@@ -99,6 +99,7 @@ SamplerTransfer::getReceiver(unsigned int app_index, const std::vector<DenseMatr
         _multi_app->name(),
         ") Control object for the 'to_control' parameter must be of type 'SamplerReceiver'.");
 
+  /*
   // Test the size of parameter list with the number of columns in Sampler matrix
   std::pair<unsigned int, unsigned int> loc = _multi_app_matrix_row[app_index];
   if (_parameter_names.size() != samples[loc.first].n())
@@ -109,6 +110,6 @@ SamplerTransfer::getReceiver(unsigned int app_index, const std::vector<DenseMatr
                ") in the Sampler data matrix with index ",
                loc.first,
                ".");
-
+  */
   return ptr;
 }

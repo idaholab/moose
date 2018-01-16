@@ -162,6 +162,31 @@ protected:
                                   bool warn_when_values_differ = false);
   ///@}
 
+  ///@{
+  /**
+   * Return the ControllableParameter object. Generally, these methods should be avoided if possible.
+   *
+   * However, in some cases (like when the type is not known) to interrogate the actual object.
+   */
+  template <typename T>
+  ControllableParameter<T> getControllableParameter(const std::string & name, bool warn_when_values_differ = false);
+
+  template <typename T>
+  ControllableParameter<T> getControllableParameterByName(const std::string & name, bool warn_when_values_differ = false);
+
+  template <typename T>
+  ControllableParameter<T> getControllableParameterByName(const std::string & object_name, const std::string & param_name, bool warn_when_values_differ = false);
+
+  template <typename T>
+  ControllableParameter<T> getControllableParameterByName(const MooseObjectName & object_name, const std::string & param_name, bool warn_when_values_differ = false);
+
+  template <typename T>
+  ControllableParameter<T> getControllableParameterByName(const std::string & tag, const std::string & object_name, const std::string & param_name, bool warn_when_values_differ = false);
+
+  template <typename T>
+  ControllableParameter<T> getControllableParameterByName(const MooseObjectParameterName & name, bool warn_when_values_differ = false);
+  ///@}
+
 private:
   /// A reference to the InputParameterWarehouse which is used for access the parameter objects
   InputParameterWarehouse & _input_parameter_warehouse;
@@ -170,7 +195,8 @@ private:
   template <typename T>
   ControllableParameter<T> getControllableParameterHelper(const MooseObjectParameterName & desired,
                                                           bool warn_when_values_differ,
-                                                          bool mark_as_set = false);
+                                                          bool mark_as_set = false,
+                                                          bool error_on_empty = true);
 };
 
 template <typename T>
@@ -311,14 +337,62 @@ Control::setControllableValueByName(const std::string & tag,
 
 template <typename T>
 ControllableParameter<T>
+Control::getControllableParameter(const std::string & name, bool warn_when_values_differ/*=false*/)
+{
+  return getControllableParameterByName<T>(getParam<std::string>(name), warn_when_values_differ);
+}
+
+template <typename T>
+ControllableParameter<T>
+Control::getControllableParameterByName(const std::string & name, bool warn_when_values_differ/*=false*/)
+{
+  MooseObjectParameterName desired(name);
+  return getControllableParameterHelper<T>(desired, warn_when_values_differ, /*mark_as_set=*/true, /*error_on_empty=*/false);
+}
+
+template <typename T>
+ControllableParameter<T>
+Control::getControllableParameterByName(const std::string & object_name, const std::string & param_name, bool warn_when_values_differ/*=false*/)
+{
+  MooseObjectParameterName desired(MooseObjectName(object_name), param_name);
+  return getControllableParameterHelper<T>(desired, warn_when_values_differ, /*mark_as_set=*/true, /*error_on_empty=*/false);
+}
+
+template <typename T>
+ControllableParameter<T>
+Control::getControllableParameterByName(const MooseObjectName & object_name, const std::string & param_name, bool warn_when_values_differ/*=false*/)
+{
+  MooseObjectParameterName desired(object_name, param_name);
+  return getControllableParameterHelper<T>(desired, warn_when_values_differ, /*mark_as_set=*/true, /*error_on_empty=*/false);
+}
+
+template <typename T>
+ControllableParameter<T>
+Control::getControllableParameterByName(const std::string & tag, const std::string & object_name, const std::string & param_name, bool warn_when_values_differ/*=false*/)
+{
+  MooseObjectParameterName desired(tag, object_name, param_name);
+  return getControllableParameterHelper<T>(desired, warn_when_values_differ, /*mark_as_set=*/true, /*error_on_empty=*/false);
+}
+
+template <typename T>
+ControllableParameter<T>
+Control::getControllableParameterByName(const MooseObjectParameterName & desired, bool warn_when_values_differ/*=false*/)
+{
+  return getControllableParameterHelper<T>(desired, warn_when_values_differ, /*mark_as_set=*/true, /*error_on_empty=*/false);
+}
+
+
+template <typename T>
+ControllableParameter<T>
 Control::getControllableParameterHelper(const MooseObjectParameterName & desired,
                                         bool warn_when_values_differ,
-                                        bool mark_as_set)
+                                        bool mark_as_set,
+                                        bool error_on_empty)
 {
 
   // The ControllableParameter object to return
   ControllableParameter<T> output =
-      _input_parameter_warehouse.getControllableParameter<T>(desired, mark_as_set);
+      _input_parameter_warehouse.getControllableParameter<T>(desired, mark_as_set, error_on_empty);
 
   // Produce a warning, if the flag is true, when multiple parameters have differing values
   if (warn_when_values_differ)
@@ -347,5 +421,6 @@ Control::getControllableParameterHelper(const MooseObjectParameterName & desired
 
   return output;
 }
+
 
 #endif // CONTROL_H
