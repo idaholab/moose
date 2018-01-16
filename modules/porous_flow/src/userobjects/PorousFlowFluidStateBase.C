@@ -46,6 +46,36 @@ PorousFlowFluidStateBase::PorousFlowFluidStateBase(const InputParameters & param
                " is larger than the number of fluid components");
 }
 
+unsigned int
+PorousFlowFluidStateBase::numPhases() const
+{
+  return _num_phases;
+}
+
+unsigned int
+PorousFlowFluidStateBase::aqueousPhaseIndex() const
+{
+  return _aqueous_phase_number;
+}
+
+unsigned int
+PorousFlowFluidStateBase::gasPhaseIndex() const
+{
+  return _gas_phase_number;
+}
+
+unsigned int
+PorousFlowFluidStateBase::aqueousComponentIndex() const
+{
+  return _aqueous_fluid_component;
+}
+
+unsigned int
+PorousFlowFluidStateBase::gasComponentIndex() const
+{
+  return _gas_fluid_component;
+}
+
 void
 PorousFlowFluidStateBase::clearFluidStateProperties(std::vector<FluidStateProperties> & fsp) const
 {

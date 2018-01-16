@@ -82,6 +82,8 @@ protected:
   std::vector<unsigned int> _zvar;
   /// Number of coupled total mass fractions. Should be _num_phases - 1
   const unsigned int _num_z_vars;
+  /// FluidState UserObject
+  const PorousFlowFluidStateBase & _fs_base;
   /// Phase number of the aqueous phase
   const unsigned int _aqueous_phase_number;
   /// Phase number of the gas phase

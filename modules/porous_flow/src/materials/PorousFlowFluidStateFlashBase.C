@@ -16,14 +16,12 @@ validParams<PorousFlowFluidStateFlashBase>()
   params.addRequiredCoupledVar("gas_porepressure",
                                "Variable that is the porepressure of the gas phase");
   params.addRequiredCoupledVar("z", "Total mass fraction of component i summed over all phases");
-  params.addParam<unsigned int>("liquid_phase_number", 0, "The phase number of the liquid phase");
-  params.addParam<unsigned int>(
-      "liquid_fluid_component", 0, "The fluid component number of the liquid phase");
   MooseEnum unit_choice("Kelvin=0 Celsius=1", "Kelvin");
   params.addParam<MooseEnum>(
       "temperature_unit", unit_choice, "The unit of the temperature variable");
   params.addRequiredParam<UserObjectName>("capillary_pressure",
                                           "Name of the UserObject defining the capillary pressure");
+  params.addRequiredParam<UserObjectName>("fluid_state", "Name of the FluidState UserObject");
   params.addClassDescription("Base class for fluid state calculations using persistent primary "
                              "variables and a vapor-liquid flash");
   return params;
@@ -42,10 +40,11 @@ PorousFlowFluidStateFlashBase::PorousFlowFluidStateFlashBase(const InputParamete
 
     _num_z_vars(coupledComponents("z")),
 
-    _aqueous_phase_number(getParam<unsigned int>("liquid_phase_number")),
-    _gas_phase_number(1 - _aqueous_phase_number),
-    _aqueous_fluid_component(getParam<unsigned int>("liquid_fluid_component")),
-    _gas_fluid_component(1 - _aqueous_fluid_component),
+    _fs_base(getUserObject<PorousFlowFluidStateBase>("fluid_state")),
+    _aqueous_phase_number(_fs_base.aqueousPhaseIndex()),
+    _gas_phase_number(_fs_base.gasPhaseIndex()),
+    _aqueous_fluid_component(_fs_base.aqueousComponentIndex()),
+    _gas_fluid_component(_fs_base.gasComponentIndex()),
 
     _temperature(_nodal_material ? getMaterialProperty<Real>("PorousFlow_temperature_nodal")
                                  : getMaterialProperty<Real>("PorousFlow_temperature_qp")),
@@ -89,10 +88,12 @@ PorousFlowFluidStateFlashBase::PorousFlowFluidStateFlashBase(const InputParamete
     _pc_uo(getUserObject<PorousFlowCapillaryPressure>("capillary_pressure"))
 {
   // Only two phases are possible in the fluidstate classes
-  if (_num_phases != 2)
-    mooseError("Only two phases are allowed in ",
+  if (_fs_base.numPhases() != _num_phases)
+    mooseError("Only ",
+               _fs_base.numPhases(),
+               " phases are allowed in ",
                _name,
-               ". Please check the number of phases entered in the dictator is 2");
+               ". Please check the number of phases entered in the dictator is correct");
 
   // Check that the number of total mass fractions provided as primary variables is correct
   if (_num_z_vars != _num_components - 1)
