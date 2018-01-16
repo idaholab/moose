@@ -37,6 +37,5 @@ AddFieldSplitAction::AddFieldSplitAction(InputParameters params) : MooseObjectAc
 void
 AddFieldSplitAction::act()
 {
-  _moose_object_pars.set<FEProblemBase *>("_fe_problem_base") = _problem.get();
   _problem->getNonlinearSystemBase().addSplit(_type, _name, _moose_object_pars);
 }
