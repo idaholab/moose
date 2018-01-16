@@ -64,14 +64,16 @@ SamplerTransfer::execute()
     // Get the sub-app SamplerReceiver object and perform error checking
     SamplerReceiver * ptr = getReceiver(app_index, samples);
 
-    // Perform the transfer
+    // Populate the row of data to transfer
     std::pair<unsigned int, unsigned int> loc = _multi_app_matrix_row[app_index];
-    ptr->reset(); // clears existing parameter settings
-    for (auto j = beginIndex(_parameter_names); j < _parameter_names.size(); ++j)
-    {
-      const Real & data = samples[loc.first](loc.second, j);
-      ptr->addControlParameter(_parameter_names[j], data);
-    }
+    std::vector<Real> row;
+    row.reserve(samples[loc.first].n());
+    for (unsigned int j = 0; j < samples[loc.first].n(); ++j)
+      row.emplace_back(samples[loc.first](loc.second, j));
+
+    // Perform the transfer
+    ptr->transfer(_parameter_names, row);
+
   }
 }
 

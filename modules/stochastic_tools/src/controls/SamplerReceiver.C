@@ -31,18 +31,13 @@ SamplerReceiver::SamplerReceiver(const InputParameters & parameters) : Control(p
 void
 SamplerReceiver::execute()
 {
-  for (auto & param_pair : _parameters)
-    setControllableValueByName<Real>(param_pair.first, param_pair.second);
+  for (std::size_t i = 0; i < _parameters.size(); ++i)
+    setControllableValueByName<Real>(_parameters[i], _values[i]);
 }
 
 void
-SamplerReceiver::reset()
+SamplerReceiver::transfer(const std::vector<std::string> & names, const std::vector<Real> & values)
 {
-  _parameters.clear();
-}
-
-void
-SamplerReceiver::addControlParameter(const std::string & name, const Real & value)
-{
-  _parameters[name] = value;
+  _parameters = names;
+  _values = values;
 }

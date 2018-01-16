@@ -35,21 +35,20 @@ public:
   virtual void execute() override;
 
 protected:
-  /**
-   * Clears the list of parameters to modify
-   */
-  void reset();
 
   /**
-   * Appends the list of parameters to modify
+   * Update the parameter names and associated values.
    */
-  void addControlParameter(const std::string & name, const Real & value);
+  void transfer(const std::vector<std::string> & names, const std::vector<Real> & values);
 
-  /// Storage for the parameters to control
-  std::map<std::string, Real> _parameters;
+  /// Parameter names to modify
+  std::vector<std::string> _parameters;
 
-  /// Allows the SamplerTransfer to call the reset and addControlParameter methods, which
-  /// should only be called by that object so making the public is dangerous.
+  /// Values to use when modifying parameters
+  std::vector<Real> _values;
+
+  /// Allows the SamplerTransfer to call the transfer method, which
+  /// should only be called by that object so making it public is dangerous.
   friend class SamplerTransfer;
 };
 
