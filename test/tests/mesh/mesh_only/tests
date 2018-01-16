@@ -7,4 +7,13 @@
     recover = false
     method = 'opt oprof'
   [../]
+
+  [./mesh_only_warning]
+    type = RunApp
+    input = 'mesh_only.i'
+    # Intentional error (not a mesh filename)
+    cli_args = '--mesh-only Outputs/exodus=false'
+    allow_warnings = true
+    expect_out = 'The --mesh-only option should be followed by a file name.'
+  [../]
 []
