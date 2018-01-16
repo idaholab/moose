@@ -14,7 +14,6 @@ InputParameters
 validParams<PorousFlowFluidStateWaterNCG>()
 {
   InputParameters params = validParams<PorousFlowFluidStateFlashBase>();
-  params.addRequiredParam<UserObjectName>("fluid_state", "Name of the FluidState UserObject");
   params.addClassDescription("Fluid state class for water and non-condensable gas");
   return params;
 }

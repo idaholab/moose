@@ -67,6 +67,36 @@ public:
   PorousFlowFluidStateBase(const InputParameters & parameters);
 
   /**
+   * The maximum number of phases in this model
+   * @return number of phases
+   */
+  unsigned int numPhases() const;
+
+  /**
+   * The index of the aqueous phase
+   * @return aqueous phase number
+   */
+  unsigned int aqueousPhaseIndex() const;
+
+  /**
+   * The index of the gas phase
+   * @return gas phase number
+   */
+  unsigned int gasPhaseIndex() const;
+
+  /**
+   * The index of the aqueous fluid component
+   * @return aqueous fluid component number
+   */
+  unsigned int aqueousComponentIndex() const;
+
+  /**
+   * The index of the gas fluid component
+   * @return gas fluid component number
+   */
+  unsigned int gasComponentIndex() const;
+
+  /**
    * Clears the contents of the FluidStateProperties data structure
    * @param[out] fsp FluidStateProperties data structure with all data initialized to 0
    */
