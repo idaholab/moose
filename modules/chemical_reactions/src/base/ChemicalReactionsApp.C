@@ -35,6 +35,8 @@
 #include "LangmuirMaterial.h"
 #include "MollifiedLangmuirMaterial.h"
 
+#include "TotalMineralVolumeFraction.h"
+
 template <>
 InputParameters
 validParams<ChemicalReactionsApp>()
@@ -95,6 +97,8 @@ ChemicalReactionsApp::registerObjects(Factory & factory)
 
   registerMaterial(LangmuirMaterial);
   registerMaterial(MollifiedLangmuirMaterial);
+
+  registerPostprocessor(TotalMineralVolumeFraction);
 }
 
 // External entry point for dynamic syntax association

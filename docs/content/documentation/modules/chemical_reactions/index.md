@@ -82,6 +82,29 @@ The exponents $\theta$ and $\eta$ in the reaction rate equation are specific to 
 reaction, and should be measured experimentally. For simplicity, they are set to unity in this
 module.
 
+The rate of change in molar concentration, $C_m$, of the $m^{\mathrm{th}}$ mineral species is
+\begin{equation}
+\frac{\partial C_m}{\partial t} = I_m.
+\end{equation}
+
+This can be expressed in terms of the mineral volume fraction
+\begin{equation}
+\phi_m = \overline{V}_m C_m,
+\end{equation}
+
+where $\overline{V}_m$ is the molar volume of the $m^{\mathrm{th}}$ mineral species,
+\begin{equation}
+\frac{\partial \phi_m}{\partial t} = \overline{V}_m I_m.
+\end{equation}
+
+The total porosity, $\phi_t$, can be defined in terms of the volume fraction of all mineral species
+\begin{equation}
+\phi_t = 1 - \sum_m \phi_m.
+\end{equation}
+In this way, the change in porosity due to mineral precipitation or dissolution can
+be calculated, which can then be used to calculate changes in other material properties
+such as permeability.
+
 ## Implementation details
 
 The physics described above is implemented in a number of `Kernels` and `AuxKernels`
@@ -137,6 +160,9 @@ More complicated formulations can be added by creating new `Materials` as requir
 ### Boundary condition
 A flux boundary condition, [`ChemicalOutFlowBC`](/chemical_reactions/ChemicalOutFlowBC.md) is
 provided to define $\nabla u$ on a boundary.
+
+### Postprocessors
+The total volume fraction of a given mineral species can be calculated using a [`TotalMineralVolumeFraction`](/chemical_reactions/TotalMineralVolumeFraction.md) postprocessor.
 
 ## Reaction network parser
 
