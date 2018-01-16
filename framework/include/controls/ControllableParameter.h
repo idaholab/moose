@@ -46,6 +46,11 @@ public:
   std::size_t size() const { return _parameter_values.size(); }
 
   /**
+   * Return true if the container is empty.
+   */
+  bool empty() { return _parameter_values.size() == 0; }
+
+  /**
    * Set the value(s) of the controlled parameters stored in this class.
    * @param value The value to change the parameters to.
    */
