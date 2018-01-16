@@ -14,7 +14,6 @@ InputParameters
 validParams<PorousFlowFluidStateBrineCO2>()
 {
   InputParameters params = validParams<PorousFlowFluidStateFlashBase>();
-  params.addRequiredParam<UserObjectName>("fluid_state", "Name of the FluidState UserObject");
   params.addCoupledVar("xnacl", 0, "The salt mass fraction in the brine (kg/kg)");
   params.addClassDescription("Fluid state class for brine and CO2");
   return params;
