@@ -188,8 +188,11 @@ class TestHarness:
             self.base_dir = os.getcwd()
             for dirpath, dirnames, filenames in os.walk(self.base_dir, followlinks=True):
                 # Prune submdule paths when searching for tests
-                if self.base_dir != dirpath and os.path.exists(os.path.join(dirpath, '.git')):
+
+                dir_name = os.path.basename(dirpath)
+                if (self.base_dir != dirpath and os.path.exists(os.path.join(dirpath, '.git'))) or dir_name in [".git", ".svn"]:
                     dirnames[:] = []
+                    filenames[:] = []
 
                 # walk into directories that aren't contrib directories
                 if "contrib" not in os.path.relpath(dirpath, os.getcwd()):
