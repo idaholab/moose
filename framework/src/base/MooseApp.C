@@ -641,9 +641,22 @@ MooseApp::writeMeshOnly(std::string mesh_file_name)
 {
   auto & mesh_ptr = _action_warehouse.mesh();
 
+  bool should_generate = false;
   // If no argument specified or if the argument following --mesh-only starts
   // with a dash, try to build an output filename based on the input mesh filename.
-  if (mesh_file_name.empty() || (mesh_file_name.find('-') == 0))
+  if (mesh_file_name.empty() || (mesh_file_name[0] == '-'))
+    should_generate = true;
+  // There's something following the --mesh-only flag, let's make an attempt to validate it.
+  // If we don't find a '.' or we DO find an equals sign, chances are this is not a file!
+  else if ((mesh_file_name.find('.') == std::string::npos ||
+            mesh_file_name.find('=') != std::string::npos))
+  {
+    mooseWarning("The --mesh-only option should be followed by a file name. Move it to the end of "
+                 "your CLI args or follow it by another \"-\" argument.");
+    should_generate = true;
+  }
+
+  if (should_generate)
   {
     mesh_file_name = _parser.getFileName();
     size_t pos = mesh_file_name.find_last_of('.');
