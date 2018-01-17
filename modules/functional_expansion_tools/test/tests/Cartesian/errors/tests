@@ -4,7 +4,7 @@
   [./missing_xyz]
     type = 'RunException'
     input = missing_xyz.i
-    expect_err = 'Must specify one of 'x', 'y', or 'z' for 'Cartesian' series!'
+    expect_err = "Must specify one of 'x', 'y', or 'z' for 'Cartesian' series!"
     group = functional_expansion
   [../]
 []
