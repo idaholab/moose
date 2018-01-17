@@ -22,6 +22,26 @@ namespace hashing
 {
 typedef std::size_t HashValue;
 
+/// Final iteration of the variadic template with no additional arguments
+inline void
+hashCombine(HashValue & /* seed */)
+{
+}
+
+/**
+ * Variadic template to hashing a combination with finite size
+ *   see: https://stackoverflow.com/a/38140932
+ */
+template <class T, class... Rest>
+inline void
+hashCombine(HashValue & seed, const T & value, Rest... rest)
+{
+  std::hash<T> hasher;
+
+  seed ^= hasher(value) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+  hashCombine(seed, rest...);
+}
+
 /**
  * Hash function for sampling 10 points from a large container and hashing
  *   see: https://stackoverflow.com/a/37007715
@@ -40,25 +60,6 @@ hashLargeContainer(Container const & container)
   }
 
   return value;
-}
-
-/// Final iteration of the variadic template with no additional arguments
-inline void
-hashCombine(HashValue & /* seed */)
-{
-}
-/**
- * Variadic template to hashing a combination with finite size
- *   see: https://stackoverflow.com/a/38140932
- */
-template <class T, class... Rest>
-inline void
-hashCombine(HashValue & seed, const T & value, Rest... rest)
-{
-  std::hash<T> hasher;
-
-  seed ^= hasher(value) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
-  hashCombine(seed, rest...);
 }
 
 /// Hashing for Point
