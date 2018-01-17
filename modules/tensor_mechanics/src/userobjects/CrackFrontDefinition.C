@@ -73,6 +73,7 @@ addCrackFrontDefinitionParams(InputParameters & params)
   params.addParam<bool>("q_function_rings", false, "Generate rings of nodes for q-function");
   params.addParam<unsigned int>("last_ring", "The number of rings of nodes to generate");
   params.addParam<unsigned int>("first_ring", "The number of rings of nodes to generate");
+  params.addParam<unsigned int>("nrings", "The number of rings of nodes to generate");
   params.addParam<VariableName>("disp_x", "Variable containing the x displacement");
   params.addParam<VariableName>("disp_y", "Variable containing the y displacement");
   params.addParam<VariableName>("disp_z", "Variable containing the z displacement");

@@ -24,6 +24,8 @@ validParams<ContactPressureAux>()
   params.addRequiredCoupledVar("nodal_area", "The nodal area");
   params.addRequiredParam<BoundaryName>("paired_boundary", "The boundary to be penetrated");
   params.set<ExecFlagEnum>("execute_on") = EXEC_NONLINEAR;
+  MooseEnum orders("FIRST SECOND THIRD FOURTH", "FIRST");
+  params.addParam<MooseEnum>("order", orders, "The finite element order: " + orders.getRawNames());
   return params;
 }
 

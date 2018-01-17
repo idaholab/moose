@@ -55,6 +55,8 @@ validParams<InteractionIntegralSM>()
   params.addParam<Real>("poissons_ratio", "Poisson's ratio for the material.");
   params.addParam<Real>("youngs_modulus", "Young's modulus of the material.");
   params.set<bool>("use_displaced_mesh") = false;
+  params.addParam<unsigned int>("ring_first",
+                                "The first ring of elements for volume integral domain");
   params.addParam<unsigned int>("ring_index", "Ring ID");
   params.addParam<MooseEnum>("q_function_type",
                              InteractionIntegralSM::qFunctionType(),
