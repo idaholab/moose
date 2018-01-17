@@ -57,17 +57,6 @@ PenetrationLocator::PenetrationLocator(SubProblem & subproblem,
     for (unsigned int dim = 0; dim <= n_dims; ++dim)
       _fe[i][dim] = FEBase::build(dim, _fe_type).release();
   }
-
-  if (_normal_smoothing_method == NSM_NODAL_NORMAL_BASED)
-  {
-    if (!((_subproblem.hasVariable("nodal_normal_x")) &&
-          (_subproblem.hasVariable("nodal_normal_y")) &&
-          (_subproblem.hasVariable("nodal_normal_z"))))
-    {
-      mooseError("To use nodal-normal-based smoothing, the nodal_normal_x, nodal_normal_y, and "
-                 "nodal_normal_z variables must exist.  Are you missing the [NodalNormals] block?");
-    }
-  }
 }
 
 PenetrationLocator::~PenetrationLocator()
