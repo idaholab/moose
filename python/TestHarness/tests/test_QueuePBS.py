@@ -3,7 +3,7 @@ from contextlib import contextmanager
 from TestHarness import TestHarness
 from TestHarness import util
 import mock
-import os, sys, unittest, time, shutil, json, re
+import os, sys, unittest, time, shutil, json
 
 
 class HarnessAndDAG(object):
