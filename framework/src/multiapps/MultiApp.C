@@ -533,7 +533,7 @@ MultiApp::createApp(unsigned int i, Real start_time)
   app_params.set<std::shared_ptr<CommandLine>>("_command_line") = _app.commandLine();
   app_params.set<unsigned int>("_multiapp_level") = _app.multiAppLevel() + 1;
   app_params.set<unsigned int>("_multiapp_number") = _first_local_app + i;
-  _apps[i].reset(AppFactory::instance().create(_app_type, full_name, app_params, _my_comm));
+  _apps[i] = AppFactory::instance().createShared(_app_type, full_name, app_params, _my_comm);
   auto & app = _apps[i];
 
   std::string input_file = "";
