@@ -41,6 +41,16 @@ SamplerReceiver::execute()
       ControllableParameter<Real> control_param = getControllableParameterByName<Real>(param_name);
       if (!control_param.empty())
       {
+        // There must be enough data to populate the controlled parameter
+        if (value_position >= _values.size())
+          mooseError("The supplied vector of Real values is not sized correctly, the "
+                     "Real parameter '",
+                     param_name,
+                     " requires a value but no more values are available in "
+                     "the supplied values which have a size of ",
+                     _values.size(),
+                     ".");
+
         control_param.set(_values[value_position++]);
         continue; // continue to the next parameter
       }
