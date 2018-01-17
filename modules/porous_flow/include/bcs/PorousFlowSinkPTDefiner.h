@@ -39,6 +39,9 @@ protected:
   /// d(Nodal temperature)/d(PorousFlow variable)
   const MaterialProperty<std::vector<Real>> * const _dtemp_dvar;
 
+  /// Subtract this from porepressure or temperature before evaluating PiecewiseLinearSink, HalfCubicSink, etc
+  const VariableValue & _pt_shift;
+
   /// Provides the variable value (either porepressure, or temperature, depending on _involves_fluid)
   virtual Real ptVar() const;
 
