@@ -63,8 +63,11 @@ validParams<MechanicalContactConstraint>()
   params.addParam<Real>(
       "normal_smoothing_distance",
       "Distance from edge in parametric coordinates over which to smooth contact normal");
-  params.addParam<std::string>("normal_smoothing_method",
-                               "Method to use to smooth normals (edge_based|nodal_normal_based)");
+  MooseEnum smoothing_method("edge_based nodal_normal_based");
+  params.addParam<MooseEnum>(
+      "normal_smoothing_method", smoothing_method, "Method to use to smooth normals");
+  params.addParam<UserObjectName>("normal_normals",
+                                  "The name of the user object that provides the nodal normals.");
   params.addParam<MooseEnum>("order", orders, "The finite element order");
 
   params.addParam<Real>("tension_release",
@@ -162,12 +165,27 @@ MechanicalContactConstraint::MechanicalContactConstraint(const InputParameters &
   if (parameters.isParamValid("tangential_tolerance"))
     _penetration_locator.setTangentialTolerance(getParam<Real>("tangential_tolerance"));
 
-  if (parameters.isParamValid("normal_smoothing_distance"))
-    _penetration_locator.setNormalSmoothingDistance(getParam<Real>("normal_smoothing_distance"));
-
-  if (parameters.isParamValid("normal_smoothing_method"))
-    _penetration_locator.setNormalSmoothingMethod(
-        parameters.get<std::string>("normal_smoothing_method"));
+  if (isParamValid("normal_smoothing_method"))
+  {
+    MooseEnum smoothing_method = getParam<MooseEnum>("normal_smoothing_method");
+    if (smoothing_method == "edge_based")
+    {
+      if (!isParamValid("normal_smoothing_distance"))
+        mooseError(
+            name(),
+            ": For edge based normal smoothing, normal_smoothing_distance parameter must be set.");
+      _penetration_locator.setEdgeBaseSmoothingMethod(getParam<Real>("normal_smoothing_distance"));
+    }
+    else if (smoothing_method == "nodal_normal_based")
+    {
+      if (!isParamValid("nodal_normals"))
+        mooseError(name(),
+                   ": For nodal nodal based smoothing, nodal_normals parameter must be set.");
+      _penetration_locator.setNodalNormalSmoothingMethod(getParam<UserObjectName>("nodal_normals"));
+    }
+    else
+      mooseError(name(), ": Unknown smoothing method.");
+  }
 
   if (_formulation == CF_TANGENTIAL_PENALTY && _model != CM_COULOMB)
     mooseError("The 'tangential_penalty' formulation can only be used with the 'coulomb' model");

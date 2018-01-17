@@ -28,9 +28,6 @@ public:
                     bool check_whether_reasonable,
                     bool update_location,
                     Real tangential_tolerance,
-                    bool do_normal_smoothing,
-                    Real normal_smoothing_distance,
-                    PenetrationLocator::NORMAL_SMOOTHING_METHOD normal_smoothing_method,
                     std::vector<std::vector<FEBase *>> & fes,
                     FEType & fe_type,
                     NearestNodeLocator & nearest_node,
@@ -41,6 +38,18 @@ public:
 
   // Splitting Constructor
   PenetrationThread(PenetrationThread & x, Threads::split split);
+
+  /**
+   * Enable normal smoothing based on edge normals
+   * @param normal_smoothing_distance Distance from edge in parametric coordinates over which to
+   * smooth the normal
+   */
+  void setEdgeBaseSmoothingMethod(Real normal_smoothing_distance);
+  /**
+   * Enable normal smoothing based on nodal normals
+   * @param uo_name The name of the user object that provides the nodal normals
+   */
+  void setNodalNormalSmoothingMethod(const UserObjectName & uo_name);
 
   void operator()(const NodeIdRange & range);
 
@@ -62,12 +71,14 @@ protected:
   bool _check_whether_reasonable;
   bool _update_location;
   Real _tangential_tolerance;
+  /// Should we do contact normal smoothing?
   bool _do_normal_smoothing;
+  /// Distance from edge (in parametric coords) within which to perform normal smoothing
   Real _normal_smoothing_distance;
-  PenetrationLocator::NORMAL_SMOOTHING_METHOD _normal_smoothing_method;
-  MooseVariable * _nodal_normal_x;
-  MooseVariable * _nodal_normal_y;
-  MooseVariable * _nodal_normal_z;
+  /// The method used for normal smoothing
+  PenetrationLocator::NormalSmoothingMethod _normal_smoothing_method;
+  /// The name of user object that provides the nodal normals, if smoothing is based nodal ones
+  UserObjectName _nodal_normals_uo;
 
   std::vector<std::vector<FEBase *>> & _fes;
 

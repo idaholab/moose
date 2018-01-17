@@ -198,6 +198,7 @@
     normalize_penalty = true
     system = Constraint
     tangential_tolerance = .1
+    normal_smoothing_method = edge_based
     normal_smoothing_distance = .1
     model = frictionless
     formulation = kinematic
@@ -211,6 +212,7 @@
     slave = 2
     variable = temp
     tangential_tolerance = .1
+    normal_smoothing_method = edge_based
     normal_smoothing_distance = .1
     gap_conductivity = 0.01
     min_gap = 0.001

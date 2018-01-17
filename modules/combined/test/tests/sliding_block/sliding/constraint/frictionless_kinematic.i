@@ -196,6 +196,7 @@
     penalty = 1e+6
     formulation = default
     system = constraint
+    normal_smoothing_method = edge_based
     normal_smoothing_distance = 0.1
   [../]
 []

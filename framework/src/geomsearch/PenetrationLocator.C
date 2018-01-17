@@ -93,9 +93,6 @@ PenetrationLocator::detectPenetration()
                        _check_whether_reasonable,
                        _update_location,
                        _tangential_tolerance,
-                       _do_normal_smoothing,
-                       _normal_smoothing_distance,
-                       _normal_smoothing_method,
                        _fe,
                        _fe_type,
                        _nearest_node,
@@ -103,7 +100,19 @@ PenetrationLocator::detectPenetration()
                        elem_list,
                        side_list,
                        id_list);
+  if (_do_normal_smoothing)
+  {
+    switch (_normal_smoothing_method)
+    {
+      case NSM_EDGE_BASED:
+        pt.setEdgeBaseSmoothingMethod(_normal_smoothing_distance);
+        break;
 
+      case NSM_NODAL_NORMAL_BASED:
+        pt.setNodalNormalSmoothingMethod(_nodal_normals_uo);
+        break;
+    }
+  }
   Threads::parallel_reduce(slave_node_range, pt);
 
   std::vector<dof_id_type> recheck_slave_nodes = pt._recheck_slave_nodes;
@@ -198,21 +207,17 @@ PenetrationLocator::setTangentialTolerance(Real tangential_tolerance)
 }
 
 void
-PenetrationLocator::setNormalSmoothingDistance(Real normal_smoothing_distance)
+PenetrationLocator::setEdgeBaseSmoothingMethod(Real normal_smoothing_distance)
 {
+  _do_normal_smoothing = true;
+  _normal_smoothing_method = NSM_EDGE_BASED;
   _normal_smoothing_distance = normal_smoothing_distance;
-  if (_normal_smoothing_distance > 0.0)
-    _do_normal_smoothing = true;
 }
 
 void
-PenetrationLocator::setNormalSmoothingMethod(std::string nsmString)
+PenetrationLocator::setNodalNormalSmoothingMethod(const UserObjectName & uo_name)
 {
-  if (nsmString == "edge_based")
-    _normal_smoothing_method = NSM_EDGE_BASED;
-  else if (nsmString == "nodal_normal_based")
-    _normal_smoothing_method = NSM_NODAL_NORMAL_BASED;
-  else
-    mooseError("Invalid normal_smoothing_method: ", nsmString);
   _do_normal_smoothing = true;
+  _normal_smoothing_method = NSM_NODAL_NORMAL_BASED;
+  _nodal_normals_uo = uo_name;
 }

@@ -3,3 +3,6 @@ ELEMENT VARIABLES (all)
 NODAL VARIABLES (all)
 	!element_id
 	!side
+	!nodal_normal_x
+	!nodal_normal_y
+	!nodal_normal_z

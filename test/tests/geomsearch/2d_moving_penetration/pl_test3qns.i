@@ -51,6 +51,7 @@
     variable = distance
     boundary = 11            #slave
     paired_boundary = 12     #master
+    normal_smoothing_method = edge_based
     normal_smoothing_distance = 0.2
   [../]
 
@@ -59,6 +60,7 @@
     variable = distance
     boundary = 12            #slave
     paired_boundary = 11     #master
+    normal_smoothing_method = edge_based
     normal_smoothing_distance = 0.2
   [../]
 

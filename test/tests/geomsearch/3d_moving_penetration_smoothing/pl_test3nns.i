@@ -69,6 +69,7 @@
     boundary = 12            #slave
     paired_boundary = 11     #master
     normal_smoothing_method = nodal_normal_based
+    nodal_normals = nodal_normals
   [../]
 
   [./penetrate3]
@@ -289,6 +290,8 @@
 []
 
 [NodalNormals]
-  boundary = 11
-  corner_boundary = 20
+  [./nodal_normals]
+    boundary = 11
+    corner_boundary = 20
+  [../]
 []

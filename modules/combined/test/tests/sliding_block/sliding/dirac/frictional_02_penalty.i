@@ -195,6 +195,7 @@
     penalty = 1e+7
     formulation = penalty
     friction_coefficient = 0.2
+    normal_smoothing_method = edge_based
     normal_smoothing_distance = 0.1
   [../]
 []
