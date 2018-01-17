@@ -79,7 +79,7 @@ ifeq ($(1),)
 else
 	@echo "MOOSE Compiling C++ with suffix (in "$$(METHOD)" mode) "$$<"..."
 endif
-	@$$(libmesh_LIBTOOL) --tag=CXX $$(LIBTOOLFLAGS) --mode=compile --quiet \
+	$$(libmesh_LIBTOOL) --tag=CXX $$(LIBTOOLFLAGS) --mode=compile --quiet \
 	  $$(libmesh_CXX) $$(libmesh_CPPFLAGS) $$(ADDITIONAL_CPPFLAGS) $$(libmesh_CXXFLAGS) $$(app_INCLUDES) $$(libmesh_INCLUDE) -MMD -MP -MF $$@.d -MT $$@ -c $$< -o $$@
 endef
 # Instantiate Rules

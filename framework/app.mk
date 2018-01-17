@@ -108,7 +108,7 @@ endif
 
 # header files
 include_dirs	:= $(shell find $(depend_dirs) -type d | grep -v "\.svn")
-app_INCLUDE     := $(foreach i, $(include_dirs), -I$(i)) $(ADDITIONAL_INCLUDES)
+include_files	:= $(shell find $(depend_dirs) -name "*.h" | grep -v "\.svn")
 
 # clang static analyzer files
 app_analyzer := $(patsubst %.C, %.plist.$(obj-suffix), $(srcfiles))
@@ -125,6 +125,17 @@ ifeq ($(LIBRARY_SUFFIX),yes)
 else
   app_test_LIB     := $(APPLICATION_DIR)/test/lib/lib$(APPLICATION_NAME)_test-$(METHOD).la
 endif
+
+# all_header_directory
+app_all_header_dir := $(APPLICATION_DIR)/all_headers
+
+$(shell mkdir -p $(app_all_header_dir))
+
+# header file links
+
+link_names := $(foreach i, $(include_files), $(app_all_header_dir)/$(notdir $(i)))
+
+$(foreach i, $(include_files), $(shell ln -sf $(i) $(app_all_header_dir)/$(notdir $(i))))
 
 # application
 app_EXEC    := $(APPLICATION_DIR)/$(APPLICATION_NAME)-$(METHOD)
@@ -164,7 +175,7 @@ endif
 app_LIBS       := $(app_LIB) $(app_LIBS)
 app_LIBS_other := $(filter-out $(app_LIB),$(app_LIBS))
 app_HEADERS    := $(app_HEADER) $(app_HEADERS)
-app_INCLUDES   += $(app_INCLUDE)
+app_INCLUDES   += -I$(app_all_header_dir) $(ADDITIONAL_INCLUDES)
 app_DIRS       += $(APPLICATION_DIR)
 
 # WARNING: the += operator does NOT work here!
@@ -189,7 +200,7 @@ LIBRARY_SUFFIX :=
 $(eval $(call CXX_RULE_TEMPLATE,_with$(app_LIB_SUFFIX)))
 
 ifeq ($(BUILD_EXEC),yes)
-  all:: $(app_EXEC)
+  all:: | $(link_names) $(app_EXEC)
 endif
 
 BUILD_EXEC :=

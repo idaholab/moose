@@ -47,7 +47,25 @@ gtest_LIB       := $(gtest_DIR)/libgtest.la
 # dependency files
 gtest_deps      := $(patsubst %.cc, %.$(obj-suffix).d, $(gtest_srcfiles))
 
-moose_INC_DIRS := $(shell find $(FRAMEWORK_DIR)/include -type d -not -path "*/.svn*")
+#moose_INC_DIRS := $(shell find $(FRAMEWORK_DIR)/include -type d -not -path "*/.svn*")
+
+moose_all_header_dir := $(FRAMEWORK_DIR)/all_headers
+
+$(shell mkdir -p $(moose_all_header_dir))
+
+include_files	:= $(shell find $(FRAMEWORK_DIR)/include -name "*.h" | grep -v "\.svn")
+link_names := $(foreach i, $(include_files), $(moose_all_header_dir)/$(notdir $(i)))
+
+#define header_rule
+#$(moose_all_header_dir)/$(notdir $(1)): $(1) $(moose_all_header_dir)
+#	ln -sf $$< $$@
+#endef
+
+#$(foreach i, $(include_files), $(eval $(call header_rule, $(i))))
+
+$(foreach i, $(include_files), $(shell ln -sf $(i) $(moose_all_header_dir)/$(notdir $(i))))
+
+moose_INC_DIRS := $(moose_all_header_dir)
 moose_INC_DIRS += $(shell find $(FRAMEWORK_DIR)/contrib/*/include -type d -not -path "*/.svn*")
 moose_INC_DIRS += "$(gtest_DIR)"
 moose_INC_DIRS += "$(hit_DIR)"
@@ -81,7 +99,7 @@ moose_analyzer += $(patsubst %.cc, %.plist.$(obj-suffix), $(hit_srcfiles))
 app_INCLUDES := $(moose_INCLUDE)
 app_LIBS     := $(moose_LIBS)
 app_DIRS     := $(FRAMEWORK_DIR)
-all:: libmesh_submodule_status moose_revision moose
+all:: | libmesh_submodule_status moose_revision $(link_names) moose
 
 # revision header
 moose_revision_header = $(FRAMEWORK_DIR)/include/base/MooseRevision.h
