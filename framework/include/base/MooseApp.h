@@ -41,6 +41,7 @@ class MeshModifier;
 class InputParameterWarehouse;
 class SystemInfo;
 class CommandLine;
+class RelationshipManager;
 
 template <>
 InputParameters validParams<MooseApp>();
@@ -230,7 +231,11 @@ public:
   /**
    * Retrieve the Executioner for this App
    */
-  Executioner * getExecutioner() { return _executioner.get(); }
+  Executioner * getExecutioner()
+  {
+    mooseAssert(_executioner, "Executioner is nullptr");
+    return _executioner.get();
+  }
 
   /**
    * Retrieve the Executioner shared pointer for this App
@@ -523,6 +528,17 @@ public:
    */
   virtual void registerExecFlags();
 
+  bool hasRelationshipManager(const std::string & name) const;
+
+  void addRelationshipManager(std::shared_ptr<RelationshipManager> relationship_manager);
+
+  void attachRelationshipManagers(Moose::RelationshipManagerType rm_type);
+
+  /**
+   * Returns the Relationship managers info suitable for printing.
+   */
+  std::vector<std::pair<std::string, std::string>> getRelationshipManagerInfo();
+
 protected:
   /**
    * Register individual flag.
@@ -686,6 +702,8 @@ protected:
 
   /// true if we want to just check the input file
   bool _check_input;
+
+  std::vector<std::shared_ptr<RelationshipManager>> _relationship_managers;
 
   /// The library, registration method and the handle to the method
   std::map<std::pair<std::string, std::string>, void *> _lib_handles;

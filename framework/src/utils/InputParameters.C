@@ -824,6 +824,22 @@ InputParameters::addParam<std::vector<MooseEnum>>(const std::string & /*name*/,
 
 template <>
 void
+InputParameters::addPrivateParam<MooseEnum>(const std::string & /*name*/)
+{
+  mooseError("You must supply a MooseEnum object when using addPrivateParam, even if the parameter "
+             "is not required!");
+}
+
+template <>
+void
+InputParameters::addPrivateParam<MultiMooseEnum>(const std::string & /*name*/)
+{
+  mooseError("You must supply a MultiMooseEnum object when using addPrivateParam, even if the "
+             "parameter is not required!");
+}
+
+template <>
+void
 InputParameters::addDeprecatedParam<MooseEnum>(const std::string & /*name*/,
                                                const std::string & /*doc_string*/,
                                                const std::string & /*deprecation_message*/)

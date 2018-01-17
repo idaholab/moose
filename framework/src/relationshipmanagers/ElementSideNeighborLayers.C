@@ -20,7 +20,7 @@ template <>
 InputParameters
 validParams<ElementSideNeighborLayers>()
 {
-  InputParameters params = validParams<RelationshipManager>();
+  InputParameters params = validParams<GeometricRelationshipManager>();
 
   params.addRequiredRangeCheckedParam<unsigned short>(
       "element_side_neighbor_layers",
@@ -28,47 +28,44 @@ validParams<ElementSideNeighborLayers>()
       "The number of additional geometric elements to make available when "
       "using distributed mesh. No effect with replicated mesh.");
 
-  params.set<Moose::RelationshipManagerType>("RelationshipManagerType") = Moose::Geometric;
-
   return params;
 }
 
 ElementSideNeighborLayers::ElementSideNeighborLayers(const InputParameters & parameters)
-  : RelationshipManager(parameters),
-    _element_side_neighbor_layers(getParam<unsigned short>("element_side_neighbor_layers")),
-    _is_active(false)
+  : GeometricRelationshipManager(parameters),
+    _element_side_neighbor_layers(getParam<unsigned short>("element_side_neighbor_layers"))
 {
 }
 
-void
-ElementSideNeighborLayers::init()
+void ElementSideNeighborLayers::attachRelationshipManagersInternal(
+    Moose::RelationshipManagerType /*rm_type*/)
 {
   if (_mesh.isDistributedMesh() && _element_side_neighbor_layers > 1)
   {
-    _default_coupling.set_n_levels(_element_side_neighbor_layers);
-    _is_active = true;
-  }
-}
+    _default_coupling = libmesh_make_unique<DefaultCoupling>();
+    _default_coupling->set_n_levels(_element_side_neighbor_layers);
 
-bool
-ElementSideNeighborLayers::isActive() const
-{
-  return _is_active;
+    attachGeometricFunctorHelper(*_default_coupling);
+  }
 }
 
 std::string
 ElementSideNeighborLayers::getInfo() const
 {
-  std::ostringstream oss;
-  oss << "ElementSideNeighborLayers (" << _element_side_neighbor_layers << " layers)";
-  return oss.str();
+  if (_default_coupling)
+  {
+    std::ostringstream oss;
+    oss << "ElementSideNeighborLayers (" << _element_side_neighbor_layers << " layers)";
+    return oss.str();
+  }
+  return "";
 }
 
 void
-ElementSideNeighborLayers::operator()(const MeshBase::const_element_iterator & range_begin,
-                                      const MeshBase::const_element_iterator & range_end,
-                                      processor_id_type p,
-                                      map_type & coupled_elements)
+ElementSideNeighborLayers::operator()(const MeshBase::const_element_iterator &,
+                                      const MeshBase::const_element_iterator &,
+                                      processor_id_type,
+                                      map_type &)
 {
-  _default_coupling(range_begin, range_end, p, coupled_elements);
+  mooseError("Unused");
 }

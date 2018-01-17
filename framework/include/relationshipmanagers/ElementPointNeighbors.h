@@ -15,7 +15,7 @@
 #ifndef ELEMENTPOINTNEIGHBORS_H
 #define ELEMENTPOINTNEIGHBORS_H
 
-#include "RelationshipManager.h"
+#include "GeometricRelationshipManager.h"
 #include "InputParameters.h"
 
 #include "libmesh/ghost_point_neighbors.h"
@@ -30,24 +30,27 @@ class GhostingFunctor;
 template <>
 InputParameters validParams<ElementPointNeighbors>();
 
-class ElementPointNeighbors : public RelationshipManager
+/**
+ * ElementSideNeighborLayers is ensure that all pointwise-connected elements in ghosted to
+ * every processor's partition. It is useful when non-local element resources are needed when using
+ * DistributedMesh.
+ */
+class ElementPointNeighbors : public GeometricRelationshipManager
 {
 public:
   ElementPointNeighbors(const InputParameters & parameters);
-  virtual ~ElementPointNeighbors() {}
 
-  virtual void init() override;
+  virtual void attachRelationshipManagersInternal(Moose::RelationshipManagerType rm_type) override;
+  virtual std::string getInfo() const override;
+
   virtual void operator()(const MeshBase::const_element_iterator & range_begin,
                           const MeshBase::const_element_iterator & range_end,
                           processor_id_type p,
                           map_type & coupled_elements) override;
-  virtual bool isActive() const override;
-  virtual std::string getInfo() const override;
 
 protected:
-  GhostPointNeighbors _point_coupling;
-
-  bool _is_active;
+  /// The libMesh coupling object that provides this RM's functionality.
+  std::unique_ptr<GhostPointNeighbors> _point_coupling;
 };
 
 #endif /* ELEMENTPOINTNEIGHBORS_H */

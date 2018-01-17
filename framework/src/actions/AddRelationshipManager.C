@@ -27,10 +27,13 @@ AddRelationshipManager::AddRelationshipManager(InputParameters params) : Action(
 void
 AddRelationshipManager::act()
 {
-  Moose::RelationshipManagerType rm_type =
-      _current_task == "add_geometric_rm" ? Moose::Geometric : Moose::Algebriac;
+  Moose::RelationshipManagerType rm_type = _current_task == "add_geometric_rm"
+                                               ? Moose::RelationshipManagerType::Geometric
+                                               : Moose::RelationshipManagerType::Algebraic;
 
   const auto & all_action_ptrs = _awh.allActionBlocks();
   for (const auto & action_ptr : all_action_ptrs)
     action_ptr->addRelationshipManagers(rm_type);
+
+  _app.attachRelationshipManagers(rm_type);
 }

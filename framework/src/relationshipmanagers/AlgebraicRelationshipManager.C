@@ -12,50 +12,33 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "ElementPointNeighbors.h"
-#include "MooseMesh.h"
-#include "Conversion.h"
+#include "AlgebraicRelationshipManager.h"
+#include "FEProblem.h"
+#include "NonlinearSystemBase.h"
 
 template <>
 InputParameters
-validParams<ElementPointNeighbors>()
+validParams<AlgebraicRelationshipManager>()
 {
   InputParameters params = validParams<GeometricRelationshipManager>();
 
+  // Algebraic functors are also Geometric by definition. We'll OR these types together to
+  // simplify logic when processing these types.
+  params.set<Moose::RelationshipManagerType>("rm_type") =
+      Moose::RelationshipManagerType::Geometric | Moose::RelationshipManagerType::Algebraic;
   return params;
 }
 
-ElementPointNeighbors::ElementPointNeighbors(const InputParameters & parameters)
-  : GeometricRelationshipManager(parameters)
+AlgebraicRelationshipManager::AlgebraicRelationshipManager(const InputParameters & parameters)
+  : GeometricRelationshipManager(parameters), LazyCoupleable(this), _problem(nullptr)
 {
-}
-
-void ElementPointNeighbors::attachRelationshipManagersInternal(
-    Moose::RelationshipManagerType /*rm_type*/)
-{
-  if (_mesh.isDistributedMesh())
-  {
-    _point_coupling = libmesh_make_unique<GhostPointNeighbors>(_mesh);
-
-    attachGeometricFunctorHelper(*_point_coupling);
-  }
-}
-
-std::string
-ElementPointNeighbors::getInfo() const
-{
-  if (_point_coupling)
-  {
-    return "ElementPointNeighbors";
-  }
-  return "";
 }
 
 void
-ElementPointNeighbors::operator()(const MeshBase::const_element_iterator &,
-                                  const MeshBase::const_element_iterator &,
-                                  processor_id_type,
-                                  map_type &)
+AlgebraicRelationshipManager::attachAlgebraicFunctorHelper(GhostingFunctor & gf) const
 {
-  mooseError("Unused");
+  mooseAssert(_problem, "Problem pointer is NULL");
+
+  // TODO: Need to figure out Nonlinear versus Aux
+  _problem->getNonlinearSystemBase().dofMap().add_coupling_functor(gf);
 }

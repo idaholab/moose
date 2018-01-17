@@ -29,7 +29,6 @@ Coupleable::Coupleable(const MooseObject * moose_object, bool nodal)
     _c_is_implicit(_c_parameters.have_parameter<bool>("implicit")
                        ? _c_parameters.get<bool>("implicit")
                        : true),
-    _coupleable_params(_c_parameters),
     _coupleable_neighbor(_c_parameters.have_parameter<bool>("_neighbor")
                              ? _c_parameters.get<bool>("_neighbor")
                              : false),
@@ -102,7 +101,7 @@ Coupleable::isCoupled(const std::string & var_name, unsigned int i)
   else
   {
     // Make sure the user originally requested this value in the InputParameter syntax
-    if (!_coupleable_params.hasCoupledValue(var_name))
+    if (!_c_parameters.hasCoupledValue(var_name))
       mooseError(_c_name,
                  ": The coupled variable \"",
                  var_name,
@@ -179,7 +178,7 @@ Coupleable::getDefaultValue(const std::string & var_name)
   if (default_value_it == _default_value.end())
   {
     VariableValue * value =
-        new VariableValue(_coupleable_max_qps, _coupleable_params.defaultCoupledValue(var_name));
+        new VariableValue(_coupleable_max_qps, _c_parameters.defaultCoupledValue(var_name));
     default_value_it = _default_value.insert(std::make_pair(var_name, value)).first;
   }
 

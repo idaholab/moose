@@ -2615,22 +2615,3 @@ MooseMesh::addMortarInterface(const std::string & name,
   _mortar_interface_by_ids[std::pair<BoundaryID, BoundaryID>(master_id, slave_id)] =
       _mortar_interface.back().get();
 }
-
-void
-MooseMesh::addRelationshipManager(std::shared_ptr<RelationshipManager> relationship_manager)
-{
-  _relationship_managers.emplace_back(relationship_manager);
-  getMesh().add_ghosting_functor(*relationship_manager);
-}
-
-std::vector<std::string>
-MooseMesh::getRelationshipManagerInfo()
-{
-  std::vector<std::string> info_strings;
-  info_strings.reserve(_relationship_managers.size());
-
-  for (const auto & rm : _relationship_managers)
-    info_strings.emplace_back(rm->getInfo());
-
-  return info_strings;
-}

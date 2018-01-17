@@ -49,10 +49,15 @@ public:
   virtual void act() = 0;
 
   /**
-   * Method to add a relationship manager for the objects being added to the system. The type
-   * eligible to be added is passed in as an argument.
+   * Method to add a relationship manager for the objects being added to the system. Relationship
+   * managers have to be added relatively early. In many cases before the Action::act() method
+   * is called.
+   * @param when_type The parameter indicating the normal time for adding either Geometric or
+   *        Algebraic RelationshipManagers. It may not always be possible to add your
+   *        RelationshipManager as early as you'd like. In these cases, your DistributedMesh may
+   *        consume more memory during the problem setup.
    */
-  virtual void addRelationshipManagers(Moose::RelationshipManagerType type);
+  virtual void addRelationshipManagers(Moose::RelationshipManagerType when_type);
 
   /**
    * The name of the action

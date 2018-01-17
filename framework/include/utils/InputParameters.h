@@ -21,6 +21,7 @@
 #include "MooseUtils.h"
 #include "MultiMooseEnum.h"
 #include "ExecFlagEnum.h"
+#include "Conversion.h"
 
 #include "libmesh/parameters.h"
 #include "libmesh/parsed_function.h"
@@ -1301,6 +1302,12 @@ void InputParameters::addParam<MultiMooseEnum>(const std::string & /*name*/,
 template <>
 void InputParameters::addParam<std::vector<MooseEnum>>(const std::string & /*name*/,
                                                        const std::string & /*doc_string*/);
+
+template <>
+void InputParameters::addPrivateParam<MooseEnum>(const std::string & /*name*/);
+
+template <>
+void InputParameters::addPrivateParam<MultiMooseEnum>(const std::string & /*name*/);
 
 template <>
 void InputParameters::addDeprecatedParam<MooseEnum>(const std::string & name,

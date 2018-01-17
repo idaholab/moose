@@ -831,11 +831,6 @@ public:
    */
   virtual std::unique_ptr<PointLocatorBase> getPointLocator() const;
 
-  /**
-   * Returns the Relationship managers info suitable for printing.
-   */
-  std::vector<std::string> getRelationshipManagerInfo();
-
 protected:
   /// Deprecated (DO NOT USE)
   std::vector<std::unique_ptr<GhostingFunctor>> _ghosting_functors;

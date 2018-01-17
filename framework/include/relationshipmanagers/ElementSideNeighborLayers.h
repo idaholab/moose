@@ -15,8 +15,7 @@
 #ifndef ELEMENTSIDENEIGHBORLAYERS_H
 #define ELEMENTSIDENEIGHBORLAYERS_H
 
-#include "RelationshipManager.h"
-#include "InputParameters.h"
+#include "GeometricRelationshipManager.h"
 
 #include "libmesh/default_coupling.h"
 
@@ -30,26 +29,30 @@ class GhostingFunctor;
 template <>
 InputParameters validParams<ElementSideNeighborLayers>();
 
-class ElementSideNeighborLayers : public RelationshipManager
+/**
+ * ElementSideNeighborLayers is used to increase the halo or stencil depth of each processor's
+ * partition. It is useful when non-local element resources are needed when using DistributedMesh.
+ */
+class ElementSideNeighborLayers : public GeometricRelationshipManager
 {
 public:
   ElementSideNeighborLayers(const InputParameters & parameters);
-  virtual ~ElementSideNeighborLayers() {}
 
-  virtual void init() override;
+  virtual void attachRelationshipManagersInternal(Moose::RelationshipManagerType rm_type) override;
+  virtual std::string getInfo() const override;
+
   virtual void operator()(const MeshBase::const_element_iterator & range_begin,
                           const MeshBase::const_element_iterator & range_end,
                           processor_id_type p,
                           map_type & coupled_elements) override;
-  virtual bool isActive() const override;
-  virtual std::string getInfo() const override;
 
 protected:
+  /// Size of the halo or stencil of elements available in each local processors partition. Only
+  /// applicable and necessary when using DistributedMesh.
   const unsigned short _element_side_neighbor_layers;
 
-  DefaultCoupling _default_coupling;
-
-  bool _is_active;
+  /// The libMesh coupling object that provides this RM's functionality.
+  std::unique_ptr<DefaultCoupling> _default_coupling;
 };
 
 #endif /* ELEMENTSIDENEIGHBORLAYERS_H */

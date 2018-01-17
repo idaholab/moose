@@ -22,6 +22,11 @@ class AddRelationshipManager;
 template <>
 InputParameters validParams<AddRelationshipManager>();
 
+/**
+ * This Action retrieves all of the Actions from the MooseAction Warehouse and triggers the
+ * addRelationshipManagers() call on each of them. Additionally, it is responsible for triggering
+ * the attachment of those relationship managers to the relevant libMesh objects.
+ */
 class AddRelationshipManager : public Action
 {
 public:

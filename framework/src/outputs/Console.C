@@ -106,12 +106,12 @@ validParams<Console>()
                                      "the average residual it is colored yellow.");
 
   // System information controls
-  MultiMooseEnum info("framework mesh aux nonlinear execution output",
-                      "framework mesh aux nonlinear execution");
+  MultiMooseEnum info("framework mesh aux nonlinear relationship execution output",
+                      "framework mesh aux nonlinear relationship execution");
   params.addParam<MultiMooseEnum>("system_info",
                                   info,
                                   "List of information types to display "
-                                  "('framework', 'mesh', 'aux', 'nonlinear', "
+                                  "('framework', 'mesh', 'aux', 'nonlinear', 'relationship', "
                                   "'execution', 'output')");
 
   // Advanced group
@@ -613,6 +613,13 @@ Console::outputSystemInformation()
     std::string output = ConsoleUtils::outputAuxiliarySystemInformation(*_problem_ptr);
     if (!output.empty())
       _console << "Auxiliary System:\n" << output;
+  }
+
+  if (_system_info_flags.contains("relationship"))
+  {
+    std::string output = ConsoleUtils::outputRelationshipManagerInformation(_app);
+    if (!output.empty())
+      _console << "Relationship Managers:\n" << output;
   }
 
   if (_system_info_flags.contains("execution"))
