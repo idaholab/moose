@@ -283,7 +283,15 @@ InputParameters::declareControllable(const std::string & input_names)
   std::vector<std::string> names;
   MooseUtils::tokenize<std::string>(input_names, names, 1, " ");
   for (auto & name : names)
-    _params[name]._controllable = true;
+  {
+    auto map_iter = _params.find(name);
+    if (map_iter != _params.end()) // error is handled by checkParams method
+      map_iter->second._controllable = true;
+    else
+      mooseError("The input parameter '",
+                 name,
+                 "' does not exist, thus cannot be marked as controllable.");
+  }
 }
 
 bool

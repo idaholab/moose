@@ -80,12 +80,12 @@ TEST(InputParameters, checkControlParamValidError)
     InputParameters params = emptyInputParameters();
     params.declareControllable("not_valid");
     params.checkParams("");
-    FAIL() << "checkParams failed to catch invalid control param";
+    FAIL() << "checkParams failed to catch non existing control param";
   }
   catch (const std::exception & e)
   {
     std::string msg(e.what());
-    ASSERT_TRUE(msg.find("invalid parameter '' marked controllable") != std::string::npos)
+    ASSERT_TRUE(msg.find("cannot be marked as controllable") != std::string::npos)
         << "failed with unexpected error: " << msg;
   }
 }
