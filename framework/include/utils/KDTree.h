@@ -14,6 +14,7 @@
 #include "MooseMesh.h"
 
 #include "libmesh/nanoflann.hpp"
+#include "libmesh/utility.h"
 
 class KDTree
 {
@@ -65,7 +66,7 @@ public:
       coord_t dist = 0.0;
 
       for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
-        dist += std::pow(p1[i] - p2(i), 2.0);
+        dist += Utility::pow<2>(p1[i] - p2(i));
 
       return dist;
     }
