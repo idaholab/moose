@@ -534,6 +534,9 @@ Assembly::reinitFEFace(const Elem * elem, unsigned int side)
       const_cast<std::vector<Real> &>((*_holder_fe_face_helper[dim])->get_JxW()));
   _current_normals.shallowCopy(
       const_cast<std::vector<Point> &>((*_holder_fe_face_helper[dim])->get_normals()));
+
+  if (_xfem != NULL)
+    modifyFaceWeightsDueToXFEM(elem, side);
 }
 
 void
@@ -1980,9 +1983,29 @@ Assembly::modifyWeightsDueToXFEM(const Elem * elem)
     mooseAssert(xfem_weight_multipliers.size() == _current_JxW.size(),
                 "Size of weight multipliers in xfem doesn't match number of quadrature points");
     for (unsigned i = 0; i < xfem_weight_multipliers.size(); i++)
-    {
       _current_JxW[i] = _current_JxW[i] * xfem_weight_multipliers[i];
-    }
+
     xfem_weight_multipliers.release();
+  }
+}
+
+void
+Assembly::modifyFaceWeightsDueToXFEM(const Elem * elem, unsigned int side)
+{
+  mooseAssert(_xfem != NULL, "This function should not be called if xfem is inactive");
+
+  if (_current_qrule_face == _current_qrule_arbitrary)
+    return;
+
+  MooseArray<Real> xfem_face_weight_multipliers;
+  if (_xfem->getXFEMFaceWeights(
+          xfem_face_weight_multipliers, elem, _current_qrule_face, _current_q_points_face, side))
+  {
+    mooseAssert(xfem_face_weight_multipliers.size() == _current_JxW_face.size(),
+                "Size of weight multipliers in xfem doesn't match number of quadrature points");
+    for (unsigned i = 0; i < xfem_face_weight_multipliers.size(); i++)
+      _current_JxW_face[i] = _current_JxW_face[i] * xfem_face_weight_multipliers[i];
+
+    xfem_face_weight_multipliers.release();
   }
 }

@@ -662,8 +662,16 @@ protected:
    * Update the integration weights for XFEM partial elements.
    * This only affects the weights if XFEM is used and if the element is cut.
    * @param elem The element for which the weights are adjusted
-  */
+   */
   void modifyWeightsDueToXFEM(const Elem * elem);
+
+  /**
+   * Update the face integration weights for XFEM partial elements.
+   * This only affects the weights if XFEM is used and if the element is cut.
+   * @param elem The element for which the weights are adjusted
+   * @param side The side of element for which the weights are adjusted
+   */
+  void modifyFaceWeightsDueToXFEM(const Elem * elem, unsigned int side = 0);
 
   SystemBase & _sys;
 
