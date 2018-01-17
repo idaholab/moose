@@ -241,6 +241,7 @@ def formatResult(tester_data, result, options, color=True):
                 formatted_results[format_rule] = (colorText(tester.specs['first_directory'], 'CYAN', **color_opts) +\
                                          formatted_results[format_rule][0].replace(tester.specs['first_directory'], '', 1), 'CYAN') # Strip out first occurence only
 
+    # join printable results in the order in which the user asked
     final_results = ' '.join([formatted_results[x][0] for x in terminal_format if formatted_results[x]])
 
     # Decorate debuging
