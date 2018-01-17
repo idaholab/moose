@@ -27,8 +27,17 @@ KDTree::neighborSearch(Point & query_point,
                        unsigned int patch_size,
                        std::vector<std::size_t> & return_index)
 {
-  return_index.resize(patch_size, std::numeric_limits<std::size_t>::max());
   std::vector<Real> return_dist_sqr(patch_size, std::numeric_limits<Real>::max());
+  neighborSearch(query_point, patch_size, return_index, return_dist_sqr);
+}
+
+void
+KDTree::neighborSearch(Point & query_point,
+                       unsigned int patch_size,
+                       std::vector<std::size_t> & return_index,
+                       std::vector<Real> & return_dist_sqr)
+{
+  return_index.assign(patch_size, std::numeric_limits<std::size_t>::max());
 
   _kd_tree->knnSearch(&query_point(0), patch_size, return_index.data(), return_dist_sqr.data());
 

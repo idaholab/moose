@@ -27,6 +27,11 @@ public:
                       unsigned int patch_size,
                       std::vector<std::size_t> & return_index);
 
+  void neighborSearch(Point & query_point,
+                      unsigned int patch_size,
+                      std::vector<std::size_t> & return_index,
+                      std::vector<Real> & return_dist_sqr);
+
   /**
    * PointListAdaptor is required to use libMesh Point coordinate type with
    * nanoflann KDTree library. The member functions within the PointListAdaptor
