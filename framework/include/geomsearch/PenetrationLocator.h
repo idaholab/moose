@@ -19,7 +19,7 @@
 #include "libmesh/fe_base.h"
 
 // Forward Declarations
-class SubProblem;
+class FEProblemBase;
 class MooseMesh;
 class GeometricSearchData;
 class NearestNodeLocator;
@@ -27,7 +27,7 @@ class NearestNodeLocator;
 class PenetrationLocator : Restartable
 {
 public:
-  PenetrationLocator(SubProblem & subproblem,
+  PenetrationLocator(FEProblemBase & fe_problem_base,
                      GeometricSearchData & geom_search_data,
                      MooseMesh & mesh,
                      const unsigned int master_id,
@@ -52,7 +52,7 @@ public:
     NSM_NODAL_NORMAL_BASED
   };
 
-  SubProblem & _subproblem;
+  FEProblemBase & _fe_problem_base;
 
   Real normDistance(const Elem & elem,
                     const Elem & side,

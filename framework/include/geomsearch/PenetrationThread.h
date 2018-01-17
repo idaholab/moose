@@ -20,7 +20,7 @@ class MooseVariable;
 class PenetrationThread
 {
 public:
-  PenetrationThread(SubProblem & subproblem,
+  PenetrationThread(FEProblemBase & fe_problem_base,
                     const MooseMesh & mesh,
                     BoundaryID master_boundary,
                     BoundaryID slave_boundary,
@@ -50,7 +50,7 @@ public:
   std::vector<dof_id_type> _recheck_slave_nodes;
 
 protected:
-  SubProblem & _subproblem;
+  FEProblemBase & _fe_problem_base;
   // The Mesh
   const MooseMesh & _mesh;
   BoundaryID _master_boundary;

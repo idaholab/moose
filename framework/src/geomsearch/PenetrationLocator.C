@@ -16,9 +16,9 @@
 #include "MooseMesh.h"
 #include "NearestNodeLocator.h"
 #include "PenetrationThread.h"
-#include "SubProblem.h"
+#include "FEProblemBase.h"
 
-PenetrationLocator::PenetrationLocator(SubProblem & subproblem,
+PenetrationLocator::PenetrationLocator(FEProblemBase & fe_problem_base,
                                        GeometricSearchData & /*geom_search_data*/,
                                        MooseMesh & mesh,
                                        const unsigned int master_id,
@@ -27,9 +27,9 @@ PenetrationLocator::PenetrationLocator(SubProblem & subproblem,
                                        NearestNodeLocator & nearest_node)
   : Restartable(Moose::stringify(master_id) + "to" + Moose::stringify(slave_id),
                 "PenetrationLocator",
-                subproblem,
+                fe_problem_base,
                 0),
-    _subproblem(subproblem),
+    _fe_problem_base(fe_problem_base),
     _mesh(mesh),
     _master_boundary(master_id),
     _slave_boundary(slave_id),
@@ -85,7 +85,7 @@ PenetrationLocator::detectPenetration()
   // Grab the slave nodes we need to worry about from the NearestNodeLocator
   NodeIdRange & slave_node_range = _nearest_node.slaveNodeRange();
 
-  PenetrationThread pt(_subproblem,
+  PenetrationThread pt(_fe_problem_base,
                        _mesh,
                        _master_boundary,
                        _slave_boundary,
@@ -111,7 +111,7 @@ PenetrationLocator::detectPenetration()
   // Update the patch for the slave nodes in recheck_slave_nodes and re-run penetration thread on
   // these nodes at every nonlinear iteration if patch update strategy is set to "iteration".
   if (recheck_slave_nodes.size() > 0 && _patch_update_strategy == Moose::Iteration &&
-      _subproblem.currentlyComputingJacobian())
+      _fe_problem_base.currentlyComputingJacobian())
   {
     // Update the patch for this subset of slave nodes and calculate the nearest neighbor_nodes
     _nearest_node.updatePatch(recheck_slave_nodes);
@@ -123,7 +123,7 @@ PenetrationLocator::detectPenetration()
   }
 
   if (recheck_slave_nodes.size() > 0 && _patch_update_strategy != Moose::Iteration &&
-      _subproblem.currentlyComputingJacobian())
+      _fe_problem_base.currentlyComputingJacobian())
     mooseDoOnce(mooseWarning("Warning in PenetrationLocator. Penetration is not "
                              "detected for one or more slave nodes. This could be because "
                              "those slave nodes simply do not project to faces on the master "

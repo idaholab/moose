@@ -12,8 +12,8 @@
 #include "ParallelUniqueId.h"
 #include "FindContactPoint.h"
 #include "NearestNodeLocator.h"
-#include "SubProblem.h"
 #include "MooseVariable.h"
+#include "FEProblemBase.h"
 #include "MooseMesh.h"
 
 #include "libmesh/threads.h"
@@ -24,7 +24,7 @@
 Threads::spin_mutex pinfo_mutex;
 
 PenetrationThread::PenetrationThread(
-    SubProblem & subproblem,
+    FEProblemBase & fe_problem_base,
     const MooseMesh & mesh,
     BoundaryID master_boundary,
     BoundaryID slave_boundary,
@@ -42,7 +42,7 @@ PenetrationThread::PenetrationThread(
     std::vector<dof_id_type> & elem_list,
     std::vector<unsigned short int> & side_list,
     std::vector<boundary_id_type> & id_list)
-  : _subproblem(subproblem),
+  : _fe_problem_base(fe_problem_base),
     _mesh(mesh),
     _master_boundary(master_boundary),
     _slave_boundary(slave_boundary),
@@ -69,7 +69,7 @@ PenetrationThread::PenetrationThread(
 
 // Splitting Constructor
 PenetrationThread::PenetrationThread(PenetrationThread & x, Threads::split /*split*/)
-  : _subproblem(x._subproblem),
+  : _fe_problem_base(x._fe_problem_base),
     _mesh(x._mesh),
     _master_boundary(x._master_boundary),
     _slave_boundary(x._slave_boundary),
