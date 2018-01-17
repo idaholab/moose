@@ -22,11 +22,12 @@ This basic sink boundary condition is implemented in [`PorousFlowSink`](/porous_
 The basic sink may be multiplied by a MOOSE Function of the pressure
 of a fluid phase *or* the temperature:
 \begin{equation}
-s = f(t, x) \times g(P^{\beta}) \ \ \ \textrm{or}\ \ \ s = f(t, x)
-\times g(T) \ .
+s = f(t, x) \times g(P^{\beta} - P_{\mathrm{e}}) \ \ \ \textrm{or}\ \ \ s = f(t, x)
+\times g(T - T_{\mathrm{e}}) \ .
 \end{equation}
 Here the units of $f\times g$ are kg.m$^{-2}$.s$^{-1}$ (for fluids) or
-J.m$^{-1}$.s$^{-1}$ (for heat).  Some commonly use forms have been
+J.m$^{-1}$.s$^{-1}$ (for heat).  $P_{\mathrm{e}}$ and $T_{\mathrm{e}}$ are reference values, that
+may be AuxVariables to allow spatial and temporal variance.  Some commonly use forms have been
 hard-coded into the Porous Flow module for ease of use in simulations:
 
 - A piecewise linear function (for simulating fluid or heat exchange with an external
@@ -102,13 +103,13 @@ Eq \eqref{eq:fix.pp.bc} (`Eq` `\eqref{eq:fix.pp.bc}`)Eqn~(\ref{}) may
 be implemented in a number of ways.  A
 [`PorousFlowPiecewiseLinearSink`](/porous_flow/PorousFlowPiecewiseLinearSink.md)
 may be constructed that models \begin{equation} f = C (P -
-P_{\mathrm{e}}) \ , \end{equation} that is, with `pt_vals =
-'-1E9+Pe Pe 1E9+Pe'` and
-`multipliers = '-C*1E9 0 C*1E9'` (the `1E9` is just an
-example: the point is that it should be much greater than any expected
-porepressure).  The numerical value of the conductance, $C$, is $\rho
-k_{nn}k_{\mathrm{r}}/\mu/L$, must be set at an appropriate value for
-the model.
+P_{\mathrm{e}}) \ , \end{equation} that is, with `pt_vals = '-1E9
+1E9'` and `multipliers = '-C C'` (the `1E9` is just an example: the
+point is that it should be much greater than any expected
+porepressure) and $P_{\mathrm{e}}$ provided by an AuxVariable (or set
+to a constant value).  The numerical value of the conductance, $C$, is
+$\rho k_{nn}k_{\mathrm{r}}/\mu/L$, must be set at an appropriate value
+for the model.
 
 Alternately, a
 [`PorousFlowPiecewiseLinearSink`](/porous_flow/PorousFlowPiecewiseLinearSink.md)
@@ -119,8 +120,7 @@ mobility and relative permeability to use; (3) these parameters are
 appropriate to the model so it reduces the potential for difficult
 numerical situations occuring.
 
-Finally, if $P_{\mathrm{e}}$ is varying over the boundary, the flux
-should be split \begin{equation} f = CP - CP_{\mathrm{e}}\ .
+Finally, if $P_{\mathrm{e}}$ is varying over the boundary it must be constructed as an AuxVariable.  An alternative is to split the flux \begin{equation} f = CP - CP_{\mathrm{e}}\ .
 \end{equation} Two PorousFlowSinks may be used.  The first term is a
 `PorousFlowPiecewiseLinearSink` as just described (with
 $P_{\mathrm{e}} = 0$).  The second term is a plain
