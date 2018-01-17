@@ -9,6 +9,7 @@ class TestHarnessTestCase(unittest.TestCase):
     """
 
     def runExceptionTests(self, *args):
+        os.environ['MOOSE_TERM_FORMAT'] = 'njCst'
         cmd = ['./run_tests'] + list(args)
         try:
             return subprocess.check_output(cmd, cwd=os.path.join(os.getenv('MOOSE_DIR'), 'test'))
@@ -17,6 +18,7 @@ class TestHarnessTestCase(unittest.TestCase):
             return err.output
 
     def runTests(self, *args):
+        os.environ['MOOSE_TERM_FORMAT'] = 'njCst'
         cmd = ['./run_tests'] + list(args)
         return subprocess.check_output(cmd, cwd=os.path.join(os.getenv('MOOSE_DIR'), 'test'))
 

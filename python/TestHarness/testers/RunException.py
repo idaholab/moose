@@ -23,7 +23,8 @@ class RunException(RunApp):
 
     def checkRunnable(self, options):
         if options.enable_recover:
-            self.setStatus('RunException RECOVER', self.bucket_skip)
+            self.addCaveats('RunException RECOVER')
+            self.setStatus(self.bucket_skip.status, self.bucket_skip)
             return False
         return RunApp.checkRunnable(self, options)
 

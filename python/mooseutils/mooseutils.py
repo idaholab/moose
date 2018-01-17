@@ -24,7 +24,7 @@ def colorText(string, color, **kwargs):
     colored = kwargs.pop('colored', True)
 
     # ANSI color codes for colored terminal output
-    color_codes = dict(RESET='\033[0m', BOLD='\033[1m',RED='\033[31m', MAGENTA='\033[32m', YELLOW='\033[33m', BLUE='\033[34m', GREEN='\033[35m', CYAN='\033[36m')
+    color_codes = dict(RESET='\033[0m', BOLD='\033[1m',RED='\033[31m', MAGENTA='\033[32m', YELLOW='\033[33m', BLUE='\033[34m', GREEN='\033[35m', CYAN='\033[36m', GREY='\033[90m')
     if code:
         color_codes['GREEN'] = '\033[32m'
         color_codes['CYAN']  = '\033[36m'
