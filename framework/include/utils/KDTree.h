@@ -97,10 +97,10 @@ public:
     }
 
     /**
-    * Optional bounding-box computation. This function is called by the nanoflann library.
-    * If the return value is false, the standard bbox computation loop in the nanoflann
-    * library is activated.
-    **/
+     * Optional bounding-box computation. This function is called by the nanoflann library.
+     * If the return value is false, the standard bbox computation loop in the nanoflann
+     * library is activated.
+     */
     template <class BBOX>
     bool kdtree_get_bbox(BBOX & /* bb */) const
     {
