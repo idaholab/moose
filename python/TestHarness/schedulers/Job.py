@@ -114,8 +114,8 @@ class Job(object):
 
     def setOutput(self, output):
         """ Method to allow schedulers to overwrite the output if certain conditions are met """
-        if not self.__tester.outfile is None and not self.__tester.outfile.closed \
-           and not self.__tester.errfile is None and not self.__tester.errfile.closed:
+        if (not self.__tester.outfile is None and not self.__tester.outfile.closed
+           and not self.__tester.errfile is None and not self.__tester.errfile.closed):
             return
         self.__joined_out = output
 
