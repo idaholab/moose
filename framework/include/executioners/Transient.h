@@ -206,6 +206,12 @@ public:
   Real numPicardIts() { return _picard_it + 1; }
 
   /**
+   * Check if Picard iteration converged when maximum number of Picard iterations is greater than
+   * one
+   */
+  virtual bool picardConverged() const;
+
+  /**
    * The relative L2 norm of the difference between solution and old solution vector.
    */
   virtual Real relativeSolutionDifferenceNorm();
