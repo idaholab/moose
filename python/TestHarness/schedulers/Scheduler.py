@@ -374,9 +374,14 @@ class Scheduler(MooseObject):
     def handleLongRunningJobs(self, job_container):
         """ Handle jobs that have not reported in alotted time """
         if job_container not in self.jobs_reported:
-            tester = job_container.getTester()
-            tester.setStatus('RUNNING...', tester.bucket_pending)
-            self.queueJobs(status_jobs=[job_container])
+            report = False
+            with self.dag_lock:
+                tester = job_container.getTester()
+                if not tester.isFinished():
+                    report = True
+                    tester.setStatus('RUNNING...', tester.bucket_pending)
+            if report:
+                self.queueJobs(status_jobs=[job_container])
 
             # Restart the reporting timer for this job
             job_container.report_timer = threading.Timer(float(tester.getMinReportTime()),
