@@ -2,9 +2,11 @@ import platform, os, re
 import subprocess
 from mooseutils import colorText
 from collections import namedtuple
+from collections import OrderedDict
 import json
 
 TERM_COLS = int(os.getenv('MOOSE_TERM_COLS', '110'))
+TERM_FORMAT = os.getenv('MOOSE_TERM_FORMAT', 'njcst')
 
 LIBMESH_OPTIONS = {
   'mesh_mode' :    { 're_option' : r'#define\s+LIBMESH_ENABLE_PARMESH\s+(\d+)',
@@ -121,47 +123,132 @@ def runCommand(cmd, cwd=None):
         output = 'ERROR: ' + output
     return output
 
+
+## method to return current character count with given results_dictionary
+def resultCharacterCount(results_dict):
+    # { formatted_result_key : ( text, color ) }
+    printable_items = []
+    for result_key, printable in results_dict.iteritems():
+        if printable:
+            printable_items.append(printable[0])
+    return len(' '.join(printable_items))
+
+## convert the incoming message tuple to the same case, as the case of format_key
+## store this information to the same cased key in formatted_results dict.
+def formatCase(format_key, message, formatted_results):
+    if message and format_key.isupper():
+        formatted_results[format_key] = (message[0].upper(), message[1])
+    elif message:
+        formatted_results[format_key] = (message[0], message[1])
+
 ## print an optionally colorified test result
 #
 # The test will not be colored if
 # 1) options.colored is False,
-# 2) the environment variable BITTEN_NOCOLOR is true, or
-# 3) the color parameter is False.
+# 2) the color parameter is False.
 def formatResult(tester_data, result, options, color=True):
+    # Support only one instance of a format identifier, but obey the order
+    terminal_format = list(OrderedDict.fromkeys(list(TERM_FORMAT)))
     tester = tester_data.getTester()
-    timing = tester_data.getTiming()
-    f_result = ''
-    caveats = ''
-    first_directory = tester.specs['first_directory']
-    test_name = tester.getTestName()
     status = tester.getStatus()
-
-    cnt = (TERM_COLS-2) - len(test_name + result)
     color_opts = {'code' : options.code, 'colored' : options.colored}
+
+    # container for every printable item
+    formatted_results = dict.fromkeys(terminal_format)
+
+    # Populate formatted_results for those we support, with requested items
+    # specified by the user. Caveats and justifications are parsed outside of
+    # loop as these two items change based on character count consumed by others.
+    caveat_index = None
+    justification_index = None
+    for i, f_key in enumerate(terminal_format):
+        # Store the caveat request. We will use this later.
+        if str(f_key).lower() == 'c':
+            caveat_index = terminal_format[i]
+
+        # Store the justification request. We will use this later.
+        if str(f_key).lower() == 'j':
+            justification_index = terminal_format[i]
+
+        if str(f_key).lower() == 'p':
+            pre_result = ' '*(8-len(status.status)) + status.status
+            formatCase(f_key, (pre_result, status.color), formatted_results)
+
+        if str(f_key).lower() == 's':
+            if not result:
+                result = str(tester.getStatusMessage())
+
+            # refrain from printing a duplicate pre_result if it will match result
+            if 'p' in [x.lower() for x in terminal_format] and result == status.status:
+                formatCase(f_key, None, formatted_results)
+            else:
+                formatCase(f_key, (result, status.color), formatted_results)
+
+        if str(f_key).lower() == 'n':
+            formatCase(f_key, (tester.getTestName(), None), formatted_results)
+
+        # Adjust the precision of time, so we can justify the length. The higher the
+        # seconds, the lower the decimal point, ie: [0.000s] - [100.0s]. Max: [99999s]
+        if str(f_key).lower() == 't' and options.timing:
+            actual = float(tester_data.getTiming())
+            int_len = len(str(int(actual)))
+            precision = min(3, max(0,(4-int_len)))
+            f_time = '[' + '{0: <6}'.format('%0.*fs' % (precision, actual)) + ']'
+            formatCase(f_key, (f_time, None), formatted_results)
+
+    # Decorate Caveats
+    if tester.getCaveats() and caveat_index is not None:
+        caveats = ','.join(tester.getCaveats())
+        caveat_color = status.color
+        if tester.didPass() or tester.isSkipped():
+            caveat_color = 'CYAN'
+
+        f_caveats = '[' + caveats + ']'
+        # +1 space created later by join
+        character_count = resultCharacterCount(formatted_results) + len(f_caveats) + 1
+
+        # If caveats are the last items the user wants printed, or -e (extra_info) is
+        # called, allow caveats to consume available character count beyond TERM_COLS.
+        # Else, we trim caveats:
+        if terminal_format[-1].lower() != 'c' \
+           and not options.extra_info \
+           and character_count > TERM_COLS:
+            over_by_amount = character_count - TERM_COLS
+            f_caveats = '[' + caveats[:len(caveats) - (over_by_amount + 3)] + '...]'
+
+        formatCase(caveat_index, (f_caveats, caveat_color), formatted_results)
+
+    # Fill the available space left, with dots
+    if justification_index is not None:
+        j_dot = None
+        # +1 space created later by join
+        character_count = resultCharacterCount(formatted_results) + 1
+        if character_count < TERM_COLS:
+            j_dot = ('.'*max(0, (TERM_COLS - character_count)), 'GREY')
+        elif character_count == TERM_COLS:
+            j_dot = ('', 'GREY')
+
+        formatCase(justification_index, j_dot, formatted_results)
+
+    # If color, decorate those items which support it
     if color:
-        if options.color_first_directory:
-            test_name = colorText(first_directory, 'CYAN', **color_opts) + test_name.replace(first_directory, '', 1) # Strip out first occurence only
-        # Color the Caveats CYAN
-        m = re.search(r'(\[.*?\])', result)
-        if m:
-            caveats = m.group(1)
-            f_result = colorText(caveats, 'CYAN', **color_opts)
+        for format_rule, printable in formatted_results.iteritems():
+            if printable and (printable[0] and printable[1]):
+                formatted_results[format_rule] = (colorText(printable[0], printable[1], **color_opts), printable[1])
 
-        # Color test results based on status.
-        # Keep any caveats that may have been colored
-        if status:
-            f_result += colorText(result.replace(caveats, ''), tester.getColor(), **color_opts)
+            # Do special coloring for first directory
+            if format_rule == 'n' and options.color_first_directory:
+                formatted_results[format_rule] = (colorText(tester.specs['first_directory'], 'CYAN', **color_opts) +\
+                                         formatted_results[format_rule][0].replace(tester.specs['first_directory'], '', 1), 'CYAN') # Strip out first occurence only
 
-        f_result = test_name + '.'*cnt + ' ' + f_result
-    else:
-        f_result = test_name + '.'*cnt + ' ' + result
+    # join printable results in the order in which the user asked
+    final_results = ' '.join([formatted_results[x][0] for x in terminal_format if formatted_results[x]])
 
-    # Tack on the timing if it exists
-    if options.timing:
-        f_result += ' [' + '%0.3f' % float(timing) + 's]'
+    # Decorate debuging
     if options.debug_harness:
-        f_result += ' Start: ' + '%0.3f' % tester_data.getStartTime() + ' End: ' + '%0.3f' % tester_data.getEndTime()
-    return f_result
+        final_results += ' Start: ' + '%0.3f' % tester_data.getStartTime() + ' End: ' + '%0.3f' % tester_data.getEndTime()
+
+    return final_results
 
 ## Color the error messages if the options permit, also do not color in bitten scripts because
 # it messes up the trac output.
@@ -561,14 +648,14 @@ class TestStatus(object):
     ######
 
     test_status         = namedtuple('test_status', 'status color')
-    bucket_initialized  = test_status(status='INITIALIZED', color='CYAN')
-    bucket_success      = test_status(status='PASS', color='GREEN')
+    bucket_initialized  = test_status(status='INIT', color='CYAN')
+    bucket_success      = test_status(status='OK', color='GREEN')
     bucket_fail         = test_status(status='FAIL', color='RED')
     bucket_deleted      = test_status(status='DELETED', color='RED')
     bucket_diff         = test_status(status='DIFF', color='YELLOW')
     bucket_pending      = test_status(status='PENDING', color='CYAN')
     bucket_finished     = test_status(status='FINISHED', color='CYAN')
-    bucket_skip         = test_status(status='SKIP', color='RESET')
+    bucket_skip         = test_status(status='SKIP', color='GREY')
     bucket_silent       = test_status(status='SILENT', color='RESET')
     bucket_queued       = test_status(status='QUEUED', color='CYAN')
     bucket_waiting_processing = test_status(status='WAITING', color='CYAN')

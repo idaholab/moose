@@ -7,8 +7,8 @@ class TestHarnessTester(TestHarnessTestCase):
         """
 
         # Verify the distributed mesh test is skipped
-        output = self.runExceptionTests('-i', 'mesh_mode_distributed')
-        self.assertIn('skipped (MESH_MODE!=DISTRIBUTED)', output)
+        output = self.runExceptionTests('-i', 'mesh_mode_distributed', '--no-color')
+        self.assertIn('[MESH_MODE!=DISTRIBUTED] SKIP', output)
 
         # Verify the distributed mesh test is passing when providing --distributed
         # To be acurate, test for OK rather than asserting if 'distributed' is

@@ -13,7 +13,8 @@ class PetscJacobianTester(RunApp):
 
     def checkRunnable(self, options):
         if options.enable_recover:
-            self.setStatus('PetscJacTester RECOVER', self.bucket_skip)
+            self.addCaveats('PetscJacTester RECOVER')
+            self.setStatus(self.bucket_skip.status, self.bucket_skip)
             return False
         return RunApp.checkRunnable(self, options)
 

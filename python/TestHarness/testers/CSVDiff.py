@@ -25,7 +25,8 @@ class CSVDiff(FileTester):
 
         # Don't Run CSVDiff on Scaled Tests
         if options.scaling and specs['scale_refine']:
-            self.setStatus("don't run CSVDiff on Scaled Tests", self.bucket_skip)
+            self.addCaveats('SCALING=True')
+            self.setStatus(self.bucket_skip.status, self.bucket_skip)
             return output
 
         if len(specs['csvdiff']) > 0:

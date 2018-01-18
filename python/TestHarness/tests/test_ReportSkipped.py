@@ -7,9 +7,9 @@ class TestHarnessTester(TestHarnessTestCase):
         """
 
         # Verify the skipped test _does_ appear
-        output = self.runExceptionTests('-i', 'ignore_skipped')
-        self.assertIn('skipped (always skipped)', output)
+        output = self.runExceptionTests('--no-color', '-i', 'ignore_skipped')
+        self.assertIn('[ALWAYS SKIPPED] SKIP', output)
 
         # Verify the skipped test does _not_ appear
-        output = self.runTests('--no-report', '-i', 'ignore_skipped')
-        self.assertNotIn('skipped (always skipped)', output)
+        output = self.runTests('--no-color', '--no-report', '-i', 'ignore_skipped')
+        self.assertNotIn('[ALWAYS SKIPPED] SKIP', output)

@@ -33,7 +33,7 @@ class TestHarnessTester(TestHarnessTestCase):
 
         # Parse the output, and find the caveat string
         raw_caveat_string = re.findall(r'\[(.*)\]', output)
-        output_caveats = raw_caveat_string[0].split(', ')
+        output_caveats = raw_caveat_string[0].split(',')
 
         # Do the comparison and assert if different. Using a
         # differential set grants us the benifit of forcing us to

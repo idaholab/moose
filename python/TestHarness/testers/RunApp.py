@@ -64,11 +64,13 @@ class RunApp(Tester):
     def checkRunnable(self, options):
         if options.enable_recover:
             if self.specs.isValid('expect_out') or self.specs.isValid('absent_out') or self.specs['should_crash'] == True:
-                self.setStatus('expect_out RECOVER', self.bucket_skip)
+                self.addCaveats('expect_out RECOVER')
+                self.setStatus(self.bucket_skip.status, self.bucket_skip)
                 return False
 
         if self.specs.isValid('executable_pattern') and re.search(self.specs['executable_pattern'], self.specs['executable']) == None:
-            self.setStatus('EXECUTABLE PATTERN', self.bucket_skip)
+            self.addCaveats('EXECUTABLE PATTERN')
+            self.setStatus(self.bucket_skip.status, self.bucket_skip)
             return False
 
         return True

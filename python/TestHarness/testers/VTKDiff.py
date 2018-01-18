@@ -62,7 +62,8 @@ class VTKDiff(RunApp):
                     output += differ.message() + '\n'
 
                     if differ.fail():
-                        self.setStatus('VTKDIFF', self.bucket_skip)
+                        self.addCaveats('VTKDIFF')
+                        self.setStatus(self.bucket_skip.status, self.bucket_skip)
                         break
 
         # If status is still pending, then it is a passing test

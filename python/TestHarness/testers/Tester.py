@@ -483,7 +483,7 @@ class Tester(MooseObject):
 
         # Check for deleted tests
         if self.specs.isValid('deleted'):
-            reasons['deleted'] = 'deleted ({})'.format(self.specs['deleted'])
+            reasons['deleted'] = str(self.specs['deleted'])
 
         # Skipped by external means (example: TestHarness part2 with --check-input)
         if self.isSkipped():
@@ -609,17 +609,14 @@ class Tester(MooseObject):
                 if key.lower() not in caveat_list:
                     tmp_reason.append(value)
 
-            # Format joined reason to better fit on the screen
-            if len(', '.join(tmp_reason)) >= util.TERM_COLS - (len(self.specs['test_name'])+21):
-                flat_reason = (', '.join(tmp_reason))[:(util.TERM_COLS - (len(self.specs['test_name'])+24))] + '...'
-            else:
-                flat_reason = ', '.join(tmp_reason)
+            flat_reason = ', '.join(tmp_reason)
 
             # If the test is deleted we still need to treat this differently
+            self.addCaveats(flat_reason)
             if 'deleted' in reasons.keys():
-                self.setStatus(flat_reason, self.bucket_deleted)
+                self.setStatus(self.bucket_deleted.status, self.bucket_deleted)
             else:
-                self.setStatus(flat_reason, self.bucket_skip)
+                self.setStatus(self.bucket_skip.status, self.bucket_skip)
             return False
 
         # Check the return values of the derived classes

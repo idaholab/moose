@@ -7,7 +7,14 @@ class TestHarnessTester(TestHarnessTestCase):
         Test that deleted tests returns a failed deleted test when extra info argument is supplied
         """
         with self.assertRaises(subprocess.CalledProcessError) as cm:
-            self.runTests('-i', 'deleted', '-e')
+            self.runTests('--no-color', '-i', 'deleted', '-e')
 
         e = cm.exception
-        self.assertRegexpMatches(e.output, 'test_harness\.deleted.*?deleted \(test deleted test\)')
+        self.assertRegexpMatches(e.output, r'test_harness\.deleted.*? \[TEST DELETED TEST\] FAILED \(DELETED\)')
+
+    def testNoExtraInfo(self):
+        """
+        Test that deleted tests do not run without -e (extra) option
+        """
+        output = self.runTests('--no-color', '-i', 'deleted')
+        self.assertNotIn('tests/test_harness.deleted', output)

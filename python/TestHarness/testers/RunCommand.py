@@ -21,5 +21,5 @@ class RunCommand(Tester):
         if self.exit_code != 0 :
             self.setStatus('CODE %d' % self.exit_code, self.bucket_fail)
         else:
-            self.setStatus(self.exit_code, self.bucket_success)
+            self.setStatus(self.success_message, self.bucket_success)
         return output
