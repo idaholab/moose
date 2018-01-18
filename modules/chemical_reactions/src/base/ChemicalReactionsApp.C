@@ -24,6 +24,7 @@
 #include "AqueousEquilibriumRxnAux.h"
 #include "KineticDisPreConcAux.h"
 #include "KineticDisPreRateAux.h"
+#include "PHAux.h"
 
 #include "AddPrimarySpeciesAction.h"
 #include "AddSecondarySpeciesAction.h"
@@ -92,6 +93,7 @@ ChemicalReactionsApp::registerObjects(Factory & factory)
   registerAux(AqueousEquilibriumRxnAux);
   registerAux(KineticDisPreConcAux);
   registerAux(KineticDisPreRateAux);
+  registerAux(PHAux);
 
   registerBoundaryCondition(ChemicalOutFlowBC);
 
