@@ -42,7 +42,7 @@ class Job(object):
         self.__outfile = None
         self.__start_time = clock()
         self.__end_time = None
-        self.__std_out = ''
+        self.__joined_out = ''
         self.report_timer = None
         self.__slots = None
         self.__unique_identifier = os.path.join(tester.getTestDir(), tester.getTestName())
@@ -94,7 +94,7 @@ class Job(object):
         self.__tester.run(self.timer, self.options)
         self.__start_time = self.timer.starts[0]
         self.__end_time = self.timer.ends[-1]
-        self.__std_out = self.__tester.std_out
+        self.__joined_out = self.__tester.joined_out
 
     def killProcess(self):
         """ Kill remaining process that may be running """
@@ -110,23 +110,24 @@ class Job(object):
 
     def getOutput(self):
         """ Return the contents of output """
-        return self.__std_out
+        return self.__joined_out
 
     def setOutput(self, output):
         """ Method to allow schedulers to overwrite the output if certain conditions are met """
-        if not self.__tester.outfile is None and not self.__tester.outfile.closed:
+        if (not self.__tester.outfile is None and not self.__tester.outfile.closed
+           and not self.__tester.errfile is None and not self.__tester.errfile.closed):
             return
-        self.__std_out = output
+        self.__joined_out = output
 
     def getActiveTime(self):
         """ Return active time """
-        m = re.search(r"Active time=(\S+)", self.__std_out)
+        m = re.search(r"Active time=(\S+)", self.__joined_out)
         if m != None:
             return m.group(1)
 
     def getSolveTime(self):
         """ Return solve time """
-        m = re.search(r"solve().*", self.__std_out)
+        m = re.search(r"solve().*", self.__joined_out)
         if m != None:
             return m.group().split()[5]
 
