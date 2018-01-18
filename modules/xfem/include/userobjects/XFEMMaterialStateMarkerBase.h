@@ -5,8 +5,8 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-#ifndef XFEMMARKERUSEROBJECT_H
-#define XFEMMARKERUSEROBJECT_H
+#ifndef XFEMMATERIALSTATEMARKERBASE_H
+#define XFEMMATERIALSTATEMARKERBASE_H
 
 #include "ElementUserObject.h"
 
@@ -15,16 +15,16 @@ class XFEM;
 /**
  * Coupled auxiliary value
  */
-class XFEMMarkerUserObject : public ElementUserObject
+class XFEMMaterialStateMarkerBase : public ElementUserObject
 {
 public:
   /**
    * Factory constructor, takes parameters so that all derived classes can be built using the same
    * constructor.
    */
-  XFEMMarkerUserObject(const InputParameters & parameters);
+  XFEMMaterialStateMarkerBase(const InputParameters & parameters);
 
-  virtual ~XFEMMarkerUserObject() {}
+  virtual ~XFEMMaterialStateMarkerBase() {}
 
   virtual void initialize();
   virtual void execute();
@@ -45,6 +45,6 @@ private:
 };
 
 template <>
-InputParameters validParams<XFEMMarkerUserObject>();
+InputParameters validParams<XFEMMaterialStateMarkerBase>();
 
-#endif // XFEMMARKERUSEROBJECT_H
+#endif // XFEMMATERIALSTATEMARKERBASE_H

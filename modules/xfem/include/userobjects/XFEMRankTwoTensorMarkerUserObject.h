@@ -8,7 +8,7 @@
 #ifndef XFEMRANKTWOTENSORMARKERUSEROBJECT_H
 #define XFEMRANKTWOTENSORMARKERUSEROBJECT_H
 
-#include "XFEMMarkerUserObject.h"
+#include "XFEMMaterialStateMarkerBase.h"
 
 class XFEMRankTwoTensorMarkerUserObject;
 class RankTwoTensor;
@@ -16,7 +16,7 @@ class RankTwoTensor;
 template <>
 InputParameters validParams<XFEMRankTwoTensorMarkerUserObject>();
 
-class XFEMRankTwoTensorMarkerUserObject : public XFEMMarkerUserObject
+class XFEMRankTwoTensorMarkerUserObject : public XFEMMaterialStateMarkerBase
 {
 public:
   XFEMRankTwoTensorMarkerUserObject(const InputParameters & parameters);

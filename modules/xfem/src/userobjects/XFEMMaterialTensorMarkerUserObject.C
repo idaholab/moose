@@ -13,7 +13,7 @@ template <>
 InputParameters
 validParams<XFEMMaterialTensorMarkerUserObject>()
 {
-  InputParameters params = validParams<XFEMMarkerUserObject>();
+  InputParameters params = validParams<XFEMMaterialStateMarkerBase>();
   params += validParams<MaterialTensorCalculator>();
   params.addRequiredParam<std::string>("tensor", "The material tensor name.");
   params.addRequiredParam<Real>("threshold", "The threshold for crack growth.");
@@ -26,7 +26,7 @@ validParams<XFEMMaterialTensorMarkerUserObject>()
 
 XFEMMaterialTensorMarkerUserObject::XFEMMaterialTensorMarkerUserObject(
     const InputParameters & parameters)
-  : XFEMMarkerUserObject(parameters),
+  : XFEMMaterialStateMarkerBase(parameters),
     _material_tensor_calculator(parameters),
     _tensor(getMaterialProperty<SymmTensor>(getParam<std::string>("tensor"))),
     _threshold(getParam<Real>("threshold")),

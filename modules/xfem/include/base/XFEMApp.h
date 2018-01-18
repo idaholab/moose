@@ -26,6 +26,7 @@ public:
   static void registerObjects(Factory & factory);
   static void associateSyntax(Syntax & syntax, ActionFactory & action_factory);
   static void associateSyntaxDepends(Syntax & syntax, ActionFactory & action_factory);
+  virtual void registerExecFlags() override;
 };
 
 #endif /* XFEMAPP_H */

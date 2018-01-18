@@ -10,7 +10,7 @@ template <>
 InputParameters
 validParams<CrackFrontPointsProvider>()
 {
-  InputParameters params = validParams<GeneralUserObject>();
+  InputParameters params = validParams<ElementUserObject>();
   params.addClassDescription("Base class for a class that can provide a set of points along a "
                              "crack front. The virtual functions must be overridden by a derived "
                              "class to provide this functionality.");
@@ -18,6 +18,6 @@ validParams<CrackFrontPointsProvider>()
 }
 
 CrackFrontPointsProvider::CrackFrontPointsProvider(const InputParameters & parameters)
-  : GeneralUserObject(parameters)
+  : ElementUserObject(parameters)
 {
 }
