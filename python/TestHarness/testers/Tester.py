@@ -79,7 +79,8 @@ class Tester(MooseObject):
         MooseObject.__init__(self, name, params)
         self.specs = params
         self.outfile = None
-        self.std_out = ''
+        self.errfile = None
+        self.joined_out = ''
         self.exit_code = 0
         self.process = None
         self.tags = params['tags']
@@ -335,18 +336,23 @@ class Tester(MooseObject):
         self.process = None
         try:
             f = TemporaryFile()
+            e = TemporaryFile()
+
             # On Windows, there is an issue with path translation when the command is passed in
             # as a list.
             if platform.system() == "Windows":
-                process = subprocess.Popen(cmd,stdout=f,stderr=f,close_fds=False, shell=True, creationflags=subprocess.CREATE_NEW_PROCESS_GROUP, cwd=cwd)
+                process = subprocess.Popen(cmd, stdout=f, stderr=e, close_fds=False,
+                                           shell=True, creationflags=subprocess.CREATE_NEW_PROCESS_GROUP, cwd=cwd)
             else:
-                process = subprocess.Popen(cmd,stdout=f,stderr=f,close_fds=False, shell=True, preexec_fn=os.setsid, cwd=cwd)
+                process = subprocess.Popen(cmd, stdout=f, stderr=e, close_fds=False,
+                                           shell=True, preexec_fn=os.setsid, cwd=cwd)
         except:
             print("Error in launching a new task", cmd)
             raise
 
         self.process = process
         self.outfile = f
+        self.errfile = e
 
         timer.start()
         process.wait()
@@ -355,8 +361,9 @@ class Tester(MooseObject):
         self.exit_code = process.poll()
 
         # store the contents of output, and close the file
-        self.std_out = util.readOutput(self.outfile, options)
+        self.joined_out = util.readOutput(self.outfile, self.errfile, options)
         self.outfile.close()
+        self.errfile.close()
 
     def killCommand(self):
         """

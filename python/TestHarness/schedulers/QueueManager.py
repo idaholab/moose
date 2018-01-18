@@ -427,7 +427,7 @@ class QueueManager(Scheduler):
                     with open(stdout_file, 'r') as f:
                         # We can use trimmed output here, now that the job has a proper
                         # status (we are not going to run processResults again).
-                        outfile = util.readOutput(f, self.options)
+                        outfile = util.readOutput(f, None, self.options)
                     job.setOutput(outfile)
                 else:
                     with self.dag_lock:
