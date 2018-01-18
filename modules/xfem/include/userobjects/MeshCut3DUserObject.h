@@ -30,24 +30,21 @@ public:
   MeshCut3DUserObject(const InputParameters & parameters);
 
   virtual void initialize() override;
-  virtual void execute() override{};
-  virtual void finalize() override{};
   virtual const std::vector<Point>
   getCrackFrontPoints(unsigned int num_crack_front_points) const override;
 
-  virtual bool active(Real time) const override;
   virtual bool cutElementByGeometry(const Elem * elem,
-                                    std::vector<CutEdge> & cut_edges,
-                                    std::vector<CutNode> & cut_nodes,
+                                    std::vector<Xfem::CutEdge> & cut_edges,
+                                    std::vector<Xfem::CutNode> & cut_nodes,
                                     Real time) const override;
   virtual bool cutElementByGeometry(const Elem * elem,
-                                    std::vector<CutFace> & cut_faces,
+                                    std::vector<Xfem::CutFace> & cut_faces,
                                     Real time) const override;
   virtual bool cutFragmentByGeometry(std::vector<std::vector<Point>> & frag_edges,
-                                     std::vector<CutEdge> & cut_edges,
+                                     std::vector<Xfem::CutEdge> & cut_edges,
                                      Real time) const override;
   virtual bool cutFragmentByGeometry(std::vector<std::vector<Point>> & frag_faces,
-                                     std::vector<CutFace> & cut_faces,
+                                     std::vector<Xfem::CutFace> & cut_faces,
                                      Real time) const override;
 
 protected:
@@ -81,7 +78,7 @@ protected:
   std::vector<dof_id_type> _boundary;
 
   /// Edges at the boundary
-  std::set<CutEdge> _boundary_edges;
+  std::set<Xfem::CutEdge> _boundary_edges;
 
   /// A map of boundary nodes and their neighbors
   std::map<dof_id_type, std::vector<dof_id_type>> _boundary_map;

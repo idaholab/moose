@@ -70,12 +70,6 @@ MeshCut3DUserObject::MeshCut3DUserObject(const InputParameters & parameters)
   }
 }
 
-bool
-MeshCut3DUserObject::active(Real time) const
-{
-  return time >= 0;
-}
-
 void
 MeshCut3DUserObject::initialize()
 {
@@ -112,8 +106,8 @@ MeshCut3DUserObject::initialize()
 
 bool
 MeshCut3DUserObject::cutElementByGeometry(const Elem * /*elem*/,
-                                          std::vector<CutEdge> & /*cut_edges*/,
-                                          std::vector<CutNode> & /*cut_nodes*/,
+                                          std::vector<Xfem::CutEdge> & /*cut_edges*/,
+                                          std::vector<Xfem::CutNode> & /*cut_nodes*/,
                                           Real /*time*/) const
 {
   mooseError("invalid method for 3D mesh cutting");
@@ -122,7 +116,7 @@ MeshCut3DUserObject::cutElementByGeometry(const Elem * /*elem*/,
 
 bool
 MeshCut3DUserObject::cutElementByGeometry(const Elem * elem,
-                                          std::vector<CutFace> & cut_faces,
+                                          std::vector<Xfem::CutFace> & cut_faces,
                                           Real /*time*/) const
 // With the crack defined by a planar mesh, this method cuts a solid element by all elements in the
 // planar mesh
@@ -180,7 +174,7 @@ MeshCut3DUserObject::cutElementByGeometry(const Elem * elem,
     if (cut_edges.size() == 2)
     {
       elem_cut = true;
-      CutFace mycut;
+      Xfem::CutFace mycut;
       mycut.face_id = i;
       mycut.face_edge.push_back(cut_edges[0]);
       mycut.face_edge.push_back(cut_edges[1]);
@@ -194,7 +188,7 @@ MeshCut3DUserObject::cutElementByGeometry(const Elem * elem,
 
 bool
 MeshCut3DUserObject::cutFragmentByGeometry(std::vector<std::vector<Point>> & /*frag_edges*/,
-                                           std::vector<CutEdge> & /*cut_edges*/,
+                                           std::vector<Xfem::CutEdge> & /*cut_edges*/,
                                            Real /*time*/) const
 {
   mooseError("invalid method for 3D mesh cutting");
@@ -203,7 +197,7 @@ MeshCut3DUserObject::cutFragmentByGeometry(std::vector<std::vector<Point>> & /*f
 
 bool
 MeshCut3DUserObject::cutFragmentByGeometry(std::vector<std::vector<Point>> & /*frag_faces*/,
-                                           std::vector<CutFace> & /*cut_faces*/,
+                                           std::vector<Xfem::CutFace> & /*cut_faces*/,
                                            Real /*time*/) const
 {
   // TODO: Need this for branching in 3D
@@ -397,7 +391,7 @@ MeshCut3DUserObject::findBoundaryEdges()
           if (node1 > node2)
             std::swap(node1, node2);
 
-          CutEdge ce;
+          Xfem::CutEdge ce;
 
           if (node1 > node2)
             std::swap(node1, node2);
@@ -455,7 +449,7 @@ MeshCut3DUserObject::findBoundaryEdges()
       if (is_edge_inside == 0)
       {
         // store boundary edges
-        CutEdge ce;
+        Xfem::CutEdge ce;
 
         if (node1 > node2)
           std::swap(node1, node2);

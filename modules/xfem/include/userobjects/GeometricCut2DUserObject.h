@@ -23,21 +23,19 @@ class GeometricCut2DUserObject : public GeometricCutUserObject
 public:
   GeometricCut2DUserObject(const InputParameters & parameters);
 
-  virtual bool active(Real time) const override;
-
   virtual bool cutElementByGeometry(const Elem * elem,
-                                    std::vector<CutEdge> & cut_edges,
-                                    std::vector<CutNode> & cut_nodes,
+                                    std::vector<Xfem::CutEdge> & cut_edges,
+                                    std::vector<Xfem::CutNode> & cut_nodes,
                                     Real time) const override;
   virtual bool cutElementByGeometry(const Elem * elem,
-                                    std::vector<CutFace> & cut_faces,
+                                    std::vector<Xfem::CutFace> & cut_faces,
                                     Real time) const override;
 
   virtual bool cutFragmentByGeometry(std::vector<std::vector<Point>> & frag_edges,
-                                     std::vector<CutEdge> & cut_edges,
+                                     std::vector<Xfem::CutEdge> & cut_edges,
                                      Real time) const override;
   virtual bool cutFragmentByGeometry(std::vector<std::vector<Point>> & frag_faces,
-                                     std::vector<CutFace> & cut_faces,
+                                     std::vector<Xfem::CutFace> & cut_faces,
                                      Real time) const override;
 
 protected:
@@ -50,6 +48,18 @@ protected:
                                    Real & segment_intersection_fraction) const;
 
   Real crossProduct2D(const Point & point_a, const Point & point_b) const;
+
+  /**
+   * Find the fractional distance along a specified cut line for the current time
+   * that is currently active. Used for time-based propagation along a line
+   * @param cut_num Index of the cut being queried
+   * @param time      Current simulation time
+   * @return Current fractional distance
+   */
+  Real cutFraction(unsigned int cut_num, Real time) const;
+
+  /// Vector of start/end times for each cut segment
+  std::vector<std::pair<Real, Real>> _cut_time_ranges;
 };
 
 #endif // GEOMETRICCUT2DUSEROBJECT_H
