@@ -47,7 +47,7 @@ Job Id: <JOB_ID>.somemachine.org
     etime = Wed Oct 18 09:08:22 2017
     run_count = 1
     Stageout_status = 1
-    Exit_status = 0
+    Exit_status = <EXIT_STATUS>
     Submit_arguments = -h /some/path/to/qsub_batch/kernelssimple_diffusiontest.sh
     history_timestamp = 1508339302
     project = moose
