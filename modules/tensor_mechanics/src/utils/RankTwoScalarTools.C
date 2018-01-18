@@ -272,7 +272,7 @@ radialStress(const RankTwoTensor & stress,
   Point radial_norm;
   normalPositionVector(point1, point2, curr_point, radial_norm);
 
-  // Compute the scalar stress component in the direciton of the normal vector from the
+  // Compute the scalar stress component in the direction of the normal vector from the
   // user-defined axis of rotation.
   Real radial_stress = 0.0;
   for (unsigned int i = 0; i < 3; ++i)

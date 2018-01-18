@@ -859,15 +859,11 @@ stochastic_tools_test:
 tensor_mechanics:
     - /AuxKernels/AccumulateAux
     - /AuxKernels/CrystalPlasticityRotationOutAux
-    - /AuxKernels/CylindricalRankTwoAux
     - /AuxKernels/ElasticEnergyAux
     - /AuxKernels/NewmarkAccelAux
     - /AuxKernels/NewmarkVelAux
     - /AuxKernels/RadialDisplacementCylinderAux
     - /AuxKernels/RadialDisplacementSphereAux
-    - /AuxKernels/RankFourAux
-    - /AuxKernels/RankTwoAux
-    - /AuxKernels/RankTwoScalarAux
     - /BCs
     - /BCs/DashpotBC
     - /BCs/DisplacementAboutAxis
@@ -919,12 +915,10 @@ tensor_mechanics:
     - /Materials/ComputeDeformGradBasedStress
     - /Materials/ComputeEigenstrain
     - /Materials/ComputeElasticSmearedCrackingStress
-    - /Materials/ComputeElasticityTensor
     - /Materials/ComputeElasticityTensorCP
     - /Materials/ComputeExtraStressConstant
     - /Materials/ComputeFiniteStrainElasticStress
     - /Materials/ComputeIncrementalSmallStrain
-    - /Materials/ComputeIsotropicElasticityTensor
     - /Materials/ComputeLayeredCosseratElasticityTensor
     - /Materials/ComputeLinearElasticPFFractureStress
     - /Materials/ComputeLinearElasticStress
