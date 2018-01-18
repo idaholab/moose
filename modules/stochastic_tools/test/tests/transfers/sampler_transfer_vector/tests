@@ -17,13 +17,13 @@
   [./invalid_name]
     type = RunException
     input = master.i
-    cli_args = Transfers/sub/parameters=foo
+    cli_args = "Transfers/sub/parameters=foo :Outputs/csv=false"
     expect_err = "Unable to locate a Real or std::vector<Real> parameter with the name 'foo.'"
   [../]
   [./extra_data]
     type = RunException
     input = master.i
-    cli_args = Transfers/sub/parameters='BCs/left/value'
+    cli_args = "Transfers/sub/parameters='BCs/left/value' :Outputs/csv=false"
     expect_err = "The number of values supplied \(4\) does not match the number of values consumed by setting parameter values \(1\)."
   [../]
 []
