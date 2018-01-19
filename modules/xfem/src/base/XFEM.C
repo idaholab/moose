@@ -1312,6 +1312,24 @@ XFEM::getPhysicalVolumeFraction(const Elem * elem) const
   return phys_volfrac;
 }
 
+bool
+XFEM::isPointInsidePhysicalDomain(const Elem * elem, const Point & point) const
+{
+  std::map<unique_id_type, XFEMCutElem *>::const_iterator it;
+  it = _cut_elem_map.find(elem->unique_id());
+  if (it != _cut_elem_map.end())
+  {
+    XFEMCutElem * xfce = it->second;
+
+    if (xfce->isPointPhysical(point))
+      return true;
+  }
+  else
+    return true;
+
+  return false;
+}
+
 Real
 XFEM::getCutPlane(const Elem * elem,
                   const Xfem::XFEM_CUTPLANE_QUANTITY quantity,
