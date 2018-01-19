@@ -5,8 +5,6 @@
 # list of application-wide excluded source files
 excluded_srcfiles :=
 
-APPLICATION_INCLUDE_DEPTH ?= 3
-
 #
 # Save off parameters for possible app.mk recursion
 #
@@ -110,7 +108,7 @@ endif
 
 # header files
 include_dirs	:= $(shell find $(depend_dirs) -type d | grep -v "\.svn")
-include_files	:= $(shell find $(depend_dirs) -name "*.h" | grep -v "\.svn")
+include_files	:= $(shell find $(depend_dirs) -name "*.[hf]" | grep -v "\.svn")
 
 # clang static analyzer files
 app_analyzer := $(patsubst %.C, %.plist.$(obj-suffix), $(srcfiles))
@@ -136,11 +134,9 @@ all_header_dir := $(APPLICATION_DIR)/build/header_symlinks
 link_names := $(foreach i, $(include_files), $(all_header_dir)/$(notdir $(i)))
 
 $(eval $(call all_header_dir_rule, $(all_header_dir)))
-$(call create_symlink_rules,$(APPLICATION_DIR),$(APPLICATION_INCLUDE_DEPTH))
+$(call symlink_rules, $(all_header_dir), $(include_files))
 
 header_symlinks:: $(all_header_dir) $(link_names)
-
-#$(foreach i, $(include_files), $(shell ln -sf $(i) $(app_all_header_dir)/$(notdir $(i))))
 
 # application
 app_EXEC    := $(APPLICATION_DIR)/$(APPLICATION_NAME)-$(METHOD)
@@ -205,7 +201,7 @@ LIBRARY_SUFFIX :=
 $(eval $(call CXX_RULE_TEMPLATE,_with$(app_LIB_SUFFIX)))
 
 ifeq ($(BUILD_EXEC),yes)
-  all:: | $(link_names) $(app_EXEC)
+  all:: $(app_EXEC)
 endif
 
 BUILD_EXEC :=
@@ -216,9 +212,11 @@ app_HEADER_deps := $(wildcard $(app_GIT_DIR)/.git/HEAD $(app_GIT_DIR)/.git/index
 # Target-specific Variable Values (See GNU-make manual)
 $(app_HEADER): curr_dir    := $(APPLICATION_DIR)
 $(app_HEADER): curr_app    := $(APPLICATION_NAME)
+$(app_HEADER): all_header_dir := $(all_header_dir)
 $(app_HEADER): $(app_HEADER_deps)
 	@echo "MOOSE Checking if header needs updating: "$@"..."
 	$(shell $(FRAMEWORK_DIR)/scripts/get_repo_revision.py $(curr_dir) $@ $(curr_app))
+	@ln -sf $@ $(all_header_dir)
 
 # Target-specific Variable Values (See GNU-make manual)
 $(app_LIB): curr_objs := $(app_objects)
