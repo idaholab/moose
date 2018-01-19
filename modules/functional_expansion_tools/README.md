@@ -41,7 +41,7 @@ Set either `ALL_MODULES := yes` or ` FUNCTIONAL_EXPANSION_TOOLS := yes` in the a
  Although there are no kernels directly provided by this module (yet), these three have varying degrees of usefulness:
 | Name | Description |
 | ------ | ------ |
-| `BodyForce` | May be used to couple a `FunctionSeries` object directly to a solution, instead of using `FunctionSeriesToAux` and `CoupledForce`. Note: using `BodyForce` is slightly more computationally intensive, so the alternative method is recommended. |
+| `BodyForce` | May be used to couple a `FunctionSeries` object directly to a solution, instead of using `FunctionSeriesToAux` and `CoupledForce`. Note: using `BodyForce` is slightly more computationally intensive, so the alternative method is recommended. If the `BodyForce` approach is used it is highly recommended to set `enable_cache = true` for the associated `FunctionSeries` object. |
 | `CoupledForce` | Couples an **AuxVariable** or **Variable** to the solution of another **Variable**. Useful in conjunction with `FunctionSeriesToAux`.
 | `NullKernel` | May be required for use in situation where no **Variables** or **Kernels** are needed. This may occur, for example, in an app that uses only the recommended `FunctionSeriesToAux`+`CoupledForce` approach. |
 
