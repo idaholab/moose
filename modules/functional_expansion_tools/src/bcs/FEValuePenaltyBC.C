@@ -24,7 +24,7 @@ validParams<FEValuePenaltyBC>()
   InputParameters params = validParams<FunctionPenaltyDirichletBC>();
 
   params.addClassDescription(
-      "Sets a value boundary condition, evaluated using a FunctionSeries  instance. This does not "
+      "Sets a value boundary condition, evaluated using a FunctionSeries instance. This does not "
       "fix the value, but rather 'strongly encourages'  value agreement by penalizing the "
       "differences through contributions to  the residual.");
 

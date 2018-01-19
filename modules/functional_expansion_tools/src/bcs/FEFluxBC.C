@@ -24,7 +24,7 @@ validParams<FEFluxBC>()
   InputParameters params = validParams<FunctionNeumannBC>();
 
   params.addClassDescription(
-      "Sets a flux boundary condition, evaluated using a FunctionSeries  instance. This does not "
+      "Sets a flux boundary condition, evaluated using a FunctionSeries instance. This does not "
       "fix the flux, but rather 'strongly encourages' flux agreement by penalizing the differences "
       "through contributions to the residual.");
 
