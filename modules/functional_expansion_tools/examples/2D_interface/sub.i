@@ -88,7 +88,7 @@
     function = FE_Basis_Flux_Sub
     variable = s
     boundary = left
-    diffusion_coefficient = thermal_conductivity
+    diffusivity = thermal_conductivity
   [../]
 []
 

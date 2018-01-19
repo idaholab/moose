@@ -1,7 +1,8 @@
 # Derived from the example '2D_interface' with the following differences:
 #
 #   1) The number of y divisions in the sub app is not the same as the master app
-#   2) The FE order for the flux term was increased to 7
+#   2) The subapp mesh is skewed in y
+#   3) The FE order for the flux term was increased to 7
 [Mesh]
   type = GeneratedMesh
   dim = 2
@@ -11,6 +12,7 @@
   ymin = 0.0
   ymax = 10.0
   ny = 23
+  bias_y = 1.2
 []
 
 [Variables]
@@ -89,7 +91,7 @@
     function = FE_Basis_Flux_Sub
     variable = s
     boundary = left
-    diffusion_coefficient = thermal_conductivity
+    diffusivity = thermal_conductivity
   [../]
 []
 
