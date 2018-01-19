@@ -460,7 +460,15 @@ protected:
    * @param comp Component number of multiple coupled variables
    * @return Pointer to the desired variable
    */
-  MooseVariableFE * getVar(const std::string & var_name, unsigned int comp);
+  MooseVariable * getVar(const std::string & var_name, unsigned int comp);
+
+  /**
+   * Extract pointer to a coupled vector variable
+   * @param var_name Name of parameter desired
+   * @param comp Component number of multiple coupled variables
+   * @return Pointer to the desired variable
+   */
+  MooseVariableVector * getVectorVar(const std::string & var_name, unsigned int comp);
 
   /**
    * Checks to make sure that the current Executioner has set "_is_transient" when old/older values

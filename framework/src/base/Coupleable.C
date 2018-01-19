@@ -166,7 +166,27 @@ Coupleable::getVar(const std::string & var_name, unsigned int comp)
     // Error check - don't couple elemental to nodal
     if (!(_coupled_vars[var_name][comp])->isNodal() && _c_nodal)
       mooseError(_c_name, ": You cannot couple an elemental variable to a nodal variable");
-    return _coupled_vars[var_name][comp];
+    if (auto * coupled_var = dynamic_cast<MooseVariable *>(_coupled_vars[var_name][comp]))
+      return coupled_var;
+    else
+      mooseError("Variable of wrong type");
+  }
+  else
+    mooseError(_c_name, ": Trying to get a non-existent component of variable '", var_name, "'");
+}
+
+MooseVariableVector *
+Coupleable::getVectorVar(const std::string & var_name, unsigned int comp)
+{
+  if (comp < _coupled_vars[var_name].size())
+  {
+    // Error check - don't couple elemental to nodal
+    if (!(_coupled_vars[var_name][comp])->isNodal() && _c_nodal)
+      mooseError(_c_name, ": You cannot couple an elemental variable to a nodal variable");
+    if (auto * coupled_var = dynamic_cast<MooseVariableVector *>(_coupled_vars[var_name][comp]))
+      return coupled_var;
+    else
+      mooseError("Variable of wrong type");
   }
   else
     mooseError(_c_name, ": Trying to get a non-existent component of variable '", var_name, "'");
