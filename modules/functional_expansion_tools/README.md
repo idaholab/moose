@@ -4,7 +4,7 @@
 #
 #
 ### Description
-Functional expansions (FEs) are a methodology that represent information as moments of a functional series. This is is related to a Fourier series representation of cyclic data. Moments are generated via numerical integration for each term in the functional series to represent the field of interest. These moments can then be used to reconsruct the field in a separate app.
+Functional expansions (FEs) are a methodology that represent information as moments of a functional series. This is is related to a Fourier series representation of cyclic data. Moments are generated via numerical integration for each term in the functional series to represent the field of interest. These moments can then be used to reconstruct the field in a separate app.
 
 Currently there are two main flavors of FE coupling available: interface and volumetric.
 
@@ -70,11 +70,17 @@ Additional functional series, polynomial or otherwise, can be added by inheritin
 Additional composite series, such as may be suitable for spherical or shell data, can be implemented by inheriting from the `CompositeSeriesBasisInterface`. The `FunctionSeries` class will need updated to support the newly-available series.
 
 ### TODO
-* Implement an `Executioner`-derived FE-based interface that can be used to simply the exchange of FE coefficients with external aplications wrapped in their own executions.
-* Implement a `Materials`-derived FE-based class that can provide continuous material properties
-* Implement support for various types of FE coefficients, including:
+* Implement an **Executioner**-derived FE-based interface that can be used to simply the exchange of FE coefficients with external applications wrapped in their own executions.
+* Implement a **Materials**-derived FE-based class that can provide continuous material properties
+* Implement a **Kernel**-derived class, à la `BodyForce`, that automatically sets `enable_cache = true` for the associated `FunctionSeries` object
+* Implement support for various types of FE coefficients
   * Separable series
   * Various orthonormalizations
+* Add more functional series
+  * Fourier
+  * Annular Zernike (0 < r ≤ 1)
+  * Shell (r = 1) for 3D cylindrical boundary conditions (Zernike-based?)
+  * Spherical harmonics + spherical composite series
 
 ### Caveats
 1) FEs are not recommended for spanning spaces with discontinuities.
@@ -84,7 +90,7 @@ Additional composite series, such as may be suitable for spherical or shell data
 
 ### Relevant Publications (Newest to Oldest)
 * B. WENDT, A. NOVAK, L. KERBY, and P. ROMANO, "Integration of Functional Expansion Methodologies as a MOOSE Module," in *PHYSOR 2018: Reactor Physics paving the way towards more efficient systems,* (2018). submitted
-* M. ELLIS, *Methods for Including Multiphsyics Feedback in Monte Carlos Reactor Physics Calculations.* PhD Dissertation, Massachussetts Institute of Technology (2017).
+* M. ELLIS, *Methods for Including Multiphsyics Feedback in Monte Carlos Reactor Physics Calculations.* PhD Dissertation, Massachusetts Institute of Technology (2017).
 * B. WENDT and L. KERBY, "MultiApp Transfers in the MOOSE Framework based on Functional Expansions." *Transactions of the American Nuclear Society,* **117**(1), pp. 735-738 (2017).
 * L. KERBY, A. TUMULAK, J. LEPPÄNEN, and V. VALTAVIRTA, "Preliminary Serpent-MOOSE Coupling and Implementation of Functional Expansion Tallies in Serpent," in *International Conference on Mathematics & Computational Methods Applied to Nuclear Science and Entineering (M&C 2017),* (2017)
 * J. FLUSSER, T. SUK, and B. ZITOV, *2D & 3D image analysis by moments.* John Wiley & Sons, Inc. (2016)
