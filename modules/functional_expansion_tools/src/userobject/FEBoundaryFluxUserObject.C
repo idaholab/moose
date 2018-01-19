@@ -25,16 +25,16 @@ validParams<FEBoundaryFluxUserObject>()
                              "'FunctionSeries'-type Function");
 
   params.addRequiredParam<std::string>(
-      "diffusion_coefficient",
-      "The name of the material diffusivity property that will be used in the flux computation.");
+      "diffusivity",
+      "The name of the material diffusivity property, or raw value, that will be used in the flux computation.");
 
   return params;
 }
 
 FEBoundaryFluxUserObject::FEBoundaryFluxUserObject(const InputParameters & parameters)
   : FEBoundaryBaseUserObject(parameters),
-    _diffusion_coefficient_name(parameters.get<std::string>("diffusion_coefficient")),
-    _diffusion_coefficient(getMaterialProperty<Real>(_diffusion_coefficient_name))
+    _diffusivity_name(parameters.get<std::string>("diffusivity")),
+    _diffusivity(getMaterialProperty<Real>(_diffusivity_name))
 {
   // Nothing here
 }
@@ -42,5 +42,5 @@ FEBoundaryFluxUserObject::FEBoundaryFluxUserObject(const InputParameters & param
 Real
 FEBoundaryFluxUserObject::computeQpIntegral()
 {
-  return -_diffusion_coefficient[_qp] * _grad_u[_qp] * _normals[_qp];
+  return -_diffusivity[_qp] * _grad_u[_qp] * _normals[_qp];
 }

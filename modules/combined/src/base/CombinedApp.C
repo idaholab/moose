@@ -105,7 +105,7 @@ CombinedApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
   ChemicalReactionsApp::associateSyntax(syntax, action_factory);
   ContactApp::associateSyntax(syntax, action_factory);
   FluidPropertiesApp::associateSyntax(syntax, action_factory);
-  FunctionalExpansionAppTools::associateSyntax(syntax, action_factory);
+  FunctionalExpansionToolsApp::associateSyntax(syntax, action_factory);
   HeatConductionApp::associateSyntax(syntax, action_factory);
   LevelSetApp::associateSyntax(syntax, action_factory);
   MiscApp::associateSyntax(syntax, action_factory);

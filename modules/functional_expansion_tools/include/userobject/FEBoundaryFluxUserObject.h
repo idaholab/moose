@@ -34,11 +34,11 @@ protected:
   // Override from SideIntegralVariableUserObject
   virtual Real computeQpIntegral() final;
 
-  /// Name of the diffusion coefficient property in the local material
-  const std::string _diffusion_coefficient_name;
+  /// Name of the diffusivity property in the local material
+  const std::string _diffusivity_name;
 
-  /// Value of the diffusion coefficient
-  const MaterialProperty<Real> & _diffusion_coefficient;
+  /// Value of the diffusivity
+  const MaterialProperty<Real> & _diffusivity;
 };
 
 #endif // FEBOUNDARYFLUXUSEROBJECT_H
