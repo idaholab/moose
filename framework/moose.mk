@@ -1,9 +1,13 @@
 #
 # MOOSE
 #
+APPLICATION_DIR := $(FRAMEWORK_DIR)
 moose_SRC_DIRS := $(FRAMEWORK_DIR)/src
 moose_SRC_DIRS += $(FRAMEWORK_DIR)/contrib/mtwist
 moose_SRC_DIRS += $(FRAMEWORK_DIR)/contrib/jsoncpp
+
+# The depth of subdirectories in `include`
+FRAMEWORK_INCLUDE_DEPTH = 3
 
 #
 # pcre
@@ -49,23 +53,48 @@ gtest_deps      := $(patsubst %.cc, %.$(obj-suffix).d, $(gtest_srcfiles))
 
 #moose_INC_DIRS := $(shell find $(FRAMEWORK_DIR)/include -type d -not -path "*/.svn*")
 
-moose_all_header_dir := $(FRAMEWORK_DIR)/all_headers
+all_header_dir := $(FRAMEWORK_DIR)/build/header_symlinks
 
-$(shell mkdir -p $(moose_all_header_dir))
+# For whatever reason the order of these has to be this way!
+define all_header_dir_rule
+$(1):
+	@$$(shell mkdir -p $$(header_dir))
+$(1): header_dir := $(1)
+endef
 
 include_files	:= $(shell find $(FRAMEWORK_DIR)/include -name "*.h" | grep -v "\.svn")
-link_names := $(foreach i, $(include_files), $(moose_all_header_dir)/$(notdir $(i)))
+link_names := $(foreach i, $(include_files), $(all_header_dir)/$(notdir $(i)))
 
-#define header_rule
-#$(moose_all_header_dir)/$(notdir $(1)): $(1) $(moose_all_header_dir)
-#	ln -sf $$< $$@
-#endef
+define prepend
+$(eval $(2):=$(1)$($(2)))
+endef
 
-#$(foreach i, $(include_files), $(eval $(call header_rule, $(i))))
+# Defines one symlink rule - meant to be called by create_symlink_rules
+# Args:
+# 1: application directory
+# 2: symlink_depth_pattern
+define symlink_rule
+$(1)/build/header_symlinks/%.h: $(1)/include/$(2)
+	@ln -sf $$< $$@
+endef
 
-$(foreach i, $(include_files), $(shell ln -sf $(i) $(moose_all_header_dir)/$(notdir $(i))))
+# Creates all fo the rules for header symlinks, pass in the directory to put the symlinnks
+# Can be conservative and pass more subdirector depth than you currently have
+# Args:
+# 1: application directory
+# 2: include subdirectory depth
+define create_symlink_rules
+$(eval depth_list:=$(shell seq 0 $(2))) \
+$(eval symlink_depth_pattern:=%.h) \
+$(foreach i, $(depth_list), $(call prepend,*/,symlink_depth_pattern) $(eval $(call symlink_rule,$(1),$(symlink_depth_pattern))))
+endef
 
-moose_INC_DIRS := $(moose_all_header_dir)
+$(eval $(call all_header_dir_rule, $(all_header_dir)))
+$(call create_symlink_rules,$(FRAMEWORK_DIR),$(FRAMEWORK_INCLUDE_DEPTH))
+
+header_symlinks:: $(all_header_dir) $(link_names)
+
+moose_INC_DIRS := $(all_header_dir)
 moose_INC_DIRS += $(shell find $(FRAMEWORK_DIR)/contrib/*/include -type d -not -path "*/.svn*")
 moose_INC_DIRS += "$(gtest_DIR)"
 moose_INC_DIRS += "$(hit_DIR)"
@@ -96,10 +125,10 @@ moose_deps := $(patsubst %.C, %.$(obj-suffix).d, $(moose_srcfiles)) \
 moose_analyzer := $(patsubst %.C, %.plist.$(obj-suffix), $(moose_srcfiles))
 moose_analyzer += $(patsubst %.cc, %.plist.$(obj-suffix), $(hit_srcfiles))
 
-app_INCLUDES := $(moose_INCLUDE)
+app_INCLUDES := $(moose_INCLUDE) $(libmesh_INCLUDE)
 app_LIBS     := $(moose_LIBS)
 app_DIRS     := $(FRAMEWORK_DIR)
-all:: | libmesh_submodule_status moose_revision $(link_names) moose
+all:: libmesh_submodule_status moose_revision moose
 
 # revision header
 moose_revision_header = $(FRAMEWORK_DIR)/include/base/MooseRevision.h
@@ -184,7 +213,7 @@ $(exodiff_APP): $(exodiff_objects)
 #
 # Clean targets
 #
-.PHONY: clean clobber cleanall echo_include echo_library libmesh_submodule_status hit
+ls.PHONY: clean clobber cleanall echo_include echo_library libmesh_submodule_status hit
 
 # Set up app-specific variables for MOOSE, so that it can use the same clean target as the apps
 app_EXEC := $(exodiff_APP)
@@ -203,6 +232,7 @@ app_deps := $(moose_deps) $(exodiff_deps) $(pcre_deps) $(gtest_deps) $(hit_deps)
 clean::
 	@$(libmesh_LIBTOOL) --mode=uninstall --quiet rm -f $(app_LIB) $(app_test_LIB)
 	@rm -rf $(app_EXEC) $(app_objects) $(main_object) $(app_deps) $(app_HEADER) $(app_test_objects)
+	rm -rf $(APPLICATION_DIR)/build
 
 # The clobber target does 'make clean' and then uses 'find' to clean a
 # bunch more stuff.  We have to write this target as though it could
@@ -220,6 +250,7 @@ clean::
 #    source files are deleted over time.
 clobber:: clean
 	@$(MOOSE_DIR)/scripts/clobber.py -v $(CURDIR)
+	@rm -rf $(APPLICATION_DIR)/build
 
 # cleanall runs 'make clean' in all dependent application directories
 cleanall:: clean

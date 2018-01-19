@@ -5,6 +5,8 @@
 # list of application-wide excluded source files
 excluded_srcfiles :=
 
+APPLICATION_INCLUDE_DEPTH ?= 3
+
 #
 # Save off parameters for possible app.mk recursion
 #
@@ -127,15 +129,18 @@ else
 endif
 
 # all_header_directory
-app_all_header_dir := $(APPLICATION_DIR)/all_headers
-
-$(shell mkdir -p $(app_all_header_dir))
+all_header_dir := $(APPLICATION_DIR)/build/header_symlinks
 
 # header file links
 
-link_names := $(foreach i, $(include_files), $(app_all_header_dir)/$(notdir $(i)))
+link_names := $(foreach i, $(include_files), $(all_header_dir)/$(notdir $(i)))
 
-$(foreach i, $(include_files), $(shell ln -sf $(i) $(app_all_header_dir)/$(notdir $(i))))
+$(eval $(call all_header_dir_rule, $(all_header_dir)))
+$(call create_symlink_rules,$(APPLICATION_DIR),$(APPLICATION_INCLUDE_DEPTH))
+
+header_symlinks:: $(all_header_dir) $(link_names)
+
+#$(foreach i, $(include_files), $(shell ln -sf $(i) $(app_all_header_dir)/$(notdir $(i))))
 
 # application
 app_EXEC    := $(APPLICATION_DIR)/$(APPLICATION_NAME)-$(METHOD)
@@ -175,7 +180,7 @@ endif
 app_LIBS       := $(app_LIB) $(app_LIBS)
 app_LIBS_other := $(filter-out $(app_LIB),$(app_LIBS))
 app_HEADERS    := $(app_HEADER) $(app_HEADERS)
-app_INCLUDES   += -I$(app_all_header_dir) $(ADDITIONAL_INCLUDES)
+app_INCLUDES   += -I$(all_header_dir) $(ADDITIONAL_INCLUDES)
 app_DIRS       += $(APPLICATION_DIR)
 
 # WARNING: the += operator does NOT work here!

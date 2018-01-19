@@ -59,33 +59,36 @@ endif
 
 all::
 
+# Add all header symlinks as dependencies to this target
+header_symlinks::
+
 #
 # C++ rules
 #
-pcre%.$(obj-suffix) : pcre%.cc
+pcre%.$(obj-suffix) : pcre%.cc header_symlinks
 	@echo "MOOSE Compiling C++ (in "$(METHOD)" mode) "$<"..."
 	@$(libmesh_LIBTOOL) --tag=CXX $(LIBTOOLFLAGS) --mode=compile --quiet \
           $(libmesh_CXX) $(libmesh_CPPFLAGS) $(ADDITIONAL_CPPFLAGS) $(libmesh_CXXFLAGS) $(app_INCLUDES) $(libmesh_INCLUDE) -DHAVE_CONFIG_H -MMD -MP -MF $@.d -MT $@ -c $< -o $@
 
-%.$(obj-suffix) : %.cc
+%.$(obj-suffix) : %.cc header_symlinks
 	@echo "MOOSE Compiling C++ (in "$(METHOD)" mode) "$<"..."
 	@$(libmesh_LIBTOOL) --tag=CXX $(LIBTOOLFLAGS) --mode=compile --quiet \
           $(libmesh_CXX) $(libmesh_CPPFLAGS) $(ADDITIONAL_CPPFLAGS) $(libmesh_CXXFLAGS) $(app_INCLUDES) $(libmesh_INCLUDE) -DHAVE_CONFIG_H -MMD -MP -MF $@.d -MT $@ -c $< -o $@
 
 define CXX_RULE_TEMPLATE
-%$(1).$(obj-suffix) : %.C
+%$(1).$(obj-suffix) : %.C header_symlinks
 ifeq ($(1),)
 	@echo "MOOSE Compiling C++ (in "$$(METHOD)" mode) "$$<"..."
 else
 	@echo "MOOSE Compiling C++ with suffix (in "$$(METHOD)" mode) "$$<"..."
 endif
-	$$(libmesh_LIBTOOL) --tag=CXX $$(LIBTOOLFLAGS) --mode=compile --quiet \
+	@$$(libmesh_LIBTOOL) --tag=CXX $$(LIBTOOLFLAGS) --mode=compile --quiet \
 	  $$(libmesh_CXX) $$(libmesh_CPPFLAGS) $$(ADDITIONAL_CPPFLAGS) $$(libmesh_CXXFLAGS) $$(app_INCLUDES) $$(libmesh_INCLUDE) -MMD -MP -MF $$@.d -MT $$@ -c $$< -o $$@
 endef
 # Instantiate Rules
 $(eval $(call CXX_RULE_TEMPLATE,))
 
-%.$(obj-suffix) : %.cpp
+%.$(obj-suffix) : %.cpp header_symlinks
 	@echo "MOOSE Compiling C++ (in "$(METHOD)" mode) "$<"..."
 	@$(libmesh_LIBTOOL) --tag=CXX $(LIBTOOLFLAGS) --mode=compile --quiet \
 	  $(libmesh_CXX) $(libmesh_CPPFLAGS) $(ADDITIONAL_CPPFLAGS) $(libmesh_CXXFLAGS) $(app_INCLUDES) $(libmesh_INCLUDE) -MMD -MP -MF $@.d -MT $@ -c $< -o $@
@@ -94,11 +97,11 @@ $(eval $(call CXX_RULE_TEMPLATE,))
 # Static Analysis
 #
 
-%.plist.$(obj-suffix) : %.C
+%.plist.$(obj-suffix) : %.C header_symlinks
 	@echo "Clang Static Analysis (in "$(METHOD)" mode) "$<"..."
 	@$(libmesh_CXX) $(libmesh_CXXFLAGS) $(app_INCLUDES) $(libmesh_INCLUDE) --analyze $< -o $@
 
-%.plist.$(obj-suffix) : %.cc
+%.plist.$(obj-suffix) : %.cc header_symlinks
 	@echo "Clang Static Analysis (in "$(METHOD)" mode) "$<"..."
 	@$(libmesh_CXX) $(libmesh_CXXFLAGS) $(app_INCLUDES) $(libmesh_INCLUDE) --analyze $< -o $@
 
@@ -106,12 +109,12 @@ $(eval $(call CXX_RULE_TEMPLATE,))
 # C rules
 #
 
-pcre%.$(obj-suffix) : pcre%.c
+pcre%.$(obj-suffix) : pcre%.c header_symlinks
 	@echo "MOOSE Compiling C (in "$(METHOD)" mode) "$<"..."
 	@$(libmesh_LIBTOOL) --tag=CC $(LIBTOOLFLAGS) --mode=compile --quiet \
           $(libmesh_CC) $(libmesh_CPPFLAGS) $(ADDITIONAL_CPPFLAGS) $(libmesh_CFLAGS) $(app_INCLUDES) $(libmesh_INCLUDE) -DHAVE_CONFIG_H -MMD -MP -MF $@.d -MT $@ -c $< -o $@
 
-%.$(obj-suffix) : %.c
+%.$(obj-suffix) : %.c header_symlinks
 	@echo "MOOSE Compiling C (in "$(METHOD)" mode) "$<"..."
 	@$(libmesh_LIBTOOL) --tag=CC $(LIBTOOLFLAGS) --mode=compile --quiet \
 	  $(libmesh_CC) $(libmesh_CPPFLAGS) $(ADDITIONAL_CPPFLAGS) $(libmesh_CFLAGS) $(app_INCLUDES) $(libmesh_INCLUDE) -MMD -MP -MF $@.d -MT $@ -c $< -o $@
@@ -122,7 +125,7 @@ pcre%.$(obj-suffix) : pcre%.c
 # Fortran77 rules
 #
 
-%.$(obj-suffix) : %.f
+%.$(obj-suffix) : %.f header_symlinks
 	@echo "MOOSE Compiling Fortan (in "$(METHOD)" mode) "$<"..."
 	@$(libmesh_LIBTOOL) --tag=F77 $(LIBTOOLFLAGS) --mode=compile --quiet \
 	  $(libmesh_F77) $(libmesh_FFLAGS) $(app_INCLUDES) $(libmesh_INCLUDE) -c $< -o $@
@@ -133,7 +136,7 @@ pcre%.$(obj-suffix) : pcre%.c
 #
 
 PreProcessed_FFLAGS := $(libmesh_FFLAGS)
-%.$(obj-suffix) : %.F
+%.$(obj-suffix) : %.F header_symlinks
 	@echo "MOOSE Compiling Fortran (in "$(METHOD)" mode) "$<"..."
 	@$(libmesh_LIBTOOL) --tag=F77 $(LIBTOOLFLAGS) --mode=compile --quiet \
 	  $(libmesh_F90) $(PreProcessed_FFLAGS) $(app_INCLUDES) $(libmesh_INCLUDE) -c $< $(module_dir_flag) -o $@
