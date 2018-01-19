@@ -125,8 +125,7 @@ Real maxPrincipal(const RankTwoTensor & r2tensor, Point & direction);
 
 /*
  * The mid Principal method calculates the second largest principal value for a
- * tensor.  This method is valid only for 3D problems and will return an error
- * if called in 2D problems.
+ * tensor.
  * param r2tensor RankTwoTensor from which to extract the principal value
  * param direction Direction corresponding to the principal value
  */
