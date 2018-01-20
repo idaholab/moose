@@ -135,4 +135,13 @@ evaluate(Real /*t*/, const Point & /*p*/)
   mooseError("The evaluate method is not defined for this type.");
 }
 
+template <>
+Real MooseParsedFunctionWrapper::evaluate(Real t, const Point & p);
+
+template <>
+DenseVector<Real> MooseParsedFunctionWrapper::evaluate(Real t, const Point & p);
+
+template <>
+RealVectorValue MooseParsedFunctionWrapper::evaluate(Real t, const Point & p);
+
 #endif // MOOOSEPARSEDFUNCTIONWRAPPER_H

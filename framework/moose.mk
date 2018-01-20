@@ -99,8 +99,26 @@ moose_LIB := $(FRAMEWORK_DIR)/libmoose-$(METHOD).la
 
 moose_LIBS := $(moose_LIB) $(pcre_LIB) $(hit_LIB)
 
+srcsubdirs := $(shell find $(FRAMEWORK_DIR)/src -maxdepth 1 -mindepth 1)
+
+unity_srcsubdirs := $(filter-out %/base, $(srcsubdirs))
+non_unity_srcsubdirs := $(filter %/base, $(srcsubdirs))
+
+# 1: the unity file to build
+# 2: the source files in that unity file
+define unity_file_rule
+$(1): $(2)
+	@echo '$$(foreach srcfile, $$^, #include"$$(srcfile)"\n)' > $$@
+endef
+
+$(foreach srcsubdir, $(unity_srcsubdirs), $(eval $(call unity_file_rule, $(srcsubdir)/$(notdir $(srcsubdir))_Unity.C, $(filter-out %_Unity.C, $(shell find $(srcsubdir) -name "*.C")))))
+
+unity_srcfiles := $(foreach srcsubdir, $(unity_srcsubdirs), $(srcsubdir)/$(notdir $(srcsubdir))_Unity.C)
+
+#objects := $(patsubst %.C, %.o, $(unity_srcfiles))
+
 # source files
-moose_srcfiles    := $(shell find $(moose_SRC_DIRS) -name "*.C")
+moose_srcfiles    := $(unity_srcfiles) $(shell find $(non_unity_srcsubdirs) -name "*.C")
 moose_csrcfiles   := $(shell find $(moose_SRC_DIRS) -name "*.c")
 moose_fsrcfiles   := $(shell find $(moose_SRC_DIRS) -name "*.f")
 moose_f90srcfiles := $(shell find $(moose_SRC_DIRS) -name "*.f90")
@@ -225,7 +243,7 @@ app_deps := $(moose_deps) $(exodiff_deps) $(pcre_deps) $(gtest_deps) $(hit_deps)
 #    files, libraries, etc.
 clean::
 	@$(libmesh_LIBTOOL) --mode=uninstall --quiet rm -f $(app_LIB) $(app_test_LIB)
-	@rm -rf $(app_EXEC) $(app_objects) $(main_object) $(app_deps) $(app_HEADER) $(app_test_objects)
+	@rm -rf $(app_EXEC) $(app_objects) $(main_object) $(app_deps) $(app_HEADER) $(app_test_objects) $(unity_srcfiles)
 	@rm -rf $(APPLICATION_DIR)/build
 
 # The clobber target does 'make clean' and then uses 'find' to clean a
