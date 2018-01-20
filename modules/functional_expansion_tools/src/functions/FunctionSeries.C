@@ -142,12 +142,10 @@ FunctionSeries::FunctionSeries(const InputParameters & parameters)
     }
 
     if (types.size() == 0)
-      mooseError("Must specify one of 'x', 'y', or 'z' for 'CylindricalDuo' "
-                 "series!");
+      mooseError("Must specify one of 'x', 'y', or 'z' for 'CylindricalDuo' series!");
 
     if (types.size() > 1)
-      mooseError("Cannot specify more than one of 'x', 'y', or 'z' for "
-                 "'CylindricalDuo' series!");
+      mooseError("Cannot specify more than one of 'x', 'y', or 'z' for 'CylindricalDuo' series!");
 
     types.push_back(_disc);
     _series_type = new CylindricalDuo(domains, _orders, types);
