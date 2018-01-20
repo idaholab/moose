@@ -68,6 +68,11 @@ public:
    */
   virtual void postSolve() {}
 
+  /**
+   * Callback to the TimeIntegrator called at the very end of time step.
+   */
+  virtual void postStep() {}
+
   virtual int order() = 0;
   virtual void computeTimeDerivatives() = 0;
 

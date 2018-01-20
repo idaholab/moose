@@ -21,6 +21,7 @@
 #include "TimePeriod.h"
 #include "MooseMesh.h"
 #include "AllLocalDofIndicesThread.h"
+#include "TimeIntegrator.h"
 
 #include "libmesh/implicit_system.h"
 #include "libmesh/nonlinear_implicit_system.h"
@@ -598,6 +599,8 @@ Transient::endStep(Real input_time)
 
   if (_last_solve_converged && !_xfem_repeat_step)
   {
+    _fe_problem.getNonlinearSystem().getTimeIntegrator()->postStep();
+
     // Compute the Error Indicators and Markers
     _problem.computeIndicators();
     _problem.computeMarkers();

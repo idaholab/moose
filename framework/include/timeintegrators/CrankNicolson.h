@@ -34,7 +34,7 @@ public:
   virtual void computeTimeDerivatives() override;
   virtual void preSolve() override;
   virtual void postResidual(NumericVector<Number> & residual) override;
-  virtual void postSolve() override;
+  virtual void postStep() override;
 
 protected:
   NumericVector<Number> & _residual_old;

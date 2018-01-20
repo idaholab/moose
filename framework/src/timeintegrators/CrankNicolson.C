@@ -63,9 +63,8 @@ CrankNicolson::postResidual(NumericVector<Number> & residual)
 }
 
 void
-CrankNicolson::postSolve()
+CrankNicolson::postStep()
 {
   // shift the residual in time
   _residual_old = _Re_non_time;
-  _residual_old.close();
 }
