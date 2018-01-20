@@ -30,9 +30,9 @@ class CrankNicolson : public TimeIntegrator
 public:
   CrankNicolson(const InputParameters & parameters);
 
+  virtual void init() override;
   virtual int order() override { return 2; }
   virtual void computeTimeDerivatives() override;
-  virtual void preSolve() override;
   virtual void postResidual(NumericVector<Number> & residual) override;
   virtual void postStep() override;
 

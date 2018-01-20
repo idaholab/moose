@@ -276,6 +276,11 @@ Transient::init()
     //  _dt = computeConstrainedDT();
     _dt = getDT();
   }
+  if (_dt == 0)
+    mooseError("Initial time step size is not evaluated properly");
+
+  if (!_app.isRecovering())
+    _fe_problem.getNonlinearSystem().getTimeIntegrator()->init();
 }
 
 void

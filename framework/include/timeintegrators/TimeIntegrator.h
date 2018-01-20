@@ -45,6 +45,7 @@ class TimeIntegrator : public MooseObject, public Restartable
 public:
   TimeIntegrator(const InputParameters & parameters);
 
+  virtual void init() {}
   virtual void preSolve() {}
   virtual void preStep() {}
   virtual void solve();
