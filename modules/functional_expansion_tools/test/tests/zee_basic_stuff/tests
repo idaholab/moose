@@ -1,0 +1,17 @@
+[Tests]
+  [./volume_coupling]
+    # This test couples a master and sub app in 1D for a light but fully-functional volumetric test
+    type = 'Exodiff'
+    input = 'volume_coupled.i'
+    exodiff = 'volume_coupled_out.e'
+    group = functional_expansion_tools
+  [../]
+
+  [./neglect_invalid_enum]
+    # If an extraneous field is provided, then so long as the 'physical_bounds' and 'orders' fields
+    # are of the correct length, no error should be provided.
+    type = 'RunApp'
+    input = neglect_invalid_enum.i
+    group = functional_expansion
+  [../]
+[]

@@ -1,15 +1,8 @@
 [Mesh]
   type = GeneratedMesh
-  dim = 3
-  nx = 5
-  ny = 5
-  nz = 5
+  dim = 1
   xmin = -1
   xmax = 1
-  ymin = -1
-  ymax = 1
-  zmin = -1
-  zmax = 1
 []
 
 [Variables]
@@ -29,17 +22,12 @@
     type = FunctionSeries
     series_type = Cartesian
     x = Legendre
+    disc = Zernike
     orders = '0'
-    physical_bounds = '-1 1 0 3'
-    coefficients = '1.0'
+    physical_bounds = '-1 1'
   [../]
 []
 
 [Executioner]
   type = Steady
 []
-
-[Outputs]
-  exodus = true
-[]
-
