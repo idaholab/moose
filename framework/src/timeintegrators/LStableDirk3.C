@@ -47,12 +47,10 @@ LStableDirk3::LStableDirk3(const InputParameters & parameters)
   _a[2][2] = _gamma;
 }
 
-LStableDirk3::~LStableDirk3() {}
-
 void
 LStableDirk3::computeTimeDerivatives()
 {
-  // We are multiplying by the method coefficients in postStep(), so
+  // We are multiplying by the method coefficients in postResidual(), so
   // the time derivatives are of the same form at every stage although
   // the current solution varies depending on the stage.
   _u_dot = *_solution;
@@ -91,11 +89,12 @@ LStableDirk3::solve()
 }
 
 void
-LStableDirk3::postStep(NumericVector<Number> & residual)
+LStableDirk3::postResidual(NumericVector<Number> & residual)
 {
   // Error if _stage got messed up somehow.
   if (_stage > 3)
-    mooseError("LStableDirk3::postStep(): Member variable _stage can only have values 1, 2, or 3.");
+    mooseError(
+        "LStableDirk3::postResidual(): Member variable _stage can only have values 1, 2, or 3.");
 
   // In the standard RK notation, the residual of stage 1 of s is given by:
   //

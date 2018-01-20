@@ -25,8 +25,6 @@ BDF2::BDF2(const InputParameters & parameters)
   _weight.resize(3);
 }
 
-BDF2::~BDF2() {}
-
 void
 BDF2::preStep()
 {
@@ -65,7 +63,7 @@ BDF2::computeTimeDerivatives()
 }
 
 void
-BDF2::postStep(NumericVector<Number> & residual)
+BDF2::postResidual(NumericVector<Number> & residual)
 {
   residual += _Re_time;
   residual += _Re_non_time;

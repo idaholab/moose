@@ -73,12 +73,10 @@ AStableDirk4::AStableDirk4(const InputParameters & parameters)
   }
 }
 
-AStableDirk4::~AStableDirk4() {}
-
 void
 AStableDirk4::computeTimeDerivatives()
 {
-  // We are multiplying by the method coefficients in postStep(), so
+  // We are multiplying by the method coefficients in postResidual(), so
   // the time derivatives are of the same form at every stage although
   // the current solution varies depending on the stage.
   _u_dot = *_solution;
@@ -130,16 +128,16 @@ AStableDirk4::solve()
 }
 
 void
-AStableDirk4::postStep(NumericVector<Number> & residual)
+AStableDirk4::postResidual(NumericVector<Number> & residual)
 {
   if (_t_step == 1 && _safe_start)
-    _bootstrap_method->postStep(residual);
+    _bootstrap_method->postResidual(residual);
 
   else
   {
     // Error if _stage got messed up somehow.
     if (_stage > 4)
-      mooseError("AStableDirk4::postStep(): Member variable _stage can only have values 1-4.");
+      mooseError("AStableDirk4::postResidual(): Member variable _stage can only have values 1-4.");
 
     if (_stage < 4)
     {

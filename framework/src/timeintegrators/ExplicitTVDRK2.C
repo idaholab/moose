@@ -28,8 +28,6 @@ ExplicitTVDRK2::ExplicitTVDRK2(const InputParameters & parameters)
 {
 }
 
-ExplicitTVDRK2::~ExplicitTVDRK2() {}
-
 void
 ExplicitTVDRK2::preSolve()
 {
@@ -99,11 +97,11 @@ ExplicitTVDRK2::solve()
 }
 
 void
-ExplicitTVDRK2::postStep(NumericVector<Number> & residual)
+ExplicitTVDRK2::postResidual(NumericVector<Number> & residual)
 {
   if (_stage == 1)
   {
-    // If postStep() is called before solve(), _stage==1 and we don't
+    // If postResidual() is called before solve(), _stage==1 and we don't
     // need to do anything.
   }
   else if (_stage == 2)
@@ -146,5 +144,6 @@ ExplicitTVDRK2::postStep(NumericVector<Number> & residual)
     residual.close();
   }
   else
-    mooseError("ExplicitTVDRK2::postStep(): _stage = ", _stage, ", only _stage = 1-3 is allowed.");
+    mooseError(
+        "ExplicitTVDRK2::postResidual(): _stage = ", _stage, ", only _stage = 1-3 is allowed.");
 }

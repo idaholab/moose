@@ -25,8 +25,6 @@ CrankNicolson::CrankNicolson(const InputParameters & parameters)
 {
 }
 
-CrankNicolson::~CrankNicolson() {}
-
 void
 CrankNicolson::computeTimeDerivatives()
 {
@@ -57,7 +55,7 @@ CrankNicolson::preSolve()
 }
 
 void
-CrankNicolson::postStep(NumericVector<Number> & residual)
+CrankNicolson::postResidual(NumericVector<Number> & residual)
 {
   residual += _Re_time;
   residual += _Re_non_time;

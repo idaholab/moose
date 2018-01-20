@@ -22,8 +22,6 @@ validParams<ExplicitEuler>()
 
 ExplicitEuler::ExplicitEuler(const InputParameters & parameters) : TimeIntegrator(parameters) {}
 
-ExplicitEuler::~ExplicitEuler() {}
-
 void
 ExplicitEuler::preSolve()
 {
@@ -45,7 +43,7 @@ ExplicitEuler::computeTimeDerivatives()
 }
 
 void
-ExplicitEuler::postStep(NumericVector<Number> & residual)
+ExplicitEuler::postResidual(NumericVector<Number> & residual)
 {
   residual += _Re_time;
   residual += _Re_non_time;

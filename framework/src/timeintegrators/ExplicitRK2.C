@@ -28,8 +28,6 @@ ExplicitRK2::ExplicitRK2(const InputParameters & parameters)
 {
 }
 
-ExplicitRK2::~ExplicitRK2() {}
-
 void
 ExplicitRK2::preSolve()
 {
@@ -92,11 +90,11 @@ ExplicitRK2::solve()
 }
 
 void
-ExplicitRK2::postStep(NumericVector<Number> & residual)
+ExplicitRK2::postResidual(NumericVector<Number> & residual)
 {
   if (_stage == 1)
   {
-    // If postStep() is called before solve(), _stage==1 and we don't
+    // If postResidual() is called before solve(), _stage==1 and we don't
     // need to do anything.
   }
   else if (_stage == 2)
@@ -140,5 +138,5 @@ ExplicitRK2::postStep(NumericVector<Number> & residual)
     residual.close();
   }
   else
-    mooseError("ExplicitRK2::postStep(): _stage = ", _stage, ", only _stage = 1-3 is allowed.");
+    mooseError("ExplicitRK2::postResidual(): _stage = ", _stage, ", only _stage = 1-3 is allowed.");
 }

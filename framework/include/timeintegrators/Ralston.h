@@ -32,7 +32,6 @@ class Ralston : public ExplicitRK2
 {
 public:
   Ralston(const InputParameters & parameters);
-  virtual ~Ralston() {}
 
 protected:
   /// Method coefficient overrides

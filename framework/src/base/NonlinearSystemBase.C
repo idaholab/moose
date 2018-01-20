@@ -544,7 +544,7 @@ NonlinearSystemBase::computeResidual(NumericVector<Number> & residual, Moose::Ke
       _Re_time->close();
     _Re_non_time->close();
     if (_time_integrator)
-      _time_integrator->postStep(residual);
+      _time_integrator->postResidual(residual);
     else
       residual += *_Re_non_time;
     residual.close();

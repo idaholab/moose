@@ -24,12 +24,11 @@ class ExplicitEuler : public TimeIntegrator
 {
 public:
   ExplicitEuler(const InputParameters & parameters);
-  virtual ~ExplicitEuler();
 
-  virtual void preSolve();
-  virtual int order() { return 1; }
-  virtual void computeTimeDerivatives();
-  virtual void postStep(NumericVector<Number> & residual);
+  virtual void preSolve() override;
+  virtual int order() override { return 1; }
+  virtual void computeTimeDerivatives() override;
+  virtual void postResidual(NumericVector<Number> & residual) override;
 
 protected:
 };
