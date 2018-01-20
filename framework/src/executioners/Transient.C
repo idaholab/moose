@@ -425,7 +425,8 @@ Transient::solveStep(Real input_dt)
 
   Real current_dt = _dt;
 
-  _problem.onTimestepBegin();
+  if (_picard_it == 0)
+    _problem.onTimestepBegin();
 
   // Increment time
   _time = _time_old + _dt;
