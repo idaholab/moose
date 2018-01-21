@@ -38,7 +38,7 @@ Set either `ALL_MODULES := yes` or ` FUNCTIONAL_EXPANSION_TOOLS := yes` in the a
 | `FunctionSeries` | The workhorse of the FE tools module. This evaluates the terms of a function series, used both for capturing moments and expanding an FE. All other FE-based objects will depend on a `FunctionSeries` instance. |
 
 ##### Kernels
- Although there are no kernels directly provided by this module (yet), these three have varying degrees of usefulness:
+Although there are no kernels directly provided by this module (yet), these three have varying degrees of usefulness:
 | Name | Description |
 | ------ | ------ |
 | `BodyForce` | May be used to couple a `FunctionSeries` object directly to a solution, instead of using `FunctionSeriesToAux` and `CoupledForce`. Note: using `BodyForce` is slightly more computationally intensive, so the alternative method is recommended. If the `BodyForce` approach is used it is highly recommended to set `enable_cache = true` for the associated `FunctionSeries` object. |
@@ -49,7 +49,7 @@ Set either `ALL_MODULES := yes` or ` FUNCTIONAL_EXPANSION_TOOLS := yes` in the a
 #
 | Name | Description |
 | ------ | ------ |
-| `MultiAppFETransfer` | This transfers the FE coefficients, or moments, between named FE objects in the multi and sub apps. Supported objects that contain coefficients for transferring are instances of `FunctionSeries` and any `FE...UserObject`. |
+| `MultiAppFETransfer` | This transfers the FE coefficients, or moments, between named FE objects in the multi and sub apps. Supported objects that contain coefficients for transferring are instances of `FunctionSeries` and any `FE...UserObject`. (Note: `MultiAppFETransfer` is actually a typedef of `MultiAppMutableCoefficientsTransfer`).|
 
 ##### UserObjects
 #
@@ -69,19 +69,6 @@ Additional functional series, polynomial or otherwise, can be added by inheritin
 
 Additional composite series, such as may be suitable for spherical or shell data, can be implemented by inheriting from the `CompositeSeriesBasisInterface`. The `FunctionSeries` class will need updated to support the newly-available series.
 
-### TODO
-* Implement an **Executioner**-derived FE-based interface that can be used to simply the exchange of FE coefficients with external applications wrapped in their own executions.
-* Implement a **Materials**-derived FE-based class that can provide continuous material properties
-* Implement a **Kernel**-derived class, à la `BodyForce`, that automatically sets `enable_cache = true` for the associated `FunctionSeries` object
-* Implement support for various types of FE coefficients
-  * Separable series
-  * Various orthonormalizations
-* Add more functional series
-  * Fourier
-  * Annular Zernike (0 < r ≤ 1)
-  * Shell (r = 1) for 3D cylindrical boundary conditions (Zernike-based?)
-  * Spherical harmonics + spherical composite series
-
 ### Caveats
 1) FEs are not recommended for spanning spaces with discontinuities.
    * One example would be a space containing two distinct materials with significantly different properties
@@ -95,3 +82,17 @@ Additional composite series, such as may be suitable for spherical or shell data
 * L. KERBY, A. TUMULAK, J. LEPPÄNEN, and V. VALTAVIRTA, "Preliminary Serpent-MOOSE Coupling and Implementation of Functional Expansion Tallies in Serpent," in *International Conference on Mathematics & Computational Methods Applied to Nuclear Science and Entineering (M&C 2017),* (2017)
 * J. FLUSSER, T. SUK, and B. ZITOV, *2D & 3D image analysis by moments.* John Wiley & Sons, Inc. (2016)
 * D. GRIESHEIMER, *Functional Expansion Tallies for Monte Carlo Simulations.* PhD Dissertation, University of Michigan (2005).
+
+### TODO
+* Implement an **Executioner**-derived FE-based interface that can be used to simply the exchange of FE coefficients with external applications wrapped in their own **Executioner**
+* Implement a **Materials**-derived FE-based class that can provide continuous material properties
+* Implement a **Kernel**-derived class, à la `BodyForce`, that automatically sets `enable_cache = true` for the associated `FunctionSeries` object
+* Add an error check in `MultiAppMutableCoefficientsTransfer` for multiple objects of the same name but different type, i.e. if there are both a **Function** and **UserObject** with the same name (or other object types as they are added)
+* Implement support for various types of FE coefficients
+  * Separable series
+  * Various orthonormalizations
+* Add more functional series
+  * Fourier
+  * Annular Zernike (0 < r ≤ 1)
+  * Shell (r = 1) for 3D cylindrical boundary conditions (Zernike-based?)
+  * Spherical harmonics + spherical composite series
