@@ -1,6 +1,7 @@
 #
 # MOOSE
 #
+APPLICATION_DIR := $(FRAMEWORK_DIR)
 moose_SRC_DIRS := $(FRAMEWORK_DIR)/src
 moose_SRC_DIRS += $(FRAMEWORK_DIR)/contrib/mtwist
 moose_SRC_DIRS += $(FRAMEWORK_DIR)/contrib/jsoncpp
@@ -47,7 +48,45 @@ gtest_LIB       := $(gtest_DIR)/libgtest.la
 # dependency files
 gtest_deps      := $(patsubst %.cc, %.$(obj-suffix).d, $(gtest_srcfiles))
 
-moose_INC_DIRS := $(shell find $(FRAMEWORK_DIR)/include -type d -not -path "*/.svn*")
+#
+# header symlinks
+#
+all_header_dir := $(FRAMEWORK_DIR)/build/header_symlinks
+moose_all_header_dir := $(all_header_dir)
+
+define all_header_dir_rule
+$(1):
+	@echo Rebuilding symlinks in $$@
+	@$$(shell mkdir -p $$@)
+endef
+
+include_files	:= $(shell find $(FRAMEWORK_DIR)/include -name "*.h" | grep -v "\.svn")
+link_names := $(foreach i, $(include_files), $(all_header_dir)/$(notdir $(i)))
+
+# Create a rule for one symlink for one header file
+# Args
+# 1: the header file
+# 2: the symlink to create
+define symlink_rule
+$(2): $(1)
+	@ln -sf $$< $$@
+endef
+
+# Create a rule for a symlink for each header file
+# Args:
+# 1: all_header_dir
+# 2: list of header files
+define symlink_rules
+$(foreach i, $(2), $(eval $(call symlink_rule, $(i), $(1)/$(notdir $(i)))))
+endef
+
+$(eval $(call all_header_dir_rule, $(all_header_dir)))
+$(call symlink_rules, $(all_header_dir), $(include_files))
+
+header_symlinks:: $(all_header_dir) $(link_names)
+
+
+moose_INC_DIRS := $(all_header_dir)
 moose_INC_DIRS += $(shell find $(FRAMEWORK_DIR)/contrib/*/include -type d -not -path "*/.svn*")
 moose_INC_DIRS += "$(gtest_DIR)"
 moose_INC_DIRS += "$(hit_DIR)"
@@ -78,16 +117,18 @@ moose_deps := $(patsubst %.C, %.$(obj-suffix).d, $(moose_srcfiles)) \
 moose_analyzer := $(patsubst %.C, %.plist.$(obj-suffix), $(moose_srcfiles))
 moose_analyzer += $(patsubst %.cc, %.plist.$(obj-suffix), $(hit_srcfiles))
 
-app_INCLUDES := $(moose_INCLUDE)
+app_INCLUDES := $(moose_INCLUDE) $(libmesh_INCLUDE)
 app_LIBS     := $(moose_LIBS)
 app_DIRS     := $(FRAMEWORK_DIR)
-all:: libmesh_submodule_status moose_revision moose
+all:: libmesh_submodule_status header_symlinks moose_revision moose
 
 # revision header
 moose_revision_header = $(FRAMEWORK_DIR)/include/base/MooseRevision.h
 moose_revision:
+	@echo Regenerating MooseRevision
 	$(shell $(FRAMEWORK_DIR)/scripts/get_repo_revision.py $(FRAMEWORK_DIR) \
 	  $(moose_revision_header) MOOSE)
+	@ln -sf $(moose_revision_header) $(moose_all_header_dir)
 
 # libmesh submodule status
 libmesh_status := $(shell git -C $(MOOSE_DIR) submodule status 2>/dev/null | grep libmesh | cut -c1)
@@ -185,6 +226,7 @@ app_deps := $(moose_deps) $(exodiff_deps) $(pcre_deps) $(gtest_deps) $(hit_deps)
 clean::
 	@$(libmesh_LIBTOOL) --mode=uninstall --quiet rm -f $(app_LIB) $(app_test_LIB)
 	@rm -rf $(app_EXEC) $(app_objects) $(main_object) $(app_deps) $(app_HEADER) $(app_test_objects)
+	@rm -rf $(APPLICATION_DIR)/build
 
 # The clobber target does 'make clean' and then uses 'find' to clean a
 # bunch more stuff.  We have to write this target as though it could
@@ -202,6 +244,7 @@ clean::
 #    source files are deleted over time.
 clobber:: clean
 	@$(MOOSE_DIR)/scripts/clobber.py -v $(CURDIR)
+	@rm -rf $(APPLICATION_DIR)/build
 
 # cleanall runs 'make clean' in all dependent application directories
 cleanall:: clean
