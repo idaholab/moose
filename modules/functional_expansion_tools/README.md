@@ -88,7 +88,8 @@ Additional composite series, such as may be suitable for spherical or shell data
 * Implement a **Materials**-derived FE-based class that can provide continuous material properties
 * Implement a **Kernel**-derived class, à la `BodyForce`, that automatically sets `enable_cache = true` for the associated `FunctionSeries` object
 * Add an error check in `MultiAppMutableCoefficientsTransfer` for multiple objects of the same name but different type, i.e. if there are both a **Function** and **UserObject** with the same name (or other object types as they are added)
-* Implement support for various types of FE coefficients
+* Implement support in `MutableCoefficientsInterface` for multiple sets of FE coefficients
+* Implement support for various types of FE derivations
   * Separable series
   * Various orthonormalizations
 * Add more functional series
