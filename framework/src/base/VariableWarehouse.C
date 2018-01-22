@@ -95,7 +95,7 @@ VariableWarehouse::names() const
 }
 
 const std::vector<MooseVariableFE *> &
-VariableWarehouse::variables()
+VariableWarehouse::fieldVariables()
 {
   return _vars;
 }

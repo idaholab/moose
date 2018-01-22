@@ -208,7 +208,7 @@ Order
 SystemBase::getMinQuadratureOrder()
 {
   Order order = CONSTANT;
-  std::vector<MooseVariableFE *> vars = _vars[0].variables();
+  std::vector<MooseVariableFE *> vars = _vars[0].fieldVariables();
   for (const auto & var : vars)
   {
     FEType fe_type = var->feType();
@@ -226,7 +226,7 @@ SystemBase::prepare(THREAD_ID tid)
   {
     const std::set<MooseVariableFE *> & active_elemental_moose_variables =
         _subproblem.getActiveElementalMooseVariables(tid);
-    const std::vector<MooseVariableFE *> & vars = _vars[tid].variables();
+    const std::vector<MooseVariableFE *> & vars = _vars[tid].fieldVariables();
     for (const auto & var : vars)
       var->clearDofIndices();
 
@@ -236,7 +236,7 @@ SystemBase::prepare(THREAD_ID tid)
   }
   else
   {
-    const std::vector<MooseVariableFE *> & vars = _vars[tid].variables();
+    const std::vector<MooseVariableFE *> & vars = _vars[tid].fieldVariables();
     for (const auto & var : vars)
       var->prepare();
   }
@@ -253,7 +253,7 @@ SystemBase::prepareFace(THREAD_ID tid, bool resize_data)
 
     std::vector<MooseVariableFE *> newly_prepared_vars;
 
-    const std::vector<MooseVariableFE *> & vars = _vars[tid].variables();
+    const std::vector<MooseVariableFE *> & vars = _vars[tid].fieldVariables();
     for (const auto & var : vars)
     {
       if (&(var->sys()) == this &&
@@ -279,7 +279,7 @@ SystemBase::prepareFace(THREAD_ID tid, bool resize_data)
 void
 SystemBase::prepareNeighbor(THREAD_ID tid)
 {
-  const std::vector<MooseVariableFE *> & vars = _vars[tid].variables();
+  const std::vector<MooseVariableFE *> & vars = _vars[tid].fieldVariables();
   for (const auto & var : vars)
     var->prepareNeighbor();
 }
@@ -298,7 +298,7 @@ SystemBase::reinitElem(const Elem * /*elem*/, THREAD_ID tid)
   }
   else
   {
-    const std::vector<MooseVariableFE *> & vars = _vars[tid].variables();
+    const std::vector<MooseVariableFE *> & vars = _vars[tid].fieldVariables();
     for (const auto & var : vars)
       var->computeElemValues();
   }
@@ -310,7 +310,7 @@ SystemBase::reinitElemFace(const Elem * /*elem*/,
                            BoundaryID /*bnd_id*/,
                            THREAD_ID tid)
 {
-  const std::vector<MooseVariableFE *> & vars = _vars[tid].variables();
+  const std::vector<MooseVariableFE *> & vars = _vars[tid].fieldVariables();
   for (const auto & var : vars)
     var->computeElemValuesFace();
 }
@@ -321,7 +321,7 @@ SystemBase::reinitNeighborFace(const Elem * /*elem*/,
                                BoundaryID /*bnd_id*/,
                                THREAD_ID tid)
 {
-  const std::vector<MooseVariableFE *> & vars = _vars[tid].variables();
+  const std::vector<MooseVariableFE *> & vars = _vars[tid].fieldVariables();
   for (const auto & var : vars)
     var->computeNeighborValuesFace();
 }
@@ -329,7 +329,7 @@ SystemBase::reinitNeighborFace(const Elem * /*elem*/,
 void
 SystemBase::reinitNeighbor(const Elem * /*elem*/, THREAD_ID tid)
 {
-  const std::vector<MooseVariableFE *> & vars = _vars[tid].variables();
+  const std::vector<MooseVariableFE *> & vars = _vars[tid].fieldVariables();
   for (const auto & var : vars)
     var->computeNeighborValues();
 }
@@ -337,7 +337,7 @@ SystemBase::reinitNeighbor(const Elem * /*elem*/, THREAD_ID tid)
 void
 SystemBase::reinitNode(const Node * /*node*/, THREAD_ID tid)
 {
-  const std::vector<MooseVariableFE *> & vars = _vars[tid].variables();
+  const std::vector<MooseVariableFE *> & vars = _vars[tid].fieldVariables();
   for (const auto & var : vars)
   {
     if (var->isNodal())
@@ -351,7 +351,7 @@ SystemBase::reinitNode(const Node * /*node*/, THREAD_ID tid)
 void
 SystemBase::reinitNodeFace(const Node * /*node*/, BoundaryID /*bnd_id*/, THREAD_ID tid)
 {
-  const std::vector<MooseVariableFE *> & vars = _vars[tid].variables();
+  const std::vector<MooseVariableFE *> & vars = _vars[tid].fieldVariables();
   for (const auto & var : vars)
   {
     if (var->isNodal())
@@ -365,7 +365,7 @@ SystemBase::reinitNodeFace(const Node * /*node*/, BoundaryID /*bnd_id*/, THREAD_
 void
 SystemBase::reinitNodeNeighbor(const Node * /*node*/, THREAD_ID tid)
 {
-  const std::vector<MooseVariableFE *> & vars = _vars[tid].variables();
+  const std::vector<MooseVariableFE *> & vars = _vars[tid].fieldVariables();
   for (const auto & var : vars)
   {
     if (var->isNodal())
@@ -379,7 +379,7 @@ SystemBase::reinitNodeNeighbor(const Node * /*node*/, THREAD_ID tid)
 void
 SystemBase::reinitNodes(const std::vector<dof_id_type> & nodes, THREAD_ID tid)
 {
-  const std::vector<MooseVariableFE *> & vars = _vars[tid].variables();
+  const std::vector<MooseVariableFE *> & vars = _vars[tid].fieldVariables();
   for (const auto & var : vars)
   {
     var->reinitNodes(nodes);
@@ -390,7 +390,7 @@ SystemBase::reinitNodes(const std::vector<dof_id_type> & nodes, THREAD_ID tid)
 void
 SystemBase::reinitNodesNeighbor(const std::vector<dof_id_type> & nodes, THREAD_ID tid)
 {
-  const std::vector<MooseVariableFE *> & vars = _vars[tid].variables();
+  const std::vector<MooseVariableFE *> & vars = _vars[tid].fieldVariables();
   for (const auto & var : vars)
   {
     var->reinitNodesNeighbor(nodes);

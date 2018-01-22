@@ -438,7 +438,7 @@ public:
 
   const std::vector<MooseVariableFE *> & getVariables(THREAD_ID tid)
   {
-    return _vars[tid].variables();
+    return _vars[tid].fieldVariables();
   }
 
   const std::vector<MooseVariableScalar *> & getScalarVariables(THREAD_ID tid)

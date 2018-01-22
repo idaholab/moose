@@ -105,7 +105,7 @@ public:
    * Get the list of variables
    * @return The list of variables
    */
-  const std::vector<MooseVariableFE *> & variables();
+  const std::vector<MooseVariableFE *> & fieldVariables();
 
   /**
    * Get the list of variables that needs to be reinitialized on a given boundary

@@ -279,7 +279,7 @@ AuxiliarySystem::compute(ExecFlagType type)
       _time_integrator->computeTimeDerivatives();
   }
 
-  if (_vars[0].variables().size() > 0)
+  if (_vars[0].fieldVariables().size() > 0)
   {
     computeNodalVars(type);
     // compute time derivatives of nodal aux variables _after_ the values were updated
@@ -287,7 +287,7 @@ AuxiliarySystem::compute(ExecFlagType type)
       _time_integrator->computeTimeDerivatives();
   }
 
-  if (_vars[0].variables().size() > 0)
+  if (_vars[0].fieldVariables().size() > 0)
   {
     computeElementalVars(type);
     // compute time derivatives of elemental aux variables _after_ the values were updated
@@ -511,7 +511,7 @@ Order
 AuxiliarySystem::getMinQuadratureOrder()
 {
   Order order = CONSTANT;
-  std::vector<MooseVariableFE *> vars = _vars[0].variables();
+  std::vector<MooseVariableFE *> vars = _vars[0].fieldVariables();
   for (const auto & var : vars)
   {
     if (!var->isNodal()) // nodal aux variables do not need quadrature
