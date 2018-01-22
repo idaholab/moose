@@ -270,10 +270,16 @@ Assembly::buildVectorFE(FEType type)
   if (!_vector_fe_shape_data[type])
     _vector_fe_shape_data[type] = new VectorFEShapeData;
 
+  unsigned int min_dim;
+  if (type.family == LAGRANGE_VEC)
+    min_dim = 0;
+  else
+    min_dim = 2;
+
   // Build an FE object for this type for each dimension up to the dimension of the current mesh
   // Note that NEDELEC_ONE elements can only be built for dimension > 2. The for loop logic should
   // be modified for LAGRANGE_VEC
-  for (unsigned int dim = 2; dim <= _mesh_dimension; dim++)
+  for (unsigned int dim = min_dim; dim <= _mesh_dimension; dim++)
   {
     if (!_vector_fe[dim][type])
       _vector_fe[dim][type] = FEGenericBase<VectorValue<Real>>::build(dim, type).release();
@@ -294,11 +300,17 @@ Assembly::buildVectorFaceFE(FEType type)
   if (!_vector_fe_shape_data_face[type])
     _vector_fe_shape_data_face[type] = new VectorFEShapeData;
 
+  unsigned int min_dim;
+  if (type.family == LAGRANGE_VEC)
+    min_dim = 0;
+  else
+    min_dim = 2;
+
   // Build an VectorFE object for this type for each dimension up to the dimension of the current
   // mesh
   // Note that NEDELEC_ONE elements can only be built for dimension > 2. The for loop logic should
   // be modified for LAGRANGE_VEC
-  for (unsigned int dim = 2; dim <= _mesh_dimension; dim++)
+  for (unsigned int dim = min_dim; dim <= _mesh_dimension; dim++)
   {
     if (!_vector_fe_face[dim][type])
       _vector_fe_face[dim][type] = FEGenericBase<VectorValue<Real>>::build(dim, type).release();
@@ -315,11 +327,17 @@ Assembly::buildVectorNeighborFE(FEType type)
   if (!_vector_fe_shape_data_neighbor[type])
     _vector_fe_shape_data_neighbor[type] = new VectorFEShapeData;
 
+  unsigned int min_dim;
+  if (type.family == LAGRANGE_VEC)
+    min_dim = 0;
+  else
+    min_dim = 2;
+
   // Build an VectorFE object for this type for each dimension up to the dimension of the current
   // mesh
   // Note that NEDELEC_ONE elements can only be built for dimension > 2. The for loop logic should
   // be modified for LAGRANGE_VEC
-  for (unsigned int dim = 2; dim <= _mesh_dimension; dim++)
+  for (unsigned int dim = min_dim; dim <= _mesh_dimension; dim++)
   {
     if (!_vector_fe_neighbor[dim][type])
       _vector_fe_neighbor[dim][type] = FEGenericBase<VectorValue<Real>>::build(dim, type).release();
@@ -335,6 +353,12 @@ Assembly::buildVectorFaceNeighborFE(FEType type)
 {
   if (!_vector_fe_shape_data_face_neighbor[type])
     _vector_fe_shape_data_face_neighbor[type] = new VectorFEShapeData;
+
+  unsigned int min_dim;
+  if (type.family == LAGRANGE_VEC)
+    min_dim = 0;
+  else
+    min_dim = 2;
 
   // Build an VectorFE object for this type for each dimension up to the dimension of the current
   // mesh
