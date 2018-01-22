@@ -26,4 +26,14 @@
     input = '2species_with_density.i'
     exodiff = '2species_with_density_out.e'
   [../]
+  [./water_dissociation]
+    type = CSVDiff
+    input = water_dissociation.i
+    csvdiff = water_dissociation_out.csv
+  [../]
+  [.co2_h2o]
+    type = CSVDiff
+    input = co2_h2o.i
+    csvdiff = co2_h2o_out.csv
+  [../]
 []
