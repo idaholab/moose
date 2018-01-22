@@ -594,9 +594,9 @@ def checkOutputReady(tester, options):
 def getOutputFromFiles(tester, options):
     file_output = ''
     output_files = checkOutputReady(tester, options)
-    for process, file_path in enumerate(output_files):
+    for file_path in output_files:
         with open(file_path, 'r') as f:
-            file_output += "#"*80 + "\nOutput from processor " + str(process) \
+            file_output += "#"*80 + "\nOutput from " + file_path \
                            + "\n" + "#"*80 + "\n" + readOutput(f, None, options)
     return file_output
 
