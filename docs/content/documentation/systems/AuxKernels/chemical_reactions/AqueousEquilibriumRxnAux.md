@@ -10,9 +10,6 @@ C_i = \frac{K_i}{\gamma_i} \prod_{j=1}^{N_c} \left(\gamma_j C_j\right)^{\nu_{ji}
 where $K_i$ is equilibrium constant, $\gamma_i$ is the activity coefficient, and
 $N_c$ is the number of primary species.
 
-!!! note:
-    Currently, $\gamma_i$ is fixed as unity in the calculation
-
 !syntax parameters /AuxKernels/AqueousEquilibriumRxnAux
 
 !syntax inputs /AuxKernels/AqueousEquilibriumRxnAux
