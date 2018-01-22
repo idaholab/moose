@@ -6,7 +6,7 @@ ifeq ($(ALL_MODULES),yes)
         CHEMICAL_REACTIONS        	:= yes
         CONTACT                   	:= yes
         FLUID_PROPERTIES          	:= yes
-				FUNCTIONAL_EXPANSION_TOOLS	:= yes
+        FUNCTIONAL_EXPANSION_TOOLS	:= yes
         HEAT_CONDUCTION           	:= yes
         LEVEL_SET                 	:= yes
         MISC                      	:= yes
