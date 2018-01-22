@@ -30,8 +30,6 @@ public:
 
   virtual void init() override;
 
-  virtual void preExecute() override;
-
   virtual void postStep() override;
   virtual void rejectStep() override;
 

@@ -63,6 +63,7 @@ FunctionDT::FunctionDT(const InputParameters & parameters)
 void
 FunctionDT::init()
 {
+  removeOldKnots();
 }
 
 void
@@ -71,13 +72,6 @@ FunctionDT::removeOldKnots()
   while ((_time_knots.size() > 0) &&
          (*_time_knots.begin() <= _time || std::abs(*_time_knots.begin() - _time) < 1e-10))
     _time_knots.erase(_time_knots.begin());
-}
-
-void
-FunctionDT::preExecute()
-{
-  TimeStepper::preExecute();
-  removeOldKnots();
 }
 
 Real
