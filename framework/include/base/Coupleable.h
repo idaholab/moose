@@ -22,7 +22,7 @@ class MooseVariableFE;
 template <typename>
 class MooseVariableField;
 typedef MooseVariableField<Real> MooseVariable;
-typedef MooseVariableField<RealVectorValue> MooseVariableVector;
+typedef MooseVariableField<RealVectorValue> VectorMooseVariable;
 namespace libMesh
 {
 template <typename T>
@@ -468,7 +468,7 @@ protected:
    * @param comp Component number of multiple coupled variables
    * @return Pointer to the desired variable
    */
-  MooseVariableVector * getVectorVar(const std::string & var_name, unsigned int comp);
+  VectorMooseVariable * getVectorVar(const std::string & var_name, unsigned int comp);
 
   /**
    * Checks to make sure that the current Executioner has set "_is_transient" when old/older values

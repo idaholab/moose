@@ -221,7 +221,7 @@ public:
   virtual bool hasVariable(const std::string & var_name) override;
   virtual MooseVariableFE & getVariable(THREAD_ID tid, const std::string & var_name) override;
   virtual MooseVariable & getStandardVariable(THREAD_ID tid, const std::string & var_name) override;
-  virtual MooseVariableVector & getVectorVariable(THREAD_ID tid,
+  virtual VectorMooseVariable & getVectorVariable(THREAD_ID tid,
                                                   const std::string & var_name) override;
 
   virtual bool hasScalarVariable(const std::string & var_name) override;

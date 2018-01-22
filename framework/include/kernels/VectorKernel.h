@@ -43,11 +43,11 @@ public:
    */
   virtual void computeOffDiagJacobianScalar(unsigned int jvar) override;
 
-  virtual MooseVariableVector & variable() override { return _var; }
+  virtual VectorMooseVariable & variable() override { return _var; }
 
 protected:
   /// This is a regular kernel so we cast to a regular MooseVariable
-  MooseVariableVector & _var;
+  VectorMooseVariable & _var;
 
   /// the current test function
   const VectorVariableTestValue & _test;

@@ -32,7 +32,7 @@ class VectorIntegratedBC : public IntegratedBCBase, public MooseVariableInterfac
 public:
   VectorIntegratedBC(const InputParameters & parameters);
 
-  virtual MooseVariableVector & variable() override { return _var; }
+  virtual VectorMooseVariable & variable() override { return _var; }
 
   virtual void computeResidual() override;
   virtual void computeJacobian() override;
@@ -47,7 +47,7 @@ public:
   void computeJacobianBlockScalar(unsigned int jvar) override;
 
 protected:
-  MooseVariableVector & _var;
+  VectorMooseVariable & _var;
 
   /// normals at quadrature points
   const MooseArray<Point> & _normals;

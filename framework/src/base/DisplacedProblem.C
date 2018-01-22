@@ -249,7 +249,7 @@ DisplacedProblem::getStandardVariable(THREAD_ID tid, const std::string & var_nam
   return _displaced_aux.getFieldVariable<Real>(tid, var_name);
 }
 
-MooseVariableVector &
+VectorMooseVariable &
 DisplacedProblem::getVectorVariable(THREAD_ID tid, const std::string & var_name)
 {
   if (_displaced_nl.hasVariable(var_name))

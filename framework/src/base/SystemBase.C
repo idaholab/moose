@@ -521,7 +521,7 @@ SystemBase::addVariable(const std::string & var_name,
       var = new MooseVariableConstMonomial(
           var_num, type, *this, _subproblem.assembly(tid), _var_kind);
     else if (type == FEType(FIRST, NEDELEC_ONE) || type.family == LAGRANGE_VEC)
-      var = new MooseVariableVector(var_num, type, *this, _subproblem.assembly(tid), _var_kind);
+      var = new VectorMooseVariable(var_num, type, *this, _subproblem.assembly(tid), _var_kind);
     else
       var = new MooseVariable(var_num, type, *this, _subproblem.assembly(tid), _var_kind);
 

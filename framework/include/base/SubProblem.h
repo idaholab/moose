@@ -26,7 +26,7 @@ class MooseVariableScalar;
 template <typename>
 class MooseVariableField;
 typedef MooseVariableField<Real> MooseVariable;
-typedef MooseVariableField<RealVectorValue> MooseVariableVector;
+typedef MooseVariableField<RealVectorValue> VectorMooseVariable;
 class RestartableDataValue;
 
 // libMesh forward declarations
@@ -77,8 +77,8 @@ public:
   /// Returns the variable reference for requested MooseVariable which may be in any system
   virtual MooseVariable & getStandardVariable(THREAD_ID tid, const std::string & var_name) = 0;
 
-  /// Returns the variable reference for requested MooseVariableVector which may be in any system
-  virtual MooseVariableVector & getVectorVariable(THREAD_ID tid, const std::string & var_name) = 0;
+  /// Returns the variable reference for requested VectorMooseVariable which may be in any system
+  virtual VectorMooseVariable & getVectorVariable(THREAD_ID tid, const std::string & var_name) = 0;
 
   /// Returns a Boolean indicating whether any system contains a variable with the name provided
   virtual bool hasScalarVariable(const std::string & var_name) = 0;

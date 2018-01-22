@@ -18,7 +18,7 @@
 template <typename>
 class MooseVariableField;
 typedef MooseVariableField<Real> MooseVariable;
-typedef MooseVariableField<VectorValue<Real>> MooseVariableVector;
+typedef MooseVariableField<VectorValue<Real>> VectorMooseVariable;
 
 class PenetrationThread
 {

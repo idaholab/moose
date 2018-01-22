@@ -1297,7 +1297,7 @@ Assembly::copyShapes(unsigned int var)
   }
   catch (std::out_of_range & e)
   {
-    MooseVariableVector & v = _sys.getFieldVariable<RealVectorValue>(_tid, var);
+    VectorMooseVariable & v = _sys.getFieldVariable<RealVectorValue>(_tid, var);
     copyShapes(v);
     if (v.computingCurl())
       curlPhi(v).shallowCopy(v.curlPhi());
@@ -1324,7 +1324,7 @@ Assembly::copyFaceShapes(unsigned int var)
   }
   catch (std::out_of_range & e)
   {
-    MooseVariableVector & v = _sys.getFieldVariable<RealVectorValue>(_tid, var));
+    VectorMooseVariable & v = _sys.getFieldVariable<RealVectorValue>(_tid, var);
     copyFaceShapes(v);
     if (v.computingCurl())
       _vector_curl_phi_face.shallowCopy(v.curlPhi());
@@ -1362,7 +1362,7 @@ Assembly::copyNeighborShapes(unsigned int var)
   }
   catch (std::out_of_range & e)
   {
-    MooseVariableVector & v = _sys.getFieldVariable<RealVectorValue>(_tid, var);
+    VectorMooseVariable & v = _sys.getFieldVariable<RealVectorValue>(_tid, var);
     copyNeighborShapes(v);
   }
 }

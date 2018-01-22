@@ -22,7 +22,7 @@ class MooseVariableFE;
 template <typename>
 class MooseVariableField;
 typedef MooseVariableField<Real> MooseVariable;
-typedef MooseVariableField<RealVectorValue> MooseVariableVector;
+typedef MooseVariableField<RealVectorValue> VectorMooseVariable;
 class MooseVariableScalar;
 
 /**
@@ -134,10 +134,10 @@ protected:
   HashMap<unsigned, MooseVariable *> _regular_vars_by_number;
 
   /// map of vector finite element variables with name keys
-  HashMap<std::string, MooseVariableVector *> _vector_vars_by_name;
+  HashMap<std::string, VectorMooseVariable *> _vector_vars_by_name;
 
   /// map of vector finite element variables with unsigned keys
-  HashMap<unsigned, MooseVariableVector *> _vector_vars_by_number;
+  HashMap<unsigned, VectorMooseVariable *> _vector_vars_by_number;
 
   /// Name to variable mapping
   std::map<std::string, MooseVariableBase *> _var_name;

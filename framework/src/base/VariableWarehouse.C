@@ -35,7 +35,7 @@ VariableWarehouse::add(const std::string & var_name, MooseVariableBase * var)
       _regular_vars_by_number[tmp_var->number()] = tmp_var;
       _regular_vars_by_name[var_name] = tmp_var;
     }
-    else if (auto * tmp_var = dynamic_cast<MooseVariableVector *>(var))
+    else if (auto * tmp_var = dynamic_cast<VectorMooseVariable *>(var))
     {
       _vector_vars_by_number[tmp_var->number()] = tmp_var;
       _vector_vars_by_name[var_name] = tmp_var;

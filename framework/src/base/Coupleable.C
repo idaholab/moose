@@ -175,7 +175,7 @@ Coupleable::getVar(const std::string & var_name, unsigned int comp)
     mooseError(_c_name, ": Trying to get a non-existent component of variable '", var_name, "'");
 }
 
-MooseVariableVector *
+VectorMooseVariable *
 Coupleable::getVectorVar(const std::string & var_name, unsigned int comp)
 {
   if (comp < _coupled_vars[var_name].size())
@@ -183,7 +183,7 @@ Coupleable::getVectorVar(const std::string & var_name, unsigned int comp)
     // Error check - don't couple elemental to nodal
     if (!(_coupled_vars[var_name][comp])->isNodal() && _c_nodal)
       mooseError(_c_name, ": You cannot couple an elemental variable to a nodal variable");
-    if (auto * coupled_var = dynamic_cast<MooseVariableVector *>(_coupled_vars[var_name][comp]))
+    if (auto * coupled_var = dynamic_cast<VectorMooseVariable *>(_coupled_vars[var_name][comp]))
       return coupled_var;
     else
       mooseError("Variable of wrong type");
@@ -274,7 +274,7 @@ Coupleable::coupledVectorValue(const std::string & var_name, unsigned int comp)
     return *getVectorDefaultValue(var_name);
 
   coupledCallback(var_name, false);
-  MooseVariableVector * var = getVectorVar(var_name, comp);
+  VectorMooseVariable * var = getVectorVar(var_name, comp);
   if (var == NULL)
     mooseError("Call coupledValue for coupled regular variables");
 
@@ -417,7 +417,7 @@ Coupleable::coupledVectorValueOld(const std::string & var_name, unsigned int com
 
   validateExecutionerType(var_name);
   coupledCallback(var_name, true);
-  MooseVariableVector * var = getVectorVar(var_name, comp);
+  VectorMooseVariable * var = getVectorVar(var_name, comp);
   if (var == NULL)
     mooseError("Call coupledValueOld for coupled scalar field variables");
 
@@ -447,7 +447,7 @@ Coupleable::coupledVectorValueOlder(const std::string & var_name, unsigned int c
 
   validateExecutionerType(var_name);
   coupledCallback(var_name, true);
-  MooseVariableVector * var = getVectorVar(var_name, comp);
+  VectorMooseVariable * var = getVectorVar(var_name, comp);
   if (var == NULL)
     mooseError("Call coupledValueOlder for coupled scalar field variables");
 
@@ -637,7 +637,7 @@ Coupleable::coupledCurl(const std::string & var_name, unsigned int comp)
   if (_c_nodal)
     mooseError("Nodal variables do not have curls");
 
-  MooseVariableVector * var = getVectorVar(var_name, comp);
+  VectorMooseVariable * var = getVectorVar(var_name, comp);
   if (var == NULL)
     mooseError("Call corresponding scalar field variable method");
 
@@ -658,7 +658,7 @@ Coupleable::coupledCurlOld(const std::string & var_name, unsigned int comp)
     mooseError("Nodal variables do not have curls");
 
   validateExecutionerType(var_name);
-  MooseVariableVector * var = getVectorVar(var_name, comp);
+  VectorMooseVariable * var = getVectorVar(var_name, comp);
   if (var == NULL)
     mooseError("Call corresponding scalar field variable method");
 
@@ -679,7 +679,7 @@ Coupleable::coupledCurlOlder(const std::string & var_name, unsigned int comp)
     mooseError("Nodal variables do not have curls");
 
   validateExecutionerType(var_name);
-  MooseVariableVector * var = getVectorVar(var_name, comp);
+  VectorMooseVariable * var = getVectorVar(var_name, comp);
   if (var == NULL)
     mooseError("Call corresponding scalar field variable method");
 

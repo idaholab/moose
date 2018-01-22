@@ -44,7 +44,7 @@ class MooseVariableFE;
 template <typename>
 class MooseVariableField;
 typedef MooseVariableField<Real> MooseVariable;
-typedef MooseVariableField<RealVectorValue> MooseVariableVector;
+typedef MooseVariableField<RealVectorValue> VectorMooseVariable;
 class XFEMInterface;
 
 /**
@@ -645,61 +645,61 @@ public:
     return _second_phi_face_neighbor;
   }
 
-  const VectorVariablePhiValue & phi(MooseVariableVector &) const { return _vector_phi; }
-  const VectorVariablePhiGradient & gradPhi(MooseVariableVector &) const
+  const VectorVariablePhiValue & phi(VectorMooseVariable &) const { return _vector_phi; }
+  const VectorVariablePhiGradient & gradPhi(VectorMooseVariable &) const
   {
     return _vector_grad_phi;
   }
-  const VectorVariablePhiSecond & secondPhi(MooseVariableVector &) const
+  const VectorVariablePhiSecond & secondPhi(VectorMooseVariable &) const
   {
     return _vector_second_phi;
   }
-  const VectorVariablePhiCurl & curlPhi(MooseVariableVector &) const { return _vector_curl_phi; }
+  const VectorVariablePhiCurl & curlPhi(VectorMooseVariable &) const { return _vector_curl_phi; }
 
-  const VectorVariablePhiValue & phiFace(MooseVariableVector &) const { return _vector_phi_face; }
-  const VectorVariablePhiGradient & gradPhiFace(MooseVariableVector &) const
+  const VectorVariablePhiValue & phiFace(VectorMooseVariable &) const { return _vector_phi_face; }
+  const VectorVariablePhiGradient & gradPhiFace(VectorMooseVariable &) const
   {
     return _vector_grad_phi_face;
   }
-  const VectorVariablePhiSecond & secondPhiFace(MooseVariableVector &) const
+  const VectorVariablePhiSecond & secondPhiFace(VectorMooseVariable &) const
   {
     return _vector_second_phi_face;
   }
-  const VectorVariablePhiCurl & curlPhiFace(MooseVariableVector &) const
+  const VectorVariablePhiCurl & curlPhiFace(VectorMooseVariable &) const
   {
     return _vector_curl_phi_face;
   }
 
-  const VectorVariablePhiValue & phiNeighbor(MooseVariableVector &) const
+  const VectorVariablePhiValue & phiNeighbor(VectorMooseVariable &) const
   {
     return _vector_phi_neighbor;
   }
-  const VectorVariablePhiGradient & gradPhiNeighbor(MooseVariableVector &) const
+  const VectorVariablePhiGradient & gradPhiNeighbor(VectorMooseVariable &) const
   {
     return _vector_grad_phi_neighbor;
   }
-  const VectorVariablePhiSecond & secondPhiNeighbor(MooseVariableVector &) const
+  const VectorVariablePhiSecond & secondPhiNeighbor(VectorMooseVariable &) const
   {
     return _vector_second_phi_neighbor;
   }
-  const VectorVariablePhiCurl & curlPhiNeighbor(MooseVariableVector &) const
+  const VectorVariablePhiCurl & curlPhiNeighbor(VectorMooseVariable &) const
   {
     return _vector_curl_phi_neighbor;
   }
 
-  const VectorVariablePhiValue & phiFaceNeighbor(MooseVariableVector &) const
+  const VectorVariablePhiValue & phiFaceNeighbor(VectorMooseVariable &) const
   {
     return _vector_phi_face_neighbor;
   }
-  const VectorVariablePhiGradient & gradPhiFaceNeighbor(MooseVariableVector &) const
+  const VectorVariablePhiGradient & gradPhiFaceNeighbor(VectorMooseVariable &) const
   {
     return _vector_grad_phi_face_neighbor;
   }
-  const VectorVariablePhiSecond & secondPhiFaceNeighbor(MooseVariableVector &) const
+  const VectorVariablePhiSecond & secondPhiFaceNeighbor(VectorMooseVariable &) const
   {
     return _vector_second_phi_face_neighbor;
   }
-  const VectorVariablePhiCurl & curlPhiFaceNeighbor(MooseVariableVector &) const
+  const VectorVariablePhiCurl & curlPhiFaceNeighbor(VectorMooseVariable &) const
   {
     return _vector_curl_phi_face_neighbor;
   }
@@ -721,43 +721,43 @@ public:
   VariablePhiGradient & gradPhiFaceNeighbor(MooseVariable &) { return _grad_phi_face_neighbor; }
   VariablePhiSecond & secondPhiFaceNeighbor(MooseVariable &) { return _second_phi_face_neighbor; }
 
-  VectorVariablePhiValue & phi(MooseVariableVector &) { return _vector_phi; }
-  VectorVariablePhiGradient & gradPhi(MooseVariableVector &) { return _vector_grad_phi; }
-  VectorVariablePhiSecond & secondPhi(MooseVariableVector &) { return _vector_second_phi; }
-  VectorVariablePhiCurl & curlPhi(MooseVariableVector &) { return _vector_curl_phi; }
+  VectorVariablePhiValue & phi(VectorMooseVariable &) { return _vector_phi; }
+  VectorVariablePhiGradient & gradPhi(VectorMooseVariable &) { return _vector_grad_phi; }
+  VectorVariablePhiSecond & secondPhi(VectorMooseVariable &) { return _vector_second_phi; }
+  VectorVariablePhiCurl & curlPhi(VectorMooseVariable &) { return _vector_curl_phi; }
 
-  VectorVariablePhiValue & phiFace(MooseVariableVector &) { return _vector_phi_face; }
-  VectorVariablePhiGradient & gradPhiFace(MooseVariableVector &) { return _vector_grad_phi_face; }
-  VectorVariablePhiSecond & secondPhiFace(MooseVariableVector &) { return _vector_second_phi_face; }
-  VectorVariablePhiCurl & curlPhiFace(MooseVariableVector &) { return _vector_curl_phi_face; }
+  VectorVariablePhiValue & phiFace(VectorMooseVariable &) { return _vector_phi_face; }
+  VectorVariablePhiGradient & gradPhiFace(VectorMooseVariable &) { return _vector_grad_phi_face; }
+  VectorVariablePhiSecond & secondPhiFace(VectorMooseVariable &) { return _vector_second_phi_face; }
+  VectorVariablePhiCurl & curlPhiFace(VectorMooseVariable &) { return _vector_curl_phi_face; }
 
-  VectorVariablePhiValue & phiNeighbor(MooseVariableVector &) { return _vector_phi_neighbor; }
-  VectorVariablePhiGradient & gradPhiNeighbor(MooseVariableVector &)
+  VectorVariablePhiValue & phiNeighbor(VectorMooseVariable &) { return _vector_phi_neighbor; }
+  VectorVariablePhiGradient & gradPhiNeighbor(VectorMooseVariable &)
   {
     return _vector_grad_phi_neighbor;
   }
-  VectorVariablePhiSecond & secondPhiNeighbor(MooseVariableVector &)
+  VectorVariablePhiSecond & secondPhiNeighbor(VectorMooseVariable &)
   {
     return _vector_second_phi_neighbor;
   }
-  VectorVariablePhiCurl & curlPhiNeighbor(MooseVariableVector &)
+  VectorVariablePhiCurl & curlPhiNeighbor(VectorMooseVariable &)
   {
     return _vector_curl_phi_neighbor;
   }
 
-  VectorVariablePhiValue & phiFaceNeighbor(MooseVariableVector &)
+  VectorVariablePhiValue & phiFaceNeighbor(VectorMooseVariable &)
   {
     return _vector_phi_face_neighbor;
   }
-  VectorVariablePhiGradient & gradPhiFaceNeighbor(MooseVariableVector &)
+  VectorVariablePhiGradient & gradPhiFaceNeighbor(VectorMooseVariable &)
   {
     return _vector_grad_phi_face_neighbor;
   }
-  VectorVariablePhiSecond & secondPhiFaceNeighbor(MooseVariableVector &)
+  VectorVariablePhiSecond & secondPhiFaceNeighbor(VectorMooseVariable &)
   {
     return _vector_second_phi_face_neighbor;
   }
-  VectorVariablePhiCurl & curlPhiFaceNeighbor(MooseVariableVector &)
+  VectorVariablePhiCurl & curlPhiFaceNeighbor(VectorMooseVariable &)
   {
     return _vector_curl_phi_face_neighbor;
   }
