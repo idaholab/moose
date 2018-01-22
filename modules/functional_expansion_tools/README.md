@@ -79,14 +79,14 @@ Additional composite series, such as may be suitable for spherical or shell data
 * B. WENDT, A. NOVAK, L. KERBY, and P. ROMANO, "Integration of Functional Expansion Methodologies as a MOOSE Module," in *PHYSOR 2018: Reactor Physics paving the way towards more efficient systems,* (2018). submitted
 * M. ELLIS, *Methods for Including Multiphsyics Feedback in Monte Carlos Reactor Physics Calculations.* PhD Dissertation, Massachusetts Institute of Technology (2017).
 * B. WENDT and L. KERBY, "MultiApp Transfers in the MOOSE Framework based on Functional Expansions." *Transactions of the American Nuclear Society,* **117**(1), pp. 735-738 (2017).
-* L. KERBY, A. TUMULAK, J. LEPPÄNEN, and V. VALTAVIRTA, "Preliminary Serpent-MOOSE Coupling and Implementation of Functional Expansion Tallies in Serpent," in *International Conference on Mathematics & Computational Methods Applied to Nuclear Science and Entineering (M&C 2017),* (2017)
+* L. KERBY, A. TUMULAK, J. LEPPANEN, and V. VALTAVIRTA, "Preliminary Serpent-MOOSE Coupling and Implementation of Functional Expansion Tallies in Serpent," in *International Conference on Mathematics & Computational Methods Applied to Nuclear Science and Entineering (M&C 2017),* (2017)
 * J. FLUSSER, T. SUK, and B. ZITOV, *2D & 3D image analysis by moments.* John Wiley & Sons, Inc. (2016)
 * D. GRIESHEIMER, *Functional Expansion Tallies for Monte Carlo Simulations.* PhD Dissertation, University of Michigan (2005).
 
 ### TODO
 * Implement an **Executioner**-derived FE-based interface that can be used to simply the exchange of FE coefficients with external applications wrapped in their own **Executioner**
 * Implement a **Materials**-derived FE-based class that can provide continuous material properties
-* Implement a **Kernel**-derived class, à la `BodyForce`, that automatically sets `enable_cache = true` for the associated `FunctionSeries` object
+* Implement a **Kernel**-derived class, a la `BodyForce`, that automatically sets `enable_cache = true` for the associated `FunctionSeries` object
 * Add an error check in `MultiAppMutableCoefficientsTransfer` for multiple objects of the same name but different type, i.e. if there are both a **Function** and **UserObject** with the same name (or other object types as they are added)
 * Implement support in `MutableCoefficientsInterface` for multiple sets of FE coefficients
 * Implement support for various types of FE derivations
@@ -94,6 +94,6 @@ Additional composite series, such as may be suitable for spherical or shell data
   * Various orthonormalizations
 * Add more functional series
   * Fourier
-  * Annular Zernike (0 < r ≤ 1)
+  * Annular Zernike (0 < r <= 1)
   * Shell (r = 1) for 3D cylindrical boundary conditions (Zernike-based?)
   * Spherical harmonics + spherical composite series

@@ -76,10 +76,10 @@
   [./FE_Basis_Value_Main]
     type = FunctionSeries
     series_type = CylindricalDuo
-    orders = '5   3' # Axial first, then (r, θ) FE
+    orders = '5   3' # Axial first, then (r, t) FE
     physical_bounds = '-2.5 2.5   0 0 1' # z_min z_max   x_center y_center radius
     z = Legendre # Axial in z
-    disc = Zernike # (r, θ) default to unit disc in x-y plane
+    disc = Zernike # (r, t) default to unit disc in x-y plane
   [../]
 []
 

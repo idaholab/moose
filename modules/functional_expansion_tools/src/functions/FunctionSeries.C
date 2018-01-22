@@ -50,7 +50,7 @@ validParams<FunctionSeries>()
   params.addRequiredParam<std::vector<unsigned int>>("orders",
                                                      "The order of each series. These must be "
                                                      "defined as \"x y z\" for Cartesian, and \"z "
-                                                     "rθ\" for CylindricalDuo.");
+                                                     "disc\" for CylindricalDuo.");
 
   params.addParam<std::vector<Real>>("physical_bounds",
                                      "The physical bounds of the function series. These must be "
