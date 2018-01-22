@@ -583,22 +583,21 @@ def deleteFilesAndFolders(test_dir, paths, delete_folders=True):
 
 # Check if test has any redirected output, and if its ready to be read
 def checkOutputReady(tester, options):
+    checked_files = []
     for redirected_file in tester.getRedirectedOutputFiles(options):
         file_path = os.path.join(tester.getTestDir(), redirected_file)
-        if not os.access(file_path, os.R_OK):
-            return False
-
-    return True
+        if os.access(file_path, os.R_OK):
+            checked_files.append(file_path)
+    return checked_files
 
 # return concatenated output from tests with redirected output
 def getOutputFromFiles(tester, options):
     file_output = ''
-    if checkOutputReady(tester, options):
-        for iteration, redirected_file in enumerate(tester.getRedirectedOutputFiles(options)):
-            file_path = os.path.join(tester.getTestDir(), redirected_file)
-            with open(file_path, 'r') as f:
-                file_output += "#"*80 + "\nOutput from processor " + str(iteration) \
-                               + "\n" + "#"*80 + "\n" + readOutput(f, None, options)
+    output_files = checkOutputReady(tester, options)
+    for process, file_path in enumerate(output_files):
+        with open(file_path, 'r') as f:
+            file_output += "#"*80 + "\nOutput from processor " + str(process) \
+                           + "\n" + "#"*80 + "\n" + readOutput(f, None, options)
     return file_output
 
 # This function reads output from the file (i.e. the test output)

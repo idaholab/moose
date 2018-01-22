@@ -359,6 +359,8 @@ class Tester(MooseObject):
         timer.stop()
 
         self.exit_code = process.poll()
+        self.outfile.flush()
+        self.errfile.flush()
 
         # store the contents of output, and close the file
         self.joined_out = util.readOutput(self.outfile, self.errfile, options)
