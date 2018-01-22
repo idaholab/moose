@@ -51,6 +51,7 @@ Legendre::checkPhysicalBounds(const std::vector<Real> & bounds) const
  * developed in Serpent, which I have developed simultaneously. Mirroring the development improves
  * the maintanability of both codes.
  */
+// clang-format off
 void
 Legendre::evaluateOrthonormal()
 {
@@ -149,6 +150,7 @@ Legendre::evaluateOrthonormal()
     save(k, ((k + k + 1) / Real(k))
             * (x * load(k - 1)  -  ((k - 1) / Real(k + k - 3)) * load(k - 2)));
 }
+// clang-format on
 
 /*
  * 'clang-format' will try to change this. I have chosen to keep the formatting as is to make it
@@ -156,6 +158,7 @@ Legendre::evaluateOrthonormal()
  * developed in Serpent, which I have developed simultaneously. Mirroring the development improves
  * the maintanability of both codes.
  */
+// clang-format off
 void
 Legendre::evaluateStandard()
 {
@@ -226,6 +229,7 @@ Legendre::evaluateStandard()
     save(k, (((2 * k - 1) * x * load(k - 1))  -  ((k - 1) * load(k - 2)))
             / Real(k));
 }
+// clang-format on
 
 const std::vector<Real> &
 Legendre::getStandardizedFunctionLimits() const

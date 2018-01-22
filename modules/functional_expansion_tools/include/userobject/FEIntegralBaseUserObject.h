@@ -111,7 +111,6 @@ protected:
   Real _volume;
 };
 
-
 template <class IntegralBaseVariableUserObject>
 FEIntegralBaseUserObject<IntegralBaseVariableUserObject>::FEIntegralBaseUserObject(
     const InputParameters & parameters)

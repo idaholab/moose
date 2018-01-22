@@ -30,8 +30,7 @@ CompositeSeriesBasisInterface::CompositeSeriesBasisInterface() : FunctionalBasis
  * of the constructor, we need to call the default FBI constructor.
  */
 CompositeSeriesBasisInterface::CompositeSeriesBasisInterface(
-    const std::vector<std::size_t> & orders,
-    std::vector<MooseEnum> series_types)
+    const std::vector<std::size_t> & orders, std::vector<MooseEnum> series_types)
   : FunctionalBasisInterface(), _series_types(series_types)
 {
   if (orders.size() != _series_types.size())

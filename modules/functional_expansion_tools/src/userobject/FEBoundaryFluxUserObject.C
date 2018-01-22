@@ -24,9 +24,10 @@ validParams<FEBoundaryFluxUserObject>()
   params.addClassDescription("Generates an FE representation for a boundary flux condition using a "
                              "'FunctionSeries'-type Function");
 
-  params.addRequiredParam<std::string>(
-      "diffusivity",
-      "The name of the material diffusivity property, or raw value, that will be used in the flux computation.");
+  params.addRequiredParam<std::string>("diffusivity",
+                                       "The name of the material diffusivity "
+                                       "property, or raw value, that will be used "
+                                       "in the flux computation.");
 
   return params;
 }

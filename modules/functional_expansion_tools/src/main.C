@@ -18,7 +18,8 @@ main(int argc, char * argv[])
   FunctionalExpansionToolsTestApp::registerApps();
 
   // Create an instance of the application and store it in a smart pointer for easy cleanup
-  std::shared_ptr<MooseApp> app = AppFactory::createAppShared("FunctionalExpansionToolsTestApp", argc, argv);
+  std::shared_ptr<MooseApp> app =
+      AppFactory::createAppShared("FunctionalExpansionToolsTestApp", argc, argv);
 
   // Execute the application
   app->run();

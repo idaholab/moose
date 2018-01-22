@@ -29,7 +29,7 @@ class SBIKey
 {
   friend class SingleSeriesBasisInterface;
   friend class CompositeSeriesBasisInterface;
-  SBIKey(){}; // Empty private constructor
+  SBIKey(){};               // Empty private constructor
   SBIKey(SBIKey const &){}; // Empty copy constructor
 };
 

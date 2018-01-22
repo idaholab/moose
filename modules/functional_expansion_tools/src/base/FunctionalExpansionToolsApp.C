@@ -22,7 +22,8 @@ validParams<FunctionalExpansionToolsApp>()
   return params;
 }
 
-FunctionalExpansionToolsApp::FunctionalExpansionToolsApp(InputParameters parameters) : MooseApp(parameters)
+FunctionalExpansionToolsApp::FunctionalExpansionToolsApp(InputParameters parameters)
+  : MooseApp(parameters)
 {
   Moose::registerObjects(_factory);
   FunctionalExpansionToolsApp::registerObjectDepends(_factory);
@@ -34,7 +35,6 @@ FunctionalExpansionToolsApp::FunctionalExpansionToolsApp(InputParameters paramet
 }
 
 FunctionalExpansionToolsApp::~FunctionalExpansionToolsApp() {}
-
 
 void
 FunctionalExpansionToolsApp::registerApps()
@@ -62,7 +62,8 @@ FunctionalExpansionToolsApp::registerObjects(Factory & factory)
 }
 
 void
-FunctionalExpansionToolsApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & /*action_factory*/)
+FunctionalExpansionToolsApp::associateSyntax(Syntax & /*syntax*/,
+                                             ActionFactory & /*action_factory*/)
 {
   /* Uncomment Syntax and ActionFactory parameters and register your new objects here! */
 }
@@ -73,10 +74,10 @@ FunctionalExpansionToolsApp::registerObjectDepends(Factory & /*factory*/)
 }
 
 void
-FunctionalExpansionToolsApp::associateSyntaxDepends(Syntax & /*syntax*/, ActionFactory & /*action_factory*/)
+FunctionalExpansionToolsApp::associateSyntaxDepends(Syntax & /*syntax*/,
+                                                    ActionFactory & /*action_factory*/)
 {
 }
-
 
 /***************************************************************************************************
  *********************** Dynamic Library Entry Points - DO NOT MODIFY ******************************

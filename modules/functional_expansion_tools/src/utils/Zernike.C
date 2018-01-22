@@ -57,6 +57,7 @@ Zernike::checkPhysicalBounds(const std::vector<Real> & bounds) const
  * developed in Serpent, which I have developed simultaneously. Mirroring the development improves
  * the maintanability of both codes.
  */
+// clang-format off
 void
 Zernike::evaluateOrthonormal()
 {
@@ -204,6 +205,7 @@ Zernike::evaluateOrthonormal()
 
   fillOutNegativeRankAndApplyAzimuthalComponent();
 }
+// clang-format on
 
 void
 Zernike::evaluateStandard()
