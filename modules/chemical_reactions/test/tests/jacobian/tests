@@ -11,9 +11,21 @@
     ratio_tol = 1e-7
     difference_tol = 1e-7
   [../]
+  [./coupled_convreact2]
+    type = PetscJacobianTester
+    input = coupled_convreact2.i
+    ratio_tol = 1e-7
+    difference_tol = 1e-7
+  [../]
   [./coupled_diffreact]
     type = PetscJacobianTester
     input = coupled_diffreact.i
+    ratio_tol = 1e-7
+    difference_tol = 1e-7
+  [../]
+  [./coupled_diffreact2]
+    type = PetscJacobianTester
+    input = coupled_diffreact2.i
     ratio_tol = 1e-7
     difference_tol = 1e-7
   [../]
@@ -22,6 +34,12 @@
     input = coupled_equilsub.i
     ratio_tol = 1e-7
     difference_tol = 5e-7
+  [../]
+  [./coupled_equilsub2]
+    type = PetscJacobianTester
+    input = coupled_equilsub2.i
+    ratio_tol = 1e-7
+    difference_tol = 1e-6
   [../]
   [./2species]
     type = PetscJacobianTester
