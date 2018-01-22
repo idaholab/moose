@@ -156,6 +156,7 @@ CompositeSeriesBasisInterface::formatCoefficients(std::ostream & stream,
    * intentionally to make the output format intuitive to the developer and improve future
    * maintainability.
    */
+  // clang-format off
   std::ostringstream formatted, domains, orders;
   std::size_t term = 0;
 
@@ -216,6 +217,7 @@ CompositeSeriesBasisInterface::formatCoefficients(std::ostream & stream,
       }
     }
   }
+  // clang-format on
 
   stream << orders.str() << domains.str() << formatted.str();
 }
