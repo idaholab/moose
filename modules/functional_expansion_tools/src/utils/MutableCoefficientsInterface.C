@@ -142,7 +142,7 @@ MutableCoefficientsInterface::importCoefficients(const MutableCoefficientsInterf
   _coefficients = other._coefficients;
 
   if (_print_coefficients)
-    std::cout << *this;
+    dynamic_cast<ConsoleStreamInterface *>(this)->_console << *this;
 
   coefficientsChanged();
 }
@@ -159,7 +159,7 @@ MutableCoefficientsInterface::resize(std::size_t size, Real fill, bool fill_out_
     _coefficients.resize(size, fill);
 
     if (_print_coefficients)
-      std::cout << *this;
+      dynamic_cast<ConsoleStreamInterface *>(this)->_console << *this;
 
     coefficientsChanged();
   }
@@ -182,7 +182,7 @@ MutableCoefficientsInterface::setCoefficients(const std::vector<Real> & new_coef
   _coefficients = new_coefficients;
 
   if (_print_coefficients)
-    std::cout << *this;
+    dynamic_cast<ConsoleStreamInterface *>(this)->_console << *this;
 
   coefficientsChanged();
 }
@@ -197,7 +197,7 @@ MutableCoefficientsInterface::setCoefficients(std::vector<Real> && dropin_coeffi
   _coefficients = dropin_coefficients;
 
   if (_print_coefficients)
-    std::cout << *this;
+    dynamic_cast<ConsoleStreamInterface *>(this)->_console << *this;
 
   coefficientsChanged();
 }

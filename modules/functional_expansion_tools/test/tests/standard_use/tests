@@ -18,7 +18,16 @@
   [../]
 
 
-[./neglect_invalid_enum]
+  [./print_coefficients]
+    # If an extraneous field is provided, then so long as the 'physical_bounds' and 'orders' fields
+    # are of the correct length, no error should be provided.
+    type = RunApp
+    input = multiapp_print_coefficients.i
+    group = functional_expansion
+  [../]
+
+
+  [./neglect_invalid_enum]
     # If an extraneous field is provided, then so long as the 'physical_bounds' and 'orders' fields
     # are of the correct length, no error should be provided.
     type = RunApp
