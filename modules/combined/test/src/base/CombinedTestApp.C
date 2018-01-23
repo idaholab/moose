@@ -148,5 +148,6 @@ CombinedTestApp::registerExecFlags(Factory & factory)
   SolidMechanicsTestApp::registerExecFlags(factory);
   StochasticToolsTestApp::registerExecFlags(factory);
   TensorMechanicsTestApp::registerExecFlags(factory);
+  WaterSteamEOSTestApp::registerExecFlags(factory);
   LevelSetTestApp::registerExecFlags(factory);
 }
