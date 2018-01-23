@@ -132,5 +132,6 @@ CombinedApp::registerExecFlags(Factory & factory)
   FluidPropertiesApp::registerExecFlags(factory);
   HeatConductionApp::registerExecFlags(factory);
   MiscApp::registerExecFlags(factory);
+  NavierStokesApp::registerExecFlags(factory);
   LevelSetApp::registerExecFlags(factory);
 }

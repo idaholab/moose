@@ -128,6 +128,9 @@ NavierStokesApp::NavierStokesApp(InputParameters parameters) : MooseApp(paramete
   Moose::associateSyntax(_syntax, _action_factory);
   NavierStokesApp::associateSyntaxDepends(_syntax, _action_factory);
   NavierStokesApp::associateSyntax(_syntax, _action_factory);
+
+  Moose::registerExecFlags(_factory);
+  NavierStokesApp::registerExecFlags(_factory);
 }
 
 NavierStokesApp::~NavierStokesApp() {}
@@ -302,4 +305,15 @@ NavierStokesApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory
 
 #undef registerAction
 #define registerAction(type, action) action_factory.regLegacy<type>(stringifyName(type), action)
+}
+
+// External entry point for dynamic execute flag registration
+extern "C" void
+NavierStokesApp__registerExecFlags(Factory & factory)
+{
+  NavierStokesApp::registerExecFlags(factory);
+}
+void
+NavierStokesApp::registerExecFlags(Factory & /*factory*/)
+{
 }

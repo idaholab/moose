@@ -142,5 +142,6 @@ CombinedTestApp::registerExecFlags(Factory & factory)
   FluidPropertiesTestApp::registerExecFlags(factory);
   HeatConductionTestApp::registerExecFlags(factory);
   MiscTestApp::registerExecFlags(factory);
+  NavierStokesTestApp::registerExecFlags(factory);
   LevelSetTestApp::registerExecFlags(factory);
 }
