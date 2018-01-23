@@ -30,46 +30,55 @@ validParams<MutableCoefficientsInterface>()
   return params;
 }
 
-MutableCoefficientsInterface::MutableCoefficientsInterface(const InputParameters & parameters)
+MutableCoefficientsInterface::MutableCoefficientsInterface(const MooseObject * moose_object,
+                                                           const InputParameters & parameters)
   : _characteristics(0),
     _coefficients(0),
     _enforce_size(false),
-    _print_coefficients(parameters.get<bool>("print_when_set"))
+    _print_coefficients(parameters.get<bool>("print_when_set")),
+    _console(moose_object->_console)
 {
   // Nothing here
 }
 
 MutableCoefficientsInterface::MutableCoefficientsInterface(
+    const MooseObject * moose_object,
     const InputParameters & parameters,
     const std::vector<Real> & new_coefficients,
     bool enforce_size)
   : _characteristics(0),
     _coefficients(new_coefficients),
     _enforce_size(enforce_size),
-    _print_coefficients(parameters.get<bool>("print_when_set"))
+    _print_coefficients(parameters.get<bool>("print_when_set")),
+    _console(moose_object->_console)
+
 {
   // Nothing here
 }
 
-MutableCoefficientsInterface::MutableCoefficientsInterface(const InputParameters & parameters,
+MutableCoefficientsInterface::MutableCoefficientsInterface(const MooseObject * moose_object,
+                                                           const InputParameters & parameters,
                                                            std::vector<Real> && dropin_coefficients,
                                                            bool enforce_size)
   : _characteristics(0),
     _coefficients(dropin_coefficients),
     _enforce_size(enforce_size),
-    _print_coefficients(parameters.get<bool>("print_when_set"))
+    _print_coefficients(parameters.get<bool>("print_when_set")),
+    _console(moose_object->_console)
 {
   // Nothing here
 }
 
-MutableCoefficientsInterface::MutableCoefficientsInterface(const InputParameters & parameters,
+MutableCoefficientsInterface::MutableCoefficientsInterface(const MooseObject * moose_object,
+                                                           const InputParameters & parameters,
                                                            std::size_t size,
                                                            Real fill,
                                                            bool enforce_size)
   : _characteristics(0),
     _coefficients(size, fill),
     _enforce_size(enforce_size),
-    _print_coefficients(parameters.get<bool>("print_when_set"))
+    _print_coefficients(parameters.get<bool>("print_when_set")),
+    _console(moose_object->_console)
 {
   // Nothing here
 }
@@ -148,7 +157,7 @@ MutableCoefficientsInterface::importCoefficients(const MutableCoefficientsInterf
   _coefficients = other._coefficients;
 
   if (_print_coefficients)
-    dynamic_cast<ConsoleStreamInterface *>(this)->_console << *this;
+    _console << *this;
 
   coefficientsChanged();
 }
@@ -165,7 +174,7 @@ MutableCoefficientsInterface::resize(std::size_t size, Real fill, bool fill_out_
     _coefficients.resize(size, fill);
 
     if (_print_coefficients)
-      dynamic_cast<ConsoleStreamInterface *>(this)->_console << *this;
+      _console << *this;
 
     coefficientsChanged();
   }
@@ -188,7 +197,7 @@ MutableCoefficientsInterface::setCoefficients(const std::vector<Real> & new_coef
   _coefficients = new_coefficients;
 
   if (_print_coefficients)
-    dynamic_cast<ConsoleStreamInterface *>(this)->_console << *this;
+    _console << *this;
 
   coefficientsChanged();
 }
@@ -203,7 +212,7 @@ MutableCoefficientsInterface::setCoefficients(std::vector<Real> && dropin_coeffi
   _coefficients = dropin_coefficients;
 
   if (_print_coefficients)
-    dynamic_cast<ConsoleStreamInterface *>(this)->_console << *this;
+    _console << *this;
 
   coefficientsChanged();
 }

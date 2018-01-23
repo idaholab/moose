@@ -118,7 +118,7 @@ template <class IntegralBaseVariableUserObject>
 FEIntegralBaseUserObject<IntegralBaseVariableUserObject>::FEIntegralBaseUserObject(
     const InputParameters & parameters)
   : IntegralBaseVariableUserObject(parameters),
-    MutableCoefficientsInterface(parameters),
+    MutableCoefficientsInterface(this, parameters),
     _keep_history(UserObject::getParam<bool>("keep_history")),
     _function_series(FunctionSeries::checkAndConvertFunction(getFunction("function"), name())),
     _print_state(UserObject::getParam<bool>("print_state")),

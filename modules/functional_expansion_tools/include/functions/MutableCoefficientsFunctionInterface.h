@@ -31,7 +31,8 @@ class MutableCoefficientsFunctionInterface : public MemoizedFunctionInterface,
                                              public MutableCoefficientsInterface
 {
 public:
-  MutableCoefficientsFunctionInterface(const InputParameters & parameters);
+  MutableCoefficientsFunctionInterface(const MooseObject * moose_object,
+                                       const InputParameters & parameters);
 
 protected:
   // Override from MemoizedFunctionInterface
