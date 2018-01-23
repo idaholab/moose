@@ -19,7 +19,9 @@ class FEValueBC;
 template <>
 InputParameters validParams<FEValueBC>();
 
-/// Defines an FE-based boundary condition that forces the values to match
+/**
+ * Defines an FE-based boundary condition that forces the values to match
+ */
 class FEValueBC : public FunctionDirichletBC
 {
 public:

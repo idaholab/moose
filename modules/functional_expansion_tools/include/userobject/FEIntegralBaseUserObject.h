@@ -24,7 +24,9 @@
 #include "FunctionSeries.h"
 #include "MutableCoefficientsInterface.h"
 
-// Class declaration for parameters - we cannot use templated types in validParams<>()
+/**
+ * Class declaration for parameters - we cannot use templated types in validParams<>()
+ */
 class FEIntegralBaseUserObjectParameters
 {
   // Empty class, used only for parameters
@@ -48,7 +50,9 @@ class FEIntegralBaseUserObject : public IntegralBaseVariableUserObject,
 public:
   FEIntegralBaseUserObject(const InputParameters & parameters);
 
-  /// Return a reference to the underlying function series
+  /**
+   * Return a reference to the underlying function series
+   */
   const FunctionSeries & getFunctionSeries() const;
 
   // Override from <IntegralBaseVariableUserObject>
@@ -78,13 +82,17 @@ protected:
   using IntegralBaseVariableUserObject::getFunction;
   using IntegralBaseVariableUserObject::name;
 
-  /// Override from <IntegralBaseVariableUserObject>
+  // Override from <IntegralBaseVariableUserObject>
   virtual Real computeIntegral() final;
 
-  /// Pure virtual method to get the centroid of the evaluated unit
+  /**
+   * Get the centroid of the evaluated unit
+   */
   virtual Point getCentroid() const = 0;
 
-  /// Pure virtual method to get the volume
+  /**
+   * Get the volume of the evaluated unit
+   */
   virtual Real getVolume() const = 0;
 
   /// History of the expansion coefficients for each solve

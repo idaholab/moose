@@ -31,40 +31,62 @@ class FunctionSeries : public MutableCoefficientsFunctionInterface
 public:
   FunctionSeries(const InputParameters & parameters);
 
-  /// Static function to cast a Function to SeriesFunction
+  /**
+   * Static function to cast a Function to SeriesFunction
+   */
   static FunctionSeries & checkAndConvertFunction(Function & function, const std::string & name);
 
   // Override from MemoizedFunctionInterface
   virtual Real evaluateValue(Real t, const Point & p) override;
 
-  /// Expand the function series at the current location and with the current coefficients
+  /**
+   * Expand the function series at the current location and with the current coefficients
+   */
   Real expand();
 
-  /// Expand the function using the provided coefficients at the current location
+  /**
+   * Expand the function using the provided coefficients at the current location
+   */
   Real expand(const std::vector<Real> & coefficients);
 
-  /// Returns the number of terms (coefficients) in the underlying function series
+  /**
+   * Returns the number of terms (coefficients) in the underlying function series
+   */
   std::size_t getNumberOfTerms() const;
 
-  /// Returns the volume of evaluation in the functional series standardized space
+  /**
+   * Returns the volume of evaluation in the functional series standardized space
+   */
   Real getStandardizedFunctionVolume() const;
 
-  /// Returns a vector of the functional orders in the underlying functional series
+  /**
+   * Returns a vector of the functional orders in the underlying functional series
+   */
   const std::vector<std::size_t> & getOrders() const;
 
-  /// Returns a vector of the orthogonally-evaluated functional series at the current location
+  /**
+   * Returns a vector of the orthogonally-evaluated functional series at the current location
+   */
   const std::vector<Real> & getOrthonormal();
 
-  /// Returns a vector of the standardly-evaluated functional series at the current location
+  /**
+   * Returns a vector of the standardly-evaluated functional series at the current location
+   */
   const std::vector<Real> & getStandard();
 
-  /// Returns true if the provided point is within the set physical boundaries
+  /**
+   * Returns true if the provided point is within the set physical boundaries
+   */
   bool isInPhysicalBounds(const Point & point) const;
 
-  /// Set the current evaluation location
+  /**
+   * Set the current evaluation location
+   */
   void setLocation(const Point & point);
 
-  /// Returns a tabularized text stream of the currently stored coefficients
+  /**
+   * Returns a tabularized text stream of the currently stored coefficients
+   */
   friend std::ostream & operator<<(std::ostream & stream, const FunctionSeries & me);
 
 protected:

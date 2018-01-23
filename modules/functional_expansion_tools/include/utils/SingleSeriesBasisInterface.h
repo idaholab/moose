@@ -31,7 +31,9 @@ public:
   virtual void setOrder(const std::vector<std::size_t> & orders) final;
   virtual void setPhysicalBounds(const std::vector<Real> & bounds) final;
 
-  /// Returns the number of terms in the single series given a value for the order
+  /**
+   * Returns the number of terms in the single series given a value for the order
+   */
   virtual std::size_t
   calculatedNumberOfTermsBasedOnOrder(const std::vector<std::size_t> & order) const = 0;
 
@@ -42,17 +44,19 @@ public:
    */
   virtual std::vector<Real> getStandardizedLocation(const std::vector<Real> & location) const = 0;
 
-  /// Returns the order of the particular domain index
+  /**
+   * Returns the order of the particular domain index
+   */
   std::size_t getOrder(std::size_t domain) const;
 
-  /**
-   * An ordered list of the x, y, and/or z domains needed by the functional basis to convert a point
-   * to a standardized location
-   */
+  /// An ordered list of the x, y, and/or z domains needed by the functional basis to convert a point
+  /// to a standardized location
   const std::vector<MooseEnum> _domains;
 
 protected:
-  /// Checks the physical bounds according to the actual implementation
+  /**
+   * Checks the physical bounds according to the actual implementation
+   */
   virtual void checkPhysicalBounds(const std::vector<Real> & bounds) const = 0;
 
   /**
@@ -74,10 +78,8 @@ private:
   /// Flag for if the physical bounds are specified for this series
   bool _are_physical_bounds_specified;
 
-  /**
-   * The domain locations of the current evaluation. This is private so that derived classes will be
-   * required to use #_standardized_location, essentially forcing location-awareness compliance
-   */
+  /// The domain locations of the current evaluation. This is private so that derived classes will be
+  /// required to use #_standardized_location, essentially forcing location-awareness compliance
   std::vector<Real> _location;
 
   // Hide _is_cache_invalid from subclasses

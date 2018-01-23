@@ -21,6 +21,11 @@ class FEBoundaryBaseUserObject;
 template <>
 InputParameters validParams<FEBoundaryBaseUserObject>();
 
+/**
+ * This class provides the base for generating a functional expansion on a boundary by inheriting
+ * from FEIntegralBaseUserObject and providing SideIntegralVariableUserObject as the template
+ * parameter
+ */
 class FEBoundaryBaseUserObject : public FEIntegralBaseUserObject<SideIntegralVariableUserObject>
 {
 public:

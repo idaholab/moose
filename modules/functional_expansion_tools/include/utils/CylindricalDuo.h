@@ -12,6 +12,10 @@
 
 #include "CompositeSeriesBasisInterface.h"
 
+/**
+ * This class constructs a functional expansion in cylindrical space using a 1D series for the axial
+ * direction and a 2D disc series for (r, t).
+ */
 class CylindricalDuo final : public CompositeSeriesBasisInterface
 {
 public:
@@ -19,7 +23,6 @@ public:
   CylindricalDuo(const std::vector<MooseEnum> & domain,
                  const std::vector<std::size_t> & order,
                  const std::vector<MooseEnum> & series_types);
-  virtual ~CylindricalDuo() = default;
 
   // Virtual overrides
   virtual void setPhysicalBounds(const std::vector<Real> & bounds) final;

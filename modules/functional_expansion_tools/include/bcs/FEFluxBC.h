@@ -19,7 +19,9 @@ class FEFluxBC;
 template <>
 InputParameters validParams<FEFluxBC>();
 
-/// Defines an FE-based BC that strongly encourages the gradients to match
+/**
+ * Defines an FE-based BC that strongly encourages the gradients to match
+ */
 class FEFluxBC : public FunctionNeumannBC
 {
 public:

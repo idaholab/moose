@@ -19,7 +19,9 @@ class FEBoundaryFluxUserObject;
 template <>
 InputParameters validParams<FEBoundaryFluxUserObject>();
 
-/// This boundary variant depends on SideIntegralVariableUserObject
+/**
+ * This boundary FE evaluator calculates the flux
+ */
 class FEBoundaryFluxUserObject final : public FEBoundaryBaseUserObject
 {
 public:

@@ -17,7 +17,9 @@ namespace hashing
 {
 typedef std::size_t HashValue;
 
-/// Final iteration of the variadic template with no additional arguments
+/**
+ * Final iteration of the variadic template with no additional arguments
+ */
 inline void
 hashCombine(HashValue & /* seed */)
 {
@@ -57,7 +59,9 @@ hashLargeContainer(Container const & container)
   return value;
 }
 
-/// Hashing for Point
+/**
+ * Hashing for Point
+ */
 inline HashValue
 hashCombine(const libMesh::Point & point)
 {
@@ -68,7 +72,9 @@ hashCombine(const libMesh::Point & point)
   return value;
 }
 
-/// Hashing for Point and time, useful for Functions
+/**
+ * Hashing for Point and time, useful for Functions
+ */
 inline HashValue
 hashCombine(Real time, const libMesh::Point & point)
 {

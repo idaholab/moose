@@ -22,7 +22,9 @@ class MultiAppMutableCoefficientsTransfer;
 template <>
 InputParameters validParams<MultiAppMutableCoefficientsTransfer>();
 
-/// Transfers mutable coefficient arrays between supported object types
+/**
+ * Transfers mutable coefficient arrays between supported object types
+ */
 class MultiAppMutableCoefficientsTransfer : public MultiAppTransfer
 {
 public:
@@ -43,12 +45,16 @@ protected:
   const std::string _multi_app_object_name;
 
 private:
-  /// Gets a MutableCoefficientsInterface-based Function, intented for use via function pointer
+  /**
+   * Gets a MutableCoefficientsInterface-based Function, intented for use via function pointer
+   */
   MutableCoefficientsInterface & getMutableCoefficientsFunction(FEProblemBase & base,
                                                                 const std::string & object_name,
                                                                 THREAD_ID thread);
 
-  /// Gets a MutableCoefficientsInterface-based UserObject, intended for use via function pointer
+  /**
+   * Gets a MutableCoefficientsInterface-based UserObject, intended for use via function pointer
+   */
   MutableCoefficientsInterface & getMutableCoefficientsUserOject(FEProblemBase & base,
                                                                  const std::string & object_name,
                                                                  THREAD_ID thread);

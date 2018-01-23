@@ -19,7 +19,9 @@ class FEValuePenaltyBC;
 template <>
 InputParameters validParams<FEValuePenaltyBC>();
 
-/// Defines an FE-based BC that strongly encourages the values to match
+/**
+ * Defines an FE-based BC that strongly encourages the values to match
+ */
 class FEValuePenaltyBC : public FunctionPenaltyDirichletBC
 {
 public:

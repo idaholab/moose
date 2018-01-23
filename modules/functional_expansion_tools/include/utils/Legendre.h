@@ -12,6 +12,9 @@
 
 #include "SingleSeriesBasisInterface.h"
 
+/**
+ * This class provides the algorithms and properties of the Legendre polynomial series.
+ */
 class Legendre final : public SingleSeriesBasisInterface
 {
 public:

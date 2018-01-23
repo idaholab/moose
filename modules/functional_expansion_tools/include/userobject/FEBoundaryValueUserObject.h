@@ -19,7 +19,9 @@ class FEBoundaryValueUserObject;
 template <>
 InputParameters validParams<FEBoundaryValueUserObject>();
 
-/// This boundary variant depends on SideIntegralVariableUserObject
+/**
+ * This boundary FE evaluator calculates the values
+ */
 class FEBoundaryValueUserObject final : public FEBoundaryBaseUserObject
 {
 public:

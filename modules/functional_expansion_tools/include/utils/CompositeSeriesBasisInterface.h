@@ -15,6 +15,10 @@
 #include "FunctionalBasisInterface.h"
 #include "SingleSeriesBasisInterface.h"
 
+/**
+ * This class is the basis for consructing a composite---or convolved---functional series by
+ * combining multiple other series together. Nonseparability is currently assumed.
+ */
 class CompositeSeriesBasisInterface : public FunctionalBasisInterface
 {
 public:
@@ -28,16 +32,22 @@ public:
   virtual bool isCacheInvalid() const final;
   virtual bool isInPhysicalBounds(const Point & point) const final;
   virtual void setLocation(const Point & p) final;
-  /* This definition must be with CSBI because it has to loop over each of the single series. */
+  // This definition must be with CSBI because it has to loop over each of the single series.
   virtual void setOrder(const std::vector<std::size_t> & orders) final;
 
-  /// Get the function limits by looping over each of the single series
+  /**
+   * Get the function limits by looping over each of the single series
+   */
   std::vector<Real> combineStandardizedFunctionLimits() const;
 
-  /// Initialize the number of terms in the composite series by looping over the single series
+  /**
+   * Initialize the number of terms in the composite series by looping over the single series
+   */
   void setNumberOfTerms();
 
-  /// Appends a tabulated form of the coefficients to the stream
+  /**
+   * Appends a tabulated form of the coefficients to the stream
+   */
   virtual void formatCoefficients(std::ostream & stream,
                                   const std::vector<Real> & coefficients) const;
 

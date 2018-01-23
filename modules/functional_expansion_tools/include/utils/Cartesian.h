@@ -12,6 +12,10 @@
 
 #include "CompositeSeriesBasisInterface.h"
 
+/**
+ * This class constructs a functional expansion using a separate series for each Cartesional
+ * dimension. 1D, 2D, and 3D domains are supported.
+ */
 class Cartesian final : public CompositeSeriesBasisInterface
 {
 public:

@@ -46,7 +46,9 @@ protected:
    */
   void fillOutNegativeRankAndApplyAzimuthalComponent();
 
-  /// Maps the double order/rank idices to a single linear index
+  /**
+   * Maps the double order/rank idices to a single linear index
+   */
   std::size_t simpleDoubleToSingle(std::size_t n, long m) const;
 
   /// Stores the recurrence evaluations for the negative rank azimuthal terms

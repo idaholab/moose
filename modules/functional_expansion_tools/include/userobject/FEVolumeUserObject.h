@@ -20,7 +20,9 @@ class FEVolumeUserObject;
 template <>
 InputParameters validParams<FEVolumeUserObject>();
 
-/// This volume variant depends on ElementIntegralVariableUserObject
+/**
+ * This volumetric FE calculates the value
+ */
 class FEVolumeUserObject final : public FEIntegralBaseUserObject<ElementIntegralVariableUserObject>
 {
 public:

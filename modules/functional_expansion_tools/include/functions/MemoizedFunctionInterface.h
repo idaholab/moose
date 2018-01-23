@@ -38,21 +38,25 @@ public:
   // Override from MeshChangedInterface
   virtual void meshChanged() override;
 
-  /// Enable/disable the cache
+  /**
+   * Enable/disable the cache
+   */
   void useCache(bool use);
 
-  /*
-   * Make this implementation of Function::Value() final so derived classes cannot bypass the
-   * memoization functionality it implements. Instead, deriving classes should implement
-   * evaluateValue().
-   */
+  // Make this implementation of Function::Value() final so derived classes cannot bypass the
+  // memoization functionality it implements. Instead, deriving classes should implement
+  // evaluateValue().
   virtual Real value(Real time, const Point & point) final;
 
 protected:
-  /// Used in derived classes, equivalent to Function::value()
+  /**
+   * Used in derived classes, equivalent to Function::value()
+   */
   virtual Real evaluateValue(Real time, const Point & point) = 0;
 
-  /// Called by derived classes to invalidate the cache, perhaps due to a state change
+  /**
+   * Called by derived classes to invalidate the cache, perhaps due to a state change
+   */
   void invalidateCache();
 
 private:
