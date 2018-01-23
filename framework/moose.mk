@@ -2,7 +2,7 @@
 # MOOSE
 #
 APPLICATION_DIR := $(FRAMEWORK_DIR)
-moose_SRC_DIRS := $(FRAMEWORK_DIR)/src
+# moose_SRC_DIRS := $(FRAMEWORK_DIR)/src
 moose_SRC_DIRS += $(FRAMEWORK_DIR)/contrib/mtwist
 moose_SRC_DIRS += $(FRAMEWORK_DIR)/contrib/jsoncpp
 
@@ -101,8 +101,20 @@ moose_LIBS := $(moose_LIB) $(pcre_LIB) $(hit_LIB)
 
 srcsubdirs := $(shell find $(FRAMEWORK_DIR)/src -maxdepth 1 -mindepth 1)
 
-unity_srcsubdirs := $(filter-out %/base, $(srcsubdirs))
-non_unity_srcsubdirs := $(filter %/base, $(srcsubdirs))
+moose_non_unity = %/base %/utils
+
+unity_src_dir = $(FRAMEWORK_DIR)/build/unity_src
+
+unity_srcsubdirs := $(filter-out $(moose_non_unity), $(srcsubdirs))
+non_unity_srcsubdirs := $(filter $(moose_non_unity), $(srcsubdirs))
+
+define unity_dir_rule
+$(1):
+	@echo Rebuilding unity source files in $$@
+	@mkdir -p $(1)
+endef
+
+$(eval $(call unity_dir_rule, $(unity_src_dir)))
 
 # 1: the unity file to build
 # 2: the source files in that unity file
@@ -111,14 +123,16 @@ $(1): $(2)
 	@echo '$$(foreach srcfile, $$^, #include"$$(srcfile)"\n)' > $$@
 endef
 
-$(foreach srcsubdir, $(unity_srcsubdirs), $(eval $(call unity_file_rule, $(srcsubdir)/$(notdir $(srcsubdir))_Unity.C, $(filter-out %_Unity.C, $(shell find $(srcsubdir) -name "*.C")))))
+$(foreach srcsubdir, $(unity_srcsubdirs), $(eval $(call unity_file_rule, $(unity_src_dir)/$(notdir $(srcsubdir))_Unity.C, $(filter-out %_Unity.C, $(shell find $(srcsubdir) -name "*.C")))))
 
-unity_srcfiles := $(foreach srcsubdir, $(unity_srcsubdirs), $(srcsubdir)/$(notdir $(srcsubdir))_Unity.C)
+app_unity_srcfiles := $(foreach srcsubdir, $(unity_srcsubdirs), $(unity_src_dir)/$(notdir $(srcsubdir))_Unity.C)
 
-#objects := $(patsubst %.C, %.o, $(unity_srcfiles))
+unity_srcfiles += $(app_unity_srcfiles)
+
+unity_files:: $(unity_src_dir)
 
 # source files
-moose_srcfiles    := $(unity_srcfiles) $(shell find $(non_unity_srcsubdirs) -name "*.C")
+moose_srcfiles    := $(app_unity_srcfiles) $(shell find $(non_unity_srcsubdirs) -name "*.C") $(shell find $(moose_SRC_DIRS) -name "*.C")
 moose_csrcfiles   := $(shell find $(moose_SRC_DIRS) -name "*.c")
 moose_fsrcfiles   := $(shell find $(moose_SRC_DIRS) -name "*.f")
 moose_f90srcfiles := $(shell find $(moose_SRC_DIRS) -name "*.f90")
@@ -138,7 +152,7 @@ moose_analyzer += $(patsubst %.cc, %.plist.$(obj-suffix), $(hit_srcfiles))
 app_INCLUDES := $(moose_INCLUDE) $(libmesh_INCLUDE)
 app_LIBS     := $(moose_LIBS)
 app_DIRS     := $(FRAMEWORK_DIR)
-all:: libmesh_submodule_status header_symlinks moose_revision moose
+all:: libmesh_submodule_status header_symlinks unity_files moose_revision moose
 
 # revision header
 moose_revision_header = $(FRAMEWORK_DIR)/include/base/MooseRevision.h
@@ -243,7 +257,7 @@ app_deps := $(moose_deps) $(exodiff_deps) $(pcre_deps) $(gtest_deps) $(hit_deps)
 #    files, libraries, etc.
 clean::
 	@$(libmesh_LIBTOOL) --mode=uninstall --quiet rm -f $(app_LIB) $(app_test_LIB)
-	@rm -rf $(app_EXEC) $(app_objects) $(main_object) $(app_deps) $(app_HEADER) $(app_test_objects) $(unity_srcfiles)
+	@rm -rf $(app_EXEC) $(app_objects) $(main_object) $(app_deps) $(app_HEADER) $(app_test_objects) $(app_unity_srcfiles)
 	@rm -rf $(APPLICATION_DIR)/build
 
 # The clobber target does 'make clean' and then uses 'find' to clean a

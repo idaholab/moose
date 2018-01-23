@@ -43,7 +43,29 @@ PLUGIN_DIR  := $(APPLICATION_DIR)/plugins
 
 excluded_srcfiles += main.C
 find_excludes     := $(foreach i, $(excluded_srcfiles), -not -name $(i))
-srcfiles    := $(shell find $(SRC_DIRS) -name "*.C" $(find_excludes))
+
+
+unity_src_dir = $(APPLICATION_DIR)/build/unity_src
+
+$(eval $(call unity_dir_rule, $(unity_src_dir)))
+
+non_unity_dirs := %.libs
+
+srcsubdirs := $(filter-out %/main.C% $(non_unity_dirs), $(shell find $(APPLICATION_DIR)/src -type d -maxdepth 1 -mindepth 1))
+
+unity_srcsubdirs := $(filter-out $(non_unity), $(srcsubdirs))
+non_unity_srcsubdirs := $(filter $(non_unity), $(srcsubdirs))
+
+$(foreach srcsubdir, $(unity_srcsubdirs), $(eval $(call unity_file_rule, $(unity_src_dir)/$(notdir $(srcsubdir))_Unity.C, $(filter-out %_Unity.C, $(shell find $(srcsubdir) -name "*.C")))))
+
+app_unity_srcfiles := $(foreach srcsubdir, $(unity_srcsubdirs), $(unity_src_dir)/$(notdir $(srcsubdir))_Unity.C)
+
+unity_srcfiles += $(app_unity_srcfiles)
+
+unity_files:: $(unity_src_dir)
+
+srcfiles    := $(app_unity_srcfiles) $(if $(non_unity_src_subdirs), $(shell find $(non_unity_srcsubdirs) -name "*.C"),)
+
 csrcfiles   := $(shell find $(SRC_DIRS) -name "*.c")
 fsrcfiles   := $(shell find $(SRC_DIRS) -name "*.f")
 f90srcfiles := $(shell find $(SRC_DIRS) -name "*.f90")
