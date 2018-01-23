@@ -33,11 +33,16 @@ StorkTestApp::StorkTestApp(InputParameters parameters) : MooseApp(parameters)
   StorkApp::associateSyntaxDepends(_syntax, _action_factory);
   StorkApp::associateSyntax(_syntax, _action_factory);
 
+  Moose::registerExecFlags(_factory);
+  ModulesApp::registerExecFlags(_factory);
+  StorkApp::registerExecFlags(_factory);
+
   bool use_test_objs = getParam<bool>("allow_test_objects");
   if (use_test_objs)
   {
     StorkTestApp::registerObjects(_factory);
     StorkTestApp::associateSyntax(_syntax, _action_factory);
+    StorkTestApp::registerExecFlags(_factory);
   }
 }
 
@@ -62,6 +67,12 @@ StorkTestApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & /*action_fact
   /* Uncomment Syntax and ActionFactory parameters and register your new test objects here! */
 }
 
+void
+StorkTestApp::registerExecFlags(Factory & /*factory*/)
+{
+  /* Uncomment Factory parameter and register your new execute flags here! */
+}
+
 /***************************************************************************************************
  *********************** Dynamic Library Entry Points - DO NOT MODIFY ******************************
  **************************************************************************************************/
@@ -84,4 +95,11 @@ extern "C" void
 StorkTestApp__associateSyntax(Syntax & syntax, ActionFactory & action_factory)
 {
   StorkTestApp::associateSyntax(syntax, action_factory);
+}
+
+// External entry point for dynamic execute flag loading
+extern "C" void
+StorkTestApp__registerExecFlags(Factory & factory)
+{
+  StorkTestApp::registerExecFlags(factory);
 }
