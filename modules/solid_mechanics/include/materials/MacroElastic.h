@@ -39,7 +39,4 @@ private:
   const PostprocessorValue & _C3131;
 };
 
-template <>
-InputParameters validParams<Elastic>();
-
 #endif

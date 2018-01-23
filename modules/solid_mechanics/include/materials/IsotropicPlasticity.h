@@ -52,7 +52,4 @@ protected:
   const MaterialProperty<Real> & _hardening_variable_old;
 };
 
-template <>
-InputParameters validParams<IsotropicPlasticity>();
-
 #endif // ISOTROPICPLASTICITY_H

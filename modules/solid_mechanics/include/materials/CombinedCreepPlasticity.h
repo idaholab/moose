@@ -51,7 +51,4 @@ protected:
 private:
 };
 
-template <>
-InputParameters validParams<CombinedCreepPlasticity>();
-
 #endif // MATERIALDRIVER_H

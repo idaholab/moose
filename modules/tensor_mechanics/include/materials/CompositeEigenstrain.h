@@ -35,7 +35,4 @@ protected:
   const std::string _M_name;
 };
 
-template <>
-InputParameters validParams<CompositeEigenstrain>();
-
 #endif // COMPOSITEEIGENSTRAIN_H

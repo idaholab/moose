@@ -38,7 +38,4 @@ protected:
   MaterialProperty<RankFourTensor> & _M;
 };
 
-template <>
-InputParameters validParams<CompositeElasticityTensor>();
-
 #endif // COMPOSITEELASTICITYTENSOR_H

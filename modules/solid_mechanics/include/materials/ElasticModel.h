@@ -29,7 +29,4 @@ protected:
                              SymmTensor & stress_new);
 };
 
-template <>
-InputParameters validParams<ElasticModel>();
-
 #endif

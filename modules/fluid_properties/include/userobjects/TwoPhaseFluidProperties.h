@@ -13,6 +13,9 @@
 class TwoPhaseFluidProperties;
 class SinglePhaseFluidProperties;
 
+template <>
+InputParameters validParams<TwoPhaseFluidProperties>();
+
 /**
  * Base class for fluid properties used with two phase flow
  */

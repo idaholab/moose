@@ -23,7 +23,4 @@ public:
 protected:
 };
 
-template <>
-InputParameters validParams<Elastic>();
-
 #endif

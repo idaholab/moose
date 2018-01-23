@@ -44,7 +44,4 @@ protected:
 private:
 };
 
-template <>
-InputParameters validParams<PowerLawCreepModel>();
-
 #endif // POWERLAWCREEPMODEL_H

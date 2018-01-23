@@ -25,7 +25,4 @@ public:
 protected:
 };
 
-template <>
-InputParameters validParams<CLSHPlasticMaterial>();
-
 #endif // CLSHPLASTICMATERIAL_H

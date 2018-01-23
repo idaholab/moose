@@ -91,7 +91,4 @@ protected:
   MaterialProperty<Real> * _matl_timestep_limit;
 };
 
-template <>
-InputParameters validParams<ReturnMappingModel>();
-
 #endif // RETURNMAPPINGMODEL_H

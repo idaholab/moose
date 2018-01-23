@@ -41,7 +41,4 @@ protected:
   Real _hf_fraction;
 };
 
-template <>
-InputParameters validParams<IsotropicTempDepHardening>();
-
 #endif // ISOTROPICTEMPDEPHARDENING_H

@@ -63,7 +63,4 @@ private:
   using Material::computeProperties;
 };
 
-template <>
-InputParameters validParams<ConstitutiveModel>();
-
 #endif // CONSTITUTIVEMODEL_H

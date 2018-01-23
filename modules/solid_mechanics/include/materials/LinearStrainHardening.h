@@ -21,7 +21,4 @@ public:
   virtual ~LinearStrainHardening() {}
 };
 
-template <>
-InputParameters validParams<LinearStrainHardening>();
-
 #endif // LINEARSTRAINHARDENING_H

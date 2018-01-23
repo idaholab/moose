@@ -43,7 +43,4 @@ protected:
 private:
 };
 
-template <>
-InputParameters validParams<IsotropicPowerLawHardening>();
-
 #endif // ISOTROPICPOWERLAWHARDENING_H
