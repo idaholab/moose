@@ -42,6 +42,9 @@ RdgApp::RdgApp(InputParameters parameters) : MooseApp(parameters)
 
   Moose::associateSyntax(_syntax, _action_factory);
   RdgApp::associateSyntax(_syntax, _action_factory);
+
+  Moose::registerExecFlags(_factory);
+  RdgApp::registerExecFlags(_factory);
 }
 
 RdgApp::~RdgApp() {}
@@ -91,5 +94,16 @@ RdgApp__associateSyntax(Syntax & syntax, ActionFactory & action_factory)
 }
 void
 RdgApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & /*action_factory*/)
+{
+}
+
+// External entry point for dynamic execute flag registration
+extern "C" void
+RdgApp__registerExecFlags(Factory & factory)
+{
+  RdgApp::registerExecFlags(factory);
+}
+void
+RdgApp::registerExecFlags(Factory & /*factory*/)
 {
 }

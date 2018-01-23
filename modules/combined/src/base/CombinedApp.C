@@ -141,5 +141,6 @@ CombinedApp::registerExecFlags(Factory & factory)
   WaterSteamEOSApp::registerExecFlags(factory);
   XFEMApp::registerExecFlags(factory);
   PorousFlowApp::registerExecFlags(factory);
+  RdgApp::registerExecFlags(factory);
   LevelSetApp::registerExecFlags(factory);
 }

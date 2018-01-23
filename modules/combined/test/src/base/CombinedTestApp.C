@@ -151,5 +151,6 @@ CombinedTestApp::registerExecFlags(Factory & factory)
   WaterSteamEOSTestApp::registerExecFlags(factory);
   XFEMTestApp::registerExecFlags(factory);
   PorousFlowTestApp::registerExecFlags(factory);
+  RdgTestApp::registerExecFlags(factory);
   LevelSetTestApp::registerExecFlags(factory);
 }
