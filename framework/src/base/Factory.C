@@ -117,6 +117,10 @@ Factory::create(const std::string & obj_name,
   buildPtr & func = it->second;
   auto obj = (*func)(params);
 
+  auto fep = std::dynamic_pointer_cast<FEProblemBase>(obj);
+  if (fep)
+    _app.actionWarehouse().problemBase() = fep;
+
   // Make sure no unexpected parameters were added by the object's constructor or by the action
   // initiating this create call.  All parameters modified by the constructor must have already
   // been specified in the object's validParams function.
