@@ -48,6 +48,9 @@ FluidPropertiesApp::FluidPropertiesApp(InputParameters parameters) : MooseApp(pa
 
   Moose::associateSyntax(_syntax, _action_factory);
   FluidPropertiesApp::associateSyntax(_syntax, _action_factory);
+
+  Moose::registerExecFlags(_factory);
+  FluidPropertiesApp::registerExecFlags(_factory);
 }
 
 FluidPropertiesApp::~FluidPropertiesApp() {}
@@ -112,4 +115,15 @@ FluidPropertiesApp::associateSyntax(Syntax & syntax, ActionFactory & action_fact
   syntax.addDependency("add_fluid_properties", "init_displaced_problem");
 
   registerAction(AddFluidPropertiesAction, "add_fluid_properties");
+}
+
+// External entry point for dynamic execute flag registration
+extern "C" void
+FluidPropertiesApp__registerExecFlags(Factory & factory)
+{
+  FluidPropertiesApp::registerExecFlags(factory);
+}
+void
+FluidPropertiesApp::registerExecFlags(Factory & /*factory*/)
+{
 }
