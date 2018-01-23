@@ -63,24 +63,12 @@ LevelSetApp::LevelSetApp(InputParameters parameters) : MooseApp(parameters)
   LevelSetApp::registerExecFlags(_factory);
 }
 
-// External entry point for dynamic application loading
-extern "C" void
-LevelSetApp__registerApps()
-{
-  LevelSetApp::registerApps();
-}
 void
 LevelSetApp::registerApps()
 {
   registerApp(LevelSetApp);
 }
 
-// External entry point for dynamic object registration
-extern "C" void
-LevelSetApp__registerObjects(Factory & factory)
-{
-  LevelSetApp::registerObjects(factory);
-}
 void
 LevelSetApp::registerObjects(Factory & factory)
 {
@@ -111,25 +99,39 @@ LevelSetApp::registerObjects(Factory & factory)
   registerTransfer(LevelSetMeshRefinementTransfer);
 }
 
-// External entry point for dynamic syntax association
-extern "C" void
-LevelSetApp__associateSyntax(Syntax & syntax, ActionFactory & action_factory)
-{
-  LevelSetApp::associateSyntax(syntax, action_factory);
-}
 void
 LevelSetApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & /*action_factory*/)
 {
 }
 
-// External entry point for dynamic execute flag registration
+void
+LevelSetApp::registerExecFlags(Factory & factory)
+{
+  registerExecFlag(LevelSet::EXEC_ADAPT_MESH);
+}
+
+
+// Dynamic Library Entry Points - DO NOT MODIFY
+extern "C" void
+LevelSetApp__registerApps()
+{
+  LevelSetApp::registerApps();
+}
+
+extern "C" void
+LevelSetApp__associateSyntax(Syntax & syntax, ActionFactory & action_factory)
+{
+  LevelSetApp::associateSyntax(syntax, action_factory);
+}
+
 extern "C" void
 LevelSetApp__registerExecFlags(Factory & factory)
 {
   LevelSetApp::registerExecFlags(factory);
 }
-void
-LevelSetApp::registerExecFlags(Factory & factory)
+
+extern "C" void
+LevelSetApp__registerObjects(Factory & factory)
 {
-  registerExecFlag(LevelSet::EXEC_ADAPT_MESH);
+  LevelSetApp::registerObjects(factory);
 }
