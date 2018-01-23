@@ -11,6 +11,7 @@
 #define VARIABLEWAREHOUSE_H
 
 #include "MooseTypes.h"
+#include "HashMap.h"
 
 #include <vector>
 #include <map>
@@ -77,6 +78,24 @@ public:
   MooseVariableBase * getVariable(unsigned int var_number);
 
   /**
+   * Get a finite element variable from the warehouse
+   * of either Real or RealVectorValue type
+   * @param var_name The name of the variable to retrieve
+   * @return The retrieved variable
+   */
+  template <typename T>
+  MooseVariableField<T> * getFieldVariable(const std::string & var_name);
+
+  /**
+   * Get a finite element variable from the warehouse
+   * of either Real or RealVectorValue type
+   * @param var_number The number of the variable to retrieve
+   * @return The retrieved variable
+   */
+  template <typename T>
+  MooseVariableField<T> * getFieldVariable(unsigned int var_number);
+
+  /**
    * Get the list of all variable names
    * @return The list of variable names
    */
@@ -87,18 +106,6 @@ public:
    * @return The list of variables
    */
   const std::vector<MooseVariableFE *> & variables();
-
-  /**
-   * Get the list of regular fe variables
-   * @return The list of regular fe variables
-   */
-  const std::vector<MooseVariable *> & regularVariables();
-
-  /**
-   * Get the list of vector fe variables
-   * @return The list of vector fe variables
-   */
-  const std::vector<MooseVariableVector *> & vectorVariables();
 
   /**
    * Get the list of variables that needs to be reinitialized on a given boundary
@@ -116,6 +123,7 @@ public:
 protected:
   /// list of variable names
   std::vector<VariableName> _names;
+
   /// list of finite element variables
   std::vector<MooseVariableFE *> _vars;
 
@@ -133,6 +141,7 @@ protected:
 
   /// Name to variable mapping
   std::map<std::string, MooseVariableBase *> _var_name;
+
   /// Map to variables that need to be evaluated on a boundary
   std::map<BoundaryID, std::set<MooseVariableFE *>> _boundary_vars;
 

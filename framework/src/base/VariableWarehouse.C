@@ -27,18 +27,24 @@ VariableWarehouse::add(const std::string & var_name, MooseVariableBase * var)
   _var_name[var_name] = var;
   _all_objects.push_back(var);
 
-  if (dynamic_cast<MooseVariableFE *>(var) != NULL)
+  if (auto * tmp_var = dynamic_cast<MooseVariableFE *>(var))
   {
-    _vars.push_back(dynamic_cast<MooseVariableFE *>(var));
-    if (dynamic_cast<MooseVariable *>(var) != NULL)
-      _regular_vars.push_back(dynamic_cast<MooseVariable *>(var));
-    else if (dynamic_cast<MooseVariableVector *>(var) != NULL)
-      _vector_vars.push_back(dynamic_cast<MooseVariableVector *>(var));
+    _vars.push_back(tmp_var);
+    if (auto * tmp_var = dynamic_cast<MooseVariable *>(var))
+    {
+      _regular_vars_by_number[tmp_var->number()] = tmp_var;
+      _regular_vars_by_name[var_name] = tmp_var;
+    }
+    else if (auto * tmp_var = dynamic_cast<MooseVariableVector *>(var))
+    {
+      _vector_vars_by_number[tmp_var->number()] = tmp_var;
+      _vector_vars_by_name[var_name] = tmp_var;
+    }
     else
       mooseError("Unknown variable class passed into VariableWarehouse. Attempt to hack us?");
   }
-  else if (dynamic_cast<MooseVariableScalar *>(var) != NULL)
-    _scalar_vars.push_back(dynamic_cast<MooseVariableScalar *>(var));
+  else if (auto * tmp_var = dynamic_cast<MooseVariableScalar *>(var))
+    _scalar_vars.push_back(tmp_var);
   else
     mooseError("Unknown variable class passed into VariableWarehouse. Attempt to hack us?");
 }
