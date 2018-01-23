@@ -47,11 +47,15 @@ CombinedTestApp::CombinedTestApp(const InputParameters & parameters) : MooseApp(
   Moose::associateSyntax(_syntax, _action_factory);
   CombinedApp::associateSyntax(_syntax, _action_factory);
 
+  Moose::registerExecFlags(_factory);
+  CombinedApp::registerExecFlags(_factory);
+
   bool use_test_objs = getParam<bool>("allow_test_objects");
   if (use_test_objs)
   {
     CombinedTestApp::registerObjects(_factory);
     CombinedTestApp::associateSyntax(_syntax, _action_factory);
+    CombinedTestApp::registerExecFlags(_factory);
   }
 }
 
@@ -122,4 +126,16 @@ CombinedTestApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory
   PorousFlowTestApp::associateSyntax(syntax, action_factory);
   RdgTestApp::associateSyntax(syntax, action_factory);
   LevelSetTestApp::associateSyntax(syntax, action_factory);
+}
+
+// External entry point for dynamic execute flag registration
+extern "C" void
+CombinedTestApp__registerExecFlags(Factory & factory)
+{
+  CombinedTestApp::registerExecFlags(factory);
+}
+void
+CombinedTestApp::registerExecFlags(Factory & factory)
+{
+  LevelSetTestApp::registerExecFlags(factory);
 }
