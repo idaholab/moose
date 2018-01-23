@@ -64,7 +64,9 @@ unity_srcfiles += $(app_unity_srcfiles)
 
 unity_files:: $(unity_src_dir)
 
-srcfiles    := $(app_unity_srcfiles) $(if $(non_unity_src_subdirs), $(shell find $(non_unity_srcsubdirs) -name "*.C"),)
+files_in_src := $(filter-out %main.C, $(shell find $(APPLICATION_DIR)/src -name "*.C" -maxdepth 1 -type f))
+
+srcfiles    := $(app_unity_srcfiles) $(if $(non_unity_src_subdirs), $(shell find $(non_unity_srcsubdirs) -name "*.C"),) $(files_in_src)
 
 csrcfiles   := $(shell find $(SRC_DIRS) -name "*.c")
 fsrcfiles   := $(shell find $(SRC_DIRS) -name "*.f")
