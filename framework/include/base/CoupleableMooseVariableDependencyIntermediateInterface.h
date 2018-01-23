@@ -12,7 +12,6 @@
 
 #include "Coupleable.h"
 #include "ScalarCoupleable.h"
-#include "MooseVariableInterface.h"
 #include "MooseVariableDependencyInterface.h"
 
 /**
@@ -22,7 +21,6 @@
 class CoupleableMooseVariableDependencyIntermediateInterface
     : public Coupleable,
       public ScalarCoupleable,
-      public MooseVariableInterface,
       public MooseVariableDependencyInterface
 {
 public:

@@ -45,6 +45,7 @@ VectorKernel::VectorKernel(const InputParameters & parameters)
     _grad_u(_is_implicit ? _var.gradSln() : _var.gradSlnOld()),
     _curl_u(_is_implicit ? _var.curlSln() : _var.curlSlnOld())
 {
+  addMooseVariableDependency(mooseVariable());
 }
 
 void

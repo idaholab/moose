@@ -32,6 +32,7 @@ validParams<PointSamplerBase>()
 PointSamplerBase::PointSamplerBase(const InputParameters & parameters)
   : GeneralVectorPostprocessor(parameters),
     CoupleableMooseVariableDependencyIntermediateInterface(this, false),
+    MooseVariableInterface<Real>(this, false),
     SamplerBase(parameters, this, _communicator),
     _mesh(_subproblem.mesh())
 {

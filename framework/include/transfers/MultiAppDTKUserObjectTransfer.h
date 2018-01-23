@@ -59,7 +59,7 @@ InputParameters validParams<MultiAppDTKUserObjectTransfer>();
 /**
  * Transfers from spatially varying UserObjects in a MultiApp to the "master" system.
  */
-class MultiAppDTKUserObjectTransfer : public MultiAppTransfer, public MooseVariableInterface
+class MultiAppDTKUserObjectTransfer : public MultiAppTransfer, public MooseVariableInterface<Real>
 {
 public:
   MultiAppDTKUserObjectTransfer(const InputParameters & parameters);

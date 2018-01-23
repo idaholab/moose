@@ -46,6 +46,7 @@ class DGKernel : public MooseObject,
                  public FunctionInterface,
                  public UserObjectInterface,
                  public NeighborCoupleableMooseVariableDependencyIntermediateInterface,
+                 public NeighborMooseVariableInterface<Real>,
                  public TwoMaterialPropertyInterface,
                  public Restartable,
                  public MeshChangedInterface

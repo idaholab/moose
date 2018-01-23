@@ -14,6 +14,7 @@
 #include "Constraint.h"
 #include "CoupleableMooseVariableDependencyIntermediateInterface.h"
 #include "MooseMesh.h"
+#include "MooseVariableInterface.h"
 
 // Forward Declarations
 class MortarConstraint;
@@ -38,7 +39,8 @@ InputParameters validParams<MortarConstraint>();
  *
  */
 class MortarConstraint : public Constraint,
-                         public CoupleableMooseVariableDependencyIntermediateInterface
+                         public CoupleableMooseVariableDependencyIntermediateInterface,
+                         public MooseVariableInterface<Real>
 {
 public:
   MortarConstraint(const InputParameters & parameters);

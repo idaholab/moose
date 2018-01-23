@@ -57,19 +57,15 @@ validParams<AuxKernel>()
 
 AuxKernel::AuxKernel(const InputParameters & parameters)
   : MooseObject(parameters),
+    MooseVariableInterface<Real>(this,
+                                 parameters.getCheckedPointerParam<AuxiliarySystem *>("_aux_sys")
+                                     ->getVariable(parameters.get<THREAD_ID>("_tid"),
+                                                   parameters.get<AuxVariableName>("variable"))
+                                     .isNodal()),
     BlockRestrictable(this),
-    BoundaryRestrictable(this,
-                         parameters.getCheckedPointerParam<AuxiliarySystem *>("_aux_sys")
-                             ->getVariable(parameters.get<THREAD_ID>("_tid"),
-                                           parameters.get<AuxVariableName>("variable"))
-                             .isNodal()),
+    BoundaryRestrictable(this, mooseVariable()->isNodal()),
     SetupInterface(this),
-    CoupleableMooseVariableDependencyIntermediateInterface(
-        this,
-        parameters.getCheckedPointerParam<AuxiliarySystem *>("_aux_sys")
-            ->getVariable(parameters.get<THREAD_ID>("_tid"),
-                          parameters.get<AuxVariableName>("variable"))
-            .isNodal()),
+    CoupleableMooseVariableDependencyIntermediateInterface(this, mooseVariable()->isNodal()),
     FunctionInterface(this),
     UserObjectInterface(this),
     TransientInterface(this),
@@ -79,10 +75,7 @@ AuxKernel::AuxKernel(const InputParameters & parameters)
     RandomInterface(parameters,
                     *parameters.getCheckedPointerParam<FEProblemBase *>("_fe_problem_base"),
                     parameters.get<THREAD_ID>("_tid"),
-                    parameters.getCheckedPointerParam<AuxiliarySystem *>("_aux_sys")
-                        ->getVariable(parameters.get<THREAD_ID>("_tid"),
-                                      parameters.get<AuxVariableName>("variable"))
-                        .isNodal()),
+                    mooseVariable()->isNodal()),
     GeometricSearchInterface(this),
     Restartable(parameters, "AuxKernels"),
     MeshChangedInterface(parameters),
@@ -119,6 +112,7 @@ AuxKernel::AuxKernel(const InputParameters & parameters)
 
     _solution(_aux_sys.solution())
 {
+  addMooseVariableDependency(mooseVariable());
   _supplied_vars.insert(parameters.get<AuxVariableName>("variable"));
 
   std::map<std::string, std::vector<MooseVariableFE *>> coupled_vars = getCoupledVars();

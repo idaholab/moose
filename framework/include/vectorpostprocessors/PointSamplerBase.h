@@ -24,6 +24,7 @@ InputParameters validParams<PointSamplerBase>();
 
 class PointSamplerBase : public GeneralVectorPostprocessor,
                          public CoupleableMooseVariableDependencyIntermediateInterface,
+                         public MooseVariableInterface<Real>,
                          protected SamplerBase
 {
 public:

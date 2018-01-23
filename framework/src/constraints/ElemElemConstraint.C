@@ -30,6 +30,7 @@ validParams<ElemElemConstraint>()
 ElemElemConstraint::ElemElemConstraint(const InputParameters & parameters)
   : Constraint(parameters),
     NeighborCoupleableMooseVariableDependencyIntermediateInterface(this, false, false),
+    NeighborMooseVariableInterface<Real>(this, false),
     _fe_problem(*getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")),
     _dim(_mesh.dimension()),
 

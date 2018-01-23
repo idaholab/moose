@@ -78,6 +78,7 @@ InterfaceKernel::InterfaceKernel(const InputParameters & parameters)
     FunctionInterface(this),
     UserObjectInterface(this),
     NeighborCoupleableMooseVariableDependencyIntermediateInterface(this, false, false),
+    NeighborMooseVariableInterface<Real>(this, false),
     Restartable(parameters, "InterfaceKernels"),
     MeshChangedInterface(parameters),
     TwoMaterialPropertyInterface(this, boundaryIDs()),
@@ -85,7 +86,7 @@ InterfaceKernel::InterfaceKernel(const InputParameters & parameters)
     _sys(*getCheckedPointerParam<SystemBase *>("_sys")),
     _tid(parameters.get<THREAD_ID>("_tid")),
     _assembly(_subproblem.assembly(_tid)),
-    _var(_sys.getFieldVariable<Real>(_tid, parameters.get<NonlinearVariableName>("variable"))),
+    _var(*mooseVariable()),
     _mesh(_subproblem.mesh()),
     _current_elem(_assembly.elem()),
     _current_elem_volume(_assembly.elemVolume()),
@@ -118,6 +119,8 @@ InterfaceKernel::InterfaceKernel(const InputParameters & parameters)
     _diag_save_in_strings(parameters.get<std::vector<AuxVariableName>>("diag_save_in"))
 
 {
+  addMooseVariableDependency(mooseVariable());
+
   if (!parameters.isParamValid("boundary"))
     mooseError(
         "In order to use an interface kernel, you must specify a boundary where it will live.");

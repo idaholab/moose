@@ -73,6 +73,7 @@ DGKernel::DGKernel(const InputParameters & parameters)
     FunctionInterface(this),
     UserObjectInterface(this),
     NeighborCoupleableMooseVariableDependencyIntermediateInterface(this, false, false),
+    NeighborMooseVariableInterface(this, false),
     TwoMaterialPropertyInterface(this, blockIDs(), boundaryIDs()),
     Restartable(parameters, "DGKernels"),
     MeshChangedInterface(parameters),
@@ -80,7 +81,7 @@ DGKernel::DGKernel(const InputParameters & parameters)
     _sys(*getCheckedPointerParam<SystemBase *>("_sys")),
     _tid(parameters.get<THREAD_ID>("_tid")),
     _assembly(_subproblem.assembly(_tid)),
-    _var(_sys.getFieldVariable<Real>(_tid, parameters.get<NonlinearVariableName>("variable"))),
+    _var(*mooseVariable()),
     _mesh(_subproblem.mesh()),
 
     _current_elem(_assembly.elem()),

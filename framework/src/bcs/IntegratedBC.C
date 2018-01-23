@@ -38,6 +38,8 @@ IntegratedBC::IntegratedBC(const InputParameters & parameters)
     _u(_is_implicit ? _var.sln() : _var.slnOld()),
     _grad_u(_is_implicit ? _var.gradSln() : _var.gradSlnOld())
 {
+  addMooseVariableDependency(mooseVariable());
+
   _save_in.resize(_save_in_strings.size());
   _diag_save_in.resize(_diag_save_in_strings.size());
 

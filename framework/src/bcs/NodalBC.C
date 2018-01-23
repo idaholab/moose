@@ -37,13 +37,16 @@ NodalBC::NodalBC(const InputParameters & parameters)
   : BoundaryCondition(parameters, true), // true is for being Nodal
     RandomInterface(parameters, _fe_problem, _tid, true),
     CoupleableMooseVariableDependencyIntermediateInterface(this, true),
-    _var(_sys.getFieldVariable<Real>(_tid, parameters.get<NonlinearVariableName>("variable"))),
+    MooseVariableInterface<Real>(this, true),
+    _var(*mooseVariable()),
     _current_node(_var.node()),
     _u(_var.nodalValue()),
     _save_in_strings(parameters.get<std::vector<AuxVariableName>>("save_in")),
     _diag_save_in_strings(parameters.get<std::vector<AuxVariableName>>("diag_save_in")),
     _is_eigen(false)
 {
+  addMooseVariableDependency(mooseVariable());
+
   _save_in.resize(_save_in_strings.size());
   _diag_save_in.resize(_diag_save_in_strings.size());
 

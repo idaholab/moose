@@ -45,6 +45,7 @@ InputParameters validParams<DiracKernel>();
 class DiracKernel : public MooseObject,
                     public SetupInterface,
                     public CoupleableMooseVariableDependencyIntermediateInterface,
+                    public MooseVariableInterface<Real>,
                     public FunctionInterface,
                     public UserObjectInterface,
                     public TransientInterface,

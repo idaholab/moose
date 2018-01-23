@@ -43,6 +43,7 @@ VectorIntegratedBC::VectorIntegratedBC(const InputParameters & parameters)
     _u(_is_implicit ? _var.sln() : _var.slnOld()),
     _curl_u(_is_implicit ? _var.curlSln() : _var.curlSlnOld())
 {
+  addMooseVariableDependency(mooseVariable());
 }
 
 void

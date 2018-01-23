@@ -33,7 +33,8 @@ InputParameters validParams<NodalBC>();
  */
 class NodalBC : public BoundaryCondition,
                 public RandomInterface,
-                public CoupleableMooseVariableDependencyIntermediateInterface
+                public CoupleableMooseVariableDependencyIntermediateInterface,
+                public MooseVariableInterface<Real>
 {
 public:
   NodalBC(const InputParameters & parameters);

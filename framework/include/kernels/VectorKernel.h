@@ -23,7 +23,7 @@ class VectorKernel;
 template <>
 InputParameters validParams<VectorKernel>();
 
-class VectorKernel : public KernelBase
+class VectorKernel : public KernelBase, public MooseVariableInterface<RealVectorValue>
 {
 public:
   VectorKernel(const InputParameters & parameters);

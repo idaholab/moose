@@ -37,7 +37,8 @@ InputParameters validParams<NodeFaceConstraint>();
  * This is common for contact algorithms and other constraints.
  */
 class NodeFaceConstraint : public Constraint,
-                           public NeighborCoupleableMooseVariableDependencyIntermediateInterface
+                           public NeighborCoupleableMooseVariableDependencyIntermediateInterface,
+                           public NeighborMooseVariableInterface<Real>
 {
 public:
   NodeFaceConstraint(const InputParameters & parameters);

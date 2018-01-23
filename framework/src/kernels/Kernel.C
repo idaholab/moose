@@ -30,7 +30,8 @@ validParams<Kernel>()
 
 Kernel::Kernel(const InputParameters & parameters)
   : KernelBase(parameters),
-    _var(_sys.getFieldVariable<Real>(_tid, parameters.get<NonlinearVariableName>("variable"))),
+    MooseVariableInterface<Real>(this, false),
+    _var(*mooseVariable()),
     _test(_var.phi()),
     _grad_test(_var.gradPhi()),
     _phi(_assembly.phi(_var)),
@@ -40,6 +41,7 @@ Kernel::Kernel(const InputParameters & parameters)
     _u_dot(_var.uDot()),
     _du_dot_du(_var.duDotDu())
 {
+  addMooseVariableDependency(mooseVariable());
   _save_in.resize(_save_in_strings.size());
   _diag_save_in.resize(_diag_save_in_strings.size());
 

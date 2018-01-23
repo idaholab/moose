@@ -57,7 +57,8 @@ class NodalKernel : public MooseObject,
                     public Restartable,
                     public MeshChangedInterface,
                     public RandomInterface,
-                    public CoupleableMooseVariableDependencyIntermediateInterface
+                    public CoupleableMooseVariableDependencyIntermediateInterface,
+                    public MooseVariableInterface<Real>
 {
 public:
   /**

@@ -22,21 +22,16 @@
 class NeighborCoupleableMooseVariableDependencyIntermediateInterface
     : public NeighborCoupleable,
       public ScalarCoupleable,
-      public NeighborMooseVariableInterface,
       public MooseVariableDependencyInterface
 {
 public:
   NeighborCoupleableMooseVariableDependencyIntermediateInterface(const MooseObject * moose_object,
                                                                  bool nodal,
                                                                  bool neighbor_nodal)
-    : NeighborCoupleable(moose_object, nodal, neighbor_nodal),
-      ScalarCoupleable(moose_object),
-      NeighborMooseVariableInterface(moose_object, nodal)
+    : NeighborCoupleable(moose_object, nodal, neighbor_nodal), ScalarCoupleable(moose_object)
   {
     for (MooseVariableFE * coupled_var : getCoupledMooseVars())
       addMooseVariableDependency(coupled_var);
-
-    addMooseVariableDependency(mooseVariable());
   }
 };
 

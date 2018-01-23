@@ -44,6 +44,7 @@ InputParameters validParams<AuxKernel>();
  *
  */
 class AuxKernel : public MooseObject,
+                  public MooseVariableInterface<Real>,
                   public BlockRestrictable,
                   public BoundaryRestrictable,
                   public SetupInterface,

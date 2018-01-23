@@ -16,9 +16,10 @@
 #include "Problem.h"
 #include "SubProblem.h"
 
-MooseVariableInterface::MooseVariableInterface(const MooseObject * moose_object,
-                                               bool nodal,
-                                               std::string var_param_name)
+template <typename T>
+MooseVariableInterface<T>::MooseVariableInterface(const MooseObject * moose_object,
+                                                  bool nodal,
+                                                  std::string var_param_name)
   : _nodal(nodal)
 {
   const InputParameters & parameters = moose_object->parameters();
@@ -39,16 +40,21 @@ MooseVariableInterface::MooseVariableInterface(const MooseObject * moose_object,
   _mvi_assembly = &problem.assembly(tid);
 }
 
-MooseVariableInterface::~MooseVariableInterface() {}
+template <typename T>
+MooseVariableInterface<T>::~MooseVariableInterface()
+{
+}
 
-MooseVariableFE *
-MooseVariableInterface::mooseVariable()
+template <typename T>
+MooseVariableField<T> *
+MooseVariableInterface<T>::mooseVariable()
 {
   return _variable;
 }
 
-const VariableValue &
-MooseVariableInterface::value()
+template <typename T>
+const typename OutputTools<T>::VariableValue &
+MooseVariableInterface<T>::value()
 {
   if (_nodal)
     return _variable->nodalValue();
@@ -151,88 +157,100 @@ const typename OutputTools<T>::VariableGradient &
 MooseVariableInterface<T>::gradient()
 {
   if (_nodal)
-    mooseError("Nodal variables do not have gradients");
+    mooseError("gradients are not defined at nodes");
 
   return _variable->gradSln();
 }
 
-const VariableGradient &
-MooseVariableInterface::gradientOld()
+template <typename T>
+const typename OutputTools<T>::VariableGradient &
+MooseVariableInterface<T>::gradientOld()
 {
   if (_nodal)
-    mooseError("Nodal variables do not have gradients");
+    mooseError("gradients are not defined at nodes");
 
   return _variable->gradSlnOld();
 }
 
-const VariableGradient &
-MooseVariableInterface::gradientOlder()
+template <typename T>
+const typename OutputTools<T>::VariableGradient &
+MooseVariableInterface<T>::gradientOlder()
 {
   if (_nodal)
-    mooseError("Nodal variables do not have gradients");
+    mooseError("gradients are not defined at nodes");
 
   return _variable->gradSlnOlder();
 }
 
-const VariableSecond &
-MooseVariableInterface::second()
+template <typename T>
+const typename OutputTools<T>::VariableSecond &
+MooseVariableInterface<T>::second()
 {
   if (_nodal)
-    mooseError("Nodal variables do not have second derivatives");
+    mooseError("second derivatives are not defined at nodes");
 
   return _variable->secondSln();
 }
 
-const VariableSecond &
-MooseVariableInterface::secondOld()
+template <typename T>
+const typename OutputTools<T>::VariableSecond &
+MooseVariableInterface<T>::secondOld()
 {
   if (_nodal)
-    mooseError("Nodal variables do not have second derivatives");
+    mooseError("second derivatives are not defined at nodes");
 
   return _variable->secondSlnOld();
 }
 
-const VariableSecond &
-MooseVariableInterface::secondOlder()
+template <typename T>
+const typename OutputTools<T>::VariableSecond &
+MooseVariableInterface<T>::secondOlder()
 {
   if (_nodal)
-    mooseError("Nodal variables do not have second derivatives");
+    mooseError("second derivatives are not defined at nodes");
 
   return _variable->secondSlnOlder();
 }
 
-const VariableTestSecond &
-MooseVariableInterface::secondTest()
+template <typename T>
+const typename OutputTools<T>::VariableTestSecond &
+MooseVariableInterface<T>::secondTest()
 {
   if (_nodal)
-    mooseError("Nodal variables do not have second derivatives");
+    mooseError("second derivatives are not defined at nodes");
 
   return _variable->secondPhi();
 }
 
-const VariableTestSecond &
-MooseVariableInterface::secondTestFace()
+template <typename T>
+const typename OutputTools<T>::VariableTestSecond &
+MooseVariableInterface<T>::secondTestFace()
 {
   if (_nodal)
-    mooseError("Nodal variables do not have second derivatives");
+    mooseError("second derivatives are not defined at nodes");
 
   return _variable->secondPhiFace();
 }
 
-const VariablePhiSecond &
-MooseVariableInterface::secondPhi()
+template <typename T>
+const typename OutputTools<T>::VariablePhiSecond &
+MooseVariableInterface<T>::secondPhi()
 {
   if (_nodal)
-    mooseError("Nodal variables do not have second derivatives");
+    mooseError("second derivatives are not defined at nodes");
 
   return _mvi_assembly->secondPhi(*_variable);
 }
 
-const VariablePhiSecond &
-MooseVariableInterface::secondPhiFace()
+template <typename T>
+const typename OutputTools<T>::VariablePhiSecond &
+MooseVariableInterface<T>::secondPhiFace()
 {
   if (_nodal)
-    mooseError("Nodal variables do not have second derivatives");
+    mooseError("second derivatives are not defined at nodes");
 
   return _mvi_assembly->secondPhiFace(*_variable);
 }
+
+template class MooseVariableInterface<Real>;
+template class MooseVariableInterface<RealVectorValue>;

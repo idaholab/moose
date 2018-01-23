@@ -22,7 +22,7 @@ InputParameters validParams<IntegratedBC>();
 /**
  * Base class for deriving any boundary condition of a integrated type
  */
-class IntegratedBC : public IntegratedBCBase
+class IntegratedBC : public IntegratedBCBase, public MooseVariableInterface<Real>
 {
 public:
   IntegratedBC(const InputParameters & parameters);

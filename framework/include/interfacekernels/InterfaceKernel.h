@@ -40,6 +40,7 @@ class InterfaceKernel : public MooseObject,
                         public FunctionInterface,
                         public UserObjectInterface,
                         public NeighborCoupleableMooseVariableDependencyIntermediateInterface,
+                        public NeighborMooseVariableInterface<Real>,
                         public Restartable,
                         public MeshChangedInterface,
                         public TwoMaterialPropertyInterface
