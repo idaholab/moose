@@ -19,7 +19,7 @@
 class IncrementMaterial;
 
 template <>
-InputParameters validParams<GenericConstantMaterial>();
+InputParameters validParams<IncrementMaterial>();
 
 /**
  * A material that tracks the number of times computeQpProperties has been called.

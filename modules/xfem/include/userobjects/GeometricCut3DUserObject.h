@@ -12,6 +12,11 @@
 
 using namespace libMesh;
 
+class GeometricCut3DUserObject;
+
+template <>
+InputParameters validParams<GeometricCut3DUserObject>();
+
 class GeometricCut3DUserObject : public GeometricCutUserObject
 {
 public:

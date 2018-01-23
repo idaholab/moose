@@ -12,6 +12,11 @@
 class PiecewiseLinear;
 class LinearInterpolation;
 
+class IsotropicTempDepHardening;
+
+template <>
+InputParameters validParams<IsotropicTempDepHardening>();
+
 class IsotropicTempDepHardening : public IsotropicPlasticity
 {
 public:

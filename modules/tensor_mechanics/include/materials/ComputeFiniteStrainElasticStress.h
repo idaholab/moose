@@ -10,6 +10,11 @@
 #include "ComputeStressBase.h"
 #include "GuaranteeConsumer.h"
 
+class ComputeFiniteStrainElasticStress;
+
+template <>
+InputParameters validParams<ComputeFiniteStrainElasticStress>();
+
 /**
  * ComputeFiniteStrainElasticStress computes the stress following elasticity
  * theory for finite strains

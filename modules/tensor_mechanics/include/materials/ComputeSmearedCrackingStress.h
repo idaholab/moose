@@ -11,6 +11,11 @@
 #include "ComputeMultipleInelasticStress.h"
 #include "Function.h"
 
+class ComputeSmearedCrackingStress;
+
+template <>
+InputParameters validParams<ComputeSmearedCrackingStress>();
+
 /**
  * ComputeSmearedCrackingStress computes the stress for a finite strain
  * material with smeared cracking

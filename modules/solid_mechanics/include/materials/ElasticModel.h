@@ -9,6 +9,11 @@
 
 #include "ConstitutiveModel.h"
 
+class ElasticModel;
+
+template <>
+InputParameters validParams<ElasticModel>();
+
 class ElasticModel : public ConstitutiveModel
 {
 public:

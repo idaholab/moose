@@ -22,7 +22,7 @@
 class NumSideQPs;
 
 template <>
-InputParameters validParams<SideIntegralPostprocessor>();
+InputParameters validParams<NumSideQPs>();
 
 /**
  * An object for testing that the specified quadrature order is used.  It

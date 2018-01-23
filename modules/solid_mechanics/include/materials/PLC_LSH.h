@@ -20,7 +20,6 @@ InputParameters validParams<PLC_LSH>();
  * Power law creep is specified by the time-hardening form
  * edot = A(sigma)**n * exp(-Q/(RT)) * t**m
  */
-
 class PLC_LSH : public SolidModel
 {
 public:

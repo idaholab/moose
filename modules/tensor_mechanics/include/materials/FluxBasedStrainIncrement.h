@@ -13,6 +13,9 @@
 
 class FluxBasedStrainIncrement;
 
+template <>
+InputParameters validParams<FluxBasedStrainIncrement>();
+
 /**
  * FluxBasedStrainIncrement computes strain increment based on flux (vacancy)
  * Forest et. al. MSMSE 2015

@@ -12,8 +12,10 @@
 #include "SymmElasticityTensor.h"
 #include "SymmTensor.h"
 
-/**
- */
+class ConstitutiveModel;
+
+template <>
+InputParameters validParams<ConstitutiveModel>();
 
 class ConstitutiveModel : public Material
 {

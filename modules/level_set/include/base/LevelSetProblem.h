@@ -5,6 +5,9 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
+#ifndef LEVELSETPROBLEM_H
+#define LEVELSETPROBLEM_H
+
 #include "FEProblem.h"
 
 class LevelSetProblem;
@@ -23,3 +26,5 @@ public:
 
   virtual bool adaptMesh() override;
 };
+
+#endif

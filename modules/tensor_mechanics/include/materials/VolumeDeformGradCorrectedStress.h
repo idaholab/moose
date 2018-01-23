@@ -13,6 +13,11 @@
 #include "RotationTensor.h"
 #include "DerivativeMaterialInterface.h"
 
+class VolumeDeformGradCorrectedStress;
+
+template <>
+InputParameters validParams<VolumeDeformGradCorrectedStress>();
+
 /**
  * VolumeDeformGradCorrectedStress transforms the Cauchy stress calculated in the previous
  *configuration to its configuration

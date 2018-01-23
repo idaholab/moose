@@ -10,6 +10,11 @@
 #include "ComputeStressBase.h"
 #include "Function.h"
 
+class LinearIsoElasticPFDamage;
+
+template <>
+InputParameters validParams<LinearIsoElasticPFDamage>();
+
 /**
  * Phase-field fracture
  * This class computes the energy contribution to damage growth

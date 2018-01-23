@@ -9,6 +9,11 @@
 
 #include "ComputeStressBase.h"
 
+class FiniteStrainCrystalPlasticity;
+
+template <>
+InputParameters validParams<FiniteStrainCrystalPlasticity>();
+
 /**
  * FiniteStrainCrystalPlasticity uses the multiplicative decomposition of deformation gradient
  * and solves the PK2 stress residual equation at the intermediate configuration to evolve the
@@ -16,11 +21,6 @@
  * The internal variables are updated using an interative predictor-corrector algorithm.
  * Backward Euler integration rule is used for the rate equations.
  */
-class FiniteStrainCrystalPlasticity;
-
-template <>
-InputParameters validParams<FiniteStrainCrystalPlasticity>();
-
 class FiniteStrainCrystalPlasticity : public ComputeStressBase
 {
 public:

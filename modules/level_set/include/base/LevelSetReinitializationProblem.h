@@ -5,6 +5,9 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
+#ifndef LEVELSETREINITIALIZATIONPROBLEM_H
+#define LEVELSETREINITIALIZATIONPROBLEM_H
+
 #include "FEProblem.h"
 
 class LevelSetReinitializationProblem;
@@ -27,3 +30,5 @@ public:
    */
   void resetTime();
 };
+
+#endif

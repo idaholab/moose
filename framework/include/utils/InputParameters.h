@@ -516,8 +516,8 @@ public:
   void defaultCoupledValue(const std::string & coupling_name, Real value);
 
   /**
-  * Returns the auto build vectors for all parameters.
-  */
+   * Returns the auto build vectors for all parameters.
+   */
   std::map<std::string, std::pair<std::string, std::string>> getAutoBuildVectors() const;
 
   /**
@@ -810,11 +810,7 @@ private:
   bool _allow_copy;
 
   // These are the only objects allowed to _create_ InputParameters
-  friend InputParameters validParams<MooseObject>();
-  friend InputParameters validParams<Action>();
-  friend InputParameters validParams<Problem>();
   friend InputParameters emptyInputParameters();
-  friend InputParameters validParams<MooseApp>();
   friend class InputParameterWarehouse;
 };
 
@@ -1343,5 +1339,14 @@ InputParameters::getParamHelper(const std::string & name,
 }
 
 InputParameters emptyInputParameters();
+
+template <class T>
+InputParameters
+validParams()
+{
+  static_assert(false && sizeof(T), "Missing validParams declaration!");
+
+  mooseError("Missing validParams declaration!");
+}
 
 #endif /* INPUTPARAMETERS_H */

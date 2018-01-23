@@ -12,6 +12,7 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
+#include "MooseObject.h"
 #include "MooseObjectAction.h"
 #include "MooseUtils.h"
 #include "Factory.h"
@@ -26,6 +27,9 @@ validParams<MooseObjectAction>()
   params.addParam<bool>("isObjectAction", true, "Indicates that this is a MooseObjectAction.");
   return params;
 }
+
+template <>
+InputParameters validParams<MooseObject>();
 
 MooseObjectAction::MooseObjectAction(InputParameters params)
   : Action(params),

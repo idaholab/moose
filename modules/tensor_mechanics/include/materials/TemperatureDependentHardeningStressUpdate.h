@@ -12,12 +12,16 @@
 class PiecewiseLinear;
 class LinearInterpolation;
 
+class TemperatureDependentHardeningStressUpdate;
+
+template <>
+InputParameters validParams<TemperatureDependentHardeningStressUpdate>();
+
 /**
  * This class inherits from IsotropicPlasticityStressUpdate. It
  * calculates stress as a function of temperature and plastic strain by
  * interpolating hardening functions at different temperatures input by the user.
  */
-
 class TemperatureDependentHardeningStressUpdate : public IsotropicPlasticityStressUpdate
 {
 public:

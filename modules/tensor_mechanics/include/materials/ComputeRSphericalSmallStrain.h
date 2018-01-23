@@ -9,6 +9,11 @@
 
 #include "ComputeSmallStrain.h"
 
+class ComputeRSphericalSmallStrain;
+
+template <>
+InputParameters validParams<ComputeRSphericalSmallStrain>();
+
 /**
  * ComputeRSphericalSmallStrain defines a strain tensor, assuming small strains,
  * in a 1D simulation assumming spherical symmetry.  The polar and azimuthal

@@ -9,6 +9,11 @@
 
 #include "ReturnMappingModel.h"
 
+class CLSHPlasticModel;
+
+template <>
+InputParameters validParams<CLSHPlasticModel>();
+
 /**
  * Plastic material
  */

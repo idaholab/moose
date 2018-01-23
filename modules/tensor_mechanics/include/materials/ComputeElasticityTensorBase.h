@@ -12,6 +12,11 @@
 #include "RankFourTensor.h"
 #include "GuaranteeProvider.h"
 
+class ComputeElasticityTensorBase;
+
+template <>
+InputParameters validParams<ComputeElasticityTensorBase>();
+
 /**
  * ComputeElasticityTensorBase the base class for computing elasticity tensors
  */

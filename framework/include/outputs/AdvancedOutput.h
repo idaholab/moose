@@ -29,6 +29,11 @@ class PetscOutput;
 class Console;
 class TransientMultiApp;
 
+class AdvancedOutput;
+
+template <>
+InputParameters validParams<AdvancedOutput>();
+
 /**
  * Based class for output objects
  *

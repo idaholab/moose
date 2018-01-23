@@ -9,6 +9,11 @@
 
 #include "SolidModel.h"
 
+class LinearStrainHardening;
+
+template <>
+InputParameters validParams<LinearStrainHardening>();
+
 class LinearStrainHardening : public SolidModel
 {
 public:

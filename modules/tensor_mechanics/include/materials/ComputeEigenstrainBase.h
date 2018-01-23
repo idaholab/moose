@@ -11,6 +11,11 @@
 
 class RankTwoTensor;
 
+class ComputeEigenstrainBase;
+
+template <>
+InputParameters validParams<ComputeEigenstrainBase>();
+
 /**
  * ComputeEigenstrainBase is the base class for eigenstrain tensors
  */

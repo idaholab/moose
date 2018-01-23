@@ -9,6 +9,11 @@
 
 #include "Elastic.h"
 
+class MacroElastic;
+
+template <>
+InputParameters validParams<MacroElastic>();
+
 class MacroElastic : public Elastic
 {
 public:

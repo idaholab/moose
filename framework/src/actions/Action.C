@@ -22,7 +22,7 @@ template <>
 InputParameters
 validParams<Action>()
 {
-  InputParameters params;
+  InputParameters params = emptyInputParameters();
 
   /**
    * Add the "active" and "inactive" parameters so that all blocks in the input file can selectively

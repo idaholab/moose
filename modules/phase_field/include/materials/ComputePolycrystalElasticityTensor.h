@@ -15,6 +15,9 @@
 class ComputePolycrystalElasticityTensor;
 class EulerAngleProvider;
 
+template <>
+InputParameters validParams<ComputePolycrystalElasticityTensor>();
+
 /**
  * Compute an evolving elasticity tensor coupled to a grain growth phase field model.
  */

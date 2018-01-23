@@ -10,6 +10,11 @@
 #include "Compute1DIncrementalStrain.h"
 #include "SubblockIndexProvider.h"
 
+class ComputeAxisymmetric1DIncrementalStrain;
+
+template <>
+InputParameters validParams<ComputeAxisymmetric1DIncrementalStrain>();
+
 /**
  * ComputeAxisymmetric1DIncrementalStrain defines a strain increment only
  * for incremental small strains in an Axisymmetric 1D problem.

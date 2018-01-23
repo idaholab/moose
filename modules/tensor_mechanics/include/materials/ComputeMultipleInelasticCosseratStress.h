@@ -11,6 +11,9 @@
 
 class ComputeMultipleInelasticCosseratStress;
 
+template <>
+InputParameters validParams<ComputeMultipleInelasticCosseratStress>();
+
 /**
  * ComputeMultipleInelasticStress computes the stress, the consistent tangent
  * operator (or an approximation to it), and a decomposition of the strain

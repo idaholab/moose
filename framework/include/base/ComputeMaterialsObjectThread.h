@@ -12,8 +12,8 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef COMPUTERESIDUALTHREAD_H
-#define COMPUTERESIDUALTHREAD_H
+#ifndef COMPUTEMATERIALOBJECTTHREAD_H
+#define COMPUTEMATERIALOBJECTTHREAD_H
 
 #include "ThreadedElementLoop.h"
 

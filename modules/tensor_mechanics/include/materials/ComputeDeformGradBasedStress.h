@@ -13,6 +13,11 @@
 #include "RotationTensor.h"
 #include "DerivativeMaterialInterface.h"
 
+class ComputeDeformGradBasedStress;
+
+template <>
+InputParameters validParams<ComputeDeformGradBasedStress>();
+
 /**
  * ComputeDeformGradBasedStress computes stress based on lagrangian strain definition
  **/

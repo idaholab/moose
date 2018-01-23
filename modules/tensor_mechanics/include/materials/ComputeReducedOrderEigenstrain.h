@@ -17,6 +17,11 @@ class InputParameters;
 class MooseObject;
 class SubProblem;
 
+class ComputeReducedOrderEigenstrain;
+
+template <>
+InputParameters validParams<ComputeReducedOrderEigenstrain>();
+
 class ComputeReducedOrderEigenstrain : public ComputeEigenstrainBase
 {
 public:

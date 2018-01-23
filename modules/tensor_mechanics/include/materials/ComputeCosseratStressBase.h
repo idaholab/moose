@@ -9,6 +9,11 @@
 
 #include "ComputeStressBase.h"
 
+class ComputeCosseratStressBase;
+
+template <>
+InputParameters validParams<ComputeCosseratStressBase>();
+
 /**
  * ComputeCosseratStressBase is the base class for stress tensors
  */

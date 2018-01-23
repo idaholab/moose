@@ -9,6 +9,11 @@
 
 #include "RadialReturnStressUpdate.h"
 
+class HyperbolicViscoplasticityStressUpdate;
+
+template <>
+InputParameters validParams<HyperbolicViscoplasticityStressUpdate>();
+
 /**
  * This class uses the Discrete material in an isotropic radial return hyperbolic
  * sine viscoplasticity model.
@@ -23,7 +28,6 @@
  * Petrinic's Introduction to Computational Plasticity (2004) Oxford University
  * Press, pg. 162 - 163.
  */
-
 class HyperbolicViscoplasticityStressUpdate : public RadialReturnStressUpdate
 {
 public:
