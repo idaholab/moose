@@ -303,6 +303,14 @@ MooseApp::getPrintableVersion() const
 void
 MooseApp::setupOptions()
 {
+  // MOOSE was updated to have the ability to register execution flags in similar fashion as
+  // objects. However, this change requires all *App.C/h files to be updated with the new
+  // registerExecFlags method. To avoid breaking all applications the default MOOSE flags
+  // are added if nothing has been added to this point. In the future this could go away or
+  // perhaps be a warning.
+  if (_execute_flags.items().empty())
+    Moose::registerExecFlags(_factory);
+
   // Print the header, this is as early as possible
   std::string hdr(header() + "\n");
   if (multiAppLevel() > 0)
