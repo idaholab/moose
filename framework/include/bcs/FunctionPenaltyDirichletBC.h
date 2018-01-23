@@ -42,9 +42,9 @@ protected:
   virtual Real computeQpResidual() override;
   virtual Real computeQpJacobian() override;
 
-private:
   Function & _func;
 
+private:
   Real _p;
 };
 
