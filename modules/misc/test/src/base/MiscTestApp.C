@@ -30,11 +30,15 @@ MiscTestApp::MiscTestApp(InputParameters parameters) : MooseApp(parameters)
   Moose::associateSyntax(_syntax, _action_factory);
   MiscApp::associateSyntax(_syntax, _action_factory);
 
+  Moose::registerExecFlags(_factory);
+  MiscApp::registerExecFlags(_factory);
+
   bool use_test_objs = getParam<bool>("allow_test_objects");
   if (use_test_objs)
   {
     MiscTestApp::registerObjects(_factory);
     MiscTestApp::associateSyntax(_syntax, _action_factory);
+    MiscTestApp::registerExecFlags(_factory);
   }
 }
 
@@ -73,5 +77,16 @@ MiscTestApp__associateSyntax(Syntax & syntax, ActionFactory & action_factory)
 }
 void
 MiscTestApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & /*action_factory*/)
+{
+}
+
+// External entry point for dynamic execute flag registration
+extern "C" void
+MiscTestApp__registerExecFlags(Factory & factory)
+{
+  MiscTestApp::registerExecFlags(factory);
+}
+void
+MiscTestApp::registerExecFlags(Factory & /*factory*/)
 {
 }

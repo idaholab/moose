@@ -35,6 +35,9 @@ MiscApp::MiscApp(const InputParameters & parameters) : MooseApp(parameters)
 
   Moose::associateSyntax(_syntax, _action_factory);
   MiscApp::associateSyntax(_syntax, _action_factory);
+
+  Moose::registerExecFlags(_factory);
+  MiscApp::registerExecFlags(_factory);
 }
 
 MiscApp::~MiscApp() {}
@@ -81,5 +84,16 @@ MiscApp__associateSyntax(Syntax & syntax, ActionFactory & action_factory)
 }
 void
 MiscApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & /*action_factory*/)
+{
+}
+
+// External entry point for dynamic execute flag registration
+extern "C" void
+MiscApp__registerExecFlags(Factory & factory)
+{
+  MiscApp::registerExecFlags(factory);
+}
+void
+MiscApp::registerExecFlags(Factory & /*factory*/)
 {
 }
