@@ -140,5 +140,6 @@ CombinedApp::registerExecFlags(Factory & factory)
   TensorMechanicsApp::registerExecFlags(factory);
   WaterSteamEOSApp::registerExecFlags(factory);
   XFEMApp::registerExecFlags(factory);
+  PorousFlowApp::registerExecFlags(factory);
   LevelSetApp::registerExecFlags(factory);
 }
