@@ -29,12 +29,7 @@ validParams<FEValuePenaltyBC>()
 FEValuePenaltyBC::FEValuePenaltyBC(const InputParameters & parameters)
   : FunctionPenaltyDirichletBC(parameters)
 {
-  /*
-   * The _func member was made private in FunctionPenaltyDirichletBC, so manually acquire the
-   * function so that we can enable the cache (memoization)
-   */
-  FunctionSeries & fe_basis =
-      FunctionSeries::checkAndConvertFunction(getFunction("function"), name());
+  FunctionSeries & fe_basis = FunctionSeries::checkAndConvertFunction(_func, name());
 
   fe_basis.useCache(true);
 }
