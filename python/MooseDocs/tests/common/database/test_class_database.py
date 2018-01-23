@@ -13,8 +13,10 @@
 #                                                                                                  #
 #                               See COPYRIGHT for full restrictions                                #
 ####################################################################################################
-
+import os
 import unittest
+
+import MooseDocs
 from MooseDocs.common.MooseClassDatabase import MooseClassDatabase
 
 class TestMooseClassDatabase(unittest.TestCase):
@@ -27,7 +29,10 @@ class TestMooseClassDatabase(unittest.TestCase):
         """
         Create class database.
         """
-        cls.database = MooseClassDatabase('http::/testing/')
+        local_moose = os.path.relpath(os.path.join(MooseDocs.MOOSE_DIR, 'framework', 'include'),
+                                      MooseDocs.ROOT_DIR)
+        locations = ['include', local_moose]
+        cls.database = MooseClassDatabase('http::/testing/', locations)
 
     def testBasic(self):
         """
