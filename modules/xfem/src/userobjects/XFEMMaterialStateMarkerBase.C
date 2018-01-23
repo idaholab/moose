@@ -5,7 +5,7 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-#include "XFEMMarkerUserObject.h"
+#include "XFEMMaterialStateMarkerBase.h"
 
 #include "XFEM.h"
 #include "MooseMesh.h"
@@ -15,7 +15,7 @@
 
 template <>
 InputParameters
-validParams<XFEMMarkerUserObject>()
+validParams<XFEMMaterialStateMarkerBase>()
 {
   InputParameters params = validParams<ElementUserObject>();
   params.addParam<std::vector<BoundaryName>>(
@@ -25,19 +25,19 @@ validParams<XFEMMarkerUserObject>()
   return params;
 }
 
-XFEMMarkerUserObject::XFEMMarkerUserObject(const InputParameters & parameters)
+XFEMMaterialStateMarkerBase::XFEMMaterialStateMarkerBase(const InputParameters & parameters)
   : ElementUserObject(parameters),
     _mesh(_subproblem.mesh()),
     _secondary_cracks(getParam<bool>("secondary_cracks"))
 {
   FEProblemBase * fe_problem = dynamic_cast<FEProblemBase *>(&_subproblem);
   if (fe_problem == NULL)
-    mooseError("Problem casting _subproblem to FEProblemBase in XFEMMarkerUserObject");
+    mooseError("Problem casting _subproblem to FEProblemBase in XFEMMaterialStateMarkerBase");
   _xfem = MooseSharedNamespace::dynamic_pointer_cast<XFEM>(fe_problem->getXFEM());
   if (_xfem == NULL)
-    mooseError("Problem casting to XFEM in XFEMMarkerUserObject");
+    mooseError("Problem casting to XFEM in XFEMMaterialStateMarkerBase");
   if (isNodal())
-    mooseError("XFEMMarkerUserObject can only be run on an element variable");
+    mooseError("XFEMMaterialStateMarkerBase can only be run on an element variable");
 
   if (isParamValid("initiate_on_boundary"))
   {
@@ -48,7 +48,7 @@ XFEMMarkerUserObject::XFEMMarkerUserObject(const InputParameters & parameters)
 }
 
 void
-XFEMMarkerUserObject::initialize()
+XFEMMaterialStateMarkerBase::initialize()
 {
   _marked_elems.clear();
   _marked_frags
@@ -57,7 +57,7 @@ XFEMMarkerUserObject::initialize()
 }
 
 void
-XFEMMarkerUserObject::execute()
+XFEMMaterialStateMarkerBase::execute()
 {
   RealVectorValue direction;
   bool isCut = _xfem->isElemCut(_current_elem);
@@ -106,9 +106,9 @@ XFEMMarkerUserObject::execute()
 }
 
 void
-XFEMMarkerUserObject::threadJoin(const UserObject & y)
+XFEMMaterialStateMarkerBase::threadJoin(const UserObject & y)
 {
-  const XFEMMarkerUserObject & xmuo = dynamic_cast<const XFEMMarkerUserObject &>(y);
+  const XFEMMaterialStateMarkerBase & xmuo = dynamic_cast<const XFEMMaterialStateMarkerBase &>(y);
 
   for (std::map<unsigned int, RealVectorValue>::const_iterator mit = xmuo._marked_elems.begin();
        mit != xmuo._marked_elems.end();
@@ -133,7 +133,7 @@ XFEMMarkerUserObject::threadJoin(const UserObject & y)
 }
 
 void
-XFEMMarkerUserObject::finalize()
+XFEMMaterialStateMarkerBase::finalize()
 {
   _communicator.set_union(_marked_elems);
   _communicator.set_union(_marked_frags);
@@ -162,7 +162,7 @@ XFEMMarkerUserObject::finalize()
 }
 
 bool
-XFEMMarkerUserObject::doesElementCrack(RealVectorValue & direction)
+XFEMMaterialStateMarkerBase::doesElementCrack(RealVectorValue & direction)
 {
   direction(1) = 1.0;
   return true;

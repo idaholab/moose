@@ -4,7 +4,6 @@
 []
 
 [XFEM]
-  geometric_cut_userobjects = 'line_seg_cut_uo1 line_seg_cut_uo2'
   qrule = volfrac
   output_cut_plane = true
 []

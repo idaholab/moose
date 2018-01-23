@@ -1,4 +1,5 @@
 #include "XFEMTestApp.h"
+#include "XFEMAppTypes.h"
 #include "XFEMApp.h"
 #include "Moose.h"
 #include "AppFactory.h"
@@ -65,4 +66,11 @@ XFEMTestApp__associateSyntax(Syntax & syntax, ActionFactory & action_factory)
 void
 XFEMTestApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & /*action_factory*/)
 {
+}
+
+void
+XFEMTestApp::registerExecFlags()
+{
+  MooseApp::registerExecFlags();
+  registerExecFlag(EXEC_XFEM_MARK);
 }

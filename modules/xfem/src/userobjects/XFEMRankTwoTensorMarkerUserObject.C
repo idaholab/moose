@@ -17,7 +17,7 @@ template <>
 InputParameters
 validParams<XFEMRankTwoTensorMarkerUserObject>()
 {
-  InputParameters params = validParams<XFEMMarkerUserObject>();
+  InputParameters params = validParams<XFEMMaterialStateMarkerBase>();
   params.addClassDescription(
       "Mark elements to be cut by XFEM based on a scalar extracted from a RankTwoTensor");
   params.addParam<MooseEnum>(
@@ -41,7 +41,7 @@ validParams<XFEMRankTwoTensorMarkerUserObject>()
 
 XFEMRankTwoTensorMarkerUserObject::XFEMRankTwoTensorMarkerUserObject(
     const InputParameters & parameters)
-  : XFEMMarkerUserObject(parameters),
+  : XFEMMaterialStateMarkerBase(parameters),
     _tensor(getMaterialProperty<RankTwoTensor>(getParam<std::string>("tensor"))),
     _scalar_type(getParam<MooseEnum>("scalar_type")),
     _point1(parameters.get<Point>("point1")),

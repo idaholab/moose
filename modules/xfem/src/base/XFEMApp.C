@@ -6,6 +6,7 @@
 /****************************************************************/
 
 #include "XFEMApp.h"
+#include "XFEMAppTypes.h"
 #include "SolidMechanicsApp.h"
 #include "TensorMechanicsApp.h"
 #include "Moose.h"
@@ -15,7 +16,6 @@
 #include "XFEMVolFracAux.h"
 #include "XFEMCutPlaneAux.h"
 #include "XFEMMarkerAux.h"
-#include "XFEMMarkerUserObject.h"
 #include "XFEMMaterialTensorMarkerUserObject.h"
 #include "XFEMRankTwoTensorMarkerUserObject.h"
 #include "XFEMAction.h"
@@ -91,7 +91,6 @@ XFEMApp::registerObjects(Factory & factory)
   registerConstraint(XFEMSingleVariableConstraint);
 
   // UserObjects
-  registerUserObject(XFEMMarkerUserObject);
   registerUserObject(XFEMMaterialTensorMarkerUserObject);
   registerUserObject(XFEMRankTwoTensorMarkerUserObject);
 
@@ -141,4 +140,11 @@ XFEMApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
   registerAction(XFEMAction, "add_bc");
 
   registerSyntax("XFEMAction", "XFEM");
+}
+
+void
+XFEMApp::registerExecFlags()
+{
+  MooseApp::registerExecFlags();
+  registerExecFlag(EXEC_XFEM_MARK);
 }

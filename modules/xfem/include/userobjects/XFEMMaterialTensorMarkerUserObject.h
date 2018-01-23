@@ -8,7 +8,7 @@
 #ifndef XFEMMATERIALTENSORMARKERUSEROBJECT_H
 #define XFEMMATERIALTENSORMARKERUSEROBJECT_H
 
-#include "XFEMMarkerUserObject.h"
+#include "XFEMMaterialStateMarkerBase.h"
 #include "MaterialTensorCalculator.h"
 
 class XFEMMaterialTensorMarkerUserObject;
@@ -16,7 +16,7 @@ class XFEMMaterialTensorMarkerUserObject;
 template <>
 InputParameters validParams<XFEMMaterialTensorMarkerUserObject>();
 
-class XFEMMaterialTensorMarkerUserObject : public XFEMMarkerUserObject
+class XFEMMaterialTensorMarkerUserObject : public XFEMMaterialStateMarkerBase
 {
 public:
   XFEMMaterialTensorMarkerUserObject(const InputParameters & parameters);
