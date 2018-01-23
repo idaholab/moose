@@ -39,6 +39,8 @@
     doxygen: http://mooseframework.org/docs/doxygen/moose/
     template: website.html
     repo: https://github.com/idaholab/moose
+    include_dirs:
+      - framework/include
     template_args:
         title: 'MOOSE'
         logo: docs/media/moose_logo_small.png

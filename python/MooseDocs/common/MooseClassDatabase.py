@@ -25,24 +25,25 @@ class MooseClassDatabase(object):
     This stores the information in a dict() with class name as the key. The value is a tuple
     of ClassInfo named tuples that contain the full path to the file and the remote location
     given the url supplied in the constructor.
+
+    Inputs:
+        repo_url[str]: Location of the remote for creating offsite links.
+        locations[list]: List of locations to search for .h files.
     """
     DEFINITION_RE = re.compile(r'class\s*(?P<class>\w+)\b[^;]')
     ClassInfo = collections.namedtuple('ClassInfo', 'filename remote')
 
-    def __init__(self, repo_url):
+    def __init__(self, repo_url, locations):
 
         self.__repo_url = repo_url.rstrip('/')
         self.__definitions = dict()
 
-        exclude = [os.path.join('moose', 'libmesh'), 'libmesh', 'build', '.git', '.lib']
-        for base, _, files in os.walk(MooseDocs.ROOT_DIR, topdown=False):
-            if any([base.startswith(os.path.join(MooseDocs.ROOT_DIR, sub)) for sub in exclude]):
-                continue
-
-            for fname in files:
-                if fname.endswith('.h'):
-                    full_file = os.path.join(base, fname)
-                    self.__search(full_file)
+        for loc in locations:
+            for base, _, files in os.walk(os.path.join(MooseDocs.ROOT_DIR, loc), topdown=False):
+                for fname in files:
+                    if fname.endswith('.h'):
+                        full_file = os.path.join(base, fname)
+                        self.__search(full_file)
 
     def __getitem__(self, value):
         """

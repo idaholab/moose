@@ -46,6 +46,12 @@ class TemplateExtension(MooseMarkdownExtension):
         config['repo'] = ['', "The remote repository to create hyperlinks "
                               "(e.g., http://github.com/idaholab/moose)."]
         config['branch'] = ['master', "The branch name to consider in repository links."]
+
+        local_moose = os.path.relpath(os.path.join(MooseDocs.MOOSE_DIR, 'framework', 'include'),
+                                      MooseDocs.ROOT_DIR)
+        config['include_dirs'] = [['include', local_moose],
+                                  "List of include and source directories that contain the "
+                                  ".C/.h files."]
         return config
 
     def extendMarkdown(self, md, md_globals):
@@ -81,6 +87,7 @@ class TemplatePostprocessorBase(Postprocessor):
         self._template = config.pop('template')
         self._template_args = config.pop('template_args', dict())
         self._environment_args = config.pop('environment_args', dict())
+        self._locations = config.pop('include_dirs')
 
         # Storage for node property.
         self._node = None
@@ -266,9 +273,8 @@ class TemplatePostprocessor(TemplatePostprocessorBase):
         self.markdown.requireExtension(AppSyntaxExtension)
         ext = self.markdown.getExtension(AppSyntaxExtension)
         self._repo = ext.getConfig('repo')
-        self._database = common.MooseClassDatabase(os.path.join(self._repo,
-                                                                'blob',
-                                                                ext.getConfig('branch')))
+        repo = os.path.join(self._repo, 'blob', ext.getConfig('branch'))
+        self._database = common.MooseClassDatabase(repo, self._locations)
         self._syntax = ext.getMooseAppSyntax()
 
     def globals(self, env):
