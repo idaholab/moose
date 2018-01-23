@@ -121,6 +121,9 @@ RichardsApp::RichardsApp(const InputParameters & parameters) : MooseApp(paramete
   Moose::associateSyntax(_syntax, _action_factory);
   RichardsApp::associateSyntax(_syntax, _action_factory);
 
+  Moose::registerExecFlags(_factory);
+  RichardsApp::registerExecFlags(_factory);
+
   mooseDeprecated("Please use the PorousFlow module instead.  If Richards contains functionality "
                   "not included in PorousFlow, please contact the moose-users google group");
 }
@@ -239,4 +242,15 @@ RichardsApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
   registerAction(Q2PAction, "add_aux_variable");
   registerAction(Q2PAction, "add_function");
   registerAction(Q2PAction, "add_postprocessor");
+}
+
+// External entry point for dynamic execute flag registration
+extern "C" void
+RichardsApp__registerExecFlags(Factory & factory)
+{
+  RichardsApp::registerExecFlags(factory);
+}
+void
+RichardsApp::registerExecFlags(Factory & /*factory*/)
+{
 }

@@ -144,5 +144,6 @@ CombinedTestApp::registerExecFlags(Factory & factory)
   MiscTestApp::registerExecFlags(factory);
   NavierStokesTestApp::registerExecFlags(factory);
   PhaseFieldTestApp::registerExecFlags(factory);
+  RichardsTestApp::registerExecFlags(factory);
   LevelSetTestApp::registerExecFlags(factory);
 }
