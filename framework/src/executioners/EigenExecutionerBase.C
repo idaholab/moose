@@ -416,7 +416,7 @@ EigenExecutionerBase::normalizeSolution(bool force)
     _eigen_sys.scaleSystemSolution(MooseEigenSystem::EIGEN, scaling);
     // update all aux variables and user objects
 
-    for (const ExecFlagType & flag : Moose::execute_flags.items())
+    for (const ExecFlagType & flag : _app.getExecuteOnEnum().items())
       _problem.execute(flag);
   }
   return scaling;

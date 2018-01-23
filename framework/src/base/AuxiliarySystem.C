@@ -37,7 +37,11 @@ AuxiliarySystem::AuxiliarySystem(FEProblemBase & subproblem, const std::string &
     _serialized_solution(*NumericVector<Number>::build(_fe_problem.comm()).release()),
     _solution_previous_nl(NULL),
     _u_dot(addVector("u_dot", true, GHOSTED)),
-    _need_serialized_solution(false)
+    _need_serialized_solution(false),
+    _aux_scalar_storage(_app.getExecuteOnEnum()),
+    _nodal_aux_storage(_app.getExecuteOnEnum()),
+    _elemental_aux_storage(_app.getExecuteOnEnum())
+
 {
   _nodal_vars.resize(libMesh::n_threads());
   _elem_vars.resize(libMesh::n_threads());

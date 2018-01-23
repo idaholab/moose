@@ -112,6 +112,9 @@ class InputParameters;
 #define registerNamedControl(obj, name) registerNamedObject(obj, name)
 #define registerNamedPartitioner(obj, name) registerNamedObject(obj, name)
 
+// Execute on flag registration
+#define registerExecFlag(flag) factory.regExecFlag(flag)
+
 /**
  * alias to wrap shared pointer type
  */
@@ -315,6 +318,12 @@ public:
   void deprecateObject(const std::string & name);
   void deprecateObject(const std::string & name, const std::string & replacement);
   ///@}
+
+  /**
+   * Add a new flag to the app.
+   * @param flag The flag to add as available to the app level ExecFlagEnum.
+   */
+  void regExecFlag(const ExecFlagType & flag);
 
 protected:
   /**
