@@ -133,5 +133,6 @@ CombinedApp::registerExecFlags(Factory & factory)
   HeatConductionApp::registerExecFlags(factory);
   MiscApp::registerExecFlags(factory);
   NavierStokesApp::registerExecFlags(factory);
+  PhaseFieldApp::registerExecFlags(factory);
   LevelSetApp::registerExecFlags(factory);
 }

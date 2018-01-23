@@ -30,6 +30,9 @@ PhaseFieldTestApp::PhaseFieldTestApp(InputParameters parameters) : MooseApp(para
   Moose::associateSyntax(_syntax, _action_factory);
   PhaseFieldApp::associateSyntax(_syntax, _action_factory);
 
+  Moose::registerExecFlags(_factory);
+  PhaseFieldApp::registerExecFlags(_factory);
+
   bool use_test_objs = getParam<bool>("allow_test_objects");
   if (use_test_objs)
   {
@@ -73,5 +76,16 @@ PhaseFieldTestApp__associateSyntax(Syntax & syntax, ActionFactory & action_facto
 }
 void
 PhaseFieldTestApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & /*action_factory*/)
+{
+}
+
+// External entry point for dynamic execute flag registration
+extern "C" void
+PhaseFieldTestApp__registerExecFlags(Factory & factory)
+{
+  PhaseFieldTestApp::registerExecFlags(factory);
+}
+void
+PhaseFieldTestApp::registerExecFlags(Factory & /*factory*/)
 {
 }
