@@ -56,6 +56,9 @@ ChemicalReactionsApp::ChemicalReactionsApp(const InputParameters & parameters)
 
   Moose::associateSyntax(_syntax, _action_factory);
   ChemicalReactionsApp::associateSyntax(_syntax, _action_factory);
+
+  Moose::registerExecFlags(_factory);
+  ChemicalReactionsApp::registerExecFlags(_factory);
 }
 
 ChemicalReactionsApp::~ChemicalReactionsApp() {}
@@ -125,4 +128,15 @@ ChemicalReactionsApp::associateSyntax(Syntax & syntax, ActionFactory & action_fa
   registerAction(AddCoupledEqSpeciesAction, "add_aux_kernel");
   registerAction(AddCoupledSolidKinSpeciesAction, "add_kernel");
   registerAction(AddCoupledSolidKinSpeciesAction, "add_aux_kernel");
+}
+
+// External entry point for dynamic execute flag registration
+extern "C" void
+ChemicalReactionsApp__registerExecFlags(Factory & factory)
+{
+  ChemicalReactionsApp::registerExecFlags(factory);
+}
+void
+ChemicalReactionsApp::registerExecFlags(Factory & /*factory*/)
+{
 }

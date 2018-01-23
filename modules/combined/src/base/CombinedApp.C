@@ -127,5 +127,6 @@ CombinedApp__registerExecFlags(Factory & factory)
 void
 CombinedApp::registerExecFlags(Factory & factory)
 {
+  ChemicalReactionsApp::registerExecFlags(factory);
   LevelSetApp::registerExecFlags(factory);
 }

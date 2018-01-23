@@ -29,6 +29,9 @@ ChemicalReactionsTestApp::ChemicalReactionsTestApp(InputParameters parameters)
   Moose::associateSyntax(_syntax, _action_factory);
   ChemicalReactionsApp::associateSyntax(_syntax, _action_factory);
 
+  Moose::registerExecFlags(_factory);
+  ChemicalReactionsApp::registerExecFlags(_factory);
+
   bool use_test_objs = getParam<bool>("allow_test_objects");
   if (use_test_objs)
   {
@@ -71,5 +74,16 @@ ChemicalReactionsTestApp__associateSyntax(Syntax & syntax, ActionFactory & actio
 }
 void
 ChemicalReactionsTestApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & /*action_factory*/)
+{
+}
+
+// External entry point for dynamic execute flag registration
+extern "C" void
+ChemicalReactionsTestApp__registerExecFlags(Factory & factory)
+{
+  ChemicalReactionsTestApp::registerExecFlags(factory);
+}
+void
+ChemicalReactionsTestApp::registerExecFlags(Factory & /*factory*/)
 {
 }
