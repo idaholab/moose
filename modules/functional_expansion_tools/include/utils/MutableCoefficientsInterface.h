@@ -67,6 +67,10 @@ public:
    * Get a reference to the vector of coefficients
    */
   const std::vector<Real> & getCoefficients() const;
+  /**
+   * Get a formatted string of the coefficients
+   */
+  std::string getCoefficientsTable() const;
 
   // Current state
   /**

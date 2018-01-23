@@ -91,6 +91,17 @@ MutableCoefficientsInterface::getCoefficients() const
   return _coefficients;
 }
 
+std::string
+MutableCoefficientsInterface::getCoefficientsTable() const
+{
+  std::stringbuf string;
+  std::ostream table(&string);
+
+  table << *this;
+
+  return string.str();
+}
+
 std::size_t
 MutableCoefficientsInterface::getSize() const
 {
