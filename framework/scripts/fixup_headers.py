@@ -9,32 +9,16 @@ import os, string, re
 from optparse import OptionParser
 
 global_ignores = ['contrib', '.svn', '.git', 'libmesh']
-moose_paths = ['framework', 'unit', 'examples', 'test', 'tutorials']
 
-copyright_header = \
-"""/****************************************************************/
-/*               DO NOT MODIFY THIS HEADER                      */
-/* MOOSE - Multiphysics Object Oriented Simulation Environment  */
-/*                                                              */
-/*           (c) 2010 Battelle Energy Alliance, LLC             */
-/*                   ALL RIGHTS RESERVED                        */
-/*                                                              */
-/*          Prepared by Battelle Energy Alliance, LLC           */
-/*            Under Contract No. DE-AC07-05ID14517              */
-/*            With the U. S. Department of Energy               */
-/*                                                              */
-/*            See COPYRIGHT for full restrictions               */
-/****************************************************************/
-"""
-
-lgpl_header = \
-"""/****************************************************************/
-/* MOOSE - Multiphysics Object Oriented Simulation Environment  */
-/*                                                              */
-/*          All contents are licensed under LGPL V2.1           */
-/*             See LICENSE for full restrictions                */
-/****************************************************************/
-"""
+unified_header = \
+"""//* This file is part of the MOOSE framework
+//* https://www.mooseframework.org
+//*
+//* All rights reserved, see COPYRIGHT for full restrictions
+//* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+//*
+//* Licensed under LGPL 2.1, please see LICENSE for details
+//* https://www.gnu.org/licenses/lgpl-2.1.html"""
 
 global_options = {}
 
@@ -61,11 +45,7 @@ def checkAndUpdate(filename):
 
     # Use the copyright header for framework files, use the lgpl header
     # for everything else
-    header = lgpl_header
-    for dirname in moose_paths:
-        if (string.find(filename, dirname) != -1):
-            header = copyright_header
-            break
+    header = unified_header
 
     # Check (exact match only)
     if (string.find(text, header) == -1):
@@ -75,12 +55,19 @@ def checkAndUpdate(filename):
             if global_options.verbose == True:
                 print '>'*40, '\n', '\n'.join((text.split('\n', 10))[:10]), '\n'*5
         else:
+            # Make sure any previous C-style header version is removed
+            text = re.sub(r'^/\*+/$.*^/\*+/$', '', text, flags=re.S | re.M)
+
+            # Make sure that any previous C++-style header (with extra character)
+            # is also removed.
+            text = re.sub(r'(?:^//\*.*\n)*', '', text, flags=re.M)
+
+            # Now cleanup extra blank lines
+            text = re.sub(r'^\s*\n$', '', text, flags=re.M)
+
             # Update
             f = open(filename + '~tmp', 'w')
-            f.write(header)
-
-            # Make sure any previous header version is removed
-            text = re.sub(r'^/\*+/$.*^/\*+/$', '', text, flags=re.S | re.M)
+            f.write(header + '\n')
 
             f.write(text)
             f.close()
