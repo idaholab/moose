@@ -57,6 +57,9 @@ HeatConductionApp::HeatConductionApp(const InputParameters & parameters) : Moose
 
   Moose::associateSyntax(_syntax, _action_factory);
   HeatConductionApp::associateSyntax(_syntax, _action_factory);
+
+  Moose::registerExecFlags(_factory);
+  HeatConductionApp::registerExecFlags(_factory);
 }
 
 HeatConductionApp::~HeatConductionApp() {}
@@ -140,4 +143,15 @@ HeatConductionApp::associateSyntax(Syntax & syntax, ActionFactory & action_facto
   registerAction(ThermalContactBCsAction, "add_bc");
   registerAction(ThermalContactDiracKernelsAction, "add_dirac_kernel");
   registerAction(ThermalContactMaterialsAction, "add_material");
+}
+
+// External entry point for dynamic execute flag registration
+extern "C" void
+HeatConductionApp__registerExecFlags(Factory & factory)
+{
+  HeatConductionApp::registerExecFlags(factory);
+}
+void
+HeatConductionApp::registerExecFlags(Factory & /*factory*/)
+{
 }

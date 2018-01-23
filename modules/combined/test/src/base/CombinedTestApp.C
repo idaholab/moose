@@ -140,5 +140,6 @@ CombinedTestApp::registerExecFlags(Factory & factory)
   ChemicalReactionsTestApp::registerExecFlags(factory);
   ContactTestApp::registerExecFlags(factory);
   FluidPropertiesTestApp::registerExecFlags(factory);
+  HeatConductionTestApp::registerExecFlags(factory);
   LevelSetTestApp::registerExecFlags(factory);
 }
