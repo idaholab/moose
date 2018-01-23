@@ -138,5 +138,6 @@ void
 CombinedTestApp::registerExecFlags(Factory & factory)
 {
   ChemicalReactionsTestApp::registerExecFlags(factory);
+  ContactTestApp::registerExecFlags(factory);
   LevelSetTestApp::registerExecFlags(factory);
 }

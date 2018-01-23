@@ -49,6 +49,9 @@ ContactApp::ContactApp(const InputParameters & parameters) : MooseApp(parameters
 
   Moose::associateSyntax(_syntax, _action_factory);
   ContactApp::associateSyntax(_syntax, _action_factory);
+
+  Moose::registerExecFlags(_factory);
+  ContactApp::registerExecFlags(_factory);
 }
 
 ContactApp::~ContactApp() {}
@@ -125,4 +128,15 @@ ContactApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
 
   registerAction(NodalAreaAction, "add_user_object");
   registerAction(NodalAreaVarAction, "add_aux_variable");
+}
+
+// External entry point for dynamic execute flag registration
+extern "C" void
+ContactApp__registerExecFlags(Factory & factory)
+{
+  ContactApp::registerExecFlags(factory);
+}
+void
+ContactApp::registerExecFlags(Factory & /*factory*/)
+{
 }
