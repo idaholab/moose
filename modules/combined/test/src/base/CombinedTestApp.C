@@ -149,5 +149,6 @@ CombinedTestApp::registerExecFlags(Factory & factory)
   StochasticToolsTestApp::registerExecFlags(factory);
   TensorMechanicsTestApp::registerExecFlags(factory);
   WaterSteamEOSTestApp::registerExecFlags(factory);
+  XFEMTestApp::registerExecFlags(factory);
   LevelSetTestApp::registerExecFlags(factory);
 }

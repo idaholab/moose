@@ -139,5 +139,6 @@ CombinedApp::registerExecFlags(Factory & factory)
   StochasticToolsApp::registerExecFlags(factory);
   TensorMechanicsApp::registerExecFlags(factory);
   WaterSteamEOSApp::registerExecFlags(factory);
+  XFEMApp::registerExecFlags(factory);
   LevelSetApp::registerExecFlags(factory);
 }
