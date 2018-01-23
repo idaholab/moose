@@ -16,7 +16,6 @@ InputParameters
 validParams<NSEnergyInviscidSpecifiedPressureBC>()
 {
   InputParameters params = validParams<NSEnergyInviscidBC>();
-  params.addRequiredParam<Real>("specified_pressure", "The specified pressure for this boundary");
   return params;
 }
 
