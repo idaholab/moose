@@ -66,6 +66,9 @@ SolidMechanicsApp::SolidMechanicsApp(const InputParameters & parameters) : Moose
   Moose::associateSyntax(_syntax, _action_factory);
   SolidMechanicsApp::associateSyntaxDepends(_syntax, _action_factory);
   SolidMechanicsApp::associateSyntax(_syntax, _action_factory);
+
+  Moose::registerExecFlags(_factory);
+  SolidMechanicsApp::registerExecFlags(_factory);
 }
 
 SolidMechanicsApp::~SolidMechanicsApp() {}
@@ -154,4 +157,15 @@ SolidMechanicsApp::associateSyntax(Syntax & syntax, ActionFactory & action_facto
   registerSyntax("SolidMechanicsAction", "SolidMechanics/*");
 
   registerAction(SolidMechanicsAction, "add_kernel");
+}
+
+// External entry point for dynamic execute flag registration
+extern "C" void
+SolidMechanicsApp__registerExecFlags(Factory & factory)
+{
+  SolidMechanicsApp::registerExecFlags(factory);
+}
+void
+SolidMechanicsApp::registerExecFlags(Factory & /*factory*/)
+{
 }

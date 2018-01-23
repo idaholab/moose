@@ -135,5 +135,6 @@ CombinedApp::registerExecFlags(Factory & factory)
   NavierStokesApp::registerExecFlags(factory);
   PhaseFieldApp::registerExecFlags(factory);
   RichardsApp::registerExecFlags(factory);
+  SolidMechanicsApp::registerExecFlags(factory);
   LevelSetApp::registerExecFlags(factory);
 }
