@@ -136,5 +136,6 @@ CombinedApp::registerExecFlags(Factory & factory)
   PhaseFieldApp::registerExecFlags(factory);
   RichardsApp::registerExecFlags(factory);
   SolidMechanicsApp::registerExecFlags(factory);
+  StochasticToolsApp::registerExecFlags(factory);
   LevelSetApp::registerExecFlags(factory);
 }

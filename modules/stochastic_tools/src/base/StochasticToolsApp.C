@@ -53,6 +53,9 @@ StochasticToolsApp::StochasticToolsApp(InputParameters parameters) : MooseApp(pa
 
   Moose::associateSyntax(_syntax, _action_factory);
   StochasticToolsApp::associateSyntax(_syntax, _action_factory);
+
+  Moose::registerExecFlags(_factory);
+  StochasticToolsApp::registerExecFlags(_factory);
 }
 
 StochasticToolsApp::~StochasticToolsApp() {}
@@ -114,5 +117,16 @@ StochasticToolsApp__associateSyntax(Syntax & syntax, ActionFactory & action_fact
 }
 void
 StochasticToolsApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & /*action_factory*/)
+{
+}
+
+// External entry point for dynamic execute flag registration
+extern "C" void
+StochasticToolsApp__registerExecFlags(Factory & factory)
+{
+  StochasticToolsApp::registerExecFlags(factory);
+}
+void
+StochasticToolsApp::registerExecFlags(Factory & /*factory*/)
 {
 }

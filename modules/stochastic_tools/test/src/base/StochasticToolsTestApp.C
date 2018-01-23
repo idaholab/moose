@@ -30,6 +30,9 @@ StochasticToolsTestApp::StochasticToolsTestApp(InputParameters parameters) : Moo
   Moose::associateSyntax(_syntax, _action_factory);
   StochasticToolsApp::associateSyntax(_syntax, _action_factory);
 
+  Moose::registerExecFlags(_factory);
+  StochasticToolsApp::registerExecFlags(_factory);
+
   bool use_test_objs = getParam<bool>("allow_test_objects");
   if (use_test_objs)
   {
@@ -74,5 +77,16 @@ StochasticToolsTestApp__associateSyntax(Syntax & syntax, ActionFactory & action_
 }
 void
 StochasticToolsTestApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & /*action_factory*/)
+{
+}
+
+// External entry point for dynamic execute flag registration
+extern "C" void
+StochasticToolsTestApp__registerExecFlags(Factory & factory)
+{
+  StochasticToolsTestApp::registerExecFlags(factory);
+}
+void
+StochasticToolsTestApp::registerExecFlags(Factory & /*factory*/)
 {
 }
