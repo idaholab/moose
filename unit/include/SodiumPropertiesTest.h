@@ -49,19 +49,17 @@ protected:
 
     InputParameters problem_params = _factory->getValidParams("FEProblem");
     problem_params.set<MooseMesh *>("mesh") = _mesh.get();
-    problem_params.set<std::string>("name") = "problem";
     problem_params.set<std::string>("_object_name") = "name2";
-    _fe_problem = libmesh_make_unique<FEProblem>(problem_params);
+    auto fep = _factory->create<FEProblemBase>("FEProblem", "problem", problem_params);
 
     // The sodium fluid properties
     InputParameters uo_pars = _factory->getValidParams("SodiumProperties");
-    _fe_problem->addUserObject("SodiumProperties", "fp", uo_pars);
-    _fp = &_fe_problem->getUserObject<SodiumProperties>("fp");
+    fep->addUserObject("SodiumProperties", "fp", uo_pars);
+    _fp = &fep->getUserObject<SodiumProperties>("fp");
   }
 
+  std::unique_ptr<MooseMesh> _mesh; // mesh must destruct last and so be declared first
   std::shared_ptr<MooseApp> _app;
-  std::unique_ptr<MooseMesh> _mesh;
-  std::unique_ptr<FEProblem> _fe_problem;
   Factory * _factory;
   const SodiumProperties * _fp;
 };

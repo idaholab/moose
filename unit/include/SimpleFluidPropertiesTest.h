@@ -44,23 +44,21 @@ protected:
 
     InputParameters problem_params = _factory->getValidParams("FEProblem");
     problem_params.set<MooseMesh *>("mesh") = _mesh.get();
-    problem_params.set<std::string>("name") = "problem";
     problem_params.set<std::string>("_object_name") = "name2";
-    _fe_problem = libmesh_make_unique<FEProblem>(problem_params);
+    auto fep = _factory->create<FEProblemBase>("FEProblem", "problem", problem_params);
 
     InputParameters uo_params = _factory->getValidParams("SimpleFluidProperties");
-    _fe_problem->addUserObject("SimpleFluidProperties", "fp", uo_params);
-    _fp = &_fe_problem->getUserObject<SimpleFluidProperties>("fp");
+    fep->addUserObject("SimpleFluidProperties", "fp", uo_params);
+    _fp = &fep->getUserObject<SimpleFluidProperties>("fp");
 
     InputParameters uo2_params = _factory->getValidParams("SimpleFluidProperties");
     uo2_params.set<Real>("porepressure_coefficient") = 0.0;
-    _fe_problem->addUserObject("SimpleFluidProperties", "fp2", uo2_params);
-    _fp2 = &_fe_problem->getUserObject<SimpleFluidProperties>("fp2");
+    fep->addUserObject("SimpleFluidProperties", "fp2", uo2_params);
+    _fp2 = &fep->getUserObject<SimpleFluidProperties>("fp2");
   }
 
+  std::unique_ptr<MooseMesh> _mesh; // mesh must destruct last and so be declared first
   std::shared_ptr<MooseApp> _app;
-  std::unique_ptr<MooseMesh> _mesh;
-  std::unique_ptr<FEProblem> _fe_problem;
   Factory * _factory;
   const SimpleFluidProperties * _fp;
   const SimpleFluidProperties * _fp2;

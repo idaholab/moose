@@ -45,13 +45,12 @@ protected:
 
     InputParameters problem_params = _factory->getValidParams("FEProblem");
     problem_params.set<MooseMesh *>("mesh") = _mesh.get();
-    problem_params.set<std::string>("name") = "problem";
     problem_params.set<std::string>("_object_name") = "name2";
-    _fe_problem = libmesh_make_unique<FEProblem>(problem_params);
+    auto fep = _factory->create<FEProblemBase>("FEProblem", "problem", problem_params);
 
     InputParameters uo_pars = _factory->getValidParams("Water97FluidProperties");
-    _fe_problem->addUserObject("Water97FluidProperties", "fp", uo_pars);
-    _fp = &_fe_problem->getUserObject<Water97FluidProperties>("fp");
+    fep->addUserObject("Water97FluidProperties", "fp", uo_pars);
+    _fp = &fep->getUserObject<Water97FluidProperties>("fp");
   }
 
   void regionDerivatives(Real p, Real T, Real tol)
@@ -91,9 +90,8 @@ protected:
     REL_TEST("de_dT", de_dT, de_dT_fd, tol);
   }
 
+  std::unique_ptr<MooseMesh> _mesh; // mesh must destruct last and so be declared first
   std::shared_ptr<MooseApp> _app;
-  std::unique_ptr<MooseMesh> _mesh;
-  std::unique_ptr<FEProblem> _fe_problem;
   Factory * _factory;
   const Water97FluidProperties * _fp;
 };

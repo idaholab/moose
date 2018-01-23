@@ -57,9 +57,7 @@ protected:
     InputParameters problem_params = _factory->getValidParams("FEProblem");
     problem_params.set<MooseMesh *>("mesh") = _mesh.get();
     problem_params.set<std::string>("_object_name") = "name2";
-
-    auto & fep = _app->actionWarehouse().problemBase();
-    fep = _factory->create<FEProblemBase>("FEProblem", "problem", problem_params);
+    auto fep = _factory->create<FEProblemBase>("FEProblem", "problem", problem_params);
 
     // The brine fluid properties
     InputParameters uo_pars = _factory->getValidParams("BrineFluidProperties");
@@ -70,8 +68,8 @@ protected:
     _water_fp = &_fp->getComponent(BrineFluidProperties::WATER);
   }
 
+  std::unique_ptr<MooseMesh> _mesh; // mesh must destruct last and so be declared first
   std::shared_ptr<MooseApp> _app;
-  std::unique_ptr<MooseMesh> _mesh;
   Factory * _factory;
   const BrineFluidProperties * _fp;
   const SinglePhaseFluidPropertiesPT * _water_fp;

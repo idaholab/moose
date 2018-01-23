@@ -58,39 +58,37 @@ protected:
 
     InputParameters problem_params = _factory->getValidParams("FEProblem");
     problem_params.set<MooseMesh *>("mesh") = _mesh.get();
-    problem_params.set<std::string>("name") = "problem";
     problem_params.set<std::string>("_object_name") = "name2";
-    _fe_problem = libmesh_make_unique<FEProblem>(problem_params);
+    auto fep = _factory->create<FEProblemBase>("FEProblem", "problem", problem_params);
 
     InputParameters pc_params = _factory->getValidParams("PorousFlowCapillaryPressureVG");
     pc_params.set<Real>("m") = 0.5;
     pc_params.set<Real>("alpha") = 0.1;
-    _fe_problem->addUserObject("PorousFlowCapillaryPressureVG", "pc", pc_params);
-    _pc = &_fe_problem->getUserObject<PorousFlowCapillaryPressureVG>("pc");
+    fep->addUserObject("PorousFlowCapillaryPressureVG", "pc", pc_params);
+    _pc = &fep->getUserObject<PorousFlowCapillaryPressureVG>("pc");
 
     InputParameters brine_params = _factory->getValidParams("BrineFluidProperties");
-    _fe_problem->addUserObject("BrineFluidProperties", "brine_fp", brine_params);
-    _brine_fp = &_fe_problem->getUserObject<BrineFluidProperties>("brine_fp");
+    fep->addUserObject("BrineFluidProperties", "brine_fp", brine_params);
+    _brine_fp = &fep->getUserObject<BrineFluidProperties>("brine_fp");
 
     InputParameters water_params = _factory->getValidParams("Water97FluidProperties");
-    _fe_problem->addUserObject("Water97FluidProperties", "water_fp", water_params);
-    _water_fp = &_fe_problem->getUserObject<Water97FluidProperties>("water_fp");
+    fep->addUserObject("Water97FluidProperties", "water_fp", water_params);
+    _water_fp = &fep->getUserObject<Water97FluidProperties>("water_fp");
 
     InputParameters co2_params = _factory->getValidParams("CO2FluidProperties");
-    _fe_problem->addUserObject("CO2FluidProperties", "co2_fp", co2_params);
-    _co2_fp = &_fe_problem->getUserObject<CO2FluidProperties>("co2_fp");
+    fep->addUserObject("CO2FluidProperties", "co2_fp", co2_params);
+    _co2_fp = &fep->getUserObject<CO2FluidProperties>("co2_fp");
 
     InputParameters uo_params = _factory->getValidParams("PorousFlowBrineCO2");
     uo_params.set<UserObjectName>("brine_fp") = "brine_fp";
     uo_params.set<UserObjectName>("co2_fp") = "co2_fp";
     uo_params.set<UserObjectName>("capillary_pressure") = "pc";
-    _fe_problem->addUserObject("PorousFlowBrineCO2", "fp", uo_params);
-    _fp = &_fe_problem->getUserObject<PorousFlowBrineCO2>("fp");
+    fep->addUserObject("PorousFlowBrineCO2", "fp", uo_params);
+    _fp = &fep->getUserObject<PorousFlowBrineCO2>("fp");
   }
 
+  std::unique_ptr<MooseMesh> _mesh; // mesh must destruct last and so be declared first
   MooseAppPtr _app;
-  std::unique_ptr<MooseMesh> _mesh;
-  std::unique_ptr<FEProblem> _fe_problem;
   Factory * _factory;
   const PorousFlowCapillaryPressureVG * _pc;
   const PorousFlowBrineCO2 * _fp;
