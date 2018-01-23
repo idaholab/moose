@@ -72,7 +72,7 @@ ActionWarehouse::addActionBlock(std::shared_ptr<Action> action)
   /**
    * Note: This routine uses the XTerm colors directly which is not advised for general purpose
    * output coloring. Most users should prefer using Problem::colorText() which respects the
-   * "color_output" optionfor terminals that do not support coloring.  Since this routine is
+   * "color_output" option for terminals that do not support coloring.  Since this routine is
    * intended for debugging only and runs before several objects exist in the system, we are just
    * using the constants directly.
    */

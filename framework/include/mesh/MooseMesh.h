@@ -451,14 +451,6 @@ public:
   const Moose::PatchUpdateType & getPatchUpdateStrategy() const;
 
   /**
-   * Method for adding Relationship managers (libMesh ghosting functors) to the Mesh object. The
-   * parameter is passed in via shared_ptr. It's expected that the Mesh object will assume ownership
-   * of the relationship manager since it's lifetime needs to last as long as the underlying
-   * MeshBase lasts.
-   */
-  void addRelationshipManager(std::shared_ptr<RelationshipManager> relationship_manager);
-
-  /**
    * Get a (slightly inflated) processor bounding box.
    *
    * @param inflation_multiplier This amount will be multiplied by the length of the diagonal of the

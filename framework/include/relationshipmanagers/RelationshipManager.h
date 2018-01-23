@@ -58,13 +58,17 @@ public:
 
 protected:
   /**
-   * Method to setup the RelationshipManager for use in the simulation. It is called exactly
-   * once for each type of functor object that this RelationshipManager is capable of creating.
-   * For GeometricRelationshipManagers, it is called exactly once. For
-   * AlgebraicRelationshipManagers, it is called twice, once for the geometric RM and once for
-   * the algebraic RM. This method should make the decision of whether or not a RM is needed
-   * for the current simulation and attach it to the right libMesh object. Note the helper
-   * methods available in the two major types of RMs.
+   * This method should make the decision of whether or not RMs are needed for the current
+   * simulation and attach them to the corresponding libMesh objects. Helper methods exist to
+   * attach geometric and algebraic RMs to the right places.
+   *
+   * This method is called at most once for each "when_type":
+   * For GeometricRelationshipManagers it'll be called exactly once. However, "when" it is called
+   * depends on the value of the developer-controlled "attach_geometric_early" value.
+   * For AlgebraicRelationshipManagers, this method may be called twice, but only once per "when"
+   * type. If the RM is able to create its geometric RM early, it should do so and attach it
+   * during the normal geometric add time. However, if that's not possible, both the geometric and
+   * algebraic RMs can be added during the "late" when time.
    */
   virtual void attachRelationshipManagersInternal(Moose::RelationshipManagerType when_type) = 0;
 

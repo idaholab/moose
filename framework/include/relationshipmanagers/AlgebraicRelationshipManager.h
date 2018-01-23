@@ -30,7 +30,7 @@ InputParameters validParams<AlgebraicRelationshipManager>();
  * needed for an objects calculations. Non-local resources include geometric element information,
  * and solution information that may be more than a single side-neighbor away in a mesh. This
  * includes physically disconnected elements that might be needed for contact or mortar
- * calculations. AlgebraicRelationshipManagers should also be attached the the Mesh for full
+ * calculations. AlgebraicRelationshipManagers should also be attached to the Mesh for full
  * DistributedMesh capability.
  */
 class AlgebraicRelationshipManager : public GeometricRelationshipManager, public LazyCoupleable

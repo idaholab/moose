@@ -142,7 +142,7 @@ public:
   /**
    * Returns the input file name that was set with setInputFileName
    */
-  std::string getInputFileName() { return _input_filename; }
+  std::string getInputFileName() const { return _input_filename; }
 
   /**
    * Override the selection of the output file base name.
@@ -169,13 +169,13 @@ public:
    * Whether or not an output position has been set.
    * @return True if it has
    */
-  bool hasOutputPosition() { return _output_position_set; }
+  bool hasOutputPosition() const { return _output_position_set; }
 
   /**
    * Get the output position.
    * @return The position offset for the output.
    */
-  Point getOutputPosition() { return _output_position; }
+  Point getOutputPosition() const { return _output_position; }
 
   /**
    * Set the starting time for the simulation.  This will override any choice
@@ -188,12 +188,12 @@ public:
   /**
    * @return Whether or not a start time has been programmatically set using setStartTime()
    */
-  bool hasStartTime() { return _start_time_set; }
+  bool hasStartTime() const { return _start_time_set; }
 
   /**
    * @return The start time
    */
-  Real getStartTime() { return _start_time; }
+  Real getStartTime() const { return _start_time; }
 
   /**
    * Each App has it's own local time.  The "global" time of the whole problem might be
@@ -205,7 +205,7 @@ public:
    * Each App has it's own local time.  The "global" time of the whole problem might be
    * different.  This offset is how far off the local App time is from the global time.
    */
-  Real getGlobalTimeOffset() { return _global_time_offset; }
+  Real getGlobalTimeOffset() const { return _global_time_offset; }
 
   /**
    * Return the filename that was parsed
@@ -231,7 +231,7 @@ public:
   /**
    * Retrieve the Executioner for this App
    */
-  Executioner * getExecutioner()
+  Executioner * getExecutioner() const
   {
     mooseAssert(_executioner, "Executioner is nullptr");
     return _executioner.get();
@@ -267,7 +267,7 @@ public:
    * @return The reference to the command line object
    * Setup options based on InputParameters.
    */
-  std::shared_ptr<CommandLine> commandLine() { return _command_line; }
+  std::shared_ptr<CommandLine> commandLine() const { return _command_line; }
 
   /**
    * This method is here so we can determine whether or not we need to

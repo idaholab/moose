@@ -79,12 +79,12 @@ public:
   /**
    * Get the MooseApp this object is associated with.
    */
-  MooseApp & getMooseApp() { return _app; }
+  MooseApp & getMooseApp() const { return _app; }
 
   /**
    * Return the enabled status of the object.
    */
-  virtual bool enabled() { return _enabled; }
+  virtual bool enabled() const { return _enabled; }
 
   /**
    * Emits an error prefixed with the file and line number of the given param (from the input

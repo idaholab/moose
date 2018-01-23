@@ -31,7 +31,7 @@ template <>
 InputParameters validParams<ElementPointNeighbors>();
 
 /**
- * ElementSideNeighborLayers is ensure that all pointwise-connected elements in ghosted to
+ * ElementSideNeighborLayers ensures that all pointwise-connected elements are ghosted to
  * every processor's partition. It is useful when non-local element resources are needed when using
  * DistributedMesh.
  */

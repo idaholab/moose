@@ -17,6 +17,8 @@
 #include "MooseVariable.h"
 #include "InputParameters.h"
 #include "MooseObject.h"
+#include "MooseApp.h"
+#include "Executioner.h"
 
 #include "libmesh/simple_range.h"
 
@@ -30,8 +32,6 @@ LazyCoupleable::LazyCoupleable(const MooseObject * moose_object)
        as_range(std::make_pair(_l_parameters.coupledVarsBegin(), _l_parameters.coupledVarsEnd())))
     _coupled_var_numbers[var_name] = libmesh_make_unique<unsigned int>(0);
 }
-
-LazyCoupleable::~LazyCoupleable() {}
 
 void
 LazyCoupleable::setFEProblemPtr(FEProblemBase * fe_problem)
@@ -65,7 +65,7 @@ LazyCoupleable::coupled(const std::string & var_name, unsigned int /*comp*/)
     if (!executioner_ptr)
       mooseError("Executioner is nullptr in LazyCoupleable. You cannot call the \"coupled\" method "
                  "until the add_algebraic_rm task");
-    setFEProblemPtr(executioner_ptr->feProblem());
+    setFEProblemPtr(&executioner_ptr->feProblem());
   }
 
   const auto & var_pair = _coupled_var_numbers.find(var_name);

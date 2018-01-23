@@ -433,15 +433,14 @@ public:
   void registerBuildableTypes(const std::string & names);
 
   /**
-   * Declares the types of RelationshipManagers that the owning object will either constructor (in
-   * the case of Actions) or requires (in the case of every other MooseObject). With normal
+   * Declares the types of RelationshipManagers that the owning object will either construct (in the
+   * case of Actions) or requires (in the case of every other MooseObject). With normal
    * MooseObject-derived types built by MooseObjectAction, MOOSE will attempt to use the
    * InputParameters available to it to construct the required RelationshipManager automatically.
    * Actions may run custom logic to create RelationshipManagers. The names and rm_type lists must
    * have the same number of entries.
    *
    * @param names A space delimited list of RelationshipMangers that may be built by this object.
-   * @param rm_type A space delimited list of RelationshipmanagerTypes corresponding to each name.
    */
   void registerRelationshipManagers(const std::string & names);
 
@@ -831,7 +830,6 @@ private:
   std::vector<std::string> _buildable_types;
 
   /// The RelationshipManagers that this object may either build or requires
-  /// Pair of RelationshipManager type name and RelationshipMangerType.
   std::vector<std::string> _buildable_rm_types;
 
   /// This parameter collapses one level of nesting in the syntax blocks.  It is used

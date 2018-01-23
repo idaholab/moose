@@ -21,9 +21,10 @@
 // Forward declarations
 class InputParameters;
 class MooseObject;
+class MooseApp;
 
 /**
- * Interface for objects that needs coupling capabilities
+ * Interface for objects that need coupling capabilities
  *
  */
 class LazyCoupleable
@@ -36,8 +37,14 @@ public:
    */
   LazyCoupleable(const MooseObject * moose_object);
 
-  ~LazyCoupleable();
+  virtual ~LazyCoupleable() = default;
 
+  /**
+   * Sets the FEProblem pointer which can (and is expected) to happen long after this interface is
+   * constructed. Once this pointer is set, this interface can retrieve the information it requires
+   * from the underlying class and the internal methods can be called. Errors are throw if internal
+   * methods are called when this pointer is nullptr.
+   */
   void setFEProblemPtr(FEProblemBase * fe_problem);
 
 private:

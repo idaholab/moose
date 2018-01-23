@@ -38,8 +38,7 @@ validParams<RelationshipManager>()
   params.addPrivateParam<bool>("attach_geometric_early", true);
 
   /**
-   * This parameter indicates which type of RelationshipManager this class represents prior to
-   * its
+   * This parameter indicates which type of RelationshipManager this class represents prior to its
    * construction. Geometric-only RelationshipManagers may be buildable early in which case the
    * framework can optimize memory usage for Distributed Mesh by allowing remote elements to be
    * deleted. Depending on the mesh size and EquationSystems size, this may have a significant
