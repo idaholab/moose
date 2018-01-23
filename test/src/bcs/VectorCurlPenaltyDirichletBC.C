@@ -1,9 +1,9 @@
-#include "VectorPenaltyDirichletBC.h"
+#include "VectorCurlPenaltyDirichletBC.h"
 #include "Function.h"
 
 template <>
 InputParameters
-validParams<VectorPenaltyDirichletBC>()
+validParams<VectorCurlPenaltyDirichletBC>()
 {
   InputParameters params = validParams<VectorIntegratedBC>();
   params.addRequiredParam<Real>("penalty", "The penalty coefficient");
@@ -13,7 +13,7 @@ validParams<VectorPenaltyDirichletBC>()
   return params;
 }
 
-VectorPenaltyDirichletBC::VectorPenaltyDirichletBC(const InputParameters & parameters)
+VectorCurlPenaltyDirichletBC::VectorCurlPenaltyDirichletBC(const InputParameters & parameters)
   : VectorIntegratedBC(parameters),
     _penalty(getParam<Real>("penalty")),
     _exact_x(getFunction("x_exact_soln")),
@@ -23,7 +23,7 @@ VectorPenaltyDirichletBC::VectorPenaltyDirichletBC(const InputParameters & param
 }
 
 Real
-VectorPenaltyDirichletBC::computeQpResidual()
+VectorCurlPenaltyDirichletBC::computeQpResidual()
 {
   RealVectorValue u_exact = {_exact_x.value(_t, _q_point[_qp]),
                              _exact_y.value(_t, _q_point[_qp]),
@@ -33,7 +33,7 @@ VectorPenaltyDirichletBC::computeQpResidual()
 }
 
 Real
-VectorPenaltyDirichletBC::computeQpJacobian()
+VectorCurlPenaltyDirichletBC::computeQpJacobian()
 {
   return _penalty * (_phi[_j][_qp]).cross(_normals[_qp]) * (_test[_i][_qp]).cross(_normals[_qp]);
 }

@@ -1,5 +1,3 @@
-# This example reproduces the libmesh vector_fe example 3 results
-
 [Mesh]
   type = GeneratedMesh
   dim = 2
@@ -15,14 +13,31 @@
     family = NEDELEC_ONE
     order = FIRST
   [../]
+  [./v]
+  [../]
 []
 
 [Kernels]
-  [./diff]
+  [./wave]
     type = VectorFEWave
     variable = u
     x_forcing_func = 'x_ffn'
     y_forcing_func = 'y_ffn'
+  [../]
+  [./diff]
+    type = Diffusion
+    variable = v
+  [../]
+  [./source]
+    type = BodyForce
+    variable = v
+  [../]
+  [./advection]
+    type = EFieldAdvection
+    variable = v
+    efield = u
+    charge = 'positive'
+    mobility = 100
   [../]
 []
 
@@ -34,6 +49,12 @@
     x_exact_soln = 'x_sln'
     y_exact_soln = 'y_sln'
     variable = u
+  [../]
+  [./bnd_v]
+    type = DirichletBC
+    boundary = 'left right top bottom'
+    value = 0
+    variable = v
   [../]
 []
 
@@ -59,14 +80,15 @@
 [Preconditioning]
   [./pre]
     type = SMP
+    full = true
   [../]
 []
 
 [Executioner]
   type = Steady
-  solve_type = 'LINEAR'
+  solve_type = 'NEWTON'
   petsc_options_iname = '-pc_type'
-  petsc_options_value = 'lu'
+  petsc_options_value = 'asm'
   petsc_options = '-snes_converged_reason -ksp_converged_reason -snes_linesearch_monitor'
 []
 
