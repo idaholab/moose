@@ -58,14 +58,29 @@ LevelSetApp::LevelSetApp(InputParameters parameters) : MooseApp(parameters)
 
   Moose::associateSyntax(_syntax, _action_factory);
   LevelSetApp::associateSyntax(_syntax, _action_factory);
+
+  Moose::registerExecFlags(_factory);
+  LevelSetApp::registerExecFlags(_factory);
 }
 
+// External entry point for dynamic application loading
+extern "C" void
+LevelSetApp__registerApps()
+{
+  LevelSetApp::registerApps();
+}
 void
 LevelSetApp::registerApps()
 {
   registerApp(LevelSetApp);
 }
 
+// External entry point for dynamic object registration
+extern "C" void
+LevelSetApp__registerObjects(Factory & factory)
+{
+  LevelSetApp::registerObjects(factory);
+}
 void
 LevelSetApp::registerObjects(Factory & factory)
 {
@@ -96,13 +111,25 @@ LevelSetApp::registerObjects(Factory & factory)
   registerTransfer(LevelSetMeshRefinementTransfer);
 }
 
+// External entry point for dynamic syntax association
+extern "C" void
+LevelSetApp__associateSyntax(Syntax & syntax, ActionFactory & action_factory)
+{
+  LevelSetApp::associateSyntax(syntax, action_factory);
+}
 void
 LevelSetApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & /*action_factory*/)
 {
 }
 
+// External entry point for dynamic execute flag registration
+extern "C" void
+LevelSetApp__registerExecFlags(Factory & factory)
+{
+  LevelSetApp::registerExecFlags(factory);
+}
 void
-LevelSetApp::registerExecFlags()
+LevelSetApp::registerExecFlags(Factory & factory)
 {
   registerExecFlag(LevelSet::EXEC_ADAPT_MESH);
 }

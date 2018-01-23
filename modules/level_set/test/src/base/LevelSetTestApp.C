@@ -30,11 +30,15 @@ LevelSetTestApp::LevelSetTestApp(InputParameters parameters) : MooseApp(paramete
   Moose::associateSyntax(_syntax, _action_factory);
   LevelSetApp::associateSyntax(_syntax, _action_factory);
 
+  Moose::registerExecFlags(_factory);
+  LevelSetApp::registerExecFlags(_factory);
+
   bool use_test_objs = getParam<bool>("allow_test_objects");
   if (use_test_objs)
   {
     LevelSetTestApp::registerObjects(_factory);
     LevelSetTestApp::associateSyntax(_syntax, _action_factory);
+    LevelSetTestApp::registerExecFlags(_factory);
   }
 }
 
@@ -72,5 +76,16 @@ LevelSetTestApp__associateSyntax(Syntax & syntax, ActionFactory & action_factory
 }
 void
 LevelSetTestApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & /*action_factory*/)
+{
+}
+
+// External entry point for dynamic execute flag registration
+extern "C" void
+LevelSetTestApp__registerExecFlags(Factory & factory)
+{
+  LevelSetTestApp::registerExecFlags(factory);
+}
+void
+LevelSetTestApp::registerExecFlags(Factory & /*factory*/)
 {
 }
