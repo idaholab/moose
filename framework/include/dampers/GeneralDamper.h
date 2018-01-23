@@ -17,8 +17,6 @@
 class GeneralDamper;
 class SubProblem;
 class SystemBase;
-class MooseVariable;
-class Assembly;
 
 template <>
 InputParameters validParams<GeneralDamper>();

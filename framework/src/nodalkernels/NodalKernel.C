@@ -11,7 +11,7 @@
 #include "Problem.h"
 #include "SubProblem.h"
 #include "SystemBase.h"
-#include "MooseVariable.h"
+#include "MooseVariableField.h"
 #include "Assembly.h"
 
 template <>
@@ -77,12 +77,12 @@ NodalKernel::NodalKernel(const InputParameters & parameters)
     _sys(*getCheckedPointerParam<SystemBase *>("_sys")),
     _tid(parameters.get<THREAD_ID>("_tid")),
     _assembly(_subproblem.assembly(_tid)),
-    _var(_sys.getVariable(_tid, parameters.get<NonlinearVariableName>("variable"))),
+    _var(_sys.getFieldVariable<Real>(_tid, parameters.get<NonlinearVariableName>("variable"))),
     _mesh(_subproblem.mesh()),
     _current_node(_var.node()),
-    _u(_var.nodalSln()),
-    _u_dot(_var.nodalSlnDot()),
-    _du_dot_du(_var.nodalSlnDuDotDu()),
+    _u(_var.nodalValue()),
+    _u_dot(_var.nodalValueDot()),
+    _du_dot_du(_var.nodalValueDuDotDu()),
     _save_in_strings(parameters.get<std::vector<AuxVariableName>>("save_in")),
     _diag_save_in_strings(parameters.get<std::vector<AuxVariableName>>("diag_save_in"))
 
@@ -92,7 +92,7 @@ NodalKernel::NodalKernel(const InputParameters & parameters)
 
   for (unsigned int i = 0; i < _save_in_strings.size(); i++)
   {
-    MooseVariable * var = &_subproblem.getVariable(_tid, _save_in_strings[i]);
+    MooseVariable * var = &_subproblem.getStandardVariable(_tid, _save_in_strings[i]);
 
     if (var->feType() != _var.feType())
       paramError(
@@ -109,7 +109,7 @@ NodalKernel::NodalKernel(const InputParameters & parameters)
 
   for (unsigned int i = 0; i < _diag_save_in_strings.size(); i++)
   {
-    MooseVariable * var = &_subproblem.getVariable(_tid, _diag_save_in_strings[i]);
+    MooseVariable * var = &_subproblem.getStandardVariable(_tid, _diag_save_in_strings[i]);
 
     if (var->feType() != _var.feType())
       paramError(

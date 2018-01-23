@@ -63,7 +63,7 @@ KKSMultiACBulkBase::KKSMultiACBulkBase(const InputParameters & parameters)
 
     for (unsigned int i = 0; i < _nvar; ++i)
     {
-      MooseVariable * cvar = _coupled_moose_vars[i];
+      MooseVariableFE * cvar = _coupled_moose_vars[i];
       // Get derivatives of all Fj wrt all coupled variables
       _prop_dFjdarg[n][i] = &getMaterialPropertyDerivative<Real>(_Fj_names[n], cvar->name());
 

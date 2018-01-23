@@ -18,10 +18,7 @@ validParams<TestLapBC>()
 }
 
 TestLapBC::TestLapBC(const InputParameters & parameters)
-  : IntegratedBC(parameters),
-    _second_u(second()),
-    _second_phi(secondPhiFace()),
-    _second_test(secondTestFace())
+  : IntegratedBC(parameters), _second_u(_var.secondSln()), _second_phi(_var.secondPhiFace())
 {
 }
 

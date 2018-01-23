@@ -1739,7 +1739,7 @@ MechanicalContactConstraint::getConnectedDofIndices(unsigned int var_num)
     else
     {
       _connected_dof_indices.clear();
-      MooseVariable & var = _sys.getVariable(0, var_num);
+      MooseVariableFE & var = _sys.getVariable(0, var_num);
       _connected_dof_indices.push_back(var.nodalDofIndex());
     }
   }

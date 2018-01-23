@@ -13,6 +13,7 @@
 // MOOSE includes
 #include "GeneralVectorPostprocessor.h"
 #include "CoupleableMooseVariableDependencyIntermediateInterface.h"
+#include "MooseVariableInterface.h"
 #include "SamplerBase.h"
 
 // Forward Declarations

@@ -16,7 +16,7 @@ CoupleableMooseVariableDependencyIntermediateInterface::
     ScalarCoupleable(moose_object),
     MooseVariableInterface(moose_object, nodal)
 {
-  for (MooseVariable * coupled_var : getCoupledMooseVars())
+  for (MooseVariableFE * coupled_var : getCoupledMooseVars())
     addMooseVariableDependency(coupled_var);
 
   addMooseVariableDependency(mooseVariable());

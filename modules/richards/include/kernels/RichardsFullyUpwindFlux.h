@@ -137,7 +137,7 @@ protected:
    * Holds the values of pressures at all the nodes of the element
    * Eg:
    * _ps_at_nodes[_pvar] is a pointer to this variable's nodal porepressure values
-   * So: (*_ps_at_nodes[_pvar])[i] = _var.nodalSln()[i] = value of porepressure at node i
+   * So: (*_ps_at_nodes[_pvar])[i] = _var.nodalValue()[i] = value of porepressure at node i
    */
   std::vector<const VariableValue *> _ps_at_nodes;
 };

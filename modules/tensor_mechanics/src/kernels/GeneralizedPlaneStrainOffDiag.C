@@ -56,9 +56,10 @@ GeneralizedPlaneStrainOffDiag::GeneralizedPlaneStrainOffDiag(const InputParamete
     _scalar_var_id(isParamValid("scalar_out_of_plane_strain_index")
                        ? getParam<unsigned int>("scalar_out_of_plane_strain_index")
                        : 0),
-    _temp_var(isParamValid("temperature")
-                  ? &_subproblem.getVariable(_tid, getParam<NonlinearVariableName>("temperature"))
-                  : NULL),
+    _temp_var(
+        isParamValid("temperature")
+            ? &_subproblem.getStandardVariable(_tid, getParam<NonlinearVariableName>("temperature"))
+            : NULL),
     _num_disp_var(getParam<std::vector<NonlinearVariableName>>("displacements").size())
 {
   const std::vector<NonlinearVariableName> & nl_vnames(
@@ -68,7 +69,7 @@ GeneralizedPlaneStrainOffDiag::GeneralizedPlaneStrainOffDiag(const InputParamete
                "generalized plane strain cases!");
 
   for (unsigned int i = 0; i < _num_disp_var; ++i)
-    _disp_var.push_back(&_subproblem.getVariable(_tid, nl_vnames[i]));
+    _disp_var.push_back(&_subproblem.getStandardVariable(_tid, nl_vnames[i]));
 
   for (unsigned int i = 0; i < _deigenstrain_dT.size(); ++i)
     _deigenstrain_dT[i] = &getMaterialPropertyDerivative<RankTwoTensor>(

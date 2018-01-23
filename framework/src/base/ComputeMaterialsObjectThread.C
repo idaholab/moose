@@ -74,7 +74,7 @@ ComputeMaterialsObjectThread::subdomainChanged()
   _need_internal_side_material = _fe_problem.needMaterialOnSide(_subdomain, _tid);
   _fe_problem.subdomainSetup(_subdomain, _tid);
 
-  std::set<MooseVariable *> needed_moose_vars;
+  std::set<MooseVariableFE *> needed_moose_vars;
   _materials.updateVariableDependency(needed_moose_vars, _tid);
   _fe_problem.setActiveElementalMooseVariables(needed_moose_vars, _tid);
 }

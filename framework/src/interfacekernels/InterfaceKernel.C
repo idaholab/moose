@@ -11,7 +11,7 @@
 
 // MOOSE includes
 #include "Assembly.h"
-#include "MooseVariable.h"
+#include "MooseVariableField.h"
 #include "SystemBase.h"
 
 #include "libmesh/quadrature.h"
@@ -85,7 +85,7 @@ InterfaceKernel::InterfaceKernel(const InputParameters & parameters)
     _sys(*getCheckedPointerParam<SystemBase *>("_sys")),
     _tid(parameters.get<THREAD_ID>("_tid")),
     _assembly(_subproblem.assembly(_tid)),
-    _var(_sys.getVariable(_tid, parameters.get<NonlinearVariableName>("variable"))),
+    _var(_sys.getFieldVariable<Real>(_tid, parameters.get<NonlinearVariableName>("variable"))),
     _mesh(_subproblem.mesh()),
     _current_elem(_assembly.elem()),
     _current_elem_volume(_assembly.elemVolume()),
@@ -100,16 +100,16 @@ InterfaceKernel::InterfaceKernel(const InputParameters & parameters)
     _coord(_assembly.coordTransformation()),
     _u(_is_implicit ? _var.sln() : _var.slnOld()),
     _grad_u(_is_implicit ? _var.gradSln() : _var.gradSlnOld()),
-    _phi(_assembly.phiFace()),
-    _grad_phi(_assembly.gradPhiFace()),
+    _phi(_assembly.phiFace(_var)),
+    _grad_phi(_assembly.gradPhiFace(_var)),
     _test(_var.phiFace()),
     _grad_test(_var.gradPhiFace()),
     _normals(_var.normals()),
     _neighbor_var(*getVar("neighbor_var", 0)),
     _neighbor_value(_neighbor_var.slnNeighbor()),
     _grad_neighbor_value(_neighbor_var.gradSlnNeighbor()),
-    _phi_neighbor(_assembly.phiFaceNeighbor()),
-    _grad_phi_neighbor(_assembly.gradPhiFaceNeighbor()),
+    _phi_neighbor(_assembly.phiFaceNeighbor(_neighbor_var)),
+    _grad_phi_neighbor(_assembly.gradPhiFaceNeighbor(_neighbor_var)),
     _test_neighbor(_neighbor_var.phiFaceNeighbor()),
     _grad_test_neighbor(_neighbor_var.gradPhiFaceNeighbor()),
     _save_in_var_side(parameters.get<MultiMooseEnum>("save_in_var_side")),
@@ -130,7 +130,7 @@ InterfaceKernel::InterfaceKernel(const InputParameters & parameters)
     {
       for (unsigned i = 0; i < _save_in_strings.size(); ++i)
       {
-        MooseVariable * var = &_subproblem.getVariable(_tid, _save_in_strings[i]);
+        MooseVariable * var = &_subproblem.getStandardVariable(_tid, _save_in_strings[i]);
 
         if (_sys.hasVariable(_save_in_strings[i]))
           mooseError("Trying to use solution variable " + _save_in_strings[i] +
@@ -174,7 +174,7 @@ InterfaceKernel::InterfaceKernel(const InputParameters & parameters)
     {
       for (unsigned i = 0; i < _diag_save_in_strings.size(); ++i)
       {
-        MooseVariable * var = &_subproblem.getVariable(_tid, _diag_save_in_strings[i]);
+        MooseVariable * var = &_subproblem.getStandardVariable(_tid, _diag_save_in_strings[i]);
 
         if (_sys.hasVariable(_diag_save_in_strings[i]))
           mooseError("Trying to use solution variable " + _diag_save_in_strings[i] +

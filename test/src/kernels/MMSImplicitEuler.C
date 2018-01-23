@@ -18,7 +18,7 @@ validParams<MMSImplicitEuler>()
 }
 
 MMSImplicitEuler::MMSImplicitEuler(const InputParameters & parameters)
-  : TimeKernel(parameters), _u_old(valueOld())
+  : TimeKernel(parameters), _u_old(_var.slnOld())
 {
 }
 

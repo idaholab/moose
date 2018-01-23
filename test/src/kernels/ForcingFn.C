@@ -10,7 +10,7 @@
 #include "ForcingFn.h"
 
 // MOOSE includes
-#include "MooseVariable.h"
+#include "MooseVariableField.h"
 
 template <>
 InputParameters

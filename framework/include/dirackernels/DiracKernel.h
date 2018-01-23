@@ -21,9 +21,10 @@
 #include "TransientInterface.h"
 #include "PostprocessorInterface.h"
 #include "GeometricSearchInterface.h"
-#include "MooseVariable.h"
+#include "MooseVariableField.h"
 #include "Restartable.h"
 #include "MeshChangedInterface.h"
+#include "MooseVariableInterface.h"
 
 // Forward Declarations
 class Assembly;

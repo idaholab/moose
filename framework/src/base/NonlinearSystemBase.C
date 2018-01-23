@@ -11,7 +11,7 @@
 #include "AuxiliarySystem.h"
 #include "Problem.h"
 #include "FEProblem.h"
-#include "MooseVariable.h"
+#include "MooseVariableField.h"
 #include "MooseVariableScalar.h"
 #include "PetscSupport.h"
 #include "Factory.h"
@@ -33,7 +33,7 @@
 #include "BoundaryCondition.h"
 #include "PresetNodalBC.h"
 #include "NodalBC.h"
-#include "IntegratedBC.h"
+#include "IntegratedBCBase.h"
 #include "DGKernel.h"
 #include "InterfaceKernel.h"
 #include "ElementDamper.h"
@@ -353,7 +353,7 @@ NonlinearSystemBase::addBoundaryCondition(const std::string & bc_name,
 
   // Cast to the various types of BCs
   std::shared_ptr<NodalBC> nbc = std::dynamic_pointer_cast<NodalBC>(bc);
-  std::shared_ptr<IntegratedBC> ibc = std::dynamic_pointer_cast<IntegratedBC>(bc);
+  std::shared_ptr<IntegratedBCBase> ibc = std::dynamic_pointer_cast<IntegratedBCBase>(bc);
 
   // NodalBC
   if (nbc)
@@ -372,7 +372,7 @@ NonlinearSystemBase::addBoundaryCondition(const std::string & bc_name,
       _preset_nodal_bcs.addObject(pnbc);
   }
 
-  // IntegratedBC
+  // IntegratedBCBase
   else if (ibc)
   {
     _integrated_bcs.addObject(ibc, tid);
@@ -392,7 +392,7 @@ NonlinearSystemBase::addBoundaryCondition(const std::string & bc_name,
       const std::set<BoundaryID> & boundary_ids = bc->boundaryIDs();
       _vars[tid].addBoundaryVar(boundary_ids, &bc->variable());
 
-      ibc = std::static_pointer_cast<IntegratedBC>(bc);
+      ibc = std::static_pointer_cast<IntegratedBCBase>(bc);
 
       _integrated_bcs.addObject(ibc, tid);
       _vars[tid].addBoundaryVars(boundary_ids, ibc->getCoupledVars());
@@ -1571,7 +1571,7 @@ NonlinearSystemBase::constraintJacobians(SparseMatrix<Number> & jacobian, bool d
                   _fe_problem.cacheJacobianNeighbor(0);
 
                 // Do the off-diagonals next
-                const std::vector<MooseVariable *> coupled_vars = nfc->getCoupledMooseVars();
+                const std::vector<MooseVariableFE *> coupled_vars = nfc->getCoupledMooseVars();
                 for (const auto & jvar : coupled_vars)
                 {
                   // Only compute jacobians for nonlinear variables
@@ -2001,7 +2001,7 @@ NonlinearSystemBase::computeJacobianInternal(SparseMatrix<Number> & jacobian,
         const auto & bcs = _nodal_bcs.getActiveBoundaryObjects(bid);
         for (const auto & bc : bcs)
         {
-          const std::vector<MooseVariable *> & coupled_moose_vars = bc->getCoupledMooseVars();
+          const std::vector<MooseVariableFE *> & coupled_moose_vars = bc->getCoupledMooseVars();
 
           // Create the set of "involved" MOOSE nonlinear vars, which includes all coupled vars and
           // the BC's own variable
@@ -2020,7 +2020,7 @@ NonlinearSystemBase::computeJacobianInternal(SparseMatrix<Number> & jacobian,
     // which variables are "coupled" as far as the preconditioner is
     // concerned, not what variables a boundary condition specifically
     // depends on.
-    std::vector<std::pair<MooseVariable *, MooseVariable *>> & coupling_entries =
+    std::vector<std::pair<MooseVariableFE *, MooseVariableFE *>> & coupling_entries =
         _fe_problem.couplingEntries(/*_tid=*/0);
 
     // Compute Jacobians for NodalBCs

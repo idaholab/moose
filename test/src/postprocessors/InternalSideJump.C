@@ -22,7 +22,6 @@ validParams<InternalSideJump>()
 
 InternalSideJump::InternalSideJump(const InputParameters & parameters)
   : InternalSidePostprocessor(parameters),
-    MooseVariableInterface(this, false),
     _current_elem_volume(_assembly.elemVolume()),
     _current_neighbor_volume(_assembly.neighborVolume()),
     _sln_dofs(coupledSolutionDoFs("variable")),

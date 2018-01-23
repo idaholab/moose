@@ -29,7 +29,6 @@
 // Forward Declarations
 class FeatureFloodCount;
 class MooseMesh;
-class MooseVariable;
 
 template <>
 InputParameters validParams<FeatureFloodCount>();
@@ -85,6 +84,9 @@ public:
 
   /// Returns a const vector to the coupled variable pointers
   const std::vector<MooseVariable *> & getCoupledVars() const { return _vars; }
+
+  /// Returns a const vector to the coupled MooseVariableFE pointers
+  const std::vector<MooseVariableFE *> & getFECoupledVars() const { return _fe_vars; }
 
   enum class FieldType
   {
@@ -501,8 +503,9 @@ protected:
   /*************************************************
    *************** Data Structures *****************
    ************************************************/
-
   /// The vector of coupled in variables
+  std::vector<MooseVariableFE *> _fe_vars;
+  /// The vector of coupled in variables cast to MooseVariable
   std::vector<MooseVariable *> _vars;
 
   /// The threshold above (or below) where an entity may begin a new region (feature)

@@ -80,7 +80,7 @@ DGKernel::DGKernel(const InputParameters & parameters)
     _sys(*getCheckedPointerParam<SystemBase *>("_sys")),
     _tid(parameters.get<THREAD_ID>("_tid")),
     _assembly(_subproblem.assembly(_tid)),
-    _var(_sys.getVariable(_tid, parameters.get<NonlinearVariableName>("variable"))),
+    _var(_sys.getFieldVariable<Real>(_tid, parameters.get<NonlinearVariableName>("variable"))),
     _mesh(_subproblem.mesh()),
 
     _current_elem(_assembly.elem()),
@@ -101,16 +101,16 @@ DGKernel::DGKernel(const InputParameters & parameters)
     _u(_is_implicit ? _var.sln() : _var.slnOld()),
     _grad_u(_is_implicit ? _var.gradSln() : _var.gradSlnOld()),
 
-    _phi(_assembly.phiFace()),
-    _grad_phi(_assembly.gradPhiFace()),
+    _phi(_assembly.phiFace(_var)),
+    _grad_phi(_assembly.gradPhiFace(_var)),
 
     _test(_var.phiFace()),
     _grad_test(_var.gradPhiFace()),
 
     _normals(_var.normals()),
 
-    _phi_neighbor(_assembly.phiFaceNeighbor()),
-    _grad_phi_neighbor(_assembly.gradPhiFaceNeighbor()),
+    _phi_neighbor(_assembly.phiFaceNeighbor(_var)),
+    _grad_phi_neighbor(_assembly.gradPhiFaceNeighbor(_var)),
 
     _test_neighbor(_var.phiFaceNeighbor()),
     _grad_test_neighbor(_var.gradPhiFaceNeighbor()),
@@ -121,12 +121,14 @@ DGKernel::DGKernel(const InputParameters & parameters)
     _save_in_strings(parameters.get<std::vector<AuxVariableName>>("save_in")),
     _diag_save_in_strings(parameters.get<std::vector<AuxVariableName>>("diag_save_in"))
 {
+  addMooseVariableDependency(mooseVariable());
+
   _save_in.resize(_save_in_strings.size());
   _diag_save_in.resize(_diag_save_in_strings.size());
 
   for (unsigned int i = 0; i < _save_in_strings.size(); i++)
   {
-    MooseVariable * var = &_subproblem.getVariable(_tid, _save_in_strings[i]);
+    MooseVariableFE * var = &_subproblem.getVariable(_tid, _save_in_strings[i]);
 
     if (_sys.hasVariable(_save_in_strings[i]))
       mooseError("Trying to use solution variable " + _save_in_strings[i] +
@@ -147,7 +149,7 @@ DGKernel::DGKernel(const InputParameters & parameters)
 
   for (unsigned int i = 0; i < _diag_save_in_strings.size(); i++)
   {
-    MooseVariable * var = &_subproblem.getVariable(_tid, _diag_save_in_strings[i]);
+    MooseVariableFE * var = &_subproblem.getVariable(_tid, _diag_save_in_strings[i]);
 
     if (_sys.hasVariable(_diag_save_in_strings[i]))
       mooseError("Trying to use solution variable " + _diag_save_in_strings[i] +

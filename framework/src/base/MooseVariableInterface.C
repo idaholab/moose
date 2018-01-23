@@ -12,7 +12,7 @@
 #include "Assembly.h"
 #include "MooseError.h" // mooseDeprecated
 #include "MooseTypes.h"
-#include "MooseVariable.h"
+#include "MooseVariableField.h"
 #include "Problem.h"
 #include "SubProblem.h"
 
@@ -34,14 +34,14 @@ MooseVariableInterface::MooseVariableInterface(const MooseObject * moose_object,
     // interface level...
     variable_name = parameters.getVecMooseType(var_param_name)[0];
 
-  _variable = &problem.getVariable(tid, variable_name);
+  _variable = &dynamic_cast<MooseVariableField<T> &>(problem.getVariable(tid, variable_name));
 
   _mvi_assembly = &problem.assembly(tid);
 }
 
 MooseVariableInterface::~MooseVariableInterface() {}
 
-MooseVariable *
+MooseVariableFE *
 MooseVariableInterface::mooseVariable()
 {
   return _variable;
@@ -51,49 +51,104 @@ const VariableValue &
 MooseVariableInterface::value()
 {
   if (_nodal)
-    return _variable->nodalSln();
+    return _variable->nodalValue();
   else
     return _variable->sln();
 }
 
-const VariableValue &
-MooseVariableInterface::valueOld()
+template <>
+const VectorVariableValue &
+MooseVariableInterface<RealVectorValue>::value()
 {
   if (_nodal)
-    return _variable->nodalSlnOld();
+    mooseError("Dofs are scalars while vector variables have vector values. Mismatch");
+  else
+    return _variable->sln();
+}
+
+template <typename T>
+const typename OutputTools<T>::VariableValue &
+MooseVariableInterface<T>::valueOld()
+{
+  if (_nodal)
+    return _variable->nodalValueOld();
   else
     return _variable->slnOld();
 }
 
-const VariableValue &
-MooseVariableInterface::valueOlder()
+template <>
+const VectorVariableValue &
+MooseVariableInterface<RealVectorValue>::valueOld()
 {
   if (_nodal)
-    return _variable->nodalSlnOlder();
+    mooseError("Dofs are scalars while vector variables have vector values. Mismatch");
+  else
+    return _variable->slnOld();
+}
+
+template <typename T>
+const typename OutputTools<T>::VariableValue &
+MooseVariableInterface<T>::valueOlder()
+{
+  if (_nodal)
+    return _variable->nodalValueOlder();
   else
     return _variable->slnOlder();
 }
 
-const VariableValue &
-MooseVariableInterface::dot()
+template <>
+const VectorVariableValue &
+MooseVariableInterface<RealVectorValue>::valueOlder()
 {
   if (_nodal)
-    return _variable->nodalSlnDot();
+    mooseError("Dofs are scalars while vector variables have vector values. Mismatch");
+  else
+    return _variable->slnOlder();
+}
+
+template <typename T>
+const typename OutputTools<T>::VariableValue &
+MooseVariableInterface<T>::dot()
+{
+  if (_nodal)
+    return _variable->nodalValueDot();
   else
     return _variable->uDot();
 }
 
-const VariableValue &
-MooseVariableInterface::dotDu()
+template <>
+const VectorVariableValue &
+MooseVariableInterface<RealVectorValue>::dot()
 {
   if (_nodal)
-    return _variable->nodalSlnDuDotDu();
+    mooseError("Dofs are scalars while vector variables have vector values. Mismatch");
+  else
+    return _variable->uDot();
+}
+
+template <typename T>
+const typename OutputTools<T>::VariableValue &
+MooseVariableInterface<T>::dotDu()
+{
+  if (_nodal)
+    return _variable->nodalValueDuDotDu();
   else
     return _variable->duDotDu();
 }
 
-const VariableGradient &
-MooseVariableInterface::gradient()
+template <>
+const VectorVariableValue &
+MooseVariableInterface<RealVectorValue>::dotDu()
+{
+  if (_nodal)
+    mooseError("Dofs are scalars while vector variables have vector values. Mismatch");
+  else
+    return _variable->duDotDu();
+}
+
+template <typename T>
+const typename OutputTools<T>::VariableGradient &
+MooseVariableInterface<T>::gradient()
 {
   if (_nodal)
     mooseError("Nodal variables do not have gradients");
@@ -170,7 +225,7 @@ MooseVariableInterface::secondPhi()
   if (_nodal)
     mooseError("Nodal variables do not have second derivatives");
 
-  return _mvi_assembly->secondPhi();
+  return _mvi_assembly->secondPhi(*_variable);
 }
 
 const VariablePhiSecond &
@@ -179,5 +234,5 @@ MooseVariableInterface::secondPhiFace()
   if (_nodal)
     mooseError("Nodal variables do not have second derivatives");
 
-  return _mvi_assembly->secondPhiFace();
+  return _mvi_assembly->secondPhiFace(*_variable);
 }

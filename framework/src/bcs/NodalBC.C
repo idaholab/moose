@@ -10,7 +10,7 @@
 #include "NodalBC.h"
 
 #include "Assembly.h"
-#include "MooseVariable.h"
+#include "MooseVariableField.h"
 #include "SystemBase.h"
 
 template <>
@@ -37,8 +37,9 @@ NodalBC::NodalBC(const InputParameters & parameters)
   : BoundaryCondition(parameters, true), // true is for being Nodal
     RandomInterface(parameters, _fe_problem, _tid, true),
     CoupleableMooseVariableDependencyIntermediateInterface(this, true),
+    _var(_sys.getFieldVariable<Real>(_tid, parameters.get<NonlinearVariableName>("variable"))),
     _current_node(_var.node()),
-    _u(_var.nodalSln()),
+    _u(_var.nodalValue()),
     _save_in_strings(parameters.get<std::vector<AuxVariableName>>("save_in")),
     _diag_save_in_strings(parameters.get<std::vector<AuxVariableName>>("diag_save_in")),
     _is_eigen(false)
@@ -48,7 +49,7 @@ NodalBC::NodalBC(const InputParameters & parameters)
 
   for (unsigned int i = 0; i < _save_in_strings.size(); i++)
   {
-    MooseVariable * var = &_subproblem.getVariable(_tid, _save_in_strings[i]);
+    MooseVariable * var = &_subproblem.getStandardVariable(_tid, _save_in_strings[i]);
 
     if (var->feType() != _var.feType())
       paramError(
@@ -65,7 +66,7 @@ NodalBC::NodalBC(const InputParameters & parameters)
 
   for (unsigned int i = 0; i < _diag_save_in_strings.size(); i++)
   {
-    MooseVariable * var = &_subproblem.getVariable(_tid, _diag_save_in_strings[i]);
+    MooseVariable * var = &_subproblem.getStandardVariable(_tid, _diag_save_in_strings[i]);
 
     if (var->feType() != _var.feType())
       paramError(

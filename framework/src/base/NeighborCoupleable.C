@@ -11,7 +11,7 @@
 
 #include "FEProblem.h"
 #include "MooseError.h" // mooseDeprecated
-#include "MooseVariable.h"
+#include "MooseVariableField.h"
 #include "Problem.h"
 #include "SubProblem.h"
 
@@ -29,7 +29,7 @@ NeighborCoupleable::coupledNeighborValue(const std::string & var_name, unsigned 
 {
   MooseVariable * var = getVar(var_name, comp);
   if (_neighbor_nodal)
-    return (_c_is_implicit) ? var->nodalSlnNeighbor() : var->nodalSlnOldNeighbor();
+    return (_c_is_implicit) ? var->nodalValueNeighbor() : var->nodalValueOldNeighbor();
   else
     return (_c_is_implicit) ? var->slnNeighbor() : var->slnOldNeighbor();
 }
@@ -41,7 +41,7 @@ NeighborCoupleable::coupledNeighborValueOld(const std::string & var_name, unsign
 
   MooseVariable * var = getVar(var_name, comp);
   if (_neighbor_nodal)
-    return (_c_is_implicit) ? var->nodalSlnOldNeighbor() : var->nodalSlnOlderNeighbor();
+    return (_c_is_implicit) ? var->nodalValueOldNeighbor() : var->nodalValueOlderNeighbor();
   else
     return (_c_is_implicit) ? var->slnOldNeighbor() : var->slnOlderNeighbor();
 }
@@ -55,7 +55,7 @@ NeighborCoupleable::coupledNeighborValueOlder(const std::string & var_name, unsi
   if (_neighbor_nodal)
   {
     if (_c_is_implicit)
-      return var->nodalSlnOlderNeighbor();
+      return var->nodalValueOlderNeighbor();
     else
       mooseError("Older values not available for explicit schemes");
   }

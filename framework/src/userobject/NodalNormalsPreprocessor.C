@@ -13,7 +13,7 @@
 #include "Assembly.h"
 #include "AuxiliarySystem.h"
 #include "MooseMesh.h"
-#include "MooseVariable.h"
+#include "MooseVariableField.h"
 
 #include "libmesh/numeric_vector.h"
 #include "libmesh/quadrature.h"
@@ -65,7 +65,7 @@ NodalNormalsPreprocessor::NodalNormalsPreprocessor(const InputParameters & param
     _corner_boundary_id(_has_corners
                             ? _mesh.getBoundaryID(getParam<BoundaryName>("corner_boundary"))
                             : static_cast<BoundaryID>(-1)),
-    _grad_phi(_assembly.feGradPhi(_fe_type))
+    _grad_phi(_assembly.feGradPhi<Real>(_fe_type))
 {
 }
 

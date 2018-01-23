@@ -85,7 +85,7 @@ AverageGrainVolume::AverageGrainVolume(const InputParameters & parameters)
     for (auto & coupled_var : coupled_vars)
       _vals.emplace_back(&coupled_var->sln());
 
-    addMooseVariableDependency(coupled_vars);
+    addMooseVariableDependency(_feature_counter->getFECoupledVars());
   }
 }
 

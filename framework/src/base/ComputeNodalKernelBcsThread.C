@@ -12,7 +12,7 @@
 // MOOSE includes
 #include "AuxiliarySystem.h"
 #include "FEProblem.h"
-#include "MooseVariable.h"
+#include "MooseVariableField.h"
 #include "NodalKernel.h"
 
 #include "libmesh/threads.h"

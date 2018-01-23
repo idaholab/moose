@@ -11,7 +11,7 @@
 #include "FEProblem.h"
 #include "SystemBase.h"
 #include "Assembly.h"
-#include "MooseVariable.h"
+#include "MooseVariableField.h"
 
 #include "libmesh/fe_interface.h"
 #include "libmesh/quadrature.h"
@@ -59,7 +59,7 @@ InitialCondition::InitialCondition(const InputParameters & parameters)
     _assembly(_fe_problem.assembly(_tid)),
     _t(_fe_problem.time()),
     _coord_sys(_assembly.coordSystem()),
-    _var(_sys.getVariable(_tid, getParam<VariableName>("variable"))),
+    _var(_sys.getFieldVariable<Real>(_tid, getParam<VariableName>("variable"))),
 
     _current_elem(_var.currentElem()),
     _current_node(NULL),
@@ -68,7 +68,7 @@ InitialCondition::InitialCondition(const InputParameters & parameters)
 {
   _supplied_vars.insert(getParam<VariableName>("variable"));
 
-  std::map<std::string, std::vector<MooseVariable *>> coupled_vars = getCoupledVars();
+  std::map<std::string, std::vector<MooseVariableFE *>> coupled_vars = getCoupledVars();
   for (const auto & it : coupled_vars)
     for (const auto & var : it.second)
       _depend_vars.insert(var->name());

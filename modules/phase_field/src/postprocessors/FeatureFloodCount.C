@@ -159,13 +159,13 @@ FeatureFloodCount::FeatureFloodCount(const InputParameters & parameters)
   : GeneralPostprocessor(parameters),
     Coupleable(this, false),
     MooseVariableDependencyInterface(),
-    _vars(getCoupledMooseVars()),
+    _fe_vars(getCoupledMooseVars()),
     _threshold(getParam<Real>("threshold")),
     _connecting_threshold(isParamValid("connecting_threshold")
                               ? getParam<Real>("connecting_threshold")
                               : getParam<Real>("threshold")),
     _mesh(_subproblem.mesh()),
-    _var_number(_vars[0]->number()),
+    _var_number(_fe_vars[0]->number()),
     _single_map_mode(getParam<bool>("use_single_map")),
     _condense_map_info(getParam<bool>("condense_map_info")),
     _global_numbering(getParam<bool>("use_global_numbering")),
@@ -173,8 +173,8 @@ FeatureFloodCount::FeatureFloodCount(const InputParameters & parameters)
     _compute_halo_maps(getParam<bool>("compute_halo_maps")),
     _compute_var_to_feature_map(getParam<bool>("compute_var_to_feature_map")),
     _use_less_than_threshold_comparison(getParam<bool>("use_less_than_threshold_comparison")),
-    _n_vars(_vars.size()),
-    _maps_size(_single_map_mode ? 1 : _vars.size()),
+    _n_vars(_fe_vars.size()),
+    _maps_size(_single_map_mode ? 1 : _fe_vars.size()),
     _n_procs(_app.n_processors()),
     _feature_counts_per_map(_maps_size),
     _feature_count(0),
@@ -191,7 +191,10 @@ FeatureFloodCount::FeatureFloodCount(const InputParameters & parameters)
   if (_var_index_mode)
     _var_index_maps.resize(_maps_size);
 
-  addMooseVariableDependency(_vars);
+  for (auto & var : _fe_vars)
+    _vars.push_back(dynamic_cast<MooseVariable *>(var));
+
+  addMooseVariableDependency(_fe_vars);
 }
 
 FeatureFloodCount::~FeatureFloodCount() {}

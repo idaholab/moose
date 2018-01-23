@@ -192,7 +192,7 @@ protected:
 
 private:
   /// Field variables coupled into this object (for error checking)
-  std::map<std::string, std::vector<MooseVariable *>> _sc_coupled_vars;
+  std::map<std::string, std::vector<MooseVariableFE *>> _sc_coupled_vars;
 };
 
 #endif // SCALARCOUPLEABLE_H

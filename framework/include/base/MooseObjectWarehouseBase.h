@@ -16,10 +16,10 @@
 #include "BlockRestrictable.h"
 #include "TransientInterface.h"
 #include "Coupleable.h"
-#include "MooseVariableInterface.h"
+#include "SubProblem.h"
 
 // Forward declarations
-class MooseVariable;
+class MooseVariableFE;
 
 /**
  * A base storage container for MooseObjects.
@@ -115,15 +115,15 @@ public:
   /**
    * Update variable dependency vector.
    */
-  void updateVariableDependency(std::set<MooseVariable *> & needed_moose_vars,
+  void updateVariableDependency(std::set<MooseVariableFE *> & needed_moose_vars,
                                 THREAD_ID tid = 0) const;
   void updateBlockVariableDependency(SubdomainID id,
-                                     std::set<MooseVariable *> & needed_moose_vars,
+                                     std::set<MooseVariableFE *> & needed_moose_vars,
                                      THREAD_ID tid = 0) const;
-  void updateBoundaryVariableDependency(std::set<MooseVariable *> & needed_moose_vars,
+  void updateBoundaryVariableDependency(std::set<MooseVariableFE *> & needed_moose_vars,
                                         THREAD_ID tid = 0) const;
   void updateBoundaryVariableDependency(BoundaryID id,
-                                        std::set<MooseVariable *> & needed_moose_vars,
+                                        std::set<MooseVariableFE *> & needed_moose_vars,
                                         THREAD_ID tid = 0) const;
   ///@}
 
@@ -185,7 +185,7 @@ protected:
   /**
    * Helper method for updating variable dependency vector
    */
-  static void updateVariableDependencyHelper(std::set<MooseVariable *> & needed_moose_vars,
+  static void updateVariableDependencyHelper(std::set<MooseVariableFE *> & needed_moose_vars,
                                              const std::vector<std::shared_ptr<T>> & objects);
 
   /**
@@ -263,13 +263,26 @@ MooseObjectWarehouseBase<T>::addObject(std::shared_ptr<T> object, THREAD_ID tid 
     // Check variables
     std::shared_ptr<Coupleable> c_ptr = std::dynamic_pointer_cast<Coupleable>(object);
     if (c_ptr)
-      for (MooseVariable * var : c_ptr->getCoupledMooseVars())
+      for (MooseVariableFE * var : c_ptr->getCoupledMooseVars())
         blk->checkVariable(*var);
 
-    std::shared_ptr<MooseVariableInterface> mvi_ptr =
-        std::dynamic_pointer_cast<MooseVariableInterface>(object);
-    if (mvi_ptr)
-      blk->checkVariable(*(mvi_ptr->mooseVariable()));
+    const InputParameters & parameters = object->parameters();
+
+    SubProblem & problem = *parameters.get<SubProblem *>("_subproblem");
+
+    THREAD_ID tid = parameters.get<THREAD_ID>("_tid");
+
+    if (parameters.isParamValid("variable"))
+    {
+      // Try the scalar version first
+      std::string variable_name = parameters.getMooseType("variable");
+      if (variable_name == "")
+        // When using vector variables, we are only going to use the first one in the list at the
+        // interface level...
+        variable_name = parameters.getVecMooseType("variable")[0];
+
+      blk->checkVariable(problem.getVariable(tid, variable_name));
+    }
   }
 }
 
@@ -495,8 +508,8 @@ MooseObjectWarehouseBase<T>::sort(THREAD_ID tid /* = 0*/)
 
 template <typename T>
 void
-MooseObjectWarehouseBase<T>::updateVariableDependency(std::set<MooseVariable *> & needed_moose_vars,
-                                                      THREAD_ID tid /* = 0*/) const
+MooseObjectWarehouseBase<T>::updateVariableDependency(
+    std::set<MooseVariableFE *> & needed_moose_vars, THREAD_ID tid /* = 0*/) const
 {
   if (hasActiveObjects(tid))
     updateVariableDependencyHelper(needed_moose_vars, _all_objects[tid]);
@@ -505,7 +518,7 @@ MooseObjectWarehouseBase<T>::updateVariableDependency(std::set<MooseVariable *> 
 template <typename T>
 void
 MooseObjectWarehouseBase<T>::updateBlockVariableDependency(
-    SubdomainID id, std::set<MooseVariable *> & needed_moose_vars, THREAD_ID tid /* = 0*/) const
+    SubdomainID id, std::set<MooseVariableFE *> & needed_moose_vars, THREAD_ID tid /* = 0*/) const
 {
   if (hasActiveBlockObjects(id, tid))
     updateVariableDependencyHelper(needed_moose_vars, getActiveBlockObjects(id, tid));
@@ -514,7 +527,7 @@ MooseObjectWarehouseBase<T>::updateBlockVariableDependency(
 template <typename T>
 void
 MooseObjectWarehouseBase<T>::updateBoundaryVariableDependency(
-    std::set<MooseVariable *> & needed_moose_vars, THREAD_ID tid /* = 0*/) const
+    std::set<MooseVariableFE *> & needed_moose_vars, THREAD_ID tid /* = 0*/) const
 {
   if (hasActiveBoundaryObjects(tid))
   {
@@ -527,7 +540,7 @@ MooseObjectWarehouseBase<T>::updateBoundaryVariableDependency(
 template <typename T>
 void
 MooseObjectWarehouseBase<T>::updateBoundaryVariableDependency(
-    BoundaryID id, std::set<MooseVariable *> & needed_moose_vars, THREAD_ID tid /* = 0*/) const
+    BoundaryID id, std::set<MooseVariableFE *> & needed_moose_vars, THREAD_ID tid /* = 0*/) const
 {
   if (hasActiveBoundaryObjects(id, tid))
     updateVariableDependencyHelper(needed_moose_vars, getActiveBoundaryObjects(id, tid));
@@ -536,7 +549,8 @@ MooseObjectWarehouseBase<T>::updateBoundaryVariableDependency(
 template <typename T>
 void
 MooseObjectWarehouseBase<T>::updateVariableDependencyHelper(
-    std::set<MooseVariable *> & needed_moose_vars, const std::vector<std::shared_ptr<T>> & objects)
+    std::set<MooseVariableFE *> & needed_moose_vars,
+    const std::vector<std::shared_ptr<T>> & objects)
 {
   for (const auto & object : objects)
   {

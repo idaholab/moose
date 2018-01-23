@@ -94,7 +94,7 @@ AuxKernel::AuxKernel(const InputParameters & parameters)
     _tid(parameters.get<THREAD_ID>("_tid")),
     _assembly(_subproblem.assembly(_tid)),
 
-    _var(_aux_sys.getVariable(_tid, parameters.get<AuxVariableName>("variable"))),
+    _var(_aux_sys.getFieldVariable<Real>(_tid, parameters.get<AuxVariableName>("variable"))),
     _nodal(_var.isNodal()),
     _bnd(boundaryRestricted()),
 
@@ -105,9 +105,9 @@ AuxKernel::AuxKernel(const InputParameters & parameters)
     _JxW(_bnd ? _assembly.JxWFace() : _assembly.JxW()),
     _coord(_assembly.coordTransformation()),
 
-    _u(_nodal ? _var.nodalSln() : _var.sln()),
-    _u_old(_nodal ? _var.nodalSlnOld() : _var.slnOld()),
-    _u_older(_nodal ? _var.nodalSlnOlder() : _var.slnOlder()),
+    _u(_nodal ? _var.nodalValue() : _var.sln()),
+    _u_old(_nodal ? _var.nodalValueOld() : _var.slnOld()),
+    _u_older(_nodal ? _var.nodalValueOlder() : _var.slnOlder()),
     _test(_var.phi()),
 
     _current_elem(_var.currentElem()),
@@ -121,7 +121,7 @@ AuxKernel::AuxKernel(const InputParameters & parameters)
 {
   _supplied_vars.insert(parameters.get<AuxVariableName>("variable"));
 
-  std::map<std::string, std::vector<MooseVariable *>> coupled_vars = getCoupledVars();
+  std::map<std::string, std::vector<MooseVariableFE *>> coupled_vars = getCoupledVars();
   for (const auto & it : coupled_vars)
     for (const auto & var : it.second)
       _depend_vars.insert(var->name());
@@ -247,7 +247,7 @@ AuxKernel::compute()
 const VariableValue &
 AuxKernel::coupledDot(const std::string & var_name, unsigned int comp)
 {
-  MooseVariable * var = getVar(var_name, comp);
+  MooseVariableFE * var = getVar(var_name, comp);
   if (var->kind() == Moose::VAR_AUXILIARY)
     mooseError(
         name(),
@@ -259,7 +259,7 @@ AuxKernel::coupledDot(const std::string & var_name, unsigned int comp)
 const VariableValue &
 AuxKernel::coupledDotDu(const std::string & var_name, unsigned int comp)
 {
-  MooseVariable * var = getVar(var_name, comp);
+  MooseVariableFE * var = getVar(var_name, comp);
   if (var->kind() == Moose::VAR_AUXILIARY)
     mooseError(
         name(),

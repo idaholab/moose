@@ -13,7 +13,7 @@
 #include "Problem.h"
 #include "FEProblem.h"
 #include "Marker.h"
-#include "MooseVariable.h"
+#include "MooseVariableField.h"
 #include "SwapBackSentinel.h"
 
 #include "libmesh/threads.h"
@@ -43,7 +43,7 @@ ComputeMarkerThread::subdomainChanged()
   _fe_problem.subdomainSetup(_subdomain, _tid);
   _marker_whs.subdomainSetup(_tid);
 
-  std::set<MooseVariable *> needed_moose_vars;
+  std::set<MooseVariableFE *> needed_moose_vars;
   _marker_whs.updateVariableDependency(needed_moose_vars, _tid);
 
   for (const auto & it : _aux_sys._elem_vars[_tid])

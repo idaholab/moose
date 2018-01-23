@@ -52,7 +52,7 @@ ElementJacobianDamper::ElementJacobianDamper(const InputParameters & parameters)
 
   for (unsigned int i = 0; i < _ndisp; ++i)
   {
-    _disp_var.push_back(&_sys.getVariable(_tid, nl_vnames[i]));
+    _disp_var.push_back(&_sys.getFieldVariable<Real>(_tid, nl_vnames[i]));
     _disp_incr.push_back(_disp_var.back()->increment());
   }
 }

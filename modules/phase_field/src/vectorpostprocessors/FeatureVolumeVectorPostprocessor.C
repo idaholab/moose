@@ -43,7 +43,7 @@ FeatureVolumeVectorPostprocessor::FeatureVolumeVectorPostprocessor(
     _var_num(declareVector("var_num")),
     _feature_volumes(declareVector("feature_volumes")),
     _intersects_bounds(declareVector("intersects_bounds")),
-    _vars(_feature_counter.getCoupledVars()),
+    _vars(_feature_counter.getFECoupledVars()),
     _mesh(_subproblem.mesh()),
     _assembly(_subproblem.assembly(_tid)),
     _q_point(_assembly.qPoints()),
@@ -55,7 +55,7 @@ FeatureVolumeVectorPostprocessor::FeatureVolumeVectorPostprocessor(
 
   _coupled_sln.reserve(_vars.size());
   for (auto & var : _vars)
-    _coupled_sln.push_back(&var->sln());
+    _coupled_sln.push_back(&(dynamic_cast<MooseVariable *>(var))->sln());
 }
 
 void

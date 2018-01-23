@@ -15,7 +15,8 @@
 // Forward declarations
 class Assembly;
 class MooseObject;
-class MooseVariable;
+template <typename T>
+class MooseVariableField;
 
 /**
  * Interface for objects that need to get values of MooseVariables
@@ -37,7 +38,7 @@ public:
    * Get the variable that this object is using.
    * @return The variable this object is using.
    */
-  MooseVariable * mooseVariable();
+  MooseVariableFE * mooseVariable();
 
   virtual ~MooseVariableInterface();
 

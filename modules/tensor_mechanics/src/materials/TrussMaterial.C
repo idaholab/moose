@@ -48,7 +48,7 @@ TrussMaterial::TrussMaterial(const InputParameters & parameters)
 
   // fetch nonlinear variables
   for (unsigned int i = 0; i < _ndisp; ++i)
-    _disp_var.push_back(&_fe_problem.getVariable(_tid, nl_vnames[i]));
+    _disp_var.push_back(&_fe_problem.getStandardVariable(_tid, nl_vnames[i]));
 }
 
 void

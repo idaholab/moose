@@ -104,14 +104,14 @@ protected:
    *
    * @return The reference to be stored off and used later.
    */
-  virtual const VariableTestSecond & neighborSecondTest();
+  virtual const typename OutputTools<T>::VariableTestSecond & neighborSecondTest();
 
   /**
    * The second derivative of the neighbor's shape function.
    *
    * @return The reference to be stored off and used later.
    */
-  virtual const VariablePhiSecond & neighborSecondPhi();
+  virtual const typename OutputTools<T>::VariablePhiSecond & neighborSecondPhi();
 };
 
 #endif /* NEIGHBORMOOSEVARIABLEINTERFACE_H */

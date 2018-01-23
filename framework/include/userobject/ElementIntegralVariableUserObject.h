@@ -26,7 +26,7 @@ InputParameters validParams<ElementIntegralVariableUserObject>();
  * class and overriding computeQpIntegral().
  */
 class ElementIntegralVariableUserObject : public ElementIntegralUserObject,
-                                          public MooseVariableInterface
+                                          public MooseVariableInterface<Real>
 {
 public:
   ElementIntegralVariableUserObject(const InputParameters & parameters);

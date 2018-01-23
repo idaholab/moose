@@ -1,0 +1,8 @@
+[Tests]
+  [./vector_fe]
+    type = Exodiff
+    input = 'vector_kernel.i'
+    exodiff = 'vector_kernel_out.e'
+    abs_zero = 1e-9
+  [../]
+[]

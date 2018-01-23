@@ -12,7 +12,6 @@
 
 #include "GeneralUserObject.h"
 #include "Coupleable.h"
-#include "MooseVariableInterface.h"
 #include "ScalarCoupleable.h"
 #include "MooseVariableDependencyInterface.h"
 #include "MooseVariable.h"

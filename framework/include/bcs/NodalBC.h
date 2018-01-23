@@ -13,6 +13,7 @@
 #include "BoundaryCondition.h"
 #include "RandomInterface.h"
 #include "CoupleableMooseVariableDependencyIntermediateInterface.h"
+#include "MooseVariableInterface.h"
 
 // Forward declarations
 class NodalBC;
@@ -37,6 +38,12 @@ class NodalBC : public BoundaryCondition,
 public:
   NodalBC(const InputParameters & parameters);
 
+  /**
+   * Gets the variable this BC is active on
+   * @return the variable
+   */
+  virtual MooseVariable & variable() override { return _var; }
+
   virtual void computeResidual(NumericVector<Number> & residual);
   virtual void computeJacobian();
   virtual void computeOffDiagJacobian(unsigned int jvar);
@@ -44,6 +51,8 @@ public:
   void setBCOnEigen(bool iseigen) { _is_eigen = iseigen; }
 
 protected:
+  MooseVariable & _var;
+
   /// current node being processed
   const Node *& _current_node;
 
@@ -54,12 +63,12 @@ protected:
 
   /// The aux variables to save the residual contributions to
   bool _has_save_in;
-  std::vector<MooseVariable *> _save_in;
+  std::vector<MooseVariableFE *> _save_in;
   std::vector<AuxVariableName> _save_in_strings;
 
   /// The aux variables to save the diagonal Jacobian contributions to
   bool _has_diag_save_in;
-  std::vector<MooseVariable *> _diag_save_in;
+  std::vector<MooseVariableFE *> _diag_save_in;
   std::vector<AuxVariableName> _diag_save_in_strings;
 
   /// Indicate whether or not the boundary condition is applied to the right

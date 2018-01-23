@@ -11,7 +11,7 @@
 
 // MOOSE includes
 #include "KernelBase.h"
-#include "MooseVariable.h"
+#include "MooseVariableField.h"
 #include "TimeDerivative.h"
 #include "TimeKernel.h"
 

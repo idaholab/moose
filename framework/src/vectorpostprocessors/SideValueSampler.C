@@ -10,7 +10,7 @@
 #include "SideValueSampler.h"
 
 // MOOSE includes
-#include "MooseVariable.h"
+#include "MooseVariableField.h"
 
 #include "libmesh/quadrature.h"
 
@@ -53,7 +53,7 @@ SideValueSampler::execute()
   for (unsigned int _qp = 0; _qp < _qrule->n_points(); _qp++)
   {
     for (unsigned int i = 0; i < _coupled_moose_vars.size(); i++)
-      _values[i] = _coupled_moose_vars[i]->sln()[_qp];
+      _values[i] = (dynamic_cast<MooseVariable *>(_coupled_moose_vars[i]))->sln()[_qp];
 
     SamplerBase::addSample(_q_point[_qp], _current_elem->id(), _values);
   }
