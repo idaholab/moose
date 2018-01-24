@@ -81,6 +81,7 @@ class InputParameters;
 #define registerOutput(name) registerObject(name)
 #define registerControl(name) registerObject(name)
 #define registerPartitioner(name) registerObject(name)
+#define registerRelationshipManager(name) registerObject(name)
 
 #define registerNamedKernel(obj, name) registerNamedObject(obj, name)
 #define registerNamedNodalKernel(obj, name) registerNamedObject(obj, name)

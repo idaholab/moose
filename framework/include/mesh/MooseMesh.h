@@ -32,6 +32,7 @@
 // forward declaration
 class MooseMesh;
 class Assembly;
+class RelationshipManager;
 
 // libMesh forward declarations
 namespace libMesh
@@ -823,7 +824,11 @@ public:
   virtual std::unique_ptr<PointLocatorBase> getPointLocator() const;
 
 protected:
+  /// Deprecated (DO NOT USE)
   std::vector<std::unique_ptr<GhostingFunctor>> _ghosting_functors;
+
+  /// The list of active geometric relationship managers (bound to the underlying MeshBase object).
+  std::vector<std::shared_ptr<RelationshipManager>> _relationship_managers;
 
   /// Can be set to DISTRIBUTED, REPLICATED, or DEFAULT.  Determines whether
   /// the underlying libMesh mesh is a ReplicatedMesh or DistributedMesh.

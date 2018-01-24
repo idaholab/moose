@@ -86,6 +86,7 @@ public:
    */
   void printInputFile(std::ostream & out);
 
+  ///@{
   /**
    * Iterators to the Actions in the warehouse.  Iterators should always be used when executing
    * Actions to capture dynamically added Actions (meta-Actions).  Meta-Actions are allowed to
@@ -94,6 +95,12 @@ public:
    */
   ActionIterator actionBlocksWithActionBegin(const std::string & task);
   ActionIterator actionBlocksWithActionEnd(const std::string & task);
+  ///@}
+
+  /**
+   * Returns a reference to all of the actions.
+   */
+  const std::vector<std::shared_ptr<Action>> & allActionBlocks() const;
 
   /**
    * Retrieve a constant list of \p Action pointers associated with the passed in task.

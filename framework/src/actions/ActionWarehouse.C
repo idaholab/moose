@@ -25,6 +25,8 @@
 #include "InfixIterator.h"
 #include "FEProblem.h"
 
+#include "libmesh/simple_range.h"
+
 ActionWarehouse::ActionWarehouse(MooseApp & app, Syntax & syntax, ActionFactory & factory)
   : ConsoleStreamInterface(app),
     _app(app),
@@ -69,14 +71,11 @@ ActionWarehouse::addActionBlock(std::shared_ptr<Action> action)
 {
   /**
    * Note: This routine uses the XTerm colors directly which is not advised for general purpose
-   * output coloring.
-   * Most users should prefer using Problem::colorText() which respects the "color_output" option
-   * for terminals
-   * that do not support coloring.  Since this routine is intended for debugging only and runs
-   * before several
-   * objects exist in the system, we are just using the constants directly.
+   * output coloring. Most users should prefer using Problem::colorText() which respects the
+   * "color_output" option for terminals that do not support coloring.  Since this routine is
+   * intended for debugging only and runs before several objects exist in the system, we are just
+   * using the constants directly.
    */
-
   std::string registered_identifier =
       action->parameters().get<std::string>("registered_identifier");
   std::set<std::string> tasks;
@@ -96,18 +95,14 @@ ActionWarehouse::addActionBlock(std::shared_ptr<Action> action)
    * consider:
    *
    * 1. The current Action is registered with multiple syntax blocks. In this case we can only use
-   * the
-   *    current instance to satisfy the specific task listed for this syntax block.  We can detect
-   * this
-   *    case by inspecting whether it has a "specific task name" set in the Action instance.
+   *    the current instance to satisfy the specific task listed for this syntax block.  We can
+   *    detect this case by inspecting whether it has a "specific task name" set in the Action
+   *    instance.
    *
    * 2. This action does not have a valid "registered identifier" set in the Action instance. This
-   * means
-   *    that this Action was not built by the Parser.  It was most likely created through a
-   * Meta-Action.
-   *    In this case, the ActionFactory itself would have already set the task it found from the
-   * build
-   *    info used to construct the Action.
+   *    means that this Action was not built by the Parser.  It was most likely created through a
+   *    Meta-Action. In this case, the ActionFactory itself would have already set the task it found
+   *    from the build info used to construct the Action.
    *
    * 3. The current Action is registered with only a single syntax block. In this case we can simply
    *    re-use the current instance to act and satisfy _all_ registered tasks. This is the normal
@@ -158,9 +153,9 @@ ActionWarehouse::addActionBlock(std::shared_ptr<Action> action)
                  << " (" << COLOR_YELLOW << task << COLOR_DEFAULT << ")\n";
 
     // Add it to the warehouse
-    _all_ptrs.push_back(action);
     _action_blocks[task].push_back(action.get());
   }
+  _all_ptrs.push_back(action);
 
   if (_show_parser)
     Moose::err << std::endl;
@@ -176,6 +171,12 @@ ActionIterator
 ActionWarehouse::actionBlocksWithActionEnd(const std::string & task)
 {
   return _action_blocks[task].end();
+}
+
+const std::vector<std::shared_ptr<Action>> &
+ActionWarehouse::allActionBlocks() const
+{
+  return _all_ptrs;
 }
 
 const std::list<Action *> &
@@ -200,21 +201,16 @@ ActionWarehouse::buildBuildableActions(const std::string & task)
   if (_syntax.isActionRequired(task) && _action_blocks[task].empty())
   {
     bool ret_value = false;
-    std::pair<std::multimap<std::string, std::string>::const_iterator,
-              std::multimap<std::string, std::string>::const_iterator>
-        range = _action_factory.getActionsByTask(task);
-    for (std::multimap<std::string, std::string>::const_iterator it = range.first;
-         it != range.second;
-         ++it)
+    auto it_pair = _action_factory.getActionsByTask(task);
+    for (const auto & action_pair : as_range(it_pair))
     {
-      InputParameters params = _action_factory.getValidParams(it->second);
+      InputParameters params = _action_factory.getValidParams(action_pair.second);
       params.set<ActionWarehouse *>("awh") = this;
 
       if (params.areAllRequiredParamsValid())
       {
         params.set<std::string>("registered_identifier") = "(AutoBuilt)";
-        params.set<std::string>("task") = task;
-        addActionBlock(_action_factory.create(it->second, "", params));
+        addActionBlock(_action_factory.create(action_pair.second, "", params));
         ret_value = true;
       }
     }

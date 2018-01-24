@@ -333,9 +333,6 @@ protected:
   /// True if implicit value is required
   bool _c_is_implicit;
 
-  /// Local InputParameters
-  const InputParameters & _coupleable_params;
-
   /// Will hold the default value for optional coupled variables.
   std::map<std::string, VariableValue *> _default_value;
 

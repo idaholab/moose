@@ -21,6 +21,7 @@
 #include "MooseUtils.h"
 #include "MultiMooseEnum.h"
 #include "ExecFlagEnum.h"
+#include "Conversion.h"
 
 #include "libmesh/parameters.h"
 #include "libmesh/parsed_function.h"
@@ -138,9 +139,9 @@ public:
 
   /**
    * These methods add an option parameter and a documentation string to the InputParameters object.
-   * The first version of this function takes a default value which is used if the parameter
-   * is not found in the input file.  The second method will leave the parameter uninitialized
-   * but can be checked with "isParamValid" before use
+   * The first version of this function takes a default value which is used if the parameter is not
+   * found in the input file. The second method will leave the parameter uninitialized but can be
+   * checked with "isParamValid" before use.
    */
   template <typename T, typename S>
   void addParam(const std::string & name, const S & value, const std::string & doc_string);
@@ -185,10 +186,10 @@ public:
                           const std::string & doc_string);
 
   /**
-   * These method add a parameter to the InputParameters object which can be retrieved
-   * like any other parameter.  This parameter however is not printed in the Input file syntax
-   * dump or web page dump so does not take a documentation string.  The first version
-   * of this function takes an optional default value.
+   * These method add a parameter to the InputParameters object which can be retrieved like any
+   * other parameter. This parameter however is not printed in the Input file syntax dump or web
+   * page dump so does not take a documentation string.  The first version of this function takes an
+   * optional default value.
    */
   template <typename T>
   void addPrivateParam(const std::string & name, const T & value);
@@ -424,14 +425,24 @@ public:
 
   /**
    * This method is here to indicate which Moose types a particular Action may build. It takes a
-   * space
-   * delimited list of registered MooseObjects.  TODO: For now we aren't actually checking this list
-   * when we build objects. Since individual actions can do whatever they want it's not exactly
-   * trivial
-   * to check this without changing the user API.  This function properly restricts the syntax and
-   * yaml dumps.
+   * space delimited list of registered MooseObjects.  TODO: For now we aren't actually checking
+   * this list when we build objects. Since individual actions can do whatever they want it's not
+   * exactly trivial to check this without changing the user API.  This function properly restricts
+   * the syntax and YAML dumps.
    */
   void registerBuildableTypes(const std::string & names);
+
+  /**
+   * Declares the types of RelationshipManagers that the owning object will either construct (in the
+   * case of Actions) or requires (in the case of every other MooseObject). With normal
+   * MooseObject-derived types built by MooseObjectAction, MOOSE will attempt to use the
+   * InputParameters available to it to construct the required RelationshipManager automatically.
+   * Actions may run custom logic to create RelationshipManagers. The names and rm_type lists must
+   * have the same number of entries.
+   *
+   * @param names A space delimited list of RelationshipMangers that may be built by this object.
+   */
+  void registerRelationshipManagers(const std::string & names);
 
   /**
    * Returns the list of buildable types as a std::vector<std::string>
@@ -439,19 +450,29 @@ public:
   const std::vector<std::string> & getBuildableTypes() const;
 
   /**
+   * Returns the list of buildable (or required) RelationshipManager object types for this object.
+   */
+  const std::vector<std::string> & getBuildableRelationshipManagerTypes() const;
+
+  ///@{
+  /**
    * Mutators for controlling whether or not the outermost level of syntax will be collapsed when
    * printed.
    */
   void collapseSyntaxNesting(bool collapse);
   bool collapseSyntaxNesting() const;
+  ///@}
 
+  ///@{
   /**
    * Mutators for controlling whether or not the outermost level of syntax will be collapsed when
    * printed.
    */
   void mooseObjectSyntaxVisibility(bool visibility);
   bool mooseObjectSyntaxVisibility() const;
+  ///@}
 
+  ///@{
   /**
    * Copy and Copy/Add operators for the InputParameters object
    */
@@ -459,6 +480,7 @@ public:
   using Parameters::operator+=;
   InputParameters & operator=(const InputParameters & rhs);
   InputParameters & operator+=(const InputParameters & rhs);
+  ///@}
 
   /**
    * This function checks parameters stored in the object to make sure they are in the correct
@@ -774,27 +796,41 @@ private:
    */
   void allowCopy(bool status) { _allow_copy = status; }
 
-  /// Make sure the parameter name doesn't have any invalid characters.
+  /**
+   * Make sure the parameter name doesn't have any invalid characters.
+   */
   void checkParamName(const std::string & name) const;
 
-  /// This method is called when adding a Parameter with a default value, can be specialized for non-matching types
+  /**
+   * This method is called when adding a Parameter with a default value, can be specialized for
+   * non-matching types.
+   */
   template <typename T, typename S>
   void setParamHelper(const std::string & name, T & l_value, const S & r_value);
 
   /// original location of input block (i.e. filename,linenum) - used for nice error messages.
   std::string _block_location;
+
   /// full HIT path of the block from the input file - used for nice error messages.
   std::string _block_fullpath;
 
+  /// The actual parameter data. Each Metadata object contains attributes for the corresponding
+  /// parameter.
   std::map<std::string, Metadata> _params;
 
   /// The coupled variables set
   std::set<std::string> _coupled_vars;
 
+  /// The class description for the owning object. This string is used in many places including
+  /// mouse-over events, and external documentation produced from the source code.
   std::string _class_description;
-  /// The parameter is used to restrict types that can be built.  Typically this
-  /// is used for MooseObjectAction derived Actions.
+
+  /// The parameter is used to restrict types that can be built.  Typically this is used for
+  /// MooseObjectAction derived Actions.
   std::vector<std::string> _buildable_types;
+
+  /// The RelationshipManagers that this object may either build or requires
+  std::vector<std::string> _buildable_rm_types;
 
   /// This parameter collapses one level of nesting in the syntax blocks.  It is used
   /// in conjunction with MooseObjectAction derived Actions.
@@ -803,10 +839,11 @@ private:
   /// This parameter hides derived MOOSE object types from appearing in syntax dumps
   bool _moose_object_syntax_visibility;
 
-  /// Flag for disabling deprecated parameters message, this is used by applyParameters to avoid dumping messages
+  /// Flag for disabling deprecated parameters message, this is used by applyParameters to avoid
+  /// dumping messages.
   bool _show_deprecated_message;
 
-  /// A flag for toggling the error message in the copy constructor
+  /// A flag for toggling the error message in the copy constructor.
   bool _allow_copy;
 
   // These are the only objects allowed to _create_ InputParameters
@@ -1263,6 +1300,12 @@ void InputParameters::addParam<MultiMooseEnum>(const std::string & /*name*/,
 template <>
 void InputParameters::addParam<std::vector<MooseEnum>>(const std::string & /*name*/,
                                                        const std::string & /*doc_string*/);
+
+template <>
+void InputParameters::addPrivateParam<MooseEnum>(const std::string & /*name*/);
+
+template <>
+void InputParameters::addPrivateParam<MultiMooseEnum>(const std::string & /*name*/);
 
 template <>
 void InputParameters::addDeprecatedParam<MooseEnum>(const std::string & name,
