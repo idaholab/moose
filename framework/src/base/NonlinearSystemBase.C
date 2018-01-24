@@ -269,7 +269,7 @@ NonlinearSystemBase::addTimeIntegrator(const std::string & type,
                                        const std::string & name,
                                        InputParameters parameters)
 {
-  parameters.set<SystemBase *>("_sys") = this;
+  parameters.addPrivateParam<SystemBase *>("_sys", this);
 
   std::shared_ptr<TimeIntegrator> ti = _factory.create<TimeIntegrator>(type, name, parameters);
   _time_integrator = ti;

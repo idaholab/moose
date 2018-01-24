@@ -468,6 +468,7 @@
 #include "TopResidualDebugOutput.h"
 #include "DOFMapOutput.h"
 #include "ControlOutput.h"
+#include "RegurgitateInput.h"
 
 // Controls
 #include "RealFunctionControl.h"
@@ -899,6 +900,7 @@ registerObjects(Factory & factory)
   registerOutput(TopResidualDebugOutput);
   registerNamedOutput(DOFMapOutput, "DOFMap");
   registerOutput(ControlOutput);
+  registerOutput(RegurgitateInput);
 
   // Controls
   registerControl(RealFunctionControl);

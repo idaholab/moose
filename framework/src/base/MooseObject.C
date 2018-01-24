@@ -22,6 +22,7 @@ InputParameters
 validParams<MooseObject>()
 {
   InputParameters params;
+  params.addRequiredParam<std::string>("type", "The C++ type to instantiate.");
   params.addParam<bool>("enable", true, "Set the enabled status of the MooseObject.");
   params.addParam<std::vector<std::string>>(
       "control_tags",

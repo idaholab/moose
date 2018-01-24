@@ -502,6 +502,10 @@ public:
   const MooseObjectWarehouse<DiracKernel> & getDiracKernelWarehouse() { return _dirac_kernels; }
   const MooseObjectWarehouse<NodalKernel> & getNodalKernelWarehouse(THREAD_ID tid);
   const MooseObjectWarehouse<IntegratedBC> & getIntegratedBCWarehouse() { return _integrated_bcs; }
+  const MooseObjectWarehouse<GeneralDamper> & getGeneralDamperWarehouse()
+  {
+    return _general_dampers;
+  }
   const MooseObjectWarehouse<ElementDamper> & getElementDamperWarehouse()
   {
     return _element_dampers;

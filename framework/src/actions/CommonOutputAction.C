@@ -65,6 +65,10 @@ validParams<CommonOutputAction>()
       "solution_history", false, "Print a solution history file (.slh) using the default settings");
   params.addParam<bool>("dofmap", false, "Create the dof map .json output file");
   params.addParam<bool>("controls", false, "Enable the screen output of Control systems.");
+  params.addParam<bool>("regurgitate",
+                        false,
+                        "Enable the creation of input file that includes all objects, including "
+                        "those added by actions.");
 
   // Common parameters
 
@@ -189,25 +193,30 @@ CommonOutputAction::act()
   if (getParam<bool>("controls") || _app.getParam<bool>("show_controls"))
     create("ControlOutput");
 
+  if (getParam<bool>("regurgitate") || _app.getParam<bool>("regurgitate"))
+    create("RegurgitateInput");
+
   if (!getParam<bool>("color"))
     Moose::setColorConsole(false);
 }
 
 void
-CommonOutputAction::create(std::string object_type)
+CommonOutputAction::create(const std::string & object_type)
 {
   // Set the 'type =' parameters for the desired object
   _action_params.set<std::string>("type") = object_type;
 
   // Create the complete object name (uses lower case of type)
-  std::transform(object_type.begin(), object_type.end(), object_type.begin(), ::tolower);
+  std::string object_name = object_type;
+  std::transform(object_name.begin(), object_name.end(), object_name.begin(), ::tolower);
 
   // Create the action
   std::shared_ptr<MooseObjectAction> action = std::static_pointer_cast<MooseObjectAction>(
-      _action_factory.create("AddOutputAction", object_type, _action_params));
+      _action_factory.create("AddOutputAction", object_name, _action_params));
 
   // Set flag indicating that the object to be created was created with short-cut syntax
   action->getObjectParams().set<bool>("_built_by_moose") = true;
+  action->getObjectParams().set<std::string>("type") = object_type;
 
   // Add the action to the warehouse
   _awh.addActionBlock(action);
