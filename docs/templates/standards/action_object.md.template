@@ -1,0 +1,28 @@
+# CodeActionName
+<!-- Modify the page title to include spaces between each word in the class name. -->
+
+!syntax description FullPathCodeActionName
+
+## Description
+<!-- The goal of documentation for Actions is to provide a clear path for users
+from the action to the PDE. Use the `CodeActionName` as it appears within the
+source code within the first paragraph under the Description heading. -->
+
+## Constructed MooseObjects
+<!-- Use a table to help users connection the action to the constructed class
+documentation pages where they can read about the theoretical and implementation
+details. Tables can be referenced in text as \ref{example_table}.
+
+!table id=example_table caption=An example table
+| Functionality     | Replaced Classes   | Associated Parameters   |
+|-------------------|--------------------|-------------------------|
+| A PDE term        | A kernel class     | A parameter that controls the kernel class creation | -->
+
+## Example Input File Syntax
+<!-- !listing path/to/test/file block=location/in/input/file -->
+
+!syntax parameters FullPathCodeActionName
+
+## References
+\bibliographystyle{unsrt}
+\bibliography{template_example.bib}

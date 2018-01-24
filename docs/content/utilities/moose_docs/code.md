@@ -32,32 +32,11 @@ listed; the table includes the class description from the source code.
 
 ## Object and System Descriptions
 
-A detailed description should be provided in addition to the generated, in-code documentation for an object by creating a markdown file using
-[MOOSE Flavored Markdown](moose_markdown/index.md). The created file must be stored in a file named according to the
+A detailed theoretical description should be provided in addition to the generated, in-code documentation for an object by creating a markdown file using [MOOSE Flavored Markdown](moose_markdown/index.md). The created file must be stored in a file named according to the
 registered MOOSE syntax within the "install" directory explained in the [Configuration](moose_docs/setup.md#configuration) section. For example, the details for the [Diffision](framework/Diffusion.md) are in the `framework/docs/content/framework/systems/Kernels/Diffusion.md` file.
 
-Stubs (minimal markdown files) for the systems and objects in MOOSE-based applications can be generated using the "moosedocs.py" script. Once created these files should be modified with additional details and are then available for use when generating a [web-site](utilities/moose_docs/website.md), [presentations](utilities/moose_docs/presentation.md), or [PDFs](utilities/moose_docs/pdf.md).
-
-To generate the stub files run the "generate" command as follows:
-
-```text
-cd ~/projects/moose/docs
-./moosedocs.py generate
-```
-
-To see a list of additional options for this command run with the "-h" flag.
-```text
-./moosedocs generate -h
-```
-
-This command needs to be run only when you edit source code of your application:
-* when you add a new object (e.g., Kernel, BoundaryCondition, etc.) to your application,
-* when you add or modify the class description of an existing object, and
-* when you modify the input parameters of an existing object.
-
-!!! warning "Generating Overwrites 'pages.yml'"
-    When the generate command is used the 'pages.yml' files will be updated to match the current structure. It is
-    possible to disable this, see the help ('./moosedocs generate -h') for more information.
+Stubs (minimal markdown files) for new classes can be generated using the "moosedocs.py" script; these stubs include a suggested template for new markdown documentation.
+See the [Instructions on Generating Documentation](moose_docs/generate.md) for details.
 
 
 ## Checking Documentation

@@ -539,12 +539,16 @@ class MooseObjectNode(ObjectNode):
         """
         Markdown stub content.
         """
+        template_filename = os.path.join(MooseDocs.MOOSE_DIR,
+                                         'docs/templates/standards/moose_object.md.template')
+        with open(template_filename, 'r') as fid:
+            template_content = fid.read()
+
+        template_content = template_content.replace('FullPathCodeClassName',
+                                                    '{}'.format(self.full_name))
+        template_content = template_content.replace('CodeClassName', '{}'.format(self.name))
         stub = self.STUB_HEADER
-        stub += '\n# {}\n'.format(self.name)
-        stub += '!syntax description {}\n\n'.format(self.full_name)
-        stub += '!syntax parameters {}\n\n'.format(self.full_name)
-        stub += '!syntax inputs {}\n\n'.format(self.full_name)
-        stub += '!syntax children {}\n'.format(self.full_name)
+        stub += template_content
         return stub
 
 class ActionNode(ObjectNode):
@@ -564,10 +568,17 @@ class ActionNode(ObjectNode):
         """
         Markdown stub content.
         """
+        template_filename = os.path.join(MooseDocs.MOOSE_DIR,
+                                         'docs/templates/standards/'
+                                         'action_object.md.template')
+        with open(template_filename, 'r') as fid:
+            template_content = fid.read()
+
+        template_content = template_content.replace('FullPathCodeActionName',
+                                                    '{}'.format(self.full_name))
+        template_content = template_content.replace('CodeActionName', '{}'.format(self.name))
         stub = self.STUB_HEADER
-        stub += '\n# {}\n'.format(self.name)
-        stub += '!syntax description {}\n\n'.format(self.full_name)
-        stub += '!syntax parameters {}\n'.format(self.full_name)
+        stub += template_content
         return stub
 
 class MooseObjectActionNode(ActionNode):
