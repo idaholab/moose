@@ -294,7 +294,7 @@ FlowModelSinglePhase::addMooseObjects()
     _sim.addAuxKernel(class_name, Component::genName(_comp_name, "pressure_uv_auxkernel"), params);
   }
   {
-    std::string class_name = "TemperatureVUAux";
+    std::string class_name = "TemperatureAux";
     InputParameters params = _factory.getValidParams(class_name);
     params.set<AuxVariableName>("variable") = TEMPERATURE;
     params.set<std::vector<SubdomainName>>("block") = _pipe.getSubdomainNames();
