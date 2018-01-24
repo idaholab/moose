@@ -33,6 +33,8 @@ validParams<FunctionDT>()
                         true,
                         "Whether or not to interpolate DT between times.  "
                         "This is true by default for historical reasons.");
+  params.addParam<unsigned int>(
+      "uniform_refine", 0, "Number of sucessive time-step uniform refinements");
   params.addClassDescription(
       "Timestepper whose steps vary over time according to a user-defined fuction");
 
@@ -58,6 +60,10 @@ FunctionDT::FunctionDT(const InputParameters & parameters)
   }
 
   _time_knots = _time_t;
+
+  Real factor = std::pow(2, getParam<unsigned int>("uniform_refine"));
+  for (auto & dt : _time_dt)
+    dt /= factor;
 }
 
 void
