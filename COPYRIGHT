@@ -1,4 +1,21 @@
-© 2010 Battelle Energy Alliance, LLC
+Large portions of this software were developed at the Idaho National Laboratory.
+
+Major contributors include the following:
+The Commonwealth Scientific and Industrial Research Organisation
+
+Other contributors include the following:
+The University of Texas at Austin
+Argonne National Laboratory
+Los Alamos National Laboratory
+Oak Ridge National Laboratory
+Massachusetts Institute of Technology
+
+For complete author information reference the Git repository
+https://github.com/idaholab/moose
+
+The following are the complete copyright notices for select institutions
+
+© 2010-2018 Battelle Energy Alliance, LLC
 ALL RIGHTS RESERVED
 
 Prepared by Battelle Energy Alliance, LLC
@@ -25,3 +42,12 @@ IMPLIED, OR ASSUMES ANY LIABILITY OR RESPONSIBILITY FOR THE USE, ACCURACY,
 COMPLETENESS, OR USEFULNESS OR ANY INFORMATION, APPARATUS, PRODUCT, OR
 PROCESS DISCLOSED, OR REPRESENTS THAT ITS USE WOULD NOT INFRINGE PRIVATELY
 OWNED RIGHTS.
+
+© 2017 Los Alamos National Security, LLC
+This material was produced under U.S. Government contract DE-AC52-06NA25396
+for Los Alamos National Laboratory (LANL), which is operated by
+Los Alamos National Security, LLC for the U.S. Department of Energy.
+The U.S. Government has rights to use, reproduce, and distribute this software.
+NEITHER THE GOVERNMENT NOR LOS ALAMOS NATIONAL SECURITY, LLC
+MAKES ANY WARRANTY, EXPRESS OR IMPLIED, OR ASSUMES ANY LIABILITY
+FOR THE USE OF THIS SOFTWARE.
