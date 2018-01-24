@@ -10,6 +10,7 @@
 #include "SetupMeshAction.h"
 #include "MooseApp.h"
 #include "MooseMesh.h"
+#include "FileMesh.h"
 #include "FEProblem.h"
 #include "ActionWarehouse.h"
 #include "Factory.h"
@@ -155,6 +156,34 @@ SetupMeshAction::act()
   // Create the mesh object and tell it to build itself
   if (_current_task == "setup_mesh")
   {
+    // switch non-file meshes to be a file-mesh if using a pre-split mesh configuration.
+    if (_app.parameters().get<bool>("use_split"))
+    {
+      auto split_file = _app.parameters().get<std::string>("split_file");
+      if (_type != "FileMesh")
+      {
+        if (split_file == "")
+          mooseError("cannot use split mesh with non-file mesh without specifying --split-file on "
+                     "command line");
+
+        _type = "FileMesh";
+        auto new_pars = validParams<FileMesh>();
+        new_pars.set<MeshFileName>("file") = split_file;
+        new_pars.set<MooseApp *>("_moose_app") = _moose_object_pars.get<MooseApp *>("_moose_app");
+        new_pars.set<MooseEnum>("parallel_type") = "distributed";
+        _moose_object_pars = new_pars;
+      }
+      else
+      {
+        _moose_object_pars.set<MooseEnum>("parallel_type") = "distributed";
+        if (split_file != "")
+          _moose_object_pars.set<MeshFileName>("file") = split_file;
+        else
+          _moose_object_pars.set<MeshFileName>("file") =
+              MooseUtils::stripExtension(_moose_object_pars.get<MeshFileName>("file")) + ".cpr";
+      }
+    }
+
     _mesh = _factory.create<MooseMesh>(_type, "mesh", _moose_object_pars);
     if (isParamValid("displacements"))
       _displaced_mesh = _factory.create<MooseMesh>(_type, "displaced_mesh", _moose_object_pars);

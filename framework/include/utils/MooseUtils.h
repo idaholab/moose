@@ -111,6 +111,12 @@ void serialEnd(const libMesh::Parallel::Communicator & comm);
 bool hasExtension(const std::string & filename, std::string ext, bool strip_exodus_ext = false);
 
 /**
+ * Removes any file extension from the fiven string s (i.e. any ".[extension]" suffix of s) and
+ * returns the result.
+ */
+std::string stripExtension(const std::string & s);
+
+/**
  * Function for splitting path and filename
  * @param full_file A complete filename and path
  * @return A std::pair<std::string, std::string> containing the path and filename

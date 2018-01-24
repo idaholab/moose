@@ -81,6 +81,12 @@ TiledMesh::clone() const
   return *(new TiledMesh(*this));
 }
 
+std::string
+TiledMesh::getFileName() const
+{
+  return getParam<MeshFileName>("file");
+}
+
 void
 TiledMesh::buildMesh()
 {

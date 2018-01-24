@@ -449,6 +449,7 @@
 #include "MaterialDerivativeTestAction.h"
 #include "AddRelationshipManager.h"
 #include "MeshOnlyAction.h"
+#include "SplitMeshAction.h"
 
 // Outputs
 #ifdef LIBMESH_HAVE_EXODUS_API
@@ -1161,6 +1162,7 @@ registerActions(Syntax & syntax, ActionFactory & action_factory)
 
   registerAction(SetupPostprocessorDataAction, "setup_postprocessor_data");
 
+  registerAction(SplitMeshAction, "split_mesh");
   registerAction(MeshOnlyAction, "mesh_only");
   registerAction(SetupMeshAction, "setup_mesh");
   registerAction(SetupMeshAction, "init_mesh");
