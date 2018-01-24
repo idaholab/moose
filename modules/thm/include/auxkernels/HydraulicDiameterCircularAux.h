@@ -3,10 +3,10 @@
 
 #include "AuxKernel.h"
 
-class HydraulicDiameterAux;
+class HydraulicDiameterCircularAux;
 
 template <>
-InputParameters validParams<HydraulicDiameterAux>();
+InputParameters validParams<HydraulicDiameterCircularAux>();
 
 /**
  * Computes hydraulic diameter for a circular pipe
