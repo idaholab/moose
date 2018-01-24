@@ -25,8 +25,6 @@ from KeyPressInteractorStyle import KeyPressInteractorStyle
 
 from ColorMap import ColorMap
 
-from ChiggerTimer import ChiggerTimer
-
 from ResultGroup import ResultGroup
 
 def create_single_source_result(source_type):
