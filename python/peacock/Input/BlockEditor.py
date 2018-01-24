@@ -41,6 +41,7 @@ class BlockEditor(QWidget, MooseWidget):
         super(BlockEditor, self).__init__(**kwds)
         self.block = block
         self.comment_edit = CommentEditor()
+        self.comment_edit.setComments(self.block.comments)
         self.comment_edit.textChanged.connect(self._blockChanged)
         self.splitter = None
         self.clone_button = None

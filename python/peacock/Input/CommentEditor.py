@@ -26,4 +26,4 @@ class CommentEditor(QWidget):
         self.editor.setPlainText(comments)
 
     def getComments(self):
-        return self.editor.toPlainText()
+        return str(self.editor.toPlainText())
