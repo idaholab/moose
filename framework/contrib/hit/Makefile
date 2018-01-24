@@ -1,4 +1,3 @@
-
 CXX ?= g++
 
 PYTHONPREFIX ?= `python-config --prefix`
