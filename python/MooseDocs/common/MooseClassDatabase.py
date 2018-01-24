@@ -34,14 +34,14 @@ class MooseClassDatabase(object):
         self.__repo_url = repo_url.rstrip('/')
         self.__definitions = dict()
 
-        exclude = [os.path.join('moose', 'libmesh'), 'libmesh', 'build', '.git', '.lib']
+        exclude = [os.path.join('moose', 'libmesh'), 'libmesh', '.git', '.lib']
         for base, _, files in os.walk(MooseDocs.ROOT_DIR, topdown=False):
             if any([base.startswith(os.path.join(MooseDocs.ROOT_DIR, sub)) for sub in exclude]):
                 continue
 
             for fname in files:
-                if fname.endswith('.h'):
-                    full_file = os.path.join(base, fname)
+                full_file = os.path.join(base, fname)
+                if fname.endswith('.h') and not os.path.islink(full_file):
                     self.__search(full_file)
 
     def __getitem__(self, value):
