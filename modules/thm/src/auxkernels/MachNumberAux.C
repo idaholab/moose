@@ -7,6 +7,7 @@ InputParameters
 validParams<MachNumberAux>()
 {
   InputParameters params = validParams<AuxKernel>();
+  params.addClassDescription("Computes Mach number.");
   params.addRequiredCoupledVar("vel", "x-component of phase velocity");
   params.addRequiredCoupledVar("v", "Specific volume");
   params.addRequiredCoupledVar("e", "Specific internal energy");
