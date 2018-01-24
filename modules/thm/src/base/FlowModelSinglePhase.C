@@ -284,7 +284,7 @@ FlowModelSinglePhase::addMooseObjects()
   }
 
   {
-    std::string class_name = "PressureVUAux";
+    std::string class_name = "PressureAux";
     InputParameters params = _factory.getValidParams(class_name);
     params.set<AuxVariableName>("variable") = PRESSURE;
     params.set<std::vector<SubdomainName>>("block") = _pipe.getSubdomainNames();
