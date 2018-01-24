@@ -147,7 +147,6 @@
 
   [./h]
     type = AverageElementSize
-    variable = u
   [../]
 
   [./dofs]
