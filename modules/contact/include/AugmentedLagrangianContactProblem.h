@@ -42,6 +42,7 @@ public:
                             const Real abstol,
                             const PetscInt nfuncs,
                             const PetscInt max_funcs,
+                            const PetscBool force_iteration,
                             const Real ref_resid,
                             const Real div_threshold) override;
 
