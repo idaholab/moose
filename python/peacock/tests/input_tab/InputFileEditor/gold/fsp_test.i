@@ -89,6 +89,8 @@
       splitting_type = additive
     [../]
     [./u]
+      # PETSc options for this subsolver
+      # A prefix will be applied, so just put the options for this subsolver only
       vars = 'u'
       petsc_options_iname = '-pc_type -ksp_type'
       petsc_options_value = '     hypre preonly'
