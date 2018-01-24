@@ -73,7 +73,6 @@
   [../]
   [./h]
     type = AverageElementSize
-    variable = phi
   [../]
 []
 
