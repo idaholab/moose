@@ -25,3 +25,5 @@ The following links provide additional details on the MOOSE documentation system
 * [Building a Presentation](moose_docs/presentation.md)
 * [Generating a PDF](moose_docs/pdf.md)
 * [Moose Style Markdown](moose_docs/moose_markdown/index.md)
+* [Document MooseObjects](moose_docs/generate.md)
+* [Standards for Documentation Pages](moose_docs/docs_standards.md)

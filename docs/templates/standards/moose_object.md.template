@@ -1,0 +1,43 @@
+# CodeClassName
+<!-- Modify the page title to include spaces between each word in the class name. -->
+
+!syntax description FullPathCodeClassName
+
+## Description
+<!-- Use the `CodeClassName` as it appears within the source code within the first paragraph under the Description heading. -->
+
+<!-- Citations are made with the MooseDocs bibtex extension: \cite{example_reference} which renders as both the author name and the publication year. -->
+
+<!-- If referencing an equation within text, use \eqref{eq:example_equation},
+\begin{equation}
+\label{eq:example_equation}
+\begin{aligned}
+x_{example} & = \chi \cdot \nabla + \gamma \\
+\chi & = \frac{1}{c} \cdot \frac{\partial x_{example}}{\partial t}
+\end{aligned}
+\end{equation}
+and begin the next line of text without an empty line after the equation. -->
+
+<!-- Tables, which can be referenced in text as \ref{example_table}, should use bold for both numbers and variables:
+
+!table id=example_table caption=An example table
+| Example Parameter | Example Value      | Example Units   |
+|-------------------|--------------------|-----------------|
+| $c$               | $12.4$             | (dimensionless) |
+| $\gamma$          | $6 \times 10^{-2}$ | $\mathrm{\mu}$m | -->
+
+<!-- Figures are included with the MooseDocs media extension:
+!media media/moose_logo_small.png width=50% padding-left=20px float=right id=example_figure caption=An example figure -->
+
+## Example Input File Syntax
+<!-- !listing path/to/test/file block=location/in/input/file -->
+
+!syntax parameters FullPathCodeClassName
+
+!syntax inputs FullPathCodeClassName
+
+!syntax children FullPathCodeClassName
+
+## References
+\bibliographystyle{unsrt}
+\bibliography{template_example.bib}
