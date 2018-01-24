@@ -49,7 +49,7 @@ public:
 protected:
   /// Size of the halo or stencil of elements available in each local processors partition. Only
   /// applicable and necessary when using DistributedMesh.
-  const unsigned short _element_side_neighbor_layers;
+  unsigned short _element_side_neighbor_layers;
 
   /// The libMesh coupling object that provides this RM's functionality.
   std::unique_ptr<DefaultCoupling> _default_coupling;

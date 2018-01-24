@@ -22,8 +22,9 @@ validParams<ElementSideNeighborLayers>()
 {
   InputParameters params = validParams<GeometricRelationshipManager>();
 
-  params.addRequiredRangeCheckedParam<unsigned short>(
+  params.addRangeCheckedParam<unsigned short>(
       "element_side_neighbor_layers",
+      1,
       "element_side_neighbor_layers>=1 & element_side_neighbor_layers<=10",
       "The number of additional geometric elements to make available when "
       "using distributed mesh. No effect with replicated mesh.");

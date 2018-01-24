@@ -1,8 +1,6 @@
 [Mesh]
   type = EBSDMesh
   filename = 'test.txt'
-
-  num_ghosted_layers = 2
 []
 
 [GlobalParams]

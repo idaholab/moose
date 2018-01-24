@@ -49,6 +49,9 @@ validParams<GrainTracker>()
 {
   InputParameters params = validParams<FeatureFloodCount>();
   params += validParams<GrainTrackerInterface>();
+
+  params.registerRelationshipManagers("GrainTrackerHaloRM");
+
   params.addClassDescription("Grain Tracker object for running reduced order parameter simulations "
                              "without grain coalescence.");
 
@@ -59,7 +62,7 @@ GrainTracker::GrainTracker(const InputParameters & parameters)
   : FeatureFloodCount(parameters),
     GrainTrackerInterface(),
     _tracking_step(getParam<int>("tracking_step")),
-    _halo_level(getParam<unsigned int>("halo_level")),
+    _halo_level(getParam<unsigned short>("halo_level")),
     _n_reserve_ops(getParam<unsigned short>("reserve_op")),
     _reserve_op_index(_n_reserve_ops <= _n_vars ? _n_vars - _n_reserve_ops : 0),
     _reserve_op_threshold(getParam<Real>("reserve_op_threshold")),
@@ -78,14 +81,6 @@ GrainTracker::GrainTracker(const InputParameters & parameters)
 {
   if (_tracking_step > 0 && _poly_ic_uo)
     mooseError("Can't start tracking after the initial condition when using a polycrystal_ic_uo");
-
-  if (_mesh.isDistributedMesh() && _halo_level > _mesh.numGhostedLayers())
-    mooseError("The GrainTracker requires additional ghosting when using DistributedMesh. Please "
-               "set the Mesh/num_ghosted_layers parameter to the number of requested halo "
-               "levels.\nNumber of Ghosted Levels: ",
-               _mesh.numGhostedLayers(),
-               "\nRequested Halo Level: ",
-               _halo_level);
 }
 
 GrainTracker::~GrainTracker() {}
