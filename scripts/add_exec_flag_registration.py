@@ -38,7 +38,7 @@ def update_app(source):
           '{0}App__registerExecFlags(Factory & factory)\n' \
           '{{\n  {0}App::registerExecFlags(factory);\n}}\n' \
           'void\n' \
-          '{0}App::registerExecFlags(Factory & /*factory*/)\n{{\n}}'
+          '{0}App::registerExecFlags(Factory & /*factory*/)\n{{\n}}\n'
     content += sub.format(app)
 
     if app.endswith('Test'):
