@@ -526,7 +526,6 @@ public:
    */
   void addExecFlag(const ExecFlagType & flag);
 
-
   bool hasRelationshipManager(const std::string & name) const;
 
   void addRelationshipManager(std::shared_ptr<RelationshipManager> relationship_manager);
@@ -544,7 +543,6 @@ public:
   const ExecFlagEnum & getExecuteOnEnum() const { return _execute_flags; }
 
 protected:
-
   /**
    * Whether or not this MooseApp has cached a Backup to use for restart / recovery
    */

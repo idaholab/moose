@@ -110,7 +110,6 @@ LevelSetApp::registerExecFlags(Factory & factory)
   registerExecFlag(LevelSet::EXEC_ADAPT_MESH);
 }
 
-
 // Dynamic Library Entry Points - DO NOT MODIFY
 extern "C" void
 LevelSetApp__registerApps()

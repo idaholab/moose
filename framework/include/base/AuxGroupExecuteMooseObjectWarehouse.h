@@ -64,8 +64,10 @@ protected:
 };
 
 template <typename T>
-AuxGroupExecuteMooseObjectWarehouse<T>::AuxGroupExecuteMooseObjectWarehouse(const ExecFlagEnum & flags, bool threaded)
-    : ExecuteMooseObjectWarehouse<T>(flags, threaded), _group_objects(3, ExecuteMooseObjectWarehouse<T>(flags, threaded)) // initialize group storage
+AuxGroupExecuteMooseObjectWarehouse<T>::AuxGroupExecuteMooseObjectWarehouse(
+    const ExecFlagEnum & flags, bool threaded)
+  : ExecuteMooseObjectWarehouse<T>(flags, threaded),
+    _group_objects(3, ExecuteMooseObjectWarehouse<T>(flags, threaded)) // initialize group storage
 {
 }
 
