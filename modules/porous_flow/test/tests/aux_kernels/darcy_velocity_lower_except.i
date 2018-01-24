@@ -1,0 +1,112 @@
+# Exception testing for PorousFlowDarcyVelocityComponentLowerDimensional
+# Checking that an error is produced if the AuxVariable is not defined only on
+# lower-dimensional elements
+[Mesh]
+  type = FileMesh
+  file = fractured_block.e
+[]
+
+[GlobalParams]
+  PorousFlowDictator = dictator
+  gravity = '1 0.5 0.2'
+[]
+
+[Variables]
+  [./pp]
+  [../]
+[]
+
+[Kernels]
+  [./dummy]
+    type = TimeDerivative
+    variable = pp
+  [../]
+[]
+
+[AuxVariables]
+  [./fracture_vel_x]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+[]
+
+[AuxKernels]
+  [./fracture_vel_x]
+    type = PorousFlowDarcyVelocityComponentLowerDimensional
+    variable = fracture_vel_x
+    component = x
+    fluid_phase = 0
+  [../]
+[]
+
+[UserObjects]
+  [./dictator]
+    type = PorousFlowDictator
+    porous_flow_vars = 'pp'
+    number_fluid_phases = 1
+    number_fluid_components = 1
+  [../]
+  [./pc]
+    type = PorousFlowCapillaryPressureConst
+    pc = 0
+  [../]
+[]
+
+[Modules]
+  [./FluidProperties]
+    [./simple_fluid]
+      type = SimpleFluidProperties
+      bulk_modulus = 1E16
+      viscosity = 10
+      density0 = 2
+      thermal_expansion = 0
+    [../]
+  [../]
+[]
+
+[Materials]
+  [./temperature_qp]
+    type = PorousFlowTemperature
+  [../]
+  [./ppss_qp]
+    type = PorousFlow1PhaseP
+    porepressure = pp
+    capillary_pressure = pc
+  [../]
+  [./simple_fluid_qp]
+    type = PorousFlowSingleComponentFluid
+    fp = simple_fluid
+    phase = 0
+  [../]
+  [./dens_all_at_quadpoints]
+    type = PorousFlowJoiner
+    material_property = PorousFlow_fluid_phase_density_qp
+    at_nodes = false
+  [../]
+  [./permeability]
+    type = PorousFlowPermeabilityConst
+    permeability = '5 0 0 0 5 0 0 0 5'
+  [../]
+  [./relperm_qp]
+    type = PorousFlowRelativePermeabilityCorey
+    at_nodes = false
+    n = 2
+    phase = 0
+  [../]
+  [./relperm_qp_all]
+    type = PorousFlowJoiner
+    at_nodes = false
+    material_property = PorousFlow_relative_permeability_qp
+  [../]
+  [./visc_qp_all]
+    type = PorousFlowJoiner
+    at_nodes = false
+    material_property = PorousFlow_viscosity_qp
+  [../]
+[]
+
+[Executioner]
+  type = Transient
+  dt = 1
+  end_time = 1
+[]

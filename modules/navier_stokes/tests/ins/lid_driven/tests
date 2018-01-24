@@ -1,8 +1,0 @@
-[Tests]
-  [./lid_driven]
-    type = 'Exodiff'
-    input = 'lid_driven.i'
-    exodiff = 'lid_driven_out.e'
-    # skip = 'under development'
-  [../]
-[]

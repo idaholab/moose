@@ -13,35 +13,36 @@
 /****************************************************************/
 #include "DerivativeMaterialInterfaceTestProvider.h"
 
-// libmesh includes
 #include "libmesh/quadrature.h"
 
-template<>
-InputParameters validParams<DerivativeMaterialInterfaceTestProvider>()
+template <>
+InputParameters
+validParams<DerivativeMaterialInterfaceTestProvider>()
 {
   InputParameters params = validParams<Material>();
   return params;
 }
 
-DerivativeMaterialInterfaceTestProvider::DerivativeMaterialInterfaceTestProvider(const InputParameters & parameters) :
-    DerivativeMaterialInterface<Material>(parameters),
-    _prop1(declarePropertyDerivative<Real>("prop","a")),
-    _prop2(declarePropertyDerivative<Real>("prop","b")),
-    _prop3(declarePropertyDerivative<Real>("prop","b", "a")),
-    _prop4(declarePropertyDerivative<Real>("prop","a", "c")),
-    _prop5(declarePropertyDerivative<Real>("prop","b", "c", "a"))
+DerivativeMaterialInterfaceTestProvider::DerivativeMaterialInterfaceTestProvider(
+    const InputParameters & parameters)
+  : DerivativeMaterialInterface<Material>(parameters),
+    _prop1(declarePropertyDerivative<Real>("prop", "a")),
+    _prop2(declarePropertyDerivative<Real>("prop", "b")),
+    _prop3(declarePropertyDerivative<Real>("prop", "b", "a")),
+    _prop4(declarePropertyDerivative<Real>("prop", "a", "c")),
+    _prop5(declarePropertyDerivative<Real>("prop", "b", "c", "a")),
+    _prop6(declareProperty<dof_id_type>("elementid"))
 {
 }
 
 void
-DerivativeMaterialInterfaceTestProvider::computeProperties()
+DerivativeMaterialInterfaceTestProvider::computeQpProperties()
 {
-  for (_qp = 0; _qp < _qrule->n_points(); ++_qp)
-  {
-    _prop1[_qp] = 1.0;
-    _prop2[_qp] = 2.0;
-    _prop3[_qp] = 3.0;
-    _prop4[_qp] = 4.0;
-    _prop5[_qp] = 5.0;
-  }
+  _prop1[_qp] = 1.0;
+  _prop2[_qp] = 2.0;
+  _prop3[_qp] = 3.0;
+  _prop4[_qp] = 4.0;
+  _prop5[_qp] = 5.0;
+
+  _prop6[_qp] = _current_elem->id();
 }

@@ -22,21 +22,20 @@ class ComboMarker;
 /**
  * Combines multiple marker fields.  The most conservative wins.
  */
-template<>
+template <>
 InputParameters validParams<ComboMarker>();
 
 class ComboMarker : public Marker
 {
 public:
   ComboMarker(const InputParameters & parameters);
-  virtual ~ComboMarker(){};
 
 protected:
-  virtual MarkerValue computeElementMarker();
+  virtual MarkerValue computeElementMarker() override;
 
   std::vector<MarkerName> _names;
 
-  std::vector<VariableValue *> _markers;
+  std::vector<const VariableValue *> _markers;
 };
 
 #endif /* COMBOMARKER_H */

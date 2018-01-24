@@ -1,0 +1,24 @@
+[Tests]
+  [./elastic]
+    type = 'CSVDiff'
+    input = 'elastic_stress.i'
+    csvdiff = 'elastic_stress_out.csv'
+  [../]
+  [./elastic_Bbar]
+    type = 'CSVDiff'
+    input = 'elastic_stress.i'
+    csvdiff = 'elastic_stress_out.csv'
+    prereq = 'elastic'
+  [../]
+  [./interface]
+    type = 'CSVDiff'
+    input = 'volumetric_strain_interface.i'
+    csvdiff = 'volumetric_strain_interface_out.csv'
+  [../]
+  [./interface_Bbar]
+    type = 'CSVDiff'
+    input = 'volumetric_strain_interface.i'
+    csvdiff = 'volumetric_strain_interface_out.csv'
+    prereq = 'interface'
+  [../]
+[]

@@ -14,20 +14,21 @@
 
 #include "ReportingConstantSource.h"
 
-template<>
-InputParameters validParams<ReportingConstantSource>()
+template <>
+InputParameters
+validParams<ReportingConstantSource>()
 {
   InputParameters params = validParams<DiracKernel>();
-  params.addRequiredParam<std::vector<Real> >("point", "The x,y,z coordinates of the point");
+  params.addRequiredParam<std::vector<Real>>("point", "The x,y,z coordinates of the point");
   params.addRequiredCoupledVar("shared", "Constant auxilary variable for storing the total flux");
   params.addParam<Real>("factor", 1, "The multiplier for the shared source value");
   return params;
 }
 
-ReportingConstantSource::ReportingConstantSource(const InputParameters & parameters) :
-    DiracKernel(parameters),
+ReportingConstantSource::ReportingConstantSource(const InputParameters & parameters)
+  : DiracKernel(parameters),
     _shared_var(coupledScalarValue("shared")),
-    _point_param(getParam<std::vector<Real> >("point")),
+    _point_param(getParam<std::vector<Real>>("point")),
     _factor(getParam<Real>("factor"))
 {
   _p(0) = _point_param[0];
@@ -51,5 +52,5 @@ Real
 ReportingConstantSource::computeQpResidual()
 {
   // This is negative because it's a forcing function that has been brought over to the left side.
-  return -_test[_i][_qp]*_shared_var[0]*_factor;
+  return -_test[_i][_qp] * _shared_var[0] * _factor;
 }

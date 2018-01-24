@@ -1,0 +1,43 @@
+[Tests]
+  [./two_block_new]
+    type = Exodiff
+    input = 'two_block_new.i'
+    exodiff = 'two_block_new_out.e'
+  [../]
+
+  [./two_block]
+    type = Exodiff
+    input = 'two_block.i'
+    exodiff = 'two_block_out.e'
+    cli_args = 'Modules/TensorMechanics/Master/block1/block=1'
+  [../]
+
+  [./error_unrestricted]
+    type = RunException
+    input = 'two_block.i'
+    expect_err = 'No TensorMechanics/Master action can be block unrestricted if more than one TensorMechanics/Master action is specified.'
+    prereq = 'two_block'
+  [../]
+
+  [./error_overlapping]
+    type = RunException
+    input = 'two_block.i'
+    cli_args = 'Modules/TensorMechanics/Master/block1/block=2'
+    expect_err = 'The block restrictions in the TensorMechanics/Master actions must be non-overlapping.'
+    prereq = 'error_unrestricted'
+  [../]
+
+  [./two_coord]
+    type = Exodiff
+    input = 'two_coord.i'
+    exodiff = 'two_coord_out.e'
+  [../]
+
+  [./error_coord]
+    type = RunException
+    input = 'two_coord.i'
+    cli_args = 'Modules/TensorMechanics/Master/active=error'
+    expect_err = 'The TensorMechanics action requires all subdomains to have the same coordinate system.'
+    prereq = 'two_coord'
+  [../]
+[]

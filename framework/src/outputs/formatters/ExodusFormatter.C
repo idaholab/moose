@@ -12,23 +12,20 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
+// MOOSE includes
 #include "ExodusFormatter.h"
 #include "Parser.h"
 #include "MooseApp.h"
 #include "SystemInfo.h"
+#include "CommandLine.h"
 
-// libMesh
 #include "libmesh/exodusII.h"
 
 // C++
 #include <sstream>
 #include <vector>
 
-
-ExodusFormatter::ExodusFormatter() :
-    InputFileFormatter(false)
-{
-}
+ExodusFormatter::ExodusFormatter() : InputFileFormatter(false) {}
 
 void
 ExodusFormatter::printInputFile(ActionWarehouse & wh)
@@ -40,12 +37,15 @@ ExodusFormatter::printInputFile(ActionWarehouse & wh)
   // Grab the command line arguments first
   _ss << "### Command Line Arguments ###\n";
   if (wh.mooseApp().commandLine())
-    wh.mooseApp().commandLine()->print("", _ss, 1);
-
+  {
+    auto argc = wh.mooseApp().commandLine()->argc();
+    auto argv = wh.mooseApp().commandLine()->argv();
+    for (int i = 1; i < argc; i++)
+      _ss << " " << argv[i];
+  }
   if (wh.mooseApp().getSystemInfo() != NULL)
   {
-    _ss << "### Version Info ###\n"
-        << wh.mooseApp().getSystemInfo()->getInfo() << "\n";
+    _ss << "### Version Info ###\n" << wh.mooseApp().getSystemInfo()->getInfo() << "\n";
   }
 
   _ss << "### Input File ###" << std::endl;
@@ -61,30 +61,27 @@ ExodusFormatter::format()
   while (std::getline(_ss, s))
   {
     // MAX_LINE_LENGTH is from ExodusII
-    if ( s.length() > MAX_LINE_LENGTH )
+    if (s.length() > MAX_LINE_LENGTH)
     {
       const std::string continuation("...");
-      const size_t cont_len(continuation.length());
+      const size_t cont_len = continuation.length();
       size_t num_lines = s.length() / (MAX_LINE_LENGTH - cont_len) + 1;
       std::string split_line;
-      for (size_t j(0), l_begin(0); j < num_lines; ++j, l_begin+=MAX_LINE_LENGTH-cont_len)
+      for (size_t j = 0, l_begin = 0; j < num_lines; ++j, l_begin += MAX_LINE_LENGTH - cont_len)
       {
-        size_t l_len = MAX_LINE_LENGTH-cont_len;
-        if (s.length() < l_begin + l_len )
-        {
+        size_t l_len = MAX_LINE_LENGTH - cont_len;
+        if (s.length() < l_begin + l_len)
           l_len = s.length() - l_begin;
-        }
-        split_line = s.substr( l_begin, l_len );
-        if ( l_begin + l_len != s.length())
-        {
+
+        split_line = s.substr(l_begin, l_len);
+
+        if (l_begin + l_len != s.length())
           split_line += continuation;
-        }
+
         _input_file_record.push_back(split_line);
       }
     }
     else
-    {
       _input_file_record.push_back(s);
-    }
   }
 }

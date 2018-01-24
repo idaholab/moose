@@ -37,9 +37,7 @@ ex_deps     := $(patsubst %.C, %.$(obj-suffix).d, $(ex_srcfiles))
 # Additional special case targets should be added here
 
 test: all
-	$(call TEST_exodiff,dirichlet_bc.i,out_coupled_dirichlet.e)
-	$(call TEST_exodiff,neumann_bc.i,out_coupled_neumann.e)
-	$(call TEST_exodiff,periodic_bc.i,out_pbc.e)
-	$(call TEST_exodiff,trapezoid.i,out_trapezoid.e)
-
-
+	$(call TEST_exodiff,dirichlet_bc.i,dirichlet_bc_out.e)
+	$(call TEST_exodiff,neumann_bc.i,neumann_bc_out.e)
+	$(call TEST_exodiff,periodic_bc.i,periodic_bc_out.e)
+	$(call TEST_exodiff,trapezoid.i,trapezoid_out.e)

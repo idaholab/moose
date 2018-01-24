@@ -1,3 +1,13 @@
+###########################################################
+# This is a test of the Control Logic System. This test
+# uses the RealFunctionControl to change a Kernel
+# coefficient based on an analytical function at the end
+# of each timestep.
+#
+# @Requirement F8.10
+###########################################################
+
+
 [Mesh]
   type = GeneratedMesh
   dim = 2
@@ -42,6 +52,7 @@
   type = Transient
   num_steps = 10
   dt = 0.1
+  dtmin = 0.1
   solve_type = PJFNK
   petsc_options_iname = '-pc_type -pc_hypre_type'
   petsc_options_value = 'hypre boomeramg'
@@ -61,14 +72,14 @@
 [Postprocessors]
   [./coef]
     type = RealControlParameterReporter
-    parameter = 'coef'
+    parameter = 'Kernels/diff/coef'
   [../]
 []
 
 [Controls]
   [./func_control]
     type = RealFunctionControl
-    parameter = 'coef'
+    parameter = '*/*/coef'
     function = 'func_coef'
     execute_on = 'initial timestep_begin'
   [../]

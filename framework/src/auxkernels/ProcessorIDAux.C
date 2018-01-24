@@ -14,21 +14,16 @@
 
 #include "ProcessorIDAux.h"
 
-template<>
-InputParameters validParams<ProcessorIDAux>()
+template <>
+InputParameters
+validParams<ProcessorIDAux>()
 {
   InputParameters params = validParams<AuxKernel>();
+  params.addClassDescription("Creates a field showing the processors and partitioning.");
   return params;
 }
 
-ProcessorIDAux::ProcessorIDAux(const InputParameters & parameters) :
-    AuxKernel(parameters)
-{
-}
-
-ProcessorIDAux::~ProcessorIDAux()
-{
-}
+ProcessorIDAux::ProcessorIDAux(const InputParameters & parameters) : AuxKernel(parameters) {}
 
 Real
 ProcessorIDAux::computeValue()
@@ -38,4 +33,3 @@ ProcessorIDAux::computeValue()
   else
     return _current_elem->processor_id();
 }
-

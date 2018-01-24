@@ -1,0 +1,15 @@
+[Tests]
+  [./creep]
+    type = 'Exodiff'
+    input = 'creep_nl1.i'
+    exodiff = 'creep_nl1_out.e'
+    prereq = 'creep_sm'
+    abs_zero = 7e-5
+  [../]
+  [./creep_sm]
+    type = 'Exodiff'
+    input = 'creep_nl1_sm.i'
+    exodiff = 'creep_nl1_out.e'
+    abs_zero = 7e-5
+  [../]
+[]

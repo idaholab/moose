@@ -1,0 +1,5 @@
+time,strainp_xx,strainp_xy,strainp_xz,strainp_yy,strainp_yz,strainp_zz,stress_xx,stress_xy,stress_xz,stress_yy,stress_yz,stress_zz
+0,0,0,0,0,0,0,0,0,0,0,0,0
+1,0,0,0,0,0,0,0,4.6490589156178e-16,8,9.7144514654701e-17,6,2
+2,0,0,0,0,0,0,0,9.2981178312357e-16,16,1.942890293094e-16,12,4
+

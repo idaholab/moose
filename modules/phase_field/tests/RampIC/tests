@@ -1,8 +1,0 @@
-[Tests]
-  [./RampIC_test]
-    # Test ramp ic generator
-    type = Exodiff
-    input = RampIC_test.i
-    exodiff = RampIC_test_out.e
-  [../]
-[]

@@ -14,24 +14,23 @@
 
 // MOOSE includes
 #include "SolutionHistory.h"
-#include "NonlinearSystem.h"
+#include "NonlinearSystemBase.h"
 #include "FEProblem.h"
 
-template<>
-InputParameters validParams<SolutionHistory>()
+#include <fstream>
+
+template <>
+InputParameters
+validParams<SolutionHistory>()
 {
   // Get the parameters from the parent object
-  InputParameters params = validParams<BasicOutput<FileOutput> >();
+  InputParameters params = validParams<FileOutput>();
 
   // Return the parameters
   return params;
-
 }
 
-SolutionHistory::SolutionHistory(const InputParameters & parameters) :
-    BasicOutput<FileOutput>(parameters)
-{
-}
+SolutionHistory::SolutionHistory(const InputParameters & parameters) : FileOutput(parameters) {}
 
 std::string
 SolutionHistory::filename()
@@ -43,14 +42,14 @@ void
 SolutionHistory::output(const ExecFlagType & /*type*/)
 {
   // Reference to the Non-linear System
-  NonlinearSystem & nl_sys = _problem_ptr->getNonlinearSystem();
+  NonlinearSystemBase & nl_sys = _problem_ptr->getNonlinearSystemBase();
 
   std::ofstream slh_file;
   slh_file.open(filename().c_str(), std::ios::app);
   slh_file << nl_sys._current_nl_its;
 
-  for (unsigned int i = 0; i < nl_sys._current_l_its.size(); i++)
-    slh_file << " " << nl_sys._current_l_its[i];
+  for (const auto & linear_its : nl_sys._current_l_its)
+    slh_file << " " << linear_its;
 
   slh_file << std::endl;
 }

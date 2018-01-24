@@ -1,0 +1,17 @@
+[Tests]
+  [./basic]
+    type = 'CSVDiff'
+    input = 'basic.i'
+    csvdiff = 'basic_out_vpp_0001.csv'
+  [../]
+  [./boundary-err]
+    type = 'RunException'
+    input = 'boundary-err.i'
+    expect_err = 'cannot be used'
+  [../]
+  [./block-restrict-err]
+    type = 'RunException'
+    input = 'block-restrict-err.i'
+    expect_err = 'is not defined on element'
+  [../]
+[]

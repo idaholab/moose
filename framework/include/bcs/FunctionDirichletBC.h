@@ -17,11 +17,11 @@
 
 #include "NodalBC.h"
 
-//Forward Declarations
+// Forward Declarations
 class FunctionDirichletBC;
 class Function;
 
-template<>
+template <>
 InputParameters validParams<FunctionDirichletBC>();
 
 /**
@@ -39,13 +39,10 @@ protected:
    */
   Real f();
 
-  /**
-   * returns (u - the function)
-   */
-  virtual Real computeQpResidual();
+  virtual Real computeQpResidual() override;
 
   /// The function being used for evaluation
   Function & _func;
 };
 
-#endif //FUNCTIONDIRICHLETBC_H
+#endif // FUNCTIONDIRICHLETBC_H

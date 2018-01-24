@@ -19,7 +19,7 @@
 
 class DataStructIC;
 
-template<>
+template <>
 InputParameters validParams<DataStructIC>();
 
 /**
@@ -40,6 +40,5 @@ private:
   MooseMesh & _mesh;
   std::map<dof_id_type, Real> _data;
 };
-
 
 #endif /* DATASTRUCTIC_H */

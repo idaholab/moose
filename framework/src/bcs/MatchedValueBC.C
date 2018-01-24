@@ -14,18 +14,19 @@
 
 #include "MatchedValueBC.h"
 
-template<>
-InputParameters validParams<MatchedValueBC>()
+template <>
+InputParameters
+validParams<MatchedValueBC>()
 {
   InputParameters params = validParams<NodalBC>();
   params.addRequiredCoupledVar("v", "The variable whose value we are to match.");
+  params.addClassDescription("Implements a NodalBC which equates two different Variables' values "
+                             "on a specified boundary.");
   return params;
 }
 
-MatchedValueBC::MatchedValueBC(const InputParameters & parameters) :
-    NodalBC(parameters),
-    _v(coupledValue("v")),
-    _v_num(coupled("v"))
+MatchedValueBC::MatchedValueBC(const InputParameters & parameters)
+  : NodalBC(parameters), _v(coupledValue("v")), _v_num(coupled("v"))
 {
 }
 
@@ -43,4 +44,3 @@ MatchedValueBC::computeQpOffDiagJacobian(unsigned int jvar)
   else
     return 0.;
 }
-

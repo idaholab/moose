@@ -15,6 +15,7 @@
 #include "MooseEnumBase.h"
 #include "MooseUtils.h"
 #include "MooseError.h"
+#include "Conversion.h"
 
 #include <sstream>
 #include <algorithm>
@@ -22,110 +23,165 @@
 #include <limits>
 #include <string>
 #include <iostream>
+#include <cstdlib>
 
-const int MooseEnumBase::INVALID_ID = std::numeric_limits<int>::min();
-
-MooseEnumBase::MooseEnumBase(std::string names, bool allow_out_of_range) :
-    _out_of_range_index(allow_out_of_range ? INVALID_ID + 1 : 0)
+MooseEnumBase::MooseEnumBase(std::string names, bool allow_out_of_range)
+  : _allow_out_of_range(allow_out_of_range)
 {
   if (names.find(',') != std::string::npos)
-  {
-    mooseDeprecated("Please use a space to separate options in a MooseEnum, commas are deprecated\nMooseEnum initialized with names: \"" << names << '\"');
-    fillNames(names, ",");
-  }
+    mooseError("Spaces are required to separate options, comma support has been removed.");
   else
-    fillNames(names);
+    addEnumerationNames(names);
 }
 
-MooseEnumBase::MooseEnumBase(const MooseEnumBase & other_enum) :
-    _names(other_enum._names),
-    _raw_names(other_enum._raw_names),
-    _name_to_id(other_enum._name_to_id),
-    _deprecated_names(other_enum._deprecated_names),
-    _out_of_range_index(other_enum._out_of_range_index)
+MooseEnumBase::MooseEnumBase(const MooseEnumBase & other_enum)
+  : _items(other_enum._items),
+    _deprecated_items(other_enum._deprecated_items),
+    _allow_out_of_range(other_enum._allow_out_of_range)
 {
 }
 
 /**
  * Private constuctor for use by libmesh::Parameters
  */
-MooseEnumBase::MooseEnumBase()
-{
-}
-
-MooseEnumBase::~MooseEnumBase()
-{
-}
+MooseEnumBase::MooseEnumBase() : _allow_out_of_range(false) {}
 
 void
-MooseEnumBase::deprecate(const std::string & name, const std::string & new_name)
+MooseEnumBase::deprecate(const std::string & name, const std::string & raw_name)
 {
-  std::string upper(name);
-  std::transform(upper.begin(), upper.end(), upper.begin(), ::toupper);
+  std::set<MooseEnumItem>::const_iterator deprecated = find(name);
+  if (deprecated == _items.end())
+    mooseError("Cannot deprecate the enum item ", name, ", is not an available value.");
 
-  std::string upper_new(new_name);
-  std::transform(upper_new.begin(), upper_new.end(), upper_new.begin(), ::toupper);
+  std::set<MooseEnumItem>::const_iterator replaced = find(raw_name);
+  if (replaced == _items.end())
+    mooseError("Cannot deprecate the enum item ",
+               name,
+               ", since the replaced item ",
+               raw_name,
+               " it is not an available value.");
 
-  _deprecated_names[upper] = upper_new;
-
+  _deprecated_items.emplace(std::make_pair(*deprecated, *replaced));
   checkDeprecated();
 }
 
 void
-MooseEnumBase::fillNames(std::string names, std::string option_delim)
+MooseEnumBase::addEnumerationNames(const std::string & names)
 {
   std::vector<std::string> elements;
-  // split on spaces
-  MooseUtils::tokenize(names, elements, 1, option_delim);
-
-  _names.resize(elements.size());
-  int value=0;
-  for (unsigned int i=0; i<elements.size(); ++i)
-  {
-    std::vector<std::string> name_value;
-
-    // Make sure the option is not malformed
-    if (elements[i].find_first_of('=') == 0 || elements[i].find_last_of('=') == elements[i].length()-1)
-      mooseError("You cannot place whitespace around the '=' character in MooseEnumBase");
-
-    // split on equals sign
-    MooseUtils::tokenize(MooseUtils::trim(elements[i]), name_value, 1, "=");
-
-    if (name_value.size() < 1 || name_value.size() > 2)
-      mooseError("Invalid option supplied in MooseEnumBase: " << elements[i]);
-
-    // See if there is a value supplied for this option
-    // strtol allows for proper conversions of both int and hex strings
-    if (name_value.size() == 2)
-      value = strtol(name_value[1].c_str(), NULL, 0);
-
-    name_value[0] = MooseUtils::trim(name_value[0]);
-
-    // preserve case for raw options, append to list
-    if (i)
-      _raw_names += " ";
-    _raw_names += name_value[0];
-
-    // convert name to uppercase
-    std::string upper(name_value[0]);
-    std::transform(upper.begin(), upper.end(), upper.begin(), ::toupper);
-
-    // populate internal datastructures
-    _names[i] = upper;
-    _name_to_id[upper] = value++;
-  }
+  MooseUtils::tokenize(names, elements, 1, " ");
+  for (const std::string & raw_name : elements)
+    addEnumerationName(raw_name);
 }
 
 void
-MooseEnumBase::checkDeprecatedBase(const std::string & name_upper) const
+MooseEnumBase::addEnumerationName(const std::string & raw_name)
 {
-  std::map<std::string, std::string>::const_iterator it = _deprecated_names.find(name_upper);
+  // Make sure the option is not malformed
+  if (raw_name.find_first_of('=') == 0 || raw_name.find_last_of('=') == raw_name.length() - 1)
+    mooseError("You cannot place whitespace around the '=' character in MooseEnumBase");
 
-  if (it != _deprecated_names.end())
+  // Split on equals sign
+  std::vector<std::string> name_value;
+  MooseUtils::tokenize(MooseUtils::trim(raw_name), name_value, 1, "=");
+
+  // There should be one or two items in the name_value
+  if (name_value.size() < 1 || name_value.size() > 2)
+    mooseError("Invalid option supplied in MooseEnumBase: ", raw_name);
+
+  // Remove un-wanted space around string
+  name_value[0] = MooseUtils::trim(name_value[0]);
+
+  // See if there is a value supplied for this option
+  // strtol allows for proper conversions of both int and hex strings
+  int value;
+  if (name_value.size() == 2)
+    value = std::strtol(name_value[1].c_str(), NULL, 0);
+  else
+    value = getNextValidID();
+
+  addEnumerationName(name_value[0], value);
+}
+
+int
+MooseEnumBase::getNextValidID() const
+{
+  int value = -1; // Use -1 so if no values exist the first will be zero
+  for (const auto & item : _items)
+    value = std::max(value, item.id());
+  return ++value;
+}
+
+void
+MooseEnumBase::addEnumerationName(const std::string & name, const int & value)
+{
+  addEnumerationItem(MooseEnumItem(name, value));
+}
+
+void
+MooseEnumBase::addEnumerationItem(const MooseEnumItem & item)
+{
+  if (find(item.id()) != _items.end())
+    mooseError("The supplied id ",
+               item.id(),
+               " already exists in the enumeration, cannot not add '",
+               item,
+               "'.");
+  if (find(item.name()) != _items.end())
+    mooseError("The name '", item.name(), "' already exists in the enumeration.");
+
+  _items.insert(item);
+}
+
+void
+MooseEnumBase::checkDeprecated(const MooseEnumItem & item) const
+{
+  std::map<MooseEnumItem, MooseEnumItem>::const_iterator it = _deprecated_items.find(item);
+  if (it != _deprecated_items.end())
   {
-    if (it->second != "")
-      mooseWarning(name_upper + " is deprecated, consider using " + it->second);
+    if (it->second.name().empty())
+      mooseWarning(item.name() + " is deprecated");
     else
-      mooseWarning(name_upper + " is deprecated");
+      mooseWarning(item.name() + " is deprecated, consider using " + it->second.name());
   }
+}
+
+std::vector<std::string>
+MooseEnumBase::getNames() const
+{
+  std::vector<std::string> out;
+  out.reserve(_items.size());
+  for (auto it = _items.begin(); it != _items.end(); ++it)
+    out.push_back(it->name());
+  return out;
+}
+
+std::string
+MooseEnumBase::getRawNames() const
+{
+  return Moose::stringify(_items, " ");
+}
+
+std::set<MooseEnumItem>::const_iterator
+MooseEnumBase::find(const std::string & name) const
+{
+  std::string upper = MooseUtils::toUpper(name);
+  return std::find_if(_items.begin(), _items.end(), [&upper](MooseEnumItem const & item) {
+    return item.name() == upper;
+  });
+}
+
+std::set<MooseEnumItem>::const_iterator
+MooseEnumBase::find(int id) const
+{
+  return std::find_if(
+      _items.begin(), _items.end(), [&id](MooseEnumItem const & item) { return item.id() == id; });
+}
+
+std::set<MooseEnumItem>::const_iterator
+MooseEnumBase::find(const MooseEnumItem & other) const
+{
+  return std::find_if(_items.begin(), _items.end(), [&other](MooseEnumItem const & item) {
+    return item.id() == other.id();
+  });
 }

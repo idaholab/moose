@@ -9,17 +9,21 @@
 #define FILERANGEBUILDER_H
 
 // MOOSE includes
-#include "InputParameters.h"
+#include "Moose.h"
 
 // Forward declarations
 class FileRangeBuilder;
+class InputParameters;
+
+template <typename T>
+InputParameters validParams();
 
 /**
  * To be called in the validParams functions of classes that need to
  * operate on ranges of files.  Adds several non-required parameters
  * that are parsed in the parseFileRange function.
  */
-template<>
+template <>
 InputParameters validParams<FileRangeBuilder>();
 
 /**
@@ -34,11 +38,13 @@ class FileRangeBuilder
 {
 public:
   FileRangeBuilder(const InputParameters & params);
-  std::string fileSuffix(){ return _file_suffix; }
-  const std::vector<std::string> & filenames(){ return _filenames; }
+  virtual ~FileRangeBuilder() = default;
+
+  std::string fileSuffix() { return _file_suffix; }
+  const std::vector<std::string> & filenames() { return _filenames; }
 
 protected:
-//  int status(){ return _status; }
+  //  int status(){ return _status; }
   void errorCheck();
 
   int _status;

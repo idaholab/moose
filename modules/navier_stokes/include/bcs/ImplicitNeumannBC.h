@@ -12,7 +12,7 @@
 // Forward Declarations
 class ImplicitNeumannBC;
 
-template<>
+template <>
 InputParameters validParams<ImplicitNeumannBC>();
 
 /**
@@ -25,13 +25,12 @@ class ImplicitNeumannBC : public IntegratedBC
 public:
   ImplicitNeumannBC(const InputParameters & parameters);
 
-  virtual ~ImplicitNeumannBC(){}
+  virtual ~ImplicitNeumannBC() {}
 
 protected:
   virtual Real computeQpResidual();
   virtual Real computeQpJacobian();
   virtual Real computeQpOffDiagJacobian(unsigned jvar);
 };
-
 
 #endif // IMPLICITNEUMANNBC_H

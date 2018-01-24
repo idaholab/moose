@@ -1,0 +1,13 @@
+[Tests]
+  [./test]
+    type = 'Exodiff'
+    input = 'stitched_mesh.i'
+    exodiff = 'stitched_mesh_out.e'
+  [../]
+  [./files_error]
+    type = 'RunException'
+    input = 'stitched_mesh.i'
+    cli_args = Mesh/files=''
+    expect_err = 'Must specify at least one mesh file for StitchedMesh'
+  [../]
+[]

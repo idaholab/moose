@@ -19,7 +19,7 @@
 
 class ElementIntegralMaterialProperty;
 
-template<>
+template <>
 InputParameters validParams<ElementIntegralMaterialProperty>();
 
 class ElementIntegralMaterialProperty : public ElementIntegralPostprocessor
@@ -28,7 +28,7 @@ public:
   ElementIntegralMaterialProperty(const InputParameters & parameters);
 
 protected:
-  virtual Real computeQpIntegral();
+  virtual Real computeQpIntegral() override;
 
   const MaterialProperty<Real> & _scalar;
 };

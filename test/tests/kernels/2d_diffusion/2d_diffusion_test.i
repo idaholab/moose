@@ -1,3 +1,12 @@
+###########################################################
+# This is a simple test of the Kernel System.
+# It solves the Laplacian equation on a small 2x2 grid.
+# The "Diffusion" kernel is used to calculate the
+# residuals of the weak form of this operator.
+#
+# @Requirement F3.30
+###########################################################
+
 [Mesh]
   file = square.e
 []

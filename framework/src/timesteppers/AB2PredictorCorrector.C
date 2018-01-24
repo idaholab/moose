@@ -20,33 +20,37 @@
 #include "NonlinearSystem.h"
 #include "AuxiliarySystem.h"
 #include "TimeIntegrator.h"
+#include "Conversion.h"
 
-//libMesh includes
 #include "libmesh/nonlinear_solver.h"
+#include "libmesh/numeric_vector.h"
 
 // C++ Includes
 #include <iomanip>
 #include <iostream>
 #include <fstream>
 
-template<>
-InputParameters validParams<AB2PredictorCorrector>()
+template <>
+InputParameters
+validParams<AB2PredictorCorrector>()
 {
   InputParameters params = validParams<TimeStepper>();
-  params.addRequiredParam<Real>("e_tol","Target error tolerance.");
-  params.addRequiredParam<Real>("e_max","Maximum acceptable error.");
+  params.addRequiredParam<Real>("e_tol", "Target error tolerance.");
+  params.addRequiredParam<Real>("e_max", "Maximum acceptable error.");
   params.addRequiredParam<Real>("dt", "Initial time step size");
-  params.addParam<Real>("max_increase", 1.0e9,    "Maximum ratio that the time step can increase.");
-  params.addParam<int>("steps_between_increase",1,"the number of time steps before recalculating dt");
-  params.addParam<int>("start_adapting",2, "when to start taking adaptive time steps");
+  params.addParam<Real>("max_increase", 1.0e9, "Maximum ratio that the time step can increase.");
+  params.addParam<int>(
+      "steps_between_increase", 1, "the number of time steps before recalculating dt");
+  params.addParam<int>("start_adapting", 2, "when to start taking adaptive time steps");
   params.addParam<Real>("scaling_parameter", .8, "scaling parameter for dt selection");
   return params;
 }
 
-AB2PredictorCorrector::AB2PredictorCorrector(const InputParameters & parameters) :
-    TimeStepper(parameters),
-    _u1(_fe_problem.getNonlinearSystem().addVector("u1", true, GHOSTED)),
+AB2PredictorCorrector::AB2PredictorCorrector(const InputParameters & parameters)
+  : TimeStepper(parameters),
+    _u1(_fe_problem.getNonlinearSystemBase().addVector("u1", true, GHOSTED)),
     _aux1(_fe_problem.getAuxiliarySystem().addVector("aux1", true, GHOSTED)),
+    _pred1(_fe_problem.getNonlinearSystemBase().addVector("pred1", true, GHOSTED)),
     _dt_full(declareRestartableData<Real>("dt_full", 0)),
     _error(declareRestartableData<Real>("error", 0)),
     _e_tol(getParam<Real>("e_tol")),
@@ -63,11 +67,6 @@ AB2PredictorCorrector::AB2PredictorCorrector(const InputParameters & parameters)
   InputParameters params = _app.getFactory().getValidParams("AdamsPredictor");
   params.set<Real>("scale") = predscale;
   _fe_problem.addPredictor("AdamsPredictor", "adamspredictor", params);
-
-}
-
-AB2PredictorCorrector::~AB2PredictorCorrector()
-{
 }
 
 void
@@ -86,7 +85,7 @@ AB2PredictorCorrector::preSolve()
 void
 AB2PredictorCorrector::step()
 {
-  NonlinearSystem & nl = _fe_problem.getNonlinearSystem();
+  NonlinearSystemBase & nl = _fe_problem.getNonlinearSystemBase();
   AuxiliarySystem & aux = _fe_problem.getAuxiliarySystem();
 
   _fe_problem.solve();
@@ -109,8 +108,8 @@ AB2PredictorCorrector::step()
     }
     else
     {
-      //First time step is problematic, sure we converged but what does that mean? We don't know.
-      //Nor can we calculate the error on the first time step.
+      // First time step is problematic, sure we converged but what does that mean? We don't know.
+      // Nor can we calculate the error on the first time step.
     }
   }
 }
@@ -141,19 +140,18 @@ AB2PredictorCorrector::computeDT()
   if (_t_step <= _start_adapting)
     return _dt;
 
-
   _my_dt_old = _dt;
 
   _dt_steps_taken += 1;
   if (_dt_steps_taken >= _steps_between_increase)
   {
+
     Real new_dt = _dt_full * _scaling_parameter * std::pow(_infnorm * _e_tol / _error, 1.0 / 3.0);
 
     if (new_dt / _dt_full > _max_increase)
-      _dt = _dt_full*_max_increase;
-    else
-      _dt = new_dt;
+      new_dt = _dt_full * _max_increase;
     _dt_steps_taken = 0;
+    return new_dt;
   }
 
   return _dt;
@@ -165,56 +163,44 @@ AB2PredictorCorrector::computeInitialDT()
   return getParam<Real>("dt");
 }
 
-int
-AB2PredictorCorrector::stringtoint(std::string string)
-{
-  if (string == "ImplicitEuler")
-    return 0;
-  else if (string == "CrankNicolson")
-    return 2;
-  else if (string == "BDF2")
-    return 3;
-  return 4;
-}
-
 Real
 AB2PredictorCorrector::estimateTimeError(NumericVector<Number> & solution)
 {
-  NumericVector<Number> & predicted_solution = _fe_problem.getNonlinearSystem().getPredictor()->solutionPredictor();
-  TimeIntegrator * ti = _fe_problem.getNonlinearSystem().getTimeIntegrator();
-  std::string scheme = ti->name();
-  Real dt_old = _fe_problem.dtOld();
-  switch (stringtoint(scheme))
+  _pred1 = _fe_problem.getNonlinearSystemBase().getPredictor()->solutionPredictor();
+  TimeIntegrator * ti = _fe_problem.getNonlinearSystemBase().getTimeIntegrator();
+  auto scheme = Moose::stringToEnum<Moose::TimeIntegratorType>(ti->name());
+  Real dt_old = _my_dt_old;
+  if (dt_old == 0)
+    dt_old = _dt;
+
+  switch (scheme)
   {
-  case 1:
-  {
-    // NOTE: this is never called, since stringtoint does not return 1 - EVER!
-    //I am not sure this is actually correct.
-    predicted_solution *= -1;
-    predicted_solution += solution;
-    Real calc = _dt * _dt * .5;
-    predicted_solution *= calc;
-    return predicted_solution.l2_norm();
-  }
-  case 2:
-  {
-    // Crank Nicolson
-    predicted_solution -= solution;
-    predicted_solution *= (_dt) / (3.0 * (_dt + dt_old));
-    return predicted_solution.l2_norm();
-  }
-  case 3:
-  {
-    // BDF2
-    predicted_solution *= -1.0;
-    predicted_solution += solution;
-    Real topcalc = 2.0 * (_dt + dt_old) * (_dt + dt_old);
-    Real bottomcalc = 6.0 * _dt * _dt + 12.0 * _dt * dt_old + 5.0 * dt_old * dt_old;
-    predicted_solution *= topcalc / bottomcalc;
-    return predicted_solution.l2_norm();
-  }
-  default:
-    break;
+    case Moose::TI_IMPLICIT_EULER:
+    {
+      _pred1 *= -1;
+      _pred1 += solution;
+      Real calc = _dt * _dt * .5;
+      _pred1 *= calc;
+      return _pred1.l2_norm();
+    }
+    case Moose::TI_CRANK_NICOLSON:
+    {
+      _pred1 -= solution;
+      _pred1 *= (_dt) / (3.0 * (_dt + dt_old));
+      return _pred1.l2_norm();
+    }
+    case Moose::TI_BDF2:
+    {
+      _pred1 *= -1.0;
+      _pred1 += solution;
+      Real topcalc = 2.0 * (_dt + dt_old) * (_dt + dt_old);
+      Real bottomcalc = 6.0 * _dt * _dt + 12.0 * _dt * dt_old + 5.0 * dt_old * dt_old;
+      _pred1 *= topcalc / bottomcalc;
+
+      return _pred1.l2_norm();
+    }
+    default:
+      break;
   }
   return -1;
 }

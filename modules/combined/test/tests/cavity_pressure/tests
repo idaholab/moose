@@ -1,0 +1,47 @@
+[Tests]
+  [./test]
+    type = 'Exodiff'
+    input = 'cavity_pressure.i'
+    exodiff = 'cavity_pressure_out.e'
+    abs_zero = 1e-10
+    rel_err = 1e-5
+  [../]
+
+  [./test_init_temp]
+    type = 'Exodiff'
+    input = 'cavity_pressure_init_temp.i'
+    exodiff = 'cavity_pressure_init_temp_out.e'
+    abs_zero = 1e-10
+    rel_err = 1e-5
+  [../]
+
+  [./test_rz]
+    type = 'Exodiff'
+    input = 'cavity_pressure_rz.i'
+    exodiff = 'cavity_pressure_rz_out.e'
+    abs_zero = 1e-10
+    recover = false
+  [../]
+
+  [./test_rz_restart1]
+    type = RunApp
+    prereq = test_rz
+    input = 'cavity_pressure_rz.i'
+    cli_args = 'Executioner/num_steps=1'
+    recover = false
+  [../]
+
+  [./test_rz_restart2]
+    type = 'Exodiff'
+    prereq = 'test_rz_restart1'
+    input = 'cavity_pressure_rz.i'
+    exodiff = 'cavity_pressure_rz_out.e'
+    delete_output_before_running = false
+  [../]
+
+  [./rz_negative_moles_check]
+    type = RunException
+    input = 'cavity_pressure_negative_volume.i'
+    expect_err = 'Negative number of moles calculated as an input for the cavity pressure'
+  [../]
+[]

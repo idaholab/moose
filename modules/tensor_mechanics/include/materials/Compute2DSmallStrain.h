@@ -11,9 +11,9 @@
 
 /**
  * Compute2DSmallStrain defines a strain tensor, assuming small strains,
- * in 2D geometries / simulatons.  ComputePlaneSmallStrain acts as a
- * base class for ComputePlaneSmallStrain, ComputeGeneralizedPlaneSmallStrain
- * and ComputeAxisymmetricRZSmallStrain through the computeStrainZZ method.
+ * in 2D geometries / simulations.  ComputePlaneSmallStrain acts as a
+ * base class for ComputePlaneSmallStrain and ComputeAxisymmetricRZSmallStrain
+ * through the computeStrainZZ method.
  */
 class Compute2DSmallStrain : public ComputeSmallStrain
 {
@@ -21,8 +21,8 @@ public:
   Compute2DSmallStrain(const InputParameters & parameters);
 
 protected:
-  virtual void computeProperties();
+  virtual void computeProperties() override;
   virtual Real computeStrainZZ() = 0;
 };
 
-#endif //COMPUTE2DSMALLSTRAIN_H
+#endif // COMPUTE2DSMALLSTRAIN_H

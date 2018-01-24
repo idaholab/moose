@@ -5,7 +5,6 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-
 #ifndef RICHARDSSATPRIMEAUX_H
 #define RICHARDSSATPRIMEAUX_H
 
@@ -13,16 +12,16 @@
 
 #include "RichardsSat.h"
 
-//Forward Declarations
+// Forward Declarations
 class RichardsSatPrimeAux;
 
-template<>
+template <>
 InputParameters validParams<RichardsSatPrimeAux>();
 
 /**
  * Derivative of fluid Saturation wrt effective saturation
  */
-class RichardsSatPrimeAux: public AuxKernel
+class RichardsSatPrimeAux : public AuxKernel
 {
 public:
   RichardsSatPrimeAux(const InputParameters & parameters);
@@ -31,7 +30,7 @@ protected:
   virtual Real computeValue();
 
   /// effective saturation
-  VariableValue & _seff_var;
+  const VariableValue & _seff_var;
 
   /// User object defining saturation as a function of effective saturation
   const RichardsSat & _sat_UO;

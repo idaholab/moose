@@ -23,7 +23,7 @@
   [../]
 
   [./forcing]
-    type = UserForcingFunction
+    type = BodyForce
     variable = forced
     function = 'x*x+y*y' # Any object expecting a function name can also receive a ParsedFunction string
   [../]
@@ -82,5 +82,6 @@
 []
 
 [Outputs]
+  execute_on = 'timestep_end'
   exodus = true
 []

@@ -18,10 +18,10 @@
 #include "ElementIntegralUserObject.h"
 #include "MooseVariableInterface.h"
 
-//Forward Declarations
+// Forward Declarations
 class ElementIntegralVariableUserObject;
 
-template<>
+template <>
 InputParameters validParams<ElementIntegralVariableUserObject>();
 
 /**
@@ -30,20 +30,19 @@ InputParameters validParams<ElementIntegralVariableUserObject>();
  * Note that specializations of this integral are possible by deriving from this
  * class and overriding computeQpIntegral().
  */
-class ElementIntegralVariableUserObject :
-  public ElementIntegralUserObject,
-  public MooseVariableInterface
+class ElementIntegralVariableUserObject : public ElementIntegralUserObject,
+                                          public MooseVariableInterface
 {
 public:
   ElementIntegralVariableUserObject(const InputParameters & parameters);
 
 protected:
-  virtual Real computeQpIntegral();
+  virtual Real computeQpIntegral() override;
 
   /// Holds the solution at current quadrature points
-  VariableValue & _u;
+  const VariableValue & _u;
   /// Holds the solution gradient at the current quadrature points
-  VariableGradient & _grad_u;
+  const VariableGradient & _grad_u;
 };
 
 #endif

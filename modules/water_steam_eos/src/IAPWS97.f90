@@ -167,7 +167,8 @@ recursive logical function cowat(t,p,d,h)
   integer:: i
   ! This tolerance allows cowat to be called just outside its
   ! nominal operating range when doing transitions to supercritical:
-  double precision, parameter:: ttol=1.0d-3
+  !double precision, parameter:: ttol=1.0d-3
+  double precision, parameter:: ttol=2.0d0
 
   ! Check input:
   if ((t<=350.0d0+ttol).and.(p<=100.d6)) then

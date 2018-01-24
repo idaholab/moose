@@ -15,34 +15,30 @@
 #include "AuxNodalScalarKernel.h"
 #include "SystemBase.h"
 
-template<>
-InputParameters validParams<AuxNodalScalarKernel>()
+template <>
+InputParameters
+validParams<AuxNodalScalarKernel>()
 {
   InputParameters params = validParams<AuxScalarKernel>();
-  params.addRequiredParam<std::vector<dof_id_type> >("nodes", "Node ids");
+  params.addRequiredParam<std::vector<dof_id_type>>("nodes", "Node ids");
   return params;
 }
 
-AuxNodalScalarKernel::AuxNodalScalarKernel(const InputParameters & parameters) :
-    AuxScalarKernel(parameters),
-    Coupleable(parameters, true),
+AuxNodalScalarKernel::AuxNodalScalarKernel(const InputParameters & parameters)
+  : AuxScalarKernel(parameters),
+    Coupleable(this, true),
     MooseVariableDependencyInterface(),
-    _node_ids(getParam<std::vector<dof_id_type> >("nodes"))
+    _node_ids(getParam<std::vector<dof_id_type>>("nodes"))
 {
   // Fill in the MooseVariable dependencies
   const std::vector<MooseVariable *> & coupled_vars = getCoupledMooseVars();
-  for (unsigned int i=0; i<coupled_vars.size(); i++)
-    addMooseVariableDependency(coupled_vars[i]);
-}
-
-AuxNodalScalarKernel::~AuxNodalScalarKernel()
-{
+  for (const auto & var : coupled_vars)
+    addMooseVariableDependency(var);
 }
 
 void
 AuxNodalScalarKernel::compute()
 {
-  _subproblem.reinitNodes(_node_ids, _tid);        // compute variables at nodes
+  _subproblem.reinitNodes(_node_ids, _tid); // compute variables at nodes
   AuxScalarKernel::compute();
 }
-

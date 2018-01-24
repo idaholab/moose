@@ -17,11 +17,10 @@
 
 #include "Material.h"
 
-
-//Forward Declarations
+// Forward Declarations
 class GenericConstantMaterial;
 
-template<>
+template <>
 InputParameters validParams<GenericConstantMaterial>();
 
 /**
@@ -38,7 +37,8 @@ public:
   GenericConstantMaterial(const InputParameters & parameters);
 
 protected:
-  virtual void computeQpProperties();
+  virtual void initQpStatefulProperties() override;
+  virtual void computeQpProperties() override;
 
   std::vector<std::string> _prop_names;
   std::vector<Real> _prop_values;
@@ -48,4 +48,4 @@ protected:
   std::vector<MaterialProperty<Real> *> _properties;
 };
 
-#endif //GENERICCONSTANTMATERIAL_H
+#endif // GENERICCONSTANTMATERIAL_H

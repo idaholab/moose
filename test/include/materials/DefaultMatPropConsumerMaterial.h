@@ -4,10 +4,10 @@
 #include "Material.h"
 #include "DerivativeMaterialInterface.h"
 
-//Forward declarations
+// Forward declarations
 class DefaultMatPropConsumerMaterial;
 
-template<>
+template <>
 InputParameters validParams<DefaultMatPropConsumerMaterial>();
 
 class DefaultMatPropConsumerMaterial : public DerivativeMaterialInterface<Material>
@@ -16,8 +16,9 @@ public:
   DefaultMatPropConsumerMaterial(const InputParameters & parameters);
 
 protected:
+  virtual void computeQpProperties();
   std::string _prop_name;
   const MaterialProperty<Real> & _prop;
 };
 
-#endif //DEFAULTMATPROPCONSUMERMATERIAL_H
+#endif // DEFAULTMATPROPCONSUMERMATERIAL_H

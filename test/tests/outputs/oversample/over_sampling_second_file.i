@@ -1,7 +1,11 @@
 [Mesh]
   type = FileMesh
-  file = wedge18_mesh.e
   # Read in and work with a second order mesh
+  file = wedge18_mesh.e
+  # If we have an oversample mesh file, we haven not yet implemented
+  # synchronization of its partitioning with the problem mesh, so we
+  # need to keep the problem mesh replicated.
+  parallel_type = replicated
 []
 
 [Functions]
@@ -37,7 +41,7 @@
   [../]
 
   [./ffn]
-    type = UserForcingFunction
+    type = BodyForce
     variable = u
     function = forcing_fn
   [../]

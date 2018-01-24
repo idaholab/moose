@@ -25,3 +25,7 @@
     family = LAGRANGE
   [../]
 []
+
+[Executioner]
+  type = Transient
+[]

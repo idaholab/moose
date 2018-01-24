@@ -17,11 +17,11 @@
 
 #include "PresetNodalBC.h"
 
-//Forward Declarations
+// Forward Declarations
 class FunctionPresetBC;
 class Function;
 
-template<>
+template <>
 InputParameters validParams<FunctionPresetBC>();
 
 /**
@@ -37,10 +37,10 @@ protected:
   /**
    * Evaluate the function at the current quadrature point and timestep.
    */
-  virtual Real computeQpValue();
+  virtual Real computeQpValue() override;
 
   /// Function being used for evaluation of this BC
   Function & _func;
 };
 
-#endif //FUNCTIONPRESETBC_H
+#endif // FUNCTIONPRESETBC_H

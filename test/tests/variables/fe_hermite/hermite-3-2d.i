@@ -38,6 +38,7 @@
     value = (x*x*x)+(y*y*y)
     grad_x = 3*x*x
     grad_y = 3*y*y
+  [../]
 []
 
 [Variables]
@@ -60,7 +61,7 @@
   [../]
 
   [./forcing]
-    type = UserForcingFunction
+    type = BodyForce
     variable = u
     function = forcing_fn
   [../]

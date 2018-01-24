@@ -18,10 +18,10 @@
 #include "SideIntegralUserObject.h"
 #include "MooseVariableInterface.h"
 
-//Forward Declarations
+// Forward Declarations
 class SideIntegralVariableUserObject;
 
-template<>
+template <>
 InputParameters validParams<SideIntegralVariableUserObject>();
 
 /**
@@ -30,20 +30,18 @@ InputParameters validParams<SideIntegralVariableUserObject>();
  * Note that specializations of this integral are possible by deriving from this
  * class and overriding computeQpIntegral().
  */
-class SideIntegralVariableUserObject :
-  public SideIntegralUserObject,
-  public MooseVariableInterface
+class SideIntegralVariableUserObject : public SideIntegralUserObject, public MooseVariableInterface
 {
 public:
   SideIntegralVariableUserObject(const InputParameters & parameters);
 
 protected:
-  virtual Real computeQpIntegral();
+  virtual Real computeQpIntegral() override;
 
   /// Holds the solution at current quadrature points
-  VariableValue & _u;
+  const VariableValue & _u;
   /// Holds the solution gradient at the current quadrature points
-  VariableGradient & _grad_u;
+  const VariableGradient & _grad_u;
 };
 
 #endif

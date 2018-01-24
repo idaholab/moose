@@ -1,0 +1,7 @@
+[Tests]
+  [./add_variable_and_block]
+    type = PythonUnitTest
+    input = test_AddVariableAndBlock.py
+    display_required = True
+  [../]
+[]

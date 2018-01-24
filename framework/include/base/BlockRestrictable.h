@@ -19,35 +19,40 @@
 #include "InputParameters.h"
 #include "ParallelUniqueId.h"
 #include "MaterialData.h"
+#include "MooseObject.h"
 
 // Forward declarations
 class BlockRestrictable;
-class FEProblem;
+class FEProblemBase;
 class MooseMesh;
+class MooseVariable;
 
-template<>
+template <>
 InputParameters validParams<BlockRestrictable>();
 
 /**
  * \class BlockRestrictable BlockRestrictable.h
  * \brief An interface that restricts an object to subdomains via the 'blocks' input parameter
  *
- * This class adds the 'blocks' input parameter and checks that it is populated, if it is not populated
+ * This class adds the 'blocks' input parameter and checks that it is populated, if it is not
+ * populated
  * it will be populated with all valid block ids via two methods:
  * -# If a 'variable' parameter is present in the input parameters then by default the 'block'
  * input is set to all blocks associated with the variable.
  * -# If no 'variable' parameter is present then it utilizes all available blocks for the
  * associated mesh.
  *
- * When using with an object with a 'variable' parameter (e.g., Kernel), the following must also exist within
+ * When using with an object with a 'variable' parameter (e.g., Kernel), the following must also
+ * exist within
  * the input parameters for the class to operate correctly
- * - '_fe_problem' = pointer to FEProblem
+ * - '_fe_problem' = pointer to FEProblemBase
  * - '_tid' = THREAD_ID for the class
  * - '_sys' = pointer to the SystemBase
  *
- * In the general case (i.e., no 'variable') \b either \b one of the following must also exist within the
+ * In the general case (i.e., no 'variable') \b either \b one of the following must also exist
+ * within the
  * input parameters for proper operation of the class:
- * - '_fe_problem' = a pointer to FEProblem
+ * - '_fe_problem' = a pointer to FEProblemBase
  * - '_mesh' = a pointer to MooseMesh
  *
  * When creating a new object, generally, this class should be inherited following MooseObject.
@@ -60,13 +65,12 @@ InputParameters validParams<BlockRestrictable>();
 class BlockRestrictable
 {
 public:
-
   /**
    * Class constructor
    * Populates the 'block' input parameters, see the general class documentation for details.
    * @param parameters The input parameters (see the detailed help for additional information)
    */
-  BlockRestrictable(const InputParameters & parameters);
+  BlockRestrictable(const MooseObject * moose_object);
 
   /**
    * Class constructor
@@ -75,7 +79,7 @@ public:
    * @param parameters The input parameters (see the detailed help for additional information)
    * @param boundary_ids The boundary ids that the object is restricted to
    */
-  BlockRestrictable(const InputParameters & parameters, const std::set<BoundaryID> & boundary_ids);
+  BlockRestrictable(const MooseObject * moose_object, const std::set<BoundaryID> & boundary_ids);
 
   /**
    * Destructor: does nothing but needs to be marked as virtual since
@@ -103,35 +107,35 @@ public:
    * Return the block subdomain ids for this object
    * @return a set of SudomainIDs that are valid for this object
    */
-  const std::set<SubdomainID> & blockIDs() const;
+  const virtual std::set<SubdomainID> & blockIDs() const;
 
   /**
    * Test if the supplied block name is valid for this object
    * @param name A SubdomainName to check
    * @return True if the given id is valid for this object
    */
-  bool hasBlocks(SubdomainName name) const;
+  bool hasBlocks(const SubdomainName & name) const;
 
   /**
    * Test if the supplied vector of block names are valid for this object
    * @param names A vector of SubdomainNames to check
    * @return True if the given ids are valid for this object
    */
-  bool hasBlocks(std::vector<SubdomainName> names) const;
+  bool hasBlocks(const std::vector<SubdomainName> & names) const;
 
   /**
    * Test if the supplied block ids are valid for this object
    * @param id A SubdomainID to check
    * @return True if the given id is valid for this object
    */
-  bool hasBlocks(SubdomainID id) const;
+  bool hasBlocks(const SubdomainID & id) const;
 
   /**
    * Test if the supplied vector block ids are valid for this object
    * @param ids A vector of SubdomainIDs ids to check
    * @return True if the all of the given ids are found within the ids for this object
    */
-  bool hasBlocks(std::vector<SubdomainID> ids) const;
+  bool hasBlocks(const std::vector<SubdomainID> & ids) const;
 
   /**
    * Test if the supplied set of block ids are valid for this object
@@ -139,23 +143,25 @@ public:
    * @return True if the all of the given ids are found within the ids for this object
    * \see isSubset
    */
-  bool hasBlocks(std::set<SubdomainID> ids) const;
+  bool hasBlocks(const std::set<SubdomainID> & ids) const;
 
   /**
    * Test if the class block ids are a subset of the supplied objects
    * @param ids A std::set of Subdomains to check
-   * @return True if all of the block ids for this class are found within the given ids (opposite of hasBlocks)
+   * @return True if all of the block ids for this class are found within the given ids (opposite of
+   * hasBlocks)
    * \see hasBlocks
    */
-  bool isBlockSubset(std::set<SubdomainID> ids) const;
+  bool isBlockSubset(const std::set<SubdomainID> & ids) const;
 
   /**
    * Test if the class block ids are a subset of the supplied objects
    * @param ids A std::vector of Subdomains to check
-   * @return True if all of the block ids for this class are found within the given ids (opposite of hasBlocks)
+   * @return True if all of the block ids for this class are found within the given ids (opposite of
+   * hasBlocks)
    * \see hasBlocks
    */
-  bool isBlockSubset(std::vector<SubdomainID> ids) const;
+  bool isBlockSubset(const std::vector<SubdomainID> & ids) const;
 
   /**
    * Check if a material property is valid for all blocks of this object
@@ -169,18 +175,32 @@ public:
    *
    * @see Material::hasBlockMaterialProperty
    */
-  template<typename T> bool hasBlockMaterialProperty(const std::string & prop_name);
+  template <typename T>
+  bool hasBlockMaterialProperty(const std::string & prop_name);
 
   /**
    * Return all of the SubdomainIDs for the mesh
-   * @return A set of all subdomians for the entire domain
+   * @return A set of all subdomians for the entire mesh
    */
-  const std::set<SubdomainID> & meshBlockIDs();
+  const std::set<SubdomainID> & meshBlockIDs() const;
+
+  /**
+   * Returns true if this object has been restricted to a boundary
+   * @see MooseObject
+   */
+  virtual bool blockRestricted() const;
+
+  /**
+   * Helper for checking that the ids for this object are in agreement with the variables
+   * on the supplied variable.
+   *
+   * @param variable The variable to check against.
+   */
+  void checkVariable(const MooseVariable & variable) const;
 
 protected:
-
   /// Pointer to the MaterialData class for this object
-  MaterialData * _blk_material_data;
+  std::shared_ptr<MaterialData> _blk_material_data;
 
   /**
    * A helper method to allow the Material object to specialize the behavior
@@ -189,9 +209,19 @@ protected:
    */
   virtual bool hasBlockMaterialPropertyHelper(const std::string & prop_name);
 
-private:
+  /**
+   * An initialization routine needed for dual constructors
+   */
+  void initializeBlockRestrictable(const MooseObject * moose_object);
 
-  /// Set of block ids supplied by the user via the input file
+  /**
+   * Check if the blocks this object operates on all have the same coordinate system,
+   * and if so return it.
+   */
+  Moose::CoordinateSystemType getBlockCoordSystem();
+
+private:
+  /// Set of block ids supplied by the user via the input file (for error reporting)
   std::set<SubdomainID> _blk_ids;
 
   /// Vector the block names supplied by the user via the input file
@@ -200,8 +230,8 @@ private:
   /// Flag for allowing dual restriction
   const bool _blk_dual_restrictable;
 
-  /// Pointer to FEProblem
-  FEProblem * _blk_feproblem;
+  /// Pointer to FEProblemBase
+  FEProblemBase * _blk_feproblem;
 
   /// Pointer to Mesh
   MooseMesh * _blk_mesh;
@@ -215,25 +245,17 @@ private:
   /// Thread id for this object
   THREAD_ID _blk_tid;
 
-  /**
-   * An initialization routine needed for dual constructors
-   */
-  void initializeBlockRestrictable(const InputParameters & parameters);
-
-  /**
-   * A helper function for extracting the subdomain IDs for a variable
-   * @param parameters A reference to the input parameters supplied to the object
-   */
-  std::set<SubdomainID> variableSubdomainIDs(const InputParameters & parameters) const;
-
+  /// Name of the object
+  const std::string & _blk_name;
 };
 
-template<typename T>
+template <typename T>
 bool
 BlockRestrictable::hasBlockMaterialProperty(const std::string & prop_name)
 {
   mooseAssert(_blk_material_data != NULL, "MaterialData pointer is not defined");
-  return hasBlockMaterialPropertyHelper(prop_name) && _blk_material_data->haveProperty<T>(prop_name);
+  return hasBlockMaterialPropertyHelper(prop_name) &&
+         _blk_material_data->haveProperty<T>(prop_name);
 }
 
 #endif // BLOCKRESTRICTABLE_H

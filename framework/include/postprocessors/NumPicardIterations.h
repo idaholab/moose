@@ -15,27 +15,30 @@
 #ifndef NUMPICARDITERATIONS_H
 #define NUMPICARDITERATIONS_H
 
+// MOOSE includes
 #include "GeneralPostprocessor.h"
-#include "Transient.h"
 
-//Forward Declarations
+// Forward Declarations
 class NumPicardIterations;
+class Transient;
 
-template<>
+template <>
 InputParameters validParams<NumPicardIterations>();
 
+/**
+ * Returns the number of Picard iterations taken by the underlying
+ * Transient Executioner as a Postprocessor.
+ */
 class NumPicardIterations : public GeneralPostprocessor
 {
 public:
   NumPicardIterations(const InputParameters & parameters);
 
-  virtual void initialize();
-  virtual void execute() {}
+  virtual void initialize() override;
+  virtual void execute() override {}
 
-  /**
-   * This will return the degrees of freedom in the system.
-   */
-  virtual Real getValue();
+  virtual Real getValue() override;
+
 protected:
   Transient * _transient_executioner;
 };

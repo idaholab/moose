@@ -19,9 +19,8 @@
 
 class AddFunctionAction;
 
-template<>
+template <>
 InputParameters validParams<AddFunctionAction>();
-
 
 /**
  * This class parses functions in the [Functions] block and creates them.
@@ -31,7 +30,7 @@ class AddFunctionAction : public MooseObjectAction
 public:
   AddFunctionAction(InputParameters params);
 
-  virtual void act();
+  virtual void act() override;
 };
 
-#endif //ADDFUNCTIONACTION_H
+#endif // ADDFUNCTIONACTION_H

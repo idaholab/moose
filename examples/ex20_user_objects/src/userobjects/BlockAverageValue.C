@@ -13,12 +13,13 @@
 /****************************************************************/
 
 #include "BlockAverageValue.h"
+#include "MooseMesh.h"
 
-// libmesh includes
 #include "libmesh/mesh_tools.h"
 
-template<>
-InputParameters validParams<BlockAverageValue>()
+template <>
+InputParameters
+validParams<BlockAverageValue>()
 {
   InputParameters params = validParams<ElementIntegralVariablePostprocessor>();
 
@@ -29,8 +30,8 @@ InputParameters validParams<BlockAverageValue>()
   return params;
 }
 
-BlockAverageValue::BlockAverageValue(const InputParameters & parameters) :
-    ElementIntegralVariablePostprocessor(parameters)
+BlockAverageValue::BlockAverageValue(const InputParameters & parameters)
+  : ElementIntegralVariablePostprocessor(parameters)
 {
 }
 
@@ -55,9 +56,7 @@ BlockAverageValue::initialize()
   // Set averages to 0 for each block
   const std::set<SubdomainID> & blocks = _subproblem.mesh().meshSubdomains();
 
-  for (std::set<SubdomainID>::const_iterator it = blocks.begin();
-      it != blocks.end();
-      ++it)
+  for (std::set<SubdomainID>::const_iterator it = blocks.begin(); it != blocks.end(); ++it)
   {
     _integral_values[*it] = 0;
     _volume_values[*it] = 0;
@@ -87,18 +86,18 @@ BlockAverageValue::threadJoin(const UserObject & y)
   const BlockAverageValue & bav = dynamic_cast<const BlockAverageValue &>(y);
 
   for (std::map<SubdomainID, Real>::const_iterator it = bav._integral_values.begin();
-      it != bav._integral_values.end();
-      ++it)
+       it != bav._integral_values.end();
+       ++it)
     _integral_values[it->first] += it->second;
 
   for (std::map<SubdomainID, Real>::const_iterator it = bav._volume_values.begin();
-      it != bav._volume_values.end();
-      ++it)
+       it != bav._volume_values.end();
+       ++it)
     _volume_values[it->first] += it->second;
 
   for (std::map<SubdomainID, Real>::const_iterator it = bav._average_values.begin();
-      it != bav._average_values.end();
-      ++it)
+       it != bav._average_values.end();
+       ++it)
     _average_values[it->first] += it->second;
 }
 
@@ -107,20 +106,20 @@ BlockAverageValue::finalize()
 {
   // Loop over the integral values and sum them up over the processors
   for (std::map<SubdomainID, Real>::iterator it = _integral_values.begin();
-      it != _integral_values.end();
-      ++it)
+       it != _integral_values.end();
+       ++it)
     gatherSum(it->second);
 
   // Loop over the volumes and sum them up over the processors
   for (std::map<SubdomainID, Real>::iterator it = _volume_values.begin();
-      it != _volume_values.end();
-      ++it)
+       it != _volume_values.end();
+       ++it)
     gatherSum(it->second);
 
   // Now everyone has the correct data so everyone can compute the averages properly:
   for (std::map<SubdomainID, Real>::iterator it = _average_values.begin();
-      it != _average_values.end();
-      ++it)
+       it != _average_values.end();
+       ++it)
   {
     SubdomainID id = it->first;
     _average_values[id] = _integral_values[id] / _volume_values[id];

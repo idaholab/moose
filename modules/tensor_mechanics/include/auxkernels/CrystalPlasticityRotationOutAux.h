@@ -12,7 +12,7 @@
 
 class CrystalPlasticityRotationOutAux;
 
-template<>
+template <>
 InputParameters validParams<CrystalPlasticityRotationOutAux>();
 
 class CrystalPlasticityRotationOutAux : public AuxKernel
@@ -30,4 +30,4 @@ private:
   const MaterialProperty<RankTwoTensor> & _update_rot;
 };
 
-#endif //CRYSTALPLASTICITYROTATIONOUTAUX_H//
+#endif // CRYSTALPLASTICITYROTATIONOUTAUX_H//

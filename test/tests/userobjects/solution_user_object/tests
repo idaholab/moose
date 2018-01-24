@@ -1,0 +1,15 @@
+[Tests]
+  [./discontinuous_value_solution_uo_p1]
+    type = 'Exodiff'
+    input = 'discontinuous_value_solution_uo_p1.i'
+    exodiff = 'discontinuous_value_solution_uo_p1.e'
+    mesh_mode = REPLICATED
+  [../]
+  [./discontinuous_value_solution_uo_p2]
+    type = 'CSVDiff'
+    input = 'discontinuous_value_solution_uo_p2.i'
+    csvdiff = 'discontinuous_value_solution_uo_p2.csv'
+    prereq = discontinuous_value_solution_uo_p1
+    mesh_mode = REPLICATED
+  [../]
+[]

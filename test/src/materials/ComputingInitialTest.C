@@ -13,28 +13,29 @@
 /****************************************************************/
 #include "ComputingInitialTest.h"
 
-template<>
-InputParameters validParams<ComputingInitialTest>()
+template <>
+InputParameters
+validParams<ComputingInitialTest>()
 {
-  InputParameters params = validParams<Material>();
-  return params;
+  return validParams<Material>();
 }
 
 ComputingInitialTest::ComputingInitialTest(const InputParameters & parameters)
-  :Material(parameters),
-   _thermal_conductivity(declareProperty<Real>("thermal_conductivity")),
-   _thermal_conductivity_old(declarePropertyOld<Real>("thermal_conductivity"))
-{}
+  : Material(parameters),
+    _thermal_conductivity(declareProperty<Real>("thermal_conductivity")),
+    _thermal_conductivity_old(getMaterialPropertyOld<Real>("thermal_conductivity"))
+{
+}
 
 void
 ComputingInitialTest::initQpStatefulProperties()
 {
-  _thermal_conductivity[_qp] = 0.;
+  _thermal_conductivity[_qp] = 0.0;
 }
 
 void
 ComputingInitialTest::computeQpProperties()
 {
   if (_subproblem.computingInitialResidual())
-    _thermal_conductivity[_qp] = _thermal_conductivity_old[_qp] + 1;
+    _thermal_conductivity[_qp] = _thermal_conductivity_old[_qp] + 1.0;
 }

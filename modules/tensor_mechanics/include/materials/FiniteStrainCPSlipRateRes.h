@@ -12,16 +12,15 @@
 
 class FiniteStrainCPSlipRateRes;
 
-template<>
+template <>
 InputParameters validParams<FiniteStrainCPSlipRateRes>();
 
-class FiniteStrainCPSlipRateRes: public FiniteStrainCrystalPlasticity
+class FiniteStrainCPSlipRateRes : public FiniteStrainCrystalPlasticity
 {
 public:
   FiniteStrainCPSlipRateRes(const InputParameters & parameters);
 
 protected:
-
   /**
    * This function solves internal variables.
    */
@@ -58,12 +57,14 @@ protected:
   virtual void getSlipIncrements();
 
   /**
-   * This function calculates partial derivative of resolved shear stress with respect to split rate.
+   * This function calculates partial derivative of resolved shear stress with respect to split
+   * rate.
    */
   virtual void calcDtauDsliprate();
 
   /**
-   * This function calculates partial derivative of slip system resistances with respect to split rate.
+   * This function calculates partial derivative of slip system resistances with respect to split
+   * rate.
    */
   virtual void calcDgssDsliprate();
 
@@ -80,7 +81,7 @@ protected:
   /**
    * This function performs the line search update.
    */
-  bool lineSearchUpdateSlipRate(const Real, const DenseVector<Real> & );
+  bool lineSearchUpdateSlipRate(const Real, const DenseVector<Real> &);
 
   /**
    * This function calculates the dot product of residual and update
@@ -94,4 +95,4 @@ protected:
   DenseMatrix<Real> _dsliprate_dsliprate;
 };
 
-#endif //FINITESTRAINCPSLIPRATERES_H
+#endif // FINITESTRAINCPSLIPRATERES_H

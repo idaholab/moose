@@ -19,7 +19,7 @@
 
 class InsideUserObject;
 
-template<>
+template <>
 InputParameters validParams<InsideUserObject>();
 
 /**
@@ -39,8 +39,8 @@ public:
   Real getValue() const { return _value; }
 
 protected:
-  VariableValue & _u;
-  VariableValue & _u_neighbor;
+  const VariableValue & _u;
+  const VariableValue & _u_neighbor;
 
   Real _value;
   const MaterialProperty<Real> & _diffusivity_prop;

@@ -9,6 +9,18 @@
     input = 'parallel_exception_residual_transient.i'
     petsc_version = '>=3.6.0'
     exodiff = 'parallel_exception_residual_transient_out.e'
+    use_old_floor = true
+  [../]
+
+  [./parallel_exception_residual_transient_non_zero_rank]
+    type = 'Exodiff'
+    input = 'parallel_exception_residual_transient.i'
+    petsc_version = '>=3.6.0'
+    cli_args = 'Kernels/exception/rank=1'
+    exodiff = 'parallel_exception_residual_transient_out.e'
+    use_old_floor = true
+    prereq = 'parallel_exception_residual_transient'
+    min_parallel = 2
   [../]
 
   # This example throws an exception during computeJacobian() in the
@@ -19,6 +31,18 @@
     input = 'parallel_exception_jacobian_transient.i'
     petsc_version = '>=3.6.0'
     exodiff = 'parallel_exception_jacobian_transient_out.e'
+    use_old_floor = true
+  [../]
+
+  [./parallel_exception_jacobian_transient_non_zero_rank]
+    type = 'Exodiff'
+    input = 'parallel_exception_jacobian_transient.i'
+    petsc_version = '>=3.6.0'
+    cli_args = 'Kernels/exception/rank=1'
+    exodiff = 'parallel_exception_jacobian_transient_out.e'
+    use_old_floor = true
+    prereq = 'parallel_exception_jacobian_transient'
+    min_parallel = 2
   [../]
 
   [./parallel_exception_initial_condition]
@@ -26,5 +50,24 @@
     input = 'parallel_exception_initial_condition.i'
     petsc_version = '>=3.5.0'
     expect_out = 'MooseException thrown during initial condition computation'
+  [../]
+
+  # Test that we can trigger an error on a non-zero rank and exit as expected
+  [./parallel_error_residual_transient_non_zero_rank]
+    type = 'RunException'
+    input = 'parallel_exception_residual_transient.i'
+    petsc_version = '>=3.6.0'
+    min_parallel = 2
+    cli_args = 'Kernels/exception/rank=1 Kernels/exception/should_throw=false Outputs/exodus=false'
+    expect_err = 'Intentional error triggered during residual calculation'
+  [../]
+
+  [./parallel_error_jacobian_transient_non_zero_rank]
+    type = 'RunException'
+    input = 'parallel_exception_residual_transient.i'
+    petsc_version = '>=3.6.0'
+    min_parallel = 2
+    cli_args = 'Kernels/exception/rank=1 Kernels/exception/should_throw=false Outputs/exodus=false'
+    expect_err = 'Intentional error triggered during residual calculation'
   [../]
 []

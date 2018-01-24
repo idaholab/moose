@@ -15,16 +15,17 @@
 #ifndef SIDEINTEGRALUSEROBJECT_H
 #define SIDEINTEGRALUSEROBJECT_H
 
-#include "SidePostprocessor.h"
+// MOOSE includes
+#include "SideUserObject.h"
 
-//Forward Declarations
+// Forward Declarations
 class SideIntegralUserObject;
 
-template<>
+template <>
 InputParameters validParams<SideIntegralUserObject>();
 
 /**
- * This postprocessor computes a volume integral of the specified variable.
+ * This postprocessor computes a side integral of the specified variable over a given boundary.
  *
  * Note that specializations of this integral are possible by deriving from this
  * class and overriding computeQpIntegral().
@@ -34,12 +35,13 @@ class SideIntegralUserObject : public SideUserObject
 public:
   SideIntegralUserObject(const InputParameters & parameters);
 
-  virtual void initialize();
-  virtual void execute();
-  virtual Real getValue();
-  virtual void threadJoin(const UserObject & y);
+  virtual void initialize() override;
+  virtual void execute() override;
+  virtual void threadJoin(const UserObject & y) override;
+  virtual void finalize() override {}
 
-  virtual void finalize(){}
+  /// Returns the integral value
+  virtual Real getValue();
 
 protected:
   virtual Real computeQpIntegral() = 0;

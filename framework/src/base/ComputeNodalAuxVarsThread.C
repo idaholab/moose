@@ -13,27 +13,29 @@
 /****************************************************************/
 
 #include "ComputeNodalAuxVarsThread.h"
-#include "AuxiliarySystem.h"
-#include "FEProblem.h"
-#include "AuxKernel.h"
 
-// libmesh includes
+// MOOSE includes
+#include "AuxiliarySystem.h"
+#include "AuxKernel.h"
+#include "FEProblem.h"
+#include "MooseMesh.h"
+
 #include "libmesh/threads.h"
 
-ComputeNodalAuxVarsThread::ComputeNodalAuxVarsThread(FEProblem & fe_problem,
-                                                     AuxiliarySystem & sys,
-                                                     std::vector<AuxWarehouse> & auxs) :
-    ThreadedNodeLoop<ConstNodeRange, ConstNodeRange::const_iterator>(fe_problem),
-    _sys(sys),
-    _auxs(auxs)
+ComputeNodalAuxVarsThread::ComputeNodalAuxVarsThread(
+    FEProblemBase & fe_problem, const MooseObjectWarehouse<AuxKernel> & storage)
+  : ThreadedNodeLoop<ConstNodeRange, ConstNodeRange::const_iterator>(fe_problem),
+    _aux_sys(fe_problem.getAuxiliarySystem()),
+    _storage(storage)
 {
 }
 
 // Splitting Constructor
-ComputeNodalAuxVarsThread::ComputeNodalAuxVarsThread(ComputeNodalAuxVarsThread & x, Threads::split split) :
-    ThreadedNodeLoop<ConstNodeRange, ConstNodeRange::const_iterator>(x, split),
-    _sys(x._sys),
-    _auxs(x._auxs)
+ComputeNodalAuxVarsThread::ComputeNodalAuxVarsThread(ComputeNodalAuxVarsThread & x,
+                                                     Threads::split split)
+  : ThreadedNodeLoop<ConstNodeRange, ConstNodeRange::const_iterator>(x, split),
+    _aux_sys(x._aux_sys),
+    _storage(x._storage)
 {
 }
 
@@ -43,30 +45,36 @@ ComputeNodalAuxVarsThread::onNode(ConstNodeRange::const_iterator & node_it)
   const Node * node = *node_it;
 
   // prepare variables
-  for (std::map<std::string, MooseVariable *>::iterator it = _sys._nodal_vars[_tid].begin(); it != _sys._nodal_vars[_tid].end(); ++it)
+  for (const auto & it : _aux_sys._nodal_vars[_tid])
   {
-    MooseVariable * var = it->second;
+    MooseVariable * var = it.second;
     var->prepareAux();
   }
 
   _fe_problem.reinitNode(node, _tid);
 
-  const std::set<SubdomainID> & block_ids = _sys.mesh().getNodeBlockIds(*node);
-  for (std::set<SubdomainID>::const_iterator block_it = block_ids.begin(); block_it != block_ids.end(); ++block_it)
+  // Get a map of all active block restricted AuxKernel objects
+  const auto & block_kernels = _storage.getActiveBlockObjects(_tid);
+
+  // Loop over all SubdomainIDs for the curnent node, if an AuxKernel is active on this block then
+  // compute it.
+  const auto & block_ids = _aux_sys.mesh().getNodeBlockIds(*node);
+  for (const auto & block : block_ids)
   {
-    for (std::vector<AuxKernel*>::const_iterator aux_it = _auxs[_tid].activeBlockNodalKernels(*block_it).begin();
-         aux_it != _auxs[_tid].activeBlockNodalKernels(*block_it).end();
-         ++aux_it)
-      (*aux_it)->compute();
+    const auto iter = block_kernels.find(block);
+
+    if (iter != block_kernels.end())
+      for (const auto & aux : iter->second)
+        aux->compute();
   }
 
   // We are done, so update the solution vector
   {
     Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
-    for (std::map<std::string, MooseVariable *>::iterator it = _sys._nodal_vars[_tid].begin(); it != _sys._nodal_vars[_tid].end(); ++it)
+    for (const auto & it : _aux_sys._nodal_vars[_tid])
     {
-      MooseVariable * var = it->second;
-      var->insert(_sys.solution());
+      MooseVariable * var = it.second;
+      var->insert(_aux_sys.solution());
     }
   }
 }

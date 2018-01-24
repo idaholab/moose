@@ -17,31 +17,19 @@
 
 #include "AuxKernel.h"
 
-
-//Forward Declarations
+// Forward Declarations
 class ProcessorIDAux;
 
-template<>
+template <>
 InputParameters validParams<ProcessorIDAux>();
 
-/**
- * ProcessorID auxiliary value (can be used only as an elemental kernel)
- *
- */
 class ProcessorIDAux : public AuxKernel
 {
 public:
-
-  /**
-   * Factory constructor, takes parameters so that all derived classes can be built using the same
-   * constructor.
-   */
   ProcessorIDAux(const InputParameters & parameters);
 
-  virtual ~ProcessorIDAux();
-
 protected:
-  virtual Real computeValue();
+  virtual Real computeValue() override;
 };
 
-#endif //PROCESSORIDAUX_H
+#endif // PROCESSORIDAUX_H

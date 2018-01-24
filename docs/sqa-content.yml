@@ -1,0 +1,6 @@
+default:
+    base: 'docs/content'
+    include:
+        - 'docs/content/media/**'
+        - 'docs/content/index.md'
+        - 'docs/content/documentation/sqa/**'

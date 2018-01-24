@@ -8,11 +8,9 @@
   ymin = 0
   ymax = 1
   elem_type = QUAD4
-  # This test can only be run with SerialMesh since, in parallel with
-  # ParallelMesh, the nodes get renumbered and thus the
-  # NodalVariableValue postprocessor's output is necessarily
-  # different.
-  distribution = serial
+  # This test can only be run with renumering disabled, so the
+  # NodalVariableValue postprocessor's node id is well-defined.
+  allow_renumbering = false
 []
 
 [Variables]

@@ -14,8 +14,9 @@
 
 #include "CoupledNeumannBC.h"
 
-template<>
-InputParameters validParams<CoupledNeumannBC>()
+template <>
+InputParameters
+validParams<CoupledNeumannBC>()
 {
   InputParameters params = validParams<IntegratedBC>();
 
@@ -25,14 +26,15 @@ InputParameters validParams<CoupledNeumannBC>()
   return params;
 }
 
-CoupledNeumannBC::CoupledNeumannBC(const InputParameters & parameters) :
-    IntegratedBC(parameters),
+CoupledNeumannBC::CoupledNeumannBC(const InputParameters & parameters)
+  : IntegratedBC(parameters),
     _alpha(getParam<Real>("alpha")),
     _some_var_val(coupledValue("some_var"))
-{}
+{
+}
 
 Real
 CoupledNeumannBC::computeQpResidual()
 {
-  return -_test[_i][_qp]*_alpha*_some_var_val[_qp];
+  return -_test[_i][_qp] * _alpha * _some_var_val[_qp];
 }

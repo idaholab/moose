@@ -1,0 +1,8 @@
+[Tests]
+  [./time_extreme_pps]
+    type = 'CSVDiff'
+    input = 'time_extreme_value.i'
+    csvdiff = 'time_extreme_value_out.csv'
+    max_parallel = 4 # Only four elements
+  [../]
+[]

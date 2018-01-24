@@ -13,7 +13,7 @@
 class DiscreteNucleation;
 class DiscreteNucleationMap;
 
-template<>
+template <>
 InputParameters validParams<DiscreteNucleation>();
 
 /**
@@ -45,4 +45,4 @@ protected:
   const DiscreteNucleationMap & _map;
 };
 
-#endif //DISCRETENUCLEATION_H
+#endif // DISCRETENUCLEATION_H

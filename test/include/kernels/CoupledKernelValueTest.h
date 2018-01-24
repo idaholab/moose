@@ -18,9 +18,8 @@
 
 class CoupledKernelValueTest;
 
-template<>
+template <>
 InputParameters validParams<CoupledKernelValueTest>();
-
 
 class CoupledKernelValueTest : public KernelValue
 {
@@ -33,10 +32,8 @@ protected:
   virtual Real precomputeQpJacobian();
   virtual Real computeQpOffDiagJacobian(unsigned int);
 
-  VariableValue & _var2;
+  const VariableValue & _var2;
   unsigned int _var2_num;
-
 };
-
 
 #endif /* COUPLEDKERNELVALUETEST_H */

@@ -1,0 +1,59 @@
+[Tests]
+  [./multi_test]
+    type = 'Exodiff'
+    input = 'multismoothcircleIC_test.i'
+    exodiff = 'multismoothcircleIC_test_out.e'
+    scale_refine = 1
+    valgrind = 'HEAVY'
+  [../]
+
+  [./multi_normal_test]
+    type = 'Exodiff'
+    input = 'multismoothcircleIC_normal_test.i'
+    exodiff = 'multismoothcircleIC_normal_test_out.e'
+    scale_refine = 1
+    valgrind = 'HEAVY'
+    max_parallel = 1 # See #9886
+  [../]
+
+  [./lattice_bounds]
+    type = 'Exodiff'
+    input = 'latticesmoothcircleIC_bounds.i'
+    exodiff = 'latticesmoothcircleIC_bounds_out.e'
+    valgrind = 'HEAVY'
+  [../]
+
+  [./lattice_test]
+    type = 'Exodiff'
+    input = 'latticesmoothcircleIC_test.i'
+    exodiff = 'latticesmoothcircleIC_test_out.e'
+    scale_refine = 1
+    valgrind = 'HEAVY'
+    max_parallel = 1 # See #9886
+  [../]
+
+  [./lattice_normal_test]
+    type = 'Exodiff'
+    input = 'latticesmoothcircleIC_normal_test.i'
+    exodiff = 'latticesmoothcircleIC_normal_test_out.e'
+    scale_refine = 1
+    valgrind = 'HEAVY'
+    max_parallel = 1 # See #9886
+  [../]
+
+  [./lattice_small_invalue_test]
+    type = 'Exodiff'
+    input = 'latticesmoothcircleIC_small_invalue_test.i'
+    exodiff = 'latticesmoothcircleIC_small_invalue_test_out.e'
+    scale_refine = 1
+    valgrind = 'HEAVY'
+  [../]
+
+  [./specified_test]
+    type = 'Exodiff'
+    input = 'specifiedsmoothcircleIC_test.i'
+    exodiff = 'specifiedsmoothcircleIC_test_out.e'
+    scale_refine = 1
+    valgrind = 'HEAVY'
+  [../]
+[]

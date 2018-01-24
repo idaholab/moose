@@ -12,25 +12,27 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
+// MOOSE includes
 #include "NumResidualEvaluations.h"
-
 #include "FEProblem.h"
 #include "SubProblem.h"
+#include "NonlinearSystem.h"
 
-template<>
-InputParameters validParams<NumResidualEvaluations>()
+template <>
+InputParameters
+validParams<NumResidualEvaluations>()
 {
   InputParameters params = validParams<GeneralPostprocessor>();
   return params;
 }
 
-NumResidualEvaluations::NumResidualEvaluations(const InputParameters & parameters) :
-    GeneralPostprocessor(parameters)
-{}
+NumResidualEvaluations::NumResidualEvaluations(const InputParameters & parameters)
+  : GeneralPostprocessor(parameters)
+{
+}
 
 Real
 NumResidualEvaluations::getValue()
 {
-  return _fe_problem.getNonlinearSystem().nResidualEvaluations();
+  return _fe_problem.getNonlinearSystemBase().nResidualEvaluations();
 }
-

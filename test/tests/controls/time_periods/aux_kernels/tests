@@ -1,0 +1,8 @@
+[Tests]
+  [./test]
+    # Test the ability to control multiple AuxKernels
+    type = Exodiff
+    input = 'control.i'
+    exodiff = 'control_out.e'
+  [../]
+[]

@@ -19,26 +19,31 @@
 
 class LinearNodalConstraint;
 
-template<>
+template <>
 InputParameters validParams<LinearNodalConstraint>();
 
+/**
+ * The slave node variable is programmed as a linear combination of
+ * the master node variables (i.e, slave_var = a_1*master_var_1+
+ * a_2*master_var_2+... + a_n*master_var_n).  The master nodes ids and
+ * corresponding weights are required as input.  The same linear
+ * combination applies to all slave nodes.
+ */
 class LinearNodalConstraint : public NodalConstraint
 {
 public:
   LinearNodalConstraint(const InputParameters & parameters);
-  virtual ~LinearNodalConstraint();
 
 protected:
-
   /**
    * Computes the residual for the current slave node
    */
-  virtual Real computeQpResidual(Moose::ConstraintType type);
+  virtual Real computeQpResidual(Moose::ConstraintType type) override;
 
   /**
    * Computes the jacobian for the constraint
    */
-  virtual Real computeQpJacobian(Moose::ConstraintJacobianType type);
+  virtual Real computeQpJacobian(Moose::ConstraintJacobianType type) override;
 
   // Holds the master node ids
   std::vector<unsigned int> _master_node_ids;

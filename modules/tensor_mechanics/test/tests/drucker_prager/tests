@@ -1,0 +1,91 @@
+[Tests]
+  [./small2_inner_edge]
+    type = 'CSVDiff'
+    input = 'small_deform2_inner_edge.i'
+    csvdiff = 'small_deform2_inner_edge.csv'
+    rel_err = 1.0E-5
+    abs_zero = 1.0E-5
+  [../]
+  [./small2_lode_zero]
+    type = 'CSVDiff'
+    input = 'small_deform2_lode_zero.i'
+    csvdiff = 'small_deform2_lode_zero.csv'
+    rel_err = 1.0E-5
+    abs_zero = 1.0E-5
+  [../]
+  [./small2_outer_tip]
+    type = 'CSVDiff'
+    input = 'small_deform2_outer_tip.i'
+    csvdiff = 'small_deform2_outer_tip.csv'
+    rel_err = 1.0E-5
+    abs_zero = 1.0E-5
+  [../]
+  [./small2_inner_tip]
+    type = 'CSVDiff'
+    input = 'small_deform2_inner_tip.i'
+    csvdiff = 'small_deform2_inner_tip.csv'
+    rel_err = 1.0E-5
+    abs_zero = 1.0E-5
+  [../]
+  [./small2_native]
+    type = 'CSVDiff'
+    input = 'small_deform2_native.i'
+    csvdiff = 'small_deform2_native.csv'
+    rel_err = 1.0E-5
+    abs_zero = 1.0E-5
+  [../]
+
+  [./small3_native]
+    type = 'CSVDiff'
+    input = 'small_deform3_native.i'
+    csvdiff = 'small_deform3_native.csv'
+    rel_err = 1.0E-5
+    abs_zero = 1.0E-5
+  [../]
+  [./small3_outer_tip]
+    type = 'CSVDiff'
+    input = 'small_deform3_outer_tip.i'
+    csvdiff = 'small_deform3_outer_tip.csv'
+    rel_err = 1.0E-5
+    abs_zero = 1.0E-5
+  [../]
+  [./small3_inner_tip]
+    type = 'CSVDiff'
+    input = 'small_deform3_inner_tip.i'
+    csvdiff = 'small_deform3_inner_tip.csv'
+    rel_err = 1.0E-5
+    abs_zero = 1.0E-5
+  [../]
+  [./small3_lode_zero]
+    type = 'CSVDiff'
+    input = 'small_deform3_lode_zero.i'
+    csvdiff = 'small_deform3_lode_zero.csv'
+    rel_err = 1.0E-5
+    abs_zero = 1.0E-5
+  [../]
+  [./small3_inner_edge]
+    type = 'CSVDiff'
+    input = 'small_deform3_inner_edge.i'
+    csvdiff = 'small_deform3_inner_edge.csv'
+    rel_err = 1.0E-5
+    abs_zero = 1.0E-5
+  [../]
+
+  [./random_hyperbolic]
+    type = 'CSVDiff'
+    input = 'random_hyperbolic.i'
+    csvdiff = 'random_hyperbolic.csv'
+    rel_err = 1.0E-5
+    abs_zero = 1.0E-5
+    cli_args = '--no-trap-fpe Mesh/nx=6 Mesh/ny=7 Mesh/xmax=6 Mesh/ymax=7'
+  [../]
+  [./random_hyperbolic_heavy]
+    type = 'CSVDiff'
+    input = 'random_hyperbolic.i'
+    csvdiff = 'random_hyperbolic.csv'
+    rel_err = 1.0E-5
+    abs_zero = 1.0E-5
+    cli_args = '--no-trap-fpe Mesh/nx=100 Mesh/ny=55 Mesh/xmax=100 Mesh/ymax=55'
+    heavy = true
+  [../]
+[]

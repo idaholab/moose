@@ -16,19 +16,16 @@
 #define CHECKPOINT_H
 
 // MOOSE includes
-#include "BasicOutput.h"
 #include "FileOutput.h"
-#include "MaterialPropertyStorage.h"
-#include "RestartableData.h"
 #include "RestartableDataIO.h"
 
 #include <deque>
 
 // Forward declarations
 class Checkpoint;
-struct CheckpointFileNames;
+class MaterialPropertyStorage;
 
-template<>
+template <>
 InputParameters validParams<Checkpoint>();
 
 /**
@@ -49,10 +46,9 @@ struct CheckpointFileNames
 /**
  *
  */
-class Checkpoint : public BasicOutput<FileOutput>
+class Checkpoint : public FileOutput
 {
 public:
-
   /**
    * Class constructor
    * @param parameters
@@ -60,20 +56,9 @@ public:
   Checkpoint(const InputParameters & parameters);
 
   /**
-   * Class destructor
-   */
-  virtual ~Checkpoint();
-
-  /**
-   * Outputs a checkpoint file.
-   * Each call to this function creates various files associated with
-   */
-  void output(const ExecFlagType & type);
-
-  /**
    * Returns the base filename for the checkpoint files
    */
-  std::string filename();
+  virtual std::string filename() override;
 
   /**
    * Retrieve the checkpoint output directory
@@ -82,10 +67,14 @@ public:
   std::string directory();
 
 protected:
-
-  void updateCheckpointFiles(CheckpointFileNames file_struct);
+  /**
+   * Outputs a checkpoint file.
+   * Each call to this function creates various files associated with
+   */
+  virtual void output(const ExecFlagType & type) override;
 
 private:
+  void updateCheckpointFiles(CheckpointFileNames file_struct);
 
   /// Max no. of output files to store
   unsigned int _num_files;
@@ -95,6 +84,9 @@ private:
 
   /// True if outputing checkpoint files in binary format
   bool _binary;
+
+  /// True if running with parallel mesh
+  bool _parallel_mesh;
 
   /// Reference to the restartable data
   const RestartableDatas & _restartable_data;
@@ -115,4 +107,4 @@ private:
   std::deque<CheckpointFileNames> _file_names;
 };
 
-#endif //CHECKPOINT_H
+#endif // CHECKPOINT_H

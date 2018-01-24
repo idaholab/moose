@@ -14,23 +14,28 @@
 
 #include "ParsedAux.h"
 
-template<>
-InputParameters validParams<ParsedAux>()
+template <>
+InputParameters
+validParams<ParsedAux>()
 {
   InputParameters params = validParams<AuxKernel>();
   params += validParams<FunctionParserUtils>();
   params.addClassDescription("Parsed function AuxKernel.");
 
-  params.addRequiredParam<std::string>("function", "function expression");
+  params.addRequiredCustomTypeParam<std::string>(
+      "function", "FunctionExpression", "function expression");
   params.addCoupledVar("args", "coupled variables");
-  params.addParam<std::vector<std::string> >("constant_names", std::vector<std::string>(), "Vector of constants used in the parsed function (use this for kB etc.)");
-  params.addParam<std::vector<std::string> >( "constant_expressions", std::vector<std::string>(), "Vector of values for the constants in constant_names (can be an FParser expression)");
+  params.addParam<std::vector<std::string>>(
+      "constant_names", "Vector of constants used in the parsed function (use this for kB etc.)");
+  params.addParam<std::vector<std::string>>(
+      "constant_expressions",
+      "Vector of values for the constants in constant_names (can be an FParser expression)");
 
   return params;
 }
 
-ParsedAux::ParsedAux(const InputParameters & parameters) :
-    AuxKernel(parameters),
+ParsedAux::ParsedAux(const InputParameters & parameters)
+  : AuxKernel(parameters),
     FunctionParserUtils(parameters),
     _function(getParam<std::string>("function")),
     _nargs(coupledComponents("args")),
@@ -45,16 +50,20 @@ ParsedAux::ParsedAux(const InputParameters & parameters) :
   }
 
   // base function object
-  _func_F = ADFunctionPtr(new ADFunction());
+  _func_F = ADFunctionPtr(std::make_shared<ADFunction>());
+
+  // set FParser interneal feature flags
+  setParserFeatureFlags(_func_F);
 
   // add the constant expressions
   addFParserConstants(_func_F,
-                      getParam<std::vector<std::string> >("constant_names"),
-                      getParam<std::vector<std::string> >("constant_expressions"));
+                      getParam<std::vector<std::string>>("constant_names"),
+                      getParam<std::vector<std::string>>("constant_expressions"));
 
   // parse function
   if (_func_F->Parse(_function, variables) >= 0)
-    mooseError("Invalid function\n" << _function << "\nin ParsedAux " << name() << ".\n" << _func_F->ErrorMsg());
+    mooseError(
+        "Invalid function\n", _function, "\nin ParsedAux ", name(), ".\n", _func_F->ErrorMsg());
 
   // optimize
   if (!_disable_fpoptimizer)

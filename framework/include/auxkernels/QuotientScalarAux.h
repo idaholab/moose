@@ -19,7 +19,7 @@
 
 class QuotientScalarAux;
 
-template<>
+template <>
 InputParameters validParams<QuotientScalarAux>();
 
 /**
@@ -31,10 +31,9 @@ class QuotientScalarAux : public AuxScalarKernel
 {
 public:
   QuotientScalarAux(const InputParameters & parameters);
-  virtual ~QuotientScalarAux();
 
 protected:
-  virtual Real computeValue();
+  virtual Real computeValue() override;
 
   VariableValue & _a;
   VariableValue & _b;

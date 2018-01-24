@@ -8,58 +8,86 @@
 #define RETURNMAPPINGMODEL_H
 
 #include "ConstitutiveModel.h"
+#include "SingleVariableReturnMappingSolution.h"
 
 /**
- * One or more constitutive models coupled together.
+ * Base class for models that perform return mapping iterations to compute stress.  This
+ * is for a single model to compute inelastic behavior.  This class can be used directly
+ * as a standalone model for a single source of inelasticity.  It can also be called from
+ * another model that combines together multiple inelastic models using Picard iterations.
  */
 
-class ReturnMappingModel : public ConstitutiveModel
+class ReturnMappingModel : public ConstitutiveModel, public SingleVariableReturnMappingSolution
 {
 public:
-  ReturnMappingModel( const InputParameters & parameters);
+  ReturnMappingModel(const InputParameters & parameters,
+                     const std::string inelastic_strain_name = "");
   virtual ~ReturnMappingModel() {}
 
+  virtual void initQpStatefulProperties() override;
 
-  /// Compute the stress (sigma += deltaSigma)
-  virtual void computeStress( const Elem & current_elem,
-                              unsigned qp,
-                              const SymmElasticityTensor & elasticityTensor,
-                              const SymmTensor & stress_old,
-                              SymmTensor & strain_increment,
-                              SymmTensor & stress_new );
+  virtual void computeStress(const Elem & current_elem,
+                             const SymmElasticityTensor & elasticityTensor,
+                             const SymmTensor & stress_old,
+                             SymmTensor & strain_increment,
+                             SymmTensor & stress_new) override;
 
-  void computeStress( const Elem & /*current_elem*/,
-                      unsigned qp,
-                      const SymmElasticityTensor & elasticityTensor,
-                      const SymmTensor & stress_old,
-                      SymmTensor & strain_increment,
-                      SymmTensor & stress_new,
-                      SymmTensor & inelastic_strain_increment );
+  /**
+   * Compute stress by performing return mapping iterations.  This can be called either
+   * from within this model, or by an external model that combines multiple inelastic models.
+   * @param current_elem               Current element
+   * @param elasticityTensor           Elasticity tensor
+   * @param stress_old                 Old state of stress
+   * @param strain_increment           Strain increment
+   * @param stress_new                 New state of stress
+   * @param inelastic_strain_increment Inelastic strain increment
+   */
+  void computeStress(const Elem & current_elem,
+                     const SymmElasticityTensor & elasticityTensor,
+                     const SymmTensor & stress_old,
+                     SymmTensor & strain_increment,
+                     SymmTensor & stress_new,
+                     SymmTensor & inelastic_strain_increment);
+
+  virtual Real computeReferenceResidual(const Real effective_trial_stress,
+                                        const Real scalar) override;
+
+  /**
+   * Compute the limiting value of the time step for this material
+   * @return Limiting time step
+   */
+  Real computeTimeStepLimit();
 
 protected:
+  /**
+   * Perform any necessary initialization before return mapping iterations
+   * @param effectiveTrialStress Effective trial stress
+   * @param elasticityTensor     Elasticity tensor
+   */
+  virtual void computeStressInitialize(Real /*effectiveTrialStress*/,
+                                       const SymmElasticityTensor & /*elasticityTensor*/)
+  {
+  }
 
-  virtual void computeStressInitialize(unsigned /*qp*/,
-                                       Real /*effectiveTrialStress*/,
-                                       const SymmElasticityTensor & /*elasticityTensor*/) {}
-  virtual void computeStressFinalize(unsigned /*qp*/,
-                                     const SymmTensor & /*inelasticStrainIncrement*/) {}
+  /**
+   * Perform any necessary steps to finalize state after return mapping iterations
+   * @param inelasticStrainIncrement Inelastic strain increment
+   */
+  virtual void computeStressFinalize(const SymmTensor & /*inelasticStrainIncrement*/) {}
 
-  virtual void iterationInitialize(unsigned /*qp*/, Real /*scalar*/) {}
-  virtual Real computeResidual(unsigned qp, Real effectiveTrialStress, Real scalar) = 0;
-  virtual Real computeDerivative(unsigned qp, Real effectiveTrialStress, Real scalar) = 0;
-  virtual void iterationFinalize(unsigned /*qp*/, Real /*scalar*/) {}
+  Real _effective_strain_increment;
 
-  const unsigned int _max_its;
-  const bool _output_iteration_info;
-  const bool _output_iteration_info_on_error;
-  const Real _relative_tolerance;
-  const Real _absolute_tolerance;
+  /// 3 * shear modulus
+  Real _three_shear_modulus;
 
-private:
-
+  MaterialProperty<Real> & _effective_inelastic_strain;
+  const MaterialProperty<Real> & _effective_inelastic_strain_old;
+  Real _max_inelastic_increment;
+  const bool _compute_matl_timestep_limit;
+  MaterialProperty<Real> * _matl_timestep_limit;
 };
 
-template<>
+template <>
 InputParameters validParams<ReturnMappingModel>();
 
 #endif // RETURNMAPPINGMODEL_H

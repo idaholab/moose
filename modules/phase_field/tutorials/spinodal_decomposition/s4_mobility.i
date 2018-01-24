@@ -8,7 +8,6 @@
 [Mesh]
   type = GeneratedMesh
   dim = 2
-  distribution = DEFAULT
   elem_type = QUAD4
   nx = 25
   ny = 25
@@ -20,10 +19,6 @@
   zmin = 0
   zmax = 0
   uniform_refine = 2
-[]
-
-[GlobalParams]
-  block = 0           # The generated mesh is used for all materials and kernels
 []
 
 [Variables]
@@ -122,11 +117,11 @@
     derivative_order = 2
   [../]
   [./precipitate_indicator]  # Returns 1/625 if precipitate
-      type = ParsedMaterial
-      f_name = prec_indic
-      args = c
-      function = if(c>0.6,0.0016,0)
-    [../]
+    type = ParsedMaterial
+    f_name = prec_indic
+    args = c
+    function = if(c>0.6,0.0016,0)
+  [../]
 []
 
 [Postprocessors]
@@ -147,8 +142,8 @@
     mat_prop = prec_indic
   [../]
   [./active_time]           # Time computer spent on simulation
-    type = RunTime
-    time_type = active
+    type = PerformanceData
+    event =  ACTIVE
   [../]
 []
 
@@ -167,7 +162,7 @@
   nl_max_its = 50
   nl_abs_tol = 1e-9
   end_time = 604800   # 7 days
-  petsc_options_iname = '-pc_type -ksp_grmres_restart -sub_ksp_type
+  petsc_options_iname = '-pc_type -ksp_gmres_restart -sub_ksp_type
                          -sub_pc_type -pc_asm_overlap'
   petsc_options_value = 'asm      31                  preonly
                          ilu          1'

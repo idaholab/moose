@@ -9,8 +9,8 @@
   ny = 10
   elem_type = QUAD4
   # This test uses ElementalVariableValue postprocessors on specific
-  # elements, if you use ParallelMesh the elements get renumbered.
-  distribution = serial
+  # elements, so element numbering needs to stay unchanged
+  allow_renumbering = false
 []
 
 [Functions]
@@ -50,7 +50,7 @@
 
   #Coupling of nonlinear to Aux
   [./force]
-    type = UserForcingFunction
+    type = BodyForce
     variable = u
     function = ffn
   [../]

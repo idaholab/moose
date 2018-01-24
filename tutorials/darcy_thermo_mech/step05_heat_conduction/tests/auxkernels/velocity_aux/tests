@@ -1,7 +1,1 @@
-[Tests]
-  [./test]
-    type = 'Exodiff'
-    input = 'velocity_aux.i'
-    exodiff = 'velocity_aux_out.e'
-  [../]
-[]
+../../../../step04_velocity_aux/tests/auxkernels/velocity_aux/tests

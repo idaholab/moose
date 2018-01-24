@@ -1,0 +1,6 @@
+[Tests]
+  [./getActiveFilenames]
+    type = PythonUnitTest
+    input = test_get_active_filenames.py
+  [../]
+[]

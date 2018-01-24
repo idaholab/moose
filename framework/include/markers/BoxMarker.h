@@ -17,27 +17,25 @@
 
 #include "Marker.h"
 
-// libmesh includes
-#include "libmesh/mesh_tools.h"
+#include "libmesh/bounding_box.h"
 
 class BoxMarker;
 
-template<>
+template <>
 InputParameters validParams<BoxMarker>();
 
 class BoxMarker : public Marker
 {
 public:
   BoxMarker(const InputParameters & parameters);
-  virtual ~BoxMarker(){};
 
 protected:
-  virtual MarkerValue computeElementMarker();
+  virtual MarkerValue computeElementMarker() override;
 
   MarkerValue _inside;
   MarkerValue _outside;
 
-  MeshTools::BoundingBox _bounding_box;
+  BoundingBox _bounding_box;
 };
 
 #endif /* BOXMARKER_H */

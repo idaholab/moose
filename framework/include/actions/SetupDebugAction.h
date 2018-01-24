@@ -21,7 +21,7 @@
 class SetupDebugAction;
 class MooseObjectAction;
 
-template<>
+template <>
 InputParameters validParams<SetupDebugAction>();
 
 /**
@@ -31,12 +31,10 @@ class SetupDebugAction : public Action
 {
 public:
   SetupDebugAction(InputParameters parameters);
-  virtual ~SetupDebugAction();
 
-  virtual void act();
+  virtual void act() override;
 
 protected:
-
   /**
    * Helper method for creating Output actions
    * @param type The type of object to create (e.g., TopResidualDebugOutput)
@@ -48,6 +46,5 @@ protected:
   /// Parameters from the action being created (AddOutputAction)
   InputParameters _action_params;
 };
-
 
 #endif /* SETUPDEBUGACTION_H */

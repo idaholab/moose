@@ -1,8 +1,0 @@
-[Tests]
-  [./test]
-    type = 'Exodiff'
-    input = 'predictor_test.i'
-    exodiff = 'out.e'
-    abs_zero = 1e-10
-  [../]
-[]

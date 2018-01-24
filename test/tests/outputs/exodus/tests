@@ -4,6 +4,7 @@
     type = 'Exodiff'
     input = 'exodus.i'
     exodiff = 'exodus_out.e'
+    group = 'requirements'
   [../]
 
   [./input]

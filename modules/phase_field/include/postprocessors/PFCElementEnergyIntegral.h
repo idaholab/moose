@@ -18,10 +18,10 @@
 #include "ElementIntegralPostprocessor.h"
 #include "MooseVariableInterface.h"
 
-//Forward Declarations
+// Forward Declarations
 class PFCElementEnergyIntegral;
 
-template<>
+template <>
 InputParameters validParams<PFCElementEnergyIntegral>();
 
 /**
@@ -30,9 +30,7 @@ InputParameters validParams<PFCElementEnergyIntegral>();
  * Note that specializations of this integral are possible by deriving from this
  * class and overriding computeQpIntegral().
  */
-class PFCElementEnergyIntegral :
-  public ElementIntegralPostprocessor,
-  public MooseVariableInterface
+class PFCElementEnergyIntegral : public ElementIntegralPostprocessor, public MooseVariableInterface
 {
 public:
   PFCElementEnergyIntegral(const InputParameters & parameters);
@@ -43,13 +41,13 @@ protected:
   MooseVariable & _var;
 
   /// Holds the solution at current quadrature points
-  VariableValue & _u;
+  const VariableValue & _u;
 
   /// Holds the solution gradient at the current quadrature points
-  VariableGradient & _grad_u;
+  const VariableGradient & _grad_u;
 
   /// Holds the solution derivative at the current quadrature points
-  VariableValue & _u_dot;
+  const VariableValue & _u_dot;
 
   /// Temperature
   const Real _temp;

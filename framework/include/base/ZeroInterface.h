@@ -15,12 +15,12 @@
 #ifndef ZEROINTERFACE_H
 #define ZEROINTERFACE_H
 
-#include "InputParameters.h"
+#include "MooseTypes.h"
 #include "MooseVariableBase.h"
-#include "ParallelUniqueId.h"
 #include "libmesh/libmesh_common.h"
 
-class FEProblem;
+class FEProblemBase;
+class InputParameters;
 
 /**
  * Interface to bring zero values inside objects
@@ -38,13 +38,13 @@ public:
   ZeroInterface(const InputParameters & parameters);
 
 protected:
-  FEProblem & _zi_feproblem;
+  FEProblemBase & _zi_feproblem;
   THREAD_ID _zi_tid;
   const Real & _real_zero;
-  VariableValue & _zero;
-  VariableGradient & _grad_zero;
-  VariableSecond & _second_zero;
-  VariablePhiSecond & _second_phi_zero;
+  const VariableValue & _zero;
+  const VariableGradient & _grad_zero;
+  const VariableSecond & _second_zero;
+  const VariablePhiSecond & _second_phi_zero;
 };
 
 #endif /* ZEROINTERFACE_H */

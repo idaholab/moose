@@ -10,4 +10,10 @@
     input = 'master_sub_output.i'
     exodiff = 'master_sub_output_out.e master_sub_output_out_sub0.e'
   [../]
+  [./test_it_adapt]
+    # Test using the IterationAdaptiveDT Timestepper in a sub-app
+    type = 'Exodiff'
+    input = 'master_iteration_adaptive.i'
+    exodiff = 'master_iteration_adaptive_out.e master_iteration_adaptive_out_sub0.e master_iteration_adaptive_out_sub1.e'
+  [../]
 []

@@ -1,0 +1,14 @@
+[Tests]
+  [./sobol]
+    type = CSVDiff
+    input = sobol.i
+    csvdiff = 'sobol_out_data_0000.csv'
+  [../]
+  [./sobol_row_col]
+    type = CSVDiff
+    input = sobol.i
+    cli_args = "VectorPostprocessors/data/output_column_and_row_sizes=true Outputs/file_base=sobol_rowcol_out"
+    csvdiff = 'sobol_rowcol_out_data_0000.csv'
+    prereq = sobol
+  [../]
+[]

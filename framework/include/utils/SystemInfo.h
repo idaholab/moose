@@ -20,14 +20,17 @@
 class SystemInfo
 {
 public:
-  SystemInfo(int argc, char *argv[]);
+  SystemInfo(int argc, char * argv[]);
 
-  std::string getInfo();
-  std::string getTimeStamp(time_t *time_stamp=NULL);
+  std::string getInfo() const;
+  std::string getTimeStamp(time_t * time_stamp = NULL) const;
+
+  int argc() const { return _argc; };
+  char ** argv() const { return _argv; };
 
 protected:
   int _argc;
-  char **_argv;
+  char ** _argv;
 };
 
 #endif // SYSTEMINFO_H

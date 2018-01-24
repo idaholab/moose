@@ -1,0 +1,2 @@
+app_name = moose_test
+cli_args = '--error'

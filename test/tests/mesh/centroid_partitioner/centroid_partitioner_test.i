@@ -1,3 +1,13 @@
+###########################################################
+# This test exercises the parallel computation aspect of
+# the framework. A Centroid partitioner is used to split
+# the mesh into chunks for several processors along a
+# vector (y-axis).
+#
+# @Requirement F2.30
+###########################################################
+
+
 [Mesh]
   type = GeneratedMesh
   dim = 2
@@ -21,9 +31,9 @@
   centroid_partitioner_direction = y
 
   # The centroid partitioner behaves differently depending on
-  # whether you are using Serial or ParallelMesh, so to get
-  # repeatable results, we restrict this test to using SerialMesh.
-  distribution = serial
+  # whether you are using Serial or DistributedMesh, so to get
+  # repeatable results, we restrict this test to using ReplicatedMesh.
+  parallel_type = replicated
 []
 
 [Variables]

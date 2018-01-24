@@ -16,19 +16,19 @@
 
 #include "MooseApp.h"
 
-template<>
-InputParameters validParams<FailingProblem>()
+template <>
+InputParameters
+validParams<FailingProblem>()
 {
   InputParameters params = validParams<FEProblem>();
   params.addRequiredParam<unsigned int>("fail_step", "The timestep to fail");
   return params;
 }
 
-FailingProblem::FailingProblem(const InputParameters & params) :
-    FEProblem(params),
-    _failed(false),
-    _fail_step(getParam<unsigned int>("fail_step"))
-{}
+FailingProblem::FailingProblem(const InputParameters & params)
+  : FEProblem(params), _failed(false), _fail_step(getParam<unsigned int>("fail_step"))
+{
+}
 
 bool
 FailingProblem::converged()
@@ -39,5 +39,5 @@ FailingProblem::converged()
     return false;
   }
 
-  return FEProblem::converged();
+  return FEProblemBase::converged();
 }

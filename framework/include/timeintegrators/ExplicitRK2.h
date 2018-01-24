@@ -19,7 +19,7 @@
 
 class ExplicitRK2;
 
-template<>
+template <>
 InputParameters validParams<ExplicitRK2>();
 
 /**
@@ -68,6 +68,7 @@ public:
   ExplicitRK2(const InputParameters & parameters);
   virtual ~ExplicitRK2();
 
+  virtual void preSolve();
   virtual int order() { return 2; }
 
   virtual void computeTimeDerivatives();
@@ -87,6 +88,5 @@ protected:
   virtual Real b1() const = 0;
   virtual Real b2() const = 0;
 };
-
 
 #endif /* EXPLICITRK2_H */

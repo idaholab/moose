@@ -16,21 +16,25 @@
 #define POSTPROCESSORINTERFACE_H
 
 // Standard includes
-#include <map>
 #include <string>
 
 // MOOSE includes
-#include "InputParameters.h"
-#include "ParallelUniqueId.h"
-#include "PostprocessorData.h"
+#include "MooseTypes.h"
 
 // Forward Declarations
-class FEProblem;
+class FEProblemBase;
+class InputParameters;
+class PostprocessorName;
+class MooseObject;
 
+/**
+ * Interface class for classes which interact with Postprocessors.
+ * Provides the getPostprocessorValueXYZ() and related interfaces.
+ */
 class PostprocessorInterface
 {
 public:
-  PostprocessorInterface(const InputParameters & params);
+  PostprocessorInterface(const MooseObject * moose_object);
 
   ///@{
   /**
@@ -96,12 +100,11 @@ public:
   bool hasPostprocessorByName(const PostprocessorName & name);
 
 private:
-
-  /// Reference the the FEProblem class
-  FEProblem & _pi_feproblem;
-
   /// PostprocessorInterface Parameters
   const InputParameters & _ppi_params;
+
+  /// Reference the the FEProblemBase class
+  FEProblemBase & _pi_feproblem;
 };
 
-#endif //POSTPROCESSORINTERFACE_H
+#endif // POSTPROCESSORINTERFACE_H

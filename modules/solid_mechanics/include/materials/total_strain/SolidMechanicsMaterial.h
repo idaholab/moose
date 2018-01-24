@@ -10,11 +10,11 @@
 #include "Material.h"
 #include "SymmElasticityTensor.h"
 
-//Forward Declarations
+// Forward Declarations
 class SolidMechanicsMaterial;
 class VolumetricModel;
 
-template<>
+template <>
 InputParameters validParams<SolidMechanicsMaterial>();
 
 /**
@@ -26,18 +26,19 @@ public:
   SolidMechanicsMaterial(const InputParameters & parameters);
 
 protected:
+  virtual void initQpStatefulProperties() override;
   const std::string _appended_property_name;
-  VariableGradient & _grad_disp_x;
-  VariableGradient & _grad_disp_y;
-  VariableGradient & _grad_disp_z;
+  const VariableGradient & _grad_disp_x;
+  const VariableGradient & _grad_disp_y;
+  const VariableGradient & _grad_disp_z;
 
   bool _has_temp;
-  VariableValue & _temp;
+  const VariableValue & _temp;
 
   bool _has_c;
-  VariableValue & _c;
+  const VariableValue & _c;
 
-  std::vector<VolumetricModel*> _volumetric_models;
+  std::vector<VolumetricModel *> _volumetric_models;
 
   MaterialProperty<SymmTensor> & _stress;
   MaterialProperty<SymmElasticityTensor> & _elasticity_tensor;
@@ -51,22 +52,19 @@ protected:
 
   MaterialProperty<SymmTensor> & _elastic_strain;
 
-
-  template<typename T>
+  template <typename T>
   MaterialProperty<T> & createProperty(const std::string & prop_name)
-    {
-      std::string name(prop_name + _appended_property_name);
-      return declareProperty<T>(name);
-    }
+  {
+    std::string name(prop_name + _appended_property_name);
+    return declareProperty<T>(name);
+  }
 
-  template<typename T>
-  MaterialProperty<T> & createPropertyOld(const std::string & prop_name)
-    {
-      std::string name(prop_name + _appended_property_name);
-      return declarePropertyOld<T>(name);
-    }
-
-
+  template <typename T>
+  const MaterialProperty<T> & getPropertyOld(const std::string & prop_name)
+  {
+    std::string name(prop_name + _appended_property_name);
+    return getMaterialPropertyOld<T>(name);
+  }
 };
 
-#endif //SOLIDMECHANICSMATERIAL_H
+#endif // SOLIDMECHANICSMATERIAL_H

@@ -13,12 +13,12 @@
 // Forward Declarations
 class MultiBarrierFunctionMaterial;
 
-template<>
+template <>
 InputParameters validParams<MultiBarrierFunctionMaterial>();
 
 /**
- * MultiBarrierFunctionMaterial is a constraint kernel that acts on one of the eta_i variables to
- * enforce \f$ \sum_n h_i(\eta_i) \equiv 1 \f$.
+ * Double well phase transformation barrier free energy contribution.
+ *\f$ g(\vec\eta) = \sum_i \eta_i^2(1-\eta_i)^2 \f$
  */
 class MultiBarrierFunctionMaterial : public DerivativeMaterialInterface<Material>
 {
@@ -39,11 +39,11 @@ protected:
 
   /// order parameters
   unsigned int _num_eta;
-  std::vector<VariableValue *> _eta;
+  std::vector<const VariableValue *> _eta;
 
   /// Barrier functions and their drivatives
   MaterialProperty<Real> & _prop_g;
   std::vector<MaterialProperty<Real> *> _prop_dg, _prop_d2g;
 };
 
-#endif //MULTIBARRIERFUNCTION_H
+#endif // MULTIBARRIERFUNCTION_H

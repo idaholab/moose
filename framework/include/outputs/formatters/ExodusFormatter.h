@@ -22,9 +22,9 @@ class ExodusFormatter : public InputFileFormatter
 public:
   ExodusFormatter();
 
-  virtual void printInputFile(ActionWarehouse & wh);
+  void printInputFile(ActionWarehouse & wh);
 
-  virtual void format();
+  void format();
 
   std::vector<std::string> & getInputFileRecord() { return _input_file_record; }
 

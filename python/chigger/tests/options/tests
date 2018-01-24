@@ -1,0 +1,50 @@
+[Tests]
+  [./run]
+    type = RunApp
+    command = options.py
+    cli_args = '--type=run'
+  [../]
+
+  [./bad_type]
+    type = RunApp
+    command = options.py
+    cli_args = '--type=bad-type'
+    expect_out = "param must be of type int but str provided."
+  [../]
+
+  [./bad_allow_type]
+    type = RunApp
+    command = options.py
+    cli_args = '--type=bad-allow-type'
+    expect_out = "The type provided, int, does not match the type of the allowed values, list."
+  [../]
+
+  [./value_not_allowed]
+    type = RunApp
+    command = options.py
+    cli_args = '--type=value-not-allowed'
+    expect_out = "Attempting to set param to a value of 1 but only the following are allowed"
+  [../]
+
+  [./bad-arg-count]
+    type = RunException
+    command = options.py
+    cli_args = '--type=bad-arg-count'
+    expect_err = "Wrong number of arguments, must supply 2 or 3 input arguments."
+  [../]
+
+  [./dump]
+    type = RunApp
+    command = options.py
+    cli_args = '--type=dump'
+    expect_out = "Some parameter"
+    skip = 'Needs terminaltables'
+  [../]
+
+  [./duplicate]
+    type = RunApp
+    command = options.py
+    cli_args = '--type=duplicate'
+    expect_out = "A parameter with the name param already exists."
+  [../]
+[]

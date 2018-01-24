@@ -1,0 +1,24 @@
+[Tests]
+[./equilibrium_without_action]
+  type = 'Exodiff'
+  input = 'equilibrium_without_action.i'
+  exodiff = 'equilibrium_out.e'
+[../]
+[./equilibrium_action]
+  type = 'Exodiff'
+  input = 'equilibrium_action.i'
+  exodiff = 'equilibrium_out.e'
+  prereq = equilibrium_without_action
+[../]
+  [./kinetic_without_action]
+    type = 'Exodiff'
+    input = 'kinetic_without_action.i'
+    exodiff = 'kinetic_out.e'
+  [../]
+  [./kinetic_action]
+    type = 'Exodiff'
+    input = 'kinetic_action.i'
+    exodiff = 'kinetic_out.e'
+    prereq = kinetic_without_action
+  [../]
+[]

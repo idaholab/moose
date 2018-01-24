@@ -18,34 +18,50 @@
 #include "Function.h"
 #include "LinearInterpolation.h"
 
+class Piecewise;
+
+template <>
+InputParameters validParams<Piecewise>();
+
 /**
- * Base class for function objects.  Functions override value to supply a
- * value at a point.
+ * Function which provides a piecewise approximation to a provided
+ * (x,y) point data set.  Derived classes which control the order
+ * (constant, linear) of the approximation should be used directly.
  */
 class Piecewise : public Function
 {
 public:
   Piecewise(const InputParameters & parameters);
-  virtual ~Piecewise();
 
   virtual Real functionSize();
   virtual Real domain(int i);
   virtual Real range(int i);
 
+  /**
+   * Provides a means for explicitly setting the x and y data.
+   */
+  void setData(const std::vector<Real> & x, const std::vector<Real> & y);
+
 protected:
+  /**
+   * Reads data from supplied CSV file.
+   */
+  std::pair<std::vector<Real>, std::vector<Real>> buildFromFile();
+
+  /**
+   * Builds data from 'x' and 'y' parameters.
+   */
+  std::pair<std::vector<Real>, std::vector<Real>> buildFromXandY();
+
+  /**
+   * Builds data from 'xy_data' parameter.
+   */
+  std::pair<std::vector<Real>, std::vector<Real>> buildFromXY();
+
   const Real _scale_factor;
-  MooseSharedPointer<LinearInterpolation> _linear_interp;
+  std::unique_ptr<LinearInterpolation> _linear_interp;
   int _axis;
   bool _has_axis;
-private:
-  const std::string _data_file_name;
-  bool parseNextLineReals( std::ifstream & ifs, std::vector<Real> & myvec);
-  void parseRows( std::vector<Real> & x, std::vector<Real> & y );
-  void parseColumns( std::vector<Real> & x, std::vector<Real> & y);
-
 };
-
-template<>
-InputParameters validParams<Piecewise>();
 
 #endif

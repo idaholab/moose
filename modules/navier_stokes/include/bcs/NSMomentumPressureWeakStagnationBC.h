@@ -7,27 +7,23 @@
 #ifndef NSMOMENTUMPRESSUREWEAKSTAGNATIONBC_H
 #define NSMOMENTUMPRESSUREWEAKSTAGNATIONBC_H
 
-#include "NSWeakStagnationBC.h"
+#include "NSWeakStagnationBaseBC.h"
 
 // Forward Declarations
 class NSMomentumPressureWeakStagnationBC;
 
-template<>
+template <>
 InputParameters validParams<NSMomentumPressureWeakStagnationBC>();
-
 
 /**
  * This class implements the pressure term of the momentum
  * equation boundary integral for use in weak stagnation
  * boundary conditions.
  */
-class NSMomentumPressureWeakStagnationBC : public NSWeakStagnationBC
+class NSMomentumPressureWeakStagnationBC : public NSWeakStagnationBaseBC
 {
-
 public:
   NSMomentumPressureWeakStagnationBC(const InputParameters & parameters);
-
-  virtual ~NSMomentumPressureWeakStagnationBC(){}
 
 protected:
   virtual Real computeQpResidual();
@@ -35,7 +31,7 @@ protected:
   virtual Real computeQpOffDiagJacobian(unsigned jvar);
 
   // Required parameters
-  unsigned _component;
+  const unsigned int _component;
 };
 
 #endif // NSMOMENTUMPRESSUREWEAKSTAGNATIONBC_H

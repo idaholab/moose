@@ -14,24 +14,24 @@
 
 #include "ConstantAux.h"
 
-template<>
-InputParameters validParams<ConstantAux>()
+template <>
+InputParameters
+validParams<ConstantAux>()
 {
   InputParameters params = validParams<AuxKernel>();
+  params.addClassDescription("Creates a constant field in the domain.");
   params.addParam<Real>("value", 0.0, "Some constant value that can be read from the input file");
+  params.declareControllable("value");
   return params;
 }
 
-ConstantAux::ConstantAux(const InputParameters & parameters) :
-    AuxKernel(parameters),
-    _value(getParam<Real>("value"))
+ConstantAux::ConstantAux(const InputParameters & parameters)
+  : AuxKernel(parameters), _value(getParam<Real>("value"))
 {
 }
-
 
 Real
 ConstantAux::computeValue()
 {
   return _value;
 }
-

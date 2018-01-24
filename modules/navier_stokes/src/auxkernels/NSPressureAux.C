@@ -4,43 +4,43 @@
 /*          All contents are licensed under LGPL V2.1           */
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
-#include "NSPressureAux.h"
 
-template<>
-InputParameters validParams<NSPressureAux>()
+// Navier-Stokes inclues
+#include "NSPressureAux.h"
+#include "NS.h"
+
+// FluidProperties includes
+#include "IdealGasFluidProperties.h"
+
+// MOOSE includes
+#include "MooseMesh.h"
+
+template <>
+InputParameters
+validParams<NSPressureAux>()
 {
   InputParameters params = validParams<AuxKernel>();
 
+  params.addClassDescription("Nodal auxiliary variable, for computing pressure at the nodes.");
   // Mark variables as required
-  params.addRequiredCoupledVar("rho", "");
-  params.addRequiredCoupledVar("u", "");
-  params.addRequiredCoupledVar("v", "");
-  params.addCoupledVar("w", ""); // Only required in 3D...
-  params.addRequiredCoupledVar("rhoe", "");
-
-  // Parameters with default values
-  params.addRequiredParam<Real>("gamma", "Ratio of specific heats");
+  params.addRequiredCoupledVar(NS::specific_volume, "specific volume");
+  params.addRequiredCoupledVar(NS::internal_energy, "internal energy");
+  params.addRequiredParam<UserObjectName>("fluid_properties",
+                                          "The name of the user object for fluid properties");
 
   return params;
 }
 
 NSPressureAux::NSPressureAux(const InputParameters & parameters)
-  :AuxKernel(parameters),
-   _rho(coupledValue("rho")),
-   _u_vel(coupledValue("u")),
-   _v_vel(coupledValue("v")),
-   _w_vel(_mesh.dimension() == 3 ? coupledValue("w") : _zero),
-   _rhoe(coupledValue("rhoe")),
-   _gamma(getParam<Real>("gamma")) // can't use Material properties in Nodal Aux...
-{}
+  : AuxKernel(parameters),
+    _specific_volume(coupledValue(NS::specific_volume)),
+    _internal_energy(coupledValue(NS::internal_energy)),
+    _fp(getUserObject<IdealGasFluidProperties>("fluid_properties"))
+{
+}
 
 Real
 NSPressureAux::computeValue()
 {
-  // Velocity vector, squared
-  Real V2 = _u_vel[_qp]*_u_vel[_qp] + _v_vel[_qp]*_v_vel[_qp] + _w_vel[_qp]*_w_vel[_qp];
-
-  // P = (gam-1) * ( rho*e_t - 1/2 * rho * V^2)
-  return (_gamma - 1)*(_rhoe[_qp] - 0.5 * _rho[_qp] * V2);
+  return _fp.pressure(_specific_volume[_qp], _internal_energy[_qp]);
 }
-

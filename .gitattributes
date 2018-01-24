@@ -17,3 +17,17 @@ contrib/* linguist-vendored
 *.xml linguist-vendored
 
 *.C linguist-language=C++
+
+# TODO(rwcarlsen): Remove this after a while.
+framework/include/**/*.h merge=clang-format
+framework/src/**/*.C     merge=clang-format
+test/include/**/*.h      merge=clang-format
+test/src/**/*.C          merge=clang-format
+modules/**/include/**/*.h   merge=clang-format
+modules/**/src/**/*.C       merge=clang-format
+examples/**/*.C          merge=clang-format
+examples/**/*.h          merge=clang-format
+unit/**/*.C              merge=clang-format
+unit/**/*.h              merge=clang-format
+tutorials/**/*.C         merge=clang-format
+tutorials/**/*.h         merge=clang-format

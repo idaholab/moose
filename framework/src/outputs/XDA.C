@@ -12,16 +12,18 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-// Moose includes
+// MOOSE includes
 #include "XDA.h"
 #include "MooseApp.h"
 #include "FEProblem.h"
+#include "MooseMesh.h"
 
-template<>
-InputParameters validParams<XDA>()
+template <>
+InputParameters
+validParams<XDA>()
 {
   // Get the base class parameters
-  InputParameters params = validParams<BasicOutput<OversampleOutput> >();
+  InputParameters params = validParams<OversampleOutput>();
 
   // Add description for the XDA class
   params.addClassDescription("Object for outputting data in the XDA/XDR format");
@@ -34,25 +36,32 @@ InputParameters validParams<XDA>()
   return params;
 }
 
-XDA::XDA(const InputParameters & parameters) :
-    BasicOutput<OversampleOutput> (parameters),
-    _binary(getParam<bool>("_binary"))
+XDA::XDA(const InputParameters & parameters)
+  : OversampleOutput(parameters), _binary(getParam<bool>("_binary"))
 {
 }
 
 void
 XDA::output(const ExecFlagType & /*type*/)
 {
-  if (_binary)
-  {
-    _mesh_ptr->getMesh().write(filename()+"_mesh.xdr");
-    _es_ptr->write (filename()+".xdr", ENCODE, EquationSystems::WRITE_DATA | EquationSystems::WRITE_ADDITIONAL_DATA);
-  }
-  else
-  {
-    _mesh_ptr->getMesh().write(filename()+"_mesh.xda");
-    _es_ptr->write (filename()+".xda", WRITE, EquationSystems::WRITE_DATA | EquationSystems::WRITE_ADDITIONAL_DATA);
-  }
+  // Strings for the two filenames to be written
+  std::string es_name = filename();
+  std::string mesh_name = es_name;
+
+  // Make sure the filename has an extension
+  if (es_name.size() < 4)
+    mooseError("Unacceptable filename, you must include an extension (.xda or .xdr).");
+
+  // Insert the mesh suffix
+  mesh_name.insert(mesh_name.size() - 4, "_mesh");
+
+  // Set the binary flag
+  XdrMODE mode = _binary ? ENCODE : WRITE;
+
+  // Write the files
+  _mesh_ptr->getMesh().write(mesh_name);
+  _es_ptr->write(
+      es_name, mode, EquationSystems::WRITE_DATA | EquationSystems::WRITE_ADDITIONAL_DATA);
   _file_num++;
 }
 
@@ -61,12 +70,12 @@ XDA::filename()
 {
   // Append the padded time step to the file base
   std::ostringstream output;
-  output << _file_base
-         << "_"
-         << std::setw(_padding)
-         << std::setprecision(0)
-         << std::setfill('0')
-         << std::right
-         << _file_num;
+  output << _file_base << "_" << std::setw(_padding) << std::setprecision(0) << std::setfill('0')
+         << std::right << _file_num;
+
+  if (_binary)
+    output << ".xdr";
+  else
+    output << ".xda";
   return output.str();
 }

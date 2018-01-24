@@ -15,36 +15,39 @@
 #ifndef LINEMATERIALSAMPLERBASE_H
 #define LINEMATERIALSAMPLERBASE_H
 
+// MOOSE includes
 #include "GeneralVectorPostprocessor.h"
-#include "RayTracing.h"
 #include "SamplerBase.h"
-#include "FEProblem.h"
-#include "InputParameters.h"
 #include "BlockRestrictable.h"
-#include "Assembly.h"
+#include "LineSegment.h"
+#include "RayTracing.h" // Moose::elementsIntersectedByLine()
+#include "Assembly.h"   // Assembly::qRule()
+#include "MooseMesh.h"  // MooseMesh::getMesh()
+#include "SwapBackSentinel.h"
+#include "FEProblem.h"
 
-// libmesh includes
-#include "libmesh/quadrature.h"
+#include "libmesh/quadrature.h" // _qrule->n_points()
 
-//Forward Declarations
-template<typename T>
+// Forward Declarations
+class MooseMesh;
+template <typename T>
 class LineMaterialSamplerBase;
 
-template<>
-InputParameters validParams<LineMaterialSamplerBase<Real> >();
+template <>
+InputParameters validParams<LineMaterialSamplerBase<Real>>();
 
 /**
- * This is a base class for sampling material properties for the integration points
- * in all elements that are intersected by a user-defined line.  The positions of
- * those points are output in x, y, z coordinates, as well as in terms of the projected
- * positions of those points along the line.  Derived classes can be created to sample
- * arbitrary types of material properties.
+ * This is a base class for sampling material properties for the
+ * integration points in all elements that are intersected by a
+ * user-defined line.  The positions of those points are output in x,
+ * y, z coordinates, as well as in terms of the projected positions of
+ * those points along the line.  Derived classes can be created to
+ * sample arbitrary types of material properties.
  */
-template<typename T>
-class LineMaterialSamplerBase :
-  public GeneralVectorPostprocessor,
-  public SamplerBase,
-  public BlockRestrictable
+template <typename T>
+class LineMaterialSamplerBase : public GeneralVectorPostprocessor,
+                                public SamplerBase,
+                                public BlockRestrictable
 {
 public:
   /**
@@ -55,34 +58,22 @@ public:
   LineMaterialSamplerBase(const InputParameters & parameters);
 
   /**
-   * Class destructor
-   */
-  virtual ~LineMaterialSamplerBase() {}
-
-  /**
    * Initialize
    * Calls through to base class's initialize()
    */
-  virtual void initialize();
+  virtual void initialize() override;
 
   /**
    * Finds all elements along the user-defined line, loops through them, and samples their
    * material properties.
    */
-  virtual void execute();
+  virtual void execute() override;
 
   /**
    * Finalize
    * Calls through to base class's finalize()
    */
-  virtual void finalize();
-
-  /**
-   * Thread Join
-   * Calls through to base class's threadJoin()
-   * @param sb SamplerBase object to be joint into this object
-   */
-  virtual void threadJoin(const SamplerBase & sb);
+  virtual void finalize() override;
 
   /**
    * Reduce the material property to a scalar for output
@@ -90,7 +81,7 @@ public:
    * @param curr_point The point corresponding to this material property
    * @return A scalar value from this material property to be output
    */
-  virtual Real getScalarFromProperty(const T & property, const Point * curr_point) = 0;
+  virtual Real getScalarFromProperty(const T & property, const Point & curr_point) = 0;
 
 protected:
   /// The beginning of the line
@@ -106,28 +97,29 @@ protected:
   MooseMesh & _mesh;
 
   /// The quadrature rule
-  QBase * & _qrule;
+  QBase *& _qrule;
 
   /// The quadrature points
   const MooseArray<Point> & _q_point;
 };
 
 template <typename T>
-LineMaterialSamplerBase<T>::LineMaterialSamplerBase(const InputParameters & parameters) :
-    GeneralVectorPostprocessor(parameters),
+LineMaterialSamplerBase<T>::LineMaterialSamplerBase(const InputParameters & parameters)
+  : GeneralVectorPostprocessor(parameters),
     SamplerBase(parameters, this, _communicator),
-    BlockRestrictable(parameters),
+    BlockRestrictable(this),
     _start(getParam<Point>("start")),
     _end(getParam<Point>("end")),
     _mesh(_subproblem.mesh()),
     _qrule(_subproblem.assembly(_tid).qRule()),
     _q_point(_subproblem.assembly(_tid).qPoints())
 {
-  std::vector<std::string> material_property_names = getParam<std::vector<std::string> >("property");
-  for (unsigned int i=0; i<material_property_names.size(); ++i)
+  std::vector<std::string> material_property_names = getParam<std::vector<std::string>>("property");
+  for (unsigned int i = 0; i < material_property_names.size(); ++i)
   {
     if (!hasMaterialProperty<T>(material_property_names[i]))
-      mooseError("In LineMaterialSamplerBase material property: " + material_property_names[i] + " does not exist.");
+      mooseError("In LineMaterialSamplerBase material property: " + material_property_names[i] +
+                 " does not exist.");
     _material_properties.push_back(&getMaterialProperty<T>(material_property_names[i]));
   }
 
@@ -148,19 +140,21 @@ LineMaterialSamplerBase<T>::execute()
   std::vector<Elem *> intersected_elems;
   std::vector<LineSegment> segments;
 
-  MooseSharedPointer<PointLocatorBase> plb = MooseSharedPointer<PointLocatorBase>(_fe_problem.mesh().getMesh().sub_point_locator().release());
-
-  Moose::elementsIntersectedByLine(_start, _end, _fe_problem.mesh(), plb, intersected_elems, segments);
+  std::unique_ptr<PointLocatorBase> pl = _mesh.getPointLocator();
+  Moose::elementsIntersectedByLine(_start, _end, _mesh, *pl, intersected_elems, segments);
 
   const RealVectorValue line_vec = _end - _start;
-  const Real line_length(line_vec.size());
+  const Real line_length(line_vec.norm());
   const RealVectorValue line_unit_vec = line_vec / line_length;
   std::vector<Real> values(_material_properties.size());
 
-  for (unsigned int i=0; i<intersected_elems.size(); ++i)
-  {
-    const Elem * elem = intersected_elems[i];
+  std::set<unsigned int> needed_mat_props;
+  const std::set<unsigned int> & mp_deps = getMatPropDependencies();
+  needed_mat_props.insert(mp_deps.begin(), mp_deps.end());
+  _fe_problem.setActiveMaterialProperties(needed_mat_props, _tid);
 
+  for (const auto & elem : intersected_elems)
+  {
     if (elem->processor_id() != processor_id())
       continue;
 
@@ -169,9 +163,13 @@ LineMaterialSamplerBase<T>::execute()
 
     _subproblem.prepare(elem, _tid);
     _subproblem.reinitElem(elem, _tid);
+
+    // Set up Sentinel class so that, even if reinitMaterials() throws, we
+    // still remember to swap back during stack unwinding.
+    SwapBackSentinel sentinel(_fe_problem, &FEProblem::swapBackMaterials, _tid);
     _fe_problem.reinitMaterials(elem->subdomain_id(), _tid);
 
-    for (unsigned int qp=0; qp<_qrule->n_points(); ++qp)
+    for (unsigned int qp = 0; qp < _qrule->n_points(); ++qp)
     {
       const RealVectorValue qp_pos(_q_point[qp]);
 
@@ -181,13 +179,13 @@ LineMaterialSamplerBase<T>::execute()
       if (qp_proj_dist_along_line < 0 || qp_proj_dist_along_line > line_length)
         continue;
 
-      for (unsigned int j=0; j<_material_properties.size(); ++j)
-        values[j] = getScalarFromProperty((*_material_properties[j])[qp], &_q_point[qp]);
+      for (unsigned int j = 0; j < _material_properties.size(); ++j)
+        values[j] = getScalarFromProperty((*_material_properties[j])[qp], _q_point[qp]);
 
       addSample(_q_point[qp], qp_proj_dist_along_line, values);
     }
-    _fe_problem.swapBackMaterials(_tid);
   }
+  _fe_problem.clearActiveMaterialProperties(_tid);
 }
 
 template <typename T>
@@ -195,13 +193,6 @@ void
 LineMaterialSamplerBase<T>::finalize()
 {
   SamplerBase::finalize();
-}
-
-template <typename T>
-void
-LineMaterialSamplerBase<T>::threadJoin(const SamplerBase & sb)
-{
-  SamplerBase::threadJoin(sb);
 }
 
 #endif

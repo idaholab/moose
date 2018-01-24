@@ -1,5 +1,6 @@
 [Mesh]
   type = GeneratedMesh
+  parallel_type = replicated # Until RayTracing.C is fixed
   dim = 3
   nx = 10
   ny = 10

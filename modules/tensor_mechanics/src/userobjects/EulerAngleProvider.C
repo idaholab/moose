@@ -6,8 +6,9 @@
 /****************************************************************/
 #include "EulerAngleProvider.h"
 
-template<>
-InputParameters validParams<EulerAngleProvider>()
+template <>
+InputParameters
+validParams<EulerAngleProvider>()
 {
   return validParams<GeneralUserObject>();
 }

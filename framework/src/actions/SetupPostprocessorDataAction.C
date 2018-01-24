@@ -16,19 +16,15 @@
 #include "SetupPostprocessorDataAction.h"
 #include "FEProblem.h"
 
-template<>
-InputParameters validParams<SetupPostprocessorDataAction>()
+template <>
+InputParameters
+validParams<SetupPostprocessorDataAction>()
 {
   InputParameters params = validParams<Action>();
   return params;
 }
 
-SetupPostprocessorDataAction::SetupPostprocessorDataAction(InputParameters params) :
-  Action(params)
-{
-}
-
-SetupPostprocessorDataAction::~SetupPostprocessorDataAction()
+SetupPostprocessorDataAction::SetupPostprocessorDataAction(InputParameters params) : Action(params)
 {
 }
 

@@ -1,0 +1,17 @@
+[Tests]
+  [./test]
+    type = 'CSVDiff'
+    input = 'isotropicSD.i'
+    csvdiff = 'isotropicSD_out.csv'
+    rel_err = 1.0E-3
+    abs_zero = 1.0E-3
+  [../]
+
+  [./power_rule]
+    type = 'CSVDiff'
+    input = 'powerRuleHardening.i'
+    csvdiff = 'powerRuleHardening_out.csv'
+    rel_err = 1.0E-3
+    abs_zero = 1.0E-3
+  [../]
+[]

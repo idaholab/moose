@@ -5,4 +5,10 @@
     exodiff = 'var_coupling_out.e'
     recover = false
   [../]
+
+  [./var_stateful_coupling]
+    type = 'Exodiff'
+    input = 'var_stateful_coupling.i'
+    exodiff = 'var_stateful_coupling_out.e'
+  [../]
 []

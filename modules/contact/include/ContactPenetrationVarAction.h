@@ -10,16 +10,15 @@
 #include "Action.h"
 #include "MooseTypes.h"
 
-class ContactPenetrationVarAction: public Action
+class ContactPenetrationVarAction : public Action
 {
 public:
   ContactPenetrationVarAction(const InputParameters & params);
 
   virtual void act();
-
 };
 
-template<>
+template <>
 InputParameters validParams<ContactPenetrationVarAction>();
 
 #endif

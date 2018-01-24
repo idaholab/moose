@@ -19,18 +19,14 @@
 #include "FileRangeBuilder.h"
 #include "ConsoleStream.h"
 
-// libmesh includes
-#include "libmesh/mesh_tools.h"
+#include "libmesh/bounding_box.h"
 
 // VTK includes
 #ifdef LIBMESH_HAVE_VTK
 
 // Some VTK header files have extra semi-colons in them, and clang
 // loves to warn about it...
-#ifdef __clang__
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wextra-semi"
-#endif
+#include "libmesh/ignore_warnings.h"
 
 #include "vtkSmartPointer.h"
 #include "vtkPNGReader.h"
@@ -44,18 +40,15 @@
 #include "vtkImageMagnitude.h"
 #include "vtkImageFlip.h"
 
-#ifdef __clang__
-#pragma clang diagnostic pop
-#endif
+#include "libmesh/restore_warnings.h"
 
 #endif
-
 
 // Forward declarations
 class ImageSampler;
 class MooseMesh;
 
-template<>
+template <>
 InputParameters validParams<ImageSampler>();
 
 /**
@@ -64,7 +57,6 @@ InputParameters validParams<ImageSampler>();
 class ImageSampler : public FileRangeBuilder
 {
 public:
-
   /**
    * Constructor.
    *
@@ -74,11 +66,6 @@ public:
    * @see ImageFunction
    */
   ImageSampler(const InputParameters & parameters);
-
-  /**
-   * Destructor.
-   */
-  virtual ~ImageSampler();
 
   /**
    * Return the pixel value for the given point
@@ -92,7 +79,6 @@ public:
   virtual void setupImageSampler(MooseMesh & mesh);
 
 protected:
-
   /**
    * Apply image re-scaling using the vtkImageShiftAndRescale object
    */
@@ -118,7 +104,6 @@ protected:
   void vtkFlip();
 
 private:
-
 #ifdef LIBMESH_HAVE_VTK
 
   /// List of file names to extract data
@@ -146,11 +131,11 @@ private:
   vtkSmartPointer<vtkImageFlip> _flip_filter;
 #endif
 
-  /**
-   * Helper method for flipping image
-   * @param axis Flag for determing the flip axis: "x=0", "y=1", "z=2"
-   * @return A smart pointer the flipping filter
-   */
+/**
+ * Helper method for flipping image
+ * @param axis Flag for determing the flip axis: "x=0", "y=1", "z=2"
+ * @return A smart pointer the flipping filter
+ */
 #ifdef LIBMESH_HAVE_VTK
   vtkSmartPointer<vtkImageFlip> imageFlip(const int & axis);
 #endif
@@ -167,20 +152,19 @@ private:
   /// Physical pixel size
   std::vector<double> _voxel;
 
-  /// Component to extract
+/// Component to extract
 #ifdef LIBMESH_HAVE_VTK
   unsigned int _component;
 #endif
 
   /// Bounding box for testing points
-  MeshTools::BoundingBox _bounding_box;
+  BoundingBox _bounding_box;
 
   /// Parameters for interface
   const InputParameters & _is_pars;
 
   /// Create a console stream object for this helper class
   ConsoleStream _is_console;
-
 };
 
 #endif // IMAGESAMPLER_H

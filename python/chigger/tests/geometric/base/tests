@@ -1,0 +1,19 @@
+[Tests]
+  [./orientation]
+    type = ImageDiff
+    command = orientation.py
+    imagediff = 'orientation.png'
+  [../]
+
+  [./scale]
+    type = ImageDiff
+    command = scale.py
+    imagediff = 'scale.png'
+  [../]
+
+  [./rotation]
+    type = ImageDiff
+    command = rotation.py
+    imagediff = 'rotation.png'
+  [../]
+[]

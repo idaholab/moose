@@ -24,6 +24,8 @@
 #include "TransientInterface.h"
 #include "PostprocessorInterface.h"
 #include "GeometricSearchInterface.h"
+#include "BlockRestrictable.h"
+#include "BoundaryRestrictable.h"
 #include "Restartable.h"
 #include "ZeroInterface.h"
 #include "MeshChangedInterface.h"
@@ -38,30 +40,29 @@ class SystemBase;
 class NodalKernel;
 class Assembly;
 
-template<>
+template <>
 InputParameters validParams<NodalKernel>();
 
 /**
  * Base class for creating new types of boundary conditions
  *
  */
-class NodalKernel :
-  public MooseObject,
-  public BlockRestrictable,
-  public SetupInterface,
-  public FunctionInterface,
-  public UserObjectInterface,
-  public TransientInterface,
-  public PostprocessorInterface,
-  public GeometricSearchInterface,
-  public Restartable,
-  public ZeroInterface,
-  public MeshChangedInterface,
-  public RandomInterface,
-  public CoupleableMooseVariableDependencyIntermediateInterface
+class NodalKernel : public MooseObject,
+                    public BlockRestrictable,
+                    public BoundaryRestrictable,
+                    public SetupInterface,
+                    public FunctionInterface,
+                    public UserObjectInterface,
+                    public TransientInterface,
+                    public PostprocessorInterface,
+                    public GeometricSearchInterface,
+                    public Restartable,
+                    public ZeroInterface,
+                    public MeshChangedInterface,
+                    public RandomInterface,
+                    public CoupleableMooseVariableDependencyIntermediateInterface
 {
 public:
-
   /**
    * Class constructor.
    * @param parameters The InputParameters for the object
@@ -126,8 +127,8 @@ protected:
   /// Reference to SubProblem
   SubProblem & _subproblem;
 
-  /// Reference to FEProblem
-  FEProblem & _fe_problem;
+  /// Reference to FEProblemBase
+  FEProblemBase & _fe_problem;
 
   /// Reference to SystemBase
   SystemBase & _sys;
@@ -145,28 +146,28 @@ protected:
   MooseMesh & _mesh;
 
   /// current node being processed
-  const Node * & _current_node;
+  const Node *& _current_node;
 
   /// Quadrature point index
   unsigned int _qp;
 
   /// Value of the unknown variable this is acting on
-  VariableValue & _u;
+  const VariableValue & _u;
 
   /// Time derivative of the variable this is acting on
-  VariableValue & _u_dot;
+  const VariableValue & _u_dot;
 
   /// Derivative of u_dot with respect to u
-  VariableValue & _du_dot_du;
+  const VariableValue & _du_dot_du;
 
   /// The aux variables to save the residual contributions to
   bool _has_save_in;
-  std::vector<MooseVariable*> _save_in;
+  std::vector<MooseVariable *> _save_in;
   std::vector<AuxVariableName> _save_in_strings;
 
   /// The aux variables to save the diagonal Jacobian contributions to
   bool _has_diag_save_in;
-  std::vector<MooseVariable*> _diag_save_in;
+  std::vector<MooseVariable *> _diag_save_in;
   std::vector<AuxVariableName> _diag_save_in_strings;
 };
 

@@ -21,7 +21,7 @@
 // Forward declerations
 class TestSetupPostprocessorDataActionFunction;
 
-template<>
+template <>
 InputParameters validParams<TestSetupPostprocessorDataActionFunction>();
 
 /**
@@ -31,17 +31,11 @@ InputParameters validParams<TestSetupPostprocessorDataActionFunction>();
 class TestSetupPostprocessorDataActionFunction : public Function
 {
 public:
-
   /**
    * Class constructor
    * @param parameters The parameters object holding data for the class to use.
    */
   TestSetupPostprocessorDataActionFunction(const InputParameters & parameters);
-
-  /**
-   * Class destructor
-   */
-  virtual ~TestSetupPostprocessorDataActionFunction();
 };
 
-#endif //TESTSETUPPOSTPROCESSORDATAACTIONFUNCTION_H
+#endif // TESTSETUPPOSTPROCESSORDATAACTIONFUNCTION_H

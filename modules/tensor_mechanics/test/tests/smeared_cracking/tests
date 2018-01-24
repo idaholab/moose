@@ -1,0 +1,54 @@
+[Tests]
+  [./cracking]
+    type = Exodiff
+    input = cracking.i
+    exodiff = cracking_out.e
+    custom_cmp = cracking.cmp
+  [../]
+  [./cracking_rz]
+    type = Exodiff
+    input = cracking_rz.i
+    exodiff = cracking_rz_out.e
+    custom_cmp = cracking_rz.cmp
+  [../]
+  [./cracking_function]
+    type = Exodiff
+    input = cracking_function.i
+    exodiff = cracking_function_out.e
+    custom_cmp = cracking_function.cmp
+  [../]
+  [./exponential]
+    type = Exodiff
+    input = cracking_exponential.i
+    exodiff = cracking_exponential_out.e
+    custom_cmp = cracking_exponential.cmp
+    use_old_floor = true
+  [../]
+  [./rz_exponential]
+    type = Exodiff
+    input = cracking_rz_exponential.i
+    exodiff = cracking_rz_exponential_out.e
+    custom_cmp = cracking_rz_exp.cmp
+  [../]
+  [./xyz]
+    type = Exodiff
+    input = cracking_xyz.i
+    exodiff = cracking_xyz_out.e
+    use_old_floor = true
+    custom_cmp = cracking_xyz.cmp
+  [../]
+  [./plane_stress]
+    type = Exodiff
+    input = cracking_plane_stress.i
+    exodiff = cracking_plane_stress_out.e
+    custom_cmp = cracking_pln_str.cmp
+  [../]
+  [./cracking_rotation]
+    type = Exodiff
+    input = cracking_rotation.i
+    exodiff = cracking_rotation_out.e
+    use_old_floor = true
+    custom_cmp = cracking_rotation.cmp
+    max_parallel = 1
+  [../]
+[]

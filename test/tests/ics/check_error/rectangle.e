@@ -1,0 +1,1 @@
+../../misc/check_error/rectangle.e

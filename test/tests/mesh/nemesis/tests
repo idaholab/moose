@@ -6,7 +6,10 @@
     max_parallel = 4
     min_parallel = 4
     recover = false
+    group = 'requirements nemesis'
+    copy_files = cylinder
   [../]
+
   [./nemesis_repartitioning_test]
     type = 'Exodiff'
     input = 'nemesis_repartitioning_test.i'
@@ -15,6 +18,7 @@
     max_parallel = 4
     min_parallel = 4
     recover = false
+    group = 'nemesis'
 
     # There appears to be a platform specific issue with the
     # nemesis repartitioning. While we do receive consistent

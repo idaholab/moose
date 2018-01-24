@@ -13,7 +13,7 @@
 // Forward Declarations
 class SwitchingFunctionConstraintEta;
 
-template<>
+template <>
 InputParameters validParams<SwitchingFunctionConstraintEta>();
 
 /**
@@ -39,8 +39,8 @@ protected:
   const MaterialProperty<Real> & _d2h;
 
   /// Lagrange multiplier
-  VariableValue & _lambda;
+  const VariableValue & _lambda;
   unsigned int _lambda_var;
 };
 
-#endif //SWITCHINGFUNCTIONCONSTRAINTETA_H
+#endif // SWITCHINGFUNCTIONCONSTRAINTETA_H

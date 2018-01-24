@@ -14,20 +14,22 @@
 
 #include "BndTestDirichletBC.h"
 
-template<>
-InputParameters validParams<BndTestDirichletBC>()
+template <>
+InputParameters
+validParams<BndTestDirichletBC>()
 {
   InputParameters p = validParams<NodalBC>();
-  MooseEnum test("none boundaryNames boundaryIDs hasBoundary isBoundarySubset hasBoundaryMaterialProperty_true hasBoundaryMaterialProperty_false", "none", "Select a test");
+  MooseEnum test("none boundaryNames boundaryIDs hasBoundary isBoundarySubset "
+                 "hasBoundaryMaterialProperty_true hasBoundaryMaterialProperty_false",
+                 "none",
+                 "Select a test");
   p.addParam<MooseEnum>("test", test, "Select the desired test");
   p.addRequiredParam<Real>("value", "Value of the BC");
   return p;
 }
 
-
-BndTestDirichletBC::BndTestDirichletBC(const InputParameters & parameters) :
-  NodalBC(parameters),
-  _value(getParam<Real>("value"))
+BndTestDirichletBC::BndTestDirichletBC(const InputParameters & parameters)
+  : NodalBC(parameters), _value(getParam<Real>("value"))
 {
 
   // Get an test enum from the kernel parameters

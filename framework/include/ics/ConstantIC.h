@@ -16,16 +16,23 @@
 #define CONSTANTIC_H
 
 #include "InitialCondition.h"
-#include "InputParameters.h"
 
 // System includes
 #include <string>
 
 // Forward Declarations
 class ConstantIC;
-namespace libMesh { class Point; }
+class InputParameters;
 
-template<>
+namespace libMesh
+{
+class Point;
+}
+
+template <typename T>
+InputParameters validParams();
+
+template <>
 InputParameters validParams<ConstantIC>();
 
 /**
@@ -34,7 +41,6 @@ InputParameters validParams<ConstantIC>();
 class ConstantIC : public InitialCondition
 {
 public:
-
   /**
    * Constructor
    *
@@ -42,15 +48,10 @@ public:
    */
   ConstantIC(const InputParameters & parameters);
 
-  /**
-   * The value of the variable at a point.
-   *
-   * This must be overridden by derived classes.
-   */
-  virtual Real value(const Point & p);
+  virtual Real value(const Point & p) override;
 
 protected:
   Real _value;
 };
 
-#endif //CONSTANTIC_H
+#endif // CONSTANTIC_H

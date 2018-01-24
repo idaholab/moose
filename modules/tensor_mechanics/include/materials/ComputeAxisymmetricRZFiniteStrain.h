@@ -20,11 +20,18 @@ public:
   ComputeAxisymmetricRZFiniteStrain(const InputParameters & parameters);
 
 protected:
-  /// the old value of the first component of the displacements vector
-  VariableValue & _disp_old_0;
+  void initialSetup() override;
 
-  virtual Real computeDeformGradZZ();
-  virtual Real computeDeformGradZZold();
+  /// Computes the current dUz/dz for axisymmetric problems, where
+  /// \f$ \epsilon_{\theta} = \frac{u_r}{r} \f$
+  Real computeGradDispZZ() override;
+
+  /// Computes the old dUz/dz for axisymmetric problems, where
+  /// \f$ \epsilon_{\theta-old} = \frac{u_{r-old}}{r_{old}} \f$
+  Real computeGradDispZZOld() override;
+
+  /// the old value of the first component of the displacements vector
+  const VariableValue & _disp_old_0;
 };
 
-#endif //COMPUTEAXISYMMETRICRZFINITESTRAIN_H
+#endif // COMPUTEAXISYMMETRICRZFINITESTRAIN_H

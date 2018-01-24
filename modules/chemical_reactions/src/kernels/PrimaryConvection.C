@@ -5,42 +5,54 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 #include "PrimaryConvection.h"
-#include "Material.h"
 
-template<>
-InputParameters validParams<PrimaryConvection>()
+template <>
+InputParameters
+validParams<PrimaryConvection>()
 {
   InputParameters params = validParams<Kernel>();
   params.addRequiredCoupledVar("p", "Pressure");
+  RealVectorValue g(0, 0, 0);
+  params.addParam<RealVectorValue>("gravity", g, "Gravity vector (default is (0, 0, 0))");
+  params.addClassDescription("Convection of primary species");
   return params;
 }
 
-PrimaryConvection::PrimaryConvection(const InputParameters & parameters) :
-    Kernel(parameters),
+PrimaryConvection::PrimaryConvection(const InputParameters & parameters)
+  : DerivativeMaterialInterface<Kernel>(parameters),
     _cond(getMaterialProperty<Real>("conductivity")),
-    _grad_p(coupledGradient("p"))
+    _gravity(getParam<RealVectorValue>("gravity")),
+    _density(getDefaultMaterialProperty<Real>("density")),
+    _grad_p(coupledGradient("p")),
+    _pvar(coupled("p"))
+
 {
 }
 
-Real PrimaryConvection::computeQpResidual()
+Real
+PrimaryConvection::computeQpResidual()
 {
-  // _grad_p[_qp] * _grad_u[_qp] is actually doing a dot product
-  RealGradient _Darcy_vel = -_grad_p[_qp] * _cond[_qp];
+  RealVectorValue darcy_vel = -_cond[_qp] * (_grad_p[_qp] - _density[_qp] * _gravity);
 
-  // Moose::out << "Pore velocity " << _Darcy_vel(0) << std::endl;
-  return _test[_i][_qp] * (_Darcy_vel * _grad_u[_qp]);
+  return _test[_i][_qp] * (darcy_vel * _grad_u[_qp]);
 }
 
-Real PrimaryConvection::computeQpJacobian()
+Real
+PrimaryConvection::computeQpJacobian()
 {
-  // the partial derivative of _grad_u is just _dphi[_j]
-  RealGradient _Darcy_vel=-_grad_p[_qp]*_cond[_qp];
+  RealVectorValue darcy_vel = -_cond[_qp] * (_grad_p[_qp] - _density[_qp] * _gravity);
 
-  return _test[_i][_qp]*(_Darcy_vel*_grad_phi[_j][_qp]);
+  return _test[_i][_qp] * (darcy_vel * _grad_phi[_j][_qp]);
 }
 
-Real PrimaryConvection::computeQpOffDiagJacobian(unsigned int /*jvar*/)
+Real
+PrimaryConvection::computeQpOffDiagJacobian(unsigned int jvar)
 {
-  return 0.0;
+  if (jvar == _pvar)
+  {
+    RealVectorValue ddarcy_vel_dp = -_cond[_qp] * _grad_phi[_j][_qp];
+    return _test[_i][_qp] * (ddarcy_vel_dp * _grad_u[_qp]);
+  }
+  else
+    return 0.0;
 }
-

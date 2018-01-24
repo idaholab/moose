@@ -40,7 +40,7 @@
   [../]
 
   [./ffn]
-    type = UserForcingFunction
+    type = BodyForce
     variable = u
     function = forcing_fn
   [../]
@@ -73,16 +73,15 @@
 
   [./Adaptivity]
     steps = 3
-    print_changed_info = true
     coarsen_fraction = 0.1
     refine_fraction = 0.2
     max_h_level = 5
-  []
+  [../]
 []
 
 [Outputs]
   execute_on = 'timestep_end'
   file_base = out_steady_adapt
   exodus = true
+  print_mesh_changed_info = true
 []
-

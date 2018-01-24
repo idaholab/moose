@@ -12,40 +12,49 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef DT2_H_
-#define DT2_H_
+#ifndef DT2_H
+#define DT2_H
 
+// MOOSE includes
 #include "TimeStepper.h"
-#include "libmesh/numeric_vector.h"
 
+// Forward declarations
 class DT2;
 
-template<>
+namespace libMesh
+{
+template <typename T>
+class NumericVector;
+}
+
+template <>
 InputParameters validParams<DT2>();
 
 /**
- *
+ * An adaptive timestepper that compares the solution obtained from a
+ * single step of size dt with two steps of size dt/2 and adjusts the
+ * next timestep accordingly.
  */
 class DT2 : public TimeStepper
 {
 public:
   DT2(const InputParameters & parameters);
 
-  virtual void preExecute();
-  virtual void preSolve();
-  virtual void step();
+  virtual void preExecute() override;
+  virtual void preSolve() override;
+  virtual void step() override;
 
-  virtual void rejectStep();
-  virtual bool converged();
+  virtual void rejectStep() override;
+  virtual bool converged() override;
 
 protected:
-  virtual Real computeInitialDT();
-  virtual Real computeDT();
+  virtual Real computeInitialDT() override;
+  virtual Real computeDT() override;
 
   ///
-  NumericVector<Number> * _u_diff, * _u1, * _u2;
-  NumericVector<Number> * _u_saved, * _u_older_saved;
-  NumericVector<Number> * _aux1, * _aux_saved, * _aux_older_saved;
+  NumericVector<Number> *_u_diff, *_u1, *_u2;
+  NumericVector<Number> *_u_saved, *_u_older_saved;
+  NumericVector<Number> *_aux1, *_aux_saved, *_aux_older_saved;
 
   /// global relative time discretization error estimate
   Real _error;
@@ -57,5 +66,4 @@ protected:
   Real _max_increase;
 };
 
-
-#endif /* DT2_H_ */
+#endif /* DT2_H */

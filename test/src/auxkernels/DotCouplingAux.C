@@ -14,8 +14,9 @@
 
 #include "DotCouplingAux.h"
 
-template<>
-InputParameters validParams<DotCouplingAux>()
+template <>
+InputParameters
+validParams<DotCouplingAux>()
 {
   InputParameters params = validParams<AuxKernel>();
   params.addRequiredCoupledVar("v", "Coupled variable");
@@ -23,15 +24,12 @@ InputParameters validParams<DotCouplingAux>()
   return params;
 }
 
-DotCouplingAux::DotCouplingAux(const InputParameters & parameters) :
-    AuxKernel(parameters),
-    _v_dot(coupledDot("v"))
+DotCouplingAux::DotCouplingAux(const InputParameters & parameters)
+  : AuxKernel(parameters), _v_dot(coupledDot("v"))
 {
 }
 
-DotCouplingAux::~DotCouplingAux()
-{
-}
+DotCouplingAux::~DotCouplingAux() {}
 
 Real
 DotCouplingAux::computeValue()

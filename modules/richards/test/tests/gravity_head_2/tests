@@ -1,0 +1,229 @@
+[Tests]
+  [./gh01]
+    type = 'CSVDiff'
+    input = 'gh01.i'
+    csvdiff = 'gh01.csv'
+    rel_err = 1e-5
+    abs_zero = 1e-4
+    compiler = 'GCC CLANG'
+  [../]
+  [./gh02]
+    type = 'CSVDiff'
+    input = 'gh02.i'
+    csvdiff = 'gh02.csv'
+    rel_err = 1e-5
+    abs_zero = 1e-4
+    compiler = 'GCC CLANG'
+  [../]
+  [./gh03]
+    type = 'CSVDiff'
+    input = 'gh03.i'
+    csvdiff = 'gh03.csv'
+    rel_err = 1e-5
+    abs_zero = 1e-4
+    compiler = 'GCC CLANG'
+  [../]
+  [./gh04]
+    type = 'CSVDiff'
+    input = 'gh04.i'
+    csvdiff = 'gh04.csv'
+    rel_err = 1e-5
+    abs_zero = 1e-4
+    compiler = 'GCC CLANG'
+  [../]
+  [./gh05]
+    type = 'CSVDiff'
+    input = 'gh05.i'
+    csvdiff = 'gh05.csv'
+    rel_err = 1e-5
+    abs_zero = 1e-4
+    max_parallel = 1
+    compiler = 'GCC CLANG'
+  [../]
+  [./gh06]
+    type = 'CSVDiff'
+    input = 'gh06.i'
+    csvdiff = 'gh06.csv'
+    rel_err = 1e-5
+    abs_zero = 1e-4
+    compiler = 'GCC CLANG'
+  [../]
+  [./gh08]
+    type = 'CSVDiff'
+    input = 'gh08.i'
+    csvdiff = 'gh08.csv'
+    rel_err = 1e-5
+    abs_zero = 1e-4
+    compiler = 'GCC CLANG'
+  [../]
+
+  [./gh17]
+    type = 'CSVDiff'
+    input = 'gh17.i'
+    csvdiff = 'gh17.csv'
+    rel_err = 1e-5
+    abs_zero = 1e-4
+    compiler = 'GCC CLANG'
+  [../]
+
+  [./gh18]
+    type = 'Exodiff'
+    input = 'gh18.i'
+    exodiff = 'gh18.e'
+    exodiff_opts = '-steps last'
+    rel_err = 1e-5
+    use_old_floor = True
+    compiler = 'GCC CLANG'
+  [../]
+
+  [./gh_lumped_07]
+    type = 'CSVDiff'
+    input = 'gh_lumped_07.i'
+    csvdiff = 'gh_lumped_07.csv'
+    rel_err = 1e-5
+    abs_zero = 1e-4
+    max_parallel = 1
+  [../]
+  [./gh_lumped_08]
+    type = 'CSVDiff'
+    input = 'gh_lumped_08.i'
+    csvdiff = 'gh_lumped_08.csv'
+    rel_err = 1e-5
+    abs_zero = 1e-4
+  [../]
+
+  [./gh_lumped_17]
+    type = 'CSVDiff'
+    input = 'gh_lumped_17.i'
+    csvdiff = 'gh_lumped_17.csv'
+    rel_err = 1e-5
+    abs_zero = 1e-4
+  [../]
+
+  [./gh_lumped_18]
+    type = 'Exodiff'
+    input = 'gh_lumped_18.i'
+    exodiff = 'gh_lumped_18.e'
+    exodiff_opts = '-steps last'
+    rel_err = 1e-5
+    use_old_floor = True
+  [../]
+
+  [./gh_bounded_17]
+    type = 'CSVDiff'
+    input = 'gh_bounded_17.i'
+    csvdiff = 'gh_bounded_17.csv'
+    rel_err = 1e-5
+    abs_zero = 1e-4
+  [../]
+
+  [./gh_fu_01]
+    type = 'CSVDiff'
+    input = 'gh_fu_01.i'
+    csvdiff = 'gh_fu_01.csv'
+    rel_err = 1e-5
+    abs_zero = 1e-4
+  [../]
+  [./gh_fu_02]
+    type = 'CSVDiff'
+    input = 'gh_fu_02.i'
+    csvdiff = 'gh_fu_02.csv'
+    rel_err = 1e-5
+    abs_zero = 1e-4
+  [../]
+  [./gh_fu_05]
+    type = 'CSVDiff'
+    input = 'gh_fu_05.i'
+    csvdiff = 'gh_fu_05.csv'
+    rel_err = 1e-5
+    abs_zero = 1e-4
+    max_parallel = 1
+  [../]
+  [./gh_fu_06]
+    type = 'CSVDiff'
+    input = 'gh_fu_06.i'
+    csvdiff = 'gh_fu_06.csv'
+    rel_err = 1e-5
+    abs_zero = 1e-4
+  [../]
+
+  [./gh_fu_17]
+    type = 'CSVDiff'
+    input = 'gh_fu_17.i'
+    csvdiff = 'gh_fu_17.csv'
+    rel_err = 1e-5
+    abs_zero = 1e-4
+  [../]
+
+  [./gh_fu_18]
+    type = 'Exodiff'
+    input = 'gh_fu_18.i'
+    exodiff = 'gh_fu_18.e'
+    exodiff_opts = '-steps last'
+    rel_err = 1e-5
+    use_old_floor = True
+  [../]
+
+  [./ghQ2P_pgas]
+    type = 'CSVDiff'
+    input = 'ghQ2P_pgas.i'
+    csvdiff = 'ghQ2P_pgas.csv'
+    rel_err = 1e-5
+    abs_zero = 1e-4
+  [../]
+
+  [./rmp_exception1]
+    type = 'RunException'
+    input = gh_bounded_17.i
+    cli_args = 'Problem/lower_var=dummy_var Outputs/file_base=rmp_except1'
+    expect_err = 'Both the bounded and lower variables must be nodal variables in RichardsMultiphaseProblem'
+  [../]
+  [./rmp_exception2]
+    type = 'RunException'
+    input = gh_bounded_17.i
+    cli_args = 'AuxVariables/dummy_var/family=HIERARCHIC AuxVariables/dummy_var/order=FIRST Problem/lower_var=dummy_var Outputs/file_base=rmp_except2'
+    expect_err = 'Both the bounded and lower variables must belong to the same element family, eg LAGRANGE, in RichardsMultiphaseProblem'
+  [../]
+  [./rmp_exception3]
+    type = 'RunException'
+    input = gh_bounded_17.i
+    cli_args = 'Problem/lower_var=dummy_var Mesh/second_order=true AuxVariables/dummy_var/family=LAGRANGE AuxVariables/dummy_var/order=SECOND Outputs/file_base=rmp_except3'
+    expect_err = 'Both the bounded and lower variables must have the same order, eg FIRST, in RichardsMultiphaseProblem'
+  [../]
+  [./except01]
+    type = 'RunException'
+    input = 'gh01.i'
+    cli_args = 'Materials/rock/viscosity="1" Outputs/file_base=except01'
+    expect_err = 'There are 2 Richards fluid variables, so you need to specify this number of viscosities, relperm_UO, seff_UO, sat_UO, density_UO, SUPG_UO'
+  [../]
+  [./except02]
+    type = 'RunException'
+    input = 'gh01.i'
+    cli_args = 'Materials/rock/relperm_UO="RelPermWater" Outputs/file_base=except02'
+    expect_err = 'There are 2 Richards fluid variables, so you need to specify this number of viscosities, relperm_UO, seff_UO, sat_UO, density_UO, SUPG_UO'
+  [../]
+  [./except03]
+    type = 'RunException'
+    input = 'gh01.i'
+    cli_args = 'Materials/rock/seff_UO="SeffWater" Outputs/file_base=except03'
+    expect_err = 'There are 2 Richards fluid variables, so you need to specify this number of viscosities, relperm_UO, seff_UO, sat_UO, density_UO, SUPG_UO'
+  [../]
+  [./except04]
+    type = 'RunException'
+    input = 'gh01.i'
+    cli_args = 'Materials/rock/sat_UO="SatWater" Outputs/file_base=except04'
+    expect_err = 'There are 2 Richards fluid variables, so you need to specify this number of viscosities, relperm_UO, seff_UO, sat_UO, density_UO, SUPG_UO'
+  [../]
+  [./except05]
+    type = 'RunException'
+    input = 'gh01.i'
+    cli_args = 'Materials/rock/density_UO="DensityWater" Outputs/file_base=except05'
+    expect_err = 'There are 2 Richards fluid variables, so you need to specify this number of viscosities, relperm_UO, seff_UO, sat_UO, density_UO, SUPG_UO'
+  [../]
+  [./except06]
+    type = 'RunException'
+    input = 'gh01.i'
+    cli_args = 'Materials/rock/SUPG_UO="SUPGwater" Outputs/file_base=except06'
+    expect_err = 'There are 2 Richards fluid variables, so you need to specify this number of viscosities, relperm_UO, seff_UO, sat_UO, density_UO, SUPG_UO'
+  [../]
+[]

@@ -19,16 +19,15 @@
 
 class SetAdaptivityOptionsAction;
 
-template<>
+template <>
 InputParameters validParams<SetAdaptivityOptionsAction>();
-
 
 class SetAdaptivityOptionsAction : public Action
 {
 public:
   SetAdaptivityOptionsAction(InputParameters params);
 
-  virtual void act();
+  virtual void act() override;
 };
 
 #endif // SETADAPTIVITYOPTIONSACTION_H

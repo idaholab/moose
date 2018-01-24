@@ -12,7 +12,7 @@
 // Forward Declarations
 class KKSXeVacSolidMaterial;
 
-template<>
+template <>
 InputParameters validParams<KKSXeVacSolidMaterial>();
 
 class KKSXeVacSolidMaterial : public DerivativeFunctionMaterialBase
@@ -44,13 +44,13 @@ private:
   /// (TODO: if cmg>cmv consider interstitial Xe)
   const Real _Efg;
 
-  VariableValue & _cmg;
+  const VariableValue & _cmg;
   unsigned int _cmg_var;
-  VariableValue & _cmv;
+  const VariableValue & _cmv;
   unsigned int _cmv_var;
 
   // helper function to return a well defined c*log(c)
   Real cLogC(Real c);
 };
 
-#endif //KKSXEVACSOLIDMATERIAL_H
+#endif // KKSXEVACSOLIDMATERIAL_H

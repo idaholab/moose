@@ -18,36 +18,49 @@
 #include "Assembly.h"
 #include "MooseVariable.h"
 
-// libMesh includes
 #include "libmesh/fe_interface.h"
 #include "libmesh/quadrature.h"
 
-template<>
-InputParameters validParams<InitialCondition>()
+template <>
+InputParameters
+validParams<InitialCondition>()
 {
   InputParameters params = validParams<MooseObject>();
   params += validParams<BlockRestrictable>();
   params += validParams<BoundaryRestrictable>();
 
-  params.addRequiredParam<VariableName>("variable", "The variable this initial condition is supposed to provide values for.");
+  params.addRequiredParam<VariableName>("variable",
+                                        "The variable this initial condition is "
+                                        "supposed to provide values for.");
+  params.addParam<bool>("ignore_uo_dependency",
+                        false,
+                        "When set to true, a UserObject retrieved "
+                        "by this IC will not be executed before the "
+                        "this IC");
+
+  params.addParamNamesToGroup("ignore_uo_dependency", "Advanced");
 
   params.registerBase("InitialCondition");
 
   return params;
 }
 
-InitialCondition::InitialCondition(const InputParameters & parameters) :
-    MooseObject(parameters),
-    Coupleable(parameters, getParam<SystemBase *>("_sys")->getVariable(parameters.get<THREAD_ID>("_tid"), parameters.get<VariableName>("variable")).isNodal()),
-    FunctionInterface(parameters),
-    UserObjectInterface(parameters),
-    BlockRestrictable(parameters),
-    BoundaryRestrictable(parameters),
+InitialCondition::InitialCondition(const InputParameters & parameters)
+  : MooseObject(parameters),
+    BlockRestrictable(this),
+    Coupleable(this,
+               getParam<SystemBase *>("_sys")
+                   ->getVariable(parameters.get<THREAD_ID>("_tid"),
+                                 parameters.get<VariableName>("variable"))
+                   .isNodal()),
+    FunctionInterface(this),
+    UserObjectInterface(this),
+    BoundaryRestrictable(this, _c_nodal),
     DependencyResolverInterface(),
     Restartable(parameters, "InitialConditions"),
     ZeroInterface(parameters),
-    _fe_problem(*parameters.getCheckedPointerParam<FEProblem *>("_fe_problem")),
-    _sys(*parameters.getCheckedPointerParam<SystemBase *>("_sys")),
+    _fe_problem(*getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")),
+    _sys(*getCheckedPointerParam<SystemBase *>("_sys")),
     _tid(getParam<THREAD_ID>("_tid")),
     _assembly(_fe_problem.assembly(_tid)),
     _t(_fe_problem.time()),
@@ -56,19 +69,18 @@ InitialCondition::InitialCondition(const InputParameters & parameters) :
 
     _current_elem(_var.currentElem()),
     _current_node(NULL),
-    _qp(0)
+    _qp(0),
+    _ignore_uo_dependency(getParam<bool>("ignore_uo_dependency"))
 {
   _supplied_vars.insert(getParam<VariableName>("variable"));
 
-  std::map<std::string, std::vector<MooseVariable *> > coupled_vars = getCoupledVars();
-  for (std::map<std::string, std::vector<MooseVariable *> >::iterator it = coupled_vars.begin(); it != coupled_vars.end(); ++it)
-    for (std::vector<MooseVariable *>::iterator it2 = it->second.begin(); it2 != it->second.end(); ++it2)
-      _depend_vars.insert((*it2)->name());
+  std::map<std::string, std::vector<MooseVariable *>> coupled_vars = getCoupledVars();
+  for (const auto & it : coupled_vars)
+    for (const auto & var : it.second)
+      _depend_vars.insert(var->name());
 }
 
-InitialCondition::~InitialCondition()
-{
-}
+InitialCondition::~InitialCondition() {}
 
 const std::set<std::string> &
 InitialCondition::getRequestedItems()
@@ -82,16 +94,26 @@ InitialCondition::getSuppliedItems()
   return _supplied_vars;
 }
 
+const UserObject &
+InitialCondition::getUserObjectBase(const std::string & name)
+{
+  if (!_ignore_uo_dependency)
+    _depend_uo.insert(_pars.get<UserObjectName>(name));
+  return UserObjectInterface::getUserObjectBase(name);
+}
+
 void
 InitialCondition::compute()
 {
   // -- NOTE ----
-  // The following code is a copy from libMesh project_vector.C plus it adds some features, so we can couple variable values
+  // The following code is a copy from libMesh project_vector.C plus it adds some features, so we
+  // can couple variable values
   // and we also do not call any callbacks, but we use our initial condition system directly.
   // ------------
 
   // The element matrix and RHS for projections.
-  // Note that Ke is always real-valued, whereas Fe may be complex valued if complex number support is enabled
+  // Note that Ke is always real-valued, whereas Fe may be complex valued if complex number support
+  // is enabled
   DenseMatrix<Real> Ke;
   DenseVector<Number> Fe;
   // The new element coefficients
@@ -111,34 +133,36 @@ InitialCondition::compute()
   std::vector<unsigned int> side_dofs;
 
   // Get FE objects of the appropriate type
-  // We cannot use the FE object in Assembly, since the following code is messing with the quadrature rules
-  // for projections and would screw it up. However, if we implement projections from one mesh to another,
+  // We cannot use the FE object in Assembly, since the following code is messing with the
+  // quadrature rules
+  // for projections and would screw it up. However, if we implement projections from one mesh to
+  // another,
   // this code should use that implementation.
-  UniquePtr<FEBase> fe (FEBase::build(dim, fe_type));
+  std::unique_ptr<FEBase> fe(FEBase::build(dim, fe_type));
 
   // Prepare variables for projection
-  UniquePtr<QBase> qrule     (fe_type.default_quadrature_rule(dim));
-  UniquePtr<QBase> qedgerule (fe_type.default_quadrature_rule(1));
-  UniquePtr<QBase> qsiderule (fe_type.default_quadrature_rule(dim-1));
+  std::unique_ptr<QBase> qrule(fe_type.default_quadrature_rule(dim));
+  std::unique_ptr<QBase> qedgerule(fe_type.default_quadrature_rule(1));
+  std::unique_ptr<QBase> qsiderule(fe_type.default_quadrature_rule(dim - 1));
 
   // The values of the shape functions at the quadrature points
-  const std::vector<std::vector<Real> > & phi = fe->get_phi();
+  const std::vector<std::vector<Real>> & phi = fe->get_phi();
 
   // The gradients of the shape functions at the quadrature points on the child element.
-  const std::vector<std::vector<RealGradient> > * dphi = NULL;
+  const std::vector<std::vector<RealGradient>> * dphi = NULL;
 
   const FEContinuity cont = fe->get_continuity();
 
   if (cont == C_ONE)
   {
-    const std::vector<std::vector<RealGradient> > & ref_dphi = fe->get_dphi();
+    const std::vector<std::vector<RealGradient>> & ref_dphi = fe->get_dphi();
     dphi = &ref_dphi;
   }
 
   // The Jacobian * quadrature weight at the quadrature points
-  const std::vector<Real> & JxW =  fe->get_JxW();
+  const std::vector<Real> & JxW = fe->get_JxW();
   // The XYZ locations of the quadrature points
-  const std::vector<Point>& xyz_values = fe->get_xyz();
+  const std::vector<Point> & xyz_values = fe->get_xyz();
 
   // Update the DOF indices for this element based on the current mesh
   _var.prepareIC();
@@ -154,7 +178,7 @@ InitialCondition::compute()
   std::vector<int> free_dof(n_dofs, 0);
 
   // Zero the interpolated values
-  Ue.resize (n_dofs);
+  Ue.resize(n_dofs);
   Ue.zero();
 
   // In general, we need a series of
@@ -170,7 +194,7 @@ InitialCondition::compute()
   {
     // FIXME: this should go through the DofMap,
     // not duplicate dof_indices code badly!
-    const unsigned int nc = FEInterface::n_dofs_at_node (dim, fe_type, elem_type, n);
+    const unsigned int nc = FEInterface::n_dofs_at_node(dim, fe_type, elem_type, n);
     if (!_current_elem->is_vertex(n))
     {
       current_dof += nc;
@@ -186,7 +210,7 @@ InitialCondition::compute()
     {
       libmesh_assert(nc == 1);
       _qp = n;
-      _current_node = _current_elem->get_node(n);
+      _current_node = _current_elem->node_ptr(n);
       Ue(current_dof) = value(*_current_node);
       dof_is_fixed[current_dof] = true;
       current_dof++;
@@ -195,7 +219,7 @@ InitialCondition::compute()
     else if (fe_type.family == HERMITE)
     {
       _qp = n;
-      _current_node = _current_elem->get_node(n);
+      _current_node = _current_elem->node_ptr(n);
       Ue(current_dof) = value(*_current_node);
       dof_is_fixed[current_dof] = true;
       current_dof++;
@@ -207,8 +231,7 @@ InitialCondition::compute()
       if (dim > 1)
       {
         // We'll finite difference mixed derivatives
-        Point nxminus = _current_elem->point(n),
-              nxplus = _current_elem->point(n);
+        Point nxminus = _current_elem->point(n), nxplus = _current_elem->point(n);
         nxminus(0) -= TOLERANCE;
         nxplus(0) += TOLERANCE;
         Gradient gxminus = gradient(nxminus);
@@ -233,8 +256,7 @@ InitialCondition::compute()
           dof_is_fixed[current_dof] = true;
           current_dof++;
           // We need new points for yz
-          Point nyminus = _current_elem->point(n),
-                nyplus = _current_elem->point(n);
+          Point nyminus = _current_elem->point(n), nyplus = _current_elem->point(n);
           nyminus(1) -= TOLERANCE;
           nyplus(1) += TOLERANCE;
           Gradient gyminus = gradient(nyminus);
@@ -244,10 +266,8 @@ InitialCondition::compute()
           dof_is_fixed[current_dof] = true;
           current_dof++;
           // Getting a 2nd order xyz is more tedious
-          Point nxmym = _current_elem->point(n),
-                nxmyp = _current_elem->point(n),
-                nxpym = _current_elem->point(n),
-                nxpyp = _current_elem->point(n);
+          Point nxmym = _current_elem->point(n), nxmyp = _current_elem->point(n),
+                nxpym = _current_elem->point(n), nxpyp = _current_elem->point(n);
           nxmym(0) -= TOLERANCE;
           nxmym(1) -= TOLERANCE;
           nxmyp(0) -= TOLERANCE;
@@ -275,12 +295,12 @@ InitialCondition::compute()
     else if (cont == C_ONE)
     {
       libmesh_assert(nc == 1 + dim);
-      _current_node = _current_elem->get_node(n);
+      _current_node = _current_elem->node_ptr(n);
       Ue(current_dof) = value(*_current_node);
       dof_is_fixed[current_dof] = true;
       current_dof++;
       Gradient grad = gradient(*_current_node);
-      for (unsigned int i=0; i != dim; ++i)
+      for (unsigned int i = 0; i != dim; ++i)
       {
         Ue(current_dof) = grad(i);
         dof_is_fixed[current_dof] = true;
@@ -296,14 +316,14 @@ InitialCondition::compute()
 
   // In 3D, project any edge values next
   if (dim > 2 && cont != DISCONTINUOUS)
-    for (unsigned int e=0; e != _current_elem->n_edges(); ++e)
+    for (unsigned int e = 0; e != _current_elem->n_edges(); ++e)
     {
       FEInterface::dofs_on_edge(_current_elem, dim, fe_type, e, side_dofs);
 
       // Some edge dofs are on nodes and already
       // fixed, others are free to calculate
       unsigned int free_dofs = 0;
-      for (unsigned int i=0; i != side_dofs.size(); ++i)
+      for (unsigned int i = 0; i != side_dofs.size(); ++i)
         if (!dof_is_fixed[side_dofs[i]])
           free_dof[free_dofs++] = i;
 
@@ -311,14 +331,16 @@ InitialCondition::compute()
       if (!free_dofs)
         continue;
 
-      Ke.resize (free_dofs, free_dofs); Ke.zero();
-      Fe.resize (free_dofs); Fe.zero();
+      Ke.resize(free_dofs, free_dofs);
+      Ke.zero();
+      Fe.resize(free_dofs);
+      Fe.zero();
       // The new edge coefficients
       DenseVector<Number> Uedge(free_dofs);
 
       // Initialize FE data on the edge
-      fe->attach_quadrature_rule (qedgerule.get());
-      fe->edge_reinit (_current_elem, e);
+      fe->attach_quadrature_rule(qedgerule.get());
+      fe->edge_reinit(_current_elem, e);
       const unsigned int n_qp = qedgerule->n_points();
 
       // Loop over the quadrature points
@@ -344,13 +366,13 @@ InitialCondition::compute()
             if (dof_is_fixed[j])
               Fe(freei) -= phi[i][qp] * phi[j][qp] * JxW[qp] * Ue(j);
             else
-              Ke(freei,freej) += phi[i][qp] * phi[j][qp] * JxW[qp];
+              Ke(freei, freej) += phi[i][qp] * phi[j][qp] * JxW[qp];
             if (cont == C_ONE)
             {
               if (dof_is_fixed[j])
                 Fe(freei) -= ((*dphi)[i][qp] * (*dphi)[j][qp]) * JxW[qp] * Ue(j);
               else
-                Ke(freei,freej) += ((*dphi)[i][qp] * (*dphi)[j][qp]) * JxW[qp];
+                Ke(freei, freej) += ((*dphi)[i][qp] * (*dphi)[j][qp]) * JxW[qp];
             }
             if (!dof_is_fixed[j])
               freej++;
@@ -365,9 +387,9 @@ InitialCondition::compute()
       Ke.cholesky_solve(Fe, Uedge);
 
       // Transfer new edge solutions to element
-      for (unsigned int i=0; i != free_dofs; ++i)
+      for (unsigned int i = 0; i != free_dofs; ++i)
       {
-        Number &ui = Ue(side_dofs[free_dof[i]]);
+        Number & ui = Ue(side_dofs[free_dof[i]]);
         libmesh_assert(std::abs(ui) < TOLERANCE || std::abs(ui - Uedge(i)) < TOLERANCE);
         ui = Uedge(i);
         dof_is_fixed[side_dofs[free_dof[i]]] = true;
@@ -376,14 +398,14 @@ InitialCondition::compute()
 
   // Project any side values (edges in 2D, faces in 3D)
   if (dim > 1 && cont != DISCONTINUOUS)
-    for (unsigned int s=0; s != _current_elem->n_sides(); ++s)
+    for (unsigned int s = 0; s != _current_elem->n_sides(); ++s)
     {
       FEInterface::dofs_on_side(_current_elem, dim, fe_type, s, side_dofs);
 
       // Some side dofs are on nodes/edges and already
       // fixed, others are free to calculate
       unsigned int free_dofs = 0;
-      for (unsigned int i=0; i != side_dofs.size(); ++i)
+      for (unsigned int i = 0; i != side_dofs.size(); ++i)
         if (!dof_is_fixed[side_dofs[i]])
           free_dof[free_dofs++] = i;
 
@@ -391,14 +413,16 @@ InitialCondition::compute()
       if (!free_dofs)
         continue;
 
-      Ke.resize (free_dofs, free_dofs); Ke.zero();
-      Fe.resize (free_dofs); Fe.zero();
+      Ke.resize(free_dofs, free_dofs);
+      Ke.zero();
+      Fe.resize(free_dofs);
+      Fe.zero();
       // The new side coefficients
       DenseVector<Number> Uside(free_dofs);
 
       // Initialize FE data on the side
-      fe->attach_quadrature_rule (qsiderule.get());
-      fe->reinit (_current_elem, s);
+      fe->attach_quadrature_rule(qsiderule.get());
+      fe->reinit(_current_elem, s);
       const unsigned int n_qp = qsiderule->n_points();
 
       // Loop over the quadrature points
@@ -424,13 +448,13 @@ InitialCondition::compute()
             if (dof_is_fixed[j])
               Fe(freei) -= phi[i][qp] * phi[j][qp] * JxW[qp] * Ue(j);
             else
-              Ke(freei,freej) += phi[i][qp] * phi[j][qp] * JxW[qp];
+              Ke(freei, freej) += phi[i][qp] * phi[j][qp] * JxW[qp];
             if (cont == C_ONE)
             {
               if (dof_is_fixed[j])
                 Fe(freei) -= ((*dphi)[i][qp] * (*dphi)[j][qp]) * JxW[qp] * Ue(j);
               else
-                Ke(freei,freej) += ((*dphi)[i][qp] * (*dphi)[j][qp]) * JxW[qp];
+                Ke(freei, freej) += ((*dphi)[i][qp] * (*dphi)[j][qp]) * JxW[qp];
             }
             if (!dof_is_fixed[j])
               freej++;
@@ -445,9 +469,9 @@ InitialCondition::compute()
       Ke.cholesky_solve(Fe, Uside);
 
       // Transfer new side solutions to element
-      for (unsigned int i=0; i != free_dofs; ++i)
+      for (unsigned int i = 0; i != free_dofs; ++i)
       {
-        Number &ui = Ue(side_dofs[free_dof[i]]);
+        Number & ui = Ue(side_dofs[free_dof[i]]);
         libmesh_assert(std::abs(ui) < TOLERANCE || std::abs(ui - Uside(i)) < TOLERANCE);
         ui = Uside(i);
         dof_is_fixed[side_dofs[free_dof[i]]] = true;
@@ -459,25 +483,27 @@ InitialCondition::compute()
   // Some interior dofs are on nodes/edges/sides and
   // already fixed, others are free to calculate
   unsigned int free_dofs = 0;
-  for (unsigned int i=0; i != n_dofs; ++i)
+  for (unsigned int i = 0; i != n_dofs; ++i)
     if (!dof_is_fixed[i])
       free_dof[free_dofs++] = i;
 
   // There may be nothing to project
   if (free_dofs)
   {
-    Ke.resize (free_dofs, free_dofs); Ke.zero();
-    Fe.resize (free_dofs); Fe.zero();
+    Ke.resize(free_dofs, free_dofs);
+    Ke.zero();
+    Fe.resize(free_dofs);
+    Fe.zero();
     // The new interior coefficients
     DenseVector<Number> Uint(free_dofs);
 
     // Initialize FE data
-    fe->attach_quadrature_rule (qrule.get());
-    fe->reinit (_current_elem);
+    fe->attach_quadrature_rule(qrule.get());
+    fe->reinit(_current_elem);
     const unsigned int n_qp = qrule->n_points();
 
     // Loop over the quadrature points
-    for (unsigned int qp=0; qp<n_qp; qp++)
+    for (unsigned int qp = 0; qp < n_qp; qp++)
     {
       // solution at the quadrature point
       Number fineval = value(xyz_values[qp]);
@@ -487,23 +513,23 @@ InitialCondition::compute()
         finegrad = gradient(xyz_values[qp]);
 
       // Form interior projection matrix
-      for (unsigned int i=0, freei=0; i != n_dofs; ++i)
+      for (unsigned int i = 0, freei = 0; i != n_dofs; ++i)
       {
         // fixed DoFs aren't test functions
         if (dof_is_fixed[i])
           continue;
-        for (unsigned int j=0, freej=0; j != n_dofs; ++j)
+        for (unsigned int j = 0, freej = 0; j != n_dofs; ++j)
         {
           if (dof_is_fixed[j])
             Fe(freei) -= phi[i][qp] * phi[j][qp] * JxW[qp] * Ue(j);
           else
-            Ke(freei,freej) += phi[i][qp] * phi[j][qp] * JxW[qp];
+            Ke(freei, freej) += phi[i][qp] * phi[j][qp] * JxW[qp];
           if (cont == C_ONE)
           {
             if (dof_is_fixed[j])
               Fe(freei) -= ((*dphi)[i][qp] * (*dphi)[j][qp]) * JxW[qp] * Ue(j);
             else
-              Ke(freei,freej) += ((*dphi)[i][qp] * (*dphi)[j][qp]) * JxW[qp];
+              Ke(freei, freej) += ((*dphi)[i][qp] * (*dphi)[j][qp]) * JxW[qp];
           }
           if (!dof_is_fixed[j])
             freej++;
@@ -517,9 +543,9 @@ InitialCondition::compute()
     Ke.cholesky_solve(Fe, Uint);
 
     // Transfer new interior solutions to element
-    for (unsigned int i=0; i != free_dofs; ++i)
+    for (unsigned int i = 0; i != free_dofs; ++i)
     {
-      Number &ui = Ue(free_dof[i]);
+      Number & ui = Ue(free_dof[i]);
       libmesh_assert(std::abs(ui) < TOLERANCE || std::abs(ui - Uint(i)) < TOLERANCE);
       ui = Uint(i);
       dof_is_fixed[free_dof[i]] = true;
@@ -527,7 +553,7 @@ InitialCondition::compute()
   } // if there are free interior dofs
 
   // Make sure every DoF got reached!
-  for (unsigned int i=0; i != n_dofs; ++i)
+  for (unsigned int i = 0; i != n_dofs; ++i)
     libmesh_assert(dof_is_fixed[i]);
 
   NumericVector<Number> & solution = _var.sys().solution();
@@ -542,21 +568,20 @@ InitialCondition::compute()
     Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
 
     for (unsigned int i = 0; i < n_dofs; i++)
-      // We may be projecting a new zero value onto
-      // an old nonzero approximation - RHS
-      // if (Ue(i) != 0.)
+    // We may be projecting a new zero value onto
+    // an old nonzero approximation - RHS
+    // if (Ue(i) != 0.)
 
-      // This is commented out because of subdomain restricted variables.
-      // It can be the case that if a subdomain restricted variable's boundary
-      // aligns perfectly with a processor boundary that the variable will get
-      // no value.  To counteract this we're going to let every processor set a
-      // value at every node and then let PETSc figure it out.
-      // Later we can choose to do something different / better.
-//      if ((dof_indices[i] >= first) && (dof_indices[i] < last))
-      {
-        solution.set(dof_indices[i], Ue(i));
-        if (cont == C_ZERO)
-          _var.setNodalValue(Ue(i), i);
-      }
+    // This is commented out because of subdomain restricted variables.
+    // It can be the case that if a subdomain restricted variable's boundary
+    // aligns perfectly with a processor boundary that the variable will get
+    // no value.  To counteract this we're going to let every processor set a
+    // value at every node and then let PETSc figure it out.
+    // Later we can choose to do something different / better.
+    //      if ((dof_indices[i] >= first) && (dof_indices[i] < last))
+    {
+      solution.set(dof_indices[i], Ue(i));
+    }
+    _var.setNodalValue(Ue);
   }
 }

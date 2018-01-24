@@ -29,7 +29,7 @@
   [../]
 
   [./lm]
-    order = SECOND
+    order = FIRST
     family = LAGRANGE
     block = middle
   [../]
@@ -41,7 +41,7 @@
     variable = u
   [../]
   [./ffn]
-    type = UserForcingFunction
+    type = BodyForce
     variable = u
     function = ffn
   [../]
@@ -62,12 +62,6 @@
     variable = u
     boundary = '1 2 3 4'
     function = exact_sln
-  [../]
-
-  [./mortar]
-    type = DiffusionFluxBC
-    variable = u
-    boundary = '100 101'
   [../]
 []
 

@@ -1,0 +1,182 @@
+[Tests]
+  [./smallstrain_3D]
+    type = 'PetscJacobianTester'
+    input = 'jacobian_test_3D.i'
+    cli_args = 'Modules/TensorMechanics/Master/all/incremental=false
+                Modules/TensorMechanics/Master/all/strain=SMALL
+                Materials/stress/type=ComputeLinearElasticStress'
+    ratio_tol = 1E-12
+    difference_tol = 1E10
+  [../]
+  [./incrementalstrain_3D]
+    type = 'PetscJacobianTester'
+    input = 'jacobian_test_3D.i'
+    cli_args = 'Modules/TensorMechanics/Master/all/incremental=true
+                Modules/TensorMechanics/Master/all/strain=SMALL
+                Materials/stress/type=ComputeFiniteStrainElasticStress'
+    ratio_tol = 1E-12
+    difference_tol = 1E10
+    prereq = 'smallstrain_3D'
+  [../]
+  [./finitestrain_3D]
+    type = 'PetscJacobianTester'
+    input = 'jacobian_test_3D.i'
+    cli_args = 'Modules/TensorMechanics/Master/all/incremental=true
+                Modules/TensorMechanics/Master/all/strain=FINITE
+                Materials/stress/type=ComputeFiniteStrainElasticStress'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+    prereq = 'incrementalstrain_3D'
+  [../]
+  [./smallstrain_3D_Bbar]
+    type = 'PetscJacobianTester'
+    input = 'jacobian_test_3D.i'
+    cli_args = 'Modules/TensorMechanics/Master/all/incremental=false
+                Modules/TensorMechanics/Master/all/strain=SMALL
+                Modules/TensorMechanics/Master/all/volumetric_locking_correction=true
+                Materials/stress/type=ComputeLinearElasticStress'
+    ratio_tol = 1E-12
+    difference_tol = 1E10
+    prereq = 'finitestrain_3D'
+  [../]
+  [./incrementalstrain_3D_Bbar]
+    type = 'PetscJacobianTester'
+    input = 'jacobian_test_3D.i'
+    cli_args = 'Modules/TensorMechanics/Master/all/incremental=true
+                Modules/TensorMechanics/Master/all/strain=SMALL
+                Modules/TensorMechanics/Master/all/volumetric_locking_correction=true
+                Materials/stress/type=ComputeFiniteStrainElasticStress'
+    ratio_tol = 1E-12
+    difference_tol = 1E10
+    prereq = 'smallstrain_3D_Bbar'
+  [../]
+  [./finitestrain_3D_Bbar]
+    type = 'PetscJacobianTester'
+    input = 'jacobian_test_3D.i'
+    cli_args = 'Modules/TensorMechanics/Master/all/incremental=true
+                Modules/TensorMechanics/Master/all/strain=FINITE
+                Modules/TensorMechanics/Master/all/volumetric_locking_correction=true
+                Materials/stress/type=ComputeFiniteStrainElasticStress'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+    prereq = 'incrementalstrain_3D_Bbar'
+  [../]
+  [./smallstrain_RZ]
+    type = 'PetscJacobianTester'
+    input = 'jacobian_test_RZ.i'
+    cli_args = 'Modules/TensorMechanics/Master/all/incremental=false
+                Modules/TensorMechanics/Master/all/strain=SMALL
+                Materials/stress/type=ComputeLinearElasticStress'
+    ratio_tol = 1E-12
+    difference_tol = 1E10
+  [../]
+  [./incrementalstrain_RZ]
+    type = 'PetscJacobianTester'
+    input = 'jacobian_test_RZ.i'
+    cli_args = 'Modules/TensorMechanics/Master/all/incremental=true
+                Modules/TensorMechanics/Master/all/strain=SMALL
+                Materials/stress/type=ComputeFiniteStrainElasticStress'
+    ratio_tol = 1E-12
+    difference_tol = 1E10
+    prereq = 'smallstrain_RZ'
+  [../]
+  [./finitestrain_RZ]
+    type = 'PetscJacobianTester'
+    input = 'jacobian_test_RZ.i'
+    cli_args = 'Modules/TensorMechanics/Master/all/incremental=true
+                Modules/TensorMechanics/Master/all/strain=FINITE
+                Materials/stress/type=ComputeFiniteStrainElasticStress'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+    prereq = 'incrementalstrain_RZ'
+  [../]
+  [./smallstrain_RZ_Bbar]
+    type = 'PetscJacobianTester'
+    input = 'jacobian_test_RZ.i'
+    cli_args = 'Modules/TensorMechanics/Master/all/incremental=false
+                Modules/TensorMechanics/Master/all/strain=SMALL
+                Modules/TensorMechanics/Master/all/volumetric_locking_correction=true
+                Materials/stress/type=ComputeLinearElasticStress'
+    ratio_tol = 1E-12
+    difference_tol = 1E10
+    prereq = 'finitestrain_RZ'
+  [../]
+  [./incrementalstrain_RZ_Bbar]
+    type = 'PetscJacobianTester'
+    input = 'jacobian_test_RZ.i'
+    cli_args = 'Modules/TensorMechanics/Master/all/incremental=true
+                Modules/TensorMechanics/Master/all/strain=SMALL
+                Modules/TensorMechanics/Master/all/volumetric_locking_correction=true
+                Materials/stress/type=ComputeFiniteStrainElasticStress'
+    ratio_tol = 1E-12
+    difference_tol = 1E10
+    prereq = 'smallstrain_RZ_Bbar'
+  [../]
+  [./finitestrain_RZ_Bbar]
+    type = 'PetscJacobianTester'
+    input = 'jacobian_test_RZ.i'
+    cli_args = 'Modules/TensorMechanics/Master/all/incremental=true
+                Modules/TensorMechanics/Master/all/strain=FINITE
+                Modules/TensorMechanics/Master/all/volumetric_locking_correction=true
+                Materials/stress/type=ComputeFiniteStrainElasticStress'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+    prereq = 'incrementalstrain_RZ_Bbar'
+  [../]
+  [./smallplanestrain]
+    type = 'PetscJacobianTester'
+    input = 'jacobian_test_planestrain.i'
+    cli_args = 'Materials/strain/type=ComputePlaneSmallStrain
+                Materials/stress/type=ComputeLinearElasticStress'
+    ratio_tol = 1E-12
+    difference_tol = 1E10
+  [../]
+  [./incrementalplanestrain]
+    type = 'PetscJacobianTester'
+    input = 'jacobian_test_planestrain.i'
+    cli_args = 'Materials/strain/type=ComputePlaneIncrementalStrain
+                Materials/stress/type=ComputeFiniteStrainElasticStress'
+    ratio_tol = 1E-12
+    difference_tol = 1E10
+    prereq = 'smallplanestrain'
+  [../]
+  [./finiteplanestrain]
+    type = 'PetscJacobianTester'
+    input = 'jacobian_test_planestrain.i'
+    cli_args = 'Materials/strain/type=ComputePlaneFiniteStrain
+                Materials/stress/type=ComputeFiniteStrainElasticStress'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+    prereq = 'incrementalplanestrain'
+  [../]
+  [./smallplanestrain_Bbar]
+    type = 'PetscJacobianTester'
+    input = 'jacobian_test_planestrain.i'
+    cli_args = 'Materials/strain/type=ComputePlaneSmallStrain
+                Materials/stress/type=ComputeLinearElasticStress
+                GlobalParams/volumetric_locking_correction=true'
+    ratio_tol = 1E-12
+    difference_tol = 1E10
+    prereq = 'finiteplanestrain'
+  [../]
+  [./incrementalplanestrain_Bbar]
+    type = 'PetscJacobianTester'
+    input = 'jacobian_test_planestrain.i'
+    cli_args = 'Materials/strain/type=ComputePlaneIncrementalStrain
+                Materials/stress/type=ComputeFiniteStrainElasticStress
+                GlobalParams/volumetric_locking_correction=true'
+    ratio_tol = 1E-12
+    difference_tol = 1E10
+    prereq = 'smallplanestrain_Bbar'
+  [../]
+  [./finiteplanestrain_Bbar]
+    type = 'PetscJacobianTester'
+    input = 'jacobian_test_planestrain.i'
+    cli_args = 'Materials/strain/type=ComputePlaneFiniteStrain
+                Materials/stress/type=ComputeFiniteStrainElasticStress
+                GlobalParams/volumetric_locking_correction=true'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+    prereq = 'incrementalplanestrain_Bbar'
+  [../]
+[]

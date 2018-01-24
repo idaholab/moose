@@ -1,0 +1,26 @@
+[Tests]
+  [./constant_poroperm]
+    type = 'Exodiff'
+    input = 'constant_poroperm.i'
+    exodiff = 'constant_poroperm_out.e'
+# Run in serial so RandomIC gets fixed PRNG results
+    max_parallel = 1
+    max_threads  = 1
+  [../]
+  [./constant_poroperm2]
+    type = 'Exodiff'
+    input = 'constant_poroperm2.i'
+    exodiff = 'constant_poroperm2_out.e'
+# Run in serial so RandomIC gets fixed PRNG results
+    max_parallel = 1
+    max_threads  = 1
+  [../]
+  [./vol_expansion_poroperm]
+    type = Exodiff
+    input = vol_expansion_poroperm.i
+    exodiff = vol_expansion_poroperm_out.e
+# Run in serial so RandomIC gets fixed PRNG results
+    max_parallel = 1
+    max_threads  = 1
+  [../]
+[]

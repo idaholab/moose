@@ -13,22 +13,30 @@
 /****************************************************************/
 
 #include "MooseVariableInterface.h"
+
+#include "Assembly.h"
+#include "MooseError.h" // mooseDeprecated
+#include "MooseTypes.h"
+#include "MooseVariable.h"
 #include "Problem.h"
 #include "SubProblem.h"
-#include "MooseTypes.h"
-#include "Assembly.h"
 
-MooseVariableInterface::MooseVariableInterface(const InputParameters & parameters, bool nodal, std::string var_param_name) :
-    _nodal(nodal)
+MooseVariableInterface::MooseVariableInterface(const MooseObject * moose_object,
+                                               bool nodal,
+                                               std::string var_param_name)
+  : _nodal(nodal)
 {
-  SubProblem & problem = *parameters.get<SubProblem *>("_subproblem");
+  const InputParameters & parameters = moose_object->parameters();
+
+  SubProblem & problem = *parameters.getCheckedPointerParam<SubProblem *>("_subproblem");
 
   THREAD_ID tid = parameters.get<THREAD_ID>("_tid");
 
   // Try the scalar version first
   std::string variable_name = parameters.getMooseType(var_param_name);
   if (variable_name == "")
-    // When using vector variables, we are only going to use the first one in the list at the interface level...
+    // When using vector variables, we are only going to use the first one in the list at the
+    // interface level...
     variable_name = parameters.getVecMooseType(var_param_name)[0];
 
   _variable = &problem.getVariable(tid, variable_name);
@@ -36,9 +44,7 @@ MooseVariableInterface::MooseVariableInterface(const InputParameters & parameter
   _mvi_assembly = &problem.assembly(tid);
 }
 
-MooseVariableInterface::~MooseVariableInterface()
-{
-}
+MooseVariableInterface::~MooseVariableInterface() {}
 
 MooseVariable *
 MooseVariableInterface::mooseVariable()
@@ -46,7 +52,7 @@ MooseVariableInterface::mooseVariable()
   return _variable;
 }
 
-VariableValue &
+const VariableValue &
 MooseVariableInterface::value()
 {
   if (_nodal)
@@ -55,7 +61,7 @@ MooseVariableInterface::value()
     return _variable->sln();
 }
 
-VariableValue &
+const VariableValue &
 MooseVariableInterface::valueOld()
 {
   if (_nodal)
@@ -64,7 +70,7 @@ MooseVariableInterface::valueOld()
     return _variable->slnOld();
 }
 
-VariableValue &
+const VariableValue &
 MooseVariableInterface::valueOlder()
 {
   if (_nodal)
@@ -73,7 +79,7 @@ MooseVariableInterface::valueOlder()
     return _variable->slnOlder();
 }
 
-VariableValue &
+const VariableValue &
 MooseVariableInterface::dot()
 {
   if (_nodal)
@@ -82,7 +88,7 @@ MooseVariableInterface::dot()
     return _variable->uDot();
 }
 
-VariableValue &
+const VariableValue &
 MooseVariableInterface::dotDu()
 {
   if (_nodal)
@@ -91,8 +97,7 @@ MooseVariableInterface::dotDu()
     return _variable->duDotDu();
 }
 
-
-VariableGradient &
+const VariableGradient &
 MooseVariableInterface::gradient()
 {
   if (_nodal)
@@ -101,7 +106,7 @@ MooseVariableInterface::gradient()
   return _variable->gradSln();
 }
 
-VariableGradient &
+const VariableGradient &
 MooseVariableInterface::gradientOld()
 {
   if (_nodal)
@@ -110,7 +115,7 @@ MooseVariableInterface::gradientOld()
   return _variable->gradSlnOld();
 }
 
-VariableGradient &
+const VariableGradient &
 MooseVariableInterface::gradientOlder()
 {
   if (_nodal)
@@ -119,7 +124,7 @@ MooseVariableInterface::gradientOlder()
   return _variable->gradSlnOlder();
 }
 
-VariableSecond &
+const VariableSecond &
 MooseVariableInterface::second()
 {
   if (_nodal)
@@ -128,7 +133,7 @@ MooseVariableInterface::second()
   return _variable->secondSln();
 }
 
-VariableSecond &
+const VariableSecond &
 MooseVariableInterface::secondOld()
 {
   if (_nodal)
@@ -137,7 +142,7 @@ MooseVariableInterface::secondOld()
   return _variable->secondSlnOld();
 }
 
-VariableSecond &
+const VariableSecond &
 MooseVariableInterface::secondOlder()
 {
   if (_nodal)
@@ -146,20 +151,38 @@ MooseVariableInterface::secondOlder()
   return _variable->secondSlnOlder();
 }
 
-VariableTestSecond &
+const VariableTestSecond &
 MooseVariableInterface::secondTest()
 {
   if (_nodal)
     mooseError("Nodal variables do not have second derivatives");
 
-  return const_cast<VariableTestSecond &>(_variable->secondPhi());
+  return _variable->secondPhi();
 }
 
-VariablePhiSecond &
+const VariableTestSecond &
+MooseVariableInterface::secondTestFace()
+{
+  if (_nodal)
+    mooseError("Nodal variables do not have second derivatives");
+
+  return _variable->secondPhiFace();
+}
+
+const VariablePhiSecond &
 MooseVariableInterface::secondPhi()
 {
   if (_nodal)
     mooseError("Nodal variables do not have second derivatives");
 
-  return const_cast<VariablePhiSecond &>(_mvi_assembly->secondPhi());
+  return _mvi_assembly->secondPhi();
+}
+
+const VariablePhiSecond &
+MooseVariableInterface::secondPhiFace()
+{
+  if (_nodal)
+    mooseError("Nodal variables do not have second derivatives");
+
+  return _mvi_assembly->secondPhiFace();
 }

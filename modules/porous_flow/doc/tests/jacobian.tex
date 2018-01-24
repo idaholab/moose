@@ -1,0 +1,66 @@
+\documentclass[]{scrreprt}
+\usepackage{amsmath,amsfonts,graphicx}
+\usepackage{multirow}
+\usepackage{pslatex}
+\usepackage{tabularx}
+\usepackage{comment}
+\usepackage{xspace}
+\usepackage{array}
+
+\usepackage{hyperref}
+
+\usepackage{caption}
+\DeclareCaptionFont{white}{\color{white}}
+\DeclareCaptionFormat{listing}{\colorbox{gray}{\parbox{\textwidth}{#1#2#3}}}
+
+\graphicspath{
+{figures/}
+}
+
+\def\species{\mathrm{sp}}
+\def\phase{\mathrm{ph}}
+\def\massfrac{\chi}
+\def\flux{\mathbf{F}}
+\def\darcyvel{\mathbf{v}}
+\def\energydens{\mathcal{E}}
+\def\d{\mathrm{d}}
+
+\newcommand{\uo}{\mbox{UO\textsubscript{2}}\xspace}
+
+\setcounter{secnumdepth}{3}
+
+
+\begin{document}
+
+
+\title{Jacobian Tests}
+\author{CSIRO}
+\maketitle
+
+\tableofcontents
+
+\chapter{Jacobian Tests}
+
+\section{Fluid-mass time derivative}
+
+The following tests of the Jacobian are performed on the fluid-mass time derivative kernel (PorousFlowMassTimeDerivative).
+\begin{enumerate}
+\item single-phase, with a single component, with a van-Genuchten capillary pressure, constant bulk-modulus density and constant porosity.
+\item single-phase, with 3 components, with a van-Genuchten capillary pressure, constant bulk-modulus density and constant porosity.
+\item 2-phase PP formulation, with 2 components (that exist in both phases), with a van-Genuchten capillary pressure, constant bulk-modulus density for each phase and constant porosity.
+\item 2-phase PP formulation, with 3 components (that exist in both phases), with a van-Genuchten capillary pressure, constant bulk-modulus density for each phase and constant porosity.
+\end{enumerate}
+
+
+\section{Fluid Advective Flux}
+
+The following tests of the Jacobian are performed on the fluid-mass advective flux kernel (PorousFlowAdvectiveFlux).
+\begin{enumerate}
+\item single-phase, with 1 component, constant viscosity, constant insitu-permeability, density with constant bulk modulus, Corey relative permeability, nonzero gravity, with van-Genuchten capillary pressure.
+\item single-phase, with 3 components, constant viscosity, constant insitu-permeability, density with constant bulk modulus, Corey relative permeability, nonzero gravity, with van-Genuchten capillary pressure.
+\item 2-phase (PP formulation), with 2 components (that exist in both phases), constant viscosity for each phase, constant insitu-permeability, density with constant bulk modulus for each phase, Corey relative permeability for each phase, nonzero gravity, with van-Genuchten capillary pressure.
+\item 2-phase (PP formulation), with 3 components (that exist in both phases), constant viscosity for each phase, constant insitu-permeability, density with constant bulk modulus for each phase, Corey relative permeability for each phase, nonzero gravity, with van-Genuchten capillary pressure.
+\end{enumerate}
+
+\end{document}
+

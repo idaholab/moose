@@ -13,10 +13,14 @@
 /****************************************************************/
 
 #include "AlphaCED.h"
-#include "Assembly.h"
 
-template<>
-InputParameters validParams<AlphaCED>()
+// MOOSE includes
+#include "Assembly.h"
+#include "MooseVariableScalar.h"
+
+template <>
+InputParameters
+validParams<AlphaCED>()
 {
   InputParameters params = validParams<ScalarKernel>();
   params.addRequiredParam<Real>("value", "The value we are enforcing");
@@ -24,15 +28,12 @@ InputParameters validParams<AlphaCED>()
   return params;
 }
 
-AlphaCED::AlphaCED(const InputParameters & parameters) :
-    ScalarKernel(parameters),
-    _value(getParam<Real>("value"))
+AlphaCED::AlphaCED(const InputParameters & parameters)
+  : ScalarKernel(parameters), _value(getParam<Real>("value"))
 {
 }
 
-AlphaCED::~AlphaCED()
-{
-}
+AlphaCED::~AlphaCED() {}
 
 void
 AlphaCED::reinit()

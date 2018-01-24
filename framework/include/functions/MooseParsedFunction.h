@@ -15,20 +15,14 @@
 #ifndef MOOSEPARSEDFUNCTION_H
 #define MOOSEPARSEDFUNCTION_H
 
-// std includes
-#include <iostream>
-#include <string>
-#include <map>
-
 // MOOSE includes
 #include "Function.h"
 #include "MooseParsedFunctionBase.h"
 
-//Forward declarations
+// Forward declarations
 class MooseParsedFunction;
-class MooseParsedFunctionWrapper;
 
-template<>
+template <>
 InputParameters validParams<MooseParsedFunction>();
 
 /**
@@ -39,22 +33,14 @@ InputParameters validParams<MooseParsedFunction>();
  * Documentation for the Function Parser can be found at:
  * http://warp.povusers.org/FunctionParser/fparser.html
  */
-class MooseParsedFunction :
-  public Function,
-  public MooseParsedFunctionBase
+class MooseParsedFunction : public Function, public MooseParsedFunctionBase
 {
 public:
-
   /**
    * Created from MooseSystem via the FunctionFactory.
    * @param parameters The input parameters
    */
   MooseParsedFunction(const InputParameters & parameters);
-
-  /**
-   * Destructor, it cleans up the libMesh::ParsedFunction object
-   */
-  virtual ~MooseParsedFunction();
 
   /**
    * Evaluate the equation at the given location. For 1-D and 2-D equations
@@ -63,13 +49,13 @@ public:
    * @param pt The current point (x,y,z)
    * @return The result of evaluating the function
    */
-  virtual Real value(Real t, const Point & pt);
+  virtual Real value(Real t, const Point & pt) override;
 
   /**
    * Evaluate the gradient of the function. This is computed in libMesh
    * through automatic symbolic differentiation.
    */
-  virtual RealGradient gradient(Real t, const Point & p);
+  virtual RealGradient gradient(Real t, const Point & p) override;
 
   /**
    * Evaluate the time derivative of the function. This is computed in libMesh
@@ -78,28 +64,23 @@ public:
    * \param p The point in space (x,y,z)
    * \return The time derivative of the function at the specified time and location
    */
-  virtual Real timeDerivative(Real t, const Point & p);
+  virtual Real timeDerivative(Real t, const Point & p) override;
 
   /**
    * Method invalid for ParsedGradFunction
    * @see ParsedVectorFunction
    */
-  virtual RealVectorValue vectorValue(Real t, const Point & p);
+  virtual RealVectorValue vectorValue(Real t, const Point & p) override;
 
   /**
    * Creates the parsed function.
    */
-  virtual void initialSetup();
+  virtual void initialSetup() override;
 
 protected:
-
   /// The function defined by the user
   std::string _value;
 
-  /// Pointer to the wrapper object for the function
-  MooseParsedFunctionWrapper * _function_ptr;
-
   friend class ParsedFunctionTest;
-
 };
-#endif //MOOSEPARSEDFUNCTION_H
+#endif // MOOSEPARSEDFUNCTION_H

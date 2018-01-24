@@ -10,7 +10,8 @@
 #include "ComputeElasticityTensorBase.h"
 
 /**
- * ComputeRotatedElasticityTensorBase is an intermediate base class that rotates an elasticity tensor based on euler angles.
+ * ComputeRotatedElasticityTensorBase is an intermediate base class that rotates an elasticity
+ * tensor based on euler angles.
  */
 class ComputeRotatedElasticityTensorBase : public ComputeElasticityTensorBase
 {
@@ -21,4 +22,4 @@ protected:
   RealVectorValue _Euler_angles;
 };
 
-#endif //COMPUTEROTATEDELASTICITYTENSORBASE_H
+#endif // COMPUTEROTATEDELASTICITYTENSORBASE_H

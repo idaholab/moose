@@ -1,7 +1,7 @@
 [Mesh]
-  # This test uses SolutionUserObject which doesn't work with ParallelMesh.
+  # This test uses SolutionUserObject which doesn't work with DistributedMesh.
   type = GeneratedMesh
-  distribution = SERIAL
+  parallel_type = replicated
   dim = 2
   nx = 2
   ny = 2

@@ -22,27 +22,24 @@
 #include "FileMesh.h"
 #include "MooseApp.h"
 
-// libMesh includes
 #include "libmesh/mesh_function.h"
 #include "libmesh/mesh_refinement.h"
 #include "libmesh/explicit_system.h"
 
-template<>
-InputParameters validParams<AddOutputAction>()
+template <>
+InputParameters
+validParams<AddOutputAction>()
 {
-   InputParameters params = validParams<MooseObjectAction>();
-   return params;
+  InputParameters params = validParams<MooseObjectAction>();
+  return params;
 }
 
-AddOutputAction::AddOutputAction(InputParameters params) :
-    MooseObjectAction(params)
-{
-}
+AddOutputAction::AddOutputAction(InputParameters params) : MooseObjectAction(params) {}
 
 void
 AddOutputAction::act()
 {
-  // Do nothing if FEProblem is NULL, this should only be the case for CoupledProblem
+  // Do nothing if FEProblemBase is NULL, this should only be the case for CoupledProblem
   if (_problem.get() == NULL)
     return;
 
@@ -51,15 +48,15 @@ AddOutputAction::act()
 
   // Reject the reserved names for objects not built by MOOSE
   if (!_moose_object_pars.get<bool>("_built_by_moose") && output_warehouse.isReservedName(_name))
-    mooseError("The name '" << _name << "' is a reserved name for output objects");
+    mooseError("The name '", _name, "' is a reserved name for output objects");
 
-  // Check that an object by the same name does not already exist; this must be done before the object
-  // is created to avoid getting misleading errors from the Parser
+  // Check that an object by the same name does not already exist; this must be done before the
+  // object is created to avoid getting misleading errors from the Parser
   if (output_warehouse.hasOutput(_name))
-    mooseError("An output object named '" << _name << "' already exists");
+    mooseError("An output object named '", _name, "' already exists");
 
-  // Add a pointer to the FEProblem class
-  _moose_object_pars.addPrivateParam<FEProblem *>("_fe_problem",  _problem.get());
+  // Add a pointer to the FEProblemBase class
+  _moose_object_pars.addPrivateParam<FEProblemBase *>("_fe_problem_base", _problem.get());
 
   // Create common parameter exclude list
   std::vector<std::string> exclude;
@@ -69,7 +66,7 @@ AddOutputAction::act()
 
     // --show-input should enable the display of the input file on the screen
     if (_app.getParam<bool>("show_input") && _moose_object_pars.get<bool>("output_screen"))
-      _moose_object_pars.set<MultiMooseEnum>("execute_input_on") = "initial";
+      _moose_object_pars.set<ExecFlagEnum>("execute_input_on") = EXEC_INITIAL;
   }
 
   // Apply the common parameters
@@ -88,6 +85,6 @@ AddOutputAction::act()
     _moose_object_pars.set<std::string>("suffix") = "auto_recovery";
 
   // Create the object and add it to the warehouse
-  MooseSharedPointer<Output> output = MooseSharedNamespace::static_pointer_cast<Output>(_factory.create(_type, _name, _moose_object_pars));
+  std::shared_ptr<Output> output = _factory.create<Output>(_type, _name, _moose_object_pars);
   output_warehouse.addOutput(output);
 }

@@ -1,0 +1,61 @@
+/****************************************************************/
+/*               DO NOT MODIFY THIS HEADER                      */
+/* MOOSE - Multiphysics Object Oriented Simulation Environment  */
+/*                                                              */
+/*           (c) 2010 Battelle Energy Alliance, LLC             */
+/*                   ALL RIGHTS RESERVED                        */
+/*                                                              */
+/*          Prepared by Battelle Energy Alliance, LLC           */
+/*            Under Contract No. DE-AC07-05ID14517              */
+/*            With the U. S. Department of Energy               */
+/*                                                              */
+/*            See COPYRIGHT for full restrictions               */
+/****************************************************************/
+
+#ifndef CHANNELGRADIENTBC_H
+#define CHANNELGRADIENTBC_H
+
+#include "IntegratedBC.h"
+
+class ChannelGradientBC;
+
+template <>
+InputParameters validParams<ChannelGradientBC>();
+
+/**
+ * ChannelGradientBC implements a boundary condition like that for heat transfer
+ * between a convecting fluid and a solid surface: \f$q = h(T_{\infty} - T_s)\f$
+ * where \f$T_{\infty}\f$ is the bulk fluid temperature, \f$T_s\f$ is the temperature
+ * of the solid surface, and \f$h\f$ is a heat transfer coefficient usually obtained
+ * through a Nusselt-like correlation. The difference in temperature is provided by
+ * a ChannelGradientVectorPostprocessor. Note that this boundary condition is only
+ * applicable to boundaries with a single varying coordinate (e.g. constant x and y,
+ * varying z)
+ */
+class ChannelGradientBC : public IntegratedBC
+{
+public:
+  ChannelGradientBC(const InputParameters & parameters);
+
+protected:
+  /**
+   * This method retrieves the difference in temperature between \f$T_{\infty}\f$
+   * and \f$T_s\f$ at the current quadrature point. It does this in a two step process:
+   *
+   *   1. Binary search to determine which vector postprocessor sampling points the
+   *      quadrature point lies between
+   *   2. Linear interpolation of the temperature difference between the bounding
+   *      sampling points
+   */
+  virtual Real getGradient();
+
+  virtual Real computeQpResidual() override;
+  virtual Real computeQpJacobian() override;
+
+  const MooseEnum _axis;
+  const VectorPostprocessorValue & _channel_gradient_axis_coordinate;
+  const VectorPostprocessorValue & _channel_gradient_value;
+  const MaterialProperty<Real> & _h;
+};
+
+#endif // CHANNELGRADIENTBC_H

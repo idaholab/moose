@@ -17,10 +17,10 @@
 
 #include "ElementAverageValue.h"
 
-//Forward Declarations
+// Forward Declarations
 class AverageElementSize;
 
-template<>
+template <>
 InputParameters validParams<AverageElementSize>();
 
 /**
@@ -31,13 +31,13 @@ class AverageElementSize : public ElementAverageValue
 public:
   AverageElementSize(const InputParameters & parameters);
 
-  virtual void initialize();
-  virtual void execute();
+  virtual void initialize() override;
+  virtual void execute() override;
 
-  virtual Real computeIntegral();
+  virtual Real computeIntegral() override;
 
-  virtual Real getValue();
-  virtual void threadJoin(const UserObject & y);
+  virtual Real getValue() override;
+  virtual void threadJoin(const UserObject & y) override;
 
 protected:
   int _elems;

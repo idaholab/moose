@@ -1,0 +1,73 @@
+[Tests]
+  [./dynamic_object_loading]
+    type = 'Exodiff'
+    input = 'dynamic_objects.i'
+    exodiff = 'dynamic_objects_out.e'
+    library_mode = 'DYNAMIC'
+
+    # Test must be run with the misc app to test dynamic loading
+    executable_pattern = 'misc-\w+$'
+    allow_warnings = true
+  [../]
+
+  [./dynamic_object_loading_syntax]
+    type = 'Exodiff'
+    input = 'dynamic_syntax.i'
+    exodiff = 'dynamic_syntax_out.e'
+    library_mode = 'DYNAMIC'
+
+    # Test must be run with the misc app to test dynamic loading
+    executable_pattern = 'misc-\w+$'
+    allow_warnings = true
+  [../]
+
+  [./dynamic_object_restrict]
+    type = 'Exodiff'
+    input = 'dynamic_objects.i'
+    exodiff = 'dynamic_objects_out.e'
+    # Register only some of the objects necessary for running this test
+    cli_args = "Problem/object_names='CHMath CHInterface'"
+    library_mode = 'DYNAMIC'
+    prereq = 'dynamic_object_loading'
+
+    # Test must be run with the misc app to test dynamic loading
+    executable_pattern = 'misc-\w+$'
+    allow_warnings = true
+  [../]
+
+  [./dynamic_object_restrict_bad]
+    type = 'RunException'
+    input = 'dynamic_objects.i'
+    expect_err = "A '\w+' is not a registered object"
+    # Register only some of the objects necessary, not enough for running this test
+    cli_args = "Problem/object_names='CHMath'"
+    library_mode = 'DYNAMIC'
+    prereq = 'dynamic_object_restrict'
+
+    # Test must be run with the misc app to test dynamic loading
+    executable_pattern = 'misc-\w+$'
+    allow_warnings = true
+  [../]
+
+  [./dynamic_object_loading_wrong_app]
+    type = 'RunException'
+    input = 'dynamic_wrong_lib.i'
+    expect_err = 'We loaded objects from the following libraries.*\n\t\.\./\.\./\.\./\.\./\.\./tensor_mechanics/lib/libtensor_mechanics'
+    library_mode = 'DYNAMIC'
+
+    # Test must be run with the misc app to test dynamic loading
+    executable_pattern = 'misc-\w+$'
+  [../]
+
+  [./dynamic_object_loading_bogus_app]
+    type = 'RunException'
+    input = 'dynamic_wrong_lib.i'
+    expect_err = 'Unable to open library file'
+    cli_args = 'Problem/register_objects_from=FooApp'
+    library_mode = 'DYNAMIC'
+    prereq = 'dynamic_object_loading_wrong_app'
+
+    # Test must be run with the misc app to test dynamic loading
+    executable_pattern = 'misc-\w+$'
+  [../]
+[]

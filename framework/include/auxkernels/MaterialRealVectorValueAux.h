@@ -21,7 +21,7 @@
 // Forward declarations
 class MaterialRealVectorValueAux;
 
-template<>
+template <>
 InputParameters validParams<MaterialRealVectorValueAux>();
 
 /**
@@ -30,22 +30,17 @@ InputParameters validParams<MaterialRealVectorValueAux>();
 class MaterialRealVectorValueAux : public MaterialAuxBase<RealVectorValue>
 {
 public:
-
   /**
    * Class constructor
    * @param parameters The input parameters for this object
    */
   MaterialRealVectorValueAux(const InputParameters & parameters);
 
-  virtual ~MaterialRealVectorValueAux();
-
 protected:
-
-  /// Returns the value of the material property for the given component
-  virtual Real getRealValue();
+  virtual Real getRealValue() override;
 
   /// The vector component to output
   unsigned int _component;
 };
 
-#endif //MATERIALREALVECTORVALUEAUX_H
+#endif // MATERIALREALVECTORVALUEAUX_H

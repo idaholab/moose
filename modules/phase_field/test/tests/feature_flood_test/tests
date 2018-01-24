@@ -1,0 +1,30 @@
+[Tests]
+  [./spiral]
+    type = CSVDiff
+    input = parallel_feature_count.i
+    csvdiff = parallel_feature_count_out.csv
+    # This test requires VTK because it uses the ImageFunction class
+    vtk = true
+    min_parallel = 4
+  [../]
+
+  [./boxes]
+    type = CSVDiff
+    input = parallel_feature_count.i
+    csvdiff = boxes_out.csv
+    cli_args = 'Mesh/file=boxes_16x16.png Outputs/file_base=boxes_out'
+    # This test requires VTK because it uses the ImageFunction class
+    vtk = true
+    min_parallel = 4
+  [../]
+
+  [./l_shapes]
+    type = CSVDiff
+    input = parallel_feature_count.i
+    csvdiff = l_shapes_out.csv
+    cli_args = 'Mesh/file=l_shapes_16x16.png Outputs/file_base=l_shapes_out'
+    # This test requires VTK because it uses the ImageFunction class
+    vtk = true
+    min_parallel = 4
+  [../]
+[]

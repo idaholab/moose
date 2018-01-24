@@ -7,6 +7,7 @@
 #include "ContactApp.h"
 #include "Moose.h"
 #include "AppFactory.h"
+#include "MooseSyntax.h"
 
 #include "ContactAction.h"
 #include "ContactMaster.h"
@@ -22,23 +23,23 @@
 #include "GluedContactConstraint.h"
 #include "MechanicalContactConstraint.h"
 #include "SparsityBasedContactConstraint.h"
-#include "FrictionalContactProblem.h"
+#include "AugmentedLagrangianContactProblem.h"
 #include "ReferenceResidualProblem.h"
 #include "NodalArea.h"
 #include "NodalAreaAction.h"
 #include "NodalAreaVarAction.h"
+#include "ContactSlipDamper.h"
+#include "ContactSplit.h"
 
-template<>
-InputParameters validParams<ContactApp>()
+template <>
+InputParameters
+validParams<ContactApp>()
 {
   InputParameters params = validParams<MooseApp>();
-  params.set<bool>("use_legacy_uo_initialization") = false;
-  params.set<bool>("use_legacy_uo_aux_computation") = false;
   return params;
 }
 
-ContactApp::ContactApp(const InputParameters & parameters) :
-    MooseApp(parameters)
+ContactApp::ContactApp(const InputParameters & parameters) : MooseApp(parameters)
 {
   Moose::registerObjects(_factory);
   ContactApp::registerObjects(_factory);
@@ -47,12 +48,14 @@ ContactApp::ContactApp(const InputParameters & parameters) :
   ContactApp::associateSyntax(_syntax, _action_factory);
 }
 
-ContactApp::~ContactApp()
-{
-}
+ContactApp::~ContactApp() {}
 
 // External entry point for dynamic application loading
-extern "C" void ContactApp__registerApps() { ContactApp::registerApps(); }
+extern "C" void
+ContactApp__registerApps()
+{
+  ContactApp::registerApps();
+}
 void
 ContactApp::registerApps()
 {
@@ -60,7 +63,11 @@ ContactApp::registerApps()
 }
 
 // External entry point for dynamic object registration
-extern "C" void ContactApp__registerObjects(Factory & factory) { ContactApp::registerObjects(factory); }
+extern "C" void
+ContactApp__registerObjects(Factory & factory)
+{
+  ContactApp::registerObjects(factory);
+}
 void
 ContactApp::registerObjects(Factory & factory)
 {
@@ -71,27 +78,33 @@ ContactApp::registerObjects(Factory & factory)
   registerConstraint(GluedContactConstraint);
   registerConstraint(MechanicalContactConstraint);
   registerConstraint(SparsityBasedContactConstraint);
-  registerProblem(FrictionalContactProblem);
+  registerProblem(AugmentedLagrangianContactProblem);
   registerProblem(ReferenceResidualProblem);
   registerUserObject(NodalArea);
   registerAux(ContactPressureAux);
+  registerDamper(ContactSlipDamper);
+  registerSplit(ContactSplit);
 }
 
 // External entry point for dynamic syntax association
-extern "C" void ContactApp__associateSyntax(Syntax & syntax, ActionFactory & action_factory) { ContactApp::associateSyntax(syntax, action_factory); }
+extern "C" void
+ContactApp__associateSyntax(Syntax & syntax, ActionFactory & action_factory)
+{
+  ContactApp::associateSyntax(syntax, action_factory);
+}
 void
 ContactApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
 {
-  syntax.registerActionSyntax("ContactAction", "Contact/*");
+  registerSyntax("ContactAction", "Contact/*");
 
-  syntax.registerActionSyntax("ContactPenetrationAuxAction", "Contact/*");
-  syntax.registerActionSyntax("ContactPenetrationVarAction", "Contact/*");
+  registerSyntax("ContactPenetrationAuxAction", "Contact/*");
+  registerSyntax("ContactPenetrationVarAction", "Contact/*");
 
-  syntax.registerActionSyntax("ContactPressureAuxAction", "Contact/*");
-  syntax.registerActionSyntax("ContactPressureVarAction", "Contact/*");
+  registerSyntax("ContactPressureAuxAction", "Contact/*");
+  registerSyntax("ContactPressureVarAction", "Contact/*");
 
-  syntax.registerActionSyntax("NodalAreaAction", "Contact/*");
-  syntax.registerActionSyntax("NodalAreaVarAction", "Contact/*");
+  registerSyntax("NodalAreaAction", "Contact/*");
+  registerSyntax("NodalAreaVarAction", "Contact/*");
 
   registerAction(ContactAction, "add_aux_kernel");
   registerAction(ContactAction, "add_aux_variable");

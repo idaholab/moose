@@ -17,10 +17,17 @@
 
 #include "GeneralPostprocessor.h"
 
-//Forward Declarations
+// Forward Declarations
 class NumDOFs;
 
-template<>
+// libMesh forward declarations
+namespace libMesh
+{
+class System;
+class EquationSystems;
+}
+
+template <>
 InputParameters validParams<NumDOFs>();
 
 class NumDOFs : public GeneralPostprocessor
@@ -28,13 +35,22 @@ class NumDOFs : public GeneralPostprocessor
 public:
   NumDOFs(const InputParameters & parameters);
 
-  virtual void initialize() {}
-  virtual void execute() {}
+  virtual void initialize() override {}
+  virtual void execute() override {}
+  virtual Real getValue() override;
 
-  /**
-   * This will return the degrees of freedom in the system.
-   */
-  virtual Real getValue();
+protected:
+  enum SystemEnum
+  {
+    NL,
+    AUX,
+    ALL
+  };
+
+  const SystemEnum _system_enum;
+
+  const System * _system_pointer;
+  const EquationSystems * _es_pointer;
 };
 
-#endif //NUMDOFS_H
+#endif // NUMDOFS_H

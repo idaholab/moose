@@ -1,0 +1,8 @@
+[Tests]
+  [./DeformedGrain]
+    method = '!DBG'
+    type = 'Exodiff'
+    input = 'DeformedGrain.i'
+    exodiff = 'DeformedGrain_out.e'
+  [../]
+[]

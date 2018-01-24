@@ -63,6 +63,7 @@
     type = TransientMultiApp
     app_type = MooseTestApp
     input_files = fromsub_sub.i
+    execute_on = 'initial timestep_begin'
   [../]
 []
 

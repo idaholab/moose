@@ -20,7 +20,7 @@
 // Forward Declaration
 class CoupledForce;
 
-template<>
+template <>
 InputParameters validParams<CoupledForce>();
 
 /**
@@ -32,15 +32,16 @@ public:
   CoupledForce(const InputParameters & parameters);
 
 protected:
-  virtual Real computeQpResidual();
+  virtual Real computeQpResidual() override;
 
-  virtual Real computeQpJacobian();
+  virtual Real computeQpJacobian() override;
 
-  virtual Real computeQpOffDiagJacobian(unsigned int jvar);
+  virtual Real computeQpOffDiagJacobian(unsigned int jvar) override;
 
 private:
   unsigned int _v_var;
-  VariableValue & _v;
+  const VariableValue & _v;
+  Real _coef;
 };
 
-#endif //COUPLEDFORCE_H
+#endif // COUPLEDFORCE_H

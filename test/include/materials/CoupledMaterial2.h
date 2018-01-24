@@ -18,7 +18,7 @@
 
 class CoupledMaterial2;
 
-template<>
+template <>
 InputParameters validParams<CoupledMaterial2>();
 
 /**
@@ -30,7 +30,7 @@ public:
   CoupledMaterial2(const InputParameters & parameters);
 
 protected:
-  virtual void computeProperties();
+  virtual void computeQpProperties();
 
   MaterialPropertyName _mat_prop_name;
   MaterialProperty<Real> & _mat_prop;
@@ -39,4 +39,4 @@ protected:
   const MaterialProperty<Real> & _coupled_mat_prop2;
 };
 
-#endif //COUPLEDMATERIAL2_H
+#endif // COUPLEDMATERIAL2_H

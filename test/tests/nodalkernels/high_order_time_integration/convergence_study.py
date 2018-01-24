@@ -14,28 +14,28 @@ scheme_errors = {}
 dt = 1.0
 dts = []
 for i in range(0,5):
-  dts.append(dt)
-  dt = dt / 2.0
+    dts.append(dt)
+    dt = dt / 2.0
 
 for scheme in schemes:
 
-  errors = []
+    errors = []
 
-  for dt in dts:
-    command = '../../../moose_test-opt -i high_order_time_integration.i Executioner/dt=' + str(dt) + ' Executioner/scheme=' + scheme
-    os.system(command)
+    for dt in dts:
+        command = '../../../moose_test-opt -i high_order_time_integration.i Executioner/dt=' + str(dt) + ' Executioner/scheme=' + scheme
+        os.system(command)
 
-    with open('high_order_time_integration_out.csv', 'r') as csvfile:
-      csv_data = csv.reader(csvfile, delimiter=',')
+        with open('high_order_time_integration_out.csv', 'r') as csvfile:
+            csv_data = csv.reader(csvfile, delimiter=',')
 
-      # Get the last row second column
-      error = deque(csv_data, 2)[0][1]
-      errors.append(error)
+            # Get the last row second column
+            error = deque(csv_data, 2)[0][1]
+            errors.append(error)
 
-  scheme_errors[scheme] = errors
+    scheme_errors[scheme] = errors
 
 for scheme, errors in scheme_errors.iteritems():
-  plt.plot(dts, errors, label=scheme)
+    plt.plot(dts, errors, label=scheme)
 
 plt.xscale('log')
 plt.yscale('log')

@@ -27,64 +27,46 @@
 
 class InternalSideUserObject;
 
-template<>
+template <>
 InputParameters validParams<InternalSideUserObject>();
 
 /**
  *
  */
-class InternalSideUserObject :
-  public UserObject,
-  public BlockRestrictable,
-  public TwoMaterialPropertyInterface,
-  public NeighborCoupleable,
-  public MooseVariableDependencyInterface,
-  public UserObjectInterface,
-  public TransientInterface,
-  public PostprocessorInterface,
-  public ZeroInterface
+class InternalSideUserObject : public UserObject,
+                               public BlockRestrictable,
+                               public TwoMaterialPropertyInterface,
+                               public NeighborCoupleable,
+                               public MooseVariableDependencyInterface,
+                               public UserObjectInterface,
+                               public TransientInterface,
+                               public PostprocessorInterface,
+                               public ZeroInterface
 {
 public:
   InternalSideUserObject(const InputParameters & parameters);
-  virtual ~InternalSideUserObject();
-
-  /**
-   * This function will get called on each geometric object this postprocessor acts on
-   * (ie Elements, Sides or Nodes).  This will most likely get called multiple times
-   * before getValue() is called.
-   *
-   * Someone somewhere has to override this.
-   */
-  virtual void execute() = 0;
-
-  /**
-   * Must override.
-   *
-   * @param uo The UserObject to be joined into _this_ object.  Take the data from the uo object and "add" it into the data for this object.
-   */
-  virtual void threadJoin(const UserObject & uo) = 0;
 
 protected:
   MooseMesh & _mesh;
 
   const MooseArray<Point> & _q_point;
-  QBase * & _qrule;
+  QBase *& _qrule;
   const MooseArray<Real> & _JxW;
   const MooseArray<Real> & _coord;
   const MooseArray<Point> & _normals;
 
-  const Elem * & _current_elem;
+  const Elem *& _current_elem;
   /// current side of the current element
   unsigned int & _current_side;
 
-  const Elem * & _current_side_elem;
+  const Elem *& _current_side_elem;
   const Real & _current_side_volume;
 
   /// The neighboring element
-  const Elem * & _neighbor_elem;
-  /// The volume (or length) of the current neighbor
-  const Real & _neighbor_elem_volume;
-};
+  const Elem *& _neighbor_elem;
 
+  /// The volume (or length) of the current neighbor
+  const Real & getNeighborElemVolume();
+};
 
 #endif /* INTERNALSIDEUSEROBJECT_H */

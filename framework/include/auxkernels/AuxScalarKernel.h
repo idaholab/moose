@@ -33,23 +33,22 @@ class SubProblem;
 class Assembly;
 class AuxScalarKernel;
 
-template<>
+template <>
 InputParameters validParams<AuxScalarKernel>();
 
 /**
  * Base class for making kernels that work on auxiliary scalar variables
  */
-class AuxScalarKernel :
-  public MooseObject,
-  public ScalarCoupleable,
-  public SetupInterface,
-  public FunctionInterface,
-  public UserObjectInterface,
-  public PostprocessorInterface,
-  public DependencyResolverInterface,
-  public TransientInterface,
-  public ZeroInterface,
-  public MeshChangedInterface
+class AuxScalarKernel : public MooseObject,
+                        public ScalarCoupleable,
+                        public SetupInterface,
+                        public FunctionInterface,
+                        public UserObjectInterface,
+                        public PostprocessorInterface,
+                        public DependencyResolverInterface,
+                        public TransientInterface,
+                        public ZeroInterface,
+                        public MeshChangedInterface
 {
 public:
   AuxScalarKernel(const InputParameters & parameters);
@@ -68,9 +67,9 @@ public:
 
   SubProblem & subProblem() { return _subproblem; }
 
-  virtual const std::set<std::string> & getRequestedItems();
+  virtual const std::set<std::string> & getRequestedItems() override;
 
-  virtual const std::set<std::string> & getSuppliedItems();
+  virtual const std::set<std::string> & getSuppliedItems() override;
 
   /**
    * Use this to enable/disable the constraint
@@ -87,7 +86,6 @@ protected:
   Assembly & _assembly;
   MooseVariableScalar & _var;
   MooseMesh & _mesh;
-//  unsigned int _dim;
 
   unsigned int _i;
 

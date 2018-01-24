@@ -1,0 +1,12 @@
+[Tests]
+  [./xfem_mechanics_prescribed_growth]
+    type = RunApp
+    input = 'xfem_mechanics_prescribed_growth.i'
+    check_input = True
+  [../]
+  [./xfem_thermomechanics_stress_growth]
+    type = RunApp
+    input = 'xfem_thermomechanics_stress_growth.i'
+    check_input = True
+  [../]
+[]

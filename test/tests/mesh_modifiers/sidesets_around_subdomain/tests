@@ -14,4 +14,20 @@
     exodiff = 'around_normals_in.e'
     recover = false
   [../]
+
+  [./around_created_subdomain]
+    type = 'Exodiff'
+    input = 'around_created_subdomain.i'
+    cli_args = '--mesh-only'
+    exodiff = 'around_created_subdomain_in.e'
+    recover = false
+  [../]
+
+  [./around_multi_created_subdomain]
+    type = 'Exodiff'
+    input = 'around_multi_created_subdomain.i'
+    cli_args = '--mesh-only'
+    exodiff = 'around_multi_created_subdomain_in.e'
+    recover = false
+  [../]
 []

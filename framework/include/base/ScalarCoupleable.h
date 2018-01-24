@@ -15,9 +15,21 @@
 #ifndef SCALARCOUPLEABLE_H
 #define SCALARCOUPLEABLE_H
 
-#include "MooseVariable.h"
-#include "MooseVariableScalar.h"
-#include "InputParameters.h"
+#include "Moose.h"
+
+// MOOSE includes
+#include "MooseVariableBase.h"
+
+// C++ includes
+#include <map>
+#include <string>
+#include <vector>
+
+// Forward declarations
+class FEProblemBase;
+class InputParameters;
+class MooseObject;
+class MooseVariableScalar;
 
 /**
  * Interface for objects that needs scalar coupling capabilities
@@ -30,7 +42,7 @@ public:
    * Constructing the object
    * @param parameters Parameters that come from constructing the object
    */
-  ScalarCoupleable(const InputParameters & parameters);
+  ScalarCoupleable(const MooseObject * moose_object);
 
   /**
    * Destructor for object
@@ -44,6 +56,11 @@ public:
   const std::vector<MooseVariableScalar *> & getCoupledMooseScalarVars();
 
 protected:
+  // Reference to the interface's input parameters
+  const InputParameters & _sc_parameters;
+
+  /// The name of the object this interface is part of
+  const std::string & _sc_name;
 
   /**
    * Returns true if a variables has been coupled_as name.
@@ -67,6 +84,14 @@ protected:
   virtual unsigned int coupledScalar(const std::string & var_name, unsigned int comp = 0);
 
   /**
+   * Returns the order for a scalar coupled variable by name
+   * @param var_name Name of coupled variable
+   * @param comp Component number for vector of coupled variables
+   * @return Order of coupled variable
+   */
+  virtual Order coupledScalarOrder(const std::string & var_name, unsigned int comp = 0);
+
+  /**
    * Returns value of a scalar coupled variable
    * @param var_name Name of coupled variable
    * @param comp Component number for vector of coupled variables
@@ -80,7 +105,8 @@ protected:
    * @param comp Component number for vector of coupled variables
    * @return Reference to a old VariableValue for the coupled variable
    */
-  virtual VariableValue & coupledScalarValueOld(const std::string & var_name, unsigned int comp = 0);
+  virtual VariableValue & coupledScalarValueOld(const std::string & var_name,
+                                                unsigned int comp = 0);
 
   /**
    * Returns the older (two time steps previous) value of a scalar coupled variable
@@ -88,22 +114,31 @@ protected:
    * @param comp Component number for vector of coupled variables
    * @return Reference to a older VariableValue for the coupled variable
    */
+  virtual VariableValue & coupledScalarValueOlder(const std::string & var_name,
+                                                  unsigned int comp = 0);
+  /**
+   * Returns the time derivative of a scalar coupled variable
+   * @param var_name Name of coupled variable
+   * @param comp Component number for vector of coupled variables
+   * @return Reference to a time derivative VariableValue for the coupled variable
+   */
   virtual VariableValue & coupledScalarDot(const std::string & var_name, unsigned int comp = 0);
 
   /**
    * Time derivative of a scalar coupled variable with respect to the coefficients
    * @param var_name Name of coupled variable
    * @param comp Component number for vector of coupled variables
-   * @return Reference to a VariableValue containing the time derivative of the coupled variable with respect to the coefficients
+   * @return Reference to a VariableValue containing the time derivative of the coupled variable
+   * with respect to the coefficients
    */
   virtual VariableValue & coupledScalarDotDu(const std::string & var_name, unsigned int comp = 0);
 
 protected:
-  // Reference to FEProblem
-  FEProblem & _sc_fe_problem;
+  // Reference to FEProblemBase
+  FEProblemBase & _sc_fe_problem;
 
   /// Coupled vars whose values we provide
-  std::map<std::string, std::vector<MooseVariableScalar *> > _coupled_scalar_vars;
+  std::map<std::string, std::vector<MooseVariableScalar *>> _coupled_scalar_vars;
 
   /// Will hold the default value for optional coupled scalar variables.
   std::map<std::string, VariableValue *> _default_value;
@@ -126,12 +161,23 @@ protected:
   VariableValue * getDefaultValue(const std::string & var_name);
 
   /**
+   * Check that the right kind of variable is being coupled in
+   *
+   * @param var_name The name of the coupled variable
+   */
+  void checkVar(const std::string & var_name);
+
+  /**
    * Extract pointer to a scalar coupled variable
    * @param var_name Name of parameter desired
    * @param comp Component number of multiple coupled variables
    * @return Pointer to the desired variable
    */
-  MooseVariableScalar *getScalarVar(const std::string & var_name, unsigned int comp);
+  MooseVariableScalar * getScalarVar(const std::string & var_name, unsigned int comp);
+
+private:
+  /// Field variables coupled into this object (for error checking)
+  std::map<std::string, std::vector<MooseVariable *>> _sc_coupled_vars;
 };
 
 #endif // SCALARCOUPLEABLE_H

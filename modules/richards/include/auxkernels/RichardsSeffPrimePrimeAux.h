@@ -5,7 +5,6 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-
 #ifndef RICHARDSSEFFPRIMEPRIMEAUX_H
 #define RICHARDSSEFFPRIMEPRIMEAUX_H
 
@@ -13,16 +12,16 @@
 
 #include "RichardsSeff.h"
 
-//Forward Declarations
+// Forward Declarations
 class RichardsSeffPrimePrimeAux;
 
-template<>
+template <>
 InputParameters validParams<RichardsSeffPrimePrimeAux>();
 
 /**
  * Calculates derivative of effective saturation wrt specified porepressures
  */
-class RichardsSeffPrimePrimeAux: public AuxKernel
+class RichardsSeffPrimePrimeAux : public AuxKernel
 {
 public:
   RichardsSeffPrimePrimeAux(const InputParameters & parameters);
@@ -54,10 +53,10 @@ protected:
    * where N is the number of arguments that the _seff_UO requires)
    * Eg, for twophase simulations N=2
    */
-  std::vector<VariableValue *> _pressure_vals;
+  std::vector<const VariableValue *> _pressure_vals;
 
   /// matrix of 2nd derivtives: This auxkernel returns _mat[_wrt1][_wrt2];
-  std::vector<std::vector<Real> > _mat;
+  std::vector<std::vector<Real>> _mat;
 };
 
 #endif // RICHARDSSEFFPRIMEPRIMEAUX_H

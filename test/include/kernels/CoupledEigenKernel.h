@@ -16,10 +16,10 @@
 
 #include "EigenKernel.h"
 
-//Forward Declarations
+// Forward Declarations
 class CoupledEigenKernel;
 
-template<>
+template <>
 InputParameters validParams<CoupledEigenKernel>();
 
 class CoupledEigenKernel : public EigenKernel
@@ -30,7 +30,7 @@ public:
 protected:
   virtual Real computeQpResidual();
 
-  VariableValue & _v;
+  const VariableValue & _v;
 };
 
-#endif //COUPLEDEIGENKERNEL_H
+#endif // COUPLEDEIGENKERNEL_H

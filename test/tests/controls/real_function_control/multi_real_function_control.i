@@ -1,3 +1,13 @@
+###########################################################
+# This is a test of the Control Logic System. This test
+# uses the RealFunctionControl to change a multiple Kernel
+# coefficients based on an analytical function at the end
+# of each timestep.
+#
+# @Requirement F8.10
+###########################################################
+
+
 [Mesh]
   type = GeneratedMesh
   dim = 2
@@ -83,7 +93,7 @@
 [Controls]
   [./func_control]
     type = RealFunctionControl
-    parameter = 'coef'
+    parameter = '*/*/coef'
     function = 'func_coef'
     execute_on = 'timestep_begin'
   [../]

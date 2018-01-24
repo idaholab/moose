@@ -17,11 +17,10 @@
 #include "Material.h"
 #include "MaterialProperty.h"
 
-
-//Forward Declarations
+// Forward Declarations
 class VecRangeCheckMaterial;
 
-template<>
+template <>
 InputParameters validParams<VecRangeCheckMaterial>();
 
 /**
@@ -31,6 +30,9 @@ class VecRangeCheckMaterial : public Material
 {
 public:
   VecRangeCheckMaterial(const InputParameters & parameters);
+
+protected:
+  void computeQpProperties();
 };
 
-#endif //VECRANGECHECKMATERIAL_H
+#endif // VECRANGECHECKMATERIAL_H

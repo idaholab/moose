@@ -14,24 +14,22 @@
 
 #include "ScalarConstantIC.h"
 
-template<>
-InputParameters validParams<ScalarConstantIC>()
+template <>
+InputParameters
+validParams<ScalarConstantIC>()
 {
   InputParameters params = validParams<ScalarInitialCondition>();
   params.set<Real>("value") = 0.0;
   return params;
 }
 
-ScalarConstantIC::ScalarConstantIC(const InputParameters & parameters) :
-    ScalarInitialCondition(parameters),
-    _value(getParam<Real>("value"))
+ScalarConstantIC::ScalarConstantIC(const InputParameters & parameters)
+  : ScalarInitialCondition(parameters), _value(getParam<Real>("value"))
 {
 }
-
 
 Real
 ScalarConstantIC::value()
 {
   return _value;
 }
-

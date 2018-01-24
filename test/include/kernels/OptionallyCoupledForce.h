@@ -20,7 +20,7 @@
 // Forward Declaration
 class OptionallyCoupledForce;
 
-template<>
+template <>
 InputParameters validParams<OptionallyCoupledForce>();
 
 /**
@@ -40,12 +40,12 @@ protected:
 
 private:
   unsigned int _v_var;
-  VariableValue & _v;
-  VariableGradient & _grad_v;
-  VariableSecond & _second_v;
-  VariableValue & _v_dot;
-  VariableValue & _v_dot_du;
+  const VariableValue & _v;
+  const VariableGradient & _grad_v;
+  const VariableSecond & _second_v;
+  const VariableValue & _v_dot;
+  const VariableValue & _v_dot_du;
   bool _v_coupled;
 };
 
-#endif //OPTIONALLYCOUPLEDFORCE_H
+#endif // OPTIONALLYCOUPLEDFORCE_H

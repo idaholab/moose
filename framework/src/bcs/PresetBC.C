@@ -14,20 +14,21 @@
 
 #include "PresetBC.h"
 
-template<>
-InputParameters validParams<PresetBC>()
+template <>
+InputParameters
+validParams<PresetBC>()
 {
   InputParameters p = validParams<NodalBC>();
   p.addRequiredParam<Real>("value", "Value of the BC");
+  p.declareControllable("value");
+  p.addClassDescription(
+      "Similar to DirichletBC except the value is applied before the solve begins");
   return p;
 }
 
-
-PresetBC::PresetBC(const InputParameters & parameters) :
-  PresetNodalBC(parameters),
-  _value(getParam<Real>("value"))
+PresetBC::PresetBC(const InputParameters & parameters)
+  : PresetNodalBC(parameters), _value(getParam<Real>("value"))
 {
-
 }
 
 Real
@@ -35,4 +36,3 @@ PresetBC::computeQpValue()
 {
   return _value;
 }
-

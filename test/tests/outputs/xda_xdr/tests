@@ -1,0 +1,8 @@
+[Tests]
+  [./both_xda_and_xdr]
+    # Test that setting xda = true and xdr = true works.
+    type = CheckFiles
+    input = xda_xdr.i
+    check_files = 'xda_xdr_out_0000.xda xda_xdr_out_0000.xdr xda_xdr_out_0000_mesh.xdr xda_xdr_out_0000_mesh.xda'
+  [../]
+[]

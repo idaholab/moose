@@ -11,8 +11,7 @@
 
 class TensorMechanicsHardeningCubic;
 
-
-template<>
+template <>
 InputParameters validParams<TensorMechanicsHardeningCubic>();
 
 /**
@@ -24,15 +23,16 @@ InputParameters validParams<TensorMechanicsHardeningCubic>();
  */
 class TensorMechanicsHardeningCubic : public TensorMechanicsHardeningModel
 {
- public:
+public:
   TensorMechanicsHardeningCubic(const InputParameters & parameters);
 
-  virtual Real value(const Real & intnl) const;
+  virtual Real value(Real intnl) const override;
 
-  virtual Real derivative(const Real & intnl) const;
+  virtual Real derivative(Real intnl) const override;
 
- private:
+  virtual std::string modelName() const override;
 
+private:
   /// value is cubic between _val_0 at internal_parameter=_intnl_0, at _val_res at internal_parameter=_intnl_limit
   Real _val_0;
 
@@ -53,7 +53,6 @@ class TensorMechanicsHardeningCubic : public TensorMechanicsHardeningModel
 
   /// convenience parameter for cubic
   Real _beta;
-
 };
 
 #endif // TENSORMECHANICSHARDENINGCUBIC_H

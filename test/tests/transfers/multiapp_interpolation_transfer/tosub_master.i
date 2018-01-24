@@ -1,3 +1,13 @@
+###########################################################
+# This is a test of the Transfer System. This test
+# uses the Multiapp System to solve independent problems
+# related geometrically. Solutions are then interpolated
+# and transferred to a non-aligned domain.
+#
+# @Requirement F7.20
+###########################################################
+
+
 [Mesh]
   type = GeneratedMesh
   dim = 2
@@ -6,8 +16,8 @@
   xmin = .21
   xmax = .79
   displacements = 'disp_x disp_y'
-  # The MultiAppInterpolationTransfer object only works with SerialMesh
-  distribution = serial
+  # The MultiAppInterpolationTransfer object only works with ReplicatedMesh
+  parallel_type = replicated
 []
 
 [Variables]

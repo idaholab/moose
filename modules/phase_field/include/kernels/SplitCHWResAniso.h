@@ -20,7 +20,7 @@ public:
   SplitCHWResAniso(const InputParameters & parameters);
 };
 
-template<>
+template <>
 InputParameters validParams<SplitCHWResAniso>();
 
-#endif //SPLITCHWRES_H
+#endif // SPLITCHWRES_H

@@ -1,0 +1,101 @@
+[Tests]
+  [./4x4_alpha_1e-6]
+    type = 'Exodiff'
+    input = 'supg_mms_test.i'
+    exodiff = '4x4_alpha_1e-6.e'
+    cli_args = 'Outputs/file_base=4x4_alpha_1e-6 Mesh/nx=4 Mesh/ny=4 GlobalParams/alpha=1e-6'
+    heavy = true
+  [../]
+  [./8x8_alpha_1e-6]
+    type = 'Exodiff'
+    input = 'supg_mms_test.i'
+    exodiff = '8x8_alpha_1e-6.e'
+    cli_args = 'Outputs/file_base=8x8_alpha_1e-6 Mesh/nx=8 Mesh/ny=8 GlobalParams/alpha=1e-6'
+    heavy = true
+  [../]
+  [./16x16_alpha_1e-6]
+    type = 'Exodiff'
+    input = 'supg_mms_test.i'
+    exodiff = '16x16_alpha_1e-6.e'
+    cli_args = 'Outputs/file_base=16x16_alpha_1e-6 Mesh/nx=16 Mesh/ny=16 GlobalParams/alpha=1e-6'
+    heavy = true
+  [../]
+  [./32x32_alpha_1e-6]
+    type = 'Exodiff'
+    input = 'supg_mms_test.i'
+    exodiff = '32x32_alpha_1e-6.e'
+    cli_args = 'Outputs/file_base=32x32_alpha_1e-6 Mesh/nx=32 Mesh/ny=32 GlobalParams/alpha=1e-6'
+    heavy = true
+  [../]
+
+  [./4x4_alpha_1e-3]
+    type = 'Exodiff'
+    input = 'supg_mms_test.i'
+    exodiff = '4x4_alpha_1e-3.e'
+    cli_args = 'Outputs/file_base=4x4_alpha_1e-3 Mesh/nx=4 Mesh/ny=4 GlobalParams/alpha=1e-3'
+    heavy = true
+  [../]
+  [./8x8_alpha_1e-3]
+    type = 'Exodiff'
+    input = 'supg_mms_test.i'
+    exodiff = '8x8_alpha_1e-3.e'
+    cli_args = 'Outputs/file_base=8x8_alpha_1e-3 Mesh/nx=8 Mesh/ny=8 GlobalParams/alpha=1e-3'
+    heavy = true
+  [../]
+  [./16x16_alpha_1e-3]
+    type = 'Exodiff'
+    input = 'supg_mms_test.i'
+    exodiff = '16x16_alpha_1e-3.e'
+    cli_args = 'Outputs/file_base=16x16_alpha_1e-3 Mesh/nx=16 Mesh/ny=16 GlobalParams/alpha=1e-3'
+    heavy = true
+  [../]
+  [./32x32_alpha_1e-3]
+    type = 'Exodiff'
+    input = 'supg_mms_test.i'
+    exodiff = '32x32_alpha_1e-3.e'
+    cli_args = 'Outputs/file_base=32x32_alpha_1e-3 Mesh/nx=32 Mesh/ny=32 GlobalParams/alpha=1e-3'
+    heavy = true
+  [../]
+
+  [./4x4_alpha_1e0]
+    type = 'Exodiff'
+    input = 'supg_mms_test.i'
+    exodiff = '4x4_alpha_1e0.e'
+    cli_args = 'Outputs/file_base=4x4_alpha_1e0 Mesh/nx=4 Mesh/ny=4 GlobalParams/alpha=1e0'
+  [../]
+  [./8x8_alpha_1e0]
+    type = 'Exodiff'
+    input = 'supg_mms_test.i'
+    exodiff = '8x8_alpha_1e0.e'
+    cli_args = 'Outputs/file_base=8x8_alpha_1e0 Mesh/nx=8 Mesh/ny=8 GlobalParams/alpha=1e0'
+  [../]
+  [./16x16_alpha_1e0]
+    type = 'Exodiff'
+    input = 'supg_mms_test.i'
+    exodiff = '16x16_alpha_1e0.e'
+    cli_args = 'Outputs/file_base=16x16_alpha_1e0 Mesh/nx=16 Mesh/ny=16 GlobalParams/alpha=1e0'
+  [../]
+  [./32x32_alpha_1e0]
+    type = 'Exodiff'
+    input = 'supg_mms_test.i'
+    exodiff = '32x32_alpha_1e0.e'
+    cli_args = 'Outputs/file_base=32x32_alpha_1e0 Mesh/nx=32 Mesh/ny=32 GlobalParams/alpha=1e0'
+  [../]
+
+  # This SUPG stabilized Q2Q1 case greatly damps and localizes oscillations compared to an
+  # unstabilized run. Run with more time steps to completely remove oscillations
+  [./adv_dominated_supg_stabilized]
+    type = 'Exodiff'
+    input = 'supg_adv_dominated_mms.i'
+    exodiff = 'adv_dominated_stabilized.e'
+    cli_args = 'GlobalParams/supg=true Outputs/file_base=adv_dominated_stabilized'
+  [../]
+  # This SUPG and PSPG stabilized Q1Q1 case does not exhibit any oscillations with Reynolds
+  # number a factor of 100 higher than previous two cases and with twice as large a dt.
+  # Cutting the number of time steps in half shows some small local oscillations
+  [./adv_dominated_supg_pspg_stabilized]
+    type = 'Exodiff'
+    input = 'supg_pspg_adv_dominated_mms.i'
+    exodiff = 'supg_pspg_adv_dominated_mms_exodus.e'
+  [../]
+[]

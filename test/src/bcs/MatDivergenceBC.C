@@ -13,8 +13,9 @@
 /****************************************************************/
 #include "MatDivergenceBC.h"
 
-template<>
-InputParameters validParams<MatDivergenceBC>()
+template <>
+InputParameters
+validParams<MatDivergenceBC>()
 {
   InputParameters params = validParams<DivergenceBC>();
   params.addRequiredParam<MaterialPropertyName>("prop_name", "The name of the material property");
@@ -22,15 +23,12 @@ InputParameters validParams<MatDivergenceBC>()
   return params;
 }
 
-MatDivergenceBC::MatDivergenceBC(const InputParameters & parameters) :
-    DivergenceBC(parameters),
-    _mat(getMaterialProperty<Real>("prop_name"))
+MatDivergenceBC::MatDivergenceBC(const InputParameters & parameters)
+  : DivergenceBC(parameters), _mat(getMaterialProperty<Real>("prop_name"))
 {
 }
 
-MatDivergenceBC::~MatDivergenceBC()
-{
-}
+MatDivergenceBC::~MatDivergenceBC() {}
 
 Real
 MatDivergenceBC::computeQpResidual()

@@ -41,7 +41,7 @@
     type = PiecewiseMultilinear
     data_file = except5.txt
   [../]
-
+[]
 
 [Executioner]
   type = Transient

@@ -1,0 +1,21 @@
+[Tests]
+  [./lid_driven]
+    type = 'Exodiff'
+    input = 'lid_driven.i'
+    exodiff = 'lid_driven_out.e'
+    custom_cmp = 'lid_driven.cmp'
+  [../]
+  [./lid_driven_stabilized]
+    type = 'Exodiff'
+    input = 'lid_driven_stabilized.i'
+    exodiff = 'lid_driven_stabilized_out.e'
+    custom_cmp = 'lid_driven.cmp'
+  [../]
+  [./still_unstable]
+    type = 'RunApp'
+    input = 'lid_driven_stabilized.i'
+    expect_out = 'Aborting as solve did not converge'
+    cli_args = 'GlobalParams/alpha=0 Outputs/exodus=false'
+    method = 'OPT'
+  [../]
+[]

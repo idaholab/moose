@@ -18,7 +18,7 @@
 
 class VarCouplingMaterial;
 
-template<>
+template <>
 InputParameters validParams<VarCouplingMaterial>();
 
 /**
@@ -31,11 +31,13 @@ public:
 
 protected:
   virtual void computeQpProperties();
+  virtual void initQpStatefulProperties();
 
-  VariableValue & _var;
+  const VariableValue & _var;
   Real _base;
   Real _coef;
   MaterialProperty<Real> & _diffusion;
+  const MaterialProperty<Real> * const _diffusion_old;
 };
 
-#endif //VARCOUPLINGMATERIAL_H
+#endif // VARCOUPLINGMATERIAL_H

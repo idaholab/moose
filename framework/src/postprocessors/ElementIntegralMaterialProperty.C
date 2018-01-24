@@ -14,22 +14,22 @@
 
 #include "ElementIntegralMaterialProperty.h"
 
-template<>
-InputParameters validParams<ElementIntegralMaterialProperty>()
+template <>
+InputParameters
+validParams<ElementIntegralMaterialProperty>()
 {
   InputParameters params = validParams<ElementIntegralPostprocessor>();
   params.addRequiredParam<MaterialPropertyName>("mat_prop", "The name of the material property");
   return params;
 }
 
-ElementIntegralMaterialProperty::ElementIntegralMaterialProperty(const InputParameters & parameters) :
-    ElementIntegralPostprocessor(parameters),
-    _scalar(getMaterialProperty<Real>("mat_prop"))
-{}
+ElementIntegralMaterialProperty::ElementIntegralMaterialProperty(const InputParameters & parameters)
+  : ElementIntegralPostprocessor(parameters), _scalar(getMaterialProperty<Real>("mat_prop"))
+{
+}
 
 Real
 ElementIntegralMaterialProperty::computeQpIntegral()
 {
   return _scalar[_qp];
 }
-

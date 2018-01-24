@@ -10,6 +10,18 @@
     type = CSVDiff
     input = 'csv_transient.i'
     csvdiff = 'csv_transient_out.csv'
+    # The SumNodalValuesAux postprocessor currently is unreliable at
+    # high processor counts; see
+    # https://github.com/idaholab/moose/issues/9026
+    max_parallel = 1
+  [../]
+  [./no_time]
+    # Tests output of postprocessors and scalars to CSV files for transient propblems without a time column
+    type = CSVDiff
+    input = 'csv_no_time.i'
+    csvdiff = 'csv_no_time_out.csv'
+    # SumNodalValuesAux is unreliable at high processor counts
+    max_parallel = 1
   [../]
   [./transient_exodus]
     # Tests output of postprocessors and scalars to Exodus files for transient propblems
@@ -18,6 +30,7 @@
     exodiff = 'csv_transient_out.e'
     cli_args = 'Outputs/csv=false Outputs/exodus=true'
     prereq = transient
+    max_parallel = 1
   [../]
   [./restart_part1]
     # First part of CSV restart test, CSV files should not append
@@ -45,5 +58,12 @@
     type = CSVDiff
     input = csv_align.i
     csvdiff = 'csv_align_out.csv'
+  [../]
+  [./sort]
+    # Tests that csv output can be sorted
+    type = CheckFiles
+    input = 'csv_sort.i'
+    check_files = csv_sort_out.csv
+    file_expect_out = "time,aux0_0,aux0_1,aux1,aux2,num_aux,num_vars"
   [../]
 []

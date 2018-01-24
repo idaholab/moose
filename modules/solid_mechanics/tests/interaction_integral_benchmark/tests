@@ -1,9 +1,0 @@
-[Tests]
- [./test]
-   type = 'Exodiff'
-   input = 'input.i'
-   exodiff = '360degree_model_out.e'
-   abs_zero = 1e-7
-   max_parallel = 1           # nl_its and lin_its will not be the same in parallel and serial
- [../]
-[]

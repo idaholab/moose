@@ -18,10 +18,10 @@
 // MOOSE includes
 #include "Control.h"
 
-// Forward declerations
+// Forward declarations
 class TestControl;
 
-template<>
+template <>
 InputParameters validParams<TestControl>();
 
 /**
@@ -34,20 +34,12 @@ public:
   virtual ~TestControl(){};
   virtual void execute();
 
-  ///@{
-  /**
-   * These methods are left intentionally empty
-   */
-  virtual void initialize(){}
-  virtual void finalize(){}
-  virtual void threadJoin(const UserObject & /*uo*/){}
-  ///@}
-
 private:
-
   /// The type of test to perform
   MooseEnum _test_type;
 
+  /// Storage for the alias test
+  const MooseObjectParameterName _alias;
 };
 
-#endif //TESTCONTROL_H
+#endif // TESTCONTROL_H

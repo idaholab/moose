@@ -14,21 +14,21 @@
 
 #include "LayeredIntegral.h"
 
-// libmesh includes
 #include "libmesh/mesh_tools.h"
 
-template<>
-InputParameters validParams<LayeredIntegral>()
+template <>
+InputParameters
+validParams<LayeredIntegral>()
 {
   InputParameters params = validParams<ElementIntegralVariableUserObject>();
   params += validParams<LayeredBase>();
   return params;
 }
 
-LayeredIntegral::LayeredIntegral(const InputParameters & parameters) :
-    ElementIntegralVariableUserObject(parameters),
-    LayeredBase(parameters)
-{}
+LayeredIntegral::LayeredIntegral(const InputParameters & parameters)
+  : ElementIntegralVariableUserObject(parameters), LayeredBase(parameters)
+{
+}
 
 void
 LayeredIntegral::initialize()
@@ -59,4 +59,3 @@ LayeredIntegral::threadJoin(const UserObject & y)
   ElementIntegralVariableUserObject::threadJoin(y);
   LayeredBase::threadJoin(y);
 }
-

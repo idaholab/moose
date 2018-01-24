@@ -12,24 +12,30 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
+// MOOSE includes
 #include "NumVars.h"
+
+#include "AuxiliarySystem.h"
+#include "NonlinearSystemBase.h"
 #include "SubProblem.h"
 
-template<>
-InputParameters validParams<NumVars>()
+template <>
+InputParameters
+validParams<NumVars>()
 {
   InputParameters params = validParams<GeneralPostprocessor>();
 
   MooseEnum system_options("nonlinear auxiliary", "nonlinear");
-  params.addParam<MooseEnum>("system", system_options, "The system for which you want to print the number of variables.");
+  params.addParam<MooseEnum>(
+      "system", system_options, "The system for which you want to print the number of variables.");
 
   return params;
 }
 
-NumVars::NumVars(const InputParameters & parameters) :
-    GeneralPostprocessor(parameters),
-    _system(getParam<MooseEnum>("system"))
-{}
+NumVars::NumVars(const InputParameters & parameters)
+  : GeneralPostprocessor(parameters), _system(getParam<MooseEnum>("system"))
+{
+}
 
 Real
 NumVars::getValue()
@@ -37,11 +43,10 @@ NumVars::getValue()
   switch (_system)
   {
     case 0:
-      return _fe_problem.getNonlinearSystem().sys().n_vars();
+      return _fe_problem.getNonlinearSystemBase().system().n_vars();
     case 1:
       return _fe_problem.getAuxiliarySystem().sys().n_vars();
   }
 
   mooseError("Unknown system type!");
 }
-

@@ -1,0 +1,8 @@
+[Tests]
+  [./timer]
+    type = RunApp
+    command = timer.py
+    expect_out = 'Timer quit cleanly 3'
+    display_required = True
+  [../]
+[]

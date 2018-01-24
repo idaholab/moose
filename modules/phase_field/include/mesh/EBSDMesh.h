@@ -9,9 +9,11 @@
 
 #include "GeneratedMesh.h"
 
+#include <array>
+
 class EBSDMesh;
 
-template<>
+template <>
 InputParameters validParams<EBSDMesh>();
 
 /**
@@ -25,15 +27,16 @@ public:
 
   virtual void buildMesh();
 
-  struct EBSDMeshGeometry {
+  struct EBSDMeshGeometry
+  {
     // grid spacing
-    Real d[3];
+    std::array<Real, 3> d;
     // grid origin
-    Real min[3];
+    std::array<Real, 3> min;
     // mesh dimension
     unsigned int dim;
     // grid size
-    unsigned int n[3];
+    std::array<unsigned int, 3> n;
   };
 
   // Interface functions for the EBSDReader
@@ -51,4 +54,4 @@ protected:
   EBSDMeshGeometry _geometry;
 };
 
-#endif //EBSDMESH_H
+#endif // EBSDMESH_H

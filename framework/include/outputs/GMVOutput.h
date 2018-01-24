@@ -16,44 +16,39 @@
 #define GMVOUTPUT_H
 
 // MOOSE includes
-#include "BasicOutput.h"
 #include "OversampleOutput.h"
 
 // Forward declarations
 class GMVOutput;
 
-template<>
+template <>
 InputParameters validParams<GMVOutput>();
 
 /**
  * Class for output data to the GMVOutputII format
  */
-class GMVOutput :
-  public BasicOutput<OversampleOutput>
+class GMVOutput : public OversampleOutput
 {
 public:
-
   /**
    * Class constructor
    */
   GMVOutput(const InputParameters & parameters);
 
 protected:
-
   /**
    * Overload the Output::output method, this is required for GMVOutput
    * output due to the method utilized for outputing
    */
-  virtual void output(const ExecFlagType & type);
+  virtual void output(const ExecFlagType & type) override;
 
   /**
    * Returns the current filename, this method handles adding the timestep suffix
    * @return A string containing the current filename to be written
    */
-  std::string filename();
+  virtual std::string filename() override;
 
 private:
-
   /// Flag for binary output
   bool _binary;
 };

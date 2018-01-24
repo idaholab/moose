@@ -5,7 +5,6 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-
 #ifndef RICHARDSHALFGAUSSIANSINK
 #define RICHARDSHALFGAUSSIANSINK
 
@@ -15,7 +14,7 @@
 // Forward Declarations
 class RichardsHalfGaussianSink;
 
-template<>
+template <>
 InputParameters validParams<RichardsHalfGaussianSink>();
 
 /**
@@ -66,10 +65,10 @@ protected:
   unsigned int _pvar;
 
   /// porepressure (or porepressure vector for multiphase problems)
-  const MaterialProperty<std::vector<Real> > & _pp;
+  const MaterialProperty<std::vector<Real>> & _pp;
 
   /// d(porepressure_i)/dvariable_j
-  const MaterialProperty<std::vector<std::vector<Real> > > & _dpp_dv;
+  const MaterialProperty<std::vector<std::vector<Real>>> & _dpp_dv;
 };
 
-#endif //RICHARDSHALFGAUSSIANSINK
+#endif // RICHARDSHALFGAUSSIANSINK

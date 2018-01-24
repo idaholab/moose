@@ -4,8 +4,6 @@
 []
 
 [Variables]
-  active = 'convected diffused'
-
   [./convected]
     order = FIRST
     family = LAGRANGE
@@ -18,8 +16,6 @@
 []
 
 [Kernels]
-  active = 'example_diff conv diff euler'
-
   [./example_diff]
     type = ExampleDiffusion
     variable = convected
@@ -43,8 +39,6 @@
 []
 
 [BCs]
-  active = 'left_convected right_convected left_diffused right_diffused'
-
   [./left_convected]
     type = DirichletBC
     variable = convected
@@ -72,12 +66,9 @@
     boundary = 'right'
     value = 1
   [../]
-
 []
 
 [Materials]
-  active = 'example'
-
   [./example]
     type = ExampleMaterial
     block = 1
@@ -89,7 +80,7 @@
 [Executioner]
   type = Transient
   solve_type = 'PJFNK'
-  num_steps = 40
+  num_steps = 12
 
   # Use our custom TimeStepper
   [./TimeStepper]
@@ -101,5 +92,6 @@
 []
 
 [Outputs]
+  execute_on = 'timestep_end'
   exodus = true
 []

@@ -15,51 +15,23 @@
 #include "Problem.h"
 #include "Factory.h"
 #include "Function.h"
-#include "TimePeriod.h"
 
-template<>
-InputParameters validParams<Problem>()
+template <>
+InputParameters
+validParams<Problem>()
 {
   InputParameters params;
+  params += validParams<MooseObject>();
   params.registerBase("Problem");
   return params;
 }
 
-Problem::Problem(const InputParameters & parameters) :
-    MooseObject(parameters),
+Problem::Problem(const InputParameters & parameters)
+  : MooseObject(parameters),
     _cli_option_found(false),
     _color_output(false),
     _termination_requested(false)
 {
 }
 
-Problem::~Problem()
-{
-  for (unsigned int i=0; i<_time_periods.size(); ++i)
-    delete _time_periods[i];
-}
-
-TimePeriod &
-Problem::addTimePeriod(const std::string & name, Real start_time)
-{
-  TimePeriod * tp = new TimePeriod(name, start_time);
-  _time_periods.push_back(tp);
-
-  return *tp;
-}
-
-TimePeriod *
-Problem::getTimePeriodByName(const std::string & name)
-{
-  for (unsigned int i=0; i<_time_periods.size(); ++i)
-    if (_time_periods[i]->name() == name)
-      return _time_periods[i];
-  return NULL;
-}
-
-const std::vector<TimePeriod *> &
-Problem::getTimePeriods() const
-{
-  return _time_periods;
-}
-
+Problem::~Problem() {}

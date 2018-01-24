@@ -15,31 +15,34 @@
 #ifndef ELEMENTINTEGRALUSEROBJECT_H
 #define ELEMENTINTEGRALUSEROBJECT_H
 
-#include "ElementPostprocessor.h"
+// MOOSE includes
+#include "ElementUserObject.h"
 
-//Forward Declarations
+// Forward Declarations
 class ElementIntegralUserObject;
 
-template<>
+template <>
 InputParameters validParams<ElementIntegralUserObject>();
 
 /**
- * This postprocessor computes a volume integral of the specified variable.
+ * This postprocessor computes a volume integral of the specified
+ * variable.
  *
- * Note that specializations of this integral are possible by deriving from this
- * class and overriding computeQpIntegral().
+ * Note that specializations of this integral are possible by deriving
+ * from this class and overriding computeQpIntegral().
  */
 class ElementIntegralUserObject : public ElementUserObject
 {
 public:
   ElementIntegralUserObject(const InputParameters & parameters);
 
-  virtual void initialize();
-  virtual void execute();
-  virtual void threadJoin(const UserObject & y);
-  virtual Real getValue();
+  virtual void initialize() override;
+  virtual void execute() override;
+  virtual void threadJoin(const UserObject & y) override;
+  virtual void finalize() override {}
 
-  virtual void finalize(){}
+  /// Returns the integral value
+  virtual Real getValue();
 
 protected:
   virtual Real computeQpIntegral() = 0;

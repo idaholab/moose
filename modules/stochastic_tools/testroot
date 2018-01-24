@@ -1,0 +1,2 @@
+app_name = stochastic_tools
+cli_args = '--error'

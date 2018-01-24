@@ -4,8 +4,8 @@
 [Mesh]
   file = elem_part1_out.e
   # This problem uses ExodusII_IO::copy_elemental_solution(), which only
-  # works with SerialMesh
-  distribution = serial
+  # works with ReplicatedMesh
+  parallel_type = replicated
 []
 
 [Functions]
@@ -50,7 +50,7 @@
   [../]
 
   [./ffn]
-    type = UserForcingFunction
+    type = BodyForce
     variable = u
     function = forcing_fn
   [../]

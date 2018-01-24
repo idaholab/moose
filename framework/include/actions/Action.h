@@ -25,12 +25,12 @@ class Action;
 class ActionWarehouse;
 class ActionFactory;
 class MooseMesh;
-class FEProblem;
+class FEProblemBase;
 class Executioner;
 class MooseApp;
 class Factory;
 
-template<>
+template <>
 InputParameters validParams<Action>();
 
 /**
@@ -40,7 +40,8 @@ class Action : public ConsoleStreamInterface
 {
 public:
   Action(InputParameters parameters);
-  virtual ~Action() {}                  // empty virtual destructor for proper memory release
+
+  virtual ~Action() {}
 
   virtual void act() = 0;
 
@@ -76,13 +77,21 @@ public:
   const T & getParam(const std::string & name) const;
   ///@}
 
-  inline bool isParamValid(const std::string &name) const { return _pars.isParamValid(name); }
+  /**
+   * Verifies that the requested parameter exists and is not NULL and returns it to the caller.
+   * The template parameter must be a pointer or an error will be thrown.
+   */
+  template <typename T>
+  T getCheckedPointerParam(const std::string & name, const std::string & error_string = "") const
+  {
+    return parameters().getCheckedPointerParam<T>(name, error_string);
+  }
+
+  inline bool isParamValid(const std::string & name) const { return _pars.isParamValid(name); }
 
   void appendTask(const std::string & task) { _all_tasks.insert(task); }
 
-
 protected:
-
   /// Input parameters for the action
   InputParameters _pars;
 
@@ -125,15 +134,14 @@ protected:
   /// The current action (even though we have seperate instances for each action)
   const std::string & _current_task;
 
-  MooseSharedPointer<MooseMesh> & _mesh;
-  MooseSharedPointer<MooseMesh> & _displaced_mesh;
+  std::shared_ptr<MooseMesh> & _mesh;
+  std::shared_ptr<MooseMesh> & _displaced_mesh;
 
   /// Convenience reference to a problem this action works on
-  MooseSharedPointer<FEProblem> & _problem;
+  std::shared_ptr<FEProblemBase> & _problem;
 
   /// Convenience reference to an executioner
-  MooseSharedPointer<Executioner> & _executioner;
-
+  std::shared_ptr<Executioner> & _executioner;
 };
 
 template <typename T>

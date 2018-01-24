@@ -9,34 +9,51 @@
 
 #include "AuxKernel.h"
 
-//Forward Declarations
 class KineticDisPreRateAux;
 
-template<>
+template <>
 InputParameters validParams<KineticDisPreRateAux>();
 
 /**
- * Coupled auxiliary value
+ * Calculate the kinetic mineral species kinetic rate according to transient
+ * state theory rate law
  */
 class KineticDisPreRateAux : public AuxKernel
 {
 public:
-
-  /**
-   * Factory constructor, takes parameters so that all derived classes can be built using the same
-   * constructor.
-   */
   KineticDisPreRateAux(const InputParameters & parameters);
 
   virtual ~KineticDisPreRateAux() {}
 
 protected:
-  virtual Real computeValue();
+  virtual Real computeValue() override;
 
-  Real _log_k,_r_area,_ref_kconst,_e_act,_gas_const,_ref_temp,_sys_temp;
-  std::vector<Real> _sto_v;
+  /// Equilibrium constant at reference temperature
+  const Real _log_k;
 
-  std::vector<VariableValue *> _vals;
+  /// Specific reactive surface area, m^2/L solution
+  const Real _r_area;
+
+  /// Reference kinetic rate constant
+  const Real _ref_kconst;
+
+  /// Activation energy
+  const Real _e_act;
+
+  /// Gas constant, 8.314 J/mol/K
+  const Real _gas_const;
+
+  /// Reference temperature
+  const Real _ref_temp;
+
+  /// Actual system temperature
+  const VariableValue & _sys_temp;
+
+  /// Stoichiometric coefficients for involved primary species
+  const std::vector<Real> _sto_v;
+
+  /// Coupled primary species concentrations
+  std::vector<const VariableValue *> _vals;
 };
 
-#endif //KINETICDISPRERATEAUX_H
+#endif // KINETICDISPRERATEAUX_H

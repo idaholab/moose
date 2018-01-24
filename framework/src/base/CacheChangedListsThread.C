@@ -15,25 +15,24 @@
 
 #include "libmesh/elem.h"
 
-CacheChangedListsThread::CacheChangedListsThread(MooseMesh & mesh) :
-    ThreadedElementLoopBase<ConstElemRange>(mesh)
+CacheChangedListsThread::CacheChangedListsThread(MooseMesh & mesh)
+  : ThreadedElementLoopBase<ConstElemRange>(mesh)
 {
 }
 
 // Splitting Constructor
-CacheChangedListsThread::CacheChangedListsThread(CacheChangedListsThread & x, Threads::split split) :
-    ThreadedElementLoopBase<ConstElemRange>(x, split)
+CacheChangedListsThread::CacheChangedListsThread(CacheChangedListsThread & x, Threads::split split)
+  : ThreadedElementLoopBase<ConstElemRange>(x, split)
 {
 }
 
-CacheChangedListsThread::~CacheChangedListsThread()
-{
-}
+CacheChangedListsThread::~CacheChangedListsThread() {}
 
 void
-CacheChangedListsThread::onElement(const Elem *elem)
+CacheChangedListsThread::onElement(const Elem * elem)
 {
-  if (elem->refinement_flag() == Elem::INACTIVE && elem->has_children() && elem->child(0)->refinement_flag() == Elem::JUST_REFINED)
+  if (elem->refinement_flag() == Elem::INACTIVE && elem->has_children() &&
+      elem->child(0)->refinement_flag() == Elem::JUST_REFINED)
     _refined_elements.push_back(elem);
 
   if (elem->refinement_flag() == Elem::JUST_COARSENED)
@@ -44,7 +43,7 @@ CacheChangedListsThread::onElement(const Elem *elem)
 
       std::vector<const Elem *> & children = _coarsened_element_children[elem];
 
-      for (unsigned int child=0; child < elem->n_children(); child++)
+      for (unsigned int child = 0; child < elem->n_children(); child++)
         children.push_back(elem->child(child));
     }
   }
@@ -53,7 +52,10 @@ CacheChangedListsThread::onElement(const Elem *elem)
 void
 CacheChangedListsThread::join(const CacheChangedListsThread & y)
 {
-  _refined_elements.insert(_refined_elements.end(), y._refined_elements.begin(), y._refined_elements.end());
-  _coarsened_elements.insert(_coarsened_elements.end(), y._coarsened_elements.begin(), y._coarsened_elements.end());
-  _coarsened_element_children.insert(y._coarsened_element_children.begin(), y._coarsened_element_children.end());
+  _refined_elements.insert(
+      _refined_elements.end(), y._refined_elements.begin(), y._refined_elements.end());
+  _coarsened_elements.insert(
+      _coarsened_elements.end(), y._coarsened_elements.begin(), y._coarsened_elements.end());
+  _coarsened_element_children.insert(y._coarsened_element_children.begin(),
+                                     y._coarsened_element_children.end());
 }

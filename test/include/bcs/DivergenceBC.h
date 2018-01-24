@@ -17,10 +17,9 @@
 
 #include "IntegratedBC.h"
 
-
 class DivergenceBC;
 
-template<>
+template <>
 InputParameters validParams<DivergenceBC>();
 
 /**
@@ -36,11 +35,9 @@ public:
    */
   DivergenceBC(const InputParameters & parameters);
 
-
 protected:
   virtual Real computeQpResidual();
   virtual Real computeQpJacobian();
 };
 
-
-#endif //DIVERGENCEBC_H
+#endif // DIVERGENCEBC_H

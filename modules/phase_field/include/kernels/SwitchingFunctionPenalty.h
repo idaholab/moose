@@ -13,7 +13,7 @@
 // Forward Declarations
 class SwitchingFunctionPenalty;
 
-template<>
+template <>
 InputParameters validParams<SwitchingFunctionPenalty>();
 
 /**
@@ -52,4 +52,4 @@ protected:
   int _a;
 };
 
-#endif //SWITCHINGFUNCTIONPENALTY_H
+#endif // SWITCHINGFUNCTIONPENALTY_H

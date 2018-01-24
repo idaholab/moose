@@ -2,13 +2,20 @@
   [./input_file]
     type = 'RunException'
     input = 'check_error.i'
-    expect_err = 'The following required'
+    expect_err = 'missing required parameter'
+  [../]
+
+  [./unused_subapp_param]
+    type = 'RunException'
+    input = 'check_error.i'
+    cli_args = 'MultiApps/multi/input_files="sub_unused.i"'
+    expect_err = 'unused parameter'
   [../]
 
   [./positions]
     type = 'RunException'
     input = 'check_error.i'
-    expect_err = 'Must supply either \'positions\' or \'positions_file\''
+    expect_err = 'Not enough positions for the number of input files'
     cli_args = 'MultiApps/multi/input_files="sub1.i sub2.i"'
   [../]
 
@@ -37,6 +44,13 @@
     type = 'RunException'
     input = 'check_error.i'
     expect_err = 'Number of entries in \'positions_file\''
-    cli_args = 'MultiApps/multi/input_files="sub1.i" MultiApps/multi/positions_file="bad_positions"'
+    cli_args = 'MultiApps/multi/input_files="sub1.i" MultiApps/multi/positions_file="bad_positions.txt"'
+  [../]
+
+  [./sub_cycling_and_catch_up]
+    type = 'RunException'
+    input = 'check_error.i'
+    expect_err = 'sub_cycling and catch_up cannot both be set to true'
+    cli_args = 'MultiApps/multi/input_files="sub1.i" MultiApps/multi/positions="0 1 0" MultiApps/multi/sub_cycling=true MultiApps/multi/catch_up=true'
   [../]
 []

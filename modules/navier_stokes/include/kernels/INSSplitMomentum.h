@@ -12,7 +12,7 @@
 // Forward Declarations
 class INSSplitMomentum;
 
-template<>
+template <>
 InputParameters validParams<INSSplitMomentum>();
 
 /**
@@ -30,7 +30,7 @@ class INSSplitMomentum : public Kernel
 public:
   INSSplitMomentum(const InputParameters & parameters);
 
-  virtual ~INSSplitMomentum(){}
+  virtual ~INSSplitMomentum() {}
 
 protected:
   virtual Real computeQpResidual();
@@ -38,19 +38,19 @@ protected:
   virtual Real computeQpOffDiagJacobian(unsigned jvar);
 
   // Coupled variables
-  VariableValue& _u_vel;
-  VariableValue& _v_vel;
-  VariableValue& _w_vel;
+  const VariableValue & _u_vel;
+  const VariableValue & _v_vel;
+  const VariableValue & _w_vel;
 
   // Acceleration vector components
-  VariableValue& _a1;
-  VariableValue& _a2;
-  VariableValue& _a3;
+  const VariableValue & _a1;
+  const VariableValue & _a2;
+  const VariableValue & _a3;
 
   // Gradients
-  VariableGradient& _grad_u_vel;
-  VariableGradient& _grad_v_vel;
-  VariableGradient& _grad_w_vel;
+  const VariableGradient & _grad_u_vel;
+  const VariableGradient & _grad_v_vel;
+  const VariableGradient & _grad_w_vel;
 
   // Variable numberings
   unsigned _u_vel_var_number;
@@ -61,14 +61,13 @@ protected:
   unsigned _a2_var_number;
   unsigned _a3_var_number;
 
-  // Material properties
-  Real _mu;
-  Real _rho;
-  RealVectorValue _gravity;
-
   // Parameters
+  RealVectorValue _gravity;
   unsigned _component;
-};
 
+  // Material properties
+  const MaterialProperty<Real> & _mu;
+  const MaterialProperty<Real> & _rho;
+};
 
 #endif // INSSPLITMOMENTUM_H

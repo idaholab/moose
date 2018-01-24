@@ -18,9 +18,9 @@
 #include "MooseTypes.h"
 #include "MooseArray.h"
 
-// libMesh includes
 #include "libmesh/tensor_value.h"
 #include "libmesh/vector_value.h"
+#include "libmesh/fe_type.h"
 
 // libMesh forward declarations
 namespace libMesh
@@ -29,27 +29,31 @@ class DofMap;
 class Variable;
 }
 
-typedef MooseArray<Real>               VariableValue;
-typedef MooseArray<RealGradient>       VariableGradient;
-typedef MooseArray<RealTensor>         VariableSecond;
+typedef MooseArray<Real> VariableValue;
+typedef MooseArray<RealGradient> VariableGradient;
+typedef MooseArray<RealTensor> VariableSecond;
 
-typedef MooseArray<std::vector<Real> >         VariableTestValue;
-typedef MooseArray<std::vector<RealGradient> > VariableTestGradient;
-typedef MooseArray<std::vector<RealTensor> >   VariableTestSecond;
+typedef MooseArray<std::vector<Real>> VariableTestValue;
+typedef MooseArray<std::vector<RealGradient>> VariableTestGradient;
+typedef MooseArray<std::vector<RealTensor>> VariableTestSecond;
 
-typedef MooseArray<std::vector<Real> >         VariablePhiValue;
-typedef MooseArray<std::vector<RealGradient> > VariablePhiGradient;
-typedef MooseArray<std::vector<RealTensor> >   VariablePhiSecond;
+typedef MooseArray<std::vector<Real>> VariablePhiValue;
+typedef MooseArray<std::vector<RealGradient>> VariablePhiGradient;
+typedef MooseArray<std::vector<RealTensor>> VariablePhiSecond;
 
 class Assembly;
 class SubProblem;
 class SystemBase;
-
+class MooseMesh;
 
 class MooseVariableBase
 {
 public:
-  MooseVariableBase(unsigned int var_num, SystemBase & sys, Assembly & assembly, Moose::VarKindType var_kind);
+  MooseVariableBase(unsigned int var_num,
+                    const FEType & fe_type,
+                    SystemBase & sys,
+                    Assembly & assembly,
+                    Moose::VarKindType var_kind);
   virtual ~MooseVariableBase();
 
   /**
@@ -59,14 +63,25 @@ public:
   unsigned int number() const { return _var_num; }
 
   /**
+   * Get the type of finite element object
+   */
+  const FEType & feType() const { return _fe_type; }
+
+  /**
    * Get the system this variable is part of.
    */
   SystemBase & sys() { return _sys; }
 
   /**
-   * Get the variable number
+   * Get the variable name
    */
   const std::string & name() const;
+
+  /**
+   * Get all global dofindices for the variable
+   */
+  const std::vector<dof_id_type> & allDofIndices() const;
+  unsigned int totalVarDofs() { return allDofIndices().size(); }
 
   /**
    * Kind of the variable (Nonlinear, Auxiliary, ...)
@@ -85,15 +100,18 @@ public:
 
   /**
    * Get the order of this variable
+   * Note: Order enum can be implicitly converted to unsigned int.
    */
-  unsigned int order() const;
+  Order order() const;
 
   /**
    * The DofMap associated with the system this variable is in.
    */
-  const DofMap & dofMap() { return _dof_map; }
+  const DofMap & dofMap() const { return _dof_map; }
 
   std::vector<dof_id_type> & dofIndices() { return _dof_indices; }
+
+  const std::vector<dof_id_type> & dofIndices() const { return _dof_indices; }
 
   unsigned int numberOfDofs() { return _dof_indices.size(); }
 
@@ -106,6 +124,8 @@ public:
 protected:
   /// variable number (from libMesh)
   unsigned int _var_num;
+  /// The FEType associated with this variable
+  FEType _fe_type;
   /// variable number within MOOSE
   unsigned int _index;
   Moose::VarKindType _var_kind;
@@ -123,6 +143,9 @@ protected:
   const DofMap & _dof_map;
   /// DOF indices
   std::vector<dof_id_type> _dof_indices;
+
+  /// mesh the variable is active in
+  MooseMesh & _mesh;
 
   /// scaling factor for this variable
   Real _scaling_factor;

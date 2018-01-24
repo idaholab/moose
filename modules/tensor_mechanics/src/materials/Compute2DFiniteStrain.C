@@ -7,83 +7,83 @@
 
 #include "Compute2DFiniteStrain.h"
 
-// libmesh includes
 #include "libmesh/quadrature.h"
 
-template<>
-InputParameters validParams<Compute2DFiniteStrain>()
+template <>
+InputParameters
+validParams<Compute2DFiniteStrain>()
 {
   InputParameters params = validParams<ComputeFiniteStrain>();
-  params.addClassDescription("Compute a strain increment and rotation increment for finite strains in 2D geometries.");
+  params.addClassDescription(
+      "Compute a strain increment and rotation increment for finite strains in 2D geometries.");
   return params;
 }
 
-Compute2DFiniteStrain::Compute2DFiniteStrain(const InputParameters & parameters) :
-    ComputeFiniteStrain(parameters)
+Compute2DFiniteStrain::Compute2DFiniteStrain(const InputParameters & parameters)
+  : ComputeFiniteStrain(parameters)
 {
 }
 
 void
 Compute2DFiniteStrain::computeProperties()
 {
-  //Method from Rashid, 1993
-  std::vector<RankTwoTensor> Fhat;
-  Fhat.resize(_qrule->n_points());
   RankTwoTensor ave_Fhat;
-  Real volume(0);
-  Real ave_dfgrd_det;
-
-  ave_dfgrd_det=0.0;
+  Real ave_dfgrd_det = 0.0;
 
   for (_qp = 0; _qp < _qrule->n_points(); ++_qp)
   {
-    //Deformation gradient calculation in cylinderical coordinates
-    RankTwoTensor A; //Deformation gradient
-    RankTwoTensor Fbar; //Old Deformation gradient
-    A.zero();
-    Fbar.zero();
+    // Deformation gradient calculation for 2D problems
+    // Note: x_disp is the radial displacement, y_disp is the axial displacement
+    RankTwoTensor A((*_grad_disp[0])[_qp],
+                    (*_grad_disp[1])[_qp],
+                    (*_grad_disp[2])[_qp]); // Deformation gradient
+    RankTwoTensor Fbar((*_grad_disp_old[0])[_qp],
+                       (*_grad_disp_old[1])[_qp],
+                       (*_grad_disp_old[2])[_qp]); // Old Deformation gradient
 
-    //Step through calculating the current and old deformation gradients
-    //  Note: x_disp is the radial displacement, y_disp is the axial displacement
-    for ( unsigned int j = 0; j < 2; ++j)
-    {
-      A(0,j) = (*_grad_disp[0])[_qp](j);
-      Fbar(0,j) = (*_grad_disp_old[0])[_qp](j);
-      A(1,j) = (*_grad_disp[1])[_qp](j);
-      Fbar(1,j) = (*_grad_disp_old[1])[_qp](j);
-    }
-    A(2,2) = computeDeformGradZZ();
-    Fbar(2,2) = computeDeformGradZZold();
+    // Compute the displacement gradient (2,2) value for plane strain, generalized plane strain, or
+    // axisymmetric problems
+    A(2, 2) = computeGradDispZZ();
+    Fbar(2, 2) = computeGradDispZZOld();
 
+    // Gauss point deformation gradient
     _deformation_gradient[_qp] = A;
-    _deformation_gradient[_qp].addIa(1.0);//Gauss point deformation gradient
+    _deformation_gradient[_qp].addIa(1.0);
 
-    A -= Fbar; //very nearly A = gradU - gradUold, adapted to cylinderical coords
+    A -= Fbar; // very nearly A = gradU - gradUold, adapted to cylindrical coords
 
-    Fbar.addIa(1.0); //Fbar = ( I + gradUold)
+    Fbar.addIa(1.0); // Fbar = ( I + gradUold)
 
-    //Incremental deformation gradient Fhat = I + A Fbar^-1
-    Fhat[_qp] = A * Fbar.inverse();
-    Fhat[_qp].addIa(1.0);
+    // Incremental deformation gradient _Fhat = I + A Fbar^-1
+    _Fhat[_qp] = A * Fbar.inverse();
+    _Fhat[_qp].addIa(1.0);
 
-    //Calculate average Fhat for volumetric locking correction
-    ave_Fhat += Fhat[_qp] * _JxW[_qp];
-    volume += _JxW[_qp];
+    if (_volumetric_locking_correction)
+    {
+      // Calculate average _Fhat for volumetric locking correction
+      ave_Fhat += _Fhat[_qp] * _JxW[_qp] * _coord[_qp];
 
-    ave_dfgrd_det += _deformation_gradient[_qp].det() * _JxW[_qp]; //Average deformation gradient
+      // Average deformation gradient
+      ave_dfgrd_det += _deformation_gradient[_qp].det() * _JxW[_qp] * _coord[_qp];
+    }
   }
-
-  ave_Fhat /= volume; //This is needed for volumetric locking correction
-  ave_dfgrd_det /=volume; //Average deformation gradient
-
+  if (_volumetric_locking_correction)
+  {
+    // needed for volumetric locking correction
+    ave_Fhat /= _current_elem_volume;
+    // average deformation gradient
+    ave_dfgrd_det /= _current_elem_volume;
+  }
   for (_qp = 0; _qp < _qrule->n_points(); ++_qp)
   {
-    Real factor( std::pow( ave_Fhat.det() / Fhat[_qp].det(), 1.0/3.0));
-    Fhat[_qp] *= factor; //Finalize volumetric locking correction
+    if (_volumetric_locking_correction)
+    {
+      // Finalize volumetric locking correction
+      _Fhat[_qp] *= std::cbrt(ave_Fhat.det() / _Fhat[_qp].det());
+      // Volumetric locking correction
+      _deformation_gradient[_qp] *= std::cbrt(ave_dfgrd_det / _deformation_gradient[_qp].det());
+    }
 
-    computeQpStrain(Fhat[_qp]);
-
-    factor = std::pow(ave_dfgrd_det / _deformation_gradient[_qp].det(), 1.0/3.0);//Volumetric locking correction
-    _deformation_gradient[_qp] *= factor;//Volumetric locking correction
+    computeQpStrain();
   }
 }

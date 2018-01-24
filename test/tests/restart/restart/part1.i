@@ -10,7 +10,7 @@
   ymax = 1
   nx = 20
   ny = 20
-  distribution = serial
+  parallel_type = replicated
 []
 
 [Functions]
@@ -48,7 +48,7 @@
   [../]
 
   [./ffn]
-    type = UserForcingFunction
+    type = BodyForce
     variable = u
     function = forcing_fn
   [../]

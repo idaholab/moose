@@ -10,10 +10,10 @@
 #include "Material.h"
 #include "DerivativeMaterialInterface.h"
 
-//Forward Declarations
+// Forward Declarations
 class ForceDensityMaterial;
 
-template<>
+template <>
 InputParameters validParams<ForceDensityMaterial>();
 
 /**
@@ -30,7 +30,7 @@ protected:
 
 private:
   /// concentration field considered to be the density of particles
-  VariableValue & _c;
+  const VariableValue & _c;
   VariableName _c_name;
   /// equilibrium density at the grain boundaries
   Real _ceq;
@@ -39,9 +39,10 @@ private:
   /// stiffness constant
   Real _k;
 
-  unsigned int _ncrys;
-  std::vector<VariableValue *> _vals;
-  std::vector<VariableGradient *> _grad_vals;
+  unsigned int _op_num;
+  std::vector<const VariableValue *> _vals;
+  std::vector<const VariableGradient *> _grad_vals;
+  std::vector<VariableName> _vals_name;
 
   std::vector<Real> _product_etas;
   std::vector<RealGradient> _sum_grad_etas;
@@ -50,9 +51,11 @@ private:
   std::string _base_name;
 
   /// force density material
-  MaterialProperty<std::vector<RealGradient> > & _dF;
+  MaterialProperty<std::vector<RealGradient>> & _dF;
   /// first order derivative of force density material w.r.t c
-  MaterialProperty<std::vector<RealGradient> > & _dFdc;
+  MaterialProperty<std::vector<RealGradient>> & _dFdc;
+  /// first order derivative of force density material w.r.t etas
+  std::vector<MaterialProperty<std::vector<Real>> *> _dFdgradeta;
 };
 
-#endif //FORCEDENSITYMATERIAL_H
+#endif // FORCEDENSITYMATERIAL_H

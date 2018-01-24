@@ -20,23 +20,23 @@
 // Forward Declarations
 class InversePowerMethod;
 
-template<>
+template <>
 InputParameters validParams<InversePowerMethod>();
 
 class InversePowerMethod : public EigenExecutionerBase
 {
 public:
-
   InversePowerMethod(const InputParameters & parameters);
 
-  virtual void init();
-  virtual void execute();
+  virtual void init() override;
+
+  virtual void execute() override;
 
 protected:
   virtual void takeStep();
 
   /// name of the postprocessor for evaluating |x-xprevious|; empty means that no postprocessor is provided and power iteration will not check convergence based on it
-  std::string _solution_diff_name;
+  const PostprocessorName & _solution_diff_name;
   /// postprocessor for evaluating |x-xprevious|
   const PostprocessorValue * _solution_diff;
   /// minimum number of power iterations
@@ -53,4 +53,4 @@ protected:
   const bool & _cheb_on;
 };
 
-#endif //INVERSEPOWERMETHOD_H
+#endif // INVERSEPOWERMETHOD_H

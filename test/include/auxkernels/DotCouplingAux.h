@@ -19,7 +19,7 @@
 
 class DotCouplingAux;
 
-template<>
+template <>
 InputParameters validParams<DotCouplingAux>();
 
 /**
@@ -34,7 +34,7 @@ public:
 protected:
   virtual Real computeValue();
 
-  VariableValue & _v_dot;
+  const VariableValue & _v_dot;
 };
 
 #endif /* DOTCOUPLINGAUX_H */

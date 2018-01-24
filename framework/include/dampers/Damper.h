@@ -18,80 +18,41 @@
 // Moose Includes
 #include "MooseObject.h"
 #include "SetupInterface.h"
-#include "ParallelUniqueId.h"
-#include "MaterialPropertyInterface.h"
 #include "Restartable.h"
 #include "MeshChangedInterface.h"
-#include "MooseVariableBase.h"
 
-//Forward Declarations
+// Forward Declarations
 class Damper;
 class SubProblem;
 class SystemBase;
-class MooseVariable;
-class Assembly;
 
-template<>
+template <>
 InputParameters validParams<Damper>();
 
 /**
  * Base class for deriving dampers
- *
  */
-class Damper :
-  public MooseObject,
-  public SetupInterface,
-  protected MaterialPropertyInterface,
-  public Restartable,
-  public MeshChangedInterface
+class Damper : public MooseObject,
+               public SetupInterface,
+               public Restartable,
+               public MeshChangedInterface
 {
 public:
   Damper(const InputParameters & parameters);
 
   /**
-   * Computes this Damper's damping for one element.
+   * Check whether damping is below the user-specified minimum value,
+   * and throw an exception if it is.
+   * @param cur_damping The computed damping to be checked against that minimum
    */
-  Real computeDamping();
+  void checkMinDamping(const Real cur_damping) const;
 
 protected:
-  /**
-   * This MUST be overridden by a child damper.
-   *
-   * This is where they actually compute a number between 0 and 1.
-   */
-  virtual Real computeQpDamping() = 0;
-
   SubProblem & _subproblem;
   SystemBase & _sys;
 
-  /// Thread ID
-  THREAD_ID _tid;
-  Assembly & _assembly;
-
-  /// Coordinate system
-  const Moose::CoordinateSystemType & _coord_sys;
-
-  /// Non-linear variable this damper works on
-  MooseVariable & _var;
-
-  /// Current element
-  const Elem * & _current_elem;
-
-  /// Quadrature point index
-  unsigned int _qp;
-  /// Quadrature points
-  const MooseArray< Point > & _q_point;
-  /// Quadrature rule
-  QBase * & _qrule;
-  /// Transformed Jacobian weights
-  const MooseArray<Real> & _JxW;
-
-  /// The current Newton increment
-  VariableValue & _u_increment;
-  /// Holds the current solution at the current quadrature point
-  VariableValue & _u;
-  /// Holds the current solution gradient at the current quadrature point
-  VariableGradient & _grad_u;
+  /// Minimum allowable value of damping
+  const Real & _min_damping;
 };
 
 #endif

@@ -11,7 +11,7 @@
   [./cli_override_error_check]
     type = RunException
     input = 'dt_from_master.i'
-    expect_err = 'The following parameters were unused on the command line'
+    expect_err = "unused command line parameter 'sub_app4:BCs/right/value=10'"
 
     # Multiapp Overrides (out of range value)
     cli_args = 'sub_app4:BCs/right/value=10'

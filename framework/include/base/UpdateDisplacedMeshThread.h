@@ -15,39 +15,45 @@
 #ifndef UPDATEDISPLACEDMESHTHREAD_H
 #define UPDATEDISPLACEDMESHTHREAD_H
 
-
+// MOOSE includes
+#include "MooseMesh.h"
 #include "ThreadedNodeLoop.h"
 
 // Forward declarations
 class DisplacedProblem;
 class UpdateDisplacedMeshThread;
-class MooseMesh;
 
 // libMesh forward declarations
 namespace libMesh
 {
-template <typename T> class NumericVector;
+template <typename T>
+class NumericVector;
 }
 
-class UpdateDisplacedMeshThread : public ThreadedNodeLoop<SemiLocalNodeRange, SemiLocalNodeRange::const_iterator>
+class UpdateDisplacedMeshThread : public ThreadedNodeLoop<NodeRange, NodeRange::const_iterator>
 {
 public:
-  UpdateDisplacedMeshThread(FEProblem & fe_problem, DisplacedProblem & displaced_problem);
+  UpdateDisplacedMeshThread(FEProblemBase & fe_problem, DisplacedProblem & displaced_problem);
 
   UpdateDisplacedMeshThread(UpdateDisplacedMeshThread & x, Threads::split split);
 
-  virtual void pre();
-
-  virtual void onNode(SemiLocalNodeRange::const_iterator & nd);
+  virtual void onNode(NodeRange::const_iterator & nd) override;
 
   void join(const UpdateDisplacedMeshThread & /*y*/);
 
 protected:
+  void init();
+
   DisplacedProblem & _displaced_problem;
   MooseMesh & _ref_mesh;
   const NumericVector<Number> & _nl_soln;
   const NumericVector<Number> & _aux_soln;
 
+  // Solution vectors with expanded ghosting, for ReplicatedMesh or
+  // for DistributedMesh cases where the standard algebraic ghosting
+  // doesn't reach as far as the geometric ghosting
+  std::shared_ptr<NumericVector<Number>> _nl_ghosted_soln;
+  std::shared_ptr<NumericVector<Number>> _aux_ghosted_soln;
 
 private:
   std::vector<unsigned int> _var_nums;
@@ -55,7 +61,6 @@ private:
 
   std::vector<unsigned int> _aux_var_nums;
   std::vector<unsigned int> _aux_var_nums_directions;
-
 
   unsigned int _num_var_nums;
   unsigned int _num_aux_var_nums;

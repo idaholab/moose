@@ -1,0 +1,7 @@
+[Tests]
+  [./bl01]
+    type = 'Exodiff'
+    input = 'bl01.i'
+    exodiff = 'bl01.e'
+  [../]
+[]

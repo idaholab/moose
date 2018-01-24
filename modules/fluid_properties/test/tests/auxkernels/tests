@@ -1,0 +1,17 @@
+[Tests]
+  [./specific_enthalpy_aux]
+    type = 'Exodiff'
+    input = 'specific_enthalpy_aux.i'
+    exodiff = 'specific_enthalpy_aux_out.e'
+  [../]
+  [./stagnation_pressure_aux]
+    type = 'Exodiff'
+    input = 'stagnation_pressure_aux.i'
+    exodiff = 'stagnation_pressure_aux_out.e'
+  [../]
+  [./stagnation_temperature_aux]
+    type = 'Exodiff'
+    input = 'stagnation_temperature_aux.i'
+    exodiff = 'stagnation_temperature_aux_out.e'
+  [../]
+[]

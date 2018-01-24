@@ -17,10 +17,10 @@
 
 #include "GeneralPostprocessor.h"
 
-//Forward Declarations
+// Forward Declarations
 class NumLinearIterations;
 
-template<>
+template <>
 InputParameters validParams<NumLinearIterations>();
 
 class NumLinearIterations : public GeneralPostprocessor
@@ -28,13 +28,10 @@ class NumLinearIterations : public GeneralPostprocessor
 public:
   NumLinearIterations(const InputParameters & parameters);
 
-  virtual void initialize() {}
-  virtual void execute() {}
+  virtual void initialize() override {}
+  virtual void execute() override {}
 
-  /**
-   * This will return the degrees of freedom in the system.
-   */
-  virtual Real getValue();
+  virtual Real getValue() override;
 };
 
 #endif // NUMLINEARITERATIONS_H

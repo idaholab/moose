@@ -12,7 +12,7 @@
 // Forward Declarations
 class INSPressurePoisson;
 
-template<>
+template <>
 InputParameters validParams<INSPressurePoisson>();
 
 /**
@@ -27,7 +27,7 @@ class INSPressurePoisson : public Kernel
 public:
   INSPressurePoisson(const InputParameters & parameters);
 
-  virtual ~INSPressurePoisson(){}
+  virtual ~INSPressurePoisson() {}
 
 protected:
   virtual Real computeQpResidual();
@@ -35,9 +35,9 @@ protected:
   virtual Real computeQpOffDiagJacobian(unsigned jvar);
 
   // Gradients of the accleration vector, 'a'
-  VariableGradient& _grad_a1;
-  VariableGradient& _grad_a2;
-  VariableGradient& _grad_a3;
+  const VariableGradient & _grad_a1;
+  const VariableGradient & _grad_a2;
+  const VariableGradient & _grad_a3;
 
   // Variable numberings
   unsigned _a1_var_number;
@@ -45,8 +45,7 @@ protected:
   unsigned _a3_var_number;
 
   // Material properties
-  Real _rho;
+  const MaterialProperty<Real> & _rho;
 };
-
 
 #endif // INSPRESSUREPOISSON_H

@@ -1,3 +1,12 @@
+###########################################################
+# This test exercises the customer Preconditioner System.
+# A Single Matrix Preconditioner is built using
+# coupling specified by the user.
+#
+# @Requirement F1.40
+###########################################################
+
+
 [Mesh]
   type = GeneratedMesh
   dim = 2
@@ -22,6 +31,7 @@
   [../]
 []
 
+# Single Matrix Preconditioner
 [Preconditioning]
   [./SMP]
     type = SMP

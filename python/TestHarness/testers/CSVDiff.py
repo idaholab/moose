@@ -1,46 +1,46 @@
-from RunApp import RunApp
-from CSVDiffer import CSVDiffer
+from FileTester import FileTester
+from TestHarness.CSVDiffer import CSVDiffer
 
-class CSVDiff(RunApp):
+class CSVDiff(FileTester):
 
-  @staticmethod
-  def validParams():
-    params = RunApp.validParams()
-    params.addRequiredParam('csvdiff',   [], "A list of files to run CSVDiff on.")
-    params.addParam('gold_dir',      'gold', "The directory where the \"golden standard\" files reside relative to the TEST_DIR: (default: ./gold/)")
-    params.addParam('abs_zero',       1e-10, "Absolute zero cutoff used in exodiff comparisons.")
-    params.addParam('rel_err',       5.5e-6, "Relative error value used in exodiff comparisons.")
-    params.addParam('delete_output_before_running',  True, "Delete pre-existing output files before running test. Only set to False if you know what you're doing!")
+    @staticmethod
+    def validParams():
+        params = FileTester.validParams()
+        params.addRequiredParam('csvdiff',   [], "A list of files to run CSVDiff on.")
+        return params
 
-    return params
+    def __init__(self, name, params):
+        FileTester.__init__(self, name, params)
 
-  def __init__(self, name, params):
-    RunApp.__init__(self, name, params)
+    def getOutputFiles(self):
+        return self.specs['csvdiff']
 
-  def prepare(self):
-    if self.specs['delete_output_before_running'] == True:
-      for file in self.specs['csvdiff']:
-        try:
-          os.remove(os.path.join(self.specs['test_dir'], file))
-        except:
-          pass
+    def processResults(self, moose_dir, options, output):
+        FileTester.processResults(self, moose_dir, options, output)
 
-  def processResults(self, moose_dir, retcode, options, output):
-    (reason, output) = RunApp.processResults(self, moose_dir, retcode, options, output)
+        specs = self.specs
 
-    specs = self.specs
-    if reason != '' or specs['skip_checks']:
-      return (reason, output)
+        if self.getStatus() == self.bucket_fail or specs['skip_checks']:
+            return output
 
-    # Don't Run CSVDiff on Scaled Tests
-    if options.scaling and specs['scale_refine']:
-      return (reason, output)
+        # Don't Run CSVDiff on Scaled Tests
+        if options.scaling and specs['scale_refine']:
+            self.addCaveats('SCALING=True')
+            self.setStatus(self.bucket_skip.status, self.bucket_skip)
+            return output
 
-    if len(specs['csvdiff']) > 0:
-      differ = CSVDiffer( specs['test_dir'], specs['csvdiff'], specs['abs_zero'], specs['rel_err'] )
-      msg = differ.diff()
-      output += 'Running CSVDiffer.py\n' + msg
-      if msg != '':
-        reason = 'CSVDIFF'
+        if len(specs['csvdiff']) > 0:
+            differ = CSVDiffer(specs['test_dir'], specs['csvdiff'], specs['abs_zero'], specs['rel_err'])
+            msg = differ.diff()
+            output += 'Running CSVDiffer.py\n' + msg
+            if msg != '':
+                if msg.find("Gold file does not exist!") != -1:
+                    self.setStatus('MISSING GOLD FILE', self.bucket_fail)
+                elif msg.find("File does not exist!") != -1:
+                    self.setStatus('FILE DOES NOT EXIST', self.bucket_fail)
+                else:
+                    self.setStatus('CSVDIFF', self.bucket_diff)
+                return output
 
-    return (reason, output)
+        self.setStatus(self.success_message, self.bucket_success)
+        return output

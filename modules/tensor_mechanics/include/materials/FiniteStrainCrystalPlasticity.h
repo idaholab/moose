@@ -7,21 +7,21 @@
 #ifndef FINITESTRAINCRYSTALPLASTICITY_H
 #define FINITESTRAINCRYSTALPLASTICITY_H
 
-#include "FiniteStrainMaterial.h"
-#include "ElementPropertyReadFile.h"
+#include "ComputeStressBase.h"
 
 /**
  * FiniteStrainCrystalPlasticity uses the multiplicative decomposition of deformation gradient
- * and solves the PK2 stress residual equation at the intermediate configuration to evolve the material state.
+ * and solves the PK2 stress residual equation at the intermediate configuration to evolve the
+ * material state.
  * The internal variables are updated using an interative predictor-corrector algorithm.
  * Backward Euler integration rule is used for the rate equations.
  */
 class FiniteStrainCrystalPlasticity;
 
-template<>
+template <>
 InputParameters validParams<FiniteStrainCrystalPlasticity>();
 
-class FiniteStrainCrystalPlasticity : public FiniteStrainMaterial
+class FiniteStrainCrystalPlasticity : public ComputeStressBase
 {
 public:
   FiniteStrainCrystalPlasticity(const InputParameters & parameters);
@@ -56,13 +56,13 @@ protected:
    */
   virtual void getSlipIncrements();
 
-  //Override to modify slip system resistance evolution
+  // Override to modify slip system resistance evolution
   /**
    * This function updates the slip system resistances.
    */
   virtual void update_slip_system_resistance();
 
-  //Old function: Kept to avoid code break in computeQpStress
+  // Old function: Kept to avoid code break in computeQpStress
   /**
    * This function updates the slip system resistances.
    */
@@ -72,10 +72,6 @@ protected:
    * This function reads slip system from file - see test.
    */
   virtual void getSlipSystems();
-  /**
-   * This function read euler angles from user object (optional) - see test.
-   */
-  virtual void getEulerAngles();
 
   /**
    * This function assign initial values of slip system resistances/internal variables
@@ -173,17 +169,12 @@ protected:
   /**
    * This function calculate stress residual.
    */
-  virtual void calcResidual( RankTwoTensor & );
+  virtual void calcResidual(RankTwoTensor &);
 
   /**
    * This function calculate jacobian.
    */
-  virtual void calcJacobian( RankFourTensor & );
-
-  /**
-   * This function calculates rotation tensor from Euler angles.
-   */
-  virtual void getEulerRotations();
+  virtual void calcJacobian(RankFourTensor &);
 
   /**
    * This function calculate the tangent moduli for preconditioner.
@@ -191,17 +182,17 @@ protected:
    * Exact jacobian is currently implemented.
    * tan_mod_type can be modified to exact in .i file to turn it on.
    */
-  virtual ElasticityTensorR4 calcTangentModuli();
+  virtual RankFourTensor calcTangentModuli();
 
   /**
    * This function calculate the elastic tangent moduli for preconditioner.
    */
-  virtual ElasticityTensorR4 elasticTangentModuli();
+  virtual RankFourTensor elasticTangentModuli();
 
   /**
    * This function calculate the exact tangent moduli for preconditioner.
    */
-  virtual ElasticityTensorR4 elastoPlasticTangentModuli();
+  virtual RankFourTensor elastoPlasticTangentModuli();
 
   /**
    * This function perform RU decomposition to obtain the rotation tensor.
@@ -268,10 +259,6 @@ protected:
   ///Number of slip system flow rate parameters
   unsigned int _num_slip_sys_flowrate_props;
 
-  ///Element property read user object
-  ///Presently used to read Euler angles -  see test
-  const ElementPropertyReadFile * _read_prop_user_object;
-
   ///Type of tangent moduli calculation
   MooseEnum _tan_mod_type;
 
@@ -280,9 +267,6 @@ protected:
 
   ///Number of slip system specific properties provided in the file containing slip system normals and directions
   unsigned int _num_slip_sys_props;
-
-  ///Flag to save euler angle as Material Property
-  bool _save_euler_angle;
 
   bool _gen_rndm_stress_flag;
 
@@ -310,34 +294,31 @@ protected:
   ///Line search bisection method maximum iteration number
   unsigned int _lsrch_max_iter;
 
-  //Line search method
+  // Line search method
   MooseEnum _lsrch_method;
 
   MaterialProperty<RankTwoTensor> & _fp;
-  MaterialProperty<RankTwoTensor> & _fp_old;
+  const MaterialProperty<RankTwoTensor> & _fp_old;
   MaterialProperty<RankTwoTensor> & _pk2;
-  MaterialProperty<RankTwoTensor> & _pk2_old;
+  const MaterialProperty<RankTwoTensor> & _pk2_old;
   MaterialProperty<RankTwoTensor> & _lag_e;
-  MaterialProperty<RankTwoTensor> & _lag_e_old;
-  MaterialProperty<std::vector<Real> > & _gss;
-  MaterialProperty<std::vector<Real> > & _gss_old;
+  const MaterialProperty<RankTwoTensor> & _lag_e_old;
+  MaterialProperty<std::vector<Real>> & _gss;
+  const MaterialProperty<std::vector<Real>> & _gss_old;
   MaterialProperty<Real> & _acc_slip;
-  MaterialProperty<Real> & _acc_slip_old;
+  const MaterialProperty<Real> & _acc_slip_old;
   MaterialProperty<RankTwoTensor> & _update_rot;
-  MaterialProperty<RankTwoTensor> & _update_rot_old;
-  MaterialProperty<RankTwoTensor> & _deformation_gradient_old;
 
-  ///Save Euler angles for output only when save_euler_angle = true in .i file
-  MaterialProperty< std::vector<Real> > * _euler_ang;
-  MaterialProperty< std::vector<Real> > * _euler_ang_old;
+  const MaterialProperty<RankTwoTensor> & _deformation_gradient;
+  const MaterialProperty<RankTwoTensor> & _deformation_gradient_old;
+  const MaterialProperty<RankFourTensor> & _elasticity_tensor;
+  const MaterialProperty<RankTwoTensor> & _crysrot;
 
   DenseVector<Real> _mo;
   DenseVector<Real> _no;
 
   DenseVector<Real> _a0;
   DenseVector<Real> _xm;
-
-  RankTwoTensor _crysrot;
 
   Real _h0;
   Real _tau_sat;
@@ -360,7 +341,7 @@ protected:
 
   bool _read_from_slip_sys_file;
 
-  bool _err_tol;///Flag to check whether convergence is achieved
+  bool _err_tol; ///Flag to check whether convergence is achieved
 
   ///Used for substepping; Uniformly divides the increment in deformation gradient
   RankTwoTensor _delta_dfgrd, _dfgrd_tmp_old;
@@ -370,4 +351,4 @@ protected:
   bool _first_step_iter, _last_step_iter, _first_substep;
 };
 
-#endif //FINITESTRAINCRYSTALPLASTICITY_H
+#endif // FINITESTRAINCRYSTALPLASTICITY_H

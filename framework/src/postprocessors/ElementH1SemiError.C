@@ -15,17 +15,17 @@
 #include "ElementH1SemiError.h"
 #include "Function.h"
 
-template<>
-InputParameters validParams<ElementH1SemiError>()
+template <>
+InputParameters
+validParams<ElementH1SemiError>()
 {
   InputParameters params = validParams<ElementIntegralVariablePostprocessor>();
   params.addRequiredParam<FunctionName>("function", "The analytic solution to compare against");
   return params;
 }
 
-ElementH1SemiError::ElementH1SemiError(const InputParameters & parameters) :
-    ElementIntegralVariablePostprocessor(parameters),
-    _func(getFunction("function"))
+ElementH1SemiError::ElementH1SemiError(const InputParameters & parameters)
+  : ElementIntegralVariablePostprocessor(parameters), _func(getFunction("function"))
 {
 }
 
@@ -38,7 +38,6 @@ ElementH1SemiError::getValue()
 Real
 ElementH1SemiError::computeQpIntegral()
 {
-  RealGradient diff = _grad_u[_qp]-_func.gradient(_t, _q_point[_qp]);
-  return diff*diff;
+  RealGradient diff = _grad_u[_qp] - _func.gradient(_t, _q_point[_qp]);
+  return diff * diff;
 }
-

@@ -20,7 +20,7 @@
 // Forward Declarations
 class QuotientAux;
 
-template<>
+template <>
 InputParameters validParams<QuotientAux>();
 
 /**
@@ -34,13 +34,11 @@ class QuotientAux : public AuxKernel
 public:
   QuotientAux(const InputParameters & parameters);
 
-  virtual ~QuotientAux() {}
-
 protected:
-  virtual Real computeValue();
+  virtual Real computeValue() override;
 
-  VariableValue & _numerator;
-  VariableValue & _denominator;
+  const VariableValue & _numerator;
+  const VariableValue & _denominator;
 };
 
 #endif // QUOTIENTAUX_H

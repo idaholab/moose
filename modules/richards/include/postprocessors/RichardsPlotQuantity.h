@@ -5,7 +5,6 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-
 #ifndef RICHARDSPLOTQUANTITY_H
 #define RICHARDSPLOTQUANTITY_H
 
@@ -14,7 +13,7 @@
 class RichardsPlotQuantity;
 class RichardsSumQuantity;
 
-template<>
+template <>
 InputParameters validParams<RichardsPlotQuantity>();
 
 /**
@@ -33,10 +32,8 @@ public:
   virtual PostprocessorValue getValue();
 
 protected:
-
   /// the RichardsSumQuantity userobject
   const RichardsSumQuantity & _total_mass;
 };
-
 
 #endif /* RICHARDSPLOTQUANTITY_H */

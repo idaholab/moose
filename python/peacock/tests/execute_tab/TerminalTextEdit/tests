@@ -1,0 +1,7 @@
+[Tests]
+  [./TerminalTextEdit]
+    type = PythonUnitTest
+    input = test_TerminalTextEdit.py
+    display_required = True
+  [../]
+[]

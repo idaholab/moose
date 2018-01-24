@@ -1,0 +1,84 @@
+[Tests]
+  [./4x4_alpha_1e-6]
+    type = 'Exodiff'
+    input = 'pspg_mms_test.i'
+    exodiff = '4x4_alpha_1e-6.e'
+    cli_args = 'Outputs/file_base=4x4_alpha_1e-6 Mesh/nx=4 Mesh/ny=4 GlobalParams/alpha=1e-6'
+    heavy = true
+  [../]
+  [./8x8_alpha_1e-6]
+    type = 'Exodiff'
+    input = 'pspg_mms_test.i'
+    exodiff = '8x8_alpha_1e-6.e'
+    cli_args = 'Outputs/file_base=8x8_alpha_1e-6 Mesh/nx=8 Mesh/ny=8 GlobalParams/alpha=1e-6'
+    heavy = true
+  [../]
+  [./16x16_alpha_1e-6]
+    type = 'Exodiff'
+    input = 'pspg_mms_test.i'
+    exodiff = '16x16_alpha_1e-6.e'
+    cli_args = 'Outputs/file_base=16x16_alpha_1e-6 Mesh/nx=16 Mesh/ny=16 GlobalParams/alpha=1e-6'
+    heavy = true
+  [../]
+  [./32x32_alpha_1e-6]
+    type = 'Exodiff'
+    input = 'pspg_mms_test.i'
+    exodiff = '32x32_alpha_1e-6.e'
+    cli_args = 'Outputs/file_base=32x32_alpha_1e-6 Mesh/nx=32 Mesh/ny=32 GlobalParams/alpha=1e-6'
+    heavy = true
+  [../]
+
+  [./4x4_alpha_1e-3]
+    type = 'Exodiff'
+    input = 'pspg_mms_test.i'
+    exodiff = '4x4_alpha_1e-3.e'
+    cli_args = 'Outputs/file_base=4x4_alpha_1e-3 Mesh/nx=4 Mesh/ny=4 GlobalParams/alpha=1e-3'
+    heavy = true
+  [../]
+  [./8x8_alpha_1e-3]
+    type = 'Exodiff'
+    input = 'pspg_mms_test.i'
+    exodiff = '8x8_alpha_1e-3.e'
+    cli_args = 'Outputs/file_base=8x8_alpha_1e-3 Mesh/nx=8 Mesh/ny=8 GlobalParams/alpha=1e-3'
+    heavy = true
+  [../]
+  [./16x16_alpha_1e-3]
+    type = 'Exodiff'
+    input = 'pspg_mms_test.i'
+    exodiff = '16x16_alpha_1e-3.e'
+    cli_args = 'Outputs/file_base=16x16_alpha_1e-3 Mesh/nx=16 Mesh/ny=16 GlobalParams/alpha=1e-3'
+    heavy = true
+  [../]
+  [./32x32_alpha_1e-3]
+    type = 'Exodiff'
+    input = 'pspg_mms_test.i'
+    exodiff = '32x32_alpha_1e-3.e'
+    cli_args = 'Outputs/file_base=32x32_alpha_1e-3 Mesh/nx=32 Mesh/ny=32 GlobalParams/alpha=1e-3'
+    heavy = true
+  [../]
+
+  [./4x4_alpha_1e0]
+    type = 'Exodiff'
+    input = 'pspg_mms_test.i'
+    exodiff = '4x4_alpha_1e0.e'
+    cli_args = 'Outputs/file_base=4x4_alpha_1e0 Mesh/nx=4 Mesh/ny=4 GlobalParams/alpha=1e0'
+  [../]
+  [./8x8_alpha_1e0]
+    type = 'Exodiff'
+    input = 'pspg_mms_test.i'
+    exodiff = '8x8_alpha_1e0.e'
+    cli_args = 'Outputs/file_base=8x8_alpha_1e0 Mesh/nx=8 Mesh/ny=8 GlobalParams/alpha=1e0'
+  [../]
+  [./16x16_alpha_1e0]
+    type = 'Exodiff'
+    input = 'pspg_mms_test.i'
+    exodiff = '16x16_alpha_1e0.e'
+    cli_args = 'Outputs/file_base=16x16_alpha_1e0 Mesh/nx=16 Mesh/ny=16 GlobalParams/alpha=1e0'
+  [../]
+  [./32x32_alpha_1e0]
+    type = 'Exodiff'
+    input = 'pspg_mms_test.i'
+    exodiff = '32x32_alpha_1e0.e'
+    cli_args = 'Outputs/file_base=32x32_alpha_1e0 Mesh/nx=32 Mesh/ny=32 GlobalParams/alpha=1e0'
+  [../]
+[]

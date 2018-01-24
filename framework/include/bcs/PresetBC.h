@@ -19,7 +19,7 @@
 
 class PresetBC;
 
-template<>
+template <>
 InputParameters validParams<PresetBC>();
 
 /**
@@ -31,7 +31,7 @@ public:
   PresetBC(const InputParameters & parameters);
 
 protected:
-  virtual Real computeQpValue();
+  virtual Real computeQpValue() override;
 
   const Real & _value;
 };

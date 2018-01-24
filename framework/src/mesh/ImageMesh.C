@@ -12,30 +12,37 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include <cstdlib> // std::system, mkstemp
 #include "ImageMesh.h"
 #include "pcrecpp.h"
 #include "MooseApp.h"
 
-// libMesh includes
-#include "libmesh/mesh_generation.h"
+#include <cstdlib> // std::system, mkstemp
+#include <fstream>
 
-template<>
-InputParameters validParams<ImageMesh>()
+#include "libmesh/mesh_generation.h"
+#include "libmesh/unstructured_mesh.h"
+
+template <>
+InputParameters
+validParams<ImageMesh>()
 {
   InputParameters params = validParams<GeneratedMesh>();
   params += validParams<FileRangeBuilder>();
-  params.addClassDescription("Generated mesh with the aspect ratio of a given image stack");
+  params.addClassDescription("Generated mesh with the aspect ratio of a given image stack.");
 
   // Add ImageMesh-specific params
-  params.addParam<bool>("scale_to_one", true, "Whether or not to scale the image so its max dimension is 1");
-  params.addRangeCheckedParam<Real>("cells_per_pixel", 1.0, "cells_per_pixel<=1.0", "The number of mesh cells per pixel, must be <=1 ");
+  params.addParam<bool>(
+      "scale_to_one", true, "Whether or not to scale the image so its max dimension is 1");
+  params.addRangeCheckedParam<Real>("cells_per_pixel",
+                                    1.0,
+                                    "cells_per_pixel<=1.0",
+                                    "The number of mesh cells per pixel, must be <=1 ");
 
   return params;
 }
 
-ImageMesh::ImageMesh(const InputParameters & parameters) :
-    GeneratedMesh(parameters),
+ImageMesh::ImageMesh(const InputParameters & parameters)
+  : GeneratedMesh(parameters),
     FileRangeBuilder(parameters),
     _scale_to_one(getParam<bool>("scale_to_one")),
     _cells_per_pixel(getParam<Real>("cells_per_pixel"))
@@ -44,15 +51,11 @@ ImageMesh::ImageMesh(const InputParameters & parameters) :
   errorCheck();
 }
 
-ImageMesh::ImageMesh(const ImageMesh & other_mesh) :
-    GeneratedMesh(other_mesh),
+ImageMesh::ImageMesh(const ImageMesh & other_mesh)
+  : GeneratedMesh(other_mesh),
     FileRangeBuilder(other_mesh.parameters()),
     _scale_to_one(getParam<bool>("scale_to_one")),
     _cells_per_pixel(getParam<Real>("cells_per_pixel"))
-{
-}
-
-ImageMesh::~ImageMesh()
 {
 }
 
@@ -66,7 +69,7 @@ void
 ImageMesh::buildMesh()
 {
   // A list of filenames of length 1 means we are building a 2D mesh
-  if (_filenames.size()==1)
+  if (_filenames.size() == 1)
     buildMesh2D(_filenames[0]);
 
   else
@@ -79,15 +82,14 @@ ImageMesh::buildMesh3D(const std::vector<std::string> & filenames)
   // If the user gave us a "stack" with 0 or 1 files in it, we can't
   // really create a 3D Mesh from that
   if (filenames.size() <= 1)
-    mooseError("ImageMesh error: Cannot create a 3D ImageMesh from an image stack with " << filenames.size() << " images.");
+    mooseError("ImageMesh error: Cannot create a 3D ImageMesh from an image stack with ",
+               filenames.size(),
+               " images.");
 
   // For each file in the stack, process it using the 'file' command.
   // We want to be sure that all the images in the stack are the same
   // size, for example...
-  int
-    xpixels = 0,
-    ypixels = 0,
-    zpixels = filenames.size();
+  int xpixels = 0, ypixels = 0, zpixels = filenames.size();
 
   // Take pixel info from the first image in the stack to determine the aspect ratio
   GetPixelInfo(filenames[0], xpixels, ypixels);
@@ -95,12 +97,13 @@ ImageMesh::buildMesh3D(const std::vector<std::string> & filenames)
   // TODO: Check that all images are the same aspect ratio and have
   // the same number of pixels?  ImageFunction does not currently do
   // this...
-  // for (unsigned i=0; i<filenames.size(); ++i)
+  // for (const auto & filename : filenames)
   // {
   //   // Extract the number of pixels from the image using the file command
-  //   GetPixelInfo(filenames[i], xpixels, ypixels);
+  //   GetPixelInfo(filename, xpixels, ypixels);
   //
-  //   // Moose::out << "Image " << filenames[i] << " has size: " << xpixels << " by " << ypixels << std::endl;
+  //   // Moose::out << "Image " << filename << " has size: " << xpixels << " by " << ypixels <<
+  //   std::endl;
   // }
 
   // Use the number of x and y pixels and the number of images to
@@ -130,24 +133,23 @@ ImageMesh::buildMesh3D(const std::vector<std::string> & filenames)
   _nz = static_cast<int>(_cells_per_pixel * zpixels);
 
   // Actually build the Mesh
-  MeshTools::Generation::build_cube(dynamic_cast<UnstructuredMesh&>(getMesh()),
-                                    _nx, _ny, _nz,
-                                    /*xmin=*/0., /*xmax=*/_xmax,
-                                    /*ymin=*/0., /*ymax=*/_ymax,
-                                    /*zmin=*/0., /*zmax=*/_zmax,
+  MeshTools::Generation::build_cube(dynamic_cast<UnstructuredMesh &>(getMesh()),
+                                    _nx,
+                                    _ny,
+                                    _nz,
+                                    /*xmin=*/0.,
+                                    /*xmax=*/_xmax,
+                                    /*ymin=*/0.,
+                                    /*ymax=*/_ymax,
+                                    /*zmin=*/0.,
+                                    /*zmax=*/_zmax,
                                     HEX8);
-
-
 }
-
-
 
 void
 ImageMesh::buildMesh2D(const std::string & filename)
 {
-  int
-    xpixels = 0,
-    ypixels = 0;
+  int xpixels = 0, ypixels = 0;
 
   // Extract the number of pixels from the image using the file command
   GetPixelInfo(filename, xpixels, ypixels);
@@ -171,10 +173,13 @@ ImageMesh::buildMesh2D(const std::string & filename)
   _ny = static_cast<int>(_cells_per_pixel * ypixels);
 
   // Actually build the Mesh
-  MeshTools::Generation::build_square(dynamic_cast<UnstructuredMesh&>(getMesh()),
-                                      _nx, _ny,
-                                      /*xmin=*/0., /*xmax=*/_xmax,
-                                      /*ymin=*/0., /*ymax=*/_ymax,
+  MeshTools::Generation::build_square(dynamic_cast<UnstructuredMesh &>(getMesh()),
+                                      _nx,
+                                      _ny,
+                                      /*xmin=*/0.,
+                                      /*xmax=*/_xmax,
+                                      /*ymin=*/0.,
+                                      /*ymax=*/_ymax,
                                       QUAD4);
 }
 
@@ -228,13 +233,14 @@ ImageMesh::GetPixelInfo(std::string filename, int & xpixels, int & ypixels)
     // The parentheses define capture groups which are stored into the
     // xsize and ysize integers.
     // Here's an example string:
-    // sixteenth_image001_cropped3_closing_298.png: PNG image data, 115 x 99, 16-bit/color RGB, non-interlaced
+    // sixteenth_image001_cropped3_closing_298.png: PNG image data, 115 x 99, 16-bit/color RGB,
+    // non-interlaced
     xpixels = 0, ypixels = 0;
     pcrecpp::RE re("(\\d+) x (\\d+)");
     re.PartialMatch(command_result, &xpixels, &ypixels);
 
     // Detect failure of the regex
-    if ((xpixels==0) || (ypixels==0))
+    if ((xpixels == 0) || (ypixels == 0))
     {
       error_message = "Regex failed to find a match in " + command_result;
       break;

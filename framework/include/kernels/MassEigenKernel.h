@@ -17,10 +17,10 @@
 
 #include "EigenKernel.h"
 
-//Forward Declarations
+// Forward Declarations
 class MassEigenKernel;
 
-template<>
+template <>
 InputParameters validParams<MassEigenKernel>();
 
 class MassEigenKernel : public EigenKernel
@@ -29,8 +29,8 @@ public:
   MassEigenKernel(const InputParameters & parameters);
 
 protected:
-  virtual Real computeQpResidual();
-  virtual Real computeQpJacobian();
+  virtual Real computeQpResidual() override;
+  virtual Real computeQpJacobian() override;
 };
 
-#endif //MASSEIGENKERNEL_H
+#endif // MASSEIGENKERNEL_H

@@ -1,9 +1,0 @@
-[Tests]
-  [./test]
-    type = 'Exodiff'
-    input = 'reference_residual_test.i'
-    exodiff = 'out.e'
-    custom_cmp = 'reference_residual_test.cmp'
-    scale_refine = 2
-  [../]
-[]

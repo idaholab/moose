@@ -19,7 +19,7 @@
 
 class DotCouplingKernel;
 
-template<>
+template <>
 InputParameters validParams<DotCouplingKernel>();
 
 /**
@@ -35,9 +35,8 @@ protected:
   virtual Real computeQpResidual();
   virtual Real computeQpJacobian();
 
-  VariableValue & _v_dot;
-  VariableValue & _dv_dot_dv;
+  const VariableValue & _v_dot;
+  const VariableValue & _dv_dot_dv;
 };
-
 
 #endif /* DOTCOUPLINGKERNEL_H */

@@ -1,26 +1,39 @@
+/****************************************************************/
+/* MOOSE - Multiphysics Object Oriented Simulation Environment  */
+/*                                                              */
+/*          All contents are licensed under LGPL V2.1           */
+/*             See LICENSE for full restrictions                */
+/****************************************************************/
+
 #include "PolycrystalElasticDrivingForceAction.h"
 #include "Factory.h"
-#include "Parser.h"
 #include "FEProblem.h"
 #include "Conversion.h"
 
-template<>
-InputParameters validParams<PolycrystalElasticDrivingForceAction>()
+template <>
+InputParameters
+validParams<PolycrystalElasticDrivingForceAction>()
 {
   InputParameters params = validParams<Action>();
-  params.addClassDescription("Action that addes the elastic driving force for each order parameter");
+  params.addClassDescription(
+      "Action that addes the elastic driving force for each order parameter");
   params.addRequiredParam<unsigned int>("op_num", "specifies the number of grains to create");
   params.addRequiredParam<std::string>("var_name_base", "specifies the base name of the variables");
-  params.addParam<bool>("use_displaced_mesh", false, "Whether to use displaced mesh in the kernels");
-  params.addParam<std::string>("base_name", "Optional parameter that allows the user to define multiple mechanics material systems on the same block, i.e. for multiple phases");
+  params.addParam<bool>(
+      "use_displaced_mesh", false, "Whether to use displaced mesh in the kernels");
+  params.addParam<std::string>("base_name",
+                               "Optional parameter that allows the user to define "
+                               "multiple mechanics material systems on the same "
+                               "block, i.e. for multiple phases");
   return params;
 }
 
-PolycrystalElasticDrivingForceAction::PolycrystalElasticDrivingForceAction(const InputParameters & params) :
-    Action(params),
+PolycrystalElasticDrivingForceAction::PolycrystalElasticDrivingForceAction(
+    const InputParameters & params)
+  : Action(params),
     _op_num(getParam<unsigned int>("op_num")),
     _var_name_base(getParam<std::string>("var_name_base")),
-    _base_name(isParamValid("base_name") ? getParam<std::string>("base_name") + "_" : "" ),
+    _base_name(isParamValid("base_name") ? getParam<std::string>("base_name") + "_" : ""),
     _elasticity_tensor_name(_base_name + "elasticity_tensor")
 {
 }
@@ -28,10 +41,10 @@ PolycrystalElasticDrivingForceAction::PolycrystalElasticDrivingForceAction(const
 void
 PolycrystalElasticDrivingForceAction::act()
 {
-  #ifdef DEBUG
-    Moose::err << "Inside the PolycrystalElasticDrivingForceAction Object\n";
-    Moose::err << "var name base:" << _var_name_base;
-  #endif
+#ifdef DEBUG
+  Moose::err << "Inside the PolycrystalElasticDrivingForceAction Object\n";
+  Moose::err << "var name base:" << _var_name_base;
+#endif
 
   for (unsigned int op = 0; op < _op_num; ++op)
   {
@@ -41,7 +54,7 @@ PolycrystalElasticDrivingForceAction::act()
     // Create Stiffness derivative name
     MaterialPropertyName D_stiff_name = propertyNameFirst(_elasticity_tensor_name, var_name);
 
-    //Set name of kernel being created
+    // Set name of kernel being created
     std::string kernel_type = "ACGrGrElasticDrivingForce";
 
     // Set the actual parameters for the kernel
@@ -56,4 +69,3 @@ PolycrystalElasticDrivingForceAction::act()
     _problem->addKernel(kernel_type, kernel_name, poly_params);
   }
 }
-

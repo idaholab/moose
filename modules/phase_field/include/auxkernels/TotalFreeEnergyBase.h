@@ -9,14 +9,15 @@
 
 #include "AuxKernel.h"
 
-//Forward Declarations
+// Forward Declarations
 class TotalFreeEnergyBase;
 
-template<>
+template <>
 InputParameters validParams<TotalFreeEnergyBase>();
 
 /**
- * Total free energy (both the bulk and gradient parts), where the bulk free energy has been defined in a material and called f_name
+ * Total free energy (both the bulk and gradient parts), where the bulk free energy has been defined
+ * in a material and called f_name
  */
 class TotalFreeEnergyBase : public AuxKernel
 {
@@ -28,15 +29,15 @@ protected:
 
   /// Coupled interface variables
   unsigned int _nvars;
-  std::vector<VariableValue *> _vars;
-  std::vector<VariableGradient *> _grad_vars;
+  std::vector<const VariableValue *> _vars;
+  std::vector<const VariableGradient *> _grad_vars;
 
   /// Gradient free energy prefactor kappa
-  std::vector<std::string> _kappa_names;
+  std::vector<MaterialPropertyName> _kappa_names;
   unsigned int _nkappas;
 
   /// Additional free energy contribution
-  VariableValue & _additional_free_energy;
+  const VariableValue & _additional_free_energy;
 };
 
-#endif //TOTALFREEENERGYBASE_H
+#endif // TOTALFREEENERGYBASE_H

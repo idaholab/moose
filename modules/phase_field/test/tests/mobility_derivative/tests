@@ -1,0 +1,44 @@
+[Tests]
+  [./coupledmatdiffusion]
+    type = 'Exodiff'
+    input = 'coupledmatdiffusion.i'
+    exodiff = 'coupledmatdiffusion_out.e'
+  [../]
+  [./matdiffusion]
+    type = 'Exodiff'
+    input = 'matdiffusion.i'
+    exodiff = 'matdiffusion_out.e'
+  [../]
+  [./mobility_derivative_test]
+    type = 'Exodiff'
+    input = 'mobility_derivative_test.i'
+    exodiff = 'mobility_derivative_test_out.e'
+  [../]
+  [./mobility_derivative_split_coupled_test]
+      type = 'Exodiff'
+      input = 'mobility_derivative_split_coupled_test.i'
+      exodiff = 'mobility_derivative_split_coupled_test_out.e'
+  [../]
+  [./mobility_derivative_direct_test]
+    type = 'Exodiff'
+    input = 'mobility_derivative_direct_test.i'
+    exodiff = 'mobility_derivative_direct_test_out.e'
+    compiler = 'GCC CLANG'
+  [../]
+  [./mobility_derivative_direct_coupled_test]
+    type = 'Exodiff'
+    input = 'mobility_derivative_direct_coupled_test.i'
+    exodiff = 'mobility_derivative_direct_coupled_test_oversample.e'
+    compiler = 'GCC CLANG'
+  [../]
+  [./AC_mobility_derivative_test]
+    type = 'Exodiff'
+    input = 'AC_mobility_derivative_test.i'
+    exodiff = 'AC_mobility_derivative_test_out.e'
+  [../]
+  [./AC_mobility_derivative_coupled_test]
+    type = 'Exodiff'
+    input = 'AC_mobility_derivative_coupled_test.i'
+    exodiff = 'AC_mobility_derivative_coupled_test_out.e'
+  [../]
+[]

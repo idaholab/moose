@@ -3,11 +3,7 @@
 []
 
 [Variables]
-  active = 'diffused'
-
   [./diffused]
-    # Note that we do not have the 'active' parameter here.  Since it
-    # is missing we will automatically pickup all nested blocks
     order = FIRST
     family = LAGRANGE
 
@@ -15,7 +11,7 @@
     # for which we want to apply this initial condition
     [./InitialCondition]
       type = ExampleIC
-      coefficient = 2.0;
+      coefficient = 2.0
     [../]
   [../]
 []
@@ -33,8 +29,6 @@
 []
 
 [BCs]
-  active = 'left right'
-
   [./left]
     type = DirichletBC
     variable = diffused

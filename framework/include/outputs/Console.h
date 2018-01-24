@@ -17,22 +17,19 @@
 
 // MOOSE includes
 #include "TableOutput.h"
-#include "FormattedTable.h"
 
 // Forward declarations
 class Console;
 
-template<>
+template <>
 InputParameters validParams<Console>();
 
 /**
  * An output object for writing to the console (screen)
  */
-class Console :
-  public TableOutput
+class Console : public TableOutput
 {
 public:
-
   /**
    * Class constructor
    */
@@ -48,7 +45,7 @@ public:
    * Prints the system information, this is done here so that the system information
    * is printed prior to any PETSc solve information
    */
-  virtual void initialSetup();
+  virtual void initialSetup() override;
 
   /**
    * Customizes the order of output for the various components as well as adds additional
@@ -56,17 +53,18 @@ public:
    *
    * This method explicitly re-implements portions of AdvancedOutput::output, which is generally not
    * recommended. This is done here to get the output ordering desired. If additional output types
-   * (e.g., elemental or nodal) are required in the future this calls will need to be explicitly added
+   * (e.g., elemental or nodal) are required in the future this calls will need to be explicitly
+   * added
    * as well.
    */
-  virtual void output(const ExecFlagType & type);
+  virtual void output(const ExecFlagType & type) override;
 
   /**
    * Creates the output file name
    * Appends the user-supplied 'file_base' input parameter with a '.txt' extension
    * @return A string containing the output filename
    */
-  virtual std::string filename();
+  virtual std::string filename() override;
 
   /**
    * Output string for setting up PETSC output
@@ -76,10 +74,20 @@ public:
   /**
    * Performs console related printing when the mesh is changed
    */
-  void meshChanged();
+  void meshChanged() override;
+
+  /**
+   * Return system information flags
+   */
+  MultiMooseEnum & systemInfoFlags()
+  {
+    if (!_allow_changing_sysinfo_flag)
+      mooseError(
+          "accessing console system information flags is not allowed after console initial setup");
+    return _system_info_flags;
+  }
 
 protected:
-
   /**
    * Adds the printing of system information to the init() method
    */
@@ -88,27 +96,30 @@ protected:
   /**
    * Print the input file at the beginning of the simulation
    */
-  virtual void outputInput();
+  virtual void outputInput() override;
 
   /**
    * Prints the aux scalar variables table to the screen
    */
-  virtual void outputScalarVariables();
+  virtual void outputScalarVariables() override;
 
   /**
    * Prints the postprocessor table to the screen
    */
-  virtual void outputPostprocessors();
+  virtual void outputPostprocessors() override;
 
   /**
    * Not implemented.
    */
-  virtual void outputVectorPostprocessors() { mooseError("Can't currently output VectorPostprocessors to the screen"); };
+  virtual void outputVectorPostprocessors() override
+  {
+    mooseError("Can't currently output VectorPostprocessors to the screen");
+  };
 
   /**
    * Print system information
    */
-  virtual void outputSystemInformation();
+  virtual void outputSystemInformation() override;
 
   /**
    * A helper function for outputting norms in color
@@ -168,19 +179,14 @@ protected:
   /// State for all performance logging
   bool _perf_log;
 
+  /// The interval at which the performance log is printed
+  unsigned int _perf_log_interval;
+
   /// State for solve performance log
   bool _solve_log;
 
-  /// State for setup performance log
-  bool _setup_log;
-
-#ifdef LIBMESH_ENABLE_PERFORMANCE_LOGGING
   /// Control the display libMesh performance log
   bool _libmesh_log;
-#endif
-
-  /// State for early setup log printing
-  bool _setup_log_early;
 
   /// State for the performance log header information
   bool _perf_header;
@@ -198,7 +204,6 @@ protected:
   unsigned int _precision;
 
 private:
-
   /**
    * Add a message to the output streams
    * @param message The message to add to the output streams
@@ -210,9 +215,6 @@ private:
    * output stream buffer is cleaned up correctly. Thus, it is a private method.
    */
   void mooseConsole(const std::string & message);
-
-  /// State of the --timing command line argument from MooseApp
-  bool _timing;
 
   /// Reference to cached messages from calls to _console
   const std::ostringstream & _console_buffer;
@@ -230,6 +232,10 @@ private:
   MultiMooseEnum _system_info_flags;
 
   friend class OutputWarehouse;
+
+private:
+  /// A boolean for protecting _system_info_flags from being changed undesirably
+  bool _allow_changing_sysinfo_flag;
 };
 
 #endif /* CONSOLE_H */

@@ -1,0 +1,7 @@
+[Tests]
+  [./ignore_skipped]
+    type = RunApp
+    input = good.i
+    skip = "always skipped"
+  [../]
+[]

@@ -17,12 +17,15 @@
 #include "FEProblem.h"
 #include "MooseEnum.h"
 
-template<>
-InputParameters validParams<SetupQuadratureAction>()
+template <>
+InputParameters
+validParams<SetupQuadratureAction>()
 {
   MooseEnum types("CLOUGH CONICAL GAUSS GRID MONOMIAL SIMPSON TRAP GAUSS_LOBATTO", "GAUSS");
   MooseEnum order("AUTO CONSTANT FIRST SECOND THIRD FOURTH FIFTH SIXTH SEVENTH EIGHTH NINTH TENTH "
-                  "ELEVENTH TWELFTH THIRTEENTH FOURTEENTH FIFTEENTH SIXTEENTH SEVENTEENTH EIGHTTEENTH NINTEENTH TWENTIETH", "AUTO");
+                  "ELEVENTH TWELFTH THIRTEENTH FOURTEENTH FIFTEENTH SIXTEENTH SEVENTEENTH "
+                  "EIGHTTEENTH NINTEENTH TWENTIETH",
+                  "AUTO");
 
   InputParameters params = validParams<Action>();
 
@@ -34,16 +37,12 @@ InputParameters validParams<SetupQuadratureAction>()
   return params;
 }
 
-SetupQuadratureAction::SetupQuadratureAction(InputParameters parameters) :
-    Action(parameters),
+SetupQuadratureAction::SetupQuadratureAction(InputParameters parameters)
+  : Action(parameters),
     _type(Moose::stringToEnum<QuadratureType>(getParam<MooseEnum>("type"))),
     _order(Moose::stringToEnum<Order>(getParam<MooseEnum>("order"))),
     _element_order(Moose::stringToEnum<Order>(getParam<MooseEnum>("element_order"))),
     _side_order(Moose::stringToEnum<Order>(getParam<MooseEnum>("side_order")))
-{
-}
-
-SetupQuadratureAction::~SetupQuadratureAction()
 {
 }
 
@@ -53,4 +52,3 @@ SetupQuadratureAction::act()
   if (_problem.get() != NULL)
     _problem->createQRules(_type, _order, _element_order, _side_order);
 }
-

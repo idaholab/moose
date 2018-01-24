@@ -6,34 +6,28 @@
 /****************************************************************/
 #include "NSMomentumViscousBC.h"
 
-template<>
-InputParameters validParams<NSMomentumViscousBC>()
+template <>
+InputParameters
+validParams<NSMomentumViscousBC>()
 {
   InputParameters params = validParams<NSIntegratedBC>();
-
-  // Required parameters
-  params.addRequiredParam<unsigned>("component", "(0,1,2) = (x,y,z) for which momentum component this BC is applied to");
-
+  params.addClassDescription("This class corresponds to the viscous part of the 'natural' boundary "
+                             "condition for the momentum equations.");
+  params.addRequiredParam<unsigned>(
+      "component", "(0,1,2) = (x,y,z) for which momentum component this BC is applied to");
   return params;
 }
 
-
-
-
 NSMomentumViscousBC::NSMomentumViscousBC(const InputParameters & parameters)
-    : NSIntegratedBC(parameters),
-
-      // Parameters to be specified in input file block...
-      _component(getParam<unsigned>("component")),
-
-      // Derivative computing object
-      _vst_derivs(*this)
+  : NSIntegratedBC(parameters),
+    _component(getParam<unsigned>("component")),
+    // Derivative computing object
+    _vst_derivs(*this)
 {
 }
 
-
-
-Real NSMomentumViscousBC::computeQpResidual()
+Real
+NSMomentumViscousBC::computeQpResidual()
 {
   // n . (-tau) . v
 
@@ -48,19 +42,18 @@ Real NSMomentumViscousBC::computeQpResidual()
   return -visc_term;
 }
 
-
-
-Real NSMomentumViscousBC::computeQpJacobian()
+Real
+NSMomentumViscousBC::computeQpJacobian()
 {
   // See Eqns. (41)--(43) from the notes for the viscous boundary term contributions
-  Real visc_term = 0.;
+  Real visc_term = 0.0;
 
   // Set variable names as in the notes
-  const unsigned k = _component;
-  const unsigned m = _component+1; // _component = 0,1,2 -> m = 1,2,3 global variable number
+  const unsigned int k = _component;
+  const unsigned int m = _component + 1; // _component = 0,1,2 -> m = 1,2,3 global variable number
 
   // FIXME: attempt calling shared dtau function
-  for (unsigned ell=0; ell<LIBMESH_DIM; ++ell)
+  for (unsigned int ell = 0; ell < LIBMESH_DIM; ++ell)
     visc_term += _vst_derivs.dtau(k, ell, m) * _normals[_qp](ell);
 
   // Multiply visc_term by test function
@@ -70,30 +63,34 @@ Real NSMomentumViscousBC::computeQpJacobian()
   return -visc_term;
 }
 
-
-
-Real NSMomentumViscousBC::computeQpOffDiagJacobian(unsigned jvar)
+Real
+NSMomentumViscousBC::computeQpOffDiagJacobian(unsigned jvar)
 {
-  // See Eqns. (41)--(43) from the notes for the viscous boundary
-  // term contributions.
+  if (isNSVariable(jvar))
+  {
 
-  // Map jvar into the variable m for our problem, regardless of
-  // how Moose has numbered things.
-  unsigned m = this->map_var_number(jvar);
+    // See Eqns. (41)--(43) from the notes for the viscous boundary
+    // term contributions.
 
-  // Now compute viscous contribution
-  Real visc_term = 0.;
+    // Map jvar into the variable m for our problem, regardless of
+    // how Moose has numbered things.
+    unsigned m = mapVarNumber(jvar);
 
-  // Set variable names as in the notes
-  const unsigned k = _component;
+    // Now compute viscous contribution
+    Real visc_term = 0.0;
 
-  for (unsigned ell=0; ell<LIBMESH_DIM; ++ell)
-    visc_term += _vst_derivs.dtau(k, ell, m) * _normals[_qp](ell);
+    // Set variable names as in the notes
+    const unsigned int k = _component;
 
-  // Multiply visc_term by test function
-  visc_term *= _test[_i][_qp];
+    for (unsigned int ell = 0; ell < LIBMESH_DIM; ++ell)
+      visc_term += _vst_derivs.dtau(k, ell, m) * _normals[_qp](ell);
 
-  // Note the sign...
-  return -visc_term;
+    // Multiply visc_term by test function
+    visc_term *= _test[_i][_qp];
+
+    // Note the sign...
+    return -visc_term;
+  }
+  else
+    return 0.0;
 }
-

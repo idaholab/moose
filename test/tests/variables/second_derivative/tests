@@ -1,0 +1,7 @@
+[Tests]
+  [./interface_kernels]
+    type = Exodiff
+    input = 'interface_kernels.i'
+    exodiff = 'interface_kernels_out.e'
+  [../]
+[]

@@ -1,0 +1,27 @@
+[Tests]
+  [./change_with_respect_to_initial_error_dependent]
+    type = 'RunException'
+    input = 'change_over_time.i'
+    cli_args = "Postprocessors/change_over_time/change_with_respect_to_initial=true Postprocessors/my_postprocessor/execute_on='timestep_end'"
+    expect_err = "When 'change_with_respect_to_initial' is specified to be true, 'execute_on' for the dependent post-processor \('my_postprocessor'\) must include 'initial'"
+  [../]
+  [./change_with_respect_to_initial_error_this]
+    type = 'RunException'
+    input = 'change_over_time.i'
+    cli_args = "Postprocessors/change_over_time/change_with_respect_to_initial=true Postprocessors/change_over_time/execute_on='timestep_end'"
+    expect_err = "When 'change_with_respect_to_initial' is specified to be true, 'execute_on' for the ChangeOverTimePostprocessor \('change_over_time'\) must include 'initial'"
+  [../]
+  [./change_with_respect_to_previous]
+    type = 'CSVDiff'
+    input = 'change_over_time.i'
+    csvdiff = 'change_over_time_previous.csv'
+  [../]
+  [./change_with_respect_to_initial]
+    type = 'CSVDiff'
+    input = 'change_over_time.i'
+    cli_args = "Postprocessors/change_over_time/change_with_respect_to_initial=true Outputs/file_base='change_over_time_initial'"
+    csvdiff = 'change_over_time_initial.csv'
+    # This fails in recover because the initial value is lost
+    recover = false
+  [../]
+[]

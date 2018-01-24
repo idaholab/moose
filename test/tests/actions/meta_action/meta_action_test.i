@@ -1,3 +1,12 @@
+###########################################################
+# This is a test of the Action System. An Action is created
+# to build other objects pro grammatically. Two blocks in
+# the input file have been commented out to demonstrate
+# usage.
+#
+# @Requirement F1.50
+###########################################################
+
 [Mesh]
   file = square.e
   uniform_refine = 4

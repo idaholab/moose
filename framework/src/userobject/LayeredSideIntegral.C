@@ -14,21 +14,19 @@
 
 #include "LayeredSideIntegral.h"
 
-// libmesh includes
-#include "libmesh/mesh_tools.h"
-
-template<>
-InputParameters validParams<LayeredSideIntegral>()
+template <>
+InputParameters
+validParams<LayeredSideIntegral>()
 {
   InputParameters params = validParams<SideIntegralVariableUserObject>();
   params += validParams<LayeredBase>();
   return params;
 }
 
-LayeredSideIntegral::LayeredSideIntegral(const InputParameters & parameters) :
-    SideIntegralVariableUserObject(parameters),
-    LayeredBase(parameters)
-{}
+LayeredSideIntegral::LayeredSideIntegral(const InputParameters & parameters)
+  : SideIntegralVariableUserObject(parameters), LayeredBase(parameters)
+{
+}
 
 void
 LayeredSideIntegral::initialize()
@@ -59,4 +57,3 @@ LayeredSideIntegral::threadJoin(const UserObject & y)
   SideIntegralVariableUserObject::threadJoin(y);
   LayeredBase::threadJoin(y);
 }
-

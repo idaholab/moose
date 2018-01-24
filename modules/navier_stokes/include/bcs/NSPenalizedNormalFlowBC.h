@@ -12,9 +12,8 @@
 // Forward Declarations
 class NSPenalizedNormalFlowBC;
 
-template<>
+template <>
 InputParameters validParams<NSPenalizedNormalFlowBC>();
-
 
 /**
  * This class penalizes the the value of u.n on the boundary
@@ -22,11 +21,8 @@ InputParameters validParams<NSPenalizedNormalFlowBC>();
  */
 class NSPenalizedNormalFlowBC : public NSIntegratedBC
 {
-
 public:
   NSPenalizedNormalFlowBC(const InputParameters & parameters);
-
-  virtual ~NSPenalizedNormalFlowBC(){}
 
 protected:
   /**
@@ -37,9 +33,8 @@ protected:
   virtual Real computeQpOffDiagJacobian(unsigned jvar);
 
   // Required parameters
-  Real _penalty;
-  Real _specified_udotn;
+  const Real _penalty;
+  const Real _specified_udotn;
 };
-
 
 #endif // NSPENALIZEDNORMALFLOWBC_H

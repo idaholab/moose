@@ -7,11 +7,11 @@
 
 #include "ParsedMaterialHelper.h"
 
-// libmesh includes
 #include "libmesh/quadrature.h"
 
-template<>
-InputParameters validParams<ParsedMaterialHelper>()
+template <>
+InputParameters
+validParams<ParsedMaterialHelper>()
 {
   InputParameters params = validParams<FunctionMaterialBase>();
   params += validParams<FunctionParserUtils>();
@@ -20,8 +20,8 @@ InputParameters validParams<ParsedMaterialHelper>()
 }
 
 ParsedMaterialHelper::ParsedMaterialHelper(const InputParameters & parameters,
-                                           VariableNameMappingMode map_mode) :
-    FunctionMaterialBase(parameters),
+                                           VariableNameMappingMode map_mode)
+  : FunctionMaterialBase(parameters),
     FunctionParserUtils(parameters),
     _variable_names(_nargs),
     _mat_prop_descriptors(0),
@@ -34,8 +34,7 @@ void
 ParsedMaterialHelper::functionParse(const std::string & function_expression)
 {
   std::vector<std::string> empty_string_vector;
-  functionParse(function_expression,
-                empty_string_vector, empty_string_vector);
+  functionParse(function_expression, empty_string_vector, empty_string_vector);
 }
 
 void
@@ -45,8 +44,12 @@ ParsedMaterialHelper::functionParse(const std::string & function_expression,
 {
   std::vector<std::string> empty_string_vector;
   std::vector<Real> empty_real_vector;
-  functionParse(function_expression, constant_names, constant_expressions,
-                empty_string_vector, empty_string_vector, empty_real_vector);
+  functionParse(function_expression,
+                constant_names,
+                constant_expressions,
+                empty_string_vector,
+                empty_string_vector,
+                empty_real_vector);
 }
 
 void
@@ -60,8 +63,19 @@ ParsedMaterialHelper::functionParse(const std::string & function_expression,
   // build base function object
   _func_F = ADFunctionPtr(new ADFunction());
 
+  // set FParser internal feature flags
+  setParserFeatureFlags(_func_F);
+
   // initialize constants
   addFParserConstants(_func_F, constant_names, constant_expressions);
+
+  // add further constants coming from default value coupling
+  if (_map_mode == USE_PARAM_NAMES)
+    for (std::vector<std::string>::iterator it = _arg_constant_defaults.begin();
+         it != _arg_constant_defaults.end();
+         ++it)
+      if (!_func_F->AddConstant(*it, _pars.defaultCoupledValue(*it)))
+        mooseError("Invalid constant name in parsed function object");
 
   // set variable names based on map_mode
   switch (_map_mode)
@@ -74,7 +88,8 @@ ParsedMaterialHelper::functionParse(const std::string & function_expression,
     case USE_PARAM_NAMES:
       // we do not allow vector coupling in this mode
       if (!_mapping_is_unique)
-        mooseError("Derivative parsed materials must couple exactly one non-linear variable per coupled variable input parameter.");
+        mooseError("Derivative parsed materials must couple exactly one non-linear variable per "
+                   "coupled variable input parameter.");
 
       for (unsigned i = 0; i < _nargs; ++i)
         _variable_names[i] = _arg_param_names[i];
@@ -121,12 +136,16 @@ ParsedMaterialHelper::functionParse(const std::string & function_expression,
   }
 
   // erase leading comma
-  variables.erase(0,1);
+  variables.erase(0, 1);
 
   // build the base function
   if (_func_F->Parse(function_expression, variables) >= 0)
-     mooseError("Invalid function\n" << function_expression << '\n' <<
-                variables << "\nin ParsedMaterialHelper.\n" << _func_F->ErrorMsg());
+    mooseError("Invalid function\n",
+               function_expression,
+               '\n',
+               variables,
+               "\nin ParsedMaterialHelper.\n",
+               _func_F->ErrorMsg());
 
   // create parameter passing buffer
   _func_params.resize(_nargs + nmat_props);
@@ -139,6 +158,11 @@ void
 ParsedMaterialHelper::functionsPostParse()
 {
   functionsOptimize();
+
+  // force a value update to get the property at least once and register it for the dependencies
+  unsigned int nmat_props = _mat_prop_descriptors.size();
+  for (unsigned int i = 0; i < nmat_props; ++i)
+    _mat_prop_descriptors[i].value();
 }
 
 void
@@ -148,7 +172,7 @@ ParsedMaterialHelper::functionsOptimize()
   if (!_disable_fpoptimizer)
     _func_F->Optimize();
   if (_enable_jit && !_func_F->JITCompile())
-    mooseWarning("Failed to JIT compile expression, falling back to byte code interpretation.");
+    mooseInfo("Failed to JIT compile expression, falling back to byte code interpretation.");
 }
 
 void

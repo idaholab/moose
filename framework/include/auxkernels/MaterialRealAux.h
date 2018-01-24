@@ -18,10 +18,10 @@
 // MOOSE includes
 #include "MaterialAuxBase.h"
 
-//Forward Declarations
+// Forward Declarations
 class MaterialRealAux;
 
-template<>
+template <>
 InputParameters validParams<MaterialRealAux>();
 
 /**
@@ -30,7 +30,6 @@ InputParameters validParams<MaterialRealAux>();
 class MaterialRealAux : public MaterialAuxBase<Real>
 {
 public:
-
   /**
    * Class constructor.
    * @param parameters Input parameters for this object
@@ -38,9 +37,8 @@ public:
   MaterialRealAux(const InputParameters & parameters);
 
 protected:
-
   /// Returns the material property values at quadrature points
   virtual Real getRealValue();
 };
 
-#endif //MATERIALREALAUX_H
+#endif // MATERIALREALAUX_H

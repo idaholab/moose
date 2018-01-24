@@ -7,27 +7,23 @@
 #ifndef NSMOMENTUMCONVECTIVEWEAKSTAGNATIONBC_H
 #define NSMOMENTUMCONVECTIVEWEAKSTAGNATIONBC_H
 
-#include "NSWeakStagnationBC.h"
+#include "NSWeakStagnationBaseBC.h"
 
 // Forward Declarations
 class NSMomentumConvectiveWeakStagnationBC;
 
-template<>
+template <>
 InputParameters validParams<NSMomentumConvectiveWeakStagnationBC>();
-
 
 /**
  * The convective part (sans pressure term) of the momentum equation
  * boundary integral evaluated at specified stagnation temperature,
  * stagnation pressure, and flow direction values.
  */
-class NSMomentumConvectiveWeakStagnationBC : public NSWeakStagnationBC
+class NSMomentumConvectiveWeakStagnationBC : public NSWeakStagnationBaseBC
 {
-
 public:
   NSMomentumConvectiveWeakStagnationBC(const InputParameters & parameters);
-
-  virtual ~NSMomentumConvectiveWeakStagnationBC(){}
 
 protected:
   virtual Real computeQpResidual();
@@ -35,7 +31,7 @@ protected:
   virtual Real computeQpOffDiagJacobian(unsigned jvar);
 
   // Required parameters
-  unsigned _component;
+  const unsigned int _component;
 };
 
 #endif // NSMOMENTUMCONVECTIVEWEAKSTAGNATIONBC_H

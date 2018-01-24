@@ -12,13 +12,15 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
+// MOOSE includes
 #include "UserObjectInterface.h"
-#include "FEProblem.h"
+#include "DiscreteElementUserObject.h"
+#include "InputParameters.h"
 
-UserObjectInterface::UserObjectInterface(const InputParameters & params) :
-    _uoi_feproblem(*params.get<FEProblem *>("_fe_problem")),
-    _uoi_tid(params.have_parameter<THREAD_ID>("_tid") ? params.get<THREAD_ID>("_tid") : 0),
-    _uoi_params(params)
+UserObjectInterface::UserObjectInterface(const MooseObject * moose_object)
+  : _uoi_params(moose_object->parameters()),
+    _uoi_feproblem(*_uoi_params.getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")),
+    _uoi_tid(_uoi_params.have_parameter<THREAD_ID>("_tid") ? _uoi_params.get<THREAD_ID>("_tid") : 0)
 {
 }
 
@@ -32,4 +34,10 @@ const UserObject &
 UserObjectInterface::getUserObjectBaseByName(const std::string & name)
 {
   return _uoi_feproblem.getUserObjectBase(name);
+}
+
+bool
+UserObjectInterface::isDiscreteUserObject(const UserObject & uo) const
+{
+  return dynamic_cast<const DiscreteElementUserObject *>(&uo) != NULL;
 }

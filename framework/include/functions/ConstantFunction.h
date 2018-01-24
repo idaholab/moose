@@ -19,7 +19,8 @@
 
 class ConstantFunction;
 
-template<> InputParameters validParams<ConstantFunction>();
+template <>
+InputParameters validParams<ConstantFunction>();
 
 /**
  * Class that represents constant function
@@ -29,11 +30,10 @@ class ConstantFunction : public Function
 public:
   ConstantFunction(const InputParameters & parameters);
 
-  virtual Real value(Real t, const Point & p);
+  virtual Real value(Real t, const Point & p) override;
 
 protected:
   const Real & _value;
 };
 
 #endif
-

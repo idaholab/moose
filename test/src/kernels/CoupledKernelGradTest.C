@@ -13,45 +13,43 @@
 /****************************************************************/
 #include "CoupledKernelGradTest.h"
 
-
-template<>
-InputParameters validParams<CoupledKernelGradTest>()
+template <>
+InputParameters
+validParams<CoupledKernelGradTest>()
 {
   InputParameters p = validParams<KernelGrad>();
-  p.addRequiredCoupledVar("var2","Coupled Variable");
-  p.addRequiredParam<std::vector<Real> >("vel","velocity");
-  p.addParam<bool>("test_coupling_error", false, "Set to true to verify that error messages are produced if a coupling is requested that wasn't declared");
+  p.addRequiredCoupledVar("var2", "Coupled Variable");
+  p.addRequiredParam<std::vector<Real>>("vel", "velocity");
+  p.addParam<bool>("test_coupling_error",
+                   false,
+                   "Set to true to verify that error messages are "
+                   "produced if a coupling is requested that wasn't "
+                   "declared");
   return p;
 }
 
-
-CoupledKernelGradTest::CoupledKernelGradTest(const InputParameters & parameters) :
-    KernelGrad(parameters),
-    _var2(coupledValue("var2")),
-    _var2_num(coupled("var2"))
+CoupledKernelGradTest::CoupledKernelGradTest(const InputParameters & parameters)
+  : KernelGrad(parameters), _var2(coupledValue("var2")), _var2_num(coupled("var2"))
 {
-  std::vector<Real> a(getParam<std::vector<Real> >("vel"));
-  if (a.size()!=2)
+  std::vector<Real> a(getParam<std::vector<Real>>("vel"));
+  if (a.size() != 2)
   {
     mooseError("ERROR: CoupledKernelGradTest only implemented for 2D, vel is not size 2");
   }
-  _beta=RealVectorValue(a[0],a[1]);
+  _beta = RealVectorValue(a[0], a[1]);
 
   // Test coupling error
   if (getParam<bool>("test_coupling_error"))
     coupledGradient("var_undeclared");
 }
 
-CoupledKernelGradTest::~CoupledKernelGradTest()
-{
-}
+CoupledKernelGradTest::~CoupledKernelGradTest() {}
 
 RealGradient
 CoupledKernelGradTest::precomputeQpResidual()
 {
-  return -_beta*_var2[_qp];
+  return -_beta * _var2[_qp];
 }
-
 
 RealGradient
 CoupledKernelGradTest::precomputeQpJacobian()
@@ -64,8 +62,8 @@ CoupledKernelGradTest::computeQpOffDiagJacobian(unsigned int jvar)
 {
   if (jvar == _var2_num)
   {
-    //return _beta*_var2[_qp]*_phi[_j][_qp]*_grad_test[_i][_qp];
-    return -(_beta*_phi[_j][_qp])*_grad_test[_i][_qp];
+    // return _beta*_var2[_qp]*_phi[_j][_qp]*_grad_test[_i][_qp];
+    return -(_beta * _phi[_j][_qp]) * _grad_test[_i][_qp];
   }
   else
   {

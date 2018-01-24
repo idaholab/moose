@@ -19,21 +19,15 @@
 #include "Checkpoint.h"
 #include "MooseObjectAction.h"
 
-template<>
-InputParameters validParams<SetupRecoverFileBaseAction>()
+template <>
+InputParameters
+validParams<SetupRecoverFileBaseAction>()
 {
   InputParameters params = validParams<Action>();
   return params;
 }
 
-SetupRecoverFileBaseAction::SetupRecoverFileBaseAction(InputParameters params) :
-  Action(params)
-{
-}
-
-SetupRecoverFileBaseAction::~SetupRecoverFileBaseAction()
-{
-}
+SetupRecoverFileBaseAction::SetupRecoverFileBaseAction(InputParameters params) : Action(params) {}
 
 void
 SetupRecoverFileBaseAction::act()
@@ -50,7 +44,7 @@ SetupRecoverFileBaseAction::act()
     std::list<std::string> checkpoint_files = _app.getCheckpointFiles();
 
     // Grab the most recent one
-    std::string recovery_file_base = MooseUtils::getRecoveryFileBase(checkpoint_files);
+    std::string recovery_file_base = MooseUtils::getLatestAppCheckpointFileBase(checkpoint_files);
 
     if (recovery_file_base.empty())
       mooseError("Unable to find suitable recovery file!");

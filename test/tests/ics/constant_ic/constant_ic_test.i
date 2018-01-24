@@ -1,3 +1,12 @@
+###########################################################
+# This is a simple test demonstrating the use of the
+# user-defined initial condition system.
+#
+# @Requirement F3.20
+# @Requirement F5.20
+###########################################################
+
+
 [Mesh]
   file = square.e
 []
@@ -9,6 +18,7 @@
     order = FIRST
     family = LAGRANGE
 
+    # Initial Condition on Nonlinear variable
     [./InitialCondition]
       type = ConstantIC
       value = 6.2
@@ -23,6 +33,7 @@
     order = FIRST
     family = LAGRANGE
 
+    # Initial Condition on Auxiliary variable
     [./InitialCondition]
       type = ConstantIC
       value = 9.3

@@ -1,0 +1,105 @@
+[Tests]
+  [./grav01a]
+    type = 'CSVDiff'
+    input = 'grav01a.i'
+    csvdiff = 'grav01a.csv'
+    rel_err = 1.0E-5
+# Run in serial so RandomIC gives the same result, to avoid spurious errors
+    max_parallel = 1
+    max_threads  = 1
+  [../]
+  [./grav01b]
+    type = 'CSVDiff'
+    input = 'grav01b.i'
+    csvdiff = 'grav01b.csv'
+    rel_err = 1.0E-5
+# Run in serial so RandomIC gives the same result, to avoid spurious errors
+    max_parallel = 1
+    max_threads  = 1
+  [../]
+  [./grav01c]
+    type = 'CSVDiff'
+    input = 'grav01c.i'
+    csvdiff = 'grav01c.csv'
+    rel_err = 1.0E-5
+# Run in serial so RandomIC gives the same result, to avoid spurious errors
+    max_parallel = 1
+    max_threads  = 1
+  [../]
+  [./grav01c_action]
+    type = 'CSVDiff'
+    input = 'grav01c_action.i'
+    csvdiff = 'grav01c_action.csv'
+    rel_err = 1.0E-5
+# Run in serial so RandomIC gives the same result, to avoid spurious errors
+    max_parallel = 1
+    max_threads  = 1
+  [../]
+  [./grav02a]
+    type = 'CSVDiff'
+    input = 'grav02a.i'
+    csvdiff = 'grav02a.csv'
+    rel_err = 1.0E-5
+  [../]
+  [./grav02b]
+    type = 'CSVDiff'
+    input = 'grav02b.i'
+    csvdiff = 'grav02b.csv'
+    rel_err = 1.0E-5
+  [../]
+  [./grav02c]
+    type = 'CSVDiff'
+    input = 'grav02c.i'
+    csvdiff = 'grav02c.csv'
+    rel_err = 1.0E-5
+  [../]
+  [./grav02d]
+    type = 'CSVDiff'
+    input = 'grav02d.i'
+    csvdiff = 'grav02d.csv'
+    rel_err = 1.0E-5
+  [../]
+  [./grav02e]
+    type = 'Exodiff'
+    input = 'grav02e.i'
+    exodiff = 'grav02e.e'
+  [../]
+  [./grav02f]
+    type = 'Exodiff'
+    input = 'grav02f.i'
+    exodiff = 'grav02f.e'
+  [../]
+  [./grav02g]
+    type = 'Exodiff'
+    input = 'grav02g.i'
+    exodiff = 'grav02g.e'
+  [../]
+
+  [./fully_saturated_grav01a]
+    type = 'CSVDiff'
+    input = 'fully_saturated_grav01a.i'
+    csvdiff = 'fully_saturated_grav01a.csv'
+    rel_err = 1.0E-5
+# Run in serial so RandomIC gives the same result, to avoid spurious errors
+    max_parallel = 1
+    max_threads  = 1
+  [../]
+  [./fully_saturated_grav01b]
+    type = 'CSVDiff'
+    input = 'fully_saturated_grav01b.i'
+    csvdiff = 'fully_saturated_grav01b.csv'
+    rel_err = 1.0E-5
+# Run in serial so RandomIC gives the same result, to avoid spurious errors
+    max_parallel = 1
+    max_threads  = 1
+  [../]
+  [./fully_saturated_grav01c]
+    type = 'CSVDiff'
+    input = 'fully_saturated_grav01c.i'
+    csvdiff = 'fully_saturated_grav01c.csv'
+    rel_err = 1.0E-5
+# Run in serial so RandomIC gives the same result, to avoid spurious errors
+    max_parallel = 1
+    max_threads  = 1
+  [../]
+[]

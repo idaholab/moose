@@ -9,9 +9,10 @@
 
 #include "StressDivergenceTensors.h"
 
- /**
- * DynamicStressDivergenceTensors derives from StressDivergenceTensors and adds stress related Rayleigh and HHT time integration terms.
- */
+/**
+* DynamicStressDivergenceTensors derives from StressDivergenceTensors and adds stress related
+* Rayleigh and HHT time integration terms.
+*/
 class DynamicStressDivergenceTensors : public StressDivergenceTensors
 {
 public:
@@ -26,8 +27,9 @@ protected:
   const MaterialProperty<RankTwoTensor> & _stress_old;
 
   // Rayleigh damping parameter _zeta and HHT time integration parameter _alpha
-  const Real _zeta;
+  const MaterialProperty<Real> & _zeta;
   const Real _alpha;
+  const bool _static_initialization;
 };
 
-#endif //DYNAMICSTRESSDIVERGENCETENSORS_H
+#endif // DYNAMICSTRESSDIVERGENCETENSORS_H

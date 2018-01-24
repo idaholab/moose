@@ -37,7 +37,7 @@
     variable = u
   [../]
   [./fn]
-    type = UserForcingFunction
+    type = BodyForce
     variable = u
     function = ffn
   [../]

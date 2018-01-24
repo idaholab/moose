@@ -17,20 +17,21 @@
 #include "SubProblem.h"
 #include "MooseTypes.h"
 
-// libmesh includes
 #include "libmesh/quadrature.h"
 
-template<>
-InputParameters validParams<ElementVariablePostprocessor>()
+template <>
+InputParameters
+validParams<ElementVariablePostprocessor>()
 {
   InputParameters params = validParams<ElementPostprocessor>();
-  params.addCoupledVar("variable", "The name of the variable that this postprocessor operates on");
+  params.addRequiredCoupledVar("variable",
+                               "The name of the variable that this postprocessor operates on");
   return params;
 }
 
-ElementVariablePostprocessor::ElementVariablePostprocessor(const InputParameters & parameters) :
-    ElementPostprocessor(parameters),
-    MooseVariableInterface(parameters, false),
+ElementVariablePostprocessor::ElementVariablePostprocessor(const InputParameters & parameters)
+  : ElementPostprocessor(parameters),
+    MooseVariableInterface(this, false),
     _u(coupledValue("variable")),
     _grad_u(coupledGradient("variable")),
     _u_dot(coupledDot("variable")),
@@ -42,7 +43,6 @@ ElementVariablePostprocessor::ElementVariablePostprocessor(const InputParameters
 void
 ElementVariablePostprocessor::execute()
 {
-  for (_qp=0; _qp<_qrule->n_points(); _qp++)
+  for (_qp = 0; _qp < _qrule->n_points(); _qp++)
     computeQpValue();
 }
-

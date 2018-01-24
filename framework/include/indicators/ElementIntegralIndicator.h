@@ -19,17 +19,15 @@
 
 class ElementIntegralIndicator;
 
-template<>
+template <>
 InputParameters validParams<ElementIntegralIndicator>();
 
-class ElementIntegralIndicator :
-  public ElementIndicator
+class ElementIntegralIndicator : public ElementIndicator
 {
 public:
   ElementIntegralIndicator(const InputParameters & parameters);
-  virtual ~ElementIntegralIndicator(){};
 
-  virtual void computeIndicator();
+  virtual void computeIndicator() override;
 
 protected:
   virtual Real computeQpIntegral();

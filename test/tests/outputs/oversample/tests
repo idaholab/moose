@@ -4,6 +4,7 @@
     type = 'Exodiff'
     input = 'oversample.i'
     exodiff = 'oversample_out.e'
+    recover = false #see #2295
   [../]
 
   [./oversample_filemesh]
@@ -11,6 +12,7 @@
     type = 'Exodiff'
     input = 'oversample_file.i'
     exodiff = 'exodus_oversample_custom_name.e'
+    recover = false #see #2295
   [../]
 
   [./adapt]
@@ -24,12 +26,14 @@
     type = 'Exodiff'
     input = 'over_sampling_test_gen.i'
     exodiff = 'out_gen.e out_gen_oversample.e'
+    recover = false #see #2295
   [../]
 
   [./test_file]
     type = 'Exodiff'
     input = 'over_sampling_test_file.i'
     exodiff = 'out_file.e out_file_oversample.e'
+    recover = false #see #2295
   [../]
 
   [./test_first_order]
@@ -37,6 +41,7 @@
     input = 'over_sampling_second_file.i'
     exodiff = 'out_wedge_oversample.e'
     valgrind = 'HEAVY'   # Too slow
+    recover = false #see #2295
   [../]
 
   [./ex02]
@@ -44,6 +49,7 @@
     type = 'Exodiff'
     input = 'ex02_oversample.i'
     exodiff = 'ex02_oversample_out.e ex02_oversample_os2.e ex02_oversample_os4.e'
+    recover = false #see #2295
   [../]
 
   [./ex02_adapt]
@@ -51,5 +57,6 @@
     type = 'Exodiff'
     input = 'ex02_adapt.i'
     exodiff = 'ex02_adapt_out.e ex02_adapt_os2.e ex02_adapt_os4.e'
+    recover = false #see #2295
   [../]
 []

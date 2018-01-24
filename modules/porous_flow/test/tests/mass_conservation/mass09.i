@@ -1,0 +1,145 @@
+# Checking that the mass postprocessor throws the correct error when more than a single
+# phase index is given when using the saturation_threshold parameter
+
+[Mesh]
+  type = GeneratedMesh
+  dim = 1
+  nx = 10
+  xmin = 0
+  xmax = 1
+[]
+
+[GlobalParams]
+  PorousFlowDictator = dictator
+[]
+
+[Variables]
+  [./pp]
+  [../]
+  [./sat]
+  [../]
+[]
+
+[AuxVariables]
+  [./massfrac_ph0_sp0]
+    initial_condition = 1
+  [../]
+  [./massfrac_ph1_sp0]
+    initial_condition = 0
+  [../]
+[]
+
+[ICs]
+  [./pinit]
+    type = ConstantIC
+    value = 1
+    variable = pp
+  [../]
+  [./satinit]
+    type = FunctionIC
+    function = 1-x
+    variable = sat
+  [../]
+[]
+
+[Kernels]
+  [./mass0]
+    type = PorousFlowMassTimeDerivative
+    fluid_component = 0
+    variable = pp
+  [../]
+  [./mass1]
+    type = PorousFlowMassTimeDerivative
+    fluid_component = 1
+    variable = sat
+  [../]
+[]
+
+[UserObjects]
+  [./dictator]
+    type = PorousFlowDictator
+    porous_flow_vars = 'pp sat'
+    number_fluid_phases = 2
+    number_fluid_components = 2
+  [../]
+  [./pc]
+    type = PorousFlowCapillaryPressureVG
+    m = 0.5
+    alpha = 1
+  [../]
+[]
+
+[Modules]
+  [./FluidProperties]
+    [./simple_fluid0]
+      type = SimpleFluidProperties
+      bulk_modulus = 1
+      density0 = 1
+      thermal_expansion = 0
+    [../]
+    [./simple_fluid1]
+      type = SimpleFluidProperties
+      bulk_modulus = 1
+      density0 = 0.1
+      thermal_expansion = 0
+    [../]
+  [../]
+[]
+
+[Materials]
+  [./temperature]
+    type = PorousFlowTemperature
+    at_nodes = true
+  [../]
+  [./ppss]
+    type = PorousFlow2PhasePS
+    at_nodes = true
+    phase0_porepressure = pp
+    phase1_saturation = sat
+    capillary_pressure = pc
+  [../]
+  [./massfrac]
+    type = PorousFlowMassFraction
+    at_nodes = true
+    mass_fraction_vars = 'massfrac_ph0_sp0 massfrac_ph1_sp0'
+  [../]
+  [./simple_fluid0]
+    type = PorousFlowSingleComponentFluid
+    fp = simple_fluid0
+    at_nodes = true
+    phase = 0
+  [../]
+  [./simple_fluid1]
+    type = PorousFlowSingleComponentFluid
+    fp = simple_fluid1
+    at_nodes = true
+    phase = 1
+  [../]
+  [./dens_all]
+    type = PorousFlowJoiner
+    include_old = true
+    at_nodes = true
+    material_property = PorousFlow_fluid_phase_density_nodal
+  [../]
+  [./porosity]
+    type = PorousFlowPorosityConst
+    at_nodes = true
+    porosity = 0.1
+  [../]
+[]
+
+[Postprocessors]
+  [./comp1_total_mass]
+    type = PorousFlowFluidMass
+    fluid_component = 1
+    saturation_threshold = 0.5
+    phase = '0 1'
+  [../]
+[]
+
+[Executioner]
+  type = Transient
+  solve_type = Newton
+  dt = 1
+  end_time = 1
+[]

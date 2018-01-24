@@ -22,9 +22,11 @@
 
 #include <unistd.h>
 
-namespace Moose {
+namespace Moose
+{
 
-std::string getExecutablePath()
+std::string
+getExecutablePath()
 {
   std::string exec_path;
   char path[1024];
@@ -35,7 +37,7 @@ std::string getExecutablePath()
     exec_path = path;
   else
     mooseError("Unable to retrieve executable path");
-#else //Linux with Proc
+#else // Linux with Proc
   std::ostringstream oss;
   oss << "/proc/" << getpid() << "/exe";
   int ch = readlink(oss.str().c_str(), path, 1024);
@@ -54,4 +56,3 @@ std::string getExecutablePath()
 }
 
 } // Namespace MOOSE
-

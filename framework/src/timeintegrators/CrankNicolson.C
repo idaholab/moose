@@ -16,28 +16,26 @@
 #include "NonlinearSystem.h"
 #include "FEProblem.h"
 
-template<>
-InputParameters validParams<CrankNicolson>()
+template <>
+InputParameters
+validParams<CrankNicolson>()
 {
   InputParameters params = validParams<TimeIntegrator>();
 
   return params;
 }
 
-CrankNicolson::CrankNicolson(const InputParameters & parameters) :
-    TimeIntegrator(parameters),
-    _residual_old(_nl.addVector("residual_old", false, GHOSTED))
+CrankNicolson::CrankNicolson(const InputParameters & parameters)
+  : TimeIntegrator(parameters), _residual_old(_nl.addVector("residual_old", false, GHOSTED))
 {
 }
 
-CrankNicolson::~CrankNicolson()
-{
-}
+CrankNicolson::~CrankNicolson() {}
 
 void
 CrankNicolson::computeTimeDerivatives()
 {
-  _u_dot  = *_solution;
+  _u_dot = *_solution;
   _u_dot -= _solution_old;
   _u_dot *= 2. / _dt;
   _u_dot.close();
@@ -57,8 +55,8 @@ CrankNicolson::preSolve()
     _du_dot_du = 0;
 
     // for the first time step, compute residual for the old time step
-    _fe_problem.computeResidualType(_solution_old, *_nl.sys().rhs, Moose::KT_NONTIME);
-    _residual_old = *_nl.sys().rhs;
+    _fe_problem.computeResidualType(_solution_old, _nl.RHS(), Moose::KT_NONTIME);
+    _residual_old = _nl.RHS();
     _residual_old.close();
   }
 }

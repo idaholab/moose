@@ -1,3 +1,13 @@
+###########################################################
+# This is a simple test of the Function System. This
+# test uses forcing terms produced from analytical
+# functions of space and time to verify a solution
+# using MMS.
+#
+# @Requirement F6.20
+###########################################################
+
+
 [Mesh]
   type = GeneratedMesh
   dim = 2
@@ -84,12 +94,12 @@
     variable = v
   [../]
   [./u_mms]
-    type = UserForcingFunction
+    type = BodyForce
     variable = u
     function = u_mms_func
   [../]
   [./v_mms]
-    type = UserForcingFunction
+    type = BodyForce
     variable = v
     function = v_mms_func
   [../]

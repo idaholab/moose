@@ -20,7 +20,7 @@
 // Forward Declaration
 class TimeKernel;
 
-template<>
+template <>
 InputParameters validParams<TimeKernel>();
 
 /**
@@ -31,10 +31,8 @@ class TimeKernel : public Kernel
 {
 public:
   TimeKernel(const InputParameters & parameters);
-  virtual ~TimeKernel();
 
-  virtual void computeResidual();
-
+  virtual void computeResidual() override;
 };
 
-#endif //TIMEKERNEL_H
+#endif // TIMEKERNEL_H

@@ -12,17 +12,25 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-// Moose includes
 #include "Nemesis.h"
-#include "MooseApp.h"
-#include "FEProblem.h"
 
-template<>
-InputParameters validParams<Nemesis>()
+// MOOSE includes
+#include "FEProblem.h"
+#include "MooseApp.h"
+#include "MooseMesh.h"
+#include "MooseVariableScalar.h"
+#include "SystemBase.h"
+
+#include "libmesh/dof_map.h"
+#include "libmesh/nemesis_io.h"
+
+template <>
+InputParameters
+validParams<Nemesis>()
 {
   // Get the base class parameters
-  InputParameters params = validParams<AdvancedOutput<OversampleOutput> >();
-  params += AdvancedOutput<OversampleOutput>::enableOutputTypes("scalar postprocessor input");
+  InputParameters params = validParams<AdvancedOutput>();
+  params += AdvancedOutput::enableOutputTypes("scalar postprocessor input");
 
   // Add description for the Nemesis class
   params.addClassDescription("Object for output data in the Nemesis format");
@@ -31,26 +39,22 @@ InputParameters validParams<Nemesis>()
   return params;
 }
 
-Nemesis::Nemesis(const InputParameters & parameters) :
-    AdvancedOutput<OversampleOutput>(parameters),
-    _nemesis_io_ptr(NULL),
+Nemesis::Nemesis(const InputParameters & parameters)
+  : AdvancedOutput(parameters),
+    _nemesis_io_ptr(nullptr),
     _file_num(0),
     _nemesis_num(0),
     _nemesis_initialized(false)
 {
 }
 
-Nemesis::~Nemesis()
-{
-  // Clean up the libMesh::NemesisII_IO object
-  delete _nemesis_io_ptr;
-}
+Nemesis::~Nemesis() {}
 
 void
 Nemesis::initialSetup()
 {
-  // Call the base class method
-  AdvancedOutput<OversampleOutput>::initialSetup();
+
+  AdvancedOutput::initialSetup();
 
   // Make certain that a Nemesis_IO object exists
   meshChanged();
@@ -59,17 +63,10 @@ Nemesis::initialSetup()
 void
 Nemesis::meshChanged()
 {
-  // Maintain Oversample::meshChanged() functionality
-  OversampleOutput::meshChanged();
-
   // Do not delete the Nemesis_IO object if it has not been used; also there is no need to setup
   // the object in this case, so just return
-  if (_nemesis_io_ptr != NULL && !_nemesis_initialized)
+  if (_nemesis_io_ptr != nullptr && !_nemesis_initialized)
     return;
-
-  // Delete existing NemesisII_IO objects
-  if (_nemesis_io_ptr != NULL)
-    delete _nemesis_io_ptr;
 
   // Increment the file number
   _file_num++;
@@ -78,9 +75,8 @@ Nemesis::meshChanged()
   _nemesis_num = 1;
 
   // Create the new NemesisIO object
-  _nemesis_io_ptr = new Nemesis_IO(_mesh_ptr->getMesh());
+  _nemesis_io_ptr = libmesh_make_unique<Nemesis_IO>(_problem_ptr->mesh().getMesh());
   _nemesis_initialized = false;
-
 }
 
 void
@@ -91,10 +87,10 @@ Nemesis::outputPostprocessors()
 
   // Append the postprocessor data to the global name value parameters; scalar outputs
   // also append these member variables
-  for (std::set<std::string>::const_iterator it = pps.begin(); it != pps.end(); ++it)
+  for (const auto & name : pps)
   {
-    _global_names.push_back(*it);
-    _global_values.push_back(_problem_ptr->getPostprocessorValue(*it));
+    _global_names.push_back(name);
+    _global_values.push_back(_problem_ptr->getPostprocessorValue(name));
   }
 }
 
@@ -105,16 +101,32 @@ Nemesis::outputScalarVariables()
   const std::set<std::string> & out = getScalarOutput();
 
   // Append the scalar to the global output lists
-  for (std::set<std::string>::const_iterator it = out.begin(); it != out.end(); ++it)
+  for (const auto & out_name : out)
   {
-    VariableValue & variable = _problem_ptr->getScalarVariable(0, *it).sln();
-    unsigned int n = variable.size();
+    // Make sure scalar values are in sync with the solution vector
+    // and are visible on this processor.  See TableOutput.C for
+    // TableOutput::outputScalarVariables() explanatory comments
+
+    MooseVariableScalar & scalar_var = _problem_ptr->getScalarVariable(0, out_name);
+    scalar_var.reinit();
+    VariableValue value = scalar_var.sln();
+
+    const std::vector<dof_id_type> & dof_indices = scalar_var.dofIndices();
+    const unsigned int n = dof_indices.size();
+    value.resize(n);
+
+    const DofMap & dof_map = scalar_var.sys().dofMap();
+    for (unsigned int i = 0; i != n; ++i)
+    {
+      const processor_id_type pid = dof_map.dof_owner(dof_indices[i]);
+      this->comm().broadcast(value[i], pid);
+    }
 
     // If the scalar has a single component, output the name directly
     if (n == 1)
     {
-      _global_names.push_back(*it);
-      _global_values.push_back(variable[0]);
+      _global_names.push_back(out_name);
+      _global_values.push_back(value[0]);
     }
 
     // If the scalar as many components add indices to the end of the name
@@ -123,9 +135,9 @@ Nemesis::outputScalarVariables()
       for (unsigned int i = 0; i < n; ++i)
       {
         std::ostringstream os;
-        os << *it << "_" << i;
+        os << out_name << "_" << i;
         _global_names.push_back(os.str());
-        _global_values.push_back(variable[i]);
+        _global_values.push_back(value[i]);
       }
     }
   }
@@ -134,7 +146,7 @@ Nemesis::outputScalarVariables()
 void
 Nemesis::output(const ExecFlagType & type)
 {
-  if (!OversampleOutput::shouldOutput(type))
+  if (!shouldOutput(type))
     return;
 
   // Clear the global variables (postprocessors and scalars)
@@ -142,10 +154,11 @@ Nemesis::output(const ExecFlagType & type)
   _global_values.clear();
 
   // Call the output methods
-  AdvancedOutput<OversampleOutput>::output(type);
+  AdvancedOutput::output(type);
 
   // Write the data
-  _nemesis_io_ptr->write_timestep(filename(), *_es_ptr, _nemesis_num, time() + _app.getGlobalTimeOffset());
+  _nemesis_io_ptr->write_timestep(
+      filename(), *_es_ptr, _nemesis_num, time() + _app.getGlobalTimeOffset());
   _nemesis_initialized = true;
 
   // Increment output call counter for the current file
@@ -161,18 +174,13 @@ Nemesis::filename()
 {
   // Append the .e extension on the base file name
   std::ostringstream output;
-  output << _file_base << ".e" ;
+  output << _file_base << ".e";
 
   // Add the _000x extension to the file
   if (_file_num > 1)
-    output << "-s"
-           << std::setw(_padding)
-           << std::setprecision(0)
-           << std::setfill('0')
-           << std::right
+    output << "-s" << std::setw(_padding) << std::setprecision(0) << std::setfill('0') << std::right
            << _file_num;
 
   // Return the filename
   return output.str();
-
 }

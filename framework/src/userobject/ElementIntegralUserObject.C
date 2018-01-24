@@ -12,23 +12,23 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
+// MOOSE includes
 #include "ElementIntegralUserObject.h"
 
-// libmesh includes
 #include "libmesh/quadrature.h"
 
-template<>
-InputParameters validParams<ElementIntegralUserObject>()
+template <>
+InputParameters
+validParams<ElementIntegralUserObject>()
 {
   InputParameters params = validParams<ElementUserObject>();
   return params;
 }
 
-ElementIntegralUserObject::ElementIntegralUserObject(const InputParameters & parameters) :
-    ElementUserObject(parameters),
-    _qp(0),
-    _integral_value(0)
-{}
+ElementIntegralUserObject::ElementIntegralUserObject(const InputParameters & parameters)
+  : ElementUserObject(parameters), _qp(0), _integral_value(0)
+{
+}
 
 void
 ElementIntegralUserObject::initialize()
@@ -61,8 +61,7 @@ ElementIntegralUserObject::computeIntegral()
 {
   Real sum = 0;
 
-  for (_qp=0; _qp<_qrule->n_points(); _qp++)
-    sum += _JxW[_qp]*_coord[_qp]*computeQpIntegral();
+  for (_qp = 0; _qp < _qrule->n_points(); _qp++)
+    sum += _JxW[_qp] * _coord[_qp] * computeQpIntegral();
   return sum;
 }
-

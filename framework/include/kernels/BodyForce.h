@@ -17,24 +17,37 @@
 
 #include "Kernel.h"
 
-//Forward Declarations
+// Forward Declarations
 class BodyForce;
 class Function;
 
-template<>
+template <>
 InputParameters validParams<BodyForce>();
 
+/**
+ * This kernel implements a generic functional
+ * body force term:
+ * $ - c \cdof f \cdot \phi_i $
+ *
+ * The coefficient and function both have defaults
+ * equal to 1.0.
+ */
 class BodyForce : public Kernel
 {
 public:
-
   BodyForce(const InputParameters & parameters);
 
 protected:
-  virtual Real computeQpResidual();
+  virtual Real computeQpResidual() override;
 
-  Real _value;
+  /// Scale factor
+  const Real & _scale;
+
+  /// Optional function value
   Function & _function;
+
+  /// Optional Postprocessor value
+  const PostprocessorValue & _postprocessor;
 };
 
 #endif

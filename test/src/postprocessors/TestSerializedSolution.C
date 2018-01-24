@@ -14,8 +14,13 @@
 
 #include "TestSerializedSolution.h"
 
-template<>
-InputParameters validParams<TestSerializedSolution>()
+#include "SystemBase.h"
+
+#include "libmesh/numeric_vector.h"
+
+template <>
+InputParameters
+validParams<TestSerializedSolution>()
 {
   InputParameters params = validParams<GeneralPostprocessor>();
 
@@ -26,17 +31,20 @@ InputParameters validParams<TestSerializedSolution>()
   return params;
 }
 
-TestSerializedSolution::TestSerializedSolution(const InputParameters & parameters) :
-    GeneralPostprocessor(parameters),
-    _test_sys(getParam<MooseEnum>("system") == 0 ? (SystemBase &)_fe_problem.getNonlinearSystem() : (SystemBase &)_fe_problem.getAuxiliarySystem()),
+TestSerializedSolution::TestSerializedSolution(const InputParameters & parameters)
+  : GeneralPostprocessor(parameters),
+    _test_sys(getParam<MooseEnum>("system") == 0
+                  ? (SystemBase &)_fe_problem.getNonlinearSystemBase()
+                  : (SystemBase &)_fe_problem.getAuxiliarySystem()),
     _serialized_solution(_test_sys.serializedSolution()),
     _sum(0)
-{}
+{
+}
 
 void
 TestSerializedSolution::initialize()
 {
-  _sum=0;
+  _sum = 0;
 }
 
 void
@@ -46,7 +54,7 @@ TestSerializedSolution::execute()
     mooseError("Serialized solution vector doesn't contain the correct number of entries!");
 
   // Sum up all entries in the solution vector
-  for (unsigned int i=0; i<_serialized_solution.size(); i++)
+  for (unsigned int i = 0; i < _serialized_solution.size(); i++)
     _sum += _serialized_solution(i);
 
   // Verify that every processor got the same value

@@ -9,14 +9,11 @@
 
 #include "NSKernel.h"
 
-
 // ForwardDeclarations
 class NSMomentumInviscidFlux;
 
-template<>
+template <>
 InputParameters validParams<NSMomentumInviscidFlux>();
-
-
 
 /**
  * The inviscid flux (convective + pressure terms) for the
@@ -25,7 +22,6 @@ InputParameters validParams<NSMomentumInviscidFlux>();
 class NSMomentumInviscidFlux : public NSKernel
 {
 public:
-
   NSMomentumInviscidFlux(const InputParameters & parameters);
 
 protected:
@@ -34,17 +30,17 @@ protected:
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
 
   // Coupled variables
-  VariableValue & _pressure;
+  const VariableValue & _pressure;
 
   // Parameters
-  unsigned _component;
+  const unsigned int _component;
 
 private:
   // To be used from both the on and off-diagonal
   // computeQpJacobian functions.  Variable numbering
   // should be in the canonical ordering regardless of
   // Moose's numbering.
-  Real compute_jacobian(unsigned m);
+  Real computeJacobianHelper(unsigned int m);
 };
 
 #endif

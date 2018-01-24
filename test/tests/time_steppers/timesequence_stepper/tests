@@ -1,0 +1,89 @@
+[Tests]
+  [./timesequence_no_start_time]
+    type = 'Exodiff'
+    input = 'timesequence.i'
+    exodiff = 'timesequence_no_start_time.e'
+    cli_args = 'Outputs/file_base=timesequence_no_start_time'
+  [../]
+  [./timesequence_earlier_start_time]
+    type = 'Exodiff'
+    input = 'timesequence.i'
+    exodiff = 'timesequence_earlier_start_time.e'
+    cli_args = 'Executioner/start_time=-1.0
+                Outputs/file_base=timesequence_earlier_start_time'
+  [../]
+  [./timesequence_later_start_time]
+    type = 'Exodiff'
+    input = 'timesequence.i'
+    exodiff = 'timesequence_later_start_time.e'
+    cli_args = 'Executioner/start_time=1.1
+                Outputs/file_base=timesequence_later_start_time'
+  [../]
+  [./timesequence_failed]
+    type = 'Exodiff'
+    input = 'timesequence_failed_solve.i'
+    exodiff = 'timesequence_failed_solve.e'
+    max_threads = 1
+    max_parallel = 1
+  [../]
+
+  [./exodustimesequence]
+    type = 'Exodiff'
+    prereq = timesequence_no_start_time
+    input = 'exodustimesequence.i'
+    exodiff = 'exodustimesequence_out.e'
+  [../]
+
+  [./timesequence_restart1]
+    type = 'Exodiff'
+    input = 'timesequence_restart1.i'
+    exodiff = 'timesequence_restart1.e'
+    cli_args = 'Outputs/file_base=timesequence_restart1'
+    recover = false
+  [../]
+
+  [./timesequence_restart2]
+    type = 'Exodiff'
+    input = 'timesequence_restart2.i'
+    exodiff = 'timesequence_restart2.e'
+    cli_args = 'Outputs/file_base=timesequence_restart2'
+    recover = false
+    prereq = timesequence_restart1
+  [../]
+
+  [./timesequence_restart3]
+    type = 'Exodiff'
+    input = 'timesequence_restart3.i'
+    exodiff = 'timesequence_restart3.e'
+    cli_args = 'Outputs/file_base=timesequence_restart3'
+    recover = false
+    prereq = timesequence_restart1
+  [../]
+
+  [./timesequence_restart_failure_1]
+    type = 'Exodiff'
+    input = 'timesequence_restart1.i'
+    exodiff = 'timesequence_restart_failure1.e'
+    cli_args = 'Outputs/file_base=timesequence_restart_failure1'
+    recover = false
+    max_threads = 1
+    max_parallel = 1
+  [../]
+
+  [./timesequence_restart_failure2]
+    type = 'RunException'
+    input = 'timesequence_restart_failure.i'
+    expect_err = "The timesequence provided in the restart file must be identical"
+    recover = false
+    prereq = timesequence_restart_failure_1
+    max_threads = 1
+    max_parallel = 1
+  [../]
+
+  [./csvtimesequence]
+    type = 'Exodiff'
+    prereq = timesequence_no_start_time
+    input = 'csvtimesequence.i'
+    exodiff = 'csvtimesequence_out.e'
+  [../]
+[]

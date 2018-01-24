@@ -19,21 +19,38 @@
 #include "FileMesh.h"
 #include "MooseApp.h"
 
-template<>
-InputParameters validParams<OversampleOutput>()
+#include "libmesh/distributed_mesh.h"
+#include "libmesh/equation_systems.h"
+#include "libmesh/mesh_function.h"
+
+template <>
+InputParameters
+validParams<OversampleOutput>()
 {
 
   // Get the parameters from the parent object
-  InputParameters params = validParams<FileOutput>();
-  params.addParam<unsigned int>("refinements", 0, "Number of uniform refinements for oversampling (refinement levels beyond any uniform refinements)");
-  params.addParam<Point>("position", "Set a positional offset, this vector will get added to the nodal coordinates to move the domain.");
+  InputParameters params = validParams<AdvancedOutput>();
+  params.addParam<unsigned int>("refinements",
+                                0,
+                                "Number of uniform refinements for oversampling "
+                                "(refinement levels beyond any uniform "
+                                "refinements)");
+  params.addParam<Point>("position",
+                         "Set a positional offset, this vector will get added to the "
+                         "nodal coordinates to move the domain.");
   params.addParam<MeshFileName>("file", "The name of the mesh file to read, for oversampling");
 
   // **** DEPRECATED AND REMOVED PARAMETERS ****
-  params.addDeprecatedParam<bool>("oversample", false, "Set to true to enable oversampling",
-                                  "This parameter is no longer active, simply set 'refinements' to a value greater than zero to evoke oversampling");
-  params.addDeprecatedParam<bool>("append_oversample", false, "Append '_oversample' to the output file base",
-                                  "This parameter is no longer operational, to append '_oversample' utilize the output block name or 'file_base'");
+  params.addDeprecatedParam<bool>("oversample",
+                                  false,
+                                  "Set to true to enable oversampling",
+                                  "This parameter is no longer active, simply set 'refinements' to "
+                                  "a value greater than zero to evoke oversampling");
+  params.addDeprecatedParam<bool>("append_oversample",
+                                  false,
+                                  "Append '_oversample' to the output file base",
+                                  "This parameter is no longer operational, to append "
+                                  "'_oversample' utilize the output block name or 'file_base'");
 
   // 'Oversampling' Group
   params.addParamNamesToGroup("refinements position file", "Oversampling");
@@ -41,10 +58,10 @@ InputParameters validParams<OversampleOutput>()
   return params;
 }
 
-OversampleOutput::OversampleOutput(const InputParameters & parameters) :
-    FileOutput(parameters),
-    _mesh_ptr(getParam<bool>("use_displaced") ?
-              &_problem_ptr->getDisplacedProblem()->mesh() : &_problem_ptr->mesh()),
+OversampleOutput::OversampleOutput(const InputParameters & parameters)
+  : AdvancedOutput(parameters),
+    _mesh_ptr(getParam<bool>("use_displaced") ? &_problem_ptr->getDisplacedProblem()->mesh()
+                                              : &_problem_ptr->mesh()),
     _refinements(getParam<unsigned int>("refinements")),
     _oversample(_refinements > 0 || isParamValid("file")),
     _change_position(isParamValid("position")),
@@ -59,24 +76,35 @@ OversampleOutput::OversampleOutput(const InputParameters & parameters) :
   initOversample();
 }
 
+void
+OversampleOutput::outputStep(const ExecFlagType & type)
+{
+  // Output is not allowed
+  if (!_allow_output && type != EXEC_FORCED)
+    return;
+
+  // If recovering disable output of initial condition, it was already output
+  if (type == EXEC_INITIAL && _app.isRecovering())
+    return;
+
+  // Return if the current output is not on the desired interval
+  if (type != EXEC_FINAL && !onInterval())
+    return;
+
+  // Call the output method (this has the file checking built in b/c OversampleOutput is a
+  // FileOutput)
+  if (shouldOutput(type))
+  {
+    updateOversample();
+    output(type);
+  }
+}
+
 OversampleOutput::~OversampleOutput()
 {
-  // When the Oversample::initOversample() is called it creates new objects for the _mesh_ptr and _es_ptr
-  // that contain the refined mesh and variables. Also, the _mesh_functions vector and _serialized_solution
-  // pointer are populated. In this case, it is the responsibility of the output object to clean these things
-  // up. If oversampling is not being used then you must not delete the _mesh_ptr and _es_ptr because
-  // they are owned by other objects.
-  if (_oversample || _change_position)
-  {
-    // Delete the mesh and equation system pointers
-    delete _mesh_ptr;
-    delete _es_ptr;
-
-    // Delete the mesh functions
-    for (unsigned int sys_num=0; sys_num < _mesh_functions.size(); ++sys_num)
-      for (unsigned int var_num=0; var_num < _mesh_functions[sys_num].size(); ++var_num)
-        delete _mesh_functions[sys_num][var_num];
-  }
+  // TODO: Remove once libmesh Issue #1184 is fixed
+  _oversample_es.reset();
+  _cloned_mesh_ptr.reset();
 }
 
 void
@@ -96,21 +124,48 @@ OversampleOutput::initOversample()
 
   // Re-position the oversampled mesh
   if (_change_position)
-    for (MeshBase::node_iterator nd = _mesh_ptr->getMesh().nodes_begin(); nd != _mesh_ptr->getMesh().nodes_end(); ++nd)
-      *(*nd) += _position;
+    for (auto & node : _mesh_ptr->getMesh().node_ptr_range())
+      *node += _position;
 
   // Perform the mesh refinement
   if (_oversample)
   {
     MeshRefinement mesh_refinement(_mesh_ptr->getMesh());
+
+    // We want original and refined partitioning to match so we can
+    // query from one to the other safely on distributed meshes.
+    _mesh_ptr->getMesh().skip_partitioning(true);
     mesh_refinement.uniformly_refine(_refinements);
   }
 
+  // We can't allow renumbering if we want to output multiple time
+  // steps to the same Exodus file
+  _mesh_ptr->getMesh().allow_renumbering(false);
+
   // Create the new EquationSystems
-  _es_ptr = new EquationSystems(_mesh_ptr->getMesh());
+  _oversample_es = libmesh_make_unique<EquationSystems>(_mesh_ptr->getMesh());
+  _es_ptr = _oversample_es.get();
 
   // Reference the system from which we are copying
   EquationSystems & source_es = _problem_ptr->es();
+
+  // If we're going to be copying from that system later, we need to keep its
+  // original elements as ghost elements even if it gets grossly
+  // repartitioned, since we can't repartition the oversample mesh to
+  // match.
+  DistributedMesh * dist_mesh = dynamic_cast<DistributedMesh *>(&source_es.get_mesh());
+  if (dist_mesh)
+  {
+    for (MeshBase::element_iterator it = dist_mesh->active_local_elements_begin(),
+                                    end = dist_mesh->active_local_elements_end();
+         it != end;
+         ++it)
+    {
+      Elem * elem = *it;
+
+      dist_mesh->add_extra_ghost_elem(elem);
+    }
+  }
 
   // Initialize the _mesh_functions vector
   unsigned int num_systems = source_es.n_systems();
@@ -123,7 +178,7 @@ OversampleOutput::initOversample()
     System & source_sys = source_es.get_system(sys_num);
 
     // Add the system to the new EquationsSystems
-    ExplicitSystem & dest_sys = _es_ptr->add_system<ExplicitSystem>(source_sys.name());
+    ExplicitSystem & dest_sys = _oversample_es->add_system<ExplicitSystem>(source_sys.name());
 
     // Loop through the variables in the System
     unsigned int num_vars = source_sys.n_vars();
@@ -133,7 +188,8 @@ OversampleOutput::initOversample()
       _serialized_solution = NumericVector<Number>::build(_communicator);
       _serialized_solution->init(source_sys.n_dofs(), false, SERIAL);
 
-      // Need to pull down a full copy of this vector on every processor so we can get values in parallel
+      // Need to pull down a full copy of this vector on every processor so we can get values in
+      // parallel
       source_sys.solution->localize(*_serialized_solution);
 
       // Add the variables to the system... simultaneously creating MeshFunctions for them.
@@ -151,7 +207,7 @@ OversampleOutput::initOversample()
   }
 
   // Initialize the newly created EquationSystem
-  _es_ptr->init();
+  _oversample_es->init();
 }
 
 void
@@ -171,7 +227,7 @@ OversampleOutput::updateOversample()
     {
       // Get references to the source and destination systems
       System & source_sys = source_es.get_system(sys_num);
-      System & dest_sys = _es_ptr->get_system(sys_num);
+      System & dest_sys = _oversample_es->get_system(sys_num);
 
       // Update the solution for the oversampled mesh
       _serialized_solution->clear();
@@ -182,12 +238,11 @@ OversampleOutput::updateOversample()
       for (unsigned int var_num = 0; var_num < _mesh_functions[sys_num].size(); ++var_num)
       {
 
-        // If the mesh has change the MeshFunctions need to be re-built, otherwise simply clear it for re-initialization
-        if (_mesh_functions[sys_num][var_num] == NULL || _oversample_mesh_changed)
-        {
-          delete _mesh_functions[sys_num][var_num];
-          _mesh_functions[sys_num][var_num] = new MeshFunction(source_es, *_serialized_solution, source_sys.get_dof_map(), var_num);
-        }
+        // If the mesh has change the MeshFunctions need to be re-built, otherwise simply clear it
+        // for re-initialization
+        if (!_mesh_functions[sys_num][var_num] || _oversample_mesh_changed)
+          _mesh_functions[sys_num][var_num] = libmesh_make_unique<MeshFunction>(
+              source_es, *_serialized_solution, source_sys.get_dof_map(), var_num);
         else
           _mesh_functions[sys_num][var_num]->clear();
 
@@ -196,14 +251,21 @@ OversampleOutput::updateOversample()
       }
 
       // Now loop over the nodes of the oversampled mesh setting values for each variable.
-      for (MeshBase::const_node_iterator nd = _mesh_ptr->localNodesBegin(); nd != _mesh_ptr->localNodesEnd(); ++nd)
+      for (MeshBase::const_node_iterator nd = _mesh_ptr->localNodesBegin();
+           nd != _mesh_ptr->localNodesEnd();
+           ++nd)
         for (unsigned int var_num = 0; var_num < _mesh_functions[sys_num].size(); ++var_num)
           if ((*nd)->n_dofs(sys_num, var_num))
-            dest_sys.solution->set((*nd)->dof_number(sys_num, var_num, 0), (*_mesh_functions[sys_num][var_num])(**nd - _position)); // 0 value is for component
+            dest_sys.solution->set(
+                (*nd)->dof_number(sys_num, var_num, 0),
+                (*_mesh_functions[sys_num][var_num])(**nd - _position)); // 0 value is for component
+
+      dest_sys.solution->close();
     }
   }
 
-  // Set this to false so that new output files are not created, since the oversampled mesh doesn't actually change
+  // Set this to false so that new output files are not created, since the oversampled mesh doesn't
+  // actually change
   _oversample_mesh_changed = false;
 }
 
@@ -219,19 +281,23 @@ OversampleOutput::cloneMesh()
     mesh_params.set<bool>("nemesis") = false;
     mesh_params.set<bool>("skip_partitioning") = false;
     mesh_params.set<std::string>("_object_name") = "output_problem_mesh";
-    _mesh_ptr = new FileMesh(mesh_params);
-    _mesh_ptr->allowRecovery(false); // We actually want to reread the initial mesh
-    _mesh_ptr->init();
-    _mesh_ptr->prepare();
-    _mesh_ptr->meshChanged();
+    _cloned_mesh_ptr = libmesh_make_unique<FileMesh>(mesh_params);
+    _cloned_mesh_ptr->allowRecovery(false); // We actually want to reread the initial mesh
+    _cloned_mesh_ptr->init();
+    _cloned_mesh_ptr->prepare();
+    _cloned_mesh_ptr->meshChanged();
   }
 
   // Clone the existing mesh
   else
   {
     if (_app.isRecovering())
-      mooseWarning("Recovering or Restarting with Oversampling may not work (especially with adapted meshes)!!  Refs #2295");
+      mooseWarning("Recovering or Restarting with Oversampling may not work (especially with "
+                   "adapted meshes)!!  Refs #2295");
 
-    _mesh_ptr= &(_problem_ptr->mesh().clone());
+    _cloned_mesh_ptr.reset(&(_problem_ptr->mesh().clone()));
   }
+
+  // Make sure that the mesh pointer points to the newly cloned mesh
+  _mesh_ptr = _cloned_mesh_ptr.get();
 }

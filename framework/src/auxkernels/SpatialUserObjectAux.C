@@ -15,17 +15,20 @@
 #include "SpatialUserObjectAux.h"
 #include "UserObject.h"
 
-template<>
-InputParameters validParams<SpatialUserObjectAux>()
+template <>
+InputParameters
+validParams<SpatialUserObjectAux>()
 {
   InputParameters params = validParams<AuxKernel>();
-  params.addRequiredParam<UserObjectName>("user_object", "The UserObject UserObject to get values from.  Note that the UserObject _must_ implement the spatialValue() virtual function!");
+  params.addRequiredParam<UserObjectName>(
+      "user_object",
+      "The UserObject UserObject to get values from.  Note that the UserObject "
+      "_must_ implement the spatialValue() virtual function!");
   return params;
 }
 
-SpatialUserObjectAux::SpatialUserObjectAux(const InputParameters & parameters) :
-    AuxKernel(parameters),
-    _user_object(getUserObjectBase("user_object"))
+SpatialUserObjectAux::SpatialUserObjectAux(const InputParameters & parameters)
+  : AuxKernel(parameters), _user_object(getUserObjectBase("user_object"))
 {
 }
 
@@ -37,4 +40,3 @@ SpatialUserObjectAux::computeValue()
   else
     return _user_object.spatialValue(_current_elem->centroid());
 }
-

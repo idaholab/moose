@@ -3,7 +3,7 @@
   dim = 2
   nx = 10
   ny = 10
-  distribution = serial
+  parallel_type = replicated
 []
 
 [Variables]

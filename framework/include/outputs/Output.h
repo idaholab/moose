@@ -18,22 +18,20 @@
 // MOOSE includes
 #include "MooseObject.h"
 #include "Restartable.h"
-#include "MooseTypes.h"
-#include "MooseMesh.h"
 #include "MeshChangedInterface.h"
 #include "SetupInterface.h"
 #include "AdvancedOutputUtils.h"
 
-// libMesh
-#include "libmesh/equation_systems.h"
-#include "libmesh/numeric_vector.h"
-#include "libmesh/mesh_function.h"
-
 // Forward declarations
-class Problem;
 class Output;
 
-template<>
+// libMesh forward declarations
+namespace libMesh
+{
+class EquationSystems;
+}
+
+template <>
 InputParameters validParams<Output>();
 
 /**
@@ -44,14 +42,12 @@ InputParameters validParams<Output>();
  *
  * @see Exodus Console CSV
  */
-class Output :
-  public MooseObject,
-  public Restartable,
-  public MeshChangedInterface,
-  public SetupInterface
+class Output : public MooseObject,
+               public Restartable,
+               public MeshChangedInterface,
+               public SetupInterface
 {
 public:
-
   /**
    * Class constructor
    *
@@ -66,16 +62,17 @@ public:
    * Get the output time.
    * @return The output time, which may be different than the simulation time
    *
-   * When the Executioner is steady this utilizes the time_step and when Transient the actual time is used.
+   * When the Executioner is steady this utilizes the time_step and when Transient the actual time
+   * is used.
    */
   virtual Real time();
 
-   /**
-   * Get the old output time.
-   * @return The old output time, which may be different than the simulation time
-   *
-   * @see time()
-   */
+  /**
+  * Get the old output time.
+  * @return The old output time, which may be different than the simulation time
+  *
+  * @see time()
+  */
   virtual Real timeOld();
 
   /**
@@ -116,10 +113,15 @@ public:
   virtual const OutputOnWarehouse & advancedExecuteOn() const;
 
   /**
-   * Return the support output execution times
+   * (DEPRECATED) Return the support output execution times
    * @param default_type The default MultiMooseEnum option
    */
   static MultiMooseEnum getExecuteOptions(std::string default_type = "");
+
+  /**
+   * Return an ExecFlagEnum object with the available execution flags for Output objects.
+   */
+  static ExecFlagEnum getDefaultExecFlagEnum();
 
   /**
    * Method for controlling the allow output state
@@ -132,16 +134,19 @@ public:
    */
   static void addDeprecatedInputParameters(InputParameters & params);
 
-
-protected:
-
   /**
    * A single call to this function should output all the necessary data for a single timestep.
    * @param type The type execution flag (see Moose.h)
    *
    * @see outputNodalVariables outputElementalVariables outputScalarVariables outputPostprocessors
    */
-  virtual void outputStep(const ExecFlagType & type) = 0;
+  virtual void outputStep(const ExecFlagType & type);
+
+protected:
+  /**
+   * Overload this function with the desired output activities
+   */
+  virtual void output(const ExecFlagType & type) = 0;
 
   /**
    * A method called just prior to the solve, this is used by PetscOutput to perform the necessary
@@ -153,13 +158,13 @@ protected:
    * Handles logic for determining if a step should be output
    * @return True if a call if output should be preformed
    */
-  bool shouldOutput(const ExecFlagType & type);
+  virtual bool shouldOutput(const ExecFlagType & type);
 
   /**
    * Returns true if the output interval is satisfied
    * \todo{Implement additional types of intervals (e.g., simulation time and real time)}
    */
-  bool onInterval();
+  virtual bool onInterval();
 
   /**
    * Initialization method.
@@ -167,8 +172,8 @@ protected:
    */
   virtual void initialSetup();
 
-  /// Pointer the the FEProblem object for output object (use this)
-  FEProblem * _problem_ptr;
+  /// Pointer the the FEProblemBase object for output object (use this)
+  FEProblemBase * _problem_ptr;
 
   /// Transient flag (true = transient)
   bool _transient;
@@ -183,7 +188,7 @@ protected:
   bool _sequence;
 
   /// The common Execution types; this is used as the default execution type for everything except system information and input
-  MultiMooseEnum _execute_on;
+  ExecFlagEnum _execute_on;
 
   /// The current time for output purposes
   Real & _time;

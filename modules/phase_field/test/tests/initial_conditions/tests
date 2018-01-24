@@ -1,0 +1,191 @@
+[Tests]
+  [./RampIC]
+    # Test ramp ic generator
+    type = Exodiff
+    input = 'RampIC.i'
+    exodiff = 'RampIC_out.e'
+  [../]
+
+  [./BimodalInverseSuperellipsoidsIC]
+    type = Exodiff
+    input = 'BimodalInverseSuperellipsoidsIC.i'
+    exodiff = 'BimodalInverseSuperellipsoidsIC_out.e'
+    scale_refine = 1
+  [../]
+
+  [./BimodalSuperellipsoidsIC]
+    type = Exodiff
+    input = 'BimodalSuperellipsoidsIC.i'
+    exodiff = 'BimodalSuperellipsoidsIC_out.e'
+    scale_refine = 1
+  [../]
+
+  [./BoundingBoxIC]
+    type = Exodiff
+    input = 'BoundingBoxIC.i'
+    exodiff = 'BoundingBoxIC_out.e'
+    scale_refine = 1
+    valgrind = 'HEAVY'
+  [../]
+
+  [./CrossIC]
+    type = Exodiff
+    input = 'CrossIC.i'
+    exodiff = 'CrossIC_out.e'
+    scale_refine = 1
+  [../]
+
+  [./PolycrystalVoronoiVoidIC_moregrains]
+    type = 'Exodiff'
+    input = 'PolycrystalVoronoiVoidIC_moregrains.i'
+    exodiff = 'PolycrystalVoronoiVoidIC_moregrains_out.e'
+  [../]
+
+  [./PolycrystalVoronoiVoidIC_notperiodic]
+    type = 'Exodiff'
+    input = 'PolycrystalVoronoiVoidIC_notperiodic.i'
+    exodiff = 'PolycrystalVoronoiVoidIC_notperiodic_out.e'
+  [../]
+
+  [./PolycrystalVoronoiVoidIC_periodic]
+    type = 'Exodiff'
+    input = 'PolycrystalVoronoiVoidIC_periodic.i'
+    exodiff = 'PolycrystalVoronoiVoidIC_periodic_out.e'
+  [../]
+
+  [./SmoothCircleIC]
+    type = Exodiff
+    input = 'SmoothCircleIC.i'
+    exodiff = 'SmoothCircleIC_out.e'
+    scale_refine = 1
+    valgrind = 'HEAVY'
+  [../]
+
+  [./SmoothSuperellipsoidIC]
+    type = Exodiff
+    input = 'SmoothSuperellipsoidIC.i'
+    exodiff = 'SmoothSuperellipsoidIC_out.e'
+    scale_refine = 1
+    valgrind = 'HEAVY'
+  [../]
+
+  [./SpecifiedSmoothSuperellipsoidIC]
+    type = Exodiff
+    input = 'SpecifiedSmoothSuperellipsoidIC.i'
+    exodiff = 'SpecifiedSmoothSuperellipsoidIC_out.e'
+    scale_refine = 1
+    valgrind = 'HEAVY'
+  [../]
+
+  [./RndBoundingBoxIC]
+    type = Exodiff
+    input = 'RndBoundingBoxIC.i'
+    exodiff = 'RndBoundingBoxIC_out.e'
+    scale_refine = 1
+    valgrind = 'HEAVY'
+    max_parallel = 1
+    max_threads = 1
+    recover = false # See #5207
+  [../]
+
+  [./SmoothCircleIC_3D]
+    type = Exodiff
+    input = 'SmoothCircleIC_3D.i'
+    exodiff = 'SmoothCircleIC_3D_out.e'
+    scale_refine = 1
+    valgrind = 'HEAVY'
+  [../]
+
+  [./SmoothSuperellipsoidIC_3D]
+    type = Exodiff
+    input = 'SmoothSuperellipsoidIC_3D.i'
+    exodiff = 'SmoothSuperellipsoidIC_3D_out.e'
+    scale_refine = 1
+    valgrind = 'HEAVY'
+  [../]
+
+  [./RndSmoothCircleIC]
+    type = Exodiff
+    input = 'RndSmoothCircleIC.i'
+    exodiff = 'RndSmoothCircleIC_out.e'
+    scale_refine = 1
+    valgrind = 'HEAVY'
+    max_parallel = 1
+    max_threads = 1
+  [../]
+
+  [./ClosePackIC]
+    # Test close pack ic generator (2D)
+    type = Exodiff
+    input = ClosePackIC.i
+    exodiff = ClosePackIC_out.e
+  [../]
+
+  [./ClosePackIC_3D]
+    # Test close pack ic generator (3D)
+    type = Exodiff
+    input = ClosePackIC_3D.i
+    exodiff = ClosePackIC_3D_out.e
+    method = 'opt oprof' # This test is too slow in debug
+  [../]
+
+  [./HexPolycrystalIC]
+    type = Exodiff
+    input = HexPolycrystalIC.i
+    exodiff = HexPolycrystalIC_out.e
+  [../]
+
+  [./MultiBoundingBoxIC1D]
+    type = Exodiff
+    input = MultiBoundingBoxIC1D.i
+    exodiff = MultiBoundingBoxIC1D_out.e
+  [../]
+
+  [./MultiBoundingBoxIC2D]
+    type = Exodiff
+    input = MultiBoundingBoxIC2D.i
+    exodiff = MultiBoundingBoxIC2D_out.e
+  [../]
+
+  [./MultiBoundingBoxIC3D]
+    type = Exodiff
+    input = MultiBoundingBoxIC3D.i
+    exodiff = MultiBoundingBoxIC3D_out.e
+  [../]
+
+  [./MultiSmoothSuperellipsoidIC_3D]
+    type = Exodiff
+    input = 'MultiSmoothSuperellipsoidIC_3D.i'
+    exodiff = 'MultiSmoothSuperellipsoidIC_3D_out.e'
+  [../]
+
+  [./MultiSmoothSuperellipsoidIC_2D]
+    type = Exodiff
+    input = 'MultiSmoothSuperellipsoidIC_2D.i'
+    exodiff = 'MultiSmoothSuperellipsoidIC_2D_out.e'
+  [../]
+
+  [./TricrystalTripleJunctionIC]
+    type = Exodiff
+    input = 'TricrystalTripleJunctionIC.i'
+    exodiff = 'TricrystalTripleJunctionIC_out.e'
+  [../]
+
+  [./PolycrystalCircles_FromFile]
+    type = Exodiff
+    input = 'polycrystalcircles_fromfile.i'
+    exodiff = 'polycrystalcircles_fromfile_out.e'
+  [../]
+
+  [./PolycrystalCircles_FromVector]
+    type = Exodiff
+    input = 'polycrystalcircles_fromvector.i'
+    exodiff = 'polycrystalcircles_fromvector_out.e'
+  [../]
+
+  [./SmoothCirclesFromFile]
+    type = Exodiff
+    input = 'circles_from_file_ic.i'
+    exodiff = 'circles_from_file_ic_out.e'
+  [../]
+[]

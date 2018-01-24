@@ -1,26 +1,34 @@
 /****************************************************************/
+/*               DO NOT MODIFY THIS HEADER                      */
 /* MOOSE - Multiphysics Object Oriented Simulation Environment  */
 /*                                                              */
-/*          All contents are licensed under LGPL V2.1           */
-/*             See LICENSE for full restrictions                */
+/*           (c) 2010 Battelle Energy Alliance, LLC             */
+/*                   ALL RIGHTS RESERVED                        */
+/*                                                              */
+/*          Prepared by Battelle Energy Alliance, LLC           */
+/*            Under Contract No. DE-AC07-05ID14517              */
+/*            With the U. S. Department of Energy               */
+/*                                                              */
+/*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
+
 #include "CoupledTimeDerivative.h"
 
-template<>
-InputParameters validParams<CoupledTimeDerivative>()
+template <>
+InputParameters
+validParams<CoupledTimeDerivative>()
 {
   InputParameters params = validParams<Kernel>();
-  params.addClassDescription("Time derivative Kernel that acts on a coupled variable");
+  params.addClassDescription("Time derivative Kernel that acts on a coupled variable. Weak form: "
+                             "$(\\psi_i, \\frac{\\partial v_h}{\\partial t})$.");
   params.addRequiredCoupledVar("v", "Coupled variable");
   return params;
 }
 
-CoupledTimeDerivative::CoupledTimeDerivative(const InputParameters & parameters) :
-    Kernel(parameters),
-    _v_dot(coupledDot("v")),
-    _dv_dot(coupledDotDu("v")),
-    _v_var(coupled("v"))
-{}
+CoupledTimeDerivative::CoupledTimeDerivative(const InputParameters & parameters)
+  : Kernel(parameters), _v_dot(coupledDot("v")), _dv_dot(coupledDotDu("v")), _v_var(coupled("v"))
+{
+}
 
 Real
 CoupledTimeDerivative::computeQpResidual()

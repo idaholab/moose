@@ -134,7 +134,7 @@ MOOSE is struggling with.
   ``power'' covers over the ``VG'' curves.
 \item In multiphase problems if one phase completely disappears, MOOSE
   may not converge, as discussed more fully in
-  Chapter~\ref{chap.sing.jac}.  To avoid this: 
+  Chapter~\ref{chap.sing.jac}.  To avoid this:
 \begin{enumerate}
 \item The fully-upwind kernel and boundary fluxes and dirac sources
   can be used.  If the immobile saturation of the phase is nonzero,
@@ -202,7 +202,7 @@ Evaluate this for your ``steadystate'' solution.  For instance, in the
 case of water just quoted, $R = V|\kappa|\rho_{0}/\mu\epsilon =
 V|\kappa|\times 10^{6}\epsilon$, where: $V$ is the volume of the
 finite-element mesh, and I have inserted standard values for
-$\rho_{0}$ and $\mu$.  
+$\rho_{0}$ and $\mu$.
 \item In the previous step, an appropriate tolernace on the residual
   was given as $V|\kappa|\rho_{0}\epsilon/\mu$.  However, this is often too
   large because of the factor of $V$.  The previous step assumed that
@@ -343,7 +343,7 @@ J = \frac{\phi}{dt} \left(
 \begin{array}{cc}
 \rho_{g}'S_{g} + \rho_{g}S' &
 -\rho_{g}S' \\
--\rho_{w}S' & 
+-\rho_{w}S' &
 \rho_{w}'S_{w} + \rho_{w}S'
 \end{array}
 \right)
@@ -360,7 +360,7 @@ J = \frac{\phi}{dt} \left(
 \begin{array}{cc}
 \rho_{g}'S_{g}^{\mathrm{res}}  &
 0 \\
-0 & 
+0 &
 \rho_{w}'(1 - S_{g}^{\mathrm{res}})
 \end{array}
 \right)

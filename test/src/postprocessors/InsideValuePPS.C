@@ -15,8 +15,9 @@
 #include "InsideValuePPS.h"
 #include "InsideUserObject.h"
 
-template<>
-InputParameters validParams<InsideValuePPS>()
+template <>
+InputParameters
+validParams<InsideValuePPS>()
 {
   InputParameters params = validParams<GeneralPostprocessor>();
   params.addRequiredParam<UserObjectName>("user_object", "The name of the user object");
@@ -24,16 +25,14 @@ InputParameters validParams<InsideValuePPS>()
   return params;
 }
 
-InsideValuePPS::InsideValuePPS(const InputParameters & parameters) :
-    GeneralPostprocessor(parameters),
+InsideValuePPS::InsideValuePPS(const InputParameters & parameters)
+  : GeneralPostprocessor(parameters),
     _uo(getUserObject<InsideUserObject>("user_object")),
     _value(0.)
 {
 }
 
-InsideValuePPS::~InsideValuePPS()
-{
-}
+InsideValuePPS::~InsideValuePPS() {}
 
 void
 InsideValuePPS::initialize()

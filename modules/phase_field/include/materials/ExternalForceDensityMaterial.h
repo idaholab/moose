@@ -10,11 +10,11 @@
 #include "Material.h"
 #include "DerivativeMaterialInterface.h"
 
-//Forward Declarations
+// Forward Declarations
 class ExternalForceDensityMaterial;
 class Function;
 
-template<>
+template <>
 InputParameters validParams<ExternalForceDensityMaterial>();
 
 /**
@@ -35,18 +35,21 @@ private:
   Function & _force_z;
 
   /// concentration field considered to be the density of particles
-  VariableValue & _c;
+  const VariableValue & _c;
   VariableName _c_name;
   /// stiffness constant
-  Real _k;
+  const Real _k;
 
-  unsigned int _ncrys;
-  std::vector<VariableValue *> _vals;
+  unsigned int _op_num;
+  std::vector<const VariableValue *> _vals;
+  std::vector<VariableName> _vals_name;
 
   /// force density material
-  MaterialProperty<std::vector<RealGradient> > & _dF;
+  MaterialProperty<std::vector<RealGradient>> & _dF;
   /// first order derivative of force density material w.r.t c
-  MaterialProperty<std::vector<RealGradient> > & _dFdc;
+  MaterialProperty<std::vector<RealGradient>> & _dFdc;
+
+  std::vector<MaterialProperty<std::vector<RealGradient>> *> _dFdeta;
 };
 
-#endif //EXTERNALFORCEDENSITYMATERIAL_H
+#endif // EXTERNALFORCEDENSITYMATERIAL_H

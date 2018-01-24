@@ -17,26 +17,29 @@
 #include "SubProblem.h"
 #include "Assembly.h"
 
-template<>
-InputParameters validParams<ElementUserObject>()
+#include "libmesh/elem.h"
+
+template <>
+InputParameters
+validParams<ElementUserObject>()
 {
   InputParameters params = validParams<UserObject>();
   params += validParams<BlockRestrictable>();
+  params += validParams<MaterialPropertyInterface>();
+  params += validParams<TransientInterface>();
   params += validParams<RandomInterface>();
-
   return params;
 }
 
-ElementUserObject::ElementUserObject(const InputParameters & parameters) :
-    UserObject(parameters),
-    BlockRestrictable(parameters),
-    MaterialPropertyInterface(parameters, blockIDs()),
-    UserObjectInterface(parameters),
-    Coupleable(parameters, false),
-    ScalarCoupleable(parameters),
+ElementUserObject::ElementUserObject(const InputParameters & parameters)
+  : UserObject(parameters),
+    BlockRestrictable(this),
+    MaterialPropertyInterface(this, blockIDs()),
+    UserObjectInterface(this),
+    Coupleable(this, false),
     MooseVariableDependencyInterface(),
-    TransientInterface(parameters, "element_user_objects"),
-    PostprocessorInterface(parameters),
+    TransientInterface(this),
+    PostprocessorInterface(this),
     RandomInterface(parameters, _fe_problem, _tid, false),
     ZeroInterface(parameters),
     _mesh(_subproblem.mesh()),
@@ -49,7 +52,6 @@ ElementUserObject::ElementUserObject(const InputParameters & parameters) :
 {
   // Keep track of which variables are coupled so we know what we depend on
   const std::vector<MooseVariable *> & coupled_vars = getCoupledMooseVars();
-  for (unsigned int i=0; i<coupled_vars.size(); i++)
-    addMooseVariableDependency(coupled_vars[i]);
+  for (const auto & var : coupled_vars)
+    addMooseVariableDependency(var);
 }
-

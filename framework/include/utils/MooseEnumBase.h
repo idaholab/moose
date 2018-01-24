@@ -15,23 +15,29 @@
 #ifndef MOOSEENUMBASE_H
 #define MOOSEENUMBASE_H
 
-#include "libmesh/parameters.h"
-
+// C++ includes
 #include <string>
+#include <set>
 #include <vector>
 #include <map>
-#include <ostream>
 
+// MOOSE includes
+#include "MooseEnumItem.h"
+
+/**
+ * The base class for both the MooseEnum and MultiMooseEnum classes.
+ */
 class MooseEnumBase
 {
 public:
   /**
-   * Constructor that takes a list of enumeration values, and a separate string to set a default for this instance
+   * Constructor that takes a list of enumeration values, and a
+   * separate string to set a default for this instance.
    * @param names - a list of names for this enumeration
-   * @param allow_out_of_range - determines whether this enumeration will accept values outside of it's range of
-   *                       defined values.
+   * @param allow_out_of_range - determines whether this enumeration will accept values outside of
+   *                             its range of defined values.
    */
-  MooseEnumBase(std::string names, bool allow_out_of_range=false);
+  MooseEnumBase(std::string names, bool allow_out_of_range = false);
 
   /**
    * Copy Constructor for use when creating vectors of MooseEnumBases
@@ -42,27 +48,26 @@ public:
   /**
    * This class must have a virtual destructor since it has derived classes.
    */
-  virtual ~MooseEnumBase();
+  virtual ~MooseEnumBase() = default;
 
   /**
    * Deprecates various options in the MOOSE enum. For each deprecated option,
-   * you may supply an option new option that will be used in a message telling
+   * you may supply an optional new option that will be used in a message telling
    * the user which new option replaces the old one.
    */
-  void deprecate(const std::string & name, const std::string & new_name="");
+  virtual void deprecate(const std::string & name, const std::string & raw_name = "");
 
   /**
    * Method for returning a vector of all valid enumeration names for this instance
    * @return a vector of names
    */
-  /// TODO: This should probably be turn into a set to avoid duplicate entries
-  const std::vector<std::string> & getNames() const { return _names; }
+  std::vector<std::string> getNames() const;
 
   /**
    * Method for returning the raw name strings for this instance
    * @return a space separated list of names
    */
-  const std::string & getRawNames() const { return _raw_names; }
+  std::string getRawNames() const;
 
   /**
    * IsValid
@@ -70,43 +75,67 @@ public:
    */
   virtual bool isValid() const = 0;
 
+  /**
+   * isOutOfRangeAllowed
+   * @return - a Boolean indicating whether enum names out of range are allowed
+   */
+  bool isOutOfRangeAllowed() const { return _allow_out_of_range; }
+
+  /**
+   * Return the complete set of available flags.
+   */
+  const std::set<MooseEnumItem> & items() { return _items; }
+
+  ///@{
+  /**
+   * Locate an item.
+   */
+  std::set<MooseEnumItem>::const_iterator find(const MooseEnumItem & other) const;
+  std::set<MooseEnumItem>::const_iterator find(const std::string & name) const;
+  std::set<MooseEnumItem>::const_iterator find(int id) const;
+  ///@}
+
+  /**
+   * Compute the next valid ID.
+   */
+  int getNextValidID() const;
+
 protected:
   MooseEnumBase();
 
+  ///@{
   /**
-   * Populates the _names vector
-   * @param names - a space separated list of names used to populate the internal names vector
+   * Methods to add possible enumeration value to the enum.
+   *
+   * The MooseEnum/MultiMooseEnum are not designed to be modified, with respect to the list
+   * of possible values. However, this is not the case for the ExecFlagEnum which is a special
+   * type of MultiMooseEnum for managing the "execute_on" flags. These methods are used by
+   * ExecFlagEnum to allow users to modify the available execute flags for their object.
    */
-  void fillNames(std::string names, std::string option_delim=" ");
+  void addEnumerationNames(const std::string & names);
+  void addEnumerationName(const std::string & raw_name);
+  void addEnumerationName(const std::string & name, const int & value);
+  void addEnumerationItem(const MooseEnumItem & item);
+  ///@}
 
-  // The method that must be implemented to check derived class values against the _deprecated_names list
+  /**
+   * Method that must be implemented to check derived class values against the _deprecated_names
+   */
   virtual void checkDeprecated() const = 0;
 
   /**
    * Check and warn deprecated values
    */
-  void checkDeprecatedBase(const std::string & name_upper) const;
+  void checkDeprecated(const MooseEnumItem & item) const;
 
-  /// The vector of enumeration names
-  std::vector<std::string> _names;
-
-  /// The raw string of names separated by spaces
-  std::string _raw_names;
-
-  /// The map of names to enumeration constants
-  std::map<std::string, int> _name_to_id;
+  /// Storage for the assigned items
+  std::set<MooseEnumItem> _items;
 
   /// The map of deprecated names and optional replacements
-  std::map<std::string, std::string> _deprecated_names;
+  std::map<MooseEnumItem, MooseEnumItem> _deprecated_items;
 
-  /**
-   * The index of values assigned that are NOT values in this enum.  If this index is 0 (false) then
-   * out of range values are not allowed.
-   */
-  int _out_of_range_index;
-
-  /// Constants
-  const static int INVALID_ID;
+  /// Flag to enable enumeration items not previously defined
+  bool _allow_out_of_range;
 };
 
-#endif //MOOSEENUMBASE_H
+#endif // MOOSEENUMBASE_H

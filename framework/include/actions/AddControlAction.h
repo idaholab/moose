@@ -16,12 +16,12 @@
 #define ADDCONTROLACTION_H
 
 // MOOSE includes
-#include "AddUserObjectAction.h"
+#include "MooseObjectAction.h"
 
-// Forward declerations
+// Forward declarations
 class AddControlAction;
 
-template<>
+template <>
 InputParameters validParams<AddControlAction>();
 
 /**
@@ -30,21 +30,16 @@ InputParameters validParams<AddControlAction>();
  * Control objects are GeneralUserObjects, thus just
  * use the AddUserObjectAction
  */
-class AddControlAction : public AddUserObjectAction
+class AddControlAction : public MooseObjectAction
 {
 public:
-
   /**
    * Class constructor
    * @param params Parameters for this Action
    */
-  AddControlAction(InputParameters params);
+  AddControlAction(InputParameters parameters);
 
-  /**
-   * Class destructor
-   */
-  virtual ~AddControlAction(){};
-
+  virtual void act() override;
 };
 
 #endif // ADDCONTROLACTION_H

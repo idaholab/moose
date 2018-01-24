@@ -19,7 +19,7 @@
 
 class ScalarComponentIC;
 
-template<>
+template <>
 InputParameters validParams<ScalarComponentIC>();
 
 /**
@@ -29,7 +29,6 @@ class ScalarComponentIC : public ScalarInitialCondition
 {
 public:
   ScalarComponentIC(const InputParameters & parameters);
-  virtual ~ScalarComponentIC();
 
 protected:
   virtual Real value();

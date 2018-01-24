@@ -1,8 +1,0 @@
-[Tests]
-  [./test]
-    type = 'Exodiff'
-    input = 'gap_heat_transfer_convex_test.i'
-    exodiff = 'out.e'
-    abs_zero = 1e-09
-  [../]
-[]

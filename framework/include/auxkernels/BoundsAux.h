@@ -17,33 +17,30 @@
 
 #include "AuxKernel.h"
 
-
-//Forward Declarations
+// Forward Declarations
 class BoundsAux;
 
-template<>
+template <>
 InputParameters validParams<BoundsAux>();
 
 /**
- * Fills in the "bounds vectors" to provide an upper and lower bound for the variable that is coupled in.
- * Doesn't actually calculate an auxiliary value although it must take an auxiliary variable as input.
+ * Fills in the "bounds vectors" to provide an upper and lower bound for the variable that is
+ * coupled in.
+ * Doesn't actually calculate an auxiliary value although it must take an auxiliary variable as
+ * input.
  *
  * This MUST be run on a Nodal Auxiliary Variable!
  */
 class BoundsAux : public AuxKernel
 {
 public:
-
   /**
    * Factory constructor.
    */
   BoundsAux(const InputParameters & parameters);
 
 protected:
-  /**
-   * Will store both the upper and lower bound into their respective vectors.
-   */
-  virtual Real computeValue();
+  virtual Real computeValue() override;
 
   NumericVector<Number> & _upper_vector;
   NumericVector<Number> & _lower_vector;
@@ -52,8 +49,6 @@ protected:
   bool _lower_valid;
   Real _upper;
   Real _lower;
-
-
 };
 
-#endif //BOUNDSAUX_H
+#endif // BOUNDSAUX_H

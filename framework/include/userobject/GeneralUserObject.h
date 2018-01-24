@@ -15,60 +15,58 @@
 #ifndef GENERALUSEROBJECT_H
 #define GENERALUSEROBJECT_H
 
+// MOOSE includes
 #include "UserObject.h"
+#include "MaterialPropertyInterface.h"
 #include "TransientInterface.h"
 #include "DependencyResolverInterface.h"
 #include "UserObjectInterface.h"
 #include "PostprocessorInterface.h"
 #include "VectorPostprocessorInterface.h"
-#include "MaterialPropertyInterface.h"
-#include "Problem.h"
 
-
-//Forward Declarations
+// Forward Declarations
 class GeneralUserObject;
 
-template<>
+template <>
 InputParameters validParams<GeneralUserObject>();
 
 /* This class is here to combine the Postprocessor interface and the
  * base class Postprocessor object along with adding MooseObject to the inheritance tree*/
-class GeneralUserObject :
-  public UserObject,
-  public MaterialPropertyInterface,
-  public TransientInterface,
-  public DependencyResolverInterface,
-  public UserObjectInterface,
-  protected PostprocessorInterface,
-  protected VectorPostprocessorInterface
+class GeneralUserObject : public UserObject,
+                          public MaterialPropertyInterface,
+                          public TransientInterface,
+                          public DependencyResolverInterface,
+                          public UserObjectInterface,
+                          protected PostprocessorInterface,
+                          protected VectorPostprocessorInterface
 {
 public:
   GeneralUserObject(const InputParameters & parameters);
 
+  const std::set<std::string> & getRequestedItems() override;
+
+  const std::set<std::string> & getSuppliedItems() override;
+
+  ///@{
   /**
-   * This function will get called when this user object needs to update its values
-   *
-   * Someone somewhere has to override this.
+   * This method is not used and should not be used in a custom GeneralUserObject.
    */
-  virtual void execute() = 0;
-
-  const std::set<std::string> & getRequestedItems();
-
-  const std::set<std::string> & getSuppliedItems();
-
-  virtual ~GeneralUserObject() {}
+  virtual void threadJoin(const UserObject &) final;
+  virtual void subdomainSetup() final;
+  ///@}
 
   ///@{
   /**
    * Store dependency among same object types for proper execution order
    */
-
-  // FIXME: This should be const but fails to work when it is const
   virtual const PostprocessorValue & getPostprocessorValue(const std::string & name);
   virtual const PostprocessorValue & getPostprocessorValueByName(const PostprocessorName & name);
 
-  virtual const VectorPostprocessorValue & getVectorPostprocessorValue(const std::string & name, const std::string & vector_name);
-  virtual const VectorPostprocessorValue & getVectorPostprocessorValueByName(const VectorPostprocessorName & name, const std::string & vector_name);
+  virtual const VectorPostprocessorValue &
+  getVectorPostprocessorValue(const std::string & name, const std::string & vector_name) override;
+  virtual const VectorPostprocessorValue &
+  getVectorPostprocessorValueByName(const VectorPostprocessorName & name,
+                                    const std::string & vector_name) override;
   ///@}
 
 protected:

@@ -5,12 +5,12 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-
 #include "RichardsPlotQuantity.h"
 #include "RichardsSumQuantity.h"
 
-template<>
-InputParameters validParams<RichardsPlotQuantity>()
+template <>
+InputParameters
+validParams<RichardsPlotQuantity>()
 {
   InputParameters params = validParams<GeneralPostprocessor>();
   params.addRequiredParam<UserObjectName>("uo", "user object name that has the total mass value");
@@ -18,15 +18,12 @@ InputParameters validParams<RichardsPlotQuantity>()
   return params;
 }
 
-RichardsPlotQuantity::RichardsPlotQuantity(const InputParameters & parameters) :
-    GeneralPostprocessor(parameters),
-    _total_mass(getUserObject<RichardsSumQuantity>("uo"))
+RichardsPlotQuantity::RichardsPlotQuantity(const InputParameters & parameters)
+  : GeneralPostprocessor(parameters), _total_mass(getUserObject<RichardsSumQuantity>("uo"))
 {
 }
 
-RichardsPlotQuantity::~RichardsPlotQuantity()
-{
-}
+RichardsPlotQuantity::~RichardsPlotQuantity() {}
 
 void
 RichardsPlotQuantity::initialize()
@@ -43,4 +40,3 @@ RichardsPlotQuantity::getValue()
 {
   return _total_mass.getValue();
 }
-

@@ -12,34 +12,33 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
+// MOOSE includes
 #include "AddElementalFieldAction.h"
 #include "FEProblem.h"
+#include "MooseMesh.h"
 
-// libmesh includes
 #include "libmesh/fe.h"
 
-template<>
-InputParameters validParams<AddElementalFieldAction>()
+template <>
+InputParameters
+validParams<AddElementalFieldAction>()
 {
   InputParameters params = validParams<Action>();
-  params.addParam<std::vector<SubdomainName> >("block", "The block id where this object lives.");
+  params.addParam<std::vector<SubdomainName>>("block", "The block id where this object lives.");
 
   return params;
 }
 
-AddElementalFieldAction::AddElementalFieldAction(InputParameters params) :
-    Action(params)
-{
-}
+AddElementalFieldAction::AddElementalFieldAction(InputParameters params) : Action(params) {}
 
 void
 AddElementalFieldAction::act()
 {
   std::set<SubdomainID> blocks;
-  std::vector<SubdomainName> block_param = getParam<std::vector<SubdomainName> >("block");
-  for (std::vector<SubdomainName>::iterator it = block_param.begin(); it != block_param.end(); ++it)
+  std::vector<SubdomainName> block_param = getParam<std::vector<SubdomainName>>("block");
+  for (const auto & subdomain_name : block_param)
   {
-    SubdomainID blk_id = _problem->mesh().getSubdomainID(*it);
+    SubdomainID blk_id = _problem->mesh().getSubdomainID(subdomain_name);
     blocks.insert(blk_id);
   }
 

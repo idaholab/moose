@@ -5,7 +5,6 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-
 #ifndef RICHARDSEXCAVGEOM
 #define RICHARDSEXCAVGEOM
 
@@ -14,17 +13,19 @@
 // Forward Declarations
 class RichardsExcavGeom;
 
-template<>
+template <>
 InputParameters validParams<RichardsExcavGeom>();
 
 /**
  * Defines excavation geometry.  It is used to enforce
  * pressures at the boundary of excavations (using RichardsExcav boundary condition)
  * to apply sink fluxes on these boundaries (using RichardsPiecewiseLinearSink boundary condition)
- * and to record fluid fluxes into the excavations (using RichardsExcavFlow and RichardsPiecewiseLinearSinkFlux postprocessors).
+ * and to record fluid fluxes into the excavations (using RichardsExcavFlow and
+ * RichardsPiecewiseLinearSinkFlux postprocessors).
  *
  * An excavation boundary evolves with time.
- * A RichardsExcavGeom object is used in conjunction with a static sideset to simulate this time evolution.
+ * A RichardsExcavGeom object is used in conjunction with a static sideset to simulate this time
+ * evolution.
  *
  * Define start_posn, and end_posn, which are Points.
  * Define start_time, end_time, and deactivation_time, which are Real numbers.
@@ -43,13 +44,11 @@ InputParameters validParams<RichardsExcavGeom>();
 class RichardsExcavGeom : public Function
 {
 public:
-
   RichardsExcavGeom(const InputParameters & parameters);
 
   virtual Real value(Real t, const Point & p);
 
 protected:
-
   /// start position
   RealVectorValue _start_posn;
 
@@ -76,9 +75,6 @@ protected:
 
   /// norm of retreat velocity
   Real _norm_retreat_vel;
-
-
 };
 
-#endif //RICHARDSEXCAVGEOM
-
+#endif // RICHARDSEXCAVGEOM

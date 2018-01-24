@@ -17,10 +17,9 @@
 
 #include "IntegratedBC.h"
 
-
 class HeatConductionOutflow;
 
-template<>
+template <>
 InputParameters validParams<HeatConductionOutflow>();
 
 /**
@@ -42,16 +41,19 @@ public:
   HeatConductionOutflow(const InputParameters & parameters);
 
 protected:
-  /// This is called to integrate the residual across the boundary
-  virtual Real computeQpResidual();
+  /**
+   * This is called to integrate the residual across the boundary.
+   */
+  virtual Real computeQpResidual() override;
 
-  /// Optional (but recommended!) to compute the derivative of the
-  /// residual with respect to _this_ variable
-  virtual Real computeQpJacobian();
+  /**
+   * Optional (but recommended!) to compute the derivative of the
+   * residual with respect to _this_ variable.
+   */
+  virtual Real computeQpJacobian() override;
 
   /// Thermal conductivity of the material
   const MaterialProperty<Real> & _thermal_conductivity;
 };
 
-
-#endif //HEATCONDUCTIONOUTFLOW_H
+#endif // HEATCONDUCTIONOUTFLOW_H

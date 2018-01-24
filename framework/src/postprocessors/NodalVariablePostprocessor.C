@@ -17,18 +17,17 @@
 #include "SubProblem.h"
 #include "MooseTypes.h"
 
-template<>
-InputParameters validParams<NodalVariablePostprocessor>()
+template <>
+InputParameters
+validParams<NodalVariablePostprocessor>()
 {
   InputParameters params = validParams<NodalPostprocessor>();
-  params.addCoupledVar("variable", "The name of the variable that this postprocessor operates on");
+  params.addRequiredCoupledVar("variable",
+                               "The name of the variable that this postprocessor operates on");
   return params;
 }
 
-NodalVariablePostprocessor::NodalVariablePostprocessor(const InputParameters & parameters) :
-    NodalPostprocessor(parameters),
-    MooseVariableInterface(parameters, true),
-    _u(coupledValue("variable"))
+NodalVariablePostprocessor::NodalVariablePostprocessor(const InputParameters & parameters)
+  : NodalPostprocessor(parameters), MooseVariableInterface(this, true), _u(coupledValue("variable"))
 {
 }
-

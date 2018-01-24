@@ -18,7 +18,7 @@
 
 class TestSteady;
 
-template<>
+template <>
 InputParameters validParams<TestSteady>();
 
 /**
@@ -33,10 +33,14 @@ public:
   /**
    * This will call solve() on the NonlinearSystem.
    */
-  virtual void execute();
+  virtual void execute() override;
+
+  /**
+   * Calls a custom execution flag for testing.
+   */
+  virtual void postSolve() override;
 
 private:
-
   /// The type of test that this object is to perform
   MooseEnum _test_type;
 

@@ -1,0 +1,7 @@
+[Tests]
+  [./test]
+    type = 'Exodiff'
+    input = 'steinhart-hart_linear.i'
+    exodiff = 'steinhart-hart_linear_out.e'
+  [../]
+[]

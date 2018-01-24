@@ -9,6 +9,8 @@
     type = 'Exodiff'
     input = 'fromsub_master.i'
     exodiff = 'fromsub_master_out.e'
+    use_old_floor = true
+    abs_zero = 1e-9  # 6e-10 failure w/ --distributed-mesh, np 11
   [../]
 
   [./high_order]

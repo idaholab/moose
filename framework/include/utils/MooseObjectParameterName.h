@@ -26,11 +26,12 @@
  *
  * This class is used by the Control logic system, allowing for multiple tags
  * to be applied to many different MooseObject parameters.
+ *
+ * This class simply adds a third field (parameter name) to the MooseObjectName class.
  */
 class MooseObjectParameterName : public MooseObjectName
 {
 public:
-
   /**
    * Build an object given a raw parameter name (e.g., from an input file parameter)
    */
@@ -39,12 +40,25 @@ public:
   /**
    * Build an object given a MooseObjectName and parameter name
    */
-  MooseObjectParameterName(const MooseObjectName & obj_name, std::string param);
+  MooseObjectParameterName(const MooseObjectName & obj_name, const std::string & param);
+
+  /**
+   * Build an object given a tag, object name, and parameter name
+   */
+  MooseObjectParameterName(const std::string & tag,
+                           const std::string & name,
+                           const std::string & param,
+                           const std::string & separator = std::string("/"));
 
   /**
    * Return the parameter name.
    */
   const std::string & parameter() const { return _parameter; }
+
+  /**
+   * Adds the parameter name to error checking.
+   */
+  virtual void check() final;
 
   ///@{
   /**
@@ -66,11 +80,10 @@ public:
   bool operator<(const MooseObjectParameterName & rhs) const;
   ///@}
 
-  /// Allow printing with std:: cout
+  // Allow printing with std:: cout
   friend std::ostream & operator<<(std::ostream & stream, const MooseObjectParameterName & obj);
 
 protected:
-
   /// The name of the input parameter
   std::string _parameter;
 };

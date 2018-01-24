@@ -1,8 +1,18 @@
+###########################################################
+# This is a simple test of the AuxVariable System.
+# A single discretized explicit variable is added to the
+# system which is independent of the nonlinear variables
+# being solved for by the solver.
+#
+# @Requirement F5.10
+###########################################################
+
+
 [Mesh]
   file = gap_test.e
   # This test uses the geometric search system, which does not currently work
-  # in parallel with ParallelMesh enabled.  For more information, see #2121.
-  distribution = serial
+  # in parallel with DistributedMesh enabled.  For more information, see #2121.
+  parallel_type = replicated
 []
 
 [Variables]
@@ -11,18 +21,6 @@
   [./u]
     order = FIRST
     family = LAGRANGE
-  [../]
-[]
-
-[Functions]
-  [./t]
-    type = ParsedFunction
-    value = t
-  [../]
-
-  [./zero]
-    type = ParsedFunction
-    value = 0
   [../]
 []
 
@@ -66,14 +64,14 @@
   [./x]
     type = FunctionAux
     variable = disp_x
-    function = zero
+    function = 0
     block = 1
   [../]
 
   [./y]
     type = FunctionAux
     variable = disp_y
-    function = zero
+    function = 0
     block = 1
   [../]
 

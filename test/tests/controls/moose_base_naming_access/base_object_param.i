@@ -1,10 +1,11 @@
 [Mesh]
   type = GeneratedMesh
   dim = 2
-  nx = 2
-  ny = 2
   elem_type = QUAD4
-  uniform_refine = 4
+
+  # use odd numbers so points do not fall on element boundaries
+  nx = 31
+  ny = 31
 []
 
 [Variables]

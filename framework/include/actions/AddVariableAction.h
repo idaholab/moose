@@ -19,33 +19,26 @@
 #include "Action.h"
 #include "OutputInterface.h"
 
-// libMesh includes
 #include "libmesh/fe_type.h"
 
 // Forward declerations
 class AddVariableAction;
 
-template<>
+template <>
 InputParameters validParams<AddVariableAction>();
 
 /**
  * Adds nonlinear variable
  */
-class AddVariableAction :
-  public Action,
-  public OutputInterface
+class AddVariableAction : public Action, public OutputInterface
 {
 public:
-
   /**
    * Class constructor
    */
   AddVariableAction(InputParameters params);
 
-  /**
-   * Adds the nonlinear variable
-   */
-  virtual void act();
+  virtual void act() override;
 
   /**
    * Get the possible variable families
@@ -60,7 +53,6 @@ public:
   static MooseEnum getNonlinearVariableOrders();
 
 protected:
-
   /**
    * Adds a nonlinear variable to the system.
    *

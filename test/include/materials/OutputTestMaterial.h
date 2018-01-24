@@ -21,7 +21,7 @@
 // Forward declarations
 class OutputTestMaterial;
 
-template<>
+template <>
 InputParameters validParams<OutputTestMaterial>();
 
 /**
@@ -30,12 +30,14 @@ InputParameters validParams<OutputTestMaterial>();
 class OutputTestMaterial : public Material
 {
 public:
-
   /**
    * Class constructor
    * @param prop_name
    */
   OutputTestMaterial(const InputParameters & parameters);
+
+  // Used for testing if hidden compiler warning shows up
+  virtual void computeProperties() { Material::computeProperties(); }
 
   /**
    * Class destructor
@@ -49,7 +51,7 @@ protected:
   MaterialProperty<RealVectorValue> & _vector_property;
   MaterialProperty<RealTensorValue> & _tensor_property;
   Real _factor;
-  VariableValue & _variable;
+  const VariableValue & _variable;
 };
 
-#endif //OUTPUTTESTMATERIAL_H
+#endif // OUTPUTTESTMATERIAL_H

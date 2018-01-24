@@ -14,17 +14,21 @@
 
 #include "SideAverageValue.h"
 
-template<>
-InputParameters validParams<SideAverageValue>()
+template <>
+InputParameters
+validParams<SideAverageValue>()
 {
   InputParameters params = validParams<SideIntegralVariablePostprocessor>();
+  params.addClassDescription("Computes the average value of a variable on a "
+                             "sideset. Note that this cannot be used on the "
+                             "centerline of an axisymmetric model.");
   return params;
 }
 
-SideAverageValue::SideAverageValue(const InputParameters & parameters) :
-    SideIntegralVariablePostprocessor(parameters),
-    _volume(0)
-{}
+SideAverageValue::SideAverageValue(const InputParameters & parameters)
+  : SideIntegralVariablePostprocessor(parameters), _volume(0)
+{
+}
 
 void
 SideAverageValue::initialize()
@@ -37,19 +41,22 @@ void
 SideAverageValue::execute()
 {
   SideIntegralVariablePostprocessor::execute();
-  _volume += _current_side_volume;
+  _volume += volume();
 }
 
 Real
 SideAverageValue::getValue()
 {
   Real integral = SideIntegralVariablePostprocessor::getValue();
-
   gatherSum(_volume);
-
   return integral / _volume;
 }
 
+Real
+SideAverageValue::volume()
+{
+  return _current_side_volume;
+}
 
 void
 SideAverageValue::threadJoin(const UserObject & y)
@@ -58,4 +65,3 @@ SideAverageValue::threadJoin(const UserObject & y)
   const SideAverageValue & pps = static_cast<const SideAverageValue &>(y);
   _volume += pps._volume;
 }
-

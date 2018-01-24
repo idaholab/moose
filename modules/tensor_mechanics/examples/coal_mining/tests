@@ -1,0 +1,58 @@
+[Tests]
+  [./cosserat_wp_only_run]
+    type = RunApp
+    input = 'cosserat_wp_only.i'
+    check_input = True
+  [../]
+  [./cosserat_mc_only_run]
+    type = RunApp
+    input = 'cosserat_mc_only.i'
+    check_input = True
+  [../]
+  [./cosserat_mc_wp_run]
+    type = RunApp
+    input = 'cosserat_mc_wp.i'
+    check_input = True
+  [../]
+  [./cosserat_elastic_csv]
+    type = 'CSVDiff'
+    input = 'cosserat_elastic.i'
+    csvdiff = 'cosserat_elastic.csv'
+  [../]
+  [./cosserat_wp_only_csv]
+    type = 'CSVDiff'
+    input = 'cosserat_wp_only.i'
+    csvdiff = 'cosserat_wp_only.csv'
+    heavy = true
+  [../]
+  [./cosserat_mc_only_csv]
+    type = 'CSVDiff'
+    input = 'cosserat_mc_only.i'
+    csvdiff = 'cosserat_mc_only.csv'
+    heavy = true
+  [../]
+  [./cosserat_mc_wp_csv]
+    type = 'CSVDiff'
+    input = 'cosserat_mc_wp.i'
+    csvdiff = 'cosserat_mc_wp.csv'
+    heavy = true
+  [../]
+
+  [./cosserat_mc_wp_sticky_run]
+    type = RunApp
+    input = 'cosserat_mc_wp_sticky.i'
+    check_input = True
+  [../]
+  [./cosserat_mc_wp_sticky_csv]
+    type = CSVDiff
+    input = 'cosserat_mc_wp_sticky.i'
+    csvdiff = 'cosserat_mc_wp_sticky.csv'
+    cli_args = 'Executioner/end_time=0.02'
+    heavy = true
+  [../]
+  [./cosserat_mc_wp_sticky_longitudinal_run]
+    type = RunApp
+    input = 'cosserat_mc_wp_sticky_longitudinal.i'
+    check_input = True
+  [../]
+[]

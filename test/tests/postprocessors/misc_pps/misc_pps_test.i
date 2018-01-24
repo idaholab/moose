@@ -14,16 +14,13 @@
   [./u]
     order = SECOND
     family = LAGRANGE
-    [./InitialCondition]
-      type = ConstantIC
-      value = 0
-    [../]
   [../]
 []
 
 [AuxVariables]
   [./aux_var]
     family = SCALAR
+    initial_condition = 42
   [../]
 []
 
@@ -48,7 +45,7 @@
     variable = u
   [../]
   [./ffn]
-    type = UserForcingFunction
+    type = BodyForce
     variable = u
     function = forcing_fn
   [../]
@@ -79,10 +76,6 @@
 [Postprocessors]
   # Should be zero since we aren't setting this inside any MooseObject
   # This PPS will also always report zero in this test
-  [./elapsed_time]
-    type = RunTime
-    time_type = active
-  [../]
   [./num_nonlinear_its]
     type = NumNonlinearIterations
   [../]
@@ -127,10 +120,6 @@
 []
 
 [Outputs]
-  execute_on = 'timestep_end'
   file_base = pps_out
-  [./exodus]
-    type = Exodus
-    execute_scalars_on = none
-  [../]
+  exodus = true
 []

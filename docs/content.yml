@@ -1,0 +1,6 @@
+framework:
+    base: docs/content
+    exclude:
+      - docs/content/MathJax/*
+    include:
+      - docs/content/**

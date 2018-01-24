@@ -13,27 +13,32 @@
 /****************************************************************/
 
 #include "SplineInterpolation.h"
+
+// MOOSE includes
 #include "MooseError.h"
-#include "libmesh/libmesh_common.h"
+
+// C++ includes
+#include <fstream>
 
 int SplineInterpolation::_file_number = 0;
 
-SplineInterpolation::SplineInterpolation()
-{
-}
+SplineInterpolation::SplineInterpolation() {}
 
-SplineInterpolation::SplineInterpolation(const std::vector<double> & x, const std::vector<double> & y, double yp1/* = 1e30*/, double ypn/* = 1e30*/) :
-    _x(x),
-    _y(y),
-    _yp1(yp1),
-    _ypn(ypn)
+SplineInterpolation::SplineInterpolation(const std::vector<Real> & x,
+                                         const std::vector<Real> & y,
+                                         Real yp1 /* = _deriv_bound*/,
+                                         Real ypn /* = _deriv_bound*/)
+  : SplineInterpolationBase(), _x(x), _y(y), _yp1(yp1), _ypn(ypn)
 {
   errorCheck();
   solve();
 }
 
 void
-SplineInterpolation::setData(const std::vector<double> & x, const std::vector<double> & y, double yp1/* = 1e30*/, double ypn/* = 1e30*/)
+SplineInterpolation::setData(const std::vector<Real> & x,
+                             const std::vector<Real> & y,
+                             Real yp1 /* = _deriv_bound*/,
+                             Real ypn /* = _deriv_bound*/)
 {
   _x = x;
   _y = y;
@@ -51,130 +56,57 @@ SplineInterpolation::errorCheck()
 
   bool error = false;
   for (unsigned i = 0; !error && i + 1 < _x.size(); ++i)
-    if (_x[i] >= _x[i+1])
+    if (_x[i] >= _x[i + 1])
       error = true;
 
   if (error)
-    mooseError( "x-values are not strictly increasing" );
+    mooseError("x-values are not strictly increasing");
 }
 
 void
 SplineInterpolation::solve()
 {
-  unsigned int n = _x.size();
-  if (n == 0)
-    mooseError("Solving for an empty SplineInterpolation.");
-
-  std::vector<double> u(n, 0.);
-  _y2.resize(n, 0.);
-
-  if (_yp1 >= 1e30)
-    _y2[0] = u[0] = 0.;
-  else
-  {
-    _y2[0] = -0.5;
-    u[0] = (3.0 / (_x[1] - _x[0])) * ((_y[1] - _y[0]) / (_x[1] - _x[0]) - _yp1);
-  }
-  // decomposition of tri-diagonal algorithm (_y2 and u are used for temporary storage)
-  for (unsigned int i = 1; i + 1 < n; i++)
-  {
-    double sig = (_x[i] - _x[i - 1]) / (_x[i + 1] - _x[i - 1]);
-    double p = sig * _y2[i - 1] + 2.0;
-    _y2[i] = (sig - 1.0) / p;
-    u[i] = (_y[i + 1] - _y[i]) / (_x[i + 1] - _x[i]) - (_y[i] - _y[i - 1]) / (_x[i] - _x[i - 1]);
-    u[i] = (6.0 * u[i] / (_x[i+1] - _x[i - 1]) - sig * u[i - 1]) / p;
-  }
-
-  double qn, un;
-  if (_ypn >= 1e30)
-    qn = un = 0.;
-  else
-  {
-    qn = 0.5;
-    un = (3.0 / (_x[n - 1] - _x[n - 2])) * (_ypn - (_y[n - 1] - _y[n - 2]) / (_x[n - 1] - _x[n - 2]));
-  }
-
-  _y2[n - 1] = (un - qn * u[n - 2]) / (qn * _y2[n - 2] + 1.);
-  // back substitution
-  for (int k = n - 2; k >= 0; k--)
-    _y2[k] = _y2[k] * _y2[k + 1] + u[k];
+  spline(_x, _y, _y2, _yp1, _ypn);
 }
 
-void
-SplineInterpolation::findInterval(double x, unsigned int & klo, unsigned int & khi) const
+Real
+SplineInterpolation::sample(Real x) const
 {
-  klo = 0;
-  khi = _x.size() - 1;
-  while (khi - klo > 1)
-  {
-    unsigned int k = (khi + klo) >> 1;
-    if (_x[k] > x)
-      khi = k;
-    else
-      klo = k;
-  }
+  return SplineInterpolationBase::sample(_x, _y, _y2, x);
 }
 
-void
-SplineInterpolation::computeCoeffs(unsigned int klo, unsigned int khi, double x, double & h, double & a, double & b) const
+Real
+SplineInterpolation::sampleDerivative(Real x) const
 {
-  h = _x[khi] - _x[klo];
-  if (h == 0)
-    mooseError("The values of x must be distinct");
-  a = (_x[khi] - x) / h;
-  b = (x - _x[klo]) / h;
+  return SplineInterpolationBase::sampleDerivative(_x, _y, _y2, x);
 }
 
-double
-SplineInterpolation::sample(double x) const
+Real
+SplineInterpolation::sample2ndDerivative(Real x) const
 {
-  unsigned int klo, khi;
-  findInterval(x, klo, khi);
-
-  double h, a, b;
-  computeCoeffs(klo, khi, x, h, a, b);
-
-  return a * _y[klo] + b * _y[khi] + ((a*a*a - a) * _y2[klo] + (b*b*b - b) * _y2[khi]) * (h*h) / 6.0;
+  return SplineInterpolationBase::sample2ndDerivative(_x, _y, _y2, x);
 }
 
-double
-SplineInterpolation::sampleDerivative(double x) const
-{
-  unsigned int klo, khi;
-  findInterval(x, klo, khi);
-
-  double h, a, b;
-  computeCoeffs(klo, khi, x, h, a, b);
-
-  return (_y[khi] - _y[klo]) / h - (((3.0 * a*a - 1.0) * _y2[klo] + (3.0 * b*b - 1.0) * -_y2[khi]) * h / 6.0);
-}
-
-double
-SplineInterpolation::sample2ndDerivative(double x) const
-{
-  unsigned int klo, khi;
-  findInterval(x, klo, khi);
-
-  double h, a, b;
-  computeCoeffs(klo, khi, x, h, a, b);
-
-  return a * _y2[klo] + b * _y2[khi];
-}
-
-double
+Real
 SplineInterpolation::domain(int i) const
 {
   return _x[i];
 }
 
-double
+Real
 SplineInterpolation::range(int i) const
 {
   return _y[i];
 }
 
 void
-SplineInterpolation::dumpSampleFile(std::string base_name, std::string x_label, std::string y_label, float xmin, float xmax, float ymin, float ymax)
+SplineInterpolation::dumpSampleFile(std::string base_name,
+                                    std::string x_label,
+                                    std::string y_label,
+                                    float xmin,
+                                    float xmax,
+                                    float ymin,
+                                    float ymax)
 {
   std::stringstream filename, filename_pts;
   const unsigned char fill_character = '0';
@@ -208,14 +140,14 @@ SplineInterpolation::dumpSampleFile(std::string base_name, std::string x_label, 
   out << "set key left top\n"
       << "f(x)=";
 
-   for (unsigned int i=1; i<_x.size(); ++i)
-   {
-     Real m = (_y[i] - _y[i-1])/(_x[i] - _x[i-1]);
-     Real b = (_y[i] - m*_x[i]);
+  for (unsigned int i = 1; i < _x.size(); ++i)
+  {
+    Real m = (_y[i] - _y[i - 1]) / (_x[i] - _x[i - 1]);
+    Real b = (_y[i] - m * _x[i]);
 
-     out << _x[i-1] << "<=x && x<" << _x[i] << " ? " << m << "*x+(" << b << ") : ";
-   }
-   out << " 1/0\n";
+    out << _x[i - 1] << "<=x && x<" << _x[i] << " ? " << m << "*x+(" << b << ") : ";
+  }
+  out << " 1/0\n";
 
   out << "\nplot f(x) with lines, '" << filename_pts.str() << "' using 1:2 title \"Points\"\n";
   out.close();
@@ -224,7 +156,7 @@ SplineInterpolation::dumpSampleFile(std::string base_name, std::string x_label, 
 
   out.open(filename_pts.str().c_str());
   /* Next dump the data points into a seperate file */
-  for (unsigned int i = 0; i<_x.size(); ++i)
+  for (unsigned int i = 0; i < _x.size(); ++i)
     out << _x[i] << " " << _y[i] << "\n";
   out << std::endl;
 

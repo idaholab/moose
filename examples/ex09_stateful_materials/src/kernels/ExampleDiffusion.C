@@ -16,27 +16,27 @@
 
 #include "Material.h"
 
-template<>
-InputParameters validParams<ExampleDiffusion>()
+template <>
+InputParameters
+validParams<ExampleDiffusion>()
 {
   InputParameters params = validParams<Diffusion>();
   return params;
 }
 
-
-ExampleDiffusion::ExampleDiffusion(const InputParameters & parameters) :
-    Diffusion(parameters),
-    _diffusivity(getMaterialProperty<Real>("diffusivity"))
-{}
+ExampleDiffusion::ExampleDiffusion(const InputParameters & parameters)
+  : Diffusion(parameters), _diffusivity(getMaterialProperty<Real>("diffusivity"))
+{
+}
 
 Real
 ExampleDiffusion::computeQpResidual()
 {
-  return _diffusivity[_qp]*Diffusion::computeQpResidual();
+  return _diffusivity[_qp] * Diffusion::computeQpResidual();
 }
 
 Real
 ExampleDiffusion::computeQpJacobian()
 {
-  return _diffusivity[_qp]*Diffusion::computeQpJacobian();
+  return _diffusivity[_qp] * Diffusion::computeQpJacobian();
 }

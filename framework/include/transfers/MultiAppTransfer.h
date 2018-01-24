@@ -15,31 +15,35 @@
 #ifndef MULTIAPPTRANSFER_H
 #define MULTIAPPTRANSFER_H
 
+// MOOSE includes
 #include "Transfer.h"
-#include "MultiApp.h"
 #include "MooseEnum.h"
-#include "MooseTypes.h"
 
+#include "libmesh/bounding_box.h"
+
+// Forward declarations
 class MultiAppTransfer;
+class MooseMesh;
+class MultiApp;
 
-template<>
+template <>
 InputParameters validParams<MultiAppTransfer>();
 
 /**
  * Base class for all MultiAppTransfer objects.
  *
- * MultiAppTransfers are objects that push and pull values to and from MultiApp objects
- * from and to the main (master) system.
+ * MultiAppTransfers are objects that push and pull values to and from
+ * MultiApp objects from and to the main (master) system.
  *
- * Classes that inherit from this class still need to override the execute() method from Transfer.
+ * Classes that inherit from this class still need to override the
+ * execute() method from Transfer.
  */
 class MultiAppTransfer : public Transfer
 {
 public:
   MultiAppTransfer(const InputParameters & parameters);
-  virtual ~MultiAppTransfer() {}
 
-  enum
+  enum DIRECTION
   {
     TO_MULTIAPP,
     FROM_MULTIAPP
@@ -57,11 +61,14 @@ public:
   void variableIntegrityCheck(const AuxVariableName & var_name) const;
 
   /// Return the MultiApp that this transfer belongs to
-  const MultiApp * getMultiApp() const { return _multi_app; }
+  const std::shared_ptr<MultiApp> getMultiApp() const { return _multi_app; }
+
+  /// Return the execution flags, handling "same_as_multiapp"
+  virtual const std::vector<ExecFlagType> & execFlags() const;
 
 protected:
   /// The MultiApp this Transfer is transferring data to or from
-  MultiApp * _multi_app;
+  std::shared_ptr<MultiApp> _multi_app;
 
   /// Whether we're transferring to or from the MultiApp
   MooseEnum _direction;
@@ -72,8 +79,8 @@ protected:
    */
   void getAppInfo();
 
-  std::vector<FEProblem *> _to_problems;
-  std::vector<FEProblem *> _from_problems;
+  std::vector<FEProblemBase *> _to_problems;
+  std::vector<FEProblemBase *> _from_problems;
   std::vector<EquationSystems *> _to_es;
   std::vector<EquationSystems *> _from_es;
   std::vector<MooseMesh *> _to_meshes;
@@ -88,7 +95,7 @@ protected:
    * Return the bounding boxes of all the "from" domains, including all the
    * domains not local to this processor.
    */
-  std::vector<MeshTools::BoundingBox> getFromBoundingBoxes();
+  std::vector<BoundingBox> getFromBoundingBoxes();
 
   /**
    * Return the number of "from" domains that each processor owns.

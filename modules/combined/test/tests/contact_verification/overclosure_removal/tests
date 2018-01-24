@@ -1,0 +1,9 @@
+[Tests]
+  [./test]
+    type = 'Exodiff'
+    input = 'overclosure.i'
+    exodiff = 'overclosure_exodus.e'
+    rel_err = 1e-5
+    abs_zero = 1e-6
+  [../]
+[]

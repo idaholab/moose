@@ -3,7 +3,7 @@
     type = 'Exodiff'
     input = '2d_diffusion_dg_test.i'
     exodiff = 'out.e-s003'
-    group = 'adaptive'
+    group = 'requirements adaptive'
     max_parallel = 1
   [../]
 []

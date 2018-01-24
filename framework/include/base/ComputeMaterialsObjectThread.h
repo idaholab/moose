@@ -17,13 +17,11 @@
 
 #include "ThreadedElementLoop.h"
 
-// libMesh includes
 #include "libmesh/elem_range.h"
 
 // Forward declarations
-class FEProblem;
-class NonlinearSystem;
-class MaterialWarehouse;
+class FEProblemBase;
+class NonlinearSystemBase;
 class MaterialPropertyStorage;
 class MaterialData;
 class Assembly;
@@ -31,32 +29,40 @@ class Assembly;
 class ComputeMaterialsObjectThread : public ThreadedElementLoop<ConstElemRange>
 {
 public:
-  ComputeMaterialsObjectThread(FEProblem & fe_problem, NonlinearSystem & sys, std::vector<MaterialData *> & material_data,
-                               std::vector<MaterialData *> & bnd_material_data, std::vector<MaterialData *> & neighbor_material_data,
-                               MaterialPropertyStorage & material_props, MaterialPropertyStorage & bnd_material_props,
-                               std::vector<MaterialWarehouse> & materials, std::vector<Assembly *> & assembly);
+  ComputeMaterialsObjectThread(FEProblemBase & fe_problem,
+                               std::vector<std::shared_ptr<MaterialData>> & material_data,
+                               std::vector<std::shared_ptr<MaterialData>> & bnd_material_data,
+                               std::vector<std::shared_ptr<MaterialData>> & neighbor_material_data,
+                               MaterialPropertyStorage & material_props,
+                               MaterialPropertyStorage & bnd_material_props,
+                               std::vector<Assembly *> & assembly);
 
   // Splitting Constructor
   ComputeMaterialsObjectThread(ComputeMaterialsObjectThread & x, Threads::split split);
 
   virtual ~ComputeMaterialsObjectThread();
 
-  virtual void subdomainChanged();
-  virtual void onElement(const Elem *elem);
-  virtual void onBoundary(const Elem *elem, unsigned int side, BoundaryID bnd_id);
-  virtual void onInternalSide(const Elem *elem, unsigned int side);
+  virtual void post() override;
+  virtual void subdomainChanged() override;
+  virtual void onElement(const Elem * elem) override;
+  virtual void onBoundary(const Elem * elem, unsigned int side, BoundaryID bnd_id) override;
+  virtual void onInternalSide(const Elem * elem, unsigned int side) override;
 
   void join(const ComputeMaterialsObjectThread & /*y*/);
 
 protected:
-  FEProblem & _fe_problem;
-  NonlinearSystem & _sys;
-  std::vector<MaterialData *> & _material_data;
-  std::vector<MaterialData *> & _bnd_material_data;
-  std::vector<MaterialData *> & _neighbor_material_data;
+  FEProblemBase & _fe_problem;
+  NonlinearSystemBase & _nl;
+  std::vector<std::shared_ptr<MaterialData>> & _material_data;
+  std::vector<std::shared_ptr<MaterialData>> & _bnd_material_data;
+  std::vector<std::shared_ptr<MaterialData>> & _neighbor_material_data;
   MaterialPropertyStorage & _material_props;
   MaterialPropertyStorage & _bnd_material_props;
-  std::vector<MaterialWarehouse> & _materials;
+
+  /// Reference to the Material object warehouses
+  const MaterialWarehouse & _materials;
+  const MaterialWarehouse & _discrete_materials;
+
   std::vector<Assembly *> & _assembly;
   bool _need_internal_side_material;
 
@@ -64,4 +70,4 @@ protected:
   const bool _has_bnd_stateful_props;
 };
 
-#endif //COMPUTERESIDUALTHREAD_H
+#endif // COMPUTERESIDUALTHREAD_H

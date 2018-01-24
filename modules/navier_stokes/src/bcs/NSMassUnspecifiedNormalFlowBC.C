@@ -6,45 +6,39 @@
 /****************************************************************/
 #include "NSMassUnspecifiedNormalFlowBC.h"
 
-template<>
-InputParameters validParams<NSMassUnspecifiedNormalFlowBC>()
+template <>
+InputParameters
+validParams<NSMassUnspecifiedNormalFlowBC>()
 {
   InputParameters params = validParams<NSMassBC>();
-
+  params.addClassDescription("This class implements the mass equation boundary term with the "
+                             "rho*(u.n) boundary integral computed implicitly.");
   return params;
 }
 
-
-
 NSMassUnspecifiedNormalFlowBC::NSMassUnspecifiedNormalFlowBC(const InputParameters & parameters)
-    : NSMassBC(parameters)
+  : NSMassBC(parameters)
 {
 }
 
-
-
-
-
-Real NSMassUnspecifiedNormalFlowBC::computeQpResidual()
+Real
+NSMassUnspecifiedNormalFlowBC::computeQpResidual()
 {
-  RealVectorValue mom(_rho_u[_qp], _rho_v[_qp], _rho_w[_qp]);
-
-  return this->qp_residual( mom * _normals[_qp] );
+  const RealVectorValue mom(_rho_u[_qp], _rho_v[_qp], _rho_w[_qp]);
+  return qpResidualHelper(mom * _normals[_qp]);
 }
 
-
-
-
-Real NSMassUnspecifiedNormalFlowBC::computeQpJacobian()
+Real
+NSMassUnspecifiedNormalFlowBC::computeQpJacobian()
 {
-  return this->qp_jacobian( /*on diagonal=*/ 0);
+  return qpJacobianHelper(/*on diagonal=*/0);
 }
 
-
-
-
-Real NSMassUnspecifiedNormalFlowBC::computeQpOffDiagJacobian(unsigned jvar)
+Real
+NSMassUnspecifiedNormalFlowBC::computeQpOffDiagJacobian(unsigned jvar)
 {
-  return this->qp_jacobian( this->map_var_number(jvar) );
+  if (isNSVariable(jvar))
+    return qpJacobianHelper(mapVarNumber(jvar));
+  else
+    return 0.0;
 }
-

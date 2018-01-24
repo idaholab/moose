@@ -17,22 +17,21 @@
 
 #include "SideFluxIntegral.h"
 
-//Forward Declarations
+// Forward Declarations
 class SideFluxAverage;
 
-template<>
+template <>
 InputParameters validParams<SideFluxAverage>();
 
 class SideFluxAverage : public SideFluxIntegral
 {
 public:
   SideFluxAverage(const InputParameters & parameters);
-  virtual ~SideFluxAverage(){}
 
-  virtual void initialize();
-  virtual void execute();
-  virtual Real getValue();
-  virtual void threadJoin(const UserObject & y);
+  virtual void initialize() override;
+  virtual void execute() override;
+  virtual Real getValue() override;
+  virtual void threadJoin(const UserObject & y) override;
 
 protected:
   Real _volume;

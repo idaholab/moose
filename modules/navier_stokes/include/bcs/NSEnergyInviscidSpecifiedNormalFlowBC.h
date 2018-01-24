@@ -12,20 +12,16 @@
 // Forward Declarations
 class NSEnergyInviscidSpecifiedNormalFlowBC;
 
-template<>
+template <>
 InputParameters validParams<NSEnergyInviscidSpecifiedNormalFlowBC>();
-
 
 /**
  * The inviscid energy BC term with specified normal flow.
  */
 class NSEnergyInviscidSpecifiedNormalFlowBC : public NSEnergyInviscidBC
 {
-
 public:
   NSEnergyInviscidSpecifiedNormalFlowBC(const InputParameters & parameters);
-
-  virtual ~NSEnergyInviscidSpecifiedNormalFlowBC(){}
 
 protected:
   virtual Real computeQpResidual();
@@ -33,14 +29,13 @@ protected:
   virtual Real computeQpOffDiagJacobian(unsigned jvar);
 
   // Aux Variables
-  VariableValue& _pressure;
+  const VariableValue & _pressure;
 
   // Required parameters
-  Real _un;
+  const Real _un;
 
 private:
-  // Helper Jacobian function
-  Real compute_jacobian(unsigned var_number);
+  Real computeJacobianHelper(unsigned var_number);
 };
 
 #endif // NSENERGYINVISCIDSPECIFIEDNORMALFLOWBC_H

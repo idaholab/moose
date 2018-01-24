@@ -15,27 +15,26 @@
 #ifndef MULTIAPPNEARESTNODETRANSFER_H
 #define MULTIAPPNEARESTNODETRANSFER_H
 
+// MOOSE includes
 #include "MultiAppTransfer.h"
 
-class MooseVariable;
+// Forward declarations
 class MultiAppNearestNodeTransfer;
 
-template<>
+template <>
 InputParameters validParams<MultiAppNearestNodeTransfer>();
 
 /**
  * Copy the value to the target domain from the nearest node in the source domain.
  */
-class MultiAppNearestNodeTransfer :
-  public MultiAppTransfer
+class MultiAppNearestNodeTransfer : public MultiAppTransfer
 {
 public:
   MultiAppNearestNodeTransfer(const InputParameters & parameters);
-  virtual ~MultiAppNearestNodeTransfer() {}
 
-  virtual void initialSetup();
+  virtual void initialSetup() override;
 
-  virtual void execute();
+  virtual void execute() override;
 
 protected:
   /**
@@ -56,7 +55,7 @@ protected:
    * @return The maximum distance between the point p and the eight corners of
    * the bounding box bbox.
    */
-  Real bboxMaxDistance(Point p, MeshTools::BoundingBox bbox);
+  Real bboxMaxDistance(Point p, BoundingBox bbox);
 
   /**
    * Return the distance between the given point and the nearest corner of the
@@ -66,7 +65,7 @@ protected:
    * @return The minimum distance between the point p and the eight corners of
    * the bounding box bbox.
    */
-  Real bboxMinDistance(Point p, MeshTools::BoundingBox bbox);
+  Real bboxMinDistance(Point p, BoundingBox bbox);
 
   void getLocalNodes(MooseMesh * mesh, std::vector<Node *> & local_nodes);
 
@@ -84,10 +83,10 @@ protected:
 
   // These variables allow us to cache nearest node info
   bool & _neighbors_cached;
-  std::vector< std::vector<unsigned int> > & _cached_froms;
-  std::vector< std::vector<dof_id_type> > & _cached_dof_ids;
-  std::map<unsigned int, unsigned int> & _cached_from_inds;
-  std::map<unsigned int, unsigned int> & _cached_qp_inds;
+  std::vector<std::vector<unsigned int>> & _cached_froms;
+  std::vector<std::vector<dof_id_type>> & _cached_dof_ids;
+  std::map<dof_id_type, unsigned int> & _cached_from_inds;
+  std::map<dof_id_type, unsigned int> & _cached_qp_inds;
 };
 
 #endif /* MULTIAPPNEARESTNODETRANSFER_H */

@@ -9,10 +9,10 @@
 
 #include "AuxKernel.h"
 
-//Forward Declarations
+// Forward Declarations
 class INSDivergenceAux;
 
-template<>
+template <>
 InputParameters validParams<INSDivergenceAux>();
 
 /**
@@ -29,9 +29,9 @@ protected:
   virtual Real computeValue();
 
   // Velocity gradients
-  VariableGradient& _grad_u_vel;
-  VariableGradient& _grad_v_vel;
-  VariableGradient& _grad_w_vel;
+  const VariableGradient & _grad_u_vel;
+  const VariableGradient & _grad_v_vel;
+  const VariableGradient & _grad_w_vel;
 };
 
-#endif //VELOCITYAUX_H
+#endif // VELOCITYAUX_H

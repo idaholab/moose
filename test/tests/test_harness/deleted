@@ -1,0 +1,8 @@
+[Tests]
+  [./deleted]
+    type = Exodiff
+    input = exodiff.i
+    exodiff = exodiff_out.e
+    deleted = 'test deleted test'
+  [../]
+[]

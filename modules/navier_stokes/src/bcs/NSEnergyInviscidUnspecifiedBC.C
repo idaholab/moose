@@ -4,33 +4,27 @@
 /*          All contents are licensed under LGPL V2.1           */
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
+
+// Navier-Stokes includes
+#include "NS.h"
 #include "NSEnergyInviscidUnspecifiedBC.h"
 
-template<>
-InputParameters validParams<NSEnergyInviscidUnspecifiedBC>()
+template <>
+InputParameters
+validParams<NSEnergyInviscidUnspecifiedBC>()
 {
   InputParameters params = validParams<NSEnergyInviscidBC>();
-
-  // Coupled variables
-  params.addRequiredCoupledVar("pressure", "");
-
+  params.addRequiredCoupledVar(NS::pressure, "pressure");
   return params;
 }
 
-
-
 NSEnergyInviscidUnspecifiedBC::NSEnergyInviscidUnspecifiedBC(const InputParameters & parameters)
-    : NSEnergyInviscidBC(parameters),
-
-      // Aux Variables
-      _pressure(coupledValue("pressure"))
+  : NSEnergyInviscidBC(parameters), _pressure(coupledValue(NS::pressure))
 {
 }
 
-
-
-
-Real NSEnergyInviscidUnspecifiedBC::computeQpResidual()
+Real
+NSEnergyInviscidUnspecifiedBC::computeQpResidual()
 {
   // Velocity vector object
   RealVectorValue vel(_u_vel[_qp], _v_vel[_qp], _w_vel[_qp]);
@@ -38,29 +32,26 @@ Real NSEnergyInviscidUnspecifiedBC::computeQpResidual()
   // Normal component
   Real un = vel * _normals[_qp];
 
-  return this->qp_residual(_pressure[_qp], un);
+  return qpResidualHelper(_pressure[_qp], un);
 }
 
-
-
-
-Real NSEnergyInviscidUnspecifiedBC::computeQpJacobian()
+Real
+NSEnergyInviscidUnspecifiedBC::computeQpJacobian()
 {
-  return this->compute_jacobian(/*on-diagonal variable is energy=*/4);
+  return computeJacobianHelper(/*on-diagonal variable is energy=*/4);
 }
 
-
-
-
-Real NSEnergyInviscidUnspecifiedBC::computeQpOffDiagJacobian(unsigned jvar)
+Real
+NSEnergyInviscidUnspecifiedBC::computeQpOffDiagJacobian(unsigned jvar)
 {
-  return this->compute_jacobian( this->map_var_number(jvar) );
+  if (isNSVariable(jvar))
+    return computeJacobianHelper(mapVarNumber(jvar));
+  else
+    return 0.0;
 }
 
-
-
-
-Real NSEnergyInviscidUnspecifiedBC::compute_jacobian(unsigned var_number)
+Real
+NSEnergyInviscidUnspecifiedBC::computeJacobianHelper(unsigned var_number)
 {
   // Velocity vector object
   RealVectorValue vel(_u_vel[_qp], _v_vel[_qp], _w_vel[_qp]);
@@ -70,9 +61,6 @@ Real NSEnergyInviscidUnspecifiedBC::compute_jacobian(unsigned var_number)
 
   // When both u.n and pressure are unspecified, all 3 Jacobian terms apply.
   // See base class for details.
-  return
-    this->qp_jacobian_termA(var_number, _pressure[_qp]) +
-    this->qp_jacobian_termB(var_number, un) +
-    this->qp_jacobian_termC(var_number, un);
+  return qpJacobianTermA(var_number, _pressure[_qp]) + qpJacobianTermB(var_number, un) +
+         qpJacobianTermC(var_number, un);
 }
-

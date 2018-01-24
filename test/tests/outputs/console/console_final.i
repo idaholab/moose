@@ -1,3 +1,12 @@
+###########################################################
+# This test exercises console Output control. The console
+# output is only output every third step. Additionally it
+# is forced to be output after the final timestep as well.
+#
+# @Requirement U1.40
+###########################################################
+
+
 [Mesh]
   type = GeneratedMesh
   dim = 2
@@ -9,8 +18,8 @@
   ny = 10
   elem_type = QUAD4
   # This test uses ElementalVariableValue postprocessors on specific
-  # elements, if you use ParallelMesh the elements get renumbered.
-  distribution = serial
+  # elements, so element numbering needs to stay unchanged
+  allow_renumbering = false
 []
 
 [Functions]
@@ -49,7 +58,7 @@
   [../]
 
   [./force]
-    type = UserForcingFunction
+    type = BodyForce
     variable = u
     function = ffn
   [../]

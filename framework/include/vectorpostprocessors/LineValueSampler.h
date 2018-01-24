@@ -15,13 +15,13 @@
 #ifndef LINEVALUESAMPLER_H
 #define LINEVALUESAMPLER_H
 
-#include "GeneralVectorPostprocessor.h"
+// MOOSE includes
 #include "PointSamplerBase.h"
 
-//Forward Declarations
+// Forward Declarations
 class LineValueSampler;
 
-template<>
+template <>
 InputParameters validParams<LineValueSampler>();
 
 class LineValueSampler : public PointSamplerBase
@@ -29,7 +29,19 @@ class LineValueSampler : public PointSamplerBase
 public:
   LineValueSampler(const InputParameters & parameters);
 
-  virtual ~LineValueSampler() {}
+  /**
+   * Helper function to generate the list of points along a line and a unique ID for each point.
+   * @param start_point The beginning of the line
+   * @param end_point The end of the line
+   * @param num_points The number of points along the line
+   * @param points The vector of points to fill in
+   * @param ids The vector of ids to fill in
+   */
+  static void generatePointsAndIDs(const Point & start_point,
+                                   const Point & end_point,
+                                   unsigned int num_points,
+                                   std::vector<Point> & points,
+                                   std::vector<Real> & ids);
 };
 
 #endif

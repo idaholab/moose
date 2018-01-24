@@ -5,7 +5,6 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-
 #ifndef RICHARDSSEFFAUX_H
 #define RICHARDSSEFFAUX_H
 
@@ -13,16 +12,16 @@
 
 #include "RichardsSeff.h"
 
-//Forward Declarations
+// Forward Declarations
 class RichardsSeffAux;
 
-template<>
+template <>
 InputParameters validParams<RichardsSeffAux>();
 
 /**
  * Calculates effective saturation for a specified variable
  */
-class RichardsSeffAux: public AuxKernel
+class RichardsSeffAux : public AuxKernel
 {
 public:
   RichardsSeffAux(const InputParameters & parameters);
@@ -42,7 +41,7 @@ protected:
    * where N is the number of arguments that the _seff_UO requires)
    * Eg, for twophase simulations N=2
    */
-  std::vector<VariableValue *> _pressure_vals;
+  std::vector<const VariableValue *> _pressure_vals;
 };
 
 #endif // RICHARDSSEFFAUX_H

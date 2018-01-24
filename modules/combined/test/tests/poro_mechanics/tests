@@ -1,0 +1,68 @@
+[Tests]
+  [./jacobian1]
+    type = PetscJacobianTester
+    input = jacobian1.i
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+  [../]
+  [./terzaghi]
+    type = CSVDiff
+    input = terzaghi.i
+    csvdiff = terzaghi.csv
+  [../]
+  [./undrained_oedometer]
+    type = CSVDiff
+    input = undrained_oedometer.i
+    csvdiff = undrained_oedometer.csv
+  [../]
+  [./pp_generation]
+    type = CSVDiff
+    input = pp_generation.i
+    csvdiff = pp_generation.csv
+  [../]
+  [./pp_generation_unconfined]
+    type = CSVDiff
+    input = pp_generation_unconfined.i
+    csvdiff = pp_generation_unconfined.csv
+  [../]
+  [./pp_generation_unconfined_action]
+    type = CSVDiff
+    input = pp_generation_unconfined_action.i
+    csvdiff = pp_generation_unconfined_action.csv
+  [../]
+  [./unconsolidated_undrained]
+    type = CSVDiff
+    input = unconsolidated_undrained.i
+    csvdiff = unconsolidated_undrained.csv
+  [../]
+  [./mandel]
+    type = CSVDiff
+    input = mandel.i
+    csvdiff = mandel.csv
+  [../]
+  [./borehole]
+    type = Exodiff
+    input = borehole_lowres.i
+    exodiff = borehole_lowres.e
+    rel_err = 1e-5
+  [../]
+  [./borehole_heavy]
+    type = Exodiff
+    input = borehole_highres.i
+    exodiff = borehole_highres.e
+    heavy = true
+  [../]
+
+  [./selected_qp]
+    type = CSVDiff
+    input = selected_qp.i
+    csvdiff = selected_qp.csv
+  [../]
+  [./except1]
+    type = 'RunException'
+    input = selected_qp.i
+    prereq = 'selected_qp'
+    cli_args = 'Outputs/file_base=except1 AuxKernels/mean_stress0/selected_qp=10'
+    expect_err = 'RankTwoScalarAux.  selected_qp specified as 10 but there are only 8 quadpoints in the element'
+  [../]
+[]

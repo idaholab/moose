@@ -24,7 +24,6 @@
 #include <sstream>
 #include <stdexcept>
 
-// libMesh includes
 #include "libmesh/libmesh.h"
 #include "libmesh/exodusII_io.h"
 #include "libmesh/equation_systems.h"
@@ -33,8 +32,9 @@
 #include "libmesh/string_to_enum.h"
 #include "libmesh/fe.h"
 
-template<>
-InputParameters validParams<AddLotsOfDiffusion>()
+template <>
+InputParameters
+validParams<AddLotsOfDiffusion>()
 {
   MooseEnum families(AddVariableAction::getNonlinearVariableFamilies());
   MooseEnum orders(AddVariableAction::getNonlinearVariableOrders());
@@ -45,9 +45,7 @@ InputParameters validParams<AddLotsOfDiffusion>()
   return params;
 }
 
-
-AddLotsOfDiffusion::AddLotsOfDiffusion(const InputParameters & params) :
-    AddVariableAction(params)
+AddLotsOfDiffusion::AddLotsOfDiffusion(const InputParameters & params) : AddVariableAction(params)
 {
 }
 
@@ -83,12 +81,12 @@ AddLotsOfDiffusion::act()
 
       InputParameters params = _factory.getValidParams("DirichletBC");
       params.set<NonlinearVariableName>("variable") = var_name;
-      params.set<std::vector<BoundaryName> >("boundary").push_back("left");
+      params.set<std::vector<BoundaryName>>("boundary").push_back("left");
       params.set<Real>("value") = 0;
 
       _problem->addBoundaryCondition("DirichletBC", var_name + "_left", params);
 
-      params.set<std::vector<BoundaryName> >("boundary")[0] = "right";
+      params.set<std::vector<BoundaryName>>("boundary")[0] = "right";
       params.set<Real>("value") = 1;
 
       _problem->addBoundaryCondition("DirichletBC", var_name + "_right", params);

@@ -1,0 +1,27 @@
+[Tests]
+  [./tauOpt]
+    type = 'Exodiff'
+    input = 'tauOpt.i'
+    exodiff = 'tauOpt_out.e'
+    allow_test_objects = true
+  [../]
+  [./tauMod]
+    type = 'Exodiff'
+    input = 'tauOpt.i'
+    exodiff = 'tauMod_out.e'
+    cli_args = "GlobalParams/tau_type=mod Outputs/file_base=tauMod_out"
+    allow_test_objects = true
+  [../]
+  [./1d_error_test_supg]
+    type = 'Exodiff'
+    input = 'advection_error_testing.i'
+    exodiff = 'advection_error_testing_exodus.e'
+    allow_test_objects = true
+  [../]
+  [./2d_error_test_supg]
+    type = 'Exodiff'
+    exodiff = '2d_advection_error_testing_exodus.e'
+    input = '2d_advection_error_testing.i'
+    allow_test_objects = true
+  [../]
+[]

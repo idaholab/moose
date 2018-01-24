@@ -15,16 +15,14 @@
 #include "AddKernelAction.h"
 #include "FEProblem.h"
 
-template<>
-InputParameters validParams<AddKernelAction>()
+template <>
+InputParameters
+validParams<AddKernelAction>()
 {
   return validParams<MooseObjectAction>();
 }
 
-AddKernelAction::AddKernelAction(InputParameters params) :
-    MooseObjectAction(params)
-{
-}
+AddKernelAction::AddKernelAction(InputParameters params) : MooseObjectAction(params) {}
 
 void
 AddKernelAction::act()
@@ -34,7 +32,8 @@ AddKernelAction::act()
   else
   {
     if (getAllTasks().find("add_aux_bc") != getAllTasks().end())
-      mooseWarning("The [AuxBCs] block is deprecated, all AuxKernels including both block and boundary restricted should be added within the [AuxKernels] block");
+      mooseWarning("The [AuxBCs] block is deprecated, all AuxKernels including both block and "
+                   "boundary restricted should be added within the [AuxKernels] block");
 
     _problem->addAuxKernel(_type, _name, _moose_object_pars);
   }

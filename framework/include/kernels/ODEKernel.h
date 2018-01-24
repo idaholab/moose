@@ -17,10 +17,10 @@
 
 #include "ScalarKernel.h"
 
-//Forward Declarations
+// Forward Declarations
 class ODEKernel;
 
-template<>
+template <>
 InputParameters validParams<ODEKernel>();
 
 /**
@@ -30,18 +30,16 @@ class ODEKernel : public ScalarKernel
 {
 public:
   ODEKernel(const InputParameters & parameters);
-  virtual ~ODEKernel();
 
-  virtual void reinit();
-  virtual void computeResidual();
-  virtual void computeJacobian();
-  virtual void computeOffDiagJacobian(unsigned int jvar);
+  virtual void reinit() override;
+  virtual void computeResidual() override;
+  virtual void computeJacobian() override;
+  virtual void computeOffDiagJacobian(unsigned int jvar) override;
 
 protected:
   virtual Real computeQpResidual() = 0;
   virtual Real computeQpJacobian();
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
 };
-
 
 #endif /* ODEKERNEL_H */

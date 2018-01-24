@@ -17,27 +17,32 @@
 
 #include "MooseObject.h"
 #include "ScalarCoupleable.h"
+#include "FunctionInterface.h"
 #include "DependencyResolverInterface.h"
 
-#include "libmesh/dense_vector.h"
-
-//forward declarations
+// forward declarations
 class ScalarInitialCondition;
-class SubProblem;
+class FeProblem;
 class SystemBase;
 class Assembly;
 class MooseVariableScalar;
 
-template<>
+namespace libMesh
+{
+template <typename T>
+class DenseVector;
+}
+
+template <>
 InputParameters validParams<ScalarInitialCondition>();
 
 /**
  * InitialConditions are objects that set the initial value of variables.
  */
-class ScalarInitialCondition :
-  public MooseObject,
-  public ScalarCoupleable,
-  public DependencyResolverInterface
+class ScalarInitialCondition : public MooseObject,
+                               public ScalarCoupleable,
+                               public FunctionInterface,
+                               public DependencyResolverInterface
 {
 public:
   /**
@@ -68,11 +73,14 @@ public:
   virtual const std::set<std::string> & getSuppliedItems();
 
 protected:
-  SubProblem & _subproblem;
+  FEProblemBase & _fe_problem;
   SystemBase & _sys;
   THREAD_ID _tid;
 
   Assembly & _assembly;
+  /// Time
+  Real & _t;
+
   /// Scalar variable this initial condition works on
   MooseVariableScalar & _var;
 
@@ -82,4 +90,4 @@ protected:
   std::set<std::string> _supplied_vars;
 };
 
-#endif //SCALARINITIALCONDITION_H
+#endif // SCALARINITIALCONDITION_H

@@ -10,13 +10,18 @@
   ny = 100
   xmax = 60
   ymax = 60
-  elem_type = QUAD4
 []
 
-[Variables]
-  [./c]
-    order = THIRD
-    family = HERMITE
+[Modules]
+  [./PhaseField]
+    [./Conserved]
+      [./c]
+        free_energy = fbulk
+        mobility = M
+        kappa = kappa_c
+        solve_type = DIRECT
+      [../]
+    [../]
   [../]
 []
 
@@ -31,32 +36,8 @@
   [./cIC]
     type = RandomIC
     variable = c
-    max = 0.1
     min = -0.1
-  [../]
-[]
-
-[Kernels]
-  active = 'CH_Parsed c_dot CHint'
-  [./c_dot]
-    type = TimeDerivative
-    variable = c
-  [../]
-  [./CH_Parsed]
-    type = CahnHilliard
-    variable = c
-    f_name = fbulk
-    mob_name = M
-  [../]
-  [./CH_Math]
-    type = CHMath
-    variable = c
-  [../]
-  [./CHint]
-    type = CHInterface
-    variable = c
-    mob_name = M
-    kappa_name = kappa_c
+    max =  0.1
   [../]
 []
 
@@ -82,13 +63,11 @@
 [Materials]
   [./mat]
     type = GenericConstantMaterial
-    prop_names  = 'M kappa_c'
+    prop_names  = 'M   kappa_c'
     prop_values = '1.0 0.5'
-    block = 0
   [../]
   [./free_energy]
     type = DerivativeParsedMaterial
-    block = 0
     f_name = fbulk
     args = c
     constant_names = W
@@ -112,18 +91,27 @@
 
 [Executioner]
   type = Transient
-  scheme = bdf2
-  dt = 2.0
   solve_type = NEWTON
-  petsc_options_iname = '-pc_type -pc_hypre_type -ksp_gmres_restart'
-  petsc_options_value = 'hypre boomeramg 31'
+  scheme = bdf2
+
+  # Alternative preconditioning using the additive Schwartz method and LU decomposition
+  #petsc_options_iname = '-pc_type -sub_ksp_type -sub_pc_type'
+  #petsc_options_value = 'asm      preonly       lu          '
+
+  # Preconditioning options using Hypre (algebraic multi-grid)
+  petsc_options_iname = '-pc_type -pc_hypre_type'
+  petsc_options_value = 'hypre    boomeramg'
+
   l_max_its = 30
   l_tol = 1e-4
   nl_max_its = 20
   nl_rel_tol = 1e-9
+
+  dt = 2.0
   end_time = 20.0
 []
 
 [Outputs]
   exodus = true
+  print_perf_log = true
 []

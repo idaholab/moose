@@ -9,14 +9,15 @@
 
 #include "TotalFreeEnergyBase.h"
 
-//Forward Declarations
+// Forward Declarations
 class TotalFreeEnergy;
 
-template<>
+template <>
 InputParameters validParams<TotalFreeEnergy>();
 
 /**
- * Total free energy (both the bulk and gradient parts), where the bulk free energy has been defined in a material and called f_name
+ * Total free energy (both the bulk and gradient parts), where the bulk free energy has been defined
+ * in a material and called f_name
  */
 class TotalFreeEnergy : public TotalFreeEnergyBase
 {
@@ -33,4 +34,4 @@ protected:
   std::vector<const MaterialProperty<Real> *> _kappas;
 };
 
-#endif //TOTALFREEENERGY_H
+#endif // TOTALFREEENERGY_H

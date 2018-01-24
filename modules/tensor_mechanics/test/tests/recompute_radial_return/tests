@@ -1,0 +1,91 @@
+[Tests]
+  [./isotropic_plasticity_incremental]
+    type = Exodiff
+    input = 'isotropic_plasticity_incremental_strain.i'
+    exodiff = 'isotropic_plasticity_incremental_strain_out.e'
+    compiler = 'CLANG GCC'
+  [../]
+  [./isotropic_plasticity_incremental_Bbar]
+    type = Exodiff
+    input = 'isotropic_plasticity_incremental_strain.i'
+    exodiff = 'isotropic_plasticity_incremental_strain_out.e'
+    compiler = 'CLANG GCC'
+    cli_args = 'GlobalParams/volumetric_locking_correction=true'
+    prereq = 'isotropic_plasticity_incremental'
+  [../]
+  [./isotropic_plasticity_finite]
+    type = Exodiff
+    input = 'isotropic_plasticity_finite_strain.i'
+    exodiff = 'isotropic_plasticity_finite_strain_out.e'
+    compiler = 'CLANG GCC'
+  [../]
+  [./isotropic_plasticity_finite_Bbar]
+    type = Exodiff
+    input = 'isotropic_plasticity_finite_strain.i'
+    exodiff = 'isotropic_plasticity_finite_strain_out.e'
+    compiler = 'CLANG GCC'
+    cli_args = 'GlobalParams/volumetric_locking_correction=true'
+    prereq = 'isotropic_plasticity_finite'
+  [../]
+  [./uniaxial_viscoplasticity]
+    type = Exodiff
+    input = 'uniaxial_viscoplasticity_incrementalstrain.i'
+    exodiff = 'uniaxial_viscoplasticity_incrementalstrain_out.e'
+    compiler = 'CLANG GCC'
+  [../]
+
+  [./isotropic_plasticity_error1]
+    type = 'RunException'
+    input = 'isotropic_plasticity_errors.i'
+    cli_args = 'Materials/isotropic_plasticity/hardening_function=harden_func
+                Materials/isotropic_plasticity/hardening_constant=2
+                Materials/isotropic_plasticity/yield_stress=50
+                Materials/elasticity_tensor/type=ComputeIsotropicElasticityTensor Materials/elasticity_tensor/youngs_modulus=2.1e5
+                Materials/elasticity_tensor/poissons_ratio=0.0'
+    expect_err = 'Only the hardening_constant or only the hardening_function can be defined but not both'
+  [../]
+  [./isotropic_plasticity_error2]
+    type = 'RunException'
+    input = 'isotropic_plasticity_errors.i'
+    cli_args = 'Materials/isotropic_plasticity/yield_stress=50
+                Materials/elasticity_tensor/type=ComputeIsotropicElasticityTensor Materials/elasticity_tensor/youngs_modulus=2.1e5
+                Materials/elasticity_tensor/poissons_ratio=0.0'
+    expect_err = 'Either hardening_constant or hardening_function must be defined'
+    prereq = 'isotropic_plasticity_error1'
+  [../]
+  [./isotropic_plasticity_error3]
+    type = 'RunException'
+    input = 'isotropic_plasticity_errors.i'
+    cli_args = 'Materials/isotropic_plasticity/hardening_function=harden_func
+                Materials/elasticity_tensor/type=ComputeIsotropicElasticityTensor Materials/elasticity_tensor/youngs_modulus=2.1e5
+                Materials/elasticity_tensor/poissons_ratio=0.0'
+    expect_err = 'Either yield_stress or yield_stress_function must be given'
+    prereq = 'isotropic_plasticity_error2'
+  [../]
+  [./isotropic_plasticity_error4]
+    type = 'RunException'
+    input = 'isotropic_plasticity_errors.i'
+    cli_args = 'Materials/isotropic_plasticity/hardening_function=harden_func
+                Materials/elasticity_tensor/type=ComputeIsotropicElasticityTensor Materials/elasticity_tensor/youngs_modulus=2.1e5
+                Materials/elasticity_tensor/poissons_ratio=0.0
+                Materials/isotropic_plasticity/yield_stress=-5.0'
+    expect_err = 'Yield stress must be greater than zero'
+    prereq = 'isotropic_plasticity_error3'
+  [../]
+  [./isotropic_plasticity_error5]
+    type = 'RunException'
+    input = 'isotropic_plasticity_errors.i'
+    cli_args = 'Materials/isotropic_plasticity/hardening_function=harden_func
+                Materials/isotropic_plasticity/yield_stress=50
+                Materials/elasticity_tensor/type=ComputeElasticityTensor Materials/elasticity_tensor/fill_method=symmetric21
+                Materials/elasticity_tensor/C_ijkl="1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21"'
+    expect_err = 'Model isotropic_plasticity requires an isotropic elasticity tensor, but the one supplied is not guaranteed isotropic'
+    prereq = 'isotropic_plasticity_error4'
+  [../]
+  [./affine_plasticity]
+    type = Exodiff
+    input = 'affine_plasticity.i'
+    exodiff = 'affine_plasticity_out.e'
+    custom_cmp = 'affine_plasticity.exodiff'
+  [../]
+[]

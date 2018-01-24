@@ -1,0 +1,13 @@
+[Tests]
+  [./instantenous]
+    type = Exodiff
+    input = olsson_vortex.i
+    exodiff = olsson_vortex_out.e
+  [../]
+  [./cosine]
+    type = Exodiff
+    input = olsson_vortex.i
+    cli_args = "Functions/vel_x_func/reverse_type=cosine Functions/vel_y_func/reverse_type=cosine Outputs/file_base=olsson_vortex_cosine_out"
+    exodiff = olsson_vortex_cosine_out.e
+  [../]
+[]

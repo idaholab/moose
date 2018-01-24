@@ -19,7 +19,7 @@
 
 class SetupTimeIntegratorAction;
 
-template<>
+template <>
 InputParameters validParams<SetupTimeIntegratorAction>();
 
 /**
@@ -29,13 +29,8 @@ class SetupTimeIntegratorAction : public MooseObjectAction
 {
 public:
   SetupTimeIntegratorAction(const InputParameters & parameters);
-  virtual ~SetupTimeIntegratorAction();
 
-  virtual void act();
-
-protected:
-
+  virtual void act() override;
 };
-
 
 #endif /* SETUPTIMEINTEGRATORACTION_H */

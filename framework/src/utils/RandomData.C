@@ -19,8 +19,8 @@
 
 const unsigned int MASTER = std::numeric_limits<unsigned int>::max();
 
-RandomData::RandomData(FEProblem &problem, const RandomInterface & random_interface) :
-    _rd_problem(problem),
+RandomData::RandomData(FEProblemBase & problem, const RandomInterface & random_interface)
+  : _rd_problem(problem),
     _rd_mesh(problem.mesh()),
     _is_nodal(random_interface.isNodal()),
     _reset_on(random_interface.getResetOnTime()),
@@ -33,7 +33,8 @@ RandomData::RandomData(FEProblem &problem, const RandomInterface & random_interf
 unsigned int
 RandomData::getSeed(dof_id_type id)
 {
-  mooseAssert(_seeds.find(id) != _seeds.end(), "Call to updateSeeds() is stale! Check your initialize() or timestepSetup() calls");
+  mooseAssert(_seeds.find(id) != _seeds.end(),
+              "Call to updateSeeds() is stale! Check your initialize() or timestepSetup() calls");
 
   return _seeds[id];
 }
@@ -62,11 +63,11 @@ RandomData::updateSeeds(ExecFlagType exec_flag)
   {
     _current_master_seed = _new_seed;
     updateGenerators();
-    _generator.saveState();       // Save states so that we can reset on demand
+    _generator.saveState(); // Save states so that we can reset on demand
   }
 
   if (_reset_on == exec_flag)
-    _generator.restoreState();    // Restore states here
+    _generator.restoreState(); // Restore states here
 }
 
 void
@@ -83,9 +84,9 @@ RandomData::updateGenerators()
    * processor based on their individual processor ids before generating seeds for
    * the mesh entities.
    */
-  if (_rd_mesh.isParallelMesh())
+  if (_rd_mesh.isDistributedMesh())
   {
-    unsigned int parallel_seed;
+    unsigned int parallel_seed = 0;
     for (processor_id_type proc_id = 0; proc_id < _rd_problem.n_processors(); ++proc_id)
       if (proc_id == _rd_problem.processor_id())
         parallel_seed = _generator.randl(MASTER);
@@ -96,32 +97,31 @@ RandomData::updateGenerators()
   }
 
   if (_is_nodal)
-  {
-    MeshBase::const_node_iterator it = _rd_mesh.getMesh().active_nodes_begin();
-    MeshBase::const_node_iterator end_it = _rd_mesh.getMesh().active_nodes_end();
-
-    for (; it != end_it; ++it)
-    {
-      dof_id_type id = (*it)->id();
-      _seeds[id] = _generator.randl(MASTER);
-
-      // Update the individual dof object generators
-      _generator.seed(static_cast<unsigned int>(id), _seeds[id]);
-    }
-  }
+    updateGeneratorHelper(_rd_mesh.getMesh().active_nodes_begin(),
+                          _rd_mesh.getMesh().active_nodes_end());
   else
-  {
-    MeshBase::const_element_iterator it = _rd_mesh.getMesh().active_elements_begin();
-    MeshBase::const_element_iterator end_it = _rd_mesh.getMesh().active_elements_end();
+    updateGeneratorHelper(_rd_mesh.getMesh().active_elements_begin(),
+                          _rd_mesh.getMesh().active_elements_end());
+}
 
-    for (; it != end_it; ++it)
+template <typename T>
+void
+RandomData::updateGeneratorHelper(T it, T end_it)
+{
+  processor_id_type processor_id = _rd_problem.processor_id();
+
+  for (; it != end_it; ++it)
+  {
+    dof_id_type id = (*it)->id();
+    uint32_t rand_int = _generator.randl(MASTER);
+
+    if (processor_id == (*it)->processor_id())
     {
-      dof_id_type id = (*it)->id();
-      _seeds[id] = _generator.randl(MASTER);
+      // Only save states for local dofs
+      _seeds[id] = rand_int;
 
       // Update the individual dof object generators
       _generator.seed(static_cast<unsigned int>(id), _seeds[id]);
     }
   }
-
 }

@@ -11,13 +11,12 @@
 
 class NewmarkAccelAux;
 
-template<>
+template <>
 InputParameters validParams<NewmarkAccelAux>();
 
 class NewmarkAccelAux : public AuxKernel
 {
 public:
-
   /**
   *Computes Acceleration using Newmark Time integration scheme
   */
@@ -28,11 +27,10 @@ public:
 protected:
   virtual Real computeValue();
 
-  VariableValue & _disp_old;
-  VariableValue & _disp;
-  VariableValue & _vel_old;
+  const VariableValue & _disp_old;
+  const VariableValue & _disp;
+  const VariableValue & _vel_old;
   Real _beta;
-
 };
 
-#endif //NEWMARKACCELAUX_H
+#endif // NEWMARKACCELAUX_H

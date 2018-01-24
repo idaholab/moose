@@ -9,10 +9,10 @@
 
 #include "DerivativeFunctionMaterialBase.h"
 
-//Forward Declarations
+// Forward Declarations
 class MathFreeEnergy;
 
-template<>
+template <>
 InputParameters validParams<MathFreeEnergy>();
 
 /**
@@ -32,8 +32,8 @@ protected:
 
 private:
   /// Coupled variable value for the concentration \f$ c \f$.
-  VariableValue & _c;
+  const VariableValue & _c;
   unsigned int _c_var;
 };
 
-#endif //MATHFREEENERGY_H
+#endif // MATHFREEENERGY_H

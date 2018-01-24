@@ -158,7 +158,7 @@ with respect to $S$ are correctly coded.
 (\kappa_{s}-\kappa_{n})\frac{\Theta^{2}(C-1)}{C-\Theta} \ ,
 \label{bw.krel}
 \end{equation}
-where $\Theta = (S-S_{n})/(S_{s}-S_{n})$, 
+where $\Theta = (S-S_{n})/(S_{s}-S_{n})$,
 is correctly coded, and also that its first and second derivatives
 with respect to $S$ are correctly coded.  Broadbridge and White assume
 that saturation is bounded $S_{n}\leq S\leq S_{s}$, so for most MOOSE
@@ -187,7 +187,7 @@ is correctly coded, and also that its first and second derivatives
 with respect to $P$ are correctly coded.
 
 \item That the density of methane (kg.m$^{-3}$) at 20degC as a
-  function of $P$ (Pa): 
+  function of $P$ (Pa):
 \begin{equation}
 \rho(P) = 6.54576947608\times 10^{-6}P + 1.04357716547\times 10^{-13} P^{2}
 \end{equation}
@@ -208,7 +208,7 @@ with respect to $P_{\mathrm{c}}$ are correctly coded.
 \frac{P_{\mathrm{c}}}{\lambda_{s}} = \frac{1-\Theta}{\Theta} - \frac{1}{C}\log
 \left( \frac{C-\Theta}{(C-1)\Theta} \right) \ ,
 \end{equation}
-with $\Theta = (S_{\mathrm{eff}} - S_{n})/(S_{s}-S_{n})$, 
+with $\Theta = (S_{\mathrm{eff}} - S_{n})/(S_{s}-S_{n})$,
 is correctly coded, and also that the first and second derivatives of
 $S_{\mathrm{eff}}$ with respect to $P_{\mathrm{c}}$ are correctly
 coded.  Note that Broadbridge and White assume that
@@ -310,7 +310,7 @@ Van Genuchten $m$ & 0.5 \\
 Van Genuchten $\alpha$ & 1\,Pa$^{-1}$ \\
 Porosity & 0.1 \\
 \hline
-\end{tabular} 
+\end{tabular}
 \end{center}
 The porepressure is set at $P=x$.
 
@@ -330,7 +330,7 @@ $x$ & $p$ & Density & $S_{\mathrm{eff}}$ & Saturation & Mass \\
 \hline
  & & & & Total & 0.206884 \\
 \hline
-\end{tabular} 
+\end{tabular}
 \end{center}
 MOOSE also gives the total mass as 0.206884\,kg.  This test is part of
 the automatic test suite that is run every time the code is updated.
@@ -427,7 +427,7 @@ $\mbox{}$ \\
 $\mbox{}$ \\
 \begin{tabular}{cc}
 \includegraphics[width=8cm]{gh_seff_50.eps} &
-\includegraphics[width=8cm]{gh_p_50.eps} 
+\includegraphics[width=8cm]{gh_p_50.eps}
 \end{tabular}
 \caption{Results for $S_{\mathrm{imm}}=0.3$.  Gravity points to the
   left.  Top picture: Effective saturation.  Middle picture: Pore
@@ -474,7 +474,7 @@ Power-type relative permeabilty $n$ & 2 \\
 $\kappa_{xx}$ & $10^{-5}$\,m$^{2}$ \\
 Porosity & 0.1 \\
 \hline
-\end{tabular} 
+\end{tabular}
 \end{center}
 
 \noindent In the first test a piecewise-linear sink is applied with strength:
@@ -483,7 +483,7 @@ Porosity & 0.1 \\
 \begin{array}{ll}
 1 & \mbox{ for } p \leq 0 \\
 1+p & \mbox{ for } 0<p<1 \\
-2 & \mbox{ for } p\geq 1 
+2 & \mbox{ for } p\geq 1
 \end{array}
 \right.
 \label{eqn.s01}
@@ -518,7 +518,7 @@ Figure~\ref{s01.fig}.
 \mbox{sink flux (kg.m$^{-1}$.s$^{-1}$)} = \left\{
 \begin{array}{ll}
 2\exp(-0.5(P-1)^{2}) & \mbox{ for } p < 1 \\
-2 & \mbox{ for } p\geq 1 
+2 & \mbox{ for } p\geq 1
 \end{array}
 \right.
 \label{eqn.s02}
@@ -552,13 +552,13 @@ Figure~\ref{s02.fig}.
 \noindent In the third test a piecewise-linear sink with relative
 permeability and mobility affects is used.  The flux strength is:
 \begin{equation}
-\mbox{sink flux (kg.m$^{-1}$.s$^{-1}$)} = 
+\mbox{sink flux (kg.m$^{-1}$.s$^{-1}$)} =
 \frac{\rho\kappa_{xx}\kappa_{\mathrm{rel}}}{\mu}
 \times \left\{
 \begin{array}{ll}
 100 & \mbox{ for } p \leq -1 \\
 150+50p& \mbox{ for } -1<p<1 \\
-200 & \mbox{ for } p\geq 1 
+200 & \mbox{ for } p\geq 1
 \end{array}
 \right.
 \label{eqn.s03}
@@ -610,7 +610,7 @@ element occurs.  The following fluid properties are used:
 Constant fluid bulk modulus & 2\,GPa \\
 Fluid density at zero pressure & 1000\,kg.m$^{-3}$ \\
 \hline
-\end{tabular} 
+\end{tabular}
 \end{center}
 The test is fully-saturated, so the van Genuchten parameters, etc, are
 irrelevant.  The initial porepressure is set to 10\,MPa, and the
@@ -665,7 +665,7 @@ becomes
 \begin{equation}
 \frac{\partial}{\partial t}\rho = \nabla_{i}\alpha_{ij}\nabla\rho \ ,
 \end{equation}
-with 
+with
 \begin{equation}
 \alpha_{ij} = \frac{\kappa_{ij}B}{\mu\phi} \ .
 \end{equation}
@@ -709,7 +709,7 @@ These tests run rapidly and are part of the automatic test suite.
 \caption{Comparison between the MOOSE result (in dots), and the
   exact analytic expression given by Eqn~(\ref{eqn.exact.pp}).  This
   test had 10 elements in the $x$ direction, with $0\leq x \leq
-  100$\,m, and ran for a total of 
+  100$\,m, and ran for a total of
   10$^4$ seconds with 10 timesteps.  The parameters were $B=2$\,GPa,
   $\kappa_{xx}=10^{-15}$\,m$^{2}$, $\mu=10^{-3}$\,Pa.s, $\phi=0.1$,
   with initial pressure $P=2$\,MPa, and applied pressure $P=3$\,MPa at
@@ -729,7 +729,7 @@ This test demonstrates that MOOSE behaves correctly when a simulation
 contains a sink.  The sink is a piecewise linear function of pressure.
 
 Darcy's equation for flow through a fully saturated medium without
-gravity and without sources is 
+gravity and without sources is
 \begin{equation}
 \frac{\partial}{\partial t}\phi\rho = \nabla_{i}\left(\frac{\rho
   \kappa_{ij}}{\mu} \nabla_{j}P \right) \ ,
@@ -740,7 +740,7 @@ becomes
 \begin{equation}
 \frac{\partial}{\partial t}\rho = \nabla_{i}\alpha_{ij}\nabla_{j}\rho \ ,
 \end{equation}
-with 
+with
 \begin{equation}
 \alpha_{ij} = \frac{\kappa_{ij}B}{\mu\phi} \ .
 \end{equation}
@@ -836,7 +836,7 @@ aquifer height, $b$ (m).  In the Theis solution, gravitational
 effects are ignored (the pressures at the bottom and top of the
 aquifer are is assumed equal).  At some horizontal radial distance, $r$, from
 the borehole the pressure is measured.  The geometry is shown in
-Figure~\ref{th.setup.fig}. 
+Figure~\ref{th.setup.fig}.
 
 \begin{figure}[htb]
 \begin{center}
@@ -900,7 +900,7 @@ P(r,t) = P_{0} - \frac{Q\mu}{4\pi b \kappa} \int_{\frac{r^{2}\phi\mu}{4 t \kappa
 
 The hydrogeology literature uses different notation.  It defines the
 head, $h=P/\rho g$; the transmissivity, $T = \kappa\rho g b/\mu$; the
-storativity, $S = b\rho 
+storativity, $S = b\rho
 g \phi/K_{\mathrm{w}}$; and the well function $W(x) =
 \int_{x}^{\infty}u^{-1}e^{-u}\mathrm{d}u$, so that the Theis solution,
 Eqn~(\ref{eqn.theis}) becomes
@@ -953,7 +953,7 @@ Eqn~(\ref{assumption.eqn}) contains an important assumption of the
 Theis solution which constrains the validity of the result.
 Substituting the solution, Eqn~(\ref{eqn.theis}), into the assumption
 yields
-\begin{equation} 
+\begin{equation}
 \frac{1}{u} e^{-u} \ll \frac{4 \pi b \kappa K_{\mathrm{w}}}{Q\phi\mu}
 = \frac{4\pi b T}{QS} \ ,
 \end{equation}
@@ -1157,7 +1157,7 @@ $r=300$\,m; and the outer pressure is $P_{R}=10$\,MPa.
 \label{bw}
 
 The Richards' equation for an incompressible fluid reads in one
-spatial dimension ($z$) reads 
+spatial dimension ($z$) reads
 \begin{equation}
 \dot{S} = \nabla \left(D \nabla S\right) - \nabla K \ ,
 \end{equation}
@@ -1182,7 +1182,7 @@ assume the hydraulic conductivity is
 \begin{equation}
 K(S) = K_{n} + (K_{s}-K_{n})\frac{\Theta^{2}(C-1)}{C-\Theta} \ ,
 \end{equation}
-where 
+where
 \begin{equation}
 \Theta = \frac{S - S_{n}}{S_{s} - S_{s}} \ ,
 \end{equation}
@@ -1428,7 +1428,7 @@ The initial condition is
 P(t=0) = \left\{
 \begin{array}{ll}
 P_{0} - (P_{0}-P_{15})x/5 & \ \ \ \mbox{for }\ \ x<5 \\
-P_{15} & \ \ \ \mbox{for }\ \ x\geq 5  
+P_{15} & \ \ \ \mbox{for }\ \ x\geq 5
 \end{array}
 \right. \ ,
 \end{equation}
@@ -1464,7 +1464,7 @@ and the front position $f(t)$ may be determined from
 P(x,t) & = & \left\{
 \begin{array}{ll}
 P_{0} - (P_{0}-P_{15})x/f & \mbox{ for } x\leq f  \\
-P_{15} & \mbox{ for } x>f 
+P_{15} & \mbox{ for } x>f
 \end{array}
 \right. \ ,
 \label{eqn.predicted.bl.posn.eqna}
@@ -1722,7 +1722,7 @@ The initial condition is
 P_{\mathrm{water}}(t=0) = \left\{
 \begin{array}{ll}
 10^{6}(1-x/5) & \ \ \ \mbox{for }\ \ x<5 \\
--10^{5} & \ \ \ \mbox{for }\ \ x\geq 5  
+-10^{5} & \ \ \ \mbox{for }\ \ x\geq 5
 \end{array}
 \right. \ ,
 \end{equation}
@@ -1731,7 +1731,7 @@ and
 P_{\mathrm{gas}}(t=0) = \left\{
 \begin{array}{ll}
 10^{6}(1-x/5) + 10^{3} & \ \ \ \mbox{for }\ \ x<5 \\
-10^{3} & \ \ \ \mbox{for }\ \ x\geq 5  
+10^{3} & \ \ \ \mbox{for }\ \ x\geq 5
 \end{array}
 \right. \ .
 \end{equation}
@@ -1794,7 +1794,7 @@ flow.  The simulation details are:
   to run, so is marked as ``heavy'' in the test suite and is not run
   every time the code is updated.
 \item A uniform mesh of size 0.5\,m, with timestep between 0.1\,s and
-  4\,s.  The van Genuchten 
+  4\,s.  The van Genuchten
   $\alpha=10^{-5}$\,Pa$^{-1}$ and $m=0.8$.  Instead of $P=-10^{5}$\,Pa
   at the $x=15$ end, $P=-3\times 10^{5}$\,Pa is used instead, which
   means $s=0.01$ in the unsaturated zone.  At $t=50$\,s the mesh sits

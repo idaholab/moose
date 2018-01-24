@@ -1,0 +1,15 @@
+[Tests]
+  [./volume_fraction_test]
+    type = CSVDiff
+    input = 'feature_volume_fraction.i'
+    csvdiff = 'feature_volume_fraction_out.csv'
+    rel_err = 5.0e-02
+  [../]
+
+  [./Avrami_test]
+    type = CSVDiff
+    input = 'Avrami.i'
+    csvdiff = 'Avrami_out.csv'
+    rel_err = 1.0e-02
+  [../]
+[]

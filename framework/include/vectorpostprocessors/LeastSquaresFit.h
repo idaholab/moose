@@ -17,10 +17,10 @@
 
 #include "GeneralVectorPostprocessor.h"
 
-//Forward Declarations
+// Forward Declarations
 class LeastSquaresFit;
 
-template<>
+template <>
 InputParameters validParams<LeastSquaresFit>();
 
 /**
@@ -28,8 +28,7 @@ InputParameters validParams<LeastSquaresFit>();
  *  fit on data calculated in another VectorPostprocessor.
  */
 
-class LeastSquaresFit :
-  public GeneralVectorPostprocessor
+class LeastSquaresFit : public GeneralVectorPostprocessor
 {
 public:
   /**
@@ -39,27 +38,14 @@ public:
   LeastSquaresFit(const InputParameters & parameters);
 
   /**
-   * Destructor
-   */
-  virtual ~LeastSquaresFit() {}
-
-  /**
    * Initialize, clears old results
    */
-  virtual void initialize();
+  virtual void initialize() override;
 
   /**
    * Perform the least squares fit
    */
-  virtual void execute();
-
-  ///@{
-  /**
-   * no-op because the other VectorPostprocessor is already parallel consistent
-   */
-  virtual void finalize() {}
-  virtual void threadJoin(const UserObject &) {}
-  ///@}
+  virtual void execute() override;
 
 protected:
   /// The name of the VectorPostprocessor on which to perform the fit
@@ -82,6 +68,13 @@ protected:
   /// The number of samples to be taken
   unsigned int _num_samples;
 
+  ///@{ Values used to scale and or shift x and y data
+  const Real _x_scale;
+  const Real _x_shift;
+  const Real _y_scale;
+  const Real _y_shift;
+  ///@}
+
   /// Did the user specify the min and max x values for sampling?
   bool _have_sample_x_min;
   bool _have_sample_x_max;
@@ -96,7 +89,6 @@ protected:
 
   /// The variable used to write out the coefficients of the fit
   VectorPostprocessorValue * _coeffs;
-
 };
 
 #endif

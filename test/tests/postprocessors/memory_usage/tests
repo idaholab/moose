@@ -1,0 +1,7 @@
+[Tests]
+  [./print_memory_usage]
+    type = CheckFiles
+    input = print_memory_usage.i
+    check_files = print_memory_usage_out.csv
+  [../]
+[]

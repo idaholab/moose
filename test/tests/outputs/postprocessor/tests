@@ -18,4 +18,14 @@
     input = 'postprocessor_console.i'
     csvdiff = 'postprocessor_console_out.csv'
   [../]
+  [./show_hide]
+    type = 'CSVDiff'
+    input = 'show_hide.i'
+    csvdiff = 'show_hide_out.csv'
+  [../]
+  [./test_hidden_shown]
+    type = 'RunException'
+    input = 'output_pps_hidden_shown_check.i'
+    expect_err = 'Output\(s\) specified to be both shown and hidden: elem_56'
+  [../]
 []

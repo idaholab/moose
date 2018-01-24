@@ -15,16 +15,33 @@
 #ifndef SAMPLERBASE_H
 #define SAMPLERBASE_H
 
-#include "NodalVariableVectorPostprocessor.h"
+// MOOSE includes
+#include "MooseTypes.h"
 
-//Forward Declarations
+// Forward Declarations
+class InputParameters;
 class SamplerBase;
+class VectorPostprocessor;
 
-template<>
+namespace libMesh
+{
+class Point;
+
+namespace Parallel
+{
+class Communicator;
+}
+}
+
+template <typename T>
+InputParameters validParams();
+
+template <>
 InputParameters validParams<SamplerBase>();
 
 /**
- * Base class for VectorPostprocessors that need to do "sampling" of values in the domain.
+ * Base class for VectorPostprocessors that need to do "sampling" of
+ * values in the domain.
  */
 class SamplerBase
 {
@@ -34,20 +51,20 @@ public:
    * @param vpp A pointer to the child object
    * @param comm The communicator of the child
    */
-  SamplerBase(const InputParameters & parameters, VectorPostprocessor * vpp, const libMesh::Parallel::Communicator & comm);
-  SamplerBase(const std::string & /*name*/, InputParameters parameters, VectorPostprocessor * vpp,
-              const libMesh::Parallel::Communicator & comm); // DEPRECATED CONSTRUCTOR
-  virtual ~SamplerBase() {}
+  SamplerBase(const InputParameters & parameters,
+              VectorPostprocessor * vpp,
+              const libMesh::Parallel::Communicator & comm);
+  virtual ~SamplerBase() = default;
 
 protected:
-
   /**
    * You MUST call this in the constructor of the child class and pass down the name
    * of the variables.
    *
-   * @param variable_names The names of the variables.  Note: The order of the variables sets the order of the values for addSample()
+   * @param variable_names The names of the variables.  Note: The order of the variables sets the
+   * order of the values for addSample()
    */
-  void setupVariables(std::vector<std::string> variable_names);
+  void setupVariables(const std::vector<std::string> & variable_names);
 
   /**
    * Call this with the value of every variable at each point you want to sample at.
@@ -76,7 +93,8 @@ protected:
    *
    * YOU MUST CALL THIS DURING threadJoin() in the child class!
    *
-   * @param y You must cast the UserObject to your child class type first then you can pass it in here.
+   * @param y You must cast the UserObject to your child class type first then you can pass it in
+   * here.
    */
   virtual void threadJoin(const SamplerBase & y);
 
@@ -93,7 +111,7 @@ protected:
   std::vector<std::string> _variable_names;
 
   /// What to sort by
-  unsigned int _sort_by;
+  const unsigned int _sort_by;
 
   /// x coordinate of the points
   VectorPostprocessorValue & _x;
@@ -106,18 +124,6 @@ protected:
   VectorPostprocessorValue & _id;
 
   std::vector<VectorPostprocessorValue *> _values;
-
-  /// x coordinate of the points
-  VectorPostprocessorValue _x_tmp;
-  /// y coordinate of the points
-  VectorPostprocessorValue _y_tmp;
-  /// x coordinate of the points
-  VectorPostprocessorValue _z_tmp;
-
-  /// The node ID of each point
-  VectorPostprocessorValue _id_tmp;
-
-  std::vector<VectorPostprocessorValue> _values_tmp;
 };
 
 #endif

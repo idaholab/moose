@@ -16,13 +16,21 @@
 #define MATERIALPROPERTYINTERFACE_H
 
 // MOOSE includes
+#include "FEProblemBase.h"
 #include "MooseTypes.h"
 #include "MaterialProperty.h"
 #include "MaterialData.h"
 
 // Forward declarations
-class FEProblem;
 class InputParameters;
+class MaterialPropertyInterface;
+class MooseObject;
+
+template <typename T>
+InputParameters validParams();
+
+template <>
+InputParameters validParams<MaterialPropertyInterface>();
 
 /**
  * \class MaterialPropertyInterface
@@ -37,26 +45,14 @@ class InputParameters;
 class MaterialPropertyInterface
 {
 public:
-
-  ///@{
-  /**
-   * Constructor.
-   *
-   * @param parameters The objects input parameters
-   * @param block_ids A reference to the block ids (optional)
-   * @param boundary_ids A reference to the boundary ids (optional)
-   *
-   * This class has four constructors:
-   *   (1) not restricted to boundaries or blocks
-   *   (2) restricted to only blocks
-   *   (3) restricted to only boundaries
-   *   (4) restricted to both blocks and boundaries
-   */
-  MaterialPropertyInterface(const InputParameters & parameters);
-  MaterialPropertyInterface(const InputParameters & parameters, const std::set<SubdomainID> & block_ids);
-  MaterialPropertyInterface(const InputParameters & parameters, const std::set<BoundaryID> & boundary_ids);
-  MaterialPropertyInterface(const InputParameters & parameters, const std::set<SubdomainID> & block_ids, const std::set<BoundaryID> & boundary_ids);
-  ///@}
+  MaterialPropertyInterface(const MooseObject * moose_object);
+  MaterialPropertyInterface(const MooseObject * moose_object,
+                            const std::set<SubdomainID> & block_ids);
+  MaterialPropertyInterface(const MooseObject * moose_object,
+                            const std::set<BoundaryID> & boundary_ids);
+  MaterialPropertyInterface(const MooseObject * moose_object,
+                            const std::set<SubdomainID> & block_ids,
+                            const std::set<BoundaryID> & boundary_ids);
 
   ///@{
   /**
@@ -67,11 +63,11 @@ public:
    * @param name The name of the parameter key of the material property to retrieve
    * @return Reference to the desired material property
    */
-  template<typename T>
+  template <typename T>
   const MaterialProperty<T> & getMaterialProperty(const std::string & name);
-  template<typename T>
+  template <typename T>
   const MaterialProperty<T> & getMaterialPropertyOld(const std::string & name);
-  template<typename T>
+  template <typename T>
   const MaterialProperty<T> & getMaterialPropertyOlder(const std::string & name);
   ///@}
 
@@ -82,13 +78,34 @@ public:
    * @param name The name of the material property to retrieve
    * @return Reference to the material property with the name 'name'
    */
-  template<typename T>
+  template <typename T>
   const MaterialProperty<T> & getMaterialPropertyByName(const MaterialPropertyName & name);
-  template<typename T>
+  template <typename T>
   const MaterialProperty<T> & getMaterialPropertyOldByName(const MaterialPropertyName & name);
-  template<typename T>
+  template <typename T>
   const MaterialProperty<T> & getMaterialPropertyOlderByName(const MaterialPropertyName & name);
   ///@}
+
+  /**
+   * Retrieve pointer to a material property with the mesh blocks where it is defined
+   * The name required by this method is the name defined in the input file.
+   * This function can be thought as the combination of getMaterialPropertyByName and
+   * getMaterialPropertyBlocks.
+   * It can be called after the action of all actions.
+   * @param name The name of the material property to retrieve
+   * @return Pointer to the material property with the name 'name' and the set of blocks where the
+   * property is valid
+   */
+  template <typename T>
+  std::pair<const MaterialProperty<T> *, std::set<SubdomainID>>
+  getBlockMaterialProperty(const MaterialPropertyName & name);
+
+  /**
+   * Return a material property that is initialized to zero by default and does
+   * not need to (but can) be declared by another material.
+   */
+  template <typename T>
+  const MaterialProperty<T> & getZeroMaterialProperty(const std::string & prop_name);
 
   /**
    * Retrieve the block ids that the material property is defined
@@ -120,13 +137,26 @@ public:
 
   ///@{
   /**
+   * Return a Material reference - usable for computing directly.
+   *
+   * @param name The name of the input parameter or explicit material name.
+   * @param no_warn If true, suppress warning about retrieving the material
+   * potentially during its calculation. If you don't know what this is/means,
+   * then you don't need it.
+   */
+  Material & getMaterial(const std::string & name);
+  Material & getMaterialByName(const std::string & name, bool no_warn = false);
+  ///@}
+
+  ///@{
+  /**
    * Check if the material property exists
    * @param name the name of the property to query
    * @return true if the property exists, otherwise false
    */
-  template<typename T>
+  template <typename T>
   bool hasMaterialProperty(const std::string & name);
-  template<typename T>
+  template <typename T>
   bool hasMaterialPropertyByName(const std::string & name);
   ///@}
 
@@ -142,16 +172,35 @@ public:
    */
   bool getMaterialPropertyCalled() const { return _get_material_property_called; }
 
+  /**
+   * Retrieve the set of material properties that _this_ object depends on.
+   *
+   * @return The IDs corresponding to the material properties that
+   * MUST be reinited before evaluating this object
+   */
+  const std::set<unsigned int> & getMatPropDependencies() const
+  {
+    return _material_property_dependencies;
+  }
+
 protected:
+  /// Parameters of the object with this interface
+  const InputParameters & _mi_params;
 
   /// The name of the object that this interface belongs to
   const std::string _mi_name;
 
-  /// Pointer to the material data class that stores properties
-  MaterialData * _material_data;
+  /// The type of data
+  Moose::MaterialDataType _material_data_type;
 
-  /// Reference to the FEProblem class
-  FEProblem & _mi_feproblem;
+  /// Pointer to the material data class that stores properties
+  std::shared_ptr<MaterialData> _material_data;
+
+  /// Reference to the FEProblemBase class
+  FEProblemBase & _mi_feproblem;
+
+  /// Current threaded it
+  const THREAD_ID _mi_tid;
 
   /**
    * A helper method for checking material properties
@@ -174,8 +223,8 @@ protected:
    * Helper function to parse default material property values. This is implemented
    * as a specialization for supported types and returns NULL in all other cases.
    */
-  template<typename T>
-  const MaterialProperty <T> * defaultMaterialProperty(const std::string & name);
+  template <typename T>
+  const MaterialProperty<T> * defaultMaterialProperty(const std::string & name);
 
   /**
    * True by default. If false, this class throws an error if any of
@@ -191,31 +240,49 @@ protected:
   bool _get_material_property_called;
 
   /// Storage vector for MaterialProperty<Real> default objects
-  std::vector<MooseSharedPointer<MaterialProperty<Real> > > _default_real_properties;
+  std::vector<std::unique_ptr<MaterialProperty<Real>>> _default_real_properties;
+
+  /// The set of material properties (as given by their IDs) that _this_ object depends on
+  std::set<unsigned int> _material_property_dependencies;
 
 private:
-  /**
-   * An initialization routine needed for dual constructors
-   */
-  void initializeMaterialPropertyInterface(const InputParameters & parameters);
+  /// Check and throw an error if the execution has progressed past the construction stage
+  void checkExecutionStage();
 
-  /// Empty sets for referencing when ids is not included
-  const std::set<SubdomainID> _empty_block_ids;
-
-  /// An empty set for referencing when boundary_ids is not included
-  const std::set<BoundaryID> _empty_boundary_ids;
+  /// BoundaryRestricted flag
+  const bool _mi_boundary_restricted;
 
   /// Storage for the block ids created by BlockRestrictable
-  const std::set<SubdomainID> _mi_block_ids;
+  const std::set<SubdomainID> & _mi_block_ids;
 
   /// Storage for the boundary ids created by BoundaryRestrictable
-  const std::set<BoundaryID> _mi_boundary_ids;
-
-  /// Parameters of the object with this interface
-  const InputParameters & _mi_params;
+  const std::set<BoundaryID> & _mi_boundary_ids;
 };
 
-template<typename T>
+/**
+ * Helper function templates to set a variable to zero.
+ * Specializations may have to be implemented (for examples see
+ * RankTwoTensor, RankFourTensor).
+ */
+template <typename T>
+inline void
+mooseSetToZero(T & v)
+{
+  /**
+   * The default for non-pointer types is to assign zero.
+   * This should either do something sensible, or throw a compiler error.
+   * Otherwise the T type is designed badly.
+   */
+  v = 0;
+}
+template <typename T>
+inline void
+mooseSetToZero(T *&)
+{
+  mooseError("Cannot use pointer types for MaterialProperty derivatives.");
+}
+
+template <typename T>
 const MaterialProperty<T> &
 MaterialPropertyInterface::getMaterialProperty(const std::string & name)
 {
@@ -230,10 +297,16 @@ MaterialPropertyInterface::getMaterialProperty(const std::string & name)
   return getMaterialPropertyByName<T>(prop_name);
 }
 
-template<typename T>
+template <typename T>
 const MaterialProperty<T> &
 MaterialPropertyInterface::getMaterialPropertyOld(const std::string & name)
 {
+  if (!_stateful_allowed)
+    mooseError("Stateful material properties not allowed for this object."
+               " Old property for \"",
+               name,
+               "\" was requested.");
+
   // Check if the supplied parameter is a valid input parameter key
   std::string prop_name = deducePropertyName(name);
 
@@ -245,10 +318,16 @@ MaterialPropertyInterface::getMaterialPropertyOld(const std::string & name)
   return getMaterialPropertyOldByName<T>(prop_name);
 }
 
-template<typename T>
+template <typename T>
 const MaterialProperty<T> &
 MaterialPropertyInterface::getMaterialPropertyOlder(const std::string & name)
 {
+  if (!_stateful_allowed)
+    mooseError("Stateful material properties not allowed for this object."
+               " Older property for \"",
+               name,
+               "\" was requested.");
+
   // Check if the supplied parameter is a valid input parameter key
   std::string prop_name = deducePropertyName(name);
 
@@ -261,7 +340,7 @@ MaterialPropertyInterface::getMaterialPropertyOlder(const std::string & name)
 }
 
 // General version for types that do not accept default values
-template<typename T>
+template <typename T>
 const MaterialProperty<T> *
 MaterialPropertyInterface::defaultMaterialProperty(const std::string & /*name*/)
 {
@@ -269,18 +348,16 @@ MaterialPropertyInterface::defaultMaterialProperty(const std::string & /*name*/)
 }
 
 // Forward declare explicit specializations
-template<>
+template <>
 const MaterialProperty<Real> *
 MaterialPropertyInterface::defaultMaterialProperty(const std::string & name);
 
-template<typename T>
+template <typename T>
 const MaterialProperty<T> &
 MaterialPropertyInterface::getMaterialPropertyByName(const MaterialPropertyName & name)
 {
+  checkExecutionStage();
   checkMaterialProperty(name);
-
-  if (!_stateful_allowed && _material_data->getMaterialPropertyStorage().hasStatefulProperties())
-    mooseError("Error: Stateful material properties not allowed for this object.");
 
   // mark property as requested
   markMatPropRequested(name);
@@ -288,37 +365,65 @@ MaterialPropertyInterface::getMaterialPropertyByName(const MaterialPropertyName 
   // Update the boolean flag.
   _get_material_property_called = true;
 
+  _material_property_dependencies.insert(_material_data->getPropertyId(name));
+
   return _material_data->getProperty<T>(name);
 }
 
-
-template<typename T>
+template <typename T>
 const MaterialProperty<T> &
 MaterialPropertyInterface::getMaterialPropertyOldByName(const MaterialPropertyName & name)
 {
   if (!_stateful_allowed)
-    mooseError("Error: Stateful material properties not allowed for this object.");
+    mooseError("Stateful material properties not allowed for this object."
+               " Old property for \"",
+               name,
+               "\" was requested.");
 
   // mark property as requested
   markMatPropRequested(name);
+
+  _material_property_dependencies.insert(_material_data->getPropertyId(name));
 
   return _material_data->getPropertyOld<T>(name);
 }
 
-template<typename T>
+template <typename T>
 const MaterialProperty<T> &
 MaterialPropertyInterface::getMaterialPropertyOlderByName(const MaterialPropertyName & name)
 {
   if (!_stateful_allowed)
-    mooseError("Error: Stateful material properties not allowed for this object.");
+    mooseError("Stateful material properties not allowed for this object."
+               " Older property for \"",
+               name,
+               "\" was requested.");
 
   // mark property as requested
   markMatPropRequested(name);
 
+  _material_property_dependencies.insert(_material_data->getPropertyId(name));
+
   return _material_data->getPropertyOlder<T>(name);
 }
 
-template<typename T>
+template <typename T>
+std::pair<const MaterialProperty<T> *, std::set<SubdomainID>>
+MaterialPropertyInterface::getBlockMaterialProperty(const MaterialPropertyName & name)
+{
+  if (_mi_block_ids.empty())
+    mooseError("getBlockMaterialProperty must be called by a block restrictable object");
+
+  if (!hasMaterialPropertyByName<T>(name))
+    return std::pair<const MaterialProperty<T> *, std::set<SubdomainID>>(NULL,
+                                                                         std::set<SubdomainID>());
+
+  _material_property_dependencies.insert(_material_data->getPropertyId(name));
+
+  return std::pair<const MaterialProperty<T> *, std::set<SubdomainID>>(
+      &_material_data->getProperty<T>(name), _mi_feproblem.getMaterialPropertyBlocks(name));
+}
+
+template <typename T>
 bool
 MaterialPropertyInterface::hasMaterialProperty(const std::string & name)
 {
@@ -327,11 +432,31 @@ MaterialPropertyInterface::hasMaterialProperty(const std::string & name)
   return _material_data->haveProperty<T>(prop_name);
 }
 
-template<typename T>
+template <typename T>
 bool
 MaterialPropertyInterface::hasMaterialPropertyByName(const std::string & name)
 {
   return _material_data->haveProperty<T>(name);
 }
 
-#endif //MATERIALPROPERTYINTERFACE_H
+template <typename T>
+const MaterialProperty<T> &
+MaterialPropertyInterface::getZeroMaterialProperty(const std::string & /*prop_name*/)
+{
+  // static zero property storage
+  static MaterialProperty<T> zero;
+
+  // resize to accomodate maximum number of qpoints
+  // (in multiapp scenarios getMaxQps can return different values in each app; we need the max)
+  unsigned int nqp = _mi_feproblem.getMaxQps();
+  if (nqp > zero.size())
+    zero.resize(nqp);
+
+  // set values for all qpoints to zero
+  for (unsigned int qp = 0; qp < nqp; ++qp)
+    mooseSetToZero<T>(zero[qp]);
+
+  return zero;
+}
+
+#endif // MATERIALPROPERTYINTERFACE_H

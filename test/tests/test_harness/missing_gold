@@ -1,0 +1,7 @@
+[Tests]
+  [./exodiff]
+    type = Exodiff
+    input = exodiff.i
+    exodiff = bogus_exodiff_out.e
+  [../]
+[]

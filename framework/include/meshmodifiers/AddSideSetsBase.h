@@ -17,7 +17,6 @@
 
 #include "MeshModifier.h"
 
-// libMesh includes
 #include "libmesh/fe_base.h"
 
 // Forward declarations
@@ -29,15 +28,14 @@ namespace libMesh
 class QGauss;
 }
 
-template<>
+template <>
 InputParameters validParams<AddSideSetsBase>();
 
 class AddSideSetsBase : public MeshModifier
 {
 public:
   AddSideSetsBase(const InputParameters & parameters);
-
-  virtual ~AddSideSetsBase();
+  virtual ~AddSideSetsBase(); // dtor required for unique_ptr with forward declarations
 
 protected:
   /**
@@ -57,16 +55,16 @@ protected:
    * This method implements a recursive flood routine to paint a sideset of
    * mesh to neighboring faces given a starting element and normal.
    */
-  void flood(const Elem *elem, Point normal, BoundaryID side_id);
+  void flood(const Elem * elem, Point normal, BoundaryID side_id);
 
   BoundaryID getNextBoundaryID() const;
 
   Real _variance;
   bool _fixed_normal;
 
-  FEBase *_fe_face;
-  QGauss *_qface;
-  std::map<BoundaryID, std::set<const Elem *> > _visited;
+  std::unique_ptr<FEBase> _fe_face;
+  std::unique_ptr<QGauss> _qface;
+  std::map<BoundaryID, std::set<const Elem *>> _visited;
 };
 
 #endif /* ADDSIDESETSBASE_H */

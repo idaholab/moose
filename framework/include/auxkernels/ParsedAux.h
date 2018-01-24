@@ -17,33 +17,30 @@
 
 #include "AuxKernel.h"
 #include "FunctionParserUtils.h"
-#include "libmesh/fparser_ad.hh"
 
-//Forward Declarations
+// Forward Declarations
 class ParsedAux;
 
-template<>
+template <>
 InputParameters validParams<AuxKernel>();
 
 /**
  * AuxKernel that evaluates a parsed function expression
  */
-class ParsedAux :
-  public AuxKernel,
-  public FunctionParserUtils
+class ParsedAux : public AuxKernel, public FunctionParserUtils
 {
 public:
   ParsedAux(const InputParameters & parameters);
 
 protected:
-  virtual Real computeValue();
+  virtual Real computeValue() override;
 
   /// function expression
   std::string _function;
 
   /// coupled variables
   unsigned int _nargs;
-  std::vector<VariableValue *> _args;
+  std::vector<const VariableValue *> _args;
 
   /// function parser object for the resudual and on-diagonal Jacobian
   ADFunctionPtr _func_F;

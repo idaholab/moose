@@ -9,11 +9,10 @@
 
 #include "NSMassBC.h"
 
-
 // Forward Declarations
 class NSMassUnspecifiedNormalFlowBC;
 
-template<>
+template <>
 InputParameters validParams<NSMassUnspecifiedNormalFlowBC>();
 
 /**
@@ -23,18 +22,12 @@ InputParameters validParams<NSMassUnspecifiedNormalFlowBC>();
 class NSMassUnspecifiedNormalFlowBC : public NSMassBC
 {
 public:
-
   NSMassUnspecifiedNormalFlowBC(const InputParameters & parameters);
 
-  virtual ~NSMassUnspecifiedNormalFlowBC(){}
-
 protected:
-
   virtual Real computeQpResidual();
   virtual Real computeQpJacobian();
   virtual Real computeQpOffDiagJacobian(unsigned jvar);
 };
-
-
 
 #endif // NSMASSUNSPECIFIEDNORMALFLOWBC_H

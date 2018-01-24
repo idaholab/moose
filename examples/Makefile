@@ -36,5 +36,3 @@ $(dirlist): $(moose_LIBS)
 
 test:
 	@for dir in $(dirlist); do $(MAKE) -C "$${dir}" $(MAKECMDGOALS) TEST=test_ignore || exit 1; done
-
-

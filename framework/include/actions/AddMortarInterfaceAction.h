@@ -19,7 +19,7 @@
 
 class AddMortarInterfaceAction;
 
-template<>
+template <>
 InputParameters validParams<AddMortarInterfaceAction>();
 
 /**
@@ -29,12 +29,8 @@ class AddMortarInterfaceAction : public Action
 {
 public:
   AddMortarInterfaceAction(InputParameters parameters);
-  virtual ~AddMortarInterfaceAction();
 
-  virtual void act();
-
-protected:
-
+  virtual void act() override;
 };
 
 #endif /* ADDMORTARINTERFACEACTION_H */

@@ -1,8 +1,0 @@
-[Tests]
-  [./boundary_id]
-    type = Exodiff
-    input = 'side_user_object.i'
-    exodiff = 'side_user_object_out.e'
-    max_threads = 1
-  [../]
-[]

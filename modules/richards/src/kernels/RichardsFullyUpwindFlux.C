@@ -6,43 +6,57 @@
 /****************************************************************/
 
 #include "RichardsFullyUpwindFlux.h"
-#include "Assembly.h"
 
-// libmesh includes
+// MOOSE includes
+#include "Assembly.h"
+#include "MooseVariable.h"
+#include "SystemBase.h"
+
 #include "libmesh/quadrature.h"
 
-template<>
-InputParameters validParams<RichardsFullyUpwindFlux>()
+template <>
+InputParameters
+validParams<RichardsFullyUpwindFlux>()
 {
   InputParameters params = validParams<Kernel>();
-  params.addRequiredParam<std::vector<UserObjectName> >("relperm_UO", "List of names of user objects that define relative permeability");
-  params.addRequiredParam<std::vector<UserObjectName> >("seff_UO", "List of name of user objects that define effective saturation as a function of pressure list");
-  params.addRequiredParam<std::vector<UserObjectName> >("density_UO", "List of names of user objects that define the fluid density");
-  params.addRequiredParam<UserObjectName>("richardsVarNames_UO", "The UserObject that holds the list of Richards variable names.");
+  params.addRequiredParam<std::vector<UserObjectName>>(
+      "relperm_UO", "List of names of user objects that define relative permeability");
+  params.addRequiredParam<std::vector<UserObjectName>>(
+      "seff_UO",
+      "List of name of user objects that define effective saturation as a function of "
+      "pressure list");
+  params.addRequiredParam<std::vector<UserObjectName>>(
+      "density_UO", "List of names of user objects that define the fluid density");
+  params.addRequiredParam<UserObjectName>(
+      "richardsVarNames_UO", "The UserObject that holds the list of Richards variable names.");
   return params;
 }
 
-RichardsFullyUpwindFlux::RichardsFullyUpwindFlux(const InputParameters & parameters) :
-    Kernel(parameters),
+RichardsFullyUpwindFlux::RichardsFullyUpwindFlux(const InputParameters & parameters)
+  : Kernel(parameters),
     _richards_name_UO(getUserObject<RichardsVarNames>("richardsVarNames_UO")),
     _num_p(_richards_name_UO.num_v()),
     _pvar(_richards_name_UO.richards_var_num(_var.number())),
-    _density_UO(getUserObjectByName<RichardsDensity>(getParam<std::vector<UserObjectName> >("density_UO")[_pvar])),
-    _seff_UO(getUserObjectByName<RichardsSeff>(getParam<std::vector<UserObjectName> >("seff_UO")[_pvar])),
-    _relperm_UO(getUserObjectByName<RichardsRelPerm>(getParam<std::vector<UserObjectName> >("relperm_UO")[_pvar])),
-    _viscosity(getMaterialProperty<std::vector<Real> >("viscosity")),
-    _flux_no_mob(getMaterialProperty<std::vector<RealVectorValue> >("flux_no_mob")),
-    _dflux_no_mob_dv(getMaterialProperty<std::vector<std::vector<RealVectorValue> > >("dflux_no_mob_dv")),
-    _dflux_no_mob_dgradv(getMaterialProperty<std::vector<std::vector<RealTensorValue> > >("dflux_no_mob_dgradv")),
+    _density_UO(getUserObjectByName<RichardsDensity>(
+        getParam<std::vector<UserObjectName>>("density_UO")[_pvar])),
+    _seff_UO(
+        getUserObjectByName<RichardsSeff>(getParam<std::vector<UserObjectName>>("seff_UO")[_pvar])),
+    _relperm_UO(getUserObjectByName<RichardsRelPerm>(
+        getParam<std::vector<UserObjectName>>("relperm_UO")[_pvar])),
+    _viscosity(getMaterialProperty<std::vector<Real>>("viscosity")),
+    _flux_no_mob(getMaterialProperty<std::vector<RealVectorValue>>("flux_no_mob")),
+    _dflux_no_mob_dv(
+        getMaterialProperty<std::vector<std::vector<RealVectorValue>>>("dflux_no_mob_dv")),
+    _dflux_no_mob_dgradv(
+        getMaterialProperty<std::vector<std::vector<RealTensorValue>>>("dflux_no_mob_dgradv")),
     _num_nodes(0),
     _mobility(0),
     _dmobility_dv(0)
 {
   _ps_at_nodes.resize(_num_p);
-  for (unsigned int pnum = 0 ; pnum < _num_p; ++pnum)
+  for (unsigned int pnum = 0; pnum < _num_p; ++pnum)
     _ps_at_nodes[pnum] = _richards_name_UO.nodal_var(pnum);
 }
-
 
 void
 RichardsFullyUpwindFlux::prepareNodalValues()
@@ -59,35 +73,35 @@ RichardsFullyUpwindFlux::prepareNodalValues()
   _mobility.resize(_num_nodes);
   _dmobility_dv.resize(_num_nodes);
   dseff_dp.resize(_num_p);
-  for (unsigned int nodenum = 0; nodenum < _num_nodes ; ++nodenum)
+  for (unsigned int nodenum = 0; nodenum < _num_nodes; ++nodenum)
   {
     // retrieve and calculate basic things at the node
-    p = (*_ps_at_nodes[_pvar])[nodenum]; // pressure of fluid _pvar at node nodenum
-    density = _density_UO.density(p); // density of fluid _pvar at node nodenum
+    p = (*_ps_at_nodes[_pvar])[nodenum];   // pressure of fluid _pvar at node nodenum
+    density = _density_UO.density(p);      // density of fluid _pvar at node nodenum
     ddensity_dp = _density_UO.ddensity(p); // d(density)/dP
-    seff = _seff_UO.seff(_ps_at_nodes, nodenum); // effective saturation of fluid _pvar at node nodenum
+    seff =
+        _seff_UO.seff(_ps_at_nodes, nodenum); // effective saturation of fluid _pvar at node nodenum
     _seff_UO.dseff(_ps_at_nodes, nodenum, dseff_dp); // d(seff)/d(P_ph), for ph = 0, ..., _num_p - 1
     relperm = _relperm_UO.relperm(seff); // relative permeability of fluid _pvar at node nodenum
     drelperm_ds = _relperm_UO.drelperm(seff); // d(relperm)/dseff
 
     // calculate the mobility and its derivatives wrt (variable_ph = porepressure_ph)
-    _mobility[nodenum] = density*relperm/_viscosity[0][_pvar]; // assume viscosity is constant throughout element
+    _mobility[nodenum] =
+        density * relperm / _viscosity[0][_pvar]; // assume viscosity is constant throughout element
     _dmobility_dv[nodenum].resize(_num_p);
     for (unsigned int ph = 0; ph < _num_p; ++ph)
-      _dmobility_dv[nodenum][ph] = density*drelperm_ds*dseff_dp[ph]/_viscosity[0][_pvar];
-    _dmobility_dv[nodenum][_pvar] += ddensity_dp*relperm/_viscosity[0][_pvar];
+      _dmobility_dv[nodenum][ph] = density * drelperm_ds * dseff_dp[ph] / _viscosity[0][_pvar];
+    _dmobility_dv[nodenum][_pvar] += ddensity_dp * relperm / _viscosity[0][_pvar];
   }
 }
-
 
 Real
 RichardsFullyUpwindFlux::computeQpResidual()
 {
   // note this is not the complete residual:
   // the upwind mobility parts get added in computeResidual
-  return _grad_test[_i][_qp]*_flux_no_mob[_qp][_pvar];
+  return _grad_test[_i][_qp] * _flux_no_mob[_qp][_pvar];
 }
-
 
 void
 RichardsFullyUpwindFlux::computeResidual()
@@ -96,31 +110,6 @@ RichardsFullyUpwindFlux::computeResidual()
   return;
 }
 
-
-Real
-RichardsFullyUpwindFlux::computeQpJacobian()
-{
-  // not used.  I use computeQpJac instead
-  return 0.0;
-}
-
-
-Real
-RichardsFullyUpwindFlux::computeQpOffDiagJacobian(unsigned int /*jvar*/)
-{
-  // not used.  I use computeQpJac instead
-  return 0.0;
-}
-
-
-void
-RichardsFullyUpwindFlux::computeJacobian()
-{
-  upwind(false, true, _var.number());
-  return;
-}
-
-
 void
 RichardsFullyUpwindFlux::computeOffDiagJacobian(unsigned int jvar)
 {
@@ -128,17 +117,14 @@ RichardsFullyUpwindFlux::computeOffDiagJacobian(unsigned int jvar)
   return;
 }
 
-
-
 Real
 RichardsFullyUpwindFlux::computeQpJac(unsigned int dvar)
 {
   // this is just the derivative of the flux WITHOUT the upstream mobility terms
   // Those terms get added in during computeJacobian()
-  return _grad_test[_i][_qp]*(_dflux_no_mob_dgradv[_qp][_pvar][dvar]*_grad_phi[_j][_qp] + _dflux_no_mob_dv[_qp][_pvar][dvar]*_phi[_j][_qp]);
+  return _grad_test[_i][_qp] * (_dflux_no_mob_dgradv[_qp][_pvar][dvar] * _grad_phi[_j][_qp] +
+                                _dflux_no_mob_dv[_qp][_pvar][dvar] * _phi[_j][_qp]);
 }
-
-
 
 void
 RichardsFullyUpwindFlux::upwind(bool compute_res, bool compute_jac, unsigned int jvar)
@@ -160,13 +146,10 @@ RichardsFullyUpwindFlux::upwind(bool compute_res, bool compute_jac, unsigned int
     for (_qp = 0; _qp < _qrule->n_points(); _qp++)
       _local_re(_i) += _JxW[_qp] * _coord[_qp] * computeQpResidual();
 
-
-  unsigned int dvar;
+  const unsigned int dvar = _richards_name_UO.richards_var_num(jvar);
   DenseMatrix<Number> & ke = _assembly.jacobianBlock(_var.number(), jvar);
   if (compute_jac)
   {
-    dvar = _richards_name_UO.richards_var_num(jvar);
-
     _local_ke.resize(ke.m(), ke.n());
     _local_ke.zero();
 
@@ -175,7 +158,6 @@ RichardsFullyUpwindFlux::upwind(bool compute_res, bool compute_jac, unsigned int
         for (_qp = 0; _qp < _qrule->n_points(); _qp++)
           _local_ke(_i, _j) += _JxW[_qp] * _coord[_qp] * computeQpJac(dvar);
   }
-
 
   // Now perform the upwinding by multiplying the residuals at the
   // upstream nodes by their mobilities
@@ -200,7 +182,6 @@ RichardsFullyUpwindFlux::upwind(bool compute_res, bool compute_jac, unsigned int
   // flowing out of node i must be the sum of the masses flowing
   // into the other nodes.
 
-
   // FIRST:
   // this is a dirty way of getting around precision loss problems
   // and problems at steadystate where upwinding oscillates from
@@ -209,7 +190,7 @@ RichardsFullyUpwindFlux::upwind(bool compute_res, bool compute_jac, unsigned int
   // in cosflow it is necessary.
   // I will code a better algorithm if necessary
   bool reached_steady = true;
-  for (unsigned int nodenum = 0; nodenum < _num_nodes ; ++nodenum)
+  for (unsigned int nodenum = 0; nodenum < _num_nodes; ++nodenum)
   {
     if (_local_re(nodenum) >= 1E-20)
     {
@@ -231,16 +212,15 @@ RichardsFullyUpwindFlux::upwind(bool compute_res, bool compute_jac, unsigned int
   {
     dtotal_mass_out.resize(_num_nodes);
     dtotal_in.resize(_num_nodes);
-    for (unsigned int nodenum = 0; nodenum < _num_nodes ; ++nodenum)
+    for (unsigned int nodenum = 0; nodenum < _num_nodes; ++nodenum)
     {
       dtotal_mass_out[nodenum] = 0;
       dtotal_in[nodenum] = 0;
     }
   }
 
-
   // PERFORM THE UPWINDING!
-  for (unsigned int nodenum = 0; nodenum < _num_nodes ; ++nodenum)
+  for (unsigned int nodenum = 0; nodenum < _num_nodes; ++nodenum)
   {
     if (_local_re(nodenum) >= 0 || reached_steady) // upstream node
     {
@@ -248,7 +228,7 @@ RichardsFullyUpwindFlux::upwind(bool compute_res, bool compute_jac, unsigned int
       {
         for (_j = 0; _j < _phi.size(); _j++)
           _local_ke(nodenum, _j) *= _mobility[nodenum];
-        _local_ke(nodenum, nodenum) += _dmobility_dv[nodenum][dvar]*_local_re(nodenum);
+        _local_ke(nodenum, nodenum) += _dmobility_dv[nodenum][dvar] * _local_re(nodenum);
         for (_j = 0; _j < _phi.size(); _j++)
           dtotal_mass_out[_j] += _local_ke(nodenum, _j);
       }
@@ -264,23 +244,22 @@ RichardsFullyUpwindFlux::upwind(bool compute_res, bool compute_jac, unsigned int
     }
   }
 
-
   // CONSERVE MASS
   // proportion the total_mass_out mass to the inflow nodes, weighting by their _local_re values
   if (!reached_steady)
-    for (unsigned int nodenum = 0; nodenum < _num_nodes ; ++nodenum)
+    for (unsigned int nodenum = 0; nodenum < _num_nodes; ++nodenum)
       if (_local_re(nodenum) < 0)
       {
         if (compute_jac)
           for (_j = 0; _j < _phi.size(); _j++)
           {
-            _local_ke(nodenum, _j) *= total_mass_out/total_in;
-            _local_ke(nodenum, _j) += _local_re(nodenum)*(dtotal_mass_out[_j]/total_in - dtotal_in[_j]*total_mass_out/total_in/total_in);
+            _local_ke(nodenum, _j) *= total_mass_out / total_in;
+            _local_ke(nodenum, _j) +=
+                _local_re(nodenum) * (dtotal_mass_out[_j] / total_in -
+                                      dtotal_in[_j] * total_mass_out / total_in / total_in);
           }
-        _local_re(nodenum) *= total_mass_out/total_in;
+        _local_re(nodenum) *= total_mass_out / total_in;
       }
-
-
 
   // ADD RESULTS TO RESIDUAL OR JACOBIAN
   if (compute_res)
@@ -301,16 +280,14 @@ RichardsFullyUpwindFlux::upwind(bool compute_res, bool compute_jac, unsigned int
 
     if (_has_diag_save_in && dvar == _pvar)
     {
-      unsigned int rows = ke.m();
+      const unsigned int rows = ke.m();
       DenseVector<Number> diag(rows);
       for (unsigned int i = 0; i < rows; i++)
-        diag(i) = _local_ke(i,i);
+        diag(i) = _local_ke(i, i);
 
       Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
       for (unsigned int i = 0; i < _diag_save_in.size(); i++)
         _diag_save_in[i]->sys().solution().add_vector(diag, _diag_save_in[i]->dofIndices());
     }
   }
-
 }
-

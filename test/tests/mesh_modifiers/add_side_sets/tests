@@ -9,6 +9,7 @@
     type = 'Exodiff'
     input = 'cylinder_normals.i'
     exodiff = 'cylinder_normals_out.e'
+    group = 'requirements'
   [../]
 
   [./cylinder_points_fixed]

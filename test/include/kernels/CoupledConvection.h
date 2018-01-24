@@ -18,7 +18,7 @@
 
 class CoupledConvection;
 
-template<>
+template <>
 InputParameters validParams<CoupledConvection>();
 
 /**
@@ -37,7 +37,7 @@ protected:
   virtual Real computeQpJacobian();
 
 private:
-  VariableGradient & _velocity_vector;
+  const VariableGradient & _velocity_vector;
 };
 
-#endif //COUPLEDCONVECTION_H
+#endif // COUPLEDCONVECTION_H

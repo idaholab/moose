@@ -14,8 +14,9 @@
 
 #include "CoupledDirichletBC.h"
 
-template<>
-InputParameters validParams<CoupledDirichletBC>()
+template <>
+InputParameters
+validParams<CoupledDirichletBC>()
 {
   InputParameters params = validParams<NodalBC>();
 
@@ -25,8 +26,8 @@ InputParameters validParams<CoupledDirichletBC>()
   return params;
 }
 
-CoupledDirichletBC::CoupledDirichletBC(const InputParameters & parameters) :
-    NodalBC(parameters),
+CoupledDirichletBC::CoupledDirichletBC(const InputParameters & parameters)
+  : NodalBC(parameters),
 
     /**
      * Grab the parameter for the multiplier.
@@ -37,10 +38,11 @@ CoupledDirichletBC::CoupledDirichletBC(const InputParameters & parameters) :
      * Get a reference to the coupled variable's values.
      */
     _some_var_val(coupledValue("some_var"))
-{}
+{
+}
 
 Real
 CoupledDirichletBC::computeQpResidual()
 {
-  return _u[_qp]-(_alpha*_some_var_val[_qp]);
+  return _u[_qp] - (_alpha * _some_var_val[_qp]);
 }

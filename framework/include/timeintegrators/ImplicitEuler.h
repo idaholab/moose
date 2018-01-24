@@ -19,7 +19,7 @@
 
 class ImplicitEuler;
 
-template<>
+template <>
 InputParameters validParams<ImplicitEuler>();
 
 /**
@@ -36,8 +36,6 @@ public:
   virtual void postStep(NumericVector<Number> & residual);
 
 protected:
-
 };
-
 
 #endif /* IMPLICITEULER_H */

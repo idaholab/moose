@@ -11,42 +11,28 @@
 
 // Forward Declarations
 class NSTemperatureAux;
+class IdealGasFluidProperties;
 
-template<>
+template <>
 InputParameters validParams<NSTemperatureAux>();
 
 /**
  * Temperature is an auxiliary value computed from the total energy
- * and the velocity magnitude (e_i = internal energy, e_t = total energy):
- * T = e_i / c_v
- *   = (e_t - |u|^2/2) / c_v
+ * based on the FluidProperties.
  */
 class NSTemperatureAux : public AuxKernel
 {
 public:
-
-  /**
-   * Factory constructor, takes parameters so that all derived classes can be built using the same
-   * constructor.
-   */
   NSTemperatureAux(const InputParameters & parameters);
-
-  virtual ~NSTemperatureAux() {}
 
 protected:
   virtual Real computeValue();
 
-  // The temperature depends on velocities and total energy
-  VariableValue & _rho;
-  VariableValue & _u_vel;
-  VariableValue & _v_vel;
-  VariableValue & _w_vel;
-  VariableValue & _rhoe;
+  const VariableValue & _specific_volume;
+  const VariableValue & _internal_energy;
 
-  // Specific heat at constant volume, treated as a single
-  // constant value.
-  Real _R;
-  Real _gamma;
+  // Fluid properties
+  const IdealGasFluidProperties & _fp;
 };
 
 #endif // NSTEMPERATUREAUX_H

@@ -6,8 +6,9 @@
 /****************************************************************/
 #include "CoefCoupledTimeDerivative.h"
 
-template<>
-InputParameters validParams<CoefCoupledTimeDerivative>()
+template <>
+InputParameters
+validParams<CoefCoupledTimeDerivative>()
 {
   InputParameters params = validParams<CoupledTimeDerivative>();
   params.addClassDescription("Scaled time derivative Kernel that acts on a coupled variable");
@@ -15,9 +16,8 @@ InputParameters validParams<CoefCoupledTimeDerivative>()
   return params;
 }
 
-CoefCoupledTimeDerivative::CoefCoupledTimeDerivative(const InputParameters & parameters) :
-    CoupledTimeDerivative(parameters),
-    _coef(getParam<Real>("coef"))
+CoefCoupledTimeDerivative::CoefCoupledTimeDerivative(const InputParameters & parameters)
+  : CoupledTimeDerivative(parameters), _coef(getParam<Real>("coef"))
 {
 }
 

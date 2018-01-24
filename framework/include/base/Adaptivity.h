@@ -27,7 +27,7 @@
 // libMesh
 #include "libmesh/mesh_refinement.h"
 
-class FEProblem;
+class FEProblemBase;
 class MooseMesh;
 class DisplacedProblem;
 class MooseVariable;
@@ -48,7 +48,7 @@ class ErrorEstimator;
 class Adaptivity : public ConsoleStreamInterface
 {
 public:
-  Adaptivity(FEProblem & subproblem);
+  Adaptivity(FEProblemBase & subproblem);
   virtual ~Adaptivity();
 
   /**
@@ -65,20 +65,21 @@ public:
    * @param param_name the name of the parameter
    * @param param_value the value of parameter
    */
-  template<typename T>
+  template <typename T>
   void setParam(const std::string & param_name, const T & param_value);
 
   /**
    * Set the error estimator
    *
-   * @param error_estimator_name the name of the error estimator (currently: Laplacian, Kelly, and PatchRecovery)
+   * @param error_estimator_name the name of the error estimator (currently: Laplacian, Kelly, and
+   * PatchRecovery)
    */
   void setErrorEstimator(const MooseEnum & error_estimator_name);
 
   /**
    * Set the error norm (FIXME: improve description)
    */
-  void setErrorNorm(SystemNorm &sys_norm);
+  void setErrorNorm(SystemNorm & sys_norm);
 
   /**
    *
@@ -110,19 +111,34 @@ public:
    * Set the number of cycles_per_step
    * @param num The number of cycles per step to execute
    */
-  void setCyclesPerStep(const unsigned int & num){ _cycles_per_step = num; }
+  void setCyclesPerStep(const unsigned int & num) { _cycles_per_step = num; }
+
+  /**
+   * Pull out the _recompute_markers_during_cycles flag previously set through the AdaptivityAction
+   *
+   * @return the flag to recompute markers during adaptivity cycles
+   */
+  bool getRecomputeMarkersFlag() const { return _recompute_markers_during_cycles; }
+
+  /**
+   * Set the flag to recompute markers during adaptivity cycles
+   * @param flag The flag to recompute markers
+   */
+  void setRecomputeMarkersFlag(const bool flag) { _recompute_markers_during_cycles = flag; }
 
   /**
    * Adapts the mesh based on the error estimator used
    *
    * @return a boolean that indicates whether the mesh was changed
    */
-  bool adaptMesh();
+  bool adaptMesh(std::string marker_name = std::string());
 
   /**
    * Used during initial adaptivity.
+   *
+   * @return a boolean that indicates whether the mesh was changed
    */
-  void initialAdaptMesh();
+  bool initialAdaptMesh();
 
   /**
    * Performs uniform refinement of the passed Mesh object. The
@@ -130,7 +146,7 @@ public:
    * MooseMesh object. No solution projection is performed in this
    * version.
    */
-  static void uniformRefine(MooseMesh *mesh);
+  static void uniformRefine(MooseMesh * mesh);
 
   /**
    * Performs uniform refinement on the meshes in the current
@@ -139,11 +155,25 @@ public:
   void uniformRefineWithProjection();
 
   /**
+   * Allow adaptivity to be toggled programatically.
+   * @param state The adaptivity state (on/off).
+   */
+  void setAdaptivityOn(bool state);
+
+  /**
    * Is adaptivity on?
    *
-   * @return true if we do mesh adaptivity, otherwise false
+   * @return true if mesh adaptivity is on, otherwise false
    */
   bool isOn() { return _mesh_refinement_on; }
+
+  /**
+   * Returns whether or not Adaptivity::init() has ran. Can
+   * be used to indicate if mesh adaptivity is available.
+   *
+   * @return true if the Adaptivity system is ready to be used, otherwise false
+   */
+  bool isInitialized() { return _initialized; }
 
   /**
    * Sets the time when the adaptivity is active
@@ -158,7 +188,8 @@ public:
   void setUseNewSystem();
 
   /**
-   * Sets the name of the field variable to actually use to flag elements for refinement / coarsening.
+   * Sets the name of the field variable to actually use to flag elements for refinement /
+   * coarsening.
    * This must be a CONSTANT, MONOMIAL Auxiliary Variable Name that contains values
    * corresponding to libMesh::Elem::RefinementState.
    *
@@ -167,7 +198,8 @@ public:
   void setMarkerVariableName(std::string marker_field);
 
   /**
-   * Sets the name of the field variable to actually use to flag elements for initial refinement / coarsening.
+   * Sets the name of the field variable to actually use to flag elements for initial refinement /
+   * coarsening.
    * This must be a CONSTANT, MONOMIAL Auxiliary Variable Name that contains values
    * corresponding to libMesh::Elem::RefinementState.
    *
@@ -181,12 +213,14 @@ public:
   void setMaxHLevel(unsigned int level) { _max_h_level = level; }
 
   /**
-   * Get the MooseVariable corresponding to the Marker Field Name that is actually going to be used
-   * to refine / coarsen the mesh.
-   *
-   * @return The MooseVariable
+   * Return the maximum h-level.
    */
-  MooseVariable & getMarkerVariable();
+  unsigned int getMaxHLevel() { return _max_h_level; }
+
+  /**
+   * Set the interval (number of timesteps) between refinement steps.
+   */
+  void setInterval(unsigned int interval) { _interval = interval; }
 
   /**
    * Get an ErrorVector that will be filled up with values corresponding to the
@@ -196,30 +230,37 @@ public:
    *
    * @param indicator_field The name of the field to get an ErrorVector for.
    */
-  ErrorVector & getErrorVector(std::string indicator_field);
+  ErrorVector & getErrorVector(const std::string & indicator_field);
 
   /**
    * Update the ErrorVectors that have been requested through calls to getErrorVector().
    */
   void updateErrorVectors();
 
+  /**
+   * Query if an adaptivity step should be performed at the current time / time step
+   */
+  bool isAdaptivityDue();
+
 protected:
-  FEProblem & _subproblem;
+  FEProblemBase & _subproblem;
   MooseMesh & _mesh;
 
   /// on/off flag reporting if the adaptivity is being used
   bool _mesh_refinement_on;
+  /// on/off flag reporting if the adaptivity system has been initialized
+  bool _initialized;
   /// A mesh refinement object to be used either with initial refinement or with Adaptivity.
-  MeshRefinement * _mesh_refinement;
+  std::unique_ptr<MeshRefinement> _mesh_refinement;
   /// Error estimator to be used by the apps.
-  ErrorEstimator * _error_estimator;
+  std::unique_ptr<ErrorEstimator> _error_estimator;
   /// Error vector for use with the error estimator.
-  ErrorVector * _error;
+  std::unique_ptr<ErrorVector> _error;
 
-  MooseSharedPointer<DisplacedProblem> _displaced_problem;
+  std::shared_ptr<DisplacedProblem> _displaced_problem;
 
   /// A mesh refinement object for displaced mesh
-  MeshRefinement * _displaced_mesh_refinement;
+  std::unique_ptr<MeshRefinement> _displaced_mesh_refinement;
 
   /// the number of adaptivity steps to do at the beginning of simulation
   unsigned int _initial_steps;
@@ -231,6 +272,10 @@ protected:
 
   /// Time
   Real & _t;
+  /// Time Step
+  int & _step;
+  /// intreval between adaptivity runs
+  unsigned int _interval;
   /// When adaptivity start
   Real _start_time;
   /// When adaptivity stops
@@ -250,13 +295,16 @@ protected:
   /// The maximum number of refinement levels
   unsigned int _max_h_level;
 
+  /// Whether or not to recompute markers during adaptivity cycles
+  bool _recompute_markers_during_cycles;
+
   /// Stores pointers to ErrorVectors associated with indicator field names
-  std::map<std::string, ErrorVector *> _indicator_field_to_error_vector;
+  std::map<std::string, std::unique_ptr<ErrorVector>> _indicator_field_to_error_vector;
 };
 
-template<typename T>
+template <typename T>
 void
-Adaptivity::setParam(const std::string &param_name, const T &param_value)
+Adaptivity::setParam(const std::string & param_name, const T & param_value)
 {
   if (param_name == "refine fraction")
   {
@@ -278,9 +326,11 @@ Adaptivity::setParam(const std::string &param_name, const T &param_value)
   }
   else if (param_name == "cycles_per_step")
     _cycles_per_step = param_value;
+  else if (param_name == "recompute_markers_during_cycles")
+    _recompute_markers_during_cycles = param_value;
   else
     mooseError("Invalid Param in adaptivity object");
 }
-#endif //LIBMESH_ENABLE_AMR
+#endif // LIBMESH_ENABLE_AMR
 
 #endif /* ADAPTIVITY_H */

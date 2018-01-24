@@ -1,0 +1,14 @@
+[Tests]
+  [./threads]
+    type = RunApp
+    input = threads.i
+    min_threads = 2
+    allow_test_objects = true
+  [../]
+  [./mpi]
+    type = RunApp
+    input = mpi.i
+    min_parallel = 2
+    allow_test_objects = true
+  [../]
+[]

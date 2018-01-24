@@ -16,17 +16,16 @@
 #include "MooseMesh.h"
 #include "SubProblem.h"
 
-template<>
-InputParameters validParams<AverageNodalVariableValue>()
+template <>
+InputParameters
+validParams<AverageNodalVariableValue>()
 {
   InputParameters params = validParams<NodalVariablePostprocessor>();
   return params;
 }
 
-AverageNodalVariableValue::AverageNodalVariableValue(const InputParameters & parameters) :
-    NodalVariablePostprocessor(parameters),
-    _avg(0),
-    _n(0)
+AverageNodalVariableValue::AverageNodalVariableValue(const InputParameters & parameters)
+  : NodalVariablePostprocessor(parameters), _avg(0), _n(0)
 {
 }
 
@@ -60,4 +59,3 @@ AverageNodalVariableValue::threadJoin(const UserObject & y)
   _avg += pps._avg;
   _n += pps._n;
 }
-

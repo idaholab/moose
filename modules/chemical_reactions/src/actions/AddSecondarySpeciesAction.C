@@ -5,92 +5,53 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 #include "AddSecondarySpeciesAction.h"
+#include "AddAuxVariableAction.h"
 #include "MooseUtils.h"
 #include "FEProblem.h"
 #include "Factory.h"
 #include "MooseError.h"
 
-#include <sstream>
-#include <stdexcept>
-
-// libMesh includes
-#include "libmesh/libmesh.h"
-#include "libmesh/exodusII_io.h"
-#include "libmesh/equation_systems.h"
-#include "libmesh/nonlinear_implicit_system.h"
-#include "libmesh/explicit_system.h"
 #include "libmesh/string_to_enum.h"
-#include "libmesh/fe.h"
 
-
-template<>
-InputParameters validParams<AddSecondarySpeciesAction>()
+template <>
+InputParameters
+validParams<AddSecondarySpeciesAction>()
 {
   InputParameters params = validParams<Action>();
-  params.addParam<std::vector<AuxVariableName> >("secondary_species", "The list of secondary species to add");
-  params.addParam<std::vector<std::string> >("kin_reactions", "The list of solid kinetic reactions");
-
+  params.addParam<std::vector<AuxVariableName>>("secondary_species",
+                                                "The list of secondary species to add");
+  // Get MooseEnums for the possible order/family options for this variable
+  MooseEnum families(AddAuxVariableAction::getAuxVariableFamilies());
+  MooseEnum orders(AddAuxVariableAction::getAuxVariableOrders());
+  params.addParam<MooseEnum>("family",
+                             families,
+                             "Specifies the family of FE "
+                             "shape function to use for the order parameters");
+  params.addParam<MooseEnum>("order",
+                             orders,
+                             "Specifies the order of the FE "
+                             "shape function to use for the order parameters");
+  params.addClassDescription("Adds AuxVariables for all secondary species");
   return params;
 }
 
-
-AddSecondarySpeciesAction::AddSecondarySpeciesAction(const InputParameters & params) :
-    Action(params)
+AddSecondarySpeciesAction::AddSecondarySpeciesAction(const InputParameters & params)
+  : Action(params), _secondary_species(getParam<std::vector<AuxVariableName>>("secondary_species"))
 {
 }
 
 void
 AddSecondarySpeciesAction::act()
 {
-  // Checking to see if there are aqueous eqilibrium species to be added as aux variables
+  // Checking to see if there are secondary species to be added as AuxVariables
   if (_pars.isParamValid("secondary_species"))
   {
-    std::vector<AuxVariableName> vars = getParam<std::vector<AuxVariableName> >("secondary_species");
-
-    for (unsigned int i=0; i < vars.size(); i++)
+    for (unsigned int i = 0; i < _secondary_species.size(); ++i)
     {
-      _console << "aux variables: " << vars[i] << "\t";
-      FEType fe_type(Utility::string_to_enum<Order>("first"),
-                     Utility::string_to_enum<FEFamily>("lagrange"));
-      _problem->addAuxVariable(vars[i], fe_type);
+      FEType fe_type(Utility::string_to_enum<Order>(getParam<MooseEnum>("order")),
+                     Utility::string_to_enum<FEFamily>(getParam<MooseEnum>("family")));
+
+      _problem->addAuxVariable(_secondary_species[i], fe_type);
     }
   }
-  else
-  {
-    // Checking to see if there are solid kinetic species to be added as aux variables
-    if (_pars.isParamValid("kin_reactions"))
-    {
-      std::vector<std::string> reactions = getParam<std::vector<std::string> >("kin_reactions");
-      for (unsigned int j=0; j < reactions.size(); j++)
-      {
-        std::vector<std::string> tokens;
-        std::string kin_species;
-
-        // Parsing each reaction
-        MooseUtils::tokenize(reactions[j], tokens, 1, "+=");
-
-        for (unsigned int k=0; k < tokens.size(); k++)
-        {
-          std::vector<std::string> stos_vars;
-          MooseUtils::tokenize(tokens[k], stos_vars, 1, "()");
-          if (stos_vars.size() == 1)
-          {
-            kin_species = stos_vars[0];
-            _console << "I'm here and the kin_species is: " << stos_vars[0] << "\n";
-
-          }
-//           else
-//             mooseError("There's no solid kinetic species.");
-        }
-        _console << "the " << j+1 << "-th solid kinetic species: " << kin_species << "\n";
-        FEType fe_type(Utility::string_to_enum<Order>("first"),
-                       Utility::string_to_enum<FEFamily>("lagrange"));
-        _problem->addAuxVariable(kin_species, fe_type);
-
-      }
-
-    }
-  }
-
 }
-

@@ -8,12 +8,13 @@
 #define FEATUREFLOODCOUNTAUX_H
 
 #include "AuxKernel.h"
+#include "FeatureFloodCount.h"
 
-//Forward Declarations
+// Forward Declarations
 class FeatureFloodCountAux;
-class FeatureFloodCount;
+class GrainTrackerInterface;
 
-template<>
+template <>
 InputParameters validParams<FeatureFloodCountAux>();
 
 /**
@@ -32,13 +33,19 @@ public:
 
 protected:
   virtual Real computeValue();
+  virtual void precalculateValue();
 
   /// Function being used to compute the value of this kernel
   const FeatureFloodCount & _flood_counter;
 
-  const unsigned int _var_idx;
+  const std::size_t _var_idx;
   const MooseEnum _field_display;
   bool _var_coloring;
+
+  const FeatureFloodCount::FieldType _field_type;
+
+  /// precalculated element value
+  Real _value;
 };
 
-#endif //FEATUREFLOODCOUNTAUX_H
+#endif // FEATUREFLOODCOUNTAUX_H

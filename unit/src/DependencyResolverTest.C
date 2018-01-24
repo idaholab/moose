@@ -14,24 +14,7 @@
 
 #include "DependencyResolverTest.h"
 
-CPPUNIT_TEST_SUITE_REGISTRATION( DependencyResolverTest );
-
-void
-DependencyResolverTest::setUp()
-{
-  _resolver.insertDependency("b", "a");
-  _resolver.insertDependency("c", "a");
-  _resolver.insertDependency("d", "c");
-
-  // There are no items in the same "set" so the ordering will be strict
-  _strict_ordering.insertDependency("e", "b");
-  _strict_ordering.insertDependency("a", "e");
-  _strict_ordering.insertDependency("d", "a");
-  // Ordering will be "bead"
-}
-
-void
-DependencyResolverTest::operatorParensTest()
+TEST_F(DependencyResolverTest, operatorParensTest)
 {
   std::vector<std::string> unsorted(6);
   unsorted[0] = "c";
@@ -45,46 +28,39 @@ DependencyResolverTest::operatorParensTest()
   // "bead" will come out after the independent items
   std::sort(unsorted.begin(), unsorted.end(), _strict_ordering);
 
-  CPPUNIT_ASSERT( unsorted[2] == "b");
-  CPPUNIT_ASSERT( unsorted[3] == "e");
-  CPPUNIT_ASSERT( unsorted[4] == "a");
-  CPPUNIT_ASSERT( unsorted[5] == "d");
+  EXPECT_EQ(unsorted[2], "b");
+  EXPECT_EQ(unsorted[3], "e");
+  EXPECT_EQ(unsorted[4], "a");
+  EXPECT_EQ(unsorted[5], "d");
 }
 
-void
-DependencyResolverTest::ptrTest()
+TEST_F(DependencyResolverTest, ptrTest)
 {
   DependencyResolver<int *> resolver;
 
-  int *mat3 = new int;
-  int *mat1 = new int;
-  int *mat2 = new int;
+  int mat3;
+  int mat1;
+  int mat2;
 
-  resolver.insertDependency(mat2, mat1);
-  resolver.insertDependency(mat3, mat1);
-  resolver.insertDependency(mat3, mat2);
+  resolver.insertDependency(&mat2, &mat1);
+  resolver.insertDependency(&mat3, &mat1);
+  resolver.insertDependency(&mat3, &mat2);
 
   std::vector<int *> sorted(3);
-  sorted[0] = mat1;
-  sorted[1] = mat2;
-  sorted[2] = mat3;
-
+  sorted[0] = &mat1;
+  sorted[1] = &mat2;
+  sorted[2] = &mat3;
 
   /*const std::vector<std::set<int *> > & sets =*/
   resolver.getSortedValuesSets();
 
   std::sort(sorted.begin(), sorted.end(), resolver);
-  CPPUNIT_ASSERT( sorted[0] == mat1);
-  CPPUNIT_ASSERT( sorted[1] == mat2);
-  CPPUNIT_ASSERT( sorted[2] == mat3);
-
-  delete mat1;
-  delete mat2;
-  delete mat3;
+  EXPECT_EQ(sorted[0], &mat1);
+  EXPECT_EQ(sorted[1], &mat2);
+  EXPECT_EQ(sorted[2], &mat3);
 }
 
-void
-DependencyResolverTest::simpleTest()
+TEST_F(DependencyResolverTest, simpleTest)
 {
   DependencyResolver<int> resolver;
 
@@ -101,33 +77,88 @@ DependencyResolverTest::simpleTest()
   sorted[1] = mat2;
   sorted[2] = mat3;
 
-
   /*const std::vector<std::set<int> > & sets =*/
   resolver.getSortedValuesSets();
 
   std::sort(sorted.begin(), sorted.end(), resolver);
-  CPPUNIT_ASSERT( sorted[0] == mat1);
-  CPPUNIT_ASSERT( sorted[1] == mat2);
-  CPPUNIT_ASSERT( sorted[2] == mat3);
+  EXPECT_EQ(sorted[0], mat1);
+  EXPECT_EQ(sorted[1], mat2);
+  EXPECT_EQ(sorted[2], mat3);
 }
 
-void
-DependencyResolverTest::resolverSets()
+TEST_F(DependencyResolverTest, resolverSets)
 {
   // First throw in an extra independent item
   _resolver.addItem("aa");
 
-  const std::vector<std::set<std::string> > & sets = _resolver.getSortedValuesSets();
+  const auto & sets = _resolver.getSortedValuesSets();
 
-  CPPUNIT_ASSERT( sets.size() == 3 );
-  CPPUNIT_ASSERT( sets[0].size() == 2);
-  CPPUNIT_ASSERT( sets[0].find("a") != sets[0].end() );
-  CPPUNIT_ASSERT( sets[0].find("aa") != sets[0].end() );
+  EXPECT_EQ(sets.size(), 3);
+  EXPECT_EQ(sets[0].size(), 2);
+  EXPECT_NE(std::find(sets[0].begin(), sets[0].end(), "a"), sets[0].end());
+  EXPECT_NE(std::find(sets[0].begin(), sets[0].end(), "aa"), sets[0].end());
 
-  CPPUNIT_ASSERT( sets[1].size() == 2);
-  CPPUNIT_ASSERT( sets[0].find("b") != sets[1].end() );
-  CPPUNIT_ASSERT( sets[0].find("c") != sets[1].end() );
+  EXPECT_EQ(sets[1].size(), 2);
+  EXPECT_NE(std::find(sets[1].begin(), sets[1].end(), "b"), sets[1].end());
+  EXPECT_NE(std::find(sets[1].begin(), sets[1].end(), "c"), sets[1].end());
 
-  CPPUNIT_ASSERT( sets[2].size() == 1);
-  CPPUNIT_ASSERT( sets[0].find("d") != sets[2].end() );
+  EXPECT_EQ(sets[2].size(), 1);
+  EXPECT_NE(std::find(sets[2].begin(), sets[2].end(), "d"), sets[2].end());
+}
+
+TEST_F(DependencyResolverTest, dependsOnTest)
+{
+  EXPECT_TRUE(_resolver.dependsOn("b", "a"));
+  EXPECT_TRUE(_resolver.dependsOn("c", "a"));
+  EXPECT_TRUE(_resolver.dependsOn("d", "c"));
+  EXPECT_TRUE(_resolver.dependsOn("d", "a"));
+  EXPECT_TRUE(_resolver.dependsOn("b", "b"));
+  EXPECT_TRUE(_resolver.dependsOn("a", "a"));
+  EXPECT_FALSE(_resolver.dependsOn("b", "c"));
+  EXPECT_FALSE(_resolver.dependsOn("b", "d"));
+  EXPECT_TRUE(_tree.dependsOn("k0", "m0"));
+  EXPECT_TRUE(_tree.dependsOn("k0", "m1"));
+  EXPECT_TRUE(_tree.dependsOn("k0", "m2"));
+  EXPECT_TRUE(_tree.dependsOn("k0", "mA"));
+  EXPECT_TRUE(_tree.dependsOn("k0", "mB"));
+  EXPECT_TRUE(_tree.dependsOn("k0", "mC"));
+  EXPECT_TRUE(_tree.dependsOn("k0", "mD"));
+  EXPECT_FALSE(_tree.dependsOn("k1", "m0"));
+  EXPECT_FALSE(_tree.dependsOn("k1", "m1"));
+  EXPECT_TRUE(_tree.dependsOn("k1", "m2"));
+  EXPECT_FALSE(_tree.dependsOn("k1", "mA"));
+  EXPECT_FALSE(_tree.dependsOn("k1", "mB"));
+  EXPECT_FALSE(_tree.dependsOn("k1", "mC"));
+  EXPECT_TRUE(_tree.dependsOn("k1", "mD"));
+  EXPECT_TRUE(_tree.dependsOn("m0", "m0"));
+  EXPECT_FALSE(_tree.dependsOn("m0", "m1"));
+  EXPECT_FALSE(_tree.dependsOn("m0", "m2"));
+  EXPECT_TRUE(_tree.dependsOn("m0", "mA"));
+  EXPECT_TRUE(_tree.dependsOn("m0", "mB"));
+  EXPECT_TRUE(_tree.dependsOn("m0", "mC"));
+  EXPECT_FALSE(_tree.dependsOn("m0", "mD"));
+  EXPECT_FALSE(_tree.dependsOn("m0", "k0"));
+  EXPECT_FALSE(_tree.dependsOn("m0", "k1"));
+  EXPECT_FALSE(_tree.dependsOn("k1", "k0"));
+  EXPECT_FALSE(_tree.dependsOn("k0", "k1"));
+  EXPECT_FALSE(_tree.dependsOn("m1", "something_else"));
+  EXPECT_FALSE(_tree.dependsOn("something_else", "k0"));
+}
+
+TEST_F(DependencyResolverTest, cyclicTest)
+{
+  try
+  {
+    // Attempt to insert a dependency that results in cyclicity
+    _resolver.insertDependency("a", "b");
+    FAIL() << "missing expected exception";
+  }
+  catch (const std::exception & e)
+  {
+    std::string msg(e.what());
+    ASSERT_TRUE(
+        msg.find("DependencyResolver: attempt to insert dependency will result in cyclic graph") !=
+        std::string::npos)
+        << "failed with unexpected error: " << msg;
+  }
 }

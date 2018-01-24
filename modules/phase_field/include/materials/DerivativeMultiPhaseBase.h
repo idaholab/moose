@@ -12,7 +12,7 @@
 // Forward Declarations
 class DerivativeMultiPhaseBase;
 
-template<>
+template <>
 InputParameters validParams<DerivativeMultiPhaseBase>();
 
 /**
@@ -38,7 +38,7 @@ protected:
   std::vector<int> _eta_index;
 
   /// Phase parameter (0=A-phase, 1=B-phase)
-  std::vector<VariableValue*> _etas;
+  std::vector<VariableValue *> _etas;
 
   /// name of the order parameter variable
   unsigned int _num_etas;
@@ -53,13 +53,13 @@ protected:
   std::vector<const MaterialProperty<Real> *> _prop_Fi;
 
   /// Derivatives of Fi w.r.t. arg[i]
-  std::vector<std::vector<const MaterialProperty<Real> *> > _prop_dFi;
+  std::vector<std::vector<const MaterialProperty<Real> *>> _prop_dFi;
 
   /// Second derivatives of Fi.
-  std::vector<std::vector<std::vector<const MaterialProperty<Real> *> > > _prop_d2Fi;
+  std::vector<std::vector<std::vector<const MaterialProperty<Real> *>>> _prop_d2Fi;
 
   /// Third derivatives of Fi.
-  std::vector<std::vector<std::vector<std::vector<const MaterialProperty<Real> *> > > > _prop_d3Fi;
+  std::vector<std::vector<std::vector<std::vector<const MaterialProperty<Real> *>>>> _prop_d3Fi;
 
   /// phase switching function names
   std::vector<MaterialPropertyName> _hi_names;
@@ -76,8 +76,8 @@ protected:
 
   /// Barrier function derivatives.
   std::vector<const MaterialProperty<Real> *> _dg;
-  std::vector<std::vector<const MaterialProperty<Real> *> > _d2g;
-  std::vector<std::vector<std::vector<const MaterialProperty<Real> *> > > _d3g;
+  std::vector<std::vector<const MaterialProperty<Real> *>> _d2g;
+  std::vector<std::vector<std::vector<const MaterialProperty<Real> *>>> _d3g;
 
   /// Phase transformation energy barrier
   Real _W;

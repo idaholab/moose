@@ -1,0 +1,17 @@
+[Tests]
+  [./wireframe]
+    type = ImageDiff
+    command = wireframe.py
+    imagediff = 'wireframe.png'
+    allowed_linux = 0.895
+    allowed_darwin = 0.97
+  [../]
+
+  [./points]
+    type = ImageDiff
+    command = points.py
+    imagediff = 'points.png'
+    allowed_linux = 0.965
+    allowed_darwin = 0.97
+  [../]
+[]

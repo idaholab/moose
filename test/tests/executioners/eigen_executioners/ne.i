@@ -66,6 +66,13 @@
   solve_type = 'PJFNK'
 []
 
+[Preconditioning]
+  [./smp]
+    type = SMP
+    full = true
+  [../]
+[]
+
 [Postprocessors]
   active = 'unorm udiff'
 

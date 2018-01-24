@@ -12,7 +12,7 @@
 // Forward Declarations
 class INSChorinPressurePoisson;
 
-template<>
+template <>
 InputParameters validParams<INSChorinPressurePoisson>();
 
 /**
@@ -25,7 +25,7 @@ class INSChorinPressurePoisson : public Kernel
 public:
   INSChorinPressurePoisson(const InputParameters & parameters);
 
-  virtual ~INSChorinPressurePoisson(){}
+  virtual ~INSChorinPressurePoisson() {}
 
 protected:
   virtual Real computeQpResidual();
@@ -33,9 +33,9 @@ protected:
   virtual Real computeQpOffDiagJacobian(unsigned jvar);
 
   // Gradients of the "star" velocity
-  VariableGradient& _grad_u_star;
-  VariableGradient& _grad_v_star;
-  VariableGradient& _grad_w_star;
+  const VariableGradient & _grad_u_star;
+  const VariableGradient & _grad_v_star;
+  const VariableGradient & _grad_w_star;
 
   // Variable numberings
   unsigned _u_vel_star_var_number;
@@ -43,8 +43,7 @@ protected:
   unsigned _w_vel_star_var_number;
 
   // Material properties
-  Real _rho;
+  const MaterialProperty<Real> & _rho;
 };
-
 
 #endif // INSCHORINPRESSUREPOISSON_H

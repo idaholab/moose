@@ -12,11 +12,9 @@
 // Forward Declarations
 class NSStagnationPressureBC;
 
-
 // Specialization required of all user-level Moose objects
-template<>
+template <>
 InputParameters validParams<NSStagnationPressureBC>();
-
 
 /**
  * This Dirichlet condition imposes the condition p_0 = p_0_desired,
@@ -26,25 +24,19 @@ InputParameters validParams<NSStagnationPressureBC>();
 class NSStagnationPressureBC : public NSStagnationBC
 {
 public:
-  // Constructor
   NSStagnationPressureBC(const InputParameters & parameters);
 
-  // Destructor, better be virtual
-  virtual ~NSStagnationPressureBC(){}
-
 protected:
-
   // NodalBC's can (currently) only specialize the computeQpResidual function,
   // the computeQpJacobian() function automatically assembles a "1" onto the main
   // diagonal for this DoF.
   virtual Real computeQpResidual();
 
   // Coupled variables
-  VariableValue& _pressure;
+  const VariableValue & _pressure;
 
   // Required paramters
-  Real _desired_stagnation_pressure;
+  const Real _desired_stagnation_pressure;
 };
-
 
 #endif // NSSTAGNATIONPRESSUREBC_H

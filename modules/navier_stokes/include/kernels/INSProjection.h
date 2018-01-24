@@ -12,7 +12,7 @@
 // Forward Declarations
 class INSProjection;
 
-template<>
+template <>
 InputParameters validParams<INSProjection>();
 
 /**
@@ -27,7 +27,7 @@ class INSProjection : public Kernel
 public:
   INSProjection(const InputParameters & parameters);
 
-  virtual ~INSProjection(){}
+  virtual ~INSProjection() {}
 
 protected:
   virtual Real computeQpResidual();
@@ -35,12 +35,12 @@ protected:
   virtual Real computeQpOffDiagJacobian(unsigned jvar);
 
   // Coupled variables
-  VariableValue& _a1;
-  VariableValue& _a2;
-  VariableValue& _a3;
+  const VariableValue & _a1;
+  const VariableValue & _a2;
+  const VariableValue & _a3;
 
   // Gradients
-  VariableGradient& _grad_p;
+  const VariableGradient & _grad_p;
 
   // Variable numberings
   unsigned _a1_var_number;
@@ -48,12 +48,11 @@ protected:
   unsigned _a3_var_number;
   unsigned _p_var_number;
 
-  // Material properties
-  Real _rho;
-
   // Parameters
   unsigned _component;
-};
 
+  // Material properties
+  const MaterialProperty<Real> & _rho;
+};
 
 #endif // INSPROJECTION_H

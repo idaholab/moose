@@ -5,7 +5,6 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-
 #ifndef RICHARDSSAT_H
 #define RICHARDSSAT_H
 
@@ -13,8 +12,7 @@
 
 class RichardsSat;
 
-
-template<>
+template <>
 InputParameters validParams<RichardsSat>();
 
 /**
@@ -40,17 +38,12 @@ public:
   /// derivative of saturation wrt effective saturation
   Real dsat(Real /*seff*/) const;
 
-  /// second derivative of saturation wrt effective saturation
-  Real d2sat(Real /*seff*/) const;
-
 protected:
-
   /// residual saturation for this phase
   Real _s_res;
 
   /// sum of the residual saturations for every phase
   Real _sum_s_res;
-
 };
 
 #endif // RICHARDSSAT_H

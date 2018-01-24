@@ -3,5 +3,6 @@
     type = 'CSVDiff'
     input = 'element_l2_error_pp_test.i'
     csvdiff = 'out.csv'
+    group = 'requirements'
   [../]
 []

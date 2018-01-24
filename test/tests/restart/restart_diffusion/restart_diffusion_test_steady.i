@@ -38,6 +38,13 @@
   [../]
 []
 
+[Postprocessors]
+  [./unorm]
+    type = ElementL2Norm
+    variable = u
+  [../]
+[]
+
 [Executioner]
   type = Steady
 
@@ -48,4 +55,5 @@
 [Outputs]
   file_base = steady_out
   exodus = true
+  checkpoint = true
 []

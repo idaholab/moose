@@ -4,15 +4,15 @@
 /*          All contents are licensed under LGPL V2.1           */
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
-#ifndef KKSACBULK_H
-#define KKSACBULK_H
+#ifndef KKSACBULKC_H
+#define KKSACBULKC_H
 
 #include "KKSACBulkBase.h"
 
-//Forward Declarations
+// Forward Declarations
 class KKSACBulkC;
 
-template<>
+template <>
 InputParameters validParams<KKSACBulkC>();
 
 /**
@@ -55,7 +55,7 @@ protected:
 
   /// Mixed partial derivatives of the free energy function wrt ca and
   /// any other coupled variables \f$ \frac {d^2}{dc_a dq} F_a \f$
-  std::vector<const MaterialProperty<Real>* > _prop_d2Fadcadarg;
+  std::vector<const MaterialProperty<Real> *> _prop_d2Fadcadarg;
 };
 
-#endif //KKSACBULKC_H
+#endif // KKSACBULKC_H

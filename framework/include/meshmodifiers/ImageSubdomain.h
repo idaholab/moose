@@ -19,35 +19,26 @@
 #include "MeshModifier.h"
 #include "ImageSampler.h"
 
-// libmesh includes
-#include "libmesh/mesh_tools.h"
-
 // Forward declarations
 class ImageSubdomain;
 
-template<>
+template <>
 InputParameters validParams<ImageSubdomain>();
 
 /**
  * MeshModifier for defining a Subdomains based on Image data.
  */
-class ImageSubdomain :
-    public MeshModifier,
-    public ImageSampler
+class ImageSubdomain : public MeshModifier, public ImageSampler
 {
 public:
-
   /**
    * Class constructor
    * @param parameters The input parameters
    */
   ImageSubdomain(const InputParameters & parameters);
 
-  /**
-   * Perform the actual subdomain modification based on the supplied image
-   */
-  virtual void modify();
-
+protected:
+  virtual void modify() override;
 };
 
 #endif // IMAGESUBDOMAIN_H

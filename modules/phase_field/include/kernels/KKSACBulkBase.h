@@ -9,10 +9,10 @@
 
 #include "ACBulk.h"
 
-//Forward Declarations
+// Forward Declarations
 class KKSACBulkBase;
 
-template<>
+template <>
 InputParameters validParams<KKSACBulkBase>();
 
 /**
@@ -21,7 +21,7 @@ InputParameters validParams<KKSACBulkBase>();
  *
  * The non-linear variable for this Kernel is the order parameter 'eta'.
  */
-class KKSACBulkBase : public ACBulk
+class KKSACBulkBase : public ACBulk<Real>
 {
 public:
   KKSACBulkBase(const InputParameters & parameters);
@@ -60,7 +60,7 @@ protected:
   const MaterialProperty<Real> & _prop_d2h;
 
   /// Gradients for all coupled variables
-  std::vector<VariableGradient*> _grad_args;
+  std::vector<const VariableGradient *> _grad_args;
 };
 
-#endif //KKSACBULKBASE_H
+#endif // KKSACBULKBASE_H

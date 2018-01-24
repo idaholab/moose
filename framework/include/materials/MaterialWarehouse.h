@@ -15,123 +15,56 @@
 #ifndef MATERIALWAREHOUSE_H
 #define MATERIALWAREHOUSE_H
 
-#include "Warehouse.h"
-#include "MooseTypes.h"
+// MOOSE includes
+#include "MooseObjectWarehouse.h"
 
+// Forward declarations
 class Material;
 
 /**
- * Stores materials.
+ * Material objects are special in that they have additional objects created automatically (see
+ * FEProblemBase::addMaterial).
  *
- * There are currently these types of materials
- * 1) material - material defined in the interior of an element (associated with a subdomain)
- * 2) face material - same as above but the material lives on the element side (also associated with a subdomain)
- * 3) neighbor material - same as face material but on the neighboring element (used by DG)
- * 4) boundary material - defined on a surface (associated with a side set)
+ * This class specializes the base class to acount for the additional Neightbor and face objects
+ * that may
+ * exist.
  */
-class MaterialWarehouse : public Warehouse<Material>
+class MaterialWarehouse : public MooseObjectWarehouse<Material>
 {
 public:
-  MaterialWarehouse();
-
-  // Copy Constructor
-  MaterialWarehouse(const MaterialWarehouse &rhs);
-
-  virtual ~MaterialWarehouse();
-
-  // Setup /////
-  void initialSetup();
-  void timestepSetup();
-  void residualSetup();
-  void jacobianSetup();
-
-  bool hasMaterials(SubdomainID block_id) const;
-  bool hasFaceMaterials(SubdomainID block_id) const;
-  bool hasNeighborMaterials(SubdomainID block_id) const;
-  bool hasBoundaryMaterials(BoundaryID boundary_id) const;
-
-  const std::vector<Material *> & getMaterialsByName(const std::string & name) const;
+  const MooseObjectWarehouse<Material> & operator[](Moose::MaterialDataType data_type) const;
 
   ///@{
   /**
-   * These methods return vectors of Materials for various mesh entities used
-   * to compute properties during the system "solve".  The materials in these
-   * vectors are asked to recompute their values.
+   * Convenience methods for calling object setup methods that handle the extra neighbor and face
+   * objects.
    */
-  std::vector<Material *> & getMaterials(SubdomainID block_id);
-  std::vector<Material *> & getFaceMaterials(SubdomainID block_id);
-  std::vector<Material *> & getNeighborMaterials(SubdomainID block_id);
-  std::vector<Material *> & getBoundaryMaterials(BoundaryID boundary_id);
+  virtual void initialSetup(THREAD_ID tid = 0) const;
+  virtual void timestepSetup(THREAD_ID tid = 0) const;
+  virtual void subdomainSetup(THREAD_ID tid = 0) const;
+  virtual void subdomainSetup(SubdomainID id, THREAD_ID tid = 0) const;
+  virtual void neighborSubdomainSetup(THREAD_ID tid = 0) const;
+  virtual void neighborSubdomainSetup(SubdomainID id, THREAD_ID tid = 0) const;
+  virtual void jacobianSetup(THREAD_ID tid = 0) const;
+  virtual void residualSetup(THREAD_ID tid = 0) const;
+  virtual void updateActive(THREAD_ID tid = 0);
+  void sort(THREAD_ID tid = 0);
   ///@}
 
-  std::vector<Material *> & active(SubdomainID block_id);
-
-  void addMaterial(std::vector<SubdomainID> blocks, MooseSharedPointer<Material> & material);
-  void addFaceMaterial(std::vector<SubdomainID> blocks, MooseSharedPointer<Material> & material);
-  void addNeighborMaterial(std::vector<SubdomainID> blocks, MooseSharedPointer<Material> & material);
-  void addBoundaryMaterial(std::vector<BoundaryID> boundaries, MooseSharedPointer<Material> & material);
-
   /**
-   * Get the list of blocks that materials are defined on
-   * @return The list of subdomain IDs
+   * A special method unique to this class for adding Block, Neighbor, and Face material objects.
    */
-  const std::set<SubdomainID> & blocks() const { return _blocks; }
-
-  /**
-   * Get the list of boundary ids that the materials are defined
-   * @return The set of Boundary IDs
-   */
-  const std::set<BoundaryID> & boundaries() const { return _boundaries; }
-
-  /// This method checks for coupled material properties to make sure that all retrieved properties are supplied
-  void checkMaterialDependSanity() const;
-
-  /// This method loops over all materials and calls checkStatefulSanity() on the individual materials
-  void checkStatefulSanity() const;
+  void addObjects(std::shared_ptr<Material> block,
+                  std::shared_ptr<Material> neighbor,
+                  std::shared_ptr<Material> face,
+                  THREAD_ID tid = 0);
 
 protected:
-  /// A list of material associated with the block (subdomain)
-  std::map<SubdomainID, std::vector<Material *> > _active_materials;
+  /// Stroage for neighbor material objects (Block are stored in the base class)
+  MooseObjectWarehouse<Material> _neighbor_materials;
 
-  /// A list of face materials associated with the block (subdomain)
-  std::map<SubdomainID, std::vector<Material *> > _active_face_materials;
-
-  /// A list of neighbor materials associated with the block (subdomain) (for DG)
-  std::map<SubdomainID, std::vector<Material *> > _active_neighbor_materials;
-
-  /// A list of boundary materials associated with the boundary (boundary)
-  std::map<BoundaryID, std::vector<Material *> > _active_boundary_materials;
-
-  /// Set of blocks where materials are defined
-  std::set<SubdomainID> _blocks;
-
-  /// Set of boundaries where materials are defined
-  std::set<BoundaryID> _boundaries;
-
-  /// A convenience list of all the maps
-  std::vector<std::map<SubdomainID, std::vector<Material *> > *> _master_list;
-
-  /// list of materials by name
-  std::map<std::string, std::vector<Material *> > _mat_by_name;
-
-private:
-  /**
-   * We are using MooseSharedPointer to handle the cleanup of the pointers at the end of execution.
-   * This is necessary since several warehouses might be sharing a single instance of a MooseObject.
-   */
-  std::vector<MooseSharedPointer<Material> > _all_ptrs;
-
-  /**
-   * This routine uses the Dependency Resolver to sort Materials based on dependencies they
-   * might have on coupled values
-   */
-  void sortMaterials(std::vector<Material *> & materials_vector);
-
-  /**
-   * This routine checks to make sure that all requests for material properties, specifically
-   * by other materials make sense for the given block.
-   */
-  void checkDependMaterials(const std::map<SubdomainID, std::vector<Material *> > & materials_map) const;
+  /// Stroage for face material objects (Block are stored in the base class)
+  MooseObjectWarehouse<Material> _face_materials;
 };
 
 #endif // MATERIALWAREHOUSE_H

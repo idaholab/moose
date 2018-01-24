@@ -16,22 +16,18 @@
 #include "NonlinearSystem.h"
 #include "FEProblem.h"
 
-template<>
-InputParameters validParams<ExplicitEuler>()
+template <>
+InputParameters
+validParams<ExplicitEuler>()
 {
   InputParameters params = validParams<TimeIntegrator>();
 
   return params;
 }
 
-ExplicitEuler::ExplicitEuler(const InputParameters & parameters) :
-    TimeIntegrator(parameters)
-{
-}
+ExplicitEuler::ExplicitEuler(const InputParameters & parameters) : TimeIntegrator(parameters) {}
 
-ExplicitEuler::~ExplicitEuler()
-{
-}
+ExplicitEuler::~ExplicitEuler() {}
 
 void
 ExplicitEuler::preSolve()
@@ -45,7 +41,7 @@ ExplicitEuler::preSolve()
 void
 ExplicitEuler::computeTimeDerivatives()
 {
-  _u_dot  = *_solution;
+  _u_dot = *_solution;
   _u_dot -= _solution_old;
   _u_dot *= 1 / _dt;
   _u_dot.close();

@@ -19,7 +19,7 @@
 
 class SetupPredictorAction;
 
-template<>
+template <>
 InputParameters validParams<SetupPredictorAction>();
 
 /**
@@ -29,13 +29,8 @@ class SetupPredictorAction : public MooseObjectAction
 {
 public:
   SetupPredictorAction(InputParameters parameters);
-  virtual ~SetupPredictorAction();
 
-  virtual void act();
-
-protected:
-
+  virtual void act() override;
 };
 
-
-#endif /* SETUPPREDICTORACTION_H_ */
+#endif /* SETUPPREDICTORACTION_H */

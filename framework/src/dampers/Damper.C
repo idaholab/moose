@@ -15,59 +15,38 @@
 #include "Damper.h"
 #include "SystemBase.h"
 #include "SubProblem.h"
-#include "Assembly.h"
+#include "Conversion.h"
 
-// libMesh includes
-#include "libmesh/quadrature.h"
-
-template<>
-InputParameters validParams<Damper>()
+template <>
+InputParameters
+validParams<Damper>()
 {
   InputParameters params = validParams<MooseObject>();
-  params.addRequiredParam<NonlinearVariableName>("variable", "The name of the variable that this damper operates on");
-
+  params.declareControllable("enable"); // allows Control to enable/disable this type of object
   params.registerBase("Damper");
+  params.addParam<Real>("min_damping",
+                        0.0,
+                        "Minimum value of computed damping. Damping lower than "
+                        "this will result in an exception being thrown and "
+                        "cutting the time step");
   return params;
 }
 
-Damper::Damper(const InputParameters & parameters) :
-    MooseObject(parameters),
-    SetupInterface(parameters),
-    MaterialPropertyInterface(parameters),
+Damper::Damper(const InputParameters & parameters)
+  : MooseObject(parameters),
+    SetupInterface(this),
     Restartable(parameters, "Dampers"),
     MeshChangedInterface(parameters),
-    _subproblem(*parameters.get<SubProblem *>("_subproblem")),
-    _sys(*parameters.get<SystemBase *>("_sys")),
-    _tid(parameters.get<THREAD_ID>("_tid")),
-    _assembly(_subproblem.assembly(_tid)),
-    _coord_sys(_assembly.coordSystem()),
-    _var(_sys.getVariable(_tid, parameters.get<NonlinearVariableName>("variable"))),
-
-    _current_elem(_var.currentElem()),
-    _q_point(_assembly.qPoints()),
-    _qrule(_assembly.qRule()),
-    _JxW(_assembly.JxW()),
-
-    _u_increment(_var.increment()),
-
-    _u(_var.sln()),
-    _grad_u(_var.gradSln())
+    _subproblem(*getCheckedPointerParam<SubProblem *>("_subproblem")),
+    _sys(*getCheckedPointerParam<SystemBase *>("_sys")),
+    _min_damping(getParam<Real>("min_damping"))
 {
 }
 
-Real
-Damper::computeDamping()
+void
+Damper::checkMinDamping(const Real cur_damping) const
 {
-  Real damping = 1.0;
-  Real cur_damping = 1.0;
-
-  for (_qp=0; _qp<_qrule->n_points(); _qp++)
-  {
-    cur_damping = computeQpDamping();
-    if (cur_damping < damping)
-      damping = cur_damping;
-  }
-
-  return damping;
+  if (cur_damping < _min_damping)
+    throw MooseException("From damper: '" + name() + "' damping below min_damping: " +
+                         Moose::stringify(cur_damping) + " Cutting timestep.");
 }
-

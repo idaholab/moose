@@ -14,24 +14,21 @@
 
 #include "ElementAverageTimeDerivative.h"
 
-template<>
-InputParameters validParams<ElementAverageTimeDerivative>()
+template <>
+InputParameters
+validParams<ElementAverageTimeDerivative>()
 {
   InputParameters params = validParams<ElementAverageValue>();
   return params;
 }
 
-
-
-ElementAverageTimeDerivative::ElementAverageTimeDerivative(const InputParameters & parameters) :
-    ElementAverageValue(parameters)
-{}
-
-
+ElementAverageTimeDerivative::ElementAverageTimeDerivative(const InputParameters & parameters)
+  : ElementAverageValue(parameters)
+{
+}
 
 Real
 ElementAverageTimeDerivative::computeQpIntegral()
 {
   return _u_dot[_qp];
 }
-

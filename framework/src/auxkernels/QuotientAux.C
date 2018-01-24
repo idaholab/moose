@@ -14,28 +14,26 @@
 
 #include "QuotientAux.h"
 
-template<>
-InputParameters validParams<QuotientAux>()
+template <>
+InputParameters
+validParams<QuotientAux>()
 {
   InputParameters params = validParams<AuxKernel>();
+  params.addClassDescription("Divides two coupled variables.");
   params.addCoupledVar("numerator", "The upstairs of the quotient variable");
   params.addCoupledVar("denominator", "The downstairs of the quotient variable");
   return params;
 }
 
-
-
-QuotientAux::QuotientAux(const InputParameters & parameters) :
-    AuxKernel(parameters),
-   _numerator(coupledValue("numerator")),
-   _denominator(coupledValue("denominator"))
-{}
-
-
+QuotientAux::QuotientAux(const InputParameters & parameters)
+  : AuxKernel(parameters),
+    _numerator(coupledValue("numerator")),
+    _denominator(coupledValue("denominator"))
+{
+}
 
 Real
 QuotientAux::computeValue()
 {
   return _numerator[_qp] / _denominator[_qp];
 }
-

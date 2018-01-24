@@ -67,7 +67,7 @@
   [../]
 
   [./ffn_u]
-    type = UserForcingFunction
+    type = BodyForce
     variable = u
     function = force_fn
   [../]
@@ -109,11 +109,6 @@
 []
 
 [Postprocessors]
-  [./passsidepp]
-    type = ElementSidePP
-    side_pp = sidepp
-    execute_on = timestep_end
-  [../]
 
   [./sidepp]
     type = SideIntegralVariablePostprocessor
@@ -121,6 +116,13 @@
     execute_on = timestep_end
     boundary = '0 1 2 3'
   [../]
+
+  [./passsidepp]
+    type = ElementSidePP
+    side_pp = sidepp
+    execute_on = timestep_end
+  [../]
+
 []
 
 [Executioner]

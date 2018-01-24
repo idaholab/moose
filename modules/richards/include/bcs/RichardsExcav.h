@@ -5,7 +5,6 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-
 #ifndef RICHARDSEXCAV
 #define RICHARDSEXCAV
 
@@ -15,7 +14,7 @@
 class RichardsExcav;
 class Function;
 
-template<>
+template <>
 InputParameters validParams<RichardsExcav>();
 
 /**
@@ -27,7 +26,6 @@ InputParameters validParams<RichardsExcav>();
 class RichardsExcav : public NodalBC
 {
 public:
-
   RichardsExcav(const InputParameters & parameters);
 
 protected:
@@ -54,5 +52,4 @@ protected:
   Function & _func;
 };
 
-#endif //RICHARDSEXCAV
-
+#endif // RICHARDSEXCAV

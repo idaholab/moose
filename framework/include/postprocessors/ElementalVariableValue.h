@@ -15,16 +15,19 @@
 #ifndef ELEMENTALVARIABLEVALUE_H
 #define ELEMENTALVARIABLEVALUE_H
 
+// MOOSE includes
 #include "GeneralPostprocessor.h"
-// libMesh
-#include "libmesh/elem.h"
 
+// Forward Declarations
+class ElementalVariableValue;
 class MooseMesh;
 
-//Forward Declarations
-class ElementalVariableValue;
+namespace libMesh
+{
+class Elem;
+}
 
-template<>
+template <>
 InputParameters validParams<ElementalVariableValue>();
 
 class ElementalVariableValue : public GeneralPostprocessor
@@ -32,13 +35,9 @@ class ElementalVariableValue : public GeneralPostprocessor
 public:
   ElementalVariableValue(const InputParameters & parameters);
 
-  virtual void initialize() {}
-  virtual void execute() {}
-
-  /**
-   * This will return the degrees of freedom in the system.
-   */
-  virtual Real getValue();
+  virtual void initialize() override {}
+  virtual void execute() override {}
+  virtual Real getValue() override;
 
 protected:
   MooseMesh & _mesh;
@@ -46,4 +45,4 @@ protected:
   Elem * _element;
 };
 
-#endif //ELEMENTALVARIABLEVALUE_H
+#endif // ELEMENTALVARIABLEVALUE_H

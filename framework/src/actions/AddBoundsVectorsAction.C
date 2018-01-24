@@ -12,24 +12,23 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
+// MOOSE includes
 #include "AddBoundsVectorsAction.h"
 #include "FEProblem.h"
+#include "NonlinearSystemBase.h"
 
-template<>
-InputParameters validParams<AddBoundsVectorsAction>()
+template <>
+InputParameters
+validParams<AddBoundsVectorsAction>()
 {
   return validParams<Action>();
 }
 
-AddBoundsVectorsAction::AddBoundsVectorsAction(InputParameters params) :
-    Action(params)
-{
-}
+AddBoundsVectorsAction::AddBoundsVectorsAction(InputParameters params) : Action(params) {}
 
 void
 AddBoundsVectorsAction::act()
 {
-  _problem->getNonlinearSystem().addVector("lower_bound", false, GHOSTED, false);
-  _problem->getNonlinearSystem().addVector("upper_bound", false, GHOSTED, false);
+  _problem->getNonlinearSystemBase().addVector("lower_bound", false, GHOSTED);
+  _problem->getNonlinearSystemBase().addVector("upper_bound", false, GHOSTED);
 }
-

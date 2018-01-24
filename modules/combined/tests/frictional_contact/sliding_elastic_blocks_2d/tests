@@ -1,9 +1,0 @@
-[Tests]
-  [./base]
-    type = 'Exodiff'
-    input = 'sliding_elastic_blocks_2d.i'
-    exodiff = 'sliding_elastic_blocks_2d_out.e'
-    custom_cmp = 'sliding_elastic_blocks_2d.cmp'
-    max_parallel = 1
-  [../]
-[]

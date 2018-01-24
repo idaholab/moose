@@ -18,9 +18,8 @@
 
 class CoupledKernelGradTest;
 
-template<>
+template <>
 InputParameters validParams<CoupledKernelGradTest>();
-
 
 class CoupledKernelGradTest : public KernelGrad
 {
@@ -34,10 +33,8 @@ protected:
   virtual Real computeQpOffDiagJacobian(unsigned int);
 
   RealVectorValue _beta;
-  VariableValue & _var2;
+  const VariableValue & _var2;
   unsigned int _var2_num;
-
 };
-
 
 #endif /* COUPLEDKERNELGRADTEST_H */

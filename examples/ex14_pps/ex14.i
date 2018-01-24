@@ -42,7 +42,7 @@
 
   # This Kernel can take a function name to use
   [./forcing]
-    type = UserForcingFunction
+    type = BodyForce
     variable = forced
     function = forcing_func
   [../]
@@ -75,6 +75,7 @@
     [./uniform]
       type = UniformMarker
       mark = REFINE
+      outputs = none
     [../]
   [../]
 []
@@ -91,6 +92,7 @@
 []
 
 [Outputs]
+  execute_on = 'timestep_end'
   exodus = true
   csv = true
 []

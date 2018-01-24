@@ -15,28 +15,28 @@
 #ifndef MULTIAPPUSEROBJECTTRANSFER_H
 #define MULTIAPPUSEROBJECTTRANSFER_H
 
+// MOOSE includes
 #include "MultiAppTransfer.h"
 
-class MooseVariable;
+// Forward declarations
 class MultiAppUserObjectTransfer;
 
-template<>
+template <>
 InputParameters validParams<MultiAppUserObjectTransfer>();
 
 /**
- * Samples a variable's value in the Master domain at the point where the MultiApp is.
- * Copies that value into a postprocessor in the MultiApp.
+ * Samples a variable's value in the Master domain at the point where
+ * the MultiApp is.  Copies that value into a postprocessor in the
+ * MultiApp.
  */
-class MultiAppUserObjectTransfer :
-  public MultiAppTransfer
+class MultiAppUserObjectTransfer : public MultiAppTransfer
 {
 public:
   MultiAppUserObjectTransfer(const InputParameters & parameters);
-  virtual ~MultiAppUserObjectTransfer() {}
 
-  virtual void initialSetup();
+  virtual void initialSetup() override;
 
-  virtual void execute();
+  virtual void execute() override;
 
 protected:
   AuxVariableName _to_var_name;
@@ -45,4 +45,4 @@ protected:
   bool _displaced_target_mesh;
 };
 
-#endif /* MULTIAPPVARIABLEVALUESAMPLEPOSTPROCESSORTRANSFER_H */
+#endif // MULTIAPPVARIABLEVALUESAMPLEPOSTPROCESSORTRANSFER_H

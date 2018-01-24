@@ -19,21 +19,16 @@
 
 class SideSetsBetweenSubdomains;
 
-template<>
+template <>
 InputParameters validParams<SideSetsBetweenSubdomains>();
 
-class SideSetsBetweenSubdomains :
-  public MeshModifier
+class SideSetsBetweenSubdomains : public MeshModifier
 {
 public:
   SideSetsBetweenSubdomains(const InputParameters & parameters);
 
-  virtual ~SideSetsBetweenSubdomains();
-
-  virtual void modify();
-
 protected:
-
+  virtual void modify() override;
 };
 
 #endif /* SIDESETSBETWEENSUBDOMAINS_H */

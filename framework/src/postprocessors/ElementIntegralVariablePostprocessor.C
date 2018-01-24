@@ -14,17 +14,19 @@
 
 #include "ElementIntegralVariablePostprocessor.h"
 
-template<>
-InputParameters validParams<ElementIntegralVariablePostprocessor>()
+template <>
+InputParameters
+validParams<ElementIntegralVariablePostprocessor>()
 {
   InputParameters params = validParams<ElementIntegralPostprocessor>();
-  params.addCoupledVar("variable", "The name of the variable that this object operates on");
+  params.addRequiredCoupledVar("variable", "The name of the variable that this object operates on");
   return params;
 }
 
-ElementIntegralVariablePostprocessor::ElementIntegralVariablePostprocessor(const InputParameters & parameters) :
-    ElementIntegralPostprocessor(parameters),
-    MooseVariableInterface(parameters, false),
+ElementIntegralVariablePostprocessor::ElementIntegralVariablePostprocessor(
+    const InputParameters & parameters)
+  : ElementIntegralPostprocessor(parameters),
+    MooseVariableInterface(this, false),
     _u(coupledValue("variable")),
     _grad_u(coupledGradient("variable")),
     _u_dot(coupledDot("variable"))
@@ -37,4 +39,3 @@ ElementIntegralVariablePostprocessor::computeQpIntegral()
 {
   return _u[_qp];
 }
-

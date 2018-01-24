@@ -15,34 +15,32 @@
 #ifndef TIEDVALUECONSTRAINT_H
 #define TIEDVALUECONSTRAINT_H
 
-//MOOSE includes
+// MOOSE includes
 #include "NodeFaceConstraint.h"
 
-//Forward Declarations
+// Forward Declarations
 class TiedValueConstraint;
 
-template<>
+template <>
 InputParameters validParams<TiedValueConstraint>();
 
 /**
- * A TiedValueConstraint forces the value of a variable to be the same on both sides of an interface.
+ * A TiedValueConstraint forces the value of a variable to be the same on both sides of an
+ * interface.
  */
-class TiedValueConstraint :
-  public NodeFaceConstraint
+class TiedValueConstraint : public NodeFaceConstraint
 {
 public:
   TiedValueConstraint(const InputParameters & parameters);
-  virtual ~TiedValueConstraint(){}
 
-  virtual Real computeQpSlaveValue();
-
-  virtual Real computeQpResidual(Moose::ConstraintType type);
-
-  virtual Real computeQpJacobian(Moose::ConstraintJacobianType type);
 protected:
+  virtual Real computeQpSlaveValue() override;
+
+  virtual Real computeQpResidual(Moose::ConstraintType type) override;
+
+  virtual Real computeQpJacobian(Moose::ConstraintJacobianType type) override;
   const Real _scaling;
   NumericVector<Number> & _residual_copy;
 };
 
 #endif
-

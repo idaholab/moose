@@ -9,10 +9,10 @@
 
 #include "Kernel.h"
 
-//Forward Declarations
+// Forward Declarations
 class ACMultiInterface;
 
-template<>
+template <>
 InputParameters validParams<ACMultiInterface>();
 
 /**
@@ -36,8 +36,8 @@ protected:
 
   /// Order parameters
   unsigned int _num_etas;
-  std::vector<VariableValue *> _eta;
-  std::vector<VariableGradient *> _grad_eta;
+  std::vector<const VariableValue *> _eta;
+  std::vector<const VariableGradient *> _grad_eta;
 
   /// Lookup table from couple variable number into the etas vector
   std::vector<int> _eta_vars;
@@ -53,4 +53,4 @@ protected:
   const MaterialProperty<Real> & _L;
 };
 
-#endif //ACMULTIINTERFACE_H
+#endif // ACMULTIINTERFACE_H

@@ -13,13 +13,13 @@ class SymmTensor;
 
 class VolumetricModel;
 
-template<>
+template <>
 InputParameters validParams<VolumetricModel>();
 
 class VolumetricModel : public Material
 {
 public:
-  VolumetricModel( const InputParameters & parameters );
+  VolumetricModel(const InputParameters & parameters);
   virtual ~VolumetricModel();
 
   virtual void modifyStrain(const unsigned int qp,

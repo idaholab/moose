@@ -14,19 +14,17 @@
 
 #include "LayeredSideAverage.h"
 
-// libmesh includes
-#include "libmesh/mesh_tools.h"
-
-template<>
-InputParameters validParams<LayeredSideAverage>()
+template <>
+InputParameters
+validParams<LayeredSideAverage>()
 {
   InputParameters params = validParams<LayeredSideIntegral>();
 
   return params;
 }
 
-LayeredSideAverage::LayeredSideAverage(const InputParameters & parameters) :
-    LayeredSideIntegral(parameters)
+LayeredSideAverage::LayeredSideAverage(const InputParameters & parameters)
+  : LayeredSideIntegral(parameters)
 {
   _layer_volumes.resize(_num_layers);
 }
@@ -36,8 +34,8 @@ LayeredSideAverage::initialize()
 {
   LayeredSideIntegral::initialize();
 
-  for (unsigned int i=0; i<_layer_volumes.size(); i++)
-    _layer_volumes[i] = 0.0;
+  for (auto & vol : _layer_volumes)
+    vol = 0.0;
 }
 
 void
@@ -57,7 +55,7 @@ LayeredSideAverage::finalize()
   gatherSum(_layer_volumes);
 
   // Compute the average for each layer
-  for (unsigned int i=0; i<_layer_volumes.size(); i++)
+  for (unsigned int i = 0; i < _layer_volumes.size(); i++)
     if (layerHasValue(i))
       setLayerValue(i, getLayerValue(i) / _layer_volumes[i]);
 }
@@ -67,8 +65,7 @@ LayeredSideAverage::threadJoin(const UserObject & y)
 {
   LayeredSideIntegral::threadJoin(y);
   const LayeredSideAverage & lsa = static_cast<const LayeredSideAverage &>(y);
-  for (unsigned int i=0; i<_layer_volumes.size(); i++)
+  for (unsigned int i = 0; i < _layer_volumes.size(); i++)
     if (lsa.layerHasValue(i))
       _layer_volumes[i] += lsa._layer_volumes[i];
 }
-

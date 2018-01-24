@@ -1,0 +1,22 @@
+[Tests]
+  [./finite_const_alpha]
+    type = CSVDiff
+    input = 'thermal_expansion_function_finite_const_alpha_test.i'
+    csvdiff = 'finite_const_alpha_out.csv'
+  [../]
+  [./finite_linear_alpha]
+    type = CSVDiff
+    input = 'thermal_expansion_function_finite_linear_alpha_test.i'
+    csvdiff = 'finite_linear_alpha_out.csv'
+  [../]
+  [./small_const_alpha]
+    type = CSVDiff
+    input = 'thermal_expansion_function_small_const_alpha_test.i'
+    csvdiff = 'small_const_alpha_out.csv'
+  [../]
+  [./small_linear_alpha]
+    type = CSVDiff
+    input = 'thermal_expansion_function_small_linear_alpha_test.i'
+    csvdiff = 'small_linear_alpha_out.csv'
+  [../]
+[]

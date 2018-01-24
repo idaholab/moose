@@ -17,23 +17,26 @@
 
 #include "NodalVariablePostprocessor.h"
 
-class MooseVariable;
-
-//Forward Declarations
+// Forward Declarations
 class NodalL2Norm;
 
-template<>
+template <>
 InputParameters validParams<NodalL2Norm>();
 
+/**
+ * Computes the "nodal" L2-norm of the coupled variable, which is
+ * defined by summing the square of its value at every node and taking
+ * the square root.
+ */
 class NodalL2Norm : public NodalVariablePostprocessor
 {
 public:
   NodalL2Norm(const InputParameters & parameters);
 
-  virtual void initialize();
-  virtual void execute();
-  virtual Real getValue();
-  virtual void threadJoin(const UserObject & y);
+  virtual void initialize() override;
+  virtual void execute() override;
+  virtual Real getValue() override;
+  virtual void threadJoin(const UserObject & y) override;
 
 protected:
   Real _sum_of_squares;

@@ -15,15 +15,14 @@
 #ifndef MAXQPSTHREAD_H
 #define MAXQPSTHREAD_H
 
-#include "ParallelUniqueId.h"
+#include "MooseTypes.h"
 
-// libMesh includes
 #include "libmesh/elem_range.h"
 #include "libmesh/enum_order.h"
 #include "libmesh/enum_quadrature_type.h"
 
 // Forward declarations
-class FEProblem;
+class FEProblemBase;
 
 /**
  * This class determines the maximum number of Quadrature Points and
@@ -34,12 +33,12 @@ class FEProblem;
 class MaxQpsThread
 {
 public:
-  MaxQpsThread(FEProblem & fe_problem, QuadratureType type, Order order, Order face_order);
+  MaxQpsThread(FEProblemBase & fe_problem, QuadratureType type, Order order, Order face_order);
 
   // Splitting Constructor
   MaxQpsThread(MaxQpsThread & x, Threads::split split);
 
-  void operator() (const ConstElemRange & range);
+  void operator()(const ConstElemRange & range);
 
   void join(const MaxQpsThread & y);
 
@@ -48,7 +47,7 @@ public:
   unsigned int max_shape_funcs() const { return _max_shape_funcs; }
 
 protected:
-  FEProblem & _fe_problem;
+  FEProblemBase & _fe_problem;
 
   QuadratureType _qtype;
   Order _order;
@@ -63,4 +62,4 @@ protected:
   unsigned int _max_shape_funcs;
 };
 
-#endif //MAXQPSTHREAD_H
+#endif // MAXQPSTHREAD_H

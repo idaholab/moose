@@ -1,0 +1,17 @@
+[Tests]
+  [./test]
+    type = 'Exodiff'
+    input = 'split_math_test.i'
+    exodiff = 'out.e'
+    abs_zero = 1e-09
+    scale_refine = 1
+    max_parallel = 1
+  [../]
+  [./forward_split]
+    type = 'Exodiff'
+    input = 'forward_split_math_test.i'
+    exodiff = 'forward_split_math_test_out.e'
+    abs_zero = 1e-09
+    scale_refine = 1
+  [../]
+[]

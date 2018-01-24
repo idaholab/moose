@@ -19,25 +19,35 @@
 #include "libmesh/point_locator_base.h"
 #include "libmesh/elem.h"
 
-DiracKernelInfo::DiracKernelInfo() :
-    _point_locator()
+DiracKernelInfo::DiracKernelInfo()
+  : _point_locator(), _point_equal_distance_sq(libMesh::TOLERANCE * libMesh::TOLERANCE)
 {
 }
 
-DiracKernelInfo::~DiracKernelInfo()
-{
-}
+DiracKernelInfo::~DiracKernelInfo() {}
 
 void
 DiracKernelInfo::addPoint(const Elem * elem, Point p)
 {
   _elements.insert(elem);
 
-  if (!hasPoint(elem, p))
-  {
-    std::vector<Point> & point_list = _points[elem];
-    point_list.push_back(p);
-  }
+  std::pair<std::vector<Point>, std::vector<unsigned int>> & multi_point_list = _points[elem];
+
+  const unsigned int npoint = multi_point_list.first.size();
+  mooseAssert(npoint == multi_point_list.second.size(),
+              "Different sizes for location and multiplicity data");
+
+  for (unsigned int i = 0; i < npoint; ++i)
+    if (pointsFuzzyEqual(multi_point_list.first[i], p))
+    {
+      // a point at the same (within a tolerance) location as p exists, increase its multiplicity
+      multi_point_list.second[i]++;
+      return;
+    }
+
+  // no prior point found at this location, add it with a multiplicity of one
+  multi_point_list.first.push_back(p);
+  multi_point_list.second.push_back(1);
 }
 
 void
@@ -47,33 +57,21 @@ DiracKernelInfo::clearPoints()
   _points.clear();
 }
 
-
-
 bool
 DiracKernelInfo::hasPoint(const Elem * elem, Point p)
 {
-  std::vector<Point> & point_list = _points[elem];
+  std::vector<Point> & point_list = _points[elem].first;
 
-  std::vector<Point>::iterator
-    it = point_list.begin(),
-    end = point_list.end();
-
-  for (; it != end; ++it)
-  {
-    Real delta = (*it - p).size_sq();
-
-    if (delta < TOLERANCE*TOLERANCE)
+  for (const auto & pt : point_list)
+    if (pointsFuzzyEqual(pt, p))
       return true;
-  }
 
   // If we haven't found it, we don't have it.
   return false;
 }
 
-
-
 void
-DiracKernelInfo::updatePointLocator(const MooseMesh& mesh)
+DiracKernelInfo::updatePointLocator(const MooseMesh & mesh)
 {
   // Note: we could update the PointLocator *every* time we call this
   // function, but that may introduce an unacceptable overhead in
@@ -94,6 +92,10 @@ DiracKernelInfo::updatePointLocator(const MooseMesh& mesh)
     // can't skip building it just becuase our local _elements is
     // empty, it might be non-empty on some other processor!
     _point_locator = PointLocatorBase::build(TREE_LOCAL_ELEMENTS, mesh);
+
+    // We may be querying for points which are not in the semilocal
+    // part of a distributed mesh.
+    _point_locator->enable_out_of_mesh_mode();
   }
   else
   {
@@ -108,29 +110,47 @@ DiracKernelInfo::updatePointLocator(const MooseMesh& mesh)
   }
 }
 
-
-
 const Elem *
-DiracKernelInfo::findPoint(Point p, const MooseMesh& mesh)
+DiracKernelInfo::findPoint(Point p, const MooseMesh & mesh)
 {
   // If the PointLocator has never been created, do so now.  NOTE - WE
   // CAN'T DO THIS if findPoint() is only called on some processors,
   // PointLocatorBase::build() is a 'parallel_only' method!
   if (_point_locator.get() == NULL)
+  {
     _point_locator = PointLocatorBase::build(TREE_LOCAL_ELEMENTS, mesh);
+    _point_locator->enable_out_of_mesh_mode();
+  }
 
   // Check that the PointLocator is ready to start locating points.
   // So far I do not have any tests that trip this...
   if (_point_locator->initialized() == false)
     mooseError("Error, PointLocator is not initialized!");
 
-  const Elem * elem = (*_point_locator)(p);
-
   // Note: The PointLocator object returns NULL when the Point is not
   // found within the Mesh.  This is not considered to be an error as
   // far as the DiracKernels are concerned: sometimes the Mesh moves
   // out from the Dirac point entirely and in that case the Point just
   // gets "deactivated".
+  const Elem * elem = (*_point_locator)(p);
 
-  return elem;
+  // The processors may not agree on which Elem the point is in.  This
+  // can happen if a Dirac point lies on the processor boundary, and
+  // two or more neighboring processors think the point is in the Elem
+  // on *their* side.
+  dof_id_type elem_id = elem ? elem->id() : DofObject::invalid_id;
+
+  // We are going to let the element with the smallest ID "win", all other
+  // procs will return NULL.
+  dof_id_type min_elem_id = elem_id;
+  mesh.comm().min(min_elem_id);
+
+  return min_elem_id == elem_id ? elem : NULL;
+}
+
+bool
+DiracKernelInfo::pointsFuzzyEqual(const Point & a, const Point & b)
+{
+  const Real dist_sq = (a - b).norm_sq();
+  return dist_sq < _point_equal_distance_sq;
 }

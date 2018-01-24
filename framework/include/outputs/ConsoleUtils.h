@@ -16,12 +16,17 @@
 #define CONSOLEUTILS_H
 
 // MOOSE includes
-#include "NonlinearSystem.h"
-#include "AuxiliarySystem.h"
+#include "Moose.h"
 
 // Forward declarations
 class MooseApp;
-class FEProblem;
+class FEProblemBase;
+
+// libMesh forward declarations
+namespace libMesh
+{
+class System;
+}
 
 namespace ConsoleUtils
 {
@@ -33,6 +38,11 @@ static const unsigned int console_field_width = 27;
 static const unsigned int console_line_length = 100;
 
 /**
+ * Create empty string for indenting
+ */
+std::string indent(unsigned int spaces);
+
+/**
  * Outputs framework information
  *
  * This includes the versions and timestamps
@@ -42,33 +52,27 @@ std::string outputFrameworkInformation(MooseApp & app);
 /**
  * Output the mesh information
  */
-std::string outputMeshInformation(FEProblem & problem, bool verbose = true);
-
+std::string outputMeshInformation(FEProblemBase & problem, bool verbose = true);
 
 /**
  * Output the Auxiliary system information
  */
-std::string outputAuxiliarySystemInformation(FEProblem & problem);
+std::string outputAuxiliarySystemInformation(FEProblemBase & problem);
 
 /**
  * Output the Nonlinear system information
  */
-std::string outputNonlinearSystemInformation(FEProblem & problem);
+std::string outputNonlinearSystemInformation(FEProblemBase & problem);
 
 /**
  * Output execution information
  */
-std::string outputExecutionInformation(MooseApp & app, FEProblem & problem);
+std::string outputExecutionInformation(MooseApp & app, FEProblemBase & problem);
 
 /**
  * Output the output information
  */
 std::string outputOutputInformation(MooseApp & app);
-
-/**
- * Output the legacy flag information
- */
-std::string outputLegacyInformation(MooseApp & app, FEProblem & problem);
 
 /**
  * Output system information
@@ -81,7 +85,6 @@ std::string outputSystemInformationHelper(const System & system);
  * Helper function function for stringstream formatting
  */
 void insertNewline(std::stringstream & oss, std::streampos & begin, std::streampos & curr);
-
 
 } // ConsoleUtils namespace
 

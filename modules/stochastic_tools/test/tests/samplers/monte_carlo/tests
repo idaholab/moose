@@ -1,0 +1,14 @@
+
+[Tests]
+  [./uniform]
+    type = 'CSVDiff'
+    input = 'monte_carlo_uniform.i'
+    csvdiff = 'monte_carlo_uniform_out_data_0000.csv monte_carlo_uniform_out_data_0001.csv'
+  [../]
+  [./weibull]
+    type = 'CSVDiff'
+    input = 'monte_carlo_weibull.i'
+    csvdiff = 'monte_carlo_weibull_out_data_0000.csv monte_carlo_weibull_out_data_0001.csv'
+    boost = true
+  [../]
+[]

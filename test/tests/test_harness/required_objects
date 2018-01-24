@@ -1,0 +1,12 @@
+[Tests]
+  [./bad_object]
+    type = RunApp
+    input = foo.i
+    required_objects = 'AnalyticalIndicator DoesNotExist'
+  [../]
+  [./good_objects]
+    type = RunApp
+    input = good.i
+    required_objects = 'AnalyticalIndicator VolumeHistogram Steady'
+  [../]
+[]

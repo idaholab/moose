@@ -14,21 +14,20 @@
 
 #include "UniformMarker.h"
 
-template<>
-InputParameters validParams<UniformMarker>()
+template <>
+InputParameters
+validParams<UniformMarker>()
 {
   InputParameters params = validParams<Marker>();
   MooseEnum marker_states = Marker::markerStates();
 
   params.addRequiredParam<MooseEnum>("mark", marker_states, "How to mark elements.");
-
+  params.addClassDescription("Uniformly mark all elements for refinement or coarsening.");
   return params;
 }
 
-
-UniformMarker::UniformMarker(const InputParameters & parameters) :
-    Marker(parameters),
-    _mark((MarkerValue)(int)parameters.get<MooseEnum>("mark"))
+UniformMarker::UniformMarker(const InputParameters & parameters)
+  : Marker(parameters), _mark((MarkerValue)(int)parameters.get<MooseEnum>("mark"))
 {
 }
 
@@ -37,5 +36,3 @@ UniformMarker::computeElementMarker()
 {
   return _mark;
 }
-
-

@@ -1,0 +1,58 @@
+[Tests]
+  [./bw01]
+    type = 'Exodiff'
+    input = 'bw01.i'
+    exodiff = 'bw01.e'
+    rel_err = 1E-5
+    use_old_floor = True
+    heavy = true
+    max_time = 1000
+  [../]
+  [./bw02]
+    type = 'Exodiff'
+    input = 'bw02.i'
+    exodiff = 'bw02.e'
+    rel_err = 1E-5
+    use_old_floor = True
+  [../]
+  [./wli01]
+    type = 'Exodiff'
+    input = 'wli01.i'
+    exodiff = 'wli01.e'
+    rel_err = 1E-5
+    use_old_floor = True
+    heavy = true
+    max_time = 1000
+  [../]
+  [./wli02]
+    type = 'Exodiff'
+    input = 'wli02.i'
+    exodiff = 'wli02.e'
+    rel_err = 1E-5
+    use_old_floor = True
+  [../]
+  [./rd01]
+    type = 'Exodiff'
+    input = 'rd01.i'
+    exodiff = 'rd01.e'
+    rel_err = 1E-4
+    use_old_floor = True
+    heavy = true
+    max_time = 1000
+  [../]
+  [./rd02]
+    type = 'Exodiff'
+    input = 'rd02.i'
+    exodiff = 'rd02.e'
+    rel_err = 1E-4
+    heavy = true
+    use_old_floor = True
+  [../]
+  [./rd03]
+    type = 'Exodiff'
+    input = 'rd03.i'
+    exodiff = 'rd03.e'
+    rel_err = 1E-4
+    use_old_floor = True
+  [../]
+[]

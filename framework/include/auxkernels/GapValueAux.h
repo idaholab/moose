@@ -17,12 +17,11 @@
 
 #include "AuxKernel.h"
 
-
-//Forward Declarations
+// Forward Declarations
 class GapValueAux;
 class PenetrationLocator;
 
-template<>
+template <>
 InputParameters validParams<GapValueAux>();
 
 class GapValueAux : public AuxKernel
@@ -30,20 +29,18 @@ class GapValueAux : public AuxKernel
 public:
   GapValueAux(const InputParameters & parameters);
 
-  virtual ~GapValueAux();
-
 protected:
-  virtual Real computeValue();
+  virtual Real computeValue() override;
 
   PenetrationLocator & _penetration_locator;
 
   MooseVariable & _moose_var;
 
-  const NumericVector<Number> * & _serialized_solution;
+  const NumericVector<Number> *& _serialized_solution;
 
   const DofMap & _dof_map;
 
   const bool _warnings;
 };
 
-#endif //GAPVALUEAUX_H
+#endif // GAPVALUEAUX_H

@@ -9,23 +9,25 @@
 
 #include "AuxKernel.h"
 
-//Forward Declarations
+// Forward Declarations
 class BndsCalcAux;
 
-template<>
+template <>
 InputParameters validParams<BndsCalcAux>();
 
+/**
+ * Visualize the location of grain boundaries in a polycrystalline simulation.
+ */
 class BndsCalcAux : public AuxKernel
 {
 public:
-
   BndsCalcAux(const InputParameters & parameters);
 
 protected:
   virtual Real computeValue();
 
-  std::vector<VariableValue *> _vals;
-  unsigned int _ncrys;
+  const unsigned int _op_num;
+  std::vector<const VariableValue *> _vals;
 };
 
-#endif //BNDSCALCAUX_H
+#endif // BNDSCALCAUX_H

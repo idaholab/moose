@@ -18,10 +18,10 @@
 // Moose Includes
 #include "DiracKernel.h"
 
-//Forward Declarations
+// Forward Declarations
 class BadCachingPointSource;
 
-template<>
+template <>
 InputParameters validParams<BadCachingPointSource>();
 
 /**
@@ -35,6 +35,12 @@ public:
 
   virtual void addPoints();
   virtual Real computeQpResidual();
+
+  /**
+   * Gets incremented every time the addPoints() method is called. Simulates a user
+   * adding points with a 'unique' ID that is already used by another point.
+   */
+  unsigned int _called;
 };
 
-#endif //BADCACHINGPOINTSOURCE_H
+#endif // BADCACHINGPOINTSOURCE_H

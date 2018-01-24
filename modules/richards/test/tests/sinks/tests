@@ -1,0 +1,152 @@
+[Tests]
+  [./s01]
+    type = 'CSVDiff'
+    input = 's01.i'
+    csvdiff = 's01.csv'
+    rel_err = 1.0E-5
+  [../]
+  [./s01_permch]
+    type = 'CSVDiff'
+    input = 's01.i'
+    cli_args = 'Materials/rock/perm_change="one one one one one one one one one" Materials/rock/mat_permeability="1E-6 0 0 0 1E-6 0 0 0 1E-6"'
+    prereq = 's01'
+    csvdiff = 's01.csv'
+    rel_err = 1.0E-5
+  [../]
+  [./s02]
+    type = 'CSVDiff'
+    input = 's02.i'
+    csvdiff = 's02.csv'
+    rel_err = 1.0E-5
+  [../]
+  [./s03]
+    type = 'CSVDiff'
+    input = 's03.i'
+    csvdiff = 's03.csv'
+    rel_err = 1.0E-5
+  [../]
+
+  [./s_fu_01]
+    type = 'CSVDiff'
+    input = 's_fu_01.i'
+    csvdiff = 's_fu_01.csv'
+    rel_err = 1.0E-5
+  [../]
+  [./s_fu_01_pjfnk]
+    type = 'CSVDiff'
+    input = 's_fu_01.i'
+    csvdiff = 's_fu_01.csv'
+    cli_args = 'Preconditioning/active="" Executioner/solve_type=PJFNK'
+    prereq = s_fu_01
+    rel_err = 1.0E-5
+  [../]
+  [./s_fu_03]
+    type = 'CSVDiff'
+    input = 's_fu_03.i'
+    csvdiff = 's_fu_03.csv'
+    rel_err = 1.0E-5
+  [../]
+
+  [./s04]
+    type = 'CSVDiff'
+    input = 's04.i'
+    csvdiff = 's04.csv'
+    rel_err = 1.0E-5
+  [../]
+  [./s_fu_04]
+    type = 'CSVDiff'
+    input = 's_fu_04.i'
+    csvdiff = 's_fu_04.csv'
+    rel_err = 1.0E-5
+  [../]
+
+  [./s05]
+    type = 'CSVDiff'
+    input = 's05.i'
+    csvdiff = 's05.csv'
+    rel_err = 1.0E-5
+  [../]
+
+  [./Q2P01]
+    type = 'CSVDiff'
+    input = 'q2p01.i'
+    csvdiff = 'q2p01.csv'
+  [../]
+  [./Q2P01_permchange]
+    type = 'CSVDiff'
+    input = 'q2p01.i'
+    cli_args = 'Materials/rock/perm_change="one one one one one one one one one" Materials/rock/mat_permeability="0.001 0 0 0 0.001 0 0 0 0.001"'
+    prereq = 'Q2P01'
+    csvdiff = 'q2p01.csv'
+  [../]
+  [./Q2P01_PJFNK]
+    type = 'CSVDiff'
+    input = 'q2p01.i'
+    prereq = 'Q2P01 Q2P01_permchange'
+    cli_args = 'Preconditioning/active="" Executioner/solve_type=PJFNK'
+    csvdiff = 'q2p01.csv'
+  [../]
+
+  [./except01]
+    type = 'RunException'
+    input = 's_fu_04.i'
+    cli_args = 'BCs/left_flux/area_pp=0 Outputs/file_base=except01'
+    expect_err = 'RichardsPiecewiseLinearSink: flux is nonzero, but area is zero!'
+    prereq = 's_fu_04'
+  [../]
+  [./except02]
+    type = 'RunException'
+    input = 'q2p01.i'
+    cli_args = 'Materials/rock/perm_change=one Outputs/file_base=except02'
+    expect_err = '9 components of perm_change must be given to a Q2PMaterial.  You supplied 1'
+  [../]
+  [./except03]
+    type = 'RunException'
+    input = 's01.i'
+    cli_args = 'Materials/rock/perm_change=one Outputs/file_base=except03'
+    expect_err = '9 components of perm_change must be given to a RichardsMaterial.  You supplied 1'
+  [../]
+  [./except04]
+    type = 'RunException'
+    input = 's01.i'
+    cli_args = 'Materials/rock/mat_porosity=0 Outputs/file_base=except04'
+    expect_err = 'Porosity set to 0 but it must be between 0 and 1'
+  [../]
+  [./except05]
+    type = 'RunException'
+    input = 's01.i'
+    cli_args = 'Materials/rock/mat_porosity=1 Outputs/file_base=except05'
+    expect_err = 'Porosity set to 1 but it must be between 0 and 1'
+  [../]
+  [./except06]
+    type = 'RunException'
+    input = 'q2p01.i'
+    cli_args = 'Postprocessors/left_water_out/fluid_density=DensityWater Outputs/file_base=except06'
+    expect_err = 'Q2PPiecewiseLinearSink: you must supply both of fluid_density and fluid_viscosity if you wish to multiply by the mobility'
+  [../]
+  [./except07]
+    type = 'RunException'
+    input = 'q2p01.i'
+    cli_args = 'Postprocessors/left_water_out/fluid_viscosity=1 Outputs/file_base=except07'
+    expect_err = 'Q2PPiecewiseLinearSink: you must supply both of fluid_density and fluid_viscosity if you wish to multiply by the mobility'
+  [../]
+  [./except08]
+    type = 'RunException'
+    input = 'q2p01.i'
+    cli_args = 'Postprocessors/left_water_out/saturation=sat Outputs/file_base=except08'
+    expect_err = 'Q2PPiecewiseLinearSink: you must supply both of fluid_relperm and saturation if you wish to multiply by the relative permeaility'
+  [../]
+  [./except09]
+    type = 'RunException'
+    input = 'q2p01.i'
+    cli_args = 'Postprocessors/left_water_out/fluid_relperm=RelPermWater Outputs/file_base=except09'
+    expect_err = 'Q2PPiecewiseLinearSink: you must supply both of fluid_relperm and saturation if you wish to multiply by the relative permeaility'
+  [../]
+  [./except10]
+    type = 'RunException'
+    input = 's_fu_04.i'
+    cli_args = 'BCs/left_flux/area_pp=0 BCs/left_flux/pressures="0 2 4" BCs/left_flux/bare_fluxes="-1 0 1" Outputs/file_base=except10'
+    expect_err = 'RichardsPiecewiseLinearSink: deriv is nonzero, but area is zero!'
+    prereq = 's_fu_04'
+  [../]
+[]

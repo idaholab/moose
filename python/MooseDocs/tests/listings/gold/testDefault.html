@@ -1,0 +1,50 @@
+<p>
+<div class="moose-float-div moose-listing-div">
+<pre style="overflow-y:scroll;max-height:350px"><code class="language-text">[Mesh]
+  type = GeneratedMesh
+  dim = 2
+  nx = 10
+  ny = 10
+[]
+
+[Variables]
+  [./u]
+  [../]
+[]
+
+[Kernels]
+  [./diff]
+    type = Diffusion
+    variable = u
+  [../]
+[]
+
+[BCs]
+  [./left]
+    type = DirichletBC
+    variable = u
+    boundary = left
+    value = 0
+  [../]
+  [./right]
+    type = DirichletBC
+    variable = u
+    boundary = right
+    value = 1
+  [../]
+[]
+
+[Executioner]
+  type = Steady
+  solve_type = 'PJFNK'
+  petsc_options_iname = '-pc_type -pc_hypre_type'
+  petsc_options_value = 'hypre boomeramg'
+[]
+
+[Outputs]
+  exodus = true
+[]
+</code></pre>
+<div><a class="moose-listing-link tooltipped" data-tooltip="test/tests/kernels/simple_diffusion/simple_diffusion.i" href="https://github.com/idaholab/moose/blob/master/test/tests/kernels/simple_diffusion/simple_diffusion.i">(simple_diffusion.i)</a></div>
+</div>
+</p>

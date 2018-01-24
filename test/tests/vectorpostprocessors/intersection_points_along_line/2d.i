@@ -3,6 +3,8 @@
   dim = 2
   nx = 10
   ny = 10
+  # Ray tracing code is not yet compatible with DistributedMesh
+  parallel_type = replicated
 []
 
 [Variables]

@@ -1,0 +1,10 @@
+[Tests]
+  [./links]
+    type = PythonUnitTest
+    input = test_link_database.py
+  [../]
+  [./class]
+    type = PythonUnitTest
+    input = test_class_database.py
+  [../]
+[]

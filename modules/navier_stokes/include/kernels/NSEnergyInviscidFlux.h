@@ -12,13 +12,12 @@
 // Forward Declarations
 class NSEnergyInviscidFlux;
 
-template<>
+template <>
 InputParameters validParams<NSEnergyInviscidFlux>();
 
 class NSEnergyInviscidFlux : public NSKernel
 {
 public:
-
   NSEnergyInviscidFlux(const InputParameters & parameters);
 
 protected:
@@ -27,7 +26,7 @@ protected:
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
 
   // Coupled variables
-  VariableValue & _enthalpy;
+  const VariableValue & _enthalpy;
 };
 
 #endif

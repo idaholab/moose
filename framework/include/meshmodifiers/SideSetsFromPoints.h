@@ -19,20 +19,16 @@
 
 class SideSetsFromPoints;
 
-template<>
+template <>
 InputParameters validParams<SideSetsFromPoints>();
 
-class SideSetsFromPoints :
-  public AddSideSetsBase
+class SideSetsFromPoints : public AddSideSetsBase
 {
 public:
   SideSetsFromPoints(const InputParameters & parameters);
 
-  virtual ~SideSetsFromPoints();
-
-  virtual void modify();
-
 protected:
+  virtual void modify() override;
 
   std::vector<BoundaryName> _boundary_names;
 

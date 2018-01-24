@@ -19,20 +19,16 @@
 
 class SideSetsFromNormals;
 
-template<>
+template <>
 InputParameters validParams<SideSetsFromNormals>();
 
-class SideSetsFromNormals :
-  public AddSideSetsBase
+class SideSetsFromNormals : public AddSideSetsBase
 {
 public:
   SideSetsFromNormals(const InputParameters & parameters);
 
-  virtual ~SideSetsFromNormals();
-
-  virtual void modify();
-
 protected:
+  virtual void modify() override;
 
   std::vector<BoundaryName> _boundary_names;
 

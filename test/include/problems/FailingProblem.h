@@ -19,11 +19,11 @@
 
 class FailingProblem;
 
-template<>
+template <>
 InputParameters validParams<FailingProblem>();
 
 /**
- * FEProblem derived class that will fail a prescribed timestep for testing
+ * FEProblemBase derived class that will fail a prescribed timestep for testing
  * timestepping algorithms
  */
 class FailingProblem : public FEProblem

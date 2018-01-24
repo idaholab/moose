@@ -11,7 +11,7 @@
 
 class INSExplicitTimestepSelector;
 
-template<>
+template <>
 InputParameters validParams<INSExplicitTimestepSelector>();
 
 /**
@@ -34,12 +34,7 @@ protected:
   Real _value;
 
   /// Velocity magnitude.  Hint: Use VectorMagnitudeAux in Moose for this
-  VariableValue& _vel_mag;
-
-  /// Material properties:  the explicit time scheme limit for the viscous
-  /// problem also depends on the kinematic viscosity.
-  Real _mu;
-  Real _rho;
+  const VariableValue & _vel_mag;
 
   /// We can compute maximum stable timesteps based on the linearized
   /// theory, but even those timesteps are sometimes still too large
@@ -47,6 +42,11 @@ protected:
   /// provide an additional "fudge" factor, 0 < beta < 1, that can be
   /// used to reduce the selected timestep even further.
   Real _beta;
+
+  /// Material properties:  the explicit time scheme limit for the viscous
+  /// problem also depends on the kinematic viscosity.
+  const MaterialProperty<Real> & _mu;
+  const MaterialProperty<Real> & _rho;
 };
 
 #endif /* INSEXPLICITTIMESTEPSELECTOR_H */

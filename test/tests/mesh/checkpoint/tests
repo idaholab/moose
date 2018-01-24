@@ -1,0 +1,56 @@
+[Tests]
+  [./test_2]
+    type = 'Exodiff'
+    input = 'checkpoint_split.i'
+    exodiff = 'test_2.e'
+    cli_args = 'Outputs/file_base=test_2  Mesh/file=checkpoint_split_in.2.cpr'
+    max_parallel = 2  # workaround until libMesh/libmesh#1408
+    min_parallel = 2  # workaround until libMesh/libmesh#1409
+    skip = 'Requires libMesh/libmesh#1409'
+  [../]
+  [./test_2a]
+    type = 'Exodiff'
+    input = 'checkpoint_split.i'
+    exodiff = 'test_2a.e'
+    cli_args = 'Outputs/file_base=test_2a Mesh/file=checkpoint_split_in.2.cpa'
+    max_parallel = 2  # workaround until libMesh/libmesh#1408
+    min_parallel = 2  # workaround until libMesh/libmesh#1409
+    skip = 'Requires libMesh/libmesh#1409'
+  [../]
+  [./test_4]
+    type = 'Exodiff'
+    input = 'checkpoint_split.i'
+    exodiff = 'test_4.e'
+    cli_args = 'Outputs/file_base=test_4  Mesh/file=checkpoint_split_in.4.cpr'
+    max_parallel = 4  # workaround until libMesh/libmesh#1408
+    min_parallel = 4  # workaround until libMesh/libmesh#1409
+    skip = 'Requires libMesh/libmesh#1409'
+  [../]
+  [./test_4a]
+    type = 'Exodiff'
+    input = 'checkpoint_split.i'
+    exodiff = 'test_4a.e'
+    cli_args = 'Outputs/file_base=test_4a Mesh/file=checkpoint_split_in.4.cpa'
+    max_parallel = 4  # workaround until libMesh/libmesh#1408
+    min_parallel = 4  # workaround until libMesh/libmesh#1409
+    skip = 'Requires libMesh/libmesh#1409'
+  [../]
+  [./test_8]
+    type = 'Exodiff'
+    input = 'checkpoint_split.i'
+    exodiff = 'test_8.e'
+    cli_args = 'Outputs/file_base=test_8  Mesh/file=checkpoint_split_in.8.cpr'
+    max_parallel = 8  # workaround until libMesh/libmesh#1408
+    min_parallel = 8  # workaround until libMesh/libmesh#1409
+    skip = 'Requires libMesh/libmesh#1409'
+  [../]
+  [./test_8a]
+    type = 'Exodiff'
+    input = 'checkpoint_split.i'
+    exodiff = 'test_8a.e'
+    cli_args = 'Outputs/file_base=test_8a Mesh/file=checkpoint_split_in.8.cpa'
+    max_parallel = 8  # workaround until libMesh/libmesh#1408
+    min_parallel = 8  # workaround until libMesh/libmesh#1409
+    skip = 'Requires libMesh/libmesh#1409'
+  [../]
+[]

@@ -1,0 +1,37 @@
+[Tests]
+  [./1d_aefv_square_wave_none]
+    type = 'Exodiff'
+    input = '1d_aefv_square_wave_none.i'
+    exodiff = '1d_aefv_square_wave_none_out.e'
+    abs_zero = 1e-4
+    rel_err = 5e-5
+  [../]
+  [./1d_aefv_square_wave_minmod]
+    type = 'Exodiff'
+    input = '1d_aefv_square_wave_minmod.i'
+    exodiff = '1d_aefv_square_wave_minmod_out.e'
+    abs_zero = 1e-4
+    rel_err = 5e-5
+  [../]
+  [./1d_aefv_square_wave_mc]
+    type = 'Exodiff'
+    input = '1d_aefv_square_wave_mc.i'
+    exodiff = '1d_aefv_square_wave_mc_out.e'
+    abs_zero = 1e-4
+    rel_err = 5e-5
+  [../]
+  [./1d_aefv_square_wave_superbee]
+    type = 'Exodiff'
+    input = '1d_aefv_square_wave_superbee.i'
+    exodiff = '1d_aefv_square_wave_superbee_out.e'
+    abs_zero = 1e-4
+    rel_err = 5e-5
+  [../]
+  [./1d_block_restrictable]
+    type = 'Exodiff'
+    input = 'block_restrictable.i'
+    exodiff = 'block_restrictable_out.e'
+    abs_zero = 1e-4
+    rel_err = 5e-5
+  [../]
+[]

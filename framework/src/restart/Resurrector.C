@@ -12,10 +12,12 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
+// MOOSE includes
 #include "Resurrector.h"
 #include "FEProblem.h"
 #include "MooseUtils.h"
 #include "MooseApp.h"
+#include "NonlinearSystem.h"
 
 #include <stdio.h>
 #include <sys/stat.h>
@@ -23,13 +25,8 @@
 const std::string Resurrector::MAT_PROP_EXT(".msmp");
 const std::string Resurrector::RESTARTABLE_DATA_EXT(".rd");
 
-Resurrector::Resurrector(FEProblem & fe_problem) :
-    _fe_problem(fe_problem),
-    _restartable(_fe_problem)
-{
-}
-
-Resurrector::~Resurrector()
+Resurrector::Resurrector(FEProblemBase & fe_problem)
+  : _fe_problem(fe_problem), _restart_file_suffix("xdr"), _restartable(_fe_problem)
 {
 }
 
@@ -40,21 +37,42 @@ Resurrector::setRestartFile(const std::string & file_base)
 }
 
 void
+Resurrector::setRestartSuffix(const std::string & file_ext)
+{
+  _restart_file_suffix = file_ext;
+}
+
+void
 Resurrector::restartFromFile()
 {
-  Moose::setup_perf_log.push("restartFromFile()","Resurrector");
-  std::string file_name(_restart_file_base + ".xdr");
+  Moose::perf_log.push("restartFromFile()", "Setup");
+  std::string file_name(_restart_file_base + '.' + _restart_file_suffix);
   MooseUtils::checkFileReadable(file_name);
   _restartable.readRestartableDataHeader(_restart_file_base + RESTARTABLE_DATA_EXT);
-  _fe_problem._eq.read(file_name, DECODE, EquationSystems::READ_DATA | EquationSystems::READ_ADDITIONAL_DATA, _fe_problem.adaptivity().isOn());
-  _fe_problem._nl.update();
-  Moose::setup_perf_log.pop("restartFromFile()","Resurrector");
+  unsigned int read_flags = EquationSystems::READ_DATA;
+  if (!_fe_problem.skipAdditionalRestartData())
+    read_flags |= EquationSystems::READ_ADDITIONAL_DATA;
+
+  // Set libHilbert renumbering flag to false.  We don't support
+  // N-to-M restarts regardless, and if we're *never* going to do
+  // N-to-M restarts then libHilbert is just unnecessary computation
+  // and communication.
+  const bool renumber = false;
+
+  // DECODE or READ based on suffix.
+  // MOOSE doesn't currently use partition-agnostic renumbering, since
+  // it can break restarts when multiple nodes are at the same point
+  _fe_problem.es().read(file_name, read_flags, renumber);
+
+  _fe_problem.getNonlinearSystemBase().update();
+  Moose::perf_log.pop("restartFromFile()", "Setup");
 }
 
 void
 Resurrector::restartRestartableData()
 {
-  Moose::setup_perf_log.push("restartRestartableData()","Resurrector");
-  _restartable.readRestartableData(_fe_problem.getMooseApp().getRestartableData(), _fe_problem.getMooseApp().getRecoverableData());
-  Moose::setup_perf_log.pop("restartRestartableData()","Resurrector");
+  Moose::perf_log.push("restartRestartableData()", "Setup");
+  _restartable.readRestartableData(_fe_problem.getMooseApp().getRestartableData(),
+                                   _fe_problem.getMooseApp().getRecoverableData());
+  Moose::perf_log.pop("restartRestartableData()", "Setup");
 }

@@ -1,0 +1,38 @@
+[Tests]
+  [./strain]
+    type = 'Exodiff'
+    input = 'strain.i'
+    exodiff = 'strain_out.e'
+  [../]
+  [./strain_gb_relax]
+    type = 'Exodiff'
+    input = 'strain_gb_relax.i'
+    exodiff = 'strain_gb_relax_out.e'
+  [../]
+  [./stress]
+    type = 'Exodiff'
+    input = 'stress.i'
+    exodiff = 'stress_out.e'
+    compiler = 'GCC CLANG'
+    custom_cmp = 'stress.cmp'
+  [../]
+  [./stress_flux_n_gb_relax]
+    type = 'Exodiff'
+    input = 'stress_flux_n_gb_relax.i'
+    exodiff = 'stress_flux_n_gb_relax_out.e'
+    compiler = 'GCC CLANG'
+    custom_cmp = 'stress.cmp'
+  [../]
+  [./stress_based_chem_pot]
+    type = 'Exodiff'
+    input = 'stress_based_chem_pot.i'
+    exodiff = 'stress_based_chem_pot_out.e'
+    abs_zero = 1e-7
+  [../]
+  [./variable_base_eigen_strain]
+    type = 'Exodiff'
+    input = 'variable_base_eigen_strain.i'
+    exodiff = 'variable_base_eigen_strain_out.e'
+    abs_zero = 1e-8
+  [../]
+[]

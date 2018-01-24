@@ -1,0 +1,26 @@
+[Tests]
+  [./subdomain_partitioner]
+    type = 'Exodiff'
+    input = 'subdomain_partitioner.i'
+    exodiff = 'subdomain_partitioner_out.e'
+    platform = DARWIN
+    dof_id_bytes = 4
+    min_parallel = 4
+    max_parallel = 4
+    # do not run this test against development version of PETSc
+    # metis and parmetis will generate different partitions
+    petsc_version_release = true
+  [../]
+  [./subdomain_partitioner_linux]
+    type = 'Exodiff'
+    input = 'subdomain_partitioner.i'
+    exodiff = 'subdomain_partitioner_out_linux.e'
+    cli_args = 'Outputs/file_base=subdomain_partitioner_out_linux'
+    platform = LINUX
+    dof_id_bytes = 4
+    min_parallel = 4
+    max_parallel = 4
+    petsc_version_release = true
+    petsc_version = '>=3.5.0'
+  [../]
+[]

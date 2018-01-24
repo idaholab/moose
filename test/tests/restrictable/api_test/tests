@@ -10,7 +10,7 @@
     type = 'RunException'
     input = 'block_restrictable.i'
     cli_args = "Variables/u/block=1"
-    expect_err = "In object diff the defined blocks are outside of the domain of the variable"
+    expect_err = "The 'block' parameter of the object 'diff' must be a subset of the 'block' parameter of the variable 'u'"
   [../]
 
   [./blocks]
@@ -48,14 +48,14 @@
     expect_err = "isBlockSubset testing passed"
   [../]
 
-  [./hasBlockMaterialProperty=true]
+  [./hasBlockMaterialProperty_true]
     type = 'RunException'
     input = 'block_restrictable.i'
     cli_args = "Kernels/diff/test=hasBlockMaterialProperty_true"
     expect_err = "hasBlockMaterialProperty is true, test passed"
   [../]
 
-  [./hasBlockMaterialProperty=false]
+  [./hasBlockMaterialProperty_false]
     type = 'RunException'
     input = 'block_restrictable.i'
     cli_args = "Kernels/diff/test=hasBlockMaterialProperty_false"
@@ -90,14 +90,14 @@
     expect_err = "isBoundarySubset test passed"
   [../]
 
-  [./hasBoundaryMaterialProperty=true]
+  [./hasBoundaryMaterialProperty_true]
     type = 'RunException'
     input = 'boundary_restrictable.i'
     cli_args = "BCs/left/test=hasBoundaryMaterialProperty_true"
     expect_err = "hasBoundaryMaterialProperty is true, test passed"
   [../]
 
-  [./hasBoundaryMaterialProperty=false]
+  [./hasBoundaryMaterialProperty_false]
     type = 'RunException'
     input = 'boundary_restrictable.i'
     cli_args = "BCs/left/test=hasBoundaryMaterialProperty_false"

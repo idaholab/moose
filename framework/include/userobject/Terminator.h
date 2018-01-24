@@ -17,10 +17,10 @@
 #include "GeneralUserObject.h"
 #include "libmesh/fparser.hh"
 
-//Forward Declarations
+// Forward Declarations
 class Terminator;
 
-template<>
+template <>
 InputParameters validParams<Terminator>();
 
 /**
@@ -46,12 +46,12 @@ class Terminator : public GeneralUserObject
 {
 public:
   Terminator(const InputParameters & parameters);
+  /// The Terminator DEFINITELY needs a destructor!
   virtual ~Terminator();
 
-  virtual void execute();
-  virtual void initialize() {};
-  virtual void finalize() {};
-
+  virtual void initialize() override {}
+  virtual void execute() override;
+  virtual void finalize() override {}
 
 protected:
   /// Postprocessor names
@@ -72,4 +72,4 @@ protected:
   Real * _params;
 };
 
-#endif //TERMINATOR_H
+#endif // TERMINATOR_H

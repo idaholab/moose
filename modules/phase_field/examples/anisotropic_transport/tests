@@ -1,0 +1,7 @@
+[Tests]
+  [./diffusion]
+    type = RunApp
+    input = 'diffusion.i'
+    check_input = True
+  [../]
+[]

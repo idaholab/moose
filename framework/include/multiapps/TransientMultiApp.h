@@ -20,7 +20,7 @@
 class TransientMultiApp;
 class Transient;
 
-template<>
+template <>
 InputParameters validParams<TransientMultiApp>();
 
 /**
@@ -28,60 +28,28 @@ InputParameters validParams<TransientMultiApp>();
  * In particular, this is important because TransientMultiApps
  * will be taken into account in the time step selection process.
  */
-class TransientMultiApp :
-  public MultiApp
+class TransientMultiApp : public MultiApp
 {
 public:
   TransientMultiApp(const InputParameters & parameters);
 
-  virtual ~TransientMultiApp();
+  virtual NumericVector<Number> & appTransferVector(unsigned int app,
+                                                    std::string var_name) override;
 
-  /**
-   * Get the vector to transfer to for this MultiApp.
-   * In general this is the Auxiliary system solution vector.
-   * But - in the case of doing transfer interpolation this might be different.
-   *
-   * @param app The global app number you want the transfer vector for.
-   * @param var_name The name of the variable you are going to be transferring to.
-   * @return The vector to fill.
-   */
-  virtual NumericVector<Number> & appTransferVector(unsigned int app, std::string var_name);
+  virtual void initialSetup() override;
 
-  virtual void initialSetup();
+  virtual bool solveStep(Real dt, Real target_time, bool auto_advance = true) override;
 
-  /**
-   * Advance all of the apps one timestep.
-   */
-  bool solveStep(Real dt, Real target_time, bool auto_advance=true);
+  virtual void advanceStep() override;
 
-  /**
-   * Actually advances time and causes output.
-   */
-  virtual void advanceStep();
+  virtual bool needsRestoration() override;
 
-  /**
-   * Whether or not this MultiApp should be restored at the beginning of
-   * each Picard iteration.
-   */
-  virtual bool needsRestoration();
+  virtual void resetApp(unsigned int global_app, Real time) override;
 
   /**
    * Finds the smallest dt from among any of the apps.
    */
   Real computeDT();
-
-  /**
-   * "Reset" the App corresponding to the global App number
-   * passed in.  "Reset" means that the App will be deleted
-   * and recreated.  The time for the new App will be set
-   * to the current simulation time.  This might be handy
-   * if some sub-app in your simulation needs to get replaced
-   * by a "new" piece of material.
-   *
-   * @param global_app The global app number to reset.
-   * @param time - The time to reset the app to.
-   */
-  virtual void resetApp(unsigned int global_app, Real time);
 
 private:
   /**
@@ -117,7 +85,7 @@ private:
   /// The DoFs associated with all of the currently transferred variables.
   std::set<dof_id_type> _transferred_dofs;
 
-  std::vector<std::map<std::string, unsigned int> > _output_file_numbers;
+  std::vector<std::map<std::string, unsigned int>> _output_file_numbers;
 
   bool _auto_advance;
 
@@ -134,20 +102,11 @@ private:
 class MultiAppSolveFailure : public std::runtime_error
 {
 public:
-  MultiAppSolveFailure(const std::string &error) throw() :
-      runtime_error(error)
-  {
-  }
+  MultiAppSolveFailure(const std::string & error) throw() : runtime_error(error) {}
 
-  MultiAppSolveFailure(const MultiAppSolveFailure & e) throw() :
-      runtime_error(e)
-  {
-  }
+  MultiAppSolveFailure(const MultiAppSolveFailure & e) throw() : runtime_error(e) {}
 
-  ~MultiAppSolveFailure() throw()
-  {
-  }
+  ~MultiAppSolveFailure() throw() {}
 };
-
 
 #endif // TRANSIENTMULTIAPP_H

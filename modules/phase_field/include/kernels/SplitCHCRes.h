@@ -9,10 +9,10 @@
 
 #include "SplitCHBase.h"
 
-//Forward Declarations
+// Forward Declarations
 class SplitCHCRes;
 
-template<>
+template <>
 InputParameters validParams<SplitCHCRes>();
 
 /// The couple, SplitCHCRes and SplitCHWRes, splits the CH equation by replacing chemical potential with 'w'.
@@ -28,7 +28,7 @@ protected:
 
   const MaterialProperty<Real> & _kappa;
   unsigned int _w_var;
-  VariableValue & _w;
+  const VariableValue & _w;
 };
 
-#endif //SPLITCHCRES_H
+#endif // SPLITCHCRES_H

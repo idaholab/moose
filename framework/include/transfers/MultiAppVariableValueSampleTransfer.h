@@ -15,28 +15,27 @@
 #ifndef MULTIAPPVARIABLEVALUESAMPLETRANSFER_H
 #define MULTIAPPVARIABLEVALUESAMPLETRANSFER_H
 
+// MOOSE includes
 #include "MultiAppTransfer.h"
 
-class MooseVariable;
+// Forward declarations
 class MultiAppVariableValueSampleTransfer;
 
-template<>
+template <>
 InputParameters validParams<MultiAppVariableValueSampleTransfer>();
 
 /**
- * Samples a variable's value in the Master domain at the point where the MultiApp is.
- * Copies that value into a field in the MultiApp.
+ * Samples a variable's value in the Master domain at the point where
+ * the MultiApp is.  Copies that value into a field in the MultiApp.
  */
-class MultiAppVariableValueSampleTransfer :
-  public MultiAppTransfer
+class MultiAppVariableValueSampleTransfer : public MultiAppTransfer
 {
 public:
   MultiAppVariableValueSampleTransfer(const InputParameters & parameters);
-  virtual ~MultiAppVariableValueSampleTransfer() {}
 
-  virtual void initialSetup();
+  virtual void initialSetup() override;
 
-  virtual void execute();
+  virtual void execute() override;
 
 protected:
   AuxVariableName _to_var_name;

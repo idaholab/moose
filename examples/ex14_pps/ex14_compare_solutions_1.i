@@ -8,7 +8,7 @@
   ymin = 0.0
   ymax = 1.0
 
-  distribution = serial # This uses SolutionUserObject which doesn't work with ParallelMesh.
+  parallel_type = replicated # This uses SolutionUserObject which doesn't work with DistributedMesh.
 []
 
 [Variables]
@@ -25,7 +25,7 @@
   [../]
 
   [./forcing]
-    type = UserForcingFunction
+    type = BodyForce
     variable = forced
     function = 'x*x+y*y' # Any object expecting a function name can also receive a ParsedFunction string
   [../]
@@ -48,6 +48,7 @@
 []
 
 [Outputs]
+  execute_on = 'timestep_end'
   exodus = true
   xda = true #XDA writes out the perfect internal state of all variables, allowing SolutionUserObject to read back in higher order solutions and adapted meshes
 []

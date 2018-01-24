@@ -14,27 +14,29 @@
 
 #include "WeakGradientBC.h"
 
-template<>
-InputParameters validParams<WeakGradientBC>()
+template <>
+InputParameters
+validParams<WeakGradientBC>()
 {
   InputParameters params = validParams<IntegratedBC>();
+  params.addClassDescription(
+      "Computes a boundary residual contribution consistent with the Diffusion Kernel. "
+      "Does not impose a boundary condition; instead computes the boundary "
+      "contribution corresponding to the current value of grad(u) and accumulates "
+      "it in the residual vector.");
   return params;
 }
 
-WeakGradientBC::WeakGradientBC(const InputParameters & parameters) :
-    IntegratedBC(parameters)
-{}
+WeakGradientBC::WeakGradientBC(const InputParameters & parameters) : IntegratedBC(parameters) {}
 
 Real
 WeakGradientBC::computeQpResidual()
 {
-  return (_grad_u[_qp]*_normals[_qp])*_test[_i][_qp];
+  return (_grad_u[_qp] * _normals[_qp]) * _test[_i][_qp];
 }
 
 Real
 WeakGradientBC::computeQpJacobian()
 {
-  return (_grad_phi[_j][_qp]*_normals[_qp])*_test[_i][_qp];
+  return (_grad_phi[_j][_qp] * _normals[_qp]) * _test[_i][_qp];
 }
-
-

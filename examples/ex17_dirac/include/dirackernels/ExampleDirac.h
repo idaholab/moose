@@ -21,7 +21,7 @@
 // Forward Declarations
 class ExampleDirac;
 
-template<>
+template <>
 InputParameters validParams<ExampleDirac>();
 
 class ExampleDirac : public DiracKernel
@@ -29,12 +29,12 @@ class ExampleDirac : public DiracKernel
 public:
   ExampleDirac(const InputParameters & parameters);
 
-  virtual void addPoints();
-  virtual Real computeQpResidual();
+  virtual void addPoints() override;
+  virtual Real computeQpResidual() override;
 
 protected:
   Real _value;
   Point _point;
 };
 
-#endif //EXAMPLEDIRAC_H
+#endif // EXAMPLEDIRAC_H

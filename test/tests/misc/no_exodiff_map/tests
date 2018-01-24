@@ -1,0 +1,8 @@
+[Tests]
+  [./test]
+    type = 'Exodiff'
+    input = 'no_exodiff_map.i'
+    exodiff = 'no_exodiff_map_out.e'
+    map = false
+  [../]
+[]

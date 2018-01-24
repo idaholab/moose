@@ -1,0 +1,87 @@
+[Tests]
+  [./test]
+    type = 'CSVDiff'
+    input = 'ipm.i'
+    csvdiff = 'ipm_out_eigenvalues_0001.csv'
+    slepc = true
+  [../]
+  [./gipm_test]
+    type = 'CSVDiff'
+    input = 'gipm.i'
+    csvdiff = 'gipm_out_eigenvalues_0001.csv'
+    slepc = true
+  [../]
+
+  [./wrong_dirichlet_value_eigen]
+    type = 'RunException'
+    input = 'gipm.i'
+    cli_args = 'BCs/homogeneous/value=1'
+    expect_err = "Can.t set an inhomogeneous Dirichlet boundary condition for eigenvalue problems."
+    slepc = true
+  [../]
+
+  [./wrong_boundary_type_eigen]
+    type = 'RunException'
+    input = 'gipm.i'
+    cli_args = 'BCs/homogeneous/type=NeumannBC'
+    expect_err = "Can.t set an inhomogeneous integrated boundary condition for eigenvalue problems."
+    slepc = true
+  [../]
+
+  [./wrong_NodalBC_type_eigen]
+    type = 'RunException'
+    input = 'gipm.i'
+    cli_args = 'BCs/homogeneous/type=FunctionDirichletBC BCs/homogeneous/function=0'
+    expect_err = "Invalid NodalBC for eigenvalue problems, please use homogeneous Dirichlet."
+    slepc = true
+  [../]
+
+  [./no_slepc]
+    type = 'RunException'
+    input = 'gipm.i'
+    cli_args = 'Executioner/solve_type=NEWTON'
+    expect_err = "Need to install SLEPc to solve eigenvalue problems, please reconfigure libMesh."
+    slepc = false
+  [../]
+
+  [./nonlinear_power]
+    type = 'CSVDiff'
+    input = 'ne.i'
+    cli_args = 'Executioner/solve_type=MF_NONLINEAR_POWER Outputs/file_base=nonlinear_power'
+    csvdiff = 'nonlinear_power_eigenvalues_0001.csv'
+    slepc_version = '>=3.7.4'
+    petsc_version_release = false
+  [../]
+
+  [./monolith_newton]
+    type = 'CSVDiff'
+    input = 'ne.i'
+    cli_args = 'Executioner/solve_type=MF_MONOLITH_NEWTON Outputs/file_base=monolith_newton'
+    csvdiff = 'monolith_newton_eigenvalues_0001.csv'
+    slepc_version = '>=3.7.4'
+    petsc_version_release = false
+  [../]
+
+  [./ne_deficient]
+    type = 'CSVDiff'
+    input = 'ne_deficient_b.i'
+    csvdiff = 'ne_deficient_b_eigenvalues_0001.csv'
+    slepc_version = '>=3.7.4'
+    petsc_version_release = false
+  [../]
+
+  [./nonlinear_laplace]
+    type = 'CSVDiff'
+    input = 'ane.i'
+    csvdiff = 'ane_eigenvalues_0001.csv'
+    slepc_version = '>=3.7.4'
+    petsc_version_release = false
+  [../]
+  [./coupled_system]
+    type = 'CSVDiff'
+    input = 'ne_coupled.i'
+    csvdiff = 'ne_coupled_eigenvalues_0001.csv'
+    slepc_version = '>=3.7.4'
+    petsc_version_release = false
+  [../]
+[]

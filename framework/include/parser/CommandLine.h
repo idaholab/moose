@@ -16,23 +16,29 @@
 #define COMMANDLINE_H
 
 // Moose Includes
-#include "InputParameters.h"
 #include "MooseError.h"
 
+#include "libmesh/parallel.h"
+
+// C++ includes
 #include <vector>
 #include <string>
 #include <map>
+#include <memory>
 #include <set>
-#include "libmesh/getpot.h"
 
 // Forward Declaration
-class Parser;
+class InputParameters;
 
+/**
+ * This class wraps provides and tracks access to command line parameters.
+ */
 class CommandLine
 {
 public:
   /// Type of argument for a given option
-  enum ARGUMENT {
+  enum ARGUMENT
+  {
     NONE,
     OPTIONAL,
     REQUIRED
@@ -60,12 +66,6 @@ public:
   void addOption(const std::string & name, Option cli_opt);
 
   /**
-   * This function extracts parameters from the command line in name=value format.  Note
-   * that the name should be fully qualified (i.e. BCs/left/value=10)
-   */
-  void buildVarsSet();
-
-  /**
    * This routine searches the command line for the given option "handle"
    * and returns a boolean indicating whether it was found.  If the given
    * option has an argument it is also filled in.
@@ -75,78 +75,76 @@ public:
   template <typename T>
   bool search(const std::string & option_name, T & argument);
 
-  bool isVariableOnCommandLine(const std::string & name) const;
-
   /**
    * Print the usage info for this command line
    */
   void printUsage() const;
 
-  /**
-   * Get the GetPot object
-   * @return Pointer to the GetPot object
-   */
-  GetPot * getPot() { return _get_pot; }
+  int argc() { return _argc; }
+  char ** argv() { return _argv; }
 
-  /**
-   * Check if we have a variable on the command line. Note that a call to this
-   * method can modify the prefix unless the optional Boolean is set to false.
-   *
-   * @param name The name of the variable
-   * @return True if the variable was defined on the command line
-   */
-  bool haveVariable(const std::string & name, bool allow_prefix_change=true);
+  // this needs to be tracked here because CommandLine has a global shared instance across all
+  // multiapps/subapps - and we need to track used/unused CLI hit params globally so we know
+  // which ones don't get used - this can't happen at the within-app level.
+  void markHitParamUsed(int argi) { _used_hiti.insert(argi); };
+  void markHitParam(int argi) { _hiti.insert(argi); }
 
-  /**
-   * Sets the prefix for the CommandLine object. This is used for passing
-   * parameters to Multiapps
-   */
-  void setPrefix(const std::string & name, const std::string & num="");
+  // Returns the unused CLI hit parameters.  This accounts for different CLI params being used
+  // by different processes in a process-parallel run, so the communicator is needed to rendezvous
+  // which parameters have been used between them all.
+  std::set<int> unused(const Parallel::Communicator & comm)
+  {
+    comm.set_union(_hiti);
+    comm.set_union(_used_hiti);
 
-  /**
-   * Resets the prefix to the value set with the last call to setPrefix.
-   * Generally you do not need to call this method unless you wish
-   * to reset the prefix after calling haveVariable before retrieving a
-   * raw pointer to the GetPot object.
-   */
-  void resetPrefix();
-
-  // Dump the contents of the GetPot object
-  void print(const char * prefix, std::ostream & out_stream, unsigned int skip_count);
+    std::set<int> unused;
+    for (int i : _hiti)
+    {
+      if (_used_hiti.count(i) == 0)
+        unused.insert(i);
+    }
+    return unused;
+  }
 
 protected:
-  /// Pointer to GetPot object that represents the command line arguments
-  GetPot * _get_pot;
   /// Command line options
   std::map<std::string, Option> _cli_options;
-  /// This is a set of all "extra" options on the command line
-  std::set<std::string> _command_line_vars;
 
-  /// The base prefix for this CommandLine object
-  std::string _base_prefix;
-  /// The number added to the prefix to point it at a specific Multiapp
-  std::string _prefix_num;
-  /// Boolean indicating whether we have prefixes set on this CommandLine Object
-  bool _has_prefix;
+private:
+  std::set<int> _used_hiti;
+  std::set<int> _hiti;
+  int _argc = 0;
+  char ** _argv = nullptr;
+  std::vector<std::string> _args;
 };
 
 template <typename T>
-bool CommandLine::search(const std::string &option_name, T & argument)
+bool
+CommandLine::search(const std::string & option_name, T & argument)
 {
   std::map<std::string, Option>::iterator pos = _cli_options.find(option_name);
   if (pos != _cli_options.end())
   {
-    for (unsigned int i=0; i<pos->second.cli_switch.size(); ++i)
+    for (unsigned int i = 0; i < pos->second.cli_switch.size(); ++i)
     {
-      if (_get_pot->search(pos->second.cli_switch[i]))
+
+      for (size_t j = 0; j < _args.size(); j++)
       {
-        // "Flag" CLI options are added as Boolean types, when we see them
-        // we set the Boolean argument to true
-        if (pos->second.argument_type == NONE)
-          argument = true;
-        else
-          argument = _get_pot->next(argument);
-        return true;
+        auto arg = _args[j];
+        if (arg == pos->second.cli_switch[i])
+        {
+          // "Flag" CLI options are added as Boolean types, when we see them
+          // we set the Boolean argument to true
+          if (pos->second.argument_type == NONE)
+            argument = true;
+          else if (j + 1 < _args.size())
+          {
+            std::stringstream ss;
+            ss << _args[j + 1];
+            ss >> argument;
+          }
+          return true;
+        }
       }
     }
 
@@ -155,13 +153,9 @@ bool CommandLine::search(const std::string &option_name, T & argument)
       Moose::err << "Required parameter: " << option_name << " missing\n";
       printUsage();
     }
+    return false;
   }
-  else
-    mooseError("Unrecognized option name");
-
-  return false;
+  mooseError("Unrecognized option name");
 }
 
-
-
-#endif //COMMANDLINE_H
+#endif // COMMANDLINE_H

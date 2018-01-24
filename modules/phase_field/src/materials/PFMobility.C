@@ -7,11 +7,11 @@
 
 #include "PFMobility.h"
 
-// libmesh includes
 #include "libmesh/quadrature.h"
 
-template<>
-InputParameters validParams<PFMobility>()
+template <>
+InputParameters
+validParams<PFMobility>()
 {
   InputParameters params = validParams<Material>();
   params.addRequiredParam<Real>("mob", "The mobility value");
@@ -19,14 +19,15 @@ InputParameters validParams<PFMobility>()
   return params;
 }
 
-PFMobility::PFMobility(const InputParameters & parameters) :
-    Material(parameters),
+PFMobility::PFMobility(const InputParameters & parameters)
+  : Material(parameters),
     _M(declareProperty<Real>("M")),
     _grad_M(declareProperty<RealGradient>("grad_M")),
     _kappa_c(declareProperty<Real>("kappa_c")),
     _mob(getParam<Real>("mob")),
     _kappa(getParam<Real>("kappa"))
-{}
+{
+}
 
 void
 PFMobility::computeProperties()
@@ -38,4 +39,3 @@ PFMobility::computeProperties()
     _kappa_c[qp] = _kappa;
   }
 }
-

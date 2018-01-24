@@ -20,7 +20,7 @@
 class FunctionScalarAux;
 class Function;
 
-template<>
+template <>
 InputParameters validParams<FunctionScalarAux>();
 
 /**
@@ -30,13 +30,11 @@ class FunctionScalarAux : public AuxScalarKernel
 {
 public:
   FunctionScalarAux(const InputParameters & parameters);
-  virtual ~FunctionScalarAux();
 
 protected:
-  virtual Real computeValue();
+  virtual Real computeValue() override;
 
-  Function & _function;
+  std::vector<Function *> _functions;
 };
-
 
 #endif /* FUNCTIONSCALARAUX_H */

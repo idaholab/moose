@@ -40,17 +40,14 @@
 []
 
 [Dampers]
-  [./u_damp]
+  [./const_damp]
     type = ConstantDamper
-    variable = u
     damping = 0.9
   [../]
 []
 
 [Executioner]
   type = Steady
-
-  # Preconditioned JFNK (default)
   solve_type = 'PJFNK'
 []
 

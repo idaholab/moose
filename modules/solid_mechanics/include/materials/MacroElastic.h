@@ -12,11 +12,10 @@
 class MacroElastic : public Elastic
 {
 public:
-  MacroElastic( const InputParameters & parameters);
+  MacroElastic(const InputParameters & parameters);
   virtual ~MacroElastic();
 
 protected:
-
   virtual void createElasticityTensor();
 
   virtual bool updateElasticityTensor(SymmElasticityTensor & tensor);
@@ -33,11 +32,9 @@ private:
   const PostprocessorValue & _C1212;
   const PostprocessorValue & _C2323;
   const PostprocessorValue & _C3131;
-
 };
 
-template<>
+template <>
 InputParameters validParams<Elastic>();
-
 
 #endif

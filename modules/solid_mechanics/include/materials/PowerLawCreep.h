@@ -12,7 +12,7 @@
 // Forward declarations
 class PowerLawCreep;
 
-template<>
+template <>
 InputParameters validParams<PowerLawCreep>();
 
 /**
@@ -23,10 +23,9 @@ InputParameters validParams<PowerLawCreep>();
 class PowerLawCreep : public SolidModel
 {
 public:
-  PowerLawCreep( const InputParameters & parameters);
+  PowerLawCreep(const InputParameters & parameters);
 
 protected:
-
 };
 
-#endif //POWERLAWCREEPMATERIAL_H
+#endif // POWERLAWCREEPMATERIAL_H

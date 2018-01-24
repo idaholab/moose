@@ -20,17 +20,24 @@
 #include "SubProblem.h"
 #include "SystemBase.h"
 
-// libmesh includes
 #include "libmesh/threads.h"
 
-template<>
-InputParameters validParams<Indicator>()
+template <>
+InputParameters
+validParams<Indicator>()
 {
   InputParameters params = validParams<MooseObject>();
   params += validParams<BlockRestrictable>();
   params += validParams<OutputInterface>();
+  params += validParams<MaterialPropertyInterface>();
 
-  params.addParam<bool>("use_displaced_mesh", false, "Whether or not this object should use the displaced mesh for computation.  Note that in the case this is true but no displacements are provided in the Mesh block the undisplaced mesh will still be used.");
+  params.addParam<bool>("use_displaced_mesh",
+                        false,
+                        "Whether or not this object should use the "
+                        "displaced mesh for computation.  Note that "
+                        "in the case this is true but no "
+                        "displacements are provided in the Mesh block "
+                        "the undisplaced mesh will still be used.");
   params.addParamNamesToGroup("use_displaced_mesh", "Advanced");
 
   params.registerBase("Indicator");
@@ -38,29 +45,21 @@ InputParameters validParams<Indicator>()
   return params;
 }
 
-
-Indicator::Indicator(const InputParameters & parameters) :
-    MooseObject(parameters),
-    BlockRestrictable(parameters),
-    SetupInterface(parameters),
-    FunctionInterface(parameters),
-    UserObjectInterface(parameters),
+Indicator::Indicator(const InputParameters & parameters)
+  : MooseObject(parameters),
+    BlockRestrictable(this),
+    SetupInterface(this),
+    FunctionInterface(this),
+    UserObjectInterface(this),
     Restartable(parameters, "Indicators"),
     OutputInterface(parameters),
-    _subproblem(*parameters.get<SubProblem *>("_subproblem")),
-    _fe_problem(*parameters.get<FEProblem *>("_fe_problem")),
-    _sys(*parameters.get<SystemBase *>("_sys")),
+    MaterialPropertyInterface(this, blockIDs()),
+    _subproblem(*getCheckedPointerParam<SubProblem *>("_subproblem")),
+    _fe_problem(*getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")),
+    _sys(*getCheckedPointerParam<SystemBase *>("_sys")),
     _solution(_sys.solution()),
     _tid(parameters.get<THREAD_ID>("_tid")),
     _assembly(_subproblem.assembly(_tid)),
-
     _mesh(_subproblem.mesh())
-//    _dim(_mesh.dimension())
 {
 }
-
-void
-Indicator::IndicatorSetup()
-{
-}
-

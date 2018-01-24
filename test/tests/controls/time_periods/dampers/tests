@@ -1,0 +1,22 @@
+[Tests]
+  [./enable_false]
+    # Tests that MooseObject parameter operates correctly when set to 'false'
+    type = RunApp
+    input = 'enable_disable.i'
+    absent_out = '6\s*Nonlinear'
+    cli_args = "Dampers/const_damp/enable=false"
+  [../]
+  [./enable_true]
+    # Tests that MooseObject parameter operates correctly when set to 'true'
+    type = RunApp
+    input = 'enable_disable.i'
+    expect_out = '6\s*Nonlinear'
+    cli_args = "Dampers/const_damp/enable=true"
+  [../]
+  [./control]
+    # Test that a damper may be disabled during simulation
+    type = CSVDiff
+    input = 'control.i'
+    csvdiff = control_out.csv
+  [../]
+[]

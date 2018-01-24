@@ -16,15 +16,18 @@
 #include "BoundaryRestrictable.h"
 #include "Material.h"
 #include "MooseMesh.h"
+#include "MooseObject.h"
 
-template<>
-InputParameters validParams<BoundaryRestrictable>()
+template <>
+InputParameters
+validParams<BoundaryRestrictable>()
 {
   // Create instance of InputParameters
   InputParameters params = emptyInputParameters();
 
   // Create user-facing 'boundary' input for restricting inheriting object to boundaries
-  params.addParam<std::vector<BoundaryName> >("boundary", "The list of boundary IDs from the mesh where this boundary condition applies");
+  params.addParam<std::vector<BoundaryName>>(
+      "boundary", "The list of boundary IDs from the mesh where this boundary condition applies");
 
   // A parameter for disabling error message for objects restrictable by boundary and block,
   // if the parameter is valid it was already set so don't do anything
@@ -35,58 +38,66 @@ InputParameters validParams<BoundaryRestrictable>()
 }
 
 // Standard constructor
-BoundaryRestrictable::BoundaryRestrictable(const InputParameters & parameters) :
-    _bnd_feproblem(parameters.isParamValid("_fe_problem") ? parameters.get<FEProblem *>("_fe_problem") : NULL),
-    _bnd_mesh(parameters.isParamValid("_mesh") ? parameters.get<MooseMesh *>("_mesh") : NULL),
-    _bnd_dual_restrictable(parameters.get<bool>("_dual_restrictable")),
-    _invalid_boundary_id(Moose::INVALID_BOUNDARY_ID),
-    _boundary_restricted(false),
+BoundaryRestrictable::BoundaryRestrictable(const MooseObject * moose_object, bool nodal)
+  : _bnd_feproblem(moose_object->isParamValid("_fe_problem_base")
+                       ? moose_object->getParam<FEProblemBase *>("_fe_problem_base")
+                       : NULL),
+    _bnd_mesh(moose_object->isParamValid("_mesh") ? moose_object->getParam<MooseMesh *>("_mesh")
+                                                  : NULL),
+    _bnd_dual_restrictable(moose_object->getParam<bool>("_dual_restrictable")),
     _block_ids(_empty_block_ids),
-    _bnd_tid(parameters.isParamValid("_tid") ? parameters.get<THREAD_ID>("_tid") : 0),
-    _current_boundary_id(_bnd_feproblem == NULL ? _invalid_boundary_id : _bnd_feproblem->getCurrentBoundaryID())
+    _bnd_tid(moose_object->isParamValid("_tid") ? moose_object->getParam<THREAD_ID>("_tid") : 0),
+    _bnd_material_data(_bnd_feproblem->getMaterialData(Moose::BOUNDARY_MATERIAL_DATA, _bnd_tid)),
+    _bnd_nodal(nodal)
 {
-  initializeBoundaryRestrictable(parameters);
+  initializeBoundaryRestrictable(moose_object);
 }
 
 // Dual restricted constructor
-BoundaryRestrictable::BoundaryRestrictable(const InputParameters & parameters, const std::set<SubdomainID> & block_ids) :
-    _bnd_feproblem(parameters.isParamValid("_fe_problem") ? parameters.get<FEProblem *>("_fe_problem") : NULL),
-    _bnd_mesh(parameters.isParamValid("_mesh") ? parameters.get<MooseMesh *>("_mesh") : NULL),
-    _bnd_dual_restrictable(parameters.get<bool>("_dual_restrictable")),
-    _invalid_boundary_id(Moose::INVALID_BOUNDARY_ID),
-    _boundary_restricted(false),
+BoundaryRestrictable::BoundaryRestrictable(const MooseObject * moose_object,
+                                           const std::set<SubdomainID> & block_ids,
+                                           bool nodal)
+  : _bnd_feproblem(moose_object->isParamValid("_fe_problem_base")
+                       ? moose_object->getParam<FEProblemBase *>("_fe_problem_base")
+                       : NULL),
+    _bnd_mesh(moose_object->isParamValid("_mesh") ? moose_object->getParam<MooseMesh *>("_mesh")
+                                                  : NULL),
+    _bnd_dual_restrictable(moose_object->getParam<bool>("_dual_restrictable")),
     _block_ids(block_ids),
-    _bnd_tid(parameters.isParamValid("_tid") ? parameters.get<THREAD_ID>("_tid") : 0),
-    _current_boundary_id(_bnd_feproblem == NULL ? _invalid_boundary_id : _bnd_feproblem->getCurrentBoundaryID())
+    _bnd_tid(moose_object->isParamValid("_tid") ? moose_object->getParam<THREAD_ID>("_tid") : 0),
+    _bnd_material_data(_bnd_feproblem->getMaterialData(Moose::BOUNDARY_MATERIAL_DATA, _bnd_tid)),
+    _bnd_nodal(nodal)
 {
-  initializeBoundaryRestrictable(parameters);
+  initializeBoundaryRestrictable(moose_object);
 }
 
 void
-BoundaryRestrictable::initializeBoundaryRestrictable(const InputParameters & parameters)
+BoundaryRestrictable::initializeBoundaryRestrictable(const MooseObject * moose_object)
 {
   // The name and id of the object
-  const std::string & name = parameters.get<std::string>("_object_name");
+  const std::string & name = moose_object->getParam<std::string>("_object_name");
 
-  // If the mesh pointer is not defined, but FEProblem is, get it from there
+  // If the mesh pointer is not defined, but FEProblemBase is, get it from there
   if (_bnd_feproblem != NULL && _bnd_mesh == NULL)
     _bnd_mesh = &_bnd_feproblem->mesh();
 
   // Check that the mesh pointer was defined, it is required for this class to operate
   if (_bnd_mesh == NULL)
-    mooseError("The input parameters must contain a pointer to FEProblem via '_fe_problem' or a pointer to the MooseMesh via '_mesh'");
+    mooseError("The input parameters must contain a pointer to FEProblemBase via '_fe_problem' or "
+               "a pointer to the MooseMesh via '_mesh'");
 
   // If the user supplies boundary IDs
-  if (parameters.isParamValid("boundary"))
+  if (moose_object->isParamValid("boundary"))
   {
     // Extract the blocks from the input
-    _boundary_names = parameters.get<std::vector<BoundaryName> >("boundary");
+    _boundary_names = moose_object->getParam<std::vector<BoundaryName>>("boundary");
 
     // Get the IDs from the supplied names
     std::vector<BoundaryID> vec_ids = _bnd_mesh->getBoundaryIDs(_boundary_names, true);
 
     // Store the IDs, handling ANY_BOUNDARY_ID if supplied
-    if (std::find(_boundary_names.begin(), _boundary_names.end(), "ANY_BOUNDARY_ID") != _boundary_names.end())
+    if (std::find(_boundary_names.begin(), _boundary_names.end(), "ANY_BOUNDARY_ID") !=
+        _boundary_names.end())
       _bnd_ids.insert(Moose::ANY_BOUNDARY_ID);
     else
       _bnd_ids.insert(vec_ids.begin(), vec_ids.end());
@@ -95,39 +106,48 @@ BoundaryRestrictable::initializeBoundaryRestrictable(const InputParameters & par
   // Produce error if the object is not allowed to be both block and boundary restricted
   if (!_bnd_dual_restrictable && !_bnd_ids.empty() && !_block_ids.empty())
     if (!_block_ids.empty() && _block_ids.find(Moose::ANY_BLOCK_ID) == _block_ids.end())
-      mooseError("Attempted to restrict the object '" << name << "' to a boundary, but the object is already restricted by block(s)");
+      mooseError("Attempted to restrict the object '",
+                 name,
+                 "' to a boundary, but the object is already restricted by block(s)");
 
   // Store ANY_BOUNDARY_ID if empty
   if (_bnd_ids.empty())
   {
     _bnd_ids.insert(Moose::ANY_BOUNDARY_ID);
-    _boundary_names = std::vector<BoundaryName>(1, "ANY_BOUNDARY_ID");
+    _boundary_names = {"ANY_BOUNDARY_ID"};
   }
-  else
-    _boundary_restricted = true;
 
   // If this object is block restricted, check that defined blocks exist on the mesh
   if (_bnd_ids.find(Moose::ANY_BOUNDARY_ID) == _bnd_ids.end())
   {
-    const std::set<BoundaryID> & valid_ids = _bnd_mesh->meshBoundaryIds();
+    const std::set<BoundaryID> * valid_ids;
+
+    if (_bnd_nodal)
+      valid_ids = &_bnd_mesh->meshNodesetIds();
+    else
+      valid_ids = &_bnd_mesh->meshSidesetIds();
+
     std::vector<BoundaryID> diff;
 
-    std::set_difference(_bnd_ids.begin(), _bnd_ids.end(), valid_ids.begin(), valid_ids.end(), std::back_inserter(diff));
+    std::set_difference(_bnd_ids.begin(),
+                        _bnd_ids.end(),
+                        valid_ids->begin(),
+                        valid_ids->end(),
+                        std::back_inserter(diff));
 
     if (!diff.empty())
     {
       std::ostringstream msg;
-      msg << "The object '" << name << "' contains the following boundary ids that do no exist on the mesh:";
-      for (std::vector<BoundaryID>::iterator it = diff.begin(); it != diff.end(); ++it)
-        msg << " " << *it;
+      msg << "The object '" << name
+          << "' contains the following boundary ids that do not exist on the mesh:";
+      for (const auto & id : diff)
+        msg << " " << id;
       mooseError(msg.str());
     }
   }
 }
 
-BoundaryRestrictable::~BoundaryRestrictable()
-{
-}
+BoundaryRestrictable::~BoundaryRestrictable() {}
 
 const std::set<BoundaryID> &
 BoundaryRestrictable::boundaryIDs() const
@@ -144,27 +164,37 @@ BoundaryRestrictable::boundaryNames() const
 unsigned int
 BoundaryRestrictable::numBoundaryIDs() const
 {
-  return (unsigned int) _bnd_ids.size();
+  return (unsigned int)_bnd_ids.size();
 }
 
 bool
-BoundaryRestrictable::hasBoundary(BoundaryName name) const
+BoundaryRestrictable::boundaryRestricted() const
+{
+  return BoundaryRestrictable::restricted(_bnd_ids);
+}
+
+bool
+BoundaryRestrictable::restricted(const std::set<BoundaryID> & ids)
+{
+  return ids.find(Moose::ANY_BOUNDARY_ID) == ids.end();
+}
+
+bool
+BoundaryRestrictable::hasBoundary(const BoundaryName & name) const
 {
   // Create a vector and utilize the getBoundaryIDs function, which
   // handles the ANY_BOUNDARY_ID (getBoundaryID does not)
-  std::vector<BoundaryName> names(1);
-  names[0] = name;
-  return hasBoundary(_bnd_mesh->getBoundaryIDs(names));
+  return hasBoundary(_bnd_mesh->getBoundaryIDs({name}));
 }
 
 bool
-BoundaryRestrictable::hasBoundary(std::vector<BoundaryName> names) const
+BoundaryRestrictable::hasBoundary(const std::vector<BoundaryName> & names) const
 {
   return hasBoundary(_bnd_mesh->getBoundaryIDs(names));
 }
 
 bool
-BoundaryRestrictable::hasBoundary(BoundaryID id) const
+BoundaryRestrictable::hasBoundary(const BoundaryID & id) const
 {
   if (_bnd_ids.empty() || _bnd_ids.find(Moose::ANY_BOUNDARY_ID) != _bnd_ids.end())
     return true;
@@ -173,14 +203,14 @@ BoundaryRestrictable::hasBoundary(BoundaryID id) const
 }
 
 bool
-BoundaryRestrictable::hasBoundary(std::vector<BoundaryID> ids, TEST_TYPE type) const
+BoundaryRestrictable::hasBoundary(const std::vector<BoundaryID> & ids, TEST_TYPE type) const
 {
   std::set<BoundaryID> ids_set(ids.begin(), ids.end());
   return hasBoundary(ids_set, type);
 }
 
 bool
-BoundaryRestrictable::hasBoundary(std::set<BoundaryID> ids, TEST_TYPE type) const
+BoundaryRestrictable::hasBoundary(const std::set<BoundaryID> & ids, TEST_TYPE type) const
 {
   // An empty input is assumed to be ANY_BOUNDARY_ID
   if (ids.empty() || ids.find(Moose::ANY_BOUNDARY_ID) != ids.end())
@@ -198,10 +228,10 @@ BoundaryRestrictable::hasBoundary(std::set<BoundaryID> ids, TEST_TYPE type) cons
   else
   {
     // Loop through the supplied ids
-    for (std::set<BoundaryID>::const_iterator it = ids.begin(); it != ids.end(); ++it)
+    for (const auto & id : ids)
     {
       // Test the current supplied id
-      bool test = hasBoundary(*it);
+      bool test = hasBoundary(id);
 
       // If the id exists in the stored ids, then return true, otherwise
       if (test)
@@ -212,20 +242,23 @@ BoundaryRestrictable::hasBoundary(std::set<BoundaryID> ids, TEST_TYPE type) cons
 }
 
 bool
-BoundaryRestrictable::isBoundarySubset(std::set<BoundaryID> ids) const
+BoundaryRestrictable::isBoundarySubset(const std::set<BoundaryID> & ids) const
 {
   // An empty input is assumed to be ANY_BOUNDARY_ID
   if (ids.empty() || ids.find(Moose::ANY_BOUNDARY_ID) != ids.end())
     return true;
 
   if (_bnd_ids.find(Moose::ANY_BOUNDARY_ID) != _bnd_ids.end())
-    return std::includes(ids.begin(), ids.end(), _bnd_mesh->meshBoundaryIds().begin(), _bnd_mesh->meshBoundaryIds().end());
+    return std::includes(ids.begin(),
+                         ids.end(),
+                         _bnd_mesh->meshBoundaryIds().begin(),
+                         _bnd_mesh->meshBoundaryIds().end());
   else
     return std::includes(ids.begin(), ids.end(), _bnd_ids.begin(), _bnd_ids.end());
 }
 
 bool
-BoundaryRestrictable::isBoundarySubset(std::vector<BoundaryID> ids) const
+BoundaryRestrictable::isBoundarySubset(const std::vector<BoundaryID> & ids) const
 {
   std::set<BoundaryID> ids_set(ids.begin(), ids.end());
   return isBoundarySubset(ids_set);
@@ -241,24 +274,25 @@ bool
 BoundaryRestrictable::hasBoundaryMaterialPropertyHelper(const std::string & prop_name) const
 {
   // Reference to MaterialWarehouse for testing and retrieving boundary ids
-  MaterialWarehouse & material_warehouse = _bnd_feproblem->getMaterialWarehouse(_bnd_tid);
+  const MaterialWarehouse & warehouse = _bnd_feproblem->getMaterialWarehouse();
 
   // Complete set of BoundaryIDs that this object is defined
-  const std::set<BoundaryID> & ids = hasBoundary(Moose::ANY_BOUNDARY_ID) ? meshBoundaryIDs() : boundaryIDs();
+  const std::set<BoundaryID> & ids =
+      hasBoundary(Moose::ANY_BOUNDARY_ID) ? meshBoundaryIDs() : boundaryIDs();
 
   // Loop over each BoundaryID for this object
-  for (std::set<BoundaryID>::const_iterator id_it = ids.begin(); id_it != ids.end(); ++id_it)
+  for (const auto & id : ids)
   {
     // Storage of material properties that have been DECLARED on this BoundaryID
     std::set<std::string> declared_props;
 
     // If boundary materials exist, populated the set of properties that were declared
-    if (material_warehouse.hasBoundaryMaterials(*id_it))
+    if (warehouse.hasActiveBoundaryObjects(id))
     {
-      std::vector<Material *> mats = material_warehouse.getBoundaryMaterials(*id_it);
-      for (std::vector<Material *>::iterator mat_it = mats.begin(); mat_it != mats.end(); ++mat_it)
+      const std::vector<std::shared_ptr<Material>> & mats = warehouse.getActiveBoundaryObjects(id);
+      for (const auto & mat : mats)
       {
-        const std::set<std::string> & mat_props = (*mat_it)->getSuppliedItems();
+        const std::set<std::string> & mat_props = mat->getSuppliedItems();
         declared_props.insert(mat_props.begin(), mat_props.end());
       }
     }

@@ -5,28 +5,29 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-
 #ifndef MATERIALTENSORCALCULATOR_H
 #define MATERIALTENSORCALCULATOR_H
 
-#include "libmesh/vector_value.h"
+// MOOSE includes
 #include "InputParameters.h"
+#include "MooseEnum.h"
 #include "SymmTensor.h"
+
+#include "libmesh/vector_value.h"
 
 class MaterialTensorCalculator;
 
-template<>
+template <>
 InputParameters validParams<MaterialTensorCalculator>();
 
 class MaterialTensorCalculator
 {
 public:
-
   enum QUANTITY_ENUM
   {
     COMPONENT,
     VONMISES,
-    PLASTICSTRAINMAG,
+    EFFECTIVESTRAIN,
     HYDROSTATIC,
     DIRECTION,
     HOOP,
@@ -57,11 +58,8 @@ protected:
 
 public:
   Real getTensorQuantity(const SymmTensor & tensor,
-                         const Point * curr_point,
-                         RealVectorValue &direction);
-
-  Real principalValue( const SymmTensor & tensor, unsigned int index, RealVectorValue &direction );
-
+                         const Point & curr_point,
+                         RealVectorValue & direction);
 };
 
-#endif //MATERIALTENSORCALCULATOR_H
+#endif // MATERIALTENSORCALCULATOR_H

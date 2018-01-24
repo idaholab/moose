@@ -11,17 +11,18 @@
 
 class AddSecondarySpeciesAction;
 
-template<>
+template <>
 InputParameters validParams<AddSecondarySpeciesAction>();
-
 
 class AddSecondarySpeciesAction : public Action
 {
 public:
   AddSecondarySpeciesAction(const InputParameters & params);
 
-  virtual void act();
+  virtual void act() override;
 
+private:
+  const std::vector<AuxVariableName> _secondary_species;
 };
 
 #endif // ADDSECONDARYSPECIESACTION_H

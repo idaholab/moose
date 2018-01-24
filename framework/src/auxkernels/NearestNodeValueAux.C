@@ -13,12 +13,17 @@
 /****************************************************************/
 
 #include "NearestNodeValueAux.h"
+
+#include "SystemBase.h"
 #include "NearestNodeLocator.h"
 
-template<>
-InputParameters validParams<NearestNodeValueAux>()
+template <>
+InputParameters
+validParams<NearestNodeValueAux>()
 {
   InputParameters params = validParams<AuxKernel>();
+  params.addClassDescription("Retrieves a field value from the closest node on the paired boundary "
+                             "and stores it on this boundary or block.");
   params.set<bool>("_dual_restrictable") = true;
   params.addRequiredParam<BoundaryName>("paired_boundary", "The boundary to get the value from.");
   params.addRequiredCoupledVar("paired_variable", "The variable to get the value of.");
@@ -26,19 +31,15 @@ InputParameters validParams<NearestNodeValueAux>()
   return params;
 }
 
-NearestNodeValueAux::NearestNodeValueAux(const InputParameters & parameters) :
-    AuxKernel(parameters),
-    _nearest_node(getNearestNodeLocator(parameters.get<BoundaryName>("paired_boundary"),
-                                        boundaryNames()[0])),
+NearestNodeValueAux::NearestNodeValueAux(const InputParameters & parameters)
+  : AuxKernel(parameters),
+    _nearest_node(
+        getNearestNodeLocator(parameters.get<BoundaryName>("paired_boundary"), boundaryNames()[0])),
     _serialized_solution(_nl_sys.currentSolution()),
     _paired_variable(coupled("paired_variable"))
 {
   if (boundaryNames().size() > 1)
     mooseError("NearestNodeValueAux can only be used with one boundary at a time!");
-}
-
-NearestNodeValueAux::~NearestNodeValueAux()
-{
 }
 
 Real
@@ -51,4 +52,3 @@ NearestNodeValueAux::computeValue()
 
   return (*_serialized_solution)(dof_number);
 }
-

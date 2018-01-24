@@ -21,18 +21,18 @@
     variable = u
   [../]
   [./force_u]
-    type = UserForcingFunction
+    type = BodyForce
     variable = u
-    function = 'x*x*x + y*y*y'
+    function = 'x*x*x+y*y*y'
   [../]
   [./diff_v]
     type = Diffusion
     variable = v
   [../]
   [./force_v]
-    type = UserForcingFunction
+    type = BodyForce
     variable = v
-    function = 'x*x*x + y*y*y'
+    function = 'x*x*x+y*y*y'
   [../]
 []
 

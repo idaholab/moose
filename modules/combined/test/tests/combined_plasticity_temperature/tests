@@ -1,0 +1,15 @@
+[Tests]
+  [./temp_dep_yield]
+    type = Exodiff
+    input = plasticity_temperature_dep_yield.i
+    exodiff = plasticity_temperature_dep_yield_out.e
+    abs_zero = 1e-9
+  [../]
+  [./temp_dep_yield_sm]
+    type = Exodiff
+    input = plasticity_temperature_dep_yield_sm.i
+    exodiff = plasticity_temperature_dep_yield_out.e
+    abs_zero = 1e-9
+    prereq = 'temp_dep_yield'
+  [../]
+[]

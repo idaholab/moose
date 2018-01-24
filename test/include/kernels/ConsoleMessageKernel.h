@@ -21,7 +21,7 @@
 // Forward declarations
 class ConsoleMessageKernel;
 
-template<>
+template <>
 InputParameters validParams<ConsoleMessageKernel>();
 
 /**
@@ -30,7 +30,6 @@ InputParameters validParams<ConsoleMessageKernel>();
 class ConsoleMessageKernel : public CoefDiffusion
 {
 public:
-
   /**
    * Class constructor
    * @param parameters Input parameters
@@ -56,7 +55,6 @@ public:
    * Prints from a const method
    */
   void constMethod() const;
-
 };
 
-#endif //CONSOLEMESSAGEKERNEL_H
+#endif // CONSOLEMESSAGEKERNEL_H

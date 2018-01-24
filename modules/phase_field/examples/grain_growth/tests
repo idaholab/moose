@@ -1,0 +1,35 @@
+[Tests]
+  [./grain_growth_2D_graintracker]
+    type = RunApp
+    input = 'grain_growth_2D_graintracker.i'
+    # Only run in opt mode to avoid timeouts in dbg.
+    method = '!DBG'
+    check_input = True
+  [../]
+  [./grain_growth_2D_random]
+    type = RunApp
+    input = 'grain_growth_2D_random.i'
+    method = '!DBG'
+    check_input = True
+  [../]
+  [./grain_growth_2D_voronoi]
+    type = RunApp
+    input = 'grain_growth_2D_voronoi.i'
+    method = '!DBG'
+    check_input = True
+  [../]
+  [./grain_growth_2D_voronoi_newadapt]
+    type = RunApp
+    input = 'grain_growth_2D_voronoi_newadapt.i'
+    cli_args = 'Adaptivity/max_h_level=0'
+    method = '!DBG'
+    check_input = True
+  [../]
+  [./grain_growth_3D]
+    type = RunApp
+    input = 'grain_growth_3D.i'
+    # Only run in opt mode to avoid timeouts in dbg.
+    method = '!DBG'
+    check_input = True
+  [../]
+[]

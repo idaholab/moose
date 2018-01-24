@@ -12,15 +12,16 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-
 #include "libmesh/petsc_macro.h"
+#include "libmesh/libmesh_config.h"
 
 #include "Moose.h"
-#include "Factory.h"
-#include "NonlinearSystem.h"
-#include "PetscSupport.h"
+
 #include "ActionWarehouse.h"
 #include "ActionFactory.h"
+#include "AuxiliarySystem.h"
+#include "Factory.h"
+#include "PetscSupport.h"
 #include "Syntax.h"
 
 // objects that can be created by MOOSE
@@ -29,6 +30,9 @@
 #include "GeneratedMesh.h"
 #include "TiledMesh.h"
 #include "ImageMesh.h"
+#include "PatternedMesh.h"
+#include "StitchedMesh.h"
+#include "AnnularMesh.h"
 
 // MeshModifiers
 #include "MeshExtruder.h"
@@ -45,22 +49,34 @@
 #include "RenameBlock.h"
 #include "AssignElementSubdomainID.h"
 #include "ImageSubdomain.h"
+#include "BlockDeleter.h"
+#include "ParsedSubdomainMeshModifier.h"
+#include "BreakBoundaryOnSubdomain.h"
+#include "ParsedAddSideset.h"
+#include "AssignSubdomainID.h"
+#include "MeshSideSet.h"
+#include "AddSideSetsFromBoundingBox.h"
 
 // problems
-#include "FEProblem.h"
 #include "DisplacedProblem.h"
+#include "FEProblem.h"
+#include "EigenProblem.h"
 
 // kernels
+#include "ConservativeAdvection.h"
 #include "TimeDerivative.h"
 #include "CoupledTimeDerivative.h"
 #include "MassLumpedTimeDerivative.h"
 #include "Diffusion.h"
 #include "AnisotropicDiffusion.h"
 #include "CoupledForce.h"
-#include "UserForcingFunction.h"
 #include "BodyForce.h"
 #include "Reaction.h"
 #include "MassEigenKernel.h"
+#include "NullKernel.h"
+#include "MaterialDerivativeTestKernel.h"
+#include "MaterialDerivativeRankTwoTestKernel.h"
+#include "MaterialDerivativeRankFourTestKernel.h"
 
 // bcs
 #include "ConvectiveFluxBC.h"
@@ -109,12 +125,20 @@
 #include "VariableGradientComponent.h"
 #include "ParsedAux.h"
 #include "VariableTimeIntegrationAux.h"
+#include "ElementLengthAux.h"
+#include "ElementLpNormAux.h"
+#include "ElementL2ErrorFunctionAux.h"
+#include "ElementH1ErrorFunctionAux.h"
+#include "DiffusionFluxAux.h"
 
 // dirac kernels
 #include "ConstantPointSource.h"
+#include "FunctionDiracSource.h"
 
-// DG kernels
+// DG
 #include "DGDiffusion.h"
+#include "DGFunctionDiffusionDirichletBC.h"
+#include "DGConvection.h"
 
 // ics
 #include "ConstantIC.h"
@@ -123,12 +147,14 @@
 #include "RandomIC.h"
 #include "ScalarConstantIC.h"
 #include "ScalarComponentIC.h"
+#include "FunctionScalarIC.h"
 
 // executioners
 #include "Steady.h"
 #include "Transient.h"
 #include "InversePowerMethod.h"
 #include "NonlinearEigen.h"
+#include "Eigenvalue.h"
 
 // functions
 #include "Axisymmetric2D3DSolutionFunction.h"
@@ -142,17 +168,24 @@
 #include "SolutionFunction.h"
 #include "PiecewiseBilinear.h"
 #include "SplineFunction.h"
+#include "BicubicSplineFunction.h"
 #include "PiecewiseMultilinear.h"
 #include "LinearCombinationFunction.h"
 #include "ImageFunction.h"
+#include "VectorPostprocessorFunction.h"
 
 // materials
 #include "GenericConstantMaterial.h"
+#include "GenericConstantRankTwoTensor.h"
 #include "GenericFunctionMaterial.h"
+#include "PiecewiseLinearInterpolationMaterial.h"
 
 // PPS
 #include "AverageElementSize.h"
 #include "AverageNodalVariableValue.h"
+#include "CumulativeValuePostprocessor.h"
+#include "ChangeOverTimePostprocessor.h"
+#include "ChangeOverTimestepPostprocessor.h"
 #include "NodalSum.h"
 #include "ElementAverageValue.h"
 #include "ElementAverageTimeDerivative.h"
@@ -164,12 +197,13 @@
 #include "ElementL2Error.h"
 #include "ElementVectorL2Error.h"
 #include "EmptyPostprocessor.h"
+#include "FindValueOnLine.h"
 #include "FunctionValuePostprocessor.h"
 #include "NodalVariableValue.h"
 #include "NumDOFs.h"
 #include "TimestepSize.h"
-#include "RunTime.h"
 #include "PerformanceData.h"
+#include "MemoryUsage.h"
 #include "NumElems.h"
 #include "NumNodes.h"
 #include "NumNonlinearIterations.h"
@@ -185,7 +219,6 @@
 #include "SideIntegralVariablePostprocessor.h"
 #include "NodalMaxValue.h"
 #include "NodalProxyMaxValue.h"
-#include "PlotFunction.h"
 #include "ScalarL2Error.h"
 #include "ElementalVariableValue.h"
 #include "ElementL2Norm.h"
@@ -198,26 +231,42 @@
 #include "NodalExtremeValue.h"
 #include "ElementExtremeValue.h"
 #include "DifferencePostprocessor.h"
+#include "RelativeDifferencePostprocessor.h"
+#include "ScalePostprocessor.h"
+#include "LinearCombinationPostprocessor.h"
 #include "NumPicardIterations.h"
 #include "FunctionSideIntegral.h"
 #include "ExecutionerAttributeReporter.h"
 #include "PercentChangePostprocessor.h"
 #include "ElementL2Difference.h"
-#include "RealControlParameterReporter.h"
+#include "TimeExtremeValue.h"
+#include "RelativeSolutionDifferenceNorm.h"
+#include "AxisymmetricCenterlineAverageValue.h"
+#include "VariableInnerProduct.h"
+#include "VariableResidual.h"
 
 // vector PPS
+#include "CSVReader.h"
 #include "ConstantVectorPostprocessor.h"
-#include "NodalValueSampler.h"
-#include "SideValueSampler.h"
-#include "PointValueSampler.h"
-#include "LineValueSampler.h"
-#include "VectorOfPostprocessors.h"
-#include "LeastSquaresFit.h"
+#include "Eigenvalues.h"
+#include "ElementVariablesDifferenceMax.h"
 #include "ElementsAlongLine.h"
+#include "ElementsAlongPlane.h"
 #include "IntersectionPointsAlongLine.h"
+#include "LeastSquaresFit.h"
+#include "LineFunctionSampler.h"
 #include "LineMaterialRealSampler.h"
+#include "LineValueSampler.h"
+#include "MaterialVectorPostprocessor.h"
+#include "NodalValueSampler.h"
+#include "PointValueSampler.h"
+#include "SideValueSampler.h"
+#include "SphericalAverage.h"
+#include "VectorOfPostprocessors.h"
+#include "VolumeHistogram.h"
 
 // user objects
+#include "GeometrySphere.h"
 #include "LayeredIntegral.h"
 #include "LayeredAverage.h"
 #include "LayeredSideIntegral.h"
@@ -229,6 +278,8 @@
 #include "NodalNormalsCorner.h"
 #include "NodalNormalsPreprocessor.h"
 #include "SolutionUserObject.h"
+#include "PerflogDumper.h"
+#include "ElementQualityChecker.h"
 #ifdef LIBMESH_HAVE_FPARSER
 #include "Terminator.h"
 #endif
@@ -238,29 +289,28 @@
 #include "FiniteDifferencePreconditioner.h"
 #include "SingleMatrixPreconditioner.h"
 
-#include "SplitBasedPreconditioner.h"
+#include "FieldSplitPreconditioner.h"
 #include "Split.h"
-#include "ContactSplit.h"
-#include "AddSplitAction.h"
+#include "AddFieldSplitAction.h"
 
 // dampers
 #include "ConstantDamper.h"
 #include "MaxIncrement.h"
-
-// DG
-#include "DGDiffusion.h"
-#include "DGFunctionDiffusionDirichletBC.h"
+#include "BoundingValueNodalDamper.h"
+#include "BoundingValueElementDamper.h"
 
 // Constraints
 #include "TiedValueConstraint.h"
 #include "CoupledTiedValueConstraint.h"
 #include "AddBoundsVectorsAction.h"
+#include "EqualGradientConstraint.h"
 #include "EqualValueConstraint.h"
 #include "EqualValueBoundaryConstraint.h"
 #include "LinearNodalConstraint.h"
 
 // ScalarKernels
 #include "ODETimeDerivative.h"
+#include "CoupledODETimeDerivative.h"
 #include "FunctionScalarAux.h"
 #include "NodalEqualValueConstraint.h"
 #include "ParsedODEKernel.h"
@@ -270,6 +320,7 @@
 #include "AnalyticalIndicator.h"
 #include "LaplacianJumpIndicator.h"
 #include "GradientJumpIndicator.h"
+#include "ValueJumpIndicator.h"
 
 // markers
 #include "ErrorToleranceMarker.h"
@@ -283,7 +334,11 @@
 
 // time steppers
 #include "ConstantDT.h"
+#include "LogConstantDT.h"
 #include "FunctionDT.h"
+#include "TimeSequenceStepper.h"
+#include "ExodusTimeSequenceStepper.h"
+#include "CSVTimeSequenceStepper.h"
 #include "IterationAdaptiveDT.h"
 #include "SolutionTimeAdaptiveDT.h"
 #include "DT2.h"
@@ -291,14 +346,16 @@
 #include "AB2PredictorCorrector.h"
 
 // time integrators
-#include "SteadyState.h"
 #include "ImplicitEuler.h"
 #include "BDF2.h"
 #include "CrankNicolson.h"
 #include "ExplicitEuler.h"
 #include "ExplicitMidpoint.h"
+#include "ExplicitTVDRK2.h"
 #include "LStableDirk2.h"
 #include "LStableDirk3.h"
+#include "AStableDirk4.h"
+#include "LStableDirk4.h"
 #include "ImplicitMidpoint.h"
 #include "Heun.h"
 #include "Ralston.h"
@@ -312,8 +369,8 @@
 
 // Transfers
 #ifdef LIBMESH_TRILINOS_HAVE_DTK
-  #include "MultiAppDTKUserObjectTransfer.h"
-  #include "MultiAppDTKInterpolationTransfer.h"
+#include "MultiAppDTKUserObjectTransfer.h"
+#include "MultiAppDTKInterpolationTransfer.h"
 #endif
 #include "MultiAppPostprocessorInterpolationTransfer.h"
 #include "MultiAppVariableValueSampleTransfer.h"
@@ -326,7 +383,7 @@
 #include "MultiAppPostprocessorTransfer.h"
 #include "MultiAppProjectionTransfer.h"
 #include "MultiAppPostprocessorToAuxScalarTransfer.h"
-
+#include "MultiAppScalarToAuxScalarTransfer.h"
 
 // Actions
 #include "AddBCAction.h"
@@ -336,6 +393,7 @@
 #include "AddKernelAction.h"
 #include "AddScalarKernelAction.h"
 #include "AddDGKernelAction.h"
+#include "AddInterfaceKernelAction.h"
 #include "AddPeriodicBCAction.h"
 #include "AddVariableAction.h"
 #include "AddAuxVariableAction.h"
@@ -343,9 +401,10 @@
 #include "AddVectorPostprocessorAction.h"
 #include "AddDamperAction.h"
 #include "AddFunctionAction.h"
+#include "AddDistributionAction.h"
+#include "AddSamplerAction.h"
 #include "CreateExecutionerAction.h"
 #include "DetermineSystemType.h"
-#include "SetupTimePeriodsAction.h"
 #include "EmptyAction.h"
 #include "InitProblemAction.h"
 #include "CopyNodalVarsAction.h"
@@ -387,6 +446,7 @@
 #include "CheckOutputAction.h"
 #include "SetupRecoverFileBaseAction.h"
 #include "AddNodalKernelAction.h"
+#include "MaterialDerivativeTestAction.h"
 
 // Outputs
 #ifdef LIBMESH_HAVE_EXODUS_API
@@ -406,10 +466,11 @@
 #include "VariableResidualNormsDebugOutput.h"
 #include "TopResidualDebugOutput.h"
 #include "DOFMapOutput.h"
-#include "ICEUpdater.h"
+#include "ControlOutput.h"
 
 // Controls
 #include "RealFunctionControl.h"
+#include "TimePeriod.h"
 
 // Partitioner
 #include "LibmeshPartitioner.h"
@@ -419,7 +480,28 @@
 #include "TimeDerivativeNodalKernel.h"
 #include "UserForcingFunctionNodalKernel.h"
 
-namespace Moose {
+#include <unistd.h>
+
+// Define the available execute flags for MOOSE. The flags using a hex value are setup to retain the
+// same numbers that were utilized with older versions of MOOSE for keeping existing applications
+// working using the deprecated flags. In the future, as in the EXEC_SAME_AS_MULTIAPP flag, there is
+// no reason to keep these flags bitwise comparable or to assigned an id because the MultiMooseEnum
+// that is used to store these has convenience methods for determining the what flags are active.
+const ExecFlagType EXEC_NONE("NONE", 0x00);                     // 0
+const ExecFlagType EXEC_INITIAL("INITIAL", 0x01);               // 1
+const ExecFlagType EXEC_LINEAR("LINEAR", 0x02);                 // 2
+const ExecFlagType EXEC_NONLINEAR("NONLINEAR", 0x04);           // 4
+const ExecFlagType EXEC_TIMESTEP_END("TIMESTEP_END", 0x08);     // 8
+const ExecFlagType EXEC_TIMESTEP_BEGIN("TIMESTEP_BEGIN", 0x10); // 16
+const ExecFlagType EXEC_FINAL("FINAL", 0x20);                   // 32
+const ExecFlagType EXEC_FORCED("FORCED", 0x40);                 // 64
+const ExecFlagType EXEC_FAILED("FAILED", 0x80);                 // 128
+const ExecFlagType EXEC_CUSTOM("CUSTOM", 0x100);                // 256
+const ExecFlagType EXEC_SUBDOMAIN("SUBDOMAIN", 0x200);          // 512
+const ExecFlagType EXEC_SAME_AS_MULTIAPP("SAME_AS_MULTIAPP");
+
+namespace Moose
+{
 
 static bool registered = false;
 
@@ -431,6 +513,9 @@ registerObjects(Factory & factory)
   registerMesh(GeneratedMesh);
   registerMesh(TiledMesh);
   registerMesh(ImageMesh);
+  registerMesh(PatternedMesh);
+  registerMesh(StitchedMesh);
+  registerMesh(AnnularMesh);
 
   // mesh modifiers
   registerMeshModifier(MeshExtruder);
@@ -447,22 +532,36 @@ registerObjects(Factory & factory)
   registerMeshModifier(RenameBlock);
   registerMeshModifier(AssignElementSubdomainID);
   registerMeshModifier(ImageSubdomain);
+  registerMeshModifier(BlockDeleter);
+  registerMeshModifier(ParsedSubdomainMeshModifier);
+  registerMeshModifier(BreakBoundaryOnSubdomain);
+  registerMeshModifier(ParsedAddSideset);
+  registerMeshModifier(AssignSubdomainID);
+  registerMeshModifier(MeshSideSet);
+  registerMeshModifier(AddSideSetsFromBoundingBox);
 
   // problems
-  registerProblem(FEProblem);
   registerProblem(DisplacedProblem);
+  registerProblem(FEProblem);
+  registerProblem(EigenProblem);
 
   // kernels
   registerKernel(TimeDerivative);
+  registerKernel(ConservativeAdvection);
   registerKernel(CoupledTimeDerivative);
   registerKernel(MassLumpedTimeDerivative);
   registerKernel(Diffusion);
   registerKernel(AnisotropicDiffusion);
   registerKernel(CoupledForce);
-  registerKernel(UserForcingFunction);
+  registerNamedObject(BodyForce, "UserForcingFunction");
+  factory.deprecateObject("UserForcingFunction", "BodyForce");
   registerKernel(BodyForce);
   registerKernel(Reaction);
   registerKernel(MassEigenKernel);
+  registerKernel(NullKernel);
+  registerKernel(MaterialDerivativeTestKernel);
+  registerKernel(MaterialDerivativeRankTwoTestKernel);
+  registerKernel(MaterialDerivativeRankFourTestKernel);
 
   // bcs
   registerBoundaryCondition(ConvectiveFluxBC);
@@ -488,6 +587,7 @@ registerObjects(Factory & factory)
 
   // dirac kernels
   registerDiracKernel(ConstantPointSource);
+  registerDiracKernel(FunctionDiracSource);
 
   // aux kernels
   registerAux(ConstantAux);
@@ -516,6 +616,11 @@ registerObjects(Factory & factory)
   registerAux(VariableGradientComponent);
   registerAux(ParsedAux);
   registerAux(VariableTimeIntegrationAux);
+  registerAux(ElementLengthAux);
+  registerAux(ElementLpNormAux);
+  registerAux(ElementL2ErrorFunctionAux);
+  registerAux(ElementH1ErrorFunctionAux);
+  registerAux(DiffusionFluxAux);
 
   // Initial Conditions
   registerInitialCondition(ConstantIC);
@@ -524,12 +629,14 @@ registerObjects(Factory & factory)
   registerInitialCondition(RandomIC);
   registerInitialCondition(ScalarConstantIC);
   registerInitialCondition(ScalarComponentIC);
+  registerInitialCondition(FunctionScalarIC);
 
   // executioners
   registerExecutioner(Steady);
   registerExecutioner(Transient);
   registerExecutioner(InversePowerMethod);
   registerExecutioner(NonlinearEigen);
+  registerExecutioner(Eigenvalue);
 
   // functions
   registerFunction(Axisymmetric2D3DSolutionFunction);
@@ -543,17 +650,24 @@ registerObjects(Factory & factory)
   registerFunction(SolutionFunction);
   registerFunction(PiecewiseBilinear);
   registerFunction(SplineFunction);
+  registerFunction(BicubicSplineFunction);
   registerFunction(PiecewiseMultilinear);
   registerFunction(LinearCombinationFunction);
   registerFunction(ImageFunction);
+  registerFunction(VectorPostprocessorFunction);
 
   // materials
   registerMaterial(GenericConstantMaterial);
+  registerMaterial(GenericConstantRankTwoTensor);
   registerMaterial(GenericFunctionMaterial);
+  registerMaterial(PiecewiseLinearInterpolationMaterial);
 
   // PPS
   registerPostprocessor(AverageElementSize);
   registerPostprocessor(AverageNodalVariableValue);
+  registerPostprocessor(CumulativeValuePostprocessor);
+  registerPostprocessor(ChangeOverTimePostprocessor);
+  registerPostprocessor(ChangeOverTimestepPostprocessor);
   registerPostprocessor(NodalSum);
   registerPostprocessor(ElementAverageValue);
   registerPostprocessor(ElementAverageTimeDerivative);
@@ -566,11 +680,12 @@ registerObjects(Factory & factory)
   registerPostprocessor(ElementVectorL2Error);
   registerPostprocessor(ScalarL2Error);
   registerPostprocessor(EmptyPostprocessor);
+  registerPostprocessor(FindValueOnLine);
   registerPostprocessor(NodalVariableValue);
   registerPostprocessor(NumDOFs);
   registerPostprocessor(TimestepSize);
-  registerPostprocessor(RunTime);
   registerPostprocessor(PerformanceData);
+  registerPostprocessor(MemoryUsage);
   registerPostprocessor(NumElems);
   registerPostprocessor(NumNodes);
   registerPostprocessor(NumNonlinearIterations);
@@ -597,27 +712,43 @@ registerObjects(Factory & factory)
   registerPostprocessor(NodalExtremeValue);
   registerPostprocessor(ElementExtremeValue);
   registerPostprocessor(DifferencePostprocessor);
+  registerPostprocessor(RelativeDifferencePostprocessor);
+  registerPostprocessor(ScalePostprocessor);
+  registerPostprocessor(LinearCombinationPostprocessor);
   registerPostprocessor(FunctionValuePostprocessor);
   registerPostprocessor(NumPicardIterations);
   registerPostprocessor(FunctionSideIntegral);
   registerPostprocessor(ExecutionerAttributeReporter);
   registerPostprocessor(PercentChangePostprocessor);
   registerPostprocessor(ElementL2Difference);
-  registerPostprocessor(RealControlParameterReporter);
+  registerPostprocessor(TimeExtremeValue);
+  registerPostprocessor(RelativeSolutionDifferenceNorm);
+  registerPostprocessor(AxisymmetricCenterlineAverageValue);
+  registerPostprocessor(VariableInnerProduct);
+  registerPostprocessor(VariableResidual);
 
   // vector PPS
+  registerVectorPostprocessor(CSVReader);
   registerVectorPostprocessor(ConstantVectorPostprocessor);
-  registerVectorPostprocessor(NodalValueSampler);
-  registerVectorPostprocessor(SideValueSampler);
-  registerVectorPostprocessor(PointValueSampler);
-  registerVectorPostprocessor(LineValueSampler);
-  registerVectorPostprocessor(VectorOfPostprocessors);
-  registerVectorPostprocessor(LeastSquaresFit);
+  registerVectorPostprocessor(Eigenvalues);
+  registerVectorPostprocessor(ElementVariablesDifferenceMax);
   registerVectorPostprocessor(ElementsAlongLine);
+  registerVectorPostprocessor(ElementsAlongPlane);
   registerVectorPostprocessor(IntersectionPointsAlongLine);
+  registerVectorPostprocessor(LeastSquaresFit);
+  registerVectorPostprocessor(LineFunctionSampler);
   registerVectorPostprocessor(LineMaterialRealSampler);
+  registerVectorPostprocessor(LineValueSampler);
+  registerVectorPostprocessor(MaterialVectorPostprocessor);
+  registerVectorPostprocessor(NodalValueSampler);
+  registerVectorPostprocessor(PointValueSampler);
+  registerVectorPostprocessor(SideValueSampler);
+  registerVectorPostprocessor(SphericalAverage);
+  registerVectorPostprocessor(VectorOfPostprocessors);
+  registerVectorPostprocessor(VolumeHistogram);
 
   // user objects
+  registerUserObject(GeometrySphere);
   registerUserObject(LayeredIntegral);
   registerUserObject(LayeredAverage);
   registerUserObject(LayeredSideIntegral);
@@ -629,6 +760,8 @@ registerObjects(Factory & factory)
   registerUserObject(NodalNormalsCorner);
   registerUserObject(NodalNormalsEvaluator);
   registerUserObject(SolutionUserObject);
+  registerUserObject(PerflogDumper);
+  registerUserObject(ElementQualityChecker);
 #ifdef LIBMESH_HAVE_FPARSER
   registerUserObject(Terminator);
 #endif
@@ -637,25 +770,30 @@ registerObjects(Factory & factory)
   registerNamedPreconditioner(PhysicsBasedPreconditioner, "PBP");
   registerNamedPreconditioner(FiniteDifferencePreconditioner, "FDP");
   registerNamedPreconditioner(SingleMatrixPreconditioner, "SMP");
-#if defined(LIBMESH_HAVE_PETSC) && !PETSC_VERSION_LESS_THAN(3,3,0)
-  registerNamedPreconditioner(SplitBasedPreconditioner, "SBP");
+#if defined(LIBMESH_HAVE_PETSC) && !PETSC_VERSION_LESS_THAN(3, 3, 0)
+  registerNamedPreconditioner(FieldSplitPreconditioner, "FSP");
 #endif
   // dampers
   registerDamper(ConstantDamper);
   registerDamper(MaxIncrement);
+  registerDamper(BoundingValueNodalDamper);
+  registerDamper(BoundingValueElementDamper);
   // DG
   registerDGKernel(DGDiffusion);
   registerBoundaryCondition(DGFunctionDiffusionDirichletBC);
+  registerDGKernel(DGConvection);
 
   // Constraints
   registerConstraint(TiedValueConstraint);
   registerConstraint(CoupledTiedValueConstraint);
+  registerConstraint(EqualGradientConstraint);
   registerConstraint(EqualValueConstraint);
   registerConstraint(EqualValueBoundaryConstraint);
   registerConstraint(LinearNodalConstraint);
 
   // Scalar kernels
   registerScalarKernel(ODETimeDerivative);
+  registerScalarKernel(CoupledODETimeDerivative);
   registerScalarKernel(NodalEqualValueConstraint);
   registerScalarKernel(ParsedODEKernel);
   registerScalarKernel(QuotientScalarAux);
@@ -664,6 +802,7 @@ registerObjects(Factory & factory)
   registerIndicator(AnalyticalIndicator);
   registerIndicator(LaplacianJumpIndicator);
   registerIndicator(GradientJumpIndicator);
+  registerIndicator(ValueJumpIndicator);
 
   // markers
   registerMarker(ErrorToleranceMarker);
@@ -677,7 +816,6 @@ registerObjects(Factory & factory)
 
   // splits
   registerSplit(Split);
-  registerSplit(ContactSplit);
 
   // MultiApps
   registerMultiApp(TransientMultiApp);
@@ -686,21 +824,27 @@ registerObjects(Factory & factory)
 
   // time steppers
   registerTimeStepper(ConstantDT);
+  registerTimeStepper(LogConstantDT);
   registerTimeStepper(FunctionDT);
+  registerTimeStepper(TimeSequenceStepper);
+  registerTimeStepper(ExodusTimeSequenceStepper);
+  registerTimeStepper(CSVTimeSequenceStepper);
   registerTimeStepper(IterationAdaptiveDT);
   registerTimeStepper(SolutionTimeAdaptiveDT);
   registerTimeStepper(DT2);
   registerTimeStepper(PostprocessorDT);
   registerTimeStepper(AB2PredictorCorrector);
   // time integrators
-  registerTimeIntegrator(SteadyState);
   registerTimeIntegrator(ImplicitEuler);
   registerTimeIntegrator(BDF2);
   registerTimeIntegrator(CrankNicolson);
   registerTimeIntegrator(ExplicitEuler);
   registerTimeIntegrator(ExplicitMidpoint);
+  registerTimeIntegrator(ExplicitTVDRK2);
   registerTimeIntegrator(LStableDirk2);
   registerTimeIntegrator(LStableDirk3);
+  registerTimeIntegrator(AStableDirk4);
+  registerTimeIntegrator(LStableDirk4);
   registerTimeIntegrator(ImplicitMidpoint);
   registerTimeIntegrator(Heun);
   registerTimeIntegrator(Ralston);
@@ -708,7 +852,7 @@ registerObjects(Factory & factory)
   registerPredictor(SimplePredictor);
   registerPredictor(AdamsPredictor);
 
-  // Transfers
+// Transfers
 #ifdef LIBMESH_TRILINOS_HAVE_DTK
   registerTransfer(MultiAppDTKUserObjectTransfer);
   registerTransfer(MultiAppDTKInterpolationTransfer);
@@ -724,8 +868,9 @@ registerObjects(Factory & factory)
   registerTransfer(MultiAppPostprocessorTransfer);
   registerTransfer(MultiAppProjectionTransfer);
   registerTransfer(MultiAppPostprocessorToAuxScalarTransfer);
+  registerTransfer(MultiAppScalarToAuxScalarTransfer);
 
-  // Outputs
+// Outputs
 #ifdef LIBMESH_HAVE_EXODUS_API
   registerOutput(Exodus);
 #endif
@@ -748,14 +893,11 @@ registerObjects(Factory & factory)
   registerOutput(VariableResidualNormsDebugOutput);
   registerOutput(TopResidualDebugOutput);
   registerNamedOutput(DOFMapOutput, "DOFMap");
-
-  // Currently the ICE Updater requires TBB
-  #ifdef LIBMESH_HAVE_TBB_API
-  registerOutput(ICEUpdater);
-  #endif
+  registerOutput(ControlOutput);
 
   // Controls
   registerControl(RealFunctionControl);
+  registerControl(TimePeriod);
 
   // Partitioner
   registerPartitioner(LibmeshPartitioner);
@@ -773,23 +915,24 @@ addActionTypes(Syntax & syntax)
 {
   /**
    * The second param here indicates whether the task must be satisfied or not for a successful run.
-   * If set to true, then the ActionWarehouse will attempt to create "Action"s automatically if they have
-   * not been explicitly created by the parser or some other mechanism.
+   * If set to true, then the ActionWarehouse will attempt to create "Action"s automatically if they
+   * have not been explicitly created by the parser or some other mechanism.
    *
-   * Note: Many of the actions in the "Minimal Problem" section are marked as false.  However, we can generally
-   * force creation of these "Action"s as needed by registering them to syntax that we expect to see even
-   * if those "Action"s  don't normally pick up parameters from the input file.
+   * Note: Many of the actions in the "Minimal Problem" section are marked as false.  However, we
+   * can generally force creation of these "Action"s as needed by registering them to syntax that we
+   * expect to see even if those "Action"s  don't normally pick up parameters from the input file.
    */
 
+  // clang-format off
   /**************************/
   /**** Register Actions ****/
   /**************************/
-  registerMooseObjectTask("create_problem",               Problem,                 true);
-  registerMooseObjectTask("setup_executioner",            Executioner,             true);
+  registerMooseObjectTask("create_problem",               Problem,                false);
+  registerMooseObjectTask("setup_executioner",            Executioner,            true);
 
   // This task does not construct an object, but it needs all of the parameters that
   // would normally be used to construct an object.
-  registerMooseObjectTask("determine_system_type",        Executioner,             true);
+  registerMooseObjectTask("determine_system_type",        Executioner,            true);
 
   registerMooseObjectTask("setup_mesh",                   MooseMesh,              false);
   registerMooseObjectTask("init_mesh",                    MooseMesh,              false);
@@ -803,6 +946,8 @@ addActionTypes(Syntax & syntax)
   registerMooseObjectTask("add_material",                 Material,               false);
   registerMooseObjectTask("add_bc",                       BoundaryCondition,      false);
   registerMooseObjectTask("add_function",                 Function,               false);
+  registerMooseObjectTask("add_distribution",             Distribution,           false);
+  registerMooseObjectTask("add_sampler",                  Sampler,                false);
 
   registerMooseObjectTask("add_aux_kernel",               AuxKernel,              false);
   registerMooseObjectTask("add_elemental_field_variable", AuxKernel,              false);
@@ -811,6 +956,7 @@ addActionTypes(Syntax & syntax)
   registerMooseObjectTask("add_aux_scalar_kernel",        AuxScalarKernel,        false);
   registerMooseObjectTask("add_dirac_kernel",             DiracKernel,            false);
   registerMooseObjectTask("add_dg_kernel",                DGKernel,               false);
+  registerMooseObjectTask("add_interface_kernel",         InterfaceKernel,        false);
   registerMooseObjectTask("add_constraint",               Constraint,             false);
 
   registerMooseObjectTask("add_ic",                       InitialCondition,       false);
@@ -822,7 +968,7 @@ addActionTypes(Syntax & syntax)
   registerMooseObjectTask("setup_time_integrator",        TimeIntegrator,         false);
 
   registerMooseObjectTask("add_preconditioning",          MoosePreconditioner,    false);
-  registerMooseObjectTask("add_split",                    Split,                  false);
+  registerMooseObjectTask("add_field_split",              Split,                  false);
 
   registerMooseObjectTask("add_user_object",              UserObject,             false);
   appendMooseObjectTask  ("add_user_object",              Postprocessor);
@@ -841,6 +987,8 @@ addActionTypes(Syntax & syntax)
   registerMooseObjectTask("add_control",                  Control,                false);
   registerMooseObjectTask("add_partitioner",              MoosePartitioner,       false);
 
+  // clang-format on
+
   registerTask("dynamic_object_registration", false);
   registerTask("common_output", true);
   registerTask("setup_recover_file_base", true);
@@ -853,7 +1001,7 @@ addActionTypes(Syntax & syntax)
   registerTask("execute_mesh_modifiers", false);
   registerTask("uniform_refine_mesh", false);
   registerTask("prepare_mesh", false);
-  registerTask("setup_mesh_complete", false);  // calls prepare
+  registerTask("setup_mesh_complete", false); // calls prepare
 
   registerTask("init_displaced_problem", false);
 
@@ -868,9 +1016,8 @@ addActionTypes(Syntax & syntax)
   registerTask("setup_quadrature", true);
 
   /// Additional Actions
-  registerTask("no_action", false);  // Used for Empty Action placeholders
+  registerTask("no_action", false); // Used for Empty Action placeholders
   registerTask("set_global_params", false);
-  registerTask("setup_time_periods", true);
   registerTask("setup_adaptivity", false);
   registerTask("meta_action", false);
   registerTask("setup_debug", false);
@@ -893,74 +1040,95 @@ addActionTypes(Syntax & syntax)
   /****** Dependencies ******/
   /**************************/
   /**
-   * The following is the default set of action dependencies for a basic MOOSE problem.  The formatting
-   * of this string is important.  Each line represents a set of dependencies that depend on the previous
-   * line.  Items on the same line have equal weight and can be executed in any order.
+   * The following is the default set of action dependencies for a basic MOOSE problem.  The
+   * formatting of this string is important.  Each line represents a set of dependencies that depend
+   * on the previous line.  Items on the same line have equal weight and can be executed in any
+   * order.
    *
    * Additional dependencies can be inserted later inside of user applications with calls to
    * ActionWarehouse::addDependency("task", "pre_req")
    */
-  syntax.addDependencySets(
-"(meta_action)"
-"(dynamic_object_registration)"
-"(common_output)"
-"(set_global_params)"
-"(setup_recover_file_base)"
-"(check_copy_nodal_vars)"
-"(setup_mesh)"
-"(add_partitioner)"
-"(init_mesh)"
-"(prepare_mesh)"
-"(add_mesh_modifier)"
-"(execute_mesh_modifiers)"
-"(add_mortar_interface)"
-"(uniform_refine_mesh)"
-"(setup_mesh_complete)"
-"(determine_system_type)"
-"(create_problem)"
-"(setup_time_integrator)"
-"(setup_executioner)"
-"(setup_time_stepper)"
-"(setup_predictor)"
-"(setup_postprocessor_data)"
-"(setup_time_periods)"
-"(init_displaced_problem)"
-"(add_aux_variable, add_variable, add_elemental_field_variable)"
-"(setup_variable_complete)"
-"(setup_quadrature)"
-"(add_function)"
-"(add_periodic_bc)"
-"(add_user_object)"
-"(setup_function_complete)"
-"(setup_adaptivity)"
-"(set_adaptivity_options)"
-"(add_ic)"
-"(add_preconditioning, add_constraint, add_split)"
-"(ready_to_init)"
-"(setup_dampers)"
-"(setup_residual_debug)"
-"(add_bounds_vectors)"
-"(add_multi_app)"
-"(add_transfer)"
-"(copy_nodal_vars, copy_nodal_aux_vars)"
-"(add_material)"
-"(setup_material_output)"
-"(init_problem)"
-"(setup_debug)"
-"(add_output)"
-"(add_postprocessor)"
-"(add_vector_postprocessor)"
-"(add_aux_kernel, add_bc, add_damper, add_dirac_kernel, add_kernel, add_nodal_kernel, add_dg_kernel, add_scalar_kernel, add_aux_scalar_kernel, add_indicator, add_marker)"
-"(add_control)"
-"(check_output)"
-"(check_integrity)"
-);
+  syntax.addDependencySets("(meta_action)"
+                           "(dynamic_object_registration)"
+                           "(common_output)"
+                           "(set_global_params)"
+                           "(setup_recover_file_base)"
+                           "(check_copy_nodal_vars)"
+                           "(setup_mesh)"
+                           "(add_partitioner)"
+                           "(init_mesh)"
+                           "(prepare_mesh)"
+                           "(add_mesh_modifier)"
+                           "(execute_mesh_modifiers)"
+                           "(add_mortar_interface)"
+                           "(uniform_refine_mesh)"
+                           "(setup_mesh_complete)"
+                           "(determine_system_type)"
+                           "(create_problem)"
+                           "(setup_time_integrator)"
+                           "(setup_executioner)"
+                           "(setup_time_stepper)"
+                           "(setup_predictor)"
+                           "(setup_postprocessor_data)"
+                           "(init_displaced_problem)"
+                           "(add_aux_variable, add_variable, add_elemental_field_variable)"
+                           "(setup_variable_complete)"
+                           "(setup_quadrature)"
+                           "(add_function)"
+                           "(add_distribution)"
+                           "(add_sampler)"
+                           "(add_periodic_bc)"
+                           "(add_user_object)"
+                           "(setup_function_complete)"
+                           "(setup_adaptivity)"
+                           "(set_adaptivity_options)"
+                           "(add_ic)"
+                           "(add_constraint, add_field_split)"
+                           "(add_preconditioning)"
+                           "(ready_to_init)"
+                           "(setup_dampers)"
+                           "(setup_residual_debug)"
+                           "(add_bounds_vectors)"
+                           "(add_multi_app)"
+                           "(add_transfer)"
+                           "(copy_nodal_vars, copy_nodal_aux_vars)"
+                           "(add_material)"
+                           "(setup_material_output)"
+                           "(init_problem)"
+                           "(setup_debug)"
+                           "(add_output)"
+                           "(add_postprocessor)"
+                           "(add_vector_postprocessor)" // MaterialVectorPostprocessor requires this
+                                                        // to be after material objects are created.
+                           "(add_aux_kernel, add_bc, add_damper, add_dirac_kernel, add_kernel, "
+                           "add_nodal_kernel, add_dg_kernel, add_interface_kernel, "
+                           "add_scalar_kernel, add_aux_scalar_kernel, add_indicator, add_marker)"
+                           "(add_control)"
+                           "(check_output)"
+                           "(check_integrity)");
+}
 
+void
+populateMeshOnlyTasks(Syntax & syntax)
+{
+  syntax.addDependencySets("(meta_action)"
+                           "(set_global_params)"
+                           "(setup_mesh)"
+                           "(add_partitioner)"
+                           "(init_mesh)"
+                           "(prepare_mesh)"
+                           "(add_mesh_modifier)"
+                           "(execute_mesh_modifiers)"
+                           "(add_mortar_interface)"
+                           "(uniform_refine_mesh)"
+                           "(setup_mesh_complete)");
 }
 
 /**
- * Multiple Action class can be associated with a single input file section, in which case all associated Actions
- * will be created and "acted" on when the associated input file section is seen.b *
+ * Multiple Action class can be associated with a single input file section, in which case all
+ * associated Actions will be created and "acted" on when the associated input file section is
+ * seen.*
+ *
  * Example:
  *  "setup_mesh" <-----------> SetupMeshAction <---------
  *                                                        \
@@ -969,8 +1137,8 @@ addActionTypes(Syntax & syntax)
  * "setup_mesh_complete" <---> SetupMeshCompleteAction <-
  *
  *
- * Action classes can also be registered to act on more than one input file section for a different task
- * if similar logic can work in multiple cases
+ * Action classes can also be registered to act on more than one input file section for a different
+ * task if similar logic can work in multiple cases
  *
  * Example:
  * "add_variable" <-----                       -> [Variables/ *]
@@ -980,17 +1148,17 @@ addActionTypes(Syntax & syntax)
  * "add_aux_variable" <-                       -> [AuxVariables/ *]
  *
  *
- * Note: Placeholder "no_action" actions must be put in places where it is possible to match an object
- *       with a star or a more specific parent later on. (i.e. where one needs to negate the '*' matching
- *       prematurely)
+ * Note: Placeholder "no_action" actions must be put in places where it is possible to match an
+ *       object with a star or a more specific parent later on. (i.e. where one needs to negate the
+ *       '*' matching prematurely).
  */
 void
 registerActions(Syntax & syntax, ActionFactory & action_factory)
 {
 
 #undef registerAction
-#define registerAction(tplt, action) action_factory.reg<tplt>(stringifyName(tplt), action)
-
+#define registerAction(tplt, action)                                                               \
+  action_factory.reg<tplt>(stringifyName(tplt), action, __FILE__, __LINE__)
 
   registerAction(SetupPostprocessorDataAction, "setup_postprocessor_data");
 
@@ -1004,10 +1172,11 @@ registerActions(Syntax & syntax, ActionFactory & action_factory)
   registerAction(SetupMeshCompleteAction, "setup_mesh_complete");
 
   registerAction(AddFunctionAction, "add_function");
+  registerAction(AddDistributionAction, "add_distribution");
+  registerAction(AddSamplerAction, "add_sampler");
   registerAction(CreateExecutionerAction, "setup_executioner");
   registerAction(SetupTimeStepperAction, "setup_time_stepper");
   registerAction(SetupTimeIntegratorAction, "setup_time_integrator");
-  registerAction(SetupTimePeriodsAction, "setup_time_periods");
   registerAction(CreateDisplacedProblemAction, "init_displaced_problem");
   registerAction(DetermineSystemType, "determine_system_type");
   registerAction(CreateProblemAction, "create_problem");
@@ -1038,14 +1207,15 @@ registerActions(Syntax & syntax, ActionFactory & action_factory)
   registerAction(AddScalarKernelAction, "add_scalar_kernel");
   registerAction(AddScalarKernelAction, "add_aux_scalar_kernel");
   registerAction(AddDGKernelAction, "add_dg_kernel");
+  registerAction(AddInterfaceKernelAction, "add_interface_kernel");
   registerAction(AddBCAction, "add_bc");
-  registerAction(EmptyAction, "no_action");  // placeholder
+  registerAction(EmptyAction, "no_action"); // placeholder
   registerAction(AddPeriodicBCAction, "add_periodic_bc");
   registerAction(AddMaterialAction, "add_material");
   registerAction(AddPostprocessorAction, "add_postprocessor");
   registerAction(AddVectorPostprocessorAction, "add_vector_postprocessor");
   registerAction(AddDamperAction, "add_damper");
-  registerAction(AddSplitAction, "add_split");
+  registerAction(AddFieldSplitAction, "add_field_split");
   registerAction(SetupPreconditionerAction, "add_preconditioning");
   registerAction(SetupQuadratureAction, "setup_quadrature");
   registerAction(DeprecatedBlockAction, "deprecated_block");
@@ -1085,17 +1255,21 @@ registerActions(Syntax & syntax, ActionFactory & action_factory)
   registerTask("finish_input_file_output", false);
   registerAction(EmptyAction, "finish_input_file_output");
 
+  registerAction(MaterialDerivativeTestAction, "add_variable");
+  registerAction(MaterialDerivativeTestAction, "add_kernel");
+  registerAction(MaterialDerivativeTestAction, "add_preconditioning");
+
 #undef registerAction
 #define registerAction(tplt, action) action_factory.regLegacy<tplt>(stringifyName(tplt), action)
 }
 
 void
-setSolverDefaults(FEProblem & problem)
+setSolverDefaults(FEProblemBase & problem)
 {
 #ifdef LIBMESH_HAVE_PETSC
   // May be a touch expensive to create a new DM every time, but probably safer to do it this way
   Moose::PetscSupport::petscSetDefaults(problem);
-#endif //LIBMESH_HAVE_PETSC
+#endif // LIBMESH_HAVE_PETSC
 }
 
 MPI_Comm
@@ -1105,7 +1279,7 @@ swapLibMeshComm(MPI_Comm new_comm)
   MPI_Comm old_comm = PETSC_COMM_WORLD;
   PETSC_COMM_WORLD = new_comm;
   return old_comm;
-#endif //LIBMESH_HAVE_PETSC
+#endif // LIBMESH_HAVE_PETSC
 }
 
 void
@@ -1114,9 +1288,6 @@ enableFPE(bool on)
   if (_trap_fpe)
     libMesh::enableFPE(on);
 }
-
-
-PerfLog setup_perf_log("Setup");
 
 /**
  * Initialize global variables
@@ -1127,10 +1298,27 @@ bool _trap_fpe = true;
 bool _trap_fpe = false;
 #endif
 
-bool _color_console = true;
+static bool _color_console = isatty(fileno(stdout));
+
+bool
+colorConsole()
+{
+  return _color_console;
+}
+
+bool
+setColorConsole(bool use_color, bool force)
+{
+  _color_console = (isatty(fileno(stdout)) || force) && use_color;
+  return _color_console;
+}
 
 bool _warnings_are_errors = false;
 
+bool _deprecated_is_error = false;
+
 bool _throw_on_error = false;
+
+ExecFlagEnum execute_flags = ExecFlagEnum();
 
 } // namespace Moose

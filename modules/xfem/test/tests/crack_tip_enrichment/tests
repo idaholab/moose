@@ -1,0 +1,17 @@
+[Tests]
+  [./crack_tip_enrichment_edge_2d]
+    type = Exodiff
+    input = edge_crack_2d.i
+    exodiff = 'edge_crack_2d_out.e'
+    map = false
+    unique_id = true
+  [../]
+  [./crack_tip_enrichment_penny_crack_3d]
+    type = Exodiff
+    input = penny_crack_3d.i
+    exodiff = 'penny_crack_3d_out.e'
+    map = false
+    unique_id = true
+    heavy = true
+  [../]
+[]

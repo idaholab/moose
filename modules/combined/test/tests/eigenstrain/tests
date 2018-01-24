@@ -1,0 +1,27 @@
+[Tests]
+  [./variable]
+    type = 'Exodiff'
+    input = 'variable.i'
+    exodiff = 'variable_out.e'
+  [../]
+  [./variable_finite]
+    type = 'Exodiff'
+    input = 'variable_finite.i'
+    exodiff = 'variable_finite_out.e'
+  [../]
+  [./variable_cahnhilliard]
+    type = 'Exodiff'
+    input = 'variable_cahnhilliard.i'
+    exodiff = 'variable_cahnhilliard_out.e'
+  [../]
+  [./composite]
+    type = 'Exodiff'
+    input = 'composite.i'
+    exodiff = 'composite_out.e'
+  [../]
+  [./inclusion]
+    type = 'Exodiff'
+    input = 'inclusion.i'
+    exodiff = 'inclusion_out.e'
+  [../]
+[]

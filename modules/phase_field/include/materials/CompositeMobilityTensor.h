@@ -7,6 +7,7 @@
 #ifndef COMPOSITEMOBILITYTENSOR_H
 #define COMPOSITEMOBILITYTENSOR_H
 
+#include "Material.h"
 #include "CompositeTensorBase.h"
 
 /**
@@ -17,13 +18,19 @@
  * The generic logic that computes a weighted sum of tensors is located in the
  * templated base class CompositeTensorBase.
  */
-class CompositeMobilityTensor : public CompositeTensorBase<RealTensorValue>
+class CompositeMobilityTensor : public CompositeTensorBase<RealTensorValue, Material>
 {
 public:
   CompositeMobilityTensor(const InputParameters & parameters);
+
+protected:
+  void computeQpProperties();
+
+  const std::string _M_name;
+  MaterialProperty<RealTensorValue> & _M;
 };
 
-template<>
+template <>
 InputParameters validParams<CompositeMobilityTensor>();
 
-#endif //COMPOSITEMOBILITYTENSOR_H
+#endif // COMPOSITEMOBILITYTENSOR_H

@@ -21,7 +21,7 @@
 // Forward declerations
 class CommonOutputAction;
 
-template<>
+template <>
 InputParameters validParams<CommonOutputAction>();
 
 /**
@@ -31,22 +31,17 @@ InputParameters validParams<CommonOutputAction>();
  * such as 'exodus=true' that result in the default output object of that
  * type to be created.
  * */
-class CommonOutputAction: public Action
+class CommonOutputAction : public Action
 {
 public:
-
   /**
    * Class constructor
    */
   CommonOutputAction(InputParameters params);
 
-  /**
-   * Perform the action creation
-   */
-  virtual void act();
+  virtual void act() override;
 
 private:
-
   /**
    * Helper method for creating the short-cut actions
    * @param object_type String of the object type, i.e., the value of 'type=' in the input file
@@ -63,4 +58,4 @@ private:
   InputParameters _action_params;
 };
 
-#endif //COMMONOUTPUTACTION_H
+#endif // COMMONOUTPUTACTION_H

@@ -15,7 +15,7 @@
 #ifndef PARALLELUNIQUEID_H
 #define PARALLELUNIQUEID_H
 
-#include "Moose.h"  // included for namespace usage
+#include "MooseTypes.h" // included for namespace usage and THREAD_ID
 
 #include "libmesh/libmesh_common.h"
 #include "libmesh/threads.h"
@@ -23,31 +23,47 @@
 #ifdef LIBMESH_HAVE_TBB_API
 #include "tbb/concurrent_queue.h"
 #include "tbb/tbb_thread.h"
+#elif LIBMESH_HAVE_OPENMP
+#include <omp.h>
+#elif LIBMESH_HAVE_PTHREAD
+#include <queue>
+#include "MooseException.h"
 #endif
 
-typedef unsigned int THREAD_ID;
+using namespace libMesh;
 
 class ParallelUniqueId
 {
 public:
-
   ParallelUniqueId()
   {
 #ifdef LIBMESH_HAVE_TBB_API
-    ids.pop(id);
+    _ids.pop(id);
+#elif LIBMESH_HAVE_OPENMP
+    id = omp_get_thread_num();
+#elif LIBMESH_HAVE_PTHREAD
+    Threads::spin_mutex::scoped_lock lock(_pthread_id_mutex);
+
+    if (_ids.empty())
+      throw MooseException(
+          "No Thread IDs available in ParallelUniqueID. Did you forget to initialize()?");
+
+    id = _ids.front();
+    _ids.pop();
 #else
-#ifdef LIBMESH_HAVE_PTHREAD
-    id = Threads::pthread_unique_id();
-#else
+    // There is no thread model active, so we're always on thread 0.
     id = 0;
-#endif
 #endif
   }
 
   ~ParallelUniqueId()
   {
 #ifdef LIBMESH_HAVE_TBB_API
-    ids.push(id);
+    _ids.push(id);
+#elif !defined(LIBMESH_HAVE_OPENMP) && defined(LIBMESH_HAVE_PTHREAD)
+    Threads::spin_mutex::scoped_lock lock(_pthread_id_mutex);
+
+    _ids.push(id);
 #endif
   }
 
@@ -57,33 +73,29 @@ public:
    */
   static void initialize()
   {
-#ifdef LIBMESH_HAVE_TBB_API
-    if (!initialized)
+    if (!_initialized)
     {
-      initialized = true;
-      for (unsigned int i=0; i<libMesh::n_threads(); ++i)
-        ids.push(i);
-    }
-#endif
-  }
+      _initialized = true;
 
-  static void reinitialize()
-  {
-#ifdef LIBMESH_HAVE_TBB_API
-    initialized = false;
-    ids.clear();
-    initialize();
+#if defined(LIBMESH_HAVE_TBB_API) ||                                                               \
+    (!defined(LIBMESH_HAVE_OPENMP) && defined(LIBMESH_HAVE_PTHREAD))
+      for (unsigned int i = 0; i < libMesh::n_threads(); ++i)
+        _ids.push(i);
 #endif
+    }
   }
 
   THREAD_ID id;
 
-protected:
+private:
 #ifdef LIBMESH_HAVE_TBB_API
-  static tbb::concurrent_bounded_queue<unsigned int> ids;
+  static tbb::concurrent_bounded_queue<unsigned int> _ids;
+#elif !defined(LIBMESH_HAVE_OPENMP) && defined(LIBMESH_HAVE_PTHREAD)
+  static std::queue<unsigned int> _ids;
+  static Threads::spin_mutex _pthread_id_mutex;
 #endif
 
-  static bool initialized;
+  static bool _initialized;
 };
 
 #endif // PARALLELUNIQUEID_H

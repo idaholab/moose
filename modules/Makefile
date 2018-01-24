@@ -18,12 +18,13 @@ include $(FRAMEWORK_DIR)/moose.mk
 ################################## MODULES ####################################
 ALL_MODULES       := yes
 INCLUDE_COMBINED  := no
+USE_TEST_LIBS     := yes
 include modules.mk
 ###############################################################################
 
 # Build the Module executable
 APPLICATION_DIR    := $(MOOSE_DIR)/modules/combined
-APPLICATION_NAME   := modules
+APPLICATION_NAME   := combined
 BUILD_EXEC         := yes
 # Note: There are no applications that depend on moose_test so the test_up and up
 # targets are not very useful here.  Instead we will test up like this is MOOSE
@@ -51,6 +52,6 @@ test_subs:
 	for app in $(MODULE_DIRS); \
 	do \
 		echo ====== Testing in $${app} ====== ; \
-		cd $${app} && $(MAKE) && ./run_tests $(COLOR_STRING) -j $(MOOSE_JOBS) -t || ret_val=1; \
+		cd $${app} && $(MAKE) && ./run_tests $(COLOR_STRING) -j $(MOOSE_JOBS) $(MOOSE_LOAD) -t || ret_val=1; \
 	done; \
 	exit $$ret_val;)

@@ -1,0 +1,302 @@
+# The no-trap-fpe is because the SVD in LAPACK calls a ieeeck routine which explicitly tries to cause exceptions by calculating 1/0 etc
+[Tests]
+  [./two_surface01]
+    type = 'CSVDiff'
+    input = 'two_surface01.i'
+    csvdiff = 'two_surface01.csv'
+    rel_err = 1.0E-5
+    abs_zero = 1.0E-5
+    cli_args = '--no-trap-fpe'
+  [../]
+  [./two_surface02]
+    type = 'CSVDiff'
+    input = 'two_surface02.i'
+    csvdiff = 'two_surface02.csv'
+    rel_err = 1.0E-5
+    abs_zero = 1.0E-5
+    cli_args = '--no-trap-fpe'
+  [../]
+  [./two_surface03]
+    type = 'CSVDiff'
+    input = 'two_surface03.i'
+    csvdiff = 'two_surface03.csv'
+    rel_err = 1.0E-5
+    abs_zero = 1.0E-5
+    cli_args = '--no-trap-fpe'
+  [../]
+  [./two_surface04]
+    type = 'CSVDiff'
+    input = 'two_surface04.i'
+    csvdiff = 'two_surface04.csv'
+    rel_err = 1.0E-5
+    abs_zero = 1.0E-5
+    cli_args = '--no-trap-fpe'
+  [../]
+  [./two_surface05]
+    type = 'CSVDiff'
+    input = 'two_surface05.i'
+    csvdiff = 'two_surface05.csv'
+    rel_err = 1.0E-5
+    abs_zero = 1.0E-5
+    cli_args = '--no-trap-fpe'
+  [../]
+
+  [./three_surface00]
+    type = 'CSVDiff'
+    input = 'three_surface00.i'
+    csvdiff = 'three_surface00.csv'
+    rel_err = 1.0E-5
+    abs_zero = 1.0E-5
+    cli_args = '--no-trap-fpe'
+  [../]
+  [./three_surface01]
+    type = 'CSVDiff'
+    input = 'three_surface01.i'
+    csvdiff = 'three_surface01.csv'
+    rel_err = 1.0E-5
+    abs_zero = 1.0E-5
+    cli_args = '--no-trap-fpe'
+  [../]
+  [./three_surface02]
+    type = 'CSVDiff'
+    input = 'three_surface02.i'
+    csvdiff = 'three_surface02.csv'
+    rel_err = 1.0E-5
+    abs_zero = 1.0E-5
+    cli_args = '--no-trap-fpe'
+  [../]
+  [./three_surface03]
+    type = 'CSVDiff'
+    input = 'three_surface03.i'
+    csvdiff = 'three_surface03.csv'
+    rel_err = 1.0E-5
+    abs_zero = 1.0E-5
+    cli_args = '--no-trap-fpe'
+  [../]
+  [./three_surface04]
+    type = 'CSVDiff'
+    input = 'three_surface04.i'
+    csvdiff = 'three_surface04.csv'
+    rel_err = 1.0E-5
+    abs_zero = 1.0E-5
+    cli_args = '--no-trap-fpe'
+  [../]
+  [./three_surface05]
+    type = 'CSVDiff'
+    input = 'three_surface05.i'
+    csvdiff = 'three_surface05.csv'
+    rel_err = 1.0E-5
+    abs_zero = 1.0E-5
+    cli_args = '--no-trap-fpe'
+  [../]
+  [./three_surface06]
+    type = 'CSVDiff'
+    input = 'three_surface06.i'
+    csvdiff = 'three_surface06.csv'
+    rel_err = 1.0E-5
+    abs_zero = 1.0E-5
+    cli_args = '--no-trap-fpe'
+  [../]
+  [./three_surface07]
+    type = 'CSVDiff'
+    input = 'three_surface07.i'
+    csvdiff = 'three_surface07.csv'
+    rel_err = 1.0E-5
+    abs_zero = 1.0E-5
+    cli_args = '--no-trap-fpe'
+  [../]
+  [./three_surface08]
+    type = 'CSVDiff'
+    input = 'three_surface08.i'
+    csvdiff = 'three_surface08.csv'
+    rel_err = 1.0E-5
+    abs_zero = 1.0E-5
+    cli_args = '--no-trap-fpe'
+  [../]
+  [./three_surface09]
+    type = 'CSVDiff'
+    input = 'three_surface09.i'
+    csvdiff = 'three_surface09.csv'
+    rel_err = 1.0E-5
+    abs_zero = 1.0E-5
+    cli_args = '--no-trap-fpe'
+  [../]
+  [./three_surface10]
+    type = 'CSVDiff'
+    input = 'three_surface10.i'
+    csvdiff = 'three_surface10.csv'
+    rel_err = 1.0E-5
+    abs_zero = 1.0E-5
+    cli_args = '--no-trap-fpe'
+  [../]
+  [./three_surface11]
+    type = 'CSVDiff'
+    input = 'three_surface11.i'
+    csvdiff = 'three_surface11.csv'
+    rel_err = 1.0E-5
+    abs_zero = 1.0E-5
+    cli_args = '--no-trap-fpe'
+  [../]
+  [./three_surface12]
+    type = 'CSVDiff'
+    input = 'three_surface12.i'
+    csvdiff = 'three_surface12.csv'
+    rel_err = 1.0E-5
+    abs_zero = 1.0E-5
+    cli_args = '--no-trap-fpe'
+  [../]
+  [./three_surface13]
+    type = 'CSVDiff'
+    input = 'three_surface13.i'
+    csvdiff = 'three_surface13.csv'
+    rel_err = 1.0E-5
+    abs_zero = 1.0E-5
+    cli_args = '--no-trap-fpe'
+  [../]
+
+  [./three_surface14]
+    type = 'CSVDiff'
+    input = 'three_surface14.i'
+    csvdiff = 'three_surface14.csv'
+    rel_err = 1.0E-5
+    abs_zero = 1.0E-5
+    cli_args = '--no-trap-fpe'
+  [../]
+  [./three_surface15]
+    type = 'CSVDiff'
+    input = 'three_surface15.i'
+    csvdiff = 'three_surface15.csv'
+    rel_err = 1.0E-5
+    abs_zero = 1.0E-5
+    cli_args = '--no-trap-fpe'
+  [../]
+  [./three_surface16]
+    type = 'CSVDiff'
+    input = 'three_surface16.i'
+    csvdiff = 'three_surface16.csv'
+    rel_err = 1.0E-5
+    abs_zero = 1.0E-5
+    cli_args = '--no-trap-fpe'
+  [../]
+  [./three_surface20]
+    type = 'CSVDiff'
+    input = 'three_surface20.i'
+    csvdiff = 'three_surface20.csv'
+    rel_err = 1.0E-5
+    abs_zero = 1.0E-5
+    cli_args = '--no-trap-fpe'
+  [../]
+  [./three_surface21]
+    type = 'CSVDiff'
+    input = 'three_surface21.i'
+    csvdiff = 'three_surface21.csv'
+    rel_err = 1.0E-5
+    abs_zero = 1.0E-5
+    cli_args = '--no-trap-fpe'
+  [../]
+  [./three_surface22]
+    type = 'CSVDiff'
+    input = 'three_surface22.i'
+    csvdiff = 'three_surface22.csv'
+    rel_err = 1.0E-5
+    abs_zero = 1.0E-5
+    cli_args = '--no-trap-fpe'
+  [../]
+
+  [./four_surface14]
+    type = 'CSVDiff'
+    input = 'four_surface14.i'
+    csvdiff = 'four_surface14.csv'
+    rel_err = 1.0E-5
+    abs_zero = 1.0E-5
+    cli_args = '--no-trap-fpe'
+  [../]
+  [./four_surface24]
+    type = 'CSVDiff'
+    input = 'four_surface24.i'
+    csvdiff = 'four_surface24.csv'
+    rel_err = 1.0E-5
+    abs_zero = 1.0E-5
+    cli_args = '--no-trap-fpe'
+  [../]
+
+  [./six_surface14]
+    type = 'CSVDiff'
+    input = 'six_surface14.i'
+    csvdiff = 'six_surface14.csv'
+    rel_err = 1.0E-5
+    abs_zero = 1.0E-5
+    cli_args = '--no-trap-fpe'
+  [../]
+
+  [./eight_surface14]
+    type = 'CSVDiff'
+    input = 'eight_surface14.i'
+    csvdiff = 'eight_surface14.csv'
+    rel_err = 1.0E-5
+    abs_zero = 1.0E-5
+    cli_args = '--no-trap-fpe'
+  [../]
+
+  [./rock1]
+    type = CSVDiff
+    input = 'rock1.i'
+    csvdiff = 'rock1.csv'
+    rel_err = 1.0E-5
+    abs_zero = 1.0E-5
+    cli_args = '--no-trap-fpe Mesh/nx=2 Mesh/ny=2 Mesh/xmax=2 Mesh/ymax=2'
+  [../]
+  [./rock1_heavy]
+    type = CSVDiff
+    input = 'rock1.i'
+    csvdiff = 'rock1.csv'
+    rel_err = 1.0E-5
+    abs_zero = 1.0E-5
+    heavy = true
+    cli_args = '--no-trap-fpe Mesh/nx=20 Mesh/ny=10 Mesh/xmax=20 Mesh/ymax=10'
+  [../]
+
+  [./paper3]
+    type = CSVDiff
+    input = 'paper3.i'
+    csvdiff = 'paper3.csv'
+    rel_err = 1.0E-4
+    abs_zero = 1.0E-4
+    cli_args = '--no-trap-fpe Mesh/nx=1 Mesh/ny=12 Mesh/xmax=1 Mesh/ymax=12'
+# Run in serial so RandomIC gets fixed PRNG results
+    max_parallel = 1
+    max_threads  = 1
+  [../]
+  [./paper5]
+    type = CSVDiff
+    input = 'paper5.i'
+    csvdiff = 'paper5.csv'
+    rel_err = 1.0E-4
+    abs_zero = 1.0E-4
+    cli_args = '--no-trap-fpe Mesh/nx=1 Mesh/ny=12 Mesh/xmax=1 Mesh/ymax=12'
+  [../]
+
+  [./special_rock1]
+    type = CSVDiff
+    input = 'special_rock1.i'
+    csvdiff = 'special_rock1.csv'
+    rel_err = 1.0E-4
+    abs_zero = 1.0E-4
+    cli_args = '--no-trap-fpe Mesh/nx=1 Mesh/ny=125 Mesh/xmax=1 Mesh/ymax=125'
+# Run in serial so RandomIC gets fixed PRNG results
+    max_parallel = 1
+    max_threads  = 1
+  [../]
+  [./special_joint1]
+    type = CSVDiff
+    input = 'special_joint1.i'
+    csvdiff = 'special_joint1.csv'
+    rel_err = 1.0E-4
+    abs_zero = 1.0E-4
+    cli_args = '--no-trap-fpe Mesh/nx=1 Mesh/ny=125 Mesh/xmax=1 Mesh/ymax=125'
+# Run in serial so RandomIC gets fixed PRNG results
+    max_parallel = 1
+    max_threads  = 1
+  [../]
+    
+[]

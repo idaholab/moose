@@ -22,7 +22,7 @@
 class RealFunctionControl;
 class Function;
 
-template<>
+template <>
 InputParameters validParams<RealFunctionControl>();
 
 /**
@@ -31,33 +31,15 @@ InputParameters validParams<RealFunctionControl>();
 class RealFunctionControl : public Control
 {
 public:
-
   /**
    * Class constructor
    * @param parameters Input parameters for this Control object
    */
   RealFunctionControl(const InputParameters & parameters);
 
-  /**
-   * Class destructor
-   */
-  virtual ~RealFunctionControl(){}
-
-  /**
-   * Evaluate the function and set the parameter value
-   */
-  virtual void execute();
-
-  ///@{
-  /**
-   * These methods are left intentionally empty
-   */
-  virtual void initialize(){}
-  virtual void finalize(){}
-  ///@}
+  virtual void execute() override;
 
 private:
-
   /// The function to execute
   Function & _function;
 

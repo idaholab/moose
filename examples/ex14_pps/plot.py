@@ -5,11 +5,11 @@ import csv
 
 # Python 2.7 does not have str.isnumeric()?
 def isInt(string):
-  try:
-    int(string)
-    return True
-  except ValueError:
-    return False
+    try:
+        int(string)
+        return True
+    except ValueError:
+        return False
 
 # Format of the CSV file is:
 # time,dofs,integral
@@ -19,14 +19,14 @@ def isInt(string):
 # 4,12961,0.022979021365857,
 # 5,51521,0.0057978748995635,
 # 6,205441,0.0014528130907967,
-reader = csv.reader(file('out.csv'))
+reader = csv.reader(file('ex14_out.csv'))
 
 dofs = []
 errs = []
 for row in reader:
-  if row and isInt(row[0]): # Skip rows that don't start with numbers.
-    dofs.append(int(row[1]))
-    errs.append(float(row[2]))
+    if row and isInt(row[0]): # Skip rows that don't start with numbers.
+        dofs.append(int(row[1]))
+        errs.append(float(row[2]))
 
 # Construct data to be plotted
 xdata = np.log10(np.sqrt(dofs))

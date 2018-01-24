@@ -15,20 +15,21 @@
 #include "AdaptAndModify.h"
 #include "TimeStepper.h"
 
-//Moose includes
+// Moose includes
 
-template<>
-InputParameters validParams<AdaptAndModify>()
+template <>
+InputParameters
+validParams<AdaptAndModify>()
 {
   InputParameters params = validParams<Transient>();
   params.addParam<unsigned int>("adapt_cycles", 1, "Number of adaptivity cycles to do.");
   return params;
 }
 
-AdaptAndModify::AdaptAndModify(const InputParameters & parameters) :
-    Transient(parameters),
-    _adapt_cycles(parameters.get<unsigned int>("adapt_cycles"))
-{}
+AdaptAndModify::AdaptAndModify(const InputParameters & parameters)
+  : Transient(parameters), _adapt_cycles(parameters.get<unsigned int>("adapt_cycles"))
+{
+}
 
 void
 AdaptAndModify::incrementStepOrReject()
@@ -61,10 +62,11 @@ AdaptAndModify::endStep(Real input_time)
   if (_last_solve_converged)
   {
     // Compute the Error Indicators and Markers
-    for (unsigned int i=0; i<_adapt_cycles; i++)
+    for (unsigned int i = 0; i < _adapt_cycles; i++)
     {
       // Compute the Error Indicators and Markers
-      _problem.computeIndicatorsAndMarkers();
+      _problem.computeIndicators();
+      _problem.computeMarkers();
 
 #ifdef LIBMESH_ENABLE_AMR
       if (_problem.adaptivity().isOn())
@@ -72,7 +74,7 @@ AdaptAndModify::endStep(Real input_time)
 
 #endif
     }
-    _problem.computeUserObjects(EXEC_CUSTOM, UserObjectWarehouse::ALL);
+    _problem.computeUserObjects(EXEC_CUSTOM, Moose::ALL);
 
     // Set the time for the next output interval if we're at or beyond an output interval
     if (_time_interval && (_time + _timestep_tolerance >= _next_interval_output_time))
@@ -80,5 +82,4 @@ AdaptAndModify::endStep(Real input_time)
   }
 
   _problem.outputStep(EXEC_TIMESTEP_END);
-
 }

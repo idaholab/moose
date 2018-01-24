@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<VTKFile type="PUnstructuredGrid" version="0.1" byte_order="LittleEndian" header_type="UInt32" compressor="vtkZLibDataCompressor">
+  <PUnstructuredGrid GhostLevel="1">
+    <PPointData>
+      <PDataArray type="Float64" Name="aux"/>
+      <PDataArray type="Float64" Name="u"/>
+    </PPointData>
+    <PCellData>
+      <PDataArray type="Int32" Name="libmesh_elem_id"/>
+      <PDataArray type="Int32" Name="subdomain_id"/>
+      <PDataArray type="Int32" Name="processor_id"/>
+    </PCellData>
+    <PPoints>
+      <PDataArray type="Float64" Name="Points" NumberOfComponents="3"/>
+    </PPoints>
+    <Piece Source="vtk_diff_serial_mesh_parallel_out_005_0.vtu"/>
+    <Piece Source="vtk_diff_serial_mesh_parallel_out_005_1.vtu"/>
+  </PUnstructuredGrid>
+</VTKFile>

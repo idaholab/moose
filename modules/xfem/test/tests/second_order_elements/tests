@@ -1,0 +1,65 @@
+[Tests]
+  [./diffusion_2d_tri6]
+    type = Exodiff
+    input = diffusion_2d_tri6.i
+    exodiff = 'diffusion_2d_tri6_out.e diffusion_2d_tri6_out.e-s002'
+    map = false
+    unique_id = true
+  [../]
+  [./diffusion_2d_quad8]
+    type = Exodiff
+    input = diffusion_2d_quad8.i
+    exodiff = 'diffusion_2d_quad8_out.e diffusion_2d_quad8_out.e-s002'
+    map = false
+    unique_id = true
+  [../]
+  [./diffusion_2d_quad9]
+    type = Exodiff
+    input = diffusion_2d_quad9.i
+    exodiff = 'diffusion_2d_quad9_out.e diffusion_2d_quad9_out.e-s002'
+    map = false
+    unique_id = true
+  [../]
+  [./diffusion_3d_tet10]
+    type = Exodiff
+    input = diffusion_3d_tet10.i
+    exodiff = 'diffusion_3d_tet10_out.e'
+    map = false
+    unique_id = true
+  [../]
+  [./diffusion_3d_hex20]
+    type = Exodiff
+    input = diffusion_3d_hex20.i
+    exodiff = 'diffusion_3d_hex20_out.e'
+    map = false
+    unique_id = true
+  [../]
+  [./diffusion_3d_hex27]
+    type = Exodiff
+    input = diffusion_3d_hex27.i
+    exodiff = 'diffusion_3d_hex27_out.e'
+    map = false
+    unique_id = true
+  [../]
+  [./square_branch_quad8_2d]
+    type = Exodiff
+    input = square_branch_quad8_2d.i
+    exodiff = 'square_branch_quad8_2d_out.e square_branch_quad8_2d_out.e-s002 square_branch_quad8_2d_out.e-s003'
+    map = false
+    unique_id = true
+  [../]
+  [./square_branch_quad9_2d]
+    type = Exodiff
+    input = square_branch_quad9_2d.i
+    exodiff = 'square_branch_quad9_2d_out.e square_branch_quad9_2d_out.e-s002 square_branch_quad9_2d_out.e-s003'
+    map = false
+    unique_id = true
+  [../]
+  [./square_branch_tri6_2d]
+    type = Exodiff
+    input = square_branch_tri6_2d.i
+    exodiff = 'square_branch_tri6_2d_out.e square_branch_tri6_2d_out.e-s002 square_branch_tri6_2d_out.e-s003'
+    map = false
+    unique_id = true
+  [../]
+[]

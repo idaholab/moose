@@ -1,0 +1,12 @@
+[Tests]
+  [./direct]
+    type = Exodiff
+    input = control_connection.i
+    exodiff = control_connection_out.e
+  [../]
+  [./alias]
+    type = Exodiff
+    input = alias_connection.i
+    exodiff = alias_connection_out.e
+  [../]
+[]

@@ -13,29 +13,24 @@
 /****************************************************************/
 
 #include "KernelGrad.h"
+
+// MOOSE includes
+#include "Assembly.h"
+#include "MooseVariable.h"
 #include "SubProblem.h"
 #include "SystemBase.h"
-#include "Assembly.h"
 
-// libmesh includes
 #include "libmesh/quadrature.h"
 
-template<>
-InputParameters validParams<KernelGrad>()
+template <>
+InputParameters
+validParams<KernelGrad>()
 {
   InputParameters params = validParams<Kernel>();
   return params;
 }
 
-
-KernelGrad::KernelGrad(const InputParameters & parameters):
-    Kernel(parameters)
-{
-}
-
-KernelGrad::~KernelGrad()
-{
-}
+KernelGrad::KernelGrad(const InputParameters & parameters) : Kernel(parameters) {}
 
 void
 KernelGrad::computeResidual()
@@ -48,7 +43,7 @@ KernelGrad::computeResidual()
   for (_qp = 0; _qp < _qrule->n_points(); _qp++)
   {
     RealGradient value = precomputeQpResidual() * _JxW[_qp] * _coord[_qp];
-    for (_i = 0; _i < n_test; _i++)  // target for auto vectorization
+    for (_i = 0; _i < n_test; _i++) // target for auto vectorization
       _local_re(_i) += value * _grad_test[_i][_qp];
   }
 
@@ -57,8 +52,8 @@ KernelGrad::computeResidual()
   if (_has_save_in)
   {
     Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
-    for (unsigned int i = 0; i < _save_in.size(); i++)
-      _save_in[i]->sys().solution().add_vector(_local_re, _save_in[i]->dofIndices());
+    for (const auto & var : _save_in)
+      var->sys().solution().add_vector(_local_re, var->dofIndices());
   }
 }
 
@@ -85,11 +80,11 @@ KernelGrad::computeJacobian()
     const unsigned int rows = ke.m();
     DenseVector<Number> diag(rows);
     for (unsigned int i = 0; i < rows; i++) // target for auto vectorization
-      diag(i) = _local_ke(i,i);
+      diag(i) = _local_ke(i, i);
 
     Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
-    for (unsigned int i = 0; i < _diag_save_in.size(); i++)
-      _diag_save_in[i]->sys().solution().add_vector(diag, _diag_save_in[i]->dofIndices());
+    for (const auto & var : _diag_save_in)
+      var->sys().solution().add_vector(diag, var->dofIndices());
   }
 }
 
@@ -120,4 +115,3 @@ KernelGrad::precomputeQpJacobian()
 {
   return RealGradient(0.0);
 }
-

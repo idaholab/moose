@@ -1,0 +1,16 @@
+[Tests]
+  [./dual]
+    type = ImageDiff
+    command = dual.py
+    imagediff = 'dual.png'
+    allowed_darwin = 0.96
+    allowed_linux = 0.94
+  [../]
+  [./dualx]
+    type = ImageDiff
+    command = dualx.py
+    imagediff = 'dualx.png'
+    allowed_linux = 0.94
+    allowed_darwin = 0.96
+  [../]
+[]

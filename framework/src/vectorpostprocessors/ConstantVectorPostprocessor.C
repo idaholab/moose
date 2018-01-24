@@ -14,27 +14,29 @@
 
 #include "ConstantVectorPostprocessor.h"
 
-template<>
-InputParameters validParams<ConstantVectorPostprocessor>()
+template <>
+InputParameters
+validParams<ConstantVectorPostprocessor>()
 {
   InputParameters params = validParams<GeneralVectorPostprocessor>();
 
-  params.addRequiredParam<VectorPostprocessorValue>("value", "The vector value this object will have.");
+  params.addRequiredParam<VectorPostprocessorValue>("value",
+                                                    "The vector value this object will have.");
   return params;
 }
 
-ConstantVectorPostprocessor::ConstantVectorPostprocessor(const InputParameters & parameters) :
-    GeneralVectorPostprocessor(parameters),
-    _value(declareVector("value"))
+ConstantVectorPostprocessor::ConstantVectorPostprocessor(const InputParameters & parameters)
+  : GeneralVectorPostprocessor(parameters), _value(declareVector("value"))
 {
   _value = getParam<VectorPostprocessorValue>("value");
 }
 
 void
 ConstantVectorPostprocessor::initialize()
-{}
+{
+}
 
 void
 ConstantVectorPostprocessor::execute()
-{}
-
+{
+}

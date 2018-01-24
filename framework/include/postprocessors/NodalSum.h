@@ -17,30 +17,28 @@
 
 #include "NodalVariablePostprocessor.h"
 
-//Forward Declarations
+// Forward Declarations
 class NodalSum;
-class MooseMesh;
 
-template<>
+template <>
 InputParameters validParams<NodalSum>();
 
+/**
+ * Computes a sum of the nodal values of the coupled variable.
+ */
 class NodalSum : public NodalVariablePostprocessor
 {
 public:
   NodalSum(const InputParameters & parameters);
 
-  virtual void initialize();
-  virtual void execute();
+  virtual void initialize() override;
+  virtual void execute() override;
+  virtual Real getValue() override;
 
-  /**
-   * This will return the degrees of freedom in the system.
-   */
-  virtual Real getValue();
-
-  void threadJoin(const UserObject & y);
+  void threadJoin(const UserObject & y) override;
 
 protected:
   Real _sum;
 };
 
-#endif //NODALSUM_H
+#endif // NODALSUM_H

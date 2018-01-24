@@ -1,5 +1,5 @@
-# The extra 'x' before the Mesh section below is intentional.  GetPot will ignore that section making an otherwise
-# ok input file appear as though there is no mesh.  We want to catch this type of error.
+# The extra 'x' before the Mesh section below is intentional.
+# We want to catch this type of error.
 x[Mesh]
   file = square.e
 []

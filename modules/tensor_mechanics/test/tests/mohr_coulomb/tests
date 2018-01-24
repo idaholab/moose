@@ -1,0 +1,238 @@
+[Tests]
+  [./except1]
+    type = 'RunException'
+    input = 'except1.i'
+    expect_err = 'Mohr-Coulomb friction angle must not be less than Mohr-Coulomb dilation angle'
+  [../]
+  [./except2]
+    type = 'RunException'
+    input = 'except2.i'
+    expect_err = 'mc_lode_cutoff must not be negative'
+  [../]
+  [./except3]
+    type = 'RunException'
+    input = 'except3.i'
+    expect_err = 'Mohr-Coulomb edge smoothing angle is too small and a non-convex yield surface will result.  Please choose a larger value'
+  [../]
+  [./except4]
+    type = 'RunException'
+    input = 'except4.i'
+    expect_err = 'Mohr-Coulomb edge smoothing angle is too small and a non-convex yield surface will result.  Please choose a larger value'
+  [../]
+
+  [./small2]
+    type = 'CSVDiff'
+    input = 'small_deform2.i'
+    csvdiff = 'small_deform2.csv'
+    rel_err = 1.0E-5
+    abs_zero = 1.0E-5
+  [../]
+  [./small2_small_strain]
+    type = 'CSVDiff'
+    input = 'small_deform2_small_strain.i'
+    csvdiff = 'small_deform2_small_strain.csv'
+    rel_err = 1.0E-5
+    abs_zero = 1.0E-5
+  [../]
+  [./small3]
+    type = 'CSVDiff'
+    input = 'small_deform3.i'
+    csvdiff = 'small_deform3.csv'
+    rel_err = 1.0E-5
+    abs_zero = 1.0E-5
+  [../]
+  [./small4]
+    type = 'CSVDiff'
+    input = 'small_deform4.i'
+    csvdiff = 'small_deform4.csv'
+    rel_err = 1.0E-5
+    abs_zero = 1.0E-5
+  [../]
+  [./small5]
+    type = 'CSVDiff'
+    input = 'small_deform5.i'
+    csvdiff = 'small_deform5.csv'
+    rel_err = 1.0E-5
+    abs_zero = 1.0E-5
+  [../]
+  [./small6]
+    type = 'CSVDiff'
+    input = 'small_deform6.i'
+    csvdiff = 'small_deform6.csv'
+    rel_err = 1.0E-5
+    abs_zero = 1.0E-5
+  [../]
+
+  [./many_cap]
+    type = 'CSVDiff'
+    input = 'many_deforms_cap.i'
+    csvdiff = 'many_deforms_cap.csv'
+    rel_err = 1.0E-5
+    abs_zero = 1.0E-5
+    heavy = true
+  [../]
+
+  [./random]
+    type = 'CSVDiff'
+    input = 'random.i'
+    csvdiff = 'random.csv'
+    rel_err = 1.0E-5
+    abs_zero = 1.0E-5
+    cli_args = '--no-trap-fpe Mesh/nx=4 Mesh/ny=5 Mesh/xmax=4 Mesh/ymax=5'
+  [../]
+  [./random_heavy]
+    type = 'CSVDiff'
+    input = 'random.i'
+    csvdiff = 'random.csv'
+    rel_err = 1.0E-5
+    abs_zero = 1.0E-5
+    cli_args = '--no-trap-fpe Mesh/nx=20 Mesh/ny=20 Mesh/xmax=20 Mesh/ymax=20'
+    heavy = true
+  [../]
+
+  [./hard1]
+    type = 'CSVDiff'
+    input = 'small_deform_hard1.i'
+    csvdiff = 'small_deform_hard1.csv'
+    rel_err = 1.0E-5
+    abs_zero = 1.0E-5
+  [../]
+  [./hard_cubic]
+    type = 'CSVDiff'
+    input = 'small_deform_hard_cubic.i'
+    csvdiff = 'small_deform_hard_cubic.csv'
+    rel_err = 1.0E-5
+    abs_zero = 1.0E-5
+  [../]
+  [./hard2]
+    type = 'CSVDiff'
+    input = 'small_deform_hard2.i'
+    csvdiff = 'small_deform_hard2.csv'
+    rel_err = 1.0E-5
+    abs_zero = 1.0E-5
+  [../]
+  [./hard3]
+    type = 'CSVDiff'
+    input = 'small_deform_hard3.i'
+    csvdiff = 'small_deform_hard3.csv'
+    rel_err = 1.0E-5
+    abs_zero = 1.0E-5
+  [../]
+
+  [./uni_axial1]
+    type = 'CSVDiff'
+    input = 'uni_axial1.i'
+    csvdiff = 'uni_axial1.csv'
+    rel_err = 1.0E-5
+    abs_zero = 1.0E-3
+  [../]
+  [./uni_axial1_small_strain]
+    type = 'CSVDiff'
+    input = 'uni_axial1_small_strain.i'
+    csvdiff = 'uni_axial1_small_strain.csv'
+    rel_err = 1.0E-5
+    abs_zero = 1.0E-3
+  [../]
+  [./uni_axial2]
+    type = 'Exodiff'
+    input = 'uni_axial2.i'
+    exodiff = 'uni_axial2.e'
+    rel_err = 4.0E-4
+    abs_zero = 1.0E-4
+    heavy = true
+  [../]
+  [./uni_axial3]
+    type = 'Exodiff'
+    input = 'uni_axial3.i'
+    exodiff = 'uni_axial3.e'
+    rel_err = 4.0E-4
+    abs_zero = 1.0E-4
+    heavy = true
+  [../]
+
+  [./small1_uo]
+    type = 'CSVDiff'
+    input = 'small_deform1_uo.i'
+    csvdiff = 'small_deform1_uo.csv'
+    rel_err = 1.0E-5
+    abs_zero = 1.0E-5
+  [../]
+
+  [./planar1]
+    type = 'CSVDiff'
+    input = 'planar1.i'
+    csvdiff = 'planar1.csv'
+    rel_err = 1.0E-5
+    cli_args = '--no-trap-fpe'
+  [../]
+  [./planar3]
+    type = 'CSVDiff'
+    input = 'planar3.i'
+    csvdiff = 'planar3.csv'
+    rel_err = 1.0E-5
+    cli_args = '--no-trap-fpe'
+  [../]
+  [./random_planar]
+    type = 'CSVDiff'
+    input = 'random_planar.i'
+    csvdiff = 'random_planar.csv'
+    rel_err = 1.0E-5
+    abs_zero = 1.0E-5
+    cli_args = '--no-trap-fpe Mesh/nx=6 Mesh/ny=7 Mesh/xmax=6 Mesh/ymax=7'
+  [../]
+  [./random_planar_heavy]
+    type = 'CSVDiff'
+    input = 'random_planar.i'
+    csvdiff = 'random_planar.csv'
+    rel_err = 1.0E-5
+    abs_zero = 1.0E-5
+    cli_args = '--no-trap-fpe Mesh/nx=20 Mesh/ny=20 Mesh/xmax=20 Mesh/ymax=20'
+    heavy = true
+  [../]
+
+  [./uni_axial2_planar]
+    type = 'Exodiff'
+    input = 'uni_axial2_planar.i'
+    exodiff = 'uni_axial2_planar.e'
+    rel_err = 4.0E-3
+    abs_zero = 1.0E-3
+    heavy = true
+  [../]
+  [./uni_axial3_planar]
+    type = 'Exodiff'
+    input = 'uni_axial3_planar.i'
+    exodiff = 'uni_axial3_planar.e'
+    rel_err = 4.0E-3
+    abs_zero = 1.0E-3
+    heavy = true
+  [../]
+
+  [./planar_hard1]
+    type = 'CSVDiff'
+    input = 'planar_hard1.i'
+    csvdiff = 'planar_hard1.csv'
+    abs_zero = 1.0E-8
+  [../]
+  [./planar_hard2]
+    type = 'CSVDiff'
+    input = 'planar_hard2.i'
+    csvdiff = 'planar_hard2.csv'
+    abs_zero = 1.0E-8
+  [../]
+  [./planar_hard3]
+    type = 'CSVDiff'
+    input = 'planar_hard3.i'
+    csvdiff = 'planar_hard3.csv'
+  [../]
+  [./planar_hard4]
+    type = 'CSVDiff'
+    input = 'planar_hard4.i'
+    csvdiff = 'planar_hard4.csv'
+  [../]
+  [./planar_hard5]
+    type = 'CSVDiff'
+    input = 'planar_hard5.i'
+    csvdiff = 'planar_hard5.csv'
+  [../]
+
+[]

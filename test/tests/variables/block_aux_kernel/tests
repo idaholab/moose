@@ -3,6 +3,6 @@
     type = 'Exodiff'
     input = 'block_aux_kernel_test.i'
     exodiff = 'out.e'
-    group = 'geometric'
+    group = 'requirements geometric'
   [../]
 []

@@ -17,19 +17,19 @@
 
 #include "GeneralVectorPostprocessor.h"
 
-//Forward Declarations
+// Forward Declarations
 class VectorOfPostprocessors;
 
-template<>
+template <>
 InputParameters validParams<VectorOfPostprocessors>();
 
 /**
  *  VectorOfPostprocessors is a type of VectorPostprocessor that outputs the
- *  values of an arbitrary user-specified set of postprocessors as a vector in the order specified by the user.
+ *  values of an arbitrary user-specified set of postprocessors as a vector in the order specified
+ * by the user.
  */
 
-class VectorOfPostprocessors :
-  public GeneralVectorPostprocessor
+class VectorOfPostprocessors : public GeneralVectorPostprocessor
 {
 public:
   /**
@@ -39,27 +39,14 @@ public:
   VectorOfPostprocessors(const InputParameters & parameters);
 
   /**
-   * Destructor
-   */
-  virtual ~VectorOfPostprocessors() {}
-
-  /**
    * Initialize, clears the postprocessor vector
    */
-  virtual void initialize();
+  virtual void initialize() override;
 
   /**
    * Populates the postprocessor vector of values with the supplied postprocessors
    */
-  virtual void execute();
-
-  ///@{
-  /**
-   * no-op because the postprocessors are already parallel consistent
-   */
-  virtual void finalize() {}
-  virtual void threadJoin(const UserObject &) {}
-  ///@}
+  virtual void execute() override;
 
 protected:
   /// The VectorPostprocessorValue object where the results are stored

@@ -80,12 +80,12 @@
     var2 = u
   [../]
   [./forceu]
-    type = UserForcingFunction
+    type = BodyForce
     variable = u
     function = forcing_fnu
   [../]
   [./forcev]
-    type = UserForcingFunction
+    type = BodyForce
     variable = v
     function = forcing_fnv
   [../]

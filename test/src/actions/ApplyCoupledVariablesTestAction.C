@@ -17,23 +17,23 @@
 #include "MooseObjectAction.h"
 #include "ActionWarehouse.h"
 
-template<>
-InputParameters validParams<ApplyCoupledVariablesTestAction>()
+template <>
+InputParameters
+validParams<ApplyCoupledVariablesTestAction>()
 {
   InputParameters params = validParams<Action>();
   params.addCustomTypeParam("coef", 0.0, "CoefficientType", "The coefficient of diffusion");
-  params.addRequiredParam<NonlinearVariableName>("variable", "The name of the variable that this Kernel operates on");
+  params.addRequiredParam<NonlinearVariableName>(
+      "variable", "The name of the variable that this Kernel operates on");
   return params;
 }
 
-ApplyCoupledVariablesTestAction::ApplyCoupledVariablesTestAction(const InputParameters & params) :
-  Action(params)
+ApplyCoupledVariablesTestAction::ApplyCoupledVariablesTestAction(const InputParameters & params)
+  : Action(params)
 {
 }
 
-ApplyCoupledVariablesTestAction::~ApplyCoupledVariablesTestAction()
-{
-}
+ApplyCoupledVariablesTestAction::~ApplyCoupledVariablesTestAction() {}
 
 void
 ApplyCoupledVariablesTestAction::act()
@@ -45,7 +45,8 @@ ApplyCoupledVariablesTestAction::act()
 
   // Create the action
   std::string long_name = "Kernels/_coef_diffusion";
-  MooseSharedPointer<MooseObjectAction> action = MooseSharedNamespace::static_pointer_cast<MooseObjectAction>(_action_factory.create("AddKernelAction", long_name, action_params));
+  std::shared_ptr<MooseObjectAction> action = std::static_pointer_cast<MooseObjectAction>(
+      _action_factory.create("AddKernelAction", long_name, action_params));
 
   // Apply the parameters from the this action to the object being created
   action->getObjectParams().applyParameters(_pars);

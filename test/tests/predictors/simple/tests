@@ -1,0 +1,17 @@
+[Tests]
+  [./test]
+    type = 'CSVDiff'
+    input = 'predictor_test.i'
+    csvdiff = 'predictor_test_out.csv'
+  [../]
+  [./test_skip]
+    type = 'CSVDiff'
+    input = 'predictor_skip_test.i'
+    csvdiff = 'predictor_skip_test_out.csv'
+  [../]
+  [./test_skip_old]
+    type = 'CSVDiff'
+    input = 'predictor_skip_old_test.i'
+    csvdiff = 'predictor_skip_old_test_out.csv'
+  [../]
+[]

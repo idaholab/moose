@@ -21,7 +21,7 @@
 // Forward declarations
 class CSV;
 
-template<>
+template <>
 InputParameters validParams<CSV>();
 
 /**
@@ -32,7 +32,6 @@ InputParameters validParams<CSV>();
 class CSV : public TableOutput
 {
 public:
-
   /**
    * Class constructor
    *
@@ -44,49 +43,46 @@ public:
   CSV(const InputParameters & parameters);
 
 protected:
-
   /**
    * Output the table to a *.csv file
    */
-  virtual void output(const ExecFlagType & type);
+  virtual void output(const ExecFlagType & type) override;
 
   /**
    * The filename for the output file
    * @return A string of output file including the extension
    */
-  virtual std::string filename();
+  virtual std::string filename() override;
 
   /**
    * Setup the CSV output
    * If restarting and the append_restart flag is false, then the output data is cleared here
    */
-  void initialSetup();
+  void initialSetup() override;
 
   /**
    * Sets the write flag and calls TableOutput::outputScalarVariables()
    */
-  virtual void outputScalarVariables();
+  virtual void outputScalarVariables() override;
 
   /**
    * Sets the write flag and calls TableOutput::outputPostprocessors()
    */
-  virtual void outputPostprocessors();
+  virtual void outputPostprocessors() override;
 
   /**
    * Sets the write flag and calls TableOutput::outputVectorPostprocessors()
    */
-  virtual void outputVectorPostprocessors();
+  virtual void outputVectorPostprocessors() override;
 
 private:
-
   /// Flag for aligning data in .csv file
   bool _align;
 
   /// Decimal digits per number in the CSV file
   unsigned int _precision;
 
-  /// Overwrite the default delimiter?
-  bool _set_delimiter;
+  /// The delimiter used when writing the CSV file
   std::string _delimiter;
 
   /// Flag for writting scalar and/or postprocessor data
@@ -94,6 +90,12 @@ private:
 
   /// Flag for writting vector postprocessor data
   bool _write_vector_table;
+
+  /// Flag for sorting column names
+  const bool _sort_columns;
+
+  /// Flag indicating MOOSE is recovering via --recover command-line option
+  bool _recovering;
 };
 
 #endif /* CSV_H */

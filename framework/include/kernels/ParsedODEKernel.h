@@ -18,18 +18,16 @@
 #include "ODEKernel.h"
 #include "FunctionParserUtils.h"
 
-//Forward Declarations
+// Forward Declarations
 class ParsedODEKernel;
 
-template<>
+template <>
 InputParameters validParams<ODEKernel>();
 
 /**
  *
  */
-class ParsedODEKernel :
-  public ODEKernel,
-  public FunctionParserUtils
+class ParsedODEKernel : public ODEKernel, public FunctionParserUtils
 {
 public:
   ParsedODEKernel(const InputParameters & parameters);
@@ -37,9 +35,9 @@ public:
 protected:
   void updateParams();
 
-  virtual Real computeQpResidual();
-  virtual Real computeQpJacobian();
-  virtual Real computeQpOffDiagJacobian(unsigned int jvar);
+  virtual Real computeQpResidual() override;
+  virtual Real computeQpJacobian() override;
+  virtual Real computeQpOffDiagJacobian(unsigned int jvar) override;
 
   /// function expression
   std::string _function;
@@ -49,7 +47,7 @@ protected:
   std::vector<VariableValue *> _args;
   std::vector<std::string> _arg_names;
 
-  /// function parser object for the resudual and on-diagonal Jacobian
+  /// function parser object for the residual and on-diagonal Jacobian
   ADFunctionPtr _func_F;
   ADFunctionPtr _func_dFdu;
 
@@ -63,6 +61,5 @@ private:
   /// Vector to look up the internal coupled variable index into _arg_*  through the libMesh variable number
   std::vector<unsigned int> _arg_index;
 };
-
 
 #endif /* PARSEDODEKERNEL_H */

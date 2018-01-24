@@ -19,7 +19,7 @@
 
 class SimplePredictor;
 
-template<>
+template <>
 InputParameters validParams<SimplePredictor>();
 
 /**
@@ -48,12 +48,9 @@ class SimplePredictor : public Predictor
 {
 public:
   SimplePredictor(const InputParameters & parameters);
-  virtual ~SimplePredictor();
 
-  virtual void apply(NumericVector<Number> & sln);
-
-protected:
-  Real _scale;
+  virtual bool shouldApply() override;
+  virtual void apply(NumericVector<Number> & sln) override;
 };
 
 #endif /* SIMPLEPREDICTOR_H */

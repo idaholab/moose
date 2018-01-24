@@ -1,0 +1,21 @@
+[Tests]
+  [./min_nodal_damping]
+    type = 'RunApp'
+    input = 'min_nodal_damping.i'
+    expect_out = "From damper: 'limit' damping below min_damping"
+    min_threads = 2
+    min_parallel = 2
+  [../]
+  [./min_elem_damping]
+    type = 'RunApp'
+    input = 'min_elem_damping.i'
+    expect_out = "From damper: 'limit' damping below min_damping"
+    min_threads = 2
+    min_parallel = 2
+  [../]
+  [./min_general_damping]
+    type = 'RunException'
+    input = 'min_general_damping.i'
+    expect_err = "Solve failed and timestep already at or below dtmin"
+  [../]
+[]

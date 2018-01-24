@@ -16,46 +16,44 @@
 #define DOFMAPOUTPUT_H
 
 // MOOSE includes
-#include "BasicOutput.h"
 #include "FileOutput.h"
 
 // Forward declarations
 class DOFMapOutput;
+class MooseMesh;
 
-template<>
+template <>
 InputParameters validParams<DOFMapOutput>();
 
 /**
  * An output object for writing the DOF map of the system in a machine parsable format
  */
-class DOFMapOutput : public BasicOutput<FileOutput>
+class DOFMapOutput : public FileOutput
 {
 public:
   DOFMapOutput(const InputParameters & parameters);
-  virtual ~DOFMapOutput(){};
 
   /**
    * Creates the output file name
    * Appends the user-supplied 'file_base' input parameter with a '.txt' extension
    * @return A string containing the output filename
    */
-  virtual std::string filename();
+  virtual std::string filename() override;
 
   /**
    * Write the DOF mapt
    */
-  void output(const ExecFlagType & type);
+  void output(const ExecFlagType & type) override;
 
 protected:
-
   /**
    * A helper method for joining items with a delimeter
    * @param begin Beginning iterator
    * @param end Ending iterator
    * @param delim The delimiter character to insert
    */
-  template<typename T>
-  std::string join(const T & begin, const T & end, const char* const delim);
+  template <typename T>
+  std::string join(const T & begin, const T & end, const char * const delim);
 
   /**
    * Write the file stream to the file

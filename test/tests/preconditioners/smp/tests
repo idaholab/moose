@@ -3,6 +3,7 @@
     type = 'Exodiff'
     input = 'smp_single_test.i'
     exodiff = 'smp_single_test_out.e'
+    group = 'requirements'
   [../]
 
   [./smp_adapt_test]

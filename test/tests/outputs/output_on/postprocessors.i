@@ -39,8 +39,8 @@
 
 [Postprocessors]
   [./sum]
-    type = RunTime
-    time_type = 'alive'
+    type = PerformanceData
+    event = 'alive'
     execute_on = 'initial nonlinear timestep_end'
   [../]
 []

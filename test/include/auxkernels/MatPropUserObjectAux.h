@@ -17,11 +17,11 @@
 
 #include "AuxKernel.h"
 
-//Forward Declarations
+// Forward Declarations
 class MatPropUserObjectAux;
 class MaterialPropertyUserObject;
 
-template<>
+template <>
 InputParameters validParams<MatPropUserObjectAux>();
 
 class MatPropUserObjectAux : public AuxKernel

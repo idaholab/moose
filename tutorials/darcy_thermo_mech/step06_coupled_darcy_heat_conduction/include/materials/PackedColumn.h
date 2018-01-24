@@ -11,8 +11,8 @@
 /*                                                              */
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
-#ifndef PACKEDCOLUMN_H_
-#define PACKEDCOLUMN_H_
+#ifndef PACKEDCOLUMN_H
+#define PACKEDCOLUMN_H
 
 #include "Material.h"
 
@@ -21,7 +21,7 @@
 
 class PackedColumn;
 
-template<>
+template <>
 InputParameters validParams<PackedColumn>();
 
 /**
@@ -40,13 +40,13 @@ protected:
    * Necessary override.  This is where the values of the properties
    * are computed.
    */
-  virtual void computeQpProperties();
+  virtual void computeQpProperties() override;
 
-  /// The radius of the balls in the column
-  const Real & _ball_radius;
+  /// The radius of the spheres in the column
+  const Real & _sphere_radius;
 
   /// The permeability of the medium is based on a linear
-  /// interpolation between the two different ball sizes which are
+  /// interpolation between the two different sphere sizes which are
   /// assumed to be present.
   LinearInterpolation _permeability_interpolation;
 
@@ -67,6 +67,11 @@ protected:
 
   /// The bulk density
   MaterialProperty<Real> & _density;
+
+  /// Single value to store the interpolated permeability base on
+  /// sphere size.  The _sphere_radius is assumed to be constant, so
+  /// we only have to compute this once.
+  Real _interpolated_permeability;
 };
 
-#endif //PACKEDCOLUMN_H
+#endif // PACKEDCOLUMN_H

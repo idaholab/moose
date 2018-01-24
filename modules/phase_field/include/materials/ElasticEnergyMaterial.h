@@ -12,9 +12,9 @@
 // Forward Declaration
 class ElasticEnergyMaterial;
 class RankTwoTensor;
-class ElasticityTensorR4;
+class RankFourTensor;
 
-template<>
+template <>
 InputParameters validParams<DerivativeFunctionMaterialBase>();
 
 /**
@@ -25,10 +25,12 @@ class ElasticEnergyMaterial : public DerivativeFunctionMaterialBase
 public:
   ElasticEnergyMaterial(const InputParameters & parameters);
 
+  virtual void initialSetup() override;
+
 protected:
-  virtual Real computeF();
-  virtual Real computeDF(unsigned int i_var);
-  virtual Real computeD2F(unsigned int i_var, unsigned int j_var);
+  virtual Real computeF() override;
+  virtual Real computeDF(unsigned int i_var) override;
+  virtual Real computeD2F(unsigned int i_var, unsigned int j_var) override;
 
   std::string _base_name;
 
@@ -38,16 +40,16 @@ protected:
   // std::vector<std::vector<const MaterialProperty<RankTwoTensor> *> > _d2stress;
 
   ///@{ Elasticity tensor derivatives
-  const MaterialProperty<ElasticityTensorR4> & _elasticity_tensor;
-  std::vector<const MaterialProperty<ElasticityTensorR4> *> _delasticity_tensor;
-  std::vector<std::vector<const MaterialProperty<ElasticityTensorR4> *> > _d2elasticity_tensor;
+  const MaterialProperty<RankFourTensor> & _elasticity_tensor;
+  std::vector<const MaterialProperty<RankFourTensor> *> _delasticity_tensor;
+  std::vector<std::vector<const MaterialProperty<RankFourTensor> *>> _d2elasticity_tensor;
   ///@}
 
   ///@{ Strain and derivatives
   const MaterialProperty<RankTwoTensor> & _strain;
   std::vector<const MaterialProperty<RankTwoTensor> *> _dstrain;
-  std::vector<std::vector<const MaterialProperty<RankTwoTensor> *> > _d2strain;
+  std::vector<std::vector<const MaterialProperty<RankTwoTensor> *>> _d2strain;
   ///@}
 };
 
-#endif //ELASTICENERGYMATERIAL_H
+#endif // ELASTICENERGYMATERIAL_H

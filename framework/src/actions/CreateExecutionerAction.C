@@ -17,28 +17,45 @@
 #include "PetscSupport.h"
 #include "MooseApp.h"
 #include "Executioner.h"
+#include "Eigenvalue.h"
+#include "FEProblem.h"
+#include "EigenProblem.h"
 
-template<>
-InputParameters validParams<CreateExecutionerAction>()
+template <>
+InputParameters
+validParams<CreateExecutionerAction>()
 {
   InputParameters params = validParams<MooseObjectAction>();
 
   return params;
 }
 
-
-CreateExecutionerAction::CreateExecutionerAction(InputParameters params) :
-    MooseObjectAction(params)
+CreateExecutionerAction::CreateExecutionerAction(InputParameters params) : MooseObjectAction(params)
 {
 }
 
 void
 CreateExecutionerAction::act()
 {
-  Moose::setup_perf_log.push("Create Executioner","Setup");
-  _moose_object_pars.set<FEProblem *>("_fe_problem") = _problem.get();
-  MooseSharedPointer<Executioner> executioner = MooseSharedNamespace::static_pointer_cast<Executioner>(_factory.create(_type, "Executioner", _moose_object_pars));
-  Moose::setup_perf_log.pop("Create Executioner","Setup");
+  _moose_object_pars.set<FEProblemBase *>("_fe_problem_base") = _problem.get();
+
+  std::shared_ptr<FEProblem> fe_problem = std::dynamic_pointer_cast<FEProblem>(_problem);
+  if (fe_problem)
+    _moose_object_pars.set<FEProblem *>("_fe_problem") = fe_problem.get();
+
+  std::shared_ptr<EigenProblem> eigen_problem = std::dynamic_pointer_cast<EigenProblem>(_problem);
+  if (eigen_problem)
+    _moose_object_pars.set<EigenProblem *>("_eigen_problem") = eigen_problem.get();
+
+  std::shared_ptr<Executioner> executioner =
+      _factory.create<Executioner>(_type, "Executioner", _moose_object_pars);
+
+  std::shared_ptr<Eigenvalue> eigen_executioner =
+      std::dynamic_pointer_cast<Eigenvalue>(executioner);
+
+  if ((eigen_problem == nullptr) != (eigen_executioner == nullptr))
+    mooseError("Executioner is not consistent with each other; EigenExecutioner needs an "
+               "EigenProblem, and Steady and Transient need a FEProblem");
 
   _app.executioner() = executioner;
 }

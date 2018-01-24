@@ -15,7 +15,6 @@
 #ifndef VARIABLEWAREHOUSE_H
 #define VARIABLEWAREHOUSE_H
 
-#include "Warehouse.h"
 #include "MooseTypes.h"
 
 #include <vector>
@@ -29,7 +28,7 @@ class MooseVariableScalar;
 /**
  * Holds variables and provides some services
  */
-class VariableWarehouse : public Warehouse<MooseVariableBase>
+class VariableWarehouse
 {
 public:
   VariableWarehouse();
@@ -47,21 +46,22 @@ public:
    * @param bnd The boundary id where this variable is defined
    * @param var The variable
    */
-  void addBoundaryVar(BoundaryID bnd, MooseVariable *var);
+  void addBoundaryVar(BoundaryID bnd, MooseVariable * var);
 
   /**
    * Add a variable to a set of boundaries
    * @param boundary_ids The boundary ids where this variable is defined
    * @param var The variable
    */
-  void addBoundaryVar(const std::set<BoundaryID> & boundary_ids, MooseVariable *var);
+  void addBoundaryVar(const std::set<BoundaryID> & boundary_ids, MooseVariable * var);
 
   /**
    * Add a map of variables to a set of boundaries
    * @param boundary_ids The boundary ids where this variable is defined
    * @param vars A map of variables
    */
-  void addBoundaryVars(const std::set<BoundaryID> & boundary_ids, const std::map<std::string, std::vector<MooseVariable *> > & vars);
+  void addBoundaryVars(const std::set<BoundaryID> & boundary_ids,
+                       const std::map<std::string, std::vector<MooseVariable *>> & vars);
 
   /**
    * Get a variable from the warehouse
@@ -110,10 +110,13 @@ protected:
   /// Name to variable mapping
   std::map<std::string, MooseVariableBase *> _var_name;
   /// Map to variables that need to be evaluated on a boundary
-  std::map<BoundaryID, std::set<MooseVariable *> > _boundary_vars;
+  std::map<BoundaryID, std::set<MooseVariable *>> _boundary_vars;
 
   /// list of all variables
   std::vector<MooseVariableScalar *> _scalar_vars;
+
+  /// All instances of objects (raw pointers)
+  std::vector<MooseVariableBase *> _all_objects;
 };
 
 #endif // VARIABLEWAREHOUSE_H

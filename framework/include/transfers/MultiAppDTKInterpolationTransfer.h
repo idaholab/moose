@@ -12,32 +12,31 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifdef LIBMESH_TRILINOS_HAVE_DTK
-
 #ifndef MULTIAPPDTKINTERPOLATIONTRANSFER_H
 #define MULTIAPPDTKINTERPOLATIONTRANSFER_H
 
+#include "libmesh/libmesh_config.h"
+
+#ifdef LIBMESH_TRILINOS_HAVE_DTK
+
 #include "MultiAppTransfer.h"
-#include "MooseVariableInterface.h"
 #include "DTKInterpolationHelper.h"
 
-class MooseVariable;
+// Forward declarations
 class MultiAppDTKInterpolationTransfer;
 
-template<>
+template <>
 InputParameters validParams<MultiAppDTKInterpolationTransfer>();
 
 /**
  * Transfers from spatially varying Interpolations in a MultiApp to the "master" system.
  */
-class MultiAppDTKInterpolationTransfer :
-  public MultiAppTransfer
+class MultiAppDTKInterpolationTransfer : public MultiAppTransfer
 {
 public:
   MultiAppDTKInterpolationTransfer(const InputParameters & parameters);
-  virtual ~MultiAppDTKInterpolationTransfer() {}
 
-  virtual void execute();
+  virtual void execute() override;
 
 protected:
   VariableName _from_var_name;
@@ -47,6 +46,5 @@ protected:
   Point _master_position;
 };
 
-#endif /* MULTIAPPDTKINTERPOLATIONTRANSFER_H */
-
-#endif //LIBMESH_TRILINOS_HAVE_DTK
+#endif // LIBMESH_TRILINOS_HAVE_DTK
+#endif // MULTIAPPDTKINTERPOLATIONTRANSFER_H

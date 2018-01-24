@@ -1,0 +1,20 @@
+[Tests]
+  [./newfiles]
+    type = ImageDiff
+    command = new_files.py
+    imagediff = 'new_files_0.png new_files_1.png new_files_2.png new_files_3.png'
+  [../]
+
+  [./newfiles_adapt]
+    type = ImageDiff
+    command = new_files_adapt.py
+    imagediff = 'new_files_adapt_0.png new_files_adapt_4.png new_files_adapt_8.png'
+  [../]
+
+  [./old_files]
+    type = RunApp
+    command = old_files.py
+    expect_out = "[0.0, 0.5, 1.0, 2.0, 3.5, 4.5]"
+    match_literal = True
+  [../]
+[]

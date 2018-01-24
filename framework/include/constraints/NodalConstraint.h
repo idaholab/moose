@@ -15,29 +15,27 @@
 #ifndef NODALCONSTRAINT_H
 #define NODALCONSTRAINT_H
 
-//MOOSE includes
+// MOOSE includes
 #include "Constraint.h"
 #include "NeighborCoupleableMooseVariableDependencyIntermediateInterface.h"
 
-//Forward Declarations
+// Forward Declarations
 class NodalConstraint;
 
-template<>
+template <>
 InputParameters validParams<NodalConstraint>();
 
-class NodalConstraint :
-  public Constraint,
-  public NeighborCoupleableMooseVariableDependencyIntermediateInterface
+class NodalConstraint : public Constraint,
+                        public NeighborCoupleableMooseVariableDependencyIntermediateInterface
 {
 public:
   NodalConstraint(const InputParameters & parameters);
-  virtual ~NodalConstraint();
 
   /**
    * Get the list of master nodes
    * @return list of master nodes IDs
    */
-  std::vector<dof_id_type> &  getMasterNodeId() { return _master_node_vector; }
+  std::vector<dof_id_type> & getMasterNodeId() { return _master_node_vector; }
 
   /**
    * Get the list of connected slave nodes
@@ -62,23 +60,25 @@ public:
 
 protected:
   /**
-   * This is the virtual that derived classes should override for computing the residual on neighboring element.
+   * This is the virtual that derived classes should override for computing the residual on
+   * neighboring element.
    */
   virtual Real computeQpResidual(Moose::ConstraintType type) = 0;
 
   /**
-   * This is the virtual that derived classes should override for computing the Jacobian on neighboring element.
+   * This is the virtual that derived classes should override for computing the Jacobian on
+   * neighboring element.
    */
   virtual Real computeQpJacobian(Moose::ConstraintJacobianType type) = 0;
 
   /// Value of the unknown variable this BC is action on
-  VariableValue & _u_slave;
+  const VariableValue & _u_slave;
   /// node IDs connected to the master node (slave nodes)
   std::vector<dof_id_type> _connected_nodes;
   /// node IDs of the master node
   std::vector<dof_id_type> _master_node_vector;
   /// Holds the current solution at the current quadrature point
-  VariableValue & _u_master;
+  const VariableValue & _u_master;
   /// Specifies formulation type used to apply constraints
   Moose::ConstraintFormulationType _formulation;
   /**

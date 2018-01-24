@@ -14,16 +14,17 @@
 
 #include "ExampleMaterial.h"
 
-template<>
-InputParameters validParams<ExampleMaterial>()
+template <>
+InputParameters
+validParams<ExampleMaterial>()
 {
   InputParameters params = validParams<Material>();
   params.addParam<Real>("initial_diffusivity", 1.0, "The Initial Diffusivity");
   return params;
 }
 
-ExampleMaterial::ExampleMaterial(const InputParameters & parameters) :
-    Material(parameters),
+ExampleMaterial::ExampleMaterial(const InputParameters & parameters)
+  : Material(parameters),
 
     // Get a parameter value for the diffusivity
     _initial_diffusivity(getParam<Real>("initial_diffusivity")),
@@ -32,11 +33,12 @@ ExampleMaterial::ExampleMaterial(const InputParameters & parameters) :
     // valued property named "diffusivity" that Kernels can use.
     _diffusivity(declareProperty<Real>("diffusivity")),
 
-    // Declare that we are going to have an old value of diffusivity
+    // Retrieve/use an old value of diffusivity.
     // Note: this is _expensive_ as we have to store values for each
     // qp throughout the mesh. Only do this if you REALLY need it!
-    _diffusivity_old(declarePropertyOld<Real>("diffusivity"))
-{}
+    _diffusivity_old(getMaterialPropertyOld<Real>("diffusivity"))
+{
+}
 
 void
 ExampleMaterial::initQpStatefulProperties()

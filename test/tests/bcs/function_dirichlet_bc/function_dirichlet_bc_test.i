@@ -1,3 +1,12 @@
+###########################################################
+# This is a test of Boundary Condition System. The
+# FunctionDirichletBC is used to contribute the residuals
+# to the boundary term operators in the weak form.
+#
+# @Requirement F3.40
+###########################################################
+
+
 [Mesh]
   file = square.e
   uniform_refine = 4
@@ -51,7 +60,7 @@
   [../]
 
   [./forcing]
-    type = UserForcingFunction
+    type = BodyForce
     variable = u
     function = forcing_func
   [../]
@@ -60,6 +69,7 @@
 [BCs]
   active = 'all'
 
+  # Boundary Condition System
   [./all]
     type = FunctionDirichletBC
     variable = u

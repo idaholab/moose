@@ -1,0 +1,15 @@
+[Tests]
+  [./resid]
+    type = 'Exodiff'
+    input = 'dg_advection_diffusion_test.i'
+    exodiff = 'dg_advection_diffusion_test_out.e'
+    cli_args = 'Mesh/uniform_refine=4'
+    abs_zero = 1e-9
+  [../]
+  [./jac]
+    type = 'PetscJacobianTester'
+    input = 'dg_advection_diffusion_test.i'
+    cli_args = 'Outputs/exodus=false'
+    recover = false
+  [../]
+[]

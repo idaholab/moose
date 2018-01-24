@@ -18,10 +18,10 @@
 #include "Material.h"
 #include "LinearInterpolation.h"
 
-//Forward Declarations
+// Forward Declarations
 class ExampleMaterial;
 
-template<>
+template <>
 InputParameters validParams<ExampleMaterial>();
 
 /**
@@ -33,7 +33,7 @@ public:
   ExampleMaterial(const InputParameters & parameters);
 
 protected:
-  virtual void computeQpProperties();
+  virtual void computeQpProperties() override;
 
 private:
   /**
@@ -51,7 +51,7 @@ private:
    * This is the member reference that will hold the gradient
    * of the coupled variable
    */
-  VariableGradient & _diffusion_gradient;
+  const VariableGradient & _diffusion_gradient;
 
   /**
    * This object returns a piecewise linear function based an a series
@@ -60,4 +60,4 @@ private:
   LinearInterpolation _piecewise_func;
 };
 
-#endif //EXAMPLEMATERIAL_H
+#endif // EXAMPLEMATERIAL_H

@@ -7,9 +7,23 @@
   [../]
 
   [./mesh]
-    # Check that simulation information may be printed with differing output_on
+    # Check that mesh information prints when the mesh changes
     type = RunApp
     input = 'system_info_mesh.i'
     expect_out = 'time\s=\s0.1.*?Nodes:.*?time\s=\s0.2.*?Nodes:.*?time\s=\s0.3.*?Nodes:'
+  [../]
+
+  [./aux]
+    # Check that Aux system information prints when the mesh changes
+    type = RunApp
+    input = 'system_info_mesh.i'
+    expect_out = 'Num DOFs:\s*2889'
+  [../]
+
+  [./nonlinear]
+    # Check that Nonlinear system information prints when the mesh changes
+    type = RunApp
+    input = 'system_info_mesh.i'
+    expect_out = 'Num DOFs:\s*1009'
   [../]
 []

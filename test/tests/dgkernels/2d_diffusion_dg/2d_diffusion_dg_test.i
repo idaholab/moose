@@ -1,3 +1,14 @@
+###########################################################
+# This is a test of the Discontinuous Galerkin System.
+# Discontinous basis functions are used (Monomials) and
+# a the Laplacian DGKernel contributes to the
+# internal edges around each element. Jumps are allowed
+# by penalized by this method.
+#
+# @Requirement F3.60
+###########################################################
+
+
 [Mesh]
   type = GeneratedMesh
   dim = 2
@@ -78,7 +89,7 @@
   [../]
 
   [./forcing]
-    type = UserForcingFunction
+    type = BodyForce
     variable = u
     function = forcing_fn
   [../]

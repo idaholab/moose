@@ -6,30 +6,37 @@
 /****************************************************************/
 #include "SwitchingFunctionConstraintLagrange.h"
 
-template<>
-InputParameters validParams<SwitchingFunctionConstraintLagrange>()
+template <>
+InputParameters
+validParams<SwitchingFunctionConstraintLagrange>()
 {
   InputParameters params = validParams<Kernel>();
-  params.addClassDescription("Lagrange multiplier kernel to constrain the sum of all switching functions in a multiphase system. This kernel acts on the lagrange multiplier variable.");
-  params.addParam<std::vector<MaterialPropertyName> >("h_names", "Switching Function Materials that provide h(eta_i)");
+  params.addClassDescription("Lagrange multiplier kernel to constrain the sum of all switching "
+                             "functions in a multiphase system. This kernel acts on the lagrange "
+                             "multiplier variable.");
+  params.addParam<std::vector<MaterialPropertyName>>(
+      "h_names", "Switching Function Materials that provide h(eta_i)");
   params.addRequiredCoupledVar("etas", "eta_i order parameters, one for each h");
   params.addParam<Real>("epsilon", 1e-9, "Shift factor to avoid a zero pivot");
   return params;
 }
 
-SwitchingFunctionConstraintLagrange::SwitchingFunctionConstraintLagrange(const InputParameters & parameters) :
-    DerivativeMaterialInterface<Kernel>(parameters),
-    _h_names(getParam<std::vector<MaterialPropertyName> >("h_names")),
+SwitchingFunctionConstraintLagrange::SwitchingFunctionConstraintLagrange(
+    const InputParameters & parameters)
+  : DerivativeMaterialInterface<Kernel>(parameters),
+    _h_names(getParam<std::vector<MaterialPropertyName>>("h_names")),
     _num_h(_h_names.size()),
     _h(_num_h),
     _dh(_num_h),
-    _number_of_nl_variables(_fe_problem.getNonlinearSystem().nVariables()),
+    _number_of_nl_variables(_fe_problem.getNonlinearSystemBase().nVariables()),
     _j_eta(_number_of_nl_variables, -1),
     _epsilon(getParam<Real>("epsilon"))
 {
   // parameter check. We need exactly one eta per h
   if (_num_h != coupledComponents("etas"))
-    mooseError("Need to pass in as many h_names as etas in SwitchingFunctionConstraintLagrange kernel " << name());
+    mooseError(
+        "Need to pass in as many h_names as etas in SwitchingFunctionConstraintLagrange kernel ",
+        name());
 
   // fetch switching functions (for the residual) and h derivatives (for the Jacobian)
   for (unsigned int i = 0; i < _num_h; ++i)
@@ -70,4 +77,3 @@ SwitchingFunctionConstraintLagrange::computeQpOffDiagJacobian(unsigned int j_var
   else
     return 0.0;
 }
-

@@ -18,7 +18,7 @@
 
 class MMSImplicitEuler;
 
-template<>
+template <>
 InputParameters validParams<MMSImplicitEuler>();
 
 class MMSImplicitEuler : public TimeKernel
@@ -30,7 +30,7 @@ protected:
   virtual Real computeQpResidual();
   virtual Real computeQpJacobian();
 
-  VariableValue & _u_old;
+  const VariableValue & _u_old;
 };
 
-#endif //MMSIMPLICITEULER_H_
+#endif // MMSIMPLICITEULER_H_

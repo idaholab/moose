@@ -1,0 +1,53 @@
+Job Id: <JOB_ID>.somemachine.org
+    Job_Name = kernelssimple_diffusiontest
+    Job_Owner = userid@somemachine.org
+    resources_used.cpupercent = 0
+    resources_used.cput = 00:00:00
+    resources_used.mem = 0kb
+    resources_used.ncpus = 1
+    resources_used.vmem = 0kb
+    resources_used.walltime = 00:00:02
+    job_state = <JOB_STATE>
+    queue = batch
+    server = somemachine.org
+    Checkpoint = u
+    ctime = Wed Oct 18 09:08:22 2017
+    Error_Path = somemachine.org:/path/to/kernelssimple_diffusiontest.e<JOB_ID>
+    exec_host = somemachine.org/0
+    exec_vnode = (somemachine.org:ncpus=1)
+    Hold_Types = n
+    Join_Path = oe
+    Keep_Files = n
+    Mail_Points = a
+    mtime = Wed Oct 18 09:08:22 2017
+    Output_Path = somemachine.org:/path/to/kernelssimple_diffusiontest.o<JOB_ID>
+    Priority = 0
+    qtime = Wed Oct 18 09:08:22 2017
+    Rerunable = True
+    Resource_List.ncpus = 1
+    Resource_List.nodect = 1
+    Resource_List.nodes = 1
+    Resource_List.place = free
+    Resource_List.select = 1
+    Resource_List.walltime = 00:05:00
+    stime = Wed Oct 18 09:08:22 2017
+    session_id = 24056
+    jobdir = /home/userid
+    substate = 92
+    Variable_List = PBS_O_HOME=/home/userid,PBS_O_LANG=en_US.UTF-8,
+	PBS_O_LOGNAME=userid,
+	PBS_O_PATH=/opt/moose/cppunit-1.12.1/gcc-opt/bin:/opt/moose/mpich/mpic
+	h-3.2/gcc-opt/bin:/opt/moose/gcc-6.2.0/bin:/usr/local/sbin:/usr/local/b
+	in:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin:
+	/opt/pbs/bin,PBS_O_MAIL=/var/mail/userid,PBS_O_SHELL=/bin/bash,
+	PBS_O_WORKDIR=/some/path/to/tester_dir,PBS_O_SYSTEM=Linux,PBS_O_QUEUE=batch,
+	PBS_O_HOST=somemachine.org
+    comment = Job run at Wed Oct 18 at 09:08 on (somemachine.org:ncpus=1) and f
+	inished
+    etime = Wed Oct 18 09:08:22 2017
+    run_count = 1
+    Stageout_status = 1
+    Exit_status = <EXIT_STATUS>
+    Submit_arguments = -h /some/path/to/qsub_batch/kernelssimple_diffusiontest.sh
+    history_timestamp = 1508339302
+    project = moose

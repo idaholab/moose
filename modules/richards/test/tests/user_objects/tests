@@ -1,0 +1,87 @@
+[Tests]
+  [./test_uo1]
+    type = 'CSVDiff'
+    input = 'uo1.i'
+    csvdiff = 'uo1.csv'
+    abs_zero = 1.0E-4
+  [../]
+  [./test_uo2]
+    type = 'CSVDiff'
+    input = 'uo2.i'
+    csvdiff = 'uo2.csv'
+    abs_zero = 1E-6
+  [../]
+  [./test_uo3]
+    type = 'CSVDiff'
+    input = 'uo3.i'
+    csvdiff = 'uo3.csv'
+    abs_zero = 1E-6
+  [../]
+  [./test_uo4]
+    type = 'CSVDiff'
+    input = 'uo4.i'
+    csvdiff = 'uo4.csv'
+    abs_zero = 1E-6
+  [../]
+
+  [./test_uo_error1]
+    type = 'RunException'
+    input = uo3.i
+    cli_args = 'AuxKernels/dSeff1VG_AuxK/wrtnum=1 Outputs/file_base=except1'
+    expect_err = 'Your wrtnum is 1 but it must obey 0 <= wrtnum < 1.'
+  [../]
+  [./test_uo_error2]
+    type = 'RunException'
+    input = uo3.i
+    cli_args = 'AuxKernels/d2Seff1VG_AuxK/wrtnum1=1 Outputs/file_base=except2'
+    expect_err = 'Your wrtnum1 is 1 but it must obey 0 <= wrtnum1 < 1.'
+  [../]
+  [./test_uo_error3]
+    type = 'RunException'
+    input = uo3.i
+    cli_args = 'AuxKernels/d2Seff1VG_AuxK/wrtnum2=1 Outputs/file_base=except3'
+    expect_err = 'Your wrtnum2 is 1 but it must obey 0 <= wrtnum2 < 1.'
+  [../]
+  [./except04]
+    type = 'RunException'
+    input = uo1.i
+    cli_args = 'Functions/answer_dRelPermPower/direction="0 0 0" Outputs/file_base=except04'
+    expect_err = 'The direction in the GradParsedFunction must have positive length.'
+  [../]
+  [./except05]
+    type = 'RunException'
+    input = uo1.i
+    cli_args = 'Functions/answer_d2RelPermPower/direction="0 0 0" Outputs/file_base=except05'
+    expect_err = 'The direction in the Grad2ParsedFunction must have positive length.'
+  [../]
+  [./except06]
+    type = 'RunException'
+    input = uo2.i
+    cli_args = 'UserObjects/DensityConstBulkCut/zero_point=1E6 Outputs/file_base=except06'
+    expect_err = 'RichardsDensityConstantbulkCut: zero_point must be less than cut_limit'
+  [../]
+  [./except07]
+    type = 'RunException'
+    input = uo1.i
+    cli_args = 'UserObjects/RelPermBW/Ss=0.4 UserObjects/RelPermBW/Sn=0.6 Outputs/file_base=except07'
+    expect_err = 'In BW relative permeability Sn set to 0.6 and Ss set to 0.4 but these must obey Ss > Sn'
+  [../]
+  [./except08]
+    type = 'RunException'
+    input = uo1.i
+    cli_args = 'UserObjects/RelPermBW/Kn=0.6 UserObjects/RelPermBW/Ks=0.4 Outputs/file_base=except08'
+    expect_err = 'In BW relative permeability Kn set to 0.6 and Ks set to 0.4 but these must obey Ks > Kn'
+  [../]
+  [./except09]
+    type = 'RunException'
+    input = uo3.i
+    cli_args = 'UserObjects/Saturation/sum_s_res=0 Outputs/file_base=except09'
+    expect_err = 'sum_s_res set to 0 but it must obey s_res <= sum_s_res < 1'
+  [../]
+  [./except10]
+    type = 'RunException'
+    input = uo3.i
+    cli_args = 'UserObjects/Seff1BWsmall/Ss=0.1 UserObjects/Seff1BWsmall/Sn=0.9 Outputs/file_base=except10'
+    expect_err = 'In BW effective saturation Sn set to 0.9 and Ss set to 0.1 but these must obey Ss > Sn'
+  [../]
+[]

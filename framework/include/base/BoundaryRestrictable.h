@@ -18,13 +18,12 @@
 // MOOSE includes
 #include "InputParameters.h"
 #include "MaterialData.h"
-#include "FEProblem.h"
 
 // Forward declarations
 class BoundaryRestrictable;
 class MooseMesh;
 
-template<>
+template <>
 InputParameters validParams<BoundaryRestrictable>();
 
 /**
@@ -37,7 +36,6 @@ InputParameters validParams<BoundaryRestrictable>();
 class BoundaryRestrictable
 {
 public:
-
   /// A flag changing the behavior of hasBoundary
   enum TEST_TYPE
   {
@@ -50,8 +48,9 @@ public:
    * Populates the _bnd_ids for the given boundary names supplied
    * with the 'boundary' input parameter
    * @param parameters The input parameters
+   * @param nodal True indicates that the object is operating on nodesets, false for sidesets
    */
-  BoundaryRestrictable(const InputParameters & parameters);
+  BoundaryRestrictable(const MooseObject * moose_object, bool nodal);
 
   /**
    * Class constructor
@@ -59,8 +58,17 @@ public:
    * see the general class documentation for details.
    * @param parameters The input parameters (see the detailed help for additional information)
    * @param block_ids The block ids that the object is restricted to
+   * @param nodal True indicates that the object is operating on nodesets, false for sidesets
    */
-  BoundaryRestrictable(const InputParameters & parameters, const std::set<SubdomainID> & block_ids);
+  BoundaryRestrictable(const MooseObject * moose_object,
+                       const std::set<SubdomainID> & block_ids,
+                       bool nodal);
+
+  /**
+   * Helper for determining if the object is boundary restricted. This is needed for the
+   * MaterialPropertyInterface.
+   */
+  static bool restricted(const std::set<BoundaryID> & ids);
 
   /**
    * Empty class destructor
@@ -71,7 +79,7 @@ public:
    * Return the boundary IDs for this object
    * @return A set of all boundary ids for which the object is restricted
    */
-  const std::set<BoundaryID> & boundaryIDs() const;
+  const virtual std::set<BoundaryID> & boundaryIDs() const;
 
   /**
    * Return the boundary names for this object
@@ -90,21 +98,21 @@ public:
    * @param name A BoundaryName to check
    * @return True if the given id is valid for this object
    */
-  bool hasBoundary(BoundaryName name) const;
+  bool hasBoundary(const BoundaryName & name) const;
 
   /**
    * Test if the supplied vector of boundary names are valid for this object
    * @param names A vector of BoundaryNames to check
    * @return True if the given ids are valid for this object
    */
-  bool hasBoundary(std::vector<BoundaryName> names) const;
+  bool hasBoundary(const std::vector<BoundaryName> & names) const;
 
   /**
    * Test if the supplied boundary ids are valid for this object
    * @param id A BoundaryID to check
    * @return True if the given id is valid for this object
    */
-  bool hasBoundary(BoundaryID id) const;
+  bool hasBoundary(const BoundaryID & id) const;
 
   /**
    * Test if the supplied vector boundary ids are valid for this object
@@ -114,7 +122,7 @@ public:
    * match those of the object
    * @return True if the all of the given ids are found within the ids for this object
    */
-  bool hasBoundary(std::vector<BoundaryID> ids, TEST_TYPE type=ALL) const;
+  bool hasBoundary(const std::vector<BoundaryID> & ids, TEST_TYPE type = ALL) const;
 
   /**
    * Test if the supplied set of boundary ids are valid for this object
@@ -126,23 +134,25 @@ public:
    * @return True if the all of the given ids are found within the ids for this object
    * \see isSubset
    */
-  bool hasBoundary(std::set<BoundaryID> ids, TEST_TYPE type=ALL) const;
+  bool hasBoundary(const std::set<BoundaryID> & ids, TEST_TYPE type = ALL) const;
 
   /**
    * Test if the class boundary ids are a subset of the supplied objects
    * @param ids A std::set of boundaries to check
-   * @return True if all of the boundary ids for this class are found within the given ids (opposite of hasBoundary)
+   * @return True if all of the boundary ids for this class are found within the given ids (opposite
+   * of hasBoundary)
    * \see hasBoundary
    */
-  bool isBoundarySubset(std::set<BoundaryID> ids) const;
+  bool isBoundarySubset(const std::set<BoundaryID> & ids) const;
 
   /*
    * Test if the class boundary ids are a subset of the supplied objects
    * @param ids A std::set of Boundary IDs to check
-   * @return True if all of the boundary ids for this class are found within the given ids (opposite of hasBoundary)
+   * @return True if all of the boundary ids for this class are found within the given ids (opposite
+   * of hasBoundary)
    * \see hasBoundary
    */
-  bool isBoundarySubset(std::vector<BoundaryID> ids) const;
+  bool isBoundarySubset(const std::vector<BoundaryID> & ids) const;
 
   /**
    * Check if a material property is valid for all boundaries of this object
@@ -154,12 +164,14 @@ public:
    * @param prop_name the name of the property to query
    * @return true if the property exists for all boundary ids of the object, otherwise false
    */
-  template<typename T> bool hasBoundaryMaterialProperty(const std::string & prop_name) const;
+  template <typename T>
+  bool hasBoundaryMaterialProperty(const std::string & prop_name) const;
 
   /**
    * Returns true if this object has been restricted to a boundary
+   * @see MooseObject
    */
-  bool boundaryRestricted() { return _boundary_restricted; }
+  virtual bool boundaryRestricted() const;
 
   /**
    * Returns the set of all boundary ids for the entire mesh
@@ -167,11 +179,9 @@ public:
    */
   const std::set<BoundaryID> & meshBoundaryIDs() const;
 
-
 private:
-
-  /// Pointer to FEProblem
-  FEProblem * _bnd_feproblem;
+  /// Pointer to FEProblemBase
+  FEProblemBase * _bnd_feproblem;
 
   /// Point to mesh
   MooseMesh * _bnd_mesh;
@@ -185,12 +195,6 @@ private:
   /// Flag for allowing dual restriction with BlockRestrictable
   const bool _bnd_dual_restrictable;
 
-  /// Invalid BoundaryID for case when FEProblem
-  const BoundaryID _invalid_boundary_id;
-
-  /// Flag indicating if the class is boundary restricted
-  bool _boundary_restricted;
-
   /// An empty set for referencing when block_ids is not included
   const std::set<SubdomainID> _empty_block_ids;
 
@@ -200,29 +204,33 @@ private:
   /// Thread id for this object
   THREAD_ID _bnd_tid;
 
+  /// Pointer to MaterialData for boundary (@see hasBoundaryMaterialProperty)
+  std::shared_ptr<MaterialData> _bnd_material_data;
+
+  /// Whether or not this object is restricted to nodesets
+  bool _bnd_nodal;
+
   /**
    * An initialization routine needed for dual constructors
    */
-  void initializeBoundaryRestrictable(const InputParameters & parameters);
+  void initializeBoundaryRestrictable(const MooseObject * moose_object);
 
 protected:
-
   /**
    * A helper method to avoid circular #include problems.
    * @see hasBoundaryMaterialProperty
    */
   bool hasBoundaryMaterialPropertyHelper(const std::string & prop_name) const;
-
-  /// Reference to active boundary id
-  const BoundaryID & _current_boundary_id;
 };
 
-template<typename T>
+template <typename T>
 bool
 BoundaryRestrictable::hasBoundaryMaterialProperty(const std::string & prop_name) const
 {
-  // If you get here the supplied property is defined on all boundaries, but is still subject existence in the MateialData class
-  return hasBoundaryMaterialPropertyHelper(prop_name) && _bnd_feproblem->getBoundaryMaterialData(_bnd_tid)->haveProperty<T>(prop_name);
+  // If you get here the supplied property is defined on all boundaries, but is still subject
+  // existence in the MateialData class
+  return hasBoundaryMaterialPropertyHelper(prop_name) &&
+         _bnd_material_data->haveProperty<T>(prop_name);
 }
 
 #endif // BOUNDARYRESTRICTABLE_H

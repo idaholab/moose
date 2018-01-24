@@ -47,13 +47,13 @@
   [./cl]
     order = FIRST
     family = LAGRANGE
-    initial_condition = 0.0
+    initial_condition = 0.1
   [../]
   # Solid phase solute concentration
   [./cs]
     order = FIRST
     family = LAGRANGE
-    initial_condition = 0.0
+    initial_condition = 0.9
   [../]
 []
 
@@ -74,13 +74,11 @@
     variable = eta
     type = FunctionIC
     function = ic_func_eta
-    block = 0
   [../]
   [./c]
     variable = c
     type = FunctionIC
     function = ic_func_c
-    block = 0
   [../]
 []
 
@@ -88,7 +86,6 @@
   # Free energy of the liquid
   [./fl]
     type = DerivativeParsedMaterial
-    block = 0
     f_name = fl
     args = 'cl'
     function = '(0.1-cl)^2'
@@ -97,7 +94,6 @@
   # Free energy of the solid
   [./fs]
     type = DerivativeParsedMaterial
-    block = 0
     f_name = fs
     args = 'cs'
     function = '(0.9-cs)^2'
@@ -106,7 +102,6 @@
   # h(eta)
   [./h_eta]
     type = SwitchingFunctionMaterial
-    block = 0
     h_order = HIGH
     eta = eta
   [../]
@@ -114,7 +109,6 @@
   # g(eta)
   [./g_eta]
     type = BarrierFunctionMaterial
-    block = 0
     g_order = SIMPLE
     eta = eta
   [../]
@@ -122,14 +116,13 @@
   # constant properties
   [./constants]
     type = GenericConstantMaterial
-    block = 0
     prop_names  = 'M   L   eps_sq'
     prop_values = '0.7 0.7 1.0  '
   [../]
 []
 
 [Kernels]
-  active = 'PhaseConc ChemPotVacancies CHBulk ACBulkF ACBulkC ACInterface dcdt detadt ckernel'
+  active = 'PhaseConc ChemPotSolute CHBulk ACBulkF ACBulkC ACInterface dcdt detadt ckernel'
 
   # enforce c = (1-h(eta))*cl + h(eta)*cs
   [./PhaseConc]
@@ -141,7 +134,7 @@
   [../]
 
   # enforce pointwise equality of chemical potentials
-  [./ChemPotVacancies]
+  [./ChemPotSolute]
     type = KKSPhaseChemicalPotential
     variable = cl
     cb       = cs
@@ -216,13 +209,14 @@
 [Executioner]
   type = Transient
   solve_type = 'PJFNK'
-  petsc_options_iname = '-pc_factor_shift_type'
-  petsc_options_value = 'nonzero'
+
+  petsc_options_iname = '-pc_type -sub_pc_type -sub_pc_factor_shift_type'
+  petsc_options_value = 'asm      ilu          nonzero'
 
   l_max_its = 100
   nl_max_its = 100
-  num_steps = 50
 
+  num_steps = 50
   dt = 0.1
 []
 
@@ -261,5 +255,8 @@
 
 [Outputs]
   exodus = true
-  csv = true
+  [./csv]
+    type = CSV
+    execute_on = final
+  [../]
 []

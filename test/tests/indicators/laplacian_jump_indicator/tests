@@ -1,8 +1,18 @@
 [Tests]
-  [./test]
+  [./test_biharmonic]
     type = 'Exodiff'
-    input = 'laplacian_jump_indicator_test.i'
-    exodiff = 'laplacian_jump_indicator_test_out.e'
-    scale_refine = 2
+    input = 'biharmonic.i'
+    exodiff = 'biharmonic_out.e'
+  [../]
+  [./test_biharmonic_weak_bc]
+    type = 'Exodiff'
+    input = 'biharmonic.i'
+    exodiff = 'biharmonic_weak_bc_out.e'
+    cli_args = "BCs/active='all_value all_laplacian' Outputs/file_base=biharmonic_weak_bc_out"
+  [../]
+  [./test_biharmonic_transient]
+    type = 'Exodiff'
+    input = 'biharmonic_transient.i'
+    exodiff = 'biharmonic_transient_out.e'
   [../]
 []

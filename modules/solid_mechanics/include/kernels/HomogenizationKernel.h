@@ -9,19 +9,18 @@
 
 #include "Kernel.h"
 
-//Forward Declarations
+// Forward Declarations
 class ColumnMajorMatrix;
 class HomogenizationKernel;
 class SymmElasticityTensor;
 class SymmTensor;
 
-template<>
+template <>
 InputParameters validParams<HomogenizationKernel>();
 
 class HomogenizationKernel : public Kernel
 {
 public:
-
   HomogenizationKernel(const InputParameters & parameters);
 
 protected:
@@ -32,7 +31,5 @@ protected:
 private:
   const unsigned int _component;
   const unsigned int _column;
-
-
 };
-#endif //HOMOGENIZATIONKERNEL_H
+#endif // HOMOGENIZATIONKERNEL_H

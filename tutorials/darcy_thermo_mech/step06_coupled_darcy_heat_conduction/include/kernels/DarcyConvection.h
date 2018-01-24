@@ -20,7 +20,7 @@
 // Forward Declaration
 class DarcyConvection;
 
-template<>
+template <>
 InputParameters validParams<DarcyConvection>();
 
 /**
@@ -34,23 +34,21 @@ public:
   DarcyConvection(const InputParameters & parameters);
 
 protected:
-  virtual Real computeQpResidual();
+  virtual Real computeQpResidual() override;
 
-  virtual Real computeQpJacobian();
+  virtual Real computeQpJacobian() override;
 
-  virtual Real computeQpOffDiagJacobian(unsigned int jvar);
+  virtual Real computeQpOffDiagJacobian(unsigned int jvar) override;
 
   /// The gradient of pressure
-  VariableGradient & _pressure_gradient;
+  const VariableGradient & _pressure_gradient;
 
   /// Coupling identifier for the pressure.  This is used to uniquely
   /// identify a coupled variable
   unsigned int _pressure_var;
 
-  /**
-   * These references will be set by the initialization list so that
-   * values can be pulled from the Material system.
-   */
+  /// These references will be set by the initialization list so that
+  /// values can be pulled from the Material system.
   const MaterialProperty<Real> & _permeability;
   const MaterialProperty<Real> & _porosity;
   const MaterialProperty<Real> & _viscosity;
@@ -58,4 +56,4 @@ protected:
   const MaterialProperty<Real> & _heat_capacity;
 };
 
-#endif //DARCYCONVECTION_H
+#endif // DARCYCONVECTION_H

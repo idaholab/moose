@@ -9,10 +9,12 @@
 
 #include "ConservedNoiseInterface.h"
 
-//Forward Declarations
+#include <unordered_map>
+
+// Forward Declarations
 class ConservedNoiseBase;
 
-template<>
+template <>
 InputParameters validParams<ConservedNoiseBase>();
 
 /**
@@ -39,7 +41,7 @@ public:
   Real getQpValue(dof_id_type element_id, unsigned int qp) const;
 
 protected:
-  LIBMESH_BEST_UNORDERED_MAP<dof_id_type, std::vector<Real> > _random_data;
+  std::unordered_map<dof_id_type, std::vector<Real>> _random_data;
 };
 
-#endif //CONSERVEDNOISEBASE_H
+#endif // CONSERVEDNOISEBASE_H

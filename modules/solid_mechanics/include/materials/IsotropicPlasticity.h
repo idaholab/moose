@@ -17,21 +17,25 @@ class PiecewiseLinear;
 class IsotropicPlasticity : public ReturnMappingModel
 {
 public:
-  IsotropicPlasticity( const InputParameters & parameters);
+  IsotropicPlasticity(const InputParameters & parameters);
 
-  virtual void initStatefulProperties(unsigned n_points);
+  virtual void initQpStatefulProperties() override;
 
 protected:
-  virtual void computeStressInitialize(unsigned qp, Real effectiveTrialStress, const SymmElasticityTensor & elasticityTensor);
-  virtual void computeStressFinalize(unsigned qp, const SymmTensor & plasticStrainIncrement);
+  virtual void computeYieldStress();
+  virtual void computeStressInitialize(Real effectiveTrialStress,
+                                       const SymmElasticityTensor & elasticityTensor) override;
+  virtual void computeStressFinalize(const SymmTensor & plasticStrainIncrement) override;
 
-  virtual Real computeResidual(unsigned qp, Real effectiveTrialStress, Real scalar);
-  virtual Real computeDerivative(unsigned qp, Real effectiveTrialStress, Real scalar);
-  virtual void iterationFinalize(unsigned qp, Real scalar);
+  virtual Real computeResidual(const Real effectiveTrialStress, const Real scalar) override;
+  virtual Real computeDerivative(const Real effectiveTrialStress, const Real scalar) override;
+  virtual void iterationFinalize(Real scalar) override;
 
-  virtual Real computeHardening(unsigned qp, Real scalar);
+  virtual Real computeHardeningValue(Real scalar);
+  virtual Real computeHardeningDerivative(Real scalar);
 
-  const Real _yield_stress;
+  Function * _yield_stress_function;
+  Real _yield_stress;
   const Real _hardening_constant;
   PiecewiseLinear * const _hardening_function;
 
@@ -40,18 +44,13 @@ protected:
   Real _hardening_slope;
 
   MaterialProperty<SymmTensor> & _plastic_strain;
-  MaterialProperty<SymmTensor> & _plastic_strain_old;
-  MaterialProperty<Real> * _scalar_plastic_strain;
-  MaterialProperty<Real> * _scalar_plastic_strain_old;
+  const MaterialProperty<SymmTensor> & _plastic_strain_old;
 
   MaterialProperty<Real> & _hardening_variable;
-  MaterialProperty<Real> & _hardening_variable_old;
-
-private:
-
+  const MaterialProperty<Real> & _hardening_variable_old;
 };
 
-template<>
+template <>
 InputParameters validParams<IsotropicPlasticity>();
 
 #endif // ISOTROPICPLASTICITY_H

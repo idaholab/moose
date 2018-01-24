@@ -12,20 +12,16 @@
 // Forward Declarations
 class NSEnergyInviscidUnspecifiedBC;
 
-template<>
+template <>
 InputParameters validParams<NSEnergyInviscidUnspecifiedBC>();
-
 
 /**
  * The inviscid energy BC term with specified pressure.
  */
 class NSEnergyInviscidUnspecifiedBC : public NSEnergyInviscidBC
 {
-
 public:
   NSEnergyInviscidUnspecifiedBC(const InputParameters & parameters);
-
-  virtual ~NSEnergyInviscidUnspecifiedBC(){}
 
 protected:
   virtual Real computeQpResidual();
@@ -33,11 +29,11 @@ protected:
   virtual Real computeQpOffDiagJacobian(unsigned jvar);
 
   // Aux Variables
-  VariableValue& _pressure;
+  const VariableValue & _pressure;
 
 private:
   // Helper Jacobian function
-  Real compute_jacobian(unsigned var_number);
+  Real computeJacobianHelper(unsigned var_number);
 };
 
 #endif // NSENERGYINVISCIDUNSPECIFIEDBC_H

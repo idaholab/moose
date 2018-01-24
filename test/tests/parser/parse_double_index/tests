@@ -1,0 +1,7 @@
+[Tests]
+  [./parse_double_index]
+    type = 'Exodiff'
+    input = 'parse_double_index.i'
+    exodiff = 'parse_double_index.e'
+  [../]
+[]

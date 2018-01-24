@@ -14,10 +14,14 @@
 
 #include "VTKOutput.h"
 
-template<>
-InputParameters validParams<VTKOutput>()
+#include "libmesh/vtk_io.h"
+#include "libmesh/equation_systems.h"
+
+template <>
+InputParameters
+validParams<VTKOutput>()
 {
-  InputParameters params = validParams<BasicOutput<OversampleOutput> >();
+  InputParameters params = validParams<OversampleOutput>();
 
   // Set default padding to 3
   params.set<unsigned int>("padding") = 3;
@@ -29,9 +33,8 @@ InputParameters validParams<VTKOutput>()
   return params;
 }
 
-VTKOutput::VTKOutput(const InputParameters & parameters) :
-    BasicOutput<OversampleOutput>(parameters),
-    _binary(getParam<bool>("binary"))
+VTKOutput::VTKOutput(const InputParameters & parameters)
+  : OversampleOutput(parameters), _binary(getParam<bool>("binary"))
 {
 }
 
@@ -62,14 +65,10 @@ VTKOutput::filename()
   std::ostringstream output;
   output << _file_base;
 
-  // Add the _00x.vtk extension to the file
-  output << "_"
-         << std::setw(_padding)
-         << std::setprecision(0)
-         << std::setfill('0')
-         << std::right
-         << _file_num
-         << ".vtk";
+  // In serial, add the _00x.vtk extension.
+  // In parallel, add the _00x.pvtu extension.
+  std::string ext = (n_processors() == 1) ? ".vtk" : ".pvtu";
+  output << "_" << std::setw(_padding) << std::setfill('0') << std::right << _file_num << ext;
 
   // Return the filename
   return output.str();

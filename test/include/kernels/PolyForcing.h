@@ -18,7 +18,7 @@
 
 class PolyForcing;
 
-template<>
+template <>
 InputParameters validParams<PolyForcing>();
 
 class PolyForcing : public Kernel
@@ -35,7 +35,6 @@ protected:
   Real _x;
   Real _y;
   Real _z;
-
 };
 
-#endif //POLYFORCING_H
+#endif // POLYFORCING_H

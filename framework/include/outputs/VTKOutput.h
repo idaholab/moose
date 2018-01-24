@@ -16,50 +16,40 @@
 #define VTKOUTPUT_H
 
 // MOOSE includes
-#include "BasicOutput.h"
 #include "OversampleOutput.h"
-
-// libMesh includes
-#include "libmesh/vtk_io.h"
 
 // Forward declerations
 class VTKOutput;
 
-template<>
+template <>
 InputParameters validParams<VTKOutput>();
 
 /**
  *
  */
-class VTKOutput :
-  public BasicOutput<OversampleOutput>
+class VTKOutput : public OversampleOutput
 {
 public:
-
   /**
    * Class constructor
    * @param parameters Object parameters
    */
   VTKOutput(const InputParameters & parameters);
 
-
 protected:
-
   /**
    * Perform the output of VTKOutput
    */
-  virtual void output(const ExecFlagType & type);
+  virtual void output(const ExecFlagType & type) override;
 
   /**
    * Return the file name with the *.vtk extension
    */
-  std::string filename();
+  virtual std::string filename() override;
 
 private:
-
   /// Flag for using binary compression
   bool _binary;
-
 };
 
-#endif //VTKOUTPUT_H
+#endif // VTKOUTPUT_H

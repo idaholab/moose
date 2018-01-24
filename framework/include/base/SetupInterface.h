@@ -15,20 +15,26 @@
 #ifndef SETUPINTERFACE_H
 #define SETUPINTERFACE_H
 
-#include "InputParameters.h"
-#include "ExecStore.h"
+#include "MooseTypes.h"
+#include "ExecFlagEnum.h"
 #include "MooseEnum.h"
+#include "InputParameters.h"
 
 // Forward declarations
+class InputParameters;
+class MooseObject;
 class SetupInterface;
 
-template<>
+template <typename T>
+InputParameters validParams();
+
+template <>
 InputParameters validParams<SetupInterface>();
 
 class SetupInterface
 {
 public:
-  SetupInterface(const InputParameters & params);
+  SetupInterface(const MooseObject * moose_object);
   virtual ~SetupInterface();
 
   /**
@@ -52,35 +58,52 @@ public:
   virtual void residualSetup();
 
   /**
-   * Gets called when the subdomain changes (i.e. in a Jacobian or residual loop) and before this object is asked to do its job
+   * Gets called when the subdomain changes (i.e. in a Jacobian or residual loop) and before this
+   * object is asked to do its job
    */
   virtual void subdomainSetup();
 
   /**
-   * Get the execution flag for the object
+   * Return the execute on MultiMooseEnum for this object.
+   */
+  const ExecFlagEnum & getExecuteOnEnum() const;
+
+  /**
+   * (DEPRECATED) Get the execution flag for the object
+   * TODO: ExecFlagType
    */
   virtual const std::vector<ExecFlagType> & execFlags() const;
 
   /**
-   * Build and return the execution flags as a bitfield
+   * (DEPRECATED) Build and return the execution flags as a bitfield
+   * TODO: ExecFlagType
    */
   ExecFlagType execBitFlags() const;
 
   /**
-   * Returns the available options for the 'execute_on' input parameters
+   * (DEPRECATED) Returns the available options for the 'execute_on' input parameters
+   * TODO: ExecFlagType
    * @return A MooseEnum with the available 'execute_on' options, the default is 'residual'
    */
-  static MultiMooseEnum getExecuteOptions();
+  static ExecFlagEnum getExecuteOptions();
+
+private:
+  /// Empty ExecFlagEnum for the case when the "execute_on" parameter is not included. This
+  /// is private because others should not be messing with it.
+  ExecFlagEnum _empty_execute_enum;
 
 protected:
-  /// execution flag (when is the object executed/evaluated)
-  std::vector<ExecFlagType> _exec_flags;
+  /// Execute settings for this oejct.
+  const ExecFlagEnum & _execute_enum;
 
-  /// Reference to FEProblem
+  /// (DEPRECATED) execution flag (when is the object executed/evaluated) TODO: ExecFlagType
+  const std::vector<ExecFlagType> _exec_flags;
+
+  /// Reference to FEProblemBase
   const ExecFlagType & _current_execute_flag;
 
-  // FEProblem::addMultiApp needs to reset the execution flags
-  friend class FEProblem;
+  // FEProblemBase::addMultiApp needs to reset the execution flags
+  friend class FEProblemBase;
 };
 
 #endif /* SETUPINTERFACE_H */

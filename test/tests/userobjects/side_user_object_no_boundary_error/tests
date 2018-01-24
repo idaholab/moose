@@ -1,0 +1,7 @@
+[Tests]
+  [./test]
+    type = RunException
+    input = side_no_boundary.i
+    expect_err = "missing required parameter 'Postprocessors/avg/boundary'"
+  [../]
+[]

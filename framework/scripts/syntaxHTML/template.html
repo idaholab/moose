@@ -1,12 +1,12 @@
 <%def name="genBlock(block)">
   <%doc>Only display Child from a node named /ParentBlock/Child </%doc>
-  <li><a><b>${block['name'].split('/')[-1]}</b></a>
+  <li><a><b>${block['name'].split('/')[-1]|h}</b></a>
     <ul>
       % if block['description'] != '':
-        <li><div><a><b>Description: ${block['description']}</b></a></div></li>
+        <li><div><a><b>Description: ${block['description']|h}</b></a></div></li>
       % endif
       % if type in block and block['type'] != None:
-        <Li><div class="required"><a>type = ${block['type']}</a></div></li>
+        <Li><div class="required"><a>type = ${block['type']|h}</a></div></li>
       % endif
 
       <%doc>Generate parameters, required ones are red</%doc>
@@ -16,12 +16,12 @@
             % if param['required'] == True:
               required
             % endif
-            "><a>${param['name']}</a>
+            "><a>${param['name']|h}</a>
               <ul>
                 % if param['default'] != None:
-                  <li><a>Default: ${param['default']}</a></li>
+                  <li><a>Default: ${param['default']|h}</a></li>
                 % endif
-                <li><a>Description: ${param['description']}</a></li>
+                <li><a>Description: ${param['description']|h}</a></li>
               </ul>
           </li>
         % endfor

@@ -16,16 +16,15 @@
 #define TOPRESIDUALEBUGOUTPUT_H
 
 // MOOSE includes
-#include "BasicOutput.h"
 #include "PetscOutput.h"
-#include "FEProblem.h"
+
+#include "libmesh/system.h"
 
 // Forward declerations
 class TopResidualDebugOutput;
 
-template<>
+template <>
 InputParameters validParams<TopResidualDebugOutput>();
-
 
 /**
  * A structure for storing data related to top residuals
@@ -38,19 +37,15 @@ struct TopResidualDebugOutputTopResidualData
   Real _residual;
   bool _is_scalar;
 
-  TopResidualDebugOutputTopResidualData() :
-      _var(0),
-      _nd(0),
-      _residual(0.),
-      _is_scalar(false)
-    {}
+  TopResidualDebugOutputTopResidualData() : _var(0), _nd(0), _residual(0.), _is_scalar(false) {}
 
-  TopResidualDebugOutputTopResidualData(unsigned int var, dof_id_type nd, Real residual, bool is_scalar = false) :
-      _var(var),
-      _nd(nd),
-      _residual(residual),
-      _is_scalar(is_scalar)
-    {}
+  TopResidualDebugOutputTopResidualData(unsigned int var,
+                                        dof_id_type nd,
+                                        Real residual,
+                                        bool is_scalar = false)
+    : _var(var), _nd(nd), _residual(residual), _is_scalar(is_scalar)
+  {
+  }
 };
 
 /**
@@ -58,27 +53,20 @@ struct TopResidualDebugOutputTopResidualData
  *
  * This class may be used from inside the [Outputs] block or via the [Debug] block (preferred)
  */
-class TopResidualDebugOutput : public BasicOutput<PetscOutput>
+class TopResidualDebugOutput : public PetscOutput
 {
 public:
-
   /**
    * Class constructor
    * @param parameters Object input parameters
    */
   TopResidualDebugOutput(const InputParameters & parameters);
 
-  /**
-   * Class destructor
-   */
-  virtual ~TopResidualDebugOutput();
-
 protected:
-
   /**
    * Perform the debugging output
    */
-  virtual void output(const ExecFlagType & type);
+  virtual void output(const ExecFlagType & type) override;
 
   /**
    * Prints the n top residuals for the variables in the system
@@ -91,14 +79,17 @@ protected:
    * Method for sorting the residuals data from TopResidualDebugOutputTopResidualData structs
    * @see printTopResiduals
    */
-  static bool sortTopResidualData(TopResidualDebugOutputTopResidualData i, TopResidualDebugOutputTopResidualData j) { return (fabs(i._residual) > fabs(j._residual)); }
+  static bool sortTopResidualData(TopResidualDebugOutputTopResidualData i,
+                                  TopResidualDebugOutputTopResidualData j)
+  {
+    return (fabs(i._residual) > fabs(j._residual));
+  }
 
   /// Number of residuals to display
   unsigned int _num_residuals;
 
   /// Reference to libMesh system
-  TransientNonlinearImplicitSystem & _sys;
-
+  System & _sys;
 };
 
 #endif // TOPRESIDUALDEBUGOUTPUT_H

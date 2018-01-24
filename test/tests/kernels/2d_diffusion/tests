@@ -4,12 +4,20 @@
     input = '2d_diffusion_test.i'
     exodiff = 'out.e'
     scale_refine = 5
+    group = 'requirements'
   [../]
 
   [./testneumann]
     type = 'Exodiff'
     input = '2d_diffusion_neumannbc_test.i'
     exodiff = 'neumannbc_out.e'
+    scale_refine = 5
+  [../]
+
+  [./testbodyforce]
+    type = 'Exodiff'
+    input = '2d_diffusion_bodyforce_test.i'
+    exodiff = 'bodyforce_out.e'
     scale_refine = 5
   [../]
 

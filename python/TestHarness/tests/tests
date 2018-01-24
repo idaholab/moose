@@ -1,0 +1,94 @@
+[Tests]
+  [./long_running]
+    type = PythonUnitTest
+    input = test_LongRunning.py
+  [../]
+  [./diff]
+    type = PythonUnitTest
+    input = test_Diff.py
+  [../]
+  [./cyclic]
+    type = PythonUnitTest
+    input = test_Cyclic.py
+  [../]
+  [./dependency_skip]
+    type = PythonUnitTest
+    input = test_DependencySkip.py
+  [../]
+  [./missing_gold]
+    type = PythonUnitTest
+    input = test_MissingGold.py
+  [../]
+  [./expect]
+    type = PythonUnitTest
+    input = test_Expect.py
+  [../]
+  [./duplicate]
+    type = PythonUnitTest
+    input = test_Duplicate.py
+  [../]
+  [./deleted]
+    type = PythonUnitTest
+    input = test_Deleted.py
+  [../]
+  [./dry_run]
+    type = PythonUnitTest
+    input = test_DryRun.py
+  [../]
+  [./dislpay_required]
+    type = PythonUnitTest
+    input = test_DisplayRequired.py
+  [../]
+  [./ignore]
+    type = PythonUnitTest
+    input = test_Ignore.py
+  [../]
+  [./timeout]
+    type = PythonUnitTest
+    input = test_Timeout.py
+  [../]
+  [./unknown_prereq]
+    type = PythonUnitTest
+    input = test_UnknownPrereq.py
+  [../]
+  [./syntax]
+    type = PythonUnitTest
+    input = test_Syntax.py
+  [../]
+  [./required_objects]
+    type = PythonUnitTest
+    input = test_RequiredObjects.py
+  [../]
+   [./should_execute]
+    type = PythonUnitTest
+    input = test_ShouldExecute.py
+  [../]
+  [./queue_pbs]
+    type = PythonUnitTest
+    input = test_QueuePBS.py
+  [../]
+  [./report_skipped]
+    type = PythonUnitTest
+    input = test_ReportSkipped.py
+  [../]
+  [./distributed_mesh]
+    type = PythonUnitTest
+    input = test_DistributedMesh.py
+  [../]
+  [./allocations]
+    type = PythonUnitTest
+    input = test_Allocations.py
+  [../]
+  [./exra_info]
+    type = PythonUnitTest
+    input = test_ExtraInfo.py
+  [../]
+  [./parser_errors]
+    type = PythonUnitTest
+    input = test_ParserErrors.py
+  [../]
+  [./duplicate_test_names]
+    type = PythonUnitTest
+    input = test_DuplicateTestNames.py
+  [../]
+[]

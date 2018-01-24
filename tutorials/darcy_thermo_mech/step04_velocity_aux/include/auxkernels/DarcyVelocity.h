@@ -17,21 +17,20 @@
 
 #include "AuxKernel.h"
 
-//Forward Declarations
+// Forward Declarations
 class DarcyVelocity;
 
-template<>
+template <>
 InputParameters validParams<DarcyVelocity>();
 
 /**
- * Constant auxiliary value
+ * Auxiliary kernel responsible for computing the Darcy velocity given
+ * several fluid properties and the pressure gradient.
  */
 class DarcyVelocity : public AuxKernel
 {
 public:
   DarcyVelocity(const InputParameters & parameters);
-
-  virtual ~DarcyVelocity() {}
 
 protected:
   /**
@@ -39,17 +38,17 @@ protected:
    * every quadrature point.  For Nodal Auxiliary variables those quadrature
    * points coincide with the nodes.
    */
-  virtual Real computeValue();
+  virtual Real computeValue() override;
 
-  /// Will hold 0,1,2 for x,y,z
+  /// Will hold 0, 1, or 2 corresponding to x, y, or z.
   int _component;
 
   /// The gradient of a coupled variable
-  VariableGradient & _pressure_gradient;
+  const VariableGradient & _pressure_gradient;
 
   /// Holds the permeability and viscosity from the material system
   const MaterialProperty<Real> & _permeability;
   const MaterialProperty<Real> & _viscosity;
 };
 
-#endif //DARCYVELOCITY_H
+#endif // DARCYVELOCITY_H

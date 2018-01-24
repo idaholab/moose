@@ -1,7 +1,1 @@
-[Tests]
-  [./test]
-    type = 'Exodiff'
-    input = 'outflow.i'
-    exodiff = 'outflow_out.e'
-  [../]
-[]
+../../../../step09_mechanics/tests/bcs/outflow/tests

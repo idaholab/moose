@@ -18,8 +18,7 @@
 #include "ComputeFullJacobianThread.h"
 
 // Forward declarations
-class FEProblem;
-class NonlinearSystem;
+class FEProblemBase;
 
 /**
  * Helper class for holding the preconditioning blocks to fill.
@@ -27,12 +26,13 @@ class NonlinearSystem;
 class JacobianBlock
 {
 public:
-  JacobianBlock(libMesh::System & precond_system, SparseMatrix<Number> & jacobian, unsigned int ivar, unsigned int jvar) :
-      _precond_system(precond_system),
-      _jacobian(jacobian),
-      _ivar(ivar),
-      _jvar(jvar)
-    {}
+  JacobianBlock(libMesh::System & precond_system,
+                SparseMatrix<Number> & jacobian,
+                unsigned int ivar,
+                unsigned int jvar)
+    : _precond_system(precond_system), _jacobian(jacobian), _ivar(ivar), _jvar(jvar)
+  {
+  }
 
   libMesh::System & _precond_system;
   SparseMatrix<Number> & _jacobian;
@@ -45,20 +45,19 @@ public:
 class ComputeJacobianBlocksThread : public ComputeFullJacobianThread
 {
 public:
-  ComputeJacobianBlocksThread(FEProblem & fe_problem, std::vector<JacobianBlock*> & blocks);
+  ComputeJacobianBlocksThread(FEProblemBase & fe_problem, std::vector<JacobianBlock *> & blocks);
 
   // Splitting Constructor
   ComputeJacobianBlocksThread(ComputeJacobianBlocksThread & x, Threads::split split);
 
   virtual ~ComputeJacobianBlocksThread();
 
-  void join(const ComputeJacobianThread & /*y*/)
-  {}
+  void join(const ComputeJacobianThread & /*y*/) {}
 
 protected:
-  virtual void postElement(const Elem * elem);
+  virtual void postElement(const Elem * elem) override;
 
-  std::vector<JacobianBlock*> _blocks;
+  std::vector<JacobianBlock *> _blocks;
 };
 
-#endif //COMPUTEJACOBIANBLOCKSTHREAD_H
+#endif // COMPUTEJACOBIANBLOCKSTHREAD_H

@@ -14,17 +14,19 @@
 
 #include "ElementIntegralVariableUserObject.h"
 
-template<>
-InputParameters validParams<ElementIntegralVariableUserObject>()
+template <>
+InputParameters
+validParams<ElementIntegralVariableUserObject>()
 {
   InputParameters params = validParams<ElementIntegralUserObject>();
-  params.addCoupledVar("variable", "The name of the variable that this object operates on");
+  params.addRequiredCoupledVar("variable", "The name of the variable that this object operates on");
   return params;
 }
 
-ElementIntegralVariableUserObject::ElementIntegralVariableUserObject(const InputParameters & parameters) :
-    ElementIntegralUserObject(parameters),
-    MooseVariableInterface(parameters, false),
+ElementIntegralVariableUserObject::ElementIntegralVariableUserObject(
+    const InputParameters & parameters)
+  : ElementIntegralUserObject(parameters),
+    MooseVariableInterface(this, false),
     _u(coupledValue("variable")),
     _grad_u(coupledGradient("variable"))
 {
@@ -36,4 +38,3 @@ ElementIntegralVariableUserObject::computeQpIntegral()
 {
   return _u[_qp];
 }
-

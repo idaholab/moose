@@ -7,10 +7,11 @@
     valgrind = 'HEAVY'
   [../]
 
-  [./test_hermite_converge_neumann]
+  [./test_hermite_converge_dirichlet]
     type = 'Exodiff'
-    input = 'hermite_converge_neumann.i'
-    exodiff = 'hermite_converge_neumann_out.e-s003'
+    input = 'hermite_converge_dirichlet.i'
+    exodiff = 'hermite_converge_dirichlet_out.e-s003'
     valgrind = 'HEAVY'
+    abs_zero = 1e-09
   [../]
 []

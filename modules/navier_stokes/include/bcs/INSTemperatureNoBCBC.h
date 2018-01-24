@@ -12,7 +12,7 @@
 // Forward Declarations
 class INSTemperatureNoBCBC;
 
-template<>
+template <>
 InputParameters validParams<INSTemperatureNoBCBC>();
 
 /**
@@ -24,15 +24,14 @@ class INSTemperatureNoBCBC : public IntegratedBC
 public:
   INSTemperatureNoBCBC(const InputParameters & parameters);
 
-  virtual ~INSTemperatureNoBCBC(){}
+  virtual ~INSTemperatureNoBCBC() {}
 
 protected:
   virtual Real computeQpResidual();
   virtual Real computeQpJacobian();
   virtual Real computeQpOffDiagJacobian(unsigned jvar);
 
-  Real _k;
+  const MaterialProperty<Real> & _k;
 };
-
 
 #endif // INSTEMPERATURENOBCBC_H

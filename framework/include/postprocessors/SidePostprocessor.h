@@ -18,23 +18,24 @@
 #include "SideUserObject.h"
 #include "Postprocessor.h"
 
-//Forward Declarations
+// Forward Declarations
 class SidePostprocessor;
 
-template<>
+template <>
 InputParameters validParams<SidePostprocessor>();
 
-class SidePostprocessor :
-  public SideUserObject,
-  public Postprocessor
+class SidePostprocessor : public SideUserObject, public Postprocessor
 {
 public:
   SidePostprocessor(const InputParameters & parameters);
 
   /**
-   * Finalize.  This is called _after_ execute() and _after_ threadJoin()!  This is probably where you want to do MPI communication!
+   * This is called _after_ execute() and _after_ threadJoin()!  This is probably where you want to
+   * do MPI communication!
+   * Finalize is not required for Postprocessor implementations since work may be done in
+   * getValue().
    */
-  virtual void finalize(){}
+  virtual void finalize() override {}
 };
 
 #endif

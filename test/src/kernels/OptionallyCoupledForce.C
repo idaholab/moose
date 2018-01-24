@@ -14,8 +14,9 @@
 
 #include "OptionallyCoupledForce.h"
 
-template<>
-InputParameters validParams<OptionallyCoupledForce>()
+template <>
+InputParameters
+validParams<OptionallyCoupledForce>()
 {
   InputParameters params = validParams<Kernel>();
 
@@ -24,8 +25,8 @@ InputParameters validParams<OptionallyCoupledForce>()
   return params;
 }
 
-OptionallyCoupledForce::OptionallyCoupledForce(const InputParameters & parameters) :
-    Kernel(parameters),
+OptionallyCoupledForce::OptionallyCoupledForce(const InputParameters & parameters)
+  : Kernel(parameters),
     _v_var(coupled("v")),
     _v(coupledValue("v")),
     _grad_v(coupledGradient("v")),
@@ -35,13 +36,15 @@ OptionallyCoupledForce::OptionallyCoupledForce(const InputParameters & parameter
     _v_coupled(isCoupled("v"))
 {
   if (!_v_coupled && _v_var < 64)
-    mooseError("Something is wrong with the coupling system.  It should be producing really huge numbers for coupled('v') But instead it generated: " << _v_var);
+    mooseError("Something is wrong with the coupling system.  It should be producing really huge "
+               "numbers for coupled('v') But instead it generated: ",
+               _v_var);
 }
 
 Real
 OptionallyCoupledForce::computeQpResidual()
 {
-  return -_v[_qp]*_test[_i][_qp];
+  return -_v[_qp] * _test[_i][_qp];
 }
 
 Real
@@ -54,6 +57,6 @@ Real
 OptionallyCoupledForce::computeQpOffDiagJacobian(unsigned int jvar)
 {
   if (jvar == _v_var)
-    return -_phi[_j][_qp]*_test[_i][_qp];
+    return -_phi[_j][_qp] * _test[_i][_qp];
   return 0.0;
 }

@@ -15,63 +15,81 @@
 #ifndef CONSTRAINTWAREHOUSE_H
 #define CONSTRAINTWAREHOUSE_H
 
-#include "Warehouse.h"
+// MOOSE includes
+#include "MooseObjectWarehouse.h"
 #include "MooseTypes.h"
 
 class Constraint;
 class NodalConstraint;
 class NodeFaceConstraint;
 class FaceFaceConstraint;
+class ElemElemConstraint;
 
 /**
  * Warehouse for storing constraints
  */
-class ConstraintWarehouse : public Warehouse<Constraint>
+class ConstraintWarehouse : public MooseObjectWarehouse<Constraint>
 {
 public:
   ConstraintWarehouse();
-  virtual ~ConstraintWarehouse();
 
-  // Setup /////
-  void initialSetup();
-  void timestepSetup();
-  void residualSetup();
-  void jacobianSetup();
+  /**
+   * Add Constraint object to the warehouse.
+   * @param object A std::shared_ptr of the object
+   * @param tid Not used.
+   */
+  void addObject(std::shared_ptr<Constraint> object, THREAD_ID tid = 0);
 
-  void addNodalConstraint(MooseSharedPointer<NodalConstraint> nfc);
+  ///@{
+  /**
+   * Access methods for active objects.
+   */
+  const std::vector<std::shared_ptr<NodalConstraint>> & getActiveNodalConstraints() const;
+  const std::vector<std::shared_ptr<FaceFaceConstraint>> &
+  getActiveFaceFaceConstraints(const std::string & interface) const;
+  const std::vector<std::shared_ptr<ElemElemConstraint>> &
+  getActiveElemElemConstraints(InterfaceID interface_id) const;
+  const std::vector<std::shared_ptr<NodeFaceConstraint>> &
+  getActiveNodeFaceConstraints(BoundaryID boundary_id, bool displaced) const;
+  ///@}
 
-  void addNodeFaceConstraint(unsigned int slave, unsigned int master, MooseSharedPointer<NodeFaceConstraint> nfc);
+  ///@{
+  /**
+   * Deterimine if active objects exist.
+   */
+  bool hasActiveNodalConstraints() const;
+  bool hasActiveFaceFaceConstraints(const std::string & interface) const;
+  bool hasActiveElemElemConstraints(const InterfaceID interface_id) const;
+  bool hasActiveNodeFaceConstraints(BoundaryID boundary_id, bool displaced) const;
+  ///@}
 
-  void addFaceFaceConstraint(const std::string & name, MooseSharedPointer<FaceFaceConstraint> ffc);
+  /**
+   * Update supplied subdomain and variable coverate containters.
+   */
+  void subdomainsCovered(std::set<SubdomainID> & subdomains_covered,
+                         std::set<std::string> & unique_variables,
+                         THREAD_ID tid = 0) const;
 
-  std::vector<NodalConstraint *> & getNodalConstraints();
-
-  std::vector<NodeFaceConstraint *> & getNodeFaceConstraints(BoundaryID boundary_id);
-  std::vector<NodeFaceConstraint *> & getDisplacedNodeFaceConstraints(BoundaryID boundary_id);
-
-  std::vector<FaceFaceConstraint *> & getFaceFaceConstraints(const std::string & name);
-
-  void subdomainsCovered(std::set<SubdomainID> & subdomains_covered, std::set<std::string> & unique_variables) const;
+  /**
+   * Update the various active lists.
+   */
+  void updateActive(THREAD_ID tid = 0);
 
 protected:
-  /**
-   * We are using MooseSharedPointer to handle the cleanup of the pointers at the end of execution.
-   * This is necessary since several warehouses might be sharing a single instance of a MooseObject.
-   */
-  std::vector<MooseSharedPointer<Constraint> > _all_ptrs;
+  /// NodalConstraint objects
+  MooseObjectWarehouse<NodalConstraint> _nodal_constraints;
 
-  /// nodal constraints on a boundary
-  std::vector<NodalConstraint *> _nodal_constraints;
+  /// NodeFaceConstraint objects (non-displaced)
+  std::map<BoundaryID, MooseObjectWarehouse<NodeFaceConstraint>> _node_face_constraints;
 
-  std::map<BoundaryID, std::vector<NodeFaceConstraint *> > _node_face_constraints;
-  std::map<BoundaryID, std::vector<NodeFaceConstraint *> > _displaced_node_face_constraints;
+  /// NodeFaceConstraint objects (displaced)
+  std::map<BoundaryID, MooseObjectWarehouse<NodeFaceConstraint>> _displaced_node_face_constraints;
 
-  std::map<std::string, std::vector<FaceFaceConstraint *> > _face_face_constraints;
+  /// FaceFaceConstraints
+  std::map<std::string, MooseObjectWarehouse<FaceFaceConstraint>> _face_face_constraints;
 
-  // We can't use "auto", but these typedefs make parsing for loops much easier for humans...
-  typedef std::vector<NodalConstraint *>::const_iterator NodalConstraintIter;
-  typedef std::map<BoundaryID, std::vector<NodeFaceConstraint *> >::const_iterator NodeFaceIter;
-  typedef std::map<std::string, std::vector<FaceFaceConstraint *> >::const_iterator FaceFaceIter;
+  /// ElemElemConstraints
+  std::map<unsigned int, MooseObjectWarehouse<ElemElemConstraint>> _element_constraints;
 };
 
 #endif // CONSTRAINTWAREHOUSE_H

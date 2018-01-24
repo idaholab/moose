@@ -1,45 +1,55 @@
+/****************************************************************/
+/* MOOSE - Multiphysics Object Oriented Simulation Environment  */
+/*                                                              */
+/*          All contents are licensed under LGPL V2.1           */
+/*             See LICENSE for full restrictions                */
+/****************************************************************/
+
 #include "CHPFCRFF.h"
 #include "MathUtils.h"
-using namespace MathUtils;
 
-template<>
-InputParameters validParams<CHPFCRFF>()
+template <>
+InputParameters
+validParams<CHPFCRFF>()
 {
   InputParameters params = validParams<Kernel>();
+  params.addClassDescription(
+      "Cahn-Hilliard residual for the RFF form of the phase field crystal model");
   params.addRequiredCoupledVar("v", "Array of names of the real parts of the L variables");
   MooseEnum log_options("tolerance cancelation expansion nothing");
-  params.addRequiredParam<MooseEnum>("log_approach", log_options, "Which approach will be used to handle the natural log");
+  params.addRequiredParam<MooseEnum>(
+      "log_approach", log_options, "Which approach will be used to handle the natural log");
   params.addParam<Real>("tol", 1.0e-9, "Tolerance used when the tolerance approach is chosen");
-  params.addParam<Real>("n_exp_terms", 4, "Number of terms used in the Taylor expansion of the natural log term");
+  params.addParam<Real>(
+      "n_exp_terms", 4, "Number of terms used in the Taylor expansion of the natural log term");
   params.addParam<MaterialPropertyName>("mob_name", "M", "The mobility used with the kernel");
   params.addParam<MaterialPropertyName>("Dmob_name", "DM", "The D mobility used with the kernel");
-  params.addParam<bool>("has_MJac",false,"Jacobian information for the mobility is defined");
+  params.addParam<bool>("has_MJac", false, "Jacobian information for the mobility is defined");
   params.addParam<Real>("a", 1.0, "Constants on Taylor Series");
   params.addParam<Real>("b", 1.0, "Constants on Taylor Series");
   params.addParam<Real>("c", 1.0, "Constants on Taylor Series");
   return params;
 }
 
-CHPFCRFF::CHPFCRFF(const InputParameters & parameters) :
-    Kernel(parameters),
+CHPFCRFF::CHPFCRFF(const InputParameters & parameters)
+  : Kernel(parameters),
     _M(getMaterialProperty<Real>("mob_name")),
     _has_MJac(getParam<bool>("has_MJac")),
     _DM(_has_MJac ? &getMaterialProperty<Real>("Dmob_name") : NULL),
     _log_approach(getParam<MooseEnum>("log_approach")),
     _tol(getParam<Real>("tol")),
+    _num_L(coupledComponents("v")),
+    _vals_var(_num_L),
+    _grad_vals(_num_L),
     _n_exp_terms(getParam<Real>("n_exp_terms")),
     _a(getParam<Real>("a")),
     _b(getParam<Real>("b")),
-    _c(getParam<Real>("c")),
-    _num_L(coupledComponents("v")) // number of L variables
+    _c(getParam<Real>("c"))
 {
-  _grad_vals.resize(_num_L); // Resize variable array
-  _vals_var.resize(_num_L);
-
   // Loop through grains and load coupled gradients into the arrays
   for (unsigned int i = 0; i < _num_L; ++i)
   {
-    _vals_var[i] = coupled("v",i);
+    _vals_var[i] = coupled("v", i);
     _grad_vals[i] = &coupledGradient("v", i);
   }
 }
@@ -61,13 +71,13 @@ CHPFCRFF::computeQpResidual()
   {
     case 0: // approach using tolerance
       if (1.0 + c < _tol)
-        frac = 1.0/_tol;
+        frac = 1.0 / _tol;
       else
-        frac = 1.0/(1.0 + c);
+        frac = 1.0 / (1.0 + c);
       break;
 
     case 2:
-      for (unsigned int i=2; i<(_n_exp_terms + 2.0); ++i)
+      for (unsigned int i = 2; i < (_n_exp_terms + 2.0); ++i)
       {
         // Apply Coefficents to Taylor Series defined in input file
         Real temp_coeff;
@@ -80,7 +90,7 @@ CHPFCRFF::computeQpResidual()
         else
           temp_coeff = 1.0;
 
-        ln_expansion += temp_coeff * std::pow(-1.0, Real(i)) * std::pow(_u[_qp], Real(i)-2.0);
+        ln_expansion += temp_coeff * std::pow(-1.0, Real(i)) * std::pow(_u[_qp], Real(i) - 2.0);
       }
       break;
   }
@@ -90,19 +100,19 @@ CHPFCRFF::computeQpResidual()
   switch (_log_approach)
   {
     case 0: // approach using tolerance
-      GradDFDCons = grad_c*frac - sum_grad_L;
+      GradDFDCons = grad_c * frac - sum_grad_L;
       break;
 
     case 1: // approach using cancelation from the mobility
-      GradDFDCons = grad_c - (1.0 + c)*sum_grad_L;
+      GradDFDCons = grad_c - (1.0 + c) * sum_grad_L;
       break;
 
     case 2: // appraoch using substitution
-      GradDFDCons = ln_expansion*grad_c - sum_grad_L;
+      GradDFDCons = ln_expansion * grad_c - sum_grad_L;
       break;
 
     case 3: // Just using the log
-      GradDFDCons = grad_c/(1.0 + c) - sum_grad_L;
+      GradDFDCons = grad_c / (1.0 + c) - sum_grad_L;
       break;
   }
 
@@ -129,7 +139,7 @@ CHPFCRFF::computeQpJacobian()
       if (1.0 + c < _tol)
       {
         frac = 1.0 / _tol;
-        dfrac = -1.0 / (_tol*_tol);
+        dfrac = -1.0 / (_tol * _tol);
       }
       else
       {
@@ -163,15 +173,15 @@ CHPFCRFF::computeQpJacobian()
   switch (_log_approach)
   {
     case 0: // approach using tolerance
-      dGradDFDConsdC = _grad_phi[_j][_qp]*frac + _phi[_j][_qp]*grad_c*dfrac;
+      dGradDFDConsdC = _grad_phi[_j][_qp] * frac + _phi[_j][_qp] * grad_c * dfrac;
       break;
 
     case 1: // approach using cancelation from the mobility
-      dGradDFDConsdC = _grad_phi[_j][_qp] - _phi[_j][_qp]*sum_grad_L;
+      dGradDFDConsdC = _grad_phi[_j][_qp] - _phi[_j][_qp] * sum_grad_L;
       break;
 
     case 2: // appraoch using substitution
-      for (unsigned int i=2; i<(_n_exp_terms + 2.0); ++i)
+      for (unsigned int i = 2; i < (_n_exp_terms + 2.0); ++i)
       {
         Real temp_coeff;
         if (i == 2)
@@ -183,14 +193,17 @@ CHPFCRFF::computeQpJacobian()
         else
           temp_coeff = 1.0;
 
-        Dln_expansion += temp_coeff * std::pow(static_cast<Real>(-1.0), static_cast<Real>(i)) * (static_cast<Real>(i) - 2.0) * std::pow(_u[_qp], static_cast<Real>(i) - 3.0);
+        Dln_expansion += temp_coeff * std::pow(static_cast<Real>(-1.0), static_cast<Real>(i)) *
+                         (static_cast<Real>(i) - 2.0) *
+                         std::pow(_u[_qp], static_cast<Real>(i) - 3.0);
       }
 
       dGradDFDConsdC = ln_expansion * _grad_phi[_j][_qp] + _phi[_j][_qp] * Dln_expansion * grad_c;
       break;
 
     case 3: // Nothing special
-      dGradDFDConsdC = _grad_phi[_j][_qp] / (1.0 + c) - grad_c / ((1.0 + c) * (1.0 + c)) * _phi[_j][_qp];
+      dGradDFDConsdC =
+          _grad_phi[_j][_qp] / (1.0 + c) - grad_c / ((1.0 + c) * (1.0 + c)) * _phi[_j][_qp];
       break;
   }
 
@@ -214,7 +227,7 @@ CHPFCRFF::computeQpOffDiagJacobian(unsigned int jvar)
           dGradDFDConsdL = -dsum_grad_L;
           break;
 
-        case 1:  // approach using cancelation from the mobility
+        case 1: // approach using cancelation from the mobility
           dGradDFDConsdL = -(1.0 + c) * dsum_grad_L;
           break;
 
@@ -232,4 +245,3 @@ CHPFCRFF::computeQpOffDiagJacobian(unsigned int jvar)
 
   return 0.0;
 }
-

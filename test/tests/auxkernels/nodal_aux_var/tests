@@ -9,6 +9,7 @@
     type = 'Exodiff'
     input = 'nodal_aux_var_test.i'
     exodiff = 'out.e'
+    group = 'requirements'
   [../]
 
   [./sort_test]

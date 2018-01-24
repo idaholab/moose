@@ -25,14 +25,16 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
-OutputWarehouse::OutputWarehouse() :
-    Warehouse<Output>(),
+OutputWarehouse::OutputWarehouse(MooseApp & app)
+  : _app(app),
+    _buffer_action_console_outputs(false),
     _output_exec_flag(EXEC_CUSTOM),
-    _force_output(false)
+    _force_output(false),
+    _logging_requested(false)
 {
   // Set the reserved names
-  _reserved.insert("none");                  // allows 'none' to be used as a keyword in 'outputs' parameter
-  _reserved.insert("all");                   // allows 'all' to be used as a keyword in 'outputs' parameter
+  _reserved.insert("none"); // allows 'none' to be used as a keyword in 'outputs' parameter
+  _reserved.insert("all");  // allows 'all' to be used as a keyword in 'outputs' parameter
 }
 
 OutputWarehouse::~OutputWarehouse()
@@ -45,47 +47,47 @@ OutputWarehouse::~OutputWarehouse()
 void
 OutputWarehouse::initialSetup()
 {
-  for (std::vector<Output *>::const_iterator it = _all_objects.begin(); it != _all_objects.end(); ++it)
-    (*it)->initialSetup();
+  for (const auto & obj : _all_objects)
+    obj->initialSetup();
 }
 
 void
 OutputWarehouse::timestepSetup()
 {
-  for (std::vector<Output *>::const_iterator it = _all_objects.begin(); it != _all_objects.end(); ++it)
-    (*it)->timestepSetup();
+  for (const auto & obj : _all_objects)
+    obj->timestepSetup();
 }
 
 void
 OutputWarehouse::solveSetup()
 {
-  for (std::vector<Output *>::const_iterator it = _all_objects.begin(); it != _all_objects.end(); ++it)
-    (*it)->solveSetup();
+  for (const auto & obj : _all_objects)
+    obj->solveSetup();
 }
 
 void
 OutputWarehouse::jacobianSetup()
 {
-  for (std::vector<Output *>::const_iterator it = _all_objects.begin(); it != _all_objects.end(); ++it)
-    (*it)->jacobianSetup();
+  for (const auto & obj : _all_objects)
+    obj->jacobianSetup();
 }
 
 void
 OutputWarehouse::residualSetup()
 {
-  for (std::vector<Output *>::const_iterator it = _all_objects.begin(); it != _all_objects.end(); ++it)
-    (*it)->residualSetup();
+  for (const auto & obj : _all_objects)
+    obj->residualSetup();
 }
 
 void
 OutputWarehouse::subdomainSetup()
 {
-  for (std::vector<Output *>::const_iterator it = _all_objects.begin(); it != _all_objects.end(); ++it)
-    (*it)->subdomainSetup();
+  for (const auto & obj : _all_objects)
+    obj->subdomainSetup();
 }
 
 void
-OutputWarehouse::addOutput(MooseSharedPointer<Output> & output)
+OutputWarehouse::addOutput(std::shared_ptr<Output> & output)
 {
   _all_ptrs.push_back(output);
 
@@ -108,7 +110,7 @@ OutputWarehouse::addOutput(MooseSharedPointer<Output> & output)
   // Insert object sync times to the global set
   if (output->parameters().isParamValid("sync_times"))
   {
-    std::vector<Real> sync_times = output->parameters().get<std::vector<Real> >("sync_times");
+    std::vector<Real> sync_times = output->parameters().get<std::vector<Real>>("sync_times");
     _sync_times.insert(sync_times.begin(), sync_times.end());
   }
 }
@@ -120,8 +122,14 @@ OutputWarehouse::hasOutput(const std::string & name) const
 }
 
 const std::set<OutputName> &
-OutputWarehouse::getOutputNames() const
+OutputWarehouse::getOutputNames()
 {
+  if (_object_names.empty() && _app.actionWarehouse().hasActions("add_output"))
+  {
+    const auto & actions = _app.actionWarehouse().getActionListByName("add_output");
+    for (const auto & act : actions)
+      _object_names.insert(act->name());
+  }
   return _object_names;
 }
 
@@ -129,7 +137,7 @@ void
 OutputWarehouse::addOutputFilename(const OutFileBase & filename)
 {
   if (_file_base_set.find(filename) != _file_base_set.end())
-    mooseError("An output file with the name, " << filename << ", already exists.");
+    mooseError("An output file with the name, ", filename, ", already exists.");
   _file_base_set.insert(filename);
 }
 
@@ -139,11 +147,13 @@ OutputWarehouse::outputStep(ExecFlagType type)
   if (_force_output)
     type = EXEC_FORCED;
 
-  for (std::vector<Output *>::const_iterator it = _all_objects.begin(); it != _all_objects.end(); ++it)
-    (*it)->outputStep(type);
+  for (const auto & obj : _all_objects)
+    if (obj->enabled())
+      obj->outputStep(type);
 
   /**
-   * This is one of three locations where we explicitly flush the output buffers during a simulation:
+   * This is one of three locations where we explicitly flush the output buffers during a
+   * simulation:
    * PetscOutput::petscNonlinearOutput()
    * PetscOutput::petscLinearOutput()
    * OutputWarehouse::outputStep()
@@ -160,8 +170,8 @@ OutputWarehouse::outputStep(ExecFlagType type)
 void
 OutputWarehouse::meshChanged()
 {
-  for (std::vector<Output *>::const_iterator it = _all_objects.begin(); it != _all_objects.end(); ++it)
-    (*it)->meshChanged();
+  for (const auto & obj : _all_objects)
+    obj->meshChanged();
 }
 
 void
@@ -171,12 +181,26 @@ OutputWarehouse::mooseConsole()
   std::vector<Console *> objects = getOutputs<Console>();
   if (!objects.empty())
   {
-    for (std::vector<Console *>::iterator it = objects.begin(); it != objects.end(); ++it)
-      (*it)->mooseConsole(_console_buffer.str());
+    for (const auto & obj : objects)
+      obj->mooseConsole(_console_buffer.str());
 
     // Reset
     _console_buffer.clear();
     _console_buffer.str("");
+  }
+  else
+  {
+    if (!_buffer_action_console_outputs)
+    {
+      // this will cause messages to console before its construction immediately flushed and
+      // cleared.
+      std::string message = _console_buffer.str();
+      if (_app.multiAppLevel() > 0)
+        MooseUtils::indentMessage(_app.name(), message);
+      Moose::out << message << std::flush;
+      _console_buffer.clear();
+      _console_buffer.str("");
+    }
   }
 }
 
@@ -190,9 +214,9 @@ OutputWarehouse::flushConsoleBuffer()
 void
 OutputWarehouse::setFileNumbers(std::map<std::string, unsigned int> input, unsigned int offset)
 {
-  for (std::vector<Output *>::const_iterator it = _all_objects.begin(); it != _all_objects.end(); ++it)
+  for (const auto & obj : _all_objects)
   {
-    FileOutput * ptr = dynamic_cast<FileOutput *>(*it);
+    FileOutput * ptr = dynamic_cast<FileOutput *>(obj);
     if (ptr != NULL)
     {
       std::map<std::string, unsigned int>::const_iterator it = input.find(ptr->name());
@@ -213,9 +237,9 @@ OutputWarehouse::getFileNumbers()
 {
 
   std::map<std::string, unsigned int> output;
-  for (std::vector<Output *>::const_iterator it = _all_objects.begin(); it != _all_objects.end(); ++it)
+  for (const auto & obj : _all_objects)
   {
-    FileOutput * ptr = dynamic_cast<FileOutput *>(*it);
+    FileOutput * ptr = dynamic_cast<FileOutput *>(obj);
     if (ptr != NULL)
       output[ptr->name()] = ptr->getFileNumber();
   }
@@ -241,15 +265,18 @@ OutputWarehouse::getSyncTimes()
 }
 
 void
-OutputWarehouse::addInterfaceHideVariables(const std::string & output_name, const std::set<std::string> & variable_names)
+OutputWarehouse::addInterfaceHideVariables(const std::string & output_name,
+                                           const std::set<std::string> & variable_names)
 {
   _interface_map[output_name].insert(variable_names.begin(), variable_names.end());
 }
 
 void
-OutputWarehouse::buildInterfaceHideVariables(const std::string & output_name, std::set<std::string> & hide)
+OutputWarehouse::buildInterfaceHideVariables(const std::string & output_name,
+                                             std::set<std::string> & hide)
 {
-  std::map<std::string, std::set<std::string> >::const_iterator it = _interface_map.find(output_name);
+  std::map<std::string, std::set<std::string>>::const_iterator it =
+      _interface_map.find(output_name);
   if (it != _interface_map.end())
     hide = it->second;
 }
@@ -257,11 +284,10 @@ OutputWarehouse::buildInterfaceHideVariables(const std::string & output_name, st
 void
 OutputWarehouse::checkOutputs(const std::set<OutputName> & names)
 {
-  for (std::set<OutputName>::const_iterator it = names.begin(); it != names.end(); ++it)
-    if (!isReservedName(*it) && !hasOutput(*it))
-      mooseError("The output object '" << *it << "' is not a defined output object");
+  for (const auto & name : names)
+    if (!isReservedName(name) && !hasOutput(name))
+      mooseError("The output object '", name, "' is not a defined output object");
 }
-
 
 const std::set<std::string> &
 OutputWarehouse::getReservedNames() const
@@ -284,8 +310,8 @@ OutputWarehouse::setOutputExecutionType(ExecFlagType type)
 void
 OutputWarehouse::allowOutput(bool state)
 {
-  for (std::vector<Output *>::iterator it = _all_objects.begin(); it != _all_objects.end(); ++it)
-    (*it)->allowOutput(state);
+  for (const auto & obj : _all_objects)
+    obj->allowOutput(state);
 }
 
 void

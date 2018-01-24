@@ -1,0 +1,177 @@
+[Tests]
+  [./bh02]
+    type = 'CSVDiff'
+    input = 'bh02.i'
+    csvdiff = 'bh02.csv'
+    rel_err = 1E-5
+  [../]
+  [./bh02_xy]
+    type = 'CSVDiff'
+    input = 'bh02.i'
+    prereq = 'bh02'
+    cli_args = 'DiracKernels/bh/point_file=bh02_xy.bh'
+    csvdiff = 'bh02.csv'
+    rel_err = 1E-5
+  [../]
+  [./bh02_x]
+    type = 'CSVDiff'
+    input = 'bh02.i'
+    prereq = 'bh02 bh02_xy'
+    cli_args = 'DiracKernels/bh/point_file=bh02_x.bh'
+    csvdiff = 'bh02.csv'
+    rel_err = 1E-5
+  [../]
+  [./bh03]
+    type = 'CSVDiff'
+    input = 'bh03.i'
+    csvdiff = 'bh03.csv'
+    rel_err = 1E-5
+  [../]
+  [./bh04]
+    type = 'CSVDiff'
+    input = 'bh04.i'
+    csvdiff = 'bh04.csv'
+    rel_err = 1E-5
+  [../]
+  [./bh05]
+    type = 'CSVDiff'
+    input = 'bh05.i'
+    csvdiff = 'bh05.csv'
+    rel_err = 1E-5
+  [../]
+
+  [./bh07]
+    type = 'Exodiff'
+    input = 'bh07.i'
+    exodiff = 'bh07.e'
+    rel_err = 1E-5
+  [../]
+
+  [./bh_lumped_07]
+    type = 'Exodiff'
+    input = 'bh_lumped_07.i'
+    exodiff = 'bh_lumped_07.e'
+    rel_err = 1E-5
+  [../]
+
+  [./bh08]
+    type = 'CSVDiff'
+    input = 'bh08.i'
+    csvdiff = 'bh08.csv'
+    rel_err = 1E-5
+  [../]
+  [./bh09]
+    type = 'CSVDiff'
+    input = 'bh09.i'
+    csvdiff = 'bh09.csv'
+    rel_err = 1E-5
+  [../]
+  [./bh10]
+    type = 'CSVDiff'
+    input = 'bh10.i'
+    csvdiff = 'bh10.csv'
+    rel_err = 1E-5
+  [../]
+
+  [./bh27]
+    type = 'Exodiff'
+    input = 'bh27.i'
+    exodiff = 'bh27.e'
+    rel_err = 1E-5
+    abs_zero = 1E-5
+    heavy = true
+  [../]
+
+  [./bh_fu_02]
+    type = 'CSVDiff'
+    input = 'bh_fu_02.i'
+    csvdiff = 'bh_fu_02.csv'
+    rel_err = 1E-5
+  [../]
+  [./bh_fu_03]
+    type = 'CSVDiff'
+    input = 'bh_fu_03.i'
+    csvdiff = 'bh_fu_03.csv'
+    rel_err = 1E-5
+  [../]
+  [./bh_fu_04]
+    type = 'CSVDiff'
+    input = 'bh_fu_04.i'
+    csvdiff = 'bh_fu_04.csv'
+    rel_err = 1E-5
+  [../]
+  [./bh_fu_05]
+    type = 'CSVDiff'
+    input = 'bh_fu_05.i'
+    csvdiff = 'bh_fu_05.csv'
+    rel_err = 1E-5
+  [../]
+
+  [./bh_fu_07]
+    type = 'Exodiff'
+    input = 'bh_fu_07.i'
+    exodiff = 'bh_fu_07.e'
+    rel_err = 1E-5
+  [../]
+
+  [./bh_fu_08]
+    type = 'Exodiff'
+    input = 'bh_fu_08.i'
+    exodiff = 'bh_fu_08.e'
+    rel_err = 1E-5
+  [../]
+
+  [./st01]
+    type = 'CSVDiff'
+    input = 'st01.i'
+    csvdiff = 'st01.csv'
+    rel_err = 1E-5
+  [../]
+  [./st01_2cols]
+    type = 'CSVDiff'
+    input = 'st01.i'
+    prereq = st01
+    cli_args = 'DiracKernels/stream/point_file=st01_2cols.stream'
+    csvdiff = 'st01.csv'
+    rel_err = 1E-5
+  [../]
+  [./st01_1col]
+    type = 'CSVDiff'
+    input = 'st01.i'
+    prereq = 'st01 st01_2cols'
+    cli_args = 'DiracKernels/stream/point_file=st01_1col.stream'
+    csvdiff = 'st01.csv'
+    rel_err = 1E-5
+  [../]
+
+  [./Q2P01]
+    type = 'CSVDiff'
+    input = 'q2p01.i'
+    csvdiff = 'q2p01.csv'
+  [../]
+
+  [./except01]
+    type = 'RunException'
+    input = 'st01.i'
+    cli_args = 'DiracKernels/stream/point_file=does_not_exist Outputs/file_base=except01'
+    expect_err = 'Error opening file \'.*does_not_exist\' from RichardsPolyLineSink.'
+  [../]
+  [./except02]
+    type = 'RunException'
+    input = 'bh02.i'
+    cli_args = 'DiracKernels/bh/point_file=does_not_exist Outputs/file_base=except02'
+    expect_err = 'Error opening file \'.*does_not_exist\' from a Peaceman-type Borehole.'
+  [../]
+  [./except03]
+    type = 'RunException'
+    input = 'bh02.i'
+    cli_args = 'DiracKernels/bh/point_file=bh02_zero.bh Outputs/file_base=except03'
+    expect_err = 'Peaceman-type borehole has a zero-segment length at \(x,y,z\) = 0.22 0.23 0.24'
+  [../]
+  [./except04]
+    type = 'RunException'
+    input = 'bh02.i'
+    cli_args = 'DiracKernels/bh/point_file=bh02_huge.bh Outputs/file_base=except04'
+    expect_err = 'The effective element size \(about 0.2-times-true-ele-size\) for an element containing a Peaceman-type borehole must be \(much\) larger than the borehole radius for the Peaceman formulation to be correct.  Your element has effective size 0.39598 and the borehole radius is 10'
+  [../]
+[]

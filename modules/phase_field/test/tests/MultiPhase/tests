@@ -1,0 +1,78 @@
+[Tests]
+  [./derivativetwophasematerial]
+    type = 'Exodiff'
+    input = 'derivativetwophasematerial.i'
+    exodiff = 'derivativetwophasematerial_out.e'
+  [../]
+  [./orderparameterfunctionmaterial]
+    type = 'Exodiff'
+    input = 'orderparameterfunctionmaterial.i'
+    exodiff = 'orderparameterfunctionmaterial_out.e'
+  [../]
+  [./thirdphasesuppressionmaterial]
+    type = 'Exodiff'
+    input = 'thirdphasesuppressionmaterial.i'
+    exodiff = 'thirdphasesuppressionmaterial_out.e'
+  [../]
+  [./multibarrierfunction]
+    type = 'Exodiff'
+    input = 'multibarrierfunction.i'
+    exodiff = 'multibarrierfunction_out.e'
+  [../]
+  [./crosstermbarrierfunction]
+    type = 'Exodiff'
+    input = 'crosstermbarrierfunction.i'
+    exodiff = 'crosstermbarrierfunction_out.e'
+  [../]
+  [./asymmetriccrosstermbarrierfunction]
+    type = 'Exodiff'
+    input = 'asymmetriccrosstermbarrierfunction.i'
+    exodiff = 'asymmetriccrosstermbarrierfunction_out.e'
+  [../]
+
+  [./lagrangemult]
+    type = 'Exodiff'
+    input = 'lagrangemult.i'
+    exodiff = 'lagrangemult_out.e'
+  [../]
+  [./penalty]
+    type = 'Exodiff'
+    input = 'penalty.i'
+    exodiff = 'penalty_out.e'
+  [../]
+  [./crosstermfreeenergy]
+    type = 'Exodiff'
+    input = 'crosstermfreeenergy.i'
+    exodiff = 'crosstermfreeenergy_out.e'
+  [../]
+  [./acmultiinterface]
+    type = 'Exodiff'
+    input = 'acmultiinterface.i'
+    exodiff = 'acmultiinterface_out.e'
+  [../]
+  [./acmultiinterface_aux]
+    type = 'Exodiff'
+    input = 'acmultiinterface_aux.i'
+    exodiff = 'acmultiinterface_aux_out.e'
+  [../]
+  [./switchingfunction3phasematerial]
+    type = 'Exodiff'
+    input = 'switchingfunction3phasematerial.i'
+    exodiff = 'switchingfunction3phasematerial_out.e'
+  [../]
+  [./switchingfunctionmultiphasematerial]
+    type = 'Exodiff'
+    input = 'switchingfunctionmultiphasematerial.i'
+    exodiff = 'switchingfunctionmultiphasematerial_out.e'
+  [../]
+  [./mixedswitchingfunctionmaterial]
+    type = 'Exodiff'
+    input = 'mixedswitchingfunctionmaterial.i'
+    exodiff = 'mixedswitchingfunctionmaterial_out.e'
+  [../]
+  [./barrierfunctionmaterial]
+    type = 'Exodiff'
+    input = 'barrierfunctionmaterial.i'
+    exodiff = 'barrierfunctionmaterial_out.e'
+  [../]
+[]

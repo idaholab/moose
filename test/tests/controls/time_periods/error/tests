@@ -1,0 +1,33 @@
+[Tests]
+  [./steady_error]
+    type = RunException
+    input = 'steady_error.i'
+    expect_err = "TimePeriod objects only operate on transient problems"
+  [../]
+  [./start_end_size_mismatch]
+    type = RunException
+    input = 'control.i'
+    cli_args = "Controls/damping_control/start_time='0.25 0.5'"
+    expect_err = "The end time and start time vectors must be the same length."
+  [../]
+  [./time_disable_size_mismatch]
+    type = RunException
+    input = 'control.i'
+    cli_args = "Controls/damping_control/start_time='0.25 0.5' Controls/damping_control/end_time='0.5 0.6'"
+    expect_err = "The start/end time input must be a scalar or the same length as the enable/disable lists."
+    match_literal = true
+  [../]
+  [./enable_disable_not_set]
+    type = RunException
+    input = 'control.i'
+    cli_args = "Controls/damping_control/enable_objects='' Controls/damping_control/disable_objects=''"
+    expect_err = "Either or both of the 'enable_objects' and 'disable_objects' parameters must be set."
+    match_literal = true
+  [../]
+  [./start_greater_than_end_error]
+    type = RunException
+    input = 'control.i'
+    cli_args = "Controls/damping_control/start_time=0.55 Controls/damping_control/end_time=0.25"
+    expect_err = "The start time\(s\) must be less than the end time\(s\)\."
+  [../]
+[]

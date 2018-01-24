@@ -18,15 +18,27 @@
 #include "MooseApp.h"
 #include "MooseUtils.h" // remove when getBaseName is removed
 
-template<>
-InputParameters validParams<Action>()
+template <>
+InputParameters
+validParams<Action>()
 {
   InputParameters params;
-  std::vector<std::string> blocks(1);
-  blocks[0] = "__all__";
-  // Add the "active" parameter to all blocks to support selective child visitation (turn blocks on and off without comments)
-  params.addParam<std::vector<std::string> >("active", blocks, "If specified only the blocks named will be visited and made active");
 
+  /**
+   * Add the "active" and "inactive" parameters so that all blocks in the input file can selectively
+   * create white or black lists of active/inactive sub-blocks.
+   */
+  params.addParam<std::vector<std::string>>(
+      "active",
+      std::vector<std::string>({"__all__"}),
+      "If specified only the blocks named will be visited and made active");
+  params.addParam<std::vector<std::string>>(
+      "inactive",
+      std::vector<std::string>(),
+      "If specified blocks matching these identifiers will be skipped.");
+
+  params.addPrivateParam<std::string>("_moose_docs_type",
+                                      "action"); // the type of syntax for documentation system
   params.addPrivateParam<std::string>("_action_name"); // the name passed to ActionFactory::create
   params.addPrivateParam<std::string>("task");
   params.addPrivateParam<std::string>("registered_identifier");
@@ -36,21 +48,24 @@ InputParameters validParams<Action>()
   return params;
 }
 
-Action::Action(InputParameters parameters) :
-    ConsoleStreamInterface(*parameters.getCheckedPointerParam<MooseApp *>("_moose_app", "In Action constructor")),
+Action::Action(InputParameters parameters)
+  : ConsoleStreamInterface(
+        *parameters.getCheckedPointerParam<MooseApp *>("_moose_app", "In Action constructor")),
     _pars(parameters),
-    _registered_identifier(isParamValid("registered_identifier") ? getParam<std::string>("registered_identifier") : ""),
+    _registered_identifier(isParamValid("registered_identifier")
+                               ? getParam<std::string>("registered_identifier")
+                               : ""),
     _name(getParam<std::string>("_action_name")),
     _action_type(getParam<std::string>("action_type")),
-    _app(*parameters.getCheckedPointerParam<MooseApp *>("_moose_app", "In Action constructor")),
+    _app(*getCheckedPointerParam<MooseApp *>("_moose_app", "In Action constructor")),
     _factory(_app.getFactory()),
     _action_factory(_app.getActionFactory()),
     _specific_task_name(_pars.isParamValid("task") ? getParam<std::string>("task") : ""),
-    _awh(*parameters.getCheckedPointerParam<ActionWarehouse *>("awh")),
+    _awh(*getCheckedPointerParam<ActionWarehouse *>("awh")),
     _current_task(_awh.getCurrentTaskName()),
     _mesh(_awh.mesh()),
     _displaced_mesh(_awh.displacedMesh()),
-    _problem(_awh.problem()),
+    _problem(_awh.problemBase()),
     _executioner(_app.executioner())
 {
 }

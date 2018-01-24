@@ -15,46 +15,48 @@
 #ifndef MOOSEPRECONDITIONER_H
 #define MOOSEPRECONDITIONER_H
 
+// MOOSE includes
 #include "MooseObject.h"
 #include "Restartable.h"
 
-// libMesh include
-#include "libmesh/numeric_vector.h"
-
-//Forward declarations
-namespace libMesh
-{
-  class MeshBase;
-}
-
-class FEProblem;
+// Forward declarations
+class FEProblemBase;
 class MoosePreconditioner;
 
+namespace libMesh
+{
+class MeshBase;
+template <typename T>
+class NumericVector;
+}
 
-template<>
+template <>
 InputParameters validParams<MoosePreconditioner>();
 
 /**
- * Base class for MOOSE preconditioners
+ * Base class for MOOSE preconditioners.
  */
-class MoosePreconditioner :
-  public MooseObject,
-  public Restartable
+class MoosePreconditioner : public MooseObject, public Restartable
 {
 public:
   MoosePreconditioner(const InputParameters & params);
-  virtual ~MoosePreconditioner();
+  virtual ~MoosePreconditioner() = default;
 
   /**
-   * Helper function for copying values associated with variables in vectors from two different systems.
+   * Helper function for copying values associated with variables in
+   * vectors from two different systems.
    */
   static void copyVarValues(MeshBase & mesh,
-                     const unsigned int from_system, const unsigned int from_var, const NumericVector<Number> & from_vector,
-                     const unsigned int to_system, const unsigned int to_var, NumericVector<Number> & to_vector);
+                            const unsigned int from_system,
+                            const unsigned int from_var,
+                            const NumericVector<Number> & from_vector,
+                            const unsigned int to_system,
+                            const unsigned int to_var,
+                            NumericVector<Number> & to_vector);
 
 protected:
   /// Subproblem this preconditioner is part of
-  FEProblem & _fe_problem;
+  FEProblemBase & _fe_problem;
 };
 
 #endif /* MOOSEPRECONDITIONER_H */

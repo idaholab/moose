@@ -14,17 +14,17 @@
 
 #include "EmptyPostprocessor.h"
 
-// libMesh includes
 #include "libmesh/parallel.h"
 
-template<>
-InputParameters validParams<EmptyPostprocessor>()
+template <>
+InputParameters
+validParams<EmptyPostprocessor>()
 {
   InputParameters params = validParams<GeneralPostprocessor>();
   return params;
 }
 
-EmptyPostprocessor::EmptyPostprocessor(const InputParameters & parameters) :
-    GeneralPostprocessor(parameters)
-{}
-
+EmptyPostprocessor::EmptyPostprocessor(const InputParameters & parameters)
+  : GeneralPostprocessor(parameters)
+{
+}

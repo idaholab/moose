@@ -8,37 +8,37 @@
   [./except1]
     type = 'RunException'
     input = 'except.i'
-    cli_args = 'MeshModifiers/active='sbb0 too_many_new_id''
+    cli_args = "MeshModifiers/active='sbb0 too_many_new_id'"
     expect_err = 'The vector of old_block information must have the same length as the vector of new_block information'
   [../]
   [./except2]
     type = 'RunException'
     input = 'except.i'
-    cli_args = 'MeshModifiers/active='sbb0 old_id_and_name''
+    cli_args = "MeshModifiers/active='sbb0 old_id_and_name'"
     expect_err = 'You must supply exactly one of old_block_id or old_block_name'
   [../]
   [./except3]
     type = 'RunException'
     input = 'except.i'
-    cli_args = 'MeshModifiers/active='sbb0 no_old_id''
+    cli_args = "MeshModifiers/active='sbb0 no_old_id'"
     expect_err = 'You must supply exactly one of old_block_id or old_block_name'
   [../]
   [./except4]
     type = 'RunException'
     input = 'except.i'
-    cli_args = 'MeshModifiers/active='sbb0 too_many_old''
+    cli_args = "MeshModifiers/active='sbb0 too_many_old'"
     expect_err = 'The vector of old_block information must have the same length as the vector of new_block information'
   [../]
   [./except5]
     type = 'RunException'
     input = 'except.i'
-    cli_args = 'MeshModifiers/active='sbb0 new_id_and_name''
+    cli_args = "MeshModifiers/active='sbb0 new_id_and_name'"
     expect_err = 'You must supply exactly one of new_block_id or new_block_name'
   [../]
   [./except6]
     type = 'RunException'
     input = 'except.i'
-    cli_args = 'MeshModifiers/active='sbb0 no_new''
+    cli_args = "MeshModifiers/active='sbb0 no_new'"
     expect_err = 'You must supply exactly one of new_block_id or new_block_name'
   [../]
 

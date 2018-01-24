@@ -11,11 +11,11 @@
 /*                                                              */
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
-
 #include "StatefulMaterial.h"
 
-template<>
-InputParameters validParams<StatefulMaterial>()
+template <>
+InputParameters
+validParams<StatefulMaterial>()
 {
   InputParameters params = validParams<Material>();
   params.addParam<Real>("initial_diffusivity", 0.5, "The Initial Diffusivity");
@@ -23,20 +23,20 @@ InputParameters validParams<StatefulMaterial>()
 }
 
 StatefulMaterial::StatefulMaterial(const InputParameters & parameters)
-  :Material(parameters),
+  : Material(parameters),
 
-   // Get a parameter value for the diffusivity
-   _initial_diffusivity(getParam<Real>("initial_diffusivity")),
+    // Get a parameter value for the diffusivity
+    _initial_diffusivity(getParam<Real>("initial_diffusivity")),
 
-   // Declare that this material is going to have a Real
-   // valued property named "diffusivity" that Kernels can use.
-   _diffusivity(declareProperty<Real>("diffusivity")),
+    // Declare that this material is going to have a Real
+    // valued property named "diffusivity" that Kernels can use.
+    _diffusivity(declareProperty<Real>("diffusivity")),
 
-   // Declare that we are going to have an old value of diffusivity
-   // Note: this is _expensive_ and currently means that you can't
-   // use adaptivity!  Only do this if you REALLY need it!
-   _diffusivity_old(declarePropertyOld<Real>("diffusivity"))
-{}
+    // Retrieve/use an old value of diffusivity.
+    // Note: this is _expensive_ - only do this if you REALLY need it!
+    _diffusivity_old(getMaterialPropertyOld<Real>("diffusivity"))
+{
+}
 
 void
 StatefulMaterial::initQpStatefulProperties()
@@ -47,5 +47,5 @@ StatefulMaterial::initQpStatefulProperties()
 void
 StatefulMaterial::computeQpProperties()
 {
-  _diffusivity[_qp] = _diffusivity_old[_qp] * 2;
+  _diffusivity[_qp] = _diffusivity_old[_qp] * 2.0;
 }

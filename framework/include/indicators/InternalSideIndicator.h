@@ -25,7 +25,7 @@
 class InternalSideIndicator;
 class MooseVariable;
 
-template<>
+template <>
 InputParameters validParams<InternalSideIndicator>();
 
 /**
@@ -33,46 +33,42 @@ InputParameters validParams<InternalSideIndicator>();
  * physics on internal sides (edges/faces).
  *
  */
-class InternalSideIndicator :
-  public Indicator,
-  public NeighborCoupleable,
-  public ScalarCoupleable,
-  public NeighborMooseVariableInterface
+class InternalSideIndicator : public Indicator,
+                              public NeighborCoupleable,
+                              public ScalarCoupleable,
+                              public NeighborMooseVariableInterface
 {
 public:
-
   /**
    * Factory constructor initializes all internal references needed for indicator computation.
    *
    */
   InternalSideIndicator(const InputParameters & parameters);
 
-  virtual ~InternalSideIndicator();
-
   /**
    * Computes the indicator for the current side.
    */
-  virtual void computeIndicator();
+  virtual void computeIndicator() override;
 
-  virtual void finalize();
+  virtual void finalize() override;
 
 protected:
   MooseVariable & _field_var;
 
-  const Elem * & _current_elem;
+  const Elem *& _current_elem;
   /// The neighboring element
-  const Elem * & _neighbor_elem;
+  const Elem *& _neighbor_elem;
 
   /// Current side
   unsigned int & _current_side;
   /// Current side element
-  const Elem * & _current_side_elem;
+  const Elem *& _current_side_elem;
 
   /// Coordinate system
   const Moose::CoordinateSystemType & _coord_sys;
   unsigned int _qp;
-  const MooseArray< Point > & _q_point;
-  QBase * & _qrule;
+  const MooseArray<Point> & _q_point;
+  QBase *& _qrule;
   const MooseArray<Real> & _JxW;
   const MooseArray<Real> & _coord;
 
@@ -83,18 +79,19 @@ protected:
   bool _scale_by_flux_faces;
 
   /// Holds the current solution at the current quadrature point on the face.
-  VariableValue & _u;
+  const VariableValue & _u;
 
   /// Holds the current solution gradient at the current quadrature point on the face.
-  VariableGradient & _grad_u;
+  const VariableGradient & _grad_u;
 
   /// Normal vectors at the quadrature points
-  const MooseArray<Point>& _normals;
+  const MooseArray<Point> & _normals;
 
   /// Holds the current solution at the current quadrature point
-  VariableValue & _u_neighbor;
+  const VariableValue & _u_neighbor;
+
   /// Holds the current solution gradient at the current quadrature point
-  VariableGradient & _grad_u_neighbor;
+  const VariableGradient & _grad_u_neighbor;
 
   /**
    * The virtual function you will want to override to compute error contributions.
@@ -105,8 +102,9 @@ protected:
   virtual Real computeQpIntegral() = 0;
 
 public:
-  // boundary id used for internal edges (all DG kernels lives on this boundary id -- a made-up number)
+  // boundary id used for internal edges (all DG kernels lives on this boundary id -- a made-up
+  // number)
   static const BoundaryID InternalBndId;
 };
 
-#endif //INTERNALSIDEINDICATOR_H
+#endif // INTERNALSIDEINDICATOR_H

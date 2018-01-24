@@ -1,0 +1,20 @@
+[Tests]
+  [./test_sm]
+    type = 'Exodiff'
+    input = 'fdp_geometric_coupling_sm.i'
+    cli_args = 'Outputs/file_base=fdp_geometric_coupling_out'
+    exodiff = 'fdp_geometric_coupling_out.e'
+    abs_zero = 1e-10
+    max_parallel = 1
+    valgrind = 'HEAVY'
+    prereq = test
+  [../]
+  [./test]
+    type = 'Exodiff'
+    input = 'fdp_geometric_coupling.i'
+    exodiff = 'fdp_geometric_coupling_out.e'
+    abs_zero = 1e-10
+    max_parallel = 1
+    valgrind = 'HEAVY'
+  [../]
+[]

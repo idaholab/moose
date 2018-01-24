@@ -1,0 +1,38 @@
+[Tests]
+  [./h2o]
+    type = 'CSVDiff'
+    input = 'h2o.i'
+    csvdiff = 'h2o.csv'
+    rel_err = 1.0E-5
+  [../]
+  [./methane]
+    type = 'CSVDiff'
+    input = 'methane.i'
+    csvdiff = 'methane.csv'
+    rel_err = 1.0E-5
+  [../]
+  [./ideal_gas]
+    type = 'CSVDiff'
+    input = 'ideal_gas.i'
+    csvdiff = 'ideal_gas.csv'
+    rel_err = 1.0E-5
+  [../]
+  [./brine1]
+    type = 'CSVDiff'
+    input = 'brine1.i'
+    csvdiff = 'brine1.csv'
+    rel_err = 1.0E-5
+  [../]
+  [./co2]
+    type = 'CSVDiff'
+    input = 'co2.i'
+    csvdiff = 'co2.csv'
+    rel_err = 1.0E-5
+  [../]
+  [./simple_fluid]
+    type = 'CSVDiff'
+    input = 'simple_fluid.i'
+    csvdiff = 'simple_fluid.csv'
+    rel_err = 1.0E-5
+  [../]
+[]

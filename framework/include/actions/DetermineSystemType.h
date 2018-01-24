@@ -19,7 +19,7 @@
 
 class DetermineSystemType;
 
-template<>
+template <>
 InputParameters validParams<DetermineSystemType>();
 
 class DetermineSystemType : public MooseObjectAction
@@ -27,7 +27,7 @@ class DetermineSystemType : public MooseObjectAction
 public:
   DetermineSystemType(InputParameters parameters);
 
-  virtual void act();
+  virtual void act() override;
 };
 
 #endif /* DETERMINESYSTEMTYPE_H */

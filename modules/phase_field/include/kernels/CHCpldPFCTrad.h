@@ -1,15 +1,22 @@
+/****************************************************************/
+/* MOOSE - Multiphysics Object Oriented Simulation Environment  */
+/*                                                              */
+/*          All contents are licensed under LGPL V2.1           */
+/*             See LICENSE for full restrictions                */
+/****************************************************************/
+
 #ifndef CHCPLDPFCTRAD_H
 #define CHCPLDPFCTRAD_H
 
-#include "CHSplitVar.h"
+#include "LaplacianSplit.h"
 
-//Forward Declarations
+// Forward Declarations
 class CHCpldPFCTrad;
 
-template<>
+template <>
 InputParameters validParams<CHCpldPFCTrad>();
 
-class CHCpldPFCTrad : public CHSplitVar
+class CHCpldPFCTrad : public LaplacianSplit
 {
 public:
   CHCpldPFCTrad(const InputParameters & parameters);
@@ -22,4 +29,4 @@ private:
   const MaterialProperty<Real> & _coeff;
 };
 
-#endif //CHCPLDPFCTRAD_H
+#endif // CHCPLDPFCTRAD_H

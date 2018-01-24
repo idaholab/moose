@@ -1,0 +1,196 @@
+[Tests]
+  [./small1]
+    type = 'CSVDiff'
+    input = 'small_deform1.i'
+    csvdiff = 'small_deform1.csv'
+  [../]
+  [./small2]
+    type = 'CSVDiff'
+    input = 'small_deform2.i'
+    csvdiff = 'small_deform2.csv'
+  [../]
+  [./small3]
+    type = 'CSVDiff'
+    input = 'small_deform3.i'
+    csvdiff = 'small_deform3.csv'
+  [../]
+  [./small5]
+    type = 'CSVDiff'
+    input = 'small_deform5.i'
+    csvdiff = 'small_deform5.csv'
+  [../]
+  [./small6]
+    type = 'CSVDiff'
+    input = 'small_deform6.i'
+    csvdiff = 'small_deform6.csv'
+  [../]
+  [./small7]
+    type = 'CSVDiff'
+    input = 'small_deform7.i'
+    csvdiff = 'small_deform7.csv'
+  [../]
+  [./small8]
+    type = 'CSVDiff'
+    input = 'small_deform8.i'
+    csvdiff = 'small_deform8.csv'
+  [../]
+  [./small9]
+    type = 'CSVDiff'
+    input = 'small_deform9.i'
+    csvdiff = 'small_deform9.csv'
+  [../]
+  [./small11]
+    type = 'CSVDiff'
+    input = 'small_deform11.i'
+    csvdiff = 'small_deform11.csv'
+  [../]
+  [./small12]
+    type = 'CSVDiff'
+    input = 'small_deform12.i'
+    csvdiff = 'small_deform12.csv'
+  [../]
+  [./small13]
+    type = 'CSVDiff'
+    input = 'small_deform13.i'
+    csvdiff = 'small_deform13.csv'
+  [../]
+  [./small15]
+    type = 'CSVDiff'
+    input = 'small_deform15.i'
+    csvdiff = 'small_deform15.csv'
+  [../]
+  [./small16]
+    type = 'CSVDiff'
+    input = 'small_deform16.i'
+    csvdiff = 'small_deform16.csv'
+  [../]
+  [./small17]
+    type = 'CSVDiff'
+    input = 'small_deform17.i'
+    csvdiff = 'small_deform17.csv'
+  [../]
+  [./small18]
+    type = 'CSVDiff'
+    input = 'small_deform18.i'
+    csvdiff = 'small_deform18.csv'
+  [../]
+  [./small19]
+    type = 'CSVDiff'
+    input = 'small_deform19.i'
+    csvdiff = 'small_deform19.csv'
+  [../]
+
+  [./small21]
+    type = 'CSVDiff'
+    input = 'small_deform21.i'
+    csvdiff = 'small_deform21.csv'
+  [../]
+  [./small23]
+    type = 'CSVDiff'
+    input = 'small_deform23.i'
+    csvdiff = 'small_deform23.csv'
+  [../]
+  [./small24]
+    type = 'CSVDiff'
+    input = 'small_deform24.i'
+    csvdiff = 'small_deform24.csv'
+  [../]
+  [./small25]
+    type = 'CSVDiff'
+    input = 'small_deform25.i'
+    csvdiff = 'small_deform25.csv'
+  [../]
+
+  [./small_hard3]
+    type = 'CSVDiff'
+    input = 'small_deform_hard3.i'
+    csvdiff = 'small_deform_hard3.csv'
+  [../]
+  [./small_hard13]
+    type = 'CSVDiff'
+    input = 'small_deform_hard13.i'
+    csvdiff = 'small_deform_hard13.csv'
+  [../]
+  [./small_hard21]
+    type = 'CSVDiff'
+    input = 'small_deform_hard21.i'
+    csvdiff = 'small_deform_hard21.csv'
+  [../]
+  [./small_hard22]
+    type = 'CSVDiff'
+    input = 'small_deform_hard22.i'
+    csvdiff = 'small_deform_hard22.csv'
+    abs_zero = 1.0E-9
+  [../]
+
+  [./random1]
+    type = CSVDiff
+    input = 'random1.i'
+    csvdiff = 'random1.csv'
+    cli_args = 'Mesh/nx=10 Mesh/ny=12 Mesh/xmax=10 Mesh/ymax=12'
+  [../]
+  [./random1_heavy]
+    type = CSVDiff
+    input = 'random1.i'
+    csvdiff = 'random1.csv'
+    cli_args = 'Mesh/nx=40 Mesh/ny=42 Mesh/xmax=40 Mesh/ymax=42'
+    heavy = true
+  [../]
+  [./random2]
+    type = CSVDiff
+    input = 'random2.i'
+    csvdiff = 'random2.csv'
+    cli_args = 'Mesh/nx=10 Mesh/ny=12 Mesh/xmax=10 Mesh/ymax=12'
+  [../]
+  [./random2_heavy]
+    type = CSVDiff
+    input = 'random2.i'
+    csvdiff = 'random2.csv'
+    cli_args = 'Mesh/nx=40 Mesh/ny=42 Mesh/xmax=40 Mesh/ymax=42'
+    heavy = true
+  [../]
+  [./random3]
+    type = CSVDiff
+    input = 'random3.i'
+    csvdiff = 'random3.csv'
+    cli_args = 'Mesh/nx=10 Mesh/ny=12 Mesh/xmax=10 Mesh/ymax=12'
+  [../]
+  [./random3_heavy]
+    type = CSVDiff
+    input = 'random3.i'
+    csvdiff = 'random3.csv'
+    cli_args = 'Mesh/nx=40 Mesh/ny=42 Mesh/xmax=40 Mesh/ymax=42'
+    heavy = true
+  [../]
+  [./random4]
+    type = CSVDiff
+    input = 'random4.i'
+    csvdiff = 'random4.csv'
+    cli_args = 'Mesh/nx=10 Mesh/ny=12 Mesh/xmax=10 Mesh/ymax=12'
+  [../]
+  [./random4_heavy]
+    type = CSVDiff
+    input = 'random4.i'
+    csvdiff = 'random4.csv'
+    cli_args = 'Mesh/nx=40 Mesh/ny=42 Mesh/xmax=40 Mesh/ymax=42'
+    heavy = true
+  [../]
+  [./random5]
+    type = Exodiff
+    input = 'random5.i'
+    exodiff = 'random5.e'
+    heavy = true
+    abs_zero = 1.0E-6
+  [../]
+
+  [./small1_cosserat]
+    type = 'CSVDiff'
+    input = 'small_deform1_cosserat.i'
+    csvdiff = 'small_deform1_cosserat.csv'
+  [../]
+  [./small9_cosserat]
+    type = 'CSVDiff'
+    input = 'small_deform9_cosserat.i'
+    csvdiff = 'small_deform9_cosserat.csv'
+  [../]
+[]

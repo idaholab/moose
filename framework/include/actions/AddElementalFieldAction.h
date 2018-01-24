@@ -19,16 +19,15 @@
 
 class AddElementalFieldAction;
 
-template<>
+template <>
 InputParameters validParams<AddElementalFieldAction>();
-
 
 class AddElementalFieldAction : public Action
 {
 public:
   AddElementalFieldAction(InputParameters params);
 
-  virtual void act();
+  virtual void act() override;
 };
 
 #endif // ADDELEMENTALFIELDACTION_H

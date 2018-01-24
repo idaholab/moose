@@ -21,10 +21,10 @@
 #include "FEProblem.h"
 #include "Factory.h"
 #include "MooseEnum.h"
-#include "EigenSystem.h"
+#include "MooseEigenSystem.h"
 #include "MooseObjectAction.h"
+#include "MooseMesh.h"
 
-// libMesh includes
 #include "libmesh/libmesh.h"
 #include "libmesh/exodusII_io.h"
 #include "libmesh/equation_systems.h"
@@ -35,8 +35,9 @@
 // class static initialization
 const Real AddVariableAction::_abs_zero_tol = 1e-12;
 
-template<>
-InputParameters validParams<AddVariableAction>()
+template <>
+InputParameters
+validParams<AddVariableAction>()
 {
   // Get MooseEnums for the possible order/family options for this variable
   MooseEnum families(AddVariableAction::getNonlinearVariableFamilies());
@@ -45,10 +46,15 @@ InputParameters validParams<AddVariableAction>()
   // Define the general input options
   InputParameters params = validParams<Action>();
   params += validParams<OutputInterface>();
-  params.addParam<MooseEnum>("family", families, "Specifies the family of FE shape functions to use for this variable");
-  params.addParam<MooseEnum>("order", orders,  "Specifies the order of the FE shape function to use for this variable (additional orders not listed are allowed)");
+  params.addParam<MooseEnum>(
+      "family", families, "Specifies the family of FE shape functions to use for this variable");
+  params.addParam<MooseEnum>("order",
+                             orders,
+                             "Specifies the order of the FE shape function to use "
+                             "for this variable (additional orders not listed are "
+                             "allowed)");
   params.addParam<Real>("initial_condition", "Specifies the initial condition for this variable");
-  params.addParam<std::vector<SubdomainName> >("block", "The block id where this variable lives");
+  params.addParam<std::vector<SubdomainName>>("block", "The block id where this variable lives");
   params.addParam<bool>("eigen", false, "True to make this variable an eigen variable");
 
   // Advanced input options
@@ -58,8 +64,8 @@ InputParameters validParams<AddVariableAction>()
   return params;
 }
 
-AddVariableAction::AddVariableAction(InputParameters params) :
-    Action(params),
+AddVariableAction::AddVariableAction(InputParameters params)
+  : Action(params),
     OutputInterface(params, false),
     _fe_type(Utility::string_to_enum<Order>(getParam<MooseEnum>("order")),
              Utility::string_to_enum<FEFamily>(getParam<MooseEnum>("family"))),
@@ -70,7 +76,9 @@ AddVariableAction::AddVariableAction(InputParameters params) :
 MooseEnum
 AddVariableAction::getNonlinearVariableFamilies()
 {
-  return MooseEnum("LAGRANGE MONOMIAL HERMITE SCALAR HIERARCHIC CLOUGH XYZ SZABAB BERNSTEIN L2_LAGRANGE L2_HIERARCHIC", "LAGRANGE");
+  return MooseEnum("LAGRANGE MONOMIAL HERMITE SCALAR HIERARCHIC CLOUGH XYZ SZABAB BERNSTEIN "
+                   "L2_LAGRANGE L2_HIERARCHIC",
+                   "LAGRANGE");
 }
 
 MooseEnum
@@ -112,7 +120,8 @@ AddVariableAction::createInitialConditionAction()
     action_params.set<std::string>("type") = "ConstantIC";
 
   // Create the action
-  MooseSharedPointer<MooseObjectAction> action = MooseSharedNamespace::static_pointer_cast<MooseObjectAction>(_action_factory.create("AddInitialConditionAction", long_name, action_params));
+  std::shared_ptr<MooseObjectAction> action = std::static_pointer_cast<MooseObjectAction>(
+      _action_factory.create("AddInitialConditionAction", long_name, action_params));
 
   // Set the required parameters for the object to be created
   action->getObjectParams().set<VariableName>("variable") = var_name;
@@ -142,7 +151,7 @@ AddVariableAction::addVariable(std::string & var_name)
 
   if (getParam<bool>("eigen"))
   {
-    EigenSystem & esys(static_cast<EigenSystem &>(_problem->getNonlinearSystem()));
+    MooseEigenSystem & esys(static_cast<MooseEigenSystem &>(_problem->getNonlinearSystemBase()));
     esys.markEigenVariable(var_name);
   }
 }
@@ -152,10 +161,10 @@ AddVariableAction::getSubdomainIDs()
 {
   // Extract and return the block ids supplied in the input
   std::set<SubdomainID> blocks;
-  std::vector<SubdomainName> block_param = getParam<std::vector<SubdomainName> >("block");
-  for (std::vector<SubdomainName>::iterator it = block_param.begin(); it != block_param.end(); ++it)
+  std::vector<SubdomainName> block_param = getParam<std::vector<SubdomainName>>("block");
+  for (const auto & subdomain_name : block_param)
   {
-    SubdomainID blk_id = _problem->mesh().getSubdomainID(*it);
+    SubdomainID blk_id = _problem->mesh().getSubdomainID(subdomain_name);
     blocks.insert(blk_id);
   }
   return blocks;

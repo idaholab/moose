@@ -14,31 +14,37 @@
 
 #include "OutputTestMaterial.h"
 
-template<>
-InputParameters validParams<OutputTestMaterial>()
+template <>
+InputParameters
+validParams<OutputTestMaterial>()
 {
   InputParameters params = validParams<Material>();
-  params.addParam<std::string>("real_property_name", "real_property", "The name of the scalar real property");
-  params.addParam<std::string>("vector_property_name", "vector_property", "The name of the vector real property");
-  params.addParam<std::string>("tensor_property_name", "tensor_property", "The name of the tensor real property");
-  params.addParam<Real>("real_factor", 0, "Add this factor to all of the scalar real material property");
-  params.addCoupledVar("variable", "Variable to use for making this test material more complicated");
+  params.addParam<std::string>(
+      "real_property_name", "real_property", "The name of the scalar real property");
+  params.addParam<std::string>(
+      "vector_property_name", "vector_property", "The name of the vector real property");
+  params.addParam<std::string>(
+      "tensor_property_name", "tensor_property", "The name of the tensor real property");
+  params.addParam<Real>(
+      "real_factor", 0, "Add this factor to all of the scalar real material property");
+  params.addCoupledVar("variable",
+                       "Variable to use for making this test material more complicated");
   return params;
 }
 
-OutputTestMaterial::OutputTestMaterial(const InputParameters & parameters) :
-    Material(parameters),
+OutputTestMaterial::OutputTestMaterial(const InputParameters & parameters)
+  : Material(parameters),
     _real_property(declareProperty<Real>(getParam<std::string>("real_property_name"))),
-    _vector_property(declareProperty<RealVectorValue>(getParam<std::string>("vector_property_name"))),
-    _tensor_property(declareProperty<RealTensorValue>(getParam<std::string>("tensor_property_name"))),
+    _vector_property(
+        declareProperty<RealVectorValue>(getParam<std::string>("vector_property_name"))),
+    _tensor_property(
+        declareProperty<RealTensorValue>(getParam<std::string>("tensor_property_name"))),
     _factor(getParam<Real>("real_factor")),
     _variable(coupledValue("variable"))
 {
 }
 
-OutputTestMaterial::~OutputTestMaterial()
-{
-}
+OutputTestMaterial::~OutputTestMaterial() {}
 
 void
 OutputTestMaterial::computeQpProperties()
@@ -53,6 +59,6 @@ OutputTestMaterial::computeQpProperties()
   RealVectorValue vec(v + x, v + y);
   _vector_property[_qp] = vec;
 
-  RealTensorValue tensor(v, x*y, 0, -x*y, y*y);
+  RealTensorValue tensor(v, x * y, 0, -x * y, y * y);
   _tensor_property[_qp] = tensor;
 }

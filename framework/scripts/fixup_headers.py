@@ -39,56 +39,56 @@ lgpl_header = \
 global_options = {}
 
 def fixupHeader():
-  for dirpath, dirnames, filenames in os.walk(os.getcwd() + "/../../"):
+    for dirpath, dirnames, filenames in os.walk(os.getcwd() + "/../../"):
 
-    # Don't traverse into ignored directories
-    for ignore in global_ignores:
-      if ignore in dirnames:
-        dirnames.remove(ignore)
+        # Don't traverse into ignored directories
+        for ignore in global_ignores:
+            if ignore in dirnames:
+                dirnames.remove(ignore)
 
-    #print dirpath
-    #print dirnames
-    for file in filenames:
-      suffix = os.path.splitext(file)
-      if suffix[-1] == '.C' or suffix[-1] == '.h':
-        checkAndUpdate(os.path.abspath(dirpath + '/' + file))
+        #print dirpath
+        #print dirnames
+        for file in filenames:
+            suffix = os.path.splitext(file)
+            if suffix[-1] == '.C' or suffix[-1] == '.h':
+                checkAndUpdate(os.path.abspath(dirpath + '/' + file))
 
 
 def checkAndUpdate(filename):
-  f = open(filename)
-  text = f.read()
-  f.close()
+    f = open(filename)
+    text = f.read()
+    f.close()
 
-  # Use the copyright header for framework files, use the lgpl header
-  # for everything else
-  header = lgpl_header
-  for dirname in moose_paths:
-    if (string.find(filename, dirname) != -1):
-      header = copyright_header
-      break
+    # Use the copyright header for framework files, use the lgpl header
+    # for everything else
+    header = lgpl_header
+    for dirname in moose_paths:
+        if (string.find(filename, dirname) != -1):
+            header = copyright_header
+            break
 
-  # Check (exact match only)
-  if (string.find(text, header) == -1):
-    # print the first 10 lines or so of the file
-    if global_options.update == False: # Report only
-      print filename + ' does not contain an up to date header'
-      if global_options.verbose == True:
-        print '>'*40, '\n', '\n'.join((text.split('\n', 10))[:10]), '\n'*5
-    else:
-      # Update
-      f = open(filename + '~tmp', 'w')
-      f.write(header)
+    # Check (exact match only)
+    if (string.find(text, header) == -1):
+        # print the first 10 lines or so of the file
+        if global_options.update == False: # Report only
+            print filename + ' does not contain an up to date header'
+            if global_options.verbose == True:
+                print '>'*40, '\n', '\n'.join((text.split('\n', 10))[:10]), '\n'*5
+        else:
+            # Update
+            f = open(filename + '~tmp', 'w')
+            f.write(header)
 
-      # Make sure any previous header version is removed
-      text = re.sub(r'^/\*+/$.*^/\*+/$', '', text, flags=re.S | re.M)
+            # Make sure any previous header version is removed
+            text = re.sub(r'^/\*+/$.*^/\*+/$', '', text, flags=re.S | re.M)
 
-      f.write(text)
-      f.close()
-      os.rename(filename + '~tmp', filename)
+            f.write(text)
+            f.close()
+            os.rename(filename + '~tmp', filename)
 
 if __name__ == '__main__':
-  parser = OptionParser()
-  parser.add_option("-u", "--update", action="store_true", dest="update", default=False)
-  parser.add_option("-v", "--verbose", action="store_true", dest="verbose", default=False)
-  (global_options, args) = parser.parse_args()
-  fixupHeader()
+    parser = OptionParser()
+    parser.add_option("-u", "--update", action="store_true", dest="update", default=False)
+    parser.add_option("-v", "--verbose", action="store_true", dest="verbose", default=False)
+    (global_options, args) = parser.parse_args()
+    fixupHeader()

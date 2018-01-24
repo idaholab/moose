@@ -17,32 +17,25 @@
 
 #include "AuxKernel.h"
 
-
-//Forward Declarations
+// Forward Declarations
 class NearestNodeDistanceAux;
 class NearestNodeLocator;
 
-template<>
+template <>
 InputParameters validParams<NearestNodeDistanceAux>();
 
 /**
- * Constant auxiliary value
+ * Computes the distance from a block or boundary to another boundary.
  */
 class NearestNodeDistanceAux : public AuxKernel
 {
 public:
-  /**
-   * Factory constructor, takes parameters so that all derived classes can be built using the same
-   * constructor.
-   */
   NearestNodeDistanceAux(const InputParameters & parameters);
 
-  virtual ~NearestNodeDistanceAux();
-
 protected:
-  virtual Real computeValue();
+  virtual Real computeValue() override;
 
   NearestNodeLocator & _nearest_node;
 };
 
-#endif //NEARESTNODEDISTANCEAUX_H
+#endif // NEARESTNODEDISTANCEAUX_H

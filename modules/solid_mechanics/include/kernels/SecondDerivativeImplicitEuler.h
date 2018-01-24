@@ -5,16 +5,15 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-
 #ifndef SECONDDERIVATIVEIMPLICITEULER_H
 #define SECONDDERIVATIVEIMPLICITEULER_H
 
 #include "TimeKernel.h"
 
-//Forward Declarations
+// Forward Declarations
 class SecondDerivativeImplicitEuler;
 
-template<>
+template <>
 InputParameters validParams<SecondDerivativeImplicitEuler>();
 
 class SecondDerivativeImplicitEuler : public TimeKernel
@@ -26,8 +25,8 @@ protected:
   virtual Real computeQpResidual();
   virtual Real computeQpJacobian();
 
-  VariableValue & _u_old;
-  VariableValue & _u_older;
+  const VariableValue & _u_old;
+  const VariableValue & _u_older;
 };
 
-#endif //SECONDDERIVATIVEIMPLICITEULER_H
+#endif // SECONDDERIVATIVEIMPLICITEULER_H

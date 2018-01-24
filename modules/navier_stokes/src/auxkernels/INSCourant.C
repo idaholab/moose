@@ -5,12 +5,15 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 #include "INSCourant.h"
+#include "MooseMesh.h"
 
-template<>
-InputParameters validParams<INSCourant>()
+template <>
+InputParameters
+validParams<INSCourant>()
 {
   InputParameters params = validParams<AuxKernel>();
 
+  params.addClassDescription("Computes h_min / |u|.");
   // Coupled variables
   params.addRequiredCoupledVar("u", "x-velocity");
   params.addCoupledVar("v", "y-velocity"); // only required in 2D and 3D
@@ -20,22 +23,21 @@ InputParameters validParams<INSCourant>()
 }
 
 INSCourant::INSCourant(const InputParameters & parameters)
-  :AuxKernel(parameters),
-  _u_vel(coupledValue("u")),
-  _v_vel(_mesh.dimension() >= 2 ? coupledValue("v") : _zero),
-  _w_vel(_mesh.dimension() == 3 ? coupledValue("w") : _zero)
-{}
+  : AuxKernel(parameters),
+    _u_vel(coupledValue("u")),
+    _v_vel(_mesh.dimension() >= 2 ? coupledValue("v") : _zero),
+    _w_vel(_mesh.dimension() == 3 ? coupledValue("w") : _zero)
+{
+}
 
 Real
 INSCourant::computeValue()
 {
-  RealVectorValue U(_u_vel[_qp], _v_vel[_qp], _w_vel[_qp]);
-
-  Real vel_mag = U.size();
+  const RealVectorValue U(_u_vel[_qp], _v_vel[_qp], _w_vel[_qp]);
+  Real vel_mag = U.norm();
 
   // Don't divide by zero...
   vel_mag = std::max(vel_mag, std::numeric_limits<Real>::epsilon());
 
   return _current_elem->hmin() / vel_mag;
 }
-

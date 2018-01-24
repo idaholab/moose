@@ -17,11 +17,10 @@
 
 #include "AuxKernel.h"
 
-
-//Forward Declarations
+// Forward Declarations
 class FluxAverageAux;
 
-template<>
+template <>
 InputParameters validParams<FluxAverageAux>();
 
 /**
@@ -43,14 +42,13 @@ protected:
   Real _diffusivity;
 
   /// Coupled gradient
-  VariableGradient & _coupled_gradient;
+  const VariableGradient & _coupled_gradient;
 
   /// The variable we're coupled to
   MooseVariable & _coupled_var;
 
   /// normals at quadrature points
   const MooseArray<Point> & _normals;
-
 };
 
-#endif //FLUXAVERAGEAUX_H
+#endif // FLUXAVERAGEAUX_H

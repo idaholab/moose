@@ -17,10 +17,9 @@
 
 #include "AuxKernel.h"
 
-
 class MultipleUpdateAux;
 
-template<>
+template <>
 InputParameters validParams<MultipleUpdateAux>();
 
 /**
@@ -35,11 +34,9 @@ public:
 protected:
   virtual Real computeValue();
 
-  VariableValue & _nl_u;
+  const VariableValue & _nl_u;
   VariableValue & _var1;
   VariableValue & _var2;
-
 };
-
 
 #endif /* MULTIPLEUPDATEAUX_H_ */

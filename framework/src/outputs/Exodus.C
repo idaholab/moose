@@ -12,26 +12,38 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-// Moose includes
 #include "Exodus.h"
-#include "MooseApp.h"
-#include "FEProblem.h"
+
+// Moose includes
 #include "DisplacedProblem.h"
 #include "ExodusFormatter.h"
+#include "FEProblem.h"
 #include "FileMesh.h"
+#include "MooseApp.h"
+#include "MooseVariableScalar.h"
+#include "LockFile.h"
 
-template<>
-InputParameters validParams<Exodus>()
+#include "libmesh/exodusII_io.h"
+
+template <>
+InputParameters
+validParams<Exodus>()
 {
   // Get the base class parameters
-  InputParameters params = validParams<AdvancedOutput<OversampleOutput> >();
-  params += AdvancedOutput<OversampleOutput>::enableOutputTypes("nodal elemental scalar postprocessor input");
+  InputParameters params = validParams<OversampleOutput>();
+  params += AdvancedOutput::enableOutputTypes("nodal elemental scalar postprocessor input");
 
-  // Enable sequential file output (do not set default, the use_displace criteria relies on isParamValid, see Constructor)
-  params.addParam<bool>("sequence", "Enable/disable sequential file output (enabled by default when 'use_displace = true', otherwise defaults to false");
+  // Enable sequential file output (do not set default, the use_displace criteria relies on
+  // isParamValid, see Constructor)
+  params.addParam<bool>("sequence",
+                        "Enable/disable sequential file output (enabled by default "
+                        "when 'use_displace = true', otherwise defaults to false");
 
   // Select problem dimension for mesh output
-  params.addParam<bool>("use_problem_dimension", "Use the problem dimension to the mesh output. Set to false when outputting lower dimensional meshes embedded in a higher dimensional space.");
+  params.addParam<bool>("use_problem_dimension",
+                        "Use the problem dimension to the mesh output. "
+                        "Set to false when outputting lower dimensional "
+                        "meshes embedded in a higher dimensional space.");
 
   // Set the default padding to 3
   params.set<unsigned int>("padding") = 3;
@@ -40,27 +52,27 @@ InputParameters validParams<Exodus>()
   params.addClassDescription("Object for output data in the Exodus II format");
 
   // Flag for overwriting at each timestep
-  params.addParam<bool>("overwrite", false, "When true the latest timestep will overwrite the existing file, so only a single timestep exists.");
+  params.addParam<bool>("overwrite",
+                        false,
+                        "When true the latest timestep will overwrite the "
+                        "existing file, so only a single timestep exists.");
 
   // Set outputting of the input to be on by default
-  params.set<MultiMooseEnum>("execute_input_on") = "initial";
+  params.set<ExecFlagEnum>("execute_input_on") = EXEC_INITIAL;
 
   // Return the InputParameters
   return params;
 }
 
-Exodus::Exodus(const InputParameters & parameters) :
-    AdvancedOutput<OversampleOutput>(parameters),
+Exodus::Exodus(const InputParameters & parameters)
+  : OversampleOutput(parameters),
     _exodus_initialized(false),
     _exodus_num(declareRestartableData<unsigned int>("exodus_num", 0)),
     _recovering(_app.isRecovering()),
     _exodus_mesh_changed(declareRestartableData<bool>("exodus_mesh_changed", true)),
-    _sequence(isParamValid("sequence") ? getParam<bool>("sequence") : _use_displaced ? true : false),
+    _sequence(isParamValid("sequence") ? getParam<bool>("sequence")
+                                       : _use_displaced ? true : false),
     _overwrite(getParam<bool>("overwrite"))
-{
-}
-
-Exodus::~Exodus()
 {
 }
 
@@ -68,16 +80,19 @@ void
 Exodus::initialSetup()
 {
   // Call base class setup method
-  AdvancedOutput<OversampleOutput>::initialSetup();
+  AdvancedOutput::initialSetup();
 
   // The libMesh::ExodusII_IO will fail when it is closed if the object is created but
   // nothing is written to the file. This checks that at least something will be written.
   if (!hasOutput())
     mooseError("The current settings result in nothing being output to the Exodus file.");
 
-  // Test that some sort of variable output exists (case when all variables are disabled but input output is still enabled
-  if (!hasNodalVariableOutput() && !hasElementalVariableOutput() && !hasPostprocessorOutput() && !hasScalarOutput())
-    mooseError("The current settings results in only the input file and no variables being output to the Exodus file, this is not supported.");
+  // Test that some sort of variable output exists (case when all variables are disabled but input
+  // output is still enabled
+  if (!hasNodalVariableOutput() && !hasElementalVariableOutput() && !hasPostprocessorOutput() &&
+      !hasScalarOutput())
+    mooseError("The current settings results in only the input file and no variables being output "
+               "to the Exodus file, this is not supported.");
 }
 
 void
@@ -99,15 +114,15 @@ Exodus::sequence(bool state)
 void
 Exodus::outputSetup()
 {
-  if (_exodus_io_ptr != NULL)
+  if (_exodus_io_ptr)
   {
     // Do nothing if the ExodusII_IO objects exists, but has not been initialized
-    if (!_exodus_initialized && _exodus_io_ptr != NULL)
+    if (!_exodus_initialized)
       return;
 
     // Do nothing if the output is using oversampling. In this case the mesh that is being output
     // has not been changed, so there is no need to create a new ExodusII_IO object
-    if (_exodus_io_ptr != NULL && (_oversample || _change_position))
+    if (_oversample || _change_position)
       return;
 
     // Do nothing if the mesh has not changed and sequential output is not desired
@@ -116,7 +131,7 @@ Exodus::outputSetup()
   }
 
   // Create the ExodusII_IO object
-  _exodus_io_ptr.reset(new ExodusII_IO(_es_ptr->get_mesh()));
+  _exodus_io_ptr = libmesh_make_unique<ExodusII_IO>(_es_ptr->get_mesh());
   _exodus_initialized = false;
 
   // Increment file number and set appending status, append if all the following conditions are met:
@@ -144,15 +159,41 @@ Exodus::outputSetup()
   }
 
   if (isParamValid("use_problem_dimension"))
-    _exodus_io_ptr->use_mesh_dimension_instead_of_spatial_dimension(getParam<bool>("use_problem_dimension"));
+    _exodus_io_ptr->use_mesh_dimension_instead_of_spatial_dimension(
+        getParam<bool>("use_problem_dimension"));
   else
   {
-    // Utilize the spatial dimensions
+    // If the spatial_dimension is 1 (this can only happen in recent
+    // versions of libmesh where the meaning of spatial_dimension has
+    // changed), then force the Exodus file to be written with
+    // num_dim==3.
+    //
+    // This works around an issue in Paraview where 1D meshes cannot
+    // not be visualized correctly.  Note: the mesh_dimension() should
+    // get changed back to 1 the next time MeshBase::prepare_for_use()
+    // is called.
+    if (_es_ptr->get_mesh().spatial_dimension() == 1)
+      _exodus_io_ptr->write_as_dimension(3);
+
+    // If the spatial_dimension is 2 (again, only possible in recent
+    // versions of libmesh), then we need to be careful as this mesh
+    // would not have been written with num_dim==2 in the past.
+    //
+    // We *can't* simply write it with num_dim==mesh_dimension,
+    // because mesh_dimension might be 1, and as discussed above, we
+    // don't allow num_dim==1 Exodus files.  Therefore, in this
+    // particular case, we force writing with num_dim==3.  Note: the
+    // humor of writing a mesh of 1D elements which lives in 2D space
+    // as num_dim==3 is not lost on me.
+    if (_es_ptr->get_mesh().spatial_dimension() == 2 && _es_ptr->get_mesh().mesh_dimension() == 1)
+      _exodus_io_ptr->write_as_dimension(3);
+
+    // Utilize the spatial dimension.  This value of this flag is
+    // superseded by the value passed to write_as_dimension(), if any.
     if (_es_ptr->get_mesh().mesh_dimension() != 1)
       _exodus_io_ptr->use_mesh_dimension_instead_of_spatial_dimension(true);
   }
 }
-
 
 void
 Exodus::outputNodalVariables()
@@ -162,7 +203,8 @@ Exodus::outputNodalVariables()
   _exodus_io_ptr->set_output_variables(nodal);
 
   // Write the data via libMesh::ExodusII_IO
-  _exodus_io_ptr->write_timestep(filename(), *_es_ptr, _exodus_num, time() + _app.getGlobalTimeOffset());
+  _exodus_io_ptr->write_timestep(
+      filename(), *_es_ptr, _exodus_num, time() + _app.getGlobalTimeOffset());
 
   if (!_overwrite)
     _exodus_num++;
@@ -179,7 +221,8 @@ Exodus::outputElementalVariables()
     outputEmptyTimestep();
 
   // Write the elemental data
-  std::vector<std::string> elemental(getElementalVariableOutput().begin(), getElementalVariableOutput().end());
+  std::vector<std::string> elemental(getElementalVariableOutput().begin(),
+                                     getElementalVariableOutput().end());
   _exodus_io_ptr->set_output_variables(elemental);
   _exodus_io_ptr->write_element_data(*_es_ptr);
 }
@@ -192,10 +235,10 @@ Exodus::outputPostprocessors()
 
   // Append the postprocessor data to the global name value parameters; scalar outputs
   // also append these member variables
-  for (std::set<std::string>::const_iterator it = pps.begin(); it != pps.end(); ++it)
+  for (const auto & name : pps)
   {
-    _global_names.push_back(*it);
-    _global_values.push_back(_problem_ptr->getPostprocessorValue(*it));
+    _global_names.push_back(name);
+    _global_values.push_back(_problem_ptr->getPostprocessorValue(name));
   }
 }
 
@@ -206,16 +249,32 @@ Exodus::outputScalarVariables()
   const std::set<std::string> & out = getScalarOutput();
 
   // Append the scalar to the global output lists
-  for (std::set<std::string>::const_iterator it = out.begin(); it != out.end(); ++it)
+  for (const auto & out_name : out)
   {
-    VariableValue & variable = _problem_ptr->getScalarVariable(0, *it).sln();
-    unsigned int n = variable.size();
+    // Make sure scalar values are in sync with the solution vector
+    // and are visible on this processor.  See TableOutput.C for
+    // TableOutput::outputScalarVariables() explanatory comments
+
+    MooseVariableScalar & scalar_var = _problem_ptr->getScalarVariable(0, out_name);
+    scalar_var.reinit();
+    VariableValue value = scalar_var.sln();
+
+    const std::vector<dof_id_type> & dof_indices = scalar_var.dofIndices();
+    const unsigned int n = dof_indices.size();
+    value.resize(n);
+
+    const DofMap & dof_map = scalar_var.sys().dofMap();
+    for (unsigned int i = 0; i != n; ++i)
+    {
+      const processor_id_type pid = dof_map.dof_owner(dof_indices[i]);
+      this->comm().broadcast(value[i], pid);
+    }
 
     // If the scalar has a single component, output the name directly
     if (n == 1)
     {
-      _global_names.push_back(*it);
-      _global_values.push_back(variable[0]);
+      _global_names.push_back(out_name);
+      _global_values.push_back(value[0]);
     }
 
     // If the scalar as many components add indices to the end of the name
@@ -224,9 +283,9 @@ Exodus::outputScalarVariables()
       for (unsigned int i = 0; i < n; ++i)
       {
         std::ostringstream os;
-        os << *it << "_" << i;
+        os << out_name << "_" << i;
         _global_names.push_back(os.str());
-        _global_values.push_back(variable[i]);
+        _global_values.push_back(value[i]);
       }
     }
   }
@@ -244,7 +303,6 @@ Exodus::outputInput()
   _input_record = syntax_formatter.getInputFileRecord();
 }
 
-
 void
 Exodus::output(const ExecFlagType & type)
 {
@@ -253,10 +311,11 @@ Exodus::output(const ExecFlagType & type)
     return;
 
   // Start the performance log
-  Moose::perf_log.push("output()", "Exodus");
+  Moose::perf_log.push("Exodus::output()", "Output");
 
   // Prepare the ExodusII_IO object
   outputSetup();
+  LockFile lf(filename(), processor_id() == 0);
 
   // Adjust the position of the output
   if (_app.hasOutputPosition())
@@ -267,7 +326,7 @@ Exodus::output(const ExecFlagType & type)
   _global_values.clear();
 
   // Call the individual output methods
-  AdvancedOutput<OversampleOutput>::output(type);
+  AdvancedOutput::output(type);
 
   // Write the global variables (populated by the output methods)
   if (!_global_values.empty())
@@ -280,7 +339,7 @@ Exodus::output(const ExecFlagType & type)
   // Write the input file record if it exists and the output file is initialized
   if (!_input_record.empty() && _exodus_initialized)
   {
-     _exodus_io_ptr->write_information_records(_input_record);
+    _exodus_io_ptr->write_information_records(_input_record);
     _input_record.clear();
   }
 
@@ -288,7 +347,7 @@ Exodus::output(const ExecFlagType & type)
   _exodus_mesh_changed = false;
 
   // Stop the logging
-  Moose::perf_log.pop("output()", "Exodus");
+  Moose::perf_log.pop("Exodus::output()", "Output");
 }
 
 std::string
@@ -300,11 +359,7 @@ Exodus::filename()
 
   // Add the -s00x extension to the file
   if (_file_num > 1)
-    output << "-s"
-           << std::setw(_padding)
-           << std::setprecision(0)
-           << std::setfill('0')
-           << std::right
+    output << "-s" << std::setw(_padding) << std::setprecision(0) << std::setfill('0') << std::right
            << _file_num;
 
   // Return the filename
@@ -316,7 +371,8 @@ Exodus::outputEmptyTimestep()
 {
   // Write a timestep with no variables
   _exodus_io_ptr->set_output_variables(std::vector<std::string>());
-  _exodus_io_ptr->write_timestep(filename(), *_es_ptr, _exodus_num, time() + _app.getGlobalTimeOffset());
+  _exodus_io_ptr->write_timestep(
+      filename(), *_es_ptr, _exodus_num, time() + _app.getGlobalTimeOffset());
 
   if (!_overwrite)
     _exodus_num++;

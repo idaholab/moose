@@ -14,12 +14,8 @@
 [Variables]
   [./pressure]
   [../]
-  [./temp]
+  [./temperature]
     initial_condition = 300 # Start at room temperature
-  [../]
-  [./disp_r]
-  [../]
-  [./disp_z]
   [../]
 []
 
@@ -42,6 +38,15 @@
   [../]
 []
 
+[Modules/TensorMechanics/Master]
+  [./all]
+    # This block adds all of the proper Kernels, strain calculators, and Variables
+    # for TensorMechanics in the correct coordinate system (autodetected)
+    add_variables = true
+    strain = FINITE
+  [../]
+[]
+
 [Kernels]
   [./darcy_pressure]
     type = DarcyPressure
@@ -49,21 +54,16 @@
   [../]
   [./heat_conduction]
     type = HeatConduction
-    variable = temp
+    variable = temperature
   [../]
   [./heat_conduction_time_derivative]
-    type = HeatConductionTimeDerivative
-    variable = temp
-    use_heat_capacity = true
+    type = HeatCapacityConductionTimeDerivative
+    variable = temperature
   [../]
   [./heat_convection]
     type = DarcyConvection
-    variable = temp
+    variable = temperature
     darcy_pressure = pressure
-  [../]
-  [./AxisymmetricRZ]
-    # This block adds all of the proper Kernels for TensorMechanics in RZ
-    use_displaced_mesh = true
   [../]
 []
 
@@ -102,23 +102,23 @@
     type = DirichletBC
     variable = pressure
     boundary = bottom
-    value = 4000 # (Pa) From Figure 2 from paper.  First data point for 1mm balls.
+    value = 4000 # (Pa) From Figure 2 from paper.  First data point for 1mm spheres.
   [../]
   [./outlet]
     type = DirichletBC
     variable = pressure
     boundary = top
-    value = 0 # (Pa) Gives the correct pressure drop from Figure 2 for 1mm balls
+    value = 0 # (Pa) Gives the correct pressure drop from Figure 2 for 1mm spheres
   [../]
   [./inlet_temperature]
     type = DirichletBC
-    variable = temp
+    variable = temperature
     boundary = bottom
     value = 350 # (C)
   [../]
   [./outlet_temperature]
     type = HeatConductionOutflow
-    variable = temp
+    variable = temperature
     boundary = top
   [../]
   [./hold_inlet]
@@ -144,9 +144,7 @@
 [Materials]
   [./column]
     type = PackedColumn
-    block = 0
-    ball_radius = 1
-    temperature = temp
+    sphere_radius = 1
     thermal_conductivity = k_eff # Use the AuxVariable instead of calculating
   [../]
 
@@ -154,26 +152,16 @@
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 200e9 # (Pa) from wikipedia
     poissons_ratio = .3 # from wikipedia
-    block = 0
   [../]
-
-  [./small_strain_arz]
-    type = ComputeAxisymmetricRZFiniteStrain
-    temperature = temp
-    thermal_expansion_coeff = 12e-6 # (K^-1) @20C from wikipedia
-    block = 0
-  [../]
-
-  [./_elastic_strain]
+  [./elastic_stress]
     type = ComputeFiniteStrainElasticStress
-    block = 0
   [../]
 []
 
 [Postprocessors]
-  [./average_temp]
+  [./average_temperature]
     type = ElementAverageValue
-    variable = temp
+    variable = temperature
   [../]
 []
 
@@ -218,12 +206,12 @@
     postprocessor = k_eff
     execute_on = 'timestep_end'
   [../]
-  [./temp_to_sub]
+  [./temperature_to_sub]
     type = MultiAppVariableValueSamplePostprocessorTransfer
     direction = to_multiapp
     multi_app = micro
-    source_variable = temp
-    postprocessor = temp_in
+    source_variable = temperature
+    postprocessor = temperature_in
     execute_on = 'timestep_end'
   [../]
 []

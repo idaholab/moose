@@ -1,0 +1,25 @@
+[Tests]
+  [./except01]
+    type = 'RunException'
+    input = 'except01.i'
+    expect_err = 'ComputeEigenstrainFromInitialStress: 9 initial stress functions must be provided.  You supplied 3'
+  [../]
+  [./gravity]
+    type = 'Exodiff'
+    input = 'gravity.i'
+    exodiff = 'gravity.e'
+  [../]
+  [./gravity_cosserat]
+    type = 'Exodiff'
+    input = 'gravity_cosserat.i'
+    exodiff = 'gravity_cosserat.e'
+  [../]
+  [./mc_tensile]
+    type = 'CSVDiff'
+    input = 'mc_tensile.i'
+    csvdiff = 'mc_tensile.csv'
+    rel_err = 1.0E-5
+    abs_zero = 1.0E-5
+    cli_args = '--no-trap-fpe'
+  [../]
+[]

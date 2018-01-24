@@ -7,13 +7,14 @@
 #ifndef NSTHERMALINFLOWBC_H
 #define NSTHERMALINFLOWBC_H
 
+// MOOSE includes
 #include "NodalBC.h"
-
 
 // Forward Declarations
 class NSInflowThermalBC;
+class IdealGasFluidProperties;
 
-template<>
+template <>
 InputParameters validParams<NSInflowThermalBC>();
 
 /**
@@ -23,10 +24,7 @@ InputParameters validParams<NSInflowThermalBC>();
 class NSInflowThermalBC : public NodalBC
 {
 public:
-
   NSInflowThermalBC(const InputParameters & parameters);
-
-  virtual ~NSInflowThermalBC(){}
 
 protected:
   // In general, the residual equation is u-u_d=0, where u_d
@@ -35,19 +33,17 @@ protected:
   // to simply have a 1 on the diagonal.
   virtual Real computeQpResidual();
 
-  // Specific heat at constant volume, treated as a single
-  // constant value.
-  Real _R;
-  Real _gamma;
-
   // The specified density for this inflow boundary
-  Real _specified_rho;
+  const Real _specified_rho;
 
   // The specified temperature for this inflow boundary
-  Real _specified_temperature;
+  const Real _specified_temperature;
 
   // The specified velocity magnitude for this inflow boundary
-  Real _specified_velocity_magnitude;
+  const Real _specified_velocity_magnitude;
+
+  // Fluid properties
+  const IdealGasFluidProperties & _fp;
 };
 
 #endif // NSTHERMALINFLOWBC_H

@@ -5,7 +5,6 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-
 #ifndef RICHARDSSUPGstandard_H
 #define RICHARDSSUPGstandard_H
 
@@ -13,15 +12,16 @@
 
 class RichardsSUPGstandard;
 
-
-template<>
+template <>
 InputParameters validParams<RichardsSUPGstandard>();
 
 /**
  * standard SUPG relationships
  * valid for the Richards equation.
  * here i use a formula for "tau" presented in Appendix A of
- * TJR Hughes, M Mallet and A Mizukami ``A new finite element formulation for computational fluid dynamics:: II. Behond SUPG'' Computer Methods in Applied Mechanics and Engineering 54 (1986) 341--355
+ * TJR Hughes, M Mallet and A Mizukami ``A new finite element formulation for computational fluid
+ * dynamics:: II. Behond SUPG'' Computer Methods in Applied Mechanics and Engineering 54 (1986)
+ * 341--355
  */
 class RichardsSUPGstandard : public RichardsSUPG
 {
@@ -36,7 +36,8 @@ public:
    * @param density fluid density
    * @param gravity gravitational acceleration vector
    */
-  RealVectorValue velSUPG(RealTensorValue perm, RealVectorValue gradp, Real density, RealVectorValue gravity) const;
+  RealVectorValue
+  velSUPG(RealTensorValue perm, RealVectorValue gradp, Real density, RealVectorValue gravity) const;
 
   /**
    * derivative of SUPG velocity wrt gradient of porepressure
@@ -50,7 +51,8 @@ public:
    * @param density_prime derivative of fluid density wrt porepressure
    * @param gravity gravitational acceleration vector
    */
-  RealVectorValue dvelSUPG_dp(RealTensorValue perm, Real density_prime, RealVectorValue gravity) const;
+  RealVectorValue
+  dvelSUPG_dp(RealTensorValue perm, Real density_prime, RealVectorValue gravity) const;
 
   /**
    * |bb| ~ 2*velocity/element_length
@@ -60,7 +62,11 @@ public:
    * @param eta_prime spatial gradient of the isoparametric coordinate eta
    * @param zeta_prime spatial gradient of the isoparametric coordinate zeta
    */
-  RealVectorValue bb(RealVectorValue vel, int dimen, RealVectorValue xi_prime, RealVectorValue eta_prime, RealVectorValue zeta_prime) const;
+  RealVectorValue bb(RealVectorValue vel,
+                     int dimen,
+                     RealVectorValue xi_prime,
+                     RealVectorValue eta_prime,
+                     RealVectorValue zeta_prime) const;
 
   /**
    * derivative of bb*bb wrt gradient of porepressure
@@ -70,7 +76,11 @@ public:
    * @param eta_prime spatial gradient of the isoparametric coordinate eta
    * @param zeta_prime spatial gradient of the isoparametric coordinate zeta
    */
-  RealVectorValue dbb2_dgradp(RealVectorValue vel, RealTensorValue dvel_dgradp, RealVectorValue xi_prime, RealVectorValue eta_prime, RealVectorValue zeta_prime) const;
+  RealVectorValue dbb2_dgradp(RealVectorValue vel,
+                              RealTensorValue dvel_dgradp,
+                              RealVectorValue xi_prime,
+                              RealVectorValue eta_prime,
+                              RealVectorValue zeta_prime) const;
 
   /**
    * derivative of bb*bb wrt porepressure
@@ -80,7 +90,11 @@ public:
    * @param eta_prime spatial gradient of the isoparametric coordinate eta
    * @param zeta_prime spatial gradient of the isoparametric coordinate zeta
    */
-  Real dbb2_dp(RealVectorValue vel, RealVectorValue dvel_dp, RealVectorValue xi_prime, RealVectorValue eta_prime, RealVectorValue zeta_prime) const;
+  Real dbb2_dp(RealVectorValue vel,
+               RealVectorValue dvel_dp,
+               RealVectorValue xi_prime,
+               RealVectorValue eta_prime,
+               RealVectorValue zeta_prime) const;
 
   /**
    * The SUPG tau parameter.
@@ -99,7 +113,11 @@ public:
    * @param b the b parameter: |b| ~ 2*SUPGvelocity/element_length
    * @param db2_dgradp derivative of b*b wrt gradient of porepressure
    */
-  RealVectorValue dtauSUPG_dgradp(RealVectorValue vel, RealTensorValue dvel_dgradp, Real traceperm, RealVectorValue b, RealVectorValue db2_dgradp) const;
+  RealVectorValue dtauSUPG_dgradp(RealVectorValue vel,
+                                  RealTensorValue dvel_dgradp,
+                                  Real traceperm,
+                                  RealVectorValue b,
+                                  RealVectorValue db2_dgradp) const;
 
   /**
    * derivative of tau wrt porepressure (keeping gradp fixed)
@@ -109,13 +127,16 @@ public:
    * @param b the b parameter: |b| ~ 2*SUPGvelocity/element_length
    * @param db2_dp derivative of b*b wrt porepressure
    */
-  Real dtauSUPG_dp(RealVectorValue vel, RealVectorValue dvel_dp, Real traceperm, RealVectorValue b, Real db2_dp) const;
+  Real dtauSUPG_dp(RealVectorValue vel,
+                   RealVectorValue dvel_dp,
+                   Real traceperm,
+                   RealVectorValue b,
+                   Real db2_dp) const;
 
   /// returns false in this case since everything is trivial
   bool SUPG_trivial() const;
 
 protected:
-
   /**
    * the SUPG pressure parameter
    * This dictates how strong the SUPG is
@@ -125,13 +146,11 @@ protected:
   Real _p_SUPG;
 
 private:
-
   /// cosh(alpha)/sinh(alpha) - 1/alpha, modified at extreme values of alpha to prevent overflows
   Real cosh_relation(Real alpha) const;
 
   /// derivative of cosh_relation wrt alpha
   Real cosh_relation_prime(Real alpha) const;
-
 };
 
 #endif // RICHARDSSUPGstandard_H

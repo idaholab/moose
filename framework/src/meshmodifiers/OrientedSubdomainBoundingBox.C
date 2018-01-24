@@ -15,29 +15,28 @@
 #include "OrientedSubdomainBoundingBox.h"
 #include "MooseMesh.h"
 
-template<>
-InputParameters validParams<OrientedSubdomainBoundingBox>()
+template <>
+InputParameters
+validParams<OrientedSubdomainBoundingBox>()
 {
   InputParameters params = validParams<MeshModifier>();
   params += validParams<OrientedBoxInterface>();
 
   MooseEnum location("INSIDE OUTSIDE", "INSIDE");
-  params.addRequiredParam<SubdomainID>("block_id", "Subdomain id to set for inside/outside the bounding box");
-  params.addParam<MooseEnum>("location", location, "Control of where the subdomain id is to be set");
+  params.addRequiredParam<SubdomainID>("block_id",
+                                       "Subdomain id to set for inside/outside the bounding box");
+  params.addParam<MooseEnum>(
+      "location", location, "Control of where the subdomain id is to be set");
 
   return params;
 }
 
-OrientedSubdomainBoundingBox::OrientedSubdomainBoundingBox(const InputParameters & parameters) :
-    MeshModifier(parameters),
+OrientedSubdomainBoundingBox::OrientedSubdomainBoundingBox(const InputParameters & parameters)
+  : MeshModifier(parameters),
     OrientedBoxInterface(parameters),
     _location(parameters.get<MooseEnum>("location")),
     _block_id(parameters.get<SubdomainID>("block_id"))
 
-{
-}
-
-OrientedSubdomainBoundingBox::~OrientedSubdomainBoundingBox()
 {
 }
 
@@ -48,17 +47,13 @@ OrientedSubdomainBoundingBox::modify()
   if (!_mesh_ptr)
     mooseError("_mesh_ptr must be initialized before calling SubdomainBoundingBox::modify()");
 
-  // Reference the the libMesh::MeshBase
-  MeshBase & mesh = _mesh_ptr->getMesh();
-
   // Loop over the elements
-  for (MeshBase::element_iterator el = mesh.active_elements_begin(); el != mesh.active_elements_end(); ++el)
+  for (const auto & elem : _mesh_ptr->getMesh().active_element_ptr_range())
   {
-    bool contains = containsPoint((*el)->centroid());
+    bool contains = containsPoint(elem->centroid());
     if (contains && _location == "INSIDE")
-      (*el)->subdomain_id() = _block_id;
+      elem->subdomain_id() = _block_id;
     else if (!contains && _location == "OUTSIDE")
-      (*el)->subdomain_id() = _block_id;
+      elem->subdomain_id() = _block_id;
   }
 }
-

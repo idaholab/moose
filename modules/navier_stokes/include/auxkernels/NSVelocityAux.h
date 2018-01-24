@@ -9,10 +9,10 @@
 
 #include "AuxKernel.h"
 
-//Forward Declarations
+// Forward Declarations
 class NSVelocityAux;
 
-template<>
+template <>
 InputParameters validParams<NSVelocityAux>();
 
 /**
@@ -21,7 +21,6 @@ InputParameters validParams<NSVelocityAux>();
 class NSVelocityAux : public AuxKernel
 {
 public:
-
   /**
    * Factory constructor, takes parameters so that all derived classes can be built using the same
    * constructor.
@@ -33,9 +32,8 @@ public:
 protected:
   virtual Real computeValue();
 
-  VariableValue & _rho;
-  VariableValue & _momentum;
-
+  const VariableValue & _rho;
+  const VariableValue & _momentum;
 };
 
-#endif //VELOCITYAUX_H
+#endif // VELOCITYAUX_H

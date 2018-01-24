@@ -4,10 +4,10 @@
 #include "Kernel.h"
 #include "DerivativeMaterialInterface.h"
 
-//Forward declarations
+// Forward declarations
 class DefaultMatPropConsumerKernel;
 
-template<>
+template <>
 InputParameters validParams<DefaultMatPropConsumerKernel>();
 
 class DefaultMatPropConsumerKernel : public DerivativeMaterialInterface<Kernel>
@@ -17,8 +17,8 @@ public:
 
 protected:
   virtual Real computeQpResidual() { return 0.0; };
-  std::string _prop_name;
+
   const MaterialProperty<Real> & _prop;
 };
 
-#endif //DEFAULTMATPROPCONSUMERKERNEL_H
+#endif // DEFAULTMATPROPCONSUMERKERNEL_H

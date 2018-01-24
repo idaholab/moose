@@ -15,13 +15,13 @@
 #ifndef POSTPROCESSORDATA_H
 #define POSTPROCESSORDATA_H
 
-//MOOSE includes
+// MOOSE includes
 #include "MooseTypes.h"
 #include "Restartable.h"
 
 #include <map>
 
-class FEProblem;
+class FEProblemBase;
 
 class PostprocessorData : public Restartable
 {
@@ -29,7 +29,7 @@ public:
   /**
    * Class constructor
    */
-  PostprocessorData(FEProblem & fe_problem);
+  PostprocessorData(FEProblemBase & fe_problem);
 
   /**
    * Initialization method, sets the current and old value to 0.0 for this
@@ -66,7 +66,7 @@ public:
   /**
    * Get the map of names -> Postprocessor values. Exposed for error checking.
    */
-  const std::map<std::string, PostprocessorValue*> & values() const { return _values; }
+  const std::map<std::string, PostprocessorValue *> & values() const { return _values; }
 
   /**
    * Copy the current Postprocessor values into old (i.e. shift it "back in time")
@@ -74,15 +74,14 @@ public:
   void copyValuesBack();
 
 protected:
-
   /// Values of the Postprocessor at the current time
-  std::map<std::string, PostprocessorValue*> _values;
+  std::map<std::string, PostprocessorValue *> _values;
 
   /// Values of the Postprocessors at the time t-1
-  std::map<std::string, PostprocessorValue*> _values_old;
+  std::map<std::string, PostprocessorValue *> _values_old;
 
   /// Values of the Postprocessors at the time t-2
-  std::map<std::string, PostprocessorValue*> _values_older;
+  std::map<std::string, PostprocessorValue *> _values_older;
 };
 
-#endif //POSTPROCESSORDATA_H
+#endif // POSTPROCESSORDATA_H

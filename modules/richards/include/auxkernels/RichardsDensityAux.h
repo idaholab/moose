@@ -5,7 +5,6 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-
 #ifndef RICHARDSDENSITYAUX_H
 #define RICHARDSDENSITYAUX_H
 
@@ -13,16 +12,16 @@
 
 #include "RichardsDensity.h"
 
-//Forward Declarations
+// Forward Declarations
 class RichardsDensityAux;
 
-template<>
+template <>
 InputParameters validParams<RichardsDensityAux>();
 
 /**
  * Fluid density as a function of porepressure
  */
-class RichardsDensityAux: public AuxKernel
+class RichardsDensityAux : public AuxKernel
 {
 public:
   RichardsDensityAux(const InputParameters & parameters);
@@ -31,7 +30,7 @@ protected:
   virtual Real computeValue();
 
   /// porepressure
-  VariableValue & _pressure_var;
+  const VariableValue & _pressure_var;
 
   /// userobject that defines density as a fcn of porepressure
   const RichardsDensity & _density_UO;

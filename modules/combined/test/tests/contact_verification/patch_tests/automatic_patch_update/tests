@@ -1,0 +1,17 @@
+[Tests]
+  [./sliding_blocks]
+    type = 'Exodiff'
+    input = 'sliding_update.i'
+    exodiff = 'sliding_update_out.e'
+    abs_zero = 1e-8
+  [../]
+  [./error_test]
+    type = RunException
+    input = 'sliding_update.i'
+    cli_args = 'Mesh/ghosting_patch_size=2
+                Outputs/file_base=sliding_error_out'
+    expect_err = "Error in NearestNodeLocator : The nearest neighbor lies outside the ghosted set of elements. Increase the ghosting_patch_size parameter in the mesh block and try again."
+    prereq = sliding_blocks
+    min_parallel=2
+  [../]
+[]

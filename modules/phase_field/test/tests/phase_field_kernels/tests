@@ -1,0 +1,90 @@
+[Tests]
+  [./matproptest]
+    type = CSVDiff
+    input = 'matproptest.i'
+    csvdiff = 'matproptest_out.csv'
+  [../]
+
+  [./CahnHilliard]
+    type = 'Exodiff'
+    input = 'CahnHilliard.i'
+    exodiff = 'CahnHilliard_out.e'
+  [../]
+
+  [./SplitCahnHilliard]
+    type = 'Exodiff'
+    input = 'SplitCahnHilliard.i'
+    exodiff = 'SplitCahnHilliard_out.e'
+    max_parallel = 1                      # -pc_type lu
+  [../]
+
+  [./AllenCahn]
+    type = 'Exodiff'
+    input = 'AllenCahn.i'
+    exodiff = 'AllenCahn_out.e'
+  [../]
+
+  # This coupled formulation should give the same result as the direct Allen-Cahn
+  [./CoupledAllenCahn]
+    type = 'Exodiff'
+    prereq = 'AllenCahn'
+    input = 'CoupledAllenCahn.i'
+    exodiff = 'AllenCahn_out.e'
+  [../]
+
+  # This is also a coupled formulation of Allen-Cahn equation, using variable mobility
+  # Primarily here to test CoupledCoefReaction kernel
+  [./CoupledCoefAllenCahn]
+    type = 'Exodiff'
+    input = 'CoupledCoefAllenCahn.i'
+    exodiff = 'CoupledCoefAllenCahn_out.e'
+  [../]
+
+  [./analyzejacobian_AllenCahn]
+    type = 'AnalyzeJacobian'
+    input = 'AllenCahn.i'
+    prereq = 'CoupledAllenCahn'
+    expect_out = '\nNo errors detected. :-\)\n'
+    resize_mesh = true
+    recover = false
+    #skip = 'see #3847'
+  [../]
+
+  [./ParsedMaterial]
+    type = 'Exodiff'
+    input = 'ParsedMaterial.i'
+    exodiff = 'ParsedMaterial_out.e'
+  [../]
+  [./ConstructionOrder]
+    type = 'Exodiff'
+    input = 'ConstructionOrder.i'
+    exodiff = 'ConstructionOrder_out.e'
+  [../]
+
+  [./SimpleSplitCHWRes]
+    type = 'Exodiff'
+    input = 'SimpleSplitCHWRes.i'
+    exodiff = 'SimpleSplitCHWRes_out.e'
+  [../]
+
+  [./SimpleCHInterface]
+    type = 'Exodiff'
+    input = 'SimpleCHInterface.i'
+    exodiff = 'SimpleCHInterface_out.e'
+  [../]
+
+  [./ACInterfaceStress]
+    type = 'Exodiff'
+    input = 'ACInterfaceStress.i'
+    exodiff = 'ACInterfaceStress_out.e'
+    cli_args = 'Executioner/dt=0.001'
+  [../]
+
+  [./analyzejacobian_ACInterfaceStress]
+    type = 'AnalyzeJacobian'
+    input = 'ACInterfaceStress_jacobian.i'
+    expect_out = '\nNo errors detected. :-\)\n'
+    recover = false
+    heavy = true
+  [../]
+[]

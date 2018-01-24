@@ -9,13 +9,13 @@
 #ifndef ACGBPOLY_H
 #define ACGBPOLY_H
 
-//Forward Declarations
+// Forward Declarations
 class ACGBPoly;
 
-template<>
+template <>
 InputParameters validParams<ACGBPoly>();
 
-class ACGBPoly : public ACBulk
+class ACGBPoly : public ACBulk<Real>
 {
 public:
   ACGBPoly(const InputParameters & parameters);
@@ -24,7 +24,7 @@ protected:
   virtual Real computeDFDOP(PFFunctionType type);
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
 
-  VariableValue & _c;
+  const VariableValue & _c;
   unsigned int _c_var;
 
   const MaterialProperty<Real> & _mu;
@@ -33,4 +33,4 @@ protected:
   Real _en_ratio;
 };
 
-#endif //ACGBPOLY_H
+#endif // ACGBPOLY_H

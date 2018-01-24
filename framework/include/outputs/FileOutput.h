@@ -21,7 +21,7 @@
 // Forward declerations
 class FileOutput;
 
-template<>
+template <>
 InputParameters validParams<FileOutput>();
 
 /**
@@ -32,16 +32,10 @@ InputParameters validParams<FileOutput>();
 class FileOutput : public PetscOutput
 {
 public:
-
   /**
    * Class constructor
    */
   FileOutput(const InputParameters & parameters);
-
-  /**
-   * Class destructor
-   */
-  virtual ~FileOutput();
 
   /**
    * The filename for the output file
@@ -77,11 +71,10 @@ public:
   static std::string getOutputFileBase(MooseApp & app, std::string suffix = "_out");
 
 protected:
-
   /**
    * Checks if the output method should be executed
    */
-  bool shouldOutput(const ExecFlagType & type);
+  virtual bool shouldOutput(const ExecFlagType & type) override;
 
   /**
    * Checks the filename for output
@@ -103,8 +96,8 @@ protected:
   std::vector<std::string> _output_if_base_contains;
 
 private:
-
-  // OutputWarehouse needs access to _file_num for MultiApp ninja wizardry (see OutputWarehouse::merge)
+  // OutputWarehouse needs access to _file_num for MultiApp ninja wizardry (see
+  // OutputWarehouse::merge)
   friend class OutputWarehouse;
 };
 

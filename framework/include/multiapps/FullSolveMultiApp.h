@@ -20,7 +20,7 @@
 class FullSolveMultiApp;
 class Executioner;
 
-template<>
+template <>
 InputParameters validParams<FullSolveMultiApp>();
 
 /**
@@ -28,25 +28,18 @@ InputParameters validParams<FullSolveMultiApp>();
  *
  * Each "step" after that it will do nothing.
  */
-class FullSolveMultiApp :
-  public MultiApp
+class FullSolveMultiApp : public MultiApp
 {
 public:
   FullSolveMultiApp(const InputParameters & parameters);
 
-  virtual ~FullSolveMultiApp();
+  virtual void initialSetup() override;
 
-  virtual void initialSetup();
+  virtual bool solveStep(Real dt, Real target_time, bool auto_advance = true) override;
 
-  /**
-   * Completely solve all of the Apps
-   */
-  virtual bool solveStep(Real dt, Real target_time, bool auto_advance=true);
+  virtual void advanceStep() override {}
 
-  /**
-   * Actually advances time and causes output.
-   */
-  virtual void advanceStep(){}
+  virtual bool isSolved() const override { return _solved; }
 
 private:
   std::vector<Executioner *> _executioners;

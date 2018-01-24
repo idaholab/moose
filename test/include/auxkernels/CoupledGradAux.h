@@ -17,11 +17,10 @@
 
 #include "AuxKernel.h"
 
-
-//Forward Declarations
+// Forward Declarations
 class CoupledGradAux;
 
-template<>
+template <>
 InputParameters validParams<CoupledGradAux>();
 
 /**
@@ -30,7 +29,6 @@ InputParameters validParams<CoupledGradAux>();
 class CoupledGradAux : public AuxKernel
 {
 public:
-
   /**
    * Factory constructor, takes parameters so that all derived classes can be built using the same
    * constructor.
@@ -47,7 +45,7 @@ protected:
   /// The number of coupled variable
   int _coupled;
   /// The value of coupled gradient
-  VariableGradient & _coupled_grad;
+  const VariableGradient & _coupled_grad;
 };
 
-#endif //COUPLEDGRADAUX_H
+#endif // COUPLEDGRADAUX_H

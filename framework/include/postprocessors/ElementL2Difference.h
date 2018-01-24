@@ -17,36 +17,27 @@
 
 #include "ElementIntegralVariablePostprocessor.h"
 
-class Function;
-
-//Forward Declarations
+// Forward Declarations
 class ElementL2Difference;
 
-template<>
+template <>
 InputParameters validParams<ElementL2Difference>();
 
 /**
  * Computes the L2-Norm difference between two solution fields.
  */
-class ElementL2Difference :
-  public ElementIntegralVariablePostprocessor
+class ElementL2Difference : public ElementIntegralVariablePostprocessor
 {
 public:
   ElementL2Difference(const InputParameters & parameters);
 
-  /**
-   * Get the L2 Difference.
-   */
-  virtual Real getValue();
+  virtual Real getValue() override;
 
 protected:
-  /**
-   * Compute the per Qp difference squared.
-   */
-  virtual Real computeQpIntegral();
+  virtual Real computeQpIntegral() override;
 
   /// The variable to compare to
-  VariableValue & _other_var;
+  const VariableValue & _other_var;
 };
 
-#endif //ELEMENTL2DIFFERENCE_H
+#endif // ELEMENTL2DIFFERENCE_H

@@ -10,26 +10,25 @@
 #include "DerivativeParsedMaterialHelper.h"
 #include "ExpressionBuilder.h"
 
-//Forward Declarations
+// Forward Declarations
 class MathEBFreeEnergy;
 
-template<>
+template <>
 InputParameters validParams<MathEBFreeEnergy>();
 
 /**
  * Material class that creates the math free energy with the expression builder
- * and uses automatic differentiation to get the derivatives: F = 1/4*(1 + c)^2*(1 - c)^2.
+ * and uses automatic differentiation to get the derivatives.
+ * \f$ F = \frac14 (1 + c)^2 (1 - c)^2 \f$.
  */
-class MathEBFreeEnergy : public DerivativeParsedMaterialHelper,
-                         public ExpressionBuilder
+class MathEBFreeEnergy : public DerivativeParsedMaterialHelper, public ExpressionBuilder
 {
 public:
   MathEBFreeEnergy(const InputParameters & parameters);
 
 protected:
-
   /// Coupled variable value for the concentration \f$ c \f$.
   EBTerm _c;
 };
 
-#endif //MATHEBFREEENERGY_H
+#endif // MATHEBFREEENERGY_H

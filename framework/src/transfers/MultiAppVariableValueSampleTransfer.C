@@ -14,25 +14,32 @@
 
 #include "MultiAppVariableValueSampleTransfer.h"
 
-// Moose
-#include "MooseTypes.h"
+// MOOSE includes
 #include "FEProblem.h"
+#include "MooseMesh.h"
+#include "MooseTypes.h"
+#include "MooseVariable.h"
+#include "MultiApp.h"
+#include "SystemBase.h"
 
-// libMesh
 #include "libmesh/meshfree_interpolation.h"
+#include "libmesh/numeric_vector.h"
 #include "libmesh/system.h"
 
-template<>
-InputParameters validParams<MultiAppVariableValueSampleTransfer>()
+template <>
+InputParameters
+validParams<MultiAppVariableValueSampleTransfer>()
 {
   InputParameters params = validParams<MultiAppTransfer>();
-  params.addRequiredParam<AuxVariableName>("variable", "The auxiliary variable to store the transferred values in.");
+  params.addRequiredParam<AuxVariableName>(
+      "variable", "The auxiliary variable to store the transferred values in.");
   params.addRequiredParam<VariableName>("source_variable", "The variable to transfer from.");
   return params;
 }
 
-MultiAppVariableValueSampleTransfer::MultiAppVariableValueSampleTransfer(const InputParameters & parameters) :
-    MultiAppTransfer(parameters),
+MultiAppVariableValueSampleTransfer::MultiAppVariableValueSampleTransfer(
+    const InputParameters & parameters)
+  : MultiAppTransfer(parameters),
     _to_var_name(getParam<AuxVariableName>("variable")),
     _from_var_name(getParam<VariableName>("source_variable"))
 {
@@ -42,6 +49,8 @@ void
 MultiAppVariableValueSampleTransfer::initialSetup()
 {
   variableIntegrityCheck(_to_var_name);
+
+  _multi_app->problemBase().mesh().errorIfDistributedMesh("MultiAppVariableValueSampleTransfer");
 }
 
 void
@@ -53,16 +62,16 @@ MultiAppVariableValueSampleTransfer::execute()
   {
     case TO_MULTIAPP:
     {
-      FEProblem & from_problem = _multi_app->problem();
+      FEProblemBase & from_problem = _multi_app->problemBase();
       MooseVariable & from_var = from_problem.getVariable(0, _from_var_name);
       SystemBase & from_system_base = from_var.sys();
       SubProblem & from_sub_problem = from_system_base.subproblem();
 
       MooseMesh & from_mesh = from_problem.mesh();
 
-      UniquePtr<PointLocatorBase> pl = from_mesh.getMesh().sub_point_locator();
+      std::unique_ptr<PointLocatorBase> pl = from_mesh.getPointLocator();
 
-      for (unsigned int i=0; i<_multi_app->numGlobalApps(); i++)
+      for (unsigned int i = 0; i < _multi_app->numGlobalApps(); i++)
       {
         Real value = -std::numeric_limits<Real>::max();
 
@@ -86,22 +95,22 @@ MultiAppVariableValueSampleTransfer::execute()
           _communicator.max(value);
 
           if (value == -std::numeric_limits<Real>::max())
-            mooseError("Transfer failed to sample point value at point: " << multi_app_position);
+            mooseError("Transfer failed to sample point value at point: ", multi_app_position);
         }
 
         if (_multi_app->hasLocalApp(i))
         {
-          MPI_Comm swapped = Moose::swapLibMeshComm(_multi_app->comm());
+          Moose::ScopedCommSwapper swapper(_multi_app->comm());
 
           // Loop over the master nodes and set the value of the variable
-          System * to_sys = find_sys(_multi_app->appProblem(i).es(), _to_var_name);
+          System * to_sys = find_sys(_multi_app->appProblemBase(i).es(), _to_var_name);
 
           unsigned int sys_num = to_sys->number();
           unsigned int var_num = to_sys->variable_number(_to_var_name);
 
           NumericVector<Real> & solution = _multi_app->appTransferVector(i, _to_var_name);
 
-          MooseMesh & mesh = _multi_app->appProblem(i).mesh();
+          MooseMesh & mesh = _multi_app->appProblemBase(i).mesh();
 
           MeshBase::const_node_iterator node_it = mesh.localNodesBegin();
           MeshBase::const_node_iterator node_end = mesh.localNodesEnd();
@@ -119,10 +128,7 @@ MultiAppVariableValueSampleTransfer::execute()
             }
           }
           solution.close();
-          _multi_app->appProblem(i).es().update();
-
-          // Swap back
-          Moose::swapLibMeshComm(swapped);
+          _multi_app->appProblemBase(i).es().update();
         }
       }
 

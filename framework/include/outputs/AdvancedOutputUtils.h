@@ -17,13 +17,10 @@
 
 // MOOSE includes
 #include "MooseError.h"
-#include "MultiMooseEnum.h"
-#include "InputParameters.h"
+#include "ExecFlagEnum.h"
 
-// STL includes
-#include <vector>
-#include <string>
-#include <map>
+// Forward declarations
+class InputParameters;
 
 /**
  * A structure for storing the various lists that contain
@@ -48,11 +45,10 @@ struct OutputData
   std::set<std::string> output;
 };
 
-
 /**
  * In newer versions of Clang calling operator[] on a map with a component that
  * has a default constructor is an error, thus utilizing a map directly to store
- * a MultiMooseEnum is not possible.
+ * a ExecFlagEnum is not possible.
  *
  * This template class is a map wrapper that provides the basic map-like functionality
  * for accessing map types with operator[] by using find internally. It also produces
@@ -63,7 +59,7 @@ struct OutputData
  *
  * @see OutputOnWarehouse OutputDataWarehouse
  */
-template<typename T>
+template <typename T>
 class OutputMapWrapper
 {
 public:
@@ -80,7 +76,7 @@ public:
     // Locate the map entry, error if it is not found
     typename std::map<std::string, T>::iterator iter = _map.find(name);
     if (iter == _map.end())
-      mooseError("Unknown map key " << name);
+      mooseError("Unknown map key ", name);
     return iter->second;
   }
 
@@ -90,10 +86,16 @@ public:
    */
   typename std::map<std::string, T>::iterator begin() { return _map.begin(); }
   typename std::map<std::string, T>::iterator end() { return _map.end(); }
-  typename std::map<std::string, T>::iterator find(const std::string & name) { return _map.find(name); }
+  typename std::map<std::string, T>::iterator find(const std::string & name)
+  {
+    return _map.find(name);
+  }
   typename std::map<std::string, T>::const_iterator begin() const { return _map.begin(); }
-  typename std::map<std::string, T>::const_iterator end() const { return _map.end(); } const
-  typename std::map<std::string, T>::const_iterator find(const std::string & name) const { return _map.find(name); }
+  typename std::map<std::string, T>::const_iterator end() const { return _map.end(); }
+  const typename std::map<std::string, T>::const_iterator find(const std::string & name) const
+  {
+    return _map.find(name);
+  }
   ///@}
 
   /**
@@ -101,13 +103,10 @@ public:
    */
   bool contains(const std::string & name) { return find(name) != end(); }
 
-
 protected:
-
   /// Data storage
   typename std::map<std::string, T> _map;
 };
-
 
 /**
  * A helper warehouse class for storing the "execute_on" settings for
@@ -118,26 +117,25 @@ protected:
  * the output types (e.g., execute_postprocessors_on) are stored in a map.
  *
  * This allows for iterative access to these parameters, which makes creating
- * generic code (e.g., AdvancedOutput::shouldOutput) possible. However, MultiMooseEnum
+ * generic code (e.g., AdvancedOutput::shouldOutput) possible. However, ExecFlagEnum
  * has a private constructor, so calling operator[] on the map is a compile time error.
  *
  * To get around this and to provide a more robust storage structure, one that will error
  * if the wrong output name is given, this warehouse was created. For the purposes of the
  * AdvancedOutput object this warehouse functions exactly like a std::map, but provides
- * an operator[] that works with MultiMooseEnum and errors if called on an invalid key.
+ * an operator[] that works with ExecFlagEnum and errors if called on an invalid key.
  *
  * @see OutputMapWrapper OutputDataWarehouse
  */
-class OutputOnWarehouse : public OutputMapWrapper<MultiMooseEnum>
+class OutputOnWarehouse : public OutputMapWrapper<ExecFlagEnum>
 {
 public:
-
   /**
    * Constructor
    * @param execute_on The general "execute_on" settings for the object.
    * @param parameters The parameters object holding data for the class to use.
    */
-  OutputOnWarehouse(const MultiMooseEnum & execute_on, const InputParameters & parameters);
+  OutputOnWarehouse(const ExecFlagEnum & execute_on, const InputParameters & parameters);
 };
 
 /**
@@ -151,7 +149,6 @@ public:
 class OutputDataWarehouse : public OutputMapWrapper<OutputData>
 {
 public:
-
   /**
    * Populate the OutputData structures for all output types that are 'variable' based
    */
@@ -163,8 +160,7 @@ public:
    * When false everything should output.
    * @see AdvancedOutput::initOutputList
    */
-  bool hasShowList(){ return _has_show_list; }
-
+  bool hasShowList() { return _has_show_list; }
 
   /**
    * Set the show list bool.
@@ -174,13 +170,9 @@ public:
    */
   void setHasShowList(bool value) { _has_show_list = value; }
 
-
 private:
-
   // True when the input file contains a show/hide list
   bool _has_show_list;
-
 };
-
 
 #endif // ADVANCEDOUTPUTUTILS_H

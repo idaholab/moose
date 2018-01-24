@@ -17,14 +17,12 @@
 #include "MooseUtils.h"
 #include "OutputWarehouse.h"
 
-ConsoleStream::ConsoleStream(OutputWarehouse & output_warehouse) :
-    _output_warehouse(output_warehouse),
-    _oss(output_warehouse.consoleBuffer())
+ConsoleStream::ConsoleStream(OutputWarehouse & output_warehouse)
+  : _output_warehouse(output_warehouse), _oss(output_warehouse.consoleBuffer())
 {
 }
 
-const ConsoleStream &
-ConsoleStream::operator<<(StandardEndLine /*manip*/) const
+const ConsoleStream & ConsoleStream::operator<<(StandardEndLine /*manip*/) const
 {
   _oss << '\n';
   _output_warehouse.mooseConsole();

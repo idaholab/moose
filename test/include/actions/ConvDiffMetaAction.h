@@ -25,7 +25,7 @@ public:
   virtual void act();
 };
 
-template<>
+template <>
 InputParameters validParams<ConvDiffMetaAction>();
 
-#endif //CONVDIFFMETAACTION_H
+#endif // CONVDIFFMETAACTION_H

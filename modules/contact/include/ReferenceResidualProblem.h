@@ -5,7 +5,6 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-
 #ifndef REFERENCERESIDUALPROBLEM_H
 #define REFERENCERESIDUALPROBLEM_H
 
@@ -13,11 +12,12 @@
 
 class ReferenceResidualProblem;
 
-template<>
+template <>
 InputParameters validParams<ReferenceResidualProblem>();
 
 /**
- * FEProblem derived class to enable convergence checking relative to a user-specified postprocessor
+ * FEProblemBase derived class to enable convergence checking relative to a user-specified
+ * postprocessor
  */
 class ReferenceResidualProblem : public FEProblem
 {
@@ -28,7 +28,7 @@ public:
   virtual void initialSetup();
   virtual void timestepSetup();
   void updateReferenceResidual();
-  virtual MooseNonlinearConvergenceReason checkNonlinearConvergence(std::string &msg,
+  virtual MooseNonlinearConvergenceReason checkNonlinearConvergence(std::string & msg,
                                                                     const PetscInt it,
                                                                     const Real xnorm,
                                                                     const Real snorm,
@@ -73,6 +73,9 @@ protected:
   std::vector<Real> _refResid;
   std::vector<Real> _resid;
   ///@}
+
+  /// Local storage for the scaling factors applied to each of the variables to apply to _refResidVars.
+  std::vector<Real> _scaling_factors;
 };
 
 #endif /* REFERENCERESIDUALPROBLEM_H */

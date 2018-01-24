@@ -18,10 +18,10 @@
 // Moose Includes
 #include "DiracKernel.h"
 
-//Forward Declarations
+// Forward Declarations
 class ReportingConstantSource;
 
-template<>
+template <>
 InputParameters validParams<ReportingConstantSource>();
 
 /**
@@ -42,4 +42,4 @@ protected:
   Real _factor;
 };
 
-#endif //REPORTINGCONSTANTSOURCE_H
+#endif // REPORTINGCONSTANTSOURCE_H

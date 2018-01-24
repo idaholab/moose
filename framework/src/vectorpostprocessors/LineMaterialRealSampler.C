@@ -12,22 +12,24 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
+// MOOSE includes
 #include "LineMaterialRealSampler.h"
 
-template<>
-InputParameters validParams<LineMaterialRealSampler>()
+template <>
+InputParameters
+validParams<LineMaterialRealSampler>()
 {
-  InputParameters params = validParams<LineMaterialSamplerBase<Real> >();
+  InputParameters params = validParams<LineMaterialSamplerBase<Real>>();
   return params;
 }
 
-LineMaterialRealSampler::LineMaterialRealSampler(const InputParameters & parameters) :
-    LineMaterialSamplerBase<Real>(parameters)
+LineMaterialRealSampler::LineMaterialRealSampler(const InputParameters & parameters)
+  : LineMaterialSamplerBase<Real>(parameters)
 {
 }
 
 Real
-LineMaterialRealSampler::getScalarFromProperty(const Real & property, const Point * /*curr_point*/)
+LineMaterialRealSampler::getScalarFromProperty(const Real & property, const Point & /*curr_point*/)
 {
   return property;
 }

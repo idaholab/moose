@@ -1,0 +1,127 @@
+[Tests]
+  [./test_nodal]
+    type = 'Exodiff'
+    input = 'grain_tracker_same.i'
+    exodiff = 'grain_tracker_same_out.e'
+
+    # integer based maps can shift slightly in parallel
+    max_parallel = 1
+    valgrind = 'HEAVY'
+    max_time = 500
+  [../]
+
+  [./test_advanced_op_assignment]
+    type = 'CSVDiff'
+    input = 'grain_tracker_advanced_op.i'
+    csvdiff = 'grain_tracker_advanced_op_out.csv'
+    recover = false # No solve
+    max_parallel = 1
+  [../]
+
+  [./test_halo_periodic_bc]
+    type = 'Exodiff'
+    input = 'grain_halo_over_bc.i'
+    exodiff = 'grain_halo_over_bc_out.e'
+    method = '!DBG' # slow test
+    valgrind = 'HEAVY'
+    max_parallel = 1
+  [../]
+
+  [./test_elemental]
+    type = 'Exodiff'
+    input = 'grain_tracker_test_elemental.i'
+    exodiff = 'grain_tracker_test_elemental_out.e-s002'
+    method = '!DBG' # slow test
+    valgrind = 'HEAVY'
+    max_time = 500
+  [../]
+
+  [./test_remapping_parallel]
+    type = 'CSVDiff'
+    input = 'grain_tracker_remapping_test.i'
+    csvdiff = 'grain_tracker_remapping_test_out.csv'
+    method = '!DBG' # slow test
+    valgrind = 'HEAVY'
+  [../]
+
+  [./remapping_with_reserve]
+    type = 'Exodiff'
+    input = 'grain_tracker_reserve.i'
+    exodiff = 'grain_tracker_reserve_out.e'
+    abs_zero = 1e-6 # Remapping can cause more significant diffs
+    method = '!DBG' # slow test
+    valgrind = 'HEAVY'
+  [../]
+
+  [./test_ebsd]
+    type = 'Exodiff'
+    input = 'grain_tracker_ebsd.i'
+    exodiff = 'grain_tracker_ebsd_out.e'
+  [../]
+
+  [./test_ebsd_adapt]
+    type = 'Exodiff'
+    input = 'grain_tracker_ebsd.i'
+    exodiff = 'grain_tracker_ebsd_adapt_out.e'
+    cli_args = 'Executioner/Adaptivity/initial_adaptivity=1 Executioner/Adaptivity/refine_fraction=0.7 Executioner/Adaptivity/max_h_level=1 Outputs/file_base=grain_tracker_ebsd_adapt_out'
+  [../]
+
+  [./split_grain]
+    type = 'CSVDiff'
+    # Make sure that this simulation hits the "split grain" logic branch
+    expect_out = 'Split Grain Detected'
+    input = 'split_grain.i'
+    csvdiff = 'split_grain_out.csv'
+    max_time = 500
+    method = '!DBG' # slow test
+    valgrind ='HEAVY'
+  [../]
+
+  ###################################################
+  # Faux grain tracker
+  ###################################################
+  [./test_faux_nodal]
+    type = 'Exodiff'
+    input = 'grain_tracker_same.i'
+    cli_args = 'Outputs/file_base=gt_faux_nodal_out UserObjects/grain_tracker/type=FauxGrainTracker'
+
+    exodiff = 'gt_faux_nodal_out.e'
+    valgrind = 'HEAVY'
+    max_time = 500
+  [../]
+
+  [./test_faux_element]
+    type = 'Exodiff'
+    input = 'grain_tracker_test_elemental.i'
+    cli_args = 'Outputs/file_base=gt_faux_elemental_out UserObjects/grain_tracker/type=FauxGrainTracker'
+
+    exodiff = 'gt_faux_elemental_out.e-s002'
+    method = '!DBG' # slow test
+    valgrind = 'HEAVY'
+    max_time = 500
+  [../]
+
+  [./grain_tracker_volume]
+    type = 'CSVDiff'
+    input = 'grain_tracker_volume.i'
+    csvdiff = 'grain_tracker_volume_out_grain_volumes_0000.csv grain_tracker_volume_out.csv'
+    rel_err = 1.e-3
+  [../]
+
+  [./grain_tracker_volume_single]
+    type = 'CSVDiff'
+    input = 'grain_tracker_volume_single.i'
+    csvdiff = 'grain_tracker_volume_single_out_grain_volumes_0000.csv'
+    rel_err = 1.e-3
+  [../]
+
+  # This test should work the same with the FeatureFloodCount object
+  [./feature_flood_volume]
+    type = 'CSVDiff'
+    input = 'grain_tracker_volume.i'
+    cli_args = 'Postprocessors/grain_tracker/type=FeatureFloodCount'
+    csvdiff = 'grain_tracker_volume_out_grain_volumes_0000.csv grain_tracker_volume_out.csv'
+    prereq = grain_tracker_volume
+    rel_err = 1.e-3
+  [../]
+[]

@@ -13,21 +13,27 @@
 /****************************************************************/
 
 #include "MassLumpedTimeDerivative.h"
-#include "Assembly.h"
 
-// libmesh includes
+// MOOSE includes
+#include "Assembly.h"
+#include "MooseVariable.h"
+
 #include "libmesh/quadrature.h"
 
-template<>
-InputParameters validParams<MassLumpedTimeDerivative>()
+template <>
+InputParameters
+validParams<MassLumpedTimeDerivative>()
 {
   InputParameters params = validParams<TimeKernel>();
+  params.addClassDescription(
+      "Lumped formulation of the time derivative $\\frac{\\partial u}{\\partial t}$. Its "
+      "corresponding weak form is $\\dot{u_i}(\\psi_i, 1)$ where $\\dot{u_i}$ denotes the time "
+      "derivative of the solution coefficient associated with node $i$.");
   return params;
 }
 
-MassLumpedTimeDerivative::MassLumpedTimeDerivative(const InputParameters & parameters) :
-    TimeKernel(parameters),
-    _u_dot_nodal(_var.nodalValueDot())
+MassLumpedTimeDerivative::MassLumpedTimeDerivative(const InputParameters & parameters)
+  : TimeKernel(parameters), _u_dot_nodal(_var.nodalValueDot())
 {
 }
 
@@ -52,4 +58,3 @@ MassLumpedTimeDerivative::computeJacobian()
     for (_qp = 0; _qp < _qrule->n_points(); _qp++)
       ke(_i, _i) += _JxW[_qp] * _coord[_qp] * computeQpJacobian();
 }
-

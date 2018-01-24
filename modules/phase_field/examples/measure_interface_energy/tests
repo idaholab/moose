@@ -1,0 +1,7 @@
+[Tests]
+  [./1Dinterface_energy]
+    type = RunApp
+    input = '1Dinterface_energy.i'
+    check_input = True
+  [../]
+[]

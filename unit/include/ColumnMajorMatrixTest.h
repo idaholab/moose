@@ -15,99 +15,81 @@
 #ifndef COLUMNMAJORMATRIXTEST_H
 #define COLUMNMAJORMATRIXTEST_H
 
+// CPPUnit includes
+#include "gtest/gtest.h"
 
+// Moose includes
+#include "ColumnMajorMatrix.h"
 
-//CPPUnit includes
-#include "cppunit/extensions/HelperMacros.h"
+#include "libmesh/vector_value.h"
+#include "libmesh/tensor_value.h"
 
-class ColumnMajorMatrix;
-
-class ColumnMajorMatrixTest : public CppUnit::TestFixture
+class ColumnMajorMatrixTest : public ::testing::Test
 {
-  CPPUNIT_TEST_SUITE( ColumnMajorMatrixTest );
+protected:
+  /**
+   * Initialize the various test objects to the right size.
+   */
+  ColumnMajorMatrixTest()
+    : a(3, 3), t(3, 2), two_mat(2, 2), add(3, 2), add_solution(3, 2), sub(3, 2), sub_solution(3, 2)
+  {
+  }
 
-  CPPUNIT_TEST( rowColConstructor );
-  CPPUNIT_TEST( copyConstructor );
-  CPPUNIT_TEST( tensorConstructor );
-  CPPUNIT_TEST( ThreeColConstructor );
-  CPPUNIT_TEST( numEntries );
-  CPPUNIT_TEST( reshapeMatrix );
-  CPPUNIT_TEST( accessMatrix );
-  CPPUNIT_TEST( print );
-  CPPUNIT_TEST( fillMatrix );
-  CPPUNIT_TEST( transposeMatrix );
-  CPPUNIT_TEST( setDiagMatrix );
-  CPPUNIT_TEST( trMatrix );
-  CPPUNIT_TEST( zeroMatrix );
-  CPPUNIT_TEST( identityMatrix );
-  CPPUNIT_TEST( contractionMatrix );
-  CPPUNIT_TEST( normMatrix );
-  CPPUNIT_TEST( tensorAssignOperator );
-  CPPUNIT_TEST( matrixAssignOperator );
-  CPPUNIT_TEST( multMatrixScalar );
-  CPPUNIT_TEST( multMatrixVec );
-  CPPUNIT_TEST( multMatrixMatrix );
-  CPPUNIT_TEST( addMatrixMatrix );
-  CPPUNIT_TEST( addMatrixMatrixEquals );
-  CPPUNIT_TEST( subMatrixMatrixEquals );
-  CPPUNIT_TEST( addMatrixScalar );
-  CPPUNIT_TEST( divideMatrixScalarEquals );
-  CPPUNIT_TEST( multMatrixScalarEquals );
-  CPPUNIT_TEST( addMatrixScalarEquals );
-  CPPUNIT_TEST( equalMatrix );
-  CPPUNIT_TEST( notEqualMatrix );
-  CPPUNIT_TEST( kronecker );
-  CPPUNIT_TEST( inverse );
-  CPPUNIT_TEST( eigen );
-  CPPUNIT_TEST( eigenNonsym );
-  CPPUNIT_TEST( exp );
+  void SetUp()
+  {
+    // Define commonly used matrices for testing
+    a(0, 0) = 1;
+    a(1, 0) = 2;
+    a(2, 0) = 3;
+    a(0, 1) = 4;
+    a(1, 1) = 5;
+    a(2, 1) = 6;
+    a(0, 2) = 7;
+    a(1, 2) = 8;
+    a(2, 2) = 9;
 
-  CPPUNIT_TEST_SUITE_END();
+    t(0, 0) = 1;
+    t(1, 0) = 2;
+    t(2, 0) = 3;
+    t(0, 1) = 4;
+    t(1, 1) = 5;
+    t(2, 1) = 6;
 
-public:
-  void setUp();
-  void tearDown();
+    two_mat(0, 0) = 1;
+    two_mat(1, 0) = 2;
+    two_mat(0, 1) = 3;
+    two_mat(1, 1) = 4;
 
-  void rowColConstructor();
-  void copyConstructor();
-  void tensorConstructor();
-  void ThreeColConstructor();
-  void numEntries();
-  void reshapeMatrix();
-  void accessMatrix();
-  void print();
-  void fillMatrix();
-  void transposeMatrix();
-  void setDiagMatrix();
-  void trMatrix();
-  void zeroMatrix();
-  void identityMatrix();
-  void contractionMatrix();
-  void normMatrix();
-  void tensorAssignOperator();
-  void matrixAssignOperator();
-  void multMatrixScalar();
-  void multMatrixVec();
-  void multMatrixMatrix();
-  void addMatrixMatrix();
-  void addMatrixMatrixEquals();
-  void subMatrixMatrixEquals();
-  void addMatrixScalar();
-  void divideMatrixScalarEquals();
-  void multMatrixScalarEquals();
-  void addMatrixScalarEquals();
-  void equalMatrix();
-  void notEqualMatrix();
-  void kronecker();
-  void inverse();
-  void eigen();
-  void eigenNonsym();
-  void exp();
+    add(0, 0) = 6;
+    add(1, 0) = 5;
+    add(2, 0) = 4;
+    add(0, 1) = 1;
+    add(1, 1) = 1;
+    add(2, 1) = 1;
 
-private:
-  ColumnMajorMatrix *a, *t, *two_mat;
-  ColumnMajorMatrix *add, *add_solution;
-  ColumnMajorMatrix *sub, *sub_solution;
+    add_solution(0, 0) = 7;
+    add_solution(1, 0) = 7;
+    add_solution(2, 0) = 7;
+    add_solution(0, 1) = 5;
+    add_solution(1, 1) = 6;
+    add_solution(2, 1) = 7;
+
+    sub(0, 0) = 0;
+    sub(1, 0) = 1;
+    sub(2, 0) = 2;
+    sub(0, 1) = 1;
+    sub(1, 1) = 1;
+    sub(2, 1) = 1;
+
+    sub_solution(0, 0) = 1;
+    sub_solution(1, 0) = 1;
+    sub_solution(2, 0) = 1;
+    sub_solution(0, 1) = 3;
+    sub_solution(1, 1) = 4;
+    sub_solution(2, 1) = 5;
+  }
+
+  ColumnMajorMatrix a, t, two_mat, add, add_solution, sub, sub_solution;
 };
 
-#endif  // COLUMNMAJORMATRIXTEST_H
+#endif // COLUMNMAJORMATRIXTEST_H

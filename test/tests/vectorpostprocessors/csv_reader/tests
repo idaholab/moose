@@ -1,0 +1,23 @@
+[Tests]
+  [./read]
+    type = CSVDiff
+    input = read.i
+    csvdiff = 'read_out_reader_0000.csv'
+  [../]
+  [./parallel]
+    # Tests that data that CSV data that is read on processor 0 is broadcast to other ranks. This
+    # uses a test object to check that the data is broadcast, which can't be done with file IO
+    # because reading and writing happens on rank 0.
+    type = RunApp
+    input = read.i
+    cli_args = 'UserObjects/tester/rank=1 Outputs/csv=false'
+    min_parallel = 2
+  [../]
+  [./tester_fail]
+    type = RunException
+    input = read.i
+    cli_args = "UserObjects/tester/rank=1 UserObjects/tester/gold='1 2 3'"
+    min_parallel = 2
+    expect_err = "The supplied gold data does not match the VPP data on the given rank."
+  [../]
+[]

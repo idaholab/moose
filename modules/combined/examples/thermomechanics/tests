@@ -1,0 +1,7 @@
+[Tests]
+  [./circle_thermal_expansion_stress]
+    type = RunApp
+    input = 'circle_thermal_expansion_stress.i'
+    check_input = True
+  [../]
+[]

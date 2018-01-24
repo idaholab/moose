@@ -14,22 +14,18 @@
 
 #include "ConstantScalarAux.h"
 
-template<>
-InputParameters validParams<ConstantScalarAux>()
+template <>
+InputParameters
+validParams<ConstantScalarAux>()
 {
   InputParameters params = validParams<AuxScalarKernel>();
   params.addRequiredParam<Real>("value", "The value to be set to the scalar variable.");
-
+  params.declareControllable("value");
   return params;
 }
 
-ConstantScalarAux::ConstantScalarAux(const InputParameters & parameters) :
-    AuxScalarKernel(parameters),
-    _value(getParam<Real>("value"))
-{
-}
-
-ConstantScalarAux::~ConstantScalarAux()
+ConstantScalarAux::ConstantScalarAux(const InputParameters & parameters)
+  : AuxScalarKernel(parameters), _value(getParam<Real>("value"))
 {
 }
 
@@ -38,4 +34,3 @@ ConstantScalarAux::computeValue()
 {
   return _value;
 }
-

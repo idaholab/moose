@@ -5,7 +5,6 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-
 #ifndef RICHARDSEXCAVFLOW_H
 #define RICHARDSEXCAVFLOW_H
 
@@ -13,18 +12,17 @@
 #include "MaterialPropertyInterface.h"
 #include "RichardsVarNames.h"
 
-//Forward Declarations
+// Forward Declarations
 class RichardsExcavFlow;
 class Function;
 
-template<>
+template <>
 InputParameters validParams<RichardsExcavFlow>();
 
 /**
  * Records total mass flow into an excavation defined by a RichardsExcavGeom function
  */
-class RichardsExcavFlow :
-  public SideIntegralVariablePostprocessor
+class RichardsExcavFlow : public SideIntegralVariablePostprocessor
 {
 public:
   RichardsExcavFlow(const InputParameters & parameters);
@@ -39,7 +37,7 @@ protected:
   unsigned int _pvar;
 
   /// mass-flux of fluid (a vector in the multicomponent case)
-  const MaterialProperty<std::vector<RealVectorValue> > &_flux;
+  const MaterialProperty<std::vector<RealVectorValue>> & _flux;
 
   /// the RichardsExcavGeom that defines where on the boundary we'll compute the mass flux
   Function & _func;

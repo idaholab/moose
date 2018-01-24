@@ -1,0 +1,7 @@
+[Tests]
+  [./CheckMesh]
+    type = PythonUnitTest
+    input = test_check_mesh.py
+    display_required = True
+  [../]
+[]

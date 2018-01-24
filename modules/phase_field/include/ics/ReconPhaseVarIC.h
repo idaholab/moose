@@ -14,7 +14,7 @@
 // Forward Declarations
 class ReconPhaseVarIC;
 
-template<>
+template <>
 InputParameters validParams<ReconPhaseVarIC>();
 
 /**
@@ -32,12 +32,12 @@ public:
 
 private:
   MooseMesh & _mesh;
-  NonlinearSystem & _nl;
+
   const EBSDReader & _ebsd_reader;
 
   unsigned int _phase;
 
-  const std::map<dof_id_type, std::vector<Real> > & _node_to_phase_weight_map;
+  const std::map<dof_id_type, std::vector<Real>> & _node_to_phase_weight_map;
 };
 
-#endif //RECONPHASEVARIC_H
+#endif // RECONPHASEVARIC_H

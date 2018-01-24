@@ -11,16 +11,15 @@
 /*                                                              */
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
-
-#include "Material.h"
-
 #ifndef STATEFULMATERIAL_H
 #define STATEFULMATERIAL_H
 
-//Forward Declarations
+#include "Material.h"
+
+// Forward Declarations
 class StatefulMaterial;
 
-template<>
+template <>
 InputParameters validParams<StatefulMaterial>();
 
 /**
@@ -43,7 +42,7 @@ private:
    * and previous material properties respectively
    */
   MaterialProperty<Real> & _diffusivity;
-  MaterialProperty<Real> & _diffusivity_old;
+  const MaterialProperty<Real> & _diffusivity_old;
 };
 
-#endif //STATEFULMATERIAL_H
+#endif // STATEFULMATERIAL_H

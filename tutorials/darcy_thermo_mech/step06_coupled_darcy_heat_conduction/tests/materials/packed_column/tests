@@ -1,7 +1,1 @@
-[Tests]
-  [./test]
-    type = 'Exodiff'
-    input = 'packed_column.i'
-    exodiff = 'packed_column_out.e'
-  [../]
-[]
+../../../../step05_heat_conduction/tests/materials/packed_column/tests

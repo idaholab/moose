@@ -9,16 +9,15 @@
 
 #include "Kernel.h"
 
-//Forward Declarations
+// Forward Declarations
 class NSGravityPower;
 
-template<>
+template <>
 InputParameters validParams<NSGravityPower>();
 
 class NSGravityPower : public Kernel
 {
 public:
-
   NSGravityPower(const InputParameters & parameters);
 
 protected:
@@ -27,9 +26,9 @@ protected:
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
 
   unsigned int _momentum_var;
-  VariableValue & _momentum;
+  const VariableValue & _momentum;
 
-  Real _acceleration;
+  const Real _acceleration;
 };
 
-#endif
+#endif // NSGRAVITYPOWER_H

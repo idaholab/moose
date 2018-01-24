@@ -21,7 +21,6 @@
 #include "MooseVariable.h"
 #include "MooseMesh.h"
 
-// libmesh includes
 #include "libmesh/threads.h"
 
 #include <algorithm>
@@ -30,25 +29,24 @@
 Threads::spin_mutex pinfo_mutex;
 
 PenetrationThread::PenetrationThread(
-  SubProblem & subproblem,
-  const MooseMesh & mesh,
-  BoundaryID master_boundary,
-  BoundaryID slave_boundary,
-  std::map<dof_id_type, PenetrationInfo *> & penetration_info,
-  bool check_whether_reasonable,
-  bool update_location,
-  Real tangential_tolerance,
-  bool do_normal_smoothing,
-  Real normal_smoothing_distance,
-  PenetrationLocator::NORMAL_SMOOTHING_METHOD normal_smoothing_method,
-  std::vector<std::vector<FEBase *> > & fes,
-  FEType & fe_type,
-  NearestNodeLocator & nearest_node,
-  std::map<dof_id_type, std::vector<dof_id_type> > & node_to_elem_map,
-  std::vector<dof_id_type> & elem_list,
-  std::vector<unsigned short int> & side_list,
-  std::vector<boundary_id_type> & id_list,
-  bool skip_off_process_slaves)
+    SubProblem & subproblem,
+    const MooseMesh & mesh,
+    BoundaryID master_boundary,
+    BoundaryID slave_boundary,
+    std::map<dof_id_type, PenetrationInfo *> & penetration_info,
+    bool check_whether_reasonable,
+    bool update_location,
+    Real tangential_tolerance,
+    bool do_normal_smoothing,
+    Real normal_smoothing_distance,
+    PenetrationLocator::NORMAL_SMOOTHING_METHOD normal_smoothing_method,
+    std::vector<std::vector<FEBase *>> & fes,
+    FEType & fe_type,
+    NearestNodeLocator & nearest_node,
+    const std::map<dof_id_type, std::vector<dof_id_type>> & node_to_elem_map,
+    std::vector<dof_id_type> & elem_list,
+    std::vector<unsigned short int> & side_list,
+    std::vector<boundary_id_type> & id_list)
   : _subproblem(subproblem),
     _mesh(mesh),
     _master_boundary(master_boundary),
@@ -70,75 +68,68 @@ PenetrationThread::PenetrationThread(
     _elem_list(elem_list),
     _side_list(side_list),
     _id_list(id_list),
-    _n_elems(elem_list.size()),
-    _skip_off_process_slaves(skip_off_process_slaves)
+    _n_elems(elem_list.size())
 {
 }
 
 // Splitting Constructor
-PenetrationThread::PenetrationThread(PenetrationThread & x, Threads::split /*split*/) :
-  _subproblem(x._subproblem),
-  _mesh(x._mesh),
-  _master_boundary(x._master_boundary),
-  _slave_boundary(x._slave_boundary),
-  _penetration_info(x._penetration_info),
-  _check_whether_reasonable(x._check_whether_reasonable),
-  _update_location(x._update_location),
-  _tangential_tolerance(x._tangential_tolerance),
-  _do_normal_smoothing(x._do_normal_smoothing),
-  _normal_smoothing_distance(x._normal_smoothing_distance),
-  _normal_smoothing_method(x._normal_smoothing_method),
-  _fes(x._fes),
-  _fe_type(x._fe_type),
-  _nearest_node(x._nearest_node),
-  _node_to_elem_map(x._node_to_elem_map),
-  _elem_list(x._elem_list),
-  _side_list(x._side_list),
-  _id_list(x._id_list),
-  _n_elems(x._n_elems),
-  _skip_off_process_slaves(x._skip_off_process_slaves)
+PenetrationThread::PenetrationThread(PenetrationThread & x, Threads::split /*split*/)
+  : _subproblem(x._subproblem),
+    _mesh(x._mesh),
+    _master_boundary(x._master_boundary),
+    _slave_boundary(x._slave_boundary),
+    _penetration_info(x._penetration_info),
+    _check_whether_reasonable(x._check_whether_reasonable),
+    _update_location(x._update_location),
+    _tangential_tolerance(x._tangential_tolerance),
+    _do_normal_smoothing(x._do_normal_smoothing),
+    _normal_smoothing_distance(x._normal_smoothing_distance),
+    _normal_smoothing_method(x._normal_smoothing_method),
+    _fes(x._fes),
+    _fe_type(x._fe_type),
+    _nearest_node(x._nearest_node),
+    _node_to_elem_map(x._node_to_elem_map),
+    _elem_list(x._elem_list),
+    _side_list(x._side_list),
+    _id_list(x._id_list),
+    _n_elems(x._n_elems)
 {
 }
 
 void
-PenetrationThread::operator() (const NodeIdRange & range)
+PenetrationThread::operator()(const NodeIdRange & range)
 {
   ParallelUniqueId puid;
   _tid = puid.id;
 
-  //Must get the variables every time this is run because _tid can change
+  // Must get the variables every time this is run because _tid can change
   if (_do_normal_smoothing &&
       _normal_smoothing_method == PenetrationLocator::NSM_NODAL_NORMAL_BASED)
   {
-    _nodal_normal_x = &_subproblem.getVariable(_tid,"nodal_normal_x");
-    _nodal_normal_y = &_subproblem.getVariable(_tid,"nodal_normal_y");
-    _nodal_normal_z = &_subproblem.getVariable(_tid,"nodal_normal_z");
+    _nodal_normal_x = &_subproblem.getVariable(_tid, "nodal_normal_x");
+    _nodal_normal_y = &_subproblem.getVariable(_tid, "nodal_normal_y");
+    _nodal_normal_z = &_subproblem.getVariable(_tid, "nodal_normal_z");
   }
 
-  for (NodeIdRange::const_iterator nd = range.begin() ; nd != range.end(); ++nd)
+  for (const auto & node_id : range)
   {
-    const Node & node = _mesh.node(*nd);
-
-    // Never allocate pinfos for off-process slave nodes. This is because when the constraints get
-    // applied, we loop over local slave nodes, never over master nodes. So we only ever use the
-    // pinfos that are on nodes owned by this process.
-    if ( _skip_off_process_slaves && node.processor_id() != _subproblem.processor_id())
-      continue;
+    const Node & node = _mesh.nodeRef(node_id);
 
     // We're going to get a reference to the pointer for the pinfo for this node
     // This will allow us to manipulate this pointer without having to go through
     // the _penetration_info map... meaning this is the only mutex we'll have to do!
     pinfo_mutex.lock();
-    PenetrationInfo * & info = _penetration_info[node.id()];
+    PenetrationInfo *& info = _penetration_info[node.id()];
     pinfo_mutex.unlock();
 
-    std::vector<PenetrationInfo*> p_info;
+    std::vector<PenetrationInfo *> p_info;
     bool info_set(false);
 
     // See if we already have info about this node
     if (info)
     {
-      FEBase * fe = _fes[_tid][info->_side->dim()];
+      FEBase * fe_elem = _fes[_tid][info->_elem->dim()];
+      FEBase * fe_side = _fes[_tid][info->_side->dim()];
 
       if (!_update_location && (info->_distance >= 0 || info->isCaptured()))
       {
@@ -149,14 +140,21 @@ PenetrationThread::operator() (const NodeIdRange & range)
         // Use the previous reference coordinates
         std::vector<Point> points(1);
         points[0] = contact_ref;
-        fe->reinit(info->_side, &points);
-        const std::vector<Point> slave_pos = fe->get_xyz();
-        Moose::findContactPoint(*info, fe, _fe_type, slave_pos[0],
-                                false, _tangential_tolerance, contact_point_on_side);
+        fe_side->reinit(info->_side, &points);
+        const std::vector<Point> slave_pos = fe_side->get_xyz();
+        Moose::findContactPoint(*info,
+                                fe_elem,
+                                fe_side,
+                                _fe_type,
+                                slave_pos[0],
+                                false,
+                                _tangential_tolerance,
+                                contact_point_on_side);
 
         // Restore the original reference coordinates
         info->_closest_point_ref = contact_ref;
-        // Just calculated as the distance of the contact point off the surface (0).  Set to 0 to avoid round-off.
+        // Just calculated as the distance of the contact point off the surface (0).  Set to 0 to
+        // avoid round-off.
         info->_distance = 0.0;
         info_set = true;
       }
@@ -165,20 +163,26 @@ PenetrationThread::operator() (const NodeIdRange & range)
         Real old_tangential_distance(info->_tangential_distance);
         bool contact_point_on_side(false);
 
-        Moose::findContactPoint(*info, fe, _fe_type, node,
-                                false, _tangential_tolerance, contact_point_on_side);
+        Moose::findContactPoint(*info,
+                                fe_elem,
+                                fe_side,
+                                _fe_type,
+                                node,
+                                false,
+                                _tangential_tolerance,
+                                contact_point_on_side);
 
         if (contact_point_on_side)
         {
-          if (info->_tangential_distance <= 0.0) //on the face
+          if (info->_tangential_distance <= 0.0) // on the face
           {
             info_set = true;
           }
           else if (info->_tangential_distance > 0.0 && old_tangential_distance > 0.0)
-          { //off the face but within tolerance, was that way on the last step too
-            if (info->_side->dim()==2 && info->_off_edge_nodes.size()<2)
-            { //Closest point on face is on a node rather than an edge.  Another
-              //face might be a better candidate.
+          { // off the face but within tolerance, was that way on the last step too
+            if (info->_side->dim() == 2 && info->_off_edge_nodes.size() < 2)
+            { // Closest point on face is on a node rather than an edge.  Another
+              // face might be a better candidate.
             }
             else
             {
@@ -192,73 +196,77 @@ PenetrationThread::operator() (const NodeIdRange & range)
     if (!info_set)
     {
       const Node * closest_node = _nearest_node.nearestNode(node.id());
-      std::vector<dof_id_type> & closest_elems = _node_to_elem_map[closest_node->id()];
+      auto node_to_elem_pair = _node_to_elem_map.find(closest_node->id());
+      mooseAssert(node_to_elem_pair != _node_to_elem_map.end(),
+                  "Missing entry in node to elem map");
+      const std::vector<dof_id_type> & closest_elems = node_to_elem_pair->second;
 
-      for (unsigned int j=0; j<closest_elems.size(); j++)
+      for (const auto & elem_id : closest_elems)
       {
-        dof_id_type elem_id = closest_elems[j];
-        const Elem * elem = _mesh.elem(elem_id);
+        const Elem * elem = _mesh.elemPtr(elem_id);
 
-        std::vector<PenetrationInfo*> thisElemInfo;
-        std::vector<const Node*> nodesThatMustBeOnSide;
+        std::vector<PenetrationInfo *> thisElemInfo;
+        std::vector<const Node *> nodesThatMustBeOnSide;
         nodesThatMustBeOnSide.push_back(closest_node);
-        createInfoForElem(thisElemInfo, p_info, &node, elem, nodesThatMustBeOnSide, _check_whether_reasonable);
+        createInfoForElem(
+            thisElemInfo, p_info, &node, elem, nodesThatMustBeOnSide, _check_whether_reasonable);
       }
 
       if (p_info.size() == 1)
       {
         if (p_info[0]->_tangential_distance <= _tangential_tolerance)
         {
-          switchInfo( info, p_info[0] );
+          switchInfo(info, p_info[0]);
           info_set = true;
         }
       }
       else if (p_info.size() > 1)
       {
 
-        //Loop through all pairs of faces, and check for contact on ridge betweeen each face pair
+        // Loop through all pairs of faces, and check for contact on ridge betweeen each face pair
         std::vector<RidgeData> ridgeDataVec;
         for (unsigned int i = 0; i + 1 < p_info.size(); ++i)
-        {
           for (unsigned int j = i + 1; j < p_info.size(); ++j)
           {
             Point closest_coor;
             Real tangential_distance(0.0);
-            Node* closest_node_on_ridge(NULL);
-            unsigned int index=0;
+            const Node * closest_node_on_ridge = NULL;
+            unsigned int index = 0;
             Point closest_coor_ref;
             bool found_ridge_contact_point = findRidgeContactPoint(closest_coor,
                                                                    tangential_distance,
                                                                    closest_node_on_ridge,
                                                                    index,
                                                                    closest_coor_ref,
-                                                                   p_info, i, j);
+                                                                   p_info,
+                                                                   i,
+                                                                   j);
             if (found_ridge_contact_point)
             {
               RidgeData rpd;
-              rpd._closest_coor=closest_coor;
-              rpd._tangential_distance=tangential_distance;
-              rpd._closest_node=closest_node_on_ridge;
+              rpd._closest_coor = closest_coor;
+              rpd._tangential_distance = tangential_distance;
+              rpd._closest_node = closest_node_on_ridge;
               rpd._index = index;
-              rpd._closest_coor_ref=closest_coor_ref;
+              rpd._closest_coor_ref = closest_coor_ref;
               ridgeDataVec.push_back(rpd);
             }
           }
-        }
-        if (ridgeDataVec.size() > 0) //Either find the ridge pair that is the best or find a peak
+
+        if (ridgeDataVec.size() > 0) // Either find the ridge pair that is the best or find a peak
         {
-          //Group together ridges for which we are off the edge of a common node.
-          //Those are peaks.
+          // Group together ridges for which we are off the edge of a common node.
+          // Those are peaks.
           std::vector<RidgeSetData> ridgeSetDataVec;
-          for (unsigned int i(0); i<ridgeDataVec.size(); ++i)
+          for (unsigned int i = 0; i < ridgeDataVec.size(); ++i)
           {
-            bool foundSetWithMatchingNode(false);
-            for (unsigned int j(0); j<ridgeSetDataVec.size(); ++j)
+            bool foundSetWithMatchingNode = false;
+            for (unsigned int j = 0; j < ridgeSetDataVec.size(); ++j)
             {
               if (ridgeDataVec[i]._closest_node != NULL &&
                   ridgeDataVec[i]._closest_node == ridgeSetDataVec[j]._closest_node)
               {
-                foundSetWithMatchingNode=true;
+                foundSetWithMatchingNode = true;
                 ridgeSetDataVec[j]._ridge_data_vec.push_back(ridgeDataVec[i]);
                 break;
               }
@@ -266,45 +274,50 @@ PenetrationThread::operator() (const NodeIdRange & range)
             if (!foundSetWithMatchingNode)
             {
               RidgeSetData rsd;
-              rsd._distance=std::numeric_limits<Real>::max();
+              rsd._distance = std::numeric_limits<Real>::max();
               rsd._ridge_data_vec.push_back(ridgeDataVec[i]);
-              rsd._closest_node=ridgeDataVec[i]._closest_node;
+              rsd._closest_node = ridgeDataVec[i]._closest_node;
               ridgeSetDataVec.push_back(rsd);
             }
           }
-          //Compute distance to each set of ridges
-          for (unsigned int i(0); i<ridgeSetDataVec.size(); ++i)
+          // Compute distance to each set of ridges
+          for (unsigned int i = 0; i < ridgeSetDataVec.size(); ++i)
           {
-            if (ridgeSetDataVec[i]._closest_node != NULL) //Either a peak or off the edge of single ridge
+            if (ridgeSetDataVec[i]._closest_node !=
+                NULL) // Either a peak or off the edge of single ridge
             {
-              if (ridgeSetDataVec[i]._ridge_data_vec.size() == 1) //off edge of single ridge
+              if (ridgeSetDataVec[i]._ridge_data_vec.size() == 1) // off edge of single ridge
               {
-                if (ridgeSetDataVec[i]._ridge_data_vec[0]._tangential_distance <= _tangential_tolerance) //off within tolerance
+                if (ridgeSetDataVec[i]._ridge_data_vec[0]._tangential_distance <=
+                    _tangential_tolerance) // off within tolerance
                 {
-                  ridgeSetDataVec[i]._closest_coor = ridgeSetDataVec[i]._ridge_data_vec[0]._closest_coor;
+                  ridgeSetDataVec[i]._closest_coor =
+                      ridgeSetDataVec[i]._ridge_data_vec[0]._closest_coor;
                   Point contact_point_vec = node - ridgeSetDataVec[i]._closest_coor;
-                  ridgeSetDataVec[i]._distance = contact_point_vec.size();
+                  ridgeSetDataVec[i]._distance = contact_point_vec.norm();
                 }
               }
-              else //several ridges join at common node to make peak.  The common node is the contact point
+              else // several ridges join at common node to make peak.  The common node is the
+                   // contact point
               {
                 ridgeSetDataVec[i]._closest_coor = *ridgeSetDataVec[i]._closest_node;
                 Point contact_point_vec = node - ridgeSetDataVec[i]._closest_coor;
-                ridgeSetDataVec[i]._distance = contact_point_vec.size();
+                ridgeSetDataVec[i]._distance = contact_point_vec.norm();
               }
             }
-            else //on a single ridge
+            else // on a single ridge
             {
-              ridgeSetDataVec[i]._closest_coor = ridgeSetDataVec[i]._ridge_data_vec[0]._closest_coor;
+              ridgeSetDataVec[i]._closest_coor =
+                  ridgeSetDataVec[i]._ridge_data_vec[0]._closest_coor;
               Point contact_point_vec = node - ridgeSetDataVec[i]._closest_coor;
-              ridgeSetDataVec[i]._distance = contact_point_vec.size();
+              ridgeSetDataVec[i]._distance = contact_point_vec.norm();
             }
           }
-          //Find the set of ridges closest to us.
+          // Find the set of ridges closest to us.
           unsigned int closest_ridge_set_index(0);
           Real closest_distance(ridgeSetDataVec[0]._distance);
           Point closest_point(ridgeSetDataVec[0]._closest_coor);
-          for (unsigned int i(1); i<ridgeSetDataVec.size(); ++i)
+          for (unsigned int i = 1; i < ridgeSetDataVec.size(); ++i)
           {
             if (ridgeSetDataVec[i]._distance < closest_distance)
             {
@@ -314,26 +327,33 @@ PenetrationThread::operator() (const NodeIdRange & range)
             }
           }
 
-          if (closest_distance < std::numeric_limits<Real>::max()) //contact point is on the closest ridge set
+          if (closest_distance <
+              std::numeric_limits<Real>::max()) // contact point is on the closest ridge set
           {
-            //find the face in the ridge set with the smallest index, assign that one to the interaction
+            // find the face in the ridge set with the smallest index, assign that one to the
+            // interaction
             unsigned int face_index(std::numeric_limits<unsigned int>::max());
-            for (unsigned int i(0); i<ridgeSetDataVec[closest_ridge_set_index]._ridge_data_vec.size(); ++i)
+            for (unsigned int i = 0;
+                 i < ridgeSetDataVec[closest_ridge_set_index]._ridge_data_vec.size();
+                 ++i)
             {
               if (ridgeSetDataVec[closest_ridge_set_index]._ridge_data_vec[i]._index < face_index)
                 face_index = ridgeSetDataVec[closest_ridge_set_index]._ridge_data_vec[i]._index;
             }
 
-            mooseAssert(face_index < std::numeric_limits<unsigned int>::max(),"face_index invalid");
+            mooseAssert(face_index < std::numeric_limits<unsigned int>::max(),
+                        "face_index invalid");
 
             p_info[face_index]->_closest_point = closest_point;
-            p_info[face_index]->_distance = (p_info[face_index]->_distance >= 0.0 ? 1.0 : -1.0) * closest_distance;
-            //Calculate the normal as the vector from the ridge to the point only if we're not doing normal
-            //smoothing.  Normal smoothing will average out the normals on its own.
+            p_info[face_index]->_distance =
+                (p_info[face_index]->_distance >= 0.0 ? 1.0 : -1.0) * closest_distance;
+            // Calculate the normal as the vector from the ridge to the point only if we're not
+            // doing normal
+            // smoothing.  Normal smoothing will average out the normals on its own.
             if (!_do_normal_smoothing)
             {
               Point normal(closest_point - node);
-              const Real len(normal.size());
+              const Real len(normal.norm());
               if (len > 0)
               {
                 normal /= len;
@@ -348,20 +368,26 @@ PenetrationThread::operator() (const NodeIdRange & range)
             p_info[face_index]->_tangential_distance = 0.0;
 
             Point closest_point_ref;
-            if (ridgeSetDataVec[closest_ridge_set_index]._ridge_data_vec.size()==1) //contact with a single ridge rather than a peak
+            if (ridgeSetDataVec[closest_ridge_set_index]._ridge_data_vec.size() ==
+                1) // contact with a single ridge rather than a peak
             {
-              p_info[face_index]->_tangential_distance = ridgeSetDataVec[closest_ridge_set_index]._ridge_data_vec[0]._tangential_distance;
-              p_info[face_index]->_closest_point_ref = ridgeSetDataVec[closest_ridge_set_index]._ridge_data_vec[0]._closest_coor_ref;
+              p_info[face_index]->_tangential_distance =
+                  ridgeSetDataVec[closest_ridge_set_index]._ridge_data_vec[0]._tangential_distance;
+              p_info[face_index]->_closest_point_ref =
+                  ridgeSetDataVec[closest_ridge_set_index]._ridge_data_vec[0]._closest_coor_ref;
             }
             else
-            { //peak
-              Node* closest_node_on_face;
-              bool restricted = restrictPointToFace(p_info[face_index]->_closest_point_ref, closest_node_on_face, p_info[face_index]->_side);
+            { // peak
+              const Node * closest_node_on_face;
+              bool restricted = restrictPointToFace(p_info[face_index]->_closest_point_ref,
+                                                    closest_node_on_face,
+                                                    p_info[face_index]->_side);
               if (restricted)
               {
                 if (closest_node_on_face != ridgeSetDataVec[closest_ridge_set_index]._closest_node)
                 {
-                  mooseError("Closest node when restricting point to face != closest node from RidgeSetData");
+                  mooseError("Closest node when restricting point to face != closest node from "
+                             "RidgeSetData");
                 }
               }
             }
@@ -371,37 +397,43 @@ PenetrationThread::operator() (const NodeIdRange & range)
             points[0] = p_info[face_index]->_closest_point_ref;
             fe->reinit(p_info[face_index]->_side, &points);
             p_info[face_index]->_side_phi = fe->get_phi();
+            p_info[face_index]->_side_grad_phi = fe->get_dphi();
             p_info[face_index]->_dxyzdxi = fe->get_dxyzdxi();
             p_info[face_index]->_dxyzdeta = fe->get_dxyzdeta();
             p_info[face_index]->_d2xyzdxideta = fe->get_d2xyzdxideta();
 
-            switchInfo( info, p_info[face_index] );
+            switchInfo(info, p_info[face_index]);
             info_set = true;
           }
           else
-          {//todo:remove invalid ridge cases so they don't mess up individual face competition????
+          { // todo:remove invalid ridge cases so they don't mess up individual face competition????
           }
         }
 
-        if (!info_set) //contact wasn't on a ridge -- compete individual interactions
+        if (!info_set) // contact wasn't on a ridge -- compete individual interactions
         {
-          unsigned int best(0),i(1);
-          do{
-            CompeteInteractionResult CIResult=competeInteractions(p_info[best],p_info[i]);
-            if (CIResult == FIRST_WINS){
+          unsigned int best(0), i(1);
+          do
+          {
+            CompeteInteractionResult CIResult = competeInteractions(p_info[best], p_info[i]);
+            if (CIResult == FIRST_WINS)
+            {
               i++;
-            } else if (CIResult == SECOND_WINS){
+            }
+            else if (CIResult == SECOND_WINS)
+            {
               best = i;
               i++;
-            } else if (CIResult == NEITHER_WINS){
-              best = i+1;
-              i+=2;
             }
-          }
-          while (i<p_info.size() && best<p_info.size());
+            else if (CIResult == NEITHER_WINS)
+            {
+              best = i + 1;
+              i += 2;
+            }
+          } while (i < p_info.size() && best < p_info.size());
           if (best < p_info.size())
           {
-            switchInfo( info, p_info[best] );
+            switchInfo(info, p_info[best]);
             info_set = true;
           }
         }
@@ -410,6 +442,13 @@ PenetrationThread::operator() (const NodeIdRange & range)
 
     if (!info_set)
     {
+      // If penetration is not detected within the saved patch, it is possible
+      // that the slave node has moved outside the saved patch. So, the patch
+      // for the slave nodes saved in _recheck_slave_nodes has to be updated
+      // and the penetration detection has to be re-run on the updated patch.
+
+      _recheck_slave_nodes.push_back(node_id);
+
       delete info;
       info = NULL;
     }
@@ -417,10 +456,10 @@ PenetrationThread::operator() (const NodeIdRange & range)
     {
       smoothNormal(info, p_info);
       FEBase * fe = _fes[_tid][info->_side->dim()];
-      computeSlip( *fe, *info );
+      computeSlip(*fe, *info);
     }
 
-    for ( unsigned int j(0); j < p_info.size(); ++j )
+    for (unsigned int j = 0; j < p_info.size(); ++j)
     {
       if (p_info[j])
       {
@@ -428,17 +467,19 @@ PenetrationThread::operator() (const NodeIdRange & range)
         p_info[j] = NULL;
       }
     }
-
   }
 }
 
 void
-PenetrationThread::join(const PenetrationThread & /*other*/)
-{}
+PenetrationThread::join(const PenetrationThread & other)
+{
+  _recheck_slave_nodes.insert(_recheck_slave_nodes.end(),
+                              other._recheck_slave_nodes.begin(),
+                              other._recheck_slave_nodes.end());
+}
 
 void
-PenetrationThread::switchInfo( PenetrationInfo * & info,
-                               PenetrationInfo * & infoNew )
+PenetrationThread::switchInfo(PenetrationInfo *& info, PenetrationInfo *& infoNew)
 {
   mooseAssert(infoNew != NULL, "infoNew object is null");
   if (info)
@@ -454,8 +495,11 @@ PenetrationThread::switchInfo( PenetrationInfo * & info,
     infoNew->_contact_force = info->_contact_force;
     infoNew->_contact_force_old = info->_contact_force_old;
     infoNew->_lagrange_multiplier = info->_lagrange_multiplier;
+    infoNew->_lagrange_multiplier_slip = info->_lagrange_multiplier_slip;
     infoNew->_locked_this_step = info->_locked_this_step;
+    infoNew->_stick_locked_this_step = info->_stick_locked_this_step;
     infoNew->_mech_status = info->_mech_status;
+    infoNew->_mech_status_old = info->_mech_status_old;
   }
   else
   {
@@ -468,111 +512,120 @@ PenetrationThread::switchInfo( PenetrationInfo * & info,
   infoNew = NULL; // Set this to NULL so that we don't delete it (now owned by _penetration_info).
 }
 
-//Determine whether first (pi1) or second (pi2) interaction is stronger
+// Determine whether first (pi1) or second (pi2) interaction is stronger
 PenetrationThread::CompeteInteractionResult
-PenetrationThread::competeInteractions(PenetrationInfo * pi1,
-                                       PenetrationInfo * pi2)
+PenetrationThread::competeInteractions(PenetrationInfo * pi1, PenetrationInfo * pi2)
 {
 
   CompeteInteractionResult result = NEITHER_WINS;
 
   if (pi1->_tangential_distance > _tangential_tolerance &&
-      pi2->_tangential_distance > _tangential_tolerance) //out of tol on both faces
-    result=NEITHER_WINS;
+      pi2->_tangential_distance > _tangential_tolerance) // out of tol on both faces
+    result = NEITHER_WINS;
 
   else if (pi1->_tangential_distance == 0.0 &&
-      pi2->_tangential_distance > 0.0)                   //on face 1, off face 2
-    result=FIRST_WINS;
+           pi2->_tangential_distance > 0.0) // on face 1, off face 2
+    result = FIRST_WINS;
 
   else if (pi2->_tangential_distance == 0.0 &&
-           pi1->_tangential_distance > 0.0)              //on face 2, off face 1
-    result=SECOND_WINS;
+           pi1->_tangential_distance > 0.0) // on face 2, off face 1
+    result = SECOND_WINS;
 
   else if (pi1->_tangential_distance <= _tangential_tolerance &&
-           pi2->_tangential_distance > _tangential_tolerance) //in face 1 tol, out of face 2 tol
-    result=FIRST_WINS;
+           pi2->_tangential_distance > _tangential_tolerance) // in face 1 tol, out of face 2 tol
+    result = FIRST_WINS;
 
   else if (pi2->_tangential_distance <= _tangential_tolerance &&
-           pi1->_tangential_distance > _tangential_tolerance) //in face 2 tol, out of face 1 tol
-    result=SECOND_WINS;
+           pi1->_tangential_distance > _tangential_tolerance) // in face 2 tol, out of face 1 tol
+    result = SECOND_WINS;
 
-  else if (pi1->_tangential_distance == 0.0 &&
-           pi2->_tangential_distance == 0.0)                  //on both faces
+  else if (pi1->_tangential_distance == 0.0 && pi2->_tangential_distance == 0.0) // on both faces
   {
-    if (pi1->_distance >= 0.0 && pi2->_distance < 0.0)  //favor face with positive distance (penetrated)
-      result=FIRST_WINS;
+    if (pi1->_distance >= 0.0 &&
+        pi2->_distance < 0.0) // favor face with positive distance (penetrated)
+      result = FIRST_WINS;
 
     else if (pi2->_distance >= 0.0 && pi1->_distance < 0.0)
-      result=SECOND_WINS;
+      result = SECOND_WINS;
 
-    else if (std::abs(pi1->_distance) < std::abs(pi2->_distance)) //otherwise, favor the closer face
+    else if (std::abs(pi1->_distance) < std::abs(pi2->_distance)) // otherwise, favor the closer
+                                                                  // face
     {
-      //TODO: This could cause an abrupt jump from one face to the other.  Smooth this transition
-      //Moose::out<<"Case1:  n: "<<pi1->_node->id()<<" e1: "<<pi1->_elem->id()<<" e2: "<<pi2->_elem->id()<<std::endl;
-      result=FIRST_WINS;
+      // TODO: This could cause an abrupt jump from one face to the other.  Smooth this transition
+      // Moose::out<<"Case1:  n: "<<pi1->_node->id()<<" e1: "<<pi1->_elem->id()<<" e2:
+      // "<<pi2->_elem->id()<<std::endl;
+      result = FIRST_WINS;
     }
-    else if (std::abs(pi2->_distance) < std::abs(pi1->_distance)) //otherwise, favor the closer face
+    else if (std::abs(pi2->_distance) < std::abs(pi1->_distance)) // otherwise, favor the closer
+                                                                  // face
     {
-      //TODO: This could cause an abrupt jump from one face to the other.  Smooth this transition
-      //Moose::out<<"Case2:  n: "<<pi1->_node->id()<<" e1: "<<pi1->_elem->id()<<" e2: "<<pi2->_elem->id()<<std::endl;
-      result=SECOND_WINS;
+      // TODO: This could cause an abrupt jump from one face to the other.  Smooth this transition
+      // Moose::out<<"Case2:  n: "<<pi1->_node->id()<<" e1: "<<pi1->_elem->id()<<" e2:
+      // "<<pi2->_elem->id()<<std::endl;
+      result = SECOND_WINS;
     }
-    else //completely equal.  Favor the one with a smaller element id (for repeatibility)
+    else // completely equal.  Favor the one with a smaller element id (for repeatibility)
     {
-      //TODO: This could cause an abrupt jump from one face to the other.  Smooth this transition
-      //Moose::out<<"Case3:  n: "<<pi1->_node->id()<<" e1: "<<pi1->_elem->id()<<" e2: "<<pi2->_elem->id()<<std::endl;
-      if (pi1->_elem->id()<pi2->_elem->id())
-        result=FIRST_WINS;
+      // TODO: This could cause an abrupt jump from one face to the other.  Smooth this transition
+      // Moose::out<<"Case3:  n: "<<pi1->_node->id()<<" e1: "<<pi1->_elem->id()<<" e2:
+      // "<<pi2->_elem->id()<<std::endl;
+      if (pi1->_elem->id() < pi2->_elem->id())
+        result = FIRST_WINS;
 
       else
-        result=SECOND_WINS;
+        result = SECOND_WINS;
     }
   }
   else if (pi1->_tangential_distance <= _tangential_tolerance &&
-           pi2->_tangential_distance <= _tangential_tolerance) //off but within tol of both faces
+           pi2->_tangential_distance <= _tangential_tolerance) // off but within tol of both faces
   {
-    CommonEdgeResult cer=interactionsOffCommonEdge(pi1,pi2);
-    if (cer == COMMON_EDGE || cer == COMMON_NODE) //ridge case.
+    CommonEdgeResult cer = interactionsOffCommonEdge(pi1, pi2);
+    if (cer == COMMON_EDGE || cer == COMMON_NODE) // ridge case.
     {
-      //We already checked for ridges, and it got rejected, so neither face must be valid
-      result=NEITHER_WINS;
-//      mooseError("Erroneously encountered ridge case");
+      // We already checked for ridges, and it got rejected, so neither face must be valid
+      result = NEITHER_WINS;
+      //      mooseError("Erroneously encountered ridge case");
     }
-    else if (cer == EDGE_AND_COMMON_NODE) //off side of face, off corner of another face.  Favor the off-side face
+    else if (cer == EDGE_AND_COMMON_NODE) // off side of face, off corner of another face.  Favor
+                                          // the off-side face
     {
       if (pi1->_off_edge_nodes.size() == pi2->_off_edge_nodes.size())
         mooseError("Invalid off_edge_nodes counts");
 
-      else if (pi1->_off_edge_nodes.size()==2)
-        result=FIRST_WINS;
+      else if (pi1->_off_edge_nodes.size() == 2)
+        result = FIRST_WINS;
 
-      else if (pi2->_off_edge_nodes.size()==2)
-        result=SECOND_WINS;
+      else if (pi2->_off_edge_nodes.size() == 2)
+        result = SECOND_WINS;
 
       else
         mooseError("Invalid off_edge_nodes counts");
     }
-    else //Use the same logic as in the on-face condition (above).  A little copy-paste can't hurt...
+    else // Use the same logic as in the on-face condition (above).  A little copy-paste can't
+         // hurt...
     {
-      if (pi1->_distance >= 0.0 && pi2->_distance < 0.0)  //favor face with positive distance (penetrated)
-        result=FIRST_WINS;
+      if (pi1->_distance >= 0.0 &&
+          pi2->_distance < 0.0) // favor face with positive distance (penetrated)
+        result = FIRST_WINS;
 
       else if (pi2->_distance >= 0.0 && pi1->_distance < 0.0)
-        result=SECOND_WINS;
+        result = SECOND_WINS;
 
-      else if (std::abs(pi1->_distance) < std::abs(pi2->_distance)) //otherwise, favor the closer face
-        result=FIRST_WINS;
+      else if (std::abs(pi1->_distance) <
+               std::abs(pi2->_distance)) // otherwise, favor the closer face
+        result = FIRST_WINS;
 
-      else if (std::abs(pi2->_distance) < std::abs(pi1->_distance)) //otherwise, favor the closer face
-        result=SECOND_WINS;
+      else if (std::abs(pi2->_distance) <
+               std::abs(pi1->_distance)) // otherwise, favor the closer face
+        result = SECOND_WINS;
 
-      else //completely equal.  Favor the one with a smaller element id (for repeatibility)
+      else // completely equal.  Favor the one with a smaller element id (for repeatibility)
       {
-        if (pi1->_elem->id()<pi2->_elem->id())
-          result=FIRST_WINS;
+        if (pi1->_elem->id() < pi2->_elem->id())
+          result = FIRST_WINS;
 
         else
-          result=SECOND_WINS;
+          result = SECOND_WINS;
       }
     }
   }
@@ -581,54 +634,52 @@ PenetrationThread::competeInteractions(PenetrationInfo * pi1,
 }
 
 PenetrationThread::CommonEdgeResult
-PenetrationThread::interactionsOffCommonEdge(PenetrationInfo * pi1,
-                                             PenetrationInfo * pi2)
+PenetrationThread::interactionsOffCommonEdge(PenetrationInfo * pi1, PenetrationInfo * pi2)
 {
   CommonEdgeResult common_edge(NO_COMMON);
-  const std::vector<Node*> &off_edge_nodes1(pi1->_off_edge_nodes);
-  const std::vector<Node*> &off_edge_nodes2(pi2->_off_edge_nodes);
-  const unsigned dim1(pi1->_side->dim());
-  const unsigned dim2(pi2->_side->dim());
+  const std::vector<const Node *> & off_edge_nodes1 = pi1->_off_edge_nodes;
+  const std::vector<const Node *> & off_edge_nodes2 = pi2->_off_edge_nodes;
+  const unsigned dim1 = pi1->_side->dim();
 
   if (dim1 == 1)
   {
-    mooseAssert(dim2==1,"Incompatible dimensionalities");
-    mooseAssert(off_edge_nodes1.size()<2 && off_edge_nodes2.size()<2,"off_edge_nodes size should be <2 for 2D contact");
-    if (off_edge_nodes1.size()==1 && off_edge_nodes2.size()==1 && off_edge_nodes1[0]==off_edge_nodes2[0])
+    mooseAssert(pi2->_side->dim() == 1, "Incompatible dimensions.");
+    mooseAssert(off_edge_nodes1.size() < 2 && off_edge_nodes2.size() < 2,
+                "off_edge_nodes size should be <2 for 2D contact");
+    if (off_edge_nodes1.size() == 1 && off_edge_nodes2.size() == 1 &&
+        off_edge_nodes1[0] == off_edge_nodes2[0])
       common_edge = COMMON_EDGE;
   }
   else
   {
-    mooseAssert(dim1==2 && dim2==2,"Incompatible dimensionalities");
-    mooseAssert(off_edge_nodes1.size()<3 && off_edge_nodes2.size()<3,"off_edge_nodes size should be <3 for 3D contact");
-    if (off_edge_nodes1.size()==1)
+    mooseAssert(dim1 == 2 && pi2->_side->dim() == 2, "Incompatible dimensions.");
+    mooseAssert(off_edge_nodes1.size() < 3 && off_edge_nodes2.size() < 3,
+                "off_edge_nodes size should be <3 for 3D contact");
+    if (off_edge_nodes1.size() == 1)
     {
-      if (off_edge_nodes2.size()==1)
+      if (off_edge_nodes2.size() == 1)
       {
         if (off_edge_nodes1[0] == off_edge_nodes2[0])
           common_edge = COMMON_NODE;
       }
-      else if (off_edge_nodes2.size()==2)
+      else if (off_edge_nodes2.size() == 2)
       {
-        if (off_edge_nodes1[0] == off_edge_nodes2[0] ||
-            off_edge_nodes1[0] == off_edge_nodes2[1])
+        if (off_edge_nodes1[0] == off_edge_nodes2[0] || off_edge_nodes1[0] == off_edge_nodes2[1])
           common_edge = EDGE_AND_COMMON_NODE;
       }
     }
-    else if (off_edge_nodes1.size()==2)
+    else if (off_edge_nodes1.size() == 2)
     {
-      if (off_edge_nodes2.size()==1)
+      if (off_edge_nodes2.size() == 1)
       {
-        if (off_edge_nodes1[0] == off_edge_nodes2[0] ||
-            off_edge_nodes1[1] == off_edge_nodes2[0])
+        if (off_edge_nodes1[0] == off_edge_nodes2[0] || off_edge_nodes1[1] == off_edge_nodes2[0])
           common_edge = EDGE_AND_COMMON_NODE;
       }
-      else if (off_edge_nodes2.size()==2)
+      else if (off_edge_nodes2.size() == 2)
       {
         if ((off_edge_nodes1[0] == off_edge_nodes2[0] &&
              off_edge_nodes1[1] == off_edge_nodes2[1]) ||
-            (off_edge_nodes1[1] == off_edge_nodes2[0] &&
-             off_edge_nodes1[0] == off_edge_nodes2[1]))
+            (off_edge_nodes1[1] == off_edge_nodes2[0] && off_edge_nodes1[0] == off_edge_nodes2[1]))
           common_edge = COMMON_EDGE;
       }
     }
@@ -637,67 +688,71 @@ PenetrationThread::interactionsOffCommonEdge(PenetrationInfo * pi1,
 }
 
 bool
-PenetrationThread::findRidgeContactPoint(Point &contact_point,
+PenetrationThread::findRidgeContactPoint(Point & contact_point,
                                          Real & tangential_distance,
-                                         Node* &closest_node,
-                                         unsigned int &index,
-                                         Point &contact_point_ref,
-                                         std::vector<PenetrationInfo*> &p_info,
+                                         const Node *& closest_node,
+                                         unsigned int & index,
+                                         Point & contact_point_ref,
+                                         std::vector<PenetrationInfo *> & p_info,
                                          const unsigned int index1,
                                          const unsigned int index2)
 {
   tangential_distance = 0.0;
   closest_node = NULL;
-  PenetrationInfo* pi1 = p_info[index1];
-  PenetrationInfo* pi2 = p_info[index2];
+  PenetrationInfo * pi1 = p_info[index1];
+  PenetrationInfo * pi2 = p_info[index2];
   const unsigned sidedim(pi1->_side->dim());
   mooseAssert(sidedim == pi2->_side->dim(), "Incompatible dimensionalities");
 
-  //Nodes on faces for the two interactions
-  std::vector<Node*> side1_nodes;
-  getSideCornerNodes(pi1->_side,side1_nodes);
-  std::vector<Node*> side2_nodes;
-  getSideCornerNodes(pi2->_side,side2_nodes);
+  // Nodes on faces for the two interactions
+  std::vector<const Node *> side1_nodes;
+  getSideCornerNodes(pi1->_side, side1_nodes);
+  std::vector<const Node *> side2_nodes;
+  getSideCornerNodes(pi2->_side, side2_nodes);
 
-  std::sort(side1_nodes.begin(),side1_nodes.end());
-  std::sort(side2_nodes.begin(),side2_nodes.end());
+  std::sort(side1_nodes.begin(), side1_nodes.end());
+  std::sort(side2_nodes.begin(), side2_nodes.end());
 
-  //Find nodes shared by the two faces
-  std::vector<Node*> common_nodes;
-  std::set_intersection(side1_nodes.begin(), side1_nodes.end(),
-                       side2_nodes.begin(), side2_nodes.end(),
-                       std::inserter(common_nodes, common_nodes.end()));
+  // Find nodes shared by the two faces
+  std::vector<const Node *> common_nodes;
+  std::set_intersection(side1_nodes.begin(),
+                        side1_nodes.end(),
+                        side2_nodes.begin(),
+                        side2_nodes.end(),
+                        std::inserter(common_nodes, common_nodes.end()));
 
   if (common_nodes.size() != sidedim)
     return false;
 
   bool found_point1, found_point2;
   Point closest_coor_ref1(pi1->_closest_point_ref);
-  Node* closest_node1;
-  found_point1 = restrictPointToSpecifiedEdgeOfFace(closest_coor_ref1,closest_node1,pi1->_side,common_nodes);
+  const Node * closest_node1;
+  found_point1 = restrictPointToSpecifiedEdgeOfFace(
+      closest_coor_ref1, closest_node1, pi1->_side, common_nodes);
 
   Point closest_coor_ref2(pi2->_closest_point_ref);
-  Node* closest_node2;
-  found_point2 = restrictPointToSpecifiedEdgeOfFace(closest_coor_ref2,closest_node2,pi2->_side,common_nodes);
+  const Node * closest_node2;
+  found_point2 = restrictPointToSpecifiedEdgeOfFace(
+      closest_coor_ref2, closest_node2, pi2->_side, common_nodes);
 
   if (!found_point1 || !found_point2)
     return false;
 
-//  if (sidedim == 2)
-//  {
-    //TODO:
-    //We have the parametric coordinates of the closest intersection point for both faces.
-    //We need to find a point somewhere in the middle of them so there's not an abrupt jump.
-    //Find that point by taking dot products of vector from contact point to slave node point
-    //with face normal vectors to see which face we're closer to.
-//  }
+  //  if (sidedim == 2)
+  //  {
+  // TODO:
+  // We have the parametric coordinates of the closest intersection point for both faces.
+  // We need to find a point somewhere in the middle of them so there's not an abrupt jump.
+  // Find that point by taking dot products of vector from contact point to slave node point
+  // with face normal vectors to see which face we're closer to.
+  //  }
 
   FEBase * fe = NULL;
   std::vector<Point> points(1);
 
-  //We have to pick one of the two faces to own the contact point.  It doesn't really matter
-  //which one we pick.  For repeatibility, pick the face with the lowest index.
-  if (index1<index2)
+  // We have to pick one of the two faces to own the contact point.  It doesn't really matter
+  // which one we pick.  For repeatibility, pick the face with the lowest index.
+  if (index1 < index2)
   {
     fe = _fes[_tid][pi1->_side->dim()];
     contact_point_ref = closest_coor_ref1;
@@ -718,13 +773,14 @@ PenetrationThread::findRidgeContactPoint(Point &contact_point,
 
   if (sidedim == 2)
   {
-    if (closest_node1) //point is off the ridge between the two elements
+    if (closest_node1) // point is off the ridge between the two elements
     {
-      mooseAssert((closest_node1 == closest_node2 || closest_node2 == NULL),"If off edge of ridge, closest node must be the same on both elements");
+      mooseAssert((closest_node1 == closest_node2 || closest_node2 == NULL),
+                  "If off edge of ridge, closest node must be the same on both elements");
       closest_node = closest_node1;
 
       RealGradient off_face = *closest_node1 - contact_point;
-      tangential_distance = off_face.size();
+      tangential_distance = off_face.norm();
     }
   }
 
@@ -732,14 +788,13 @@ PenetrationThread::findRidgeContactPoint(Point &contact_point,
 }
 
 void
-PenetrationThread::getSideCornerNodes(Elem* side,
-                                      std::vector<Node*> &corner_nodes)
+PenetrationThread::getSideCornerNodes(const Elem * side, std::vector<const Node *> & corner_nodes)
 {
   const ElemType t(side->type());
   corner_nodes.clear();
 
-  corner_nodes.push_back(side->get_node(0));
-  corner_nodes.push_back(side->get_node(1));
+  corner_nodes.push_back(side->node_ptr(0));
+  corner_nodes.push_back(side->node_ptr(1));
   switch (t)
   {
     case EDGE2:
@@ -752,7 +807,7 @@ PenetrationThread::getSideCornerNodes(Elem* side,
     case TRI3:
     case TRI6:
     {
-      corner_nodes.push_back(side->get_node(2));
+      corner_nodes.push_back(side->node_ptr(2));
       break;
     }
 
@@ -760,42 +815,43 @@ PenetrationThread::getSideCornerNodes(Elem* side,
     case QUAD8:
     case QUAD9:
     {
-      corner_nodes.push_back(side->get_node(2));
-      corner_nodes.push_back(side->get_node(3));
+      corner_nodes.push_back(side->node_ptr(2));
+      corner_nodes.push_back(side->node_ptr(3));
       break;
     }
 
     default:
     {
-      mooseError("Unsupported face type: "<<t);
+      mooseError("Unsupported face type: ", t);
       break;
     }
   }
 }
 
 bool
-PenetrationThread::restrictPointToSpecifiedEdgeOfFace(Point& p,
-                                                      Node* &closest_node,
-                                                      const Elem* side,
-                                                      const std::vector<Node*> &edge_nodes)
+PenetrationThread::restrictPointToSpecifiedEdgeOfFace(Point & p,
+                                                      const Node *& closest_node,
+                                                      const Elem * side,
+                                                      const std::vector<const Node *> & edge_nodes)
 {
-  const ElemType t(side->type());
-  Real &xi   = p(0);
-  Real &eta  = p(1);
+  const ElemType t = side->type();
+  Real & xi = p(0);
+  Real & eta = p(1);
   closest_node = NULL;
 
   std::vector<unsigned int> local_node_indices;
-  for (unsigned int i(0); i<edge_nodes.size(); ++i)
+  for (const auto & edge_node : edge_nodes)
   {
-    unsigned int local_index = side->get_node_index(edge_nodes[i]);
+    unsigned int local_index = side->get_node_index(edge_node);
     if (local_index == libMesh::invalid_uint)
       mooseError("Side does not contain node");
     local_node_indices.push_back(local_index);
   }
-  mooseAssert(local_node_indices.size() == side->dim(), "Number of edge nodes must match side dimensionality");
+  mooseAssert(local_node_indices.size() == side->dim(),
+              "Number of edge nodes must match side dimensionality");
   std::sort(local_node_indices.begin(), local_node_indices.end());
 
-  bool off_of_this_edge(false);
+  bool off_of_this_edge = false;
 
   switch (t)
   {
@@ -808,8 +864,8 @@ PenetrationThread::restrictPointToSpecifiedEdgeOfFace(Point& p,
         if (xi <= -1.0)
         {
           xi = -1.0;
-          off_of_this_edge=true;
-          closest_node = side->get_node(0);
+          off_of_this_edge = true;
+          closest_node = side->node_ptr(0);
         }
       }
       else if (local_node_indices[0] == 1)
@@ -817,8 +873,8 @@ PenetrationThread::restrictPointToSpecifiedEdgeOfFace(Point& p,
         if (xi >= 1.0)
         {
           xi = 1.0;
-          off_of_this_edge=true;
-          closest_node = side->get_node(1);
+          off_of_this_edge = true;
+          closest_node = side->node_ptr(1);
         }
       }
       else
@@ -831,45 +887,42 @@ PenetrationThread::restrictPointToSpecifiedEdgeOfFace(Point& p,
     case TRI3:
     case TRI6:
     {
-      if ((local_node_indices[0] == 0) &&
-          (local_node_indices[1] == 1))
+      if ((local_node_indices[0] == 0) && (local_node_indices[1] == 1))
       {
         if (eta <= 0.0)
         {
           eta = 0.0;
-          off_of_this_edge=true;
-          if (xi<0.0)
-            closest_node = side->get_node(0);
-          else if (xi>1.0)
-            closest_node = side->get_node(1);
+          off_of_this_edge = true;
+          if (xi < 0.0)
+            closest_node = side->node_ptr(0);
+          else if (xi > 1.0)
+            closest_node = side->node_ptr(1);
         }
       }
-      else if ((local_node_indices[0] == 1) &&
-               (local_node_indices[1] == 2))
+      else if ((local_node_indices[0] == 1) && (local_node_indices[1] == 2))
       {
         if ((xi + eta) > 1.0)
         {
-          Real delta = (xi+eta-1.0)/2.0;
+          Real delta = (xi + eta - 1.0) / 2.0;
           xi -= delta;
           eta -= delta;
-          off_of_this_edge=true;
-          if (xi>1.0)
-            closest_node = side->get_node(1);
-          else if (xi<0.0)
-            closest_node = side->get_node(2);
+          off_of_this_edge = true;
+          if (xi > 1.0)
+            closest_node = side->node_ptr(1);
+          else if (xi < 0.0)
+            closest_node = side->node_ptr(2);
         }
       }
-      else if ((local_node_indices[0] == 0) &&
-               (local_node_indices[1] == 2))
+      else if ((local_node_indices[0] == 0) && (local_node_indices[1] == 2))
       {
         if (xi <= 0.0)
         {
           xi = 0.0;
-          off_of_this_edge=true;
-          if (eta>1.0)
-            closest_node = side->get_node(2);
-          else if (eta<0.0)
-            closest_node = side->get_node(0);
+          off_of_this_edge = true;
+          if (eta > 1.0)
+            closest_node = side->node_ptr(2);
+          else if (eta < 0.0)
+            closest_node = side->node_ptr(0);
         }
       }
       else
@@ -884,56 +937,52 @@ PenetrationThread::restrictPointToSpecifiedEdgeOfFace(Point& p,
     case QUAD8:
     case QUAD9:
     {
-      if ((local_node_indices[0] == 0) &&
-          (local_node_indices[1] == 1))
+      if ((local_node_indices[0] == 0) && (local_node_indices[1] == 1))
       {
         if (eta <= -1.0)
         {
           eta = -1.0;
-          off_of_this_edge=true;
-          if (xi<-1.0)
-            closest_node = side->get_node(0);
-          else if (xi>1.0)
-            closest_node = side->get_node(1);
+          off_of_this_edge = true;
+          if (xi < -1.0)
+            closest_node = side->node_ptr(0);
+          else if (xi > 1.0)
+            closest_node = side->node_ptr(1);
         }
       }
-      else if ((local_node_indices[0] == 1) &&
-               (local_node_indices[1] == 2))
+      else if ((local_node_indices[0] == 1) && (local_node_indices[1] == 2))
       {
         if (xi >= 1.0)
         {
           xi = 1.0;
-          off_of_this_edge=true;
-          if (eta<-1.0)
-            closest_node = side->get_node(1);
-          else if (eta>1.0)
-            closest_node = side->get_node(2);
+          off_of_this_edge = true;
+          if (eta < -1.0)
+            closest_node = side->node_ptr(1);
+          else if (eta > 1.0)
+            closest_node = side->node_ptr(2);
         }
       }
-      else if ((local_node_indices[0] == 2) &&
-               (local_node_indices[1] == 3))
+      else if ((local_node_indices[0] == 2) && (local_node_indices[1] == 3))
       {
         if (eta >= 1.0)
         {
           eta = 1.0;
-          off_of_this_edge=true;
-          if (xi<-1.0)
-            closest_node = side->get_node(3);
-          else if (xi>1.0)
-            closest_node = side->get_node(2);
+          off_of_this_edge = true;
+          if (xi < -1.0)
+            closest_node = side->node_ptr(3);
+          else if (xi > 1.0)
+            closest_node = side->node_ptr(2);
         }
       }
-      else if ((local_node_indices[0] == 0) &&
-               (local_node_indices[1] == 3))
+      else if ((local_node_indices[0] == 0) && (local_node_indices[1] == 3))
       {
         if (xi <= -1.0)
         {
           xi = -1.0;
-          off_of_this_edge=true;
-          if (eta<-1.0)
-            closest_node = side->get_node(0);
-          else if (eta>1.0)
-            closest_node = side->get_node(3);
+          off_of_this_edge = true;
+          if (eta < -1.0)
+            closest_node = side->node_ptr(0);
+          else if (eta > 1.0)
+            closest_node = side->node_ptr(3);
         }
       }
       else
@@ -945,7 +994,7 @@ PenetrationThread::restrictPointToSpecifiedEdgeOfFace(Point& p,
 
     default:
     {
-      mooseError("Unsupported face type: "<<t);
+      mooseError("Unsupported face type: ", t);
       break;
     }
   }
@@ -953,13 +1002,11 @@ PenetrationThread::restrictPointToSpecifiedEdgeOfFace(Point& p,
 }
 
 bool
-PenetrationThread::restrictPointToFace(Point& p,
-                                       Node* &closest_node,
-                                       const Elem* side)
+PenetrationThread::restrictPointToFace(Point & p, const Node *& closest_node, const Elem * side)
 {
   const ElemType t(side->type());
-  Real &xi   = p(0);
-  Real &eta  = p(1);
+  Real & xi = p(0);
+  Real & eta = p(1);
   closest_node = NULL;
 
   bool off_of_this_face(false);
@@ -973,14 +1020,14 @@ PenetrationThread::restrictPointToFace(Point& p,
       if (xi < -1.0)
       {
         xi = -1.0;
-        off_of_this_face=true;
-        closest_node = side->get_node(0);
+        off_of_this_face = true;
+        closest_node = side->node_ptr(0);
       }
       else if (xi > 1.0)
       {
         xi = 1.0;
-        off_of_this_face=true;
-        closest_node = side->get_node(1);
+        off_of_this_face = true;
+        closest_node = side->node_ptr(1);
       }
       break;
     }
@@ -991,30 +1038,30 @@ PenetrationThread::restrictPointToFace(Point& p,
       if (eta < 0.0)
       {
         eta = 0.0;
-        off_of_this_face=true;
+        off_of_this_face = true;
         if (xi < 0.5)
         {
-          closest_node = side->get_node(0);
-          if (xi<0.0)
+          closest_node = side->node_ptr(0);
+          if (xi < 0.0)
             xi = 0.0;
         }
         else
         {
-          closest_node = side->get_node(1);
-          if (xi>1.0)
+          closest_node = side->node_ptr(1);
+          if (xi > 1.0)
             xi = 1.0;
         }
       }
       else if ((xi + eta) > 1.0)
       {
-        Real delta = (xi+eta-1.0)/2.0;
+        Real delta = (xi + eta - 1.0) / 2.0;
         xi -= delta;
         eta -= delta;
-        off_of_this_face=true;
-        if (xi>0.5)
+        off_of_this_face = true;
+        if (xi > 0.5)
         {
-          closest_node = side->get_node(1);
-          if (xi>1.0)
+          closest_node = side->node_ptr(1);
+          if (xi > 1.0)
           {
             xi = 1.0;
             eta = 0.0;
@@ -1022,8 +1069,8 @@ PenetrationThread::restrictPointToFace(Point& p,
         }
         else
         {
-          closest_node = side->get_node(2);
-          if (xi<0.0)
+          closest_node = side->node_ptr(2);
+          if (xi < 0.0)
           {
             xi = 0.0;
             eta = 1.0;
@@ -1033,17 +1080,17 @@ PenetrationThread::restrictPointToFace(Point& p,
       else if (xi < 0.0)
       {
         xi = 0.0;
-        off_of_this_face=true;
-        if (eta>0.5)
+        off_of_this_face = true;
+        if (eta > 0.5)
         {
-          closest_node = side->get_node(2);
-          if (eta>1.0)
+          closest_node = side->node_ptr(2);
+          if (eta > 1.0)
             eta = 1.0;
         }
         else
         {
-          closest_node = side->get_node(0);
-          if (eta<0.0)
+          closest_node = side->node_ptr(0);
+          if (eta < 0.0)
             eta = 0.0;
         }
       }
@@ -1057,16 +1104,16 @@ PenetrationThread::restrictPointToFace(Point& p,
       if (eta < -1.0)
       {
         eta = -1.0;
-        off_of_this_face=true;
+        off_of_this_face = true;
         if (xi < 0.0)
         {
-          closest_node = side->get_node(0);
+          closest_node = side->node_ptr(0);
           if (xi < -1.0)
             xi = -1.0;
         }
         else
         {
-          closest_node = side->get_node(1);
+          closest_node = side->node_ptr(1);
           if (xi > 1.0)
             xi = 1.0;
         }
@@ -1074,16 +1121,16 @@ PenetrationThread::restrictPointToFace(Point& p,
       else if (xi > 1.0)
       {
         xi = 1.0;
-        off_of_this_face=true;
+        off_of_this_face = true;
         if (eta < 0.0)
         {
-          closest_node = side->get_node(1);
+          closest_node = side->node_ptr(1);
           if (eta < -1.0)
             eta = -1.0;
         }
         else
         {
-          closest_node = side->get_node(2);
+          closest_node = side->node_ptr(2);
           if (eta > 1.0)
             eta = 1.0;
         }
@@ -1091,16 +1138,16 @@ PenetrationThread::restrictPointToFace(Point& p,
       else if (eta > 1.0)
       {
         eta = 1.0;
-        off_of_this_face=true;
+        off_of_this_face = true;
         if (xi < 0.0)
         {
-          closest_node = side->get_node(3);
+          closest_node = side->node_ptr(3);
           if (xi < -1.0)
             xi = -1.0;
         }
         else
         {
-          closest_node = side->get_node(2);
+          closest_node = side->node_ptr(2);
           if (xi > 1.0)
             xi = 1.0;
         }
@@ -1108,16 +1155,16 @@ PenetrationThread::restrictPointToFace(Point& p,
       else if (xi < -1.0)
       {
         xi = -1.0;
-        off_of_this_face=true;
+        off_of_this_face = true;
         if (eta < 0.0)
         {
-          closest_node = side->get_node(0);
+          closest_node = side->node_ptr(0);
           if (eta < -1.0)
             eta = -1.0;
         }
         else
         {
-          closest_node = side->get_node(3);
+          closest_node = side->node_ptr(3);
           if (eta > 1.0)
             eta = 1.0;
         }
@@ -1127,7 +1174,7 @@ PenetrationThread::restrictPointToFace(Point& p,
 
     default:
     {
-      mooseError("Unsupported face type: "<<t);
+      mooseError("Unsupported face type: ", t);
       break;
     }
   }
@@ -1150,43 +1197,43 @@ PenetrationThread::isFaceReasonableCandidate(const Elem * master_elem,
 
   Point ref_point;
 
-  std::vector<Point> points(1); //Default constructor gives us a point at 0,0,0
+  std::vector<Point> points(1); // Default constructor gives us a point at 0,0,0
 
   fe->reinit(side, &points);
 
   RealGradient d = *slave_point - phys_point[0];
 
-  const Real twosqrt2 = 2.8284; //way more precision than we actually need here
-  Real max_face_length = side->hmax() + twosqrt2*tangential_tolerance;
+  const Real twosqrt2 = 2.8284; // way more precision than we actually need here
+  Real max_face_length = side->hmax() + twosqrt2 * tangential_tolerance;
 
   RealVectorValue normal;
-  if (dim-1 == 2)
+  if (dim - 1 == 2)
   {
     normal = dxyz_dxi[0].cross(dxyz_deta[0]);
   }
-  else if (dim-1 == 1)
+  else if (dim - 1 == 1)
   {
-    normal = RealGradient(dxyz_dxi[0](1),-dxyz_dxi[0](0));
+    normal = RealGradient(dxyz_dxi[0](1), -dxyz_dxi[0](0));
   }
   else
   {
     return true;
   }
-  normal /= normal.size();
+  normal /= normal.norm();
 
   const Real dot(d * normal);
 
-  const RealGradient normcomp = dot*normal;
+  const RealGradient normcomp = dot * normal;
   const RealGradient tangcomp = d - normcomp;
 
-  const Real tangdist = tangcomp.size();
+  const Real tangdist = tangcomp.norm();
 
-  //Increase the size of the zone that we consider if the vector from the face
-  //to the node has a larger normal component
-  const Real faceExpansionFactor = 2.0 * (1.0 + normcomp.size()/d.size());
+  // Increase the size of the zone that we consider if the vector from the face
+  // to the node has a larger normal component
+  const Real faceExpansionFactor = 2.0 * (1.0 + normcomp.norm() / d.norm());
 
   bool isReasonableCandidate = true;
-  if (tangdist > faceExpansionFactor*max_face_length)
+  if (tangdist > faceExpansionFactor * max_face_length)
   {
     isReasonableCandidate = false;
   }
@@ -1200,105 +1247,104 @@ PenetrationThread::computeSlip(FEBase & fe, PenetrationInfo & info)
   //   original projected position of slave node
   std::vector<Point> points(1);
   points[0] = info._starting_closest_point_ref;
-  UniquePtr<Elem> side = info._starting_elem->build_side(info._starting_side_num, false);
+  std::unique_ptr<const Elem> side =
+      info._starting_elem->build_side_ptr(info._starting_side_num, false);
   fe.reinit(side.get(), &points);
   const std::vector<Point> & starting_point = fe.get_xyz();
   info._incremental_slip = info._closest_point - starting_point[0];
   if (info.isCaptured())
   {
-    info._frictional_energy = info._frictional_energy_old + info._contact_force*info._incremental_slip;
-    info._accumulated_slip = info._accumulated_slip_old + info._incremental_slip.size();
+    info._frictional_energy =
+        info._frictional_energy_old + info._contact_force * info._incremental_slip;
+    info._accumulated_slip = info._accumulated_slip_old + info._incremental_slip.norm();
   }
 }
 
 void
-PenetrationThread::smoothNormal(PenetrationInfo* info,
-                                std::vector<PenetrationInfo*> & p_info)
+PenetrationThread::smoothNormal(PenetrationInfo * info, std::vector<PenetrationInfo *> & p_info)
 {
   if (_do_normal_smoothing)
   {
     if (_normal_smoothing_method == PenetrationLocator::NSM_EDGE_BASED)
     {
-      //If we are within the smoothing distance of any edges or corners, find the
-      //corner nodes for those edges/corners, and weights from distance to edge/corner
+      // If we are within the smoothing distance of any edges or corners, find the
+      // corner nodes for those edges/corners, and weights from distance to edge/corner
       std::vector<Real> edge_face_weights;
-      std::vector<PenetrationInfo*> edge_face_info;
+      std::vector<PenetrationInfo *> edge_face_info;
 
       getSmoothingFacesAndWeights(info, edge_face_info, edge_face_weights, p_info);
 
-      mooseAssert(edge_face_info.size() == edge_face_weights.size(),"edge_face_info.size() != edge_face_weights.size()");
+      mooseAssert(edge_face_info.size() == edge_face_weights.size(),
+                  "edge_face_info.size() != edge_face_weights.size()");
 
       if (edge_face_info.size() > 0)
       {
-        //Smooth the normal using the weighting functions for all participating faces.
+        // Smooth the normal using the weighting functions for all participating faces.
         RealVectorValue new_normal;
         Real this_face_weight = 1.0;
 
-        for (unsigned int efwi = 0; efwi<edge_face_weights.size(); ++efwi)
+        for (unsigned int efwi = 0; efwi < edge_face_weights.size(); ++efwi)
         {
-          PenetrationInfo *npi = edge_face_info[efwi];
+          PenetrationInfo * npi = edge_face_info[efwi];
           if (npi)
-          {
             new_normal += npi->_normal * edge_face_weights[efwi];
-          }
+
           this_face_weight -= edge_face_weights[efwi];
         }
-        mooseAssert(this_face_weight >= (0.25-1e-8),"Sum of weights of other faces shouldn't exceed 0.75");
+        mooseAssert(this_face_weight >= (0.25 - 1e-8),
+                    "Sum of weights of other faces shouldn't exceed 0.75");
         new_normal += info->_normal * this_face_weight;
 
-        const Real len(new_normal.size());
+        const Real len = new_normal.norm();
         if (len > 0)
-        {
           new_normal /= len;
-        }
 
         info->_normal = new_normal;
       }
     }
     else if (_normal_smoothing_method == PenetrationLocator::NSM_NODAL_NORMAL_BASED)
     {
-      //params.addParam<VariableName>("var_name","description");
-      //getParam<VariableName>("var_name")
-      info->_normal(0) = _nodal_normal_x->getValue(info->_side,info->_side_phi);
-      info->_normal(1) = _nodal_normal_y->getValue(info->_side,info->_side_phi);
-      info->_normal(2) = _nodal_normal_z->getValue(info->_side,info->_side_phi);
-      const Real len(info->_normal.size());
+      // params.addParam<VariableName>("var_name","description");
+      // getParam<VariableName>("var_name")
+      info->_normal(0) = _nodal_normal_x->getValue(info->_side, info->_side_phi);
+      info->_normal(1) = _nodal_normal_y->getValue(info->_side, info->_side_phi);
+      info->_normal(2) = _nodal_normal_z->getValue(info->_side, info->_side_phi);
+      const Real len(info->_normal.norm());
       if (len > 0)
-      {
         info->_normal /= len;
-      }
     }
   }
 }
 
 void
-PenetrationThread::getSmoothingFacesAndWeights(PenetrationInfo* info,
-                                               std::vector<PenetrationInfo*> &edge_face_info,
-                                               std::vector<Real> &edge_face_weights,
-                                               std::vector<PenetrationInfo*> & p_info)
+PenetrationThread::getSmoothingFacesAndWeights(PenetrationInfo * info,
+                                               std::vector<PenetrationInfo *> & edge_face_info,
+                                               std::vector<Real> & edge_face_weights,
+                                               std::vector<PenetrationInfo *> & p_info)
 {
-  const Elem* side = info->_side;
-  const Point& p=info->_closest_point_ref;
+  const Elem * side = info->_side;
+  const Point & p = info->_closest_point_ref;
   std::set<dof_id_type> elems_to_exclude;
   elems_to_exclude.insert(info->_elem->id());
-  const Node* slave_node = info->_node;
+  const Node * slave_node = info->_node;
 
-  std::vector<std::vector<const Node*> > edge_nodes;
+  std::vector<std::vector<const Node *>> edge_nodes;
 
-  //Get the pairs of nodes along every edge that we are close enough to smooth with
+  // Get the pairs of nodes along every edge that we are close enough to smooth with
   getSmoothingEdgeNodesAndWeights(p, side, edge_nodes, edge_face_weights);
-  std::vector<Elem*> edge_neighbor_elems;
-  edge_face_info.resize(edge_nodes.size(),NULL);
+  std::vector<Elem *> edge_neighbor_elems;
+  edge_face_info.resize(edge_nodes.size(), NULL);
 
   std::vector<unsigned int> edges_without_neighbors;
 
-  for (unsigned int i=0; i<edge_nodes.size(); ++i)
+  for (unsigned int i = 0; i < edge_nodes.size(); ++i)
   {
-    //Sort all sets of edge nodes (needed for comparing edges)
-    std::sort(edge_nodes[i].begin(),edge_nodes[i].end());
+    // Sort all sets of edge nodes (needed for comparing edges)
+    std::sort(edge_nodes[i].begin(), edge_nodes[i].end());
 
-    std::vector<PenetrationInfo*> face_info_comm_edge;
-    getInfoForFacesWithCommonNodes(slave_node, elems_to_exclude, edge_nodes[i], face_info_comm_edge, p_info);
+    std::vector<PenetrationInfo *> face_info_comm_edge;
+    getInfoForFacesWithCommonNodes(
+        slave_node, elems_to_exclude, edge_nodes[i], face_info_comm_edge, p_info);
 
     if (face_info_comm_edge.size() == 0)
       edges_without_neighbors.push_back(i);
@@ -1308,38 +1354,39 @@ PenetrationThread::getSmoothingFacesAndWeights(PenetrationInfo* info,
       edge_face_info[i] = face_info_comm_edge[0];
   }
 
-  //Remove edges without neighbors from the vector, starting from end
+  // Remove edges without neighbors from the vector, starting from end
   std::vector<unsigned int>::reverse_iterator rit;
   for (rit = edges_without_neighbors.rbegin(); rit != edges_without_neighbors.rend(); ++rit)
   {
     unsigned int index = *rit;
-    edge_nodes.erase(edge_nodes.begin()+index);
-    edge_face_weights.erase(edge_face_weights.begin()+index);
-    edge_face_info.erase(edge_face_info.begin()+index);
+    edge_nodes.erase(edge_nodes.begin() + index);
+    edge_face_weights.erase(edge_face_weights.begin() + index);
+    edge_face_info.erase(edge_face_info.begin() + index);
   }
 
-  //Handle corner case
+  // Handle corner case
   if (edge_nodes.size() > 1)
   {
     if (edge_nodes.size() != 2)
       mooseError("Invalid number of smoothing edges");
 
-    //find common node
-    std::vector<const Node*> common_nodes;
-    std::set_intersection(edge_nodes[0].begin(), edge_nodes[0].end(),
-                          edge_nodes[1].begin(), edge_nodes[1].end(),
+    // find common node
+    std::vector<const Node *> common_nodes;
+    std::set_intersection(edge_nodes[0].begin(),
+                          edge_nodes[0].end(),
+                          edge_nodes[1].begin(),
+                          edge_nodes[1].end(),
                           std::inserter(common_nodes, common_nodes.end()));
 
     if (common_nodes.size() != 1)
       mooseError("Invalid number of common nodes");
 
-    for (unsigned int i=0; i<edge_face_info.size(); ++i)
-    {
-      elems_to_exclude.insert(edge_face_info[i]->_elem->id());
-    }
+    for (const auto & pinfo : edge_face_info)
+      elems_to_exclude.insert(pinfo->_elem->id());
 
-    std::vector<PenetrationInfo*> face_info_comm_edge;
-    getInfoForFacesWithCommonNodes(slave_node, elems_to_exclude, common_nodes, face_info_comm_edge, p_info);
+    std::vector<PenetrationInfo *> face_info_comm_edge;
+    getInfoForFacesWithCommonNodes(
+        slave_node, elems_to_exclude, common_nodes, face_info_comm_edge, p_info);
 
     unsigned int num_corner_neighbors = face_info_comm_edge.size();
 
@@ -1348,14 +1395,14 @@ PenetrationThread::getSmoothingFacesAndWeights(PenetrationInfo* info,
       Real fw0 = edge_face_weights[0];
       Real fw1 = edge_face_weights[1];
 
-      //Corner weight is product of edge weights.  Spread out over multiple neighbors.
+      // Corner weight is product of edge weights.  Spread out over multiple neighbors.
       Real fw_corner = (fw0 * fw1) / static_cast<Real>(num_corner_neighbors);
 
-      //Adjust original edge weights
+      // Adjust original edge weights
       edge_face_weights[0] *= (1.0 - fw1);
       edge_face_weights[1] *= (1.0 - fw0);
 
-      for (unsigned int i=0; i<num_corner_neighbors; ++i)
+      for (unsigned int i = 0; i < num_corner_neighbors; ++i)
       {
         edge_face_weights.push_back(fw_corner);
         edge_face_info.push_back(face_info_comm_edge[i]);
@@ -1365,14 +1412,15 @@ PenetrationThread::getSmoothingFacesAndWeights(PenetrationInfo* info,
 }
 
 void
-PenetrationThread::getSmoothingEdgeNodesAndWeights(const Point& p,
-                                                   const Elem* side,
-                                                   std::vector<std::vector<const Node*> > &edge_nodes,
-                                                   std::vector<Real> &edge_face_weights)
+PenetrationThread::getSmoothingEdgeNodesAndWeights(
+    const Point & p,
+    const Elem * side,
+    std::vector<std::vector<const Node *>> & edge_nodes,
+    std::vector<Real> & edge_face_weights)
 {
   const ElemType t(side->type());
-  const Real &xi   = p(0);
-  const Real &eta  = p(1);
+  const Real & xi = p(0);
+  const Real & eta = p(1);
 
   Real smooth_limit = 1.0 - _normal_smoothing_distance;
 
@@ -1384,20 +1432,20 @@ PenetrationThread::getSmoothingEdgeNodesAndWeights(const Point& p,
     {
       if (xi < -smooth_limit)
       {
-        std::vector<const Node*> en;
-        en.push_back(side->get_node(0));
+        std::vector<const Node *> en;
+        en.push_back(side->node_ptr(0));
         edge_nodes.push_back(en);
-        Real fw = 0.5 - (1.0 + xi)/(2.0 * _normal_smoothing_distance);
+        Real fw = 0.5 - (1.0 + xi) / (2.0 * _normal_smoothing_distance);
         if (fw > 0.5)
           fw = 0.5;
         edge_face_weights.push_back(fw);
       }
       else if (xi > smooth_limit)
       {
-        std::vector<const Node*> en;
-        en.push_back(side->get_node(1));
+        std::vector<const Node *> en;
+        en.push_back(side->node_ptr(1));
         edge_nodes.push_back(en);
-        Real fw = 0.5 - (1.0 - xi)/(2.0 * _normal_smoothing_distance);
+        Real fw = 0.5 - (1.0 - xi) / (2.0 * _normal_smoothing_distance);
         if (fw > 0.5)
           fw = 0.5;
         edge_face_weights.push_back(fw);
@@ -1410,33 +1458,33 @@ PenetrationThread::getSmoothingEdgeNodesAndWeights(const Point& p,
     {
       if (eta < -smooth_limit)
       {
-        std::vector<const Node*> en;
-        en.push_back(side->get_node(0));
-        en.push_back(side->get_node(1));
+        std::vector<const Node *> en;
+        en.push_back(side->node_ptr(0));
+        en.push_back(side->node_ptr(1));
         edge_nodes.push_back(en);
-        Real fw = 0.5 - (1.0 + eta)/(2.0 * _normal_smoothing_distance);
+        Real fw = 0.5 - (1.0 + eta) / (2.0 * _normal_smoothing_distance);
         if (fw > 0.5)
           fw = 0.5;
         edge_face_weights.push_back(fw);
       }
-      if ((xi+eta) > smooth_limit)
+      if ((xi + eta) > smooth_limit)
       {
-        std::vector<const Node*> en;
-        en.push_back(side->get_node(1));
-        en.push_back(side->get_node(2));
+        std::vector<const Node *> en;
+        en.push_back(side->node_ptr(1));
+        en.push_back(side->node_ptr(2));
         edge_nodes.push_back(en);
-        Real fw = 0.5 - (1.0 - xi - eta)/(2.0 * _normal_smoothing_distance);
+        Real fw = 0.5 - (1.0 - xi - eta) / (2.0 * _normal_smoothing_distance);
         if (fw > 0.5)
           fw = 0.5;
         edge_face_weights.push_back(fw);
       }
       if (xi < -smooth_limit)
       {
-        std::vector<const Node*> en;
-        en.push_back(side->get_node(2));
-        en.push_back(side->get_node(0));
+        std::vector<const Node *> en;
+        en.push_back(side->node_ptr(2));
+        en.push_back(side->node_ptr(0));
         edge_nodes.push_back(en);
-        Real fw = 0.5 - (1.0 + xi)/(2.0 * _normal_smoothing_distance);
+        Real fw = 0.5 - (1.0 + xi) / (2.0 * _normal_smoothing_distance);
         if (fw > 0.5)
           fw = 0.5;
         edge_face_weights.push_back(fw);
@@ -1450,44 +1498,44 @@ PenetrationThread::getSmoothingEdgeNodesAndWeights(const Point& p,
     {
       if (eta < -smooth_limit)
       {
-        std::vector<const Node*> en;
-        en.push_back(side->get_node(0));
-        en.push_back(side->get_node(1));
+        std::vector<const Node *> en;
+        en.push_back(side->node_ptr(0));
+        en.push_back(side->node_ptr(1));
         edge_nodes.push_back(en);
-        Real fw = 0.5 - (1.0 + eta)/(2.0 * _normal_smoothing_distance);
+        Real fw = 0.5 - (1.0 + eta) / (2.0 * _normal_smoothing_distance);
         if (fw > 0.5)
           fw = 0.5;
         edge_face_weights.push_back(fw);
       }
       if (xi > smooth_limit)
       {
-        std::vector<const Node*> en;
-        en.push_back(side->get_node(1));
-        en.push_back(side->get_node(2));
+        std::vector<const Node *> en;
+        en.push_back(side->node_ptr(1));
+        en.push_back(side->node_ptr(2));
         edge_nodes.push_back(en);
-        Real fw = 0.5 - (1.0 - xi)/(2.0 * _normal_smoothing_distance);
+        Real fw = 0.5 - (1.0 - xi) / (2.0 * _normal_smoothing_distance);
         if (fw > 0.5)
           fw = 0.5;
         edge_face_weights.push_back(fw);
       }
       if (eta > smooth_limit)
       {
-        std::vector<const Node*> en;
-        en.push_back(side->get_node(2));
-        en.push_back(side->get_node(3));
+        std::vector<const Node *> en;
+        en.push_back(side->node_ptr(2));
+        en.push_back(side->node_ptr(3));
         edge_nodes.push_back(en);
-        Real fw = 0.5 - (1.0 - eta)/(2.0 * _normal_smoothing_distance);
+        Real fw = 0.5 - (1.0 - eta) / (2.0 * _normal_smoothing_distance);
         if (fw > 0.5)
           fw = 0.5;
         edge_face_weights.push_back(fw);
       }
       if (xi < -smooth_limit)
       {
-        std::vector<const Node*> en;
-        en.push_back(side->get_node(3));
-        en.push_back(side->get_node(0));
+        std::vector<const Node *> en;
+        en.push_back(side->node_ptr(3));
+        en.push_back(side->node_ptr(0));
         edge_nodes.push_back(en);
-        Real fw = 0.5 - (1.0 + xi)/(2.0 * _normal_smoothing_distance);
+        Real fw = 0.5 - (1.0 + xi) / (2.0 * _normal_smoothing_distance);
         if (fw > 0.5)
           fw = 0.5;
         edge_face_weights.push_back(fw);
@@ -1497,47 +1545,50 @@ PenetrationThread::getSmoothingEdgeNodesAndWeights(const Point& p,
 
     default:
     {
-      mooseError("Unsupported face type: "<<t);
+      mooseError("Unsupported face type: ", t);
       break;
     }
   }
 }
 
 void
-PenetrationThread::getInfoForFacesWithCommonNodes(const Node *slave_node,
-                                                  const std::set<dof_id_type> &elems_to_exclude,
-                                                  const std::vector<const Node*> edge_nodes,
-                                                  std::vector<PenetrationInfo*> &face_info_comm_edge,
-                                                  std::vector<PenetrationInfo*> & p_info)
+PenetrationThread::getInfoForFacesWithCommonNodes(
+    const Node * slave_node,
+    const std::set<dof_id_type> & elems_to_exclude,
+    const std::vector<const Node *> edge_nodes,
+    std::vector<PenetrationInfo *> & face_info_comm_edge,
+    std::vector<PenetrationInfo *> & p_info)
 {
-  //elems connected to a node on this edge, find one that has the same corners as this, and is not the current elem
-  std::vector<dof_id_type> & elems_connected_to_node = _node_to_elem_map[edge_nodes[0]->id()]; //just need one of the nodes
+  // elems connected to a node on this edge, find one that has the same corners as this, and is not
+  // the current elem
+  auto node_to_elem_pair = _node_to_elem_map.find(edge_nodes[0]->id()); // just need one of the
+                                                                        // nodes
+  mooseAssert(node_to_elem_pair != _node_to_elem_map.end(), "Missing entry in node to elem map");
+  const std::vector<dof_id_type> & elems_connected_to_node = node_to_elem_pair->second;
 
-  std::vector<const Elem*> elems_connected_to_edge;
+  std::vector<const Elem *> elems_connected_to_edge;
 
-  for (unsigned int ecni=0; ecni<elems_connected_to_node.size(); ecni++)
+  for (unsigned int ecni = 0; ecni < elems_connected_to_node.size(); ecni++)
   {
     if (elems_to_exclude.find(elems_connected_to_node[ecni]) != elems_to_exclude.end())
       continue;
-    const Elem * elem = _mesh.elem(elems_connected_to_node[ecni]);
+    const Elem * elem = _mesh.elemPtr(elems_connected_to_node[ecni]);
 
-    std::vector<const Node*> nodevec;
-    for (unsigned int ni=0; ni<elem->n_nodes(); ++ni)
-    {
+    std::vector<const Node *> nodevec;
+    for (unsigned int ni = 0; ni < elem->n_nodes(); ++ni)
       if (elem->is_vertex(ni))
-      {
-        nodevec.push_back(elem->get_node(ni));
-      }
-    }
-    std::vector<const Node*> common_nodes;
-    std::sort(nodevec.begin(),nodevec.end());
-    std::set_intersection(edge_nodes.begin(), edge_nodes.end(),
-                          nodevec.begin(), nodevec.end(),
+        nodevec.push_back(elem->node_ptr(ni));
+
+    std::vector<const Node *> common_nodes;
+    std::sort(nodevec.begin(), nodevec.end());
+    std::set_intersection(edge_nodes.begin(),
+                          edge_nodes.end(),
+                          nodevec.begin(),
+                          nodevec.end(),
                           std::inserter(common_nodes, common_nodes.end()));
+
     if (common_nodes.size() == edge_nodes.size())
-    {
       elems_connected_to_edge.push_back(elem);
-    }
   }
 
   if (elems_connected_to_edge.size() > 0)
@@ -1548,7 +1599,8 @@ PenetrationThread::getInfoForFacesWithCommonNodes(const Node *slave_node,
     // There can only be one element on the same surface
     // 3D:
     // If there are two edge nodes, there can only be one element on the same surface
-    // If there is only one edge node (a corner), there could be multiple elements on the same surface
+    // If there is only one edge node (a corner), there could be multiple elements on the same
+    // surface
     bool allowMultipleNeighbors = false;
 
     if (elems_connected_to_edge[0]->dim() == 3)
@@ -1559,102 +1611,97 @@ PenetrationThread::getInfoForFacesWithCommonNodes(const Node *slave_node,
       }
     }
 
-    for (unsigned int i=0; i<elems_connected_to_edge.size(); ++i)
+    for (unsigned int i = 0; i < elems_connected_to_edge.size(); ++i)
     {
-      std::vector<PenetrationInfo*> thisElemInfo;
+      std::vector<PenetrationInfo *> thisElemInfo;
       getInfoForElem(thisElemInfo, p_info, elems_connected_to_edge[i]);
       if (thisElemInfo.size() > 0 && !allowMultipleNeighbors)
       {
         if (thisElemInfo.size() > 1)
-        {
-          mooseError("Found multiple neighbors to current edge/face on surface when only one is allowed");
-        }
+          mooseError(
+              "Found multiple neighbors to current edge/face on surface when only one is allowed");
         face_info_comm_edge.push_back(thisElemInfo[0]);
         break;
       }
+
       createInfoForElem(thisElemInfo, p_info, slave_node, elems_connected_to_edge[i], edge_nodes);
       if (thisElemInfo.size() > 0 && !allowMultipleNeighbors)
       {
         if (thisElemInfo.size() > 1)
-        {
-          mooseError("Found multiple neighbors to current edge/face on surface when only one is allowed");
-        }
+          mooseError(
+              "Found multiple neighbors to current edge/face on surface when only one is allowed");
         face_info_comm_edge.push_back(thisElemInfo[0]);
         break;
       }
-      for (unsigned int j=0; j<thisElemInfo.size(); ++j)
-      {
+
+      for (unsigned int j = 0; j < thisElemInfo.size(); ++j)
         face_info_comm_edge.push_back(thisElemInfo[j]);
-      }
     }
   }
 }
 
 void
-PenetrationThread::getInfoForElem(std::vector<PenetrationInfo*> &thisElemInfo,
-                                  std::vector<PenetrationInfo*> &p_info,
-                                  const Elem* elem)
+PenetrationThread::getInfoForElem(std::vector<PenetrationInfo *> & thisElemInfo,
+                                  std::vector<PenetrationInfo *> & p_info,
+                                  const Elem * elem)
 {
-  for (unsigned int pii=0; pii<p_info.size(); ++pii)
+  for (const auto & pi : p_info)
   {
-    if (!p_info[pii])
+    if (!pi)
       continue;
 
-    if (p_info[pii]->_elem == elem)
-    {
-      thisElemInfo.push_back(p_info[pii]);
-    }
+    if (pi->_elem == elem)
+      thisElemInfo.push_back(pi);
   }
 }
 
 void
-PenetrationThread::createInfoForElem(std::vector<PenetrationInfo*> &thisElemInfo,
-                                     std::vector<PenetrationInfo*> &p_info,
-                                     const Node* slave_node,
-                                     const Elem* elem,
-                                     const std::vector<const Node*> &nodes_that_must_be_on_side,
+PenetrationThread::createInfoForElem(std::vector<PenetrationInfo *> & thisElemInfo,
+                                     std::vector<PenetrationInfo *> & p_info,
+                                     const Node * slave_node,
+                                     const Elem * elem,
+                                     const std::vector<const Node *> & nodes_that_must_be_on_side,
                                      const bool check_whether_reasonable)
 {
   std::vector<unsigned int> sides;
-  //TODO: After libMesh update, add this line to MooseMesh.h, call sidesWithBoundaryID,  delete getSidesOnMasterBoundary, and delete vectors used by it
-  //  void sidesWithBoundaryID(std::vector<unsigned int>& sides, const Elem * const elem, const BoundaryID boundary_id) const
+  // TODO: After libMesh update, add this line to MooseMesh.h, call sidesWithBoundaryID,  delete
+  // getSidesOnMasterBoundary, and delete vectors used by it
+  //  void sidesWithBoundaryID(std::vector<unsigned int>& sides, const Elem * const elem, const
+  //  BoundaryID boundary_id) const
   // {
   //   _mesh.get_boundary_info().sides_with_boundary_id(sides, elem, boundary_id);
   // }
   getSidesOnMasterBoundary(sides, elem);
-//  _mesh.sidesWithBoundaryID(sides, elem, _master_boundary);
+  // _mesh.sidesWithBoundaryID(sides, elem, _master_boundary);
 
-  for (unsigned int i=0; i<sides.size(); ++i)
+  for (unsigned int i = 0; i < sides.size(); ++i)
   {
-    //Don't create info for this side if one already exists
+    // Don't create info for this side if one already exists
     bool already_have_info_this_side = false;
-    for (unsigned int j=0; j<thisElemInfo.size(); ++j)
-    {
-      if (thisElemInfo[j]->_side_num == sides[i])
+    for (const auto & pi : thisElemInfo)
+      if (pi->_side_num == sides[i])
       {
         already_have_info_this_side = true;
         break;
       }
-    }
+
     if (already_have_info_this_side)
-    {
       break;
-    }
 
-    Elem *side = (elem->build_side(sides[i],false)).release();
+    const Elem * side = (elem->build_side_ptr(sides[i], false)).release();
 
+    // Only continue with creating info for this side if the side contains
+    // all of the nodes in nodes_that_must_be_on_side
+    std::vector<const Node *> nodevec;
+    for (unsigned int ni = 0; ni < side->n_nodes(); ++ni)
+      nodevec.push_back(side->node_ptr(ni));
 
-    //Only continue with creating info for this side if the side contains
-    //all of the nodes in nodes_that_must_be_on_side
-    std::vector<const Node*> nodevec;
-    for (unsigned int ni=0; ni<side->n_nodes(); ++ni)
-    {
-      nodevec.push_back(side->get_node(ni));
-    }
-    std::sort(nodevec.begin(),nodevec.end());
-    std::vector<const Node*> common_nodes;
-    std::set_intersection(nodes_that_must_be_on_side.begin(), nodes_that_must_be_on_side.end(),
-                          nodevec.begin(), nodevec.end(),
+    std::sort(nodevec.begin(), nodevec.end());
+    std::vector<const Node *> common_nodes;
+    std::set_intersection(nodes_that_must_be_on_side.begin(),
+                          nodes_that_must_be_on_side.end(),
+                          nodevec.begin(),
+                          nodevec.end(),
                           std::inserter(common_nodes, common_nodes.end()));
     if (common_nodes.size() != nodes_that_must_be_on_side.size())
     {
@@ -1662,18 +1709,17 @@ PenetrationThread::createInfoForElem(std::vector<PenetrationInfo*> &thisElemInfo
       break;
     }
 
-    FEBase * fe = _fes[_tid][side->dim()];
+    FEBase * fe_elem = _fes[_tid][elem->dim()];
+    FEBase * fe_side = _fes[_tid][side->dim()];
 
-    //Optionally check to see whether face is reasonable candidate based on an
-    //estimate of how closely it is likely to project to the face
+    // Optionally check to see whether face is reasonable candidate based on an
+    // estimate of how closely it is likely to project to the face
     if (check_whether_reasonable)
-    {
-      if (!isFaceReasonableCandidate(elem, side, fe, slave_node, _tangential_tolerance))
+      if (!isFaceReasonableCandidate(elem, side, fe_side, slave_node, _tangential_tolerance))
       {
         delete side;
         break;
       }
-    }
 
     Point contact_phys;
     Point contact_ref;
@@ -1682,31 +1728,38 @@ PenetrationThread::createInfoForElem(std::vector<PenetrationInfo*> &thisElemInfo
     Real tangential_distance = 0.;
     RealGradient normal;
     bool contact_point_on_side;
-    std::vector<Node*> off_edge_nodes;
-    std::vector<std::vector<Real> > side_phi;
+    std::vector<const Node *> off_edge_nodes;
+    std::vector<std::vector<Real>> side_phi;
+    std::vector<std::vector<RealGradient>> side_grad_phi;
     std::vector<RealGradient> dxyzdxi;
     std::vector<RealGradient> dxyzdeta;
     std::vector<RealGradient> d2xyzdxideta;
 
-    PenetrationInfo * pen_info =
-      new PenetrationInfo(slave_node,
-                          elem,
-                          side,
-                          sides[i],
-                          normal,
-                          distance,
-                          tangential_distance,
-                          contact_phys,
-                          contact_ref,
-                          contact_on_face_ref,
-                          off_edge_nodes,
-                          side_phi,
-                          dxyzdxi,
-                          dxyzdeta,
-                          d2xyzdxideta);
+    PenetrationInfo * pen_info = new PenetrationInfo(slave_node,
+                                                     elem,
+                                                     side,
+                                                     sides[i],
+                                                     normal,
+                                                     distance,
+                                                     tangential_distance,
+                                                     contact_phys,
+                                                     contact_ref,
+                                                     contact_on_face_ref,
+                                                     off_edge_nodes,
+                                                     side_phi,
+                                                     side_grad_phi,
+                                                     dxyzdxi,
+                                                     dxyzdeta,
+                                                     d2xyzdxideta);
 
-    Moose::findContactPoint(*pen_info, fe, _fe_type, *slave_node,
-                            true, _tangential_tolerance, contact_point_on_side);
+    Moose::findContactPoint(*pen_info,
+                            fe_elem,
+                            fe_side,
+                            _fe_type,
+                            *slave_node,
+                            true,
+                            _tangential_tolerance,
+                            contact_point_on_side);
 
     thisElemInfo.push_back(pen_info);
 
@@ -1714,20 +1767,15 @@ PenetrationThread::createInfoForElem(std::vector<PenetrationInfo*> &thisElemInfo
   }
 }
 
-//TODO: After libMesh update, replace this with a call to sidesWithBoundaryID, delete vectors used by this method
+// TODO: After libMesh update, replace this with a call to sidesWithBoundaryID, delete vectors used
+// by this method
 void
-PenetrationThread::getSidesOnMasterBoundary(std::vector<unsigned int> &sides,
-                                            const Elem *const elem)
+PenetrationThread::getSidesOnMasterBoundary(std::vector<unsigned int> & sides,
+                                            const Elem * const elem)
 {
   sides.clear();
-  for (unsigned int m=0; m<_n_elems; ++m)
-  {
+  for (unsigned int m = 0; m < _n_elems; ++m)
     if (_elem_list[m] == elem->id())
-    {
       if (_id_list[m] == static_cast<short>(_master_boundary))
-      {
         sides.push_back(_side_list[m]);
-      }
-    }
-  }
 }

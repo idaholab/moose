@@ -5,26 +5,49 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-
-//  "Broadbridge-White" form of relative permeability (P Broadbridge and I White ``Constant rate rainfall infiltration: A versatile nonlinear model 1. Analytic Solution'', Water Resources Research 24 (1988) 145-154)
+//  "Broadbridge-White" form of relative permeability (P Broadbridge and I White ``Constant rate
+//  rainfall infiltration: A versatile nonlinear model 1. Analytic Solution'', Water Resources
+//  Research 24 (1988) 145-154)
 //
 #include "RichardsRelPermBW.h"
+#include "libmesh/utility.h"
 
-template<>
-InputParameters validParams<RichardsRelPermBW>()
+template <>
+InputParameters
+validParams<RichardsRelPermBW>()
 {
   InputParameters params = validParams<RichardsRelPerm>();
-  params.addRequiredRangeCheckedParam<Real>("Sn", "Sn >= 0", "Low saturation.  This must be < Ss, and non-negative.  This is BW's initial effective saturation, below which effective saturation never goes in their simulations/models.  If Kn=0 then Sn is the immobile saturation.");
-  params.addRangeCheckedParam<Real>("Ss", 1.0, "Ss <= 1", "High saturation.  This must be > Sn and <= 1.  Effective saturation where porepressure = 0.  Effective saturation never exceeds this value in BW's simulations/models.");
-  params.addRangeCheckedParam<Real>("Kn", 0.0, "Kn >= 0", "Relative permeability at Seff = Sn.  Must be < Ks");
-  params.addRangeCheckedParam<Real>("Ks", 1.0, "Ks <= 1", "Relative permeability at Seff = Ss.  Must be > Kn");
-  params.addRequiredRangeCheckedParam<Real>("C", "C > 1", "BW's C parameter.  Must be > 1.   Define s = (seff - Sn)/(Ss - Sn).  Then relperm = Kn + s^2(c-1)(Kn-Ks)/(c-s) if 0<s<1, otherwise relperm = Kn if s<=0, otherwise relperm = Ks if s>=1.");
-  params.addClassDescription("Broadbridge-White form of relative permeability.  Define s = (seff - Sn)/(Ss - Sn).  Then relperm = Kn + s^2(c-1)(Kn-Ks)/(c-s) if 0<s<1, otherwise relperm = Kn if s<=0, otherwise relperm = Ks if s>=1.");
+  params.addRequiredRangeCheckedParam<Real>(
+      "Sn",
+      "Sn >= 0",
+      "Low saturation.  This must be < Ss, and non-negative.  This is BW's "
+      "initial effective saturation, below which effective saturation never goes "
+      "in their simulations/models.  If Kn=0 then Sn is the immobile saturation.");
+  params.addRangeCheckedParam<Real>(
+      "Ss",
+      1.0,
+      "Ss <= 1",
+      "High saturation.  This must be > Sn and <= 1.  Effective saturation "
+      "where porepressure = 0.  Effective saturation never exceeds this "
+      "value in BW's simulations/models.");
+  params.addRangeCheckedParam<Real>(
+      "Kn", 0.0, "Kn >= 0", "Relative permeability at Seff = Sn.  Must be < Ks");
+  params.addRangeCheckedParam<Real>(
+      "Ks", 1.0, "Ks <= 1", "Relative permeability at Seff = Ss.  Must be > Kn");
+  params.addRequiredRangeCheckedParam<Real>(
+      "C",
+      "C > 1",
+      "BW's C parameter.  Must be > 1.   Define s = (seff - Sn)/(Ss - Sn).  Then "
+      "relperm = Kn + s^2(c-1)(Kn-Ks)/(c-s) if 0<s<1, otherwise relperm = Kn if "
+      "s<=0, otherwise relperm = Ks if s>=1.");
+  params.addClassDescription("Broadbridge-White form of relative permeability.  Define s = (seff - "
+                             "Sn)/(Ss - Sn).  Then relperm = Kn + s^2(c-1)(Kn-Ks)/(c-s) if 0<s<1, "
+                             "otherwise relperm = Kn if s<=0, otherwise relperm = Ks if s>=1.");
   return params;
 }
 
-RichardsRelPermBW::RichardsRelPermBW(const InputParameters & parameters) :
-    RichardsRelPerm(parameters),
+RichardsRelPermBW::RichardsRelPermBW(const InputParameters & parameters)
+  : RichardsRelPerm(parameters),
     _sn(getParam<Real>("Sn")),
     _ss(getParam<Real>("Ss")),
     _kn(getParam<Real>("Kn")),
@@ -32,12 +55,19 @@ RichardsRelPermBW::RichardsRelPermBW(const InputParameters & parameters) :
     _c(getParam<Real>("C"))
 {
   if (_ss <= _sn)
-    mooseError("In BW relative permeability Sn set to " << _sn << " and Ss set to " << _ss << " but these must obey Ss > Sn");
+    mooseError("In BW relative permeability Sn set to ",
+               _sn,
+               " and Ss set to ",
+               _ss,
+               " but these must obey Ss > Sn");
   if (_ks <= _kn)
-    mooseError("In BW relative permeability Kn set to " << _kn << " and Ks set to " << _ks << " but these must obey Ks > Kn");
-  _coef = (_ks - _kn)*(_c - 1); // shorthand coefficient
+    mooseError("In BW relative permeability Kn set to ",
+               _kn,
+               " and Ks set to ",
+               _ks,
+               " but these must obey Ks > Kn");
+  _coef = (_ks - _kn) * (_c - 1); // shorthand coefficient
 }
-
 
 Real
 RichardsRelPermBW::relperm(Real seff) const
@@ -48,12 +78,10 @@ RichardsRelPermBW::relperm(Real seff) const
   if (seff >= _ss)
     return _ks;
 
-  Real s_internal = (seff - _sn)/(_ss - _sn);
-  Real krel = _kn + _coef*std::pow(s_internal, 2)/(_c - s_internal);
-
+  const Real s_internal = (seff - _sn) / (_ss - _sn);
+  const Real krel = _kn + _coef * Utility::pow<2>(s_internal) / (_c - s_internal);
   return krel;
 }
-
 
 Real
 RichardsRelPermBW::drelperm(Real seff) const
@@ -64,11 +92,11 @@ RichardsRelPermBW::drelperm(Real seff) const
   if (seff >= _ss)
     return 0.0;
 
-  Real s_internal = (seff - _sn)/(_ss - _sn);
-  Real krelp = _coef*( 2.0*s_internal/(_c - s_internal) + std::pow(s_internal, 2)/std::pow(_c - s_internal, 2));
-  return krelp/(_ss - _sn);
+  const Real s_internal = (seff - _sn) / (_ss - _sn);
+  const Real krelp = _coef * (2.0 * s_internal / (_c - s_internal) +
+                              Utility::pow<2>(s_internal) / Utility::pow<2>(_c - s_internal));
+  return krelp / (_ss - _sn);
 }
-
 
 Real
 RichardsRelPermBW::d2relperm(Real seff) const
@@ -79,9 +107,9 @@ RichardsRelPermBW::d2relperm(Real seff) const
   if (seff >= _ss)
     return 0.0;
 
-  Real s_internal = (seff - _sn)/(_ss - _sn);
-  Real krelpp = _coef*( 2.0/(_c - s_internal) + 4.0*s_internal/std::pow(_c - s_internal, 2) + 2*std::pow(s_internal, 2)/std::pow(_c - s_internal, 3) );
-  return krelpp/std::pow(_ss - _sn, 2);
+  const Real s_internal = (seff - _sn) / (_ss - _sn);
+  const Real krelpp =
+      _coef * (2.0 / (_c - s_internal) + 4.0 * s_internal / Utility::pow<2>(_c - s_internal) +
+               2.0 * Utility::pow<2>(s_internal) / Utility::pow<3>(_c - s_internal));
+  return krelpp / Utility::pow<2>(_ss - _sn);
 }
-
-

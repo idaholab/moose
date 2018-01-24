@@ -19,16 +19,15 @@
 
 class CheckIntegrityAction;
 
-template<>
+template <>
 InputParameters validParams<CheckIntegrityAction>();
-
 
 class CheckIntegrityAction : public Action
 {
 public:
   CheckIntegrityAction(InputParameters params);
 
-  virtual void act();
+  virtual void act() override;
 };
 
 #endif // CHECKINTEGRITYACTION_H

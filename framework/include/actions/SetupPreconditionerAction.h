@@ -19,7 +19,7 @@
 
 class SetupPreconditionerAction;
 
-template<>
+template <>
 InputParameters validParams<SetupPreconditionerAction>();
 
 /**
@@ -30,7 +30,7 @@ class SetupPreconditionerAction : public MooseObjectAction
 public:
   SetupPreconditionerAction(InputParameters params);
 
-  virtual void act();
+  virtual void act() override;
 
 protected:
   static unsigned int _count;

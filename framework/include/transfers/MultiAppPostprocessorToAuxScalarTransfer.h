@@ -19,37 +19,25 @@
 #include "MultiAppTransfer.h"
 
 // Forward declerations
-class MooseVariable;
 class MultiAppPostprocessorToAuxScalarTransfer;
 
-template<>
+template <>
 InputParameters validParams<MultiAppPostprocessorToAuxScalarTransfer>();
 
 /**
  * Copies the value of a Postprocessor from one app to a scalar AuxVariable in another.
  */
-class MultiAppPostprocessorToAuxScalarTransfer :
-  public MultiAppTransfer
+class MultiAppPostprocessorToAuxScalarTransfer : public MultiAppTransfer
 {
 public:
-
-  /**
-   * Class constructor.
-   */
   MultiAppPostprocessorToAuxScalarTransfer(const InputParameters & parameters);
-
-  /**
-   * Classs destructor.
-   */
-  virtual ~MultiAppPostprocessorToAuxScalarTransfer() {}
 
   /**
    * Execute the transfer
    */
-  virtual void execute();
+  virtual void execute() override;
 
 protected:
-
   /// The name of the postprocessor that the transfer originates
   PostprocessorName _from_pp_name;
 

@@ -5,6 +5,11 @@
   ny = 1
 []
 
+[AuxVariables]
+  [./dummy]
+  [../]
+[]
+
 [Materials]
   [./provider]
     type = DerivativeMaterialInterfaceTestProvider
@@ -21,6 +26,13 @@
     prop_name = 1.0
     block = 0
     outputs = exodus
+  [../]
+
+  [./dummy]
+    type = GenericConstantMaterial
+    prop_names = prop
+    block = 0
+    prop_values = 0
   [../]
 []
 

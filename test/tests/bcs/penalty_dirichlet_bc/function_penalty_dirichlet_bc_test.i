@@ -21,6 +21,7 @@
     value = x*x+y*y
     grad_x = 2*x
     grad_y = 2*y
+  [../]
 []
 
 [Variables]
@@ -43,7 +44,7 @@
   [../]
 
   [./forcing]
-    type = UserForcingFunction
+    type = BodyForce
     variable = u
     function = forcing_fn
   [../]

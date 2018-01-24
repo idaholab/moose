@@ -1,0 +1,11 @@
+[Tests]
+  [./crack2d]
+    type = 'Exodiff'
+    input = 'crack2d.i'
+    exodiff = 'crack2d_out.e'
+    abs_zero = 1e-09
+    use_old_floor = True
+    valgrind = 'HEAVY'
+    max_time = 500
+  [../]
+[../]

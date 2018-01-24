@@ -18,10 +18,10 @@ public:
   ComputeElasticityTensor(const InputParameters & parameters);
 
 protected:
-  virtual void computeQpElasticityTensor();
+  virtual void computeQpElasticityTensor() override;
 
   /// Individual material information
-  ElasticityTensorR4 _Cijkl;
+  RankFourTensor _Cijkl;
 };
 
-#endif //COMPUTEELASTICITYTENSOR_H
+#endif // COMPUTEELASTICITYTENSOR_H

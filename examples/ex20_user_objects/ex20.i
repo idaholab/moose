@@ -48,6 +48,7 @@
     type = BlockAverageValue
     variable = u
     execute_on = timestep_begin
+    outputs = none
   [../]
 []
 

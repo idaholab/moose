@@ -1,0 +1,6 @@
+[Tests]
+  [./long_running]
+    type = RunApp
+    input = long_running.i
+  [../]
+[]

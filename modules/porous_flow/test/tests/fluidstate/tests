@@ -1,0 +1,51 @@
+[Tests]
+  [./waterncg_liquid]
+    type = 'Exodiff'
+    input = 'waterncg.i'
+    exodiff = 'waterncg_liquid.e'
+  [../]
+  [./waterncg_twophase]
+    type = 'Exodiff'
+    input = 'waterncg.i'
+    exodiff = 'waterncg_twophase.e'
+    cli_args = 'Variables/z/initial_condition=0.25 Outputs/file_base=waterncg_twophase'
+  [../]
+  [./waterncg_gas]
+    type = 'Exodiff'
+    input = 'waterncg.i'
+    exodiff = 'waterncg_gas.e'
+    cli_args = 'Variables/z/initial_condition=0.999 Outputs/file_base=waterncg_gas'
+  [../]
+  [./theis]
+    type = 'CSVDiff'
+    input = 'theis.i'
+    csvdiff = "theis_csvout.csv"
+  [../]
+  [./theis_tabulated]
+    type = 'CSVDiff'
+    input = 'theis_tabulated.i'
+    csvdiff = "theis_csvout.csv"
+    prereq = 'theis'
+  [../]
+  [./brineco2]
+    type = 'CSVDiff'
+    input = 'brineco2.i'
+    csvdiff = 'brineco2.csv'
+  [../]
+  [./theis_brineco2]
+    type = 'CSVDiff'
+    input = 'theis_brineco2.i'
+    csvdiff = "theis_brineco2_csvout.csv"
+    heavy = true
+  [../]
+  [./waterncg_ic]
+    type = 'CSVDiff'
+    input = 'waterncg_ic.i'
+    csvdiff = "waterncg_ic_out.csv"
+  [../]
+  [./brineco2_ic]
+    type = 'CSVDiff'
+    input = 'brineco2_ic.i'
+    csvdiff = "brineco2_ic_out.csv"
+  [../]
+[]

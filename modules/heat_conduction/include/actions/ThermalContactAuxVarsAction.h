@@ -13,24 +13,21 @@ class ThermalContactAuxVarsAction : public Action
 {
 public:
   ThermalContactAuxVarsAction(const InputParameters & params);
-  virtual ~ThermalContactAuxVarsAction(){}
-  virtual void act();
 
-  static std::string
-  getGapValueName(const InputParameters & param)
+  virtual void act() override;
+
+  static std::string getGapValueName(const InputParameters & param)
   {
     return "paired_" + param.get<NonlinearVariableName>("variable");
   }
 
-  static std::string
-  getGapConductivityName(const InputParameters & param)
+  static std::string getGapConductivityName(const InputParameters & param)
   {
     return "paired_k_" + param.get<NonlinearVariableName>("variable");
   }
-
 };
 
-template<>
+template <>
 InputParameters validParams<ThermalContactAuxVarsAction>();
 
 #endif

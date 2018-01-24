@@ -3,6 +3,6 @@
     type = 'CSVDiff'
     input = 'nodal_value_sampler.i'
     csvdiff = 'nodal_value_sampler_out_nodal_sample_0001.csv'
-    mesh_mode = SERIAL
+    mesh_mode = REPLICATED
   [../]
 []

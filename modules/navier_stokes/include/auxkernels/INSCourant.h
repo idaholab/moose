@@ -9,10 +9,10 @@
 
 #include "AuxKernel.h"
 
-//Forward Declarations
+// Forward Declarations
 class INSCourant;
 
-template<>
+template <>
 InputParameters validParams<INSCourant>();
 
 /**
@@ -23,15 +23,13 @@ class INSCourant : public AuxKernel
 public:
   INSCourant(const InputParameters & parameters);
 
-  virtual ~INSCourant() {}
-
 protected:
   virtual Real computeValue();
 
   // Velocity
-  VariableValue& _u_vel;
-  VariableValue& _v_vel;
-  VariableValue& _w_vel;
+  const VariableValue & _u_vel;
+  const VariableValue & _v_vel;
+  const VariableValue & _w_vel;
 };
 
-#endif //VELOCITYAUX_H
+#endif // INSCOURANT_H

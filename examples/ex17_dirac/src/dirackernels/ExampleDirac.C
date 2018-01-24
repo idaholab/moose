@@ -14,8 +14,9 @@
 
 #include "ExampleDirac.h"
 
-template<>
-InputParameters validParams<ExampleDirac>()
+template <>
+InputParameters
+validParams<ExampleDirac>()
 {
   InputParameters params = validParams<DiracKernel>();
   params.addRequiredParam<Real>("value", "The value of the point source");
@@ -23,10 +24,8 @@ InputParameters validParams<ExampleDirac>()
   return params;
 }
 
-ExampleDirac::ExampleDirac(const InputParameters & parameters) :
-    DiracKernel(parameters),
-    _value(getParam<Real>("value")),
-    _point(getParam<Point>("point"))
+ExampleDirac::ExampleDirac(const InputParameters & parameters)
+  : DiracKernel(parameters), _value(getParam<Real>("value")), _point(getParam<Point>("point"))
 {
 }
 
@@ -44,6 +43,5 @@ Real
 ExampleDirac::computeQpResidual()
 {
   // This is negative because it's a forcing function that has been brought over to the left side
-  return -_test[_i][_qp]*_value;
+  return -_test[_i][_qp] * _value;
 }
-

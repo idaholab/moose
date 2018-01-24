@@ -1,0 +1,37 @@
+[Tests]
+  [./derivative_parsed_material]
+    type = 'Exodiff'
+    input = 'derivative_parsed_material.i'
+    exodiff = 'derivative_parsed_material.e'
+  [../]
+
+  [./kks_example]
+    type = 'Exodiff'
+    input = 'kks_example.i'
+    exodiff = 'kks_example.e'
+  [../]
+
+  [./kks_example_split]
+    type = 'Exodiff'
+    input = 'kks_example_split.i'
+    exodiff = 'kks_example_split.e'
+  [../]
+
+  [./kks_example_offset]
+    type = 'Exodiff'
+    input = 'kks_example_offset.i'
+    exodiff = 'kks_example_offset.e'
+  [../]
+
+  [./kks_xevac]
+    type = 'Exodiff'
+    input = 'kks_xevac.i'
+    exodiff = 'kks_xevac.e'
+  [../]
+
+  [./kks_multiphase]
+    type = 'Exodiff'
+    input = 'kks_multiphase.i'
+    exodiff = 'kks_multiphase_out.e'
+  [../]
+[]

@@ -191,7 +191,7 @@ presence of large negative porepressures.)
 The MOOSE implementation allows users to specify arbitrary
 relationships between density and porepressure.  One common case
 for liquids is that the fluid bulk modulus is constant, which means
-that 
+that
 \begin{equation}
 \rho = \rho_{0}e^{P/K} \ .
 \end{equation}
@@ -315,7 +315,7 @@ The Broadbridge-White capillary curve valid for small $K_{n}$ has also been code
 
 The Rogers-Stallybrass-Clements capillary curve valid for zero
 residual saturations and oil viscosity double that of water viscosity
-has also been coded into MOOSE~\cite{rsc1983}. 
+has also been coded into MOOSE~\cite{rsc1983}.
 
 A ``shifted'' version of Eqn~(\ref{vg.cap.eqn}) has been coded for
 into MOOSE for 2-phase simulations.  The effective saturation for the
@@ -582,7 +582,7 @@ permeability.  Another example is in coupled problems when $\kappa$ is
 a function of time.
 
 Finally, all these piecewise-linear sink fluxes may be multiplied by a
-user-defined function: 
+user-defined function:
 \begin{equation}
 F \rightarrow F\times g(t, x, y, z) \ ,
 \end{equation}
@@ -699,12 +699,12 @@ about 5\,m, so a standard value for $\sigma$ is $\sigma = 5\times
 is 1000\,kg.m$^{-3}$ and gravity is 10\,m.s$^{-2}$.
 
 Finally, the half-Gaussian sink may be multiplied by a
-user-defined function: 
+user-defined function:
 \begin{equation}
 F \rightarrow F\times g(t, x, y, z) \ ,
 \end{equation}
 if the user desires.  This is useful, for instance, if
-evapotranspiration is a known function of space and time. 
+evapotranspiration is a known function of space and time.
 
 
 If the half-Gaussian sink is unsuitable, a piecewise-linear
@@ -810,22 +810,22 @@ P_{\mathrm{atm}}) )$.
 
 Wellbores are implemented in a similar way to
 Eqn~(\ref{source.stream.eqn}) using the method first described by
-Peaceman~\cite{peaceman1983}.  Here  
+Peaceman~\cite{peaceman1983}.  Here
 \begin{equation}
 F = \sum_{i}f(P_{i}, x_{i})\delta(x - x_{i}) \ ,
 \end{equation}
 with $P_{i}$ being the porepressure at point $i$.  Here $f$ is a
-special function (measured in kg.s$^{-1}$ in standard 
+special function (measured in kg.s$^{-1}$ in standard
 units) defined in terms of the pressure at a
 point at the wall of the wellbore (which is an input parameter: it is
-not the porepressure) 
+not the porepressure)
 \begin{equation}
 P_{\mathrm{wellbore}}(x_{i}) = P_{\mathrm{bot}} + \gamma \cdot (x_{i} -
 x_{i}^{\mathrm{bot}})
 \end{equation}
 The form of $f$ is
 \begin{equation}
-f(P_{i}, x_{i}) = 
+f(P_{i}, x_{i}) =
 W \left|C(P_{i}-P_{\mathrm{wellbore}})\right|
 \frac{\kappa_{\mathrm{rel}}\rho}{\mu}(P_{i} - P_{\mathrm{wellbore}})
 \end{equation}
@@ -854,7 +854,7 @@ There are a number of parameters in these expressions:
   acts as a source, adding fluid to the porespace.
 \end{itemize}
 \item The function $W$ is called the well-constant of the wellbore, and is
-measured in units of length$^{3}$. 
+measured in units of length$^{3}$.
 \end{itemize}
 
 Peaceman~\cite{peaceman1983} described the form of $W$ by performing
@@ -873,7 +873,7 @@ finite-difference approach, Peaceman found that
 \begin{equation}
 r_{e} = 0.28 \frac{\sqrt{\sqrt{\kappa_{xx}/\kappa_{yy}}L_{x}^{2} +
     \sqrt{\kappa_{yy}/\kappa_{xx}}L_{y}^{2}}}{(\kappa_{xx}/\kappa_{yy})^{1/4}
-  + (\kappa_{yy}/\kappa_{xx})^{1/4}} 
+  + (\kappa_{yy}/\kappa_{xx})^{1/4}}
 = 0.2 \frac{\sqrt{\mbox{$\frac{1}{2}$}\sqrt{\kappa_{xx}/\kappa_{yy}}L_{x}^{2} +
     \mbox{$\frac{1}{2}$}\sqrt{\kappa_{yy}/\kappa_{xx}}L_{y}^{2}}}{\mbox{$\frac{1}{2}$}(\kappa_{xx}/\kappa_{yy})^{1/4}
   + \mbox{$\frac{1}{2}$}(\kappa_{yy}/\kappa_{xx})^{1/4}} \ .
@@ -1314,7 +1314,7 @@ and the mobility function
 The isoparametric coordinate for the first element is $\xi =
 \frac{z-L/2}{L/2}$, which yields $b=2v/L$
 (Eqn~(\ref{eqn.b.params.supg}).  When $P_{\mathrm{SUPG}}$ is set
-small, the upwinding parameter 
+small, the upwinding parameter
 \begin{equation}
 \tau = \left|\frac{L}{2v}\right| \ .
 \end{equation}
@@ -1451,7 +1451,7 @@ think this approach was first introduced by Dalen~\cite{dalen1979} in
 The residual at the downwind nodes is determined by conserving mass.
 Specifically, let
 \begin{equation}
-I_{\mathrm{up}} = \sum_{I_{a}\geq 0}I_{a} \ \ \ \mbox{and}\ \ \ 
+I_{\mathrm{up}} = \sum_{I_{a}\geq 0}I_{a} \ \ \ \mbox{and}\ \ \
 I_{\mathrm{down}} = -\sum_{I_{a}<0} I_{a} \ .
 \end{equation}
 Then
@@ -1603,7 +1603,7 @@ Richards' equations for multi-phase flow are
 \begin{equation}
 \phi \frac{\partial}{\partial t} \left( \rho^{\gamma} S^{\gamma} \right) = \nabla_{i}
 \left( \frac{\rho^{\gamma} \kappa_{ij}\kappa^{\gamma}_{\mathrm{rel}}}{\mu^{\gamma}} (\nabla_{j}P^{\gamma} - \rho^{\gamma}
-g_{j}) \right) 
+g_{j}) \right)
 + F^{\gamma} \ ,
 \label{richards.eqn.multi}
 \end{equation}
@@ -1632,7 +1632,7 @@ S^{\gamma}_{\mathrm{eff}}(P_{1},\ P_{2},\ldots) \ .
 It is therefore the saturations that couple the separate phases
 together.  The MOOSE implementation allows users to specify arbitrary
 functions for the effective saturations, but these must obey the
-constraint 
+constraint
 \begin{equation}
 \sum_{\gamma}S^{\gamma} = 1 \ .
 \end{equation}

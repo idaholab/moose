@@ -19,9 +19,8 @@
 
 class AddLotsOfAuxVariablesAction;
 
-template<>
+template <>
 InputParameters validParams<AddLotsOfAuxVariablesAction>();
-
 
 class AddLotsOfAuxVariablesAction : public Action
 {

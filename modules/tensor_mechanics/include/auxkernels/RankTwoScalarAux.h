@@ -12,29 +12,39 @@
 
 class RankTwoScalarAux;
 
-/**
- * RankTwoScalarAux provides scalar values of RankTwoTensor
- * Currently supported are VonMisesStress, EquivalentPlasticStrain, Hydrostatic, L2norm,
- * MaxPrincipal, MidPrincipal, MinPrincipal
- */
-
-template<>
+template <>
 InputParameters validParams<RankTwoScalarAux>();
 
+/**
+ * RankTwoScalarAux uses the namespace RankTwoScalarTools to compute scalar
+ * values from Rank-2 tensors.
+ */
 class RankTwoScalarAux : public AuxKernel
 {
 public:
   RankTwoScalarAux(const InputParameters & parameters);
-  virtual ~RankTwoScalarAux() {}
 
 protected:
   virtual Real computeValue();
-  Real calcEigenValues();
 
   const MaterialProperty<RankTwoTensor> & _tensor;
+
+  /**
+   * Determines the information to be extracted from the tensor by using the
+   * RankTwoScalarTools namespace, e.g., vonMisesStress, EquivalentPlasticStrain,
+   * L2norm, MaxPrincipal eigenvalue, etc.
+   */
   MooseEnum _scalar_type;
 
-private:
+  /// whether or not selected_qp has been set
+  const bool _has_selected_qp;
+
+  /// The std::vector will be evaluated at this quadpoint only if defined
+  const unsigned int _selected_qp;
+
+  const Point _point1;
+  const Point _point2;
+  Point _input_direction;
 };
 
-#endif //RANKTWOSCALARAUX_H
+#endif // RANKTWOSCALARAUX_H

@@ -14,17 +14,18 @@
 
 #include "ConstantRate.h"
 
-template<>
-InputParameters validParams<ConstantRate>()
+template <>
+InputParameters
+validParams<ConstantRate>()
 {
   InputParameters params = validParams<NodalKernel>();
   params.addRequiredParam<Real>("rate", "The constant rate in 'du/dt = rate'");
+  params.declareControllable("rate");
   return params;
 }
 
-ConstantRate::ConstantRate(const InputParameters & parameters) :
-    NodalKernel(parameters),
-    _rate(getParam<Real>("rate"))
+ConstantRate::ConstantRate(const InputParameters & parameters)
+  : NodalKernel(parameters), _rate(getParam<Real>("rate"))
 {
 }
 

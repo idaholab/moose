@@ -1,0 +1,50 @@
+[Tests]
+  [./uniform]
+    type = CSVDiff
+    input = uniform.i
+    csvdiff = 'uniform_out.csv'
+    allow_test_objects = true
+  [../]
+  [./weibull]
+    type = CSVDiff
+    input = weibull.i
+    csvdiff = 'weibull_out.csv'
+    boost = true
+    allow_test_objects = true
+  [../]
+  [./weibull_no_boost]
+    type = RunException
+    input = weibull.i
+    expect_err = "The WeibullDistribution distribution named 'weibull' requires that libMesh"
+    boost = false
+    allow_test_objects = true
+  [../]
+  [./normal]
+    type = CSVDiff
+    input = normal.i
+    csvdiff = 'normal_out.csv'
+    boost = true
+    allow_test_objects = true
+  [../]
+  [./normal_no_boost]
+    type = RunException
+    input = normal.i
+    expect_err = "The NormalDistribution distribution named 'normal_test' requires that libMesh"
+    boost = false
+    allow_test_objects = true
+  [../]
+  [./lognormal]
+    type = CSVDiff
+    input = lognormal.i
+    csvdiff = 'lognormal_out.csv'
+    boost = true
+    allow_test_objects = true
+  [../]
+  [./lognormal_no_boost]
+    type = RunException
+    input = lognormal.i
+    expect_err = "The LognormalDistribution distribution named 'lognormal_test' requires that libMesh"
+    boost = false
+    allow_test_objects = true
+  [../]
+[]

@@ -11,25 +11,25 @@
 /*                                                              */
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
+
+// MOOSE includes
 #include "SetupPredictorAction.h"
 #include "Transient.h"
 #include "Predictor.h"
 #include "Factory.h"
+#include "NonlinearSystemBase.h"
 
-template<>
-InputParameters validParams<SetupPredictorAction>()
+template <>
+InputParameters
+validParams<SetupPredictorAction>()
 {
   InputParameters params = validParams<MooseObjectAction>();
 
   return params;
 }
 
-SetupPredictorAction::SetupPredictorAction(InputParameters parameters) :
-    MooseObjectAction(parameters)
-{
-}
-
-SetupPredictorAction::~SetupPredictorAction()
+SetupPredictorAction::SetupPredictorAction(InputParameters parameters)
+  : MooseObjectAction(parameters)
 {
 }
 
@@ -42,10 +42,10 @@ SetupPredictorAction::act()
     if (transient == NULL)
       mooseError("You can setup time stepper only with executioners of transient type.");
 
-    _moose_object_pars.set<FEProblem *>("_fe_problem") = _problem.get();
+    _moose_object_pars.set<FEProblemBase *>("_fe_problem_base") = _problem.get();
     _moose_object_pars.set<Transient *>("_executioner") = transient;
-    MooseSharedPointer<Predictor> predictor = MooseSharedNamespace::static_pointer_cast<Predictor>(_factory.create(_type, "Predictor", _moose_object_pars));
-    _problem->getNonlinearSystem().setPredictor(predictor);
+    std::shared_ptr<Predictor> predictor =
+        _factory.create<Predictor>(_type, "Predictor", _moose_object_pars);
+    _problem->getNonlinearSystemBase().setPredictor(predictor);
   }
 }
-

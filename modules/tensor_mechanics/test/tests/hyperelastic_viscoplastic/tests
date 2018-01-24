@@ -1,0 +1,26 @@
+[Tests]
+  [./one_elem]
+    type = 'Exodiff'
+    input = 'one_elem.i'
+    exodiff = 'one_elem.e'
+    allow_warnings = true
+  [../]
+  [./one_elem_multi]
+    type = 'Exodiff'
+    input = 'one_elem_multi.i'
+    exodiff = 'one_elem_multi.e'
+    allow_warnings = true
+  [../]
+  [./one_elem_base]
+    type = 'Exodiff'
+    input = 'one_elem_base.i'
+    exodiff = 'one_elem_base.e'
+    allow_warnings = true
+  [../]
+  [./one_elem_linear_harden]
+    type = 'Exodiff'
+    input = 'one_elem_linear_harden.i'
+    exodiff = 'one_elem_linear_harden.e'
+    allow_warnings = true
+  [../]
+[]

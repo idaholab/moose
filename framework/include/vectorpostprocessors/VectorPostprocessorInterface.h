@@ -15,22 +15,23 @@
 #ifndef VECTORPOSTPROCESSORINTERFACE_H
 #define VECTORPOSTPROCESSORINTERFACE_H
 
-// Standard includes
-#include <map>
-#include <string>
-
 // MOOSE includes
-#include "InputParameters.h"
-#include "ParallelUniqueId.h"
-#include "VectorPostprocessorData.h"
+#include "MooseTypes.h"
 
 // Forward Declarations
-class FEProblem;
+class FEProblemBase;
+class InputParameters;
+class MooseObject;
 
 class VectorPostprocessorInterface
 {
 public:
-  VectorPostprocessorInterface(const InputParameters & parameters);
+  VectorPostprocessorInterface(const MooseObject * moose_object);
+
+  /**
+   * This class has virtual methods, so it needs a virtual dtor.
+   */
+  virtual ~VectorPostprocessorInterface() = default;
 
   /**
    * Retrieve the value of a VectorPostprocessor
@@ -43,9 +44,11 @@ public:
    * a VectorPostprocessor you may have an input file with "pp = my_pp", this function
    * requires the "pp" name as input (see .../moose_test/functions/VectorPostprocessorFunction.C)
    *
-   * see getVectorPostprocessorValueOld getVectorPostprocessorValueByName getVectorPostprocessorValueOldByName
+   * see getVectorPostprocessorValueOld getVectorPostprocessorValueByName
+   * getVectorPostprocessorValueOldByName
    */
-  virtual const VectorPostprocessorValue & getVectorPostprocessorValue(const std::string & name, const std::string & vector_name);
+  virtual const VectorPostprocessorValue &
+  getVectorPostprocessorValue(const std::string & name, const std::string & vector_name);
 
   /**
    * Retrieve the value of the VectorPostprocessor
@@ -58,9 +61,12 @@ public:
    * "pp = my_pp", this method requires the "my_pp" name as input
    * (see .../moose_test/functions/VectorPostprocessorFunction.C)
    *
-   * see getVectorPostprocessorValue getVectorPostprocessorValueOldByName getVectorPostprocessorValueByName
+   * see getVectorPostprocessorValue getVectorPostprocessorValueOldByName
+   * getVectorPostprocessorValueByName
    */
-  virtual const VectorPostprocessorValue & getVectorPostprocessorValueByName(const VectorPostprocessorName & name, const std::string & vector_name);
+  virtual const VectorPostprocessorValue &
+  getVectorPostprocessorValueByName(const VectorPostprocessorName & name,
+                                    const std::string & vector_name);
 
   /**
    * Retrieve the old value of a VectorPostprocessor
@@ -70,7 +76,8 @@ public:
    *
    * see getVectorPostprocessorValue
    */
-  const VectorPostprocessorValue & getVectorPostprocessorValueOld(const std::string & name, const std::string & vector_name);
+  const VectorPostprocessorValue & getVectorPostprocessorValueOld(const std::string & name,
+                                                                  const std::string & vector_name);
 
   /**
    * Retrieve the old value of a VectorPostprocessor
@@ -79,12 +86,15 @@ public:
    * @return The value of the VectorPostprocessor
    *
    * If within the validParams for the object the addVectorPostprocessorParam was called this method
-   * will retun a reference to the default value specified in the call to the addVectorPostprocessorParam
+   * will retun a reference to the default value specified in the call to the
+   * addVectorPostprocessorParam
    * function if the postVectorPostprocessor does not exist.
    *
    * see getVectorPostprocessorValueByName
    */
-  const VectorPostprocessorValue & getVectorPostprocessorValueOldByName(const VectorPostprocessorName & name, const std::string & vector_name);
+  const VectorPostprocessorValue &
+  getVectorPostprocessorValueOldByName(const VectorPostprocessorName & name,
+                                       const std::string & vector_name);
 
   /**
    * Determine if the VectorPostprocessor exists
@@ -104,17 +114,15 @@ public:
    */
   bool hasVectorPostprocessorByName(const VectorPostprocessorName & name) const;
 
-
 private:
+  /// VectorPostprocessorInterface Parameters
+  const InputParameters & _vpi_params;
 
-  /// Reference the the FEProblem class
-  FEProblem & _vpi_feproblem;
+  /// Reference the the FEProblemBase class
+  FEProblemBase & _vpi_feproblem;
 
   /// Thread ID
   THREAD_ID _vpi_tid;
-
-  /// VectorPostprocessorInterface Parameters
-  const InputParameters & _vpi_params;
 };
 
-#endif //VECTORPOSTPROCESSORINTERFACE_H
+#endif // VECTORPOSTPROCESSORINTERFACE_H

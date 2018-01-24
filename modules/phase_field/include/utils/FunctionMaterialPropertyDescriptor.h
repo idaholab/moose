@@ -19,8 +19,7 @@ class MooseObject;
  * Material properties get fully described using this structure, including their dependent
  * variables and derivation state.
  */
-class FunctionMaterialPropertyDescriptor :
-  public DerivativeMaterialPropertyNameInterface
+class FunctionMaterialPropertyDescriptor : public DerivativeMaterialPropertyNameInterface
 {
 public:
   /*
@@ -43,6 +42,10 @@ public:
   /// copy constructor
   FunctionMaterialPropertyDescriptor(const FunctionMaterialPropertyDescriptor &);
 
+  /// construct a vector of FunctionMaterialPropertyDescriptors from a vector of strings
+  static std::vector<FunctionMaterialPropertyDescriptor>
+  parseVector(const std::vector<std::string> &, MooseObject *);
+
   /// get the fparser symbol name
   const std::string & getSymbolName() const { return _fparser_name; };
 
@@ -50,17 +53,10 @@ public:
   void setSymbolName(const std::string & n) { _fparser_name = n; };
 
   /// get the property name
-  const std::string getPropertyName() const
-  {
-    return propertyName(_base_name, _derivative_vars);
-  };
+  const std::string getPropertyName() const { return propertyName(_base_name, _derivative_vars); };
 
   /// get the property reference
-  const MaterialProperty<Real> & value() const
-  {
-    mooseAssert( _value != NULL, "_value pointer is NULL" );
-    return *_value;
-  }
+  const MaterialProperty<Real> & value() const;
 
   /// take another derivative
   void addDerivative(const VariableName & var);
@@ -72,12 +68,13 @@ public:
    */
   bool dependsOn(const std::string & var) const;
 
+  /// builds a list of dependent variables (exactly all variabled for which depends on returns true)
+  std::vector<VariableName> getDependentVariables();
+
   // output the internal state of this descriptor for debugging purposes
   void printDebug();
 
 private:
-  void updatePropertyReference();
-
   void parseDerivative(const std::string &);
   void parseDependentVariables(const std::string &);
 
@@ -90,8 +87,8 @@ private:
   std::vector<VariableName> _dependent_vars;
   std::vector<VariableName> _derivative_vars;
 
-  /// material property value
-  const MaterialProperty<Real> * _value;
+  /// material property value (this is lazily updated and cached when read through value())
+  mutable const MaterialProperty<Real> * _value;
 
   /// material object that owns this descriptor
   MooseObject * _parent;

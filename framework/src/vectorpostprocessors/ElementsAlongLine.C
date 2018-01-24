@@ -14,10 +14,14 @@
 
 #include "ElementsAlongLine.h"
 
+// MOOSE includes
+#include "LineSegment.h"
 #include "RayTracing.h"
+#include "MooseMesh.h"
 
-template<>
-InputParameters validParams<ElementsAlongLine>()
+template <>
+InputParameters
+validParams<ElementsAlongLine>()
 {
   InputParameters params = validParams<GeneralVectorPostprocessor>();
 
@@ -26,12 +30,13 @@ InputParameters validParams<ElementsAlongLine>()
   return params;
 }
 
-ElementsAlongLine::ElementsAlongLine(const InputParameters & parameters) :
-    GeneralVectorPostprocessor(parameters),
+ElementsAlongLine::ElementsAlongLine(const InputParameters & parameters)
+  : GeneralVectorPostprocessor(parameters),
     _start(getParam<Point>("start")),
     _end(getParam<Point>("end")),
     _elem_ids(declareVector("elem_ids"))
 {
+  _fe_problem.mesh().errorIfDistributedMesh("ElementsAlongLine");
 }
 
 void
@@ -46,14 +51,14 @@ ElementsAlongLine::execute()
   std::vector<Elem *> intersected_elems;
   std::vector<LineSegment> segments;
 
-  MooseSharedPointer<PointLocatorBase> plb = MooseSharedPointer<PointLocatorBase>(_fe_problem.mesh().getMesh().sub_point_locator().release());
-
-  Moose::elementsIntersectedByLine(_start, _end, _fe_problem.mesh(), plb, intersected_elems, segments);
+  std::unique_ptr<PointLocatorBase> pl = _fe_problem.mesh().getPointLocator();
+  Moose::elementsIntersectedByLine(
+      _start, _end, _fe_problem.mesh(), *pl, intersected_elems, segments);
 
   unsigned int num_elems = intersected_elems.size();
 
   _elem_ids.resize(num_elems);
 
-  for (unsigned int i=0; i<num_elems; i++)
+  for (unsigned int i = 0; i < num_elems; i++)
     _elem_ids[i] = intersected_elems[i]->id();
 }

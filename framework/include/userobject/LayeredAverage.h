@@ -17,27 +17,25 @@
 
 #include "LayeredIntegral.h"
 
-// libmesh includes
-#include "libmesh/mesh_tools.h"
-
-//Forward Declarations
+// Forward Declarations
 class LayeredAverage;
 
-template<>
+template <>
 InputParameters validParams<LayeredAverage>();
 
 /**
- * This UserObject computes  averages of a variable storing partial sums for the specified number of intervals in a direction (x,y,z).c
+ * This UserObject computes averages of a variable storing partial
+ * sums for the specified number of intervals in a direction (x,y,z).
  */
 class LayeredAverage : public LayeredIntegral
 {
 public:
   LayeredAverage(const InputParameters & parameters);
 
-  virtual void initialize();
-  virtual void execute();
-  virtual void finalize();
-  virtual void threadJoin(const UserObject & y);
+  virtual void initialize() override;
+  virtual void execute() override;
+  virtual void finalize() override;
+  virtual void threadJoin(const UserObject & y) override;
 
 protected:
   /// Value of the volume for each layer

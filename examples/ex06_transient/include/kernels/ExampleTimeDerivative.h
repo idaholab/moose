@@ -20,21 +20,20 @@
 // Forward Declarations
 class ExampleTimeDerivative;
 
-template<>
+template <>
 InputParameters validParams<ExampleTimeDerivative>();
 
 class ExampleTimeDerivative : public TimeDerivative
 {
 public:
-
   ExampleTimeDerivative(const InputParameters & parameters);
 
 protected:
-  virtual Real computeQpResidual();
+  virtual Real computeQpResidual() override;
 
-  virtual Real computeQpJacobian();
+  virtual Real computeQpJacobian() override;
 
   Real _time_coefficient;
 };
 
-#endif //EXAMPLETIMEDERIVATIVE
+#endif // EXAMPLETIMEDERIVATIVE

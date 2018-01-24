@@ -15,9 +15,7 @@
 #ifndef NEIGHBORCOUPLEABLE_H
 #define NEIGHBORCOUPLEABLE_H
 
-#include "MooseVariable.h"
-#include "MooseVariableScalar.h"
-#include "InputParameters.h"
+#include "MooseVariableBase.h"
 #include "Coupleable.h"
 
 /**
@@ -32,20 +30,34 @@ public:
    * @param parameters Parameters that come from constructing the object
    * @param nodal true if we need to couple with nodal values, otherwise false
    */
-  NeighborCoupleable(const InputParameters & parameters, bool nodal, bool neighbor_nodal);
+  NeighborCoupleable(const MooseObject * moose_object, bool nodal, bool neighbor_nodal);
 
   virtual ~NeighborCoupleable();
 
   // neighbor
-  virtual VariableValue & coupledNeighborValue(const std::string & var_name, unsigned int comp = 0);
-  virtual VariableValue & coupledNeighborValueOld(const std::string & var_name, unsigned int comp = 0);
-  virtual VariableValue & coupledNeighborValueOlder(const std::string & var_name, unsigned int comp = 0);
+  virtual const VariableValue & coupledNeighborValue(const std::string & var_name,
+                                                     unsigned int comp = 0);
+  virtual const VariableValue & coupledNeighborValueOld(const std::string & var_name,
+                                                        unsigned int comp = 0);
+  virtual const VariableValue & coupledNeighborValueOlder(const std::string & var_name,
+                                                          unsigned int comp = 0);
 
-  virtual VariableGradient & coupledNeighborGradient(const std::string & var_name, unsigned int comp = 0);
-  virtual VariableGradient & coupledNeighborGradientOld(const std::string & var_name, unsigned int comp = 0);
-  virtual VariableGradient & coupledNeighborGradientOlder(const std::string & var_name, unsigned int comp = 0);
+  virtual const VariableGradient & coupledNeighborGradient(const std::string & var_name,
+                                                           unsigned int comp = 0);
+  virtual const VariableGradient & coupledNeighborGradientOld(const std::string & var_name,
+                                                              unsigned int comp = 0);
+  virtual const VariableGradient & coupledNeighborGradientOlder(const std::string & var_name,
+                                                                unsigned int comp = 0);
 
-  virtual VariableSecond & coupledNeighborSecond(const std::string & var_name, unsigned int i = 0);
+  virtual const VariableSecond & coupledNeighborSecond(const std::string & var_name,
+                                                       unsigned int i = 0);
+
+  virtual const DenseVector<Number> & coupledNeighborSolutionDoFs(const std::string & var_name,
+                                                                  unsigned int comp = 0);
+  virtual const DenseVector<Number> & coupledNeighborSolutionDoFsOld(const std::string & var_name,
+                                                                     unsigned int comp = 0);
+  virtual const DenseVector<Number> & coupledNeighborSolutionDoFsOlder(const std::string & var_name,
+                                                                       unsigned int comp = 0);
 
 protected:
   bool _neighbor_nodal;

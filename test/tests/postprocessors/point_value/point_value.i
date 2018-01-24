@@ -1,8 +1,16 @@
 [Mesh]
   type = GeneratedMesh
   dim = 2
-  nx = 10
-  ny = 10
+  nx = 2
+  ny = 2
+[]
+
+[MeshModifiers]
+  [./subdomain]
+    type = AssignElementSubdomainID
+    element_ids   = '0 1 2 3'
+    subdomain_ids = '1 2 3 4'
+  [../]
 []
 
 [Variables]
@@ -42,14 +50,9 @@
 
 [Executioner]
   type = Steady
-
-  # Preconditioned JFNK (default)
-  solve_type = 'PJFNK'
-
-  petsc_options_iname = '-pc_type -pc_hypre_type'
-  petsc_options_value = 'hypre boomeramg'
+  solve_type = 'NEWTON'
 []
 
 [Outputs]
-  exodus = true
+  csv = true
 []

@@ -1,12 +1,18 @@
+/****************************************************************/
+/* MOOSE - Multiphysics Object Oriented Simulation Environment  */
+/*                                                              */
+/*          All contents are licensed under LGPL V2.1           */
+/*             See LICENSE for full restrictions                */
+/****************************************************************/
 #ifndef PFCTRADMATERIAL_H
 #define PFCTRADMATERIAL_H
 
 #include "Material.h"
 
-//Forward Declarations
+// Forward Declarations
 class PFCTradMaterial;
 
-template<>
+template <>
 InputParameters validParams<PFCTradMaterial>();
 
 class PFCTradMaterial : public Material
@@ -18,10 +24,12 @@ protected:
   virtual void computeQpProperties();
 
 private:
-  unsigned int _order;
+  const unsigned int _order;
+
   MaterialProperty<Real> & _M;
   MaterialProperty<Real> & _a;
   MaterialProperty<Real> & _b;
+
   MaterialProperty<Real> & _C0;
   MaterialProperty<Real> & _C2;
   MaterialProperty<Real> & _C4;
@@ -29,4 +37,4 @@ private:
   MaterialProperty<Real> & _C8;
 };
 
-#endif //PFCTRADMATERIAL_H
+#endif // PFCTRADMATERIAL_H

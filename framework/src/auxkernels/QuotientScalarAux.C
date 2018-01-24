@@ -14,8 +14,9 @@
 
 #include "QuotientScalarAux.h"
 
-template<>
-InputParameters validParams<QuotientScalarAux>()
+template <>
+InputParameters
+validParams<QuotientScalarAux>()
 {
   InputParameters params = validParams<AuxScalarKernel>();
   params.addCoupledVar("numerator", "The upstairs of the quotient variable");
@@ -24,14 +25,10 @@ InputParameters validParams<QuotientScalarAux>()
   return params;
 }
 
-QuotientScalarAux::QuotientScalarAux(const InputParameters & parameters) :
-    AuxScalarKernel(parameters),
+QuotientScalarAux::QuotientScalarAux(const InputParameters & parameters)
+  : AuxScalarKernel(parameters),
     _a(coupledScalarValue("numerator")),
     _b(coupledScalarValue("denominator"))
-{
-}
-
-QuotientScalarAux::~QuotientScalarAux()
 {
 }
 
@@ -40,4 +37,3 @@ QuotientScalarAux::computeValue()
 {
   return _a[0] / _b[0];
 }
-

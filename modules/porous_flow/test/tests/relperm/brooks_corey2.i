@@ -1,0 +1,175 @@
+# Test Brooks-Corey relative permeability curve by varying saturation over the mesh
+# Exponent lambda = 2 for both phases
+# Residual saturation of phase 0: s0r = 0.2
+# Residual saturation of phase 1: s1r = 0.3
+
+[Mesh]
+  type = GeneratedMesh
+  dim = 1
+  nx = 20
+[]
+
+[GlobalParams]
+  PorousFlowDictator = dictator
+[]
+
+[Variables]
+  [./p0]
+    initial_condition = 1e6
+  [../]
+  [./s1]
+  [../]
+[]
+
+[AuxVariables]
+  [./s0aux]
+    family = MONOMIAL
+    order = CONSTANT
+  [../]
+  [./s1aux]
+    family = MONOMIAL
+    order = CONSTANT
+  [../]
+  [./kr0aux]
+    family = MONOMIAL
+    order = CONSTANT
+  [../]
+  [./kr1aux]
+    family = MONOMIAL
+    order = CONSTANT
+  [../]
+[]
+
+[AuxKernels]
+  [./s0]
+    type = PorousFlowPropertyAux
+    property = saturation
+    phase = 0
+    variable = s0aux
+  [../]
+  [./s1]
+    type = PorousFlowPropertyAux
+    property = saturation
+    phase = 1
+    variable = s1aux
+  [../]
+  [./kr0]
+    type = PorousFlowPropertyAux
+    property = relperm
+    phase = 0
+    variable = kr0aux
+  [../]
+  [./kr1]
+    type = PorousFlowPropertyAux
+    property = relperm
+    phase = 1
+    variable = kr1aux
+  [../]
+[]
+
+[Functions]
+  [./s1]
+    type = ParsedFunction
+    value = x
+  [../]
+[]
+
+[ICs]
+  [./s1]
+    type = FunctionIC
+    variable = s1
+    function = s1
+  [../]
+[]
+
+[Kernels]
+  [./p0]
+    type = Diffusion
+    variable = p0
+  [../]
+  [./s1]
+    type = Diffusion
+    variable = s1
+  [../]
+[]
+
+[UserObjects]
+  [./dictator]
+    type = PorousFlowDictator
+    porous_flow_vars = 'p0 s1'
+    number_fluid_phases = 2
+    number_fluid_components = 2
+  [../]
+  [./pc]
+    type = PorousFlowCapillaryPressureConst
+    pc = 0
+  [../]
+[]
+
+[Materials]
+  [./temperature]
+    type = PorousFlowTemperature
+  [../]
+  [./ppss]
+    type = PorousFlow2PhasePS
+    phase0_porepressure = p0
+    phase1_saturation = s1
+    capillary_pressure = pc
+  [../]
+  [./kr0]
+    type = PorousFlowRelativePermeabilityBC
+    phase = 0
+    lambda = 2
+    s_res = 0.2
+    sum_s_res = 0.5
+  [../]
+  [./kr1]
+    type = PorousFlowRelativePermeabilityBC
+    phase = 1
+    lambda = 2
+    nw_phase = true
+    s_res = 0.3
+    sum_s_res = 0.5
+  [../]
+  [./kr_all]
+    type = PorousFlowJoiner
+    material_property = PorousFlow_relative_permeability_qp
+  [../]
+[]
+
+[VectorPostprocessors]
+  [./vpp]
+    type = LineValueSampler
+    variable = 's0aux s1aux kr0aux kr1aux'
+    start_point = '0 0 0'
+    end_point = '1 0 0'
+    num_points = 20
+    sort_by = id
+  [../]
+[]
+
+[Executioner]
+  type = Steady
+  solve_type = NEWTON
+  nl_abs_tol = 1e-12
+[]
+
+[BCs]
+  [./sleft]
+    type = DirichletBC
+    variable = s1
+    value = 0
+    boundary = left
+  [../]
+  [./sright]
+    type = DirichletBC
+    variable = s1
+    value = 1
+    boundary = right
+  [../]
+[]
+
+[Outputs]
+  csv = true
+  execute_on = timestep_end
+[]

@@ -14,33 +14,32 @@
 
 #include "PointerLoadError.h"
 
-template<>
-InputParameters validParams<PointerLoadError>()
+template <>
+InputParameters
+validParams<PointerLoadError>()
 {
-  InputParameters params = validParams<UserObject>();
+  InputParameters params = validParams<GeneralUserObject>();
   return params;
 }
 
-
-PointerLoadError::PointerLoadError(const InputParameters & params) :
-    GeneralUserObject(params),
-    _pointer_data(declareRestartableData<Stupid *>("pointer_data"))
+PointerLoadError::PointerLoadError(const InputParameters & params)
+  : GeneralUserObject(params),
+    _pointer_data(declareRestartableData<TypeWithNoLoad *>("pointer_data"))
 {
-  _pointer_data = new Stupid;
+  _pointer_data = new TypeWithNoLoad;
   _pointer_data->_i = 1;
 }
 
-PointerLoadError::~PointerLoadError()
-{
-  delete _pointer_data;
-}
+PointerLoadError::~PointerLoadError() { delete _pointer_data; }
 
-void PointerLoadError::initialSetup()
+void
+PointerLoadError::initialSetup()
 {
   _pointer_data->_i = 2;
 }
 
-void PointerLoadError::timestepSetup()
+void
+PointerLoadError::timestepSetup()
 {
   _pointer_data->_i += 1;
 }
@@ -49,4 +48,3 @@ void
 PointerLoadError::execute()
 {
 }
-

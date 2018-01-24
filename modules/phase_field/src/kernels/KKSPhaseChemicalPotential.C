@@ -9,21 +9,35 @@
 
 using namespace MathUtils;
 
-template<>
-InputParameters validParams<KKSPhaseChemicalPotential>()
+template <>
+InputParameters
+validParams<KKSPhaseChemicalPotential>()
 {
   InputParameters params = validParams<Kernel>();
-  params.addClassDescription("KKS model kernel to enforce the pointwise equality of phase chemical potentials  dFa/dca = dFb/dcb. The non-linear variable of this kernel is ca.");
-  params.addRequiredCoupledVar("cb", "Phase b concentration"); // note that ca is u, the non-linear variable!
-  params.addRequiredParam<MaterialPropertyName>("fa_name", "Base name of the free energy function Fa (f_name in the corresponding derivative function material)");
-  params.addRequiredParam<MaterialPropertyName>("fb_name", "Base name of the free energy function Fb (f_name in the corresponding derivative function material)");
-  params.addCoupledVar("args_a", "Vector of further parameters to Fa (optional, to add in second cross derivatives of Fa)");
-  params.addCoupledVar("args_b", "Vector of further parameters to Fb (optional, to add in second cross derivatives of Fb)");
+  params.addClassDescription("KKS model kernel to enforce the pointwise equality of phase chemical "
+                             "potentials  dFa/dca = dFb/dcb. The non-linear variable of this "
+                             "kernel is ca.");
+  params.addRequiredCoupledVar(
+      "cb", "Phase b concentration"); // note that ca is u, the non-linear variable!
+  params.addRequiredParam<MaterialPropertyName>("fa_name",
+                                                "Base name of the free energy function "
+                                                "Fa (f_name in the corresponding "
+                                                "derivative function material)");
+  params.addRequiredParam<MaterialPropertyName>("fb_name",
+                                                "Base name of the free energy function "
+                                                "Fb (f_name in the corresponding "
+                                                "derivative function material)");
+  params.addCoupledVar(
+      "args_a",
+      "Vector of further parameters to Fa (optional, to add in second cross derivatives of Fa)");
+  params.addCoupledVar(
+      "args_b",
+      "Vector of further parameters to Fb (optional, to add in second cross derivatives of Fb)");
   return params;
 }
 
-KKSPhaseChemicalPotential::KKSPhaseChemicalPotential(const InputParameters & parameters) :
-    DerivativeMaterialInterface<JvarMapInterface<Kernel> >(parameters),
+KKSPhaseChemicalPotential::KKSPhaseChemicalPotential(const InputParameters & parameters)
+  : DerivativeMaterialInterface<JvarMapKernelInterface<Kernel>>(parameters),
     _cb_var(coupled("cb")),
     _cb_name(getVar("cb", 0)->name()),
     // first derivatives
@@ -33,11 +47,12 @@ KKSPhaseChemicalPotential::KKSPhaseChemicalPotential(const InputParameters & par
     _d2fadca2(getMaterialPropertyDerivative<Real>("fa_name", _var.name(), _var.name())),
     _d2fbdcbca(getMaterialPropertyDerivative<Real>("fb_name", _cb_name, _var.name()))
 {
-  MooseVariable *arg;
+  MooseVariable * arg;
   unsigned int i;
 
 #ifdef DEBUG
-  _console << "KKSPhaseChemicalPotential(" << name() << ") " << _var.name() << ' ' << _cb_name << '\n';
+  _console << "KKSPhaseChemicalPotential(" << name() << ") " << _var.name() << ' ' << _cb_name
+           << '\n';
 #endif
 
   unsigned int nvar = _coupled_moose_vars.size();
@@ -49,7 +64,8 @@ KKSPhaseChemicalPotential::KKSPhaseChemicalPotential(const InputParameters & par
     // get the moose variable
     arg = _coupled_moose_vars[i];
 
-    // lookup table for the material properties representing the derivatives needed for the off-diagonal jacobian
+    // lookup table for the material properties representing the derivatives needed for the
+    // off-diagonal jacobian
     _d2fadcadarg[i] = &getMaterialPropertyDerivative<Real>("fa_name", _var.name(), arg->name());
     _d2fbdcbdarg[i] = &getMaterialPropertyDerivative<Real>("fb_name", _cb_name, arg->name());
   }
@@ -80,9 +96,7 @@ Real
 KKSPhaseChemicalPotential::computeQpOffDiagJacobian(unsigned int jvar)
 {
   // get the coupled variable jvar is referring to
-  unsigned int cvar;
-  if (!mapJvarToCvar(jvar, cvar))
-    return 0.0;
+  const unsigned int cvar = mapJvarToCvar(jvar);
 
   return _test[_i][_qp] * _phi[_j][_qp] * ((*_d2fadcadarg[cvar])[_qp] - (*_d2fbdcbdarg[cvar])[_qp]);
 }

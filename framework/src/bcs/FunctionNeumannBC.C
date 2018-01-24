@@ -15,17 +15,20 @@
 #include "FunctionNeumannBC.h"
 #include "Function.h"
 
-template<>
-InputParameters validParams<FunctionNeumannBC>()
+template <>
+InputParameters
+validParams<FunctionNeumannBC>()
 {
   InputParameters params = validParams<IntegratedBC>();
   params.addRequiredParam<FunctionName>("function", "The function.");
+  params.addClassDescription("Imposes the integrated boundary condition "
+                             "$\\frac{\\partial u}{\\partial n}=h(t,\\vec{x})$, "
+                             "where $h$ is a (possibly) time and space-dependent MOOSE Function.");
   return params;
 }
 
-FunctionNeumannBC::FunctionNeumannBC(const InputParameters & parameters) :
-    IntegratedBC(parameters),
-    _func(getFunction("function"))
+FunctionNeumannBC::FunctionNeumannBC(const InputParameters & parameters)
+  : IntegratedBC(parameters), _func(getFunction("function"))
 {
 }
 
@@ -34,4 +37,3 @@ FunctionNeumannBC::computeQpResidual()
 {
   return -_test[_i][_qp] * _func.value(_t, _q_point[_qp]);
 }
-

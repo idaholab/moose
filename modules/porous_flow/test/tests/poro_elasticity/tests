@@ -1,0 +1,102 @@
+[Tests]
+  [./vol_expansion]
+    type = Exodiff
+    input = vol_expansion.i
+    exodiff = vol_expansion.e
+  [../]
+  [./undrained_oedometer]
+    type = CSVDiff
+    input = undrained_oedometer.i
+    csvdiff = undrained_oedometer.csv
+  [../]
+  [./pp_generation]
+    type = CSVDiff
+    input = pp_generation.i
+    csvdiff = pp_generation.csv
+  [../]
+  [./pp_generation_action]
+    type = CSVDiff
+    input = pp_generation_action.i
+    csvdiff = pp_generation_action.csv
+  [../]
+  [./pp_generation_fullysat_action]
+    type = CSVDiff
+    input = pp_generation_fullysat_action.i
+    csvdiff = pp_generation_fullysat_action.csv
+  [../]
+  [./pp_generation_unconfined]
+    type = CSVDiff
+    input = pp_generation_unconfined.i
+    csvdiff = pp_generation_unconfined.csv
+  [../]
+  [./pp_generation_unconfined_constM]
+    type = CSVDiff
+    input = pp_generation_unconfined_constM.i
+    csvdiff = pp_generation_unconfined_constM.csv
+  [../]
+  [./pp_generation_unconfined_fully_saturated]
+    type = CSVDiff
+    input = pp_generation_unconfined_fully_saturated.i
+    csvdiff = pp_generation_unconfined_fully_saturated.csv
+  [../]
+  [./pp_generation_unconfined_fully_saturated_volume]
+    type = CSVDiff
+    input = pp_generation_unconfined_fully_saturated_volume.i
+    csvdiff = pp_generation_unconfined_fully_saturated_volume.csv
+  [../]
+  [./pp_generation_unconfined_basicthm]
+    type = CSVDiff
+    input = pp_generation_unconfined_basicthm.i
+    csvdiff = pp_generation_unconfined_basicthm.csv
+  [../]
+  [./mandel]
+    type = CSVDiff
+    input = mandel.i
+    csvdiff = mandel.csv
+  [../]
+  [./mandel_constM]
+    type = CSVDiff
+    input = mandel_constM.i
+    csvdiff = mandel_constM.csv
+  [../]
+  [./mandel_fully_saturated]
+    type = CSVDiff
+    input = mandel_fully_saturated.i
+    csvdiff = mandel_fully_saturated.csv
+  [../]
+  [./mandel_fully_saturated_volume]
+    type = CSVDiff
+    input = mandel_fully_saturated_volume.i
+    csvdiff = mandel_fully_saturated_volume.csv
+  [../]
+  [./mandel_basicthm]
+    type = CSVDiff
+    input = mandel_basicthm.i
+    csvdiff = mandel_basicthm.csv
+  [../]
+  [./terzaghi]
+    type = CSVDiff
+    input = terzaghi.i
+    csvdiff = terzaghi.csv
+  [../]
+  [./terzaghi_constM]
+    type = CSVDiff
+    input = terzaghi_constM.i
+    csvdiff = terzaghi_constM.csv
+  [../]
+  [./terzaghi_fully_saturated_volume]
+    type = CSVDiff
+    input = terzaghi_fully_saturated_volume.i
+    csvdiff = terzaghi_fully_saturated_volume.csv
+  [../]
+  [./terzaghi_basicthm]
+    type = CSVDiff
+    input = terzaghi_basicthm.i
+    csvdiff = terzaghi_basicthm.csv
+  [../]
+  [./vol_expansion_poroperm]
+    type = CSVDiff
+    input = vol_expansion_poroperm.i
+    csvdiff = vol_expansion_poroperm.csv
+  [../]
+[]

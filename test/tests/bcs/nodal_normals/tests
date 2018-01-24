@@ -28,4 +28,10 @@
     input = 'cylinder_hexes_1st_2nd.i'
     exodiff = 'cylinder_hexes_1st_2nd_out.e'
   [../]
+
+  [./small_sqaure]
+    type = 'Exodiff'
+    input = 'square_quads.i'
+    exodiff = 'square_quads_out.e'
+  [../]
 []

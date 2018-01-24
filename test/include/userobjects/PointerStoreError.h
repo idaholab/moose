@@ -19,10 +19,10 @@
 
 class PointerStoreError;
 
-template<>
+template <>
 InputParameters validParams<PointerStoreError>();
 
-class ReallyDumb
+class TypeWithNoStore
 {
 public:
   int _i;
@@ -37,13 +37,12 @@ public:
   virtual void initialSetup();
   virtual void timestepSetup();
 
-  virtual void initialize() {};
+  virtual void initialize(){};
   virtual void execute();
-  virtual void finalize() {};
+  virtual void finalize(){};
 
 protected:
-  ReallyDumb * & _pointer_data;
+  TypeWithNoStore *& _pointer_data;
 };
-
 
 #endif /* POINTERSTOREERROR_H */

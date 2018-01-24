@@ -9,10 +9,10 @@
 
 #include "Kernel.h"
 
-//Forward Declaration
+// Forward Declaration
 class SoretDiffusion;
 
-template<>
+template <>
 InputParameters validParams<SoretDiffusion>();
 /**
  * SoretDiffusion adds the soret effect in the split form of the Cahn-Hilliard
@@ -33,16 +33,19 @@ protected:
   unsigned int _T_var;
 
   /// Coupled variable for the temperature
-  VariableValue & _T;
+  const VariableValue & _T;
 
   /// Variable gradient for temperature
-  VariableGradient & _grad_T;
+  const VariableGradient & _grad_T;
+
+  /// is the kernel used in a coupled form?
+  const bool _is_coupled;
 
   /// int label for the Concentration
   unsigned int _c_var;
 
   /// Variable value for the concentration
-  VariableValue & _c;
+  const VariableValue & _c;
 
   /// Diffusivity material property
   const MaterialProperty<Real> & _D;
@@ -51,7 +54,7 @@ protected:
   const MaterialProperty<Real> & _Q;
 
   /// Boltzmann constant
-  const Real _kb;
+  const Real _kB;
 };
 
-#endif //SORETDIFFUSION_H
+#endif // SORETDIFFUSION_H

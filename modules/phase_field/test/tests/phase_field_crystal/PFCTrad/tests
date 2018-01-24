@@ -1,0 +1,10 @@
+[Tests]
+  [./test]
+    type = 'Exodiff'
+    input = 'PFCTrad_test.i'
+    exodiff = 'PFCTrad_test_out.e'
+# Run in serial so RandomIC gets fixed PRNG results
+    max_parallel = 1
+    max_threads  = 1
+  [../]
+[]

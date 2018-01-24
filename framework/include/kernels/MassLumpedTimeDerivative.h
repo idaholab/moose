@@ -20,7 +20,7 @@
 // Forward Declaration
 class MassLumpedTimeDerivative;
 
-template<>
+template <>
 InputParameters validParams<MassLumpedTimeDerivative>();
 
 class MassLumpedTimeDerivative : public TimeKernel
@@ -28,13 +28,13 @@ class MassLumpedTimeDerivative : public TimeKernel
 public:
   MassLumpedTimeDerivative(const InputParameters & parameters);
 
-  virtual void computeJacobian();
+  virtual void computeJacobian() override;
 
 protected:
-  virtual Real computeQpResidual();
-  virtual Real computeQpJacobian();
+  virtual Real computeQpResidual() override;
+  virtual Real computeQpJacobian() override;
 
-  VariableValue & _u_dot_nodal;
+  const VariableValue & _u_dot_nodal;
 };
 
 #endif // MASSLUMPEDTIMEDERIVATIVE_H

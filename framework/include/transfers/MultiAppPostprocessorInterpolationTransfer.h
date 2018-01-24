@@ -15,25 +15,25 @@
 #ifndef MULTIAPPPOSTPROCESSORINTERPOLATIONTRANSFER_H
 #define MULTIAPPPOSTPROCESSORINTERPOLATIONTRANSFER_H
 
+// MOOSE includes
 #include "MultiAppTransfer.h"
 
-class MooseVariable;
+// Forward declarations
 class MultiAppPostprocessorInterpolationTransfer;
 
-template<>
+template <>
 InputParameters validParams<MultiAppPostprocessorInterpolationTransfer>();
 
 /**
- * Transfers from spatially varying PostprocessorInterpolations in a MultiApp to the "master" system.
+ * Transfers from spatially varying PostprocessorInterpolations in a MultiApp to the "master"
+ * system.
  */
-class MultiAppPostprocessorInterpolationTransfer :
-  public MultiAppTransfer
+class MultiAppPostprocessorInterpolationTransfer : public MultiAppTransfer
 {
 public:
   MultiAppPostprocessorInterpolationTransfer(const InputParameters & parameters);
-  virtual ~MultiAppPostprocessorInterpolationTransfer() {}
 
-  virtual void execute();
+  virtual void execute() override;
 
 protected:
   PostprocessorName _postprocessor;

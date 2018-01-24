@@ -16,10 +16,10 @@
 
 #include "EigenKernel.h"
 
-//Forward Declarations
+// Forward Declarations
 class PMassEigenKernel;
 
-template<>
+template <>
 InputParameters validParams<PMassEigenKernel>();
 
 /**
@@ -39,4 +39,4 @@ protected:
   Real _p;
 };
 
-#endif //PMASSEIGENKERNEL_H
+#endif // PMASSEIGENKERNEL_H

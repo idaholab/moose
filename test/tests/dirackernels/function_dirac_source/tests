@@ -1,0 +1,7 @@
+[Tests]
+  [./function_dirac_source]
+    type = 'Exodiff'
+    input = 'function_dirac_source.i'
+    exodiff = 'function_dirac_source_out.e'
+  [../]
+[]

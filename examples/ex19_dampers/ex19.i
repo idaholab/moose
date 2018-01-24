@@ -12,8 +12,6 @@
 []
 
 [Variables]
-  active = 'diffusion'
-
   [./diffusion]
     order = FIRST
     family = LAGRANGE
@@ -21,8 +19,6 @@
 []
 
 [Kernels]
-  active = 'diff'
-
   [./diff]
     type = Diffusion
     variable = diffusion
@@ -30,19 +26,17 @@
 []
 
 [BCs]
-  active = 'left right'
-
   [./left]
     type = DirichletBC
     variable = diffusion
-    boundary = 1
+    boundary = 3
     value = 3
   [../]
 
   [./right]
     type = DirichletBC
     variable = diffusion
-    boundary = 2
+    boundary = 1
     value = 1
   [../]
 []
@@ -61,11 +55,8 @@
 
   #Preconditioned JFNK (default)
   solve_type = 'PJFNK'
-
-
 []
 
 [Outputs]
-  file_base = out
   exodus = true
 []

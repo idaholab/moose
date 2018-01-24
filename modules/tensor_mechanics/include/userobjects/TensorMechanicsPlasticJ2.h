@@ -10,11 +10,9 @@
 #include "TensorMechanicsPlasticModel.h"
 #include "TensorMechanicsHardeningModel.h"
 
-
 class TensorMechanicsPlasticJ2;
 
-
-template<>
+template <>
 InputParameters validParams<TensorMechanicsPlasticJ2>();
 
 /**
@@ -23,75 +21,71 @@ InputParameters validParams<TensorMechanicsPlasticJ2>();
  */
 class TensorMechanicsPlasticJ2 : public TensorMechanicsPlasticModel
 {
- public:
+public:
   TensorMechanicsPlasticJ2(const InputParameters & parameters);
 
-  /// returns the model name (J2)
-  virtual std::string modelName() const;
+  virtual std::string modelName() const override;
 
- protected:
+  virtual bool useCustomReturnMap() const override;
 
-  /**
-   * The yield function
-   * @param stress the stress at which to calculate the yield function
-   * @param intnl internal parameter
-   * @return the yield function
-   */
-  Real yieldFunction(const RankTwoTensor & stress, const Real & intnl) const;
+  virtual bool useCustomCTO() const override;
 
-  /**
-   * The derivative of yield function with respect to stress
-   * @param stress the stress at which to calculate the yield function
-   * @param intnl internal parameter
-   * @return df_dstress(i, j) = dyieldFunction/dstress(i, j)
-   */
-  RankTwoTensor dyieldFunction_dstress(const RankTwoTensor & stress, const Real & intnl) const;
+  virtual bool returnMap(const RankTwoTensor & trial_stress,
+                         Real intnl_old,
+                         const RankFourTensor & E_ijkl,
+                         Real ep_plastic_tolerance,
+                         RankTwoTensor & returned_stress,
+                         Real & returned_intnl,
+                         std::vector<Real> & dpm,
+                         RankTwoTensor & delta_dp,
+                         std::vector<Real> & yf,
+                         bool & trial_stress_inadmissible) const override;
 
-  /**
-   * The derivative of yield function with respect to the internal parameter
-   * @param stress the stress at which to calculate the yield function
-   * @param intnl internal parameter
-   * @return the derivative
-   */
-  Real dyieldFunction_dintnl(const RankTwoTensor & stress, const Real & intnl) const;
+  virtual RankFourTensor
+  consistentTangentOperator(const RankTwoTensor & trial_stress,
+                            Real intnl_old,
+                            const RankTwoTensor & stress,
+                            Real intnl,
+                            const RankFourTensor & E_ijkl,
+                            const std::vector<Real> & cumulative_pm) const override;
 
-  /**
-   * The flow potential
-   * @param stress the stress at which to calculate the flow potential
-   * @param intnl internal parameter
-   * @return the flow potential
-   */
-  RankTwoTensor flowPotential(const RankTwoTensor & stress, const Real & intnl) const;
+protected:
+  virtual Real yieldFunction(const RankTwoTensor & stress, Real intnl) const override;
 
-  /**
-   * The derivative of the flow potential with respect to stress
-   * @param stress the stress at which to calculate the flow potential
-   * @param intnl internal parameter
-   * @return dr_dstress(i, j, k, l) = dr(i, j)/dstress(k, l)
-   */
-  RankFourTensor dflowPotential_dstress(const RankTwoTensor & stress, const Real & intnl) const;
+  virtual RankTwoTensor dyieldFunction_dstress(const RankTwoTensor & stress,
+                                               Real intnl) const override;
 
-  /**
-   * The derivative of the flow potential with respect to the internal parameter
-   * @param stress the stress at which to calculate the flow potential
-   * @param intnl internal parameter
-   * @return dr_dintnl(i, j) = dr(i, j)/dintnl
-   */
-  RankTwoTensor dflowPotential_dintnl(const RankTwoTensor & stress, const Real & intnl) const;
+  Real dyieldFunction_dintnl(const RankTwoTensor & stress, Real intnl) const override;
+
+  virtual RankTwoTensor flowPotential(const RankTwoTensor & stress, Real intnl) const override;
+
+  virtual RankFourTensor dflowPotential_dstress(const RankTwoTensor & stress,
+                                                Real intnl) const override;
+
+  RankTwoTensor dflowPotential_dintnl(const RankTwoTensor & stress, Real intnl) const override;
 
   /**
    * YieldStrength.  The yield function is sqrt(3*J2) - yieldStrength.
    * In this class yieldStrength = 1, but this
    * may be over-ridden by derived classes with nontrivial hardning
    */
-  virtual Real yieldStrength(const Real & intnl) const;
+  virtual Real yieldStrength(Real intnl) const;
 
   /// d(yieldStrength)/d(intnl)
-  virtual Real dyieldStrength(const Real & intnl) const;
+  virtual Real dyieldStrength(Real intnl) const;
 
+private:
+  /// yield strength, from user input
   const TensorMechanicsHardeningModel & _strength;
 
+  /// max iters for custom return map loop
+  const unsigned _max_iters;
 
+  /// Whether to use the custom return-map algorithm
+  const bool _use_custom_returnMap;
+
+  /// Whether to use the custom consistent tangent operator calculation
+  const bool _use_custom_cto;
 };
 
 #endif // TENSORMECHANICSPLASTICJ2_H

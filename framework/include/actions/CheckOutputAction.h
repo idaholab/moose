@@ -21,7 +21,7 @@
 // Forward declerations
 class CheckOutputAction;
 
-template<>
+template <>
 InputParameters validParams<CheckOutputAction>();
 
 /**
@@ -30,25 +30,15 @@ InputParameters validParams<CheckOutputAction>();
 class CheckOutputAction : public Action
 {
 public:
-
   /**
    * Class constructor
    * @param params Input parameters for this object
    */
   CheckOutputAction(InputParameters params);
 
-  /**
-   * Class destructor
-   */
-  virtual ~CheckOutputAction();
-
-  /**
-   * Preforms a set of checks on various Output objects
-   */
-  virtual void act();
+  virtual void act() override;
 
 private:
-
   /**
    * Performs check for "outputs" option for Variables and AuxVariables blocks
    * @param task The name of the task to extract names from (add_variable or add_aux_variable)
@@ -56,7 +46,8 @@ private:
   void checkVariableOutput(const std::string & task);
 
   /**
-   * Preforms a set of checks on each of the Material objects that the "outputs" parameters has valid values
+   * Preforms a set of checks on each of the Material objects that the "outputs" parameters has
+   * valid values
    */
   void checkMaterialOutput();
 
@@ -71,4 +62,4 @@ private:
   void checkPerfLogOutput();
 };
 
-#endif //CHECKOUTPUTACTION_H
+#endif // CHECKOUTPUTACTION_H

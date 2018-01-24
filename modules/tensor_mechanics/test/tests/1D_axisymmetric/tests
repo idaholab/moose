@@ -1,0 +1,33 @@
+[Tests]
+  [./axisymmetric_plane_strain_incremental]
+    type = 'Exodiff'
+    input = 'axisymm_plane_strain_incremental.i'
+    exodiff = 'axisymm_plane_strain_incremental_out.e'
+  [../]
+  [./axisymmetric_plane_strain_small]
+    type = 'Exodiff'
+    input = 'axisymm_plane_strain_small.i'
+    exodiff = 'axisymm_plane_strain_small_out.e'
+  [../]
+  [./axisymmetric_plane_strain_finite]
+    type = 'Exodiff'
+    input = 'axisymm_plane_strain_finite.i'
+    exodiff = 'axisymm_plane_strain_finite_out.e'
+  [../]
+
+  [./axisymmetric_gps_incremental]
+    type = 'Exodiff'
+    input = 'axisymm_gps_incremental.i'
+    exodiff = 'axisymm_gps_incremental_out.e'
+  [../]
+  [./axisymmetric_gps_small]
+    type = 'Exodiff'
+    input = 'axisymm_gps_small.i'
+    exodiff = 'axisymm_gps_small_out.e'
+  [../]
+  [./axisymmetric_gps_finite]
+    type = 'Exodiff'
+    input = 'axisymm_gps_finite.i'
+    exodiff = 'axisymm_gps_finite_out.e'
+  [../]
+[]

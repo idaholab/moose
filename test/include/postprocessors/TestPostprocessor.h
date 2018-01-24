@@ -19,7 +19,7 @@
 
 class TestPostprocessor;
 
-template<>
+template <>
 InputParameters validParams<TestPostprocessor>();
 
 /**
@@ -52,7 +52,6 @@ public:
   virtual Real getValue();
 
 private:
-
   /// Type of testing action to perform
   MooseEnum _test_type;
 
@@ -61,7 +60,9 @@ private:
   const PostprocessorValue & _old_val;
   const PostprocessorValue & _older_val;
   ///@}
-};
 
+  /// A test counter
+  unsigned int _execute_count = 0;
+};
 
 #endif // TESTPOSTPROCESSOR_H

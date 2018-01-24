@@ -14,19 +14,16 @@
 
 #include "LayeredAverage.h"
 
-// libmesh includes
-#include "libmesh/mesh_tools.h"
-
-template<>
-InputParameters validParams<LayeredAverage>()
+template <>
+InputParameters
+validParams<LayeredAverage>()
 {
   InputParameters params = validParams<LayeredIntegral>();
 
   return params;
 }
 
-LayeredAverage::LayeredAverage(const InputParameters & parameters) :
-    LayeredIntegral(parameters)
+LayeredAverage::LayeredAverage(const InputParameters & parameters) : LayeredIntegral(parameters)
 {
   _layer_volumes.resize(_num_layers);
 }
@@ -36,8 +33,8 @@ LayeredAverage::initialize()
 {
   LayeredIntegral::initialize();
 
-  for (unsigned int i=0; i<_layer_volumes.size(); i++)
-    _layer_volumes[i] = 0.0;
+  for (auto & vol : _layer_volumes)
+    vol = 0.0;
 }
 
 void
@@ -57,7 +54,7 @@ LayeredAverage::finalize()
   gatherSum(_layer_volumes);
 
   // Compute the average for each layer
-  for (unsigned int i=0; i<_layer_volumes.size(); i++)
+  for (unsigned int i = 0; i < _layer_volumes.size(); i++)
     if (layerHasValue(i))
       setLayerValue(i, getLayerValue(i) / _layer_volumes[i]);
 }
@@ -67,7 +64,6 @@ LayeredAverage::threadJoin(const UserObject & y)
 {
   LayeredIntegral::threadJoin(y);
   const LayeredAverage & la = static_cast<const LayeredAverage &>(y);
-  for (unsigned int i=0; i<_layer_volumes.size(); i++)
+  for (unsigned int i = 0; i < _layer_volumes.size(); i++)
     _layer_volumes[i] += la._layer_volumes[i];
 }
-

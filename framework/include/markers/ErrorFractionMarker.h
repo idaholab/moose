@@ -19,22 +19,22 @@
 
 class ErrorFractionMarker;
 
-template<>
+template <>
 InputParameters validParams<ErrorFractionMarker>();
 
 class ErrorFractionMarker : public IndicatorMarker
 {
 public:
   ErrorFractionMarker(const InputParameters & parameters);
-  virtual ~ErrorFractionMarker(){};
 
-  virtual void markerSetup();
+  virtual void markerSetup() override;
 
 protected:
-  virtual MarkerValue computeElementMarker();
+  virtual MarkerValue computeElementMarker() override;
 
   Real _coarsen;
   Real _refine;
+  bool _clear_extremes;
 
   Real _max;
   Real _min;

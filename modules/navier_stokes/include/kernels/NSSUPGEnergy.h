@@ -12,7 +12,7 @@
 // Forward Declarations
 class NSSUPGEnergy;
 
-template<>
+template <>
 InputParameters validParams<NSSUPGEnergy>();
 
 /**
@@ -33,7 +33,7 @@ private:
   // Single function for computing on and off-diagonal Jacobian
   // entries in a single function.  The input index is in Moose
   // variable numbering.
-  Real compute_jacobian(unsigned var);
+  Real computeJacobianHelper(unsigned var);
 };
 
 #endif // NSSUPGENERGY_H

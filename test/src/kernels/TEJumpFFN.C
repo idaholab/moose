@@ -14,8 +14,9 @@
 
 #include "TEJumpFFN.h"
 
-template<>
-InputParameters validParams<TEJumpFFN>()
+template <>
+InputParameters
+validParams<TEJumpFFN>()
 {
   InputParameters params = validParams<Kernel>();
   params.addParam<double>("t_jump", 1.0, "Time when the jump occurs");
@@ -23,17 +24,16 @@ InputParameters validParams<TEJumpFFN>()
   return params;
 }
 
-TEJumpFFN::TEJumpFFN(const InputParameters & parameters) :
-    Kernel(parameters),
-    _t_jump(getParam<Real>("t_jump")),
-    _slope(getParam<Real>("slope"))
+TEJumpFFN::TEJumpFFN(const InputParameters & parameters)
+  : Kernel(parameters), _t_jump(getParam<Real>("t_jump")), _slope(getParam<Real>("slope"))
 {
 }
 
 Real
 TEJumpFFN::computeQpResidual()
 {
-  return -_test[_i][_qp] * (_slope * libMesh::pi)/(1 + _slope*_slope*libMesh::pi*libMesh::pi*std::pow(_t_jump - _t, 2));
+  return -_test[_i][_qp] * (_slope * libMesh::pi) /
+         (1 + _slope * _slope * libMesh::pi * libMesh::pi * std::pow(_t_jump - _t, 2));
 }
 
 Real

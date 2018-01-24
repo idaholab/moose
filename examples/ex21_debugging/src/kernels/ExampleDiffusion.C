@@ -18,29 +18,30 @@
  * This function defines the valid parameters for
  * this Kernel and their default values
  */
-template<>
-InputParameters validParams<ExampleDiffusion>()
+template <>
+InputParameters
+validParams<ExampleDiffusion>()
 {
   InputParameters params = validParams<Diffusion>();
-  params.addRequiredCoupledVar("coupled_coef", "The value of this variable will be used as the diffusion coefficient.");
+  params.addRequiredCoupledVar(
+      "coupled_coef", "The value of this variable will be used as the diffusion coefficient.");
 
   return params;
 }
 
-
-ExampleDiffusion::ExampleDiffusion(const InputParameters & parameters) :
-    Diffusion(parameters),
-    _coupled_coef(coupledValue("coupled_coef"))
-{}
+ExampleDiffusion::ExampleDiffusion(const InputParameters & parameters)
+  : Diffusion(parameters), _coupled_coef(coupledValue("coupled_coef"))
+{
+}
 
 Real
 ExampleDiffusion::computeQpResidual()
 {
-  return _coupled_coef[_qp]*Diffusion::computeQpResidual();
+  return _coupled_coef[_qp] * Diffusion::computeQpResidual();
 }
 
 Real
 ExampleDiffusion::computeQpJacobian()
 {
-  return _coupled_coef[_qp]*Diffusion::computeQpJacobian();
+  return _coupled_coef[_qp] * Diffusion::computeQpJacobian();
 }

@@ -4,6 +4,9 @@
   # Yes we want a slightly irregular grid
   nx = 11
   ny = 11
+  # We will transfer data to the sub app, and that is currently only
+  # supported from a replicated mesh
+  parallel_type = replicated
 []
 
 [Variables]
@@ -67,4 +70,8 @@
     type = MultiAppVariableValueSampleTransfer
     multi_app = sub
   [../]
+[]
+
+[Problem]
+  parallel_barrier_messaging = false
 []

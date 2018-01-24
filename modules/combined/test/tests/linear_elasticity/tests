@@ -1,0 +1,46 @@
+[Tests]
+  [./linear_elastic_material]
+    type = 'Exodiff'
+    input = 'linear_elastic_material.i'
+    exodiff = 'linear_elastic_material_out.e'
+    max_parallel = 1
+  [../]
+
+  [./linear_anisotropic_material_sm]
+    type = 'Exodiff'
+    input = 'linear_anisotropic_material_sm.i'
+    exodiff = 'linear_anisotropic_material_out.e'
+  [../]
+
+  [./linear_anisotropic_material]
+    type = 'Exodiff'
+    input = 'linear_anisotropic_material.i'
+    exodiff = 'linear_anisotropic_material_out.e'
+    prereq = 'linear_anisotropic_material_sm'
+  [../]
+
+  [./applied_strain]
+    type = 'Exodiff'
+    input = 'applied_strain.i'
+    exodiff = 'applied_strain_out.e'
+  [../]
+
+  [./extra_stress]
+    type = 'Exodiff'
+    input = 'extra_stress.i'
+    exodiff = 'extra_stress_out.e'
+  [../]
+
+  [./tensor]
+    type = 'Exodiff'
+    input = 'tensor.i'
+    exodiff = 'tensor_out.e'
+    max_parallel = 1
+  [../]
+
+  [./thermal_expansion]
+    type = 'Exodiff'
+    input = 'thermal_expansion.i'
+    exodiff = 'thermal_expansion_out.e'
+  [../]
+[]

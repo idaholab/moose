@@ -8,9 +8,9 @@
   nx = 4
   ny = 4
   elem_type = QUAD4
-  # This test will not work in parallel with ParallelMesh enabled
+  # This test will not work in parallel with DistributedMesh enabled
   # due to a bug in PeriodicBCs.
-  distribution = serial
+  parallel_type = replicated
 []
 
 [Functions]
@@ -20,15 +20,6 @@
     grad_x = -pi*cos(pi*x)*sin(pi*y)
     grad_y = -pi*sin(pi*x)*cos(pi*y)
   [../]
-
-  [./bc_fnr]
-    type = ParsedFunction
-    value = -pi*cos(pi*x)*sin(pi*y)
-  [../]
-  [./bc_fnl]
-    type = ParsedFunction
-    value = pi*cos(pi*x)*sin(pi*y)
-  [../]
   [./bc_fnt]
     type = ParsedFunction
     value = -pi*sin(pi*x)*cos(pi*y)
@@ -37,7 +28,6 @@
     type = ParsedFunction
     value = pi*sin(pi*x)*cos(pi*y)
   [../]
-
   [./forcing_fn]
     type = ParsedFunction
     value = -2*pi*pi*sin(pi*x)*sin(pi*y)-sin(pi*x)*sin(pi*y)
@@ -57,43 +47,23 @@
     type = Diffusion
     variable = u
   [../]
-
   [./reaction]
     type = Reaction
     variable = u
   [../]
-
   [./forcing]
-    type = UserForcingFunction
+    type = BodyForce
     variable = u
     function = forcing_fn
   [../]
 []
 
 [BCs]
-#  [./all]
-#    type = FunctionDirichletBC
-#    variable = u
-#    boundary = 'bottom right top left'
-#    function = bc_fn
-#  [../]
   [./Periodic]
     [./all]
       variable = u
       auto_direction= 'x y'
     [../]
-  [../]
-  [./bc_right]
-    type=FunctionNeumannBC
-    variable = u
-    boundary = 'right'
-    function = bc_fnr
-  [../]
-  [./bc_left]
-    type=FunctionNeumannBC
-    variable = u
-    boundary = 'left'
-    function = bc_fnl
   [../]
   [./bc_top]
     type=FunctionNeumannBC
@@ -113,12 +83,10 @@
   [./dofs]
     type = NumDOFs
   [../]
-
   [./h]
     type = AverageElementSize
     variable = u
   [../]
-
   [./L2error]
     type = ElementL2Error
     variable = u
@@ -138,18 +106,23 @@
 
 [Executioner]
   type = Steady
-
   solve_type = 'NEWTON'
 
-  [./Adaptivity]
-   steps = 2
-    refine_fraction = 1
-    coarsen_fraction = 0
-    max_h_level = 10
-    print_changed_info = 1
-  [../]
+  # We use higher-order quadrature to ensure that the forcing function
+  # is integrated accurately.
   [./Quadrature]
-    order=FIFTEENTH
+    order=ELEVENTH
+  [../]
+[]
+
+[Adaptivity]
+  steps = 2
+  marker = uniform
+  [./Markers]
+    [./uniform]
+      type = UniformMarker
+      mark = refine
+    [../]
   [../]
 []
 
@@ -157,4 +130,5 @@
   execute_on = 'timestep_end'
   exodus = true
   csv = true
+  print_mesh_changed_info = true
 []

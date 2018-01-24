@@ -1,8 +1,8 @@
 [Mesh]
-  # This test uses SolutionUserObject which doesn't work with ParallelMesh.
+  # This test uses SolutionUserObject which doesn't work with DistributedMesh.
   type = FileMesh
   file = cubesource.e
-  distribution = serial
+  parallel_type = replicated
 []
 
 [Variables]
@@ -42,10 +42,6 @@
     system_variables = source_nodal
     execute_on = 'initial timestep_begin'
   [../]
-[]
-[Problem]
-  type = FEProblem
-  use_legacy_uo_initialization = false
 []
 
 [BCs]

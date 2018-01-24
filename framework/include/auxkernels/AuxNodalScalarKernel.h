@@ -21,25 +21,20 @@
 
 class NodalScalarKernel;
 
-template<>
+template <>
 InputParameters validParams<NodalScalarKernel>();
 
 /**
  *
  */
-class AuxNodalScalarKernel :
-  public AuxScalarKernel,
-  public Coupleable,
-  public MooseVariableDependencyInterface
+class AuxNodalScalarKernel : public AuxScalarKernel,
+                             public Coupleable,
+                             public MooseVariableDependencyInterface
 {
 public:
   AuxNodalScalarKernel(const InputParameters & parameters);
-  virtual ~AuxNodalScalarKernel();
 
-  /**
-   * Evaluate the kernel
-   */
-  virtual void compute();
+  virtual void compute() override;
 
 protected:
   /// List of node IDs

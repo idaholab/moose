@@ -1,0 +1,15 @@
+[Tests]
+  [./multi_same_times]
+    # Test the ability to control multiple AuxScalarKernels with the same start/end times
+    type = CSVDiff
+    input = 'control.i'
+    csvdiff = 'control_out.csv'
+  [../]
+
+  [./multi_different_times]
+    # Test the ability to control multiple AuxScalarKernels with different start/end times
+    type = CSVDiff
+    input = 'control_different.i'
+    csvdiff = 'control_different_out.csv'
+  [../]
+[]

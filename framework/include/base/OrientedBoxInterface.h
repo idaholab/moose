@@ -16,26 +16,28 @@
 #define ORIENTEDBOXINTERFACE_H
 
 // MOOSE includes
-#include "InputParameters.h"
 #include "MooseTypes.h"
 
-// libMesh includes
-#include "libmesh/mesh_base.h"
-#include "libmesh/mesh_tools.h"
+#include "libmesh/bounding_box.h" // For destructor
 #include "libmesh/vector_value.h"
 #include "libmesh/tensor_value.h"
 
 // Forward declarations
+class InputParameters;
 class OrientedBoxInterface;
 
-template<>
+template <typename T>
+InputParameters validParams();
+
+template <>
 InputParameters validParams<OrientedBoxInterface>();
 
 /*
  * An interface class for testing if a point is within a bounding box with arbitrary orientation
  *
  * This constructor does most of the work.
- * The overall strategy is to create a box of the required size which is centered at the origin, with
+ * The overall strategy is to create a box of the required size which is centered at the origin,
+ * with
  * the width along the x axis, the length along the y axis, and the height along the z axis
  *
  * Then create the transformation from real space into this box, which is:
@@ -47,7 +49,6 @@ InputParameters validParams<OrientedBoxInterface>();
 class OrientedBoxInterface
 {
 public:
-
   /**
    * Class constructor
    */
@@ -56,10 +57,9 @@ public:
   /**
    * Class destructor
    */
-  virtual ~OrientedBoxInterface();
+  virtual ~OrientedBoxInterface() = default;
 
 protected:
-
   /**
    * Test if the supplied point is within the defined oriented bounding box
    * @param point The point to test
@@ -67,17 +67,15 @@ protected:
    */
   bool containsPoint(const Point & point);
 
-
 private:
-
   /// Center of the defined bounding box
   Point _center;
 
   /// Rotation matrix for transforming the bounding box
-  RealTensorValue * _rot_matrix;
+  std::unique_ptr<RealTensorValue> _rot_matrix;
 
   /// The bounding box used to test if the point is contained within
-  MeshTools::BoundingBox * _bounding_box;
+  std::unique_ptr<BoundingBox> _bounding_box;
 };
 
 #endif // ORIENTEDBOXINTERFACE_H

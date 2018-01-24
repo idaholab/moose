@@ -20,7 +20,7 @@
 
 class SplineFunction;
 
-template<>
+template <>
 InputParameters validParams<SplineFunction>();
 
 /**
@@ -30,17 +30,18 @@ class SplineFunction : public Function
 {
 public:
   SplineFunction(const InputParameters & parameters);
-  virtual ~SplineFunction();
 
-  virtual Real value(Real t, const Point & p);
-  virtual RealGradient gradient(Real t, const Point & p);
+  virtual Real value(Real t, const Point & p) override;
+  virtual RealGradient gradient(Real t, const Point & p) override;
 
   virtual Real derivative(const Point & p);
   virtual Real secondDerivative(const Point & p);
 
 protected:
   SplineInterpolation _ipol;
-};
 
+  /// Desired component
+  int _component;
+};
 
 #endif /* SPLINEFUNCTION_H */

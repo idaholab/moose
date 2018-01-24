@@ -5,14 +5,18 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-
 #include "RichardsApp.h"
 #include "Moose.h"
 #include "AppFactory.h"
+#include "MooseSyntax.h"
+
+// Actions
+#include "Q2PAction.h"
 
 // UserObjects
 #include "RichardsVarNames.h"
 #include "RichardsDensityConstBulk.h"
+#include "RichardsDensityConstBulkCut.h"
 #include "RichardsDensityIdeal.h"
 #include "RichardsDensityMethane20degC.h"
 #include "RichardsDensityVDW.h"
@@ -22,6 +26,7 @@
 #include "RichardsRelPermVG1.h"
 #include "RichardsRelPermBW.h"
 #include "RichardsRelPermPowerGas.h"
+#include "Q2PRelPermPowerGas.h"
 #include "RichardsSeff1VG.h"
 #include "RichardsSeff1VGcut.h"
 #include "RichardsSeff1BWsmall.h"
@@ -55,10 +60,12 @@
 #include "RichardsMaterial.h"
 #include "PoroFullSatMaterial.h" // Used for mechanical coupling
 #include "DarcyMaterial.h"
+#include "Q2PMaterial.h"
 
 // DiracKernels
 #include "RichardsBorehole.h"
 #include "RichardsPolyLineSink.h"
+#include "Q2PBorehole.h"
 
 // Functions
 #include "RichardsExcavGeom.h"
@@ -69,9 +76,9 @@
 #include "RichardsMass.h"
 #include "RichardsPiecewiseLinearSinkFlux.h"
 #include "RichardsHalfGaussianSinkFlux.h"
-#include "NodalMaxVarChange.h"
 #include "RichardsExcavFlow.h"
 #include "RichardsPlotQuantity.h"
+#include "Q2PPiecewiseLinearSinkFlux.h"
 
 // Kernels
 #include "RichardsMassChange.h"
@@ -81,37 +88,42 @@
 #include "RichardsPPenalty.h"
 #include "PoroFullSatTimeDerivative.h" // Used for mechanical coupling
 #include "DarcyFlux.h"
+#include "Q2PPorepressureFlux.h"
+#include "Q2PSaturationFlux.h"
+#include "Q2PSaturationDiffusion.h"
+#include "Q2PNodalMass.h"
+#include "Q2PNegativeNodalMassOld.h"
 
-  // BoundaryConditions
+// BoundaryConditions
 #include "RichardsExcav.h"
 #include "RichardsPiecewiseLinearSink.h"
 #include "RichardsHalfGaussianSink.h"
+#include "Q2PPiecewiseLinearSink.h"
 
 // Problems
 #include "RichardsMultiphaseProblem.h"
 
-template<>
-InputParameters validParams<RichardsApp>()
+template <>
+InputParameters
+validParams<RichardsApp>()
 {
   InputParameters params = validParams<MooseApp>();
-  params.set<bool>("use_legacy_uo_initialization") = false;
-  params.set<bool>("use_legacy_uo_aux_computation") = false;
   return params;
 }
 
-RichardsApp::RichardsApp(const InputParameters & parameters) :
-    MooseApp(parameters)
+RichardsApp::RichardsApp(const InputParameters & parameters) : MooseApp(parameters)
 {
   Moose::registerObjects(_factory);
   RichardsApp::registerObjects(_factory);
 
   Moose::associateSyntax(_syntax, _action_factory);
   RichardsApp::associateSyntax(_syntax, _action_factory);
+
+  mooseDeprecated("Please use the PorousFlow module instead.  If Richards contains functionality "
+                  "not included in PorousFlow, please contact the moose-users google group");
 }
 
-RichardsApp::~RichardsApp()
-{
-}
+RichardsApp::~RichardsApp() {}
 
 void
 RichardsApp::registerApps()
@@ -125,6 +137,7 @@ RichardsApp::registerObjects(Factory & factory)
   // UserObjects
   registerUserObject(RichardsVarNames);
   registerUserObject(RichardsDensityConstBulk);
+  registerUserObject(RichardsDensityConstBulkCut);
   registerUserObject(RichardsDensityIdeal);
   registerUserObject(RichardsDensityMethane20degC);
   registerUserObject(RichardsDensityVDW);
@@ -134,6 +147,7 @@ RichardsApp::registerObjects(Factory & factory)
   registerUserObject(RichardsRelPermVG1);
   registerUserObject(RichardsRelPermBW);
   registerUserObject(RichardsRelPermPowerGas);
+  registerUserObject(Q2PRelPermPowerGas);
   registerUserObject(RichardsSeff1VG);
   registerUserObject(RichardsSeff1VGcut);
   registerUserObject(RichardsSeff1BWsmall);
@@ -167,10 +181,12 @@ RichardsApp::registerObjects(Factory & factory)
   registerMaterial(RichardsMaterial);
   registerMaterial(PoroFullSatMaterial); // Used for mechanical coupling
   registerMaterial(DarcyMaterial);
+  registerMaterial(Q2PMaterial);
 
   // DiracKernels
   registerDiracKernel(RichardsPolyLineSink);
   registerDiracKernel(RichardsBorehole);
+  registerDiracKernel(Q2PBorehole);
 
   // Functions
   registerFunction(RichardsExcavGeom);
@@ -181,9 +197,9 @@ RichardsApp::registerObjects(Factory & factory)
   registerPostprocessor(RichardsMass);
   registerPostprocessor(RichardsPiecewiseLinearSinkFlux);
   registerPostprocessor(RichardsHalfGaussianSinkFlux);
-  registerPostprocessor(NodalMaxVarChange);
   registerPostprocessor(RichardsExcavFlow);
   registerPostprocessor(RichardsPlotQuantity);
+  registerPostprocessor(Q2PPiecewiseLinearSinkFlux);
 
   // Kernels
   registerKernel(RichardsMassChange);
@@ -193,17 +209,32 @@ RichardsApp::registerObjects(Factory & factory)
   registerKernel(RichardsPPenalty);
   registerKernel(PoroFullSatTimeDerivative); // Used for mechanical coupling
   registerKernel(DarcyFlux);
+  registerKernel(Q2PPorepressureFlux);
+  registerKernel(Q2PSaturationFlux);
+  registerKernel(Q2PSaturationDiffusion);
+  registerKernel(Q2PNodalMass);
+  registerKernel(Q2PNegativeNodalMassOld);
 
   // BoundaryConditions
   registerBoundaryCondition(RichardsExcav);
   registerBoundaryCondition(RichardsPiecewiseLinearSink);
   registerBoundaryCondition(RichardsHalfGaussianSink);
+  registerBoundaryCondition(Q2PPiecewiseLinearSink);
 
   // Problems
   registerProblem(RichardsMultiphaseProblem);
 }
 
 void
-RichardsApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & /*action_factory*/)
+RichardsApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
 {
+  registerSyntaxTask("Q2PAction", "Q2P", "add_kernel");
+  registerSyntaxTask("Q2PAction", "Q2P", "add_aux_variable");
+  registerSyntaxTask("Q2PAction", "Q2P", "add_function");
+  registerSyntaxTask("Q2PAction", "Q2P", "add_postprocessor");
+
+  registerAction(Q2PAction, "add_kernel");
+  registerAction(Q2PAction, "add_aux_variable");
+  registerAction(Q2PAction, "add_function");
+  registerAction(Q2PAction, "add_postprocessor");
 }

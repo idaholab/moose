@@ -1,4 +1,13 @@
-# This test has been verified to give the same error calculation as the libMesh kelly_error_estimator.  If this test is diffing... the diff is wrong!
+###########################################################
+# This is a test of the Mesh Indicator System. It computes
+# a user-defined "error" for each element in the Mesh.
+#
+# This test has been verified to give the same error
+# calculation as the libMesh kelly_error_estimator.  If
+# this test is diffing... the diff is wrong!
+#
+# @Requirement F2.40
+###########################################################
 
 [Mesh]
   type = GeneratedMesh
@@ -49,6 +58,7 @@
   [../]
 []
 
+# Mesh Indicator System
 [Adaptivity]
   [./Indicators]
     [./error]

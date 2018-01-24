@@ -14,15 +14,17 @@
 
 #include "MaterialRealAux.h"
 
-template<>
-InputParameters validParams<MaterialRealAux>()
+template <>
+InputParameters
+validParams<MaterialRealAux>()
 {
-  InputParameters params = validParams<MaterialAuxBase<Real> >();
+  InputParameters params = validParams<MaterialAuxBase<Real>>();
+  params.addClassDescription("Outputs element volume-averaged material properties");
   return params;
 }
 
-MaterialRealAux::MaterialRealAux(const InputParameters & parameters):
-    MaterialAuxBase<Real>(parameters)
+MaterialRealAux::MaterialRealAux(const InputParameters & parameters)
+  : MaterialAuxBase<Real>(parameters)
 {
 }
 

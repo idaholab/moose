@@ -19,7 +19,7 @@
 
 class SetupTimeStepperAction;
 
-template<>
+template <>
 InputParameters validParams<SetupTimeStepperAction>();
 
 /**
@@ -29,13 +29,8 @@ class SetupTimeStepperAction : public MooseObjectAction
 {
 public:
   SetupTimeStepperAction(InputParameters parameters);
-  virtual ~SetupTimeStepperAction();
 
-  virtual void act();
-
-protected:
-
+  virtual void act() override;
 };
-
 
 #endif /* SETUPTIMESTEPPERACTION_H */

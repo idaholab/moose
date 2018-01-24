@@ -26,7 +26,7 @@
 class Problem;
 class Executioner;
 
-template<>
+template <>
 InputParameters validParams<Executioner>();
 
 /**
@@ -38,11 +38,10 @@ InputParameters validParams<Executioner>();
  * for the NonlinearSystem once... where Transient Executioners call solve()
  * multiple times... i.e. once per timestep.
  */
-class Executioner :
-  public MooseObject,
-  public UserObjectInterface,
-  public PostprocessorInterface,
-  public Restartable
+class Executioner : public MooseObject,
+                    public UserObjectInterface,
+                    public PostprocessorInterface,
+                    public Restartable
 {
 public:
   /**
@@ -92,9 +91,9 @@ public:
   virtual Problem & problem();
 
   /**
-   * Return a reference to this Executioner's FEProblem instance
+   * Return a reference to this Executioner's FEProblemBase instance
    */
-  FEProblem & feProblem();
+  FEProblemBase & feProblem();
 
   /** The name of the TimeStepper
    * This is an empty string for non-Transient executioners
@@ -104,7 +103,7 @@ public:
 
   /**
    * Can be used by subsclasses to call parentOutputPositionChanged()
-   * on the underlying FEProblem.
+   * on the underlying FEProblemBase.
    */
   virtual void parentOutputPositionChanged() {}
 
@@ -114,16 +113,17 @@ public:
   virtual bool lastSolveConverged();
 
 protected:
-
   /**
    * Adds a postprocessor to report a Real class attribute
    * @param name The name of the postprocessor to create
    * @param attribute The Real class attribute to report
    * @param execute_on When to execute the postprocessor that is created
    */
-  virtual void addAttributeReporter(const std::string & name, Real & attribute, const std::string execute_on = "");
+  virtual void addAttributeReporter(const std::string & name,
+                                    Real & attribute,
+                                    const std::string execute_on = "");
 
-  FEProblem & _fe_problem;
+  FEProblemBase & _fe_problem;
 
   /// Initial Residual Variables
   Real _initial_residual_norm;
@@ -136,4 +136,4 @@ protected:
   std::vector<std::string> _splitting;
 };
 
-#endif //EXECUTIONER_H
+#endif // EXECUTIONER_H

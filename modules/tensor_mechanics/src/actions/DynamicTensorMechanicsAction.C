@@ -5,43 +5,42 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 #include "DynamicTensorMechanicsAction.h"
-
 #include "Factory.h"
 #include "FEProblem.h"
 #include "Parser.h"
 
-template<>
-InputParameters validParams<DynamicTensorMechanicsAction>()
+template <>
+InputParameters
+validParams<DynamicTensorMechanicsAction>()
 {
   InputParameters params = validParams<TensorMechanicsAction>();
   params.addClassDescription("Set up dynamic stress divergence kernels");
-  params.addParam<Real>("zeta", 0, "zeta parameter for the Rayleigh damping");
+  params.addParam<MaterialPropertyName>("zeta",
+                                        0.0,
+                                        "Name of material property or a constant real "
+                                        "number defining the zeta parameter for the "
+                                        "Rayleigh damping.");
   params.addParam<Real>("alpha", 0, "alpha parameter for HHT time integration");
+  params.addParam<bool>("static_initialization",
+                        false,
+                        "Set to true get the system to "
+                        "equillibrium under gravity by running a "
+                        "quasi-static analysis (by solving Ku = F) "
+                        "in the first time step.");
   return params;
 }
 
-DynamicTensorMechanicsAction::DynamicTensorMechanicsAction(const InputParameters & params) :
-  TensorMechanicsAction(params)
+DynamicTensorMechanicsAction::DynamicTensorMechanicsAction(const InputParameters & params)
+  : TensorMechanicsAction(params)
 {
 }
 
-void
-DynamicTensorMechanicsAction::addkernel(const std::string & name, InputParameters & params)
+std::string
+DynamicTensorMechanicsAction::getKernelType()
 {
-  //Add the zeta and alpha parameters to the params (which belongs to StressDivergenceTensors).
-  //Add DynamicStressDivergenceTensors kernel
-  params.addParam<Real>("zeta", 0, "zeta parameter for the Rayleigh damping");
-  params.addParam<Real>("alpha", 0, "alpha parameter for HHT time integration");
-
-  params.set<Real>("zeta") = getParam<Real>("zeta");
-  params.set<Real>("alpha") = getParam<Real>("alpha");
-
-  _problem->addKernel("DynamicStressDivergenceTensors", name, params);
+  // choose kernel type based on coordinate system
+  if (_coord_system == Moose::COORD_XYZ)
+    return "DynamicStressDivergenceTensors";
+  else
+    mooseError("Unsupported coordinate system");
 }
-
-void
-DynamicTensorMechanicsAction::act()
-{
-  TensorMechanicsAction::act();
-}
-

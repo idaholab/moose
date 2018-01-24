@@ -1,0 +1,36 @@
+var options = {
+  lineWidth: 1,
+  {%- if chart_width %}
+  width: {{chart_width}},
+  {%- endif %}
+  {%- if chart_height %}
+  height: {{chart_height}},
+  {%- endif %}
+  {%- if title or subtitle %}
+  chart: {
+    {%- if title %}
+    title: '{{title}}',
+    {%- endif %}
+    {%- if subtitle %}
+    subtitle: '{{subtitle}}'
+    {%- endif %}
+  },
+  {%- endif %}
+  hAxis: {
+    {%- if haxis_title %}
+    title: '{{haxis_title}}',
+    {%- endif %}
+    {%- if haxis_ticks %}
+    ticks: {{haxis_ticks}},
+    {%- endif %}
+  },
+
+  vAxis: {
+    {%- if vaxis_title %}
+    title: '{{vaxis_title}}',
+    {%- endif %}
+    {%- if vaxis_ticks %}
+    ticks: {{vaxis_ticks}},
+    {%- endif %}
+  },
+};

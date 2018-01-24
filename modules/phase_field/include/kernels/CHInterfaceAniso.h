@@ -19,7 +19,7 @@ public:
   CHInterfaceAniso(const InputParameters & parameters);
 };
 
-template<>
+template <>
 InputParameters validParams<CHInterfaceAniso>();
 
-#endif //CHINTERFACEANISO_H
+#endif // CHINTERFACEANISO_H

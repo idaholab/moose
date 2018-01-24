@@ -17,7 +17,7 @@
 
   [./forcing_func]
     type = ParsedFunction
-    value = "alpha*alpha*pi*pi*sin(alpha*pi*x)"
+    value = '"alpha*alpha*pi*pi*sin(alpha*pi*x)"'
     vars = 'alpha'
     vals = '16'
   [../]
@@ -32,7 +32,7 @@
   [../]
 
   [./forcing]
-    type = UserForcingFunction
+    type = BodyForce
     variable = u
     function = forcing_func
   [../]

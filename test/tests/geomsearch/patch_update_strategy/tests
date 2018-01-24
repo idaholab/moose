@@ -3,15 +3,34 @@
     type = 'Exodiff'
     input = 'never.i'
     exodiff = 'never_out.e'
+    use_old_floor = True
+    allow_warnings = true
   [../]
   [./auto]
     type = 'Exodiff'
     input = 'auto.i'
     exodiff = 'auto_out.e'
+    use_old_floor = True
   [../]
   [./always]
     type = 'Exodiff'
     input = 'always.i'
     exodiff = 'always_out.e'
+    use_old_floor = True
+  [../]
+  [./nonlinear_iter]
+    type = 'Exodiff'
+    input = 'always.i'
+    cli_args = 'Mesh/patch_update_strategy=iteration'
+    exodiff = 'always_out.e'
+    use_old_floor = True
+    prereq = always
+  [../]
+  [./never_warning]
+    type = RunException
+    input = 'never.i'
+    cli_args = 'Outputs/file_base=never_warning_out'
+    expect_err = "Warning in PenetrationLocator. Penetration is not detected for one or more slave nodes. This could be because those slave nodes simply do not project to faces on the master surface. However, this could also be because contact should be enforced on those nodes, but the faces that they project to are outside the contact patch, which will give an erroneous result. Use appropriate options for 'patch_size' and 'patch_update_strategy' in the Mesh block to avoid this issue. Setting 'patch_update_strategy=iteration' is recommended because it completely avoids this potential issue. Also note that this warning is printed only once, so a similar situation could occur multiple times during the simulation but this warning is printed only at the first occurrence."
+    prereq = never
   [../]
 []

@@ -19,16 +19,15 @@
 
 class GlobalParamsAction;
 
-template<>
+template <>
 InputParameters validParams<GlobalParamsAction>();
 
-
-class GlobalParamsAction: public Action
+class GlobalParamsAction : public Action
 {
 public:
   GlobalParamsAction(InputParameters params);
 
-  virtual void act();
+  virtual void act() override;
 
   /**
    * This function is here to remove parameters of a type so that global parameters
@@ -38,17 +37,21 @@ public:
   void remove(const std::string & name);
 
   template <typename T>
-  inline
-  T & setScalarParam(const std::string &name)
+  inline T & setScalarParam(const std::string & name)
   {
     return parameters().set<T>(name);
   }
 
   template <typename T>
-  inline
-  std::vector<T> & setVectorParam(const std::string &name)
+  inline std::vector<T> & setVectorParam(const std::string & name)
   {
-    return parameters().set<std::vector<T> >(name);
+    return parameters().set<std::vector<T>>(name);
+  }
+
+  template <typename T>
+  inline std::vector<std::vector<T>> & setDoubleIndexParam(const std::string & name)
+  {
+    return parameters().set<std::vector<std::vector<T>>>(name);
   }
 };
-#endif //GLOBALPARAMSACTION_H
+#endif // GLOBALPARAMSACTION_H

@@ -14,22 +14,18 @@
 
 #include "OnOffDirichletBC.h"
 
-template<>
-InputParameters validParams<OnOffDirichletBC>()
+template <>
+InputParameters
+validParams<OnOffDirichletBC>()
 {
   InputParameters params = validParams<DirichletBC>();
 
   return params;
 }
 
-OnOffDirichletBC::OnOffDirichletBC(const InputParameters & parameters) :
-    DirichletBC(parameters)
-{
-}
+OnOffDirichletBC::OnOffDirichletBC(const InputParameters & parameters) : DirichletBC(parameters) {}
 
-OnOffDirichletBC::~OnOffDirichletBC()
-{
-}
+OnOffDirichletBC::~OnOffDirichletBC() {}
 
 bool
 OnOffDirichletBC::shouldApply()

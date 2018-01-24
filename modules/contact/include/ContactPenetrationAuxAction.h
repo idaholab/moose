@@ -13,10 +13,10 @@
 
 class ContactPenetrationAuxAction;
 
-template<>
+template <>
 InputParameters validParams<ContactPenetrationAuxAction>();
 
-class ContactPenetrationAuxAction: public Action
+class ContactPenetrationAuxAction : public Action
 {
 public:
   ContactPenetrationAuxAction(const InputParameters & params);
@@ -28,6 +28,5 @@ private:
   const BoundaryName _slave;
   const MooseEnum _order;
 };
-
 
 #endif // CONTACTACTION_H

@@ -18,27 +18,43 @@
 #include "ComputeJacobianThread.h"
 
 // Forward declarations
-class FEProblem;
-class NonlinearSystem;
+class FEProblemBase;
+class NonlinearSystemBase;
 
 class ComputeFullJacobianThread : public ComputeJacobianThread
 {
 public:
-  ComputeFullJacobianThread(FEProblem & fe_problem, NonlinearSystem & sys, SparseMatrix<Number> & jacobian);
+  ComputeFullJacobianThread(FEProblemBase & fe_problem,
+                            SparseMatrix<Number> & jacobian,
+                            Moose::KernelType kernel_type = Moose::KT_ALL);
 
   // Splitting Constructor
   ComputeFullJacobianThread(ComputeFullJacobianThread & x, Threads::split split);
 
   virtual ~ComputeFullJacobianThread();
 
-  void join(const ComputeJacobianThread & /*y*/)
-  {}
-
+  void join(const ComputeJacobianThread & /*y*/) {}
 
 protected:
-  virtual void computeJacobian();
-  virtual void computeFaceJacobian(BoundaryID bnd_id);
-  virtual void computeInternalFaceJacobian();
+  virtual void computeJacobian() override;
+  virtual void computeFaceJacobian(BoundaryID bnd_id) override;
+  virtual void computeInternalFaceJacobian(const Elem * neighbor) override;
+  virtual void computeInternalInterFaceJacobian(BoundaryID bnd_id) override;
+
+  NonlinearSystemBase & _nl;
+
+  // Reference to BC storage structures
+  const MooseObjectWarehouse<IntegratedBC> & _integrated_bcs;
+
+  // Reference to DGKernel storage
+  const MooseObjectWarehouse<DGKernel> & _dg_kernels;
+
+  // Reference to interface kernel storage
+  const MooseObjectWarehouse<InterfaceKernel> & _interface_kernels;
+
+  Moose::KernelType _kernel_type;
+
+  const KernelWarehouse * _warehouse;
 };
 
-#endif //COMPUTEFULLJACOBIANTHREAD_H
+#endif // COMPUTEFULLJACOBIANTHREAD_H

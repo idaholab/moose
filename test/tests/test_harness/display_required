@@ -1,0 +1,7 @@
+[Tests]
+  [./display_required]
+    type = RunCommand
+    command = ls
+    display_required = true
+  [../]
+[]

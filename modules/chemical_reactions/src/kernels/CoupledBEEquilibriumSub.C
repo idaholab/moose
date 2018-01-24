@@ -5,116 +5,127 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 #include "CoupledBEEquilibriumSub.h"
-#include "Material.h"
 
-/**
- * This function defines the valid parameters for
- * this Kernel and their default values
- */
-template<>
-InputParameters validParams<CoupledBEEquilibriumSub>()
+template <>
+InputParameters
+validParams<CoupledBEEquilibriumSub>()
 {
-  InputParameters params = validParams<Kernel>();
-  params.addParam<Real>("weight",1.0,"The weight of the equilibrium species");
-  params.addParam<Real>("log_k",0.0,"The equilibrium constaant of this equilibrium species in dissociateion reaction");
-
-  params.addParam<Real>("sto_u",1.0,"The stochiomentic coef of the primary variable this kernel operats on");
-  params.addRequiredParam<std::vector<Real> >("sto_v","The stochiometric coefficients of coupled primary species");
-
-  params.addCoupledVar("v", "Coupled primary species constituting the equalibrium species");
-
+  InputParameters params = validParams<TimeDerivative>();
+  params.addParam<Real>(
+      "weight", 1.0, "The weight of the equilibrium species in total concentration");
+  params.addParam<Real>("log_k", 0.0, "The equilibrium constant of this equilibrium species");
+  params.addParam<Real>(
+      "sto_u",
+      1.0,
+      "The stoichiometric coefficient of the primary species this kernel operates on");
+  params.addCoupledVar(
+      "gamma_u", 1.0, "Activity coefficient of primary species that this kernel operates on");
+  params.addRequiredParam<std::vector<Real>>(
+      "sto_v", "The stoichiometric coefficients of coupled primary species");
+  params.addCoupledVar("gamma_v", 1.0, "Activity coefficients of coupled primary species");
+  params.addCoupledVar("gamma_eq", 1.0, "Activity coefficient of this equilibrium species");
+  params.addCoupledVar("v", "Coupled primary species constituting the equilibrium species");
+  params.addClassDescription("Derivative of equilibrium species concentration wrt time");
   return params;
 }
 
-
 CoupledBEEquilibriumSub::CoupledBEEquilibriumSub(const InputParameters & parameters)
-  // You must call the constructor of the base class first
-  :Kernel(parameters),
-   _weight(getParam<Real>("weight")),
-   _log_k(getParam<Real>("log_k")),
-   _sto_u(getParam<Real>("sto_u")),
-   _sto_v(getParam<std::vector<Real> >("sto_v")),
-   _porosity(getMaterialProperty<Real>("porosity")),
-   _u_old(valueOld())
+  : TimeDerivative(parameters),
+    _weight(getParam<Real>("weight")),
+    _log_k(getParam<Real>("log_k")),
+    _sto_u(getParam<Real>("sto_u")),
+    _sto_v(getParam<std::vector<Real>>("sto_v")),
+    _gamma_u(coupledValue("gamma_u")),
+    _gamma_u_old(coupledValueOld("gamma_u")),
+    _gamma_eq(coupledValue("gamma_eq")),
+    _gamma_eq_old(coupledValueOld("gamma_eq")),
+    _porosity(getMaterialProperty<Real>("porosity")),
+    _u_old(valueOld())
 {
-  int n = coupledComponents("v");
+  const unsigned int n = coupledComponents("v");
+
+  // Check that the correct number of coupled values have been provided
+  if (_sto_v.size() != n)
+    mooseError("The number of values in sto_v is incorrect in ", _name);
+
+  if (isCoupled("gamma_v"))
+    if (coupled("gamma_v") != n)
+      mooseError("The number of variables in gamma_v is incorrect in ", _name);
+
   _vars.resize(n);
   _v_vals.resize(n);
   _v_vals_old.resize(n);
+  _gamma_v.resize(n);
+  _gamma_v_old.resize(n);
 
-  for (unsigned int i=0; i < _v_vals.size(); ++i)
+  for (unsigned int i = 0; i < _vars.size(); ++i)
   {
     _vars[i] = coupled("v", i);
     _v_vals[i] = &coupledValue("v", i);
-    _v_vals_old[i] = & coupledValueOld("v", i);
+    _v_vals_old[i] = &coupledValueOld("v", i);
+    // If gamma_v has been supplied, use those values, but if not, use the default value
+    _gamma_v[i] = (isCoupled("gamma_v") ? &coupledValue("gamma_v", i) : &coupledValue("gamma_v"));
+    _gamma_v_old[i] =
+        (isCoupled("gamma_v") ? &coupledValueOld("gamma_v", i) : &coupledValue("gamma_v"));
   }
-
 }
 
-Real CoupledBEEquilibriumSub::computeQpResidual()
+Real
+CoupledBEEquilibriumSub::computeQpResidual()
 {
-  Real _val_new = std::pow(10.0,_log_k)*std::pow(_u[_qp],_sto_u);
-  Real _val_old = std::pow(10.0,_log_k)*std::pow(_u_old[_qp],_sto_u);
+  mooseAssert(_gamma_eq[_qp] > 0.0, "Activity coefficient must be greater than zero");
 
-  if (_v_vals.size())
-    {
+  // Contribution due to primary species that this kernel acts on
+  Real val_new =
+      std::pow(10.0, _log_k) * std::pow(_gamma_u[_qp] * _u[_qp], _sto_u) / _gamma_eq[_qp];
+  Real val_old = std::pow(10.0, _log_k) * std::pow(_gamma_u_old[_qp] * _u_old[_qp], _sto_u) /
+                 _gamma_eq_old[_qp];
 
-      for (unsigned int i=0; i<_v_vals.size(); ++i)
-      {
-        _val_new *= std::pow((*_v_vals[i])[_qp],_sto_v[i]);
-
-        _val_old *= std::pow((*_v_vals_old[i])[_qp],_sto_v[i]);
-
-      }
-
-    }
-
-  return _porosity[_qp]*_weight*_test[_i][_qp]*(_val_new-_val_old)/_dt;
-
-}
-
-Real CoupledBEEquilibriumSub::computeQpJacobian()
-{
-  Real _val_new = std::pow(10.0,_log_k)*_sto_u*std::pow(_u[_qp],_sto_u-1.0)*_phi[_j][_qp];
-
-  if (_v_vals.size())
-    {
-
-      for (unsigned int i=0; i<_v_vals.size(); ++i)
-        _val_new *= std::pow((*_v_vals[i])[_qp],_sto_v[i]);
-    }
-
-  return _porosity[_qp]*_test[_i][_qp]*_weight*_val_new/_dt;
-}
-
-
-Real CoupledBEEquilibriumSub::computeQpOffDiagJacobian(unsigned int jvar)
-{
-  Real _val_new = std::pow(10.0,_log_k)*std::pow(_u[_qp],_sto_u);
-
-  if (_vars.size())
+  // Contribution due to coupled primary species
+  for (unsigned int i = 0; i < _vars.size(); ++i)
   {
-
-    for (unsigned int i=0; i<_vars.size(); ++i)
-    {
-
-      if (jvar == _vars[i])
-      {
-        _val_new *= _sto_v[i]*std::pow((*_v_vals[i])[_qp],_sto_v[i]-1.0)*_phi[_j][_qp];
-      }
-
-      else
-      {
-        _val_new *= std::pow((*_v_vals[i])[_qp],_sto_v[i]);
-      }
-
-    }
-
-    return _porosity[_qp]*_test[_i][_qp]*_weight*_val_new/_dt;
-
+    val_new *= std::pow((*_gamma_v[i])[_qp] * (*_v_vals[i])[_qp], _sto_v[i]);
+    val_old *= std::pow((*_gamma_v_old[i])[_qp] * (*_v_vals_old[i])[_qp], _sto_v[i]);
   }
-  else
+
+  return _porosity[_qp] * _weight * _test[_i][_qp] * (val_new - val_old) / _dt;
+}
+
+Real
+CoupledBEEquilibriumSub::computeQpJacobian()
+{
+  Real val_new = std::pow(10.0, _log_k) * _sto_u * _gamma_u[_qp] *
+                 std::pow(_gamma_u[_qp] * _u[_qp], _sto_u - 1.0) * _phi[_j][_qp] / _gamma_eq[_qp];
+
+  for (unsigned int i = 0; i < _vars.size(); ++i)
+    val_new *= std::pow((*_gamma_v[i])[_qp] * (*_v_vals[i])[_qp], _sto_v[i]);
+
+  return _porosity[_qp] * _test[_i][_qp] * _weight * val_new / _dt;
+}
+
+Real
+CoupledBEEquilibriumSub::computeQpOffDiagJacobian(unsigned int jvar)
+{
+  // If no coupled species, return 0
+  if (_v_vals.size() == 0)
     return 0.0;
 
-}
+  // If jvar is not one of the coupled species, return 0
+  if (std::find(_vars.begin(), _vars.end(), jvar) == _vars.end())
+    return 0.0;
 
+  Real val_new =
+      std::pow(10.0, _log_k) * std::pow(_gamma_u[_qp] * _u[_qp], _sto_u) / _gamma_eq[_qp];
+
+  for (unsigned int i = 0; i < _vars.size(); ++i)
+  {
+    if (jvar == _vars[i])
+      val_new *= _sto_v[i] * (*_gamma_v[i])[_qp] *
+                 std::pow((*_gamma_v[i])[_qp] * (*_v_vals[i])[_qp], _sto_v[i] - 1.0) *
+                 _phi[_j][_qp];
+    else
+      val_new *= std::pow((*_gamma_v[i])[_qp] * (*_v_vals[i])[_qp], _sto_v[i]);
+  }
+
+  return _porosity[_qp] * _test[_i][_qp] * _weight * val_new / _dt;
+}

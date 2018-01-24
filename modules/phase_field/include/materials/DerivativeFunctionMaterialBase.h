@@ -12,7 +12,7 @@
 // Forward Declarations
 class DerivativeFunctionMaterialBase;
 
-template<>
+template <>
 InputParameters validParams<DerivativeFunctionMaterialBase>();
 
 /**
@@ -65,7 +65,11 @@ protected:
    *
    * @param arg The index of the function argument the derivative is taken of
    */
-  virtual Real computeDF(unsigned int arg ) { libmesh_ignore(arg); return 0.0; }
+  virtual Real computeDF(unsigned int arg)
+  {
+    libmesh_ignore(arg);
+    return 0.0;
+  }
 
   /**
    * Override this method to calculate the second derivatives.
@@ -75,7 +79,12 @@ protected:
    * @param arg1 The variable the first derivative is taken of
    * @param arg2 The variable the second derivative is taken of
    */
-  virtual Real computeD2F(unsigned int arg1, unsigned int arg2) { libmesh_ignore(arg1); libmesh_ignore(arg2); return 0.0; }
+  virtual Real computeD2F(unsigned int arg1, unsigned int arg2)
+  {
+    libmesh_ignore(arg1);
+    libmesh_ignore(arg2);
+    return 0.0;
+  }
 
   /**
    * Override this method to calculate the third derivatives.
@@ -92,10 +101,10 @@ protected:
   std::vector<MaterialProperty<Real> *> _prop_dF;
 
   /// Material properties to store the second derivatives.
-  std::vector<std::vector<MaterialProperty<Real> *> > _prop_d2F;
+  std::vector<std::vector<MaterialProperty<Real> *>> _prop_d2F;
 
   /// Material properties to store the third derivatives.
-  std::vector<std::vector<std::vector<MaterialProperty<Real> *> > > _prop_d3F;
+  std::vector<std::vector<std::vector<MaterialProperty<Real> *>>> _prop_d3F;
 };
 
-#endif //DERIVATIVEFUNCTIONMATERIALBASE_H
+#endif // DERIVATIVEFUNCTIONMATERIALBASE_H

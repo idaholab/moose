@@ -14,17 +14,19 @@
 
 #include "SideIntegralVariableUserObject.h"
 
-template<>
-InputParameters validParams<SideIntegralVariableUserObject>()
+template <>
+InputParameters
+validParams<SideIntegralVariableUserObject>()
 {
   InputParameters params = validParams<SideIntegralUserObject>();
-  params.addCoupledVar("variable", "The name of the variable that this boundary condition applies to");
+  params.addRequiredCoupledVar("variable",
+                               "The name of the variable that this boundary condition applies to");
   return params;
 }
 
-SideIntegralVariableUserObject::SideIntegralVariableUserObject(const InputParameters & parameters) :
-    SideIntegralUserObject(parameters),
-    MooseVariableInterface(parameters, false),
+SideIntegralVariableUserObject::SideIntegralVariableUserObject(const InputParameters & parameters)
+  : SideIntegralUserObject(parameters),
+    MooseVariableInterface(this, false),
     _u(coupledValue("variable")),
     _grad_u(coupledGradient("variable"))
 {
@@ -36,4 +38,3 @@ SideIntegralVariableUserObject::computeQpIntegral()
 {
   return _u[_qp];
 }
-

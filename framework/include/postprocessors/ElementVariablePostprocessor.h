@@ -18,37 +18,31 @@
 #include "ElementPostprocessor.h"
 #include "MooseVariableInterface.h"
 
-class MooseVariable;
-
-//Forward Declarations
+// Forward Declarations
 class ElementVariablePostprocessor;
 
-template<>
+template <>
 InputParameters validParams<ElementVariablePostprocessor>();
 
-class ElementVariablePostprocessor :
-  public ElementPostprocessor,
-  public MooseVariableInterface
+class ElementVariablePostprocessor : public ElementPostprocessor, public MooseVariableInterface
 {
 public:
   ElementVariablePostprocessor(const InputParameters & parameters);
 
-  /// Just does a loop over "qp" calling computeQpValue()
-  virtual void execute();
+  virtual void execute() override;
 
 protected:
-
   /// This is what derived classes should override to do something on every quadrature point on every element
   virtual void computeQpValue() = 0;
 
   /// Holds the solution at current quadrature points
-  VariableValue & _u;
+  const VariableValue & _u;
 
   /// Holds the solution gradient at the current quadrature points
-  VariableGradient & _grad_u;
+  const VariableGradient & _grad_u;
 
   /// Holds the solution derivative at the current quadrature points
-  VariableValue & _u_dot;
+  const VariableValue & _u_dot;
 
   /// The current quadrature point
   unsigned int _qp;

@@ -17,10 +17,10 @@
 
 #include "NodalKernel.h"
 
-//Forward Declarations
+// Forward Declarations
 class ConstantRate;
 
-template<>
+template <>
 InputParameters validParams<ConstantRate>();
 
 /**
@@ -35,18 +35,12 @@ public:
   ConstantRate(const InputParameters & parameters);
 
 protected:
-  /**
-   * Implement -rate
-   */
-  virtual Real computeQpResidual();
+  virtual Real computeQpResidual() override;
 
-  /**
-   * Jacobian with respect to the variable this NodalKernel is operating on.
-   */
-  virtual Real computeQpJacobian();
+  virtual Real computeQpJacobian() override;
 
   /// The rate
-  Real _rate;
+  const Real & _rate;
 };
 
 #endif

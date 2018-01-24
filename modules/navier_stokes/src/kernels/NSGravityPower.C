@@ -6,28 +6,24 @@
 /****************************************************************/
 #include "NSGravityPower.h"
 
-template<>
-InputParameters validParams<NSGravityPower>()
+template <>
+InputParameters
+validParams<NSGravityPower>()
 {
   InputParameters params = validParams<Kernel>();
-
-  // This term is coupled to the momentum variable for whichever equation this is
+  params.addClassDescription("This class computes the momentum contributed by gravity.");
   params.addRequiredCoupledVar("momentum", "");
-
-  // Don't hard-code any defaults here, its too hard to keep all your defaults synchronized.
   params.addRequiredParam<Real>("acceleration", "The body force vector component.");
-
   return params;
 }
 
 NSGravityPower::NSGravityPower(const InputParameters & parameters)
-  :Kernel(parameters),
+  : Kernel(parameters),
     _momentum_var(coupled("momentum")),
     _momentum(coupledValue("momentum")),
     _acceleration(getParam<Real>("acceleration"))
-  {}
-
-
+{
+}
 
 Real
 NSGravityPower::computeQpResidual()
@@ -36,23 +32,17 @@ NSGravityPower::computeQpResidual()
   return -_momentum[_qp] * _acceleration * _test[_i][_qp];
 }
 
-
-
-Real NSGravityPower::computeQpJacobian()
+Real
+NSGravityPower::computeQpJacobian()
 {
-  return 0.;
+  return 0.0;
 }
-
-
 
 Real
 NSGravityPower::computeQpOffDiagJacobian(unsigned int jvar)
 {
   if (jvar == _momentum_var)
-  {
     return -_phi[_j][_qp] * _acceleration * _test[_i][_qp];
-  }
 
-  return 0;
+  return 0.0;
 }
-

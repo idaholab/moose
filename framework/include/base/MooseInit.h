@@ -17,7 +17,7 @@
 
 #include "Moose.h"
 
-//libMesh
+// libMesh
 #include "libmesh/libmesh.h"
 
 /**
@@ -29,8 +29,8 @@
 class MooseInit : public LibMeshInit
 {
 public:
-  MooseInit(int argc, char *argv[], MPI_Comm COMM_WORLD_IN=MPI_COMM_WORLD);
-  virtual ~MooseInit();
+  MooseInit(int argc, char * argv[], MPI_Comm COMM_WORLD_IN = MPI_COMM_WORLD);
+  virtual ~MooseInit() = default;
 };
 
 #endif /* MOOSEINIT_H */

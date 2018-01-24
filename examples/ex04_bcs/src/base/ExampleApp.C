@@ -11,10 +11,11 @@
 /*                                                              */
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
+
+// MOOSE Includes
 #include "ExampleApp.h"
-#include "Moose.h"
-#include "Factory.h"
 #include "AppFactory.h"
+#include "MooseSyntax.h"
 
 // Example 4 Includes
 #include "ExampleConvection.h"
@@ -22,18 +23,15 @@
 #include "CoupledDirichletBC.h"
 #include "CoupledNeumannBC.h"
 
-template<>
-InputParameters validParams<ExampleApp>()
+template <>
+InputParameters
+validParams<ExampleApp>()
 {
   InputParameters params = validParams<MooseApp>();
-
-  params.set<bool>("use_legacy_uo_initialization") = false;
-  params.set<bool>("use_legacy_uo_aux_computation") = false;
   return params;
 }
 
-ExampleApp::ExampleApp(InputParameters parameters) :
-    MooseApp(parameters)
+ExampleApp::ExampleApp(InputParameters parameters) : MooseApp(parameters)
 {
   srand(processor_id());
 
@@ -44,16 +42,12 @@ ExampleApp::ExampleApp(InputParameters parameters) :
   ExampleApp::associateSyntax(_syntax, _action_factory);
 }
 
-ExampleApp::~ExampleApp()
-{
-}
-
 void
 ExampleApp::registerObjects(Factory & factory)
 {
   registerKernel(ExampleConvection);
-  registerKernel(ExampleGaussContForcing);                 // Extra forcing term
-  registerBoundaryCondition(CoupledDirichletBC);    // Register our Boundary Conditions
+  registerKernel(ExampleGaussContForcing);       // Extra forcing term
+  registerBoundaryCondition(CoupledDirichletBC); // Register our Boundary Conditions
   registerBoundaryCondition(CoupledNeumannBC);
 }
 
@@ -64,6 +58,6 @@ ExampleApp::registerApps()
 }
 
 void
-ExampleApp::associateSyntax(Syntax& /*syntax*/, ActionFactory & /*action_factory*/)
+ExampleApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & /*action_factory*/)
 {
 }

@@ -21,6 +21,7 @@
     value = (1-x*x)*(1-y*y)
     grad_x = 2*(x*y*y-x)
     grad_y = 2*(x*x*y-y)
+  [../]
 []
 
 [Variables]
@@ -43,7 +44,7 @@
   [../]
 
   [./forcing]
-    type = UserForcingFunction
+    type = BodyForce
     variable = u
     function = forcing_fn
   [../]
@@ -89,10 +90,8 @@
 
 [Executioner]
   type = Steady
-
-  # Preconditioned JFNK (default)
   solve_type = 'PJFNK'
-  nl_rel_tol = 1e-15
+  nl_rel_tol = 1e-14
 []
 
 [Outputs]

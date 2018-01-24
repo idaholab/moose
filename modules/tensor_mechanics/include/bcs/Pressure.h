@@ -12,7 +12,7 @@
 class Function;
 class Pressure;
 
-template<>
+template <>
 InputParameters validParams<Pressure>();
 
 /**
@@ -21,13 +21,9 @@ InputParameters validParams<Pressure>();
 class Pressure : public IntegratedBC
 {
 public:
-
   Pressure(const InputParameters & parameters);
 
-  virtual ~Pressure(){}
-
 protected:
-
   virtual Real computeQpResidual();
 
   const int _component;
@@ -42,4 +38,4 @@ protected:
   const Real _alpha;
 };
 
-#endif //PRESSURE_H
+#endif // PRESSURE_H

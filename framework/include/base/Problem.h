@@ -17,10 +17,10 @@
 
 #include "MooseObject.h"
 
-class TimePeriod;
+class TimePeriodOld;
 class Problem;
 
-template<>
+template <>
 InputParameters validParams<Problem>();
 
 /**
@@ -39,24 +39,6 @@ public:
    */
   void _setCLIOption() { _cli_option_found = true; }
 
-  // Time periods //////
-
-  /**
-   * Add a time period
-   * @param name Name of the time period
-   * @param start_time Start time of the time period
-   */
-  TimePeriod & addTimePeriod(const std::string & name, Real start_time);
-
-  /**
-   * Get time period by name
-   * @param name Name of the time period to get
-   * @return Pointer to the time period struct if found, otherwise NULL
-   */
-  virtual TimePeriod * getTimePeriodByName(const std::string & name);
-
-  const std::vector<TimePeriod *> & getTimePeriods() const;
-
   /**
    * Allow objects to request clean termination of the solve
    */
@@ -69,9 +51,6 @@ public:
   virtual bool isSolveTerminationRequested() { return _termination_requested; };
 
 protected:
-  /// Time periods
-  std::vector<TimePeriod *> _time_periods;
-
   /// True if the CLI option is found
   bool _cli_option_found;
 

@@ -19,7 +19,7 @@
 
 class TestSerializedSolution;
 
-template<>
+template <>
 InputParameters validParams<TestSerializedSolution>();
 
 /**
@@ -46,7 +46,6 @@ public:
   virtual Real getValue();
 
 protected:
-
   /// The system to be tested
   SystemBase & _test_sys;
 
@@ -56,6 +55,5 @@ protected:
   /// Sum of all of the entries in the serialized solution vector
   Real _sum;
 };
-
 
 #endif

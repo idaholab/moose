@@ -19,16 +19,13 @@
 
 class FDKernel;
 
-template<>
+template <>
 InputParameters validParams<FDKernel>();
 
-class FDKernel :
-  public Kernel
+class FDKernel : public Kernel
 {
 public:
   FDKernel(const InputParameters & parameters);
-
-  virtual ~FDKernel(){};
 
   virtual void computeJacobian();
   /**
@@ -40,14 +37,17 @@ public:
    * @param jvar The number of the scalar variable
    */
   virtual void computeOffDiagJacobianScalar(unsigned int jvar);
- protected:
+
+protected:
   /**
    * Computes the residual when the current state of j-th variable
    * at element node i is perturbed by perturbation.
    * With perturbation = 0.0 we have the unperturbed residual.
    */
-  virtual DenseVector<Number>
-    perturbedResidual(unsigned int ivar, unsigned int i, Real perturbation_scale, Real& perturbation);
+  virtual DenseVector<Number> perturbedResidual(unsigned int ivar,
+                                                unsigned int i,
+                                                Real perturbation_scale,
+                                                Real & perturbation);
 
   Real _scale;
 };

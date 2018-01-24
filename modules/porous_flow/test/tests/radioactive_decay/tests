@@ -1,0 +1,7 @@
+[Tests]
+  [./radioactive_deacy01]
+    type = 'CSVDiff'
+    input = 'radioactive_decay01.i'
+    csvdiff = 'radioactive_decay01.csv'
+  [../]
+[]

@@ -1,0 +1,163 @@
+[Tests]
+  [./glued_kin]
+    type = 'CSVDiff'
+    input = 'plane3_template1.i'
+    csvdiff = 'plane3_glued_kin_check.csv plane3_glued_kin_check_cont_press_0001.csv plane3_glued_kin_check_x_disp_0001.csv'
+    cli_args = 'Contact/leftright/model=glued Contact/leftright/formulation=kinematic Outputs/file_base=plane3_glued_kin_out Outputs/chkfile/file_base=plane3_glued_kin_check'
+    rel_err = 1e-5
+    abs_zero = 1e-8
+    max_parallel = 1
+    superlu = true
+    prereq = 'glued_kin_sm'
+    petsc_version = '>=3.7.6'
+    compiler = 'GCC CLANG' #superlu bug, see MOOSE issue #10084
+  [../]
+  [./glued_pen]
+    type = 'CSVDiff'
+    input = 'plane3_template1.i'
+    csvdiff = 'plane3_glued_pen_check.csv plane3_glued_pen_check_cont_press_0001.csv plane3_glued_pen_check_x_disp_0001.csv'
+    cli_args = 'Contact/leftright/model=glued Contact/leftright/formulation=penalty Outputs/file_base=plane3_glued_pen_out Outputs/chkfile/file_base=plane3_glued_pen_check'
+    rel_err = 1e-5
+    abs_zero = 1e-8
+    max_parallel = 1
+    superlu = true
+    prereq = 'glued_pen_sm'
+  [../]
+  [./frictionless_kin]
+    type = 'CSVDiff'
+    input = 'plane3_template1.i'
+    csvdiff = 'plane3_frictionless_kin_check.csv plane3_frictionless_kin_check_cont_press_0001.csv plane3_frictionless_kin_check_x_disp_0001.csv'
+    cli_args = 'Contact/leftright/model=frictionless Contact/leftright/formulation=kinematic Outputs/file_base=plane3_frictionless_kin_out Outputs/chkfile/file_base=plane3_frictionless_kin_check'
+    rel_err = 1e-5
+    abs_zero = 1e-8
+    max_parallel = 1
+    superlu = true
+    prereq = 'frictionless_kin_sm'
+    petsc_version = '>=3.7.6'
+  [../]
+  [./frictionless_pen]
+    type = 'CSVDiff'
+    input = 'plane3_template1.i'
+    csvdiff = 'plane3_frictionless_pen_check.csv plane3_frictionless_pen_check_cont_press_0001.csv plane3_frictionless_pen_check_x_disp_0001.csv'
+    cli_args = 'Contact/leftright/model=frictionless Contact/leftright/formulation=penalty Outputs/file_base=plane3_frictionless_pen_out Outputs/chkfile/file_base=plane3_frictionless_pen_check'
+    rel_err = 1e-5
+    abs_zero = 1e-8
+    max_parallel = 1
+    superlu = true
+    prereq = 'frictionless_pen_sm'
+  [../]
+  [./frictionless_aug]
+    type = 'CSVDiff'
+    input = 'plane3_template2.i'
+    csvdiff = 'plane3_frictionless_aug_check.csv plane3_frictionless_aug_check_cont_press_0001.csv plane3_frictionless_aug_check_x_disp_0001.csv'
+    cli_args = 'Contact/leftright/model=frictionless Contact/leftright/formulation=augmented_lagrange Outputs/file_base=plane3_frictionless_aug_out Outputs/chkfile/file_base=plane3_frictionless_aug_check'
+    rel_err = 1e-5
+    abs_zero = 1e-8
+    max_parallel = 1
+    superlu = true
+    prereq = 'frictionless_aug_sm'
+  [../]
+  [./glued_kin_sm]
+    type = 'CSVDiff'
+    input = 'plane3_template1_sm.i'
+    csvdiff = 'plane3_glued_kin_check.csv plane3_glued_kin_check_cont_press_0001.csv plane3_glued_kin_check_x_disp_0001.csv'
+    cli_args = 'Contact/leftright/model=glued Contact/leftright/formulation=kinematic
+                Outputs/file_base=plane3_glued_kin_out Outputs/chkfile/file_base=plane3_glued_kin_check
+                Executioner/petsc_options_iname="-pc_type -pc_factor_mat_solver_package"
+                Executioner/petsc_options_value="lu superlu_dist"'
+    rel_err = 1e-5
+    abs_zero = 1e-8
+    max_parallel = 1
+    superlu = true
+    petsc_version = '>=3.7.6'
+    compiler = 'GCC CLANG' #superlu bug, see MOOSE issue #10084
+  [../]
+  [./glued_pen_sm]
+    type = 'CSVDiff'
+    input = 'plane3_template1_sm.i'
+    csvdiff = 'plane3_glued_pen_check.csv plane3_glued_pen_check_cont_press_0001.csv plane3_glued_pen_check_x_disp_0001.csv'
+    cli_args = 'Contact/leftright/model=glued Contact/leftright/formulation=penalty
+                Outputs/file_base=plane3_glued_pen_out Outputs/chkfile/file_base=plane3_glued_pen_check
+                Executioner/petsc_options_iname="-pc_type -pc_factor_mat_solver_package" Executioner/petsc_options_value="lu superlu_dist"'
+    rel_err = 1e-5
+    abs_zero = 1e-8
+    max_parallel = 1
+    superlu = true
+  [../]
+  [./frictionless_kin_sm]
+    type = 'CSVDiff'
+    input = 'plane3_template1_sm.i'
+    csvdiff = 'plane3_frictionless_kin_check.csv plane3_frictionless_kin_check_cont_press_0001.csv plane3_frictionless_kin_check_x_disp_0001.csv'
+    cli_args = 'Contact/leftright/model=frictionless Contact/leftright/formulation=kinematic
+                Outputs/file_base=plane3_frictionless_kin_out Outputs/chkfile/file_base=plane3_frictionless_kin_check
+                Executioner/petsc_options_iname="-pc_type -pc_factor_mat_solver_package" Executioner/petsc_options_value="lu superlu_dist"'
+    rel_err = 1e-5
+    abs_zero = 1e-8
+    max_parallel = 1
+    superlu = true
+    compiler = 'GCC CLANG' #superlu bug, see MOOSE issue #10084
+  [../]
+  [./frictionless_pen_sm]
+    type = 'CSVDiff'
+    input = 'plane3_template1_sm.i'
+    csvdiff = 'plane3_frictionless_pen_check.csv plane3_frictionless_pen_check_cont_press_0001.csv plane3_frictionless_pen_check_x_disp_0001.csv'
+    cli_args = 'Contact/leftright/model=frictionless Contact/leftright/formulation=penalty
+                Outputs/file_base=plane3_frictionless_pen_out Outputs/chkfile/file_base=plane3_frictionless_pen_check
+                Executioner/petsc_options_iname="-pc_type -pc_factor_mat_solver_package" Executioner/petsc_options_value="lu superlu_dist"'
+    rel_err = 1e-5
+    abs_zero = 1e-8
+    max_parallel = 1
+    superlu = true
+  [../]
+  [./frictionless_aug_sm]
+    type = 'CSVDiff'
+    input = 'plane3_template2_sm.i'
+    csvdiff = 'plane3_frictionless_aug_check.csv plane3_frictionless_aug_check_cont_press_0001.csv plane3_frictionless_aug_check_x_disp_0001.csv'
+    cli_args = 'Contact/leftright/model=frictionless Contact/leftright/formulation=augmented_lagrange
+                Outputs/file_base=plane3_frictionless_aug_out Outputs/chkfile/file_base=plane3_frictionless_aug_check'
+    rel_err = 1e-5
+    abs_zero = 1e-8
+    max_parallel = 1
+    superlu = true
+  [../]
+  [./mu_0_2_aug]
+    type = 'CSVDiff'
+    input = 'plane3_template2.i'
+    csvdiff = 'plane3_mu_0_2_aug_check.csv plane3_mu_0_2_aug_check_cont_press_0001.csv plane3_mu_0_2_aug_check_x_disp_0001.csv'
+    cli_args = 'Contact/leftright/model=coulomb Contact/leftright/formulation=augmented_lagrange Contact/leftright/friction_coefficient=0.2 Contact/leftright/al_incremental_slip_tolerance=1e-6 Contact/leftright/al_frictional_force_tolerance=5e-2 Outputs/file_base=plane3_mu_0_2_aug_out Outputs/chkfile/file_base=plane3_mu_0_2_aug_check'
+    rel_err = 1e-5
+    abs_zero = 1e-8
+    max_parallel = 1
+    superlu = true
+    prereq = 'mu_0_2_aug_sm'
+  [../]
+  [./mu_0_2_aug_sm]
+    type = 'CSVDiff'
+    input = 'plane3_template2_sm.i'
+    csvdiff = 'plane3_mu_0_2_aug_check.csv plane3_mu_0_2_aug_check_cont_press_0001.csv plane3_mu_0_2_aug_check_x_disp_0001.csv'
+    cli_args = 'Contact/leftright/model=coulomb Contact/leftright/formulation=augmented_lagrange Contact/leftright/friction_coefficient=0.2 Contact/leftright/al_incremental_slip_tolerance=1e-6 Contact/leftright/al_frictional_force_tolerance=5e-2 Outputs/file_base=plane3_mu_0_2_aug_out Outputs/chkfile/file_base=plane3_mu_0_2_aug_check'
+    rel_err = 1e-5
+    abs_zero = 1e-8
+    max_parallel = 1
+    superlu = true
+  [../]
+  [./mu_0_2_pen]
+    type = 'CSVDiff'
+    input = 'plane3_mu_0_2_pen.i'
+    csvdiff = 'plane3_mu_0_2_pen_check.csv plane3_mu_0_2_pen_check_cont_press_0001.csv plane3_mu_0_2_pen_check_x_disp_0001.csv'
+    rel_err = 1e-5
+    abs_zero = 1e-8
+    max_parallel = 1
+    superlu = true
+    prereq = 'mu_0_2_pen_sm'
+  [../]
+  [./mu_0_2_pen_sm]
+    type = 'CSVDiff'
+    input = 'plane3_mu_0_2_pen_sm.i'
+    csvdiff = 'plane3_mu_0_2_pen_check.csv plane3_mu_0_2_pen_check_cont_press_0001.csv plane3_mu_0_2_pen_check_x_disp_0001.csv'
+    rel_err = 1e-5
+    abs_zero = 1e-8
+    max_parallel = 1
+    superlu = true
+  [../]
+[]

@@ -12,21 +12,23 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
+// MOOSE includes
 #include "VerifyElementUniqueID.h"
 #include "SubProblem.h"
+#include "MooseMesh.h"
 
-#include <algorithm>
-
-template<>
-InputParameters validParams<VerifyElementUniqueID>()
+template <>
+InputParameters
+validParams<VerifyElementUniqueID>()
 {
   InputParameters params = validParams<ElementUserObject>();
   return params;
 }
 
-VerifyElementUniqueID::VerifyElementUniqueID(const InputParameters & parameters) :
-    ElementUserObject(parameters)
-{}
+VerifyElementUniqueID::VerifyElementUniqueID(const InputParameters & parameters)
+  : ElementUserObject(parameters)
+{
+}
 
 // This object can't test every possible scenario.  For instance, it can't detect recycled ids
 // It's only designed to make sure that all ids are unique in any given
@@ -48,7 +50,7 @@ VerifyElementUniqueID::execute()
 }
 
 void
-VerifyElementUniqueID::threadJoin(const UserObject &y)
+VerifyElementUniqueID::threadJoin(const UserObject & y)
 {
   const VerifyElementUniqueID & uo = static_cast<const VerifyElementUniqueID &>(y);
 
@@ -59,7 +61,7 @@ void
 VerifyElementUniqueID::finalize()
 {
   // On Parallel Mesh we have to look at all the ids over all the processors
-  if (_subproblem.mesh().isParallelMesh())
+  if (_subproblem.mesh().isDistributedMesh())
     _communicator.allgather(_all_ids);
 
   std::sort(_all_ids.begin(), _all_ids.end());
@@ -67,4 +69,3 @@ VerifyElementUniqueID::finalize()
   if (it_end != _all_ids.end())
     mooseError("Duplicate unique_ids found!");
 }
-

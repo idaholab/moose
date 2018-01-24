@@ -13,21 +13,25 @@
 /****************************************************************/
 
 #include "NodalEqualValueConstraint.h"
-#include "Assembly.h"
 
-template<>
-InputParameters validParams<NodalEqualValueConstraint>()
+// MOOSE includes
+#include "Assembly.h"
+#include "MooseVariableScalar.h"
+
+template <>
+InputParameters
+validParams<NodalEqualValueConstraint>()
 {
   InputParameters params = validParams<NodalScalarKernel>();
   params.addRequiredCoupledVar("var", "Variable(s) to put the constraint on");
   return params;
 }
 
-NodalEqualValueConstraint::NodalEqualValueConstraint(const InputParameters & parameters) :
-    NodalScalarKernel(parameters)
+NodalEqualValueConstraint::NodalEqualValueConstraint(const InputParameters & parameters)
+  : NodalScalarKernel(parameters)
 {
   if (_node_ids.size() != 2)
-    mooseError(name() << ": The number of nodes has to be 2, but it is " << _node_ids.size() << ".");
+    paramError("nodes", "invalid number of nodes: want 2, got ", _node_ids.size());
 
   unsigned int n = coupledComponents("var");
   _value.resize(n);
@@ -37,10 +41,6 @@ NodalEqualValueConstraint::NodalEqualValueConstraint(const InputParameters & par
     _value[k] = &coupledValue("var", k);
     _val_number[k] = coupled("var", k);
   }
-}
-
-NodalEqualValueConstraint::~NodalEqualValueConstraint()
-{
 }
 
 void
@@ -67,8 +67,7 @@ NodalEqualValueConstraint::computeJacobian()
   {
     DenseMatrix<Number> & ken = _assembly.jacobianBlock(_var.number(), _val_number[k]);
 
-    ken(k, 0) =  1.;
+    ken(k, 0) = 1.;
     ken(k, 1) = -1.;
   }
 }
-

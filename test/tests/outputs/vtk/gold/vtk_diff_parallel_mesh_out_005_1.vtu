@@ -1,13 +1,13 @@
 <?xml version="1.0"?>
-<VTKFile type="UnstructuredGrid" version="0.1" byte_order="LittleEndian" compressor="vtkZLibDataCompressor">
+<VTKFile type="UnstructuredGrid" version="0.1" byte_order="LittleEndian" header_type="UInt32" compressor="vtkZLibDataCompressor">
   <UnstructuredGrid>
     <Piece NumberOfPoints="6" NumberOfCells="2">
       <PointData>
         <DataArray type="Float64" Name="aux" format="ascii" RangeMin="0" RangeMax="0">
           0 0 0 0 0 0
         </DataArray>
-        <DataArray type="Float64" Name="u" format="ascii" RangeMin="0" RangeMax="0">
-          0 0 0 0 0 0
+        <DataArray type="Float64" Name="u" format="ascii" RangeMin="0" RangeMax="0.074429858227">
+          0 0 0 0.074429858072 0.074429858005 0.074429858227
         </DataArray>
       </PointData>
       <CellData>
@@ -16,6 +16,9 @@
         </DataArray>
         <DataArray type="Int32" Name="subdomain_id" format="ascii" RangeMin="0" RangeMax="0">
           0 0
+        </DataArray>
+        <DataArray type="Int32" Name="processor_id" format="ascii" RangeMin="1" RangeMax="1">
+          1 1
         </DataArray>
       </CellData>
       <Points>

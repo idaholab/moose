@@ -21,7 +21,7 @@
 // Forward declerations
 class NumElemQPs;
 
-template<>
+template <>
 InputParameters validParams<ElementIntegralPostprocessor>();
 
 /**
@@ -37,4 +37,4 @@ public:
   virtual Real computeQpIntegral();
 };
 
-#endif //NUMELEMQPS_H
+#endif // NUMELEMQPS_H

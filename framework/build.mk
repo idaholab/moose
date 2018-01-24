@@ -57,69 +57,51 @@ ifneq (,$(findstring mpi,$(cxx_compiler)))
 	cxx_compiler = $(shell $(libmesh_CXX) -show)
 endif
 
-MOOSE_PRECOMPILED ?= false
-PCH_FLAGS=
-PCH_MODE=
-PCH_DEP=
-
-# Check if using precompiled headers is possible
-# cxx compiler could be used to define which compiler is being used
-# so that different compiler options are usable. Libmesh only
-# appears to check if GCC is used
-ifeq ($(MOOSE_PRECOMPILED), true)
-  ifneq (,$(filter $(cxx_compiler), g++))
-	  PRECOMPILED = true
-  endif
-endif
-
 all::
-ifdef PRECOMPILED
-#
-# Precompiled Header Rules
-#
 
-# [JWP] - Libtool does not seem to have support for PCH yet, so for
-# now just use the compiler directly, and depend on the user to
-# disable precompiled header support if it is not available on his
-# system.
-%.h.gch/$(METHOD).h.gch : %.h
-	@echo "MOOSE Pre-Compiling Header (in "$(METHOD)" mode) "$<"..."
-	@mkdir -p $(FRAMEWORK_DIR)/include/base/Precompiled.h.gch
-	@$(libmesh_CXX) $(libmesh_CPPFLAGS) $(ADDITIONAL_CPPFLAGS) $(libmesh_CXXFLAGS) -DPRECOMPILED $(libmesh_INCLUDE) -MMD -MF $@.d -c $< -o $@
-
-#
-# add dependency - all object files depend on the precompiled header file.
-#
-PCH_DEP=$(FRAMEWORK_DIR)/include/base/Precompiled.h.gch/$(METHOD).h.gch
-
-PCH_FLAGS=-DPRECOMPILED -include Precompiled.h
-PCH_MODE="with PCH "
-endif
+# Add all header symlinks as dependencies to this target
+header_symlinks::
 
 #
 # C++ rules
 #
-
-pcre%.$(obj-suffix) : pcre%.cc $(PCH_DEP)
-	@echo "MOOSE Compiling C++ $(PCH_MODE)(in "$(METHOD)" mode) "$<"..."
+pcre%.$(obj-suffix) : pcre%.cc
+	@echo "MOOSE Compiling C++ (in "$(METHOD)" mode) "$<"..."
 	@$(libmesh_LIBTOOL) --tag=CXX $(LIBTOOLFLAGS) --mode=compile --quiet \
-          $(libmesh_CXX) $(libmesh_CPPFLAGS) $(ADDITIONAL_CPPFLAGS) $(libmesh_CXXFLAGS) $(PCH_FLAGS) $(app_INCLUDES) $(libmesh_INCLUDE) -DHAVE_CONFIG_H -MMD -MP -MF $@.d -MT $@ -c $< -o $@
+          $(libmesh_CXX) $(libmesh_CPPFLAGS) $(ADDITIONAL_CPPFLAGS) $(libmesh_CXXFLAGS) $(app_INCLUDES) $(libmesh_INCLUDE) -DHAVE_CONFIG_H -MMD -MP -MF $@.d -MT $@ -c $< -o $@
 
-%.$(obj-suffix) : %.C $(PCH_DEP)
-	@echo "MOOSE Compiling C++ $(PCH_MODE)(in "$(METHOD)" mode) "$<"..."
+%.$(obj-suffix) : %.cc
+	@echo "MOOSE Compiling C++ (in "$(METHOD)" mode) "$<"..."
 	@$(libmesh_LIBTOOL) --tag=CXX $(LIBTOOLFLAGS) --mode=compile --quiet \
-	  $(libmesh_CXX) $(libmesh_CPPFLAGS) $(ADDITIONAL_CPPFLAGS) $(libmesh_CXXFLAGS) $(PCH_FLAGS) $(app_INCLUDES) $(libmesh_INCLUDE) -MMD -MP -MF $@.d -MT $@ -c $< -o $@
+          $(libmesh_CXX) $(libmesh_CPPFLAGS) $(ADDITIONAL_CPPFLAGS) $(libmesh_CXXFLAGS) $(app_INCLUDES) $(libmesh_INCLUDE) -DHAVE_CONFIG_H -MMD -MP -MF $@.d -MT $@ -c $< -o $@
 
-%.$(obj-suffix) : %.cpp $(PCH_DEP)
-	@echo "MOOSE Compiling C++ $(PCH_MODE)(in "$(METHOD)" mode) "$<"..."
+define CXX_RULE_TEMPLATE
+%$(1).$(obj-suffix) : %.C
+ifeq ($(1),)
+	@echo "MOOSE Compiling C++ (in "$$(METHOD)" mode) "$$<"..."
+else
+	@echo "MOOSE Compiling C++ with suffix (in "$$(METHOD)" mode) "$$<"..."
+endif
+	@$$(libmesh_LIBTOOL) --tag=CXX $$(LIBTOOLFLAGS) --mode=compile --quiet \
+	  $$(libmesh_CXX) $$(libmesh_CPPFLAGS) $$(ADDITIONAL_CPPFLAGS) $$(libmesh_CXXFLAGS) $$(app_INCLUDES) $$(libmesh_INCLUDE) -MMD -MP -MF $$@.d -MT $$@ -c $$< -o $$@
+endef
+# Instantiate Rules
+$(eval $(call CXX_RULE_TEMPLATE,))
+
+%.$(obj-suffix) : %.cpp
+	@echo "MOOSE Compiling C++ (in "$(METHOD)" mode) "$<"..."
 	@$(libmesh_LIBTOOL) --tag=CXX $(LIBTOOLFLAGS) --mode=compile --quiet \
-	  $(libmesh_CXX) $(libmesh_CPPFLAGS) $(ADDITIONAL_CPPFLAGS) $(libmesh_CXXFLAGS) $(PCH_FLAGS) $(app_INCLUDES) $(libmesh_INCLUDE) -MMD -MP -MF $@.d -MT $@ -c $< -o $@
+	  $(libmesh_CXX) $(libmesh_CPPFLAGS) $(ADDITIONAL_CPPFLAGS) $(libmesh_CXXFLAGS) $(app_INCLUDES) $(libmesh_INCLUDE) -MMD -MP -MF $@.d -MT $@ -c $< -o $@
 
 #
 # Static Analysis
 #
 
 %.plist.$(obj-suffix) : %.C
+	@echo "Clang Static Analysis (in "$(METHOD)" mode) "$<"..."
+	@$(libmesh_CXX) $(libmesh_CXXFLAGS) $(app_INCLUDES) $(libmesh_INCLUDE) --analyze $< -o $@
+
+%.plist.$(obj-suffix) : %.cc
 	@echo "Clang Static Analysis (in "$(METHOD)" mode) "$<"..."
 	@$(libmesh_CXX) $(libmesh_CXXFLAGS) $(app_INCLUDES) $(libmesh_INCLUDE) --analyze $< -o $@
 
@@ -190,11 +172,15 @@ endif
 	  $(libmesh_F90) $(libmesh_FFLAGS) $(libmesh_INCLUDE) -c $< $(module_dir_flag) -o $@
 
 # Add method to list of defines passed to the compiler
-libmesh_CXXFLAGS       += -DMETHOD=$(METHOD)
+libmesh_CXXFLAGS += -DMETHOD=$(METHOD)
 
 # treat these warnings as errors (This doesn't seem to be necessary for Intel)
 ifneq (,$(findstring g++,$(cxx_compiler)))
-  libmesh_CXXFLAGS     += -Werror=return-type -Werror=reorder
+  libmesh_CXXFLAGS += -Werror=return-type -Werror=reorder
+
+	# Disable the long string warning from GCC
+	# warning: string length ‘524’ is greater than the length ‘509’ ISO C90 compilers are required to support [-Woverlength-strings]
+	libmesh_CXXFLAGS += -Woverlength-strings
 endif
 
 #

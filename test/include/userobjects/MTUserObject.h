@@ -19,9 +19,8 @@
 
 class MTUserObject;
 
-template<>
+template <>
 InputParameters validParams<MTUserObject>();
-
 
 /**
  * Demonstration of user-data object
@@ -35,7 +34,7 @@ public:
   /**
    * Called before execute() is ever called so that data can be cleared.
    */
-  virtual void initialize(){}
+  virtual void initialize() {}
 
   /**
    * Called when this object needs to compute something.
@@ -75,6 +74,5 @@ protected:
   /// Number of elements to allocate (we do not like magic numbers)
   static const unsigned int NUM = 10;
 };
-
 
 #endif /* MTUSEROBJECT_H */

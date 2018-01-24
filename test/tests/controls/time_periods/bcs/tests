@@ -1,0 +1,12 @@
+[Tests]
+  [./dirichlet]
+    type = Exodiff
+    input = bcs.i
+    exodiff = bcs_out.e
+  [../]
+  [./integrated]
+    type = Exodiff
+    input = bcs_integrated.i
+    exodiff = bcs_integrated_out.e
+  [../]
+[]

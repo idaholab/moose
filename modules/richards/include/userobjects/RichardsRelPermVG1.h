@@ -5,7 +5,6 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-
 #ifndef RICHARDSRELPERMVG1_H
 #define RICHARDSRELPERMVG1_H
 
@@ -13,8 +12,7 @@
 
 class RichardsRelPermVG1;
 
-
-template<>
+template <>
 InputParameters validParams<RichardsRelPermVG1>();
 
 /**
@@ -50,7 +48,6 @@ public:
   Real d2relperm(Real seff) const;
 
 protected:
-
   /// immobile saturation
   Real _simm;
 
@@ -71,7 +68,6 @@ protected:
 
   /// coefficient of cubic term in cubic relperm relation
   Real _vg1_cub;
-
 };
 
 #endif // RICHARDSRELPERMVG1_H

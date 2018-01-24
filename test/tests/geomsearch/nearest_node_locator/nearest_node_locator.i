@@ -1,3 +1,13 @@
+###########################################################
+# This is a test of the Geometric Search System. This test
+# uses the nearest node locator through the
+# NearestNodeDistanceAux Auxilary Kernel to record the
+# distance to the nearest nodes along paired
+# boundaries.
+#
+# @Requirement F6.50
+###########################################################
+
 [Mesh]
   file = 2dcontact_collide.e
 []

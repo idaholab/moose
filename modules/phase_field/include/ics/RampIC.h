@@ -4,17 +4,15 @@
 /*          All contents are licensed under LGPL V2.1           */
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
-
 #ifndef RAMPIC_H
 #define RAMPIC_H
 
 #include "InitialCondition.h"
-#include "InputParameters.h"
 
-//Forward Declarations
+// Forward Declarations
 class RampIC;
 
-template<>
+template <>
 InputParameters validParams<RampIC>();
 
 /**
@@ -43,4 +41,4 @@ protected:
   const Real _value_right;
 };
 
-#endif //RAMPIC_H
+#endif // RAMPIC_H

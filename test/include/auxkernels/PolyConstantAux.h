@@ -18,7 +18,7 @@
 
 class PolyConstantAux;
 
-template<>
+template <>
 InputParameters validParams<PolyConstantAux>();
 
 class PolyConstantAux : public AuxKernel
@@ -32,4 +32,4 @@ protected:
   virtual Real computeValue();
 };
 
-#endif //POLYCONSTANTAUX_H
+#endif // POLYCONSTANTAUX_H

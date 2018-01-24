@@ -34,6 +34,8 @@
     type = MaterialPointSource
     variable = u
     point = '0.2 0.3 0.0'
+    material_prop = 'matp'
+    prop_state = 'current'
   [../]
 []
 

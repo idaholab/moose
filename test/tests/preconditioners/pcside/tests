@@ -1,0 +1,8 @@
+[Tests]
+  [./test]
+    type = 'Exodiff'
+    abs_zero = 1e-8
+    input = 'diffusionCG.i'
+    exodiff = 'out.e'
+  [../]
+[]

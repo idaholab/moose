@@ -20,7 +20,7 @@
 // Forward Declaration
 class CoupledTimeDerivative;
 
-template<>
+template <>
 InputParameters validParams<CoupledTimeDerivative>();
 
 /**
@@ -32,14 +32,13 @@ public:
   CoupledTimeDerivative(const InputParameters & parameters);
 
 protected:
-  virtual Real computeQpResidual();
-  virtual Real computeQpJacobian();
-  virtual Real computeQpOffDiagJacobian(unsigned int jvar);
+  virtual Real computeQpResidual() override;
+  virtual Real computeQpJacobian() override;
+  virtual Real computeQpOffDiagJacobian(unsigned int jvar) override;
 
-private:
-  VariableValue & _v_dot;
-  VariableValue & _dv_dot;
-  unsigned int _v_var;
+  const VariableValue & _v_dot;
+  const VariableValue & _dv_dot;
+  const unsigned int _v_var;
 };
 
-#endif //COUPLEDTIMEDERIVATIVE_H
+#endif // COUPLEDTIMEDERIVATIVE_H

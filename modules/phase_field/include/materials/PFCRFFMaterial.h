@@ -1,12 +1,18 @@
+/****************************************************************/
+/* MOOSE - Multiphysics Object Oriented Simulation Environment  */
+/*                                                              */
+/*          All contents are licensed under LGPL V2.1           */
+/*             See LICENSE for full restrictions                */
+/****************************************************************/
 #ifndef PFCRFFMATERIAL_H
 #define PFCRFFMATERIAL_H
 
 #include "Material.h"
 
-//Forward Declarations
+// Forward Declarations
 class PFCRFFMaterial;
 
-template<>
+template <>
 InputParameters validParams<PFCRFFMaterial>();
 
 class PFCRFFMaterial : public Material
@@ -43,4 +49,4 @@ private:
   unsigned int _num_L;
 };
 
-#endif //PFCRFFMATERIAL_H
+#endif // PFCRFFMATERIAL_H

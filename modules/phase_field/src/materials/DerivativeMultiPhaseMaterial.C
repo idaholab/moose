@@ -6,24 +6,26 @@
 /****************************************************************/
 #include "DerivativeMultiPhaseMaterial.h"
 
-template<>
-InputParameters validParams<DerivativeMultiPhaseMaterial>()
+template <>
+InputParameters
+validParams<DerivativeMultiPhaseMaterial>()
 {
   InputParameters params = validParams<DerivativeMultiPhaseBase>();
-  params.addClassDescription("Two phase material that combines n phase materials using a switching function with and n nonconserved order parameters (to be used with SwitchingFunctionConstraint*).");
+  params.addClassDescription("Two phase material that combines n phase materials using a switching "
+                             "function with and n nonconserved order parameters (to be used with "
+                             "SwitchingFunctionConstraint*).");
   params.addCoupledVar("etas", "Order parameters for all phases.");
   return params;
 }
 
-DerivativeMultiPhaseMaterial::DerivativeMultiPhaseMaterial(const InputParameters & parameters) :
-    DerivativeMultiPhaseBase(parameters),
-    _dhi(_num_etas),
-    _d2hi(_num_etas),
-    _d3hi(_num_etas)
+DerivativeMultiPhaseMaterial::DerivativeMultiPhaseMaterial(const InputParameters & parameters)
+  : DerivativeMultiPhaseBase(parameters), _dhi(_num_etas), _d2hi(_num_etas), _d3hi(_num_etas)
 {
   // verify that the user supplied one less eta than the number of phases
   if (_num_hi != _num_etas)
-    mooseError("The number of coupled etas must be equal to the number of hi_names in DerivativeMultiPhaseMaterial " << name());
+    mooseError("The number of coupled etas must be equal to the number of hi_names in "
+               "DerivativeMultiPhaseMaterial ",
+               name());
 
   for (unsigned int i = 0; i < _num_etas; ++i)
   {
@@ -31,7 +33,8 @@ DerivativeMultiPhaseMaterial::DerivativeMultiPhaseMaterial(const InputParameters
     _d2hi[i] = &getMaterialPropertyDerivative<Real>(_hi_names[i], _eta_names[i], _eta_names[i]);
 
     if (_third_derivatives)
-      _d3hi[i] = &getMaterialPropertyDerivative<Real>(_hi_names[i], _eta_names[i], _eta_names[i], _eta_names[i]);
+      _d3hi[i] = &getMaterialPropertyDerivative<Real>(
+          _hi_names[i], _eta_names[i], _eta_names[i], _eta_names[i]);
   }
 }
 
@@ -64,11 +67,12 @@ DerivativeMultiPhaseMaterial::computeD2F(unsigned int i_var, unsigned int j_var)
 
   if (i_eta >= 0 && j_eta >= 0)
   {
-    // if the derivatives are taken w.r.t. a single eta the d2hi term for eta_i appears, otherwise it drops out
+    // if the derivatives are taken w.r.t. a single eta the d2hi term for eta_i appears, otherwise
+    // it drops out
     // because we assume that hi _only_ depends on eta_i
     Real d2F = (i_eta == j_eta) ? (*_d2hi[i_eta])[_qp] * (*_prop_Fi[i_eta])[_qp] : 0.0;
 
-    return  d2F + _W * (*_d2g[i_eta][j_eta])[_qp];
+    return d2F + _W * (*_d2g[i_eta][j_eta])[_qp];
   }
 
   // one argument is an eta-variable
@@ -101,11 +105,13 @@ DerivativeMultiPhaseMaterial::computeD3F(unsigned int i_var, unsigned int j_var,
 
   if (i_eta >= 0 && j_eta >= 0 && k_eta >= 0)
   {
-    // if the derivatives are taken w.r.t. a single eta the d3hi term for eta_i appears, otherwise it drops out
+    // if the derivatives are taken w.r.t. a single eta the d3hi term for eta_i appears, otherwise
+    // it drops out
     // because we assume that hi _only_ depends on eta_i
-    Real d3F = (i_eta == j_eta && j_eta == k_eta) ? (*_d3hi[i_eta])[_qp] * (*_prop_Fi[i_eta])[_qp] : 0.0;
+    Real d3F =
+        (i_eta == j_eta && j_eta == k_eta) ? (*_d3hi[i_eta])[_qp] * (*_prop_Fi[i_eta])[_qp] : 0.0;
 
-    return  d3F + _W * (*_d3g[i_eta][j_eta][k_eta])[_qp];
+    return d3F + _W * (*_d3g[i_eta][j_eta][k_eta])[_qp];
   }
 
   // two arguments are eta-variables
@@ -137,4 +143,3 @@ DerivativeMultiPhaseMaterial::computeD3F(unsigned int i_var, unsigned int j_var,
     d3F += (*_hi[n])[_qp] * (*_prop_d3Fi[n][i][j][k])[_qp];
   return d3F;
 }
-

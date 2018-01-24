@@ -4,4 +4,10 @@
     input = 'stateful_coupling.i'
     exodiff = 'stateful_coupling_out.e'
   [../]
+
+  [./aux_init_qp_props]
+    type = 'Exodiff'
+    input = 'stateful_aux.i'
+    exodiff = 'stateful_aux_out.e'
+  [../]
 []

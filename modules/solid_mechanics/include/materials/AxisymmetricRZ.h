@@ -9,7 +9,7 @@
 
 #include "Element.h"
 
-//Forward Declarations
+// Forward Declarations
 class SymmElasticityTensor;
 namespace SolidMechanics
 {
@@ -17,31 +17,28 @@ namespace SolidMechanics
 class AxisymmetricRZ : public Element
 {
 public:
-  AxisymmetricRZ(SolidModel & solid_model, const std::string & name, const InputParameters & parameters);
+  AxisymmetricRZ(SolidModel & solid_model,
+                 const std::string & name,
+                 const InputParameters & parameters);
   virtual ~AxisymmetricRZ();
 
 protected:
+  virtual void computeStrain(const unsigned qp,
+                             const SymmTensor & total_strain_old,
+                             SymmTensor & total_strain_new,
+                             SymmTensor & strain_increment);
 
-  virtual void computeStrain( const unsigned qp,
-                              const SymmTensor & total_strain_old,
-                              SymmTensor & total_strain_new,
-                              SymmTensor & strain_increment );
+  virtual unsigned int getNumKnownCrackDirs() const { return 1; }
 
-  virtual unsigned int getNumKnownCrackDirs() const
-  {
-    return 1;
-  }
-
-  VariableValue & _disp_r;
-  VariableValue & _disp_z;
+  const VariableValue & _disp_r;
+  const VariableValue & _disp_z;
 
   const bool _large_strain;
 
-  VariableGradient & _grad_disp_r;
-  VariableGradient & _grad_disp_z;
-
+  const VariableGradient & _grad_disp_r;
+  const VariableGradient & _grad_disp_z;
+  const bool _volumetric_locking_correction;
 };
-
 }
 
-#endif //SOLIDMECHANICSMATERIALRZ_H
+#endif // SOLIDMECHANICSMATERIALRZ_H

@@ -13,89 +13,98 @@
 /****************************************************************/
 
 #include "ComputeElemAuxVarsThread.h"
+
+// MOOSE includes
 #include "AuxiliarySystem.h"
 #include "AuxKernel.h"
+#include "SwapBackSentinel.h"
 #include "FEProblem.h"
-// libmesh includes
+
 #include "libmesh/threads.h"
 
-
-ComputeElemAuxVarsThread::ComputeElemAuxVarsThread(FEProblem & problem, AuxiliarySystem & sys, std::vector<AuxWarehouse> & auxs, bool need_materials) :
-    ThreadedElementLoop<ConstElemRange>(problem, sys),
-    _aux_sys(sys),
-    _auxs(auxs),
+ComputeElemAuxVarsThread::ComputeElemAuxVarsThread(FEProblemBase & problem,
+                                                   const MooseObjectWarehouse<AuxKernel> & storage,
+                                                   bool need_materials)
+  : ThreadedElementLoop<ConstElemRange>(problem),
+    _aux_sys(problem.getAuxiliarySystem()),
+    _aux_kernels(storage),
     _need_materials(need_materials)
 {
 }
 
 // Splitting Constructor
-ComputeElemAuxVarsThread::ComputeElemAuxVarsThread(ComputeElemAuxVarsThread & x, Threads::split /*split*/) :
-    ThreadedElementLoop<ConstElemRange>(x._fe_problem, x._system),
+ComputeElemAuxVarsThread::ComputeElemAuxVarsThread(ComputeElemAuxVarsThread & x,
+                                                   Threads::split /*split*/)
+  : ThreadedElementLoop<ConstElemRange>(x._fe_problem),
     _aux_sys(x._aux_sys),
-    _auxs(x._auxs),
+    _aux_kernels(x._aux_kernels),
     _need_materials(x._need_materials)
 {
 }
 
-ComputeElemAuxVarsThread::~ComputeElemAuxVarsThread()
-{
-}
+ComputeElemAuxVarsThread::~ComputeElemAuxVarsThread() {}
 
 void
 ComputeElemAuxVarsThread::subdomainChanged()
 {
+  _fe_problem.subdomainSetup(_subdomain, _tid);
+
   // prepare variables
-  for (std::map<std::string, MooseVariable *>::iterator it = _aux_sys._elem_vars[_tid].begin(); it != _aux_sys._elem_vars[_tid].end(); ++it)
+  for (const auto & it : _aux_sys._elem_vars[_tid])
   {
-    MooseVariable * var = it->second;
+    MooseVariable * var = it.second;
     var->prepareAux();
   }
 
-  // block setup
-  for (std::vector<AuxKernel *>::const_iterator aux_it=_auxs[_tid].activeBlockElementKernels(_subdomain).begin();
-      aux_it != _auxs[_tid].activeBlockElementKernels(_subdomain).end();
-      aux_it++)
-    (*aux_it)->subdomainSetup();
-
   std::set<MooseVariable *> needed_moose_vars;
+  std::set<unsigned int> needed_mat_props;
 
-  for (std::vector<AuxKernel*>::const_iterator block_element_aux_it = _auxs[_tid].activeBlockElementKernels(_subdomain).begin();
-      block_element_aux_it != _auxs[_tid].activeBlockElementKernels(_subdomain).end(); ++block_element_aux_it)
+  if (_aux_kernels.hasActiveBlockObjects(_subdomain, _tid))
   {
-    const std::set<MooseVariable *> & mv_deps = (*block_element_aux_it)->getMooseVariableDependencies();
-    needed_moose_vars.insert(mv_deps.begin(), mv_deps.end());
+    const std::vector<std::shared_ptr<AuxKernel>> & kernels =
+        _aux_kernels.getActiveBlockObjects(_subdomain, _tid);
+    for (const auto & aux : kernels)
+    {
+      aux->subdomainSetup();
+      const std::set<MooseVariable *> & mv_deps = aux->getMooseVariableDependencies();
+      const std::set<unsigned int> & mp_deps = aux->getMatPropDependencies();
+      needed_moose_vars.insert(mv_deps.begin(), mv_deps.end());
+      needed_mat_props.insert(mp_deps.begin(), mp_deps.end());
+    }
   }
 
   _fe_problem.setActiveElementalMooseVariables(needed_moose_vars, _tid);
+  _fe_problem.setActiveMaterialProperties(needed_mat_props, _tid);
   _fe_problem.prepareMaterials(_subdomain, _tid);
 }
-
 
 void
 ComputeElemAuxVarsThread::onElement(const Elem * elem)
 {
-  if (! _auxs[_tid].activeBlockElementKernels(_subdomain).empty())
+  if (_aux_kernels.hasActiveBlockObjects(_subdomain, _tid))
   {
+    const std::vector<std::shared_ptr<AuxKernel>> & kernels =
+        _aux_kernels.getActiveBlockObjects(_subdomain, _tid);
     _fe_problem.prepare(elem, _tid);
     _fe_problem.reinitElem(elem, _tid);
+
+    // Set up the sentinel so that, even if reinitMaterials() throws, we
+    // still remember to swap back.
+    SwapBackSentinel sentinel(_fe_problem, &FEProblem::swapBackMaterials, _tid, _need_materials);
 
     if (_need_materials)
       _fe_problem.reinitMaterials(elem->subdomain_id(), _tid);
 
-    for (std::vector<AuxKernel*>::const_iterator block_element_aux_it = _auxs[_tid].activeBlockElementKernels(_subdomain).begin();
-        block_element_aux_it != _auxs[_tid].activeBlockElementKernels(_subdomain).end(); ++block_element_aux_it)
-      (*block_element_aux_it)->compute();
-
-    if (_need_materials)
-      _fe_problem.swapBackMaterials(_tid);
+    for (const auto & aux : kernels)
+      aux->compute();
 
     // update the solution vector
     {
       Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
-      for (std::map<std::string, MooseVariable *>::iterator it = _aux_sys._elem_vars[_tid].begin(); it != _aux_sys._elem_vars[_tid].end(); ++it)
+      for (const auto & it : _aux_sys._elem_vars[_tid])
       {
-        MooseVariable * var = it->second;
-        var->insert(_system.solution());
+        MooseVariable * var = it.second;
+        var->insert(_aux_sys.solution());
       }
     }
   }
@@ -105,6 +114,7 @@ void
 ComputeElemAuxVarsThread::post()
 {
   _fe_problem.clearActiveElementalMooseVariables(_tid);
+  _fe_problem.clearActiveMaterialProperties(_tid);
 }
 
 void

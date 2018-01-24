@@ -3,10 +3,10 @@
   dim = 2
   nx = 10
   ny = 10
-  # This test currently diffs when run in parallel with ParallelMesh enabled,
+  # This test currently diffs when run in parallel with DistributedMesh enabled,
   # most likely due to the fact that it uses some geometric search stuff.
   # For more information, see #2121.
-  distribution = serial
+  parallel_type = replicated
 []
 
 [Variables]

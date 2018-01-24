@@ -15,19 +15,18 @@
 #ifndef LAYEREDSIDEFLUXAVERAGE_H
 #define LAYEREDSIDEFLUXAVERAGE_H
 
+// MOOSE includes
 #include "LayeredSideAverage.h"
 
-// libmesh includes
-#include "libmesh/mesh_tools.h"
-
-//Forward Declarations
+// Forward Declarations
 class LayeredSideFluxAverage;
 
-template<>
+template <>
 InputParameters validParams<LayeredSideFluxAverage>();
 
 /**
- * This UserObject computes side averages of a flux storing partial sums for the specified number of intervals in a direction (x,y,z).
+ * This UserObject computes side averages of a flux storing partial
+ * sums for the specified number of intervals in a direction (x,y,z).
  */
 class LayeredSideFluxAverage : public LayeredSideAverage
 {
@@ -35,7 +34,7 @@ public:
   LayeredSideFluxAverage(const InputParameters & parameters);
 
 protected:
-  virtual Real computeQpIntegral();
+  virtual Real computeQpIntegral() override;
 
   std::string _diffusivity;
   const MaterialProperty<Real> & _diffusion_coef;

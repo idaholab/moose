@@ -1,0 +1,33 @@
+[Tests]
+  [./ics_on_same_boundary]
+    type = RunException
+    input = two_ics_on_same_boundary.i
+    expect_err = "The initial condition 'left2' is being defined on a boundary that already has an initial condition defined."
+  [../]
+
+  [./ics_on_same_block]
+    type = RunException
+    input = two_ics_on_same_block.i
+    expect_err = "The initial condition 'block2' is being defined on a block that already has an initial condition defined."
+  [../]
+
+  [./ics_on_same_block_both_global]
+    type = RunException
+    input = two_ics_on_same_block_global.i
+    expect_err = "The initial condition 'block2' is being defined on a block that already has an initial condition defined."
+  [../]
+
+  [./ics_on_same_block_first_global]
+    type = RunException
+    input = two_ics_on_same_block_global.i
+    expect_err = "The initial condition 'block2' is being defined on a block that already has an initial condition defined."
+    cli_args = 'ICs/block/block=2'
+  [../]
+
+  [./ics_on_same_block_second_global]
+    type = RunException
+    input = two_ics_on_same_block_global.i
+    expect_err = "The initial condition 'block2' is being defined on a block that already has an initial condition defined."
+    cli_args = 'ICs/block2/block=2'
+  [../]
+[]
