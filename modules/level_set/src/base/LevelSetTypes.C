@@ -14,3 +14,4 @@
 #include "MooseEnumItem.h"
 
 const ExecFlagType LevelSet::EXEC_ADAPT_MESH("ADAPT_MESH");
+const ExecFlagType LevelSet::EXEC_COMPUTE_MARKERS("COMPUTE_MARKERS", 1234);

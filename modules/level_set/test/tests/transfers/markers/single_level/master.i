@@ -76,7 +76,6 @@
     multi_app = sub
     source_variable = marker
     variable = marker
-    check_multiapp_execute_on = false
   [../]
 []
 

@@ -2777,10 +2777,16 @@ FEProblemBase::getCurrentExecuteOnFlag() const
 }
 
 void
+FEProblemBase::setCurrentExecuteOnFlag(const ExecFlagType & flag)
+{
+  _current_execute_on_flag = flag;
+}
+
+void
 FEProblemBase::execute(const ExecFlagType & exec_type)
 {
   // Set the current flag
-  _current_execute_on_flag = exec_type;
+  setCurrentExecuteOnFlag(exec_type);
   if (exec_type == EXEC_NONLINEAR)
     _currently_computing_jacobian = true;
   // Samplers
@@ -2799,7 +2805,7 @@ FEProblemBase::execute(const ExecFlagType & exec_type)
   executeControls(exec_type);
 
   // Return the current flag to None
-  _current_execute_on_flag = EXEC_NONE;
+  setCurrentExecuteOnFlag(EXEC_NONE);
   _currently_computing_jacobian = false;
 }
 
