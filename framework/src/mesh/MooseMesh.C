@@ -18,6 +18,7 @@
 #include "Assembly.h"
 #include "MooseUtils.h"
 #include "MooseApp.h"
+#include "RelationshipManager.h"
 
 #include <utility>
 

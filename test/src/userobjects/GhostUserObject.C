@@ -29,6 +29,11 @@ validParams<GhostUserObject>()
       "The rank for which the ghosted elements are recorded (Default: ALL)");
 
   params.set<ExecFlagEnum>("execute_on") = EXEC_TIMESTEP_BEGIN;
+
+  params.registerRelationshipManagers("ElementSideNeighborLayers");
+  params.addRequiredParam<unsigned short>("element_side_neighbor_layers",
+                                          "Number of layers to ghost");
+
   params.addClassDescription("User object to calculate ghosted elements on a single processor or "
                              "the union across all processors.");
   return params;

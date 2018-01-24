@@ -321,6 +321,21 @@ stringToEnum<MffdType>(const std::string & s)
   return mffd_type_to_enum[upper];
 }
 
+// Definition in MooseTypes.h
+std::string
+stringify(const Moose::RelationshipManagerType & t)
+{
+  switch (t)
+  {
+    case Moose::RelationshipManagerType::Geometric:
+      return "Geometric";
+    case Moose::RelationshipManagerType::Algebraic:
+      return "Algebraic";
+    default:
+      return "ERROR";
+  }
+}
+
 std::string
 stringify(const SolveType & t)
 {

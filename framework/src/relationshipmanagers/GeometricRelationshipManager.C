@@ -12,41 +12,26 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef MOOSEOBJECTACTION_H
-#define MOOSEOBJECTACTION_H
-
-#include "Action.h"
-
-#include <string>
-
-class MooseObjectAction;
+#include "GeometricRelationshipManager.h"
+#include "MooseMesh.h"
 
 template <>
-InputParameters validParams<MooseObjectAction>();
-
-class MooseObjectAction : public Action
+InputParameters
+validParams<GeometricRelationshipManager>()
 {
-public:
-  MooseObjectAction(InputParameters params);
+  InputParameters params = validParams<RelationshipManager>();
 
-  virtual void addRelationshipManagers(Moose::RelationshipManagerType when_type) override;
+  params.set<Moose::RelationshipManagerType>("rm_type") = Moose::RelationshipManagerType::Geometric;
+  return params;
+}
 
-  /**
-   * Retreive the parameters of the object to be created by this action
-   */
-  InputParameters & getObjectParams() { return _moose_object_pars; }
+GeometricRelationshipManager::GeometricRelationshipManager(const InputParameters & parameters)
+  : RelationshipManager(parameters)
+{
+}
 
-  /**
-   * Return the object type to be created
-   */
-  const std::string & getMooseObjectType() const { return _type; }
-
-protected:
-  /// The Object type that is being created
-  std::string _type;
-
-  /// The parameters for the object to be created
-  InputParameters _moose_object_pars;
-};
-
-#endif // MOOSEOBJECTACTION_H
+void
+GeometricRelationshipManager::attachGeometricFunctorHelper(GhostingFunctor & gf) const
+{
+  _mesh.getMesh().add_ghosting_functor(gf);
+}

@@ -23,6 +23,10 @@
 #include "libmesh/elem.h"
 #include "libmesh/petsc_macro.h"
 #include "libmesh/boundary_info.h"
+#include "libmesh/parameters.h"
+
+// BOOST include
+#include "bitmask_operators.h"
 
 #include <string>
 #include <vector>
@@ -327,7 +331,36 @@ enum PatchUpdateType
   Auto,
   Iteration
 };
+
+/**
+ * Main types of Relationship Managers
+ */
+enum class RelationshipManagerType : unsigned char
+{
+  Invalid = 0x0,
+  Geometric = 0x1,
+  Algebraic = 0x2
+};
+
+std::string stringify(const Moose::RelationshipManagerType & t);
 }
+
+namespace libMesh
+{
+template <>
+inline void
+print_helper(std::ostream & os, const Moose::RelationshipManagerType * param)
+{
+  // Specialization so that we don't print out unprintable characters
+  os << Moose::stringify(*param);
+}
+}
+
+template <>
+struct enable_bitmask_operators<Moose::RelationshipManagerType>
+{
+  static const bool enable = true;
+};
 
 /**
  * This Macro is used to generate std::string derived types useful for

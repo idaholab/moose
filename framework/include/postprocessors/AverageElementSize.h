@@ -15,7 +15,7 @@
 #ifndef AVERAGEELEMENTSIZE_H
 #define AVERAGEELEMENTSIZE_H
 
-#include "ElementAverageValue.h"
+#include "ElementPostprocessor.h"
 
 // Forward Declarations
 class AverageElementSize;
@@ -26,7 +26,7 @@ InputParameters validParams<AverageElementSize>();
 /**
  * This postprocessor computes an average element size (h) for the whole domain.
  */
-class AverageElementSize : public ElementAverageValue
+class AverageElementSize : public ElementPostprocessor
 {
 public:
   AverageElementSize(const InputParameters & parameters);
@@ -34,12 +34,11 @@ public:
   virtual void initialize() override;
   virtual void execute() override;
 
-  virtual Real computeIntegral() override;
-
   virtual Real getValue() override;
   virtual void threadJoin(const UserObject & y) override;
 
 protected:
+  Real _total_size;
   int _elems;
 };
 

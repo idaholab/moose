@@ -165,7 +165,7 @@ EigenKernel::computeOffDiagJacobian(unsigned int jvar)
 }
 
 bool
-EigenKernel::enabled()
+EigenKernel::enabled() const
 {
   bool flag = MooseObject::enabled();
   if (_eigen)

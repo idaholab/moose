@@ -12,7 +12,7 @@
   [./geometric_edge_neighbor_two_2D]
     type = 'Exodiff'
     input = 'geometric_neighbors.i'
-    cli_args = 'Mesh/num_ghosted_layers=2 Outputs/file_base=geometric_edge_two_2D_out'
+    cli_args = 'UserObjects/ghost_uo/element_side_neighbor_layers=2 Outputs/file_base=geometric_edge_two_2D_out'
     exodiff = 'geometric_edge_two_2D_out.e'
 
     min_parallel = 3
@@ -33,7 +33,7 @@
   [./geometric_edge_neighbor_two_3D_Mac]
     type = 'Exodiff'
     input = 'geometric_neighbors.i'
-    cli_args = 'Mesh/num_ghosted_layers=2 Mesh/dim=3 Mesh/nz=8 Outputs/file_base=geometric_edge_two_3D_out_Mac'
+    cli_args = 'UserObjects/ghost_uo/element_side_neighbor_layers=2 Mesh/dim=3 Mesh/nz=8 Outputs/file_base=geometric_edge_two_3D_out_Mac'
     exodiff = 'geometric_edge_two_3D_out_Mac.e'
     platform = DARWIN
 
@@ -55,7 +55,7 @@
   [./geometric_edge_neighbor_two_3D_Linux]
     type = 'Exodiff'
     input = 'geometric_neighbors.i'
-    cli_args = 'Mesh/num_ghosted_layers=2 Mesh/dim=3 Mesh/nz=8 Outputs/file_base=geometric_edge_two_3D_out_Linux'
+    cli_args = 'UserObjects/ghost_uo/element_side_neighbor_layers=2 Mesh/dim=3 Mesh/nz=8 Outputs/file_base=geometric_edge_two_3D_out_Linux'
     exodiff = 'geometric_edge_two_3D_out_Linux.e'
     platform = LINUX
 

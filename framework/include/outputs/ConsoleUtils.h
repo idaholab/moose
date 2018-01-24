@@ -65,6 +65,11 @@ std::string outputAuxiliarySystemInformation(FEProblemBase & problem);
 std::string outputNonlinearSystemInformation(FEProblemBase & problem);
 
 /**
+ * Output action RelationshipManager information
+ */
+std::string outputRelationshipManagerInformation(MooseApp & app);
+
+/**
  * Output execution information
  */
 std::string outputExecutionInformation(MooseApp & app, FEProblemBase & problem);

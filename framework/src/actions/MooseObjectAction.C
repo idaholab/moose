@@ -15,6 +15,10 @@
 #include "MooseObjectAction.h"
 #include "MooseUtils.h"
 #include "Factory.h"
+#include "RelationshipManager.h"
+#include "Conversion.h"
+#include "MooseMesh.h"
+#include "MooseApp.h"
 
 template <>
 InputParameters
@@ -38,4 +42,32 @@ MooseObjectAction::MooseObjectAction(InputParameters params)
                            : validParams<MooseObject>())
 {
   _moose_object_pars.blockFullpath() = params.blockFullpath();
+}
+
+void MooseObjectAction::addRelationshipManagers(Moose::RelationshipManagerType /*when_type*/)
+{
+  const auto & buildable_types = _moose_object_pars.getBuildableRelationshipManagerTypes();
+
+  for (const auto & buildable_type : buildable_types)
+  {
+    /**
+     * This method is always called twice. Once to attempt adding early RMs and once to add late
+     * RMs. For generic MooseObjects, we'd like to add RMs as early as possible, but we'll have to
+     * be careful not to add them twice!
+     */
+    auto new_name = name() + '_' + buildable_type + "_rm";
+    if (_app.hasRelationshipManager(new_name))
+      continue;
+
+    auto rm_params = _factory.getValidParams(buildable_type);
+    rm_params.applyParameters(_moose_object_pars);
+    rm_params.set<MooseMesh *>("mesh") = _mesh.get();
+
+    if (rm_params.areAllRequiredParamsValid())
+    {
+      auto rm_obj = _factory.create<RelationshipManager>(buildable_type, new_name, rm_params);
+
+      _app.addRelationshipManager(rm_obj);
+    }
+  }
 }

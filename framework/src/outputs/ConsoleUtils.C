@@ -209,6 +209,24 @@ outputSystemInformationHelper(const System & system)
 }
 
 std::string
+outputRelationshipManagerInformation(MooseApp & app)
+{
+  std::stringstream oss;
+  oss << std::left;
+
+  auto info_strings = app.getRelationshipManagerInfo();
+  if (info_strings.size())
+  {
+    for (const auto & info_pair : info_strings)
+      oss << std::setw(console_field_width) << std::string("  ") + info_pair.first << ": "
+          << info_pair.second << '\n';
+    oss << '\n';
+  }
+
+  return oss.str();
+}
+
+std::string
 outputExecutionInformation(MooseApp & app, FEProblemBase & problem)
 {
 

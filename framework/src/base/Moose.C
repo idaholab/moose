@@ -447,6 +447,7 @@
 #include "SetupRecoverFileBaseAction.h"
 #include "AddNodalKernelAction.h"
 #include "MaterialDerivativeTestAction.h"
+#include "AddRelationshipManager.h"
 
 // Outputs
 #ifdef LIBMESH_HAVE_EXODUS_API
@@ -479,6 +480,10 @@
 #include "ConstantRate.h"
 #include "TimeDerivativeNodalKernel.h"
 #include "UserForcingFunctionNodalKernel.h"
+
+// relationship managers
+#include "ElementSideNeighborLayers.h"
+#include "ElementPointNeighbors.h"
 
 #include <unistd.h>
 
@@ -907,6 +912,10 @@ registerObjects(Factory & factory)
   registerNodalKernel(ConstantRate);
   registerNodalKernel(UserForcingFunctionNodalKernel);
 
+  // RelationshipManagers
+  registerRelationshipManager(ElementSideNeighborLayers);
+  registerRelationshipManager(ElementPointNeighbors);
+
   registered = true;
 }
 
@@ -914,7 +923,7 @@ void
 addActionTypes(Syntax & syntax)
 {
   /**
-   * The second param here indicates whether the task must be satisfied or not for a successful run.
+   * The last param here indicates whether the task must be satisfied or not for a successful run.
    * If set to true, then the ActionWarehouse will attempt to create "Action"s automatically if they
    * have not been explicitly created by the parser or some other mechanism.
    *
@@ -1001,10 +1010,12 @@ addActionTypes(Syntax & syntax)
   registerTask("execute_mesh_modifiers", false);
   registerTask("uniform_refine_mesh", false);
   registerTask("prepare_mesh", false);
+  registerTask("add_geometric_rm", true);
   registerTask("setup_mesh_complete", false); // calls prepare
 
   registerTask("init_displaced_problem", false);
 
+  registerTask("add_algebraic_rm", true);
   registerTask("init_problem", true);
   registerTask("check_copy_nodal_vars", true);
   registerTask("copy_nodal_vars", true);
@@ -1056,6 +1067,7 @@ addActionTypes(Syntax & syntax)
                            "(check_copy_nodal_vars)"
                            "(setup_mesh)"
                            "(add_partitioner)"
+                           "(add_geometric_rm)"
                            "(init_mesh)"
                            "(prepare_mesh)"
                            "(add_mesh_modifier)"
@@ -1094,6 +1106,7 @@ addActionTypes(Syntax & syntax)
                            "(copy_nodal_vars, copy_nodal_aux_vars)"
                            "(add_material)"
                            "(setup_material_output)"
+                           "(add_algebraic_rm)"
                            "(init_problem)"
                            "(setup_debug)"
                            "(add_output)"
@@ -1245,6 +1258,9 @@ registerActions(Syntax & syntax, ActionFactory & action_factory)
   // NonParsedActions
   registerAction(SetupDampersAction, "setup_dampers");
   registerAction(EmptyAction, "ready_to_init");
+  registerAction(AddRelationshipManager, "add_algebraic_rm");
+  registerAction(AddRelationshipManager, "add_geometric_rm");
+
   registerAction(InitProblemAction, "init_problem");
   registerAction(CheckIntegrityAction, "check_integrity");
 

@@ -16,6 +16,7 @@
 #include "ActionWarehouse.h"
 #include "MooseMesh.h"
 #include "MooseApp.h"
+#include "MooseTypes.h"
 #include "MooseUtils.h" // remove when getBaseName is removed
 
 template <>
@@ -69,6 +70,8 @@ Action::Action(InputParameters parameters)
     _executioner(_app.executioner())
 {
 }
+
+void Action::addRelationshipManagers(Moose::RelationshipManagerType) {}
 
 /// DEPRECATED METHODS
 std::string

@@ -12,41 +12,28 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef MOOSEOBJECTACTION_H
-#define MOOSEOBJECTACTION_H
-
-#include "Action.h"
-
-#include <string>
-
-class MooseObjectAction;
+#include "AddRelationshipManager.h"
+#include "FEProblem.h"
 
 template <>
-InputParameters validParams<MooseObjectAction>();
-
-class MooseObjectAction : public Action
+InputParameters
+validParams<AddRelationshipManager>()
 {
-public:
-  MooseObjectAction(InputParameters params);
+  return validParams<Action>();
+}
 
-  virtual void addRelationshipManagers(Moose::RelationshipManagerType when_type) override;
+AddRelationshipManager::AddRelationshipManager(InputParameters params) : Action(params) {}
 
-  /**
-   * Retreive the parameters of the object to be created by this action
-   */
-  InputParameters & getObjectParams() { return _moose_object_pars; }
+void
+AddRelationshipManager::act()
+{
+  Moose::RelationshipManagerType rm_type =
+      (_current_task == "add_geometric_rm" ? Moose::RelationshipManagerType::Geometric
+                                           : Moose::RelationshipManagerType::Algebraic);
 
-  /**
-   * Return the object type to be created
-   */
-  const std::string & getMooseObjectType() const { return _type; }
+  const auto & all_action_ptrs = _awh.allActionBlocks();
+  for (const auto & action_ptr : all_action_ptrs)
+    action_ptr->addRelationshipManagers(rm_type);
 
-protected:
-  /// The Object type that is being created
-  std::string _type;
-
-  /// The parameters for the object to be created
-  InputParameters _moose_object_pars;
-};
-
-#endif // MOOSEOBJECTACTION_H
+  _app.attachRelationshipManagers(rm_type);
+}
