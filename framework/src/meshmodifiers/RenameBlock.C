@@ -35,17 +35,19 @@ validParams<RenameBlock>()
   params.addParam<std::vector<SubdomainID>>(
       "new_block_id",
       "Elements with the old block number (or name) will be given this block "
-      "number.  You must supply either new_block_id or new_block_name.  You may "
-      "supply a vector of new_block_id, in which case the old_block information "
-      "must also be a vector.");
+      "number.  If the old blocks are named, their names will be passed onto the "
+      "newly numbered blocks.");
   params.addParam<std::vector<SubdomainName>>(
       "new_block_name",
       "Elements with the old block number (or name) will be given this block "
-      "name.  You must supply either new_block_id or new_block_name.  You may "
-      "supply a vector of new_block_id, in which case the old_block information "
-      "must also be a vector.");
-  params.addClassDescription("RenameBlock re-numbers or re-names an old_block_id or old_block_name "
-                             "with a new_block_id or new_block_name");
+      "name.  No change of block ID is performed, unless multiple old blocks are "
+      "given the same name, in which case they are all given the first old block "
+      "number.");
+  params.addClassDescription(
+      "RenameBlock re-numbers or re-names an old_block_id or old_block_name "
+      "with a new_block_id or new_block_name.  If using RenameBlock to "
+      "merge blocks (by giving them the same name, for instance) it is "
+      "advisable to specify all your blocks in old_blocks to avoid inconsistencies");
   return params;
 }
 
@@ -78,21 +80,32 @@ RenameBlock::modify()
   // have been put into the mesh yet, eg old_block_name might have been inserted by
   // another MeshModifier
   if (isParamValid("old_block_id"))
+  {
+    // user must have supplied old_block_id
     _old_block_id = getParam<std::vector<SubdomainID>>("old_block_id");
-  else // must have supplied old_block_name
-    _old_block_id =
-        _mesh_ptr->getSubdomainIDs(getParam<std::vector<SubdomainName>>("old_block_name"));
+    _old_block_name.reserve(_old_block_id.size());
+    for (const auto & block_id : _old_block_id)
+      _old_block_name.emplace_back(_mesh_ptr->getMesh().subdomain_name(block_id));
+  }
+  else
+  {
+    // user must have supplied old_block_name
+    _old_block_name = getParam<std::vector<SubdomainName>>("old_block_name");
+    _old_block_id = _mesh_ptr->getSubdomainIDs(_old_block_name);
+  }
 
+  // construct new_block_id and new_block_name
   if (isParamValid("new_block_id"))
   {
     _new_block_id = getParam<std::vector<SubdomainID>>("new_block_id");
     if (_new_block_id.size() != _old_block_id.size())
       mooseError("RenameBlock: The vector of old_block information must have the same length as "
                  "the vector of new_block information\n");
-    for (const auto & elem : _mesh_ptr->getMesh().active_element_ptr_range())
-      for (unsigned i = 0; i < _old_block_id.size(); ++i)
-        if (elem->subdomain_id() == _old_block_id[i])
-          elem->subdomain_id() = _new_block_id[i];
+
+    // construct the _new_block_name
+    _new_block_name.reserve(_new_block_id.size());
+    for (const auto & block_id : _new_block_id)
+      _new_block_name.emplace_back(newBlockName(block_id));
   }
   else // must have supplied new_block_name
   {
@@ -100,8 +113,34 @@ RenameBlock::modify()
     if (_new_block_name.size() != _old_block_id.size())
       mooseError("RenameBlock: The vector of old_block information must have the same length as "
                  "the vector of new_block information\n");
-    for (unsigned i = 0; i < _old_block_id.size(); ++i)
-      // libmesh appears to check that _old_block_id[i] isn't too big or too small
-      _mesh_ptr->getMesh().subdomain_name(_old_block_id[i]) = _new_block_name[i];
+
+    _new_block_id.reserve(_new_block_name.size());
+    for (const auto & block_name : _new_block_name)
+      _new_block_id.emplace_back(newBlockID(block_name));
   }
+
+  for (const auto & elem : _mesh_ptr->getMesh().active_element_ptr_range())
+    for (unsigned i = 0; i < _old_block_id.size(); ++i)
+      if (elem->subdomain_id() == _old_block_id[i])
+        elem->subdomain_id() = _new_block_id[i];
+  for (unsigned i = 0; i < _old_block_id.size(); ++i)
+    _mesh_ptr->getMesh().subdomain_name(_old_block_id[i]) = _new_block_name[i];
+}
+
+const SubdomainName
+RenameBlock::newBlockName(const SubdomainID & new_block_id)
+{
+  for (unsigned i = 0; i < _new_block_id.size(); ++i)
+    if (_new_block_id[i] == new_block_id)
+      return _old_block_name[i];
+  mooseError("RenameBlock: error in code");
+}
+
+const SubdomainID
+RenameBlock::newBlockID(const SubdomainName & new_block_name)
+{
+  for (unsigned i = 0; i < _new_block_name.size(); ++i)
+    if (_new_block_name[i] == new_block_name)
+      return _old_block_id[i];
+  mooseError("RenameBlock: error in code");
 }
