@@ -27,21 +27,23 @@ public:
   ReferenceResidualProblem(const InputParameters & params);
   virtual ~ReferenceResidualProblem();
 
-  virtual void initialSetup();
-  virtual void timestepSetup();
+  virtual void initialSetup() override;
+  virtual void timestepSetup() override;
   void updateReferenceResidual();
-  virtual MooseNonlinearConvergenceReason checkNonlinearConvergence(std::string & msg,
-                                                                    const PetscInt it,
-                                                                    const Real xnorm,
-                                                                    const Real snorm,
-                                                                    const Real fnorm,
-                                                                    const Real rtol,
-                                                                    const Real stol,
-                                                                    const Real abstol,
-                                                                    const PetscInt nfuncs,
-                                                                    const PetscInt max_funcs,
-                                                                    const Real ref_resid,
-                                                                    const Real div_threshold);
+  virtual MooseNonlinearConvergenceReason
+  checkNonlinearConvergence(std::string & msg,
+                            const PetscInt it,
+                            const Real xnorm,
+                            const Real snorm,
+                            const Real fnorm,
+                            const Real rtol,
+                            const Real stol,
+                            const Real abstol,
+                            const PetscInt nfuncs,
+                            const PetscInt max_funcs,
+                            const PetscBool force_iteration,
+                            const Real ref_resid,
+                            const Real div_threshold) override;
 
   bool checkConvergenceIndividVars(const Real fnorm,
                                    const Real abstol,
