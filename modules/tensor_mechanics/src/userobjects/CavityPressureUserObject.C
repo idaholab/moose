@@ -14,6 +14,8 @@ InputParameters
 validParams<CavityPressureUserObject>()
 {
   InputParameters params = validParams<GeneralUserObject>();
+  params.addClassDescription("Uses the ideal gas law to compute internal pressure"
+                             "and an initial moles of gas quantity");
   params.addParam<Real>(
       "initial_pressure",
       0,
