@@ -32,7 +32,7 @@ Eq \eqref{eq:rank4tensor_aux_indices} shows the index values for a linear hypere
 ## Example Input File Syntax
 !listing modules/combined/test/tests/linear_elasticity/tensor.i block=AuxKernels/matl_C25
 
-An AuxVariable is required to store the `RankFourAux` AuxKernel information. Note that the name of the AuxVariable is used as the arguement for the `variable` input parameter in the `RankFourAux` block.
+An AuxVariable is required to store the `RankFourAux` AuxKernel information. Note that the name of the AuxVariable is used as the argument for the `variable` input parameter in the `RankFourAux` block.
 !listing modules/combined/test/tests/linear_elasticity/tensor.i block=AuxVariables/C25
 
 !syntax parameters /AuxKernels/RankFourAux
