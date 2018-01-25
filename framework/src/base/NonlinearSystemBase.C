@@ -1083,8 +1083,6 @@ NonlinearSystemBase::computeResidualInternal(Moose::KernelType type)
   _constraints.residualSetup();
   _general_dampers.residualSetup();
   _nodal_bcs.residualSetup();
-  if (_fe_problem.computingNonlinearResid())
-    _constraints.nonlinearResidualSetup();
 
   // reinit scalar variables
   for (unsigned int tid = 0; tid < libMesh::n_threads(); tid++)

@@ -3,7 +3,7 @@
     type = 'Exodiff'
     input = 'sliding_update.i'
     exodiff = 'sliding_update_out.e'
-    abs_zero = 1e-8
+    abs_zero = 1e-7
   [../]
   [./error_test]
     type = RunException

@@ -195,3 +195,11 @@ ConstraintWarehouse::subdomainsCovered(std::set<SubdomainID> & subdomains_covere
     }
   }
 }
+
+void
+ConstraintWarehouse::residualEnd(THREAD_ID tid /* = 0*/) const
+{
+  checkThreadID(tid);
+  for (const auto & object : _active_objects[tid])
+    object->residualEnd();
+}

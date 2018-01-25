@@ -269,7 +269,7 @@
 
   line_search = 'none'
 
-  nl_abs_tol = 1e-10
+  nl_abs_tol = 1e-9
   nl_rel_tol = 1e-7
   l_max_its = 100
   nl_max_its = 200
