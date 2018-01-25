@@ -1,11 +1,11 @@
-// This file is part of the MOOSE framework
-// https://www.mooseframework.org
-//
-// All rights reserved, see COPYRIGHT for full restrictions
-// https://github.com/idaholab/moose/blob/master/COPYRIGHT
-//
-// Licensed under LGPL 2.1, please see LICENSE for details
-// https://www.gnu.org/licenses/lgpl-2.1.html
+//* This file is part of the MOOSE framework
+//* https://www.mooseframework.org
+//*
+//* All rights reserved, see COPYRIGHT for full restrictions
+//* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+//*
+//* Licensed under LGPL 2.1, please see LICENSE for details
+//* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #ifndef HASHING_H
 #define HASHING_H
@@ -13,6 +13,10 @@
 // MOOSE includes
 #include "MooseTypes.h"
 
+/**
+ * This namespace provides efficient algorithms for quickly hashing different types for checking
+ * identity with a very low collision probability.
+ */
 namespace hashing
 {
 typedef std::size_t HashValue;
