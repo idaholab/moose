@@ -1,7 +1,7 @@
 from time import sleep
 from FactorySystem.MooseObject import MooseObject
 from Job import Job
-import os
+import os, traceback
 from contrib import dag
 from timeit import default_timer as clock
 
@@ -594,6 +594,6 @@ class Scheduler(MooseObject):
                     self.queueJobs(run_jobs=[job_container])
                     sleep(0.3)
 
-        except Exception as e:
-            print('runWorker Exception: %s' % (e))
+        except Exception:
+            print('runWorker Exception: %s' % (traceback.format_exc()))
             self.killRemaining()
