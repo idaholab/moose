@@ -15,6 +15,12 @@
     type = ParsedFunction
     value = x
   [../]
+
+  [./dts]
+    type = PiecewiseLinear
+    x = '0.1  10'
+    y = '0.1  10'
+  [../]
 []
 
 [Variables]
@@ -63,8 +69,7 @@
   num_steps = 3
   [./TimeStepper]
     type = FunctionDT
-    time_t  = '0.1  10'
-    time_dt = '0.1  10'
+    function = dts
   [../]
 []
 
