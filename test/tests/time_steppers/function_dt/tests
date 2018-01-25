@@ -15,4 +15,10 @@
     cli_args = "Executioner/TimeStepper/time_t='0 0.85' Outputs/exodus=false"
     expect_err = "In FunctionDT TimeStepper: Vectors are not the same length"
   [../]
+  [./function_dt_no_interpolation_refine]
+    type = 'Exodiff'
+    input = 'function_dt_no_interpolation.i'
+    cli_args = 'Executioner/TimeStepper/uniform_refine=1 Outputs/file_base=function_dt_no_interpolation_refine_out'
+    exodiff = 'function_dt_no_interpolation_refine_out.e'
+  [../]
 []

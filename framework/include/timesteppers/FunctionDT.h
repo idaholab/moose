@@ -35,7 +35,7 @@ protected:
   void removeOldKnots();
 
   const std::vector<Real> & _time_t;
-  const std::vector<Real> & _time_dt;
+  std::vector<Real> _time_dt;
 
   /// Piecewise linear definition of time stepping
   std::unique_ptr<LinearInterpolation> _time_ipol;
