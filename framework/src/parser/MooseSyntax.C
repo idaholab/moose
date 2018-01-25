@@ -83,7 +83,6 @@ associateSyntax(Syntax & syntax, ActionFactory & action_factory)
 
   registerSyntax("AddMaterialAction", "Materials/*");
 
-  registerSyntax("SetupPostprocessorDataAction", "Postprocessors/*");
   registerSyntax("AddPostprocessorAction", "Postprocessors/*");
   syntax.registerSyntaxType("Postprocessors/*", "PostprocessorName");
   syntax.registerSyntaxType("Postprocessors/*", "UserObjectName");

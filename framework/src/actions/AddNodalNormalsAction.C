@@ -64,7 +64,7 @@ AddNodalNormalsAction::act()
   execute_options = {EXEC_INITIAL, EXEC_TIMESTEP_BEGIN};
 
   // Create the NodalNormalsPreprocessor UserObject
-  if (_current_task == "add_postprocessor")
+  if (_current_task == "add_user_object")
   {
     InputParameters pars = _factory.getValidParams("NodalNormalsPreprocessor");
     pars.set<Order>("fe_order") = order;
@@ -76,10 +76,7 @@ AddNodalNormalsAction::act()
       pars.set<BoundaryName>("corner_boundary") = _corner_boundary;
 
     _problem->addUserObject("NodalNormalsPreprocessor", "nodal_normals_preprocessor", pars);
-  }
 
-  if (_current_task == "add_user_object")
-  {
     /// Create the NodalNormalsCorner UserObject (only if corner boundary is given)
     if (_has_corners)
     {

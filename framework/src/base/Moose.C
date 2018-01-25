@@ -436,7 +436,7 @@
 #include "SetupTimeIntegratorAction.h"
 #include "SetupPredictorAction.h"
 #include "AddMortarInterfaceAction.h"
-#include "SetupPostprocessorDataAction.h"
+#include "InstantiatePostprocessorsAction.h"
 #include "MaterialOutputAction.h"
 #include "CheckOutputAction.h"
 #include "SetupRecoverFileBaseAction.h"
@@ -1015,7 +1015,7 @@ addActionTypes(Syntax & syntax)
   registerTask("check_copy_nodal_vars", true);
   registerTask("copy_nodal_vars", true);
   registerTask("copy_nodal_aux_vars", true);
-  registerTask("setup_postprocessor_data", false);
+  registerTask("instantiate_postprocessors", true);
 
   registerTask("setup_dampers", true);
   registerTask("check_integrity", true);
@@ -1076,7 +1076,7 @@ addActionTypes(Syntax & syntax)
                            "(setup_executioner)"
                            "(setup_time_stepper)"
                            "(setup_predictor)"
-                           "(setup_postprocessor_data)"
+                           "(add_postprocessor)"
                            "(init_displaced_problem)"
                            "(add_aux_variable, add_variable, add_elemental_field_variable)"
                            "(setup_variable_complete)"
@@ -1105,7 +1105,7 @@ addActionTypes(Syntax & syntax)
                            "(init_problem)"
                            "(setup_debug)"
                            "(add_output)"
-                           "(add_postprocessor)"
+                           "(instantiate_postprocessors)"
                            "(add_vector_postprocessor)" // MaterialVectorPostprocessor requires this
                                                         // to be after material objects are created.
                            "(add_aux_kernel, add_bc, add_damper, add_dirac_kernel, add_kernel, "
@@ -1167,8 +1167,6 @@ registerActions(Syntax & syntax, ActionFactory & action_factory)
 #undef registerAction
 #define registerAction(tplt, action)                                                               \
   action_factory.reg<tplt>(stringifyName(tplt), action, __FILE__, __LINE__)
-
-  registerAction(SetupPostprocessorDataAction, "setup_postprocessor_data");
 
   registerAction(SetupMeshAction, "setup_mesh");
   registerAction(SetupMeshAction, "init_mesh");
@@ -1258,6 +1256,7 @@ registerActions(Syntax & syntax, ActionFactory & action_factory)
 
   registerAction(InitProblemAction, "init_problem");
   registerAction(CheckIntegrityAction, "check_integrity");
+  registerAction(InstantiatePostprocessorsAction, "instantiate_postprocessors");
 
   registerAction(AddMultiAppAction, "add_multi_app");
   registerAction(AddTransferAction, "add_transfer");

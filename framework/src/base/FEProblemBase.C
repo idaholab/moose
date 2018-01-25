@@ -2504,23 +2504,32 @@ getPostprocessorPointer(UO_TYPE * uo)
 }
 
 void
-FEProblemBase::initPostprocessorData(const std::string & name)
-{
-  _pps_data.init(name);
-}
-
-void
 FEProblemBase::addPostprocessor(std::string pp_name,
                                 const std::string & name,
                                 InputParameters parameters)
 {
-  // Check for name collision
-  if (_all_user_objects.hasActiveObject(name))
-    mooseError(std::string("A UserObject with the name \"") + name +
-               "\" already exists.  You may not add a Postprocessor by the same name.");
+  // Save the postprocessor parameters to be created later during the instantiate_postprocessor task
+  _declared_pps_params.emplace_back(pp_name, name, parameters);
 
-  addUserObject(pp_name, name, parameters);
-  initPostprocessorData(name);
+  // Make sure that we declare the data now for binding to postprocessors during subsequent tasks
+  _pps_data.init(name);
+}
+
+void
+FEProblemBase::instantiatePostprocessors()
+{
+  for (auto & pps_data : _declared_pps_params)
+  {
+    // Check for name collision
+    if (_all_user_objects.hasActiveObject(pps_data._name))
+      mooseError(std::string("A UserObject with the name \"") + pps_data._name +
+                 "\" already exists.  You may not add a Postprocessor by the same name.");
+
+    addUserObject(pps_data._pp_name, pps_data._name, pps_data._params);
+  }
+
+  // clear the parameters, we don't need them anymore
+  _declared_pps_params.clear();
 }
 
 void
