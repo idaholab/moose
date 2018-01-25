@@ -13,6 +13,11 @@
 #include "RadialReturnStressUpdate.h"
 #include "MooseMesh.h"
 
+class PowerLawCreepStressUpdate;
+
+template <>
+InputParameters validParams<PowerLawCreepStressUpdate>();
+
 /**
  * This class uses the Discrete material in a radial return isotropic creep
  * model.  This class is one of the basic
@@ -24,7 +29,6 @@
  * creep based on stress, temperature, and time effects.  This class also
  * computes the creep strain as a stateful material property.
  */
-
 class PowerLawCreepStressUpdate : public RadialReturnStressUpdate
 {
 public:

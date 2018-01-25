@@ -30,6 +30,9 @@ XFEMTestApp::XFEMTestApp(InputParameters parameters) : MooseApp(parameters)
   XFEMApp::associateSyntaxDepends(_syntax, _action_factory);
   XFEMApp::associateSyntax(_syntax, _action_factory);
 
+  Moose::registerExecFlags(_factory);
+  XFEMApp::registerExecFlags(_factory);
+
   bool use_test_objs = getParam<bool>("allow_test_objects");
   if (use_test_objs)
   {
@@ -72,5 +75,16 @@ XFEMTestApp__associateSyntax(Syntax & syntax, ActionFactory & action_factory)
 }
 void
 XFEMTestApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & /*action_factory*/)
+{
+}
+
+// External entry point for dynamic execute flag registration
+extern "C" void
+XFEMTestApp__registerExecFlags(Factory & factory)
+{
+  XFEMTestApp::registerExecFlags(factory);
+}
+void
+XFEMTestApp::registerExecFlags(Factory & /*factory*/)
 {
 }

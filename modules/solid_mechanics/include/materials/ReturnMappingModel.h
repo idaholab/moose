@@ -13,13 +13,17 @@
 #include "ConstitutiveModel.h"
 #include "SingleVariableReturnMappingSolution.h"
 
+class ReturnMappingModel;
+
+template <>
+InputParameters validParams<ReturnMappingModel>();
+
 /**
  * Base class for models that perform return mapping iterations to compute stress.  This
  * is for a single model to compute inelastic behavior.  This class can be used directly
  * as a standalone model for a single source of inelasticity.  It can also be called from
  * another model that combines together multiple inelastic models using Picard iterations.
  */
-
 class ReturnMappingModel : public ConstitutiveModel, public SingleVariableReturnMappingSolution
 {
 public:
@@ -89,8 +93,5 @@ protected:
   const bool _compute_matl_timestep_limit;
   MaterialProperty<Real> * _matl_timestep_limit;
 };
-
-template <>
-InputParameters validParams<ReturnMappingModel>();
 
 #endif // RETURNMAPPINGMODEL_H

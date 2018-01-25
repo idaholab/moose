@@ -17,7 +17,7 @@
 class ParsedODEKernel;
 
 template <>
-InputParameters validParams<ODEKernel>();
+InputParameters validParams<ParsedODEKernel>();
 
 /**
  *

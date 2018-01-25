@@ -28,6 +28,9 @@ RdgTestApp::RdgTestApp(InputParameters parameters) : MooseApp(parameters)
   Moose::associateSyntax(_syntax, _action_factory);
   RdgApp::associateSyntax(_syntax, _action_factory);
 
+  Moose::registerExecFlags(_factory);
+  RdgApp::registerExecFlags(_factory);
+
   bool use_test_objs = getParam<bool>("allow_test_objects");
   if (use_test_objs)
   {
@@ -70,5 +73,16 @@ RdgTestApp__associateSyntax(Syntax & syntax, ActionFactory & action_factory)
 }
 void
 RdgTestApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & /*action_factory*/)
+{
+}
+
+// External entry point for dynamic execute flag registration
+extern "C" void
+RdgTestApp__registerExecFlags(Factory & factory)
+{
+  RdgTestApp::registerExecFlags(factory);
+}
+void
+RdgTestApp::registerExecFlags(Factory & /*factory*/)
 {
 }

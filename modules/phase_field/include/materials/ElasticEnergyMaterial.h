@@ -18,7 +18,7 @@ class RankTwoTensor;
 class RankFourTensor;
 
 template <>
-InputParameters validParams<DerivativeFunctionMaterialBase>();
+InputParameters validParams<ElasticEnergyMaterial>();
 
 /**
  * Material class to compute the elastic free energy and its derivatives

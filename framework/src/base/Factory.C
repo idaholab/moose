@@ -166,3 +166,9 @@ Factory::deprecateObject(const std::string & name, const std::string & replaceme
   deprecateObject(name);
   _deprecated_with_replace[name] = replacement;
 }
+
+void
+Factory::regExecFlag(const ExecFlagType & flag)
+{
+  _app.addExecFlag(flag);
+}

@@ -12,6 +12,11 @@
 
 #include "ComputeElasticityTensorBase.h"
 
+class ComputeRotatedElasticityTensorBase;
+
+template <>
+InputParameters validParams<ComputeRotatedElasticityTensorBase>();
+
 /**
  * ComputeRotatedElasticityTensorBase is an intermediate base class that rotates an elasticity
  * tensor based on euler angles.

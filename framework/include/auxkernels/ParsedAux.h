@@ -17,7 +17,7 @@
 class ParsedAux;
 
 template <>
-InputParameters validParams<AuxKernel>();
+InputParameters validParams<ParsedAux>();
 
 /**
  * AuxKernel that evaluates a parsed function expression

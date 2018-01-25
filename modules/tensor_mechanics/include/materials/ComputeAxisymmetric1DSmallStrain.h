@@ -13,6 +13,11 @@
 #include "Compute1DSmallStrain.h"
 #include "SubblockIndexProvider.h"
 
+class ComputeAxisymmetric1DSmallStrain;
+
+template <>
+InputParameters validParams<ComputeAxisymmetric1DSmallStrain>();
+
 /**
  * ComputeAxisymmetric1DSmallStrain defines small strains in an Axisymmetric 1D problem.
  * The COORD_TYPE in the Problem block must be set to RZ.

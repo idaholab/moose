@@ -12,6 +12,11 @@
 
 #include "SolidModel.h"
 
+class Elastic;
+
+template <>
+InputParameters validParams<Elastic>();
+
 class Elastic : public SolidModel
 {
 public:
@@ -20,8 +25,5 @@ public:
 
 protected:
 };
-
-template <>
-InputParameters validParams<Elastic>();
 
 #endif

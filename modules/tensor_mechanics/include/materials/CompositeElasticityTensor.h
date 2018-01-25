@@ -14,6 +14,11 @@
 #include "CompositeTensorBase.h"
 #include "RankFourTensor.h"
 
+class CompositeElasticityTensor;
+
+template <>
+InputParameters validParams<CompositeElasticityTensor>();
+
 /**
  * CompositeElasticityTensor provides a simple RankFourTensor type
  * MaterialProperty that can be used as an Elasticity tensor in a mechanics simulation.
@@ -35,8 +40,5 @@ protected:
 
   MaterialProperty<RankFourTensor> & _M;
 };
-
-template <>
-InputParameters validParams<CompositeElasticityTensor>();
 
 #endif // COMPOSITEELASTICITYTENSOR_H

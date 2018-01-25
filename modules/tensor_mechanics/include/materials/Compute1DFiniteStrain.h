@@ -12,6 +12,11 @@
 
 #include "ComputeFiniteStrain.h"
 
+class Compute1DFiniteStrain;
+
+template <>
+InputParameters validParams<Compute1DFiniteStrain>();
+
 /**
  * Compute1DFiniteStrain defines a strain increment for finite strains in 1D problems,
  * handling strains in other two directions. It contains virtual methods to define

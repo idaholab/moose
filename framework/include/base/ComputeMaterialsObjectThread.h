@@ -7,8 +7,8 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef COMPUTERESIDUALTHREAD_H
-#define COMPUTERESIDUALTHREAD_H
+#ifndef COMPUTEMATERIALOBJECTTHREAD_H
+#define COMPUTEMATERIALOBJECTTHREAD_H
 
 #include "ThreadedElementLoop.h"
 

@@ -309,12 +309,14 @@ MooseTestApp::MooseTestApp(const InputParameters & parameters) : MooseApp(parame
 {
   bool use_test_objs = !getParam<bool>("disallow_test_objects");
   Moose::registerObjects(_factory);
-  if (use_test_objs)
-    MooseTestApp::registerObjects(_factory);
-
   Moose::associateSyntax(_syntax, _action_factory);
+  Moose::registerExecFlags(_factory);
   if (use_test_objs)
+  {
+    MooseTestApp::registerObjects(_factory);
     MooseTestApp::associateSyntax(_syntax, _action_factory);
+    MooseTestApp::registerExecFlags(_factory);
+  }
 }
 
 MooseTestApp::~MooseTestApp() {}
@@ -645,9 +647,14 @@ MooseTestApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
   registerSyntax("AddMatAndKernel", "AddMatAndKernel");
 }
 
-void
-MooseTestApp::registerExecFlags()
+// External entry point for dynamic execute flag registration
+extern "C" void
+MooseTestApp__registerExecFlags(Factory & factory)
 {
-  MooseApp::registerExecFlags();
+  MooseTestApp::registerExecFlags(factory);
+}
+void
+MooseTestApp::registerExecFlags(Factory & factory)
+{
   registerExecFlag(EXEC_JUST_GO);
 }

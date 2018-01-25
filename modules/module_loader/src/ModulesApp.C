@@ -91,6 +91,9 @@ ModulesApp::ModulesApp(const InputParameters & parameters) : MooseApp(parameters
 
   Moose::associateSyntax(_syntax, _action_factory);
   ModulesApp::associateSyntax(_syntax, _action_factory);
+
+  Moose::registerExecFlags(_factory);
+  ModulesApp::registerExecFlags(_factory);
 }
 
 ModulesApp::~ModulesApp() {}
@@ -257,4 +260,80 @@ ModulesApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
 #endif
 
   clearUnusedWarnings(syntax, action_factory);
+}
+
+// External entry point for dynamic object registration
+extern "C" void
+ModulesApp__registerExecFlags(Factory & factory)
+{
+  ModulesApp::registerExecFlags(factory);
+}
+void
+ModulesApp::registerExecFlags(Factory & factory)
+{
+#ifdef CHEMICAL_REACTIONS_ENABLED
+  ChemicalReactionsApp::registerExecFlags(factory);
+#endif
+
+#ifdef CONTACT_ENABLED
+  ContactApp::registerExecFlags(factory);
+#endif
+
+#ifdef FLUID_PROPERTIES_ENABLED
+  FluidPropertiesApp::registerExecFlags(factory);
+#endif
+
+#ifdef HEAT_CONDUCTION_ENABLED
+  HeatConductionApp::registerExecFlags(factory);
+#endif
+
+#ifdef LEVEL_SET_ENABLED
+  LevelSetApp::registerExecFlags(factory);
+#endif
+
+#ifdef MISC_ENABLED
+  MiscApp::registerExecFlags(factory);
+#endif
+
+#ifdef NAVIER_STOKES_ENABLED
+  NavierStokesApp::registerExecFlags(factory);
+#endif
+
+#ifdef PHASE_FIELD_ENABLED
+  PhaseFieldApp::registerExecFlags(factory);
+#endif
+
+#ifdef POROUS_FLOW_ENABLED
+  PorousFlowApp::registerExecFlags(factory);
+#endif
+
+#ifdef RDG_ENABLED
+  RdgApp::registerExecFlags(factory);
+#endif
+
+#ifdef RICHARDS_ENABLED
+  RichardsApp::registerExecFlags(factory);
+#endif
+
+#ifdef SOLID_MECHANICS_ENABLED
+  SolidMechanicsApp::registerExecFlags(factory);
+#endif
+
+#ifdef STOCHASTIC_TOOLS_ENABLED
+  StochasticToolsApp::registerExecFlags(factory);
+#endif
+
+#ifdef TENSOR_MECHANICS_ENABLED
+  TensorMechanicsApp::registerExecFlags(factory);
+#endif
+
+#ifdef WATER_STEAM_EOS_ENABLED
+  WaterSteamEOSApp::registerExecFlags(factory);
+#endif
+
+#ifdef XFEM_ENABLED
+  XFEMApp::registerExecFlags(factory);
+#endif
+
+  clearUnusedWarnings(factory);
 }

@@ -12,6 +12,11 @@
 
 #include "ComputeStressBase.h"
 
+class ComputeIsotropicLinearElasticPFFractureStress;
+
+template <>
+InputParameters validParams<ComputeIsotropicLinearElasticPFFractureStress>();
+
 /**
  * Phase-field fracture
  * This class computes the stress and energy contribution for the

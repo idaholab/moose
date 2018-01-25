@@ -30,6 +30,9 @@ SolidMechanicsTestApp::SolidMechanicsTestApp(InputParameters parameters) : Moose
   SolidMechanicsApp::associateSyntaxDepends(_syntax, _action_factory);
   SolidMechanicsApp::associateSyntax(_syntax, _action_factory);
 
+  Moose::registerExecFlags(_factory);
+  SolidMechanicsApp::registerExecFlags(_factory);
+
   bool use_test_objs = getParam<bool>("allow_test_objects");
   if (use_test_objs)
   {
@@ -72,5 +75,16 @@ SolidMechanicsTestApp__associateSyntax(Syntax & syntax, ActionFactory & action_f
 }
 void
 SolidMechanicsTestApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & /*action_factory*/)
+{
+}
+
+// External entry point for dynamic execute flag registration
+extern "C" void
+SolidMechanicsTestApp__registerExecFlags(Factory & factory)
+{
+  SolidMechanicsTestApp::registerExecFlags(factory);
+}
+void
+SolidMechanicsTestApp::registerExecFlags(Factory & /*factory*/)
 {
 }

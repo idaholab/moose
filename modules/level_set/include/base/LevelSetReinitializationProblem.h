@@ -7,6 +7,9 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
+#ifndef LEVELSETREINITIALIZATIONPROBLEM_H
+#define LEVELSETREINITIALIZATIONPROBLEM_H
+
 #include "FEProblem.h"
 
 class LevelSetReinitializationProblem;
@@ -29,3 +32,5 @@ public:
    */
   void resetTime();
 };
+
+#endif

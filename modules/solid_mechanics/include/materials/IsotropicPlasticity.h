@@ -14,8 +14,10 @@
 
 class PiecewiseLinear;
 
-/**
- */
+class IsotropicPlasticity;
+
+template <>
+InputParameters validParams<IsotropicPlasticity>();
 
 class IsotropicPlasticity : public ReturnMappingModel
 {
@@ -52,8 +54,5 @@ protected:
   MaterialProperty<Real> & _hardening_variable;
   const MaterialProperty<Real> & _hardening_variable_old;
 };
-
-template <>
-InputParameters validParams<IsotropicPlasticity>();
 
 #endif // ISOTROPICPLASTICITY_H

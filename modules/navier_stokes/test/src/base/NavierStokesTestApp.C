@@ -33,6 +33,9 @@ NavierStokesTestApp::NavierStokesTestApp(InputParameters parameters) : MooseApp(
   NavierStokesApp::associateSyntaxDepends(_syntax, _action_factory);
   NavierStokesApp::associateSyntax(_syntax, _action_factory);
 
+  Moose::registerExecFlags(_factory);
+  NavierStokesApp::registerExecFlags(_factory);
+
   bool use_test_objs = getParam<bool>("allow_test_objects");
   if (use_test_objs)
   {
@@ -77,5 +80,16 @@ NavierStokesTestApp__associateSyntax(Syntax & syntax, ActionFactory & action_fac
 }
 void
 NavierStokesTestApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & /*action_factory*/)
+{
+}
+
+// External entry point for dynamic execute flag registration
+extern "C" void
+NavierStokesTestApp__registerExecFlags(Factory & factory)
+{
+  NavierStokesTestApp::registerExecFlags(factory);
+}
+void
+NavierStokesTestApp::registerExecFlags(Factory & /*factory*/)
 {
 }

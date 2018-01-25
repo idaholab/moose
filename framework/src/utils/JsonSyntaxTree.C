@@ -15,6 +15,7 @@
 #include "ExecFlagEnum.h"
 #include "Parser.h"
 #include "pcrecpp.h"
+#include "Action.h"
 
 // C++ includes
 #include <algorithm>

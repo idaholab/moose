@@ -16,7 +16,7 @@ template <>
 InputParameters
 validParams<MooseObject>()
 {
-  InputParameters params;
+  InputParameters params = emptyInputParameters();
   params.addParam<bool>("enable", true, "Set the enabled status of the MooseObject.");
   params.addParam<std::vector<std::string>>(
       "control_tags",

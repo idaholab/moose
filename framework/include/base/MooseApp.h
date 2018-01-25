@@ -519,9 +519,12 @@ public:
   bool checkInput() const { return _check_input; }
 
   /**
-   * Register the execute flags.
+   * WARNING: This is an internal method for MOOSE, if you need the add new ExecFlagTypes then
+   * use the registerExecFlag macro as done in Moose.C/h.
+   *
+   * @param flag The flag to add as available to the app level ExecFlagEnum.
    */
-  virtual void registerExecFlags();
+  void addExecFlag(const ExecFlagType & flag);
 
   bool hasRelationshipManager(const std::string & name) const;
 
@@ -534,12 +537,12 @@ public:
    */
   std::vector<std::pair<std::string, std::string>> getRelationshipManagerInfo();
 
-protected:
   /**
-   * Register individual flag.
+   * Return the app level ExecFlagEnum, this contains all the available flags for the app.
    */
-  static void registerExecFlag(const ExecFlagType & flag);
+  const ExecFlagEnum & getExecuteOnEnum() const { return _execute_flags; }
 
+protected:
   /**
    * Whether or not this MooseApp has cached a Backup to use for restart / recovery
    */
@@ -755,6 +758,9 @@ private:
 
   /// Cache for a Backup to use for restart / recovery
   std::shared_ptr<Backup> _cached_backup;
+
+  /// Execution flags for this App
+  ExecFlagEnum _execute_flags;
 
   // Allow FEProblemBase to set the recover/restart state, so make it a friend
   friend class FEProblemBase;

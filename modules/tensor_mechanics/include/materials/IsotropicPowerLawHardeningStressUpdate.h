@@ -13,6 +13,11 @@
 #include "IsotropicPlasticityStressUpdate.h"
 #include "MooseMesh.h"
 
+class IsotropicPowerLawHardeningStressUpdate;
+
+template <>
+InputParameters validParams<IsotropicPowerLawHardeningStressUpdate>();
+
 /**
  * This class uses the Discrete material in a radial return isotropic plasticity
  * model.  This class is one of the basic radial return constitutive models;
@@ -29,7 +34,6 @@
  * suppressed to enable this class to solve for yield stress:
  * \f$ \sigma_y = \left( \frac{E^n}{K} \right)^{1/(n-1)} \f$
  */
-
 class IsotropicPowerLawHardeningStressUpdate : public IsotropicPlasticityStressUpdate
 {
 public:

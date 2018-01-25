@@ -27,6 +27,9 @@ WaterSteamEOSApp::WaterSteamEOSApp(const InputParameters & parameters) : MooseAp
 
   Moose::associateSyntax(_syntax, _action_factory);
   WaterSteamEOSApp::associateSyntax(_syntax, _action_factory);
+
+  Moose::registerExecFlags(_factory);
+  WaterSteamEOSApp::registerExecFlags(_factory);
 }
 
 WaterSteamEOSApp::~WaterSteamEOSApp() {}
@@ -62,5 +65,16 @@ WaterSteamEOSApp__associateSyntax(Syntax & syntax, ActionFactory & action_factor
 }
 void
 WaterSteamEOSApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & /*action_factory*/)
+{
+}
+
+// External entry point for dynamic execute flag registration
+extern "C" void
+WaterSteamEOSApp__registerExecFlags(Factory & factory)
+{
+  WaterSteamEOSApp::registerExecFlags(factory);
+}
+void
+WaterSteamEOSApp::registerExecFlags(Factory & /*factory*/)
 {
 }

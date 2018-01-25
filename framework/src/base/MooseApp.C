@@ -55,7 +55,7 @@ template <>
 InputParameters
 validParams<MooseApp>()
 {
-  InputParameters params;
+  InputParameters params = emptyInputParameters();
 
   params.addCommandLineParam<bool>(
       "display_version", "-v --version", false, "Print application version");
@@ -303,6 +303,14 @@ MooseApp::getPrintableVersion() const
 void
 MooseApp::setupOptions()
 {
+  // MOOSE was updated to have the ability to register execution flags in similar fashion as
+  // objects. However, this change requires all *App.C/h files to be updated with the new
+  // registerExecFlags method. To avoid breaking all applications the default MOOSE flags
+  // are added if nothing has been added to this point. In the future this could go away or
+  // perhaps be a warning.
+  if (_execute_flags.items().empty())
+    Moose::registerExecFlags(_factory);
+
   // Print the header, this is as early as possible
   std::string hdr(header() + "\n");
   if (multiAppLevel() > 0)
@@ -752,7 +760,6 @@ MooseApp::run()
   Moose::perf_log.push("Application Setup", "Setup");
   try
   {
-    registerExecFlags();
     setupOptions();
     runInputFile();
   }
@@ -1336,26 +1343,20 @@ MooseApp::createMinimalApp()
 }
 
 void
-MooseApp::registerExecFlags()
+MooseApp::addExecFlag(const ExecFlagType & flag)
 {
-  registerExecFlag(EXEC_NONE);
-  registerExecFlag(EXEC_INITIAL);
-  registerExecFlag(EXEC_LINEAR);
-  registerExecFlag(EXEC_NONLINEAR);
-  registerExecFlag(EXEC_TIMESTEP_END);
-  registerExecFlag(EXEC_TIMESTEP_BEGIN);
-  registerExecFlag(EXEC_FINAL);
-  registerExecFlag(EXEC_FORCED);
-  registerExecFlag(EXEC_FAILED);
-  registerExecFlag(EXEC_CUSTOM);
-  registerExecFlag(EXEC_SUBDOMAIN);
-  registerExecFlag(EXEC_SAME_AS_MULTIAPP);
-}
-
-void
-MooseApp::registerExecFlag(const ExecFlagType & flag)
-{
-  Moose::execute_flags.addAvailableFlags(flag);
+  if (flag.id() == MooseEnumItem::INVALID_ID)
+  {
+    // It is desired that users when creating ExecFlagTypes should not worry about needing
+    // to assign a name and an ID. However, the ExecFlagTypes created by users are global constants
+    // and the ID to be assigned can't be known at construction time of this global constant, it is
+    // only known when it is added to this object (ExecFlagEnum). Therefore, this const cast allows
+    // the ID to be set after construction. This was the lesser of two evils: const_cast or
+    // friend class with mutable members.
+    ExecFlagType & non_const_flag = const_cast<ExecFlagType &>(flag);
+    non_const_flag.setID(_execute_flags.getNextValidID());
+  }
+  _execute_flags.addAvailableFlags(flag);
 }
 
 bool

@@ -164,6 +164,7 @@ using libMesh::err;
 void registerObjects(Factory & factory);
 void addActionTypes(Syntax & syntax);
 void registerActions(Syntax & syntax, ActionFactory & action_factory);
+void registerExecFlags(Factory & factory);
 void populateMeshOnlyTasks(Syntax & syntax);
 
 void setSolverDefaults(FEProblemBase & problem);
