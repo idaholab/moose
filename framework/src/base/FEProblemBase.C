@@ -3333,11 +3333,7 @@ FEProblemBase::restoreMultiApps(ExecFlagType type, bool force)
 
     for (const auto & multi_app : multi_apps)
       if (force || multi_app->needsRestoration())
-      {
-        std::cout << " Restoring: " << multi_app->name() << std::endl;
-
         multi_app->restore();
-      }
 
     _console << "Waiting For Other Processors To Finish" << std::endl;
     MooseUtils::parallelBarrierNotify(_communicator, _parallel_barrier_messaging);
@@ -4439,7 +4435,7 @@ FEProblemBase::possiblyRebuildGeomSearchPatches()
           break;
       }
 
-        // Let this fall through if things do need to be updated...
+      // Let this fall through if things do need to be updated...
 
       case Moose::Always:
         // Flush output here to see the message before the reinitialization, which could take a
@@ -4747,9 +4743,8 @@ FEProblemBase::checkProblemIntegrity()
                   std::ostream_iterator<unsigned int>(extra_subdomain_ids, " "));
 
         mooseError("The following blocks from your input mesh do not contain an active material: " +
-                   extra_subdomain_ids.str() +
-                   "\nWhen ANY mesh block contains a Material object, "
-                   "all blocks must contain a Material object.\n");
+                   extra_subdomain_ids.str() + "\nWhen ANY mesh block contains a Material object, "
+                                               "all blocks must contain a Material object.\n");
       }
     }
 
