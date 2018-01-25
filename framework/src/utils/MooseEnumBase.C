@@ -146,8 +146,8 @@ MooseEnumBase::getNames() const
 {
   std::vector<std::string> out;
   out.reserve(_items.size());
-  for (auto it = _items.begin(); it != _items.end(); ++it)
-    out.push_back(it->name());
+  for (const auto & item : _items)
+    out.push_back(item.name());
   return out;
 }
 
@@ -160,10 +160,11 @@ MooseEnumBase::getRawNames() const
 std::vector<int>
 MooseEnumBase::getIDs() const
 {
-  std::vector<int> output;
-  for (auto it = _items.begin(); it != _items.end(); ++it)
-    output.push_back(it->id());
-  return output;
+  std::vector<int> out;
+  out.reserve(_items.size());
+  for (const auto & item : _items)
+    out.push_back(item.id());
+  return out;
 }
 
 std::set<MooseEnumItem>::const_iterator

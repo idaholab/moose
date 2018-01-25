@@ -48,8 +48,10 @@ MooseEnum::operator=(const std::string & name)
   if (iter == _items.end())
   {
     if (!_allow_out_of_range) // Are out of range values allowed?
-      mooseError(std::string("Invalid option \"") + name +
-                 "\" in MooseEnum.  Valid options (not case-sensitive) are \"" + getRawNames() +
+      mooseError("Invalid option \"",
+                 name,
+                 "\" in MooseEnum.  Valid options (not case-sensitive) are \"",
+                 getRawNames(),
                  "\".");
     else
     {
@@ -76,7 +78,7 @@ MooseEnum::operator=(int value)
 
   std::set<MooseEnumItem>::const_iterator iter = find(value);
   if (iter == _items.end())
-    mooseError(std::string("Invalid id \""),
+    mooseError("Invalid id \"",
                value,
                "\" in MooseEnum. Valid ids are \"",
                Moose::stringify(getIDs()),
@@ -95,7 +97,7 @@ MooseEnum::operator==(const char * name) const
   std::string upper(MooseUtils::toUpper(name));
 
   mooseAssert(_allow_out_of_range || find(upper) != _items.end(),
-              std::string("Invalid string comparison \"") + upper +
+              "Invalid string comparison \"" + upper +
                   "\" in MooseEnum.  Valid options (not case-sensitive) are \"" + getRawNames() +
                   "\".");
 
