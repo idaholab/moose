@@ -12,6 +12,11 @@
 
 #include "ComputeStrainBase.h"
 
+class ComputeIncrementalStrainBase;
+
+template <>
+InputParameters validParams<ComputeIncrementalStrainBase>();
+
 /**
  * ComputeIncrementalStrainBase is the base class for strain tensors using incremental formulations
  */

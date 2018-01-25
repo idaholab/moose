@@ -7,6 +7,9 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
+#ifndef LEVELSETPROBLEM_H
+#define LEVELSETPROBLEM_H
+
 #include "FEProblem.h"
 
 class LevelSetProblem;
@@ -25,3 +28,5 @@ public:
 
   virtual bool adaptMesh() override;
 };
+
+#endif

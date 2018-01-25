@@ -17,7 +17,7 @@
 class NumElemQPs;
 
 template <>
-InputParameters validParams<ElementIntegralPostprocessor>();
+InputParameters validParams<NumElemQPs>();
 
 /**
  * An object for testing that the specified quadrature order is used.  It

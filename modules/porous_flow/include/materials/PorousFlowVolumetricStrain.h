@@ -13,6 +13,11 @@
 #include "PorousFlowMaterialVectorBase.h"
 #include "RankTwoTensor.h"
 
+class PorousFlowVolumetricStrain;
+
+template <>
+InputParameters validParams<PorousFlowVolumetricStrain>();
+
 /**
  * PorousFlowVolumetricStrain computes volumetric strains, and derivatives thereof
  */

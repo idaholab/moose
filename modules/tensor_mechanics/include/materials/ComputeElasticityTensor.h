@@ -12,6 +12,11 @@
 
 #include "ComputeRotatedElasticityTensorBase.h"
 
+class ComputeElasticityTensor;
+
+template <>
+InputParameters validParams<ComputeElasticityTensor>();
+
 /**
  * ComputeElasticityTensor defines an elasticity tensor material object with a given base name.
  */

@@ -14,6 +14,11 @@
 
 class StressUpdateBase;
 
+class ComputeMultipleInelasticStress;
+
+template <>
+InputParameters validParams<ComputeMultipleInelasticStress>();
+
 /**
  * ComputeMultipleInelasticStress computes the stress, the consistent tangent
  * operator (or an approximation to it), and a decomposition of the strain

@@ -19,6 +19,11 @@
 // Forward declarations
 class FEProblemBase;
 
+class Split;
+
+template <>
+InputParameters validParams<Split>();
+
 /**
  * Base class for split-based preconditioners.
  */

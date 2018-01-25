@@ -55,7 +55,7 @@ template <>
 InputParameters
 validParams<MooseApp>()
 {
-  InputParameters params;
+  InputParameters params = emptyInputParameters();
 
   params.addCommandLineParam<bool>(
       "display_version", "-v --version", false, "Print application version");
