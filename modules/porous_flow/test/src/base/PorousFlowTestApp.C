@@ -30,6 +30,9 @@ PorousFlowTestApp::PorousFlowTestApp(InputParameters parameters) : MooseApp(para
   PorousFlowApp::associateSyntaxDepends(_syntax, _action_factory);
   PorousFlowApp::associateSyntax(_syntax, _action_factory);
 
+  Moose::registerExecFlags(_factory);
+  PorousFlowApp::registerExecFlags(_factory);
+
   bool use_test_objs = getParam<bool>("allow_test_objects");
   if (use_test_objs)
   {
@@ -72,5 +75,16 @@ PorousFlowTestApp__associateSyntax(Syntax & syntax, ActionFactory & action_facto
 }
 void
 PorousFlowTestApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & /*action_factory*/)
+{
+}
+
+// External entry point for dynamic execute flag registration
+extern "C" void
+PorousFlowTestApp__registerExecFlags(Factory & factory)
+{
+  PorousFlowTestApp::registerExecFlags(factory);
+}
+void
+PorousFlowTestApp::registerExecFlags(Factory & /*factory*/)
 {
 }

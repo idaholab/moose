@@ -32,7 +32,7 @@ public:
   /**
    * Constructor.
    */
-  AuxGroupExecuteMooseObjectWarehouse(bool thread = true);
+  AuxGroupExecuteMooseObjectWarehouse(const ExecFlagEnum & flags, bool thread = true);
 
   /**
    * Access the AuxGroup via bracket operator.
@@ -64,8 +64,10 @@ protected:
 };
 
 template <typename T>
-AuxGroupExecuteMooseObjectWarehouse<T>::AuxGroupExecuteMooseObjectWarehouse(bool threaded)
-  : ExecuteMooseObjectWarehouse<T>(threaded), _group_objects(3) // initialize group storage
+AuxGroupExecuteMooseObjectWarehouse<T>::AuxGroupExecuteMooseObjectWarehouse(
+    const ExecFlagEnum & flags, bool threaded)
+  : ExecuteMooseObjectWarehouse<T>(flags, threaded),
+    _group_objects(3, ExecuteMooseObjectWarehouse<T>(flags, threaded)) // initialize group storage
 {
 }
 

@@ -58,6 +58,9 @@ LevelSetApp::LevelSetApp(InputParameters parameters) : MooseApp(parameters)
 
   Moose::associateSyntax(_syntax, _action_factory);
   LevelSetApp::associateSyntax(_syntax, _action_factory);
+
+  Moose::registerExecFlags(_factory);
+  LevelSetApp::registerExecFlags(_factory);
 }
 
 void
@@ -102,7 +105,32 @@ LevelSetApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & /*action_facto
 }
 
 void
-LevelSetApp::registerExecFlags()
+LevelSetApp::registerExecFlags(Factory & factory)
 {
   registerExecFlag(LevelSet::EXEC_ADAPT_MESH);
+}
+
+// Dynamic Library Entry Points - DO NOT MODIFY
+extern "C" void
+LevelSetApp__registerApps()
+{
+  LevelSetApp::registerApps();
+}
+
+extern "C" void
+LevelSetApp__associateSyntax(Syntax & syntax, ActionFactory & action_factory)
+{
+  LevelSetApp::associateSyntax(syntax, action_factory);
+}
+
+extern "C" void
+LevelSetApp__registerExecFlags(Factory & factory)
+{
+  LevelSetApp::registerExecFlags(factory);
+}
+
+extern "C" void
+LevelSetApp__registerObjects(Factory & factory)
+{
+  LevelSetApp::registerObjects(factory);
 }

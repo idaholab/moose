@@ -139,6 +139,9 @@ PorousFlowApp::PorousFlowApp(const InputParameters & parameters) : MooseApp(para
   Moose::associateSyntax(_syntax, _action_factory);
   PorousFlowApp::associateSyntaxDepends(_syntax, _action_factory);
   PorousFlowApp::associateSyntax(_syntax, _action_factory);
+
+  Moose::registerExecFlags(_factory);
+  PorousFlowApp::registerExecFlags(_factory);
 }
 
 PorousFlowApp::~PorousFlowApp() {}
@@ -329,4 +332,15 @@ PorousFlowApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
   registerAction(PorousFlowBasicTHM, "add_material");
   registerAction(PorousFlowBasicTHM, "add_aux_variable");
   registerAction(PorousFlowBasicTHM, "add_aux_kernel");
+}
+
+// External entry point for dynamic execute flag registration
+extern "C" void
+PorousFlowApp__registerExecFlags(Factory & factory)
+{
+  PorousFlowApp::registerExecFlags(factory);
+}
+void
+PorousFlowApp::registerExecFlags(Factory & /*factory*/)
+{
 }

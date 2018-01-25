@@ -302,6 +302,9 @@ PhaseFieldApp::PhaseFieldApp(const InputParameters & parameters) : MooseApp(para
 
   Moose::associateSyntax(_syntax, _action_factory);
   PhaseFieldApp::associateSyntax(_syntax, _action_factory);
+
+  Moose::registerExecFlags(_factory);
+  PhaseFieldApp::registerExecFlags(_factory);
 }
 
 PhaseFieldApp::~PhaseFieldApp() {}
@@ -603,4 +606,15 @@ PhaseFieldApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
   registerAction(PolycrystalVoronoiVoidICAction, "add_ic");
   registerAction(RigidBodyMultiKernelAction, "add_kernel");
   registerAction(Tricrystal2CircleGrainsICAction, "add_ic");
+}
+
+// External entry point for dynamic execute flag registration
+extern "C" void
+PhaseFieldApp__registerExecFlags(Factory & factory)
+{
+  PhaseFieldApp::registerExecFlags(factory);
+}
+void
+PhaseFieldApp::registerExecFlags(Factory & /*factory*/)
+{
 }

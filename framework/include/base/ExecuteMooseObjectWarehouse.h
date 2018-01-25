@@ -35,7 +35,7 @@ public:
    * Constructor.
    * @param threaded True enables threaded object storage (default).
    */
-  ExecuteMooseObjectWarehouse(bool threaded = true);
+  ExecuteMooseObjectWarehouse(const ExecFlagEnum & flags, bool threaded = true);
 
   virtual ~ExecuteMooseObjectWarehouse();
 
@@ -104,11 +104,12 @@ protected:
 };
 
 template <typename T>
-ExecuteMooseObjectWarehouse<T>::ExecuteMooseObjectWarehouse(bool threaded)
+ExecuteMooseObjectWarehouse<T>::ExecuteMooseObjectWarehouse(const ExecFlagEnum & flags,
+                                                            bool threaded)
   : MooseObjectWarehouse<T>(threaded)
 {
   // Initialize the active/all data structures with the correct map entries and empty vectors
-  for (const auto & flag : Moose::execute_flags.items())
+  for (const auto & flag : flags.items())
     _execute_objects.insert(std::make_pair(flag, MooseObjectWarehouse<T>(threaded)));
 }
 
@@ -125,7 +126,9 @@ operator[](ExecFlagType exec_flag) const
   const auto iter = _execute_objects.find(exec_flag);
 
   if (iter == _execute_objects.end())
-    mooseError("Unable to locate the desired execute flag, the supplied execution flag was likely "
+    mooseError("Unable to locate the desired execute flag (",
+               exec_flag,
+               "), the supplied execution flag was likely "
                "not registered.");
 
   return iter->second;
@@ -138,7 +141,9 @@ MooseObjectWarehouse<T> & ExecuteMooseObjectWarehouse<T>::operator[](ExecFlagTyp
   const auto iter = _execute_objects.find(exec_flag);
 
   if (iter == _execute_objects.end())
-    mooseError("Unable to locate the desired execute flag, the supplied execution flag was likely "
+    mooseError("Unable to locate the desired execute flag (",
+               exec_flag,
+               "), the supplied execution flag was likely "
                "not registered.");
 
   return iter->second;

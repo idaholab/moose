@@ -28,6 +28,9 @@ WaterSteamEOSTestApp::WaterSteamEOSTestApp(InputParameters parameters) : MooseAp
   Moose::associateSyntax(_syntax, _action_factory);
   WaterSteamEOSApp::associateSyntax(_syntax, _action_factory);
 
+  Moose::registerExecFlags(_factory);
+  WaterSteamEOSApp::registerExecFlags(_factory);
+
   bool use_test_objs = getParam<bool>("allow_test_objects");
   if (use_test_objs)
   {
@@ -70,5 +73,16 @@ WaterSteamEOSTestApp__associateSyntax(Syntax & syntax, ActionFactory & action_fa
 }
 void
 WaterSteamEOSTestApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & /*action_factory*/)
+{
+}
+
+// External entry point for dynamic execute flag registration
+extern "C" void
+WaterSteamEOSTestApp__registerExecFlags(Factory & factory)
+{
+  WaterSteamEOSTestApp::registerExecFlags(factory);
+}
+void
+WaterSteamEOSTestApp::registerExecFlags(Factory & /*factory*/)
 {
 }

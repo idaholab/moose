@@ -80,31 +80,41 @@ execute flag the following steps should be followed.
 
 ### 1. Declare and Define an Execute Flag
 
-Within your application a new global `const` should be declared in a header file. For example, within the test application for MOOSE, there is a header (MooseTestAppTypes.h) that declares a
-new flag (`EXEC_JUST_GO`).
+Within your application a new global `const` should be declared in a header file. For example, within
+the `LevelSetApp` within MOOSE modules, there is a header (LevelSetTypes.h) that declares a new
+flag (`EXEC_ADAPT_MESH`).
 
-!listing test/include/base/MooseTestAppTypes.h
+!listing modules/level_set/include/base/LevelSetTypes.h
 
 This new global must be defined, which occurs in the corresponding source file. When
 defining the new flags with a name and optionally an integer value.
 
-!listing test/src/base/MooseTestAppTypes.C
+!listing modules/level_set/src/base/LevelSetTypes.C
 
 ### 2. Register the Execute Flag
-After the new flag(s) are declared and defined, it must be registered with MOOSE. In the MooseApp object there is a virtual method, `registerExecFlags` that must be overridden. Within this
-method the base class method should be called to register any existing flags (i.e., MOOSE execute flags) and then the `registerExecFlag` method should be called for each of the new flags being created for an application. For example, the MooseTestApp contains the following.
+After the new flag(s) are declared and defined, it must be registered with MOOSE. This is
+accomplished in similar fashion as object registration, simply add the newly created flag by calling
+`registerExecFlag` with the `registerExecFlags` function of your application.
 
-!listing test/include/base/MooseTestApp.h line=registerExecFlags strip-leading-whitespace=True
+!listing modules/level_set/src/base/LevelSetApp.C start=LevelSetApp::registerExecFlags(Fac end=// Dynamic
 
-!listing test/src/base/MooseTestApp.C start=MooseTestApp::registerExecFlags()
+!!!note
+    If your application does not have a `registerExecFlags` function, it must be created. This can
+    be done automatically by running the `add_exec_flag_registration.py` that is located in the
+    scripts directory within MOOSE.
 
 ### 3. Add the Execute Flag to InputParameters
-After a flag is registered, it must be made available to the object(s) in which are desired to be executed with the custom flag. This is done by adding this new flag to an existing objects valid parameters. For example, the following adds the `EXEC_JUST_GO` flag to a postprocessor.
+After a flag is registered, it must be made available to the object(s) in which are desired to be
+executed with the custom flag. This is done by adding this new flag to an existing objects valid
+parameters. For example, the following adds the `EXEC_ADAPT_MESH` flag to a `Transfer` object.
 
-!listing test/src/postprocessors/TestPostprocessor.C start=template <> end=TestPostprocessor::TestPostprocessor
+!listing modules/level_set/src/transfers/LevelSetMeshRefinementTransfer.C strip-leading-whitespace=1 start=ExecFlagEnum end=params.set<bool>
 
 
 ### 4. Use the Execute Flag
-Depending on what type of custom computation is desired, various MOOSE execution calls accept execution flags, which will spawn calculations. For example, the TestSteady contains the following, which uses the custom flag that was declared, defined, and registered.
+Depending on what type of custom computation is desired, various MOOSE execution calls accept
+execution flags, which will spawn calculations. For example, the `LevelSetProblem` contains
+a custom method that uses the `EXEC_ADAPT_MESH` flag to preform
+an additional [`MultiAppTransfer`](Transfers/index.md) execution.
 
-!listing test/src/executioners/TestSteady.C start=TestSteady::postSolve
+!listing modules/level_set/src/base/LevelSetProblem.C strip-leading-whitespace=1 line=LevelSet::EXEC_ADAPT_MESH

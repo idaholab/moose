@@ -28,6 +28,9 @@ TensorMechanicsTestApp::TensorMechanicsTestApp(InputParameters parameters) : Moo
   Moose::associateSyntax(_syntax, _action_factory);
   TensorMechanicsApp::associateSyntax(_syntax, _action_factory);
 
+  Moose::registerExecFlags(_factory);
+  TensorMechanicsApp::registerExecFlags(_factory);
+
   bool use_test_objs = getParam<bool>("allow_test_objects");
   if (use_test_objs)
   {
@@ -70,5 +73,16 @@ TensorMechanicsTestApp__associateSyntax(Syntax & syntax, ActionFactory & action_
 }
 void
 TensorMechanicsTestApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & /*action_factory*/)
+{
+}
+
+// External entry point for dynamic execute flag registration
+extern "C" void
+TensorMechanicsTestApp__registerExecFlags(Factory & factory)
+{
+  TensorMechanicsTestApp::registerExecFlags(factory);
+}
+void
+TensorMechanicsTestApp::registerExecFlags(Factory & /*factory*/)
 {
 }

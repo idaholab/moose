@@ -223,6 +223,9 @@ TensorMechanicsApp::TensorMechanicsApp(const InputParameters & parameters) : Moo
 
   Moose::associateSyntax(_syntax, _action_factory);
   TensorMechanicsApp::associateSyntax(_syntax, _action_factory);
+
+  Moose::registerExecFlags(_factory);
+  TensorMechanicsApp::registerExecFlags(_factory);
 }
 
 TensorMechanicsApp::~TensorMechanicsApp() {}
@@ -503,4 +506,15 @@ TensorMechanicsApp::associateSyntax(Syntax & syntax, ActionFactory & action_fact
   registerAction(DomainIntegralAction, "add_aux_kernel");
   registerAction(DomainIntegralAction, "add_postprocessor");
   registerAction(DomainIntegralAction, "add_material");
+}
+
+// External entry point for dynamic execute flag registration
+extern "C" void
+TensorMechanicsApp__registerExecFlags(Factory & factory)
+{
+  TensorMechanicsApp::registerExecFlags(factory);
+}
+void
+TensorMechanicsApp::registerExecFlags(Factory & /*factory*/)
+{
 }

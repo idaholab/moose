@@ -1275,6 +1275,23 @@ registerActions(Syntax & syntax, ActionFactory & action_factory)
 }
 
 void
+registerExecFlags(Factory & factory)
+{
+  registerExecFlag(EXEC_NONE);
+  registerExecFlag(EXEC_INITIAL);
+  registerExecFlag(EXEC_LINEAR);
+  registerExecFlag(EXEC_NONLINEAR);
+  registerExecFlag(EXEC_TIMESTEP_END);
+  registerExecFlag(EXEC_TIMESTEP_BEGIN);
+  registerExecFlag(EXEC_FINAL);
+  registerExecFlag(EXEC_FORCED);
+  registerExecFlag(EXEC_FAILED);
+  registerExecFlag(EXEC_CUSTOM);
+  registerExecFlag(EXEC_SUBDOMAIN);
+  registerExecFlag(EXEC_SAME_AS_MULTIAPP);
+}
+
+void
 setSolverDefaults(FEProblemBase & problem)
 {
 #ifdef LIBMESH_HAVE_PETSC
@@ -1329,7 +1346,5 @@ bool _warnings_are_errors = false;
 bool _deprecated_is_error = false;
 
 bool _throw_on_error = false;
-
-ExecFlagEnum execute_flags = ExecFlagEnum();
 
 } // namespace Moose

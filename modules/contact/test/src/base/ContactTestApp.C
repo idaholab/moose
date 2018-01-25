@@ -28,6 +28,9 @@ ContactTestApp::ContactTestApp(InputParameters parameters) : MooseApp(parameters
   Moose::associateSyntax(_syntax, _action_factory);
   ContactApp::associateSyntax(_syntax, _action_factory);
 
+  Moose::registerExecFlags(_factory);
+  ContactApp::registerExecFlags(_factory);
+
   bool use_test_objs = getParam<bool>("allow_test_objects");
   if (use_test_objs)
   {
@@ -70,5 +73,16 @@ ContactTestApp__associateSyntax(Syntax & syntax, ActionFactory & action_factory)
 }
 void
 ContactTestApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & /*action_factory*/)
+{
+}
+
+// External entry point for dynamic execute flag registration
+extern "C" void
+ContactTestApp__registerExecFlags(Factory & factory)
+{
+  ContactTestApp::registerExecFlags(factory);
+}
+void
+ContactTestApp::registerExecFlags(Factory & /*factory*/)
 {
 }
