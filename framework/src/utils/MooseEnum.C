@@ -10,6 +10,7 @@
 #include "MooseEnum.h"
 #include "MooseUtils.h"
 #include "MooseError.h"
+#include "Conversion.h"
 
 #include <sstream>
 #include <algorithm>
@@ -47,8 +48,10 @@ MooseEnum::operator=(const std::string & name)
   if (iter == _items.end())
   {
     if (!_allow_out_of_range) // Are out of range values allowed?
-      mooseError(std::string("Invalid option \"") + name +
-                 "\" in MooseEnum.  Valid options (not case-sensitive) are \"" + getRawNames() +
+      mooseError("Invalid option \"",
+                 name,
+                 "\" in MooseEnum.  Valid options (not case-sensitive) are \"",
+                 getRawNames(),
                  "\".");
     else
     {
@@ -64,13 +67,37 @@ MooseEnum::operator=(const std::string & name)
   return *this;
 }
 
+MooseEnum &
+MooseEnum::operator=(int value)
+{
+  if (value == MooseEnumItem::INVALID_ID)
+  {
+    _current = MooseEnumItem("", MooseEnumItem::INVALID_ID);
+    return *this;
+  }
+
+  std::set<MooseEnumItem>::const_iterator iter = find(value);
+  if (iter == _items.end())
+    mooseError("Invalid id \"",
+               value,
+               "\" in MooseEnum. Valid ids are \"",
+               Moose::stringify(getIDs()),
+               "\".");
+  else
+    _current = *iter;
+
+  checkDeprecated();
+
+  return *this;
+}
+
 bool
 MooseEnum::operator==(const char * name) const
 {
   std::string upper(MooseUtils::toUpper(name));
 
   mooseAssert(_allow_out_of_range || find(upper) != _items.end(),
-              std::string("Invalid string comparison \"") + upper +
+              "Invalid string comparison \"" + upper +
                   "\" in MooseEnum.  Valid options (not case-sensitive) are \"" + getRawNames() +
                   "\".");
 
