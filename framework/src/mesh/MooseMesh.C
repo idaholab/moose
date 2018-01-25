@@ -122,15 +122,6 @@ validParams<MooseMesh>()
       "construct_node_list_from_side_list",
       true,
       "Whether or not to generate nodesets from the sidesets (usually a good idea).");
-  params.addParam<unsigned short>("num_ghosted_layers",
-                                  1,
-                                  "Parameter to specify the number of geometric element layers"
-                                  " that will be available when DistributedMesh is used. Value is "
-                                  "ignored in ReplicatedMesh mode");
-  params.addParam<bool>("ghost_point_neighbors",
-                        false,
-                        "Boolean to specify whether or not all point neighbors are ghosted"
-                        " when DistributedMesh is used. Value is ignored in ReplicatedMesh mode");
   params.addParam<unsigned int>(
       "patch_size", 40, "The number of nodes to consider in the NearestNode neighborhood.");
   params.addParam<unsigned int>("ghosting_patch_size",
@@ -149,8 +140,7 @@ validParams<MooseMesh>()
 
   // groups
   params.addParamNamesToGroup(
-      "dim nemesis patch_update_strategy construct_node_list_from_side_list num_ghosted_layers"
-      " ghost_point_neighbors patch_size",
+      "dim nemesis patch_update_strategy construct_node_list_from_side_list patch_size",
       "Advanced");
   params.addParamNamesToGroup("partitioner centroid_partitioner_direction", "Partitioning");
 
@@ -179,7 +169,6 @@ MooseMesh::MooseMesh(const InputParameters & parameters)
                              : 5 * _patch_size),
     _max_leaf_size(getParam<unsigned int>("max_leaf_size")),
     _regular_orthogonal_mesh(false),
-    _num_ghosted_layers(getParam<unsigned short>("num_ghosted_layers")),
     _allow_recovery(true),
     _construct_node_list_from_side_list(getParam<bool>("construct_node_list_from_side_list"))
 {
@@ -233,20 +222,6 @@ MooseMesh::MooseMesh(const InputParameters & parameters)
       _partitioner_name = "parmetis";
       _partitioner_overridden = true;
     }
-
-    // Add geometric ghosting functors to mesh if running with DistributedMesh
-    if (getParam<bool>("ghost_point_neighbors"))
-      _ghosting_functors.emplace_back(libmesh_make_unique<GhostPointNeighbors>(*_mesh));
-
-    if (_num_ghosted_layers > 1)
-    {
-      auto default_coupling = libmesh_make_unique<DefaultCoupling>();
-      default_coupling->set_n_levels(_num_ghosted_layers);
-      _ghosting_functors.emplace_back(std::move(default_coupling));
-    }
-
-    for (auto & gf : _ghosting_functors)
-      _mesh->add_ghosting_functor(*gf);
   }
   else
     _mesh = libmesh_make_unique<ReplicatedMesh>(_communicator, dim);

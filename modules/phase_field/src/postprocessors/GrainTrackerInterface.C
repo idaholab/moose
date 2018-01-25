@@ -16,7 +16,7 @@ validParams<GrainTrackerInterface>()
 {
   InputParameters params = validParams<FeatureFloodCount>();
   params.addParam<int>("tracking_step", 0, "The timestep for when we should start tracking grains");
-  params.addParam<unsigned int>(
+  params.addParam<unsigned short>(
       "halo_level", 2, "The thickness of the halo surrounding each feature.");
   params.addParam<bool>(
       "remap_grains", true, "Indicates whether remapping should be done or not (default: true)");

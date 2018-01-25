@@ -1,8 +1,6 @@
 [Mesh]
   type = EBSDMesh
   filename = EBSD_split_grain.txt
-
-  num_ghosted_layers = 2
 []
 
 [GlobalParams]
