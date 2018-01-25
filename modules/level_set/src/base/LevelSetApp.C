@@ -108,6 +108,7 @@ void
 LevelSetApp::registerExecFlags(Factory & factory)
 {
   registerExecFlag(LevelSet::EXEC_ADAPT_MESH);
+  registerExecFlag(LevelSet::EXEC_COMPUTE_MARKERS);
 }
 
 // Dynamic Library Entry Points - DO NOT MODIFY

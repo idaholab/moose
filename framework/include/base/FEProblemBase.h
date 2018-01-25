@@ -1228,13 +1228,16 @@ public:
   /// Returns whether or not this Problem has a TimeIntegrator
   bool hasTimeIntegrator() const { return _has_time_integrator; }
 
+  ///@{
   /**
-   * Return the current execution flag.
+   * Return/set the current execution flag.
    *
    * Returns EXEC_NONE when not being executed.
    * @see FEProblemBase::execute
    */
   const ExecFlagType & getCurrentExecuteOnFlag() const;
+  void setCurrentExecuteOnFlag(const ExecFlagType &);
+  ///@}
 
   /**
    * Convenience function for performing execution of MOOSE systems.

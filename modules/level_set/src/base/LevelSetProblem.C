@@ -25,54 +25,21 @@ validParams<LevelSetProblem>()
 
 LevelSetProblem::LevelSetProblem(const InputParameters & parameters) : FEProblem(parameters) {}
 
+void
+LevelSetProblem::computeMarkers()
+{
+  FEProblem::computeMarkers();
+  setCurrentExecuteOnFlag(LevelSet::EXEC_COMPUTE_MARKERS);
+  execMultiAppTransfers(LevelSet::EXEC_COMPUTE_MARKERS, MultiAppTransfer::TO_MULTIAPP);
+  setCurrentExecuteOnFlag(EXEC_NONE);
+}
+
 bool
 LevelSetProblem::adaptMesh()
 {
-  // reset cycle counter
-  _cycles_completed = 0;
-
-  if (!_adaptivity.isAdaptivityDue())
-    return false;
-
-  unsigned int cycles_per_step = _adaptivity.getCyclesPerStep();
-
-  Moose::perf_log.push("Adaptivity: adaptMesh()", "Execution");
-
-  bool mesh_changed = false;
-
-  for (unsigned int i = 0; i < cycles_per_step; ++i)
-  {
-    _console << "Adaptivity step " << i + 1 << " of " << cycles_per_step << '\n';
-
-    // Markers were already computed once by Executioner
-    if (_adaptivity.getRecomputeMarkersFlag() && i > 0)
-      computeMarkers();
-
-    execMultiAppTransfers(LevelSet::EXEC_ADAPT_MESH, MultiAppTransfer::TO_MULTIAPP);
-
-    if (_adaptivity.adaptMesh())
-    {
-      mesh_changed = true;
-
-      meshChangedHelper(true); // This may be an intermediate change
-      _cycles_completed++;
-    }
-    else
-    {
-      _console << "Mesh unchanged, skipping remaining steps..." << std::endl;
-      break;
-    }
-
-    // Show adaptivity progress
-    _console << std::flush;
-  }
-
-  // We're done with all intermediate changes; now get systems ready
-  // for real if necessary.
-  if (mesh_changed)
-    _eq.reinit_systems();
-
-  Moose::perf_log.pop("Adaptivity: adaptMesh()", "Execution");
-
-  return mesh_changed;
+  bool adapt = FEProblem::adaptMesh();
+  setCurrentExecuteOnFlag(LevelSet::EXEC_ADAPT_MESH);
+  execMultiAppTransfers(LevelSet::EXEC_ADAPT_MESH, MultiAppTransfer::TO_MULTIAPP);
+  setCurrentExecuteOnFlag(EXEC_NONE);
+  return adapt;
 }
