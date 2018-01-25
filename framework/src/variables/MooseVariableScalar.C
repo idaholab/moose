@@ -19,6 +19,13 @@
 
 #include <limits>
 
+template <>
+InputParameters
+validParams<MooseVariableScalar>()
+{
+  return validParams<MooseVariableBase>();
+}
+
 MooseVariableScalar::MooseVariableScalar(const InputParameters & parameters)
   : MooseVariableBase(parameters),
     _need_u_dot(false),

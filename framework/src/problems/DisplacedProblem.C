@@ -397,6 +397,23 @@ DisplacedProblem::getSystem(const std::string & var_name)
 }
 
 void
+DisplacedProblem::addVariable(const std::string & var_type,
+                              const std::string & name,
+                              InputParameters parameters)
+{
+  _displaced_nl.addVariable(var_type, name, parameters);
+}
+
+void
+DisplacedProblem::addAuxVariable(const std::string & var_type,
+                                 const std::string & name,
+                                 InputParameters parameters)
+{
+  _displaced_aux.addVariable(var_type, name, parameters);
+}
+
+/*
+void
 DisplacedProblem::addVariable(const std::string & var_name,
                               const FEType & type,
                               Real scale_factor,
@@ -450,6 +467,7 @@ DisplacedProblem::addAuxScalarVariable(const std::string & var_name,
 {
   _displaced_aux.addScalarVariable(var_name, order, scale_factor, active_subdomains);
 }
+*/
 
 void
 DisplacedProblem::prepare(const Elem * elem, THREAD_ID tid)

@@ -1874,21 +1874,27 @@ FEProblemBase::addVariable(const std::string & var_name,
   if (duplicateVariableCheck(var_name, type, /* is_aux = */ false))
     return;
 
-  InputParameters params = _factory.getValidParams("MooseVariableBase");
-  params.set<MooseEnum>("order") = type.order;
-  params.set<MooseEnum>("family") = type.family;
+  std::string var_type;
+  if (type == FEType(0, MONOMIAL))
+    var_type = "MooseVariableConstMonomial";
+  else
+    var_type = "MooseVariable";
+
+  InputParameters params = _factory.getValidParams(var_type);
+  params.set<FEProblemBase *>("_fe_problem_base") = this;
+  params.set<Moose::VarKindType>("_var_kind") = Moose::VarKindType::VAR_NONLINEAR;
+  //params.set<MooseEnum>("order") = type.order.get_order();
+  //params.set<MooseEnum>("family") = int(type.family);
   params.set<Real>("scaling") = scale_factor;
   if (active_subdomains)
     for (const SubdomainID & id : *active_subdomains)
-      params.set<set::vector<SubdomainName>>("block").push_back(Moose::stringify(id));
+      params.set<std::vector<SubdomainName>>("block").push_back(Moose::stringify(id));
 
-  if (type == FEType(0, MONOMIAL))
-    _nl->addVariable("MooseVariableConstMonomial", var_name, params);
-  else
-    _nl->addVariable("MooseVariable", var_name, params);
 
+  _nl->addVariable(var_type, var_name, params);
   if (_displaced_problem)
-    _displaced_problem->addVariable(var_name, type, scale_factor, active_subdomains);
+    _displaced_problem->addVariable(var_type, var_name, params);
+    //_displaced_problem->addVariable(var_name, type, scale_factor, active_subdomains);
 }
 
 void
@@ -1920,9 +1926,21 @@ FEProblemBase::addScalarVariable(const std::string & var_name,
   if (duplicateVariableCheck(var_name, type, /* is_aux = */ false))
     return;
 
-  _nl->addScalarVariable(var_name, order, scale_factor, active_subdomains);
+  InputParameters params = _factory.getValidParams("MooseScalarVariable");
+  params.set<FEProblemBase *>("_fe_problem_base") = this;
+  params.set<Moose::VarKindType>("_var_kind") = Moose::VarKindType::VAR_NONLINEAR;
+  //params.set<MooseEnum>("order") = type.order;
+  //params.set<MooseEnum>("family") = type.family;
+  params.set<Real>("scaling") = scale_factor;
+  if (active_subdomains)
+    for (const SubdomainID & id : *active_subdomains)
+      params.set<std::vector<SubdomainName>>("block").push_back(Moose::stringify(id));
+
+  _nl->addVariable("MooseScalarVariable", var_name, params);
   if (_displaced_problem)
-    _displaced_problem->addScalarVariable(var_name, order, scale_factor, active_subdomains);
+    _displaced_problem->addVariable("MooseScalarVariable", var_name, params);
+
+    // _displaced_problem->addScalarVariable(var_name, order, scale_factor, active_subdomains);
 }
 
 void
@@ -2100,9 +2118,22 @@ FEProblemBase::addAuxVariable(const std::string & var_name,
   if (duplicateVariableCheck(var_name, type, /* is_aux = */ true))
     return;
 
-  _aux->addVariable(var_name, type, 1.0, active_subdomains);
+  InputParameters params = _factory.getValidParams("MooseVariable");
+  params.set<FEProblemBase *>("_fe_problem_base") = this;
+  params.set<Moose::VarKindType>("_var_kind") = Moose::VarKindType::VAR_AUXILIARY;
+
+  //params.set<MooseEnum>("order") = type.order.get_order();
+  //params.set<MooseEnum>("family") = int(type.family);
+  // params.set<Real>("scaling") = scale_factor;
+  if (active_subdomains)
+    for (const SubdomainID & id : *active_subdomains)
+      params.set<std::vector<SubdomainName>>("block").push_back(Moose::stringify(id));
+
+
+
+  _aux->addVariable("MooseVariable", var_name, params);
   if (_displaced_problem)
-    _displaced_problem->addAuxVariable(var_name, type, active_subdomains);
+    _displaced_problem->addAuxVariable("MooseVariable", var_name, params);
 }
 
 void
@@ -2133,9 +2164,20 @@ FEProblemBase::addAuxScalarVariable(const std::string & var_name,
   if (duplicateVariableCheck(var_name, type, /* is_aux = */ true))
     return;
 
-  _aux->addScalarVariable(var_name, order, scale_factor, active_subdomains);
+  InputParameters params = _factory.getValidParams("MooseVariable");
+  params.set<FEProblemBase *>("_fe_problem_base") = this;
+  params.set<Moose::VarKindType>("_var_kind") = Moose::VarKindType::VAR_AUXILIARY;
+
+  //params.set<MooseEnum>("order") = type.order.get_order();
+  params.set<MooseEnum>("family") = "SCALAR";
+  // params.set<Real>("scaling") = scale_factor;
+  if (active_subdomains)
+    for (const SubdomainID & id : *active_subdomains)
+      params.set<std::vector<SubdomainName>>("block").push_back(Moose::stringify(id));
+
+  _aux->addVariable("MooseVariable", var_name, params);
   if (_displaced_problem)
-    _displaced_problem->addAuxScalarVariable(var_name, order, scale_factor, active_subdomains);
+    _displaced_problem->addAuxVariable("MooseVariable", var_name, params);
 }
 
 void

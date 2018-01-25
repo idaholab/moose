@@ -665,6 +665,8 @@ SystemBase::addVariable(const std::string & var_type,
 {
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
   {
+    parameters.set<SystemBase *>("_system_base") = this;
+
     std::shared_ptr<MooseVariableBase> var =
         _factory.create<MooseVariableBase>(var_type, name, parameters, tid);
 
@@ -741,6 +743,18 @@ SystemBase::addArrayVariable(const std::string & var_name,
   if (var_num > _max_var_number)
     _max_var_number = var_num;
 }
+
+/*
+void
+SystemBase::addScalarVariable(const std::string & var_type, const std::string & name,
+InputParameters parameters)
+{
+ for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
+ {
+   std::shared_ptr<MooseVariableBase> var =
+         _factory.create<MooseVariableBase>(var_type, name, parameters, tid);
+}
+*/
 
 void
 SystemBase::addScalarVariable(const std::string & var_name,
