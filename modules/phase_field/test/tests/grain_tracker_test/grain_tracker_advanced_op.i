@@ -9,7 +9,6 @@
   zmax = 0
   elem_type = QUAD4
 
-  num_ghosted_layers = 2
   parallel_type = replicated # Periodic BCs
 []
 

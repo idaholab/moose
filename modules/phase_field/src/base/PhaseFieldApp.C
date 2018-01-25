@@ -282,6 +282,11 @@
 #include "GrainForcesPostprocessor.h"
 #include "GrainTextureVectorPostprocessor.h"
 
+/*
+ * RelationshipManagers
+ */
+#include "GrainTrackerHaloRM.h"
+
 template <>
 InputParameters
 validParams<PhaseFieldApp>()
@@ -519,6 +524,8 @@ PhaseFieldApp::registerObjects(Factory & factory)
 
   registerMesh(EBSDMesh);
   registerMesh(MortarPeriodicMesh);
+
+  registerRelationshipManager(GrainTrackerHaloRM);
 }
 
 // External entry point for dynamic syntax association

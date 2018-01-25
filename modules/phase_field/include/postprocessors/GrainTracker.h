@@ -179,7 +179,7 @@ protected:
   const int _tracking_step;
 
   /// The thickness of the halo surrounding each grain
-  const unsigned int _halo_level;
+  const unsigned short _halo_level;
 
   /// Depth of renumbering recursion (a depth of zero means no recursion)
   static const unsigned int _max_renumbering_recursion = 4;

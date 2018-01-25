@@ -13,8 +13,6 @@
   ymax = 1000 # maximum y-coordinate of the mesh
   elem_type = QUAD4 # Type of elements used in the mesh
   uniform_refine = 1 # Initial uniform refinement of the mesh
-
-  num_ghosted_layers = 2 # Required for all distributed mesh runs with grain tracker
 []
 
 [GlobalParams]

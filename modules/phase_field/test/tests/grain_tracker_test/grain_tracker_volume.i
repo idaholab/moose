@@ -13,7 +13,6 @@
   ymax = 2
   zmax = 0
   elem_type = QUAD4
-  num_ghosted_layers = 2
 []
 
 [Variables]
