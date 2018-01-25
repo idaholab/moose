@@ -90,13 +90,15 @@ public:
    */
   bool compareCurrent(const MooseEnum & other, CompareMode mode = CompareMode::COMPARE_NAME) const;
 
+  ///@{
   /**
    * Assignment operators
-   *  TODO: Perhaps we should implement an int assignment operator
-   * @param name - a string representing one of the enumeration values.
+   * @param name/int - a string or int representing one of the enumeration values.
    * @return A reference to this object for chaining
    */
   MooseEnum & operator=(const std::string & name);
+  MooseEnum & operator=(int value);
+  ///@}
 
   /**
    * IsValid

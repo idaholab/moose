@@ -334,3 +334,29 @@ TEST(MooseEnum, compareCurrent)
   EXPECT_TRUE(a.compareCurrent(c, MooseEnum::CompareMode::COMPARE_ID));
   EXPECT_FALSE(a.compareCurrent(c, MooseEnum::CompareMode::COMPARE_BOTH));
 }
+
+TEST(MooseEnum, operatorEqual)
+{
+  MooseEnum a("a=1 b=2", "a");
+  EXPECT_EQ(a, 1);
+  a = 2;
+  EXPECT_EQ(a, 2);
+
+  try
+  {
+    a = 3;
+    FAIL() << "missing error when setting MooseEnum to invalid int.";
+  }
+  catch (const std::exception & e)
+  {
+    std::string msg(e.what());
+    ASSERT_NE(msg.find("Invalid id \"3\" in MooseEnum. Valid ids are \"1,2\"."), std::string::npos)
+        << "failed with unexpected error: " << msg;
+  }
+}
+
+TEST(MooseEnum, getIDs)
+{
+  MooseEnum a("a=1980 e=1949", "e");
+  EXPECT_EQ(a.getIDs(), std::vector<int>({1949, 1980})); // stored as set so they come out sorted
+}
