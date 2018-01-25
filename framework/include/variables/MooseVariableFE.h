@@ -27,6 +27,15 @@
 #include "libmesh/dense_vector.h"
 
 class TimeIntegrator;
+template <typename>
+class MooseVariableFE;
+
+template <>
+InputParameters validParams<MooseVariableFE<Real>>();
+template <>
+InputParameters validParams<MooseVariableFE<RealVectorValue>>();
+template <>
+InputParameters validParams<MooseVariableFE<RealEigenVector>>();
 
 /**
  * Class for stuff related to variables
@@ -83,13 +92,7 @@ public:
   typedef typename Moose::DOFType<OutputType>::type OutputData;
   typedef MooseArray<OutputData> DoFValue;
 
-  MooseVariableFE(unsigned int var_num,
-                  const FEType & fe_type,
-                  SystemBase & sys,
-                  const Assembly & assembly,
-                  Moose::VarKindType var_kind,
-                  THREAD_ID tid,
-                  unsigned int count = 1);
+  MooseVariableFE(const InputParameters & parameters);
 
   void clearDofIndices() override;
 

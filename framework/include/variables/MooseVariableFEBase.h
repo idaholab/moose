@@ -23,12 +23,7 @@ class Point;
 class MooseVariableFEBase : public MooseVariableBase
 {
 public:
-  MooseVariableFEBase(unsigned int var_num,
-                      const FEType & fe_type,
-                      SystemBase & sys,
-                      Moose::VarKindType var_kind,
-                      THREAD_ID tid,
-                      unsigned int count);
+  MooseVariableFEBase(const InputParameters & parameters);
 
   /**
    * Clear out the dof indices.  We do this in case this variable is not going to be prepared at

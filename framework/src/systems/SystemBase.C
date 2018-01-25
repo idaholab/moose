@@ -659,6 +659,26 @@ SystemBase::addVariable(const std::string & var_name,
 }
 
 void
+SystemBase::addVariable(const std::string & var_type,
+                        const std::string & name,
+                        InputParameters parameters)
+{
+  for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
+  {
+    std::shared_ptr<MooseVariableBase> var =
+        _factory.create<MooseVariableBase>(var_type, name, parameters, tid);
+
+    _vars[tid].add(name, var.get());
+
+    if (var->blockRestricted())
+      for (const SubdomainID & id : var->blockIDs())
+        _var_map[var->number()].insert(id);
+    else
+      _var_map[var->number()] = std::set<SubdomainID>();
+  }
+}
+
+void
 SystemBase::addArrayVariable(const std::string & var_name,
                              const FEType & type,
                              unsigned int components,

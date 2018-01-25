@@ -14,13 +14,8 @@
 
 #include "libmesh/quadrature.h"
 
-MooseVariableConstMonomial::MooseVariableConstMonomial(unsigned int var_num,
-                                                       const FEType & fe_type,
-                                                       SystemBase & sys,
-                                                       Assembly & assembly,
-                                                       Moose::VarKindType var_kind,
-                                                       THREAD_ID tid)
-  : MooseVariable(var_num, fe_type, sys, assembly, var_kind, tid)
+MooseVariableConstMonomial::MooseVariableConstMonomial(const InputParameters & parameters)
+  : MooseVariable(parameters)
 {
 }
 

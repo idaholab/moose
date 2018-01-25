@@ -16,14 +16,8 @@
 #include "MooseVariableData.h"
 
 template <typename OutputType>
-MooseVariableFE<OutputType>::MooseVariableFE(unsigned int var_num,
-                                             const FEType & fe_type,
-                                             SystemBase & sys,
-                                             const Assembly & assembly,
-                                             Moose::VarKindType var_kind,
-                                             THREAD_ID tid,
-                                             unsigned int count)
-  : MooseVariableFEBase(var_num, fe_type, sys, var_kind, tid, count), _assembly(assembly)
+MooseVariableFE<OutputType>::MooseVariableFE(const InputParameters & parameters)
+  : MooseVariableFEBase(parameters)
 {
   _element_data = libmesh_make_unique<MooseVariableData<OutputType>>(*this,
                                                                      sys,

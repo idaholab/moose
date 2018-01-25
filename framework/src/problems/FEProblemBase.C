@@ -1874,7 +1874,19 @@ FEProblemBase::addVariable(const std::string & var_name,
   if (duplicateVariableCheck(var_name, type, /* is_aux = */ false))
     return;
 
-  _nl->addVariable(var_name, type, scale_factor, active_subdomains);
+  InputParameters params = _factory.getValidParams("MooseVariableBase");
+  params.set<MooseEnum>("order") = type.order;
+  params.set<MooseEnum>("family") = type.family;
+  params.set<Real>("scaling") = scale_factor;
+  if (active_subdomains)
+    for (const SubdomainID & id : *active_subdomains)
+      params.set<set::vector<SubdomainName>>("block").push_back(Moose::stringify(id));
+
+  if (type == FEType(0, MONOMIAL))
+    _nl->addVariable("MooseVariableConstMonomial", var_name, params);
+  else
+    _nl->addVariable("MooseVariable", var_name, params);
+
   if (_displaced_problem)
     _displaced_problem->addVariable(var_name, type, scale_factor, active_subdomains);
 }

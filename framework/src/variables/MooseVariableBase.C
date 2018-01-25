@@ -11,28 +11,62 @@
 #include "SubProblem.h"
 #include "SystemBase.h"
 #include "MooseMesh.h"
+#include "MooseApp.h"
+#include "InputParameterWarehouse.h"
 
 #include "libmesh/variable.h"
 #include "libmesh/dof_map.h"
 #include "libmesh/system.h"
+#include "libmesh/fe_type.h"
+#include "libmesh/string_to_enum.h"
 
-MooseVariableBase::MooseVariableBase(unsigned int var_num,
-                                     const FEType & fe_type,
-                                     SystemBase & sys,
-                                     Moose::VarKindType var_kind,
-                                     THREAD_ID tid,
-                                     unsigned int count)
-  : _var_num(var_num),
-    _fe_type(fe_type),
-    _var_kind(var_kind),
-    _subproblem(sys.subproblem()),
-    _sys(sys),
-    _variable(sys.system().variable(_var_num)),
-    _dof_map(sys.dofMap()),
+template <>
+InputParameters
+validParams<MooseVariableBase>()
+{
+  InputParameters params = validParams<MooseObject>();
+  params += validParams<BlockRestrictable>();
+
+  MooseEnum order("CONSTANT=0 FIRST=1 SECOND=2 THIRD=3 FOURTH=4", "FIRST", true);
+  params.addParam<MooseEnum>(order,
+                             "Order of the FE shape function to use for this variable (additional "
+                             "orders not listed here are allowed, depending on the family).");
+
+  MooseEnum family("LAGRANGE=0 MONOMIAL=2 HERMITE=22 SCALAR=31 HIERARCHIC=1 CLOUGH=21 XYZ=5 "
+                   "SZABAB=4 BERNSTEIN=3 L2_LAGRANGE=7 L2_HIERARCHIC=6",
+                   "LAGRANGE");
+  params.addParam<MooseEnum>(
+      family, "Specifies the family of FE shape functions to use for this variable.");
+
+  params.addParam<Real>("initial_condition", "Specifies the initial condition for this variable");
+
+  // Advanced input options
+  params.addParam<Real>("scaling", 1.0, "Specifies a scaling factor to apply to this variable");
+  // params.addParam<bool>("eigen", false, "True to make this variable an eigen variable");
+  params.addParamNamesToGroup("scaling eigen", "Advanced");
+
+  params.addPrivateParam<SystemBase *>("_system_base");
+  params.addPrivateParam<THREAD_ID>("_tid");
+  params.addPrivateParam<Moose::VarKindType>("_var_kind");
+
+  return params;
+}
+
+MooseVariableBase::MooseVariableBase(const InputParameters & parameters)
+  : MooseObject(parameters),
+    BlockRestrictable(this),
+    _sys(*getParam<SystemBase *>("_system_base")),
+    _fe_type(Utility::string_to_enum<Order>(getParam<MooseEnum>("order")),
+             Utility::string_to_enum<FEFamily>(getParam<MooseEnum>("family"))),
+    _var_num(_sys.system().add_variable(_name, _fe_type, &blockIDs())),
+    _var_kind(getParam<Moose::VarKindType>("_var_kind")),
+    _subproblem(_sys.subproblem()),
+    _variable(_sys.system().variable(_var_num)),
+    _assembly(_subproblem.assembly(getParam<int>("_tid"))),
+    _dof_map(_sys.dofMap()),
     _mesh(_subproblem.mesh()),
-    _tid(tid),
-    _count(count),
-    _scaling_factor(std::vector<Real>(_count, 1.0))
+    _count(getParam<unsigned int>("components")),
+    _scaling_factor(std::vector<Real>(_count, 1.))
 {
   if (_count > 1)
   {
@@ -40,18 +74,10 @@ MooseVariableBase::MooseVariableBase(unsigned int var_num,
     std::size_t found = name0.find_last_of("_");
     if (found == std::string::npos)
       mooseError("");
-    _name = name0.substr(0, found);
+    _var_name = name0.substr(0, found);
   }
   else
-    _name = _sys.system().variable(_var_num).name();
-}
-
-MooseVariableBase::~MooseVariableBase() {}
-
-const std::string &
-MooseVariableBase::name() const
-{
-  return _name;
+    _var_name = _sys.system().variable(_var_num).name();
 }
 
 const std::vector<dof_id_type> &

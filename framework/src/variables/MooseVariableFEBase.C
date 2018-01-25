@@ -9,12 +9,7 @@
 
 #include "MooseVariableFE.h"
 
-MooseVariableFEBase::MooseVariableFEBase(unsigned int var_num,
-                                         const FEType & fe_type,
-                                         SystemBase & sys,
-                                         Moose::VarKindType var_kind,
-                                         THREAD_ID tid,
-                                         unsigned int count)
-  : MooseVariableBase(var_num, fe_type, sys, var_kind, tid, count)
+MooseVariableFEBase::MooseVariableFEBase(const InputParameters & parameters)
+  : MooseVariableBase(parameters)
 {
 }

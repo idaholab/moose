@@ -34,6 +34,7 @@ class MooseMesh;
 class SubProblem;
 class SystemBase;
 class TimeIntegrator;
+class InputParameters;
 
 // libMesh forward declarations
 namespace libMesh
@@ -362,6 +363,9 @@ public:
                            const FEType & type,
                            Real scale_factor,
                            const std::set<SubdomainID> * const active_subdomains = nullptr);
+
+  virtual void
+  addVariable(const std::string & var_type, const std::string & name, InputParameters parameters);
 
   /**
    * Adds an array variable to the system

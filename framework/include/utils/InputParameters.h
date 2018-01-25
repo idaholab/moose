@@ -916,6 +916,8 @@ private:
 
   // These are the only objects allowed to _create_ InputParameters
   friend InputParameters emptyInputParameters();
+  //friend InputParameters validParams<MooseApp>();
+  //friend class MooseVariableBase; //TODO:MooseVariableToMooseObject
   friend class InputParameterWarehouse;
 };
 
