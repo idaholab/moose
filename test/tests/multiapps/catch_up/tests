@@ -1,0 +1,8 @@
+[Tests]
+  [./test]
+    type = 'Exodiff'
+    input = 'master.i'
+    exodiff = 'master_out.e master_out_sub_app0.e master_out_sub_app1.e'
+    allow_warnings = true
+  [../]
+[]
