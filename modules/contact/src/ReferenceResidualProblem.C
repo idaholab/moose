@@ -158,6 +158,7 @@ ReferenceResidualProblem::checkNonlinearConvergence(std::string & msg,
                                                     const Real abstol,
                                                     const PetscInt nfuncs,
                                                     const PetscInt max_funcs,
+                                                    const PetscBool force_iteration,
                                                     const Real ref_resid,
                                                     const Real /*div_threshold*/)
 {
@@ -190,7 +191,7 @@ ReferenceResidualProblem::checkNonlinearConvergence(std::string & msg,
     oss << "Failed to converge, function norm is NaN\n";
     reason = MOOSE_DIVERGED_FNORM_NAN;
   }
-  else if (fnorm < abstol)
+  else if (fnorm < abstol && (it || !force_iteration))
   {
     oss << "Converged due to function norm " << fnorm << " < " << abstol << std::endl;
     reason = MOOSE_CONVERGED_FNORM_ABS;
