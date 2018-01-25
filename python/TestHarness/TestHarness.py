@@ -105,6 +105,7 @@ class TestHarness:
         self.results_storage = os.path.join(self.base_dir, '.previous_test_results.json')
         self.code = '2d2d6769726c2d6d6f6465'
         self.error_code = 0x0
+        self.keyboard_talk = True
         # Assume libmesh is a peer directory to MOOSE if not defined
         if os.environ.has_key("LIBMESH_DIR"):
             self.libmesh_dir = os.environ['LIBMESH_DIR']
@@ -261,6 +262,7 @@ class TestHarness:
             # Wait for all the tests to complete
             self.scheduler.waitFinish()
 
+            # TODO: this DOES NOT WORK WITH MAX FAILES (max failes is considered a scheduler error at the moment)
             if not self.scheduler.schedulerError():
                 self.cleanup()
 
@@ -270,12 +272,18 @@ class TestHarness:
 
         except KeyboardInterrupt:
             # Attempt to kill jobs currently running
-            self.scheduler.killRemaining()
-
-            print('\nExiting due to keyboard interrupt...')
+            self.scheduler.killRemaining(keyboard=True)
+            self.keyboard_interrupt()
             sys.exit(1)
 
         return
+
+    def keyboard_interrupt(self):
+        """ Control how keyboard interrupt displays """
+        if self.keyboard_talk:
+            # Prevent multiple keyboard interrupt messages
+            self.keyboard_talk = False
+            print('\nExiting due to keyboard interrupt...')
 
    # Create and return list of tester objects. A tester is created by providing
     # abspath to basename (dirpath), and the test file in queustion (file)
@@ -355,11 +363,11 @@ class TestHarness:
         # When running in valgrind mode, we end up with a ton of output for each failed
         # test.  Therefore, we limit the number of fails...
         if self.options.valgrind_mode and self.num_failed > self.options.valgrind_max_fails:
-            tester.setStatus('Max Fails Exceeded', tester.bucket_fail)
+            tester.setStatus(tester.fail, 'Max Fails Exceeded')
         elif self.num_failed > self.options.max_fails:
-            tester.setStatus('Max Fails Exceeded', tester.bucket_fail)
+            tester.setStatus(tester.fail, 'Max Fails Exceeded')
         elif tester.parameters().isValid('have_errors') and tester.parameters()['have_errors']:
-            tester.setStatus('Parser Error', tester.bucket_fail)
+            tester.setStatus(tester.fail, 'Parser Error')
 
     # This method splits a lists of tests into two pieces each, the first piece will run the test for
     # approx. half the number of timesteps and will write out a restart file.  The second test will
@@ -393,7 +401,7 @@ class TestHarness:
                 new_tests.append(part2)
 
             elif part1.parameters()['recover'] == True and part1.parameters()['check_input']:
-                part1.setStatus('SYNTAX ONLY TEST', part1.bucket_silent)
+                part1.setStatus(part1.silent)
 
         testers.extend(new_tests)
         return testers
@@ -405,8 +413,9 @@ class TestHarness:
             return True
 
     # Method contianing logic on whether or not we should print results of given tester
-    def canPrint(self, tester):
-        if tester.isSkipped() and self.options.report_skipped is False:
+    def canPrint(self, job):
+        tester = job.getTester()
+        if tester.isSkip() and self.options.report_skipped is False:
             return False
 
         elif tester.isSilent() or (tester.isDeleted() and not self.options.extra_info):
@@ -416,7 +425,7 @@ class TestHarness:
 
     def formatStatusMessage(self, tester):
         # PASS and DRY_RUN fall into this catagory
-        if tester.didPass():
+        if tester.isPass():
             result = tester.getStatusMessage()
             if result == '':
                 result = tester.success_message
@@ -426,7 +435,7 @@ class TestHarness:
                         tester.addCaveats(check)
 
         # FAIL, DIFF and DELETED fall into this catagory
-        elif tester.didFail() or (tester.isDeleted() and self.options.extra_info):
+        elif tester.isFail() or (tester.isDeleted() and self.options.extra_info):
             message = tester.getStatusMessage()
             if message == '':
                 message = tester.getStatus().status
@@ -444,35 +453,74 @@ class TestHarness:
 
         return result
 
-    def getTesterOutput(self, job):
-        """ Method to return a testers stdout """
+    def printOutput(self, job):
+        """ Method to print a testers output to the screen """
         tester = job.getTester()
-        output = 'Working Directory: ' + tester.getTestDir() + '\nRunning command: ' + tester.getCommand(self.options) + '\n'
-        output += job.getOutput()
-        output = output.replace('\r', '\n')  # replace the carriage returns with newlines
-        lines = output.split('\n')
-        # Obtain color based on test status
-        color = tester.getColor()
+        output = ''
+        # Print what ever status the tester has at the time
+        if self.options.verbose or (tester.isFail() and not self.options.quiet):
+            output = 'Working Directory: ' + tester.getTestDir() + '\nRunning command: ' + tester.getCommand(self.options) + '\n'
+            output += job.getOutput()
+            output = output.replace('\r', '\n')  # replace the carriage returns with newlines
+            lines = output.split('\n')
 
-        if output != '':
-            test_name = util.colorText(tester.getTestName()  + ": ", color, colored=self.options.colored, code=self.options.code)
-            output = test_name + ("\n" + test_name).join(lines)
+            # Obtain color based on test status
+            color = tester.getColor()
+
+            if output != '':
+                test_name = util.colorText(tester.getTestName()  + ": ", color, colored=self.options.colored, code=self.options.code)
+                output = test_name + ("\n" + test_name).join(lines)
+                print(output)
         return output
 
-    def handleTestStatus(self, job):
-        """ Method to handle a test status """
-        tester = job.getTester()
-        if self.canPrint(tester):
-            # Print results and perform any desired post job processing
-            if tester.isFinished():
+    def normalizeStatus(self, job):
+        """
+        Determine when to use a job status as opposed to tester status. There
+        are three possible job statuses that would prevent a tester from having
+        a finished status:
 
-                # perform printing of application output if so desired (verbose/failed, etc)
-                if self.options.verbose or (tester.didFail() and not self.options.quiet):
-                    print(self.getTesterOutput(job))
+        Failed Jobs:   jobs which failed due to a timeout, or which never
+                       entered the running queue due some scheduling error.
+
+        Skipped Jobs:  jobs which were skipped (at the job level), and never
+                       called tester.getRunnable().
+
+        Running jobs:  jobs which are currently running, and have not yet
+                       finished.
+
+        When these job statuses are encounterd, we need to adjust the unset
+        tester's status to _something_, so the TestHarness only has to deal
+        with a single status object.
+
+        The special case is the running status. Which when encountered by
+        handleJobStatus, does not trigger this method. We simply list it here
+        for completeness.
+
+        TODO: Does this belong in the scheduler? The only reason it is here
+              is because the scheduler does not set tester statuses.
+        """
+        tester = job.getTester()
+        message = job.getStatusMessage()
+        if job.isFail():
+            tester.setStatus(tester.fail, message)
+        elif job.isSkip() and not tester.isSilent() and not tester.isDeleted():
+            tester.setStatus(tester.skip, message)
+
+        return tester
+
+    def handleJobStatus(self, job):
+        """ Method to handle a job status """
+        if self.canPrint(job):
+            # Print results and perform any desired post job processing
+            if job.isFinished():
+                tester = self.normalizeStatus(job)
+
+                # perform printing of application output if so desired
+                self.printOutput(job)
 
                 # Print status with caveats
-                result = self.formatStatusMessage(tester)
-                print(util.formatResult(job, result, self.options))
+                result = self.formatCaveats(tester)
+                print(util.formatResult(job, result, self.options, caveats=True))
 
                 timing = job.getTiming()
 
@@ -481,18 +529,16 @@ class TestHarness:
 
                 self.postRun(tester.specs, timing)
 
-                if tester.isSkipped():
+                if tester.isSkip():
                     self.num_skipped += 1
-                elif tester.didPass():
+                elif tester.isPass():
                     self.num_passed += 1
-                elif tester.isQueued() or tester.isWaiting():
-                    self.num_pending += 1
                 else:
                     self.num_failed += 1
 
             # Just print current status without saving results
             else:
-                print(util.formatResult(job, 'RUNNING...', self.options))
+                print(util.formatResult(job, 'RUNNING...', self.options, caveats=False))
 
     # Print final results, close open files, and exit with the correct error code
     def cleanup(self):
@@ -505,8 +551,8 @@ class TestHarness:
 
         if (self.options.verbose or (self.num_failed != 0 and not self.options.quiet)) and not self.options.dry_run:
             print('\n\nFinal Test Results:\n' + ('-' * (util.TERM_COLS)))
-            for (tester_data, result, timing) in sorted(self.test_table, key=lambda x: x[1], reverse=True):
-                print(util.formatResult(tester_data, result, self.options))
+            for (job, result, timing) in sorted(self.test_table, key=lambda x: x[1], reverse=True):
+                print(util.formatResult(job, result, self.options, caveats=True))
 
         time = clock() - self.start_time
 
@@ -526,7 +572,7 @@ class TestHarness:
 
         # Print a different footer when performing a dry run
         if self.options.dry_run:
-            print('Processed %d tests in %.1f seconds' % (self.num_passed+self.num_skipped, time))
+            print('Processed %d tests in %.1f seconds.' % (self.num_passed+self.num_skipped, time))
             summary = '<b>%d would run</b>'
             summary += ', <b>%d would be skipped</b>'
             summary += fatal_error
@@ -534,7 +580,7 @@ class TestHarness:
                              colored=self.options.colored, code=self.options.code ))
 
         else:
-            print('Ran %d tests in %.1f seconds' % (self.num_passed+self.num_failed, time))
+            print('Ran %d tests in %.1f seconds.' % (self.num_passed+self.num_failed, time))
 
             if self.num_passed:
                 summary = '<g>%d passed</g>'
@@ -549,6 +595,9 @@ class TestHarness:
                 summary += ', <r>%d FAILED</r>'
             else:
                 summary += ', <b>%d failed</b>'
+            if self.scheduler.maxFailures():
+                summary += '\n<r>MAX FAILURES REACHED</r>'
+
             summary += fatal_error
 
             print(util.colorText( summary % (self.num_passed, self.num_skipped, self.num_pending, self.num_failed),  "", html = True, \
@@ -571,7 +620,7 @@ class TestHarness:
                                                                        'LONG_NAME' : tester.getTestName(),
                                                                        'TIMING'    : job.getTiming(),
                                                                        'STATUS'    : tester.getStatus().status,
-                                                                       'FAIL'      : tester.didFail(),
+                                                                       'FAIL'      : tester.isFail(),
                                                                        'COLOR'     : tester.getStatus().color,
                                                                        'CAVEATS'   : list(tester.getCaveats()),
                                                                        'COMMAND'   : tester.getCommand(self.options)}

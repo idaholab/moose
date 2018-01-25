@@ -1,0 +1,30 @@
+[Tests]
+  [./testA]
+    type = RunApp
+    input = good.i
+    prereq = testB
+  [../]
+  [./testB]
+    type = RunApp
+    input = good.i
+    prereq = testC
+  [../]
+  [./testC]
+    type = RunApp
+    input = good.i
+    prereq = testD
+  [../]
+  [./testD]
+    type = RunApp
+    input = good.i
+  [../]
+  [./testE]
+    type = RunApp
+    input = good.i
+  [../]
+  [./testF]
+    type = RunApp
+    input = good.i
+    prereq = 'testE testA'
+  [../]
+[]

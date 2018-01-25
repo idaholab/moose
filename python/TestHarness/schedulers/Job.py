@@ -9,6 +9,7 @@
 
 import re, os
 from timeit import default_timer as clock
+from TestHarness import StatusSystem
 
 
 class Timer(object):
@@ -54,7 +55,17 @@ class Job(object):
         self.__joined_out = ''
         self.report_timer = None
         self.__slots = None
-        self.__unique_identifier = os.path.join(tester.getTestDir(), tester.getTestName())
+
+        # Enumerate available job statuses
+        self.status = StatusSystem.JobStatus()
+
+        self.hold = self.status.hold
+        self.queued = self.status.queued
+        self.running = self.status.running
+        self.skip = self.status.skip
+        self.crash = self.status.crash
+        self.error = self.status.error
+        self.finished = self.status.finished
 
     def getTester(self):
         """ Return the tester object """
@@ -76,9 +87,41 @@ class Job(object):
         """ Return the shorthand Test name """
         return self.getTestName().split('.')[1]
 
+    def getTesterStatus(self):
+        """ Wrapper method to return a testers current status """
+        return self.__tester.getStatus()
+
+    def getPrereqs(self):
+        """ Wrapper method to return the testers prereqs """
+        return self.__tester.getPrereqs()
+
+    def getTestDir(self):
+        """ Wrapper method to return the testers working directory """
+        return self.__tester.getTestDir()
+
+    def addCaveats(self, kwargs):
+        """ Wrapper method for setting caveats """
+        return self.__tester.addCaveats(kwargs)
+
+    def getCaveats(self):
+        """ Wrapper method for getting caveats """
+        return self.__tester.getCaveats()
+
+    def getRunnable(self):
+        """ Wrapper method to return getRunnable """
+        return self.__tester.getRunnable(self.options)
+
     def getUniqueIdentifier(self):
         """ A unique identifier for this job object """
-        return self.__unique_identifier
+        return os.path.join(self.getTestDir(), self.getTestName())
+
+    def getUniquePrereqs(self):
+        """ Return a list of prereqs with what should be their unique identifier """
+        prereqs = self.getPrereqs()
+        unique_prereqs = []
+        for prereq in prereqs:
+            unique_prereqs.append(os.path.join(self.getTestDir(), prereq))
+        return unique_prereqs
 
     def getSlots(self):
         """ Return the number of slots this job consumes """
@@ -96,11 +139,17 @@ class Job(object):
         A blocking method to handle the exit status of the process object while keeping track of the
         time the process was active. When the process exits, read the output and close the file.
         """
-        self.__tester.prepare(self.options)
 
-        if self.options.dry_run or not self.__tester.shouldExecute():
-            self.__tester.setStatus(self.__tester.getSuccessMessage(), self.__tester.bucket_success)
+        # Do not execute app, but allow processResults to commence
+        if not self.__tester.shouldExecute():
             return
+
+        # Do not execute app, and do not processResults (set a success status)
+        elif self.options.dry_run:
+            self.__tester.setStatus(self.__tester.success, 'DRY RUN')
+            return
+
+        self.__tester.prepare(self.options)
 
         self.__start_time = clock()
         self.timer.reset()
@@ -150,8 +199,34 @@ class Job(object):
             return self.getActiveTime()
         elif self.getEndTime() and self.getStartTime():
             return self.timer.cumulativeDur()
-        elif self.getStartTime() and self.__tester.isPending():
+        elif self.getStartTime() and self.isRunning():
             # If the test is still running, return current run time instead
             return max(0.0, clock() - self.getStartTime())
         else:
             return 0.0
+
+    # Wrapper methods for adjusting statuses
+    def getStatus(self):
+        return self.status.getStatus()
+    def getStatusMessage(self):
+        return self.status.getStatusMessage()
+    def setStatus(self, status, message=''):
+        return self.status.setStatus(status, message)
+
+    # Wrapper methods for returning a bool status
+    def isHold(self):
+        return self.status.isHold()
+    def isSkip(self):
+        return self.status.isSkip()
+    def isQueued(self):
+        return self.status.isQueued()
+    def isRunning(self):
+        return self.status.isRunning()
+    def isCrash(self):
+        return self.status.isCrash()
+    def isError(self):
+        return self.status.isError()
+    def isFail(self):
+        return self.status.isFail()
+    def isFinished(self):
+        return self.status.isFinished()

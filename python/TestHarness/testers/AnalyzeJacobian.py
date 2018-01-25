@@ -77,10 +77,9 @@ class AnalyzeJacobian(Tester):
             if self.exit_code != 0 :
                 reason = 'CRASH'
 
-        # populate status bucket
         if reason != '':
-            self.setStatus(reason, self.bucket_fail)
+            self.setStatus(self.fail, reason)
         else:
-            self.setStatus(self.success_message, self.bucket_success)
+            self.setStatus(self.success)
 
         return output
