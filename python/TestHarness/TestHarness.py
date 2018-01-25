@@ -237,7 +237,7 @@ class TestHarness:
             self.cleanup()
 
             # flags for the TestHarness start at the high bit
-            if self.num_failed:
+            if self.num_failed or self.scheduler.schedulerError():
                 self.error_code = self.error_code | 0x80
 
         except KeyboardInterrupt:
