@@ -16,6 +16,9 @@ InputParameters
 validParams<CavityPressurePostprocessor>()
 {
   InputParameters params = validParams<GeneralPostprocessor>();
+  params.addClassDescription("Interfaces with the CavityPressureUserObject to store"
+                             "the initial number of moles of a gas contained within"
+                             "an internal volume");
   params.addRequiredParam<UserObjectName>(
       "cavity_pressure_uo", "The CavityPressureUserObject that computes the initial moles");
   params.addRequiredParam<std::string>("quantity", "The quantity to report");

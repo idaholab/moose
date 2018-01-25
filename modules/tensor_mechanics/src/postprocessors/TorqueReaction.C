@@ -18,7 +18,11 @@ InputParameters
 validParams<TorqueReaction>()
 {
   InputParameters params = validParams<NodalPostprocessor>();
-  params.addRequiredParam<std::vector<AuxVariableName>>("react", "The reaction variables");
+  params.addClassDescription("TorqueReaction calculates the torque in 2D and 3D"
+                             "about a user-specified axis of rotation centered"
+                             "at a user-specied origin.");
+  params.addRequiredParam<std::vector<AuxVariableName>>("reaction_force_variables",
+                                                        "The reaction variables");
   params.addParam<RealVectorValue>(
       "axis_origin", Point(), "Origin of the axis of rotation used to calculate the torque");
   params.addRequiredParam<RealVectorValue>("direction_vector",
@@ -35,7 +39,8 @@ TorqueReaction::TorqueReaction(const InputParameters & parameters)
     _axis_origin(getParam<RealVectorValue>("axis_origin")),
     _direction_vector(getParam<RealVectorValue>("direction_vector"))
 {
-  std::vector<AuxVariableName> reacts = getParam<std::vector<AuxVariableName>>("react");
+  std::vector<AuxVariableName> reacts =
+      getParam<std::vector<AuxVariableName>>("reaction_force_variables");
   _nrt = reacts.size();
 
   for (unsigned int i = 0; i < _nrt; ++i)
