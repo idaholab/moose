@@ -422,20 +422,20 @@ petscNonlinearConverged(SNES snes,
   // xnorm: 2-norm of current iterate
   // snorm: 2-norm of current step
   // fnorm: 2-norm of function at current iterate
-  MooseNonlinearConvergenceReason moose_reason = problem.checkNonlinearConvergence(
-      msg,
-      it,
-      xnorm,
-      snorm,
-      fnorm,
-      rtol,
-      stol,
-      atol,
-      nfuncs,
-      maxf,
-      force_iteration,
-      system._initial_residual_before_preset_bcs,
-      /*div_threshold=*/(1.0 / rtol) * system._initial_residual_before_preset_bcs);
+  MooseNonlinearConvergenceReason moose_reason =
+      problem.checkNonlinearConvergence(msg,
+                                        it,
+                                        xnorm,
+                                        snorm,
+                                        fnorm,
+                                        rtol,
+                                        stol,
+                                        atol,
+                                        nfuncs,
+                                        maxf,
+                                        force_iteration,
+                                        system._initial_residual_before_preset_bcs,
+                                        std::numeric_limits<Real>::max());
 
   if (msg.length() > 0)
     PetscInfo(snes, msg.c_str());
