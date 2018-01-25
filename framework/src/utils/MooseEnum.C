@@ -10,6 +10,7 @@
 #include "MooseEnum.h"
 #include "MooseUtils.h"
 #include "MooseError.h"
+#include "Conversion.h"
 
 #include <sstream>
 #include <algorithm>
@@ -56,6 +57,30 @@ MooseEnum::operator=(const std::string & name)
       _items.insert(_current);
     }
   }
+  else
+    _current = *iter;
+
+  checkDeprecated();
+
+  return *this;
+}
+
+MooseEnum &
+MooseEnum::operator=(int value)
+{
+  if (value == MooseEnumItem::INVALID_ID)
+  {
+    _current = MooseEnumItem("", MooseEnumItem::INVALID_ID);
+    return *this;
+  }
+
+  std::set<MooseEnumItem>::const_iterator iter = find(value);
+  if (iter == _items.end())
+    mooseError(std::string("Invalid id \""),
+               value,
+               "\" in MooseEnum. Valid ids are \"",
+               Moose::stringify(getIDs()),
+               "\".");
   else
     _current = *iter;
 

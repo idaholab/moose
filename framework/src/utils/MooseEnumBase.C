@@ -157,6 +157,15 @@ MooseEnumBase::getRawNames() const
   return Moose::stringify(_items, " ");
 }
 
+std::vector<int>
+MooseEnumBase::getIDs() const
+{
+  std::vector<int> output;
+  for (auto it = _items.begin(); it != _items.end(); ++it)
+    output.push_back(it->id());
+  return output;
+}
+
 std::set<MooseEnumItem>::const_iterator
 MooseEnumBase::find(const std::string & name) const
 {

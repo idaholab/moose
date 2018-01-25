@@ -65,6 +65,12 @@ public:
   std::string getRawNames() const;
 
   /**
+   * Method for returning a vector of ids for this instance
+   * @return a vector of ints containing the possible ids for this enumeration
+   */
+  std::vector<int> getIDs() const;
+
+  /**
    * IsValid
    * @return - a Boolean indicating whether this Enumeration has been set
    */
