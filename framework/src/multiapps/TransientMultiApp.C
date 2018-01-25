@@ -396,8 +396,61 @@ TransientMultiApp::solveStep(Real dt, Real target_time, bool auto_advance)
             }
           }
         }
-        else if (!ex->lastSolveConverged())
-          throw MultiAppSolveFailure(name() + " failed to converge");
+        else
+        {
+          if (!ex->lastSolveConverged())
+          {
+            // Even if we don't allow auto_advance - we can still catch up to the current time if
+            // possible
+            if (_catch_up)
+            {
+              _console << "Starting Catch Up!" << std::endl;
+
+              bool caught_up = false;
+
+              unsigned int catch_up_step = 0;
+
+              Real catch_up_dt = dt / 2;
+
+              while (!caught_up && catch_up_step < _max_catch_up_steps)
+              {
+                Moose::err << "Solving " << name() << " catch up step " << catch_up_step
+                           << std::endl;
+                ex->incrementStepOrReject();
+
+                ex->computeDT();
+                ex->takeStep(catch_up_dt); // Cut the timestep in half to try two half-step solves
+
+                // This is required because we can't call endStep() yet
+                // (which normally increments time)
+                Real current_time = ex->getTime() + ex->getDT();
+
+                if (ex->lastSolveConverged())
+                {
+                  if (current_time + app_time_offset + ex->timestepTol() * std::abs(current_time) >=
+                      target_time)
+                  {
+                    caught_up = true;
+                    break; // break here so that we don't run endStep() or postStep() since this
+                           // MultiApp should NOT be auto_advanced
+                  }
+                }
+                else
+                  catch_up_dt /= 2.0;
+
+                ex->endStep();
+                ex->postStep();
+
+                catch_up_step++;
+              }
+
+              if (!caught_up)
+                throw MultiAppSolveFailure(name() + " Failed to catch up!\n");
+            }
+            else
+              throw MultiAppSolveFailure(name() + " failed to converge");
+          }
+        }
       }
 
       // Re-enable all output (it may of been disabled by sub-cycling)
