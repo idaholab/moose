@@ -129,6 +129,9 @@
 // dg kernels
 #include "DGCoupledDiffusion.h"
 
+// Nodal Kernels
+#include "JacobianCheck.h"
+
 // ICs
 #include "TEIC.h"
 #include "MTICSum.h"
@@ -465,6 +468,9 @@ MooseTestApp::registerObjects(Factory & factory)
 
   // dg kernels
   registerDGKernel(DGCoupledDiffusion);
+
+  // Nodal Kernels
+  registerNodalKernel(JacobianCheck);
 
   // Initial conditions
   registerInitialCondition(TEIC);
