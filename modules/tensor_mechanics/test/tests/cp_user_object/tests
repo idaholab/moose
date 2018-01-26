@@ -36,4 +36,9 @@
     input = 'crysp_linesearch.i'
     exodiff = 'crysp_lsearch_out.e'
   [../]
+  [./orthotropic_rotation]
+    type = 'CSVDiff'
+    input = 'orthotropic_rotation_Cijkl.i'
+    csvdiff = 'orthotropic_rotation_Cijkl_out.csv'
+  [../]
 []
