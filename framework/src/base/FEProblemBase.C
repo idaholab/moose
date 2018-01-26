@@ -1309,7 +1309,7 @@ FEProblemBase::reinitElem(const Elem * elem, THREAD_ID tid)
 
 void
 FEProblemBase::reinitElemPhys(const Elem * elem,
-                              std::vector<Point> phys_points_in_elem,
+                              const std::vector<Point> & phys_points_in_elem,
                               THREAD_ID tid)
 {
   _assembly[tid]->reinitAtPhysical(elem, phys_points_in_elem);
