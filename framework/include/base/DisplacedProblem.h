@@ -150,8 +150,9 @@ public:
 
   virtual bool reinitDirac(const Elem * elem, THREAD_ID tid) override;
   virtual void reinitElem(const Elem * elem, THREAD_ID tid) override;
-  virtual void
-  reinitElemPhys(const Elem * elem, std::vector<Point> phys_points_in_elem, THREAD_ID tid) override;
+  virtual void reinitElemPhys(const Elem * elem,
+                              const std::vector<Point> & phys_points_in_elem,
+                              THREAD_ID tid) override;
   virtual void
   reinitElemFace(const Elem * elem, unsigned int side, BoundaryID bnd_id, THREAD_ID tid) override;
   virtual void reinitNode(const Node * node, THREAD_ID tid) override;
