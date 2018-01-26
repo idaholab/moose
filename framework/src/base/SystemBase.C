@@ -502,6 +502,7 @@ SystemBase::addVariable(const std::string & var_type, const std::string & name, 
     std::shared_ptr<MooseVariableBase> var =
           _factory.create<MooseVariableBase>(var_type, name, parameters, tid);
 
+    _variable_warehouse.addObject(var, tid); //TODO: _vars will go away, but this is needed to keep the shared_ptr from deleting when it goes out of scope
     _vars[tid].add(name, var.get());
 
     if (var->blockRestricted())

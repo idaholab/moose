@@ -80,6 +80,8 @@ MooseVariableBase::MooseVariableBase(const InputParameters & parameters)
   }
   else
     _var_name = _sys.system().variable(_var_num).name();
+
+  std::cout << "Variable " << _name << " " << _var_num << " " << number() << std::endl;
 }
 
 const std::vector<dof_id_type> &

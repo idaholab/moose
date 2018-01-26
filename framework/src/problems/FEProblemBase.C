@@ -1883,8 +1883,8 @@ FEProblemBase::addVariable(const std::string & var_name,
   InputParameters params = _factory.getValidParams(var_type);
   params.set<FEProblemBase *>("_fe_problem_base") = this;
   params.set<Moose::VarKindType>("_var_kind") = Moose::VarKindType::VAR_NONLINEAR;
-  //params.set<MooseEnum>("order") = type.order.get_order();
-  //params.set<MooseEnum>("family") = int(type.family);
+  params.set<MooseEnum>("order") = type.order.get_order();
+  params.set<MooseEnum>("family") = int(type.family);
   params.set<Real>("scaling") = scale_factor;
   if (active_subdomains)
     for (const SubdomainID & id : *active_subdomains)
@@ -1929,8 +1929,8 @@ FEProblemBase::addScalarVariable(const std::string & var_name,
   InputParameters params = _factory.getValidParams("MooseScalarVariable");
   params.set<FEProblemBase *>("_fe_problem_base") = this;
   params.set<Moose::VarKindType>("_var_kind") = Moose::VarKindType::VAR_NONLINEAR;
-  //params.set<MooseEnum>("order") = type.order;
-  //params.set<MooseEnum>("family") = type.family;
+  params.set<MooseEnum>("order") = type.order.get_order();
+  params.set<MooseEnum>("family") = SCALAR; //TODO: set this in MooseScalarVariable::validParams
   params.set<Real>("scaling") = scale_factor;
   if (active_subdomains)
     for (const SubdomainID & id : *active_subdomains)

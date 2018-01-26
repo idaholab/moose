@@ -15,6 +15,8 @@
 #include "MooseTypes.h"
 #include "VariableWarehouse.h"
 #include "InputParameters.h"
+#include "MooseObjectWarehouseBase.h"
+#include "MooseVariableBase.h"
 
 // libMesh
 #include "libmesh/exodusII_io.h"
@@ -740,12 +742,12 @@ public:
    * @param order The order of the variable
    * @param scale_factor The scaling factor to be used with this scalar variable
    */
-//  virtual void addScalarVariable(const std::string & var_name,
-//                                 Order order,
-//                                 Real scale_factor,
-//                                 const std::set<SubdomainID> * const active_subdomains = NULL);
-//  virtual void addScalarVariable(const std::string & var_type, const std::string & name, InputParameters parameters);
-
+  //  virtual void addScalarVariable(const std::string & var_name,
+  //                                 Order order,
+  //                                 Real scale_factor,
+  //                                 const std::set<SubdomainID> * const active_subdomains = NULL);
+  //  virtual void addScalarVariable(const std::string & var_type, const std::string & name,
+  //  InputParameters parameters);
 
   const std::vector<VariableName> & getVariableNames() const { return _vars[0].names(); }
 
@@ -830,6 +832,9 @@ protected:
 
   /// Map variable number to its pointer
   std::vector<std::vector<MooseVariableFEBase *>> _numbered_vars;
+
+  /// Storage for MooseVariable objects
+  MooseObjectWarehouseBase<MooseVariableBase> _variable_warehouse;
 };
 
 #define PARALLEL_TRY
