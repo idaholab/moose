@@ -12,34 +12,31 @@
 #                                                               #
 #              See COPYRIGHT for full restrictions              #
 #################################################################
-from ChiggerObject import ChiggerObject
-class ChiggerTimer(ChiggerObject):
+from ChiggerObserver import ChiggerObserver
+class TimerObserver(ChiggerObserver):
     """
-    Class for creating timers to be passed in to RenderWindow.start() method.
-
-    Inputs:
-        window[chigger.base.RenderWindow]: The RenderWindow object that will execute the timer.
+    Class for creating timers to be passed in to RenderWindow object.
     """
-
     @staticmethod
     def getOptions():
-        opt = ChiggerObject.getOptions()
+        opt = ChiggerObserver.getOptions()
         opt.add('duration', 1000, "The repeat interval, in milliseconds, of the timer.", vtype=int)
         opt.add('count', None, "The maximum number of timer calls before terminating timer loop.",
                 vtype=int)
         opt.add('terminate', False, "Terminate the VTK window when the 'count' is reached.")
         return opt
 
-    def __init__(self, window, **kwargs):
-        super(ChiggerTimer, self).__init__(**kwargs)
+    def __init__(self, **kwargs):
+        super(TimerObserver, self).__init__(**kwargs)
         self._count = 0
-        self._window = window
 
-    def duration(self):
+    def init(self, window):
         """
-        Return the timer duration (ms)
+        Add the TimerEvent for this object.
         """
-        return self.getOption('duration')
+        super(TimerObserver, self).init(window)
+        window.getVTKInteractor().AddObserver('TimerEvent', self._callback)
+        window.getVTKInteractor().CreateRepeatingTimer(self.getOption('duration'))
 
     def count(self):
         """
@@ -47,20 +44,25 @@ class ChiggerTimer(ChiggerObject):
         """
         return self._count
 
-    def callback(self, obj, event): #pylint: disable=unused-argument
+    def update(self, **kwargs):
+        """
+        Update the window object.
+        """
+        super(TimerObserver, self).update(**kwargs)
+        if self._window.needsUpdate():
+            self._window.update()
+
+    def _callback(self, obj, event): #pylint: disable=unused-argument
         """
         The function to be called by the RenderWindow.
 
         Inputs:
             obj, event: Required by VTK.
         """
-        if self.needsUpdate():
-            self.update()
-
         if self.isOptionValid('count') and (self._count >= self.getOption('count')):
             self._window.getVTKInteractor().DestroyTimer()
             if self.getOption('terminate'):
                 self._window.getVTKInteractor().TerminateApp()
             return
-        self._window.update()
+        self.update()
         self._count += 1

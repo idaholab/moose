@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 #pylint: disable=missing-docstring
 #################################################################
 #                   DO NOT MODIFY THIS HEADER                   #
@@ -12,13 +13,12 @@
 #                                                               #
 #              See COPYRIGHT for full restrictions              #
 #################################################################
-from RenderWindow import RenderWindow
-import base
-import utils
-import misc
-import annotations
-import exodus
-import geometric
-import graphs
-import filters
-import observers
+import chigger
+reader = chigger.exodus.ExodusReader('../input/mug_blocks_out.e')
+mug = chigger.exodus.ExodusResult(reader, variable='diffused', cmap='viridis')
+
+observer = chigger.observers.TimerObserver(count=3, terminate=True)
+window = chigger.RenderWindow(mug, size=[300,300], observers=[observer])
+window.start()
+
+print 'count =', observer.count()

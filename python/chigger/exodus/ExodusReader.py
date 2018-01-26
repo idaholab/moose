@@ -355,10 +355,12 @@ class ExodusReader(base.ChiggerObject):
             # Account for out-of-range timesteps
             if (timestep < 0) and (timestep != -1):
                 mooseutils.mooseWarning("Timestep out of range:", timestep, 'not in', repr([0, n]))
+                self.setOption('timestep', 0)
                 timestep = 0
             elif timestep > n:
                 mooseutils.mooseWarning("Timestep out of range:", timestep, 'not in', repr([0, n]))
-                timestep = -1
+                self.setOption('timestep', n)
+                timestep = n
 
         # Time
         elif self.isOptionValid('time'):

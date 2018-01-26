@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 #pylint: disable=missing-docstring
 #################################################################
 #                   DO NOT MODIFY THIS HEADER                   #
@@ -13,11 +12,19 @@
 #                                                               #
 #              See COPYRIGHT for full restrictions              #
 #################################################################
-import chigger
-reader = chigger.exodus.ExodusReader('../input/mug_blocks_out.e')
-mug = chigger.exodus.ExodusResult(reader, variable='aux_elem')
-window = chigger.RenderWindow(mug, size=[300,300], test=False)
+from chigger.base import ChiggerObject
+class ChiggerObserver(ChiggerObject):
+    """
+    Base class for definning VTK observer functions.
+    """
+    @staticmethod
+    def getOptions():
+        opt = ChiggerObject.getOptions()
+        return opt
 
-timer = chigger.base.ChiggerTimer(window, count=3, terminate=True)
-window.start(timer=timer)
-print 'Timer quit cleanly', timer.count()
+    def __init__(self, *args, **kwargs):
+        super(ChiggerObserver, self).__init__(*args, **kwargs)
+        self._window = None
+
+    def init(self, window):
+        self._window = window
