@@ -430,13 +430,10 @@ DisplacedProblem::reinitElem(const Elem * elem, THREAD_ID tid)
 
 void
 DisplacedProblem::reinitElemPhys(const Elem * elem,
-                                 std::vector<Point> phys_points_in_elem,
+                                 const std::vector<Point> & phys_points_in_elem,
                                  THREAD_ID tid)
 {
-  std::vector<Point> points(phys_points_in_elem.size());
-  std::copy(phys_points_in_elem.begin(), phys_points_in_elem.end(), points.begin());
-
-  _assembly[tid]->reinitAtPhysical(elem, points);
+  _assembly[tid]->reinitAtPhysical(elem, phys_points_in_elem);
 
   _displaced_nl.prepare(tid);
   _displaced_aux.prepare(tid);
