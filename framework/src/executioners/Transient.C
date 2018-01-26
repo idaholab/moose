@@ -139,6 +139,7 @@ validParams<Transient>()
 Transient::Transient(const InputParameters & parameters)
   : Executioner(parameters),
     _problem(_fe_problem),
+    _nl(_fe_problem.getNonlinearSystemBase()),
     _time_scheme(getParam<MooseEnum>("scheme").getEnum<Moose::TimeIntegratorType>()),
     _t_step(_problem.timeStep()),
     _time(_problem.time()),
@@ -180,11 +181,11 @@ Transient::Transient(const InputParameters & parameters)
     _picard_rel_tol(getParam<Real>("picard_rel_tol")),
     _picard_abs_tol(getParam<Real>("picard_abs_tol")),
     _verbose(getParam<bool>("verbose")),
-    _sln_diff(_problem.getNonlinearSystemBase().addVector("sln_diff", false, PARALLEL)),
+    _sln_diff(_nl.addVector("sln_diff", false, PARALLEL)),
     _relax_factor(getParam<Real>("relaxation_factor")),
     _relaxed_vars(getParam<std::vector<std::string>>("relaxed_variables"))
 {
-  _problem.getNonlinearSystemBase().setDecomposition(_splitting);
+  _nl.setDecomposition(_splitting);
   _t_step = 0;
   _dt = 0;
   _next_interval_output_time = 0.0;
@@ -218,10 +219,9 @@ Transient::Transient(const InputParameters & parameters)
   {
     if (_relax_factor >= 2.0 || _relax_factor <= 0.0)
       mooseError("The Picard iteration relaxation factor should be between 0.0 and 2.0");
-    NonlinearSystem & _nl_system = _fe_problem.getNonlinearSystem();
 
     // Store a copy of the previous solution here
-    _nl_system.addVector("relax_previous", false, PARALLEL);
+    _nl.addVector("relax_previous", false, PARALLEL);
   }
   // This lets us know if we are at Picard iteration > 0, works for both master- AND sub-app.
   // Initialize such that _prev_time != _time for the first Picard iteration
@@ -280,7 +280,7 @@ Transient::init()
     mooseError("Initial time step size is not evaluated properly");
 
   if (!_app.isRecovering())
-    _fe_problem.getNonlinearSystem().getTimeIntegrator()->init();
+    _nl.getTimeIntegrator()->init();
 }
 
 void
@@ -478,15 +478,14 @@ Transient::solveStep(Real input_dt)
   // _prev_time == _time is like _picard_it > 0, but it also works for the sub-app
   if (_prev_time == _time && _relax_factor != 1.0)
   {
-    NonlinearSystem & _nl_system = _fe_problem.getNonlinearSystem();
-    NumericVector<Number> & solution = _nl_system.solution();
-    NumericVector<Number> & relax_previous = _nl_system.getVector("relax_previous");
+    NumericVector<Number> & solution = _nl.solution();
+    NumericVector<Number> & relax_previous = _nl.getVector("relax_previous");
 
     // Save off the current solution
     relax_previous = solution;
 
     // Snag all of the local dof indices for all of these variables
-    System & libmesh_nl_system = _nl_system.system();
+    System & libmesh_nl_system = _nl.system();
     AllLocalDofIndicesThread aldit(libmesh_nl_system, _relaxed_vars);
     ConstElemRange & elem_range = *_fe_problem.mesh().getActiveLocalElementRange();
     Threads::parallel_reduce(elem_range, aldit);
@@ -500,14 +499,13 @@ Transient::solveStep(Real input_dt)
   // _prev_time == _time is like _picard_it > 0, but it also works for the sub-app
   if (_prev_time == _time && _relax_factor != 1.0)
   {
-    NonlinearSystem & _nl_system = _fe_problem.getNonlinearSystem();
-    NumericVector<Number> & solution = _nl_system.solution();
-    NumericVector<Number> & relax_previous = _nl_system.getVector("relax_previous");
+    NumericVector<Number> & solution = _nl.solution();
+    NumericVector<Number> & relax_previous = _nl.getVector("relax_previous");
     for (const auto & dof : _relaxed_dofs)
       solution.set(dof,
                    (relax_previous(dof) * (1.0 - _relax_factor)) + (solution(dof) * _relax_factor));
     solution.close();
-    _nl_system.update();
+    _nl.update();
   }
   // This keeps track of Picard iteration, even if this is the sub-app.
   // It is used for relaxation logic
@@ -605,7 +603,7 @@ Transient::endStep(Real input_time)
 
   if (_last_solve_converged && !_xfem_repeat_step)
   {
-    _fe_problem.getNonlinearSystem().getTimeIntegrator()->postStep();
+    _nl.getTimeIntegrator()->postStep();
 
     // Compute the Error Indicators and Markers
     _problem.computeIndicators();
@@ -725,7 +723,7 @@ Transient::keepGoing()
     else // Keep going
     {
       // Update solution norm for next time step
-      _old_time_solution_norm = _problem.getNonlinearSystemBase().currentSolution()->l2_norm();
+      _old_time_solution_norm = _nl.currentSolution()->l2_norm();
       // Print steady-state relative error norm
       _console << "Steady-State Relative Differential Norm: " << _sln_diff_norm << std::endl;
     }
@@ -845,9 +843,8 @@ Transient::getTimeStepperName()
 Real
 Transient::relativeSolutionDifferenceNorm()
 {
-  const NumericVector<Number> & current_solution =
-      *_problem.getNonlinearSystemBase().currentSolution();
-  const NumericVector<Number> & old_solution = _problem.getNonlinearSystemBase().solutionOld();
+  const NumericVector<Number> & current_solution = *_nl.currentSolution();
+  const NumericVector<Number> & old_solution = _nl.solutionOld();
 
   _sln_diff = current_solution;
   _sln_diff -= old_solution;
