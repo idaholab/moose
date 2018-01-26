@@ -15,6 +15,9 @@ pcre_csrcfiles := $(shell find $(pcre_DIR) -name "*.c")
 pcre_objects   := $(patsubst %.cc, %.$(obj-suffix), $(pcre_srcfiles))
 pcre_objects   += $(patsubst %.c, %.$(obj-suffix), $(pcre_csrcfiles))
 pcre_LIB       :=  $(pcre_DIR)/libpcre-$(METHOD).la
+
+$(pcre_objects): app_INCLUDES := -I$(pcre_DIR)/include
+
 # dependency files
 pcre_deps      := $(patsubst %.cc, %.$(obj-suffix).d, $(pcre_srcfiles)) \
 
@@ -113,6 +116,9 @@ moose_objects   += $(patsubst %.f90, %.$(obj-suffix), $(moose_f90srcfiles))
 moose_deps := $(patsubst %.C, %.$(obj-suffix).d, $(moose_srcfiles)) \
               $(patsubst %.c, %.$(obj-suffix).d, $(moose_csrcfiles))
 
+# Define target specific includes so that when compiling MOOSE files only the includes for MOOSE are on the line
+$(moose_objects): app_INCLUDES := $(moose_INCLUDE)
+
 # clang static analyzer files
 moose_analyzer := $(patsubst %.C, %.plist.$(obj-suffix), $(moose_srcfiles))
 moose_analyzer += $(patsubst %.cc, %.plist.$(obj-suffix), $(hit_srcfiles))
@@ -188,6 +194,9 @@ exodiff_APP := $(exodiff_DIR)/exodiff
 exodiff_srcfiles := $(shell find $(exodiff_DIR) -name "*.C")
 exodiff_objects  := $(patsubst %.C, %.$(obj-suffix), $(exodiff_srcfiles))
 exodiff_includes := $(app_INCLUDES) -I$(exodiff_DIR) $(libmesh_INCLUDE)
+
+$(exodiff_objects): app_INCLUDES := $(exodiff_includes)
+
 # dependency files
 exodiff_deps := $(patsubst %.C, %.$(obj-suffix).d, $(exodiff_srcfiles))
 
