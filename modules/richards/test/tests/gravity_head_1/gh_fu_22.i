@@ -18,6 +18,15 @@
   seff_UO = SeffVG
 []
 
+[Functions]
+  [./dts]
+    type = PiecewiseLinear
+    y = '1 10 100 1000 10000'
+    x = '0 10 100 1000 10000'
+  [../]
+[]
+
+
 [UserObjects]
   [./PPNames]
     type = RichardsVarNames
@@ -113,8 +122,7 @@
 
   [./TimeStepper]
     type = FunctionDT
-    time_dt = '1 10 100 1000 10000'
-    time_t = '0 10 100 1000 10000'
+    function = dts
   [../]
 []
 

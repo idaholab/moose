@@ -15,6 +15,14 @@
   gravity = '0 0 0'
 []
 
+[Functions]
+  [./dts]
+    type = PiecewiseLinear
+    y = '3E-3 3E-2 0.05'
+    x = '0 1 5'
+  [../]
+[]
+
 [UserObjects]
   [./dictator]
     type = PorousFlowDictator
@@ -277,8 +285,7 @@
 
   [./TimeStepper]
     type = FunctionDT
-    time_dt = '3E-3 3E-2 0.05'
-    time_t = '0 1 5'
+    function = dts
   [../]
 []
 

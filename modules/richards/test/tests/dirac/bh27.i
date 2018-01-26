@@ -14,6 +14,14 @@
   viscosity = '1E-3 1E-5'
 []
 
+[Functions]
+  [./dts]
+    type = PiecewiseLinear
+    y = '1000 10000'
+    x = '100 1000'
+  [../]
+[]
+
 
 [UserObjects]
   [./PPNames]
@@ -223,8 +231,7 @@
 
   [./TimeStepper]
     type = FunctionDT
-    time_dt = '1000 10000'
-    time_t = '100 1000'
+    function = dts
   [../]
 
 []

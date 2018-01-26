@@ -14,6 +14,14 @@
   PorousFlowDictator = dictator
 []
 
+[Functions]
+  [./dts]
+    type = PiecewiseLinear
+    y = '1E-3 1E-2 1E-1'
+    x = '1E-3 1E-2 1E-1'
+  [../]
+[]
+
 [Variables]
   [./ppwater]
     initial_condition = -0.1
@@ -244,8 +252,7 @@
   solve_type = Newton
   [./TimeStepper]
     type = FunctionDT
-    time_dt = '1E-3 1E-2 1E-1'
-    time_t = '1E-3 1E-2 1E-1'
+    function = dts
   [../]
   end_time = 1.0
 []

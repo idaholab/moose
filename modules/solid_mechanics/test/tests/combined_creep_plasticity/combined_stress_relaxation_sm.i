@@ -32,6 +32,14 @@
   displacements = 'disp_x disp_y disp_z'
 []
 
+[Functions]
+  [./dts]
+    type = PiecewiseLinear
+    y = '1e-2 1e-1 1e0 1e1 1e2'
+    x = '0    7e-1 7e0 7e1 1e2'
+  [../]
+[]
+
 [Variables]
   [./disp_x]
     order = FIRST
@@ -187,8 +195,7 @@
 
   [./TimeStepper]
     type = FunctionDT
-    time_dt = '1e-2 1e-1 1e0 1e1 1e2'
-    time_t  = '0    7e-1 7e0 7e1 1e2'
+    function = dts
   [../]
 []
 

@@ -13,6 +13,14 @@
   PorousFlowDictator = dictator
 []
 
+[Functions]
+  [./dts]
+    type = PiecewiseLinear
+    y = '1E-2 1 10 500 5000 50000'
+    x = '0 10 100 1000 10000 500000'
+  [../]
+[]
+
 [UserObjects]
   [./dictator]
     type = PorousFlowDictator
@@ -187,8 +195,7 @@
 
   [./TimeStepper]
     type = FunctionDT
-    time_dt = '1E-2 1 10 500 5000 50000'
-    time_t = '0 10 100 1000 10000 500000'
+    function = dts
   [../]
 []
 
