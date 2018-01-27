@@ -99,7 +99,7 @@ moose_LIB := $(FRAMEWORK_DIR)/libmoose-$(METHOD).la
 
 moose_LIBS := $(moose_LIB) $(pcre_LIB) $(hit_LIB)
 
-srcsubdirs := $(shell find $(FRAMEWORK_DIR)/src -maxdepth 1 -mindepth 1)
+srcsubdirs := $(shell find $(FRAMEWORK_DIR)/src -type d -not -path '*/.libs*')
 
 moose_non_unity = %/base %/utils
 
@@ -119,20 +119,44 @@ $(eval $(call unity_dir_rule, $(unity_src_dir)))
 # 1: the unity file to build
 # 2: the source files in that unity file
 define unity_file_rule
-$(1): $(2)
-	@echo '$$(foreach srcfile, $$^, #include"$$(srcfile)"\n)' > $$@
+$(1):$(2)
+	@echo '$$(foreach srcfile,$$^,#include"$$(srcfile)\n")' > $$@
 endef
 
-$(foreach srcsubdir, $(unity_srcsubdirs), $(eval $(call unity_file_rule, $(unity_src_dir)/$(notdir $(srcsubdir))_Unity.C, $(filter-out %_Unity.C, $(shell find $(srcsubdir) -name "*.C")))))
+# 1: The directory where the unity source files will go
+# 2: The application directory
+# 3: A subdir that will be unity built
+# The output: is the unique .C file name for the unity file
+# Here's what this does:
+# For each explicit path we're going to create a unique unity filename by:
+# 1. Stripping off $(FRAMEWORK_DIR)/src
+# 2. For the special case of src itself strip off $(FRAMEWORK_DIR)
+# 3. Turn every remaining '/' into an '_'
+# 4. Add '_Unity.C'
+unity_unique_name = $(1)/$(subst /,_,$(patsubst $(2)/%,%,$(patsubst $(2)/src/%,%,$(3))))_Unity.C
 
-app_unity_srcfiles := $(foreach srcsubdir, $(unity_srcsubdirs), $(unity_src_dir)/$(notdir $(srcsubdir))_Unity.C)
+#$(foreach srcsubdir,$(unity_srcsubdirs),$(info $(srcsubdir))) #eval $(call unity_file_rule, $(call unity_unique_name,$(unity_src_dir),$(FRAMEWORK_DIR),$(srcsubdir)),$(filter-out %_Unity.C,$(shell find $(srcsubdir) -type f -maxdepth 1 -name "*.C")))))
+
+# Here's what this does:
+# 1. Defines a rule to build a unity file from each subdirectory under src
+# 2. Does that by looping over the explicit paths found before (unity_srcsubdirs)
+# 3. For each explicit path we're going to create a unique unity filename by calling unity_unique_name
+# 4. Now that we have the name of the Unity file we need to find all of the .C files that should be #included in it
+# 4a. Use find to pick up all .C files
+# 4b. Make sure we don't pick up any _Unity.C files (we shouldn't have any anyway)
+
+$(foreach srcsubdir,$(unity_srcsubdirs),$(eval $(call unity_file_rule,$(call unity_unique_name,$(unity_src_dir),$(FRAMEWORK_DIR),$(srcsubdir)),$(shell find $(srcsubdir) -type f -maxdepth 1 -name "*.C"))))
+
+app_unity_srcfiles = $(foreach srcsubdir,$(unity_srcsubdirs),$(call unity_unique_name,$(unity_src_dir),$(FRAMEWORK_DIR),$(srcsubdir)))
+
+#$(info $(app_unity_srcfiles))
 
 unity_srcfiles += $(app_unity_srcfiles)
 
 unity_files:: $(unity_src_dir)
 
 # source files
-moose_srcfiles    := $(app_unity_srcfiles) $(shell find $(non_unity_srcsubdirs) -name "*.C") $(shell find $(moose_SRC_DIRS) -name "*.C")
+moose_srcfiles    := $(app_unity_srcfiles) $(shell find $(non_unity_srcsubdirs) -maxdepth 1 -name "*.C") $(shell find $(moose_SRC_DIRS) -name "*.C")
 moose_csrcfiles   := $(shell find $(moose_SRC_DIRS) -name "*.c")
 moose_fsrcfiles   := $(shell find $(moose_SRC_DIRS) -name "*.f")
 moose_f90srcfiles := $(shell find $(moose_SRC_DIRS) -name "*.f90")
