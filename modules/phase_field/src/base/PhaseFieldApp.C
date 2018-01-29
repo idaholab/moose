@@ -139,8 +139,6 @@
 #include "CrossTermBarrierFunctionMaterial.h"
 #include "DeformedGrainMaterial.h"
 #include "DerivativeMultiPhaseMaterial.h"
-#include "DerivativeParsedMaterial.h"
-#include "DerivativeSumMaterial.h"
 #include "DerivativeTwoPhaseMaterial.h"
 #include "DiscreteNucleation.h"
 #include "ElasticEnergyMaterial.h"
@@ -159,7 +157,6 @@
 #include "MathFreeEnergy.h"
 #include "MixedSwitchingFunctionMaterial.h"
 #include "MultiBarrierFunctionMaterial.h"
-#include "ParsedMaterial.h"
 #include "PFCRFFMaterial.h"
 #include "PFCTradMaterial.h"
 #include "PFFracBulkRateMaterial.h"
@@ -439,8 +436,6 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerMaterial(CrossTermBarrierFunctionMaterial);
   registerMaterial(DeformedGrainMaterial);
   registerMaterial(DerivativeMultiPhaseMaterial);
-  registerMaterial(DerivativeParsedMaterial);
-  registerMaterial(DerivativeSumMaterial);
   registerMaterial(DerivativeTwoPhaseMaterial);
   registerMaterial(DiscreteNucleation);
   registerMaterial(ElasticEnergyMaterial);
@@ -459,7 +454,6 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerMaterial(MathFreeEnergy);
   registerMaterial(MixedSwitchingFunctionMaterial);
   registerMaterial(MultiBarrierFunctionMaterial);
-  registerMaterial(ParsedMaterial);
   registerMaterial(PFCRFFMaterial);
   registerMaterial(PFCTradMaterial);
   registerMaterial(PFFracBulkRateMaterial);
