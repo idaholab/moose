@@ -72,25 +72,25 @@ ComputeNodalKernelBCJacobiansThread::onNode(ConstBndNodeRange::const_iterator & 
       const auto & objects = _nodal_kernels.getActiveBoundaryObjects(boundary_id, _tid);
       for (const auto & nodal_kernel : objects)
       {
-        // If this NodalKernel isn't operating on this ivar... skip it
-        if (nodal_kernel->variable().number() != ivar)
-          break;
-
-        // If this NodalKernel is acting on the jvar add it to the list and short-circuit the loop
-        if (nodal_kernel->variable().number() == jvar)
+        if (nodal_kernel->variable().number() == ivar)
         {
-          active_involved_kernels.push_back(nodal_kernel);
-          continue;
-        }
-
-        // See if this NodalKernel is coupled to the jvar
-        const std::vector<MooseVariable *> & coupled_vars = nodal_kernel->getCoupledMooseVars();
-        for (const auto & var : coupled_vars)
-        {
-          if (var->number() == jvar)
+          // If this NodalKernel is acting on the jvar add it to the list and short-circuit the
+          // loop
+          if (nodal_kernel->variable().number() == jvar)
           {
             active_involved_kernels.push_back(nodal_kernel);
-            break; // It only takes one
+            continue;
+          }
+
+          // See if this NodalKernel is coupled to the jvar
+          const std::vector<MooseVariable *> & coupled_vars = nodal_kernel->getCoupledMooseVars();
+          for (const auto & var : coupled_vars)
+          {
+            if (var->number() == jvar)
+            {
+              active_involved_kernels.push_back(nodal_kernel);
+              break; // It only takes one
+            }
           }
         }
       }

@@ -20,6 +20,12 @@
     type = ParsedFunction
     value = 2*t*(x*x+y*y)-4*t*t
   [../]
+
+  [./dts]
+    type = PiecewiseLinear
+    x = '0   0.85 2'
+    y = '0.2 0.2  0.2'
+  [../]
 []
 
 [Variables]
@@ -71,8 +77,7 @@
   num_steps = 10
   [./TimeStepper]
     type = FunctionDT
-    time_t  = '0   0.85 2'
-    time_dt = '0.2 0.2  0.2'
+    function = dts
     min_dt = 0.1
   [../]
 []

@@ -8,6 +8,14 @@
   PorousFlowDictator = dictator
 []
 
+[Functions]
+  [./dts]
+    type = PiecewiseLinear
+    y = '1000 10000'
+    x = '100 1000'
+  [../]
+[]
+
 [Variables]
   [./pp]
     initial_condition = 1E7
@@ -193,8 +201,7 @@
   [./TimeStepper]
     # get only marginally better results for smaller time steps
     type = FunctionDT
-    time_dt = '1000 10000'
-    time_t = '100 1000'
+    function = dts
   [../]
 []
 

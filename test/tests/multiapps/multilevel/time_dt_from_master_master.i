@@ -6,6 +6,14 @@
   xmax = 100
 []
 
+[Functions]
+  [./dts]
+    type = PiecewiseLinear
+    x = '0     1'
+    y = '0.25  1'
+  [../]
+[]
+
 [Variables]
   [./u]
   [../]
@@ -50,8 +58,7 @@
   dt = 0.25
   [./TimeStepper]
     type = FunctionDT
-    time_t  = '0     1'
-    time_dt = '0.25  1'
+    function = dts
   [../]
 []
 

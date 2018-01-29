@@ -14,6 +14,14 @@
   zmax = 1
 []
 
+[Functions]
+  [./dts]
+    type = PiecewiseLinear
+    y = '1E-2 1E-1 1 1E1 1E2 1E3'
+    x = '0 1E-1 1 1E1 1E2 1E3'
+  [../]
+[]
+
 
 [UserObjects]
   [./DensityWater]
@@ -169,8 +177,7 @@
 
   [./TimeStepper]
     type = FunctionDT
-    time_dt = '1E-2 1E-1 1 1E1 1E2 1E3'
-    time_t = '0 1E-1 1 1E1 1E2 1E3'
+    function = dts
   [../]
 
 

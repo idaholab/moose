@@ -22,6 +22,14 @@
   ny = 10
 []
 
+[Functions]
+  [./dts]
+    type = PiecewiseLinear
+    x = '0.01 0.1'
+    y = '0.005 0.05'
+  [../]
+[]
+
 [Variables]
   [./u]
     initial_condition = 0.0
@@ -149,8 +157,7 @@
 #  num_steps = 10
   [./TimeStepper]
      type = FunctionDT
-     time_t = '0.01 0.1'
-     time_dt = '0.005 0.05'
+     function = dts
   [../]
 
   nl_abs_tol = 1.e-15
