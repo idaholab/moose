@@ -36,7 +36,6 @@ validParams<RichardsVarNames>()
 RichardsVarNames::RichardsVarNames(const InputParameters & parameters)
   : GeneralUserObject(parameters),
     Coupleable(this, false),
-    ZeroInterface(parameters),
     _num_v(coupledComponents("richards_vars")),
     _var_types(getParam<MooseEnum>("var_types"))
 {

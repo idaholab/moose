@@ -53,7 +53,6 @@ InitialCondition::InitialCondition(const InputParameters & parameters)
     BoundaryRestrictable(this, _c_nodal),
     DependencyResolverInterface(),
     Restartable(parameters, "InitialConditions"),
-    ZeroInterface(parameters),
     _fe_problem(*getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")),
     _sys(*getCheckedPointerParam<SystemBase *>("_sys")),
     _tid(getParam<THREAD_ID>("_tid")),

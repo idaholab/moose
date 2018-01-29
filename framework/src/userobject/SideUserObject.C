@@ -31,7 +31,6 @@ SideUserObject::SideUserObject(const InputParameters & parameters)
     UserObjectInterface(this),
     TransientInterface(this),
     PostprocessorInterface(this),
-    ZeroInterface(parameters),
     _mesh(_subproblem.mesh()),
     _q_point(_assembly.qPointsFace()),
     _qrule(_assembly.qRuleFace()),

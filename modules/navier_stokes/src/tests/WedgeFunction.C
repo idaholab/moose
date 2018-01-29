@@ -66,7 +66,7 @@ WedgeFunction::value(Real /*t*/, const Point & p)
 
   // We pass "eta" to the PiecewiseLinear function in place of "time",
   // plus a dummy Point which is not used.
-  const Real f_value = _f.value(eta, Point(0., 0., 0.));
+  const Real f_value = _f.value(eta, _point_zero);
 
   // Vars 0 and 1 are the velocities.
   if (_var_num < 2)

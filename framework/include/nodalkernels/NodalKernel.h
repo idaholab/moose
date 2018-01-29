@@ -22,7 +22,6 @@
 #include "BlockRestrictable.h"
 #include "BoundaryRestrictable.h"
 #include "Restartable.h"
-#include "ZeroInterface.h"
 #include "MeshChangedInterface.h"
 #include "RandomInterface.h"
 #include "CoupleableMooseVariableDependencyIntermediateInterface.h"
@@ -52,7 +51,6 @@ class NodalKernel : public MooseObject,
                     public PostprocessorInterface,
                     public GeometricSearchInterface,
                     public Restartable,
-                    public ZeroInterface,
                     public MeshChangedInterface,
                     public RandomInterface,
                     public CoupleableMooseVariableDependencyIntermediateInterface

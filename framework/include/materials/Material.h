@@ -27,7 +27,6 @@
 #include "VectorPostprocessorInterface.h"
 #include "DependencyResolverInterface.h"
 #include "Restartable.h"
-#include "ZeroInterface.h"
 #include "MeshChangedInterface.h"
 #include "OutputInterface.h"
 #include "RandomInterface.h"
@@ -61,7 +60,6 @@ class Material : public MooseObject,
                  public VectorPostprocessorInterface,
                  public DependencyResolverInterface,
                  public Restartable,
-                 public ZeroInterface,
                  public MeshChangedInterface,
                  public OutputInterface,
                  public RandomInterface

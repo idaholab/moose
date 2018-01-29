@@ -48,7 +48,6 @@ AuxScalarKernel::AuxScalarKernel(const InputParameters & parameters)
     PostprocessorInterface(this),
     DependencyResolverInterface(),
     TransientInterface(this),
-    ZeroInterface(parameters),
     MeshChangedInterface(parameters),
     _subproblem(*getCheckedPointerParam<SubProblem *>("_subproblem")),
     _sys(*getCheckedPointerParam<SystemBase *>("_sys")),

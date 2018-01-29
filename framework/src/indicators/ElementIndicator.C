@@ -39,7 +39,6 @@ ElementIndicator::ElementIndicator(const InputParameters & parameters)
     Coupleable(this, false),
     ScalarCoupleable(this),
     MooseVariableInterface(this, false),
-    ZeroInterface(parameters),
 
     _field_var(_sys.getVariable(_tid, name())),
 

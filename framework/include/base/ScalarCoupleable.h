@@ -147,6 +147,15 @@ protected:
   /// Local InputParameters
   const InputParameters & _coupleable_params;
 
+  /// Thread ID of the thread using this object
+  THREAD_ID _sc_tid;
+
+  /// Scalar zero
+  const Real & _real_zero;
+
+  /// Zero point
+  const Point & _point_zero;
+
   /**
    * Helper method to return (and insert if necessary) the default value
    * for an uncoupled variable.
