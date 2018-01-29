@@ -402,7 +402,7 @@ petscNonlinearConverged(SNES snes,
   // Whether or not to force SNESSolve() take at least one iteration regardless of the initial
   // residual norm
   PetscBool force_iteration = PETSC_FALSE;
-#if !PETSC_VERSION_LESS_THAN(3, 8, 3) || !PETSC_RELEASE_LESS_THAN(3, 8, 3)
+#if !PETSC_VERSION_LESS_THAN(3, 8, 3)
   ierr = SNESGetForceIteration(snes, &force_iteration);
   CHKERRABORT(problem.comm().get(), ierr);
 #endif
