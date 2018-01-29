@@ -10,6 +10,7 @@
 #include "InternalVolume.h"
 
 #include "MooseMesh.h"
+#include "Function.h"
 
 template <>
 InputParameters
@@ -22,8 +23,11 @@ validParams<InternalVolume>()
       "component", 0, "component<3", "The component to use in the integration");
   params.addParam<Real>(
       "scale_factor", 1, "A scale factor to be applied to the internal volume calculation");
-  params.addParam<Real>(
-      "addition", 0, "An additional volume to be included in the internal volume calculation");
+  params.addParam<FunctionName>("addition",
+                                0,
+                                "An additional volume to be included in the "
+                                "internal volume calculation. A time-dependent "
+                                "function is expected.");
   params.set<bool>("use_displaced_mesh") = true;
   return params;
 }
@@ -32,7 +36,7 @@ InternalVolume::InternalVolume(const InputParameters & parameters)
   : SideIntegralPostprocessor(parameters),
     _component(getParam<unsigned int>("component")),
     _scale(getParam<Real>("scale_factor")),
-    _addition(getParam<Real>("addition"))
+    _addition(getFunction("addition"))
 {
 }
 
@@ -125,5 +129,6 @@ InternalVolume::computeQpIntegral()
 Real
 InternalVolume::getValue()
 {
-  return _scale * SideIntegralPostprocessor::getValue() + _addition;
+  Point p;
+  return _scale * SideIntegralPostprocessor::getValue() + _addition.value(_t, p);
 }
