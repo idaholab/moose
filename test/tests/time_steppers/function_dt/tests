@@ -9,10 +9,4 @@
     input = 'function_dt_no_interpolation.i'
     exodiff = 'function_dt_no_interpolation_out.e'
   [../]
-  [./function_dt_mismatch_vecs]
-    type = 'RunException'
-    input = 'function_dt_min.i'
-    cli_args = "Executioner/TimeStepper/time_t='0 0.85' Outputs/exodus=false"
-    expect_err = "In FunctionDT TimeStepper: Vectors are not the same length"
-  [../]
 []

@@ -25,6 +25,14 @@
   gravity = '-1 0 0'
 []
 
+[Functions]
+  [./dts]
+    type = PiecewiseLinear
+    y = '1E-2 1E-1 1E0 0.5E1 0.5E2 0.4E4 1E5 1E6 1E7'
+    x = '0 1E-1 1E0 1E1 1E2 1E3 1E4 1E5 1E6'
+  [../]
+[]
+
 [UserObjects]
   [./PPNames]
     type = RichardsVarNames
@@ -273,8 +281,7 @@
 
   [./TimeStepper]
     type = FunctionDT
-    time_dt = '1E-2 1E-1 1E0 0.5E1 0.5E2 0.4E4 1E5 1E6 1E7'
-    time_t = '0 1E-1 1E0 1E1 1E2 1E3 1E4 1E5 1E6'
+    function = dts
   [../]
 []
 

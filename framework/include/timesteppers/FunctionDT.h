@@ -11,14 +11,16 @@
 #define FUNCTIONDT_H
 
 #include "TimeStepper.h"
+#include "FunctionInterface.h"
 #include "LinearInterpolation.h"
 
 class FunctionDT;
+class Function;
 
 template <>
 InputParameters validParams<FunctionDT>();
 
-class FunctionDT : public TimeStepper
+class FunctionDT : public TimeStepper, public FunctionInterface
 {
 public:
   FunctionDT(const InputParameters & parameters);
@@ -36,6 +38,12 @@ protected:
 
   const std::vector<Real> & _time_t;
   const std::vector<Real> & _time_dt;
+
+  /// true, if we are using `_function`, false if we are using _time_ipol
+  bool _use_function;
+  /// The time-dependent function specifying the time step size (turn this into a reference then
+  /// `time_t` and `time_dt` is removed)
+  Function * _function;
 
   /// Piecewise linear definition of time stepping
   std::unique_ptr<LinearInterpolation> _time_ipol;
