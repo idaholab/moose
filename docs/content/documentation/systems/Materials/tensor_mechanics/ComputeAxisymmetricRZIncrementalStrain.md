@@ -1,7 +1,6 @@
 #Compute Axisymmetric RZ Incremental Strain
 !syntax description /Materials/ComputeAxisymmetricRZIncrementalStrain
 
-
 ## Description
 The material `ComputeAxisymmetricRZIncrementalStrain` calculates the small incremental strain for Axisymmetric systems.
 

@@ -15,6 +15,8 @@ InputParameters
 validParams<DisplacementAboutAxis>()
 {
   InputParameters params = validParams<PresetNodalBC>();
+  params.addClassDescription("Implements a boundary condition that enforces rotational"
+                             "displacement around an axis on a boundary");
   addDisplacementAboutAxisParams(params);
   params.addRequiredParam<int>("component", "The component for the rotational displacement");
   params.set<bool>("use_displaced_mesh") = true;
