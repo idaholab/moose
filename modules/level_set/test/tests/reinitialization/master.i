@@ -86,17 +86,16 @@
 [Executioner]
   type = Transient
   solve_type = PJFNK
-  num_steps = 2
   start_time = 0
-  nl_rel_tol = 1e-10
+  end_time = 1
+  nl_rel_tol = 1e-12
   scheme = crank-nicolson
   petsc_options_iname = '-pc_type -pc_sub_type'
-  petsc_options_value = 'hypre    boomeramg'
-
+  petsc_options_value = 'asm      ilu'
   [./TimeStepper]
     type = PostprocessorDT
     postprocessor = cfl
-    scale = 0.8
+    scale = 1
   [../]
 
 []
