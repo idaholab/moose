@@ -41,7 +41,7 @@ protected:
 
   const unsigned int _component;
   const Real _scale;
-  const Real _addition;
+  Function & _addition;
 };
 
 #endif // INTERNALVOLUME_H
