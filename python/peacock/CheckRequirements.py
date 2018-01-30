@@ -101,4 +101,4 @@ def check_pandas():
     return True
 
 def has_requirements():
-    return check_qt() and check_vtk() and check_matplotlib() and check_pandas()
+    return check_qt() and check_matplotlib() and check_vtk() and check_pandas()
