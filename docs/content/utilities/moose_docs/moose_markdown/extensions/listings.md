@@ -43,25 +43,6 @@ Similarly, if 'end' is omitted the snippet will include the remainder of the fil
 
 !listing test/tests/kernels/simple_diffusion/simple_diffusion.i start=Kernels end=Executioner id=range caption=Code block including lines within a range.
 
-## C++ Class Methods
-A special version of the `!listing` command for parsing C++ code using the [Clang](https://en.wikipedia.org/wiki/Clang) compiler directly. This is done by using the "method" setting. A complete list of available settings for this special version of the `!listing` command is
-provided in \ref{moose-clang-listing}.
-C++ classes in MOOSE. For example, the following limits the included code to the `computeQpResidual`
-method.
-
-```markdown
-!listing framework/src/kernels/Diffusion.C method=computeQpResidual id=clang caption=Code listing using the clang parser.
-```
-
-!listing framework/src/kernels/Diffusion.C method=computeQpResidual id=clang caption=Code listing using the clang parser.
-
-!!! warning "Warning: Parsing methods with clang is slow."
-    This method uses the clang parser directly, which can be slow. Thus, in general source code should be
-    included using the line and range match methods above and this method reserved for cases where those methods
-    fail to capture the necessary code.
-
-!extension-settings moose-clang-listing caption=List of available settings when including C++ (.C/h) files.
-
 ## Input File Block
 Like for C++ files, [MOOSE] input files also have additional capability, mainly the "block" setting (see \ref{moose-input-listing} for a complete list). Including the block name the included content will be limited to the content matching the supplied name. Notice that the supplied name may be approximate; however, if it is not unique only the first match will appear.
 
