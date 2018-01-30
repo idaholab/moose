@@ -18,8 +18,8 @@ template <>
 InputParameters validParams<ComputeExtraStressConstant>();
 
 /**
- * ComputeEigenstrain computes an Eigenstrain that is a function of a single variable defined by a
- * base tensor and a scalar function defined in a Derivative Material.
+ * Computes a constant extra stress that is added to the stress calculated
+ * by the constitutive model
  */
 class ComputeExtraStressConstant : public ComputeExtraStressBase
 {

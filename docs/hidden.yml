@@ -858,7 +858,6 @@ stochastic_tools_test:
     - /UserObjects/TestSampler
 tensor_mechanics:
     - /AuxKernels/AccumulateAux
-    - /AuxKernels/CrystalPlasticityRotationOutAux
     - /AuxKernels/ElasticEnergyAux
     - /AuxKernels/NewmarkAccelAux
     - /AuxKernels/NewmarkVelAux
@@ -866,21 +865,12 @@ tensor_mechanics:
     - /AuxKernels/RadialDisplacementSphereAux
     - /BCs
     - /BCs/DashpotBC
-    - /BCs/DisplacementAboutAxis
     - /BCs/PresetAcceleration
     - /BCs/PresetDisplacement
     - /BCs/PresetVelocity
-    - /BCs/Pressure
-    - /BCs/CavityPressure
-    - /BCs/CavityPressure/CavityPressureAction
-    - /BCs/CavityPressure/CavityPressurePPAction
-    - /BCs/CavityPressure/CavityPressureUOAction
-    - /BCs/Pressure
-    - /BCs/Pressure/PressureAction
     - /Kernels/CosseratStressDivergenceTensors
     - /Kernels/DynamicStressDivergenceTensors
     - /Kernels/GeneralizedPlaneStrainOffDiag
-    - /Kernels/Gravity
     - /Kernels/InertialForce
     - /Kernels/MomentBalancing
     - /Kernels/OutOfPlanePressure
@@ -902,8 +892,6 @@ tensor_mechanics:
     - /Materials/CappedWeakInclinedPlaneStressUpdate
     - /Materials/CappedWeakPlaneCosseratStressUpdate
     - /Materials/CappedWeakPlaneStressUpdate
-    - /Materials/CompositeEigenstrain
-    - /Materials/CompositeElasticityTensor
     - /Materials/ComputeAxisymmetric1DFiniteStrain
     - /Materials/ComputeAxisymmetric1DIncrementalStrain
     - /Materials/ComputeAxisymmetric1DSmallStrain
@@ -913,15 +901,9 @@ tensor_mechanics:
     - /Materials/ComputeCosseratLinearElasticStress
     - /Materials/ComputeCosseratSmallStrain
     - /Materials/ComputeDeformGradBasedStress
-    - /Materials/ComputeEigenstrain
     - /Materials/ComputeElasticSmearedCrackingStress
-    - /Materials/ComputeElasticityTensorCP
-    - /Materials/ComputeExtraStressConstant
-    - /Materials/ComputeFiniteStrainElasticStress
-    - /Materials/ComputeIncrementalSmallStrain
     - /Materials/ComputeLayeredCosseratElasticityTensor
     - /Materials/ComputeLinearElasticPFFractureStress
-    - /Materials/ComputeLinearElasticStress
     - /Materials/ComputeMultiPlasticityStress
     - /Materials/ComputeMultipleInelasticCosseratStress
     - /Materials/ComputeMultipleInelasticStress
@@ -929,12 +911,7 @@ tensor_mechanics:
     - /Materials/ComputePlaneIncrementalStrain
     - /Materials/ComputePlaneSmallStrain
     - /Materials/ComputePlasticHeatEnergy
-    - /Materials/ComputeRSphericalFiniteStrain
-    - /Materials/ComputeRSphericalIncrementalStrain
-    - /Materials/ComputeRSphericalSmallStrain
-    - /Materials/ComputeSmallStrain
     - /Materials/ComputeStrainIncrementBasedStress
-    - /Materials/ComputeThermalExpansionEigenstrain
     - /Materials/ComputeVariableBaseEigenStrain
     - /Materials/ComputeVariableEigenstrain
     - /Materials/ComputeVolumetricDeformGrad
@@ -950,7 +927,6 @@ tensor_mechanics:
     - /Materials/LinearElasticTruss
     - /Materials/LinearViscoelasticStressUpdate
     - /Materials/MultiPhaseStressMaterial
-    - /Materials/PowerLawCreepStressUpdate
     - /Materials/StressBasedChemicalPotential
     - /Materials/SumTensorIncrements
     - /Materials/TemperatureDependentHardeningStressUpdate
@@ -962,13 +938,10 @@ tensor_mechanics:
     - /Modules/TensorMechanics/GeneralizedPlaneStrain/GeneralizedPlaneStrainAction
     - /Modules/TensorMechanics/Master/CommonTensorMechanicsAction
     - /Modules/TensorMechanics/Master/TensorMechanicsAction
-    - /Postprocessors/CavityPressurePostprocessor
     - /Postprocessors/Mass
     - /Postprocessors/MaterialTensorIntegral
     - /Postprocessors/MaterialTimeStepPostprocessor
-    - /Postprocessors/TorqueReaction
     - /ScalarKernels/GeneralizedPlaneStrain
-    - /UserObjects/CavityPressureUserObject
     - /UserObjects/CrystalPlasticitySlipRateGSS
     - /UserObjects/CrystalPlasticitySlipResistanceGSS
     - /UserObjects/CrystalPlasticityStateVarRateComponentGSS
@@ -1003,8 +976,6 @@ tensor_mechanics:
     - /UserObjects/TensorMechanicsPlasticWeakPlaneShear
     - /UserObjects/TensorMechanicsPlasticWeakPlaneTensile
     - /UserObjects/TensorMechanicsPlasticWeakPlaneTensileN
-    - /VectorPostprocessors/LineMaterialRankTwoSampler
-    - /VectorPostprocessors/LineMaterialRankTwoScalarSampler
 xfem:
     - /AuxKernels/XFEMCutPlaneAux
     - /AuxKernels/XFEMMarkerAux
