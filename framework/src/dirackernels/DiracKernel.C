@@ -57,7 +57,6 @@ DiracKernel::DiracKernel(const InputParameters & parameters)
     PostprocessorInterface(this),
     GeometricSearchInterface(this),
     Restartable(parameters, "DiracKernels"),
-    ZeroInterface(parameters),
     MeshChangedInterface(parameters),
     _subproblem(*getCheckedPointerParam<SubProblem *>("_subproblem")),
     _sys(*getCheckedPointerParam<SystemBase *>("_sys")),

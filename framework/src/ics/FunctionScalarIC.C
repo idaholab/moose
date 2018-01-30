@@ -36,5 +36,5 @@ FunctionScalarIC::FunctionScalarIC(const InputParameters & parameters)
 Real
 FunctionScalarIC::value()
 {
-  return _func[_i]->value(_t, Point(0, 0, 0));
+  return _func[_i]->value(_t, _point_zero);
 }

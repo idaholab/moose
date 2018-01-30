@@ -23,7 +23,7 @@ namespace SolidMechanics
 /**
  * Element is the base class for all of this module's solid mechanics element formulations.
  */
-class Element : public Coupleable, public ZeroInterface
+class Element : public Coupleable
 {
 public:
   Element(SolidModel & solid_model, const std::string & name, const InputParameters & parameters);

@@ -46,7 +46,6 @@ ScalarKernel::ScalarKernel(const InputParameters & parameters)
     UserObjectInterface(this),
     PostprocessorInterface(this),
     TransientInterface(this),
-    ZeroInterface(parameters),
     MeshChangedInterface(parameters),
     VectorPostprocessorInterface(this),
     _subproblem(*getCheckedPointerParam<SubProblem *>("_subproblem")),

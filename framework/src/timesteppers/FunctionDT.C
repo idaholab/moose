@@ -126,7 +126,7 @@ FunctionDT::computeDT()
   Real local_dt = 0;
 
   if (_use_function)
-    local_dt = _function->value(_time, Point(0, 0, 0));
+    local_dt = _function->value(_time, _point_zero);
   else
   {
     if (_interpolate)

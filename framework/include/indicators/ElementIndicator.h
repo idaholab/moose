@@ -17,7 +17,6 @@
 #include "ScalarCoupleable.h"
 #include "MooseVariableInterface.h"
 #include "MaterialPropertyInterface.h"
-#include "ZeroInterface.h"
 
 // Forward declarations
 class ElementIndicator;
@@ -31,8 +30,7 @@ class ElementIndicator : public Indicator,
                          public PostprocessorInterface,
                          public Coupleable,
                          public ScalarCoupleable,
-                         public MooseVariableInterface,
-                         public ZeroInterface
+                         public MooseVariableInterface
 {
 public:
   ElementIndicator(const InputParameters & parameters);

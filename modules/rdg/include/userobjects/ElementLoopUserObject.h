@@ -15,7 +15,6 @@
 #include "MooseVariableInterface.h"
 #include "ScalarCoupleable.h"
 #include "MooseVariableDependencyInterface.h"
-#include "ZeroInterface.h"
 #include "MooseVariable.h"
 #include "SubProblem.h"
 #include "NonlinearSystem.h"
@@ -61,8 +60,7 @@ InputParameters validParams<ElementLoopUserObject>();
 class ElementLoopUserObject : public GeneralUserObject,
                               public BlockRestrictable,
                               public Coupleable,
-                              public MooseVariableDependencyInterface,
-                              public ZeroInterface
+                              public MooseVariableDependencyInterface
 {
 public:
   ElementLoopUserObject(const InputParameters & parameters);

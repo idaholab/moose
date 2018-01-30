@@ -25,7 +25,6 @@
 #include "BlockRestrictable.h"
 #include "BoundaryRestrictable.h"
 #include "Restartable.h"
-#include "ZeroInterface.h"
 #include "MeshChangedInterface.h"
 #include "VectorPostprocessorInterface.h"
 
@@ -57,7 +56,6 @@ class AuxKernel : public MooseObject,
                   public RandomInterface,
                   protected GeometricSearchInterface,
                   public Restartable,
-                  public ZeroInterface,
                   public MeshChangedInterface,
                   protected VectorPostprocessorInterface
 {

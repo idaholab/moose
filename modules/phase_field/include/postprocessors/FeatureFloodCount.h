@@ -14,7 +14,6 @@
 #include "GeneralPostprocessor.h"
 #include "InfixIterator.h"
 #include "MooseVariableDependencyInterface.h"
-#include "ZeroInterface.h"
 
 #include <iterator>
 #include <list>
@@ -45,8 +44,7 @@ InputParameters validParams<FeatureFloodCount>();
  */
 class FeatureFloodCount : public GeneralPostprocessor,
                           public Coupleable,
-                          public MooseVariableDependencyInterface,
-                          public ZeroInterface
+                          public MooseVariableDependencyInterface
 {
 public:
   FeatureFloodCount(const InputParameters & parameters);

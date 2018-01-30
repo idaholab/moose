@@ -83,7 +83,6 @@ Material::Material(const InputParameters & parameters)
     VectorPostprocessorInterface(this),
     DependencyResolverInterface(),
     Restartable(parameters, "Materials"),
-    ZeroInterface(parameters),
     MeshChangedInterface(parameters),
 
     // The false flag disables the automatic call buildOutputVariableHideList;

@@ -328,6 +328,9 @@ protected:
   /// True if implicit value is required
   bool _c_is_implicit;
 
+  /// Thread ID of the thread using this object
+  THREAD_ID _c_tid;
+
   /// Will hold the default value for optional coupled variables.
   std::map<std::string, VariableValue *> _default_value;
 
@@ -339,6 +342,15 @@ protected:
 
   /// This will always be zero because the default values for optionally coupled variables is always constant
   VariableSecond _default_second;
+
+  /// Zero value of a variable
+  const VariableValue & _zero;
+  /// Zero gradient of a variable
+  const VariableGradient & _grad_zero;
+  /// Zero second derivative of a variable
+  const VariableSecond & _second_zero;
+  /// Zero second derivative of a test function
+  const VariablePhiSecond & _second_phi_zero;
 
   /**
    * Check that the right kind of variable is being coupled in

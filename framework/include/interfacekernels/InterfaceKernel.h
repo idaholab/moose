@@ -20,7 +20,6 @@
 #include "NeighborCoupleableMooseVariableDependencyIntermediateInterface.h"
 #include "FunctionInterface.h"
 #include "Restartable.h"
-#include "ZeroInterface.h"
 #include "MeshChangedInterface.h"
 #include "TwoMaterialPropertyInterface.h"
 
@@ -42,7 +41,6 @@ class InterfaceKernel : public MooseObject,
                         public UserObjectInterface,
                         public NeighborCoupleableMooseVariableDependencyIntermediateInterface,
                         public Restartable,
-                        public ZeroInterface,
                         public MeshChangedInterface,
                         public TwoMaterialPropertyInterface
 {

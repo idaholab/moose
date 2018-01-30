@@ -12,7 +12,6 @@
 
 #include "GeneralUserObject.h"
 #include "Coupleable.h"
-#include "ZeroInterface.h"
 
 class RichardsVarNames;
 
@@ -24,7 +23,7 @@ InputParameters validParams<RichardsVarNames>();
  * used in RichardsMaterial and kernels, etc, and the
  * variable number used internally by MOOSE
  */
-class RichardsVarNames : public GeneralUserObject, public Coupleable, public ZeroInterface
+class RichardsVarNames : public GeneralUserObject, public Coupleable
 {
 public:
   RichardsVarNames(const InputParameters & parameters);

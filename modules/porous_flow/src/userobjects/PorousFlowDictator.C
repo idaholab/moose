@@ -34,7 +34,6 @@ validParams<PorousFlowDictator>()
 PorousFlowDictator::PorousFlowDictator(const InputParameters & parameters)
   : GeneralUserObject(parameters),
     Coupleable(this, false),
-    ZeroInterface(parameters),
     _num_variables(coupledComponents("porous_flow_vars")),
     _num_phases(getParam<unsigned int>("number_fluid_phases")),
     _num_components(getParam<unsigned int>("number_fluid_components"))

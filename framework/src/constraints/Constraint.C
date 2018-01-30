@@ -44,7 +44,6 @@ Constraint::Constraint(const InputParameters & parameters)
     TransientInterface(this),
     GeometricSearchInterface(this),
     Restartable(parameters, "Constraints"),
-    ZeroInterface(parameters),
     MeshChangedInterface(parameters),
     _subproblem(*getCheckedPointerParam<SubProblem *>("_subproblem")),
     _sys(*getCheckedPointerParam<SystemBase *>("_sys")),

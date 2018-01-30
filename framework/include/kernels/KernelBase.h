@@ -23,7 +23,6 @@
 #include "RandomInterface.h"
 #include "GeometricSearchInterface.h"
 #include "Restartable.h"
-#include "ZeroInterface.h"
 #include "MeshChangedInterface.h"
 
 class MooseMesh;
@@ -52,7 +51,6 @@ class KernelBase : public MooseObject,
                    public RandomInterface,
                    protected GeometricSearchInterface,
                    public Restartable,
-                   public ZeroInterface,
                    public MeshChangedInterface
 {
 public:

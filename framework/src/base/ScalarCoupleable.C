@@ -23,12 +23,13 @@ ScalarCoupleable::ScalarCoupleable(const MooseObject * moose_object)
     _sc_is_implicit(_sc_parameters.have_parameter<bool>("implicit")
                         ? _sc_parameters.get<bool>("implicit")
                         : true),
-    _coupleable_params(_sc_parameters)
+    _coupleable_params(_sc_parameters),
+    _sc_tid(_sc_parameters.have_parameter<THREAD_ID>("_tid") ? _sc_parameters.get<THREAD_ID>("_tid")
+                                                             : 0),
+    _real_zero(_sc_fe_problem._real_zero[_sc_tid]),
+    _point_zero(_sc_fe_problem._point_zero[_sc_tid])
 {
   SubProblem & problem = *_sc_parameters.getCheckedPointerParam<SubProblem *>("_subproblem");
-
-  THREAD_ID tid =
-      _sc_parameters.have_parameter<THREAD_ID>("_tid") ? _sc_parameters.get<THREAD_ID>("_tid") : 0;
 
   // Coupling
   for (std::set<std::string>::const_iterator iter = _sc_parameters.coupledVarsBegin();
@@ -43,13 +44,13 @@ ScalarCoupleable::ScalarCoupleable(const MooseObject * moose_object)
       {
         if (problem.hasScalarVariable(coupled_var_name))
         {
-          MooseVariableScalar * scalar_var = &problem.getScalarVariable(tid, coupled_var_name);
+          MooseVariableScalar * scalar_var = &problem.getScalarVariable(_sc_tid, coupled_var_name);
           _coupled_scalar_vars[name].push_back(scalar_var);
           _coupled_moose_scalar_vars.push_back(scalar_var);
         }
         else if (problem.hasVariable(coupled_var_name))
         {
-          MooseVariable * moose_var = &problem.getVariable(tid, coupled_var_name);
+          MooseVariable * moose_var = &problem.getVariable(_sc_tid, coupled_var_name);
           _sc_coupled_vars[name].push_back(moose_var);
         }
         else
