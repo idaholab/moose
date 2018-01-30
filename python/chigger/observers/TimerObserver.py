@@ -7,7 +7,7 @@
 #*
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
-
+import vtk
 from ChiggerObserver import ChiggerObserver
 class TimerObserver(ChiggerObserver):
     """
@@ -23,16 +23,15 @@ class TimerObserver(ChiggerObserver):
         return opt
 
     def __init__(self, **kwargs):
-        super(TimerObserver, self).__init__(**kwargs)
+        super(TimerObserver, self).__init__(vtk.vtkCommand.TimerEvent, **kwargs)
         self._count = 0
 
-    def init(self, window):
+    def addObserver(self, event, vtkinteractor):
         """
         Add the TimerEvent for this object.
         """
-        super(TimerObserver, self).init(window)
-        window.getVTKInteractor().AddObserver('TimerEvent', self._callback)
-        window.getVTKInteractor().CreateRepeatingTimer(self.getOption('duration'))
+        vtkinteractor.CreateRepeatingTimer(self.getOption('duration'))
+        return vtkinteractor.AddObserver(event, self._callback)
 
     def count(self):
         """

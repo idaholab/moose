@@ -7,27 +7,27 @@
 #*
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
-
+import vtk
 from ChiggerObserver import ChiggerObserver
 class KeyObserver(ChiggerObserver):
     """
     Class for creating key press observers to be passed in to RenderWindow object.
     """
+
     @staticmethod
     def getOptions():
         opt = ChiggerObserver.getOptions()
         return opt
 
     def __init__(self, **kwargs):
-        super(KeyObserver, self).__init__(**kwargs)
+        super(KeyObserver, self).__init__(vtk.vtkCommand.KeyPressEvent, **kwargs)
         self._key = None
 
-    def init(self, window):
+    def addObserver(self, event, vtkinteractor):
         """
         Add the KeyPressEvent for this object.
         """
-        super(KeyObserver, self).init(window)
-        window.getVTKInteractor().AddObserver('KeyPressEvent', self._callback)
+        return vtkinteractor.AddObserver(event, self._callback)
 
     def _callback(self, obj, event): #pylint: disable=unused-argument
         """
