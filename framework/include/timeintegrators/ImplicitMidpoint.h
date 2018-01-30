@@ -48,13 +48,12 @@ class ImplicitMidpoint : public TimeIntegrator
 {
 public:
   ImplicitMidpoint(const InputParameters & parameters);
-  virtual ~ImplicitMidpoint();
 
-  virtual int order() { return 2; }
+  virtual int order() override { return 2; }
 
-  virtual void computeTimeDerivatives();
-  virtual void solve();
-  virtual void postStep(NumericVector<Number> & residual);
+  virtual void computeTimeDerivatives() override;
+  virtual void solve() override;
+  virtual void postResidual(NumericVector<Number> & residual) override;
 
 protected:
   unsigned int _stage;

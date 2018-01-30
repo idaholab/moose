@@ -42,12 +42,10 @@ LStableDirk4::LStableDirk4(const InputParameters & parameters)
   }
 }
 
-LStableDirk4::~LStableDirk4() {}
-
 void
 LStableDirk4::computeTimeDerivatives()
 {
-  // We are multiplying by the method coefficients in postStep(), so
+  // We are multiplying by the method coefficients in postResidual(), so
   // the time derivatives are of the same form at every stage although
   // the current solution varies depending on the stage.
   _u_dot = *_solution;
@@ -86,13 +84,13 @@ LStableDirk4::solve()
 }
 
 void
-LStableDirk4::postStep(NumericVector<Number> & residual)
+LStableDirk4::postResidual(NumericVector<Number> & residual)
 {
   // Error if _stage got messed up somehow.
   if (_stage > _n_stages)
     // the explicit cast prevents strange compiler weirdness with the static
     // const variable and the variadic mooseError function
-    mooseError("LStableDirk4::postStep(): Member variable _stage can only have values 1-",
+    mooseError("LStableDirk4::postResidual(): Member variable _stage can only have values 1-",
                (unsigned int)_n_stages,
                ".");
 

@@ -29,12 +29,10 @@ LStableDirk2::LStableDirk2(const InputParameters & parameters)
 {
 }
 
-LStableDirk2::~LStableDirk2() {}
-
 void
 LStableDirk2::computeTimeDerivatives()
 {
-  // We are multiplying by the method coefficients in postStep(), so
+  // We are multiplying by the method coefficients in postResidual(), so
   // the time derivatives are of the same form at every stage although
   // the current solution varies depending on the stage.
   _u_dot = *_solution;
@@ -76,7 +74,7 @@ LStableDirk2::solve()
 }
 
 void
-LStableDirk2::postStep(NumericVector<Number> & residual)
+LStableDirk2::postResidual(NumericVector<Number> & residual)
 {
   if (_stage == 1)
   {
@@ -121,5 +119,5 @@ LStableDirk2::postStep(NumericVector<Number> & residual)
     residual.close();
   }
   else
-    mooseError("LStableDirk2::postStep(): Member variable _stage can only have values 1 or 2.");
+    mooseError("LStableDirk2::postResidual(): Member variable _stage can only have values 1 or 2.");
 }
