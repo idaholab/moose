@@ -26,9 +26,9 @@ public:
   ImplicitEuler(const InputParameters & parameters);
   virtual ~ImplicitEuler();
 
-  virtual int order() { return 1; }
-  virtual void computeTimeDerivatives();
-  virtual void postStep(NumericVector<Number> & residual);
+  virtual int order() override { return 1; }
+  virtual void computeTimeDerivatives() override;
+  virtual void postResidual(NumericVector<Number> & residual) override;
 
 protected:
 };

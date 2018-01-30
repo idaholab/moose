@@ -45,12 +45,11 @@ class LStableDirk2 : public TimeIntegrator
 {
 public:
   LStableDirk2(const InputParameters & parameters);
-  virtual ~LStableDirk2();
 
-  virtual int order() { return 2; }
-  virtual void computeTimeDerivatives();
-  virtual void solve();
-  virtual void postStep(NumericVector<Number> & residual);
+  virtual int order() override { return 2; }
+  virtual void computeTimeDerivatives() override;
+  virtual void solve() override;
+  virtual void postResidual(NumericVector<Number> & residual) override;
 
 protected:
   //! Indicates the current stage (1 or 2).

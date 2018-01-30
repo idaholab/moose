@@ -4,5 +4,6 @@
     type = Exodiff
     input = master.i
     exodiff = master_out.e
+    cli_args = Executioner/num_steps=2
   [../]
 []

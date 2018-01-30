@@ -32,7 +32,6 @@ class Heun : public ExplicitRK2
 {
 public:
   Heun(const InputParameters & parameters);
-  virtual ~Heun() {}
 
 protected:
   /// Method coefficient overrides

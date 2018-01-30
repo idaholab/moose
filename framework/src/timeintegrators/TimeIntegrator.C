@@ -40,8 +40,6 @@ TimeIntegrator::TimeIntegrator(const InputParameters & parameters)
 {
 }
 
-TimeIntegrator::~TimeIntegrator() {}
-
 void
 TimeIntegrator::solve()
 {

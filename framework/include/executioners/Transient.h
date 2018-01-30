@@ -220,6 +220,9 @@ protected:
   /// Here for backward compatibility
   FEProblemBase & _problem;
 
+  /// Reference to nonlinear system base for faster access
+  NonlinearSystemBase & _nl;
+
   Moose::TimeIntegratorType _time_scheme;
   std::shared_ptr<TimeStepper> _time_stepper;
 

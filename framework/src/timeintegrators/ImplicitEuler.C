@@ -35,7 +35,7 @@ ImplicitEuler::computeTimeDerivatives()
 }
 
 void
-ImplicitEuler::postStep(NumericVector<Number> & residual)
+ImplicitEuler::postResidual(NumericVector<Number> & residual)
 {
   residual += _Re_time;
   residual += _Re_non_time;

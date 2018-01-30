@@ -24,12 +24,11 @@ class BDF2 : public TimeIntegrator
 {
 public:
   BDF2(const InputParameters & parameters);
-  virtual ~BDF2();
 
-  virtual int order() { return 2; }
-  virtual void preStep();
-  virtual void computeTimeDerivatives();
-  virtual void postStep(NumericVector<Number> & residual);
+  virtual int order() override { return 2; }
+  virtual void preStep() override;
+  virtual void computeTimeDerivatives() override;
+  virtual void postResidual(NumericVector<Number> & residual) override;
 
 protected:
   std::vector<Real> & _weight;
