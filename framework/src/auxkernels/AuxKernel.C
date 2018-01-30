@@ -85,7 +85,6 @@ AuxKernel::AuxKernel(const InputParameters & parameters)
                         .isNodal()),
     GeometricSearchInterface(this),
     Restartable(parameters, "AuxKernels"),
-    ZeroInterface(parameters),
     MeshChangedInterface(parameters),
     VectorPostprocessorInterface(this),
     _subproblem(*getCheckedPointerParam<SubProblem *>("_subproblem")),

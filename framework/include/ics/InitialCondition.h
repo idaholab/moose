@@ -18,7 +18,6 @@
 #include "BlockRestrictable.h"
 #include "DependencyResolverInterface.h"
 #include "BoundaryRestrictable.h"
-#include "ZeroInterface.h"
 #include "MooseTypes.h"
 
 // libMesh
@@ -46,8 +45,7 @@ class InitialCondition : public MooseObject,
                          public UserObjectInterface,
                          public BoundaryRestrictable,
                          public DependencyResolverInterface,
-                         public Restartable,
-                         public ZeroInterface
+                         public Restartable
 {
 public:
   /**

@@ -12,6 +12,7 @@
 
 #include "MooseObject.h"
 #include "Restartable.h"
+#include "ScalarCoupleable.h"
 
 class TimeStepper;
 class FEProblemBase;
@@ -23,7 +24,7 @@ InputParameters validParams<TimeStepper>();
 /**
  * Base class for time stepping
  */
-class TimeStepper : public MooseObject, public Restartable
+class TimeStepper : public MooseObject, public Restartable, public ScalarCoupleable
 {
 public:
   TimeStepper(const InputParameters & parameters);

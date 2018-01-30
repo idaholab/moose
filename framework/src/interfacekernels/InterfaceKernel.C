@@ -79,7 +79,6 @@ InterfaceKernel::InterfaceKernel(const InputParameters & parameters)
     UserObjectInterface(this),
     NeighborCoupleableMooseVariableDependencyIntermediateInterface(this, false, false),
     Restartable(parameters, "InterfaceKernels"),
-    ZeroInterface(parameters),
     MeshChangedInterface(parameters),
     TwoMaterialPropertyInterface(this, boundaryIDs()),
     _subproblem(*getCheckedPointerParam<SubProblem *>("_subproblem")),

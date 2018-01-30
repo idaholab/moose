@@ -17,7 +17,6 @@
 #include "UserObjectInterface.h"
 #include "PostprocessorInterface.h"
 #include "TransientInterface.h"
-#include "ZeroInterface.h"
 #include "MeshChangedInterface.h"
 #include "VectorPostprocessorInterface.h"
 
@@ -40,7 +39,6 @@ class ScalarKernel : public MooseObject,
                      public UserObjectInterface,
                      public PostprocessorInterface,
                      public TransientInterface,
-                     public ZeroInterface,
                      public MeshChangedInterface,
                      protected VectorPostprocessorInterface
 {

@@ -20,7 +20,6 @@
 #include "TransientInterface.h"
 #include "PostprocessorInterface.h"
 #include "RandomInterface.h"
-#include "ZeroInterface.h"
 
 // Forward Declarations
 class NodalUserObject;
@@ -40,8 +39,7 @@ class NodalUserObject : public UserObject,
                         public MooseVariableDependencyInterface,
                         public TransientInterface,
                         protected PostprocessorInterface,
-                        public RandomInterface,
-                        public ZeroInterface
+                        public RandomInterface
 {
 public:
   NodalUserObject(const InputParameters & parameters);

@@ -35,6 +35,7 @@ SetupTimeStepperAction::act()
     if (transient == NULL)
       mooseError("You can setup time stepper only with executioners of transient type.");
 
+    _moose_object_pars.set<SubProblem *>("_subproblem") = _problem.get();
     _moose_object_pars.set<FEProblemBase *>("_fe_problem_base") = _problem.get();
     _moose_object_pars.set<Transient *>("_executioner") = transient;
     std::shared_ptr<TimeStepper> ts =

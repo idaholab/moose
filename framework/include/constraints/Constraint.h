@@ -18,7 +18,6 @@
 #include "TransientInterface.h"
 #include "GeometricSearchInterface.h"
 #include "Restartable.h"
-#include "ZeroInterface.h"
 #include "MeshChangedInterface.h"
 
 // Forward Declarations
@@ -41,7 +40,6 @@ class Constraint : public MooseObject,
                    public TransientInterface,
                    protected GeometricSearchInterface,
                    public Restartable,
-                   public ZeroInterface,
                    public MeshChangedInterface
 {
 public:

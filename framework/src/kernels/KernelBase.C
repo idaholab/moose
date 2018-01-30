@@ -74,7 +74,6 @@ KernelBase::KernelBase(const InputParameters & parameters)
                     false),
     GeometricSearchInterface(this),
     Restartable(parameters, "Kernels"),
-    ZeroInterface(parameters),
     MeshChangedInterface(parameters),
     _subproblem(*getCheckedPointerParam<SubProblem *>("_subproblem")),
     _fe_problem(*getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")),

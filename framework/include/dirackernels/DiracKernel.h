@@ -23,7 +23,6 @@
 #include "GeometricSearchInterface.h"
 #include "MooseVariable.h"
 #include "Restartable.h"
-#include "ZeroInterface.h"
 #include "MeshChangedInterface.h"
 
 // Forward Declarations
@@ -52,7 +51,6 @@ class DiracKernel : public MooseObject,
                     public PostprocessorInterface,
                     protected GeometricSearchInterface,
                     public Restartable,
-                    public ZeroInterface,
                     public MeshChangedInterface
 {
 public:

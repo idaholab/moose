@@ -19,7 +19,6 @@
 #include "DependencyResolverInterface.h"
 #include "TransientInterface.h"
 #include "MooseVariableScalar.h"
-#include "ZeroInterface.h"
 #include "MeshChangedInterface.h"
 
 // Forward declarations
@@ -42,7 +41,6 @@ class AuxScalarKernel : public MooseObject,
                         public PostprocessorInterface,
                         public DependencyResolverInterface,
                         public TransientInterface,
-                        public ZeroInterface,
                         public MeshChangedInterface
 {
 public:

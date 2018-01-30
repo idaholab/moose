@@ -19,7 +19,6 @@
 #include "UserObjectInterface.h"
 #include "TransientInterface.h"
 #include "PostprocessorInterface.h"
-#include "ZeroInterface.h"
 
 // Forward Declarations
 class SideUserObject;
@@ -34,8 +33,7 @@ class SideUserObject : public UserObject,
                        public MooseVariableDependencyInterface,
                        public UserObjectInterface,
                        public TransientInterface,
-                       protected PostprocessorInterface,
-                       public ZeroInterface
+                       protected PostprocessorInterface
 {
 public:
   SideUserObject(const InputParameters & parameters);

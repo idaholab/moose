@@ -10,7 +10,6 @@
 #include "SetupTimeIntegratorAction.h"
 #include "Transient.h"
 #include "Factory.h"
-#include "TimeStepper.h"
 
 template <>
 InputParameters

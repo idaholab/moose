@@ -23,7 +23,6 @@
 #include "GeometricSearchInterface.h"
 #include "BoundaryRestrictableRequired.h"
 #include "Restartable.h"
-#include "ZeroInterface.h"
 #include "MeshChangedInterface.h"
 
 // Forward declerations
@@ -52,7 +51,6 @@ class BoundaryCondition : public MooseObject,
                           public VectorPostprocessorInterface,
                           public GeometricSearchInterface,
                           public Restartable,
-                          public ZeroInterface,
                           public MeshChangedInterface
 {
 public:

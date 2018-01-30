@@ -18,7 +18,6 @@
 #include "UserObjectInterface.h"
 #include "TransientInterface.h"
 #include "PostprocessorInterface.h"
-#include "ZeroInterface.h"
 
 class InternalSideUserObject;
 
@@ -35,8 +34,7 @@ class InternalSideUserObject : public UserObject,
                                public MooseVariableDependencyInterface,
                                public UserObjectInterface,
                                public TransientInterface,
-                               public PostprocessorInterface,
-                               public ZeroInterface
+                               public PostprocessorInterface
 {
 public:
   InternalSideUserObject(const InputParameters & parameters);

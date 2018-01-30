@@ -39,7 +39,6 @@ NodalUserObject::NodalUserObject(const InputParameters & parameters)
     TransientInterface(this),
     PostprocessorInterface(this),
     RandomInterface(parameters, _fe_problem, _tid, true),
-    ZeroInterface(parameters),
     _mesh(_subproblem.mesh()),
     _qp(0),
     _current_node(_assembly.node()),

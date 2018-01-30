@@ -12,7 +12,6 @@
 
 #include "GeneralUserObject.h"
 #include "Coupleable.h"
-#include "ZeroInterface.h"
 
 class PorousFlowDictator;
 
@@ -70,7 +69,7 @@ InputParameters validParams<PorousFlowDictator>();
            `.....```` `,.`````````..,,,,,.....``````
 */
 
-class PorousFlowDictator : public GeneralUserObject, public Coupleable, public ZeroInterface
+class PorousFlowDictator : public GeneralUserObject, public Coupleable
 {
 public:
   PorousFlowDictator(const InputParameters & parameters);

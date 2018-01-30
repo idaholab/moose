@@ -230,6 +230,7 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
   _grad_zero.resize(n_threads);
   _second_zero.resize(n_threads);
   _second_phi_zero.resize(n_threads);
+  _point_zero.resize(n_threads);
   _uo_jacobian_moose_vars.resize(n_threads);
 
   _material_data.resize(n_threads);
@@ -1264,13 +1265,14 @@ FEProblemBase::reinitDirac(const Elem * elem, THREAD_ID tid)
        * The maximum number of qps can rise if several Dirac points are added to a single element.
        * In that case we need to resize the zeros to compensate.
        */
+      unsigned int max_qpts = getMaxQps();
       for (unsigned int tid = 0; tid < libMesh::n_threads(); ++tid)
       {
-        _zero[tid].resize(getMaxQps(), 0);
-        _grad_zero[tid].resize(getMaxQps(), RealGradient(0.));
-        _second_zero[tid].resize(getMaxQps(), RealTensor(0.));
+        _zero[tid].resize(max_qpts, 0);
+        _grad_zero[tid].resize(max_qpts, RealGradient(0.));
+        _second_zero[tid].resize(max_qpts, RealTensor(0.));
         _second_phi_zero[tid].resize(
-            getMaxQps(), std::vector<RealTensor>(getMaxShapeFunctions(), RealTensor(0.)));
+            max_qpts, std::vector<RealTensor>(getMaxShapeFunctions(), RealTensor(0.)));
       }
     }
 
@@ -3567,12 +3569,13 @@ FEProblemBase::createQRules(QuadratureType type, Order order, Order volume_order
     _communicator.max(_max_shape_funcs);
   }
 
+  unsigned int max_qpts = getMaxQps();
   for (unsigned int tid = 0; tid < libMesh::n_threads(); ++tid)
   {
-    _zero[tid].resize(getMaxQps(), 0);
-    _grad_zero[tid].resize(getMaxQps(), RealGradient(0.));
-    _second_zero[tid].resize(getMaxQps(), RealTensor(0.));
-    _second_phi_zero[tid].resize(getMaxQps(),
+    _zero[tid].resize(max_qpts, 0);
+    _grad_zero[tid].resize(max_qpts, RealGradient(0.));
+    _second_zero[tid].resize(max_qpts, RealTensor(0.));
+    _second_phi_zero[tid].resize(max_qpts,
                                  std::vector<RealTensor>(getMaxShapeFunctions(), RealTensor(0.)));
   }
 }
