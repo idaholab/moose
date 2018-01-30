@@ -18,7 +18,6 @@ validParams<SolidMaterialProperties>()
 
 SolidMaterialProperties::SolidMaterialProperties(const InputParameters & parameters)
   : GeneralUserObject(parameters),
-    ZeroInterface(parameters),
     _k(getFunction("k")),
     _Cp(getFunction("Cp")),
     _rho(getFunction("rho"))

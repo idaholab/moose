@@ -3,7 +3,6 @@
 
 #include "GeneralUserObject.h"
 #include "Function.h"
-#include "ZeroInterface.h"
 
 class SolidMaterialProperties;
 
@@ -13,7 +12,7 @@ InputParameters validParams<SolidMaterialProperties>();
 /**
  *
  */
-class SolidMaterialProperties : public GeneralUserObject, public ZeroInterface
+class SolidMaterialProperties : public GeneralUserObject
 {
 public:
   SolidMaterialProperties(const InputParameters & parameters);
