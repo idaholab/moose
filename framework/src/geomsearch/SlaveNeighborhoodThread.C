@@ -74,8 +74,8 @@ SlaveNeighborhoodThread::operator()(const NodeIdRange & range)
 
     _kd_tree.neighborSearch(query_pt, patch_size, return_index);
 
-    std::vector<dof_id_type> neighbor_nodes(patch_size);
-    for (unsigned int i = 0; i < patch_size; ++i)
+    std::vector<dof_id_type> neighbor_nodes(return_index.size());
+    for (unsigned int i = 0; i < return_index.size(); ++i)
       neighbor_nodes[i] = _trial_master_nodes[return_index[i]];
 
     processor_id_type processor_id = _mesh.processor_id();
