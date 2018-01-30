@@ -203,8 +203,8 @@ RankTwoTensor::fillFromInputVector(const std::vector<Real> & input, FillMethod f
       break;
 
     default:
-      mooseError("Please check the number of entries in the input vecto for building a "
-                 "RankTwoTensor. It must be 1, 3, 6, or 9");
+      mooseError("Please check the number of entries in the input vector for building "
+                 "a RankTwoTensor. It must be 1, 3, 6, or 9");
   }
 }
 

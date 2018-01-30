@@ -122,7 +122,7 @@ Note the `DerivativeParsedMaterial`,  which evaluates an expression given in the
 
 Extra stresses ($\mathbf{\sigma}_0$) can also be pulled into the residual calculation after the constitutive model calculation of the stress. The extra stress material property, `extra_stress` is defined in the `ComputeExtraStressBase` class and is added to the stress value.
 \begin{equation}
-  \sigma_{ij} = \sigma_{ij} + \sigma^{exta}_{ij}
+  \sigma_{ij} = \sigma_{ij} + \sigma^{extra}_{ij}
 \end{equation}
 
 An extra stress may be a residual stress, such as in large civil engineering simulations.
