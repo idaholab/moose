@@ -51,6 +51,17 @@ FunctionMaterialPropertyDescriptor::FunctionMaterialPropertyDescriptor(
 {
 }
 
+FunctionMaterialPropertyDescriptor::FunctionMaterialPropertyDescriptor(
+    const FunctionMaterialPropertyDescriptor & rhs, MooseObject * parent)
+  : _fparser_name(rhs._fparser_name),
+    _base_name(rhs._base_name),
+    _dependent_vars(rhs._dependent_vars),
+    _derivative_vars(rhs._derivative_vars),
+    _value(NULL),
+    _parent(parent)
+{
+}
+
 std::vector<FunctionMaterialPropertyDescriptor>
 FunctionMaterialPropertyDescriptor::parseVector(const std::vector<std::string> & expression_list,
                                                 MooseObject * parent)

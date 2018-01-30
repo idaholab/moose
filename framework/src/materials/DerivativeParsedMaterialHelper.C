@@ -101,14 +101,16 @@ DerivativeParsedMaterialHelper::assembleDerivatives()
     }
 
     // copy coupled material properties
-    for (unsigned int i = 0; i < master->_mat_prop_descriptors.size(); ++i)
+    auto start = _mat_prop_descriptors.size();
+    for (unsigned int i = start; i < master->_mat_prop_descriptors.size(); ++i)
     {
-      FunctionMaterialPropertyDescriptor newdescriptor(master->_mat_prop_descriptors[i]);
+      FunctionMaterialPropertyDescriptor newdescriptor(master->_mat_prop_descriptors[i], this);
       _mat_prop_descriptors.push_back(newdescriptor);
     }
 
     // size parameter buffer
     _func_params.resize(master->_func_params.size());
+    return;
   }
 
   // set up job queue. We need a deque here to be able to iterate over the currently queued items.
