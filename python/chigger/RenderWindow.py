@@ -41,7 +41,9 @@ class RenderWindow(base.ChiggerObject):
                                    "(set vtkRenderWindow::SetAAFrames).", vtype=int)
 
         # Observers
-        opt.add('observers', [], "A list of ChiggerObserver objects.")
+        opt.add('observers', [], "A list of ChiggerObserver objects, once added they are not " \
+                                 "removed. Hence, changing the observers in this list will not " \
+                                 "remove existing objects.")
 
         # Background settings
         background = misc.ChiggerBackground.getOptions()
@@ -231,13 +233,13 @@ class RenderWindow(base.ChiggerObject):
 
         # Observers
         if self.__vtkinteractor:
-            self.__vtkinteractor.RemoveAllObservers()
             for observer in self.getOption('observers'):
                 if not isinstance(observer, observers.ChiggerObserver):
                     msg = "The supplied observer of type {} must be a {} object."
                     raise mooseutils.MooseException(msg.format(type(observer),
                                                                observers.ChiggerObserver))
-                else:
+
+                elif not observer.isActive() is None:
                     observer.init(self)
 
         self.__vtkwindow.Render()
