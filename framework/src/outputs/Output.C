@@ -44,6 +44,8 @@ validParams<Output>()
   params.addParam<bool>("sync_only", false, "Only export results at sync times");
   params.addParam<Real>("start_time", "Time at which this output object begins to operate");
   params.addParam<Real>("end_time", "Time at which this output object stop operating");
+  params.addParam<int>("start_step", "Time step at which this output object begins to operate");
+  params.addParam<int>("end_step", "Time step at which this output object stop operating");
   params.addParam<Real>(
       "time_tolerance", 1e-14, "Time tolerance utilized checking start and end times");
 
@@ -111,9 +113,13 @@ Output::Output(const InputParameters & parameters)
     _sync_times(std::set<Real>(getParam<std::vector<Real>>("sync_times").begin(),
                                getParam<std::vector<Real>>("sync_times").end())),
     _start_time(isParamValid("start_time") ? getParam<Real>("start_time")
-                                           : -std::numeric_limits<Real>::max()),
+                                           : std::numeric_limits<Real>::lowest()),
     _end_time(isParamValid("end_time") ? getParam<Real>("end_time")
                                        : std::numeric_limits<Real>::max()),
+    _start_step(isParamValid("start_step") ? getParam<int>("start_step")
+                                           : std::numeric_limits<int>::lowest()),
+    _end_step(isParamValid("end_step") ? getParam<int>("end_step")
+                                       : std::numeric_limits<int>::max()),
     _t_tol(getParam<Real>("time_tolerance")),
     _sync_only(getParam<bool>("sync_only")),
     _initialized(false),
@@ -179,7 +185,9 @@ Output::onInterval()
   bool output = false;
 
   // Return true if the current step on the current output interval and within the output time range
-  if (_time >= _start_time && _time <= _end_time && (_t_step % _interval) == 0)
+  // and within the output step range
+  if (_time >= _start_time && _time <= _end_time && _t_step >= _start_step &&
+      _t_step <= _end_step && (_t_step % _interval) == 0)
     output = true;
 
   // Return false if 'sync_only' is set to true
