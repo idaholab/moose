@@ -1,0 +1,11 @@
+[Tests]
+  [./test]
+    type = 'RunApp'
+    input = 'test.i'
+    max_time = 2
+    max_parallel = 1
+    requirements = 'Setup time of a system with a large number of scalar variables should be small'
+    issues = '#9480'
+    design = '/moose_variables.md'
+  [../]
+[]
