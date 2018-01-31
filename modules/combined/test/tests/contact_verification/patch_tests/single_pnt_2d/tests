@@ -81,7 +81,7 @@
     csvdiff = 'single_point_2d_out_frictional_0_2_kin.csv'
     cli_args = 'Executioner/end_time=0.002 Executioner/nl_rel_tol=1e-8 Executioner/nl_abs_tol=1e-10 Contact/leftright/friction_coefficient=0.2 Outputs/file_base=single_point_2d_out_frictional_0_2_kin'
     rel_err = 1e-4
-    abs_zero = 3e-5
+    abs_zero = 4e-5
     max_parallel = 1
     superlu = true
     prereq = 'mu_0_2_kin_sm'
