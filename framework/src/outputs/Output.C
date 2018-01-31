@@ -113,11 +113,11 @@ Output::Output(const InputParameters & parameters)
     _sync_times(std::set<Real>(getParam<std::vector<Real>>("sync_times").begin(),
                                getParam<std::vector<Real>>("sync_times").end())),
     _start_time(isParamValid("start_time") ? getParam<Real>("start_time")
-                                           : -std::numeric_limits<Real>::max()),
+                                           : std::numeric_limits<Real>::lowest()),
     _end_time(isParamValid("end_time") ? getParam<Real>("end_time")
                                        : std::numeric_limits<Real>::max()),
     _start_step(isParamValid("start_step") ? getParam<int>("start_step")
-                                           : -std::numeric_limits<int>::max()),
+                                           : std::numeric_limits<int>::lowest()),
     _end_step(isParamValid("end_step") ? getParam<int>("end_step")
                                        : std::numeric_limits<int>::max()),
     _t_tol(getParam<Real>("time_tolerance")),
