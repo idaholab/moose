@@ -215,6 +215,12 @@ protected:
   /// End outputting time
   Real _end_time;
 
+  /// Start outputting at this time step
+  int _start_step;
+
+  /// End outputting at this time step
+  int _end_step;
+
   /// Time checking tolerance
   Real _t_tol;
 
