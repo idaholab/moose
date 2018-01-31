@@ -15,7 +15,7 @@
 #include "MooseApp.h"
 #include "Conversion.h"
 
-static unsigned int counter = 0;
+static unsigned int cp_counter = 0;
 
 template <>
 InputParameters
@@ -66,7 +66,7 @@ ContactPressureAuxAction::act()
     std::stringstream name;
     name << _name;
     name << "_contact_pressure_";
-    name << counter++;
+    name << cp_counter++;
 
     params.set<ExecFlagEnum>("execute_on",
                              true) = {EXEC_NONLINEAR, EXEC_TIMESTEP_END, EXEC_TIMESTEP_BEGIN};

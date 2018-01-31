@@ -120,7 +120,7 @@ $(eval $(call unity_dir_rule, $(unity_src_dir)))
 # 2: the source files in that unity file
 define unity_file_rule
 $(1):$(2)
-	@echo '$$(foreach srcfile,$$^,#include"$$(srcfile)\n")' > $$@
+	@echo '$$(foreach srcfile,$$^,#include"$$(srcfile)"\n)' > $$@
 endef
 
 # 1: The directory where the unity source files will go

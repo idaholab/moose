@@ -49,16 +49,17 @@ unity_src_dir = $(APPLICATION_DIR)/build/unity_src
 
 $(eval $(call unity_dir_rule, $(unity_src_dir)))
 
-non_unity_dirs := %.libs
+non_unity_dirs := %.libs %/src
 
-srcsubdirs := $(filter-out %/main.C% $(non_unity_dirs), $(shell find $(APPLICATION_DIR)/src -type d -maxdepth 1 -mindepth 1))
+srcsubdirs := $(shell find $(APPLICATION_DIR)/src -type d -not -path '*/.libs*')
 
-unity_srcsubdirs := $(filter-out $(non_unity), $(srcsubdirs))
-non_unity_srcsubdirs := $(filter $(non_unity), $(srcsubdirs))
+unity_srcsubdirs := $(filter-out $(non_unity_dirs), $(srcsubdirs))
+non_unity_srcsubdirs := $(filter $(non_unity_dirs), $(srcsubdirs))
 
-$(foreach srcsubdir, $(unity_srcsubdirs), $(eval $(call unity_file_rule, $(unity_src_dir)/$(notdir $(srcsubdir))_Unity.C, $(filter-out %_Unity.C, $(shell find $(srcsubdir) -name "*.C")))))
 
-app_unity_srcfiles := $(foreach srcsubdir, $(unity_srcsubdirs), $(unity_src_dir)/$(notdir $(srcsubdir))_Unity.C)
+$(foreach srcsubdir,$(unity_srcsubdirs),$(eval $(call unity_file_rule,$(call unity_unique_name,$(unity_src_dir),$(APPLICATION_DIR),$(srcsubdir)),$(shell find $(srcsubdir) -type f -maxdepth 1 -name "*.C"))))
+
+app_unity_srcfiles = $(foreach srcsubdir,$(unity_srcsubdirs),$(call unity_unique_name,$(unity_src_dir),$(APPLICATION_DIR),$(srcsubdir)))
 
 unity_srcfiles += $(app_unity_srcfiles)
 
