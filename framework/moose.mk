@@ -1,8 +1,11 @@
+# Whether or not to do a Unity build
+MOOSE_UNITY ?= true
+
 #
 # MOOSE
 #
 APPLICATION_DIR := $(FRAMEWORK_DIR)
-# moose_SRC_DIRS := $(FRAMEWORK_DIR)/src
+moose_SRC_DIRS := $(FRAMEWORK_DIR)/src
 moose_SRC_DIRS += $(FRAMEWORK_DIR)/contrib/mtwist
 moose_SRC_DIRS += $(FRAMEWORK_DIR)/contrib/jsoncpp
 
@@ -99,6 +102,11 @@ moose_LIB := $(FRAMEWORK_DIR)/libmoose-$(METHOD).la
 
 moose_LIBS := $(moose_LIB) $(pcre_LIB) $(hit_LIB)
 
+moose_srcfiles    := $(shell find $(moose_SRC_DIRS) -name "*.C")
+
+### Unity Build ###
+ifeq ($(MOOSE_UNITY),true)
+
 srcsubdirs := $(shell find $(FRAMEWORK_DIR)/src -type d -not -path '*/.libs*')
 
 moose_non_unity = %/base %/utils
@@ -144,7 +152,6 @@ unity_unique_name = $(1)/$(subst /,_,$(patsubst $(2)/%,%,$(patsubst $(2)/src/%,%
 # 4. Now that we have the name of the Unity file we need to find all of the .C files that should be #included in it
 # 4a. Use find to pick up all .C files
 # 4b. Make sure we don't pick up any _Unity.C files (we shouldn't have any anyway)
-
 $(foreach srcsubdir,$(unity_srcsubdirs),$(eval $(call unity_file_rule,$(call unity_unique_name,$(unity_src_dir),$(FRAMEWORK_DIR),$(srcsubdir)),$(shell find $(srcsubdir) -type f -maxdepth 1 -name "*.C"))))
 
 app_unity_srcfiles = $(foreach srcsubdir,$(unity_srcsubdirs),$(call unity_unique_name,$(unity_src_dir),$(FRAMEWORK_DIR),$(srcsubdir)))
@@ -155,8 +162,10 @@ unity_srcfiles += $(app_unity_srcfiles)
 
 unity_files:: $(unity_src_dir)
 
+moose_srcfiles    := $(app_unity_srcfiles) $(shell find $(non_unity_srcsubdirs) -maxdepth 1 -name "*.C") $(shell find $(filter-out %/src,$(moose_SRC_DIRS)) -name "*.C")
+endif
+
 # source files
-moose_srcfiles    := $(app_unity_srcfiles) $(shell find $(non_unity_srcsubdirs) -maxdepth 1 -name "*.C") $(shell find $(moose_SRC_DIRS) -name "*.C")
 moose_csrcfiles   := $(shell find $(moose_SRC_DIRS) -name "*.c")
 moose_fsrcfiles   := $(shell find $(moose_SRC_DIRS) -name "*.f")
 moose_f90srcfiles := $(shell find $(moose_SRC_DIRS) -name "*.f90")
