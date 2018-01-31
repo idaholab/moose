@@ -636,16 +636,11 @@ public:
   // Postprocessors /////
   virtual void
   addPostprocessor(std::string pp_name, const std::string & name, InputParameters parameters);
+  void instantiatePostprocessors();
 
   // VectorPostprocessors /////
   virtual void
   addVectorPostprocessor(std::string pp_name, const std::string & name, InputParameters parameters);
-
-  /**
-   * Initializes the postprocessor data
-   * @see SetupPostprocessorDataAction
-   */
-  void initPostprocessorData(const std::string & name);
 
   // UserObjects /////
   virtual void
@@ -1397,6 +1392,18 @@ protected:
   MooseObjectWarehouse<Marker> _markers;
 
   // postprocessors
+  struct DeclaredPPS
+  {
+    DeclaredPPS(std::string pp_name, std::string name, InputParameters params)
+      : _pp_name(pp_name), _name(name), _params(params)
+    {
+    }
+
+    std::string _pp_name;
+    std::string _name;
+    InputParameters _params;
+  };
+  std::list<DeclaredPPS> _declared_pps_params;
   PostprocessorData _pps_data;
 
   // VectorPostprocessors

@@ -7,24 +7,24 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-// MOOSE includes
-#include "SetupPostprocessorDataAction.h"
+#include "InstantiatePostprocessorsAction.h"
 #include "FEProblem.h"
 
 template <>
 InputParameters
-validParams<SetupPostprocessorDataAction>()
+validParams<InstantiatePostprocessorsAction>()
 {
   InputParameters params = validParams<Action>();
   return params;
 }
 
-SetupPostprocessorDataAction::SetupPostprocessorDataAction(InputParameters params) : Action(params)
+InstantiatePostprocessorsAction::InstantiatePostprocessorsAction(const InputParameters & params)
+  : Action(params)
 {
 }
 
 void
-SetupPostprocessorDataAction::act()
+InstantiatePostprocessorsAction::act()
 {
-  _problem->initPostprocessorData(_name);
+  _problem->instantiatePostprocessors();
 }
