@@ -226,6 +226,7 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
   unsigned int n_threads = libMesh::n_threads();
 
   _real_zero.resize(n_threads, 0.);
+  _scalar_zero.resize(n_threads);
   _zero.resize(n_threads);
   _grad_zero.resize(n_threads);
   _second_zero.resize(n_threads);
@@ -321,6 +322,7 @@ FEProblemBase::~FEProblemBase()
   for (unsigned int i = 0; i < n_threads; i++)
   {
     _zero[i].release();
+    _scalar_zero[i].release();
     _grad_zero[i].release();
     _second_zero[i].release();
     _second_phi_zero[i].release();
@@ -1268,6 +1270,8 @@ FEProblemBase::reinitDirac(const Elem * elem, THREAD_ID tid)
       unsigned int max_qpts = getMaxQps();
       for (unsigned int tid = 0; tid < libMesh::n_threads(); ++tid)
       {
+        // the highest available order in libMesh is 43
+        _scalar_zero[tid].resize(FORTYTHIRD, 0);
         _zero[tid].resize(max_qpts, 0);
         _grad_zero[tid].resize(max_qpts, RealGradient(0.));
         _second_zero[tid].resize(max_qpts, RealTensor(0.));
@@ -3572,6 +3576,8 @@ FEProblemBase::createQRules(QuadratureType type, Order order, Order volume_order
   unsigned int max_qpts = getMaxQps();
   for (unsigned int tid = 0; tid < libMesh::n_threads(); ++tid)
   {
+    // the highest available order in libMesh is 43
+    _scalar_zero[tid].resize(FORTYTHIRD, 0);
     _zero[tid].resize(max_qpts, 0);
     _grad_zero[tid].resize(max_qpts, RealGradient(0.));
     _second_zero[tid].resize(max_qpts, RealTensor(0.));

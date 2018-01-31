@@ -1278,9 +1278,9 @@ public:
   ///@{
   /**
    * Convenience zeros
-   * @see ZeroInterface
    */
   std::vector<Real> _real_zero;
+  std::vector<VariableValue> _scalar_zero;
   std::vector<VariableValue> _zero;
   std::vector<VariableGradient> _grad_zero;
   std::vector<VariableSecond> _second_zero;
