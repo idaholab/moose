@@ -4,6 +4,14 @@
     input = 'master.i'
     exodiff = 'master_out.e master_out_sub0.e'
   [../]
+  [./test_short_subapp]
+    type = 'Exodiff'
+    input = 'master_short.i'
+    exodiff = 'master_short_out.e master_short_out_sub0.e'
+    # cannot run in recover mode, becuase the subapp time gets cut into a half, but the subapp
+    # needs to run till 0.2s in the first half, then recover and continue.
+    recover = false
+  [../]
   [./test_sub_cycle_output]
     # Run the same test as above, but test for sub-cycle output
     type = 'Exodiff'
