@@ -22,16 +22,9 @@
 
 [Variables]
   [./c]
-    order = FIRST
-    family = LAGRANGE
     [./InitialCondition]
-      type = SmoothCircleIC
-      x1 = 0.0
-      y1 = 0.0
-      radius = 0.5
-      invalue = 1.0
-      outvalue = 0.0
-      int_width = 1.0
+      type = FunctionIC
+      function = x
     [../]
   [../]
 []

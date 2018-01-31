@@ -6,6 +6,7 @@
 //*
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
+
 #include "FunctionMaterialPropertyDescriptor.h"
 #include "DerivativeMaterialInterface.h"
 #include "Material.h"
@@ -16,7 +17,7 @@ FunctionMaterialPropertyDescriptor::FunctionMaterialPropertyDescriptor(
     const std::string & expression, MooseObject * parent)
   : _dependent_vars(), _derivative_vars(), _parent(parent)
 {
-  size_t define = expression.find_last_of(":=");
+  auto define = expression.find_last_of(":=");
 
   // expression contains a ':='
   if (define != std::string::npos)
@@ -35,10 +36,10 @@ FunctionMaterialPropertyDescriptor::FunctionMaterialPropertyDescriptor(
     _fparser_name = _base_name;
   }
 
-  _value = NULL;
+  _value = nullptr;
 }
 
-FunctionMaterialPropertyDescriptor::FunctionMaterialPropertyDescriptor() : _value(NULL) {}
+FunctionMaterialPropertyDescriptor::FunctionMaterialPropertyDescriptor() : _value(nullptr) {}
 
 FunctionMaterialPropertyDescriptor::FunctionMaterialPropertyDescriptor(
     const FunctionMaterialPropertyDescriptor & rhs)
@@ -46,8 +47,19 @@ FunctionMaterialPropertyDescriptor::FunctionMaterialPropertyDescriptor(
     _base_name(rhs._base_name),
     _dependent_vars(rhs._dependent_vars),
     _derivative_vars(rhs._derivative_vars),
-    _value(NULL),
+    _value(nullptr),
     _parent(rhs._parent)
+{
+}
+
+FunctionMaterialPropertyDescriptor::FunctionMaterialPropertyDescriptor(
+    const FunctionMaterialPropertyDescriptor & rhs, MooseObject * parent)
+  : _fparser_name(rhs._fparser_name),
+    _base_name(rhs._base_name),
+    _dependent_vars(rhs._dependent_vars),
+    _derivative_vars(rhs._derivative_vars),
+    _value(nullptr),
+    _parent(parent)
 {
 }
 
@@ -56,10 +68,8 @@ FunctionMaterialPropertyDescriptor::parseVector(const std::vector<std::string> &
                                                 MooseObject * parent)
 {
   std::vector<FunctionMaterialPropertyDescriptor> fmpds;
-  for (std::vector<std::string>::const_iterator i = expression_list.begin();
-       i != expression_list.end();
-       ++i)
-    fmpds.push_back(FunctionMaterialPropertyDescriptor(*i, parent));
+  for (auto & ex : expression_list)
+    fmpds.push_back(FunctionMaterialPropertyDescriptor(ex, parent));
   return fmpds;
 }
 
@@ -67,7 +77,7 @@ void
 FunctionMaterialPropertyDescriptor::addDerivative(const VariableName & var)
 {
   _derivative_vars.push_back(var);
-  _value = NULL;
+  _value = nullptr;
 }
 
 bool
@@ -90,8 +100,8 @@ FunctionMaterialPropertyDescriptor::getDependentVariables()
 void
 FunctionMaterialPropertyDescriptor::parseDerivative(const std::string & expression)
 {
-  size_t open = expression.find_first_of("[");
-  size_t close = expression.find_last_of("]");
+  auto open = expression.find_first_of("[");
+  auto close = expression.find_last_of("]");
 
   if (open == std::string::npos && close == std::string::npos)
   {
@@ -105,8 +115,8 @@ FunctionMaterialPropertyDescriptor::parseDerivative(const std::string & expressi
   {
     // tokenize splits the arguments in d2h2:=D[h2(eta1,eta2),eta1] into 'h2(eta1' 'eta2)' 'eta1'
     // DAMN!!
-    std::string arguments = expression.substr(open + 1, close - open - 1);
-    size_t close2 = arguments.find_last_of(")");
+    auto arguments = expression.substr(open + 1, close - open - 1);
+    auto close2 = arguments.find_last_of(")");
 
     if (close2 == std::string::npos)
     {
@@ -140,8 +150,8 @@ FunctionMaterialPropertyDescriptor::parseDerivative(const std::string & expressi
 void
 FunctionMaterialPropertyDescriptor::parseDependentVariables(const std::string & expression)
 {
-  size_t open = expression.find_first_of("(");
-  size_t close = expression.find_last_of(")");
+  auto open = expression.find_first_of("(");
+  auto close = expression.find_last_of(")");
 
   if (open == std::string::npos && close == std::string::npos)
   {
@@ -169,18 +179,18 @@ void
 FunctionMaterialPropertyDescriptor::printDebug()
 {
   Moose::out << "MPD: " << _fparser_name << ' ' << _base_name << " deriv = [";
-  for (unsigned int i = 0; i < _derivative_vars.size(); ++i)
-    Moose::out << _derivative_vars[i] << ' ';
+  for (auto & dv : _derivative_vars)
+    Moose::out << dv << ' ';
   Moose::out << "] dep = [";
-  for (unsigned int i = 0; i < _dependent_vars.size(); ++i)
-    Moose::out << _dependent_vars[i] << ' ';
+  for (auto & dv : _dependent_vars)
+    Moose::out << dv << ' ';
   Moose::out << "] " << getPropertyName() << '\n';
 }
 
 const MaterialProperty<Real> &
 FunctionMaterialPropertyDescriptor::value() const
 {
-  if (_value == NULL)
+  if (_value == nullptr)
   {
     DerivativeMaterialInterface<Material> * _material_parent =
         dynamic_cast<DerivativeMaterialInterface<Material> *>(_parent);
