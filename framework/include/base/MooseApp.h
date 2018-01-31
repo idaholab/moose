@@ -567,6 +567,7 @@ protected:
   /// Constructor is protected so that this object is constructed through the AppFactory object
   MooseApp(InputParameters parameters);
 
+  /// TODO: remove this function after updating rattlesnake to not use it
   /// Populate the _syntax object with mesh only tasks that will be executed before writing mesh.
   virtual void modifyMeshOnlyTasks(Syntax &) {}
 
