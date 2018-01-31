@@ -37,15 +37,14 @@ class ContactMaster : public DiracKernel
 public:
   ContactMaster(const InputParameters & parameters);
 
-  virtual void jacobianSetup();
-  virtual void timestepSetup();
+  virtual void timestepSetup() override;
 
-  virtual void addPoints();
-  void computeContactForce(PenetrationInfo * pinfo);
-  virtual Real computeQpResidual();
-  virtual Real computeQpJacobian();
+  virtual void addPoints() override;
+  void computeContactForce(PenetrationInfo * pinfo, bool update_contact_set);
+  virtual Real computeQpResidual() override;
+  virtual Real computeQpJacobian() override;
 
-  virtual void updateContactSet(bool beginning_of_step = false);
+  virtual void updateContactStatefulData();
 
   static ContactFormulation contactFormulation(std::string name);
   static ContactModel contactModel(std::string name);
@@ -64,7 +63,6 @@ protected:
   const Real _friction_coefficient;
   const Real _tension_release;
   const Real _capture_tolerance;
-  bool _updateContactSet;
 
   NumericVector<Number> & _residual_copy;
 

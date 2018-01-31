@@ -4143,16 +4143,6 @@ FEProblemBase::computeJacobian(const NumericVector<Number> & soln,
     _currently_computing_jacobian = false;
     _has_jacobian = true;
   }
-
-  if (_solver_params._type == Moose::ST_JFNK || _solver_params._type == Moose::ST_PJFNK)
-  {
-    // This call is here to make sure the residual vector is up to date with any decisions that have
-    // been made in
-    // the Jacobian evaluation.  That is important in JFNK because that residual is used for finite
-    // differencing
-    computeResidual(soln, _nl->RHS());
-    _nl->RHS().close();
-  }
 }
 
 void

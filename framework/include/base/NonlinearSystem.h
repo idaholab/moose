@@ -11,6 +11,8 @@
 #define NONLINEARSYSTEM_H
 
 #include "NonlinearSystemBase.h"
+#include "ComputeResidualFunctor.h"
+#include "ComputeFDResidualFunctor.h"
 
 /**
  * Nonlinear system to be solved
@@ -68,6 +70,8 @@ public:
 
 protected:
   TransientNonlinearImplicitSystem & _transient_sys;
+  ComputeResidualFunctor _nl_residual_functor;
+  ComputeFDResidualFunctor _fd_residual_functor;
 
 private:
   /**

@@ -70,6 +70,8 @@ public:
    */
   void updateActive(THREAD_ID tid = 0);
 
+  virtual void residualEnd(THREAD_ID tid = 0) const;
+
 protected:
   /// NodalConstraint objects
   MooseObjectWarehouse<NodalConstraint> _nodal_constraints;

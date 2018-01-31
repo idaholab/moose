@@ -32,12 +32,13 @@ public:
 
   virtual void timestepSetup() override;
   virtual void jacobianSetup() override;
+  virtual void residualEnd() override;
 
   virtual bool AugmentedLagrangianContactConverged();
 
   virtual void updateAugmentedLagrangianMultiplier(bool beginning_of_step = false);
 
-  virtual void updateContactSet(bool beginning_of_step = false);
+  virtual void updateContactStatefulData(bool beginning_of_step = false);
 
   virtual Real computeQpSlaveValue() override;
 
@@ -83,7 +84,7 @@ public:
   virtual bool addCouplingEntriesToJacobian() override { return _master_slave_jacobian; }
 
   bool shouldApply() override;
-  void computeContactForce(PenetrationInfo * pinfo);
+  void computeContactForce(PenetrationInfo * pinfo, bool update_contact_set);
 
 protected:
   MooseSharedPointer<DisplacedProblem> _displaced_problem;
@@ -103,7 +104,7 @@ protected:
   const Real _capture_tolerance;
   const unsigned int _stick_lock_iterations;
   const Real _stick_unlock_factor;
-  bool _update_contact_set;
+  bool _update_stateful_data;
 
   NumericVector<Number> & _residual_copy;
   //  std::map<Point, PenetrationInfo *> _point_to_info;
@@ -129,6 +130,12 @@ protected:
   Real _al_incremental_slip_tolerance;
   /// The tolerance of the frictional force for augmented Lagrangian method
   Real _al_frictional_force_tolerance;
+
+  std::set<dof_id_type> _current_contact_state;
+  std::set<dof_id_type> _old_contact_state;
+
+private:
+  const bool _print_contact_nodes;
 };
 
 #endif
