@@ -1248,6 +1248,9 @@ NonlinearSystemBase::computeResidualInternal(Moose::KernelType type)
       // Displaced Constraints
       if (_fe_problem.getDisplacedProblem())
         constraintResiduals(*_Re_non_time, true);
+
+      if (_fe_problem.computingNonlinearResid())
+        _constraints.residualEnd();
     }
     PARALLEL_CATCH;
     _Re_non_time->close();

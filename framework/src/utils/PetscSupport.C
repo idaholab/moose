@@ -125,12 +125,7 @@ setSolverOptions(SolverParams & solver_params)
   switch (solver_params._type)
   {
     case Moose::ST_PJFNK:
-      setSinglePetscOption("-snes_mf_operator");
-      setSinglePetscOption("-mat_mffd_type", stringify(solver_params._mffd_type));
-      break;
-
     case Moose::ST_JFNK:
-      setSinglePetscOption("-snes_mf");
       setSinglePetscOption("-mat_mffd_type", stringify(solver_params._mffd_type));
       break;
 
@@ -427,20 +422,20 @@ petscNonlinearConverged(SNES snes,
   // xnorm: 2-norm of current iterate
   // snorm: 2-norm of current step
   // fnorm: 2-norm of function at current iterate
-  MooseNonlinearConvergenceReason moose_reason = problem.checkNonlinearConvergence(
-      msg,
-      it,
-      xnorm,
-      snorm,
-      fnorm,
-      rtol,
-      stol,
-      atol,
-      nfuncs,
-      maxf,
-      force_iteration,
-      system._initial_residual_before_preset_bcs,
-      /*div_threshold=*/(1.0 / rtol) * system._initial_residual_before_preset_bcs);
+  MooseNonlinearConvergenceReason moose_reason =
+      problem.checkNonlinearConvergence(msg,
+                                        it,
+                                        xnorm,
+                                        snorm,
+                                        fnorm,
+                                        rtol,
+                                        stol,
+                                        atol,
+                                        nfuncs,
+                                        maxf,
+                                        force_iteration,
+                                        system._initial_residual_before_preset_bcs,
+                                        std::numeric_limits<Real>::max());
 
   if (msg.length() > 0)
     PetscInfo(snes, msg.c_str());

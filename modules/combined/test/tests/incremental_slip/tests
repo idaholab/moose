@@ -1,16 +1,8 @@
 [Tests]
-  [./slip_tm]
+  [./slip]
     type = Exodiff
     input = 'incremental_slip.i'
     exodiff = 'incremental_slip_out.e'
-    abs_zero = 5e-09
-    superlu = true
-  [../]
-  [./slip_sm]
-    type = Exodiff
-    input = 'incremental_slip.i'
-    exodiff = 'incremental_slip_out.e'
-    prereq = 'slip_tm'
     abs_zero = 5e-09
     superlu = true
   [../]

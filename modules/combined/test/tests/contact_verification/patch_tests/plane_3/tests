@@ -31,7 +31,6 @@
     rel_err = 1e-5
     abs_zero = 1e-8
     max_parallel = 1
-    superlu = true
     prereq = 'frictionless_kin_sm'
     petsc_version = '>=3.7.6'
   [../]

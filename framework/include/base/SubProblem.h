@@ -414,6 +414,9 @@ public:
    */
   virtual bool currentlyComputingJacobian() const { return _currently_computing_jacobian; };
 
+  /// Check whether residual being evaulated is non-linear
+  bool & computingNonlinearResid() { return _computing_nonlinear_residual; }
+
 protected:
   /// The Factory for building objects
   Factory & _factory;
@@ -469,6 +472,9 @@ protected:
 
   /// Flag to determine whether the problem is currently computing Jacobian
   bool _currently_computing_jacobian;
+
+  /// Whether residual being evaulated is non-linear
+  bool _computing_nonlinear_residual;
 
 private:
   /**
