@@ -1,0 +1,15 @@
+[Tests]
+  [./exodiff_diff_gold]
+    type = Exodiff
+    input = exodiff_diff_gold.i
+    exodiff = exodiff_diff_gold_out.e
+    gold_dir = diff_gold
+  [../]
+
+  [./csvdiff_diff_gold]
+    type = CSVDiff
+    input = csvdiff_diff_gold.i
+    csvdiff = csvdiff_diff_gold_out.csv
+    gold_dir = diff_gold
+  [../]
+[]

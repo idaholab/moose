@@ -1,10 +1,4 @@
 [Tests]
-  [./matproptest]
-    type = CSVDiff
-    input = 'matproptest.i'
-    csvdiff = 'matproptest_out.csv'
-  [../]
-
   [./CahnHilliard]
     type = 'Exodiff'
     input = 'CahnHilliard.i'
@@ -48,17 +42,6 @@
     resize_mesh = true
     recover = false
     #skip = 'see #3847'
-  [../]
-
-  [./ParsedMaterial]
-    type = 'Exodiff'
-    input = 'ParsedMaterial.i'
-    exodiff = 'ParsedMaterial_out.e'
-  [../]
-  [./ConstructionOrder]
-    type = 'Exodiff'
-    input = 'ConstructionOrder.i'
-    exodiff = 'ConstructionOrder_out.e'
   [../]
 
   [./SimpleSplitCHWRes]

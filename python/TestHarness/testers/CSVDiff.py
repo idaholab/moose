@@ -39,7 +39,7 @@ class CSVDiff(FileTester):
             return output
 
         if len(specs['csvdiff']) > 0:
-            differ = CSVDiffer(specs['test_dir'], specs['csvdiff'], specs['abs_zero'], specs['rel_err'])
+            differ = CSVDiffer(specs['test_dir'], specs['csvdiff'], specs['abs_zero'], specs['rel_err'], specs['gold_dir'])
             msg = differ.diff()
             output += 'Running CSVDiffer.py\n' + msg
             if msg != '':

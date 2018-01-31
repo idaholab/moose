@@ -73,17 +73,15 @@ ParsedMaterialHelper::functionParse(const std::string & function_expression,
 
   // add further constants coming from default value coupling
   if (_map_mode == USE_PARAM_NAMES)
-    for (std::vector<std::string>::iterator it = _arg_constant_defaults.begin();
-         it != _arg_constant_defaults.end();
-         ++it)
-      if (!_func_F->AddConstant(*it, _pars.defaultCoupledValue(*it)))
+    for (const auto & acd : _arg_constant_defaults)
+      if (!_func_F->AddConstant(acd, _pars.defaultCoupledValue(acd)))
         mooseError("Invalid constant name in parsed function object");
 
   // set variable names based on map_mode
   switch (_map_mode)
   {
     case USE_MOOSE_NAMES:
-      for (unsigned i = 0; i < _nargs; ++i)
+      for (unsigned int i = 0; i < _nargs; ++i)
         _variable_names[i] = _arg_names[i];
       break;
 
@@ -111,8 +109,8 @@ ParsedMaterialHelper::functionParse(const std::string & function_expression,
   {
     _tol[i] = -1.0;
 
-    // for every argument look throug the entire tolerance vector to find a match
-    for (unsigned int j = 0; j < tol_names.size(); ++j)
+    // for every argument look through the entire tolerance vector to find a match
+    for (auto j = beginIndex(tol_names); j < tol_names.size(); ++j)
       if (_variable_names[i] == tol_names[j])
       {
         _tol[i] = tol_values[j];
@@ -162,9 +160,8 @@ ParsedMaterialHelper::functionsPostParse()
   functionsOptimize();
 
   // force a value update to get the property at least once and register it for the dependencies
-  unsigned int nmat_props = _mat_prop_descriptors.size();
-  for (unsigned int i = 0; i < nmat_props; ++i)
-    _mat_prop_descriptors[i].value();
+  for (auto & mpd : _mat_prop_descriptors)
+    mpd.value();
 }
 
 void
@@ -197,8 +194,8 @@ ParsedMaterialHelper::computeProperties()
     }
 
     // insert material property values
-    unsigned int nmat_props = _mat_prop_descriptors.size();
-    for (unsigned int i = 0; i < nmat_props; ++i)
+    auto nmat_props = _mat_prop_descriptors.size();
+    for (auto i = beginIndex(_mat_prop_descriptors); i < nmat_props; ++i)
       _func_params[i + _nargs] = _mat_prop_descriptors[i].value()[_qp];
 
     // TODO: computeQpProperties()

@@ -1,0 +1,17 @@
+[Tests]
+  [./material_chaining]
+    type = CSVDiff
+    input = 'material_chaining.i'
+    csvdiff = 'material_chaining_out.csv'
+  [../]
+  [./parsed_material]
+    type = 'Exodiff'
+    input = 'parsed_material.i'
+    exodiff = 'parsed_material_out.e'
+  [../]
+    [./construction_order]
+    type = 'Exodiff'
+    input = 'construction_order.i'
+    exodiff = 'construction_order_out.e'
+  [../]
+[]

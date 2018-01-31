@@ -170,9 +170,12 @@
 #include "VectorPostprocessorFunction.h"
 
 // materials
+#include "DerivativeParsedMaterial.h"
+#include "DerivativeSumMaterial.h"
 #include "GenericConstantMaterial.h"
 #include "GenericConstantRankTwoTensor.h"
 #include "GenericFunctionMaterial.h"
+#include "ParsedMaterial.h"
 #include "PiecewiseLinearInterpolationMaterial.h"
 
 // PPS
@@ -658,9 +661,12 @@ registerObjects(Factory & factory)
   registerFunction(VectorPostprocessorFunction);
 
   // materials
+  registerMaterial(DerivativeParsedMaterial);
+  registerMaterial(DerivativeSumMaterial);
   registerMaterial(GenericConstantMaterial);
   registerMaterial(GenericConstantRankTwoTensor);
   registerMaterial(GenericFunctionMaterial);
+  registerMaterial(ParsedMaterial);
   registerMaterial(PiecewiseLinearInterpolationMaterial);
 
   // PPS

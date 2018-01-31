@@ -50,9 +50,8 @@ DerivativeParsedMaterialHelper::functionsPostParse()
   assembleDerivatives();
 
   // force a value update to get the property at least once and register it for the dependencies
-  unsigned int nmat_props = _mat_prop_descriptors.size();
-  for (unsigned int i = 0; i < nmat_props; ++i)
-    _mat_prop_descriptors[i].value();
+  for (auto & mpd : _mat_prop_descriptors)
+    mpd.value();
 }
 
 ParsedMaterialHelper::MatPropDescriptorList::iterator
@@ -91,7 +90,7 @@ DerivativeParsedMaterialHelper::assembleDerivatives()
             warehouse.getActiveObject(name()));
 
     // copy parsers and declare properties
-    for (unsigned int i = 0; i < master->_derivatives.size(); ++i)
+    for (auto i = beginIndex(master->_derivatives); i < master->_derivatives.size(); ++i)
     {
       Derivative newderivative;
       newderivative.first =
@@ -101,14 +100,18 @@ DerivativeParsedMaterialHelper::assembleDerivatives()
     }
 
     // copy coupled material properties
-    for (unsigned int i = 0; i < master->_mat_prop_descriptors.size(); ++i)
+    auto start = _mat_prop_descriptors.size();
+    for (auto i = beginIndex(master->_mat_prop_descriptors, start);
+         i < master->_mat_prop_descriptors.size();
+         ++i)
     {
-      FunctionMaterialPropertyDescriptor newdescriptor(master->_mat_prop_descriptors[i]);
+      FunctionMaterialPropertyDescriptor newdescriptor(master->_mat_prop_descriptors[i], this);
       _mat_prop_descriptors.push_back(newdescriptor);
     }
 
     // size parameter buffer
     _func_params.resize(master->_func_params.size());
+    return;
   }
 
   // set up job queue. We need a deque here to be able to iterate over the currently queued items.
@@ -120,16 +123,13 @@ DerivativeParsedMaterialHelper::assembleDerivatives()
   {
     QueueItem current = queue.front();
 
-    // all permutations of one set of derivatives are equal, so we make sure to generate only one
-    // each
-    unsigned int first = current._dargs.empty() ? 0 : current._dargs.back();
-
-    // add necessary derivative steps
-    for (unsigned int i = first; i < _nargs; ++i)
+    // Add necessary derivative steps. All permutations of one set of derivatives are equal, so we
+    // make sure to generate only one each.
+    for (auto i = current._dargs.empty() ? 0u : current._dargs.back(); i < _nargs; ++i)
     {
       // go through list of material properties and check if derivatives are needed
-      unsigned int ndesc = _mat_prop_descriptors.size();
-      for (unsigned int jj = 0; jj < ndesc; ++jj)
+      auto ndesc = _mat_prop_descriptors.size();
+      for (auto jj = beginIndex(_mat_prop_descriptors); jj < ndesc; ++jj)
       {
         FunctionMaterialPropertyDescriptor * j = &_mat_prop_descriptors[jj];
 
@@ -224,8 +224,8 @@ DerivativeParsedMaterialHelper::computeProperties()
     }
 
     // insert material property values
-    unsigned int nmat_props = _mat_prop_descriptors.size();
-    for (unsigned int i = 0; i < nmat_props; ++i)
+    auto nmat_props = _mat_prop_descriptors.size();
+    for (auto i = beginIndex(_mat_prop_descriptors); i < nmat_props; ++i)
       _func_params[i + _nargs] = _mat_prop_descriptors[i].value()[_qp];
 
     // set function value
@@ -233,7 +233,7 @@ DerivativeParsedMaterialHelper::computeProperties()
       (*_prop_F)[_qp] = evaluate(_func_F);
 
     // set derivatives
-    for (unsigned int i = 0; i < _derivatives.size(); ++i)
-      (*_derivatives[i].first)[_qp] = evaluate(_derivatives[i].second);
+    for (auto & D : _derivatives)
+      (*D.first)[_qp] = evaluate(D.second);
   }
 }
