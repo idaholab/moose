@@ -523,17 +523,10 @@ MooseApp::setupOptions()
 
     if (isParamValid("mesh_only"))
     {
-      // Clear out the normal MOOSE tasks. We'll repopulate the syntax object with a subset
-      // of tasks necessary for processing the mesh.
-      _syntax.clearTaskDependencies();
-
-      // Call the global function in Moose.C to prepopulate mesh-only tasks
-      Moose::populateMeshOnlyTasks(_syntax);
-
-      // Call the user-definable callback
-      modifyMeshOnlyTasks(_syntax);
+      _syntax.registerTaskName("mesh_only", true);
+      _syntax.addDependency("mesh_only", "setup_mesh_complete");
+      _action_warehouse.setFinalTask("mesh_only");
     }
-
     _action_warehouse.build();
   }
   else
@@ -571,10 +564,7 @@ MooseApp::runInputFile()
   _action_warehouse.executeAllActions();
 
   if (isParamValid("mesh_only"))
-  {
-    writeMeshOnly(getParam<std::string>("mesh_only"));
     _ready_to_exit = true;
-  }
   else if (getParam<bool>("list_constructed_objects"))
   {
     // TODO: ask multiapps for their constructed objects
@@ -638,57 +628,6 @@ bool
 MooseApp::hasRecoverFileBase()
 {
   return !_recover_base.empty();
-}
-
-void
-MooseApp::writeMeshOnly(std::string mesh_file_name)
-{
-  auto & mesh_ptr = _action_warehouse.mesh();
-
-  bool should_generate = false;
-  // If no argument specified or if the argument following --mesh-only starts
-  // with a dash, try to build an output filename based on the input mesh filename.
-  if (mesh_file_name.empty() || (mesh_file_name[0] == '-'))
-    should_generate = true;
-  // There's something following the --mesh-only flag, let's make an attempt to validate it.
-  // If we don't find a '.' or we DO find an equals sign, chances are this is not a file!
-  else if ((mesh_file_name.find('.') == std::string::npos ||
-            mesh_file_name.find('=') != std::string::npos))
-  {
-    mooseWarning("The --mesh-only option should be followed by a file name. Move it to the end of "
-                 "your CLI args or follow it by another \"-\" argument.");
-    should_generate = true;
-  }
-
-  if (should_generate)
-  {
-    mesh_file_name = _parser.getFileName();
-    size_t pos = mesh_file_name.find_last_of('.');
-
-    // Default to writing out an ExodusII mesh base on the input filename.
-    mesh_file_name = mesh_file_name.substr(0, pos) + "_in.e";
-  }
-
-  // If we're writing an Exodus file, write the Mesh using its logical
-  // element dimension rather than the spatial dimension, unless it's
-  // a 1D Mesh.  One reason to prefer this approach is that sidesets
-  // are displayed incorrectly for 2D triangular elements in both
-  // Paraview and Cubit if num_dim==3 in the Exodus file. We do the
-  // same thing in MOOSE's Exodus Output object, so we are mimicking
-  // that behavior here.
-  if (mesh_file_name.find(".e") + 2 == mesh_file_name.size())
-  {
-    ExodusII_IO exio(mesh_ptr->getMesh());
-    if (mesh_ptr->getMesh().mesh_dimension() != 1)
-      exio.use_mesh_dimension_instead_of_spatial_dimension(true);
-
-    exio.write(mesh_file_name);
-  }
-  else
-  {
-    // Just write the file using the name requested by the user.
-    mesh_ptr->getMesh().write(mesh_file_name);
-  }
 }
 
 void

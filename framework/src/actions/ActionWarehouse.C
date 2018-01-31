@@ -36,6 +36,14 @@ ActionWarehouse::ActionWarehouse(MooseApp & app, Syntax & syntax, ActionFactory 
 ActionWarehouse::~ActionWarehouse() {}
 
 void
+ActionWarehouse::setFinalTask(const std::string & task)
+{
+  if (!_syntax.hasTask(task))
+    mooseError("cannot use unregistered task '", task, "' as final task");
+  _final_task = task;
+}
+
+void
 ActionWarehouse::build()
 {
   _ordered_names = _syntax.getSortedTask();
@@ -324,7 +332,11 @@ ActionWarehouse::executeAllActions()
   }
 
   for (const auto & task : _ordered_names)
+  {
     executeActionsWithAction(task);
+    if (_final_task != "" && task == _final_task)
+      break;
+  }
 }
 
 void

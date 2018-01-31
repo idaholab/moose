@@ -567,14 +567,9 @@ protected:
   /// Constructor is protected so that this object is constructed through the AppFactory object
   MooseApp(InputParameters parameters);
 
+  /// TODO: remove this function after updating rattlesnake to not use it
   /// Populate the _syntax object with mesh only tasks that will be executed before writing mesh.
   virtual void modifyMeshOnlyTasks(Syntax &) {}
-
-  /// Write out the mesh file (used by the --mesh-only command line flag).
-  virtual void writeMeshOnly(std::string mesh_file_name);
-
-  /// TODO: Deprecated, remove
-  virtual void meshOnly(std::string /*mesh_file_name*/) { mooseDeprecated("Use writeMeshOnly"); }
 
   /**
    * NOTE: This is an internal function meant for MOOSE use only!
