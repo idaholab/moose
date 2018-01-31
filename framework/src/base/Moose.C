@@ -443,6 +443,7 @@
 #include "AddNodalKernelAction.h"
 #include "MaterialDerivativeTestAction.h"
 #include "AddRelationshipManager.h"
+#include "MeshOnlyAction.h"
 
 // Outputs
 #ifdef LIBMESH_HAVE_EXODUS_API
@@ -1116,22 +1117,6 @@ addActionTypes(Syntax & syntax)
                            "(check_integrity)");
 }
 
-void
-populateMeshOnlyTasks(Syntax & syntax)
-{
-  syntax.addDependencySets("(meta_action)"
-                           "(set_global_params)"
-                           "(setup_mesh)"
-                           "(add_partitioner)"
-                           "(init_mesh)"
-                           "(prepare_mesh)"
-                           "(add_mesh_modifier)"
-                           "(execute_mesh_modifiers)"
-                           "(add_mortar_interface)"
-                           "(uniform_refine_mesh)"
-                           "(setup_mesh_complete)");
-}
-
 /**
  * Multiple Action class can be associated with a single input file section, in which case all
  * associated Actions will be created and "acted" on when the associated input file section is
@@ -1170,6 +1155,7 @@ registerActions(Syntax & syntax, ActionFactory & action_factory)
 
   registerAction(SetupPostprocessorDataAction, "setup_postprocessor_data");
 
+  registerAction(MeshOnlyAction, "mesh_only");
   registerAction(SetupMeshAction, "setup_mesh");
   registerAction(SetupMeshAction, "init_mesh");
   registerAction(SetupMeshCompleteAction, "prepare_mesh");

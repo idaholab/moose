@@ -148,6 +148,8 @@ public:
     return action_vector;
   }
 
+  void setFinalTask(const std::string & task);
+
   /**
    * Check if Actions associated with passed in task exist.
    */
@@ -244,6 +246,10 @@ protected:
 
   /// Problem class
   std::shared_ptr<FEProblemBase> _problem;
+
+private:
+  /// Last task to run before (optional) early termination - blank means no early termination.
+  std::string _final_task;
 };
 
 #endif // ACTIONWAREHOUSE_H
