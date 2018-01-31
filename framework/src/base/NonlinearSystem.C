@@ -152,16 +152,7 @@ NonlinearSystem::solve()
 #ifdef LIBMESH_HAVE_PETSC
   PetscNonlinearSolver<Real> & solver =
       static_cast<PetscNonlinearSolver<Real> &>(*_transient_sys.nonlinear_solver);
-  Moose::SolveType moose_solve_type = _fe_problem.solverParams()._type;
-  if (moose_solve_type == Moose::ST_PJFNK || moose_solve_type == Moose::ST_JFNK)
-  {
-    if (moose_solve_type == Moose::ST_PJFNK)
-      solver.solve_type() = PetscNonlinearSolver<Real>::MF_OPERATOR;
-    else
-      solver.solve_type() = PetscNonlinearSolver<Real>::MF;
-
-    solver.mffd_residual_object = &_fd_residual_functor;
-  }
+  solver.mffd_residual_object = &_fd_residual_functor;
 #endif
 
   if (_time_integrator)
