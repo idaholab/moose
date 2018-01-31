@@ -7,6 +7,10 @@
     type = PythonUnitTest
     input = test_Diff.py
   [../]
+  [./diff_gold]
+    type = PythonUnitTest
+    input = test_DiffGold.py
+  [../]
   [./cyclic]
     type = PythonUnitTest
     input = test_Cyclic.py
