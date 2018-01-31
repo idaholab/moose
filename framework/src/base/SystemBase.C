@@ -24,6 +24,9 @@
 #include "MooseMesh.h"
 #include "InputParameters.h"
 
+#include "libmesh/string_to_enum.h"
+
+
 /// Free function used for a libMesh callback
 void
 extraSendList(std::vector<dof_id_type> & send_list, void * context)
@@ -495,6 +498,13 @@ SystemBase::addVector(const std::string & vector_name, const bool project, const
 void
 SystemBase::addVariable(const std::string & var_type, const std::string & name, InputParameters parameters)
 {
+  parameters.set<SystemBase *>("_system_base") = this;
+  FEType type(Utility::string_to_enum<Order>(parameters.get<MooseEnum>("order")),
+              Utility::string_to_enum<FEFamily>(parameters.get<MooseEnum>("family")));
+
+  unsigned int var_num = system().add_variable(name, type, NULL);
+  parameters.set<unsigned int>("_var_num") = var_num;
+
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
   {
     parameters.set<SystemBase *>("_system_base") = this;
@@ -509,8 +519,15 @@ SystemBase::addVariable(const std::string & var_type, const std::string & name, 
       for (const SubdomainID & id : var->blockIDs())
         _var_map[var->number()].insert(id);
     else
+    {
+      std::cout << "Not block..." << var->number() << std::endl;
         _var_map[var->number()] = std::set<SubdomainID>();
+    }
+
   }
+
+
+
 }
 
 /*

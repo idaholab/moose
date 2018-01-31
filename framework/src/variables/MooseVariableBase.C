@@ -50,7 +50,7 @@ validParams<MooseVariableBase>()
   params.addPrivateParam<SystemBase *>("_system_base");
   params.addPrivateParam<FEProblemBase *>("_fe_problem_base");
   params.addPrivateParam<Moose::VarKindType>("_var_kind");
-
+  params.addPrivateParam<unsigned int>("_var_num");
   return params;
 }
 
@@ -60,7 +60,7 @@ MooseVariableBase::MooseVariableBase(const InputParameters & parameters)
     _sys(*getParam<SystemBase *>("_system_base")), // TODO: get from _fe_problem_base
     _fe_type(Utility::string_to_enum<Order>(getParam<MooseEnum>("order")),
              Utility::string_to_enum<FEFamily>(getParam<MooseEnum>("family"))),
-    _var_num(_sys.system().add_variable(_name, _fe_type, &blockIDs())),
+    _var_num(getParam<unsigned int>("_var_num")),
     _var_kind(getParam<Moose::VarKindType>("_var_kind")),
     _subproblem(_sys.subproblem()),
     _variable(_sys.system().variable(_var_num)),

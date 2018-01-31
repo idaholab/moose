@@ -207,6 +207,7 @@ void
 MooseVariable::prepare()
 {
   _dof_map.dof_indices(_elem, _dof_indices, _var_num);
+  std::cout << "_var_num = " << _var_num << " _dof_indices.size() = " << _dof_indices.size() << std::endl;
   _has_nodal_value = false;
   _has_nodal_value_neighbor = false;
 

@@ -2249,11 +2249,22 @@ Assembly::prepareJacobianBlock()
 
     unsigned int jcount = (vi == vj && _component_block_diagonal[vi]) ? 1 : jvar.count();
 
+<<<<<<< HEAD
     for (MooseIndex(_jacobian_block_used) tag = 0; tag < _jacobian_block_used.size(); tag++)
     {
       jacobianBlock(vi, vj, tag)
           .resize(ivar.dofIndices().size() * ivar.count(), jvar.dofIndices().size() * jcount);
       _jacobian_block_used[tag][vi][vj] = 0;
+=======
+    const std::vector<MooseVariable *> & vars = _sys.getVariables(_tid);
+    std::cout << "vars.size() = " << vars.size() << std::endl;
+    for (const auto & var : vars)
+      for (unsigned int i = 0; i < _sub_Re.size(); i++)
+      {
+        std::cout << "DOFS: " << var->dofIndices().size() << std::endl;
+        _sub_Re[i][var->number()].resize(var->dofIndices().size());
+        _sub_Re[i][var->number()].zero();
+>>>>>>> 38240d5335... simple diffusion not crashing
     }
   }
 }
