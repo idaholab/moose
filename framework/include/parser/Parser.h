@@ -125,12 +125,6 @@ public:
 
   virtual ~Parser();
 
-  /// Retrieve the Syntax associated with the passed Action and task
-  std::string getSyntaxByAction(const std::string & action, const std::string & task)
-  {
-    return _syntax.getSyntaxByAction(action, task);
-  }
-
   /**
    * Return the filename that was parsed
    */

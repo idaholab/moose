@@ -10,7 +10,11 @@
 #include "Syntax.h"
 #include "MooseUtils.h"
 
-Syntax::Syntax() {}
+#include "libmesh/simple_range.h"
+
+#include <algorithm>
+
+Syntax::Syntax() : _actions_to_syntax_valid(false) {}
 
 void
 Syntax::registerTaskName(std::string task, bool is_required)
@@ -113,8 +117,10 @@ Syntax::registerActionSyntax(const std::string & action,
   action_info._action = action;
   action_info._task = task;
 
-  _associated_actions.insert(std::make_pair(syntax, action_info));
+  _syntax_to_actions.insert(std::make_pair(syntax, action_info));
   _syntax_to_line.addInfo(syntax, action, task, file, line);
+
+  _actions_to_syntax_valid = false;
 }
 
 void
@@ -124,7 +130,7 @@ Syntax::replaceActionSyntax(const std::string & action,
                             const std::string & file,
                             int line)
 {
-  _associated_actions.erase(syntax);
+  _syntax_to_actions.erase(syntax);
   registerActionSyntax(action, syntax, task, file, line);
 }
 
@@ -140,18 +146,28 @@ Syntax::isDeprecatedSyntax(const std::string & syntax) const
   return _deprecated_syntax.find(syntax) != _deprecated_syntax.end();
 }
 
-std::string
+std::vector<std::string>
 Syntax::getSyntaxByAction(const std::string & action, const std::string & task)
 {
-  std::string syntax;
-  /**
-   * For now we don't have a data structure that maps Actions to Syntax but this routine
-   * is only used by the build full tree routine so it doesn't need to be fast.  We
-   * will do a linear search for each call to this routine.
-   */
-  for (const auto & iter : _associated_actions)
-    if (iter.second._action == action && (iter.second._task == task || iter.second._task == ""))
-      syntax = iter.first;
+  // See if the reverse multimap has been built yet, if not build it now
+  if (!_actions_to_syntax_valid)
+  {
+    std::transform(_syntax_to_actions.begin(),
+                   _syntax_to_actions.end(),
+                   std::inserter(_actions_to_syntax, _actions_to_syntax.begin()),
+                   [](const std::pair<std::string, ActionInfo> pair) {
+                     return std::make_pair(pair.second._action,
+                                           std::make_pair(pair.first, pair.second._task));
+                   });
+    _actions_to_syntax_valid = true;
+  }
+
+  std::vector<std::string> syntax;
+  auto it_pair = _actions_to_syntax.equal_range(action);
+  for (const auto & syntax_pair : as_range(it_pair))
+    // If task is blank, return all syntax, otherwise filter by task
+    if (task == "" || syntax_pair.second.second == task)
+      syntax.emplace_back(syntax_pair.second.first);
 
   return syntax;
 }
@@ -160,7 +176,8 @@ std::string
 Syntax::isAssociated(const std::string & real_id, bool * is_parent)
 {
   /**
-   * This implementation assumes that wildcards can occur in the place of an entire token but not as
+   * This implementation assumes that wildcards can occur in the place of an entire token but not
+   * as
    * part of a token (i.e.  'Variables/ * /InitialConditions' is valid but not 'Variables/Partial*
    * /InitialConditions'.
    * Since maps are ordered, a reverse traversal through the registered list will always select a
@@ -177,7 +194,7 @@ Syntax::isAssociated(const std::string & real_id, bool * is_parent)
   MooseUtils::tokenize(real_id, real_elements);
 
   *is_parent = false;
-  for (it = _associated_actions.rbegin(); it != _associated_actions.rend(); ++it)
+  for (it = _syntax_to_actions.rbegin(); it != _syntax_to_actions.rend(); ++it)
   {
     std::string reg_id = it->first;
     if (reg_id == real_id)
@@ -223,7 +240,7 @@ std::pair<std::multimap<std::string, Syntax::ActionInfo>::iterator,
           std::multimap<std::string, Syntax::ActionInfo>::iterator>
 Syntax::getActions(const std::string & name)
 {
-  return _associated_actions.equal_range(name);
+  return _syntax_to_actions.equal_range(name);
 }
 
 bool

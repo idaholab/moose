@@ -27,7 +27,6 @@ public:
     std::string _task;
   };
 
-public:
   Syntax();
 
   void registerTaskName(std::string task, bool is_required);
@@ -88,8 +87,12 @@ public:
   /// Returns a Boolean indicating whether the syntax has been deprecated through a call to deprecateActionSyntax
   bool isDeprecatedSyntax(const std::string & syntax) const;
 
-  // Retrieve the Syntax associated with the passed Action and task
-  std::string getSyntaxByAction(const std::string & action, const std::string & task);
+  /**
+   * Retrieve the syntax associated with the passed in action type string. If a task string is also
+   * passed in, only syntax associated with that action+task combo will be returned.
+   */
+  std::vector<std::string> getSyntaxByAction(const std::string & action,
+                                             const std::string & task = "");
 
   /**
    * Method for determining whether a piece of syntax is associated with an Action
@@ -103,7 +106,7 @@ public:
 
   const std::multimap<std::string, ActionInfo> & getAssociatedActions() const
   {
-    return _associated_actions;
+    return _syntax_to_actions;
   }
 
   bool verifyMooseObjectTask(const std::string & base, const std::string & task) const;
@@ -129,13 +132,22 @@ protected:
   /// The dependency resolver
   DependencyResolver<std::string> _tasks;
 
-  /// Actions/Syntax association
-  std::multimap<std::string, ActionInfo> _associated_actions;
+  /// The syntax object to ActionInfo (Action+task) associations
+  std::multimap<std::string, ActionInfo> _syntax_to_actions;
+
+  /// The ActionInfo (Action+task) to syntax associations (built only when needed)
+  /// Action -> (Syntax, Task)
+  std::multimap<std::string, std::pair<std::string, std::string>> _actions_to_syntax;
 
   /// Syntax/Type association
   std::multimap<std::string, std::string> _associated_types;
 
+  /// Boolean indicating whether the _actions_to_syntax map is built and valid and synced
+  bool _actions_to_syntax_valid;
+
+  /// The set of deprecated syntax items
   std::set<std::string> _deprecated_syntax;
+
   FileLineInfoMap _syntax_to_line;
 };
 
