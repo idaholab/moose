@@ -73,7 +73,7 @@ non_unity_srcsubdirs := $(filter $(non_unity_dirs), $(srcsubdirs))
 # Loop over the subdirectories, creating a rule to create the Unity source file
 # for each subdirectory.  To do that we need to create a unique name using the
 # full hierarchy of the path underneath src
-$(foreach srcsubdir,$(unity_srcsubdirs),$(eval $(call unity_file_rule,$(call unity_unique_name,$(unity_src_dir),$(APPLICATION_DIR),$(srcsubdir)),$(shell find $(srcsubdir) -type f -maxdepth 1 -name "*.C"))))
+$(foreach srcsubdir,$(unity_srcsubdirs),$(eval $(call unity_file_rule,$(call unity_unique_name,$(unity_src_dir),$(APPLICATION_DIR),$(srcsubdir)),$(shell find $(srcsubdir) -maxdepth 1 -type f -name "*.C"))))
 
 # This creates the whole list of Unity source files so we can use it as a dependency
 app_unity_srcfiles = $(foreach srcsubdir,$(unity_srcsubdirs),$(call unity_unique_name,$(unity_src_dir),$(APPLICATION_DIR),$(srcsubdir)))
@@ -85,7 +85,7 @@ unity_srcfiles += $(app_unity_srcfiles)
 unity_files:: $(unity_src_dir)
 
 # Pick up all of the additional files in the src directory since we're not unity building those
-files_in_src := $(filter-out %main.C, $(shell find $(APPLICATION_DIR)/src -name "*.C" -maxdepth 1 -type f))
+files_in_src := $(filter-out %main.C, $(shell find $(APPLICATION_DIR)/src -maxdepth 1 -name "*.C" -type f))
 
 # Override srcfiles
 srcfiles    := $(app_unity_srcfiles) $(if $(non_unity_src_subdirs), $(shell find $(non_unity_srcsubdirs) -name "*.C"),) $(files_in_src)
