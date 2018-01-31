@@ -153,6 +153,9 @@ protected:
   /// Scalar zero
   const Real & _real_zero;
 
+  /// Zero value of a scalar variable
+  const VariableValue & _scalar_zero;
+
   /// Zero point
   const Point & _point_zero;
 

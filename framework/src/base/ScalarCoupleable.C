@@ -27,6 +27,7 @@ ScalarCoupleable::ScalarCoupleable(const MooseObject * moose_object)
     _sc_tid(_sc_parameters.have_parameter<THREAD_ID>("_tid") ? _sc_parameters.get<THREAD_ID>("_tid")
                                                              : 0),
     _real_zero(_sc_fe_problem._real_zero[_sc_tid]),
+    _scalar_zero(_sc_fe_problem._scalar_zero[_sc_tid]),
     _point_zero(_sc_fe_problem._point_zero[_sc_tid])
 {
   SubProblem & problem = *_sc_parameters.getCheckedPointerParam<SubProblem *>("_subproblem");
