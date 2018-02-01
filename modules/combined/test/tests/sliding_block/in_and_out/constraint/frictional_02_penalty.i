@@ -158,6 +158,7 @@
   type = Transient
   solve_type = 'PJFNK'
 
+  petsc_options = '-snes_ksp_ew'
   petsc_options_iname = '-pc_type -sub_pc_type -pc_asm_overlap -ksp_gmres_restart'
   petsc_options_value = 'asm     lu    20    101'
 
