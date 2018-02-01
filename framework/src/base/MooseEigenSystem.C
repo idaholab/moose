@@ -93,9 +93,11 @@ MooseEigenSystem::scaleSystemSolution(SYSTEMTAG tag, Real scaling_factor)
     {
       for (const auto & dof : _eigen_var_indices)
         solution().set(dof, solution()(dof) * scaling_factor);
+
+      solution().close();
     }
   }
-  solution().close();
+
   update();
 }
 
@@ -173,9 +175,11 @@ MooseEigenSystem::initSystemSolution(SYSTEMTAG tag, Real v)
     {
       for (const auto & dof : _eigen_var_indices)
         solution().set(dof, v);
+
+      solution().close();
     }
   }
-  solution().close();
+
   update();
 }
 
@@ -196,9 +200,11 @@ MooseEigenSystem::initSystemSolutionOld(SYSTEMTAG tag, Real v)
     {
       for (const auto & dof : _eigen_var_indices)
         solutionOld().set(dof, v);
+
+      solutionOld().close();
     }
   }
-  solutionOld().close();
+
   update();
 }
 

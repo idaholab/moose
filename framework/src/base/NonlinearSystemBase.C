@@ -529,7 +529,6 @@ NonlinearSystemBase::computeResidual(NumericVector<Number> & residual, Moose::Ke
     if (hasVector(numeric_vec))
     {
       NumericVector<Number> & vec = getVector(numeric_vec);
-      vec.close();
       vec.zero();
     }
 
@@ -547,7 +546,6 @@ NonlinearSystemBase::computeResidual(NumericVector<Number> & residual, Moose::Ke
       _time_integrator->postResidual(residual);
     else
       residual += *_Re_non_time;
-    residual.close();
 
     computeNodalBCs(residual, type);
 
@@ -555,7 +553,6 @@ NonlinearSystemBase::computeResidual(NumericVector<Number> & residual, Moose::Ke
     if (_need_residual_ghosted && _debugging_residuals)
     {
       *_residual_ghosted = residual;
-      _residual_ghosted->close();
     }
 
     // Need to close and update the aux system in case residuals were saved to it.

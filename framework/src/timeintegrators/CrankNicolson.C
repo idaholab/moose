@@ -41,7 +41,6 @@ CrankNicolson::init()
 {
   // make sure that time derivative contribution is zero in the first pre-solve step
   _u_dot.zero();
-  _u_dot.close();
 
   _du_dot_du = 0;
 

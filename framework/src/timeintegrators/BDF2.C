@@ -67,5 +67,4 @@ BDF2::postResidual(NumericVector<Number> & residual)
 {
   residual += _Re_time;
   residual += _Re_non_time;
-  residual.close();
 }
