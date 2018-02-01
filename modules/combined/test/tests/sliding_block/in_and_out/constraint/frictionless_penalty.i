@@ -166,6 +166,7 @@
   type = Transient
   solve_type = 'PJFNK'
 
+  petsc_options = '-snes_ksp_ew'
   petsc_options_iname = '-pc_type -pc_factor_mat_solver_package'
   petsc_options_value = 'lu     superlu_dist'
 
