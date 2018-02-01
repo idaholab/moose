@@ -263,6 +263,7 @@
 #include "TestSteady.h"
 #include "SteadyWithNull.h"
 #include "AdaptAndModify.h"
+#include "PPBindingSteady.h"
 
 // problems
 #include "MooseTestProblem.h"
@@ -600,6 +601,7 @@ MooseTestApp::registerObjects(Factory & factory)
   registerExecutioner(TestSteady);
   registerExecutioner(AdaptAndModify);
   registerExecutioner(SteadyWithNull);
+  registerExecutioner(PPBindingSteady);
 
   registerProblem(MooseTestProblem);
   registerProblem(FailingProblem);
