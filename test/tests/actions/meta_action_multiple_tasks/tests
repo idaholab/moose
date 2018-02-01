@@ -1,0 +1,7 @@
+[Tests]
+  [./circle_quads]
+    type = 'Exodiff'
+    input = 'circle_quads.i'
+    exodiff = 'circle_quads_out.e'
+  [../]
+[]

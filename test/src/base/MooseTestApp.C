@@ -277,6 +277,7 @@
 #include "AddLotsOfDiffusion.h"
 #include "TestGetActionsAction.h"
 #include "BadAddKernelAction.h"
+#include "MetaNodalNormalsAction.h"
 
 // TimeSteppers
 #include "TimeSequenceStepperFailTest.h"
@@ -653,6 +654,9 @@ MooseTestApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
   registerAction(AddMatAndKernel, "add_material");
   registerAction(AddMatAndKernel, "add_variable");
   registerSyntax("AddMatAndKernel", "AddMatAndKernel");
+
+  registerAction(MetaNodalNormalsAction, "meta_action");
+  registerSyntax("MetaNodalNormalsAction", "MetaNodalNormals");
 }
 
 // External entry point for dynamic execute flag registration

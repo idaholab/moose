@@ -321,10 +321,7 @@ Parser::walkRaw(std::string /*fullpath*/, std::string /*nodepath*/, hit::Node * 
   std::string registered_identifier = _syntax.isAssociated(section_name, &is_parent);
 
   // We need to retrieve a list of Actions associated with the current identifier
-  std::pair<std::multimap<std::string, Syntax::ActionInfo>::iterator,
-            std::multimap<std::string, Syntax::ActionInfo>::iterator>
-      iters = _syntax.getActions(registered_identifier);
-
+  auto iters = _syntax.getActions(registered_identifier);
   if (iters.first == iters.second)
   {
     _errmsg += errormsg(getFileName(),
@@ -544,11 +541,14 @@ Parser::parse(const std::string & input_filename)
   //                            This is because we retrieve valid parameters from the Factory
   //                            during parse time. Objects must be registered before
   //                            validParameters can be retrieved.
-  _secs_need_first = {
-      _syntax.getSyntaxByAction("SetupDebugAction", "setup_debug"),
-      _syntax.getSyntaxByAction("GlobalParamsAction", "set_global_params"),
-      _syntax.getSyntaxByAction("DynamicObjectRegistrationAction", "dynamic_object_registration"),
-  };
+  auto syntax = _syntax.getSyntaxByAction("SetupDebugAction");
+  std::copy(syntax.begin(), syntax.end(), std::back_inserter(_secs_need_first));
+
+  syntax = _syntax.getSyntaxByAction("GlobalParamsAction");
+  std::copy(syntax.begin(), syntax.end(), std::back_inserter(_secs_need_first));
+
+  syntax = _syntax.getSyntaxByAction("DynamicObjectRegistrationAction");
+  std::copy(syntax.begin(), syntax.end(), std::back_inserter(_secs_need_first));
 
   // walk all the sections extracting paramters from each into InputParameters objects
   for (auto & sec : _secs_need_first)
@@ -935,7 +935,7 @@ Parser::extractParams(const std::string & prefix, InputParameters & p)
   std::ostringstream error_stream;
   static const std::string global_params_task = "set_global_params";
   static const std::string global_params_block_name =
-      _syntax.getSyntaxByAction("GlobalParamsAction", global_params_task);
+      _syntax.getSyntaxByAction("GlobalParamsAction").front();
 
   ActionIterator act_iter = _action_wh.actionBlocksWithActionBegin(global_params_task);
   GlobalParamsAction * global_params_block = nullptr;

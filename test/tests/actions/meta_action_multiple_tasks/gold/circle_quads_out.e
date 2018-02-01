@@ -1,0 +1,1 @@
+../../../bcs/nodal_normals/gold/circle_quads_out.e
