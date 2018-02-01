@@ -126,10 +126,14 @@ $(eval $(call unity_dir_rule, $(unity_src_dir)))
 
 # 1: the unity file to build
 # 2: the source files in that unity file
+# 3: The unity source directory
+# The "|" in the prereqs starts the beginning of "position dependent" prereqs
+# these are prereqs that must be run first - but their timestamp isn't used
 define unity_file_rule
-$(1):$(2)
+$(1):$(2) | $(3)
 	@echo Creating Unity $$@
-	@echo -e '$$(foreach srcfile,$$^,#include"$$(srcfile)"\n)' > $$@
+	$$(shell echo > $$@)
+	$$(foreach srcfile,$$(filter-out $$(lastword $$^),$$^),$$(shell echo '#include"$$(srcfile)"' >> $$@))
 endef
 
 # 1: The directory where the unity source files will go
@@ -151,15 +155,13 @@ unity_unique_name = $(1)/$(subst /,_,$(patsubst $(2)/%,%,$(patsubst $(2)/src/%,%
 # 4. Now that we have the name of the Unity file we need to find all of the .C files that should be #included in it
 # 4a. Use find to pick up all .C files
 # 4b. Make sure we don't pick up any _Unity.C files (we shouldn't have any anyway)
-$(foreach srcsubdir,$(unity_srcsubdirs),$(eval $(call unity_file_rule,$(call unity_unique_name,$(unity_src_dir),$(FRAMEWORK_DIR),$(srcsubdir)),$(shell find $(srcsubdir) -maxdepth 1 -type f -name "*.C"))))
+$(foreach srcsubdir,$(unity_srcsubdirs),$(eval $(call unity_file_rule,$(call unity_unique_name,$(unity_src_dir),$(FRAMEWORK_DIR),$(srcsubdir)),$(shell find $(srcsubdir) -maxdepth 1 -type f -name "*.C"),$(unity_src_dir))))
 
 app_unity_srcfiles = $(foreach srcsubdir,$(unity_srcsubdirs),$(call unity_unique_name,$(unity_src_dir),$(FRAMEWORK_DIR),$(srcsubdir)))
 
 #$(info $(app_unity_srcfiles))
 
 unity_srcfiles += $(app_unity_srcfiles)
-
-unity_files:: $(unity_src_dir)
 
 moose_srcfiles    := $(app_unity_srcfiles) $(shell find $(non_unity_srcsubdirs) -maxdepth 1 -name "*.C") $(shell find $(filter-out %/src,$(moose_SRC_DIRS)) -name "*.C")
 endif
@@ -184,7 +186,7 @@ moose_analyzer += $(patsubst %.cc, %.plist.$(obj-suffix), $(hit_srcfiles))
 app_INCLUDES := $(moose_INCLUDE) $(libmesh_INCLUDE)
 app_LIBS     := $(moose_LIBS)
 app_DIRS     := $(FRAMEWORK_DIR)
-all:: libmesh_submodule_status header_symlinks unity_files moose_revision moose
+all:: libmesh_submodule_status header_symlinks moose_revision moose
 
 # revision header
 moose_revision_header = $(FRAMEWORK_DIR)/include/base/MooseRevision.h
