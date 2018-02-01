@@ -176,8 +176,9 @@ TransientMultiApp::solveStep(Real dt, Real target_time, bool auto_advance)
       // The App might have a different local time from the rest of the problem
       Real app_time_offset = _apps[i]->getGlobalTimeOffset();
 
-      if ((ex->getTime() + app_time_offset) + 2e-14 >=
-          target_time) // Maybe this MultiApp was already solved
+      // Maybe this MultiApp was already solved
+      if ((ex->getTime() + app_time_offset + 2e-14 >= target_time) ||
+          (ex->getTime() >= ex->endTime()))
         continue;
 
       if (_sub_cycling)
