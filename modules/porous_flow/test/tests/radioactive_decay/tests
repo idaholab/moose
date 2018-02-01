@@ -4,4 +4,9 @@
     input = 'radioactive_decay01.i'
     csvdiff = 'radioactive_decay01.csv'
   [../]
+  [./exponential_decay]
+    type = 'CSVDiff'
+    input = 'exponential_decay.i'
+    csvdiff = 'exponential_decay_out.csv'
+  [../]
 []
