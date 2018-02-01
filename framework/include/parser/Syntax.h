@@ -29,22 +29,71 @@ public:
 
   Syntax();
 
-  void registerTaskName(std::string task, bool is_required);
-  void registerTaskName(std::string task, std::string moose_object_type, bool is_required);
-  void appendTaskName(std::string task, std::string moose_object_type);
+  /**
+   * Method to register a new task. Tasks are short verbs (strings) that describe a particular point
+   * in the simulation setup phase.
+   * @param task The task (verb) to be registered with MOOSE.
+   * @param is_required indicates whether the task is required for a sucessful simulation.
+   */
+  void registerTaskName(const std::string & task, bool is_required);
 
-  void addDependency(std::string task, std::string pre_req);
+  /**
+   * Method to register a new task (see overload method with same name). This version also accepts
+   * a string representing a pluggable MOOSE system. When objects are created through a task, the
+   * MOOSE system is checked if it exists to make sure it's "allowed" to create those types of
+   * objects.
+   */
+  void registerTaskName(const std::string & task,
+                        const std::string & moose_object_type,
+                        bool is_required);
+
+  /**
+   * Method to associate another "allowed" pluggable MOOSE system to an existing registered task.
+   * Each object created during a task is checked against associated systems.
+   */
+  void appendTaskName(const std::string & task, const std::string & moose_object_type);
+
+  /**
+   * Method to insert a new task in the list of existing tasks at the specified location.
+   */
+  void addDependency(const std::string & task, const std::string & pre_req);
+
+  /**
+   * Adds all dependencies in a single call. The string is split on parenthesis and each task listed
+   * within the parenthesis is given equal precedence.
+   */
   void addDependencySets(const std::string & action_sets);
+
+  /**
+   * Clears all tasks from the system object.
+   */
   void clearTaskDependencies();
 
+  /**
+   * Get a list of serialized tasks in a correct dependency order. The order my be more ordered than
+   * specified.
+   */
   const std::vector<std::string> & getSortedTask();
+
+  /**
+   * Get a list of serialized tasks in a correct dependency order. The vector of sets return type
+   * assures that tasks with equal precedence appear in a single set.
+   */
   const std::vector<std::vector<std::string>> & getSortedTaskSet();
 
+  /**
+   * Returns a Boolean indicating whether or not a task is registered with the syntax object.
+   */
   bool hasTask(const std::string & task);
 
+  /**
+   * Returns a Boolean indicating whether the specified task is required.
+   */
   bool isActionRequired(const std::string & task);
 
-  // Registration function for associating Moose Actions with syntax
+  /**
+   * Registration function for associating Moose Actions with syntax.
+   */
   void registerActionSyntax(const std::string & action,
                             const std::string & syntax,
                             const std::string & task = "",
@@ -72,19 +121,18 @@ public:
   /**
    * Get a multimap of registered associations of syntax with type.
    */
-  const std::multimap<std::string, std::string> & getAssociatedTypes() const
-  {
-    return _associated_types;
-  }
+  const std::multimap<std::string, std::string> & getAssociatedTypes() const;
 
   /**
    * This method deprecates previously registered syntax. You should use the exact form that you
-   * want deprecated
-   * in the passed in parameter.
+   * want deprecated in the passed in parameter.
    */
   void deprecateActionSyntax(const std::string & syntax);
 
-  /// Returns a Boolean indicating whether the syntax has been deprecated through a call to deprecateActionSyntax
+  /**
+   * Returns a Boolean indicating whether the syntax has been deprecated through a call to
+   * deprecateActionSyntax.
+   */
   bool isDeprecatedSyntax(const std::string & syntax) const;
 
   /**
@@ -100,15 +148,24 @@ public:
    */
   std::string isAssociated(const std::string & real_id, bool * is_parent);
 
-  std::pair<std::multimap<std::string, ActionInfo>::iterator,
-            std::multimap<std::string, ActionInfo>::iterator>
-  getActions(const std::string & name);
+  /**
+   * Returns a pair of multimap iterators to all the ActionInfo objects associated with a given
+   * piece of syntax.
+   */
+  std::pair<std::multimap<std::string, ActionInfo>::const_iterator,
+            std::multimap<std::string, ActionInfo>::const_iterator>
+  getActions(const std::string & syntax) const;
 
-  const std::multimap<std::string, ActionInfo> & getAssociatedActions() const
-  {
-    return _syntax_to_actions;
-  }
+  /**
+   * Return all Syntax to Action associations.
+   */
+  const std::multimap<std::string, ActionInfo> & getAssociatedActions() const;
 
+  /**
+   * Returns a Boolean indicating whether a task is associated with on of the MOOSE pluggable
+   * systems (BASE CLASSES). See "registerMooseObjectTask" macro in Moose.C. This information can be
+   * used to determine whether certain objects may be safely built during the specified task.
+   */
   bool verifyMooseObjectTask(const std::string & base, const std::string & task) const;
 
   /**

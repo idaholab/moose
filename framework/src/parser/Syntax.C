@@ -17,7 +17,7 @@
 Syntax::Syntax() : _actions_to_syntax_valid(false) {}
 
 void
-Syntax::registerTaskName(std::string task, bool is_required)
+Syntax::registerTaskName(const std::string & task, bool is_required)
 {
   if (_registered_tasks.find(task) != _registered_tasks.end())
     mooseError("A ", task, " is already registered.  Do you need to use appendTaskName instead?");
@@ -27,7 +27,9 @@ Syntax::registerTaskName(std::string task, bool is_required)
 }
 
 void
-Syntax::registerTaskName(std::string task, std::string moose_object_type, bool is_required)
+Syntax::registerTaskName(const std::string & task,
+                         const std::string & moose_object_type,
+                         bool is_required)
 {
   if (_registered_tasks.find(task) != _registered_tasks.end())
     mooseError("A ", task, " is already registered.  Do you need to use appendTaskName instead?");
@@ -38,7 +40,7 @@ Syntax::registerTaskName(std::string task, std::string moose_object_type, bool i
 }
 
 void
-Syntax::appendTaskName(std::string task, std::string moose_object_type)
+Syntax::appendTaskName(const std::string & task, const std::string & moose_object_type)
 {
   if (_registered_tasks.find(task) == _registered_tasks.end())
     mooseError("A ", task, " is not a registered task name.");
@@ -47,7 +49,7 @@ Syntax::appendTaskName(std::string task, std::string moose_object_type)
 }
 
 void
-Syntax::addDependency(std::string task, std::string pre_req)
+Syntax::addDependency(const std::string & task, const std::string & pre_req)
 {
   if (_registered_tasks.find(task) == _registered_tasks.end())
     mooseError("A ", task, " is not a registered task name.");
@@ -176,25 +178,22 @@ std::string
 Syntax::isAssociated(const std::string & real_id, bool * is_parent)
 {
   /**
-   * This implementation assumes that wildcards can occur in the place of an entire token but not
-   * as
+   * This implementation assumes that wildcards can occur in the place of an entire token but not as
    * part of a token (i.e.  'Variables/ * /InitialConditions' is valid but not 'Variables/Partial*
-   * /InitialConditions'.
-   * Since maps are ordered, a reverse traversal through the registered list will always select a
-   * more specific match before a wildcard match ('*' == char(42)).
+   * /InitialConditions'. Since maps are ordered, a reverse traversal through the registered list
+   * will always select a more specific match before a wildcard match ('*' == char(42)).
    */
   bool local_is_parent;
-  if (is_parent == NULL)
+  if (is_parent == nullptr)
     is_parent = &local_is_parent; // Just so we don't have to keep checking below when we want to
                                   // set the value
-  std::multimap<std::string, ActionInfo>::reverse_iterator it;
   std::vector<std::string> real_elements, reg_elements;
   std::string return_value;
 
   MooseUtils::tokenize(real_id, real_elements);
 
   *is_parent = false;
-  for (it = _syntax_to_actions.rbegin(); it != _syntax_to_actions.rend(); ++it)
+  for (auto it = _syntax_to_actions.rbegin(); it != _syntax_to_actions.rend(); ++it)
   {
     std::string reg_id = it->first;
     if (reg_id == real_id)
@@ -233,26 +232,23 @@ Syntax::isAssociated(const std::string & real_id, bool * is_parent)
   if (*is_parent)
     return return_value;
   else
-    return std::string("");
+    return "";
 }
 
-std::pair<std::multimap<std::string, Syntax::ActionInfo>::iterator,
-          std::multimap<std::string, Syntax::ActionInfo>::iterator>
-Syntax::getActions(const std::string & name)
+std::pair<std::multimap<std::string, Syntax::ActionInfo>::const_iterator,
+          std::multimap<std::string, Syntax::ActionInfo>::const_iterator>
+Syntax::getActions(const std::string & syntax) const
 {
-  return _syntax_to_actions.equal_range(name);
+  return _syntax_to_actions.equal_range(syntax);
 }
 
 bool
 Syntax::verifyMooseObjectTask(const std::string & base, const std::string & task) const
 {
-  std::pair<std::multimap<std::string, std::string>::const_iterator,
-            std::multimap<std::string, std::string>::const_iterator>
-      iters = _moose_systems_to_tasks.equal_range(base);
+  auto iters = _moose_systems_to_tasks.equal_range(base);
 
-  for (std::multimap<std::string, std::string>::const_iterator it = iters.first; it != iters.second;
-       ++it)
-    if (task == it->second)
+  for (const auto & task_it : as_range(iters))
+    if (task == task_it.second)
       return true;
 
   return false;
@@ -262,6 +258,18 @@ void
 Syntax::registerSyntaxType(const std::string & syntax, const std::string & type)
 {
   _associated_types.insert(std::make_pair(syntax, type));
+}
+
+const std::multimap<std::string, std::string> &
+Syntax::getAssociatedTypes() const
+{
+  return _associated_types;
+}
+
+const std::multimap<std::string, Syntax::ActionInfo> &
+Syntax::getAssociatedActions() const
+{
+  return _syntax_to_actions;
 }
 
 FileLineInfo
