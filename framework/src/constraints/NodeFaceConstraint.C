@@ -84,31 +84,7 @@ NodeFaceConstraint::NodeFaceConstraint(const InputParameters & parameters)
 
     _overwrite_slave_residual(true)
 {
-  if (parameters.isParamValid("tangential_tolerance"))
-  {
-    _penetration_locator.setTangentialTolerance(getParam<Real>("tangential_tolerance"));
-  }
-  if (isParamValid("normal_smoothing_method"))
-  {
-    MooseEnum smoothing_method = getParam<MooseEnum>("normal_smoothing_method");
-    if (smoothing_method == "edge_based")
-    {
-      if (!isParamValid("normal_smoothing_distance"))
-        mooseError(
-            name(),
-            ": For edge based normal smoothing, normal_smoothing_distance parameter must be set.");
-      _penetration_locator.setEdgeBaseSmoothingMethod(getParam<Real>("normal_smoothing_distance"));
-    }
-    else if (smoothing_method == "nodal_normal_based")
-    {
-      if (!isParamValid("nodal_normals"))
-        mooseError(name(),
-                   ": For nodal nodal based smoothing, nodal_normals parameter must be set.");
-      _penetration_locator.setNodalNormalSmoothingMethod(getParam<UserObjectName>("nodal_normals"));
-    }
-    else
-      mooseError(name(), ": Unknown smoothing method.");
-  }
+  _penetration_locator.setFromParameters(name(), parameters);
   // Put a "1" into test_slave
   // will always only have one entry that is 1
   _test_slave[0].push_back(1);

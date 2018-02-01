@@ -221,3 +221,31 @@ PenetrationLocator::setNodalNormalSmoothingMethod(const UserObjectName & uo_name
   _normal_smoothing_method = NSM_NODAL_NORMAL_BASED;
   _nodal_normals_uo = uo_name;
 }
+
+void
+PenetrationLocator::setFromParameters(const std::string & name, const InputParameters & parameters)
+{
+  if (parameters.isParamValid("tangential_tolerance"))
+    setTangentialTolerance(parameters.get<Real>("tangential_tolerance"));
+
+  if (parameters.isParamValid("normal_smoothing_method"))
+  {
+    MooseEnum smoothing_method = parameters.get<MooseEnum>("normal_smoothing_method");
+    if (smoothing_method == "edge_based")
+    {
+      if (!parameters.isParamValid("normal_smoothing_distance"))
+        mooseError(
+            name,
+            ": For edge based normal smoothing, normal_smoothing_distance parameter must be set.");
+      setEdgeBaseSmoothingMethod(parameters.get<Real>("normal_smoothing_distance"));
+    }
+    else if (smoothing_method == "nodal_normal_based")
+    {
+      if (!parameters.isParamValid("nodal_normals"))
+        mooseError(name, ": For nodal nodal based smoothing, nodal_normals parameter must be set.");
+      setNodalNormalSmoothingMethod(parameters.get<UserObjectName>("nodal_normals"));
+    }
+    else
+      mooseError(name, ": Unknown smoothing method.");
+  }
+}

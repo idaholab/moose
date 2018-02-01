@@ -94,6 +94,14 @@ public:
   void setNodalNormalSmoothingMethod(const UserObjectName & uo_name);
   Real getTangentialTolerance() { return _tangential_tolerance; }
 
+  /**
+   * Setup the locator using the InputParameters of a MOOSE object
+   *
+   * @param name The name of the MOOSE object calling this method - used for error reporting
+   * @param parameters The input parameter of the calling user object
+   */
+  void setFromParameters(const std::string & name, const InputParameters & parameters);
+
 protected:
   /// Check whether found candidates are reasonable
   bool _check_whether_reasonable;
