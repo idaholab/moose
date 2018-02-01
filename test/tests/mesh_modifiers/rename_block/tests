@@ -4,6 +4,11 @@
     input = 'rename1.i'
     exodiff = 'rename1_out.e'
   [../]
+  [./rename2]
+    type = 'Exodiff'
+    input = 'rename2.i'
+    exodiff = 'rename2_out.e'
+  [../]
 
   [./except1]
     type = 'RunException'
