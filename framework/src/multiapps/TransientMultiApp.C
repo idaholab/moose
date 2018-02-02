@@ -415,8 +415,7 @@ TransientMultiApp::solveStep(Real dt, Real target_time, bool auto_advance)
 
               while (!caught_up && catch_up_step < _max_catch_up_steps)
               {
-                Moose::err << "Solving " << name() << " catch up step " << catch_up_step
-                           << std::endl;
+                _console << "Solving " << name() << " catch up step " << catch_up_step << std::endl;
                 ex->incrementStepOrReject();
 
                 ex->computeDT();
@@ -426,7 +425,7 @@ TransientMultiApp::solveStep(Real dt, Real target_time, bool auto_advance)
                 if (ex->lastSolveConverged())
                 {
                   if (ex->getTime() + app_time_offset +
-                          ex->timestepTol() * std::abs(ex->getTime()) >=
+                          (ex->timestepTol() * std::abs(ex->getTime())) >=
                       target_time)
                   {
                     problem.outputStep(EXEC_FORCED);
@@ -462,10 +461,10 @@ TransientMultiApp::solveStep(Real dt, Real target_time, bool auto_advance)
 
               Real catch_up_dt = dt / 2;
 
-              while (!caught_up && catch_up_step < _max_catch_up_steps)
+              // Note: this loop will _break_ if target_time is satisfied
+              while (catch_up_step < _max_catch_up_steps)
               {
-                Moose::err << "Solving " << name() << " catch up step " << catch_up_step
-                           << std::endl;
+                _console << "Solving " << name() << " catch up step " << catch_up_step << std::endl;
                 ex->incrementStepOrReject();
 
                 ex->computeDT();
@@ -477,7 +476,8 @@ TransientMultiApp::solveStep(Real dt, Real target_time, bool auto_advance)
 
                 if (ex->lastSolveConverged())
                 {
-                  if (current_time + app_time_offset + ex->timestepTol() * std::abs(current_time) >=
+                  if (current_time + app_time_offset +
+                          (ex->timestepTol() * std::abs(current_time)) >=
                       target_time)
                   {
                     caught_up = true;
