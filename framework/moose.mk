@@ -133,8 +133,9 @@ define unity_file_rule
 $(1):$(2) | $(3)
 	@echo Creating Unity $$@
 	$$(shell echo > $$@)
-	$$(foreach srcfile,$$(filter-out $$(lastword $$^),$$^),$$(shell echo '#include"$$(srcfile)"' >> $$@))
+	$$(foreach srcfile,$(filter-out $(3),$$^),$$(shell echo '#include"$$(srcfile)"' >> $$@))
 endef
+#	$$(foreach srcfile,$$(filter-out $$(lastword $$^),$$^),$$(shell echo '#include"$$(srcfile)"' >> $$@))
 
 # 1: The directory where the unity source files will go
 # 2: The application directory
