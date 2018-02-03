@@ -78,6 +78,8 @@ validParams<ContactAction>()
 
   params.addParam<Real>("al_frictional_force_tolerance",
                         "The tolerance of the frictional force for augmented Lagrangian method.");
+  params.addParam<bool>(
+      "print_contact_nodes", false, "Whether to print the number of nodes in contact.");
   return params;
 }
 
@@ -150,6 +152,7 @@ ContactAction::act()
       params.set<std::vector<VariableName>>("displacements") = coupled_displacements;
       params.set<BoundaryName>("boundary") = _master;
       params.set<bool>("use_displaced_mesh") = true;
+      params.set<bool>("print_contact_nodes") = getParam<bool>("print_contact_nodes");
 
       for (unsigned int i = 0; i < ndisp; ++i)
       {

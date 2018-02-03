@@ -469,7 +469,7 @@ MechanicalContactConstraint::shouldApply()
       if (pinfo->isCaptured())
       {
         in_contact = true;
-        if (is_nonlinear)
+        if (is_nonlinear && _print_contact_nodes)
           _current_contact_state.insert(pinfo->_node->id());
       }
     }
@@ -1783,12 +1783,13 @@ MechanicalContactConstraint::residualEnd()
 {
   if (_component == 0 && _print_contact_nodes)
   {
+    _communicator.set_union(_current_contact_state, 0);
     if (_current_contact_state == _old_contact_state)
-      mooseWarning(
-          "Unchanged contact state. ", _current_contact_state.size(), " nodes in contact.");
+      _console << "Unchanged contact state. " << _current_contact_state.size()
+               << " nodes in contact.\n";
     else
-      mooseWarning(
-          "Changed contact state!!! ", _current_contact_state.size(), " nodes in contact.");
+      _console << "Changed contact state!!! " << _current_contact_state.size()
+               << " nodes in contact.\n";
 
     _old_contact_state = _current_contact_state;
     _current_contact_state.clear();
