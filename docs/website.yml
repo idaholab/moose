@@ -55,6 +55,7 @@
                 - Manual Install: docs/content/getting_started/installation/manual_installation.md
             - Documentation:
                 - Systems: docs/content/documentation/systems/index.md
+                - Application Development: docs/content/documentation/application_development/index.md
                 - Interfaces: docs/content/documentation/interfaces/index.md
                 - Modules: docs/content/documentation/modules/index.md
                 - MooseUtils: docs/content/documentation/MooseUtils/index.md
