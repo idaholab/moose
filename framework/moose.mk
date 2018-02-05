@@ -1,5 +1,5 @@
 # Whether or not to do a Unity build
-MOOSE_UNITY ?= true
+MOOSE_UNITY ?= false
 
 #
 # MOOSE
