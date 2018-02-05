@@ -7,6 +7,7 @@
 #include <set>
 
 #include "parse.h"
+#include "braceexpr.h"
 
 class Flags;
 std::vector<std::string> parseOpts(int argc, char ** argv, Flags & flags);
@@ -32,6 +33,21 @@ main(int argc, char ** argv)
     return validate(argc - 2, argv + 2);
   else if (subcmd == "format")
     return format(argc - 2, argv + 2);
+  else if (subcmd == "braceexpr")
+  {
+    std::stringstream ss;
+    for (std::string line; std::getline(std::cin, line);)
+      ss << line << std::endl;
+
+    BraceExpander expander;
+    EnvEvaler env;
+    RawEvaler raw;
+    expander.registerEvaler("env", env);
+    expander.registerEvaler("raw", raw);
+    std::cout << expander.expand(ss.str()) << "\n";
+
+    return 0;
+  }
 
   std::cerr << "unrecognized subcommand '" << subcmd << "'\n";
   return 1;
