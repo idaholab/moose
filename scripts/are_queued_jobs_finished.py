@@ -9,6 +9,7 @@
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
 import sys, os, json, re, subprocess
+from tempfile import TemporaryFile
 
 class Jobs:
     """ Class to manage I/O to the supplied json file """
@@ -45,21 +46,34 @@ def getQueuedJobIDs(jobs):
 
 def getJobStatus(job_ids):
     """ run qstat and return tuple of (job_id, status) """
-    qstat_cmd = ['qstat', '-x']
+    results = ''
+    qstat_cmd = ['qstat', '-xf']
     qstat_cmd.extend(job_ids)
-    process = subprocess.Popen(qstat_cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    results = process.communicate()
+    t = TemporaryFile()
+    process = subprocess.Popen(qstat_cmd, stdout=t)
+    process.wait()
     if process.returncode != 0:
         sys.exit(1)
     else:
-        parsed_statuses = re.findall(r'(\d+).*\d+ (\w)', results[0])
-        return parsed_statuses
+        t.seek(0)
+        results = t.read()
+
+    t.close()
+    return results
 
 def updateStatus(jobs, finished_jobs):
     """ loop through jobs and adjust the status for those supplied in finished_jobs """
     for job, meta in jobs.getJobs().iteritems():
-        if 'job_id' in meta and meta['job_id'] in finished_jobs and meta['status_bucket']['status'] == 'QUEUED':
-            meta['status_bucket']['status'] = 'WAITING'
+        # Use list splicing to simplify the search process
+        if 'job_id' in meta \
+           and meta['job_id'] in finished_jobs[0::2] \
+           and meta['status_bucket']['status'] == 'QUEUED':
+
+            my_status = finished_jobs[finished_jobs.index(meta['job_id']) + 1]
+
+            if my_status['status'] == 'FAIL':
+                meta['caveat_message'] = 'Killed by PBS'
+            meta['status_bucket'] = my_status
 
 def isFinished(jobs):
     """ Update job statuses, and return bool if all jobs are finished. """
@@ -68,11 +82,21 @@ def isFinished(jobs):
     if previously_queued_ids:
         current_statuses = getJobStatus(previously_queued_ids)
         finished_jobs = []
-        for job_id, status in current_statuses:
-            if status != 'F':
-                is_finished = False
-                continue
-            finished_jobs.append(job_id)
+        for job in current_statuses.split('\n\n'):
+            if job:
+                job_id = re.search(r'^Job Id: (\d+)\.[\W\w]+$', job).group(1)
+                job_state = re.search(r'job_state = (\w)', job).group(1)
+                if job_state == 'F':
+                    job_status = {'status' :'WAITING', 'color' : 'CYAN' }
+
+                    # if exit status is non-zero, fail the job
+                    if int(re.search(r'Exit_status = (\d+)', job).group(1)):
+                        job_status = { 'status' :'FAIL', 'color' : 'RED' }
+
+                    finished_jobs.extend([job_id, job_status])
+                else:
+                    is_finished = False
+
         updateStatus(jobs, finished_jobs)
 
     jobs.saveJobs()
