@@ -1,7 +1,7 @@
 [Tests]
   [./circle_quads]
-    type = 'Exodiff'
-    input = 'circle_quads.i'
-    exodiff = 'circle_quads_out.e'
+    type = 'RunApp'
+    input = 'meta_multiple_tasks.i'
+    expect_out = 'Adding variable var1.*Adding material mat1.*Adding kernel kern1'
   [../]
 []

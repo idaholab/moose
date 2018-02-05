@@ -8,53 +8,59 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "AddMatAndKernel.h"
-#include "Parser.h"
 #include "FEProblem.h"
 #include "Factory.h"
-#include "MooseEnum.h"
 #include "AddVariableAction.h"
-#include "Conversion.h"
-#include "DirichletBC.h"
-
-#include <sstream>
-#include <stdexcept>
-
-#include "libmesh/libmesh.h"
-#include "libmesh/exodusII_io.h"
-#include "libmesh/equation_systems.h"
-#include "libmesh/nonlinear_implicit_system.h"
-#include "libmesh/explicit_system.h"
-#include "libmesh/string_to_enum.h"
-#include "libmesh/fe.h"
 
 template <>
 InputParameters
 validParams<AddMatAndKernel>()
 {
   InputParameters params = validParams<AddVariableAction>();
+  params.addParam<bool>("verbose",
+                        false,
+                        "Boolean which causes the Action to print information"
+                        "about what its doing");
   return params;
 }
 
-AddMatAndKernel::AddMatAndKernel(const InputParameters & params) : AddVariableAction(params) {}
+AddMatAndKernel::AddMatAndKernel(const InputParameters & params)
+  : AddVariableAction(params), _verbose(getParam<bool>("verbose"))
+{
+}
 
 void
 AddMatAndKernel::act()
 {
-  std::string var_name = "var1";
+  const std::string var_name = "var1";
   if (_current_task == "add_variable")
+  {
+    if (_verbose)
+      _console << "AddMatAndKernel: Adding variable " << var_name << '\n';
+
     addVariable(var_name);
+  }
   else if (_current_task == "add_kernel")
   {
+    const std::string kernel_name = "kern1";
+
+    if (_verbose)
+      _console << "AddMatAndKernel: Adding kernel " << kernel_name << '\n';
+
     InputParameters params = _factory.getValidParams("MatDiffusion");
     params.set<NonlinearVariableName>("variable") = var_name;
     params.set<MaterialPropertyName>("prop_name") = "prop1";
-    _problem->addKernel("MatDiffusion", "kern1", params);
+    _problem->addKernel("MatDiffusion", kernel_name, params);
   }
   else if (_current_task == "add_material")
   {
+    const std::string mat_name = "mat1";
+    if (_verbose)
+      _console << "AddMatAndKernel: Adding material " << mat_name << '\n';
+
     InputParameters params = _factory.getValidParams("GenericConstantMaterial");
     params.set<std::vector<std::string>>("prop_names") = {"prop1"};
     params.set<std::vector<Real>>("prop_values") = {42};
-    _problem->addMaterial("GenericConstantMaterial", "mat1", params);
+    _problem->addMaterial("GenericConstantMaterial", mat_name, params);
   }
 }

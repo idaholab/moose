@@ -7,28 +7,28 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "MetaNodalNormalsAction.h"
+#include "MetaMultipleTasksAction.h"
 #include "ActionFactory.h"
 #include "ActionWarehouse.h"
 
 template <>
 InputParameters
-validParams<MetaNodalNormalsAction>()
+validParams<MetaMultipleTasksAction>()
 {
   InputParameters params = validParams<Action>();
   return params;
 }
 
-MetaNodalNormalsAction::MetaNodalNormalsAction(const InputParameters & params) : Action(params) {}
+MetaMultipleTasksAction::MetaMultipleTasksAction(const InputParameters & params) : Action(params) {}
 
 void
-MetaNodalNormalsAction::act()
+MetaMultipleTasksAction::act()
 {
-  InputParameters object_params = _action_factory.getValidParams("AddNodalNormalsAction");
+  InputParameters object_params = _action_factory.getValidParams("AddMatAndKernel");
   object_params.set<ActionWarehouse *>("awh") = &_awh;
+  object_params.set<bool>("verbose") = true;
 
   // Create and Add First Variable Action
-  auto action =
-      _action_factory.create("AddNodalNormalsAction", "AddNodalNormalsAction", object_params);
+  auto action = _action_factory.create("AddMatAndKernel", "AddMatAndKernel", object_params);
   _awh.addActionBlock(action);
 }

@@ -7,20 +7,20 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef METANODALNORMALSACTION_H
-#define METANODALNORMALSACTION_H
+#ifndef METAMULTIPLETASKSACTION_H
+#define METAMULTIPLETASKSACTION_H
 
 #include "Action.h"
 
-class MetaNodalNormalsAction : public Action
+class MetaMultipleTasksAction : public Action
 {
 public:
-  MetaNodalNormalsAction(const InputParameters & params);
+  MetaMultipleTasksAction(const InputParameters & params);
 
   virtual void act();
 };
 
 template <>
-InputParameters validParams<MetaNodalNormalsAction>();
+InputParameters validParams<MetaMultipleTasksAction>();
 
-#endif // METANODALNORMALSACTION_H
+#endif // METAMULTIPLETASKSACTION_H

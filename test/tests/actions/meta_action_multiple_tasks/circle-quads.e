@@ -1,1 +1,0 @@
-../../bcs/nodal_normals/circle-quads.e
