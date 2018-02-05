@@ -18,8 +18,10 @@
 #include "Output.h"
 #include "TimeStepper.h"
 #include "Transient.h"
+#include "NonlinearSystem.h"
 
 #include "libmesh/mesh_tools.h"
+#include "libmesh/numeric_vector.h"
 
 template <>
 InputParameters
@@ -72,6 +74,12 @@ validParams<TransientMultiApp>()
       false,
       "If true this will allow failed solves to attempt to 'catch up' using smaller timesteps.");
 
+  params.addParam<bool>("keep_solution_during_restore",
+                        false,
+                        "This is useful when doing Picard with catch_up steps.  It takes the "
+                        "solution from the final catch_up step and re-uses it as the initial guess "
+                        "for the next picard iteration");
+
   params.addParam<Real>("max_catch_up_steps",
                         2,
                         "Maximum number of steps to allow an app to take "
@@ -93,6 +101,7 @@ TransientMultiApp::TransientMultiApp(const InputParameters & parameters)
     _failures(0),
     _catch_up(getParam<bool>("catch_up")),
     _max_catch_up_steps(getParam<Real>("max_catch_up_steps")),
+    _keep_solution_during_restore(getParam<bool>("keep_solution_during_restore")),
     _first(declareRecoverableData<bool>("first", true)),
     _auto_advance(false),
     _print_sub_cycles(getParam<bool>("print_sub_cycles"))
@@ -108,6 +117,18 @@ TransientMultiApp::TransientMultiApp(const InputParameters & parameters)
     mooseError("MultiApp ",
                name(),
                " sub_cycling and catch_up cannot both be set to true simultaneously.");
+
+  if (_sub_cycling && _keep_solution_during_restore)
+    mooseError("In MultiApp ",
+               name(),
+               " it doesn't make any sense to keep a solution during restore when doing "
+               "sub_cycling.  Consider trying catch_up steps instead");
+
+  if (!_catch_up && _keep_solution_during_restore)
+    mooseError("In MultiApp ",
+               name(),
+               " `keep_solution_during_restore` requires `catch_up = true`.  Either disable "
+               "`keep_solution_during_restart` or set `catch_up = true`");
 }
 
 NumericVector<Number> &
@@ -139,6 +160,35 @@ TransientMultiApp::initialSetup()
     // Grab Transient Executioners from each app
     for (unsigned int i = 0; i < _my_num_apps; i++)
       setupApp(i);
+  }
+}
+
+void
+TransientMultiApp::restore()
+{
+  // Must be restarting / recovering so hold off on restoring
+  // Instead - the restore will happen in createApp()
+  // Note that _backups was already populated by dataLoad()
+  if (_apps.empty())
+    return;
+
+  if (_keep_solution_during_restore)
+  {
+    _end_solutions.resize(_my_num_apps);
+
+    for (unsigned int i = 0; i < _my_num_apps; i++)
+      _end_solutions[i] =
+          _apps[i]->getExecutioner()->feProblem().getNonlinearSystem().solution().clone();
+  }
+
+  MultiApp::restore();
+
+  if (_keep_solution_during_restore)
+  {
+    for (unsigned int i = 0; i < _my_num_apps; i++)
+      _apps[i]->getExecutioner()->feProblem().getNonlinearSystem().solution() = *_end_solutions[i];
+
+    _end_solutions.clear();
   }
 }
 
@@ -365,8 +415,7 @@ TransientMultiApp::solveStep(Real dt, Real target_time, bool auto_advance)
 
               while (!caught_up && catch_up_step < _max_catch_up_steps)
               {
-                Moose::err << "Solving " << name() << " catch up step " << catch_up_step
-                           << std::endl;
+                _console << "Solving " << name() << " catch up step " << catch_up_step << std::endl;
                 ex->incrementStepOrReject();
 
                 ex->computeDT();
@@ -376,7 +425,7 @@ TransientMultiApp::solveStep(Real dt, Real target_time, bool auto_advance)
                 if (ex->lastSolveConverged())
                 {
                   if (ex->getTime() + app_time_offset +
-                          ex->timestepTol() * std::abs(ex->getTime()) >=
+                          (ex->timestepTol() * std::abs(ex->getTime())) >=
                       target_time)
                   {
                     problem.outputStep(EXEC_FORCED);
@@ -396,8 +445,62 @@ TransientMultiApp::solveStep(Real dt, Real target_time, bool auto_advance)
             }
           }
         }
-        else if (!ex->lastSolveConverged())
-          throw MultiAppSolveFailure(name() + " failed to converge");
+        else
+        {
+          if (!ex->lastSolveConverged())
+          {
+            // Even if we don't allow auto_advance - we can still catch up to the current time if
+            // possible
+            if (_catch_up)
+            {
+              _console << "Starting Catch Up!" << std::endl;
+
+              bool caught_up = false;
+
+              unsigned int catch_up_step = 0;
+
+              Real catch_up_dt = dt / 2;
+
+              // Note: this loop will _break_ if target_time is satisfied
+              while (catch_up_step < _max_catch_up_steps)
+              {
+                _console << "Solving " << name() << " catch up step " << catch_up_step << std::endl;
+                ex->incrementStepOrReject();
+
+                ex->computeDT();
+                ex->takeStep(catch_up_dt); // Cut the timestep in half to try two half-step solves
+
+                // This is required because we can't call endStep() yet
+                // (which normally increments time)
+                Real current_time = ex->getTime() + ex->getDT();
+
+                if (ex->lastSolveConverged())
+                {
+                  if (current_time + app_time_offset +
+                          (ex->timestepTol() * std::abs(current_time)) >=
+                      target_time)
+                  {
+                    caught_up = true;
+                    break; // break here so that we don't run endStep() or postStep() since this
+                           // MultiApp should NOT be auto_advanced
+                  }
+                }
+                else
+                  catch_up_dt /= 2.0;
+
+                ex->endStep();
+                ex->postStep();
+
+                catch_up_step++;
+              }
+
+              if (!caught_up)
+                throw MultiAppSolveFailure(name() + " Failed to catch up!\n");
+            }
+            else
+              throw MultiAppSolveFailure(name() + " failed to converge");
+          }
+        }
       }
 
       // Re-enable all output (it may of been disabled by sub-cycling)

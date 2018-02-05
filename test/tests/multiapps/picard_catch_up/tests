@@ -1,0 +1,12 @@
+[Tests]
+  [./test]
+    type = 'Exodiff'
+    input = 'master.i'
+    exodiff = 'master_out_sub0.e master_out.e'
+    max_parallel = 1 # This is here because we're counting residual evaluations
+    max_threads = 1 # NanAtCountKernel changes behavior with threads
+    recover = false
+    petsc_version = '>=3.6.1'
+    allow_warnings = true
+  [../]
+[]
