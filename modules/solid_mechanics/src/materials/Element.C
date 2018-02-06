@@ -16,7 +16,7 @@ namespace SolidMechanics
 
 Element::Element(SolidModel & solid_model,
                  const std::string & /*name*/,
-                 const InputParameters & parameters)
+                 const InputParameters & /*parameters*/)
   : Coupleable(&solid_model, false), _solid_model(solid_model)
 {
 }
