@@ -31,6 +31,7 @@ private:
   std::vector<EFAFace *> _faces;
   std::vector<EFAVolumeNode *> _interior_nodes;
   std::vector<std::vector<EFAElement3D *>> _face_neighbors;
+  std::vector<std::vector<std::vector<EFAElement3D *>>> _face_edge_neighbors;
   std::vector<EFAFragment3D *> _fragments;
   std::vector<std::vector<EFAFace *>> _faces_adjacent_to_faces;
   unsigned int _num_vertices;
@@ -53,6 +54,11 @@ public:
 
   bool overlaysElement(const EFAElement3D * other_elem) const;
   virtual unsigned int getNeighborIndex(const EFAElement * neighbor_elem) const;
+  virtual void getNeighborEdgeIndex(const EFAElement3D * neighbor_elem,
+                                    unsigned int face_id,
+                                    unsigned int edge_id,
+                                    unsigned int & neigh_face_id,
+                                    unsigned int & neigh_edge_id) const;
   virtual void clearNeighbors();
   virtual void setupNeighbors(std::map<EFANode *, std::set<EFAElement *>> & InverseConnectivityMap);
   virtual void neighborSanityCheck() const;
@@ -99,6 +105,9 @@ public:
   EFAFace * getFace(unsigned int face_id) const;
   unsigned int getFaceID(EFAFace * face) const;
   std::vector<unsigned int> getCommonFaceID(const EFAElement3D * other_elem) const;
+  bool getCommonEdgeID(const EFAElement3D * other_elem,
+                       std::vector<unsigned int> & face_id,
+                       std::vector<unsigned int> & edge_id) const;
   unsigned int getNeighborFaceNodeID(unsigned int face_id,
                                      unsigned int node_id,
                                      EFAElement3D * neighbor_elem) const;
@@ -122,7 +131,10 @@ public:
   isPhysicalEdgeCut(unsigned int ElemFaceID, unsigned int ElemFaceEdgeID, double position) const;
   bool isFacePhantom(unsigned int face_id) const;
   unsigned int numFaceNeighbors(unsigned int face_id) const;
+  unsigned int numEdgeNeighbors(unsigned int face_id, unsigned int edge_id) const;
   EFAElement3D * getFaceNeighbor(unsigned int face_id, unsigned int neighbor_id) const;
+  EFAElement3D *
+  getEdgeNeighbor(unsigned int face_id, unsigned int edge_id, unsigned int neighbor_id) const;
 
   bool fragmentHasTipFaces() const;
   std::vector<unsigned int> getTipFaceIDs() const;

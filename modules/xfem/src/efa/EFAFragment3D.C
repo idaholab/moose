@@ -127,6 +127,23 @@ EFAFragment3D::isConnected(EFAFragment * other_fragment) const
   return is_connected;
 }
 
+bool
+EFAFragment3D::isEdgeConnected(EFAFragment * other_fragment) const
+{
+  EFAFragment3D * other_frag3d = dynamic_cast<EFAFragment3D *>(other_fragment);
+  if (!other_frag3d)
+    EFAError("in isEdgeConnected other_fragment is not of type EFAfragement3D");
+
+  for (unsigned int i = 0; i < _faces.size(); ++i)
+    for (unsigned int j = 0; j < _faces[i]->numEdges(); ++j)
+      for (unsigned int k = 0; k < other_frag3d->numFaces(); ++k)
+        for (unsigned int l = 0; l < other_frag3d->_faces[k]->numEdges(); ++l)
+          if (_faces[i]->getEdge(j)->equivalent(*(other_frag3d->_faces[k]->getEdge(l))))
+            return true;
+
+  return false;
+}
+
 void
 EFAFragment3D::removeInvalidEmbeddedNodes(std::map<unsigned int, EFANode *> & EmbeddedNodes)
 {

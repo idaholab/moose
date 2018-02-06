@@ -25,7 +25,8 @@ EFAElement3D::EFAElement3D(unsigned int eid, unsigned int n_nodes, unsigned int 
   : EFAElement(eid, n_nodes),
     _num_faces(n_faces),
     _faces(_num_faces, NULL),
-    _face_neighbors(_num_faces, {nullptr})
+    _face_neighbors(_num_faces),
+    _face_edge_neighbors(_num_faces)
 {
   if (_num_faces == 4)
   {
@@ -58,7 +59,8 @@ EFAElement3D::EFAElement3D(const EFAElement3D * from_elem, bool convert_to_local
   : EFAElement(from_elem->_id, from_elem->_num_nodes),
     _num_faces(from_elem->_num_faces),
     _faces(_num_faces, NULL),
-    _face_neighbors(_num_faces, {nullptr})
+    _face_neighbors(_num_faces),
+    _face_edge_neighbors(_num_faces)
 {
   if (convert_to_local)
   {
@@ -219,7 +221,7 @@ EFAElement3D::setLocalCoordinates()
       _local_node_coor[26] = EFAPoint(0.5, 0.5, 0.5);
     }
   }
-  else
+  else if (_num_faces == 4)
   {
     /*
                   3
@@ -259,6 +261,8 @@ EFAElement3D::setLocalCoordinates()
       _local_node_coor[9] = EFAPoint(0.0, 0.5, 0.5);
     }
   }
+  else
+    EFAError("EFAElement3D: number of faces should be either 4(TET) or 6(HEX).");
 }
 
 unsigned int
@@ -457,9 +461,35 @@ EFAElement3D::getNeighborIndex(const EFAElement * neighbor_elem) const
     for (unsigned int j = 0; j < _face_neighbors[i].size(); ++j)
       if (_face_neighbors[i][j] == neighbor_elem)
         return i;
-  EFAError(
-      "in get_neighbor_index() element ", _id, " does not have neighbor ", neighbor_elem->id());
+  EFAError("in getNeighborIndex() element ", _id, " does not have neighbor ", neighbor_elem->id());
   return 99999;
+}
+
+void
+EFAElement3D::getNeighborEdgeIndex(const EFAElement3D * neighbor_elem,
+                                   unsigned int face_id,
+                                   unsigned int edge_id,
+                                   unsigned int & neigh_face_id,
+                                   unsigned int & neigh_edge_id) const
+{
+  EFAEdge * edge = this->getFace(face_id)->getEdge(edge_id);
+  for (unsigned int i = 0; i < neighbor_elem->numFaces(); ++i)
+  {
+    for (unsigned int j = 0; j < neighbor_elem->getFace(i)->numEdges(); ++j)
+    {
+      EFAEdge * neigh_edge = neighbor_elem->getFace(i)->getEdge(j);
+      if (neigh_edge->equivalent(*edge))
+      {
+        neigh_face_id = i;
+        neigh_edge_id = j;
+        return;
+      }
+    }
+  }
+  EFAError("in getNeighborEdgeIndex() element ",
+           _id,
+           " does not share a common edge with element",
+           neighbor_elem->id());
 }
 
 void
@@ -467,7 +497,11 @@ EFAElement3D::clearNeighbors()
 {
   _general_neighbors.clear();
   for (unsigned int face_iter = 0; face_iter < _num_faces; ++face_iter)
-    _face_neighbors[face_iter] = {nullptr};
+  {
+    _face_neighbors[face_iter].clear();
+    for (unsigned int edge_iter = 0; edge_iter < _faces[face_iter]->numEdges(); ++edge_iter)
+      _face_edge_neighbors[face_iter][edge_iter].clear();
+  }
 }
 
 void
@@ -481,6 +515,36 @@ EFAElement3D::setupNeighbors(std::map<EFANode *, std::set<EFAElement *>> & Inver
       EFAError("neighbor_elem is not of EFAelement3D type");
 
     std::vector<unsigned int> common_face_id = getCommonFaceID(neigh_elem);
+    std::vector<unsigned int> face_ids, edge_ids;
+    if (common_face_id.size() == 0 && getCommonEdgeID(neigh_elem, face_ids, edge_ids) &&
+        !overlaysElement(neigh_elem))
+    {
+      bool is_edge_neighbor = false;
+
+      // Fragments must match up.
+      if ((_fragments.size() > 1) || (neigh_elem->numFragments() > 1))
+      {
+        EFAError("in updateFaceNeighbors: Cannot have more than 1 fragment");
+      }
+      else if ((_fragments.size() == 1) && (neigh_elem->numFragments() == 1))
+      {
+        if (_fragments[0]->isEdgeConnected(neigh_elem->getFragment(0)))
+          is_edge_neighbor = true;
+      }
+      else // If there are no fragments to match up, consider them edge neighbors
+        is_edge_neighbor = true;
+
+      if (is_edge_neighbor)
+      {
+        for (unsigned int i = 0; i < face_ids.size(); ++i)
+        {
+          unsigned int face_id = face_ids[i];
+          unsigned int edge_id = edge_ids[i];
+          _face_edge_neighbors[face_id][edge_id].push_back(neigh_elem);
+        }
+      }
+    }
+
     if (common_face_id.size() == 1 && !overlaysElement(neigh_elem))
     {
       unsigned int face_id = common_face_id[0];
@@ -501,21 +565,16 @@ EFAElement3D::setupNeighbors(std::map<EFANode *, std::set<EFAElement *>> & Inver
 
       if (is_face_neighbor)
       {
-        if (_face_neighbors[face_id][0])
+        if (_face_neighbors[face_id].size() > 1)
         {
-          if (_face_neighbors[face_id].size() > 1)
-          {
-            EFAError("Element ",
-                     _id,
-                     " already has 2 face neighbors: ",
-                     _face_neighbors[face_id][0]->id(),
-                     " ",
-                     _face_neighbors[face_id][1]->id());
-          }
-          _face_neighbors[face_id].push_back(neigh_elem);
+          EFAError("Element ",
+                   _id,
+                   " already has 2 face neighbors: ",
+                   _face_neighbors[face_id][0]->id(),
+                   " ",
+                   _face_neighbors[face_id][1]->id());
         }
-        else
-          _face_neighbors[face_id][0] = neigh_elem;
+        _face_neighbors[face_id].push_back(neigh_elem);
       }
     }
   }
@@ -872,9 +931,8 @@ EFAElement3D::fragmentSanityCheck(unsigned int n_old_frag_faces, unsigned int n_
   }
   else // frag is thoroughly cut
   {
-    if (_fragments.size() != 2 ||
-        (_fragments[0]->numFaces() + _fragments[1]->numFaces()) !=
-            n_old_frag_faces + n_old_frag_cuts + 2)
+    if (_fragments.size() != 2 || (_fragments[0]->numFaces() + _fragments[1]->numFaces()) !=
+                                      n_old_frag_faces + n_old_frag_cuts + 2)
       EFAError("Incorrect link size for element that has been completely cut");
   }
 }
@@ -1440,6 +1498,13 @@ EFAElement3D::createFaces()
   else
     EFAError("unknown 3D element type in createFaces()");
 
+  for (unsigned int face_iter = 0; face_iter < _num_faces; ++face_iter)
+  {
+    _face_edge_neighbors[face_iter].resize(_faces[face_iter]->numEdges());
+    for (unsigned int edge_iter = 0; edge_iter < _faces[face_iter]->numEdges(); ++edge_iter)
+      _face_edge_neighbors[face_iter][edge_iter].clear();
+  }
+
   // create element face connectivity array
   findFacesAdjacentToFaces(); // IMPORTANT
 }
@@ -1485,6 +1550,40 @@ EFAElement3D::getCommonFaceID(const EFAElement3D * other_elem) const
     }
   }
   return face_id;
+}
+
+bool
+EFAElement3D::getCommonEdgeID(const EFAElement3D * other_elem,
+                              std::vector<unsigned int> & face_id,
+                              std::vector<unsigned int> & edge_id) const
+{
+  bool has_common_edge = false;
+  bool move_to_next_edge = false;
+  face_id.clear();
+  edge_id.clear();
+  for (unsigned int i = 0; i < _num_faces; ++i)
+    for (unsigned int j = 0; j < _faces[i]->numEdges(); ++j)
+    {
+      move_to_next_edge = false;
+      for (unsigned int k = 0; k < other_elem->_num_faces; ++k)
+      {
+        for (unsigned int l = 0; l < other_elem->_faces[k]->numEdges(); ++l)
+          if ((_faces[i]->getEdge(j)->equivalent(*(other_elem->_faces[k]->getEdge(l)))) &&
+              !(_faces[i]->equivalent(other_elem->_faces[k])))
+          {
+            face_id.push_back(i);
+            edge_id.push_back(j);
+            move_to_next_edge = true;
+            has_common_edge = true;
+            break;
+          }
+
+        if (move_to_next_edge)
+          break;
+      }
+    }
+
+  return has_common_edge;
 }
 
 unsigned int
@@ -1740,10 +1839,13 @@ EFAElement3D::isFacePhantom(unsigned int face_id) const
 unsigned int
 EFAElement3D::numFaceNeighbors(unsigned int face_id) const
 {
-  unsigned int num_neighbors = 0;
-  if (_face_neighbors[face_id][0])
-    num_neighbors = _face_neighbors[face_id].size();
-  return num_neighbors;
+  return _face_neighbors[face_id].size();
+}
+
+unsigned int
+EFAElement3D::numEdgeNeighbors(unsigned int face_id, unsigned int edge_id) const
+{
+  return _face_edge_neighbors[face_id][edge_id].size();
 }
 
 EFAElement3D *
@@ -1751,6 +1853,17 @@ EFAElement3D::getFaceNeighbor(unsigned int face_id, unsigned int neighbor_id) co
 {
   if (_face_neighbors[face_id][0] != NULL && neighbor_id < _face_neighbors[face_id].size())
     return _face_neighbors[face_id][neighbor_id];
+  else
+    EFAError("edge neighbor does not exist");
+}
+
+EFAElement3D *
+EFAElement3D::getEdgeNeighbor(unsigned int face_id,
+                              unsigned int edge_id,
+                              unsigned int neighbor_id) const
+{
+  if (neighbor_id < _face_edge_neighbors[face_id][edge_id].size())
+    return _face_edge_neighbors[face_id][edge_id][neighbor_id];
   else
     EFAError("edge neighbor does not exist");
 }
@@ -1900,6 +2013,7 @@ EFAElement3D::addFaceEdgeCut(unsigned int face_id,
 
   // check if cut has already been added to this face edge
   bool cut_exist = false;
+
   if (cut_edge->hasIntersectionAtPosition(position, edge_node1))
   {
     unsigned int emb_id = cut_edge->getEmbeddedNodeIndex(position, edge_node1);
@@ -1955,6 +2069,27 @@ EFAElement3D::addFaceEdgeCut(unsigned int face_id,
       unsigned neigh_edge_id = getNeighborFaceEdgeID(face_id, edge_id, face_neighbor);
       double neigh_pos = 1.0 - position; // get emb node's postion on neighbor edge
       face_neighbor->addFaceEdgeCut(
+          neigh_face_id, neigh_edge_id, neigh_pos, local_embedded, EmbeddedNodes, false, true);
+    }
+
+    for (unsigned int en_iter = 0; en_iter < numEdgeNeighbors(face_id, edge_id); ++en_iter)
+    {
+      EFAElement3D * edge_neighbor = getEdgeNeighbor(face_id, edge_id, en_iter);
+      unsigned int neigh_face_id, neigh_edge_id;
+      getNeighborEdgeIndex(edge_neighbor, face_id, edge_id, neigh_face_id, neigh_edge_id);
+
+      // Check the ordering of the node and the assign the position
+      double neigh_pos;
+      if (_faces[face_id]->getEdge(edge_id)->getNode(0) ==
+          edge_neighbor->getFace(neigh_face_id)->getEdge(neigh_edge_id)->getNode(0))
+        neigh_pos = position;
+      else if (_faces[face_id]->getEdge(edge_id)->getNode(1) ==
+               edge_neighbor->getFace(neigh_face_id)->getEdge(neigh_edge_id)->getNode(0))
+        neigh_pos = 1.0 - position;
+      else
+        EFAError("The EFANodes on commaon edge are not matched.");
+
+      edge_neighbor->addFaceEdgeCut(
           neigh_face_id, neigh_edge_id, neigh_pos, local_embedded, EmbeddedNodes, false, true);
     }
   } // If add_to_neighbor required
