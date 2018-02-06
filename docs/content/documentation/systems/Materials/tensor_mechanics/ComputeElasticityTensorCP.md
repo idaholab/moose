@@ -44,7 +44,10 @@ The elasticity tensor is then rotated with Eq \eqref{eq:cp_elasticity_tensor_rot
   C'_{ijkl} = R^T_{im} R^T_{jn} R^T_{ko} R^T_{lp} C_{mnop}
 \end{equation}
 at the beginning of each material timestep calculation.
+The rotation matrix used in this class, `ComputeElasticityTensorCP`, is the transpose of the rotation matrix created from the Bunge Euler angles in the base class, `ComputeElasticityTensor`. This difference in the rotation matrix is because of the active rotation convention used in crystal plasticity simulations.
 
+!!! note "Crystal Plasticity Simulations use Active Rotation"
+    The crystal plasticity materials, including `ComputeElasticityTensorCP` employ an active rotation: the crystal system is rotated into the sample (loading) coordinate system. Generally the Bunge Euler angles are used to describe a passive rotation: rotating the sample coordinate system into the crystal coordinate system. As a result, the rotation tensor applied is the transpose of the rotation tensor given in \eqref{eq:rotation_tensor}.
 
 ## Example Input File Syntax
 !listing modules/tensor_mechanics/test/tests/cp_user_object/crysp.i block=Materials/elasticity_tensor
