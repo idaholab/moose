@@ -38,6 +38,11 @@ public:
    * Compute the inverse CDF (quantile function) value for given variable value y
    */
   virtual Real quantile(const Real & y) = 0;
+
+  /**
+   * Compute the median of the distribution
+   */
+  virtual Real median();
 };
 
 #endif /* DISTRIBUTION_H */

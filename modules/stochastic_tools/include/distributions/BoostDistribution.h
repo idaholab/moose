@@ -51,6 +51,7 @@ public:
   virtual Real pdf(const Real & x) override;
   virtual Real cdf(const Real & x) override;
   virtual Real quantile(const Real & y) override;
+  virtual Real median() override;
 
 protected:
   /// This must be defined by the child class in the constructor
@@ -104,6 +105,18 @@ BoostDistribution<T>::quantile(const Real & y)
   return boost::math::quantile(*_distribution_unique_ptr, y);
 #else
   return y; // unreachable
+#endif
+}
+
+template <typename T>
+Real
+BoostDistribution<T>::median()
+{
+#ifdef LIBMESH_HAVE_EXTERNAL_BOOST
+  mooseAssert(_distribution_unique_ptr, "Boost distribution pointer not defined.");
+  return boost::math::median(*_distribution_unique_ptr);
+#else
+  return 0; // unreachable
 #endif
 }
 

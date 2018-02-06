@@ -1,3 +1,6 @@
+# Test for a diffusion problem which uses four points moment_fitting approach.
+# See this paper (https://doi.org/10.1007/s00466-018-1544-2) for more details about moment_fitting approach.
+
 [GlobalParams]
   order = FIRST
   family = LAGRANGE
@@ -17,7 +20,7 @@
 
 [XFEM]
   geometric_cut_userobjects = 'line_seg_cut_uo'
-  qrule = volfrac
+  qrule = moment_fitting
   output_cut_plane = true
 []
 

@@ -81,7 +81,6 @@
 []
 
 [Outputs]
-  file_base = diffusion_flux_bc_out
   interval = 1
   execute_on = timestep_end
   exodus = true
