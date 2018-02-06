@@ -16,12 +16,12 @@
 #include "FunctionalExpansionToolsApp.h"
 #include "FunctionSeries.h"
 #include "FunctionSeriesToAux.h"
-#include "FEBoundaryValueUserObject.h"
-#include "FEBoundaryFluxUserObject.h"
-#include "FEFluxBC.h"
-#include "FEValueBC.h"
-#include "FEValuePenaltyBC.h"
-#include "FEVolumeUserObject.h"
+#include "FXBoundaryValueUserObject.h"
+#include "FXBoundaryFluxUserObject.h"
+#include "FXFluxBC.h"
+#include "FXValueBC.h"
+#include "FXValuePenaltyBC.h"
+#include "FXVolumeUserObject.h"
 #include "MultiAppMutableCoefficientsTransfer.h"
 
 template <>
@@ -57,18 +57,18 @@ FunctionalExpansionToolsApp::registerObjects(Factory & factory)
 {
   registerAuxKernel(FunctionSeriesToAux);
 
-  registerBoundaryCondition(FEValueBC);
-  registerBoundaryCondition(FEValuePenaltyBC);
-  registerBoundaryCondition(FEFluxBC);
+  registerBoundaryCondition(FXValueBC);
+  registerBoundaryCondition(FXValuePenaltyBC);
+  registerBoundaryCondition(FXFluxBC);
 
   registerFunction(FunctionSeries);
 
-  registerUserObject(FEBoundaryValueUserObject);
-  registerUserObject(FEBoundaryFluxUserObject);
-  registerUserObject(FEVolumeUserObject);
+  registerUserObject(FXBoundaryValueUserObject);
+  registerUserObject(FXBoundaryFluxUserObject);
+  registerUserObject(FXVolumeUserObject);
 
-  // MultiAppFETransfer is a typedef of MultiAppMutableCoefficientsTransfer
-  registerTransfer(MultiAppFETransfer);
+  // MultiAppFXTransfer is a typedef of MultiAppMutableCoefficientsTransfer
+  registerTransfer(MultiAppFXTransfer);
 }
 
 void

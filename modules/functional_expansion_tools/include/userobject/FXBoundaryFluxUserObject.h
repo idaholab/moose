@@ -7,25 +7,25 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef FEBOUNDARYFLUXUSEROBJECT_H
-#define FEBOUNDARYFLUXUSEROBJECT_H
+#ifndef FXBOUNDARYFLUXUSEROBJECT_H
+#define FXBOUNDARYFLUXUSEROBJECT_H
 
 // Module includes
-#include "FEBoundaryBaseUserObject.h"
+#include "FXBoundaryBaseUserObject.h"
 
 // Forward declarations
-class FEBoundaryFluxUserObject;
+class FXBoundaryFluxUserObject;
 
 template <>
-InputParameters validParams<FEBoundaryFluxUserObject>();
+InputParameters validParams<FXBoundaryFluxUserObject>();
 
 /**
- * This boundary FE evaluator calculates the flux
+ * This boundary FX evaluator calculates the flux
  */
-class FEBoundaryFluxUserObject final : public FEBoundaryBaseUserObject
+class FXBoundaryFluxUserObject final : public FXBoundaryBaseUserObject
 {
 public:
-  FEBoundaryFluxUserObject(const InputParameters & parameters);
+  FXBoundaryFluxUserObject(const InputParameters & parameters);
 
 protected:
   // Override from SideIntegralVariableUserObject
@@ -38,4 +38,4 @@ protected:
   const MaterialProperty<Real> & _diffusivity;
 };
 
-#endif // FEBOUNDARYFLUXUSEROBJECT_H
+#endif // FXBOUNDARYFLUXUSEROBJECT_H

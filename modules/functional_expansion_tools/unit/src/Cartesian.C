@@ -24,25 +24,25 @@ TEST(FunctionalExpansionsTest, legendreSeriesEvaluation)
 {
   const unsigned int order = 15;
   Real location = -0.90922108754014;
-  std::array<Real, order> truth = {{ 0.50000000000000,
+  std::array<Real, order> truth = {{0.50000000000000,
                                     -1.36383163131021,
-                                     1.85006119760378,
+                                    1.85006119760378,
                                     -1.80341832197563,
-                                     1.19175581122701,
+                                    1.19175581122701,
                                     -0.11669847057321,
                                     -1.20462734483853,
-                                     2.48341349094950,
+                                    2.48341349094950,
                                     -3.41981864606651,
-                                     3.76808851494207,
+                                    3.76808851494207,
                                     -3.39261995754146,
-                                     2.30300489952095,
+                                    2.30300489952095,
                                     -0.66011244776270,
                                     -1.24901920248131,
-                                     3.06342136027001}};
+                                    3.06342136027001}};
   Legendre legendre({FBI::_domain_options = "x"}, {order});
 
   legendre.setLocation(Point(location));
-  auto& answer = legendre.getAllOrthonormal();
+  auto & answer = legendre.getAllOrthonormal();
   for (std::size_t i = 0; i < order; ++i)
     EXPECT_NEAR(answer[i], truth[i], tol);
 }

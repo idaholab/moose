@@ -7,8 +7,8 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef FEINTEGRALBASEUSEROBJECT_H
-#define FEINTEGRALBASEUSEROBJECT_H
+#ifndef FXINTEGRALBASEUSEROBJECT_H
+#define FXINTEGRALBASEUSEROBJECT_H
 
 // MOOSE includes
 #include "AuxiliarySystem.h"
@@ -27,28 +27,28 @@
 /**
  * Class declaration for parameters - we cannot use templated types in validParams<>()
  */
-class FEIntegralBaseUserObjectParameters
+class FXIntegralBaseUserObjectParameters
 {
   // Empty class, used only for parameters
 };
 
 template <>
-InputParameters validParams<FEIntegralBaseUserObjectParameters>();
+InputParameters validParams<FXIntegralBaseUserObjectParameters>();
 
 /**
  * This class interacts with a MooseApp through functional expansions. It is templated to allow the
- * inheritance of two dual classes that operate in a volume (FEVolumeUserObject) or on a boundary
- * (FEBoundaryFluxUserObject and FEBoundaryValueUserObject)
+ * inheritance of two dual classes that operate in a volume (FXVolumeUserObject) or on a boundary
+ * (FXBoundaryFluxUserObject and FXBoundaryValueUserObject)
  *
  * It uses an instance of FunctionSeries to generate the orthonormal function series required to
  * generate the functional expansion coefficients.
  */
 template <class IntegralBaseVariableUserObject>
-class FEIntegralBaseUserObject : public IntegralBaseVariableUserObject,
+class FXIntegralBaseUserObject : public IntegralBaseVariableUserObject,
                                  public MutableCoefficientsInterface
 {
 public:
-  FEIntegralBaseUserObject(const InputParameters & parameters);
+  FXIntegralBaseUserObject(const InputParameters & parameters);
 
   /**
    * Return a reference to the underlying function series
@@ -115,10 +115,10 @@ protected:
 };
 
 template <class IntegralBaseVariableUserObject>
-FEIntegralBaseUserObject<IntegralBaseVariableUserObject>::FEIntegralBaseUserObject(
+FXIntegralBaseUserObject<IntegralBaseVariableUserObject>::FXIntegralBaseUserObject(
     const InputParameters & parameters)
   : IntegralBaseVariableUserObject(parameters),
-    MutableCoefficientsInterface(this, parameters),
+    MutableCoefficientsInterface(this, this, parameters),
     _keep_history(UserObject::getParam<bool>("keep_history")),
     _function_series(FunctionSeries::checkAndConvertFunction(getFunction("function"), name())),
     _print_state(UserObject::getParam<bool>("print_state")),
@@ -135,7 +135,7 @@ FEIntegralBaseUserObject<IntegralBaseVariableUserObject>::FEIntegralBaseUserObje
 
 template <class IntegralBaseVariableUserObject>
 Real
-FEIntegralBaseUserObject<IntegralBaseVariableUserObject>::computeIntegral()
+FXIntegralBaseUserObject<IntegralBaseVariableUserObject>::computeIntegral()
 {
   Real sum = 0.0;
   const Point centroid = getCentroid();
@@ -167,13 +167,13 @@ FEIntegralBaseUserObject<IntegralBaseVariableUserObject>::computeIntegral()
 
 template <class IntegralBaseVariableUserObject>
 void
-FEIntegralBaseUserObject<IntegralBaseVariableUserObject>::finalize()
+FXIntegralBaseUserObject<IntegralBaseVariableUserObject>::finalize()
 {
   // Sum the coefficient arrays over all processes
   _communicator.sum(_coefficient_partials);
   _communicator.sum(_volume);
 
-  // Normalize the volume of the functional expansion to the FE standard space
+  // Normalize the volume of the functional expansion to the FX standard space
   const Real volume_normalization = _standardized_function_volume / _volume;
   for (auto & partial : _coefficient_partials)
     partial *= volume_normalization;
@@ -196,21 +196,21 @@ FEIntegralBaseUserObject<IntegralBaseVariableUserObject>::finalize()
 
 template <class IntegralBaseVariableUserObject>
 const FunctionSeries &
-FEIntegralBaseUserObject<IntegralBaseVariableUserObject>::getFunctionSeries() const
+FXIntegralBaseUserObject<IntegralBaseVariableUserObject>::getFunctionSeries() const
 {
   return _function_series;
 }
 
 template <class IntegralBaseVariableUserObject>
 Real
-FEIntegralBaseUserObject<IntegralBaseVariableUserObject>::getValue()
+FXIntegralBaseUserObject<IntegralBaseVariableUserObject>::getValue()
 {
   return _integral_value;
 }
 
 template <class IntegralBaseVariableUserObject>
 void
-FEIntegralBaseUserObject<IntegralBaseVariableUserObject>::initialize()
+FXIntegralBaseUserObject<IntegralBaseVariableUserObject>::initialize()
 {
   IntegralBaseVariableUserObject::initialize();
 
@@ -223,10 +223,10 @@ FEIntegralBaseUserObject<IntegralBaseVariableUserObject>::initialize()
 
 template <class IntegralBaseVariableUserObject>
 void
-FEIntegralBaseUserObject<IntegralBaseVariableUserObject>::threadJoin(const UserObject & s)
+FXIntegralBaseUserObject<IntegralBaseVariableUserObject>::threadJoin(const UserObject & s)
 {
-  const FEIntegralBaseUserObject<IntegralBaseVariableUserObject> & sibling =
-      static_cast<const FEIntegralBaseUserObject<IntegralBaseVariableUserObject> &>(s);
+  const FXIntegralBaseUserObject<IntegralBaseVariableUserObject> & sibling =
+      static_cast<const FXIntegralBaseUserObject<IntegralBaseVariableUserObject> &>(s);
 
   for (std::size_t c = 0; c < _coefficient_partials.size(); ++c)
     _coefficient_partials[c] += sibling._coefficient_partials[c];
@@ -236,11 +236,11 @@ FEIntegralBaseUserObject<IntegralBaseVariableUserObject>::threadJoin(const UserO
 
 template <class IntegralBaseVariableUserObject>
 Real
-FEIntegralBaseUserObject<IntegralBaseVariableUserObject>::spatialValue(const Point & location) const
+FXIntegralBaseUserObject<IntegralBaseVariableUserObject>::spatialValue(const Point & location) const
 {
   _function_series.setLocation(location);
 
   return _function_series.expand(_coefficients);
 }
 
-#endif // FEINTEGRALBASEUSEROBJECT_H
+#endif // FXINTEGRALBASEUSEROBJECT_H

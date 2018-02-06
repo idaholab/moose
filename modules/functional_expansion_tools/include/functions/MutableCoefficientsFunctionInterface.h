@@ -32,6 +32,7 @@ class MutableCoefficientsFunctionInterface : public MemoizedFunctionInterface,
 {
 public:
   MutableCoefficientsFunctionInterface(const MooseObject * moose_object,
+                                       Restartable * restartable,
                                        const InputParameters & parameters);
 
 protected:

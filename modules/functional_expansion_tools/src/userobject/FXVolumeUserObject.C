@@ -8,26 +8,26 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 // Module includes
-#include "FEVolumeUserObject.h"
+#include "FXVolumeUserObject.h"
 
 template <>
 InputParameters
-validParams<FEVolumeUserObject>()
+validParams<FXVolumeUserObject>()
 {
   InputParameters params = validParams<ElementIntegralVariableUserObject>();
 
-  params += validParams<FEIntegralBaseUserObjectParameters>();
+  params += validParams<FXIntegralBaseUserObjectParameters>();
 
-  params.addClassDescription("Generates an FE representation of a variable value over a volume "
-                             "using a 'FunctionSeries'-type Function");
+  params.addClassDescription("Generates an Functional Expansion representation of a variable value "
+                             "over a volume using a 'FunctionSeries'-type Function");
 
   return params;
 }
 
-FEVolumeUserObject::FEVolumeUserObject(const InputParameters & parameters)
-  : FEIntegralBaseUserObject<ElementIntegralVariableUserObject>(parameters)
+FXVolumeUserObject::FXVolumeUserObject(const InputParameters & parameters)
+  : FXIntegralBaseUserObject<ElementIntegralVariableUserObject>(parameters)
 {
-  mooseInfo("Using FEVolumeUserObject '",
+  mooseInfo("Using FXVolumeUserObject '",
             name(),
             "'.\nNote: it is your responsibility to ensure that the dimensionality, order, and "
             "series parameters for FunctionSeries '",
@@ -36,13 +36,13 @@ FEVolumeUserObject::FEVolumeUserObject(const InputParameters & parameters)
 }
 
 Point
-FEVolumeUserObject::getCentroid() const
+FXVolumeUserObject::getCentroid() const
 {
   return _current_elem->centroid();
 }
 
 Real
-FEVolumeUserObject::getVolume() const
+FXVolumeUserObject::getVolume() const
 {
   return _current_elem_volume;
 }

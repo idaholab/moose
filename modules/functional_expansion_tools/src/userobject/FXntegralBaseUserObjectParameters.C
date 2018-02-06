@@ -8,11 +8,11 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 // Module includes
-#include "FEIntegralBaseUserObject.h"
+#include "FXIntegralBaseUserObject.h"
 
 template <>
 InputParameters
-validParams<FEIntegralBaseUserObjectParameters>()
+validParams<FXIntegralBaseUserObjectParameters>()
 {
   InputParameters params = validParams<MutableCoefficientsInterface>();
 

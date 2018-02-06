@@ -43,9 +43,9 @@ Legendre::checkPhysicalBounds(const std::vector<Real> & bounds) const
 
 /*
  * 'clang-format' will try to change this. I have chosen to keep the formatting as is to make it
- * easier to understand and follow the formulas. The formatting also is closely related to the FETs
- * developed in Serpent, which I have developed simultaneously. Mirroring the development improves
- * the maintanability of both codes.
+ * easier to understand and follow the formulas. The formatting also is closely related to the
+ * Functional Expansion Tallies (FETs) developed in Serpent, which I have developed simultaneously.
+ * Mirroring the development improves the maintanability of both codes.
  */
 // clang-format off
 void
@@ -127,7 +127,7 @@ Legendre::evaluateOrthonormal()
   /* L_k = ---------------------------------------------                    */
   /*                        k                                               */
   /*                                                                        */
-  /* However, for FEs we are using a the orthonormalized version of the     */
+  /* However, for FXs we are using a the orthonormalized version of the     */
   /* polynomials, so each polynomial L_k is multiplied by:                  */
   /*    (2 * k + 1)                                                         */
   /*    -----------      essentially:    k + 0.5                            */
@@ -150,9 +150,9 @@ Legendre::evaluateOrthonormal()
 
 /*
  * 'clang-format' will try to change this. I have chosen to keep the formatting as is to make it
- * easier to understand and follow the formulas. The formatting also is closely related to the FETs
- * developed in Serpent, which I have developed simultaneously. Mirroring the development improves
- * the maintanability of both codes.
+ * easier to understand and follow the formulas. The formatting also is closely related to the
+ * Functional Expansion Tallies (FETs) developed in Serpent, which I have developed simultaneously.
+ * Mirroring the development improves the maintanability of both codes.
  */
 // clang-format off
 void

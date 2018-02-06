@@ -44,7 +44,7 @@
   [../]
 
 
-  [./MultiAppFETransfer_missing_local]
+  [./MultiAppFXTransfer_missing_local]
     # The named object must exist in the local app
     type = RunException
     input = multiapp_missing_local_object.i
@@ -53,7 +53,7 @@
   [../]
 
 
-  [./MultiAppFETransfer_missing_sub]
+  [./MultiAppFXTransfer_missing_sub]
     # The named object must exist in the sub app
     type = RunException
     input = multiapp_missing_sub_object.i
@@ -62,7 +62,7 @@
   [../]
 
 
-  [./MultiAppFETransfer_bad_function_series]
+  [./MultiAppFXTransfer_bad_function_series]
     # A coupled function must be a FunctionSeries type
     type = RunException
     input = multiapp_bad_function_series.i
@@ -71,8 +71,8 @@
   [../]
 
 
-  [./MultiAppFETransfer_bad_user_object]
-    # A coupled UserObject must be one of the FE...UserObject types
+  [./MultiAppFXTransfer_bad_user_object]
+    # A coupled UserObject must be one of the FX...UserObject types
     type = RunException
     input = multiapp_bad_user_object.i
     expect_err = "' does not inherit from MutableCoefficientsInterface."
@@ -80,8 +80,8 @@
   [../]
 
 
-  [./MultiAppFETransfer_incompatible_orders]
-    # Coupled FEs must have the same orders in all dimensions
+  [./MultiAppFXTransfer_incompatible_orders]
+    # Coupled FXs must have the same orders in all dimensions
     type = RunException
     input = multiapp_incompatible_orders.i
     expect_err = "' is not compatible with '"

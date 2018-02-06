@@ -41,7 +41,7 @@
   [./reconstruct_s_in]
     type = FunctionSeriesToAux
     variable = s_in
-    function = FE_Basis_Value_Main
+    function = FX_Basis_Value_Main
   [../]
 []
 
@@ -63,7 +63,7 @@
 []
 
 [Functions]
-  [./FE_Basis_Value_Main]
+  [./FX_Basis_Value_Main]
     type = FunctionSeries
     series_type = Cartesian
     orders = '3'
@@ -73,9 +73,9 @@
 []
 
 [UserObjects]
-  [./FE_Value_UserObject_Main]
-    type = FEVolumeUserObject
-    function = FE_Basis_Value_Main
+  [./FX_Value_UserObject_Main]
+    type = FXVolumeUserObject
+    function = FX_Basis_Value_Main
     variable = m
   [../]
 []
@@ -114,7 +114,7 @@
 []
 
 [MultiApps]
-  [./FETransferApp]
+  [./FXTransferApp]
     type = TransientMultiApp
     input_files = volume_sub.i
   [../]
@@ -122,17 +122,17 @@
 
 [Transfers]
   [./ValueToSub]
-    type = MultiAppFETransfer
+    type = MultiAppFXTransfer
     direction = to_multiapp
-    multi_app = FETransferApp
-    this_app_object_name = FE_Value_UserObject_Main
-    multi_app_object_name = FE_Basis_Value_Sub
+    multi_app = FXTransferApp
+    this_app_object_name = FX_Value_UserObject_Main
+    multi_app_object_name = FX_Basis_Value_Sub
   [../]
   [./ValueToMe]
-    type = MultiAppFETransfer
+    type = MultiAppFXTransfer
     direction = from_multiapp
-    multi_app = FETransferApp
-    this_app_object_name = FE_Basis_Value_Main
-    multi_app_object_name = FE_Value_UserObject_Sub
+    multi_app = FXTransferApp
+    this_app_object_name = FX_Basis_Value_Main
+    multi_app_object_name = FX_Value_UserObject_Sub
   [../]
 []

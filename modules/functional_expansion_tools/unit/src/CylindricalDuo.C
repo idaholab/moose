@@ -43,7 +43,7 @@ TEST(FunctionalExpansionsTest, zernikeSeriesEvaluationXY)
             0.223343150486739,
             0.698275682841869,
             1.080889714660983}};
-  auto& answer = zernike.getAllOrthonormal();
+  auto & answer = zernike.getAllOrthonormal();
   for (std::size_t i = 0; i < zernike.getNumberOfTerms(); ++i)
     EXPECT_NEAR(answer[i], truth[i], tol);
 }

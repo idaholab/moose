@@ -7,25 +7,25 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef FEVALUEBC_H
-#define FEVALUEBC_H
+#ifndef FXFLUXBC_H
+#define FXFLUXBC_H
 
 // MOOSE includes
-#include "FunctionDirichletBC.h"
+#include "FunctionNeumannBC.h"
 
 // Forward declarations
-class FEValueBC;
+class FXFluxBC;
 
 template <>
-InputParameters validParams<FEValueBC>();
+InputParameters validParams<FXFluxBC>();
 
 /**
- * Defines an FE-based boundary condition that forces the values to match
+ * Defines an FX-based BC that strongly encourages the gradients to match
  */
-class FEValueBC : public FunctionDirichletBC
+class FXFluxBC : public FunctionNeumannBC
 {
 public:
-  FEValueBC(const InputParameters & parameters);
+  FXFluxBC(const InputParameters & parameters);
 };
 
-#endif // FEVALUEBC_H
+#endif // FXFLUXBC_H

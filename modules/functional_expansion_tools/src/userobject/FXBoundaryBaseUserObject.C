@@ -8,23 +8,23 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 // Module includes
-#include "FEBoundaryBaseUserObject.h"
+#include "FXBoundaryBaseUserObject.h"
 
 template <>
 InputParameters
-validParams<FEBoundaryBaseUserObject>()
+validParams<FXBoundaryBaseUserObject>()
 {
   InputParameters params = validParams<SideIntegralVariableUserObject>();
 
-  params += validParams<FEIntegralBaseUserObjectParameters>();
+  params += validParams<FXIntegralBaseUserObjectParameters>();
 
   return params;
 }
 
-FEBoundaryBaseUserObject::FEBoundaryBaseUserObject(const InputParameters & parameters)
-  : FEIntegralBaseUserObject(parameters)
+FXBoundaryBaseUserObject::FXBoundaryBaseUserObject(const InputParameters & parameters)
+  : FXIntegralBaseUserObject(parameters)
 {
-  mooseInfo("Using FEInterface-type UserObject '",
+  mooseInfo("Using FXInterface-type UserObject '",
             name(),
             "'.\nNote: it is your responsibility to ensure that the dimensionality, order, and "
             "series parameters for FunctionSeries '",
@@ -33,13 +33,13 @@ FEBoundaryBaseUserObject::FEBoundaryBaseUserObject(const InputParameters & param
 }
 
 Point
-FEBoundaryBaseUserObject::getCentroid() const
+FXBoundaryBaseUserObject::getCentroid() const
 {
   return _current_side_elem->centroid();
 }
 
 Real
-FEBoundaryBaseUserObject::getVolume() const
+FXBoundaryBaseUserObject::getVolume() const
 {
   return _current_side_volume;
 }

@@ -27,10 +27,10 @@ validParams<MutableCoefficientsFunctionInterface>()
 }
 
 MutableCoefficientsFunctionInterface::MutableCoefficientsFunctionInterface(
-    const MooseObject * moose_object, const InputParameters & parameters)
+    const MooseObject * moose_object, Restartable * restartable, const InputParameters & parameters)
   : MemoizedFunctionInterface(parameters),
     FunctionInterface(this),
-    MutableCoefficientsInterface(moose_object, parameters)
+    MutableCoefficientsInterface(moose_object, restartable, parameters)
 {
   if (isParamValid("coefficients"))
     setCoefficients(getParam<std::vector<Real>>("coefficients")), enforceSize(true);

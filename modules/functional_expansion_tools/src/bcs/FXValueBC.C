@@ -8,25 +8,22 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 // Module includes
-#include "FEValuePenaltyBC.h"
+#include "FXValueBC.h"
 #include "FunctionSeries.h"
 
 template <>
 InputParameters
-validParams<FEValuePenaltyBC>()
+validParams<FXValueBC>()
 {
-  InputParameters params = validParams<FunctionPenaltyDirichletBC>();
+  InputParameters params = validParams<FunctionDirichletBC>();
 
   params.addClassDescription(
-      "Sets a value boundary condition, evaluated using a FunctionSeries instance. This does not "
-      "fix the value, but rather 'strongly encourages'  value agreement by penalizing the "
-      "differences through contributions to  the residual.");
+      "Imposes a fixed value boundary condition, evaluated using a FunctionSeries instance.");
 
   return params;
 }
 
-FEValuePenaltyBC::FEValuePenaltyBC(const InputParameters & parameters)
-  : FunctionPenaltyDirichletBC(parameters)
+FXValueBC::FXValueBC(const InputParameters & parameters) : FunctionDirichletBC(parameters)
 {
   FunctionSeries & fe_basis = FunctionSeries::checkAndConvertFunction(_func, name());
 

@@ -24,7 +24,7 @@ validParams<MultiAppMutableCoefficientsTransfer>()
 
   params.addClassDescription("Transfers coefficient arrays between objects that are derived from "
                              "MutableCoefficientsInterface; currently includes the following "
-                             "types: FunctionSeries, FEBoundaryUserObject, and FEVolumeUserObject");
+                             "types: FunctionSeries, FXBoundaryUserObject, and FXVolumeUserObject");
 
   params.addRequiredParam<std::string>(
       "this_app_object_name",
@@ -35,7 +35,7 @@ validParams<MultiAppMutableCoefficientsTransfer>()
       "Name of the MutableCoefficientsInterface-derived object in the MultiApp.");
 
   params.addParam<std::string>(
-      "pretty_name", "MultiAppFETransfer", "Typename by which this class should be identified.");
+      "pretty_name", "MultiAppFXTransfer", "Typename by which this class should be identified.");
 
   return params;
 }
@@ -95,8 +95,8 @@ MultiAppMutableCoefficientsTransfer::scanProblemBaseForObject(FEProblemBase & ba
    *   FunctionSeries
    *
    * UserObjects:
-   *   FEBoundaryUserObject (via FEBaseUserObject)
-   *   FEVolumeUserObject (via FEBaseUserObject)
+   *   FXBoundaryUserObject (via FXBaseUserObject)
+   *   FXVolumeUserObject (via FXBaseUserObject)
    */
   MutableCoefficientsInterface * interface;
 

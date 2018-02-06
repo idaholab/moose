@@ -7,25 +7,25 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef FEFLUXBC_H
-#define FEFLUXBC_H
+#ifndef FXVALUEPENALTYBC_H
+#define FXVALUEPENALTYBC_H
 
 // MOOSE includes
-#include "FunctionNeumannBC.h"
+#include "FunctionPenaltyDirichletBC.h"
 
 // Forward declarations
-class FEFluxBC;
+class FXValuePenaltyBC;
 
 template <>
-InputParameters validParams<FEFluxBC>();
+InputParameters validParams<FXValuePenaltyBC>();
 
 /**
- * Defines an FE-based BC that strongly encourages the gradients to match
+ * Defines an FX-based BC that strongly encourages the values to match
  */
-class FEFluxBC : public FunctionNeumannBC
+class FXValuePenaltyBC : public FunctionPenaltyDirichletBC
 {
 public:
-  FEFluxBC(const InputParameters & parameters);
+  FXValuePenaltyBC(const InputParameters & parameters);
 };
 
-#endif // FEFLUXBC_H
+#endif // FXVALUEPENALTYBC_H

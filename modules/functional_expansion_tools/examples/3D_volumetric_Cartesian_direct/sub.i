@@ -1,12 +1,7 @@
-# Basic example coupling a master and sub app in a 3D Cartesian volume.
+# Derived from the example '3D_volumetric_Cartesian' with the following differences:
 #
-# The master app provides field values to the sub app via FEs, which then performs its calculations.
-# The sub app's solution field values are then transferred back to the master app and coupled into
-# the solution of the master app solution.
-#
-# This example couples FEs via AuxVariable, the recommended approach.
-#
-# Note: this problem is not light, and may take a few minutes to solve.
+#   1) The coupling is performed via BodyForce instead of the
+#      FunctionSeriesToAux+CoupledForce approach
 [Mesh]
   type = GeneratedMesh
   dim = 3
@@ -54,7 +49,7 @@
 [AuxKernels]
   [./reconstruct_m_in]
     type = FunctionSeriesToAux
-    function = FE_Basis_Value_Sub
+    function = FX_Basis_Value_Sub
     variable = m_in
   [../]
   [./calculate_s] # Something to make 's' change each time, but allow a converging solution
@@ -66,7 +61,7 @@
 []
 
 [Functions]
-  [./FE_Basis_Value_Sub]
+  [./FX_Basis_Value_Sub]
     type = FunctionSeries
     series_type = Cartesian
     orders = '3   4   5'
@@ -78,9 +73,9 @@
 []
 
 [UserObjects]
-  [./FE_Value_UserObject_Sub]
-    type = FEVolumeUserObject
-    function = FE_Basis_Value_Sub
+  [./FX_Value_UserObject_Sub]
+    type = FXVolumeUserObject
+    function = FX_Basis_Value_Sub
     variable = s
   [../]
 []

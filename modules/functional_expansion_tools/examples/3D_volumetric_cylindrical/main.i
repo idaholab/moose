@@ -1,10 +1,10 @@
 # Basic example coupling a master and sub app in a 3D cylindrical mesh from an input file
 #
-# The master app provides field values to the sub app via FEs, which then performs its calculations.
-# The sub app's solution field values are then transferred back to the master app and coupled into
-# the solution of the master app solution.
+# The master app provides field values to the sub app via Functional Expansions, which then performs
+# its calculations. The sub app's solution field values are then transferred back to the master app
+# and coupled into the solution of the master app solution.
 #
-# This example couples FEs via AuxVariable, the recommended approach.
+# This example couples Functional Expansions via AuxVariable, the recommended approach.
 #
 # Note: this problem is not light, and may take a few minutes to solve.
 [Mesh]
@@ -46,7 +46,7 @@
   [./reconstruct_s_in]
     type = FunctionSeriesToAux
     variable = s_in
-    function = FE_Basis_Value_Main
+    function = FX_Basis_Value_Main
   [../]
 []
 
@@ -76,10 +76,10 @@
 []
 
 [Functions]
-  [./FE_Basis_Value_Main]
+  [./FX_Basis_Value_Main]
     type = FunctionSeries
     series_type = CylindricalDuo
-    orders = '5   3' # Axial first, then (r, t) FE
+    orders = '5   3' # Axial first, then (r, t) FX
     physical_bounds = '-2.5 2.5   0 0 1' # z_min z_max   x_center y_center radius
     z = Legendre # Axial in z
     disc = Zernike # (r, t) default to unit disc in x-y plane
@@ -87,9 +87,9 @@
 []
 
 [UserObjects]
-  [./FE_Value_UserObject_Main]
-    type = FEVolumeUserObject
-    function = FE_Basis_Value_Main
+  [./FX_Value_UserObject_Main]
+    type = FXVolumeUserObject
+    function = FX_Basis_Value_Main
     variable = m
   [../]
 []
@@ -128,7 +128,7 @@
 []
 
 [MultiApps]
-  [./FETransferApp]
+  [./FXTransferApp]
     type = TransientMultiApp
     input_files = sub.i
   [../]
@@ -136,17 +136,17 @@
 
 [Transfers]
   [./ValueToSub]
-    type = MultiAppFETransfer
+    type = MultiAppFXTransfer
     direction = to_multiapp
-    multi_app = FETransferApp
-    this_app_object_name = FE_Value_UserObject_Main
-    multi_app_object_name = FE_Basis_Value_Sub
+    multi_app = FXTransferApp
+    this_app_object_name = FX_Value_UserObject_Main
+    multi_app_object_name = FX_Basis_Value_Sub
   [../]
   [./ValueToMe]
-    type = MultiAppFETransfer
+    type = MultiAppFXTransfer
     direction = from_multiapp
-    multi_app = FETransferApp
-    this_app_object_name = FE_Basis_Value_Main
-    multi_app_object_name = FE_Value_UserObject_Sub
+    multi_app = FXTransferApp
+    this_app_object_name = FX_Basis_Value_Main
+    multi_app_object_name = FX_Value_UserObject_Sub
   [../]
 []

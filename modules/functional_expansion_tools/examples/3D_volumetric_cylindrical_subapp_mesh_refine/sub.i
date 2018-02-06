@@ -59,7 +59,7 @@
 [AuxKernels]
   [./reconstruct_m_in]
     type = FunctionSeriesToAux
-    function = FE_Basis_Value_Sub
+    function = FX_Basis_Value_Sub
     variable = m_in
   [../]
   [./calculate_s] # Something to make 's' change each time, but allow a converging solution
@@ -71,10 +71,10 @@
 []
 
 [Functions]
-  [./FE_Basis_Value_Sub]
+  [./FX_Basis_Value_Sub]
     type = FunctionSeries
     series_type = CylindricalDuo
-    orders = '5   3' # Axial first, then (r, t) FE
+    orders = '5   3' # Axial first, then (r, t) FX
     physical_bounds = '-2.5 2.5   0 0 1' # z_min z_max   x_center y_center radius
     z = Legendre # Axial in z
     disc = Zernike # (r, t) default to unit disc in x-y plane
@@ -82,9 +82,9 @@
 []
 
 [UserObjects]
-  [./FE_Value_UserObject_Sub]
-    type = FEVolumeUserObject
-    function = FE_Basis_Value_Sub
+  [./FX_Value_UserObject_Sub]
+    type = FXVolumeUserObject
+    function = FX_Basis_Value_Sub
     variable = s
   [../]
 []

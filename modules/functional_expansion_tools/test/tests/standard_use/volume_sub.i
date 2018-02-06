@@ -33,7 +33,7 @@
 [AuxKernels]
   [./reconstruct_m_in]
     type = FunctionSeriesToAux
-    function = FE_Basis_Value_Sub
+    function = FX_Basis_Value_Sub
     variable = m_in
   [../]
   [./calculate_s]
@@ -45,7 +45,7 @@
 []
 
 [Functions]
-  [./FE_Basis_Value_Sub]
+  [./FX_Basis_Value_Sub]
     type = FunctionSeries
     series_type = Cartesian
     orders = '3'
@@ -55,9 +55,9 @@
 []
 
 [UserObjects]
-  [./FE_Value_UserObject_Sub]
-    type = FEVolumeUserObject
-    function = FE_Basis_Value_Sub
+  [./FX_Value_UserObject_Sub]
+    type = FXVolumeUserObject
+    function = FX_Basis_Value_Sub
     variable = s
   [../]
 []

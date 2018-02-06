@@ -23,8 +23,8 @@ validParams<FunctionSeries>()
   InputParameters params = validParams<MutableCoefficientsFunctionInterface>();
 
   params.addClassDescription("This function uses a convolution of functional"
-                             " series (functional expansion or FE) to create a"
-                             " 3D function");
+                             " series (functional expansion or FX) to create a"
+                             " 1D, 2D, or 3D function");
 
   /*
    * The available composite series types.
@@ -65,7 +65,7 @@ validParams<FunctionSeries>()
 }
 
 FunctionSeries::FunctionSeries(const InputParameters & parameters)
-  : MutableCoefficientsFunctionInterface(this, parameters),
+  : MutableCoefficientsFunctionInterface(this, this, parameters),
     _orders(convertOrders(getParam<std::vector<unsigned int>>("orders"))),
     _physical_bounds(getParam<std::vector<Real>>("physical_bounds")),
     _series_type_name(getParam<MooseEnum>("series_type")),

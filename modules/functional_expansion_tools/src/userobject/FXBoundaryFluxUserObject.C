@@ -8,16 +8,16 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 // Module includes
-#include "FEBoundaryFluxUserObject.h"
+#include "FXBoundaryFluxUserObject.h"
 
 template <>
 InputParameters
-validParams<FEBoundaryFluxUserObject>()
+validParams<FXBoundaryFluxUserObject>()
 {
-  InputParameters params = validParams<FEBoundaryBaseUserObject>();
+  InputParameters params = validParams<FXBoundaryBaseUserObject>();
 
-  params.addClassDescription("Generates an FE representation for a boundary flux condition using a "
-                             "'FunctionSeries'-type Function");
+  params.addClassDescription("Generates an Functional Expansion representation for a boundary flux "
+                             "condition using a 'FunctionSeries'-type Function");
 
   params.addRequiredParam<std::string>("diffusivity",
                                        "The name of the material diffusivity "
@@ -27,8 +27,8 @@ validParams<FEBoundaryFluxUserObject>()
   return params;
 }
 
-FEBoundaryFluxUserObject::FEBoundaryFluxUserObject(const InputParameters & parameters)
-  : FEBoundaryBaseUserObject(parameters),
+FXBoundaryFluxUserObject::FXBoundaryFluxUserObject(const InputParameters & parameters)
+  : FXBoundaryBaseUserObject(parameters),
     _diffusivity_name(parameters.get<std::string>("diffusivity")),
     _diffusivity(getMaterialProperty<Real>(_diffusivity_name))
 {
@@ -36,7 +36,7 @@ FEBoundaryFluxUserObject::FEBoundaryFluxUserObject(const InputParameters & param
 }
 
 Real
-FEBoundaryFluxUserObject::computeQpIntegral()
+FXBoundaryFluxUserObject::computeQpIntegral()
 {
   return -_diffusivity[_qp] * _grad_u[_qp] * _normals[_qp];
 }

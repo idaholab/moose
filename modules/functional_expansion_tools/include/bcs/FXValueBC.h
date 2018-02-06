@@ -7,25 +7,25 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef FEVALUEPENALTYBC_H
-#define FEVALUEPENALTYBC_H
+#ifndef FXVALUEBC_H
+#define FXVALUEBC_H
 
 // MOOSE includes
-#include "FunctionPenaltyDirichletBC.h"
+#include "FunctionDirichletBC.h"
 
 // Forward declarations
-class FEValuePenaltyBC;
+class FXValueBC;
 
 template <>
-InputParameters validParams<FEValuePenaltyBC>();
+InputParameters validParams<FXValueBC>();
 
 /**
- * Defines an FE-based BC that strongly encourages the values to match
+ * Defines an FX-based boundary condition that forces the values to match
  */
-class FEValuePenaltyBC : public FunctionPenaltyDirichletBC
+class FXValueBC : public FunctionDirichletBC
 {
 public:
-  FEValuePenaltyBC(const InputParameters & parameters);
+  FXValueBC(const InputParameters & parameters);
 };
 
-#endif // FEVALUEPENALTYBC_H
+#endif // FXVALUEBC_H

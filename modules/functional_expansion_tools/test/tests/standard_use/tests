@@ -37,7 +37,7 @@
 
 
   [./incompatible_dimensions]
-    # FEs do not currently validate the physical dimensions between objects.
+    # Functional Expansions do not currently validate the physical dimensions between objects.
     type = RunApp
     input = multiapp_different_physical_boundaries.i
     group = functional_expansion_tools

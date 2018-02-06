@@ -31,52 +31,12 @@ validParams<MutableCoefficientsInterface>()
 }
 
 MutableCoefficientsInterface::MutableCoefficientsInterface(const MooseObject * moose_object,
+                                                           Restartable * restartable,
                                                            const InputParameters & parameters)
-  : _characteristics(0),
-    _coefficients(0),
+  : _characteristics(
+        restartable->declareRestartableData<std::vector<std::size_t>>("characteristics")),
+    _coefficients(restartable->declareRestartableData<std::vector<Real>>("coefficients")),
     _enforce_size(false),
-    _print_coefficients(parameters.get<bool>("print_when_set")),
-    _console(moose_object->_console)
-{
-  // Nothing here
-}
-
-MutableCoefficientsInterface::MutableCoefficientsInterface(
-    const MooseObject * moose_object,
-    const InputParameters & parameters,
-    const std::vector<Real> & new_coefficients,
-    bool enforce_size)
-  : _characteristics(0),
-    _coefficients(new_coefficients),
-    _enforce_size(enforce_size),
-    _print_coefficients(parameters.get<bool>("print_when_set")),
-    _console(moose_object->_console)
-
-{
-  // Nothing here
-}
-
-MutableCoefficientsInterface::MutableCoefficientsInterface(const MooseObject * moose_object,
-                                                           const InputParameters & parameters,
-                                                           std::vector<Real> && dropin_coefficients,
-                                                           bool enforce_size)
-  : _characteristics(0),
-    _coefficients(dropin_coefficients),
-    _enforce_size(enforce_size),
-    _print_coefficients(parameters.get<bool>("print_when_set")),
-    _console(moose_object->_console)
-{
-  // Nothing here
-}
-
-MutableCoefficientsInterface::MutableCoefficientsInterface(const MooseObject * moose_object,
-                                                           const InputParameters & parameters,
-                                                           std::size_t size,
-                                                           Real fill,
-                                                           bool enforce_size)
-  : _characteristics(0),
-    _coefficients(size, fill),
-    _enforce_size(enforce_size),
     _print_coefficients(parameters.get<bool>("print_when_set")),
     _console(moose_object->_console)
 {

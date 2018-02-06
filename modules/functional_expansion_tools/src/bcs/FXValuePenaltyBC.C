@@ -8,24 +8,25 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 // Module includes
-#include "FEFluxBC.h"
+#include "FXValuePenaltyBC.h"
 #include "FunctionSeries.h"
 
 template <>
 InputParameters
-validParams<FEFluxBC>()
+validParams<FXValuePenaltyBC>()
 {
-  InputParameters params = validParams<FunctionNeumannBC>();
+  InputParameters params = validParams<FunctionPenaltyDirichletBC>();
 
   params.addClassDescription(
-      "Sets a flux boundary condition, evaluated using a FunctionSeries instance. This does not "
-      "fix the flux, but rather 'strongly encourages' flux agreement by penalizing the differences "
-      "through contributions to the residual.");
+      "Sets a value boundary condition, evaluated using a FunctionSeries instance. This does not "
+      "fix the value, but rather 'strongly encourages'  value agreement by penalizing the "
+      "differences through contributions to  the residual.");
 
   return params;
 }
 
-FEFluxBC::FEFluxBC(const InputParameters & parameters) : FunctionNeumannBC(parameters)
+FXValuePenaltyBC::FXValuePenaltyBC(const InputParameters & parameters)
+  : FunctionPenaltyDirichletBC(parameters)
 {
   FunctionSeries & fe_basis = FunctionSeries::checkAndConvertFunction(_func, name());
 

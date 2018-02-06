@@ -24,7 +24,8 @@ validParams<FunctionalExpansionToolsTestApp>()
   return params;
 }
 
-FunctionalExpansionToolsTestApp::FunctionalExpansionToolsTestApp(InputParameters parameters) : MooseApp(parameters)
+FunctionalExpansionToolsTestApp::FunctionalExpansionToolsTestApp(InputParameters parameters)
+  : MooseApp(parameters)
 {
   Moose::registerObjects(_factory);
   FunctionalExpansionToolsApp::registerObjectDepends(_factory);
@@ -58,7 +59,8 @@ FunctionalExpansionToolsTestApp::registerObjects(Factory & /*factory*/)
 }
 
 void
-FunctionalExpansionToolsTestApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & /*action_factory*/)
+FunctionalExpansionToolsTestApp::associateSyntax(Syntax & /*syntax*/,
+                                                 ActionFactory & /*action_factory*/)
 {
   /* Uncomment Syntax and ActionFactory parameters and register your new test objects here! */
 }

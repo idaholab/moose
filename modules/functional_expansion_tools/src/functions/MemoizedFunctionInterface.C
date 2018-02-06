@@ -23,7 +23,7 @@ validParams<MemoizedFunctionInterface>()
                         false,
                         "Enables cached function evaluations. Recommended only if this function is "
                         "used directly in a BC or Kernel. This will be enabled automatically if "
-                        "any of the FE-based BCs are used.");
+                        "any of the FX-based BCs are used.");
 
   params.addParam<bool>("respect_time", false, "Enable to clear the cache at each new time step.");
 

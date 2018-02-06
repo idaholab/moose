@@ -7,34 +7,34 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef FEBOUNDARYBASEUSEROBJECT_H
-#define FEBOUNDARYBASEUSEROBJECT_H
+#ifndef FXBOUNDARYBASEUSEROBJECT_H
+#define FXBOUNDARYBASEUSEROBJECT_H
 
 // MOOSE includes
 #include "SideIntegralVariableUserObject.h"
 
 // Module includes
-#include "FEIntegralBaseUserObject.h"
+#include "FXIntegralBaseUserObject.h"
 
-class FEBoundaryBaseUserObject;
+class FXBoundaryBaseUserObject;
 
 template <>
-InputParameters validParams<FEBoundaryBaseUserObject>();
+InputParameters validParams<FXBoundaryBaseUserObject>();
 
 /**
  * This class provides the base for generating a functional expansion on a boundary by inheriting
- * from FEIntegralBaseUserObject and providing SideIntegralVariableUserObject as the template
+ * from FXIntegralBaseUserObject and providing SideIntegralVariableUserObject as the template
  * parameter
  */
-class FEBoundaryBaseUserObject : public FEIntegralBaseUserObject<SideIntegralVariableUserObject>
+class FXBoundaryBaseUserObject : public FXIntegralBaseUserObject<SideIntegralVariableUserObject>
 {
 public:
-  FEBoundaryBaseUserObject(const InputParameters & parameters);
+  FXBoundaryBaseUserObject(const InputParameters & parameters);
 
 protected:
-  // Overrides from FEIntegralBaseUserObject
+  // Overrides from FXIntegralBaseUserObject
   virtual Point getCentroid() const final;
   virtual Real getVolume() const final;
 };
 
-#endif // FEBOUNDARYBASEUSEROBJECT_H
+#endif // FXBOUNDARYBASEUSEROBJECT_H

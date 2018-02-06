@@ -34,7 +34,7 @@ public:
   virtual void execute() override;
   virtual void initialSetup() override;
 
-  /// A user-defined pretty name for this transfer, defaults to 'MultiAppFETransfer'
+  /// A user-defined pretty name for this transfer, defaults to 'MultiAppFXTransfer'
   const std::string _pretty_name;
 
 protected:
@@ -82,6 +82,6 @@ private:
 };
 
 /// Typedef for the functional_expansion_tools module
-typedef MultiAppMutableCoefficientsTransfer MultiAppFETransfer;
+typedef MultiAppMutableCoefficientsTransfer MultiAppFXTransfer;
 
 #endif // MULTIAPPMUTABLECOEFFICIENTSTRANSFER_H

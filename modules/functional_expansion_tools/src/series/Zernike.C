@@ -49,9 +49,9 @@ Zernike::checkPhysicalBounds(const std::vector<Real> & bounds) const
 
 /*
  * 'clang-format' will try to change this. I have chosen to keep the formatting as is to make it
- * easier to understand and follow the formulas. The formatting also is closely related to the FETs
- * developed in Serpent, which I have developed simultaneously. Mirroring the development improves
- * the maintanability of both codes.
+ * easier to understand and follow the formulas. The formatting also is closely related to the
+ * Functional Expansion Tallies (FETs) developed in Serpent, which I have developed simultaneously.
+ * Mirroring the development improves the maintanability of both codes.
  */
 // clang-format off
 void

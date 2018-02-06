@@ -2,7 +2,7 @@
 #
 #   1) The number of y divisions in the sub app is not the same as the master app
 #   2) The subapp mesh is skewed in y
-#   3) The FE order for the flux term was increased to 7
+#   3) The Functional Expansion order for the flux term was increased to 7
 [Mesh]
   type = GeneratedMesh
   dim = 2
@@ -53,28 +53,28 @@
 
 [BCs]
   [./interface_value]
-    type = FEValueBC
+    type = FXValueBC
     variable = m
     boundary = right
-    function = FE_Basis_Value_Main
+    function = FX_Basis_Value_Main
   [../]
   [./interface_flux]
-    type = FEFluxBC
+    type = FXFluxBC
     boundary = right
     variable = m
-    function = FE_Basis_Flux_Main
+    function = FX_Basis_Flux_Main
   [../]
 []
 
 [Functions]
-  [./FE_Basis_Value_Main]
+  [./FX_Basis_Value_Main]
     type = FunctionSeries
     series_type = Cartesian
     orders = '4'
     physical_bounds = '0.0 10'
     y = Legendre
   [../]
-  [./FE_Basis_Flux_Main]
+  [./FX_Basis_Flux_Main]
     type = FunctionSeries
     series_type = Cartesian
     orders = '7'
@@ -84,9 +84,9 @@
 []
 
 [UserObjects]
-  [./FE_Flux_UserObject_Main]
-    type = FEBoundaryFluxUserObject
-    function = FE_Basis_Flux_Main
+  [./FX_Flux_UserObject_Main]
+    type = FXBoundaryFluxUserObject
+    function = FX_Basis_Flux_Main
     variable = m
     boundary = right
     diffusivity = thermal_conductivity
@@ -130,7 +130,7 @@
 []
 
 [MultiApps]
-  [./FETransferApp]
+  [./FXTransferApp]
     type = TransientMultiApp
     input_files = sub.i
     sub_cycling = true
@@ -139,24 +139,24 @@
 
 [Transfers]
   [./FluxToSub]
-    type = MultiAppFETransfer
+    type = MultiAppFXTransfer
     direction = to_multiapp
-    multi_app = FETransferApp
-    this_app_object_name = FE_Flux_UserObject_Main
-    multi_app_object_name = FE_Basis_Flux_Sub
+    multi_app = FXTransferApp
+    this_app_object_name = FX_Flux_UserObject_Main
+    multi_app_object_name = FX_Basis_Flux_Sub
   [../]
   [./ValueToMe]
-    type = MultiAppFETransfer
+    type = MultiAppFXTransfer
     direction = from_multiapp
-    multi_app = FETransferApp
-    this_app_object_name = FE_Basis_Value_Main
-    multi_app_object_name = FE_Value_UserObject_Sub
+    multi_app = FXTransferApp
+    this_app_object_name = FX_Basis_Value_Main
+    multi_app_object_name = FX_Value_UserObject_Sub
   [../]
   [./FluxToMe]
-    type = MultiAppFETransfer
+    type = MultiAppFXTransfer
     direction = from_multiapp
-    multi_app = FETransferApp
-    this_app_object_name = FE_Basis_Flux_Main
-    multi_app_object_name = FE_Flux_UserObject_Sub
+    multi_app = FXTransferApp
+    this_app_object_name = FX_Basis_Flux_Main
+    multi_app_object_name = FX_Flux_UserObject_Sub
   [../]
 []

@@ -16,6 +16,7 @@
 // MOOSE includes
 #include "InputParameters.h"
 #include "MooseTypes.h"
+#include "Restartable.h"
 
 // Forward declarations
 class MutableCoefficientsInterface;
@@ -34,29 +35,8 @@ class MutableCoefficientsInterface
 {
 public:
   MutableCoefficientsInterface(const MooseObject * moose_object,
+                               Restartable * restartable,
                                const InputParameters & parameters);
-  /**
-   * Construct the class and copy the provided coefficients
-   */
-  MutableCoefficientsInterface(const MooseObject * moose_object,
-                               const InputParameters & parameters,
-                               const std::vector<Real> & new_coefficients,
-                               bool enforce_size = true);
-  /**
-   * Construct the class and move the provided coefficients
-   */
-  MutableCoefficientsInterface(const MooseObject * moose_object,
-                               const InputParameters & parameters,
-                               std::vector<Real> && dropin_coefficients,
-                               bool enforce_size = true);
-  /**
-   * Construct the class and fill out the coefficient array as requested
-   */
-  MutableCoefficientsInterface(const MooseObject * moose_object,
-                               const InputParameters & parameters,
-                               std::size_t size,
-                               Real fill = 0.0,
-                               bool enforce_size = true);
 
   // Coefficient access
   /**
@@ -128,10 +108,10 @@ protected:
   virtual void coefficientsChanged(){};
 
   /// An array of integer characteristics that can be used to check compatibility
-  std::vector<std::size_t> _characteristics;
+  std::vector<std::size_t> & _characteristics;
 
   /// The coefficient array
-  std::vector<Real> _coefficients;
+  std::vector<Real> & _coefficients;
 
   /// Boolean that locks or allows resizing of the coefficient array
   bool _enforce_size;

@@ -7,31 +7,31 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef FEVOLUMEUSEROBJECT_H
-#define FEVOLUMEUSEROBJECT_H
+#ifndef FXVOLUMEUSEROBJECT_H
+#define FXVOLUMEUSEROBJECT_H
 
 // MOOSE includes
 #include "ElementIntegralVariableUserObject.h"
-#include "FEIntegralBaseUserObject.h"
+#include "FXIntegralBaseUserObject.h"
 
 // Forward declarations
-class FEVolumeUserObject;
+class FXVolumeUserObject;
 
 template <>
-InputParameters validParams<FEVolumeUserObject>();
+InputParameters validParams<FXVolumeUserObject>();
 
 /**
- * This volumetric FE calculates the value
+ * This volumetric FX calculates the value
  */
-class FEVolumeUserObject final : public FEIntegralBaseUserObject<ElementIntegralVariableUserObject>
+class FXVolumeUserObject final : public FXIntegralBaseUserObject<ElementIntegralVariableUserObject>
 {
 public:
-  FEVolumeUserObject(const InputParameters & parameters);
+  FXVolumeUserObject(const InputParameters & parameters);
 
 protected:
-  // Overrides from FEIntegralBaseUserObject
+  // Overrides from FXIntegralBaseUserObject
   virtual Point getCentroid() const;
   virtual Real getVolume() const;
 };
 
-#endif // FEVOLUMEUSEROBJECT_H
+#endif // FXVOLUMEUSEROBJECT_H

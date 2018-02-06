@@ -8,22 +8,24 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 // Module includes
-#include "FEValueBC.h"
+#include "FXFluxBC.h"
 #include "FunctionSeries.h"
 
 template <>
 InputParameters
-validParams<FEValueBC>()
+validParams<FXFluxBC>()
 {
-  InputParameters params = validParams<FunctionDirichletBC>();
+  InputParameters params = validParams<FunctionNeumannBC>();
 
   params.addClassDescription(
-      "Imposes a fixed value boundary condition, evaluated using a FunctionSeries instance.");
+      "Sets a flux boundary condition, evaluated using a FunctionSeries instance. This does not "
+      "fix the flux, but rather 'strongly encourages' flux agreement by penalizing the differences "
+      "through contributions to the residual.");
 
   return params;
 }
 
-FEValueBC::FEValueBC(const InputParameters & parameters) : FunctionDirichletBC(parameters)
+FXFluxBC::FXFluxBC(const InputParameters & parameters) : FunctionNeumannBC(parameters)
 {
   FunctionSeries & fe_basis = FunctionSeries::checkAndConvertFunction(_func, name());
 
