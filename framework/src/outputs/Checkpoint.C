@@ -152,31 +152,7 @@ Checkpoint::updateCheckpointFiles(CheckpointFileNames file_struct)
       std::ostringstream oss;
       oss << delete_files.checkpoint;
       std::string file_name = oss.str();
-      int ret = remove(file_name.c_str());
-      if (ret != 0)
-        mooseWarning("Error during the deletion of file '", file_name, "': ", std::strerror(ret));
-    }
-
-    if (_parallel_mesh)
-    {
-      std::ostringstream oss;
-      oss << delete_files.checkpoint << '-' << n_processors() << '-' << proc_id;
-      std::string file_name = oss.str();
-      int ret = remove(file_name.c_str());
-      if (ret != 0)
-        mooseWarning("Error during the deletion of file '", file_name, "': ", std::strerror(ret));
-    }
-    else
-    {
-      if (proc_id == 0)
-      {
-        std::ostringstream oss;
-        oss << delete_files.checkpoint << "-1-0";
-        std::string file_name = oss.str();
-        int ret = remove(file_name.c_str());
-        if (ret != 0)
-          mooseWarning("Error during the deletion of file '", file_name, "': ", std::strerror(ret));
-      }
+      CheckpointIO::cleanup(file_name, comm().size());
     }
 
     // Delete the system files (xdr and xdr.0000, ...)
@@ -189,6 +165,7 @@ Checkpoint::updateCheckpointFiles(CheckpointFileNames file_struct)
       if (ret != 0)
         mooseWarning("Error during the deletion of file '", file_name, "': ", std::strerror(ret));
     }
+
     {
       std::ostringstream oss;
       oss << delete_files.system << "." << std::setw(4) << std::setprecision(0) << std::setfill('0')
