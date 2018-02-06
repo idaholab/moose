@@ -7,10 +7,8 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-// C++ includes
 #include <numeric> // Provides accumulate()
 
-// Module includes
 #include "FunctionalBasisInterface.h" // Provides _domain_options
 #include "FunctionSeries.h"
 #include "Cartesian.h"

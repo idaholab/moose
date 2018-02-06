@@ -10,14 +10,11 @@
 #ifndef MUTABLECOEFFICIENTSFUNCTIONINTERFACE_H
 #define MUTABLECOEFFICIENTSFUNCTIONINTERFACE_H
 
-// MOOSE includes
 #include "FunctionInterface.h"
 
-// Module lincludes
 #include "MemoizedFunctionInterface.h"
 #include "MutableCoefficientsInterface.h"
 
-// Forward declarations
 class MutableCoefficientsFunctionInterface;
 
 template <>

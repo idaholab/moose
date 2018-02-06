@@ -10,7 +10,6 @@
 #ifndef HASHING_H
 #define HASHING_H
 
-// MOOSE includes
 #include "MooseTypes.h"
 
 /**

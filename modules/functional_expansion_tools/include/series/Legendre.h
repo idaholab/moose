@@ -10,7 +10,6 @@
 #ifndef LEGENDRE_H
 #define LEGENDRE_H
 
-// Module includes
 #include "SingleSeriesBasisInterface.h"
 
 /**

@@ -10,13 +10,10 @@
 #ifndef MULTIAPPMUTABLECOEFFICIENTSTRANSFER_H
 #define MULTIAPPMUTABLECOEFFICIENTSTRANSFER_H
 
-// MOOSE includes
 #include "MultiAppTransfer.h"
 
-// Module includes
 #include "MutableCoefficientsInterface.h"
 
-// Forward declations
 class MultiAppMutableCoefficientsTransfer;
 
 template <>

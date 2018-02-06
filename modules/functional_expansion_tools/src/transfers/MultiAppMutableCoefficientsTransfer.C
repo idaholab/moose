@@ -7,13 +7,11 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-// MOOSE includes
 #include "FEProblemBase.h"
 #include "Function.h"
 #include "MultiApp.h"
 #include "UserObject.h"
 
-// Module includes
 #include "MultiAppMutableCoefficientsTransfer.h"
 
 template <>

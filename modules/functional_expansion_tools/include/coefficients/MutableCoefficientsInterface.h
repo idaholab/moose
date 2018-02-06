@@ -10,15 +10,12 @@
 #ifndef MUTABLECOEFFICIENTSINTERFACE_H
 #define MUTABLECOEFFICIENTSINTERFACE_H
 
-// C++ includes
 #include <vector>
 
-// MOOSE includes
 #include "InputParameters.h"
 #include "MooseTypes.h"
 #include "Restartable.h"
 
-// Forward declarations
 class MutableCoefficientsInterface;
 
 template <>

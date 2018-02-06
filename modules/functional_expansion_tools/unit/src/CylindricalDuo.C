@@ -7,10 +7,8 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-// gtest includes
 #include "gtest/gtest.h"
 
-// Module test header
 #include "Setup.h"
 
 TEST(FunctionalExpansionsTest, zernikeConstructor)

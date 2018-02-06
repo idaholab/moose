@@ -10,7 +10,6 @@
 #ifndef FUNCTIONAL_EXPANSION_TOOLSTESTAPP_H
 #define FUNCTIONAL_EXPANSION_TOOLSTESTAPP_H
 
-// MOOSE includes
 #include "MooseApp.h"
 
 class FunctionalExpansionToolsTestApp;

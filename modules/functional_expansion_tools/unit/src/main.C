@@ -7,19 +7,15 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-// C++ includes
 #include <fstream>
 #include <string>
 
-// Moose includes
 #include "Moose.h"
 #include "MooseInit.h"
 #include "AppFactory.h"
 
-// gtest includes
 #include "gtest/gtest.h"
 
-// Module includes
 #include "FunctionalExpansionToolsApp.h"
 
 PerfLog Moose::perf_log("gtest");

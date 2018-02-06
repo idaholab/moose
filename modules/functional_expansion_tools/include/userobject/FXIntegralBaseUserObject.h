@@ -10,17 +10,14 @@
 #ifndef FXINTEGRALBASEUSEROBJECT_H
 #define FXINTEGRALBASEUSEROBJECT_H
 
-// MOOSE includes
 #include "AuxiliarySystem.h"
 #include "MooseError.h"
 #include "MooseMesh.h"
 #include "MooseVariable.h"
 #include "UserObject.h"
 
-// libMesh includes
 #include "libmesh/quadrature.h"
 
-// Module includes
 #include "FunctionSeries.h"
 #include "MutableCoefficientsInterface.h"
 

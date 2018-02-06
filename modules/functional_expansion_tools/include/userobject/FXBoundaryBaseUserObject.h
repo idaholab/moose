@@ -10,10 +10,8 @@
 #ifndef FXBOUNDARYBASEUSEROBJECT_H
 #define FXBOUNDARYBASEUSEROBJECT_H
 
-// MOOSE includes
 #include "SideIntegralVariableUserObject.h"
 
-// Module includes
 #include "FXIntegralBaseUserObject.h"
 
 class FXBoundaryBaseUserObject;

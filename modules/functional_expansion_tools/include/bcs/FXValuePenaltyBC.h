@@ -10,10 +10,8 @@
 #ifndef FXVALUEPENALTYBC_H
 #define FXVALUEPENALTYBC_H
 
-// MOOSE includes
 #include "FunctionPenaltyDirichletBC.h"
 
-// Forward declarations
 class FXValuePenaltyBC;
 
 template <>

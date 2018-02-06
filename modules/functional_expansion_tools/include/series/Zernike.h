@@ -10,7 +10,6 @@
 #ifndef ZERNIKE_H
 #define ZERNIKE_H
 
-// Module includes
 #include "SingleSeriesBasisInterface.h"
 
 /**

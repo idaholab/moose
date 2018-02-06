@@ -10,7 +10,6 @@
 #ifndef FUNCTIONALBASISINTERFACE_H
 #define FUNCTIONALBASISINTERFACE_H
 
-// MOOSE includes
 #include "MooseEnum.h"
 #include "MooseError.h"
 #include "MooseTypes.h"

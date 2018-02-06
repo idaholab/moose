@@ -10,7 +10,6 @@
 #ifndef SINGLESERIESBASISINTERFACE_H
 #define SINGLESERIESBASISINTERFACE_H
 
-// Module includes
 #include "FunctionalBasisInterface.h"
 
 /**

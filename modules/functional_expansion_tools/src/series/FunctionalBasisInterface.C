@@ -7,7 +7,6 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-// Module includes
 #include "FunctionalBasisInterface.h"
 
 MooseEnum FunctionalBasisInterface::_domain_options("x=0 y=1 z=2");

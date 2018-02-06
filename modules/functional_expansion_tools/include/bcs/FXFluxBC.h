@@ -10,10 +10,8 @@
 #ifndef FXFLUXBC_H
 #define FXFLUXBC_H
 
-// MOOSE includes
 #include "FunctionNeumannBC.h"
 
-// Forward declarations
 class FXFluxBC;
 
 template <>

@@ -10,10 +10,8 @@
 #ifndef FXBOUNDARYFLUXUSEROBJECT_H
 #define FXBOUNDARYFLUXUSEROBJECT_H
 
-// Module includes
 #include "FXBoundaryBaseUserObject.h"
 
-// Forward declarations
 class FXBoundaryFluxUserObject;
 
 template <>

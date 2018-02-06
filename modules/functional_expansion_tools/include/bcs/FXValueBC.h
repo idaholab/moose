@@ -10,10 +10,8 @@
 #ifndef FXVALUEBC_H
 #define FXVALUEBC_H
 
-// MOOSE includes
 #include "FunctionDirichletBC.h"
 
-// Forward declarations
 class FXValueBC;
 
 template <>

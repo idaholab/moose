@@ -10,11 +10,9 @@
 #ifndef FXVOLUMEUSEROBJECT_H
 #define FXVOLUMEUSEROBJECT_H
 
-// MOOSE includes
 #include "ElementIntegralVariableUserObject.h"
 #include "FXIntegralBaseUserObject.h"
 
-// Forward declarations
 class FXVolumeUserObject;
 
 template <>

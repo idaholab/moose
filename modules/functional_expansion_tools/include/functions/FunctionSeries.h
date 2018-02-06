@@ -10,14 +10,11 @@
 #ifndef FUNCTIONSERIES_H
 #define FUNCTIONSERIES_H
 
-// Module includes
 #include "MutableCoefficientsFunctionInterface.h"
 #include "CompositeSeriesBasisInterface.h"
 
-// Forward declaration
 class FunctionSeries;
 
-// InputParameters declaration
 template <>
 InputParameters validParams<FunctionSeries>();
 

@@ -10,16 +10,12 @@
 #ifndef MEMOIZEFUNCTIONINTERFACE_H
 #define MEMOIZEFUNCTIONINTERFACE_H
 
-// C++ includes
 #include <map>
 
-// MOOSE includes
 #include "Function.h"
 
-// Module includes
 #include "Hashing.h"
 
-// Forward declarations
 class MemoizedFunctionInterface;
 
 template <>

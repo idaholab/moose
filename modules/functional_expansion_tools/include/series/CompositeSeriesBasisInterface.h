@@ -10,10 +10,8 @@
 #ifndef COMPOSITESERIESBASISINTERFACE_H
 #define COMPOSITESERIESBASISINTERFACE_H
 
-// C++ includes
 #include <iomanip>
 
-// Module includes
 #include "FunctionalBasisInterface.h"
 #include "SingleSeriesBasisInterface.h"
 

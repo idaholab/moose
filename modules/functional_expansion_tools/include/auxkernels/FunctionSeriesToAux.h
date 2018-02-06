@@ -10,10 +10,8 @@
 #ifndef FUNCTIONSERIESTOAUX_H
 #define FUNCTIONSERIESTOAUX_H
 
-// MOOSE includes
 #include "FunctionAux.h"
 
-// Forward declarations
 class FunctionSeriesToAux;
 
 template <>

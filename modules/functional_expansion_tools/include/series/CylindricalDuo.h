@@ -10,7 +10,6 @@
 #ifndef CYLINDRICALDUO_H
 #define CYLINDRICALDUO_H
 
-// Module includes
 #include "CompositeSeriesBasisInterface.h"
 
 /**

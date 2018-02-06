@@ -10,7 +10,6 @@
 #ifndef CARTESIAN_H
 #define CARTESIAN_H
 
-// Module includes
 #include "CompositeSeriesBasisInterface.h"
 
 /**
