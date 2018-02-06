@@ -57,7 +57,9 @@ class SparseMatrix;
 class NonlinearSystemBase : public SystemBase, public ConsoleStreamInterface
 {
 public:
-  NonlinearSystemBase(FEProblemBase & problem, System & sys, const std::string & name);
+  NonlinearSystemBase(FEProblemBase & problem,
+                      NonlinearImplicitSystem & sys,
+                      const std::string & name);
   virtual ~NonlinearSystemBase();
 
   virtual void init() override;
@@ -556,8 +558,8 @@ public:
 
   virtual NumericVector<Number> & solution() override { return *_sys.solution; }
 
-  virtual System & system() override { return _sys; }
-  virtual const System & system() const override { return _sys; }
+  virtual NonlinearImplicitSystem & system() override { return _sys; }
+  virtual const NonlinearImplicitSystem & system() const override { return _sys; }
 
   virtual NumericVector<Number> * solutionPreviousNewton() override
   {
@@ -576,7 +578,7 @@ public:
 
 public:
   FEProblemBase & _fe_problem;
-  System & _sys;
+  NonlinearImplicitSystem & _sys;
   // FIXME: make these protected and create getters/setters
   Real _last_rnorm;
   Real _last_nl_rnorm;

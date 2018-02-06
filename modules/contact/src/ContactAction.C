@@ -13,6 +13,9 @@
 #include "FEProblem.h"
 #include "Conversion.h"
 #include "AddVariableAction.h"
+#include "ContactLineSearch.h"
+#include "NonlinearSystemBase.h"
+#include "libmesh/petsc_nonlinear_solver.h"
 
 registerMooseAction("ContactApp", ContactAction, "add_aux_kernel");
 
@@ -87,7 +90,11 @@ validParams<ContactAction>()
   params.addParam<Real>("al_frictional_force_tolerance",
                         "The tolerance of the frictional force for augmented Lagrangian method.");
   params.addParam<bool>(
-      "print_contact_nodes", false, "Whether to print the number of nodes in contact.");
+      "custom_line_search", false, "Whether to use a contact customized line search.");
+  params.addParam<unsigned>(
+      "allowed_lambda_cuts",
+      2,
+      "The number of times lambda is allowed to be cut in half in the custom line search");
   return params;
 }
 
@@ -112,6 +119,14 @@ ContactAction::ContactAction(const InputParameters & params)
 void
 ContactAction::act()
 {
+#ifdef LIBMESH_HAVE_PETSC
+  std::unique_ptr<ContactLineSearch> contact_linesearch =
+      getParam<bool>("custom_line_search")
+          ? libmesh_make_unique<ContactLineSearch>(
+                *_problem, _app, getParam<unsigned>("allowed_lambda_cuts"))
+          : nullptr;
+#endif
+
   if (!_problem->getDisplacedProblem())
     mooseError("Contact requires updated coordinates.  Use the 'displacements = ...' line in the "
                "Mesh block.");
@@ -160,7 +175,6 @@ ContactAction::act()
       params.set<std::vector<VariableName>>("displacements") = coupled_displacements;
       params.set<BoundaryName>("boundary") = _master;
       params.set<bool>("use_displaced_mesh") = true;
-      params.set<bool>("print_contact_nodes") = getParam<bool>("print_contact_nodes");
 
       for (unsigned int i = 0; i < ndisp; ++i)
       {
@@ -169,7 +183,9 @@ ContactAction::act()
         params.set<unsigned int>("component") = i;
         params.set<NonlinearVariableName>("variable") = displacements[i];
         params.set<std::vector<VariableName>>("master_variable") = {coupled_displacements[i]};
-
+#ifdef LIBMESH_HAVE_PETSC
+        params.set<ContactLineSearch *>("contact_linesearch") = contact_linesearch.get();
+#endif
         _problem->addConstraint("MechanicalContactConstraint", name, params);
       }
     }
@@ -213,4 +229,9 @@ ContactAction::act()
       }
     }
   }
+#ifdef LIBMESH_HAVE_PETSC
+  PetscNonlinearSolver<Real> & petsc_nonlinear_solver = static_cast<PetscNonlinearSolver<Real> &>(
+      *_problem->getNonlinearSystemBase().system().nonlinear_solver);
+  petsc_nonlinear_solver.linesearch_object = std::move(contact_linesearch);
+#endif
 }

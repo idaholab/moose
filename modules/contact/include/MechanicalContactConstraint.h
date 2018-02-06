@@ -16,6 +16,12 @@
 
 // Forward Declarations
 class MechanicalContactConstraint;
+class ContactLineSearch;
+namespace libMesh
+{
+template <typename T>
+class PetscNonlinearSolver;
+}
 
 template <>
 InputParameters validParams<MechanicalContactConstraint>();
@@ -28,7 +34,7 @@ class MechanicalContactConstraint : public NodeFaceConstraint
 {
 public:
   MechanicalContactConstraint(const InputParameters & parameters);
-  virtual ~MechanicalContactConstraint() {}
+  virtual ~MechanicalContactConstraint();
 
   virtual void timestepSetup() override;
   virtual void jacobianSetup() override;
@@ -88,6 +94,7 @@ public:
 
 protected:
   MooseSharedPointer<DisplacedProblem> _displaced_problem;
+  FEProblem & _fe_problem;
   Real nodalArea(PenetrationInfo & pinfo);
   Real getPenalty(PenetrationInfo & pinfo);
   Real getTangentialPenalty(PenetrationInfo & pinfo);
@@ -131,11 +138,14 @@ protected:
   /// The tolerance of the frictional force for augmented Lagrangian method
   Real _al_frictional_force_tolerance;
 
-  std::set<dof_id_type> _current_contact_state;
+#ifdef LIBMESH_HAVE_PETSC
+  ContactLineSearch * _contact_linesearch;
+#endif
+  std::set<dof_id_type> * _current_contact_state;
   std::set<dof_id_type> _old_contact_state;
 
-private:
   const bool _print_contact_nodes;
+  static Threads::spin_mutex _contact_set_mutex;
 };
 
 #endif
