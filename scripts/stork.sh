@@ -62,14 +62,14 @@ if [[ -d "$dir" ]]; then
 fi
 cp -R "$MOOSE_DIR/stork" "$dir" || echo "error: app/module creation failed" >&2 || exit 1
 
-find $dir | grep '/[.]' | xargs rm -f # remove hidden files (e.g. vim swp files)
+find $dir -type f -name '.*' | xargs rm -f # remove hidden files (e.g. vim swp files)
 
 # rename app name within files
 function recursiveRename {
     src=$1
     dst=$2
     grep --recursive -l "$src" $dir | xargs sed -i.bak 's/'"$src"'/'"$dst"'/g'
-    find $dir | grep '\.bak$' | xargs rm -f
+    find $dir -type f -name '*.bak' | xargs rm -f
 }
 recursiveRename "$srcname" "$dstname"
 recursiveRename "$srcnamelow" "$dstnamelow"
