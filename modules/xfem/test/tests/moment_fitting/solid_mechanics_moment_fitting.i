@@ -1,3 +1,6 @@
+# Test for a mechanics problem which uses four points moment_fitting approach.
+# See this paper (https://doi.org/10.1007/s00466-018-1544-2) for more details about moment_fitting approach.
+
 [GlobalParams]
   order = FIRST
   family = LAGRANGE
@@ -162,7 +165,6 @@
 []
 
 [Outputs]
-  file_base = square_moment_fitting_out
   exodus = true
   [./console]
     type = Console

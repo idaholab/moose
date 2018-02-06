@@ -1,0 +1,24 @@
+[Tests]
+  [./solid_mechanics_moment_fitting]
+    type = Exodiff
+    input = solid_mechanics_moment_fitting.i
+    exodiff = 'solid_mechanics_moment_fitting_out.e'
+    map = false
+    # XFEM requires --enable-unique-ids in libmesh
+    unique_id = true
+  [../]
+  [./diffusion_moment_fitting_four_points]
+    type = Exodiff
+    input = diffusion_moment_fitting_four_points.i
+    exodiff = 'diffusion_moment_fitting_four_points_out.e'
+    map = false
+    unique_id = true
+  [../]
+  [./diffusion_moment_fitting_six_points]
+    type = Exodiff
+    input = diffusion_moment_fitting_six_points.i
+    exodiff = 'diffusion_moment_fitting_six_points_out.e'
+    map = false
+    unique_id = true
+  [../]
+[]
