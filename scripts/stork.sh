@@ -119,4 +119,8 @@ fi
 if [[ "$kind" == "module" ]]; then
   rm -f $dir/LICENSE
   rm -f $dir/README.md
+  rm -f $dir/scripts/*
+  rmdir $dir/scripts
+  rm -f $dir/run_tests
+  ln -s ../../scripts/run_tests $dir/run_tests
 fi
