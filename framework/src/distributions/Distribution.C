@@ -20,3 +20,10 @@ validParams<Distribution>()
 }
 
 Distribution::Distribution(const InputParameters & parameters) : MooseObject(parameters) {}
+
+Real
+Distribution::median()
+{
+  mooseError("The distribution '", name(), "' must override the median method.");
+  return 0;
+}
