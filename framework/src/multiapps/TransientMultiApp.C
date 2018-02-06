@@ -386,10 +386,6 @@ TransientMultiApp::solveStep(Real dt, Real target_time, bool auto_advance)
           problem.advanceState();
 
         if (auto_advance)
-          if (_first != true)
-            ex->incrementStepOrReject();
-
-        if (auto_advance)
           problem.allowOutput(true);
 
         ex->takeStep(dt);
@@ -524,18 +520,28 @@ TransientMultiApp::solveStep(Real dt, Real target_time, bool auto_advance)
 }
 
 void
-TransientMultiApp::advanceStep()
+TransientMultiApp::incrementTStep()
 {
-  if (!_auto_advance && !_sub_cycling)
+  if (!_sub_cycling)
   {
     for (unsigned int i = 0; i < _my_num_apps; i++)
     {
-      /*FEProblemBase * problem =*/appProblemBase(_first_local_app + i);
       Transient * ex = _transient_executioners[i];
+      ex->incrementStepOrReject();
+    }
+  }
+}
 
+void
+TransientMultiApp::finishStep()
+{
+  if (!_sub_cycling)
+  {
+    for (unsigned int i = 0; i < _my_num_apps; i++)
+    {
+      Transient * ex = _transient_executioners[i];
       ex->endStep();
       ex->postStep();
-      ex->incrementStepOrReject();
     }
   }
 }

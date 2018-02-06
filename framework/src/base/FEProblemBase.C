@@ -3281,7 +3281,17 @@ FEProblemBase::postExecute()
 }
 
 void
-FEProblemBase::advanceMultiApps(ExecFlagType type)
+FEProblemBase::incrementMultiAppTStep(ExecFlagType type)
+{
+  const auto & multi_apps = _multi_apps[type].getActiveObjects();
+
+  if (multi_apps.size())
+    for (const auto & multi_app : multi_apps)
+      multi_app->incrementTStep();
+}
+
+void
+FEProblemBase::finishMultiAppStep(ExecFlagType type)
 {
   const auto & multi_apps = _multi_apps[type].getActiveObjects();
 
@@ -3290,7 +3300,7 @@ FEProblemBase::advanceMultiApps(ExecFlagType type)
     _console << COLOR_CYAN << "\nAdvancing MultiApps" << COLOR_DEFAULT << std::endl;
 
     for (const auto & multi_app : multi_apps)
-      multi_app->advanceStep();
+      multi_app->finishStep();
 
     _console << "Waiting For Other Processors To Finish" << std::endl;
     MooseUtils::parallelBarrierNotify(_communicator, _parallel_barrier_messaging);

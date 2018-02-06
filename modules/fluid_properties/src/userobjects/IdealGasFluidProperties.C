@@ -42,8 +42,8 @@ Real
 IdealGasFluidProperties::pressure(Real v, Real u) const
 {
   if (v == 0.0)
-    throw MooseException(name() + ": Invalid value of specific volume detected (v = " +
-                         Moose::stringify(v) + ").");
+    throw MooseException(
+        name() + ": Invalid value of specific volume detected (v = " + Moose::stringify(v) + ").");
 
   // The std::max function serves as a hard limiter, which will guarantee non-negative pressure
   // when resolving strongly nonlinear waves
