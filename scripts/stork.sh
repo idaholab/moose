@@ -115,3 +115,8 @@ if [[ "$kind" == "app" ]]; then
     echo "    ./scripts/install-format-hook.sh"
     echo ""
 fi
+
+if [[ "$kind" == "module" ]]; then
+  rm -f $dir/LICENSE
+  rm -f $dir/README.md
+fi
