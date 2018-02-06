@@ -122,7 +122,7 @@ RenameBlock::modify()
     _mesh_ptr->getMesh().subdomain_name(_old_block_id[i]) = _new_block_name[i];
 }
 
-const SubdomainName
+SubdomainName
 RenameBlock::newBlockName(const SubdomainID & new_block_id)
 {
   for (unsigned i = 0; i < _new_block_id.size(); ++i)
@@ -131,7 +131,7 @@ RenameBlock::newBlockName(const SubdomainID & new_block_id)
   mooseError("RenameBlock: error in code");
 }
 
-const SubdomainID
+SubdomainID
 RenameBlock::newBlockID(const SubdomainName & new_block_name)
 {
   for (unsigned i = 0; i < _new_block_name.size(); ++i)

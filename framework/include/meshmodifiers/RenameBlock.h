@@ -65,7 +65,7 @@ private:
    * @param new_block_id the new block's ID number
    * @return the name that will be given to that block
    */
-  const SubdomainName newBlockName(const SubdomainID & new_block_id);
+  SubdomainName newBlockName(const SubdomainID & new_block_id);
 
   /**
    * Given a new_block_name, provide a block ID, based
@@ -90,7 +90,7 @@ private:
    * @param new_block_name the new block's name
    * @return the ID number that will be given to that block
    */
-  const SubdomainID newBlockID(const SubdomainName & new_block_name);
+  SubdomainID newBlockID(const SubdomainName & new_block_name);
 };
 
 #endif // RENAMEBLOCK_H
