@@ -44,18 +44,14 @@ CentroidMultiApp::fillPositions()
 {
   MooseMesh & master_mesh = _fe_problem.mesh();
 
-  auto & bids = blockIDs();
-
-  // Detect if it can be on any block
-  bool any_bid = bids.find(Moose::ANY_BLOCK_ID) != bids.end();
-
   for (const auto & elem_ptr : master_mesh.getMesh().active_local_element_ptr_range())
-  {
-    if (any_bid || bids.find(elem_ptr->subdomain_id()) != bids.end())
+    if (hasBlocks(elem_ptr->subdomain_id()))
       _positions.push_back(elem_ptr->centroid());
-  }
 
   libMesh::ParallelObject::comm().allgather(_positions);
+
+  if (_positions.empty())
+    mooseError("No positions found for CentroidMultiapp ", _name);
 
   // An attempt to try to make this parallel stable
   std::sort(_positions.begin(), _positions.end());
