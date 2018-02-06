@@ -1,3 +1,7 @@
+# Test for a diffusion problem which uses six points moment_fitting approach.
+# To use six points rule, add Quadrature block with order = FOURTH and type = MONOMIAL.
+# See this paper (https://doi.org/10.1007/s00466-018-1544-2) for more details about moment_fitting approach.
+
 [GlobalParams]
   order = FIRST
   family = LAGRANGE
@@ -17,7 +21,7 @@
 
 [XFEM]
   geometric_cut_userobjects = 'line_seg_cut_uo'
-  qrule = volfrac
+  qrule = moment_fitting
   output_cut_plane = true
 []
 
@@ -73,6 +77,11 @@
   petsc_options_iname = '-pc_type -pc_hypre_type'
   petsc_options_value = 'hypre boomeramg'
   line_search = 'none'
+
+  [./Quadrature]
+    order = FOURTH
+    type = MONOMIAL
+  [../]
 
   l_tol = 1e-3
   nl_max_its = 15

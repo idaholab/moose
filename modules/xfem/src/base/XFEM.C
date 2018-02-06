@@ -25,6 +25,7 @@
 #include "MooseVariable.h"
 #include "NonlinearSystem.h"
 #include "FEProblem.h"
+#include "Assembly.h"
 
 #include "libmesh/mesh_communication.h"
 
@@ -1153,16 +1154,20 @@ XFEM::cutMeshWithEFA(NonlinearSystemBase & nl, AuxiliarySystem & aux)
       EFAElement2D * new_efa_elem2d = dynamic_cast<EFAElement2D *>(new_elements[i]);
       if (!new_efa_elem2d)
         mooseError("EFAelem is not of EFAelement2D type");
-      xfce = new XFEMCutElem2D(
-          libmesh_elem, new_efa_elem2d, (*_material_data)[0]->nQPoints(), libmesh_elem->n_sides());
+      xfce = new XFEMCutElem2D(libmesh_elem,
+                               new_efa_elem2d,
+                               _fe_problem->assembly(0).qRule()->n_points(),
+                               libmesh_elem->n_sides());
     }
     else if (_mesh->mesh_dimension() == 3)
     {
       EFAElement3D * new_efa_elem3d = dynamic_cast<EFAElement3D *>(new_elements[i]);
       if (!new_efa_elem3d)
         mooseError("EFAelem is not of EFAelement3D type");
-      xfce = new XFEMCutElem3D(
-          libmesh_elem, new_efa_elem3d, (*_material_data)[0]->nQPoints(), libmesh_elem->n_sides());
+      xfce = new XFEMCutElem3D(libmesh_elem,
+                               new_efa_elem3d,
+                               _fe_problem->assembly(0).qRule()->n_points(),
+                               libmesh_elem->n_sides());
     }
     _cut_elem_map.insert(std::pair<unique_id_type, XFEMCutElem *>(libmesh_elem->unique_id(), xfce));
     efa_id_to_new_elem.insert(std::make_pair(efa_child_id, libmesh_elem));
