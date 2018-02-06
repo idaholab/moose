@@ -131,22 +131,18 @@ class RunPBS(QueueManager):
             # Job is finished
             if job_state.group(1) == 'F':
                 # The exit code PBS recorded when the application exited
-                tester.exit_code = re.search(r'Exit_status = (\d+)', output).group(1)
+                tester.exit_code = int(re.search(r'Exit_status = (\d+)', output).group(1))
 
                 # non-zero exit codes are handled properly elsewhere (as a CRASH). So do not set any
-                # failed bucket here. Instead, add a message (caveat) as to why it crashed (if we know).
-                # additional info in next TL;DR note.
+                # failed buckets for finished PBS jobs. Instead, add a message (caveat) as to why it
+                # failed (if we know).
 
                 # Set the bucket that allows processResults to commence
                 reason = 'WAITING'
                 bucket = tester.bucket_waiting_processing
 
-                # NOTE:
-                # Setting a failed bucket in RunPBS derived scheduler will cause the TestHarness to assume
-                # there is no output from the job we launched. but we do have output in this case. And it
-                # contains valuable information as to why PBS killed the job. So just set a caveat. The
-                # TestHarness _will_ fail the job later, correctly, because of the non-zero exit code.
-                if tester.exit_code == '271':
+                # NOTE: 271 occurs when when PBS ended the job prematurely (walltime, etc)
+                if tester.exit_code == 271:
                     tester.addCaveats('Killed by PBS')
 
             # Job is currently running
