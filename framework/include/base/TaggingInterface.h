@@ -44,6 +44,14 @@ public:
 
   void addMatrixTag(TagID tag_id);
 
+  bool isVectorTagged() { return _vector_tags.size() > 0; }
+
+  bool isMatrixTagged() { return _matrix_tags.size() > 0; }
+
+  std::set<TagID> & getVectorTags() { return _vector_tags; }
+
+  std::set<TagID> & getMatrixTags() { return _matrix_tags; }
+
 protected:
   /// The vectors this Kernel will contribute to
   std::set<TagID> _vector_tags;

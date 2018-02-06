@@ -46,6 +46,11 @@ public:
    */
   virtual void addObject(std::shared_ptr<T> object, THREAD_ID tid = 0, bool recurse = true);
 
+  /**
+   * Return how many kernels we store in the current warehouse
+   */
+  unsigned int size(THREAD_ID tid = 0);
+
   ///@{
   /**
    * Retrieve complete vector to the all/block/boundary restricted objects for a given thread.
@@ -216,6 +221,14 @@ MooseObjectWarehouseBase<T>::MooseObjectWarehouseBase(bool threaded /*=true*/)
 template <typename T>
 MooseObjectWarehouseBase<T>::~MooseObjectWarehouseBase()
 {
+}
+
+template <typename T>
+unsigned int
+MooseObjectWarehouseBase<T>::size(THREAD_ID tid /* =0 */)
+{
+  checkThreadID(tid);
+  return _all_objects[tid].size();
 }
 
 template <typename T>

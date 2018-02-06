@@ -1111,8 +1111,6 @@ public:
 
   void serializeSolution();
 
-  void setKernelTypeResidual(Moose::KernelType kt) { _kernel_type = kt; }
-
   void registerRandomInterface(RandomInterface & random_interface, const std::string & name);
 
   /**
