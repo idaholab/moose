@@ -121,7 +121,9 @@ struct TestCase
 TEST(MooseUtilsTests, levenshteinDist)
 {
   TestCase cases[] = {
-      {"hello", "hell", 1}, {"flood", "foods", 2}, {"fandango", "odanget", 5},
+      {"hello", "hell", 1},
+      {"flood", "foods", 2},
+      {"fandango", "odanget", 5},
   };
 
   for (size_t i = 0; i < sizeof(cases) / sizeof(TestCase); i++)

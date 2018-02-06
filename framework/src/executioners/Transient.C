@@ -381,12 +381,24 @@ Transient::incrementStepOrReject()
 
       _problem.advanceState();
 
-      // Advance (and Output) MultiApps if we were doing Picard iterations
+      /*
+       * Call the multi-app executioners endStep and
+       * postStep methods when doing Picard. We do not perform these calls for
+       * loose coupling because Transient::endStep and Transient::postStep get
+       * called from TransientMultiApp::solveStep in that case.
+       */
       if (_picard_max_its > 1)
       {
-        _problem.advanceMultiApps(EXEC_TIMESTEP_BEGIN);
-        _problem.advanceMultiApps(EXEC_TIMESTEP_END);
+        _problem.finishMultiAppStep(EXEC_TIMESTEP_BEGIN);
+        _problem.finishMultiAppStep(EXEC_TIMESTEP_END);
       }
+      /*
+       * Ensure that we increment the sub-application time steps so that
+       * when dt selection is made in the master application, we are using
+       * the correct time step information
+       */
+      _problem.incrementMultiAppTStep(EXEC_TIMESTEP_BEGIN);
+      _problem.incrementMultiAppTStep(EXEC_TIMESTEP_END);
     }
   }
   else

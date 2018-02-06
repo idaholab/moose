@@ -105,8 +105,9 @@ template <typename T>
 Real
 CahnHilliardFluxBCBase<T>::computeQpJacobian()
 {
-  return _penalty * ((_M[_qp] * _grad_phi[_j][_qp] + _phi[_j][_qp] * _dMdw[_qp] * _grad_u[_qp]) *
-                     _normals[_qp]) *
+  return _penalty *
+             ((_M[_qp] * _grad_phi[_j][_qp] + _phi[_j][_qp] * _dMdw[_qp] * _grad_u[_qp]) *
+              _normals[_qp]) *
              (_M[_qp] * _normals[_qp] * _grad_test[_i][_qp] +
               _dMdw[_qp] * _grad_u[_qp] * _normals[_qp] * _test[_i][_qp]) +
          _penalty * ((_M[_qp] * _grad_u[_qp] - _flux) * _normals[_qp]) *
