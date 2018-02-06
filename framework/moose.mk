@@ -1,3 +1,6 @@
+# Whether or not to do a Unity build
+MOOSE_UNITY ?= false
+
 #
 # MOOSE
 #
@@ -99,8 +102,72 @@ moose_LIB := $(FRAMEWORK_DIR)/libmoose-$(METHOD).la
 
 moose_LIBS := $(moose_LIB) $(pcre_LIB) $(hit_LIB)
 
-# source files
 moose_srcfiles    := $(shell find $(moose_SRC_DIRS) -name "*.C")
+
+### Unity Build ###
+ifeq ($(MOOSE_UNITY),true)
+
+srcsubdirs := $(shell find $(FRAMEWORK_DIR)/src -type d -not -path '*/.libs*')
+
+moose_non_unity = %/base %/utils
+
+unity_src_dir = $(FRAMEWORK_DIR)/build/unity_src
+
+unity_srcsubdirs := $(filter-out $(moose_non_unity), $(srcsubdirs))
+non_unity_srcsubdirs := $(filter $(moose_non_unity), $(srcsubdirs))
+
+define unity_dir_rule
+$(1):
+	@echo Creating Unity Directory $$@
+	@mkdir -p $(1)
+endef
+
+$(eval $(call unity_dir_rule, $(unity_src_dir)))
+
+# 1: the unity file to build
+# 2: the source files in that unity file
+# 3: The unity source directory
+# The "|" in the prereqs starts the beginning of "position dependent" prereqs
+# these are prereqs that must be run first - but their timestamp isn't used
+define unity_file_rule
+$(1):$(2) | $(3)
+	@echo Creating Unity $$@
+	$$(shell echo > $$@)
+	$$(foreach srcfile,$(filter-out $(3),$$^),$$(shell echo '#include"$$(srcfile)"' >> $$@))
+endef
+#	$$(foreach srcfile,$$(filter-out $$(lastword $$^),$$^),$$(shell echo '#include"$$(srcfile)"' >> $$@))
+
+# 1: The directory where the unity source files will go
+# 2: The application directory
+# 3: A subdir that will be unity built
+# The output: is the unique .C file name for the unity file
+# Here's what this does:
+# For each explicit path we're going to create a unique unity filename by:
+# 1. Stripping off $(FRAMEWORK_DIR)/src
+# 2. For the special case of src itself strip off $(FRAMEWORK_DIR)
+# 3. Turn every remaining '/' into an '_'
+# 4. Add '_Unity.C'
+unity_unique_name = $(1)/$(subst /,_,$(patsubst $(2)/%,%,$(patsubst $(2)/src/%,%,$(3))))_Unity.C
+
+# Here's what this does:
+# 1. Defines a rule to build a unity file from each subdirectory under src
+# 2. Does that by looping over the explicit paths found before (unity_srcsubdirs)
+# 3. For each explicit path we're going to create a unique unity filename by calling unity_unique_name
+# 4. Now that we have the name of the Unity file we need to find all of the .C files that should be #included in it
+# 4a. Use find to pick up all .C files
+# 4b. Make sure we don't pick up any _Unity.C files (we shouldn't have any anyway)
+$(foreach srcsubdir,$(unity_srcsubdirs),$(eval $(call unity_file_rule,$(call unity_unique_name,$(unity_src_dir),$(FRAMEWORK_DIR),$(srcsubdir)),$(shell find $(srcsubdir) -maxdepth 1 -type f -name "*.C"),$(unity_src_dir))))
+
+app_unity_srcfiles = $(foreach srcsubdir,$(unity_srcsubdirs),$(call unity_unique_name,$(unity_src_dir),$(FRAMEWORK_DIR),$(srcsubdir)))
+
+#$(info $(app_unity_srcfiles))
+
+unity_srcfiles += $(app_unity_srcfiles)
+
+moose_srcfiles    := $(app_unity_srcfiles) $(shell find $(non_unity_srcsubdirs) -maxdepth 1 -name "*.C") $(shell find $(filter-out %/src,$(moose_SRC_DIRS)) -name "*.C")
+endif
+
+# source files
 moose_csrcfiles   := $(shell find $(moose_SRC_DIRS) -name "*.c")
 moose_fsrcfiles   := $(shell find $(moose_SRC_DIRS) -name "*.f")
 moose_f90srcfiles := $(shell find $(moose_SRC_DIRS) -name "*.f90")
@@ -225,7 +292,7 @@ app_deps := $(moose_deps) $(exodiff_deps) $(pcre_deps) $(gtest_deps) $(hit_deps)
 #    files, libraries, etc.
 clean::
 	@$(libmesh_LIBTOOL) --mode=uninstall --quiet rm -f $(app_LIB) $(app_test_LIB)
-	@rm -rf $(app_EXEC) $(app_objects) $(main_object) $(app_deps) $(app_HEADER) $(app_test_objects)
+	@rm -rf $(app_EXEC) $(app_objects) $(main_object) $(app_deps) $(app_HEADER) $(app_test_objects) $(app_unity_srcfiles)
 	@rm -rf $(APPLICATION_DIR)/build
 
 # The clobber target does 'make clean' and then uses 'find' to clean a

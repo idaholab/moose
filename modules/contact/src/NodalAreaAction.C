@@ -15,7 +15,7 @@
 #include "MooseApp.h"
 #include "Conversion.h"
 
-static unsigned int counter = 0;
+static unsigned int na_counter = 0;
 
 template <>
 InputParameters
@@ -44,5 +44,5 @@ NodalAreaAction::act()
   _moose_object_pars.set<bool>("use_displaced_mesh") = true;
 
   _problem->addUserObject(
-      "NodalArea", "nodal_area_object_" + Moose::stringify(counter++), _moose_object_pars);
+      "NodalArea", "nodal_area_object_" + Moose::stringify(na_counter++), _moose_object_pars);
 }
