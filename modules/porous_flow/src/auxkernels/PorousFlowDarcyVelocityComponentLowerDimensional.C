@@ -16,28 +16,23 @@ InputParameters
 validParams<PorousFlowDarcyVelocityComponentLowerDimensional>()
 {
   InputParameters params = validParams<PorousFlowDarcyVelocityComponent>();
+  params.addCoupledVar("aperture", 1.0, "Aperture of the fracture");
   params.addClassDescription(
       "Darcy velocity on a lower-dimensional element embedded in a higher-dimensional mesh.  Units "
-      "m^3.s^-1.m^-2, or m.s^-1.  Darcy velocity =  -(k_ij * krel /mu (nabla_j P - w_j)), where "
-      "k_ij is the permeability tensor, krel is the relative permeability, mu is the fluid "
-      "viscosity, P is the fluid pressure, and w_j is the fluid weight.  The difference between "
-      "this AuxKernel and PorousFlowDarcyVelocity is that this one projects gravity along the "
-      "element's tangent direction.  NOTE!  For a meaningful answer, your permeability tensor must "
-      "NOT contain terms that rotate tangential vectors to non-tangential vectors.");
+      "m^3.s^-1.m^-2, or m.s^-1.  Darcy velocity =  -(k_ij * krel /(mu * a) (nabla_j P - w_j)), "
+      "where k_ij is the permeability tensor, krel is the relative permeability, mu is the fluid "
+      "viscosity, P is the fluid pressure, a is the fracture aperture and w_j is the fluid weight. "
+      " The difference between this AuxKernel and PorousFlowDarcyVelocity is that this one "
+      "projects gravity along the element's tangent direction.  NOTE!  For a meaningful answer, "
+      "your permeability tensor must NOT contain terms that rotate tangential vectors to "
+      "non-tangential vectors.");
   return params;
 }
 
 PorousFlowDarcyVelocityComponentLowerDimensional::PorousFlowDarcyVelocityComponentLowerDimensional(
     const InputParameters & parameters)
-  : PorousFlowDarcyVelocityComponent(parameters),
-    _tang_xi(LIBMESH_DIM + 1),
-    _tang_eta(LIBMESH_DIM + 1)
+  : PorousFlowDarcyVelocityComponent(parameters), _aperture(coupledValue("aperture"))
 {
-  for (unsigned i = 0; i < LIBMESH_DIM + 1; ++i)
-  {
-    _tang_xi[i] = &_assembly.getFE(FEType(), i)->get_dxyzdxi();
-    _tang_eta[i] = &_assembly.getFE(FEType(), i)->get_dxyzdeta();
-  }
 }
 
 Real
@@ -51,14 +46,23 @@ PorousFlowDarcyVelocityComponentLowerDimensional::computeValue()
                "only since it employs "
                "PorousFlowDarcyVelocityComponentLowerDimensional\n");
 
+  // MOOSE will automatically make grad(P) lie along the element's tangent direction
+  // but we need to project gravity in that direction too
+
+  // tang_xi is the element's tangent vector in xi direction
+  const std::vector<RealGradient> & tang_xi = _assembly.getFE(FEType(), elem_dim)->get_dxyzdxi();
   RealVectorValue tangential_gravity =
-      (_gravity * (*_tang_xi[elem_dim])[_qp] / (*_tang_xi[elem_dim])[_qp].norm_sq()) *
-      (*_tang_xi[elem_dim])[_qp];
+      (_gravity * tang_xi[_qp] / tang_xi[_qp].norm_sq()) * tang_xi[_qp];
   if (elem_dim == 2)
-    tangential_gravity +=
-        (_gravity * (*_tang_eta[elem_dim])[_qp] / (*_tang_eta[elem_dim])[_qp].norm_sq()) *
-        (*_tang_eta[elem_dim])[_qp];
+  {
+    // tang_eta is the element's tangent vector in eta direction
+    const std::vector<RealGradient> & tang_eta =
+        _assembly.getFE(FEType(), elem_dim)->get_dxyzdeta();
+    tangential_gravity += (_gravity * tang_eta[_qp] / tang_eta[_qp].norm_sq()) * tang_eta[_qp];
+  }
+
   return -(_permeability[_qp] *
            (_grad_p[_qp][_ph] - _fluid_density_qp[_qp][_ph] * tangential_gravity) *
-           _relative_permeability[_qp][_ph] / _fluid_viscosity[_qp][_ph])(_component);
+           _relative_permeability[_qp][_ph] / _fluid_viscosity[_qp][_ph])(_component) /
+         _aperture[_qp];
 }

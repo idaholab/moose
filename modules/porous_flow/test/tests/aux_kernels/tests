@@ -15,6 +15,11 @@
     input = 'darcy_velocity_lower.i'
     csvdiff = 'darcy_velocity_lower_out.csv'
   [../]
+  [./darcy_velocity_lower_2D]
+    type = 'CSVDiff'
+    input = 'darcy_velocity_lower_2D.i'
+    csvdiff = 'darcy_velocity_lower_2D_out.csv'
+  [../]
   [./darcy_velocity_lower_except]
     type = 'RunException'
     input = 'darcy_velocity_lower_except.i'
