@@ -507,8 +507,6 @@ const ExecFlagType EXEC_SAME_AS_MULTIAPP("SAME_AS_MULTIAPP");
 namespace Moose
 {
 
-static bool registered = false;
-
 void
 registerObjects(Factory & factory)
 {
@@ -917,8 +915,6 @@ registerObjects(Factory & factory)
   // RelationshipManagers
   registerRelationshipManager(ElementSideNeighborLayers);
   registerRelationshipManager(ElementPointNeighbors);
-
-  registered = true;
 }
 
 void
