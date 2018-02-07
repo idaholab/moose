@@ -130,12 +130,11 @@ $(eval $(call unity_dir_rule, $(unity_src_dir)))
 # The "|" in the prereqs starts the beginning of "position dependent" prereqs
 # these are prereqs that must be run first - but their timestamp isn't used
 define unity_file_rule
-$(1):$(2) | $(3)
+$(1):$(2) $(3) | $(4)
 	@echo Creating Unity $$@
 	$$(shell echo > $$@)
-	$$(foreach srcfile,$(filter-out $(3),$$^),$$(shell echo '#include"$$(srcfile)"' >> $$@))
+	$$(foreach srcfile,$$(filter-out $(3) $(4),$$^),$$(shell echo '#include"$$(srcfile)"' >> $$@))
 endef
-#	$$(foreach srcfile,$$(filter-out $$(lastword $$^),$$^),$$(shell echo '#include"$$(srcfile)"' >> $$@))
 
 # 1: The directory where the unity source files will go
 # 2: The application directory
@@ -156,7 +155,7 @@ unity_unique_name = $(1)/$(subst /,_,$(patsubst $(2)/%,%,$(patsubst $(2)/src/%,%
 # 4. Now that we have the name of the Unity file we need to find all of the .C files that should be #included in it
 # 4a. Use find to pick up all .C files
 # 4b. Make sure we don't pick up any _Unity.C files (we shouldn't have any anyway)
-$(foreach srcsubdir,$(unity_srcsubdirs),$(eval $(call unity_file_rule,$(call unity_unique_name,$(unity_src_dir),$(FRAMEWORK_DIR),$(srcsubdir)),$(shell find $(srcsubdir) -maxdepth 1 -type f -name "*.C"),$(unity_src_dir))))
+$(foreach srcsubdir,$(unity_srcsubdirs),$(eval $(call unity_file_rule,$(call unity_unique_name,$(unity_src_dir),$(FRAMEWORK_DIR),$(srcsubdir)),$(shell find $(srcsubdir) -maxdepth 1 -type f -name "*.C"),$(srcsubdir),$(unity_src_dir))))
 
 app_unity_srcfiles = $(foreach srcsubdir,$(unity_srcsubdirs),$(call unity_unique_name,$(unity_src_dir),$(FRAMEWORK_DIR),$(srcsubdir)))
 
