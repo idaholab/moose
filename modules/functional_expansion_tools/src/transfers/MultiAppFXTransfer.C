@@ -12,11 +12,11 @@
 #include "MultiApp.h"
 #include "UserObject.h"
 
-#include "MultiAppMutableCoefficientsTransfer.h"
+#include "MultiAppFXTransfer.h"
 
 template <>
 InputParameters
-validParams<MultiAppMutableCoefficientsTransfer>()
+validParams<MultiAppFXTransfer>()
 {
   InputParameters params = validParams<MultiAppTransfer>();
 
@@ -32,26 +32,20 @@ validParams<MultiAppMutableCoefficientsTransfer>()
       "multi_app_object_name",
       "Name of the MutableCoefficientsInterface-derived object in the MultiApp.");
 
-  params.addParam<std::string>(
-      "pretty_name", "MultiAppFXTransfer", "Typename by which this class should be identified.");
-
   return params;
 }
 
-MultiAppMutableCoefficientsTransfer::MultiAppMutableCoefficientsTransfer(
-    const InputParameters & parameters)
+MultiAppFXTransfer::MultiAppFXTransfer(const InputParameters & parameters)
   : MultiAppTransfer(parameters),
-    _pretty_name(getParam<std::string>("pretty_name")),
     _this_app_object_name(getParam<std::string>("this_app_object_name")),
     _multi_app_object_name(getParam<std::string>("multi_app_object_name")),
     getMultiAppObject(NULL),
     getSubAppObject(NULL)
 {
-  // Nothing here
 }
 
 void
-MultiAppMutableCoefficientsTransfer::initialSetup()
+MultiAppFXTransfer::initialSetup()
 {
   // Search for the _this_app_object_name in the LocalApp
   getMultiAppObject =
@@ -80,10 +74,10 @@ MultiAppMutableCoefficientsTransfer::initialSetup()
         "Transfer '", name(), "': Cannot find object '", _multi_app_object_name, "' in SubApp");
 }
 
-MultiAppMutableCoefficientsTransfer::GetProblemObject
-MultiAppMutableCoefficientsTransfer::scanProblemBaseForObject(FEProblemBase & base,
-                                                              const std::string & object_name,
-                                                              const std::string & app_name)
+MultiAppFXTransfer::GetProblemObject
+MultiAppFXTransfer::scanProblemBaseForObject(FEProblemBase & base,
+                                             const std::string & object_name,
+                                             const std::string & app_name)
 {
   /*
    * For now we are only considering Functions and UserObjects, as they are the only types currently
@@ -106,7 +100,7 @@ MultiAppMutableCoefficientsTransfer::scanProblemBaseForObject(FEProblemBase & ba
 
     // Check to see if the function is a subclass of MutableCoefficientsInterface
     if (interface)
-      return &MultiAppMutableCoefficientsTransfer::getMutableCoefficientsFunction;
+      return &MultiAppFXTransfer::getMutableCoefficientsFunction;
     else
       mooseError("Function '",
                  object_name,
@@ -124,7 +118,7 @@ MultiAppMutableCoefficientsTransfer::scanProblemBaseForObject(FEProblemBase & ba
 
     // Check to see if the userObject is a subclass of MutableCoefficientsInterface
     if (interface)
-      return &MultiAppMutableCoefficientsTransfer::getMutableCoefficientsUserOject;
+      return &MultiAppFXTransfer::getMutableCoefficientsUserOject;
     else
       mooseError("UserObject '",
                  object_name,
@@ -138,16 +132,17 @@ MultiAppMutableCoefficientsTransfer::scanProblemBaseForObject(FEProblemBase & ba
 }
 
 MutableCoefficientsInterface &
-MultiAppMutableCoefficientsTransfer::getMutableCoefficientsFunction(FEProblemBase & base,
-                                                                    const std::string & object_name,
-                                                                    THREAD_ID thread)
+MultiAppFXTransfer::getMutableCoefficientsFunction(FEProblemBase & base,
+                                                   const std::string & object_name,
+                                                   THREAD_ID thread)
 {
   return dynamic_cast<MutableCoefficientsInterface &>(base.getFunction(object_name, thread));
 }
 
 MutableCoefficientsInterface &
-MultiAppMutableCoefficientsTransfer::getMutableCoefficientsUserOject(
-    FEProblemBase & base, const std::string & object_name, THREAD_ID thread)
+MultiAppFXTransfer::getMutableCoefficientsUserOject(FEProblemBase & base,
+                                                    const std::string & object_name,
+                                                    THREAD_ID thread)
 {
   // Get the non-const qualified UserObject, otherwise we would use getUserObject()
   UserObject * user_object = base.getUserObjects().getActiveObject(object_name, thread).get();
@@ -156,9 +151,9 @@ MultiAppMutableCoefficientsTransfer::getMutableCoefficientsUserOject(
 }
 
 void
-MultiAppMutableCoefficientsTransfer::execute()
+MultiAppFXTransfer::execute()
 {
-  _console << "Beginning " << _pretty_name << ": " << name() << std::endl;
+  _console << "Beginning MultiAppFXTransfer: " << name() << std::endl;
 
   switch (_direction)
   {
@@ -225,5 +220,5 @@ MultiAppMutableCoefficientsTransfer::execute()
     }
   }
 
-  _console << "Finished " << _pretty_name << ": " << name() << std::endl;
+  _console << "Finished MultiAppFXTransfer: " << name() << std::endl;
 }

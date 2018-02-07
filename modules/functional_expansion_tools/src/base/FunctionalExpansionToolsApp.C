@@ -20,7 +20,7 @@
 #include "FXValueBC.h"
 #include "FXValuePenaltyBC.h"
 #include "FXVolumeUserObject.h"
-#include "MultiAppMutableCoefficientsTransfer.h"
+#include "MultiAppFXTransfer.h"
 
 template <>
 InputParameters
@@ -65,7 +65,6 @@ FunctionalExpansionToolsApp::registerObjects(Factory & factory)
   registerUserObject(FXBoundaryFluxUserObject);
   registerUserObject(FXVolumeUserObject);
 
-  // MultiAppFXTransfer is a typedef of MultiAppMutableCoefficientsTransfer
   registerTransfer(MultiAppFXTransfer);
 }
 

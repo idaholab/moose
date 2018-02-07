@@ -26,29 +26,29 @@ include $(FRAMEWORK_DIR)/moose.mk
 
 ################################## MODULES ####################################
 # set desired physics modules equal to 'yes' to enable them
-CHEMICAL_REACTIONS        	:= no
-CONTACT                   	:= no
-FLUID_PROPERTIES          	:= no
-FUNCTIONAL_EXPANSION_TOOLS	:= yes
-HEAT_CONDUCTION           	:= no
-MISC                      	:= no
-NAVIER_STOKES             	:= no
-PHASE_FIELD               	:= no
-RDG                       	:= no
-RICHARDS                  	:= no
-SOLID_MECHANICS           	:= no
-STOCHASTIC_TOOLS          	:= no
-TENSOR_MECHANICS          	:= no
-WATER_STEAM_EOS           	:= no
-XFEM                      	:= no
-POROUS_FLOW               	:= no
-LEVEL_SET                 	:= no
+CHEMICAL_REACTIONS          := no
+CONTACT                     := no
+FLUID_PROPERTIES            := no
+FUNCTIONAL_EXPANSION_TOOLS  := yes
+HEAT_CONDUCTION             := no
+MISC                        := no
+NAVIER_STOKES               := no
+PHASE_FIELD                 := no
+RDG                         := no
+RICHARDS                    := no
+SOLID_MECHANICS             := no
+STOCHASTIC_TOOLS            := no
+TENSOR_MECHANICS            := no
+WATER_STEAM_EOS             := no
+XFEM                        := no
+POROUS_FLOW                 := no
+LEVEL_SET                   := no
 include           $(MOOSE_DIR)/modules/modules.mk
 ###############################################################################
 
 # Extra stuff for GTEST
-ADDITIONAL_INCLUDES	:= -I$(FRAMEWORK_DIR)/contrib/gtest
-ADDITIONAL_LIBS 	:= $(FRAMEWORK_DIR)/contrib/gtest/libgtest.la
+ADDITIONAL_INCLUDES  := -I$(FRAMEWORK_DIR)/contrib/gtest
+ADDITIONAL_LIBS   := $(FRAMEWORK_DIR)/contrib/gtest/libgtest.la
 
 # dep apps
 CURRENT_DIR        := $(shell pwd)

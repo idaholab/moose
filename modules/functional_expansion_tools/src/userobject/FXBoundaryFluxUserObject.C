@@ -31,7 +31,6 @@ FXBoundaryFluxUserObject::FXBoundaryFluxUserObject(const InputParameters & param
     _diffusivity_name(parameters.get<std::string>("diffusivity")),
     _diffusivity(getMaterialProperty<Real>(_diffusivity_name))
 {
-  // Nothing here
 }
 
 Real

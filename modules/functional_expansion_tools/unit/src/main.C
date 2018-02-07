@@ -20,8 +20,8 @@
 
 PerfLog Moose::perf_log("gtest");
 
-MooseEnum SingleSeriesTypes1D("Legendre");
-MooseEnum SingleSeriesTypes2D("Zernike");
+MooseEnum single_series_types_1D("Legendre");
+MooseEnum single_series_types_2D("Zernike");
 
 GTEST_API_ int
 main(int argc, char ** argv)

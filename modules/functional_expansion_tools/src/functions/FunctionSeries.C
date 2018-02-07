@@ -24,17 +24,15 @@ validParams<FunctionSeries>()
                              " series (functional expansion or FX) to create a"
                              " 1D, 2D, or 3D function");
 
-  /*
-   * The available composite series types.
-   *   Cartesian:      1D, 2D, or 3D, depending on which of x, y, and z are present
-   *   CylindricalDuo: planar disc expansion and axial expansion
-   */
-  MooseEnum SeriesTypes("Cartesian CylindricalDuo");
-  MooseEnum SingleSeriesTypes1D("Legendre");
-  MooseEnum SingleSeriesTypes2D("Zernike");
+  // The available composite series types.
+  //   Cartesian:      1D, 2D, or 3D, depending on which of x, y, and z are present
+  //   CylindricalDuo: planar disc expansion and axial expansion
+  MooseEnum series_types("Cartesian CylindricalDuo");
+  MooseEnum single_series_types_1D("Legendre");
+  MooseEnum single_series_types_2D("Zernike");
 
   params.addRequiredParam<MooseEnum>(
-      "series_type", SeriesTypes, "The type of function series to construct.");
+      "series_type", series_types, "The type of function series to construct.");
 
   /*
    * This needs to use `unsigned int` instead of `std::size_t` because otherwise
@@ -51,12 +49,12 @@ validParams<FunctionSeries>()
                                      "Cartesian, and \"axial_min axial_max disc_center1 "
                                      "disc_center2 radius\" for CylindricalDuo");
 
-  params.addParam<MooseEnum>("x", SingleSeriesTypes1D, "The series to use for the x-direction.");
-  params.addParam<MooseEnum>("y", SingleSeriesTypes1D, "The series to use for the y-direction.");
-  params.addParam<MooseEnum>("z", SingleSeriesTypes1D, "The series to use for the z-direction.");
+  params.addParam<MooseEnum>("x", single_series_types_1D, "The series to use for the x-direction.");
+  params.addParam<MooseEnum>("y", single_series_types_1D, "The series to use for the y-direction.");
+  params.addParam<MooseEnum>("z", single_series_types_1D, "The series to use for the z-direction.");
 
   params.addParam<MooseEnum>("disc",
-                             SingleSeriesTypes2D,
+                             single_series_types_2D,
                              "The series to use for the disc. Its direction is determined by "
                              "orthogonality to the declared direction of the axis.");
   return params;
@@ -75,62 +73,64 @@ FunctionSeries::FunctionSeries(const InputParameters & parameters)
   std::vector<MooseEnum> domains;
   std::vector<MooseEnum> types;
 
-  /*
-   * For Cartesian series, at least one of 'x', 'y', and 'z' must be specified.
-   *
-   * The individual series are always stored in x, y, z order (independent of the order in which
-   * they appear in the input file). Hence, the 'orders' and 'physical_bounds' vectors must always
-   * be specified in x, y, z order.
-   */
   if (_series_type_name == "Cartesian")
   {
+    /*
+     * For Cartesian series, at least one of 'x', 'y', and 'z' must be specified.
+     *
+     * The individual series are always stored in x, y, z order (independent of the order in which
+     * they appear in the input file). Hence, the 'orders' and 'physical_bounds' vectors must always
+     * be specified in x, y, z order.
+     */
     if (isParamValid("x"))
     {
-      domains.push_back(FBI::_domain_options = "x");
+      domains.push_back(FunctionalBasisInterface::_domain_options = "x");
       types.push_back(_x);
     }
     if (isParamValid("y"))
     {
-      domains.push_back(FBI::_domain_options = "y");
+      domains.push_back(FunctionalBasisInterface::_domain_options = "y");
       types.push_back(_y);
     }
     if (isParamValid("z"))
     {
-      domains.push_back(FBI::_domain_options = "z");
+      domains.push_back(FunctionalBasisInterface::_domain_options = "z");
       types.push_back(_z);
     }
     if (types.size() == 0)
       mooseError("Must specify one of 'x', 'y', or 'z' for 'Cartesian' series!");
-    _series_type = new Cartesian(domains, _orders, types);
+    _series_type = libmesh_make_unique<Cartesian>(domains, _orders, types, name());
   }
-
-  /*
-   * CylindricalDuo represents a disc-axial expansion, where the disc is described by a single
-   * series, such as Zernike (as opposed to a series individually representing r and a second series
-   * independently representing theta. For CylindricalDuo series, the series are always stored in
-   * the axial, planar order, independent of which order the series appear in the input file.
-   * Therefore, the _orders and _physical_bounds vectors must always appear in axial, planar order.
-   * The first entry in _domains is interpreted as the axial direction, and the following two as the
-   * planar.
-   */
-  if (_series_type_name == "CylindricalDuo")
+  else if (_series_type_name == "CylindricalDuo")
   {
+    /*
+     * CylindricalDuo represents a disc-axial expansion, where the disc is described by a single
+     * series, such as Zernike (as opposed to a series individually representing r and a second
+     * series independently representing theta. For CylindricalDuo series, the series are always
+     * stored in the axial, planar order, independent of which order the series appear in the input
+     * file. Therefore, the _orders and _physical_bounds vectors must always appear in axial, planar
+     * order. The first entry in _domains is interpreted as the axial direction, and the following
+     * two as the planar.
+     */
     if (isParamValid("x"))
     {
-      domains = {
-          FBI::_domain_options = "x", FBI::_domain_options = "y", FBI::_domain_options = "z"};
+      domains = {FunctionalBasisInterface::_domain_options = "x",
+                 FunctionalBasisInterface::_domain_options = "y",
+                 FunctionalBasisInterface::_domain_options = "z"};
       types.push_back(_x);
     }
     if (isParamValid("y"))
     {
-      domains = {
-          FBI::_domain_options = "y", FBI::_domain_options = "x", FBI::_domain_options = "z"};
+      domains = {FunctionalBasisInterface::_domain_options = "y",
+                 FunctionalBasisInterface::_domain_options = "x",
+                 FunctionalBasisInterface::_domain_options = "z"};
       types.push_back(_y);
     }
     if (isParamValid("z"))
     {
-      domains = {
-          FBI::_domain_options = "z", FBI::_domain_options = "x", FBI::_domain_options = "y"};
+      domains = {FunctionalBasisInterface::_domain_options = "z",
+                 FunctionalBasisInterface::_domain_options = "x",
+                 FunctionalBasisInterface::_domain_options = "y"};
       types.push_back(_z);
     }
 
@@ -141,8 +141,10 @@ FunctionSeries::FunctionSeries(const InputParameters & parameters)
       mooseError("Cannot specify more than one of 'x', 'y', or 'z' for 'CylindricalDuo' series!");
 
     types.push_back(_disc);
-    _series_type = new CylindricalDuo(domains, _orders, types);
+    _series_type = libmesh_make_unique<CylindricalDuo>(domains, _orders, types, name());
   }
+  else
+    mooseError("Unknown functional series type \"", _series_type_name, "\"");
 
   // Set the physical bounds of each of the single series if defined
   if (isParamValid("physical_bounds"))
@@ -261,7 +263,7 @@ operator<<(std::ostream & stream, const FunctionSeries & me)
 }
 
 std::vector<std::size_t>
-FunctionSeries::convertOrders(const std::vector<unsigned int> orders)
+FunctionSeries::convertOrders(const std::vector<unsigned int> & orders)
 {
   return std::vector<std::size_t>(orders.begin(), orders.end());
 }

@@ -94,7 +94,7 @@ protected:
   const std::vector<Real> _physical_bounds;
 
   /// Stores a pointer to the functional series object
-  CompositeSeriesBasisInterface * _series_type;
+  std::unique_ptr<CompositeSeriesBasisInterface> _series_type;
 
   /// Stores the name of the current functional series type
   const MooseEnum & _series_type_name;
@@ -118,7 +118,7 @@ private:
    * issues reading a list of integers in as `std::size_t` (unsigned long), so this workaround is
    * required in order to set `_orders` in the constructor initializer list.
    */
-  static std::vector<std::size_t> convertOrders(const std::vector<unsigned int> orders);
+  static std::vector<std::size_t> convertOrders(const std::vector<unsigned int> & orders);
 };
 
 #endif

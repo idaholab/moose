@@ -3,46 +3,46 @@
 ###############################################################################
 
 ifeq ($(ALL_MODULES),yes)
-        CHEMICAL_REACTIONS        	:= yes
-        CONTACT                   	:= yes
-        FLUID_PROPERTIES          	:= yes
-        FUNCTIONAL_EXPANSION_TOOLS	:= yes
-        HEAT_CONDUCTION           	:= yes
-        LEVEL_SET                 	:= yes
-        MISC                      	:= yes
-        NAVIER_STOKES             	:= yes
-        PHASE_FIELD               	:= yes
-        POROUS_FLOW               	:= yes
-        RDG                       	:= yes
-        RICHARDS                  	:= yes
-        SOLID_MECHANICS           	:= yes
-        STOCHASTIC_TOOLS          	:= yes
-        TENSOR_MECHANICS          	:= yes
-        WATER_STEAM_EOS           	:= yes
-        XFEM                      	:= yes
+        CHEMICAL_REACTIONS          := yes
+        CONTACT                     := yes
+        FLUID_PROPERTIES            := yes
+        FUNCTIONAL_EXPANSION_TOOLS  := yes
+        HEAT_CONDUCTION             := yes
+        LEVEL_SET                   := yes
+        MISC                        := yes
+        NAVIER_STOKES               := yes
+        PHASE_FIELD                 := yes
+        POROUS_FLOW                 := yes
+        RDG                         := yes
+        RICHARDS                    := yes
+        SOLID_MECHANICS             := yes
+        STOCHASTIC_TOOLS            := yes
+        TENSOR_MECHANICS            := yes
+        WATER_STEAM_EOS             := yes
+        XFEM                        := yes
 endif
 
 ifeq ($(XFEM),yes)
-        SOLID_MECHANICS           	:= yes
+        SOLID_MECHANICS             := yes
 endif
 
 ifeq ($(SOLID_MECHANICS),yes)
-        TENSOR_MECHANICS          	:= yes
+        TENSOR_MECHANICS            := yes
 endif
 
 ifeq ($(POROUS_FLOW),yes)
-        TENSOR_MECHANICS          	:= yes
-        FLUID_PROPERTIES          	:= yes
-        CHEMICAL_REACTIONS        	:= yes
+        TENSOR_MECHANICS            := yes
+        FLUID_PROPERTIES            := yes
+        CHEMICAL_REACTIONS          := yes
 endif
 
 ifeq ($(NAVIER_STOKES),yes)
-        FLUID_PROPERTIES          	:= yes
-        RDG                       	:= yes
+        FLUID_PROPERTIES            := yes
+        RDG                         := yes
 endif
 
 ifeq ($(PHASE_FIELD),yes)
-        TENSOR_MECHANICS          	:= yes
+        TENSOR_MECHANICS            := yes
 endif
 
 # The master list of all moose modules
@@ -74,7 +74,7 @@ ifeq ($(FLUID_PROPERTIES),yes)
 endif
 
 ifeq ($(FUNCTIONAL_EXPANSION_TOOLS),yes)
-	APPLICATION_NAME   := functional_expansion_tools
+  APPLICATION_NAME   := functional_expansion_tools
   APPLICATION_DIR    := $(MOOSE_DIR)/modules/$(APPLICATION_NAME)
   SUFFIX             := fet
   include $(FRAMEWORK_DIR)/app.mk

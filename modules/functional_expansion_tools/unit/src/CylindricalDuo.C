@@ -14,7 +14,9 @@
 TEST(FunctionalExpansionsTest, zernikeConstructor)
 {
   const unsigned int order = 5;
-  Zernike zernike({FBI::_domain_options = "x", FBI::_domain_options = "y"}, {order});
+  Zernike zernike({FunctionalBasisInterface::_domain_options = "x",
+                   FunctionalBasisInterface::_domain_options = "y"},
+                  {order});
   EXPECT_EQ(zernike.getOrder(0), order);
 }
 
@@ -24,7 +26,9 @@ TEST(FunctionalExpansionsTest, zernikeSeriesEvaluationXY)
   const Point location(-0.90922108754014, 0.262698547343, 0.156796889218);
   std::vector<Real> truth;
 
-  Zernike zernike({FBI::_domain_options = "x", FBI::_domain_options = "y"}, {order});
+  Zernike zernike({FunctionalBasisInterface::_domain_options = "x",
+                   FunctionalBasisInterface::_domain_options = "y"},
+                  {order});
   zernike.setLocation(location);
   truth = {{0.318309886183791,
             -0.300628811510287,
@@ -52,7 +56,9 @@ TEST(FunctionalExpansionsTest, zernikeSeriesEvaluationXZ)
   const Point location(-0.90922108754014, 0.262698547343, 0.156796889218);
   std::vector<Real> truth;
 
-  Zernike zernike({FBI::_domain_options = "x", FBI::_domain_options = "z"}, {order});
+  Zernike zernike({FunctionalBasisInterface::_domain_options = "x",
+                   FunctionalBasisInterface::_domain_options = "z"},
+                  {order});
   zernike.setLocation(location);
   truth = {{0.318309886183791,
             -0.180774038043348,
@@ -80,7 +86,9 @@ TEST(FunctionalExpansionsTest, zernikeSeriesEvaluationYZ)
   const Point location(-0.90922108754014, 0.262698547343, 0.156796889218);
   std::vector<Real> truth;
 
-  Zernike zernike({FBI::_domain_options = "y", FBI::_domain_options = "z"}, {order});
+  Zernike zernike({FunctionalBasisInterface::_domain_options = "y",
+                   FunctionalBasisInterface::_domain_options = "z"},
+                  {order});
   zernike.setLocation(location);
   truth = {{0.318309886183791,
             0.052230505695590,
@@ -104,52 +112,56 @@ TEST(FunctionalExpansionsTest, zernikeSeriesEvaluationYZ)
 
 TEST(FunctionalExpansionsTest, cylindricalDuoConstructorAxialX)
 {
-  const std::vector<MooseEnum> domains = {
-      FBI::_domain_options = "x", FBI::_domain_options = "y", FBI::_domain_options = "z"};
+  const std::vector<MooseEnum> domains = {FunctionalBasisInterface::_domain_options = "x",
+                                          FunctionalBasisInterface::_domain_options = "y",
+                                          FunctionalBasisInterface::_domain_options = "z"};
   const std::vector<std::size_t> orders = {5, 18};
-  const std::vector<MooseEnum> series = {SingleSeriesTypes1D = "Legendre",
-                                         SingleSeriesTypes2D = "Zernike"};
+  const std::vector<MooseEnum> series = {single_series_types_1D = "Legendre",
+                                         single_series_types_2D = "Zernike"};
 
-  CylindricalDuo cylindrical(domains, orders, series);
+  CylindricalDuo cylindrical(domains, orders, series, name);
   EXPECT_EQ(cylindrical.getNumberOfTerms(),
             (orders[0] + 1) * ((orders[1] + 1) * (orders[1] + 2)) / 2);
 }
 
 TEST(FunctionalExpansionsTest, cylindricalDuoConstructorAxialY)
 {
-  const std::vector<MooseEnum> domains = {
-      FBI::_domain_options = "y", FBI::_domain_options = "x", FBI::_domain_options = "z"};
+  const std::vector<MooseEnum> domains = {FunctionalBasisInterface::_domain_options = "y",
+                                          FunctionalBasisInterface::_domain_options = "x",
+                                          FunctionalBasisInterface::_domain_options = "z"};
   const std::vector<std::size_t> orders = {23, 8};
-  const std::vector<MooseEnum> series = {SingleSeriesTypes1D = "Legendre",
-                                         SingleSeriesTypes2D = "Zernike"};
+  const std::vector<MooseEnum> series = {single_series_types_1D = "Legendre",
+                                         single_series_types_2D = "Zernike"};
 
-  CylindricalDuo cylindrical(domains, orders, series);
+  CylindricalDuo cylindrical(domains, orders, series, name);
   EXPECT_EQ(cylindrical.getNumberOfTerms(),
             (orders[0] + 1) * ((orders[1] + 1) * (orders[1] + 2)) / 2);
 }
 
 TEST(FunctionalExpansionsTest, cylindricalDuoConstructorAxialZ)
 {
-  const std::vector<MooseEnum> domains = {
-      FBI::_domain_options = "z", FBI::_domain_options = "x", FBI::_domain_options = "y"};
+  const std::vector<MooseEnum> domains = {FunctionalBasisInterface::_domain_options = "z",
+                                          FunctionalBasisInterface::_domain_options = "x",
+                                          FunctionalBasisInterface::_domain_options = "y"};
   const std::vector<std::size_t> orders = {21, 23};
-  const std::vector<MooseEnum> series = {SingleSeriesTypes1D = "Legendre",
-                                         SingleSeriesTypes2D = "Zernike"};
+  const std::vector<MooseEnum> series = {single_series_types_1D = "Legendre",
+                                         single_series_types_2D = "Zernike"};
 
-  CylindricalDuo cylindrical(domains, orders, series);
+  CylindricalDuo cylindrical(domains, orders, series, name);
   EXPECT_EQ(cylindrical.getNumberOfTerms(),
             (orders[0] + 1) * ((orders[1] + 1) * (orders[1] + 2)) / 2);
 }
 
 TEST(FunctionalExpansionsTest, cylindricalDuoEvaluator)
 {
-  const std::vector<MooseEnum> domains = {
-      FBI::_domain_options = "x", FBI::_domain_options = "y", FBI::_domain_options = "z"};
+  const std::vector<MooseEnum> domains = {FunctionalBasisInterface::_domain_options = "x",
+                                          FunctionalBasisInterface::_domain_options = "y",
+                                          FunctionalBasisInterface::_domain_options = "z"};
   const std::vector<std::size_t> orders = {15, 17};
-  const std::vector<MooseEnum> series = {SingleSeriesTypes1D = "Legendre",
-                                         SingleSeriesTypes2D = "Zernike"};
+  const std::vector<MooseEnum> series = {single_series_types_1D = "Legendre",
+                                         single_series_types_2D = "Zernike"};
 
-  CylindricalDuo cylindrical(domains, orders, series);
+  CylindricalDuo cylindrical(domains, orders, series, name);
 
   const std::vector<Point> locations = {
       Point(-0.14854612627465, 0.60364074055275, 0.76978431165674),
@@ -170,13 +182,14 @@ TEST(FunctionalExpansionsTest, cylindricalDuoEvaluator)
 
 TEST(FunctionalExpansionsTest, functionalBasisInterfaceCylindrical)
 {
-  const std::vector<MooseEnum> domains = {
-      FBI::_domain_options = "x", FBI::_domain_options = "y", FBI::_domain_options = "z"};
+  const std::vector<MooseEnum> domains = {FunctionalBasisInterface::_domain_options = "x",
+                                          FunctionalBasisInterface::_domain_options = "y",
+                                          FunctionalBasisInterface::_domain_options = "z"};
   const std::vector<std::size_t> orders = {4, 5};
-  const std::vector<MooseEnum> series = {SingleSeriesTypes1D = "Legendre",
-                                         SingleSeriesTypes2D = "Zernike"};
+  const std::vector<MooseEnum> series = {single_series_types_1D = "Legendre",
+                                         single_series_types_2D = "Zernike"};
 
-  CylindricalDuo cylindrical(domains, orders, series);
+  CylindricalDuo cylindrical(domains, orders, series, name);
 
   const Point location(-0.38541903411291, 0.61369802505416, -0.04539307255549);
   const Real truth = 0.10414963426362565;

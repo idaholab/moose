@@ -15,15 +15,11 @@
  */
 #define MAX_DIRECT_CALCULATION 12
 
-Legendre::Legendre() : SingleSeriesBasisInterface()
-{
-  // Nothing here, we only needed to call the parent constructor
-}
+Legendre::Legendre() : SingleSeriesBasisInterface() {}
 
 Legendre::Legendre(const std::vector<MooseEnum> & domain, const std::vector<std::size_t> & order)
   : SingleSeriesBasisInterface(domain, order, calculatedNumberOfTermsBasedOnOrder(order))
 {
-  // Nothing here, we only needed to call the parent constructor
 }
 
 std::size_t
@@ -40,13 +36,6 @@ Legendre::checkPhysicalBounds(const std::vector<Real> & bounds) const
     mooseError("Legend: Invalid number of bounds specified for single series!");
 }
 
-/*
- * 'clang-format' will try to change this. I have chosen to keep the formatting as is to make it
- * easier to understand and follow the formulas. The formatting also is closely related to the
- * Functional Expansion Tallies (FETs) developed in Serpent, which I have developed simultaneously.
- * Mirroring the development improves the maintanability of both codes.
- */
-// clang-format off
 void
 Legendre::evaluateOrthonormal()
 {
@@ -54,16 +43,17 @@ Legendre::evaluateOrthonormal()
   const Real & x = _standardized_location[0];
   const Real x2 = x * x;
 
-  /* Use direct formula to efficiently evaluate the polynomials for n <= 12   */
-  /*                                                                          */
-  /* The performance benefit diminishes for higher n. It is expected that     */
-  /* the cost of the direct calculation nears that of the recurrence relation */
-  /* in the neighborhood of n == 15, although this theory is untested due to  */
-  /* only implementing the direct calculations up to n == 12.                 */
-  /*                                                                          */
-  /* If you want to calculate the higher-order Legendre Coefficients and      */
-  /* code them in then be my guest.                                           */
-
+  /*
+   * Use direct formula to efficiently evaluate the polynomials for n <= 12
+   *
+   * The performance benefit diminishes for higher n. It is expected that the cost of the direct
+   * calculation nears that of the recurrence relation in the neighborhood of n == 15, although this
+   * theory is untested due to only implementing the direct calculations up to n == 12.
+   *
+   * If you want to calculate the higher-order Legendre Coefficients and code them in then be my
+   * guest.
+   */
+  // clang-format off
   switch (_orders[0])
   {
     default:
@@ -119,41 +109,34 @@ Legendre::evaluateOrthonormal()
       save(0, 1
               * 0.5);
   }
+  // clang-format on
 
-  /* Evaluate any remaining polynomials.                                    */
-  /* The original recurrence relation is:                                   */
-  /*       (2 * k - 1) * x * L_(k-1) - (k - 1) * L_(k-2)                    */
-  /* L_k = ---------------------------------------------                    */
-  /*                        k                                               */
-  /*                                                                        */
-  /* However, for FXs we are using a the orthonormalized version of the     */
-  /* polynomials, so each polynomial L_k is multiplied by:                  */
-  /*    (2 * k + 1)                                                         */
-  /*    -----------      essentially:    k + 0.5                            */
-  /*         2                                                              */
-  /* Reversing this in the previous polynomials and implementing for the    */
-  /* current polynomial results in the orthonormalized recurrence:          */
-  /*       (2 * k + 1)   /                 (k - 1)             \            */
-  /* L_k = ----------- * | x * L_(k-1) - ----------- * L_(k-2) |            */
-  /*            k        \               (2 * k - 3)           /            */
-  /*                                                                        */
-  /* The options are 1) to use this form, or 2) to not apply the            */
-  /* orthonormalization at first, and then loop through all the values in   */
-  /* a second loop and then apply the orthonormalization.                   */
-
+  /*
+   * Evaluate any remaining polynomials.
+   *
+   * The original recurrence relation is:
+   *       (2 * k - 1) * x * L_(k-1) - (k - 1) * L_(k-2)
+   * L_k = ---------------------------------------------
+   *                        k
+   *
+   * However, for FXs we are using a the orthonormalized version of the polynomials, so each
+   * polynomial L_k is multiplied by:
+   *    (2 * k + 1)
+   *    -----------      essentially:    k + 0.5
+   *         2
+   * Reversing this in the previous polynomials and implementing for the current polynomial results
+   * in the orthonormalized recurrence:
+   *       (2 * k + 1)   /                 (k - 1)             \
+   * L_k = ----------- * | x * L_(k-1) - ----------- * L_(k-2) |
+   *            k        \               (2 * k - 3)           /
+   *
+   * The options are 1) to use this form, or 2) to not apply the orthonormalization at first, and
+   * then loop through all the values in a second loop and then apply the orthonormalization.
+   */
   for (k = MAX_DIRECT_CALCULATION + 1; k <= _orders[0]; ++k)
-    save(k, ((k + k + 1) / Real(k))
-            * (x * load(k - 1)  -  ((k - 1) / Real(k + k - 3)) * load(k - 2)));
+    save(k, ((k + k + 1) / Real(k)) * (x * load(k - 1) - ((k - 1) / (k + k - 3.0)) * load(k - 2)));
 }
-// clang-format on
 
-/*
- * 'clang-format' will try to change this. I have chosen to keep the formatting as is to make it
- * easier to understand and follow the formulas. The formatting also is closely related to the
- * Functional Expansion Tallies (FETs) developed in Serpent, which I have developed simultaneously.
- * Mirroring the development improves the maintanability of both codes.
- */
-// clang-format off
 void
 Legendre::evaluateStandard()
 {
@@ -161,16 +144,17 @@ Legendre::evaluateStandard()
   const Real x = _standardized_location[0];
   const Real x2 = x * x;
 
-  /* Use direct formula to efficiently evaluate the polynomials for n <= 12   */
-  /*                                                                          */
-  /* The performance benefit diminishes for higher n. It is expected that     */
-  /* the cost of the direct calculation nears that of the recurrence relation */
-  /* in the neighborhood of n == 15, although this theory is untested due to  */
-  /* only implementing the direct calculations up to n == 12.                 */
-  /*                                                                          */
-  /* If you want to calculate the higher-order Legendre Coefficients and      */
-  /* code them in then be my guest.                                           */
-
+  /*
+   * Use direct formula to efficiently evaluate the polynomials for n <= 12
+   *
+   * The performance benefit diminishes for higher n. It is expected that the cost of the direct
+   * calculation nears that of the recurrence relation in the neighborhood of n == 15, although this
+   * theory is untested due to only implementing the direct calculations up to n == 12.
+   *
+   * If you want to calculate the higher-order Legendre Coefficients and
+   * code them in then be my guest.
+   */
+  // clang-format off
   switch (_orders[0])
   {
     default:
@@ -213,18 +197,18 @@ Legendre::evaluateStandard()
     case 0:
       save(0, 1);
   }
+  // clang-format on
 
-  /* Evaluate any remaining polynomials.                                    */
-  /* The recurrence relation is:                                            */
-  /*       (2 * k - 1) * x * L_(k-1) - (k - 1) * L_(k-2)                    */
-  /* L_k = ---------------------------------------------                    */
-  /*                        k                                               */
-
+  /*
+   * Evaluate any remaining polynomials.
+   * The recurrence relation is:
+   *       (2 * k - 1) * x * L_(k-1) - (k - 1) * L_(k-2)
+   * L_k = ---------------------------------------------
+   *                        k
+   */
   for (k = MAX_DIRECT_CALCULATION + 1; k <= _orders[0]; ++k)
-    save(k, (((2 * k - 1) * x * load(k - 1))  -  ((k - 1) * load(k - 2)))
-            / Real(k));
+    save(k, (((2 * k - 1) * x * load(k - 1)) - ((k - 1) * load(k - 2))) / Real(k));
 }
-// clang-format on
 
 const std::vector<Real> &
 Legendre::getStandardizedFunctionLimits() const

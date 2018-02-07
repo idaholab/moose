@@ -16,15 +16,16 @@
 #include "SingleSeriesBasisInterface.h"
 
 /**
- * This class is the basis for consructing a composite---or convolved---functional series by
+ * This class is the basis for constructing a composite---or convolved---functional series by
  * combining multiple other series together. Nonseparability is currently assumed.
  */
 class CompositeSeriesBasisInterface : public FunctionalBasisInterface
 {
 public:
-  CompositeSeriesBasisInterface();
+  CompositeSeriesBasisInterface(const std::string & who_is_using_me);
   CompositeSeriesBasisInterface(const std::vector<std::size_t> & orders,
-                                std::vector<MooseEnum> series_types);
+                                std::vector<MooseEnum> series_types,
+                                const std::string & who_is_using_me);
 
   // Overrides from FunctionalBasisInterface
   virtual const std::vector<Real> & getStandardizedFunctionLimits() const final;
@@ -66,14 +67,18 @@ protected:
   std::vector<MooseEnum> _series_types;
 
   /// A pointer to the single series type (one for each entry in _domains)
-  std::vector<SingleSeriesBasisInterface *> _series;
+  std::vector<std::unique_ptr<SingleSeriesBasisInterface>> _series;
+
+  /// The name of the MooseObject that is using this class
+  const std::string & _who_is_using_me;
 
 private:
   /// The previous point at which the series was evaluated
   Point _previous_point;
 
-  // Hide _is_cache_invalid from subclasses, as everything can be done by CSBI
-  using FBI::_is_cache_invalid;
+  // Hide from subclasses (everything can be done by CSBI) to prevent BAD things from happening
+  using FunctionalBasisInterface::_is_cache_invalid;
+  using FunctionalBasisInterface::clearBasisEvaluation;
 };
 
 #endif // COMPOSITESERIESBASISINTERFACE_H

@@ -31,7 +31,6 @@ public:
   virtual const std::vector<Real> & getStandardizedFunctionLimits() const override;
 
 protected:
-  // Provide pure virtual methods
   // Overrides from FunctionalBasisInterface
   virtual void evaluateOrthonormal() override;
   virtual void evaluateStandard() override;

@@ -16,18 +16,6 @@
 
 // Shortened typename
 class FunctionalBasisInterface;
-typedef FunctionalBasisInterface FBI;
-
-/**
- * Passkey for ...SeriesBasisInterface
- */
-class SBIKey
-{
-  friend class SingleSeriesBasisInterface;
-  friend class CompositeSeriesBasisInterface;
-  SBIKey(){};               // Empty private constructor
-  SBIKey(SBIKey const &){}; // Empty copy constructor
-};
 
 /**
  * This class provides the basis for any custom functional basis, and is the parent class of both
@@ -130,12 +118,8 @@ public:
 protected:
   /**
    * Set all entries of the basis evaluation to zero.
-   *
-   * This method should really be made private, since calling it innappropriately will wreak havoc.
-   * Both SSBI and CSBI have valid use cases, so this method is provided here with a PassKey instead
-   * that will force future developers to consider if they are calling this method appropriately.
    */
-  virtual void clearBasisEvaluation(const unsigned int & number_of_terms, SBIKey);
+  virtual void clearBasisEvaluation(const unsigned int & number_of_terms);
 
   /**
    * Evaluate the orthonormal form of the functional basis
@@ -164,11 +148,6 @@ protected:
   bool _is_cache_invalid;
 
 private:
-  /**
-   * Set all entries of the basis evaluation to zero.
-   */
-  virtual void clearBasisEvaluation(const unsigned int & number_of_terms);
-
   /// Stores the values of the basis evaluation
   std::vector<Real> _basis_evaluation;
 

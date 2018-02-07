@@ -14,24 +14,28 @@
  * Default constructor creates a functional basis with one term. In order for the _series member to
  * be initialized, we initialized it with a Legendre series.
  */
-CompositeSeriesBasisInterface::CompositeSeriesBasisInterface() : FunctionalBasisInterface(1)
+CompositeSeriesBasisInterface::CompositeSeriesBasisInterface(const std::string & who_is_using_me)
+  : FunctionalBasisInterface(1), _who_is_using_me(who_is_using_me)
 {
-  _series.push_back(new Legendre());
+  _series.push_back(libmesh_make_unique<Legendre>());
 }
 
 /*
  * The non-default constructor is where we actually loop over the series_types and initialize
  * pointers to those members. Because we won't know the number of terms until the end of the body
- * of the constructor, we need to call the default FBI constructor.
+ * of the constructor, we need to call the default FunctionalBasisInterface constructor.
  */
 CompositeSeriesBasisInterface::CompositeSeriesBasisInterface(
-    const std::vector<std::size_t> & orders, std::vector<MooseEnum> series_types)
-  : FunctionalBasisInterface(), _series_types(series_types)
+    const std::vector<std::size_t> & orders,
+    std::vector<MooseEnum> series_types,
+    const std::string & who_is_using_me)
+  : FunctionalBasisInterface(), _series_types(series_types), _who_is_using_me(who_is_using_me)
 {
   if (orders.size() != _series_types.size())
-    mooseError("CSBI: Incorrect number of 'orders' specified for 'FunctionSeries'! Check that "
-               "'orders' is the correct length and no invalid enumerations are specified for the "
-               "series.");
+    mooseError(_who_is_using_me,
+               " calling CSBI::CSBI(...): Incorrect number of 'orders' specified for "
+               "'FunctionSeries'! Check that 'orders' is the correct length and no invalid "
+               "enumerations are specified for the series.");
 }
 
 void
@@ -119,7 +123,7 @@ CompositeSeriesBasisInterface::getStandardizedFunctionVolume() const
 {
   Real function_volume = 1.0;
 
-  for (auto series : _series)
+  for (auto & series : _series)
     function_volume *= series->getStandardizedFunctionVolume();
 
   return function_volume;
@@ -144,12 +148,6 @@ void
 CompositeSeriesBasisInterface::formatCoefficients(std::ostream & stream,
                                                   const std::vector<Real> & coefficients) const
 {
-  /*
-   * 'clang-format' will try to change the formatting of this method. The whitespace is present to
-   * provide alignment that corresponds to the actual output of the function. This was done
-   * intentionally to make the output format intuitive to the developer and improve future
-   * maintainability.
-   */
   // clang-format off
   std::ostringstream formatted, domains, orders;
   std::size_t term = 0;
@@ -259,7 +257,7 @@ CompositeSeriesBasisInterface::setNumberOfTerms()
    * The length of the _basis_evaluation depends on the number of terms, so we need to clear the
    * entries because the number of terms in the composite series may have changed.
    */
-  clearBasisEvaluation(_number_of_terms, {});
+  clearBasisEvaluation(_number_of_terms);
 }
 
 void
@@ -267,8 +265,9 @@ CompositeSeriesBasisInterface::setOrder(const std::vector<std::size_t> & orders)
 {
   // One order must be specified for each single series
   if (orders.size() != _series.size())
-    mooseError("CSBI: Mismatch between the orders provided and the number of"
-               " series in the functional basis!");
+    mooseError(_who_is_using_me,
+               " calling CSBI::setOrder(): Mismatch between the orders provided and the number of "
+               "series in the functional basis!");
 
   // Update the orders of each of the single series
   for (std::size_t i = 0; i < _series.size(); ++i)

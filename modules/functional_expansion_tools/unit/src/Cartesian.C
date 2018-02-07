@@ -14,7 +14,7 @@
 TEST(FunctionalExpansionsTest, legendreConstructor)
 {
   const unsigned int order = 5;
-  Legendre legendre({FBI::_domain_options = "x"}, {order});
+  Legendre legendre({FunctionalBasisInterface::_domain_options = "x"}, {order});
   EXPECT_EQ(legendre.getOrder(0), order);
 }
 
@@ -37,7 +37,7 @@ TEST(FunctionalExpansionsTest, legendreSeriesEvaluation)
                                     -0.66011244776270,
                                     -1.24901920248131,
                                     3.06342136027001}};
-  Legendre legendre({FBI::_domain_options = "x"}, {order});
+  Legendre legendre({FunctionalBasisInterface::_domain_options = "x"}, {order});
 
   legendre.setLocation(Point(location));
   auto & answer = legendre.getAllOrthonormal();
@@ -51,35 +51,36 @@ TEST(FunctionalExpansionsTest, CartesianConstructor)
   std::vector<std::size_t> orders;
   std::vector<MooseEnum> series;
 
-  domains.push_back(FBI::_domain_options = "x");
+  domains.push_back(FunctionalBasisInterface::_domain_options = "x");
   orders = {19};
-  series.push_back(SingleSeriesTypes1D = "Legendre");
-  Cartesian legendreOne(domains, orders, series);
+  series.push_back(single_series_types_1D = "Legendre");
+  Cartesian legendreOne(domains, orders, series, name);
   EXPECT_EQ(legendreOne.getNumberOfTerms(), orders[0] + 1);
 
-  domains.push_back(FBI::_domain_options = "y");
+  domains.push_back(FunctionalBasisInterface::_domain_options = "y");
   orders = {{13, 15}};
-  series.push_back(SingleSeriesTypes1D = "Legendre");
-  Cartesian legendreTwo(domains, orders, series);
+  series.push_back(single_series_types_1D = "Legendre");
+  Cartesian legendreTwo(domains, orders, series, name);
   EXPECT_EQ(legendreTwo.getNumberOfTerms(), (orders[0] + 1) * (orders[1] + 1));
 
-  domains.push_back(FBI::_domain_options = "z");
+  domains.push_back(FunctionalBasisInterface::_domain_options = "z");
   orders = {{14, 21, 22}};
-  series.push_back(SingleSeriesTypes1D = "Legendre");
-  Cartesian legendreThree(domains, orders, series);
+  series.push_back(single_series_types_1D = "Legendre");
+  Cartesian legendreThree(domains, orders, series, name);
   EXPECT_EQ(legendreThree.getNumberOfTerms(), (orders[0] + 1) * (orders[1] + 1) * (orders[2] + 1));
 }
 
 TEST(FunctionalExpansionsTest, Cartesian3D)
 {
-  const std::vector<MooseEnum> domains = {
-      FBI::_domain_options = "x", FBI::_domain_options = "y", FBI::_domain_options = "z"};
+  const std::vector<MooseEnum> domains = {FunctionalBasisInterface::_domain_options = "x",
+                                          FunctionalBasisInterface::_domain_options = "y",
+                                          FunctionalBasisInterface::_domain_options = "z"};
   const std::vector<std::size_t> orders = {14, 21, 22};
-  const std::vector<MooseEnum> series = {SingleSeriesTypes1D = "Legendre",
-                                         SingleSeriesTypes1D = "Legendre",
-                                         SingleSeriesTypes1D = "Legendre"};
+  const std::vector<MooseEnum> series = {single_series_types_1D = "Legendre",
+                                         single_series_types_1D = "Legendre",
+                                         single_series_types_1D = "Legendre"};
 
-  Cartesian legendre3D(domains, orders, series);
+  Cartesian legendre3D(domains, orders, series, name);
 
   const std::vector<Point> locations = {
       Point(-0.14854612627465, 0.60364074055275, 0.76978431165674),
@@ -99,14 +100,15 @@ TEST(FunctionalExpansionsTest, Cartesian3D)
 
 TEST(FunctionalExpansionsTest, functionalBasisInterfaceCartesian)
 {
-  const std::vector<MooseEnum> domains = {
-      FBI::_domain_options = "x", FBI::_domain_options = "y", FBI::_domain_options = "z"};
+  const std::vector<MooseEnum> domains = {FunctionalBasisInterface::_domain_options = "x",
+                                          FunctionalBasisInterface::_domain_options = "y",
+                                          FunctionalBasisInterface::_domain_options = "z"};
   const std::vector<std::size_t> orders = {4, 5, 3};
-  const std::vector<MooseEnum> series = {SingleSeriesTypes1D = "Legendre",
-                                         SingleSeriesTypes1D = "Legendre",
-                                         SingleSeriesTypes1D = "Legendre"};
+  const std::vector<MooseEnum> series = {single_series_types_1D = "Legendre",
+                                         single_series_types_1D = "Legendre",
+                                         single_series_types_1D = "Legendre"};
 
-  Cartesian legendre3D(domains, orders, series);
+  Cartesian legendre3D(domains, orders, series, name);
 
   const Point location(-0.38541903411291, 0.61369802505416, -0.04539307255549);
   const Real truth = 0.26458908225718;

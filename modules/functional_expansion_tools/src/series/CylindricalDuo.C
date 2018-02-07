@@ -11,25 +11,34 @@
 #include "Legendre.h"
 #include "Zernike.h"
 
-CylindricalDuo::CylindricalDuo() : CompositeSeriesBasisInterface()
+CylindricalDuo::CylindricalDuo(const std::string & who_is_using_me)
+  : CompositeSeriesBasisInterface(who_is_using_me)
 {
-  // Nothing here, we only needed to call the parent constructor
 }
 
 CylindricalDuo::CylindricalDuo(const std::vector<MooseEnum> & domains,
                                const std::vector<std::size_t> & orders,
-                               const std::vector<MooseEnum> & series_types)
-  : CompositeSeriesBasisInterface(orders, series_types)
+                               const std::vector<MooseEnum> & series_types,
+                               const std::string & who_is_using_me)
+  : CompositeSeriesBasisInterface(orders, series_types, who_is_using_me)
 {
   // Initialize the pointer to the axial series
   if (_series_types[0] == "Legendre")
-    _series.push_back(new Legendre({domains[0]}, {orders[0]}));
+  {
+    std::vector<MooseEnum> local_domain = {domains[0]};
+    std::vector<std::size_t> local_order = {orders[0]};
+    _series.push_back(libmesh_make_unique<Legendre>(local_domain, local_order));
+  }
   else
     mooseError("CylindricalDuo: No other linear series implemented except Legendre!");
 
   // Initialize the pointer to the disc series
   if (_series_types[1] == "Zernike")
-    _series.push_back(new Zernike({domains[1], domains[2]}, {orders[1]}));
+  {
+    std::vector<MooseEnum> local_domain = {domains[1], domains[2]};
+    std::vector<std::size_t> local_order = {orders[1]};
+    _series.push_back(libmesh_make_unique<Zernike>(local_domain, local_order));
+  }
   else
     mooseError("CylindricalDuo: No other disc series implemented except Zernike!");
 

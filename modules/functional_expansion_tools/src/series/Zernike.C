@@ -12,20 +12,16 @@
 #include "Zernike.h"
 
 /**
- * The higherst order of Zernike polynomials calculated directly instead of via
- * the recurrence relation
+ * The higherst order of Zernike polynomials calculated directly instead of via the recurrence
+ * relation
  */
 #define MAX_DIRECT_CALCULATION 10
 
-Zernike::Zernike() : SingleSeriesBasisInterface()
-{
-  // Nothing here, we only needed to call the parent constructor
-}
+Zernike::Zernike() : SingleSeriesBasisInterface() {}
 
 Zernike::Zernike(const std::vector<MooseEnum> & domain, const std::vector<std::size_t> & order)
   : SingleSeriesBasisInterface(domain, order, calculatedNumberOfTermsBasedOnOrder(order))
 {
-  // Nothing here, we only needed to call the parent constructor
 }
 
 std::size_t
@@ -45,12 +41,6 @@ Zernike::checkPhysicalBounds(const std::vector<Real> & bounds) const
     mooseError("Zernike: Invalid number of bounds specified for single series!");
 }
 
-/*
- * 'clang-format' will try to change this. I have chosen to keep the formatting as is to make it
- * easier to understand and follow the formulas. The formatting also is closely related to the
- * Functional Expansion Tallies (FETs) developed in Serpent, which I have developed simultaneously.
- * Mirroring the development improves the maintanability of both codes.
- */
 // clang-format off
 void
 Zernike::evaluateOrthonormal()
@@ -185,9 +175,9 @@ Zernike::evaluateOrthonormal()
 
     for (q = n; q >= 4; q -= 2)
     {
-      H3 = (-4 * (q - 2) * (q - 3)) / (double)((n + q - 2) * (n - q + 4));
-      H2 = (H3 * (n + q) * (n - q + 2)) / (4 * (q - 1)) + (q - 2);
-      H1 = q * (q - 1) / 2 - q * H2 + (H3 * (n + q + 2) * (n - q)) / 8;
+      H3 = (-4 * (q - 2) * (q - 3)) / ((n + q - 2) * (n - q + 4.0));
+      H2 = (H3 * (n + q) * (n - q + 2)) / (4.0 * (q - 1)) + (q - 2);
+      H1 = q * (q - 1) / 2 - q * H2 + (H3 * (n + q + 2) * (n - q)) / 8.0;
       j--;
       if (q == 4)
         save(j, (H1 * load(j + 2) + (H2 + H3 / rho2) * load(j + 1))
@@ -297,9 +287,9 @@ Zernike::evaluateStandard()
 
     for (q = n; q >= 4; q -= 2)
     {
-      H3 = (-4 * (q - 2) * (q - 3)) / (double)((n + q - 2) * (n - q + 4));
-      H2 = (H3 * (n + q) * (n - q + 2)) / (4 * (q - 1)) + (q - 2);
-      H1 = q * (q - 1) / 2 - q * H2 + (H3 * (n + q + 2) * (n - q)) / 8;
+      H3 = (-4 * (q - 2) * (q - 3)) / ((n + q - 2) * (n - q + 4.0));
+      H2 = (H3 * (n + q) * (n - q + 2)) / (4.0 * (q - 1)) + (q - 2);
+      H1 = q * (q - 1) / 2 - q * H2 + (H3 * (n + q + 2) * (n - q)) / 8.0;
       j--;
       save(j, H1 * load(j + 2) + (H2 + H3 / rho2) * load(j + 1));
     }

@@ -10,20 +10,25 @@
 #include "Cartesian.h"
 #include "Legendre.h"
 
-Cartesian::Cartesian() : CompositeSeriesBasisInterface()
+Cartesian::Cartesian(const std::string & who_is_using_me)
+  : CompositeSeriesBasisInterface(who_is_using_me)
 {
-  // Nothing here, we only needed to call the parent constructor
 }
 
 Cartesian::Cartesian(const std::vector<MooseEnum> & domains,
                      const std::vector<std::size_t> & orders,
-                     const std::vector<MooseEnum> & series_types)
-  : CompositeSeriesBasisInterface(orders, series_types)
+                     const std::vector<MooseEnum> & series_types,
+                     const std::string & who_is_using_me)
+  : CompositeSeriesBasisInterface(orders, series_types, who_is_using_me)
 {
   // Initialize the pointers to each of the single series
   for (std::size_t i = 0; i < _series_types.size(); ++i)
     if (_series_types[i] == "Legendre")
-      _series.push_back(new Legendre({domains[i]}, {orders[i]}));
+    {
+      std::vector<MooseEnum> local_domain = {domains[i]};
+      std::vector<std::size_t> local_order = {orders[i]};
+      _series.push_back(libmesh_make_unique<Legendre>(local_domain, local_order));
+    }
     else
       mooseError("Cartesian: No other linear series implemented except Legendre!");
 

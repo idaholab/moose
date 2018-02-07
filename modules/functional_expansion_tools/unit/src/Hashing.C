@@ -23,7 +23,7 @@ TEST(FunctionalExpansionsTest, hashPointAndTime)
 {
   const Point location(0.8392988091, 0.8482835642, 0.2509438471);
   const Real time = 0.5049258208;
-  const hashing::HashValue truth = 5131894250299652951u;
+  const hashing::HashValue truth = 5131894250494321433u;
 
   EXPECT_EQ(hashing::hashCombine(time, location), truth);
 }

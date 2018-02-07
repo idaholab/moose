@@ -19,10 +19,11 @@
 class CylindricalDuo final : public CompositeSeriesBasisInterface
 {
 public:
-  CylindricalDuo();
+  CylindricalDuo(const std::string & who_is_using_me);
   CylindricalDuo(const std::vector<MooseEnum> & domain,
                  const std::vector<std::size_t> & order,
-                 const std::vector<MooseEnum> & series_types);
+                 const std::vector<MooseEnum> & series_types,
+                 const std::string & who_is_using_me);
 
   // Virtual overrides
   virtual void setPhysicalBounds(const std::vector<Real> & bounds) final;

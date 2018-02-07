@@ -64,7 +64,7 @@ SingleSeriesBasisInterface::setOrder(const std::vector<std::size_t> & orders)
   _number_of_terms = calculatedNumberOfTermsBasedOnOrder(_orders);
 
   // Zero the basis evaluation
-  clearBasisEvaluation(_number_of_terms, {});
+  clearBasisEvaluation(_number_of_terms);
   _is_cache_invalid = true;
 }
 

@@ -34,7 +34,6 @@ MemoizedFunctionInterface::MemoizedFunctionInterface(const InputParameters & par
     _enable_cache(getParam<bool>("enable_cache")),
     _respect_time(getParam<bool>("respect_time"))
 {
-  // Nothing here
 }
 
 void
@@ -51,7 +50,10 @@ MemoizedFunctionInterface::value(Real time, const Point & point)
   {
     // Start the cache over if we are at a new time step
     if (_respect_time && time != _current_time)
-      _current_time = time, invalidateCache();
+    {
+      _current_time = time;
+      invalidateCache();
+    }
 
     // Try to insert a new value into the cache
     auto result = _cache.insert({hashing::hashCombine(time, point), 0.0});

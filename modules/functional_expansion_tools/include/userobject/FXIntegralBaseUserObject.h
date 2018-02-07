@@ -61,9 +61,6 @@ public:
   virtual Real spatialValue(const Point & location) const final;
   virtual void threadJoin(const UserObject & sibling) final;
 
-  /// Keep the expansion coefficients after each solve
-  const bool _keep_history;
-
 protected:
   // Policy-based design requires us to specify which inherited members we are using
   using IntegralBaseVariableUserObject::_JxW;
@@ -101,6 +98,9 @@ protected:
   /// Reference to the underlying function series
   FunctionSeries & _function_series;
 
+  /// Keep the expansion coefficients after each solve
+  const bool _keep_history;
+
   /// Flag to prints the state of the zeroth instance in finalize()
   const bool _print_state;
 
@@ -116,8 +116,8 @@ FXIntegralBaseUserObject<IntegralBaseVariableUserObject>::FXIntegralBaseUserObje
     const InputParameters & parameters)
   : IntegralBaseVariableUserObject(parameters),
     MutableCoefficientsInterface(this, this, parameters),
-    _keep_history(UserObject::getParam<bool>("keep_history")),
     _function_series(FunctionSeries::checkAndConvertFunction(getFunction("function"), name())),
+    _keep_history(UserObject::getParam<bool>("keep_history")),
     _print_state(UserObject::getParam<bool>("print_state")),
     _standardized_function_volume(_function_series.getStandardizedFunctionVolume())
 {

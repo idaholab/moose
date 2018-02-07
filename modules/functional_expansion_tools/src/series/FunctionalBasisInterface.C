@@ -141,12 +141,6 @@ FunctionalBasisInterface::save(std::size_t index, Real value)
 }
 
 void
-FunctionalBasisInterface::clearBasisEvaluation(const unsigned int & number_of_terms, SBIKey)
-{
-  clearBasisEvaluation(number_of_terms);
-}
-
-void
 FunctionalBasisInterface::clearBasisEvaluation(const unsigned int & number_of_terms)
 {
   _basis_evaluation.assign(number_of_terms, 0.0);

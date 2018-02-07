@@ -37,7 +37,6 @@ MutableCoefficientsInterface::MutableCoefficientsInterface(const MooseObject * m
     _print_coefficients(parameters.get<bool>("print_when_set")),
     _console(moose_object->_console)
 {
-  // Nothing here
 }
 
 Real MutableCoefficientsInterface::operator[](std::size_t index) const

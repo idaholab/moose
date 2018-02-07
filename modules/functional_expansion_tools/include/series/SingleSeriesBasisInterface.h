@@ -20,7 +20,6 @@ class SingleSeriesBasisInterface : public FunctionalBasisInterface
 {
 public:
   SingleSeriesBasisInterface();
-
   SingleSeriesBasisInterface(const std::vector<MooseEnum> & domains,
                              const std::vector<std::size_t> & orders,
                              const unsigned int number_of_terms);
@@ -82,8 +81,9 @@ private:
   /// required to use #_standardized_location, essentially forcing location-awareness compliance
   std::vector<Real> _location;
 
-  // Hide _is_cache_invalid from subclasses
-  using FBI::_is_cache_invalid;
+  // Hide from subclasses to prevent BAD things from happening
+  using FunctionalBasisInterface::_is_cache_invalid;
+  using FunctionalBasisInterface::clearBasisEvaluation;
 };
 
 #endif // SINGLESERIESBASISINTERFACE_H

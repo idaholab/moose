@@ -52,14 +52,14 @@ hashLargeContainer(Container const & container)
 {
   std::size_t size = container.size();
   std::size_t stride = 1 + size / 10;
-  HashValue value = size;
+  HashValue seed = size;
 
   for (std::size_t i = 0; i < size; i += stride)
   {
-    hashCombine(value, container.data()[i]);
+    hashCombine(seed, container.data()[i]);
   }
 
-  return value;
+  return seed;
 }
 
 /**
@@ -68,11 +68,12 @@ hashLargeContainer(Container const & container)
 inline HashValue
 hashCombine(const libMesh::Point & point)
 {
-  HashValue value = 3;
+  // 'Magic seed' seed that provides entropy against the other hashCombine() seed
+  HashValue seed = 3;
 
-  hashCombine(value, point(0), point(1), point(2));
+  hashCombine(seed, point(0), point(1), point(2));
 
-  return value;
+  return seed;
 }
 
 /**
@@ -81,11 +82,12 @@ hashCombine(const libMesh::Point & point)
 inline HashValue
 hashCombine(Real time, const libMesh::Point & point)
 {
-  HashValue value = 4;
+  // 'Magic seed' seed that provides entropy against the other hashCombine() seed
+  HashValue seed = 42;
 
-  hashCombine(value, time, point(0), point(1), point(2));
+  hashCombine(seed, time, point(0), point(1), point(2));
 
-  return value;
+  return seed;
 }
 }
 

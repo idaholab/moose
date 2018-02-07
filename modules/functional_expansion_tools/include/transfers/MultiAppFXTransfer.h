@@ -14,25 +14,22 @@
 
 #include "MutableCoefficientsInterface.h"
 
-class MultiAppMutableCoefficientsTransfer;
+class MultiAppFXTransfer;
 
 template <>
-InputParameters validParams<MultiAppMutableCoefficientsTransfer>();
+InputParameters validParams<MultiAppFXTransfer>();
 
 /**
  * Transfers mutable coefficient arrays between supported object types
  */
-class MultiAppMutableCoefficientsTransfer : public MultiAppTransfer
+class MultiAppFXTransfer : public MultiAppTransfer
 {
 public:
-  MultiAppMutableCoefficientsTransfer(const InputParameters & parameters);
+  MultiAppFXTransfer(const InputParameters & parameters);
 
   // Overrides from MultiAppTransfer
   virtual void execute() override;
   virtual void initialSetup() override;
-
-  /// A user-defined pretty name for this transfer, defaults to 'MultiAppFXTransfer'
-  const std::string _pretty_name;
 
 protected:
   /// Name of the MutableCoefficientsInterface-derived object in the creating app
@@ -60,7 +57,7 @@ private:
    * Function pointer typedef for functions used to find, convert, and return the appropriate
    * MutableCoefficientsInterface object from an FEProblemBase.
    */
-  typedef MutableCoefficientsInterface & (MultiAppMutableCoefficientsTransfer::*GetProblemObject)(
+  typedef MutableCoefficientsInterface & (MultiAppFXTransfer::*GetProblemObject)(
       FEProblemBase & base, const std::string & object_name, THREAD_ID thread);
 
   /**
@@ -77,8 +74,5 @@ private:
   /// Function pointer for grabbing the SubApp object
   GetProblemObject getSubAppObject;
 };
-
-/// Typedef for the functional_expansion_tools module
-typedef MultiAppMutableCoefficientsTransfer MultiAppFXTransfer;
 
 #endif // MULTIAPPMUTABLECOEFFICIENTSTRANSFER_H

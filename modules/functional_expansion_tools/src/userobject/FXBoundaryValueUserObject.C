@@ -24,5 +24,4 @@ validParams<FXBoundaryValueUserObject>()
 FXBoundaryValueUserObject::FXBoundaryValueUserObject(const InputParameters & parameters)
   : FXBoundaryBaseUserObject(parameters)
 {
-  // Nothing here
 }
