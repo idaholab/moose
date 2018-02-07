@@ -46,6 +46,8 @@ validParams<Exodus>()
   params.addParam<MooseEnum>(
       "output_dimension", output_dimension, "The dimension of the output file");
 
+  params.addParamNamesToGroup("output_dimension", "Advanced");
+
   // Set the default padding to 3
   params.set<unsigned int>("padding") = 3;
 
