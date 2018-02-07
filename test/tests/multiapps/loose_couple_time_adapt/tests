@@ -1,14 +1,12 @@
 [Tests]
   [./begin]
     type = 'Exodiff'
-    input = 'master.i'
-    exodiff = 'begin.e'
-    cli_args = 'MultiApps/dummy/execute_on=timestep_begin Outputs/file_base=begin'
+    input = 'begin.i'
+    exodiff = 'begin.e begin_out_dummy0.e'
   [../]
   [./end]
     type = 'Exodiff'
-    input = 'master.i'
-    exodiff = 'end.e master_out_dummy0.e'
-    cli_args = 'Outputs/file_base=end'
+    input = 'end.i'
+    exodiff = 'end.e end_out_dummy0.e'
   [../]
 []
