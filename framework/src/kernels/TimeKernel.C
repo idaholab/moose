@@ -33,8 +33,13 @@ TimeKernel::TimeKernel(const InputParameters & parameters) : Kernel(parameters) 
 void
 TimeKernel::computeResidual()
 {
-  DenseVector<Number> & re = _assembly.residualBlock(_var.number(), Moose::KT_TIME);
-  _local_re.resize(re.size());
+  _re_blocks.resize(_vector_tags.size());
+  mooseAssert(_vector_tags.size() >= 1, "we need at least one active tag");
+  auto vector_tag = _vector_tags.begin();
+  for (auto i = beginIndex(_vector_tags); i < _vector_tags.size(); i++, ++vector_tag)
+    _re_blocks[i] = &_assembly.residualBlock(_var.number(), *vector_tag);
+
+  _local_re.resize(_re_blocks[0]->size());
   _local_re.zero();
 
   precalculateResidual();
@@ -42,7 +47,8 @@ TimeKernel::computeResidual()
     for (_qp = 0; _qp < _qrule->n_points(); _qp++)
       _local_re(_i) += _JxW[_qp] * _coord[_qp] * computeQpResidual();
 
-  re += _local_re;
+  for (auto & re : _re_blocks)
+    *re += _local_re;
 
   if (_has_save_in)
   {
