@@ -99,7 +99,7 @@ UpdateDisplacedMeshThread::init()
     Threads::parallel_reduce(node_range, nl_send_list);
     nl_send_list.unique();
     _nl_ghosted_soln->init(
-        _nl_soln.size(), _nl_soln.local_size(), nl_send_list.send_list(), GHOSTED);
+        _nl_soln.size(), _nl_soln.local_size(), nl_send_list.send_list(), true, GHOSTED);
     _nl_soln.localize(*_nl_ghosted_soln, nl_send_list.send_list());
   }
 
@@ -109,7 +109,7 @@ UpdateDisplacedMeshThread::init()
     Threads::parallel_reduce(node_range, aux_send_list);
     aux_send_list.unique();
     _aux_ghosted_soln->init(
-        _aux_soln.size(), _aux_soln.local_size(), aux_send_list.send_list(), GHOSTED);
+        _aux_soln.size(), _aux_soln.local_size(), aux_send_list.send_list(), true, GHOSTED);
     _aux_soln.localize(*_aux_ghosted_soln, aux_send_list.send_list());
   }
 }

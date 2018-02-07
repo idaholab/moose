@@ -4444,9 +4444,9 @@ FEProblemBase::possiblyRebuildGeomSearchPatches()
         if (max < 0.4)
           break;
       }
+        libmesh_fallthrough();
 
       // Let this fall through if things do need to be updated...
-
       case Moose::Always:
         // Flush output here to see the message before the reinitialization, which could take a
         // while
@@ -4753,8 +4753,9 @@ FEProblemBase::checkProblemIntegrity()
                   std::ostream_iterator<unsigned int>(extra_subdomain_ids, " "));
 
         mooseError("The following blocks from your input mesh do not contain an active material: " +
-                   extra_subdomain_ids.str() + "\nWhen ANY mesh block contains a Material object, "
-                                               "all blocks must contain a Material object.\n");
+                   extra_subdomain_ids.str() +
+                   "\nWhen ANY mesh block contains a Material object, "
+                   "all blocks must contain a Material object.\n");
       }
     }
 

@@ -29,11 +29,6 @@ public:
   virtual void execute() override;
   virtual void finalize() override;
 
-  // Let the SamplerBase version of threadJoin() take part in the
-  // overload resolution process, otherwise we get warnings about
-  // overloaded virtual functions and "hiding" in debug mode.
-  using SamplerBase::threadJoin;
-
 protected:
   /// Beginning of the line
   Point _start_point;
