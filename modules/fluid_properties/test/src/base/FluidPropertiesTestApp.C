@@ -14,6 +14,7 @@
 
 // kernels
 #include "EntropyFromEnthalpyPressureDerivativesTestKernel.h"
+#include "SoundSpeedFromVolumeInternalEnergyDerivativesTestKernel.h"
 
 // materials
 #include "MultiComponentFluidPropertiesMaterialPT.h"
@@ -70,6 +71,7 @@ void
 FluidPropertiesTestApp::registerObjects(Factory & factory)
 {
   registerKernel(EntropyFromEnthalpyPressureDerivativesTestKernel);
+  registerKernel(SoundSpeedFromVolumeInternalEnergyDerivativesTestKernel);
 
   registerMaterial(MultiComponentFluidPropertiesMaterialPT);
 }

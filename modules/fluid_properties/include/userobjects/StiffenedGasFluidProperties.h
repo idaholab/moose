@@ -28,7 +28,8 @@ public:
 
   virtual Real pressure(Real v, Real u) const override;
   virtual Real temperature(Real v, Real u) const override;
-  virtual Real c(Real v, Real u) const override;
+  virtual Real c(Real v, Real e) const override;
+  virtual void c(Real v, Real e, Real & c, Real & dc_dv, Real & dc_de) const override;
   virtual Real cp(Real v, Real u) const override;
   virtual Real cv(Real v, Real u) const override;
   virtual Real gamma(Real v, Real u) const override;
