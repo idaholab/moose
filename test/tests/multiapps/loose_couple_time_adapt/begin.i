@@ -41,7 +41,7 @@
   [./dummy]
     type = TransientMultiApp
     input_files = adaptiveDT.i
-    execute_on = timestep_end
+    execute_on = timestep_begin
   [../]
 []
 
@@ -55,4 +55,5 @@
 
 [Outputs]
   exodus = true
+  file_base = begin
 []
