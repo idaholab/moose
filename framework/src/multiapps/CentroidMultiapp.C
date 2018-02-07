@@ -48,6 +48,7 @@ CentroidMultiApp::fillPositions()
     if (hasBlocks(elem_ptr->subdomain_id()))
       _positions.push_back(elem_ptr->centroid());
 
+  // Use the comm from the problem this MultiApp is part of
   libMesh::ParallelObject::comm().allgather(_positions);
 
   if (_positions.empty())
