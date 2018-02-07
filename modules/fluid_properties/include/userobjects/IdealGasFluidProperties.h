@@ -30,6 +30,8 @@ public:
   virtual Real temperature(Real v, Real u) const override;
   virtual Real c(Real v, Real e) const override;
   virtual void c(Real v, Real e, Real & c, Real & dc_dv, Real & dc_de) const override;
+  virtual Real c_from_v_h(Real v, Real h) const override;
+  virtual void c_from_v_h(Real v, Real h, Real & c, Real & dc_dv, Real & dc_dh) const override;
   virtual Real cp(Real v = 0., Real u = 0.) const override;
   virtual Real cv(Real v = 0., Real u = 0.) const override;
   virtual Real gamma(Real v = 0., Real u = 0.) const override;

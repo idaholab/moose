@@ -79,6 +79,25 @@ IdealGasFluidProperties::c(Real v, Real e, Real & c_value, Real & dc_dv, Real & 
   dc_de = dc_dT * dT_de;
 }
 
+Real
+IdealGasFluidProperties::c_from_v_h(Real v, Real h) const
+{
+  const Real e = h / _gamma;
+  return c(v, e);
+}
+
+void
+IdealGasFluidProperties::c_from_v_h(
+    Real v, Real h, Real & c_value, Real & dc_dv, Real & dc_dh) const
+{
+  const Real e = h / _gamma;
+  const Real de_dh = 1.0 / _gamma;
+
+  Real dc_de;
+  c(v, e, c_value, dc_dv, dc_de);
+  dc_dh = dc_de * de_dh;
+}
+
 Real IdealGasFluidProperties::cp(Real, Real) const { return _cp; }
 
 Real IdealGasFluidProperties::cv(Real, Real) const { return _cv; }

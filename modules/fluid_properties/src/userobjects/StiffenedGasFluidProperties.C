@@ -75,6 +75,28 @@ StiffenedGasFluidProperties::c(Real v, Real e, Real & c_value, Real & dc_dv, Rea
   dc_de = dc_dp * dp_de;
 }
 
+Real
+StiffenedGasFluidProperties::c_from_v_h(Real v, Real h) const
+{
+  const Real e = (h + (_gamma - 1.0) * _q + _gamma * _p_inf * v) / _gamma;
+  return c(v, e);
+}
+
+void
+StiffenedGasFluidProperties::c_from_v_h(
+    Real v, Real h, Real & c_value, Real & dc_dv, Real & dc_dh) const
+{
+  const Real e = (h + (_gamma - 1.0) * _q + _gamma * _p_inf * v) / _gamma;
+  const Real de_dh = 1.0 / _gamma;
+  const Real de_dv = _p_inf;
+
+  Real dc_dv_partial, dc_de;
+  c(v, e, c_value, dc_dv_partial, dc_de);
+
+  dc_dv = dc_dv_partial + dc_de * de_dv;
+  dc_dh = dc_de * de_dh;
+}
+
 Real StiffenedGasFluidProperties::cp(Real, Real) const { return _cp; }
 
 Real StiffenedGasFluidProperties::cv(Real, Real) const { return _cv; }
