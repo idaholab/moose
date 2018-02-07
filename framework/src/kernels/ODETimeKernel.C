@@ -19,6 +19,10 @@ InputParameters
 validParams<ODETimeKernel>()
 {
   InputParameters params = validParams<ODEKernel>();
+
+  params.set<MultiMooseEnum>("vector_tags") = "time";
+  params.set<MultiMooseEnum>("matrix_tags") = "nontime";
+
   return params;
 }
 
@@ -27,7 +31,10 @@ ODETimeKernel::ODETimeKernel(const InputParameters & parameters) : ODEKernel(par
 void
 ODETimeKernel::computeResidual()
 {
-  DenseVector<Number> & re = _assembly.residualBlock(_var.number(), Moose::KT_TIME);
+  prepareVectorTag(_assembly, _var.number());
+
   for (_i = 0; _i < _var.order(); _i++)
-    re(_i) += computeQpResidual();
+    _local_re(_i) += computeQpResidual();
+
+  appendTaggedLocalResidual();
 }

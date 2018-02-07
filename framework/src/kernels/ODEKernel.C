@@ -32,19 +32,24 @@ ODEKernel::reinit()
 void
 ODEKernel::computeResidual()
 {
-  DenseVector<Number> & re = _assembly.residualBlock(_var.number());
+  prepareVectorTag(_assembly, _var.number());
+
   for (_i = 0; _i < _var.order(); _i++)
-    re(_i) += computeQpResidual();
+    _local_re(_i) += computeQpResidual();
+
+  appendTaggedLocalResidual();
 }
 
 void
 ODEKernel::computeJacobian()
 {
-  DenseMatrix<Number> & ke = _assembly.jacobianBlock(_var.number(), _var.number());
+  prepareMatrixTag(_assembly, _var.number(), _var.number());
 
   for (_i = 0; _i < _var.order(); _i++)
     for (_j = 0; _j < _var.order(); _j++)
-      ke(_i, _j) += computeQpJacobian();
+      _local_ke(_i, _j) += computeQpJacobian();
+
+  appendTaggedLocalMatrix();
 
   // compute off-diagonal jacobians wrt scalar variables
   const std::vector<MooseVariableScalar *> & scalar_vars = _sys.getScalarVariables(_tid);
@@ -57,14 +62,17 @@ ODEKernel::computeOffDiagJacobian(unsigned int jvar)
 {
   if (_sys.isScalarVariable(jvar))
   {
-    DenseMatrix<Number> & ke = _assembly.jacobianBlock(_var.number(), jvar);
+    prepareMatrixTag(_assembly, _var.number(), jvar);
+
     MooseVariableScalar & var_j = _sys.getScalarVariable(_tid, jvar);
     for (_i = 0; _i < _var.order(); _i++)
       for (_j = 0; _j < var_j.order(); _j++)
       {
         if (jvar != _var.number())
-          ke(_i, _j) += computeQpOffDiagJacobian(jvar);
+          _local_ke(_i, _j) += computeQpOffDiagJacobian(jvar);
       }
+
+    appendTaggedLocalMatrix();
   }
 }
 

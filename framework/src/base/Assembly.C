@@ -931,13 +931,6 @@ Assembly::reinitNeighborAtPhysical(const Elem * neighbor,
 }
 
 DenseMatrix<Number> &
-Assembly::jacobianBlock(unsigned int ivar, unsigned int jvar)
-{
-  _jacobian_block_used[ivar][jvar] = 1;
-  return _sub_Kee[0][ivar][_block_diagonal_matrix ? 0 : jvar];
-}
-
-DenseMatrix<Number> &
 Assembly::jacobianBlock(unsigned int ivar, unsigned int jvar, TagID tag)
 {
   _jacobian_block_used[ivar][jvar] = 1;

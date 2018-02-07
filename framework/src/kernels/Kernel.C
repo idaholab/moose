@@ -92,22 +92,14 @@ Kernel::Kernel(const InputParameters & parameters)
 void
 Kernel::computeResidual()
 {
-  _re_blocks.resize(_vector_tags.size());
-  mooseAssert(_vector_tags.size() >= 1, "we need at least one active tag");
-  auto vector_tag = _vector_tags.begin();
-  for (auto i = beginIndex(_vector_tags); i < _vector_tags.size(); i++, ++vector_tag)
-    _re_blocks[i] = &_assembly.residualBlock(_var.number(), *vector_tag);
-
-  _local_re.resize(_re_blocks[0]->size());
-  _local_re.zero();
+  prepareVectorTag(_assembly, _var.number());
 
   precalculateResidual();
   for (_i = 0; _i < _test.size(); _i++)
     for (_qp = 0; _qp < _qrule->n_points(); _qp++)
       _local_re(_i) += _JxW[_qp] * _coord[_qp] * computeQpResidual();
 
-  for (auto & re : _re_blocks)
-    *re += _local_re;
+  appendTaggedLocalResidual();
 
   if (_has_save_in)
   {
@@ -120,13 +112,7 @@ Kernel::computeResidual()
 void
 Kernel::computeJacobian()
 {
-  _ke_blocks.resize(_matrix_tags.size());
-  auto mat_vector = _matrix_tags.begin();
-  for (auto i = beginIndex(_matrix_tags); i < _matrix_tags.size(); i++, ++mat_vector)
-    _ke_blocks[i] = &_assembly.jacobianBlock(_var.number(), _var.number(), *mat_vector);
-
-  _local_ke.resize(_ke_blocks[0]->m(), _ke_blocks[0]->n());
-  _local_ke.zero();
+  prepareMatrixTag(_assembly, _var.number(), _var.number());
 
   precalculateJacobian();
   for (_i = 0; _i < _test.size(); _i++)
@@ -134,8 +120,7 @@ Kernel::computeJacobian()
       for (_qp = 0; _qp < _qrule->n_points(); _qp++)
         _local_ke(_i, _j) += _JxW[_qp] * _coord[_qp] * computeQpJacobian();
 
-  for (auto & ke : _ke_blocks)
-    *ke += _local_ke;
+  appendTaggedLocalMatrix();
 
   if (_has_diag_save_in)
   {
@@ -177,24 +162,28 @@ Kernel::computeOffDiagJacobian(unsigned int jvar)
     computeJacobian();
   else
   {
-    DenseMatrix<Number> & ke = _assembly.jacobianBlock(_var.number(), jvar);
+    prepareMatrixTag(_assembly, _var.number(), jvar);
 
     precalculateOffDiagJacobian(jvar);
     for (_i = 0; _i < _test.size(); _i++)
       for (_j = 0; _j < _phi.size(); _j++)
         for (_qp = 0; _qp < _qrule->n_points(); _qp++)
-          ke(_i, _j) += _JxW[_qp] * _coord[_qp] * computeQpOffDiagJacobian(jvar);
+          _local_ke(_i, _j) += _JxW[_qp] * _coord[_qp] * computeQpOffDiagJacobian(jvar);
+
+    appendTaggedLocalMatrix();
   }
 }
 
 void
 Kernel::computeOffDiagJacobianScalar(unsigned int jvar)
 {
-  DenseMatrix<Number> & ke = _assembly.jacobianBlock(_var.number(), jvar);
   MooseVariableScalar & jv = _sys.getScalarVariable(_tid, jvar);
+  prepareMatrixTag(_assembly, _var.number(), jvar);
 
   for (_i = 0; _i < _test.size(); _i++)
     for (_j = 0; _j < jv.order(); _j++)
       for (_qp = 0; _qp < _qrule->n_points(); _qp++)
-        ke(_i, _j) += _JxW[_qp] * _coord[_qp] * computeQpOffDiagJacobian(jvar);
+        _local_ke(_i, _j) += _JxW[_qp] * _coord[_qp] * computeQpOffDiagJacobian(jvar);
+
+  appendTaggedLocalMatrix();
 }

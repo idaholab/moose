@@ -72,12 +72,6 @@ protected:
 
   /// Derivative of u_dot with respect to u
   const VariableValue & _du_dot_du;
-
-  /// Residual blocks Vectors For each Tag
-  std::vector<DenseVector<Number> *> _re_blocks;
-
-  /// Kernel blocks Vectors For each Tag
-  std::vector<DenseMatrix<Number> *> _ke_blocks;
 };
 
 #endif /* KERNEL_H */

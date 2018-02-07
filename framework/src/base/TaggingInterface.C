@@ -16,6 +16,8 @@
 #include "Conversion.h"
 #include "FEProblem.h"
 
+#include "libmesh/dense_vector.h"
+
 template <>
 InputParameters
 validParams<TaggingInterface>()
@@ -76,6 +78,9 @@ TaggingInterface::TaggingInterface(SubProblem & subproblem, const MooseObject & 
 
     _matrix_tags.insert(_subproblem.getMatrixTagID(matrix_tag_name));
   }
+
+  _re_blocks.resize(_vector_tags.size());
+  _ke_blocks.resize(_matrix_tags.size());
 }
 
 void
@@ -112,6 +117,60 @@ TaggingInterface::addMatrixTag(TagID tag_id)
     mooseError("Matrix tag ", tag_id, " does not exsit in system");
 
   _matrix_tags.insert(tag_id);
+}
+
+void
+TaggingInterface::prepareVectorTag(Assembly & assembly, unsigned int ivar)
+{
+  _re_blocks.resize(_vector_tags.size());
+  mooseAssert(_vector_tags.size() >= 1, "we need at least one active tag");
+  auto vector_tag = _vector_tags.begin();
+  for (auto i = beginIndex(_vector_tags); i < _vector_tags.size(); i++, ++vector_tag)
+    _re_blocks[i] = &assembly.residualBlock(ivar, *vector_tag);
+
+  _local_re.resize(_re_blocks[0]->size());
+  _local_re.zero();
+}
+
+void
+TaggingInterface::prepareMatrixTag(Assembly & assembly, unsigned int ivar, unsigned int jvar)
+{
+  _ke_blocks.resize(_matrix_tags.size());
+  mooseAssert(_matrix_tags.size() >= 1, "we need at least one active tag");
+  auto mat_vector = _matrix_tags.begin();
+  for (auto i = beginIndex(_matrix_tags); i < _matrix_tags.size(); i++, ++mat_vector)
+    _ke_blocks[i] = &assembly.jacobianBlock(ivar, jvar, *mat_vector);
+
+  _local_ke.resize(_ke_blocks[0]->m(), _ke_blocks[0]->n());
+  _local_ke.zero();
+}
+
+void
+TaggingInterface::appendTaggedLocalResidual()
+{
+  for (auto & re : _re_blocks)
+    *re += _local_re;
+}
+
+void
+TaggingInterface::assignTaggedLocalResidual()
+{
+  for (auto & re : _re_blocks)
+    *re = _local_re;
+}
+
+void
+TaggingInterface::appendTaggedLocalMatrix()
+{
+  for (auto & ke : _ke_blocks)
+    *ke += _local_ke;
+}
+
+void
+TaggingInterface::assignTaggedLocalMatrix()
+{
+  for (auto & ke : _ke_blocks)
+    *ke = _local_ke;
 }
 
 TaggingInterface::~TaggingInterface() {}

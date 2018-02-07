@@ -169,12 +169,6 @@ protected:
   /// current index for the shape function
   unsigned int _j;
 
-  /// Holds residual entries as they are accumulated by this Kernel
-  DenseVector<Number> _local_re;
-
-  /// Holds residual entries as they are accumulated by this Kernel
-  DenseMatrix<Number> _local_ke;
-
   /// The aux variables to save the residual contributions to
   bool _has_save_in;
   std::vector<MooseVariableFEBase *> _save_in;

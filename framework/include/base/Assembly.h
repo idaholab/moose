@@ -593,9 +593,7 @@ public:
     return _sub_Rn[static_cast<unsigned int>(type)][var_num];
   }
 
-  DenseMatrix<Number> & jacobianBlock(unsigned int ivar, unsigned int jvar);
-
-  DenseMatrix<Number> & jacobianBlock(unsigned int ivar, unsigned int jvar, TagID tag);
+  DenseMatrix<Number> & jacobianBlock(unsigned int ivar, unsigned int jvar, TagID tag = 0);
 
   DenseMatrix<Number> & jacobianBlockNonlocal(unsigned int ivar, unsigned int jvar);
   DenseMatrix<Number> &
