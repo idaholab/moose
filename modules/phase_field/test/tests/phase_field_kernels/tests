@@ -34,6 +34,12 @@
     exodiff = 'CoupledCoefAllenCahn_out.e'
   [../]
 
+  [./MatGradSqCoupled]
+    type = 'Exodiff'
+    input = 'MatGradSqCoupled.i'
+    exodiff = 'MatGradSqCoupled_out.e'
+  [../]
+
   [./analyzejacobian_AllenCahn]
     type = 'AnalyzeJacobian'
     input = 'AllenCahn.i'
