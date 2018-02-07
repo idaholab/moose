@@ -154,6 +154,9 @@ private:
 
   /// Flag for overwriting timesteps
   bool _overwrite;
+
+  /// Enum for the output dimension
+  MooseEnum _output_dimension;
 };
 
 #endif /* EXODUS_H */
