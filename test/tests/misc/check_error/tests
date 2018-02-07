@@ -325,7 +325,7 @@
   [./missing_mesh_test]
     type = 'RunException'
     input = 'missing_mesh_test.i'
-    expect_err = "Unable to open file \S+"
+    expect_err = "cannot locate mesh file '\S+'"
   [../]
 
   [./missing_req_par_action_obj_test]
