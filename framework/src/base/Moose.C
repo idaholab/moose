@@ -364,6 +364,7 @@
 #include "TransientMultiApp.h"
 #include "FullSolveMultiApp.h"
 #include "AutoPositionsMultiApp.h"
+#include "CentroidMultiApp.h"
 
 // Transfers
 #ifdef LIBMESH_TRILINOS_HAVE_DTK
@@ -826,6 +827,7 @@ registerObjects(Factory & factory)
   registerMultiApp(TransientMultiApp);
   registerMultiApp(FullSolveMultiApp);
   registerMultiApp(AutoPositionsMultiApp);
+  registerMultiApp(CentroidMultiApp);
 
   // time steppers
   registerTimeStepper(ConstantDT);

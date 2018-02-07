@@ -30,7 +30,9 @@ protected:
   /**
    * _must_ fill in _positions with the positions of the sub-aps
    */
-  virtual void fillPositions() override;
+  void fillPositions() override;
+
+  virtual void initialSetup() override;
 };
 
 #endif // AUTOPOSITIONSMULTIAPP_H
