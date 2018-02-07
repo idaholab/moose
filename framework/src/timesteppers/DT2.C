@@ -85,10 +85,6 @@ DT2::preSolve()
   *_aux_saved = *aux_sys.current_local_solution;
   *_aux_older_saved = *aux_sys.older_local_solution;
 
-  _u_saved->close();
-  _u_older_saved->close();
-  _aux_saved->close();
-  _aux_older_saved->close();
 }
 
 void
@@ -105,9 +101,8 @@ DT2::step()
   {
     // save the solution (for time step with dt)
     *_u1 = *nl.currentSolution();
-    _u1->close();
+
     *_aux1 = *aux_sys.current_local_solution;
-    _aux1->close();
 
     // take two steps with dt/2
     _console << "Taking two dt/2 time steps" << std::endl;
@@ -115,8 +110,6 @@ DT2::step()
     // restore solutions to the original state
     *nl_sys.current_local_solution = *_u_saved;
     *aux_sys.current_local_solution = *_aux_saved;
-    nl_sys.current_local_solution->close();
-    aux_sys.current_local_solution->close();
 
     _dt = getCurrentDT() / 2; // cut the time step in half
     _time = _time_old + _dt;
@@ -151,7 +144,6 @@ DT2::step()
         nl_sys.update();
 
         *_u2 = *nl_sys.current_local_solution;
-        _u2->close();
 
         // compute error
         *_u_diff = *_u2;
@@ -185,12 +177,6 @@ DT2::step()
       *aux_sys.old_local_solution = *_aux1;
       *aux_sys.older_local_solution = *_aux_saved;
 
-      nl_sys.current_local_solution->close();
-      nl.solutionOld().close();
-      nl.solutionOlder().close();
-      aux_sys.current_local_solution->close();
-      aux_sys.old_local_solution->close();
-      aux_sys.older_local_solution->close();
     }
   }
 }
@@ -234,12 +220,6 @@ DT2::rejectStep()
   *aux_sys.old_local_solution = *_aux_saved;
   *aux_sys.older_local_solution = *_aux_older_saved;
 
-  nl_sys.solution->close();
-  nl.solutionOld().close();
-  nl.solutionOlder().close();
-  aux_sys.solution->close();
-  aux_sys.old_local_solution->close();
-  aux_sys.older_local_solution->close();
 }
 
 bool

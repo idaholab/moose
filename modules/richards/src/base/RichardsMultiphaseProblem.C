@@ -123,7 +123,6 @@ RichardsMultiphaseProblem::updateSolution(NumericVector<Number> & vec_solution,
   if (updatedSolution)
   {
     ghosted_solution = vec_solution;
-    ghosted_solution.close();
   }
 
   return updatedSolution;

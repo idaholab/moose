@@ -282,11 +282,9 @@ PhysicsBasedPreconditioner::apply(const NumericVector<Number> & x, NumericVector
       // It does what it does because there is no vector_mult_sub()
       rhs.close();
       rhs.scale(-1.0);
-      rhs.close();
       off_diag.vector_mult_add(rhs, *coupled_system.solution);
       rhs.close();
       rhs.scale(-1.0);
-      rhs.close();
     }
 
     // Apply the preconditioner to the small system

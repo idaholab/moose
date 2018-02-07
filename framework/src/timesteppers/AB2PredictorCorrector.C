@@ -88,10 +88,9 @@ AB2PredictorCorrector::step()
   if (_converged)
   {
     _u1 = *nl.currentSolution();
-    _u1.close();
 
     _aux1 = *aux.currentSolution();
-    _aux1.close();
+
     if (_t_step >= _start_adapting)
     {
       // Calculate error if past the first solve
