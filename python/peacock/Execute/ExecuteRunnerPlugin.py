@@ -80,11 +80,22 @@ class ExecuteRunnerPlugin(QWidget, Plugin):
         self.exe_path = None
         self.exe_args = []
         self.has_csv = False
+        self._input_file = ""
 
         self.setup()
 
+    def setInputFile(self, input_file):
+        if input_file:
+            self._input_file = os.path.basename(input_file)
+        else:
+            self._input_file = ""
+
     def _tempInputFile(self):
-        return os.path.abspath("peacock_run_exe_tmp.i")
+        if self._input_file:
+            tmp = "peacock_run_exe_tmp_%s" % self._input_file
+        else:
+            tmp = "peacock_run_exe_tmp.i"
+        return os.path.abspath(tmp)
 
     def _showProgressBar(self, show):
         """
