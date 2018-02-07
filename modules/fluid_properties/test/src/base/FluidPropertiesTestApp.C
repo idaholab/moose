@@ -12,6 +12,10 @@
 #include "AppFactory.h"
 #include "MooseSyntax.h"
 
+// kernels
+#include "EntropyFromEnthalpyPressureDerivativesTestKernel.h"
+
+// materials
 #include "MultiComponentFluidPropertiesMaterialPT.h"
 
 template <>
@@ -65,6 +69,8 @@ FluidPropertiesTestApp__registerObjects(Factory & factory)
 void
 FluidPropertiesTestApp::registerObjects(Factory & factory)
 {
+  registerKernel(EntropyFromEnthalpyPressureDerivativesTestKernel);
+
   registerMaterial(MultiComponentFluidPropertiesMaterialPT);
 }
 
