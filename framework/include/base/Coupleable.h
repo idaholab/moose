@@ -58,10 +58,28 @@ public:
   }
 
   /**
-   * Get the list of coupled variables
-   * @return The list of coupled variables
+   * Get the list of all coupled variables
+   * @return The list of all coupled variables
    */
   const std::vector<MooseVariableFE *> & getCoupledMooseVars() const { return _coupled_moose_vars; }
+
+  /**
+   * Get the list of standard coupled variables
+   * @return The list of standard coupled variables
+   */
+  const std::vector<MooseVariable *> & getCoupledStandardMooseVars() const
+  {
+    return _coupled_standard_moose_vars;
+  }
+
+  /**
+   * Get the list of vector coupled variables
+   * @return The list of vector coupled variables
+   */
+  const std::vector<VectorMooseVariable *> & getCoupledVectorMooseVars() const
+  {
+    return _coupled_vector_moose_vars;
+  }
 
 protected:
   /**
@@ -384,8 +402,14 @@ protected:
   /// Coupled vars whose values we provide
   std::map<std::string, std::vector<MooseVariableFE *>> _coupled_vars;
 
-  /// Vector of coupled variables
+  /// Vector of all coupled variables
   std::vector<MooseVariableFE *> _coupled_moose_vars;
+
+  /// Vector of standard coupled variables
+  std::vector<MooseVariable *> _coupled_standard_moose_vars;
+
+  /// Vector of vector coupled variables
+  std::vector<VectorMooseVariable *> _coupled_vector_moose_vars;
 
   /// True if we provide coupling to nodal values
   bool _c_nodal;

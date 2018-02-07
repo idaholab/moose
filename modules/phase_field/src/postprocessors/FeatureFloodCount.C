@@ -160,6 +160,7 @@ FeatureFloodCount::FeatureFloodCount(const InputParameters & parameters)
     Coupleable(this, false),
     MooseVariableDependencyInterface(),
     _fe_vars(getCoupledMooseVars()),
+    _vars(getCoupledStandardMooseVars()),
     _threshold(getParam<Real>("threshold")),
     _connecting_threshold(isParamValid("connecting_threshold")
                               ? getParam<Real>("connecting_threshold")
@@ -190,9 +191,6 @@ FeatureFloodCount::FeatureFloodCount(const InputParameters & parameters)
 {
   if (_var_index_mode)
     _var_index_maps.resize(_maps_size);
-
-  for (auto & var : _fe_vars)
-    _vars.push_back(dynamic_cast<MooseVariable *>(var));
 
   addMooseVariableDependency(_fe_vars);
 }

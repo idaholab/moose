@@ -54,8 +54,8 @@ FeatureVolumeVectorPostprocessor::FeatureVolumeVectorPostprocessor(
   addMooseVariableDependency(_vars);
 
   _coupled_sln.reserve(_vars.size());
-  for (auto & var : _vars)
-    _coupled_sln.push_back(&(dynamic_cast<MooseVariable *>(var))->sln());
+  for (auto & var : _feature_counter.getCoupledVars())
+    _coupled_sln.push_back(&var->sln());
 }
 
 void

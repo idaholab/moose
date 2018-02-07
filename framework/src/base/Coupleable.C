@@ -54,6 +54,12 @@ Coupleable::Coupleable(const MooseObject * moose_object, bool nodal)
           MooseVariableFE * moose_var = &problem.getVariable(_c_tid, coupled_var_name);
           _coupled_vars[name].push_back(moose_var);
           _coupled_moose_vars.push_back(moose_var);
+          if (auto * tmp_var = dynamic_cast<MooseVariable *>(moose_var))
+            _coupled_standard_moose_vars.push_back(tmp_var);
+          else if (auto * tmp_var = dynamic_cast<VectorMooseVariable *>(moose_var))
+            _coupled_vector_moose_vars.push_back(tmp_var);
+          else
+            mooseError("Unknown variable type!");
         }
         else if (problem.hasScalarVariable(coupled_var_name))
         {
@@ -415,7 +421,7 @@ Coupleable::coupledVectorValueOld(const std::string & var_name, unsigned int com
   if (!isCoupled(var_name))
     return *getVectorDefaultValue(var_name);
 
-  validateExecutionerType(var_name);
+  validateExecutionerType(var_name, "coupledVectorValueOld");
   coupledCallback(var_name, true);
   VectorMooseVariable * var = getVectorVar(var_name, comp);
   if (var == NULL)
@@ -445,7 +451,7 @@ Coupleable::coupledVectorValueOlder(const std::string & var_name, unsigned int c
   if (!isCoupled(var_name))
     return *getVectorDefaultValue(var_name);
 
-  validateExecutionerType(var_name);
+  validateExecutionerType(var_name, "coupledVectorValueOlder");
   coupledCallback(var_name, true);
   VectorMooseVariable * var = getVectorVar(var_name, comp);
   if (var == NULL)
@@ -657,7 +663,7 @@ Coupleable::coupledCurlOld(const std::string & var_name, unsigned int comp)
   if (_c_nodal)
     mooseError("Nodal variables do not have curls");
 
-  validateExecutionerType(var_name);
+  validateExecutionerType(var_name, "coupledCurlOld");
   VectorMooseVariable * var = getVectorVar(var_name, comp);
   if (var == NULL)
     mooseError("Call corresponding scalar field variable method");
@@ -678,7 +684,7 @@ Coupleable::coupledCurlOlder(const std::string & var_name, unsigned int comp)
   if (_c_nodal)
     mooseError("Nodal variables do not have curls");
 
-  validateExecutionerType(var_name);
+  validateExecutionerType(var_name, "coupledCurlOlder");
   VectorMooseVariable * var = getVectorVar(var_name, comp);
   if (var == NULL)
     mooseError("Call corresponding scalar field variable method");
