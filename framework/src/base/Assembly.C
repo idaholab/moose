@@ -1433,34 +1433,31 @@ Assembly::cacheResidualBlock(std::vector<Real> & cached_residual_values,
 }
 
 void
-Assembly::addResidual(NumericVector<Number> & residual,
-                      Moose::KernelType type /* = Moose::KT_NONTIME*/)
+Assembly::addResidual(NumericVector<Number> & residual, TagID tag_id /* = 0 */)
 {
   const std::vector<MooseVariableFEBase *> & vars = _sys.getVariables(_tid);
   for (const auto & var : vars)
     addResidualBlock(
-        residual, _sub_Re[type][var->number()], var->dofIndices(), var->scalingFactor());
+        residual, _sub_Re[tag_id][var->number()], var->dofIndices(), var->scalingFactor());
 }
 
 void
-Assembly::addResidualNeighbor(NumericVector<Number> & residual,
-                              Moose::KernelType type /* = Moose::KT_NONTIME*/)
+Assembly::addResidualNeighbor(NumericVector<Number> & residual, TagID tag_id /* = 0 */)
 {
   const std::vector<MooseVariableFEBase *> & vars = _sys.getVariables(_tid);
   for (const auto & var : vars)
     addResidualBlock(
-        residual, _sub_Rn[type][var->number()], var->dofIndicesNeighbor(), var->scalingFactor());
+        residual, _sub_Rn[tag_id][var->number()], var->dofIndicesNeighbor(), var->scalingFactor());
 }
 
 void
-Assembly::addResidualScalar(NumericVector<Number> & residual,
-                            Moose::KernelType type /* = Moose::KT_NONTIME*/)
+Assembly::addResidualScalar(NumericVector<Number> & residual, TagID tag_id /* = 0 */)
 {
   // add the scalar variables residuals
   const std::vector<MooseVariableScalar *> & vars = _sys.getScalarVariables(_tid);
   for (const auto & var : vars)
     addResidualBlock(
-        residual, _sub_Re[type][var->number()], var->dofIndices(), var->scalingFactor());
+        residual, _sub_Re[tag_id][var->number()], var->dofIndices(), var->scalingFactor());
 }
 
 void
@@ -1505,13 +1502,24 @@ Assembly::cacheResidualNeighbor()
 {
   const std::vector<MooseVariableFEBase *> & vars = _sys.getVariables(_tid);
   for (const auto & var : vars)
-    for (unsigned int i = 0; i < _sub_Re.size(); i++)
-      if (_sys.hasResidualVector((Moose::KernelType)i))
-        cacheResidualBlock(_cached_residual_values[i],
-                           _cached_residual_rows[i],
-                           _sub_Rn[i][var->number()],
+  {
+    auto & tag_name_to_tag_id = _sys.subproblem().getVectorTag();
+
+    mooseAssert(tag_name_to_tag_id.size() == _sub_Rn.size(),
+                "the number of tags does not equal to the number of residuals ");
+
+    for (auto tag_it = tag_name_to_tag_id.begin(); tag_it != tag_name_to_tag_id.end(); ++tag_it)
+    {
+      if (_sys.hasVector(tag_it->second))
+      {
+        cacheResidualBlock(_cached_residual_values[tag_it->second],
+                           _cached_residual_rows[tag_it->second],
+                           _sub_Rn[tag_it->second][var->number()],
                            var->dofIndicesNeighbor(),
                            var->scalingFactor());
+      }
+    }
+  }
 }
 
 void
@@ -1520,11 +1528,10 @@ Assembly::cacheResidualNodes(DenseVector<Number> & res, std::vector<dof_id_type>
   // Add the residual value and dof_index to cached_residual_values and cached_residual_rows
   // respectively.
   // This is used by NodalConstraint.C to cache the residual calculated for master and slave node.
-  Moose::KernelType type = Moose::KT_NONTIME;
   for (unsigned int i = 0; i < dof_index.size(); ++i)
   {
-    _cached_residual_values[type].push_back(res(i));
-    _cached_residual_rows[type].push_back(dof_index[i]);
+    _cached_residual_values[0].push_back(res(i));
+    _cached_residual_rows[0].push_back(dof_index[i]);
   }
 }
 
@@ -1532,17 +1539,16 @@ void
 Assembly::addCachedResiduals()
 {
   auto & tag_name_to_tag_id = _sys.subproblem().getVectorTag();
-  auto tag_it = tag_name_to_tag_id.begin();
 
   mooseAssert(tag_name_to_tag_id.size() == _sub_Re.size(),
               "the number of tags does not equal to the number of residuals ");
 
-  for (unsigned int i = 0; tag_it != tag_name_to_tag_id.end(); i++, ++tag_it)
+  for (auto tag_it = tag_name_to_tag_id.begin(); tag_it != tag_name_to_tag_id.end(); ++tag_it)
   {
     if (!_sys.hasVector(tag_it->second))
     {
-      _cached_residual_values[i].clear();
-      _cached_residual_rows[i].clear();
+      _cached_residual_values[tag_it->second].clear();
+      _cached_residual_rows[tag_it->second].clear();
       continue;
     }
     addCachedResidual(_sys.getVector(tag_it->second), tag_it->second);
@@ -1602,23 +1608,21 @@ Assembly::setResidualBlock(NumericVector<Number> & residual,
 }
 
 void
-Assembly::setResidual(NumericVector<Number> & residual,
-                      Moose::KernelType type /* = Moose::KT_NONTIME*/)
+Assembly::setResidual(NumericVector<Number> & residual, TagID tag_id /* = 0 */)
 {
   const std::vector<MooseVariableFEBase *> & vars = _sys.getVariables(_tid);
   for (const auto & var : vars)
     setResidualBlock(
-        residual, _sub_Re[type][var->number()], var->dofIndices(), var->scalingFactor());
+        residual, _sub_Re[tag_id][var->number()], var->dofIndices(), var->scalingFactor());
 }
 
 void
-Assembly::setResidualNeighbor(NumericVector<Number> & residual,
-                              Moose::KernelType type /* = Moose::KT_NONTIME*/)
+Assembly::setResidualNeighbor(NumericVector<Number> & residual, TagID tag_id /* = 0 */)
 {
   const std::vector<MooseVariableFEBase *> & vars = _sys.getVariables(_tid);
   for (const auto & var : vars)
     setResidualBlock(
-        residual, _sub_Rn[type][var->number()], var->dofIndicesNeighbor(), var->scalingFactor());
+        residual, _sub_Rn[tag_id][var->number()], var->dofIndicesNeighbor(), var->scalingFactor());
 }
 
 void

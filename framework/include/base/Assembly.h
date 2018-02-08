@@ -484,11 +484,9 @@ public:
   void copyNeighborShapes(MooseVariableFEImpl<T> & v);
   void copyNeighborShapes(unsigned int var);
 
-  void addResidual(NumericVector<Number> & residual, Moose::KernelType type = Moose::KT_NONTIME);
-  void addResidualNeighbor(NumericVector<Number> & residual,
-                           Moose::KernelType type = Moose::KT_NONTIME);
-  void addResidualScalar(NumericVector<Number> & residual,
-                         Moose::KernelType type = Moose::KT_NONTIME);
+  void addResidual(NumericVector<Number> & residual, TagID tag_id = 0);
+  void addResidualNeighbor(NumericVector<Number> & residual, TagID tag_id = 0);
+  void addResidualScalar(NumericVector<Number> & residual, TagID tag_id = 0);
 
   /**
    * Takes the values that are currently in _sub_Re and appends them to the cached values.
@@ -535,9 +533,8 @@ public:
    */
   void addCachedResidual(NumericVector<Number> & residual, TagID tag_id);
 
-  void setResidual(NumericVector<Number> & residual, Moose::KernelType type = Moose::KT_NONTIME);
-  void setResidualNeighbor(NumericVector<Number> & residual,
-                           Moose::KernelType type = Moose::KT_NONTIME);
+  void setResidual(NumericVector<Number> & residual, TagID tag_id = 0);
+  void setResidualNeighbor(NumericVector<Number> & residual, TagID tag_id = 0);
 
   void addJacobian(SparseMatrix<Number> & jacobian);
   void addJacobianNonlocal(SparseMatrix<Number> & jacobian);
@@ -586,21 +583,14 @@ public:
    */
   void addCachedJacobian(SparseMatrix<Number> & jacobian);
 
-  DenseVector<Number> & residualBlock(unsigned int var_num,
-                                      Moose::KernelType type = Moose::KT_NONTIME)
-  {
-    return _sub_Re[static_cast<unsigned int>(type)][var_num];
-  }
-
-  DenseVector<Number> & residualBlock(unsigned int var_num, TagID tag_id)
+  DenseVector<Number> & residualBlock(unsigned int var_num, TagID tag_id = 0)
   {
     return _sub_Re[static_cast<unsigned int>(tag_id)][var_num];
   }
 
-  DenseVector<Number> & residualBlockNeighbor(unsigned int var_num,
-                                              Moose::KernelType type = Moose::KT_NONTIME)
+  DenseVector<Number> & residualBlockNeighbor(unsigned int var_num, TagID tag_id = 0)
   {
-    return _sub_Rn[static_cast<unsigned int>(type)][var_num];
+    return _sub_Rn[static_cast<unsigned int>(tag_id)][var_num];
   }
 
   DenseMatrix<Number> & jacobianBlock(unsigned int ivar, unsigned int jvar, TagID tag = 0);
