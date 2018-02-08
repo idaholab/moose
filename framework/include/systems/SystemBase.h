@@ -171,6 +171,19 @@ public:
   virtual bool hasVector(TagID tag_id);
 
   /**
+   * Ideally, we should not need this API.
+   * There exists a really bad API "addCachedResidualDirectly " in FEProblem and DisplacedProblem
+   * This API should go away once addCachedResidualDirectly is removed in the future
+   * Return Tag ID for Time
+   */
+  virtual TagID timeVectorTag();
+
+  /*
+   * Return TagID for nontime
+   */
+  virtual TagID nonTimeVectorTag();
+
+  /**
    * Get a raw NumericVector
    */
   virtual NumericVector<Number> & getVector(const std::string & name);

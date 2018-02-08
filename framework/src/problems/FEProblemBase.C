@@ -1019,10 +1019,11 @@ FEProblemBase::residualVector(Moose::KernelType type)
 void
 FEProblemBase::addResidual(THREAD_ID tid)
 {
-  if (_nl->hasResidualVector(Moose::KT_TIME))
-    _assembly[tid]->addResidual(residualVector(Moose::KT_TIME), Moose::KT_TIME);
-  if (_nl->hasResidualVector(Moose::KT_NONTIME))
-    _assembly[tid]->addResidual(residualVector(Moose::KT_NONTIME), Moose::KT_NONTIME);
+  auto & tags = getVectorTag();
+
+  for (auto & tag : tags)
+    if (_nl->hasVector(tag.second))
+      _assembly[tid]->addResidual(_nl->getVector(tag.second), tag.second);
 
   if (_displaced_problem)
     _displaced_problem->addResidual(tid);
@@ -1031,10 +1032,12 @@ FEProblemBase::addResidual(THREAD_ID tid)
 void
 FEProblemBase::addResidualNeighbor(THREAD_ID tid)
 {
-  if (_nl->hasResidualVector(Moose::KT_TIME))
-    _assembly[tid]->addResidualNeighbor(residualVector(Moose::KT_TIME), Moose::KT_TIME);
-  if (_nl->hasResidualVector(Moose::KT_NONTIME))
-    _assembly[tid]->addResidualNeighbor(residualVector(Moose::KT_NONTIME), Moose::KT_NONTIME);
+  auto & tags = getVectorTag();
+
+  for (auto & tag : tags)
+    if (_nl->hasVector(tag.second))
+      _assembly[tid]->addResidualNeighbor(_nl->getVector(tag.second), tag.second);
+
   if (_displaced_problem)
     _displaced_problem->addResidualNeighbor(tid);
 }
@@ -1042,10 +1045,11 @@ FEProblemBase::addResidualNeighbor(THREAD_ID tid)
 void
 FEProblemBase::addResidualScalar(THREAD_ID tid /* = 0*/)
 {
-  if (_nl->hasResidualVector(Moose::KT_TIME))
-    _assembly[tid]->addResidualScalar(residualVector(Moose::KT_TIME), Moose::KT_TIME);
-  if (_nl->hasResidualVector(Moose::KT_NONTIME))
-    _assembly[tid]->addResidualScalar(residualVector(Moose::KT_NONTIME), Moose::KT_NONTIME);
+  auto & tags = getVectorTag();
+
+  for (auto & tag : tags)
+    if (_nl->hasVector(tag.second))
+      _assembly[tid]->addResidualScalar(_nl->getVector(tag.second), tag.second);
 }
 
 void
@@ -1073,13 +1077,14 @@ FEProblemBase::addCachedResidual(THREAD_ID tid)
     _displaced_problem->addCachedResidual(tid);
 }
 
+// Hate this API
 void
 FEProblemBase::addCachedResidualDirectly(NumericVector<Number> & residual, THREAD_ID tid)
 {
-  if (_nl->hasResidualVector(Moose::KT_TIME))
-    _assembly[tid]->addCachedResidual(residual, Moose::KT_TIME);
-  if (_nl->hasResidualVector(Moose::KT_NONTIME))
-    _assembly[tid]->addCachedResidual(residual, Moose::KT_NONTIME);
+  if (_nl->hasVector(_nl->timeVectorTag()))
+    _assembly[tid]->addCachedResidual(residual, _nl->timeVectorTag());
+  if (_nl->hasVector(_nl->nonTimeVectorTag()))
+    _assembly[tid]->addCachedResidual(residual, _nl->nonTimeVectorTag());
 
   if (_displaced_problem)
     _displaced_problem->addCachedResidualDirectly(residual, tid);

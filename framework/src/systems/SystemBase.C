@@ -642,6 +642,20 @@ SystemBase::hasVector(const std::string & name) const
   return system().have_vector(name);
 }
 
+TagID
+SystemBase::timeVectorTag()
+{
+  mooseError("Not implemented yet");
+  return 0;
+}
+
+TagID
+SystemBase::nonTimeVectorTag()
+{
+  mooseError("Not implemented yet");
+  return 0;
+}
+
 bool
 SystemBase::hasVector(TagID tag)
 {

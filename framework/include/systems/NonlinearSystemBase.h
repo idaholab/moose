@@ -545,6 +545,10 @@ public:
 
   virtual void setPreviousNewtonSolution(const NumericVector<Number> & soln);
 
+  virtual TagID timeVectorTag() override { return _Re_time_tag; }
+
+  virtual TagID nonTimeVectorTag() override { return _Re_non_time_tag; }
+
 public:
   FEProblemBase & _fe_problem;
   System & _sys;
