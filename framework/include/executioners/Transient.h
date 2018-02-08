@@ -263,9 +263,9 @@ protected:
   /**
    * Steady state detection variables:
    */
-  bool _trans_ss_check;
-  Real _ss_check_tol;
-  Real _ss_tmin;
+  bool _steady_state_detection;
+  Real _steady_state_tolerance;
+  Real _steady_state_start_time;
   Real & _sln_diff_norm;
   Real & _old_time_solution_norm;
 
