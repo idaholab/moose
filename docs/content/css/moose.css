@@ -783,3 +783,8 @@ span.badge.new.pass{
     bottom: 0;
     left: 0;
 }
+
+/* Every 'header' markdown (##) section clears a floating div */
+div.section.scrollspy {
+    clear: both;
+}

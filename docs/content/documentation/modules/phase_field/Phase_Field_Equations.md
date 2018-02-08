@@ -8,29 +8,29 @@ The system of PDEs representing the evolution of the various variables required 
 
 We present this a general form of the phase field PDEs here, and then show how it can be solved via FEM.  The PDE's are evolution equations for the various variables and are functions of the free energy functional $F$.  The evolution of all conserved variables is defined using modified Cahn-Hilliard equations, i.e.
 
-$$
+\begin{equation}
 \frac{\partial c_i}{\partial t} = \nabla \cdot M_i \nabla \frac{\delta F}{\delta c_i}
-$$
+\end{equation}
 
 where $c_i$ is a conserved variable and $M_i$ is the associated mobility.  The evolution of nonconserved order parameters is represented with an Allen-Cahn equation, according to
 
-$$
+\begin{equation}
 \frac{\partial \eta_j}{\partial t} = - L_j \frac{\delta F}{\delta \eta_j}, \label{eq:AC}
-$$
+\end{equation}
 
 where $\eta_j$ is an order parameter and $L_j$ is the order parameter mobility.
 
 The free energy functional, for a phase field model using $N$ conserved variables $c_i$ and $M$ order parameters $\eta_j$, is described by
 
-$$
+\begin{equation}
 F = \int_V \big[ f_{loc}(c_1, \ldots,c_N, \eta_1, \ldots, \eta_M) + f_{gr}(c_1, \ldots,c_N, \eta_1,  \ldots, \eta_M) + E_{d} \big] \, dV,
-$$
+\end{equation}
 
 where $f_{loc}$ defines the local free energy density as a function of all concentrations and order parameters, and varies from model to model.  The gradient energy density
 
-$$
+\begin{equation}
 f_{gr} = \sum_i^N \frac{\kappa_i}{2} |\nabla c_i|^2 + \sum^M_j \frac{\kappa_j}{2} |\nabla \eta_j|^2
-$$
+\end{equation}
 
 where $\kappa_i$ and $\kappa_j$ are gradient energy coefficients.  Finally, $E_d$ describes any additional sources of energy in the system, such as deformation or electrostatic energy.  By combining the equations listed above and evaluating the functional derivatives ([further explanations](Derivationexplanations)), the evolution of the variables is described as
 
@@ -83,11 +83,11 @@ $$
 
 To prepare for the FEM discretization, we construct a residual equation (equal to zero) in weak form in the usual manner.  First, the weighted integral residual projection is constructed using test function $\psi_m$ and applying the divergence theorem to lower the derivative order. Thus, the Allen-Cahn equation yields
 
-$$
+
 \begin{eqnarray}
 	\boldsymbol{\mathcal{R}}_{\eta_i} &=& \left(  \frac{\partial \eta_j}{\partial t}, \psi_m \right) + \left( \nabla(\kappa_j\eta_j), \nabla (L\psi_m) \right) + L \left( \frac{\partial f_{loc}}{\partial \eta_j} + \frac{\partial E_d}{\partial \eta_j}, \psi_m \right) - \left<L\kappa_j \nabla \eta_j \cdot \vec{n}, \psi_m \right>,
 \end{eqnarray}
-$$
+
 
 where the $(*,*)$ operator represents a volume integral with an inner product and the $\left<*,*\right>$ operator represents a surface integral with an inner product. Solving the Cahn-Hilliard equation with FEM is more difficult, due to the fourth order gradient. It can be solved in two ways.
 
