@@ -1487,10 +1487,17 @@ Assembly::cacheResidual()
 }
 
 void
-Assembly::cacheResidualContribution(dof_id_type dof, Real value, Moose::KernelType type)
+Assembly::cacheResidualContribution(dof_id_type dof, Real value, TagID tag_id)
 {
-  _cached_residual_values[type].push_back(value);
-  _cached_residual_rows[type].push_back(dof);
+  _cached_residual_values[tag_id].push_back(value);
+  _cached_residual_rows[tag_id].push_back(dof);
+}
+
+void
+Assembly::cacheResidualContribution(dof_id_type dof, Real value, std::set<TagID> & tags)
+{
+  for (auto & tag : tags)
+    cacheResidualContribution(dof, value, tag);
 }
 
 void

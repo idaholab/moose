@@ -501,9 +501,19 @@ public:
    *
    * @param dof The degree of freedom to add the residual contribution to
    * @param value The value of the residual contribution.
-   * @param type Whether the contribution should go to the Time or Non-Time residual
+   * @param TagID  the contribution should go to the tagged residual
    */
-  void cacheResidualContribution(dof_id_type dof, Real value, Moose::KernelType type);
+  void cacheResidualContribution(dof_id_type dof, Real value, TagID tag_id);
+
+  /**
+   * Cache individual residual contributions.  These will ultimately get added to the residual when
+   * addCachedResidual() is called.
+   *
+   * @param dof The degree of freedom to add the residual contribution to
+   * @param value The value of the residual contribution.
+   * @param tags the contribution should go to all tags
+   */
+  void cacheResidualContribution(dof_id_type dof, Real value, std::set<TagID> & tags);
 
   /**
    * Lets an external class cache residual at a set of nodes

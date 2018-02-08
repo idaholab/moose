@@ -19,6 +19,10 @@ InputParameters
 validParams<TimeNodalKernel>()
 {
   InputParameters params = validParams<NodalKernel>();
+
+  params.set<MultiMooseEnum>("vector_tags") = "time";
+  params.set<MultiMooseEnum>("matrix_tags") = "nontime";
+
   return params;
 }
 
@@ -32,7 +36,7 @@ TimeNodalKernel::computeResidual()
     dof_id_type & dof_idx = _var.nodalDofIndex();
     _qp = 0;
     Real res = computeQpResidual();
-    _assembly.cacheResidualContribution(dof_idx, res, Moose::KT_TIME);
+    _assembly.cacheResidualContribution(dof_idx, res, _vector_tags);
 
     if (_has_save_in)
     {

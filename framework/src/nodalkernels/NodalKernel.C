@@ -23,6 +23,7 @@ validParams<NodalKernel>()
   params += validParams<BlockRestrictable>();
   params += validParams<BoundaryRestrictable>();
   params += validParams<RandomInterface>();
+  params += validParams<TaggingInterface>();
 
   params.addRequiredParam<NonlinearVariableName>(
       "variable", "The name of the variable that this boundary condition applies to");
@@ -73,6 +74,7 @@ NodalKernel::NodalKernel(const InputParameters & parameters)
                     true),
     CoupleableMooseVariableDependencyIntermediateInterface(this, true),
     MooseVariableInterface<Real>(this, true),
+    TaggingInterface(*getCheckedPointerParam<FEProblemBase *>("_fe_problem_base"), *this),
     _subproblem(*getCheckedPointerParam<SubProblem *>("_subproblem")),
     _fe_problem(*getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")),
     _sys(*getCheckedPointerParam<SystemBase *>("_sys")),
@@ -146,7 +148,7 @@ NodalKernel::computeResidual()
     dof_id_type & dof_idx = _var.nodalDofIndex();
     _qp = 0;
     Real res = computeQpResidual();
-    _assembly.cacheResidualContribution(dof_idx, res, Moose::KT_NONTIME);
+    _assembly.cacheResidualContribution(dof_idx, res, _vector_tags);
 
     if (_has_save_in)
     {
