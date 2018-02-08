@@ -23,6 +23,7 @@ framework:
     - /AuxKernels/MaterialRealVectorValueAux
     - /AuxKernels/MaterialStdVectorAux
     - /AuxKernels/MaterialStdVectorRealGradientAux
+    - /AuxKernels/NodalNormalAux
     - /AuxKernels/NormalizationAux
     - /AuxKernels/ParsedAux
     - /AuxKernels/SelfAux
@@ -327,8 +328,8 @@ framework:
     - /UserObjects/LayeredSideIntegral
     - /UserObjects/NearestPointLayeredAverage
     - /UserObjects/NodalNormalsCorner
-    - /UserObjects/NodalNormalsEvaluator
-    - /UserObjects/NodalNormalsPreprocessor
+    - /UserObjects/NodalNormalsBoundaryNodes
+    - /UserObjects/NodalNormalsUserObject
     - /UserObjects/SolutionUserObject
     - /UserObjects/Terminator
     - /Variables

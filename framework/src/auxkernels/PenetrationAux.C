@@ -34,8 +34,11 @@ validParams<PenetrationAux>()
   params.addParam<Real>(
       "normal_smoothing_distance",
       "Distance from edge in parametric coordinates over which to smooth contact normal");
-  params.addParam<std::string>("normal_smoothing_method",
-                               "Method to use to smooth normals (edge_based|nodal_normal_based)");
+  MooseEnum smoothing_method("edge_based nodal_normal_based");
+  params.addParam<MooseEnum>(
+      "normal_smoothing_method", smoothing_method, "Method to use to smooth normals");
+  params.addParam<UserObjectName>("nodal_normals",
+                                  "The name of the user object that provides the nodal normals.");
   params.addParam<MooseEnum>("order", orders, "The finite element order");
 
   params.set<bool>("use_displaced_mesh") = true;
@@ -74,15 +77,7 @@ PenetrationAux::PenetrationAux(const InputParameters & parameters)
                      boundaryNames()[0],
                      Utility::string_to_enum<Order>(parameters.get<MooseEnum>("order"))))
 {
-  if (parameters.isParamValid("tangential_tolerance"))
-    _penetration_locator.setTangentialTolerance(getParam<Real>("tangential_tolerance"));
-
-  if (parameters.isParamValid("normal_smoothing_distance"))
-    _penetration_locator.setNormalSmoothingDistance(getParam<Real>("normal_smoothing_distance"));
-
-  if (parameters.isParamValid("normal_smoothing_method"))
-    _penetration_locator.setNormalSmoothingMethod(
-        parameters.get<std::string>("normal_smoothing_method"));
+  _penetration_locator.setFromParameters(name(), parameters);
 }
 
 Real

@@ -10,7 +10,6 @@
 #ifndef PENETRATIONLOCATOR_H
 #define PENETRATIONLOCATOR_H
 
-// Moose includes
 #include "Restartable.h"
 #include "PenetrationInfo.h"
 
@@ -18,8 +17,7 @@
 #include "libmesh/point.h"
 #include "libmesh/fe_base.h"
 
-// Forward Declarations
-class SubProblem;
+class FEProblemBase;
 class MooseMesh;
 class GeometricSearchData;
 class NearestNodeLocator;
@@ -27,7 +25,7 @@ class NearestNodeLocator;
 class PenetrationLocator : Restartable
 {
 public:
-  PenetrationLocator(SubProblem & subproblem,
+  PenetrationLocator(FEProblemBase & fe_problem_base,
                      GeometricSearchData & geom_search_data,
                      MooseMesh & mesh,
                      const unsigned int master_id,
@@ -46,13 +44,13 @@ public:
   Real penetrationDistance(dof_id_type node_id);
   RealVectorValue penetrationNormal(dof_id_type node_id);
 
-  enum NORMAL_SMOOTHING_METHOD
+  enum NormalSmoothingMethod
   {
     NSM_EDGE_BASED,
     NSM_NODAL_NORMAL_BASED
   };
 
-  SubProblem & _subproblem;
+  FEProblemBase & _fe_problem_base;
 
   Real normDistance(const Elem & elem,
                     const Elem & side,
@@ -69,7 +67,7 @@ public:
 
   FEType _fe_type;
 
-  // One FE for each thread and for each dimension
+  /// One FE for each thread and for each dimension
   std::vector<std::vector<FEBase *>> _fe;
 
   NearestNodeLocator & _nearest_node;
@@ -83,22 +81,44 @@ public:
   void setCheckWhetherReasonable(bool state);
   void setUpdate(bool update);
   void setTangentialTolerance(Real tangential_tolerance);
-  void setNormalSmoothingDistance(Real normal_smoothing_distance);
-  void setNormalSmoothingMethod(std::string nsmString);
+  /**
+   * Enable normal smoothing based on edge normals
+   * @param normal_smoothing_distance Distance from edge in parametric coordinates over which to
+   * smooth the normal
+   */
+  void setEdgeBaseSmoothingMethod(Real normal_smoothing_distance);
+  /**
+   * Enable normal smoothing based on nodal normals
+   * @param uo_name The name of the user object that provides the nodal normals
+   */
+  void setNodalNormalSmoothingMethod(const UserObjectName & uo_name);
   Real getTangentialTolerance() { return _tangential_tolerance; }
+
+  /**
+   * Setup the locator using the InputParameters of a MOOSE object
+   *
+   * @param name The name of the MOOSE object calling this method - used for error reporting
+   * @param parameters The input parameter of the calling user object
+   */
+  void setFromParameters(const std::string & name, const InputParameters & parameters);
 
 protected:
   /// Check whether found candidates are reasonable
   bool _check_whether_reasonable;
-  bool & _update_location;         // Update the penetration location for nodes found last time
-  Real _tangential_tolerance;      // Tangential distance a node can be from a face and still be in
-                                   // contact
-  bool _do_normal_smoothing;       // Should we do contact normal smoothing?
-  Real _normal_smoothing_distance; // Distance from edge (in parametric coords) within which to
-                                   // perform normal smoothing
-  NORMAL_SMOOTHING_METHOD _normal_smoothing_method;
-
-  const Moose::PatchUpdateType _patch_update_strategy; // Contact patch update strategy
+  /// Update the penetration location for nodes found last time
+  bool & _update_location;
+  /// Tangential distance a node can be from a face and still be in contact
+  Real _tangential_tolerance;
+  /// Should we do contact normal smoothing?
+  bool _do_normal_smoothing;
+  /// Distance from edge (in parametric coords) within which to perform normal smoothing
+  Real _normal_smoothing_distance;
+  /// The method used for normal smoothing
+  NormalSmoothingMethod _normal_smoothing_method;
+  /// The name of user object that provides the nodal normals, if smoothing is based nodal ones
+  UserObjectName _nodal_normals_uo;
+  /// Contact patch update strategy
+  const Moose::PatchUpdateType _patch_update_strategy;
 };
 
 /**

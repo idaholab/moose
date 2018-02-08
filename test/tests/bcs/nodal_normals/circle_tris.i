@@ -24,6 +24,36 @@
 []
 
 [NodalNormals]
+  [./nodal_normals]
+    boundary = '1'
+    execute_on = initial
+  [../]
+[]
+
+[AuxVariables]
+  [./nodal_normal_x]
+  [../]
+  [./nodal_normal_y]
+  [../]
+  [./nodal_normal_z]
+  [../]
+[]
+
+[AuxKernels]
+  [./nnx]
+    type = NodalNormalAux
+    variable = nodal_normal_x
+    component = X
+    nodal_normals = nodal_normals
+    execute_on = timestep_end
+  [../]
+  [./nny]
+    type = NodalNormalAux
+    variable = nodal_normal_y
+    component = Y
+    nodal_normals = nodal_normals
+    execute_on = timestep_end
+  [../]
 []
 
 [Variables]
@@ -58,19 +88,19 @@
     variable = nodal_normal_x
     boundary = '1'
     function = analytical_normal_x
+    execute_on = timestep_end
   [../]
   [./ny_pps]
     type = NodalL2Error
     variable = nodal_normal_y
     boundary = '1'
     function = analytical_normal_y
+    execute_on = timestep_end
   [../]
 []
 
 [Executioner]
   type = Steady
-
-  # Preconditioned JFNK (default)
   solve_type = 'PJFNK'
   nl_rel_tol = 1e-13
 []

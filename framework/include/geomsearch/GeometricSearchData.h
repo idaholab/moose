@@ -16,7 +16,7 @@
 
 // Forward Declarations
 class MooseMesh;
-class SubProblem;
+class FEProblemBase;
 class PenetrationLocator;
 class NearestNodeLocator;
 class ElementPairLocator;
@@ -35,7 +35,7 @@ public:
     ELEMENTPAIR
   };
 
-  GeometricSearchData(SubProblem & subproblem, MooseMesh & mesh);
+  GeometricSearchData(FEProblemBase & fe_problem_base, MooseMesh & mesh);
   virtual ~GeometricSearchData();
 
   PenetrationLocator & getPenetrationLocator(const BoundaryName & master,
@@ -98,7 +98,7 @@ public:
   void updateGhostedElems();
 
   // protected:
-  SubProblem & _subproblem;
+  FEProblemBase & _fe_problem_base;
   MooseMesh & _mesh;
   std::map<std::pair<unsigned int, unsigned int>, PenetrationLocator *> _penetration_locators;
   std::map<std::pair<unsigned int, unsigned int>, NearestNodeLocator *> _nearest_node_locators;

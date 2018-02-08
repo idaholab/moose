@@ -13,6 +13,7 @@
 #include "NodalBC.h"
 
 class NodalNormalBC;
+class NodalNormalsUserObject;
 
 template <>
 InputParameters validParams<NodalNormalBC>();
@@ -30,11 +31,10 @@ public:
   virtual void computeResidual(NumericVector<Number> & residual) override;
 
 protected:
-  const VariableValue & _nx;
-  const VariableValue & _ny;
-  const VariableValue & _nz;
   /// Normal at the node (it is pre-computed by user object subsystem)
   Point _normal;
+  /// The user object holding the nodal normals
+  const NodalNormalsUserObject & _nodal_normals;
 };
 
 #endif /* NODALNORMALBC_H */

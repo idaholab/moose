@@ -12,8 +12,8 @@
 #include "ParallelUniqueId.h"
 #include "FindContactPoint.h"
 #include "NearestNodeLocator.h"
-#include "SubProblem.h"
-#include "MooseVariable.h"
+#include "NodalNormalsUserObject.h"
+#include "FEProblemBase.h"
 #include "MooseMesh.h"
 
 #include "libmesh/threads.h"
@@ -24,7 +24,7 @@
 Threads::spin_mutex pinfo_mutex;
 
 PenetrationThread::PenetrationThread(
-    SubProblem & subproblem,
+    FEProblemBase & fe_problem_base,
     const MooseMesh & mesh,
     BoundaryID master_boundary,
     BoundaryID slave_boundary,
@@ -32,9 +32,6 @@ PenetrationThread::PenetrationThread(
     bool check_whether_reasonable,
     bool update_location,
     Real tangential_tolerance,
-    bool do_normal_smoothing,
-    Real normal_smoothing_distance,
-    PenetrationLocator::NORMAL_SMOOTHING_METHOD normal_smoothing_method,
     std::vector<std::vector<FEBase *>> & fes,
     FEType & fe_type,
     NearestNodeLocator & nearest_node,
@@ -42,7 +39,7 @@ PenetrationThread::PenetrationThread(
     std::vector<dof_id_type> & elem_list,
     std::vector<unsigned short int> & side_list,
     std::vector<boundary_id_type> & id_list)
-  : _subproblem(subproblem),
+  : _fe_problem_base(fe_problem_base),
     _mesh(mesh),
     _master_boundary(master_boundary),
     _slave_boundary(slave_boundary),
@@ -50,12 +47,9 @@ PenetrationThread::PenetrationThread(
     _check_whether_reasonable(check_whether_reasonable),
     _update_location(update_location),
     _tangential_tolerance(tangential_tolerance),
-    _do_normal_smoothing(do_normal_smoothing),
-    _normal_smoothing_distance(normal_smoothing_distance),
-    _normal_smoothing_method(normal_smoothing_method),
-    _nodal_normal_x(NULL),
-    _nodal_normal_y(NULL),
-    _nodal_normal_z(NULL),
+    _do_normal_smoothing(false),
+    _normal_smoothing_distance(0.),
+    _normal_smoothing_method(PenetrationLocator::NSM_EDGE_BASED),
     _fes(fes),
     _fe_type(fe_type),
     _nearest_node(nearest_node),
@@ -69,7 +63,7 @@ PenetrationThread::PenetrationThread(
 
 // Splitting Constructor
 PenetrationThread::PenetrationThread(PenetrationThread & x, Threads::split /*split*/)
-  : _subproblem(x._subproblem),
+  : _fe_problem_base(x._fe_problem_base),
     _mesh(x._mesh),
     _master_boundary(x._master_boundary),
     _slave_boundary(x._slave_boundary),
@@ -80,6 +74,7 @@ PenetrationThread::PenetrationThread(PenetrationThread & x, Threads::split /*spl
     _do_normal_smoothing(x._do_normal_smoothing),
     _normal_smoothing_distance(x._normal_smoothing_distance),
     _normal_smoothing_method(x._normal_smoothing_method),
+    _nodal_normals_uo(x._nodal_normals_uo),
     _fes(x._fes),
     _fe_type(x._fe_type),
     _nearest_node(x._nearest_node),
@@ -92,19 +87,26 @@ PenetrationThread::PenetrationThread(PenetrationThread & x, Threads::split /*spl
 }
 
 void
+PenetrationThread::setEdgeBaseSmoothingMethod(Real normal_smoothing_distance)
+{
+  _do_normal_smoothing = true;
+  _normal_smoothing_method = PenetrationLocator::NSM_EDGE_BASED;
+  _normal_smoothing_distance = normal_smoothing_distance;
+}
+
+void
+PenetrationThread::setNodalNormalSmoothingMethod(const UserObjectName & uo_name)
+{
+  _do_normal_smoothing = true;
+  _normal_smoothing_method = PenetrationLocator::NSM_NODAL_NORMAL_BASED;
+  _nodal_normals_uo = uo_name;
+}
+
+void
 PenetrationThread::operator()(const NodeIdRange & range)
 {
   ParallelUniqueId puid;
   _tid = puid.id;
-
-  // Must get the variables every time this is run because _tid can change
-  if (_do_normal_smoothing &&
-      _normal_smoothing_method == PenetrationLocator::NSM_NODAL_NORMAL_BASED)
-  {
-    _nodal_normal_x = &_subproblem.getVariable(_tid, "nodal_normal_x");
-    _nodal_normal_y = &_subproblem.getVariable(_tid, "nodal_normal_y");
-    _nodal_normal_z = &_subproblem.getVariable(_tid, "nodal_normal_z");
-  }
 
   for (const auto & node_id : range)
   {
@@ -1299,14 +1301,15 @@ PenetrationThread::smoothNormal(PenetrationInfo * info, std::vector<PenetrationI
     }
     else if (_normal_smoothing_method == PenetrationLocator::NSM_NODAL_NORMAL_BASED)
     {
-      // params.addParam<VariableName>("var_name","description");
-      // getParam<VariableName>("var_name")
-      info->_normal(0) = _nodal_normal_x->getValue(info->_side, info->_side_phi);
-      info->_normal(1) = _nodal_normal_y->getValue(info->_side, info->_side_phi);
-      info->_normal(2) = _nodal_normal_z->getValue(info->_side, info->_side_phi);
-      const Real len(info->_normal.norm());
+      const NodalNormalsUserObject & nnuo =
+          _fe_problem_base.getUserObject<NodalNormalsUserObject>(_nodal_normals_uo);
+      Point normal(0, 0, 0);
+      for (unsigned int i = 0; i < info->_side_phi.size(); i++)
+        normal += info->_side_phi[i][0] * nnuo.getNormal(info->_side->node_id(i));
+      const Real len(normal.norm());
       if (len > 0)
-        info->_normal /= len;
+        normal /= len;
+      info->_normal = normal;
     }
   }
 }

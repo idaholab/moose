@@ -62,6 +62,7 @@
     boundary = 11            #slave
     paired_boundary = 12     #master
     tangential_tolerance = 0.09
+    normal_smoothing_method = edge_based
     normal_smoothing_distance = 0.2
   [../]
 
@@ -71,6 +72,7 @@
     boundary = 12            #slave
     paired_boundary = 11     #master
     tangential_tolerance = 0.09
+    normal_smoothing_method = edge_based
     normal_smoothing_distance = 0.2
   [../]
 

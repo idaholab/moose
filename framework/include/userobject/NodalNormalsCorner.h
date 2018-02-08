@@ -13,13 +13,15 @@
 #include "SideUserObject.h"
 
 class NodalNormalsCorner;
-class AuxiliarySystem;
+class NodalNormalsUserObject;
 
 template <>
 InputParameters validParams<NodalNormalsCorner>();
 
 /**
+ * Collect all contributions from boundary nodes that are in corners.
  *
+ * @see NodalNormalsUserObject
  */
 class NodalNormalsCorner : public SideUserObject
 {
@@ -32,8 +34,12 @@ public:
   virtual void threadJoin(const UserObject & uo) override;
 
 protected:
-  AuxiliarySystem & _aux;
+  /// true if the boundary has corners, otherwise false
+  bool _has_corners;
+  /// The node set ID containing the corner nodes
   BoundaryID _corner_boundary_id;
+  /// The user object that stores the nodal normals
+  const NodalNormalsUserObject & _nodal_normals_uo;
 };
 
 #endif /* NODALNORMALSCORNER_H */

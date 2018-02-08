@@ -33,8 +33,11 @@ validParams<NodeFaceConstraint>()
   params.addParam<Real>(
       "normal_smoothing_distance",
       "Distance from edge in parametric coordinates over which to smooth contact normal");
-  params.addParam<std::string>("normal_smoothing_method",
-                               "Method to use to smooth normals (edge_based|nodal_normal_based)");
+  MooseEnum smoothing_method("edge_based nodal_normal_based");
+  params.addParam<MooseEnum>(
+      "normal_smoothing_method", smoothing_method, "Method to use to smooth normals");
+  params.addParam<UserObjectName>("normal_normals",
+                                  "The name of the user object that provides the nodal normals.");
   params.addParam<MooseEnum>("order", orders, "The finite element order used for projections");
 
   params.addRequiredCoupledVar("master_variable", "The variable on the master side of the domain");
@@ -81,19 +84,7 @@ NodeFaceConstraint::NodeFaceConstraint(const InputParameters & parameters)
 
     _overwrite_slave_residual(true)
 {
-  if (parameters.isParamValid("tangential_tolerance"))
-  {
-    _penetration_locator.setTangentialTolerance(getParam<Real>("tangential_tolerance"));
-  }
-  if (parameters.isParamValid("normal_smoothing_distance"))
-  {
-    _penetration_locator.setNormalSmoothingDistance(getParam<Real>("normal_smoothing_distance"));
-  }
-  if (parameters.isParamValid("normal_smoothing_method"))
-  {
-    _penetration_locator.setNormalSmoothingMethod(
-        parameters.get<std::string>("normal_smoothing_method"));
-  }
+  _penetration_locator.setFromParameters(name(), parameters);
   // Put a "1" into test_slave
   // will always only have one entry that is 1
   _test_slave[0].push_back(1);

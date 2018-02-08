@@ -29,9 +29,21 @@
     exodiff = 'cylinder_hexes_1st_2nd_out.e'
   [../]
 
-  [./small_sqaure]
+  [./small_square]
     type = 'Exodiff'
     input = 'square_quads.i'
     exodiff = 'square_quads_out.e'
+  [../]
+
+  [./square_quads_multiple]
+    type = 'Exodiff'
+    input = 'square_quads_multiple.i'
+    exodiff = 'square_quads_multiple_out.e'
+  [../]
+
+  [./internal_sideset]
+    type = 'Exodiff'
+    input = 'internal_sideset.i'
+    exodiff = 'internal_sideset_out.e'
   [../]
 []

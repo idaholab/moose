@@ -54,8 +54,11 @@ validParams<ContactAction>()
   params.addParam<Real>(
       "normal_smoothing_distance",
       "Distance from edge in parametric coordinates over which to smooth contact normal");
-  params.addParam<std::string>("normal_smoothing_method",
-                               "Method to use to smooth normals (edge_based|nodal_normal_based)");
+  MooseEnum smoothing_method("edge_based nodal_normal_based");
+  params.addParam<MooseEnum>(
+      "normal_smoothing_method", smoothing_method, "Method to use to smooth normals");
+  params.addParam<UserObjectName>("normal_normals",
+                                  "The name of the user object that provides the nodal normals.");
   params.addParam<MooseEnum>("order", orders, "The finite element order: FIRST, SECOND, etc.");
   params.addParam<MooseEnum>(
       "formulation",

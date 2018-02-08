@@ -33,8 +33,11 @@ validParams<GapValueAux>()
   params.addParam<Real>(
       "normal_smoothing_distance",
       "Distance from edge in parametric coordinates over which to smooth contact normal");
-  params.addParam<std::string>("normal_smoothing_method",
-                               "Method to use to smooth normals (edge_based|nodal_normal_based)");
+  MooseEnum smoothing_method("edge_based nodal_normal_based");
+  params.addParam<MooseEnum>(
+      "normal_smoothing_method", smoothing_method, "Method to use to smooth normals");
+  params.addParam<UserObjectName>("normal_normals",
+                                  "The name of the user object that provides the nodal normals.");
   params.addParam<MooseEnum>("order", orders, "The finite element order");
   params.addParam<bool>(
       "warnings", false, "Whether to output warning messages concerning nodes not being found");
@@ -57,15 +60,7 @@ GapValueAux::GapValueAux(const InputParameters & parameters)
     _dof_map(_moose_var.dofMap()),
     _warnings(getParam<bool>("warnings"))
 {
-  if (parameters.isParamValid("tangential_tolerance"))
-    _penetration_locator.setTangentialTolerance(getParam<Real>("tangential_tolerance"));
-
-  if (parameters.isParamValid("normal_smoothing_distance"))
-    _penetration_locator.setNormalSmoothingDistance(getParam<Real>("normal_smoothing_distance"));
-
-  if (parameters.isParamValid("normal_smoothing_method"))
-    _penetration_locator.setNormalSmoothingMethod(
-        parameters.get<std::string>("normal_smoothing_method"));
+  _penetration_locator.setFromParameters(name(), parameters);
 
   Order pairedVarOrder(_moose_var.order());
   Order gvaOrder(Utility::string_to_enum<Order>(parameters.get<MooseEnum>("order")));

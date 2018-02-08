@@ -16,9 +16,9 @@
 #include "MooseMesh.h"
 #include "NearestNodeLocator.h"
 #include "PenetrationThread.h"
-#include "SubProblem.h"
+#include "FEProblemBase.h"
 
-PenetrationLocator::PenetrationLocator(SubProblem & subproblem,
+PenetrationLocator::PenetrationLocator(FEProblemBase & fe_problem_base,
                                        GeometricSearchData & /*geom_search_data*/,
                                        MooseMesh & mesh,
                                        const unsigned int master_id,
@@ -27,9 +27,9 @@ PenetrationLocator::PenetrationLocator(SubProblem & subproblem,
                                        NearestNodeLocator & nearest_node)
   : Restartable(Moose::stringify(master_id) + "to" + Moose::stringify(slave_id),
                 "PenetrationLocator",
-                subproblem,
+                fe_problem_base,
                 0),
-    _subproblem(subproblem),
+    _fe_problem_base(fe_problem_base),
     _mesh(mesh),
     _master_boundary(master_id),
     _slave_boundary(slave_id),
@@ -56,17 +56,6 @@ PenetrationLocator::PenetrationLocator(SubProblem & subproblem,
     _fe[i].resize(n_dims + 1);
     for (unsigned int dim = 0; dim <= n_dims; ++dim)
       _fe[i][dim] = FEBase::build(dim, _fe_type).release();
-  }
-
-  if (_normal_smoothing_method == NSM_NODAL_NORMAL_BASED)
-  {
-    if (!((_subproblem.hasVariable("nodal_normal_x")) &&
-          (_subproblem.hasVariable("nodal_normal_y")) &&
-          (_subproblem.hasVariable("nodal_normal_z"))))
-    {
-      mooseError("To use nodal-normal-based smoothing, the nodal_normal_x, nodal_normal_y, and "
-                 "nodal_normal_z variables must exist.  Are you missing the [NodalNormals] block?");
-    }
   }
 }
 
@@ -96,7 +85,7 @@ PenetrationLocator::detectPenetration()
   // Grab the slave nodes we need to worry about from the NearestNodeLocator
   NodeIdRange & slave_node_range = _nearest_node.slaveNodeRange();
 
-  PenetrationThread pt(_subproblem,
+  PenetrationThread pt(_fe_problem_base,
                        _mesh,
                        _master_boundary,
                        _slave_boundary,
@@ -104,9 +93,6 @@ PenetrationLocator::detectPenetration()
                        _check_whether_reasonable,
                        _update_location,
                        _tangential_tolerance,
-                       _do_normal_smoothing,
-                       _normal_smoothing_distance,
-                       _normal_smoothing_method,
                        _fe,
                        _fe_type,
                        _nearest_node,
@@ -114,7 +100,19 @@ PenetrationLocator::detectPenetration()
                        elem_list,
                        side_list,
                        id_list);
+  if (_do_normal_smoothing)
+  {
+    switch (_normal_smoothing_method)
+    {
+      case NSM_EDGE_BASED:
+        pt.setEdgeBaseSmoothingMethod(_normal_smoothing_distance);
+        break;
 
+      case NSM_NODAL_NORMAL_BASED:
+        pt.setNodalNormalSmoothingMethod(_nodal_normals_uo);
+        break;
+    }
+  }
   Threads::parallel_reduce(slave_node_range, pt);
 
   std::vector<dof_id_type> recheck_slave_nodes = pt._recheck_slave_nodes;
@@ -122,7 +120,7 @@ PenetrationLocator::detectPenetration()
   // Update the patch for the slave nodes in recheck_slave_nodes and re-run penetration thread on
   // these nodes at every nonlinear iteration if patch update strategy is set to "iteration".
   if (recheck_slave_nodes.size() > 0 && _patch_update_strategy == Moose::Iteration &&
-      _subproblem.currentlyComputingJacobian())
+      _fe_problem_base.currentlyComputingJacobian())
   {
     // Update the patch for this subset of slave nodes and calculate the nearest neighbor_nodes
     _nearest_node.updatePatch(recheck_slave_nodes);
@@ -134,7 +132,7 @@ PenetrationLocator::detectPenetration()
   }
 
   if (recheck_slave_nodes.size() > 0 && _patch_update_strategy != Moose::Iteration &&
-      _subproblem.currentlyComputingJacobian())
+      _fe_problem_base.currentlyComputingJacobian())
     mooseDoOnce(mooseWarning("Warning in PenetrationLocator. Penetration is not "
                              "detected for one or more slave nodes. This could be because "
                              "those slave nodes simply do not project to faces on the master "
@@ -209,21 +207,45 @@ PenetrationLocator::setTangentialTolerance(Real tangential_tolerance)
 }
 
 void
-PenetrationLocator::setNormalSmoothingDistance(Real normal_smoothing_distance)
+PenetrationLocator::setEdgeBaseSmoothingMethod(Real normal_smoothing_distance)
 {
+  _do_normal_smoothing = true;
+  _normal_smoothing_method = NSM_EDGE_BASED;
   _normal_smoothing_distance = normal_smoothing_distance;
-  if (_normal_smoothing_distance > 0.0)
-    _do_normal_smoothing = true;
 }
 
 void
-PenetrationLocator::setNormalSmoothingMethod(std::string nsmString)
+PenetrationLocator::setNodalNormalSmoothingMethod(const UserObjectName & uo_name)
 {
-  if (nsmString == "edge_based")
-    _normal_smoothing_method = NSM_EDGE_BASED;
-  else if (nsmString == "nodal_normal_based")
-    _normal_smoothing_method = NSM_NODAL_NORMAL_BASED;
-  else
-    mooseError("Invalid normal_smoothing_method: ", nsmString);
   _do_normal_smoothing = true;
+  _normal_smoothing_method = NSM_NODAL_NORMAL_BASED;
+  _nodal_normals_uo = uo_name;
+}
+
+void
+PenetrationLocator::setFromParameters(const std::string & name, const InputParameters & parameters)
+{
+  if (parameters.isParamValid("tangential_tolerance"))
+    setTangentialTolerance(parameters.get<Real>("tangential_tolerance"));
+
+  if (parameters.isParamValid("normal_smoothing_method"))
+  {
+    MooseEnum smoothing_method = parameters.get<MooseEnum>("normal_smoothing_method");
+    if (smoothing_method == "edge_based")
+    {
+      if (!parameters.isParamValid("normal_smoothing_distance"))
+        mooseError(
+            name,
+            ": For edge based normal smoothing, normal_smoothing_distance parameter must be set.");
+      setEdgeBaseSmoothingMethod(parameters.get<Real>("normal_smoothing_distance"));
+    }
+    else if (smoothing_method == "nodal_normal_based")
+    {
+      if (!parameters.isParamValid("nodal_normals"))
+        mooseError(name, ": For nodal nodal based smoothing, nodal_normals parameter must be set.");
+      setNodalNormalSmoothingMethod(parameters.get<UserObjectName>("nodal_normals"));
+    }
+    else
+      mooseError(name, ": Unknown smoothing method.");
+  }
 }

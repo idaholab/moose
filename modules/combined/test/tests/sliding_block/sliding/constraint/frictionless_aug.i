@@ -222,6 +222,7 @@
     formulation = augmented_lagrange
     tangential_tolerance = 1e-3
     system = constraint
+    normal_smoothing_method = edge_based
     normal_smoothing_distance = 0.1
     al_penetration_tolerance = 1e-9
   [../]

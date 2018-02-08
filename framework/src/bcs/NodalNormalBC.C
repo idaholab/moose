@@ -8,25 +8,20 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "NodalNormalBC.h"
+#include "NodalNormalsUserObject.h"
 
 template <>
 InputParameters
 validParams<NodalNormalBC>()
 {
   InputParameters params = validParams<NodalBC>();
-  params.addCoupledVar("nx", "x-component of the normal");
-  params.addCoupledVar("ny", "y-component of the normal");
-  params.addCoupledVar("nz", "z-component of the normal");
-
-  params.set<std::vector<VariableName>>("nx") = {"nodal_normal_x"};
-  params.set<std::vector<VariableName>>("ny") = {"nodal_normal_y"};
-  params.set<std::vector<VariableName>>("nz") = {"nodal_normal_z"};
-
+  params.addRequiredParam<UserObjectName>("nodal_normals",
+                                          "The user object holding the nodal normals.");
   return params;
 }
 
 NodalNormalBC::NodalNormalBC(const InputParameters & parameters)
-  : NodalBC(parameters), _nx(coupledValue("nx")), _ny(coupledValue("ny")), _nz(coupledValue("nz"))
+  : NodalBC(parameters), _nodal_normals(getUserObject<NodalNormalsUserObject>("nodal_normals"))
 {
 }
 
@@ -34,6 +29,6 @@ void
 NodalNormalBC::computeResidual(NumericVector<Number> & residual)
 {
   _qp = 0;
-  _normal = Point(_nx[_qp], _ny[_qp], _nz[_qp]);
+  _normal = _nodal_normals.getNormal(_current_node->id());
   NodalBC::computeResidual(residual);
 }

@@ -27,6 +27,9 @@ public:
   AddMatAndKernel(const InputParameters & params);
 
   virtual void act();
+
+private:
+  const bool _verbose;
 };
 
 #endif // ADDMATANDKERNEL_H

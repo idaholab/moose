@@ -250,10 +250,17 @@ Assembly::getFEFace(FEType type, unsigned int dim)
 }
 
 FEBase *&
+Assembly::getFENeighbor(FEType type, unsigned int dim)
+{
+  buildNeighborFE(type);
+  return _fe_neighbor[dim][type];
+}
+
+FEBase *&
 Assembly::getFEFaceNeighbor(FEType type, unsigned int dim)
 {
   buildFaceNeighborFE(type);
-  return _fe_neighbor[dim][type];
+  return _fe_face_neighbor[dim][type];
 }
 
 const VariablePhiValue &
