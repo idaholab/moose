@@ -35,7 +35,7 @@ def build_options(parser):
                         help="The YAML file containing the locations containing the markdown "
                              "files (Default: %(default)s). If the file doesn't exists the default "
                              "is {'default':{'base':'docs/content', 'include':'docs/content/*'}}")
-    if MooseDocs.ROOT_DIR == MooseDocs.MOOSE_DIR:
+    if os.path.realpath(MooseDocs.ROOT_DIR) == os.path.realpath(MooseDocs.MOOSE_DIR):
         parser.add_argument('--init', action='store_true', help="Initialize and/or update the "
                                                                 "large media submodule if needed.")
     parser.add_argument('--dump', action='store_true',
@@ -171,20 +171,24 @@ def build(config_file=None, site_dir=None, num_threads=None, no_livereload=False
         os.makedirs(site_dir)
 
     # Check submodule for large_media
-    if MooseDocs.ROOT_DIR == MooseDocs.MOOSE_DIR:
+    if os.path.realpath(MooseDocs.ROOT_DIR) == os.path.realpath(MooseDocs.MOOSE_DIR):
         status = common.submodule_status()
-        if status['docs/content/media/large_media'] == '-':
-            if init:
-                subprocess.call(['git', 'submodule', 'update', '--init',
-                                 'docs/content/media/large_media'], cwd=MooseDocs.MOOSE_DIR)
-            else:
-                LOG.warning("The 'large_media' submodule for storing images above 1MB is not "
-                            "initialized, thus some images will not be visible within the "
-                            "generated website. Run the build command with the --init flag to "
-                            "initialize the submodule.")
+        large_media = os.path.realpath(os.path.join(MooseDocs.ROOT_DIR, 'docs', 'content',
+                                                    'media', 'large_media'))
+        for submodule, status in status.iteritems():
+            if ((os.path.realpath(os.path.join(MooseDocs.MOOSE_DIR, submodule)) == large_media)
+                    and (status == '-')):
+                if init:
+                    subprocess.call(['git', 'submodule', 'update', '--init',
+                                     'docs/content/media/large_media'], cwd=MooseDocs.MOOSE_DIR)
+                else:
+                    LOG.warning("The 'large_media' submodule for storing images above 1MB is not "
+                                "initialized, thus some images will not be visible within the "
+                                "generated website. Run the build command with the --init flag to "
+                                "initialize the submodule.")
 
     # Check media files size
-    if MooseDocs.ROOT_DIR == MooseDocs.MOOSE_DIR:
+    if os.path.realpath(MooseDocs.ROOT_DIR) == os.path.realpath(MooseDocs.MOOSE_DIR):
         media = os.path.join(MooseDocs.MOOSE_DIR, 'docs', 'content', 'media')
         ignore = set()
         for base, _, files in os.walk(os.path.join(media, 'large_media')):
