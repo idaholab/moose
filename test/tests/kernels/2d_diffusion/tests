@@ -33,7 +33,7 @@
     input = '2d_diffusion_test.i'
     exodiff = 'out.e'
     cli_args = 'Executioner/nl_abs_tol=1e+1 Executioner/petsc_options_iname=-snes_force_iteration Executioner/petsc_options_value=1'
-    petsc_version = '>=3.8.3'
+    petsc_version = '>=3.8.4'
     prereq = testdirichlet
   [../]
 []
