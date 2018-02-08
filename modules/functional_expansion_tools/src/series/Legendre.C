@@ -13,7 +13,7 @@
  * The highest order of Legendre polynomials calculated directly instead of via the recurrence
  * relation
  */
-#define MAX_DIRECT_CALCULATION 12
+#define MAX_DIRECT_CALCULATION_LEGENDRE 12
 
 Legendre::Legendre() : SingleSeriesBasisInterface() {}
 
@@ -39,7 +39,7 @@ Legendre::checkPhysicalBounds(const std::vector<Real> & bounds) const
 void
 Legendre::evaluateOrthonormal()
 {
-  long k;
+  std::size_t k;
   const Real & x = _standardized_location[0];
   const Real x2 = x * x;
 
@@ -57,53 +57,65 @@ Legendre::evaluateOrthonormal()
   switch (_orders[0])
   {
     default:
-    case MAX_DIRECT_CALCULATION:  /* 12 */
+    case MAX_DIRECT_CALCULATION_LEGENDRE:  /* 12 */
       save(12, ((((((676039 * x2 - 1939938) * x2 + 2078505) * x2 - 1021020) * x2 + 225225) * x2 - 18018) * x2 + 231) / 1024
                * 12.5);
+      libmesh_fallthrough();
 
     case 11:
       save(11, (((((88179 * x2 - 230945) * x2 + 218790) * x2 - 90090) * x2 + 15015) * x2 - 693) * x / 256
                * 11.5);
+      libmesh_fallthrough();
 
     case 10:
       save(10, (((((46189 * x2 - 109395) * x2 + 90090) * x2 - 30030) * x2 + 3465) * x2 - 63) / 256
                * 10.5);
+      libmesh_fallthrough();
 
     case 9:
       save(9, ((((12155 * x2 - 25740) * x2 + 18018) * x2 - 4620) * x2 + 315) * x / 128
               * 9.5);
+      libmesh_fallthrough();
 
     case 8:
       save(8, ((((6435 * x2 - 12012) * x2 + 6930) * x2 - 1260) * x2 + 35) / 128
               * 8.5);
+      libmesh_fallthrough();
 
     case 7:
       save(7, (((429 * x2 - 693) * x2 + 315) * x2 - 35) * x / 16
               * 7.5);
+      libmesh_fallthrough();
 
     case 6:
       save(6, (((231 * x2 - 315) * x2 + 105) * x2 - 5) / 16
               * 6.5);
+      libmesh_fallthrough();
 
     case 5:
       save(5, ((63 * x2 - 70) * x2 + 15) * x / 8
               * 5.5);
+      libmesh_fallthrough();
 
     case 4:
       save(4, ((35 * x2 - 30) * x2 + 3) / 8
               * 4.5);
+      libmesh_fallthrough();
 
     case 3:
       save(3, (5 * x2 - 3) * x / 2
               * 3.5);
+      libmesh_fallthrough();
 
     case 2:
       save(2, (3 * x2 - 1) / 2
               * 2.5);
+      libmesh_fallthrough();
 
     case 1:
       save(1, x
               * 1.5);
+      libmesh_fallthrough();
 
     case 0:
       save(0, 1
@@ -133,14 +145,14 @@ Legendre::evaluateOrthonormal()
    * The options are 1) to use this form, or 2) to not apply the orthonormalization at first, and
    * then loop through all the values in a second loop and then apply the orthonormalization.
    */
-  for (k = MAX_DIRECT_CALCULATION + 1; k <= _orders[0]; ++k)
+  for (k = MAX_DIRECT_CALCULATION_LEGENDRE + 1; k <= _orders[0]; ++k)
     save(k, ((k + k + 1) / Real(k)) * (x * load(k - 1) - ((k - 1) / (k + k - 3.0)) * load(k - 2)));
 }
 
 void
 Legendre::evaluateStandard()
 {
-  long k;
+  std::size_t k;
   const Real x = _standardized_location[0];
   const Real x2 = x * x;
 
@@ -158,41 +170,53 @@ Legendre::evaluateStandard()
   switch (_orders[0])
   {
     default:
-    case MAX_DIRECT_CALCULATION:  /* 12 */
+    case MAX_DIRECT_CALCULATION_LEGENDRE:  /* 12 */
       save(12, ((((((676039 * x2 - 1939938) * x2 + 2078505) * x2 - 1021020) * x2 + 225225) * x2 - 18018) * x2 + 231) / 1024);
+      libmesh_fallthrough();
 
     case 11:
       save(11, (((((88179 * x2 - 230945) * x2 + 218790) * x2 - 90090) * x2 + 15015) * x2 - 693) * x / 256);
+      libmesh_fallthrough();
 
     case 10:
       save(10, (((((46189 * x2 - 109395) * x2 + 90090) * x2 - 30030) * x2 + 3465) * x2 - 63) / 256);
+      libmesh_fallthrough();
 
     case 9:
       save(9, ((((12155 * x2 - 25740) * x2 + 18018) * x2 - 4620) * x2 + 315) * x / 128);
+      libmesh_fallthrough();
 
     case 8:
       save(8, ((((6435 * x2 - 12012) * x2 + 6930) * x2 - 1260) * x2 + 35) / 128);
+      libmesh_fallthrough();
 
     case 7:
       save(7, (((429 * x2 - 693) * x2 + 315) * x2 - 35) * x / 16);
+      libmesh_fallthrough();
 
     case 6:
       save(6, (((231 * x2 - 315) * x2 + 105) * x2 - 5) / 16);
+      libmesh_fallthrough();
 
     case 5:
       save(5, ((63 * x2 - 70) * x2 + 15) * x / 8);
+      libmesh_fallthrough();
 
     case 4:
       save(4, ((35 * x2 - 30) * x2 + 3) / 8);
+      libmesh_fallthrough();
 
     case 3:
       save(3, (5 * x2 - 3) * x / 2);
+      libmesh_fallthrough();
 
     case 2:
       save(2, (3 * x2 - 1) / 2);
+      libmesh_fallthrough();
 
     case 1:
       save(1, x);
+      libmesh_fallthrough();
 
     case 0:
       save(0, 1);
@@ -206,7 +230,7 @@ Legendre::evaluateStandard()
    * L_k = ---------------------------------------------
    *                        k
    */
-  for (k = MAX_DIRECT_CALCULATION + 1; k <= _orders[0]; ++k)
+  for (k = MAX_DIRECT_CALCULATION_LEGENDRE + 1; k <= _orders[0]; ++k)
     save(k, (((2 * k - 1) * x * load(k - 1)) - ((k - 1) * load(k - 2))) / Real(k));
 }
 
