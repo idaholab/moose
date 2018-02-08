@@ -344,9 +344,25 @@ TEST(HitTests, RenderCases)
 
 TEST(HitTests, MergeTree)
 {
-  auto root1 = hit::parse("TESTCASE", "[foo]bar=42[]");
-  auto root2 = hit::parse("TESTCASE", "foo/baz/boo=42");
-  hit::explode(root2);
-  hit::merge(root2, root1);
-  EXPECT_EQ("[foo]\n  bar = 42\n  [baz]\n    boo = 42\n  []\n[]", root1->render());
+  {
+    auto root1 = hit::parse("TESTCASE", "[foo]bar=42[]");
+    auto root2 = hit::parse("TESTCASE", "foo/baz/boo=42");
+    hit::explode(root2);
+    hit::merge(root2, root1);
+    EXPECT_EQ("[foo]\n  bar = 42\n  [baz]\n    boo = 42\n  []\n[]", root1->render());
+  }
+
+  {
+    auto root1 = hit::parse("TESTCASE", "foo/bar=baz");
+    auto root2 = hit::parse("TESTCASE", "foo/bar=42");
+    hit::merge(root2, root1);
+    auto n = root1->find("foo/bar");
+    auto f = dynamic_cast<hit::Field *>(n);
+    if (!f)
+      FAIL() << "merge case node type is not NodeType::Field";
+
+    // Make sure that the the from type overrides the into type on merge
+    else if (f->kind() != hit::Field::Kind::Int)
+      FAIL() << "merge case kind type is not overridden (string)";
+  }
 }
