@@ -30,8 +30,45 @@ public:
   virtual Real pressure(Real v, Real u) const = 0;
   /// Temperature as a function of specific internal energy and specific volume
   virtual Real temperature(Real v, Real u) const = 0;
-  /// Sound speed
-  virtual Real c(Real v, Real u) const = 0;
+
+  /**
+   * Sound speed as a function of specific volume and specific internal energy
+   *
+   * @param[in] v   specific volume
+   * @param[in] e   specific internal energy
+   * @returns sound speed
+   */
+  virtual Real c(Real v, Real e) const = 0;
+
+  /**
+   * Sound speed and derivatives as a function of specific volume and specific internal energy
+   *
+   * @param[in]  v       specific volume
+   * @param[in]  e       specific internal energy
+   * @param[out] dc_dv   derivative of sound speed w.r.t. specific volume
+   * @param[out] dc_de   derivative of sound speed w.r.t. specific internal energy
+   */
+  virtual void c(Real v, Real e, Real & c, Real & dc_dv, Real & dc_de) const = 0;
+
+  /**
+   * Sound speed as a function of specific volume and specific enthalpy
+   *
+   * @param[in] v   specific volume
+   * @param[in] h   specific enthalpy
+   * @returns sound speed
+   */
+  virtual Real c_from_v_h(Real v, Real h) const = 0;
+
+  /**
+   * Sound speed and derivatives as a function of specific volume and specific enthalpy
+   *
+   * @param[in]  v       specific volume
+   * @param[in]  h       specific enthalpy
+   * @param[out] dc_dv   derivative of sound speed w.r.t. specific volume
+   * @param[out] dc_dh   derivative of sound speed w.r.t. specific enthalpy
+   */
+  virtual void c_from_v_h(Real v, Real h, Real & c, Real & dc_dv, Real & dc_dh) const = 0;
+
   /// Specific heat
   virtual Real cp(Real v, Real u) const = 0;
   /// Isochoric specific heat
