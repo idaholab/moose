@@ -73,7 +73,7 @@ petsc_options_iname | petsc_options_value | Description
 `-sub_pc_type` | `ilu, lu, hypre` | Can be used with bjacobi or asm
 `-pc_hypre_type` | `boomeramg` | Algebraic multigrid
 `-pc_hypre_boomeramg` (cont.) | | "Information Threshold" for AMG process
-` _strong_threshold` | `0.0 - 1.0` | **(0.7 is auto set for 3D)
+` _strong_threshold` | `0.0 - 1.0` | (0.7 is auto set for 3D)
 `-ksp_gmres_restart` | `#` | Number of Krylov vectors to store
 
 

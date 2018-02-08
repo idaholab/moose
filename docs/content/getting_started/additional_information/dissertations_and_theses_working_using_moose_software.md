@@ -1,6 +1,3 @@
-[](name: publications)
-[](.tiny[.scroll[)
-
 1. C. Permann, "Scalable Distributed Feature Tracking and Remapping on Adaptive Unstructured Meshes for Finite Element Simulations.", Ph.D. Dissertation, University of Idaho, 2017.
 [https://digital.lib.uidaho.edu/cdm/ref/collection/etd/id/1190?_ga=2.151644473.1447126491.1504793669-781710164.1478808612](https://digital.lib.uidaho.edu/cdm/ref/collection/etd/id/1190?_ga=2.151644473.1447126491.1504793669-781710164.1478808612)
 
