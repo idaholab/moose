@@ -13,7 +13,8 @@
 #include <iomanip>
 
 #include "FunctionalBasisInterface.h"
-#include "SingleSeriesBasisInterface.h"
+
+class SingleSeriesBasisInterface;
 
 /**
  * This class is the basis for constructing a composite---or convolved---functional series by
@@ -26,6 +27,13 @@ public:
   CompositeSeriesBasisInterface(const std::vector<std::size_t> & orders,
                                 std::vector<MooseEnum> series_types,
                                 const std::string & who_is_using_me);
+  virtual ~CompositeSeriesBasisInterface();
+
+  // Disable move and copy operations
+  CompositeSeriesBasisInterface(const CompositeSeriesBasisInterface &) = delete;
+  CompositeSeriesBasisInterface(CompositeSeriesBasisInterface &&) = delete;
+  void operator=(const CompositeSeriesBasisInterface &) = delete;
+  CompositeSeriesBasisInterface & operator=(CompositeSeriesBasisInterface &&) = delete;
 
   // Overrides from FunctionalBasisInterface
   virtual const std::vector<Real> & getStandardizedFunctionLimits() const final;

@@ -120,3 +120,5 @@ SingleSeriesBasisInterface::getOrder(std::size_t domain) const
 {
   return domain < _orders.size() ? _orders[domain] : -1;
 }
+
+SingleSeriesBasisInterface::~SingleSeriesBasisInterface() {}

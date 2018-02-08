@@ -23,6 +23,13 @@ public:
   SingleSeriesBasisInterface(const std::vector<MooseEnum> & domains,
                              const std::vector<std::size_t> & orders,
                              const unsigned int number_of_terms);
+  virtual ~SingleSeriesBasisInterface();
+
+  // Disable move and copy operations
+  SingleSeriesBasisInterface(const SingleSeriesBasisInterface &) = delete;
+  SingleSeriesBasisInterface(SingleSeriesBasisInterface &&) = delete;
+  void operator=(const SingleSeriesBasisInterface &) = delete;
+  SingleSeriesBasisInterface & operator=(SingleSeriesBasisInterface &&) = delete;
 
   // Overrides from FunctionalBasisInterface
   virtual bool isCacheInvalid() const final;

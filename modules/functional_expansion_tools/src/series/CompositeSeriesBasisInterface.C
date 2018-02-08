@@ -295,3 +295,5 @@ CompositeSeriesBasisInterface::setLocation(const Point & point)
   // Store the previous point
   _previous_point = point;
 }
+
+CompositeSeriesBasisInterface::~CompositeSeriesBasisInterface() {}
