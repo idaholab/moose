@@ -1,0 +1,10 @@
+[Tests]
+  [./vector_pp_transfer]
+    type = 'CSVDiff'
+    input = 'master.i'
+    csvdiff = 'master_out_receive_values_0001.csv'
+    rel_err = 3.8e-05
+    min_parallel = 2
+    max_parallel = 2
+  [../]
+[]

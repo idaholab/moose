@@ -11,7 +11,7 @@
 #define SAMPLERPOSTPROCESSORTRANSFER_H
 
 // MOOSE includes
-#include "MultiAppTransfer.h"
+#include "MultiAppVectorPostprocessorTransfer.h"
 #include "Sampler.h"
 
 // Forward declarations
@@ -26,16 +26,14 @@ InputParameters validParams<SamplerPostprocessorTransfer>();
 /**
  * Transfer Postprocessor from sub-applications to the master application.
  */
-class SamplerPostprocessorTransfer : public MultiAppTransfer
+class SamplerPostprocessorTransfer : public MultiAppVectorPostprocessorTransfer
 {
 public:
   SamplerPostprocessorTransfer(const InputParameters & parameters);
-  virtual void execute() override;
   virtual void initialSetup() override;
 
 protected:
-  /// Name of VPP that will store the data
-  const VectorPostprocessorName & _results_name;
+  virtual void executeFromMultiapp() override;
 
   /// SamplerMultiApp that this transfer is working with
   SamplerMultiApp * _sampler_multi_app;
@@ -45,9 +43,6 @@ protected:
 
   /// Storage for StochasticResults object that data will be transferred to/from
   StochasticResults * _results;
-
-  /// Name of Postprocessor transferring from
-  const std::string & _sub_pp_name;
 };
 
 #endif

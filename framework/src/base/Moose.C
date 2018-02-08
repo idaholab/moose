@@ -383,6 +383,7 @@
 #include "MultiAppProjectionTransfer.h"
 #include "MultiAppPostprocessorToAuxScalarTransfer.h"
 #include "MultiAppScalarToAuxScalarTransfer.h"
+#include "MultiAppVectorPostprocessorTransfer.h"
 
 // Actions
 #include "AddBCAction.h"
@@ -876,6 +877,7 @@ registerObjects(Factory & factory)
   registerTransfer(MultiAppProjectionTransfer);
   registerTransfer(MultiAppPostprocessorToAuxScalarTransfer);
   registerTransfer(MultiAppScalarToAuxScalarTransfer);
+  registerTransfer(MultiAppVectorPostprocessorTransfer);
 
 // Outputs
 #ifdef LIBMESH_HAVE_EXODUS_API
