@@ -236,7 +236,7 @@ The content of some input file blocks is described in detail for clarity.
 
 ####GlobalParams
 
-!listing modules/rdg/test/tests/advection_1d/1d_aefv_square_wave_minmod.i block=GlobalParams
+!listing modules/rdg/test/tests/advection_1d/1d_aefv_square_wave.i block=GlobalParams
 
 Notes:
 
@@ -246,7 +246,7 @@ Notes:
 
 ####Mesh
 
-!listing modules/rdg/test/tests/advection_1d/1d_aefv_square_wave_minmod.i block=Mesh
+!listing modules/rdg/test/tests/advection_1d/1d_aefv_square_wave.i block=Mesh
 
 Notes:
 
@@ -254,7 +254,7 @@ Notes:
 
 ####Functions
 
-!listing modules/rdg/test/tests/advection_1d/1d_aefv_square_wave_minmod.i block=Functions
+!listing modules/rdg/test/tests/advection_1d/1d_aefv_square_wave.i block=Functions
 
 Notes:
 
@@ -262,7 +262,7 @@ Notes:
 
 ####UserObjects
 
-!listing modules/rdg/test/tests/advection_1d/1d_aefv_square_wave_minmod.i block=UserObjects
+!listing modules/rdg/test/tests/advection_1d/1d_aefv_square_wave.i block=UserObjects
 
 Notes:
 
@@ -274,7 +274,7 @@ Notes:
 
 ####Variables
 
-!listing modules/rdg/test/tests/advection_1d/1d_aefv_square_wave_minmod.i block=Variables
+!listing modules/rdg/test/tests/advection_1d/1d_aefv_square_wave.i block=Variables
 
 Notes:
 
@@ -282,7 +282,7 @@ Notes:
 
 ####Kernels
 
-!listing modules/rdg/test/tests/advection_1d/1d_aefv_square_wave_minmod.i block=Kernels
+!listing modules/rdg/test/tests/advection_1d/1d_aefv_square_wave.i block=Kernels
 
 Notes:
 
@@ -292,7 +292,7 @@ Notes:
 
 ####DGKernels
 
-!listing modules/rdg/test/tests/advection_1d/1d_aefv_square_wave_minmod.i block=DGKernels
+!listing modules/rdg/test/tests/advection_1d/1d_aefv_square_wave.i block=DGKernels
 
 Notes:
 
@@ -300,7 +300,7 @@ Notes:
 
 ####BCs
 
-!listing modules/rdg/test/tests/advection_1d/1d_aefv_square_wave_minmod.i block=BCs
+!listing modules/rdg/test/tests/advection_1d/1d_aefv_square_wave.i block=BCs
 
 Notes:
 
@@ -308,7 +308,7 @@ Notes:
 
 ####Materials
 
-!listing modules/rdg/test/tests/advection_1d/1d_aefv_square_wave_minmod.i block=Materials
+!listing modules/rdg/test/tests/advection_1d/1d_aefv_square_wave.i block=Materials
 
 Notes:
 
