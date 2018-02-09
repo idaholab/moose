@@ -40,6 +40,9 @@ class InputParameters;
 #define registerDeprecatedObjectWithReplacement(dep_obj, replacement_name, time)                   \
   factory.regReplaced<dep_obj>(stringifyName(dep_obj), replacement_name, time, __FILE__, __LINE__)
 
+#define registerRenamedObject(orig_name, new_obj, time)                                            \
+  factory.renameObject<new_obj>(orig_name, stringifyName(new_obj), time, __FILE__, __LINE__)
+
 // for backward compatibility
 #define registerKernel(name) registerObject(name)
 #define registerNodalKernel(name) registerObject(name)
@@ -249,6 +252,39 @@ public:
   }
 
   /**
+   * Used when an existing object's name changes
+   *
+   * Template T: The type of the new class
+   *
+   * @param orig_name The name of the original class
+   * @param new_name The name of the new class
+   * @param time_str The date the deprecation will expire
+   *
+   * Note: Params file and line are supplied by the macro
+   */
+  template <typename T>
+  void renameObject(const std::string & orig_name,
+                    const std::string & new_name,
+                    const std::string time_str,
+                    const std::string & file,
+                    int line)
+  {
+    // Deprecate the old name
+    // Store the time
+    _deprecated_time[orig_name] = parseTime(time_str);
+
+    // Store the new name
+    _deprecated_name[orig_name] = new_name;
+
+    // Register the new object with the old name
+    reg<T>(orig_name, __FILE__, __LINE__);
+    associateNameToClass(orig_name, new_name);
+
+    // Register the new object with the new name
+    reg<T>(new_name, file, line);
+  }
+
+  /**
    * Get valid parameters for the object
    * @param name Name of the object whose parameter we are requesting
    * @return Parameters of the object
@@ -317,6 +353,12 @@ public:
    */
   std::vector<std::string> getConstructedObjects() const;
 
+  /**
+   * Add a new flag to the app.
+   * @param flag The flag to add as available to the app level ExecFlagEnum.
+   */
+  void regExecFlag(const ExecFlagType & flag);
+
 protected:
   /**
    * Parse time string (mm/dd/yyyy HH:MM)
@@ -324,12 +366,6 @@ protected:
    * @return A time_t object with the expiration date
    */
   time_t parseTime(std::string);
-
-  /**
-   * Add a new flag to the app.
-   * @param flag The flag to add as available to the app level ExecFlagEnum.
-   */
-  void regExecFlag(const ExecFlagType & flag);
 
   /**
    * Show the appropriate message for deprecated objects

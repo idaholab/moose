@@ -133,7 +133,7 @@ Factory::deprecatedMessage(const std::string obj_name)
       msg << "Update your application using the '" << name_it->second << "' object";
 
     // Produce the error message
-    mooseError(msg.str());
+    mooseDeprecationExpired(msg.str());
   }
 
   // Expiring object
@@ -145,7 +145,7 @@ Factory::deprecatedMessage(const std::string obj_name)
 
     // Append replacement object, if it exsits
     if (name_it != _deprecated_name.end())
-      msg << "Replaced " << obj_name << " with " << name_it->second;
+      msg << "Replace " << obj_name << " with " << name_it->second;
 
     // Produce the error message
     mooseDeprecated(msg.str());
