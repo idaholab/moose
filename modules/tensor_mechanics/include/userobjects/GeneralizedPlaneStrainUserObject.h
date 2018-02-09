@@ -31,6 +31,7 @@ public:
   void threadJoin(const UserObject & uo) override;
   void finalize() override;
   virtual Real returnResidual(unsigned int scalar_var_id = 0) const;
+  virtual Real returnReferenceResidual(unsigned int scalar_var_id = 0) const;
   virtual Real returnJacobian(unsigned int scalar_var_id = 0) const;
 
 protected:
@@ -45,6 +46,7 @@ protected:
   const Real _factor;
   unsigned int _scalar_out_of_plane_strain_direction;
   std::vector<Real> _residual;
+  std::vector<Real> _reference_residual;
   std::vector<Real> _jacobian;
 };
 
