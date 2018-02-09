@@ -10,7 +10,7 @@
 #ifndef AEFVSLOPELIMITINGONED_H
 #define AEFVSLOPELIMITINGONED_H
 
-#include "SlopeLimitingBase.h"
+#include "SlopeLimitingMultiDBase.h"
 
 // Forward Declarations
 class AEFVSlopeLimitingOneD;
@@ -24,7 +24,7 @@ InputParameters validParams<AEFVSlopeLimitingOneD>();
  * for the advection equation
  * using a cell-centered finite volume method
  */
-class AEFVSlopeLimitingOneD : public SlopeLimitingBase
+class AEFVSlopeLimitingOneD : public SlopeLimitingMultiDBase
 {
 public:
   AEFVSlopeLimitingOneD(const InputParameters & parameters);

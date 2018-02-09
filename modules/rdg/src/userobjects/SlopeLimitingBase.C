@@ -25,16 +25,12 @@ validParams<SlopeLimitingBase>()
 
   params.addParam<bool>("include_bc", true, "Indicate whether to include bc, default = true");
 
-  params.addRequiredParam<UserObjectName>("slope_reconstruction",
-                                          "Name for slope reconstruction user object");
-
   return params;
 }
 
 SlopeLimitingBase::SlopeLimitingBase(const InputParameters & parameters)
   : ElementLoopUserObject(parameters),
     _include_bc(getParam<bool>("include_bc")),
-    _rslope(getUserObject<SlopeReconstructionBase>("slope_reconstruction")),
     _q_point_face(_assembly.qPointsFace()),
     _qrule_face(_assembly.qRuleFace()),
     _JxW_face(_assembly.JxWFace()),
