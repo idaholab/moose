@@ -283,7 +283,7 @@
   l_tol = 1e-6
 
   nl_max_its = 100
-  nl_abs_tol = 1e-8
+  nl_abs_tol = 4e-8
   #nl_rel_tol = 1e-3
   nl_rel_tol = 1e-6
 

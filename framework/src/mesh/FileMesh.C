@@ -98,8 +98,7 @@ FileMesh::buildMesh()
       // and renumbering, at least at first.
       if (file == "LATEST")
       {
-        std::list<std::string> dir_list(1, path);
-        std::list<std::string> files = MooseUtils::getFilesInDirs(dir_list);
+        std::list<std::string> files = MooseUtils::listDir(path);
 
         // Fill in the name of the LATEST file so we can open it and read it.
         _file_name = MooseUtils::getLatestMeshCheckpointFile(files);
@@ -118,7 +117,8 @@ FileMesh::buildMesh()
         getMesh().allow_renumbering(false);
       }
 
-      MooseUtils::checkFileReadable(_file_name);
+      if (!MooseUtils::pathExists(_file_name))
+        mooseError("cannot locate mesh file '", _file_name, "'");
       getMesh().read(_file_name);
 
       if (restarting)
