@@ -72,6 +72,13 @@ public:
    */
   virtual void sequence(bool state);
 
+  /**
+   * Force the output dimension programatically
+   *
+   * @param dim The dimension written in the output file
+   */
+  void setOutputDimension(unsigned int dim);
+
 protected:
   /**
    * Outputs nodal, nonlinear variables
