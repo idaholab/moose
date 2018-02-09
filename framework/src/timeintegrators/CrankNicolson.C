@@ -39,17 +39,17 @@ CrankNicolson::computeTimeDerivatives()
 void
 CrankNicolson::init()
 {
-  // make sure that time derivative contribution is zero in the first pre-solve step
+  // time derivative is assumed to be zero on initial
   _u_dot.zero();
-  _u_dot.close();
-
   _du_dot_du = 0;
 
   // compute residual for the initial time step
   // Note: we can not directly pass _residual_old in computeResidualType because
   //       the function will call postResidual, which will cause _residual_old
   //       to be added on top of itself prohibited by PETSc.
-  _fe_problem.computeResidualType(*_solution, _nl.RHS(), Moose::KT_NONTIME);
+  //       Objects executed on initial have been executed by FEProblem,
+  //       so we can and should directly call NonlinearSystem residual evaluation.
+  _nl.computeResidual(_nl.RHS(), Moose::KT_NONTIME);
   _residual_old = _nl.RHS();
 }
 
