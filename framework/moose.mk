@@ -253,7 +253,7 @@ exodiff_DIR := $(FRAMEWORK_DIR)/contrib/exodiff
 exodiff_APP := $(exodiff_DIR)/exodiff
 exodiff_srcfiles := $(shell find $(exodiff_DIR) -name "*.C")
 exodiff_objects  := $(patsubst %.C, %.$(obj-suffix), $(exodiff_srcfiles))
-exodiff_includes := $(app_INCLUDES) -I$(exodiff_DIR) $(libmesh_INCLUDE)
+exodiff_includes := -I$(exodiff_DIR) $(libmesh_INCLUDE)
 # dependency files
 exodiff_deps := $(patsubst %.C, %.$(obj-suffix).d, $(exodiff_srcfiles))
 
@@ -261,8 +261,8 @@ all:: exodiff
 
 # Target-specific Variable Values (See GNU-make manual)
 exodiff: app_INCLUDES := $(exodiff_includes)
+exodiff: libmesh_CXXFLAGS := -std=gnu++11 -O2 -felide-constructors -Wno-parentheses-equality
 exodiff: $(exodiff_APP)
-
 $(exodiff_APP): $(exodiff_objects)
 	@echo "Linking Executable "$@"..."
 	@$(libmesh_LIBTOOL) --tag=CXX $(LIBTOOLFLAGS) --mode=link --quiet \

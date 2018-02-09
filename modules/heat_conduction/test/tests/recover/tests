@@ -22,5 +22,6 @@
     delete_output_before_running = false
     cli_args = '--recover recover_out_cp/0005'
     superlu = true
+    skip = 'Non-deterministic on Intel compiler #10737'
   [../]
 []

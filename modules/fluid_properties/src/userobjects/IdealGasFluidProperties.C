@@ -57,12 +57,45 @@ IdealGasFluidProperties::temperature(Real /*v*/, Real u) const
 }
 
 Real
-IdealGasFluidProperties::c(Real v, Real u) const
+IdealGasFluidProperties::c(Real v, Real e) const
 {
-  Real temp = temperature(v, u);
+  Real temp = temperature(v, e);
   // The std::max function serves as a hard limiter, which will guarantee non-negative speed of
   // sound when resolving strongly nonlinear waves
   return std::sqrt(std::max(1.0e-8, _gamma * _R * temp));
+}
+
+void
+IdealGasFluidProperties::c(Real v, Real e, Real & c_value, Real & dc_dv, Real & dc_de) const
+{
+  Real dp_dv, dp_de, dT_dv, dT_de;
+  dp_duv(v, e, dp_dv, dp_de, dT_dv, dT_de);
+
+  const Real T = temperature(v, e);
+  c_value = std::sqrt(_gamma * _R * T);
+
+  const Real dc_dT = 0.5 / c_value * _gamma * _R;
+  dc_dv = dc_dT * dT_dv;
+  dc_de = dc_dT * dT_de;
+}
+
+Real
+IdealGasFluidProperties::c_from_v_h(Real v, Real h) const
+{
+  const Real e = h / _gamma;
+  return c(v, e);
+}
+
+void
+IdealGasFluidProperties::c_from_v_h(
+    Real v, Real h, Real & c_value, Real & dc_dv, Real & dc_dh) const
+{
+  const Real e = h / _gamma;
+  const Real de_dh = 1.0 / _gamma;
+
+  Real dc_de;
+  c(v, e, c_value, dc_dv, dc_de);
+  dc_dh = dc_de * de_dh;
 }
 
 Real IdealGasFluidProperties::cp(Real, Real) const { return _cp; }

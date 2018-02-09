@@ -382,7 +382,7 @@ lexNumber(Lexer * l)
     return lexHit;
   }
 
-  if (!charIn(l->peek(), allspace) && l->peek() != '\0')
+  if (!charIn(l->peek(), allspace + "[") && l->peek() != '\0')
   {
     // fall back to string
     consumeUnquotedString(l);

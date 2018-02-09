@@ -61,6 +61,11 @@ public:
 
   virtual void postExecute();
 
+  /**
+   * Called just after construction to allow derived classes to set _positions;
+   */
+  void setupPositions();
+
   virtual void initialSetup() override;
 
   /**

@@ -8,6 +8,7 @@
 # relative_permeability = 1
 # permeability = (5, 5, 5)  (in the bulk)
 # permeability = (10, 10, 10)   (in the fracture)
+# aperture = 1
 # gravity = (1, 0.5, 0.2)
 # So Darcy velocity in the bulk = (1, 0.5, -0.3)
 # in the fracture grad(P) = (0, 0.3213938, 0.11697778)

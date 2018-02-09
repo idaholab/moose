@@ -55,9 +55,46 @@ StiffenedGasFluidProperties::temperature(Real v, Real u) const
 }
 
 Real
-StiffenedGasFluidProperties::c(Real v, Real u) const
+StiffenedGasFluidProperties::c(Real v, Real e) const
 {
-  return std::sqrt(_gamma * (this->pressure(v, u) + _p_inf) * v);
+  return std::sqrt(_gamma * (this->pressure(v, e) + _p_inf) * v);
+}
+
+void
+StiffenedGasFluidProperties::c(Real v, Real e, Real & c_value, Real & dc_dv, Real & dc_de) const
+{
+  const Real p = pressure(v, e);
+  Real dp_dv, dp_de, dT_dv, dT_de;
+  dp_duv(v, e, dp_dv, dp_de, dT_dv, dT_de);
+
+  c_value = c(v, e);
+  const Real dc_dp = 0.5 / c_value * _gamma * v;
+  const Real dc_dv_partial = 0.5 / c_value * _gamma * (p + _p_inf);
+
+  dc_dv = dc_dv_partial + dc_dp * dp_dv;
+  dc_de = dc_dp * dp_de;
+}
+
+Real
+StiffenedGasFluidProperties::c_from_v_h(Real v, Real h) const
+{
+  const Real e = (h + (_gamma - 1.0) * _q + _gamma * _p_inf * v) / _gamma;
+  return c(v, e);
+}
+
+void
+StiffenedGasFluidProperties::c_from_v_h(
+    Real v, Real h, Real & c_value, Real & dc_dv, Real & dc_dh) const
+{
+  const Real e = (h + (_gamma - 1.0) * _q + _gamma * _p_inf * v) / _gamma;
+  const Real de_dh = 1.0 / _gamma;
+  const Real de_dv = _p_inf;
+
+  Real dc_dv_partial, dc_de;
+  c(v, e, c_value, dc_dv_partial, dc_de);
+
+  dc_dv = dc_dv_partial + dc_de * de_dv;
+  dc_dh = dc_de * de_dh;
 }
 
 Real StiffenedGasFluidProperties::cp(Real, Real) const { return _cp; }

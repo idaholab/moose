@@ -174,6 +174,7 @@ TEST(HitTests, ParseFields)
        "hello_./:<>-+world",
        "foo",
        hit::Field::Kind::String},
+      {"left-bracket-after-number", "[hello]foo=42[]", "hello/foo", "42", hit::Field::Kind::Int},
       {"ignore leading spaces 1", "foo=    bar", "foo", "bar", hit::Field::Kind::String},
       {"ignore leading spaces 2", "foo=     \t42", "foo", "42", hit::Field::Kind::Int},
       {"ignore trailing spaces", "foo=bar\t   ", "foo", "bar", hit::Field::Kind::String},

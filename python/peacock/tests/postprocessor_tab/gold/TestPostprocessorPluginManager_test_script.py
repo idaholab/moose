@@ -22,7 +22,7 @@ axes0.set_title('Snow Data')
 
 # y1-axis Settings
 axes1.set_ylabel('Air Temperature [C]')
-axes1.set_ylim([0.0, 35.939999999999998])
+axes1.set_ylim([0.0, 35.94])
 
 # Show figure and write pdf
 plt.show()

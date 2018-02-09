@@ -23,12 +23,24 @@ validParams<AutoPositionsMultiApp>()
   params.suppressParameter<std::vector<Point>>("positions");
   params.suppressParameter<std::vector<FileName>>("positions_file");
 
+  // Turn off the base class position parameter
+  params.set<bool>("use_positions") = false;
+
   return params;
 }
 
 AutoPositionsMultiApp::AutoPositionsMultiApp(const InputParameters & parameters)
   : TransientMultiApp(parameters), BoundaryRestrictable(this, true) // true for applying to nodesets
 {
+  fillPositions();
+}
+
+void
+AutoPositionsMultiApp::initialSetup()
+{
+  init(_positions.size());
+
+  MultiApp::initialSetup();
 }
 
 void
