@@ -3,7 +3,6 @@
   order = CONSTANT
   family = MONOMIAL
   u = u
-  slope_reconstruction = rslope
   slope_limiting = lslope
   implicit = false
 []
@@ -51,13 +50,6 @@
 []
 ############################################################
 [UserObjects]
-
-  [./rslope]
-    type = AEFVSlopeReconstructionOneD
-    execute_on = 'linear'
-    block = 0
-  [../]
-
   [./lslope]
     type = AEFVSlopeLimitingOneD
     execute_on = 'linear'

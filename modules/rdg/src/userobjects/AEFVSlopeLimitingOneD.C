@@ -13,7 +13,7 @@ template <>
 InputParameters
 validParams<AEFVSlopeLimitingOneD>()
 {
-  InputParameters params = validParams<SlopeLimitingMultiDBase>();
+  InputParameters params = validParams<SlopeLimitingBase>();
   params.addClassDescription("One-dimensional slope limiting to get the limited slope of cell "
                              "average variable for the advection equation using a cell-centered "
                              "finite volume method.");
@@ -24,7 +24,7 @@ validParams<AEFVSlopeLimitingOneD>()
 }
 
 AEFVSlopeLimitingOneD::AEFVSlopeLimitingOneD(const InputParameters & parameters)
-  : SlopeLimitingMultiDBase(parameters), _u(getVar("u", 0)), _scheme(getParam<MooseEnum>("scheme"))
+  : SlopeLimitingBase(parameters), _u(getVar("u", 0)), _scheme(getParam<MooseEnum>("scheme"))
 {
 }
 
