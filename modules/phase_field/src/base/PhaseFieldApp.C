@@ -63,7 +63,7 @@
 #include "MatAnisoDiffusion.h"
 #include "MatDiffusion.h"
 #include "MatReaction.h"
-#include "MatGradSqCoupled.h"
+#include "MatGradSquareCoupled.h"
 #include "MultiGrainRigidBodyMotion.h"
 #include "PFFracBulkRate.h"
 #include "PFFracCoupledInterface.h"
@@ -376,7 +376,7 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerKernel(MatAnisoDiffusion);
   registerKernel(MatDiffusion);
   registerKernel(MatReaction);
-  registerKernel(MatGradSqCoupled);
+  registerKernel(MatGradSquareCoupled);
   registerKernel(MultiGrainRigidBodyMotion);
   registerDeprecatedObject(PFFracBulkRate);
   registerKernel(PFFractureBulkRate);

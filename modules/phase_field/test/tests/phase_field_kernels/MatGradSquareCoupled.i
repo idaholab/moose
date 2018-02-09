@@ -1,5 +1,5 @@
 #
-# Test the MatGradSqCoupled kernel (which adds -L*v to the residual) for the case
+# Test the MatGradSquareCoupled kernel (which adds -L*v to the residual) for the case
 # where v is a coupled variable
 #
 
@@ -66,11 +66,11 @@
     mob_name = L
     args = w
   [../]
-# MatGradSq kernel
+# MatGradSquareCoupled kernel
   [./nabla_eta]
-    type = MatGradSqCoupled
+    type = MatGradSquareCoupled
     variable = w
-    elec = eta
+    elec_potential = eta
     prefactor = 0.5
   [../]
 []
@@ -117,26 +117,8 @@
   dt = 0.5
 []
 
-# Record eta
-[VectorPostprocessors]
-  [./eta]
-    type =  LineValueSampler
-    start_point = '0 25 0'
-    end_point = '50 25 0'
-    variable = eta
-    num_points = 15
-    sort_by =  id
-    execute_on = timestep_end
-  [../]
-[]
-
 [Outputs]
   hide = w
-#  interval = 1
   exodus = true
   console = true
-  [./csv]
-    type = CSV
-    execute_on = final
-  [../]
 []
