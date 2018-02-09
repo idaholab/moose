@@ -79,25 +79,77 @@ Factory::restrictRegisterableObjects(const std::vector<std::string> & names)
   _registerable_objects.insert(names.begin(), names.end());
 }
 
+time_t
+Factory::parseTime(const std::string t_str)
+{
+  // The string must be a certain length to be valid
+  if (t_str.size() != 16)
+    mooseError("The deprecated time not formatted correctly; it must be given as mm/dd/yyyy HH:MM");
+
+  // Store the time, the time must be specified as: mm/dd/yyyy HH:MM
+  time_t t_end;
+  struct tm * t_end_info;
+  time(&t_end);
+  t_end_info = localtime(&t_end);
+  t_end_info->tm_mon = std::atoi(t_str.substr(0, 2).c_str()) - 1;
+  t_end_info->tm_mday = std::atoi(t_str.substr(3, 2).c_str());
+  t_end_info->tm_year = std::atoi(t_str.substr(6, 4).c_str()) - 1900;
+  t_end_info->tm_hour = std::atoi(t_str.substr(11, 2).c_str()) + 1;
+  t_end_info->tm_min = std::atoi(t_str.substr(14, 2).c_str());
+  t_end_info->tm_sec = 0;
+  t_end = mktime(t_end_info);
+  return t_end;
+}
+
 void
 Factory::deprecatedMessage(const std::string obj_name)
 {
+  std::map<std::string, time_t>::iterator time_it = _deprecated_time.find(obj_name);
+
   // If the object is not deprecated return
-  auto iter = _deprecated.find(obj_name);
-  if (iter == _deprecated.end())
+  if (time_it == _deprecated_time.end())
     return;
 
-  // Build the basic message
+  // Get the current time
+  time_t now;
+  time(&now);
+
+  // Get the stop time
+  time_t t_end = time_it->second;
+
+  // Message storage
   std::ostringstream msg;
-  msg << "Deprecated Object: " << obj_name << "\n";
 
-  // Append replacement object, if it exsits
-  auto map_iter = _deprecated_with_replace.find(obj_name);
-  if (map_iter != _deprecated_with_replace.end())
-    msg << "Replaced " << obj_name << " with " << map_iter->second;
+  std::map<std::string, std::string>::iterator name_it = _deprecated_name.find(obj_name);
 
-  // Produce the error message
-  mooseDeprecated(msg.str());
+  // Expired object
+  if (now > t_end)
+  {
+    msg << "***** Invalid Object: " << obj_name << " *****\n";
+    msg << "Expired on " << ctime(&t_end);
+
+    // Append replacement object, if it exsits
+    if (name_it != _deprecated_name.end())
+      msg << "Update your application using the '" << name_it->second << "' object";
+
+    // Produce the error message
+    mooseError(msg.str());
+  }
+
+  // Expiring object
+  else
+  {
+    // Build the basic message
+    msg << "Deprecated Object: " << obj_name << "\n";
+    msg << "This object will be removed on " << ctime(&t_end);
+
+    // Append replacement object, if it exsits
+    if (name_it != _deprecated_name.end())
+      msg << "Replaced " << obj_name << " with " << name_it->second;
+
+    // Produce the error message
+    mooseDeprecated(msg.str());
+  }
 }
 
 void
@@ -152,19 +204,6 @@ Factory::associatedClassName(const std::string & name) const
     return "";
   else
     return it->second;
-}
-
-void
-Factory::deprecateObject(const std::string & name)
-{
-  _deprecated.insert(name);
-}
-
-void
-Factory::deprecateObject(const std::string & name, const std::string & replacement)
-{
-  deprecateObject(name);
-  _deprecated_with_replace[name] = replacement;
 }
 
 void
