@@ -1,6 +1,5 @@
 #
-# Test the MatGradSquareCoupled kernel (which adds -L*v to the residual) for the case
-# where v is a coupled variable
+# Test the MatGradSquareCoupled kernel
 #
 
 [Mesh]
