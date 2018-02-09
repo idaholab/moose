@@ -116,6 +116,13 @@ pathContains(const std::string & expression,
 }
 
 bool
+pathExists(const std::string & path)
+{
+  struct stat buffer;
+  return (stat(path.c_str(), &buffer) == 0);
+}
+
+bool
 checkFileReadable(const std::string & filename, bool check_line_endings, bool throw_on_unreadable)
 {
   std::ifstream in(filename.c_str(), std::ifstream::in);
@@ -463,30 +470,38 @@ indentMessage(const std::string & prefix,
 }
 
 std::list<std::string>
+listDir(const std::string path, bool files_only)
+{
+  std::list<std::string> files;
+
+  tinydir_dir dir;
+  dir.has_next = 0; // Avoid a garbage value in has_next (clang StaticAnalysis)
+  tinydir_open(&dir, path.c_str());
+
+  while (dir.has_next)
+  {
+    tinydir_file file;
+    file.is_dir = 0; // Avoid a garbage value in is_dir (clang StaticAnalysis)
+    tinydir_readfile(&dir, &file);
+
+    if (!files_only || !file.is_dir)
+      files.push_back(path + "/" + file.name);
+
+    tinydir_next(&dir);
+  }
+
+  tinydir_close(&dir);
+
+  return files;
+}
+
+std::list<std::string>
 getFilesInDirs(const std::list<std::string> & directory_list)
 {
   std::list<std::string> files;
 
   for (const auto & dir_name : directory_list)
-  {
-    tinydir_dir dir;
-    dir.has_next = 0; // Avoid a garbage value in has_next (clang StaticAnalysis)
-    tinydir_open(&dir, dir_name.c_str());
-
-    while (dir.has_next)
-    {
-      tinydir_file file;
-      file.is_dir = 0; // Avoid a garbage value in is_dir (clang StaticAnalysis)
-      tinydir_readfile(&dir, &file);
-
-      if (!file.is_dir)
-        files.push_back(dir_name + "/" + file.name);
-
-      tinydir_next(&dir);
-    }
-
-    tinydir_close(&dir);
-  }
+    files.splice(files.end(), listDir(dir_name, true));
 
   return files;
 }
