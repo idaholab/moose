@@ -27,7 +27,8 @@ class Kernel;
 class ComputeResidualThread : public ThreadedElementLoop<ConstElemRange>
 {
 public:
-  ComputeResidualThread(FEProblemBase & fe_problem, Moose::KernelType type);
+  ComputeResidualThread(FEProblemBase & fe_problem, std::vector<TagID> & tags);
+
   // Splitting Constructor
   ComputeResidualThread(ComputeResidualThread & x, Threads::split split);
 
@@ -45,7 +46,7 @@ public:
 
 protected:
   NonlinearSystemBase & _nl;
-  Moose::KernelType _kernel_type;
+  std::vector<TagID> & _tags;
   unsigned int _num_cached;
 
   /// Reference to BC storage structures
@@ -59,7 +60,9 @@ protected:
 
   ///@{
   /// Reference to Kernel storage structures
-  const MooseObjectWarehouse<KernelBase> & _kernels;
+  MooseObjectTagWarehouse<KernelBase> & _kernels;
+
+  MooseObjectWarehouse<KernelBase> * _tag_kernels;
   ///@}
 };
 

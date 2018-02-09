@@ -201,13 +201,11 @@ NonlinearEigenSystem::addEigenKernels(std::shared_ptr<KernelBase> kernel, THREAD
   if (kernel->isEigenKernel())
   {
     _eigen_kernels.addObject(kernel, tid);
-    kernel->addVectorTag(_Re_non_time_tag);
     kernel->addVectorTag(_Bx_tag);
   }
   else
   {
     _non_eigen_kernels.addObject(kernel, tid);
-    kernel->addVectorTag(_Re_non_time_tag);
     kernel->addVectorTag(_Ax_tag);
   }
 }
@@ -250,32 +248,6 @@ NonlinearEigenSystem::getNthConvergedEigenvalue(dof_id_type n)
   if (n >= n_converged_eigenvalues)
     mooseError(n, " not in [0, ", n_converged_eigenvalues, ")");
   return _transient_sys.get_eigenpair(n);
-}
-
-void
-NonlinearEigenSystem::computeResidualClose(NumericVector<Number> & Ax, NumericVector<Number> & Bx)
-{
-  computeResidualCloseA(Ax);
-  computeResidualCloseB(Bx);
-}
-
-void
-NonlinearEigenSystem::computeResidualCloseA(NumericVector<Number> & Ax)
-{
-  auto & tagged_Ax = getVector(_Ax_tag);
-  tagged_Ax.close();
-  Ax = tagged_Ax;
-}
-
-/*
-get closeAndCopyTaggedAx
-*/
-void
-NonlinearEigenSystem::computeResidualCloseB(NumericVector<Number> & Bx)
-{
-  auto & tagged_Bx = getVector(_Bx_tag);
-  tagged_Bx.close();
-  Bx = tagged_Bx;
 }
 
 #else

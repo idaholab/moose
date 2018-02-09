@@ -13,6 +13,7 @@
 #include "SystemBase.h"
 #include "ConstraintWarehouse.h"
 #include "MooseObjectWarehouse.h"
+#include "MooseObjectTagWarehouse.h"
 
 #include "libmesh/transient_system.h"
 #include "libmesh/nonlinear_implicit_system.h"
@@ -238,11 +239,17 @@ public:
   void constraintResiduals(NumericVector<Number> & residual, bool displaced);
 
   /**
-   * Computes residual
+   * Computes residual for a given tag
    * @param residual Residual is formed in here
-   * @param type The type of kernels for which the residual is to be computed.
+   * @param the tag of kernels for which the residual is to be computed.
    */
-  void computeResidual(NumericVector<Number> & residual, Moose::KernelType type = Moose::KT_ALL);
+  void computeResidual(NumericVector<Number> & residual, TagID tag_id);
+
+  void computeResidual(NumericVector<Number> & residual);
+
+  void computeResidual(std::vector<NumericVector<Number> *> & residuals, std::vector<TagID> & tags);
+
+  void computeResidual(NumericVector<Number> & residual, std::vector<TagID> & tags);
 
   /**
    * Finds the implicit sparsity graph between geometrically related dofs.
@@ -491,7 +498,7 @@ public:
   /**
    * Access functions to Warehouses from outside NonlinearSystemBase
    */
-  const MooseObjectWarehouse<KernelBase> & getKernelWarehouse() { return _kernels; }
+  MooseObjectTagWarehouse<KernelBase> & getKernelWarehouse() { return _kernels; }
   const MooseObjectWarehouse<KernelBase> & getTimeKernelWarehouse() { return _time_kernels; }
   const MooseObjectWarehouse<KernelBase> & getNonTimeKernelWarehouse() { return _non_time_kernels; }
   const MooseObjectWarehouse<KernelBase> & getEigenKernelWarehouse() { return _eigen_kernels; }
@@ -564,16 +571,28 @@ public:
 
 protected:
   /**
-   * Compute the residual
+   * Compute the residual for a given tag
    * @param type The type of kernels for which the residual is to be computed.
    */
-  void computeResidualInternal(Moose::KernelType type = Moose::KT_ALL);
+  void computeResidualInternal(TagID tag_id);
+
+  /**
+   * Compute residual for all kernels
+   */
+  void computeResidualInternal();
+
+  /**
+   * Compute residual for all tags
+   */
+  void computeResidualInternal(std::vector<TagID> & tags);
 
   /**
    * Enforces nodal boundary conditions
    * @param residual Residual where nodal BCs are enforced (input/output)
    */
-  void computeNodalBCs(NumericVector<Number> & residual, Moose::KernelType type = Moose::KT_ALL);
+  void computeNodalBCs(NumericVector<Number> & residual);
+
+  void computeNodalBCs(NumericVector<Number> & residual, std::vector<TagID> & tags);
 
   void computeJacobianInternal(SparseMatrix<Number> & jacobian, Moose::KernelType kernel_type);
 
@@ -611,6 +630,11 @@ protected:
 
   /// Tag for time contribution residual
   TagID _Re_time_tag;
+
+  std::vector<TagID> _nl_vector_tags;
+
+  std::vector<NumericVector<Number> *> _nl_vector_residuals;
+
   /// residual vector for time contributions
   NumericVector<Number> * _Re_time;
 
@@ -624,7 +648,7 @@ protected:
 
   ///@{
   /// Kernel Storage
-  MooseObjectWarehouse<KernelBase> _kernels;
+  MooseObjectTagWarehouse<KernelBase> _kernels;
   MooseObjectWarehouse<ScalarKernel> _scalar_kernels;
   MooseObjectWarehouse<ScalarKernel> _time_scalar_kernels;
   MooseObjectWarehouse<ScalarKernel> _non_time_scalar_kernels;
@@ -640,7 +664,7 @@ protected:
   ///@{
   /// BoundaryCondition Warhouses
   MooseObjectWarehouse<IntegratedBCBase> _integrated_bcs;
-  MooseObjectWarehouse<NodalBCBase> _nodal_bcs;
+  MooseObjectTagWarehouse<NodalBCBase> _nodal_bcs;
   MooseObjectWarehouse<PresetNodalBC> _preset_nodal_bcs;
   ///@}
 

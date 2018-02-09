@@ -86,7 +86,8 @@ NodalBC::computeResidual(NumericVector<Number> & residual)
     residual.set(dof_idx, res);
 
     for (auto tag_id : _vector_tags)
-      _fe_problem.getNonlinearSystemBase().getVector(tag_id).set(dof_idx, res);
+      if (_fe_problem.getNonlinearSystemBase().hasVector(tag_id))
+        _fe_problem.getNonlinearSystemBase().getVector(tag_id).set(dof_idx, res);
 
     if (_has_save_in)
     {

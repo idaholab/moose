@@ -21,7 +21,7 @@
 #include "EigenProblem.h"
 #include "Conversion.h"
 #include "EigenProblem.h"
-#include "NonlinearSystemBase.h"
+#include "NonlinearEigenSystem.h"
 
 #include "libmesh/petsc_vector.h"
 #include "libmesh/petsc_matrix.h"
@@ -487,7 +487,7 @@ mooseSlepcEigenFormJacobianB(SNES snes, Vec x, Mat jac, Mat pc, void * ctx)
 }
 
 void
-moosePetscSNESFormFunction(SNES /*snes*/, Vec x, Vec r, void * ctx, Moose::KernelType type)
+moosePetscSNESFormFunction(SNES /*snes*/, Vec x, Vec r, void * ctx, TagID tag)
 {
   EigenProblem * eigen_problem = static_cast<EigenProblem *>(ctx);
   NonlinearSystemBase & nl = eigen_problem->getNonlinearSystemBase();
@@ -500,7 +500,7 @@ moosePetscSNESFormFunction(SNES /*snes*/, Vec x, Vec r, void * ctx, Moose::Kerne
 
   R.zero();
 
-  eigen_problem->computeResidualType(*sys.current_local_solution.get(), R, type);
+  eigen_problem->computeResidual(*sys.current_local_solution.get(), R, tag);
 
   R.close();
 }
@@ -510,7 +510,10 @@ mooseSlepcEigenFormFunctionA(SNES snes, Vec x, Vec r, void * ctx)
 {
   PetscFunctionBegin;
 
-  moosePetscSNESFormFunction(snes, x, r, ctx, Moose::KT_NONEIGEN);
+  EigenProblem * eigen_problem = static_cast<EigenProblem *>(ctx);
+  NonlinearEigenSystem & eigen_nl = eigen_problem->getNonlinearEigenSystem();
+
+  moosePetscSNESFormFunction(snes, x, r, ctx, eigen_nl.nonEigenVectorTag());
   PetscFunctionReturn(0);
 }
 
@@ -519,7 +522,10 @@ mooseSlepcEigenFormFunctionB(SNES snes, Vec x, Vec r, void * ctx)
 {
   PetscFunctionBegin;
 
-  moosePetscSNESFormFunction(snes, x, r, ctx, Moose::KT_EIGEN);
+  EigenProblem * eigen_problem = static_cast<EigenProblem *>(ctx);
+  NonlinearEigenSystem & eigen_nl = eigen_problem->getNonlinearEigenSystem();
+
+  moosePetscSNESFormFunction(snes, x, r, ctx, eigen_nl.eigenVectorTag());
   PetscFunctionReturn(0);
 }
 
@@ -529,7 +535,7 @@ mooseSlepcEigenFormFunctionAB(SNES /*snes*/, Vec x, Vec Ax, Vec Bx, void * ctx)
   PetscFunctionBegin;
 
   EigenProblem * eigen_problem = static_cast<EigenProblem *>(ctx);
-  NonlinearSystemBase & nl = eigen_problem->getNonlinearSystemBase();
+  NonlinearEigenSystem & nl = eigen_problem->getNonlinearEigenSystem();
   System & sys = nl.system();
 
   PetscVector<Number> X_global(x, sys.comm()), AX(Ax, sys.comm()), BX(Bx, sys.comm());
@@ -540,7 +546,17 @@ mooseSlepcEigenFormFunctionAB(SNES /*snes*/, Vec x, Vec Ax, Vec Bx, void * ctx)
   AX.zero();
   BX.zero();
 
-  eigen_problem->computeResidualABType(*sys.current_local_solution.get(), AX, BX, Moose::KT_ALL);
+  std::vector<NumericVector<Number> *> residuals;
+
+  residuals.push_back(&AX);
+  residuals.push_back(&BX);
+
+  std::vector<TagID> tags;
+
+  tags.push_back(nl.nonEigenVectorTag());
+  tags.push_back(nl.eigenVectorTag());
+
+  eigen_problem->computeResidual(*sys.current_local_solution.get(), residuals, tags);
 
   AX.close();
   BX.close();

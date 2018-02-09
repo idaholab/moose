@@ -110,11 +110,9 @@ public:
     return _eigen_values;
   }
 
-  void computeResidualClose(NumericVector<Number> & Ax, NumericVector<Number> & Bx);
+  TagID eigenVectorTag() { return _Bx_tag; }
 
-  void computeResidualCloseA(NumericVector<Number> & Ax);
-
-  void computeResidualCloseB(NumericVector<Number> & Bx);
+  TagID nonEigenVectorTag() { return _Ax_tag; }
 
 protected:
   TransientEigenSystem & _transient_sys;

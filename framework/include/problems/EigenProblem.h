@@ -50,14 +50,7 @@ public:
                                SparseMatrix<Number> & jacobian,
                                Moose::KernelType kernel_type) override;
 
-  void computeResidualABType(const NumericVector<Number> & soln,
-                             NumericVector<Number> & Ax,
-                             NumericVector<Number> & Bx,
-                             Moose::KernelType type);
-
-  virtual void computeResidualType(const NumericVector<Number> & soln,
-                                   NumericVector<Number> & R,
-                                   Moose::KernelType type) override;
+  NonlinearEigenSystem & getNonlinearEigenSystem() { return *_nl_eigen; }
 
   virtual void checkProblemIntegrity() override;
 #if LIBMESH_HAVE_SLEPC

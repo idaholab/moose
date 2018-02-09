@@ -526,8 +526,48 @@ NonlinearSystemBase::zeroVectorForResidual(const std::string & vector_name)
 }
 
 void
-NonlinearSystemBase::computeResidual(NumericVector<Number> & residual, Moose::KernelType type)
+NonlinearSystemBase::computeResidual(NumericVector<Number> & residual)
 {
+  auto & tags = _fe_problem.getVectorTag();
+  _nl_vector_tags.clear();
+
+  for (auto & tag : tags)
+    _nl_vector_tags.push_back(tag.second);
+
+  _nl_vector_residuals.clear();
+  _nl_vector_residuals.push_back(&residual);
+
+  computeResidual(_nl_vector_residuals, _nl_vector_tags);
+}
+
+void
+NonlinearSystemBase::computeResidual(NumericVector<Number> & residual, TagID tag_id)
+{
+  _nl_vector_residuals.clear();
+  _nl_vector_residuals.push_back(&residual);
+
+  _nl_vector_tags.clear();
+  _nl_vector_tags.push_back(tag_id);
+
+  computeResidual(_nl_vector_residuals, _nl_vector_tags);
+}
+
+void
+NonlinearSystemBase::computeResidual(NumericVector<Number> & residual, std::vector<TagID> & tags)
+{
+  _nl_vector_residuals.clear();
+  _nl_vector_residuals.push_back(&residual);
+
+  computeResidual(_nl_vector_residuals, tags);
+}
+
+void
+NonlinearSystemBase::computeResidual(std::vector<NumericVector<Number> *> & residuals,
+                                     std::vector<TagID> & tags)
+{
+  // residuals.size() = 1 is allowed to make the code backward compatible
+  mooseAssert(tags.size() >= 1 && (residuals.size() == tags.size() || residuals.size() == 1),
+              "The number of residuals do not match with the number of tags");
   Moose::perf_log.push("compute_residual()", "Execution");
 
   _n_residual_evaluations++;
@@ -544,24 +584,24 @@ NonlinearSystemBase::computeResidual(NumericVector<Number> & residual, Moose::Ke
 
   try
   {
-    residual.zero();
+    residuals[0]->zero();
     zeroTaggedVectors();
-    computeResidualInternal(type);
+    computeResidualInternal(tags);
     closeTaggedVectors();
 
     if (_time_integrator)
-      _time_integrator->postResidual(residual);
+      _time_integrator->postResidual(*(residuals[0]));
     else
-      residual += *_Re_non_time;
-    residual.close();
+      *(residuals[0]) += *_Re_non_time;
+    residuals[0]->close();
 
-    computeNodalBCs(residual, type);
+    computeNodalBCs(*residuals[0], tags);
     closeTaggedVectors();
 
     // If we are debugging residuals we need one more assignment to have the ghosted copy up to date
     if (_need_residual_ghosted && _debugging_residuals)
     {
-      *_residual_ghosted = residual;
+      *_residual_ghosted = *(residuals[0]);
       _residual_ghosted->close();
     }
 
@@ -579,6 +619,12 @@ NonlinearSystemBase::computeResidual(NumericVector<Number> & residual, Moose::Ke
   }
 
   Moose::enableFPE(false);
+  unsigned int i = 0;
+  if (residuals.size() > 1)
+    for (auto & residual : residuals)
+    {
+      *residual = getVector(tags[i++]);
+    }
 
   Moose::perf_log.pop("compute_residual()", "Execution");
 }
@@ -1076,7 +1122,28 @@ NonlinearSystemBase::constraintResiduals(NumericVector<Number> & residual, bool 
 }
 
 void
-NonlinearSystemBase::computeResidualInternal(Moose::KernelType type)
+NonlinearSystemBase::computeResidualInternal(TagID tag_id)
+{
+  _nl_vector_tags.clear();
+  _nl_vector_tags.push_back(tag_id);
+
+  computeResidualInternal(_nl_vector_tags);
+}
+
+void
+NonlinearSystemBase::computeResidualInternal()
+{
+  auto & tags = _fe_problem.getVectorTag();
+  _nl_vector_tags.clear();
+
+  for (auto & tag : tags)
+    _nl_vector_tags.push_back(tag.second);
+
+  computeResidualInternal(_nl_vector_tags);
+}
+
+void
+NonlinearSystemBase::computeResidualInternal(std::vector<TagID> & tags)
 {
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
   {
@@ -1106,7 +1173,7 @@ NonlinearSystemBase::computeResidualInternal(Moose::KernelType type)
 
     ConstElemRange & elem_range = *_mesh.getActiveLocalElementRange();
 
-    ComputeResidualThread cr(_fe_problem, type);
+    ComputeResidualThread cr(_fe_problem, tags);
 
     Threads::parallel_reduce(elem_range, cr);
 
@@ -1129,24 +1196,21 @@ NonlinearSystemBase::computeResidualInternal(Moose::KernelType type)
 
       const std::vector<std::shared_ptr<ScalarKernel>> * scalars;
 
-      // Use the right subset of ScalarKernels depending on the KernelType.
-      switch (type)
+      // This code should be refactored once we can do tags for scalar
+      // kernels
+      if (!tags.size() || tags.size() == _fe_problem.numVectorTags())
+        scalars = &(_scalar_kernels.getActiveObjects());
+      else if (tags.size() == 1)
       {
-        case Moose::KT_ALL:
-          scalars = &(_scalar_kernels.getActiveObjects());
-          break;
-
-        case Moose::KT_TIME:
+        if (tags[0] == timeVectorTag())
           scalars = &(_time_scalar_kernels.getActiveObjects());
-          break;
-
-        case Moose::KT_NONTIME:
+        else if (tags[0] == nonTimeVectorTag())
           scalars = &(_non_time_scalar_kernels.getActiveObjects());
-          break;
-
-        default:
-          mooseError("Unrecognized KernelType in computeResidualInternal().");
+        else
+          mooseError("Wrong tags for scalar kernels ");
       }
+      else
+        mooseError("Unrecognized tags for scalar kernels in computeResidualInternal().");
 
       bool have_scalar_contributions = false;
       for (const auto & scalar_kernel : *scalars)
@@ -1269,8 +1333,19 @@ NonlinearSystemBase::computeResidualInternal(Moose::KernelType type)
 }
 
 void
-NonlinearSystemBase::computeNodalBCs(NumericVector<Number> & residual,
-                                     Moose::KernelType /*kernel_type*/)
+NonlinearSystemBase::computeNodalBCs(NumericVector<Number> & residual)
+{
+  _nl_vector_tags.clear();
+
+  auto & tags = _fe_problem.getVectorTag();
+  for (auto & tag : tags)
+    _nl_vector_tags.push_back(tag.second);
+
+  computeNodalBCs(residual, _nl_vector_tags);
+}
+
+void
+NonlinearSystemBase::computeNodalBCs(NumericVector<Number> & residual, std::vector<TagID> & tags)
 {
   // We need to close the diag_save_in variables on the aux system before NodalBCBases clear the
   // dofs on boundary nodes
@@ -1295,9 +1370,19 @@ NonlinearSystemBase::computeNodalBCs(NumericVector<Number> & residual,
           // reinit variables in nodes
           _fe_problem.reinitNodeFace(node, boundary_id, 0);
 
-          if (_nodal_bcs.hasActiveBoundaryObjects(boundary_id))
+          MooseObjectTagWarehouse<NodalBCBase> * nbc_warehouse;
+
+          // Select nodal kernels
+          if (tags.size() == _fe_problem.numVectorTags() || !tags.size())
+            nbc_warehouse = &_nodal_bcs;
+          else if (tags.size() == 1)
+            nbc_warehouse = &(_nodal_bcs.getVectorTagObjectWarehouse(tags[0], 0));
+          else
+            nbc_warehouse = &(_nodal_bcs.getVectorTagsObjectWarehouse(tags, 0));
+
+          if (nbc_warehouse->hasActiveBoundaryObjects(boundary_id))
           {
-            const auto & bcs = _nodal_bcs.getActiveBoundaryObjects(boundary_id);
+            const auto & bcs = nbc_warehouse->getActiveBoundaryObjects(boundary_id);
             for (const auto & nbc : bcs)
               if (nbc->shouldApply())
                 nbc->computeResidual(residual);

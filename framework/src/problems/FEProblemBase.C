@@ -4064,7 +4064,7 @@ FEProblemBase::addPredictor(const std::string & type,
 Real
 FEProblemBase::computeResidualL2Norm()
 {
-  computeResidualType(*_nl->currentSolution(), _nl->RHS());
+  computeResidual(*_nl->currentSolution(), _nl->RHS());
 
   return _nl->RHS().l2_norm();
 }
@@ -4078,11 +4078,17 @@ FEProblemBase::computeResidual(NonlinearImplicitSystem & /*sys*/,
 }
 
 void
-FEProblemBase::computeResidual(const NumericVector<Number> & soln, NumericVector<Number> & residual)
+FEProblemBase::computeResidual(const NumericVector<Number> & soln,
+                               NumericVector<Number> & residual,
+                               std::vector<TagID> & tags)
 {
   try
   {
-    computeResidualType(soln, residual, _kernel_type);
+    _fe_vector_residuals.clear();
+
+    _fe_vector_residuals.push_back(&residual);
+
+    computeResidual(soln, _fe_vector_residuals, tags);
   }
   catch (MooseException & e)
   {
@@ -4099,6 +4105,31 @@ FEProblemBase::computeResidual(const NumericVector<Number> & soln, NumericVector
 }
 
 void
+FEProblemBase::computeResidual(const NumericVector<Number> & soln,
+                               NumericVector<Number> & residual,
+                               TagID tag)
+{
+  _fe_vector_tags.clear();
+
+  _fe_vector_tags.push_back(tag);
+
+  computeResidual(soln, residual, _fe_vector_tags);
+}
+
+void
+FEProblemBase::computeResidual(const NumericVector<Number> & soln, NumericVector<Number> & residual)
+{
+  auto & tags = getVectorTag();
+
+  _fe_vector_tags.clear();
+
+  for (auto & tag : tags)
+    _fe_vector_tags.push_back(tag.second);
+
+  computeResidual(soln, residual, _fe_vector_tags);
+}
+
+void
 FEProblemBase::computeTransientImplicitResidual(Real time,
                                                 const NumericVector<Number> & u,
                                                 const NumericVector<Number> & udot,
@@ -4110,9 +4141,9 @@ FEProblemBase::computeTransientImplicitResidual(Real time,
 }
 
 void
-FEProblemBase::computeResidualType(const NumericVector<Number> & soln,
-                                   NumericVector<Number> & residual,
-                                   Moose::KernelType type)
+FEProblemBase::computeResidual(const NumericVector<Number> & soln,
+                               std::vector<NumericVector<Number> *> & residuals,
+                               std::vector<TagID> & tags)
 {
   _nl->setSolution(soln);
 
@@ -4173,7 +4204,7 @@ FEProblemBase::computeResidualType(const NumericVector<Number> & soln,
 
   _app.getOutputWarehouse().residualSetup();
 
-  _nl->computeResidual(residual, type);
+  _nl->computeResidual(residuals, tags);
 }
 
 void

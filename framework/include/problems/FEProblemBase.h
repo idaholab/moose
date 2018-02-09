@@ -876,9 +876,18 @@ public:
                                NumericVector<Number> & residual);
   virtual void computeResidual(const NumericVector<Number> & soln,
                                NumericVector<Number> & residual);
-  virtual void computeResidualType(const NumericVector<Number> & soln,
-                                   NumericVector<Number> & residual,
-                                   Moose::KernelType type = Moose::KT_ALL);
+
+  virtual void
+  computeResidual(const NumericVector<Number> & soln, NumericVector<Number> & residual, TagID tag);
+
+  virtual void computeResidual(const NumericVector<Number> & soln,
+                               NumericVector<Number> & residual,
+                               std::vector<TagID> & tags);
+
+  virtual void computeResidual(const NumericVector<Number> & soln,
+                               std::vector<NumericVector<Number> *> & residuals,
+                               std::vector<TagID> & tags);
+
   virtual void computeJacobian(NonlinearImplicitSystem & sys,
                                const NumericVector<Number> & soln,
                                SparseMatrix<Number> & jacobian);
@@ -1328,6 +1337,10 @@ protected:
   EquationSystems _eq;
   bool _initialized;
   Moose::KernelType _kernel_type;
+
+  std::vector<TagID> _fe_vector_tags;
+
+  std::vector<NumericVector<Number> *> _fe_vector_residuals;
 
   /// Whether or not to actually solve the nonlinear system
   bool _solve;
