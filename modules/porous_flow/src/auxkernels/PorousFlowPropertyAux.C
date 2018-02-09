@@ -82,6 +82,7 @@ PorousFlowPropertyAux::PorousFlowPropertyAux(const InputParameters & parameters)
 
     case PropertyEnum::ENTHALPY:
       _enthalpy = &getMaterialProperty<std::vector<Real>>("PorousFlow_fluid_phase_enthalpy_qp");
+      break;
 
     case PropertyEnum::INTERNAL_ENERGY:
       _internal_energy =
