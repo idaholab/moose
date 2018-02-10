@@ -90,6 +90,16 @@ Exodus::Exodus(const InputParameters & parameters)
 }
 
 void
+Exodus::setOutputDimension(unsigned int dim)
+{
+  if (dim >= 1 && dim <= 3)
+    _output_dimension = dim;
+  else
+    mooseError(
+        name(), ": Invalid dimension (", dim, ") specified.  Allowed dimensions are 1, 2 or 3.");
+}
+
+void
 Exodus::initialSetup()
 {
   // Call base class setup method
