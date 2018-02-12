@@ -10,7 +10,7 @@
 #ifndef NACLFLUIDPROPERTIESTEST_H
 #define NACLFLUIDPROPERTIESTEST_H
 
-#include "gtest/gtest.h"
+#include "gtest_include.h"
 
 #include "MooseApp.h"
 #include "Utils.h"

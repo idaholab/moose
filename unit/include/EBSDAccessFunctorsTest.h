@@ -10,7 +10,7 @@
 #ifndef EBSDACCESSFUNCTORSTEST_H
 #define EBSDACCESSFUNCTORSTEST_H
 
-#include "gtest/gtest.h"
+#include "gtest_include.h"
 #include "EBSDAccessFunctors.h"
 
 class EBSDAccessFunctorsTest : public ::testing::Test, public EBSDAccessFunctors

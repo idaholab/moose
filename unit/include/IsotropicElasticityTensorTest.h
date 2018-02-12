@@ -10,7 +10,7 @@
 #ifndef ISOTROPICELASTICITYTENSORTEST_H
 #define ISOTROPICELASTICITYTENSORTEST_H
 
-#include "gtest/gtest.h"
+#include "gtest_include.h"
 
 #include "IsotropicElasticityTensor.h"
 

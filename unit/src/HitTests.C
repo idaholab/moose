@@ -10,7 +10,7 @@
 #include "hit.h"
 #include "Parser.h"
 
-#include "gtest/gtest.h"
+#include "gtest_include.h"
 
 #include <iostream>
 #include <vector>

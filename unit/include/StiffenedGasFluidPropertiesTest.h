@@ -10,7 +10,7 @@
 #ifndef StiffenedGasFluidPropertiesTest_H
 #define StiffenedGasFluidPropertiesTest_H
 
-#include "gtest/gtest.h"
+#include "gtest_include.h"
 
 #include "MooseApp.h"
 #include "Utils.h"
