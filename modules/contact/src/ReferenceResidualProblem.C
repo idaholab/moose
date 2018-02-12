@@ -14,6 +14,7 @@
 #include "MooseApp.h"
 #include "MooseMesh.h"
 #include "MooseVariable.h"
+#include "MooseVariableScalar.h"
 #include "NonlinearSystem.h"
 
 template <>
@@ -112,7 +113,10 @@ ReferenceResidualProblem::initialSetup()
   const unsigned int size_solnVars = _solnVars.size();
   _scaling_factors.resize(size_solnVars);
   for (unsigned int i = 0; i < size_solnVars; ++i)
-    _scaling_factors[i] = nonlinear_sys.getVariable(/*tid*/ 0, _solnVars[i]).scalingFactor();
+    if (nonlinear_sys.isScalarVariable(_solnVars[i]))
+      _scaling_factors[i] = nonlinear_sys.getScalarVariable(0, _solnVars[i]).scalingFactor();
+    else
+      _scaling_factors[i] = nonlinear_sys.getVariable(/*tid*/ 0, _solnVars[i]).scalingFactor();
 
   FEProblemBase::initialSetup();
 }
