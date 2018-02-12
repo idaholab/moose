@@ -32,4 +32,9 @@
     type = PythonUnitTest
     input = test_camel_to_space.py
   [../]
+
+  [hit]
+    type = PythonUnitTest
+    input = test_hit_load.py
+  []
 []
