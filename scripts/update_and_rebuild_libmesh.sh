@@ -92,7 +92,7 @@ if [ -z "$go_fast" ]; then
                --enable-unique-id \
                --disable-warnings \
                --enable-unique-ptr \
-               --enable-openmp \
+               --with-thread-model=openmp \
                --disable-maintainer-mode \
                --enable-petsc-required \
                --disable-metaphysicl \
