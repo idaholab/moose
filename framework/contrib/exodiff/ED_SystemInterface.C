@@ -12,7 +12,7 @@
 
 #include "stringx.h"
 #include "ED_Version.h"
-#include <SL_tokenize.h>
+#include <STRINGLIB_tokenize.h>
 
 namespace {
   void Parse_Die(const char* line)
@@ -668,7 +668,7 @@ bool SystemInterface::parse_options(int argc, char **argv)
       // temp should be of the form <ts1>:<ts2>  where ts# is either a timestep number
       // (1-based) or 'last'
       std::vector<std::string> tokens;
-      SLIB::tokenize(temp, ":", tokens);
+      STRINGLIB::tokenize(temp, ":", tokens);
       if (tokens.size() == 2) {
 	if (case_strcmp(tokens[0], "last") == 0) {
 	  explicit_steps.first = -1;

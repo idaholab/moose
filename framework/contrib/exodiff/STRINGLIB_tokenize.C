@@ -1,7 +1,7 @@
-#include "SL_tokenize.h"
+#include "STRINGLIB_tokenize.h"
 #include <algorithm>
 
-void SLIB::tokenize(const std::string& str, const std::string& separators,
+void STRINGLIB::tokenize(const std::string& str, const std::string& separators,
 		    std::vector<std::string>& tokens)
 {
   std::string curr_token = "";
