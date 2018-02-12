@@ -1577,6 +1577,8 @@ MechanicalContactConstraint::computeQpOffDiagJacobian(Moose::ConstraintJacobianT
             if (pinfo->_mech_status == PenetrationInfo::MS_SLIPPING ||
                 pinfo->_mech_status == PenetrationInfo::MS_SLIPPING_FRICTION)
               return normal_comp;
+            else
+              return 0.0;
           }
           else if (_formulation == CF_PENALTY &&
                    (pinfo->_mech_status == PenetrationInfo::MS_SLIPPING ||
