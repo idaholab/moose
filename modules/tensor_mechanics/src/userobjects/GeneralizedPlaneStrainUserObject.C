@@ -61,6 +61,7 @@ GeneralizedPlaneStrainUserObject::initialize()
 
   unsigned int max_size = _subblock_id_provider ? _subblock_id_provider->getMaxSubblockIndex() : 1;
   _residual.assign(max_size, 0.0);
+  _reference_residual.assign(max_size, 0.0);
   _jacobian.assign(max_size, 0.0);
 }
 
@@ -77,6 +78,11 @@ GeneralizedPlaneStrainUserObject::execute()
         _JxW[_qp] * _coord[_qp] * (_stress[_qp](_scalar_out_of_plane_strain_direction,
                                                 _scalar_out_of_plane_strain_direction) +
                                    _out_of_plane_pressure.value(_t, _q_point[_qp]) * _factor);
+
+    _reference_residual[subblock_id] += std::abs(
+        _JxW[_qp] * _coord[_qp] *
+        _stress[_qp](_scalar_out_of_plane_strain_direction, _scalar_out_of_plane_strain_direction));
+
     // diagonal jacobian, integral of C(2, 2, 2, 2) for COORD_XYZ
     _jacobian[subblock_id] +=
         _JxW[_qp] * _coord[_qp] * _Cijkl[_qp](_scalar_out_of_plane_strain_direction,
@@ -94,6 +100,7 @@ GeneralizedPlaneStrainUserObject::threadJoin(const UserObject & uo)
   for (unsigned int i = 0; i < _residual.size(); ++i)
   {
     _residual[i] += gpsuo._residual[i];
+    _reference_residual[i] += gpsuo._reference_residual[i];
     _jacobian[i] += gpsuo._jacobian[i];
   }
 }
@@ -102,22 +109,38 @@ void
 GeneralizedPlaneStrainUserObject::finalize()
 {
   gatherSum(_residual);
+  gatherSum(_reference_residual);
   gatherSum(_jacobian);
 }
 
 Real
 GeneralizedPlaneStrainUserObject::returnResidual(unsigned int scalar_var_id) const
 {
-  if (_residual.size() < scalar_var_id)
+  if (_residual.size() <= scalar_var_id)
     mooseError("Index out of bounds!");
 
   return _residual[scalar_var_id];
 }
 
 Real
+GeneralizedPlaneStrainUserObject::returnReferenceResidual(unsigned int scalar_var_id) const
+{
+  // At startup, the GeneralizedPlaneStrainReferenceResidual class can ask for this value
+  // before it has been computed.  Return 0.0 in this case.  The only way size will stay
+  // zero is if initialize is never called.
+  if (_reference_residual.size() == 0)
+    return 0.0;
+
+  if (_residual.size() <= scalar_var_id)
+    mooseError("Index out of bounds!");
+
+  return _reference_residual[scalar_var_id];
+}
+
+Real
 GeneralizedPlaneStrainUserObject::returnJacobian(unsigned int scalar_var_id) const
 {
-  if (_jacobian.size() < scalar_var_id)
+  if (_jacobian.size() <= scalar_var_id)
     mooseError("Index out of bounds!");
 
   return _jacobian[scalar_var_id];

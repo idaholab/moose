@@ -8,4 +8,10 @@
    superlu = true
 #   deleted = '#6924'
  [../]
+ [./out_of_plane_pressure]
+   type = 'Exodiff'
+   input = 'out_of_plane_pressure.i'
+   exodiff = 'out_of_plane_pressure_out.e'
+   abs_zero = 1e-9
+ [../]
 []

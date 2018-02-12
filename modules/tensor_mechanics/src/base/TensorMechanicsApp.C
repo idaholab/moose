@@ -152,17 +152,18 @@
 #include "HEVPFlowRatePowerLawJ2.h"
 #include "LinearViscoelasticityManager.h"
 
-#include "CylindricalRankTwoAux.h"
-#include "RankTwoAux.h"
-#include "RankFourAux.h"
-#include "ElasticEnergyAux.h"
 #include "AccumulateAux.h"
 #include "CrystalPlasticityRotationOutAux.h"
-#include "RankTwoScalarAux.h"
+#include "CylindricalRankTwoAux.h"
+#include "ElasticEnergyAux.h"
+#include "GeneralizedPlaneStrainReferenceResidual.h"
 #include "NewmarkAccelAux.h"
 #include "NewmarkVelAux.h"
 #include "RadialDisplacementCylinderAux.h"
 #include "RadialDisplacementSphereAux.h"
+#include "RankFourAux.h"
+#include "RankTwoAux.h"
+#include "RankTwoScalarAux.h"
 
 #include "CavityPressureAction.h"
 #include "CavityPressurePostprocessor.h"
@@ -392,19 +393,20 @@ TensorMechanicsApp::registerObjects(Factory & factory)
   registerUserObject(CrackFrontDefinition);
   registerUserObject(LinearViscoelasticityManager);
 
-  registerAux(CylindricalRankTwoAux);
-  registerAux(RankTwoAux);
-  registerAux(RankFourAux);
-  registerAux(ElasticEnergyAux);
   registerAux(AccumulateAux);
   registerAux(CrystalPlasticityRotationOutAux);
-  registerAux(RankTwoScalarAux);
+  registerAux(CylindricalRankTwoAux);
+  registerAux(DomainIntegralQFunction);
+  registerAux(DomainIntegralTopologicalQFunction);
+  registerAux(ElasticEnergyAux);
+  registerAux(GeneralizedPlaneStrainReferenceResidual);
   registerAux(NewmarkAccelAux);
   registerAux(NewmarkVelAux);
   registerAux(RadialDisplacementCylinderAux);
   registerAux(RadialDisplacementSphereAux);
-  registerAux(DomainIntegralQFunction);
-  registerAux(DomainIntegralTopologicalQFunction);
+  registerAux(RankFourAux);
+  registerAux(RankTwoAux);
+  registerAux(RankTwoScalarAux);
 
   registerBoundaryCondition(DashpotBC);
   registerBoundaryCondition(PresetVelocity);
