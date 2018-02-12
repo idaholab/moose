@@ -26,6 +26,7 @@ public:
   PipeBase(const InputParameters & params);
 
   virtual void init() override;
+  virtual void check() override;
 
   virtual const std::string & getType() override { return _type; }
 

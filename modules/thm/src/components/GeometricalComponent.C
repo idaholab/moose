@@ -17,6 +17,7 @@ validParams<GeometricalComponent>()
       "length", "The lengths of the subsections of the geometric component along the main axis");
   params.addRequiredParam<std::vector<unsigned int>>(
       "n_elems", "The number of elements in each subsection along the main axis");
+  params.addParam<bool>("2nd_order_mesh", false, "Use 2nd order elements in the mesh");
 
   return params;
 }
@@ -27,7 +28,7 @@ GeometricalComponent::GeometricalComponent(const InputParameters & parameters)
     _offset(getParam<RealVectorValue>("offset")),
     _dir(getParam<RealVectorValue>("orientation")),
     _rotation(getParam<Real>("rotation")),
-    _2nd_order_mesh(_sim.getParam<bool>("2nd_order_mesh")),
+    _2nd_order_mesh(getParam<bool>("2nd_order_mesh")),
     _lengths(getParam<std::vector<Real>>("length")),
     _n_elems(getParam<std::vector<unsigned int>>("n_elems")),
     _displace_node_user_object_name(genName(name(), "displace_node"))
@@ -37,6 +38,11 @@ GeometricalComponent::GeometricalComponent(const InputParameters & parameters)
   _length = std::accumulate(_lengths.begin(), _lengths.end(), 0.0);
   _n_elem = std::accumulate(_n_elems.begin(), _n_elems.end(), 0);
   _n_nodes = computeNumberOfNodes(_n_elem);
+
+  if (_2nd_order_mesh)
+    _fe_type = FEType(SECOND, LAGRANGE);
+  else
+    _fe_type = FEType(FIRST, LAGRANGE);
 }
 
 void
@@ -80,6 +86,21 @@ GeometricalComponent::setupMesh()
   // When using 2D or even 3D meshes, this has to be way smarter
   for (unsigned int node_id = first_node_id; node_id < last_node_id; node_id++)
     _mesh.nodeRef(node_id)(2) += id();
+}
+
+void
+GeometricalComponent::check()
+{
+  // Do not use TRAP q-rule with 2nd order FEs
+  if (_2nd_order_mesh)
+  {
+    auto actions = _app.actionWarehouse().getActionListByName("setup_quadrature");
+    const MooseEnum & quadrature_type = (*actions.begin())->getParam<MooseEnum>("type");
+
+    if (quadrature_type == "TRAP")
+      logError("Cannot use TRAP quadrature rule with 2nd order elements.  Use SIMPSON or GAUSS "
+               "instead.");
+  }
 }
 
 void

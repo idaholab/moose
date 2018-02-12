@@ -42,23 +42,23 @@ FlowModelSinglePhase::addVariables()
   std::vector<Real> scaling_factor = _sim.getParam<std::vector<Real>>("scaling_factor_1phase");
 
   // Nonlinear variables
-  _sim.addVariable(true, RHOA, _sim.feType(), subdomain_id, scaling_factor[0]);
-  _sim.addVariable(true, RHOUA, _sim.feType(), subdomain_id, scaling_factor[1]);
-  _sim.addVariable(true, RHOEA, _sim.feType(), subdomain_id, scaling_factor[2]);
+  _sim.addVariable(true, RHOA, _fe_type, subdomain_id, scaling_factor[0]);
+  _sim.addVariable(true, RHOUA, _fe_type, subdomain_id, scaling_factor[1]);
+  _sim.addVariable(true, RHOEA, _fe_type, subdomain_id, scaling_factor[2]);
 
   _solution_vars = {RHOA, RHOUA, RHOEA};
 
   // Auxiliary
-  _sim.addVariable(false, DENSITY, _sim.feType(), subdomain_id);
-  _sim.addVariable(false, MOMENTUM_DENSITY, _sim.feType(), subdomain_id);
-  _sim.addVariable(false, TOTAL_ENERGY_DENSITY, _sim.feType(), subdomain_id);
-  _sim.addVariable(false, VELOCITY, _sim.feType(), subdomain_id);
-  _sim.addVariable(false, PRESSURE, _sim.feType(), subdomain_id);
-  _sim.addVariable(false, SPECIFIC_VOLUME, _sim.feType(), subdomain_id);
-  _sim.addVariable(false, SPECIFIC_INTERNAL_ENERGY, _sim.feType(), subdomain_id);
-  _sim.addVariable(false, TEMPERATURE, _sim.feType(), subdomain_id);
-  _sim.addVariable(false, SPECIFIC_TOTAL_ENTHALPY, _sim.feType(), subdomain_id);
-  _sim.addVariable(false, HEAT_TRANSFER_COEFFICIENT_WALL, _sim.feType(), subdomain_id);
+  _sim.addVariable(false, DENSITY, _fe_type, subdomain_id);
+  _sim.addVariable(false, MOMENTUM_DENSITY, _fe_type, subdomain_id);
+  _sim.addVariable(false, TOTAL_ENERGY_DENSITY, _fe_type, subdomain_id);
+  _sim.addVariable(false, VELOCITY, _fe_type, subdomain_id);
+  _sim.addVariable(false, PRESSURE, _fe_type, subdomain_id);
+  _sim.addVariable(false, SPECIFIC_VOLUME, _fe_type, subdomain_id);
+  _sim.addVariable(false, SPECIFIC_INTERNAL_ENERGY, _fe_type, subdomain_id);
+  _sim.addVariable(false, TEMPERATURE, _fe_type, subdomain_id);
+  _sim.addVariable(false, SPECIFIC_TOTAL_ENTHALPY, _fe_type, subdomain_id);
+  _sim.addVariable(false, HEAT_TRANSFER_COEFFICIENT_WALL, _fe_type, subdomain_id);
 }
 
 void

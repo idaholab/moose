@@ -22,6 +22,7 @@ public:
   GeometricalComponent(const InputParameters & parameters);
 
   virtual void setupMesh() override;
+  virtual void check() override;
 
   /**
    * Method that moves the nodes from reference space into the physical space.
@@ -68,6 +69,12 @@ public:
                    const std::string & subdomain_name,
                    const Moose::CoordinateSystemType & coord_system = Moose::COORD_XYZ);
 
+  /**
+   * Get the FE type for this component
+   * @return The finite element type
+   */
+  const FEType & feType() const { return _fe_type; }
+
 protected:
   virtual void buildMesh() = 0;
   const FunctionName & getVariableFn(const FunctionName & fn_param_name);
@@ -86,6 +93,9 @@ protected:
 
   /// True if simulation is using a second order mesh
   bool _2nd_order_mesh;
+
+  /// The FE type used in this component
+  FEType _fe_type;
 
   /// Number of sections in the geometric component
   unsigned int _n_sections;

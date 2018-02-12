@@ -35,6 +35,7 @@ PipeBase::init()
     InputParameters pars = emptyInputParameters();
     pars.set<Simulation *>("_sim") = &_sim;
     pars.set<PipeBase *>("_pipe") = this;
+    pars.set<bool>("2nd_order_mesh") = _2nd_order_mesh;
     _flow_model = std::make_shared<FlowModelSinglePhase>(name(), pars);
     _flow_model->init();
   }
@@ -43,9 +44,16 @@ PipeBase::init()
     InputParameters pars = emptyInputParameters();
     pars.set<Simulation *>("_sim") = &_sim;
     pars.set<PipeBase *>("_pipe") = this;
+    pars.set<bool>("2nd_order_mesh") = _2nd_order_mesh;
     _flow_model = std::make_shared<FlowModelTwoPhase>(name(), pars);
     _flow_model->init();
   }
   else
     logError("Unknown model type supplied, '", _model_id, "'");
+}
+
+void
+PipeBase::check()
+{
+  GeometricalComponent::check();
 }
