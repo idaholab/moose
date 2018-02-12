@@ -11,7 +11,6 @@
 #define SLOPELIMITINGBASE_H
 
 #include "ElementLoopUserObject.h"
-#include "SlopeReconstructionBase.h"
 
 // Forward Declarations
 class SlopeLimitingBase;
@@ -48,9 +47,6 @@ protected:
 
   /// option whether to include BCs
   bool _include_bc;
-
-  /// slope reconstruction user object
-  const SlopeReconstructionBase & _rslope;
 
   /// required data for face assembly
   const MooseArray<Point> & _q_point_face;

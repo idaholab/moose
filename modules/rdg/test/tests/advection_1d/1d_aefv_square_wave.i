@@ -3,7 +3,6 @@
   order = CONSTANT
   family = MONOMIAL
   u = u
-  slope_reconstruction = rslope
   slope_limiting = lslope
   implicit = false
 []
@@ -28,16 +27,10 @@
 []
 ############################################################
 [UserObjects]
-
-  [./rslope]
-    type = AEFVSlopeReconstructionOneD
-    execute_on = 'linear'
-  [../]
-
   [./lslope]
     type = AEFVSlopeLimitingOneD
     execute_on = 'linear'
-    scheme = 'minmod' #none | minmod | mc | superbee
+    scheme = 'none' #none | minmod | mc | superbee
   [../]
 
   [./internal_side_flux]
@@ -119,7 +112,7 @@
 [Outputs]
   [./Exodus]
     type = Exodus
-    file_base = 1d_aefv_square_wave_minmod_out
+    file_base = 1d_aefv_square_wave_none_out
     interval = 2
   [../]
   print_perf_log = true

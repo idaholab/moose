@@ -22,7 +22,6 @@
 #include "AEFVKernel.h"
 
 // User objects
-#include "AEFVSlopeReconstructionOneD.h"
 #include "AEFVSlopeLimitingOneD.h"
 #include "AEFVUpwindInternalSideFlux.h"
 #include "AEFVFreeOutflowBoundaryFlux.h"
@@ -80,7 +79,6 @@ RdgApp::registerObjects(Factory & factory)
   registerMaterial(AEFVMaterial);
 
   // User objects
-  registerUserObject(AEFVSlopeReconstructionOneD);
   registerUserObject(AEFVSlopeLimitingOneD);
   registerUserObject(AEFVUpwindInternalSideFlux);
   registerUserObject(AEFVFreeOutflowBoundaryFlux);
