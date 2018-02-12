@@ -92,6 +92,23 @@ Real wallHeatTransferCoefficient(Real Nu, Real k, Real D_h);
 Real surfaceTension(Real temperature);
 
 /**
+ * Derivative of velocity w.r.t. alpha*rho*A
+ *
+ * @param[in] arhoA    alpha*rho*A
+ * @param[in] arhouA   alpha*rho*u*A
+ * @returns derivative of velocity w.r.t. alpha*rho*A
+ */
+Real dvel_darhoA(Real arhoA, Real arhouA);
+
+/**
+ * Derivative of velocity w.r.t. alpha*rho*u*A
+ *
+ * @param[in] arhoA   alpha*rho*A
+ * @returns derivative of velocity w.r.t. alpha*rho*u*A
+ */
+Real dvel_darhouA(Real arhoA);
+
+/**
  * Derivative of specific volume wrt alpha_liquid
  *
  * Makes sense only when using 7-equation model

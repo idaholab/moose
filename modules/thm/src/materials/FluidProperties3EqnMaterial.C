@@ -84,8 +84,8 @@ FluidProperties3EqnMaterial::computeQpProperties()
   _dv_drhoA[_qp] = RELAP7::dv_darhoA(_area[_qp], _rhoA[_qp]);
 
   _vel[_qp] = _rhouA[_qp] / _rhoA[_qp];
-  _dvel_drhoA[_qp] = -_rhouA[_qp] / (_rhoA[_qp] * _rhoA[_qp]);
-  _dvel_drhouA[_qp] = 1.0 / _rhoA[_qp];
+  _dvel_drhoA[_qp] = RELAP7::dvel_darhoA(_rhoA[_qp], _rhouA[_qp]);
+  _dvel_drhouA[_qp] = RELAP7::dvel_darhouA(_rhoA[_qp]);
 
   _e[_qp] = (_rhoEA[_qp] - 0.5 * _rhouA[_qp] * _rhouA[_qp] / _rhoA[_qp]) / _rhoA[_qp];
   _de_drhoA[_qp] = RELAP7::de_darhoA(_rhoA[_qp], _rhouA[_qp], _rhoEA[_qp]);

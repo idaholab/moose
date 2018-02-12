@@ -69,6 +69,18 @@ surfaceTension(Real temperature)
 }
 
 Real
+dvel_darhoA(Real arhoA, Real arhouA)
+{
+  return -arhouA / (arhoA * arhoA);
+}
+
+Real
+dvel_darhouA(Real arhoA)
+{
+  return 1.0 / arhoA;
+}
+
+Real
 dv_dalpha_liquid(Real area, Real arhoA, bool is_liquid)
 {
   const Real sign = is_liquid ? 1.0 : -1.0;
