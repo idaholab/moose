@@ -1,29 +1,32 @@
 [Tests]
   [./1d_aefv_square_wave_none]
     type = 'Exodiff'
-    input = '1d_aefv_square_wave_none.i'
+    input = '1d_aefv_square_wave.i'
     exodiff = '1d_aefv_square_wave_none_out.e'
     abs_zero = 1e-4
     rel_err = 5e-5
   [../]
   [./1d_aefv_square_wave_minmod]
     type = 'Exodiff'
-    input = '1d_aefv_square_wave_minmod.i'
+    input = '1d_aefv_square_wave.i'
     exodiff = '1d_aefv_square_wave_minmod_out.e'
+    cli_args = 'UserObjects/lslope/scheme=minmod Outputs/Exodus/file_base=1d_aefv_square_wave_minmod_out'
     abs_zero = 1e-4
     rel_err = 5e-5
   [../]
   [./1d_aefv_square_wave_mc]
     type = 'Exodiff'
-    input = '1d_aefv_square_wave_mc.i'
+    input = '1d_aefv_square_wave.i'
     exodiff = '1d_aefv_square_wave_mc_out.e'
+    cli_args = 'UserObjects/lslope/scheme=mc Outputs/Exodus/file_base=1d_aefv_square_wave_mc_out'
     abs_zero = 1e-4
     rel_err = 5e-5
   [../]
   [./1d_aefv_square_wave_superbee]
     type = 'Exodiff'
-    input = '1d_aefv_square_wave_superbee.i'
+    input = '1d_aefv_square_wave.i'
     exodiff = '1d_aefv_square_wave_superbee_out.e'
+    cli_args = 'UserObjects/lslope/scheme=superbee Outputs/Exodus/file_base=1d_aefv_square_wave_superbee_out'
     abs_zero = 1e-4
     rel_err = 5e-5
   [../]
