@@ -19,6 +19,9 @@ extern "C" int SAT_VU_SPL(double v,
                           double & ul,
                           double & uv);
 
+namespace RELAP7
+{
+
 Real
 Reynolds(Real volume_fraction, Real rho, Real v, Real Dh, Real visc)
 {
@@ -322,4 +325,5 @@ bool
 isOutlet(Real vel, Real normal)
 {
   return (vel * normal) >= 0;
+}
 }

@@ -5,6 +5,9 @@
 
 using namespace libMesh;
 
+namespace RELAP7
+{
+
 // gravitational acceleration, or gravity constant
 static const Real gravity_const = 9.81;
 
@@ -82,10 +85,10 @@ Real viscosityNumber(Real viscosity, Real surf_tension, Real rho_k, Real delta_r
 Real wallHeatTransferCoefficient(Real Nu, Real k, Real D_h);
 
 /**
-* Computes surface tension [N/m]
-* @param temperature
-* @return returns the surface tension [N/m]
-*/
+ * Computes surface tension [N/m]
+ * @param temperature
+ * @return returns the surface tension [N/m]
+ */
 Real surfaceTension(Real temperature);
 
 /**
@@ -170,5 +173,6 @@ bool isInlet(Real vel, Real normal);
  * @param normal Outward normal vector
  */
 bool isOutlet(Real vel, Real normal);
+}
 
 #endif // NUMERICS_H
