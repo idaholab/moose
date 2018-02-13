@@ -58,7 +58,7 @@ class Parser:
         self.errors = []
         self.fname = ''
 
-    def parse(self, filename):
+    def parse(self, filename, default_values = None):
         with open(filename, 'r') as f:
             data = f.read()
 
@@ -75,7 +75,7 @@ class Parser:
         root.walk(w, hit.NodeType.All)
         self.errors.extend(w.errors)
 
-        self._parseNode(filename, root)
+        self._parseNode(filename, root, default_values)
 
     def error(self, msg, node=None):
         if node:
@@ -135,12 +135,20 @@ class Parser:
         params['have_errors'] = have_err
 
     # private:
-    def _parseNode(self, filename, node):
+    def _parseNode(self, filename, node, default_values):
         if node.find('type'):
             moose_type = node.param('type')
 
             # Get the valid Params for this type
             params = self.factory.validParams(moose_type)
+
+            # Apply any new defaults
+            for key, value in default_values.iterparams():
+                if key in params.keys():
+                    if key == 'cli_args':
+                      params[key] += ' ' + value + ' '
+                    else:
+                      params[key] = value
 
             # Extract the parameters from the Getpot node
             self.extractParams(filename, params, node)
@@ -166,7 +174,7 @@ class Parser:
 
         # Loop over the section names and parse them
         for child in node.children(node_type=hit.NodeType.Section):
-            self._parseNode(filename, child)
+            self._parseNode(filename, child, default_values)
 
     # This routine returns a Boolean indicating whether a given block
     # looks like a valid subblock. In the Testing system, a valid subblock

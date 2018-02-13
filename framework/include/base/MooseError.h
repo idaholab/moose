@@ -147,6 +147,19 @@ mooseWarningStream(S & oss, Args &&... args)
 
 template <typename S, typename... Args>
 void
+mooseUnusedStream(S & oss, Args &&... args)
+{
+  std::ostringstream ss;
+  mooseStreamAll(ss, args...);
+  std::string msg = mooseMsgFmt(ss.str(), "*** Warning ***", COLOR_YELLOW);
+  if (Moose::_throw_on_error)
+    throw std::runtime_error(msg);
+
+  oss << msg << std::flush;
+}
+
+template <typename S, typename... Args>
+void
 mooseInfoStream(S & oss, Args &&... args)
 {
   mooseDoOnce({
@@ -199,6 +212,14 @@ void
 mooseWarning(Args &&... args)
 {
   moose::internal::mooseWarningStream(Moose::out, std::forward<Args>(args)...);
+}
+
+/// Warning message used to notify the users of unused parts of their input files
+template <typename... Args>
+void
+mooseUnused(Args &&... args)
+{
+  moose::internal::mooseUnusedStream(Moose::out, std::forward<Args>(args)...);
 }
 
 /// Emit a deprecated code/feature message with the given stringified, concatenated args.

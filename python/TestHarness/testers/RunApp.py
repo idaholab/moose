@@ -37,10 +37,12 @@ class RunApp(Tester):
         params.addParam('min_parallel',    1, "Minimum number of MPI processes that this test can be run with (Default: 1)")
         params.addParam('max_threads',    16, "Max number of threads (Default: 16)")
         params.addParam('min_threads',     1, "Min number of threads (Default: 1)")
-        params.addParam('allow_warnings',   False, "If the test harness is run --error warnings become errors, setting this to true will disable this an run the test without --error");
         params.addParam('redirect_output',  False, "Redirect stdout to files. Neccessary when expecting an error when using parallel options")
 
-        params.addParamWithType('allow_deprecated_until', type(time.localtime()), "A test that only runs if current date is less than specified date")
+        params.addParam('allow_warnings',   False, "Whether or not warnings are allowed.  If this is False (the default) then a warning will be treated as an error.  Can be globally overridden by setting 'allow_warnings = True' in the testroot file.");
+        params.addParam('allow_unused',   False, "Whether or not unused parameters are allowed in the input file.  Can be globally overridden by setting 'allow_unused = True' in the testroot file.");
+        params.addParam('allow_override', False, "Whether or not overriding a parameter/block in the input file generates an error.  Can be globally overridden by setting 'allow_override = True' in the testroot file.");
+        params.addParam('allow_deprecated', True, "Whether or not deprecated warnings are allowed.  Setting to False will cause deprecation warnings to be treated as test failures.  We do NOT recommend you globally set this permanently to False!  Deprecations are a part of the normal development flow and _SHOULD_ be allowed!")
 
         # Valgrind
         params.addParam('valgrind', 'NORMAL', "Set to (NONE, NORMAL, HEAVY) to determine which configurations where valgrind will run.")
@@ -55,10 +57,6 @@ class RunApp(Tester):
         else:
             self.mpi_command = 'mpiexec'
             self.force_mpi = False
-
-        # Handle the special allow_deprecated_until parameter
-        if params.isValid('allow_deprecated_until') and params['allow_deprecated_until'] > time.localtime():
-            self.specs['cli_args'].append('--allow-deprecated')
 
         # Make sure that either input or command is supplied
         if not (params.isValid('input') or params.isValid('command')):
@@ -123,16 +121,20 @@ class RunApp(Tester):
             # and it is NOT supplied already in the cli-args option
             cli_args.append('--distributed-mesh')
 
-        if options.error and '--error' not in cli_args and not specs["allow_warnings"]:
-            # The user has passed the error option to the test harness
-            # and it is NOT supplied already in the cli-args option\
+
+        root_params = specs['root_params']
+
+        if '--error' not in cli_args and (not specs["allow_warnings"] or options.error):
             cli_args.append('--error')
 
-        if options.error_unused and '--error-unused' not in cli_args and '--warn-unused' not in cli_args and not specs["allow_warnings"]:
-            # The user has passed the error-unused option to the test harness
-            # and it is NOT supplied already in the cli-args option
-            # also, neither is the conflicting option "warn-unused"
+        if '--error-unused' not in cli_args and (not specs["allow_unused"] or options.error_unused):
             cli_args.append('--error-unused')
+
+        if '--error-override' not in cli_args and not specs["allow_override"]:
+            cli_args.append('--error-override')
+
+        if '--error-deprecated' not in cli_args and (not specs["allow_deprecated"] or options.error_deprecated):
+            cli_args.append('--error-deprecated')
 
         if self.getCheckInput():
             cli_args.append('--check-input')

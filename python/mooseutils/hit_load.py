@@ -144,10 +144,10 @@ def hit_load(filename):
 
     hit_node = hit.parse(filename, content)
     root = HitNode(hitnode=hit_node)
-    _hit_parse(root, hit_node, filename)
+    hit_parse(root, hit_node, filename)
     return root
 
-def _hit_parse(root, hit_node, filename):
+def hit_parse(root, hit_node, filename):
     """
     Parse the supplied content into a hit tree.
 
@@ -162,7 +162,7 @@ def _hit_parse(root, hit_node, filename):
     for hit_child in hit_node.children():
         if hit_child.type() == hit.NodeType.Section:
             new = HitNode(parent=root, hitnode=hit_child)
-            _hit_parse(new, hit_child, filename)
+            hit_parse(new, hit_child, filename)
 
     return root
 

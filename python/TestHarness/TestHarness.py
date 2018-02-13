@@ -21,6 +21,7 @@ from FactorySystem.Parser import Parser
 from FactorySystem.Warehouse import Warehouse
 import util
 import hit
+from mooseutils import HitNode, hit_parse
 
 import argparse
 from timeit import default_timer as clock
@@ -36,10 +37,14 @@ def findTestRoot(start=os.getcwd(), method=os.environ.get('METHOD', 'opt')):
             args = []
             if root.find('cli_args'):
                 args = shlex.split(root.param('cli_args'))
+
+            hit_node = HitNode(hitnode=root)
+            hit_parse(hit_node, root, '')
+
             # TODO: add check to see if the binary exists before returning. This can be used to
             # allow users to control fallthrough for e.g. individual module binaries vs. the
             # combined binary.
-            return rootdir, root.param('app_name'), args
+            return rootdir, root.param('app_name'), args, hit_node
         rootdir = os.path.dirname(rootdir)
     raise RuntimeError('test root directory not found')
 
@@ -56,9 +61,9 @@ class TestHarness:
         os.environ['PYTHONPATH'] = os.path.join(moose_dir, 'python') + ':' + os.environ.get('PYTHONPATH', '')
 
         if app_name:
-            rootdir, app_name, args = '.', app_name, []
+            rootdir, app_name, args, root_params = '.', app_name, [], HitNode(hitnode=hit.parse('',''))
         else:
-            rootdir, app_name, args = findTestRoot(start=os.getcwd())
+            rootdir, app_name, args, root_params = findTestRoot(start=os.getcwd())
 
         orig_cwd = os.getcwd()
         os.chdir(rootdir)
@@ -67,6 +72,8 @@ class TestHarness:
         self.factory = Factory()
 
         self.app_name = app_name
+
+        self.root_params = root_params
 
         # Build a Warehouse to hold the MooseObjects
         self.warehouse = Warehouse()
@@ -267,7 +274,7 @@ class TestHarness:
         parser = Parser(self.factory, self.warehouse)
 
         # Parse it
-        parser.parse(file)
+        parser.parse(file, self.root_params)
         self.parse_errors.extend(parser.errors)
 
         # Retrieve the tests from the warehouse
@@ -333,6 +340,7 @@ class TestHarness:
         params['moose_dir'] = self.moose_dir
         params['base_dir'] = self.base_dir
         params['first_directory'] = first_directory
+        params['root_params'] = self.root_params
 
         if params.isValid('prereq'):
             if type(params['prereq']) != list:
@@ -660,6 +668,7 @@ class TestHarness:
         parser.add_argument('--distributed-mesh', action='store_true', dest='distributed_mesh', help='Pass "--distributed-mesh" to executable')
         parser.add_argument('--error', action='store_true', help='Run the tests with warnings as errors (Pass "--error" to executable)')
         parser.add_argument('--error-unused', action='store_true', help='Run the tests with errors on unused parameters (Pass "--error-unused" to executable)')
+        parser.add_argument('--error-deprecated', action='store_true', help='Run the tests with errors on deprecations')
 
         # Option to use for passing unwrapped options to the executable
         parser.add_argument('--cli-args', nargs='?', type=str, dest='cli_args', help='Append the following list of arguments to the command line (Encapsulate the command in quotes)')

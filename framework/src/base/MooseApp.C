@@ -343,16 +343,8 @@ MooseApp::setupOptions()
   // Turn all warnings in MOOSE to errors (almost see next logic block)
   Moose::_warnings_are_errors = getParam<bool>("error");
 
-  /**
-   * Deprecated messages can be toggled to errors independently from everything else.
-   * Normally they are toggled with the --error flag but that behavior can
-   * be modified with the --allow-warnings.
-   */
-  if (getParam<bool>("error_deprecated") ||
-      (Moose::_warnings_are_errors && !getParam<bool>("allow_deprecated")))
-    Moose::_deprecated_is_error = true;
-  else
-    Moose::_deprecated_is_error = false;
+  // Deprecated messages can be toggled to errors independently from everything else.
+  Moose::_deprecated_is_error = getParam<bool>("error_deprecated");
 
   if (isUltimateMaster()) // makes sure coloring isn't reset incorrectly in multi-app settings
   {
@@ -582,6 +574,7 @@ MooseApp::errorCheck()
 {
   bool warn = _enable_unused_check == WARN_UNUSED;
   bool err = _enable_unused_check == ERROR_UNUSED;
+
   _parser.errorCheck(*_comm, warn, err);
 
   auto apps = _executioner->feProblem().getMultiAppWarehouse().getObjects();

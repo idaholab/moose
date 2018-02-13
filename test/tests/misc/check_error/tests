@@ -95,14 +95,14 @@
     type = 'RunException'
     input = 'deprecated_param_test.i'
     expect_err = "The parameter \w+ is deprecated."
-    cli_args = '--error Kernels/nan/deprecated_default=1'
+    cli_args = 'Kernels/nan/deprecated_default=1'
   [../]
 
   [./deprecated_param_no_default]
     type = 'RunException'
     input = 'deprecated_param_test.i'
     expect_err = "The parameter \w+ is deprecated."
-    cli_args = '--error Kernels/nan/deprecated_no_default=1'
+    cli_args = 'Kernels/nan/deprecated_no_default=1'
   [../]
 
   [./double_restrict_uo_test]
@@ -432,8 +432,7 @@
     type = 'RunApp'
     expect_out = "unused parameter 'Mesh/unused_param'"
     input = 'unused_param_test.i'
-    cli_args = '--warn-unused'
-    allow_warnings = true
+    allow_unused = true
     max_parallel = 1 # warning can mix on multiple processes
   [../]
 
@@ -441,8 +440,8 @@
     type = 'RunApp'
     expect_out = "unused parameter 'Executioner/unused_param'"
     input = 'unused_param_test.i'
-    cli_args = '--warn-unused Executioner/unused_param=true'
-    allow_warnings = true
+    cli_args = 'Executioner/unused_param=true'
+    allow_unused = true
     max_parallel = 1 # warning can mix on multiple processes
   [../]
 
