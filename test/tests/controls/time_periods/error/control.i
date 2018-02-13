@@ -60,8 +60,12 @@
   [./damping_control]
     type = TimePeriod
     disable_objects = 'const_damp'
-    start_time = 0.25
-    end_time = 0.55
+
+    # Note: These numbers are quoted to get around an issue when
+    # overriding numeric types with vectors of numeric types
+    # on the CLI. They are still interpreted as numbers.
+    start_time = '0.25'
+    end_time = '0.55'
     execute_on = 'initial timestep_begin'
   [../]
 []

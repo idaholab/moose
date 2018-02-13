@@ -10,7 +10,7 @@
 #ifndef TABULATEDFLUIDPROPERTIESTEST_H
 #define TABULATEDFLUIDPROPERTIESTEST_H
 
-#include "gtest/gtest.h"
+#include "gtest_include.h"
 
 #include "FEProblem.h"
 #include "AppFactory.h"

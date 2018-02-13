@@ -56,8 +56,8 @@
     type = IterationAdaptiveDT
     dt = 1.0
     optimal_iterations = 10
-    time_t = '0.0, 5.0'
-    time_dt = '1.0, 5.0'
+    time_t = '0.0 5.0'
+    time_dt = '1.0 5.0'
   [../]
 []
 

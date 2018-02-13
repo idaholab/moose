@@ -459,7 +459,12 @@ Field::vecIntVal()
   {
     try
     {
-      vec.push_back(std::stoi(s));
+      size_t pos = 0;
+      auto converted_val = std::stoi(s, &pos);
+      if (pos != s.size())
+        throw std::invalid_argument("dummy");
+
+      vec.push_back(converted_val);
     }
     catch (...)
     {
@@ -478,7 +483,12 @@ Field::vecFloatVal()
   {
     try
     {
-      vec.push_back(std::stod(s));
+      size_t pos = 0;
+      auto converted_val = std::stod(s, &pos);
+      if (pos != s.size())
+        throw std::invalid_argument("dummy");
+
+      vec.push_back(converted_val);
     }
     catch (...)
     {
@@ -520,7 +530,11 @@ Field::intVal()
                 "')");
   try
   {
-    return std::stoi(_val);
+    size_t pos = 0;
+    auto converted_val = std::stoi(_val, &pos);
+    if (pos != _val.size())
+      throw std::invalid_argument("dummy");
+    return converted_val;
   }
   catch (...)
   {
@@ -535,7 +549,11 @@ Field::floatVal()
                 "')");
   try
   {
-    return std::stod(_val);
+    size_t pos = 0;
+    auto converted_val = std::stod(_val, &pos);
+    if (pos != _val.size())
+      throw std::invalid_argument("dummy");
+    return converted_val;
   }
   catch (...)
   {
@@ -812,10 +830,10 @@ public:
     }
     else if (result->type() == NodeType::Field)
     {
-      // node exists - overwrite its value
+      // node exists - overwrite its value and kind
       auto dst = static_cast<Field *>(result);
       auto src = static_cast<Field *>(n);
-      dst->setVal(src->val());
+      dst->setVal(src->val(), src->kind());
     }
   }
 

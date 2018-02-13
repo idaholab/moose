@@ -29,7 +29,7 @@
     # work.
     type = AddExtraNodeset
     new_boundary = pinned_node
-    coord = '1, 0'
+    coord = '1 0'
   [../]
 []
 

@@ -10,7 +10,7 @@
 #ifndef USERFUNCTIONTEST_H
 #define USERFUNCTIONTEST_H
 
-#include "gtest/gtest.h"
+#include "gtest_include.h"
 
 #include "InputParameters.h"
 #include "MooseParsedFunction.h"

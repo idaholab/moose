@@ -1285,7 +1285,7 @@ Parser::setScalarParameter(const std::string & full_name,
                    "\n";
       }
     }
-    else if (t == typeid(double))
+    else if (t == typeid(double) || t == typeid(float))
     {
       try
       {

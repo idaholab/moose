@@ -347,12 +347,12 @@ class Field : public Node
 {
 public:
   // Kind represents all possible value types that can be stored in a field.
-  enum class Kind
+  enum class Kind : unsigned char
   {
     None,
+    Bool,
     Int,
     Float,
-    Bool,
     String,
   };
   Field(const std::string & field, Kind k, const std::string & val);

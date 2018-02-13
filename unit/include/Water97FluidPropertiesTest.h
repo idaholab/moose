@@ -11,7 +11,7 @@
 #define WATER97FLUIDPROPERTIESTEST_H
 
 // CPPUnit includes
-#include "gtest/gtest.h"
+#include "gtest_include.h"
 
 #include "MooseApp.h"
 #include "Utils.h"
