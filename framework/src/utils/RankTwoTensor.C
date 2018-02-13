@@ -26,6 +26,7 @@
 #include <iomanip>
 #include <ostream>
 #include <vector>
+#include <array>
 
 template <>
 void
@@ -563,6 +564,20 @@ RankTwoTensor::mixedProductIkJl(const RankTwoTensor & b) const
 }
 
 RankFourTensor
+RankTwoTensor::mixedProductIlJk(const RankTwoTensor & b) const
+{
+  RankFourTensor result;
+
+  for (unsigned int i = 0; i < N; ++i)
+    for (unsigned int j = 0; j < N; ++j)
+      for (unsigned int k = 0; k < N; ++k)
+        for (unsigned int l = 0; l < N; ++l)
+          result(i, j, k, l) = (*this)(i, l) * b(j, k);
+
+  return result;
+}
+
+RankFourTensor
 RankTwoTensor::mixedProductJkIl(const RankTwoTensor & b) const
 {
   RankFourTensor result;
@@ -578,6 +593,56 @@ RankTwoTensor::mixedProductJkIl(const RankTwoTensor & b) const
       }
 
   return result;
+}
+
+RankFourTensor
+RankTwoTensor::positveProjectionEigenDecomposition() const
+{
+  // The calculate of projection tensor follows
+  // C. Miehe and M. Lambrecht, Commun. Numer. Meth. Engng 2001; 17:337~353
+
+  // Compute eigenvectors and eigenvalues of mechanical strain
+  RankTwoTensor eigvec;
+  std::vector<Real> eigval(N);
+  (*this).symmetricEigenvaluesEigenvectors(eigval, eigvec);
+
+  // Separate out positive and negative eigen values
+  std::array<Real, N> epos;
+  for (unsigned int i = 0; i < N; ++i)
+    epos[i] = (std::abs(eigval[i]) + eigval[i]) / 2.0;
+
+  // projection tensor
+  RankFourTensor proj_pos;
+  RankFourTensor Gab, Gba;
+  RankTwoTensor Ma, Mb;
+
+  for (unsigned int i = 0; i < N; ++i)
+  {
+    Ma.vectorOuterProduct(eigvec.column(i), eigvec.column(i));
+    Mb.vectorOuterProduct(eigvec.column(i), eigvec.column(i));
+    Gab = Ma.outerProduct(Mb);
+    if (eigval[i] > 0.0)
+      proj_pos += Gab;
+  }
+
+  for (unsigned int i = 0; i < N; ++i)
+  {
+    for (unsigned int j = 0; j < N && j != i; ++j)
+    {
+      Ma.vectorOuterProduct(eigvec.column(i), eigvec.column(i));
+      Mb.vectorOuterProduct(eigvec.column(j), eigvec.column(j));
+
+      Gab = Ma.mixedProductIkJl(Mb) + Ma.mixedProductIlJk(Mb);
+      Gba = Mb.mixedProductIkJl(Ma) + Mb.mixedProductIlJk(Ma);
+
+      // The case for equal eigenvalues
+      if (!MooseUtils::absoluteFuzzyEqual(eigval[i], eigval[j]))
+        proj_pos += (epos[i] - epos[j]) / (eigval[i] - eigval[j]) * (Gab + Gba) * 0.5;
+      else
+        proj_pos += (Gab + Gba) * 0.5;
+    }
+  }
+  return proj_pos;
 }
 
 RankTwoTensor

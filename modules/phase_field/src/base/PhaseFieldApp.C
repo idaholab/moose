@@ -24,7 +24,6 @@
 #include "ACInterfaceKobayashi1.h"
 #include "ACInterfaceKobayashi2.h"
 #include "ACInterfaceStress.h"
-#include "AllenCahnPFFracture.h"
 #include "ACSEDGPoly.h"
 #include "ACSwitching.h"
 #include "AllenCahn.h"
@@ -65,8 +64,6 @@
 #include "MatReaction.h"
 #include "MatGradSquareCoupled.h"
 #include "MultiGrainRigidBodyMotion.h"
-#include "PFFracBulkRate.h"
-#include "PFFracCoupledInterface.h"
 #include "SimpleACInterface.h"
 #include "SimpleCHInterface.h"
 #include "SimpleCoupledACInterface.h"
@@ -77,8 +74,6 @@
 #include "SplitCHParsed.h"
 #include "SplitCHWRes.h"
 #include "SplitCHWResAniso.h"
-#include "SplitPFFractureBulkRate.h"
-#include "PFFractureBulkRate.h"
 #include "SusceptibilityTimeDerivative.h"
 #include "SwitchingFunctionConstraintEta.h"
 #include "SwitchingFunctionConstraintLagrange.h"
@@ -154,7 +149,6 @@
 #include "MultiBarrierFunctionMaterial.h"
 #include "PFCRFFMaterial.h"
 #include "PFCTradMaterial.h"
-#include "PFFracBulkRateMaterial.h"
 #include "PFMobility.h"
 #include "PFParamsPolyFreeEnergy.h"
 #include "PhaseNormalTensor.h"
@@ -331,7 +325,6 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerKernel(ACInterfaceKobayashi1);
   registerKernel(ACInterfaceKobayashi2);
   registerKernel(ACInterfaceStress);
-  registerKernel(AllenCahnPFFracture);
   registerKernel(ACSEDGPoly);
   registerKernel(ACSwitching);
   registerKernel(AllenCahn);
@@ -372,9 +365,6 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerKernel(MatReaction);
   registerKernel(MatGradSquareCoupled);
   registerKernel(MultiGrainRigidBodyMotion);
-  registerDeprecatedObject(PFFracBulkRate, "08/01/2018 00:00");
-  registerKernel(PFFractureBulkRate);
-  registerDeprecatedObject(PFFracCoupledInterface, "08/01/2018 00:00");
   registerKernel(SimpleACInterface);
   registerKernel(SimpleCHInterface);
   registerKernel(SimpleCoupledACInterface);
@@ -385,7 +375,6 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerKernel(SplitCHParsed);
   registerKernel(SplitCHWRes);
   registerKernel(SplitCHWResAniso);
-  registerKernel(SplitPFFractureBulkRate);
   registerKernel(SusceptibilityTimeDerivative);
   registerKernel(SwitchingFunctionConstraintEta);
   registerKernel(SwitchingFunctionConstraintLagrange);
@@ -449,7 +438,6 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerMaterial(MultiBarrierFunctionMaterial);
   registerMaterial(PFCRFFMaterial);
   registerMaterial(PFCTradMaterial);
-  registerMaterial(PFFracBulkRateMaterial);
   registerMaterial(PFParamsPolyFreeEnergy);
   registerMaterial(PhaseNormalTensor);
   registerMaterial(PolynomialFreeEnergy);
