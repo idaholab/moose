@@ -13,5 +13,6 @@
     type = 'Exodiff'
     input = 'two_circle_marker_gaussian_ic.i'
     exodiff = 'two_circle_marker_gaussian_ic_out.e-s002'
-  [../]  
-[]    
+    max_parallel = 6 # Diffs with distributed mesh on 7-10 processors
+  [../]
+[]
