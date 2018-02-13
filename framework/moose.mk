@@ -194,7 +194,9 @@ moose_revision:
 	@echo Regenerating MooseRevision
 	$(shell $(FRAMEWORK_DIR)/scripts/get_repo_revision.py $(FRAMEWORK_DIR) \
 	  $(moose_revision_header) MOOSE)
-	@ln -sf $(moose_revision_header) $(moose_all_header_dir)
+	@if [ ! -e "$(moose_all_header_dir)/MooseRevision.h" ]; then \
+		ln -sf $(moose_revision_header) $(moose_all_header_dir); \
+	fi
 
 # libmesh submodule status
 libmesh_status := $(shell git -C $(MOOSE_DIR) submodule status 2>/dev/null | grep libmesh | cut -c1)
