@@ -124,11 +124,6 @@ validParams<MooseApp>()
       "Error when encountering overridden or parameters supplied multiple times");
   params.addCommandLineParam<bool>(
       "error_deprecated", "--error-deprecated", false, "Turn deprecated code messages into Errors");
-  params.addCommandLineParam<bool>(
-      "allow_deprecated",
-      "--allow-deprecated",
-      false,
-      "Can be used in conjunction with --error to turn off deprecated errors");
 
   params.addCommandLineParam<bool>(
       "distributed_mesh",
@@ -260,9 +255,6 @@ MooseApp::MooseApp(InputParameters parameters)
     _command_line = getParam<std::shared_ptr<CommandLine>>("_command_line");
   else
     mooseError("Valid CommandLine object required");
-
-  if (getParam<bool>("error_deprecated") && getParam<bool>("allow_deprecated"))
-    mooseError("Both error deprecated and allowed deprecated were set.");
 
   if (_check_input && isParamValid("recover"))
     mooseError("Cannot run --check-input with --recover. Recover files might not exist");

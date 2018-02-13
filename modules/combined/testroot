@@ -1,2 +1,1 @@
 app_name = combined
-cli_args = '--error'

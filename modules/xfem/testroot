@@ -1,2 +1,1 @@
 app_name = xfem
-cli_args = '--error'

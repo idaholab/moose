@@ -1,2 +1,1 @@
 app_name = heat_conduction
-cli_args = '--error'

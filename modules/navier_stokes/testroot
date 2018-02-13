@@ -1,2 +1,1 @@
 app_name = navier_stokes
-cli_args = '--error'

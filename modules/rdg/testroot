@@ -1,2 +1,1 @@
 app_name = rdg
-cli_args = '--error'

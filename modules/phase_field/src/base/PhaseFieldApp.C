@@ -343,7 +343,7 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerKernel(CahnHilliard);
   registerKernel(CahnHilliardAniso);
   registerKernel(CHBulkPFCTrad);
-  registerDeprecatedObject(CHCpldPFCTrad);
+  registerDeprecatedObject(CHCpldPFCTrad, "08/01/2018 00:00");
   registerKernel(CHInterface);
   registerKernel(CHInterfaceAniso);
   registerKernel(CHMath);
@@ -376,9 +376,9 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerKernel(MatDiffusion);
   registerKernel(MatReaction);
   registerKernel(MultiGrainRigidBodyMotion);
-  registerDeprecatedObject(PFFracBulkRate);
+  registerDeprecatedObject(PFFracBulkRate, "08/01/2018 00:00");
   registerKernel(PFFractureBulkRate);
-  registerDeprecatedObject(PFFracCoupledInterface);
+  registerDeprecatedObject(PFFracCoupledInterface, "08/01/2018 00:00");
   registerKernel(SimpleACInterface);
   registerKernel(SimpleCHInterface);
   registerKernel(SimpleCoupledACInterface);

@@ -1,2 +1,1 @@
 app_name = tensor_mechanics
-cli_args = '--error'
