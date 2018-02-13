@@ -7,7 +7,7 @@
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
-import re, os, time
+import re, os
 from Tester import Tester
 from TestHarness import util
 
@@ -120,9 +120,6 @@ class RunApp(Tester):
             # The user has passed the parallel-mesh option to the test harness
             # and it is NOT supplied already in the cli-args option
             cli_args.append('--distributed-mesh')
-
-
-        root_params = specs['root_params']
 
         if '--error' not in cli_args and (not specs["allow_warnings"] or options.error):
             cli_args.append('--error')
