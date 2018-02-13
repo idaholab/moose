@@ -26,11 +26,10 @@
     input = 'lots_of_variables.i'
     exodiff = 'lots_of_variables_out.e'
     max_parallel = 1
-    max_time = 30
+    max_time = 60 # Newer GCC + Profiling takes ~30 seconds
     compiler = 'GCC'
     method = 'OPT OPROF'
     valgrind = 'HEAVY'
-    min_reported_time = 20
     # this test has unknown issue with PETSc-master
     # It is related to communcators in VTK
     # We will fix it in the new release
