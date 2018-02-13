@@ -416,7 +416,7 @@ MooseTestApp::registerObjects(Factory & factory)
 
   registerDeprecatedObject(ExpiredKernel, "01/01/2018 00:00");
   registerDeprecatedObject(DeprecatedKernel, "01/01/2050 00:00");
-  registerRenamedObject("OldName", RenamedKernel, "01/01/2050 00:00");
+  registerRenamedObject("OldNamedKernel", RenamedKernel, "01/01/2050 00:00");
 
   // Aux kernels
   registerAux(DriftDiffusionFluxAux);

@@ -1,0 +1,27 @@
+[Tests]
+  [./deprecated]
+    type = 'RunApp'
+    input = 'deprecation.i'
+    cli_args = 'Kernels/diff/type=DeprecatedKernel'
+    expect_out = 'Deprecated Object: DeprecatedKernel'
+  [../]
+  [./expired]
+    type = 'RunApp'
+    input = 'deprecation.i'
+    cli_args = 'Kernels/diff/type=ExpiredKernel'
+    expect_out = 'Expired on Mon Jan'
+  [../]
+  [./expired_error]
+    type = 'RunException'
+    input = 'deprecation.i'
+    cli_args = 'Kernels/diff/type=ExpiredKernel'
+    expect_err = 'ERROR.*Expired on Mon Jan'
+    allow_deprecated = False
+  [../]
+  [./renamed]
+    type = 'RunApp'
+    input = 'deprecation.i'
+    cli_args = 'Kernels/diff/type=OldNamedKernel'
+    expect_out = 'Replace OldNamedKernel with RenamedKernel'
+  [../]
+[]
