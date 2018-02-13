@@ -61,6 +61,7 @@
                 - MooseUtils: docs/content/documentation/MooseUtils/index.md
                 - Software Quality: docs/content/documentation/sqa/index.md
             - Utilites:
+                - Python Tools: docs/content/utilities/python/index.md
                 - MooseDocs: docs/content/utilities/moose_docs/index.md
                 - Developing MOOSE Apps: docs/content/utilities/development/index.md
                 - Memory Logger: docs/content/utilities/memory_logger/memory_logger.md
