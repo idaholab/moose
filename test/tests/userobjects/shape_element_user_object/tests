@@ -4,6 +4,7 @@
     input = 'shape_element_user_object.i'
     recover = false
     allow_warnings = true
+    max_threads = 1
   [../]
 
   [./simple_shape_element_uo]
@@ -14,6 +15,7 @@
     difference_tol = 1E10
     recover = false
     allow_warnings = true
+    max_threads = 1
   [../]
 
   [./jacobian_test1]
@@ -24,6 +26,7 @@
     difference_tol = 1E10
     recover = false
     allow_warnings = true
+    max_threads = 1
   [../]
 
   [./jacobian_test2]
@@ -34,6 +37,7 @@
     difference_tol = 1E10
     recover = false
     allow_warnings = true
+    max_threads = 1
   [../]
 
   [./shape_side_uo_jac_test]
@@ -54,5 +58,6 @@
     exodiff = 'shape_side_uo_physics_test_out.e'
     allow_warnings = true
     recover = false
+    max_threads = 1
   [../]
 []
