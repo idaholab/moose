@@ -8,8 +8,8 @@ validParams<OneDHeatForcingFunction>()
   params.addRequiredParam<Real>("power_fraction", "The fraction of power used");
   params.addRequiredCoupledVar("total_power", "Total reactor power");
   params.addRequiredParam<Real>("volume", "The total heat structure volume");
-  params.addParam<FunctionName>("power_shape_function",
-                                "The name of the function that defines the power shape");
+  params.addRequiredParam<FunctionName>("power_shape_function",
+                                        "The name of the function that defines the power shape");
 
   return params;
 }
