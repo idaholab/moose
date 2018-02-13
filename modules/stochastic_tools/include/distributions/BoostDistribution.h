@@ -13,7 +13,9 @@
 #include "Distribution.h"
 
 #ifdef LIBMESH_HAVE_EXTERNAL_BOOST
+#include "libmesh/ignore_warnings.h"
 #include <boost/math/distributions.hpp>
+#include "libmesh/restore_warnings.h"
 #else
 class BoostDistributionDummy
 {

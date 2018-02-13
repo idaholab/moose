@@ -11,7 +11,7 @@
 #define DEPENDENCYRESOLVERTEST_H
 
 // CPPUnit includes
-#include "gtest/gtest.h"
+#include "gtest_include.h"
 
 #include "DependencyResolver.h"
 

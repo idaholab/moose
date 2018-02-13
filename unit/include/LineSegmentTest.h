@@ -10,7 +10,7 @@
 #ifndef LINESEGMENTTEST_H
 #define LINESEGMENTTEST_H
 
-#include "gtest/gtest.h"
+#include "gtest_include.h"
 
 #include "LineSegment.h"
 

@@ -11,7 +11,7 @@
 #define EBSDMESHERRORTEST_H
 
 // CPPUnit includes
-#include "gtest/gtest.h"
+#include "gtest_include.h"
 
 // Moose includes
 #include "EBSDMesh.h"

@@ -10,7 +10,7 @@
 #ifndef RANKTWOTENSORTEST_H
 #define RANKTWOTENSORTEST_H
 
-#include "gtest/gtest.h"
+#include "gtest_include.h"
 
 // Moose includes
 #include "RankTwoTensor.h"
