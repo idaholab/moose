@@ -1,1 +1,2 @@
 app_name = moose_python
+allow_warnings = false

@@ -1,1 +1,2 @@
 app_name = rdg
+allow_warnings = false

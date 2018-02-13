@@ -1,1 +1,2 @@
 app_name = phase_field
+allow_warnings = false

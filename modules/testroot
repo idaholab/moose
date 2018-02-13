@@ -1,2 +1,3 @@
 app_name = combined/combined
 cli_args = '--color-first-directory'
+allow_warnings = false

@@ -1,1 +1,2 @@
 app_name = navier_stokes
+allow_warnings = false

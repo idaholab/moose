@@ -1,1 +1,2 @@
 app_name = porous_flow
+allow_warnings = false

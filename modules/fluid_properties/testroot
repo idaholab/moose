@@ -1,1 +1,2 @@
 app_name = fluid_properties
+allow_warnings = false

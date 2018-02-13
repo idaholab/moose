@@ -1,1 +1,2 @@
 app_name = solid_mechanics
+allow_warnings = false

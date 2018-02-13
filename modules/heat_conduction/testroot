@@ -1,1 +1,2 @@
 app_name = heat_conduction
+allow_warnings = false

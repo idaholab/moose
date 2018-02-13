@@ -1,1 +1,2 @@
 app_name = moose_test
+allow_warnings = false

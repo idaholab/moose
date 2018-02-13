@@ -1,1 +1,2 @@
 app_name = chemical_reactions
+allow_warnings = false

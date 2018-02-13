@@ -1,1 +1,2 @@
 app_name = xfem
+allow_warnings = false

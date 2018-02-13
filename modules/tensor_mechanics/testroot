@@ -1,1 +1,2 @@
 app_name = tensor_mechanics
+allow_warnings = false
