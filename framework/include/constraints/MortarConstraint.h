@@ -7,8 +7,8 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef FACEFACECONSTRAINT_H
-#define FACEFACECONSTRAINT_H
+#ifndef MORTARCONSTRAINT_H
+#define MORTARCONSTRAINT_H
 
 // MOOSE includes
 #include "Constraint.h"
@@ -16,11 +16,11 @@
 #include "MooseMesh.h"
 
 // Forward Declarations
-class FaceFaceConstraint;
+class MortarConstraint;
 class FEProblemBase;
 
 template <>
-InputParameters validParams<FaceFaceConstraint>();
+InputParameters validParams<MortarConstraint>();
 
 /**
  * User for mortar methods
@@ -37,11 +37,11 @@ InputParameters validParams<FaceFaceConstraint>();
  *         +--------------+-------------+-------------+
  *
  */
-class FaceFaceConstraint : public Constraint,
-                           public CoupleableMooseVariableDependencyIntermediateInterface
+class MortarConstraint : public Constraint,
+                         public CoupleableMooseVariableDependencyIntermediateInterface
 {
 public:
-  FaceFaceConstraint(const InputParameters & parameters);
+  MortarConstraint(const InputParameters & parameters);
 
   /**
    * Evaluate variables, compute q-points, etc.
@@ -161,4 +161,4 @@ protected:
   const VariablePhiValue & _phi_slave;
 };
 
-#endif /* FACEFACECONSTRAINT_H */
+#endif /* MORTARCONSTRAINT_H */

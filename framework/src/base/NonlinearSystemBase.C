@@ -44,7 +44,7 @@
 #include "PenetrationLocator.h"
 #include "NodalConstraint.h"
 #include "NodeFaceConstraint.h"
-#include "FaceFaceConstraint.h"
+#include "MortarConstraint.h"
 #include "ElemElemConstraint.h"
 #include "ScalarKernel.h"
 #include "Parser.h"
@@ -969,9 +969,9 @@ NonlinearSystemBase::constraintResiduals(NumericVector<Number> & residual, bool 
   auto & ifaces = _mesh.getMortarInterfaces();
   for (const auto & iface : ifaces)
   {
-    if (_constraints.hasActiveFaceFaceConstraints(iface->_name))
+    if (_constraints.hasActiveMortarConstraints(iface->_name))
     {
-      const auto & face_constraints = _constraints.getActiveFaceFaceConstraints(iface->_name);
+      const auto & face_constraints = _constraints.getActiveMortarConstraints(iface->_name);
 
       // go over elements on that interface
       const std::vector<Elem *> & elems = iface->_elems;
@@ -1682,10 +1682,10 @@ NonlinearSystemBase::constraintJacobians(SparseMatrix<Number> & jacobian, bool d
   auto & ifaces = _mesh.getMortarInterfaces();
   for (const auto & iface : ifaces)
   {
-    if (_constraints.hasActiveFaceFaceConstraints(iface->_name))
+    if (_constraints.hasActiveMortarConstraints(iface->_name))
     {
-      // FaceFaceConstraint objects
-      const auto & face_constraints = _constraints.getActiveFaceFaceConstraints(iface->_name);
+      // MortarConstraint objects
+      const auto & face_constraints = _constraints.getActiveMortarConstraints(iface->_name);
 
       // go over elements on that interface
       const std::vector<Elem *> & elems = iface->_elems;

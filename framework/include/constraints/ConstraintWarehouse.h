@@ -17,7 +17,7 @@
 class Constraint;
 class NodalConstraint;
 class NodeFaceConstraint;
-class FaceFaceConstraint;
+class MortarConstraint;
 class ElemElemConstraint;
 
 /**
@@ -40,8 +40,8 @@ public:
    * Access methods for active objects.
    */
   const std::vector<std::shared_ptr<NodalConstraint>> & getActiveNodalConstraints() const;
-  const std::vector<std::shared_ptr<FaceFaceConstraint>> &
-  getActiveFaceFaceConstraints(const std::string & interface) const;
+  const std::vector<std::shared_ptr<MortarConstraint>> &
+  getActiveMortarConstraints(const std::string & interface) const;
   const std::vector<std::shared_ptr<ElemElemConstraint>> &
   getActiveElemElemConstraints(InterfaceID interface_id) const;
   const std::vector<std::shared_ptr<NodeFaceConstraint>> &
@@ -53,7 +53,7 @@ public:
    * Deterimine if active objects exist.
    */
   bool hasActiveNodalConstraints() const;
-  bool hasActiveFaceFaceConstraints(const std::string & interface) const;
+  bool hasActiveMortarConstraints(const std::string & interface) const;
   bool hasActiveElemElemConstraints(const InterfaceID interface_id) const;
   bool hasActiveNodeFaceConstraints(BoundaryID boundary_id, bool displaced) const;
   ///@}
@@ -82,8 +82,8 @@ protected:
   /// NodeFaceConstraint objects (displaced)
   std::map<BoundaryID, MooseObjectWarehouse<NodeFaceConstraint>> _displaced_node_face_constraints;
 
-  /// FaceFaceConstraints
-  std::map<std::string, MooseObjectWarehouse<FaceFaceConstraint>> _face_face_constraints;
+  /// MortarConstraints
+  std::map<std::string, MooseObjectWarehouse<MortarConstraint>> _mortar_constraints;
 
   /// ElemElemConstraints
   std::map<unsigned int, MooseObjectWarehouse<ElemElemConstraint>> _element_constraints;

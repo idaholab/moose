@@ -10,7 +10,7 @@
 #ifndef GAPCONDUCTANCECONSTRAINT_H
 #define GAPCONDUCTANCECONSTRAINT_H
 
-#include "FaceFaceConstraint.h"
+#include "MortarConstraint.h"
 
 class GapConductanceConstraint;
 
@@ -52,7 +52,7 @@ InputParameters validParams<GapConductanceConstraint>();
  * variable. Likewise, the term "primal variable" refers to the
  * temperature variable.
  */
-class GapConductanceConstraint : public FaceFaceConstraint
+class GapConductanceConstraint : public MortarConstraint
 {
 public:
   GapConductanceConstraint(const InputParameters & parameters);

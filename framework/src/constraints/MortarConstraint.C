@@ -7,7 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "FaceFaceConstraint.h"
+#include "MortarConstraint.h"
 
 // MOOSE includes
 #include "Assembly.h"
@@ -20,7 +20,7 @@
 
 template <>
 InputParameters
-validParams<FaceFaceConstraint>()
+validParams<MortarConstraint>()
 {
   InputParameters params = validParams<Constraint>();
   params.addRequiredParam<std::string>("interface", "The name of the interface.");
@@ -29,7 +29,7 @@ validParams<FaceFaceConstraint>()
   return params;
 }
 
-FaceFaceConstraint::FaceFaceConstraint(const InputParameters & parameters)
+MortarConstraint::MortarConstraint(const InputParameters & parameters)
   : Constraint(parameters),
     CoupleableMooseVariableDependencyIntermediateInterface(this, true),
     _fe_problem(*getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")),
@@ -64,7 +64,7 @@ FaceFaceConstraint::FaceFaceConstraint(const InputParameters & parameters)
 }
 
 void
-FaceFaceConstraint::reinit()
+MortarConstraint::reinit()
 {
   unsigned int nqp = _qrule->n_points();
 
@@ -118,7 +118,7 @@ FaceFaceConstraint::reinit()
 }
 
 void
-FaceFaceConstraint::reinitSide(Moose::ConstraintType res_type)
+MortarConstraint::reinitSide(Moose::ConstraintType res_type)
 {
   switch (res_type)
   {
@@ -141,7 +141,7 @@ FaceFaceConstraint::reinitSide(Moose::ConstraintType res_type)
 }
 
 void
-FaceFaceConstraint::computeResidual()
+MortarConstraint::computeResidual()
 {
   DenseVector<Number> & re = _assembly.residualBlock(_var.number());
   for (_qp = 0; _qp < _qrule->n_points(); _qp++)
@@ -150,7 +150,7 @@ FaceFaceConstraint::computeResidual()
 }
 
 void
-FaceFaceConstraint::computeResidualSide(Moose::ConstraintType side)
+MortarConstraint::computeResidualSide(Moose::ConstraintType side)
 {
   switch (side)
   {
@@ -179,7 +179,7 @@ FaceFaceConstraint::computeResidualSide(Moose::ConstraintType side)
 }
 
 void
-FaceFaceConstraint::computeJacobian()
+MortarConstraint::computeJacobian()
 {
   _phi = _assembly.getFE(_var.feType(), _dim - 1)->get_phi(); // yes we need to do a copy here
   std::vector<std::vector<Real>> phi_master;
@@ -194,7 +194,7 @@ FaceFaceConstraint::computeJacobian()
 }
 
 void
-FaceFaceConstraint::computeJacobianSide(Moose::ConstraintType side)
+MortarConstraint::computeJacobianSide(Moose::ConstraintType side)
 {
   switch (side)
   {
@@ -240,12 +240,12 @@ FaceFaceConstraint::computeJacobianSide(Moose::ConstraintType side)
 }
 
 Real
-FaceFaceConstraint::computeQpJacobian()
+MortarConstraint::computeQpJacobian()
 {
   return 0.;
 }
 
-Real FaceFaceConstraint::computeQpJacobianSide(Moose::ConstraintJacobianType /*side_type*/)
+Real MortarConstraint::computeQpJacobianSide(Moose::ConstraintJacobianType /*side_type*/)
 {
   return 0.;
 }

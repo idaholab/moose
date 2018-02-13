@@ -15,12 +15,12 @@ template <>
 InputParameters
 validParams<EqualValueConstraint>()
 {
-  InputParameters params = validParams<FaceFaceConstraint>();
+  InputParameters params = validParams<MortarConstraint>();
   return params;
 }
 
 EqualValueConstraint::EqualValueConstraint(const InputParameters & parameters)
-  : FaceFaceConstraint(parameters)
+  : MortarConstraint(parameters)
 {
 }
 
