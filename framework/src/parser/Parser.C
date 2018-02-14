@@ -1369,9 +1369,17 @@ Parser::setVectorParameter(const std::string & full_name,
   std::vector<T> vec;
   if (_root->find(full_name))
   {
-    auto tmp = _root->param<std::vector<Base>>(full_name);
-    for (auto val : tmp)
-      vec.push_back(val);
+    try
+    {
+      auto tmp = _root->param<std::vector<Base>>(full_name);
+      for (auto val : tmp)
+        vec.push_back(val);
+    }
+    catch (hit::Error & err)
+    {
+      _errmsg += errormsg(_input_filename, _root->find(full_name), err.what());
+      return;
+    }
   }
 
   param->set() = vec;
@@ -1442,7 +1450,11 @@ Parser::setDoubleIndexParameter(const std::string & full_name,
 
   for (unsigned j = 0; j < first_tokenized_vector.size(); ++j)
     if (!MooseUtils::tokenizeAndConvert<T>(first_tokenized_vector[j], param->set()[j]))
-      mooseError("Reading parameter ", short_name, " failed.");
+    {
+      _errmsg += errormsg(
+          _input_filename, _root->find(full_name), "invalid format for parameter ", full_name);
+      return;
+    }
 
   if (in_global)
   {
@@ -1465,13 +1477,29 @@ Parser::setScalarComponentParameter(const std::string & full_name,
                                     bool in_global,
                                     GlobalParamsAction * global_block)
 {
-  auto vec = _root->param<std::vector<double>>(full_name);
+  std::vector<double> vec;
+  try
+  {
+    vec = _root->param<std::vector<double>>(full_name);
+  }
+  catch (hit::Error & err)
+  {
+    _errmsg += errormsg(_input_filename, _root->find(full_name), err.what());
+    return;
+  }
 
   if (vec.size() != LIBMESH_DIM)
-    mooseError(std::string("Error in Scalar Component parameter ") + full_name + ": size is ",
-               vec.size(),
-               ", should be ",
-               LIBMESH_DIM);
+  {
+    _errmsg += errormsg(_input_filename,
+                        _root->find(full_name),
+                        "wrong number of values in scalar component parameter ",
+                        full_name,
+                        ": size ",
+                        vec.size(),
+                        " is not a multiple of ",
+                        LIBMESH_DIM);
+    return;
+  }
 
   T value;
   for (unsigned int i = 0; i < vec.size(); ++i)
@@ -1493,13 +1521,29 @@ Parser::setVectorComponentParameter(const std::string & full_name,
                                     bool in_global,
                                     GlobalParamsAction * global_block)
 {
-  auto vec = _root->param<std::vector<double>>(full_name);
+  std::vector<double> vec;
+  try
+  {
+    vec = _root->param<std::vector<double>>(full_name);
+  }
+  catch (hit::Error & err)
+  {
+    _errmsg += errormsg(_input_filename, _root->find(full_name), err.what());
+    return;
+  }
 
   if (vec.size() % LIBMESH_DIM)
-    mooseError(std::string("Error in Vector Component parameter ") + full_name + ": size is ",
-               vec.size(),
-               ", should be a multiple of ",
-               LIBMESH_DIM);
+  {
+    _errmsg += errormsg(_input_filename,
+                        _root->find(full_name),
+                        "wrong number of values in vector component parameter ",
+                        full_name,
+                        ": size ",
+                        vec.size(),
+                        " is not a multiple of ",
+                        LIBMESH_DIM);
+    return;
+  }
 
   std::vector<T> values;
   for (unsigned int i = 0; i < vec.size() / LIBMESH_DIM; ++i)
@@ -1626,10 +1670,17 @@ Parser::setScalarParameter<RealTensorValue, RealTensorValue>(
 {
   auto vec = _root->param<std::vector<double>>(full_name);
   if (vec.size() != LIBMESH_DIM * LIBMESH_DIM)
-    mooseError(std::string("Error in RealTensorValue parameter ") + full_name + ": size is ",
-               vec.size(),
-               ", should be ",
-               LIBMESH_DIM * LIBMESH_DIM);
+  {
+    _errmsg += errormsg(_input_filename,
+                        _root->find(full_name),
+                        "invalid RealTensorValue parameter ",
+                        full_name,
+                        ": size is ",
+                        vec.size(),
+                        " but should be ",
+                        LIBMESH_DIM * LIBMESH_DIM);
+    return;
+  }
 
   RealTensorValue value;
   for (int i = 0; i < LIBMESH_DIM; ++i)
@@ -1773,8 +1824,17 @@ Parser::setVectorParameter<VariableName, VariableName>(
 
     for (unsigned int i = 0; i < vec.size(); ++i)
       if (var_names[i] == "")
-        mooseError("MOOSE does not currently support a coupled vector where some parameters are "
-                   "reals and others are variables");
+      {
+        _errmsg += errormsg(
+            _input_filename,
+            _root->find(full_name),
+            "invalid vallue for ",
+            full_name,
+            ":\n"
+            "    MOOSE does not currently support a coupled vector where some parameters are ",
+            "reals and others are variables");
+        return;
+      }
       else
         param->set()[i] = var_names[i];
   }
