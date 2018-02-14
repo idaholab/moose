@@ -1,6 +1,11 @@
 
 #include "braceexpr.h"
 
+#include <cstdlib>
+
+namespace hit
+{
+
 std::string
 BraceNode::str(int indent)
 {
@@ -28,7 +33,7 @@ BraceNode::append()
 }
 
 std::string
-EnvEvaler::eval(std::list<std::string> & args)
+EnvEvaler::eval(std::list<std::string> & args) const
 {
   std::string var = args.front();
   std::string val;
@@ -39,7 +44,7 @@ EnvEvaler::eval(std::list<std::string> & args)
 }
 
 std::string
-RawEvaler::eval(std::list<std::string> & args)
+RawEvaler::eval(std::list<std::string> & args) const
 {
   std::string s;
   for (auto & arg : args)
@@ -51,7 +56,7 @@ size_t parseBraceNode(const std::string & input, size_t start, BraceNode & n);
 size_t parseBraceBody(const std::string & input, size_t start, BraceNode & n);
 
 void
-BraceExpander::registerEvaler(const std::string & name, Evaler & ev)
+BraceExpander::registerEvaler(const std::string & name, const Evaler & ev)
 {
   _evalers[name] = &ev;
 }
@@ -150,3 +155,69 @@ parseBraceBody(const std::string & input, size_t start, BraceNode & n)
   }
   return start;
 }
+
+ExpandWalker::ExpandWalker(std::string fname, BraceExpander& expander)
+  : _fname(fname), _expander(expander)
+{
+}
+
+void
+ExpandWalker::walk(const std::string & /*fullpath*/, const std::string & /*nodepath*/, Node * n)
+{
+  auto f = dynamic_cast<Field *>(n);
+  if (!f)
+    return;
+
+  std::string s;
+  try
+  {
+    s = _expander.expand(f->val());
+  }
+  catch (Error & err)
+  {
+    errors.push_back(errormsg(_fname, n, err.what()));
+    return;
+  }
+
+  auto start = s.find("${");
+  while (start < s.size())
+  {
+    auto end = s.find("}", start);
+    if (end != std::string::npos)
+    {
+      auto var = s.substr(start + 2, end - (start + 2));
+
+      auto curr = n;
+      while ((curr = curr->parent()))
+      {
+        auto src = curr->find(var);
+        if (src && src != n && src->type() == NodeType::Field)
+        {
+          used.push_back(pathJoin({curr->fullpath(), var}));
+          s = s.substr(0, start) + curr->param<std::string>(var) +
+              s.substr(end + 1, s.size() - (end + 1));
+
+          if (end + 1 - start == f->val().size())
+            f->setVal(s, dynamic_cast<Field *>(curr->find(var))->kind());
+          else
+            f->setVal(s);
+
+          // move end back to the position of the end of the replacement text - not the replaced
+          // text since the former is the one relevant to the string for remaining replacements.
+          end = start + curr->param<std::string>(var).size();
+          break;
+        }
+      }
+
+      if (curr == nullptr)
+        errors.push_back(
+            errormsg(_fname, n, "no variable '", var, "' found for substitution expression"));
+    }
+    else
+      errors.push_back(errormsg(_fname, n, "missing substitution expression terminator '}'"));
+    start = s.find("${", end);
+  }
+  f->setVal(s);
+}
+
+} // namespace hit
