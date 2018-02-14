@@ -77,7 +77,7 @@ class InputFile(object):
             root = hit.parse(os.path.abspath(filename), data)
             hit.explode(root)
             w = DupWalker(os.path.abspath(filename))
-            root.walk(w, hit.NodeType.All)
+            root.walk(w, hit.NodeType.Field)
             if w.errors:
                 for err in w.errors:
                     mooseutils.mooseWarning(err)
