@@ -1,7 +1,7 @@
 #ifndef ENUMS_H
 #define ENUMS_H
 
-#include <string>
+#include <algorithm>
 #include "MooseEnum.h"
 
 namespace RELAP7
@@ -30,6 +30,16 @@ template <typename T>
 T stringToEnum(const std::string & s,
                const std::map<std::string, T> & enum_map,
                const std::string & description);
+
+/**
+ * Gets MooseEnum corresponding to an enum, using a map of string to enum
+ *
+ * @tparam    T             enum type
+ * @param[in] default_key   key corresponding to default value
+ * @param[in] enum_map      map of string to enum
+ */
+template <typename T>
+MooseEnum getMooseEnum(const std::string & default_key, const std::map<std::string, T> & enum_map);
 
 /// Type of the heat transfer geometry
 enum EConvHeatTransGeom
@@ -111,10 +121,10 @@ enum ECheckValveType
 const std::map<std::string, ECheckValveType> check_valve_type_to_enum{
     {"FLOW", CHECK_VALVE_FLOW}, {"STATIC", CHECK_VALVE_STATIC}, {"DYNAMIC", CHECK_VALVE_DYNAMIC}};
 
-MooseEnum getCheckValveType(const std::string & str = "FLOW");
-
 template <>
 ECheckValveType stringToEnum<ECheckValveType>(const std::string & s);
+
+MooseEnum getCheckValveType(const std::string & str = "FLOW");
 
 // ----------------------------------------------------------------------------
 
