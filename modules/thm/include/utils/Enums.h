@@ -155,7 +155,6 @@ MooseEnum getFlowEquationType(const std::string & eqn_name = "INVALID");
 /// Type of heat structure
 enum EHeatStructureType
 {
-  HS_TYPE_INVALID,
   HS_TYPE_PLATE,
   HS_TYPE_CYLINDER
 };
