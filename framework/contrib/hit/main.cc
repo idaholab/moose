@@ -39,9 +39,9 @@ main(int argc, char ** argv)
     for (std::string line; std::getline(std::cin, line);)
       ss << line << std::endl;
 
-    BraceExpander expander;
-    EnvEvaler env;
-    RawEvaler raw;
+    hit::BraceExpander expander;
+    hit::EnvEvaler env;
+    hit::RawEvaler raw;
     expander.registerEvaler("env", env);
     expander.registerEvaler("raw", raw);
     std::cout << expander.expand(ss.str()) << "\n";
@@ -126,26 +126,6 @@ parseOpts(int argc, char ** argv, Flags & flags)
   return positional;
 }
 
-inline std::string
-errormsg(std::string /*fname*/, hit::Node * /*n*/)
-{
-  return "";
-}
-
-template <typename T, typename... Args>
-std::string
-errormsg(std::string fname, hit::Node * n, T arg, Args... args)
-{
-  std::stringstream ss;
-  if (n && fname.size() > 0)
-    ss << fname << ":" << n->line() << ": ";
-  else if (fname.size() > 0)
-    ss << fname << ":0: ";
-  ss << arg;
-  ss << errormsg("", nullptr, args...);
-  return ss.str();
-}
-
 class DupParamWalker : public hit::Walker
 {
 public:
@@ -160,10 +140,11 @@ public:
       if (_duplicates.count(fullpath) == 0)
       {
         errors.push_back(
-            errormsg(_fname, existing, prefix, " '", fullpath, "' supplied multiple times"));
+            hit::errormsg(_fname, existing, prefix, " '", fullpath, "' supplied multiple times"));
         _duplicates.insert(fullpath);
       }
-      errors.push_back(errormsg(_fname, n, prefix, " '", fullpath, "' supplied multiple times"));
+      errors.push_back(
+          hit::errormsg(_fname, n, prefix, " '", fullpath, "' supplied multiple times"));
     }
     _have[n->fullpath()] = n;
   }
