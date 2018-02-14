@@ -41,4 +41,23 @@
     cli_args = 'Kernels/diff/use_displaced_mesh=true Executioner/dt=0.8'
     expect_err = 'ERROR: negative Jacobian -0.0625 at point \(x,y,z\)=\(-0.105662, 0.211325, 0.211325\) in element 0'
   [../]
+
+  [./no_negative_jacobian_2D]
+    type = RunApp
+    input = no_negative_jacobian_2D.i
+  [../]
+  [./jacobian_2D_zero]
+    type = RunException
+    input = no_negative_jacobian_2D.i
+    prereq = no_negative_jacobian_2D
+    cli_args = 'Kernels/diff/use_displaced_mesh=true'
+    expect_err = 'ERROR: negative Jacobian 0 at point \(x,y,z\)=\(       0, 0.211325,        0\) in element 0'
+  [../]
+  #[./jacobian_2D_negative]
+  #  type = RunException
+  #  input = no_negative_jacobian_2D.i
+  #  prereq = no_negative_jacobian_2D
+  #  cli_args = 'Kernels/diff/use_displaced_mesh=true Executioner/dt=0.8'
+  #  expect_err = 'ERROR: negative Jacobian -0.0625 at point \(x,y,z\)=\(-0.105662, 0.211325, 0.211325\) in element 0'
+  #[../]
 []
