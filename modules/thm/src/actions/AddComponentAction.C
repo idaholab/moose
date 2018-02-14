@@ -5,11 +5,11 @@ template <>
 InputParameters
 validParams<AddComponentAction>()
 {
-  InputParameters params = validParams<R7ObjectAction>();
+  InputParameters params = validParams<RELAP7ObjectAction>();
   return params;
 }
 
-AddComponentAction::AddComponentAction(InputParameters params) : R7ObjectAction(params) {}
+AddComponentAction::AddComponentAction(InputParameters params) : RELAP7ObjectAction(params) {}
 
 void
 AddComponentAction::act()

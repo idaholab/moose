@@ -1,7 +1,7 @@
 #ifndef IDENTIFYLOOPSACTION_H
 #define IDENTIFYLOOPSACTION_H
 
-#include "R7Action.h"
+#include "RELAP7Action.h"
 
 class IdentifyLoopsAction;
 
@@ -11,7 +11,7 @@ InputParameters validParams<IdentifyLoopsAction>();
 /**
  * Identifies the component loops.
  */
-class IdentifyLoopsAction : public R7Action
+class IdentifyLoopsAction : public RELAP7Action
 {
 public:
   IdentifyLoopsAction(InputParameters parameters);

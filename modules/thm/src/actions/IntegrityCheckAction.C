@@ -5,12 +5,12 @@ template <>
 InputParameters
 validParams<IntegrityCheckAction>()
 {
-  InputParameters params = validParams<R7Action>();
+  InputParameters params = validParams<RELAP7Action>();
 
   return params;
 }
 
-IntegrityCheckAction::IntegrityCheckAction(InputParameters parameters) : R7Action(parameters) {}
+IntegrityCheckAction::IntegrityCheckAction(InputParameters parameters) : RELAP7Action(parameters) {}
 
 void
 IntegrityCheckAction::act()

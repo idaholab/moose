@@ -5,13 +5,13 @@ template <>
 InputParameters
 validParams<ControlDataIntegrityCheckAction>()
 {
-  InputParameters params = validParams<R7Action>();
+  InputParameters params = validParams<RELAP7Action>();
 
   return params;
 }
 
 ControlDataIntegrityCheckAction::ControlDataIntegrityCheckAction(InputParameters parameters)
-  : R7Action(parameters)
+  : RELAP7Action(parameters)
 {
 }
 

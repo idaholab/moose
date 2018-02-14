@@ -4,12 +4,12 @@ template <>
 InputParameters
 validParams<IdentifyLoopsAction>()
 {
-  InputParameters params = validParams<R7Action>();
+  InputParameters params = validParams<RELAP7Action>();
 
   return params;
 }
 
-IdentifyLoopsAction::IdentifyLoopsAction(InputParameters parameters) : R7Action(parameters) {}
+IdentifyLoopsAction::IdentifyLoopsAction(InputParameters parameters) : RELAP7Action(parameters) {}
 
 void
 IdentifyLoopsAction::act()

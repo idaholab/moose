@@ -1,14 +1,14 @@
 #ifndef ADDCOMPONENTACTION_H
 #define ADDCOMPONENTACTION_H
 
-#include "R7ObjectAction.h"
+#include "RELAP7ObjectAction.h"
 
 class AddComponentAction;
 
 template <>
 InputParameters validParams<AddComponentAction>();
 
-class AddComponentAction : public R7ObjectAction
+class AddComponentAction : public RELAP7ObjectAction
 {
 public:
   AddComponentAction(InputParameters params);

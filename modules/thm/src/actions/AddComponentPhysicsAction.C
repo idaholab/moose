@@ -4,11 +4,13 @@ template <>
 InputParameters
 validParams<AddComponentPhysicsAction>()
 {
-  InputParameters params = validParams<R7Action>();
+  InputParameters params = validParams<RELAP7Action>();
   return params;
 }
 
-AddComponentPhysicsAction::AddComponentPhysicsAction(InputParameters params) : R7Action(params) {}
+AddComponentPhysicsAction::AddComponentPhysicsAction(InputParameters params) : RELAP7Action(params)
+{
+}
 
 void
 AddComponentPhysicsAction::act()

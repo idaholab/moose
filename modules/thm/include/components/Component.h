@@ -16,7 +16,7 @@ template <>
 InputParameters validParams<Component>();
 
 /**
- * Base class for R7 components
+ * Base class for RELAP-7 components
  */
 class Component : public RELAP7Object
 {
