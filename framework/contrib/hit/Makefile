@@ -4,8 +4,8 @@ PYTHONPREFIX ?= `python-config --prefix`
 PYTHONCFLAGS ?= `python-config --cflags`
 PYTHONLDFLAGS ?= `python-config --ldflags`
 
-hit: main.cc parse.cc lex.cc lex.h parse.h
-	$(CXX) -std=c++11 -g $(CXXFLAGS) $< parse.cc lex.cc -o $@
+hit: main.cc parse.cc lex.cc braceexpr.cc braceexpr.h lex.h parse.h
+	$(CXX) -std=c++11 -g $(CXXFLAGS) $< parse.cc lex.cc braceexpr.cc -o $@
 
 rewrite: rewrite.cc parse.cc lex.cc lex.h parse.h
 	$(CXX) -std=c++11 -g $(CXXFLAGS) $< parse.cc lex.cc -o $@
