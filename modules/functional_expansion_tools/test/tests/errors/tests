@@ -1,13 +1,4 @@
 [Tests]
-  [./FunctionSeriesToAux_bad_function]
-    # The function must be a FunctionSeries type
-    type = RunException
-    input = aux_bad_function.i
-    expect_err = "'function' must be a FunctionSeries type"
-    group = functional_expansion_tools
-  [../]
-
-
   [./Cartesian_missing_series]
     # Every functional series must have a series set for each dimension
     type = RunException
@@ -40,6 +31,42 @@
     type = RunException
     input = multiple_series_duo.i
     expect_err = "Cannot specify more than one of 'x', 'y', or 'z' for 'CylindricalDuo' series!"
+    group = functional_expansion_tools
+  [../]
+
+
+  [./FXFluxBC_bad_function]
+    # The function must be a FunctionSeries type
+    type = RunException
+    input = bc_flux_bad_function.i
+    expect_err = "must be a FunctionSeries-type object."
+    group = functional_expansion_tools
+  [../]
+
+
+  [./FXValueBC_bad_function]
+    # The function must be a FunctionSeries type
+    type = RunException
+    input = bc_value_bad_function.i
+    expect_err = "must be a FunctionSeries-type object."
+    group = functional_expansion_tools
+  [../]
+
+
+  [./FXValuePenaltyBC_bad_function]
+    # The function must be a FunctionSeries type
+    type = RunException
+    input = bc_value_penalty_bad_function.i
+    expect_err = "must be a FunctionSeries-type object."
+    group = functional_expansion_tools
+  [../]
+
+
+  [./FunctionSeriesToAux_bad_function]
+    # The function must be a FunctionSeries type
+    type = RunException
+    input = aux_bad_function.i
+    expect_err = "must be a FunctionSeries-type object."
     group = functional_expansion_tools
   [../]
 

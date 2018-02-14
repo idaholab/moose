@@ -31,7 +31,9 @@ public:
   /**
    * Static function to cast a Function to SeriesFunction
    */
-  static FunctionSeries & checkAndConvertFunction(Function & function, const std::string & name);
+  static FunctionSeries & checkAndConvertFunction(Function & function,
+                                                  const std::string & typeName,
+                                                  const std::string & objectName);
 
   // Override from MemoizedFunctionInterface
   virtual Real evaluateValue(Real t, const Point & p) override;

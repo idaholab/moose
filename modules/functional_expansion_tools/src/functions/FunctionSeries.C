@@ -156,13 +156,21 @@ FunctionSeries::FunctionSeries(const InputParameters & parameters)
 }
 
 FunctionSeries &
-FunctionSeries::checkAndConvertFunction(Function & function, const std::string & name)
+FunctionSeries::checkAndConvertFunction(Function & function,
+                                        const std::string & typeName,
+                                        const std::string & objectName)
 {
-  if (!dynamic_cast<FunctionSeries *>(&function))
-    ::mooseError(
-        name, ":\n\"function\" ", function.name(), " must refer to a \"FunctionSeries\" object.");
+  FunctionSeries * test = dynamic_cast<FunctionSeries *>(&function);
+  if (!test)
+    ::mooseError("In ",
+                 typeName,
+                 "-type object \"",
+                 objectName,
+                 "\": the named Function \"",
+                 function.name(),
+                 "\" must be a FunctionSeries-type object.");
 
-  return static_cast<FunctionSeries &>(function);
+  return *test;
 }
 
 Real

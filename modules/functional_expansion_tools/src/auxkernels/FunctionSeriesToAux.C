@@ -30,8 +30,5 @@ validParams<FunctionSeriesToAux>()
 FunctionSeriesToAux::FunctionSeriesToAux(const InputParameters & parameters)
   : FunctionAux(parameters)
 {
-  FunctionSeries * validate = dynamic_cast<FunctionSeries *>(&_func);
-
-  if (!validate)
-    paramError("function", "'function' must be a FunctionSeries type");
+  FunctionSeries::checkAndConvertFunction(_func, getParam<std::string>("_moose_base"), name());
 }
