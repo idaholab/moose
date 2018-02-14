@@ -7,8 +7,29 @@
 namespace RELAP7
 {
 
+/**
+ * Converts a string to an enum
+ *
+ * This template is designed to be specialized and use the other version of this
+ * function in conjunction with the correct map.
+ *
+ * @tparam    T          enum type
+ * @param[in] s          string to convert
+ */
 template <typename T>
 T stringToEnum(const std::string & s);
+
+/**
+ * Converts a string to an enum using a map of string to enum
+ *
+ * @tparam    T          enum type
+ * @param[in] s          string to convert
+ * @param[in] enum_map   map of string to enum
+ */
+template <typename T>
+T stringToEnum(const std::string & s,
+               const std::map<std::string, T> & enum_map,
+               const std::string & description);
 
 /// Type of the heat transfer geometry
 enum EConvHeatTransGeom
