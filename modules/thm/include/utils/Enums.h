@@ -17,6 +17,9 @@ enum EConvHeatTransGeom
   CHTG_ROD_BUNDLE
 };
 
+const std::map<std::string, EConvHeatTransGeom> heat_transfer_geom_to_enum{
+    {"PIPE", CHTG_PIPE}, {"ROD_BUNDLE", CHTG_ROD_BUNDLE}};
+
 template <>
 EConvHeatTransGeom stringToEnum<EConvHeatTransGeom>(const std::string & s);
 
@@ -32,6 +35,8 @@ enum EEndType
   OUT ///< outlet
 };
 
+const std::map<std::string, EEndType> pipe_end_type_to_enum{{"IN", IN}, {"OUT", OUT}};
+
 template <>
 EEndType stringToEnum<EEndType>(const std::string & s);
 
@@ -44,6 +49,9 @@ enum EValveStatusType
   VALVE_CLOSING = -1, ///< valve is being closed
   VALVE_OPENING = 2   ///< valve is being opened
 };
+
+const std::map<std::string, EValveStatusType> valve_status_type_to_enum{{"OPEN", VALVE_OPEN},
+                                                                        {"CLOSE", VALVE_CLOSE}};
 
 template <>
 EValveStatusType stringToEnum<EValveStatusType>(const std::string & s);
@@ -60,6 +68,9 @@ enum EValveActionType
   VALVE_TURNING_OFF = -1 ///< turning off the valve
 };
 
+const std::map<std::string, EValveActionType> valve_action_type_to_enum{
+    {"NO_ACTION", VALVE_NO_ACTION}, {"OPEN", VALVE_TURNING_ON}, {"CLOSE", VALVE_TURNING_OFF}};
+
 template <>
 EValveActionType stringToEnum<EValveActionType>(const std::string & s);
 
@@ -75,6 +86,9 @@ enum ECheckValveType
   CHECK_VALVE_STATIC = 1, ///< the type of check valve which closes by static differential pressure
   CHECK_VALVE_DYNAMIC = 2 ///< the type of check valve which closes by dynamic differential pressure
 };
+
+const std::map<std::string, ECheckValveType> check_valve_type_to_enum{
+    {"FLOW", CHECK_VALVE_FLOW}, {"STATIC", CHECK_VALVE_STATIC}, {"DYNAMIC", CHECK_VALVE_DYNAMIC}};
 
 MooseEnum getCheckValveType(const std::string & str = "FLOW");
 
@@ -102,6 +116,13 @@ enum EFlowEquationType
   INVALID = 4
 };
 
+const std::map<std::string, EFlowEquationType> flow_equation_type_to_enum{
+    {"CONTINUITY", CONTINUITY},
+    {"MOMENTUM", MOMENTUM},
+    {"ENERGY", ENERGY},
+    {"VOIDFRACTION", VOIDFRACTION},
+    {"INVALID", INVALID}};
+
 template <>
 EFlowEquationType stringToEnum<EFlowEquationType>(const std::string & s);
 
@@ -117,6 +138,9 @@ enum EHeatStructureType
   HS_TYPE_PLATE,
   HS_TYPE_CYLINDER
 };
+
+const std::map<std::string, EHeatStructureType> hs_type_to_enum{{"PLATE", HS_TYPE_PLATE},
+                                                                {"CYLINDER", HS_TYPE_CYLINDER}};
 
 template <>
 EHeatStructureType stringToEnum<EHeatStructureType>(const std::string & s);
@@ -187,6 +211,6 @@ const std::map<unsigned int, std::string> wall_heat_transfer_flow_regime_type_to
     {WHT_TRANSITION, "transition_boiling"},
     {WHT_INVERTEDANNULAR, "inverted_annular_postCHF"},
     {WHT_DISPERSED, "dispersed_postCHF"}};
-}
+} // namespace RELAP7
 
 #endif // ENUMS_H
