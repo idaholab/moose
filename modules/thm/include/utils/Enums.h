@@ -134,21 +134,19 @@ enum EFlowEquationType
   MOMENTUM = 1,
   ENERGY = 2,
   VOIDFRACTION = 3,
-  INVALID = 4
 };
 
 const std::map<std::string, EFlowEquationType> flow_equation_type_to_enum{
     {"CONTINUITY", CONTINUITY},
     {"MOMENTUM", MOMENTUM},
     {"ENERGY", ENERGY},
-    {"VOIDFRACTION", VOIDFRACTION},
-    {"INVALID", INVALID}};
+    {"VOIDFRACTION", VOIDFRACTION}};
 
 template <>
 EFlowEquationType stringToEnum<EFlowEquationType>(const std::string & s);
 
 // get MooseEnum with equation type
-MooseEnum getFlowEquationType(const std::string & eqn_name = "INVALID");
+MooseEnum getFlowEquationType(const std::string & eqn_name = "");
 
 // ----------------------------------------------------------------------------
 
