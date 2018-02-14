@@ -49,7 +49,7 @@ PipeBase::init()
     _flow_model->init();
   }
   else
-    logError("Unknown model type supplied, '", _model_id, "'");
+    logModelNotImplementedError(_model_id);
 }
 
 void

@@ -131,7 +131,6 @@ protected:
   std::vector<Moose::CoordinateSystemType> _coord_sys;
 
 private:
-  void validateNSectionsConsistent(int n_lengths, int n_n_elems);
   void generateNodeLocations();
   unsigned int computeNumberOfNodes(unsigned int n_elems);
   std::vector<Real> getUniformNodeLocations(Real length, unsigned int n_nodes);

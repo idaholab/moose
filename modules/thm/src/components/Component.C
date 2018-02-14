@@ -157,3 +157,64 @@ Component::makeFunctionControllableIfConstant(const FunctionName & fn_name,
   if (dynamic_cast<ConstantFunction *>(&fn) != nullptr)
     connectObject(fn.parameters(), "", fn_name, control_name, param);
 }
+
+void
+Component::checkComponentExistsByName(const std::string & comp_name) const
+{
+  if (!_sim.hasComponent(comp_name))
+    logError("The component '", comp_name, "' does not exist");
+}
+
+void
+Component::checkMutuallyExclusiveParameters(const std::vector<std::string> & params) const
+{
+  unsigned int n_provided_params = 0;
+  for (const auto & param : params)
+    if (isParamValid(param))
+      n_provided_params++;
+
+  if (n_provided_params != 1)
+  {
+    std::string params_list_string = "{'" + params[0] + "'";
+    for (unsigned int i = 1; i < params.size(); ++i)
+      params_list_string += ", '" + params[i] + "'";
+    params_list_string += "}";
+
+    if (n_provided_params == 0)
+      logError("One of the parameters ", params_list_string, " must be provided");
+    else
+      logError("Only one of the parameters ", params_list_string, " can be provided");
+  }
+}
+
+void
+Component::check1PhaseRequiredParameter(const std::string & param) const
+{
+  if (!isParamValid(param))
+    logError("The parameter '", param, "' must be provided for single-phase flow");
+}
+
+void
+Component::check2PhaseRequiredParameter(const std::string & param) const
+{
+  if (!isParamValid(param))
+    logError("The parameter '", param, "' must be provided for two-phase flow");
+}
+
+void
+Component::check7EqnRequiredParameter(const std::string & param) const
+{
+  if (!isParamValid(param))
+    logError("The parameter '", param, "' must be provided for the 7-equation model");
+}
+
+void
+Component::logModelNotImplementedError(const RELAP7::FlowModelID & model) const
+{
+  if (model == RELAP7::FM_SINGLE_PHASE)
+    logError("This component is not implemented for single-phase flow");
+  else if (model == RELAP7::FM_TWO_PHASE)
+    logError("This component is not implemented for two-phase flow");
+  else
+    logError("This component is not implemented for model type '", model, "'");
+}

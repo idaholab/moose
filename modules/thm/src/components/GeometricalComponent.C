@@ -33,7 +33,8 @@ GeometricalComponent::GeometricalComponent(const InputParameters & parameters)
     _n_elems(getParam<std::vector<unsigned int>>("n_elems")),
     _displace_node_user_object_name(genName(name(), "displace_node"))
 {
-  validateNSectionsConsistent(_lengths.size(), _n_elems.size());
+  checkSizeGreaterThan<Real>("length", 0);
+  checkEqualSize<Real, unsigned int>("length", "n_elems");
   _n_sections = _lengths.size();
   _length = std::accumulate(_lengths.begin(), _lengths.end(), 0.0);
   _n_elem = std::accumulate(_n_elems.begin(), _n_elems.end(), 0);
@@ -43,28 +44,6 @@ GeometricalComponent::GeometricalComponent(const InputParameters & parameters)
     _fe_type = FEType(SECOND, LAGRANGE);
   else
     _fe_type = FEType(FIRST, LAGRANGE);
-}
-
-void
-GeometricalComponent::validateNSectionsConsistent(int n_lengths, int n_n_elems)
-{
-  bool specified_lengths = n_lengths > 0;
-  bool specified_n_elems = n_n_elems > 0;
-  bool agreeing_inputs = n_lengths == n_n_elems;
-  bool valid_inputs = specified_n_elems && specified_lengths && agreeing_inputs;
-
-  if (!valid_inputs)
-  {
-    if (!agreeing_inputs)
-      logError("The number of entries in the parameter 'length' does not equal the number of "
-               "entries in the parameter 'n_elems'.");
-
-    if (!specified_lengths)
-      logError("There are zero entries for the parameter 'length'.");
-
-    if (!specified_n_elems)
-      logError("There are zero entries for the parameter 'n_elems'.");
-  }
 }
 
 unsigned int
