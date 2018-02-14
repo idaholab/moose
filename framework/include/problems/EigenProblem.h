@@ -46,10 +46,6 @@ public:
   // silences warning in debug mode about the other computeJacobian signature being hidden
   using FEProblemBase::computeJacobian;
 
-  virtual void computeJacobian(const NumericVector<Number> & soln,
-                               SparseMatrix<Number> & jacobian,
-                               Moose::KernelType kernel_type) override;
-
   NonlinearEigenSystem & getNonlinearEigenSystem() { return *_nl_eigen; }
 
   virtual void checkProblemIntegrity() override;

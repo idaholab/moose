@@ -83,6 +83,14 @@
     value = 0
     use_displaced_mesh = true
   [../]
+  [./eigen_bc]
+    type = DirichletBC
+    variable = u
+    boundary = '0 1 2 3'
+    value = 0
+    use_displaced_mesh = true
+    eigen_bc = true
+  [../]
 []
 
 [Executioner]

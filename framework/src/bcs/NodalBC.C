@@ -108,7 +108,10 @@ NodalBC::computeJacobian()
   if (_var.isNodalDefined())
   {
     _qp = 0;
-    Real cached_val = computeQpJacobian();
+    Real cached_val = 0.;
+    if (!_eigen_BC)
+      cached_val = computeQpJacobian();
+
     dof_id_type cached_row = _var.nodalDofIndex();
 
     // Cache the user's computeQpJacobian() value for later use.
@@ -131,7 +134,10 @@ NodalBC::computeOffDiagJacobian(unsigned int jvar)
   else
   {
     _qp = 0;
-    Real cached_val = computeQpOffDiagJacobian(jvar);
+    Real cached_val = 0.0;
+    if (!_eigen_BC)
+      cached_val = computeQpOffDiagJacobian(jvar);
+
     dof_id_type cached_row = _var.nodalDofIndex();
     // Note: this only works for Lagrange variables...
     dof_id_type cached_col = _current_node->dof_number(_sys.number(), jvar, 0);

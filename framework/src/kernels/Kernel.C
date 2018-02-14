@@ -99,7 +99,7 @@ Kernel::computeResidual()
     for (_qp = 0; _qp < _qrule->n_points(); _qp++)
       _local_re(_i) += _JxW[_qp] * _coord[_qp] * computeQpResidual();
 
-  appendTaggedLocalResidual();
+  accumulateTaggedLocalResidual();
 
   if (_has_save_in)
   {
@@ -120,7 +120,7 @@ Kernel::computeJacobian()
       for (_qp = 0; _qp < _qrule->n_points(); _qp++)
         _local_ke(_i, _j) += _JxW[_qp] * _coord[_qp] * computeQpJacobian();
 
-  appendTaggedLocalMatrix();
+  accumulateTaggedLocalMatrix();
 
   if (_has_diag_save_in)
   {
@@ -170,7 +170,7 @@ Kernel::computeOffDiagJacobian(unsigned int jvar)
         for (_qp = 0; _qp < _qrule->n_points(); _qp++)
           _local_ke(_i, _j) += _JxW[_qp] * _coord[_qp] * computeQpOffDiagJacobian(jvar);
 
-    appendTaggedLocalMatrix();
+    accumulateTaggedLocalMatrix();
   }
 }
 
@@ -185,5 +185,5 @@ Kernel::computeOffDiagJacobianScalar(unsigned int jvar)
       for (_qp = 0; _qp < _qrule->n_points(); _qp++)
         _local_ke(_i, _j) += _JxW[_qp] * _coord[_qp] * computeQpOffDiagJacobian(jvar);
 
-  appendTaggedLocalMatrix();
+  accumulateTaggedLocalMatrix();
 }

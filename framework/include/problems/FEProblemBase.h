@@ -891,9 +891,15 @@ public:
   virtual void computeJacobian(NonlinearImplicitSystem & sys,
                                const NumericVector<Number> & soln,
                                SparseMatrix<Number> & jacobian);
+  virtual void computeJacobian(const NumericVector<Number> & soln, SparseMatrix<Number> & jacobian);
+
+  virtual void
+  computeJacobian(const NumericVector<Number> & soln, SparseMatrix<Number> & jacobian, TagID tag);
+
   virtual void computeJacobian(const NumericVector<Number> & soln,
                                SparseMatrix<Number> & jacobian,
-                               Moose::KernelType kernel_type = Moose::KT_ALL);
+                               std::vector<TagID> & tags);
+
   /**
    * Computes several Jacobian blocks simultaneously, summing their contributions into smaller
    * preconditioning matrices.
@@ -965,8 +971,6 @@ public:
   virtual void computeIndicatorsAndMarkers();
   virtual void computeIndicators();
   virtual void computeMarkers();
-
-  virtual NumericVector<Number> & residualVector(Moose::KernelType type);
 
   virtual void addResidual(THREAD_ID tid) override;
   virtual void addResidualNeighbor(THREAD_ID tid) override;
@@ -1336,9 +1340,10 @@ protected:
   MooseMesh & _mesh;
   EquationSystems _eq;
   bool _initialized;
-  Moose::KernelType _kernel_type;
 
   std::vector<TagID> _fe_vector_tags;
+
+  std::vector<TagID> _fe_matrix_tags;
 
   std::vector<NumericVector<Number> *> _fe_vector_residuals;
 

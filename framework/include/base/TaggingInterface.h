@@ -40,13 +40,13 @@ public:
   TaggingInterface(SubProblem & subproblem, const MooseObject & moose_object);
   virtual ~TaggingInterface();
 
-  void addVectorTag(TagName & tag_name);
+  void useVectorTag(TagName & tag_name);
 
-  void addMatrixTag(TagName & tag_name);
+  void useMatrixTag(TagName & tag_name);
 
-  void addVectorTag(TagID tag_id);
+  void useVectorTag(TagID tag_id);
 
-  void addMatrixTag(TagID tag_id);
+  void useMatrixTag(TagID tag_id);
 
   bool isVectorTagged() { return _vector_tags.size() > 0; }
 
@@ -76,7 +76,7 @@ public:
    * Local residual blocks  will be appended by adding
    * the current local kernel residual
    */
-  void appendTaggedLocalResidual();
+  void accumulateTaggedLocalResidual();
 
   /**
    * Local residual blocks will assigned as
@@ -87,7 +87,7 @@ public:
    * Local Jacobian blocks  will be appended by adding
    * the current local kernel Jacobian
    */
-  void appendTaggedLocalMatrix();
+  void accumulateTaggedLocalMatrix();
   /**
    * Local Jacobian blocks will assigned as
    * the current local kernel Jacobian

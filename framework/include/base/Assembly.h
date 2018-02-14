@@ -485,8 +485,11 @@ public:
   void copyNeighborShapes(unsigned int var);
 
   void addResidual(NumericVector<Number> & residual, TagID tag_id = 0);
+  void addResidual(std::map<TagName, TagID> & tags);
   void addResidualNeighbor(NumericVector<Number> & residual, TagID tag_id = 0);
+  void addResidualNeighbor(std::map<TagName, TagID> & tags);
   void addResidualScalar(NumericVector<Number> & residual, TagID tag_id = 0);
+  void addResidualScalar(std::map<TagName, TagID> & tags);
 
   /**
    * Takes the values that are currently in _sub_Re and appends them to the cached values.

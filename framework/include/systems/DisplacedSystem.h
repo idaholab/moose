@@ -29,11 +29,6 @@ public:
 
   virtual void init() override;
 
-  virtual bool hasResidualVector(Moose::KernelType type) const override
-  {
-    return _undisplaced_system.hasResidualVector(type);
-  }
-
   virtual NumericVector<Number> & getVector(TagID tag_id) override
   {
     return _undisplaced_system.getVector(tag_id);
@@ -42,11 +37,6 @@ public:
   virtual TagID timeVectorTag() override { return _undisplaced_system.timeVectorTag(); }
 
   virtual TagID nonTimeVectorTag() override { return _undisplaced_system.nonTimeVectorTag(); }
-
-  virtual NumericVector<Number> & residualVector(Moose::KernelType type) override
-  {
-    return _undisplaced_system.residualVector(type);
-  }
 
   virtual NumericVector<Number> & getVector(const std::string & name) override;
 

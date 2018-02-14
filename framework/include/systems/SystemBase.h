@@ -154,8 +154,6 @@ public:
 
   virtual Number & duDotDu() { return _du_dot_du; }
   virtual NumericVector<Number> & solutionUDot() { return *_dummy_vec; }
-  virtual NumericVector<Number> & residualVector(Moose::KernelType /*type*/) { return *_dummy_vec; }
-  virtual bool hasResidualVector(Moose::KernelType) const { return false; };
 
   virtual void saveOldSolutions();
   virtual void restoreOldSolutions();
@@ -163,7 +161,7 @@ public:
   /**
    * Check if the named vector exists in the system.
    */
-  virtual bool hasVector(const std::string & tag_name) const;
+  bool hasVector(const std::string & tag_name) const;
 
   /**
    * Check if the tagged vector exists in the system.
@@ -511,7 +509,7 @@ public:
    *                                            The ghosting pattern is the same as the solution
    * vector.
    */
-  virtual NumericVector<Number> & addVector(TagID tag, const bool project, const ParallelType type);
+  NumericVector<Number> & addVector(TagID tag, const bool project, const ParallelType type);
 
   virtual void closeTaggedVectors();
 

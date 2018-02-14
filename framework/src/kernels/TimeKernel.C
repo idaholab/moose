@@ -40,7 +40,7 @@ TimeKernel::computeResidual()
     for (_qp = 0; _qp < _qrule->n_points(); _qp++)
       _local_re(_i) += _JxW[_qp] * _coord[_qp] * computeQpResidual();
 
-  appendTaggedLocalResidual();
+  accumulateTaggedLocalResidual();
 
   if (_has_save_in)
   {

@@ -84,7 +84,7 @@ TaggingInterface::TaggingInterface(SubProblem & subproblem, const MooseObject & 
 }
 
 void
-TaggingInterface::addVectorTag(TagName & tag_name)
+TaggingInterface::useVectorTag(TagName & tag_name)
 {
   if (!_subproblem.vectorTagExists(tag_name))
     mooseError("Vector tag ", tag_name, " does not exsit in system");
@@ -93,7 +93,7 @@ TaggingInterface::addVectorTag(TagName & tag_name)
 }
 
 void
-TaggingInterface::addMatrixTag(TagName & tag_name)
+TaggingInterface::useMatrixTag(TagName & tag_name)
 {
   if (!_subproblem.matrixTagExists(tag_name))
     mooseError("Matrix tag ", tag_name, " does not exsit in system");
@@ -102,7 +102,7 @@ TaggingInterface::addMatrixTag(TagName & tag_name)
 }
 
 void
-TaggingInterface::addVectorTag(TagID tag_id)
+TaggingInterface::useVectorTag(TagID tag_id)
 {
   if (!_subproblem.vectorTagExists(tag_id))
     mooseError("Vector tag ", tag_id, " does not exsit in system");
@@ -111,7 +111,7 @@ TaggingInterface::addVectorTag(TagID tag_id)
 }
 
 void
-TaggingInterface::addMatrixTag(TagID tag_id)
+TaggingInterface::useMatrixTag(TagID tag_id)
 {
   if (!_subproblem.matrixTagExists(tag_id))
     mooseError("Matrix tag ", tag_id, " does not exsit in system");
@@ -146,7 +146,7 @@ TaggingInterface::prepareMatrixTag(Assembly & assembly, unsigned int ivar, unsig
 }
 
 void
-TaggingInterface::appendTaggedLocalResidual()
+TaggingInterface::accumulateTaggedLocalResidual()
 {
   for (auto & re : _re_blocks)
     *re += _local_re;
@@ -160,7 +160,7 @@ TaggingInterface::assignTaggedLocalResidual()
 }
 
 void
-TaggingInterface::appendTaggedLocalMatrix()
+TaggingInterface::accumulateTaggedLocalMatrix()
 {
   for (auto & ke : _ke_blocks)
     *ke += _local_ke;

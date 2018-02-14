@@ -37,7 +37,7 @@ ODEKernel::computeResidual()
   for (_i = 0; _i < _var.order(); _i++)
     _local_re(_i) += computeQpResidual();
 
-  appendTaggedLocalResidual();
+  accumulateTaggedLocalResidual();
 }
 
 void
@@ -49,7 +49,7 @@ ODEKernel::computeJacobian()
     for (_j = 0; _j < _var.order(); _j++)
       _local_ke(_i, _j) += computeQpJacobian();
 
-  appendTaggedLocalMatrix();
+  accumulateTaggedLocalMatrix();
 
   // compute off-diagonal jacobians wrt scalar variables
   const std::vector<MooseVariableScalar *> & scalar_vars = _sys.getScalarVariables(_tid);
@@ -72,7 +72,7 @@ ODEKernel::computeOffDiagJacobian(unsigned int jvar)
           _local_ke(_i, _j) += computeQpOffDiagJacobian(jvar);
       }
 
-    appendTaggedLocalMatrix();
+    accumulateTaggedLocalMatrix();
   }
 }
 

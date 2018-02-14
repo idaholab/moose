@@ -114,6 +114,10 @@ public:
 
   TagID nonEigenVectorTag() { return _Ax_tag; }
 
+  TagID eigenMatrixTag() { return _B_tag; }
+
+  TagID nonEigenMatrixTag() { return _A_tag; }
+
 protected:
   TransientEigenSystem & _transient_sys;
   EigenProblem & _eigen_problem;
@@ -121,6 +125,8 @@ protected:
   unsigned int _n_eigen_pairs_required;
   TagID _Ax_tag;
   TagID _Bx_tag;
+  TagID _A_tag;
+  TagID _B_tag;
 };
 
 #else

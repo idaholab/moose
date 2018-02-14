@@ -1442,12 +1442,28 @@ Assembly::addResidual(NumericVector<Number> & residual, TagID tag_id /* = 0 */)
 }
 
 void
+Assembly::addResidual(std::map<TagName, TagID> & tags)
+{
+  for (auto & tag : tags)
+    if (_sys.hasVector(tag.second))
+      addResidual(_sys.getVector(tag.second), tag.second);
+}
+
+void
 Assembly::addResidualNeighbor(NumericVector<Number> & residual, TagID tag_id /* = 0 */)
 {
   const std::vector<MooseVariableFEBase *> & vars = _sys.getVariables(_tid);
   for (const auto & var : vars)
     addResidualBlock(
         residual, _sub_Rn[tag_id][var->number()], var->dofIndicesNeighbor(), var->scalingFactor());
+}
+
+void
+Assembly::addResidualNeighbor(std::map<TagName, TagID> & tags)
+{
+  for (auto & tag : tags)
+    if (_sys.hasVector(tag.second))
+      addResidualNeighbor(_sys.getVector(tag.second), tag.second);
 }
 
 void
@@ -1458,6 +1474,14 @@ Assembly::addResidualScalar(NumericVector<Number> & residual, TagID tag_id /* = 
   for (const auto & var : vars)
     addResidualBlock(
         residual, _sub_Re[tag_id][var->number()], var->dofIndices(), var->scalingFactor());
+}
+
+void
+Assembly::addResidualScalar(std::map<TagName, TagID> & tags)
+{
+  for (auto & tag : tags)
+    if (_sys.hasVector(tag.second))
+      addResidualScalar(_sys.getVector(tag.second), tag.second);
 }
 
 void

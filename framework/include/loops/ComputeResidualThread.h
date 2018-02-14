@@ -11,6 +11,7 @@
 #define COMPUTERESIDUALTHREAD_H
 
 #include "ThreadedElementLoop.h"
+#include "MooseObjectTagWarehouse.h"
 
 #include "libmesh/elem_range.h"
 
@@ -62,7 +63,7 @@ protected:
   /// Reference to Kernel storage structures
   MooseObjectTagWarehouse<KernelBase> & _kernels;
 
-  MooseObjectWarehouse<KernelBase> * _tag_kernels;
+  MooseObjectTagWarehouse<KernelBase> * _tag_kernels;
   ///@}
 };
 

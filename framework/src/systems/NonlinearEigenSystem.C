@@ -33,11 +33,13 @@ assemble_matrix(EquationSystems & es, const std::string & system_name)
 {
   EigenProblem * p = es.parameters.get<EigenProblem *>("_eigen_problem");
   EigenSystem & eigen_system = es.get_system<EigenSystem>(system_name);
+  NonlinearEigenSystem & eigen_nl = p->getNonlinearEigenSystem();
 
   if (!p->isNonlinearEigenvalueSolver())
   {
-    p->computeJacobian(
-        *eigen_system.current_local_solution.get(), *eigen_system.matrix_A, Moose::KT_NONEIGEN);
+    p->computeJacobian(*eigen_system.current_local_solution.get(),
+                       *eigen_system.matrix_A,
+                       eigen_nl.nonEigenVectorTag());
   }
   else
   {
@@ -72,8 +74,9 @@ assemble_matrix(EquationSystems & es, const std::string & system_name)
     {
       if (!p->isNonlinearEigenvalueSolver())
       {
-        p->computeJacobian(
-            *eigen_system.current_local_solution.get(), *eigen_system.matrix_B, Moose::KT_EIGEN);
+        p->computeJacobian(*eigen_system.current_local_solution.get(),
+                           *eigen_system.matrix_B,
+                           eigen_nl.eigenVectorTag());
       }
       else
       {
@@ -116,6 +119,10 @@ NonlinearEigenSystem::NonlinearEigenSystem(EigenProblem & eigen_problem, const s
 
   _Bx_tag = eigen_problem.addVectorTag("Bx_tag");
   addVector(_Bx_tag, false, GHOSTED);
+
+  _A_tag = eigen_problem.addMatrixTag("A_tag");
+
+  _B_tag = eigen_problem.addMatrixTag("B_tag");
 }
 
 void
@@ -196,17 +203,17 @@ NonlinearEigenSystem::nonlinearSolver()
 }
 
 void
-NonlinearEigenSystem::addEigenKernels(std::shared_ptr<KernelBase> kernel, THREAD_ID tid)
+NonlinearEigenSystem::addEigenKernels(std::shared_ptr<KernelBase> kernel, THREAD_ID /*tid*/)
 {
   if (kernel->isEigenKernel())
   {
-    _eigen_kernels.addObject(kernel, tid);
-    kernel->addVectorTag(_Bx_tag);
+    kernel->useVectorTag(_Bx_tag);
+    kernel->useMatrixTag(_B_tag);
   }
   else
   {
-    _non_eigen_kernels.addObject(kernel, tid);
-    kernel->addVectorTag(_Ax_tag);
+    kernel->useVectorTag(_Ax_tag);
+    kernel->useMatrixTag(_A_tag);
   }
 }
 
@@ -215,9 +222,15 @@ NonlinearEigenSystem::addEigenBoundaryCondition(std::shared_ptr<BoundaryConditio
                                                 THREAD_ID /*tid*/)
 {
   if (bc->isEigenBC())
-    bc->addVectorTag(_Bx_tag);
+  {
+    bc->useVectorTag(_Bx_tag);
+    bc->useMatrixTag(_B_tag);
+  }
   else
-    bc->addVectorTag(_Ax_tag);
+  {
+    bc->useVectorTag(_Ax_tag);
+    bc->useMatrixTag(_A_tag);
+  }
 }
 
 void

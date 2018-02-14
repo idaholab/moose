@@ -105,7 +105,7 @@ public:
   /**
    * Check to see if a particular Tag exists by using Tag name
    */
-  virtual bool vectorTagExists(const TagName & tag_name);
+  bool vectorTagExists(const TagName & tag_name);
 
   /**
    * The total number of tags
@@ -153,6 +153,8 @@ public:
    * The total number of tags
    */
   virtual unsigned int numMatrixTags() { return _matrix_tag_name_to_tag_id.size(); }
+
+  virtual std::map<TagName, TagID> & getMatrixTag() { return _matrix_tag_name_to_tag_id; }
 
   // Variables /////
   virtual bool hasVariable(const std::string & var_name) const = 0;

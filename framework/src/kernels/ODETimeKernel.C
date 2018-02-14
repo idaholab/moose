@@ -36,5 +36,5 @@ ODETimeKernel::computeResidual()
   for (_i = 0; _i < _var.order(); _i++)
     _local_re(_i) += computeQpResidual();
 
-  appendTaggedLocalResidual();
+  accumulateTaggedLocalResidual();
 }

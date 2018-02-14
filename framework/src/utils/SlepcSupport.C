@@ -440,8 +440,7 @@ slepcSetOptions(EigenProblem & eigen_problem, const InputParameters & params)
 }
 
 void
-moosePetscSNESFormJacobian(
-    SNES /*snes*/, Vec x, Mat jac, Mat pc, void * ctx, Moose::KernelType type)
+moosePetscSNESFormJacobian(SNES /*snes*/, Vec x, Mat jac, Mat pc, void * ctx, TagID tag)
 {
   EigenProblem * eigen_problem = static_cast<EigenProblem *>(ctx);
   NonlinearSystemBase & nl = eigen_problem->getNonlinearSystemBase();
@@ -461,7 +460,7 @@ moosePetscSNESFormJacobian(
 
   PC.zero();
 
-  eigen_problem->computeJacobian(*sys.current_local_solution.get(), PC, type);
+  eigen_problem->computeJacobian(*sys.current_local_solution.get(), PC, tag);
 
   PC.close();
   if (jac != pc)
@@ -473,7 +472,10 @@ mooseSlepcEigenFormJacobianA(SNES snes, Vec x, Mat jac, Mat pc, void * ctx)
 {
   PetscFunctionBegin;
 
-  moosePetscSNESFormJacobian(snes, x, jac, pc, ctx, Moose::KT_NONEIGEN);
+  EigenProblem * eigen_problem = static_cast<EigenProblem *>(ctx);
+  NonlinearEigenSystem & eigen_nl = eigen_problem->getNonlinearEigenSystem();
+
+  moosePetscSNESFormJacobian(snes, x, jac, pc, ctx, eigen_nl.nonEigenMatrixTag());
   PetscFunctionReturn(0);
 }
 
@@ -482,7 +484,10 @@ mooseSlepcEigenFormJacobianB(SNES snes, Vec x, Mat jac, Mat pc, void * ctx)
 {
   PetscFunctionBegin;
 
-  moosePetscSNESFormJacobian(snes, x, jac, pc, ctx, Moose::KT_EIGEN);
+  EigenProblem * eigen_problem = static_cast<EigenProblem *>(ctx);
+  NonlinearEigenSystem & eigen_nl = eigen_problem->getNonlinearEigenSystem();
+
+  moosePetscSNESFormJacobian(snes, x, jac, pc, ctx, eigen_nl.eigenMatrixTag());
   PetscFunctionReturn(0);
 }
 

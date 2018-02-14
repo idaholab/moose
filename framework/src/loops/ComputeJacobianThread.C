@@ -24,7 +24,7 @@
 
 ComputeJacobianThread::ComputeJacobianThread(FEProblemBase & fe_problem,
                                              SparseMatrix<Number> & jacobian,
-                                             Moose::KernelType kernel_type)
+                                             std::vector<TagID> & tags)
   : ThreadedElementLoop<ConstElemRange>(fe_problem),
     _jacobian(jacobian),
     _nl(fe_problem.getNonlinearSystemBase()),
@@ -33,7 +33,7 @@ ComputeJacobianThread::ComputeJacobianThread(FEProblemBase & fe_problem,
     _dg_kernels(_nl.getDGKernelWarehouse()),
     _interface_kernels(_nl.getInterfaceKernelWarehouse()),
     _kernels(_nl.getKernelWarehouse()),
-    _kernel_type(kernel_type)
+    _tags(tags)
 {
 }
 
@@ -47,7 +47,8 @@ ComputeJacobianThread::ComputeJacobianThread(ComputeJacobianThread & x, Threads:
     _dg_kernels(x._dg_kernels),
     _interface_kernels(x._interface_kernels),
     _kernels(x._kernels),
-    _kernel_type(x._kernel_type)
+    _warehouse(x._warehouse),
+    _tags(x._tags)
 {
 }
 
@@ -56,37 +57,9 @@ ComputeJacobianThread::~ComputeJacobianThread() {}
 void
 ComputeJacobianThread::computeJacobian()
 {
-  const MooseObjectWarehouse<KernelBase> * warehouse;
-  switch (_kernel_type)
+  if (_warehouse->hasActiveBlockObjects(_subdomain, _tid))
   {
-    case Moose::KT_ALL:
-      warehouse = &_nl.getKernelWarehouse();
-      break;
-
-    case Moose::KT_TIME:
-      warehouse = &_nl.getTimeKernelWarehouse();
-      break;
-
-    case Moose::KT_NONTIME:
-      warehouse = &_nl.getNonTimeKernelWarehouse();
-      break;
-
-    case Moose::KT_EIGEN:
-      warehouse = &_nl.getEigenKernelWarehouse();
-      break;
-
-    case Moose::KT_NONEIGEN:
-      warehouse = &_nl.getNonEigenKernelWarehouse();
-      break;
-
-    default:
-      mooseError("Unknown kernel type \n");
-  }
-
-  if (warehouse->hasActiveBlockObjects(_subdomain, _tid))
-  {
-    const std::vector<std::shared_ptr<KernelBase>> & kernels =
-        warehouse->getActiveBlockObjects(_subdomain, _tid);
+    auto & kernels = _warehouse->getActiveBlockObjects(_subdomain, _tid);
     for (const auto & kernel : kernels)
       if (kernel->isImplicit())
       {
@@ -178,6 +151,18 @@ ComputeJacobianThread::subdomainChanged()
   _fe_problem.setActiveElementalMooseVariables(needed_moose_vars, _tid);
   _fe_problem.setActiveMaterialProperties(needed_mat_props, _tid);
   _fe_problem.prepareMaterials(_subdomain, _tid);
+
+  // If users pass a empty vector or a full size of vector,
+  // we take all kernels
+  if (!_tags.size() || _tags.size() == _fe_problem.numVectorTags())
+    _warehouse = &_kernels;
+  // If we have one tag only,
+  // We call tag based storage
+  else if (_tags.size() == 1)
+    _warehouse = &(_kernels.getMatrixTagObjectWarehouse(_tags[0], _tid));
+  // This one may be expensive, and hopefully we do not use it so often
+  else
+    _warehouse = &(_kernels.getMatrixTagsObjectWarehouse(_tags, _tid));
 }
 
 void

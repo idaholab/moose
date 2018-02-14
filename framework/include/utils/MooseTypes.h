@@ -191,15 +191,6 @@ enum VarKindType
   VAR_AUXILIARY
 };
 
-enum KernelType
-{
-  KT_NONTIME = 0,
-  KT_TIME = 1,
-  KT_NONEIGEN = 2,
-  KT_EIGEN = 3,
-  KT_ALL
-};
-
 enum CouplingType
 {
   COUPLING_DIAG,

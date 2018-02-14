@@ -647,23 +647,13 @@ DisplacedProblem::clearDiracInfo()
 void
 DisplacedProblem::addResidual(THREAD_ID tid)
 {
-  auto & tags = getVectorTag();
-
-  for (auto & tag : tags)
-    if (_mproblem.getNonlinearSystemBase().hasVector(tag.second))
-      _assembly[tid]->addResidual(_mproblem.getNonlinearSystemBase().getVector(tag.second),
-                                  tag.second);
+  _assembly[tid]->addResidual(getVectorTag());
 }
 
 void
 DisplacedProblem::addResidualNeighbor(THREAD_ID tid)
 {
-  auto & tags = getVectorTag();
-
-  for (auto & tag : tags)
-    if (_mproblem.getNonlinearSystemBase().hasVector(tag.second))
-      _assembly[tid]->addResidualNeighbor(_mproblem.getNonlinearSystemBase().getVector(tag.second),
-                                          tag.second);
+  _assembly[tid]->addResidualNeighbor(getVectorTag());
 }
 
 void

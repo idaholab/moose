@@ -282,8 +282,11 @@ public:
    * Computes Jacobian
    * @param jacobian Jacobian is formed in here
    */
-  void computeJacobian(SparseMatrix<Number> & jacobian,
-                       Moose::KernelType kernel_type = Moose::KT_ALL);
+  void computeJacobian(SparseMatrix<Number> & jacobian);
+
+  void computeJacobian(SparseMatrix<Number> & jacobian, TagID tag);
+
+  void computeJacobian(SparseMatrix<Number> & jacobian, std::vector<TagID> & tags);
 
   /**
    * Computes several Jacobian blocks simultaneously, summing their contributions into smaller
@@ -294,6 +297,8 @@ public:
    * @param blocks The blocks to fill in (JacobianBlock is defined in ComputeJacobianBlocksThread)
    */
   void computeJacobianBlocks(std::vector<JacobianBlock *> & blocks);
+
+  void computeJacobianBlocks(std::vector<JacobianBlock *> & blocks, std::vector<TagID> & tags);
 
   /**
    * Compute damping
@@ -336,8 +341,10 @@ public:
   virtual void setSolutionUDot(const NumericVector<Number> & udot);
 
   virtual NumericVector<Number> & solutionUDot() override;
-  virtual NumericVector<Number> & residualVector(Moose::KernelType type) override;
-  virtual bool hasResidualVector(Moose::KernelType type) const override;
+
+  NumericVector<Number> & getResidualTimeVector();
+
+  NumericVector<Number> & getResidualNonTimeVector();
 
   virtual const NumericVector<Number> *& currentSolution() override { return _current_solution; }
 
@@ -499,13 +506,6 @@ public:
    * Access functions to Warehouses from outside NonlinearSystemBase
    */
   MooseObjectTagWarehouse<KernelBase> & getKernelWarehouse() { return _kernels; }
-  const MooseObjectWarehouse<KernelBase> & getTimeKernelWarehouse() { return _time_kernels; }
-  const MooseObjectWarehouse<KernelBase> & getNonTimeKernelWarehouse() { return _non_time_kernels; }
-  const MooseObjectWarehouse<KernelBase> & getEigenKernelWarehouse() { return _eigen_kernels; }
-  const MooseObjectWarehouse<KernelBase> & getNonEigenKernelWarehouse()
-  {
-    return _non_eigen_kernels;
-  }
   const MooseObjectWarehouse<DGKernel> & getDGKernelWarehouse() { return _dg_kernels; }
   const MooseObjectWarehouse<InterfaceKernel> & getInterfaceKernelWarehouse()
   {
@@ -594,7 +594,7 @@ protected:
 
   void computeNodalBCs(NumericVector<Number> & residual, std::vector<TagID> & tags);
 
-  void computeJacobianInternal(SparseMatrix<Number> & jacobian, Moose::KernelType kernel_type);
+  void computeJacobianInternal(SparseMatrix<Number> & jacobian, std::vector<TagID> & tags);
 
   void computeDiracContributions(SparseMatrix<Number> * jacobian = NULL);
 
@@ -633,6 +633,8 @@ protected:
 
   std::vector<TagID> _nl_vector_tags;
 
+  std::vector<TagID> _nl_matrix_tags;
+
   std::vector<NumericVector<Number> *> _nl_vector_residuals;
 
   /// residual vector for time contributions
@@ -654,10 +656,6 @@ protected:
   MooseObjectWarehouse<ScalarKernel> _non_time_scalar_kernels;
   MooseObjectWarehouse<DGKernel> _dg_kernels;
   MooseObjectWarehouse<InterfaceKernel> _interface_kernels;
-  MooseObjectWarehouse<KernelBase> _time_kernels;
-  MooseObjectWarehouse<KernelBase> _non_time_kernels;
-  MooseObjectWarehouse<KernelBase> _eigen_kernels;
-  MooseObjectWarehouse<KernelBase> _non_eigen_kernels;
 
   ///@}
 
