@@ -41,4 +41,13 @@
     cli_args = 'Kernels/diff/use_displaced_mesh=true Executioner/dt=0.8'
     expect_err = 'ERROR: negative Jacobian -0.0625 at point \(x,y,z\)=\(-0.105662, 0.211325, 0.211325\) in element 0'
   [../]
+
+  [./inf_nan]
+    type = PetscJacobianTester
+    input = 'inf_nan.i'
+    recover = false
+    ratio_tol = nan
+    difference_tol = nan
+    cli_args = '--no-trap-fpe'
+  [../]
 []
