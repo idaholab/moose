@@ -12,6 +12,7 @@
 // MOOSE includes
 #include "Assembly.h"
 #include "MooseVariableScalar.h"
+#include "MooseMesh.h"
 #include "SystemBase.h"
 
 template <>
@@ -19,7 +20,10 @@ InputParameters
 validParams<NodalScalarKernel>()
 {
   InputParameters params = validParams<ScalarKernel>();
-  params.addRequiredParam<std::vector<dof_id_type>>("nodes", "Node ids");
+  params.addParam<std::vector<dof_id_type>>("nodes", "Supply nodes using node ids");
+  params.addParam<std::vector<BoundaryName>>(
+      "boundary", "The list of boundary IDs  from the mesh where this nodal kernel applies");
+
   return params;
 }
 
@@ -27,12 +31,39 @@ NodalScalarKernel::NodalScalarKernel(const InputParameters & parameters)
   : ScalarKernel(parameters),
     Coupleable(this, true),
     MooseVariableDependencyInterface(),
-    _node_ids(getParam<std::vector<dof_id_type>>("nodes"))
+    _node_ids(getParam<std::vector<dof_id_type>>("nodes")),
+    _boundary_names(getParam<std::vector<BoundaryName>>("boundary"))
 {
   // Fill in the MooseVariable dependencies
-  const std::vector<MooseVariable *> & coupled_vars = getCoupledMooseVars();
+  const std::vector<MooseVariableFE *> & coupled_vars = getCoupledMooseVars();
   for (const auto & var : coupled_vars)
     addMooseVariableDependency(var);
+
+  // Check if node_ids and/or node_bc_names given
+  if ((_node_ids.size() == 0) && (_boundary_names.size() == 0))
+    mooseError("Must provide either 'nodes' or 'boundary' parameter.");
+
+  if ((_node_ids.size() != 0) && (_boundary_names.size() != 0))
+    mooseError("Both 'nodes' and 'boundary' parameters were specified. Use the 'boundary' "
+               "parameter only.");
+
+  // nodal bc names provided, append the nodes in each bc to _node_ids
+  if ((_node_ids.size() == 0) && (_boundary_names.size() != 0))
+  {
+    std::vector<dof_id_type> nodelist;
+
+    for (auto i = beginIndex(_boundary_names); i < _boundary_names.size(); i++)
+    {
+      nodelist = _mesh.getNodeList(_mesh.getBoundaryID(_boundary_names[i]));
+      for (auto k = beginIndex(_boundary_names); k < nodelist.size(); k++)
+        _node_ids.push_back(nodelist[k]);
+    }
+  }
+  else
+  {
+    mooseDeprecated("Using the 'nodes' parameter is deprecated. Please update your input file to "
+                    "use the 'boundary' parameter.");
+  }
 }
 
 void

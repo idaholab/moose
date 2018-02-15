@@ -7,4 +7,13 @@
     max_threads = 1
     compiler = 'GCC CLANG'
   [../]
+
+  [./test_with_nodebc_name]
+    type = 'Exodiff'
+    input = '1d_nodebc_name.i'
+    exodiff = '1d_nodebc_name_out.e'
+    max_parallel = 1
+    max_threads = 1
+    compiler = 'GCC CLANG'
+  [../]
 []
