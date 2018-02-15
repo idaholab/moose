@@ -72,7 +72,7 @@ class Parser:
         self.root = root
 
         w = DupWalker(os.path.abspath(filename))
-        root.walk(w, hit.NodeType.All)
+        root.walk(w, hit.NodeType.Field)
         self.errors.extend(w.errors)
 
         self._parseNode(filename, root)
