@@ -323,6 +323,7 @@ Coupleable::coupledDot(const std::string & var_name, unsigned int comp)
   if (!isCoupled(var_name)) // Return default 0
     return _default_value_zero;
 
+  validateExecutionerType(var_name);
   MooseVariable * var = getVar(var_name, comp);
 
   if (!_coupleable_neighbor)
@@ -348,6 +349,7 @@ Coupleable::coupledDotDu(const std::string & var_name, unsigned int comp)
   if (!isCoupled(var_name)) // Return default 0
     return _default_value_zero;
 
+  validateExecutionerType(var_name);
   MooseVariable * var = getVar(var_name, comp);
 
   if (!_coupleable_neighbor)
@@ -609,6 +611,7 @@ Coupleable::coupledNodalDot(const std::string & var_name, unsigned int comp)
   if (!isCoupled(var_name)) // Return default 0
     return _default_value_zero;
 
+  validateExecutionerType(var_name);
   coupledCallback(var_name, false);
   MooseVariable * var = getVar(var_name, comp);
 
@@ -689,7 +692,7 @@ Coupleable::validateExecutionerType(const std::string & name) const
 {
   if (!_c_fe_problem.isTransient())
     mooseError(_c_name,
-               ": You may not couple in old or older values of \"",
+               ": You may not couple in old, older or time derivative values of \"",
                name,
                "\" when using a \"Steady\" executioner.");
 }

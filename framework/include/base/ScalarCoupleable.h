@@ -182,6 +182,13 @@ protected:
    */
   MooseVariableScalar * getScalarVar(const std::string & var_name, unsigned int comp);
 
+  /**
+   * Checks to make sure that the current Executioner has set "_is_transient" when old/older values
+   * are coupled in.
+   * @param name the name of the variable
+   */
+  void validateExecutionerType(const std::string & name) const;
+
 private:
   /// Field variables coupled into this object (for error checking)
   std::map<std::string, std::vector<MooseVariable *>> _sc_coupled_vars;
