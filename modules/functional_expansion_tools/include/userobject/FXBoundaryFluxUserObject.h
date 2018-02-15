@@ -1,0 +1,39 @@
+//* This file is part of the MOOSE framework
+//* https://www.mooseframework.org
+//*
+//* All rights reserved, see COPYRIGHT for full restrictions
+//* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+//*
+//* Licensed under LGPL 2.1, please see LICENSE for details
+//* https://www.gnu.org/licenses/lgpl-2.1.html
+
+#ifndef FXBOUNDARYFLUXUSEROBJECT_H
+#define FXBOUNDARYFLUXUSEROBJECT_H
+
+#include "FXBoundaryBaseUserObject.h"
+
+class FXBoundaryFluxUserObject;
+
+template <>
+InputParameters validParams<FXBoundaryFluxUserObject>();
+
+/**
+ * This boundary FX evaluator calculates the flux
+ */
+class FXBoundaryFluxUserObject final : public FXBoundaryBaseUserObject
+{
+public:
+  FXBoundaryFluxUserObject(const InputParameters & parameters);
+
+protected:
+  // Override from SideIntegralVariableUserObject
+  virtual Real computeQpIntegral() final;
+
+  /// Name of the diffusivity property in the local material
+  const std::string _diffusivity_name;
+
+  /// Value of the diffusivity
+  const MaterialProperty<Real> & _diffusivity;
+};
+
+#endif // FXBOUNDARYFLUXUSEROBJECT_H

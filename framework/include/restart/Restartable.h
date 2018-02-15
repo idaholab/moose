@@ -211,6 +211,9 @@ private:
   friend class Transient;
   friend class TableOutput;
   friend class TransientMultiApp;
+
+  /// For access to declareRestartableData() while avoiding diamond inheritance
+  friend class MutableCoefficientsInterface;
 };
 
 template <typename T>
