@@ -368,7 +368,7 @@ protected:
   MooseVariable * getVar(const std::string & var_name, unsigned int comp);
 
   /**
-   * Checks to make sure that the current Executioner has set "_it_transient" when old/older values
+   * Checks to make sure that the current Executioner has set "_is_transient" when old/older values
    * are coupled in.
    * @param name the name of the variable
    */
