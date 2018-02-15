@@ -23,7 +23,8 @@ validParams<VariableResidualNormsDebugOutput>()
   InputParameters params = validParams<PetscOutput>();
 
   // By default this outputs on every nonlinear iteration
-  params.set<ExecFlagEnum>("execute_on", true) = EXEC_NONLINEAR;
+  params.set<ExecFlagEnum>("execute_on") = EXEC_NONLINEAR;
+  params.suppressParameter<ExecFlagEnum>("execute_on");
   return params;
 }
 
