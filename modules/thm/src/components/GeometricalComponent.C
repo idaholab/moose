@@ -70,6 +70,8 @@ GeometricalComponent::setupMesh()
 void
 GeometricalComponent::check()
 {
+  Component::check();
+
   // Do not use TRAP q-rule with 2nd order FEs
   if (_2nd_order_mesh)
   {

@@ -29,6 +29,8 @@ PipeBase::getFluidPropertiesName() const
 void
 PipeBase::init()
 {
+  GeometricalComponent::init();
+
   _model_id = _app.getFlowModelID(_sim.getUserObject<FluidProperties>(_fp_name));
   if (_model_id == RELAP7::FM_SINGLE_PHASE)
   {
