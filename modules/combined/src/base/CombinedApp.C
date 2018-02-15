@@ -16,19 +16,20 @@
 #include "ChemicalReactionsApp.h"
 #include "ContactApp.h"
 #include "FluidPropertiesApp.h"
+#include "FunctionalExpansionToolsApp.h"
 #include "HeatConductionApp.h"
+#include "LevelSetApp.h"
 #include "MiscApp.h"
 #include "NavierStokesApp.h"
 #include "PhaseFieldApp.h"
+#include "PorousFlowApp.h"
+#include "RdgApp.h"
 #include "RichardsApp.h"
 #include "SolidMechanicsApp.h"
 #include "StochasticToolsApp.h"
 #include "TensorMechanicsApp.h"
 #include "WaterSteamEOSApp.h"
 #include "XFEMApp.h"
-#include "PorousFlowApp.h"
-#include "RdgApp.h"
-#include "LevelSetApp.h"
 
 template <>
 InputParameters
@@ -76,19 +77,20 @@ CombinedApp::registerObjects(Factory & factory)
   ChemicalReactionsApp::registerObjects(factory);
   ContactApp::registerObjects(factory);
   FluidPropertiesApp::registerObjects(factory);
+  FunctionalExpansionToolsApp::registerObjects(factory);
   HeatConductionApp::registerObjects(factory);
+  LevelSetApp::registerObjects(factory);
   MiscApp::registerObjects(factory);
   NavierStokesApp::registerObjects(factory);
   PhaseFieldApp::registerObjects(factory);
+  PorousFlowApp::registerObjects(factory);
+  RdgApp::registerObjects(factory);
   RichardsApp::registerObjects(factory);
   SolidMechanicsApp::registerObjects(factory);
   StochasticToolsApp::registerObjects(factory);
   TensorMechanicsApp::registerObjects(factory);
   WaterSteamEOSApp::registerObjects(factory);
   XFEMApp::registerObjects(factory);
-  PorousFlowApp::registerObjects(factory);
-  RdgApp::registerObjects(factory);
-  LevelSetApp::registerObjects(factory);
 }
 
 // External entry point for dynamic syntax association
@@ -103,19 +105,20 @@ CombinedApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
   ChemicalReactionsApp::associateSyntax(syntax, action_factory);
   ContactApp::associateSyntax(syntax, action_factory);
   FluidPropertiesApp::associateSyntax(syntax, action_factory);
+  FunctionalExpansionToolsApp::associateSyntax(syntax, action_factory);
   HeatConductionApp::associateSyntax(syntax, action_factory);
+  LevelSetApp::associateSyntax(syntax, action_factory);
   MiscApp::associateSyntax(syntax, action_factory);
   NavierStokesApp::associateSyntax(syntax, action_factory);
   PhaseFieldApp::associateSyntax(syntax, action_factory);
+  PorousFlowApp::associateSyntax(syntax, action_factory);
+  RdgApp::associateSyntax(syntax, action_factory);
   RichardsApp::associateSyntax(syntax, action_factory);
   SolidMechanicsApp::associateSyntax(syntax, action_factory);
   StochasticToolsApp::associateSyntax(syntax, action_factory);
   TensorMechanicsApp::associateSyntax(syntax, action_factory);
   WaterSteamEOSApp::associateSyntax(syntax, action_factory);
   XFEMApp::associateSyntax(syntax, action_factory);
-  PorousFlowApp::associateSyntax(syntax, action_factory);
-  RdgApp::associateSyntax(syntax, action_factory);
-  LevelSetApp::associateSyntax(syntax, action_factory);
 }
 
 // External entry point for dynamic execute flag registration

@@ -1,0 +1,139 @@
+[Tests]
+  [./Cartesian_missing_series]
+    # Every functional series must have a series set for each dimension
+    type = RunException
+    input = missing_series_x.i
+    expect_err = "Must specify one of 'x', 'y', or 'z' for 'Cartesian' series!"
+    group = functional_expansion_tools
+  [../]
+
+
+  [./CylindricalDuo_missing_axis_series]
+    # Every functional series must have a series set for each dimension
+    type = RunException
+    input = missing_series_duo_axis.i
+    expect_err = "Must specify one of 'x', 'y', or 'z' for 'CylindricalDuo' series!"
+    group = functional_expansion_tools
+  [../]
+
+
+  [./CylindricalDuo_missing_disc_series]
+    # Every functional series must have a series set for each dimension
+    type = RunException
+    input = missing_series_duo_disc.i
+    expect_err = "No other disc series implemented except Zernike!"
+    group = functional_expansion_tools
+  [../]
+
+
+  [./CylindricalDuo_multiple_series]
+    # No multiple axes allowed for CylindricalDuo
+    type = RunException
+    input = multiple_series_duo.i
+    expect_err = "Cannot specify more than one of 'x', 'y', or 'z' for 'CylindricalDuo' series!"
+    group = functional_expansion_tools
+  [../]
+
+
+  [./FXFluxBC_bad_function]
+    # The function must be a FunctionSeries type
+    type = RunException
+    input = bc_flux_bad_function.i
+    expect_err = "must be a FunctionSeries-type object."
+    group = functional_expansion_tools
+  [../]
+
+
+  [./FXValueBC_bad_function]
+    # The function must be a FunctionSeries type
+    type = RunException
+    input = bc_value_bad_function.i
+    expect_err = "must be a FunctionSeries-type object."
+    group = functional_expansion_tools
+  [../]
+
+
+  [./FXValuePenaltyBC_bad_function]
+    # The function must be a FunctionSeries type
+    type = RunException
+    input = bc_value_penalty_bad_function.i
+    expect_err = "must be a FunctionSeries-type object."
+    group = functional_expansion_tools
+  [../]
+
+
+  [./FunctionSeriesToAux_bad_function]
+    # The function must be a FunctionSeries type
+    type = RunException
+    input = aux_bad_function.i
+    expect_err = "must be a FunctionSeries-type object."
+    group = functional_expansion_tools
+  [../]
+
+
+  [./MultiAppFXTransfer_missing_local]
+    # The named object must exist in the local app
+    type = RunException
+    input = multiapp_missing_local_object.i
+    expect_err = "': Cannot find object '"
+    group = functional_expansion_tools
+  [../]
+
+
+  [./MultiAppFXTransfer_missing_sub]
+    # The named object must exist in the sub app
+    type = RunException
+    input = multiapp_missing_sub_object.i
+    expect_err = "': Cannot find object '"
+    group = functional_expansion_tools
+  [../]
+
+
+  [./MultiAppFXTransfer_bad_function_series]
+    # A coupled function must be a FunctionSeries type
+    type = RunException
+    input = multiapp_bad_function_series.i
+    expect_err = "' does not inherit from MutableCoefficientsInterface."
+    group = functional_expansion_tools
+  [../]
+
+
+  [./MultiAppFXTransfer_bad_user_object]
+    # A coupled UserObject must be one of the FX...UserObject types
+    type = RunException
+    input = multiapp_bad_user_object.i
+    expect_err = "' does not inherit from MutableCoefficientsInterface."
+    group = functional_expansion_tools
+  [../]
+
+
+  [./MultiAppFXTransfer_incompatible_orders]
+    # Coupled FXs must have the same orders in all dimensions
+    type = RunException
+    input = multiapp_incompatible_orders.i
+    expect_err = "' is not compatible with '"
+    group = functional_expansion_tools
+  [../]
+
+
+  [./invalid_order]
+    # For any type of expansion, there are extraneous fields that should not be included. If these
+    # are included, they are neglected, but their matching entries in 'physical_bounds' and 'orders'
+    # are NOT neglected. An error should be provided if the length of 'orders' does not match the
+    # number of series.
+    type = RunException
+    input = invalid_order.i
+    expect_err = "Incorrect number of 'orders' specified for 'FunctionSeries'! Check that 'orders' is the correct length and no invalid enumerations are specified for the series."
+    group = functional_expansion
+  [../]
+
+
+  [./invalid_bounds_length]
+    # An error is provided if the length of 'physical_bounds' does not match the number of valid
+    # series.
+    type = RunException
+    input = invalid_bounds_length.i
+    expect_err = "Mismatch between the physical bounds provided and the number of series in the functional basis!"
+    group = functional_expansion
+  [../]
+[]
