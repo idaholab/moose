@@ -158,24 +158,6 @@ MooseEnum getFlowEquationType(const std::string & eqn_name = "");
 
 // ----------------------------------------------------------------------------
 
-/// Type of heat structure
-enum EHeatStructureType
-{
-  HS_TYPE_PLATE,
-  HS_TYPE_CYLINDER
-};
-
-const std::map<std::string, EHeatStructureType> hs_type_to_enum{{"PLATE", HS_TYPE_PLATE},
-                                                                {"CYLINDER", HS_TYPE_CYLINDER}};
-
-template <>
-EHeatStructureType stringToEnum<EHeatStructureType>(const std::string & s);
-
-/// Enum with the heat structure type
-MooseEnum getHeatStructureType(const std::string & name = "PLATE");
-
-// ----------------------------------------------------------------------------
-
 enum EFlowRegimeNamesType
 {
   FR_DISPERSEDBUBBLE, ///< Weight of DispersedBubble Correlations  PreCHF
@@ -238,5 +220,34 @@ const std::map<unsigned int, std::string> wall_heat_transfer_flow_regime_type_to
     {WHT_INVERTEDANNULAR, "inverted_annular_postCHF"},
     {WHT_DISPERSED, "dispersed_postCHF"}};
 } // namespace RELAP7
+
+template <typename T>
+T
+RELAP7::stringToEnum(const std::string & s, const std::map<std::string, T> & enum_map)
+{
+  std::string upper(s);
+  std::transform(upper.begin(), upper.end(), upper.begin(), ::toupper);
+
+  if (!enum_map.count(upper))
+    return static_cast<T>(-100);
+  else
+    return enum_map.at(upper);
+}
+
+template <typename T>
+MooseEnum
+RELAP7::getMooseEnum(const std::string & default_key, const std::map<std::string, T> & enum_map)
+{
+  std::string keys_string;
+  for (typename std::map<std::string, T>::const_iterator it = enum_map.begin();
+       it != enum_map.end();
+       it++)
+    if (it == enum_map.begin())
+      keys_string += it->first;
+    else
+      keys_string += " " + it->first;
+
+  return MooseEnum(keys_string, default_key, true);
+}
 
 #endif // ENUMS_H
