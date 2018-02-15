@@ -119,6 +119,11 @@ mooseMsgFmt(const std::string & msg, const std::string & title, const std::strin
 
 [[noreturn]] void mooseErrorRaw(std::string msg, const std::string prefix = "");
 
+/**
+ * All of the following are not meant to be called directly - they are called by the normal macros
+ * (mooseError(), etc.) down below
+ * @{
+ */
 void mooseStreamAll(std::ostringstream & ss);
 
 template <typename T, typename... Args>
@@ -188,6 +193,9 @@ mooseDeprecatedStream(S & oss, bool expired, Args &&... args)
               else libMesh::write_traceout();
               oss << ss.str() << std::endl;);
 }
+/**
+ * @}
+ */
 
 } // namespace internal
 } // namespace moose
@@ -215,6 +223,7 @@ mooseWarning(Args &&... args)
 }
 
 /// Warning message used to notify the users of unused parts of their input files
+/// Really used internally by the parser and shouldn't really be called elsewhere
 template <typename... Args>
 void
 mooseUnused(Args &&... args)

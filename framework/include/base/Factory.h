@@ -212,7 +212,8 @@ public:
   /**
    * Register a deprecated object that expires
    * @param obj_name The name of the object to register
-   * @param t_str String containing the expiration date for the object
+   * @param t_str String containing the expiration date for the object in "MM/DD/YYYY HH:MM" format.
+   * Note that the HH:MM is not optional
    *
    * Note: Params file and line are supplied by the macro
    */
@@ -234,6 +235,7 @@ public:
    * @param dep_obj - The name (type) of the object being registered (the deprecated type)
    * @param replacement_name - The name of the object replacing the deprecated object (new name)
    * @param time_str - Time at which the deprecated message prints as  an error "MM/DD/YYYY HH:MM"
+   * Note that the HH:MM is not optional
    *
    * Note: Params file and line are supplied by the macro
    */
