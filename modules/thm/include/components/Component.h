@@ -28,7 +28,15 @@ public:
   Component * parent() { return _parent; }
 
   /**
-   * Initialize the component
+   * Initializes the component
+   *
+   * The reason this function exists (as opposed to just having everything in
+   * the constructor) is because some initialization depends on all components
+   * existing, since many components couple to other components. Therefore,
+   * when deciding whether code should go into the constructor or this function,
+   * one should use the following reasoning: if an operation does not require
+   * the existence of other components, then put that operation in the
+   * constructor; otherwise, put it in this function.
    */
   virtual void init();
 
