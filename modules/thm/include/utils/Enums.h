@@ -39,22 +39,6 @@ T stringToEnum(const std::string & s, const std::map<std::string, T> & enum_map)
 template <typename T>
 MooseEnum getMooseEnum(const std::string & default_key, const std::map<std::string, T> & enum_map);
 
-/// Type of the heat transfer geometry
-enum EConvHeatTransGeom
-{
-  CHTG_PIPE,
-  CHTG_ROD_BUNDLE
-};
-
-const std::map<std::string, EConvHeatTransGeom> heat_transfer_geom_to_enum{
-    {"PIPE", CHTG_PIPE}, {"ROD_BUNDLE", CHTG_ROD_BUNDLE}};
-
-template <>
-EConvHeatTransGeom stringToEnum<EConvHeatTransGeom>(const std::string & s);
-
-/// Enum with convective heat transfer geometry
-MooseEnum getConvHeatTransGeometry(const std::string & name);
-
 // ----------------------------------------------------------------------------
 
 /// Type of the end
