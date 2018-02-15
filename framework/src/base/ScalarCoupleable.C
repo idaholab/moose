@@ -147,7 +147,7 @@ ScalarCoupleable::coupledScalarValueOld(const std::string & var_name, unsigned i
   if (!isCoupledScalar(var_name, comp))
     return *getDefaultValue(var_name);
 
-  validateExecutionerType(var_name);
+  validateExecutionerType(var_name, "coupledScalarValueOld");
   MooseVariableScalar * var = getScalarVar(var_name, comp);
   return (_sc_is_implicit) ? var->slnOld() : var->slnOlder();
 }
@@ -159,7 +159,7 @@ ScalarCoupleable::coupledScalarValueOlder(const std::string & var_name, unsigned
   if (!isCoupledScalar(var_name, comp))
     return *getDefaultValue(var_name);
 
-  validateExecutionerType(var_name);
+  validateExecutionerType(var_name, "coupledScalarValueOlder");
   MooseVariableScalar * var = getScalarVar(var_name, comp);
   if (_sc_is_implicit)
     return var->slnOlder();
@@ -171,7 +171,7 @@ VariableValue &
 ScalarCoupleable::coupledScalarDot(const std::string & var_name, unsigned int comp)
 {
   checkVar(var_name);
-  validateExecutionerType(var_name);
+  validateExecutionerType(var_name, "coupledScalarDot");
   MooseVariableScalar * var = getScalarVar(var_name, comp);
   return var->uDot();
 }
@@ -180,7 +180,7 @@ VariableValue &
 ScalarCoupleable::coupledScalarDotDu(const std::string & var_name, unsigned int comp)
 {
   checkVar(var_name);
-  validateExecutionerType(var_name);
+  validateExecutionerType(var_name, "coupledScalarDotDu");
   MooseVariableScalar * var = getScalarVar(var_name, comp);
   return var->duDotDu();
 }
@@ -219,13 +219,17 @@ ScalarCoupleable::getScalarVar(const std::string & var_name, unsigned int comp)
 }
 
 void
-ScalarCoupleable::validateExecutionerType(const std::string & name) const
+ScalarCoupleable::validateExecutionerType(const std::string & name,
+                                          const std::string & fn_name) const
 {
   if (!_sc_fe_problem.isTransient())
     mooseError(_sc_name,
-               ": You may not couple in old, older or time derivative values of \"",
+               ": Calling '",
+               fn_name,
+               "' on variable \"",
                name,
-               "\" when using a \"Steady\" executioner.");
+               "\" when using a \"Steady\" executioner is not allowed. This value is available "
+               "only in transient simulations.");
 }
 
 unsigned int
