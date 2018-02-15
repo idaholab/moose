@@ -12,15 +12,13 @@
 // C++ includes
 #include <fstream>
 
-extern "C" void FORTRAN_CALL(dgels)(...);
-
 int PolynomialFit::_file_number = 0;
 
-PolynomialFit::PolynomialFit(std::vector<Real> x,
-                             std::vector<Real> y,
+PolynomialFit::PolynomialFit(const std::vector<Real> & x,
+                             const std::vector<Real> & y,
                              unsigned int order,
                              bool truncate_order)
-  : _x(x), _y(y), _order(order), _truncate_order(truncate_order)
+  : LeastSquaresFitBase(x, y), _order(order), _truncate_order(truncate_order)
 {
   if (_truncate_order) // && (_x.size() / 10) < _order)
   {
@@ -37,13 +35,8 @@ PolynomialFit::PolynomialFit(std::vector<Real> x,
   else if (_x.size() < order)
     throw std::domain_error(
         "Polynomial Fit requires an order less than the size of the input vector");
-}
 
-void
-PolynomialFit::generate()
-{
-  fillMatrix();
-  doLeastSquares();
+  _num_coeff = _order + 1;
 }
 
 void
@@ -53,8 +46,7 @@ PolynomialFit::fillMatrix()
   unsigned int num_cols = _order + 1;
   _matrix.resize(num_rows * num_cols);
 
-  for (unsigned int col = 0; col <= _order; ++col)
-  {
+  for (unsigned int col = 0; col < num_cols; ++col)
     for (unsigned int row = 0; row < num_rows; ++row)
     {
       Real value = 1;
@@ -63,62 +55,6 @@ PolynomialFit::fillMatrix()
 
       _matrix[(col * num_rows) + row] = value;
     }
-  }
-}
-
-void
-PolynomialFit::doLeastSquares()
-{
-  char mode = 'N';
-  int num_rows = _x.size();
-  int num_coeff = _order + 1;
-  int num_rhs = 1;
-  int buffer_size = -1;
-  Real opt_buffer_size;
-  Real * buffer;
-  int return_value = 0;
-
-  // Must copy _y because the call to dgels destroys the original values
-  std::vector<Real> rhs = _y;
-
-  FORTRAN_CALL(dgels)
-  (&mode,
-   &num_rows,
-   &num_coeff,
-   &num_rhs,
-   &_matrix[0],
-   &num_rows,
-   &rhs[0],
-   &num_rows,
-   &opt_buffer_size,
-   &buffer_size,
-   &return_value);
-  if (return_value)
-    throw std::runtime_error("Call to Fortran routine 'dgels' returned non-zero exit code");
-
-  buffer_size = (int)opt_buffer_size;
-
-  buffer = new Real[buffer_size];
-  FORTRAN_CALL(dgels)
-  (&mode,
-   &num_rows,
-   &num_coeff,
-   &num_rhs,
-   &_matrix[0],
-   &num_rows,
-   &rhs[0],
-   &num_rows,
-   buffer,
-   &buffer_size,
-   &return_value);
-  delete[] buffer;
-
-  if (return_value)
-    throw std::runtime_error("Call to Fortran routine 'dgels' returned non-zero exit code");
-
-  _coeffs.resize(num_coeff);
-  for (int i = 0; i < num_coeff; ++i)
-    _coeffs[i] = rhs[i];
 }
 
 Real
@@ -199,16 +135,4 @@ PolynomialFit::dumpSampleFile(std::string base_name,
 
   ++_file_number;
   out.close();
-}
-
-unsigned int
-PolynomialFit::getSampleSize()
-{
-  return _x.size();
-}
-
-const std::vector<Real> &
-PolynomialFit::getCoefficients()
-{
-  return _coeffs;
 }

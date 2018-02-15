@@ -10,50 +10,31 @@
 #ifndef POLYNOMIALFIT_H
 #define POLYNOMIALFIT_H
 
-#include <vector>
-#include <string>
-
-#include "Moose.h"
+#include "LeastSquaresFitBase.h"
 
 /**
- * This class applies the Least Squares algorithm to a set of points to provide a smooth curve for
- * sampling values.
+ * Least squares polynomial fit
  *
  * Requires: LAPACK
  */
-class PolynomialFit
+class PolynomialFit : public LeastSquaresFitBase
 {
 public:
   /* Constructor, Takes two vectors of points for which to apply the fit.  One should be of the
    * independent variable while the other should be of the dependent variable.  These values should
    * correspond to one and other in the same position.  The third parameter is the requested
-   * polynomial
-   * order and the forth parameter tells the class whether or not it should truncate the order if
-   * there
-   * are not enough points for which to apply the polynomial fit.
+   * polynomial order and the forth parameter tells the class whether or not it should truncate
+   * the order if there are not enough points for which to apply the polynomial fit.
    */
-  PolynomialFit(std::vector<Real> X,
-                std::vector<Real> Y,
+  PolynomialFit(const std::vector<Real> & x,
+                const std::vector<Real> & y,
                 unsigned int order,
                 bool truncate_order = false);
 
-  virtual ~PolynomialFit() = default;
+  virtual Real sample(Real x) override;
 
   /**
-   * This function generates the polynomial fit.  This function must be called prior to using
-   * sample or dumpSample File. Note:  If you pass a vectors that
-   * contain duplicate independent measures the call to LAPACK will fail
-   */
-  void generate();
-
-  /**
-   * This function will take an independent variable input and will return the dependent variable
-   * based on the generated fit
-   */
-  Real sample(Real x);
-
-  /**
-   * This function will dump GNUPLOT input files that can be run to show the data points and
+   * Dump GNUPLOT input files that can be run to show the data points and
    * function fits
    */
   void dumpSampleFile(std::string base_name,
@@ -64,35 +45,13 @@ public:
                       float ymin = 0,
                       float ymax = 0);
 
-  /**
-   * This function returns the size of the array holding the points, i.e. the number of sample
-   * points
-   */
-  unsigned int getSampleSize();
-
-  /**
-   * Get a const reference to the coefficients of the least squares fit.
-   */
-  const std::vector<Real> & getCoefficients();
-
-private:
-  /**
-   * This is a helper function that creates the matrix necessary for the Least Squares algorithm.
-   */
-  void fillMatrix();
-
-  /**
-   * This function is the wrapper for the LAPACK dgels function and is called by generate.
-   */
-  void doLeastSquares();
-
-  std::vector<Real> _x;
-  std::vector<Real> _y;
-  std::vector<Real> _matrix;
-  std::vector<Real> _coeffs;
+protected:
+  virtual void fillMatrix() override;
+  /// Order of the polynomial
   unsigned int _order;
+  /// Flag to implement a truncated polynomial
   bool _truncate_order;
-
+  /// File number
   static int _file_number;
 };
 
