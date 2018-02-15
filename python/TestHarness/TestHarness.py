@@ -243,7 +243,8 @@ class TestHarness:
             # Wait for all the tests to complete
             self.scheduler.waitFinish()
 
-            self.cleanup()
+            if not self.scheduler.schedulerError():
+                self.cleanup()
 
             # flags for the TestHarness start at the high bit
             if self.num_failed or self.scheduler.schedulerError():
