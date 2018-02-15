@@ -27,9 +27,7 @@ T stringToEnum(const std::string & s);
  * @param[in] enum_map   map of string to enum
  */
 template <typename T>
-T stringToEnum(const std::string & s,
-               const std::map<std::string, T> & enum_map,
-               const std::string & description);
+T stringToEnum(const std::string & s, const std::map<std::string, T> & enum_map);
 
 /**
  * Gets MooseEnum corresponding to an enum, using a map of string to enum
