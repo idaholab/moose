@@ -111,7 +111,7 @@ GeometricalComponent::getConnections(RELAP7::EEndType id) const
   if (it != _connections.end())
     return it->second;
   else
-    mooseError(name(), ": No end of this type available (", id, ").");
+    mooseError(name(), ": Invalid pipe end type (", id, ").");
 }
 
 void

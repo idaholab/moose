@@ -132,6 +132,19 @@ protected:
                                           const std::string & param = "value");
 
   /**
+   * Gets an enum parameter
+   *
+   * This function takes the name of a MooseEnum parameter that is tied to an
+   * enum defined in RELAP-7. If the value is invalid, an error will be logged,
+   * and a negative integer will be cast into the enum type.
+   *
+   * @tparam    T       enum type
+   * @param[in] param   name of the MooseEnum parameter
+   */
+  template <typename T>
+  T getEnumParam(const std::string & param) const;
+
+  /**
    * Checks that a component exists
    *
    * @param[in] comp_name   name of the component
@@ -372,6 +385,37 @@ Component::hasComponentByName(const std::string & comp_name, bool log_errors) co
       logError("The component '", comp_name, "' does not exist");
     return false;
   }
+}
+
+template <typename T>
+T
+Component::getEnumParam(const std::string & param) const
+{
+  const MooseEnum & moose_enum = getParam<MooseEnum>(param);
+  const T value = RELAP7::stringToEnum<T>(moose_enum);
+  if (value < 0)
+  {
+    // Get the keys from the MooseEnum. Unfortunately, this returns a list of
+    // *all* keys, including the invalid key that was supplied. Thus, that key
+    // needs to be manually excluded below.
+    const std::vector<std::string> & keys = moose_enum.getNames();
+
+    // Create the string of keys to go in the error message. The last element of
+    // keys is skipped because the invalid key should always be last.
+    std::string keys_string = "{";
+    for (unsigned int i = 0; i < keys.size() - 1; ++i)
+    {
+      if (i != 0)
+        keys_string += ",";
+      keys_string += "'" + keys[i] + "'";
+    }
+    keys_string += "}";
+
+    logError("The parameter '" + param + "' was given an invalid value ('" +
+             std::string(moose_enum) + "'). Valid values (case-insensitive) are " + keys_string);
+  }
+
+  return value;
 }
 
 template <typename T>
