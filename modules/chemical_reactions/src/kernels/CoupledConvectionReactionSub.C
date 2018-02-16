@@ -22,7 +22,7 @@ validParams<CoupledConvectionReactionSub>()
                         "operates on in the equilibrium reaction");
   params.addCoupledVar(
       "gamma_u", 1.0, "Activity coefficient of primary species that this kernel operates on");
-  params.addRequiredParam<std::vector<Real>>(
+  params.addParam<std::vector<Real>>(
       "sto_v",
       "The stoichiometric coefficients of coupled primary species in equilibrium reaction");
   params.addRequiredCoupledVar("p", "Pressure");

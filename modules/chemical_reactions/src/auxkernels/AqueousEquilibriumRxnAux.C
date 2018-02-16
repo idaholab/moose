@@ -17,8 +17,8 @@ validParams<AqueousEquilibriumRxnAux>()
   params.addParam<Real>("log_k", 0.0, "The equilibrium constant in dissociation form");
   params.addRequiredParam<std::vector<Real>>("sto_v",
                                              "The stoichiometric coefficient of reactants");
-  params.addCoupledVar("v",
-                       "The list of primary species participating in this equilibrium species");
+  params.addRequiredCoupledVar(
+      "v", "The list of primary species participating in this equilibrium species");
   params.addCoupledVar("gamma", 1.0, "Activity coefficient of this secondary equilibrium species");
   params.addCoupledVar("gamma_v", 1.0, "Activity coefficients of coupled primary species");
   params.addClassDescription("Concentration of secondary equilibrium species");
