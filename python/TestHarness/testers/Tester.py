@@ -79,6 +79,11 @@ class Tester(MooseObject):
         params.addParam('link_files',         [], "Additional list of files/directories to symlink when performing queueing operations")
         params.addParam('queue_scheduler',  True, "A test that runs only if using queue options")
 
+        # SQA
+        params.addParam("requirement", None, "The SQA requirement that this test satisfies (e.g., 'The Marker system shall provide means to mark elements for refinement within a box region.')")
+        params.addParam("design", [], "The list of markdown files that contain the design(s) associated with this test (e.g., '/Markers/index.md /BoxMarker.md').")
+        params.addParam("issues", [], "The list of github issues associated with this test (e.g., '#1234 #4321')")
+
         return params
 
     # This is what will be checked for when we look for valid testers
