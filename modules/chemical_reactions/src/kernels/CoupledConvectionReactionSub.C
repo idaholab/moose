@@ -56,7 +56,7 @@ CoupledConvectionReactionSub::CoupledConvectionReactionSub(const InputParameters
     mooseError("The number of values in sto_v is incorrect in ", _name);
 
   if (isCoupled("gamma_v"))
-    if (coupled("gamma_v") != n)
+    if (coupledComponents("gamma_v") != n)
       mooseError("The number of variables in gamma_v is incorrect in ", _name);
 
   _vars.resize(n);

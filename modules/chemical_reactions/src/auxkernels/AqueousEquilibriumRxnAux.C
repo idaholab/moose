@@ -40,7 +40,7 @@ AqueousEquilibriumRxnAux::AqueousEquilibriumRxnAux(const InputParameters & param
 
   // Check that the correct number of activity coefficients have been provided (if applicable)
   if (isCoupled("gamma_v"))
-    if (coupled("gamma_v") != n)
+    if (coupledComponents("gamma_v") != n)
       mooseError("The number of activity coefficients and coupled species must be equal in ",
                  _name);
 
