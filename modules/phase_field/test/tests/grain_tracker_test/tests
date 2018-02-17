@@ -106,6 +106,9 @@
     input = 'grain_tracker_volume.i'
     csvdiff = 'grain_tracker_volume_out_grain_volumes_0000.csv grain_tracker_volume_out.csv'
     rel_err = 1.e-3
+
+    # Lots of adaptivity, slower test
+    min_parallel = 4
   [../]
 
   [./grain_tracker_volume_single]
@@ -113,6 +116,9 @@
     input = 'grain_tracker_volume_single.i'
     csvdiff = 'grain_tracker_volume_single_out_grain_volumes_0000.csv'
     rel_err = 1.e-3
+
+    # Lots of adaptivity, slower test
+    min_parallel = 4
   [../]
 
   # This test should work the same with the FeatureFloodCount object
