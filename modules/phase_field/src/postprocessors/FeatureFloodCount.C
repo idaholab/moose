@@ -596,7 +596,7 @@ FeatureFloodCount::getFeatureVar(unsigned int feature_id) const
   {
     mooseAssert(local_index < _feature_sets.size(), "local_index out of bounds");
     return _feature_sets[local_index]._status != Status::INACTIVE
-               ? _feature_sets[feature_id]._var_index
+               ? _feature_sets[local_index]._var_index
                : invalid_id;
   }
 
@@ -617,7 +617,9 @@ FeatureFloodCount::doesFeatureIntersectBoundary(unsigned int feature_id) const
   if (local_index != invalid_size_t)
   {
     mooseAssert(local_index < _feature_sets.size(), "local_index out of bounds");
-    return _feature_sets[local_index]._intersects_boundary;
+    return _feature_sets[local_index]._status != Status::INACTIVE
+               ? _feature_sets[local_index]._intersects_boundary
+               : invalid_id;
   }
 
   return false;
