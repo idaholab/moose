@@ -94,10 +94,10 @@ MooseVariableConstMonomial::computeElemValuesHelper(const unsigned & nqp, const 
 
   const dof_id_type & idx = _dof_indices[0];
   const Real & soln = (*_sys.currentSolution())(idx);
-  Real soln_old;
-  Real soln_older;
-  Real soln_previous_nl;
-  Real u_dot;
+  Real soln_old = 0;
+  Real soln_older = 0;
+  Real soln_previous_nl = 0;
+  Real u_dot = 0;
   const Real & du_dot_du = _sys.duDotDu();
 
   if (_need_nodal_u)
@@ -232,9 +232,9 @@ MooseVariableConstMonomial::computeNeighborValuesHelper(const unsigned & nqp, co
 
   const dof_id_type & idx = _dof_indices_neighbor[0];
   const Real & soln = (*_sys.currentSolution())(idx);
-  Real soln_old;
-  Real soln_older;
-  Real u_dot;
+  Real soln_old = 0;
+  Real soln_older = 0;
+  Real u_dot = 0;
 
   if (_need_nodal_u_neighbor)
     _nodal_u_neighbor[0] = soln;

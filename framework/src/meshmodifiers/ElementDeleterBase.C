@@ -68,7 +68,7 @@ ElementDeleterBase::modify()
 #endif
 
   // Get the BoundaryID from the mesh
-  BoundaryID boundary_id;
+  BoundaryID boundary_id = 0;
   if (_assign_boundary)
     boundary_id = _mesh_ptr->getBoundaryIDs({_boundary_name}, true)[0];
 

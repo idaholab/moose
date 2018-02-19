@@ -398,6 +398,24 @@ tokenizeAndConvert(const std::string & str,
 }
 
 /**
+ * convert takes a string representation of a number type and converts it to the number.
+ * This method is here to get around deficiencies in the STL stoi and stod methods where they
+ * might successfully convert part of a string to a number when we'd like to throw an error.
+ */
+template <typename T>
+T
+convert(const std::string & str)
+{
+  std::stringstream ss(str);
+  T val;
+  if ((ss >> val).fail() || !ss.eof())
+    throw std::runtime_error(std::string("Unable to convert ") + str + " to type " +
+                             demangle(typeid(T).name()));
+
+  return val;
+}
+
+/**
  * Convert supplied string to upper case.
  * @params name The string to convert upper case.
  */
