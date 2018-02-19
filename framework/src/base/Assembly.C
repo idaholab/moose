@@ -1574,8 +1574,11 @@ void
 Assembly::addCachedJacobian(SparseMatrix<Number> & jacobian)
 {
   if (!_sys.subproblem().checkNonlocalCouplingRequirement())
+  {
+    // Note: braces are here to silence opt-mode compile warning.
     mooseAssert(_cached_jacobian_rows.size() == _cached_jacobian_cols.size(),
                 "Error: Cached data sizes MUST be the same!");
+  }
 
   for (unsigned int i = 0; i < _cached_jacobian_rows.size(); i++)
     jacobian.add(_cached_jacobian_rows[i], _cached_jacobian_cols[i], _cached_jacobian_values[i]);
