@@ -35,6 +35,7 @@
 #include "MooseUtils.h"
 
 #include "libmesh/parallel.h"
+#include "libmesh/fparser.hh"
 
 // Regular expression includes
 #include "pcrecpp.h"
@@ -46,6 +47,50 @@
 #include <iomanip>
 #include <algorithm>
 #include <cstdlib>
+
+class FuncParseEvaler : public hit::Evaler
+{
+public:
+  virtual std::string eval(hit::Node * n, std::list<std::string> & args)
+  {
+    std::string func_text;
+    for (auto & s : args)
+      func_text += s;
+
+    FunctionParser fp;
+    std::vector<std::string> var_names;
+    auto ret = fp.ParseAndDeduceVariables(func_text, var_names);
+    if (ret != -1)
+      throw hit::Error(std::string("fparse error: ") + fp.ErrorMsg());
+
+    std::string errors;
+    std::vector<double> var_vals;
+    for (auto & var : var_names)
+    {
+      // recursively check all parent scopes for the needed variables
+      auto curr = n;
+      while ((curr = curr->parent()))
+      {
+        auto src = curr->find(var);
+        if (src && src != n && src->type() == hit::NodeType::Field)
+        {
+          var_vals.push_back(curr->param<double>(var));
+          break;
+        }
+      }
+
+      if (curr == nullptr)
+        errors += "\n    no variable '" + var + "' found for use in function parser expression";
+    }
+
+    if (!errors.empty())
+      throw hit::Error(errors);
+
+    std::stringstream ss;
+    ss << std::setprecision(17) << fp.Eval(var_vals.data());
+    return ss.str();
+  }
+};
 
 Parser::Parser(MooseApp & app, ActionWarehouse & action_wh)
   : ConsoleStreamInterface(app),
@@ -513,8 +558,10 @@ Parser::parse(const std::string & input_filename)
   hit::BraceExpander expander;
   hit::RawEvaler raw;
   hit::EnvEvaler env;
+  FuncParseEvaler fparse_ev;
   expander.registerEvaler("raw", raw);
   expander.registerEvaler("env", env);
+  expander.registerEvaler("fparse", fparse_ev);
   hit::ExpandWalker exw(_input_filename, expander);
   _root->walk(&exw);
   for (auto & var : exw.used)
