@@ -10,4 +10,14 @@
     exodiff = '2species_out.e'
     prereq = 2species
   [../]
+  [./calcite_precipitation]
+    type = 'CSVDiff'
+    input = 'calcite_precipitation.i'
+    csvdiff = 'calcite_precipitation_out.csv'
+  [../]
+  [./calcite_dissolution]
+    type = 'CSVDiff'
+    input = 'calcite_dissolution.i'
+    csvdiff = 'calcite_dissolution_out.csv'
+  [../]
 []

@@ -17,8 +17,8 @@ validParams<AqueousEquilibriumRxnAux>()
   params.addParam<Real>("log_k", 0.0, "The equilibrium constant in dissociation form");
   params.addRequiredParam<std::vector<Real>>("sto_v",
                                              "The stoichiometric coefficient of reactants");
-  params.addCoupledVar("v",
-                       "The list of primary species participating in this equilibrium species");
+  params.addRequiredCoupledVar(
+      "v", "The list of primary species participating in this equilibrium species");
   params.addCoupledVar("gamma", 1.0, "Activity coefficient of this secondary equilibrium species");
   params.addCoupledVar("gamma_v", 1.0, "Activity coefficients of coupled primary species");
   params.addClassDescription("Concentration of secondary equilibrium species");
@@ -35,13 +35,15 @@ AqueousEquilibriumRxnAux::AqueousEquilibriumRxnAux(const InputParameters & param
 
   // Check that the correct number of stoichiometric coefficients have been provided
   if (_sto_v.size() != n)
-    mooseError("The number of stoichiometric coefficients and coupled species must be equal in ",
+    mooseError("The number of stoichiometric coefficients in sto_v is not equal to the number of "
+               "coupled species in ",
                _name);
 
   // Check that the correct number of activity coefficients have been provided (if applicable)
   if (isCoupled("gamma_v"))
-    if (coupled("gamma_v") != n)
-      mooseError("The number of activity coefficients and coupled species must be equal in ",
+    if (coupledComponents("gamma_v") != n)
+      mooseError("The number of activity coefficients in gamma_v is not equal to the number of "
+                 "coupled species in ",
                  _name);
 
   _vals.resize(n);
