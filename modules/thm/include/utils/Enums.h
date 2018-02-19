@@ -41,20 +41,6 @@ MooseEnum getMooseEnum(const std::string & default_key, const std::map<std::stri
 
 // ----------------------------------------------------------------------------
 
-/// Type of the end
-enum EEndType
-{
-  IN, ///< inlet
-  OUT ///< outlet
-};
-
-const std::map<std::string, EEndType> pipe_end_type_to_enum{{"IN", IN}, {"OUT", OUT}};
-
-template <>
-EEndType stringToEnum<EEndType>(const std::string & s);
-
-// ----------------------------------------------------------------------------
-
 enum EValveStatusType
 {
   VALVE_CLOSE = 0,    ///< valve is closed
