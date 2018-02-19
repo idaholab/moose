@@ -230,7 +230,6 @@
   nl_rel_step_tol = 1e-10
   dtmax = 10.0
   nl_rel_tol = 1e-10
-  ss_check_tol = 1e-10
   end_time = 30.0
   dtmin = 0.5
   num_steps = 10

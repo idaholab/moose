@@ -63,17 +63,34 @@ validParams<Transient>()
                                 std::numeric_limits<unsigned int>::max(),
                                 "The number of timesteps in a transient run");
   params.addParam<int>("n_startup_steps", 0, "The number of timesteps during startup");
+
+  params.addDeprecatedParam<bool>("trans_ss_check",
+                                  false,
+                                  "Whether or not to check for steady state conditions",
+                                  "Use steady_state_detection instead");
+  params.addDeprecatedParam<Real>("ss_check_tol",
+                                  1.0e-08,
+                                  "Whenever the relative residual changes by less "
+                                  "than this the solution will be considered to be "
+                                  "at steady state.",
+                                  "Use steady_state_tolerance instead");
+  params.addDeprecatedParam<Real>(
+      "ss_tmin",
+      0.0,
+      "Minimum amount of time to run before checking for steady state conditions.",
+      "Use steady_state_start_time instead");
+
   params.addParam<bool>(
-      "trans_ss_check", false, "Whether or not to check for steady state conditions");
-  params.addParam<Real>("ss_check_tol",
+      "steady_state_detection", false, "Whether or not to check for steady state conditions");
+  params.addParam<Real>("steady_state_tolerance",
                         1.0e-08,
                         "Whenever the relative residual changes by less "
                         "than this the solution will be considered to be "
                         "at steady state.");
   params.addParam<Real>(
-      "ss_tmin",
+      "steady_state_start_time",
       0.0,
-      "Minimum number of timesteps to take before checking for steady state conditions.");
+      "Minimum amount of time to run before checking for steady state conditions.");
 
   params.addParam<std::vector<std::string>>("time_periods", "The names of periods");
   params.addParam<std::vector<Real>>("time_period_starts", "The start times of time periods");
@@ -118,6 +135,10 @@ validParams<Transient>()
                                             std::vector<std::string>(),
                                             "List of variables to relax during Picard Iteration");
 
+  params.addParamNamesToGroup(
+      "steady_state_detection steady_state_tolerance steady_state_start_time",
+      "Steady State Detection");
+
   params.addParamNamesToGroup("start_time dtmin dtmax n_startup_steps trans_ss_check ss_check_tol "
                               "ss_tmin abort_on_solve_fail timestep_tolerance use_multiapp_dt",
                               "Advanced");
@@ -160,9 +181,9 @@ Transient::Transient(const InputParameters & parameters)
     _num_steps(getParam<unsigned int>("num_steps")),
     _n_startup_steps(getParam<int>("n_startup_steps")),
     _steps_taken(0),
-    _trans_ss_check(getParam<bool>("trans_ss_check")),
-    _ss_check_tol(getParam<Real>("ss_check_tol")),
-    _ss_tmin(getParam<Real>("ss_tmin")),
+    _steady_state_detection(getParam<bool>("steady_state_detection")),
+    _steady_state_tolerance(getParam<Real>("steady_state_tolerance")),
+    _steady_state_start_time(getParam<Real>("steady_state_start_time")),
     _sln_diff_norm(declareRecoverableData<Real>("sln_diff_norm", 0.0)),
     _old_time_solution_norm(declareRecoverableData<Real>("old_time_solution_norm", 0.0)),
     _sync_times(_app.getOutputWarehouse().getSyncTimes()),
@@ -185,6 +206,16 @@ Transient::Transient(const InputParameters & parameters)
     _relax_factor(getParam<Real>("relaxation_factor")),
     _relaxed_vars(getParam<std::vector<std::string>>("relaxed_variables"))
 {
+  // Handl deprecated parameters
+  if (!parameters.isParamSetByAddParam("trans_ss_check"))
+    _steady_state_detection = getParam<bool>("trans_ss_check");
+
+  if (!parameters.isParamSetByAddParam("ss_check_tol"))
+    _steady_state_tolerance = getParam<Real>("ss_check_tol");
+
+  if (!parameters.isParamSetByAddParam("ss_tmin"))
+    _steady_state_start_time = getParam<Real>("ss_tmin");
+
   _nl.setDecomposition(_splitting);
   _t_step = 0;
   _dt = 0;
@@ -734,10 +765,11 @@ Transient::keepGoing()
   bool keep_going = !_problem.isSolveTerminationRequested();
 
   // Check for stop condition based upon steady-state check flag:
-  if (lastSolveConverged() && !_xfem_repeat_step && _trans_ss_check == true && _time > _ss_tmin)
+  if (lastSolveConverged() && !_xfem_repeat_step && _steady_state_detection == true &&
+      _time > _steady_state_start_time)
   {
     // Check solution difference relative norm against steady-state tolerance
-    if (_sln_diff_norm < _ss_check_tol)
+    if (_sln_diff_norm < _steady_state_tolerance)
     {
       _console << "Steady-State Solution Achieved at time: " << _time << std::endl;
       // Output last solve if not output previously by forcing it

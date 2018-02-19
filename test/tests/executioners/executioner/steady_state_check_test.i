@@ -93,7 +93,7 @@
   num_steps = 12
   dt = 1
 
-  trans_ss_check = true
+  steady_state_detection = true
 []
 
 [Outputs]
