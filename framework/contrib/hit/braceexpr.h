@@ -53,31 +53,31 @@ private:
 class Evaler
 {
 public:
-  virtual std::string eval(std::list<std::string> & args) const = 0;
+  virtual std::string eval(Node * n, std::list<std::string> & args) = 0;
 };
 
 class EnvEvaler : public Evaler
 {
 public:
-  virtual std::string eval(std::list<std::string> & args) const override;
+  virtual std::string eval(Node * n, std::list<std::string> & args) override;
 };
 
 class RawEvaler : public Evaler
 {
 public:
-  virtual std::string eval(std::list<std::string> & args) const override;
+  virtual std::string eval(Node * n, std::list<std::string> & args) override;
 };
 
 class BraceExpander
 {
 public:
-  void registerEvaler(const std::string & name, const Evaler & ev);
-  std::string expand(const std::string & input);
+  void registerEvaler(const std::string & name, Evaler & ev);
+  std::string expand(Node * n, const std::string & input);
 
 private:
-  std::string expand(BraceNode & expr);
+  std::string expand(Node * n, BraceNode & expr);
 
-  std::map<std::string, const Evaler *> _evalers;
+  std::map<std::string, Evaler *> _evalers;
 };
 
 // Expands ${...} substitution expressions with variable values from the tree.
@@ -85,7 +85,7 @@ class ExpandWalker : public Walker
 {
 public:
   ExpandWalker(std::string fname, BraceExpander& expander);
-  virtual void walk(const std::string & /*fullpath*/, const std::string & /*nodepath*/, hit::Node * n);
+  virtual void walk(const std::string & /*fullpath*/, const std::string & /*nodepath*/, Node * n);
 
   std::vector<std::string> used;
   std::vector<std::string> errors;

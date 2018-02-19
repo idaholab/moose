@@ -2,6 +2,7 @@
 #include "braceexpr.h"
 
 #include <cstdlib>
+#include <iostream>
 
 namespace hit
 {
@@ -33,7 +34,7 @@ BraceNode::append()
 }
 
 std::string
-EnvEvaler::eval(std::list<std::string> & args) const
+EnvEvaler::eval(Node * /*n*/, std::list<std::string> & args)
 {
   std::string var = args.front();
   std::string val;
@@ -44,7 +45,7 @@ EnvEvaler::eval(std::list<std::string> & args) const
 }
 
 std::string
-RawEvaler::eval(std::list<std::string> & args) const
+RawEvaler::eval(Node * /*n*/, std::list<std::string> & args)
 {
   std::string s;
   for (auto & arg : args)
@@ -56,13 +57,13 @@ size_t parseBraceNode(const std::string & input, size_t start, BraceNode & n);
 size_t parseBraceBody(const std::string & input, size_t start, BraceNode & n);
 
 void
-BraceExpander::registerEvaler(const std::string & name, const Evaler & ev)
+BraceExpander::registerEvaler(const std::string & name, Evaler & ev)
 {
   _evalers[name] = &ev;
 }
 
 std::string
-BraceExpander::expand(const std::string & input)
+BraceExpander::expand(Node * n, const std::string & input)
 {
   std::string result = input;
   size_t start = 0;
@@ -79,7 +80,7 @@ BraceExpander::expand(const std::string & input)
       continue;
     }
 
-    auto replace_text = expand(root);
+    auto replace_text = expand(n, root);
     result.replace(root.offset(), root.len(), replace_text);
     start = root.offset() + replace_text.size();
   }
@@ -87,7 +88,7 @@ BraceExpander::expand(const std::string & input)
 }
 
 std::string
-BraceExpander::expand(BraceNode & expr)
+BraceExpander::expand(Node * n, BraceNode & expr)
 {
   auto args = expr.list();
   if (args.size() == 0)
@@ -95,13 +96,13 @@ BraceExpander::expand(BraceNode & expr)
 
   std::list<std::string> expanded_args;
   for (auto it = args.begin(); it != args.end(); ++it)
-    expanded_args.push_back(expand(*it));
+    expanded_args.push_back(expand(n, *it));
 
   auto cmd = expanded_args.front();
   if (_evalers.count(cmd) == 0)
     throw std::runtime_error("no valid evaler '" + cmd + "'");
   expanded_args.pop_front();
-  return _evalers[cmd]->eval(expanded_args);
+  return _evalers[cmd]->eval(n, expanded_args);
 }
 
 size_t
@@ -171,7 +172,7 @@ ExpandWalker::walk(const std::string & /*fullpath*/, const std::string & /*nodep
   std::string s;
   try
   {
-    s = _expander.expand(f->val());
+    s = _expander.expand(n, f->val());
   }
   catch (Error & err)
   {

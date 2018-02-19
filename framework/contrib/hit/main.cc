@@ -44,7 +44,7 @@ main(int argc, char ** argv)
     hit::RawEvaler raw;
     expander.registerEvaler("env", env);
     expander.registerEvaler("raw", raw);
-    std::cout << expander.expand(ss.str()) << "\n";
+    std::cout << expander.expand(nullptr, ss.str()) << "\n";
 
     return 0;
   }
