@@ -160,6 +160,9 @@ SetupMeshAction::act()
     if (_app.parameters().get<bool>("use_split"))
     {
       auto split_file = _app.parameters().get<std::string>("split_file");
+      if (split_file != "")
+        split_file = MooseUtils::stripExtension(split_file) + ".cpr";
+
       if (_type != "FileMesh")
       {
         if (split_file == "")

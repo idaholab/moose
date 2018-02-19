@@ -36,7 +36,7 @@ SplitMeshAction::act()
   std::vector<unsigned int> splits;
   bool success = MooseUtils::tokenizeAndConvert(splitstr, splits, ", ");
   if (!success)
-    mooseError("invalid argument for --split-file: '", splitstr, "'");
+    mooseError("invalid argument for --split-mesh: '", splitstr, "'");
 
   for (std::size_t i = 0; i < splits.size(); i++)
   {
@@ -47,9 +47,10 @@ SplitMeshAction::act()
     Moose::out << "    - writing " << cpr->current_processor_ids().size() << " files per process..."
                << std::endl;
     cpr->binary() = true;
-    auto fname = MooseUtils::stripExtension(mesh->getFileName()) + ".cpr";
-    if (mesh->getFileName() == "")
+    auto fname = mesh->getFileName();
+    if (fname == "")
       fname = _app.parameters().get<std::string>("split_file");
+    fname = MooseUtils::stripExtension(fname) + ".cpr";
     cpr->write(fname);
   }
 }
