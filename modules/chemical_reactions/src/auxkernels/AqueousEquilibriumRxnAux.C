@@ -35,13 +35,15 @@ AqueousEquilibriumRxnAux::AqueousEquilibriumRxnAux(const InputParameters & param
 
   // Check that the correct number of stoichiometric coefficients have been provided
   if (_sto_v.size() != n)
-    mooseError("The number of stoichiometric coefficients and coupled species must be equal in ",
+    mooseError("The number of stoichiometric coefficients in sto_v is not equal to the number of "
+               "coupled species in ",
                _name);
 
   // Check that the correct number of activity coefficients have been provided (if applicable)
   if (isCoupled("gamma_v"))
     if (coupledComponents("gamma_v") != n)
-      mooseError("The number of activity coefficients and coupled species must be equal in ",
+      mooseError("The number of activity coefficients in gamma_v is not equal to the number of "
+                 "coupled species in ",
                  _name);
 
   _vals.resize(n);

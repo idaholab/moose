@@ -49,11 +49,15 @@ CoupledBEEquilibriumSub::CoupledBEEquilibriumSub(const InputParameters & paramet
 
   // Check that the correct number of coupled values have been provided
   if (_sto_v.size() != n)
-    mooseError("The number of values in sto_v is incorrect in ", _name);
+    mooseError("The number of stoichiometric coefficients in sto_v is not equal to the number of "
+               "coupled species in ",
+               _name);
 
   if (isCoupled("gamma_v"))
     if (coupledComponents("gamma_v") != n)
-      mooseError("The number of variables in gamma_v is incorrect in ", _name);
+      mooseError("The number of activity coefficients in gamma_v is not equal to the number of "
+                 "coupled species in ",
+                 _name);
 
   _vars.resize(n);
   _v_vals.resize(n);
