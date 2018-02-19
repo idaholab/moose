@@ -103,10 +103,10 @@ GeometricalComponent::displaceMesh(const std::vector<SubdomainName> & blocks)
   _sim.addUserObject(class_name, genName(name(), "displace_node"), params);
 }
 
-const std::vector<RELAP7::Connection> &
-GeometricalComponent::getConnections(RELAP7::EEndType id) const
+const std::vector<GeometricalComponent::Connection> &
+GeometricalComponent::getConnections(PipeConnectable::EEndType id) const
 {
-  std::map<RELAP7::EEndType, std::vector<RELAP7::Connection>>::const_iterator it =
+  std::map<PipeConnectable::EEndType, std::vector<Connection>>::const_iterator it =
       _connections.find(id);
   if (it != _connections.end())
     return it->second;

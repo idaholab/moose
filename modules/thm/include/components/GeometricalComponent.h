@@ -3,6 +3,7 @@
 
 #include "Component.h"
 #include "RELAP7App.h"
+#include "PipeConnectable.h"
 #include <map>
 #include <unordered_set>
 #include <numeric>
@@ -20,6 +21,23 @@ class GeometricalComponent : public Component
 {
 public:
   GeometricalComponent(const InputParameters & parameters);
+
+  struct Connection
+  {
+    /// Physical position of the connecting point
+    Point _position;
+    /// Boundary node of connection (used by other components for connecting)
+    Node * _node;
+    /// Boundary id of this connection
+    unsigned int _boundary_id;
+    /// Out norm (either 1 or -1) on boundaries
+    Real _normal;
+
+    Connection(const Point & pt, Node * node, unsigned int bc_id, Real normal)
+      : _position(pt), _node(node), _boundary_id(bc_id), _normal(normal)
+    {
+    }
+  };
 
   virtual void setupMesh() override;
   virtual void check() override;
@@ -39,7 +57,7 @@ public:
   virtual Real getNumElems() const { return _n_elem; }
   virtual Real getLength() const { return _length; }
 
-  virtual const std::vector<RELAP7::Connection> & getConnections(RELAP7::EEndType id) const;
+  virtual const std::vector<Connection> & getConnections(PipeConnectable::EEndType id) const;
 
   /**
    * Gets the subdomain IDs for this component
@@ -121,7 +139,7 @@ protected:
   /// Node locations along the main axis
   std::vector<Real> _node_locations;
 
-  std::map<RELAP7::EEndType, std::vector<RELAP7::Connection>> _connections;
+  std::map<PipeConnectable::EEndType, std::vector<Connection>> _connections;
 
   /// List of subdomain IDs this components owns
   std::vector<unsigned int> _subdomain_ids;
