@@ -50,7 +50,7 @@ class SQAExtension(MooseMarkdownExtension):
         md.registerExtension(self)
         config = self.getConfigs()
 
-        repo = os.path.join(config['repo'], 'blob', config['branch'])
+        repo = os.path.join(config.pop('repo'), 'blob', config['branch'])
         database = SQAInputTagDatabase(repo)
 
         md.preprocessors.add('moose_sqa',
@@ -72,12 +72,103 @@ class SQAExtension(MooseMarkdownExtension):
                               SQALink(markdown_instance=md, **config),
                               '_begin')
 
+        md.inlinePatterns.add('moose-requirements',
+                              SQARequirements(markdown_instance=md, repo=repo, **config),
+                              '_begin')
+
 
 def makeExtension(*args, **kwargs): #pylint: disable=invalid-name
     """
     Create SQAExtension
     """
     return SQAExtension(*args, **kwargs)
+
+Requirement = collections.namedtuple('Requirement',
+                                     "name path filename requirement design issues")
+
+def get_requirements():
+    """
+    Extracts the requirements from the moose/test/tests directory. This is only a
+    temporary solution to a larger effort.
+    """
+    directories = [os.path.join(MooseDocs.ROOT_DIR, 'test', 'tests')]
+    spec = 'tests'
+    out = set()
+    for location in directories:
+        for base, _, files in os.walk(location):
+            for fname in files:
+                if fname == spec:
+                    full_file = os.path.join(base, fname)
+                    root = mooseutils.hit_load(full_file)
+                    for child in root.children[0]:
+                        if 'requirement' in child:
+                            design = child['design'] if 'design' in child else None
+                            issues = child['issues'] if 'issues' in child else None
+                            req = Requirement(name=child.name,
+                                              path=os.path.relpath(full_file, MooseDocs.ROOT_DIR),
+                                              filename=full_file,
+                                              requirement=child['requirement'],
+                                              design=design,
+                                              issues=issues)
+                            out.add(req)
+
+    return out
+
+class SQARequirements(MooseMarkdownCommon, Pattern):
+    """
+    Builds SQA requirement list from test specification files.
+    """
+    RE = r'(?<!`)!sqa requirements'
+
+    @staticmethod
+    def defaultSettings():
+        settings = MooseMarkdownCommon.defaultSettings()
+        return settings
+
+    def __init__(self, markdown_instance=None, repo=None, **kwargs):
+        MooseMarkdownCommon.__init__(self, **kwargs)
+        Pattern.__init__(self, self.RE, markdown_instance)
+        self._repo = repo
+
+    def handleMatch(self, match): #pylint: disable=unused-argument
+        """
+        Build the matrix.
+        """
+        repo_issue = "https://github.com/idaholab/moose/issues"
+
+        ol = etree.Element('ol')
+        ol.set('class', 'collection browser-default')
+        for req in get_requirements():
+            li = etree.SubElement(ol, 'li')
+            li.set('class', 'collection-item')
+
+            p = etree.SubElement(li, 'p')
+            p.text = req.requirement
+
+            p = etree.SubElement(li, 'p')
+            p.text = 'Specification: '
+            a = etree.SubElement(p, 'a')
+            a.set('href', '{}/{}'.format(self._repo, req.path))
+            a.text = '{}:{}'.format(req.path, req.name)
+
+            if req.design:
+                p = etree.SubElement(li, 'p')
+                p.text = 'Design: '
+                for design in req.design.split():
+                    node = self.getFilename(design)
+                    a = etree.SubElement(p, 'a')
+                    a.set("href", '/' + node[1].destination)
+                    a.text = node[1].name + ' '
+
+            if req.issues:
+                p = etree.SubElement(li, 'p')
+                p.text = 'Issues: '
+                for issue in req.issues.split():
+                    a = etree.SubElement(p, 'a')
+                    a.set("href", "{}/{}".format(repo_issue, issue[1:]))
+                    a.text = issue + ' '
+
+        return ol
 
 class SQAPreprocessor(MooseMarkdownCommon, Preprocessor):
     """
