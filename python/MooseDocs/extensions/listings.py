@@ -327,7 +327,7 @@ class ListingInputPattern(ListingPattern):
     """
     Markdown extension for extracting blocks from input files.
     """
-    RE = r'(?<!`)!listing\s+(?P<filename>.*\.i)(?:$|\s+)(?P<settings>.*)'
+    RE = r'(?<!`)!listing\s+(?P<filename>.*(?:/tests|\.i)) *(?P<settings>.*)?'
 
     @staticmethod
     def defaultSettings():
