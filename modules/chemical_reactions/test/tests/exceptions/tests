@@ -1,0 +1,37 @@
+[Tests]
+  [./missing_gamma]
+    type = RunException
+    input = missing_gamma.i
+    expect_err = "The number of activity coefficients in gamma_v is not equal to the number of coupled species in c"
+  [../]
+  [./missing_gamma2]
+    type = RunException
+    input = missing_gamma2.i
+    expect_err = "The number of activity coefficients in gamma_v is not equal to the number of coupled species in aeq"
+  [../]
+  [./extra_gamma]
+    type = RunException
+    input = extra_gamma.i
+    expect_err = "The number of activity coefficients in gamma_v is not equal to the number of coupled species in c"
+  [../]
+  [./missing_sto]
+    type = RunException
+    input = missing_sto.i
+    expect_err = "The number of stoichiometric coefficients in sto_v is not equal to the number of coupled species in c"
+  [../]
+  [./missing_sto2]
+    type = RunException
+    input = missing_sto2.i
+    expect_err = "The number of stoichiometric coefficients in sto_v is not equal to the number of coupled species in aeq"
+  [../]
+  [./missing_sto3]
+    type = RunException
+    input = missing_sto3.i
+    expect_err = "The number of stoichiometric coefficients in sto_v is not equal to the number of reactant species in mineral_conc"
+  [../]
+  [./extra_sto]
+    type = RunException
+    input = extra_sto.i
+    expect_err = "The number of stoichiometric coefficients in sto_v is not equal to the number of coupled species in c"
+  [../]
+[]
