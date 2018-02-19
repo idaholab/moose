@@ -194,6 +194,20 @@ class TestMooseDocsImport(LogTestCase):
         self.assertNotIn(gold, items)
 
 
+class TestLargeMediaImport(LogTestCase):
+    """
+    Tests for import large_media files.
+    """
+    def testBasic(self):
+        items = moose_docs_import(include=['large_media/**'],
+                                  root_dir=MooseDocs.ROOT_DIR,
+                                  base='',
+                                  extensions=('.gif'))
+        self.assertIsInstance(items, list)
+        self.assertIn(os.path.join(MooseDocs.ROOT_DIR,
+                                   'large_media/level_set/circle_rotate_master_out.gif'),
+                      items)
+
 
 if __name__ == '__main__':
     unittest.main(verbosity=2)
