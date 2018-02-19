@@ -387,6 +387,7 @@ class Scheduler(MooseObject):
             while self.job_queue_count > 0:
                 # One of our children died :( so exit uncleanly (do not join)
                 if self.error_state:
+                    self.killRemaining()
                     return
                 sleep(0.5)
 
@@ -559,8 +560,8 @@ class Scheduler(MooseObject):
             if not tester.isSilent() or not tester.isDeleted():
                 self.last_reported = clock()
 
-            # Do any job_queue_count decremenation last. If zero, the thread pools may close
-            # prematurely (see waitFinish method).
+            # Do job_queue_count decrement last. If zero, the thread pools may close prematurely,
+            # preventing the last job status from printing (see waitFinish method).
             if tester.isFinished():
                 with self.job_queue_lock:
                     self.job_queue_count -= 1
@@ -577,6 +578,11 @@ class Scheduler(MooseObject):
 
     def runWorker(self, job_container):
         """ Method the run_pool calls when an available thread becomes ready """
+        # There exists the possibility that jobs are still trying to empty out of the
+        # run_pool (like this job), and we wish to no longer run any jobs.
+        if self.error_state:
+            return
+
         # Wrap the entire runWorker thread inside a try/exception to catch thread errors
         try:
             tester = job_container.getTester()
