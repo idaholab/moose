@@ -41,24 +41,6 @@ MooseEnum getMooseEnum(const std::string & default_key, const std::map<std::stri
 
 // ----------------------------------------------------------------------------
 
-enum EValveActionType
-{
-  VALVE_NO_ACTION = 0,   ///< maintaining current status
-  VALVE_TURNING_ON = 1,  ///< turning on the valve
-  VALVE_TURNING_OFF = -1 ///< turning off the valve
-};
-
-const std::map<std::string, EValveActionType> valve_action_type_to_enum{
-    {"NO_ACTION", VALVE_NO_ACTION}, {"OPEN", VALVE_TURNING_ON}, {"CLOSE", VALVE_TURNING_OFF}};
-
-template <>
-EValveActionType stringToEnum<EValveActionType>(const std::string & s);
-
-/// Enum with valve action
-MooseEnum getValveActionType(const std::string & name = "");
-
-// ----------------------------------------------------------------------------
-
 /// Check valve type
 enum ECheckValveType
 {
