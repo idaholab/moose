@@ -184,6 +184,17 @@ class TestFileTree(LogTestCase):
         node = self.finder(exclude, name)
         self.assertEqual(len(node), 0)
 
+    def testLargeMedia(self):
+        config = dict()
+        config['large_media'] = dict(include=['large_media/**'],
+                                     root_dir=MooseDocs.ROOT_DIR,
+                                     base='',
+                                     extensions=('.gif'))
+
+        include = common.moose_docs_file_tree(config)
+        name = '/large_media/level_set/circle_rotate_master_out.gif'
+        node = self.finder(include, name)
+        self.assertEqual(len(node), 1)
 
 if __name__ == '__main__':
     unittest.main(verbosity=2)

@@ -1,6 +1,6 @@
 # Phase Field Module
 
-!media media/phase_field/pf_module_examples_vertical.png width=200px padding-left=20px float=right caption=Phase field results produced using the MOOSE Phase Field Module
+!media /phase_field/pf_module_examples_vertical.png width=200px padding-left=20px float=right caption=Phase field results produced using the MOOSE Phase Field Module
 
 * [Systems](phase_field/systems.md)
 

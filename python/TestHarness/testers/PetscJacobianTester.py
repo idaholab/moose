@@ -9,6 +9,7 @@
 
 from RunApp import RunApp
 import re
+import math
 
 class PetscJacobianTester(RunApp):
 
@@ -31,15 +32,44 @@ class PetscJacobianTester(RunApp):
         RunApp.__init__(self, name, params)
         self.specs['cli_args'].append('-snes_type test')
 
+    def __strToFloat(self, str):
+        """ Convert string to float """
+        # PETSc returns 'nan.' and 'inf.', so in order to convert it properly, we need to strip the trailing '.'
+        if str == 'nan.' or str == 'inf.':
+            return float(str[:-1])
+        # And '-nan.' is also a possible result from PETSc
+        elif str == '-nan.':
+            return float('nan')
+        else:
+            return float(str)
+
+    def __compare(self, value, threshold):
+        """
+        return True if:
+          1. `value` and `threshold` are both Inf
+          2. `value` and `threshold` are both NaN
+          3. `value` is less then `threshold`
+        otherwise False
+        """
+        if (math.isnan(value) and math.isnan(float(threshold))):
+            return True
+        elif (math.isinf(value) and math.isinf(float(threshold))):
+            return True
+        elif value < float(threshold):
+            return True
+        else:
+            return False
+
     def processResults(self, moose_dir, options, output):
         m = re.search("Norm of matrix ratio (\S+?),? difference (\S+) \(user-defined state\)", output, re.MULTILINE | re.DOTALL);
         if m:
-            if float(m.group(1)) < float(self.specs['ratio_tol']) and float(m.group(2)) < float(self.specs['difference_tol']):
+            if self.__compare(self.__strToFloat(m.group(1)), self.specs['ratio_tol']) and \
+               self.__compare(self.__strToFloat(m.group(2)), self.specs['difference_tol']):
                 reason = ''
             else:
                 reason = 'INCORRECT JACOBIAN'
         else:
-            reason = 'EXPECTED OUTPUT NOT FOUND';
+            reason = 'EXPECTED OUTPUT NOT FOUND'
 
         # populate status bucket
         if reason != '':

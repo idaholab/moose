@@ -68,7 +68,7 @@ mesh and field data for the simulation.
 
 ## Results
 
-!media media/level_set/example_circle_16.gif width=40% margin-left=10px float=right id=example_circle_16 caption=Results of executing [circle_16.i] showing the "phi" field variable and the  0.5 contour initially (black) and as the solution progresses (green).
+!media /level_set/example_circle_16.gif width=40% margin-left=10px float=right id=example_circle_16 caption=Results of executing [circle_16.i] showing the "phi" field variable and the  0.5 contour initially (black) and as the solution progresses (green).
 
 \ref{example_circle_16} show the results of the simulation defined by executing the [circle_16.i] input file,
 which can be done using the following commands.
@@ -99,7 +99,7 @@ a function of the element size (see [LevelSetCFLCondition](level_set/LevelSetCFL
 example, the increased number of timesteps and the increased problem size are noticeable but do not cause an
 intractable increase of run time.
 
-!media media/level_set/example_circle_64.gif width=40% margin-left=10px float=right id=example_circle_64 caption=Results of executing [circle_16.i], with two uniform refinement levels, showing the "phi" field variable and the  0.5 contour initially (black) and as the solution progresses (green).
+!media /level_set/example_circle_64.gif width=40% margin-left=10px float=right id=example_circle_64 caption=Results of executing [circle_16.i], with two uniform refinement levels, showing the "phi" field variable and the  0.5 contour initially (black) and as the solution progresses (green).
 
 \ref{example_circle_64} shows the results from running [circle_16.i] with two uniform refinements applied, the
 improvement in the solution is drastic and for this simple example may be adequate.
