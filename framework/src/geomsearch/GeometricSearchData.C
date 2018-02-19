@@ -374,6 +374,9 @@ GeometricSearchData::getMortarNearestNodeLocator(const unsigned int master_id,
       mortarboundary_id = MORTAR_BASE_ID + master_id;
       _boundary_to_mortarboundary[master_id] = mortarboundary_id;
       break;
+
+    default:
+      mooseError("Unknown side type");
   }
 
   generateMortarNodes(master_id, slave_id, 1001);

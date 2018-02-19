@@ -1259,46 +1259,25 @@ Parser::setScalarParameter(const std::string & full_name,
   catch (hit::Error & err)
   {
     auto strval = _root->param<std::string>(full_name);
-    size_t pos = 0;
 
     // handle the case where the user put a number inside quotes - we really shouldn't allow this,
     // but "backwards compatibility" :-(
     auto & t = typeid(T);
     if (t == typeid(int) || t == typeid(unsigned int) || t == typeid(SubdomainID) ||
-        t == typeid(BoundaryID))
+        t == typeid(BoundaryID) || t == typeid(double))
     {
       try
       {
-        auto v = std::stoi(strval, &pos);
-        param->set() = *reinterpret_cast<T *>(&v);
-        if (pos != strval.size())
-          throw std::runtime_error("dummy"); // catch below and emit error
+        param->set() = MooseUtils::convert<T>(strval);
       }
-      catch (...) // some std::exception's were slipping through with "catch(std::exception&)"
+      catch (std::exception & /*e*/)
       {
+        const std::string format_type = (t == typeid(double)) ? "float" : "integer";
         _errmsg += errormsg(_input_filename,
                             _root->find(full_name),
-                            "invalid integer syntax for parameter: ",
-                            full_name,
-                            "=",
-                            strval) +
-                   "\n";
-      }
-    }
-    else if (t == typeid(double) || t == typeid(float))
-    {
-      try
-      {
-        auto v = std::stod(strval, &pos);
-        param->set() = *reinterpret_cast<T *>(&v);
-        if (pos != strval.size())
-          throw std::runtime_error("dummy"); // catch below and emit error
-      }
-      catch (...) // some std::exception's were slipping through with "catch(std::exception&)"
-      {
-        _errmsg += errormsg(_input_filename,
-                            _root->find(full_name),
-                            "invalid float syntax for parameter: ",
+                            "invalid ",
+                            format_type,
+                            " syntax for parameter: ",
                             full_name,
                             "=",
                             strval) +
