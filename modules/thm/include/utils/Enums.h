@@ -41,15 +41,6 @@ MooseEnum getMooseEnum(const std::string & default_key, const std::map<std::stri
 
 // ----------------------------------------------------------------------------
 
-enum ETHCouplingType
-{
-  MOD_DENSITY, ///< moderator density
-  MOD_TEMP,    ///< moderator temperature
-  FUEL_TEMP    ///< fuel temperature
-};
-
-// ----------------------------------------------------------------------------
-
 /// The type of an equation
 enum EFlowEquationType
 {
