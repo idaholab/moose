@@ -6,6 +6,7 @@
     scale_refine = 2
     requirement = "The adaptivity system shall create an auxiliary field variable that marks elements for refinement within a rectangular region."
     design = "/Markers/index.md /BoxMarker.md"
+    issues = '#1275'
   [../]
   [./mark_and_adapt]
     type = 'Exodiff'
@@ -14,5 +15,6 @@
     scale_refine = 2
     requirement = "The adaptivity system shall adapt the mesh within a rectangular region."
     design = "/Markers/index.md /BoxMarker.md"
+    issues = '#1275'
   [../]
 []
