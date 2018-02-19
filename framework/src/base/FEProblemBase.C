@@ -1473,7 +1473,7 @@ FEProblemBase::reinitNeighborPhys(const Elem * neighbor,
   _aux->reinitNeighborFace(neighbor, neighbor_side, 0, tid);
 
   // Do the same for the displaced problem
-  if (_displaced_problem != NULL)
+  if (_displaced_problem != NULL && _reinit_displaced_face)
     _displaced_problem->reinitNeighborPhys(
         _displaced_mesh->elemPtr(neighbor->id()), neighbor_side, physical_points, tid);
 }
@@ -1498,7 +1498,7 @@ FEProblemBase::reinitNeighborPhys(const Elem * neighbor,
   _aux->reinitNeighbor(neighbor, tid);
 
   // Do the same for the displaced problem
-  if (_displaced_problem != NULL)
+  if (_displaced_problem != NULL && _reinit_displaced_elem)
     _displaced_problem->reinitNeighborPhys(
         _displaced_mesh->elemPtr(neighbor->id()), physical_points, tid);
 }
