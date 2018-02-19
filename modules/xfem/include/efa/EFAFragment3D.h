@@ -40,6 +40,7 @@ public:
   virtual unsigned int getNumCutNodes() const;
   virtual std::set<EFANode *> getAllNodes() const;
   virtual bool isConnected(EFAFragment * other_fragment) const;
+  virtual bool isEdgeConnected(EFAFragment * other_fragment) const;
   virtual void removeInvalidEmbeddedNodes(std::map<unsigned int, EFANode *> & EmbeddedNodes);
 
   // EFAfragment3D specific methods
