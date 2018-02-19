@@ -4,3 +4,7 @@ framework:
       - docs/content/MathJax/*
     include:
       - docs/content/**
+large_media:
+     base: large_media
+     include:
+       - large_media/**

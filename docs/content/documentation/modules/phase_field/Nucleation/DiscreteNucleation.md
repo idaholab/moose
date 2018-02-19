@@ -1,6 +1,6 @@
 # Discrete Nucleation
 
-!media media/nucleation.gif width=50% padding-left=20px float=right caption=Nucleation system in action on a FeCuNi system. Clockwise from top left: Copper concentration, nickel concentration, nucleation penalty energy density, bulk free energy density.
+!media /phase_field/nucleation.gif width=50% padding-left=20px float=right caption=Nucleation system in action on a FeCuNi system. Clockwise from top left: Copper concentration, nickel concentration, nucleation penalty energy density, bulk free energy density.
 
 The _discrete nucleation_ system allows users to incorporate nucleation phenomena in phase field simulations. Due to the lack of thermal fluctuations (also see [Langevin Noise](Nucleation/LangevinNoise.md)) nucleation phenomena are not intrinsic to the phase field method. We introduce nucleation by artificially triggering and stabilizing the formation of nuclei through local modifications of the free energy density.
 

@@ -56,11 +56,11 @@ solve when steady-state is achieved according to the criteria defined by \citet{
 \ref{circle_rotate_master_out} shows the results of the bubble problem with reinitialization, the result looks
 similar to the SUPG result. However, if you consider the area conservation discussed in the [Area Comparison](#area_comparison) section, the reinitialization scheme yields the superior solution for this problem.
 
-!media media/level_set/circle_rotate_out.gif id=circle_rotate_out width=32% margin-right=2% float=left caption=Results from solving the rotating circle problem with the level set equation alone.
+!media /level_set/circle_rotate_out.gif id=circle_rotate_out width=32% margin-right=2% float=left caption=Results from solving the rotating circle problem with the level set equation alone.
 
-!media media/level_set/circle_rotate_supg_out.gif id=circle_rotate_supg_out width=32% margin-right=2% float=left caption=Results from solving the rotating circle problem with the level set equation using SUPG stabilization.
+!media /level_set/circle_rotate_supg_out.gif id=circle_rotate_supg_out width=32% margin-right=2% float=left caption=Results from solving the rotating circle problem with the level set equation using SUPG stabilization.
 
-!media media/level_set/circle_rotate_master_out.gif id=circle_rotate_master_out width=32% float=left caption=Results from solving the rotating circle problem with the level set equation with reinitialization.
+!media /level_set/circle_rotate_master_out.gif id=circle_rotate_master_out width=32% float=left caption=Results from solving the rotating circle problem with the level set equation with reinitialization.
 
 ## Area Comparison
 
