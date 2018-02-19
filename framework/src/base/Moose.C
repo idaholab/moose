@@ -557,9 +557,7 @@ registerObjects(Factory & factory)
   registerKernel(Diffusion);
   registerKernel(AnisotropicDiffusion);
   registerKernel(CoupledForce);
-  registerNamedObject(BodyForce, "UserForcingFunction");
-  factory.deprecateObject("UserForcingFunction", "BodyForce");
-  registerKernel(BodyForce);
+  registerRenamedObject("UserForcingFunction", BodyForce, "04/01/2018 00:00");
   registerKernel(Reaction);
   registerKernel(MassEigenKernel);
   registerKernel(NullKernel);

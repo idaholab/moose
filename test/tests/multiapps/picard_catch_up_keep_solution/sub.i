@@ -38,7 +38,6 @@
     type = FunctionDirichletBC
     variable = v
     boundary = right
-    value = 0
     function = 't + 1'
   [../]
 []

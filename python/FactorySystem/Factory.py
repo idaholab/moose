@@ -60,12 +60,12 @@ class Factory:
     def printDump(self, root_node_name):
         print "[" + root_node_name + "]"
 
-        for name, object in self.objects.iteritems():
+        for name, object in sorted(self.objects.iteritems()):
             print "  [./" + name + "]"
 
             params = self.validParams(name)
 
-            for key in params.desc:
+            for key in sorted(params.desc):
                 default = ''
                 if params.isValid(key):
                     the_param = params[key]

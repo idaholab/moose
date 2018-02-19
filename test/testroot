@@ -1,2 +1,4 @@
 app_name = moose_test
-cli_args = '--error'
+allow_warnings = false
+allow_unused = false
+allow_override = false
