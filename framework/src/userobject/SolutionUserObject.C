@@ -410,16 +410,12 @@ SolutionUserObject::initialSetup()
   if (_initialized)
     return;
 
-  // Several aspects of SolutionUserObject won't work if the FEProblemBase's MooseMesh is
-  // a DistributedMesh:
+  // Create a libmesh::Mesh object for storing the loaded data.
+  // Several aspects of SolutionUserObject won't work with a DistributedMesh:
   // .) ExodusII_IO::copy_nodal_solution() doesn't work in parallel.
   // .) We don't know if directValue will be used, which may request
   //    a value on a Node we don't have.
-  _fe_problem.mesh().errorIfDistributedMesh("SolutionUserObject");
-
-  // Create a libmesh::Mesh object for storing the loaded data.  Since
-  // SolutionUserObject is restricted to only work with ReplicatedMesh
-  // (see above) we can force the Mesh used here to be a ReplicatedMesh.
+  // We force the Mesh used here to be a ReplicatedMesh.
   _mesh = libmesh_make_unique<ReplicatedMesh>(_communicator);
 
   // ExodusII mesh file supplied
