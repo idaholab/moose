@@ -368,11 +368,12 @@ protected:
   MooseVariable * getVar(const std::string & var_name, unsigned int comp);
 
   /**
-   * Checks to make sure that the current Executioner has set "_it_transient" when old/older values
+   * Checks to make sure that the current Executioner has set "_is_transient" when old/older values
    * are coupled in.
    * @param name the name of the variable
+   * @param fn_name The name of the function that called this method - used in the error message
    */
-  void validateExecutionerType(const std::string & name) const;
+  void validateExecutionerType(const std::string & name, const std::string & fn_name) const;
 
   /// Whether or not this object is a "neighbor" object: ie all of it's coupled values should be neighbor values
   bool _coupleable_neighbor;

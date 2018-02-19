@@ -37,7 +37,7 @@ NeighborCoupleable::coupledNeighborValue(const std::string & var_name, unsigned 
 const VariableValue &
 NeighborCoupleable::coupledNeighborValueOld(const std::string & var_name, unsigned int comp)
 {
-  validateExecutionerType(var_name);
+  validateExecutionerType(var_name, "coupledNeighborValueOld");
 
   MooseVariable * var = getVar(var_name, comp);
   if (_neighbor_nodal)
@@ -49,7 +49,7 @@ NeighborCoupleable::coupledNeighborValueOld(const std::string & var_name, unsign
 const VariableValue &
 NeighborCoupleable::coupledNeighborValueOlder(const std::string & var_name, unsigned int comp)
 {
-  validateExecutionerType(var_name);
+  validateExecutionerType(var_name, "coupledNeighborValueOlder");
 
   MooseVariable * var = getVar(var_name, comp);
   if (_neighbor_nodal)
@@ -84,7 +84,7 @@ NeighborCoupleable::coupledNeighborGradientOld(const std::string & var_name, uns
   if (_neighbor_nodal)
     mooseError("Nodal variables do not have gradients");
 
-  validateExecutionerType(var_name);
+  validateExecutionerType(var_name, "coupledNeighborGradientOld");
   MooseVariable * var = getVar(var_name, comp);
   return (_c_is_implicit) ? var->gradSlnOldNeighbor() : var->gradSlnOlderNeighbor();
 }
@@ -95,7 +95,7 @@ NeighborCoupleable::coupledNeighborGradientOlder(const std::string & var_name, u
   if (_neighbor_nodal)
     mooseError("Nodal variables do not have gradients");
 
-  validateExecutionerType(var_name);
+  validateExecutionerType(var_name, "coupledNeighborGradientOlder");
   MooseVariable * var = getVar(var_name, comp);
   if (_c_is_implicit)
     return var->gradSlnOlderNeighbor();
@@ -129,6 +129,7 @@ NeighborCoupleable::coupledNeighborSolutionDoFsOld(const std::string & var_name,
   if (_neighbor_nodal)
     mooseError("nodal objects should not call coupledSolutionDoFsOld");
 
+  validateExecutionerType(var_name, "coupledNeighborSolutionDoFsOld");
   MooseVariable * var = getVar(var_name, comp);
   return (_c_is_implicit) ? var->solutionDoFsOldNeighbor() : var->solutionDoFsOlderNeighbor();
 }
@@ -140,6 +141,7 @@ NeighborCoupleable::coupledNeighborSolutionDoFsOlder(const std::string & var_nam
   if (_neighbor_nodal)
     mooseError("nodal objects should not call coupledSolutionDoFsOlder");
 
+  validateExecutionerType(var_name, "coupledNeighborSolutionDoFsOlder");
   MooseVariable * var = getVar(var_name, comp);
   if (_c_is_implicit)
     return var->solutionDoFsOlderNeighbor();

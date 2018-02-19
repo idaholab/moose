@@ -92,6 +92,7 @@
 #include "FluxAverageAux.h"
 #include "OldMaterialAux.h"
 #include "DotCouplingAux.h"
+#include "ScalarDotCouplingAux.h"
 #include "VectorPostprocessorAux.h"
 #include "ExampleShapeElementKernel.h"
 #include "ExampleShapeElementKernel2.h"
@@ -428,6 +429,7 @@ MooseTestApp::registerObjects(Factory & factory)
   registerAux(FluxAverageAux);
   registerAux(OldMaterialAux);
   registerAux(DotCouplingAux);
+  registerAux(ScalarDotCouplingAux);
   registerAux(VectorPostprocessorAux);
   registerAux(GhostAux);
   registerAux(FunctionGradAux);
