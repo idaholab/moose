@@ -41,25 +41,6 @@ MooseEnum getMooseEnum(const std::string & default_key, const std::map<std::stri
 
 // ----------------------------------------------------------------------------
 
-enum EValveStatusType
-{
-  VALVE_CLOSE = 0,    ///< valve is closed
-  VALVE_OPEN = 1,     ///< valve is opened
-  VALVE_CLOSING = -1, ///< valve is being closed
-  VALVE_OPENING = 2   ///< valve is being opened
-};
-
-const std::map<std::string, EValveStatusType> valve_status_type_to_enum{{"OPEN", VALVE_OPEN},
-                                                                        {"CLOSE", VALVE_CLOSE}};
-
-template <>
-EValveStatusType stringToEnum<EValveStatusType>(const std::string & s);
-
-/// Enum with valve status
-MooseEnum getValveStatusType(const std::string & name = "");
-
-// ----------------------------------------------------------------------------
-
 enum EValveActionType
 {
   VALVE_NO_ACTION = 0,   ///< maintaining current status
