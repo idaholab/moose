@@ -57,6 +57,7 @@ All documentation should be written with American English spelling conventions.
   - Include a caption (`caption=`) to describe contents.
   - Also include a label (`id=` for tables) to reference the figure within the text.
   - Image files should be added to the appropriate module or framework folder in `docs/content/media/`
-    - Large images and movies should be add to the [large_media](https://github.com/idaholab/large_media) submodule repository.
+    - Large images and movies should be add to the [large_media](https://github.com/idaholab/large_media) submodule repository,
+      this submodule is located at the top level of the repository (e.g., ~/projects/moose/large_media).
   - Set the figure image width in a manner to ensure the wrapped text is readable:
     - A setting of 90-95% of the text width or 40-70% of the text width is suggested.
