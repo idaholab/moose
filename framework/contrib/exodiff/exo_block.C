@@ -1,6 +1,6 @@
-// Copyright(C) 2008 Sandia Corporation.  Under the terms of Contract
-// DE-AC04-94AL85000 with Sandia Corporation, the U.S. Government retains
-// certain rights in this software
+// Copyright(C) 2008-2017 National Technology & Engineering Solutions
+// of Sandia, LLC (NTESS).  Under the terms of Contract DE-NA0003525 with
+// NTESS, the U.S. Government retains certain rights in this software.
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -14,7 +14,7 @@
 //       disclaimer in the documentation and/or other materials provided
 //       with the distribution.
 //
-//     * Neither the name of Sandia Corporation nor the names of its
+//     * Neither the name of NTESS nor the names of its
 //       contributors may be used to endorse or promote products derived
 //       from this software without specific prior written permission.
 //
@@ -31,30 +31,22 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 
-#include <iostream>
-#include <cstdlib>
-
-#include "smart_assert.h"
+#include "ED_SystemInterface.h" // for SystemInterface, interface
 #include "exo_block.h"
-#include "libmesh/exodusII.h"
-
-#include <string>
-#include <sstream>
-
-using namespace std;
+#include "libmesh/exodusII.h" // for ex_block, etc
+#include "smart_assert.h"     // for SMART_ASSERT
+#include <cstdlib>            // for exit, nullptr
+#include <iostream>           // for operator<<, endl, ostream, etc
+#include <string>             // for string, char_traits
 
 template <typename INT>
-Exo_Block<INT>::Exo_Block()
-  : Exo_Entity(),
-    num_nodes_per_elmt(-1),
-    conn(NULL)
-{ }
+Exo_Block<INT>::Exo_Block() : Exo_Entity(), num_nodes_per_elmt(-1), conn(nullptr)
+{
+}
 
 template <typename INT>
 Exo_Block<INT>::Exo_Block(int file_id, size_t exo_block_id)
-  : Exo_Entity(file_id, exo_block_id),
-    num_nodes_per_elmt(-1),
-    conn(NULL)
+  : Exo_Entity(file_id, exo_block_id), num_nodes_per_elmt(-1), conn(nullptr)
 {
   SMART_ASSERT(file_id >= 0);
   SMART_ASSERT((int)exo_block_id > EX_INVALID_ID);
@@ -63,15 +55,8 @@ Exo_Block<INT>::Exo_Block(int file_id, size_t exo_block_id)
 }
 
 template <typename INT>
-Exo_Block<INT>::Exo_Block(int file_id,
-		     size_t id,
-                     const char* type,
-                     size_t num_e,
-                     size_t num_npe)
-  : Exo_Entity(file_id, id, num_e),
-    elmt_type(type),
-    num_nodes_per_elmt(num_npe),
-    conn(NULL)
+Exo_Block<INT>::Exo_Block(int file_id, size_t id, const char * type, size_t num_e, size_t num_npe)
+  : Exo_Entity(file_id, id, num_e), elmt_type(type), num_nodes_per_elmt(num_npe), conn(nullptr)
 {
   SMART_ASSERT(id > 0);
   SMART_ASSERT(elmt_type != "");
@@ -81,24 +66,33 @@ Exo_Block<INT>::Exo_Block(int file_id,
 template <typename INT>
 Exo_Block<INT>::~Exo_Block()
 {
-  if (conn)  delete [] conn;
+  if (conn)
+  {
+    delete[] conn;
+  }
 }
 
 template <typename INT>
-EXOTYPE Exo_Block<INT>::exodus_type() const {return EX_ELEM_BLOCK;}
+EXOTYPE
+Exo_Block<INT>::exodus_type() const
+{
+  return EX_ELEM_BLOCK;
+}
 
 template <typename INT>
-void Exo_Block<INT>::entity_load_params()
+void
+Exo_Block<INT>::entity_load_params()
 {
   int num_attr;
-  ex_block block;
+  ex_block block{};
   block.id = id_;
   block.type = EX_ELEM_BLOCK;
   int err = ex_get_block_param(fileId, &block);
 
-  if (err < 0) {
-    std::cout << "Exo_Block<INT>::Load_Block_Params(): ERROR: Failed to get element"
-         << " block parameters!  Aborting..." << std::endl;
+  if (err < 0)
+  {
+    ERROR("Exo_Block<INT>::Load_Block_Params(): Failed to get element"
+          << " block parameters!  Aborting...\n");
     exit(1);
   }
 
@@ -109,42 +103,53 @@ void Exo_Block<INT>::entity_load_params()
 
   if (num_nodes_per_elmt < 0 || num_attr < 0)
   {
-    std::cout << "Exo_Block<INT>::Load_Block_Params(): ERROR: Data appears corrupt for"
-         << " block " << id_ << "(id=" << id_
-         << ")!" << std::endl
-         << "\tnum elmts = "          << numEntity  << std::endl
-         << "\tnum nodes per elmt = " << num_nodes_per_elmt << std::endl
-         << "\tnum attributes = "     << num_attr      << std::endl
-         << " ... Aborting..." << std::endl;
+    ERROR("Exo_Block<INT>::Load_Block_Params(): Data appears corrupt for"
+          << " block " << id_ << "(id=" << id_ << ")!\n"
+          << "\tnum elmts = " << numEntity << '\n'
+          << "\tnum nodes per elmt = " << num_nodes_per_elmt << '\n'
+          << "\tnum attributes = " << num_attr << '\n'
+          << " ... Aborting...\n");
     exit(1);
   }
 }
 
 template <typename INT>
-string Exo_Block<INT>::Load_Connectivity()
+std::string
+Exo_Block<INT>::Load_Connectivity()
 {
   SMART_ASSERT(Check_State());
 
-  if (fileId < 0) return "ERROR:  Invalid file id!";
-  if (id_ == EX_INVALID_ID) return "ERROR:  Must initialize block parameters first!";
-
-  if (conn) delete [] conn;  conn = 0;
+  if (fileId < 0)
+  {
+    return "ERROR:  Invalid file id!";
+  }
+  if (id_ == EX_INVALID_ID)
+  {
+    return "ERROR:  Must initialize block parameters first!";
+  }
+  if (conn)
+  {
+    delete[] conn;
+  }
+  conn = nullptr;
 
   if (numEntity && num_nodes_per_elmt)
   {
-    conn = new INT[ (size_t)numEntity * num_nodes_per_elmt ];  SMART_ASSERT(conn != 0);
+    conn = new INT[numEntity * num_nodes_per_elmt];
+    SMART_ASSERT(conn != nullptr);
 
-    int err = ex_get_conn(fileId, EX_ELEM_BLOCK, id_, conn, 0, 0);
-    if (err < 0) {
-      std::cout << "Exo_Block<INT>::Load_Connectivity()  ERROR: Call to ex_get_conn"
-           << " returned error value!  Block id = " << id_ << std::endl;
-      std::cout << "Aborting..." << std::endl;
+    int err = ex_get_conn(fileId, EX_ELEM_BLOCK, id_, conn, nullptr, nullptr);
+    if (err < 0)
+    {
+      ERROR("Exo_Block<INT>::Load_Connectivity(): Call to ex_get_conn"
+            << " returned error value!  Block id = " << id_ << '\n'
+            << "Aborting...\n");
       exit(1);
     }
-    else if (err > 0) {
-      ostringstream oss;
-      oss << "WARNING:  Number " << err
-          << " returned from call to ex_get_conn()";
+    else if (err > 0)
+    {
+      std::ostringstream oss;
+      oss << "WARNING:  Number " << err << " returned from call to ex_get_conn()";
       return oss.str();
     }
   }
@@ -153,83 +158,104 @@ string Exo_Block<INT>::Load_Connectivity()
 }
 
 template <typename INT>
-string Exo_Block<INT>::Free_Connectivity()
+std::string
+Exo_Block<INT>::Free_Connectivity()
 {
   SMART_ASSERT(Check_State());
-  if (conn) delete [] conn;  conn = 0;
+  if (conn)
+  {
+    delete[] conn;
+  }
+  conn = nullptr;
   return "";
 }
 
 template <typename INT>
-const INT* Exo_Block<INT>::Connectivity(size_t elmt_index) const
+const INT *
+Exo_Block<INT>::Connectivity(size_t elmt_index) const
 {
   SMART_ASSERT(Check_State());
 
-  if (!conn || elmt_index >= numEntity) return 0;
+  if (!conn || elmt_index >= numEntity)
+  {
+    return nullptr;
+  }
 
-  return &conn[(size_t)elmt_index * num_nodes_per_elmt];
+  return &conn[elmt_index * num_nodes_per_elmt];
 }
 
 template <typename INT>
-string Exo_Block<INT>::Give_Connectivity(size_t& num_e, size_t& npe, INT*& recv_conn)
+std::string
+Exo_Block<INT>::Give_Connectivity(size_t & num_e, size_t & npe, INT *& recv_conn)
 {
   if (num_nodes_per_elmt < 0)
+  {
     return "ERROR:  Connectivity parameters have not been determined!";
-
+  }
   num_e = numEntity;
   npe = num_nodes_per_elmt;
   recv_conn = conn;
 
-  conn = 0;  // Transfers responsibility of deleting to the receiving pointer.
+  conn = nullptr; // Transfers responsibility of deleting to the receiving pointer.
 
   return "";
 }
 
 template <typename INT>
-int Exo_Block<INT>::Check_State() const
+int
+Exo_Block<INT>::Check_State() const
 {
   SMART_ASSERT(id_ >= EX_INVALID_ID);
-  SMART_ASSERT( !( id_ == EX_INVALID_ID && elmt_type != "" ) );
-  SMART_ASSERT( !( id_ == EX_INVALID_ID && num_nodes_per_elmt >= 0 ) );
-  SMART_ASSERT( !( id_ == EX_INVALID_ID && conn ) );
+  SMART_ASSERT(!(id_ == EX_INVALID_ID && elmt_type != ""));
+  SMART_ASSERT(!(id_ == EX_INVALID_ID && num_nodes_per_elmt >= 0));
+  SMART_ASSERT(!(id_ == EX_INVALID_ID && conn));
 
-  SMART_ASSERT( !( conn && (numEntity == 0 || num_nodes_per_elmt <= 0) ) );
+  SMART_ASSERT(!(conn && (numEntity == 0 || num_nodes_per_elmt <= 0)));
 
   return 1;
 }
 
 template <typename INT>
-void Exo_Block<INT>::Display_Stats(std::ostream& s) const
+void
+Exo_Block<INT>::Display_Stats(std::ostream & s) const
 {
-  s << "Exo_Block<INT>::Display()  block id = " << id_           << std::endl
-    << "                  element type = " << elmt_type          << std::endl
-    << "               number of elmts = " << numEntity          << std::endl
-    << "      number of nodes per elmt = " << num_nodes_per_elmt << std::endl
-    << "          number of attributes = " << attr_count()       << std::endl
-    << "           number of variables = " << var_count()        << std::endl;
+  s << "Exo_Block<INT>::Display()  block id = " << id_ << '\n'
+    << "                  element type = " << elmt_type << '\n'
+    << "               number of elmts = " << numEntity << '\n'
+    << "      number of nodes per elmt = " << num_nodes_per_elmt << '\n'
+    << "          number of attributes = " << attr_count() << '\n'
+    << "           number of variables = " << var_count() << '\n';
 }
 
 template <typename INT>
-void Exo_Block<INT>::Display(std::ostream& s) const
+void
+Exo_Block<INT>::Display(std::ostream & s) const
 {
   SMART_ASSERT(Check_State());
 
-  s << "Exo_Block<INT>::Display()  block id = " << id_           << std::endl
-    << "                  element type = " << elmt_type          << std::endl
-    << "               number of elmts = " << numEntity          << std::endl
-    << "      number of nodes per elmt = " << num_nodes_per_elmt << std::endl
-    << "          number of attributes = " << attr_count()       << std::endl
-    << "           number of variables = " << var_count()        << std::endl;
+  s << "Exo_Block<INT>::Display()  block id = " << id_ << '\n'
+    << "                  element type = " << elmt_type << '\n'
+    << "               number of elmts = " << numEntity << '\n'
+    << "      number of nodes per elmt = " << num_nodes_per_elmt << '\n'
+    << "          number of attributes = " << attr_count() << '\n'
+    << "           number of variables = " << var_count() << '\n';
 
-  if (conn) {
+  if (conn)
+  {
     size_t index = 0;
     s << "       connectivity = ";
-    for (size_t e = 0; e < numEntity; ++e) {
-      if (e != 0) s << "                      ";
+    for (size_t e = 0; e < numEntity; ++e)
+    {
+      if (e != 0)
+      {
+        s << "                      ";
+      }
       s << "(" << (e + 1) << ") ";
       for (int n = 0; n < num_nodes_per_elmt; ++n)
-	s << conn[index++] << " ";
-      s << std::endl;
+      {
+        s << conn[index++] << " ";
+      }
+      s << '\n';
     }
   }
 }
