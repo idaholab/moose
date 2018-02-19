@@ -37,9 +37,9 @@ Real
 ZPolarizedWave::value(Real t, const Point & p)
 {
   if (_component == "real") {
-    return std::cos(_sign * _k * p(0) * std::cos(2 * libMesh::pi * _theta));
+    return std::cos(_sign * _k * p(0) * std::cos(2 * libMesh::pi * _theta / 360));
   }
   else {
-    return std::sin(_sign * _k * p(0) * std::cos(2 * libMesh::pi * _theta));
+    return std::sin(_sign * _k * p(0) * std::cos(2 * libMesh::pi * _theta / 360));
   }
 }
