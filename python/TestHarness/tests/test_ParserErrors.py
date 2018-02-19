@@ -19,4 +19,3 @@ class TestHarnessTester(TestHarnessTestCase):
         # TODO: Are there more we can test?
         output = self.runExceptionTests('-i', 'parse_errors')
         self.assertIn('duplicate parameter', output)
-        self.assertIn('invalid date value', output)

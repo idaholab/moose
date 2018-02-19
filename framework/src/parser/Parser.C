@@ -607,7 +607,7 @@ Parser::errorCheck(const Parallel::Communicator & comm, bool warn_unused, bool e
   }
 
   if (_warnmsg.size() > 0)
-    mooseWarning(_warnmsg);
+    mooseUnused(_warnmsg);
   if (_errmsg.size() > 0)
     mooseError(_errmsg);
 }

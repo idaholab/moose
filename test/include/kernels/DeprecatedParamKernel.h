@@ -7,27 +7,27 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef COEFDIFFUSION_H
-#define COEFDIFFUSION_H
+#ifndef DEPRECATEDPARAMKERNEL_H
+#define DEPRECATEDPARAMKERNEL_H
 
-#include "Kernel.h"
+#include "Reaction.h"
 
 // Forward Declarations
-class CoefDiffusion;
+class DeprecatedParamKernel;
 
 template <>
-InputParameters validParams<CoefDiffusion>();
+InputParameters validParams<DeprecatedParamKernel>();
 
-class CoefDiffusion : public Kernel
+class DeprecatedParamKernel : public Reaction
 {
 public:
-  CoefDiffusion(const InputParameters & parameters);
+  DeprecatedParamKernel(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpResidual() override;
   virtual Real computeQpJacobian() override;
 
-  const Real & _coef;
+  Real _coef;
 };
 
-#endif // COEFDIFFUSION_H
+#endif // DEPRECATEDPARAMKERNEL_H

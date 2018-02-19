@@ -1,2 +1,4 @@
 app_name = heat_conduction
-cli_args = '--error'
+allow_warnings = false
+allow_unused = false
+allow_override = false

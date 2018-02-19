@@ -124,11 +124,6 @@ validParams<MooseApp>()
       "Error when encountering overridden or parameters supplied multiple times");
   params.addCommandLineParam<bool>(
       "error_deprecated", "--error-deprecated", false, "Turn deprecated code messages into Errors");
-  params.addCommandLineParam<bool>(
-      "allow_deprecated",
-      "--allow-deprecated",
-      false,
-      "Can be used in conjunction with --error to turn off deprecated errors");
 
   params.addCommandLineParam<bool>(
       "distributed_mesh",
@@ -261,9 +256,6 @@ MooseApp::MooseApp(InputParameters parameters)
   else
     mooseError("Valid CommandLine object required");
 
-  if (getParam<bool>("error_deprecated") && getParam<bool>("allow_deprecated"))
-    mooseError("Both error deprecated and allowed deprecated were set.");
-
   if (_check_input && isParamValid("recover"))
     mooseError("Cannot run --check-input with --recover. Recover files might not exist");
 }
@@ -343,16 +335,8 @@ MooseApp::setupOptions()
   // Turn all warnings in MOOSE to errors (almost see next logic block)
   Moose::_warnings_are_errors = getParam<bool>("error");
 
-  /**
-   * Deprecated messages can be toggled to errors independently from everything else.
-   * Normally they are toggled with the --error flag but that behavior can
-   * be modified with the --allow-warnings.
-   */
-  if (getParam<bool>("error_deprecated") ||
-      (Moose::_warnings_are_errors && !getParam<bool>("allow_deprecated")))
-    Moose::_deprecated_is_error = true;
-  else
-    Moose::_deprecated_is_error = false;
+  // Deprecated messages can be toggled to errors independently from everything else.
+  Moose::_deprecated_is_error = getParam<bool>("error_deprecated");
 
   if (isUltimateMaster()) // makes sure coloring isn't reset incorrectly in multi-app settings
   {
@@ -582,6 +566,7 @@ MooseApp::errorCheck()
 {
   bool warn = _enable_unused_check == WARN_UNUSED;
   bool err = _enable_unused_check == ERROR_UNUSED;
+
   _parser.errorCheck(*_comm, warn, err);
 
   auto apps = _executioner->feProblem().getMultiAppWarehouse().getObjects();
