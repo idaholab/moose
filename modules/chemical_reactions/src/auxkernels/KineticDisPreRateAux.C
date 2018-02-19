@@ -44,9 +44,10 @@ KineticDisPreRateAux::KineticDisPreRateAux(const InputParameters & parameters)
   // Check that the number of stoichiometric coefficients is equal to the number
   // of reactant species
   if (_sto_v.size() != n)
-    mooseError("The number of stoichiometric coefficients is not equal to the number of reactant "
-               "species in ",
-               _name);
+    mooseError(
+        "The number of stoichiometric coefficients in sto_v is not equal to the number of reactant "
+        "species in ",
+        _name);
 
   _vals.resize(n);
   for (unsigned int i = 0; i < n; ++i)

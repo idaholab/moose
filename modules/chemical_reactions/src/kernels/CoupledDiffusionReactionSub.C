@@ -26,8 +26,8 @@ validParams<CoupledDiffusionReactionSub>()
                         "operates on in the equilibrium reaction");
   params.addCoupledVar(
       "gamma_u", 1.0, "Activity coefficient of primary species that this kernel operates on");
-  params.addRequiredParam<std::vector<Real>>(
-      "sto_v", "The stoichiometric coefficients of coupled primary species");
+  params.addParam<std::vector<Real>>("sto_v",
+                                     "The stoichiometric coefficients of coupled primary species");
   params.addCoupledVar("v", "List of coupled primary species in this equilibrium species");
   params.addCoupledVar("gamma_v", 1.0, "Activity coefficients of coupled primary species");
   params.addCoupledVar("gamma_eq", 1.0, "Activity coefficient of this equilibrium species");
@@ -49,11 +49,15 @@ CoupledDiffusionReactionSub::CoupledDiffusionReactionSub(const InputParameters &
 
   // Check that the correct number of coupled values have been provided
   if (_sto_v.size() != n)
-    mooseError("The number of values in sto_v is incorrect in ", _name);
+    mooseError("The number of stoichiometric coefficients in sto_v is not equal to the number of "
+               "coupled species in ",
+               _name);
 
   if (isCoupled("gamma_v"))
-    if (coupled("gamma_v") != n)
-      mooseError("The number of variables in gamma_v is incorrect in ", _name);
+    if (coupledComponents("gamma_v") != n)
+      mooseError("The number of activity coefficients in gamma_v is not equal to the number of "
+                 "coupled species in ",
+                 _name);
 
   _vars.resize(n);
   _vals.resize(n);

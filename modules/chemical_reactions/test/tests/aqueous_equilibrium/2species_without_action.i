@@ -115,28 +115,22 @@
   [./a1eq]
     type = CoupledBEEquilibriumSub
     variable = a
-    v = ''
     log_k = 2
     weight = 2
-    sto_v = ''
     sto_u = 2
   [../]
   [./a1diff]
     type = CoupledDiffusionReactionSub
     variable = a
-    v = ''
     log_k = 2
     weight = 2
-    sto_v = ''
     sto_u = 2
   [../]
   [./a1conv]
     type = CoupledConvectionReactionSub
     variable = a
-    v = ''
     log_k = 2
     weight = 2
-    sto_v = ''
     sto_u = 2
     p = pressure
   [../]
