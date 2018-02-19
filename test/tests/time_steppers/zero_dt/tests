@@ -1,0 +1,8 @@
+[Tests]
+  [./test]
+  type = 'RunException'
+    input = 'test.i'
+    expect_err = "Time stepper computed zero time step size on initial which is not allowed."
+    recover = false
+  [../]
+[]
