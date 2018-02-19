@@ -716,6 +716,23 @@ NonlinearSystemBase::getResidualNonTimeVector()
   return *_Re_non_time;
 }
 
+NumericVector<Number> &
+NonlinearSystemBase::residualVector(TagID tag)
+{
+  mooseDeprecated("Please use getVector()");
+  switch (tag)
+  {
+    case 0:
+      return getResidualNonTimeVector();
+
+    case 1:
+      return getResidualTimeVector();
+
+    default:
+      mooseError("The required residual vector is not available");
+  }
+}
+
 void
 NonlinearSystemBase::computeTimeDerivatives()
 {

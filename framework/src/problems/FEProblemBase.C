@@ -4096,6 +4096,15 @@ FEProblemBase::computeResidual(const NumericVector<Number> & soln,
 }
 
 void
+FEProblemBase::computeResidualType(const NumericVector<Number> & soln,
+                                   NumericVector<Number> & residual,
+                                   TagID tag)
+{
+  mooseDeprecated("Please use computeResidual()");
+  computeResidual(soln, residual, tag);
+}
+
+void
 FEProblemBase::computeResidual(const NumericVector<Number> & soln, NumericVector<Number> & residual)
 {
   auto & tags = getVectorTag();

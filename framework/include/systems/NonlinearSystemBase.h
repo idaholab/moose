@@ -346,6 +346,8 @@ public:
 
   NumericVector<Number> & getResidualNonTimeVector();
 
+  NumericVector<Number> & residualVector(TagID tag);
+
   virtual const NumericVector<Number> *& currentSolution() override { return _current_solution; }
 
   virtual void serializeSolution();

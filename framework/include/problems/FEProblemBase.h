@@ -880,6 +880,10 @@ public:
   virtual void
   computeResidual(const NumericVector<Number> & soln, NumericVector<Number> & residual, TagID tag);
 
+  virtual void computeResidualType(const NumericVector<Number> & soln,
+                                   NumericVector<Number> & residual,
+                                   TagID tag);
+
   virtual void computeResidual(const NumericVector<Number> & soln,
                                NumericVector<Number> & residual,
                                std::vector<TagID> & tags);
