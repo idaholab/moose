@@ -41,24 +41,6 @@ MooseEnum getMooseEnum(const std::string & default_key, const std::map<std::stri
 
 // ----------------------------------------------------------------------------
 
-/// Check valve type
-enum ECheckValveType
-{
-  CHECK_VALVE_FLOW = 0,   ///< the type of check valve which closes by flow reversal
-  CHECK_VALVE_STATIC = 1, ///< the type of check valve which closes by static differential pressure
-  CHECK_VALVE_DYNAMIC = 2 ///< the type of check valve which closes by dynamic differential pressure
-};
-
-const std::map<std::string, ECheckValveType> check_valve_type_to_enum{
-    {"FLOW", CHECK_VALVE_FLOW}, {"STATIC", CHECK_VALVE_STATIC}, {"DYNAMIC", CHECK_VALVE_DYNAMIC}};
-
-template <>
-ECheckValveType stringToEnum<ECheckValveType>(const std::string & s);
-
-MooseEnum getCheckValveType(const std::string & str = "FLOW");
-
-// ----------------------------------------------------------------------------
-
 enum ETHCouplingType
 {
   MOD_DENSITY, ///< moderator density
