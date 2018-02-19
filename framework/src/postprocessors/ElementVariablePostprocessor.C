@@ -29,7 +29,7 @@ ElementVariablePostprocessor::ElementVariablePostprocessor(const InputParameters
     MooseVariableInterface(this, false),
     _u(coupledValue("variable")),
     _grad_u(coupledGradient("variable")),
-    _u_dot(coupledDot("variable")),
+    _u_dot(_is_transient ? coupledDot("variable") : _zero),
     _qp(0)
 {
   addMooseVariableDependency(mooseVariable());

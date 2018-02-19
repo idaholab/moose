@@ -222,7 +222,7 @@ Coupleable::coupledValueOld(const std::string & var_name, unsigned int comp)
   if (!isCoupled(var_name))
     return *getDefaultValue(var_name);
 
-  validateExecutionerType(var_name);
+  validateExecutionerType(var_name, "coupledValueOld");
   coupledCallback(var_name, true);
   MooseVariable * var = getVar(var_name, comp);
 
@@ -249,7 +249,7 @@ Coupleable::coupledValueOlder(const std::string & var_name, unsigned int comp)
   if (!isCoupled(var_name))
     return *getDefaultValue(var_name);
 
-  validateExecutionerType(var_name);
+  validateExecutionerType(var_name, "coupledValueOlder");
   coupledCallback(var_name, true);
   MooseVariable * var = getVar(var_name, comp);
 
@@ -323,6 +323,7 @@ Coupleable::coupledDot(const std::string & var_name, unsigned int comp)
   if (!isCoupled(var_name)) // Return default 0
     return _default_value_zero;
 
+  validateExecutionerType(var_name, "coupledDot");
   MooseVariable * var = getVar(var_name, comp);
 
   if (!_coupleable_neighbor)
@@ -348,6 +349,7 @@ Coupleable::coupledDotDu(const std::string & var_name, unsigned int comp)
   if (!isCoupled(var_name)) // Return default 0
     return _default_value_zero;
 
+  validateExecutionerType(var_name, "coupledDotDu");
   MooseVariable * var = getVar(var_name, comp);
 
   if (!_coupleable_neighbor)
@@ -396,7 +398,7 @@ Coupleable::coupledGradientOld(const std::string & var_name, unsigned int comp)
   if (_c_nodal)
     mooseError(_c_name, ": Nodal variables do not have gradients");
 
-  validateExecutionerType(var_name);
+  validateExecutionerType(var_name, "coupledGradientOld");
   MooseVariable * var = getVar(var_name, comp);
 
   if (!_coupleable_neighbor)
@@ -416,7 +418,7 @@ Coupleable::coupledGradientOlder(const std::string & var_name, unsigned int comp
   if (_c_nodal)
     mooseError(_c_name, ": Nodal variables do not have gradients");
 
-  validateExecutionerType(var_name);
+  validateExecutionerType(var_name, "coupledGradientOlder");
   MooseVariable * var = getVar(var_name, comp);
 
   if (_c_is_implicit)
@@ -480,7 +482,7 @@ Coupleable::coupledSecondOld(const std::string & var_name, unsigned int comp)
   if (_c_nodal)
     mooseError(_c_name, ": Nodal variables do not have second derivatives");
 
-  validateExecutionerType(var_name);
+  validateExecutionerType(var_name, "coupledSecondOld");
   MooseVariable * var = getVar(var_name, comp);
   if (!_coupleable_neighbor)
     return (_c_is_implicit) ? var->secondSlnOld() : var->secondSlnOlder();
@@ -499,7 +501,7 @@ Coupleable::coupledSecondOlder(const std::string & var_name, unsigned int comp)
   if (_c_nodal)
     mooseError(_c_name, ": Nodal variables do not have second derivatives");
 
-  validateExecutionerType(var_name);
+  validateExecutionerType(var_name, "coupledSecondOlder");
   MooseVariable * var = getVar(var_name, comp);
   if (_c_is_implicit)
   {
@@ -554,7 +556,7 @@ Coupleable::coupledNodalValueOld(const std::string & var_name, unsigned int comp
   if (!isCoupled(var_name))
     return *getDefaultValue(var_name);
 
-  validateExecutionerType(var_name);
+  validateExecutionerType(var_name, "coupledNodalValueOld");
   coupledCallback(var_name, true);
   MooseVariable * var = getVar(var_name, comp);
 
@@ -571,7 +573,7 @@ Coupleable::coupledNodalValueOlder(const std::string & var_name, unsigned int co
   if (!isCoupled(var_name))
     return *getDefaultValue(var_name);
 
-  validateExecutionerType(var_name);
+  validateExecutionerType(var_name, "coupledNodalValueOlder");
   coupledCallback(var_name, true);
   MooseVariable * var = getVar(var_name, comp);
   if (_c_is_implicit)
@@ -609,6 +611,7 @@ Coupleable::coupledNodalDot(const std::string & var_name, unsigned int comp)
   if (!isCoupled(var_name)) // Return default 0
     return _default_value_zero;
 
+  validateExecutionerType(var_name, "coupledNodalDot");
   coupledCallback(var_name, false);
   MooseVariable * var = getVar(var_name, comp);
 
@@ -649,7 +652,7 @@ Coupleable::coupledSolutionDoFsOld(const std::string & var_name, unsigned int co
   if (_c_nodal)
     mooseError(_c_name, ": nodal objects should not call coupledSolutionDoFsOld");
 
-  validateExecutionerType(var_name);
+  validateExecutionerType(var_name, "coupledSolutionDoFsOld");
   coupledCallback(var_name, true);
   MooseVariable * var = getVar(var_name, comp);
 
@@ -670,7 +673,7 @@ Coupleable::coupledSolutionDoFsOlder(const std::string & var_name, unsigned int 
   if (_c_nodal)
     mooseError(_c_name, ": nodal objects should not call coupledSolutionDoFsOlder");
 
-  validateExecutionerType(var_name);
+  validateExecutionerType(var_name, "coupledSolutionDoFsOlder");
   coupledCallback(var_name, true);
   MooseVariable * var = getVar(var_name, comp);
   if (_c_is_implicit)
@@ -685,11 +688,14 @@ Coupleable::coupledSolutionDoFsOlder(const std::string & var_name, unsigned int 
 }
 
 void
-Coupleable::validateExecutionerType(const std::string & name) const
+Coupleable::validateExecutionerType(const std::string & name, const std::string & fn_name) const
 {
   if (!_c_fe_problem.isTransient())
     mooseError(_c_name,
-               ": You may not couple in old or older values of \"",
+               ": Calling '",
+               fn_name,
+               "' on variable \"",
                name,
-               "\" when using a \"Steady\" executioner.");
+               "\" when using a \"Steady\" executioner is not allowed. This value is available "
+               "only in transient simulations.");
 }
