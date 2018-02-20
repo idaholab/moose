@@ -75,8 +75,6 @@ ReflectionCoefficient::computeReflection()
     Real _imag_numerator = _reflected_real.value(_t,_q_point[_qp]) * _imag_diff - _reflected_imag.value(_t,_q_point[_qp]) * _real_diff;
     Real _denominator = std::pow(_reflected_real.value(_t,_q_point[_qp]), 2) + std::pow(_reflected_imag.value(_t,_q_point[_qp]), 2);
 
-    std::cout << _real_numerator << " " << _imag_numerator;
-
     _ref = std::sqrt(std::pow(_real_numerator / _denominator, 2) + std::pow(_imag_numerator / _denominator, 2));
   }
   return _ref;
