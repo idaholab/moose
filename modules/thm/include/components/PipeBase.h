@@ -35,7 +35,6 @@ public:
 
 protected:
   virtual void init() override;
-  virtual void check() override;
 
   /// The name of the user object that defines fluid properties
   const UserObjectName & _fp_name;

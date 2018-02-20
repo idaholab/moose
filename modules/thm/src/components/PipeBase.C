@@ -61,9 +61,3 @@ PipeBase::init()
   else
     logModelNotImplementedError(_model_id);
 }
-
-void
-PipeBase::check()
-{
-  GeometricalComponent::check();
-}
