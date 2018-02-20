@@ -27,6 +27,7 @@
 #include "KineticDisPreConcAux.h"
 #include "KineticDisPreRateAux.h"
 #include "PHAux.h"
+#include "TotalConcentrationAux.h"
 
 #include "AddPrimarySpeciesAction.h"
 #include "AddSecondarySpeciesAction.h"
@@ -99,6 +100,7 @@ ChemicalReactionsApp::registerObjects(Factory & factory)
   registerAux(KineticDisPreConcAux);
   registerAux(KineticDisPreRateAux);
   registerAux(PHAux);
+  registerAux(TotalConcentrationAux);
 
   registerBoundaryCondition(ChemicalOutFlowBC);
 
