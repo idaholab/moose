@@ -12,17 +12,15 @@
 
 #include "Coupleable.h"
 #include "ScalarCoupleable.h"
-#include "MooseVariableInterface.h"
 #include "MooseVariableDependencyInterface.h"
 
 /**
  * Intermediate base class that ties together all the interfaces for getting
- * MooseVariables with the MooseVariableDependencyInterface
+ * MooseVariableFEs with the MooseVariableDependencyInterface
  */
 class CoupleableMooseVariableDependencyIntermediateInterface
     : public Coupleable,
       public ScalarCoupleable,
-      public MooseVariableInterface,
       public MooseVariableDependencyInterface
 {
 public:

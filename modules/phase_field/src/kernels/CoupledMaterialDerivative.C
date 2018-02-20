@@ -35,7 +35,7 @@ CoupledMaterialDerivative::CoupledMaterialDerivative(const InputParameters & par
   // Get free energy derivatives for other coupled variables besides v
   for (unsigned int i = 0; i < _nvar; ++i)
   {
-    MooseVariable * ivar = _coupled_moose_vars[i];
+    MooseVariableFE * ivar = _coupled_moose_vars[i];
     _d2Fdvdarg[i] = &getMaterialPropertyDerivative<Real>("mob_name", _v_name, ivar->name());
   }
 }

@@ -12,7 +12,7 @@
 // MOOSE includes
 #include "Assembly.h"
 #include "FEProblem.h"
-#include "MooseVariable.h"
+#include "MooseVariableField.h"
 #include "SubProblem.h"
 #include "SystemBase.h"
 
@@ -35,11 +35,11 @@ NodalDamper::NodalDamper(const InputParameters & parameters)
     _tid(parameters.get<THREAD_ID>("_tid")),
     _assembly(_subproblem.assembly(_tid)),
     _coord_sys(_assembly.coordSystem()),
-    _var(_sys.getVariable(_tid, parameters.get<NonlinearVariableName>("variable"))),
+    _var(_sys.getFieldVariable<Real>(_tid, parameters.get<NonlinearVariableName>("variable"))),
     _current_node(_var.node()),
     _qp(0),
     _u_increment(_var.increment()),
-    _u(_var.nodalSln())
+    _u(_var.nodalValue())
 {
 }
 

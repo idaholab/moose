@@ -1,8 +1,0 @@
-[Tests]
-  [./test_fd_diffusion]
-    type = 'Exodiff'
-    input = 'fd_diffusion.i'
-    exodiff = 'fd_diffusion_out.e'
-    max_parallel = 1
-  [../]
-[]

@@ -23,7 +23,8 @@ template <>
 InputParameters validParams<ElemElemConstraint>();
 
 class ElemElemConstraint : public Constraint,
-                           public NeighborCoupleableMooseVariableDependencyIntermediateInterface
+                           public NeighborCoupleableMooseVariableDependencyIntermediateInterface,
+                           public NeighborMooseVariableInterface<Real>
 {
 public:
   ElemElemConstraint(const InputParameters & parameters);

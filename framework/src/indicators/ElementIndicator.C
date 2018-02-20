@@ -10,7 +10,7 @@
 #include "ElementIndicator.h"
 
 #include "Assembly.h"
-#include "MooseVariable.h"
+#include "MooseVariableField.h"
 #include "SystemBase.h"
 
 #include "libmesh/threads.h"
@@ -38,9 +38,9 @@ ElementIndicator::ElementIndicator(const InputParameters & parameters)
     PostprocessorInterface(this),
     Coupleable(this, false),
     ScalarCoupleable(this),
-    MooseVariableInterface(this, false),
+    MooseVariableInterface<Real>(this, false),
 
-    _field_var(_sys.getVariable(_tid, name())),
+    _field_var(_subproblem.getStandardVariable(_tid, name())),
 
     _current_elem(_field_var.currentElem()),
     _current_elem_volume(_assembly.elemVolume()),
@@ -49,14 +49,14 @@ ElementIndicator::ElementIndicator(const InputParameters & parameters)
     _JxW(_assembly.JxW()),
     _coord(_assembly.coordTransformation()),
 
-    _var(_subproblem.getVariable(_tid, parameters.get<VariableName>("variable"))),
+    _var(_subproblem.getStandardVariable(_tid, parameters.get<VariableName>("variable"))),
 
     _u(_var.sln()),
     _grad_u(_var.gradSln()),
     _u_dot(_var.uDot()),
     _du_dot_du(_var.duDotDu())
 {
-  const std::vector<MooseVariable *> & coupled_vars = getCoupledMooseVars();
+  const std::vector<MooseVariableFE *> & coupled_vars = getCoupledMooseVars();
   for (const auto & var : coupled_vars)
     addMooseVariableDependency(var);
 

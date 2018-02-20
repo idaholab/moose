@@ -13,7 +13,7 @@
 #include "FindContactPoint.h"
 #include "NearestNodeLocator.h"
 #include "SubProblem.h"
-#include "MooseVariable.h"
+#include "MooseVariableField.h"
 #include "MooseMesh.h"
 
 #include "libmesh/threads.h"
@@ -101,9 +101,9 @@ PenetrationThread::operator()(const NodeIdRange & range)
   if (_do_normal_smoothing &&
       _normal_smoothing_method == PenetrationLocator::NSM_NODAL_NORMAL_BASED)
   {
-    _nodal_normal_x = &_subproblem.getVariable(_tid, "nodal_normal_x");
-    _nodal_normal_y = &_subproblem.getVariable(_tid, "nodal_normal_y");
-    _nodal_normal_z = &_subproblem.getVariable(_tid, "nodal_normal_z");
+    _nodal_normal_x = &_subproblem.getStandardVariable(_tid, "nodal_normal_x");
+    _nodal_normal_y = &_subproblem.getStandardVariable(_tid, "nodal_normal_y");
+    _nodal_normal_z = &_subproblem.getStandardVariable(_tid, "nodal_normal_z");
   }
 
   for (const auto & node_id : range)

@@ -15,7 +15,10 @@
 #include "PenetrationLocator.h"
 
 // Forward declarations
-class MooseVariable;
+template <typename>
+class MooseVariableField;
+typedef MooseVariableField<Real> MooseVariable;
+typedef MooseVariableField<VectorValue<Real>> VectorMooseVariable;
 
 class PenetrationThread
 {

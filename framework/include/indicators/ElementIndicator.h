@@ -20,7 +20,10 @@
 
 // Forward declarations
 class ElementIndicator;
-class MooseVariable;
+template <typename>
+class MooseVariableField;
+typedef MooseVariableField<Real> MooseVariable;
+typedef MooseVariableField<VectorValue<Real>> VectorMooseVariable;
 
 template <>
 InputParameters validParams<ElementIndicator>();
@@ -30,13 +33,13 @@ class ElementIndicator : public Indicator,
                          public PostprocessorInterface,
                          public Coupleable,
                          public ScalarCoupleable,
-                         public MooseVariableInterface
+                         public MooseVariableInterface<Real>
 {
 public:
   ElementIndicator(const InputParameters & parameters);
 
 protected:
-  MooseVariable & _field_var;
+  MooseVariableFE & _field_var;
 
   const Elem *& _current_elem;
   /// Volume of the current element

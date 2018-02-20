@@ -11,114 +11,162 @@
 
 // MOOSE includes
 #include "Assembly.h"
-#include "MooseVariable.h"
+#include "MooseVariableField.h"
 #include "MooseTypes.h"
 #include "Problem.h"
 #include "SubProblem.h"
 
-NeighborMooseVariableInterface::NeighborMooseVariableInterface(const MooseObject * moose_object,
-                                                               bool nodal)
-  : MooseVariableInterface(moose_object, nodal)
+template <typename T>
+NeighborMooseVariableInterface<T>::NeighborMooseVariableInterface(const MooseObject * moose_object,
+                                                                  bool nodal)
+  : MooseVariableInterface<T>(moose_object, nodal)
 {
 }
 
-NeighborMooseVariableInterface::~NeighborMooseVariableInterface() {}
-
-const VariableValue &
-NeighborMooseVariableInterface::neighborValue()
+template <typename T>
+NeighborMooseVariableInterface<T>::~NeighborMooseVariableInterface()
 {
-  if (_nodal)
-    return _variable->nodalSlnNeighbor();
+}
+
+template <typename T>
+const typename OutputTools<T>::VariableValue &
+NeighborMooseVariableInterface<T>::neighborValue()
+{
+  if (this->_nodal)
+    return this->_variable->nodalValueNeighbor();
   else
-    return _variable->slnNeighbor();
+    return this->_variable->slnNeighbor();
 }
 
-const VariableValue &
-NeighborMooseVariableInterface::neighborValueOld()
+template <>
+const VectorVariableValue &
+NeighborMooseVariableInterface<RealVectorValue>::neighborValue()
 {
-  if (_nodal)
-    return _variable->nodalSlnOldNeighbor();
+  if (this->_nodal)
+    mooseError("Dofs are scalars while vector variables have vector values. Mismatch");
   else
-    return _variable->slnOldNeighbor();
+    return this->_variable->slnNeighbor();
 }
 
-const VariableValue &
-NeighborMooseVariableInterface::neighborValueOlder()
+template <typename T>
+const typename OutputTools<T>::VariableValue &
+NeighborMooseVariableInterface<T>::neighborValueOld()
 {
-  if (_nodal)
-    return _variable->nodalSlnOlderNeighbor();
+  if (this->_nodal)
+    return this->_variable->nodalValueOldNeighbor();
   else
-    return _variable->slnOlderNeighbor();
+    return this->_variable->slnOldNeighbor();
 }
 
-const VariableGradient &
-NeighborMooseVariableInterface::neighborGradient()
+template <>
+const VectorVariableValue &
+NeighborMooseVariableInterface<RealVectorValue>::neighborValueOld()
 {
-  if (_nodal)
+  if (this->_nodal)
+    mooseError("Dofs are scalars while vector variables have vector values. Mismatch");
+  else
+    return this->_variable->slnOldNeighbor();
+}
+
+template <typename T>
+const typename OutputTools<T>::VariableValue &
+NeighborMooseVariableInterface<T>::neighborValueOlder()
+{
+  if (this->_nodal)
+    return this->_variable->nodalValueOlderNeighbor();
+  else
+    return this->_variable->slnOlderNeighbor();
+}
+
+template <>
+const VectorVariableValue &
+NeighborMooseVariableInterface<RealVectorValue>::neighborValueOlder()
+{
+  if (this->_nodal)
+    mooseError("Dofs are scalars while vector variables have vector values. Mismatch");
+  else
+    return this->_variable->slnOlderNeighbor();
+}
+
+template <typename T>
+const typename OutputTools<T>::VariableGradient &
+NeighborMooseVariableInterface<T>::neighborGradient()
+{
+  if (this->_nodal)
     mooseError("Nodal variables do not have gradients");
 
-  return _variable->gradSlnNeighbor();
+  return this->_variable->gradSlnNeighbor();
 }
 
-const VariableGradient &
-NeighborMooseVariableInterface::neighborGradientOld()
+template <typename T>
+const typename OutputTools<T>::VariableGradient &
+NeighborMooseVariableInterface<T>::neighborGradientOld()
 {
-  if (_nodal)
+  if (this->_nodal)
     mooseError("Nodal variables do not have gradients");
 
-  return _variable->gradSlnOldNeighbor();
+  return this->_variable->gradSlnOldNeighbor();
 }
 
-const VariableGradient &
-NeighborMooseVariableInterface::neighborGradientOlder()
+template <typename T>
+const typename OutputTools<T>::VariableGradient &
+NeighborMooseVariableInterface<T>::neighborGradientOlder()
 {
-  if (_nodal)
+  if (this->_nodal)
     mooseError("Nodal variables do not have gradients");
 
-  return _variable->gradSlnOlderNeighbor();
+  return this->_variable->gradSlnOlderNeighbor();
 }
 
-const VariableSecond &
-NeighborMooseVariableInterface::neighborSecond()
+template <typename T>
+const typename OutputTools<T>::VariableSecond &
+NeighborMooseVariableInterface<T>::neighborSecond()
 {
-  if (_nodal)
+  if (this->_nodal)
     mooseError("Nodal variables do not have second derivatives");
 
-  return _variable->secondSlnNeighbor();
+  return this->_variable->secondSlnNeighbor();
 }
 
-const VariableSecond &
-NeighborMooseVariableInterface::neighborSecondOld()
+template <typename T>
+const typename OutputTools<T>::VariableSecond &
+NeighborMooseVariableInterface<T>::neighborSecondOld()
 {
-  if (_nodal)
+  if (this->_nodal)
     mooseError("Nodal variables do not have second derivatives");
 
-  return _variable->secondSlnOldNeighbor();
+  return this->_variable->secondSlnOldNeighbor();
 }
 
-const VariableSecond &
-NeighborMooseVariableInterface::neighborSecondOlder()
+template <typename T>
+const typename OutputTools<T>::VariableSecond &
+NeighborMooseVariableInterface<T>::neighborSecondOlder()
 {
-  if (_nodal)
+  if (this->_nodal)
     mooseError("Nodal variables do not have second derivatives");
 
-  return _variable->secondSlnOlderNeighbor();
+  return this->_variable->secondSlnOlderNeighbor();
 }
 
-const VariableTestSecond &
-NeighborMooseVariableInterface::neighborSecondTest()
+template <typename T>
+const typename OutputTools<T>::VariableTestSecond &
+NeighborMooseVariableInterface<T>::neighborSecondTest()
 {
-  if (_nodal)
+  if (this->_nodal)
     mooseError("Nodal variables do not have second derivatives");
 
-  return _variable->secondPhiFaceNeighbor();
+  return this->_variable->secondPhiFaceNeighbor();
 }
 
-const VariablePhiSecond &
-NeighborMooseVariableInterface::neighborSecondPhi()
+template <typename T>
+const typename OutputTools<T>::VariablePhiSecond &
+NeighborMooseVariableInterface<T>::neighborSecondPhi()
 {
-  if (_nodal)
+  if (this->_nodal)
     mooseError("Nodal variables do not have second derivatives");
 
-  return _mvi_assembly->secondPhiFaceNeighbor();
+  return this->_mvi_assembly->secondPhiFaceNeighbor(*this->_variable);
 }
+
+template class NeighborMooseVariableInterface<Real>;
+template class NeighborMooseVariableInterface<RealVectorValue>;

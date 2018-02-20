@@ -25,7 +25,8 @@ InputParameters validParams<PFCElementEnergyIntegral>();
  * Note that specializations of this integral are possible by deriving from this
  * class and overriding computeQpIntegral().
  */
-class PFCElementEnergyIntegral : public ElementIntegralPostprocessor, public MooseVariableInterface
+class PFCElementEnergyIntegral : public ElementIntegralPostprocessor,
+                                 public MooseVariableInterface<Real>
 {
 public:
   PFCElementEnergyIntegral(const InputParameters & parameters);

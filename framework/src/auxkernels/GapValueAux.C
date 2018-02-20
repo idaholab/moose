@@ -52,7 +52,7 @@ GapValueAux::GapValueAux(const InputParameters & parameters)
                      parameters.get<BoundaryName>("paired_boundary"),
                      boundaryNames()[0],
                      Utility::string_to_enum<Order>(parameters.get<MooseEnum>("order")))),
-    _moose_var(_subproblem.getVariable(_tid, getParam<VariableName>("paired_variable"))),
+    _moose_var(_subproblem.getStandardVariable(_tid, getParam<VariableName>("paired_variable"))),
     _serialized_solution(_moose_var.sys().currentSolution()),
     _dof_map(_moose_var.dofMap()),
     _warnings(getParam<bool>("warnings"))

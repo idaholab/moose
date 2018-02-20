@@ -13,6 +13,7 @@
 // MOOSE includes
 #include "GeneralVectorPostprocessor.h"
 #include "CoupleableMooseVariableDependencyIntermediateInterface.h"
+#include "MooseVariableInterface.h"
 #include "SamplerBase.h"
 
 // Forward Declarations
@@ -23,6 +24,7 @@ InputParameters validParams<PointSamplerBase>();
 
 class PointSamplerBase : public GeneralVectorPostprocessor,
                          public CoupleableMooseVariableDependencyIntermediateInterface,
+                         public MooseVariableInterface<Real>,
                          protected SamplerBase
 {
 public:

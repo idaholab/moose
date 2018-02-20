@@ -76,8 +76,8 @@ Q2PSaturationFlux::prepareNodalValues()
     density = _density.density(_pp_nodal[nodenum]);      // fluid density at the node
     ddensity_dp = _density.ddensity(_pp_nodal[nodenum]); // d(fluid density)/dP at the node
     relperm = _relperm.relperm(
-        _var.nodalSln()[nodenum]); // relative permeability of the fluid at node nodenum
-    drelperm_ds = _relperm.drelperm(_var.nodalSln()[nodenum]); // d(relperm)/dsat
+        _var.nodalValue()[nodenum]); // relative permeability of the fluid at node nodenum
+    drelperm_ds = _relperm.drelperm(_var.nodalValue()[nodenum]); // d(relperm)/dsat
 
     // calculate the mobility and its derivatives wrt P and S
     _mobility[nodenum] = density * relperm / _viscosity;

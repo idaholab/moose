@@ -43,6 +43,8 @@ protected:
   using CHBulk<T>::_grad_phi;
   using CHBulk<T>::_grad_test;
   using CHBulk<T>::_coupled_moose_vars;
+  using CHBulk<T>::_subproblem;
+  using CHBulk<T>::_tid;
 
 private:
   const unsigned int _nvar;
@@ -103,7 +105,7 @@ CahnHilliardBase<T>::CahnHilliardBase(const InputParameters & parameters)
           &this->template getMaterialPropertyDerivative<Real>("f_name", _var.name(), iname, jname);
     }
 
-    _grad_vars[i + 1] = &(_coupled_moose_vars[i]->gradSln());
+    _grad_vars[i + 1] = &_subproblem.getStandardVariable(_tid, iname).gradSln();
   }
 }
 

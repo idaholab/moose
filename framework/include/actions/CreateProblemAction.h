@@ -34,7 +34,6 @@ protected:
   ///    be set for the whole domain
   /// 2. _blocks.size() > 0 and no coordinate system was specified, then the whole domain will be XYZ.
   /// 3. _blocks.size() > 0 and one coordinate system was specified, then the whole domain will be that system.
-  bool _fe_cache;
 };
 
 #endif /* CREATEPROBLEMACTION_H */

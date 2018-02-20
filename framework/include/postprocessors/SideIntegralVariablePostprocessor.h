@@ -26,7 +26,7 @@ InputParameters validParams<SideIntegralVariablePostprocessor>();
  * class and overriding computeQpIntegral().
  */
 class SideIntegralVariablePostprocessor : public SideIntegralPostprocessor,
-                                          public MooseVariableInterface
+                                          public MooseVariableInterface<Real>
 {
 public:
   SideIntegralVariablePostprocessor(const InputParameters & parameters);

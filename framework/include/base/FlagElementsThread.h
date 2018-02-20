@@ -39,7 +39,7 @@ protected:
   AuxiliarySystem & _aux_sys;
   unsigned int _system_number;
   Adaptivity & _adaptivity;
-  MooseVariable & _field_var;
+  MooseVariableFE & _field_var;
   unsigned int _field_var_number;
   std::vector<Number> & _serialized_solution;
   unsigned int _max_h_level;

@@ -11,7 +11,7 @@
 
 // MOOSE includes
 #include "FEProblem.h"
-#include "MooseVariable.h"
+#include "MooseVariableFE.h"
 #include "MooseVariableScalar.h"
 #include "Problem.h"
 #include "SubProblem.h"
@@ -51,7 +51,7 @@ ScalarCoupleable::ScalarCoupleable(const MooseObject * moose_object)
         }
         else if (problem.hasVariable(coupled_var_name))
         {
-          MooseVariable * moose_var = &problem.getVariable(_sc_tid, coupled_var_name);
+          MooseVariableFE * moose_var = &problem.getVariable(_sc_tid, coupled_var_name);
           _sc_coupled_vars[name].push_back(moose_var);
         }
         else

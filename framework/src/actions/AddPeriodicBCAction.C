@@ -16,7 +16,7 @@
 #include "GeneratedMesh.h"
 #include "InputParameters.h"
 #include "MooseMesh.h"
-#include "MooseVariable.h"
+#include "MooseVariableField.h"
 #include "NonlinearSystem.h"
 
 #include "libmesh/periodic_boundary.h" // translation PBCs provided by libmesh

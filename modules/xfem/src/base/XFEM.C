@@ -1763,7 +1763,7 @@ std::vector<dof_id_type>
 XFEM::getElementSolutionDofs(const Elem * elem, SystemBase & sys) const
 {
   SubdomainID sid = elem->subdomain_id();
-  const std::vector<MooseVariable *> & vars = sys.getVariables(0);
+  const std::vector<MooseVariableFE *> & vars = sys.getVariables(0);
   std::vector<dof_id_type> solution_dofs;
   solution_dofs.reserve(vars.size()); // just an approximation
   for (auto var : vars)
@@ -1789,7 +1789,7 @@ std::vector<dof_id_type>
 XFEM::getNodeSolutionDofs(const Node * node, SystemBase & sys) const
 {
   const std::set<SubdomainID> & sids = _moose_mesh->getNodeBlockIds(*node);
-  const std::vector<MooseVariable *> & vars = sys.getVariables(0);
+  const std::vector<MooseVariableFE *> & vars = sys.getVariables(0);
   std::vector<dof_id_type> solution_dofs;
   solution_dofs.reserve(vars.size()); // just an approximation
   for (auto var : vars)

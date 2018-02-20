@@ -30,7 +30,10 @@ class InitialCondition;
 class FEProblemBase;
 class SystemBase;
 class Assembly;
-class MooseVariable;
+template <typename>
+class MooseVariableField;
+typedef MooseVariableField<Real> MooseVariable;
+typedef MooseVariableField<VectorValue<Real>> VectorMooseVariable;
 
 template <>
 InputParameters validParams<InitialCondition>();

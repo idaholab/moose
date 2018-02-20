@@ -25,7 +25,8 @@ InputParameters validParams<SideIntegralVariableUserObject>();
  * Note that specializations of this integral are possible by deriving from this
  * class and overriding computeQpIntegral().
  */
-class SideIntegralVariableUserObject : public SideIntegralUserObject, public MooseVariableInterface
+class SideIntegralVariableUserObject : public SideIntegralUserObject,
+                                       public MooseVariableInterface<Real>
 {
 public:
   SideIntegralVariableUserObject(const InputParameters & parameters);

@@ -56,7 +56,7 @@ KKSCHBulk::KKSCHBulk(const InputParameters & parameters)
   // Iterate over all coupled variables
   for (unsigned int i = 0; i < _nvar; ++i)
   {
-    MooseVariable * cvar = _coupled_moose_vars[i];
+    MooseVariable * cvar = _coupled_standard_moose_vars[i];
 
     // get the second derivative material property (TODO:warn)
     _second_derivatives[i] =

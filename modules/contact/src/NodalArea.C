@@ -27,7 +27,7 @@ validParams<NodalArea>()
 
 NodalArea::NodalArea(const InputParameters & parameters)
   : SideIntegralVariableUserObject(parameters),
-    _phi(getCoupledVars().find("variable")->second[0]->phiFace()),
+    _phi(_variable->phiFace()),
     _system(_variable->sys()),
     _aux_solution(_system.solution())
 {

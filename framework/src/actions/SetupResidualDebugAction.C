@@ -13,7 +13,7 @@
 #include "ActionWarehouse.h"
 #include "Factory.h"
 #include "FEProblem.h"
-#include "MooseVariable.h"
+#include "MooseVariableField.h"
 #include "NonlinearSystemBase.h"
 #include "Conversion.h"
 
@@ -45,7 +45,7 @@ SetupResidualDebugAction::act()
   for (const auto & var_name : _show_var_residual)
   {
     // add aux-variable
-    MooseVariable & var = _problem->getVariable(0, var_name);
+    MooseVariableFE & var = _problem->getVariable(0, var_name);
     InputParameters params = _factory.getValidParams("DebugResidualAux");
     const std::set<SubdomainID> & subdomains = var.activeSubdomains();
 

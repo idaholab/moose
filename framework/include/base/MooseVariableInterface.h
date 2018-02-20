@@ -15,11 +15,13 @@
 // Forward declarations
 class Assembly;
 class MooseObject;
-class MooseVariable;
+template <typename T>
+class MooseVariableField;
 
 /**
  * Interface for objects that need to get values of MooseVariables
  */
+template <typename T>
 class MooseVariableInterface
 {
 public:
@@ -37,7 +39,7 @@ public:
    * Get the variable that this object is using.
    * @return The variable this object is using.
    */
-  MooseVariable * mooseVariable();
+  MooseVariableField<T> * mooseVariable();
 
   virtual ~MooseVariableInterface();
 
@@ -49,28 +51,28 @@ protected:
    *
    * @return The reference to be stored off and used later.
    */
-  virtual const VariableValue & value();
+  virtual const typename OutputTools<T>::VariableValue & value();
 
   /**
    * The old value of the variable this object is operating on.
    *
    * @return The reference to be stored off and used later.
    */
-  virtual const VariableValue & valueOld();
+  virtual const typename OutputTools<T>::VariableValue & valueOld();
 
   /**
    * The older value of the variable this object is operating on.
    *
    * @return The reference to be stored off and used later.
    */
-  virtual const VariableValue & valueOlder();
+  virtual const typename OutputTools<T>::VariableValue & valueOlder();
 
   /**
    * The time derivative of the variable this object is operating on.
    *
    * @return The reference to be stored off and used later.
    */
-  virtual const VariableValue & dot();
+  virtual const typename OutputTools<T>::VariableValue & dot();
 
   /**
    * The derivative of the time derivative of the variable this object is operating on
@@ -80,7 +82,7 @@ protected:
    *
    * @return The reference to be stored off and used later.
    */
-  virtual const VariableValue & dotDu();
+  virtual const typename OutputTools<T>::VariableValue & dotDu();
 
   /**
    * The gradient of the variable this object is operating on.
@@ -89,49 +91,49 @@ protected:
    *
    * @return The reference to be stored off and used later.
    */
-  virtual const VariableGradient & gradient();
+  virtual const typename OutputTools<T>::VariableGradient & gradient();
 
   /**
    * The old gradient of the variable this object is operating on.
    *
    * @return The reference to be stored off and used later.
    */
-  virtual const VariableGradient & gradientOld();
+  virtual const typename OutputTools<T>::VariableGradient & gradientOld();
 
   /**
    * The older gradient of the variable this object is operating on.
    *
    * @return The reference to be stored off and used later.
    */
-  virtual const VariableGradient & gradientOlder();
+  virtual const typename OutputTools<T>::VariableGradient & gradientOlder();
 
   /**
    * The second derivative of the variable this object is operating on.
    *
    * @return The reference to be stored off and used later.
    */
-  virtual const VariableSecond & second();
+  virtual const typename OutputTools<T>::VariableSecond & second();
 
   /**
    * The old second derivative of the variable this object is operating on.
    *
    * @return The reference to be stored off and used later.
    */
-  virtual const VariableSecond & secondOld();
+  virtual const typename OutputTools<T>::VariableSecond & secondOld();
 
   /**
    * The older second derivative of the variable this object is operating on.
    *
    * @return The reference to be stored off and used later.
    */
-  virtual const VariableSecond & secondOlder();
+  virtual const typename OutputTools<T>::VariableSecond & secondOlder();
 
   /**
    * The second derivative of the test function.
    *
    * @return The reference to be stored off and used later.
    */
-  virtual const VariableTestSecond & secondTest();
+  virtual const typename OutputTools<T>::VariableTestSecond & secondTest();
 
   /**
    * The second derivative of the test function on the current face.
@@ -140,14 +142,14 @@ protected:
    *
    * @return The reference to be stored off and used later.
    */
-  virtual const VariableTestSecond & secondTestFace();
+  virtual const typename OutputTools<T>::VariableTestSecond & secondTestFace();
 
   /**
    * The second derivative of the trial function.
    *
    * @return The reference to be stored off and used later.
    */
-  virtual const VariablePhiSecond & secondPhi();
+  virtual const typename OutputTools<T>::VariablePhiSecond & secondPhi();
 
   /**
    * The second derivative of the trial function on the current face.
@@ -156,13 +158,13 @@ protected:
    *
    * @return The reference to be stored off and used later.
    */
-  virtual const VariablePhiSecond & secondPhiFace();
+  virtual const typename OutputTools<T>::VariablePhiSecond & secondPhiFace();
 
   /// Whether or not this object is acting only at nodes
   bool _nodal;
 
   /// The variable this object is acting on
-  MooseVariable * _variable;
+  MooseVariableField<T> * _variable;
 
 protected:
   Assembly * _mvi_assembly;

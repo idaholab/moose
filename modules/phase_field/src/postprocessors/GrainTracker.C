@@ -1239,11 +1239,11 @@ GrainTracker::swapSolutionValuesHelper(Node * curr_node,
     // Retrieve the value either from the old variable or cache
     if (cache_mode == RemapCacheMode::FILL || cache_mode == RemapCacheMode::BYPASS)
     {
-      current = _vars[curr_var_index]->nodalSln()[0];
+      current = _vars[curr_var_index]->nodalValue()[0];
       if (_is_transient)
       {
-        old = _vars[curr_var_index]->nodalSlnOld()[0];
-        older = _vars[curr_var_index]->nodalSlnOlder()[0];
+        old = _vars[curr_var_index]->nodalValueOld()[0];
+        older = _vars[curr_var_index]->nodalValueOlder()[0];
       }
     }
     else // USE

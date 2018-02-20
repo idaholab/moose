@@ -50,6 +50,7 @@ DiracKernel::DiracKernel(const InputParameters & parameters)
   : MooseObject(parameters),
     SetupInterface(this),
     CoupleableMooseVariableDependencyIntermediateInterface(this, false),
+    MooseVariableInterface<Real>(this, false),
     FunctionInterface(this),
     UserObjectInterface(this),
     TransientInterface(this),
@@ -62,7 +63,7 @@ DiracKernel::DiracKernel(const InputParameters & parameters)
     _sys(*getCheckedPointerParam<SystemBase *>("_sys")),
     _tid(parameters.get<THREAD_ID>("_tid")),
     _assembly(_subproblem.assembly(_tid)),
-    _var(_sys.getVariable(_tid, parameters.get<NonlinearVariableName>("variable"))),
+    _var(*mooseVariable()),
     _mesh(_subproblem.mesh()),
     _coord_sys(_assembly.coordSystem()),
     _dirac_kernel_info(_subproblem.diracKernelInfo()),
@@ -71,8 +72,8 @@ DiracKernel::DiracKernel(const InputParameters & parameters)
     _physical_point(_assembly.physicalPoints()),
     _qrule(_assembly.qRule()),
     _JxW(_assembly.JxW()),
-    _phi(_assembly.phi()),
-    _grad_phi(_assembly.gradPhi()),
+    _phi(_assembly.phi(_var)),
+    _grad_phi(_assembly.gradPhi(_var)),
     _test(_var.phi()),
     _grad_test(_var.gradPhi()),
     _u(_var.sln()),
@@ -81,6 +82,8 @@ DiracKernel::DiracKernel(const InputParameters & parameters)
     _du_dot_du(_var.duDotDu()),
     _drop_duplicate_points(parameters.get<bool>("drop_duplicate_points"))
 {
+  addMooseVariableDependency(mooseVariable());
+
   // Stateful material properties are not allowed on DiracKernels
   statefulPropertiesAllowed(false);
 }

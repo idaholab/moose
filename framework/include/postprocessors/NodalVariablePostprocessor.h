@@ -24,7 +24,7 @@ InputParameters validParams<NodalVariablePostprocessor>();
  * This is a base class for other classes which compute post-processed
  * values based on nodal solution values of _u.
  */
-class NodalVariablePostprocessor : public NodalPostprocessor, public MooseVariableInterface
+class NodalVariablePostprocessor : public NodalPostprocessor, public MooseVariableInterface<Real>
 {
 public:
   NodalVariablePostprocessor(const InputParameters & parameters);

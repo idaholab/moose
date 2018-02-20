@@ -10,7 +10,7 @@
 #include "DGCoupledDiffusion.h"
 
 // MOOSE includes
-#include "MooseVariable.h"
+#include "MooseVariableField.h"
 
 template <>
 InputParameters
@@ -23,7 +23,7 @@ validParams<DGCoupledDiffusion>()
 
 DGCoupledDiffusion::DGCoupledDiffusion(const InputParameters & parameters)
   : DGKernel(parameters),
-    _v_var(*getVar("v", 0)),
+    _v_var(dynamic_cast<MooseVariable &>(*getVar("v", 0))),
     _v(_v_var.sln()),
     _v_neighbor(_v_var.slnNeighbor()),
     _grad_v(_v_var.gradSln()),

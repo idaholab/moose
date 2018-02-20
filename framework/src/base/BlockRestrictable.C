@@ -13,10 +13,9 @@
 #include "FEProblem.h"
 #include "Material.h"
 #include "MooseMesh.h"
-#include "MooseVariable.h"
+#include "MooseVariableField.h"
 #include "SystemBase.h"
 #include "Conversion.h"
-#include "MooseVariableInterface.h"
 
 template <>
 InputParameters
@@ -300,7 +299,7 @@ BlockRestrictable::getBlockCoordSystem()
 }
 
 void
-BlockRestrictable::checkVariable(const MooseVariable & variable) const
+BlockRestrictable::checkVariable(const MooseVariableFE & variable) const
 {
   if (!isBlockSubset(variable.activeSubdomains()))
   {

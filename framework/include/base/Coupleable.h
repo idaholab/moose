@@ -10,14 +10,19 @@
 #ifndef COUPLEABLE_H
 #define COUPLEABLE_H
 
-// MOOSE includes
-#include "MooseVariableBase.h"
+#include <map>
+#include "MooseTypes.h"
+#include "MooseArray.h"
 
 // Forward declarations
 class InputParameters;
-class MooseVariable;
 class MooseVariableScalar;
 class MooseObject;
+class MooseVariableFE;
+template <typename>
+class MooseVariableField;
+typedef MooseVariableField<Real> MooseVariable;
+typedef MooseVariableField<RealVectorValue> VectorMooseVariable;
 namespace libMesh
 {
 template <typename T>
@@ -47,16 +52,34 @@ public:
    * Get the list of coupled variables
    * @return The list of coupled variables
    */
-  const std::map<std::string, std::vector<MooseVariable *>> & getCoupledVars()
+  const std::map<std::string, std::vector<MooseVariableFE *>> & getCoupledVars()
   {
     return _coupled_vars;
   }
 
   /**
-   * Get the list of coupled variables
-   * @return The list of coupled variables
+   * Get the list of all coupled variables
+   * @return The list of all coupled variables
    */
-  const std::vector<MooseVariable *> & getCoupledMooseVars() const { return _coupled_moose_vars; }
+  const std::vector<MooseVariableFE *> & getCoupledMooseVars() const { return _coupled_moose_vars; }
+
+  /**
+   * Get the list of standard coupled variables
+   * @return The list of standard coupled variables
+   */
+  const std::vector<MooseVariable *> & getCoupledStandardMooseVars() const
+  {
+    return _coupled_standard_moose_vars;
+  }
+
+  /**
+   * Get the list of vector coupled variables
+   * @return The list of vector coupled variables
+   */
+  const std::vector<VectorMooseVariable *> & getCoupledVectorMooseVars() const
+  {
+    return _coupled_vector_moose_vars;
+  }
 
 protected:
   /**
@@ -90,9 +113,19 @@ protected:
    * @param var_name Name of coupled variable
    * @param comp Component number for vector of coupled variables
    * @return Reference to a VariableValue for the coupled variable
-   * @see Kernel::value
+   * @see Kernel::_u
    */
   virtual const VariableValue & coupledValue(const std::string & var_name, unsigned int comp = 0);
+
+  /**
+   * Returns value of a coupled vector variable
+   * @param var_name Name of coupled vector variable
+   * @param comp Component number for vector of coupled vector variables
+   * @return Reference to a VectorVariableValue for the coupled vector variable
+   * @see VectorKernel::_u
+   */
+  virtual const VectorVariableValue & coupledVectorValue(const std::string & var_name,
+                                                         unsigned int comp = 0);
 
   /**
    * Returns a *writable* reference to a coupled variable.  Note: you
@@ -136,6 +169,26 @@ protected:
                                                        unsigned int comp = 0);
 
   /**
+   * Returns an old value from previous time step  of a coupled vector variable
+   * @param var_name Name of coupled variable
+   * @param comp Component number for vector of coupled variables
+   * @return Reference to a VectorVariableValue containing the old value of the coupled variable
+   * @see Kernel::_u_old
+   */
+  virtual const VectorVariableValue & coupledVectorValueOld(const std::string & var_name,
+                                                            unsigned int comp = 0);
+
+  /**
+   * Returns an old value from two time steps previous of a coupled vector variable
+   * @param var_name Name of coupled variable
+   * @param comp Component number for vector of coupled variables
+   * @return Reference to a VectorVariableValue containing the older value of the coupled variable
+   * @see Kernel::_u_older
+   */
+  virtual const VectorVariableValue & coupledVectorValueOlder(const std::string & var_name,
+                                                              unsigned int comp = 0);
+
+  /**
    * Returns gradient of a coupled variable
    * @param var_name Name of coupled variable
    * @param comp Component number for vector of coupled variables
@@ -173,6 +226,36 @@ protected:
    */
   virtual const VariableGradient & coupledGradientPreviousNL(const std::string & var_name,
                                                              unsigned int comp = 0);
+
+  /**
+   * Returns curl of a coupled variable
+   * @param var_name Name of coupled variable
+   * @param comp Component number for vector of coupled variables
+   * @return Reference to a VectorVariableCurl containing the curl of the coupled variable
+   * @see Kernel::_curl_u
+   */
+  virtual const VectorVariableCurl & coupledCurl(const std::string & var_name,
+                                                 unsigned int comp = 0);
+
+  /**
+   * Returns an old curl from previous time step of a coupled variable
+   * @param var_name Name of coupled variable
+   * @param comp Component number for vector of coupled variables
+   * @return Reference to a VectorVariableCurl containing the old curl of the coupled variable
+   * @see Kernel::_curl_u_old
+   */
+  virtual const VectorVariableCurl & coupledCurlOld(const std::string & var_name,
+                                                    unsigned int comp = 0);
+
+  /**
+   * Returns an old curl from two time steps previous of a coupled variable
+   * @param var_name Name of coupled variable
+   * @param comp Component number for vector of coupled variables
+   * @return Reference to a VectorVariableCurl containing the older curl of the coupled variable
+   * @see Kernel::_curl_u_older
+   */
+  virtual const VectorVariableCurl & coupledCurlOlder(const std::string & var_name,
+                                                      unsigned int comp = 0);
 
   /**
    * Returns second derivative of a coupled variable
@@ -317,10 +400,16 @@ protected:
   FEProblemBase & _c_fe_problem;
 
   /// Coupled vars whose values we provide
-  std::map<std::string, std::vector<MooseVariable *>> _coupled_vars;
+  std::map<std::string, std::vector<MooseVariableFE *>> _coupled_vars;
 
-  /// Vector of coupled variables
-  std::vector<MooseVariable *> _coupled_moose_vars;
+  /// Vector of all coupled variables
+  std::vector<MooseVariableFE *> _coupled_moose_vars;
+
+  /// Vector of standard coupled variables
+  std::vector<MooseVariable *> _coupled_standard_moose_vars;
+
+  /// Vector of vector coupled variables
+  std::vector<VectorMooseVariable *> _coupled_vector_moose_vars;
 
   /// True if we provide coupling to nodal values
   bool _c_nodal;
@@ -334,7 +423,13 @@ protected:
   /// Will hold the default value for optional coupled variables.
   std::map<std::string, VariableValue *> _default_value;
 
-  /// This will always be zero because the default values for optionally coupled variables is always constant and this is used for time derivative info
+  /// Will hold the default value for optional vector coupled variables.
+  std::map<std::string, VectorVariableValue *> _default_vector_value;
+
+  /**
+   * This will always be zero because the default values for optionally coupled variables is always
+   * constant and this is used for time derivative info
+   */
   VariableValue _default_value_zero;
 
   /// This will always be zero because the default values for optionally coupled variables is always constant
@@ -351,6 +446,22 @@ protected:
   const VariableSecond & _second_zero;
   /// Zero second derivative of a test function
   const VariablePhiSecond & _second_phi_zero;
+  /// Zero value of a vector variable
+  const VectorVariableValue & _vector_zero;
+  /// Zero value of the curl of a vector variable
+  const VectorVariableCurl & _vector_curl_zero;
+
+  /**
+   * This will always be zero because the default values for optionally coupled variables is always
+   * constant and this is used for time derivative info
+   */
+  VectorVariableValue _default_vector_value_zero;
+
+  /// This will always be zero because the default values for optionally coupled variables is always constant
+  VectorVariableGradient _default_vector_gradient;
+
+  /// This will always be zero because the default values for optionally coupled variables is always constant
+  VectorVariableCurl _default_vector_curl;
 
   /**
    * Check that the right kind of variable is being coupled in
@@ -360,12 +471,28 @@ protected:
   void checkVar(const std::string & var_name);
 
   /**
+   * Extract pointer to a base finite element coupled variable
+   * @param var_name Name of parameter desired
+   * @param comp Component number of multiple coupled variables
+   * @return Pointer to the desired variable
+   */
+  MooseVariableFE * getFEVar(const std::string & var_name, unsigned int comp);
+
+  /**
    * Extract pointer to a coupled variable
    * @param var_name Name of parameter desired
    * @param comp Component number of multiple coupled variables
    * @return Pointer to the desired variable
    */
   MooseVariable * getVar(const std::string & var_name, unsigned int comp);
+
+  /**
+   * Extract pointer to a coupled vector variable
+   * @param var_name Name of parameter desired
+   * @param comp Component number of multiple coupled variables
+   * @return Pointer to the desired variable
+   */
+  VectorMooseVariable * getVectorVar(const std::string & var_name, unsigned int comp);
 
   /**
    * Checks to make sure that the current Executioner has set "_is_transient" when old/older values
@@ -383,9 +510,17 @@ private:
    * Helper method to return (and insert if necessary) the default value
    * for an uncoupled variable.
    * @param var_name the name of the variable for which to retrieve a default value
-   * @return VariableValue * a pointer to the associated VarirableValue.
+   * @return a pointer to the associated VariableValue.
    */
   VariableValue * getDefaultValue(const std::string & var_name);
+
+  /**
+   * Helper method to return (and insert if necessary) the default value
+   * for an uncoupled vector variable.
+   * @param var_name the name of the vector variable for which to retrieve a default value
+   * @return a pointer to the associated VectorVariableValue.
+   */
+  VectorVariableValue * getVectorDefaultValue(const std::string & var_name);
 
   /// Maximum qps for any element in this system
   unsigned int _coupleable_max_qps;

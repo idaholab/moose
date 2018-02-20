@@ -26,7 +26,10 @@
 #include "MeshChangedInterface.h"
 
 // Forward declerations
-class MooseVariable;
+template <typename>
+class MooseVariableField;
+typedef MooseVariableField<Real> MooseVariable;
+typedef MooseVariableField<VectorValue<Real>> VectorMooseVariable;
 class MooseMesh;
 class Problem;
 class SubProblem;
@@ -62,10 +65,10 @@ public:
   BoundaryCondition(const InputParameters & parameters, bool nodal);
 
   /**
-   * Gets the variable this BC is active on
-   * @return the variable
+   * Get a reference to the MooseVariableFE
+   * @return Reference to MooseVariableFE
    */
-  MooseVariable & variable();
+  virtual MooseVariableFE & variable() = 0;
 
   /**
    * Get a reference to the subproblem
@@ -101,9 +104,6 @@ protected:
 
   /// Reference to assembly
   Assembly & _assembly;
-
-  /// variable this BC works on
-  MooseVariable & _var;
 
   /// Mesh this BC is defined on
   MooseMesh & _mesh;

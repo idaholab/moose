@@ -28,13 +28,6 @@ validParams<CreateProblemAction>()
       "coord_type", coord_types, "Type of the coordinate system per block param");
   params.addParam<MooseEnum>(
       "rz_coord_axis", rz_coord_axis, "The rotation axis (X | Y) for axisymetric coordinates");
-
-  params.addParam<bool>("fe_cache",
-                        false,
-                        "Whether or not to turn on the finite element shape "
-                        "function caching system.  This can increase speed with "
-                        "an associated memory cost.");
-
   params.addParam<bool>(
       "kernel_coverage_check", true, "Set to false to disable kernel->subdomain coverage check");
   params.addParam<bool>("material_coverage_check",
@@ -58,8 +51,7 @@ validParams<CreateProblemAction>()
 CreateProblemAction::CreateProblemAction(InputParameters parameters)
   : MooseObjectAction(parameters),
     _blocks(getParam<std::vector<SubdomainName>>("block")),
-    _coord_sys(getParam<MultiMooseEnum>("coord_type")),
-    _fe_cache(getParam<bool>("fe_cache"))
+    _coord_sys(getParam<MultiMooseEnum>("coord_type"))
 {
 }
 
@@ -94,7 +86,6 @@ CreateProblemAction::act()
     // set up the problem
     _problem->setCoordSystem(_blocks, _coord_sys);
     _problem->setAxisymmetricCoordAxis(getParam<MooseEnum>("rz_coord_axis"));
-    _problem->useFECache(_fe_cache);
     _problem->setKernelCoverageCheck(getParam<bool>("kernel_coverage_check"));
     _problem->setMaterialCoverageCheck(getParam<bool>("material_coverage_check"));
     _problem->setParallelBarrierMessaging(getParam<bool>("parallel_barrier_messaging"));

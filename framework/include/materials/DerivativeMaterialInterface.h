@@ -17,7 +17,7 @@
 #include "KernelBase.h"
 #include "Material.h"
 #include "MaterialProperty.h"
-#include "MooseVariable.h"
+#include "MooseVariableField.h"
 #include "NonlinearSystem.h"
 
 // Forward declarations

@@ -11,9 +11,11 @@
 #define MOOSEVARIABLECONSTMONOMIAL_H
 
 #include "MooseTypes.h"
-#include "MooseVariable.h"
+#include "MooseVariableField.h"
 
-class MooseVariableConstMonomial : public MooseVariable
+class Assembly;
+
+class MooseVariableConstMonomial : public MooseVariableField<Real>
 {
 public:
   MooseVariableConstMonomial(unsigned int var_num,
@@ -27,8 +29,8 @@ public:
   virtual void computeNeighborValuesFace() override;
   virtual void computeNeighborValues() override;
 
-  virtual void computeElemValuesHelper(const unsigned & nqp, const Real & phi);
-  virtual void computeNeighborValuesHelper(const unsigned & nqp, const Real & phi);
+  virtual void computeMonomialValuesHelper(const unsigned & nqp, const Real & phi);
+  virtual void computeMonomialNeighborValuesHelper(const unsigned & nqp, const Real & phi);
 };
 
 #endif /* MOOSEVARIABLECONSTMONOMIAL_H */

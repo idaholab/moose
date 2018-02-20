@@ -10,7 +10,7 @@
 #include "RandomHitSolutionModifier.h"
 
 // MOOSE includes
-#include "MooseVariable.h"
+#include "MooseVariableField.h"
 #include "NonlinearSystemBase.h"
 #include "RandomHitUserObject.h"
 
@@ -30,7 +30,8 @@ RandomHitSolutionModifier::RandomHitSolutionModifier(const InputParameters & par
   : GeneralUserObject(parameters),
     _random_hits(getUserObject<RandomHitUserObject>("random_hits")),
     _mesh(_subproblem.mesh()),
-    _variable(_subproblem.getVariable(0, parameters.get<VariableName>("modify"))),
+    _variable(dynamic_cast<MooseVariable &>(
+        _subproblem.getVariable(0, parameters.get<VariableName>("modify")))),
     _amount(parameters.get<Real>("amount"))
 {
 }

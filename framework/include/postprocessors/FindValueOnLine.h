@@ -54,7 +54,7 @@ protected:
   const Real _tol;
 
   /// coupled variable
-  MooseVariable * _coupled_var;
+  MooseVariable & _coupled_var;
 
   /// detected interface location
   Real _position;

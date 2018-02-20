@@ -19,7 +19,7 @@
 #include "InfixIterator.h"
 #include "MooseApp.h"
 #include "MooseUtils.h"
-#include "MooseVariable.h"
+#include "MooseVariableField.h"
 #include "Postprocessor.h"
 #include "Restartable.h"
 #include "VectorPostprocessor.h"
@@ -382,10 +382,29 @@ AdvancedOutput::initAvailableLists()
   {
     if (_problem_ptr->hasVariable(var_name))
     {
-      MooseVariable & var = _problem_ptr->getVariable(0, var_name);
+      MooseVariableFE & var = _problem_ptr->getVariable(0, var_name);
       const FEType type = var.feType();
       if (type.order == CONSTANT)
         _execute_data["elemental"].available.insert(var_name);
+      else if (type.family == NEDELEC_ONE || type.family == LAGRANGE_VEC)
+      {
+        switch (_es_ptr->get_mesh().spatial_dimension())
+        {
+          case 0:
+          case 1:
+            _execute_data["nodal"].available.insert(var_name);
+            break;
+          case 2:
+            _execute_data["nodal"].available.insert(var_name + "_x");
+            _execute_data["nodal"].available.insert(var_name + "_y");
+            break;
+          case 3:
+            _execute_data["nodal"].available.insert(var_name + "_x");
+            _execute_data["nodal"].available.insert(var_name + "_y");
+            _execute_data["nodal"].available.insert(var_name + "_z");
+            break;
+        }
+      }
       else
         _execute_data["nodal"].available.insert(var_name);
     }
@@ -433,10 +452,29 @@ AdvancedOutput::initShowHideLists(const std::vector<VariableName> & show,
   {
     if (_problem_ptr->hasVariable(var_name))
     {
-      MooseVariable & var = _problem_ptr->getVariable(0, var_name);
+      MooseVariableFE & var = _problem_ptr->getVariable(0, var_name);
       const FEType type = var.feType();
       if (type.order == CONSTANT)
         _execute_data["elemental"].show.insert(var_name);
+      else if (type.family == NEDELEC_ONE || type.family == LAGRANGE_VEC)
+      {
+        switch (_es_ptr->get_mesh().spatial_dimension())
+        {
+          case 0:
+          case 1:
+            _execute_data["nodal"].show.insert(var_name);
+            break;
+          case 2:
+            _execute_data["nodal"].show.insert(var_name + "_x");
+            _execute_data["nodal"].show.insert(var_name + "_y");
+            break;
+          case 3:
+            _execute_data["nodal"].show.insert(var_name + "_x");
+            _execute_data["nodal"].show.insert(var_name + "_y");
+            _execute_data["nodal"].show.insert(var_name + "_z");
+            break;
+        }
+      }
       else
         _execute_data["nodal"].show.insert(var_name);
     }
@@ -455,10 +493,29 @@ AdvancedOutput::initShowHideLists(const std::vector<VariableName> & show,
   {
     if (_problem_ptr->hasVariable(var_name))
     {
-      MooseVariable & var = _problem_ptr->getVariable(0, var_name);
+      MooseVariableFE & var = _problem_ptr->getVariable(0, var_name);
       const FEType type = var.feType();
       if (type.order == CONSTANT)
         _execute_data["elemental"].hide.insert(var_name);
+      else if (type.family == NEDELEC_ONE || type.family == LAGRANGE_VEC)
+      {
+        switch (_es_ptr->get_mesh().spatial_dimension())
+        {
+          case 0:
+          case 1:
+            _execute_data["nodal"].hide.insert(var_name);
+            break;
+          case 2:
+            _execute_data["nodal"].hide.insert(var_name + "_x");
+            _execute_data["nodal"].hide.insert(var_name + "_y");
+            break;
+          case 3:
+            _execute_data["nodal"].hide.insert(var_name + "_x");
+            _execute_data["nodal"].hide.insert(var_name + "_y");
+            _execute_data["nodal"].hide.insert(var_name + "_z");
+            break;
+        }
+      }
       else
         _execute_data["nodal"].hide.insert(var_name);
     }

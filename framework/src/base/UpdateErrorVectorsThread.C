@@ -13,7 +13,7 @@
 #include "AuxiliarySystem.h"
 #include "FEProblem.h"
 #include "Marker.h"
-#include "MooseVariable.h"
+#include "MooseVariableField.h"
 #include "Problem.h"
 
 #include "libmesh/threads.h"

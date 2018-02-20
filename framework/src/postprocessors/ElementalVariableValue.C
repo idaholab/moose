@@ -48,7 +48,7 @@ ElementalVariableValue::getValue()
     _subproblem.prepare(_element, _tid);
     _subproblem.reinitElem(_element, _tid);
 
-    MooseVariable & var = _subproblem.getVariable(_tid, _var_name);
+    MooseVariable & var = _subproblem.getStandardVariable(_tid, _var_name);
     const VariableValue & u = var.sln();
     unsigned int n = u.size();
     for (unsigned int i = 0; i < n; i++)

@@ -24,7 +24,7 @@
 #include "ExecuteMooseObjectWarehouse.h"
 #include "AuxGroupExecuteMooseObjectWarehouse.h"
 #include "MaterialWarehouse.h"
-#include "MooseVariableBase.h"
+#include "MooseVariableField.h"
 #include "MultiAppTransfer.h"
 #include "Postprocessor.h"
 
@@ -69,7 +69,7 @@ class Function;
 class Distribution;
 class Sampler;
 class KernelBase;
-class IntegratedBC;
+class IntegratedBCBase;
 
 // libMesh forward declarations
 namespace libMesh
@@ -165,8 +165,9 @@ public:
 
   bool areCoupled(unsigned int ivar, unsigned int jvar);
 
-  std::vector<std::pair<MooseVariable *, MooseVariable *>> & couplingEntries(THREAD_ID tid);
-  std::vector<std::pair<MooseVariable *, MooseVariable *>> & nonlocalCouplingEntries(THREAD_ID tid);
+  std::vector<std::pair<MooseVariableFE *, MooseVariableFE *>> & couplingEntries(THREAD_ID tid);
+  std::vector<std::pair<MooseVariableFE *, MooseVariableFE *>> &
+  nonlocalCouplingEntries(THREAD_ID tid);
 
   /**
    * Check for converence of the nonlinear solution
@@ -218,7 +219,11 @@ public:
                                                               const PetscInt maxits);
 
   virtual bool hasVariable(const std::string & var_name) override;
-  virtual MooseVariable & getVariable(THREAD_ID tid, const std::string & var_name) override;
+  virtual MooseVariableFE & getVariable(THREAD_ID tid, const std::string & var_name) override;
+  virtual MooseVariable & getStandardVariable(THREAD_ID tid, const std::string & var_name) override;
+  virtual VectorMooseVariable & getVectorVariable(THREAD_ID tid,
+                                                  const std::string & var_name) override;
+
   virtual bool hasScalarVariable(const std::string & var_name) override;
   virtual MooseVariableScalar & getScalarVariable(THREAD_ID tid,
                                                   const std::string & var_name) override;
@@ -230,7 +235,7 @@ public:
    *
    * @param tid The thread id
    */
-  virtual void setActiveElementalMooseVariables(const std::set<MooseVariable *> & moose_vars,
+  virtual void setActiveElementalMooseVariables(const std::set<MooseVariableFE *> & moose_vars,
                                                 THREAD_ID tid) override;
 
   /**
@@ -238,7 +243,7 @@ public:
    *
    * @param tid The thread id
    */
-  virtual const std::set<MooseVariable *> &
+  virtual const std::set<MooseVariableFE *> &
   getActiveElementalMooseVariables(THREAD_ID tid) override;
 
   /**
@@ -249,9 +254,9 @@ public:
   virtual bool hasActiveElementalMooseVariables(THREAD_ID tid) override;
 
   /**
-   * Clear the active elemental MooseVariable.  If there are no active variables then they will all
-   * be reinited.
-   * Call this after finishing the computation that was using a restricted set of MooseVariables
+   * Clear the active elemental MooseVariableFE.  If there are no active variables then they will
+   * all be reinited.
+   * Call this after finishing the computation that was using a restricted set of MooseVariableFEs
    *
    * @param tid The thread id
    */
@@ -315,9 +320,9 @@ public:
    */
   void checkNonlocalCoupling();
   void checkUserObjectJacobianRequirement(THREAD_ID tid);
-  void setVariableAllDoFMap(const std::vector<MooseVariable *> moose_vars);
+  void setVariableAllDoFMap(const std::vector<MooseVariableFE *> moose_vars);
 
-  const std::vector<MooseVariable *> & getUserObjectJacobianVariables(THREAD_ID tid) const
+  const std::vector<MooseVariableFE *> & getUserObjectJacobianVariables(THREAD_ID tid) const
   {
     return _uo_jacobian_moose_vars[tid];
   }
@@ -387,13 +392,6 @@ public:
   virtual void newAssemblyArray(NonlinearSystemBase & nl);
   virtual void deleteAssemblyArray();
   virtual void initNullSpaceVectors(const InputParameters & parameters, NonlinearSystemBase & nl);
-
-  /**
-   * Whether or not this problem should utilize FE shape function caching.
-   *
-   * @param fe_cache True for using the cache false for not.
-   */
-  virtual void useFECache(bool fe_cache) override;
 
   virtual void init() override;
   virtual void solve() override;
@@ -1302,6 +1300,8 @@ public:
   std::vector<VariableSecond> _second_zero;
   std::vector<VariablePhiSecond> _second_phi_zero;
   std::vector<Point> _point_zero;
+  std::vector<VectorVariableValue> _vector_zero;
+  std::vector<VectorVariableCurl> _vector_curl_zero;
   ///@}
 
   /**
@@ -1380,7 +1380,7 @@ protected:
   MooseObjectWarehouse<KernelBase> _nonlocal_kernels;
 
   /// nonlocal integrated_bcs
-  MooseObjectWarehouse<IntegratedBC> _nonlocal_integrated_bcs;
+  MooseObjectWarehouse<IntegratedBCBase> _nonlocal_integrated_bcs;
 
   ///@{
   /// Initial condition storage
@@ -1532,7 +1532,7 @@ protected:
   bool _has_nonlocal_coupling;
   bool _calculate_jacobian_in_uo;
 
-  std::vector<std::vector<MooseVariable *>> _uo_jacobian_moose_vars;
+  std::vector<std::vector<MooseVariableFE *>> _uo_jacobian_moose_vars;
 
   SolverParams _solver_params;
 

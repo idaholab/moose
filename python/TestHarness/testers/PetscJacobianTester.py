@@ -10,15 +10,31 @@
 from RunApp import RunApp
 import re
 import math
+from enum import EnumMeta, IntEnum
+
+class DefaultEnumMeta(EnumMeta):
+    default = object()
+
+    def __call__(cls, value=default, *args, **kwargs):
+        if value is DefaultEnumMeta.default:
+            # Assume the first enum is default
+            return next(iter(cls))
+        return super(DefaultEnumMeta, cls).__call__(value, *args, **kwargs) # PY2
+
+class JacobianEnum(IntEnum):
+    __metaclass__ = DefaultEnumMeta  # PY2 with enum34
+    user = 0
+    const_positive = 1
+    const_negative = 2
 
 class PetscJacobianTester(RunApp):
-
     @staticmethod
     def validParams():
         params = RunApp.validParams()
         params.addParam('ratio_tol', 1e-8, "Relative tolerance to compare the ration against.")
         params.addParam('difference_tol', 1e-8, "Relative tolerance to compare the difference against.")
-
+        params.addParam('state', JacobianEnum(), "The state for which we want to compare "
+                                                 "against the finite-differenced Jacobian.")
         return params
 
     def checkRunnable(self, options):
@@ -61,7 +77,19 @@ class PetscJacobianTester(RunApp):
             return False
 
     def processResults(self, moose_dir, options, output):
-        m = re.search("Norm of matrix ratio (\S+?),? difference (\S+) \(user-defined state\)", output, re.MULTILINE | re.DOTALL);
+        if int(self.specs['state']) == JacobianEnum.user:
+            m = re.search("Norm of matrix ratio (\S+?),? difference (\S+) \(user-defined state\)",
+                          output, re.MULTILINE | re.DOTALL);
+        elif int(self.specs['state']) == JacobianEnum.const_positive:
+            m = re.search("Norm of matrix ratio (\S+?),? difference (\S+) \(constant state 1\.0\)",
+                          output, re.MULTILINE | re.DOTALL);
+        elif int(self.specs['state']) == JacobianEnum.const_negative:
+            m = re.search("Norm of matrix ratio (\S+?),? difference (\S+) \(constant state -1\.0\)",
+                          output, re.MULTILINE | re.DOTALL);
+        else:
+            self.setStatus("state must be either 'user=0, const_positive=1, or const_negative=2'", self.bucket_fail)
+            return output
+
         if m:
             if self.__compare(self.__strToFloat(m.group(1)), self.specs['ratio_tol']) and \
                self.__compare(self.__strToFloat(m.group(2)), self.specs['difference_tol']):
