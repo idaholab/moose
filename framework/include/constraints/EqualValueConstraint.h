@@ -10,7 +10,7 @@
 #ifndef EQUALVALUECONSTRAINT_H
 #define EQUALVALUECONSTRAINT_H
 
-#include "FaceFaceConstraint.h"
+#include "MortarConstraint.h"
 
 class EqualValueConstraint;
 
@@ -21,7 +21,7 @@ InputParameters validParams<EqualValueConstraint>();
  * Constrain the value of a variable to be the same on both sides of an
  * interface.
  */
-class EqualValueConstraint : public FaceFaceConstraint
+class EqualValueConstraint : public MortarConstraint
 {
 public:
   EqualValueConstraint(const InputParameters & parameters);

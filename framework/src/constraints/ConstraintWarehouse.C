@@ -11,7 +11,7 @@
 
 // MOOSE includes
 #include "ElemElemConstraint.h"
-#include "FaceFaceConstraint.h"
+#include "MortarConstraint.h"
 #include "MooseVariable.h"
 #include "NodalConstraint.h"
 #include "NodeFaceConstraint.h"
@@ -26,7 +26,7 @@ ConstraintWarehouse::addObject(std::shared_ptr<Constraint> object, THREAD_ID /*t
 
   // Cast the the possible Contraint types
   std::shared_ptr<NodeFaceConstraint> nfc = std::dynamic_pointer_cast<NodeFaceConstraint>(object);
-  std::shared_ptr<FaceFaceConstraint> ffc = std::dynamic_pointer_cast<FaceFaceConstraint>(object);
+  std::shared_ptr<MortarConstraint> ffc = std::dynamic_pointer_cast<MortarConstraint>(object);
   std::shared_ptr<NodalConstraint> nc = std::dynamic_pointer_cast<NodalConstraint>(object);
   std::shared_ptr<ElemElemConstraint> ec = std::dynamic_pointer_cast<ElemElemConstraint>(object);
 
@@ -44,11 +44,11 @@ ConstraintWarehouse::addObject(std::shared_ptr<Constraint> object, THREAD_ID /*t
       _node_face_constraints[slave].addObject(nfc);
   }
 
-  // FaceFaceConstraint
+  // MortarConstraint
   else if (ffc)
   {
     const std::string & interface = ffc->getParam<std::string>("interface");
-    _face_face_constraints[interface].addObject(ffc);
+    _mortar_constraints[interface].addObject(ffc);
   }
 
   // ElemElemConstraint
@@ -95,13 +95,13 @@ ConstraintWarehouse::getActiveNodeFaceConstraints(BoundaryID boundary_id, bool d
   return it->second.getActiveObjects();
 }
 
-const std::vector<std::shared_ptr<FaceFaceConstraint>> &
-ConstraintWarehouse::getActiveFaceFaceConstraints(const std::string & interface) const
+const std::vector<std::shared_ptr<MortarConstraint>> &
+ConstraintWarehouse::getActiveMortarConstraints(const std::string & interface) const
 {
-  std::map<std::string, MooseObjectWarehouse<FaceFaceConstraint>>::const_iterator it =
-      _face_face_constraints.find(interface);
-  mooseAssert(it != _face_face_constraints.end(),
-              "Unable to locate storage for FaceFaceConstraint objects for the given interface: "
+  std::map<std::string, MooseObjectWarehouse<MortarConstraint>>::const_iterator it =
+      _mortar_constraints.find(interface);
+  mooseAssert(it != _mortar_constraints.end(),
+              "Unable to locate storage for MortarConstraint objects for the given interface: "
                   << interface);
   return it->second.getActiveObjects();
 }
@@ -124,11 +124,11 @@ ConstraintWarehouse::hasActiveNodalConstraints() const
 }
 
 bool
-ConstraintWarehouse::hasActiveFaceFaceConstraints(const std::string & interface) const
+ConstraintWarehouse::hasActiveMortarConstraints(const std::string & interface) const
 {
-  std::map<std::string, MooseObjectWarehouse<FaceFaceConstraint>>::const_iterator it =
-      _face_face_constraints.find(interface);
-  return (it != _face_face_constraints.end() && it->second.hasActiveObjects());
+  std::map<std::string, MooseObjectWarehouse<MortarConstraint>>::const_iterator it =
+      _mortar_constraints.find(interface);
+  return (it != _mortar_constraints.end() && it->second.hasActiveObjects());
 }
 
 bool
@@ -183,7 +183,7 @@ ConstraintWarehouse::subdomainsCovered(std::set<SubdomainID> & subdomains_covere
                                        std::set<std::string> & unique_variables,
                                        THREAD_ID /*tid=0*/) const
 {
-  for (const auto & it : _face_face_constraints)
+  for (const auto & it : _mortar_constraints)
   {
     const auto & objects = it.second.getActiveObjects();
     for (const auto & ffc : objects)
