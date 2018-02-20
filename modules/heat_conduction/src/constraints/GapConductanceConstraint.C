@@ -13,7 +13,7 @@ template <>
 InputParameters
 validParams<GapConductanceConstraint>()
 {
-  InputParameters params = validParams<FaceFaceConstraint>();
+  InputParameters params = validParams<MortarConstraint>();
   params.addClassDescription(
       "Computes the residual and Jacobian contributions for the 'Lagrange Multiplier' "
       "implementation of the thermal contact problem. For more information, see the "
@@ -24,7 +24,7 @@ validParams<GapConductanceConstraint>()
 }
 
 GapConductanceConstraint::GapConductanceConstraint(const InputParameters & parameters)
-  : FaceFaceConstraint(parameters), _k(getParam<Real>("k"))
+  : MortarConstraint(parameters), _k(getParam<Real>("k"))
 {
 }
 

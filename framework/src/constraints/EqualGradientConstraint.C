@@ -15,13 +15,13 @@ template <>
 InputParameters
 validParams<EqualGradientConstraint>()
 {
-  InputParameters params = validParams<FaceFaceConstraint>();
+  InputParameters params = validParams<MortarConstraint>();
   params.addRequiredParam<unsigned int>("component", "Gradient component to constrain");
   return params;
 }
 
 EqualGradientConstraint::EqualGradientConstraint(const InputParameters & parameters)
-  : FaceFaceConstraint(parameters), _component(getParam<unsigned int>("component"))
+  : MortarConstraint(parameters), _component(getParam<unsigned int>("component"))
 {
 }
 

@@ -10,7 +10,7 @@
 #ifndef EQUALGRADIENTCONSTRAINT_H
 #define EQUALGRADIENTCONSTRAINT_H
 
-#include "FaceFaceConstraint.h"
+#include "MortarConstraint.h"
 
 class EqualGradientConstraint;
 
@@ -21,7 +21,7 @@ InputParameters validParams<EqualGradientConstraint>();
  * Constrain a specified component of the gradient of a variable to be the same
  * on both sides of an interface.
  */
-class EqualGradientConstraint : public FaceFaceConstraint
+class EqualGradientConstraint : public MortarConstraint
 {
 public:
   EqualGradientConstraint(const InputParameters & parameters);
