@@ -1,0 +1,66 @@
+reset
+graphics pause
+#
+# ------------------------------------------ 
+# information for boundary outer
+# ------------------------------------------ 
+#
+# vertices for boundary outer
+create vertex   0.0000000E+00 -1.0000000E+03  0.0000000E+00
+create vertex   1.1500000E+03 -1.0000000E+03  0.0000000E+00
+create vertex   1.1500000E+03  2.0000000E+03  0.0000000E+00
+create vertex   0.0000000E+00  2.0000000E+03  0.0000000E+00
+# curves for boundary outer
+create curve            1           2
+curve            1 rename "outer1"
+create curve            2           3
+curve            2 rename "outer2"
+create curve            3           4
+curve            3 rename "outer3"
+create curve            4           1
+curve            4 rename "outer4"
+# seeding for boundary outer
+# surface for boundary outer
+create surface curve      outer1 outer2 outer3 outer4
+surface            1 rename "outer"
+surface outer scheme pave
+#
+# ------------------------------------------ 
+# information for boundary panel
+# ------------------------------------------ 
+#
+# vertices for boundary panel
+create vertex   0.0000000E+00  0.0000000E+00  0.0000000E+00
+create vertex   1.5000000E+02  0.0000000E+00  0.0000000E+00
+create vertex   1.5000000E+02  1.0000000E+03  0.0000000E+00
+create vertex   0.0000000E+00  1.0000000E+03  0.0000000E+00
+# curves for boundary panel
+create curve            9          10
+curve            5 rename "panel1"
+create curve           10          11
+curve            6 rename "panel2"
+create curve           11          12
+curve            7 rename "panel3"
+create curve           12           9
+curve            8 rename "panel4"
+# seeding for boundary panel
+curve panel1 scheme pinpoint location 30.00000 60.00000 90.00000 120.0000
+curve panel2 scheme pinpoint location 58.82353 117.6471 176.4706 235.2941 294.1176 352.9412 411.7647 470.5882 529.4117 588.2353 647.0588 705.8823 764.7059 823.5294 882.3529 941.1765
+curve panel3 scheme pinpoint location 30.00000 60.00000 90.00000 120.0000
+curve panel4 scheme pinpoint location 58.82355 117.6471 176.4706 235.2941 294.1177 352.9412 411.7647 470.5883 529.4117 588.2353 647.0588 705.8823 764.7059 823.5294 882.3530 941.1765
+# surface for boundary panel
+create surface curve      panel1 panel2 panel3 panel4
+surface            2 rename "panel"
+surface panel scheme map
+#
+# ------------------------------------------ 
+# final things
+# ------------------------------------------ 
+#
+imprint all
+merge all
+surface            3 scheme pave
+display
+ mesh surface 2 to            2
+ mesh surface            3
+ block 1 surface all

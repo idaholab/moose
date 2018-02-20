@@ -1,0 +1,47 @@
+[Tests]
+  [./coarse]
+    type = CSVDiff
+    input = 'coarse.i'
+    csvdiff = 'coarse_csv_xmass_0011.csv'
+    abs_zero = 1E-7
+  [../]
+  [./coarse_3D]
+    type = CSVDiff
+    heavy = true
+    input = 'coarse_3D.i'
+    csvdiff = 'coarse_3D_csv_xmass_0021.csv'
+    abs_zero = 1E-7
+  [../]
+  [./fine_steady]
+    type = Exodiff
+    heavy = true
+    input = 'fine_steady.i'
+    exodiff = 'fine_steady_out.e'
+    abs_zero = 1E-7
+  [../]
+  [./fine_transient]
+    type = CSVDiff
+    heavy = true
+    input = 'fine_transient.i'
+    csvdiff = 'fine_transient_out_xmass_0001.csv fine_transient_out_xmass_0002.csv'
+    cli_args = 'Executioner/end_time=0.02'
+    prereq = fine_steady
+    abs_zero = 1E-7
+  [../]
+  [./fine_thick_fracture_steady]
+    type = Exodiff
+    heavy = true
+    input = 'fine_thick_fracture_steady.i'
+    exodiff = 'fine_thick_fracture_steady_out.e'
+    abs_zero = 1E-7
+  [../]
+  [./fine_thick_fracture_transient]
+    type = CSVDiff
+    heavy = true
+    input = 'fine_thick_fracture_transient.i'
+    csvdiff = 'fine_thick_fracture_transient_out_xmass_0001.csv fine_thick_fracture_transient_out_xmass_0002.csv'
+    cli_args = 'Executioner/end_time=0.02'
+    prereq = fine_thick_fracture_steady
+    abs_zero = 1E-7
+  [../]
+[]
