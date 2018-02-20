@@ -88,6 +88,12 @@ class Scheduler(MooseObject):
         # DAG Lock when processing the DAG
         self.dag_lock = threading.Lock()
 
+        # Queue Lock when processing thread pool states
+        self.queue_lock = threading.Lock()
+
+        # Job Count Lock when processing job_queue_count
+        self.job_queue_lock = threading.Lock()
+
         # Workers in use (single job might request multiple slots)
         self.slots_in_use = 0
 
@@ -107,12 +113,16 @@ class Scheduler(MooseObject):
         closes the status pool to prevent further statuses from printing to the
         screen.
         """
-        self.run_pool.close()
-        self.status_pool.close()
+        with self.queue_lock:
+            self.error_state = True
+            self.status_pool.close()
+            self.run_pool.close()
 
         for tester_data in self.tester_datas:
             tester_data.killProcess()
-        self.job_queue_count = 0
+
+        with self.job_queue_lock:
+            self.job_queue_count = 0
 
     def schedulerError(self):
         """
@@ -300,17 +310,18 @@ class Scheduler(MooseObject):
         """
         # If any threads caused an exception, we have already closed down the queue and need to
         # not schedule any more jobs
-        if self.run_pool._state or self.error_state:
+        if self.error_state:
             return
 
         # Instance the DAG class so we can share it amongst all the Job containers
         job_dag = dag.DAG()
 
+        runnable_jobs = set([])
         non_runnable_jobs = set([])
         name_to_job_container = {}
 
         # Increment our simple queue count with the number of testers the scheduler received
-        with self.slot_lock:
+        with self.job_queue_lock:
             self.job_queue_count += len(testers)
 
         # Create a local dictionary of tester names to job containers. Add this dictionary to a
@@ -339,34 +350,27 @@ class Scheduler(MooseObject):
             non_runnable_jobs.update(additionally_skipped)
             job_dag.delete_node_if_exists(job)
 
-        # Get a count of all the items still in the DAG. These will be the jobs that ultimately are queued
-        runnable_jobs = job_dag.size()
-
         # Make sure we didn't drop a tester somehow
-        if len(non_runnable_jobs) + runnable_jobs != len(testers):
+        if len(non_runnable_jobs) + job_dag.size() != len(testers):
             raise SchedulerError('Runnable tests in addition to Skipped tests does not match total scheduled test count!')
 
         # Inform derived schedulers of the jobs we are skipping immediately
         self.reportSkipped(non_runnable_jobs)
 
-        # Assign a status thread to begin work on any skipped/failed jobs
-        self.queueJobs(status_jobs=non_runnable_jobs)
-
         # Allow derived schedulers to modify the dag before we launch
         # TODO: We don't like this, and this will change when we move to better DAG handling.
-        if runnable_jobs:
+        if job_dag.size():
             self.preLaunch(job_dag)
 
         # Build our list of runnable jobs and set the tester's status to queued
-        job_list = []
-        if runnable_jobs:
-            job_list = job_dag.ind_nodes()
-            for job_container in job_list:
-                tester = job_container.getTester()
+        if job_dag.size():
+            runnable_jobs = job_dag.ind_nodes()
+            for job in runnable_jobs:
+                tester = job.getTester()
                 tester.setStatus('QUEUED', tester.bucket_pending)
 
-        # Queue runnable jobs
-        self.queueJobs(run_jobs=job_list)
+        # Queue generated jobs
+        self.queueJobs(run_jobs=runnable_jobs, status_jobs=non_runnable_jobs)
 
     def waitFinish(self):
         """
@@ -374,25 +378,32 @@ class Scheduler(MooseObject):
         the thread pools and perform a join. Once the last thread exits, we return from this
         method.
 
-        There are two thread pools in play; the Tester pool which is performing all the tests,
+        There are two thread pools in play; the Run pool which is executing all the testers,
         and the Status pool which is handling the printing of tester statuses. Because the
         Status pool will always have the last item needing to be 'printed', we close and join
-        the Tester pool first, and then we do the same to the Status pool.
+        the Run pool first, and then, we close the Status pool.
         """
-        while self.job_queue_count > 0:
-            # One of our children died :( so exit uncleanly
-            if self.error_state:
-                self.killRemaining()
-                return
-            sleep(0.5)
+        try:
+            while self.job_queue_count > 0:
+                # One of our children died :( so exit uncleanly (do not join)
+                if self.error_state:
+                    self.killRemaining()
+                    return
+                sleep(0.5)
 
-        self.run_pool.close()
-        self.run_pool.join()
-        self.status_pool.close()
-        self.status_pool.join()
+            self.run_pool.close()
+            self.run_pool.join()
+            self.status_pool.close()
+            self.status_pool.join()
 
-        # Notify derived schedulers we are exiting
-        self.notifyFinishedSchedulers()
+            # Notify derived schedulers we are exiting
+            self.notifyFinishedSchedulers()
+
+        except KeyboardInterrupt:
+            # This method is called by the main thread, and therefor we must print the appropriate
+            # keyboard interrupt response.
+            self.killRemaining()
+            print('\nExiting due to keyboard interrupt...')
 
     def handleLongRunningJobs(self, job_container):
         """ Handle jobs that have not reported in alotted time """
@@ -498,18 +509,27 @@ class Scheduler(MooseObject):
            .queueJobs(run_jobs=[job_container_list]
 
         """
-        for job_container in run_jobs:
-            if not self.error_state or not self.error_state:
-                self.run_pool.apply_async(self.runWorker, (job_container,))
 
-        for job_container in status_jobs:
-            if not self.status_pool._state or not self.error_state:
-                self.status_pool.apply_async(self.statusWorker, (job_container,))
+        with self.queue_lock:
+            if (not self.error_state
+                and not self.status_pool._state
+                and not self.run_pool._state):
+
+                for job in status_jobs:
+                    self.status_pool.apply_async(self.statusWorker, (job,))
+
+                for job in run_jobs:
+                    self.run_pool.apply_async(self.runWorker, (job,))
 
     def statusWorker(self, job_container):
         """ Method the status_pool calls when an available thread becomes ready """
         # Wrap entire statusWorker thread inside a try/exception to catch thread errors
         try:
+            # There exists the possibility that jobs are still trying to empty out of the
+            # status_pool (like this job), and we wish to no longer print any statuses.
+            if self.error_state:
+                return
+
             tester = job_container.getTester()
 
             # If the job is still running for a long period of time and we have not reported
@@ -536,21 +556,33 @@ class Scheduler(MooseObject):
                 # All other statuses are sent unmolested
                 self.harness.handleTestStatus(job_container)
 
-            # Decrement the job queue count now that this job has finished
-            if tester.isFinished():
-                with self.slot_lock:
-                    self.job_queue_count -= 1
-
             # Record current reported time only if it is an activity the user will see
             if not tester.isSilent() or not tester.isDeleted():
                 self.last_reported = clock()
 
+            # Do job_queue_count decrement last. If zero, the thread pools may close prematurely,
+            # preventing the last job status from printing (see waitFinish method).
+            if tester.isFinished():
+                with self.job_queue_lock:
+                    self.job_queue_count -= 1
+
         except Exception:
             self.error_state = True
-            print('statusWorker Exception: %s' % (traceback.format_exc()))
+            print('Test: %s, statusWorker Exception: %s' % (tester.getTestName(), traceback.format_exc()))
+
+        except KeyboardInterrupt:
+            # Just set the error state. The base class will catch the KeyboardInterrupt, and will
+            # print the appropriate message.
+            self.error_state = True
+            pass
 
     def runWorker(self, job_container):
         """ Method the run_pool calls when an available thread becomes ready """
+        # There exists the possibility that jobs are still trying to empty out of the
+        # run_pool (like this job), and we wish to no longer run any jobs.
+        if self.error_state:
+            return
+
         # Wrap the entire runWorker thread inside a try/exception to catch thread errors
         try:
             tester = job_container.getTester()
@@ -620,3 +652,9 @@ class Scheduler(MooseObject):
         except Exception:
             self.error_state = True
             print('runWorker Exception: %s' % (traceback.format_exc()))
+
+        except KeyboardInterrupt:
+            # Just set the error state. The base class will catch the KeyboardInterrupt, and will
+            # print the appropriate message.
+            self.error_state = True
+            pass
