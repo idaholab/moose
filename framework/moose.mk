@@ -263,7 +263,7 @@ all:: exodiff
 
 # Target-specific Variable Values (See GNU-make manual)
 exodiff: app_INCLUDES := $(exodiff_includes)
-exodiff: libmesh_CXXFLAGS := -std=gnu++11 -O2 -felide-constructors -Wno-parentheses-equality
+exodiff: libmesh_CXXFLAGS := -std=gnu++11 -O2 -felide-constructors -w
 exodiff: $(exodiff_APP)
 $(exodiff_APP): $(exodiff_objects)
 	@echo "Linking Executable "$@"..."
