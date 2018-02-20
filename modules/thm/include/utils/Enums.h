@@ -41,29 +41,6 @@ MooseEnum getMooseEnum(const std::string & default_key, const std::map<std::stri
 
 // ----------------------------------------------------------------------------
 
-/// The type of an equation
-enum EFlowEquationType
-{
-  CONTINUITY = 0,
-  MOMENTUM = 1,
-  ENERGY = 2,
-  VOIDFRACTION = 3,
-};
-
-const std::map<std::string, EFlowEquationType> flow_equation_type_to_enum{
-    {"CONTINUITY", CONTINUITY},
-    {"MOMENTUM", MOMENTUM},
-    {"ENERGY", ENERGY},
-    {"VOIDFRACTION", VOIDFRACTION}};
-
-template <>
-EFlowEquationType stringToEnum<EFlowEquationType>(const std::string & s);
-
-// get MooseEnum with equation type
-MooseEnum getFlowEquationType(const std::string & eqn_name = "");
-
-// ----------------------------------------------------------------------------
-
 enum EFlowRegimeNamesType
 {
   FR_DISPERSEDBUBBLE, ///< Weight of DispersedBubble Correlations  PreCHF
