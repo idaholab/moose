@@ -18,6 +18,8 @@ protected:
 
 private:
   Real _coefficient;
+
+  Function & _func;
 };
 
 #endif // COEFFDIFFUSION_H
