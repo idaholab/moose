@@ -138,13 +138,15 @@ The Darcy flux is calculated using
 
 ### AuxKernels
 The following `AuxKernels` are used to calculate secondary species and mineral
-concentrations.
+concentrations, as well as total primary species concentration and solution pH.
 
 - [`AqueousEquilibriumRxnAux`](/chemical_reactions/AqueousEquilibriumRxnAux.md) The concentration
-of secondary species $C_i$ for equilibrium reaction
+of secondary species $C_i$ for the $i^{\mathrm{th}}$ equilibrium reaction
 - [`KineticDisPreRateAux`](/chemical_reactions/KineticDisPreRateAux.md) The kinetic rate $I_m$
-of kinetic reaction
+of the $m^{\mathrm{th}}$ kinetic reaction
 - [`KineticDisPreConcAux`](/chemical_reactions/KineticDisPreConcAux.md) The concentration of mineral species
+- [`TotalConcentrationAux`](/chemical_reactions/TotalConcentrationAux.md) The total concentration of a given primary species
+- [`PHAux`](/chemical_reactions/PHAux.md) The pH of the solution
 
 ### Material properties
 The `Kernels` above require several material properties to be defined using the
