@@ -201,7 +201,8 @@ ComputeMultipleInelasticStress::updateQpState(RankTwoTensor & elastic_strain_inc
              << "iteration output for ComputeMultipleInelasticStress solve:"
              << " time=" << _t << " int_pt=" << _qp << std::endl;
   }
-  Real l2norm_delta_stress, first_l2norm_delta_stress;
+  Real l2norm_delta_stress;
+  Real first_l2norm_delta_stress = 1.0;
   unsigned int counter = 0;
 
   std::vector<RankTwoTensor> inelastic_strain_increment;
@@ -271,9 +272,8 @@ ComputeMultipleInelasticStress::updateQpState(RankTwoTensor & elastic_strain_inc
     // now check convergence in the stress:
     // once the change in stress is within tolerance after each recompute material
     // consider the stress to be converged
-    RankTwoTensor delta_stress(stress_max - stress_min);
-    l2norm_delta_stress = delta_stress.L2norm();
-    if (counter == 0)
+    l2norm_delta_stress = (stress_max - stress_min).L2norm();
+    if (counter == 0 && l2norm_delta_stress > 0.0)
       first_l2norm_delta_stress = l2norm_delta_stress;
 
     if (_output_iteration_info == true)
