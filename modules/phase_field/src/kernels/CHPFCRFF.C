@@ -66,7 +66,7 @@ CHPFCRFF::computeQpResidual()
   for (unsigned int i = 0; i < _num_L; ++i)
     sum_grad_L += (*_grad_vals[i])[_qp] * 0.5;
 
-  Real frac;
+  Real frac = 0.0;
   Real ln_expansion = 0.0;
 
   switch (_log_approach)
@@ -132,7 +132,8 @@ CHPFCRFF::computeQpJacobian()
   for (unsigned int i = 0; i < _num_L; ++i)
     sum_grad_L += (*_grad_vals[i])[_qp] * 0.5;
 
-  Real frac, dfrac;
+  Real frac = 0.0;
+  Real dfrac = 0.0;
   Real ln_expansion = 0.0;
 
   switch (_log_approach)

@@ -37,11 +37,10 @@ TEST_F(Water97FluidPropertiesTest, inRegion)
   EXPECT_EQ(_fp->inRegion(30.0e6, 2000), 5);
 
   // Test out of range errors
-  unsigned int region;
   try
   {
     // Trigger invalid pressure error
-    region = _fp->inRegion(101.0e6, 300.0);
+    _fp->inRegion(101.0e6, 300.0);
     // TODO: this test fails with the following line that should be uncommented:
     // FAIL() << "missing expected error";
   }
@@ -55,7 +54,7 @@ TEST_F(Water97FluidPropertiesTest, inRegion)
   try
   {
     // Trigger another invalid pressure error
-    region = _fp->inRegion(51.0e6, 1200.0);
+    _fp->inRegion(51.0e6, 1200.0);
     FAIL() << "missing expected error";
   }
   catch (const std::exception & e)
@@ -68,7 +67,7 @@ TEST_F(Water97FluidPropertiesTest, inRegion)
   try
   {
     // Trigger invalid temperature error
-    region = _fp->inRegion(5.0e6, 2001.0);
+    _fp->inRegion(5.0e6, 2001.0);
     // TODO: this test fails with the following line that should be uncommented:
     // FAIL() << "missing expected error";
   }
