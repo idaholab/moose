@@ -1,4 +1,4 @@
-// Copyright(C) 2008-2017 National Technology & Engineering Solutions
+// Copyright(C) 2009-2017 National Technology & Engineering Solutions
 // of Sandia, LLC (NTESS).  Under the terms of Contract DE-NA0003525 with
 // NTESS, the U.S. Government retains certain rights in this software.
 //
@@ -13,7 +13,6 @@
 //       copyright notice, this list of conditions and the following
 //       disclaimer in the documentation and/or other materials provided
 //       with the distribution.
-//
 //     * Neither the name of NTESS nor the names of its
 //       contributors may be used to endorse or promote products derived
 //       from this software without specific prior written permission.
@@ -30,10 +29,57 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
-#ifndef SEACAS_Version_h
-#define SEACAS_Version_h
+// (c) Tristan Brindle. Code samples are MIT licensed.
+// http://tcbrindle.github.io/posts/a-quicker-study-on-tokenising/
 
-static std::string version("2.90");
-static std::string verdate("2018-02-15");
+#include "SL_tokenize.h"
+#include <algorithm>
 
-#endif // SEACAS_Version_h
+std::vector<std::string>
+SLIB::tokenize(const std::string & str, const std::string & separators, bool allow_empty_token)
+{
+  std::vector<std::string> tokens;
+  auto first = std::begin(str);
+  while (first != std::end(str))
+  {
+    const auto second =
+        std::find_first_of(first, std::end(str), std::begin(separators), std::end(separators));
+    if (first != second || allow_empty_token)
+    {
+      tokens.emplace_back(first, second);
+    }
+    if (second == std::end(str))
+    {
+      break;
+    }
+    first = std::next(second);
+  }
+  return tokens;
+}
+
+#if 0
+#include <iostream>
+
+typedef std::vector<std::string> TokenList;
+
+int main()
+{
+  char s[128];
+  while(!std::cin.eof()) {
+    std::cout << "Enter a string: ";
+    std::cin.getline(s,128);
+    std::string input_line(s);
+    if (input_line != "quit") {
+      std::vector<std::string> tokens = tokenize(input_line, ": \t\r\v\n");
+      cout << "There were " << tokens.size() << " tokens in the line\n";
+      TokenList::const_iterator I = tokens.begin();
+      while (I != tokens.end()) {
+	std::cout << "'" << *I++ << "'\t";
+      }
+      std::cout << '\n';
+    } else {
+      exit(0);
+    }
+  }
+}
+#endif

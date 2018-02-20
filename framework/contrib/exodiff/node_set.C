@@ -1,6 +1,6 @@
-// Copyright(C) 2008 Sandia Corporation.  Under the terms of Contract
-// DE-AC04-94AL85000 with Sandia Corporation, the U.S. Government retains
-// certain rights in this software
+// Copyright(C) 2008-2017 National Technology & Engineering Solutions
+// of Sandia, LLC (NTESS).  Under the terms of Contract DE-NA0003525 with
+// NTESS, the U.S. Government retains certain rights in this software.
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -14,7 +14,7 @@
 //       disclaimer in the documentation and/or other materials provided
 //       with the distribution.
 //
-//     * Neither the name of Sandia Corporation nor the names of its
+//     * Neither the name of NTESS nor the names of its
 //       contributors may be used to endorse or promote products derived
 //       from this software without specific prior written permission.
 //
@@ -31,177 +31,215 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 
-#include <iostream>
-#include <cstdlib>
-
-#include "smart_assert.h"
+#include "ED_SystemInterface.h" // for ERROR, SystemInterface, etc
+#include "libmesh/exodusII.h"   // for ex_set, etc
+#include "iqsort.h"             // for index_qsort
 #include "node_set.h"
-#include "libmesh/exodusII.h"
-#include "iqsort.h"
-#include "ED_SystemInterface.h"
-
-
-using namespace std;
+#include "smart_assert.h" // for SMART_ASSERT
+#include <cstdlib>        // for exit
+#include <iostream>       // for operator<<, ostream, etc
+#include <vector>         // for vector
 
 template <typename INT>
 Node_Set<INT>::Node_Set()
-  : Exo_Entity(),
-    num_dist_factors(0),
-    nodes(NULL),
-    nodeIndex(NULL),
-    dist_factors(NULL)
-{ }
+  : Exo_Entity(), num_dist_factors(0), nodes(nullptr), nodeIndex(nullptr), dist_factors(nullptr)
+{
+}
 
 template <typename INT>
 Node_Set<INT>::Node_Set(int file_id, size_t id)
   : Exo_Entity(file_id, id),
     num_dist_factors(0),
-    nodes(NULL),
-    nodeIndex(NULL),
-    dist_factors(NULL)
-{ }
+    nodes(nullptr),
+    nodeIndex(nullptr),
+    dist_factors(nullptr)
+{
+}
 
 template <typename INT>
 Node_Set<INT>::Node_Set(int file_id, size_t id, size_t nnodes, size_t ndfs)
   : Exo_Entity(file_id, id, nnodes),
     num_dist_factors(ndfs),
-    nodes(NULL),
-    nodeIndex(NULL),
-    dist_factors(NULL)
-{}
+    nodes(nullptr),
+    nodeIndex(nullptr),
+    dist_factors(nullptr)
+{
+}
 
 template <typename INT>
 Node_Set<INT>::~Node_Set()
 {
-  delete [] nodes;
-  delete [] nodeIndex;
-  delete [] dist_factors;
+  delete[] nodes;
+  delete[] nodeIndex;
+  delete[] dist_factors;
 }
 
 template <typename INT>
-EXOTYPE Node_Set<INT>::exodus_type() const {return EX_NODE_SET;}
+EXOTYPE
+Node_Set<INT>::exodus_type() const
+{
+  return EX_NODE_SET;
+}
 
 template <typename INT>
-const INT* Node_Set<INT>::Nodes() const
+const INT *
+Node_Set<INT>::Nodes() const
 {
   // See if already loaded...
-  if (!nodes) {
+  if (!nodes)
+  {
     load_nodes();
   }
   return nodes;
 }
 
 template <typename INT>
-size_t Node_Set<INT>::Node_Id(size_t position) const
+size_t
+Node_Set<INT>::Node_Id(size_t position) const
 {
-  if (numEntity <= 0) {
+  if (numEntity <= 0)
+  {
     return 0;
-  } else {
-    // See if already loaded...
-    if (!nodes) {
-      load_nodes();
-    }
-    SMART_ASSERT(position < numEntity);
-    return nodes[nodeIndex[position]];
   }
+
+  // See if already loaded...
+  if (!nodes)
+  {
+    load_nodes();
+  }
+  SMART_ASSERT(position < numEntity);
+  return nodes[nodeIndex[position]];
 }
 
 template <typename INT>
-size_t Node_Set<INT>::Node_Index(size_t position) const
+size_t
+Node_Set<INT>::Node_Index(size_t position) const
 {
-  if (numEntity <= 0) {
+  if (numEntity <= 0)
+  {
     return 0;
-  } else {
-    // See if already loaded...
-    if (!nodes) {
-      load_nodes();
-    }
-    SMART_ASSERT(position < numEntity);
-    SMART_ASSERT(nodeIndex != NULL);
-    return nodeIndex[position];
   }
+
+  // See if already loaded...
+  if (!nodes)
+  {
+    load_nodes();
+  }
+  SMART_ASSERT(position < numEntity);
+  SMART_ASSERT(nodeIndex != nullptr);
+  return nodeIndex[position];
 }
 
 template <typename INT>
-void Node_Set<INT>::apply_map(const INT *node_map)
+void
+Node_Set<INT>::apply_map(const INT * node_map)
 {
-  SMART_ASSERT(node_map != NULL);
-  if (nodes != NULL) {
-    delete [] nodes;     nodes = NULL;
-    delete [] nodeIndex; nodeIndex = NULL;
+  SMART_ASSERT(node_map != nullptr);
+  if (nodes != nullptr)
+  {
+    delete[] nodes;
+    nodes = nullptr;
+    delete[] nodeIndex;
+    nodeIndex = nullptr;
   }
   load_nodes(node_map);
 }
 
 template <typename INT>
-void Node_Set<INT>::load_nodes(const INT *node_map) const
+void
+Node_Set<INT>::load_nodes(const INT * node_map) const
 {
-  if (numEntity > 0) {
-    nodes = new INT[numEntity];  SMART_ASSERT(nodes != 0);
-    nodeIndex = new INT[numEntity];  SMART_ASSERT(nodeIndex != 0);
-    ex_get_set(fileId, EX_NODE_SET, id_, nodes, 0);
+  if (numEntity > 0)
+  {
+    nodes = new INT[numEntity];
+    SMART_ASSERT(nodes != nullptr);
+    nodeIndex = new INT[numEntity];
+    SMART_ASSERT(nodeIndex != nullptr);
+    ex_get_set(fileId, EX_NODE_SET, id_, nodes, nullptr);
 
-    if (node_map != NULL) {
-      for (size_t i=0; i < numEntity; i++) {
-	nodes[i] = 1+node_map[nodes[i]-1];
+    if (node_map != nullptr)
+    {
+      for (size_t i = 0; i < numEntity; i++)
+      {
+        nodes[i] = 1 + node_map[nodes[i] - 1];
       }
     }
 
-    for (size_t i=0; i < numEntity; i++) {
+    for (size_t i = 0; i < numEntity; i++)
+    {
       nodeIndex[i] = i;
     }
     if (interface.nsmap_flag)
+    {
       index_qsort(nodes, nodeIndex, numEntity);
+    }
   }
 }
 
 template <typename INT>
-const double* Node_Set<INT>::Distribution_Factors() const
+const double *
+Node_Set<INT>::Distribution_Factors() const
 {
-  if (!dist_factors && num_dist_factors > 0) {
-    dist_factors = new double[num_dist_factors];  SMART_ASSERT(dist_factors != 0);
+  if ((dist_factors == nullptr) && num_dist_factors > 0)
+  {
+    dist_factors = new double[num_dist_factors];
+    SMART_ASSERT(dist_factors != nullptr);
     ex_get_set_dist_fact(fileId, EX_NODE_SET, id_, dist_factors);
   }
   return dist_factors;
 }
 
 template <typename INT>
-void Node_Set<INT>::Display(std::ostream& s)
+void
+Node_Set<INT>::Free_Distribution_Factors() const
 {
-  Check_State();
-  s << "Node_Set<INT>::Display_Stats()  Exodus node set ID = " << id_              << std::endl
-    << "                              number of nodes = " << numEntity        << std::endl
-    << "               number of distribution factors = " << num_dist_factors << std::endl
-    << "                          number of variables = " << var_count()      << std::endl;
+  if (dist_factors)
+  {
+    delete[] dist_factors;
+    dist_factors = nullptr;
+  }
 }
 
 template <typename INT>
-int Node_Set<INT>::Check_State() const
+void
+Node_Set<INT>::Display(std::ostream & s)
+{
+  Check_State();
+  s << "Node_Set<INT>::Display_Stats()  Exodus node set ID = " << id_ << '\n'
+    << "                              number of nodes = " << numEntity << '\n'
+    << "               number of distribution factors = " << num_dist_factors << '\n'
+    << "                          number of variables = " << var_count() << '\n';
+}
+
+template <typename INT>
+int
+Node_Set<INT>::Check_State() const
 {
   SMART_ASSERT(id_ >= EX_INVALID_ID);
-  SMART_ASSERT( !( id_ == EX_INVALID_ID && numEntity > 0 ) );
-  SMART_ASSERT( !( id_ == EX_INVALID_ID && num_dist_factors > 0 ) );
-  SMART_ASSERT( !( id_ == EX_INVALID_ID && nodes ) );
-  SMART_ASSERT( !( id_ == EX_INVALID_ID && dist_factors ) );
+  SMART_ASSERT(!(id_ == EX_INVALID_ID && numEntity > 0));
+  SMART_ASSERT(!(id_ == EX_INVALID_ID && num_dist_factors > 0));
+  SMART_ASSERT(!(id_ == EX_INVALID_ID && nodes));
+  SMART_ASSERT(!(id_ == EX_INVALID_ID && dist_factors));
 
   return 1;
 }
 
 template <typename INT>
-void Node_Set<INT>::entity_load_params()
+void
+Node_Set<INT>::entity_load_params()
 {
   std::vector<ex_set> sets(1);
   sets[0].id = id_;
   sets[0].type = EX_NODE_SET;
-  sets[0].entry_list = NULL;
-  sets[0].extra_list = NULL;
-  sets[0].distribution_factor_list = NULL;
+  sets[0].entry_list = nullptr;
+  sets[0].extra_list = nullptr;
+  sets[0].distribution_factor_list = nullptr;
 
   int err = ex_get_sets(fileId, 1, &sets[0]);
 
-  if (err < 0) {
-    std::cout << "ERROR: Failed to get nodeset parameters for nodeset " << id_
-	      << ". !  Aborting..." << std::endl;
+  if (err < 0)
+  {
+    ERROR("Failed to get nodeset parameters for nodeset " << id_ << ". !  Aborting...\n");
     exit(1);
   }
 

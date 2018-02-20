@@ -1,5 +1,5 @@
 /*
- * Copyright(C) 2008-2017 National Technology & Engineering Solutions
+ * Copyright(C) 2009-2017 National Technology & Engineering Solutions
  * of Sandia, LLC (NTESS).  Under the terms of Contract DE-NA0003525 with
  * NTESS, the U.S. Government retains certain rights in this software.
  *
@@ -14,7 +14,6 @@
  *       copyright notice, this list of conditions and the following
  *       disclaimer in the documentation and/or other materials provided
  *       with the distribution.
- *
  *     * Neither the name of NTESS nor the names of its
  *       contributors may be used to endorse or promote products derived
  *       from this software without specific prior written permission.
@@ -32,22 +31,27 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  */
-#ifndef EXODIFF_UTIL_H
-#define EXODIFF_UTIL_H
+#ifndef TOKENIZE_H
+#define TOKENIZE_H
 
-#include "terminal_color.h"
+#include <string>
+#include <vector>
 
-#if __cplusplus > 199711L
-#define TOPTR(x) x.data()
-#else
-#define TOPTR(x) (x.empty() ? nullptr : &x[0])
-#endif
-
-char **get_name_array(int size, int length);
-void free_name_array(char ** names, int size);
-
-void ERR_OUT(std::ostringstream & buf);
-void DIFF_OUT(std::ostringstream & buf, trmclr::Style color = trmclr::red);
-void DIFF_OUT(const char * buf, trmclr::Style color = trmclr::red);
+/**
+ * Take the 'str' argument and split it using the list of characters
+ * in separators as separators. Return tokens as a vector of strings.
+ */
+namespace SLIB
+{
+/**
+ * If `allow_empty_token` is false, then multiple sequential delimiters will not produce an empty
+ * token,
+ * If it is true, then there is a token between each and every delimiter even if empty.
+ * If | is delimiter, then when false: a|||b is two tokens `a` and `b`.
+ * When true, a|||b is 4 tokens "a" "" "" "b"
+ */
+std::vector<std::string>
+tokenize(const std::string & str, const std::string & separators, bool allow_empty_token = false);
+} // namespace SLIB
 
 #endif
