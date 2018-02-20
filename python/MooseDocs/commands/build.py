@@ -173,14 +173,13 @@ def build(config_file=None, site_dir=None, num_threads=None, no_livereload=False
     # Check submodule for large_media
     if os.path.realpath(MooseDocs.ROOT_DIR) == os.path.realpath(MooseDocs.MOOSE_DIR):
         status = common.submodule_status()
-        large_media = os.path.realpath(os.path.join(MooseDocs.ROOT_DIR, 'docs', 'content',
-                                                    'media', 'large_media'))
+        large_media = os.path.realpath(os.path.join(MooseDocs.ROOT_DIR, 'large_media'))
         for submodule, status in status.iteritems():
             if ((os.path.realpath(os.path.join(MooseDocs.MOOSE_DIR, submodule)) == large_media)
                     and (status == '-')):
                 if init:
                     subprocess.call(['git', 'submodule', 'update', '--init',
-                                     'docs/content/media/large_media'], cwd=MooseDocs.MOOSE_DIR)
+                                     'large_media'], cwd=MooseDocs.MOOSE_DIR)
                 else:
                     LOG.warning("The 'large_media' submodule for storing images above 1MB is not "
                                 "initialized, thus some images will not be visible within the "
