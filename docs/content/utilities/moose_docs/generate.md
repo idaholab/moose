@@ -81,10 +81,5 @@ and design documents. The file paths do not need to be complete, but must be uni
 1. **issues**: A list of [github issues](https://github.com/idaholab/moose/issues/) that are
 associated with the test and items being tested.
 
-For example, the following tests specification for the [BoxMarker](/BoxMarker.md) object lists
-these items.
-
-!listing test/tests/markers/box_marker/tests
-
 The complete list of all the requirements and associated test for MOOSE is provided in the
 [Software Requirement Specification](/moose_srs.md).
