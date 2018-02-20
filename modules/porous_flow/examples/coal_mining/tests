@@ -1,0 +1,10 @@
+[Tests]
+  [./coarse]
+    type = CSVDiff
+    heavy = true
+    input = 'coarse_with_fluid.i'
+    csvdiff = 'coarse_with_fluid_out.csv'
+    cli_args = 'Executioner/end_time=0.014706'
+    superlu = true
+  [../]
+[]

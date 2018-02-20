@@ -83,6 +83,14 @@ to make sure that only valid fluid components or phases are used.
 !!! note:
     A `PorousFlowDictator` **must** be present in all simulations!
 
+## Examples
+
+We are currently in the process of building a few key examples of PorousFlow.
+
+- [Flow through an explicitly fractured medium and flow through a fracture network](/porous_flow/flow_through_fractured_media.md)
+- [Cold CO$_{2}$ injection into an elastic reservoir - a THM problem](/porous_flow/co2_example.md)
+- [Underground mining - an HM problem](/porous_flow/coal_mining.md)
+
 ## Additional MOOSE objects
 
 The PorousFlow module also includes a number of additional MOOSE objects to aid
