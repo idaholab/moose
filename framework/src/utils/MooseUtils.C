@@ -254,6 +254,15 @@ hasExtension(const std::string & filename, std::string ext, bool strip_exodus_ex
     return false;
 }
 
+std::string
+stripExtension(const std::string & s)
+{
+  auto pos = s.rfind(".");
+  if (pos != std::string::npos)
+    return s.substr(0, pos);
+  return s;
+}
+
 std::pair<std::string, std::string>
 splitFileName(std::string full_file)
 {

@@ -40,6 +40,7 @@
 #include "libmesh/exodusII_io.h"
 #include "libmesh/mesh_refinement.h"
 #include "libmesh/string_to_enum.h"
+#include "libmesh/checkpoint_io.h"
 
 // System include for dynamic library methods
 #include <dlfcn.h>
@@ -130,6 +131,19 @@ validParams<MooseApp>()
       "--distributed-mesh",
       false,
       "The libMesh Mesh underlying MooseMesh should always be a DistributedMesh");
+
+  params.addCommandLineParam<std::string>(
+      "split_mesh",
+      "--split-mesh [splits]",
+      "comma-separated list of numbers of chunks to split the mesh into");
+
+  params.addCommandLineParam<std::string>("split_file",
+                                          "--split-file [filename]",
+                                          "",
+                                          "optional name of split mesh file(s) to write/read");
+
+  params.addCommandLineParam<bool>(
+      "use_split", "--use-split", false, "use split distributed mesh files");
 
   params.addCommandLineParam<unsigned int>(
       "refinements",
@@ -511,6 +525,12 @@ MooseApp::setupOptions()
       _syntax.addDependency("mesh_only", "setup_mesh_complete");
       _action_warehouse.setFinalTask("mesh_only");
     }
+    else if (isParamValid("split_mesh"))
+    {
+      _syntax.registerTaskName("split_mesh", true);
+      _syntax.addDependency("split_mesh", "setup_mesh_complete");
+      _action_warehouse.setFinalTask("split_mesh");
+    }
     _action_warehouse.build();
   }
   else
@@ -547,17 +567,17 @@ MooseApp::runInputFile()
 
   _action_warehouse.executeAllActions();
 
-  if (isParamValid("mesh_only"))
+  if (isParamValid("mesh_only") || isParamValid("split_mesh"))
     _ready_to_exit = true;
   else if (getParam<bool>("list_constructed_objects"))
   {
     // TODO: ask multiapps for their constructed objects
+    _ready_to_exit = true;
     std::vector<std::string> obj_list = _factory.getConstructedObjects();
     Moose::out << "**START OBJECT DATA**\n";
     for (const auto & name : obj_list)
       Moose::out << name << "\n";
     Moose::out << "**END OBJECT DATA**\n" << std::endl;
-    _ready_to_exit = true;
   }
 }
 

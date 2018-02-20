@@ -812,6 +812,12 @@ public:
    */
   virtual std::unique_ptr<PointLocatorBase> getPointLocator() const;
 
+  /**
+   * Returns the name of the mesh file read to produce this mesh if any or an empty string
+   * otherwise.
+   */
+  virtual std::string getFileName() const { return ""; }
+
 protected:
   /// Deprecated (DO NOT USE)
   std::vector<std::unique_ptr<GhostingFunctor>> _ghosting_functors;
@@ -965,9 +971,6 @@ protected:
 
   /// The patch update strategy
   Moose::PatchUpdateType _patch_update_strategy;
-
-  /// file_name iff this mesh was read from a file
-  std::string _file_name;
 
   /// Vector of all the Nodes in the mesh for determining when to add a new point
   std::vector<Node *> _node_map;
