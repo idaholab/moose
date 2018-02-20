@@ -1,6 +1,6 @@
-// Copyright(C) 2008 Sandia Corporation.  Under the terms of Contract
-// DE-AC04-94AL85000 with Sandia Corporation, the U.S. Government retains
-// certain rights in this software
+// Copyright(C) 2008-2017 National Technology & Engineering Solutions
+// of Sandia, LLC (NTESS).  Under the terms of Contract DE-NA0003525 with
+// NTESS, the U.S. Government retains certain rights in this software.
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -14,7 +14,7 @@
 //       disclaimer in the documentation and/or other materials provided
 //       with the distribution.
 //
-//     * Neither the name of Sandia Corporation nor the names of its
+//     * Neither the name of NTESS nor the names of its
 //       contributors may be used to endorse or promote products derived
 //       from this software without specific prior written permission.
 //
@@ -35,49 +35,50 @@
 #define NODE_SET_H
 
 #include "exo_entity.h"
-#include <iostream>
+#include "side_set.h" // for Side_Set
 
 template <typename INT>
 class ExoII_Read;
 
 template <typename INT>
-class Node_Set: public Exo_Entity {
+class Node_Set : public Exo_Entity
+{
 public:
-
   Node_Set();
-  Node_Set(int file_id, size_t exo_set_id);
-  Node_Set(int file_id, size_t exo_set_id, size_t num_nodes, size_t num_dist_factors = 0);
- ~Node_Set();
+  Node_Set(int file_id, size_t id);
+  Node_Set(int file_id, size_t id, size_t nnodes, size_t ndfs = 0);
+  ~Node_Set() override;
 
-  void apply_map(const INT *node_map);
-  const INT*    Nodes() const;
+  void apply_map(const INT * node_map);
+  const INT * Nodes() const;
   size_t Node_Id(size_t position) const;
   size_t Node_Index(size_t position) const;
 
-  const double* Distribution_Factors() const;
+  const double * Distribution_Factors() const;
+  void Free_Distribution_Factors() const;
 
-  void Display(std::ostream& = std::cout);
+  void Display(std::ostream & /*s*/ = std::cout);
   int  Check_State() const;
 
 private:
-  Node_Set(const Node_Set&);  // Not written.
-  const Node_Set& operator=(const Node_Set&);  // Not written.
+  Node_Set(const Node_Set &);                   // Not written.
+  const Node_Set & operator=(const Node_Set &); // Not written.
 
-  void entity_load_params();
+  void entity_load_params() override;
 
-  EXOTYPE exodus_type() const;
-  const char* label() const {return "Nodeset";}
+  EXOTYPE exodus_type() const override;
+  const char * label() const override { return "Nodeset"; }
+  const char * short_label() const override { return "nodeset"; }
 
-  void load_nodes(const INT *node_map = NULL) const;
+  void load_nodes(const INT * node_map = nullptr) const;
 
   size_t num_dist_factors;
 
-  mutable INT*    nodes;          // Array.
-  mutable INT*    nodeIndex;     // An index array which orders the nodelist in sorted order.
-  mutable double* dist_factors; // Array.
+  mutable INT * nodes;           // Array.
+  mutable INT * nodeIndex;       // An index array which orders the nodelist in sorted order.
+  mutable double * dist_factors; // Array.
 
   friend class ExoII_Read<INT>;
 };
-
 
 #endif

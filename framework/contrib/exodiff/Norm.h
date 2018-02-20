@@ -30,67 +30,92 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
+#ifndef ED_NORM_H
+#define ED_NORM_H
 
-#ifndef EXO_BLOCK_H
-#define EXO_BLOCK_H
-
-#include "exo_entity.h"
-#include <iostream>
-
-#include <string>
-
-template <typename INT>
-class ExoII_Read;
-
-template <typename INT>
-class Exo_Block : public Exo_Entity
+#include <cmath>
+class Norm
 {
 public:
-  Exo_Block();
-  Exo_Block(int file_id, size_t exo_block_id);
-  Exo_Block(int file_id, size_t id, const char * type, size_t num_e, size_t num_npe);
-  ~Exo_Block() override;
+  Norm()
+    : l1_norm_1(0.0), l1_norm_2(0.0), l1_norm_d(0.0), l2_norm_1(0.0), l2_norm_2(0.0), l2_norm_d(0.0)
+  {
+  }
 
-  std::string Load_Connectivity();
-  std::string Free_Connectivity();
+  double diff(int order) const
+  {
+    if (order == 1)
+    {
+      return l1_norm_d;
+    }
+    if (order == 2)
+    {
+      return std::sqrt(l2_norm_d);
+    }
+    else
+    {
+      return 0.0;
+    }
+  }
 
-  // Access functions:
+  double left(int order) const
+  {
+    if (order == 1)
+    {
+      return l1_norm_1;
+    }
+    if (order == 2)
+    {
+      return std::sqrt(l2_norm_1);
+    }
+    else
+    {
+      return 0.0;
+    }
+  }
 
-  const std::string & Elmt_Type() const { return elmt_type; }
-  size_t Num_Nodes_per_Elmt() const { return num_nodes_per_elmt; }
+  double right(int order) const
+  {
+    if (order == 1)
+    {
+      return l1_norm_2;
+    }
+    if (order == 2)
+    {
+      return std::sqrt(l2_norm_2);
+    }
+    else
+    {
+      return 0.0;
+    }
+  }
 
-  // Block description access functions:
+  double relative(int order) const
+  {
+    double l = left(order);
+    double r = right(order);
+    double lr_max = l > r ? l : r;
+    return diff(order) / lr_max;
+  }
 
-  const INT * Connectivity() const { return conn; }  // 1-offset connectivity
-  const INT * Connectivity(size_t elmt_index) const; // 1-offset connectivity
+  void add_value(double val1, double val2)
+  {
+    l1_norm_d += std::fabs(val1 - val2);
+    l1_norm_1 += std::fabs(val1);
+    l1_norm_2 += std::fabs(val2);
 
-  std::string Give_Connectivity(size_t & num_e,    // Moves connectivity matrix
-                                size_t & npe,      // to conn pointer and sets
-                                INT *& recv_conn); // its own to null.
+    l2_norm_d += (val1 - val2) * (val1 - val2);
+    l2_norm_1 += val1 * val1;
+    l2_norm_2 += val2 * val2;
+  }
 
-  // Misc:
+  double l1_norm_1;
+  double l1_norm_2;
+  double l1_norm_d;
 
-  int Check_State() const;
-
-  void Display_Stats(std::ostream & /*s*/ = std::cout) const;
-  void Display(std::ostream & /*s*/ = std::cout) const;
-
-private:
-  Exo_Block(const Exo_Block &);                   // Not written.
-  const Exo_Block & operator=(const Exo_Block &); // Not written.
-
-  void entity_load_params() override;
-
-  EXOTYPE exodus_type() const override;
-  const char * label() const override { return "Element Block"; }
-  const char * short_label() const override { return "block"; }
-
-  std::string elmt_type;
-  int         num_nodes_per_elmt;
-
-  INT * conn; // Array; holds a matrix, num_elmts by num_nodes_per_elmt.
-
-  friend class ExoII_Read<INT>;
+  double l2_norm_1;
+  double l2_norm_2;
+  double l2_norm_d;
 };
 
 #endif
