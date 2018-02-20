@@ -17,11 +17,6 @@ validParams<SolidWall>()
 SolidWall::SolidWall(const InputParameters & params) : PipeBoundary(params) {}
 
 void
-SolidWall::addVariables()
-{
-}
-
-void
 SolidWall::addMooseObjects1Phase()
 {
   {

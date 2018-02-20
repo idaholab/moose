@@ -17,7 +17,6 @@ class SolidWall : public PipeBoundary
 public:
   SolidWall(const InputParameters & params);
 
-  virtual void addVariables() override;
   virtual void addMooseObjects() override;
 
 protected:
