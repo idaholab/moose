@@ -29,16 +29,15 @@ RobinReflectionBC::RobinReflectionBC(const InputParameters & parameters)
 Real
 RobinReflectionBC::computeQpResidual()
 {
+
+  Real _coefficient = _k * std::cos(_theta * 2 * libMesh::pi / 360.);
+
   if (_num_type.compare("real") == 0)
   {
-    return -_test[_i][_qp] * (_k * std::cos(_theta * libMesh::pi / 180.) * _coupled_val[_qp] +
-                              2 * _k * std::cos(_theta * libMesh::pi / 180.) *
-                                  std::sin(_k * _L * std::cos(_theta * libMesh::pi / 180.)));
+    return -_test[_i][_qp] * _coefficient * (_coupled_val[_qp] - 2 * std::sin(_k * _L * std::cos(_theta * 2 * libMesh::pi / 360.)));
   }
   else //if (_num_type.compare("imaginary") == 0)
   {
-    return _test[_i][_qp] * (_k * std::cos(_theta * libMesh::pi / 180.) * _coupled_val[_qp] -
-                             2 * _k * std::cos(_theta * libMesh::pi / 180.) *
-                                 std::cos(_k * _L * std::cos(_theta * libMesh::pi / 180.)));
+    return -_test[_i][_qp] * _coefficient * (2 * std::cos(_k * _L * std::cos(_theta * 2 * libMesh::pi / 360.)) - _coupled_val[_qp]);
   }
 }
