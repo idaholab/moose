@@ -3,14 +3,14 @@
     # Use the debug block to print variable residual norms
     type = 'RunApp'
     input = 'show_var_residual_norms.i'
-    expect_out = "\|residual\|_2 of individual variables:"
+    expect_out = "\|residual\|_2 of individual variables:.*\|residual\|_2 of individual variables:.*\|residual\|_2 of individual variables:"
   [../]
 
   [./show_var_residual_norms_debug]
     # Use the debug block to print variable residual norms
     type = 'RunApp'
     input = 'show_var_residual_norms_debug.i'
-    expect_out = "\|residual\|_2 of individual variables:"
+    expect_out = "\|residual\|_2 of individual variables:.*\|residual\|_2 of individual variables:.*\|residual\|_2 of individual variables:"
   [../]
 
   [./show_material_props]

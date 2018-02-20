@@ -78,7 +78,6 @@
   nl_abs_tol = 1e-10
   nl_rel_step_tol = 1e-10
   nl_rel_tol = 1e-10
-  ss_check_tol = 1e-10
 
   dt = 0.05
   dtmin = 0.05

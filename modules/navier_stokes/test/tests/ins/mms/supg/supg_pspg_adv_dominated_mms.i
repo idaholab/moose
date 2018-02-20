@@ -172,8 +172,8 @@ rho=2.5
   # To run to steady-state, set num-steps to some large number (1000000 for example)
   type = Transient
   num_steps = 10
-  trans_ss_check = true
-  ss_check_tol = 1e-10
+  steady_state_detection = true
+  steady_state_tolerance = 1e-10
   [./TimeStepper]
     dt = .1
     type = IterationAdaptiveDT
