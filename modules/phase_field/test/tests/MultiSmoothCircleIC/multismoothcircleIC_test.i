@@ -1,9 +1,9 @@
 [Mesh]
   type = GeneratedMesh
   dim = 3
-  nx = 22
-  ny = 22
-  nz = 22
+  nx = 15
+  ny = 15
+  nz = 15
   xmin = 0
   xmax = 100
   ymin = 0
@@ -27,7 +27,7 @@
     invalue = 1.0
     outvalue = 0.0001
     bubspac = 30.0 # This spacing is from bubble center to bubble center
-    numbub = 10
+    numbub = 6
     radius = 10.0
     int_width = 12.0
     radius_variation = 0.2
