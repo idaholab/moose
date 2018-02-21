@@ -143,6 +143,7 @@ class ExecuteOptionsPlugin(QWidget, Plugin):
         self._recent_exe_menu = None
         self._recent_working_menu = None
         self._recent_args_menu = None
+        self._force_reload_action = None
         self._exe_watcher = QFileSystemWatcher()
         self._exe_watcher.fileChanged.connect(self.setExecutablePath)
 
@@ -182,6 +183,8 @@ class ExecuteOptionsPlugin(QWidget, Plugin):
             if files:
                 self._exe_watcher.removePaths(files)
             self._exe_watcher.addPath(app_path)
+        if self._force_reload_action:
+            self._force_reload_action.setEnabled(app_info.valid())
         self._updateRecentExe(app_path, not app_info.valid())
         self._loading_dialog.hide()
 
@@ -309,6 +312,9 @@ class ExecuteOptionsPlugin(QWidget, Plugin):
         self._recent_working_menu.updateRecentlyOpened()
         self._recent_exe_menu.updateRecentlyOpened()
 
+    def _reload_syntax(self):
+        self.setExecutablePath(self.exe_line.text())
+
     def addToMenu(self, menu):
         """
         Adds menu entries specific to the Arguments to the menubar.
@@ -337,6 +343,8 @@ class ExecuteOptionsPlugin(QWidget, Plugin):
                 20,
                 )
         self._recent_args_menu.selected.connect(self._setExecutableArgs)
+        self._force_reload_action = WidgetUtils.addAction(menu, "Reload executable syntax", self._reload_syntax)
+        self._force_reload_action.setEnabled(False)
 
     def clearRecentlyUsed(self):
         if self._recent_args_menu:
