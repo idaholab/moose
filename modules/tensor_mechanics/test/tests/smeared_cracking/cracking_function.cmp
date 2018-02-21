@@ -5,7 +5,7 @@ TIME STEPS relative 1.e-6 floor 0.0     # min:               0 @ t1 max:        
 GLOBAL VARIABLES relative 1.e-6 floor 1.e-10
 	elem_crack_flags_x  # min:               0 @ t1	max:               1 @ t2
 	elem_strain_xx      # min:               0 @ t1	max:    0.0029955077 @ t41
-	elem_stress_xx      # min:               0 @ t1	max:       999750.08 @ t21
+	elem_stress_xx      floor 1.e-9 # min:               0 @ t1	max:       999750.08 @ t21
 
 NODAL VARIABLES relative 1.e-6 floor 1.e-10
 	disp_x  floor 1.e-9 # min:               0 @ t1,n1	max:           0.001 @ t41,n7
