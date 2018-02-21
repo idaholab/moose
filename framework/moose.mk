@@ -39,7 +39,8 @@ pyhit_LIB       := $(FRAMEWORK_DIR)/../python/hit.so
 
 hit $(pyhit_LIB): $(pyhit_srcfiles)
 	@echo "Building and linking "$@"..."
-	@bash -c '(cd "$(hit_DIR)" && $(libmesh_CXX) -std=c++11 -w -fPIC -lstdc++ -shared -L`python-config --prefix`/lib `python-config --includes` `python-config --ldflags` $^ -o $(pyhit_LIB))'
+	@bash -c 'cd "$(hit_DIR)" && python setup.py build_ext --inplace `if test "$$VS11COMNTOOLS"; then echo "--compiler=msvc"; fi`'
+	@bash -c 'mv $(hit_DIR)/hit.so $(pyhit_LIB) || mv $(hit_DIR)/hit.pyd $(FRAMEWORK_DIR)/../python/'
 
 #
 # gtest
