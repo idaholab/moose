@@ -1,5 +1,7 @@
 CXX ?= g++
 
+PYTHONCOMPILERFLAG ?= `if test "$$VS11COMNTOOLS"; then echo "--compiler=msvc"; fi`
+
 hit: main.cc parse.cc lex.cc lex.h parse.h
 	$(CXX) -std=c++11 -g $(CXXFLAGS) $< parse.cc lex.cc -o $@
 
