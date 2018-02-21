@@ -9,8 +9,8 @@
     type = Exodiff
     input = 'coupled_scalar_vector.i'
     exodiff = 'coupled_scalar_vector_out.e'
-    abs_zero = 1e-8
-    rel_err = 1e-5
+    abs_zero = 3e-8
+    rel_err = 3e-5
   [../]
   [./lagrange_vec]
     type = Exodiff
