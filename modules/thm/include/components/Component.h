@@ -38,6 +38,11 @@ public:
   Component * parent() { return _parent; }
 
   /**
+   * Returns a list of names of components that this component depends upon
+   */
+  const std::vector<std::string> & getDependencies() const { return _dependencies; }
+
+  /**
    * Wrapper function for \c init() that marks the function as being called
    */
   void executeInit();
@@ -163,6 +168,13 @@ protected:
    * Performs mesh setup such as creating mesh or naming mesh sets
    */
   virtual void setupMesh() {}
+
+  /**
+   * Adds a component name to the list of dependencies
+   *
+   * @param[in] dependency   name of component to add to list of dependencies
+   */
+  void addDependency(const std::string & dependency);
 
   /**
    * Makes a function controllable if it is constant
@@ -385,6 +397,9 @@ private:
 
   /// Component setup status
   EComponentSetupStatus _component_setup_status;
+
+  /// List of names of components that this component depends upon
+  std::vector<std::string> _dependencies;
 };
 
 template <typename T>

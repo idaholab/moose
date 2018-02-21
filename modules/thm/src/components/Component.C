@@ -175,6 +175,12 @@ Component::checkSetupStatus(const EComponentSetupStatus & status) const
 }
 
 void
+Component::addDependency(const std::string & dependency)
+{
+  _dependencies.push_back(dependency);
+}
+
+void
 Component::makeFunctionControllableIfConstant(const FunctionName & fn_name,
                                               const std::string & control_name,
                                               const std::string & param)
