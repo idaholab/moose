@@ -28,6 +28,8 @@ private:
 
   Real _k;
 
+  Function & _inverseMuR;
+
 };
 
 #endif // ROBINREFLECTIONBC_H
