@@ -14,13 +14,15 @@
 #include "Damper.h"
 #include "MaterialPropertyInterface.h"
 #include "MooseTypes.h"
-#include "MooseVariableBase.h"
 
 // Forward Declarations
 class ElementDamper;
 class SubProblem;
 class SystemBase;
-class MooseVariable;
+template <typename>
+class MooseVariableField;
+typedef MooseVariableField<Real> MooseVariable;
+typedef MooseVariableField<VectorValue<Real>> VectorMooseVariable;
 class Assembly;
 
 template <>

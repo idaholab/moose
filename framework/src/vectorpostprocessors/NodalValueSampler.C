@@ -10,7 +10,7 @@
 #include "NodalValueSampler.h"
 
 // MOOSE includes
-#include "MooseVariable.h"
+#include "MooseVariableField.h"
 
 // C++ includes
 #include <numeric>
@@ -61,7 +61,7 @@ NodalValueSampler::execute()
   // separate NodalValueSampler objects to get their values.
   for (unsigned int i = 0; i < _coupled_moose_vars.size(); i++)
   {
-    const VariableValue & nodal_solution = _coupled_moose_vars[i]->nodalSln();
+    const VariableValue & nodal_solution = _coupled_moose_vars[i]->nodalValue();
 
     if (nodal_solution.size() > 0)
     {

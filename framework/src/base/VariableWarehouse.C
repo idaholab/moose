@@ -8,7 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "VariableWarehouse.h"
-#include "MooseVariable.h"
+#include "MooseVariableField.h"
 #include "MooseVariableScalar.h"
 #include "MooseTypes.h"
 
@@ -27,34 +27,45 @@ VariableWarehouse::add(const std::string & var_name, MooseVariableBase * var)
   _var_name[var_name] = var;
   _all_objects.push_back(var);
 
-  if (dynamic_cast<MooseVariable *>(var) != NULL)
+  if (auto * tmp_var = dynamic_cast<MooseVariableFE *>(var))
   {
-    _vars.push_back(dynamic_cast<MooseVariable *>(var));
+    _vars.push_back(tmp_var);
+    if (auto * tmp_var = dynamic_cast<MooseVariable *>(var))
+    {
+      _regular_vars_by_number[tmp_var->number()] = tmp_var;
+      _regular_vars_by_name[var_name] = tmp_var;
+    }
+    else if (auto * tmp_var = dynamic_cast<VectorMooseVariable *>(var))
+    {
+      _vector_vars_by_number[tmp_var->number()] = tmp_var;
+      _vector_vars_by_name[var_name] = tmp_var;
+    }
+    else
+      mooseError("Unknown variable class passed into VariableWarehouse. Attempt to hack us?");
   }
-  else if (dynamic_cast<MooseVariableScalar *>(var) != NULL)
-  {
-    _scalar_vars.push_back(dynamic_cast<MooseVariableScalar *>(var));
-  }
+  else if (auto * tmp_var = dynamic_cast<MooseVariableScalar *>(var))
+    _scalar_vars.push_back(tmp_var);
   else
     mooseError("Unknown variable class passed into VariableWarehouse. Attempt to hack us?");
 }
 
 void
-VariableWarehouse::addBoundaryVar(BoundaryID bnd, MooseVariable * var)
+VariableWarehouse::addBoundaryVar(BoundaryID bnd, MooseVariableFE * var)
 {
   _boundary_vars[bnd].insert(var);
 }
 
 void
-VariableWarehouse::addBoundaryVar(const std::set<BoundaryID> & boundary_ids, MooseVariable * var)
+VariableWarehouse::addBoundaryVar(const std::set<BoundaryID> & boundary_ids, MooseVariableFE * var)
 {
   for (const auto & bid : boundary_ids)
     addBoundaryVar(bid, var);
 }
 
 void
-VariableWarehouse::addBoundaryVars(const std::set<BoundaryID> & boundary_ids,
-                                   const std::map<std::string, std::vector<MooseVariable *>> & vars)
+VariableWarehouse::addBoundaryVars(
+    const std::set<BoundaryID> & boundary_ids,
+    const std::map<std::string, std::vector<MooseVariableFE *>> & vars)
 {
   for (const auto & bid : boundary_ids)
     for (const auto & it : vars)
@@ -83,8 +94,8 @@ VariableWarehouse::names() const
   return _names;
 }
 
-const std::vector<MooseVariable *> &
-VariableWarehouse::variables()
+const std::vector<MooseVariableFE *> &
+VariableWarehouse::fieldVariables()
 {
   return _vars;
 }
@@ -95,8 +106,41 @@ VariableWarehouse::scalars()
   return _scalar_vars;
 }
 
-const std::set<MooseVariable *> &
+const std::set<MooseVariableFE *> &
 VariableWarehouse::boundaryVars(BoundaryID bnd)
 {
   return _boundary_vars[bnd];
 }
+
+template <typename T>
+MooseVariableField<T> *
+VariableWarehouse::getFieldVariable(const std::string & var_name)
+{
+  return _regular_vars_by_name.at(var_name);
+}
+
+template <typename T>
+MooseVariableField<T> *
+VariableWarehouse::getFieldVariable(unsigned int var_number)
+{
+  return _regular_vars_by_number.at(var_number);
+}
+
+template <>
+MooseVariableField<RealVectorValue> *
+VariableWarehouse::getFieldVariable<RealVectorValue>(const std::string & var_name)
+{
+  return _vector_vars_by_name.at(var_name);
+}
+
+template <>
+MooseVariableField<RealVectorValue> *
+VariableWarehouse::getFieldVariable<RealVectorValue>(unsigned int var_number)
+{
+  return _vector_vars_by_number.at(var_number);
+}
+
+template MooseVariableField<Real> *
+VariableWarehouse::getFieldVariable<Real>(const std::string & var_name);
+template MooseVariableField<Real> *
+VariableWarehouse::getFieldVariable<Real>(unsigned int var_number);

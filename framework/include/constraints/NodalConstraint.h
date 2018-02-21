@@ -21,7 +21,8 @@ template <>
 InputParameters validParams<NodalConstraint>();
 
 class NodalConstraint : public Constraint,
-                        public NeighborCoupleableMooseVariableDependencyIntermediateInterface
+                        public NeighborCoupleableMooseVariableDependencyIntermediateInterface,
+                        public NeighborMooseVariableInterface<Real>
 {
 public:
   NodalConstraint(const InputParameters & parameters);

@@ -8,7 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "ChannelGradientBC.h"
-#include "MooseVariable.h"
+#include "MooseVariableField.h"
 
 template <>
 InputParameters

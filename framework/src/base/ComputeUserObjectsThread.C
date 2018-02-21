@@ -52,7 +52,7 @@ ComputeUserObjectsThread::subdomainChanged()
 {
   _fe_problem.subdomainSetup(_subdomain, _tid);
 
-  std::set<MooseVariable *> needed_moose_vars;
+  std::set<MooseVariableFE *> needed_moose_vars;
   _elemental_user_objects.updateBlockVariableDependency(_subdomain, needed_moose_vars, _tid);
   _side_user_objects.updateBoundaryVariableDependency(needed_moose_vars, _tid);
   _internal_side_user_objects.updateBlockVariableDependency(_subdomain, needed_moose_vars, _tid);
@@ -94,7 +94,7 @@ ComputeUserObjectsThread::onElement(const Elem * elem)
       _elemental_user_objects.hasActiveBlockObjects(_subdomain, _tid))
   {
     // Prepare shape functions for ShapeElementUserObjects
-    std::vector<MooseVariable *> jacobian_moose_vars =
+    std::vector<MooseVariableFE *> jacobian_moose_vars =
         _fe_problem.getUserObjectJacobianVariables(_tid);
     for (auto & jvar : jacobian_moose_vars)
     {
@@ -136,7 +136,7 @@ ComputeUserObjectsThread::onBoundary(const Elem * elem, unsigned int side, Bound
   if (_fe_problem.currentlyComputingJacobian())
   {
     // Prepare shape functions for ShapeSideUserObjects
-    std::vector<MooseVariable *> jacobian_moose_vars =
+    std::vector<MooseVariableFE *> jacobian_moose_vars =
         _fe_problem.getUserObjectJacobianVariables(_tid);
     for (auto & jvar : jacobian_moose_vars)
     {

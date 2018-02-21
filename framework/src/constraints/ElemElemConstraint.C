@@ -14,7 +14,7 @@
 #include "ElementPairInfo.h"
 #include "FEProblem.h"
 #include "MooseMesh.h"
-#include "MooseVariable.h"
+#include "MooseVariableField.h"
 
 #include "libmesh/quadrature.h"
 
@@ -30,6 +30,7 @@ validParams<ElemElemConstraint>()
 ElemElemConstraint::ElemElemConstraint(const InputParameters & parameters)
   : Constraint(parameters),
     NeighborCoupleableMooseVariableDependencyIntermediateInterface(this, false, false),
+    NeighborMooseVariableInterface<Real>(this, false),
     _fe_problem(*getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")),
     _dim(_mesh.dimension()),
 
@@ -40,14 +41,14 @@ ElemElemConstraint::ElemElemConstraint(const InputParameters & parameters)
     _u(_var.sln()),
     _grad_u(_var.gradSln()),
 
-    _phi(_assembly.phi()),
-    _grad_phi(_assembly.gradPhi()),
+    _phi(_assembly.phi(_var)),
+    _grad_phi(_assembly.gradPhi(_var)),
 
     _test(_var.phi()),
     _grad_test(_var.gradPhi()),
 
-    _phi_neighbor(_assembly.phiNeighbor()),
-    _grad_phi_neighbor(_assembly.gradPhiNeighbor()),
+    _phi_neighbor(_assembly.phiNeighbor(_var)),
+    _grad_phi_neighbor(_assembly.gradPhiNeighbor(_var)),
 
     _test_neighbor(_var.phiNeighbor()),
     _grad_test_neighbor(_var.gradPhiNeighbor()),
@@ -55,6 +56,7 @@ ElemElemConstraint::ElemElemConstraint(const InputParameters & parameters)
     _u_neighbor(_var.slnNeighbor()),
     _grad_u_neighbor(_var.gradSlnNeighbor())
 {
+  addMooseVariableDependency(&_var);
 }
 
 void

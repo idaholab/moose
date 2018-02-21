@@ -18,7 +18,7 @@ validParams<ElementL2Diff>()
 }
 
 ElementL2Diff::ElementL2Diff(const InputParameters & parameters)
-  : ElementIntegralVariablePostprocessor(parameters), _u_old(valueOld())
+  : ElementIntegralVariablePostprocessor(parameters), _u_old(coupledValueOld("variable"))
 {
 }
 

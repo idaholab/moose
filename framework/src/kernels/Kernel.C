@@ -11,11 +11,10 @@
 
 // MOOSE includes
 #include "Assembly.h"
-#include "MooseVariable.h"
+#include "MooseVariableField.h"
 #include "MooseVariableScalar.h"
-#include "Problem.h"
 #include "SubProblem.h"
-#include "SystemBase.h"
+#include "NonlinearSystem.h"
 
 #include "libmesh/threads.h"
 #include "libmesh/quadrature.h"
@@ -31,11 +30,60 @@ validParams<Kernel>()
 
 Kernel::Kernel(const InputParameters & parameters)
   : KernelBase(parameters),
+    MooseVariableInterface<Real>(this, false),
+    _var(*mooseVariable()),
+    _test(_var.phi()),
+    _grad_test(_var.gradPhi()),
+    _phi(_assembly.phi(_var)),
+    _grad_phi(_assembly.gradPhi(_var)),
     _u(_is_implicit ? _var.sln() : _var.slnOld()),
     _grad_u(_is_implicit ? _var.gradSln() : _var.gradSlnOld()),
     _u_dot(_var.uDot()),
     _du_dot_du(_var.duDotDu())
 {
+  addMooseVariableDependency(mooseVariable());
+  _save_in.resize(_save_in_strings.size());
+  _diag_save_in.resize(_diag_save_in_strings.size());
+
+  for (unsigned int i = 0; i < _save_in_strings.size(); i++)
+  {
+    MooseVariable * var = &_subproblem.getStandardVariable(_tid, _save_in_strings[i]);
+
+    if (_fe_problem.getNonlinearSystemBase().hasVariable(_save_in_strings[i]))
+      paramError("save_in", "cannot use solution variable as save-in variable");
+
+    if (var->feType() != _var.feType())
+      paramError(
+          "save_in",
+          "saved-in auxiliary variable is incompatible with the object's nonlinear variable: ",
+          moose::internal::incompatVarMsg(*var, _var));
+
+    _save_in[i] = var;
+    var->sys().addVariableToZeroOnResidual(_save_in_strings[i]);
+    addMooseVariableDependency(var);
+  }
+
+  _has_save_in = _save_in.size() > 0;
+
+  for (unsigned int i = 0; i < _diag_save_in_strings.size(); i++)
+  {
+    MooseVariable * var = &_subproblem.getStandardVariable(_tid, _diag_save_in_strings[i]);
+
+    if (_fe_problem.getNonlinearSystemBase().hasVariable(_diag_save_in_strings[i]))
+      paramError("diag_save_in", "cannot use solution variable as diag save-in variable");
+
+    if (var->feType() != _var.feType())
+      paramError(
+          "diag_save_in",
+          "saved-in auxiliary variable is incompatible with the object's nonlinear variable: ",
+          moose::internal::incompatVarMsg(*var, _var));
+
+    _diag_save_in[i] = var;
+    var->sys().addVariableToZeroOnJacobian(_diag_save_in_strings[i]);
+    addMooseVariableDependency(var);
+  }
+
+  _has_diag_save_in = _diag_save_in.size() > 0;
 }
 
 void
@@ -115,21 +163,4 @@ Kernel::computeOffDiagJacobianScalar(unsigned int jvar)
     for (_j = 0; _j < jv.order(); _j++)
       for (_qp = 0; _qp < _qrule->n_points(); _qp++)
         ke(_i, _j) += _JxW[_qp] * _coord[_qp] * computeQpOffDiagJacobian(jvar);
-}
-
-Real
-Kernel::computeQpJacobian()
-{
-  return 0;
-}
-
-Real
-Kernel::computeQpOffDiagJacobian(unsigned int /*jvar*/)
-{
-  return 0;
-}
-
-void
-Kernel::precalculateResidual()
-{
 }

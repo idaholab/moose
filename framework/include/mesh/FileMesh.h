@@ -34,7 +34,7 @@ public:
 
   // Get/Set Filename (for meshes read from a file)
   void setFileName(const std::string & file_name) { _file_name = file_name; }
-  const std::string & getFileName() const { return _file_name; }
+  virtual std::string getFileName() const override { return _file_name; }
 
 protected:
   /// the file_name from whence this mesh came

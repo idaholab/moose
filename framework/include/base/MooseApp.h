@@ -252,6 +252,8 @@ public:
    */
   Factory & getFactory() { return _factory; }
 
+  processor_id_type processor_id() { return cast_int<processor_id_type>(_comm->rank()); }
+
   /**
    * Retrieve the ActionFactory associated with this App.
    */

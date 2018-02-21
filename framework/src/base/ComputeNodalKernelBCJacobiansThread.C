@@ -13,7 +13,7 @@
 #include "Assembly.h"
 #include "AuxiliarySystem.h"
 #include "FEProblem.h"
-#include "MooseVariable.h"
+#include "MooseVariableField.h"
 #include "NodalKernel.h"
 
 #include "libmesh/threads.h"
@@ -54,11 +54,12 @@ ComputeNodalKernelBCJacobiansThread::onNode(ConstBndNodeRange::const_iterator & 
 
   BoundaryID boundary_id = bnode->_bnd_id;
 
-  std::vector<std::pair<MooseVariable *, MooseVariable *>> & ce = _fe_problem.couplingEntries(_tid);
+  std::vector<std::pair<MooseVariableFE *, MooseVariableFE *>> & ce =
+      _fe_problem.couplingEntries(_tid);
   for (const auto & it : ce)
   {
-    MooseVariable & ivariable = *(it.first);
-    MooseVariable & jvariable = *(it.second);
+    MooseVariableFE & ivariable = *(it.first);
+    MooseVariableFE & jvariable = *(it.second);
 
     unsigned int ivar = ivariable.number();
     unsigned int jvar = jvariable.number();
@@ -83,7 +84,7 @@ ComputeNodalKernelBCJacobiansThread::onNode(ConstBndNodeRange::const_iterator & 
           }
 
           // See if this NodalKernel is coupled to the jvar
-          const std::vector<MooseVariable *> & coupled_vars = nodal_kernel->getCoupledMooseVars();
+          const std::vector<MooseVariableFE *> & coupled_vars = nodal_kernel->getCoupledMooseVars();
           for (const auto & var : coupled_vars)
           {
             if (var->number() == jvar)

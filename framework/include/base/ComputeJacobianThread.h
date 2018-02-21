@@ -17,7 +17,7 @@
 // Forward declarations
 class FEProblemBase;
 class NonlinearSystemBase;
-class IntegratedBC;
+class IntegratedBCBase;
 class DGKernel;
 class InterfaceKernel;
 class KernelWarehouse;
@@ -51,7 +51,7 @@ protected:
   unsigned int _num_cached;
 
   // Reference to BC storage structures
-  const MooseObjectWarehouse<IntegratedBC> & _integrated_bcs;
+  const MooseObjectWarehouse<IntegratedBCBase> & _integrated_bcs;
 
   // Reference to DGKernel storage structure
   const MooseObjectWarehouse<DGKernel> & _dg_kernels;

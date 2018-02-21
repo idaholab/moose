@@ -32,6 +32,7 @@ validParams<MortarConstraint>()
 MortarConstraint::MortarConstraint(const InputParameters & parameters)
   : Constraint(parameters),
     CoupleableMooseVariableDependencyIntermediateInterface(this, true),
+    MooseVariableInterface<Real>(this, true),
     _fe_problem(*getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")),
     _dim(_mesh.dimension()),
 
@@ -41,10 +42,11 @@ MortarConstraint::MortarConstraint(const InputParameters & parameters)
     _coord(_assembly.coordTransformation()),
     _current_elem(_assembly.elem()),
 
-    _master_var(_subproblem.getVariable(_tid, getParam<VariableName>("master_variable"))),
-    _slave_var(isParamValid("slave_variable")
-                   ? _subproblem.getVariable(_tid, getParam<VariableName>("slave_variable"))
-                   : _subproblem.getVariable(_tid, getParam<VariableName>("master_variable"))),
+    _master_var(_subproblem.getStandardVariable(_tid, getParam<VariableName>("master_variable"))),
+    _slave_var(
+        isParamValid("slave_variable")
+            ? _subproblem.getStandardVariable(_tid, getParam<VariableName>("slave_variable"))
+            : _subproblem.getStandardVariable(_tid, getParam<VariableName>("master_variable"))),
     _lambda(_var.sln()),
 
     _iface(*_mesh.getMortarInterfaceByName(getParam<std::string>("interface"))),

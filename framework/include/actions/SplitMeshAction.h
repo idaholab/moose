@@ -7,26 +7,24 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef FDADVECTION_H
-#define FDADVECTION_H
+#ifndef SPLITMESHACTION_H
+#define SPLITMESHACTION_H
 
-#include "FDKernel.h"
+#include "Action.h"
 
-class FDAdvection;
+#include <string>
+
+class SplitMeshAction;
 
 template <>
-InputParameters validParams<FDAdvection>();
+InputParameters validParams<SplitMeshAction>();
 
-class FDAdvection : public FDKernel
+class SplitMeshAction : public Action
 {
 public:
-  FDAdvection(const InputParameters & parameters);
+  SplitMeshAction(InputParameters params);
 
-protected:
-  virtual Real computeQpResidual();
-
-private:
-  const VariableGradient & _grad_advector;
+  virtual void act() override;
 };
 
-#endif // FDADVECTION_H
+#endif // SPLITMESHACTION_H

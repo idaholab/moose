@@ -27,7 +27,10 @@ class SubProblem;
 class FEProblemBase;
 class SystemBase;
 class Assembly;
-class MooseVariable;
+template <typename>
+class MooseVariableField;
+typedef MooseVariableField<Real> MooseVariable;
+typedef MooseVariableField<VectorValue<Real>> VectorMooseVariable;
 class Marker;
 class Adaptivity;
 
@@ -98,7 +101,7 @@ protected:
    * @param name The name of the _other_ Marker that you want to have access to.
    * @return A _reference_ that will hold the value of the marker in it's 0 (zeroth) position.
    */
-  const VariableValue & getMarkerValue(std::string name);
+  const MooseArray<Real> & getMarkerValue(std::string name);
 
   SubProblem & _subproblem;
   FEProblemBase & _fe_problem;
@@ -109,7 +112,7 @@ protected:
 
   Assembly & _assembly;
 
-  MooseVariable & _field_var;
+  MooseVariableFE & _field_var;
   const Elem *& _current_elem;
 
   MooseMesh & _mesh;

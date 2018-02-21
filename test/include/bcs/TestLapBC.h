@@ -38,7 +38,6 @@ protected:
 
   const VariableSecond & _second_u;
   const VariablePhiSecond & _second_phi;
-  const VariableTestSecond & _second_test;
 };
 
 #endif // TESTLAPBC_H

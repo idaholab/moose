@@ -29,7 +29,10 @@ class MooseMesh;
 class SubProblem;
 class KernelBase;
 class Assembly;
-class MooseVariable;
+template <typename>
+class MooseVariableField;
+typedef MooseVariableField<Real> MooseVariable;
+typedef MooseVariableField<VectorValue<Real>> VectorMooseVariable;
 
 template <>
 InputParameters validParams<KernelBase>();
@@ -85,13 +88,39 @@ public:
    */
   virtual void computeNonlocalOffDiagJacobian(unsigned int /* jvar */) {}
 
-  /// Returns the variable number that this Kernel operates on.
-  MooseVariable & variable();
+  /**
+   * Returns the variable number that this Kernel operates on.
+   */
+  virtual MooseVariableFE & variable() = 0;
 
-  /// Returns a reference to the SubProblem for which this Kernel is active
-  SubProblem & subProblem();
+  /**
+   * Returns a reference to the SubProblem for which this Kernel is active
+   */
+  SubProblem & subProblem() { return _subproblem; }
 
   virtual bool isEigenKernel() const { return _eigen_kernel; }
+
+protected:
+  /**
+   * Compute this Kernel's contribution to the residual at the current quadrature point
+   */
+  virtual Real computeQpResidual() = 0;
+  /**
+   * Compute this Kernel's contribution to the Jacobian at the current quadrature point
+   */
+  virtual Real computeQpJacobian() { return 0; }
+  /**
+   * This is the virtual that derived classes should override for computing an off-diagonal Jacobian
+   * component.
+   */
+  virtual Real computeQpOffDiagJacobian(unsigned int /*jvar*/) { return 0; }
+
+  /**
+   * Following methods are used for Kernels that need to perform a per-element calculation
+   */
+  virtual void precalculateResidual() {}
+  virtual void precalculateJacobian() {}
+  virtual void precalculateOffDiagJacobian(unsigned int /* jvar */) {}
 
 protected:
   /// Reference to this kernel's SubProblem
@@ -108,9 +137,6 @@ protected:
 
   /// Reference to this Kernel's assembly object
   Assembly & _assembly;
-
-  /// Reference to this Kernel's MooseVariable object
-  MooseVariable & _var;
 
   /// Reference to this Kernel's mesh object
   MooseMesh & _mesh;
@@ -141,18 +167,6 @@ protected:
   /// current index for the shape function
   unsigned int _j;
 
-  /// the current test function
-  const VariableTestValue & _test;
-
-  /// gradient of the test function
-  const VariableTestGradient & _grad_test;
-
-  /// the current shape functions
-  const VariablePhiValue & _phi;
-
-  /// gradient of the shape function
-  const VariablePhiGradient & _grad_phi;
-
   /// Holds residual entries as they are accumulated by this Kernel
   DenseVector<Number> _local_re;
 
@@ -161,12 +175,12 @@ protected:
 
   /// The aux variables to save the residual contributions to
   bool _has_save_in;
-  std::vector<MooseVariable *> _save_in;
+  std::vector<MooseVariableFE *> _save_in;
   std::vector<AuxVariableName> _save_in_strings;
 
   /// The aux variables to save the diagonal Jacobian contributions to
   bool _has_diag_save_in;
-  std::vector<MooseVariable *> _diag_save_in;
+  std::vector<MooseVariableFE *> _diag_save_in;
   std::vector<AuxVariableName> _diag_save_in_strings;
 
   bool _eigen_kernel;

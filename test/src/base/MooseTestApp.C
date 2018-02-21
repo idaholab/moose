@@ -64,8 +64,6 @@
 #include "DiffTensorKernel.h"
 #include "OptionallyCoupledForce.h"
 #include "CoupledForceLagged.h"
-#include "FDDiffusion.h"
-#include "FDAdvection.h"
 #include "MaterialEigenKernel.h"
 #include "PHarmonic.h"
 #include "PMassEigenKernel.h"
@@ -79,6 +77,9 @@
 
 #include "DefaultMatPropConsumerKernel.h"
 #include "DoNotCopyParametersKernel.h"
+#include "VectorFEWave.h"
+#include "LinearVectorPoisson.h"
+
 #include "DriftDiffusionFluxAux.h"
 #include "CoupledAux.h"
 #include "CoupledScalarAux.h"
@@ -103,12 +104,15 @@
 #include "SimpleTestShapeElementKernel.h"
 #include "LateDeclarationVectorPostprocessor.h"
 #include "PotentialAdvection.h"
+#include "EFieldAdvection.h"
 #include "GhostAux.h"
 #include "FunctionGradAux.h"
 #include "CheckCurrentExecAux.h"
 #include "FunctionDerivativeAux.h"
 #include "MaterialPropertyBlockAux.h"
 
+#include "VectorCurlPenaltyDirichletBC.h"
+#include "LinearVectorPenaltyDirichletBC.h"
 #include "ChannelGradientBC.h"
 #include "RobinBC.h"
 #include "InflowBC.h"
@@ -354,6 +358,7 @@ MooseTestApp::registerObjects(Factory & factory)
 {
   // Kernels
   registerKernel(PotentialAdvection);
+  registerKernel(EFieldAdvection);
   registerKernel(CoeffParamDiffusion);
   registerKernel(CoupledConvection);
   registerKernel(ForcingFn);
@@ -400,8 +405,6 @@ MooseTestApp::registerObjects(Factory & factory)
   registerKernel(ScalarLagrangeMultiplier);
   registerKernel(OptionallyCoupledForce);
   registerKernel(CoupledForceLagged);
-  registerKernel(FDDiffusion);
-  registerKernel(FDAdvection);
   registerKernel(MaterialEigenKernel);
   registerKernel(PHarmonic);
   registerKernel(PMassEigenKernel);
@@ -414,6 +417,8 @@ MooseTestApp::registerObjects(Factory & factory)
   registerKernel(ExampleShapeElementKernel);
   registerKernel(ExampleShapeElementKernel2);
   registerKernel(SimpleTestShapeElementKernel);
+  registerKernel(VectorFEWave);
+  registerKernel(LinearVectorPoisson);
 
   registerDeprecatedObject(ExpiredKernel, "01/01/2018 00:00");
   registerDeprecatedObject(DeprecatedKernel, "01/01/2050 00:00");
@@ -450,6 +455,8 @@ MooseTestApp::registerObjects(Factory & factory)
   registerInterfaceKernel(OneSideDiffusion);
 
   // Boundary Conditions
+  registerBoundaryCondition(VectorCurlPenaltyDirichletBC);
+  registerBoundaryCondition(LinearVectorPenaltyDirichletBC);
   registerBoundaryCondition(ChannelGradientBC);
   registerBoundaryCondition(ExampleShapeSideIntegratedBC);
   registerBoundaryCondition(RobinBC);

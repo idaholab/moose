@@ -48,6 +48,27 @@ processor, it can be split prior to the simulation.
     element assembly and solve. In both types the solution data is distributed, which is the portion of the simulation
     that usually dominates memory demands.
 
+## Mesh splitting
+
+For large meshes, MOOSE provides the ability to pre-split a mesh for use in the the "distributed"
+format/mode.  To split and use a mesh for distributed runs:
+
+```
+// For input files with a file-based mesh:
+$ moose-app-opt -i your_input-file.i --split-mesh 500,1000,2000 // comma-separated list of split configurations
+Splitting 500 ways...
+    - writing 500 files per process...
+Splitting 1000 ways...
+    - writing 1000 files per process...
+...
+
+// MOOSE automatically selects the pre-split mesh configuration based on MPI procs
+$ mpiexec -n 1000 moose-app-opt -i your_input-file.i --use-split
+```
+
+For more details see "[Mesh Splitting](/Mesh/splitting.md)".
+
+
 ## Displaced Mesh
 
 Calculations can take place in either the initial mesh configuration or, when requested, the "displaced"

@@ -25,9 +25,13 @@
 #include "MeshChangedInterface.h"
 #include "RandomInterface.h"
 #include "CoupleableMooseVariableDependencyIntermediateInterface.h"
+#include "MooseVariableInterface.h"
 
 // Forward declerations
-class MooseVariable;
+template <typename>
+class MooseVariableField;
+typedef MooseVariableField<Real> MooseVariable;
+typedef MooseVariableField<VectorValue<Real>> VectorMooseVariable;
 class MooseMesh;
 class SubProblem;
 class SystemBase;
@@ -53,7 +57,8 @@ class NodalKernel : public MooseObject,
                     public Restartable,
                     public MeshChangedInterface,
                     public RandomInterface,
-                    public CoupleableMooseVariableDependencyIntermediateInterface
+                    public CoupleableMooseVariableDependencyIntermediateInterface,
+                    public MooseVariableInterface<Real>
 {
 public:
   /**
@@ -155,12 +160,12 @@ protected:
 
   /// The aux variables to save the residual contributions to
   bool _has_save_in;
-  std::vector<MooseVariable *> _save_in;
+  std::vector<MooseVariableFE *> _save_in;
   std::vector<AuxVariableName> _save_in_strings;
 
   /// The aux variables to save the diagonal Jacobian contributions to
   bool _has_diag_save_in;
-  std::vector<MooseVariable *> _diag_save_in;
+  std::vector<MooseVariableFE *> _diag_save_in;
   std::vector<AuxVariableName> _diag_save_in_strings;
 };
 

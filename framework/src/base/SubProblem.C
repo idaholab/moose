@@ -13,7 +13,7 @@
 #include "Conversion.h"
 #include "Function.h"
 #include "MooseApp.h"
-#include "MooseVariable.h"
+#include "MooseVariableField.h"
 #include "MooseArray.h"
 
 template <>
@@ -53,7 +53,7 @@ SubProblem::SubProblem(const InputParameters & parameters)
 SubProblem::~SubProblem() {}
 
 void
-SubProblem::setActiveElementalMooseVariables(const std::set<MooseVariable *> & moose_vars,
+SubProblem::setActiveElementalMooseVariables(const std::set<MooseVariableFE *> & moose_vars,
                                              THREAD_ID tid)
 {
   if (!moose_vars.empty())
@@ -63,7 +63,7 @@ SubProblem::setActiveElementalMooseVariables(const std::set<MooseVariable *> & m
   }
 }
 
-const std::set<MooseVariable *> &
+const std::set<MooseVariableFE *> &
 SubProblem::getActiveElementalMooseVariables(THREAD_ID tid)
 {
   return _active_elemental_moose_variables[tid];

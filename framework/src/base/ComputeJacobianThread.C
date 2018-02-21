@@ -11,10 +11,10 @@
 
 #include "DGKernel.h"
 #include "FEProblem.h"
-#include "IntegratedBC.h"
+#include "IntegratedBCBase.h"
 #include "InterfaceKernel.h"
 #include "KernelWarehouse.h"
-#include "MooseVariable.h"
+#include "MooseVariableField.h"
 #include "NonlinearSystem.h"
 #include "NonlocalIntegratedBC.h"
 #include "NonlocalKernel.h"
@@ -108,7 +108,7 @@ ComputeJacobianThread::computeJacobian()
 void
 ComputeJacobianThread::computeFaceJacobian(BoundaryID bnd_id)
 {
-  const std::vector<std::shared_ptr<IntegratedBC>> & bcs =
+  const std::vector<std::shared_ptr<IntegratedBCBase>> & bcs =
       _integrated_bcs.getActiveBoundaryObjects(bnd_id, _tid);
   for (const auto & bc : bcs)
     if (bc->shouldApply() && bc->isImplicit())
@@ -163,7 +163,7 @@ ComputeJacobianThread::subdomainChanged()
   _fe_problem.subdomainSetup(_subdomain, _tid);
 
   // Update variable Dependencies
-  std::set<MooseVariable *> needed_moose_vars;
+  std::set<MooseVariableFE *> needed_moose_vars;
   _kernels.updateBlockVariableDependency(_subdomain, needed_moose_vars, _tid);
   _integrated_bcs.updateBoundaryVariableDependency(needed_moose_vars, _tid);
   _dg_kernels.updateBlockVariableDependency(_subdomain, needed_moose_vars, _tid);

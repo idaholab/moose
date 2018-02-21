@@ -449,6 +449,7 @@
 #include "MaterialDerivativeTestAction.h"
 #include "AddRelationshipManager.h"
 #include "MeshOnlyAction.h"
+#include "SplitMeshAction.h"
 
 // Outputs
 #ifdef LIBMESH_HAVE_EXODUS_API
@@ -949,6 +950,7 @@ addActionTypes(Syntax & syntax)
 
   registerMooseObjectTask("add_kernel",                   Kernel,                 false);
   appendMooseObjectTask  ("add_kernel",                   EigenKernel);
+  appendMooseObjectTask  ("add_kernel",                   VectorKernel);
 
   registerMooseObjectTask("add_nodal_kernel",             NodalKernel,            false);
 
@@ -1159,6 +1161,7 @@ registerActions(Syntax & syntax, ActionFactory & action_factory)
 
   registerAction(SetupPostprocessorDataAction, "setup_postprocessor_data");
 
+  registerAction(SplitMeshAction, "split_mesh");
   registerAction(MeshOnlyAction, "mesh_only");
   registerAction(SetupMeshAction, "setup_mesh");
   registerAction(SetupMeshAction, "init_mesh");

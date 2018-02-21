@@ -47,7 +47,7 @@ KKSACBulkBase::KKSACBulkBase(const InputParameters & parameters)
   // Iterate over all coupled variables
   for (unsigned int i = 0; i < _nvar; ++i)
   {
-    MooseVariable * cvar = _coupled_moose_vars[i];
+    MooseVariable * cvar = _coupled_standard_moose_vars[i];
 
     // get the first derivatives of Fa and Fb material property
     _derivatives_Fa[i] = &getMaterialPropertyDerivative<Real>("fa_name", cvar->name());

@@ -43,7 +43,7 @@ InternalSideUserObject::InternalSideUserObject(const InputParameters & parameter
     _neighbor_elem(_assembly.neighbor())
 {
   // Keep track of which variables are coupled so we know what we depend on
-  const std::vector<MooseVariable *> & coupled_vars = getCoupledMooseVars();
+  const std::vector<MooseVariableFE *> & coupled_vars = getCoupledMooseVars();
   for (const auto & var : coupled_vars)
     addMooseVariableDependency(var);
 }

@@ -99,7 +99,7 @@
 template <typename... Args>
 [[noreturn]] void mooseError(Args &&... args);
 
-class MooseVariable;
+class MooseVariableFE;
 
 namespace moose
 {
@@ -112,7 +112,7 @@ namespace internal
 ///
 /// This is a convenience function to be used when error messages (especially with paramError)
 /// need to report that variable types are incompatible (e.g. with residual save-in).
-std::string incompatVarMsg(MooseVariable & var1, MooseVariable & var2);
+std::string incompatVarMsg(MooseVariableFE & var1, MooseVariableFE & var2);
 
 std::string
 mooseMsgFmt(const std::string & msg, const std::string & title, const std::string & color);

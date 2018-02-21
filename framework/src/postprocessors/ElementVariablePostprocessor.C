@@ -26,7 +26,7 @@ validParams<ElementVariablePostprocessor>()
 
 ElementVariablePostprocessor::ElementVariablePostprocessor(const InputParameters & parameters)
   : ElementPostprocessor(parameters),
-    MooseVariableInterface(this, false),
+    MooseVariableInterface<Real>(this, false),
     _u(coupledValue("variable")),
     _grad_u(coupledGradient("variable")),
     _u_dot(_is_transient ? coupledDot("variable") : _zero),

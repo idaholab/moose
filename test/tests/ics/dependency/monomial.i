@@ -86,32 +86,36 @@
 
 [BCs]
   [./left_u]
-    type = DirichletBC
+    type = PenaltyDirichletBC
     variable = u
     boundary = left
     value = 0
+    penalty = 1000
   [../]
 
   [./right_u]
-    type = DirichletBC
+    type = PenaltyDirichletBC
     variable = u
     boundary = right
     value = 1
+    penalty = 1000
   [../]
 
 
   [./left_v]
-    type = DirichletBC
+    type = PenaltyDirichletBC
     variable = v
     boundary = left
     value = 2
+    penalty = 1000
   [../]
 
   [./right_v]
-    type = DirichletBC
+    type = PenaltyDirichletBC
     variable = v
     boundary = right
     value = 1
+    penalty = 1000
   [../]
 []
 

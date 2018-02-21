@@ -11,7 +11,7 @@
 #define AUXKERNEL_H
 
 #include "MooseObject.h"
-#include "MooseVariable.h" // for name() in mooseError calls
+#include "MooseVariableField.h" // for name() in mooseError calls
 #include "SetupInterface.h"
 #include "CoupleableMooseVariableDependencyIntermediateInterface.h"
 #include "MaterialPropertyInterface.h"
@@ -27,6 +27,7 @@
 #include "Restartable.h"
 #include "MeshChangedInterface.h"
 #include "VectorPostprocessorInterface.h"
+#include "MooseVariableInterface.h"
 
 // forward declarations
 class SubProblem;
@@ -43,6 +44,7 @@ InputParameters validParams<AuxKernel>();
  *
  */
 class AuxKernel : public MooseObject,
+                  public MooseVariableInterface<Real>,
                   public BlockRestrictable,
                   public BoundaryRestrictable,
                   public SetupInterface,

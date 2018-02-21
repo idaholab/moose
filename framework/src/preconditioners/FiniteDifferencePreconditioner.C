@@ -11,7 +11,7 @@
 
 // MOOSE includes
 #include "FEProblem.h"
-#include "MooseVariable.h"
+#include "MooseVariableField.h"
 #include "NonlinearSystem.h"
 
 #include "libmesh/coupling_matrix.h"

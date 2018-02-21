@@ -18,7 +18,10 @@
 
 // Forward Declarations
 class InternalSideIndicator;
-class MooseVariable;
+template <typename>
+class MooseVariableField;
+typedef MooseVariableField<Real> MooseVariable;
+typedef MooseVariableField<VectorValue<Real>> VectorMooseVariable;
 
 template <>
 InputParameters validParams<InternalSideIndicator>();
@@ -31,7 +34,7 @@ InputParameters validParams<InternalSideIndicator>();
 class InternalSideIndicator : public Indicator,
                               public NeighborCoupleable,
                               public ScalarCoupleable,
-                              public NeighborMooseVariableInterface
+                              public NeighborMooseVariableInterface<Real>
 {
 public:
   /**
@@ -48,7 +51,7 @@ public:
   virtual void finalize() override;
 
 protected:
-  MooseVariable & _field_var;
+  MooseVariableFE & _field_var;
 
   const Elem *& _current_elem;
   /// The neighboring element

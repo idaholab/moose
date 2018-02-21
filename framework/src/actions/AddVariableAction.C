@@ -72,7 +72,7 @@ MooseEnum
 AddVariableAction::getNonlinearVariableFamilies()
 {
   return MooseEnum("LAGRANGE MONOMIAL HERMITE SCALAR HIERARCHIC CLOUGH XYZ SZABAB BERNSTEIN "
-                   "L2_LAGRANGE L2_HIERARCHIC",
+                   "L2_LAGRANGE L2_HIERARCHIC NEDELEC_ONE LAGRANGE_VEC",
                    "LAGRANGE");
 }
 

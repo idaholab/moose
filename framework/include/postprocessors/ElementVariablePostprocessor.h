@@ -19,7 +19,8 @@ class ElementVariablePostprocessor;
 template <>
 InputParameters validParams<ElementVariablePostprocessor>();
 
-class ElementVariablePostprocessor : public ElementPostprocessor, public MooseVariableInterface
+class ElementVariablePostprocessor : public ElementPostprocessor,
+                                     public MooseVariableInterface<Real>
 {
 public:
   ElementVariablePostprocessor(const InputParameters & parameters);

@@ -46,7 +46,7 @@ protected:
   std::vector<RealVectorValue> _grad_enrich_disp;
 
   /// enrichment displacement variables
-  std::vector<std::vector<MooseVariable *>> _enrich_variable;
+  std::vector<std::vector<MooseVariableFE *>> _enrich_variable;
 
   /// the current shape functions
   const VariablePhiValue & _phi;

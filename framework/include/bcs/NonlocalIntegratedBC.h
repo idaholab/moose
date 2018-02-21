@@ -62,7 +62,10 @@ protected:
   /// Optimization option for getting jocobinas from userobject once per dof
   virtual void getUserObjectJacobian(unsigned int /*jvar*/, dof_id_type /*dof_index*/) {}
   /// optimization option for executing nonlocal jacobian calculation only for nonzero elements
-  virtual bool globalDoFEnabled(MooseVariable & /*var*/, dof_id_type /*dof_index*/) { return true; }
+  virtual bool globalDoFEnabled(MooseVariableFE & /*var*/, dof_id_type /*dof_index*/)
+  {
+    return true;
+  }
 
   unsigned int _k;
 };

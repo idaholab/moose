@@ -56,7 +56,7 @@
             - Documentation:
                 - Systems: docs/content/documentation/systems/index.md
                 - Application Development: docs/content/documentation/application_development/index.md
-                - Interfaces: docs/content/documentation/interfaces/index.md
+                - Framework Development: docs/content/documentation/framework_development/index.md
                 - Modules: docs/content/documentation/modules/index.md
                 - MooseUtils: docs/content/documentation/MooseUtils/index.md
                 - Software Quality: docs/content/documentation/sqa/index.md

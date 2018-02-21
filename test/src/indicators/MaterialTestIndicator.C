@@ -11,7 +11,7 @@
 
 // MOOSE includes
 #include "Assembly.h"
-#include "MooseVariable.h"
+#include "MooseVariableField.h"
 #include "SystemBase.h"
 
 template <>
@@ -29,7 +29,7 @@ MaterialTestIndicator::MaterialTestIndicator(const InputParameters & parameters)
   : Indicator(parameters),
     _property(getMaterialProperty<Real>("property")),
     _qrule(_assembly.qRule()),
-    _indicator_var(_sys.getVariable(_tid, name()))
+    _indicator_var(dynamic_cast<MooseVariable &>(_sys.getVariable(_tid, name())))
 {
 }
 

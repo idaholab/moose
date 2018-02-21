@@ -11,36 +11,50 @@
 #define KERNEL_H
 
 #include "KernelBase.h"
+#include "MooseVariableInterface.h"
 
 class Kernel;
 
 template <>
 InputParameters validParams<Kernel>();
 
-class Kernel : public KernelBase
+class Kernel : public KernelBase, public MooseVariableInterface<Real>
 {
 public:
   Kernel(const InputParameters & parameters);
 
+  /// Compute this Kernel's contribution to the residual
   virtual void computeResidual() override;
+
+  /// Compute this Kernel's contribution to the diagonal Jacobian entries
   virtual void computeJacobian() override;
+
+  /// Computes d-residual / d-jvar... storing the result in Ke.
   virtual void computeOffDiagJacobian(unsigned int jvar) override;
+
+  /**
+   * Computes jacobian block with respect to a scalar variable
+   * @param jvar The number of the scalar variable
+   */
   virtual void computeOffDiagJacobianScalar(unsigned int jvar) override;
 
+  virtual MooseVariable & variable() override { return _var; }
+
 protected:
-  /// Compute this Kernel's contribution to the residual at the current quadrature point
-  virtual Real computeQpResidual() = 0;
+  /// This is a regular kernel so we cast to a regular MooseVariable
+  MooseVariable & _var;
 
-  /// Compute this Kernel's contribution to the Jacobian at the current quadrature point
-  virtual Real computeQpJacobian();
+  /// the current test function
+  const VariableTestValue & _test;
 
-  /// This is the virtual that derived classes should override for computing an off-diagonal Jacobian component.
-  virtual Real computeQpOffDiagJacobian(unsigned int jvar);
+  /// gradient of the test function
+  const VariableTestGradient & _grad_test;
 
-  /// Following methods are used for Kernels that need to perform a per-element calculation
-  virtual void precalculateResidual();
-  virtual void precalculateJacobian() {}
-  virtual void precalculateOffDiagJacobian(unsigned int /* jvar */) {}
+  /// the current shape functions
+  const VariablePhiValue & _phi;
+
+  /// gradient of the shape function
+  const VariablePhiGradient & _grad_phi;
 
   /// Holds the solution at current quadrature points
   const VariableValue & _u;

@@ -21,9 +21,10 @@
 #include "TransientInterface.h"
 #include "PostprocessorInterface.h"
 #include "GeometricSearchInterface.h"
-#include "MooseVariable.h"
+#include "MooseVariableField.h"
 #include "Restartable.h"
 #include "MeshChangedInterface.h"
+#include "MooseVariableInterface.h"
 
 // Forward Declarations
 class Assembly;
@@ -44,6 +45,7 @@ InputParameters validParams<DiracKernel>();
 class DiracKernel : public MooseObject,
                     public SetupInterface,
                     public CoupleableMooseVariableDependencyIntermediateInterface,
+                    public MooseVariableInterface<Real>,
                     public FunctionInterface,
                     public UserObjectInterface,
                     public TransientInterface,

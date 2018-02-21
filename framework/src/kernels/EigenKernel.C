@@ -15,7 +15,7 @@
 #include "Executioner.h"
 #include "MooseApp.h"
 #include "MooseEigenSystem.h"
-#include "MooseVariable.h"
+#include "MooseVariableField.h"
 
 #include "libmesh/quadrature.h"
 
@@ -23,7 +23,7 @@ template <>
 InputParameters
 validParams<EigenKernel>()
 {
-  InputParameters params = validParams<KernelBase>();
+  InputParameters params = validParams<Kernel>();
   params.addParam<bool>(
       "eigen", true, "Use for eigenvalue problem (true) or source problem (false)");
   params.addParam<PostprocessorName>(
@@ -33,9 +33,7 @@ validParams<EigenKernel>()
 }
 
 EigenKernel::EigenKernel(const InputParameters & parameters)
-  : KernelBase(parameters),
-    _u(_is_implicit ? _var.sln() : _var.slnOld()),
-    _grad_u(_is_implicit ? _var.gradSln() : _var.gradSlnOld()),
+  : Kernel(parameters),
     _eigen(getParam<bool>("eigen")),
     _eigen_sys(dynamic_cast<MooseEigenSystem *>(&_fe_problem.getNonlinearSystemBase())),
     _eigenvalue(NULL)

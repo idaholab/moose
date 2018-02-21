@@ -1,0 +1,29 @@
+[Tests]
+  [./vector_fe]
+    type = Exodiff
+    input = 'vector_kernel.i'
+    exodiff = 'vector_kernel_out.e'
+    abs_zero = 1e-8
+  [../]
+  [./coupled_scalar_vector]
+    type = Exodiff
+    input = 'coupled_scalar_vector.i'
+    exodiff = 'coupled_scalar_vector_out.e'
+    abs_zero = 1e-8
+    rel_err = 1e-5
+  [../]
+  [./lagrange_vec]
+    type = Exodiff
+    input = 'lagrange_vec.i'
+    exodiff = 'lagrange_vec_out.e'
+    abs_zero = 1e-8
+  [../]
+  [./jacobian]
+    type = PetscJacobianTester
+    input = 'coupled_scalar_vector_jacobian.i'
+    recover = false
+    state = 1
+    ratio_tol = 1e-7
+    difference_tol = 5e-6
+  [../]
+[]

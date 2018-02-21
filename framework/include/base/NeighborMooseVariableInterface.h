@@ -17,7 +17,8 @@
  * Enhances MooseVariableInterface interface provide values from neighbor elements
  *
  */
-class NeighborMooseVariableInterface : public MooseVariableInterface
+template <typename T>
+class NeighborMooseVariableInterface : public MooseVariableInterface<T>
 {
 public:
   /**
@@ -35,14 +36,14 @@ protected:
    *
    * @return The reference to be stored off and used later.
    */
-  virtual const VariableValue & neighborValue();
+  virtual const typename OutputTools<T>::VariableValue & neighborValue();
 
   /**
    * The old value of the variable this object is operating on evaluated on the "neighbor" element.
    *
    * @return The reference to be stored off and used later.
    */
-  virtual const VariableValue & neighborValueOld();
+  virtual const typename OutputTools<T>::VariableValue & neighborValueOld();
 
   /**
    * The older value of the variable this object is operating on evaluated on the "neighbor"
@@ -50,14 +51,14 @@ protected:
    *
    * @return The reference to be stored off and used later.
    */
-  virtual const VariableValue & neighborValueOlder();
+  virtual const typename OutputTools<T>::VariableValue & neighborValueOlder();
 
   /**
    * The gradient of the variable this object is operating on evaluated on the "neighbor" element.
    *
    * @return The reference to be stored off and used later.
    */
-  virtual const VariableGradient & neighborGradient();
+  virtual const typename OutputTools<T>::VariableGradient & neighborGradient();
 
   /**
    * The old gradient of the variable this object is operating on evaluated on the "neighbor"
@@ -65,7 +66,7 @@ protected:
    *
    * @return The reference to be stored off and used later.
    */
-  virtual const VariableGradient & neighborGradientOld();
+  virtual const typename OutputTools<T>::VariableGradient & neighborGradientOld();
 
   /**
    * The older gradient of the variable this object is operating on evaluated on the "neighbor"
@@ -73,7 +74,7 @@ protected:
    *
    * @return The reference to be stored off and used later.
    */
-  virtual const VariableGradient & neighborGradientOlder();
+  virtual const typename OutputTools<T>::VariableGradient & neighborGradientOlder();
 
   /**
    * The second derivative of the variable this object is operating on evaluated on the "neighbor"
@@ -81,7 +82,7 @@ protected:
    *
    * @return The reference to be stored off and used later.
    */
-  virtual const VariableSecond & neighborSecond();
+  virtual const typename OutputTools<T>::VariableSecond & neighborSecond();
 
   /**
    * The old second derivative of the variable this object is operating on evaluated on the
@@ -89,7 +90,7 @@ protected:
    *
    * @return The reference to be stored off and used later.
    */
-  virtual const VariableSecond & neighborSecondOld();
+  virtual const typename OutputTools<T>::VariableSecond & neighborSecondOld();
 
   /**
    * The older second derivative of the variable this object is operating on evaluated on the
@@ -97,21 +98,21 @@ protected:
    *
    * @return The reference to be stored off and used later.
    */
-  virtual const VariableSecond & neighborSecondOlder();
+  virtual const typename OutputTools<T>::VariableSecond & neighborSecondOlder();
 
   /**
    * The second derivative of the neighbor's test function.
    *
    * @return The reference to be stored off and used later.
    */
-  virtual const VariableTestSecond & neighborSecondTest();
+  virtual const typename OutputTools<T>::VariableTestSecond & neighborSecondTest();
 
   /**
    * The second derivative of the neighbor's shape function.
    *
    * @return The reference to be stored off and used later.
    */
-  virtual const VariablePhiSecond & neighborSecondPhi();
+  virtual const typename OutputTools<T>::VariablePhiSecond & neighborSecondPhi();
 };
 
 #endif /* NEIGHBORMOOSEVARIABLEINTERFACE_H */

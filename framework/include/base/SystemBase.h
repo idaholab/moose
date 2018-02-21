@@ -26,7 +26,11 @@
 // Forward declarations
 class Factory;
 class MooseApp;
-class MooseVariable;
+class MooseVariableFE;
+template <typename>
+class MooseVariableField;
+typedef MooseVariableField<Real> MooseVariable;
+typedef MooseVariableField<VectorValue<Real>> VectorMooseVariable;
 class MooseMesh;
 class SubProblem;
 class SystemBase;
@@ -213,6 +217,8 @@ public:
    */
   virtual bool hasVariable(const std::string & var_name);
   virtual bool hasScalarVariable(const std::string & var_name);
+  template <typename T>
+  bool hasVariable(const std::string & var_name);
 
   virtual bool isScalarVariable(unsigned int var_name);
 
@@ -223,7 +229,7 @@ public:
    * @param var_name variable name
    * @return reference the variable (class)
    */
-  virtual MooseVariable & getVariable(THREAD_ID tid, const std::string & var_name);
+  MooseVariableFE & getVariable(THREAD_ID tid, const std::string & var_name);
 
   /**
    * Gets a reference to a variable with specified number
@@ -232,7 +238,27 @@ public:
    * @param var_number libMesh variable number
    * @return reference the variable (class)
    */
-  virtual MooseVariable & getVariable(THREAD_ID tid, unsigned int var_number);
+  MooseVariableFE & getVariable(THREAD_ID tid, unsigned int var_number);
+
+  /**
+   * Gets a reference to a variable of with specified name
+   *
+   * @param tid Thread id
+   * @param var_name variable name
+   * @return reference the variable (class)
+   */
+  template <typename T>
+  MooseVariableField<T> & getFieldVariable(THREAD_ID tid, const std::string & var_name);
+
+  /**
+   * Gets a reference to a variable with specified number
+   *
+   * @param tid Thread id
+   * @param var_number libMesh variable number
+   * @return reference the variable (class)
+   */
+  template <typename T>
+  MooseVariableField<T> & getFieldVariable(THREAD_ID tid, unsigned int var_number);
 
   /**
    * Gets a reference to a scalar variable with specified number
@@ -410,10 +436,11 @@ public:
                                  const std::string & source_name,
                                  const std::string & timestep);
 
-  const std::vector<MooseVariable *> & getVariables(THREAD_ID tid)
+  const std::vector<MooseVariableFE *> & getVariables(THREAD_ID tid)
   {
-    return _vars[tid].variables();
+    return _vars[tid].fieldVariables();
   }
+
   const std::vector<MooseVariableScalar *> & getScalarVariables(THREAD_ID tid)
   {
     return _vars[tid].scalars();

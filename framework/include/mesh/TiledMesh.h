@@ -27,6 +27,8 @@ public:
 
   virtual void buildMesh() override;
 
+  virtual std::string getFileName() const override;
+
 protected:
   const Real _x_width;
   const Real _y_width;

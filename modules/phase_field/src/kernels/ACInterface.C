@@ -44,7 +44,7 @@ ACInterface::ACInterface(const InputParameters & parameters)
   // Get mobility and kappa derivatives and coupled variable gradients
   for (unsigned int i = 0; i < _nvar; ++i)
   {
-    MooseVariable * ivar = _coupled_moose_vars[i];
+    MooseVariable * ivar = _coupled_standard_moose_vars[i];
     const VariableName iname = ivar->name();
     if (iname == _var.name())
       mooseError("The kernel variable should not be specified in the coupled `args` parameter.");

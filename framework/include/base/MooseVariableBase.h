@@ -24,19 +24,6 @@ class DofMap;
 class Variable;
 }
 
-typedef MooseArray<Real> VariableValue;
-typedef MooseArray<RealGradient> VariableGradient;
-typedef MooseArray<RealTensor> VariableSecond;
-
-typedef MooseArray<std::vector<Real>> VariableTestValue;
-typedef MooseArray<std::vector<RealGradient>> VariableTestGradient;
-typedef MooseArray<std::vector<RealTensor>> VariableTestSecond;
-
-typedef MooseArray<std::vector<Real>> VariablePhiValue;
-typedef MooseArray<std::vector<RealGradient>> VariablePhiGradient;
-typedef MooseArray<std::vector<RealTensor>> VariablePhiSecond;
-
-class Assembly;
 class SubProblem;
 class SystemBase;
 class MooseMesh;
@@ -47,7 +34,6 @@ public:
   MooseVariableBase(unsigned int var_num,
                     const FEType & fe_type,
                     SystemBase & sys,
-                    Assembly & assembly,
                     Moose::VarKindType var_kind);
   virtual ~MooseVariableBase();
 
@@ -132,8 +118,6 @@ protected:
   /// libMesh variable object for this variable
   const Variable & _variable;
 
-  /// Assembly data
-  Assembly & _assembly;
   /// DOF map
   const DofMap & _dof_map;
   /// DOF indices
