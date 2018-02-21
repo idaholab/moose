@@ -1,18 +1,21 @@
 #ifndef FLOWCONNECTION_H
 #define FLOWCONNECTION_H
 
-#include <map>
-#include <string>
-#include <vector>
+#include "Component.h"
 #include "Enums.h"
 
+class FlowConnection;
+
+template <>
+InputParameters validParams<FlowConnection>();
+
 /**
- * Interface class for components that connect to pipes (junctions and boundaries)
+ * Base class for components that connect to pipes (junctions and boundaries)
  */
-class FlowConnection
+class FlowConnection : public Component
 {
 public:
-  FlowConnection();
+  FlowConnection(const InputParameters & params);
 
   /// End type
   enum EEndType

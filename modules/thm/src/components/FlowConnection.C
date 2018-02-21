@@ -1,5 +1,4 @@
 #include "FlowConnection.h"
-#include "MooseError.h"
 
 const std::map<std::string, FlowConnection::EEndType> FlowConnection::_end_type_to_enum{
     {"IN", IN}, {"OUT", OUT}};
@@ -11,7 +10,15 @@ RELAP7::stringToEnum(const std::string & s)
   return stringToEnum<FlowConnection::EEndType>(s, FlowConnection::_end_type_to_enum);
 }
 
-FlowConnection::FlowConnection() {}
+template <>
+InputParameters
+validParams<FlowConnection>()
+{
+  InputParameters params = validParams<Component>();
+  return params;
+}
+
+FlowConnection::FlowConnection(const InputParameters & params) : Component(params) {}
 
 void
 FlowConnection::addConnection(const std::string & connection_string)
@@ -32,4 +39,8 @@ FlowConnection::addConnection(const std::string & connection_string)
   // store connection data
   _connections.push_back(Connection(connection_string, connected_component_name, end_type));
   _connected_component_names.push_back(connected_component_name);
+
+  // Add dependency because the connected component's setupMesh() must be called
+  // before this component's setupMesh().
+  addDependency(connected_component_name);
 }
