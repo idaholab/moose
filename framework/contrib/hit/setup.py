@@ -10,6 +10,7 @@ setup(
         Extension(
             "hit",
             ["hit.cpp", "lex.cc", "parse.cc"],
+            extra_compile_args=['-std=c++11'],
         )
     ]
 )
