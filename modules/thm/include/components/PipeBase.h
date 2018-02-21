@@ -5,7 +5,7 @@
 #include "libmesh/vector_value.h"
 
 #include "RELAP7App.h"
-#include "GeometricalComponent.h"
+#include "GeometricalFlowComponent.h"
 
 class PipeBase;
 
@@ -20,15 +20,13 @@ InputParameters validParams<PipeBase>();
  * aligned with x-axis. Its
  * subdivided into _n_elems elements (of type EDGE2).
  */
-class PipeBase : public GeometricalComponent
+class PipeBase : public GeometricalFlowComponent
 {
 public:
   PipeBase(const InputParameters & params);
 
   // Pipe specific interface ----
-  virtual UserObjectName getFluidPropertiesName() const { return _fp_name; }
   virtual std::shared_ptr<const FlowModel> getFlowModel() const;
-  virtual const RELAP7::FlowModelID & getFlowModelID() const;
   virtual unsigned int getSubdomainID() const = 0;
   virtual bool isHorizontal() const = 0;
   virtual Real getInclinedAngle() const = 0;
@@ -36,12 +34,8 @@ public:
 protected:
   virtual void init() override;
 
-  /// The name of the user object that defines fluid properties
-  const UserObjectName & _fp_name;
   /// The flow model used by this pipe
   std::shared_ptr<FlowModel> _flow_model;
-  /// The flow model type used by this pipe
-  RELAP7::FlowModelID _model_id;
 };
 
 #endif /* PIPEBASE_H */

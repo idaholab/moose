@@ -1,5 +1,4 @@
 #include "PipeBase.h"
-#include "FluidProperties.h"
 #include "FlowModelSinglePhase.h"
 #include "FlowModelTwoPhase.h"
 
@@ -7,14 +6,13 @@ template <>
 InputParameters
 validParams<PipeBase>()
 {
-  InputParameters params = validParams<GeometricalComponent>();
-  params.addRequiredParam<UserObjectName>("fp", "The name of fluid property user object");
+  InputParameters params = validParams<GeometricalFlowComponent>();
   params.addPrivateParam<std::string>("component_type", "pipe");
   return params;
 }
 
 PipeBase::PipeBase(const InputParameters & params)
-  : GeometricalComponent(params), _fp_name(getParam<UserObjectName>("fp")), _flow_model(nullptr)
+  : GeometricalFlowComponent(params), _flow_model(nullptr)
 {
 }
 
@@ -26,20 +24,11 @@ PipeBase::getFlowModel() const
   return _flow_model;
 }
 
-const RELAP7::FlowModelID &
-PipeBase::getFlowModelID() const
-{
-  checkSetupStatus(INITIALIZED_PRIMARY);
-
-  return _model_id;
-}
-
 void
 PipeBase::init()
 {
-  GeometricalComponent::init();
+  GeometricalFlowComponent::init();
 
-  _model_id = _app.getFlowModelID(_sim.getUserObject<FluidProperties>(_fp_name));
   if (_model_id == RELAP7::FM_SINGLE_PHASE)
   {
     InputParameters pars = emptyInputParameters();

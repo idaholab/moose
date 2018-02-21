@@ -99,19 +99,6 @@ GeometricalComponent::displaceMesh(const std::vector<SubdomainName> & blocks)
   _sim.addUserObject(class_name, genName(name(), "displace_node"), params);
 }
 
-const std::vector<GeometricalComponent::Connection> &
-GeometricalComponent::getConnections(PipeConnectable::EEndType id) const
-{
-  checkSetupStatus(MESH_PREPARED);
-
-  std::map<PipeConnectable::EEndType, std::vector<Connection>>::const_iterator it =
-      _connections.find(id);
-  if (it != _connections.end())
-    return it->second;
-  else
-    mooseError(name(), ": Invalid pipe end type (", id, ").");
-}
-
 const std::vector<unsigned int> &
 GeometricalComponent::getSubdomainIds() const
 {
