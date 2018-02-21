@@ -82,10 +82,8 @@ public:
    */
   RestartableData(std::string name, void * context) : RestartableDataValue(name, context)
   {
-    _value_ptr = new T;
+    _value_ptr = libmesh_make_unique<T>();
   }
-
-  virtual ~RestartableData() { delete _value_ptr; }
 
   /**
    * @returns a read-only reference to the parameter value.
@@ -119,7 +117,7 @@ public:
 
 private:
   /// Stored value.
-  T * _value_ptr;
+  std::unique_ptr<T> _value_ptr;
 };
 
 // ------------------------------------------------------------
@@ -135,7 +133,7 @@ template <typename T>
 inline void
 RestartableData<T>::swap(RestartableDataValue * libmesh_dbg_var(rhs))
 {
-  mooseAssert(rhs != NULL, "Assigning NULL?");
+  mooseAssert(rhs, "Assigning NULL?");
   //  _value.swap(cast_ptr<RestartableData<T>*>(rhs)->_value);
 }
 
@@ -157,20 +155,6 @@ RestartableData<T>::load(std::istream & stream)
 /**
  * Container for storing material properties
  */
-class RestartableDatas : public std::vector<std::map<std::string, RestartableDataValue *>>
-{
-public:
-  RestartableDatas(size_type n) : std::vector<std::map<std::string, RestartableDataValue *>>(n) {}
+using RestartableDatas = std::vector<std::map<std::string, std::unique_ptr<RestartableDataValue>>>;
 
-  virtual ~RestartableDatas()
-  {
-    for (std::vector<std::map<std::string, RestartableDataValue *>>::iterator i = begin();
-         i != end();
-         ++i)
-      for (std::map<std::string, RestartableDataValue *>::iterator j = (*i).begin();
-           j != (*i).end();
-           ++j)
-        delete j->second;
-  }
-};
 #endif

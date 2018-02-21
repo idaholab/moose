@@ -28,41 +28,35 @@ class MooseApp;
 class Restartable
 {
 public:
+  /**
+   * Class constructor
+   *
+   * @param moose_object The MooseObject that this interface is being implemented on.
+   * @param system_name The name of the MOOSE system.  ie "Kernel", "BCs", etc.  Should roughly
+   * correspond to the section in the input file so errors are easy to understand.
+   *
+   * This method will forward the thread id if it exists in the moose_object parameters. Delegates
+   * to the "MooseApp &" constructor.
+   */
   Restartable(const MooseObject * moose_object, const std::string & system_name);
 
+  /**
+   * Class constructor
+   *
+   * Similar to the other class constructor but also accepts an individual thread ID. If this
+   * method is used, no thread ID in the parameters object is used. Delegates to the "MooseApp &"
+   * constructor.
+   */
   Restartable(const MooseObject * moose_object, const std::string & system_name, THREAD_ID tid);
 
+  /**
+   * This class constructor is used for non-Moose-based objects like interfaces. A name for the
+   * storage as well as a system name must be passed in along with the thread ID explicitly.
+   */
   Restartable(MooseApp & moose_app,
               const std::string & name,
               const std::string & system_name,
               THREAD_ID tid);
-
-  /**
-   * Class constructor
-   * Populates the SubProblem and MooseMesh pointers
-   * @param parameters The InputParameters for the object.
-   * @param system_name The name of the MOOSE system.  ie "Kernel", "BCs", etc.  Should roughly
-   * correspond to the section in the input file so errors are easy to understand.
-   * @param subproblem An optional method for inputting the SubProblem object, this is used by
-   * FEProblemBase, otherwise the SubProblem comes from the parameters
-   */
-  //  Restartable(const InputParameters & parameters,
-  //              std::string system_name,
-  //              SubProblem * subproblem = nullptr);
-
-  /**
-   * Constructor for objects that don't have "parameters"
-   *
-   * @param name The name of the object
-   * @param system_name The name of the MOOSE system.  ie "Kernel", "BCs", etc.  Should roughly
-   * correspond to the section in the input file so errors are easy to understand.
-   * @param subproblem A reference to the subproblem for this object
-   * @param tid Optional thread id (will default to zero)
-   */
-  //  Restartable(const std::string & name,
-  //              std::string system_name,
-  //              SubProblem & subproblem,
-  //              THREAD_ID tid = 0);
 
   /**
    * Emtpy destructor
@@ -124,8 +118,6 @@ protected:
   declareRestartableDataWithContext(std::string data_name, const T & init_value, void * context);
 
   /**
-   * NOTE: These are used internally in MOOSE.  NOT FOR PUBLIC CONSUMPTION!
-   *
    * Declare a piece of data as "recoverable".
    * This means that in the event of a recovery this piece of data
    * will be restored back to its previous value.
@@ -140,8 +132,6 @@ protected:
   T & declareRecoverableData(std::string data_name);
 
   /**
-   * NOTE: These are used internally in MOOSE.  NOT FOR PUBLIC CONSUMPTION!
-   *
    * Declare a piece of data as "restartable" and initialize it.
    * This means that in the event of a restart this piece of data
    * will be restored back to its previous value.
@@ -157,8 +147,6 @@ protected:
   T & declareRecoverableData(std::string data_name, const T & init_value);
 
   /**
-   * Note: This is only used internally in MOOSE.  DO NOT use this function!
-   *
    * Declare a piece of data as "restartable".
    * This means that in the event of a restart this piece of data
    * will be restored back to its previous value.
@@ -172,8 +160,6 @@ protected:
   T & declareRestartableDataWithObjectName(std::string data_name, std::string object_name);
 
   /**
-   * Note: This is only used internally in MOOSE.  DO NOT use this function!
-   *
    * Declare a piece of data as "restartable".
    * This means that in the event of a restart this piece of data
    * will be restored back to its previous value.
@@ -191,7 +177,9 @@ protected:
 
 private:
   /// Helper function for actually registering the restartable data.
-  void registerRestartableDataOnApp(std::string name, RestartableDataValue * data, THREAD_ID tid);
+  void registerRestartableDataOnApp(std::string name,
+                                    std::unique_ptr<RestartableDataValue> data,
+                                    THREAD_ID tid);
 
   /// Helper function for actually registering the restartable data.
   void registerRecoverableDataOnApp(std::string name);
@@ -228,11 +216,12 @@ T &
 Restartable::declareRestartableDataWithContext(std::string data_name, void * context)
 {
   std::string full_name = _restartable_system_name + "/" + _restartable_name + "/" + data_name;
-  RestartableData<T> * data_ptr = new RestartableData<T>(full_name, context);
+  auto data_ptr = libmesh_make_unique<RestartableData<T>>(full_name, context);
+  T & restartable_data_ref = data_ptr->get();
 
-  registerRestartableDataOnApp(full_name, data_ptr, _restartable_tid);
+  registerRestartableDataOnApp(full_name, std::move(data_ptr), _restartable_tid);
 
-  return data_ptr->get();
+  return restartable_data_ref;
 }
 
 template <typename T>
@@ -242,13 +231,13 @@ Restartable::declareRestartableDataWithContext(std::string data_name,
                                                void * context)
 {
   std::string full_name = _restartable_system_name + "/" + _restartable_name + "/" + data_name;
-  RestartableData<T> * data_ptr = new RestartableData<T>(full_name, context);
-
+  auto data_ptr = libmesh_make_unique<RestartableData<T>>(full_name, context);
   data_ptr->set() = init_value;
 
-  registerRestartableDataOnApp(full_name, data_ptr, _restartable_tid);
+  T & restartable_data_ref = data_ptr->get();
+  registerRestartableDataOnApp(full_name, std::move(data_ptr), _restartable_tid);
 
-  return data_ptr->get();
+  return restartable_data_ref;
 }
 
 template <typename T>

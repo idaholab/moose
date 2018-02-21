@@ -832,14 +832,15 @@ MooseApp::libNameToAppName(const std::string & library_name) const
 }
 
 void
-MooseApp::registerRestartableData(std::string name, RestartableDataValue * data, THREAD_ID tid)
+MooseApp::registerRestartableData(std::string name,
+                                  std::unique_ptr<RestartableDataValue> data,
+                                  THREAD_ID tid)
 {
-  std::map<std::string, RestartableDataValue *> & restartable_data = _restartable_data[tid];
+  auto & restartable_data = _restartable_data[tid];
+  auto insert_pair = moose_try_emplace(restartable_data, name, std::move(data));
 
-  if (restartable_data.find(name) != restartable_data.end())
+  if (!insert_pair.second)
     mooseError("Attempted to declare restartable twice with the same name: ", name);
-
-  restartable_data[name] = data;
 }
 
 void

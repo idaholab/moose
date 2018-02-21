@@ -30,6 +30,7 @@
 #include <iostream>
 #include <map>
 #include <unordered_map>
+#include <memory>
 
 // Forward declarations
 class ColumnMajorMatrix;

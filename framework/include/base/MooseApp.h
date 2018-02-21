@@ -425,8 +425,9 @@ public:
    * @param data The actual data object.
    * @param tid The thread id of the object.  Use 0 if the object is not threaded.
    */
-  virtual void
-  registerRestartableData(std::string name, RestartableDataValue * data, THREAD_ID tid);
+  void registerRestartableData(std::string name,
+                               std::unique_ptr<RestartableDataValue> data,
+                               THREAD_ID tid);
 
   /**
    * Return reference to the restatable data object
@@ -579,7 +580,7 @@ protected:
    *
    * @param name The full (unique) name.
    */
-  virtual void registerRecoverableData(std::string name);
+  void registerRecoverableData(std::string name);
 
   /**
    * Runs post-initialization error checking that cannot be run correctly unless the simulation

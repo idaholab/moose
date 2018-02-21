@@ -44,10 +44,10 @@ Restartable::Restartable(MooseApp & moose_app,
 
 void
 Restartable::registerRestartableDataOnApp(std::string name,
-                                          RestartableDataValue * data,
+                                          std::unique_ptr<RestartableDataValue> data,
                                           THREAD_ID tid)
 {
-  _restartable_app.registerRestartableData(name, data, tid);
+  _restartable_app.registerRestartableData(name, std::move(data), tid);
 }
 
 void
