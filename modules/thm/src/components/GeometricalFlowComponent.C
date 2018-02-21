@@ -28,11 +28,11 @@ GeometricalFlowComponent::init()
 }
 
 const std::vector<GeometricalFlowComponent::Connection> &
-GeometricalFlowComponent::getConnections(PipeConnectable::EEndType end_type) const
+GeometricalFlowComponent::getConnections(FlowConnection::EEndType end_type) const
 {
   checkSetupStatus(MESH_PREPARED);
 
-  std::map<PipeConnectable::EEndType, std::vector<Connection>>::const_iterator it =
+  std::map<FlowConnection::EEndType, std::vector<Connection>>::const_iterator it =
       _connections.find(end_type);
   if (it != _connections.end())
     return it->second;

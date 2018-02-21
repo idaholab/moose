@@ -2,7 +2,7 @@
 #define GEOMETRICALFLOWCOMPONENT_H
 
 #include "GeometricalComponent.h"
-#include "PipeConnectable.h"
+#include "FlowConnection.h"
 
 class GeometricalFlowComponent;
 
@@ -40,7 +40,7 @@ public:
    *
    * @param[in] end_type   end type for the connections to get
    */
-  virtual const std::vector<Connection> & getConnections(PipeConnectable::EEndType end_type) const;
+  virtual const std::vector<Connection> & getConnections(FlowConnection::EEndType end_type) const;
 
   /**
    * Gets the name of the fluid properties user object for this component
@@ -56,7 +56,7 @@ protected:
   virtual void init() override;
 
   /// Map of end type to a list of connections
-  std::map<PipeConnectable::EEndType, std::vector<Connection>> _connections;
+  std::map<FlowConnection::EEndType, std::vector<Connection>> _connections;
 
   /// Name of fluid properties user object
   const UserObjectName & _fp_name;
