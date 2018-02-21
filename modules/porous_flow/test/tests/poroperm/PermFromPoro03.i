@@ -221,8 +221,8 @@
 
   # Porosity
   [./porosity]
-    type = PorousFlowPorosityConst
-    porosity = 0.1
+    type = PorousFlowPorosity
+    porosity_zero = 0.1
   [../]
 
   # Permeability

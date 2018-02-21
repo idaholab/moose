@@ -124,7 +124,9 @@
     at_nodes = false
   [../]
   [./porosity]
-    type = PorousFlowPorosityHM
+    type = PorousFlowPorosity
+    fluid = true
+    mechanical = true
     at_nodes = false
     porosity_zero = 0.1
     biot_coefficient = 0.5

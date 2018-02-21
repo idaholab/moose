@@ -301,7 +301,9 @@
     material_property = PorousFlow_viscosity_nodal
   [../]
   [./porosity]
-    type = PorousFlowPorosityHM
+    type = PorousFlowPorosity
+    fluid = true
+    mechanical = true
     ensure_positive = false
     at_nodes = true
     porosity_zero = 0.1

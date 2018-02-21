@@ -59,6 +59,7 @@
 #include "PorousFlowPermeabilityKozenyCarman.h"
 #include "PorousFlowPermeabilityExponential.h"
 #include "PorousFlowPorosityConst.h"
+#include "PorousFlowPorosity.h"
 #include "PorousFlowPorosityHM.h"
 #include "PorousFlowPorosityHMBiotModulus.h"
 #include "PorousFlowPorosityTM.h"
@@ -84,6 +85,8 @@
 #include "PorousFlowConstantThermalExpansionCoefficient.h"
 #include "PorousFlowFluidStateWaterNCG.h"
 #include "PorousFlowFluidStateBrineCO2.h"
+#include "PorousFlowMassFractionAqueousEquilibriumChemistry.h"
+#include "PorousFlowAqueousPreDisChemistry.h"
 
 // Kernels
 #include "PorousFlowAdvectiveFlux.h"
@@ -104,6 +107,7 @@
 #include "PorousFlowFullySaturatedHeatAdvection.h"
 #include "PorousFlowFullySaturatedMassTimeDerivative.h"
 #include "PorousFlowExponentialDecay.h"
+#include "PorousFlowPreDis.h"
 
 // BoundaryConditions
 #include "PorousFlowSink.h"
@@ -216,6 +220,7 @@ PorousFlowApp::registerObjects(Factory & factory)
   registerMaterial(PorousFlowPermeabilityKozenyCarman);
   registerMaterial(PorousFlowPermeabilityExponential);
   registerMaterial(PorousFlowPorosityConst);
+  registerMaterial(PorousFlowPorosity);
   registerMaterial(PorousFlowPorosityHM);
   registerMaterial(PorousFlowPorosityHMBiotModulus);
   registerMaterial(PorousFlowPorosityTM);
@@ -241,6 +246,8 @@ PorousFlowApp::registerObjects(Factory & factory)
   registerMaterial(PorousFlowConstantThermalExpansionCoefficient);
   registerMaterial(PorousFlowFluidStateWaterNCG);
   registerMaterial(PorousFlowFluidStateBrineCO2);
+  registerMaterial(PorousFlowMassFractionAqueousEquilibriumChemistry);
+  registerMaterial(PorousFlowAqueousPreDisChemistry);
 
   // Kernels
   registerKernel(PorousFlowAdvectiveFlux);
@@ -261,6 +268,7 @@ PorousFlowApp::registerObjects(Factory & factory)
   registerKernel(PorousFlowFullySaturatedHeatAdvection);
   registerKernel(PorousFlowFullySaturatedMassTimeDerivative);
   registerKernel(PorousFlowExponentialDecay);
+  registerKernel(PorousFlowPreDis);
 
   // BoundaryConditions
   registerBoundaryCondition(PorousFlowSink);
