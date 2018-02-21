@@ -1,4 +1,5 @@
 #include "FlowConnection.h"
+#include "GeometricalFlowComponent.h"
 
 const std::map<std::string, FlowConnection::EEndType> FlowConnection::_end_type_to_enum{
     {"IN", IN}, {"OUT", OUT}};
@@ -19,6 +20,15 @@ validParams<FlowConnection>()
 }
 
 FlowConnection::FlowConnection(const InputParameters & params) : Component(params) {}
+
+void
+FlowConnection::check()
+{
+  Component::check();
+
+  for (const auto & comp_name : _connected_component_names)
+    checkComponentOfTypeExistsByName<GeometricalFlowComponent>(comp_name);
+}
 
 void
 FlowConnection::addConnection(const std::string & connection_string)
@@ -43,4 +53,11 @@ FlowConnection::addConnection(const std::string & connection_string)
   // Add dependency because the connected component's setupMesh() must be called
   // before this component's setupMesh().
   addDependency(connected_component_name);
+}
+
+void
+FlowConnection::checkNumberOfConnections(const unsigned int & n_connections) const
+{
+  if (_connections.size() != n_connections)
+    logError("The number of connections (", _connections.size(), ") must equal ", n_connections);
 }

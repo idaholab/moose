@@ -66,6 +66,8 @@ public:
   }
 
 protected:
+  virtual void check() override;
+
   /**
    * Adds a connection for this component
    *
@@ -76,6 +78,22 @@ protected:
    */
   void addConnection(const std::string & connection_string);
 
+  /**
+   * Checks that the number of connections is equal to the supplied value
+   *
+   * @param[in] n_connections   enforced number of connections
+   */
+  void checkNumberOfConnections(const unsigned int & n_connections) const;
+
+  /**
+   * Checks that the size of a vector parameter equals the number of connections
+   *
+   * @tparam    T       type of element in the vector parameter
+   * @param[in] param   vector parameter name
+   */
+  template <typename T>
+  void checkSizeEqualsNumberOfConnections(const std::string & param) const;
+
 private:
   /// Vector of connections of this component
   std::vector<Connection> _connections;
@@ -83,6 +101,21 @@ private:
   /// Vector of connected component names
   std::vector<std::string> _connected_component_names;
 };
+
+template <typename T>
+void
+FlowConnection::checkSizeEqualsNumberOfConnections(const std::string & param) const
+{
+  const auto & value = getParam<std::vector<T>>(param);
+  if (value.size() != _connections.size())
+    logError("The number of entries in '",
+             param,
+             "' (",
+             value.size(),
+             ") must equal the number of connections (",
+             _connections.size(),
+             ")");
+}
 
 namespace RELAP7
 {
