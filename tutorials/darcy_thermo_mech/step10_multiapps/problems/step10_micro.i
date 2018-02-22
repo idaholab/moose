@@ -38,6 +38,10 @@
 [AuxVariables]
   [./phi]
   [../]
+  [./por_var]
+    family = MONOMIAL
+    order = CONSTANT
+  [../]
 []
 
 [AuxKernels]
@@ -47,6 +51,11 @@
     variable = phi
     reference_temperature = 300
     temperature = temperature_in
+  [../]
+  [./por_var]
+    type = MaterialRealAux
+    variable = por_var
+    property = porosity
   [../]
 []
 
@@ -93,6 +102,15 @@
     dx = 0.1
     boundary = right
     length_scale = 1
+  [../]
+  [./por_var]
+    type = ElementAverageValue
+    variable = por_var
+  [../]
+  [./t_right]
+    type = SideAverageValue
+    boundary = right
+    variable = temperature
   [../]
 []
 
