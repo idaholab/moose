@@ -259,6 +259,8 @@ format(int argc, char ** argv)
 {
   Flags flags;
   flags.add("i", "modify file(s) inplace");
+  flags.add("maxlen", "maximum line length for strings", "100");
+  flags.add("indent", "indentation string", "  ");
   auto positional = parseOpts(argc, argv, flags);
 
   if (positional.size() < 1)
@@ -266,6 +268,8 @@ format(int argc, char ** argv)
     std::cerr << "please pass in an input file argument\n";
     return 1;
   }
+
+  int maxlen = std::stoi(flags.val("maxlen"));
 
   int ret = 0;
   for (int i = 0; i < positional.size(); i++)
@@ -287,11 +291,11 @@ format(int argc, char ** argv)
     }
 
     if (!flags.have("i"))
-      std::cout << root->render() << "\n";
+      std::cout << root->render(0, flags.val("indent"), maxlen) << "\n";
     else
     {
       std::ofstream f(fname);
-      f << root->render();
+      f << root->render(0, flags.val("indent"), maxlen);
     }
   }
 

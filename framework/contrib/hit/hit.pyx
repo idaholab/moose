@@ -99,7 +99,8 @@ cdef class Node:
         return self.render()
 
     def render(self, indent=0, indent_text='  ', maxlen=0):
-        return self._cnode.render(indent)
+        cindent = <string> indent_text.encode('utf-8')
+        return self._cnode.render(indent, cindent, maxlen)
 
     def line(self):
         return int(self._cnode.line())
