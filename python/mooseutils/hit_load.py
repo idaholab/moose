@@ -1,10 +1,38 @@
 """Wrapper for hit parser."""
 import os
-import anytree
 import hit
 import message
 
-class HitNode(anytree.NodeMixin):
+# The 'HitNode' object is used within the TestHarness, which should operate without any
+# special python libraries. However, the 'anytree' package is used by various utilities within the
+# moose/python tools (e.g., MooseDocs). It is useful to have this hit wrapper use the anytree
+# package for consistency. Therefore, the following allows the HitNode to work with or without it.
+try:
+    import anytree
+    from anytree import NodeMixin
+    HAVE_ANYTREE = True
+
+except ImportError:
+    HAVE_ANYTREE = False
+
+    class NodeMixin(object):
+        """Proxy for anytree.NodeMixin"""
+        def __init__(self):
+            self._parent = None
+            self.name = None
+            self.children = list()
+
+        @property
+        def parent(self):
+            return self._parent
+
+        @parent.setter
+        def parent(self, value):
+            self._parent = value
+            if self._parent:
+                self._parent.children.append(self)
+
+class HitNode(NodeMixin):
     """
     An anytree.Node object for building a hit tree.
     """
@@ -36,7 +64,7 @@ class HitNode(anytree.NodeMixin):
 
     def find(self, name, fuzzy=True):
         """
-        Locate first occurance of a node by name starting from this node.
+        Locate first occurrence of a node by name starting from this node.
 
         Inputs:
             name[str]: The name to search for within the tree.
@@ -44,9 +72,14 @@ class HitNode(anytree.NodeMixin):
                          provide name must be in the node name. If this is set to False the names
                          must match exact.
         """
-        for node in anytree.PreOrderIter(self):
-            if (fuzzy and name in node.name) or (not fuzzy and name == node.name):
-                return node
+        if HAVE_ANYTREE:
+            for node in anytree.PreOrderIter(self):
+                if (fuzzy and name in node.name) or (not fuzzy and name == node.name):
+                    return node
+        else:
+            msg = "The 'find' method requires the 'anytree' python package. This can " \
+                  "be installed via your python package manager (e.g., pip install anytree --user)."
+            message.mooseError(msg)
 
     def findall(self, name, fuzzy=True):
         """
@@ -58,8 +91,13 @@ class HitNode(anytree.NodeMixin):
                          provide name must be in the node name. If this is set to False the names
                          must match exact.
         """
-        filter_ = lambda n: (fuzzy and name in n.name) or (not fuzzy and n.name == name)
-        return [node for node in anytree.PreOrderIter(self, filter_=filter_)]
+        if HAVE_ANYTREE:
+            filter_ = lambda n: (fuzzy and name in n.name) or (not fuzzy and n.name == name)
+            return [node for node in anytree.PreOrderIter(self, filter_=filter_)]
+        else:
+            msg = "The 'findall' method requires the 'anytree' python package. This can " \
+                  "be installed via your python package manager (e.g., pip install anytree --user)."
+            message.mooseError(msg)
 
     def render(self):
         """
@@ -124,7 +162,9 @@ class HitNode(anytree.NodeMixin):
         """
         Print the complete tree beginning at this node.
         """
-        return str(anytree.RenderTree(self))
+        if HAVE_ANYTREE:
+            return str(anytree.RenderTree(self))
+        return self.__class__
 
 def hit_load(filename):
     """
