@@ -37,6 +37,7 @@ hit_deps      := $(patsubst %.cc, %.$(obj-suffix).d, $(hit_srcfiles))
 pyhit_srcfiles  := $(hit_DIR)/hit.cpp $(hit_DIR)/lex.cc $(hit_DIR)/parse.cc
 pyhit_LIB       := $(FRAMEWORK_DIR)/../python/hit.so
 
+# on *nix, produces hit.so, on windows, produces hit.pyd
 hit $(pyhit_LIB): $(pyhit_srcfiles)
 	@echo "Building and linking "$@"..."
 	@bash -c 'cd "$(hit_DIR)" && python setup.py build_ext --inplace `if test "$$VS11COMNTOOLS"; then echo "--compiler=msvc"; fi`'
