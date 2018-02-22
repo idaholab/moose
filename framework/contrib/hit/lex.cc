@@ -336,28 +336,34 @@ lexString(Lexer * l)
   l->ignore();
 
   if (!charIn(l->peek(), "'\""))
-    consumeUnquotedString(l);
-  else
   {
-    char quote = 0;
-    if (l->accept("\""))
-      quote = '"';
-    else if (l->accept("'"))
-      quote = '\'';
+    consumeUnquotedString(l);
+    l->emit(TokType::String);
+    return lexHit;
+  }
 
+  std::string quote = "";
+  if (l->peek() == '"')
+    quote = "\"";
+  else if (l->peek() == '\'')
+    quote = "'";
+
+  while (l->accept(quote))
+  {
     char c = l->input()[l->start()];
     char prev;
     while (true)
     {
       prev = c;
       c = l->next();
-      if (c == quote and prev != '\\')
+      if (c == quote[0] and prev != '\\')
         break;
       else if (c == '\0')
         return l->error("unterminated string");
     }
+    l->emit(TokType::String);
+    consumeWhitespace(l);
   }
-  l->emit(TokType::String);
   return lexHit;
 }
 

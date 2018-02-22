@@ -735,7 +735,7 @@ parseSectionBody(Parser * p, Node * n)
     else if (tok.type == TokType::EOF)
       return;
     else
-      p->error(tok, "unexpected token");
+      p->error(tok, "unexpected token " + tok.str());
   }
 }
 
@@ -773,7 +773,29 @@ parseField(Parser * p, Node * n)
     if (isbool)
       field = p->emit(new Field(fieldtok.val, Field::Kind::Bool, valtok.val));
     else
-      field = p->emit(new Field(fieldtok.val, Field::Kind::String, valtok.val));
+    {
+      std::string strval;
+      std::string quote;
+      while (true)
+      {
+        if (valtok.type == TokType::String)
+        {
+          auto s = valtok.val;
+          if (valtok.val[0] == '"' || valtok.val[0] == '\'')
+          {
+            quote = std::string(1, valtok.val[0]);
+            s = s.substr(1, s.size() - 2);
+          }
+          strval += s;
+        }
+
+        if (p->peek().type != TokType::BlankLine && p->peek().type != TokType::String)
+          break;
+        valtok = p->next();
+      }
+      strval = quote + strval + quote;
+      field = p->emit(new Field(fieldtok.val, Field::Kind::String, strval));
+    }
   }
   else
     p->error(valtok, "malformed field value");
