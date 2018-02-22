@@ -10,6 +10,7 @@
 #include "ComputeSmearedCrackingStress.h"
 #include "ElasticityTensorTools.h"
 #include "StressUpdateBase.h"
+#include "Conversion.h"
 
 template <>
 InputParameters
@@ -17,26 +18,31 @@ validParams<ComputeSmearedCrackingStress>()
 {
   InputParameters params = validParams<ComputeMultipleInelasticStress>();
   params.addClassDescription("Compute stress using a fixed smeared cracking model");
-  params.addParam<std::string>(
-      "cracking_release",
-      "abrupt",
-      "The cracking release type.  Choices are abrupt (default) and exponential.");
-  params.addParam<Real>(
+  MooseEnum cracking_release("abrupt exponential power", "abrupt");
+  params.addParam<MooseEnum>("cracking_release",
+                             cracking_release,
+                             "The cracking release type.  'abrupt' (default) gives an abrupt "
+                             "stress release, 'exponential' uses an exponential softening model, "
+                             "and 'power' uses a power law");
+  params.addRangeCheckedParam<Real>(
       "cracking_residual_stress",
       0.0,
+      "cracking_residual_stress <= 1 & cracking_residual_stress >= 0",
       "The fraction of the cracking stress allowed to be maintained following a crack.");
   params.addRequiredCoupledVar(
       "cracking_stress",
       "The stress threshold beyond which cracking occurs. Negative values prevent cracking.");
-  params.addParam<std::vector<unsigned int>>(
-      "active_crack_planes", "Planes on which cracks are allowed (0,1,2 -> x,z,theta in RZ)");
+  MultiMooseEnum direction("x y z");
+  params.addParam<MultiMooseEnum>(
+      "prescribed_crack_directions", direction, "Prescribed directions of first cracks");
   params.addParam<unsigned int>(
       "max_cracks", 3, "The maximum number of cracks allowed at a material point.");
-  params.addParam<Real>("cracking_neg_fraction",
-                        0,
-                        "The fraction of the cracking strain at which "
-                        "a transitition begins during decreasing "
-                        "strain to the original stiffness.");
+  params.addRangeCheckedParam<Real>("cracking_neg_fraction",
+                                    0,
+                                    "cracking_neg_fraction <= 1 & cracking_neg_fraction >= 0",
+                                    "The fraction of the cracking strain at which "
+                                    "a transitition begins during decreasing "
+                                    "strain to the original stiffness.");
   params.addParam<Real>("cracking_beta",
                         1.0,
                         "Coefficient used to control the softening in the exponential model.  "
@@ -59,41 +65,19 @@ validParams<ComputeSmearedCrackingStress>()
   return params;
 }
 
-namespace
-{
-ComputeSmearedCrackingStress::CRACKING_RELEASE
-getCrackingModel(const std::string & name)
-{
-  std::string n(name);
-  std::transform(n.begin(), n.end(), n.begin(), ::tolower);
-  ComputeSmearedCrackingStress::CRACKING_RELEASE cm(ComputeSmearedCrackingStress::CR_UNKNOWN);
-  if (n == "abrupt")
-    cm = ComputeSmearedCrackingStress::CR_ABRUPT;
-  else if (n == "exponential")
-    cm = ComputeSmearedCrackingStress::CR_EXPONENTIAL;
-  else if (n == "power")
-    cm = ComputeSmearedCrackingStress::CR_POWER;
-  if (cm == ComputeSmearedCrackingStress::CR_UNKNOWN)
-    mooseError("Unknown cracking model");
-  return cm;
-}
-}
-
 ComputeSmearedCrackingStress::ComputeSmearedCrackingStress(const InputParameters & parameters)
   : ComputeMultipleInelasticStress(parameters),
-    _cracking_release(getCrackingModel(getParam<std::string>("cracking_release"))),
+    _cracking_release(getParam<MooseEnum>("cracking_release").getEnum<CrackingRelease>()),
     _cracking_residual_stress(getParam<Real>("cracking_residual_stress")),
     _cracking_stress(coupledValue("cracking_stress")),
-    _active_crack_planes(3, 1),
     _max_cracks(getParam<unsigned int>("max_cracks")),
     _cracking_neg_fraction(getParam<Real>("cracking_neg_fraction")),
     _cracking_beta(getParam<Real>("cracking_beta")),
     _shear_retention_factor(getParam<Real>("shear_retention_factor")),
     _max_stress_correction(getParam<Real>("max_stress_correction")),
+    _crack_damage(declareProperty<RealVectorValue>(_base_name + "crack_damage")),
+    _crack_damage_old(getMaterialPropertyOld<RealVectorValue>(_base_name + "crack_damage")),
     _crack_flags(declareProperty<RealVectorValue>(_base_name + "crack_flags")),
-    _crack_flags_old(getMaterialPropertyOld<RealVectorValue>(_base_name + "crack_flags")),
-    _crack_count(NULL),
-    _crack_count_old(NULL),
     _crack_rotation(declareProperty<RankTwoTensor>(_base_name + "crack_rotation")),
     _crack_rotation_old(getMaterialPropertyOld<RankTwoTensor>(_base_name + "crack_rotation")),
     _crack_strain(declareProperty<RealVectorValue>(_base_name + "crack_strain")),
@@ -101,31 +85,33 @@ ComputeSmearedCrackingStress::ComputeSmearedCrackingStress(const InputParameters
     _crack_max_strain(declareProperty<RealVectorValue>(_base_name + "crack_max_strain")),
     _crack_max_strain_old(getMaterialPropertyOld<RealVectorValue>(_base_name + "crack_max_strain"))
 {
-  if (_cracking_release == CR_POWER)
+  MultiMooseEnum prescribed_crack_directions =
+      getParam<MultiMooseEnum>("prescribed_crack_directions");
+  if (prescribed_crack_directions.size() > 0)
   {
-    _crack_count = &declareProperty<RealVectorValue>(_base_name + "crack_count");
-    _crack_count_old = &getMaterialPropertyOld<RealVectorValue>(_base_name + "crack_count");
-  }
-
-  if (parameters.isParamValid("active_crack_planes"))
-  {
-    const std::vector<unsigned int> & planes =
-        getParam<std::vector<unsigned>>("active_crack_planes");
-    for (unsigned int i = 0; i < 3; ++i)
-      _active_crack_planes[i] = 0;
-
-    for (unsigned int i = 0; i < planes.size(); ++i)
+    if (prescribed_crack_directions.size() > 3)
+      mooseError("A maximum of three crack directions may be specified");
+    for (unsigned int i = 0; i < prescribed_crack_directions.size(); ++i)
     {
-      if (planes[i] > 2)
-        mooseError("Active planes must be 0, 1, or 2");
-      _active_crack_planes[planes[i]] = 1;
+      for (unsigned int j = 0; j < i; ++j)
+        if (prescribed_crack_directions[i] == prescribed_crack_directions[j])
+          mooseError("Entries in 'prescribed_crack_directions' cannot be repeated");
+      _prescribed_crack_directions.push_back(
+          static_cast<unsigned int>(prescribed_crack_directions.get(i)));
+    }
+
+    // Fill in the last remaining direction if 2 are specified
+    if (_prescribed_crack_directions.size() == 2)
+    {
+      std::set<unsigned int> available_dirs = {0, 1, 2};
+      for (auto dir : _prescribed_crack_directions)
+        if (available_dirs.erase(dir) != 1)
+          mooseError("Invalid prescribed crack direction:" + Moose::stringify(dir));
+      if (available_dirs.size() != 1)
+        mooseError("Error in finding remaining available crack direction");
+      _prescribed_crack_directions.push_back(*available_dirs.begin());
     }
   }
-  if (_cracking_residual_stress < 0 || _cracking_residual_stress > 1)
-    mooseError("cracking_residual_stress must be between 0 and 1");
-  if (parameters.isParamSetByUser("cracking_neg_fraction") &&
-      (_cracking_neg_fraction <= 0 || _cracking_neg_fraction > 1))
-    mooseError("cracking_neg_fraction must be > zero and <= 1");
 }
 
 void
@@ -133,21 +119,68 @@ ComputeSmearedCrackingStress::initQpStatefulProperties()
 {
   ComputeMultipleInelasticStress::initQpStatefulProperties();
 
-  _crack_flags[_qp](0) = _crack_flags[_qp](1) = _crack_flags[_qp](2) = 1;
+  _crack_damage[_qp] = 0.0;
 
-  if (_crack_count)
-    (*_crack_count)[_qp] = 0;
+  _crack_strain[_qp] = 0.0;
+  _crack_max_strain[_qp](0) = 0.0;
 
-  _crack_strain[_qp] = 0;
-  _crack_max_strain[_qp](0) = 0;
-  _crack_rotation[_qp].Identity();
+  switch (_prescribed_crack_directions.size())
+  {
+    case 0:
+    {
+      _crack_rotation[_qp] = RankTwoTensor::Identity();
+      break;
+    }
+    case 1:
+    {
+      _crack_rotation[_qp].zero();
+      switch (_prescribed_crack_directions[0])
+      {
+        case 0:
+        {
+          _crack_rotation[_qp](0, 0) = 1.0;
+          _crack_rotation[_qp](1, 1) = 1.0;
+          _crack_rotation[_qp](2, 2) = 1.0;
+          break;
+        }
+        case 1:
+        {
+          _crack_rotation[_qp](1, 0) = 1.0;
+          _crack_rotation[_qp](0, 1) = 1.0;
+          _crack_rotation[_qp](2, 2) = 1.0;
+          break;
+        }
+        case 2:
+        {
+          _crack_rotation[_qp](2, 0) = 1.0;
+          _crack_rotation[_qp](0, 1) = 1.0;
+          _crack_rotation[_qp](1, 2) = 1.0;
+          break;
+        }
+      }
+      break;
+    }
+    case 2:
+    {
+      mooseError("Number of prescribed crack directions cannot be 2");
+      break;
+    }
+    case 3:
+    {
+      for (unsigned int i = 0; i < _prescribed_crack_directions.size(); ++i)
+      {
+        RealVectorValue crack_dir_vec;
+        crack_dir_vec(_prescribed_crack_directions[i]) = 1.0;
+        _crack_rotation[_qp].fillColumn(i, crack_dir_vec);
+      }
+    }
+  }
 }
 
 void
 ComputeSmearedCrackingStress::initialSetup()
 {
   ComputeMultipleInelasticStress::initialSetup();
-  _is_finite_strain = hasBlockMaterialProperty<RankTwoTensor>(_base_name + "strain_increment");
 
   if (!hasGuaranteedMaterialProperty(_elasticity_tensor_name, Guarantee::ISOTROPIC))
     mooseError("ComputeSmearedCrackingStress requires that the elasticity tensor be "
@@ -176,8 +209,8 @@ ComputeSmearedCrackingStress::computeQpStress()
     // Since the other inelastic models are inactive, they will not limit the time step
     _matl_timestep_limit[_qp] = std::numeric_limits<Real>::max();
 
-    // update elasticity tensor with old cracking status: crack_flags_old and crack_orientation_old
-    updateElasticityTensor();
+    // update _local_elasticity_tensor based on cracking state in previous time step
+    updateLocalElasticityTensor();
 
     // Calculate stress in intermediate configuration
     _stress[_qp] = _local_elasticity_tensor * _elastic_strain[_qp];
@@ -191,18 +224,17 @@ ComputeSmearedCrackingStress::computeQpStress()
   }
 
   // compute crack status and adjust stress
-  crackingStressRotation();
+  updateCrackingStateAndStress();
 
   if (_perform_finite_strain_rotations)
   {
     finiteStrainRotation(force_elasticity_rotation);
-    _crack_rotation[_qp] =
-        _rotation_increment[_qp] * _crack_rotation[_qp] * _rotation_increment[_qp].transpose();
+    _crack_rotation[_qp] = _rotation_increment[_qp] * _crack_rotation[_qp];
   }
 }
 
 void
-ComputeSmearedCrackingStress::updateElasticityTensor()
+ComputeSmearedCrackingStress::updateLocalElasticityTensor()
 {
   const Real youngs_modulus =
       ElasticityTensorTools::getIsotropicYoungsModulus(_elasticity_tensor[_qp]);
@@ -213,7 +245,7 @@ ComputeSmearedCrackingStress::updateElasticityTensor()
 
   if (cracking_stress > 0)
   {
-    RealVectorValue crack_flags_local(1.0, 1.0, 1.0);
+    RealVectorValue stiffness_ratio_local(1.0, 1.0, 1.0);
     const RankTwoTensor & R = _crack_rotation_old[_qp];
     RankTwoTensor ePrime(_elastic_strain_old[_qp]);
     ePrime.rotate(R.transpose());
@@ -221,26 +253,26 @@ ComputeSmearedCrackingStress::updateElasticityTensor()
     for (unsigned int i = 0; i < 3; ++i)
     {
       // Update elasticity tensor based on crack status of the end of last time step
-      if (_crack_flags_old[_qp](i) < 1.0)
+      if (_crack_damage_old[_qp](i) > 0.0)
       {
-        if (_cracking_neg_fraction == 0 && MooseUtils::absoluteFuzzyLessThan(ePrime(i, i), 0.0))
-          crack_flags_local(i) = 1.0;
-        else if (_cracking_neg_fraction > 0 &&
+        if (_cracking_neg_fraction == 0.0 && MooseUtils::absoluteFuzzyLessThan(ePrime(i, i), 0.0))
+          stiffness_ratio_local(i) = 1.0;
+        else if (_cracking_neg_fraction > 0.0 &&
                  ePrime(i, i) < _crack_strain_old[_qp](i) * _cracking_neg_fraction &&
                  ePrime(i, i) > -_crack_strain_old[_qp](i) * _cracking_neg_fraction)
         {
           const Real etr = _cracking_neg_fraction * _crack_strain_old[_qp](i);
           const Real Eo = cracking_stress / _crack_strain_old[_qp](i);
-          const Real Ec = Eo * _crack_flags_old[_qp](i);
+          const Real Ec = Eo * (1.0 - _crack_damage_old[_qp](i));
           const Real a = (Ec - Eo) / (4 * etr);
           const Real b = (Ec + Eo) / 2;
           // Compute the ratio of the current transition stiffness to the original stiffness
-          crack_flags_local(i) = (2.0 * a * etr + b) / Eo;
+          stiffness_ratio_local(i) = (2.0 * a * etr + b) / Eo;
           cracking_locally_active = true;
         }
         else
         {
-          crack_flags_local(i) = _crack_flags_old[_qp](i);
+          stiffness_ratio_local(i) = (1.0 - _crack_damage_old[_qp](i));
           cracking_locally_active = true;
         }
       }
@@ -249,11 +281,9 @@ ComputeSmearedCrackingStress::updateElasticityTensor()
     if (cracking_locally_active)
     {
       // Update the elasticity tensor in the crack coordinate system
-      const RealVectorValue & c = crack_flags_local;
-
-      const bool c0_coupled = MooseUtils::absoluteFuzzyEqual(c(0), 1.0);
-      const bool c1_coupled = MooseUtils::absoluteFuzzyEqual(c(1), 1.0);
-      const bool c2_coupled = MooseUtils::absoluteFuzzyEqual(c(2), 1.0);
+      const bool c0_coupled = MooseUtils::absoluteFuzzyEqual(stiffness_ratio_local(0), 1.0);
+      const bool c1_coupled = MooseUtils::absoluteFuzzyEqual(stiffness_ratio_local(1), 1.0);
+      const bool c2_coupled = MooseUtils::absoluteFuzzyEqual(stiffness_ratio_local(2), 1.0);
 
       const Real c01 = (c0_coupled && c1_coupled ? 1.0 : 0.0);
       const Real c02 = (c0_coupled && c2_coupled ? 1.0 : 0.0);
@@ -267,12 +297,15 @@ ComputeSmearedCrackingStress::updateElasticityTensor()
       // for isotropic or orthotropic materials.
       std::vector<Real> local_elastic(9);
 
-      local_elastic[0] = (c0_coupled ? _elasticity_tensor[_qp](0, 0, 0, 0) : c(0) * youngs_modulus);
+      local_elastic[0] = (c0_coupled ? _elasticity_tensor[_qp](0, 0, 0, 0)
+                                     : stiffness_ratio_local(0) * youngs_modulus);
       local_elastic[1] = _elasticity_tensor[_qp](0, 0, 1, 1) * c01;
       local_elastic[2] = _elasticity_tensor[_qp](0, 0, 2, 2) * c02;
-      local_elastic[3] = (c1_coupled ? _elasticity_tensor[_qp](1, 1, 1, 1) : c(1) * youngs_modulus);
+      local_elastic[3] = (c1_coupled ? _elasticity_tensor[_qp](1, 1, 1, 1)
+                                     : stiffness_ratio_local(1) * youngs_modulus);
       local_elastic[4] = _elasticity_tensor[_qp](1, 1, 2, 2) * c12;
-      local_elastic[5] = (c2_coupled ? _elasticity_tensor[_qp](2, 2, 2, 2) : c(2) * youngs_modulus);
+      local_elastic[5] = (c2_coupled ? _elasticity_tensor[_qp](2, 2, 2, 2)
+                                     : stiffness_ratio_local(2) * youngs_modulus);
       local_elastic[6] = _elasticity_tensor[_qp](1, 2, 1, 2) * c12_shear_retention;
       local_elastic[7] = _elasticity_tensor[_qp](0, 2, 0, 2) * c02_shear_retention;
       local_elastic[8] = _elasticity_tensor[_qp](0, 1, 0, 1) * c01_shear_retention;
@@ -288,7 +321,7 @@ ComputeSmearedCrackingStress::updateElasticityTensor()
 }
 
 void
-ComputeSmearedCrackingStress::crackingStressRotation()
+ComputeSmearedCrackingStress::updateCrackingStateAndStress()
 {
   const Real youngs_modulus =
       ElasticityTensorTools::getIsotropicYoungsModulus(_elasticity_tensor[_qp]);
@@ -305,17 +338,17 @@ ComputeSmearedCrackingStress::crackingStressRotation()
     {
       _crack_max_strain[_qp](i) = _crack_max_strain_old[_qp](i);
       _crack_strain[_qp](i) = _crack_strain_old[_qp](i);
-      _crack_flags[_qp](i) = _crack_flags_old[_qp](i);
+      _crack_damage[_qp](i) = _crack_damage_old[_qp](i);
     }
 
     // Compute crack orientations: updated _crack_rotation[_qp] based on current strain
-    RealVectorValue principal_strain;
-    computeCrackStrainAndOrientation(principal_strain);
+    RealVectorValue strain_in_crack_dir;
+    computeCrackStrainAndOrientation(strain_in_crack_dir);
 
     for (unsigned i = 0; i < 3; ++i)
     {
-      if (principal_strain(i) > _crack_max_strain[_qp](i))
-        _crack_max_strain[_qp](i) = principal_strain(i);
+      if (strain_in_crack_dir(i) > _crack_max_strain[_qp](i))
+        _crack_max_strain[_qp](i) = strain_in_crack_dir(i);
     }
 
     // Check for new cracks.
@@ -327,7 +360,7 @@ ComputeSmearedCrackingStress::crackingStressRotation()
     unsigned int num_cracks = 0;
     for (unsigned int i = 0; i < 3; ++i)
     {
-      if (_crack_flags_old[_qp](i) < 1)
+      if (_crack_damage_old[_qp](i) > 0.0)
         ++num_cracks;
     }
 
@@ -337,38 +370,20 @@ ComputeSmearedCrackingStress::crackingStressRotation()
     {
       sigma(i) = sigmaPrime(i, i);
 
-      Real crackFactor(1);
+      Real stiffness_ratio = 1.0 - _crack_damage[_qp](i);
 
-      if (_cracking_release == CR_POWER)
-        (*_crack_count)[_qp](i) = (*_crack_count_old)[_qp](i);
+      const bool pre_existing_crack = (_crack_damage_old[_qp](i) > 0.0);
+      const bool met_stress_criterion = (sigma(i) > cracking_stress);
+      const bool loading_existing_crack = (strain_in_crack_dir(i) >= _crack_max_strain[_qp](i));
+      const bool allowed_to_crack = (pre_existing_crack || num_cracks < _max_cracks);
+      bool new_crack = false;
 
-      if ((_cracking_release == CR_POWER && sigma(i) > cracking_stress &&
-           _active_crack_planes[i] == 1))
+      cracked |= pre_existing_crack;
+
+      // Adjustments for newly created cracks
+      if (met_stress_criterion && !pre_existing_crack && allowed_to_crack)
       {
-        cracked = true;
-        ++((*_crack_count)[_qp](i));
-
-        // Assume Poisson's ratio drops to zero for this direction.  Stiffness is then Young's
-        // modulus.
-        if ((*_crack_count_old)[_qp](i) == 0)
-        {
-          ++num_cracks;
-          _crack_strain[_qp](i) = cracking_stress / youngs_modulus;
-        }
-        // Compute stress, factor....
-        _crack_flags[_qp](i) *= 1. / 3.;
-
-        if (_crack_max_strain[_qp](i) < _crack_strain[_qp](i))
-          _crack_max_strain[_qp](i) = _crack_strain[_qp](i);
-
-        sigma(i) = _crack_flags[_qp](i) * youngs_modulus * principal_strain(i);
-      }
-      else if (_cracking_release != CR_POWER && _crack_flags_old[_qp](i) == 1 &&
-               sigma(i) > cracking_stress && num_cracks < _max_cracks &&
-               _active_crack_planes[i] == 1)
-      {
-        // A new crack
-        cracked = true;
+        new_crack = true;
         ++num_cracks;
 
         // Assume Poisson's ratio drops to zero for this direction.  Stiffness is then Young's
@@ -377,56 +392,55 @@ ComputeSmearedCrackingStress::crackingStressRotation()
 
         if (_crack_max_strain[_qp](i) < _crack_strain[_qp](i))
           _crack_max_strain[_qp](i) = _crack_strain[_qp](i);
-
-        crackFactor = computeCrackFactor(
-            i, sigma(i), _crack_flags[_qp](i), cracking_stress, cracking_alpha, youngs_modulus);
-
-        _crack_flags[_qp](i) = crackFactor;
       }
 
-      else if (_cracking_release != CR_POWER && _crack_flags_old[_qp](i) < 1 &&
-               std::abs(principal_strain(i) - _crack_max_strain[_qp](i)) < 1e-10)
+      // Update stress and stiffness ratio according to specified crack release model
+      if (new_crack || (pre_existing_crack && loading_existing_crack))
       {
-        // Previously cracked,
-        // Crack opening
         cracked = true;
-        crackFactor = computeCrackFactor(
-            i, sigma(i), _crack_flags[_qp](i), cracking_stress, cracking_alpha, youngs_modulus);
-        _crack_flags[_qp](i) = crackFactor;
+        computeCrackingRelease(i,
+                               sigma(i),
+                               stiffness_ratio,
+                               strain_in_crack_dir(i),
+                               cracking_stress,
+                               cracking_alpha,
+                               youngs_modulus);
+        _crack_damage[_qp](i) = 1.0 - stiffness_ratio;
       }
 
-      else if (_cracking_neg_fraction > 0 &&
-               _crack_strain[_qp](i) * _cracking_neg_fraction > principal_strain(i) &&
-               -_crack_strain[_qp](i) * _cracking_neg_fraction < principal_strain(i))
+      else if (cracked && _cracking_neg_fraction > 0 &&
+               _crack_strain[_qp](i) * _cracking_neg_fraction > strain_in_crack_dir(i) &&
+               -_crack_strain[_qp](i) * _cracking_neg_fraction < strain_in_crack_dir(i))
       {
-        cracked = true;
         const Real etr = _cracking_neg_fraction * _crack_strain[_qp](i);
         const Real Eo = cracking_stress / _crack_strain[_qp](i);
-        const Real Ec = Eo * _crack_flags_old[_qp](i);
-        const Real a = (Ec - Eo) / (4 * etr);
-        const Real b = (Ec + Eo) / 2;
-        const Real c = (Ec - Eo) * etr / 4;
-        sigma(i) = (a * principal_strain(i) + b) * principal_strain(i) + c;
+        const Real Ec = Eo * (1.0 - _crack_damage_old[_qp](i));
+        const Real a = (Ec - Eo) / (4.0 * etr);
+        const Real b = 0.5 * (Ec + Eo);
+        const Real c = 0.25 * (Ec - Eo) * etr;
+        sigma(i) = (a * strain_in_crack_dir(i) + b) * strain_in_crack_dir(i) + c;
       }
     }
 
     if (cracked)
-      applyCracksToTensor(_stress[_qp], sigma);
+      updateStressTensorForCracking(_stress[_qp], sigma);
   }
+
+  _crack_flags[_qp](0) = 1.0 - _crack_damage[_qp](2);
+  _crack_flags[_qp](1) = 1.0 - _crack_damage[_qp](1);
+  _crack_flags[_qp](2) = 1.0 - _crack_damage[_qp](0);
 }
 
 void
-ComputeSmearedCrackingStress::computeCrackStrainAndOrientation(RealVectorValue & principal_strain)
+ComputeSmearedCrackingStress::computeCrackStrainAndOrientation(
+    RealVectorValue & strain_in_crack_dir)
 {
-  // The rotation tensor is ordered such that known dirs appear last in the list of
-  // columns.  So, if one dir is known, it corresponds with the last column in the
-  // rotation tensor.
-  //
-  // This convention is based on the eigen routine returning eigen values in
-  // ascending order.
-  const unsigned int numKnownDirs = getNumKnownCrackDirs();
+  // The rotation tensor is ordered such that directions for pre-existing cracks appear first
+  // in the list of columns.  For example, if there is one existing crack, its direction is in the
+  // first column in the rotation tensor.
+  const unsigned int num_known_dirs = getNumKnownCrackDirs();
 
-  if (numKnownDirs == 0)
+  if (num_known_dirs == 0)
   {
     std::vector<Real> eigval(3, 0.0);
     RankTwoTensor eigvec;
@@ -434,33 +448,36 @@ ComputeSmearedCrackingStress::computeCrackStrainAndOrientation(RealVectorValue &
     _elastic_strain[_qp].symmetricEigenvaluesEigenvectors(eigval, eigvec);
 
     // If the elastic strain is beyond the cracking strain, save the eigen vectors as
-    // the rotation tensor.
-    _crack_rotation[_qp] = eigvec;
+    // the rotation tensor. Reverse their order so that the third principal strain
+    // (most tensile) will correspond to the first crack.
+    _crack_rotation[_qp].fillColumn(0, eigvec.column(2));
+    _crack_rotation[_qp].fillColumn(1, eigvec.column(1));
+    _crack_rotation[_qp].fillColumn(2, eigvec.column(0));
 
-    principal_strain(0) = eigval[0];
-    principal_strain(1) = eigval[1];
-    principal_strain(2) = eigval[2];
+    strain_in_crack_dir(0) = eigval[2];
+    strain_in_crack_dir(1) = eigval[1];
+    strain_in_crack_dir(2) = eigval[0];
   }
-  else if (numKnownDirs == 1)
+  else if (num_known_dirs == 1)
   {
     // This is easily the most complicated case.
     // 1.  Rotate the elastic strain to the orientation associated with the known
     //     crack.
-    // 2.  Extract the upper 2x2 diagonal block into a separate tensor.
+    // 2.  Extract the lower 2x2 block into a separate tensor.
     // 3.  Run the eigen solver on the result.
     // 4.  Update the rotation tensor to reflect the effect of the 2 eigenvectors.
 
     // 1.
     const RankTwoTensor & R = _crack_rotation[_qp];
     RankTwoTensor ePrime(_elastic_strain[_qp]);
-    ePrime.rotate(R.transpose()); // elastic strain in principal coordinates
+    ePrime.rotate(R.transpose()); // elastic strain in crack coordinates
 
     // 2.
     ColumnMajorMatrix e2x2(2, 2);
-    e2x2(0, 0) = ePrime(0, 0);
-    e2x2(1, 0) = ePrime(1, 0);
-    e2x2(0, 1) = ePrime(0, 1);
-    e2x2(1, 1) = ePrime(1, 1);
+    e2x2(0, 0) = ePrime(1, 1);
+    e2x2(1, 0) = ePrime(2, 1);
+    e2x2(0, 1) = ePrime(1, 2);
+    e2x2(1, 1) = ePrime(2, 2);
 
     // 3.
     ColumnMajorMatrix e_val2x1(2, 1);
@@ -468,44 +485,26 @@ ComputeSmearedCrackingStress::computeCrackStrainAndOrientation(RealVectorValue &
     e2x2.eigen(e_val2x1, e_vec2x2);
 
     // 4.
-    ColumnMajorMatrix e_vec(3, 3);
-    e_vec(0, 0) = e_vec2x2(0, 0);
-    e_vec(1, 0) = e_vec2x2(1, 0);
-    e_vec(2, 0) = 0;
-    e_vec(0, 1) = e_vec2x2(0, 1);
-    e_vec(1, 1) = e_vec2x2(1, 1);
-    e_vec(2, 1) = 0;
-    e_vec(2, 0) = 0;
-    e_vec(2, 1) = 0;
-    e_vec(2, 2) = 1;
-
-    RankTwoTensor eigvec(e_vec(0, 0),
-                         e_vec(1, 0),
-                         e_vec(2, 0),
-                         e_vec(0, 1),
-                         e_vec(1, 1),
-                         e_vec(2, 1),
-                         e_vec(0, 2),
-                         e_vec(1, 2),
-                         e_vec(2, 2));
+    RankTwoTensor eigvec(
+        1.0, 0.0, 0.0, 0.0, e_vec2x2(0, 1), e_vec2x2(1, 1), 0.0, e_vec2x2(0, 0), e_vec2x2(1, 0));
 
     _crack_rotation[_qp] = _crack_rotation_old[_qp] * eigvec; // Roe implementation
 
-    principal_strain(0) = e_val2x1(0, 0);
-    principal_strain(1) = e_val2x1(1, 0);
-    principal_strain(2) = ePrime(2, 2);
+    strain_in_crack_dir(0) = ePrime(0, 0);
+    strain_in_crack_dir(1) = e_val2x1(1, 0);
+    strain_in_crack_dir(2) = e_val2x1(0, 0);
   }
-  else if (numKnownDirs == 2 || numKnownDirs == 3)
+  else if (num_known_dirs == 2 || num_known_dirs == 3)
   {
     // Rotate to cracked orientation and pick off the strains in the rotated
     // coordinate directions.
     const RankTwoTensor & R = _crack_rotation[_qp];
     RankTwoTensor ePrime(_elastic_strain[_qp]);
-    ePrime.rotate(R.transpose()); // elastic strain in principal coordinates
+    ePrime.rotate(R.transpose()); // elastic strain in crack coordinates
 
-    principal_strain(0) = ePrime(0, 0);
-    principal_strain(1) = ePrime(1, 1);
-    principal_strain(2) = ePrime(2, 2);
+    strain_in_crack_dir(0) = ePrime(0, 0);
+    strain_in_crack_dir(1) = ePrime(1, 1);
+    strain_in_crack_dir(2) = ePrime(2, 2);
   }
   else
     mooseError("Invalid number of known crack directions");
@@ -514,82 +513,79 @@ ComputeSmearedCrackingStress::computeCrackStrainAndOrientation(RealVectorValue &
 unsigned int
 ComputeSmearedCrackingStress::getNumKnownCrackDirs() const
 {
-  const unsigned fromElement = 0;
-  unsigned int retVal = 0;
-  for (unsigned int i = 0; i < 3 - fromElement; ++i)
-    retVal += (_crack_flags_old[_qp](i) < 1);
-  return retVal + fromElement;
-}
-
-Real
-ComputeSmearedCrackingStress::computeCrackFactor(int i,
-                                                 Real & sigma,
-                                                 Real & flag_value,
-                                                 const Real cracking_stress,
-                                                 const Real cracking_alpha,
-                                                 const Real youngs_modulus)
-{
-  if (_cracking_release == CR_EXPONENTIAL)
+  unsigned int num_known_dirs = 0;
+  for (unsigned int i = 0; i < 3; ++i)
   {
-    if (_crack_max_strain[_qp](i) < _crack_strain[_qp](i))
-    {
-      mooseError("Max strain less than crack strain: ",
-                 i,
-                 " ",
-                 sigma,
-                 ", ",
-                 _crack_max_strain[_qp](i),
-                 ", ",
-                 _crack_strain[_qp](i),
-                 ", ",
-                 _elastic_strain[_qp](0, 0),
-                 ", ",
-                 _elastic_strain[_qp](1, 1),
-                 ", ",
-                 _elastic_strain[_qp](2, 2),
-                 ", ",
-                 _elastic_strain[_qp](0, 1),
-                 ", ",
-                 _elastic_strain[_qp](0, 2),
-                 ", ",
-                 _elastic_strain[_qp](1, 2));
-    }
-    const Real crackMaxStrain = _crack_max_strain[_qp](i);
-    // Compute stress that follows exponental curve
-    sigma = cracking_stress * (_cracking_residual_stress +
-                               (1.0 - _cracking_residual_stress) *
-                                   std::exp(cracking_alpha * _cracking_beta / cracking_stress *
-                                            (crackMaxStrain - _crack_strain[_qp](i))));
-    // Compute ratio of current stiffness to original stiffness
-    flag_value = sigma * _crack_strain[_qp](i) / (crackMaxStrain * cracking_stress);
+    if (_crack_damage_old[_qp](i) > 0.0 || _prescribed_crack_directions.size() >= i + 1)
+      ++num_known_dirs;
   }
-  else
-  {
-    if (_cracking_residual_stress == 0)
-    {
-      const Real tiny = 1e-16;
-      flag_value = tiny;
-      sigma = tiny * _crack_strain[_qp](i) * youngs_modulus;
-    }
-    else
-    {
-      sigma = _cracking_residual_stress * cracking_stress;
-      flag_value = sigma / (_crack_max_strain[_qp](i) * youngs_modulus);
-    }
-  }
-  if (flag_value < 0)
-  {
-    std::stringstream err;
-    err << "Negative crack flag found: " << i << " " << flag_value << ", "
-        << _crack_max_strain[_qp](i) << ", " << _crack_strain[_qp](i) << ", " << std::endl;
-    mooseError(err.str());
-  }
-  return flag_value;
+  return num_known_dirs;
 }
 
 void
-ComputeSmearedCrackingStress::applyCracksToTensor(RankTwoTensor & tensor,
-                                                  const RealVectorValue & sigma)
+ComputeSmearedCrackingStress::computeCrackingRelease(int i,
+                                                     Real & sigma,
+                                                     Real & stiffness_ratio,
+                                                     const Real strain_in_crack_dir,
+                                                     const Real cracking_stress,
+                                                     const Real cracking_alpha,
+                                                     const Real youngs_modulus)
+{
+  switch (_cracking_release)
+  {
+    case CrackingRelease::power:
+    {
+      if (sigma > cracking_stress)
+      {
+        stiffness_ratio /= 3.0;
+        sigma = stiffness_ratio * youngs_modulus * strain_in_crack_dir;
+      }
+      break;
+    }
+    case CrackingRelease::exponential:
+    {
+      const Real crack_max_strain = _crack_max_strain[_qp](i);
+      mooseAssert(crack_max_strain >= _crack_strain[_qp](i),
+                  "crack_max_strain must be >= crack_strain");
+
+      // Compute stress that follows exponental curve
+      sigma = cracking_stress * (_cracking_residual_stress +
+                                 (1.0 - _cracking_residual_stress) *
+                                     std::exp(cracking_alpha * _cracking_beta / cracking_stress *
+                                              (crack_max_strain - _crack_strain[_qp](i))));
+      // Compute ratio of current stiffness to original stiffness
+      stiffness_ratio = sigma * _crack_strain[_qp](i) / (crack_max_strain * cracking_stress);
+      break;
+    }
+    case CrackingRelease::abrupt:
+    {
+      if (_cracking_residual_stress == 0)
+      {
+        const Real tiny = 1e-16;
+        stiffness_ratio = tiny;
+        sigma = tiny * _crack_strain[_qp](i) * youngs_modulus;
+      }
+      else
+      {
+        sigma = _cracking_residual_stress * cracking_stress;
+        stiffness_ratio = sigma / (_crack_max_strain[_qp](i) * youngs_modulus);
+      }
+      break;
+    }
+  }
+
+  if (stiffness_ratio < 0)
+  {
+    std::stringstream err;
+    err << "Negative stiffness ratio: " << i << " " << stiffness_ratio << ", "
+        << _crack_max_strain[_qp](i) << ", " << _crack_strain[_qp](i) << ", " << std::endl;
+    mooseError(err.str());
+  }
+}
+
+void
+ComputeSmearedCrackingStress::updateStressTensorForCracking(RankTwoTensor & tensor,
+                                                            const RealVectorValue & sigma)
 {
   // Get transformation matrix
   const RankTwoTensor & R = _crack_rotation[_qp];
@@ -598,7 +594,7 @@ ComputeSmearedCrackingStress::applyCracksToTensor(RankTwoTensor & tensor,
 
   // Reset stress if cracked
   for (unsigned int i = 0; i < 3; ++i)
-    if (_crack_flags[_qp](i) < 1)
+    if (_crack_damage[_qp](i) > 0.0)
     {
       const Real stress_correction_ratio = (tensor(i, i) - sigma(i)) / tensor(i, i);
       if (stress_correction_ratio > _max_stress_correction)
@@ -617,7 +613,7 @@ bool
 ComputeSmearedCrackingStress::previouslyCracked()
 {
   for (unsigned int i = 0; i < 3; ++i)
-    if (_crack_flags_old[_qp](i) < 1.0)
+    if (_crack_damage_old[_qp](i) > 0.0)
       return true;
   return false;
 }

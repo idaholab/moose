@@ -28,62 +28,126 @@ class ComputeSmearedCrackingStress : public ComputeMultipleInelasticStress
 public:
   ComputeSmearedCrackingStress(const InputParameters & parameters);
 
-  enum CRACKING_RELEASE
-  {
-    CR_ABRUPT = 0,
-    CR_EXPONENTIAL,
-    CR_POWER,
-    CR_UNKNOWN
-  };
-
-  virtual void initialSetup();
+  virtual void initialSetup() override;
+  virtual void initQpStatefulProperties() override;
+  virtual void computeQpStress() override;
 
 protected:
-  virtual void initQpStatefulProperties();
-  virtual void computeQpStress();
+  /**
+   * Update the local elasticity tensor (_local_elasticity_tensor)
+   * due to the effects of cracking.
+   */
+  void updateLocalElasticityTensor();
 
-  void updateElasticityTensor();
+  /**
+   * Update all cracking-related state variables and the stress
+   * tensor due to cracking in all directions.
+   */
+  virtual void updateCrackingStateAndStress();
 
-  virtual void crackingStressRotation();
-  virtual Real computeCrackFactor(int i,
-                                  Real & sigma,
-                                  Real & flag_value,
-                                  const Real cracking_stress,
-                                  const Real cracking_alpha,
-                                  const Real youngs_modulus);
+  /**
+   * Compute the effect of the cracking release model on the stress
+   * and stiffness in the direction of a single crack.
+   * @param i Index of current crack direction
+   * @param sigma Stress in direction of crack
+   * @param stiffness_ratio Ratio of damaged to original stiffness
+   *                        in cracking direction
+   * @param strain_in_crack_dir Strain in the current crack direction
+   * @param cracking_stress Threshold tensile stress for crack initiation
+   * @param cracking_alpha Initial slope of exponential softening model
+   * @param youngs_modulus Young's modulus
+   */
+  virtual void computeCrackingRelease(int i,
+                                      Real & sigma,
+                                      Real & stiffness_ratio,
+                                      const Real strain_in_crack_dir,
+                                      const Real cracking_stress,
+                                      const Real cracking_alpha,
+                                      const Real youngs_modulus);
 
+  /**
+   * Get the number of known crack directions. This includes cracks
+   * in prescribed directions (even if not yet active) and active
+   * cracks in other directions.
+   * @return number of known crack directions
+   */
   virtual unsigned int getNumKnownCrackDirs() const;
-  void computeCrackStrainAndOrientation(RealVectorValue & principal_strain);
 
-  void applyCracksToTensor(RankTwoTensor & tensor, const RealVectorValue & sigma);
+  /**
+   * Compute the crack strain in the crack coordinate system. Also
+   * computes the crack orientations, and stores in _crack_rotation.
+   * @param strain_in_crack_dir Computed strains in crack directions
+   */
+  void computeCrackStrainAndOrientation(RealVectorValue & strain_in_crack_dir);
 
+  /**
+   * Updates the full stress tensor to account for the effect of cracking
+   * using the provided stresses in the crack directions. The tensor is
+   * rotated into the crack coordinates, modified, and rotated back.
+   * @param tensor Stress tensor to be updated
+   * @param sigma Vector of stresses in crack directions
+   */
+  void updateStressTensorForCracking(RankTwoTensor & tensor, const RealVectorValue & sigma);
+
+  /**
+   * Check to see whether there was cracking in any diretion in the previous
+   * time step.
+   * @return true if cracked, false if not cracked
+   */
   bool previouslyCracked();
 
-  bool _is_finite_strain;
+  /// Enum defining the crack release model
+  const enum class CrackingRelease { abrupt, exponential, power } _cracking_release;
 
   ///@{ Input parameters for smeared crack models
-  const CRACKING_RELEASE _cracking_release;
+
+  /// Ratio of the residual stress after being fully cracked to the tensile
+  /// cracking threshold stress
   const Real _cracking_residual_stress;
+
+  /// Threshold at which cracking initiates if tensile stress exceeds it
   const VariableValue & _cracking_stress;
 
-  std::vector<unsigned int> _active_crack_planes;
+  /// User-prescribed cracking directions
+  std::vector<unsigned int> _prescribed_crack_directions;
+
+  /// Maximum number of cracks permitted at a material point
   const unsigned int _max_cracks;
+
+  /// Defines transition to changed stiffness during unloading
   const Real _cracking_neg_fraction;
 
+  /// Controls slope of exponential softening curve
   const Real _cracking_beta;
+
+  /// Controls the amount of shear retained
   const Real _shear_retention_factor;
+
+  /// Controls the maximum amount that the damaged elastic stress is corrected
+  /// to folow the release model during a time step
   const Real _max_stress_correction;
   ///@}
 
-  //@{ Stateful material properties related to smeared cracking model
+  //@{ Damage (goes from 0 to 1) in crack directions
+  MaterialProperty<RealVectorValue> & _crack_damage;
+  const MaterialProperty<RealVectorValue> & _crack_damage_old;
+  ///@}
+
+  /// Vector of values going from 1 to 0 as crack damage accumulates. Legacy
+  /// property for backward compatibility -- remove in the future.
   MaterialProperty<RealVectorValue> & _crack_flags;
-  const MaterialProperty<RealVectorValue> & _crack_flags_old;
-  MaterialProperty<RealVectorValue> * _crack_count;
-  const MaterialProperty<RealVectorValue> * _crack_count_old;
+
+  //@{ Rotation tensor used to rotate tensors into crack local coordinates
   MaterialProperty<RankTwoTensor> & _crack_rotation;
   const MaterialProperty<RankTwoTensor> & _crack_rotation_old;
+  ///@}
+
+  //@{ Strain in direction of crack upon crack initiation
   MaterialProperty<RealVectorValue> & _crack_strain;
   const MaterialProperty<RealVectorValue> & _crack_strain_old;
+  ///@}
+
+  //@{ Maximum strain in direction of crack
   MaterialProperty<RealVectorValue> & _crack_max_strain;
   const MaterialProperty<RealVectorValue> & _crack_max_strain_old;
   ///@}
