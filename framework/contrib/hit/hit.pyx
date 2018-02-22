@@ -98,7 +98,7 @@ cdef class Node:
     def __repr__(self):
         return self.render()
 
-    def render(self, indent=0):
+    def render(self, indent=0, indent_text='  ', maxlen=0):
         return self._cnode.render(indent)
 
     def line(self):
