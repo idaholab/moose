@@ -224,7 +224,7 @@ AddCoupledSolidKinSpeciesAction::act()
     {
       InputParameters params_kin = _factory.getValidParams("KineticDisPreConcAux");
       params_kin.set<AuxVariableName>("variable") = _solid_kinetic_species[i];
-      params_kin.set<Real>("log_k") = _logk[i];
+      params_kin.defaultCoupledValue("log_k", _logk[i]);
       params_kin.set<Real>("r_area") = _r_area[i];
       params_kin.set<Real>("ref_kconst") = _ref_kconst[i];
       params_kin.set<Real>("e_act") = _e_act[i];

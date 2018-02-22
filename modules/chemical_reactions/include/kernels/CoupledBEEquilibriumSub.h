@@ -34,7 +34,7 @@ private:
   /// Weight of the equilibrium species in the total primary species
   const Real _weight;
   /// Equilibrium constant for the equilibrium species
-  const Real _log_k;
+  const VariableValue & _log_k;
   /// Stoichiometric coefficient of the primary species in the equilibrium species
   const Real _sto_u;
   /// Stoichiometric coefficients of the coupled primary species in the equilibrium species

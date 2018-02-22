@@ -21,6 +21,12 @@
     exodiff = '2species_out.e'
     prereq = 2species
   [../]
+  [./2species_eqaux]
+    type = 'Exodiff'
+    input = '2species_eqaux.i'
+    exodiff = '2species_out.e'
+    prereq = 2species_without_action
+  [../]
   [./2species_with_density]
     type = 'Exodiff'
     input = '2species_with_density.i'
@@ -31,7 +37,7 @@
     input = water_dissociation.i
     csvdiff = water_dissociation_out.csv
   [../]
-  [.co2_h2o]
+  [./co2_h2o]
     type = CSVDiff
     input = co2_h2o.i
     csvdiff = co2_h2o_out.csv
