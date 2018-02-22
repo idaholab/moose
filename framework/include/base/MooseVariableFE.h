@@ -249,6 +249,23 @@ public:
   /// Returns dof solution on element
   const MooseArray<Number> & dofValue();
 
+  /**
+   * Return phi size
+   */
+  virtual size_t phiSize() = 0;
+  /**
+   * Return phiFace size
+   */
+  virtual size_t phiFaceSize() = 0;
+  /**
+   * Return phiNeighbor size
+   */
+  virtual size_t phiNeighborSize() = 0;
+  /**
+   * Return phiFaceNeighbor size
+   */
+  virtual size_t phiFaceNeighborSize() = 0;
+
 protected:
   /// Our assembly
   Assembly & _assembly;
@@ -281,6 +298,7 @@ protected:
   bool _need_grad_old;
   bool _need_grad_older;
   bool _need_grad_previous_nl;
+  bool _need_grad_dot;
 
   bool _need_second;
   bool _need_second_old;
@@ -298,6 +316,7 @@ protected:
   bool _need_grad_old_neighbor;
   bool _need_grad_older_neighbor;
   bool _need_grad_previous_nl_neighbor;
+  bool _need_grad_neighbor_dot;
 
   bool _need_second_neighbor;
   bool _need_second_old_neighbor;

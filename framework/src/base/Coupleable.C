@@ -513,6 +513,36 @@ Coupleable::coupledDot(const std::string & var_name, unsigned int comp)
   }
 }
 
+const VectorVariableValue &
+Coupleable::coupledVectorDot(const std::string & var_name, unsigned int comp)
+{
+  checkVar(var_name);
+  if (!isCoupled(var_name)) // Return default 0
+    return _default_vector_value_zero;
+
+  validateExecutionerType(var_name, "coupledVectorDot");
+  VectorMooseVariable * var = getVectorVar(var_name, comp);
+  if (var == NULL)
+    mooseError("Call corresponding standard variable method");
+
+  if (!_coupleable_neighbor)
+  {
+    if (_c_nodal)
+      mooseError("Vector variables are not required to be continuous and so should not be used "
+                 "with nodal compute objects");
+    else
+      return var->uDot();
+  }
+  else
+  {
+    if (_c_nodal)
+      mooseError("Vector variables are not required to be continuous and so should not be used "
+                 "with nodal compute objects");
+    else
+      return var->uDotNeighbor();
+  }
+}
+
 const VariableValue &
 Coupleable::coupledDotDu(const std::string & var_name, unsigned int comp)
 {
@@ -631,6 +661,27 @@ Coupleable::coupledGradientPreviousNL(const std::string & var_name, unsigned int
     return var->gradSlnPreviousNL();
   else
     return var->gradSlnPreviousNLNeighbor();
+}
+
+const VariableGradient &
+Coupleable::coupledGradientDot(const std::string & var_name, unsigned int comp)
+{
+  checkVar(var_name);
+  if (!isCoupled(var_name)) // Return default 0
+    return _default_gradient;
+
+  coupledCallback(var_name, false);
+  if (_c_nodal)
+    mooseError(_c_name, ": Nodal variables do not have gradients");
+
+  MooseVariable * var = getVar(var_name, comp);
+  if (var == NULL)
+    mooseError("Call corresponding vector variable method");
+
+  if (!_coupleable_neighbor)
+    return var->gradSlnDot();
+  else
+    return var->gradSlnNeighborDot();
 }
 
 const VectorVariableCurl &

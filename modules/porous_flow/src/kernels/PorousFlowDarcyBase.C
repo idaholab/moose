@@ -136,9 +136,9 @@ PorousFlowDarcyBase::computeJacobian()
 }
 
 void
-PorousFlowDarcyBase::computeOffDiagJacobian(unsigned int jvar)
+PorousFlowDarcyBase::computeOffDiagJacobian(MooseVariableFE & jvar)
 {
-  computeResidualAndJacobian(JacRes::CALCULATE_JACOBIAN, jvar);
+  computeResidualAndJacobian(JacRes::CALCULATE_JACOBIAN, jvar.number());
 }
 
 void
@@ -327,7 +327,7 @@ PorousFlowDarcyBase::fullyUpwind(JacRes res_or_jac, unsigned int ph, unsigned in
    *
    * The final subtle thing is we must also conserve fluid mass: the total component mass flowing
    * out of node i must be the sum of the masses flowing into the other nodes.
-  **/
+   **/
 
   /// The number of nodes in the element
   const unsigned int num_nodes = _test.size();

@@ -33,7 +33,8 @@ public:
   StressDivergenceTensors(const InputParameters & parameters);
 
   virtual void computeJacobian() override;
-  virtual void computeOffDiagJacobian(unsigned int jvar) override;
+  virtual void computeOffDiagJacobian(MooseVariableFE & jvar) override;
+  using Kernel::computeOffDiagJacobian;
 
 protected:
   virtual void initialSetup() override;

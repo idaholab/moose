@@ -97,7 +97,7 @@ ComputeFullJacobianThread::computeJacobian()
         if ((kernel->variable().number() == ivar) && kernel->isImplicit())
         {
           kernel->subProblem().prepareShapes(jvar, _tid);
-          kernel->computeOffDiagJacobian(jvar);
+          kernel->computeOffDiagJacobian(jvariable);
         }
     }
   }
@@ -183,7 +183,7 @@ ComputeFullJacobianThread::computeFaceJacobian(BoundaryID bnd_id)
         if (bc->shouldApply() && bc->variable().number() == ivar.number() && bc->isImplicit())
         {
           bc->subProblem().prepareFaceShapes(jvar.number(), _tid);
-          bc->computeJacobianBlock(jvar.number());
+          bc->computeJacobianBlock(jvar);
         }
     }
   }

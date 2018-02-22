@@ -228,6 +228,16 @@ protected:
                                                              unsigned int comp = 0);
 
   /**
+   * Time derivative of the gradient of a coupled variable
+   * @param var_name Name of coupled variable
+   * @param comp Component number for vector of coupled variables
+   * @return Reference to a VariableGradient containing the time derivative of the gradient of a
+   * coupled variable
+   */
+  virtual const VariableGradient & coupledGradientDot(const std::string & var_name,
+                                                      unsigned int comp = 0);
+
+  /**
    * Returns curl of a coupled variable
    * @param var_name Name of coupled variable
    * @param comp Component number for vector of coupled variables
@@ -305,6 +315,16 @@ protected:
    * @see Kernel::dot
    */
   virtual const VariableValue & coupledDot(const std::string & var_name, unsigned int comp = 0);
+
+  /**
+   * Time derivative of a coupled vector variable
+   * @param var_name Name of coupled vector variable
+   * @param comp Component number for vector of coupled vector variables
+   * @return Reference to a VectorVariableValue containing the time derivative of the coupled
+   * variable
+   */
+  virtual const VectorVariableValue & coupledVectorDot(const std::string & var_name,
+                                                       unsigned int comp = 0);
 
   /**
    * Time derivative of a coupled variable with respect to the coefficients
