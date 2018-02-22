@@ -21,8 +21,7 @@
 
 [AuxVariables]
   [./k_eff]
-    order = CONSTANT
-    family = MONOMIAL
+    initial_condition = 14.362648
   [../]
   [./velocity_x]
     order = CONSTANT
@@ -68,12 +67,6 @@
 []
 
 [AuxKernels]
-  [./keff_initial]
-    type = MaterialRealAux
-    variable = k_eff
-    property = thermal_conductivity
-    execute_on = 'initial'
-  [../]
   [./velocity_x]
     type = DarcyVelocity
     variable = velocity_x
