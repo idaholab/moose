@@ -28,11 +28,10 @@ InputParameters validParams<MutableCoefficientsInterface>();
  * MutableCoefficientsInterface can easily be used in any MultiAppMutableCoefficientsTransfer-
  * based transfer.
  */
-class MutableCoefficientsInterface
+class MutableCoefficientsInterface : public Restartable
 {
 public:
   MutableCoefficientsInterface(const MooseObject * moose_object,
-                               Restartable * restartable,
                                const InputParameters & parameters);
 
   // Coefficient access

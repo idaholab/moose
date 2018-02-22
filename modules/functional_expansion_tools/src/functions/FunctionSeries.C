@@ -61,7 +61,7 @@ validParams<FunctionSeries>()
 }
 
 FunctionSeries::FunctionSeries(const InputParameters & parameters)
-  : MutableCoefficientsFunctionInterface(this, this, parameters),
+  : MutableCoefficientsFunctionInterface(this, parameters),
     _orders(convertOrders(getParam<std::vector<unsigned int>>("orders"))),
     _physical_bounds(getParam<std::vector<Real>>("physical_bounds")),
     _series_type_name(getParam<MooseEnum>("series_type")),
