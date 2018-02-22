@@ -36,7 +36,7 @@ Set either ` FUNCTIONAL_EXPANSION_TOOLS := yes` (or `ALL_MODULES := yes`) in the
 | ------ | ------ |
 | [`FXFluxBC`](/functional_expansion_tools/FXFluxBC.md) | Provides a *strongly encouraged* FX-based Neumann boundary condition. |
 | [`FXValueBC`](/functional_expansion_tools/FXValueBC.md) | Provides a *fixed* FX-based Dirichlet boundary condition. |
-| [`FXFluxBC`](/functional_expansion_tools/FXFluxBC.md) | Provides a *strongly encouraged* FX-based Dirichlet boundary condition. |
+| [`FXValuePenaltyBC`](/functional_expansion_tools/FXValuePenaltyBC.md) | Provides a *strongly encouraged* FX-based Dirichlet boundary condition. |
 
 
 ### Functions
@@ -60,7 +60,7 @@ Although there are no kernels directly provided by this module (yet), these thre
 
 | Name | Description |
 | ------ | ------ |
-| [`MultiAppFXTransfer`](/functional_expansion_tools/MultiAppFXTransfer.md) | This transfers the FX coefficients, or moments, between named FX objects in the multi and sub apps. Supported objects that contain coefficients for transferring are instances of `FunctionSeries` and any `FX...UserObject`. (Note: `MultiAppFXTransfer` is actually a typedef of `MultiAppMutableCoefficientsTransfer`).|
+| [`MultiAppFXTransfer`](/functional_expansion_tools/MultiAppFXTransfer.md) | This transfers the FX coefficients, or moments, between named FX objects in the multi and sub apps. Supported objects that contain coefficients for transferring are instances of `FunctionSeries` and any `FX...UserObject`.|
 
 
 ### UserObjects
@@ -101,7 +101,7 @@ Additional composite series, such as may be suitable for spherical or shell data
 * Investigate the implementation of using `NearestPointBase` approach to easily equip multiple FXs
 * Implement a **Materials**-derived FX-based class that can provide continuous material properties
 * Implement a **Kernel**-derived class, a la `BodyForce`, that automatically sets `enable_cache = true` for the associated `FunctionSeries` object
-* Add an error check in `MultiAppMutableCoefficientsTransfer` for multiple objects of the same name but different type, i.e. if there are both a **Function** and **UserObject** with the same name (or other object types as they are added)
+* Add an error check in `MultiAppFXTransfer` for multiple objects of the same name but different type, i.e. if there are both a **Function** and **UserObject** with the same name (or other object types as they are added)
 * Implement support in `MutableCoefficientsInterface` for multiple sets of FX coefficients
 * Implement support for various types of FX derivations
     * Separable series

@@ -9,6 +9,8 @@
 
 #include "gtest/gtest.h"
 
+#include <array>
+
 #include "Setup.h"
 
 TEST(FunctionalExpansionsTest, legendreConstructor)

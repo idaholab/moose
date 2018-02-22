@@ -14,18 +14,45 @@
 TEST(FunctionalExpansionsTest, hashPoint)
 {
   const Point location(0.9780619323, 0.2136556650, 0.3509044429);
-  const hashing::HashValue truth = 12573501117625172216u;
+  const Point location_mirror(location);
+  Point location_twiddle_limit(location);
+  Point location_twiddle_nochange(location);
 
-  EXPECT_EQ(hashing::hashCombine(location), truth);
+  location_twiddle_limit(0) += 6e-17;
+  location_twiddle_nochange(0) += 5e-17;
+
+  const hashing::HashValue result = hashing::hashCombine(location);
+  const hashing::HashValue result_mirror = hashing::hashCombine(location_mirror);
+  const hashing::HashValue result_twiddle_limit = hashing::hashCombine(location_twiddle_limit);
+  const hashing::HashValue result_twiddle_nochange =
+      hashing::hashCombine(location_twiddle_nochange);
+
+  EXPECT_EQ(result, result_mirror);
+  EXPECT_NE(result, result_twiddle_limit);
+  EXPECT_EQ(result, result_twiddle_nochange);
 }
 
 TEST(FunctionalExpansionsTest, hashPointAndTime)
 {
-  const Point location(0.8392988091, 0.8482835642, 0.2509438471);
   const Real time = 0.5049258208;
-  const hashing::HashValue truth = 5131894250494321433u;
+  const Point location(0.8392988091, 0.8482835642, 0.2509438471);
+  const Point location_mirror(location);
+  Point location_twiddle_limit(location);
+  Point location_twiddle_nochange(location);
 
-  EXPECT_EQ(hashing::hashCombine(time, location), truth);
+  location_twiddle_limit(0) += 6e-17;
+  location_twiddle_nochange(0) += 5e-17;
+
+  const hashing::HashValue result = hashing::hashCombine(time, location);
+  const hashing::HashValue result_mirror = hashing::hashCombine(time, location_mirror);
+  const hashing::HashValue result_twiddle_limit =
+      hashing::hashCombine(time, location_twiddle_limit);
+  const hashing::HashValue result_twiddle_nochange =
+      hashing::hashCombine(time, location_twiddle_nochange);
+
+  EXPECT_EQ(result, result_mirror);
+  EXPECT_NE(result, result_twiddle_limit);
+  EXPECT_EQ(result, result_twiddle_nochange);
 }
 
 TEST(FunctionalExpansionsTest, hashIntVector)
@@ -35,9 +62,19 @@ TEST(FunctionalExpansionsTest, hashIntVector)
                                     -145, 76,  -470, -100, 367,  1,    485,  458,  88,   112,
                                     -212, 357, -403, 467,  127,  138,  388,  -244, -479, -239,
                                     -354, 475, -453, -36,  -365, -248, -95,  93,   -286, 436}};
-  const hashing::HashValue truth = 15665072587259105797u;
+  const std::vector<int> vector_mirror(vector.begin(), vector.end());
+  const std::vector<int> vector_chopped(vector.begin(), --vector.end());
+  std::vector<int> vector_twiddle(vector.begin(), vector.end());
+  ++vector_twiddle[0];
 
-  EXPECT_EQ(hashing::hashLargeContainer(vector), truth);
+  const hashing::HashValue result = hashing::hashLargeContainer(vector);
+  const hashing::HashValue result_mirror = hashing::hashLargeContainer(vector_mirror);
+  const hashing::HashValue result_chopped = hashing::hashLargeContainer(vector_chopped);
+  const hashing::HashValue result_twiddle = hashing::hashLargeContainer(vector_twiddle);
+
+  EXPECT_EQ(result, result_mirror);
+  EXPECT_NE(result, result_chopped);
+  EXPECT_NE(result, result_twiddle);
 }
 
 TEST(FunctionalExpansionsTest, hashRealVector)
@@ -52,17 +89,33 @@ TEST(FunctionalExpansionsTest, hashRealVector)
        0.2437974613, 0.3544349330, 0.5725840559, 0.2903856081, 0.0055479019, 0.6819050123,
        0.5512080507, 0.7301519914, 0.0077125671, 0.5284511770, 0.6894292950, 0.5014027958,
        0.9773264137, 0.8477810277}};
-  const hashing::HashValue truth = 17839983326257054046u;
+  const std::vector<Real> vector_mirror(vector.begin(), vector.end());
+  const std::vector<Real> vector_chopped(vector.begin(), --vector.end());
+  std::vector<Real> vector_twiddle_limit(vector.begin(), vector.end());
+  std::vector<Real> vector_twiddle_nochange(vector.begin(), vector.end());
 
-  EXPECT_EQ(hashing::hashLargeContainer(vector), truth);
+  vector_twiddle_limit[0] += 6e-17;
+  vector_twiddle_nochange[0] += 5e-17;
+
+  const hashing::HashValue result = hashing::hashLargeContainer(vector);
+  const hashing::HashValue result_mirror = hashing::hashLargeContainer(vector_mirror);
+  const hashing::HashValue result_chopped = hashing::hashLargeContainer(vector_chopped);
+  const hashing::HashValue result_twiddle_limit = hashing::hashLargeContainer(vector_twiddle_limit);
+  const hashing::HashValue result_twiddle_nochange =
+      hashing::hashLargeContainer(vector_twiddle_nochange);
+
+  EXPECT_EQ(result, result_mirror);
+  EXPECT_NE(result, result_chopped);
+  EXPECT_NE(result, result_twiddle_limit);
+  EXPECT_EQ(result, result_twiddle_nochange);
 }
 
 TEST(FunctionalExpansionsTest, hashVararg)
 {
-  const hashing::HashValue truth = 11318853036716890990u;
-  hashing::HashValue value = 42;
+  hashing::HashValue original = 42;
+  hashing::HashValue additional_small, additional_regular, additional_large, original_mirror;
 
-  hashing::hashCombine(value,
+  hashing::hashCombine(original,
                        0.9873791320,
                        0.1953364838,
                        0.8116485930,
@@ -114,5 +167,13 @@ TEST(FunctionalExpansionsTest, hashVararg)
                        0.6151646001,
                        0.1672976625);
 
-  EXPECT_EQ(value, truth);
+  additional_small = additional_regular = additional_large = original_mirror = original;
+  hashing::hashCombine(additional_small, 3.9e-120);
+  hashing::hashCombine(additional_regular, 0.3971072909);
+  hashing::hashCombine(additional_large, 3.9e120);
+
+  EXPECT_EQ(original, original_mirror);
+  EXPECT_NE(original, additional_small);
+  EXPECT_NE(original, additional_regular);
+  EXPECT_NE(original, additional_large);
 }
