@@ -34,7 +34,7 @@ protected:
   /// Weight of the equilibrium species concentration in the total primary species concentration
   const Real _weight;
   /// Equilibrium constant for the equilibrium species in association form
-  const Real _log_k;
+  const VariableValue & _log_k;
   /// Stoichiometric coefficient of the primary species
   const Real _sto_u;
   /// Stoichiometric coefficients of the coupled primary species

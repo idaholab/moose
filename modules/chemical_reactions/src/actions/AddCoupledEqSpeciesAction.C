@@ -204,7 +204,7 @@ AddCoupledEqSpeciesAction::act()
           InputParameters params_sub = _factory.getValidParams("CoupledBEEquilibriumSub");
           params_sub.set<NonlinearVariableName>("variable") = _primary_species[i];
           params_sub.set<Real>("weight") = _weights[i][j];
-          params_sub.set<Real>("log_k") = _eq_const[j];
+          params_sub.defaultCoupledValue("log_k", _eq_const[j]);
           params_sub.set<Real>("sto_u") = _sto_u[i][j];
           params_sub.set<std::vector<Real>>("sto_v") = _sto_v[i][j];
           params_sub.set<std::vector<VariableName>>("v") = _coupled_v[i][j];
@@ -215,7 +215,7 @@ AddCoupledEqSpeciesAction::act()
           InputParameters params_cd = _factory.getValidParams("CoupledDiffusionReactionSub");
           params_cd.set<NonlinearVariableName>("variable") = _primary_species[i];
           params_cd.set<Real>("weight") = _weights[i][j];
-          params_cd.set<Real>("log_k") = _eq_const[j];
+          params_cd.defaultCoupledValue("log_k", _eq_const[j]);
           params_cd.set<Real>("sto_u") = _sto_u[i][j];
           params_cd.set<std::vector<Real>>("sto_v") = _sto_v[i][j];
           params_cd.set<std::vector<VariableName>>("v") = _coupled_v[i][j];
@@ -229,7 +229,7 @@ AddCoupledEqSpeciesAction::act()
             InputParameters params_conv = _factory.getValidParams("CoupledConvectionReactionSub");
             params_conv.set<NonlinearVariableName>("variable") = _primary_species[i];
             params_conv.set<Real>("weight") = _weights[i][j];
-            params_conv.set<Real>("log_k") = _eq_const[j];
+            params_conv.defaultCoupledValue("log_k", _eq_const[j]);
             params_conv.set<Real>("sto_u") = _sto_u[i][j];
             params_conv.set<std::vector<Real>>("sto_v") = _sto_v[i][j];
             params_conv.set<std::vector<VariableName>>("v") = _coupled_v[i][j];
@@ -253,7 +253,7 @@ AddCoupledEqSpeciesAction::act()
       {
         InputParameters params_eq = _factory.getValidParams("AqueousEquilibriumRxnAux");
         params_eq.set<AuxVariableName>("variable") = _eq_species[j];
-        params_eq.set<Real>("log_k") = _eq_const[j];
+        params_eq.defaultCoupledValue("log_k", _eq_const[j]);
         params_eq.set<std::vector<Real>>("sto_v") = _stos[j];
         params_eq.set<std::vector<VariableName>>("v") = _primary_species_involved[j];
         _problem->addAuxKernel("AqueousEquilibriumRxnAux", "aux_" + _eq_species[j], params_eq);

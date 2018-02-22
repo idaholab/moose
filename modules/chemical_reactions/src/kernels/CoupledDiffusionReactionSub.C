@@ -18,7 +18,7 @@ validParams<CoupledDiffusionReactionSub>()
       "weight",
       1.0,
       "Weight of equilibrium species concentration in the primary species concentration");
-  params.addParam<Real>(
+  params.addCoupledVar(
       "log_k", 0.0, "Equilibrium constant of the equilbrium reaction in dissociation form");
   params.addParam<Real>("sto_u",
                         1.0,
@@ -39,7 +39,7 @@ CoupledDiffusionReactionSub::CoupledDiffusionReactionSub(const InputParameters &
   : Kernel(parameters),
     _diffusivity(getMaterialProperty<Real>("diffusivity")),
     _weight(getParam<Real>("weight")),
-    _log_k(getParam<Real>("log_k")),
+    _log_k(coupledValue("log_k")),
     _sto_u(getParam<Real>("sto_u")),
     _sto_v(getParam<std::vector<Real>>("sto_v")),
     _gamma_u(coupledValue("gamma_u")),
@@ -98,7 +98,7 @@ CoupledDiffusionReactionSub::computeQpResidual()
   }
 
   mooseAssert(_gamma_eq[_qp] > 0.0, "Activity coefficient must be greater than zero");
-  return _weight * std::pow(10.0, _log_k) * _diffusivity[_qp] * _grad_test[_i][_qp] *
+  return _weight * std::pow(10.0, _log_k[_qp]) * _diffusivity[_qp] * _grad_test[_i][_qp] *
          (diff1 + diff2_sum) / _gamma_eq[_qp];
   ;
 }
@@ -132,7 +132,7 @@ CoupledDiffusionReactionSub::computeQpJacobian()
     diff2_sum += diff2;
   }
 
-  return _weight * std::pow(10.0, _log_k) * _diffusivity[_qp] * _grad_test[_i][_qp] *
+  return _weight * std::pow(10.0, _log_k[_qp]) * _diffusivity[_qp] * _grad_test[_i][_qp] *
          (diff1 + diff2_sum) / _gamma_eq[_qp];
 }
 
@@ -207,6 +207,6 @@ CoupledDiffusionReactionSub::computeQpOffDiagJacobian(unsigned int jvar)
       diff3_sum += diff3;
     }
 
-  return _weight * std::pow(10.0, _log_k) * _diffusivity[_qp] * _grad_test[_i][_qp] *
+  return _weight * std::pow(10.0, _log_k[_qp]) * _diffusivity[_qp] * _grad_test[_i][_qp] *
          (diff1 + diff2 + diff3_sum) / _gamma_eq[_qp];
 }

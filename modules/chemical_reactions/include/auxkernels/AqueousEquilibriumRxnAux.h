@@ -29,7 +29,7 @@ protected:
   virtual Real computeValue() override;
 
   /// Equilibrium constant
-  const Real _log_k;
+  const VariableValue & _log_k;
   /// Stoichiometric coefficients of coupled primary species
   const std::vector<Real> _sto_v;
   /// Coupled primary species

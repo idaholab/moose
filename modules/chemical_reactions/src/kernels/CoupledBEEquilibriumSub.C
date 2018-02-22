@@ -16,7 +16,7 @@ validParams<CoupledBEEquilibriumSub>()
   InputParameters params = validParams<TimeDerivative>();
   params.addParam<Real>(
       "weight", 1.0, "The weight of the equilibrium species in total concentration");
-  params.addParam<Real>("log_k", 0.0, "The equilibrium constant of this equilibrium species");
+  params.addCoupledVar("log_k", 0.0, "The equilibrium constant of this equilibrium species");
   params.addParam<Real>(
       "sto_u",
       1.0,
@@ -35,7 +35,7 @@ validParams<CoupledBEEquilibriumSub>()
 CoupledBEEquilibriumSub::CoupledBEEquilibriumSub(const InputParameters & parameters)
   : TimeDerivative(parameters),
     _weight(getParam<Real>("weight")),
-    _log_k(getParam<Real>("log_k")),
+    _log_k(coupledValue("log_k")),
     _sto_u(getParam<Real>("sto_u")),
     _sto_v(getParam<std::vector<Real>>("sto_v")),
     _gamma_u(coupledValue("gamma_u")),
@@ -84,8 +84,8 @@ CoupledBEEquilibriumSub::computeQpResidual()
 
   // Contribution due to primary species that this kernel acts on
   Real val_new =
-      std::pow(10.0, _log_k) * std::pow(_gamma_u[_qp] * _u[_qp], _sto_u) / _gamma_eq[_qp];
-  Real val_old = std::pow(10.0, _log_k) * std::pow(_gamma_u_old[_qp] * _u_old[_qp], _sto_u) /
+      std::pow(10.0, _log_k[_qp]) * std::pow(_gamma_u[_qp] * _u[_qp], _sto_u) / _gamma_eq[_qp];
+  Real val_old = std::pow(10.0, _log_k[_qp]) * std::pow(_gamma_u_old[_qp] * _u_old[_qp], _sto_u) /
                  _gamma_eq_old[_qp];
 
   // Contribution due to coupled primary species
@@ -101,7 +101,7 @@ CoupledBEEquilibriumSub::computeQpResidual()
 Real
 CoupledBEEquilibriumSub::computeQpJacobian()
 {
-  Real val_new = std::pow(10.0, _log_k) * _sto_u * _gamma_u[_qp] *
+  Real val_new = std::pow(10.0, _log_k[_qp]) * _sto_u * _gamma_u[_qp] *
                  std::pow(_gamma_u[_qp] * _u[_qp], _sto_u - 1.0) * _phi[_j][_qp] / _gamma_eq[_qp];
 
   for (unsigned int i = 0; i < _vars.size(); ++i)
@@ -122,7 +122,7 @@ CoupledBEEquilibriumSub::computeQpOffDiagJacobian(unsigned int jvar)
     return 0.0;
 
   Real val_new =
-      std::pow(10.0, _log_k) * std::pow(_gamma_u[_qp] * _u[_qp], _sto_u) / _gamma_eq[_qp];
+      std::pow(10.0, _log_k[_qp]) * std::pow(_gamma_u[_qp] * _u[_qp], _sto_u) / _gamma_eq[_qp];
 
   for (unsigned int i = 0; i < _vars.size(); ++i)
   {
