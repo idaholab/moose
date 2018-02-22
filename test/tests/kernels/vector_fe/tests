@@ -22,7 +22,7 @@
     type = PetscJacobianTester
     input = 'coupled_scalar_vector_jacobian.i'
     recover = false
-    state = 1
+    state = const_positive
     ratio_tol = 1e-7
     difference_tol = 5e-6
   [../]
