@@ -28,22 +28,18 @@ GeometricalComponent::GeometricalComponent(const InputParameters & parameters)
     _offset(getParam<RealVectorValue>("offset")),
     _dir(getParam<RealVectorValue>("orientation")),
     _rotation(getParam<Real>("rotation")),
-    _2nd_order_mesh(getParam<bool>("2nd_order_mesh")),
     _lengths(getParam<std::vector<Real>>("length")),
+    _length(std::accumulate(_lengths.begin(), _lengths.end(), 0.0)),
     _n_elems(getParam<std::vector<unsigned int>>("n_elems")),
+    _n_elem(std::accumulate(_n_elems.begin(), _n_elems.end(), 0)),
+    _2nd_order_mesh(getParam<bool>("2nd_order_mesh")),
+    _n_nodes(computeNumberOfNodes(_n_elem)),
+    _n_sections(_lengths.size()),
+    _fe_type(_2nd_order_mesh ? FEType(SECOND, LAGRANGE) : FEType(FIRST, LAGRANGE)),
     _displace_node_user_object_name(genName(name(), "displace_node"))
 {
   checkSizeGreaterThan<Real>("length", 0);
   checkEqualSize<Real, unsigned int>("length", "n_elems");
-  _n_sections = _lengths.size();
-  _length = std::accumulate(_lengths.begin(), _lengths.end(), 0.0);
-  _n_elem = std::accumulate(_n_elems.begin(), _n_elems.end(), 0);
-  _n_nodes = computeNumberOfNodes(_n_elem);
-
-  if (_2nd_order_mesh)
-    _fe_type = FEType(SECOND, LAGRANGE);
-  else
-    _fe_type = FEType(FIRST, LAGRANGE);
 }
 
 unsigned int
@@ -106,12 +102,38 @@ GeometricalComponent::displaceMesh(const std::vector<SubdomainName> & blocks)
 const std::vector<GeometricalComponent::Connection> &
 GeometricalComponent::getConnections(PipeConnectable::EEndType id) const
 {
+  checkSetupStatus(MESH_PREPARED);
+
   std::map<PipeConnectable::EEndType, std::vector<Connection>>::const_iterator it =
       _connections.find(id);
   if (it != _connections.end())
     return it->second;
   else
     mooseError(name(), ": Invalid pipe end type (", id, ").");
+}
+
+const std::vector<unsigned int> &
+GeometricalComponent::getSubdomainIds() const
+{
+  checkSetupStatus(MESH_PREPARED);
+
+  return _subdomain_ids;
+}
+
+const std::vector<SubdomainName> &
+GeometricalComponent::getSubdomainNames() const
+{
+  checkSetupStatus(MESH_PREPARED);
+
+  return _subdomain_names;
+}
+
+const std::vector<Moose::CoordinateSystemType> &
+GeometricalComponent::getCoordSysTypes() const
+{
+  checkSetupStatus(MESH_PREPARED);
+
+  return _coord_sys;
 }
 
 void

@@ -61,16 +61,34 @@ public:
    *
    * @return vector of subdomain IDs for this component
    */
-  virtual const std::vector<unsigned int> & getSubdomainIds() const { return _subdomain_ids; }
+  virtual const std::vector<unsigned int> & getSubdomainIds() const;
 
   /**
    * Gets the subdomain names for this component
    *
    * @return vector of subdomain names for this component
    */
-  virtual const std::vector<SubdomainName> & getSubdomainNames() const { return _subdomain_names; }
+  virtual const std::vector<SubdomainName> & getSubdomainNames() const;
 
-  virtual const std::vector<Moose::CoordinateSystemType> & getCoordSysTypes() { return _coord_sys; }
+  /**
+   * Gets the coordinate system types for this component
+   *
+   * @return vector of coordinate system types for this component
+   */
+  virtual const std::vector<Moose::CoordinateSystemType> & getCoordSysTypes() const;
+
+  /**
+   * Gets the FE type for this component
+   *
+   * @return The finite element type
+   */
+  const FEType & feType() const { return _fe_type; }
+
+protected:
+  virtual void check() override;
+  virtual void setupMesh() override;
+
+  virtual void buildMesh() = 0;
 
   /**
    * Sets the next subdomain ID, name, and coordinate system
@@ -84,57 +102,46 @@ public:
                    const std::string & subdomain_name,
                    const Moose::CoordinateSystemType & coord_system = Moose::COORD_XYZ);
 
-  /**
-   * Get the FE type for this component
-   * @return The finite element type
-   */
-  const FEType & feType() const { return _fe_type; }
-
-protected:
-  virtual void check() override;
-  virtual void setupMesh() override;
-
-  virtual void buildMesh() = 0;
   const FunctionName & getVariableFn(const FunctionName & fn_param_name);
 
   /// Physical position in the space
-  Point _position;
+  const Point & _position;
 
   /// Offset for mesh generation
-  Point _offset;
+  const RealVectorValue & _offset;
 
   /// Direction this pipe is going to
-  RealVectorValue _dir;
+  const RealVectorValue & _dir;
 
   /// Rotation of the component around x-axis in non-displaced space
-  Real _rotation;
-
-  /// True if simulation is using a second order mesh
-  bool _2nd_order_mesh;
-
-  /// The FE type used in this component
-  FEType _fe_type;
-
-  /// Number of sections in the geometric component
-  unsigned int _n_sections;
-
-  /// Length of the geometric component along the main axis
-  Real _length;
+  const Real & _rotation;
 
   /// Length of each subsection of the geometric component
   std::vector<Real> _lengths;
 
-  /// Number of elements along the main axis
-  unsigned int _n_elem;
+  /// Total length of the geometric component along the main axis
+  Real _length;
 
   /// Number of elements in each subsection of the geometric component
-  std::vector<unsigned int> _n_elems;
+  const std::vector<unsigned int> & _n_elems;
+
+  /// Number of elements along the main axis
+  const unsigned int _n_elem;
+
+  /// True if simulation is using a second order mesh
+  const bool _2nd_order_mesh;
+
+  /// Number of nodes along the main axis
+  const unsigned int _n_nodes;
+
+  /// Number of sections in the geometric component
+  const unsigned int _n_sections;
+
+  /// The FE type used in this component
+  const FEType _fe_type;
 
   /// The name of the user object to displace nodes into the physical space
   UserObjectName _displace_node_user_object_name;
-
-  /// Number of nodes along the main axis
-  unsigned int _n_nodes;
 
   /// Node locations along the main axis
   std::vector<Real> _node_locations;
