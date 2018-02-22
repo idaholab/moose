@@ -26,6 +26,13 @@ PipeBase::getFluidPropertiesName() const
   return _fp_name;
 }
 
+const RELAP7::FlowModelID &
+PipeBase::getFlowModelID() const
+{
+  checkSetupStatus(INITIALIZED_PRIMARY);
+  return _model_id;
+}
+
 void
 PipeBase::init()
 {

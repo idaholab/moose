@@ -39,9 +39,6 @@ public:
     }
   };
 
-  virtual void setupMesh() override;
-  virtual void check() override;
-
   /**
    * Method that moves the nodes from reference space into the physical space.
    * Child classes are required to call this in addMooseObjects() if they want to perform such a
@@ -94,6 +91,9 @@ public:
   const FEType & feType() const { return _fe_type; }
 
 protected:
+  virtual void check() override;
+  virtual void setupMesh() override;
+
   virtual void buildMesh() = 0;
   const FunctionName & getVariableFn(const FunctionName & fn_param_name);
 

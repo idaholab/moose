@@ -23,35 +23,39 @@ class Component : public RELAP7Object
 public:
   Component(const InputParameters & parameters);
 
+  /// Component setup status type
+  enum EComponentSetupStatus
+  {
+    CREATED,               ///< only created
+    MESH_PREPARED,         ///< mesh set up
+    INITIALIZED_PRIMARY,   ///< mesh set up, called primary init
+    INITIALIZED_SECONDARY, ///< mesh set up, called both inits
+    CHECKED                ///< mesh set up, called both inits, checked
+  };
+
   unsigned int id() { return _id; }
 
   Component * parent() { return _parent; }
 
   /**
-   * Initializes the component
-   *
-   * The reason this function exists (as opposed to just having everything in
-   * the constructor) is because some initialization depends on all components
-   * existing, since many components couple to other components. Therefore,
-   * when deciding whether code should go into the constructor or this function,
-   * one should use the following reasoning: if an operation does not require
-   * the existence of other components, then put that operation in the
-   * constructor; otherwise, put it in this function.
+   * Wrapper function for \c init() that marks the function as being called
    */
-  virtual void init();
+  void executeInit();
 
   /**
-   * Perform secondary initialization, which relies on init() being called
-   * for all components.
+   * Wrapper function for \c initSecondary() that marks the function as being called
    */
-  virtual void initSecondary();
+  void executeInitSecondary();
 
   /**
-   * Check the component integrity
+   * Wrapper function for \c check() that marks the function as being called
    */
-  virtual void check();
+  void executeCheck();
 
-  virtual void setupMesh() = 0;
+  /**
+   * Wrapper function for \c setupMesh() that marks the function as being called
+   */
+  void executeSetupMesh();
 
   virtual void addVariables() {}
 
@@ -109,6 +113,17 @@ public:
                      const std::string & name,
                      const std::string & par_name);
 
+  /**
+   * Throws an error if the supplied setup status of this component has not been reached
+   *
+   * This is useful for getter functions that rely on data initialized after the
+   * constructor; if an error is not thrown, then uninitialized data could be
+   * returned from these functions.
+   *
+   * @param[in] status   Setup status that this component must have reached
+   */
+  void checkSetupStatus(const EComponentSetupStatus & status) const;
+
 public:
   static std::string
   genName(const std::string & prefix, unsigned int id, const std::string & suffix = "");
@@ -120,6 +135,35 @@ public:
   genName(const std::string & prefix, const std::string & middle, const std::string & suffix = "");
 
 protected:
+  /**
+   * Initializes the component
+   *
+   * The reason this function exists (as opposed to just having everything in
+   * the constructor) is because some initialization depends on all components
+   * existing, since many components couple to other components. Therefore,
+   * when deciding whether code should go into the constructor or this function,
+   * one should use the following reasoning: if an operation does not require
+   * the existence of other components, then put that operation in the
+   * constructor; otherwise, put it in this function.
+   */
+  virtual void init() {}
+
+  /**
+   * Perform secondary initialization, which relies on init() being called
+   * for all components.
+   */
+  virtual void initSecondary() {}
+
+  /**
+   * Check the component integrity
+   */
+  virtual void check() {}
+
+  /**
+   * Performs mesh setup such as creating mesh or naming mesh sets
+   */
+  virtual void setupMesh() {}
+
   /**
    * Makes a function controllable if it is constant
    *
@@ -338,6 +382,9 @@ private:
   // Do not want users to touch these, they _must_ use the API
   static unsigned int subdomain_ids;
   static unsigned int bc_ids;
+
+  /// Component setup status
+  EComponentSetupStatus _component_setup_status;
 };
 
 template <typename T>

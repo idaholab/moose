@@ -25,20 +25,20 @@ class PipeBase : public GeometricalComponent
 public:
   PipeBase(const InputParameters & params);
 
-  virtual void init() override;
-  virtual void check() override;
-
   virtual const std::string & getType() override { return _type; }
 
   // Pipe specific interface ----
   virtual UserObjectName getFluidPropertiesName() const;
   virtual std::shared_ptr<const FlowModel> getFlowModel() const { return _flow_model; }
-  virtual const RELAP7::FlowModelID & getFlowModelID() const { return _model_id; }
+  virtual const RELAP7::FlowModelID & getFlowModelID() const;
   virtual unsigned int getSubdomainID() const = 0;
   virtual bool isHorizontal() const = 0;
   virtual Real getInclinedAngle() const = 0;
 
 protected:
+  virtual void init() override;
+  virtual void check() override;
+
   /// The name of the user object that defines fluid properties
   UserObjectName _fp_name;
   /// The flow model used by this pipe

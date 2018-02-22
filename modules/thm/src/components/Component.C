@@ -93,23 +93,37 @@ Component::Component(const InputParameters & parameters)
     _factory(_app.getFactory()),
     _mesh(_sim.mesh()),
     _phys_mesh(_sim.physicalMesh()),
-    _zero(_sim._zero)
+    _zero(_sim._zero),
+    _component_setup_status(CREATED)
 {
 }
 
 void
-Component::init()
+Component::executeInit()
 {
+  init();
+  _component_setup_status = INITIALIZED_PRIMARY;
 }
 
 void
-Component::initSecondary()
+Component::executeInitSecondary()
 {
+  initSecondary();
+  _component_setup_status = INITIALIZED_SECONDARY;
 }
 
 void
-Component::check()
+Component::executeCheck()
 {
+  check();
+  _component_setup_status = CHECKED;
+}
+
+void
+Component::executeSetupMesh()
+{
+  setupMesh();
+  _component_setup_status = MESH_PREPARED;
 }
 
 unsigned int
@@ -146,6 +160,18 @@ Component::connectObject(const InputParameters & params,
   MooseObjectParameterName par_value(
       MooseObjectName(params.get<std::string>("_moose_base"), mooseName), par_name);
   _app.getInputParameterWarehouse().addControllableParameterConnection(alias, par_value);
+}
+
+void
+Component::checkSetupStatus(const EComponentSetupStatus & status) const
+{
+  if (_component_setup_status < status)
+    mooseError(name(),
+               ": The component setup status (",
+               _component_setup_status,
+               ") is less than the required status (",
+               status,
+               ")");
 }
 
 void
