@@ -14,7 +14,7 @@ InputParameters
 validParams<AqueousEquilibriumRxnAux>()
 {
   InputParameters params = validParams<AuxKernel>();
-  params.addParam<Real>("log_k", 0.0, "The equilibrium constant in dissociation form");
+  params.addCoupledVar("log_k", 0.0, "The equilibrium constant in dissociation form");
   params.addRequiredParam<std::vector<Real>>("sto_v",
                                              "The stoichiometric coefficient of reactants");
   params.addRequiredCoupledVar(
@@ -27,7 +27,7 @@ validParams<AqueousEquilibriumRxnAux>()
 
 AqueousEquilibriumRxnAux::AqueousEquilibriumRxnAux(const InputParameters & parameters)
   : AuxKernel(parameters),
-    _log_k(getParam<Real>("log_k")),
+    _log_k(coupledValue("log_k")),
     _sto_v(getParam<std::vector<Real>>("sto_v")),
     _gamma_eq(coupledValue("gamma"))
 {
@@ -66,5 +66,5 @@ AqueousEquilibriumRxnAux::computeValue()
     conc_product *= std::pow((*_gamma_v[i])[_qp] * (*_vals[i])[_qp], _sto_v[i]);
 
   mooseAssert(_gamma_eq[_qp] > 0.0, "Activity coefficient must be greater than zero");
-  return std::pow(10.0, _log_k) * conc_product / _gamma_eq[_qp];
+  return std::pow(10.0, _log_k[_qp]) * conc_product / _gamma_eq[_qp];
 }

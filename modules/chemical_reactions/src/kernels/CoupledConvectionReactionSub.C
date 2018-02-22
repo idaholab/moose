@@ -15,7 +15,7 @@ validParams<CoupledConvectionReactionSub>()
 {
   InputParameters params = validParams<Kernel>();
   params.addParam<Real>("weight", 1.0, "Weight of the equilibrium species");
-  params.addParam<Real>("log_k", 0.0, "Equilibrium constant of dissociation equilibrium reaction");
+  params.addCoupledVar("log_k", 0.0, "Equilibrium constant of dissociation equilibrium reaction");
   params.addParam<Real>("sto_u",
                         1.0,
                         "Stoichiometric coef of the primary species the kernel "
@@ -38,7 +38,7 @@ validParams<CoupledConvectionReactionSub>()
 CoupledConvectionReactionSub::CoupledConvectionReactionSub(const InputParameters & parameters)
   : DerivativeMaterialInterface<Kernel>(parameters),
     _weight(getParam<Real>("weight")),
-    _log_k(getParam<Real>("log_k")),
+    _log_k(coupledValue("log_k")),
     _sto_u(getParam<Real>("sto_u")),
     _sto_v(getParam<std::vector<Real>>("sto_v")),
     _cond(getMaterialProperty<Real>("conductivity")),
@@ -102,7 +102,7 @@ CoupledConvectionReactionSub::computeQpResidual()
   }
 
   mooseAssert(_gamma_eq[_qp] > 0.0, "Activity coefficient must be greater than zero");
-  return _weight * std::pow(10.0, _log_k) * _test[_i][_qp] * darcy_vel * (d_u + d_var_sum) /
+  return _weight * std::pow(10.0, _log_k[_qp]) * _test[_i][_qp] * darcy_vel * (d_u + d_var_sum) /
          _gamma_eq[_qp];
 }
 
@@ -136,7 +136,7 @@ CoupledConvectionReactionSub::computeQpJacobian()
   }
 
   RealGradient d_u_j = d_u_1 + d_u_2;
-  return _weight * std::pow(10.0, _log_k) * _test[_i][_qp] * darcy_vel * (d_u_j + d_var_sum) /
+  return _weight * std::pow(10.0, _log_k[_qp]) * _test[_i][_qp] * darcy_vel * (d_u_j + d_var_sum) /
          _gamma_eq[_qp];
 }
 
@@ -165,8 +165,8 @@ CoupledConvectionReactionSub::computeQpOffDiagJacobian(unsigned int jvar)
 
       d_var_sum += d_var;
     }
-    return _weight * std::pow(10.0, _log_k) * _test[_i][_qp] * ddarcy_vel_dp * (d_u + d_var_sum) /
-           _gamma_eq[_qp];
+    return _weight * std::pow(10.0, _log_k[_qp]) * _test[_i][_qp] * ddarcy_vel_dp *
+           (d_u + d_var_sum) / _gamma_eq[_qp];
   }
 
   if (_vals.size() == 0)
@@ -232,6 +232,6 @@ CoupledConvectionReactionSub::computeQpOffDiagJacobian(unsigned int jvar)
       diff3_sum += diff3;
     }
 
-  return _weight * std::pow(10.0, _log_k) * _test[_i][_qp] * darcy_vel *
+  return _weight * std::pow(10.0, _log_k[_qp]) * _test[_i][_qp] * darcy_vel *
          (diff1 + diff2 + diff3_sum) / _gamma_eq[_qp];
 }
