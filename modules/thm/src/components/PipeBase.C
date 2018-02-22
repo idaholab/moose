@@ -20,16 +20,19 @@ PipeBase::PipeBase(const InputParameters & params)
 {
 }
 
-UserObjectName
-PipeBase::getFluidPropertiesName() const
+std::shared_ptr<const FlowModel>
+PipeBase::getFlowModel() const
 {
-  return _fp_name;
+  checkSetupStatus(INITIALIZED_PRIMARY);
+
+  return _flow_model;
 }
 
 const RELAP7::FlowModelID &
 PipeBase::getFlowModelID() const
 {
   checkSetupStatus(INITIALIZED_PRIMARY);
+
   return _model_id;
 }
 

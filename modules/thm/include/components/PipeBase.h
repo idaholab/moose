@@ -28,8 +28,8 @@ public:
   virtual const std::string & getType() override { return _type; }
 
   // Pipe specific interface ----
-  virtual UserObjectName getFluidPropertiesName() const;
-  virtual std::shared_ptr<const FlowModel> getFlowModel() const { return _flow_model; }
+  virtual UserObjectName getFluidPropertiesName() const { return _fp_name; }
+  virtual std::shared_ptr<const FlowModel> getFlowModel() const;
   virtual const RELAP7::FlowModelID & getFlowModelID() const;
   virtual unsigned int getSubdomainID() const = 0;
   virtual bool isHorizontal() const = 0;
@@ -40,7 +40,7 @@ protected:
   virtual void check() override;
 
   /// The name of the user object that defines fluid properties
-  UserObjectName _fp_name;
+  const UserObjectName & _fp_name;
   /// The flow model used by this pipe
   std::shared_ptr<FlowModel> _flow_model;
   /// The flow model type used by this pipe
