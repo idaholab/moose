@@ -10,7 +10,7 @@
 // MOOSE includes
 #include "IterationAdaptiveDT.h"
 #include "Function.h"
-#include "Piecewise.h"
+#include "PiecewiseBase.h"
 #include "Transient.h"
 #include "NonlinearSystem.h"
 
@@ -36,7 +36,7 @@ validParams<IterationAdaptiveDT>()
                                      "is used as an upper limit for the "
                                      "current time step length");
   params.addParam<FunctionName>("timestep_limiting_function",
-                                "A 'Piecewise' type function used to control the timestep by "
+                                "A 'PiecewiseBase' type function used to control the timestep by "
                                 "limiting the change in the function over a timestep");
   params.addParam<Real>(
       "max_function_change",
@@ -124,7 +124,8 @@ IterationAdaptiveDT::init()
     _timestep_limiting_function =
         &_fe_problem.getFunction(getParam<FunctionName>("timestep_limiting_function"),
                                  isParamValid("_tid") ? getParam<THREAD_ID>("_tid") : 0);
-    _piecewise_timestep_limiting_function = dynamic_cast<Piecewise *>(_timestep_limiting_function);
+    _piecewise_timestep_limiting_function =
+        dynamic_cast<PiecewiseBase *>(_timestep_limiting_function);
 
     if (_piecewise_timestep_limiting_function)
     {
@@ -135,7 +136,7 @@ IterationAdaptiveDT::init()
         _times[i] = _piecewise_timestep_limiting_function->domain(i);
     }
     else
-      mooseError("timestep_limiting_function must be a Piecewise function");
+      mooseError("timestep_limiting_function must be a PiecewiseBase function");
   }
 }
 

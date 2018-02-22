@@ -10,13 +10,11 @@
 #include "Piecewise.h"
 #include "DelimitedFileReader.h"
 
-#include <fstream>
-
 template <>
 InputParameters
 validParams<Piecewise>()
 {
-  InputParameters params = validParams<Function>();
+  InputParameters params = validParams<PiecewiseBase>();
   params.addParam<std::vector<Real>>("xy_data",
                                      "All function data, supplied in abscissa, ordinate pairs");
   params.addParam<std::vector<Real>>("x", "The abscissa values");
@@ -32,17 +30,11 @@ validParams<Piecewise>()
       "format", format, "Format of csv data file that is in either in columns or rows");
   params.addParam<Real>("scale_factor", 1.0, "Scale factor to be applied to the ordinate values");
 
-  MooseEnum axis("x=0 y=1 z=2 0=3 1=4 2=5");
-  axis.deprecate("0", "x");
-  axis.deprecate("1", "y");
-  axis.deprecate("2", "z");
-  params.addParam<MooseEnum>(
-      "axis", axis, "The axis used (x, y, or z) if this is to be a function of position");
   return params;
 }
 
 Piecewise::Piecewise(const InputParameters & parameters)
-  : Function(parameters), _scale_factor(getParam<Real>("scale_factor")), _has_axis(false)
+  : PiecewiseBase(parameters), _scale_factor(getParam<Real>("scale_factor"))
 {
   std::pair<std::vector<Real>, std::vector<Real>> xy;
 
@@ -61,60 +53,6 @@ Piecewise::Piecewise(const InputParameters & parameters)
                ": Either 'data_file', 'x' and 'y', or 'xy_data' must be specified.");
 
   setData(xy.first, xy.second);
-}
-
-void
-Piecewise::setData(const std::vector<Real> & x, const std::vector<Real> & y)
-{
-  // Size mismatch error
-  if (x.size() != y.size())
-    mooseError("In Piecewise ", _name, ": Lengths of x and y data do not match.");
-
-  try
-  {
-    _linear_interp = libmesh_make_unique<LinearInterpolation>(x, y);
-  }
-  catch (std::domain_error & e)
-  {
-    mooseError("In Piecewise ", _name, ": ", e.what());
-  }
-
-  if (isParamValid("axis"))
-  {
-    const MooseEnum & axis = getParam<MooseEnum>("axis");
-    switch (axis)
-    {
-      case 0:
-      case 1:
-      case 2:
-        _axis = axis;
-        break;
-      case 3:
-      case 4:
-      case 5:
-        _axis = axis - 3;
-        break;
-    }
-    _has_axis = true;
-  }
-}
-
-Real
-Piecewise::functionSize()
-{
-  return _linear_interp->getSampleSize();
-}
-
-Real
-Piecewise::domain(int i)
-{
-  return _linear_interp->domain(i);
-}
-
-Real
-Piecewise::range(int i)
-{
-  return _linear_interp->range(i);
 }
 
 std::pair<std::vector<Real>, std::vector<Real>>
