@@ -53,7 +53,7 @@ public:
 
   virtual void setupMesh() = 0;
 
-  virtual void addVariables() = 0;
+  virtual void addVariables() {}
 
   virtual void addMooseObjects() {}
 
