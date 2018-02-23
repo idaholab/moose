@@ -22,6 +22,38 @@ validParams<FlowConnection>()
 FlowConnection::FlowConnection(const InputParameters & params) : Component(params) {}
 
 void
+FlowConnection::setupMesh()
+{
+  for (const auto & connection : _connections)
+  {
+    const std::string & comp_name = connection._geometrical_component_name;
+
+    if (hasComponentByName<GeometricalFlowComponent>(comp_name))
+    {
+      const GeometricalFlowComponent & gc = getComponentByName<GeometricalFlowComponent>(comp_name);
+      for (auto && conn : gc.getConnections(connection._end_type))
+      {
+        const BoundaryName boundary_name = createBoundaryName(comp_name);
+
+        // get info from the connection
+        _positions.push_back(conn._position);
+        _nodes.push_back(conn._node->id());
+        _normals.push_back(conn._normal);
+        _boundary_ids.push_back(conn._boundary_id);
+        _boundary_names.push_back(boundary_name);
+        _connection_strings.push_back(connection._string);
+
+        // name the nodeset/sideset corresponding to the node of the connected pipe end
+        _mesh.setBoundaryName(conn._boundary_id, boundary_name);
+
+        // add connection's node to nodeset of all boundary nodes
+        _mesh.getMesh().boundary_info->add_node(conn._node, RELAP7::bnd_nodeset_id);
+      }
+    }
+  }
+}
+
+void
 FlowConnection::init()
 {
   Component::init();

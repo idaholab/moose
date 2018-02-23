@@ -74,6 +74,7 @@ public:
   }
 
 protected:
+  virtual void setupMesh() override;
   virtual void init() override;
   virtual void check() override;
 
@@ -103,7 +104,32 @@ protected:
   template <typename T>
   void checkSizeEqualsNumberOfConnections(const std::string & param) const;
 
+  /// Physical positions of connected pipes
+  std::vector<Point> _positions;
+  /// Boundary node IDs from connected pipes
+  std::vector<dof_id_type> _nodes;
+  /// Boundary IDs of connected pipes
+  std::vector<unsigned int> _boundary_ids;
+  /// Boundary names of connected pipes
+  std::vector<BoundaryName> _boundary_names;
+  /// Outward normals associated with connected pipes
+  std::vector<Real> _normals;
+  /// Connection strings
+  std::vector<std::string> _connection_strings;
+
 private:
+  /**
+   * Creates a nodeset/sideset name from the connected component name
+   *
+   * Generally, for boundaries, this will be the name of this component, but
+   * junctions will need to combine this component's name with the connected
+   * component's name.
+   *
+   * @param[in] comp_name   name of the connected component
+   * @returns nodeset/sideset name for a particular connection
+   */
+  virtual std::string createBoundaryName(const std::string & comp_name) const = 0;
+
   /// Vector of connections of this component
   std::vector<Connection> _connections;
 
