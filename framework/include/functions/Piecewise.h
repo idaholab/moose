@@ -10,8 +10,7 @@
 #ifndef PIECEWISE_H
 #define PIECEWISE_H
 
-#include "Function.h"
-#include "LinearInterpolation.h"
+#include "PiecewiseBase.h"
 
 class Piecewise;
 
@@ -20,22 +19,14 @@ InputParameters validParams<Piecewise>();
 
 /**
  * Function which provides a piecewise approximation to a provided
- * (x,y) point data set.  Derived classes which control the order
+ * (x,y) point data set generated from file, (x,y) pairs, or separate
+ * (x,y) vectors.  Derived classes which control the order
  * (constant, linear) of the approximation should be used directly.
  */
-class Piecewise : public Function
+class Piecewise : public PiecewiseBase
 {
 public:
   Piecewise(const InputParameters & parameters);
-
-  virtual Real functionSize();
-  virtual Real domain(int i);
-  virtual Real range(int i);
-
-  /**
-   * Provides a means for explicitly setting the x and y data.
-   */
-  void setData(const std::vector<Real> & x, const std::vector<Real> & y);
 
 protected:
   /**
@@ -54,9 +45,6 @@ protected:
   std::pair<std::vector<Real>, std::vector<Real>> buildFromXY();
 
   const Real _scale_factor;
-  std::unique_ptr<LinearInterpolation> _linear_interp;
-  int _axis;
-  bool _has_axis;
 };
 
 #endif

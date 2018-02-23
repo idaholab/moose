@@ -15,7 +15,7 @@
 #include "PostprocessorInterface.h"
 
 class Function;
-class Piecewise;
+class PiecewiseBase;
 
 /**
  * Adjust the timestep based on the number of iterations.
@@ -73,7 +73,7 @@ protected:
   const PostprocessorValue * _pps_value;
 
   Function * _timestep_limiting_function;
-  Piecewise * _piecewise_timestep_limiting_function;
+  PiecewiseBase * _piecewise_timestep_limiting_function;
   /// time point defined in the piecewise function
   std::vector<Real> _times;
 
@@ -83,7 +83,7 @@ protected:
 
   std::set<Real> _tfunc_times;
 
-  /// Piecewise linear definition of time stepping
+  /// PiecewiseBase linear definition of time stepping
   LinearInterpolation _time_ipol;
   /// true if we want to use piecewise-defined time stepping
   const bool _use_time_ipol;
