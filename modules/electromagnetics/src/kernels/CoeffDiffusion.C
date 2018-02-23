@@ -21,11 +21,11 @@ CoeffDiffusion::CoeffDiffusion(const InputParameters & parameters)
 Real
 CoeffDiffusion::computeQpResidual()
 {
-  return -_coefficient * _func.value(_t,_q_point[_qp]) * Diffusion::computeQpResidual();
+  return _coefficient * _func.value(_t,_q_point[_qp]) * Diffusion::computeQpResidual();
 }
 
 Real
 CoeffDiffusion::computeQpJacobian()
 {
-  return -_coefficient * _func.value(_t,_q_point[_qp]) * Diffusion::computeQpJacobian();
+  return _coefficient * _func.value(_t,_q_point[_qp]) * Diffusion::computeQpJacobian();
 }
