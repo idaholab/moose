@@ -218,13 +218,13 @@ public:
                                                               const Real dtol,
                                                               const PetscInt maxits);
 
-  virtual bool hasVariable(const std::string & var_name) override;
+  virtual bool hasVariable(const std::string & var_name) const override;
   virtual MooseVariableFE & getVariable(THREAD_ID tid, const std::string & var_name) override;
   virtual MooseVariable & getStandardVariable(THREAD_ID tid, const std::string & var_name) override;
   virtual VectorMooseVariable & getVectorVariable(THREAD_ID tid,
                                                   const std::string & var_name) override;
 
-  virtual bool hasScalarVariable(const std::string & var_name) override;
+  virtual bool hasScalarVariable(const std::string & var_name) const override;
   virtual MooseVariableScalar & getScalarVariable(THREAD_ID tid,
                                                   const std::string & var_name) override;
   virtual System & getSystem(const std::string & var_name) override;
@@ -237,21 +237,6 @@ public:
    */
   virtual void setActiveElementalMooseVariables(const std::set<MooseVariableFE *> & moose_vars,
                                                 THREAD_ID tid) override;
-
-  /**
-   * Get the MOOSE variables to be reinited on each element.
-   *
-   * @param tid The thread id
-   */
-  virtual const std::set<MooseVariableFE *> &
-  getActiveElementalMooseVariables(THREAD_ID tid) override;
-
-  /**
-   * Whether or not a list of active elemental moose variables has been set.
-   *
-   * @return True if there has been a list of active elemental moose variables set, False otherwise
-   */
-  virtual bool hasActiveElementalMooseVariables(THREAD_ID tid) override;
 
   /**
    * Clear the active elemental MooseVariableFE.  If there are no active variables then they will
@@ -270,23 +255,6 @@ public:
    */
   virtual void setActiveMaterialProperties(const std::set<unsigned int> & mat_prop_ids,
                                            THREAD_ID tid) override;
-
-  /**
-   * Get the material properties required by the current computing thread.
-   *
-   * @param tid The thread id
-   */
-  virtual const std::set<unsigned int> & getActiveMaterialProperties(THREAD_ID tid) override;
-
-  /**
-   * Method to check whether or not a list of active material roperties has been set. This method
-   * is called by reinitMaterials to determine whether Material computeProperties methods need to be
-   * called. If the return is False, this check prevents unnecessary material property computation
-   * @param tid The thread id
-   *
-   * @return True if there has been a list of active material properties set, False otherwise
-   */
-  virtual bool hasActiveMaterialProperties(THREAD_ID tid) override;
 
   /**
    * Clear the active material properties. Should be called at the end of every computing thread
@@ -422,10 +390,10 @@ public:
   virtual void checkExceptionAndStopSolve();
 
   virtual bool converged() override;
-  virtual unsigned int nNonlinearIterations() override;
-  virtual unsigned int nLinearIterations() override;
-  virtual Real finalNonlinearResidual() override;
-  virtual bool computingInitialResidual() override;
+  virtual unsigned int nNonlinearIterations() const override;
+  virtual unsigned int nLinearIterations() const override;
+  virtual Real finalNonlinearResidual() const override;
+  virtual bool computingInitialResidual() const override;
 
   /**
    * Returns true if we are in or beyond the initialSetup stage
@@ -654,7 +622,10 @@ public:
    *
    * @see AdvancedOutput::initPostprocessorOrVectorPostprocessorLists
    */
-  const ExecuteMooseObjectWarehouse<UserObject> & getUserObjects() { return _all_user_objects; }
+  const ExecuteMooseObjectWarehouse<UserObject> & getUserObjects() const
+  {
+    return _all_user_objects;
+  }
 
   /**
    * Get the user object by its name
@@ -662,7 +633,7 @@ public:
    * @return Const reference to the user object
    */
   template <class T>
-  const T & getUserObject(const std::string & name, unsigned int tid = 0)
+  const T & getUserObject(const std::string & name, unsigned int tid = 0) const
   {
     if (_all_user_objects.hasActiveObject(name, tid))
     {
@@ -678,14 +649,14 @@ public:
    * @param name The name of the user object being retrieved
    * @return Const reference to the user object
    */
-  const UserObject & getUserObjectBase(const std::string & name);
+  const UserObject & getUserObjectBase(const std::string & name) const;
 
   /**
    * Check if there if a user object of given name
    * @param name The name of the user object being checked for
    * @return true if the user object exists, false otherwise
    */
-  bool hasUserObject(const std::string & name);
+  bool hasUserObject(const std::string & name) const;
 
   /**
    * Check existence of the postprocessor.
@@ -696,6 +667,11 @@ public:
 
   /**
    * Get a reference to the value associated with the postprocessor.
+   * @param name The name of the post-processor
+   * @return The reference to the old value
+   *
+   * Note: This method cannot be marked const. It calls another interface, which creates maps space
+   * in a map on demand.
    */
   PostprocessorValue & getPostprocessorValue(const PostprocessorName & name);
 
@@ -703,6 +679,9 @@ public:
    * Get the reference to the old value of a post-processor
    * @param name The name of the post-processor
    * @return The reference to the old value
+   *
+   * Note: This method cannot be marked const. It calls another interface, which creates maps space
+   * in a map on demand.
    */
   PostprocessorValue & getPostprocessorValueOld(const std::string & name);
 
@@ -710,6 +689,9 @@ public:
    * Get the reference to the older value of a post-processor
    * @param name The name of the post-processor
    * @return The reference to the old value
+   *
+   * Note: This method cannot be marked const. It calls another interface, which creates maps space
+   * in a map on demand.
    */
   PostprocessorValue & getPostprocessorValueOlder(const std::string & name);
 
@@ -717,7 +699,7 @@ public:
    * Returns whether or not the current simulation has any multiapps
    */
   bool hasMultiApps() const { return _multi_apps.hasActiveObjects(); }
-  bool hasMultiApp(const std::string & name);
+  bool hasMultiApp(const std::string & name) const;
 
   /**
    * Check existence of the VectorPostprocessor.
@@ -794,7 +776,7 @@ public:
   /**
    * Get a MultiApp object by name.
    */
-  std::shared_ptr<MultiApp> getMultiApp(const std::string & multi_app_name);
+  std::shared_ptr<MultiApp> getMultiApp(const std::string & multi_app_name) const;
 
   /**
    * Get Transfers by ExecFlagType and direction
@@ -1200,13 +1182,13 @@ public:
   /*
    * Return a reference to the material warehouse of *all* Material objects.
    */
-  const MaterialWarehouse & getMaterialWarehouse() { return _all_materials; }
+  const MaterialWarehouse & getMaterialWarehouse() const { return _all_materials; }
 
   /*
    * Return a reference to the material warehouse of Material objects to be computed.
    */
-  const MaterialWarehouse & getComputeMaterialWarehouse() { return _materials; }
-  const MaterialWarehouse & getDiscreteMaterialWarehouse() { return _discrete_materials; }
+  const MaterialWarehouse & getComputeMaterialWarehouse() const { return _materials; }
+  const MaterialWarehouse & getDiscreteMaterialWarehouse() const { return _discrete_materials; }
 
   /**
    * Return a pointer to a Material object.  If no_warn is true, suppress
@@ -1229,14 +1211,17 @@ public:
    * Will return True if the user wants to get an error when
    * a nonzero is reallocated in the Jacobian by PETSc
    */
-  bool errorOnJacobianNonzeroReallocation() { return _error_on_jacobian_nonzero_reallocation; }
+  bool errorOnJacobianNonzeroReallocation() const
+  {
+    return _error_on_jacobian_nonzero_reallocation;
+  }
 
   void setErrorOnJacobianNonzeroReallocation(bool state)
   {
     _error_on_jacobian_nonzero_reallocation = state;
   }
 
-  bool ignoreZerosInJacobian() { return _ignore_zeros_in_jacobian; }
+  bool ignoreZerosInJacobian() const { return _ignore_zeros_in_jacobian; }
 
   void setIgnoreZerosInJacobian(bool state) { _ignore_zeros_in_jacobian = state; }
 
@@ -1282,7 +1267,7 @@ public:
    * Check to see whether we need to compute the variable values of the previous Newton iterate
    * @return true if the user required values of the previous Newton iterate
    */
-  bool needsPreviousNewtonIteration();
+  bool needsPreviousNewtonIteration() const;
 
   /**
    * Whether or not to skip loading the additional data when restarting

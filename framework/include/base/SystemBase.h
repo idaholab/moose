@@ -97,7 +97,7 @@ public:
    * Gets the number of this system
    * @return The number of this system
    */
-  virtual unsigned int number();
+  virtual unsigned int number() const;
   virtual MooseMesh & mesh() { return _mesh; }
   virtual SubProblem & subproblem() { return _subproblem; }
 
@@ -163,7 +163,7 @@ public:
   /**
    * Check if the named vector exists in the system.
    */
-  virtual bool hasVector(const std::string & name);
+  virtual bool hasVector(const std::string & name) const;
 
   /**
    * Get a raw NumericVector
@@ -209,18 +209,18 @@ public:
                            Real scale_factor,
                            const std::set<SubdomainID> * const active_subdomains = NULL);
 
+  ///@{
   /**
    * Query a system for a variable
    *
    * @param var_name name of the variable
    * @return true if the variable exists
    */
-  virtual bool hasVariable(const std::string & var_name);
-  virtual bool hasScalarVariable(const std::string & var_name);
-  template <typename T>
-  bool hasVariable(const std::string & var_name);
+  virtual bool hasVariable(const std::string & var_name) const;
+  virtual bool hasScalarVariable(const std::string & var_name) const;
+  ///@}
 
-  virtual bool isScalarVariable(unsigned int var_name);
+  virtual bool isScalarVariable(unsigned int var_name) const;
 
   /**
    * Gets a reference to a variable of with specified name
@@ -290,7 +290,7 @@ public:
    * Get the number of variables in this system
    * @return the number of variables
    */
-  virtual unsigned int nVariables();
+  virtual unsigned int nVariables() const;
 
   /**
    * Adds this variable to the list of variables to be zeroed during each residual evaluation.
@@ -472,7 +472,7 @@ public:
   virtual NumericVector<Number> &
   addVector(const std::string & vector_name, const bool project, const ParallelType type);
 
-  virtual const std::string & name() { return system().name(); }
+  virtual const std::string & name() const { return system().name(); }
 
   /**
    * Adds a scalar variable

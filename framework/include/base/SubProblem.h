@@ -69,7 +69,7 @@ public:
   virtual bool isTransient() const = 0;
 
   // Variables /////
-  virtual bool hasVariable(const std::string & var_name) = 0;
+  virtual bool hasVariable(const std::string & var_name) const = 0;
 
   /// Returns the variable reference for requested variable which may be in any system
   virtual MooseVariableFE & getVariable(THREAD_ID tid, const std::string & var_name) = 0;
@@ -81,7 +81,7 @@ public:
   virtual VectorMooseVariable & getVectorVariable(THREAD_ID tid, const std::string & var_name) = 0;
 
   /// Returns a Boolean indicating whether any system contains a variable with the name provided
-  virtual bool hasScalarVariable(const std::string & var_name) = 0;
+  virtual bool hasScalarVariable(const std::string & var_name) const = 0;
 
   /// Returns the scalar variable reference from whichever system contains it
   virtual MooseVariableScalar & getScalarVariable(THREAD_ID tid, const std::string & var_name) = 0;
@@ -103,14 +103,14 @@ public:
    *
    * @param tid The thread id
    */
-  virtual const std::set<MooseVariableFE *> & getActiveElementalMooseVariables(THREAD_ID tid);
+  virtual const std::set<MooseVariableFE *> & getActiveElementalMooseVariables(THREAD_ID tid) const;
 
   /**
    * Whether or not a list of active elemental moose variables has been set.
    *
    * @return True if there has been a list of active elemental moose variables set, False otherwise
    */
-  virtual bool hasActiveElementalMooseVariables(THREAD_ID tid);
+  virtual bool hasActiveElementalMooseVariables(THREAD_ID tid) const;
 
   /**
    * Clear the active elemental MooseVariableFE.  If there are no active variables then they will
@@ -135,7 +135,7 @@ public:
    *
    * @param tid The thread id
    */
-  virtual const std::set<unsigned int> & getActiveMaterialProperties(THREAD_ID tid);
+  virtual const std::set<unsigned int> & getActiveMaterialProperties(THREAD_ID tid) const;
 
   /**
    * Method to check whether or not a list of active material roperties has been set. This method
@@ -145,7 +145,7 @@ public:
    *
    * @return True if there has been a list of active material properties set, False otherwise
    */
-  virtual bool hasActiveMaterialProperties(THREAD_ID tid);
+  virtual bool hasActiveMaterialProperties(THREAD_ID tid) const;
 
   /**
    * Clear the active material properties. Should be called at the end of every computing thread
@@ -164,12 +164,12 @@ public:
    * Returns the desired radial direction for RZ coordinate transformation
    * @return The coordinate direction for the radial direction
    */
-  unsigned int getAxisymmetricRadialCoord();
+  unsigned int getAxisymmetricRadialCoord() const;
 
   virtual DiracKernelInfo & diracKernelInfo();
-  virtual Real finalNonlinearResidual();
-  virtual unsigned int nNonlinearIterations();
-  virtual unsigned int nLinearIterations();
+  virtual Real finalNonlinearResidual() const;
+  virtual unsigned int nNonlinearIterations() const;
+  virtual unsigned int nLinearIterations() const;
 
   virtual void addResidual(THREAD_ID tid) = 0;
   virtual void addResidualNeighbor(THREAD_ID tid) = 0;
@@ -390,7 +390,7 @@ public:
    * Returns true if the problem is in the process of computing it's initial residual.
    * @return Whether or not the problem is currently computing the initial residual.
    */
-  virtual bool computingInitialResidual() = 0;
+  virtual bool computingInitialResidual() const = 0;
 
   /**
    * Return the list of elements that should have their DoFs ghosted to this processor.
