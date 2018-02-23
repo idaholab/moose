@@ -85,6 +85,8 @@ class InputTree(object):
         """
         try:
             new_input_file = InputFile()
+            if filename is None:
+                filename = ""
             new_input_file.readInputData(input_str, filename)
             return self._setInputFile(new_input_file)
         except Exception as e:
