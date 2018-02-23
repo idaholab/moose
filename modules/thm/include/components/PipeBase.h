@@ -25,8 +25,6 @@ class PipeBase : public GeometricalComponent
 public:
   PipeBase(const InputParameters & params);
 
-  virtual const std::string & getType() override { return _type; }
-
   // Pipe specific interface ----
   virtual UserObjectName getFluidPropertiesName() const { return _fp_name; }
   virtual std::shared_ptr<const FlowModel> getFlowModel() const;
@@ -45,9 +43,6 @@ protected:
   std::shared_ptr<FlowModel> _flow_model;
   /// The flow model type used by this pipe
   RELAP7::FlowModelID _model_id;
-
-public:
-  static const std::string _type;
 };
 
 #endif /* PIPEBASE_H */

@@ -66,8 +66,6 @@ public:
 
   virtual void addMooseObjects() {}
 
-  virtual const std::string & getType() = 0;
-
   /**
    * Return a reference to a component via a parameter name
    * @tparam T the type of the component we are requesting

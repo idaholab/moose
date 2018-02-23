@@ -3,15 +3,13 @@
 #include "FlowModelSinglePhase.h"
 #include "FlowModelTwoPhase.h"
 
-const std::string PipeBase::_type("pipe");
-
 template <>
 InputParameters
 validParams<PipeBase>()
 {
   InputParameters params = validParams<GeometricalComponent>();
   params.addRequiredParam<UserObjectName>("fp", "The name of fluid property user object");
-  params.addPrivateParam<std::string>("component_type", PipeBase::_type);
+  params.addPrivateParam<std::string>("component_type", "pipe");
   return params;
 }
 
