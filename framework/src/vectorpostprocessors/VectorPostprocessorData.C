@@ -11,7 +11,7 @@
 #include "FEProblem.h"
 
 VectorPostprocessorData::VectorPostprocessorData(FEProblemBase & fe_problem)
-  : Restartable("values", "VectorPostprocessorData", fe_problem, 0)
+  : Restartable(fe_problem.getMooseApp(), "values", "VectorPostprocessorData", 0)
 {
 }
 

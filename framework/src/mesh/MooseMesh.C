@@ -149,7 +149,7 @@ validParams<MooseMesh>()
 
 MooseMesh::MooseMesh(const InputParameters & parameters)
   : MooseObject(parameters),
-    Restartable(parameters, "Mesh"),
+    Restartable(this, "Mesh"),
     _mesh_parallel_type(getParam<MooseEnum>("parallel_type")),
     _use_distributed_mesh(false),
     _distribution_overridden(false),
@@ -232,7 +232,7 @@ MooseMesh::MooseMesh(const InputParameters & parameters)
 
 MooseMesh::MooseMesh(const MooseMesh & other_mesh)
   : MooseObject(other_mesh._pars),
-    Restartable(_pars, "Mesh"),
+    Restartable(this, "Mesh"),
     _mesh_parallel_type(other_mesh._mesh_parallel_type),
     _use_distributed_mesh(other_mesh._use_distributed_mesh),
     _distribution_overridden(other_mesh._distribution_overridden),

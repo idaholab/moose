@@ -34,7 +34,7 @@ validParams<Predictor>()
 
 Predictor::Predictor(const InputParameters & parameters)
   : MooseObject(parameters),
-    Restartable(parameters, "Predictors"),
+    Restartable(this, "Predictors"),
     _fe_problem(*getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")),
     _nl(_fe_problem.getNonlinearSystemBase()),
 

@@ -28,11 +28,13 @@ validParams<MutableCoefficientsInterface>()
 }
 
 MutableCoefficientsInterface::MutableCoefficientsInterface(const MooseObject * moose_object,
-                                                           Restartable * restartable,
                                                            const InputParameters & parameters)
-  : _characteristics(
-        restartable->declareRestartableData<std::vector<std::size_t>>("characteristics")),
-    _coefficients(restartable->declareRestartableData<std::vector<Real>>("coefficients")),
+  : Restartable(moose_object->getMooseApp(),
+                moose_object->name() + "_coefs",
+                "MutableCoefficientsInterface",
+                moose_object->parameters().get<THREAD_ID>("_tid")),
+    _characteristics(declareRestartableData<std::vector<std::size_t>>("characteristics")),
+    _coefficients(declareRestartableData<std::vector<Real>>("coefficients")),
     _enforce_size(false),
     _print_coefficients(parameters.get<bool>("print_when_set")),
     _console(moose_object->_console)

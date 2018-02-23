@@ -65,7 +65,7 @@ NodalKernel::NodalKernel(const InputParameters & parameters)
     TransientInterface(this),
     PostprocessorInterface(this),
     GeometricSearchInterface(this),
-    Restartable(parameters, "BCs"),
+    Restartable(this, "BCs"),
     MeshChangedInterface(parameters),
     RandomInterface(parameters,
                     *parameters.getCheckedPointerParam<FEProblemBase *>("_fe_problem_base"),

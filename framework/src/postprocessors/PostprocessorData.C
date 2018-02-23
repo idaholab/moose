@@ -11,7 +11,7 @@
 #include "FEProblem.h"
 
 PostprocessorData::PostprocessorData(FEProblemBase & fe_problem)
-  : Restartable("values", "PostprocessorData", fe_problem, 0)
+  : Restartable(fe_problem.getMooseApp(), "values", "PostprocessorData", 0)
 {
 }
 
@@ -26,7 +26,7 @@ PostprocessorData::getPostprocessorValue(const PostprocessorName & name)
 {
   PostprocessorValue *& pp_val = _values[name];
 
-  if (pp_val == NULL)
+  if (pp_val == nullptr)
     pp_val = &declareRestartableDataWithObjectName<PostprocessorValue>(name, "values");
 
   return *pp_val;
@@ -37,7 +37,7 @@ PostprocessorData::getPostprocessorValueOld(const PostprocessorName & name)
 {
   PostprocessorValue *& pp_val = _values_old[name];
 
-  if (pp_val == NULL)
+  if (pp_val == nullptr)
     pp_val = &declareRestartableDataWithObjectName<PostprocessorValue>(name, "values_old");
 
   return *pp_val;
@@ -48,7 +48,7 @@ PostprocessorData::getPostprocessorValueOlder(const PostprocessorName & name)
 {
   PostprocessorValue *& pp_val = _values_older[name];
 
-  if (pp_val == NULL)
+  if (pp_val == nullptr)
     pp_val = &declareRestartableDataWithObjectName<PostprocessorValue>(name, "values_older");
 
   return *pp_val;

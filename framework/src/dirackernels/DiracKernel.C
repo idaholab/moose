@@ -57,7 +57,7 @@ DiracKernel::DiracKernel(const InputParameters & parameters)
     MaterialPropertyInterface(this),
     PostprocessorInterface(this),
     GeometricSearchInterface(this),
-    Restartable(parameters, "DiracKernels"),
+    Restartable(this, "DiracKernels"),
     MeshChangedInterface(parameters),
     _subproblem(*getCheckedPointerParam<SubProblem *>("_subproblem")),
     _sys(*getCheckedPointerParam<SystemBase *>("_sys")),

@@ -77,7 +77,7 @@ AuxKernel::AuxKernel(const InputParameters & parameters)
                     parameters.get<THREAD_ID>("_tid"),
                     mooseVariable()->isNodal()),
     GeometricSearchInterface(this),
-    Restartable(parameters, "AuxKernels"),
+    Restartable(this, "AuxKernels"),
     MeshChangedInterface(parameters),
     VectorPostprocessorInterface(this),
     _subproblem(*getCheckedPointerParam<SubProblem *>("_subproblem")),

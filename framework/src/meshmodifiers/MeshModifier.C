@@ -31,7 +31,7 @@ validParams<MeshModifier>()
 
 MeshModifier::MeshModifier(const InputParameters & parameters)
   : MooseObject(parameters),
-    Restartable(parameters, "MeshModifiers"),
+    Restartable(this, "MeshModifiers"),
     _mesh_ptr(NULL),
     _depends_on(getParam<std::vector<std::string>>("depends_on")),
     _force_prepare(getParam<bool>("force_prepare"))

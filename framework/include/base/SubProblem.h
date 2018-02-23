@@ -398,17 +398,6 @@ public:
    */
   virtual std::set<dof_id_type> & ghostedElems() { return _ghosted_elems; }
 
-  /**
-   * Register a piece of restartable data.  This is data that will get
-   * written / read to / from a restart file.
-   *
-   * @param name The full (unique) name.
-   * @param data The actual data object.
-   * @param tid The thread id of the object.  Use 0 if the object is not threaded.
-   */
-  virtual void
-  registerRestartableData(std::string name, RestartableDataValue * data, THREAD_ID tid);
-
   std::map<std::string, std::vector<dof_id_type>> _var_dof_map;
   const CouplingMatrix & nonlocalCouplingMatrix() const { return _nonlocal_cm; }
 
@@ -492,18 +481,6 @@ private:
   void checkMatProps(std::map<T, std::set<std::string>> & props,
                      std::map<T, std::multimap<std::string, std::string>> & check_props,
                      std::map<T, std::set<MaterialPropertyName>> & zero_props);
-
-  /**
-   * NOTE: This is an internal function meant for MOOSE use only!
-   *
-   * Register a piece of recoverable data.  This is data that will get
-   * written / read to / from a restart file.
-   *
-   * However, this data will ONLY get read from the restart file during a RECOVERY operation!
-   *
-   * @param name The full (unique) name.
-   */
-  virtual void registerRecoverableData(std::string name);
 
   ///@{ Helper functions for checkMatProps
   template <typename T>

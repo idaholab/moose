@@ -12,6 +12,7 @@
 
 // MOOSE includes
 #include "DataIO.h"
+#include "RestartableData.h"
 
 // C++ includes
 #include <sstream>
@@ -20,8 +21,6 @@
 
 // Forward declarations
 class Backup;
-class RestartableDatas;
-class RestartableDataValue;
 class FEProblemBase;
 
 /**
@@ -69,17 +68,17 @@ private:
   /**
    * Serializes the data into the stream object.
    */
-  void
-  serializeRestartableData(const std::map<std::string, RestartableDataValue *> & restartable_data,
-                           std::ostream & stream);
+  void serializeRestartableData(
+      const std::map<std::string, std::unique_ptr<RestartableDataValue>> & restartable_data,
+      std::ostream & stream);
 
   /**
    * Deserializes the data from the stream object.
    */
-  void
-  deserializeRestartableData(const std::map<std::string, RestartableDataValue *> & restartable_data,
-                             std::istream & stream,
-                             const std::set<std::string> & recoverable_data);
+  void deserializeRestartableData(
+      const std::map<std::string, std::unique_ptr<RestartableDataValue>> & restartable_data,
+      std::istream & stream,
+      const std::set<std::string> & recoverable_data);
 
   /**
    * Serializes the data for the Systems in FEProblemBase

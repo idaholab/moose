@@ -40,6 +40,7 @@ class Control : public MooseObject,
                 public SetupInterface,
                 public FunctionInterface,
                 public UserObjectInterface,
+                public Restartable,
                 protected PostprocessorInterface,
                 protected VectorPostprocessorInterface
 {

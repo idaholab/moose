@@ -145,7 +145,7 @@ validParams<FEProblemBase>()
 
 FEProblemBase::FEProblemBase(const InputParameters & parameters)
   : SubProblem(parameters),
-    Restartable(parameters, "FEProblemBase", this),
+    Restartable(this, "FEProblemBase"),
     _mesh(*getCheckedPointerParam<MooseMesh *>("mesh")),
     _eq(_mesh),
     _initialized(false),
