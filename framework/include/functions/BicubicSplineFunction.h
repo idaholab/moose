@@ -36,6 +36,9 @@ public:
 protected:
   BicubicSplineInterpolation _ipol;
 
+  // Desired normal direction
+  unsigned int _normal_component;
+
   std::vector<Real> _x1;
   std::vector<Real> _x2;
   std::vector<Real> _yx11;
@@ -45,6 +48,10 @@ protected:
 
   Function & _yx1;
   Function & _yx2;
+
+  // The xyz index that x1/x2 should map to
+  Real _x1_index;
+  Real _x2_index;
 };
 
 #endif /* BICUBICSPLINEFUNCTION_H */

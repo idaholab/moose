@@ -1,24 +1,25 @@
 [Mesh]
   type = GeneratedMesh
   dim = 3
-  nz = 1
+  ny = 1 # needed to ensure Z is the problem dimension
   nx = 4
-  ny = 4
+  nz = 4
   xmax = 4
-  ymax = 4
+  zmax = 4
 []
 
 [Functions]
   [./yx1]
     type = ParsedFunction
-    value = '3*x^2'
+    value = '3*z^2'
   [../]
   [./yx2]
     type = ParsedFunction
-    value = '6*y^2'
+    value = '6*x^2'
   [../]
   [./spline_fn]
     type = BicubicSplineFunction
+    normal_component = y
     x1 = '0 2 4'
     x2 = '0 2 4 6'
     y = '0 16 128 432 8 24 136 440 64 80 192 496'
@@ -31,11 +32,11 @@
   [../]
   [./u_func]
     type = ParsedFunction
-    value = 'x^3 + 2*y^3'
+    value = 'z^3 + 2*x^3'
   [../]
   [./u2_forcing_func]
     type = ParsedFunction
-    value = '-6*x - 12*y'
+    value = '-6*z - 12*x'
   [../]
 []
 
@@ -53,7 +54,7 @@
     order = FIRST
     family = LAGRANGE
   [../]
-  [./y_deriv]
+  [./z_deriv]
     order = FIRST
     family = LAGRANGE
   [../]
@@ -68,14 +69,14 @@
   [./deriv_1]
     type = FunctionDerivativeAux
     function = spline_fn
-    variable = x_deriv
-    component = 1
+    variable = z_deriv
+    component = 3
   [../]
   [./deriv_2]
     type = FunctionDerivativeAux
     function = spline_fn
-    variable = y_deriv
-    component = 2
+    variable = x_deriv
+    component = 1
   [../]
 []
 
@@ -95,7 +96,7 @@
   [./sides]
     type = FunctionDirichletBC
     variable = u
-    boundary = '0 1 2 3'
+    boundary = 'left right front back'
     function = u_func
   [../]
 []
@@ -116,13 +117,13 @@
   [./x_deriv_err_analytic]
     type = NodalL2Error
     variable = x_deriv
-    function = yx1
+    function = yx2
     execute_on = 'initial timestep_end'
   [../]
-  [./y_deriv_err_analytic]
+  [./z_deriv_err_analytic]
     type = NodalL2Error
-    variable = y_deriv
-    function = yx2
+    variable = z_deriv
+    function = yx1
     execute_on = 'initial timestep_end'
   [../]
 []
@@ -130,6 +131,7 @@
 [Executioner]
   type = Steady
   solve_type = NEWTON
+  nl_rel_tol = 1e-12
 []
 
 [Outputs]
