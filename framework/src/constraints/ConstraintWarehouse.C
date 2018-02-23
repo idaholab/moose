@@ -54,8 +54,14 @@ ConstraintWarehouse::addObject(std::shared_ptr<Constraint> object, THREAD_ID /*t
   // ElemElemConstraint
   else if (ec)
   {
+    bool displaced = ec->parameters().have_parameter<bool>("use_displaced_mesh") &&
+                     ec->getParam<bool>("use_displaced_mesh");
     const InterfaceID interface_id = ec->getParam<InterfaceID>("interface_id");
-    _element_constraints[interface_id].addObject(ec);
+
+    if (displaced)
+      _displaced_element_constraints[interface_id].addObject(ec);
+    else
+      _element_constraints[interface_id].addObject(ec);
   }
 
   // NodalConstraint
@@ -107,11 +113,24 @@ ConstraintWarehouse::getActiveMortarConstraints(const std::string & interface) c
 }
 
 const std::vector<std::shared_ptr<ElemElemConstraint>> &
-ConstraintWarehouse::getActiveElemElemConstraints(const InterfaceID interface_id) const
+ConstraintWarehouse::getActiveElemElemConstraints(const InterfaceID interface_id,
+                                                  bool displaced) const
 {
-  std::map<unsigned int, MooseObjectWarehouse<ElemElemConstraint>>::const_iterator it =
-      _element_constraints.find(interface_id);
-  mooseAssert(it != _element_constraints.end(),
+  std::map<unsigned int, MooseObjectWarehouse<ElemElemConstraint>>::const_iterator it, end_it;
+
+  if (displaced)
+  {
+    it = _displaced_element_constraints.find(interface_id);
+    end_it = _displaced_element_constraints.end();
+  }
+
+  else
+  {
+    it = _element_constraints.find(interface_id);
+    end_it = _element_constraints.end();
+  }
+
+  mooseAssert(it != end_it,
               "Unable to locate storage for ElemElemConstraint objects for the given interface id: "
                   << interface_id);
   return it->second.getActiveObjects();
@@ -132,11 +151,24 @@ ConstraintWarehouse::hasActiveMortarConstraints(const std::string & interface) c
 }
 
 bool
-ConstraintWarehouse::hasActiveElemElemConstraints(const InterfaceID interface_id) const
+ConstraintWarehouse::hasActiveElemElemConstraints(const InterfaceID interface_id,
+                                                  bool displaced) const
 {
-  std::map<unsigned int, MooseObjectWarehouse<ElemElemConstraint>>::const_iterator it =
-      _element_constraints.find(interface_id);
-  return (it != _element_constraints.end() && it->second.hasActiveObjects());
+  std::map<unsigned int, MooseObjectWarehouse<ElemElemConstraint>>::const_iterator it, end_it;
+
+  if (displaced)
+  {
+    it = _displaced_element_constraints.find(interface_id);
+    end_it = _displaced_element_constraints.end();
+  }
+
+  else
+  {
+    it = _element_constraints.find(interface_id);
+    end_it = _element_constraints.end();
+  }
+
+  return (it != end_it && it->second.hasActiveObjects());
 }
 
 bool
