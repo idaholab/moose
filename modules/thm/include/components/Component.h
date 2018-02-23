@@ -89,7 +89,7 @@ public:
    * @return true if the component with given name and type exists, otherwise false
    */
   template <typename T>
-  bool hasComponent(const std::string & name, bool log_errors = true) const;
+  bool hasComponent(const std::string & name) const;
 
   /**
    * Check the existence and type of a component given its name
@@ -98,7 +98,7 @@ public:
    * @return true if the component with given name and type exists, otherwise false
    */
   template <typename T>
-  bool hasComponentByName(const std::string & cname, bool log_errors = true) const;
+  bool hasComponentByName(const std::string & cname) const;
 
   /**
    * Connect with control logic
@@ -417,34 +417,20 @@ Component::getComponentByName(const std::string & comp_name) const
 
 template <typename T>
 bool
-Component::hasComponent(const std::string & pname, bool log_errors) const
+Component::hasComponent(const std::string & pname) const
 {
   const std::string & comp_name = getParam<std::string>(pname);
-  return hasComponentByName<T>(comp_name, log_errors);
+  return hasComponentByName<T>(comp_name);
 }
 
 template <typename T>
 bool
-Component::hasComponentByName(const std::string & comp_name, bool log_errors) const
+Component::hasComponentByName(const std::string & comp_name) const
 {
-  if (_sim.hasComponent(comp_name))
-  {
-    if (_sim.hasComponentOfType<T>(comp_name))
-      return true;
-    else
-    {
-      if (log_errors)
-        logError(
-            "The component '", comp_name, "' is not of type '", demangle(typeid(T).name()), "'");
-      return false;
-    }
-  }
+  if (_sim.hasComponentOfType<T>(comp_name))
+    return true;
   else
-  {
-    if (log_errors)
-      logError("The component '", comp_name, "' does not exist");
     return false;
-  }
 }
 
 template <typename T>
@@ -482,14 +468,21 @@ template <typename T>
 void
 Component::checkComponentOfTypeExists(const std::string & param) const
 {
-  hasComponent<T>(param, true);
+  const std::string & comp_name = getParam<std::string>(param);
+  checkComponentOfTypeExistsByName<T>(comp_name);
 }
 
 template <typename T>
 void
-Component::checkComponentOfTypeExistsByName(const std::string & param) const
+Component::checkComponentOfTypeExistsByName(const std::string & comp_name) const
 {
-  hasComponentByName<T>(param, true);
+  if (!_sim.hasComponentOfType<T>(comp_name))
+  {
+    if (_sim.hasComponent(comp_name))
+      logError("The component '", comp_name, "' is not of type '", demangle(typeid(T).name()), "'");
+    else
+      logError("The component '", comp_name, "' does not exist");
+  }
 }
 
 template <typename T>
