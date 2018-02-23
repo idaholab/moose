@@ -19,16 +19,26 @@ validParams<ComputeSmearedCrackingStress>()
   InputParameters params = validParams<ComputeMultipleInelasticStress>();
   params.addClassDescription("Compute stress using a fixed smeared cracking model");
   MooseEnum cracking_release("abrupt exponential power", "abrupt");
-  params.addParam<MooseEnum>("cracking_release",
-                             cracking_release,
-                             "The cracking release type.  'abrupt' (default) gives an abrupt "
-                             "stress release, 'exponential' uses an exponential softening model, "
-                             "and 'power' uses a power law");
-  params.addRangeCheckedParam<Real>(
+  params.addDeprecatedParam<MooseEnum>(
+      "cracking_release",
+      cracking_release,
+      "The cracking release type.  'abrupt' (default) gives an abrupt "
+      "stress release, 'exponential' uses an exponential softening model, "
+      "and 'power' uses a power law",
+      "This is replaced by the use of 'softening_models' together with a separate block defining "
+      "a softening model");
+  params.addParam<std::vector<MaterialName>>(
+      "softening_models",
+      "The material objects used to compute softening behavior for loading a crack."
+      "Either 1 or 3 models must be specified. If a single model is specified, it is"
+      "used for all directions. If 3 models are specified, they will be used for the"
+      "3 crack directions in sequence");
+  params.addDeprecatedParam<Real>(
       "cracking_residual_stress",
       0.0,
-      "cracking_residual_stress <= 1 & cracking_residual_stress >= 0",
-      "The fraction of the cracking stress allowed to be maintained following a crack.");
+      "The fraction of the cracking stress allowed to be maintained following a crack.",
+      "This is replaced by the use of 'softening_models' together with a separate block defining "
+      "a softening model");
   params.addRequiredCoupledVar(
       "cracking_stress",
       "The stress threshold beyond which cracking occurs. Negative values prevent cracking.");
@@ -43,11 +53,14 @@ validParams<ComputeSmearedCrackingStress>()
                                     "The fraction of the cracking strain at which "
                                     "a transitition begins during decreasing "
                                     "strain to the original stiffness.");
-  params.addParam<Real>("cracking_beta",
-                        1.0,
-                        "Coefficient used to control the softening in the exponential model.  "
-                        "When set to 1, the initial softening slope is equal to the negative "
-                        "of the Young's modulus.  Smaller numbers scale down that slope.");
+  params.addDeprecatedParam<Real>(
+      "cracking_beta",
+      1.0,
+      "Coefficient used to control the softening in the exponential model.  "
+      "When set to 1, the initial softening slope is equal to the negative "
+      "of the Young's modulus.  Smaller numbers scale down that slope.",
+      "This is replaced by the use of 'softening_models' together with a separate block defining "
+      "a softening model");
   params.addParam<Real>(
       "max_stress_correction",
       1.0,
@@ -80,8 +93,10 @@ ComputeSmearedCrackingStress::ComputeSmearedCrackingStress(const InputParameters
     _crack_flags(declareProperty<RealVectorValue>(_base_name + "crack_flags")),
     _crack_rotation(declareProperty<RankTwoTensor>(_base_name + "crack_rotation")),
     _crack_rotation_old(getMaterialPropertyOld<RankTwoTensor>(_base_name + "crack_rotation")),
-    _crack_strain(declareProperty<RealVectorValue>(_base_name + "crack_strain")),
-    _crack_strain_old(getMaterialPropertyOld<RealVectorValue>(_base_name + "crack_strain")),
+    _crack_initiation_strain(
+        declareProperty<RealVectorValue>(_base_name + "crack_initiation_strain")),
+    _crack_initiation_strain_old(
+        getMaterialPropertyOld<RealVectorValue>(_base_name + "crack_initiation_strain")),
     _crack_max_strain(declareProperty<RealVectorValue>(_base_name + "crack_max_strain")),
     _crack_max_strain_old(getMaterialPropertyOld<RealVectorValue>(_base_name + "crack_max_strain"))
 {
@@ -112,6 +127,19 @@ ComputeSmearedCrackingStress::ComputeSmearedCrackingStress(const InputParameters
       _prescribed_crack_directions.push_back(*available_dirs.begin());
     }
   }
+
+  if (parameters.isParamSetByUser("softening_models"))
+  {
+    if (parameters.isParamSetByUser("cracking_release"))
+      mooseError("In ComputeSmearedCrackingStress cannot specify both 'cracking_release' and "
+                 "'softening_models'");
+    if (parameters.isParamSetByUser("cracking_residual_stress"))
+      mooseError("In ComputeSmearedCrackingStress cannot specify both 'cracking_residual_stress' "
+                 "and 'softening_models'");
+    if (parameters.isParamSetByUser("cracking_beta"))
+      mooseError("In ComputeSmearedCrackingStress cannot specify both 'cracking_beta' and "
+                 "'softening_models'");
+  }
 }
 
 void
@@ -121,7 +149,7 @@ ComputeSmearedCrackingStress::initQpStatefulProperties()
 
   _crack_damage[_qp] = 0.0;
 
-  _crack_strain[_qp] = 0.0;
+  _crack_initiation_strain[_qp] = 0.0;
   _crack_max_strain[_qp](0) = 0.0;
 
   switch (_prescribed_crack_directions.size())
@@ -185,6 +213,30 @@ ComputeSmearedCrackingStress::initialSetup()
   if (!hasGuaranteedMaterialProperty(_elasticity_tensor_name, Guarantee::ISOTROPIC))
     mooseError("ComputeSmearedCrackingStress requires that the elasticity tensor be "
                "guaranteed isotropic");
+
+  std::vector<MaterialName> soft_matls = getParam<std::vector<MaterialName>>("softening_models");
+  if (soft_matls.size() != 0)
+  {
+    for (auto soft_matl : soft_matls)
+    {
+      SmearedCrackSofteningBase * scsb =
+          dynamic_cast<SmearedCrackSofteningBase *>(&getMaterialByName(soft_matl));
+      if (scsb)
+        _softening_models.push_back(scsb);
+      else
+        mooseError("Model " + soft_matl +
+                   " is not a softening model that can be used with ComputeSmearedCrackingStress");
+    }
+    if (_softening_models.size() == 1)
+    {
+      // Reuse the same model in all 3 directions
+      _softening_models.push_back(_softening_models[0]);
+      _softening_models.push_back(_softening_models[0]);
+    }
+    else if (_softening_models.size() != 3)
+      mooseError("If 'softening_models' is specified in ComputeSmearedCrackingStress, either 1 or "
+                 "3 models must be provided");
+  }
 }
 
 void
@@ -258,11 +310,11 @@ ComputeSmearedCrackingStress::updateLocalElasticityTensor()
         if (_cracking_neg_fraction == 0.0 && MooseUtils::absoluteFuzzyLessThan(ePrime(i, i), 0.0))
           stiffness_ratio_local(i) = 1.0;
         else if (_cracking_neg_fraction > 0.0 &&
-                 ePrime(i, i) < _crack_strain_old[_qp](i) * _cracking_neg_fraction &&
-                 ePrime(i, i) > -_crack_strain_old[_qp](i) * _cracking_neg_fraction)
+                 ePrime(i, i) < _crack_initiation_strain_old[_qp](i) * _cracking_neg_fraction &&
+                 ePrime(i, i) > -_crack_initiation_strain_old[_qp](i) * _cracking_neg_fraction)
         {
-          const Real etr = _cracking_neg_fraction * _crack_strain_old[_qp](i);
-          const Real Eo = cracking_stress / _crack_strain_old[_qp](i);
+          const Real etr = _cracking_neg_fraction * _crack_initiation_strain_old[_qp](i);
+          const Real Eo = cracking_stress / _crack_initiation_strain_old[_qp](i);
           const Real Ec = Eo * (1.0 - _crack_damage_old[_qp](i));
           const Real a = (Ec - Eo) / (4 * etr);
           const Real b = (Ec + Eo) / 2;
@@ -337,7 +389,7 @@ ComputeSmearedCrackingStress::updateCrackingStateAndStress()
     for (unsigned i = 0; i < 3; ++i)
     {
       _crack_max_strain[_qp](i) = _crack_max_strain_old[_qp](i);
-      _crack_strain[_qp](i) = _crack_strain_old[_qp](i);
+      _crack_initiation_strain[_qp](i) = _crack_initiation_strain_old[_qp](i);
       _crack_damage[_qp](i) = _crack_damage_old[_qp](i);
     }
 
@@ -388,32 +440,41 @@ ComputeSmearedCrackingStress::updateCrackingStateAndStress()
 
         // Assume Poisson's ratio drops to zero for this direction.  Stiffness is then Young's
         // modulus.
-        _crack_strain[_qp](i) = cracking_stress / youngs_modulus;
+        _crack_initiation_strain[_qp](i) = cracking_stress / youngs_modulus;
 
-        if (_crack_max_strain[_qp](i) < _crack_strain[_qp](i))
-          _crack_max_strain[_qp](i) = _crack_strain[_qp](i);
+        if (_crack_max_strain[_qp](i) < _crack_initiation_strain[_qp](i))
+          _crack_max_strain[_qp](i) = _crack_initiation_strain[_qp](i);
       }
 
       // Update stress and stiffness ratio according to specified crack release model
       if (new_crack || (pre_existing_crack && loading_existing_crack))
       {
         cracked = true;
-        computeCrackingRelease(i,
-                               sigma(i),
-                               stiffness_ratio,
-                               strain_in_crack_dir(i),
-                               cracking_stress,
-                               cracking_alpha,
-                               youngs_modulus);
+        if (_softening_models.size() != 0)
+          _softening_models[i]->computeCrackingRelease(sigma(i),
+                                                       stiffness_ratio,
+                                                       strain_in_crack_dir(i),
+                                                       _crack_initiation_strain[_qp](i),
+                                                       _crack_max_strain[_qp](i),
+                                                       cracking_stress,
+                                                       youngs_modulus);
+        else
+          computeCrackingRelease(i,
+                                 sigma(i),
+                                 stiffness_ratio,
+                                 strain_in_crack_dir(i),
+                                 cracking_stress,
+                                 cracking_alpha,
+                                 youngs_modulus);
         _crack_damage[_qp](i) = 1.0 - stiffness_ratio;
       }
 
       else if (cracked && _cracking_neg_fraction > 0 &&
-               _crack_strain[_qp](i) * _cracking_neg_fraction > strain_in_crack_dir(i) &&
-               -_crack_strain[_qp](i) * _cracking_neg_fraction < strain_in_crack_dir(i))
+               _crack_initiation_strain[_qp](i) * _cracking_neg_fraction > strain_in_crack_dir(i) &&
+               -_crack_initiation_strain[_qp](i) * _cracking_neg_fraction < strain_in_crack_dir(i))
       {
-        const Real etr = _cracking_neg_fraction * _crack_strain[_qp](i);
-        const Real Eo = cracking_stress / _crack_strain[_qp](i);
+        const Real etr = _cracking_neg_fraction * _crack_initiation_strain[_qp](i);
+        const Real Eo = cracking_stress / _crack_initiation_strain[_qp](i);
         const Real Ec = Eo * (1.0 - _crack_damage_old[_qp](i));
         const Real a = (Ec - Eo) / (4.0 * etr);
         const Real b = 0.5 * (Ec + Eo);
@@ -545,16 +606,18 @@ ComputeSmearedCrackingStress::computeCrackingRelease(int i,
     case CrackingRelease::exponential:
     {
       const Real crack_max_strain = _crack_max_strain[_qp](i);
-      mooseAssert(crack_max_strain >= _crack_strain[_qp](i),
-                  "crack_max_strain must be >= crack_strain");
+      mooseAssert(crack_max_strain >= _crack_initiation_strain[_qp](i),
+                  "crack_max_strain must be >= crack_initiation_strain");
 
       // Compute stress that follows exponental curve
-      sigma = cracking_stress * (_cracking_residual_stress +
-                                 (1.0 - _cracking_residual_stress) *
-                                     std::exp(cracking_alpha * _cracking_beta / cracking_stress *
-                                              (crack_max_strain - _crack_strain[_qp](i))));
+      sigma =
+          cracking_stress * (_cracking_residual_stress +
+                             (1.0 - _cracking_residual_stress) *
+                                 std::exp(cracking_alpha * _cracking_beta / cracking_stress *
+                                          (crack_max_strain - _crack_initiation_strain[_qp](i))));
       // Compute ratio of current stiffness to original stiffness
-      stiffness_ratio = sigma * _crack_strain[_qp](i) / (crack_max_strain * cracking_stress);
+      stiffness_ratio =
+          sigma * _crack_initiation_strain[_qp](i) / (crack_max_strain * cracking_stress);
       break;
     }
     case CrackingRelease::abrupt:
@@ -563,7 +626,7 @@ ComputeSmearedCrackingStress::computeCrackingRelease(int i,
       {
         const Real tiny = 1e-16;
         stiffness_ratio = tiny;
-        sigma = tiny * _crack_strain[_qp](i) * youngs_modulus;
+        sigma = tiny * _crack_initiation_strain[_qp](i) * youngs_modulus;
       }
       else
       {
@@ -578,7 +641,8 @@ ComputeSmearedCrackingStress::computeCrackingRelease(int i,
   {
     std::stringstream err;
     err << "Negative stiffness ratio: " << i << " " << stiffness_ratio << ", "
-        << _crack_max_strain[_qp](i) << ", " << _crack_strain[_qp](i) << ", " << std::endl;
+        << _crack_max_strain[_qp](i) << ", " << _crack_initiation_strain[_qp](i) << ", "
+        << std::endl;
     mooseError(err.str());
   }
 }

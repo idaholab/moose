@@ -1,9 +1,16 @@
 #
-# Simple pull test for cracking.
-# The stress increases for two steps and then drops to zero.
+# Simple test of power law softening law for smeared cracking.
+# Upon reaching the failure stress in the x direction, the
+# softening model abruptly reduces the stress to a fraction
+# of its original value, and re-loading occurs at a reduced
+# stiffness. This is repeated multiple times.
 
 [Mesh]
-  file = cracking_test.e
+  type = GeneratedMesh
+  dim = 3
+  nx = 1
+  ny = 1
+  nz = 1
 []
 
 [GlobalParams]
@@ -30,25 +37,25 @@
   [./pull]
     type = FunctionPresetBC
     variable = disp_x
-    boundary = 4
+    boundary = right
     function = displ
   [../]
   [./left]
     type = PresetBC
     variable = disp_x
-    boundary = 1
+    boundary = left
     value = 0.0
   [../]
   [./bottom]
     type = PresetBC
     variable = disp_y
-    boundary = 2
+    boundary = bottom
     value = 0.0
   [../]
   [./back]
     type = PresetBC
     variable = disp_z
-    boundary = 3
+    boundary = back
     value = 0.0
   [../]
 []
@@ -62,10 +69,11 @@
   [./elastic_stress]
     type = ComputeSmearedCrackingStress
     cracking_stress = 1.68e6
-    softening_models = abrupt_softening
+    softening_models = power_law_softening
   [../]
-  [./abrupt_softening]
-    type = AbruptSoftening
+  [./power_law_softening]
+    type = PowerLawSoftening
+    stiffness_reduction = 0.3333
   [../]
 []
 
@@ -83,8 +91,8 @@
   nl_abs_tol = 1e-8
   l_tol = 1e-5
   start_time = 0.0
-  end_time = 0.1
-  dt = 0.025
+  end_time = 1.0
+  dt = 0.01
 []
 
 [Outputs]

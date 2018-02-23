@@ -121,6 +121,9 @@
 #include "LinearViscoelasticStressUpdate.h"
 #include "ComputeLinearViscoelasticStress.h"
 #include "ComputeEigenstrainFromInitialStress.h"
+#include "AbruptSoftening.h"
+#include "ExponentialSoftening.h"
+#include "PowerLawSoftening.h"
 
 #include "TensorMechanicsPlasticSimpleTester.h"
 #include "TensorMechanicsPlasticTensile.h"
@@ -355,6 +358,9 @@ TensorMechanicsApp::registerObjects(Factory & factory)
   registerMaterial(ComputeLinearViscoelasticStress);
   registerMaterial(ThermalFractureIntegral);
   registerMaterial(ComputeEigenstrainFromInitialStress);
+  registerMaterial(AbruptSoftening);
+  registerMaterial(ExponentialSoftening);
+  registerMaterial(PowerLawSoftening);
 
   registerUserObject(TensorMechanicsPlasticSimpleTester);
   registerUserObject(TensorMechanicsPlasticTensile);

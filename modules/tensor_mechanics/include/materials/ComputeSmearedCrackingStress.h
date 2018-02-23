@@ -12,6 +12,7 @@
 
 #include "ColumnMajorMatrix.h"
 #include "ComputeMultipleInelasticStress.h"
+#include "SmearedCrackSofteningBase.h"
 #include "Function.h"
 
 class ComputeSmearedCrackingStress;
@@ -143,8 +144,8 @@ protected:
   ///@}
 
   //@{ Strain in direction of crack upon crack initiation
-  MaterialProperty<RealVectorValue> & _crack_strain;
-  const MaterialProperty<RealVectorValue> & _crack_strain_old;
+  MaterialProperty<RealVectorValue> & _crack_initiation_strain;
+  const MaterialProperty<RealVectorValue> & _crack_initiation_strain_old;
   ///@}
 
   //@{ Maximum strain in direction of crack
@@ -155,6 +156,9 @@ protected:
   //@{ Variables used by multiple methods within the calculation for a single material point
   RankFourTensor _local_elasticity_tensor;
   ///@}
+
+  /// The user-supplied list of softening models to be used in the 3 crack directions
+  std::vector<SmearedCrackSofteningBase *> _softening_models;
 };
 
 #endif // COMPUTESMEAREDCRACKINGSTRESS_H
