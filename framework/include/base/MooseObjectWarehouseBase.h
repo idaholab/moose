@@ -41,9 +41,10 @@ public:
 
   /**
    * Adds an object to the storage structure.
-   * @param object A shared pointer to the object being added
+   * @param tid The thread ID (default is 0)
+   * @param recurse Whether or not to build recusive warehouses (typically for Kernels)
    */
-  virtual void addObject(std::shared_ptr<T> object, THREAD_ID tid = 0);
+  virtual void addObject(std::shared_ptr<T> object, THREAD_ID tid = 0, bool recurse = true);
 
   ///@{
   /**
@@ -219,7 +220,9 @@ MooseObjectWarehouseBase<T>::~MooseObjectWarehouseBase()
 
 template <typename T>
 void
-MooseObjectWarehouseBase<T>::addObject(std::shared_ptr<T> object, THREAD_ID tid /*= 0*/)
+MooseObjectWarehouseBase<T>::addObject(std::shared_ptr<T> object,
+                                       THREAD_ID tid /*= 0*/,
+                                       bool /* recurse = true */)
 {
   checkThreadID(tid);
 
@@ -652,10 +655,8 @@ MooseObjectWarehouseBase<T>::checkThreadID(THREAD_ID libmesh_dbg_var(tid)) const
 {
   mooseAssert(tid < _num_threads,
               "Attempting to access a thread id ("
-                  << tid
-                  << ") greater than the number allowed by the storage item ("
-                  << _num_threads
-                  << ")");
+                  << tid << ") greater than the number allowed by the storage item ("
+                  << _num_threads << ")");
 }
 
 #endif // MOOSEOBJECTWAREHOUSEBASE_H

@@ -21,6 +21,7 @@ class IntegratedBCBase;
 class DGKernel;
 class InterfaceKernel;
 class KernelWarehouse;
+class Kernel;
 
 class ComputeJacobianThread : public ThreadedElementLoop<ConstElemRange>
 {
@@ -60,7 +61,7 @@ protected:
   const MooseObjectWarehouse<InterfaceKernel> & _interface_kernels;
 
   // Reference to Kernel storage structure
-  const KernelWarehouse & _kernels;
+  const MooseObjectWarehouse<KernelBase> & _kernels;
 
   Moose::KernelType _kernel_type;
 

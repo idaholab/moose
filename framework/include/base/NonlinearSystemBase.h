@@ -11,7 +11,6 @@
 #define NONLINEARSYSTEMBASE_H
 
 #include "SystemBase.h"
-#include "KernelWarehouse.h"
 #include "ConstraintWarehouse.h"
 #include "MooseObjectWarehouse.h"
 
@@ -37,6 +36,7 @@ class ScalarKernel;
 class DiracKernel;
 class NodalKernel;
 class Split;
+class KernelBase;
 
 // libMesh forward declarations
 namespace libMesh
@@ -487,13 +487,16 @@ public:
   /**
    * Access functions to Warehouses from outside NonlinearSystemBase
    */
-  const KernelWarehouse & getKernelWarehouse() const { return _kernels; }
-  const KernelWarehouse & getTimeKernelWarehouse() const { return _time_kernels; }
-  const KernelWarehouse & getNonTimeKernelWarehouse() const { return _non_time_kernels; }
-  const KernelWarehouse & getEigenKernelWarehouse() const { return _eigen_kernels; }
-  const KernelWarehouse & getNonEigenKernelWarehouse() const { return _non_eigen_kernels; }
-  const MooseObjectWarehouse<DGKernel> & getDGKernelWarehouse() const { return _dg_kernels; }
-  const MooseObjectWarehouse<InterfaceKernel> & getInterfaceKernelWarehouse() const
+  const MooseObjectWarehouse<KernelBase> & getKernelWarehouse() { return _kernels; }
+  const MooseObjectWarehouse<KernelBase> & getTimeKernelWarehouse() { return _time_kernels; }
+  const MooseObjectWarehouse<KernelBase> & getNonTimeKernelWarehouse() { return _non_time_kernels; }
+  const MooseObjectWarehouse<KernelBase> & getEigenKernelWarehouse() { return _eigen_kernels; }
+  const MooseObjectWarehouse<KernelBase> & getNonEigenKernelWarehouse()
+  {
+    return _non_eigen_kernels;
+  }
+  const MooseObjectWarehouse<DGKernel> & getDGKernelWarehouse() { return _dg_kernels; }
+  const MooseObjectWarehouse<InterfaceKernel> & getInterfaceKernelWarehouse()
   {
     return _interface_kernels;
   }
@@ -603,16 +606,16 @@ protected:
 
   ///@{
   /// Kernel Storage
-  KernelWarehouse _kernels;
+  MooseObjectWarehouse<KernelBase> _kernels;
   MooseObjectWarehouse<ScalarKernel> _scalar_kernels;
   MooseObjectWarehouse<ScalarKernel> _time_scalar_kernels;
   MooseObjectWarehouse<ScalarKernel> _non_time_scalar_kernels;
   MooseObjectWarehouse<DGKernel> _dg_kernels;
   MooseObjectWarehouse<InterfaceKernel> _interface_kernels;
-  KernelWarehouse _time_kernels;
-  KernelWarehouse _non_time_kernels;
-  KernelWarehouse _eigen_kernels;
-  KernelWarehouse _non_eigen_kernels;
+  MooseObjectWarehouse<KernelBase> _time_kernels;
+  MooseObjectWarehouse<KernelBase> _non_time_kernels;
+  MooseObjectWarehouse<KernelBase> _eigen_kernels;
+  MooseObjectWarehouse<KernelBase> _non_eigen_kernels;
 
   ///@}
 

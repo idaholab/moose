@@ -15,6 +15,7 @@
 // Forward declarations
 class FEProblemBase;
 class NonlinearSystemBase;
+class Kernel;
 
 class ComputeFullJacobianThread : public ComputeJacobianThread
 {
@@ -49,7 +50,7 @@ protected:
 
   Moose::KernelType _kernel_type;
 
-  const KernelWarehouse * _warehouse;
+  const MooseObjectWarehouse<KernelBase> * _warehouse;
 };
 
 #endif // COMPUTEFULLJACOBIANTHREAD_H
