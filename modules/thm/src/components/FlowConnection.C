@@ -108,3 +108,19 @@ FlowConnection::checkNumberOfConnections(const unsigned int & n_connections) con
   if (_connections.size() != n_connections)
     logError("The number of connections (", _connections.size(), ") must equal ", n_connections);
 }
+
+const std::vector<dof_id_type> &
+FlowConnection::getNodeIDs() const
+{
+  checkSetupStatus(MESH_PREPARED);
+
+  return _nodes;
+}
+
+const std::vector<BoundaryName> &
+FlowConnection::getBoundaryNames() const
+{
+  checkSetupStatus(MESH_PREPARED);
+
+  return _boundary_names;
+}

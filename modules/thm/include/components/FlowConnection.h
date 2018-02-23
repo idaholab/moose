@@ -73,6 +73,20 @@ public:
     return _connected_subdomain_ids;
   }
 
+  /**
+   * Gets the list of boundary nodes connected to this component
+   *
+   * @return list of connected boundary nodes
+   */
+  virtual const std::vector<dof_id_type> & getNodeIDs() const;
+
+  /**
+   * Gets the boundary names for this component
+   *
+   * @return boundary names for this component
+   */
+  const std::vector<BoundaryName> & getBoundaryNames() const;
+
 protected:
   virtual void setupMesh() override;
   virtual void init() override;
