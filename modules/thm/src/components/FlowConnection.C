@@ -22,6 +22,21 @@ validParams<FlowConnection>()
 FlowConnection::FlowConnection(const InputParameters & params) : Component(params) {}
 
 void
+FlowConnection::init()
+{
+  Component::init();
+
+  // create list of subdomain IDs
+  for (const auto & comp_name : _connected_component_names)
+  {
+    const GeometricalFlowComponent & comp =
+        _sim.getComponentByName<GeometricalFlowComponent>(comp_name);
+    const std::vector<unsigned int> & ids = comp.getSubdomainIds();
+    _connected_subdomain_ids.insert(_connected_subdomain_ids.end(), ids.begin(), ids.end());
+  }
+}
+
+void
 FlowConnection::check()
 {
   Component::check();
