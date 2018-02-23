@@ -35,6 +35,8 @@ public:
 protected:
   /// List of node IDs
   std::vector<dof_id_type> _node_ids;
+  /// List of node boundary names
+  std::vector<BoundaryName> _boundary_names;
 };
 
 #endif /* NODALSCALARKERNEL_H */
