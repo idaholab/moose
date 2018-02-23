@@ -29,7 +29,9 @@ InitialConditionWarehouse::initialSetup(THREAD_ID tid)
 }
 
 void
-InitialConditionWarehouse::addObject(std::shared_ptr<InitialCondition> object, THREAD_ID tid)
+InitialConditionWarehouse::addObject(std::shared_ptr<InitialCondition> object,
+                                     THREAD_ID tid,
+                                     bool recurse)
 {
   // Check that when object is boundary restricted that the variable is nodal
   const MooseVariableFE & var = object->variable();
@@ -81,7 +83,7 @@ InitialConditionWarehouse::addObject(std::shared_ptr<InitialCondition> object, T
   }
 
   // Add the IC to the storage
-  MooseObjectWarehouseBase<InitialCondition>::addObject(object, tid);
+  MooseObjectWarehouseBase<InitialCondition>::addObject(object, tid, recurse);
 }
 
 std::set<std::string>

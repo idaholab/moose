@@ -43,7 +43,7 @@ public:
    * Adds an object to the storage structure.
    * @param object A shared pointer to the object being added
    */
-  virtual void addObject(std::shared_ptr<T> object, THREAD_ID tid = 0);
+  virtual void addObject(std::shared_ptr<T> object, THREAD_ID tid = 0, bool recurse = true);
   void addObjectMask(std::shared_ptr<T> object,
                      THREAD_ID tid = 0,
                      std::uint16_t flag_mask = std::numeric_limits<std::uint16_t>::max());
@@ -200,7 +200,9 @@ ExecuteMooseObjectWarehouse<T>::setup(const ExecFlagType & exec_flag, THREAD_ID 
 
 template <typename T>
 void
-ExecuteMooseObjectWarehouse<T>::addObject(std::shared_ptr<T> object, THREAD_ID tid)
+ExecuteMooseObjectWarehouse<T>::addObject(std::shared_ptr<T> object,
+                                          THREAD_ID tid,
+                                          bool /*recurse*/)
 {
   addObjectMask(object, tid, 0xFFFF);
 }

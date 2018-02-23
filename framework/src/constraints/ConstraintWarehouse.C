@@ -19,7 +19,9 @@
 ConstraintWarehouse::ConstraintWarehouse() : MooseObjectWarehouse<Constraint>(/*threaded=*/false) {}
 
 void
-ConstraintWarehouse::addObject(std::shared_ptr<Constraint> object, THREAD_ID /*tid = 0*/)
+ConstraintWarehouse::addObject(std::shared_ptr<Constraint> object,
+                               THREAD_ID /*tid = 0*/,
+                               bool /*recurse = true*/)
 {
   // Adds to the storage of _all_objects
   MooseObjectWarehouse<Constraint>::addObject(object);
