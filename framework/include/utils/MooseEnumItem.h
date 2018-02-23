@@ -26,9 +26,9 @@ public:
   MooseEnumItem(const std::string & name, const int & id = INVALID_ID);
   ~MooseEnumItem() = default;
   MooseEnumItem(const MooseEnumItem & other);
-  MooseEnumItem(MooseEnumItem && other) = default;
+  MooseEnumItem(MooseEnumItem && /*other*/) = default;
   MooseEnumItem & operator=(const MooseEnumItem & other);
-  MooseEnumItem & operator=(MooseEnumItem && other) = default;
+  MooseEnumItem & operator=(MooseEnumItem && /*other*/) = default;
 
   ///@{
   /**
