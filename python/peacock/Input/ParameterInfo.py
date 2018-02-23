@@ -108,6 +108,13 @@ class ParameterInfo(object):
         else:
             return str(self.value)
 
+    def hitType(self):
+        """
+        Return the Hit Field type
+        """
+        hit_map = {"Boolean": "Bool", "Real": "Float", "Integer": "Int"}
+        return hit_map.get(self.basic_type, "String")
+
     def toolTip(self):
         return self.description + "\nDefault: %s" % self.default
 
