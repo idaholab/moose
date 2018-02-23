@@ -24,7 +24,7 @@ private:
 
   Real _L;
 
-  std::string _num_type;
+  MooseEnum _component;
 
   Real _k;
 
