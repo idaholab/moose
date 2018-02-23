@@ -156,7 +156,7 @@
   [./function_file_test3]
     type = 'RunException'
     input = 'function_file_test3.i'
-    expect_err = "In Piecewise \S+: Lengths of x and y data do not match."
+    expect_err = "In PiecewiseBase \S+: Lengths of x and y data do not match."
   [../]
 
   [./function_file_test4]
