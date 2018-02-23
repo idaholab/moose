@@ -223,6 +223,7 @@
 #include "TestCSVReader.h"
 #include "ToggleMeshAdaptivity.h"
 #include "MatSideUserObject.h"
+#include "SplitTester.h"
 
 // Postprocessors
 #include "TestCopyInitialSolution.h"
@@ -590,6 +591,7 @@ MooseTestApp::registerObjects(Factory & factory)
   registerUserObject(TestCSVReader);
   registerUserObject(ToggleMeshAdaptivity);
   registerUserObject(MatSideUserObject);
+  registerUserObject(SplitTester);
 
   registerPostprocessor(InsideValuePPS);
   registerPostprocessor(TestCopyInitialSolution);
