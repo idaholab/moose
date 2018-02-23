@@ -10,14 +10,11 @@
 #include "SplitTester.h"
 #include "MooseMesh.h"
 
-#include "libmesh/distributed_mesh.h"
-
 template <>
 InputParameters
 validParams<SplitTester>()
 {
   return validParams<GeneralUserObject>();
-  // pars.set<MultiMooseEnum>("execute_on") = "timestep_begin";
 }
 
 SplitTester::SplitTester(const InputParameters & parameters) : GeneralUserObject(parameters) {}
@@ -25,9 +22,9 @@ SplitTester::SplitTester(const InputParameters & parameters) : GeneralUserObject
 void
 SplitTester::execute()
 {
+  if (!_fe_problem.mesh().isDistributedMesh())
+    mooseError("Not using DistributedMesh but should be");
   auto & m = _fe_problem.mesh().getMesh();
-  if (!dynamic_cast<DistributedMesh *>(&m))
-    mooseError("not using DistributedMesh but should be");
   if (m.n_elem_on_proc(processor_id()) == m.n_elem())
-    mooseError("elements not shared properly between distributed mesh procs");
+    mooseError("Elements not shared properly between distributed mesh procs");
 }
