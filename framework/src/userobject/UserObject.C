@@ -50,7 +50,7 @@ UserObject::UserObject(const InputParameters & parameters)
     SetupInterface(this),
     FunctionInterface(this),
     DistributionInterface(this),
-    Restartable(parameters, "UserObjects"),
+    Restartable(this, "UserObjects"),
     MeshChangedInterface(parameters),
     ScalarCoupleable(this),
     _subproblem(*getCheckedPointerParam<SubProblem *>("_subproblem")),

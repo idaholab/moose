@@ -26,7 +26,7 @@ Function::Function(const InputParameters & parameters)
     TransientInterface(this),
     PostprocessorInterface(this),
     UserObjectInterface(this),
-    Restartable(parameters, "Functions"),
+    Restartable(this, "Functions"),
     MeshChangedInterface(parameters),
     ScalarCoupleable(this)
 {

@@ -49,7 +49,7 @@ BoundaryCondition::BoundaryCondition(const InputParameters & parameters, bool no
     PostprocessorInterface(this),
     VectorPostprocessorInterface(this),
     GeometricSearchInterface(this),
-    Restartable(parameters, "BCs"),
+    Restartable(this, "BCs"),
     MeshChangedInterface(parameters),
     _subproblem(*getCheckedPointerParam<SubProblem *>("_subproblem")),
     _fe_problem(*getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")),

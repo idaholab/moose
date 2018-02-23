@@ -35,6 +35,7 @@ Control::Control(const InputParameters & parameters)
     SetupInterface(this),
     FunctionInterface(this),
     UserObjectInterface(this),
+    Restartable(this, "Controls"),
     PostprocessorInterface(this),
     VectorPostprocessorInterface(this),
     _fe_problem(*getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")),

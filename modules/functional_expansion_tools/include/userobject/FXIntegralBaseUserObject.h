@@ -115,7 +115,7 @@ template <class IntegralBaseVariableUserObject>
 FXIntegralBaseUserObject<IntegralBaseVariableUserObject>::FXIntegralBaseUserObject(
     const InputParameters & parameters)
   : IntegralBaseVariableUserObject(parameters),
-    MutableCoefficientsInterface(this, this, parameters),
+    MutableCoefficientsInterface(this, parameters),
     _function_series(FunctionSeries::checkAndConvertFunction(
         getFunction("function"), UserObject::getParam<std::string>("_moose_base"), name())),
     _keep_history(UserObject::getParam<bool>("keep_history")),

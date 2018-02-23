@@ -43,7 +43,7 @@ Marker::Marker(const InputParameters & parameters)
     SetupInterface(this),
     DependencyResolverInterface(),
     UserObjectInterface(this),
-    Restartable(parameters, "Markers"),
+    Restartable(this, "Markers"),
     PostprocessorInterface(this),
     MeshChangedInterface(parameters),
     OutputInterface(parameters),

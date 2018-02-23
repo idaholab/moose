@@ -82,7 +82,7 @@ Material::Material(const InputParameters & parameters)
     PostprocessorInterface(this),
     VectorPostprocessorInterface(this),
     DependencyResolverInterface(),
-    Restartable(parameters, "Materials"),
+    Restartable(this, "Materials"),
     MeshChangedInterface(parameters),
 
     // The false flag disables the automatic call buildOutputVariableHideList;
@@ -133,9 +133,10 @@ Material::initStatefulProperties(unsigned int n_points)
   for (auto & prop : _supplied_props)
     if (_material_data->getMaterialPropertyStorage().isStatefulProp(prop) &&
         !_overrides_init_stateful_props)
-      mooseError(std::string("Material \"") + name() + "\" provides one or more stateful "
-                                                       "properties but initQpStatefulProperties() "
-                                                       "was not overridden in the derived class.");
+      mooseError(std::string("Material \"") + name() +
+                 "\" provides one or more stateful "
+                 "properties but initQpStatefulProperties() "
+                 "was not overridden in the derived class.");
 }
 
 void

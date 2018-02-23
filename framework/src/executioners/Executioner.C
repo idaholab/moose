@@ -72,7 +72,7 @@ Executioner::Executioner(const InputParameters & parameters)
   : MooseObject(parameters),
     UserObjectInterface(this),
     PostprocessorInterface(this),
-    Restartable(parameters, "Executioners"),
+    Restartable(this, "Executioners"),
     _fe_problem(*getCheckedPointerParam<FEProblemBase *>(
         "_fe_problem_base", "This might happen if you don't have a mesh")),
     _initial_residual_norm(std::numeric_limits<Real>::max()),

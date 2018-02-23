@@ -413,18 +413,6 @@ SubProblem::getAxisymmetricRadialCoord()
     return 0; // otherwise the radial direction is assumed to be x, i.e., the rotation axis is y
 }
 
-void
-SubProblem::registerRestartableData(std::string name, RestartableDataValue * data, THREAD_ID tid)
-{
-  _app.registerRestartableData(this->name() + "/" + name, data, tid);
-}
-
-void
-SubProblem::registerRecoverableData(std::string name)
-{
-  _app.registerRecoverableData(this->name() + "/" + name);
-}
-
 // Anonymous namespace for local helper methods
 namespace
 {

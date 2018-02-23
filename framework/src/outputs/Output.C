@@ -95,7 +95,7 @@ Output::getDefaultExecFlagEnum()
 
 Output::Output(const InputParameters & parameters)
   : MooseObject(parameters),
-    Restartable(parameters, "Output"),
+    Restartable(this, "Output"),
     MeshChangedInterface(parameters),
     SetupInterface(this),
     _problem_ptr(getParam<FEProblemBase *>("_fe_problem_base")),

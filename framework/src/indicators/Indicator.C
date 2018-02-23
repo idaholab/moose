@@ -46,7 +46,7 @@ Indicator::Indicator(const InputParameters & parameters)
     SetupInterface(this),
     FunctionInterface(this),
     UserObjectInterface(this),
-    Restartable(parameters, "Indicators"),
+    Restartable(this, "Indicators"),
     OutputInterface(parameters),
     MaterialPropertyInterface(this, blockIDs()),
     _subproblem(*getCheckedPointerParam<SubProblem *>("_subproblem")),
