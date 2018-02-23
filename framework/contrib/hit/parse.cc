@@ -7,6 +7,8 @@
 #include <iterator>
 #include <memory>
 
+#include <iostream>
+
 #include "parse.h"
 
 // the EOF macro wreaks havok on our TokType enum which has an EOF member. So undefine it and the
@@ -812,10 +814,9 @@ parseField(Parser * p, Node * n)
     else
     {
       std::string strval;
-      std::string quote;
+      std::string quote = quoteChar(valtok.val);
       while (true)
       {
-        quote = quoteChar(valtok.val);
         if (valtok.type == TokType::String)
         {
           auto s = valtok.val;
@@ -825,7 +826,11 @@ parseField(Parser * p, Node * n)
         }
 
         if (p->peek().type != TokType::BlankLine && p->peek().type != TokType::String)
+        {
+          if (valtok.type == TokType::BlankLine)
+            p->backup();
           break;
+        }
         valtok = p->next();
       }
       strval = quote + strval + quote;
