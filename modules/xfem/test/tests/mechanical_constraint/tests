@@ -1,0 +1,11 @@
+[Tests]
+  [./glued_penalty]
+    type = Exodiff
+    input = glued_penalty.i
+    exodiff = 'glued_penalty_out.e'
+    abs_zero = 1e-8
+    use_old_floor = true
+    map = false
+    unique_id = true
+  [../]
+[]

@@ -43,7 +43,7 @@ public:
   const std::vector<std::shared_ptr<MortarConstraint>> &
   getActiveMortarConstraints(const std::string & interface) const;
   const std::vector<std::shared_ptr<ElemElemConstraint>> &
-  getActiveElemElemConstraints(InterfaceID interface_id) const;
+  getActiveElemElemConstraints(InterfaceID interface_id, bool displaced) const;
   const std::vector<std::shared_ptr<NodeFaceConstraint>> &
   getActiveNodeFaceConstraints(BoundaryID boundary_id, bool displaced) const;
   ///@}
@@ -54,7 +54,7 @@ public:
    */
   bool hasActiveNodalConstraints() const;
   bool hasActiveMortarConstraints(const std::string & interface) const;
-  bool hasActiveElemElemConstraints(const InterfaceID interface_id) const;
+  bool hasActiveElemElemConstraints(const InterfaceID interface_id, bool displaced) const;
   bool hasActiveNodeFaceConstraints(BoundaryID boundary_id, bool displaced) const;
   ///@}
 
@@ -85,8 +85,11 @@ protected:
   /// MortarConstraints
   std::map<std::string, MooseObjectWarehouse<MortarConstraint>> _mortar_constraints;
 
-  /// ElemElemConstraints
+  /// ElemElemConstraints (non-displaced)
   std::map<unsigned int, MooseObjectWarehouse<ElemElemConstraint>> _element_constraints;
+
+  /// ElemElemConstraints (displaced)
+  std::map<unsigned int, MooseObjectWarehouse<ElemElemConstraint>> _displaced_element_constraints;
 };
 
 #endif // CONSTRAINTWAREHOUSE_H
