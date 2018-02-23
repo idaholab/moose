@@ -3,7 +3,6 @@
 
 #include "Control.h"
 #include "ControlData.h"
-#include "Restartable.h"
 #include "Simulation.h"
 
 class RELAP7Control;
@@ -11,7 +10,7 @@ class RELAP7Control;
 template <>
 InputParameters validParams<RELAP7Control>();
 
-class RELAP7Control : public Control, public Restartable
+class RELAP7Control : public Control
 {
 public:
   RELAP7Control(const InputParameters & parameters);

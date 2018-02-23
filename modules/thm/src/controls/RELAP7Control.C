@@ -11,7 +11,6 @@ validParams<RELAP7Control>()
 
 RELAP7Control::RELAP7Control(const InputParameters & parameters)
   : Control(parameters),
-    Restartable(parameters, "RELAP7Controls"),
     _sim(*_app.parameters().getCheckedPointerParam<Simulation *>("_sim"))
 {
 }
