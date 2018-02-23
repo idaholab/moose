@@ -1,9 +1,9 @@
 [Mesh]
   type = GeneratedMesh
   dim = 3
-  nx = 22
-  ny = 22
-  nz = 22
+  nx = 15
+  ny = 15
+  nz = 15
   xmin = 0
   xmax = 100
   ymin = 0
@@ -69,7 +69,6 @@
     type = FeatureFloodCount
     variable = c
     execute_on = 'initial timestep_end'
-    flood_entity_type = NODAL
   [../]
 []
 
@@ -88,9 +87,6 @@
   start_time = 0.0
   num_steps = 1
   dt = 100.0
-  [./Adaptivity]
-    refine_fraction = .5
-  [../]
 []
 
 [Outputs]

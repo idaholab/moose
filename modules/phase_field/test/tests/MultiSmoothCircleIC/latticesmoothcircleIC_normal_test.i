@@ -1,5 +1,4 @@
 [Mesh]
-
   type = GeneratedMesh
   dim = 3
   nx = 22
@@ -16,7 +15,6 @@
 []
 
 [Variables]
-
   [./c]
     order = FIRST
     family = LAGRANGE
