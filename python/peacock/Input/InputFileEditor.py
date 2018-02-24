@@ -68,12 +68,17 @@ class InputFileEditor(QWidget, MooseWidget):
         self.block_editor.cloneBlock.connect(self.block_tree.copyBlock)
         self.block_editor.removeBlock.connect(self.block_tree.removeBlock)
         self.block_editor.editingFinished.connect(self.onEditingFinished)
+        self.block_editor.appliedAndClosed.connect(self.onEditorAppliedAndClosed)
         self.block_editor.setWindowFlags(Qt.Window)
         self.block_editor.resize(640, 480)
         self.block_tree.blockSignals(False)
         self.block_editor.updateWatchers()
         self.block_editor.show()
         self.block_editor.raise_()
+
+    def onEditorAppliedAndClosed(self, block):
+        if block:
+            self.block_tree.includeBlock(block, True)
 
     def onEditingFinished(self):
         """

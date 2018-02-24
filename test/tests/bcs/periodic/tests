@@ -65,7 +65,7 @@
   [./testlevel1]
     type = 'Exodiff'
     input = 'periodic_level_1_test.i'
-    exodiff = 'level1.e level1.e-s005 level1.e-s010'
+    exodiff = 'periodic_level_1_test_out.e periodic_level_1_test_out.e-s004 periodic_level_1_test_out.e-s007'
     group = 'adaptive  periodic'
     valgrind = 'HEAVY'
     abs_zero = 1e-6

@@ -31,7 +31,8 @@ class BlockEditor(QWidget, MooseWidget):
         blockChanged(object): Apply has been clicked for this block.
         cloneBlock(object): The user wants to clone the block we are currently editing.
         removeBlock(object): The user wants to remove the block we are currently editing.
-        editingFinished(object): The user is done editing this block. Typically done by closing the window.
+        editingFinished(): The user is done editing this block. Typically done by closing the window.
+        appliedAndClosed(object): Emit the block when the user hits the "Apply & Close" button
     """
     needBlockList = pyqtSignal(list) # list of paths that we need children for
     blockRenamed = pyqtSignal(object, str) # block with changes, old path
@@ -40,6 +41,7 @@ class BlockEditor(QWidget, MooseWidget):
     cloneBlock = pyqtSignal(object) # block to clone
     removeBlock = pyqtSignal(object) # block to remove
     editingFinished = pyqtSignal()
+    appliedAndClosed = pyqtSignal(object)
 
     def __init__(self, block, type_to_block_map, **kwds):
         """
@@ -188,6 +190,7 @@ class BlockEditor(QWidget, MooseWidget):
         """
         if self.apply_button.isEnabled():
             self.applyChanges()
+            self.appliedAndClosed.emit(self.block)
         self.close()
 
     def resetChanges(self):

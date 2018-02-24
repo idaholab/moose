@@ -317,6 +317,17 @@ class BlockTree(QTreeWidget, MooseWidget):
                     self.changed.emit(parent_block)
                 self._includeParents(parent_block)
 
+    def includeBlock(self, block, include=True):
+        item = self._path_item_map.get(block.path)
+        if item:
+            block.included = include
+            if include:
+                item.setCheckState(0, Qt.Checked)
+                self._includeParents(block)
+            else:
+                item.setCheckState(0, Qt.Unchecked)
+            self.changed.emit(block)
+
     def _treeContextMenu(self, point):
         """
         Context menu on the tree. This allows for quick access to adding and cloning nodes.
