@@ -147,6 +147,7 @@ of the $m^{\mathrm{th}}$ kinetic reaction
 - [`KineticDisPreConcAux`](/chemical_reactions/KineticDisPreConcAux.md) The concentration of mineral species
 - [`TotalConcentrationAux`](/chemical_reactions/TotalConcentrationAux.md) The total concentration of a given primary species
 - [`PHAux`](/chemical_reactions/PHAux.md) The pH of the solution
+- [`EquilibriumConstantAux`](/chemical_reactions/EquilibriumConstantAux.md) Temperature-dependent equilibrium constant
 
 ### Material properties
 The `Kernels` above require several material properties to be defined using the
