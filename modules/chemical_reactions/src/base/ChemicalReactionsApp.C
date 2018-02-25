@@ -119,7 +119,8 @@ ChemicalReactionsApp__associateSyntax(Syntax & syntax, ActionFactory & action_fa
 void
 ChemicalReactionsApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
 {
-  registerSyntax("AddPrimarySpeciesAction", "ReactionNetwork");
+  registerSyntax("AddPrimarySpeciesAction", "ReactionNetwork/AqueousEquilibriumReactions");
+  registerSyntax("AddPrimarySpeciesAction", "ReactionNetwork/SolidKineticReactions");
   registerSyntax("AddSecondarySpeciesAction", "ReactionNetwork/AqueousEquilibriumReactions");
   registerSyntax("AddSecondarySpeciesAction", "ReactionNetwork/SolidKineticReactions");
   registerSyntax("AddCoupledEqSpeciesAction", "ReactionNetwork/AqueousEquilibriumReactions");
