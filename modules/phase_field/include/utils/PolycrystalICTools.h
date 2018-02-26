@@ -34,8 +34,8 @@ public:
   AdjacencyMatrix & operator=(const AdjacencyMatrix & f) = delete;
 
   // Use only move constructors
-  AdjacencyMatrix(AdjacencyMatrix && f) = default;
-  AdjacencyMatrix & operator=(AdjacencyMatrix && f) = default;
+  AdjacencyMatrix(AdjacencyMatrix && /* f */) = default;
+  AdjacencyMatrix & operator=(AdjacencyMatrix && /* f */) = default;
 
   T & operator()(unsigned int i, unsigned int j) { return _data[i * _size + j]; }
   T operator()(unsigned int i, unsigned int j) const { return _data[i * _size + j]; }

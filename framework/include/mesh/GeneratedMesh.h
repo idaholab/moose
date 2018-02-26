@@ -24,7 +24,7 @@ class GeneratedMesh : public MooseMesh
 {
 public:
   GeneratedMesh(const InputParameters & parameters);
-  GeneratedMesh(const GeneratedMesh & other_mesh) = default;
+  GeneratedMesh(const GeneratedMesh & /* other_mesh */) = default;
 
   // No copy
   GeneratedMesh & operator=(const GeneratedMesh & other_mesh) = delete;

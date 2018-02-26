@@ -143,8 +143,8 @@ public:
 
     ///@{
     // Default Move constructors
-    FeatureData(FeatureData && f) = default;
-    FeatureData & operator=(FeatureData && f) = default;
+    FeatureData(FeatureData && /* f */) = default;
+    FeatureData & operator=(FeatureData && /* f */) = default;
     ///@}
 
     ///@{
@@ -284,8 +284,8 @@ public:
      * standard containers directly. To enforce this, we are explicitly marking these methods
      * private. They can be triggered through an explicit call to "duplicate".
      */
-    FeatureData(const FeatureData & f) = default;
-    FeatureData & operator=(const FeatureData & f) = default;
+    FeatureData(const FeatureData & /* f */) = default;
+    FeatureData & operator=(const FeatureData & /* f */) = default;
     ///@}
   };
 
