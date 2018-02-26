@@ -254,11 +254,21 @@ findParam(int argc, char ** argv)
   return ret;
 }
 
+class TokenClearer : public hit::Walker
+{
+public:
+  void walk(const std::string & fullpath, const std::string & /*nodepath*/, hit::Node * n) override
+  {
+    n->tokens().clear();
+  }
+};
+
 int
 format(int argc, char ** argv)
 {
   Flags flags;
   flags.add("i", "modify file(s) inplace");
+  flags.add("canonical", "use canonical section open/closing tokens");
   flags.add("maxlen", "maximum line length for strings", "100");
   flags.add("indent", "indentation string", "  ");
   auto positional = parseOpts(argc, argv, flags);
@@ -289,6 +299,10 @@ format(int argc, char ** argv)
       ret = 1;
       continue;
     }
+
+    TokenClearer tc;
+    if (flags.have("canonical"))
+      root->walk(&tc, hit::NodeType::Section);
 
     if (!flags.have("i"))
       std::cout << root->render(0, flags.val("indent"), maxlen) << "\n";
