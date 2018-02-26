@@ -50,8 +50,8 @@ SolidWall::addMooseObjects2Phase()
 void
 SolidWall::addMooseObjects()
 {
-  if (_model_id == RELAP7::FM_SINGLE_PHASE)
+  if (_flow_model_id == RELAP7::FM_SINGLE_PHASE)
     addMooseObjects1Phase();
-  else if (_model_id == RELAP7::FM_TWO_PHASE)
+  else if (_flow_model_id == RELAP7::FM_TWO_PHASE)
     addMooseObjects2Phase();
 }
