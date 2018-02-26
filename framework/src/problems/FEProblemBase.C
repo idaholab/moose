@@ -4906,8 +4906,9 @@ FEProblemBase::checkProblemIntegrity()
                   std::ostream_iterator<unsigned int>(extra_subdomain_ids, " "));
 
         mooseError("The following blocks from your input mesh do not contain an active material: " +
-                   extra_subdomain_ids.str() + "\nWhen ANY mesh block contains a Material object, "
-                                               "all blocks must contain a Material object.\n");
+                   extra_subdomain_ids.str() +
+                   "\nWhen ANY mesh block contains a Material object, "
+                   "all blocks must contain a Material object.\n");
       }
     }
 
