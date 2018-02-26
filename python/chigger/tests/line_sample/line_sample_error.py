@@ -18,3 +18,4 @@ sample = chigger.exodus.ExodusResultLineSampler(mug, point1=(0, 0.05, 0), point2
 sample.update()
 x = sample[0].getDistance()
 y = sample[0].getSample('invalid_name') # testing this error
+exit(1)
