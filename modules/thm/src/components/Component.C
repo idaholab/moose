@@ -2,6 +2,7 @@
 #include "Simulation.h"
 #include "MooseApp.h"
 #include "ConstantFunction.h"
+#include "Numerics.h"
 
 unsigned int Component::subdomain_ids = 0;
 unsigned int Component::bc_ids = 0;
@@ -11,6 +12,7 @@ InputParameters
 validParams<Component>()
 {
   InputParameters params = validParams<RELAP7Object>();
+  params.addParam<RealVectorValue>("gravity", RELAP7::default_gravity_vector, "Gravity vector");
   params.addPrivateParam<Simulation *>("_sim");
   params.addPrivateParam<std::string>("built_by_action", "add_component");
 
