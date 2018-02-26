@@ -22,7 +22,7 @@
 
 ComputeFullJacobianThread::ComputeFullJacobianThread(FEProblemBase & fe_problem,
                                                      SparseMatrix<Number> & jacobian,
-                                                     std::vector<TagID> & tags)
+                                                     std::set<TagID> & tags)
   : ComputeJacobianThread(fe_problem, jacobian, tags),
     _nl(fe_problem.getNonlinearSystemBase()),
     _integrated_bcs(_nl.getIntegratedBCWarehouse()),
@@ -64,10 +64,12 @@ ComputeFullJacobianThread::computeJacobian()
       // any)
       const auto & kernels = _warehouse->getActiveVariableBlockObjects(ivar, _subdomain, _tid);
       for (const auto & kernel : kernels)
-        if ((kernel->variable().number() == ivar) && kernel->isImplicit())
         {
-          kernel->subProblem().prepareShapes(jvar, _tid);
-          kernel->computeOffDiagJacobian(jvariable);
+          if ((kernel->variable().number() == ivar) && kernel->isImplicit())
+          {
+            kernel->subProblem().prepareShapes(jvar, _tid);
+            kernel->computeOffDiagJacobian(jvariable);
+          }
         }
     }
   }

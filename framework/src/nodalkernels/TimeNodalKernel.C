@@ -21,7 +21,7 @@ validParams<TimeNodalKernel>()
   InputParameters params = validParams<NodalKernel>();
 
   params.set<MultiMooseEnum>("vector_tags") = "time";
-  params.set<MultiMooseEnum>("matrix_tags") = "nontime";
+  params.set<MultiMooseEnum>("matrix_tags") = "system";
 
   return params;
 }

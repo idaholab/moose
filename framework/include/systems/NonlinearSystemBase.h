@@ -247,9 +247,9 @@ public:
 
   void computeResidual(NumericVector<Number> & residual);
 
-  void computeResidual(std::vector<NumericVector<Number> *> & residuals, std::vector<TagID> & tags);
+  void computeResidual(std::set<TagID> & tags);
 
-  void computeResidual(NumericVector<Number> & residual, std::vector<TagID> & tags);
+  void computeResidual(NumericVector<Number> & residual, std::set<TagID> & tags);
 
   /**
    * Finds the implicit sparsity graph between geometrically related dofs.
@@ -286,7 +286,9 @@ public:
 
   void computeJacobian(SparseMatrix<Number> & jacobian, TagID tag);
 
-  void computeJacobian(SparseMatrix<Number> & jacobian, std::vector<TagID> & tags);
+  void computeJacobian(SparseMatrix<Number> & jacobian, std::set<TagID> & tags);
+
+  void computeJacobian(std::set<TagID> & tags);
 
   /**
    * Computes several Jacobian blocks simultaneously, summing their contributions into smaller
@@ -298,7 +300,7 @@ public:
    */
   void computeJacobianBlocks(std::vector<JacobianBlock *> & blocks);
 
-  void computeJacobianBlocks(std::vector<JacobianBlock *> & blocks, std::vector<TagID> & tags);
+  void computeJacobianBlocks(std::vector<JacobianBlock *> & blocks, std::set<TagID> & tags);
 
   /**
    * Compute damping
@@ -558,6 +560,9 @@ public:
 
   virtual TagID nonTimeVectorTag() override { return _Re_non_time_tag; }
 
+  virtual TagID residualVectorTag() override { return _Re_tag; }
+
+  virtual TagID systemMatrixTag() override { return _Ke_system_tag; }
 public:
   FEProblemBase & _fe_problem;
   System & _sys;
@@ -574,19 +579,9 @@ public:
 protected:
   /**
    * Compute the residual for a given tag
-   * @param type The type of kernels for which the residual is to be computed.
+   * @param tags The tags of kernels for which the residual is to be computed.
    */
-  void computeResidualInternal(TagID tag_id);
-
-  /**
-   * Compute residual for all kernels
-   */
-  void computeResidualInternal();
-
-  /**
-   * Compute residual for all tags
-   */
-  void computeResidualInternal(std::vector<TagID> & tags);
+  void computeResidualInternal(std::set<TagID> & tags);
 
   /**
    * Enforces nodal boundary conditions
@@ -594,9 +589,11 @@ protected:
    */
   void computeNodalBCs(NumericVector<Number> & residual);
 
-  void computeNodalBCs(NumericVector<Number> & residual, std::vector<TagID> & tags);
+  void computeNodalBCs(NumericVector<Number> & residual, std::set<TagID> & tags);
 
-  void computeJacobianInternal(SparseMatrix<Number> & jacobian, std::vector<TagID> & tags);
+  void computeNodalBCs(std::set<TagID> & tags);
+
+  void computeJacobianInternal(std::set<TagID> & tags);
 
   void computeDiracContributions(SparseMatrix<Number> * jacobian = NULL);
 
@@ -633,11 +630,9 @@ protected:
   /// Tag for time contribution residual
   TagID _Re_time_tag;
 
-  std::vector<TagID> _nl_vector_tags;
+  std::set<TagID> _nl_vector_tags;
 
-  std::vector<TagID> _nl_matrix_tags;
-
-  std::vector<NumericVector<Number> *> _nl_vector_residuals;
+  std::set<TagID> _nl_matrix_tags;
 
   /// residual vector for time contributions
   NumericVector<Number> * _Re_time;
@@ -647,8 +642,16 @@ protected:
   /// residual vector for non-time contributions
   NumericVector<Number> * _Re_non_time;
 
+  /// Used for the residual vector from PETSc
+  TagID _Re_tag;
+
   /// Tag for non-time contribution Jacobian
   TagID _Ke_non_time_tag;
+
+  /// Tag for time contribution Jacobian
+  TagID _Ke_time_tag;
+
+  TagID _Ke_system_tag;
 
   ///@{
   /// Kernel Storage

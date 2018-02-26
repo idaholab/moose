@@ -507,23 +507,32 @@ SystemBase::addVector(TagID tag, const bool project, const ParallelType type)
 
   NumericVector<Number> * vec = &system().add_vector(vector_name, project, type);
 
+  if (_tagged_vectors.size() < tag + 1)
+    _tagged_vectors.resize(tag + 1);
+
   _tagged_vectors[tag] = vec;
 
   return *vec;
 }
 
 void
-SystemBase::closeTaggedVectors()
+SystemBase::closeTaggedVectors(std::set<TagID> & tags)
 {
-  for (auto tag_vec = _tagged_vectors.begin(); tag_vec != _tagged_vectors.end(); ++tag_vec)
-    tag_vec->second->close();
+  for (auto & tag : tags)
+  {
+    mooseAssert(_subproblem.vectorTagExists(tag), "Tag: " << tag << " does not exsit");
+    getVector(tag).close();
+  }
 }
 
 void
-SystemBase::zeroTaggedVectors()
+SystemBase::zeroTaggedVectors(std::set<TagID> & tags)
 {
-  for (auto tag_vec = _tagged_vectors.begin(); tag_vec != _tagged_vectors.end(); ++tag_vec)
-    tag_vec->second->zero();
+  for (auto & tag : tags)
+  {
+    mooseAssert(_subproblem.vectorTagExists(tag), "Tag: " << tag << " does not exsit");
+    getVector(tag).zero();
+  }
 }
 
 void
@@ -539,7 +548,7 @@ SystemBase::removeVector(TagID tag_id)
   {
     auto vector_name = _subproblem.vectorTagName(tag_id);
     system().remove_vector(vector_name);
-    _tagged_vectors.erase(tag_id);
+    _tagged_vectors[tag_id] = nullptr;
 
     _subproblem.removeVectorTag(vector_name);
   }
@@ -650,7 +659,28 @@ SystemBase::timeVectorTag()
 }
 
 TagID
+SystemBase::timeMatrixTag()
+{
+  mooseError("Not implemented yet");
+  return 0;
+}
+
+TagID
+SystemBase::systemMatrixTag()
+{
+  mooseError("Not implemented yet");
+  return 0;
+}
+
+TagID
 SystemBase::nonTimeVectorTag()
+{
+  mooseError("Not implemented yet");
+  return 0;
+}
+
+TagID
+SystemBase::residualVectorTag()
 {
   mooseError("Not implemented yet");
   return 0;
@@ -659,7 +689,7 @@ SystemBase::nonTimeVectorTag()
 bool
 SystemBase::hasVector(TagID tag)
 {
-  return _tagged_vectors.find(tag) != _tagged_vectors.end();
+  return tag < _tagged_vectors.size() && _tagged_vectors[tag];
 }
 
 /**
@@ -679,6 +709,23 @@ SystemBase::getVector(TagID tag)
   return *_tagged_vectors[tag];
 }
 
+void
+SystemBase::associateVectorToTag(NumericVector<Number> & vec, TagID tag)
+{
+  mooseAssert(_subproblem.vectorTagExists(tag),
+              "You can't associate a tag that does not exist " << tag);
+  if (_tagged_vectors.size() < tag + 1)
+    _tagged_vectors.resize(tag + 1);
+
+  _tagged_vectors[tag] = &vec;
+}
+
+void
+SystemBase::clearTaggedVectors()
+{
+  _tagged_vectors.clear();
+}
+
 bool
 SystemBase::hasMatrix(TagID tag)
 {
@@ -688,9 +735,27 @@ SystemBase::hasMatrix(TagID tag)
 SparseMatrix<Number> &
 SystemBase::getMatrix(TagID tag)
 {
-  mooseAssert(hasVector(tag), "Cannot retrieve matrix with matrix_tag: " << tag);
+  mooseAssert(hasMatrix(tag), "Cannot retrieve matrix with matrix_tag: " << tag);
 
   return *_tagged_matrices[tag];
+}
+
+void
+SystemBase::associateMatirxToTag(SparseMatrix<Number> & matrix, TagID tag)
+{
+  mooseAssert(_subproblem.matrixTagExists(tag),
+              "Cannot associate Matirx with matrix_tag : " << tag << "that does not exsit");
+
+  if (_tagged_matrices.size() < tag + 1)
+    _tagged_matrices.resize(tag + 1);
+
+  _tagged_matrices[tag] = &matrix;
+}
+
+void
+SystemBase::clearTaggedMatrices()
+{
+  _tagged_matrices.clear();
 }
 
 unsigned int

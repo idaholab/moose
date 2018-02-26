@@ -38,6 +38,20 @@ public:
 
   virtual TagID nonTimeVectorTag() override { return _undisplaced_system.nonTimeVectorTag(); }
 
+  virtual void associateVectorToTag(NumericVector<Number> & vec, TagID tag) override
+  {
+    _undisplaced_system.associateVectorToTag(vec, tag);
+  }
+
+  virtual void clearTaggedVectors() override { _undisplaced_system.clearTaggedVectors(); }
+
+  virtual void associateMatirxToTag(SparseMatrix<Number> & matrix, TagID tag) override
+  {
+    _undisplaced_system.associateMatirxToTag(matrix, tag);
+  }
+
+  virtual void clearTaggedMatrices() override { _undisplaced_system.clearTaggedMatrices(); }
+
   virtual NumericVector<Number> & getVector(const std::string & name) override;
 
   virtual NumericVector<Number> & serializedSolution() override
@@ -113,6 +127,13 @@ public:
   }
 
   virtual bool hasVector(TagID tag_id) override { return _undisplaced_system.hasVector(tag_id); }
+
+  virtual bool hasMatrix(TagID tag_id) override { return _undisplaced_system.hasMatrix(tag_id); }
+
+  virtual SparseMatrix<Number> & getMatrix(TagID tag) override
+  {
+    return _undisplaced_system.getMatrix(tag);
+  }
 
   virtual NumericVector<Number> & solutionOld() override { return *_sys.old_local_solution; }
 

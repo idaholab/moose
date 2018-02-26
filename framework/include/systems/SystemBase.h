@@ -176,10 +176,25 @@ public:
    */
   virtual TagID timeVectorTag();
 
+  /**
+   * Return the Matrix Tag ID for Time
+   */
+  virtual TagID timeMatrixTag();
+
+  /**
+   * Return the Matrix Tag ID for System
+   */
+  virtual TagID systemMatrixTag();
+
   /*
    * Return TagID for nontime
    */
   virtual TagID nonTimeVectorTag();
+
+  /*
+   * Return TagID for nontime
+   */
+  virtual TagID residualVectorTag();
 
   /**
    * Get a raw NumericVector
@@ -192,6 +207,13 @@ public:
   virtual NumericVector<Number> & getVector(TagID tag);
 
   /**
+  * Associate a vector for a given tag
+  */
+  virtual void associateVectorToTag(NumericVector<Number> & vec, TagID tag);
+
+  virtual void clearTaggedVectors();
+
+  /**
    * Check if the tagged matrix exists in the system.
    */
   virtual bool hasMatrix(TagID tag);
@@ -200,6 +222,15 @@ public:
    * Get a raw SparseMatrix
    */
   virtual SparseMatrix<Number> & getMatrix(TagID tag);
+  /**
+  * associate a matirx to a tag
+  */
+  virtual void associateMatirxToTag(SparseMatrix<Number> & matrix, TagID tag);
+
+  /**
+  * Clear all tagged matrices
+  */
+  virtual void clearTaggedMatrices();
 
   /**
    * Returns a reference to a serialized version of the solution vector for this subproblem
@@ -511,9 +542,9 @@ public:
    */
   NumericVector<Number> & addVector(TagID tag, const bool project, const ParallelType type);
 
-  virtual void closeTaggedVectors();
+  virtual void closeTaggedVectors(std::set<TagID> & tags);
 
-  virtual void zeroTaggedVectors();
+  virtual void zeroTaggedVectors(std::set<TagID> & tags);
 
   /**
    * Remove a solution length vector from the system with the specified TagID
@@ -586,8 +617,8 @@ protected:
 
   Real _du_dot_du;
 
-  std::map<TagID, NumericVector<Number> *> _tagged_vectors;
-  std::map<TagID, SparseMatrix<Number> *> _tagged_matrices;
+  std::vector<NumericVector<Number> *> _tagged_vectors;
+  std::vector<SparseMatrix<Number> *> _tagged_matrices;
 
   NumericVector<Number> * _dummy_vec; // to satisfy the interface
 

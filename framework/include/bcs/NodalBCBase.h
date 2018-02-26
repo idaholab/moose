@@ -37,7 +37,8 @@ class NodalBCBase : public BoundaryCondition,
 public:
   NodalBCBase(const InputParameters & parameters);
 
-  virtual void computeResidual(NumericVector<Number> & residual) = 0;
+  void computeResidual(NumericVector<Number> & residual);
+  virtual void computeResidual() = 0;
   virtual void computeJacobian() = 0;
   virtual void computeOffDiagJacobian(unsigned int jvar) = 0;
 

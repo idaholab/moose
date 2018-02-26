@@ -57,8 +57,6 @@ protected:
   /// std::vector<TagID> based storage
   std::vector<std::map<std::vector<TagID>, MooseObjectTagWarehouse<T>>>
       _matrix_tags_to_object_warehouse;
-
-  std::vector<std::shared_ptr<T>> _variable_objects;
 };
 
 template <typename T>
@@ -207,4 +205,5 @@ MooseObjectTagWarehouse<T>::getMatrixTagsObjectWarehouse(std::vector<TagID> & v_
     return matrix_tags_to_object_warehourse[v_tags];
   }
 }
+
 #endif // MOOSEOBJECTTAGWAREHOUSE_H

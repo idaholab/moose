@@ -26,7 +26,7 @@ validParams<TaggingInterface>()
 
   // These are the default names for tags, but users will be able to add their own
   MultiMooseEnum vtags("nontime time", "nontime", true);
-  MultiMooseEnum mtags("nontime time", "nontime", true);
+  MultiMooseEnum mtags("nontime time", "system", true);
 
   params.addParam<MultiMooseEnum>(
       "vector_tags", vtags, "The tag for the vectors this Kernel should fill");

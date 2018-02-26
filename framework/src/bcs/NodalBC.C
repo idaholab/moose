@@ -72,7 +72,7 @@ NodalBC::NodalBC(const InputParameters & parameters)
 }
 
 void
-NodalBC::computeResidual(NumericVector<Number> & residual)
+NodalBC::computeResidual()
 {
   if (_var.isNodalDefined())
   {
@@ -82,8 +82,6 @@ NodalBC::computeResidual(NumericVector<Number> & residual)
 
     if (!_eigen_BC)
       res = computeQpResidual();
-
-    residual.set(dof_idx, res);
 
     for (auto tag_id : _vector_tags)
       if (_fe_problem.getNonlinearSystemBase().hasVector(tag_id))

@@ -22,7 +22,7 @@ class ComputeFullJacobianThread : public ComputeJacobianThread
 public:
   ComputeFullJacobianThread(FEProblemBase & fe_problem,
                             SparseMatrix<Number> & jacobian,
-                            std::vector<TagID> & tags);
+                            std::set<TagID> & tags);
 
   // Splitting Constructor
   ComputeFullJacobianThread(ComputeFullJacobianThread & x, Threads::split split);
@@ -46,8 +46,6 @@ protected:
 
   // Reference to interface kernel storage
   const MooseObjectWarehouse<InterfaceKernel> & _interface_kernels;
-
-  const MooseObjectWarehouse<KernelBase> * _warehouse;
 };
 
 #endif // COMPUTEFULLJACOBIANTHREAD_H

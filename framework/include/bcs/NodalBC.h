@@ -35,7 +35,7 @@ public:
    */
   virtual MooseVariable & variable() override { return _var; }
 
-  virtual void computeResidual(NumericVector<Number> & residual) override;
+  virtual void computeResidual() override;
   virtual void computeJacobian() override;
   virtual void computeOffDiagJacobian(unsigned int jvar) override;
 

@@ -24,7 +24,7 @@
 
 ComputeJacobianThread::ComputeJacobianThread(FEProblemBase & fe_problem,
                                              SparseMatrix<Number> & jacobian,
-                                             std::vector<TagID> & tags)
+                                             std::set<TagID> & tags)
   : ThreadedElementLoop<ConstElemRange>(fe_problem),
     _jacobian(jacobian),
     _nl(fe_problem.getNonlinearSystemBase()),
@@ -154,15 +154,16 @@ ComputeJacobianThread::subdomainChanged()
 
   // If users pass a empty vector or a full size of vector,
   // we take all kernels
-  if (!_tags.size() || _tags.size() == _fe_problem.numVectorTags())
+  if (!_tags.size() || _tags.size() == _fe_problem.numMatrixTags())
     _warehouse = &_kernels;
   // If we have one tag only,
   // We call tag based storage
   else if (_tags.size() == 1)
-    _warehouse = &(_kernels.getMatrixTagObjectWarehouse(_tags[0], _tid));
+    _warehouse = &(_kernels.getMatrixTagObjectWarehouse(*(_tags.begin()), _tid));
   // This one may be expensive, and hopefully we do not use it so often
   else
-    _warehouse = &(_kernels.getMatrixTagsObjectWarehouse(_tags, _tid));
+    mooseError("Not implemented yet");
+  //_warehouse = &(_kernels.getMatrixTagsObjectWarehouse(_tags, _tid));
 }
 
 void

@@ -134,25 +134,6 @@ NonlinearSystem::addMatrix(TagID tag)
 }
 
 void
-NonlinearSystem::removeMatrix(TagID tag_id)
-{
-  if (!_subproblem.matrixTagExists(tag_id))
-    mooseError("Cannot remove a tagged matrix with matrix_tag, ",
-               tag_id,
-               ", that tag does not exist in System ",
-               name());
-
-  if (hasMatrix(tag_id))
-  {
-    auto matrix_name = _subproblem.matrixTagName(tag_id);
-    _transient_sys.remove_matrix(matrix_name);
-    _tagged_matrices.erase(tag_id);
-
-    _subproblem.removeMatrixTag(matrix_name);
-  }
-}
-
-void
 NonlinearSystem::solve()
 {
   // Only attach the postcheck function to the solver if we actually
@@ -234,6 +215,8 @@ NonlinearSystem::stopSolve()
   // should make PETSc return DIVERGED_NANORINF the next time it does
   // a reduction.  We'll write to the first local dof on every
   // processor that has any dofs.
+  _transient_sys.rhs->close();
+
   if (_transient_sys.rhs->local_size())
     _transient_sys.rhs->set(_transient_sys.rhs->first_local_index(),
                             std::numeric_limits<Real>::quiet_NaN());

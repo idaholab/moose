@@ -33,7 +33,7 @@ VectorNodalBC::VectorNodalBC(const InputParameters & parameters)
 }
 
 void
-VectorNodalBC::computeResidual(NumericVector<Number> & residual)
+VectorNodalBC::computeResidual()
 {
   const std::vector<dof_id_type> & dof_indices = _var.dofIndices();
 
@@ -42,8 +42,10 @@ VectorNodalBC::computeResidual(NumericVector<Number> & residual)
   if (!_is_eigen)
     res = computeQpResidual();
 
-  for (size_t i = 0; i < dof_indices.size(); ++i)
-    residual.set(dof_indices[i], res(i));
+  for (auto tag_id : _vector_tags)
+    if (_fe_problem.getNonlinearSystemBase().hasVector(tag_id))
+      for (size_t i = 0; i < dof_indices.size(); ++i)
+        _fe_problem.getNonlinearSystemBase().getVector(tag_id).set(dof_indices[i], res(i));
 }
 
 void

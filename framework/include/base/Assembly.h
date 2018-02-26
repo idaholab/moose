@@ -489,6 +489,7 @@ public:
   void addResidualNeighbor(NumericVector<Number> & residual, TagID tag_id = 0);
   void addResidualNeighbor(std::map<TagName, TagID> & tags);
   void addResidualScalar(NumericVector<Number> & residual, TagID tag_id = 0);
+  void addResidualScalar(TagID tag_id);
   void addResidualScalar(std::map<TagName, TagID> & tags);
 
   /**
@@ -604,7 +605,8 @@ public:
   void cacheJacobianBlock(DenseMatrix<Number> & jac_block,
                           std::vector<dof_id_type> & idof_indices,
                           std::vector<dof_id_type> & jdof_indices,
-                          Real scaling_factor);
+                          Real scaling_factor,
+                          TagID tag = 0);
   void cacheJacobianBlockNonlocal(DenseMatrix<Number> & jac_block,
                                   const std::vector<dof_id_type> & idof_indices,
                                   const std::vector<dof_id_type> & jdof_indices,
@@ -1003,7 +1005,7 @@ protected:
   std::vector<std::pair<MooseVariableFEBase *, MooseVariableFEBase *>> _cm_entry;
   std::vector<std::pair<MooseVariableFEBase *, MooseVariableFEBase *>> _cm_nonlocal_entry;
   /// Flag that indicates if the jacobian block was used
-  std::vector<std::vector<unsigned char>> _jacobian_block_used;
+  std::vector<std::vector<std::vector<unsigned char>>> _jacobian_block_used;
   std::vector<std::vector<unsigned char>> _jacobian_block_nonlocal_used;
   /// Flag that indicates if the jacobian block for neighbor was used
   std::vector<std::vector<unsigned char>> _jacobian_block_neighbor_used;
@@ -1255,11 +1257,11 @@ protected:
   unsigned int _max_cached_residuals;
 
   /// Values cached by calling cacheJacobian()
-  std::vector<Real> _cached_jacobian_values;
+  std::vector<std::vector<Real>> _cached_jacobian_values;
   /// Row where the corresponding cached value should go
-  std::vector<dof_id_type> _cached_jacobian_rows;
+  std::vector<std::vector<dof_id_type>> _cached_jacobian_rows;
   /// Column where the corresponding cached value should go
-  std::vector<dof_id_type> _cached_jacobian_cols;
+  std::vector<std::vector<dof_id_type>> _cached_jacobian_cols;
 
   unsigned int _max_cached_jacobians;
 

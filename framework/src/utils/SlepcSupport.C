@@ -551,17 +551,15 @@ mooseSlepcEigenFormFunctionAB(SNES /*snes*/, Vec x, Vec Ax, Vec Bx, void * ctx)
   AX.zero();
   BX.zero();
 
-  std::vector<NumericVector<Number> *> residuals;
+  std::set<TagID> tags;
 
-  residuals.push_back(&AX);
-  residuals.push_back(&BX);
+  tags.insert(nl.nonEigenVectorTag());
+  tags.insert(nl.eigenVectorTag());
+  nl.setSolution(*sys.current_local_solution.get());
+  nl.associateVectorToTag(AX, nl.nonEigenVectorTag());
+  nl.associateVectorToTag(BX, nl.eigenVectorTag());
 
-  std::vector<TagID> tags;
-
-  tags.push_back(nl.nonEigenVectorTag());
-  tags.push_back(nl.eigenVectorTag());
-
-  eigen_problem->computeResidual(*sys.current_local_solution.get(), residuals, tags);
+  eigen_problem->computeResidual(tags);
 
   AX.close();
   BX.close();
