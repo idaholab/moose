@@ -40,7 +40,6 @@
 []
 
 [ReactionNetwork]
-  primary_species = 'a b'
   [./SolidKineticReactions]
     primary_species = 'a b'
     secondary_species = mineral

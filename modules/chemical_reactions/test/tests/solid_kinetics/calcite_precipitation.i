@@ -49,7 +49,6 @@
 []
 
 [ReactionNetwork]
-  primary_species = 'ca++ hco3- h+'
   [./AqueousEquilibriumReactions]
     primary_species = 'ca++ hco3- h+'
     secondary_species = 'co2_aq co3-- caco3_aq cahco3+ caoh+ oh-'
