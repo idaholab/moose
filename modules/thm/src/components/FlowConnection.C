@@ -1,5 +1,6 @@
 #include "FlowConnection.h"
 #include "GeometricalFlowComponent.h"
+#include "FlowModelTwoPhase.h"
 
 const std::map<std::string, FlowConnection::EEndType> FlowConnection::_end_type_to_enum{
     {"IN", IN}, {"OUT", OUT}};
@@ -61,39 +62,55 @@ FlowConnection::init()
 {
   Component::init();
 
-  std::vector<UserObjectName> fp_names;
-  std::vector<RELAP7::FlowModelID> flow_model_ids;
-  std::vector<bool> implicit_rdg_flags;
-  std::vector<FlowModel::ESpatialDiscretizationType> spatial_discretizations;
-  for (const auto & connection : _connections)
+  if (_connections.size() > 0)
   {
-    const std::string comp_name = connection._geometrical_component_name;
-    const GeometricalFlowComponent & comp =
-        _sim.getComponentByName<GeometricalFlowComponent>(comp_name);
+    std::vector<UserObjectName> fp_names;
+    std::vector<RELAP7::FlowModelID> flow_model_ids;
+    std::vector<bool> implicit_rdg_flags;
+    std::vector<FlowModel::ESpatialDiscretizationType> spatial_discretizations;
+    for (const auto & connection : _connections)
+    {
+      const std::string comp_name = connection._geometrical_component_name;
+      const GeometricalFlowComponent & comp =
+          _sim.getComponentByName<GeometricalFlowComponent>(comp_name);
 
-    // add to list of subdomain IDs
-    const std::vector<unsigned int> & ids = comp.getSubdomainIds();
-    _connected_subdomain_ids.insert(_connected_subdomain_ids.end(), ids.begin(), ids.end());
+      // add to list of subdomain IDs
+      const std::vector<unsigned int> & ids = comp.getSubdomainIds();
+      _connected_subdomain_ids.insert(_connected_subdomain_ids.end(), ids.begin(), ids.end());
 
-    fp_names.push_back(comp.getFluidPropertiesName());
-    flow_model_ids.push_back(comp.getFlowModelID());
-    _rdg_flux_names.push_back(comp.getRDGFluxUserObjectName());
-    implicit_rdg_flags.push_back(comp.getImplicitRDGFlag());
-    spatial_discretizations.push_back(comp.getSpatialDiscretizationType());
+      fp_names.push_back(comp.getFluidPropertiesName());
+      flow_model_ids.push_back(comp.getFlowModelID());
+      _rdg_flux_names.push_back(comp.getRDGFluxUserObjectName());
+      implicit_rdg_flags.push_back(comp.getImplicitRDGFlag());
+      spatial_discretizations.push_back(comp.getSpatialDiscretizationType());
+    }
+
+    checkAllConnectionsHaveSame<UserObjectName>(fp_names, "fluid properties object");
+    _fp_name = fp_names[0];
+
+    checkAllConnectionsHaveSame<RELAP7::FlowModelID>(flow_model_ids, "flow model ID");
+    _flow_model_id = flow_model_ids[0];
+
+    checkAllConnectionsHaveSame<bool>(implicit_rdg_flags, "implicit rDG flag");
+    _implicit_rdg = implicit_rdg_flags[0];
+
+    checkAllConnectionsHaveSame<FlowModel::ESpatialDiscretizationType>(spatial_discretizations,
+                                                                       "spatial discretization");
+    _spatial_discretization = spatial_discretizations[0];
+
+    if (hasComponentByName<Pipe>(_connections[0]._geometrical_component_name))
+    {
+      const Pipe & pipe = getComponentByName<Pipe>(_connections[0]._geometrical_component_name);
+      if (_flow_model_id == RELAP7::FM_TWO_PHASE)
+      {
+        auto flow_model = pipe.getFlowModel();
+        auto flow_model_2phase = dynamic_cast<const FlowModelTwoPhase &>(*flow_model);
+        _phase_interaction = flow_model_2phase.getPhaseInteraction();
+      }
+    }
   }
-
-  checkAllConnectionsHaveSame<UserObjectName>(fp_names, "fluid properties object");
-  _fp_name = fp_names[0];
-
-  checkAllConnectionsHaveSame<RELAP7::FlowModelID>(flow_model_ids, "flow model ID");
-  _flow_model_id = flow_model_ids[0];
-
-  checkAllConnectionsHaveSame<bool>(implicit_rdg_flags, "implicit rDG flag");
-  _implicit_rdg = implicit_rdg_flags[0];
-
-  checkAllConnectionsHaveSame<FlowModel::ESpatialDiscretizationType>(spatial_discretizations,
-                                                                     "spatial discretization");
-  _spatial_discretization = spatial_discretizations[0];
+  else
+    logError("The component is not connected.");
 }
 
 void

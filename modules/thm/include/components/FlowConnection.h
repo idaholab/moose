@@ -159,6 +159,8 @@ protected:
   bool _implicit_rdg;
   /// Spatial discretization
   FlowModel::ESpatialDiscretizationType _spatial_discretization;
+  /// flag signalling that there is phase interaction (relevant only in 2-phase)
+  bool _phase_interaction;
 
 private:
   /**
