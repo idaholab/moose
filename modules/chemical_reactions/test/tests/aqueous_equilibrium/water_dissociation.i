@@ -38,7 +38,6 @@
 []
 
 [ReactionNetwork]
-  primary_species = h+
   [./AqueousEquilibriumReactions]
     primary_species = h+
     secondary_species = oh-

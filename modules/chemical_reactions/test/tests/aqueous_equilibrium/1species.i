@@ -59,7 +59,6 @@
 []
 
 [ReactionNetwork]
-  primary_species = a
   [./AqueousEquilibriumReactions]
     primary_species = a
     reactions = '2a = pa2 1'

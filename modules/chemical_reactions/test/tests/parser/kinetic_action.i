@@ -21,7 +21,6 @@
 []
 
 [ReactionNetwork]
-  primary_species = 'a b c d'
   [./SolidKineticReactions]
     primary_species = 'a b c d'
     secondary_species = 'm1 m2 m3'

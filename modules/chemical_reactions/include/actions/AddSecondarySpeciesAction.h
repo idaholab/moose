@@ -10,14 +10,14 @@
 #ifndef ADDSECONDARYSPECIESACTION_H
 #define ADDSECONDARYSPECIESACTION_H
 
-#include "Action.h"
+#include "AddAuxVariableAction.h"
 
 class AddSecondarySpeciesAction;
 
 template <>
 InputParameters validParams<AddSecondarySpeciesAction>();
 
-class AddSecondarySpeciesAction : public Action
+class AddSecondarySpeciesAction : public AddAuxVariableAction
 {
 public:
   AddSecondarySpeciesAction(const InputParameters & params);
@@ -25,6 +25,7 @@ public:
   virtual void act() override;
 
 private:
+  /// Secondary species to add
   const std::vector<AuxVariableName> _secondary_species;
 };
 
