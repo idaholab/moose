@@ -24,9 +24,12 @@ PostprocessorData::hasPostprocessor(const std::string & name)
 PostprocessorValue &
 PostprocessorData::getPostprocessorValue(const PostprocessorName & name)
 {
-  PostprocessorValue *& pp_val = _values[name];
+  auto insert_pair = _values.emplace(name, nullptr);
+  auto inserted = insert_pair.second;
+  auto iterator = insert_pair.first;
 
-  if (pp_val == nullptr)
+  PostprocessorValue *& pp_val = iterator->second;
+  if (inserted)
     pp_val = &declareRestartableDataWithObjectName<PostprocessorValue>(name, "values");
 
   return *pp_val;
@@ -35,9 +38,12 @@ PostprocessorData::getPostprocessorValue(const PostprocessorName & name)
 PostprocessorValue &
 PostprocessorData::getPostprocessorValueOld(const PostprocessorName & name)
 {
-  PostprocessorValue *& pp_val = _values_old[name];
+  auto insert_pair = _values_old.emplace(name, nullptr);
+  auto inserted = insert_pair.second;
+  auto iterator = insert_pair.first;
 
-  if (pp_val == nullptr)
+  PostprocessorValue *& pp_val = iterator->second;
+  if (inserted)
     pp_val = &declareRestartableDataWithObjectName<PostprocessorValue>(name, "values_old");
 
   return *pp_val;
@@ -46,9 +52,12 @@ PostprocessorData::getPostprocessorValueOld(const PostprocessorName & name)
 PostprocessorValue &
 PostprocessorData::getPostprocessorValueOlder(const PostprocessorName & name)
 {
-  PostprocessorValue *& pp_val = _values_older[name];
+  auto insert_pair = _values_older.emplace(name, nullptr);
+  auto inserted = insert_pair.second;
+  auto iterator = insert_pair.first;
 
-  if (pp_val == nullptr)
+  PostprocessorValue *& pp_val = iterator->second;
+  if (inserted)
     pp_val = &declareRestartableDataWithObjectName<PostprocessorValue>(name, "values_older");
 
   return *pp_val;

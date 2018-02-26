@@ -256,9 +256,8 @@ SystemBase::prepareFace(THREAD_ID tid, bool resize_data)
     const std::vector<MooseVariableFE *> & vars = _vars[tid].fieldVariables();
     for (const auto & var : vars)
     {
-      if (&(var->sys()) == this &&
-          !active_elemental_moose_variables.count(
-              var)) // If it wasnt in the active list we need to prepare it
+      if (&(var->sys()) == this && !active_elemental_moose_variables.count(
+                                       var)) // If it wasnt in the active list we need to prepare it
       {
         var->prepare();
         newly_prepared_vars.push_back(var);
@@ -564,7 +563,7 @@ SystemBase::addScalarVariable(const std::string & var_name,
 }
 
 bool
-SystemBase::hasVariable(const std::string & var_name)
+SystemBase::hasVariable(const std::string & var_name) const
 {
   if (system().has_variable(var_name))
     return system().variable_type(var_name).family != SCALAR;
@@ -573,7 +572,7 @@ SystemBase::hasVariable(const std::string & var_name)
 }
 
 bool
-SystemBase::hasScalarVariable(const std::string & var_name)
+SystemBase::hasScalarVariable(const std::string & var_name) const
 {
   if (system().has_variable(var_name))
     return system().variable_type(var_name).family == SCALAR;
@@ -582,13 +581,13 @@ SystemBase::hasScalarVariable(const std::string & var_name)
 }
 
 bool
-SystemBase::isScalarVariable(unsigned int var_num)
+SystemBase::isScalarVariable(unsigned int var_num) const
 {
   return (system().variable(var_num).type().family == SCALAR);
 }
 
 unsigned int
-SystemBase::nVariables()
+SystemBase::nVariables() const
 {
   return _vars[0].names().size();
 }
@@ -597,7 +596,7 @@ SystemBase::nVariables()
  * Check if the named vector exists in the system.
  */
 bool
-SystemBase::hasVector(const std::string & name)
+SystemBase::hasVector(const std::string & name) const
 {
   return system().have_vector(name);
 }
@@ -612,7 +611,7 @@ SystemBase::getVector(const std::string & name)
 }
 
 unsigned int
-SystemBase::number()
+SystemBase::number() const
 {
   return system().number();
 }

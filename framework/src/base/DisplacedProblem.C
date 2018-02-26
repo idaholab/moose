@@ -217,7 +217,7 @@ DisplacedProblem::updateMesh(const NumericVector<Number> & soln,
 }
 
 bool
-DisplacedProblem::hasVariable(const std::string & var_name)
+DisplacedProblem::hasVariable(const std::string & var_name) const
 {
   if (_displaced_nl.hasVariable(var_name))
     return true;
@@ -261,7 +261,7 @@ DisplacedProblem::getVectorVariable(THREAD_ID tid, const std::string & var_name)
 }
 
 bool
-DisplacedProblem::hasScalarVariable(const std::string & var_name)
+DisplacedProblem::hasScalarVariable(const std::string & var_name) const
 {
   if (_displaced_nl.hasScalarVariable(var_name))
     return true;
@@ -786,7 +786,7 @@ DisplacedProblem::converged()
 }
 
 bool
-DisplacedProblem::computingInitialResidual()
+DisplacedProblem::computingInitialResidual() const
 {
   return _mproblem.computingInitialResidual();
 }
