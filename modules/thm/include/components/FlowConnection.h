@@ -87,6 +87,13 @@ public:
    */
   const std::vector<BoundaryName> & getBoundaryNames() const;
 
+  /**
+   * Gets the name of fluid properties used in all flow connections
+   *
+   * @return name of fluid properties used in all flow connections
+   */
+  const UserObjectName & getFluidPropertiesName() const;
+
 protected:
   virtual void setupMesh() override;
   virtual void init() override;
@@ -118,6 +125,17 @@ protected:
   template <typename T>
   void checkSizeEqualsNumberOfConnections(const std::string & param) const;
 
+  /**
+   * Checks that all connections have the same of a certain type of object
+   *
+   * @tparam    T             type of object to check
+   * @param[in] objects       list of objects corresponding to each connection
+   * @param[in] description   description of the obect to check
+   */
+  template <typename T>
+  void checkAllConnectionsHaveSame(const std::vector<T> & objects,
+                                   const std::string & description) const;
+
   /// Physical positions of connected pipes
   std::vector<Point> _positions;
   /// Boundary node IDs from connected pipes
@@ -130,6 +148,11 @@ protected:
   std::vector<Real> _normals;
   /// Connection strings
   std::vector<std::string> _connection_strings;
+
+  /// Convenience variable that stores model type
+  RELAP7::FlowModelID _flow_model_id;
+  /// The name of the fluid property user object
+  UserObjectName _fp_name;
 
 private:
   /**
@@ -167,6 +190,16 @@ FlowConnection::checkSizeEqualsNumberOfConnections(const std::string & param) co
              ") must equal the number of connections (",
              _connections.size(),
              ")");
+}
+
+template <typename T>
+void
+FlowConnection::checkAllConnectionsHaveSame(const std::vector<T> & objects,
+                                            const std::string & description) const
+{
+  for (const auto & obj : objects)
+    if (obj != objects[0])
+      logError("All connections must have the same ", description);
 }
 
 namespace RELAP7

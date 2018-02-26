@@ -19,7 +19,10 @@ validParams<FlowConnection>()
   return params;
 }
 
-FlowConnection::FlowConnection(const InputParameters & params) : Component(params) {}
+FlowConnection::FlowConnection(const InputParameters & params)
+  : Component(params), _flow_model_id(RELAP7::FM_INVALID)
+{
+}
 
 void
 FlowConnection::setupMesh()
@@ -58,14 +61,27 @@ FlowConnection::init()
 {
   Component::init();
 
-  // create list of subdomain IDs
-  for (const auto & comp_name : _connected_component_names)
+  std::vector<UserObjectName> fp_names;
+  std::vector<RELAP7::FlowModelID> flow_model_ids;
+  for (const auto & connection : _connections)
   {
+    const std::string comp_name = connection._geometrical_component_name;
     const GeometricalFlowComponent & comp =
         _sim.getComponentByName<GeometricalFlowComponent>(comp_name);
+
+    // add to list of subdomain IDs
     const std::vector<unsigned int> & ids = comp.getSubdomainIds();
     _connected_subdomain_ids.insert(_connected_subdomain_ids.end(), ids.begin(), ids.end());
+
+    fp_names.push_back(comp.getFluidPropertiesName());
+    flow_model_ids.push_back(comp.getFlowModelID());
   }
+
+  checkAllConnectionsHaveSame<UserObjectName>(fp_names, "fluid properties object");
+  _fp_name = fp_names[0];
+
+  checkAllConnectionsHaveSame<RELAP7::FlowModelID>(flow_model_ids, "flow model ID");
+  _flow_model_id = flow_model_ids[0];
 }
 
 void
@@ -123,4 +139,12 @@ FlowConnection::getBoundaryNames() const
   checkSetupStatus(MESH_PREPARED);
 
   return _boundary_names;
+}
+
+const UserObjectName &
+FlowConnection::getFluidPropertiesName() const
+{
+  checkSetupStatus(INITIALIZED_PRIMARY);
+
+  return _fp_name;
 }
