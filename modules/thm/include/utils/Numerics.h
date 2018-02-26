@@ -2,6 +2,7 @@
 #define NUMERICS_H
 
 #include "libmesh/libmesh_common.h"
+#include "libmesh/vector_value.h"
 
 using namespace libMesh;
 
@@ -10,6 +11,8 @@ namespace RELAP7
 
 // gravitational acceleration, or gravity constant
 static const Real gravity_const = 9.81;
+
+static VectorValue<Real> default_gravity_vector = VectorValue<Real>(0.0, 0.0, -9.8);
 
 // Stefan-Boltzman constant, in [W/m^2-K]
 static const Real Stefan_Boltzman_const = 5.670e-8;
