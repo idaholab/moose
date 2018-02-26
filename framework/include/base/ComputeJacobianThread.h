@@ -20,7 +20,6 @@ class NonlinearSystemBase;
 class IntegratedBCBase;
 class DGKernel;
 class InterfaceKernel;
-class KernelWarehouse;
 class Kernel;
 
 class ComputeJacobianThread : public ThreadedElementLoop<ConstElemRange>

@@ -22,7 +22,6 @@ class DGKernel;
 class InterfaceKernel;
 class TimeKernel;
 class KernelBase;
-class KernelWarehouse;
 class Kernel;
 
 class ComputeResidualThread : public ThreadedElementLoop<ConstElemRange>
