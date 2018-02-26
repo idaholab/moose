@@ -20,6 +20,8 @@ public:
   virtual void addMooseObjects() override;
 
 protected:
+  virtual void check() override;
+
   virtual void addMooseObjects1Phase();
   virtual void addMooseObjects2Phase();
 };

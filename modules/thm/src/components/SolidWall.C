@@ -17,6 +17,13 @@ validParams<SolidWall>()
 SolidWall::SolidWall(const InputParameters & params) : FlowBoundary(params) {}
 
 void
+SolidWall::check()
+{
+  if (_spatial_discretization == FlowModel::rDG)
+    logSpatialDiscretizationNotImplementedError(_spatial_discretization);
+}
+
+void
 SolidWall::addMooseObjects1Phase()
 {
   {
