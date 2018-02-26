@@ -2617,7 +2617,7 @@ FEProblemBase::addUserObject(std::string user_object_name,
 }
 
 const UserObject &
-FEProblemBase::getUserObjectBase(const std::string & name)
+FEProblemBase::getUserObjectBase(const std::string & name) const
 {
   if (_all_user_objects.hasActiveObject(name))
     return *(_all_user_objects.getActiveObject(name).get());
@@ -2626,7 +2626,7 @@ FEProblemBase::getUserObjectBase(const std::string & name)
 }
 
 bool
-FEProblemBase::hasUserObject(const std::string & name)
+FEProblemBase::hasUserObject(const std::string & name) const
 {
   return _all_user_objects.hasActiveObject(name);
 }
@@ -3183,13 +3183,13 @@ FEProblemBase::addMultiApp(const std::string & multi_app_name,
 }
 
 bool
-FEProblemBase::hasMultiApp(const std::string & multi_app_name)
+FEProblemBase::hasMultiApp(const std::string & multi_app_name) const
 {
   return _multi_apps.hasActiveObject(multi_app_name);
 }
 
 std::shared_ptr<MultiApp>
-FEProblemBase::getMultiApp(const std::string & multi_app_name)
+FEProblemBase::getMultiApp(const std::string & multi_app_name) const
 {
   return _multi_apps.getActiveObject(multi_app_name);
 }
@@ -3440,7 +3440,7 @@ FEProblemBase::addTransfer(const std::string & transfer_name,
 }
 
 bool
-FEProblemBase::hasVariable(const std::string & var_name)
+FEProblemBase::hasVariable(const std::string & var_name) const
 {
   if (_nl->hasVariable(var_name))
     return true;
@@ -3484,7 +3484,7 @@ FEProblemBase::getVectorVariable(THREAD_ID tid, const std::string & var_name)
 }
 
 bool
-FEProblemBase::hasScalarVariable(const std::string & var_name)
+FEProblemBase::hasScalarVariable(const std::string & var_name) const
 {
   if (_nl->hasScalarVariable(var_name))
     return true;
@@ -3526,18 +3526,6 @@ FEProblemBase::setActiveElementalMooseVariables(const std::set<MooseVariableFE *
     _displaced_problem->setActiveElementalMooseVariables(moose_vars, tid);
 }
 
-const std::set<MooseVariableFE *> &
-FEProblemBase::getActiveElementalMooseVariables(THREAD_ID tid)
-{
-  return SubProblem::getActiveElementalMooseVariables(tid);
-}
-
-bool
-FEProblemBase::hasActiveElementalMooseVariables(THREAD_ID tid)
-{
-  return SubProblem::hasActiveElementalMooseVariables(tid);
-}
-
 void
 FEProblemBase::clearActiveElementalMooseVariables(THREAD_ID tid)
 {
@@ -3555,18 +3543,6 @@ FEProblemBase::setActiveMaterialProperties(const std::set<unsigned int> & mat_pr
 
   if (_displaced_problem)
     _displaced_problem->setActiveMaterialProperties(mat_prop_ids, tid);
-}
-
-const std::set<unsigned int> &
-FEProblemBase::getActiveMaterialProperties(THREAD_ID tid)
-{
-  return SubProblem::getActiveMaterialProperties(tid);
-}
-
-bool
-FEProblemBase::hasActiveMaterialProperties(THREAD_ID tid)
-{
-  return SubProblem::hasActiveMaterialProperties(tid);
 }
 
 void
@@ -3866,25 +3842,25 @@ FEProblemBase::converged()
 }
 
 unsigned int
-FEProblemBase::nNonlinearIterations()
+FEProblemBase::nNonlinearIterations() const
 {
   return _nl->nNonlinearIterations();
 }
 
 unsigned int
-FEProblemBase::nLinearIterations()
+FEProblemBase::nLinearIterations() const
 {
   return _nl->nLinearIterations();
 }
 
 Real
-FEProblemBase::finalNonlinearResidual()
+FEProblemBase::finalNonlinearResidual() const
 {
   return _nl->finalNonlinearResidual();
 }
 
 bool
-FEProblemBase::computingInitialResidual()
+FEProblemBase::computingInitialResidual() const
 {
   return _nl->computingInitialResidual();
 }
@@ -5217,7 +5193,7 @@ FEProblemBase::needMaterialOnSide(SubdomainID subdomain_id, THREAD_ID tid)
 }
 
 bool
-FEProblemBase::needsPreviousNewtonIteration()
+FEProblemBase::needsPreviousNewtonIteration() const
 {
   return _needs_old_newton_iter;
 }

@@ -91,8 +91,11 @@ public:
   virtual void setupFiniteDifferencedPreconditioner() = 0;
   void setupFieldDecomposition();
 
-  bool haveFiniteDifferencedPreconditioner() { return _use_finite_differenced_preconditioner; }
-  bool haveFieldSplitPreconditioner() { return _use_field_split_preconditioner; }
+  bool haveFiniteDifferencedPreconditioner() const
+  {
+    return _use_finite_differenced_preconditioner;
+  }
+  bool haveFieldSplitPreconditioner() const { return _use_field_split_preconditioner; }
 
   /**
    * Returns the convergence state
@@ -417,28 +420,28 @@ public:
   /**
    * Return the number of non-linear iterations
    */
-  unsigned int nNonlinearIterations() { return _n_iters; }
+  unsigned int nNonlinearIterations() const { return _n_iters; }
 
   /**
    * Return the number of linear iterations
    */
-  unsigned int nLinearIterations() { return _n_linear_iters; }
+  unsigned int nLinearIterations() const { return _n_linear_iters; }
 
   /**
    * Return the total number of residual evaluations done so far in this calculation
    */
-  unsigned int nResidualEvaluations() { return _n_residual_evaluations; }
+  unsigned int nResidualEvaluations() const { return _n_residual_evaluations; }
 
   /**
    * Return the final nonlinear residual
    */
-  Real finalNonlinearResidual() { return _final_residual; }
+  Real finalNonlinearResidual() const { return _final_residual; }
 
   /**
    * Return the last nonlinear norm
    * @return A Real containing the last computed residual norm
    */
-  Real nonlinearNorm() { return _last_nl_rnorm; }
+  Real nonlinearNorm() const { return _last_nl_rnorm; }
 
   /**
    * Force the printing of all variable norms after each solve.
@@ -484,28 +487,33 @@ public:
   /**
    * Access functions to Warehouses from outside NonlinearSystemBase
    */
-  const KernelWarehouse & getKernelWarehouse() { return _kernels; }
-  const KernelWarehouse & getTimeKernelWarehouse() { return _time_kernels; }
-  const KernelWarehouse & getNonTimeKernelWarehouse() { return _non_time_kernels; }
-  const KernelWarehouse & getEigenKernelWarehouse() { return _eigen_kernels; }
-  const KernelWarehouse & getNonEigenKernelWarehouse() { return _non_eigen_kernels; }
-  const MooseObjectWarehouse<DGKernel> & getDGKernelWarehouse() { return _dg_kernels; }
-  const MooseObjectWarehouse<InterfaceKernel> & getInterfaceKernelWarehouse()
+  const KernelWarehouse & getKernelWarehouse() const { return _kernels; }
+  const KernelWarehouse & getTimeKernelWarehouse() const { return _time_kernels; }
+  const KernelWarehouse & getNonTimeKernelWarehouse() const { return _non_time_kernels; }
+  const KernelWarehouse & getEigenKernelWarehouse() const { return _eigen_kernels; }
+  const KernelWarehouse & getNonEigenKernelWarehouse() const { return _non_eigen_kernels; }
+  const MooseObjectWarehouse<DGKernel> & getDGKernelWarehouse() const { return _dg_kernels; }
+  const MooseObjectWarehouse<InterfaceKernel> & getInterfaceKernelWarehouse() const
   {
     return _interface_kernels;
   }
-  const MooseObjectWarehouse<DiracKernel> & getDiracKernelWarehouse() { return _dirac_kernels; }
-  const MooseObjectWarehouse<NodalKernel> & getNodalKernelWarehouse(THREAD_ID tid);
-  const MooseObjectWarehouse<IntegratedBCBase> & getIntegratedBCWarehouse()
+  const MooseObjectWarehouse<DiracKernel> & getDiracKernelWarehouse() const
+  {
+    return _dirac_kernels;
+  }
+  const MooseObjectWarehouse<IntegratedBCBase> & getIntegratedBCWarehouse() const
   {
     return _integrated_bcs;
   }
-  const MooseObjectWarehouse<ElementDamper> & getElementDamperWarehouse()
+  const MooseObjectWarehouse<ElementDamper> & getElementDamperWarehouse() const
   {
     return _element_dampers;
   }
-  const MooseObjectWarehouse<NodalDamper> & getNodalDamperWarehouse() { return _nodal_dampers; }
-  const ConstraintWarehouse & getConstraintWarehouse() { return _constraints; };
+  const MooseObjectWarehouse<NodalDamper> & getNodalDamperWarehouse() const
+  {
+    return _nodal_dampers;
+  }
+  const ConstraintWarehouse & getConstraintWarehouse() const { return _constraints; };
   //@}
 
   /**
