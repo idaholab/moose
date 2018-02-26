@@ -10,11 +10,11 @@ template <>
 InputParameters
 validParams<SolidWall>()
 {
-  InputParameters params = validParams<PipeBoundary>();
+  InputParameters params = validParams<FlowBoundary>();
   return params;
 }
 
-SolidWall::SolidWall(const InputParameters & params) : PipeBoundary(params) {}
+SolidWall::SolidWall(const InputParameters & params) : FlowBoundary(params) {}
 
 void
 SolidWall::addMooseObjects1Phase()
