@@ -337,6 +337,14 @@ protected:
    */
   void logModelNotImplementedError(const RELAP7::FlowModelID & model) const;
 
+  /**
+   * Logs an error for the spatial discretization type not being implemented for the component
+   *
+   * @param[in] spatial_discretization   spatial discretization type
+   */
+  void logSpatialDiscretizationNotImplementedError(
+      const FlowModel::ESpatialDiscretizationType & spatial_discretization) const;
+
   /// Unique ID of this component
   unsigned int _id;
   /// Pointer to a parent component (used in composed components)

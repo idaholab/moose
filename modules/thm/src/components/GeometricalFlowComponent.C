@@ -10,12 +10,17 @@ validParams<GeometricalFlowComponent>()
   params.addClassDescription("Base class for geometrical components that have fluid flow");
 
   params.addRequiredParam<UserObjectName>("fp", "Name of fluid properties user object");
+  params.addParam<MooseEnum>("slope_limiter",
+                             FlowModel::getSlopeLimiterType("None"),
+                             "Slope limiter type for rDG spatial discretization");
 
   return params;
 }
 
 GeometricalFlowComponent::GeometricalFlowComponent(const InputParameters & parameters)
-  : GeometricalComponent(parameters), _fp_name(getParam<UserObjectName>("fp"))
+  : GeometricalComponent(parameters),
+    _fp_name(getParam<UserObjectName>("fp")),
+    _slope_limiter(getEnumParam<FlowModel::ESlopeLimiterType>("slope_limiter"))
 {
 }
 

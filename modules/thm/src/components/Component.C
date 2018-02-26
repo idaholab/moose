@@ -250,3 +250,17 @@ Component::logModelNotImplementedError(const RELAP7::FlowModelID & model) const
   else
     logError("This component is not implemented for model type '", model, "'");
 }
+
+void
+Component::logSpatialDiscretizationNotImplementedError(
+    const FlowModel::ESpatialDiscretizationType & spatial_discretization) const
+{
+  if (spatial_discretization == FlowModel::CG)
+    logError("This component is not implemented for CG spatial discretization");
+  else if (spatial_discretization == FlowModel::rDG)
+    logError("This component is not implemented for rDG spatial discretization");
+  else
+    logError("This component is not implemented for spatial discretization type '",
+             spatial_discretization,
+             "'");
+}

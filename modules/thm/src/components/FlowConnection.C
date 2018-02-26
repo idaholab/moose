@@ -63,6 +63,7 @@ FlowConnection::init()
 
   std::vector<UserObjectName> fp_names;
   std::vector<RELAP7::FlowModelID> flow_model_ids;
+  std::vector<FlowModel::ESpatialDiscretizationType> spatial_discretizations;
   for (const auto & connection : _connections)
   {
     const std::string comp_name = connection._geometrical_component_name;
@@ -75,6 +76,7 @@ FlowConnection::init()
 
     fp_names.push_back(comp.getFluidPropertiesName());
     flow_model_ids.push_back(comp.getFlowModelID());
+    spatial_discretizations.push_back(comp.getSpatialDiscretizationType());
   }
 
   checkAllConnectionsHaveSame<UserObjectName>(fp_names, "fluid properties object");
@@ -82,6 +84,10 @@ FlowConnection::init()
 
   checkAllConnectionsHaveSame<RELAP7::FlowModelID>(flow_model_ids, "flow model ID");
   _flow_model_id = flow_model_ids[0];
+
+  checkAllConnectionsHaveSame<FlowModel::ESpatialDiscretizationType>(spatial_discretizations,
+                                                                     "spatial discretization");
+  _spatial_discretization = spatial_discretizations[0];
 }
 
 void

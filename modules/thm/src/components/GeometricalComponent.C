@@ -18,6 +18,9 @@ validParams<GeometricalComponent>()
   params.addRequiredParam<std::vector<unsigned int>>(
       "n_elems", "The number of elements in each subsection along the main axis");
   params.addParam<bool>("2nd_order_mesh", false, "Use 2nd order elements in the mesh");
+  params.addRequiredParam<MooseEnum>("spatial_discretization",
+                                     FlowModel::getSpatialDiscretizationMooseEnum("CG"),
+                                     "Spatial discretization");
 
   return params;
 }
@@ -33,6 +36,8 @@ GeometricalComponent::GeometricalComponent(const InputParameters & parameters)
     _n_elems(getParam<std::vector<unsigned int>>("n_elems")),
     _n_elem(std::accumulate(_n_elems.begin(), _n_elems.end(), 0)),
     _2nd_order_mesh(getParam<bool>("2nd_order_mesh")),
+    _spatial_discretization(
+        getEnumParam<FlowModel::ESpatialDiscretizationType>("spatial_discretization")),
     _n_nodes(computeNumberOfNodes(_n_elem)),
     _n_sections(_lengths.size()),
     _fe_type(_2nd_order_mesh ? FEType(SECOND, LAGRANGE) : FEType(FIRST, LAGRANGE)),

@@ -153,6 +153,8 @@ protected:
   RELAP7::FlowModelID _flow_model_id;
   /// The name of the fluid property user object
   UserObjectName _fp_name;
+  /// Spatial discretization
+  FlowModel::ESpatialDiscretizationType _spatial_discretization;
 
 private:
   /**

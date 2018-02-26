@@ -61,6 +61,9 @@ protected:
   /// Name of fluid properties user object
   const UserObjectName & _fp_name;
 
+  /// Slope limiter type for rDG
+  const FlowModel::ESlopeLimiterType _slope_limiter;
+
   /// Flow model type
   RELAP7::FlowModelID _model_id;
 };

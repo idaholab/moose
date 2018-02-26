@@ -64,6 +64,14 @@ public:
    */
   const FEType & feType() const { return _fe_type; }
 
+  /**
+   * Gets the spatial discretization type for this component
+   */
+  const FlowModel::ESpatialDiscretizationType & getSpatialDiscretizationType() const
+  {
+    return _spatial_discretization;
+  }
+
 protected:
   virtual void check() override;
   virtual void setupMesh() override;
@@ -110,6 +118,9 @@ protected:
 
   /// True if simulation is using a second order mesh
   const bool _2nd_order_mesh;
+
+  /// Spatial discretization
+  const FlowModel::ESpatialDiscretizationType _spatial_discretization;
 
   /// Number of nodes along the main axis
   const unsigned int _n_nodes;
