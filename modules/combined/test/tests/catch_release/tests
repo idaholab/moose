@@ -4,6 +4,10 @@
     input = 'catch_release.i'
     exodiff = 'catch_release_out.e'
     custom_cmp = 'catch_release.exodiff'
-    petsc_version = '>=3.1'
+    # This test fails with a negative Jacobian for older versions of
+    # PETSc, possibly due to the changes in 3061bbd5d. It had already
+    # been restricted for many years to PETSc >= 3.1, most likely due
+    # to numerical instability.
+    petsc_version = '>=3.5.0'
   [../]
 []
