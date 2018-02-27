@@ -48,9 +48,8 @@
     type = 'Exodiff'
     input = 'gravity_rz_quad8.i'
     exodiff = 'gravity_rz_quad8_out.e'
-    abs_zero = 1e-07
-    use_old_floor = True
     prereq = 'rz_quad8_sm'
+    custom_cmp = gravity_rz_quad8.cmp
   [../]
   [./rz_quad4]
     type = 'Exodiff'

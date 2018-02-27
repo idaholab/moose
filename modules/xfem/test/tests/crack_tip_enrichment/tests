@@ -5,6 +5,7 @@
     exodiff = 'edge_crack_2d_out.e'
     map = false
     unique_id = true
+    superlu = true
   [../]
   [./crack_tip_enrichment_penny_crack_3d]
     type = Exodiff
@@ -13,5 +14,6 @@
     map = false
     unique_id = true
     heavy = true
+    superlu = true
   [../]
 []

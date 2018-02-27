@@ -97,5 +97,7 @@
     type = 'Exodiff'
     input = 'supg_pspg_adv_dominated_mms.i'
     exodiff = 'supg_pspg_adv_dominated_mms_exodus.e'
+    # This problem uses SuperLU.
+    superlu = true
   [../]
 []

@@ -23,5 +23,7 @@
     exodiff = '2d_advection_error_testing_exodus.e'
     input = '2d_advection_error_testing.i'
     allow_test_objects = true
+    # This problem uses SuperLU.
+    superlu = true
   [../]
 []

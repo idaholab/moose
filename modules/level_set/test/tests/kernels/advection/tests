@@ -3,5 +3,7 @@
     type = CSVDiff
     input = advection_mms.i
     csvdiff = advection_mms_out.csv
+    # This problem uses SuperLU.
+    superlu = true
   [../]
 []

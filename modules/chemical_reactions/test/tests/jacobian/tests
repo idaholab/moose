@@ -38,8 +38,8 @@
   [./coupled_equilsub2]
     type = PetscJacobianTester
     input = coupled_equilsub2.i
-    ratio_tol = 1e-7
-    difference_tol = 1e-6
+    ratio_tol = 1e-6
+    difference_tol = 1e-5
   [../]
   [./2species]
     type = PetscJacobianTester
@@ -51,12 +51,12 @@
     type = PetscJacobianTester
     input = 2species_equilibrium.i
     ratio_tol = 1e-7
-    difference_tol = 5e-7
+    difference_tol = 1e-6
   [../]
   [./2species_equilibrium_with_density]
     type = PetscJacobianTester
     input = 2species_equilibrium_with_density.i
     ratio_tol = 1e-7
-    difference_tol = 5e-7
+    difference_tol = 1e-6
   [../]
 []

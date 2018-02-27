@@ -4,6 +4,7 @@
     input = 'sliding_update.i'
     exodiff = 'sliding_update_out.e'
     abs_zero = 1e-7
+    superlu = true
   [../]
   [./error_test]
     type = RunException

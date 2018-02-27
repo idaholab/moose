@@ -42,6 +42,8 @@
     csvdiff = 'grain_tracker_remapping_test_out.csv'
     method = '!DBG' # slow test
     valgrind = 'HEAVY'
+    # This test uses a coloring algorithm that requires PETSc >= 3.5.0.
+    petsc_version = '>=3.5.0'
   [../]
 
   [./remapping_with_reserve]
@@ -75,6 +77,8 @@
     max_time = 500
     method = '!DBG' # slow test
     valgrind ='HEAVY'
+    # This test uses a coloring algorithm that requires PETSc >= 3.5.0.
+    petsc_version = '>=3.5.0'
   [../]
 
   ###################################################

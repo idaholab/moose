@@ -175,12 +175,16 @@
     type = Exodiff
     input = 'polycrystalcircles_fromfile.i'
     exodiff = 'polycrystalcircles_fromfile_out.e'
+    # This test uses a coloring algorithm that requires PETSc >= 3.5.0.
+    petsc_version = '>=3.5.0'
   [../]
 
   [./PolycrystalCircles_FromVector]
     type = Exodiff
     input = 'polycrystalcircles_fromvector.i'
     exodiff = 'polycrystalcircles_fromvector_out.e'
+    # This test uses a coloring algorithm that requires PETSc >= 3.5.0.
+    petsc_version = '>=3.5.0'
   [../]
 
   [./SmoothCirclesFromFile]
