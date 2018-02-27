@@ -22,8 +22,9 @@
   [../]
 
   [./line_sample_error]
-    type = RunException
+    type = RunApp
     command = line_sample_error.py
-    expect_err = "Unable to locate the variable, invalid_name, in the supplied source data."
+    expect_out = "Unable to locate the variable, invalid_name, in the supplied source data."
+    errors = "zzzzzzz" # Supress default error checking
   [../]
 []
