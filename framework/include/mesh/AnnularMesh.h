@@ -24,7 +24,7 @@ class AnnularMesh : public MooseMesh
 {
 public:
   AnnularMesh(const InputParameters & parameters);
-  AnnularMesh(const AnnularMesh & other_mesh) = default;
+  AnnularMesh(const AnnularMesh & /* other_mesh */) = default;
 
   // No copy
   AnnularMesh & operator=(const AnnularMesh & other_mesh) = delete;
