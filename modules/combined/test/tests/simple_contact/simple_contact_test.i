@@ -2,6 +2,10 @@
 
 [Mesh]
   file = contact.e
+  # PETSc < 3.5.0 requires the iteration patch_update_strategy to
+  # avoid PenetrationLocator warnings, which are currently treated as
+  # errors by the TestHarness.
+  patch_update_strategy = 'iteration'
 []
 
 [GlobalParams]
