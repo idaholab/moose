@@ -7,6 +7,8 @@
 #include <iterator>
 #include <memory>
 
+#include <iostream>
+
 #include "parse.h"
 
 // the EOF macro wreaks havok on our TokType enum which has an EOF member. So undefine it and the
@@ -17,7 +19,16 @@
 namespace hit
 {
 
-const std::string indentString = "  ";
+// returns the type of quoting used on string s (i.e. " or ') or an empty string otherwise.
+std::string
+quoteChar(const std::string & s)
+{
+  if (s[0] == '\'')
+    return "'";
+  else if (s[0] == '"')
+    return "\"";
+  return "";
+}
 
 // split breaks input into a vector treating whitespace as a delimiter.  Consecutive whitespace
 // characters are treated as a single delimiter.
@@ -248,14 +259,14 @@ Node::children(NodeType t)
 }
 
 std::string
-Node::render(int indent)
+Node::render(int indent, const std::string & indent_text, int maxlen)
 {
   if (_type == NodeType::Root)
     indent = -1;
 
   std::string s;
   for (auto child : _children)
-    s += child->render(indent + 1) + "\n";
+    s += child->render(indent + 1, indent_text, maxlen) + "\n";
   return s;
 }
 
@@ -350,11 +361,11 @@ Comment::Comment(const std::string & text, bool is_inline)
 }
 
 std::string
-Comment::render(int indent)
+Comment::render(int indent, const std::string & indent_text, int /*maxlen*/)
 {
   if (_isinline)
     return " " + _text;
-  return "\n" + strRepeat(indentString, indent) + _text;
+  return "\n" + strRepeat(indent_text, indent) + _text;
 }
 
 Node *
@@ -372,24 +383,24 @@ Section::path()
 }
 
 std::string
-Section::render(int indent)
+Section::render(int indent, const std::string & indent_text, int maxlen)
 {
   std::string s;
   if (path() != "" && tokens().size() > 4)
-    s = "\n" + strRepeat(indentString, indent) + "[" + tokens()[1].val + "]";
+    s = "\n" + strRepeat(indent_text, indent) + "[" + tokens()[1].val + "]";
   else if (path() != "")
-    s = "\n" + strRepeat(indentString, indent) + "[" + _path + "]";
+    s = "\n" + strRepeat(indent_text, indent) + "[" + _path + "]";
 
   for (auto child : children())
     if (path() == "")
-      s += child->render(indent);
+      s += child->render(indent, indent_text, maxlen);
     else
-      s += child->render(indent + 1);
+      s += child->render(indent + 1, indent_text, maxlen);
 
   if (path() != "" && tokens().size() > 4)
-    s += "\n" + strRepeat(indentString, indent) + "[" + tokens()[4].val + "]";
+    s += "\n" + strRepeat(indent_text, indent) + "[" + tokens()[4].val + "]";
   else if (path() != "")
-    s += "\n" + strRepeat(indentString, indent) + "[]";
+    s += "\n" + strRepeat(indent_text, indent) + "[]";
 
   if (indent == 0 &&
       ((root() == this && s[0] == '\n') || (parent() && parent()->children()[0] == this)))
@@ -418,11 +429,62 @@ Field::path()
 }
 
 std::string
-Field::render(int indent)
+Field::render(int indent, const std::string & indent_text, int maxlen)
 {
-  std::string s = "\n" + strRepeat(indentString, indent) + _field + " = " + _val;
+  std::string s = "\n" + strRepeat(indent_text, indent) + _field + " = ";
+  size_t prefix_len = s.size() - 1;
+  auto quote = quoteChar(_val);
+  int max = maxlen - prefix_len - 1;
+
+  // special rendering logic for quoted strings that go over maxlen:
+  if (_kind == Kind::String && quote != "" && max > 0)
+  {
+    // strip outer quotes - will will add back our own for each line
+    std::string unquoted = _val.substr(1, _val.size() - 2);
+
+    // iterate over the string in chunks of size "max"
+    size_t pos = 0;
+    while (pos + max < unquoted.size())
+    {
+      // to avoid splitting words, walk backwards from the "max" sized chunk boundary to find a
+      // space character
+      size_t boundary = pos + max;
+      while (boundary > pos && !charIn(unquoted[boundary], " \t"))
+        boundary--;
+
+      // if we didn't find a space, just fall back to the original max sized chunk boundary and
+      // split the word anyway
+      if (boundary == pos)
+        boundary = pos + max;
+
+      // shift the boundary to after the space character (instead of before it) unless that would
+      // make the index beyond the string length.
+      boundary = std::min(boundary + 1, unquoted.size());
+
+      // add the leading indentation and newline - skip it for the first first chunk of a string
+      // because it should go on the same line as the "=",
+      if (pos > 0)
+        s += "\n" + strRepeat(" ", prefix_len);
+
+      // add the quoted chunk to our string text
+      s += quote + unquoted.substr(pos, boundary - pos) + quote;
+      pos = boundary;
+    }
+
+    // add any remaining partial chunk of the string value
+    if (pos < unquoted.size())
+    {
+      // again only add leading newline and indentation for greater chunks after the first.
+      if (pos > 0)
+        s += "\n" + strRepeat(" ", prefix_len);
+      s += quote + unquoted.substr(pos, std::string::npos) + quote;
+    }
+  }
+  else
+    s += _val;
+
   for (auto child : children())
-    s += child->render(indent + 1);
+    s += child->render(indent + 1, indent_text, maxlen);
   return s;
 }
 
@@ -560,17 +622,13 @@ Field::floatVal()
     throw Error("cannot convert '" + _val + "' to float");
   }
 }
+
 std::string
 Field::strVal()
 {
   std::string s = _val;
 
-  std::string quote = "";
-  if (_val[0] == '\'')
-    quote = "'";
-  else if (_val[0] == '"')
-    quote = "\"";
-
+  auto quote = quoteChar(_val);
   if (quote != "")
   {
     s = _val.substr(1, _val.size() - 2);
@@ -775,22 +833,23 @@ parseField(Parser * p, Node * n)
     else
     {
       std::string strval;
-      std::string quote;
+      std::string quote = quoteChar(valtok.val);
       while (true)
       {
         if (valtok.type == TokType::String)
         {
           auto s = valtok.val;
-          if (valtok.val[0] == '"' || valtok.val[0] == '\'')
-          {
-            quote = std::string(1, valtok.val[0]);
+          if (quote != "")
             s = s.substr(1, s.size() - 2);
-          }
           strval += s;
         }
 
         if (p->peek().type != TokType::BlankLine && p->peek().type != TokType::String)
+        {
+          if (valtok.type == TokType::BlankLine)
+            p->backup();
           break;
+        }
         valtok = p->next();
       }
       strval = quote + strval + quote;

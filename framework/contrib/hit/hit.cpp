@@ -712,7 +712,7 @@ struct __pyx_opt_args_3hit_NewComment {
   PyObject *is_inline;
 };
 
-/* "hit.pyx":198
+/* "hit.pyx":199
  * # constructors are python objects.  So the Node constructor does nothing and this function
  * # actually sets the internal cnode member pointer.
  * cdef _initpynode(chit.Node* n, own=False):             # <<<<<<<<<<<<<<
@@ -1082,6 +1082,7 @@ int __pyx_module_is_main_hit = 0;
 static PyObject *__pyx_builtin_object;
 static PyObject *__pyx_builtin_RuntimeError;
 static const char __pyx_k__5[] = "";
+static const char __pyx_k__6[] = "  ";
 static const char __pyx_k_All[] = "All";
 static const char __pyx_k_Int[] = "Int";
 static const char __pyx_k_doc[] = "__doc__";
@@ -1112,6 +1113,7 @@ static const char __pyx_k_utf_8[] = "utf-8";
 static const char __pyx_k_String[] = "String";
 static const char __pyx_k_encode[] = "encode";
 static const char __pyx_k_indent[] = "indent";
+static const char __pyx_k_maxlen[] = "maxlen";
 static const char __pyx_k_module[] = "__module__";
 static const char __pyx_k_object[] = "object";
 static const char __pyx_k_render[] = "render";
@@ -1133,6 +1135,7 @@ static const char __pyx_k_metaclass[] = "__metaclass__";
 static const char __pyx_k_node_type[] = "node_type";
 static const char __pyx_k_NewComment[] = "NewComment";
 static const char __pyx_k_NewSection[] = "NewSection";
+static const char __pyx_k_indent_text[] = "indent_text";
 static const char __pyx_k_RuntimeError[] = "RuntimeError";
 static const char __pyx_k_unknown_NodeType[] = "unknown NodeType ";
 static const char __pyx_k_cline_in_traceback[] = "cline_in_traceback";
@@ -1156,6 +1159,7 @@ static PyObject *__pyx_n_s_Section;
 static PyObject *__pyx_n_s_String;
 static PyObject *__pyx_n_s_Unknown;
 static PyObject *__pyx_kp_s__5;
+static PyObject *__pyx_kp_s__6;
 static PyObject *__pyx_n_s_children;
 static PyObject *__pyx_n_s_cline_in_traceback;
 static PyObject *__pyx_n_s_clone;
@@ -1167,10 +1171,12 @@ static PyObject *__pyx_n_s_fullpath;
 static PyObject *__pyx_n_s_hit;
 static PyObject *__pyx_kp_s_hit_pyx;
 static PyObject *__pyx_n_s_indent;
+static PyObject *__pyx_n_s_indent_text;
 static PyObject *__pyx_n_s_input;
 static PyObject *__pyx_n_s_is_inline;
 static PyObject *__pyx_n_s_kind;
 static PyObject *__pyx_n_s_main;
+static PyObject *__pyx_n_s_maxlen;
 static PyObject *__pyx_n_s_metaclass;
 static PyObject *__pyx_n_s_module;
 static PyObject *__pyx_n_s_name;
@@ -1205,7 +1211,7 @@ static void __pyx_pf_3hit_4Node_8__dealloc__(struct __pyx_obj_3hit_Node *__pyx_v
 static PyObject *__pyx_pf_3hit_4Node_10__deepcopy__(struct __pyx_obj_3hit_Node *__pyx_v_self, CYTHON_UNUSED PyObject *__pyx_v_memodict); /* proto */
 static PyObject *__pyx_pf_3hit_4Node_12__reduce__(struct __pyx_obj_3hit_Node *__pyx_v_self); /* proto */
 static PyObject *__pyx_pf_3hit_4Node_14__repr__(struct __pyx_obj_3hit_Node *__pyx_v_self); /* proto */
-static PyObject *__pyx_pf_3hit_4Node_16render(struct __pyx_obj_3hit_Node *__pyx_v_self, PyObject *__pyx_v_indent); /* proto */
+static PyObject *__pyx_pf_3hit_4Node_16render(struct __pyx_obj_3hit_Node *__pyx_v_self, PyObject *__pyx_v_indent, PyObject *__pyx_v_indent_text, PyObject *__pyx_v_maxlen); /* proto */
 static PyObject *__pyx_pf_3hit_4Node_18line(struct __pyx_obj_3hit_Node *__pyx_v_self); /* proto */
 static PyObject *__pyx_pf_3hit_4Node_20path(struct __pyx_obj_3hit_Node *__pyx_v_self); /* proto */
 static PyObject *__pyx_pf_3hit_4Node_22fullpath(struct __pyx_obj_3hit_Node *__pyx_v_self); /* proto */
@@ -1225,16 +1231,17 @@ static PyObject *__pyx_pf_3hit_10explode(CYTHON_UNUSED PyObject *__pyx_self, str
 static PyObject *__pyx_pf_3hit_12merge(CYTHON_UNUSED PyObject *__pyx_self, struct __pyx_obj_3hit_Node *__pyx_v_src, struct __pyx_obj_3hit_Node *__pyx_v_dst); /* proto */
 static PyObject *__pyx_tp_new_3hit_Node(PyTypeObject *t, PyObject *a, PyObject *k); /*proto*/
 static PyObject *__pyx_int_0;
-static PyObject *__pyx_k__8;
-static PyObject *__pyx_k__9;
+static PyObject *__pyx_k__10;
+static PyObject *__pyx_k__11;
 static PyObject *__pyx_tuple_;
 static PyObject *__pyx_tuple__2;
 static PyObject *__pyx_tuple__3;
 static PyObject *__pyx_tuple__4;
-static PyObject *__pyx_tuple__6;
 static PyObject *__pyx_tuple__7;
-static PyObject *__pyx_tuple__10;
-static PyObject *__pyx_codeobj__11;
+static PyObject *__pyx_tuple__8;
+static PyObject *__pyx_tuple__9;
+static PyObject *__pyx_tuple__12;
+static PyObject *__pyx_codeobj__13;
 
 /* "hit.pyx":14
  *     Blank = 'Blank'
@@ -2785,7 +2792,7 @@ static PyObject *__pyx_pf_3hit_4Node_14__repr__(struct __pyx_obj_3hit_Node *__py
  *     def __repr__(self):
  *         return self.render()             # <<<<<<<<<<<<<<
  * 
- *     def render(self, indent=0):
+ *     def render(self, indent=0, indent_text='  ', maxlen=0):
  */
   __Pyx_XDECREF(__pyx_r);
   __pyx_t_2 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_self), __pyx_n_s_render); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 99, __pyx_L1_error)
@@ -2836,26 +2843,34 @@ static PyObject *__pyx_pf_3hit_4Node_14__repr__(struct __pyx_obj_3hit_Node *__py
 /* "hit.pyx":101
  *         return self.render()
  * 
- *     def render(self, indent=0):             # <<<<<<<<<<<<<<
- *         return self._cnode.render(indent)
- * 
+ *     def render(self, indent=0, indent_text='  ', maxlen=0):             # <<<<<<<<<<<<<<
+ *         cindent = <string> indent_text.encode('utf-8')
+ *         return self._cnode.render(indent, cindent, maxlen)
  */
 
 /* Python wrapper */
 static PyObject *__pyx_pw_3hit_4Node_17render(PyObject *__pyx_v_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
 static PyObject *__pyx_pw_3hit_4Node_17render(PyObject *__pyx_v_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
   PyObject *__pyx_v_indent = 0;
+  PyObject *__pyx_v_indent_text = 0;
+  PyObject *__pyx_v_maxlen = 0;
   PyObject *__pyx_r = 0;
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("render (wrapper)", 0);
   {
-    static PyObject **__pyx_pyargnames[] = {&__pyx_n_s_indent,0};
-    PyObject* values[1] = {0};
+    static PyObject **__pyx_pyargnames[] = {&__pyx_n_s_indent,&__pyx_n_s_indent_text,&__pyx_n_s_maxlen,0};
+    PyObject* values[3] = {0,0,0};
     values[0] = ((PyObject *)__pyx_int_0);
+    values[1] = ((PyObject *)__pyx_kp_s__6);
+    values[2] = ((PyObject *)__pyx_int_0);
     if (unlikely(__pyx_kwds)) {
       Py_ssize_t kw_args;
       const Py_ssize_t pos_args = PyTuple_GET_SIZE(__pyx_args);
       switch (pos_args) {
+        case  3: values[2] = PyTuple_GET_ITEM(__pyx_args, 2);
+        CYTHON_FALLTHROUGH;
+        case  2: values[1] = PyTuple_GET_ITEM(__pyx_args, 1);
+        CYTHON_FALLTHROUGH;
         case  1: values[0] = PyTuple_GET_ITEM(__pyx_args, 0);
         CYTHON_FALLTHROUGH;
         case  0: break;
@@ -2868,12 +2883,28 @@ static PyObject *__pyx_pw_3hit_4Node_17render(PyObject *__pyx_v_self, PyObject *
           PyObject* value = PyDict_GetItem(__pyx_kwds, __pyx_n_s_indent);
           if (value) { values[0] = value; kw_args--; }
         }
+        CYTHON_FALLTHROUGH;
+        case  1:
+        if (kw_args > 0) {
+          PyObject* value = PyDict_GetItem(__pyx_kwds, __pyx_n_s_indent_text);
+          if (value) { values[1] = value; kw_args--; }
+        }
+        CYTHON_FALLTHROUGH;
+        case  2:
+        if (kw_args > 0) {
+          PyObject* value = PyDict_GetItem(__pyx_kwds, __pyx_n_s_maxlen);
+          if (value) { values[2] = value; kw_args--; }
+        }
       }
       if (unlikely(kw_args > 0)) {
         if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "render") < 0)) __PYX_ERR(0, 101, __pyx_L3_error)
       }
     } else {
       switch (PyTuple_GET_SIZE(__pyx_args)) {
+        case  3: values[2] = PyTuple_GET_ITEM(__pyx_args, 2);
+        CYTHON_FALLTHROUGH;
+        case  2: values[1] = PyTuple_GET_ITEM(__pyx_args, 1);
+        CYTHON_FALLTHROUGH;
         case  1: values[0] = PyTuple_GET_ITEM(__pyx_args, 0);
         CYTHON_FALLTHROUGH;
         case  0: break;
@@ -2881,39 +2912,62 @@ static PyObject *__pyx_pw_3hit_4Node_17render(PyObject *__pyx_v_self, PyObject *
       }
     }
     __pyx_v_indent = values[0];
+    __pyx_v_indent_text = values[1];
+    __pyx_v_maxlen = values[2];
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("render", 0, 0, 1, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 101, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("render", 0, 0, 3, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 101, __pyx_L3_error)
   __pyx_L3_error:;
   __Pyx_AddTraceback("hit.Node.render", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
-  __pyx_r = __pyx_pf_3hit_4Node_16render(((struct __pyx_obj_3hit_Node *)__pyx_v_self), __pyx_v_indent);
+  __pyx_r = __pyx_pf_3hit_4Node_16render(((struct __pyx_obj_3hit_Node *)__pyx_v_self), __pyx_v_indent, __pyx_v_indent_text, __pyx_v_maxlen);
 
   /* function exit code */
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_3hit_4Node_16render(struct __pyx_obj_3hit_Node *__pyx_v_self, PyObject *__pyx_v_indent) {
+static PyObject *__pyx_pf_3hit_4Node_16render(struct __pyx_obj_3hit_Node *__pyx_v_self, PyObject *__pyx_v_indent, PyObject *__pyx_v_indent_text, PyObject *__pyx_v_maxlen) {
+  std::string __pyx_v_cindent;
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
-  int __pyx_t_1;
+  PyObject *__pyx_t_1 = NULL;
   PyObject *__pyx_t_2 = NULL;
+  std::string __pyx_t_3;
+  int __pyx_t_4;
+  int __pyx_t_5;
   __Pyx_RefNannySetupContext("render", 0);
 
   /* "hit.pyx":102
  * 
- *     def render(self, indent=0):
- *         return self._cnode.render(indent)             # <<<<<<<<<<<<<<
+ *     def render(self, indent=0, indent_text='  ', maxlen=0):
+ *         cindent = <string> indent_text.encode('utf-8')             # <<<<<<<<<<<<<<
+ *         return self._cnode.render(indent, cindent, maxlen)
+ * 
+ */
+  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_v_indent_text, __pyx_n_s_encode); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 102, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_1);
+  __pyx_t_2 = __Pyx_PyObject_Call(__pyx_t_1, __pyx_tuple__7, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 102, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_2);
+  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  __pyx_t_3 = __pyx_convert_string_from_py_std__in_string(__pyx_t_2); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 102, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+  __pyx_v_cindent = ((std::string)__pyx_t_3);
+
+  /* "hit.pyx":103
+ *     def render(self, indent=0, indent_text='  ', maxlen=0):
+ *         cindent = <string> indent_text.encode('utf-8')
+ *         return self._cnode.render(indent, cindent, maxlen)             # <<<<<<<<<<<<<<
  * 
  *     def line(self):
  */
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = __Pyx_PyInt_As_int(__pyx_v_indent); if (unlikely((__pyx_t_1 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 102, __pyx_L1_error)
-  __pyx_t_2 = __pyx_convert_PyBytes_string_to_py_std__in_string(__pyx_v_self->_cnode->render(__pyx_t_1)); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 102, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyInt_As_int(__pyx_v_indent); if (unlikely((__pyx_t_4 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 103, __pyx_L1_error)
+  __pyx_t_5 = __Pyx_PyInt_As_int(__pyx_v_maxlen); if (unlikely((__pyx_t_5 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 103, __pyx_L1_error)
+  __pyx_t_2 = __pyx_convert_PyBytes_string_to_py_std__in_string(__pyx_v_self->_cnode->render(__pyx_t_4, __pyx_v_cindent, __pyx_t_5)); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 103, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __pyx_r = __pyx_t_2;
   __pyx_t_2 = 0;
@@ -2922,13 +2976,14 @@ static PyObject *__pyx_pf_3hit_4Node_16render(struct __pyx_obj_3hit_Node *__pyx_
   /* "hit.pyx":101
  *         return self.render()
  * 
- *     def render(self, indent=0):             # <<<<<<<<<<<<<<
- *         return self._cnode.render(indent)
- * 
+ *     def render(self, indent=0, indent_text='  ', maxlen=0):             # <<<<<<<<<<<<<<
+ *         cindent = <string> indent_text.encode('utf-8')
+ *         return self._cnode.render(indent, cindent, maxlen)
  */
 
   /* function exit code */
   __pyx_L1_error:;
+  __Pyx_XDECREF(__pyx_t_1);
   __Pyx_XDECREF(__pyx_t_2);
   __Pyx_AddTraceback("hit.Node.render", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = NULL;
@@ -2938,8 +2993,8 @@ static PyObject *__pyx_pf_3hit_4Node_16render(struct __pyx_obj_3hit_Node *__pyx_
   return __pyx_r;
 }
 
-/* "hit.pyx":104
- *         return self._cnode.render(indent)
+/* "hit.pyx":105
+ *         return self._cnode.render(indent, cindent, maxlen)
  * 
  *     def line(self):             # <<<<<<<<<<<<<<
  *         return int(self._cnode.line())
@@ -2966,7 +3021,7 @@ static PyObject *__pyx_pf_3hit_4Node_18line(struct __pyx_obj_3hit_Node *__pyx_v_
   PyObject *__pyx_t_2 = NULL;
   __Pyx_RefNannySetupContext("line", 0);
 
-  /* "hit.pyx":105
+  /* "hit.pyx":106
  * 
  *     def line(self):
  *         return int(self._cnode.line())             # <<<<<<<<<<<<<<
@@ -2974,22 +3029,22 @@ static PyObject *__pyx_pf_3hit_4Node_18line(struct __pyx_obj_3hit_Node *__pyx_v_
  *     def path(self):
  */
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = __Pyx_PyInt_From_int(__pyx_v_self->_cnode->line()); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 105, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyInt_From_int(__pyx_v_self->_cnode->line()); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 106, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = PyTuple_New(1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 105, __pyx_L1_error)
+  __pyx_t_2 = PyTuple_New(1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 106, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_GIVEREF(__pyx_t_1);
   PyTuple_SET_ITEM(__pyx_t_2, 0, __pyx_t_1);
   __pyx_t_1 = 0;
-  __pyx_t_1 = __Pyx_PyObject_Call(((PyObject *)(&PyInt_Type)), __pyx_t_2, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 105, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_Call(((PyObject *)(&PyInt_Type)), __pyx_t_2, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 106, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __pyx_r = __pyx_t_1;
   __pyx_t_1 = 0;
   goto __pyx_L0;
 
-  /* "hit.pyx":104
- *         return self._cnode.render(indent)
+  /* "hit.pyx":105
+ *         return self._cnode.render(indent, cindent, maxlen)
  * 
  *     def line(self):             # <<<<<<<<<<<<<<
  *         return int(self._cnode.line())
@@ -3008,7 +3063,7 @@ static PyObject *__pyx_pf_3hit_4Node_18line(struct __pyx_obj_3hit_Node *__pyx_v_
   return __pyx_r;
 }
 
-/* "hit.pyx":107
+/* "hit.pyx":108
  *         return int(self._cnode.line())
  * 
  *     def path(self):             # <<<<<<<<<<<<<<
@@ -3036,7 +3091,7 @@ static PyObject *__pyx_pf_3hit_4Node_20path(struct __pyx_obj_3hit_Node *__pyx_v_
   PyObject *__pyx_t_2 = NULL;
   __Pyx_RefNannySetupContext("path", 0);
 
-  /* "hit.pyx":108
+  /* "hit.pyx":109
  * 
  *     def path(self):
  *         return str(self._cnode.path())             # <<<<<<<<<<<<<<
@@ -3044,21 +3099,21 @@ static PyObject *__pyx_pf_3hit_4Node_20path(struct __pyx_obj_3hit_Node *__pyx_v_
  *         return str(self._cnode.fullpath())
  */
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = __pyx_convert_PyBytes_string_to_py_std__in_string(__pyx_v_self->_cnode->path()); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 108, __pyx_L1_error)
+  __pyx_t_1 = __pyx_convert_PyBytes_string_to_py_std__in_string(__pyx_v_self->_cnode->path()); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 109, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = PyTuple_New(1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 108, __pyx_L1_error)
+  __pyx_t_2 = PyTuple_New(1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 109, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_GIVEREF(__pyx_t_1);
   PyTuple_SET_ITEM(__pyx_t_2, 0, __pyx_t_1);
   __pyx_t_1 = 0;
-  __pyx_t_1 = __Pyx_PyObject_Call(((PyObject *)(&PyString_Type)), __pyx_t_2, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 108, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_Call(((PyObject *)(&PyString_Type)), __pyx_t_2, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 109, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __pyx_r = __pyx_t_1;
   __pyx_t_1 = 0;
   goto __pyx_L0;
 
-  /* "hit.pyx":107
+  /* "hit.pyx":108
  *         return int(self._cnode.line())
  * 
  *     def path(self):             # <<<<<<<<<<<<<<
@@ -3078,7 +3133,7 @@ static PyObject *__pyx_pf_3hit_4Node_20path(struct __pyx_obj_3hit_Node *__pyx_v_
   return __pyx_r;
 }
 
-/* "hit.pyx":109
+/* "hit.pyx":110
  *     def path(self):
  *         return str(self._cnode.path())
  *     def fullpath(self):             # <<<<<<<<<<<<<<
@@ -3106,7 +3161,7 @@ static PyObject *__pyx_pf_3hit_4Node_22fullpath(struct __pyx_obj_3hit_Node *__py
   PyObject *__pyx_t_2 = NULL;
   __Pyx_RefNannySetupContext("fullpath", 0);
 
-  /* "hit.pyx":110
+  /* "hit.pyx":111
  *         return str(self._cnode.path())
  *     def fullpath(self):
  *         return str(self._cnode.fullpath())             # <<<<<<<<<<<<<<
@@ -3114,21 +3169,21 @@ static PyObject *__pyx_pf_3hit_4Node_22fullpath(struct __pyx_obj_3hit_Node *__py
  *         t = <int>self._cnode.type()
  */
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = __pyx_convert_PyBytes_string_to_py_std__in_string(__pyx_v_self->_cnode->fullpath()); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 110, __pyx_L1_error)
+  __pyx_t_1 = __pyx_convert_PyBytes_string_to_py_std__in_string(__pyx_v_self->_cnode->fullpath()); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 111, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = PyTuple_New(1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 110, __pyx_L1_error)
+  __pyx_t_2 = PyTuple_New(1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 111, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_GIVEREF(__pyx_t_1);
   PyTuple_SET_ITEM(__pyx_t_2, 0, __pyx_t_1);
   __pyx_t_1 = 0;
-  __pyx_t_1 = __Pyx_PyObject_Call(((PyObject *)(&PyString_Type)), __pyx_t_2, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 110, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_Call(((PyObject *)(&PyString_Type)), __pyx_t_2, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 111, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __pyx_r = __pyx_t_1;
   __pyx_t_1 = 0;
   goto __pyx_L0;
 
-  /* "hit.pyx":109
+  /* "hit.pyx":110
  *     def path(self):
  *         return str(self._cnode.path())
  *     def fullpath(self):             # <<<<<<<<<<<<<<
@@ -3148,7 +3203,7 @@ static PyObject *__pyx_pf_3hit_4Node_22fullpath(struct __pyx_obj_3hit_Node *__py
   return __pyx_r;
 }
 
-/* "hit.pyx":111
+/* "hit.pyx":112
  *     def fullpath(self):
  *         return str(self._cnode.fullpath())
  *     def type(self):             # <<<<<<<<<<<<<<
@@ -3178,7 +3233,7 @@ static PyObject *__pyx_pf_3hit_4Node_24type(struct __pyx_obj_3hit_Node *__pyx_v_
   PyObject *__pyx_t_3 = NULL;
   __Pyx_RefNannySetupContext("type", 0);
 
-  /* "hit.pyx":112
+  /* "hit.pyx":113
  *         return str(self._cnode.fullpath())
  *     def type(self):
  *         t = <int>self._cnode.type()             # <<<<<<<<<<<<<<
@@ -3187,7 +3242,7 @@ static PyObject *__pyx_pf_3hit_4Node_24type(struct __pyx_obj_3hit_Node *__pyx_v_
  */
   __pyx_v_t = ((int)__pyx_v_self->_cnode->type());
 
-  /* "hit.pyx":113
+  /* "hit.pyx":114
  *     def type(self):
  *         t = <int>self._cnode.type()
  *         if t == <int>chit.NTField:             # <<<<<<<<<<<<<<
@@ -3197,7 +3252,7 @@ static PyObject *__pyx_pf_3hit_4Node_24type(struct __pyx_obj_3hit_Node *__pyx_v_
   __pyx_t_1 = ((__pyx_v_t == ((int)hit::NodeType::Field)) != 0);
   if (__pyx_t_1) {
 
-    /* "hit.pyx":114
+    /* "hit.pyx":115
  *         t = <int>self._cnode.type()
  *         if t == <int>chit.NTField:
  *             return NodeType.Field             # <<<<<<<<<<<<<<
@@ -3205,16 +3260,16 @@ static PyObject *__pyx_pf_3hit_4Node_24type(struct __pyx_obj_3hit_Node *__pyx_v_
  *             return NodeType.Section
  */
     __Pyx_XDECREF(__pyx_r);
-    __pyx_t_2 = __Pyx_GetModuleGlobalName(__pyx_n_s_NodeType); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 114, __pyx_L1_error)
+    __pyx_t_2 = __Pyx_GetModuleGlobalName(__pyx_n_s_NodeType); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 115, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
-    __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_n_s_Field); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 114, __pyx_L1_error)
+    __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_n_s_Field); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 115, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
     __pyx_r = __pyx_t_3;
     __pyx_t_3 = 0;
     goto __pyx_L0;
 
-    /* "hit.pyx":113
+    /* "hit.pyx":114
  *     def type(self):
  *         t = <int>self._cnode.type()
  *         if t == <int>chit.NTField:             # <<<<<<<<<<<<<<
@@ -3223,7 +3278,7 @@ static PyObject *__pyx_pf_3hit_4Node_24type(struct __pyx_obj_3hit_Node *__pyx_v_
  */
   }
 
-  /* "hit.pyx":115
+  /* "hit.pyx":116
  *         if t == <int>chit.NTField:
  *             return NodeType.Field
  *         elif t == <int>chit.NTSection:             # <<<<<<<<<<<<<<
@@ -3233,7 +3288,7 @@ static PyObject *__pyx_pf_3hit_4Node_24type(struct __pyx_obj_3hit_Node *__pyx_v_
   __pyx_t_1 = ((__pyx_v_t == ((int)hit::NodeType::Section)) != 0);
   if (__pyx_t_1) {
 
-    /* "hit.pyx":116
+    /* "hit.pyx":117
  *             return NodeType.Field
  *         elif t == <int>chit.NTSection:
  *             return NodeType.Section             # <<<<<<<<<<<<<<
@@ -3241,16 +3296,16 @@ static PyObject *__pyx_pf_3hit_4Node_24type(struct __pyx_obj_3hit_Node *__pyx_v_
  *             return NodeType.Comment
  */
     __Pyx_XDECREF(__pyx_r);
-    __pyx_t_3 = __Pyx_GetModuleGlobalName(__pyx_n_s_NodeType); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 116, __pyx_L1_error)
+    __pyx_t_3 = __Pyx_GetModuleGlobalName(__pyx_n_s_NodeType); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 117, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
-    __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_3, __pyx_n_s_Section); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 116, __pyx_L1_error)
+    __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_3, __pyx_n_s_Section); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 117, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
     __pyx_r = __pyx_t_2;
     __pyx_t_2 = 0;
     goto __pyx_L0;
 
-    /* "hit.pyx":115
+    /* "hit.pyx":116
  *         if t == <int>chit.NTField:
  *             return NodeType.Field
  *         elif t == <int>chit.NTSection:             # <<<<<<<<<<<<<<
@@ -3259,7 +3314,7 @@ static PyObject *__pyx_pf_3hit_4Node_24type(struct __pyx_obj_3hit_Node *__pyx_v_
  */
   }
 
-  /* "hit.pyx":117
+  /* "hit.pyx":118
  *         elif t == <int>chit.NTSection:
  *             return NodeType.Section
  *         elif t == <int>chit.NTComment:             # <<<<<<<<<<<<<<
@@ -3269,7 +3324,7 @@ static PyObject *__pyx_pf_3hit_4Node_24type(struct __pyx_obj_3hit_Node *__pyx_v_
   __pyx_t_1 = ((__pyx_v_t == ((int)hit::NodeType::Comment)) != 0);
   if (__pyx_t_1) {
 
-    /* "hit.pyx":118
+    /* "hit.pyx":119
  *             return NodeType.Section
  *         elif t == <int>chit.NTComment:
  *             return NodeType.Comment             # <<<<<<<<<<<<<<
@@ -3277,16 +3332,16 @@ static PyObject *__pyx_pf_3hit_4Node_24type(struct __pyx_obj_3hit_Node *__pyx_v_
  *             return NodeType.Blank
  */
     __Pyx_XDECREF(__pyx_r);
-    __pyx_t_2 = __Pyx_GetModuleGlobalName(__pyx_n_s_NodeType); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 118, __pyx_L1_error)
+    __pyx_t_2 = __Pyx_GetModuleGlobalName(__pyx_n_s_NodeType); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 119, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
-    __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_n_s_Comment); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 118, __pyx_L1_error)
+    __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_n_s_Comment); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 119, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
     __pyx_r = __pyx_t_3;
     __pyx_t_3 = 0;
     goto __pyx_L0;
 
-    /* "hit.pyx":117
+    /* "hit.pyx":118
  *         elif t == <int>chit.NTSection:
  *             return NodeType.Section
  *         elif t == <int>chit.NTComment:             # <<<<<<<<<<<<<<
@@ -3295,7 +3350,7 @@ static PyObject *__pyx_pf_3hit_4Node_24type(struct __pyx_obj_3hit_Node *__pyx_v_
  */
   }
 
-  /* "hit.pyx":119
+  /* "hit.pyx":120
  *         elif t == <int>chit.NTComment:
  *             return NodeType.Comment
  *         elif t == <int>chit.NTBlank:             # <<<<<<<<<<<<<<
@@ -3305,7 +3360,7 @@ static PyObject *__pyx_pf_3hit_4Node_24type(struct __pyx_obj_3hit_Node *__pyx_v_
   __pyx_t_1 = ((__pyx_v_t == ((int)hit::NodeType::Blank)) != 0);
   if (__pyx_t_1) {
 
-    /* "hit.pyx":120
+    /* "hit.pyx":121
  *             return NodeType.Comment
  *         elif t == <int>chit.NTBlank:
  *             return NodeType.Blank             # <<<<<<<<<<<<<<
@@ -3313,16 +3368,16 @@ static PyObject *__pyx_pf_3hit_4Node_24type(struct __pyx_obj_3hit_Node *__pyx_v_
  *             return 'Unknown'
  */
     __Pyx_XDECREF(__pyx_r);
-    __pyx_t_3 = __Pyx_GetModuleGlobalName(__pyx_n_s_NodeType); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 120, __pyx_L1_error)
+    __pyx_t_3 = __Pyx_GetModuleGlobalName(__pyx_n_s_NodeType); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 121, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
-    __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_3, __pyx_n_s_Blank); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 120, __pyx_L1_error)
+    __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_3, __pyx_n_s_Blank); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 121, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
     __pyx_r = __pyx_t_2;
     __pyx_t_2 = 0;
     goto __pyx_L0;
 
-    /* "hit.pyx":119
+    /* "hit.pyx":120
  *         elif t == <int>chit.NTComment:
  *             return NodeType.Comment
  *         elif t == <int>chit.NTBlank:             # <<<<<<<<<<<<<<
@@ -3331,7 +3386,7 @@ static PyObject *__pyx_pf_3hit_4Node_24type(struct __pyx_obj_3hit_Node *__pyx_v_
  */
   }
 
-  /* "hit.pyx":122
+  /* "hit.pyx":123
  *             return NodeType.Blank
  *         else:
  *             return 'Unknown'             # <<<<<<<<<<<<<<
@@ -3345,7 +3400,7 @@ static PyObject *__pyx_pf_3hit_4Node_24type(struct __pyx_obj_3hit_Node *__pyx_v_
     goto __pyx_L0;
   }
 
-  /* "hit.pyx":111
+  /* "hit.pyx":112
  *     def fullpath(self):
  *         return str(self._cnode.fullpath())
  *     def type(self):             # <<<<<<<<<<<<<<
@@ -3365,7 +3420,7 @@ static PyObject *__pyx_pf_3hit_4Node_24type(struct __pyx_obj_3hit_Node *__pyx_v_
   return __pyx_r;
 }
 
-/* "hit.pyx":124
+/* "hit.pyx":125
  *             return 'Unknown'
  * 
  *     def kind(self):             # <<<<<<<<<<<<<<
@@ -3397,14 +3452,14 @@ static PyObject *__pyx_pf_3hit_4Node_26kind(struct __pyx_obj_3hit_Node *__pyx_v_
   int __pyx_t_4;
   __Pyx_RefNannySetupContext("kind", 0);
 
-  /* "hit.pyx":125
+  /* "hit.pyx":126
  * 
  *     def kind(self):
  *         if self.type() != NodeType.Field:             # <<<<<<<<<<<<<<
  *             return FieldKind.NotField
  * 
  */
-  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_self), __pyx_n_s_type); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 125, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_self), __pyx_n_s_type); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 126, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __pyx_t_3 = NULL;
   if (CYTHON_UNPACK_METHODS && likely(PyMethod_Check(__pyx_t_2))) {
@@ -3417,26 +3472,26 @@ static PyObject *__pyx_pf_3hit_4Node_26kind(struct __pyx_obj_3hit_Node *__pyx_v_
     }
   }
   if (__pyx_t_3) {
-    __pyx_t_1 = __Pyx_PyObject_CallOneArg(__pyx_t_2, __pyx_t_3); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 125, __pyx_L1_error)
+    __pyx_t_1 = __Pyx_PyObject_CallOneArg(__pyx_t_2, __pyx_t_3); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 126, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   } else {
-    __pyx_t_1 = __Pyx_PyObject_CallNoArg(__pyx_t_2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 125, __pyx_L1_error)
+    __pyx_t_1 = __Pyx_PyObject_CallNoArg(__pyx_t_2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 126, __pyx_L1_error)
   }
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __pyx_t_2 = __Pyx_GetModuleGlobalName(__pyx_n_s_NodeType); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 125, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_GetModuleGlobalName(__pyx_n_s_NodeType); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 126, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_n_s_Field); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 125, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_n_s_Field); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 126, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __pyx_t_2 = PyObject_RichCompare(__pyx_t_1, __pyx_t_3, Py_NE); __Pyx_XGOTREF(__pyx_t_2); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 125, __pyx_L1_error)
+  __pyx_t_2 = PyObject_RichCompare(__pyx_t_1, __pyx_t_3, Py_NE); __Pyx_XGOTREF(__pyx_t_2); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 126, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  __pyx_t_4 = __Pyx_PyObject_IsTrue(__pyx_t_2); if (unlikely(__pyx_t_4 < 0)) __PYX_ERR(0, 125, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyObject_IsTrue(__pyx_t_2); if (unlikely(__pyx_t_4 < 0)) __PYX_ERR(0, 126, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   if (__pyx_t_4) {
 
-    /* "hit.pyx":126
+    /* "hit.pyx":127
  *     def kind(self):
  *         if self.type() != NodeType.Field:
  *             return FieldKind.NotField             # <<<<<<<<<<<<<<
@@ -3444,16 +3499,16 @@ static PyObject *__pyx_pf_3hit_4Node_26kind(struct __pyx_obj_3hit_Node *__pyx_v_
  *         f = <chit.Field *> self._cnode
  */
     __Pyx_XDECREF(__pyx_r);
-    __pyx_t_2 = __Pyx_GetModuleGlobalName(__pyx_n_s_FieldKind); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 126, __pyx_L1_error)
+    __pyx_t_2 = __Pyx_GetModuleGlobalName(__pyx_n_s_FieldKind); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 127, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
-    __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_n_s_NotField); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 126, __pyx_L1_error)
+    __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_n_s_NotField); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 127, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
     __pyx_r = __pyx_t_3;
     __pyx_t_3 = 0;
     goto __pyx_L0;
 
-    /* "hit.pyx":125
+    /* "hit.pyx":126
  * 
  *     def kind(self):
  *         if self.type() != NodeType.Field:             # <<<<<<<<<<<<<<
@@ -3462,7 +3517,7 @@ static PyObject *__pyx_pf_3hit_4Node_26kind(struct __pyx_obj_3hit_Node *__pyx_v_
  */
   }
 
-  /* "hit.pyx":128
+  /* "hit.pyx":129
  *             return FieldKind.NotField
  * 
  *         f = <chit.Field *> self._cnode             # <<<<<<<<<<<<<<
@@ -3471,7 +3526,7 @@ static PyObject *__pyx_pf_3hit_4Node_26kind(struct __pyx_obj_3hit_Node *__pyx_v_
  */
   __pyx_v_f = ((hit::Field *)__pyx_v_self->_cnode);
 
-  /* "hit.pyx":129
+  /* "hit.pyx":130
  * 
  *         f = <chit.Field *> self._cnode
  *         k = <int>f.kind()             # <<<<<<<<<<<<<<
@@ -3480,7 +3535,7 @@ static PyObject *__pyx_pf_3hit_4Node_26kind(struct __pyx_obj_3hit_Node *__pyx_v_
  */
   __pyx_v_k = ((int)__pyx_v_f->kind());
 
-  /* "hit.pyx":130
+  /* "hit.pyx":131
  *         f = <chit.Field *> self._cnode
  *         k = <int>f.kind()
  *         if k == <int>chit.Int:             # <<<<<<<<<<<<<<
@@ -3490,7 +3545,7 @@ static PyObject *__pyx_pf_3hit_4Node_26kind(struct __pyx_obj_3hit_Node *__pyx_v_
   __pyx_t_4 = ((__pyx_v_k == ((int)hit::Field::Kind::Int)) != 0);
   if (__pyx_t_4) {
 
-    /* "hit.pyx":131
+    /* "hit.pyx":132
  *         k = <int>f.kind()
  *         if k == <int>chit.Int:
  *             return FieldKind.Int             # <<<<<<<<<<<<<<
@@ -3498,16 +3553,16 @@ static PyObject *__pyx_pf_3hit_4Node_26kind(struct __pyx_obj_3hit_Node *__pyx_v_
  *             return FieldKind.Float
  */
     __Pyx_XDECREF(__pyx_r);
-    __pyx_t_3 = __Pyx_GetModuleGlobalName(__pyx_n_s_FieldKind); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 131, __pyx_L1_error)
+    __pyx_t_3 = __Pyx_GetModuleGlobalName(__pyx_n_s_FieldKind); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 132, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
-    __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_3, __pyx_n_s_Int); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 131, __pyx_L1_error)
+    __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_3, __pyx_n_s_Int); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 132, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
     __pyx_r = __pyx_t_2;
     __pyx_t_2 = 0;
     goto __pyx_L0;
 
-    /* "hit.pyx":130
+    /* "hit.pyx":131
  *         f = <chit.Field *> self._cnode
  *         k = <int>f.kind()
  *         if k == <int>chit.Int:             # <<<<<<<<<<<<<<
@@ -3516,7 +3571,7 @@ static PyObject *__pyx_pf_3hit_4Node_26kind(struct __pyx_obj_3hit_Node *__pyx_v_
  */
   }
 
-  /* "hit.pyx":132
+  /* "hit.pyx":133
  *         if k == <int>chit.Int:
  *             return FieldKind.Int
  *         elif k == <int>chit.Float:             # <<<<<<<<<<<<<<
@@ -3526,7 +3581,7 @@ static PyObject *__pyx_pf_3hit_4Node_26kind(struct __pyx_obj_3hit_Node *__pyx_v_
   __pyx_t_4 = ((__pyx_v_k == ((int)hit::Field::Kind::Float)) != 0);
   if (__pyx_t_4) {
 
-    /* "hit.pyx":133
+    /* "hit.pyx":134
  *             return FieldKind.Int
  *         elif k == <int>chit.Float:
  *             return FieldKind.Float             # <<<<<<<<<<<<<<
@@ -3534,16 +3589,16 @@ static PyObject *__pyx_pf_3hit_4Node_26kind(struct __pyx_obj_3hit_Node *__pyx_v_
  *             return FieldKind.Bool
  */
     __Pyx_XDECREF(__pyx_r);
-    __pyx_t_2 = __Pyx_GetModuleGlobalName(__pyx_n_s_FieldKind); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 133, __pyx_L1_error)
+    __pyx_t_2 = __Pyx_GetModuleGlobalName(__pyx_n_s_FieldKind); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 134, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
-    __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_n_s_Float); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 133, __pyx_L1_error)
+    __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_n_s_Float); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 134, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
     __pyx_r = __pyx_t_3;
     __pyx_t_3 = 0;
     goto __pyx_L0;
 
-    /* "hit.pyx":132
+    /* "hit.pyx":133
  *         if k == <int>chit.Int:
  *             return FieldKind.Int
  *         elif k == <int>chit.Float:             # <<<<<<<<<<<<<<
@@ -3552,7 +3607,7 @@ static PyObject *__pyx_pf_3hit_4Node_26kind(struct __pyx_obj_3hit_Node *__pyx_v_
  */
   }
 
-  /* "hit.pyx":134
+  /* "hit.pyx":135
  *         elif k == <int>chit.Float:
  *             return FieldKind.Float
  *         elif k == <int>chit.Bool:             # <<<<<<<<<<<<<<
@@ -3562,7 +3617,7 @@ static PyObject *__pyx_pf_3hit_4Node_26kind(struct __pyx_obj_3hit_Node *__pyx_v_
   __pyx_t_4 = ((__pyx_v_k == ((int)hit::Field::Kind::Bool)) != 0);
   if (__pyx_t_4) {
 
-    /* "hit.pyx":135
+    /* "hit.pyx":136
  *             return FieldKind.Float
  *         elif k == <int>chit.Bool:
  *             return FieldKind.Bool             # <<<<<<<<<<<<<<
@@ -3570,16 +3625,16 @@ static PyObject *__pyx_pf_3hit_4Node_26kind(struct __pyx_obj_3hit_Node *__pyx_v_
  *             return FieldKind.String
  */
     __Pyx_XDECREF(__pyx_r);
-    __pyx_t_3 = __Pyx_GetModuleGlobalName(__pyx_n_s_FieldKind); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 135, __pyx_L1_error)
+    __pyx_t_3 = __Pyx_GetModuleGlobalName(__pyx_n_s_FieldKind); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 136, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
-    __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_3, __pyx_n_s_Bool); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 135, __pyx_L1_error)
+    __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_3, __pyx_n_s_Bool); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 136, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
     __pyx_r = __pyx_t_2;
     __pyx_t_2 = 0;
     goto __pyx_L0;
 
-    /* "hit.pyx":134
+    /* "hit.pyx":135
  *         elif k == <int>chit.Float:
  *             return FieldKind.Float
  *         elif k == <int>chit.Bool:             # <<<<<<<<<<<<<<
@@ -3588,7 +3643,7 @@ static PyObject *__pyx_pf_3hit_4Node_26kind(struct __pyx_obj_3hit_Node *__pyx_v_
  */
   }
 
-  /* "hit.pyx":136
+  /* "hit.pyx":137
  *         elif k == <int>chit.Bool:
  *             return FieldKind.Bool
  *         elif k == <int>chit.String:             # <<<<<<<<<<<<<<
@@ -3598,7 +3653,7 @@ static PyObject *__pyx_pf_3hit_4Node_26kind(struct __pyx_obj_3hit_Node *__pyx_v_
   __pyx_t_4 = ((__pyx_v_k == ((int)hit::Field::Kind::String)) != 0);
   if (__pyx_t_4) {
 
-    /* "hit.pyx":137
+    /* "hit.pyx":138
  *             return FieldKind.Bool
  *         elif k == <int>chit.String:
  *             return FieldKind.String             # <<<<<<<<<<<<<<
@@ -3606,16 +3661,16 @@ static PyObject *__pyx_pf_3hit_4Node_26kind(struct __pyx_obj_3hit_Node *__pyx_v_
  * 
  */
     __Pyx_XDECREF(__pyx_r);
-    __pyx_t_2 = __Pyx_GetModuleGlobalName(__pyx_n_s_FieldKind); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 137, __pyx_L1_error)
+    __pyx_t_2 = __Pyx_GetModuleGlobalName(__pyx_n_s_FieldKind); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 138, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
-    __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_n_s_String); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 137, __pyx_L1_error)
+    __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_n_s_String); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 138, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
     __pyx_r = __pyx_t_3;
     __pyx_t_3 = 0;
     goto __pyx_L0;
 
-    /* "hit.pyx":136
+    /* "hit.pyx":137
  *         elif k == <int>chit.Bool:
  *             return FieldKind.Bool
  *         elif k == <int>chit.String:             # <<<<<<<<<<<<<<
@@ -3624,7 +3679,7 @@ static PyObject *__pyx_pf_3hit_4Node_26kind(struct __pyx_obj_3hit_Node *__pyx_v_
  */
   }
 
-  /* "hit.pyx":138
+  /* "hit.pyx":139
  *         elif k == <int>chit.String:
  *             return FieldKind.String
  *         return FieldKind.NotField             # <<<<<<<<<<<<<<
@@ -3632,16 +3687,16 @@ static PyObject *__pyx_pf_3hit_4Node_26kind(struct __pyx_obj_3hit_Node *__pyx_v_
  *     def raw(self):
  */
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_3 = __Pyx_GetModuleGlobalName(__pyx_n_s_FieldKind); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 138, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_GetModuleGlobalName(__pyx_n_s_FieldKind); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 139, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_3, __pyx_n_s_NotField); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 138, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_3, __pyx_n_s_NotField); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 139, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __pyx_r = __pyx_t_2;
   __pyx_t_2 = 0;
   goto __pyx_L0;
 
-  /* "hit.pyx":124
+  /* "hit.pyx":125
  *             return 'Unknown'
  * 
  *     def kind(self):             # <<<<<<<<<<<<<<
@@ -3662,7 +3717,7 @@ static PyObject *__pyx_pf_3hit_4Node_26kind(struct __pyx_obj_3hit_Node *__pyx_v_
   return __pyx_r;
 }
 
-/* "hit.pyx":140
+/* "hit.pyx":141
  *         return FieldKind.NotField
  * 
  *     def raw(self):             # <<<<<<<<<<<<<<
@@ -3693,14 +3748,14 @@ static PyObject *__pyx_pf_3hit_4Node_28raw(struct __pyx_obj_3hit_Node *__pyx_v_s
   std::string __pyx_t_5;
   __Pyx_RefNannySetupContext("raw", 0);
 
-  /* "hit.pyx":141
+  /* "hit.pyx":142
  * 
  *     def raw(self):
  *         if self.type() != NodeType.Field:             # <<<<<<<<<<<<<<
  *             return None
  *         return str(self._cnode.strVal())
  */
-  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_self), __pyx_n_s_type); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 141, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_self), __pyx_n_s_type); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 142, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __pyx_t_3 = NULL;
   if (CYTHON_UNPACK_METHODS && likely(PyMethod_Check(__pyx_t_2))) {
@@ -3713,26 +3768,26 @@ static PyObject *__pyx_pf_3hit_4Node_28raw(struct __pyx_obj_3hit_Node *__pyx_v_s
     }
   }
   if (__pyx_t_3) {
-    __pyx_t_1 = __Pyx_PyObject_CallOneArg(__pyx_t_2, __pyx_t_3); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 141, __pyx_L1_error)
+    __pyx_t_1 = __Pyx_PyObject_CallOneArg(__pyx_t_2, __pyx_t_3); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 142, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   } else {
-    __pyx_t_1 = __Pyx_PyObject_CallNoArg(__pyx_t_2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 141, __pyx_L1_error)
+    __pyx_t_1 = __Pyx_PyObject_CallNoArg(__pyx_t_2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 142, __pyx_L1_error)
   }
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __pyx_t_2 = __Pyx_GetModuleGlobalName(__pyx_n_s_NodeType); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 141, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_GetModuleGlobalName(__pyx_n_s_NodeType); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 142, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_n_s_Field); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 141, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_n_s_Field); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 142, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __pyx_t_2 = PyObject_RichCompare(__pyx_t_1, __pyx_t_3, Py_NE); __Pyx_XGOTREF(__pyx_t_2); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 141, __pyx_L1_error)
+  __pyx_t_2 = PyObject_RichCompare(__pyx_t_1, __pyx_t_3, Py_NE); __Pyx_XGOTREF(__pyx_t_2); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 142, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  __pyx_t_4 = __Pyx_PyObject_IsTrue(__pyx_t_2); if (unlikely(__pyx_t_4 < 0)) __PYX_ERR(0, 141, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyObject_IsTrue(__pyx_t_2); if (unlikely(__pyx_t_4 < 0)) __PYX_ERR(0, 142, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   if (__pyx_t_4) {
 
-    /* "hit.pyx":142
+    /* "hit.pyx":143
  *     def raw(self):
  *         if self.type() != NodeType.Field:
  *             return None             # <<<<<<<<<<<<<<
@@ -3744,7 +3799,7 @@ static PyObject *__pyx_pf_3hit_4Node_28raw(struct __pyx_obj_3hit_Node *__pyx_v_s
     __pyx_r = Py_None;
     goto __pyx_L0;
 
-    /* "hit.pyx":141
+    /* "hit.pyx":142
  * 
  *     def raw(self):
  *         if self.type() != NodeType.Field:             # <<<<<<<<<<<<<<
@@ -3753,7 +3808,7 @@ static PyObject *__pyx_pf_3hit_4Node_28raw(struct __pyx_obj_3hit_Node *__pyx_v_s
  */
   }
 
-  /* "hit.pyx":143
+  /* "hit.pyx":144
  *         if self.type() != NodeType.Field:
  *             return None
  *         return str(self._cnode.strVal())             # <<<<<<<<<<<<<<
@@ -3765,23 +3820,23 @@ static PyObject *__pyx_pf_3hit_4Node_28raw(struct __pyx_obj_3hit_Node *__pyx_v_s
     __pyx_t_5 = __pyx_v_self->_cnode->strVal();
   } catch(...) {
     __Pyx_CppExn2PyErr();
-    __PYX_ERR(0, 143, __pyx_L1_error)
+    __PYX_ERR(0, 144, __pyx_L1_error)
   }
-  __pyx_t_2 = __pyx_convert_PyBytes_string_to_py_std__in_string(__pyx_t_5); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 143, __pyx_L1_error)
+  __pyx_t_2 = __pyx_convert_PyBytes_string_to_py_std__in_string(__pyx_t_5); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 144, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_3 = PyTuple_New(1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 143, __pyx_L1_error)
+  __pyx_t_3 = PyTuple_New(1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 144, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_GIVEREF(__pyx_t_2);
   PyTuple_SET_ITEM(__pyx_t_3, 0, __pyx_t_2);
   __pyx_t_2 = 0;
-  __pyx_t_2 = __Pyx_PyObject_Call(((PyObject *)(&PyString_Type)), __pyx_t_3, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 143, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_Call(((PyObject *)(&PyString_Type)), __pyx_t_3, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 144, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __pyx_r = __pyx_t_2;
   __pyx_t_2 = 0;
   goto __pyx_L0;
 
-  /* "hit.pyx":140
+  /* "hit.pyx":141
  *         return FieldKind.NotField
  * 
  *     def raw(self):             # <<<<<<<<<<<<<<
@@ -3802,7 +3857,7 @@ static PyObject *__pyx_pf_3hit_4Node_28raw(struct __pyx_obj_3hit_Node *__pyx_v_s
   return __pyx_r;
 }
 
-/* "hit.pyx":145
+/* "hit.pyx":146
  *         return str(self._cnode.strVal())
  * 
  *     def find(self, path):             # <<<<<<<<<<<<<<
@@ -3834,23 +3889,23 @@ static PyObject *__pyx_pf_3hit_4Node_30find(struct __pyx_obj_3hit_Node *__pyx_v_
   int __pyx_t_4;
   __Pyx_RefNannySetupContext("find", 0);
 
-  /* "hit.pyx":146
+  /* "hit.pyx":147
  * 
  *     def find(self, path):
  *         cpath = <string> path.encode('utf-8')             # <<<<<<<<<<<<<<
  *         n = self._cnode.find(cpath)
  *         if n == NULL:
  */
-  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_v_path, __pyx_n_s_encode); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 146, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_v_path, __pyx_n_s_encode); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 147, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = __Pyx_PyObject_Call(__pyx_t_1, __pyx_tuple__6, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 146, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_Call(__pyx_t_1, __pyx_tuple__8, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 147, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_3 = __pyx_convert_string_from_py_std__in_string(__pyx_t_2); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 146, __pyx_L1_error)
+  __pyx_t_3 = __pyx_convert_string_from_py_std__in_string(__pyx_t_2); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 147, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __pyx_v_cpath = ((std::string)__pyx_t_3);
 
-  /* "hit.pyx":147
+  /* "hit.pyx":148
  *     def find(self, path):
  *         cpath = <string> path.encode('utf-8')
  *         n = self._cnode.find(cpath)             # <<<<<<<<<<<<<<
@@ -3859,7 +3914,7 @@ static PyObject *__pyx_pf_3hit_4Node_30find(struct __pyx_obj_3hit_Node *__pyx_v_
  */
   __pyx_v_n = __pyx_v_self->_cnode->find(__pyx_v_cpath);
 
-  /* "hit.pyx":148
+  /* "hit.pyx":149
  *         cpath = <string> path.encode('utf-8')
  *         n = self._cnode.find(cpath)
  *         if n == NULL:             # <<<<<<<<<<<<<<
@@ -3869,7 +3924,7 @@ static PyObject *__pyx_pf_3hit_4Node_30find(struct __pyx_obj_3hit_Node *__pyx_v_
   __pyx_t_4 = ((__pyx_v_n == NULL) != 0);
   if (__pyx_t_4) {
 
-    /* "hit.pyx":149
+    /* "hit.pyx":150
  *         n = self._cnode.find(cpath)
  *         if n == NULL:
  *             return None             # <<<<<<<<<<<<<<
@@ -3881,7 +3936,7 @@ static PyObject *__pyx_pf_3hit_4Node_30find(struct __pyx_obj_3hit_Node *__pyx_v_
     __pyx_r = Py_None;
     goto __pyx_L0;
 
-    /* "hit.pyx":148
+    /* "hit.pyx":149
  *         cpath = <string> path.encode('utf-8')
  *         n = self._cnode.find(cpath)
  *         if n == NULL:             # <<<<<<<<<<<<<<
@@ -3890,7 +3945,7 @@ static PyObject *__pyx_pf_3hit_4Node_30find(struct __pyx_obj_3hit_Node *__pyx_v_
  */
   }
 
-  /* "hit.pyx":150
+  /* "hit.pyx":151
  *         if n == NULL:
  *             return None
  *         return _initpynode(n)             # <<<<<<<<<<<<<<
@@ -3898,13 +3953,13 @@ static PyObject *__pyx_pf_3hit_4Node_30find(struct __pyx_obj_3hit_Node *__pyx_v_
  *     def param(self, path=''):
  */
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_2 = __pyx_f_3hit__initpynode(__pyx_v_n, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 150, __pyx_L1_error)
+  __pyx_t_2 = __pyx_f_3hit__initpynode(__pyx_v_n, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 151, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __pyx_r = __pyx_t_2;
   __pyx_t_2 = 0;
   goto __pyx_L0;
 
-  /* "hit.pyx":145
+  /* "hit.pyx":146
  *         return str(self._cnode.strVal())
  * 
  *     def find(self, path):             # <<<<<<<<<<<<<<
@@ -3924,7 +3979,7 @@ static PyObject *__pyx_pf_3hit_4Node_30find(struct __pyx_obj_3hit_Node *__pyx_v_
   return __pyx_r;
 }
 
-/* "hit.pyx":152
+/* "hit.pyx":153
  *         return _initpynode(n)
  * 
  *     def param(self, path=''):             # <<<<<<<<<<<<<<
@@ -3961,7 +4016,7 @@ static PyObject *__pyx_pw_3hit_4Node_33param(PyObject *__pyx_v_self, PyObject *_
         }
       }
       if (unlikely(kw_args > 0)) {
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "param") < 0)) __PYX_ERR(0, 152, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "param") < 0)) __PYX_ERR(0, 153, __pyx_L3_error)
       }
     } else {
       switch (PyTuple_GET_SIZE(__pyx_args)) {
@@ -3975,7 +4030,7 @@ static PyObject *__pyx_pw_3hit_4Node_33param(PyObject *__pyx_v_self, PyObject *_
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("param", 0, 0, 1, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 152, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("param", 0, 0, 1, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 153, __pyx_L3_error)
   __pyx_L3_error:;
   __Pyx_AddTraceback("hit.Node.param", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
@@ -4005,23 +4060,23 @@ static PyObject *__pyx_pf_3hit_4Node_32param(struct __pyx_obj_3hit_Node *__pyx_v
   PyObject *__pyx_t_7 = NULL;
   __Pyx_RefNannySetupContext("param", 0);
 
-  /* "hit.pyx":153
+  /* "hit.pyx":154
  * 
  *     def param(self, path=''):
  *         cpath = <string> path.encode('utf-8')             # <<<<<<<<<<<<<<
  *         n = self._cnode.find(cpath)
  *         if path != '' and n == NULL:
  */
-  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_v_path, __pyx_n_s_encode); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 153, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_v_path, __pyx_n_s_encode); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 154, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = __Pyx_PyObject_Call(__pyx_t_1, __pyx_tuple__7, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 153, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_Call(__pyx_t_1, __pyx_tuple__9, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 154, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_3 = __pyx_convert_string_from_py_std__in_string(__pyx_t_2); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 153, __pyx_L1_error)
+  __pyx_t_3 = __pyx_convert_string_from_py_std__in_string(__pyx_t_2); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 154, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __pyx_v_cpath = ((std::string)__pyx_t_3);
 
-  /* "hit.pyx":154
+  /* "hit.pyx":155
  *     def param(self, path=''):
  *         cpath = <string> path.encode('utf-8')
  *         n = self._cnode.find(cpath)             # <<<<<<<<<<<<<<
@@ -4030,14 +4085,14 @@ static PyObject *__pyx_pf_3hit_4Node_32param(struct __pyx_obj_3hit_Node *__pyx_v
  */
   __pyx_v_n = __pyx_v_self->_cnode->find(__pyx_v_cpath);
 
-  /* "hit.pyx":155
+  /* "hit.pyx":156
  *         cpath = <string> path.encode('utf-8')
  *         n = self._cnode.find(cpath)
  *         if path != '' and n == NULL:             # <<<<<<<<<<<<<<
  *             return None
  *         elif path == '':
  */
-  __pyx_t_5 = (__Pyx_PyString_Equals(__pyx_v_path, __pyx_kp_s__5, Py_NE)); if (unlikely(__pyx_t_5 < 0)) __PYX_ERR(0, 155, __pyx_L1_error)
+  __pyx_t_5 = (__Pyx_PyString_Equals(__pyx_v_path, __pyx_kp_s__5, Py_NE)); if (unlikely(__pyx_t_5 < 0)) __PYX_ERR(0, 156, __pyx_L1_error)
   if (__pyx_t_5) {
   } else {
     __pyx_t_4 = __pyx_t_5;
@@ -4048,7 +4103,7 @@ static PyObject *__pyx_pf_3hit_4Node_32param(struct __pyx_obj_3hit_Node *__pyx_v
   __pyx_L4_bool_binop_done:;
   if (__pyx_t_4) {
 
-    /* "hit.pyx":156
+    /* "hit.pyx":157
  *         n = self._cnode.find(cpath)
  *         if path != '' and n == NULL:
  *             return None             # <<<<<<<<<<<<<<
@@ -4060,7 +4115,7 @@ static PyObject *__pyx_pf_3hit_4Node_32param(struct __pyx_obj_3hit_Node *__pyx_v
     __pyx_r = Py_None;
     goto __pyx_L0;
 
-    /* "hit.pyx":155
+    /* "hit.pyx":156
  *         cpath = <string> path.encode('utf-8')
  *         n = self._cnode.find(cpath)
  *         if path != '' and n == NULL:             # <<<<<<<<<<<<<<
@@ -4069,17 +4124,17 @@ static PyObject *__pyx_pf_3hit_4Node_32param(struct __pyx_obj_3hit_Node *__pyx_v
  */
   }
 
-  /* "hit.pyx":157
+  /* "hit.pyx":158
  *         if path != '' and n == NULL:
  *             return None
  *         elif path == '':             # <<<<<<<<<<<<<<
  *             n = self._cnode
  * 
  */
-  __pyx_t_4 = (__Pyx_PyString_Equals(__pyx_v_path, __pyx_kp_s__5, Py_EQ)); if (unlikely(__pyx_t_4 < 0)) __PYX_ERR(0, 157, __pyx_L1_error)
+  __pyx_t_4 = (__Pyx_PyString_Equals(__pyx_v_path, __pyx_kp_s__5, Py_EQ)); if (unlikely(__pyx_t_4 < 0)) __PYX_ERR(0, 158, __pyx_L1_error)
   if (__pyx_t_4) {
 
-    /* "hit.pyx":158
+    /* "hit.pyx":159
  *             return None
  *         elif path == '':
  *             n = self._cnode             # <<<<<<<<<<<<<<
@@ -4089,7 +4144,7 @@ static PyObject *__pyx_pf_3hit_4Node_32param(struct __pyx_obj_3hit_Node *__pyx_v
     __pyx_t_6 = __pyx_v_self->_cnode;
     __pyx_v_n = __pyx_t_6;
 
-    /* "hit.pyx":157
+    /* "hit.pyx":158
  *         if path != '' and n == NULL:
  *             return None
  *         elif path == '':             # <<<<<<<<<<<<<<
@@ -4098,27 +4153,27 @@ static PyObject *__pyx_pf_3hit_4Node_32param(struct __pyx_obj_3hit_Node *__pyx_v
  */
   }
 
-  /* "hit.pyx":160
+  /* "hit.pyx":161
  *             n = self._cnode
  * 
  *         cdef Node nn = _initpynode(n)             # <<<<<<<<<<<<<<
  *         if nn.type() != NodeType.Field:
  *             return None
  */
-  __pyx_t_2 = __pyx_f_3hit__initpynode(__pyx_v_n, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 160, __pyx_L1_error)
+  __pyx_t_2 = __pyx_f_3hit__initpynode(__pyx_v_n, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 161, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  if (!(likely(((__pyx_t_2) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_2, __pyx_ptype_3hit_Node))))) __PYX_ERR(0, 160, __pyx_L1_error)
+  if (!(likely(((__pyx_t_2) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_2, __pyx_ptype_3hit_Node))))) __PYX_ERR(0, 161, __pyx_L1_error)
   __pyx_v_nn = ((struct __pyx_obj_3hit_Node *)__pyx_t_2);
   __pyx_t_2 = 0;
 
-  /* "hit.pyx":161
+  /* "hit.pyx":162
  * 
  *         cdef Node nn = _initpynode(n)
  *         if nn.type() != NodeType.Field:             # <<<<<<<<<<<<<<
  *             return None
  * 
  */
-  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_nn), __pyx_n_s_type); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 161, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_nn), __pyx_n_s_type); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 162, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_t_7 = NULL;
   if (CYTHON_UNPACK_METHODS && likely(PyMethod_Check(__pyx_t_1))) {
@@ -4131,26 +4186,26 @@ static PyObject *__pyx_pf_3hit_4Node_32param(struct __pyx_obj_3hit_Node *__pyx_v
     }
   }
   if (__pyx_t_7) {
-    __pyx_t_2 = __Pyx_PyObject_CallOneArg(__pyx_t_1, __pyx_t_7); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 161, __pyx_L1_error)
+    __pyx_t_2 = __Pyx_PyObject_CallOneArg(__pyx_t_1, __pyx_t_7); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 162, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
   } else {
-    __pyx_t_2 = __Pyx_PyObject_CallNoArg(__pyx_t_1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 161, __pyx_L1_error)
+    __pyx_t_2 = __Pyx_PyObject_CallNoArg(__pyx_t_1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 162, __pyx_L1_error)
   }
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_1 = __Pyx_GetModuleGlobalName(__pyx_n_s_NodeType); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 161, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_GetModuleGlobalName(__pyx_n_s_NodeType); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 162, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_7 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_Field); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 161, __pyx_L1_error)
+  __pyx_t_7 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_Field); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 162, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_7);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_1 = PyObject_RichCompare(__pyx_t_2, __pyx_t_7, Py_NE); __Pyx_XGOTREF(__pyx_t_1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 161, __pyx_L1_error)
+  __pyx_t_1 = PyObject_RichCompare(__pyx_t_2, __pyx_t_7, Py_NE); __Pyx_XGOTREF(__pyx_t_1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 162, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
-  __pyx_t_4 = __Pyx_PyObject_IsTrue(__pyx_t_1); if (unlikely(__pyx_t_4 < 0)) __PYX_ERR(0, 161, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyObject_IsTrue(__pyx_t_1); if (unlikely(__pyx_t_4 < 0)) __PYX_ERR(0, 162, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   if (__pyx_t_4) {
 
-    /* "hit.pyx":162
+    /* "hit.pyx":163
  *         cdef Node nn = _initpynode(n)
  *         if nn.type() != NodeType.Field:
  *             return None             # <<<<<<<<<<<<<<
@@ -4162,7 +4217,7 @@ static PyObject *__pyx_pf_3hit_4Node_32param(struct __pyx_obj_3hit_Node *__pyx_v
     __pyx_r = Py_None;
     goto __pyx_L0;
 
-    /* "hit.pyx":161
+    /* "hit.pyx":162
  * 
  *         cdef Node nn = _initpynode(n)
  *         if nn.type() != NodeType.Field:             # <<<<<<<<<<<<<<
@@ -4171,7 +4226,7 @@ static PyObject *__pyx_pf_3hit_4Node_32param(struct __pyx_obj_3hit_Node *__pyx_v
  */
   }
 
-  /* "hit.pyx":164
+  /* "hit.pyx":165
  *             return None
  * 
  *         f = <chit.Field *> nn._cnode             # <<<<<<<<<<<<<<
@@ -4180,14 +4235,14 @@ static PyObject *__pyx_pf_3hit_4Node_32param(struct __pyx_obj_3hit_Node *__pyx_v
  */
   __pyx_v_f = ((hit::Field *)__pyx_v_nn->_cnode);
 
-  /* "hit.pyx":165
+  /* "hit.pyx":166
  * 
  *         f = <chit.Field *> nn._cnode
  *         k = nn.kind()             # <<<<<<<<<<<<<<
  *         if k == FieldKind.Int:
  *             return int(f.intVal())
  */
-  __pyx_t_7 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_nn), __pyx_n_s_kind); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 165, __pyx_L1_error)
+  __pyx_t_7 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_nn), __pyx_n_s_kind); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 166, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_7);
   __pyx_t_2 = NULL;
   if (CYTHON_UNPACK_METHODS && likely(PyMethod_Check(__pyx_t_7))) {
@@ -4200,35 +4255,35 @@ static PyObject *__pyx_pf_3hit_4Node_32param(struct __pyx_obj_3hit_Node *__pyx_v
     }
   }
   if (__pyx_t_2) {
-    __pyx_t_1 = __Pyx_PyObject_CallOneArg(__pyx_t_7, __pyx_t_2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 165, __pyx_L1_error)
+    __pyx_t_1 = __Pyx_PyObject_CallOneArg(__pyx_t_7, __pyx_t_2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 166, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   } else {
-    __pyx_t_1 = __Pyx_PyObject_CallNoArg(__pyx_t_7); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 165, __pyx_L1_error)
+    __pyx_t_1 = __Pyx_PyObject_CallNoArg(__pyx_t_7); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 166, __pyx_L1_error)
   }
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
   __pyx_v_k = __pyx_t_1;
   __pyx_t_1 = 0;
 
-  /* "hit.pyx":166
+  /* "hit.pyx":167
  *         f = <chit.Field *> nn._cnode
  *         k = nn.kind()
  *         if k == FieldKind.Int:             # <<<<<<<<<<<<<<
  *             return int(f.intVal())
  *         elif k == FieldKind.Float:
  */
-  __pyx_t_1 = __Pyx_GetModuleGlobalName(__pyx_n_s_FieldKind); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 166, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_GetModuleGlobalName(__pyx_n_s_FieldKind); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 167, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_7 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_Int); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 166, __pyx_L1_error)
+  __pyx_t_7 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_Int); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 167, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_7);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_1 = PyObject_RichCompare(__pyx_v_k, __pyx_t_7, Py_EQ); __Pyx_XGOTREF(__pyx_t_1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 166, __pyx_L1_error)
+  __pyx_t_1 = PyObject_RichCompare(__pyx_v_k, __pyx_t_7, Py_EQ); __Pyx_XGOTREF(__pyx_t_1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 167, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
-  __pyx_t_4 = __Pyx_PyObject_IsTrue(__pyx_t_1); if (unlikely(__pyx_t_4 < 0)) __PYX_ERR(0, 166, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyObject_IsTrue(__pyx_t_1); if (unlikely(__pyx_t_4 < 0)) __PYX_ERR(0, 167, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   if (__pyx_t_4) {
 
-    /* "hit.pyx":167
+    /* "hit.pyx":168
  *         k = nn.kind()
  *         if k == FieldKind.Int:
  *             return int(f.intVal())             # <<<<<<<<<<<<<<
@@ -4236,21 +4291,21 @@ static PyObject *__pyx_pf_3hit_4Node_32param(struct __pyx_obj_3hit_Node *__pyx_v
  *             return float(f.floatVal())
  */
     __Pyx_XDECREF(__pyx_r);
-    __pyx_t_1 = __Pyx_PyInt_From_int(__pyx_v_f->intVal()); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 167, __pyx_L1_error)
+    __pyx_t_1 = __Pyx_PyInt_From_int(__pyx_v_f->intVal()); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 168, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
-    __pyx_t_7 = PyTuple_New(1); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 167, __pyx_L1_error)
+    __pyx_t_7 = PyTuple_New(1); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 168, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_7);
     __Pyx_GIVEREF(__pyx_t_1);
     PyTuple_SET_ITEM(__pyx_t_7, 0, __pyx_t_1);
     __pyx_t_1 = 0;
-    __pyx_t_1 = __Pyx_PyObject_Call(((PyObject *)(&PyInt_Type)), __pyx_t_7, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 167, __pyx_L1_error)
+    __pyx_t_1 = __Pyx_PyObject_Call(((PyObject *)(&PyInt_Type)), __pyx_t_7, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 168, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
     __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
     __pyx_r = __pyx_t_1;
     __pyx_t_1 = 0;
     goto __pyx_L0;
 
-    /* "hit.pyx":166
+    /* "hit.pyx":167
  *         f = <chit.Field *> nn._cnode
  *         k = nn.kind()
  *         if k == FieldKind.Int:             # <<<<<<<<<<<<<<
@@ -4259,25 +4314,25 @@ static PyObject *__pyx_pf_3hit_4Node_32param(struct __pyx_obj_3hit_Node *__pyx_v
  */
   }
 
-  /* "hit.pyx":168
+  /* "hit.pyx":169
  *         if k == FieldKind.Int:
  *             return int(f.intVal())
  *         elif k == FieldKind.Float:             # <<<<<<<<<<<<<<
  *             return float(f.floatVal())
  *         elif k == FieldKind.Bool:
  */
-  __pyx_t_1 = __Pyx_GetModuleGlobalName(__pyx_n_s_FieldKind); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 168, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_GetModuleGlobalName(__pyx_n_s_FieldKind); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 169, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_7 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_Float); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 168, __pyx_L1_error)
+  __pyx_t_7 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_Float); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 169, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_7);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_1 = PyObject_RichCompare(__pyx_v_k, __pyx_t_7, Py_EQ); __Pyx_XGOTREF(__pyx_t_1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 168, __pyx_L1_error)
+  __pyx_t_1 = PyObject_RichCompare(__pyx_v_k, __pyx_t_7, Py_EQ); __Pyx_XGOTREF(__pyx_t_1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 169, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
-  __pyx_t_4 = __Pyx_PyObject_IsTrue(__pyx_t_1); if (unlikely(__pyx_t_4 < 0)) __PYX_ERR(0, 168, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyObject_IsTrue(__pyx_t_1); if (unlikely(__pyx_t_4 < 0)) __PYX_ERR(0, 169, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   if (__pyx_t_4) {
 
-    /* "hit.pyx":169
+    /* "hit.pyx":170
  *             return int(f.intVal())
  *         elif k == FieldKind.Float:
  *             return float(f.floatVal())             # <<<<<<<<<<<<<<
@@ -4285,13 +4340,13 @@ static PyObject *__pyx_pf_3hit_4Node_32param(struct __pyx_obj_3hit_Node *__pyx_v
  *             return bool(f.boolVal())
  */
     __Pyx_XDECREF(__pyx_r);
-    __pyx_t_1 = PyFloat_FromDouble(__pyx_v_f->floatVal()); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 169, __pyx_L1_error)
+    __pyx_t_1 = PyFloat_FromDouble(__pyx_v_f->floatVal()); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 170, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
     __pyx_r = __pyx_t_1;
     __pyx_t_1 = 0;
     goto __pyx_L0;
 
-    /* "hit.pyx":168
+    /* "hit.pyx":169
  *         if k == FieldKind.Int:
  *             return int(f.intVal())
  *         elif k == FieldKind.Float:             # <<<<<<<<<<<<<<
@@ -4300,25 +4355,25 @@ static PyObject *__pyx_pf_3hit_4Node_32param(struct __pyx_obj_3hit_Node *__pyx_v
  */
   }
 
-  /* "hit.pyx":170
+  /* "hit.pyx":171
  *         elif k == FieldKind.Float:
  *             return float(f.floatVal())
  *         elif k == FieldKind.Bool:             # <<<<<<<<<<<<<<
  *             return bool(f.boolVal())
  *         return str(f.strVal())
  */
-  __pyx_t_1 = __Pyx_GetModuleGlobalName(__pyx_n_s_FieldKind); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 170, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_GetModuleGlobalName(__pyx_n_s_FieldKind); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 171, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_7 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_Bool); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 170, __pyx_L1_error)
+  __pyx_t_7 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_Bool); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 171, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_7);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_1 = PyObject_RichCompare(__pyx_v_k, __pyx_t_7, Py_EQ); __Pyx_XGOTREF(__pyx_t_1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 170, __pyx_L1_error)
+  __pyx_t_1 = PyObject_RichCompare(__pyx_v_k, __pyx_t_7, Py_EQ); __Pyx_XGOTREF(__pyx_t_1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 171, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
-  __pyx_t_4 = __Pyx_PyObject_IsTrue(__pyx_t_1); if (unlikely(__pyx_t_4 < 0)) __PYX_ERR(0, 170, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyObject_IsTrue(__pyx_t_1); if (unlikely(__pyx_t_4 < 0)) __PYX_ERR(0, 171, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   if (__pyx_t_4) {
 
-    /* "hit.pyx":171
+    /* "hit.pyx":172
  *             return float(f.floatVal())
  *         elif k == FieldKind.Bool:
  *             return bool(f.boolVal())             # <<<<<<<<<<<<<<
@@ -4326,17 +4381,17 @@ static PyObject *__pyx_pf_3hit_4Node_32param(struct __pyx_obj_3hit_Node *__pyx_v
  * 
  */
     __Pyx_XDECREF(__pyx_r);
-    __pyx_t_1 = __Pyx_PyBool_FromLong(__pyx_v_f->boolVal()); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 171, __pyx_L1_error)
+    __pyx_t_1 = __Pyx_PyBool_FromLong(__pyx_v_f->boolVal()); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 172, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
-    __pyx_t_4 = __Pyx_PyObject_IsTrue(__pyx_t_1); if (unlikely(__pyx_t_4 < 0)) __PYX_ERR(0, 171, __pyx_L1_error)
+    __pyx_t_4 = __Pyx_PyObject_IsTrue(__pyx_t_1); if (unlikely(__pyx_t_4 < 0)) __PYX_ERR(0, 172, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-    __pyx_t_1 = __Pyx_PyBool_FromLong((!(!__pyx_t_4))); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 171, __pyx_L1_error)
+    __pyx_t_1 = __Pyx_PyBool_FromLong((!(!__pyx_t_4))); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 172, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
     __pyx_r = __pyx_t_1;
     __pyx_t_1 = 0;
     goto __pyx_L0;
 
-    /* "hit.pyx":170
+    /* "hit.pyx":171
  *         elif k == FieldKind.Float:
  *             return float(f.floatVal())
  *         elif k == FieldKind.Bool:             # <<<<<<<<<<<<<<
@@ -4345,7 +4400,7 @@ static PyObject *__pyx_pf_3hit_4Node_32param(struct __pyx_obj_3hit_Node *__pyx_v
  */
   }
 
-  /* "hit.pyx":172
+  /* "hit.pyx":173
  *         elif k == FieldKind.Bool:
  *             return bool(f.boolVal())
  *         return str(f.strVal())             # <<<<<<<<<<<<<<
@@ -4353,21 +4408,21 @@ static PyObject *__pyx_pf_3hit_4Node_32param(struct __pyx_obj_3hit_Node *__pyx_v
  *     def walk(self, walker, node_type=NodeType.All):
  */
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = __pyx_convert_PyBytes_string_to_py_std__in_string(__pyx_v_f->strVal()); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 172, __pyx_L1_error)
+  __pyx_t_1 = __pyx_convert_PyBytes_string_to_py_std__in_string(__pyx_v_f->strVal()); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 173, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_7 = PyTuple_New(1); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 172, __pyx_L1_error)
+  __pyx_t_7 = PyTuple_New(1); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 173, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_7);
   __Pyx_GIVEREF(__pyx_t_1);
   PyTuple_SET_ITEM(__pyx_t_7, 0, __pyx_t_1);
   __pyx_t_1 = 0;
-  __pyx_t_1 = __Pyx_PyObject_Call(((PyObject *)(&PyString_Type)), __pyx_t_7, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 172, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_Call(((PyObject *)(&PyString_Type)), __pyx_t_7, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 173, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
   __pyx_r = __pyx_t_1;
   __pyx_t_1 = 0;
   goto __pyx_L0;
 
-  /* "hit.pyx":152
+  /* "hit.pyx":153
  *         return _initpynode(n)
  * 
  *     def param(self, path=''):             # <<<<<<<<<<<<<<
@@ -4390,7 +4445,7 @@ static PyObject *__pyx_pf_3hit_4Node_32param(struct __pyx_obj_3hit_Node *__pyx_v
   return __pyx_r;
 }
 
-/* "hit.pyx":174
+/* "hit.pyx":175
  *         return str(f.strVal())
  * 
  *     def walk(self, walker, node_type=NodeType.All):             # <<<<<<<<<<<<<<
@@ -4409,7 +4464,7 @@ static PyObject *__pyx_pw_3hit_4Node_35walk(PyObject *__pyx_v_self, PyObject *__
   {
     static PyObject **__pyx_pyargnames[] = {&__pyx_n_s_walker,&__pyx_n_s_node_type,0};
     PyObject* values[2] = {0,0};
-    values[1] = __pyx_k__8;
+    values[1] = __pyx_k__10;
     if (unlikely(__pyx_kwds)) {
       Py_ssize_t kw_args;
       const Py_ssize_t pos_args = PyTuple_GET_SIZE(__pyx_args);
@@ -4434,7 +4489,7 @@ static PyObject *__pyx_pw_3hit_4Node_35walk(PyObject *__pyx_v_self, PyObject *__
         }
       }
       if (unlikely(kw_args > 0)) {
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "walk") < 0)) __PYX_ERR(0, 174, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "walk") < 0)) __PYX_ERR(0, 175, __pyx_L3_error)
       }
     } else {
       switch (PyTuple_GET_SIZE(__pyx_args)) {
@@ -4450,7 +4505,7 @@ static PyObject *__pyx_pw_3hit_4Node_35walk(PyObject *__pyx_v_self, PyObject *__
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("walk", 0, 1, 2, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 174, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("walk", 0, 1, 2, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 175, __pyx_L3_error)
   __pyx_L3_error:;
   __Pyx_AddTraceback("hit.Node.walk", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
@@ -4480,14 +4535,14 @@ static PyObject *__pyx_pf_3hit_4Node_34walk(struct __pyx_obj_3hit_Node *__pyx_v_
   PyObject *(*__pyx_t_11)(PyObject *);
   __Pyx_RefNannySetupContext("walk", 0);
 
-  /* "hit.pyx":175
+  /* "hit.pyx":176
  * 
  *     def walk(self, walker, node_type=NodeType.All):
  *         if self.type() == node_type or node_type == NodeType.All:             # <<<<<<<<<<<<<<
  *             walker.walk(self.fullpath(), self.path(), self);
  *         for child in self.children():
  */
-  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_self), __pyx_n_s_type); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 175, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_self), __pyx_n_s_type); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 176, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __pyx_t_4 = NULL;
   if (CYTHON_UNPACK_METHODS && likely(PyMethod_Check(__pyx_t_3))) {
@@ -4500,45 +4555,45 @@ static PyObject *__pyx_pf_3hit_4Node_34walk(struct __pyx_obj_3hit_Node *__pyx_v_
     }
   }
   if (__pyx_t_4) {
-    __pyx_t_2 = __Pyx_PyObject_CallOneArg(__pyx_t_3, __pyx_t_4); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 175, __pyx_L1_error)
+    __pyx_t_2 = __Pyx_PyObject_CallOneArg(__pyx_t_3, __pyx_t_4); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 176, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   } else {
-    __pyx_t_2 = __Pyx_PyObject_CallNoArg(__pyx_t_3); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 175, __pyx_L1_error)
+    __pyx_t_2 = __Pyx_PyObject_CallNoArg(__pyx_t_3); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 176, __pyx_L1_error)
   }
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  __pyx_t_3 = PyObject_RichCompare(__pyx_t_2, __pyx_v_node_type, Py_EQ); __Pyx_XGOTREF(__pyx_t_3); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 175, __pyx_L1_error)
+  __pyx_t_3 = PyObject_RichCompare(__pyx_t_2, __pyx_v_node_type, Py_EQ); __Pyx_XGOTREF(__pyx_t_3); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 176, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __pyx_t_5 = __Pyx_PyObject_IsTrue(__pyx_t_3); if (unlikely(__pyx_t_5 < 0)) __PYX_ERR(0, 175, __pyx_L1_error)
+  __pyx_t_5 = __Pyx_PyObject_IsTrue(__pyx_t_3); if (unlikely(__pyx_t_5 < 0)) __PYX_ERR(0, 176, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   if (!__pyx_t_5) {
   } else {
     __pyx_t_1 = __pyx_t_5;
     goto __pyx_L4_bool_binop_done;
   }
-  __pyx_t_3 = __Pyx_GetModuleGlobalName(__pyx_n_s_NodeType); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 175, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_GetModuleGlobalName(__pyx_n_s_NodeType); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 176, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_3, __pyx_n_s_All); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 175, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_3, __pyx_n_s_All); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 176, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  __pyx_t_3 = PyObject_RichCompare(__pyx_v_node_type, __pyx_t_2, Py_EQ); __Pyx_XGOTREF(__pyx_t_3); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 175, __pyx_L1_error)
+  __pyx_t_3 = PyObject_RichCompare(__pyx_v_node_type, __pyx_t_2, Py_EQ); __Pyx_XGOTREF(__pyx_t_3); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 176, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __pyx_t_5 = __Pyx_PyObject_IsTrue(__pyx_t_3); if (unlikely(__pyx_t_5 < 0)) __PYX_ERR(0, 175, __pyx_L1_error)
+  __pyx_t_5 = __Pyx_PyObject_IsTrue(__pyx_t_3); if (unlikely(__pyx_t_5 < 0)) __PYX_ERR(0, 176, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __pyx_t_1 = __pyx_t_5;
   __pyx_L4_bool_binop_done:;
   if (__pyx_t_1) {
 
-    /* "hit.pyx":176
+    /* "hit.pyx":177
  *     def walk(self, walker, node_type=NodeType.All):
  *         if self.type() == node_type or node_type == NodeType.All:
  *             walker.walk(self.fullpath(), self.path(), self);             # <<<<<<<<<<<<<<
  *         for child in self.children():
  *             child.walk(walker, node_type);
  */
-    __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_v_walker, __pyx_n_s_walk); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 176, __pyx_L1_error)
+    __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_v_walker, __pyx_n_s_walk); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 177, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
-    __pyx_t_6 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_self), __pyx_n_s_fullpath); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 176, __pyx_L1_error)
+    __pyx_t_6 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_self), __pyx_n_s_fullpath); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 177, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_6);
     __pyx_t_7 = NULL;
     if (CYTHON_UNPACK_METHODS && likely(PyMethod_Check(__pyx_t_6))) {
@@ -4551,14 +4606,14 @@ static PyObject *__pyx_pf_3hit_4Node_34walk(struct __pyx_obj_3hit_Node *__pyx_v_
       }
     }
     if (__pyx_t_7) {
-      __pyx_t_4 = __Pyx_PyObject_CallOneArg(__pyx_t_6, __pyx_t_7); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 176, __pyx_L1_error)
+      __pyx_t_4 = __Pyx_PyObject_CallOneArg(__pyx_t_6, __pyx_t_7); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 177, __pyx_L1_error)
       __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
     } else {
-      __pyx_t_4 = __Pyx_PyObject_CallNoArg(__pyx_t_6); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 176, __pyx_L1_error)
+      __pyx_t_4 = __Pyx_PyObject_CallNoArg(__pyx_t_6); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 177, __pyx_L1_error)
     }
     __Pyx_GOTREF(__pyx_t_4);
     __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
-    __pyx_t_7 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_self), __pyx_n_s_path); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 176, __pyx_L1_error)
+    __pyx_t_7 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_self), __pyx_n_s_path); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 177, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_7);
     __pyx_t_8 = NULL;
     if (CYTHON_UNPACK_METHODS && likely(PyMethod_Check(__pyx_t_7))) {
@@ -4571,10 +4626,10 @@ static PyObject *__pyx_pf_3hit_4Node_34walk(struct __pyx_obj_3hit_Node *__pyx_v_
       }
     }
     if (__pyx_t_8) {
-      __pyx_t_6 = __Pyx_PyObject_CallOneArg(__pyx_t_7, __pyx_t_8); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 176, __pyx_L1_error)
+      __pyx_t_6 = __Pyx_PyObject_CallOneArg(__pyx_t_7, __pyx_t_8); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 177, __pyx_L1_error)
       __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
     } else {
-      __pyx_t_6 = __Pyx_PyObject_CallNoArg(__pyx_t_7); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 176, __pyx_L1_error)
+      __pyx_t_6 = __Pyx_PyObject_CallNoArg(__pyx_t_7); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 177, __pyx_L1_error)
     }
     __Pyx_GOTREF(__pyx_t_6);
     __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
@@ -4593,7 +4648,7 @@ static PyObject *__pyx_pf_3hit_4Node_34walk(struct __pyx_obj_3hit_Node *__pyx_v_
     #if CYTHON_FAST_PYCALL
     if (PyFunction_Check(__pyx_t_2)) {
       PyObject *__pyx_temp[4] = {__pyx_t_7, __pyx_t_4, __pyx_t_6, ((PyObject *)__pyx_v_self)};
-      __pyx_t_3 = __Pyx_PyFunction_FastCall(__pyx_t_2, __pyx_temp+1-__pyx_t_9, 3+__pyx_t_9); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 176, __pyx_L1_error)
+      __pyx_t_3 = __Pyx_PyFunction_FastCall(__pyx_t_2, __pyx_temp+1-__pyx_t_9, 3+__pyx_t_9); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 177, __pyx_L1_error)
       __Pyx_XDECREF(__pyx_t_7); __pyx_t_7 = 0;
       __Pyx_GOTREF(__pyx_t_3);
       __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
@@ -4603,7 +4658,7 @@ static PyObject *__pyx_pf_3hit_4Node_34walk(struct __pyx_obj_3hit_Node *__pyx_v_
     #if CYTHON_FAST_PYCCALL
     if (__Pyx_PyFastCFunction_Check(__pyx_t_2)) {
       PyObject *__pyx_temp[4] = {__pyx_t_7, __pyx_t_4, __pyx_t_6, ((PyObject *)__pyx_v_self)};
-      __pyx_t_3 = __Pyx_PyCFunction_FastCall(__pyx_t_2, __pyx_temp+1-__pyx_t_9, 3+__pyx_t_9); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 176, __pyx_L1_error)
+      __pyx_t_3 = __Pyx_PyCFunction_FastCall(__pyx_t_2, __pyx_temp+1-__pyx_t_9, 3+__pyx_t_9); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 177, __pyx_L1_error)
       __Pyx_XDECREF(__pyx_t_7); __pyx_t_7 = 0;
       __Pyx_GOTREF(__pyx_t_3);
       __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
@@ -4611,7 +4666,7 @@ static PyObject *__pyx_pf_3hit_4Node_34walk(struct __pyx_obj_3hit_Node *__pyx_v_
     } else
     #endif
     {
-      __pyx_t_8 = PyTuple_New(3+__pyx_t_9); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 176, __pyx_L1_error)
+      __pyx_t_8 = PyTuple_New(3+__pyx_t_9); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 177, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_8);
       if (__pyx_t_7) {
         __Pyx_GIVEREF(__pyx_t_7); PyTuple_SET_ITEM(__pyx_t_8, 0, __pyx_t_7); __pyx_t_7 = NULL;
@@ -4625,14 +4680,14 @@ static PyObject *__pyx_pf_3hit_4Node_34walk(struct __pyx_obj_3hit_Node *__pyx_v_
       PyTuple_SET_ITEM(__pyx_t_8, 2+__pyx_t_9, ((PyObject *)__pyx_v_self));
       __pyx_t_4 = 0;
       __pyx_t_6 = 0;
-      __pyx_t_3 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_t_8, NULL); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 176, __pyx_L1_error)
+      __pyx_t_3 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_t_8, NULL); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 177, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_3);
       __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
     }
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
 
-    /* "hit.pyx":175
+    /* "hit.pyx":176
  * 
  *     def walk(self, walker, node_type=NodeType.All):
  *         if self.type() == node_type or node_type == NodeType.All:             # <<<<<<<<<<<<<<
@@ -4641,14 +4696,14 @@ static PyObject *__pyx_pf_3hit_4Node_34walk(struct __pyx_obj_3hit_Node *__pyx_v_
  */
   }
 
-  /* "hit.pyx":177
+  /* "hit.pyx":178
  *         if self.type() == node_type or node_type == NodeType.All:
  *             walker.walk(self.fullpath(), self.path(), self);
  *         for child in self.children():             # <<<<<<<<<<<<<<
  *             child.walk(walker, node_type);
  * 
  */
-  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_self), __pyx_n_s_children); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 177, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_self), __pyx_n_s_children); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 178, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __pyx_t_8 = NULL;
   if (CYTHON_UNPACK_METHODS && likely(PyMethod_Check(__pyx_t_2))) {
@@ -4661,10 +4716,10 @@ static PyObject *__pyx_pf_3hit_4Node_34walk(struct __pyx_obj_3hit_Node *__pyx_v_
     }
   }
   if (__pyx_t_8) {
-    __pyx_t_3 = __Pyx_PyObject_CallOneArg(__pyx_t_2, __pyx_t_8); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 177, __pyx_L1_error)
+    __pyx_t_3 = __Pyx_PyObject_CallOneArg(__pyx_t_2, __pyx_t_8); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 178, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
   } else {
-    __pyx_t_3 = __Pyx_PyObject_CallNoArg(__pyx_t_2); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 177, __pyx_L1_error)
+    __pyx_t_3 = __Pyx_PyObject_CallNoArg(__pyx_t_2); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 178, __pyx_L1_error)
   }
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
@@ -4672,9 +4727,9 @@ static PyObject *__pyx_pf_3hit_4Node_34walk(struct __pyx_obj_3hit_Node *__pyx_v_
     __pyx_t_2 = __pyx_t_3; __Pyx_INCREF(__pyx_t_2); __pyx_t_10 = 0;
     __pyx_t_11 = NULL;
   } else {
-    __pyx_t_10 = -1; __pyx_t_2 = PyObject_GetIter(__pyx_t_3); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 177, __pyx_L1_error)
+    __pyx_t_10 = -1; __pyx_t_2 = PyObject_GetIter(__pyx_t_3); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 178, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
-    __pyx_t_11 = Py_TYPE(__pyx_t_2)->tp_iternext; if (unlikely(!__pyx_t_11)) __PYX_ERR(0, 177, __pyx_L1_error)
+    __pyx_t_11 = Py_TYPE(__pyx_t_2)->tp_iternext; if (unlikely(!__pyx_t_11)) __PYX_ERR(0, 178, __pyx_L1_error)
   }
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   for (;;) {
@@ -4682,17 +4737,17 @@ static PyObject *__pyx_pf_3hit_4Node_34walk(struct __pyx_obj_3hit_Node *__pyx_v_
       if (likely(PyList_CheckExact(__pyx_t_2))) {
         if (__pyx_t_10 >= PyList_GET_SIZE(__pyx_t_2)) break;
         #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
-        __pyx_t_3 = PyList_GET_ITEM(__pyx_t_2, __pyx_t_10); __Pyx_INCREF(__pyx_t_3); __pyx_t_10++; if (unlikely(0 < 0)) __PYX_ERR(0, 177, __pyx_L1_error)
+        __pyx_t_3 = PyList_GET_ITEM(__pyx_t_2, __pyx_t_10); __Pyx_INCREF(__pyx_t_3); __pyx_t_10++; if (unlikely(0 < 0)) __PYX_ERR(0, 178, __pyx_L1_error)
         #else
-        __pyx_t_3 = PySequence_ITEM(__pyx_t_2, __pyx_t_10); __pyx_t_10++; if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 177, __pyx_L1_error)
+        __pyx_t_3 = PySequence_ITEM(__pyx_t_2, __pyx_t_10); __pyx_t_10++; if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 178, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_3);
         #endif
       } else {
         if (__pyx_t_10 >= PyTuple_GET_SIZE(__pyx_t_2)) break;
         #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
-        __pyx_t_3 = PyTuple_GET_ITEM(__pyx_t_2, __pyx_t_10); __Pyx_INCREF(__pyx_t_3); __pyx_t_10++; if (unlikely(0 < 0)) __PYX_ERR(0, 177, __pyx_L1_error)
+        __pyx_t_3 = PyTuple_GET_ITEM(__pyx_t_2, __pyx_t_10); __Pyx_INCREF(__pyx_t_3); __pyx_t_10++; if (unlikely(0 < 0)) __PYX_ERR(0, 178, __pyx_L1_error)
         #else
-        __pyx_t_3 = PySequence_ITEM(__pyx_t_2, __pyx_t_10); __pyx_t_10++; if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 177, __pyx_L1_error)
+        __pyx_t_3 = PySequence_ITEM(__pyx_t_2, __pyx_t_10); __pyx_t_10++; if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 178, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_3);
         #endif
       }
@@ -4702,7 +4757,7 @@ static PyObject *__pyx_pf_3hit_4Node_34walk(struct __pyx_obj_3hit_Node *__pyx_v_
         PyObject* exc_type = PyErr_Occurred();
         if (exc_type) {
           if (likely(exc_type == PyExc_StopIteration || PyErr_GivenExceptionMatches(exc_type, PyExc_StopIteration))) PyErr_Clear();
-          else __PYX_ERR(0, 177, __pyx_L1_error)
+          else __PYX_ERR(0, 178, __pyx_L1_error)
         }
         break;
       }
@@ -4711,14 +4766,14 @@ static PyObject *__pyx_pf_3hit_4Node_34walk(struct __pyx_obj_3hit_Node *__pyx_v_
     __Pyx_XDECREF_SET(__pyx_v_child, __pyx_t_3);
     __pyx_t_3 = 0;
 
-    /* "hit.pyx":178
+    /* "hit.pyx":179
  *             walker.walk(self.fullpath(), self.path(), self);
  *         for child in self.children():
  *             child.walk(walker, node_type);             # <<<<<<<<<<<<<<
  * 
  *     def clone(self):
  */
-    __pyx_t_8 = __Pyx_PyObject_GetAttrStr(__pyx_v_child, __pyx_n_s_walk); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 178, __pyx_L1_error)
+    __pyx_t_8 = __Pyx_PyObject_GetAttrStr(__pyx_v_child, __pyx_n_s_walk); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 179, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_8);
     __pyx_t_6 = NULL;
     __pyx_t_9 = 0;
@@ -4735,7 +4790,7 @@ static PyObject *__pyx_pf_3hit_4Node_34walk(struct __pyx_obj_3hit_Node *__pyx_v_
     #if CYTHON_FAST_PYCALL
     if (PyFunction_Check(__pyx_t_8)) {
       PyObject *__pyx_temp[3] = {__pyx_t_6, __pyx_v_walker, __pyx_v_node_type};
-      __pyx_t_3 = __Pyx_PyFunction_FastCall(__pyx_t_8, __pyx_temp+1-__pyx_t_9, 2+__pyx_t_9); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 178, __pyx_L1_error)
+      __pyx_t_3 = __Pyx_PyFunction_FastCall(__pyx_t_8, __pyx_temp+1-__pyx_t_9, 2+__pyx_t_9); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 179, __pyx_L1_error)
       __Pyx_XDECREF(__pyx_t_6); __pyx_t_6 = 0;
       __Pyx_GOTREF(__pyx_t_3);
     } else
@@ -4743,13 +4798,13 @@ static PyObject *__pyx_pf_3hit_4Node_34walk(struct __pyx_obj_3hit_Node *__pyx_v_
     #if CYTHON_FAST_PYCCALL
     if (__Pyx_PyFastCFunction_Check(__pyx_t_8)) {
       PyObject *__pyx_temp[3] = {__pyx_t_6, __pyx_v_walker, __pyx_v_node_type};
-      __pyx_t_3 = __Pyx_PyCFunction_FastCall(__pyx_t_8, __pyx_temp+1-__pyx_t_9, 2+__pyx_t_9); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 178, __pyx_L1_error)
+      __pyx_t_3 = __Pyx_PyCFunction_FastCall(__pyx_t_8, __pyx_temp+1-__pyx_t_9, 2+__pyx_t_9); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 179, __pyx_L1_error)
       __Pyx_XDECREF(__pyx_t_6); __pyx_t_6 = 0;
       __Pyx_GOTREF(__pyx_t_3);
     } else
     #endif
     {
-      __pyx_t_4 = PyTuple_New(2+__pyx_t_9); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 178, __pyx_L1_error)
+      __pyx_t_4 = PyTuple_New(2+__pyx_t_9); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 179, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_4);
       if (__pyx_t_6) {
         __Pyx_GIVEREF(__pyx_t_6); PyTuple_SET_ITEM(__pyx_t_4, 0, __pyx_t_6); __pyx_t_6 = NULL;
@@ -4760,14 +4815,14 @@ static PyObject *__pyx_pf_3hit_4Node_34walk(struct __pyx_obj_3hit_Node *__pyx_v_
       __Pyx_INCREF(__pyx_v_node_type);
       __Pyx_GIVEREF(__pyx_v_node_type);
       PyTuple_SET_ITEM(__pyx_t_4, 1+__pyx_t_9, __pyx_v_node_type);
-      __pyx_t_3 = __Pyx_PyObject_Call(__pyx_t_8, __pyx_t_4, NULL); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 178, __pyx_L1_error)
+      __pyx_t_3 = __Pyx_PyObject_Call(__pyx_t_8, __pyx_t_4, NULL); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 179, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_3);
       __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
     }
     __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
 
-    /* "hit.pyx":177
+    /* "hit.pyx":178
  *         if self.type() == node_type or node_type == NodeType.All:
  *             walker.walk(self.fullpath(), self.path(), self);
  *         for child in self.children():             # <<<<<<<<<<<<<<
@@ -4777,7 +4832,7 @@ static PyObject *__pyx_pf_3hit_4Node_34walk(struct __pyx_obj_3hit_Node *__pyx_v_
   }
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-  /* "hit.pyx":174
+  /* "hit.pyx":175
  *         return str(f.strVal())
  * 
  *     def walk(self, walker, node_type=NodeType.All):             # <<<<<<<<<<<<<<
@@ -4804,7 +4859,7 @@ static PyObject *__pyx_pf_3hit_4Node_34walk(struct __pyx_obj_3hit_Node *__pyx_v_
   return __pyx_r;
 }
 
-/* "hit.pyx":180
+/* "hit.pyx":181
  *             child.walk(walker, node_type);
  * 
  *     def clone(self):             # <<<<<<<<<<<<<<
@@ -4833,7 +4888,7 @@ static PyObject *__pyx_pf_3hit_4Node_36clone(struct __pyx_obj_3hit_Node *__pyx_v
   struct __pyx_opt_args_3hit__initpynode __pyx_t_3;
   __Pyx_RefNannySetupContext("clone", 0);
 
-  /* "hit.pyx":181
+  /* "hit.pyx":182
  * 
  *     def clone(self):
  *         return _initpynode(self._cnode.clone(), own=self._own)             # <<<<<<<<<<<<<<
@@ -4841,18 +4896,18 @@ static PyObject *__pyx_pf_3hit_4Node_36clone(struct __pyx_obj_3hit_Node *__pyx_v
  *         return _initpynode(self._cnode.root())
  */
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = __Pyx_PyBool_FromLong(__pyx_v_self->_own); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 181, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyBool_FromLong(__pyx_v_self->_own); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 182, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_t_3.__pyx_n = 1;
   __pyx_t_3.own = __pyx_t_1;
-  __pyx_t_2 = __pyx_f_3hit__initpynode(__pyx_v_self->_cnode->clone(), &__pyx_t_3); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 181, __pyx_L1_error)
+  __pyx_t_2 = __pyx_f_3hit__initpynode(__pyx_v_self->_cnode->clone(), &__pyx_t_3); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 182, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __pyx_r = __pyx_t_2;
   __pyx_t_2 = 0;
   goto __pyx_L0;
 
-  /* "hit.pyx":180
+  /* "hit.pyx":181
  *             child.walk(walker, node_type);
  * 
  *     def clone(self):             # <<<<<<<<<<<<<<
@@ -4872,7 +4927,7 @@ static PyObject *__pyx_pf_3hit_4Node_36clone(struct __pyx_obj_3hit_Node *__pyx_v
   return __pyx_r;
 }
 
-/* "hit.pyx":182
+/* "hit.pyx":183
  *     def clone(self):
  *         return _initpynode(self._cnode.clone(), own=self._own)
  *     def root(self):             # <<<<<<<<<<<<<<
@@ -4899,7 +4954,7 @@ static PyObject *__pyx_pf_3hit_4Node_38root(struct __pyx_obj_3hit_Node *__pyx_v_
   PyObject *__pyx_t_1 = NULL;
   __Pyx_RefNannySetupContext("root", 0);
 
-  /* "hit.pyx":183
+  /* "hit.pyx":184
  *         return _initpynode(self._cnode.clone(), own=self._own)
  *     def root(self):
  *         return _initpynode(self._cnode.root())             # <<<<<<<<<<<<<<
@@ -4907,13 +4962,13 @@ static PyObject *__pyx_pf_3hit_4Node_38root(struct __pyx_obj_3hit_Node *__pyx_v_
  *         return _initpynode(self._cnode.root())
  */
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = __pyx_f_3hit__initpynode(__pyx_v_self->_cnode->root(), NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 183, __pyx_L1_error)
+  __pyx_t_1 = __pyx_f_3hit__initpynode(__pyx_v_self->_cnode->root(), NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 184, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_r = __pyx_t_1;
   __pyx_t_1 = 0;
   goto __pyx_L0;
 
-  /* "hit.pyx":182
+  /* "hit.pyx":183
  *     def clone(self):
  *         return _initpynode(self._cnode.clone(), own=self._own)
  *     def root(self):             # <<<<<<<<<<<<<<
@@ -4932,7 +4987,7 @@ static PyObject *__pyx_pf_3hit_4Node_38root(struct __pyx_obj_3hit_Node *__pyx_v_
   return __pyx_r;
 }
 
-/* "hit.pyx":184
+/* "hit.pyx":185
  *     def root(self):
  *         return _initpynode(self._cnode.root())
  *     def parent(self):             # <<<<<<<<<<<<<<
@@ -4959,7 +5014,7 @@ static PyObject *__pyx_pf_3hit_4Node_40parent(struct __pyx_obj_3hit_Node *__pyx_
   PyObject *__pyx_t_1 = NULL;
   __Pyx_RefNannySetupContext("parent", 0);
 
-  /* "hit.pyx":185
+  /* "hit.pyx":186
  *         return _initpynode(self._cnode.root())
  *     def parent(self):
  *         return _initpynode(self._cnode.root())             # <<<<<<<<<<<<<<
@@ -4967,13 +5022,13 @@ static PyObject *__pyx_pf_3hit_4Node_40parent(struct __pyx_obj_3hit_Node *__pyx_
  *         self._cnode.addChild(child._cnode)
  */
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = __pyx_f_3hit__initpynode(__pyx_v_self->_cnode->root(), NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 185, __pyx_L1_error)
+  __pyx_t_1 = __pyx_f_3hit__initpynode(__pyx_v_self->_cnode->root(), NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 186, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_r = __pyx_t_1;
   __pyx_t_1 = 0;
   goto __pyx_L0;
 
-  /* "hit.pyx":184
+  /* "hit.pyx":185
  *     def root(self):
  *         return _initpynode(self._cnode.root())
  *     def parent(self):             # <<<<<<<<<<<<<<
@@ -4992,7 +5047,7 @@ static PyObject *__pyx_pf_3hit_4Node_40parent(struct __pyx_obj_3hit_Node *__pyx_
   return __pyx_r;
 }
 
-/* "hit.pyx":186
+/* "hit.pyx":187
  *     def parent(self):
  *         return _initpynode(self._cnode.root())
  *     def addChild(self, Node child):             # <<<<<<<<<<<<<<
@@ -5006,7 +5061,7 @@ static PyObject *__pyx_pw_3hit_4Node_43addChild(PyObject *__pyx_v_self, PyObject
   PyObject *__pyx_r = 0;
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("addChild (wrapper)", 0);
-  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_child), __pyx_ptype_3hit_Node, 1, "child", 0))) __PYX_ERR(0, 186, __pyx_L1_error)
+  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_child), __pyx_ptype_3hit_Node, 1, "child", 0))) __PYX_ERR(0, 187, __pyx_L1_error)
   __pyx_r = __pyx_pf_3hit_4Node_42addChild(((struct __pyx_obj_3hit_Node *)__pyx_v_self), ((struct __pyx_obj_3hit_Node *)__pyx_v_child));
 
   /* function exit code */
@@ -5023,7 +5078,7 @@ static PyObject *__pyx_pf_3hit_4Node_42addChild(struct __pyx_obj_3hit_Node *__py
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("addChild", 0);
 
-  /* "hit.pyx":187
+  /* "hit.pyx":188
  *         return _initpynode(self._cnode.root())
  *     def addChild(self, Node child):
  *         self._cnode.addChild(child._cnode)             # <<<<<<<<<<<<<<
@@ -5032,7 +5087,7 @@ static PyObject *__pyx_pf_3hit_4Node_42addChild(struct __pyx_obj_3hit_Node *__py
  */
   __pyx_v_self->_cnode->addChild(__pyx_v_child->_cnode);
 
-  /* "hit.pyx":186
+  /* "hit.pyx":187
  *     def parent(self):
  *         return _initpynode(self._cnode.root())
  *     def addChild(self, Node child):             # <<<<<<<<<<<<<<
@@ -5047,7 +5102,7 @@ static PyObject *__pyx_pf_3hit_4Node_42addChild(struct __pyx_obj_3hit_Node *__py
   return __pyx_r;
 }
 
-/* "hit.pyx":188
+/* "hit.pyx":189
  *     def addChild(self, Node child):
  *         self._cnode.addChild(child._cnode)
  *     def children(self, node_type = NodeType.All):             # <<<<<<<<<<<<<<
@@ -5065,7 +5120,7 @@ static PyObject *__pyx_pw_3hit_4Node_45children(PyObject *__pyx_v_self, PyObject
   {
     static PyObject **__pyx_pyargnames[] = {&__pyx_n_s_node_type,0};
     PyObject* values[1] = {0};
-    values[0] = __pyx_k__9;
+    values[0] = __pyx_k__11;
     if (unlikely(__pyx_kwds)) {
       Py_ssize_t kw_args;
       const Py_ssize_t pos_args = PyTuple_GET_SIZE(__pyx_args);
@@ -5084,7 +5139,7 @@ static PyObject *__pyx_pw_3hit_4Node_45children(PyObject *__pyx_v_self, PyObject
         }
       }
       if (unlikely(kw_args > 0)) {
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "children") < 0)) __PYX_ERR(0, 188, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "children") < 0)) __PYX_ERR(0, 189, __pyx_L3_error)
       }
     } else {
       switch (PyTuple_GET_SIZE(__pyx_args)) {
@@ -5098,7 +5153,7 @@ static PyObject *__pyx_pw_3hit_4Node_45children(PyObject *__pyx_v_self, PyObject
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("children", 0, 0, 1, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 188, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("children", 0, 0, 1, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 189, __pyx_L3_error)
   __pyx_L3_error:;
   __Pyx_AddTraceback("hit.Node.children", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
@@ -5123,7 +5178,7 @@ static PyObject *__pyx_pf_3hit_4Node_44children(struct __pyx_obj_3hit_Node *__py
   int __pyx_t_4;
   __Pyx_RefNannySetupContext("children", 0);
 
-  /* "hit.pyx":189
+  /* "hit.pyx":190
  *         self._cnode.addChild(child._cnode)
  *     def children(self, node_type = NodeType.All):
  *         ckids = self._cnode.children(_nodetype_enum(node_type));             # <<<<<<<<<<<<<<
@@ -5132,19 +5187,19 @@ static PyObject *__pyx_pf_3hit_4Node_44children(struct __pyx_obj_3hit_Node *__py
  */
   __pyx_v_ckids = __pyx_v_self->_cnode->children(__pyx_f_3hit__nodetype_enum(__pyx_v_node_type));
 
-  /* "hit.pyx":190
+  /* "hit.pyx":191
  *     def children(self, node_type = NodeType.All):
  *         ckids = self._cnode.children(_nodetype_enum(node_type));
  *         kids = []             # <<<<<<<<<<<<<<
  *         for val in ckids:
  *             kids.append(_initpynode(val))
  */
-  __pyx_t_1 = PyList_New(0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 190, __pyx_L1_error)
+  __pyx_t_1 = PyList_New(0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 191, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_v_kids = ((PyObject*)__pyx_t_1);
   __pyx_t_1 = 0;
 
-  /* "hit.pyx":191
+  /* "hit.pyx":192
  *         ckids = self._cnode.children(_nodetype_enum(node_type));
  *         kids = []
  *         for val in ckids:             # <<<<<<<<<<<<<<
@@ -5158,19 +5213,19 @@ static PyObject *__pyx_pf_3hit_4Node_44children(struct __pyx_obj_3hit_Node *__py
     ++__pyx_t_2;
     __pyx_v_val = __pyx_t_3;
 
-    /* "hit.pyx":192
+    /* "hit.pyx":193
  *         kids = []
  *         for val in ckids:
  *             kids.append(_initpynode(val))             # <<<<<<<<<<<<<<
  *         return kids
  * 
  */
-    __pyx_t_1 = __pyx_f_3hit__initpynode(__pyx_v_val, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 192, __pyx_L1_error)
+    __pyx_t_1 = __pyx_f_3hit__initpynode(__pyx_v_val, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 193, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
-    __pyx_t_4 = __Pyx_PyList_Append(__pyx_v_kids, __pyx_t_1); if (unlikely(__pyx_t_4 == -1)) __PYX_ERR(0, 192, __pyx_L1_error)
+    __pyx_t_4 = __Pyx_PyList_Append(__pyx_v_kids, __pyx_t_1); if (unlikely(__pyx_t_4 == -1)) __PYX_ERR(0, 193, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-    /* "hit.pyx":191
+    /* "hit.pyx":192
  *         ckids = self._cnode.children(_nodetype_enum(node_type));
  *         kids = []
  *         for val in ckids:             # <<<<<<<<<<<<<<
@@ -5179,7 +5234,7 @@ static PyObject *__pyx_pf_3hit_4Node_44children(struct __pyx_obj_3hit_Node *__py
  */
   }
 
-  /* "hit.pyx":193
+  /* "hit.pyx":194
  *         for val in ckids:
  *             kids.append(_initpynode(val))
  *         return kids             # <<<<<<<<<<<<<<
@@ -5191,7 +5246,7 @@ static PyObject *__pyx_pf_3hit_4Node_44children(struct __pyx_obj_3hit_Node *__py
   __pyx_r = __pyx_v_kids;
   goto __pyx_L0;
 
-  /* "hit.pyx":188
+  /* "hit.pyx":189
  *     def addChild(self, Node child):
  *         self._cnode.addChild(child._cnode)
  *     def children(self, node_type = NodeType.All):             # <<<<<<<<<<<<<<
@@ -5211,7 +5266,7 @@ static PyObject *__pyx_pf_3hit_4Node_44children(struct __pyx_obj_3hit_Node *__py
   return __pyx_r;
 }
 
-/* "hit.pyx":198
+/* "hit.pyx":199
  * # constructors are python objects.  So the Node constructor does nothing and this function
  * # actually sets the internal cnode member pointer.
  * cdef _initpynode(chit.Node* n, own=False):             # <<<<<<<<<<<<<<
@@ -5233,23 +5288,23 @@ static PyObject *__pyx_f_3hit__initpynode(hit::Node *__pyx_v_n, struct __pyx_opt
     }
   }
 
-  /* "hit.pyx":199
+  /* "hit.pyx":200
  * # actually sets the internal cnode member pointer.
  * cdef _initpynode(chit.Node* n, own=False):
  *     pyn = Node(own=own)             # <<<<<<<<<<<<<<
  *     pyn._cnode = n
  *     return pyn
  */
-  __pyx_t_1 = PyDict_New(); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 199, __pyx_L1_error)
+  __pyx_t_1 = PyDict_New(); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 200, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_own, __pyx_v_own) < 0) __PYX_ERR(0, 199, __pyx_L1_error)
-  __pyx_t_2 = __Pyx_PyObject_Call(((PyObject *)__pyx_ptype_3hit_Node), __pyx_empty_tuple, __pyx_t_1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 199, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_own, __pyx_v_own) < 0) __PYX_ERR(0, 200, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_Call(((PyObject *)__pyx_ptype_3hit_Node), __pyx_empty_tuple, __pyx_t_1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 200, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __pyx_v_pyn = ((struct __pyx_obj_3hit_Node *)__pyx_t_2);
   __pyx_t_2 = 0;
 
-  /* "hit.pyx":200
+  /* "hit.pyx":201
  * cdef _initpynode(chit.Node* n, own=False):
  *     pyn = Node(own=own)
  *     pyn._cnode = n             # <<<<<<<<<<<<<<
@@ -5258,7 +5313,7 @@ static PyObject *__pyx_f_3hit__initpynode(hit::Node *__pyx_v_n, struct __pyx_opt
  */
   __pyx_v_pyn->_cnode = __pyx_v_n;
 
-  /* "hit.pyx":201
+  /* "hit.pyx":202
  *     pyn = Node(own=own)
  *     pyn._cnode = n
  *     return pyn             # <<<<<<<<<<<<<<
@@ -5270,7 +5325,7 @@ static PyObject *__pyx_f_3hit__initpynode(hit::Node *__pyx_v_n, struct __pyx_opt
   __pyx_r = ((PyObject *)__pyx_v_pyn);
   goto __pyx_L0;
 
-  /* "hit.pyx":198
+  /* "hit.pyx":199
  * # constructors are python objects.  So the Node constructor does nothing and this function
  * # actually sets the internal cnode member pointer.
  * cdef _initpynode(chit.Node* n, own=False):             # <<<<<<<<<<<<<<
@@ -5291,7 +5346,7 @@ static PyObject *__pyx_f_3hit__initpynode(hit::Node *__pyx_v_n, struct __pyx_opt
   return __pyx_r;
 }
 
-/* "hit.pyx":203
+/* "hit.pyx":204
  *     return pyn
  * 
  * def parse(fname, input):             # <<<<<<<<<<<<<<
@@ -5331,11 +5386,11 @@ static PyObject *__pyx_pw_3hit_9parse(PyObject *__pyx_self, PyObject *__pyx_args
         case  1:
         if (likely((values[1] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_input)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("parse", 1, 2, 2, 1); __PYX_ERR(0, 203, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("parse", 1, 2, 2, 1); __PYX_ERR(0, 204, __pyx_L3_error)
         }
       }
       if (unlikely(kw_args > 0)) {
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "parse") < 0)) __PYX_ERR(0, 203, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "parse") < 0)) __PYX_ERR(0, 204, __pyx_L3_error)
       }
     } else if (PyTuple_GET_SIZE(__pyx_args) != 2) {
       goto __pyx_L5_argtuple_error;
@@ -5348,7 +5403,7 @@ static PyObject *__pyx_pw_3hit_9parse(PyObject *__pyx_self, PyObject *__pyx_args
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("parse", 1, 2, 2, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 203, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("parse", 1, 2, 2, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 204, __pyx_L3_error)
   __pyx_L3_error:;
   __Pyx_AddTraceback("hit.parse", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
@@ -5372,24 +5427,24 @@ static PyObject *__pyx_pf_3hit_8parse(CYTHON_UNUSED PyObject *__pyx_self, PyObje
   struct __pyx_opt_args_3hit__initpynode __pyx_t_5;
   __Pyx_RefNannySetupContext("parse", 0);
 
-  /* "hit.pyx":204
+  /* "hit.pyx":205
  * 
  * def parse(fname, input):
  *     cdef chit.Node* node = chit.parse(fname, input)             # <<<<<<<<<<<<<<
  *     return _initpynode(node, own=True)
  * 
  */
-  __pyx_t_1 = __pyx_convert_string_from_py_std__in_string(__pyx_v_fname); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 204, __pyx_L1_error)
-  __pyx_t_2 = __pyx_convert_string_from_py_std__in_string(__pyx_v_input); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 204, __pyx_L1_error)
+  __pyx_t_1 = __pyx_convert_string_from_py_std__in_string(__pyx_v_fname); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 205, __pyx_L1_error)
+  __pyx_t_2 = __pyx_convert_string_from_py_std__in_string(__pyx_v_input); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 205, __pyx_L1_error)
   try {
     __pyx_t_3 = hit::parse(__pyx_t_1, __pyx_t_2);
   } catch(...) {
     __Pyx_CppExn2PyErr();
-    __PYX_ERR(0, 204, __pyx_L1_error)
+    __PYX_ERR(0, 205, __pyx_L1_error)
   }
   __pyx_v_node = __pyx_t_3;
 
-  /* "hit.pyx":205
+  /* "hit.pyx":206
  * def parse(fname, input):
  *     cdef chit.Node* node = chit.parse(fname, input)
  *     return _initpynode(node, own=True)             # <<<<<<<<<<<<<<
@@ -5399,13 +5454,13 @@ static PyObject *__pyx_pf_3hit_8parse(CYTHON_UNUSED PyObject *__pyx_self, PyObje
   __Pyx_XDECREF(__pyx_r);
   __pyx_t_5.__pyx_n = 1;
   __pyx_t_5.own = Py_True;
-  __pyx_t_4 = __pyx_f_3hit__initpynode(__pyx_v_node, &__pyx_t_5); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 205, __pyx_L1_error)
+  __pyx_t_4 = __pyx_f_3hit__initpynode(__pyx_v_node, &__pyx_t_5); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 206, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
   __pyx_r = __pyx_t_4;
   __pyx_t_4 = 0;
   goto __pyx_L0;
 
-  /* "hit.pyx":203
+  /* "hit.pyx":204
  *     return pyn
  * 
  * def parse(fname, input):             # <<<<<<<<<<<<<<
@@ -5424,7 +5479,7 @@ static PyObject *__pyx_pf_3hit_8parse(CYTHON_UNUSED PyObject *__pyx_self, PyObje
   return __pyx_r;
 }
 
-/* "hit.pyx":207
+/* "hit.pyx":208
  *     return _initpynode(node, own=True)
  * 
  * cpdef explode(Node n):             # <<<<<<<<<<<<<<
@@ -5439,7 +5494,7 @@ static PyObject *__pyx_f_3hit_explode(struct __pyx_obj_3hit_Node *__pyx_v_n, CYT
   hit::Node *__pyx_t_1;
   __Pyx_RefNannySetupContext("explode", 0);
 
-  /* "hit.pyx":208
+  /* "hit.pyx":209
  * 
  * cpdef explode(Node n):
  *     n._cnode = chit.explode(n._cnode)             # <<<<<<<<<<<<<<
@@ -5450,11 +5505,11 @@ static PyObject *__pyx_f_3hit_explode(struct __pyx_obj_3hit_Node *__pyx_v_n, CYT
     __pyx_t_1 = hit::explode(__pyx_v_n->_cnode);
   } catch(...) {
     __Pyx_CppExn2PyErr();
-    __PYX_ERR(0, 208, __pyx_L1_error)
+    __PYX_ERR(0, 209, __pyx_L1_error)
   }
   __pyx_v_n->_cnode = __pyx_t_1;
 
-  /* "hit.pyx":209
+  /* "hit.pyx":210
  * cpdef explode(Node n):
  *     n._cnode = chit.explode(n._cnode)
  *     return n             # <<<<<<<<<<<<<<
@@ -5466,7 +5521,7 @@ static PyObject *__pyx_f_3hit_explode(struct __pyx_obj_3hit_Node *__pyx_v_n, CYT
   __pyx_r = ((PyObject *)__pyx_v_n);
   goto __pyx_L0;
 
-  /* "hit.pyx":207
+  /* "hit.pyx":208
  *     return _initpynode(node, own=True)
  * 
  * cpdef explode(Node n):             # <<<<<<<<<<<<<<
@@ -5490,7 +5545,7 @@ static PyObject *__pyx_pw_3hit_11explode(PyObject *__pyx_self, PyObject *__pyx_v
   PyObject *__pyx_r = 0;
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("explode (wrapper)", 0);
-  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_n), __pyx_ptype_3hit_Node, 1, "n", 0))) __PYX_ERR(0, 207, __pyx_L1_error)
+  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_n), __pyx_ptype_3hit_Node, 1, "n", 0))) __PYX_ERR(0, 208, __pyx_L1_error)
   __pyx_r = __pyx_pf_3hit_10explode(__pyx_self, ((struct __pyx_obj_3hit_Node *)__pyx_v_n));
 
   /* function exit code */
@@ -5508,7 +5563,7 @@ static PyObject *__pyx_pf_3hit_10explode(CYTHON_UNUSED PyObject *__pyx_self, str
   PyObject *__pyx_t_1 = NULL;
   __Pyx_RefNannySetupContext("explode", 0);
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = __pyx_f_3hit_explode(__pyx_v_n, 0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 207, __pyx_L1_error)
+  __pyx_t_1 = __pyx_f_3hit_explode(__pyx_v_n, 0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 208, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_r = __pyx_t_1;
   __pyx_t_1 = 0;
@@ -5525,7 +5580,7 @@ static PyObject *__pyx_pf_3hit_10explode(CYTHON_UNUSED PyObject *__pyx_self, str
   return __pyx_r;
 }
 
-/* "hit.pyx":211
+/* "hit.pyx":212
  *     return n
  * 
  * cpdef merge(Node src, Node dst):             # <<<<<<<<<<<<<<
@@ -5539,7 +5594,7 @@ static PyObject *__pyx_f_3hit_merge(struct __pyx_obj_3hit_Node *__pyx_v_src, str
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("merge", 0);
 
-  /* "hit.pyx":212
+  /* "hit.pyx":213
  * 
  * cpdef merge(Node src, Node dst):
  *     chit.merge(src._cnode, dst._cnode)             # <<<<<<<<<<<<<<
@@ -5549,10 +5604,10 @@ static PyObject *__pyx_f_3hit_merge(struct __pyx_obj_3hit_Node *__pyx_v_src, str
     hit::merge(__pyx_v_src->_cnode, __pyx_v_dst->_cnode);
   } catch(...) {
     __Pyx_CppExn2PyErr();
-    __PYX_ERR(0, 212, __pyx_L1_error)
+    __PYX_ERR(0, 213, __pyx_L1_error)
   }
 
-  /* "hit.pyx":211
+  /* "hit.pyx":212
  *     return n
  * 
  * cpdef merge(Node src, Node dst):             # <<<<<<<<<<<<<<
@@ -5603,11 +5658,11 @@ static PyObject *__pyx_pw_3hit_13merge(PyObject *__pyx_self, PyObject *__pyx_arg
         case  1:
         if (likely((values[1] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_dst)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("merge", 1, 2, 2, 1); __PYX_ERR(0, 211, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("merge", 1, 2, 2, 1); __PYX_ERR(0, 212, __pyx_L3_error)
         }
       }
       if (unlikely(kw_args > 0)) {
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "merge") < 0)) __PYX_ERR(0, 211, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "merge") < 0)) __PYX_ERR(0, 212, __pyx_L3_error)
       }
     } else if (PyTuple_GET_SIZE(__pyx_args) != 2) {
       goto __pyx_L5_argtuple_error;
@@ -5620,14 +5675,14 @@ static PyObject *__pyx_pw_3hit_13merge(PyObject *__pyx_self, PyObject *__pyx_arg
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("merge", 1, 2, 2, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 211, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("merge", 1, 2, 2, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 212, __pyx_L3_error)
   __pyx_L3_error:;
   __Pyx_AddTraceback("hit.merge", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
-  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_src), __pyx_ptype_3hit_Node, 1, "src", 0))) __PYX_ERR(0, 211, __pyx_L1_error)
-  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_dst), __pyx_ptype_3hit_Node, 1, "dst", 0))) __PYX_ERR(0, 211, __pyx_L1_error)
+  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_src), __pyx_ptype_3hit_Node, 1, "src", 0))) __PYX_ERR(0, 212, __pyx_L1_error)
+  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_dst), __pyx_ptype_3hit_Node, 1, "dst", 0))) __PYX_ERR(0, 212, __pyx_L1_error)
   __pyx_r = __pyx_pf_3hit_12merge(__pyx_self, __pyx_v_src, __pyx_v_dst);
 
   /* function exit code */
@@ -5645,7 +5700,7 @@ static PyObject *__pyx_pf_3hit_12merge(CYTHON_UNUSED PyObject *__pyx_self, struc
   PyObject *__pyx_t_1 = NULL;
   __Pyx_RefNannySetupContext("merge", 0);
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = __pyx_f_3hit_merge(__pyx_v_src, __pyx_v_dst, 0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 211, __pyx_L1_error)
+  __pyx_t_1 = __pyx_f_3hit_merge(__pyx_v_src, __pyx_v_dst, 0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 212, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_r = __pyx_t_1;
   __pyx_t_1 = 0;
@@ -6116,6 +6171,7 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_n_s_String, __pyx_k_String, sizeof(__pyx_k_String), 0, 0, 1, 1},
   {&__pyx_n_s_Unknown, __pyx_k_Unknown, sizeof(__pyx_k_Unknown), 0, 0, 1, 1},
   {&__pyx_kp_s__5, __pyx_k__5, sizeof(__pyx_k__5), 0, 0, 1, 0},
+  {&__pyx_kp_s__6, __pyx_k__6, sizeof(__pyx_k__6), 0, 0, 1, 0},
   {&__pyx_n_s_children, __pyx_k_children, sizeof(__pyx_k_children), 0, 0, 1, 1},
   {&__pyx_n_s_cline_in_traceback, __pyx_k_cline_in_traceback, sizeof(__pyx_k_cline_in_traceback), 0, 0, 1, 1},
   {&__pyx_n_s_clone, __pyx_k_clone, sizeof(__pyx_k_clone), 0, 0, 1, 1},
@@ -6127,10 +6183,12 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_n_s_hit, __pyx_k_hit, sizeof(__pyx_k_hit), 0, 0, 1, 1},
   {&__pyx_kp_s_hit_pyx, __pyx_k_hit_pyx, sizeof(__pyx_k_hit_pyx), 0, 0, 1, 0},
   {&__pyx_n_s_indent, __pyx_k_indent, sizeof(__pyx_k_indent), 0, 0, 1, 1},
+  {&__pyx_n_s_indent_text, __pyx_k_indent_text, sizeof(__pyx_k_indent_text), 0, 0, 1, 1},
   {&__pyx_n_s_input, __pyx_k_input, sizeof(__pyx_k_input), 0, 0, 1, 1},
   {&__pyx_n_s_is_inline, __pyx_k_is_inline, sizeof(__pyx_k_is_inline), 0, 0, 1, 1},
   {&__pyx_n_s_kind, __pyx_k_kind, sizeof(__pyx_k_kind), 0, 0, 1, 1},
   {&__pyx_n_s_main, __pyx_k_main, sizeof(__pyx_k_main), 0, 0, 1, 1},
+  {&__pyx_n_s_maxlen, __pyx_k_maxlen, sizeof(__pyx_k_maxlen), 0, 0, 1, 1},
   {&__pyx_n_s_metaclass, __pyx_k_metaclass, sizeof(__pyx_k_metaclass), 0, 0, 1, 1},
   {&__pyx_n_s_module, __pyx_k_module, sizeof(__pyx_k_module), 0, 0, 1, 1},
   {&__pyx_n_s_name, __pyx_k_name, sizeof(__pyx_k_name), 0, 0, 1, 1},
@@ -6211,39 +6269,50 @@ static int __Pyx_InitCachedConstants(void) {
   __Pyx_GOTREF(__pyx_tuple__4);
   __Pyx_GIVEREF(__pyx_tuple__4);
 
-  /* "hit.pyx":146
+  /* "hit.pyx":102
+ * 
+ *     def render(self, indent=0, indent_text='  ', maxlen=0):
+ *         cindent = <string> indent_text.encode('utf-8')             # <<<<<<<<<<<<<<
+ *         return self._cnode.render(indent, cindent, maxlen)
+ * 
+ */
+  __pyx_tuple__7 = PyTuple_Pack(1, __pyx_kp_s_utf_8); if (unlikely(!__pyx_tuple__7)) __PYX_ERR(0, 102, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple__7);
+  __Pyx_GIVEREF(__pyx_tuple__7);
+
+  /* "hit.pyx":147
  * 
  *     def find(self, path):
  *         cpath = <string> path.encode('utf-8')             # <<<<<<<<<<<<<<
  *         n = self._cnode.find(cpath)
  *         if n == NULL:
  */
-  __pyx_tuple__6 = PyTuple_Pack(1, __pyx_kp_s_utf_8); if (unlikely(!__pyx_tuple__6)) __PYX_ERR(0, 146, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_tuple__6);
-  __Pyx_GIVEREF(__pyx_tuple__6);
+  __pyx_tuple__8 = PyTuple_Pack(1, __pyx_kp_s_utf_8); if (unlikely(!__pyx_tuple__8)) __PYX_ERR(0, 147, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple__8);
+  __Pyx_GIVEREF(__pyx_tuple__8);
 
-  /* "hit.pyx":153
+  /* "hit.pyx":154
  * 
  *     def param(self, path=''):
  *         cpath = <string> path.encode('utf-8')             # <<<<<<<<<<<<<<
  *         n = self._cnode.find(cpath)
  *         if path != '' and n == NULL:
  */
-  __pyx_tuple__7 = PyTuple_Pack(1, __pyx_kp_s_utf_8); if (unlikely(!__pyx_tuple__7)) __PYX_ERR(0, 153, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_tuple__7);
-  __Pyx_GIVEREF(__pyx_tuple__7);
+  __pyx_tuple__9 = PyTuple_Pack(1, __pyx_kp_s_utf_8); if (unlikely(!__pyx_tuple__9)) __PYX_ERR(0, 154, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple__9);
+  __Pyx_GIVEREF(__pyx_tuple__9);
 
-  /* "hit.pyx":203
+  /* "hit.pyx":204
  *     return pyn
  * 
  * def parse(fname, input):             # <<<<<<<<<<<<<<
  *     cdef chit.Node* node = chit.parse(fname, input)
  *     return _initpynode(node, own=True)
  */
-  __pyx_tuple__10 = PyTuple_Pack(3, __pyx_n_s_fname, __pyx_n_s_input, __pyx_n_s_node); if (unlikely(!__pyx_tuple__10)) __PYX_ERR(0, 203, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_tuple__10);
-  __Pyx_GIVEREF(__pyx_tuple__10);
-  __pyx_codeobj__11 = (PyObject*)__Pyx_PyCode_New(2, 0, 3, 0, 0, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__10, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_hit_pyx, __pyx_n_s_parse, 203, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__11)) __PYX_ERR(0, 203, __pyx_L1_error)
+  __pyx_tuple__12 = PyTuple_Pack(3, __pyx_n_s_fname, __pyx_n_s_input, __pyx_n_s_node); if (unlikely(!__pyx_tuple__12)) __PYX_ERR(0, 204, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple__12);
+  __Pyx_GIVEREF(__pyx_tuple__12);
+  __pyx_codeobj__13 = (PyObject*)__Pyx_PyCode_New(2, 0, 3, 0, 0, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__12, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_hit_pyx, __pyx_n_s_parse, 204, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__13)) __PYX_ERR(0, 204, __pyx_L1_error)
   __Pyx_RefNannyFinishContext();
   return 0;
   __pyx_L1_error:;
@@ -6585,48 +6654,48 @@ PyMODINIT_FUNC PyInit_hit(void)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   PyType_Modified(__pyx_ptype_3hit_Node);
 
-  /* "hit.pyx":174
+  /* "hit.pyx":175
  *         return str(f.strVal())
  * 
  *     def walk(self, walker, node_type=NodeType.All):             # <<<<<<<<<<<<<<
  *         if self.type() == node_type or node_type == NodeType.All:
  *             walker.walk(self.fullpath(), self.path(), self);
  */
-  __pyx_t_2 = __Pyx_GetModuleGlobalName(__pyx_n_s_NodeType); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 174, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_GetModuleGlobalName(__pyx_n_s_NodeType); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 175, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_n_s_All); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 174, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_n_s_All); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 175, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __pyx_k__8 = __pyx_t_1;
+  __pyx_k__10 = __pyx_t_1;
   __Pyx_GIVEREF(__pyx_t_1);
   __pyx_t_1 = 0;
 
-  /* "hit.pyx":188
+  /* "hit.pyx":189
  *     def addChild(self, Node child):
  *         self._cnode.addChild(child._cnode)
  *     def children(self, node_type = NodeType.All):             # <<<<<<<<<<<<<<
  *         ckids = self._cnode.children(_nodetype_enum(node_type));
  *         kids = []
  */
-  __pyx_t_1 = __Pyx_GetModuleGlobalName(__pyx_n_s_NodeType); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 188, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_GetModuleGlobalName(__pyx_n_s_NodeType); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 189, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_All); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 188, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_All); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 189, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_k__9 = __pyx_t_2;
+  __pyx_k__11 = __pyx_t_2;
   __Pyx_GIVEREF(__pyx_t_2);
   __pyx_t_2 = 0;
 
-  /* "hit.pyx":203
+  /* "hit.pyx":204
  *     return pyn
  * 
  * def parse(fname, input):             # <<<<<<<<<<<<<<
  *     cdef chit.Node* node = chit.parse(fname, input)
  *     return _initpynode(node, own=True)
  */
-  __pyx_t_2 = PyCFunction_NewEx(&__pyx_mdef_3hit_9parse, NULL, __pyx_n_s_hit); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 203, __pyx_L1_error)
+  __pyx_t_2 = PyCFunction_NewEx(&__pyx_mdef_3hit_9parse, NULL, __pyx_n_s_hit); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 204, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_parse, __pyx_t_2) < 0) __PYX_ERR(0, 203, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_parse, __pyx_t_2) < 0) __PYX_ERR(0, 204, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
   /* "hit.pyx":2

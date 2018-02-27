@@ -105,6 +105,11 @@ Lexer::emit(TokType type)
   _start = _pos;
 }
 
+size_t Lexer::lastToken()
+{
+  return _tokens.back().offset + _tokens.back().val.size();
+}
+
 void
 Lexer::ignore()
 {
@@ -171,6 +176,8 @@ void
 Lexer::backup()
 {
   _pos -= _width;
+  if (_pos < _start)
+    _start = _pos;
 }
 
 std::string
@@ -237,6 +244,7 @@ consumeWhitespace(Lexer * l)
     if (l->pos() == start)
       break;
   }
+
   l->acceptRun(allspace);
   l->ignore();
   return l->pos() - start;
@@ -258,7 +266,7 @@ void
 lexComments(Lexer * l)
 {
   // The first comment in a file can't be an inline comment.
-  if (l->start() > 0)
+  if (l->start() > 0 && l->tokens().back().type != TokType::BlankLine)
   {
     l->acceptRun(space);
     l->ignore();
@@ -364,6 +372,11 @@ lexString(Lexer * l)
     l->emit(TokType::String);
     consumeWhitespace(l);
   }
+
+  // the peek condition is to prevent infinite loop if we have reached EOF
+  while (l->peek() && l->lastToken() < l->pos())
+    l->backup();
+
   return lexHit;
 }
 

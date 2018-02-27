@@ -21,7 +21,7 @@ cdef extern from "parse.h" namespace "hit":
         string path()
         string fullpath()
         int line()
-        string render(int indent)
+        string render(int indent, const string & indent_text, int maxlen)
 
         string strVal() except +
         #bool boolVal()

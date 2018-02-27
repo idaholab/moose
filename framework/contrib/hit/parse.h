@@ -52,6 +52,8 @@
 namespace hit
 {
 
+const std::string default_indent = "  ";
+
 /// NodeType represents every element type in a parsed hit tree.
 enum class NodeType
 {
@@ -166,8 +168,11 @@ public:
 
   /// render builds an hit syntax/text that is equivalent to the hit tree starting at this
   /// node (and downward) - i.e. parsing this function's returned string would yield a node tree
-  /// identical to this nodes tree downward.
-  virtual std::string render(int indent = 0);
+  /// identical to this nodes tree downward.  indent is the indent level using indent_text as the
+  /// indent string (repeated once for each level).  maxlen is the maximum line lengch before
+  /// breaking string values.
+  virtual std::string
+  render(int indent = 0, const std::string & indent_text = default_indent, int maxlen = 0);
 
   /// walk does a depth-first traversal of the hit tree starting at this node (it
   /// doesn't visit any nodes that require traversing this node's parent) calling the passed
@@ -306,7 +311,8 @@ public:
   static const bool Block = false;
   Comment(const std::string & text, bool is_inline);
 
-  virtual std::string render(int indent = 0) override;
+  virtual std::string
+  render(int indent = 0, const std::string & indent_text = default_indent, int maxlen = 0) override;
   virtual Node * clone() override;
 
 private:
@@ -319,7 +325,12 @@ class Blank : public Node
 {
 public:
   Blank() : Node(NodeType::Blank) {}
-  virtual std::string render(int /*indent = 0*/) override { return "\n"; }
+  virtual std::string render(int /*indent = 0*/,
+                             const std::string & /*indent_text = default_indent*/,
+                             int /*maxlen = 0*/) override
+  {
+    return "\n";
+  }
   virtual Node * clone() override { return new Blank(); };
 };
 
@@ -333,7 +344,8 @@ public:
   /// path returns the hit path located in the section's header i.e. the section's name.
   virtual std::string path() override;
 
-  virtual std::string render(int indent = 0) override;
+  virtual std::string
+  render(int indent = 0, const std::string & indent_text = default_indent, int maxlen = 0) override;
   virtual Node * clone() override;
 
 private:
@@ -360,7 +372,8 @@ public:
   /// path returns the hit Field name (i.e. content before the "=")
   virtual std::string path() override;
 
-  virtual std::string render(int indent = 0) override;
+  virtual std::string
+  render(int indent = 0, const std::string & indent_text = default_indent, int maxlen = 0) override;
   virtual Node * clone() override;
 
   /// kind returns the semantic type of the value stored in this field (e.g. Int, Bool, Float,

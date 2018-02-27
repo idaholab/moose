@@ -100,6 +100,9 @@ public:
   /// offset to the current pos.
   void emit(TokType type);
 
+  /// lastToken returns the offset of the last character of the most recent emitted token.
+  size_t lastToken();
+
   /// error emits an error token with the given messsage.  For convenience returns an nullptr
   /// LexFunc that can be directly returns by any LexFunc that calls error.
   LexFunc error(const std::string & msg);
@@ -124,7 +127,7 @@ public:
   /// tokens - effectively skipping a portion of the input text.
   void ignore();
   /// backup unconsumes the most recently consumed byte of input, reducing the position offset by
-  /// one.  This should only be called at most once after each call to next.
+  /// one.  This should usually only be called once after each call to next.
   void backup();
 
   /// input returns the full input text the lexer is operating on i.e. the entire input string it
