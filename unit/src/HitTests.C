@@ -76,6 +76,7 @@ TEST(HitTests, PassCases)
       {"no whitespace with sections and fields", "[hello][world]foo=bar[]baz=42[]"},
       {"no leading ./ in sub-block", "[hello] [world] [] []"},
       {"consecutive string literals", "foo='bar''baz'"},
+      {"no infinite loop", "foo='bar'\n\n "},
   };
 
   for (size_t i = 0; i < sizeof(cases) / sizeof(PassFailCase); i++)
@@ -322,15 +323,35 @@ struct RenderCase
   std::string name;
   std::string input;
   std::string output;
+  int maxlen;
 };
 
 TEST(HitTests, RenderCases)
 {
   RenderCase cases[] = {
-      {"root level fields", "foo=bar boo=far", "foo = bar\nboo = far"},
-      {"single section", "[foo]bar=baz[../]", "[foo]\n  bar = baz\n[../]"},
-      {"remove leading newline", "\n[foo]bar=baz[../]", "[foo]\n  bar = baz\n[../]"},
-      {"preserve consecutive newline", "[foo]\n\nbar=baz[../]", "[foo]\n\n  bar = baz\n[../]"},
+      {"root level fields", "foo=bar boo=far", "foo = bar\nboo = far", 0},
+      {"single section", "[foo]bar=baz[../]", "[foo]\n  bar = baz\n[../]", 0},
+      {"remove leading newline", "\n[foo]bar=baz[../]", "[foo]\n  bar = baz\n[../]", 0},
+      {"preserve consecutive newline", "[foo]\n\nbar=baz[../]", "[foo]\n\n  bar = baz\n[../]", 0},
+      {"reflow long string",
+       "foo='hello my name is joe and I work in a button factory'",
+       "foo = 'hello my name is joe '\n      'and I work in a '\n      'button factory'",
+       28},
+      {"don't reflow unquoted string", "foo=unquotedstring", "foo = unquotedstring", 5},
+      {"reflow unbroken string", "foo='longstring'", "foo = 'longst'\n      'ring'", 12},
+      {"reflow pre-broken strings",
+       "foo='why'\n' separate '  'strings?'",
+       "foo = 'why separate strings?'",
+       0},
+      {"preserve quotes preceding blankline", "foo = '42'\n\n", "foo = '42'\n", 0},
+      {"preserve block comment (#10889)",
+       "[hello]\n  foo = '42'\n\n  # comment\n  bar = 'baz'\n[]",
+       "[hello]\n  foo = '42'\n\n  # comment\n  bar = 'baz'\n[]",
+       0},
+      {"preserve block comment 2 (#10889)",
+       "[hello]\n  foo = '42'\n  # comment\n  bar = 'baz'\n[]",
+       "[hello]\n  foo = '42'\n  # comment\n  bar = 'baz'\n[]",
+       0},
   };
 
   for (size_t i = 0; i < sizeof(cases) / sizeof(RenderCase); i++)
@@ -341,13 +362,13 @@ TEST(HitTests, RenderCases)
     try
     {
       root = hit::parse("TESTCASE", test.input);
-      got = root->render();
+      got = root->render(0, "  ", test.maxlen);
     }
     catch (std::exception & err)
     {
       FAIL() << "case " << i + 1 << " FAIL (" << test.name << "): unexpected error: " << err.what();
     }
-    EXPECT_EQ(test.output, got) << "case " << i + 1 << " FAIL";
+    EXPECT_EQ(test.output, got) << "case " << i + 1 << " FAIL (" << test.name << ")";
   }
 }
 
