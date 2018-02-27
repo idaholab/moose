@@ -4,5 +4,10 @@
     input = 'diff_kernel_aux_mat_dep.i'
     exodiff = 'diff_kernel_aux_mat_dep_out.e'
     max_threads = 1
+    # The Material in this test effectively counts the number of residual
+    # evaluations performed by the code, and that varies between older and
+    # newer versions of PETSc due to the changes in 3061bbd5d. This test is
+    # therefore only valid with newer versions of PETSc.
+    petsc_version = '>=3.5.0'
   [../]
 []
