@@ -19,7 +19,7 @@ def addInactive(hit_parent, parent, children):
         if entry and entry.checkInactive():
             inactive.append(entry.name)
     if inactive:
-        hit_parent.addChild(hit.NewField("inactive", "String", ' '.join(inactive)))
+        hit_parent.addChild(hit.NewField("inactive", "String", "'%s'" % ' '.join(inactive)))
 
 def inputTreeToString(root):
     """

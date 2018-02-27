@@ -56,7 +56,7 @@
 []
 
 [BCs]
-  inactive = left right
+  inactive = 'left right'
   [all]
     type = FunctionDirichletBC
     variable = u

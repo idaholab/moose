@@ -33,7 +33,7 @@
 []
 
 [BCs]
-  inactive = right_v
+  inactive = 'right_v'
   [left_u]
     type = DirichletBC
     variable = u
