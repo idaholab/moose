@@ -356,7 +356,7 @@ lexString(Lexer * l)
     {
       prev = c;
       c = l->next();
-      if (c == quote[0] and prev != '\\')
+      if (c == quote[0] && prev != '\\')
         break;
       else if (c == '\0')
         return l->error("unterminated string");
