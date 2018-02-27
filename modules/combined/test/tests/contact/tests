@@ -30,6 +30,9 @@
     exodiff = 4ElemTensionRelease_out.e
     custom_cmp = '4ElemTensionRelease.exodiff'
     min_parallel = 4
+    # This test has substantial diffs in older versions of PETSc due to the changes
+    # in the way residuals are computed in contact problems in 3061bbd5d.
+    petsc_version = '>=3.5.0'
   [../]
 
   [./4ElemTensionRelease_constraint]
@@ -38,6 +41,9 @@
     exodiff = 4ElemTensionRelease_mechanical_constraint_out.e
     custom_cmp = '4ElemTensionRelease.exodiff'
     min_parallel = 4
+    # This test has substantial diffs in older versions of PETSc due to the changes
+    # in the way residuals are computed in contact problems in 3061bbd5d.
+    petsc_version = '>=3.5.0'
   [../]
 
   [./4ElemTensionRelease_no_new_nonzeros]
@@ -47,6 +53,9 @@
     custom_cmp = '4ElemTensionRelease.exodiff'
     cli_args = 'Problem/error_on_jacobian_nonzero_reallocation=true Outputs/file_base=4ElemTensionRelease_no_new_nonzeros_out'
     max_parallel = 1
+    # This test has substantial diffs in older versions of PETSc due to the changes
+    # in the way residuals are computed in contact problems in 3061bbd5d.
+    petsc_version = '>=3.5.0'
   [../]
 
   [./8ElemTensionRelease]
@@ -56,5 +65,8 @@
     custom_cmp = '8ElemTensionRelease.exodiff'
     min_parallel = 4
     max_parallel = 4
+    # This test has substantial diffs in older versions of PETSc due to the changes
+    # in the way residuals are computed in contact problems in 3061bbd5d.
+    petsc_version = '>=3.5.0'
   [../]
 []
