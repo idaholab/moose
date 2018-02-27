@@ -8,7 +8,7 @@ function printusage {
     echo "    When --module is supplied after the <name> a MOOSE module will be created."
 }
 
-if [[ "$1" == "-h" || $# == 0 || $# > 2 ]]; then
+if [[ "$1" == "-h" || "$1" == "--help" || $# == 0 || $# > 2 ]]; then
     printusage
     exit 1
 fi
