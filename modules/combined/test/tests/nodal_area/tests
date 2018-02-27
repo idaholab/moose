@@ -42,6 +42,9 @@
     input = 'nodal_area_Hex20_3.i'
     exodiff = 'nodal_area_Hex20_3_out.e'
     custom_cmp = 'nodal_area_Hex20_3.exodiff'
+    # This test fails with a negative Jacobian for older versions of
+    # PETSc, possibly due to the changes in 3061bbd5d.
+    petsc_version = '>=3.5.0'
   [../]
   [./Hex202Proc]
     type = 'Exodiff'
