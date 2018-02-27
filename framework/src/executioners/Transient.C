@@ -267,6 +267,7 @@ Transient::init()
   if (!_time_stepper.get())
   {
     InputParameters pars = _app.getFactory().getValidParams("ConstantDT");
+    pars.set<SubProblem *>("_subproblem") = &_problem;
     pars.set<Transient *>("_executioner") = this;
 
     /**
