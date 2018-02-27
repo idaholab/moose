@@ -6,30 +6,30 @@
 []
 
 [Variables]
-  [./u]
-  [../]
+  [u]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
-  [../]
+  []
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = 'left'
     value = 0
-  [../]
-  [./right]
+  []
+  [right]
     type = DirichletBC
     variable = u
     boundary = 'right'
     value = 1
-  [../]
+  []
 []
 
 [Executioner]
@@ -45,11 +45,10 @@
 []
 
 [VectorPostprocessors]
-  [./foo]
+  [foo]
     type = LineValueSampler
     num_points = 10
     end_point = '1 0 0'
     start_point = '0 0 0'
-  [../]
+  []
 []
-
