@@ -38,10 +38,10 @@ RobinReflectionBC::computeQpResidual()
 
   if (_component == "real")
   {
-    return -_test[_i][_qp] * _inverseMuR.value(_t,_q_point[_qp]) * _coefficient * (_coupled_val[_qp] - 2 * std::sin(_coefficient * _L));
+    return -_test[_i][_qp] * _inverseMuR.value(_t,_q_point[_qp]) * _coefficient * (_coupled_val[_qp] - 2 * std::sin(_coefficient * _q_point[_qp](0)));
   }
   else
   {
-    return -_test[_i][_qp] * _inverseMuR.value(_t,_q_point[_qp]) * _coefficient * (2 * std::cos(_coefficient * _L) - _coupled_val[_qp]);
+    return -_test[_i][_qp] * _inverseMuR.value(_t,_q_point[_qp]) * _coefficient * (2 * std::cos(_coefficient * _q_point[_qp](0)) - _coupled_val[_qp]);
   }
 }
