@@ -1,4 +1,4 @@
-# Test for small strain timoshenko beam bending in z direction
+# Test for small strain timoshenko beam bending in y direction
 
 # A unit load is applied at the end of a cantilever beam of length 4m.
 # The properties of the cantilever beam are as follows:
@@ -93,9 +93,9 @@
 []
 
 [NodalKernels]
-  [./force_z2]
+  [./force_y2]
     type = ConstantRate
-    variable = disp_z
+    variable = disp_y
     boundary = 2
     rate = 1.0
   [../]
@@ -125,7 +125,7 @@
 
 [Kernels]
   [./solid_disp_x]
-    type = StressDivergenceTensorsBeam
+    type = StressDivergenceBeam
     block = '1'
     displacements = 'disp_x disp_y disp_z'
     rotations = 'rot_x rot_y rot_z'
@@ -133,7 +133,7 @@
     variable = disp_x
   [../]
   [./solid_disp_y]
-    type = StressDivergenceTensorsBeam
+    type = StressDivergenceBeam
     block = '1'
     displacements = 'disp_x disp_y disp_z'
     rotations = 'rot_x rot_y rot_z'
@@ -141,7 +141,7 @@
     variable = disp_y
   [../]
   [./solid_disp_z]
-    type = StressDivergenceTensorsBeam
+    type = StressDivergenceBeam
     block = '1'
     displacements = 'disp_x disp_y disp_z'
     rotations = 'rot_x rot_y rot_z'
@@ -149,7 +149,7 @@
     variable = disp_z
   [../]
   [./solid_rot_x]
-    type = StressDivergenceTensorsBeam
+    type = StressDivergenceBeam
     block = '1'
     displacements = 'disp_x disp_y disp_z'
     rotations = 'rot_x rot_y rot_z'
@@ -157,7 +157,7 @@
     variable = rot_x
   [../]
   [./solid_rot_y]
-    type = StressDivergenceTensorsBeam
+    type = StressDivergenceBeam
     block = '1'
     displacements = 'disp_x disp_y disp_z'
     rotations = 'rot_x rot_y rot_z'
@@ -165,7 +165,7 @@
     variable = rot_y
   [../]
   [./solid_rot_z]
-    type = StressDivergenceTensorsBeam
+    type = StressDivergenceBeam
     block = '1'
     displacements = 'disp_x disp_y disp_z'
     rotations = 'rot_x rot_y rot_z'
@@ -195,7 +195,7 @@
     y_orientation = '0.0 1.0 0.0'
   [../]
   [./stress]
-    type = ComputeBeamForces
+    type = ComputeBeamResultants
     block = 1
   [../]
 []
@@ -209,7 +209,7 @@
   [./disp_y]
     type = PointValue
     point = '4.0 0.0 0.0'
-    variable = disp_z
+    variable = disp_y
   [../]
 []
 

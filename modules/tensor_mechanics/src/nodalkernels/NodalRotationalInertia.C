@@ -12,16 +12,18 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "NodalInertialTorque.h"
+#include "NodalRotationalInertia.h"
 #include "MooseVariable.h"
 #include "AuxiliarySystem.h"
 #include "MooseMesh.h"
 
 template <>
 InputParameters
-validParams<NodalInertialTorque>()
+validParams<NodalRotationalInertia>()
 {
   InputParameters params = validParams<NodalKernel>();
+  params.addClassDescription("Calculates the inertial torques and inertia proportional damping "
+                             "corresponding to the nodal rotational inertia.");
   params.addRequiredCoupledVar("rotations", "rotational displacement variables");
   params.addRequiredCoupledVar("rot_velocities", "rotational velocity variables");
   params.addRequiredCoupledVar("rot_accelerations", "rotational acceleration variables");
@@ -53,7 +55,7 @@ validParams<NodalInertialTorque>()
   return params;
 }
 
-NodalInertialTorque::NodalInertialTorque(const InputParameters & parameters)
+NodalRotationalInertia::NodalRotationalInertia(const InputParameters & parameters)
   : NodalKernel(parameters),
     _aux_sys(_fe_problem.getAuxiliarySystem()),
     _nrot(coupledComponents("rotations")),
@@ -78,8 +80,8 @@ NodalInertialTorque::NodalInertialTorque(const InputParameters & parameters)
     MooseVariable * rot_vel_var = getVar("rot_velocities", i);
     MooseVariable * rot_accel_var = getVar("rot_accelerations", i);
 
-    _rot[i] = &rot_var->nodalSln();
-    _rot_old[i] = &rot_var->nodalSlnOld();
+    _rot[i] = &rot_var->nodalValue();
+    _rot_old[i] = &rot_var->nodalValueOld();
 
     _rot_vel_num[i] = rot_vel_var->number();
     _rot_accel_num[i] = rot_accel_var->number();
@@ -154,7 +156,7 @@ NodalInertialTorque::NodalInertialTorque(const InputParameters & parameters)
 }
 
 Real
-NodalInertialTorque::computeQpResidual()
+NodalRotationalInertia::computeQpResidual()
 {
   if (_dt == 0)
     return 0;
@@ -172,8 +174,9 @@ NodalInertialTorque::computeQpResidual()
       Real rot_accel_old =
           aux_sol_old(_current_node->dof_number(_aux_sys.number(), _rot_accel_num[i], 0));
 
-      rot_accel[i] = 1. / _beta * ((((*_rot[i])[_qp] - (*_rot_old[i])[_qp]) / (_dt * _dt)) -
-                                   rot_vel_old[i] / _dt - rot_accel_old * (0.5 - _beta));
+      rot_accel[i] = 1. / _beta *
+                     ((((*_rot[i])[_qp] - (*_rot_old[i])[_qp]) / (_dt * _dt)) -
+                      rot_vel_old[i] / _dt - rot_accel_old * (0.5 - _beta));
       rot_vel[i] =
           rot_vel_old[i] + (_dt * (1 - _gamma)) * rot_accel_old + _gamma * _dt * rot_accel[i];
     }
@@ -188,7 +191,7 @@ NodalInertialTorque::computeQpResidual()
 }
 
 Real
-NodalInertialTorque::computeQpJacobian()
+NodalRotationalInertia::computeQpJacobian()
 {
   if (_dt == 0)
     return 0.0;
@@ -198,7 +201,7 @@ NodalInertialTorque::computeQpJacobian()
 }
 
 Real
-NodalInertialTorque::computeQpOffDiagJacobian(unsigned int jvar)
+NodalRotationalInertia::computeQpOffDiagJacobian(unsigned int jvar)
 {
   unsigned int coupled_component = 0;
   bool rot_coupled = false;

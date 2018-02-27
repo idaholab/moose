@@ -12,15 +12,17 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "NodalInertialForce.h"
+#include "NodalTranslationalInertia.h"
 #include "MooseVariable.h"
 #include "AuxiliarySystem.h"
 
 template <>
 InputParameters
-validParams<NodalInertialForce>()
+validParams<NodalTranslationalInertia>()
 {
   InputParameters params = validParams<NodalKernel>();
+  params.addClassDescription("Computes the interial forces and mass proportional damping terms "
+                             "corresponding to nodal mass.");
   params.addRequiredCoupledVar("velocity", "velocity variable");
   params.addRequiredCoupledVar("acceleration", "acceleration variable");
   params.addRequiredParam<Real>("beta", "beta parameter for Newmark Time integration");
@@ -38,10 +40,10 @@ validParams<NodalInertialForce>()
   return params;
 }
 
-NodalInertialForce::NodalInertialForce(const InputParameters & parameters)
+NodalTranslationalInertia::NodalTranslationalInertia(const InputParameters & parameters)
   : NodalKernel(parameters),
     _mass(getParam<Real>("mass")),
-    _u_old(_var.nodalSlnOld()),
+    _u_old(_var.nodalValueOld()),
     _beta(getParam<Real>("beta")),
     _gamma(getParam<Real>("gamma")),
     _eta(getParam<Real>("eta")),
@@ -55,7 +57,7 @@ NodalInertialForce::NodalInertialForce(const InputParameters & parameters)
 }
 
 Real
-NodalInertialForce::computeQpResidual()
+NodalTranslationalInertia::computeQpResidual()
 {
   if (_dt == 0)
     return 0;
@@ -66,15 +68,16 @@ NodalInertialForce::computeQpResidual()
     Real vel_old = aux_sol_old(_current_node->dof_number(_aux_sys.number(), _vel_num, 0));
     Real accel_old = aux_sol_old(_current_node->dof_number(_aux_sys.number(), _accel_num, 0));
 
-    Real accel = 1. / _beta * (((_u[_qp] - _u_old[_qp]) / (_dt * _dt)) - vel_old / _dt -
-                               accel_old * (0.5 - _beta));
+    Real accel =
+        1. / _beta *
+        (((_u[_qp] - _u_old[_qp]) / (_dt * _dt)) - vel_old / _dt - accel_old * (0.5 - _beta));
     Real vel = vel_old + (_dt * (1 - _gamma)) * accel_old + _gamma * _dt * accel;
     return _mass * (accel + vel * _eta * (1 + _alpha) - _alpha * _eta * vel_old);
   }
 }
 
 Real
-NodalInertialForce::computeQpJacobian()
+NodalTranslationalInertia::computeQpJacobian()
 {
   if (_dt == 0)
     return 0;

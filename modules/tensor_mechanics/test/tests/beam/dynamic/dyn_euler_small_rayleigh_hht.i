@@ -1,8 +1,6 @@
-# Test for small strain euler beam vibration in y direction
+# Test for damped small strain euler beam vibration in y direction
 
 # An impulse load is applied at the end of a cantilever beam of length 4m.
-# The beam is massless with a lumped mass at the end of the beam. The lumped
-# mass also has a moment of inertia associated with it.
 # The properties of the cantilever beam are as follows:
 # Young's modulus (E) = 1e4
 # Shear modulus (G) = 4e7
@@ -10,15 +8,14 @@
 # Cross-section area (A) = 0.01
 # Iy = 1e-4 = Iz
 # Length (L)= 4 m
-# mass (m) = 0.01899772
-# Moment of inertia of lumped mass:
-# Ixx = 0.2
-# Iyy = 0.1
-# Izz = 0.1
-# mass proportional damping coefficient (eta) = 0.1
+# density (rho) = 1.0
+# mass proportional rayleigh damping(eta) = 0.1
+# stiffness proportional rayleigh damping(eta) = 0.1
+# HHT time integration parameter (alpha) = -0.3
+# Corresponding Newmark beta time integration parameters beta = 0.4225 and gamma = 0.8
 
 # For this beam, the dimensionless parameter alpha = kAGL^2/EI = 6.4e6
-# Therefore, the beam behaves like a Euler-Bernoulli beam.
+# Therefore, the behaves like a Euler-Bernoulli beam.
 
 # The displacement time history from this analysis matches with that obtained from Abaqus.
 
@@ -112,14 +109,14 @@
     variable = accel_x
     displacement = disp_x
     velocity = vel_x
-    beta = 0.25
+    beta = 0.4225
     execute_on = timestep_end
   [../]
   [./vel_x]
     type = NewmarkVelAux
     variable = vel_x
     acceleration = accel_x
-    gamma = 0.5
+    gamma = 0.8
     execute_on = timestep_end
   [../]
   [./accel_y]
@@ -127,14 +124,14 @@
     variable = accel_y
     displacement = disp_y
     velocity = vel_y
-    beta = 0.25
+    beta = 0.4225
     execute_on = timestep_end
   [../]
   [./vel_y]
     type = NewmarkVelAux
     variable = vel_y
     acceleration = accel_y
-    gamma = 0.5
+    gamma = 0.8
     execute_on = timestep_end
   [../]
   [./accel_z]
@@ -142,14 +139,14 @@
     variable = accel_z
     displacement = disp_z
     velocity = vel_z
-    beta = 0.25
+    beta = 0.4225
     execute_on = timestep_end
   [../]
   [./vel_z]
     type = NewmarkVelAux
     variable = vel_z
     acceleration = accel_z
-    gamma = 0.5
+    gamma = 0.8
     execute_on = timestep_end
   [../]
   [./rot_accel_x]
@@ -157,14 +154,14 @@
     variable = rot_accel_x
     displacement = rot_x
     velocity = rot_vel_x
-    beta = 0.25
+    beta = 0.4225
     execute_on = timestep_end
   [../]
   [./rot_vel_x]
     type = NewmarkVelAux
     variable = rot_vel_x
     acceleration = rot_accel_x
-    gamma = 0.5
+    gamma = 0.8
     execute_on = timestep_end
   [../]
   [./rot_accel_y]
@@ -172,14 +169,14 @@
     variable = rot_accel_y
     displacement = rot_y
     velocity = rot_vel_y
-    beta = 0.25
+    beta = 0.4225
     execute_on = timestep_end
   [../]
   [./rot_vel_y]
     type = NewmarkVelAux
     variable = rot_vel_y
     acceleration = rot_accel_y
-    gamma = 0.5
+    gamma = 0.8
     execute_on = timestep_end
   [../]
   [./rot_accel_z]
@@ -187,14 +184,14 @@
     variable = rot_accel_z
     displacement = rot_z
     velocity = rot_vel_z
-    beta = 0.25
+    beta = 0.4225
     execute_on = timestep_end
   [../]
   [./rot_vel_z]
     type = NewmarkVelAux
     variable = rot_vel_z
     acceleration = rot_accel_z
-    gamma = 0.5
+    gamma = 0.8
     execute_on = timestep_end
   [../]
 []
@@ -245,91 +242,13 @@
     boundary = 2
     function = force
   [../]
-  [./x_inertial]
-    type = NodalInertialForce
-    variable = disp_x
-    velocity = vel_x
-    acceleration = accel_x
-    boundary = 2
-    beta = 0.25
-    gamma = 0.5
-    mass = 0.01899772
-    eta = 0.1
-  [../]
-  [./y_inertial]
-    type = NodalInertialForce
-    variable = disp_y
-    velocity = vel_y
-    acceleration = accel_y
-    boundary = 2
-    beta = 0.25
-    gamma = 0.5
-    mass = 0.01899772
-    eta = 0.1
-  [../]
-  [./z_inertial]
-    type = NodalInertialForce
-    variable = disp_z
-    velocity = vel_z
-    acceleration = accel_z
-    boundary = 2
-    beta = 0.25
-    gamma = 0.5
-    mass = 0.01899772
-    eta = 0.1
-  [../]
-  [./rot_x_inertial]
-    type = NodalInertialTorque
-    variable = rot_x
-    rotations = 'rot_x rot_y rot_z'
-    rot_velocities = 'rot_vel_x rot_vel_y rot_vel_z'
-    rot_accelerations= 'rot_accel_x rot_accel_y rot_accel_z'
-    boundary = 2
-    beta = 0.25
-    gamma = 0.5
-    Ixx = 2e-1
-    Iyy = 1e-1
-    Izz = 1e-1
-    eta = 0.1
-    component = 0
-  [../]
-  [./rot_y_inertial]
-    type = NodalInertialTorque
-    variable = rot_y
-    rotations = 'rot_x rot_y rot_z'
-    rot_velocities = 'rot_vel_x rot_vel_y rot_vel_z'
-    rot_accelerations= 'rot_accel_x rot_accel_y rot_accel_z'
-    boundary = 2
-    beta = 0.25
-    gamma = 0.5
-    Ixx = 2e-1
-    Iyy = 1e-1
-    Izz = 1e-1
-    eta = 0.1
-    component = 1
-  [../]
-  [./rot_z_inertial]
-    type = NodalInertialTorque
-    variable = rot_z
-    rotations = 'rot_x rot_y rot_z'
-    rot_velocities = 'rot_vel_x rot_vel_y rot_vel_z'
-    rot_accelerations= 'rot_accel_x rot_accel_y rot_accel_z'
-    boundary = 2
-    beta = 0.25
-    gamma = 0.5
-    Ixx = 2e-1
-    Iyy = 1e-1
-    Izz = 1e-1
-    eta = 0.1
-    component = 2
-  [../]
 []
 
 [Functions]
   [./force]
     type = PiecewiseLinear
-    x = '0.0 0.1 0.2 10.0'
-    y = '0.0 1e2  0.0  0.0'
+    x = '0.0 0.2 0.4 10.0'
+    y = '0.0 1.0  0.0  0.0'
   [../]
 []
 
@@ -352,64 +271,202 @@
 # petsc_options_iname = '_ksp_gmres_restart -pc_type -pc_hypre_type -pc_hypre_boomeramg_max_iter'
 # petsc_options_value = '201                hypre     boomeramg     4'
   l_tol = 1e-8
-# l_max_its = 50
+#  l_max_its = 50
   nl_max_its = 15
   nl_rel_tol = 1e-8
   nl_abs_tol = 1e-8
   start_time = 0.0
-  dt = 0.1
+  dt = 0.2
   end_time = 5.0
   timestep_tolerance = 1e-6
 []
 
 [Kernels]
   [./solid_disp_x]
-    type = StressDivergenceTensorsBeam
+    type = StressDivergenceBeam
     block = '1'
     displacements = 'disp_x disp_y disp_z'
     rotations = 'rot_x rot_y rot_z'
     component = 0
     variable = disp_x
+    zeta = 0.1
+    alpha = -0.3
   [../]
   [./solid_disp_y]
-    type = StressDivergenceTensorsBeam
+    type = StressDivergenceBeam
     block = '1'
     displacements = 'disp_x disp_y disp_z'
     rotations = 'rot_x rot_y rot_z'
     component = 1
     variable = disp_y
+    zeta = 0.1
+    alpha = -0.3
   [../]
   [./solid_disp_z]
-    type = StressDivergenceTensorsBeam
+    type = StressDivergenceBeam
     block = '1'
     displacements = 'disp_x disp_y disp_z'
     rotations = 'rot_x rot_y rot_z'
     component = 2
     variable = disp_z
+    zeta = 0.1
+    alpha = -0.3
   [../]
   [./solid_rot_x]
-    type = StressDivergenceTensorsBeam
+    type = StressDivergenceBeam
     block = '1'
     displacements = 'disp_x disp_y disp_z'
     rotations = 'rot_x rot_y rot_z'
     component = 3
     variable = rot_x
+    zeta = 0.1
+    alpha = -0.3
   [../]
   [./solid_rot_y]
-    type = StressDivergenceTensorsBeam
+    type = StressDivergenceBeam
     block = '1'
     displacements = 'disp_x disp_y disp_z'
     rotations = 'rot_x rot_y rot_z'
     component = 4
     variable = rot_y
+    zeta = 0.1
+    alpha = -0.3
   [../]
   [./solid_rot_z]
-    type = StressDivergenceTensorsBeam
+    type = StressDivergenceBeam
     block = '1'
     displacements = 'disp_x disp_y disp_z'
     rotations = 'rot_x rot_y rot_z'
     component = 5
     variable = rot_z
+    zeta = 0.1
+    alpha = -0.3
+  [../]
+  [./inertial_force_x]
+    type = InertialForceBeam
+    block = 1
+    displacements = 'disp_x disp_y disp_z'
+    rotations = 'rot_x rot_y rot_z'
+    velocities = 'vel_x vel_y vel_z'
+    accelerations = 'accel_x accel_y accel_z'
+    rot_velocities = 'rot_vel_x rot_vel_y rot_vel_z'
+    rot_accelerations = 'rot_accel_x rot_accel_y rot_accel_z'
+    beta = 0.4225
+    gamma = 0.8
+    eta = 0.1
+    area = 0.01
+    Iy = 1e-4
+    Iz = 1e-4
+    Ay = 0.0
+    Az = 0.0
+    component = 0
+    variable = disp_x
+    alpha = -0.3
+  [../]
+  [./inertial_force_y]
+    type = InertialForceBeam
+    block = 1
+    displacements = 'disp_x disp_y disp_z'
+    rotations = 'rot_x rot_y rot_z'
+    velocities = 'vel_x vel_y vel_z'
+    accelerations = 'accel_x accel_y accel_z'
+    rot_velocities = 'rot_vel_x rot_vel_y rot_vel_z'
+    rot_accelerations = 'rot_accel_x rot_accel_y rot_accel_z'
+    beta = 0.4225
+    gamma = 0.8
+    eta = 0.1
+    area = 0.01
+    Iy = 1e-4
+    Iz = 1e-4
+    Ay = 0.0
+    Az = 0.0
+    component = 1
+    variable = disp_y
+    alpha = -0.3
+  [../]
+  [./inertial_force_z]
+    type = InertialForceBeam
+    block = 1
+    displacements = 'disp_x disp_y disp_z'
+    rotations = 'rot_x rot_y rot_z'
+    velocities = 'vel_x vel_y vel_z'
+    accelerations = 'accel_x accel_y accel_z'
+    rot_velocities = 'rot_vel_x rot_vel_y rot_vel_z'
+    rot_accelerations = 'rot_accel_x rot_accel_y rot_accel_z'
+    beta = 0.4225
+    gamma = 0.8
+    eta = 0.1
+    area = 0.01
+    Iy = 1e-4
+    Iz = 1e-4
+    Ay = 0.0
+    Az = 0.0
+    component = 2
+    variable = disp_z
+    alpha = -0.3
+  [../]
+  [./inertial_force_rot_x]
+    type = InertialForceBeam
+    block = 1
+    displacements = 'disp_x disp_y disp_z'
+    rotations = 'rot_x rot_y rot_z'
+    velocities = 'vel_x vel_y vel_z'
+    accelerations = 'accel_x accel_y accel_z'
+    rot_velocities = 'rot_vel_x rot_vel_y rot_vel_z'
+    rot_accelerations = 'rot_accel_x rot_accel_y rot_accel_z'
+    beta = 0.4225
+    gamma = 0.8
+    eta = 0.1
+    area = 0.01
+    Iy = 1e-4
+    Iz = 1e-4
+    Ay = 0.0
+    Az = 0.0
+    component = 3
+    variable = rot_x
+    alpha = -0.3
+  [../]
+  [./inertial_force_rot_y]
+    type = InertialForceBeam
+    block = 1
+    displacements = 'disp_x disp_y disp_z'
+    rotations = 'rot_x rot_y rot_z'
+    velocities = 'vel_x vel_y vel_z'
+    accelerations = 'accel_x accel_y accel_z'
+    rot_velocities = 'rot_vel_x rot_vel_y rot_vel_z'
+    rot_accelerations = 'rot_accel_x rot_accel_y rot_accel_z'
+    beta = 0.4225
+    gamma = 0.8
+    eta = 0.1
+    area = 0.01
+    Iy = 1e-4
+    Iz = 1e-4
+    Ay = 0.0
+    Az = 0.0
+    component = 4
+    variable = rot_y
+    alpha = -0.3
+  [../]
+  [./inertial_force_rot_z]
+    type = InertialForceBeam
+    block = 1
+    displacements = 'disp_x disp_y disp_z'
+    rotations = 'rot_x rot_y rot_z'
+    velocities = 'vel_x vel_y vel_z'
+    accelerations = 'accel_x accel_y accel_z'
+    rot_velocities = 'rot_vel_x rot_vel_y rot_vel_z'
+    rot_accelerations = 'rot_accel_x rot_accel_y rot_accel_z'
+    beta = 0.4225
+    gamma = 0.8
+    eta = 0.1
+    area = 0.01
+    Iy = 1e-4
+    Iz = 1e-4
+    Ay = 0.0
+    Az = 0.0
+    component = 5
+    variable = rot_z
+    alpha = -0.3
   [../]
 []
 
@@ -417,7 +474,7 @@
   [./elasticity]
     type = ComputeElasticityBeam
     youngs_modulus = 1.0e4
-    shear_modulus = 4.0e4
+    shear_modulus = 4.0e7
     shear_coefficient = 1.0
     block = 1
   [../]
@@ -434,8 +491,14 @@
     y_orientation = '0.0 1.0 0.0'
   [../]
   [./stress]
-    type = ComputeBeamForces
+    type = ComputeBeamResultants
     block = 1
+  [../]
+  [./density]
+    type = GenericConstantMaterial
+    block = 1
+    prop_names = 'density'
+    prop_values = '1.0'
   [../]
 []
 

@@ -13,10 +13,6 @@ InputParameters
 validParams<ComputeElasticityBeam>()
 {
   InputParameters params = validParams<Material>();
-  params.addParam<std::string>("base_name",
-                               "Optional parameter that allows the user to define "
-                               "multiple mechanics material systems on the same "
-                               "block, i.e. for multiple phases");
   params.addParam<FunctionName>(
       "elasticity_prefactor",
       "Optional function to use as a scalar prefactor on the elasticity vector for the beam.");
@@ -28,9 +24,8 @@ validParams<ComputeElasticityBeam>()
 
 ComputeElasticityBeam::ComputeElasticityBeam(const InputParameters & parameters)
   : Material(parameters),
-    _base_name(isParamValid("base_name") ? getParam<std::string>("base_name") + "_" : ""),
-    _material_stiffness(declareProperty<RealVectorValue>(_base_name + "material_stiffness")),
-    _material_flexure(declareProperty<RealVectorValue>(_base_name + "material_flexure")),
+    _material_stiffness(declareProperty<RealVectorValue>("material_stiffness")),
+    _material_flexure(declareProperty<RealVectorValue>("material_flexure")),
     _prefactor_function(isParamValid("elasticity_prefactor") ? &getFunction("elasticity_prefactor")
                                                              : NULL),
     _youngs_modulus(coupledValue("youngs_modulus")),

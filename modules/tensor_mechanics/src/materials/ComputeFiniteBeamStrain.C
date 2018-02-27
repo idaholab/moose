@@ -24,7 +24,7 @@ validParams<ComputeFiniteBeamStrain>()
 
 ComputeFiniteBeamStrain::ComputeFiniteBeamStrain(const InputParameters & parameters)
   : ComputeIncrementalBeamStrain(parameters),
-    _total_rotation_old(getMaterialPropertyOld<RankTwoTensor>(_base_name + "total_rotation"))
+    _total_rotation_old(getMaterialPropertyOld<RankTwoTensor>("total_rotation"))
 {
 }
 

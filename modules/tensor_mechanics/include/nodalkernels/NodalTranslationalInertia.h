@@ -12,53 +12,40 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef NODALINERTIALTORQUE_H
-#define NODALINERTIALTORQUE_H
+#ifndef NODALTRANSLATIONALINERTIA_H
+#define NODALTRANSLATIONALINERTIA_H
 
 #include "NodalKernel.h"
-#include "RankTwoTensor.h"
 
 // Forward Declarations
-class NodalInertialTorque;
+class NodalTranslationalInertia;
 
 template <>
-InputParameters validParams<NodalInertialTorque>();
+InputParameters validParams<NodalTranslationalInertia>();
 
 /**
- * Calculates the inertial force and mass proportional damping for nodal inertia
+ * Calculates the inertial force and mass proportional damping for a nodal mass
  */
-class NodalInertialTorque : public NodalKernel
+class NodalTranslationalInertia : public NodalKernel
 {
 public:
-  NodalInertialTorque(const InputParameters & parameters);
+  NodalTranslationalInertia(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpResidual() override;
 
   virtual Real computeQpJacobian() override;
 
-  virtual Real computeQpOffDiagJacobian(unsigned int jvar) override;
+  /// Mass associated with the node
+  const Real & _mass;
 
-  AuxiliarySystem & _aux_sys;
+  /// Old value of displacement
+  const VariableValue & _u_old;
 
-  unsigned int _nrot;
-
-  /// Value of rotational displacements
-  std::vector<const VariableValue *> _rot;
-
-  /// Old value of rotational displacements
-  std::vector<const VariableValue *> _rot_old;
-
-  /// Variable number for rotational velocity variables
-  std::vector<unsigned int> _rot_vel_num;
-
-  /// Variable number for rotational acceleration variables
-  std::vector<unsigned int> _rot_accel_num;
-
-  std::vector<unsigned int> _rot_variables;
-
-  /// Newmark beta time integration parameters - beta and gamma
+  /// Newmark time integration parameter
   const Real & _beta;
+
+  /// Newmark time integration parameter
   const Real & _gamma;
 
   /// Mass proportional Rayliegh damping
@@ -67,11 +54,14 @@ protected:
   /// HHT time integration parameter
   const Real & _alpha;
 
-  /// Component along which torque is applied
-  const unsigned int _component;
+  /// Auxiliary system object
+  AuxiliarySystem & _aux_sys;
 
-  /// Moment of inertia tensor in global coordinate system
-  RankTwoTensor _inertia;
+  /// Variable number corresponding to the velocity aux variable
+  unsigned int _vel_num;
+
+  /// Variable number corresponding to the acceleration aux variable
+  unsigned int _accel_num;
 };
 
-#endif /* NODALINERTIALTORQUE_H */
+#endif /* NODALTRANSLATIONALINERTIA_H */

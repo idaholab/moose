@@ -1,21 +1,21 @@
-# Test for small strain Euler beam bending in y direction
+# Test for small strain timoshenko beam bending in z direction
 
 # A unit load is applied at the end of a cantilever beam of length 4m.
 # The properties of the cantilever beam are as follows:
 # Young's modulus (E) = 2.60072400269
-# Shear modulus (G) = 1.0e4
+# Shear modulus (G) = 1.00027846257
 # Shear coefficient (k) = 0.85
 # Cross-section area (A) = 0.554256
 # Iy = 0.0141889 = Iz
 # Length = 4 m
 
-# For this beam, the dimensionless parameter alpha = kAGL^2/EI = 2.04e6
+# For this beam, the dimensionless parameter alpha = kAGL^2/EI = 204.3734
 
 # The small deformation analytical deflection of the beam is given by
-# delta = PL^3/3EI * (1 + 3.0 / alpha) = PL^3/3EI = 578 m
+# delta = PL^3/3EI * (1 + 3.0 / alpha) = 586.8
 
-# Using 10 elements to discretize the beam element, the FEM solution is 576.866 m.
-# The ratio beam FEM solution and analytical solution is 0.998.
+# Using 10 elements to discretize the beam element, the FEM solution is 585.2568 m.
+# This deflection matches the FEM solution given in Prathap and Bashyam (1982).
 
 # References:
 # Prathap and Bashyam (1982), International journal for numerical methods in engineering, vol. 18, 195-210.
@@ -93,9 +93,9 @@
 []
 
 [NodalKernels]
-  [./force_y2]
+  [./force_z2]
     type = ConstantRate
-    variable = disp_y
+    variable = disp_z
     boundary = 2
     rate = 1.0
   [../]
@@ -116,7 +116,7 @@
 #  petsc_options = '-snes_check_jacobian -snes_check_jacobian_view'
   nl_max_its = 15
   nl_rel_tol = 1e-10
-  nl_abs_tol = 1e-8
+  nl_abs_tol = 1e-10
 
   dt = 1
   dtmin = 1
@@ -125,7 +125,7 @@
 
 [Kernels]
   [./solid_disp_x]
-    type = StressDivergenceTensorsBeam
+    type = StressDivergenceBeam
     block = '1'
     displacements = 'disp_x disp_y disp_z'
     rotations = 'rot_x rot_y rot_z'
@@ -133,7 +133,7 @@
     variable = disp_x
   [../]
   [./solid_disp_y]
-    type = StressDivergenceTensorsBeam
+    type = StressDivergenceBeam
     block = '1'
     displacements = 'disp_x disp_y disp_z'
     rotations = 'rot_x rot_y rot_z'
@@ -141,7 +141,7 @@
     variable = disp_y
   [../]
   [./solid_disp_z]
-    type = StressDivergenceTensorsBeam
+    type = StressDivergenceBeam
     block = '1'
     displacements = 'disp_x disp_y disp_z'
     rotations = 'rot_x rot_y rot_z'
@@ -149,7 +149,7 @@
     variable = disp_z
   [../]
   [./solid_rot_x]
-    type = StressDivergenceTensorsBeam
+    type = StressDivergenceBeam
     block = '1'
     displacements = 'disp_x disp_y disp_z'
     rotations = 'rot_x rot_y rot_z'
@@ -157,7 +157,7 @@
     variable = rot_x
   [../]
   [./solid_rot_y]
-    type = StressDivergenceTensorsBeam
+    type = StressDivergenceBeam
     block = '1'
     displacements = 'disp_x disp_y disp_z'
     rotations = 'rot_x rot_y rot_z'
@@ -165,7 +165,7 @@
     variable = rot_y
   [../]
   [./solid_rot_z]
-    type = StressDivergenceTensorsBeam
+    type = StressDivergenceBeam
     block = '1'
     displacements = 'disp_x disp_y disp_z'
     rotations = 'rot_x rot_y rot_z'
@@ -178,7 +178,7 @@
   [./elasticity]
     type = ComputeElasticityBeam
     youngs_modulus = 2.60072400269
-    shear_modulus = 1.0e4
+    shear_modulus = 1.00027846257
     shear_coefficient = 0.85
     block = 1
   [../]
@@ -195,7 +195,7 @@
     y_orientation = '0.0 1.0 0.0'
   [../]
   [./stress]
-    type = ComputeBeamForces
+    type = ComputeBeamResultants
     block = 1
   [../]
 []
@@ -203,13 +203,13 @@
 [Postprocessors]
   [./disp_x]
     type = PointValue
-    point = '4.000447 0.0 0.0'
+    point = '4.0 0.0 0.0'
     variable = disp_x
   [../]
   [./disp_y]
     type = PointValue
-    point = '4.000447 0.0 0.0'
-    variable = disp_y
+    point = '4.0 0.0 0.0'
+    variable = disp_z
   [../]
 []
 

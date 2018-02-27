@@ -10,7 +10,8 @@
 #include "Material.h"
 
 /**
- * ComputeElasticityBeam defines the elasticity vector for the beam element
+ * ComputeElasticityBeam computes the equivalent of the elasticity tensor for the beam element,
+ * which are vectors of material translational and flexural stiffness
  */
 
 class ComputeElasticityBeam;
@@ -27,16 +28,22 @@ protected:
   virtual void computeQpProperties() override;
   virtual void initQpStatefulProperties() override;
 
-  std::string _base_name;
-
+  /// Material stiffness vector that relates displacement strain increments to force increments
   MaterialProperty<RealVectorValue> & _material_stiffness;
+
+  /// Material flexure vector that relates rotational strain increments to moment increments
   MaterialProperty<RealVectorValue> & _material_flexure;
 
-  /// prefactor function to multiply the elasticity tensor with
+  /// prefactor function to multiply the material stiffness and flexure vectors with
   Function * const _prefactor_function;
 
+  /// Young's modulus of the beam material
   const VariableValue & _youngs_modulus;
+
+  /// Shear modulus of the beam material
   const VariableValue & _shear_modulus;
+
+  /// Shear coefficient for the beam cross-section
   const VariableValue & _shear_coefficient;
 };
 

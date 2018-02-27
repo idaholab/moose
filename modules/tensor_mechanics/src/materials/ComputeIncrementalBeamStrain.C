@@ -25,10 +25,6 @@ validParams<ComputeIncrementalBeamStrain>()
   params.addRequiredCoupledVar(
       "displacements",
       "The displacements appropriate for the simulation geometry and coordinate system");
-  params.addParam<std::string>("base_name",
-                               "Optional parameter that allows the user to define "
-                               "multiple mechanics material systems on the same "
-                               "block, i.e. for multiple phases");
   params.addRequiredParam<RealGradient>("y_orientation",
                                         "Orientation of the y direction along "
                                         "with Iyy is provided. This should be "
@@ -40,8 +36,8 @@ validParams<ComputeIncrementalBeamStrain>()
   params.addCoupledVar("Iz", "Variable containing second moment of area about z axis");
   params.addParam<bool>(
       "large_strain", false, "Set to true if large strain have to be calculated.");
-  params.set<bool>("volumetric_locking_correction") = false;
-
+  params.addParam<std::vector<MaterialPropertyName>>(
+      "eigenstrain_names", "List of beam eigenstrains to be applied in this strain calcualtion.");
   return params;
 }
 
@@ -51,28 +47,35 @@ ComputeIncrementalBeamStrain::ComputeIncrementalBeamStrain(const InputParameters
     _ndisp(coupledComponents("displacements")),
     _rot_num(3),
     _disp_num(3),
-    _base_name(isParamValid("base_name") ? getParam<std::string>("base_name") + "_" : ""),
     _area(coupledValue("area")),
     _Ay(coupledValue("Ay")),
     _Az(coupledValue("Az")),
     _Iy(coupledValue("Iy")),
     _Iz(coupledValue("Iz")),
-    _original_local_config(declareProperty<RankTwoTensor>(_base_name + "original_local_config")),
-    _original_length(declareProperty<Real>(_base_name + "original_length")),
-    _total_rotation(declareProperty<RankTwoTensor>(_base_name + "total_rotation")),
-    _disp_strain_increment(declareProperty<RealVectorValue>(_base_name + "disp_strain_increment")),
-    _rot_strain_increment(declareProperty<RealVectorValue>(_base_name + "rot_strain_increment")),
-    _material_stiffness(
-        getMaterialPropertyByName<RealVectorValue>(_base_name + "material_stiffness")),
-    _K11(declareProperty<RankTwoTensor>(_base_name + "Jacobian_11")),
-    _K21_cross(declareProperty<RankTwoTensor>(_base_name + "Jacobian_12")),
-    _K21(declareProperty<RankTwoTensor>(_base_name + "Jacobian_21")),
-    _K22(declareProperty<RankTwoTensor>(_base_name + "Jacobian_22")),
-    _K22_cross(declareProperty<RankTwoTensor>(_base_name + "Jacobian_22_cross")),
+    _original_local_config(declareProperty<RankTwoTensor>("original_local_config")),
+    _original_length(declareProperty<Real>("original_length")),
+    _total_rotation(declareProperty<RankTwoTensor>("total_rotation")),
+    _total_disp_strain(declareProperty<RealVectorValue>("total_disp_strain")),
+    _total_rot_strain(declareProperty<RealVectorValue>("total_rot_strain")),
+    _total_disp_strain_old(getMaterialPropertyOld<RealVectorValue>("total_disp_strain")),
+    _total_rot_strain_old(getMaterialPropertyOld<RealVectorValue>("total_rot_strain")),
+    _mech_disp_strain_increment(declareProperty<RealVectorValue>("mech_disp_strain_increment")),
+    _mech_rot_strain_increment(declareProperty<RealVectorValue>("mech_rot_strain_increment")),
+    _material_stiffness(getMaterialPropertyByName<RealVectorValue>("material_stiffness")),
+    _K11(declareProperty<RankTwoTensor>("Jacobian_11")),
+    _K21_cross(declareProperty<RankTwoTensor>("Jacobian_12")),
+    _K21(declareProperty<RankTwoTensor>("Jacobian_21")),
+    _K22(declareProperty<RankTwoTensor>("Jacobian_22")),
+    _K22_cross(declareProperty<RankTwoTensor>("Jacobian_22_cross")),
     _large_strain(getParam<bool>("large_strain")),
     _grad_disp_0_local_t(3, 0.0),
     _grad_rot_0_local_t(3, 0.0),
-    _avg_rot_local_t(3, 0.0)
+    _avg_rot_local_t(3, 0.0),
+    _eigenstrain_names(getParam<std::vector<MaterialPropertyName>>("eigenstrain_names")),
+    _disp_eigenstrain(_eigenstrain_names.size()),
+    _rot_eigenstrain(_eigenstrain_names.size()),
+    _disp_eigenstrain_old(_eigenstrain_names.size()),
+    _rot_eigenstrain_old(_eigenstrain_names.size())
 {
   // Checking for consistency between mesh dimension and length of the provided displacements vector
   if (_ndisp != _nrot && _ndisp != _mesh.dimension())
@@ -93,6 +96,16 @@ ComputeIncrementalBeamStrain::ComputeIncrementalBeamStrain(const InputParameters
     mooseError("Error in ComputeIncrementalBeamStrain: Large strain caclulation does not currently "
                "support asymmetric beam configurations with non-zero first or thrid moments of "
                "area.");
+
+  for (unsigned int i = 0; i < _eigenstrain_names.size(); ++i)
+  {
+    _disp_eigenstrain[i] = &getMaterialProperty<RealVectorValue>("disp_" + _eigenstrain_names[i]);
+    _rot_eigenstrain[i] = &getMaterialProperty<RealVectorValue>("rot_" + _eigenstrain_names[i]);
+    _disp_eigenstrain_old[i] =
+        &getMaterialPropertyOld<RealVectorValue>("disp_" + _eigenstrain_names[i]);
+    _rot_eigenstrain_old[i] =
+        &getMaterialPropertyOld<RealVectorValue>("rot_" + _eigenstrain_names[i]);
+  }
 }
 
 void
@@ -149,6 +162,12 @@ ComputeIncrementalBeamStrain::initQpStatefulProperties()
   _K21[0].zero();
   _K22[0].zero();
   _K22_cross[0].zero();
+
+  RealVectorValue temp(3, 0.0);
+  _total_disp_strain[_qp] = temp;
+  _total_rot_strain[_qp] = temp;
+  _mech_disp_strain_increment[_qp] = temp;
+  _mech_rot_strain_increment[_qp] = temp;
 }
 
 void
@@ -213,15 +232,15 @@ ComputeIncrementalBeamStrain::computeQpStrain()
   // e_13 = 2 * 0.5 * (u_1,3 + u_3,1) = (rot_2 + u_n3,1 + rot_1,1 * y)
 
   // axial and shearing strains at each qp along the length of the beam
-  _disp_strain_increment[_qp](0) = _grad_disp_0_local_t(0) * _area[_qp] -
-                                   _grad_rot_0_local_t(2) * _Ay[_qp] +
-                                   _grad_rot_0_local_t(1) * _Az[_qp];
-  _disp_strain_increment[_qp](1) = -_avg_rot_local_t(2) * _area[_qp] +
-                                   _grad_disp_0_local_t(1) * _area[_qp] -
-                                   _grad_rot_0_local_t(0) * _Az[_qp];
-  _disp_strain_increment[_qp](2) = _avg_rot_local_t(1) * _area[_qp] +
-                                   _grad_disp_0_local_t(2) * _area[_qp] +
-                                   _grad_rot_0_local_t(0) * _Ay[_qp];
+  _mech_disp_strain_increment[_qp](0) = _grad_disp_0_local_t(0) * _area[_qp] -
+                                        _grad_rot_0_local_t(2) * _Ay[_qp] +
+                                        _grad_rot_0_local_t(1) * _Az[_qp];
+  _mech_disp_strain_increment[_qp](1) = -_avg_rot_local_t(2) * _area[_qp] +
+                                        _grad_disp_0_local_t(1) * _area[_qp] -
+                                        _grad_rot_0_local_t(0) * _Az[_qp];
+  _mech_disp_strain_increment[_qp](2) = _avg_rot_local_t(1) * _area[_qp] +
+                                        _grad_disp_0_local_t(2) * _area[_qp] +
+                                        _grad_rot_0_local_t(0) * _Ay[_qp];
 
   // rotational strains at each qp along the length of the beam
   // rot_strain_1 = integral(e_13 * y - e_12 * z) dA
@@ -230,18 +249,20 @@ ComputeIncrementalBeamStrain::computeQpStrain()
   // J is the product moment of inertia which is zero for most cross-sections so it is assumed to be
   // zero for this analysis
   Real J = 0;
-  _rot_strain_increment[_qp](0) =
+  _mech_rot_strain_increment[_qp](0) =
       _avg_rot_local_t(1) * _Ay[_qp] + _grad_disp_0_local_t(2) * _Ay[_qp] +
       _grad_rot_0_local_t(0) * _Iy[_qp] + _avg_rot_local_t(2) * _Az[_qp] -
       _grad_disp_0_local_t(1) * _Az[_qp] + _grad_rot_0_local_t(0) * _Iz[_qp];
-  _rot_strain_increment[_qp](1) = _grad_disp_0_local_t(0) * _Az[_qp] - _grad_rot_0_local_t(2) * J +
-                                  _grad_rot_0_local_t(1) * _Iz[_qp];
-  _rot_strain_increment[_qp](2) = _grad_disp_0_local_t(0) * _Ay[_qp] -
-                                  _grad_rot_0_local_t(2) * _Iy[_qp] + _grad_rot_0_local_t(1) * J;
+  _mech_rot_strain_increment[_qp](1) = _grad_disp_0_local_t(0) * _Az[_qp] -
+                                       _grad_rot_0_local_t(2) * J +
+                                       _grad_rot_0_local_t(1) * _Iz[_qp];
+  _mech_rot_strain_increment[_qp](2) = _grad_disp_0_local_t(0) * _Ay[_qp] -
+                                       _grad_rot_0_local_t(2) * _Iy[_qp] +
+                                       _grad_rot_0_local_t(1) * J;
 
   if (_large_strain)
   {
-    _disp_strain_increment[_qp](0) +=
+    _mech_disp_strain_increment[_qp](0) +=
         0.5 *
         ((Utility::pow<2>(_grad_disp_0_local_t(0)) + Utility::pow<2>(_grad_disp_0_local_t(1)) +
           Utility::pow<2>(_grad_disp_0_local_t(2))) *
@@ -249,21 +270,37 @@ ComputeIncrementalBeamStrain::computeQpStrain()
          Utility::pow<2>(_grad_rot_0_local_t(2)) * _Iy[_qp] +
          Utility::pow<2>(_grad_rot_0_local_t(1)) * _Iz[_qp] +
          Utility::pow<2>(_grad_rot_0_local_t(0)) * (_Iy[_qp] + _Iz[_qp]));
-    _disp_strain_increment[_qp](1) += (-_avg_rot_local_t(2) * _grad_disp_0_local_t(0) +
-                                       _avg_rot_local_t(0) * _grad_disp_0_local_t(2)) *
-                                      _area[_qp];
-    _disp_strain_increment[_qp](2) += (_avg_rot_local_t(1) * _grad_disp_0_local_t(0) -
-                                       _avg_rot_local_t(0) * _grad_disp_0_local_t(1)) *
-                                      _area[_qp];
+    _mech_disp_strain_increment[_qp](1) += (-_avg_rot_local_t(2) * _grad_disp_0_local_t(0) +
+                                            _avg_rot_local_t(0) * _grad_disp_0_local_t(2)) *
+                                           _area[_qp];
+    _mech_disp_strain_increment[_qp](2) += (_avg_rot_local_t(1) * _grad_disp_0_local_t(0) -
+                                            _avg_rot_local_t(0) * _grad_disp_0_local_t(1)) *
+                                           _area[_qp];
 
-    _rot_strain_increment[_qp](0) += -_avg_rot_local_t(1) * _grad_rot_0_local_t(2) * _Iy[_qp] +
-                                     _avg_rot_local_t(2) * _grad_rot_0_local_t(1) * _Iz[_qp];
-    _rot_strain_increment[_qp](1) += (_grad_disp_0_local_t(0) * _grad_rot_0_local_t(1) -
-                                      _grad_disp_0_local_t(1) * _grad_rot_0_local_t(0)) *
-                                     _Iz[_qp];
-    _rot_strain_increment[_qp](2) += (_grad_disp_0_local_t(2) * _grad_rot_0_local_t(0) -
-                                      _grad_disp_0_local_t(0) * _grad_rot_0_local_t(2)) *
-                                     _Iy[_qp];
+    _mech_rot_strain_increment[_qp](0) += -_avg_rot_local_t(1) * _grad_rot_0_local_t(2) * _Iy[_qp] +
+                                          _avg_rot_local_t(2) * _grad_rot_0_local_t(1) * _Iz[_qp];
+    _mech_rot_strain_increment[_qp](1) += (_grad_disp_0_local_t(0) * _grad_rot_0_local_t(1) -
+                                           _grad_disp_0_local_t(1) * _grad_rot_0_local_t(0)) *
+                                          _Iz[_qp];
+    _mech_rot_strain_increment[_qp](2) += (_grad_disp_0_local_t(2) * _grad_rot_0_local_t(0) -
+                                           _grad_disp_0_local_t(0) * _grad_rot_0_local_t(2)) *
+                                          _Iy[_qp];
+  }
+
+  _total_disp_strain[_qp] = _total_rotation[0].transpose() * _mech_disp_strain_increment[_qp] +
+                            _total_disp_strain_old[_qp];
+  _total_rot_strain[_qp] = _total_rotation[0].transpose() * _mech_rot_strain_increment[_qp] +
+                           _total_disp_strain_old[_qp];
+
+  // Convert eigen strain increment from global to beam local coordinate system and remove eigen
+  // strain increment
+  for (unsigned int i = 0; i < _eigenstrain_names.size(); ++i)
+  {
+    _mech_disp_strain_increment[_qp] -=
+        _total_rotation[0] * ((*_disp_eigenstrain[i])[_qp] - (*_disp_eigenstrain_old[i])[_qp]) *
+        _area[_qp];
+    _mech_rot_strain_increment[_qp] -=
+        _total_rotation[0] * ((*_rot_eigenstrain[i])[_qp] - (*_rot_eigenstrain_old[i])[_qp]);
   }
 }
 
@@ -488,8 +525,9 @@ ComputeIncrementalBeamStrain::computeJacobian()
     RankTwoTensor k3_large_21;
     k3_large_21.zero();
     // col1
-    k3_large_21(0, 0) = -1.0 / 6.0 * (_grad_disp_0_local_t(2) * _avg_rot_local_t(2) +
-                                      _grad_disp_0_local_t(1) * _avg_rot_local_t(1));
+    k3_large_21(0, 0) = -1.0 / 6.0 *
+                        (_grad_disp_0_local_t(2) * _avg_rot_local_t(2) +
+                         _grad_disp_0_local_t(1) * _avg_rot_local_t(1));
     k3_large_21(1, 0) = 0.25 * _grad_disp_0_local_t(0) * _avg_rot_local_t(1) -
                         1.0 / 6.0 * _grad_disp_0_local_t(1) * _avg_rot_local_t(0);
     k3_large_21(2, 0) = 0.25 * _grad_disp_0_local_t(0) * _avg_rot_local_t(2) -

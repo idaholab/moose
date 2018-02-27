@@ -22,10 +22,6 @@ validParams<InertialForceBeam>()
                              "contribution of mass dependent Rayleigh damping and HHT time "
                              "integration scheme.");
   params.set<bool>("use_displaced_mesh") = true;
-  params.addParam<std::string>("base_name",
-                               "Optional parameter that allows the user to define "
-                               "multiple mechanics material systems on the same "
-                               "block, i.e. for multiple phases");
   params.addRequiredCoupledVar(
       "rotations", "The rotations appropriate for the simulation geometry and coordinate system");
   params.addRequiredCoupledVar(
@@ -72,8 +68,6 @@ InertialForceBeam::InertialForceBeam(const InputParameters & parameters)
     _accel_num(3),
     _rot_vel_num(3),
     _rot_accel_num(3),
-    _disp_var(3),
-    _rot_var(3),
     _area(coupledValue("area")),
     _Ay(coupledValue("Ay")),
     _Az(coupledValue("Az")),
@@ -83,10 +77,8 @@ InertialForceBeam::InertialForceBeam(const InputParameters & parameters)
     _gamma(getParam<Real>("gamma")),
     _eta(getMaterialProperty<Real>("eta")),
     _alpha(getParam<Real>("alpha")),
-    _base_name(isParamValid("base_name") ? getParam<std::string>("base_name") + "_" : ""),
-    _original_local_config(
-        getMaterialPropertyByName<RankTwoTensor>(_base_name + "original_local_config")),
-    _original_length(getMaterialPropertyByName<Real>(_base_name + "original_length")),
+    _original_local_config(getMaterialPropertyByName<RankTwoTensor>("original_local_config")),
+    _original_length(getMaterialPropertyByName<Real>("original_length")),
     _component(getParam<unsigned int>("component"))
 {
   // Checking for consistency between mesh dimension and length of the provided displacements vector
@@ -113,10 +105,6 @@ InertialForceBeam::InertialForceBeam(const InputParameters & parameters)
 
     MooseVariable * rot_accel_variable = getVar("rot_accelerations", i);
     _rot_accel_num[i] = rot_accel_variable->number();
-
-    _disp_var[i] = coupled("displacements", i);
-
-    _rot_var[i] = coupled("rotations", i);
   }
 }
 
@@ -178,10 +166,12 @@ InertialForceBeam::computeResidual()
           1. / _beta * (disp0 / (_dt * _dt) - vel_old_0(i) / _dt - accel_old_0 * (0.5 - _beta));
       accel1(i) =
           1. / _beta * (disp1 / (_dt * _dt) - vel_old_1(i) / _dt - accel_old_1 * (0.5 - _beta));
-      rot_accel0(i) = 1. / _beta * (rot0 / (_dt * _dt) - rot_vel_old_0(i) / _dt -
-                                    rot_accel_old_0 * (0.5 - _beta));
-      rot_accel1(i) = 1. / _beta * (rot1 / (_dt * _dt) - rot_vel_old_1(i) / _dt -
-                                    rot_accel_old_1 * (0.5 - _beta));
+      rot_accel0(i) =
+          1. / _beta *
+          (rot0 / (_dt * _dt) - rot_vel_old_0(i) / _dt - rot_accel_old_0 * (0.5 - _beta));
+      rot_accel1(i) =
+          1. / _beta *
+          (rot1 / (_dt * _dt) - rot_vel_old_1(i) / _dt - rot_accel_old_1 * (0.5 - _beta));
 
       vel0(i) = vel_old_0(i) + (_dt * (1 - _gamma)) * accel_old_0 + _gamma * _dt * accel0(i);
       vel1(i) = vel_old_1(i) + (_dt * (1 - _gamma)) * accel_old_1 + _gamma * _dt * accel1(i);
@@ -394,7 +384,7 @@ InertialForceBeam::computeOffDiagJacobian(unsigned int jvar)
     bool rot_coupled = false;
 
     for (unsigned int i = 0; i < _ndisp; ++i)
-      if (jvar == _disp_var[i] && _component > 2)
+      if (jvar == _disp_num[i] && _component > 2)
       {
         coupled_component = i;
         disp_coupled = true;
@@ -402,7 +392,7 @@ InertialForceBeam::computeOffDiagJacobian(unsigned int jvar)
       }
 
     for (unsigned int i = 0; i < _nrot; ++i)
-      if (jvar == _rot_var[i])
+      if (jvar == _rot_num[i])
       {
         coupled_component = i + 3;
         rot_coupled = true;

@@ -1,7 +1,6 @@
 # Test for small strain euler beam vibration in y direction
 
 # An impulse load is applied at the end of a cantilever beam of length 4m.
-# The beam is massless with a lumped mass at the end of the beam
 # The properties of the cantilever beam are as follows:
 # Young's modulus (E) = 1e4
 # Shear modulus (G) = 4e7
@@ -9,18 +8,20 @@
 # Cross-section area (A) = 0.01
 # Iy = 1e-4 = Iz
 # Length (L)= 4 m
-# mass (m) = 0.01899772
+# density (rho) = 1.0
 
 # For this beam, the dimensionless parameter alpha = kAGL^2/EI = 6.4e6
 # Therefore, the beam behaves like a Euler-Bernoulli beam.
 
-# The theoretical first frequency of this beam is:
-# f1 = 1/(2 pi) * sqrt(3EI/(mL^3)) = 0.25
+# The theoretical first and third frequencies of this beam are:
+# f1 = 1/(2 pi) * (3.5156/L^2) * sqrt(EI/rho)
+# f2 = 6.268 f1
 
-# This implies that the corresponding time period of this beam is 4s.
+# This implies that the corresponding time period of this beam are 2.858 s and 0.455s
 
-# The FEM solution for this beam with 10 element gives time periods of 4s with time step of 0.01s.
-# A higher time step of 0.1 s is used in the test to reduce computational time.
+# The FEM solution for this beam with 10 element gives time periods of 2.856 s and 0.4505s with a time step of 0.01.
+# A smaller time step is required to obtain a closer match for the lower time periods/higher frequencies.
+# A higher time step of 0.05 is used in this test to reduce testing time.
 
 # The time history from this analysis matches with that obtained from Abaqus.
 
@@ -82,6 +83,30 @@
   order = FIRST
   family = LAGRANGE
   [../]
+  [./rot_vel_x]
+  order = FIRST
+  family = LAGRANGE
+  [../]
+  [./rot_vel_y]
+  order = FIRST
+  family = LAGRANGE
+  [../]
+  [./rot_vel_z]
+  order = FIRST
+  family = LAGRANGE
+  [../]
+  [./rot_accel_x]
+  order = FIRST
+  family = LAGRANGE
+  [../]
+  [./rot_accel_y]
+  order = FIRST
+  family = LAGRANGE
+  [../]
+  [./rot_accel_z]
+  order = FIRST
+  family = LAGRANGE
+  [../]
 []
 
 [AuxKernels]
@@ -127,6 +152,51 @@
     type = NewmarkVelAux
     variable = vel_z
     acceleration = accel_z
+    gamma = 0.5
+    execute_on = timestep_end
+  [../]
+  [./rot_accel_x]
+    type = NewmarkAccelAux
+    variable = rot_accel_x
+    displacement = rot_x
+    velocity = rot_vel_x
+    beta = 0.25
+    execute_on = timestep_end
+  [../]
+  [./rot_vel_x]
+    type = NewmarkVelAux
+    variable = rot_vel_x
+    acceleration = rot_accel_x
+    gamma = 0.5
+    execute_on = timestep_end
+  [../]
+  [./rot_accel_y]
+    type = NewmarkAccelAux
+    variable = rot_accel_y
+    displacement = rot_y
+    velocity = rot_vel_y
+    beta = 0.25
+    execute_on = timestep_end
+  [../]
+  [./rot_vel_y]
+    type = NewmarkVelAux
+    variable = rot_vel_y
+    acceleration = rot_accel_y
+    gamma = 0.5
+    execute_on = timestep_end
+  [../]
+  [./rot_accel_z]
+    type = NewmarkAccelAux
+    variable = rot_accel_z
+    displacement = rot_z
+    velocity = rot_vel_z
+    beta = 0.25
+    execute_on = timestep_end
+  [../]
+  [./rot_vel_z]
+    type = NewmarkVelAux
+    variable = rot_vel_z
+    acceleration = rot_accel_z
     gamma = 0.5
     execute_on = timestep_end
   [../]
@@ -178,43 +248,13 @@
     boundary = 2
     function = force
   [../]
-  [./x_inertial]
-    type = NodalInertialForce
-    variable = disp_x
-    velocity = vel_x
-    acceleration = accel_x
-    boundary = 2
-    beta = 0.25
-    gamma = 0.5
-    mass = 0.01899772
-  [../]
-  [./y_inertial]
-    type = NodalInertialForce
-    variable = disp_y
-    velocity = vel_y
-    acceleration = accel_y
-    boundary = 2
-    beta = 0.25
-    gamma = 0.5
-    mass = 0.01899772
-  [../]
-  [./z_inertial]
-    type = NodalInertialForce
-    variable = disp_z
-    velocity = vel_z
-    acceleration = accel_z
-    boundary = 2
-    beta = 0.25
-    gamma = 0.5
-    mass = 0.01899772
-  [../]
 []
 
 [Functions]
   [./force]
     type = PiecewiseLinear
-    x = '0.0 0.1 0.2 10.0'
-    y = '0.0 1e2  0.0  0.0'
+    x = '0.0 0.05 0.1 10.0'
+    y = '0.0 1.0  0.0  0.0'
   [../]
 []
 
@@ -233,23 +273,23 @@
   line_search = 'none'
 #  petsc_options = '-snes_check_jacobian -snes_check_jacobian_view'
 # petsc_options = '-snes_check_jacobian'
-#petsc_options = '-snes_ksp_ew'
+# petsc_options = '-snes_ksp_ew'
 # petsc_options_iname = '_ksp_gmres_restart -pc_type -pc_hypre_type -pc_hypre_boomeramg_max_iter'
-# petsc_options_value = '201                hypre     boomeramg     4'
-  l_tol = 1e-8
-  l_max_its = 50
-  nl_max_its = 15
+#  petsc_options_value = '201                hypre     boomeramg     4'
+#  l_tol = 1e-8
+#  l_max_its = 50
+#  nl_max_its = 15
   nl_rel_tol = 1e-8
   nl_abs_tol = 1e-8
   start_time = 0.0
-  dt = 0.1
+  dt = 0.05
   end_time = 5.0
   timestep_tolerance = 1e-6
 []
 
 [Kernels]
   [./solid_disp_x]
-    type = StressDivergenceTensorsBeam
+    type = StressDivergenceBeam
     block = '1'
     displacements = 'disp_x disp_y disp_z'
     rotations = 'rot_x rot_y rot_z'
@@ -257,7 +297,7 @@
     variable = disp_x
   [../]
   [./solid_disp_y]
-    type = StressDivergenceTensorsBeam
+    type = StressDivergenceBeam
     block = '1'
     displacements = 'disp_x disp_y disp_z'
     rotations = 'rot_x rot_y rot_z'
@@ -265,7 +305,7 @@
     variable = disp_y
   [../]
   [./solid_disp_z]
-    type = StressDivergenceTensorsBeam
+    type = StressDivergenceBeam
     block = '1'
     displacements = 'disp_x disp_y disp_z'
     rotations = 'rot_x rot_y rot_z'
@@ -273,7 +313,7 @@
     variable = disp_z
   [../]
   [./solid_rot_x]
-    type = StressDivergenceTensorsBeam
+    type = StressDivergenceBeam
     block = '1'
     displacements = 'disp_x disp_y disp_z'
     rotations = 'rot_x rot_y rot_z'
@@ -281,7 +321,7 @@
     variable = rot_x
   [../]
   [./solid_rot_y]
-    type = StressDivergenceTensorsBeam
+    type = StressDivergenceBeam
     block = '1'
     displacements = 'disp_x disp_y disp_z'
     rotations = 'rot_x rot_y rot_z'
@@ -289,10 +329,124 @@
     variable = rot_y
   [../]
   [./solid_rot_z]
-    type = StressDivergenceTensorsBeam
+    type = StressDivergenceBeam
     block = '1'
     displacements = 'disp_x disp_y disp_z'
     rotations = 'rot_x rot_y rot_z'
+    component = 5
+    variable = rot_z
+  [../]
+  [./inertial_force_x]
+    type = InertialForceBeam
+    block = 1
+    displacements = 'disp_x disp_y disp_z'
+    rotations = 'rot_x rot_y rot_z'
+    velocities = 'vel_x vel_y vel_z'
+    accelerations = 'accel_x accel_y accel_z'
+    rot_velocities = 'rot_vel_x rot_vel_y rot_vel_z'
+    rot_accelerations = 'rot_accel_x rot_accel_y rot_accel_z'
+    beta = 0.25
+    gamma = 0.5
+    area = 0.01
+    Iy = 1e-4
+    Iz = 1e-4
+    Ay = 0.0
+    Az = 0.0
+    component = 0
+    variable = disp_x
+  [../]
+  [./inertial_force_y]
+    type = InertialForceBeam
+    block = 1
+    displacements = 'disp_x disp_y disp_z'
+    rotations = 'rot_x rot_y rot_z'
+    velocities = 'vel_x vel_y vel_z'
+    accelerations = 'accel_x accel_y accel_z'
+    rot_velocities = 'rot_vel_x rot_vel_y rot_vel_z'
+    rot_accelerations = 'rot_accel_x rot_accel_y rot_accel_z'
+    beta = 0.25
+    gamma = 0.5
+    area = 0.01
+    Iy = 1e-4
+    Iz = 1e-4
+    Ay = 0.0
+    Az = 0.0
+    component = 1
+    variable = disp_y
+  [../]
+  [./inertial_force_z]
+    type = InertialForceBeam
+    block = 1
+    displacements = 'disp_x disp_y disp_z'
+    rotations = 'rot_x rot_y rot_z'
+    velocities = 'vel_x vel_y vel_z'
+    accelerations = 'accel_x accel_y accel_z'
+    rot_velocities = 'rot_vel_x rot_vel_y rot_vel_z'
+    rot_accelerations = 'rot_accel_x rot_accel_y rot_accel_z'
+    beta = 0.25
+    gamma = 0.5
+    area = 0.01
+    Iy = 1e-4
+    Iz = 1e-4
+    Ay = 0.0
+    Az = 0.0
+    component = 2
+    variable = disp_z
+  [../]
+  [./inertial_force_rot_x]
+    type = InertialForceBeam
+    block = 1
+    displacements = 'disp_x disp_y disp_z'
+    rotations = 'rot_x rot_y rot_z'
+    velocities = 'vel_x vel_y vel_z'
+    accelerations = 'accel_x accel_y accel_z'
+    rot_velocities = 'rot_vel_x rot_vel_y rot_vel_z'
+    rot_accelerations = 'rot_accel_x rot_accel_y rot_accel_z'
+    beta = 0.25
+    gamma = 0.5
+    area = 0.01
+    Iy = 1e-4
+    Iz = 1e-4
+    Ay = 0.0
+    Az = 0.0
+    component = 3
+    variable = rot_x
+  [../]
+  [./inertial_force_rot_y]
+    type = InertialForceBeam
+    block = 1
+    displacements = 'disp_x disp_y disp_z'
+    rotations = 'rot_x rot_y rot_z'
+    velocities = 'vel_x vel_y vel_z'
+    accelerations = 'accel_x accel_y accel_z'
+    rot_velocities = 'rot_vel_x rot_vel_y rot_vel_z'
+    rot_accelerations = 'rot_accel_x rot_accel_y rot_accel_z'
+    beta = 0.25
+    gamma = 0.5
+    area = 0.01
+    Iy = 1e-4
+    Iz = 1e-4
+    Ay = 0.0
+    Az = 0.0
+    component = 4
+    variable = rot_y
+  [../]
+  [./inertial_force_rot_z]
+    type = InertialForceBeam
+    block = 1
+    displacements = 'disp_x disp_y disp_z'
+    rotations = 'rot_x rot_y rot_z'
+    velocities = 'vel_x vel_y vel_z'
+    accelerations = 'accel_x accel_y accel_z'
+    rot_velocities = 'rot_vel_x rot_vel_y rot_vel_z'
+    rot_accelerations = 'rot_accel_x rot_accel_y rot_accel_z'
+    beta = 0.25
+    gamma = 0.5
+    area = 0.01
+    Iy = 1e-4
+    Iz = 1e-4
+    Ay = 0.0
+    Az = 0.0
     component = 5
     variable = rot_z
   [../]
@@ -302,7 +456,7 @@
   [./elasticity]
     type = ComputeElasticityBeam
     youngs_modulus = 1.0e4
-    shear_modulus = 4.0e4
+    shear_modulus = 4.0e7
     shear_coefficient = 1.0
     block = 1
   [../]
@@ -319,8 +473,14 @@
     y_orientation = '0.0 1.0 0.0'
   [../]
   [./stress]
-    type = ComputeBeamForces
+    type = ComputeBeamResultants
     block = 1
+  [../]
+  [./density]
+    type = GenericConstantMaterial
+    block = 1
+    prop_names = 'density'
+    prop_values = '1.0'
   [../]
 []
 

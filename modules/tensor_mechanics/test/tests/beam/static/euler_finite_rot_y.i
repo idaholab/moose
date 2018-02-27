@@ -13,9 +13,9 @@
 
 # Beam deflection:
 # small strain+rot = 3.998 m (exact 4.0)
-# large strain + small rotation = -0.05 m in x and 3.74 m in z
-# large rotations + small strain = -0.92 m in x and 2.38 m in z
-# large rotations + large strain = -0.954 m in x and 2.37 m in z (exact -1.0 m in x and 2.4 m in z)
+# large strain + small rotation = -0.05 m in x and 3.74 m in y
+# large rotations + small strain = -0.92 m in x and 2.38 m in y
+# large rotations + large strain = -0.954 m in x and 2.37 m in y (exact -1.0 m in x and 2.4 m in y)
 
 # References:
 # K. E. Bisshopp and D.C. Drucker, Quaterly of Applied Mathematics, Vol 3, No. 3, 1945.
@@ -93,9 +93,9 @@
 []
 
 [NodalKernels]
-  [./force_z2]
+  [./force_y2]
     type = UserForcingFunctionNodalKernel
-    variable = disp_z
+    variable = disp_y
     boundary = 2
     function = force
   [../]
@@ -137,7 +137,7 @@
 
 [Kernels]
   [./solid_disp_x]
-    type = StressDivergenceTensorsBeam
+    type = StressDivergenceBeam
     block = '1'
     displacements = 'disp_x disp_y disp_z'
     rotations = 'rot_x rot_y rot_z'
@@ -145,7 +145,7 @@
     variable = disp_x
   [../]
   [./solid_disp_y]
-    type = StressDivergenceTensorsBeam
+    type = StressDivergenceBeam
     block = '1'
     displacements = 'disp_x disp_y disp_z'
     rotations = 'rot_x rot_y rot_z'
@@ -153,7 +153,7 @@
     variable = disp_y
   [../]
   [./solid_disp_z]
-    type = StressDivergenceTensorsBeam
+    type = StressDivergenceBeam
     block = '1'
     displacements = 'disp_x disp_y disp_z'
     rotations = 'rot_x rot_y rot_z'
@@ -161,7 +161,7 @@
     variable = disp_z
   [../]
   [./solid_rot_x]
-    type = StressDivergenceTensorsBeam
+    type = StressDivergenceBeam
     block = '1'
     displacements = 'disp_x disp_y disp_z'
     rotations = 'rot_x rot_y rot_z'
@@ -169,7 +169,7 @@
     variable = rot_x
   [../]
   [./solid_rot_y]
-    type = StressDivergenceTensorsBeam
+    type = StressDivergenceBeam
     block = '1'
     displacements = 'disp_x disp_y disp_z'
     rotations = 'rot_x rot_y rot_z'
@@ -177,7 +177,7 @@
     variable = rot_y
   [../]
   [./solid_rot_z]
-    type = StressDivergenceTensorsBeam
+    type = StressDivergenceBeam
     block = '1'
     displacements = 'disp_x disp_y disp_z'
     rotations = 'rot_x rot_y rot_z'
@@ -208,7 +208,7 @@
     large_strain = true
   [../]
   [./stress]
-    type = ComputeBeamForces
+    type = ComputeBeamResultants
     block = 1
   [../]
 []
@@ -222,12 +222,12 @@
   [./disp_y]
     type = PointValue
     point = '4.0 0.0 0.0'
-    variable = disp_z
+    variable = disp_y
   [../]
   [./rot_z]
     type = PointValue
     point = '4.0 0.0 0.0'
-    variable = rot_y
+    variable = rot_z
   [../]
 []
 

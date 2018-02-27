@@ -5,7 +5,7 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-#include "StressDivergenceTensorsBeam.h"
+#include "StressDivergenceBeam.h"
 
 // MOOSE includes
 #include "Assembly.h"
@@ -20,14 +20,10 @@
 
 template <>
 InputParameters
-validParams<StressDivergenceTensorsBeam>()
+validParams<StressDivergenceBeam>()
 {
   InputParameters params = validParams<Kernel>();
   params.addClassDescription("Quasi-static and dynamic stress divergence kernel for Beam element");
-  params.addParam<std::string>("base_name",
-                               "Optional parameter that allows the user to define "
-                               "multiple mechanics material systems on the same "
-                               "block, i.e. for multiple phases");
   params.addRequiredParam<unsigned int>(
       "component",
       "An integer corresponding to the direction "
@@ -48,44 +44,40 @@ validParams<StressDivergenceTensorsBeam>()
   return params;
 }
 
-StressDivergenceTensorsBeam::StressDivergenceTensorsBeam(const InputParameters & parameters)
+StressDivergenceBeam::StressDivergenceBeam(const InputParameters & parameters)
   : Kernel(parameters),
-    _base_name(isParamValid("base_name") ? getParam<std::string>("base_name") + "_" : ""),
     _component(getParam<unsigned int>("component")),
     _ndisp(coupledComponents("displacements")),
     _disp_var(_ndisp),
     _nrot(coupledComponents("rotations")),
     _rot_var(_nrot),
-    _force(&getMaterialPropertyByName<RealVectorValue>(_base_name + "forces")),
-    _moment(&getMaterialPropertyByName<RealVectorValue>(_base_name + "moments")),
-    _K11(getMaterialPropertyByName<RankTwoTensor>(_base_name + "Jacobian_11")),
-    _K22(getMaterialPropertyByName<RankTwoTensor>(_base_name + "Jacobian_22")),
-    _K22_cross(getMaterialPropertyByName<RankTwoTensor>(_base_name + "Jacobian_22_cross")),
-    _K21_cross(getMaterialPropertyByName<RankTwoTensor>(_base_name + "Jacobian_12")),
-    _K21(getMaterialPropertyByName<RankTwoTensor>(_base_name + "Jacobian_21")),
-    _original_length(getMaterialPropertyByName<Real>(_base_name + "original_length")),
-    _total_rotation(&getMaterialPropertyByName<RankTwoTensor>(_base_name + "total_rotation")),
+    _force(&getMaterialPropertyByName<RealVectorValue>("forces")),
+    _moment(&getMaterialPropertyByName<RealVectorValue>("moments")),
+    _K11(getMaterialPropertyByName<RankTwoTensor>("Jacobian_11")),
+    _K22(getMaterialPropertyByName<RankTwoTensor>("Jacobian_22")),
+    _K22_cross(getMaterialPropertyByName<RankTwoTensor>("Jacobian_22_cross")),
+    _K21_cross(getMaterialPropertyByName<RankTwoTensor>("Jacobian_12")),
+    _K21(getMaterialPropertyByName<RankTwoTensor>("Jacobian_21")),
+    _original_length(getMaterialPropertyByName<Real>("original_length")),
+    _total_rotation(&getMaterialPropertyByName<RankTwoTensor>("total_rotation")),
     _zeta(getParam<Real>("zeta")),
     _alpha(getParam<Real>("alpha")),
     _force_old(_zeta > 0.0 || std::abs(_alpha) > 0.0
-                   ? &getMaterialPropertyOld<RealVectorValue>(_base_name + "forces")
+                   ? &getMaterialPropertyOld<RealVectorValue>("forces")
                    : nullptr),
     _moment_old(_zeta > 0.0 || std::abs(_alpha) > 0.0
-                    ? &getMaterialPropertyOld<RealVectorValue>(_base_name + "moments")
+                    ? &getMaterialPropertyOld<RealVectorValue>("moments")
                     : nullptr),
     _total_rotation_old(_zeta > 0.0 || std::abs(_alpha) > 0.0
-                            ? &getMaterialPropertyOld<RankTwoTensor>(_base_name + "total_rotation")
+                            ? &getMaterialPropertyOld<RankTwoTensor>("total_rotation")
                             : nullptr),
-    _force_older(std::abs(_alpha) > 0.0
-                     ? &getMaterialPropertyOlder<RealVectorValue>(_base_name + "forces")
-                     : nullptr),
-    _moment_older(std::abs(_alpha) > 0.0
-                      ? &getMaterialPropertyOlder<RealVectorValue>(_base_name + "moments")
-                      : nullptr),
-    _total_rotation_older(
-        std::abs(_alpha) > 0.0
-            ? &getMaterialPropertyOlder<RankTwoTensor>(_base_name + "total_rotation")
-            : nullptr)
+    _force_older(std::abs(_alpha) > 0.0 ? &getMaterialPropertyOlder<RealVectorValue>("forces")
+                                        : nullptr),
+    _moment_older(std::abs(_alpha) > 0.0 ? &getMaterialPropertyOlder<RealVectorValue>("moments")
+                                         : nullptr),
+    _total_rotation_older(std::abs(_alpha) > 0.0
+                              ? &getMaterialPropertyOlder<RankTwoTensor>("total_rotation")
+                              : nullptr)
 {
   if (_ndisp != _nrot)
     mooseError("The number of displacement and rotation variables should be same.");
@@ -98,7 +90,7 @@ StressDivergenceTensorsBeam::StressDivergenceTensorsBeam(const InputParameters &
 }
 
 void
-StressDivergenceTensorsBeam::computeResidual()
+StressDivergenceBeam::computeResidual()
 {
   DenseVector<Number> & re = _assembly.residualBlock(_var.number());
   mooseAssert(re.size() == 2, "Beam element has and only has two nodes.");
@@ -134,7 +126,7 @@ StressDivergenceTensorsBeam::computeResidual()
 }
 
 void
-StressDivergenceTensorsBeam::computeJacobian()
+StressDivergenceBeam::computeJacobian()
 {
   DenseMatrix<Number> & ke = _assembly.jacobianBlock(_var.number(), _var.number());
   _local_ke.resize(ke.m(), ke.n());
@@ -172,7 +164,7 @@ StressDivergenceTensorsBeam::computeJacobian()
 }
 
 void
-StressDivergenceTensorsBeam::computeOffDiagJacobian(unsigned int jvar)
+StressDivergenceBeam::computeOffDiagJacobian(unsigned int jvar)
 {
   if (jvar == _var.number())
     computeJacobian();
@@ -236,8 +228,8 @@ StressDivergenceTensorsBeam::computeOffDiagJacobian(unsigned int jvar)
 }
 
 void
-StressDivergenceTensorsBeam::computeDynamicTerms(std::vector<RealVectorValue> & global_force_res,
-                                                 std::vector<RealVectorValue> & global_moment_res)
+StressDivergenceBeam::computeDynamicTerms(std::vector<RealVectorValue> & global_force_res,
+                                          std::vector<RealVectorValue> & global_moment_res)
 {
   RealVectorValue a(3, 0.0);
   std::vector<RealVectorValue> global_force_res_old(_test.size(), a);
@@ -272,12 +264,11 @@ StressDivergenceTensorsBeam::computeDynamicTerms(std::vector<RealVectorValue> & 
 }
 
 void
-StressDivergenceTensorsBeam::computeGlobalResidual(
-    const MaterialProperty<RealVectorValue> * force,
-    const MaterialProperty<RealVectorValue> * moment,
-    const MaterialProperty<RankTwoTensor> * total_rotation,
-    std::vector<RealVectorValue> & global_force_res,
-    std::vector<RealVectorValue> & global_moment_res)
+StressDivergenceBeam::computeGlobalResidual(const MaterialProperty<RealVectorValue> * force,
+                                            const MaterialProperty<RealVectorValue> * moment,
+                                            const MaterialProperty<RankTwoTensor> * total_rotation,
+                                            std::vector<RealVectorValue> & global_force_res,
+                                            std::vector<RealVectorValue> & global_moment_res)
 {
   std::vector<RealVectorValue> force_local_t(_qrule->n_points());
   std::vector<RealVectorValue> moment_local_t(_qrule->n_points());
