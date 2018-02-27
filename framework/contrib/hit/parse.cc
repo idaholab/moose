@@ -435,27 +435,46 @@ Field::render(int indent, const std::string & indent_text, int maxlen)
   size_t prefix_len = s.size() - 1;
   auto quote = quoteChar(_val);
   int max = maxlen - prefix_len - 1;
+
+  // special rendering logic for quoted strings that go over maxlen:
   if (_kind == Kind::String && quote != "" && max > 0)
   {
+    // strip outer quotes - will will add back our own for each line
     std::string unquoted = _val.substr(1, _val.size() - 2);
 
+    // iterate over the string in chunks of size "max"
     size_t pos = 0;
     while (pos + max < unquoted.size())
     {
+      // to avoid splitting words, walk backwards from the "max" sized chunk boundary to find a
+      // space character
       size_t boundary = pos + max;
       while (boundary > pos && !charIn(unquoted[boundary], " \t"))
         boundary--;
+
+      // if we didn't find a space, just fall back to the original max sized chunk boundary and
+      // split the word anyway
       if (boundary == pos)
         boundary = pos + max;
+
+      // shift the boundary to after the space character (instead of before it) unless that would
+      // make the index beyond the string length.
       boundary = std::min(boundary + 1, unquoted.size());
 
+      // add the leading indentation and newline - skip it for the first first chunk of a string
+      // because it should go on the same line as the "=",
       if (pos > 0)
         s += "\n" + strRepeat(" ", prefix_len);
+
+      // add the quoted chunk to our string text
       s += quote + unquoted.substr(pos, boundary - pos) + quote;
       pos = boundary;
     }
+
+    // add any remaining partial chunk of the string value
     if (pos < unquoted.size())
     {
+      // again only add leading newline and indentation for greater chunks after the first.
       if (pos > 0)
         s += "\n" + strRepeat(" ", prefix_len);
       s += quote + unquoted.substr(pos, std::string::npos) + quote;
