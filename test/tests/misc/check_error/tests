@@ -92,16 +92,16 @@
   [../]
 
   [./deprecated_param_default]
-    type = 'RunException'
+    type = 'RunApp'
     input = 'deprecated_param_test.i'
-    expect_err = "The parameter \w+ is deprecated."
+    expect_out = "The parameter \w+ is deprecated."
     cli_args = 'Kernels/nan/deprecated_default=1'
   [../]
 
   [./deprecated_param_no_default]
-    type = 'RunException'
+    type = 'RunApp'
     input = 'deprecated_param_test.i'
-    expect_err = "The parameter \w+ is deprecated."
+    expect_out = "The parameter \w+ is deprecated."
     cli_args = 'Kernels/nan/deprecated_no_default=1'
   [../]
 
@@ -610,5 +610,10 @@
     type = 'RunException'
     input = 'coupling_itself.i'
     expect_err = "Coupled variable 'v' needs to be different from 'variable' with CoupledForce"
+  [../]
+  [./missing_input]
+    type = 'RunException'
+    input = 'missing_input_file.i'
+    expect_err = "Unable to open file"
   [../]
 []
