@@ -4,7 +4,7 @@
 template<>
 InputParameters validParams<CoeffDiffusion>()
 {
-  InputParameters params = validParams<Kernel>();
+  InputParameters params = validParams<Diffusion>();
   params.addParam<Real>("coefficient", 1.0, "Coefficient multiplier for diffusion term.");
   params.addParam<FunctionName>("func", 1.0, "Function multiplier for diffusion term.");
   return params;
