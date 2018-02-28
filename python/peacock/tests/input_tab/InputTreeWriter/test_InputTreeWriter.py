@@ -31,14 +31,14 @@ class Tests(Testing.PeacockTester):
     def testWriter(self):
         t = self.createBasic()
         s = InputTreeWriter.inputTreeToString(t.root)
-        self.checkFile(s, "gold/simple_diffusion.i")
+        self.checkFile(s, "gold/simple_diffusion.i", True)
 
     def testInactive(self):
         t = self.createBasic()
         d = t.getBlockInfo("/Kernels/diff")
         d.included = False
         s = InputTreeWriter.inputTreeToString(t.root)
-        self.checkFile(s, "gold/simple_diffusion_no_diff.i")
+        self.checkFile(s, "gold/simple_diffusion_no_diff.i", True)
         k = t.getBlockInfo("/Kernels")
         k.included = False
         b = t.getBlockInfo("/BCs")
@@ -46,7 +46,7 @@ class Tests(Testing.PeacockTester):
         e = t.getBlockInfo("/Executioner")
         e.included = False
         s = InputTreeWriter.inputTreeToString(t.root)
-        self.checkFile(s, "gold/simple_diffusion_inactive.i")
+        self.checkFile(s, "gold/simple_diffusion_inactive.i", True)
 
         d.included = True
         k.included = True

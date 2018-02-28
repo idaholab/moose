@@ -232,7 +232,7 @@ class Tests(BaseTests):
         mock_q.return_value = QMessageBox.Yes # The user wants to ignore changes
         self.assertEqual(w.canClose(), True)
 
-        new_block = "[AuxVariables]\n  [./New_0]\n  [../]\n[]\n\n"
+        new_block = "[AuxVariables]\n  [New_0]\n  []\n[]\n"
         s = tree.getInputFileString()
         self.assertEqual(new_block, s)
 
