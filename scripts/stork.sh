@@ -4,11 +4,12 @@ function printusage {
     echo "Usage:    stork.sh <name>"
     echo ""
     echo "    Creates a new blank MOOSE app in the current working directory."
-    echo "    <name> should be given in CamelCase format."
+    echo "    <name> should be given in CamelCase format.  Allowed are letters and numbers "
+    echo "           (cannot start with a number). No special characters are allowed."
     echo "    When --module is supplied after the <name> a MOOSE module will be created."
 }
 
-if [[ "$1" == "-h" || $# == 0 || $# > 2 ]]; then
+if [[ "$1" == "-h" || "$1" == "--help" || $# == 0 || $# > 2 ]]; then
     printusage
     exit 1
 fi
@@ -28,6 +29,17 @@ fi
 # set old/new app name variables
 srcname='Stork'
 dstname=$1
+
+# check that dstname does not contain a special character
+if [[ $dstname == *[\!\@\#\$\%\^\&\*\(\)\-\+]* ]] ; then
+  echo "error: provided name contains a special character."
+  exit 1
+fi
+# check that the name does not start with a number
+if [[ ${dstname:0:1} == *[0-9]* ]] ; then
+  echo "error: the first character of the name is a number."
+  exit 1
+fi
 
 regex='s/([A-Z][a-z])/_\1/g; s/([a-z])([A-Z])/\1_\2/g; s/^_//;'
 
