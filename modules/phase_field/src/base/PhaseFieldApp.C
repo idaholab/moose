@@ -116,12 +116,6 @@
 #include "TricrystalTripleJunctionIC.h"
 
 /*
- * Boundary Conditions
- */
-#include "CahnHilliardAnisoFluxBC.h"
-#include "CahnHilliardFluxBC.h"
-
-/*
  * InterfaceKernels
  */
 #include "EqualGradientLagrangeInterface.h"
@@ -421,9 +415,6 @@ PhaseFieldApp::registerObjects(Factory & factory)
   registerInitialCondition(ThumbIC);
   registerInitialCondition(Tricrystal2CircleGrainsIC);
   registerInitialCondition(TricrystalTripleJunctionIC);
-
-  registerBoundaryCondition(CahnHilliardAnisoFluxBC);
-  registerBoundaryCondition(CahnHilliardFluxBC);
 
   registerInterfaceKernel(EqualGradientLagrangeInterface);
   registerInterfaceKernel(EqualGradientLagrangeMultiplier);

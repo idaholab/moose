@@ -10,8 +10,12 @@
 
 [Variables]
   [./c]
-    order = THIRD
-    family = HERMITE
+    order = FIRST
+    family = LAGRANGE
+  [../]
+  [./w]
+    order = FIRST
+    family = LAGRANGE
   [../]
   [./d]
     order = FIRST
@@ -20,23 +24,32 @@
   [../]
 []
 
+[Preconditioning]
+  [./SMP]
+    type = SMP
+    coupled_groups = 'c,w'
+  [../]
+[]
+
 [Kernels]
-  [./CHSolid]
-    type = CahnHilliard
+  [./cres]
+    type = SplitCHParsed
     variable = c
     f_name = F
-    mob_name = M
-  [../]
-  [./CHInterface]
-    type = CHInterface
-    variable = c
-    mob_name = M
     kappa_name = kappa_c
+    w = w
   [../]
-  [./ie_c]
-    type = TimeDerivative
-    variable = c
+  [./wres]
+    type = SplitCHWRes
+    variable = w
+    mob_name = M
   [../]
+  [./time]
+    type = CoupledTimeDerivative
+    variable = w
+    v = c
+  [../]
+
   [./diff]
     type = MatDiffusion
     D_name = 10.0
@@ -51,13 +64,13 @@
 [BCs]
   [./in_flux]
     type = NeumannBC
-    variable = c
+    variable = w
     boundary = top
     value = 0.2
   [../]
   [./out_flux]
     type = NeumannBC
-    variable = c
+    variable = w
     boundary = bottom
     value = -0.1
   [../]

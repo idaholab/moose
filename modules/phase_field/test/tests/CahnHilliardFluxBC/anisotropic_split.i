@@ -10,8 +10,12 @@
 
 [Variables]
   [./c]
-    order = THIRD
-    family = HERMITE
+    order = FIRST
+    family = LAGRANGE
+  [../]
+  [./w]
+    order = FIRST
+    family = LAGRANGE
   [../]
   [./d]
     order = FIRST
@@ -20,23 +24,32 @@
   [../]
 []
 
+[Preconditioning]
+  [./SMP]
+    type = SMP
+    coupled_groups = 'c,w'
+  [../]
+[]
+
 [Kernels]
-  [./CHSolid]
-    type = CahnHilliard
+  [./cres]
+    type = SplitCHParsed
     variable = c
     f_name = F
-    mob_name = M
-  [../]
-  [./CHInterface]
-    type = CHInterface
-    variable = c
-    mob_name = M
     kappa_name = kappa_c
+    w = w
   [../]
-  [./ie_c]
-    type = TimeDerivative
-    variable = c
+  [./wres]
+    type = SplitCHWResAniso
+    variable = w
+    mob_name = M
   [../]
+  [./time]
+    type = CoupledTimeDerivative
+    variable = w
+    v = c
+  [../]
+
   [./diff]
     type = MatDiffusion
     D_name = 10.0
@@ -51,13 +64,13 @@
 [BCs]
   [./in_flux]
     type = NeumannBC
-    variable = c
+    variable = w
     boundary = top
     value = 0.2
   [../]
   [./out_flux]
     type = NeumannBC
-    variable = c
+    variable = w
     boundary = bottom
     value = -0.1
   [../]
@@ -82,12 +95,41 @@
     prop_names  = 'kappa_c'
     prop_values = '2.0'
   [../]
-  [./mob]
+
+  # we assemble the variable dependent anosotropic mobility tensor form two
+  # base tensors and their associated weights
+  [./mob0]
+    type = ConstantAnisotropicMobility
+    tensor = '1 0 0  0 0.5 0  0 0 0'
+    M_name = M0
+  [../]
+  [./mob1]
+    type = ConstantAnisotropicMobility
+    tensor = '0.5 0 0  0 1 0  0 0 0'
+    M_name = M1
+  [../]
+  [./wgt0]
     type = DerivativeParsedMaterial
-    f_name = M
-    function = 'c^2+d+0.1'
+    f_name = w0
+    function = 'c^2+d'
     args = 'c d'
   [../]
+  [./wgt1]
+    type = DerivativeParsedMaterial
+    f_name = w1
+    function = 'c+d^2'
+    args = 'c d'
+  [../]
+
+  # assemble mobility tensor
+  [./mob]
+    type = CompositeMobilityTensor
+    M_name = M
+    tensors = 'M0 M1'
+    weights = 'w0 w1'
+    args = 'c d'
+  [../]
+
   [./F]
     type = DerivativeParsedMaterial
     f_name = F
@@ -113,11 +155,11 @@
 
   l_max_its = 30
   l_tol = 1.0e-3
-  nl_max_its = 10
-  nl_rel_tol = 1.0e-12
+  nl_max_its = 15
+  nl_rel_tol = 1.0e-10
   num_steps = 2
 
-  dt = 0.1
+  dt = 0.01
 []
 
 [Outputs]
