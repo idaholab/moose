@@ -137,7 +137,7 @@ class RunApp(Tester):
             cli_args.append('--check-input')
 
         timing_string = ' '
-        if options.timing:
+        if options.timing and specs["timing"]:
             cli_args.append('--timing')
             cli_args.append('Outputs/print_perf_log=true')
 

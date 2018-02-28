@@ -71,6 +71,7 @@
     input = 'throw_material.i'
     exodiff = 'throw_material_out.e'
     recover = false
+    timing = false # See Ticket #10927
   [../]
 
   [./test_constant_on_elem]
