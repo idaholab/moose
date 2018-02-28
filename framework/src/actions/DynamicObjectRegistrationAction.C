@@ -28,6 +28,10 @@ validParams<DynamicObjectRegistrationAction>()
                                "Path to search for dynamic libraries (please "
                                "avoid committing absolute paths in addition to "
                                "MOOSE_LIBRARY_PATH)");
+  params.addParam<std::string>(
+      "library_name",
+      "",
+      "The file name of the library (*.la file) that will be dynamically loaded.");
   return params;
 }
 
@@ -49,9 +53,15 @@ DynamicObjectRegistrationAction::DynamicObjectRegistrationAction(InputParameters
         getParam<std::vector<std::string>>("register_objects_from");
     for (const auto & app_name : application_names)
     {
-      _app.dynamicObjectRegistration(app_name, &_factory, getParam<std::string>("library_path"));
-      _app.dynamicSyntaxAssociation(
-          app_name, &_awh.syntax(), &_action_factory, getParam<std::string>("library_path"));
+      _app.dynamicObjectRegistration(app_name,
+                                     &_factory,
+                                     getParam<std::string>("library_path"),
+                                     getParam<std::string>("library_name"));
+      _app.dynamicSyntaxAssociation(app_name,
+                                    &_awh.syntax(),
+                                    &_action_factory,
+                                    getParam<std::string>("library_path"),
+                                    getParam<std::string>("library_name"));
     }
   }
 }

@@ -386,12 +386,16 @@ public:
    */
   void dynamicObjectRegistration(const std::string & app_name,
                                  Factory * factory,
-                                 std::string library_path);
-  void dynamicAppRegistration(const std::string & app_name, std::string library_path);
+                                 std::string library_path,
+                                 const std::string & library_name);
+  void dynamicAppRegistration(const std::string & app_name,
+                              std::string library_path,
+                              const std::string & library_name);
   void dynamicSyntaxAssociation(const std::string & app_name,
                                 Syntax * syntax,
                                 ActionFactory * action_factory,
-                                std::string library_path);
+                                std::string library_path,
+                                const std::string & library_name);
   ///@}
 
   /**
