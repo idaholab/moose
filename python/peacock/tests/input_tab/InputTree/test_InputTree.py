@@ -56,19 +56,19 @@ class Tests(Testing.PeacockTester):
 
     def testTransient(self):
         t = self.createTree(input_file=self.transient)
-        self.checkFile(t.getInputFileString(), self.transient_gold)
+        self.checkFile(t.getInputFileString(), self.transient_gold, True)
 
     def testLCF(self):
         t = self.createTree(input_file=self.lcf1)
-        self.checkFile(t.getInputFileString(), self.lcf1_gold)
+        self.checkFile(t.getInputFileString(), self.lcf1_gold, True)
 
     def testFSP(self):
         t = self.createTree(input_file=self.fsp)
-        self.checkFile(t.getInputFileString(), self.fsp_gold)
+        self.checkFile(t.getInputFileString(), self.fsp_gold, True)
 
     def testSimpleDiffusion(self):
         t = self.createTree(input_file=self.simple_diffusion)
-        self.checkFile(t.getInputFileString(), self.simple_diffusion_gold)
+        self.checkFile(t.getInputFileString(), self.simple_diffusion_gold, True)
 
     def testChangingInputFiles(self):
         t = self.createTree(input_file=self.simple_diffusion)
