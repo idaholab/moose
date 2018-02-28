@@ -85,7 +85,7 @@ public:
   /// tokens returns the list of tokens generated from the lexing process that represent the input
   /// text provided to this lexer.  tokens will be empty until after the run function has been
   /// called and completes execution.
-  std::vector<Token> tokens();
+  std::vector<Token> & tokens();
   /// run executes the lexer causing it to processes the input and generate a sequence of tokens
   /// representing it.  start is the first, starting LexFunc.  run calls start, passing in this
   /// lexer instance as an argument.  If start returns another LexFunc, it is called with this lexer
