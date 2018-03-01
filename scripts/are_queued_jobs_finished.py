@@ -18,6 +18,14 @@ class Jobs:
         else:
             raise Exception('File does not exist: %s' % (json_file))
         self.__job_data = None
+        self._make_compatible()
+
+    def _make_compatible(self):
+        self.getJobs()
+        if self.__job_data:
+            for job, meta in self.__job_data.iteritems():
+                if 'job_id' in meta and not 'are_my_queued_jobs_finished' in meta:
+                    meta['are_my_queued_jobs_finished'] = False
 
     def getJobs(self):
         if self.__job_data is None:
@@ -39,7 +47,7 @@ def getQueuedJobIDs(jobs):
     """ Return a list of queued job ids contained in jobs """
     job_ids = []
     for job, meta in jobs.getJobs().iteritems():
-        if 'job_id' in meta and meta['status_bucket']['status'] == 'QUEUED':
+        if 'job_id' in meta and meta['are_my_queued_jobs_finished'] == False:
             job_ids.append(meta['job_id'])
     return job_ids
 
@@ -58,8 +66,8 @@ def getJobStatus(job_ids):
 def updateStatus(jobs, finished_jobs):
     """ loop through jobs and adjust the status for those supplied in finished_jobs """
     for job, meta in jobs.getJobs().iteritems():
-        if 'job_id' in meta and meta['job_id'] in finished_jobs and meta['status_bucket']['status'] == 'QUEUED':
-            meta['status_bucket']['status'] = 'WAITING'
+        if 'job_id' in meta and meta['job_id'] in finished_jobs and meta['are_my_queued_jobs_finished'] == False:
+            meta['are_my_queued_jobs_finished'] = True
 
 def isFinished(jobs):
     """ Update job statuses, and return bool if all jobs are finished. """
