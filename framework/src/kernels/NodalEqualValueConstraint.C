@@ -13,6 +13,8 @@
 #include "Assembly.h"
 #include "MooseVariableScalar.h"
 
+registerMooseObject("MooseApp", NodalEqualValueConstraint);
+
 template <>
 InputParameters
 validParams<NodalEqualValueConstraint>()

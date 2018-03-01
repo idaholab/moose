@@ -11,6 +11,8 @@
 #include "ExecutionerAttributeReporter.h"
 #include "MooseApp.h"
 
+registerMooseObject("MooseApp", ExecutionerAttributeReporter);
+
 template <>
 InputParameters
 validParams<ExecutionerAttributeReporter>()

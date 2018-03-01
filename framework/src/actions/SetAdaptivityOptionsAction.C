@@ -12,6 +12,8 @@
 
 #include "libmesh/fe.h"
 
+registerMooseAction("MooseApp", SetAdaptivityOptionsAction, "set_adaptivity_options");
+
 template <>
 InputParameters
 validParams<SetAdaptivityOptionsAction>()

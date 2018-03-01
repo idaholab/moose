@@ -21,6 +21,8 @@
 #include "libmesh/mesh_refinement.h"
 #include "libmesh/explicit_system.h"
 
+registerMooseAction("MooseApp", AddOutputAction, "add_output");
+
 template <>
 InputParameters
 validParams<AddOutputAction>()

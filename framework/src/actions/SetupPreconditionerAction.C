@@ -18,6 +18,8 @@
 
 unsigned int SetupPreconditionerAction::_count = 0;
 
+registerMooseAction("MooseApp", SetupPreconditionerAction, "add_preconditioning");
+
 template <>
 InputParameters
 validParams<SetupPreconditionerAction>()

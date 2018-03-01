@@ -9,6 +9,8 @@
 
 #include "CoupledODETimeDerivative.h"
 
+registerMooseObject("MooseApp", CoupledODETimeDerivative);
+
 template <>
 InputParameters
 validParams<CoupledODETimeDerivative>()

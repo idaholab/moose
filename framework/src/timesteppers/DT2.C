@@ -24,6 +24,8 @@
 // C++ Includes
 #include <iomanip>
 
+registerMooseObject("MooseApp", DT2);
+
 template <>
 InputParameters
 validParams<DT2>()

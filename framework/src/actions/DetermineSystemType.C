@@ -10,6 +10,8 @@
 #include "DetermineSystemType.h"
 #include "MooseApp.h"
 
+registerMooseAction("MooseApp", DetermineSystemType, "determine_system_type");
+
 template <>
 InputParameters
 validParams<DetermineSystemType>()

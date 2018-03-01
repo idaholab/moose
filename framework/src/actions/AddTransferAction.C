@@ -10,6 +10,8 @@
 #include "AddTransferAction.h"
 #include "FEProblem.h"
 
+registerMooseAction("MooseApp", AddTransferAction, "add_transfer");
+
 template <>
 InputParameters
 validParams<AddTransferAction>()

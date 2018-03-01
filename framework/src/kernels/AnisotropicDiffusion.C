@@ -9,6 +9,8 @@
 
 #include "AnisotropicDiffusion.h"
 
+registerMooseObject("MooseApp", AnisotropicDiffusion);
+
 template <>
 InputParameters
 validParams<AnisotropicDiffusion>()

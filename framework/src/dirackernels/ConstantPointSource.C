@@ -9,6 +9,8 @@
 
 #include "ConstantPointSource.h"
 
+registerMooseObject("MooseApp", ConstantPointSource);
+
 template <>
 InputParameters
 validParams<ConstantPointSource>()

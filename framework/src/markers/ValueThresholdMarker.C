@@ -11,6 +11,8 @@
 #include "FEProblem.h"
 #include "MooseEnum.h"
 
+registerMooseObject("MooseApp", ValueThresholdMarker);
+
 template <>
 InputParameters
 validParams<ValueThresholdMarker>()

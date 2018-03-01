@@ -11,6 +11,8 @@
 #include "FEProblem.h"
 #include "ActionWarehouse.h"
 
+registerMooseAction("MooseApp", SetupDampersAction, "setup_dampers");
+
 template <>
 InputParameters
 validParams<SetupDampersAction>()

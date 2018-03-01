@@ -12,6 +12,8 @@
 #include "SubProblem.h"
 #include "MooseMesh.h"
 
+registerMooseObject("MooseApp", NumElems);
+
 template <>
 InputParameters
 validParams<NumElems>()

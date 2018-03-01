@@ -10,6 +10,8 @@
 #include "FunctionScalarAux.h"
 #include "Function.h"
 
+registerMooseObject("MooseApp", FunctionScalarAux);
+
 template <>
 InputParameters
 validParams<FunctionScalarAux>()

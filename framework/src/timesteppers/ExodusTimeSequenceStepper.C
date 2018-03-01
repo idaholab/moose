@@ -12,6 +12,8 @@
 #include "libmesh/serial_mesh.h"
 #include "libmesh/exodusII_io.h"
 
+registerMooseObject("MooseApp", ExodusTimeSequenceStepper);
+
 template <>
 InputParameters
 validParams<ExodusTimeSequenceStepper>()

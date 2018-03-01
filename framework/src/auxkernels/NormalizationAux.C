@@ -9,6 +9,8 @@
 
 #include "NormalizationAux.h"
 
+registerMooseObject("MooseApp", NormalizationAux);
+
 template <>
 InputParameters
 validParams<NormalizationAux>()

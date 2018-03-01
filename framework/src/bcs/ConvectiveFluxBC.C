@@ -9,6 +9,8 @@
 
 #include "ConvectiveFluxBC.h"
 
+registerMooseObject("MooseApp", ConvectiveFluxBC);
+
 template <>
 InputParameters
 validParams<ConvectiveFluxBC>()

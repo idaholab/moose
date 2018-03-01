@@ -23,6 +23,8 @@
 #include "libmesh/mesh_tools.h"
 #include "libmesh/numeric_vector.h"
 
+registerMooseObject("MooseApp", TransientMultiApp);
+
 template <>
 InputParameters
 validParams<TransientMultiApp>()

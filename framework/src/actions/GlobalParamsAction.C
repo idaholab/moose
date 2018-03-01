@@ -9,6 +9,8 @@
 
 #include "GlobalParamsAction.h"
 
+registerMooseAction("MooseApp", GlobalParamsAction, "set_global_params");
+
 template <>
 InputParameters
 validParams<GlobalParamsAction>()

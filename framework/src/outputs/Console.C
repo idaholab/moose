@@ -20,6 +20,8 @@
 #include "FormattedTable.h"
 #include "NonlinearSystem.h"
 
+registerMooseObject("MooseApp", Console);
+
 template <>
 InputParameters
 validParams<Console>()

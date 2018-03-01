@@ -9,6 +9,8 @@
 
 #include "MaterialRealDenseMatrixAux.h"
 
+registerMooseObject("MooseApp", MaterialRealDenseMatrixAux);
+
 template <>
 InputParameters
 validParams<MaterialRealDenseMatrixAux>()

@@ -12,6 +12,8 @@
 #include "FEProblem.h"
 #include "NonlinearSystemBase.h"
 
+registerMooseAction("MooseApp", AddFieldSplitAction, "add_field_split");
+
 template <>
 InputParameters
 validParams<AddFieldSplitAction>()

@@ -10,6 +10,8 @@
 #include "ConstantIC.h"
 #include "libmesh/point.h"
 
+registerMooseObject("MooseApp", ConstantIC);
+
 template <>
 InputParameters
 validParams<ConstantIC>()

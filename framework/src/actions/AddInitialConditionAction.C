@@ -10,6 +10,8 @@
 #include "AddInitialConditionAction.h"
 #include "FEProblem.h"
 
+registerMooseAction("MooseApp", AddInitialConditionAction, "add_ic");
+
 template <>
 InputParameters
 validParams<AddInitialConditionAction>()

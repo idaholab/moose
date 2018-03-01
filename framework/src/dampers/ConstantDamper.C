@@ -9,6 +9,8 @@
 
 #include "ConstantDamper.h"
 
+registerMooseObject("MooseApp", ConstantDamper);
+
 template <>
 InputParameters
 validParams<ConstantDamper>()

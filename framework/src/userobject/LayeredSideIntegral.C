@@ -9,6 +9,8 @@
 
 #include "LayeredSideIntegral.h"
 
+registerMooseObject("MooseApp", LayeredSideIntegral);
+
 template <>
 InputParameters
 validParams<LayeredSideIntegral>()

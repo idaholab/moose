@@ -15,6 +15,8 @@
 
 #include "libmesh/sparse_matrix.h"
 
+registerMooseObject("MooseApp", TiedValueConstraint);
+
 template <>
 InputParameters
 validParams<TiedValueConstraint>()

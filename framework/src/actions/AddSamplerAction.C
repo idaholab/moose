@@ -10,6 +10,8 @@
 #include "AddSamplerAction.h"
 #include "FEProblem.h"
 
+registerMooseAction("MooseApp", AddSamplerAction, "add_sampler");
+
 template <>
 InputParameters
 validParams<AddSamplerAction>()

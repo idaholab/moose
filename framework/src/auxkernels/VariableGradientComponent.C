@@ -9,6 +9,8 @@
 
 #include "VariableGradientComponent.h"
 
+registerMooseObject("MooseApp", VariableGradientComponent);
+
 template <>
 InputParameters
 validParams<VariableGradientComponent>()

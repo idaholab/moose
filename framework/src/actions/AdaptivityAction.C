@@ -21,6 +21,8 @@
 #include "libmesh/transient_system.h"
 #include "libmesh/system_norm.h"
 
+registerMooseAction("MooseApp", AdaptivityAction, "setup_adaptivity");
+
 template <>
 InputParameters
 validParams<AdaptivityAction>()

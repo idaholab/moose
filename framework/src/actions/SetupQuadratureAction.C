@@ -12,6 +12,8 @@
 #include "FEProblem.h"
 #include "MooseEnum.h"
 
+registerMooseAction("MooseApp", SetupQuadratureAction, "setup_quadrature");
+
 template <>
 InputParameters
 validParams<SetupQuadratureAction>()

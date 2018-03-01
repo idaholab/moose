@@ -13,6 +13,8 @@
 #include "PiecewiseConstant.h"
 #include <limits>
 
+registerMooseObject("MooseApp", FunctionDT);
+
 template <>
 InputParameters
 validParams<FunctionDT>()

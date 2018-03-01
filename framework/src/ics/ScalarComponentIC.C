@@ -10,6 +10,8 @@
 #include "ScalarComponentIC.h"
 #include "MooseVariableScalar.h"
 
+registerMooseObject("MooseApp", ScalarComponentIC);
+
 template <>
 InputParameters
 validParams<ScalarComponentIC>()

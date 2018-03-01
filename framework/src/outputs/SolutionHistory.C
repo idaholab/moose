@@ -14,6 +14,8 @@
 
 #include <fstream>
 
+registerMooseObject("MooseApp", SolutionHistory);
+
 template <>
 InputParameters
 validParams<SolutionHistory>()

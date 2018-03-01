@@ -10,6 +10,8 @@
 #include "FunctionDirichletBC.h"
 #include "Function.h"
 
+registerMooseObject("MooseApp", FunctionDirichletBC);
+
 template <>
 InputParameters
 validParams<FunctionDirichletBC>()

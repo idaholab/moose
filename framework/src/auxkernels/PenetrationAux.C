@@ -18,6 +18,8 @@
 
 const Real PenetrationAux::NotPenetrated = -999999;
 
+registerMooseObject("MooseApp", PenetrationAux);
+
 template <>
 InputParameters
 validParams<PenetrationAux>()

@@ -13,6 +13,8 @@
 #include "Transient.h"
 #include "MooseUtils.h"
 
+registerMooseObject("MooseApp", TimePeriod);
+
 template <>
 InputParameters
 validParams<TimePeriod>()

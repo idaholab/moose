@@ -9,6 +9,8 @@
 
 #include "MatchedValueBC.h"
 
+registerMooseObject("MooseApp", MatchedValueBC);
+
 template <>
 InputParameters
 validParams<MatchedValueBC>()

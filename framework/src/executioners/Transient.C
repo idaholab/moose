@@ -35,6 +35,8 @@
 #include <sstream>
 #include <iomanip>
 
+registerMooseObject("MooseApp", Transient);
+
 template <>
 InputParameters
 validParams<Transient>()

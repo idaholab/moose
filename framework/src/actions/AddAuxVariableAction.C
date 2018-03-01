@@ -10,6 +10,8 @@
 #include "AddAuxVariableAction.h"
 #include "FEProblem.h"
 
+registerMooseAction("MooseApp", AddAuxVariableAction, "add_aux_variable");
+
 template <>
 InputParameters
 validParams<AddAuxVariableAction>()

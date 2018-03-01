@@ -21,6 +21,8 @@
 #include "libmesh/id_types.h"
 #include "libmesh/parallel_algebra.h"
 
+registerMooseObject("MooseApp", MultiAppNearestNodeTransfer);
+
 template <>
 InputParameters
 validParams<MultiAppNearestNodeTransfer>()

@@ -11,6 +11,8 @@
 #include "Conversion.h"
 #include "MooseMesh.h"
 
+registerMooseObject("MooseApp", SubdomainBoundingBox);
+
 template <>
 InputParameters
 validParams<SubdomainBoundingBox>()

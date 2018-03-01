@@ -14,6 +14,8 @@
 
 #include "libmesh/fe.h"
 
+registerMooseAction("MooseApp", AddElementalFieldAction, "add_elemental_field_variable");
+
 template <>
 InputParameters
 validParams<AddElementalFieldAction>()

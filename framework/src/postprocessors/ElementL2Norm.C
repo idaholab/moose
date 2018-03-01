@@ -9,6 +9,8 @@
 
 #include "ElementL2Norm.h"
 
+registerMooseObject("MooseApp", ElementL2Norm);
+
 template <>
 InputParameters
 validParams<ElementL2Norm>()

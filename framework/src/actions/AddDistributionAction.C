@@ -10,6 +10,8 @@
 #include "AddDistributionAction.h"
 #include "FEProblem.h"
 
+registerMooseAction("MooseApp", AddDistributionAction, "add_distribution");
+
 template <>
 InputParameters
 validParams<AddDistributionAction>()

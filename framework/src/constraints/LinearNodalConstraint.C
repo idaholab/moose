@@ -11,6 +11,8 @@
 #include "LinearNodalConstraint.h"
 #include "MooseMesh.h"
 
+registerMooseObject("MooseApp", LinearNodalConstraint);
+
 template <>
 InputParameters
 validParams<LinearNodalConstraint>()

@@ -9,6 +9,8 @@
 
 #include "PointValueSampler.h"
 
+registerMooseObject("MooseApp", PointValueSampler);
+
 template <>
 InputParameters
 validParams<PointValueSampler>()

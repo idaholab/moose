@@ -9,6 +9,8 @@
 
 #include "BicubicSplineFunction.h"
 
+registerMooseObject("MooseApp", BicubicSplineFunction);
+
 template <>
 InputParameters
 validParams<BicubicSplineFunction>()

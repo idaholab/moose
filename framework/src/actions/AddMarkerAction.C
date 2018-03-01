@@ -10,6 +10,8 @@
 #include "AddMarkerAction.h"
 #include "FEProblem.h"
 
+registerMooseAction("MooseApp", AddMarkerAction, "add_marker");
+
 template <>
 InputParameters
 validParams<AddMarkerAction>()

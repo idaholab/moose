@@ -19,6 +19,8 @@
 #include "libmesh/dof_map.h"
 #include "libmesh/nemesis_io.h"
 
+registerMooseObject("MooseApp", Nemesis);
+
 template <>
 InputParameters
 validParams<Nemesis>()

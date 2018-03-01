@@ -9,6 +9,8 @@
 
 #include "ComboMarker.h"
 
+registerMooseObject("MooseApp", ComboMarker);
+
 template <>
 InputParameters
 validParams<ComboMarker>()

@@ -13,6 +13,8 @@
 #include "MooseMesh.h"
 #include "libmesh/exodusII_io.h"
 
+registerMooseAction("MooseApp", MeshOnlyAction, "mesh_only");
+
 template <>
 InputParameters
 validParams<MeshOnlyAction>()

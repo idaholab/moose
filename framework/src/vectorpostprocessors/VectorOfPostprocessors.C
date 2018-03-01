@@ -10,6 +10,8 @@
 #include "VectorOfPostprocessors.h"
 #include "PostprocessorInterface.h"
 
+registerMooseObject("MooseApp", VectorOfPostprocessors);
+
 template <>
 InputParameters
 validParams<VectorOfPostprocessors>()

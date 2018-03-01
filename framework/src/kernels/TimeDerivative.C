@@ -15,6 +15,8 @@
 
 #include "libmesh/quadrature.h"
 
+registerMooseObject("MooseApp", TimeDerivative);
+
 template <>
 InputParameters
 validParams<TimeDerivative>()

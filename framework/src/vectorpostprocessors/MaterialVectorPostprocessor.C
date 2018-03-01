@@ -16,6 +16,8 @@
 
 #include <numeric>
 
+registerMooseObject("MooseApp", MaterialVectorPostprocessor);
+
 template <>
 InputParameters
 validParams<MaterialVectorPostprocessor>()

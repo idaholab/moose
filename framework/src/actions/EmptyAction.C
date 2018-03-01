@@ -9,6 +9,12 @@
 
 #include "EmptyAction.h"
 
+registerMooseAction("MooseApp", EmptyAction, "no_action");
+
+registerMooseAction("MooseApp", EmptyAction, "ready_to_init");
+
+registerMooseAction("MooseApp", EmptyAction, "finish_input_file_output");
+
 template <>
 InputParameters
 validParams<EmptyAction>()

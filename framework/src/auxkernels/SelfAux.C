@@ -9,6 +9,8 @@
 
 #include "SelfAux.h"
 
+registerMooseObject("MooseApp", SelfAux);
+
 template <>
 InputParameters
 validParams<SelfAux>()

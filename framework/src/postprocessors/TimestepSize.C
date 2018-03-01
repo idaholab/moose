@@ -10,6 +10,8 @@
 #include "TimestepSize.h"
 #include "FEProblem.h"
 
+registerMooseObject("MooseApp", TimestepSize);
+
 template <>
 InputParameters
 validParams<TimestepSize>()

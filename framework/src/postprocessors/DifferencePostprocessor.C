@@ -9,6 +9,8 @@
 
 #include "DifferencePostprocessor.h"
 
+registerMooseObject("MooseApp", DifferencePostprocessor);
+
 template <>
 InputParameters
 validParams<DifferencePostprocessor>()

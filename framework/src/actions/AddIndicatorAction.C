@@ -10,6 +10,8 @@
 #include "AddIndicatorAction.h"
 #include "FEProblem.h"
 
+registerMooseAction("MooseApp", AddIndicatorAction, "add_indicator");
+
 template <>
 InputParameters
 validParams<AddIndicatorAction>()

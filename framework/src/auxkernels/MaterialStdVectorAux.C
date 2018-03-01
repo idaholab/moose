@@ -9,6 +9,8 @@
 
 #include "MaterialStdVectorAux.h"
 
+registerMooseObject("MooseApp", MaterialStdVectorAux);
+
 template <>
 InputParameters
 validParams<MaterialStdVectorAux>()

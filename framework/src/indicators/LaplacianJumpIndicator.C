@@ -9,6 +9,8 @@
 
 #include "LaplacianJumpIndicator.h"
 
+registerMooseObject("MooseApp", LaplacianJumpIndicator);
+
 template <>
 InputParameters
 validParams<LaplacianJumpIndicator>()

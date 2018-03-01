@@ -10,6 +10,8 @@
 #include "AddMaterialAction.h"
 #include "FEProblem.h"
 
+registerMooseAction("MooseApp", AddMaterialAction, "add_material");
+
 template <>
 InputParameters
 validParams<AddMaterialAction>()

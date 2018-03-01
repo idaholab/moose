@@ -10,6 +10,8 @@
 #include "NodalL2Error.h"
 #include "Function.h"
 
+registerMooseObject("MooseApp", NodalL2Error);
+
 template <>
 InputParameters
 validParams<NodalL2Error>()

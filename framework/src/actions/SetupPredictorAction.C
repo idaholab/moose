@@ -14,6 +14,8 @@
 #include "Factory.h"
 #include "NonlinearSystemBase.h"
 
+registerMooseAction("MooseApp", SetupPredictorAction, "setup_predictor");
+
 template <>
 InputParameters
 validParams<SetupPredictorAction>()

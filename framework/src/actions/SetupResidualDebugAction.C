@@ -17,6 +17,8 @@
 #include "NonlinearSystemBase.h"
 #include "Conversion.h"
 
+registerMooseAction("MooseApp", SetupResidualDebugAction, "setup_residual_debug");
+
 template <>
 InputParameters
 validParams<SetupResidualDebugAction>()

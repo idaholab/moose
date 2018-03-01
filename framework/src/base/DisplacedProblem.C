@@ -23,6 +23,8 @@
 
 #include "libmesh/numeric_vector.h"
 
+registerMooseObject("MooseApp", DisplacedProblem);
+
 template <>
 InputParameters
 validParams<DisplacedProblem>()

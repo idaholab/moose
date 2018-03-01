@@ -11,6 +11,8 @@
 #include "MooseMesh.h"
 #include "SubProblem.h"
 
+registerMooseObject("MooseApp", NodalSum);
+
 template <>
 InputParameters
 validParams<NodalSum>()

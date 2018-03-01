@@ -15,6 +15,8 @@
 #include "MooseApp.h"
 #include "Executioner.h"
 
+registerMooseObject("MooseApp", Terminator);
+
 template <>
 InputParameters
 validParams<Terminator>()

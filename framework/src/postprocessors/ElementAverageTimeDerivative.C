@@ -9,6 +9,8 @@
 
 #include "ElementAverageTimeDerivative.h"
 
+registerMooseObject("MooseApp", ElementAverageTimeDerivative);
+
 template <>
 InputParameters
 validParams<ElementAverageTimeDerivative>()

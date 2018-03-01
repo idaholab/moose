@@ -12,6 +12,8 @@
 #include "SystemBase.h"
 #include "NearestNodeLocator.h"
 
+registerMooseObject("MooseApp", NearestNodeValueAux);
+
 template <>
 InputParameters
 validParams<NearestNodeValueAux>()

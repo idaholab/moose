@@ -15,6 +15,8 @@
 #include "CommonOutputAction.h"
 #include "AddVariableAction.h"
 
+registerMooseAction("MooseApp", CheckOutputAction, "check_output");
+
 template <>
 InputParameters
 validParams<CheckOutputAction>()

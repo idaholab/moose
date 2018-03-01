@@ -9,6 +9,8 @@
 
 #include "ValueJumpIndicator.h"
 
+registerMooseObject("MooseApp", ValueJumpIndicator);
+
 template <>
 InputParameters
 validParams<ValueJumpIndicator>()

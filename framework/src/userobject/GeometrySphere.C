@@ -9,6 +9,8 @@
 
 #include "GeometrySphere.h"
 
+registerMooseObject("MooseApp", GeometrySphere);
+
 template <>
 InputParameters
 validParams<GeometrySphere>()

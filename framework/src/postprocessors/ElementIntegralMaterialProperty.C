@@ -9,6 +9,8 @@
 
 #include "ElementIntegralMaterialProperty.h"
 
+registerMooseObject("MooseApp", ElementIntegralMaterialProperty);
+
 template <>
 InputParameters
 validParams<ElementIntegralMaterialProperty>()

@@ -9,6 +9,8 @@
 
 #include "SinNeumannBC.h"
 
+registerMooseObject("MooseApp", SinNeumannBC);
+
 template <>
 InputParameters
 validParams<SinNeumannBC>()

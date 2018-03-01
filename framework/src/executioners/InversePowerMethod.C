@@ -9,6 +9,8 @@
 
 #include "InversePowerMethod.h"
 
+registerMooseObject("MooseApp", InversePowerMethod);
+
 template <>
 InputParameters
 validParams<InversePowerMethod>()

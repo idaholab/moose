@@ -10,6 +10,8 @@
 #include "ElementH1Error.h"
 #include "Function.h"
 
+registerMooseObject("MooseApp", ElementH1Error);
+
 template <>
 InputParameters
 validParams<ElementH1Error>()

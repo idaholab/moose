@@ -12,6 +12,8 @@
 #include "MooseMesh.h"
 #include "FEProblem.h"
 
+registerMooseObject("MooseApp", AutoPositionsMultiApp);
+
 template <>
 InputParameters
 validParams<AutoPositionsMultiApp>()

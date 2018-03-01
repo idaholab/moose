@@ -9,6 +9,8 @@
 
 #include "ConstantAux.h"
 
+registerMooseObject("MooseApp", ConstantAux);
+
 template <>
 InputParameters
 validParams<ConstantAux>()

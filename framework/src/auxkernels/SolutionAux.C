@@ -11,6 +11,8 @@
 #include "SolutionAux.h"
 #include "SolutionUserObject.h"
 
+registerMooseObject("MooseApp", SolutionAux);
+
 template <>
 InputParameters
 validParams<SolutionAux>()

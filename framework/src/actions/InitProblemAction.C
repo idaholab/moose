@@ -10,6 +10,8 @@
 #include "InitProblemAction.h"
 #include "FEProblem.h"
 
+registerMooseAction("MooseApp", InitProblemAction, "init_problem");
+
 template <>
 InputParameters
 validParams<InitProblemAction>()

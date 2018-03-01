@@ -24,6 +24,8 @@
 #include "libmesh/mesh_function.h"
 #include "libmesh/mesh_tools.h"
 
+registerMooseObject("MooseApp", MultiAppUserObjectTransfer);
+
 template <>
 InputParameters
 validParams<MultiAppUserObjectTransfer>()

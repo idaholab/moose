@@ -9,6 +9,8 @@
 
 #include "MaterialRealAux.h"
 
+registerMooseObject("MooseApp", MaterialRealAux);
+
 template <>
 InputParameters
 validParams<MaterialRealAux>()

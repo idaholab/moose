@@ -21,6 +21,8 @@
 #include "libmesh/numeric_vector.h"
 #include "libmesh/system.h"
 
+registerMooseObject("MooseApp", MultiAppVariableValueSampleTransfer);
+
 template <>
 InputParameters
 validParams<MultiAppVariableValueSampleTransfer>()

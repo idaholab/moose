@@ -9,6 +9,8 @@
 
 #include "LayeredSideAverage.h"
 
+registerMooseObject("MooseApp", LayeredSideAverage);
+
 template <>
 InputParameters
 validParams<LayeredSideAverage>()

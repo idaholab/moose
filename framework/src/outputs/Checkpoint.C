@@ -21,6 +21,8 @@
 #include "libmesh/checkpoint_io.h"
 #include "libmesh/enum_xdr_mode.h"
 
+registerMooseObject("MooseApp", Checkpoint);
+
 template <>
 InputParameters
 validParams<Checkpoint>()

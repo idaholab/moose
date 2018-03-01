@@ -12,6 +12,8 @@
 
 #include "libmesh/numeric_vector.h"
 
+registerMooseObject("MooseApp", AdamsPredictor);
+
 template <>
 InputParameters
 validParams<AdamsPredictor>()

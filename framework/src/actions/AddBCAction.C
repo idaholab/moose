@@ -11,6 +11,8 @@
 #include "FEProblem.h"
 #include "BoundaryCondition.h"
 
+registerMooseAction("MooseApp", AddBCAction, "add_bc");
+
 template <>
 InputParameters
 validParams<AddBCAction>()

@@ -10,6 +10,8 @@
 #include "RenameBlock.h"
 #include "MooseMesh.h"
 
+registerMooseObject("MooseApp", RenameBlock);
+
 template <>
 InputParameters
 validParams<RenameBlock>()

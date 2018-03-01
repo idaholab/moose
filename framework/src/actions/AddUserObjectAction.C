@@ -10,6 +10,8 @@
 #include "AddUserObjectAction.h"
 #include "FEProblem.h"
 
+registerMooseAction("MooseApp", AddUserObjectAction, "add_user_object");
+
 template <>
 InputParameters
 validParams<AddUserObjectAction>()

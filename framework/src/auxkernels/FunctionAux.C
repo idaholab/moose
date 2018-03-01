@@ -10,6 +10,8 @@
 #include "FunctionAux.h"
 #include "Function.h"
 
+registerMooseObject("MooseApp", FunctionAux);
+
 template <>
 InputParameters
 validParams<FunctionAux>()

@@ -23,6 +23,8 @@
 #include "libmesh/meshfree_interpolation.h"
 #include "libmesh/system.h"
 
+registerMooseObject("MooseApp", MultiAppVectorPostprocessorTransfer);
+
 template <>
 InputParameters
 validParams<MultiAppVectorPostprocessorTransfer>()

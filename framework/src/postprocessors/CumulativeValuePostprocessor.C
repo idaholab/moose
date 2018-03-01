@@ -9,6 +9,8 @@
 
 #include "CumulativeValuePostprocessor.h"
 
+registerMooseObject("MooseApp", CumulativeValuePostprocessor);
+
 template <>
 InputParameters
 validParams<CumulativeValuePostprocessor>()

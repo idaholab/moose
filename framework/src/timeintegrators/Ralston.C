@@ -9,6 +9,8 @@
 
 #include "Ralston.h"
 
+registerMooseObject("MooseApp", Ralston);
+
 template <>
 InputParameters
 validParams<Ralston>()

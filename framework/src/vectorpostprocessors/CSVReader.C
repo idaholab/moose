@@ -14,6 +14,8 @@
 #include "CSVReader.h"
 #include "MooseUtils.h"
 
+registerMooseObject("MooseApp", CSVReader);
+
 template <>
 InputParameters
 validParams<CSVReader>()

@@ -10,6 +10,8 @@
 #include "FunctionSideIntegral.h"
 #include "Function.h"
 
+registerMooseObject("MooseApp", FunctionSideIntegral);
+
 template <>
 InputParameters
 validParams<FunctionSideIntegral>()

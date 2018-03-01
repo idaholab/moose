@@ -9,6 +9,8 @@
 
 #include "ProcessorIDAux.h"
 
+registerMooseObject("MooseApp", ProcessorIDAux);
+
 template <>
 InputParameters
 validParams<ProcessorIDAux>()

@@ -46,6 +46,8 @@ struct CompareElemsByLevel
 
 } // anonymous namespace
 
+registerMooseObject("MooseApp", EqualValueBoundaryConstraint);
+
 template <>
 InputParameters
 validParams<EqualValueBoundaryConstraint>()

@@ -12,6 +12,8 @@
 #include "FEProblem.h"
 #include "MooseMesh.h"
 
+registerMooseAction("MooseApp", AddMortarInterfaceAction, "add_mortar_interface");
+
 template <>
 InputParameters
 validParams<AddMortarInterfaceAction>()

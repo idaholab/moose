@@ -11,6 +11,8 @@
 #include "MooseMesh.h"
 #include "SubProblem.h"
 
+registerMooseObject("MooseApp", AverageNodalVariableValue);
+
 template <>
 InputParameters
 validParams<AverageNodalVariableValue>()

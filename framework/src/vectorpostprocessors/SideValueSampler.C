@@ -14,6 +14,8 @@
 
 #include "libmesh/quadrature.h"
 
+registerMooseObject("MooseApp", SideValueSampler);
+
 template <>
 InputParameters
 validParams<SideValueSampler>()

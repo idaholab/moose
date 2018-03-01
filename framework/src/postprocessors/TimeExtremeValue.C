@@ -12,6 +12,8 @@
 #include <algorithm>
 #include <limits>
 
+registerMooseObject("MooseApp", TimeExtremeValue);
+
 template <>
 InputParameters
 validParams<TimeExtremeValue>()

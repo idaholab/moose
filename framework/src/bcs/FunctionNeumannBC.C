@@ -10,6 +10,8 @@
 #include "FunctionNeumannBC.h"
 #include "Function.h"
 
+registerMooseObject("MooseApp", FunctionNeumannBC);
+
 template <>
 InputParameters
 validParams<FunctionNeumannBC>()
