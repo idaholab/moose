@@ -587,6 +587,8 @@ public:
    */
   void addCachedJacobian(SparseMatrix<Number> & jacobian);
 
+  void addCachedJacobian();
+
   DenseVector<Number> & residualBlock(unsigned int var_num, TagID tag_id = 0)
   {
     return _sub_Re[static_cast<unsigned int>(tag_id)][var_num];

@@ -34,12 +34,12 @@ public:
 
   MooseObjectTagWarehouse<T> & getVectorTagObjectWarehouse(TagID tag_id, THREAD_ID tid);
 
-  MooseObjectTagWarehouse<T> & getVectorTagsObjectWarehouse(std::vector<TagID> & tags,
+  MooseObjectTagWarehouse<T> & getVectorTagsObjectWarehouse(std::set<TagID> & tags,
                                                             THREAD_ID tid);
 
   MooseObjectTagWarehouse<T> & getMatrixTagObjectWarehouse(TagID tag_id, THREAD_ID tid);
 
-  MooseObjectTagWarehouse<T> & getMatrixTagsObjectWarehouse(std::vector<TagID> & tags,
+  MooseObjectTagWarehouse<T> & getMatrixTagsObjectWarehouse(std::set<TagID> & tags,
                                                             THREAD_ID tid);
 protected:
   const THREAD_ID _num_threads;
@@ -48,14 +48,14 @@ protected:
   std::vector<std::map<TagID, MooseObjectTagWarehouse<T>>> _vector_tag_to_object_warehouse;
 
   /// Object warehouse associated with a few tags
-  std::vector<std::map<std::vector<TagID>, MooseObjectTagWarehouse<T>>>
+  std::vector<std::map<std::set<TagID>, MooseObjectTagWarehouse<T>>>
       _vector_tags_to_object_warehouse;
 
   /// Tag to Matrix Object
   std::vector<std::map<TagID, MooseObjectTagWarehouse<T>>> _matrix_tag_to_object_warehouse;
 
   /// std::vector<TagID> based storage
-  std::vector<std::map<std::vector<TagID>, MooseObjectTagWarehouse<T>>>
+  std::vector<std::map<std::set<TagID>, MooseObjectTagWarehouse<T>>>
       _matrix_tags_to_object_warehouse;
 };
 
@@ -136,7 +136,7 @@ MooseObjectTagWarehouse<T>::getMatrixTagObjectWarehouse(TagID tag_id, THREAD_ID 
 
 template <typename T>
 MooseObjectTagWarehouse<T> &
-MooseObjectTagWarehouse<T>::getVectorTagsObjectWarehouse(std::vector<TagID> & v_tags, THREAD_ID tid)
+MooseObjectTagWarehouse<T>::getVectorTagsObjectWarehouse(std::set<TagID> & v_tags, THREAD_ID tid)
 {
   auto & vector_tags_to_object_warehourse = _vector_tags_to_object_warehouse[tid];
 
@@ -172,7 +172,7 @@ MooseObjectTagWarehouse<T>::getVectorTagsObjectWarehouse(std::vector<TagID> & v_
 
 template <typename T>
 MooseObjectTagWarehouse<T> &
-MooseObjectTagWarehouse<T>::getMatrixTagsObjectWarehouse(std::vector<TagID> & v_tags, THREAD_ID tid)
+MooseObjectTagWarehouse<T>::getMatrixTagsObjectWarehouse(std::set<TagID> & v_tags, THREAD_ID tid)
 {
   auto & matrix_tags_to_object_warehourse = _matrix_tags_to_object_warehouse[tid];
 

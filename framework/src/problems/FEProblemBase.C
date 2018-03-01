@@ -1147,7 +1147,7 @@ FEProblemBase::cacheJacobianNeighbor(THREAD_ID tid)
 void
 FEProblemBase::addCachedJacobian(SparseMatrix<Number> & jacobian, THREAD_ID tid)
 {
-  _assembly[tid]->addCachedJacobian(jacobian);
+  _assembly[tid]->addCachedJacobian();
   if (_displaced_problem)
     _displaced_problem->addCachedJacobian(jacobian, tid);
 }

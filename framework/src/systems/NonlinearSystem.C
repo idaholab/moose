@@ -128,6 +128,9 @@ NonlinearSystem::addMatrix(TagID tag)
 
   SparseMatrix<Number> * mat = &_transient_sys.add_matrix(matrix_name);
 
+  if (_tagged_matrices.size() < tag + 1)
+    _tagged_matrices.resize(tag + 1);
+
   _tagged_matrices[tag] = mat;
 
   return *mat;

@@ -26,7 +26,7 @@ validParams<TaggingInterface>()
 
   // These are the default names for tags, but users will be able to add their own
   MultiMooseEnum vtags("nontime time", "nontime", true);
-  MultiMooseEnum mtags("nontime time", "system", true);
+  MultiMooseEnum mtags("nontime system", "system", true);
 
   params.addParam<MultiMooseEnum>(
       "vector_tags", vtags, "The tag for the vectors this Kernel should fill");
@@ -34,7 +34,17 @@ validParams<TaggingInterface>()
   params.addParam<MultiMooseEnum>(
       "matrix_tags", mtags, "The tag for the matrices this Kernel should fill");
 
-  params.addParamNamesToGroup("vector_tags matrix_tags", "Advanced");
+  MultiMooseEnum extra_vtags(" ", " ", true);
+  MultiMooseEnum extra_mtags(" ", " ", true);
+
+  params.addParam<MultiMooseEnum>(
+      "extra_vector_tags", extra_vtags, "The extra tags for the vectors this Kernel should fill");
+
+  params.addParam<MultiMooseEnum>(
+      "extra_matrix_tags", extra_mtags, "The extra tags for the matrices this Kernel should fill");
+
+  params.addParamNamesToGroup("vector_tags matrix_tags extra_vector_tags extra_matrix_tags",
+                              "Advanced");
 
   return params;
 }
@@ -61,6 +71,22 @@ TaggingInterface::TaggingInterface(SubProblem & subproblem, const MooseObject & 
     _vector_tags.insert(_subproblem.getVectorTagID(vector_tag_name));
   }
 
+  // Add extra vector tags. These tags should be created in the System already, otherwise
+  // we can not add the extra tags
+  auto & extra_vector_tags = parameters.get<MultiMooseEnum>("extra_vector_tags");
+
+  for (auto & vector_tag_name : extra_vector_tags)
+  {
+    if (!_subproblem.vectorTagExists(vector_tag_name.name()))
+      mooseError("Kernel, ",
+                 moose_object.name(),
+                 ", was assigned an invalid vector_tag: '",
+                 vector_tag_name,
+                 "'. System doesn't have this vector tag");
+
+    _vector_tags.insert(_subproblem.getVectorTagID(vector_tag_name));
+  }
+
   auto & matrix_tag_names = parameters.get<MultiMooseEnum>("matrix_tags");
 
   if (!matrix_tag_names.isValid())
@@ -75,6 +101,20 @@ TaggingInterface::TaggingInterface(SubProblem & subproblem, const MooseObject & 
                  matrix_tag_name,
                  "'.  If this is a TimeKernel then this may have happened because you didn't "
                  "specify a Transient Executioner.");
+
+    _matrix_tags.insert(_subproblem.getMatrixTagID(matrix_tag_name));
+  }
+
+  auto & extra_matrix_tags = parameters.get<MultiMooseEnum>("extra_matrix_tags");
+
+  for (auto & matrix_tag_name : extra_matrix_tags)
+  {
+    if (!_subproblem.matrixTagExists(matrix_tag_name.name()))
+      mooseError("Kernel, ",
+                 moose_object.name(),
+                 ", was assigned an invalid matrix_tag: '",
+                 matrix_tag_name,
+                 "'. System doesn't have this matrix tag. ");
 
     _matrix_tags.insert(_subproblem.getMatrixTagID(matrix_tag_name));
   }
@@ -136,6 +176,7 @@ void
 TaggingInterface::prepareMatrixTag(Assembly & assembly, unsigned int ivar, unsigned int jvar)
 {
   _ke_blocks.resize(_matrix_tags.size());
+
   mooseAssert(_matrix_tags.size() >= 1, "we need at least one active tag");
   auto mat_vector = _matrix_tags.begin();
   for (auto i = beginIndex(_matrix_tags); i < _matrix_tags.size(); i++, ++mat_vector)

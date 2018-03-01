@@ -47,6 +47,15 @@ validParams<CreateProblemAction>()
                                        "<path>/<filebase> or <path>/LATEST to "
                                        "grab the latest file available)");
 
+  MultiMooseEnum extra_tagvs(" ", " ", true);
+  MultiMooseEnum extra_tagms(" ", " ", true);
+
+  params.addParam<MultiMooseEnum>(
+      "extra_tag_vectors", extra_tagvs, "The extra tag vectors will be filled by some Kernels");
+
+  params.addParam<MultiMooseEnum>(
+      "extra_tag_matrices", extra_tagms, "The extra the matrices will be filled by some Kernels");
+
   return params;
 }
 
@@ -117,5 +126,29 @@ CreateProblemAction::act()
       _console << "\nUsing " << restart_file_base << " for restart.\n\n";
       _problem->setRestartFile(restart_file_base);
     }
+
+    // Create etra vectors and matrices if any
+    CreateTagVectors();
+  }
+}
+
+void
+CreateProblemAction::CreateTagVectors()
+{
+  // add vectors and their tags to system
+  auto & vectors = getParam<MultiMooseEnum>("extra_tag_vectors");
+  auto & nl = _problem->getNonlinearSystemBase();
+  for (auto & vector : vectors)
+  {
+    auto tag = _problem->addVectorTag(vector);
+    nl.addVector(tag, false, GHOSTED);
+  }
+
+  // add matrices and their tags
+  auto & matrices = getParam<MultiMooseEnum>("extra_tag_matrices");
+  for (auto & matrix : matrices)
+  {
+    auto tag = _problem->addMatrixTag(matrix);
+    nl.addMatrix(tag);
   }
 }
