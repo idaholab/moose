@@ -635,4 +635,141 @@ normalizePoint(EFAPoint & p)
     p *= (1.0 / len);
 }
 
+double
+r8_acos(double c)
+//****************************************************************************80
+//
+//  Purpose:
+//
+//    R8_ACOS computes the arc cosine function, with argument truncation.
+//
+//  Discussion:
+//
+//    If you call your system ACOS routine with an input argument that is
+//    outside the range [-1.0, 1.0 ], you may get an unpleasant surprise.
+//    This routine truncates arguments outside the range.
+//
+//  Licensing:
+//
+//    This code is distributed under the GNU LGPL license.
+//
+//  Modified:
+//
+//    13 June 2002
+//
+//  Author:
+//
+//    John Burkardt
+//
+//  Parameters:
+//
+//    Input, double C, the argument, the cosine of an angle.
+//
+//    Output, double R8_ACOS, an angle whose cosine is C.
+//
+{
+#define PI 3.141592653589793
+
+  double value;
+
+  if (c <= -1.0)
+  {
+    value = PI;
+  }
+  else if (1.0 <= c)
+  {
+    value = 0.0;
+  }
+  else
+  {
+    value = acos(c);
+  }
+  return value;
+#undef PI
+}
+
+double
+angle_rad_3d(double p1[3], double p2[3], double p3[3])
+//****************************************************************************80
+//
+//  Purpose:
+//
+//    ANGLE_RAD_3D returns the angle between two vectors in 3D.
+//
+//  Discussion:
+//
+//    The routine always computes the SMALLER of the two angles between
+//    two vectors.  Thus, if the vectors make an (exterior) angle of 200
+//    degrees, the (interior) angle of 160 is reported.
+//
+//    X dot Y = Norm(X) * Norm(Y) * Cos ( Angle(X,Y) )
+//
+//  Licensing:
+//
+//    This code is distributed under the GNU LGPL license.
+//
+//  Modified:
+//
+//    20 June 2005
+//
+//  Author:
+//
+//    John Burkardt
+//
+//  Parameters:
+//
+//    Input, double P1[3], P2[3], P3[3], points defining an angle.
+//    The rays are P1 - P2 and P3 - P2.
+//
+//    Output, double ANGLE_RAD_3D, the angle between the two vectors, in radians.
+//    This value will always be between 0 and PI.  If either vector has
+//    zero length, then the angle is returned as zero.
+//
+{
+#define DIM_NUM 3
+
+  double dot;
+  int i;
+  double v1norm;
+  double v2norm;
+  double value;
+
+  v1norm = 0.0;
+  for (i = 0; i < DIM_NUM; i++)
+  {
+    v1norm = v1norm + pow(p1[i] - p2[i], 2);
+  }
+  v1norm = sqrt(v1norm);
+
+  if (v1norm == 0.0)
+  {
+    value = 0.0;
+    return value;
+  }
+
+  v2norm = 0.0;
+  for (i = 0; i < DIM_NUM; i++)
+  {
+    v2norm = v2norm + pow(p3[i] - p2[i], 2);
+  }
+  v2norm = sqrt(v2norm);
+
+  if (v2norm == 0.0)
+  {
+    value = 0.0;
+    return value;
+  }
+
+  dot = 0.0;
+  for (i = 0; i < DIM_NUM; i++)
+  {
+    dot = dot + (p1[i] - p2[i]) * (p3[i] - p2[i]);
+  }
+
+  value = r8_acos(dot / (v1norm * v2norm));
+
+  return value;
+#undef DIM_NUM
+}
+
 } // namespace XFEM
