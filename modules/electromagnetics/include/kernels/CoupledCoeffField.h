@@ -6,11 +6,13 @@
 // Forward declarations
 class CoupledCoeffField;
 
-template <> InputParameters validParams<CoupledCoeffField>();
+template <>
+InputParameters validParams<CoupledCoeffField>();
 
-class CoupledCoeffField : public Kernel {
+class CoupledCoeffField : public Kernel
+{
 public:
-  CoupledCoeffField(const InputParameters &parameters);
+  CoupledCoeffField(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpResidual() override;

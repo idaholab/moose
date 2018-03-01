@@ -10,7 +10,7 @@ validParams<RobinReflectionBC>()
   params.addRequiredParam<Real>("theta", "Incidence angle");
   params.addRequiredCoupledVar("coupled_field", "Coupled field variable");
   params.addRequiredParam<Real>("length", "length of slab");
-  MooseEnum component("imaginary real","real");
+  MooseEnum component("imaginary real", "real");
   params.addParam<MooseEnum>("component", component, "Real or Imaginary wave component.");
   params.addRequiredParam<Real>("k", "Wave number");
   params.addRequiredParam<FunctionName>("inverseMuR", "Inverse relative permeability");
@@ -38,10 +38,12 @@ RobinReflectionBC::computeQpResidual()
 
   if (_component == "real")
   {
-    return -_test[_i][_qp] * _inverseMuR.value(_t,_q_point[_qp]) * _coefficient * (_coupled_val[_qp] - 2 * std::sin(_coefficient * _q_point[_qp](0)));
+    return -_test[_i][_qp] * _inverseMuR.value(_t, _q_point[_qp]) * _coefficient *
+           (_coupled_val[_qp] - 2 * std::sin(_coefficient * _q_point[_qp](0)));
   }
   else
   {
-    return -_test[_i][_qp] * _inverseMuR.value(_t,_q_point[_qp]) * _coefficient * (2 * std::cos(_coefficient * _q_point[_qp](0)) - _coupled_val[_qp]);
+    return -_test[_i][_qp] * _inverseMuR.value(_t, _q_point[_qp]) * _coefficient *
+           (2 * std::cos(_coefficient * _q_point[_qp](0)) - _coupled_val[_qp]);
   }
 }

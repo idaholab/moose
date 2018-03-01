@@ -6,11 +6,13 @@
 // Forward declarations
 class CoeffField;
 
-template <> InputParameters validParams<CoeffField>();
+template <>
+InputParameters validParams<CoeffField>();
 
-class CoeffField : public Reaction {
+class CoeffField : public Reaction
+{
 public:
-  CoeffField(const InputParameters &parameters);
+  CoeffField(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpResidual() override;
