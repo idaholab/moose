@@ -42,11 +42,11 @@ validParams<StressDivergenceTensors>()
                        "The name of the out_of_plane_strain variable used in the "
                        "WeakPlaneStress kernel. Required only if want to provide off-diagonal "
                        "Jacobian in plane stress analysis using weak formulation.");
-  params.addParam<unsigned int>(
+  MooseEnum out_of_plane_strain_direction("x y z", "z");
+  params.addParam<MooseEnum>(
       "out_of_plane_strain_direction",
-      2,
-      "The direction of the out_of_plane_strain variable used in the WeakPlaneStress kernel. (0 "
-      "for x_direction, 1 for y_direction, 2 for z_direction)");
+      out_of_plane_strain_direction,
+      "The direction of the out_of_plane_strain variable used in the WeakPlaneStress kernel.");
   params.addParam<std::string>("base_name", "Material property base name");
   params.set<bool>("use_displaced_mesh") = false;
   params.addParam<bool>(
@@ -74,7 +74,7 @@ StressDivergenceTensors::StressDivergenceTensors(const InputParameters & paramet
                                    : nullptr),
     _out_of_plane_strain_coupled(isCoupled("out_of_plane_strain")),
     _out_of_plane_strain_var(_out_of_plane_strain_coupled ? coupled("out_of_plane_strain") : 0),
-    _out_of_plane_strain_direction(getParam<unsigned int>("out_of_plane_strain_direction")),
+    _out_of_plane_strain_direction(getParam<MooseEnum>("out_of_plane_strain_direction")),
     _avg_grad_test(_test.size(), std::vector<Real>(3, 0.0)),
     _avg_grad_phi(_phi.size(), std::vector<Real>(3, 0.0)),
     _volumetric_locking_correction(getParam<bool>("volumetric_locking_correction"))
