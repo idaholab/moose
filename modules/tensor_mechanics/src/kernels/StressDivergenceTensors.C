@@ -38,6 +38,15 @@ validParams<StressDivergenceTensors>()
       "thermal_eigenstrain_name",
       "thermal_eigenstrain",
       "The eigenstrain_name used in the ComputeThermalExpansionEigenstrain.");
+  params.addCoupledVar("out_of_plane_strain",
+                       "The name of the out_of_plane_strain variable used in the "
+                       "WeakPlaneStress kernel. Required only if want to provide off-diagonal "
+                       "Jacobian in plane stress analysis using weak formulation.");
+  MooseEnum out_of_plane_strain_direction("x y z", "z");
+  params.addParam<MooseEnum>(
+      "out_of_plane_strain_direction",
+      out_of_plane_strain_direction,
+      "The direction of the out_of_plane_strain variable used in the WeakPlaneStress kernel.");
   params.addParam<std::string>("base_name", "Material property base name");
   params.set<bool>("use_displaced_mesh") = false;
   params.addParam<bool>(
@@ -59,11 +68,13 @@ StressDivergenceTensors::StressDivergenceTensors(const InputParameters & paramet
     _disp_var(_ndisp),
     _temp_coupled(isCoupled("temperature")),
     _temp_var(_temp_coupled ? coupled("temperature") : 0),
-    _deigenstrain_dT(_temp_coupled
-                         ? &getMaterialPropertyDerivative<RankTwoTensor>(
-                               getParam<std::string>("thermal_eigenstrain_name"),
-                               getVar("temperature", 0)->name())
-                         : nullptr),
+    _deigenstrain_dT(_temp_coupled ? &getMaterialPropertyDerivative<RankTwoTensor>(
+                                         getParam<std::string>("thermal_eigenstrain_name"),
+                                         getVar("temperature", 0)->name())
+                                   : nullptr),
+    _out_of_plane_strain_coupled(isCoupled("out_of_plane_strain")),
+    _out_of_plane_strain_var(_out_of_plane_strain_coupled ? coupled("out_of_plane_strain") : 0),
+    _out_of_plane_strain_direction(getParam<MooseEnum>("out_of_plane_strain_direction")),
     _avg_grad_test(_test.size(), std::vector<Real>(3, 0.0)),
     _avg_grad_phi(_phi.size(), std::vector<Real>(3, 0.0)),
     _volumetric_locking_correction(getParam<bool>("volumetric_locking_correction"))
@@ -290,6 +301,14 @@ StressDivergenceTensors::computeQpOffDiagJacobian(unsigned int jvar)
 
       return jacobian;
     }
+
+  // off-diagonal Jacobian with respect to a coupled out_of_plane_strain variable
+  if (_out_of_plane_strain_coupled && jvar == _out_of_plane_strain_var)
+    return _Jacobian_mult[_qp](_component,
+                               _component,
+                               _out_of_plane_strain_direction,
+                               _out_of_plane_strain_direction) *
+           _grad_test[_i][_qp](_component) * _phi[_j][_qp];
 
   // off-diagonal Jacobian with respect to a coupled temperature variable
   if (_temp_coupled && jvar == _temp_var)

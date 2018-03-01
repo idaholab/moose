@@ -70,4 +70,11 @@
     use_old_floor = True
     max_parallel = 1
   [../]
+
+  [./elastic_thermal_weak_plane_stress_jacobian]
+    type = 'PetscJacobianTester'
+    input = 'elastic_thermal_weak_plane_stress_jacobian.i'
+    ratio_tol = 1E-12
+    difference_tol = 1E10
+  [../]
 []
