@@ -14,6 +14,7 @@ validParams<RobinReflectionBC>()
   params.addParam<MooseEnum>("component", component, "Real or Imaginary wave component.");
   params.addRequiredParam<Real>("k", "Wave number");
   params.addRequiredParam<FunctionName>("inverseMuR", "Inverse relative permeability");
+  params.addParam<Real>("sign", -1.0, "Sign of term in weak form (1.0, -1.0, negative is default).");
   return params;
 }
 
@@ -25,7 +26,8 @@ RobinReflectionBC::RobinReflectionBC(const InputParameters & parameters)
     _L(getParam<Real>("length")),
     _component(getParam<MooseEnum>("component")),
     _k(getParam<Real>("k")),
-    _inverseMuR(getFunction("inverseMuR"))
+    _inverseMuR(getFunction("inverseMuR")),
+    _sign(getParam<Real>("sign"))
 
 {
 }
@@ -38,12 +40,12 @@ RobinReflectionBC::computeQpResidual()
 
   if (_component == "real")
   {
-    return -_test[_i][_qp] * _inverseMuR.value(_t, _q_point[_qp]) * _coefficient *
+    return _sign * _test[_i][_qp] * _inverseMuR.value(_t, _q_point[_qp]) * _coefficient *
            (_coupled_val[_qp] - 2 * std::sin(_coefficient * _q_point[_qp](0)));
   }
   else
   {
-    return -_test[_i][_qp] * _inverseMuR.value(_t, _q_point[_qp]) * _coefficient *
+    return _sign * _test[_i][_qp] * _inverseMuR.value(_t, _q_point[_qp]) * _coefficient *
            (2 * std::cos(_coefficient * _q_point[_qp](0)) - _coupled_val[_qp]);
   }
 }
