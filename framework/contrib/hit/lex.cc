@@ -81,7 +81,8 @@ Token::str()
 }
 
 Lexer::Lexer(const std::string & name, const std::string & input) : _name(name), _input(input) {}
-std::vector<Token>
+
+std::vector<Token> &
 Lexer::tokens()
 {
   return _tokens;
@@ -105,7 +106,8 @@ Lexer::emit(TokType type)
   _start = _pos;
 }
 
-size_t Lexer::lastToken()
+size_t
+Lexer::lastToken()
 {
   return _tokens.back().offset + _tokens.back().val.size();
 }
