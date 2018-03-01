@@ -1,0 +1,433 @@
+#!/bin/bash
+
+# registerRenamedObject("UserForcingFunction", BodyForce, "04/01/2018 00:00");
+# registerNamedFunction(MooseParsedFunction, "ParsedFunction");
+# registerNamedFunction(MooseParsedGradFunction, "ParsedGradFunction");
+# registerNamedFunction(MooseParsedVectorFunction, "ParsedVectorFunction");
+# registerNamedPreconditioner(PhysicsBasedPreconditioner, "PBP");
+# registerNamedPreconditioner(FiniteDifferencePreconditioner, "FDP");
+# registerNamedPreconditioner(SingleMatrixPreconditioner, "SMP");
+# registerNamedPreconditioner(FieldSplitPreconditioner, "FSP");
+# registerNamedOutput(DOFMapOutput, "DOFMap");
+# registerNamedOutput(VTKOutput, "VTK");
+# registerNamedOutput(XDA, "XDR");
+# registerNamedOutput(GMVOutput, "GMV");
+
+dirs=$@
+
+objs='
+FileMesh
+GeneratedMesh
+TiledMesh
+ImageMesh
+PatternedMesh
+StitchedMesh
+AnnularMesh
+MeshExtruder
+SideSetsFromPoints
+SideSetsFromNormals
+AddExtraNodeset
+BoundingBoxNodeSet
+Transform
+SideSetsAroundSubdomain
+SideSetsBetweenSubdomains
+AddAllSideSetsByNormals
+SubdomainBoundingBox
+OrientedSubdomainBoundingBox
+RenameBlock
+AssignElementSubdomainID
+ImageSubdomain
+BlockDeleter
+ParsedSubdomainMeshModifier
+BreakBoundaryOnSubdomain
+ParsedAddSideset
+AssignSubdomainID
+MeshSideSet
+AddSideSetsFromBoundingBox
+DisplacedProblem
+FEProblem
+EigenProblem
+TimeDerivative
+ConservativeAdvection
+CoupledTimeDerivative
+MassLumpedTimeDerivative
+Diffusion
+AnisotropicDiffusion
+CoupledForce
+Reaction
+MassEigenKernel
+NullKernel
+MaterialDerivativeTestKernel
+MaterialDerivativeRankTwoTestKernel
+MaterialDerivativeRankFourTestKernel
+ConvectiveFluxBC
+DirichletBC
+PenaltyDirichletBC
+PresetBC
+NeumannBC
+PostprocessorNeumannBC
+FunctionDirichletBC
+FunctionPenaltyDirichletBC
+FunctionPresetBC
+FunctionNeumannBC
+MatchedValueBC
+VacuumBC
+SinDirichletBC
+SinNeumannBC
+VectorNeumannBC
+WeakGradientBC
+DiffusionFluxBC
+PostprocessorDirichletBC
+OneDEqualValueConstraintBC
+ConstantPointSource
+FunctionDiracSource
+ConstantAux
+FunctionAux
+NearestNodeDistanceAux
+NearestNodeValueAux
+PenetrationAux
+ProcessorIDAux
+SelfAux
+GapValueAux
+MaterialRealAux
+MaterialRealVectorValueAux
+MaterialRealTensorValueAux
+MaterialStdVectorAux
+MaterialRealDenseMatrixAux
+MaterialStdVectorRealGradientAux
+DebugResidualAux
+BoundsAux
+SpatialUserObjectAux
+SolutionAux
+VectorMagnitudeAux
+ConstantScalarAux
+QuotientAux
+NormalizationAux
+FunctionScalarAux
+VariableGradientComponent
+ParsedAux
+VariableTimeIntegrationAux
+ElementLengthAux
+ElementLpNormAux
+ElementL2ErrorFunctionAux
+ElementH1ErrorFunctionAux
+DiffusionFluxAux
+ConstantIC
+BoundingBoxIC
+FunctionIC
+RandomIC
+ScalarConstantIC
+ScalarComponentIC
+FunctionScalarIC
+Steady
+Transient
+InversePowerMethod
+NonlinearEigen
+Eigenvalue
+Axisymmetric2D3DSolutionFunction
+ConstantFunction
+CompositeFunction
+PiecewiseConstant
+PiecewiseLinear
+SolutionFunction
+PiecewiseBilinear
+SplineFunction
+BicubicSplineFunction
+PiecewiseMultilinear
+LinearCombinationFunction
+ImageFunction
+VectorPostprocessorFunction
+DerivativeParsedMaterial
+DerivativeSumMaterial
+GenericConstantMaterial
+GenericConstantRankTwoTensor
+GenericFunctionMaterial
+ParsedMaterial
+PiecewiseLinearInterpolationMaterial
+AverageElementSize
+AverageNodalVariableValue
+CumulativeValuePostprocessor
+ChangeOverTimePostprocessor
+ChangeOverTimestepPostprocessor
+NodalSum
+ElementAverageValue
+ElementAverageTimeDerivative
+ElementW1pError
+ElementH1Error
+ElementH1SemiError
+ElementIntegralVariablePostprocessor
+ElementIntegralMaterialProperty
+ElementL2Error
+ElementVectorL2Error
+ScalarL2Error
+EmptyPostprocessor
+FindValueOnLine
+NodalVariableValue
+NumDOFs
+TimestepSize
+PerformanceData
+MemoryUsage
+NumElems
+NumNodes
+NumNonlinearIterations
+NumLinearIterations
+Residual
+ScalarVariable
+NumVars
+NumResidualEvaluations
+Receiver
+SideAverageValue
+SideFluxIntegral
+SideFluxAverage
+SideIntegralVariablePostprocessor
+NodalMaxValue
+NodalProxyMaxValue
+ElementalVariableValue
+ElementL2Norm
+NodalL2Norm
+NodalL2Error
+TotalVariableValue
+VolumePostprocessor
+AreaPostprocessor
+PointValue
+NodalExtremeValue
+ElementExtremeValue
+DifferencePostprocessor
+RelativeDifferencePostprocessor
+ScalePostprocessor
+LinearCombinationPostprocessor
+FunctionValuePostprocessor
+NumPicardIterations
+FunctionSideIntegral
+ExecutionerAttributeReporter
+PercentChangePostprocessor
+ElementL2Difference
+TimeExtremeValue
+RelativeSolutionDifferenceNorm
+AxisymmetricCenterlineAverageValue
+VariableInnerProduct
+VariableResidual
+CSVReader
+ConstantVectorPostprocessor
+Eigenvalues
+ElementVariablesDifferenceMax
+ElementsAlongLine
+ElementsAlongPlane
+IntersectionPointsAlongLine
+LeastSquaresFit
+LineFunctionSampler
+LineMaterialRealSampler
+LineValueSampler
+MaterialVectorPostprocessor
+NodalValueSampler
+PointValueSampler
+SideValueSampler
+SphericalAverage
+VectorOfPostprocessors
+VolumeHistogram
+GeometrySphere
+LayeredIntegral
+LayeredAverage
+LayeredSideIntegral
+LayeredSideAverage
+LayeredSideFluxAverage
+NearestPointLayeredAverage
+ElementIntegralVariableUserObject
+NodalNormalsPreprocessor
+NodalNormalsCorner
+NodalNormalsEvaluator
+SolutionUserObject
+PerflogDumper
+ElementQualityChecker
+Terminator
+ConstantDamper
+MaxIncrement
+BoundingValueNodalDamper
+BoundingValueElementDamper
+DGDiffusion
+DGFunctionDiffusionDirichletBC
+DGConvection
+TiedValueConstraint
+CoupledTiedValueConstraint
+EqualGradientConstraint
+EqualValueConstraint
+EqualValueBoundaryConstraint
+LinearNodalConstraint
+ODETimeDerivative
+CoupledODETimeDerivative
+NodalEqualValueConstraint
+ParsedODEKernel
+QuotientScalarAux
+AnalyticalIndicator
+LaplacianJumpIndicator
+GradientJumpIndicator
+ValueJumpIndicator
+ErrorToleranceMarker
+ErrorFractionMarker
+UniformMarker
+BoxMarker
+OrientedBoxMarker
+ComboMarker
+ValueThresholdMarker
+ValueRangeMarker
+Split
+TransientMultiApp
+FullSolveMultiApp
+AutoPositionsMultiApp
+CentroidMultiApp
+ConstantDT
+LogConstantDT
+FunctionDT
+TimeSequenceStepper
+ExodusTimeSequenceStepper
+CSVTimeSequenceStepper
+IterationAdaptiveDT
+SolutionTimeAdaptiveDT
+DT2
+PostprocessorDT
+AB2PredictorCorrector
+ImplicitEuler
+BDF2
+CrankNicolson
+ExplicitEuler
+ExplicitMidpoint
+ExplicitTVDRK2
+LStableDirk2
+LStableDirk3
+AStableDirk4
+LStableDirk4
+ImplicitMidpoint
+Heun
+Ralston
+SimplePredictor
+AdamsPredictor
+MultiAppDTKUserObjectTransfer
+MultiAppDTKInterpolationTransfer
+MultiAppPostprocessorInterpolationTransfer
+MultiAppVariableValueSampleTransfer
+MultiAppVariableValueSamplePostprocessorTransfer
+MultiAppMeshFunctionTransfer
+MultiAppUserObjectTransfer
+MultiAppNearestNodeTransfer
+MultiAppCopyTransfer
+MultiAppInterpolationTransfer
+MultiAppPostprocessorTransfer
+MultiAppProjectionTransfer
+MultiAppPostprocessorToAuxScalarTransfer
+MultiAppScalarToAuxScalarTransfer
+MultiAppVectorPostprocessorTransfer
+Exodus
+Nemesis
+Console
+CSV
+Checkpoint
+XDA
+Tecplot
+Gnuplot
+SolutionHistory
+MaterialPropertyDebugOutput
+VariableResidualNormsDebugOutput
+TopResidualDebugOutput
+ControlOutput
+RealFunctionControl
+TimePeriod
+LibmeshPartitioner
+TimeDerivativeNodalKernel
+ConstantRate
+UserForcingFunctionNodalKernel
+ElementSideNeighborLayers
+ElementPointNeighbors
+'
+
+actions='
+SetupPostprocessorDataAction setup_postprocessor_data
+SplitMeshAction split_mesh
+MeshOnlyAction mesh_only
+SetupMeshAction setup_mesh
+SetupMeshAction init_mesh
+SetupMeshCompleteAction prepare_mesh
+AddMeshModifierAction add_mesh_modifier
+AddMortarInterfaceAction add_mortar_interface
+SetupMeshCompleteAction execute_mesh_modifiers
+SetupMeshCompleteAction uniform_refine_mesh
+SetupMeshCompleteAction setup_mesh_complete
+AddFunctionAction add_function
+AddDistributionAction add_distribution
+AddSamplerAction add_sampler
+CreateExecutionerAction setup_executioner
+SetupTimeStepperAction setup_time_stepper
+SetupTimeIntegratorAction setup_time_integrator
+CreateDisplacedProblemAction init_displaced_problem
+DetermineSystemType determine_system_type
+CreateProblemAction create_problem
+DynamicObjectRegistrationAction dynamic_object_registration
+AddOutputAction add_output
+CommonOutputAction common_output
+SetupRecoverFileBaseAction setup_recover_file_base
+GlobalParamsAction set_global_params
+SetupPredictorAction setup_predictor
+MaterialOutputAction setup_material_output
+CheckOutputAction check_output
+AddVariableAction add_variable
+AddAuxVariableAction add_aux_variable
+CopyNodalVarsAction check_copy_nodal_vars
+CopyNodalVarsAction copy_nodal_vars
+CopyNodalVarsAction copy_nodal_aux_vars
+AddICAction add_ic
+AddInitialConditionAction add_ic
+AddKernelAction add_kernel
+AddNodalKernelAction add_nodal_kernel
+AddKernelAction add_aux_kernel
+AddScalarKernelAction add_scalar_kernel
+AddScalarKernelAction add_aux_scalar_kernel
+AddDGKernelAction add_dg_kernel
+AddInterfaceKernelAction add_interface_kernel
+AddBCAction add_bc
+EmptyAction no_action
+AddPeriodicBCAction add_periodic_bc
+AddMaterialAction add_material
+AddPostprocessorAction add_postprocessor
+AddVectorPostprocessorAction add_vector_postprocessor
+AddDamperAction add_damper
+AddFieldSplitAction add_field_split
+SetupPreconditionerAction add_preconditioning
+SetupQuadratureAction setup_quadrature
+DeprecatedBlockAction deprecated_block
+AddConstraintAction add_constraint
+AddUserObjectAction add_user_object
+AddControlAction add_control
+AddElementalFieldAction add_elemental_field_variable
+AddIndicatorAction add_indicator
+AddMarkerAction add_marker
+SetAdaptivityOptionsAction set_adaptivity_options
+AddNodalNormalsAction add_aux_variable
+AddNodalNormalsAction add_postprocessor
+AddNodalNormalsAction add_user_object
+AdaptivityAction setup_adaptivity
+PartitionerAction add_partitioner
+AddDiracKernelAction add_dirac_kernel
+SetupDebugAction setup_debug
+SetupResidualDebugAction setup_residual_debug
+AddBoundsVectorsAction add_bounds_vectors
+SetupDampersAction setup_dampers
+EmptyAction ready_to_init
+AddRelationshipManager add_algebraic_rm
+AddRelationshipManager add_geometric_rm
+InitProblemAction init_problem
+CheckIntegrityAction check_integrity
+AddMultiAppAction add_multi_app
+AddTransferAction add_transfer
+EmptyAction finish_input_file_output
+MaterialDerivativeTestAction add_variable
+MaterialDerivativeTestAction add_kernel
+MaterialDerivativeTestAction add_preconditioning
+'
+
+for obj in $objs; do
+    find $dirs | grep "/${obj}\.C$" | xargs perl -0777 -i'' -pe 's/(template <>\nInputParameters\nvalidParams<(\w*)>\(\))/registerMooseObject\("MooseApp", \2\);\n\n\1/igs'
+done
+
+while read action task; do
+    find $dirs | grep "/${action}\.C$" | xargs perl -0777 -i'' -pe 's/(template <>\nInputParameters\nvalidParams<(\w*)>\(\))/registerMooseAction\("MooseApp", \2, "'"$task"'"\);\n\n\1/igs'
+done <<< "$actions"
+
