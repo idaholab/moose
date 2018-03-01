@@ -22,11 +22,8 @@
 
 #include "libmesh/threads.h"
 
-ComputeJacobianThread::ComputeJacobianThread(FEProblemBase & fe_problem,
-                                             SparseMatrix<Number> & jacobian,
-                                             std::set<TagID> & tags)
+ComputeJacobianThread::ComputeJacobianThread(FEProblemBase & fe_problem, std::set<TagID> & tags)
   : ThreadedElementLoop<ConstElemRange>(fe_problem),
-    _jacobian(jacobian),
     _nl(fe_problem.getNonlinearSystemBase()),
     _num_cached(0),
     _integrated_bcs(_nl.getIntegratedBCWarehouse()),
@@ -40,7 +37,6 @@ ComputeJacobianThread::ComputeJacobianThread(FEProblemBase & fe_problem,
 // Splitting Constructor
 ComputeJacobianThread::ComputeJacobianThread(ComputeJacobianThread & x, Threads::split split)
   : ThreadedElementLoop<ConstElemRange>(x, split),
-    _jacobian(x._jacobian),
     _nl(x._nl),
     _num_cached(x._num_cached),
     _integrated_bcs(x._integrated_bcs),
@@ -230,7 +226,7 @@ ComputeJacobianThread::onInternalSide(const Elem * elem, unsigned int side)
 
       {
         Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
-        _fe_problem.addJacobianNeighbor(_jacobian, _tid);
+        _fe_problem.addJacobianNeighbor(_tid);
       }
     }
   }
@@ -260,7 +256,7 @@ ComputeJacobianThread::onInterface(const Elem * elem, unsigned int side, Boundar
 
       {
         Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
-        _fe_problem.addJacobianNeighbor(_jacobian, _tid);
+        _fe_problem.addJacobianNeighbor(_tid);
       }
     }
   }
@@ -275,7 +271,7 @@ ComputeJacobianThread::postElement(const Elem * /*elem*/)
   if (_num_cached % 20 == 0)
   {
     Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
-    _fe_problem.addCachedJacobian(_jacobian, _tid);
+    _fe_problem.addCachedJacobian(_tid);
   }
 }
 

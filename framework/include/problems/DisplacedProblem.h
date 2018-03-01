@@ -196,9 +196,9 @@ public:
   virtual void setResidual(NumericVector<Number> & residual, THREAD_ID tid) override;
   virtual void setResidualNeighbor(NumericVector<Number> & residual, THREAD_ID tid) override;
 
-  virtual void addJacobian(SparseMatrix<Number> & jacobian, THREAD_ID tid) override;
-  virtual void addJacobianNonlocal(SparseMatrix<Number> & jacobian, THREAD_ID tid);
-  virtual void addJacobianNeighbor(SparseMatrix<Number> & jacobian, THREAD_ID tid) override;
+  virtual void addJacobian(THREAD_ID tid) override;
+  virtual void addJacobianNonlocal(THREAD_ID tid);
+  virtual void addJacobianNeighbor(THREAD_ID tid) override;
   virtual void addJacobianBlock(SparseMatrix<Number> & jacobian,
                                 unsigned int ivar,
                                 unsigned int jvar,
@@ -223,7 +223,7 @@ public:
   virtual void cacheJacobian(THREAD_ID tid) override;
   virtual void cacheJacobianNonlocal(THREAD_ID tid);
   virtual void cacheJacobianNeighbor(THREAD_ID tid) override;
-  virtual void addCachedJacobian(SparseMatrix<Number> & jacobian, THREAD_ID tid) override;
+  virtual void addCachedJacobian(THREAD_ID tid) override;
 
   virtual void prepareShapes(unsigned int var, THREAD_ID tid) override;
   virtual void prepareFaceShapes(unsigned int var, THREAD_ID tid) override;

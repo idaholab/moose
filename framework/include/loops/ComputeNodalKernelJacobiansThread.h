@@ -31,8 +31,7 @@ class ComputeNodalKernelJacobiansThread
 {
 public:
   ComputeNodalKernelJacobiansThread(FEProblemBase & fe_problem,
-                                    const MooseObjectWarehouse<NodalKernel> & nodal_kernels,
-                                    SparseMatrix<Number> & jacobian);
+                                    const MooseObjectWarehouse<NodalKernel> & nodal_kernels);
 
   // Splitting Constructor
   ComputeNodalKernelJacobiansThread(ComputeNodalKernelJacobiansThread & x, Threads::split split);
@@ -47,8 +46,6 @@ protected:
   AuxiliarySystem & _aux_sys;
 
   const MooseObjectWarehouse<NodalKernel> & _nodal_kernels;
-
-  SparseMatrix<Number> & _jacobian;
 
   /// Number of contributions cached up
   unsigned int _num_cached;

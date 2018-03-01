@@ -20,9 +20,7 @@ class Kernel;
 class ComputeFullJacobianThread : public ComputeJacobianThread
 {
 public:
-  ComputeFullJacobianThread(FEProblemBase & fe_problem,
-                            SparseMatrix<Number> & jacobian,
-                            std::set<TagID> & tags);
+  ComputeFullJacobianThread(FEProblemBase & fe_problem, std::set<TagID> & tags);
 
   // Splitting Constructor
   ComputeFullJacobianThread(ComputeFullJacobianThread & x, Threads::split split);

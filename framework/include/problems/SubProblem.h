@@ -270,8 +270,8 @@ public:
   virtual void setResidual(NumericVector<Number> & residual, THREAD_ID tid) = 0;
   virtual void setResidualNeighbor(NumericVector<Number> & residual, THREAD_ID tid) = 0;
 
-  virtual void addJacobian(SparseMatrix<Number> & jacobian, THREAD_ID tid) = 0;
-  virtual void addJacobianNeighbor(SparseMatrix<Number> & jacobian, THREAD_ID tid) = 0;
+  virtual void addJacobian(THREAD_ID tid) = 0;
+  virtual void addJacobianNeighbor(THREAD_ID tid) = 0;
   virtual void addJacobianBlock(SparseMatrix<Number> & jacobian,
                                 unsigned int ivar,
                                 unsigned int jvar,
@@ -288,7 +288,7 @@ public:
 
   virtual void cacheJacobian(THREAD_ID tid) = 0;
   virtual void cacheJacobianNeighbor(THREAD_ID tid) = 0;
-  virtual void addCachedJacobian(SparseMatrix<Number> & jacobian, THREAD_ID tid) = 0;
+  virtual void addCachedJacobian(THREAD_ID tid) = 0;
 
   virtual void prepare(const Elem * elem, THREAD_ID tid) = 0;
   virtual void prepareFace(const Elem * elem, THREAD_ID tid) = 0;

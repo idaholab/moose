@@ -21,8 +21,7 @@
 ComputeJacobianBlocksThread::ComputeJacobianBlocksThread(FEProblemBase & fe_problem,
                                                          std::vector<JacobianBlock *> & blocks,
                                                          std::set<TagID> & tags)
-  : ComputeFullJacobianThread(fe_problem, blocks[0]->_jacobian /* have to pass something */, tags),
-    _blocks(blocks)
+  : ComputeFullJacobianThread(fe_problem, tags), _blocks(blocks)
 {
 }
 

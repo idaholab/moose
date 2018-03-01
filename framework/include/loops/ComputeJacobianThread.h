@@ -26,9 +26,7 @@ class Kernel;
 class ComputeJacobianThread : public ThreadedElementLoop<ConstElemRange>
 {
 public:
-  ComputeJacobianThread(FEProblemBase & fe_problem,
-                        SparseMatrix<Number> & jacobian,
-                        std::set<TagID> & tags);
+  ComputeJacobianThread(FEProblemBase & fe_problem, std::set<TagID> & tags);
 
   // Splitting Constructor
   ComputeJacobianThread(ComputeJacobianThread & x, Threads::split split);
@@ -46,7 +44,6 @@ public:
   void join(const ComputeJacobianThread & /*y*/);
 
 protected:
-  SparseMatrix<Number> & _jacobian;
   NonlinearSystemBase & _nl;
 
   unsigned int _num_cached;

@@ -697,21 +697,21 @@ DisplacedProblem::setResidualNeighbor(NumericVector<Number> & residual, THREAD_I
 }
 
 void
-DisplacedProblem::addJacobian(SparseMatrix<Number> & jacobian, THREAD_ID tid)
+DisplacedProblem::addJacobian(THREAD_ID tid)
 {
-  _assembly[tid]->addJacobian(jacobian);
+  _assembly[tid]->addJacobian();
 }
 
 void
-DisplacedProblem::addJacobianNonlocal(SparseMatrix<Number> & jacobian, THREAD_ID tid)
+DisplacedProblem::addJacobianNonlocal(THREAD_ID tid)
 {
-  _assembly[tid]->addJacobianNonlocal(jacobian);
+  _assembly[tid]->addJacobianNonlocal();
 }
 
 void
-DisplacedProblem::addJacobianNeighbor(SparseMatrix<Number> & jacobian, THREAD_ID tid)
+DisplacedProblem::addJacobianNeighbor(THREAD_ID tid)
 {
-  _assembly[tid]->addJacobianNeighbor(jacobian);
+  _assembly[tid]->addJacobianNeighbor();
 }
 
 void
@@ -733,9 +733,9 @@ DisplacedProblem::cacheJacobianNeighbor(THREAD_ID tid)
 }
 
 void
-DisplacedProblem::addCachedJacobian(SparseMatrix<Number> & jacobian, THREAD_ID tid)
+DisplacedProblem::addCachedJacobian(THREAD_ID tid)
 {
-  _assembly[tid]->addCachedJacobian(jacobian);
+  _assembly[tid]->addCachedJacobian();
 }
 
 void

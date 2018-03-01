@@ -263,8 +263,7 @@ public:
    * coupled that
    * are related geometrically (i.e. near each other across a gap).
    */
-  void addImplicitGeometricCouplingEntries(SparseMatrix<Number> & jacobian,
-                                           GeometricSearchData & geom_search_data);
+  void addImplicitGeometricCouplingEntries(GeometricSearchData & geom_search_data);
 
   /**
    * Add jacobian contributions from Constraints
@@ -272,7 +271,7 @@ public:
    * @param jacobian reference to the Jacobian matrix
    * @param displaced Controls whether to do the displaced Constraints or non-displaced
    */
-  void constraintJacobians(SparseMatrix<Number> & jacobian, bool displaced);
+  void constraintJacobians(bool displaced);
 
   /// set all the global dof indices for a nonlinear variable
   void setVariableGlobalDoFs(const std::string & var_name);
@@ -563,6 +562,7 @@ public:
   virtual TagID residualVectorTag() override { return _Re_tag; }
 
   virtual TagID systemMatrixTag() override { return _Ke_system_tag; }
+
 public:
   FEProblemBase & _fe_problem;
   System & _sys;
@@ -595,15 +595,15 @@ protected:
 
   void computeJacobianInternal(std::set<TagID> & tags);
 
-  void computeDiracContributions(SparseMatrix<Number> * jacobian = NULL);
+  void computeDiracContributions(bool is_jacobian);
 
-  void computeScalarKernelsJacobians(SparseMatrix<Number> & jacobian);
+  void computeScalarKernelsJacobians();
 
   /**
    * Enforce nodal constraints
    */
   void enforceNodalConstraintsResidual(NumericVector<Number> & residual);
-  void enforceNodalConstraintsJacobian(SparseMatrix<Number> & jacobian);
+  void enforceNodalConstraintsJacobian();
 
   /// solution vector from nonlinear solver
   const NumericVector<Number> * _current_solution;

@@ -21,9 +21,8 @@
 #include "libmesh/threads.h"
 
 ComputeFullJacobianThread::ComputeFullJacobianThread(FEProblemBase & fe_problem,
-                                                     SparseMatrix<Number> & jacobian,
                                                      std::set<TagID> & tags)
-  : ComputeJacobianThread(fe_problem, jacobian, tags),
+  : ComputeJacobianThread(fe_problem, tags),
     _nl(fe_problem.getNonlinearSystemBase()),
     _integrated_bcs(_nl.getIntegratedBCWarehouse()),
     _dg_kernels(_nl.getDGKernelWarehouse()),

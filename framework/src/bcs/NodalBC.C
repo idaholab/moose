@@ -113,7 +113,8 @@ NodalBC::computeJacobian()
     dof_id_type cached_row = _var.nodalDofIndex();
 
     // Cache the user's computeQpJacobian() value for later use.
-    _fe_problem.assembly(0).cacheJacobianContribution(cached_row, cached_row, cached_val);
+    for (auto tag : _matrix_tags)
+      _fe_problem.assembly(0).cacheJacobianContribution(cached_row, cached_row, cached_val, tag);
 
     if (_has_diag_save_in)
     {

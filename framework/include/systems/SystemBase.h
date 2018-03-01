@@ -22,6 +22,7 @@
 #include "libmesh/dof_map.h"
 #include "libmesh/equation_systems.h"
 #include "libmesh/numeric_vector.h"
+#include "libmesh/sparse_matrix.h"
 
 // Forward declarations
 class Factory;
@@ -207,8 +208,8 @@ public:
   virtual NumericVector<Number> & getVector(TagID tag);
 
   /**
-  * Associate a vector for a given tag
-  */
+   * Associate a vector for a given tag
+   */
   virtual void associateVectorToTag(NumericVector<Number> & vec, TagID tag);
 
   virtual void clearTaggedVectors();
@@ -222,14 +223,20 @@ public:
    * Get a raw SparseMatrix
    */
   virtual SparseMatrix<Number> & getMatrix(TagID tag);
+
   /**
-  * associate a matirx to a tag
-  */
+   * Close all matrices for tags
+   */
+  void closeTaggedMatrices(std::set<TagID> & tags);
+
+  /**
+   * associate a matirx to a tag
+   */
   virtual void associateMatirxToTag(SparseMatrix<Number> & matrix, TagID tag);
 
   /**
-  * Clear all tagged matrices
-  */
+   * Clear all tagged matrices
+   */
   virtual void clearTaggedMatrices();
 
   /**

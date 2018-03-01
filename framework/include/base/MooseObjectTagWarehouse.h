@@ -41,6 +41,7 @@ public:
 
   MooseObjectTagWarehouse<T> & getMatrixTagsObjectWarehouse(std::set<TagID> & tags,
                                                             THREAD_ID tid);
+
 protected:
   const THREAD_ID _num_threads;
 

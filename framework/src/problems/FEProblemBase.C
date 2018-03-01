@@ -1087,39 +1087,37 @@ FEProblemBase::setResidualNeighbor(NumericVector<Number> & residual, THREAD_ID t
 }
 
 void
-FEProblemBase::addJacobian(SparseMatrix<Number> & jacobian, THREAD_ID tid)
+FEProblemBase::addJacobian(THREAD_ID tid)
 {
-  _assembly[tid]->addJacobian(jacobian);
+  _assembly[tid]->addJacobian();
   if (_has_nonlocal_coupling)
-    _assembly[tid]->addJacobianNonlocal(jacobian);
+    _assembly[tid]->addJacobianNonlocal();
   if (_displaced_problem)
   {
-    _displaced_problem->addJacobian(jacobian, tid);
+    _displaced_problem->addJacobian(tid);
     if (_has_nonlocal_coupling)
-      _displaced_problem->addJacobianNonlocal(jacobian, tid);
+      _displaced_problem->addJacobianNonlocal(tid);
   }
 }
 
 void
-FEProblemBase::addJacobianNeighbor(SparseMatrix<Number> & jacobian, THREAD_ID tid)
+FEProblemBase::addJacobianNeighbor(THREAD_ID tid)
 {
-  _assembly[tid]->addJacobianNeighbor(jacobian);
+  _assembly[tid]->addJacobianNeighbor();
   if (_displaced_problem)
-    _displaced_problem->addJacobianNeighbor(jacobian, tid);
+    _displaced_problem->addJacobianNeighbor(tid);
 }
 
 void
-FEProblemBase::addJacobianScalar(SparseMatrix<Number> & jacobian, THREAD_ID tid /* = 0*/)
+FEProblemBase::addJacobianScalar(THREAD_ID tid /* = 0*/)
 {
-  _assembly[tid]->addJacobianScalar(jacobian);
+  _assembly[tid]->addJacobianScalar();
 }
 
 void
-FEProblemBase::addJacobianOffDiagScalar(SparseMatrix<Number> & jacobian,
-                                        unsigned int ivar,
-                                        THREAD_ID tid /* = 0*/)
+FEProblemBase::addJacobianOffDiagScalar(unsigned int ivar, THREAD_ID tid /* = 0*/)
 {
-  _assembly[tid]->addJacobianOffDiagScalar(jacobian, ivar);
+  _assembly[tid]->addJacobianOffDiagScalar(ivar);
 }
 
 void
@@ -1145,11 +1143,11 @@ FEProblemBase::cacheJacobianNeighbor(THREAD_ID tid)
 }
 
 void
-FEProblemBase::addCachedJacobian(SparseMatrix<Number> & jacobian, THREAD_ID tid)
+FEProblemBase::addCachedJacobian(THREAD_ID tid)
 {
   _assembly[tid]->addCachedJacobian();
   if (_displaced_problem)
-    _displaced_problem->addCachedJacobian(jacobian, tid);
+    _displaced_problem->addCachedJacobian(tid);
 }
 
 void
@@ -4247,8 +4245,9 @@ FEProblemBase::computeJacobian(std::set<TagID> & tags)
 {
   if (!_has_jacobian || !_const_jacobian)
   {
-    if (_nl->hasMatrix(_nl->systemMatrixTag()))
-      _nl->getMatrix(_nl->systemMatrixTag()).zero();
+    for (auto tag : tags)
+      if (_nl->hasMatrix(tag))
+        _nl->getMatrix(tag).zero();
 
     _nl->zeroVariablesForJacobian();
     _aux->zeroVariablesForJacobian();
