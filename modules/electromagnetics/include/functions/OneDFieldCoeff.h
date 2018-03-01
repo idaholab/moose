@@ -6,11 +6,10 @@
 
 class OneDFieldCoeff;
 
-template<>
+template <>
 InputParameters validParams<OneDFieldCoeff>();
 
-class OneDFieldCoeff : public Function,
-                       public FunctionInterface
+class OneDFieldCoeff : public Function, public FunctionInterface
 {
 public:
   OneDFieldCoeff(const InputParameters & parameters);

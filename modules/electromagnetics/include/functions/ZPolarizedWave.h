@@ -5,7 +5,7 @@
 
 class ZPolarizedWave;
 
-template<>
+template <>
 InputParameters validParams<ZPolarizedWave>();
 
 class ZPolarizedWave : public Function

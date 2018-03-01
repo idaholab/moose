@@ -6,7 +6,7 @@
 
 class ReflectionCoefficient;
 
-template<>
+template <>
 InputParameters validParams<ReflectionCoefficient>();
 
 class ReflectionCoefficient : public SidePostprocessor, public MooseVariableInterface
@@ -21,7 +21,6 @@ public:
   virtual void threadJoin(const UserObject & y) override;
 
 protected:
-
   virtual Real computeReflection();
 
   const VariableValue & _u;
@@ -29,7 +28,6 @@ protected:
   unsigned int _qp;
 
 private:
-
   Function & _incoming_real;
 
   Function & _incoming_imag;
@@ -41,7 +39,6 @@ private:
   Real _R;
 
   const VariableValue & _coupled_imag;
-
 };
 
 #endif // REFLECTIONCOEFFICIENT_H

@@ -5,7 +5,8 @@
 
 class CoeffDiffusion;
 
-template <> InputParameters validParams<CoeffDiffusion>();
+template <>
+InputParameters validParams<CoeffDiffusion>();
 
 class CoeffDiffusion : public Diffusion
 {

@@ -1,8 +1,9 @@
 #include "CoeffDiffusion.h"
 #include "Function.h"
 
-template<>
-InputParameters validParams<CoeffDiffusion>()
+template <>
+InputParameters
+validParams<CoeffDiffusion>()
 {
   InputParameters params = validParams<Diffusion>();
   params.addParam<Real>("coefficient", 1.0, "Coefficient multiplier for diffusion term.");
@@ -13,19 +14,20 @@ InputParameters validParams<CoeffDiffusion>()
 CoeffDiffusion::CoeffDiffusion(const InputParameters & parameters)
   : Diffusion(parameters),
 
-  _coefficient(getParam<Real>("coefficient")),
-  _func(getFunction("func"))
+    _coefficient(getParam<Real>("coefficient")),
+    _func(getFunction("func"))
 
-{}
+{
+}
 
 Real
 CoeffDiffusion::computeQpResidual()
 {
-  return _coefficient * _func.value(_t,_q_point[_qp]) * Diffusion::computeQpResidual();
+  return _coefficient * _func.value(_t, _q_point[_qp]) * Diffusion::computeQpResidual();
 }
 
 Real
 CoeffDiffusion::computeQpJacobian()
 {
-  return _coefficient * _func.value(_t,_q_point[_qp]) * Diffusion::computeQpJacobian();
+  return _coefficient * _func.value(_t, _q_point[_qp]) * Diffusion::computeQpJacobian();
 }

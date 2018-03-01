@@ -5,7 +5,7 @@
 
 class RobinReflectionBC;
 
-template<>
+template <>
 InputParameters validParams<RobinReflectionBC>();
 
 class RobinReflectionBC : public IntegratedBC
@@ -17,7 +17,6 @@ protected:
   virtual Real computeQpResidual() override;
 
 private:
-
   Real _theta;
 
   const VariableValue & _coupled_val;
@@ -29,7 +28,6 @@ private:
   Real _k;
 
   Function & _inverseMuR;
-
 };
 
 #endif // ROBINREFLECTIONBC_H
