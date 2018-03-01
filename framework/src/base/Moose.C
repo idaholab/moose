@@ -65,7 +65,6 @@
 #include "Diffusion.h"
 #include "AnisotropicDiffusion.h"
 #include "CoupledForce.h"
-#include "BodyForce.h"
 #include "Reaction.h"
 #include "MassEigenKernel.h"
 #include "NullKernel.h"
@@ -155,9 +154,6 @@
 #include "Axisymmetric2D3DSolutionFunction.h"
 #include "ConstantFunction.h"
 #include "CompositeFunction.h"
-#include "MooseParsedFunction.h"
-#include "MooseParsedVectorFunction.h"
-#include "MooseParsedGradFunction.h"
 #include "PiecewiseConstant.h"
 #include "PiecewiseLinear.h"
 #include "SolutionFunction.h"
@@ -283,13 +279,7 @@
 #endif
 
 // preconditioners
-#include "PhysicsBasedPreconditioner.h"
-#include "FiniteDifferencePreconditioner.h"
-#include "SingleMatrixPreconditioner.h"
-
-#include "FieldSplitPreconditioner.h"
 #include "Split.h"
-#include "AddFieldSplitAction.h"
 
 // dampers
 #include "ConstantDamper.h"
@@ -450,6 +440,7 @@
 #include "AddRelationshipManager.h"
 #include "MeshOnlyAction.h"
 #include "SplitMeshAction.h"
+#include "AddFieldSplitAction.h"
 
 // Outputs
 #ifdef LIBMESH_HAVE_EXODUS_API
@@ -458,17 +449,13 @@
 #include "Nemesis.h"
 #include "Console.h"
 #include "CSV.h"
-#include "VTKOutput.h"
 #include "Checkpoint.h"
-#include "XDA.h"
-#include "GMVOutput.h"
 #include "Tecplot.h"
 #include "Gnuplot.h"
 #include "SolutionHistory.h"
 #include "MaterialPropertyDebugOutput.h"
 #include "VariableResidualNormsDebugOutput.h"
 #include "TopResidualDebugOutput.h"
-#include "DOFMapOutput.h"
 #include "ControlOutput.h"
 
 // Controls
@@ -566,7 +553,6 @@ registerObjects(Factory & factory, const std::set<std::string> & obj_labels)
   registerKernel(Diffusion);
   registerKernel(AnisotropicDiffusion);
   registerKernel(CoupledForce);
-  registerRenamedObject("UserForcingFunction", BodyForce, "04/01/2018 00:00");
   registerKernel(Reaction);
   registerKernel(MassEigenKernel);
   registerKernel(NullKernel);
@@ -653,9 +639,6 @@ registerObjects(Factory & factory, const std::set<std::string> & obj_labels)
   registerFunction(Axisymmetric2D3DSolutionFunction);
   registerFunction(ConstantFunction);
   registerFunction(CompositeFunction);
-  registerNamedFunction(MooseParsedFunction, "ParsedFunction");
-  registerNamedFunction(MooseParsedGradFunction, "ParsedGradFunction");
-  registerNamedFunction(MooseParsedVectorFunction, "ParsedVectorFunction");
   registerFunction(PiecewiseConstant);
   registerFunction(PiecewiseLinear);
   registerFunction(SolutionFunction);
@@ -780,13 +763,6 @@ registerObjects(Factory & factory, const std::set<std::string> & obj_labels)
   registerUserObject(Terminator);
 #endif
 
-  // preconditioners
-  registerNamedPreconditioner(PhysicsBasedPreconditioner, "PBP");
-  registerNamedPreconditioner(FiniteDifferencePreconditioner, "FDP");
-  registerNamedPreconditioner(SingleMatrixPreconditioner, "SMP");
-#if defined(LIBMESH_HAVE_PETSC) && !PETSC_VERSION_LESS_THAN(3, 3, 0)
-  registerNamedPreconditioner(FieldSplitPreconditioner, "FSP");
-#endif
   // dampers
   registerDamper(ConstantDamper);
   registerDamper(MaxIncrement);
@@ -895,20 +871,13 @@ registerObjects(Factory & factory, const std::set<std::string> & obj_labels)
 #endif
   registerOutput(Console);
   registerOutput(CSV);
-#ifdef LIBMESH_HAVE_VTK
-  registerNamedOutput(VTKOutput, "VTK");
-#endif
   registerOutput(Checkpoint);
-  registerNamedOutput(XDA, "XDR");
-  registerOutput(XDA);
-  registerNamedOutput(GMVOutput, "GMV");
   registerOutput(Tecplot);
   registerOutput(Gnuplot);
   registerOutput(SolutionHistory);
   registerOutput(MaterialPropertyDebugOutput);
   registerOutput(VariableResidualNormsDebugOutput);
   registerOutput(TopResidualDebugOutput);
-  registerNamedOutput(DOFMapOutput, "DOFMap");
   registerOutput(ControlOutput);
 
   // Controls

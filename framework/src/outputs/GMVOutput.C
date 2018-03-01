@@ -13,6 +13,8 @@
 #include "libmesh/equation_systems.h"
 #include "libmesh/gmv_io.h"
 
+registerMooseObjectAliased("MooseApp", GMVOutput, "GMV");
+
 template <>
 InputParameters
 validParams<GMVOutput>()

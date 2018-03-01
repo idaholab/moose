@@ -10,6 +10,10 @@
 #ifndef TERMINATOR_H
 #define TERMINATOR_H
 
+#include "libmesh/libmesh_config.h"
+
+#ifdef LIBMESH_HAVE_FPARSER
+
 #include "GeneralUserObject.h"
 #include "libmesh/fparser.hh"
 
@@ -67,5 +71,7 @@ protected:
   /// Fparser parameter buffer
   Real * _params;
 };
+
+#endif // LIBMESH_HAVE_FPARSER
 
 #endif // TERMINATOR_H

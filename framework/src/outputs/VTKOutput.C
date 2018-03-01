@@ -7,10 +7,14 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
+#ifdef LIBMESH_HAVE_VTK
+
 #include "VTKOutput.h"
 
 #include "libmesh/vtk_io.h"
 #include "libmesh/equation_systems.h"
+
+registerMooseObjectAliased("MooseApp", VTKOutput, "VTK");
 
 template <>
 InputParameters
@@ -36,7 +40,6 @@ VTKOutput::VTKOutput(const InputParameters & parameters)
 void
 VTKOutput::output(const ExecFlagType & /*type*/)
 {
-#ifdef LIBMESH_HAVE_VTK
 
   /// Create VTKIO object
   VTKIO vtk(_es_ptr->get_mesh());
@@ -47,10 +50,6 @@ VTKOutput::output(const ExecFlagType & /*type*/)
   // Write the data
   vtk.write_equation_systems(filename(), *_es_ptr);
   _file_num++;
-
-#else
-  mooseError("libMesh not configured with VTK");
-#endif
 }
 
 std::string
@@ -68,3 +67,5 @@ VTKOutput::filename()
   // Return the filename
   return output.str();
 }
+
+#endif

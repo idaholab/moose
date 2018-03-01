@@ -13,6 +13,9 @@
 #include "FEProblem.h"
 #include "MooseMesh.h"
 
+registerMooseObject("MooseApp", XDA);
+registerMooseObjectAliased("MooseApp", XDA, "XDR");
+
 template <>
 InputParameters
 validParams<XDA>()

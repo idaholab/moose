@@ -17,6 +17,8 @@
 
 #include "libmesh/coupling_matrix.h"
 
+registerMooseObjectAliased("MooseApp", SingleMatrixPreconditioner, "SMP");
+
 template <>
 InputParameters
 validParams<SingleMatrixPreconditioner>()
