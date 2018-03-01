@@ -52,10 +52,28 @@
     # XFEM requires --enable-unique-ids in libmesh
     unique_id = true
   [../]
+  [./edge_crack_3d_mesh]
+    type = Exodiff
+    input = edge_crack_3d_mesh.i
+    exodiff = 'edge_crack_3d_mesh_out.e'
+    abs_zero = 1e-8
+    map = false
+    # XFEM requires --enable-unique-ids in libmesh
+    unique_id = true
+  [../]  
   [./elliptical_crack]
     type = Exodiff
     input = elliptical_crack.i
     exodiff = 'elliptical_crack_out.e'
+    map = false
+    # XFEM requires --enable-unique-ids in libmesh
+    unique_id = true
+  [../]
+  [./mesh_grow]
+    type = Exodiff
+    input = mesh_grow.i
+    exodiff = 'mesh_grow.e'
+    abs_zero = 1e-8
     map = false
     # XFEM requires --enable-unique-ids in libmesh
     unique_id = true

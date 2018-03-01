@@ -27,6 +27,18 @@ struct CutEdge
   unsigned int host_side_id;
 };
 
+/**
+ * To allow the use of std::set<CutEdge>, the operator of < has to be overloaded for CutEdge.
+ */
+inline bool
+operator<(const CutEdge & lhs, const CutEdge & rhs)
+{
+  if (lhs.id1 != rhs.id1)
+    return lhs.id1 < rhs.id1;
+  else
+    return lhs.id2 < rhs.id2;
+}
+
 struct CutNode
 {
   unsigned int id;
