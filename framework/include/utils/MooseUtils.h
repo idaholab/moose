@@ -421,6 +421,9 @@ convert(const std::string & str)
   return val;
 }
 
+template <>
+int convert<int>(const std::string & str);
+
 /**
  * Convert supplied string to upper case.
  * @params name The string to convert upper case.

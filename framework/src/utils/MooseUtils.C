@@ -575,6 +575,34 @@ wildCardMatch(std::string name, std::string search_string)
     return false;
 }
 
+template <>
+int
+convert<int>(const std::string & str)
+{
+  std::stringstream ss(str);
+  int val;
+  if ((ss >> val).fail() || !ss.eof())
+  {
+    // Let's try to read a double and see if we can cast it to an int
+    // This would be the case for scientific notation
+    double double_val;
+    std::stringstream double_ss(str);
+
+    if ((double_ss >> double_val).fail() || !double_ss.eof())
+      throw std::runtime_error(std::string("Unable to convert ") + str + " to type " +
+                               demangle(typeid(int).name()));
+
+    // Check to see if it's an integer (and within range of an integer
+    if (double_val == static_cast<int>(double_val))
+      val = double_val;
+    else // Still failure
+      throw std::runtime_error(std::string("Unable to convert ") + str + " to type " +
+                               demangle(typeid(int).name()));
+  }
+
+  return val;
+}
+
 std::string
 toUpper(const std::string & name)
 {
