@@ -86,8 +86,6 @@ unity_srcfiles += $(app_unity_srcfiles)
 # Pick up all of the additional files in the src directory since we're not unity building those
 app_non_unity_srcfiles := $(filter-out %main.C, $(shell find $(non_unity_srcsubdirs) -maxdepth 1 \( -type f -o -type l \) -name "*.C"))
 
-$(info $(app_non_unity_srcfiles))
-
 # Override srcfiles
 srcfiles    := $(app_unity_srcfiles) $(app_non_unity_srcfiles)
 endif
