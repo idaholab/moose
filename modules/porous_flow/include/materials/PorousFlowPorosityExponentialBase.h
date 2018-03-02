@@ -47,8 +47,14 @@ protected:
   /// Returns "a" at the quadpoint (porosity = a + (b - a) * exp(decay))
   virtual Real atNegInfinityQp() const = 0;
 
+  /// d(a)/d(porous-flow variable pvar)
+  virtual Real datNegInfinityQp(unsigned pvar) const = 0;
+
   /// Returns "b" at the quadpoint (porosity = a + (b - a) * exp(decay))
   virtual Real atZeroQp() const = 0;
+
+  /// d(a)/d(porous-flow variable pvar)
+  virtual Real datZeroQp(unsigned pvar) const = 0;
 
   /// Returns "decay" at the quadpoint (porosity = a + (b - a) * exp(decay))
   virtual Real decayQp() const = 0;

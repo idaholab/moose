@@ -1,0 +1,81 @@
+//* This file is part of the MOOSE framework
+//* https://www.mooseframework.org
+//*
+//* All rights reserved, see COPYRIGHT for full restrictions
+//* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+//*
+//* Licensed under LGPL 2.1, please see LICENSE for details
+//* https://www.gnu.org/licenses/lgpl-2.1.html
+
+#ifndef POROUSFLOWPREDIS_H
+#define POROUSFLOWPREDIS_H
+
+#include "TimeDerivative.h"
+#include "PorousFlowDictator.h"
+
+// Forward Declarations
+class PorousFlowPreDis;
+
+template <>
+InputParameters validParams<PorousFlowPreDis>();
+
+/**
+ * Kernel = sum (stoichiometry * density * d(concentration)/dt)
+ * where the sum is over secondary chemical species in
+ * a precipitation-dissolution reaction system
+ */
+class PorousFlowPreDis : public TimeKernel
+{
+public:
+  PorousFlowPreDis(const InputParameters & parameters);
+
+protected:
+  virtual Real computeQpResidual() override;
+  virtual Real computeQpJacobian() override;
+  virtual Real computeQpOffDiagJacobian(unsigned int jvar) override;
+
+  /// Density of the mineral species
+  const std::vector<Real> _mineral_density;
+
+  /// holds info on the PorousFlow variables
+  const PorousFlowDictator & _dictator;
+
+  /// porosity at the qps
+  const MaterialProperty<Real> & _porosity;
+
+  /// old value of porosity
+  const MaterialProperty<Real> & _porosity_old;
+
+  /// d(porosity)/d(porous-flow variable)
+  const MaterialProperty<std::vector<Real>> & _dporosity_dvar;
+
+  /// d(porosity)/d(grad porous-flow variable)
+  const MaterialProperty<std::vector<RealGradient>> & _dporosity_dgradvar;
+
+  /// whether the porosity uses the volumetric strain at the closest quadpoint
+  const bool _strain_at_nearest_qp;
+
+  /// the nearest qp to the node
+  const MaterialProperty<unsigned int> * const _nearest_qp;
+
+  /// concentration of the secondary species
+  const MaterialProperty<std::vector<Real>> & _sec_conc;
+
+  /// old concentration of the secondary species
+  const MaterialProperty<std::vector<Real>> & _sec_conc_old;
+
+  /// d(concentration of the secondary species)/d(porflow variable)
+  const MaterialProperty<std::vector<std::vector<Real>>> & _dsec_conc_dvar;
+
+  /// stoichiometric coefficients
+  const std::vector<Real> _stoichiometry;
+
+  /**
+   * Derivative of residual with respect to PorousFlow variable number pvar
+   * This is used by both computeQpJacobian and computeQpOffDiagJacobian
+   * @param pvar take the derivative of the residual wrt this PorousFlow variable
+   */
+  Real computeQpJac(unsigned int pvar);
+};
+
+#endif // POROUSFLOWPREDIS_H

@@ -185,6 +185,12 @@ PorousFlowDispersiveFlux::computeQpJac(unsigned int jvar) const
         _permeability[_qp] * (_grad_phi[_j][_qp] * _dgrad_p_dgrad_var[_qp][ph][pvar] -
                               _phi[_j][_qp] * _dfluid_density_qp_dvar[_qp][ph][pvar] * _gravity);
     dvelocity += _permeability[_qp] * (_dgrad_p_dvar[_qp][ph][pvar] * _phi[_j][_qp]);
+    dvelocity = dvelocity * _relative_permeability[_qp][ph] / _fluid_viscosity[_qp][ph] +
+                (_permeability[_qp] * (_grad_p[_qp][ph] - _fluid_density_qp[_qp][ph] * _gravity)) *
+                    (_drelative_permeability_dvar[_qp][ph][pvar] / _fluid_viscosity[_qp][ph] -
+                     _relative_permeability[_qp][ph] * _dfluid_viscosity_dvar[_qp][ph][pvar] /
+                         std::pow(_fluid_viscosity[_qp][ph], 2)) *
+                    _phi[_j][_qp];
 
     Real dvelocity_abs = 0.0;
     if (velocity_abs > 0.0)
@@ -217,6 +223,10 @@ PorousFlowDispersiveFlux::computeQpJac(unsigned int jvar) const
              _grad_mass_frac[_qp][ph][_fluid_component];
     dflux += _fluid_density_qp[_qp][ph] * (ddiffusion * _identity_tensor + ddispersion) *
              _grad_mass_frac[_qp][ph][_fluid_component];
+
+    // NOTE: Here we assume that d(grad_mass_frac)/d(var) = d(mass_frac)/d(var) * grad_phi
+    //       This is true for most PorousFlow scenarios, but not for chemical reactions
+    //       where mass_frac is a nonlinear function of the primary MOOSE Variables
     dflux += _fluid_density_qp[_qp][ph] * (diffusion * _identity_tensor + dispersion) *
              _dmass_frac_dvar[_qp][ph][_fluid_component][pvar] * _grad_phi[_j][_qp];
   }

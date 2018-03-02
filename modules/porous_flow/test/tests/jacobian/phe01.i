@@ -116,7 +116,9 @@
     at_nodes = true
   [../]
   [./porosity]
-    type = PorousFlowPorosityTM
+    type = PorousFlowPorosity
+    thermal = true
+    mechanical = true
     at_nodes = true
     porosity_zero = 0.3
     thermal_expansion_coeff = 1.3

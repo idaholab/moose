@@ -213,7 +213,9 @@
     type = PorousFlowEffectiveFluidPressure
   [../]
   [./porosity]
-    type = PorousFlowPorosityHM
+    type = PorousFlowPorosity
+    fluid = true
+    mechanical = true
     porosity_zero = 0.1
     solid_bulk = 1
     biot_coefficient = 1

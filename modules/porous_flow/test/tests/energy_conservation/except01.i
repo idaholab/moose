@@ -76,9 +76,9 @@
     temperature = temp
   [../]
   [./porosity]
-    type = PorousFlowPorosityConst
+    type = PorousFlowPorosity
     at_nodes = true
-    porosity = 0.1
+    porosity_zero = 0.1
   [../]
   [./rock_heat]
     type = PorousFlowMatrixInternalEnergy

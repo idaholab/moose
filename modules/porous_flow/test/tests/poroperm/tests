@@ -46,4 +46,15 @@
     csvdiff = poro_hm_out.csv
   [../]
 
+  [./except1]
+    type = RunException
+    input = except1.i
+    expect_err = 'PorousFlowPorosity: When thermal=true you must provide a thermal_expansion_coeff'
+  [../]
+  [./except2]
+    type = RunException
+    input = except2.i
+    expect_err = 'PorousFlowPorosity: When fluid=true you must provide a solid_bulk'
+  [../]
+
 []

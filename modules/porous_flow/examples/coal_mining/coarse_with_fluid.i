@@ -886,14 +886,18 @@
     material_property = PorousFlow_viscosity_qp
   [../]
   [./porosity_for_aux]
-    type = PorousFlowPorosityHM
+    type = PorousFlowPorosity
+    fluid = true
+    mechanical = true
     ensure_positive = true
     porosity_zero = 0.02
     solid_bulk = 5.3333E3
   [../]
   [./porosity_bulk]
-    type = PorousFlowPorosityHM
-     block = '2 3 4 5 6 7 8 9 10 11 12 13 14 15 16'
+    type = PorousFlowPorosity
+    fluid = true
+    mechanical = true
+    block = '2 3 4 5 6 7 8 9 10 11 12 13 14 15 16'
     ensure_positive = true
     at_nodes = true
     porosity_zero = 0.02
