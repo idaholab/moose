@@ -42,7 +42,13 @@ ifneq ($(MOOSE_COLOR),true)
   COLOR_STRING = '--no-color'
 endif
 
-test_subs:
+.PHONY: builds $(MODULE_DIRS)
+builds: $(MODULE_DIRS)
+
+$(MODULE_DIRS): $(app_LIBS)
+	@$(MAKE) -C $@
+
+test_subs: all builds
 	@echo ======================================================
 	@echo Testing the following modules:
 	@for app in $(MODULE_DIRS); do echo \ $$app; done
@@ -52,6 +58,6 @@ test_subs:
 	for app in $(MODULE_DIRS); \
 	do \
 		echo ====== Testing in $${app} ====== ; \
-		cd $${app} && $(MAKE) && ./run_tests $(COLOR_STRING) -j $(MOOSE_JOBS) $(MOOSE_LOAD) -t || ret_val=1; \
+		cd $${app} && ./run_tests $(COLOR_STRING) -j $(MOOSE_JOBS) $(MOOSE_LOAD) -t || ret_val=1; \
 	done; \
 	exit $$ret_val;)

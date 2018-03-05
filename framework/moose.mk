@@ -186,12 +186,18 @@ moose_analyzer += $(patsubst %.cc, %.plist.$(obj-suffix), $(hit_srcfiles))
 app_INCLUDES := $(moose_INCLUDE) $(libmesh_INCLUDE)
 app_LIBS     := $(moose_LIBS)
 app_DIRS     := $(FRAMEWORK_DIR)
-all:: libmesh_submodule_status header_symlinks moose_revision moose
+
+moose_revision_header := $(FRAMEWORK_DIR)/include/base/MooseRevision.h
+
+all:: libmesh_submodule_status header_symlinks $(moose_revision_header) moose
 
 # revision header
-moose_revision_header = $(FRAMEWORK_DIR)/include/base/MooseRevision.h
-moose_revision:
-	@echo Regenerating MooseRevision
+moose_GIT_DIR := $(shell cd "$(FRAMEWORK_DIR)" && which git &> /dev/null && git rev-parse --show-toplevel)
+# Use wildcard in case the files don't exist
+moose_HEADER_deps := $(wildcard $(moose_GIT_DIR)/.git/HEAD $(moose_GIT_DIR)/.git/index)
+
+$(moose_revision_header): $(moose_HEADER_deps)
+	@echo "Checking if header needs updating: "$@"..."
 	$(shell $(FRAMEWORK_DIR)/scripts/get_repo_revision.py $(FRAMEWORK_DIR) \
 	  $(moose_revision_header) MOOSE)
 	@if [ ! -e "$(moose_all_header_dir)/MooseRevision.h" ]; then \

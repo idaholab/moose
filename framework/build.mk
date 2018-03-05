@@ -68,21 +68,21 @@ unity_files::
 # C++ rules
 #
 pcre%.$(obj-suffix) : pcre%.cc
-	@echo "MOOSE Compiling C++ (in "$(METHOD)" mode) "$<"..."
+	@echo "Compiling C++ (in "$(METHOD)" mode) "$<"..."
 	@$(libmesh_LIBTOOL) --tag=CXX $(LIBTOOLFLAGS) --mode=compile --quiet \
           $(libmesh_CXX) $(libmesh_CPPFLAGS) $(ADDITIONAL_CPPFLAGS) $(libmesh_CXXFLAGS) $(app_INCLUDES) $(libmesh_INCLUDE) -w -DHAVE_CONFIG_H -MMD -MP -MF $@.d -MT $@ -c $< -o $@
 
 %.$(obj-suffix) : %.cc
-	@echo "MOOSE Compiling C++ (in "$(METHOD)" mode) "$<"..."
+	@echo "Compiling C++ (in "$(METHOD)" mode) "$<"..."
 	@$(libmesh_LIBTOOL) --tag=CXX $(LIBTOOLFLAGS) --mode=compile --quiet \
           $(libmesh_CXX) $(libmesh_CPPFLAGS) $(ADDITIONAL_CPPFLAGS) $(libmesh_CXXFLAGS) $(app_INCLUDES) $(libmesh_INCLUDE) -DHAVE_CONFIG_H -MMD -MP -MF $@.d -MT $@ -c $< -o $@
 
 define CXX_RULE_TEMPLATE
 %$(1).$(obj-suffix) : %.C
 ifeq ($(1),)
-	@echo "MOOSE Compiling C++ (in "$$(METHOD)" mode) "$$<"..."
+	@echo "Compiling C++ (in "$$(METHOD)" mode) "$$<"..."
 else
-	@echo "MOOSE Compiling C++ with suffix (in "$$(METHOD)" mode) "$$<"..."
+	@echo "Compiling C++ with suffix (in "$$(METHOD)" mode) "$$<"..."
 endif
 	@$$(libmesh_LIBTOOL) --tag=CXX $$(LIBTOOLFLAGS) --mode=compile --quiet \
 	  $$(libmesh_CXX) $$(libmesh_CPPFLAGS) $$(ADDITIONAL_CPPFLAGS) $$(libmesh_CXXFLAGS) $$(app_INCLUDES) $$(libmesh_INCLUDE) -MMD -MP -MF $$@.d -MT $$@ -c $$< -o $$@
@@ -91,7 +91,7 @@ endef
 $(eval $(call CXX_RULE_TEMPLATE,))
 
 %.$(obj-suffix) : %.cpp
-	@echo "MOOSE Compiling C++ (in "$(METHOD)" mode) "$<"..."
+	@echo "Compiling C++ (in "$(METHOD)" mode) "$<"..."
 	@$(libmesh_LIBTOOL) --tag=CXX $(LIBTOOLFLAGS) --mode=compile --quiet \
 	  $(libmesh_CXX) $(libmesh_CPPFLAGS) $(ADDITIONAL_CPPFLAGS) $(libmesh_CXXFLAGS) $(app_INCLUDES) $(libmesh_INCLUDE) -MMD -MP -MF $@.d -MT $@ -c $< -o $@
 
@@ -112,12 +112,12 @@ $(eval $(call CXX_RULE_TEMPLATE,))
 #
 
 pcre%.$(obj-suffix) : pcre%.c
-	@echo "MOOSE Compiling C (in "$(METHOD)" mode) "$<"..."
+	@echo "Compiling C (in "$(METHOD)" mode) "$<"..."
 	@$(libmesh_LIBTOOL) --tag=CC $(LIBTOOLFLAGS) --mode=compile --quiet \
           $(libmesh_CC) $(libmesh_CPPFLAGS) $(ADDITIONAL_CPPFLAGS) $(libmesh_CFLAGS) $(app_INCLUDES) $(libmesh_INCLUDE) -w -DHAVE_CONFIG_H -MMD -MP -MF $@.d -MT $@ -c $< -o $@
 
 %.$(obj-suffix) : %.c
-	@echo "MOOSE Compiling C (in "$(METHOD)" mode) "$<"..."
+	@echo "Compiling C (in "$(METHOD)" mode) "$<"..."
 	@$(libmesh_LIBTOOL) --tag=CC $(LIBTOOLFLAGS) --mode=compile --quiet \
 	  $(libmesh_CC) $(libmesh_CPPFLAGS) $(ADDITIONAL_CPPFLAGS) $(libmesh_CFLAGS) $(app_INCLUDES) $(libmesh_INCLUDE) -MMD -MP -MF $@.d -MT $@ -c $< -o $@
 
@@ -128,7 +128,7 @@ pcre%.$(obj-suffix) : pcre%.c
 #
 
 %.$(obj-suffix) : %.f
-	@echo "MOOSE Compiling Fortan (in "$(METHOD)" mode) "$<"..."
+	@echo "Compiling Fortan (in "$(METHOD)" mode) "$<"..."
 	@$(libmesh_LIBTOOL) --tag=F77 $(LIBTOOLFLAGS) --mode=compile --quiet \
 	  $(libmesh_F77) $(libmesh_FFLAGS) $(app_INCLUDES) $(libmesh_INCLUDE) -c $< -o $@
 
@@ -139,7 +139,7 @@ pcre%.$(obj-suffix) : pcre%.c
 
 PreProcessed_FFLAGS := $(libmesh_FFLAGS)
 %.$(obj-suffix) : %.F
-	@echo "MOOSE Compiling Fortran (in "$(METHOD)" mode) "$<"..."
+	@echo "Compiling Fortran (in "$(METHOD)" mode) "$<"..."
 	@$(libmesh_LIBTOOL) --tag=F77 $(LIBTOOLFLAGS) --mode=compile --quiet \
 	  $(libmesh_F90) $(PreProcessed_FFLAGS) $(app_INCLUDES) $(libmesh_INCLUDE) -c $< $(module_dir_flag) -o $@
 
@@ -169,7 +169,7 @@ ifneq (,$(findstring gfortran,$(mpif90_command)))
 endif
 
 %.$(obj-suffix) : %.f90
-	@echo "MOOSE Compiling Fortran90 (in "$(METHOD)" mode) "$<"..."
+	@echo "Compiling Fortran90 (in "$(METHOD)" mode) "$<"..."
 	@$(libmesh_LIBTOOL) --tag=FC $(LIBTOOLFLAGS) --mode=compile --quiet \
 	  $(libmesh_F90) $(libmesh_FFLAGS) $(libmesh_INCLUDE) -c $< $(module_dir_flag) -o $@
 
@@ -254,16 +254,16 @@ endif
 # out to be more trouble than it was worth to get working.
 #
 %-$(METHOD).plugin : %.C
-	@echo "MOOSE Compiling C++ Plugin (in "$(METHOD)" mode) "$<"..."
+	@echo "Compiling C++ Plugin (in "$(METHOD)" mode) "$<"..."
 	@$(libmesh_CXX) $(libmesh_CPPFLAGS) $(ADDITIONAL_CPPFLAGS) $(libmesh_CXXFLAGS) -shared -fPIC $(app_INCLUDES) $(libmesh_INCLUDE) $< -o $@
 %-$(METHOD).plugin : %.c
-	@echo "MOOSE Compiling C Plugin (in "$(METHOD)" mode) "$<"..."
+	@echo "Compiling C Plugin (in "$(METHOD)" mode) "$<"..."
 	@$(libmesh_CC) $(libmesh_CPPFLAGS) $(ADDITIONAL_CPPFLAGS) $(libmesh_CFLAGS) -shared -fPIC $(app_INCLUDES) $(libmesh_INCLUDE) $< -o $@
 %-$(METHOD).plugin : %.f
-	@echo "MOOSE Compiling Fortan Plugin (in "$(METHOD)" mode) "$<"..."
+	@echo "Compiling Fortan Plugin (in "$(METHOD)" mode) "$<"..."
 	@$(libmesh_F77) $(libmesh_FFLAGS) -shared -fPIC $(app_INCLUDES) $(libmesh_INCLUDE) $< -o $@
 %-$(METHOD).plugin : %.f90
-	@echo "MOOSE Compiling Fortan Plugin (in "$(METHOD)" mode) "$<"..."
+	@echo "Compiling Fortan Plugin (in "$(METHOD)" mode) "$<"..."
 	@$(libmesh_F90) $(libmesh_FFLAGS) -shared -fPIC $(app_INCLUDES) $(libmesh_INCLUDE) $< -o $@
 
 # Define the "test" target, we'll use a variable name so that we can override it without warnings if needed
