@@ -91,6 +91,12 @@ public:
   /// the number of fluid components
   unsigned int numComponents() const;
 
+  /// the number of aqueous equilibrium secondary species
+  unsigned int numAqueousEquilibrium() const;
+
+  /// the number of aqueous kinetic secondary species
+  unsigned int numAqueousKinetic() const;
+
   /**
    * the PorousFlow variable number
    * @param moose_var_num the MOOSE variable number
@@ -151,6 +157,12 @@ protected:
 
   /// number of fluid components
   const unsigned int _num_components;
+
+  /// number of aqueous-equilibrium secondary species
+  const unsigned int _num_aqueous_equilibrium;
+
+  /// number of aqeuous-kinetic secondary species that are involved in mineralisation
+  const unsigned int _num_aqueous_kinetic;
 
 private:
   /// _moose_var_num[i] = the moose variable number corresponding to porous flow variable i
