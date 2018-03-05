@@ -212,5 +212,7 @@
     system = constraint
     normal_smoothing_distance = 0.1
     custom_line_search = true
+    contact_ltol = .5
+    allowed_lambda_cuts = 0
   [../]
 []

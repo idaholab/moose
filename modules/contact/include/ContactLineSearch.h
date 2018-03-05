@@ -28,7 +28,10 @@ class ContactLineSearch : public PetscNonlinearSolver<Real>::ComputeLineSearchOb
                           public ParallelObject
 {
 public:
-  ContactLineSearch(FEProblemBase & fe_problem, MooseApp & app, size_t allowed_lambda_cuts);
+  ContactLineSearch(FEProblemBase & fe_problem,
+                    MooseApp & app,
+                    size_t allowed_lambda_cuts,
+                    Real contact_ltol);
 
   /**
    * The custom linesearch implementation method
@@ -82,6 +85,9 @@ protected:
 
   /// How many times the linsearch is allowed to cut lambda
   size_t _allowed_lambda_cuts;
+
+  /// What the linear tolerance should be while the contact state is changing
+  Real _contact_ltol;
 };
 
 #endif

@@ -93,8 +93,12 @@ validParams<ContactAction>()
       "custom_line_search", false, "Whether to use a contact customized line search.");
   params.addParam<unsigned>(
       "allowed_lambda_cuts",
-      2,
+      0,
       "The number of times lambda is allowed to be cut in half in the custom line search");
+  params.addParam<Real>("contact_ltol",
+                        .5,
+                        "The linear relative tolerance to be used while the contact state is "
+                        "changing between non-linear iterations.");
   return params;
 }
 
@@ -122,8 +126,10 @@ ContactAction::act()
 #ifdef LIBMESH_HAVE_PETSC
   std::unique_ptr<ContactLineSearch> contact_linesearch =
       getParam<bool>("custom_line_search")
-          ? libmesh_make_unique<ContactLineSearch>(
-                *_problem, _app, getParam<unsigned>("allowed_lambda_cuts"))
+          ? libmesh_make_unique<ContactLineSearch>(*_problem,
+                                                   _app,
+                                                   getParam<unsigned>("allowed_lambda_cuts"),
+                                                   getParam<Real>("contact_ltol"))
           : nullptr;
 #endif
 
