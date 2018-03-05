@@ -201,3 +201,15 @@ TableOutput::outputScalarVariables()
       value.release();
   }
 }
+
+void
+TableOutput::clear()
+{
+  _postprocessor_table.clear();
+  for (auto & pair : _vector_postprocessor_tables)
+    pair.second.clear();
+  for (auto & pair : _vector_postprocessor_time_tables)
+    pair.second.clear();
+  _scalar_table.clear();
+  _all_data_table.clear();
+}
