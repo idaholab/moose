@@ -24,5 +24,5 @@ SoundSpeedAux::SoundSpeedAux(const InputParameters & parameters)
 Real
 SoundSpeedAux::computeValue()
 {
-  return _fp.c(_v[_qp], _e[_qp]);
+  return _fp.c_from_v_e(_v[_qp], _e[_qp]);
 }

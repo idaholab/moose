@@ -25,8 +25,8 @@ PrandtlNumberAux::PrandtlNumberAux(const InputParameters & parameters)
 Real
 PrandtlNumberAux::computeValue()
 {
-  Real cp = _fp.cp(_v[_qp], _e[_qp]);
-  Real mu = _fp.mu(_v[_qp], _e[_qp]);
-  Real k = _fp.k(_v[_qp], _e[_qp]);
+  Real cp = _fp.cp_from_v_e(_v[_qp], _e[_qp]);
+  Real mu = _fp.mu_from_v_e(_v[_qp], _e[_qp]);
+  Real k = _fp.k_from_v_e(_v[_qp], _e[_qp]);
   return RELAP7::Prandtl(cp, mu, k);
 }

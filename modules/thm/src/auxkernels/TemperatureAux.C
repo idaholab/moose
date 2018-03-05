@@ -24,5 +24,5 @@ TemperatureAux::TemperatureAux(const InputParameters & parameters)
 Real
 TemperatureAux::computeValue()
 {
-  return _fp.temperature(_v[_qp], _e[_qp]);
+  return _fp.T_from_v_e(_v[_qp], _e[_qp]);
 }

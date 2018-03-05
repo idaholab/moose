@@ -27,6 +27,6 @@ MachNumberAux::MachNumberAux(const InputParameters & parameters)
 Real
 MachNumberAux::computeValue()
 {
-  Real speed_of_sound = _fp.c(_v[_qp], _e[_qp]);
+  Real speed_of_sound = _fp.c_from_v_e(_v[_qp], _e[_qp]);
   return _vel[_qp] / speed_of_sound;
 }

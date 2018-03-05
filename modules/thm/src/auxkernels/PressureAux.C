@@ -24,5 +24,5 @@ PressureAux::PressureAux(const InputParameters & parameters)
 Real
 PressureAux::computeValue()
 {
-  return _fp.pressure(_v[_qp], _e[_qp]);
+  return _fp.p_from_v_e(_v[_qp], _e[_qp]);
 }
