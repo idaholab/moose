@@ -23,5 +23,5 @@ RhoFromPressureTemperatureIC::RhoFromPressureTemperatureIC(const InputParameters
 Real
 RhoFromPressureTemperatureIC::value(const Point & /*p*/)
 {
-  return _spfp.rho(_p[_qp], _T[_qp]);
+  return _spfp.rho_from_p_T(_p[_qp], _T[_qp]);
 }
