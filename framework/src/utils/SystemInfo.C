@@ -46,8 +46,8 @@ SystemInfo::getInfo() const
     executable = executable.substr(last_slash + 1);
   std::string executable_path(Moose::getExecutablePath() + executable);
   struct stat attrib;
-  stat(executable_path.c_str(), &attrib);
-  oss << std::setw(25) << "Executable Timestamp: " << getTimeStamp(&(attrib.st_mtime)) << "\n";
+  if (!stat(executable_path.c_str(), &attrib))
+    oss << std::setw(25) << "Executable Timestamp: " << getTimeStamp(&(attrib.st_mtime)) << "\n";
 
   oss << std::endl;
   return oss.str();
