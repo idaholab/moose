@@ -57,7 +57,9 @@ $(eval $(call unity_dir_rule, $(unity_src_dir)))
 # Exclude .libs... but also: exclude unity building src.
 # The idea here is that if all they have is src then it's a big jumble of stuff
 # that won't benefit from unity building
-non_unity_dirs := %.libs %/src
+# Also, exclude the base directory by default because it's another big jumble
+# of unrelated stuff
+non_unity_dirs := %.libs %/src %src/base $(app_non_unity_dirs)
 
 # Find all of the individual subdirectories
 # We will create a Unity file for each individual subdirectory
@@ -82,10 +84,10 @@ app_unity_srcfiles = $(foreach srcsubdir,$(unity_srcsubdirs),$(call unity_unique
 unity_srcfiles += $(app_unity_srcfiles)
 
 # Pick up all of the additional files in the src directory since we're not unity building those
-files_in_src := $(filter-out %main.C, $(shell find $(APPLICATION_DIR)/src -maxdepth 1 -name "*.C" -type f))
+app_non_unity_srcfiles := $(filter-out %main.C, $(shell find $(non_unity_srcsubdirs) -maxdepth 1 \( -type f -o -type l \) -name "*.C"))
 
 # Override srcfiles
-srcfiles    := $(app_unity_srcfiles) $(if $(non_unity_src_subdirs), $(shell find $(non_unity_srcsubdirs) -name "*.C"),) $(files_in_src)
+srcfiles    := $(app_unity_srcfiles) $(app_non_unity_srcfiles)
 endif
 
 

@@ -65,3 +65,13 @@ A different idea is to compile all of these files together, providing considerab
 The way we achieve this in MOOSE is using the idea of "Unity Builds".  A Unity Build compiles multiple `.C` files together by create a `.C` file that `#include`s all of the other `.C` files.  In MOOSE this happens in a directory called `build/unity_src` in each application / module.
 
 By default this behavior is _on_.  To turn it off you can set `MOOSE_UNITY=false` in your environment.  Further, an application can disable it permanently by putting `MOOSE_UNITY := false` at the top of their Makefile.
+
+In addition you can also keep from unity building individual directories within your project.  By default `src` and `src/base` are not unity built because they generally contain a mix of objects that don't benefit from being built simultaneously.  To add to that list, set the `app_non_unity_dirs` variable in your `Makefile` before the `include` of `app.mk` like so:
+
+```
+app_non_unity_dirs = %/src/contrib/third_party_code %/src/contrib/other_non_unity_dir
+
+include            $(FRAMEWORK_DIR)/app.mk
+```
+
+Make sure to prepend your directories with a `%` sign.
