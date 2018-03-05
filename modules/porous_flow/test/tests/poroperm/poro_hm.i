@@ -119,7 +119,9 @@
   [../]
 
   [./porosity]
-    type = PorousFlowPorosityHM
+    type = PorousFlowPorosity
+    fluid = true
+    mechanical = true
     ensure_positive = false
     porosity_zero = 0.5
     solid_bulk = 0.3

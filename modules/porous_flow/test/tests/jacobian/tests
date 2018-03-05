@@ -453,4 +453,95 @@
     ratio_tol = 1E-7
     difference_tol = 1E10
   [../]
+
+  [./chem01]
+    type = 'PetscJacobianTester'
+    input = 'chem01.i'
+    ratio_tol = 1E-3 # lots of crazy chain rules
+    difference_tol = 1E10
+  [../]
+  [./chem02]
+    type = 'PetscJacobianTester'
+    input = 'chem02.i'
+    ratio_tol = 1E-5 # lots of crazy chain rules
+    difference_tol = 1E10
+  [../]
+  [./chem03]
+    type = 'PetscJacobianTester'
+    input = 'chem03.i'
+    ratio_tol = 1E-6
+    difference_tol = 1E10
+  [../]
+  [./chem04]
+    type = 'PetscJacobianTester'
+    input = 'chem04.i'
+    ratio_tol = 1E-6
+    difference_tol = 1E10
+  [../]
+  [./chem05]
+    type = 'PetscJacobianTester'
+    input = 'chem05.i'
+    ratio_tol = 1E-6
+    difference_tol = 1E10
+  [../]
+  [./chem06]
+    type = 'PetscJacobianTester'
+    input = 'chem06.i'
+    ratio_tol = 1E-4
+    difference_tol = 1E10
+  [../]
+  [./chem07]
+    type = 'PetscJacobianTester'
+    input = 'chem07.i'
+    ratio_tol = 1E-6
+    difference_tol = 1E10
+  [../]
+  [./chem08]
+    type = 'PetscJacobianTester'
+    input = 'chem08.i'
+    ratio_tol = 1E-6
+    difference_tol = 1E10
+  [../]
+  [./chem09]
+    type = 'PetscJacobianTester'
+    input = 'chem09.i'
+    ratio_tol = 1E-6
+    difference_tol = 1E10
+  [../]
+  [./chem10]
+    type = 'PetscJacobianTester'
+    input = 'chem10.i'
+    ratio_tol = 1E-6
+    difference_tol = 1E10
+  [../]
+  [./chem11]
+    type = 'PetscJacobianTester'
+    input = 'chem11.i'
+    ratio_tol = 1E-6
+    difference_tol = 1E10
+  [../]
+  [./chem12]
+    type = 'PetscJacobianTester'
+    input = 'chem12.i'
+    ratio_tol = 1E-6
+    difference_tol = 1E10
+  [../]
+  [./chem13]
+    type = 'PetscJacobianTester'
+    input = 'chem13.i'
+    ratio_tol = 1E-6
+    difference_tol = 1E10
+  [../]
+  [./chem14]
+    type = 'PetscJacobianTester'
+    input = 'chem14.i'
+    ratio_tol = 1E-6
+    difference_tol = 1E10
+  [../]
+  [./chem15]
+    type = 'PetscJacobianTester'
+    input = 'chem15.i'
+    ratio_tol = 1E-6
+    difference_tol = 1E10
+  [../]
 []

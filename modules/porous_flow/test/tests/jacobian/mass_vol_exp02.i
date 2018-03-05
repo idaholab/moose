@@ -176,7 +176,9 @@
     material_property = PorousFlow_fluid_phase_density_nodal
   [../]
   [./porosity]
-    type = PorousFlowPorosityHM
+    type = PorousFlowPorosity
+    fluid = true
+    mechanical = true
     at_nodes = true
     porosity_zero = 0.1
     biot_coefficient = 0.5

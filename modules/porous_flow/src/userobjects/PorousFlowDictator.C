@@ -28,6 +28,16 @@ validParams<PorousFlowDictator>()
                                         "The number of fluid phases in the simulation");
   params.addRequiredParam<unsigned int>("number_fluid_components",
                                         "The number of fluid components in the simulation");
+  params.addParam<unsigned int>("number_aqueous_equilibrium",
+                                0,
+                                "The number of secondary species in the aqueous-equilibrium "
+                                "reaction system.  (Leave as zero if the simulation does not "
+                                "involve chemistry)");
+  params.addParam<unsigned int>("number_aqueous_kinetic",
+                                0,
+                                "The number of secondary species in the aqueous-kinetic reaction "
+                                "system involved in precipitation and dissolution.  (Leave as zero "
+                                "if the simulation does not involve chemistry)");
   return params;
 }
 
@@ -36,7 +46,9 @@ PorousFlowDictator::PorousFlowDictator(const InputParameters & parameters)
     Coupleable(this, false),
     _num_variables(coupledComponents("porous_flow_vars")),
     _num_phases(getParam<unsigned int>("number_fluid_phases")),
-    _num_components(getParam<unsigned int>("number_fluid_components"))
+    _num_components(getParam<unsigned int>("number_fluid_components")),
+    _num_aqueous_equilibrium(getParam<unsigned int>("number_aqueous_equilibrium")),
+    _num_aqueous_kinetic(getParam<unsigned int>("number_aqueous_kinetic"))
 {
   _moose_var_num.resize(_num_variables);
   for (unsigned int i = 0; i < _num_variables; ++i)
@@ -73,6 +85,18 @@ unsigned int
 PorousFlowDictator::numComponents() const
 {
   return _num_components;
+}
+
+unsigned int
+PorousFlowDictator::numAqueousEquilibrium() const
+{
+  return _num_aqueous_equilibrium;
+}
+
+unsigned int
+PorousFlowDictator::numAqueousKinetic() const
+{
+  return _num_aqueous_kinetic;
 }
 
 unsigned int

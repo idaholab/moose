@@ -11,36 +11,52 @@ The simplest case where porosity does not change during the simulation. A single
 value of porosity can be used, or a spatially varying porosity `AuxVariable` can
 be used to define a heterogeneous porosity distribution.
 
-## Strain-dependent porosity
-The porosity can also depend on the mechanical response of the porous medium using
-one of the following materials (depending on the coupled physics)
+## Porosity dependent on total strain, effective porepressure, temperature and/or mineralisation
 
-- Hydro-Mechanical coupling: [`PorousFlowPorosityHM`](/porous_flow/PorousFlowPorosityHM.md)
-- Thermo-Mechanical coupling: [`PorousFlowPorosityTM`](/porous_flow/PorousFlowPorosityTM.md)
-- Hydro-Thermo-Mechanical coupling: [`PorousFlowPorosityTHM`](/porous_flow/PorousFlowPorosityTHM.md)
+Using [`PorousFlowPorosity`](/porous_flow/PorousFlowPorosity.md) with appropriately set flags, porosity can depend on:
+
+ - total strain, with `mechanical = true`
+ - effective porepressure, with `fluid = true`
+ - temperature, with `thermal = true`
+ - precipitated minerals, with `chemical = true`
+
+A combination of these may be used, to simulate, for instance, THM or HM coupling.
 
 ##Evolution of porosity
 The evolution of the porosity is governed by \citep{chen2009}
 \begin{equation}
-\frac{\partial \phi}{\partial t} = (\alpha_{B} -
-\phi)\frac{\partial}{\partial t}
-\left(\epsilon^{\mathrm{total}}_{ii} - \alpha_{T} T\right) +
-\frac{(1-\alpha_{B})(\alpha_{B}-\phi)}{K}\frac{\partial
-  P_{f}}{\partial t} \ .
+\frac{\partial}{\partial t}(\phi + M) = (\alpha_{B} -
+(\phi + M))\frac{\partial}{\partial t}
+\left(\epsilon^{\mathrm{total}}_{ii} - \alpha_{T} T +
+\frac{1-\alpha_{B}}{K} 
+P_{\mathrm{f}} \right) \ .
 \label{eq:phi_dog}
 \end{equation}
 Here $K$ is the bulk modulus of the drained porous skeleton: $1/K
-= \delta_{ij}\delta_{kl}C_{ijkl}$.  Also $\alpha_{T}$ is the volumetric coefficient of thermal expansion.  This has solution
+= \delta_{ij}\delta_{kl}C_{ijkl}$.  Also $\alpha_{T}$ is the volumetric coefficient of thermal expansion.  $M$ denotes the total precipitated mineral concentration:
 \begin{equation}
-\phi = \alpha_{B} + (\phi_{0} - \alpha_{B})\times \exp \left( \frac{\alpha_{B}
+M = \sum_{\mathrm{minerals}}w_{\mathrm{mineral}} C_{\mathrm{mineral}} \ ,
+\end{equation}
+where $w$ is the user-defined weight for each mineral and $C$ is the concentration (m$^{3}$/m$^{3}$) of precipitated mineral.
+
+The equation for porosity has solution
+\begin{equation}
+\phi + M = \alpha_{B} + (\phi_{0} + M_{\mathrm{ref}} - \alpha_{B})\times \exp \left( \frac{\alpha_{B}
   - 1}{K}(P_{f} - P_{f}^{\mathrm{ref}}) - \epsilon^{\mathrm{total}}_{ii} + \alpha_{T}(T - T^{\mathrm{ref}}) \right) \ ,
 \label{eq:poro_evolve}
 \end{equation}
-where $\phi_{0}$ is the porosity at zero porepressure, zero elastic
-strain and zero temperature. Note this porosity can become negative,
+where $\phi_{0}$ is the porosity at reference porepressure, zero elastic
+strain, reference temperature and reference mineral concentration.
+Note this porosity can become negative,
 and an option for ensuring positivity is detailed below.
 
-Without porepressure effects, the correct expression for porosity as a
+With mineralisation, $\phi$ now depends on total mineral concentration, $M$.  However, the evolution of $M$ is governed by $\dot{M} = \phi I$, where $I$ is a reaction rate which is independent of porosity (but dependent on the primary chemical species, temperature, etc).  Therefore a circular dependency exists: $\phi$ depends on $M$, and $M$ depends on $\phi$.  This could be broken by promoting porosity to a MOOSE Variable, and solving for it.  Instead, PorousFlow replaces $M$ in Eq. \eqref{eq:poro_evolve} by the approximate form
+\begin{equation}
+M \rightarrow M_{\mathrm{old}} + \phi_{\mathrm{old}} I \mathrm{d}t \ .
+\end{equation}
+Note that the *old* value of porosity is used on the right-hand-side, which breaks the cyclic dependency problem.
+
+Without porepressure and mineralisation effects, the correct expression for porosity as a
 function of volumetric strain and temperature is
 \begin{equation}
 \phi = 1 + (\phi_{0} - 1)\times \exp \left(-
@@ -48,7 +64,7 @@ function of volumetric strain and temperature is
 \label{eq:poroTM_evolve}
 \end{equation}
 
-These expressions may be modified to include theeffects of plasticity.
+These expressions may be modified to include the effects of plasticity.
 
 The exponential expressions Eq. \eqref{eq:poro_evolve} and Eq. \eqref{eq:poroTM_evolve} can yield
 negative porosity values, which are unphysical.  To ensure positivity
@@ -87,7 +103,7 @@ continuity at $x=0$.
 its derivative is $\phi' = B - A$, as desired from continuity of the
 derivative at $x=0$.
 
-##Evolution of porosity for an isothermal situation
+##Evolution of porosity for an isothermal, mineral-free, situation
 
 The evolution of porosity is fundamental to the coupling between flow
 and solid mechanics.  Consider the isothermal situation with no
@@ -213,6 +229,30 @@ yields
   \phi)}{K}\frac{\partial P_{\mathrm{f}}}{\partial t} \ ,
 \end{equation}
 as written in Eq. \eqref{eq:phi_dog}.
+
+## Evolution of porosity due to mineral precipitation
+
+Consider now the case without any fluid porepressure or temperature, but with mineral precipitation.
+
+The concentration of a mineral species, $C_{\mathrm{m}}$ is defined to
+be $V_{\mathrm{m}}/V$, where the numerator is the volume of the
+mineral species and the denominator is the reference volume.  Suppose
+that $V = V_{\mathrm{m}} + V_{\mathrm{f}}$ and the definition of
+porosity is $\phi = V_{\mathrm{f}}/V$.
+
+Now consider volume changes via $\dot{V} = \dot{\epsilon}V$ (where
+$\epsilon$ is the volumetric strain) and changes in the volume of
+mineral, $\dot{V}_{\mathrm{m}}$.  Under these changes, the porosity
+evolves as
+\begin{equation}
+\dot{\phi} = \frac{\dot{V}_\mathrm{f}}{V} - \frac{V_\mathrm{f}\dot{V}}{V^{2}} = \frac{\dot{V}-\dot{V}_{\mathrm{m}}}{V} - \phi\dot{\epsilon}
+\end{equation}
+This yields, after a little algebra,
+\begin{equation}
+\dot{\phi} + \dot{C}_{\mathrm{m}} = \left(1 - (\phi + C_{\mathrm{m}}) \right) \dot{\epsilon} \ ,
+\end{equation}
+as written in Eq. \eqref{eq:phi_dog}.
+
 
 ##References
 \bibliographystyle{unsrt}
