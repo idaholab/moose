@@ -92,12 +92,13 @@ FluidProperties3EqnMaterial::computeQpProperties()
   _de_drhouA[_qp] = RELAP7::de_darhouA(_rhoA[_qp], _rhouA[_qp]);
   _de_drhoEA[_qp] = RELAP7::de_darhoEA(_rhoA[_qp]);
 
-  _p[_qp] = _fp.pressure(_v[_qp], _e[_qp]);
-  _T[_qp] = _fp.temperature(_v[_qp], _e[_qp]);
+  _p[_qp] = _fp.p_from_v_e(_v[_qp], _e[_qp]);
+  Real p, dp_dv, dp_de;
+  _fp.p_from_v_e(_v[_qp], _e[_qp], p, dp_dv, dp_de);
 
-  Real dp_dv, dp_de;
-  Real dT_dv, dT_de;
-  _fp.dp_duv(_v[_qp], _e[_qp], dp_dv, dp_de, dT_dv, dT_de);
+  _T[_qp] = _fp.T_from_v_e(_v[_qp], _e[_qp]);
+  Real T, dT_dv, dT_de;
+  _fp.T_from_v_e(_v[_qp], _e[_qp], T, dT_dv, dT_de);
 
   _dp_drhoA[_qp] = dp_dv * _dv_drhoA[_qp] + dp_de * _de_drhoA[_qp];
   _dp_drhouA[_qp] = dp_de * _de_drhouA[_qp];
@@ -121,9 +122,9 @@ FluidProperties3EqnMaterial::computeQpProperties()
   _dH_drhouA[_qp] = _dh_drhouA[_qp] + _vel[_qp] * _dvel_drhouA[_qp];
   _dH_drhoEA[_qp] = _dh_drhoEA[_qp];
 
-  _c[_qp] = _fp.c(_v[_qp], _e[_qp]);
-  _cp[_qp] = _fp.cp(_v[_qp], _e[_qp]);
-  _cv[_qp] = _fp.cv(_v[_qp], _e[_qp]);
-  _mu[_qp] = _fp.mu(_v[_qp], _e[_qp]);
-  _k[_qp] = _fp.k(_v[_qp], _e[_qp]);
+  _c[_qp] = _fp.c_from_v_e(_v[_qp], _e[_qp]);
+  _cp[_qp] = _fp.cp_from_v_e(_v[_qp], _e[_qp]);
+  _cv[_qp] = _fp.cv_from_v_e(_v[_qp], _e[_qp]);
+  _mu[_qp] = _fp.mu_from_v_e(_v[_qp], _e[_qp]);
+  _k[_qp] = _fp.k_from_v_e(_v[_qp], _e[_qp]);
 }
