@@ -124,7 +124,9 @@
   [../]
 
   [./porosity]
-    type = PorousFlowPorosityTM
+    type = PorousFlowPorosity
+    mechanical = true
+    thermal = true
     ensure_positive = false
     porosity_zero = 0.5
     thermal_expansion_coeff = 0.5

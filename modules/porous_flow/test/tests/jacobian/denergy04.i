@@ -154,7 +154,10 @@
     type = PorousFlowVolumetricStrain
   [../]
   [./porosity]
-    type = PorousFlowPorosityTHM
+    type = PorousFlowPorosity
+    fluid = true
+    mechanical = true
+    thermal = true
     ensure_positive = false
     at_nodes = true
     porosity_zero = 0.7

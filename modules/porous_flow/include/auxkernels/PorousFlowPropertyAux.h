@@ -59,6 +59,15 @@ private:
   /// Internal energy of each phase
   const MaterialProperty<std::vector<Real>> * _internal_energy;
 
+  /// Secondary-species concentration
+  const MaterialProperty<std::vector<Real>> * _sec_conc;
+
+  /// Mineral-species concentration
+  const MaterialProperty<std::vector<Real>> * _mineral_conc;
+
+  /// Mineral-species reacion rate
+  const MaterialProperty<std::vector<Real>> * _mineral_reaction_rate;
+
   /// PorousFlow Dictator UserObject
   const PorousFlowDictator & _dictator;
 
@@ -72,14 +81,23 @@ private:
     MASS_FRACTION,
     RELPERM,
     ENTHALPY,
-    INTERNAL_ENERGY
+    INTERNAL_ENERGY,
+    SECONDARY_CONCENTRATION,
+    MINERAL_CONCENTRATION,
+    MINERAL_REACTION_RATE
   } _property_enum;
 
   /// Phase index
-  unsigned int _phase;
+  const unsigned int _phase;
 
-  /// Fluid omponent index
-  unsigned int _fluid_component;
+  /// Fluid component index
+  const unsigned int _fluid_component;
+
+  /// Secondary species number
+  const unsigned int _secondary_species;
+
+  /// Mineral species number
+  const unsigned int _mineral_species;
 };
 
 #endif // POROUSFLOWPROPERTYAUX_H

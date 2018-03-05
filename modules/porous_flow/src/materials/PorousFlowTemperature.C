@@ -50,7 +50,7 @@ PorousFlowTemperature::PorousFlowTemperature(const InputParameters & parameters)
 void
 PorousFlowTemperature::initQpStatefulProperties()
 {
-  _temperature[_qp] = _temperature_var[_qp];
+  computeQpProperties();
 }
 
 void

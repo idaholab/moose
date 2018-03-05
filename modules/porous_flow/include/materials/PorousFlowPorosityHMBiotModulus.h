@@ -10,7 +10,7 @@
 #ifndef POROUSFLOWPOROSITYHMBIOTMODULUS_H
 #define POROUSFLOWPOROSITYHMBIOTMODULUS_H
 
-#include "PorousFlowPorosityHM.h"
+#include "PorousFlowPorosity.h"
 
 // Forward Declarations
 class PorousFlowPorosityHMBiotModulus;
@@ -24,10 +24,10 @@ InputParameters validParams<PorousFlowPorosityHMBiotModulus>();
  * Even though a constant BiotModulus is not strictly correct, many
  * analytical solutions of poroelasticity theory assume this, so
  * PorousFlowPorosityHMBiotModulus is useful for comparing with those solutions.
- * Otherwise it shouldn't generally be used because PorousFlowPorosityHM
+ * Otherwise it shouldn't generally be used because PorousFlowPorosity
  * is physically more correct.
  */
-class PorousFlowPorosityHMBiotModulus : public PorousFlowPorosityHM
+class PorousFlowPorosityHMBiotModulus : public PorousFlowPorosity
 {
 public:
   PorousFlowPorosityHMBiotModulus(const InputParameters & parameters);

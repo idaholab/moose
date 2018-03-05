@@ -174,7 +174,10 @@
     type = ComputeLinearElasticStress
   [../]
   [./porosity]
-    type = PorousFlowPorosityTHM
+    type = PorousFlowPorosity
+    thermal = true
+    fluid = true
+    mechanical = true
     ensure_positive = false
     at_nodes = true
     biot_coefficient = 1.0
@@ -183,7 +186,10 @@
     solid_bulk = 2
   [../]
   [./porosity_qp]
-    type = PorousFlowPorosityTHM
+    type = PorousFlowPorosity
+    thermal = true
+    fluid = true
+    mechanical = true
     ensure_positive = false
     porosity_zero = 0.5
     biot_coefficient = 1.0
