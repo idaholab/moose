@@ -39,6 +39,8 @@ public:
    */
   TableOutput(const InputParameters & parameters);
 
+  void clear();
+
 protected:
   /**
    * Populates the tables with scalar aux variables
