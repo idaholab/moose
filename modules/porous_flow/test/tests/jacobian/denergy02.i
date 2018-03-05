@@ -154,7 +154,9 @@
     type = PorousFlowVolumetricStrain
   [../]
   [./porosity]
-    type = PorousFlowPorosityHM
+    type = PorousFlowPorosity
+    fluid = true
+    mechanical = true
     at_nodes = true
     porosity_zero = 0.7
     biot_coefficient = 0.9

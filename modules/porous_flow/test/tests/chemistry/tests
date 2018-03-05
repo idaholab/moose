@@ -1,0 +1,128 @@
+[Tests]
+  [./except1]
+    type = RunException
+    input = except1.i
+    expect_err = 'PorousFlowMassFractionAqueousEquilibriumChemistry: The number of secondary activity coefficients is 1 which must be equal to the number of secondary species \(2\)'
+  [../]
+  [./except2]
+    type = RunException
+    input = except2.i
+    expect_err = 'The Dictator proclaims that the number of phases is 2 whereas PorousFlow1PhaseFullySaturated can only be used for 1-phase simulations. Be aware that the Dictator has noted your mistake.'
+  [../]
+  [./except3]
+    type = RunException
+    input = except3.i
+    expect_err = 'PorousFlowMassFractionAqueousEquilibriumChemistry: The number of mass_fraction_vars is 2 which must be one greater than the number of primary concentrations \(which is 2\)'
+  [../]
+  [./except5]
+    type = RunException
+    input = except5.i
+    expect_err = 'PorousFlowMassFractionAqueousEquilibriumChemistry: The number of equilibrium constants is 1 which must be equal to the number of reactions \(2\)'
+  [../]
+  [./except6]
+    type = RunException
+    input = except6.i
+    expect_err = 'PorousFlowMassFractionAqueousEquilibriumChemistry: The number of primary activity coefficients is 1 which must be equal to the number of primary species \(2\)'
+  [../]
+  [./except7]
+    type = RunException
+    input = except7.i
+    expect_err = 'PorousFlowMassFractionAqueousEquilibriumChemistry: The number of stoichiometric coefficients specified in \'reactions\' \(2\) must be equal to the number of reactions \(2\) multiplied by the number of primary species \(2\)'
+  [../]
+  [./except8]
+    type = RunException
+    input = except8.i
+    expect_err = 'PorousFlowAqueousPreDisChemistry: The number of specific reactive surface areas provided is 2 which must be equal to the number of reactions \(1\)'
+  [../]
+  [./except9]
+    type = RunException
+    input = except9.i
+    expect_err = 'PorousFlowAqueousPreDisChemistry: The number of kinetic rate constants is 2 which must be equal to the number of reactions \(1\)'
+  [../]
+  [./except10]
+    type = RunException
+    input = except10.i
+    expect_err = 'PorousFlowAqueousPreDisChemistry: The number of activation energies is 2 which must be equal to the number of reactions \(1\)'
+  [../]
+  [./except11]
+    type = RunException
+    input = except11.i
+    expect_err = 'PorousFlowAqueousPreDisChemistry: The number of molar volumes is 2 which must be equal to the number of reactions \(1\)'
+  [../]
+  [./except12]
+    type = RunException
+    input = except12.i
+    expect_err = 'PorousFlowAqueousPreDisChemistry: The number of theta exponents is 2 which must be equal to the number of reactions \(1\)'
+  [../]
+  [./except13]
+    type = RunException
+    input = except13.i
+    expect_err = 'PorousFlowAqueousPreDisChemistry: The number of eta exponents is 2 which must be equal to the number of reactions \(1\)'
+  [../]
+  [./except14]
+    type = RunException
+    input = except14.i
+    expect_err = 'PorousFlowAqueousPreDisMineral: The number of initial concentrations is 2 but the Dictator knows that the number of aqueous kinetic \(precipitation-dissolution\) reactions is 1'
+  [../]
+  [./except15]
+    type = RunException
+    input = except15.i
+    expect_err = 'The Dictator proclaims that the number of precipitation-dissolution secondary species in this simulation is 1 whereas you have provided 2 densities of the secondary species to PorousFlowPreDis.  The Dictator does not take such mistakes lightly'
+  [../]
+  [./except16]
+    type = RunException
+    input = except16.i
+    expect_err = 'The Dictator proclaims that the number of precipitation-dissolution secondary species in this simulation is 1 whereas you have provided 2 stoichiometric coefficients to PorousFlowPreDis.  The Dictator does not take such mistakes lightly'
+  [../]
+  [./except17]
+    type = RunException
+    input = except17.i
+    expect_err = 'PorousFlowMassFractionAqueousEquilibriumChemistry: You have specified the number of reactions to be 2 but the Dictator knows that the number of aqueous equilibrium reactions is 0'
+  [../]
+  [./except18]
+    type = RunException
+    input = except18.i
+    expect_err = 'PorousFlowAqueousPreDisChemistry: You have specified the number of reactions to be 1 but the Dictator knows that the number of aqueous kinetic \(precipitation-dissolution\) reactions is 0'
+  [../]
+  [./except19]
+    type = RunException
+    input = except19.i
+    expect_err = 'PorousFlowPorosity: When chemical=true you must provide the initial_mineral_concentrations.  The Dictator proclaims there should be 1 of these'
+  [../]
+  [./except20]
+    type = RunException
+    input = except20.i
+    expect_err = 'PorousFlowPorosity: When chemical=true you must provide the reference_chemistry values.  The Dictator proclaims there should be 1 of these'
+  [../]
+
+  [./precipitation]
+    type = CSVDiff
+    input = precipitation.i
+    csvdiff = precipitation_out.csv
+  [../]
+  [./precipitation_porosity_change]
+    type = CSVDiff
+    input = precipitation_porosity_change.i
+    csvdiff = precipitation_porosity_change_out.csv
+  [../]
+  [./dissolution]
+    type = CSVDiff
+    input = dissolution.i
+    csvdiff = dissolution_out.csv
+  [../]
+  [./dissolution_limited]
+    type = CSVDiff
+    input = dissolution_limited.i
+    csvdiff = dissolution_limited_out.csv
+  [../]
+  [./2species_equilibrium]
+    type = Exodiff
+    input = 2species_equilibrium.i
+    exodiff = 2species_equilibrium_out.e
+  [../]
+  [./2species_predis]
+    type = Exodiff
+    input = 2species_predis.i
+    exodiff = 2species_predis_out.e
+  [../]
+[]
