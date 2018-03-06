@@ -33,5 +33,5 @@ SpecificEnthalpyAux::SpecificEnthalpyAux(const InputParameters & parameters)
 Real
 SpecificEnthalpyAux::computeValue()
 {
-  return _fp.h(_pressure[_qp], _temperature[_qp]);
+  return _fp.h_from_p_T(_pressure[_qp], _temperature[_qp]);
 }

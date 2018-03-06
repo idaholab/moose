@@ -56,5 +56,5 @@ TwoPhaseFluidProperties::getVaporName() const
 Real
 TwoPhaseFluidProperties::h_lat(Real p, Real T) const
 {
-  return _fp_vapor->h(p, T) - _fp_liquid->h(p, T);
+  return _fp_vapor->h_from_p_T(p, T) - _fp_liquid->h_from_p_T(p, T);
 }

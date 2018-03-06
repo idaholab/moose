@@ -12,9 +12,9 @@
     ratio_tol = 1e-6
     difference_tol = 1e-6
   [../]
-  [./c_from_v_h_derivatives]
+  [./e_from_v_h_derivatives]
     type = PetscJacobianTester
-    input = 'c_from_v_h_derivatives.i'
+    input = 'e_from_v_h_derivatives.i'
     cli_args = '--allow-test-objects'
     ratio_tol = 1e-6
     difference_tol = 1e-6
