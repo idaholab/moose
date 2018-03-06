@@ -513,6 +513,14 @@ namespace Moose
 void
 registerObjects(Factory & factory)
 {
+  registerObjects(factory, {"MooseApp", factory.app().name()});
+}
+
+void
+registerObjects(Factory & factory, const std::set<std::string> & obj_labels)
+{
+  Registry::registerObjectsTo(factory, obj_labels);
+
   // mesh
   registerMesh(FileMesh);
   registerMesh(GeneratedMesh);
@@ -1151,9 +1159,19 @@ addActionTypes(Syntax & syntax)
  *       object with a star or a more specific parent later on. (i.e. where one needs to negate the
  *       '*' matching prematurely).
  */
+
 void
 registerActions(Syntax & syntax, ActionFactory & action_factory)
 {
+  registerActions(syntax, action_factory, {"MooseApp", action_factory.app().type()});
+}
+
+void
+registerActions(Syntax & syntax,
+                ActionFactory & action_factory,
+                const std::set<std::string> & obj_labels)
+{
+  Registry::registerActionsTo(action_factory, obj_labels);
 
 #undef registerAction
 #define registerAction(tplt, action)                                                               \

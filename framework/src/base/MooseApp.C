@@ -33,6 +33,7 @@
 #include "JsonInputFileFormatter.h"
 #include "SONDefinitionFormatter.h"
 #include "RelationshipManager.h"
+#include "Registry.h"
 
 // Regular expression includes
 #include "pcrecpp.h"
@@ -258,6 +259,8 @@ MooseApp::MooseApp(InputParameters parameters)
     _multiapp_number(
         isParamValid("_multiapp_number") ? parameters.get<unsigned int>("_multiapp_number") : 0)
 {
+  Registry::addKnownLabel(_type);
+
   if (isParamValid("_argc") && isParamValid("_argv"))
   {
     int argc = getParam<int>("_argc");
@@ -272,6 +275,12 @@ MooseApp::MooseApp(InputParameters parameters)
 
   if (_check_input && isParamValid("recover"))
     mooseError("Cannot run --check-input with --recover. Recover files might not exist");
+}
+
+void
+MooseApp::checkRegistryLabels()
+{
+  Registry::checkLabels();
 }
 
 MooseApp::~MooseApp()

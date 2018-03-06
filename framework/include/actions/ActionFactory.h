@@ -42,7 +42,7 @@ class MooseApp;
 /**
  * Typedef for function to build objects
  */
-typedef std::shared_ptr<Action> (*buildActionPtr)(InputParameters parameters);
+typedef std::shared_ptr<Action> (*buildActionPtr)(const InputParameters & parameters);
 
 /**
  * Typedef for validParams
@@ -54,7 +54,7 @@ typedef InputParameters (*paramsActionPtr)();
  */
 template <class T>
 std::shared_ptr<Action>
-buildAction(InputParameters parameters)
+buildAction(const InputParameters & parameters)
 {
   return std::make_shared<T>(parameters);
 }
@@ -69,21 +69,23 @@ public:
 
   virtual ~ActionFactory();
 
+  MooseApp & app() { return _app; }
+
   template <typename T>
   void reg(const std::string & name,
            const std::string & task,
            const std::string & file = "",
            int line = -1)
   {
-    BuildInfo build_info;
-    build_info._build_pointer = &buildAction<T>;
-    build_info._params_pointer = &validParams<T>;
-    build_info._task = task;
-    build_info._unique_id = _unique_id++;
-    _name_to_build_info.insert(std::make_pair(name, build_info));
-    _task_to_action_map.insert(std::make_pair(task, name));
-    _name_to_line.addInfo(name, task, file, line);
+    reg(name, task, &buildAction<T>, &validParams<T>, file, line);
   }
+
+  void reg(const std::string & name,
+           const std::string & task,
+           buildActionPtr obj_builder,
+           paramsActionPtr ref_params,
+           const std::string & file = "",
+           int line = -1);
 
   /**
    * Gets file and line information where an action was registered.
@@ -106,7 +108,6 @@ public:
     buildActionPtr _build_pointer;
     paramsActionPtr _params_pointer;
     std::string _task;
-    unsigned int _unique_id;
   };
 
   /// Typedef for registered Action iterator
@@ -132,9 +133,6 @@ protected:
 
   FileLineInfoMap _name_to_line;
   std::multimap<std::string, std::string> _task_to_action_map;
-
-  // TODO: I don't think we need this anymore
-  static unsigned int _unique_id; ///< Unique ID for identifying multiple registrations
 };
 
 #endif /* ACTIONFACTORY_H */

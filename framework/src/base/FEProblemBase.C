@@ -759,6 +759,8 @@ FEProblemBase::initialSetup()
     for (THREAD_ID tid = 0; tid < n_threads; ++tid)
       _assembly[tid]->initNonlocalCoupling();
   }
+
+  _app.checkRegistryLabels();
 }
 
 void

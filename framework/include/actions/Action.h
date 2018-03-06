@@ -12,6 +12,7 @@
 
 #include "InputParameters.h"
 #include "ConsoleStreamInterface.h"
+#include "Registry.h"
 
 #include <string>
 #include <ostream>
