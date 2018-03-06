@@ -103,8 +103,8 @@ AuxKernel::AuxKernel(const InputParameters & parameters)
     _u_older(_nodal ? _var.nodalValueOlder() : _var.slnOlder()),
     _test(_var.phi()),
 
-    _current_elem(_var.currentElem()),
-    _current_side(_var.currentSide()),
+    _current_elem(_assembly.elem()),
+    _current_side(_assembly.side()),
     _current_elem_volume(_assembly.elemVolume()),
     _current_side_volume(_assembly.sideElemVolume()),
 
