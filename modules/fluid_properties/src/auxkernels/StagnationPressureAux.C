@@ -40,10 +40,10 @@ StagnationPressureAux::computeValue()
   const Real v = _specific_volume[_qp];
   const Real e = _specific_internal_energy[_qp];
   const Real u = _velocity[_qp];
-  const Real p = _fp.pressure(v, e);
+  const Real p = _fp.p_from_v_e(v, e);
 
   // static entropy is equal to stagnation entropy by definition of the stagnation state
-  const Real s = _fp.s(v, e);
+  const Real s = _fp.s_from_v_e(v, e);
 
   // stagnation enthalpy
   const Real h0 = e + p * v + 0.5 * u * u;

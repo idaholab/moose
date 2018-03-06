@@ -47,7 +47,7 @@ NSInitialCondition::NSInitialCondition(const InputParameters & parameters)
 Real
 NSInitialCondition::value(const Point & /*p*/)
 {
-  const Real rho_initial = _fp.rho(_initial_pressure, _initial_temperature);
+  const Real rho_initial = _fp.rho_from_p_T(_initial_pressure, _initial_temperature);
 
   // TODO: The internal energy could be computed by the IdealGasFluidProperties.
   const Real e_initial = _fp.cv() * _initial_temperature;
@@ -61,7 +61,7 @@ NSInitialCondition::value(const Point & /*p*/)
     return e_initial;
 
   if (_var.name() == NS::mach_number)
-    return _initial_velocity.norm() / _fp.c(v_initial, e_initial);
+    return _initial_velocity.norm() / _fp.c_from_v_e(v_initial, e_initial);
 
   if (_var.name() == NS::pressure)
     return _initial_pressure;

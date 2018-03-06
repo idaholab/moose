@@ -282,7 +282,7 @@ NavierStokesMaterial::computeTau(unsigned int qp)
 
   // The speed of sound for an ideal gas, sqrt(gamma * R * T).  Not needed unless
   // we want to use a form of Tau that requires it.
-  // Real soundspeed = _fp.c(_specific_volume[_qp], _internal_energy[_qp]);
+  // Real soundspeed = _fp.c_from_v_e(_specific_volume[_qp], _internal_energy[_qp]);
 
   // If velmag == 0, then _hsupg should be zero as well.  Then tau
   // will have only the time-derivative contribution (or zero, if we
