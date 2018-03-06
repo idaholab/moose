@@ -132,11 +132,12 @@
   [../]
   [./cracking_stress]
     type = ComputeSmearedCrackingStress
-    cracking_release = exponential
     shear_retention_factor = 0.1
     cracking_stress = 3.e9
-#    max_cracks = 1
-#    prescribed_crack_directions = y
+    softening_models = exponential_softening
+  [../]
+  [./exponential_softening]
+    type = ExponentialSoftening
   [../]
 []
 

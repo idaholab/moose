@@ -97,11 +97,14 @@
   [../]
   [./elastic_stress]
     type = ComputeSmearedCrackingStress
-    cracking_release = exponential
     cracking_stress = 120
-    cracking_residual_stress = 0.1
-    cracking_beta = 0.1
     shear_retention_factor = 0.1
+    softening_models = exponential_softening
+  [../]
+  [./exponential_softening]
+    type = ExponentialSoftening
+    residual_stress = 0.1
+    beta = 0.1
   [../]
 []
 

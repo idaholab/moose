@@ -90,7 +90,11 @@
   [./elastic_stress]
     type = ComputeSmearedCrackingStress
     cracking_stress = cracking_stress_fn
-    cracking_residual_stress = 0.0
+    softening_models = abrupt_softening
+  [../]
+  [./abrupt_softening]
+    type = AbruptSoftening
+    residual_stress = 0.0
   [../]
 []
 

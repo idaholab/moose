@@ -62,10 +62,6 @@
   [./elastic_stress]
     type = ComputeSmearedCrackingStress
     cracking_stress = 1.68e6
-    softening_models = abrupt_softening
-  [../]
-  [./abrupt_softening]
-    type = AbruptSoftening
   [../]
 []
 
@@ -89,4 +85,5 @@
 
 [Outputs]
   exodus = true
+  file_base = cracking_out
 []
