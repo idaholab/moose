@@ -250,6 +250,8 @@ $(eval $(call CXX_RULE_TEMPLATE,_with$(app_LIB_SUFFIX)))
 
 ifeq ($(BUILD_EXEC),yes)
   all:: $(app_EXEC)
+else
+  all:: $(app_LIB)
 endif
 
 BUILD_EXEC :=
@@ -262,7 +264,7 @@ $(app_HEADER): curr_dir    := $(APPLICATION_DIR)
 $(app_HEADER): curr_app    := $(APPLICATION_NAME)
 $(app_HEADER): all_header_dir := $(all_header_dir)
 $(app_HEADER): $(app_HEADER_deps)
-	@echo "MOOSE Checking if header needs updating: "$@"..."
+	@echo "Checking if header needs updating: "$@"..."
 	$(shell $(FRAMEWORK_DIR)/scripts/get_repo_revision.py $(curr_dir) $@ $(curr_app))
 	@ln -sf $@ $(all_header_dir)
 
