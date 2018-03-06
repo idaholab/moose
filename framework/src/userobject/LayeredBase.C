@@ -61,6 +61,7 @@ LayeredBase::LayeredBase(const InputParameters & parameters)
     _direction(_direction_enum),
     _sample_type(parameters.get<MooseEnum>("sample_type")),
     _average_radius(parameters.get<unsigned int>("average_radius")),
+    _using_displaced_mesh(_layered_base_params.get<bool>("use_displaced_mesh")),
     _layered_base_subproblem(*parameters.getCheckedPointerParam<SubProblem *>("_subproblem")),
     _cumulative(parameters.get<bool>("cumulative"))
 {
@@ -220,6 +221,13 @@ LayeredBase::getLayerValue(unsigned int layer) const
 void
 LayeredBase::initialize()
 {
+  if (_using_displaced_mesh)
+  {
+    BoundingBox bounding_box = MeshTools::create_bounding_box(_layered_base_subproblem.mesh());
+    _direction_min = bounding_box.min()(_direction);
+    _direction_max = bounding_box.max()(_direction);
+  }
+
   for (unsigned int i = 0; i < _layer_values.size(); i++)
   {
     _layer_values[i] = 0.0;
