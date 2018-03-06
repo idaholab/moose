@@ -191,7 +191,7 @@ MultiAppUserObjectTransfer::execute()
           continue;
 
         Point app_position = _multi_app->position(i);
-        BoundingBox app_box = _multi_app->getBoundingBox(i);
+        BoundingBox app_box = _multi_app->getBoundingBox(i, _displaced_source_mesh);
         const UserObject & user_object = _multi_app->appUserObjectBase(i, _user_object_name);
 
         if (is_nodal)
