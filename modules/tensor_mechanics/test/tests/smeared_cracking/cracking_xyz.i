@@ -83,8 +83,11 @@
   [../]
   [./elastic_stress]
     type = ComputeSmearedCrackingStress
-    cracking_release = exponential
     cracking_stress = 119.3e6
+    softening_models = exponential_softening
+  [../]
+  [./exponential_softening]
+    type = ExponentialSoftening
   [../]
 []
 
