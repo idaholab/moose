@@ -1,9 +1,11 @@
-/****************************************************************/
-/* MOOSE - Multiphysics Object Oriented Simulation Environment  */
-/*                                                              */
-/*          All contents are licensed under LGPL V2.1           */
-/*             See LICENSE for full restrictions                */
-/****************************************************************/
+//* This file is part of the MOOSE framework
+//* https://www.mooseframework.org
+//*
+//* All rights reserved, see COPYRIGHT for full restrictions
+//* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+//*
+//* Licensed under LGPL 2.1, please see LICENSE for details
+//* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "MeshCut3DUserObject.h"
 
@@ -175,11 +177,11 @@ MeshCut3DUserObject::cutElementByGeometry(const Elem * elem,
     {
       elem_cut = true;
       Xfem::CutFace mycut;
-      mycut.face_id = i;
-      mycut.face_edge.push_back(cut_edges[0]);
-      mycut.face_edge.push_back(cut_edges[1]);
-      mycut.position.push_back(cut_pos[0]);
-      mycut.position.push_back(cut_pos[1]);
+      mycut._face_id = i;
+      mycut._face_edge.push_back(cut_edges[0]);
+      mycut._face_edge.push_back(cut_edges[1]);
+      mycut._position.push_back(cut_pos[0]);
+      mycut._position.push_back(cut_pos[1]);
       cut_faces.push_back(mycut);
     }
   }
@@ -395,8 +397,8 @@ MeshCut3DUserObject::findBoundaryEdges()
 
           if (node1 > node2)
             std::swap(node1, node2);
-          ce.id1 = node1;
-          ce.id2 = node2;
+          ce._id1 = node1;
+          ce._id2 = node2;
 
           _boundary_edges.insert(ce);
         }
@@ -453,8 +455,8 @@ MeshCut3DUserObject::findBoundaryEdges()
 
         if (node1 > node2)
           std::swap(node1, node2);
-        ce.id1 = node1;
-        ce.id2 = node2;
+        ce._id1 = node1;
+        ce._id2 = node2;
 
         _boundary_edges.insert(ce);
       }
@@ -463,7 +465,7 @@ MeshCut3DUserObject::findBoundaryEdges()
         // this is not a boundary edge; remove it from existing edge list
         for (auto it = _boundary_edges.begin(); it != _boundary_edges.end();)
         {
-          if ((*it).id1 == node1 && (*it).id2 == node2)
+          if ((*it)._id1 == node1 && (*it)._id2 == node2)
             it = _boundary_edges.erase(it);
           else
             ++it;
@@ -480,8 +482,8 @@ MeshCut3DUserObject::sortBoundaryNodes()
 
   for (auto it = _boundary_edges.begin(); it != _boundary_edges.end(); ++it)
   {
-    dof_id_type node1 = (*it).id1;
-    dof_id_type node2 = (*it).id2;
+    dof_id_type node1 = (*it)._id1;
+    dof_id_type node2 = (*it)._id2;
 
     mooseAssert(_boundary_map.find(node1) != _boundary_map.end(),
                 "_boundary_map does not have this key");
@@ -503,8 +505,8 @@ MeshCut3DUserObject::sortBoundaryNodes()
   }
 
   auto it2 = _boundary_edges.begin();
-  dof_id_type node1 = (*it2).id1;
-  dof_id_type node2 = (*it2).id2;
+  dof_id_type node1 = (*it2)._id1;
+  dof_id_type node2 = (*it2)._id2;
   _boundary.push_back(node1);
   _boundary.push_back(node2);
 

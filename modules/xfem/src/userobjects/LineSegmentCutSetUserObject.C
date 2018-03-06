@@ -81,6 +81,9 @@ LineSegmentCutSetUserObject::LineSegmentCutSetUserObject(const InputParameters &
     _cut_time_ranges.push_back(
         std::make_pair(_cut_data[i * line_cut_data_len + 4], _cut_data[i * line_cut_data_len + 5]));
   }
+
+  if (_cut_line_endpoints.size() != _cut_time_ranges.size())
+    mooseError("Number of start/end times must match number of cut line endpoint sets");
 }
 
 const std::vector<Point>

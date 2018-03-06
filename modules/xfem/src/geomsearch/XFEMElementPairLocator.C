@@ -9,7 +9,7 @@
 
 #include "XFEMElementPairLocator.h"
 
-XFEMElementPairLocator::XFEMElementPairLocator(MooseSharedPointer<XFEM> xfem,
+XFEMElementPairLocator::XFEMElementPairLocator(std::shared_ptr<XFEM> xfem,
                                                unsigned int interface_id,
                                                bool use_displaced_mesh)
   : ElementPairLocator(interface_id), _xfem(xfem), _use_displaced_mesh(use_displaced_mesh)

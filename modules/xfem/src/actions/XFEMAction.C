@@ -114,16 +114,16 @@ void
 XFEMAction::act()
 {
 
-  MooseSharedPointer<XFEMInterface> xfem_interface = _problem->getXFEM();
+  std::shared_ptr<XFEMInterface> xfem_interface = _problem->getXFEM();
   if (xfem_interface == NULL)
   {
     _pars.set<FEProblemBase *>("_fe_problem_base") = &*_problem;
-    MooseSharedPointer<XFEM> new_xfem(new XFEM(_pars));
+    std::shared_ptr<XFEM> new_xfem(new XFEM(_pars));
     _problem->initXFEM(new_xfem);
     xfem_interface = _problem->getXFEM();
   }
 
-  MooseSharedPointer<XFEM> xfem = MooseSharedNamespace::dynamic_pointer_cast<XFEM>(xfem_interface);
+  std::shared_ptr<XFEM> xfem = MooseSharedNamespace::dynamic_pointer_cast<XFEM>(xfem_interface);
   if (xfem == NULL)
     mooseError("dynamic cast of xfem object failed");
 
@@ -133,12 +133,12 @@ XFEMAction::act()
 
     xfem->setCrackGrowthMethod(_xfem_use_crack_growth_increment, _xfem_crack_growth_increment);
 
-    MooseSharedPointer<XFEMElementPairLocator> new_xfem_epl(new XFEMElementPairLocator(xfem, 0));
+    std::shared_ptr<XFEMElementPairLocator> new_xfem_epl(new XFEMElementPairLocator(xfem, 0));
     _problem->geomSearchData().addElementPairLocator(0, new_xfem_epl);
 
     if (_problem->getDisplacedProblem() != NULL)
     {
-      MooseSharedPointer<XFEMElementPairLocator> new_xfem_epl2(
+      std::shared_ptr<XFEMElementPairLocator> new_xfem_epl2(
           new XFEMElementPairLocator(xfem, 0, true));
       _problem->getDisplacedProblem()->geomSearchData().addElementPairLocator(0, new_xfem_epl2);
     }

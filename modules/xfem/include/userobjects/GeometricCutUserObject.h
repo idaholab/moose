@@ -27,13 +27,13 @@ namespace Xfem
 struct CutEdge
 {
   /// ID of the first node on the edge
-  unsigned int id1;
+  unsigned int _id1;
   /// ID of the second node on the edge
-  unsigned int id2;
+  unsigned int _id2;
   /// Fractional distance along the edge (from node 1 to 2) where the cut is located
-  Real distance;
+  Real _distance;
   /// Local ID of this side in the host element
-  unsigned int host_side_id;
+  unsigned int _host_side_id;
 };
 
 /**
@@ -46,54 +46,54 @@ struct CutEdge
 inline bool
 operator<(const CutEdge & lhs, const CutEdge & rhs)
 {
-  if (lhs.id1 != rhs.id1)
-    return lhs.id1 < rhs.id1;
+  if (lhs._id1 != rhs._id1)
+    return lhs._id1 < rhs._id1;
   else
-    return lhs.id2 < rhs.id2;
+    return lhs._id2 < rhs._id2;
 }
 
 /// Data structure defining a cut through a node
 struct CutNode
 {
   /// ID of the cut node
-  unsigned int id;
+  unsigned int _id;
   /// Local ID of this node in the host element
-  unsigned int host_id;
+  unsigned int _host_id;
 };
 
 /// Data structure defining a cut through a face
 struct CutFace
 {
   /// ID of the cut face
-  unsigned int face_id;
+  unsigned int _face_id;
   /// IDs of all cut faces
-  std::vector<unsigned int> face_edge;
+  std::vector<unsigned int> _face_edge;
   /// Fractional distance along the cut edges where the cut is located
-  std::vector<Real> position;
+  std::vector<Real> _position;
 };
 
 /// Data structure describing geometrically described cut through 2D element
 struct GeomMarkedElemInfo2D
 {
   /// Container for data about all cut edges in this element
-  std::vector<CutEdge> elem_cut_edges;
+  std::vector<CutEdge> _elem_cut_edges;
   /// Container for data about all cut nodes in this element
-  std::vector<CutNode> elem_cut_nodes;
+  std::vector<CutNode> _elem_cut_nodes;
   /// Container for data about all cut fragments in this element
-  std::vector<CutEdge> frag_cut_edges;
+  std::vector<CutEdge> _frag_cut_edges;
   /// Container for data about all cut edges in cut fragments in this element
-  std::vector<std::vector<Point>> frag_edges;
+  std::vector<std::vector<Point>> _frag_edges;
 };
 
 /// Data structure describing geometrically described cut through 3D element
 struct GeomMarkedElemInfo3D
 {
   /// Container for data about all cut faces in this element
-  std::vector<CutFace> elem_cut_faces;
+  std::vector<CutFace> _elem_cut_faces;
   /// Container for data about all faces this element's fragment
-  std::vector<CutFace> frag_cut_faces;
+  std::vector<CutFace> _frag_cut_faces;
   /// Container for data about all cut faces in cut fragments in this element
-  std::vector<std::vector<Point>> frag_faces;
+  std::vector<std::vector<Point>> _frag_faces;
 };
 
 } // namespace Xfem
@@ -168,7 +168,7 @@ public:
 
 protected:
   /// Pointer to the XFEM controller object
-  MooseSharedPointer<XFEM> _xfem;
+  std::shared_ptr<XFEM> _xfem;
 
   ///@{Containers with information about all 2D and 3D elements marked for cutting by this object
   std::map<unsigned int, std::vector<Xfem::GeomMarkedElemInfo2D>> _marked_elems_2d;

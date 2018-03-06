@@ -16,14 +16,14 @@
 class XFEMElementPairLocator : public ElementPairLocator
 {
 public:
-  XFEMElementPairLocator(MooseSharedPointer<XFEM> xfem,
+  XFEMElementPairLocator(std::shared_ptr<XFEM> xfem,
                          unsigned int interface_id,
                          bool use_displaced_mesh = false);
   virtual void reinit();
   virtual void update();
 
 protected:
-  MooseSharedPointer<XFEM> _xfem;
+  std::shared_ptr<XFEM> _xfem;
   bool _use_displaced_mesh;
 };
 

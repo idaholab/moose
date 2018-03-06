@@ -73,18 +73,18 @@ GeometricCut2DUserObject::cutElementByGeometry(const Elem * elem,
           {
             cut_elem = true;
             Xfem::CutEdge mycut;
-            mycut.id1 = node1->id();
-            mycut.id2 = node2->id();
-            mycut.distance = seg_int_frac;
-            mycut.host_side_id = i;
+            mycut._id1 = node1->id();
+            mycut._id2 = node2->id();
+            mycut._distance = seg_int_frac;
+            mycut._host_side_id = i;
             cut_edges.push_back(mycut);
           }
           else if (seg_int_frac < Xfem::tol)
           {
             cut_elem = true;
             Xfem::CutNode mycut;
-            mycut.id = node1->id();
-            mycut.host_id = i;
+            mycut._id = node1->id();
+            mycut._host_id = i;
             cut_nodes.push_back(mycut);
           }
         }
@@ -130,10 +130,10 @@ GeometricCut2DUserObject::cutFragmentByGeometry(std::vector<std::vector<Point>> 
         {
           cut_frag = true;
           Xfem::CutEdge mycut;
-          mycut.id1 = i;
-          mycut.id2 = (i < (n_sides - 1) ? (i + 1) : 0);
-          mycut.distance = seg_int_frac;
-          mycut.host_side_id = i;
+          mycut._id1 = i;
+          mycut._id2 = (i < (n_sides - 1) ? (i + 1) : 0);
+          mycut._distance = seg_int_frac;
+          mycut._host_side_id = i;
           cut_edges.push_back(mycut);
         }
       }
@@ -201,6 +201,9 @@ GeometricCut2DUserObject::crossProduct2D(const Point & point_a, const Point & po
 Real
 GeometricCut2DUserObject::cutFraction(unsigned int cut_num, Real time) const
 {
+  mooseAssert(_cut_time_ranges.size() > cut_num,
+              "cut_num is outside the bounds of _cut_time_ranges");
+
   Real fraction = 0.0;
 
   if (time >= _cut_time_ranges[cut_num].first)
@@ -208,8 +211,12 @@ GeometricCut2DUserObject::cutFraction(unsigned int cut_num, Real time) const
     if (time >= _cut_time_ranges[cut_num].second)
       fraction = 1.0;
     else
-      fraction = (time - _cut_time_ranges[cut_num].first) /
-                 (_cut_time_ranges[cut_num].second - _cut_time_ranges[cut_num].first);
+    {
+      Real denominator = _cut_time_ranges[cut_num].second - _cut_time_ranges[cut_num].first;
+      if (MooseUtils::absoluteFuzzyEqual(denominator, 0.0))
+        mooseError("time_start_cut and time_end_cut cannot have the same value");
+      fraction = (time - _cut_time_ranges[cut_num].first) / denominator;
+    }
   }
   return fraction;
 }

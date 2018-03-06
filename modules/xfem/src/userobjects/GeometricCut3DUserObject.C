@@ -89,11 +89,11 @@ GeometricCut3DUserObject::cutElementByGeometry(const Elem * elem,
     {
       cut_elem = true;
       Xfem::CutFace mycut;
-      mycut.face_id = i;
-      mycut.face_edge.push_back(cut_edges[0]);
-      mycut.face_edge.push_back(cut_edges[1]);
-      mycut.position.push_back(cut_pos[0]);
-      mycut.position.push_back(cut_pos[1]);
+      mycut._face_id = i;
+      mycut._face_edge.push_back(cut_edges[0]);
+      mycut._face_edge.push_back(cut_edges[1]);
+      mycut._position.push_back(cut_pos[0]);
+      mycut._position.push_back(cut_pos[1]);
       cut_faces.push_back(mycut);
     }
   }

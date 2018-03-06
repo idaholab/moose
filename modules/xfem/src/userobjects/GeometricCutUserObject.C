@@ -12,7 +12,7 @@
 // MOOSE includes
 #include "MooseError.h"
 #include "XFEM.h"
-#include "XFEMParallel.h"
+//#include "XFEMParallel.h"
 #include "DataIO.h"
 #include "XFEMAppTypes.h"
 #include "EFAElement2D.h"
@@ -77,10 +77,10 @@ GeometricCutUserObject::execute()
       if (cut)
       {
         Xfem::GeomMarkedElemInfo2D gmei2d;
-        gmei2d.elem_cut_edges = elem_cut_edges;
-        gmei2d.elem_cut_nodes = elem_cut_nodes;
-        gmei2d.frag_cut_edges = frag_cut_edges;
-        gmei2d.frag_edges = frag_edges;
+        gmei2d._elem_cut_edges = elem_cut_edges;
+        gmei2d._elem_cut_nodes = elem_cut_nodes;
+        gmei2d._frag_cut_edges = frag_cut_edges;
+        gmei2d._frag_edges = frag_edges;
         _marked_elems_2d[_current_elem->id()].push_back(gmei2d);
       }
     }
@@ -108,9 +108,9 @@ GeometricCutUserObject::execute()
       if (cut)
       {
         Xfem::GeomMarkedElemInfo3D gmei3d;
-        gmei3d.elem_cut_faces = elem_cut_faces;
-        gmei3d.frag_cut_faces = frag_cut_faces;
-        gmei3d.frag_faces = frag_faces;
+        gmei3d._elem_cut_faces = elem_cut_faces;
+        gmei3d._frag_cut_faces = frag_cut_faces;
+        gmei3d._frag_faces = frag_faces;
         _marked_elems_3d[_current_elem->id()].push_back(gmei3d);
       }
     }
@@ -141,56 +141,56 @@ template <>
 inline void
 dataStore(std::ostream & stream, Xfem::CutFace & cf, void * context)
 {
-  dataStore(stream, cf.face_id, context);
-  dataStore(stream, cf.face_edge, context);
-  dataStore(stream, cf.position, context);
+  dataStore(stream, cf._face_id, context);
+  dataStore(stream, cf._face_edge, context);
+  dataStore(stream, cf._position, context);
 }
 
 template <>
 inline void
 dataLoad(std::istream & stream, Xfem::CutFace & cf, void * context)
 {
-  dataLoad(stream, cf.face_id, context);
-  dataLoad(stream, cf.face_edge, context);
-  dataLoad(stream, cf.position, context);
+  dataLoad(stream, cf._face_id, context);
+  dataLoad(stream, cf._face_edge, context);
+  dataLoad(stream, cf._position, context);
 }
 
 template <>
 inline void
 dataStore(std::ostream & stream, Xfem::GeomMarkedElemInfo2D & gmei, void * context)
 {
-  dataStore(stream, gmei.elem_cut_edges, context);
-  dataStore(stream, gmei.elem_cut_nodes, context);
-  dataStore(stream, gmei.frag_cut_edges, context);
-  dataStore(stream, gmei.frag_edges, context);
+  dataStore(stream, gmei._elem_cut_edges, context);
+  dataStore(stream, gmei._elem_cut_nodes, context);
+  dataStore(stream, gmei._frag_cut_edges, context);
+  dataStore(stream, gmei._frag_edges, context);
 }
 
 template <>
 inline void
 dataLoad(std::istream & stream, Xfem::GeomMarkedElemInfo2D & gmei, void * context)
 {
-  dataLoad(stream, gmei.elem_cut_edges, context);
-  dataLoad(stream, gmei.elem_cut_nodes, context);
-  dataLoad(stream, gmei.frag_cut_edges, context);
-  dataLoad(stream, gmei.frag_edges, context);
+  dataLoad(stream, gmei._elem_cut_edges, context);
+  dataLoad(stream, gmei._elem_cut_nodes, context);
+  dataLoad(stream, gmei._frag_cut_edges, context);
+  dataLoad(stream, gmei._frag_edges, context);
 }
 
 template <>
 inline void
 dataStore(std::ostream & stream, Xfem::GeomMarkedElemInfo3D & gmei, void * context)
 {
-  dataStore(stream, gmei.elem_cut_faces, context);
-  dataStore(stream, gmei.frag_cut_faces, context);
-  dataStore(stream, gmei.frag_faces, context);
+  dataStore(stream, gmei._elem_cut_faces, context);
+  dataStore(stream, gmei._frag_cut_faces, context);
+  dataStore(stream, gmei._frag_faces, context);
 }
 
 template <>
 inline void
 dataLoad(std::istream & stream, Xfem::GeomMarkedElemInfo3D & gmei, void * context)
 {
-  dataLoad(stream, gmei.elem_cut_faces, context);
-  dataLoad(stream, gmei.frag_cut_faces, context);
-  dataLoad(stream, gmei.frag_faces, context);
+  dataLoad(stream, gmei._elem_cut_faces, context);
+  dataLoad(stream, gmei._frag_cut_faces, context);
+  dataLoad(stream, gmei._frag_faces, context);
 }
 
 void
@@ -254,7 +254,7 @@ GeometricCutUserObject::finalize()
     serialize(send_buffer);
 
     // broadcast serialized data to and receive from all processors
-    XFEMUtils::allgatherStringBuffers(_communicator, send_buffer, recv_buffers);
+    _communicator.allgather(send_buffer, recv_buffers);
 
     // unpack the received data and merge it into the local data structures
     deserialize(recv_buffers);

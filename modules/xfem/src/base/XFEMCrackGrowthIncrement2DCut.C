@@ -65,10 +65,10 @@ XFEMCrackGrowthIncrement2DCut::cutElementByCrackGrowthIncrement(
       {
         cut_elem = true;
         CutEdgeForCrackGrowthIncr mycut;
-        mycut.id1 = node1->id();
-        mycut.id2 = node2->id();
-        mycut.distance = seg_int_frac;
-        mycut.host_side_id = i;
+        mycut._id1 = node1->id();
+        mycut._id2 = node2->id();
+        mycut._distance = seg_int_frac;
+        mycut._host_side_id = i;
         cut_edges.push_back(mycut);
       }
     }

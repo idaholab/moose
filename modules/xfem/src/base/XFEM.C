@@ -215,6 +215,9 @@ XFEM::storeCrackTipOriginAndDirection()
 bool
 XFEM::update(Real time, NonlinearSystemBase & nl, AuxiliarySystem & aux)
 {
+  if (_moose_mesh->isDistributedMesh())
+    mooseError("Use of XFEM with distributed mesh is not yet supported");
+
   bool mesh_changed = false;
 
   buildEFAMesh();
@@ -362,32 +365,33 @@ XFEM::markCutEdgesByGeometry()
     {
       EFAElement2D * EFAElem = getEFAElem2D(gme.first);
 
-      for (unsigned int i = 0; i < gmei.elem_cut_edges.size(); ++i) // mark element edges
+      for (unsigned int i = 0; i < gmei._elem_cut_edges.size(); ++i) // mark element edges
       {
         if (!EFAElem->isEdgePhantom(
-                gmei.elem_cut_edges[i].host_side_id)) // must not be phantom edge
+                gmei._elem_cut_edges[i]._host_side_id)) // must not be phantom edge
         {
           _efa_mesh.addElemEdgeIntersection(gme.first->id(),
-                                            gmei.elem_cut_edges[i].host_side_id,
-                                            gmei.elem_cut_edges[i].distance);
+                                            gmei._elem_cut_edges[i]._host_side_id,
+                                            gmei._elem_cut_edges[i]._distance);
           marked_edges = true;
         }
       }
 
-      for (unsigned int i = 0; i < gmei.elem_cut_nodes.size(); ++i) // mark element edges
+      for (unsigned int i = 0; i < gmei._elem_cut_nodes.size(); ++i) // mark element edges
       {
-        _efa_mesh.addElemNodeIntersection(gme.first->id(), gmei.elem_cut_nodes[i].host_id);
+        _efa_mesh.addElemNodeIntersection(gme.first->id(), gmei._elem_cut_nodes[i]._host_id);
         marked_nodes = true;
       }
 
-      for (unsigned int i = 0; i < gmei.frag_cut_edges.size();
+      for (unsigned int i = 0; i < gmei._frag_cut_edges.size();
            ++i) // MUST DO THIS AFTER MARKING ELEMENT EDGES
       {
-        if (!EFAElem->getFragment(0)->isSecondaryInteriorEdge(gmei.frag_cut_edges[i].host_side_id))
+        if (!EFAElem->getFragment(0)->isSecondaryInteriorEdge(
+                gmei._frag_cut_edges[i]._host_side_id))
         {
           if (_efa_mesh.addFragEdgeIntersection(gme.first->id(),
-                                                gmei.frag_cut_edges[i].host_side_id,
-                                                gmei.frag_cut_edges[i].distance))
+                                                gmei._frag_cut_edges[i]._host_side_id,
+                                                gmei._frag_cut_edges[i]._distance))
           {
             marked_edges = true;
             if (!isElemAtCrackTip(gme.first))
@@ -768,10 +772,11 @@ XFEM::markCutEdgesByState(Real time)
 
           for (unsigned int i = 0; i < elem_cut_edges.size(); ++i) // mark element edges
           {
-            if (!CEMElem->isEdgePhantom(elem_cut_edges[i].host_side_id)) // must not be phantom edge
+            if (!CEMElem->isEdgePhantom(
+                    elem_cut_edges[i]._host_side_id)) // must not be phantom edge
             {
               _efa_mesh.addElemEdgeIntersection(
-                  elem->id(), elem_cut_edges[i].host_side_id, elem_cut_edges[i].distance);
+                  elem->id(), elem_cut_edges[i]._host_side_id, elem_cut_edges[i]._distance);
             }
           }
         }
@@ -820,27 +825,27 @@ XFEM::markCutFacesByGeometry()
     {
       EFAElement3D * EFAElem = getEFAElem3D(gme.first);
 
-      for (unsigned int i = 0; i < gmei.elem_cut_faces.size(); ++i) // mark element faces
+      for (unsigned int i = 0; i < gmei._elem_cut_faces.size(); ++i) // mark element faces
       {
-        if (!EFAElem->isFacePhantom(gmei.elem_cut_faces[i].face_id)) // must not be phantom face
+        if (!EFAElem->isFacePhantom(gmei._elem_cut_faces[i]._face_id)) // must not be phantom face
         {
           _efa_mesh.addElemFaceIntersection(gme.first->id(),
-                                            gmei.elem_cut_faces[i].face_id,
-                                            gmei.elem_cut_faces[i].face_edge,
-                                            gmei.elem_cut_faces[i].position);
+                                            gmei._elem_cut_faces[i]._face_id,
+                                            gmei._elem_cut_faces[i]._face_edge,
+                                            gmei._elem_cut_faces[i]._position);
           marked_faces = true;
         }
       }
 
-      for (unsigned int i = 0; i < gmei.frag_cut_faces.size();
+      for (unsigned int i = 0; i < gmei._frag_cut_faces.size();
            ++i) // MUST DO THIS AFTER MARKING ELEMENT EDGES
       {
-        if (!EFAElem->getFragment(0)->isThirdInteriorFace(gmei.frag_cut_faces[i].face_id))
+        if (!EFAElem->getFragment(0)->isThirdInteriorFace(gmei._frag_cut_faces[i]._face_id))
         {
           _efa_mesh.addFragFaceIntersection(gme.first->id(),
-                                            gmei.frag_cut_faces[i].face_id,
-                                            gmei.frag_cut_faces[i].face_edge,
-                                            gmei.frag_cut_faces[i].position);
+                                            gmei._frag_cut_faces[i]._face_id,
+                                            gmei._frag_cut_faces[i]._face_edge,
+                                            gmei._frag_cut_faces[i]._position);
           marked_faces = true;
         }
       }
