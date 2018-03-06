@@ -1,4 +1,4 @@
-# Tests the derivatives of the c(v,h) call
+# Tests the derivatives of the e(v,h) call
 
 [Mesh]
   type = GeneratedMesh
@@ -32,7 +32,7 @@
 
 [Kernels]
   [./test_kernel]
-    type = SoundSpeedFromVolumeEnthalpyDerivativesTestKernel
+    type = InternalEnergyFromVolumeEnthalpyDerivativesTestKernel
     variable = v
     fluid_properties = fp
     v = v

@@ -42,14 +42,14 @@ SoundSpeedFromVolumeInternalEnergyDerivativesTestKernel::
 Real
 SoundSpeedFromVolumeInternalEnergyDerivativesTestKernel::computeQpResidual()
 {
-  return _fp.c(_v[_qp], _e[_qp]);
+  return _fp.c_from_v_e(_v[_qp], _e[_qp]);
 }
 
 Real
 SoundSpeedFromVolumeInternalEnergyDerivativesTestKernel::computeQpOffDiagJacobian(unsigned int jvar)
 {
-  Real c_value, dc_dv, dc_de;
-  _fp.c(_v[_qp], _e[_qp], c_value, dc_dv, dc_de);
+  Real c, dc_dv, dc_de;
+  _fp.c_from_v_e(_v[_qp], _e[_qp], c, dc_dv, dc_de);
 
   if (jvar == _v_index)
     return dc_dv * _phi[_j][_qp];

@@ -44,5 +44,5 @@ NSPressureAux::NSPressureAux(const InputParameters & parameters)
 Real
 NSPressureAux::computeValue()
 {
-  return _fp.pressure(_specific_volume[_qp], _internal_energy[_qp]);
+  return _fp.p_from_v_e(_specific_volume[_qp], _internal_energy[_qp]);
 }

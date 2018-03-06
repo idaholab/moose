@@ -7,24 +7,25 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef SOUNDSPEEDFROMVOLUMEENTHALPYDERIVATIVESTESTKERNEL_H
-#define SOUNDSPEEDFROMVOLUMEENTHALPYDERIVATIVESTESTKERNEL_H
+#ifndef INTERNALENERGYFROMVOLUMEENTHALPYDERIVATIVESTESTKERNEL_H
+#define INTERNALENERGYFROMVOLUMEENTHALPYDERIVATIVESTESTKERNEL_H
 
 #include "FluidPropertyDerivativesTestKernel.h"
 
-class SoundSpeedFromVolumeEnthalpyDerivativesTestKernel;
+class InternalEnergyFromVolumeEnthalpyDerivativesTestKernel;
 
 template <>
-InputParameters validParams<SoundSpeedFromVolumeEnthalpyDerivativesTestKernel>();
+InputParameters validParams<InternalEnergyFromVolumeEnthalpyDerivativesTestKernel>();
 
 /**
- * Tests derivatives of sound speed from specific volume and specific enthalpy
+ * Tests derivatives of specific internal energy from specific volume and specific enthalpy
  */
-class SoundSpeedFromVolumeEnthalpyDerivativesTestKernel : public FluidPropertyDerivativesTestKernel
+class InternalEnergyFromVolumeEnthalpyDerivativesTestKernel
+  : public FluidPropertyDerivativesTestKernel
 {
 public:
-  SoundSpeedFromVolumeEnthalpyDerivativesTestKernel(const InputParameters & parameters);
-  virtual ~SoundSpeedFromVolumeEnthalpyDerivativesTestKernel();
+  InternalEnergyFromVolumeEnthalpyDerivativesTestKernel(const InputParameters & parameters);
+  virtual ~InternalEnergyFromVolumeEnthalpyDerivativesTestKernel();
 
 protected:
   virtual Real computeQpResidual() override;
@@ -41,4 +42,4 @@ protected:
   const unsigned int _h_index;
 };
 
-#endif /* SOUNDSPEEDFROMVOLUMEENTHALPYDERIVATIVESTESTKERNEL_H */
+#endif /* INTERNALENERGYFROMVOLUMEENTHALPYDERIVATIVESTESTKERNEL_H */

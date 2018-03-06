@@ -45,5 +45,5 @@ NSTemperatureAux::NSTemperatureAux(const InputParameters & parameters)
 Real
 NSTemperatureAux::computeValue()
 {
-  return _fp.temperature(_specific_volume[_qp], _internal_energy[_qp]);
+  return _fp.T_from_v_e(_specific_volume[_qp], _internal_energy[_qp]);
 }

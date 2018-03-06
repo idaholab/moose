@@ -51,5 +51,5 @@ Real
 NSMachAux::computeValue()
 {
   return RealVectorValue(_u_vel[_qp], _v_vel[_qp], _w_vel[_qp]).norm() /
-         _fp.c(_specific_volume[_qp], _internal_energy[_qp]);
+         _fp.c_from_v_e(_specific_volume[_qp], _internal_energy[_qp]);
 }

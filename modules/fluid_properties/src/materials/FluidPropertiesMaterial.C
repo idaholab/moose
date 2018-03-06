@@ -45,12 +45,12 @@ FluidPropertiesMaterial::~FluidPropertiesMaterial() {}
 void
 FluidPropertiesMaterial::computeQpProperties()
 {
-  _p[_qp] = _fp.pressure(_v[_qp], _e[_qp]);
-  _T[_qp] = _fp.temperature(_v[_qp], _e[_qp]);
-  _c[_qp] = _fp.c(_v[_qp], _e[_qp]);
-  _cp[_qp] = _fp.cp(_v[_qp], _e[_qp]);
-  _cv[_qp] = _fp.cv(_v[_qp], _e[_qp]);
-  _mu[_qp] = _fp.mu(_v[_qp], _e[_qp]);
-  _k[_qp] = _fp.k(_v[_qp], _e[_qp]);
-  _g[_qp] = _fp.g(_v[_qp], _e[_qp]);
+  _p[_qp] = _fp.p_from_v_e(_v[_qp], _e[_qp]);
+  _T[_qp] = _fp.T_from_v_e(_v[_qp], _e[_qp]);
+  _c[_qp] = _fp.c_from_v_e(_v[_qp], _e[_qp]);
+  _cp[_qp] = _fp.cp_from_v_e(_v[_qp], _e[_qp]);
+  _cv[_qp] = _fp.cv_from_v_e(_v[_qp], _e[_qp]);
+  _mu[_qp] = _fp.mu_from_v_e(_v[_qp], _e[_qp]);
+  _k[_qp] = _fp.k_from_v_e(_v[_qp], _e[_qp]);
+  _g[_qp] = _fp.g_from_v_e(_v[_qp], _e[_qp]);
 }
