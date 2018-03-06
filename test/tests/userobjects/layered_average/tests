@@ -36,4 +36,10 @@
     input = 'layered_average_interpolate.i'
     exodiff = 'layered_average_interpolate_out.e'
   [../]
+
+  [./1d_displaced]
+    type = 'Exodiff'
+    input = 'layered_average_1d_displaced.i'
+    exodiff = 'layered_average_1d_displaced_out.e'
+  [../]
 []

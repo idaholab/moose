@@ -106,6 +106,9 @@ protected:
   /// How many layers both above and below the found layer will be used in the average
   unsigned int _average_radius;
 
+  /// true if this object operates on the displaced mesh, otherwise false
+  bool _using_displaced_mesh;
+
   Real _direction_min;
   Real _direction_max;
 
