@@ -72,6 +72,8 @@
   q_function_type = Topology
   ring_first = 1
   ring_last = 4
+  incremental = true
+  solid_mechanics = true
 []
 
 [SolidMechanics]

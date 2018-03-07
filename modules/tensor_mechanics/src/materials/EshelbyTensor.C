@@ -33,8 +33,7 @@ validParams<EshelbyTensor>()
 EshelbyTensor::EshelbyTensor(const InputParameters & parameters)
   : DerivativeMaterialInterface<Material>(parameters),
     _base_name(isParamValid("base_name") ? getParam<std::string>("base_name") + "_" : ""),
-    _sed(declareProperty<Real>(_base_name + "strain_energy_density")),
-    _sed_old(getMaterialPropertyOld<Real>(_base_name + "strain_energy_density")),
+    _sed(getMaterialPropertyByName<Real>(_base_name + "strain_energy_density")),
     _eshelby_tensor(declareProperty<RankTwoTensor>(_base_name + "Eshelby_tensor")),
     _stress(getMaterialProperty<RankTwoTensor>(_base_name + "stress")),
     _stress_old(getMaterialPropertyOld<RankTwoTensor>(_base_name + "stress")),
@@ -42,8 +41,6 @@ EshelbyTensor::EshelbyTensor(const InputParameters & parameters)
     _J_thermal_term_vec(declareProperty<RealVectorValue>("J_thermal_term_vec")),
     _grad_temp(coupledGradient("temperature")),
     _has_temp(isCoupled("temperature")),
-    _mechanical_strain(getMaterialPropertyByName<RankTwoTensor>(_base_name + "mechanical_strain")),
-    _mechanical_strain_old(getMaterialPropertyOldByName<RankTwoTensor>(_base_name + "mechanical_strain")),
     _total_deigenstrain_dT(hasMaterialProperty<RankTwoTensor>("total_deigenstrain_dT")
                                ? &getMaterialProperty<RankTwoTensor>("total_deigenstrain_dT")
                                : nullptr)
@@ -72,7 +69,6 @@ EshelbyTensor::EshelbyTensor(const InputParameters & parameters)
 void
 EshelbyTensor::initQpStatefulProperties()
 {
-  _sed[_qp] = 0.0;
 }
 
 void
@@ -86,10 +82,6 @@ EshelbyTensor::computeQpProperties()
   F.addIa(1.0);
   Real detF = F.det();
   RankTwoTensor FinvT(F.inverse().transpose());
-  RankTwoTensor _my_strain_increment = (_mechanical_strain[_qp] - _mechanical_strain_old[_qp]);
-
-    _sed[_qp] = _sed_old[_qp] + _stress[_qp].doubleContraction(_my_strain_increment) / 2.0 +
-                _stress_old[_qp].doubleContraction(_my_strain_increment) / 2.0;
 
   // 1st Piola-Kirchoff Stress (P):
   RankTwoTensor P = detF * _stress[_qp] * FinvT;

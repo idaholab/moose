@@ -1,15 +1,19 @@
+# Single element test to check the strain energy density calculation
+
 [GlobalParams]
-  order = FIRST
-  family = LAGRANGE
-  displacements = 'disp_x disp_y disp_z'
+  displacements = 'disp_x disp_y'
   volumetric_locking_correction = true
 []
 
 [Mesh]
-  file = ellip_crack_4sym_norad_mm.e
-  displacements = 'disp_x disp_y disp_z'
-  partitioner = centroid
-  centroid_partitioner_direction = z
+  type = GeneratedMesh
+  dim = 2
+  nx = 1
+  ny = 1
+  xmin = 0
+  xmax = 1
+  ymin = 0
+  ymax = 2
 []
 
 [AuxVariables]
@@ -24,36 +28,17 @@
     type = PiecewiseLinear
     x = '0. 1.'
     y = '0. 1.'
-    scale_factor = -689.5 #MPa
+    scale_factor = -100
   [../]
-[]
-
-[DomainIntegral]
-  integrals = 'JIntegral InteractionIntegralKI InteractionIntegralT'
-  boundary = 1001
-  crack_direction_method = CurvedCrackFront
-  crack_end_direction_method = CrackDirectionVector
-  crack_direction_vector_end_1 = '0.0 1.0 0.0'
-  crack_direction_vector_end_2 = '1.0 0.0 0.0'
-  radius_inner = '12.5 25.0 37.5'
-  radius_outer = '25.0 37.5 50.0'
-  intersecting_boundary = '1 2'
-  symmetry_plane = 2
-  youngs_modulus = 206.8e+3 #MPa
-  poissons_ratio = 0.3
-  block = 1
-  disp_x = disp_x
-  disp_y = disp_y
-  disp_z = disp_z
-  incremental = true
 []
 
 [Modules/TensorMechanics/Master]
   [./master]
-    strain = FINITE
+    strain = SMALL
     add_variables = true
-    incremental = true
+    incremental = false
     generate_output = 'stress_xx stress_yy stress_zz vonmises_stress strain_xx strain_yy strain_zz'
+    planar_formulation = PLANE_STRAIN
   [../]
 []
 
@@ -67,27 +52,21 @@
 []
 
 [BCs]
-  [./crack_y]
+  [./no_x]
     type = DirichletBC
-    variable = disp_z
-    boundary = 6
+    variable = disp_x
+    boundary = 'left'
     value = 0.0
   [../]
   [./no_y]
     type = DirichletBC
     variable = disp_y
-    boundary = 12
-    value = 0.0
-  [../]
-  [./no_x]
-    type = DirichletBC
-    variable = disp_x
-    boundary = 1
+    boundary = 'bottom'
     value = 0.0
   [../]
   [./Pressure]
-    [./Side1]
-      boundary = 5
+    [./top]
+      boundary = 'top'
       function = rampConstantUp
     [../]
   [../]
@@ -96,20 +75,21 @@
 [Materials]
   [./elasticity_tensor]
     type = ComputeIsotropicElasticityTensor
-    youngs_modulus = 206.8e+3
+    youngs_modulus = 30e+6
     poissons_ratio = 0.3
   [../]
   [./elastic_stress]
-    type = ComputeFiniteStrainElasticStress
+    type = ComputeLinearElasticStress
   [../]
-  [./eshelby]
-    type = EshelbyTensor
+  [./strain_energy_density]
+    type = StrainEnergyDensity
+    incremental = false
   [../]
 []
 
 [Executioner]
    type = Transient
-  #petsc_options = '-snes_ksp_ew'
+
   petsc_options_iname = '-ksp_gmres_restart -pc_type -pc_hypre_type -pc_hypre_boomeramg_max_iter'
   petsc_options_value = '201                hypre    boomeramg      4'
 
@@ -117,8 +97,8 @@
 
    l_max_its = 50
    nl_max_its = 20
-   nl_abs_tol = 1e-5
-   nl_rel_tol = 1e-11
+   nl_abs_tol = 3e-7
+   nl_rel_tol = 1e-12
    l_tol = 1e-2
 
    start_time = 0.0
@@ -128,9 +108,41 @@
    num_steps = 1
 []
 
+[Postprocessors]
+  [./epxx]
+    type = ElementalVariableValue
+    variable = strain_xx
+    elementid = 0
+  [../]
+  [./epyy]
+    type = ElementalVariableValue
+    variable = strain_yy
+    elementid = 0
+  [../]
+  [./epzz]
+    type = ElementalVariableValue
+    variable = strain_zz
+    elementid = 0
+  [../]
+  [./sigxx]
+    type = ElementAverageValue
+    variable = stress_xx
+  [../]
+  [./sigyy]
+    type = ElementAverageValue
+    variable = stress_yy
+  [../]
+  [./sigzz]
+    type = ElementAverageValue
+    variable = stress_zz
+  [../]
+  [./SED]
+    type = ElementAverageValue
+    variable = SED
+  [../]
+[]
+
 [Outputs]
-  execute_on = 'timestep_end'
-  file_base = t_stress_ellip_crack_out
   exodus = true
   csv = true
 []
