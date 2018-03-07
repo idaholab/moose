@@ -125,15 +125,16 @@ endef
 $(eval $(call unity_dir_rule, $(unity_src_dir)))
 
 # 1: the unity file to build
-# 2: the source files in that unity file
+# 2: the source files in that unity file (We sort these for consistent builds across platforms)
 # 3: The unity source directory
+# 4: The unity build area (for filtering out, not a dependency)
 # The "|" in the prereqs starts the beginning of "position dependent" prereqs
 # these are prereqs that must be run first - but their timestamp isn't used
 define unity_file_rule
 $(1):$(2) $(3) | $(4)
 	@echo Creating Unity $$@
 	$$(shell echo > $$@)
-	$$(foreach srcfile,$$(filter-out $(3) $(4),$$^),$$(shell echo '#include"$$(srcfile)"' >> $$@))
+	$$(foreach srcfile,$$(sort $$(filter-out $(3) $(4),$$^)),$$(shell echo '#include"$$(srcfile)"' >> $$@))
 endef
 
 # 1: The directory where the unity source files will go
