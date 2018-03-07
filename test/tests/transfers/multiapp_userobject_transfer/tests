@@ -16,4 +16,11 @@
     input = 'tosub_displaced_master.i'
     exodiff = 'tosub_displaced_master_out.e tosub_displaced_master_out_sub_app0.e'
   [../]
+
+  [./3d_1d]
+    type = 'Exodiff'
+    input = '3d_1d_master.i'
+    exodiff = '3d_1d_master_out.e 3d_1d_master_out_sub_app0.e'
+    recover = false
+  [../]
 []
