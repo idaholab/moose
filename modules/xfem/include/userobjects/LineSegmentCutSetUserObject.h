@@ -23,9 +23,6 @@ class LineSegmentCutSetUserObject : public GeometricCut2DUserObject
 public:
   LineSegmentCutSetUserObject(const InputParameters & parameters);
 
-  virtual void initialize() override{};
-  virtual void execute() override{};
-  virtual void finalize() override{};
   virtual const std::vector<Point>
   getCrackFrontPoints(unsigned int num_crack_front_points) const override;
 

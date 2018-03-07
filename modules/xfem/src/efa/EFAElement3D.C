@@ -2118,7 +2118,7 @@ EFAElement3D::checkNeighborFaceCut(unsigned int face_id,
 {
   // N.B. this is important. We are checking if the corresponding edge of the neighbor face or of
   // the adjacent
-  // face's neighbor face has a cut at the same potition. If so, use the existing embedded node as
+  // face's neighbor face has a cut at the same position. If so, use the existing embedded node as
   // local_embedded
   for (unsigned int en_iter = 0; en_iter < numFaceNeighbors(face_id); ++en_iter)
   {

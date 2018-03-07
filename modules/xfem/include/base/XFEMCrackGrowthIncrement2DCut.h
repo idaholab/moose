@@ -18,10 +18,10 @@ using namespace libMesh;
 
 struct CutEdgeForCrackGrowthIncr
 {
-  unsigned int id1;
-  unsigned int id2;
-  Real distance;
-  unsigned int host_side_id;
+  unsigned int _id1;
+  unsigned int _id2;
+  Real _distance;
+  unsigned int _host_side_id;
 };
 
 class XFEMCrackGrowthIncrement2DCut

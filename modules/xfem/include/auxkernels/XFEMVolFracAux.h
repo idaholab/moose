@@ -32,7 +32,7 @@ protected:
   virtual Real computeValue();
 
 private:
-  MooseSharedPointer<XFEM> _xfem;
+  std::shared_ptr<XFEM> _xfem;
 };
 
 template <>

@@ -40,7 +40,7 @@ XFEMPressure::addPoints()
   _elem_qp_normal.clear();
   _elem_qp_JxW.clear();
 
-  for (std::map<unsigned int, MooseSharedPointer<ElementPairLocator>>::iterator it_epl =
+  for (std::map<unsigned int, std::shared_ptr<ElementPairLocator>>::iterator it_epl =
            _element_pair_locators->begin();
        it_epl != _element_pair_locators->end();
        ++it_epl)

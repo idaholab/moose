@@ -32,8 +32,7 @@ public:
    * @param[in] v   specific volume
    * @param[in] e   specific internal energy
    */
-  virtual Real p_from_v_e(Real v, Real e) const;
-  virtual Real pressure(Real v, Real e) const;
+  virtual Real p_from_v_e(Real v, Real e) const = 0;
 
   /**
    * Pressure and its derivatives from specific volume and specific internal energy
@@ -44,7 +43,7 @@ public:
    * @param[out] dp_dv   derivative of pressure w.r.t. specific volume
    * @param[out] dp_de   derivative of pressure w.r.t. specific internal energy
    */
-  virtual void p_from_v_e(Real v, Real e, Real & p, Real & dp_dv, Real & dp_de) const;
+  virtual void p_from_v_e(Real v, Real e, Real & p, Real & dp_dv, Real & dp_de) const = 0;
 
   /**
    * Temperature from specific volume and specific internal energy
@@ -53,8 +52,7 @@ public:
    * @param[in] e   specific internal energy
    * @returns sound speed
    */
-  virtual Real T_from_v_e(Real v, Real e) const;
-  virtual Real temperature(Real v, Real e) const;
+  virtual Real T_from_v_e(Real v, Real e) const = 0;
 
   /**
    * Temperature and its derivatives from specific volume and specific internal energy
@@ -65,9 +63,7 @@ public:
    * @param[out] dT_dv   derivative of temperature w.r.t. specific volume
    * @param[out] dT_de   derivative of temperature w.r.t. specific internal energy
    */
-  virtual void T_from_v_e(Real v, Real e, Real & T, Real & dT_dv, Real & dT_de) const;
-
-  virtual void dp_duv(Real v, Real e, Real & dp_dv, Real & dp_de, Real & dT_dv, Real & dT_de) const;
+  virtual void T_from_v_e(Real v, Real e, Real & T, Real & dT_dv, Real & dT_de) const = 0;
 
   /**
    * Sound speed from specific volume and specific internal energy
@@ -75,8 +71,7 @@ public:
    * @param[in] v   specific volume
    * @param[in] e   specific internal energy
    */
-  virtual Real c_from_v_e(Real v, Real e) const;
-  virtual Real c(Real v, Real e) const;
+  virtual Real c_from_v_e(Real v, Real e) const = 0;
 
   /**
    * Sound speed and its derivatives from specific volume and specific internal energy
@@ -86,11 +81,7 @@ public:
    * @param[out] dc_dv   derivative of sound speed w.r.t. specific volume
    * @param[out] dc_de   derivative of sound speed w.r.t. specific internal energy
    */
-  virtual void c_from_v_e(Real v, Real e, Real & c, Real & dc_dv, Real & dc_de) const;
-  virtual void c(Real v, Real e, Real & c, Real & dc_dv, Real & dc_de) const;
-
-  virtual Real c_from_v_h(Real v, Real h) const;
-  virtual void c_from_v_h(Real v, Real h, Real & c, Real & dc_dv, Real & dc_dh) const;
+  virtual void c_from_v_e(Real v, Real e, Real & c, Real & dc_dv, Real & dc_de) const = 0;
 
   /**
    * Isobaric (constant-pressure) specific heat from specific volume and specific
@@ -99,8 +90,7 @@ public:
    * @param[in] v   specific volume
    * @param[in] e   specific internal energy
    */
-  virtual Real cp_from_v_e(Real v, Real e) const;
-  virtual Real cp(Real v, Real e) const;
+  virtual Real cp_from_v_e(Real v, Real e) const = 0;
 
   /**
    * Isochoric (constant-volume) specific heat from specific volume and specific
@@ -109,8 +99,7 @@ public:
    * @param[in] v   specific volume
    * @param[in] e   specific internal energy
    */
-  virtual Real cv_from_v_e(Real v, Real e) const;
-  virtual Real cv(Real v, Real e) const;
+  virtual Real cv_from_v_e(Real v, Real e) const = 0;
 
   /**
    * Ratio of specific heats from specific volume and specific internal energy
@@ -119,7 +108,6 @@ public:
    * @param[in] e   specific internal energy
    */
   virtual Real gamma_from_v_e(Real v, Real e) const;
-  virtual Real gamma(Real v, Real e) const;
 
   /**
    * Dynamic viscosity from specific volume and specific internal energy
@@ -127,8 +115,7 @@ public:
    * @param[in] v   specific volume
    * @param[in] e   specific internal energy
    */
-  virtual Real mu_from_v_e(Real v, Real e) const;
-  virtual Real mu(Real v, Real e) const;
+  virtual Real mu_from_v_e(Real v, Real e) const = 0;
 
   /**
    * Thermal conductivity from specific volume and specific internal energy
@@ -136,8 +123,7 @@ public:
    * @param[in] v   specific volume
    * @param[in] e   specific internal energy
    */
-  virtual Real k_from_v_e(Real v, Real e) const;
-  virtual Real k(Real v, Real e) const;
+  virtual Real k_from_v_e(Real v, Real e) const = 0;
 
   /**
    * Specific entropy from specific volume and specific internal energy
@@ -145,8 +131,7 @@ public:
    * @param[in] v   specific volume
    * @param[in] e   specific internal energy
    */
-  virtual Real s_from_v_e(Real v, Real e) const;
-  virtual Real s(Real v, Real e) const;
+  virtual Real s_from_v_e(Real v, Real e) const = 0;
 
   /**
    * Specific entropy and its derivatives from specific volume and specific internal energy
@@ -157,7 +142,7 @@ public:
    * @param[out] ds_dv   derivative of specific entropy w.r.t. specific volume
    * @param[out] ds_de   derivative of specific entropy w.r.t. specific internal energy
    */
-  virtual void s_from_v_e(Real v, Real e, Real & s, Real & ds_dv, Real & ds_de) const;
+  virtual void s_from_v_e(Real v, Real e, Real & s, Real & ds_dv, Real & ds_de) const = 0;
 
   /**
    * Specific entropy from specific enthalpy and pressure
@@ -165,7 +150,7 @@ public:
    * @param[in] h   specific enthalpy
    * @param[in] p   pressure
    */
-  virtual Real s_from_h_p(Real h, Real p) const;
+  virtual Real s_from_h_p(Real h, Real p) const = 0;
 
   /**
    * Specific entropy and its derivatives from specific enthalpy and pressure
@@ -176,7 +161,7 @@ public:
    * @param[out] ds_dh   derivative of specific entropy w.r.t. specific enthalpy
    * @param[out] ds_dp   derivative of specific entropy w.r.t. pressure
    */
-  virtual void s_from_h_p(Real h, Real p, Real & s, Real & ds_dh, Real & ds_dp) const;
+  virtual void s_from_h_p(Real h, Real p, Real & s, Real & ds_dh, Real & ds_dp) const = 0;
 
   /**
    * Density from pressure and specific entropy
@@ -184,7 +169,7 @@ public:
    * @param[in] p   pressure
    * @param[in] s   specific entropy
    */
-  virtual Real rho_from_p_s(Real p, Real s) const;
+  virtual Real rho_from_p_s(Real p, Real s) const = 0;
 
   /**
    * Density and its derivatives from pressure and specific entropy
@@ -195,7 +180,7 @@ public:
    * @param[out] drho_dp   derivative of density w.r.t. pressure
    * @param[out] drho_ds   derivative of density w.r.t. specific entropy
    */
-  virtual void rho_from_p_s(Real p, Real s, Real & rho, Real & drho_dp, Real & drho_ds) const;
+  virtual void rho_from_p_s(Real p, Real s, Real & rho, Real & drho_dp, Real & drho_ds) const = 0;
 
   /**
    * Specific internal energy as a function of specific volume and specific enthalpy
@@ -203,7 +188,7 @@ public:
    * @param[in] v   specific volume
    * @param[in] h   specific enthalpy
    */
-  virtual Real e_from_v_h(Real v, Real h) const;
+  virtual Real e_from_v_h(Real v, Real h) const = 0;
 
   /**
    * Specific internal energy and derivatives as a function of specific volume and specific enthalpy
@@ -213,18 +198,7 @@ public:
    * @param[out] de_dv   derivative of specific internal energy w.r.t. specific volume
    * @param[out] de_dh   derivative of specific internal energy w.r.t. specific enthalpy
    */
-  virtual void e_from_v_h(Real v, Real h, Real & e, Real & de_dv, Real & de_dh) const;
-
-  virtual void rho_e_ps(Real p, Real s, Real & rho, Real & e) const;
-
-  virtual void rho_e_dps(Real p,
-                         Real s,
-                         Real & rho,
-                         Real & drho_dp,
-                         Real & drho_ds,
-                         Real & e,
-                         Real & de_dp,
-                         Real & de_ds) const;
+  virtual void e_from_v_h(Real v, Real h, Real & e, Real & de_dv, Real & de_dh) const = 0;
 
   /**
    * Density from pressure and temperature
@@ -232,8 +206,7 @@ public:
    * @param[in] p   pressure
    * @param[in] T   temperature
    */
-  virtual Real rho_from_p_T(Real p, Real T) const;
-  virtual Real rho(Real p, Real T) const;
+  virtual Real rho_from_p_T(Real p, Real T) const = 0;
 
   /**
    * Density and its derivatives from pressure and temperature
@@ -244,10 +217,7 @@ public:
    * @param[out] drho_dp   derivative of density w.r.t. pressure
    * @param[out] drho_dT   derivative of density w.r.t. temperature
    */
-  virtual void rho_from_p_T(Real p, Real T, Real & rho, Real & drho_dp, Real & drho_dT) const;
-  virtual void rho_dpT(Real p, Real T, Real & rho, Real & drho_dp, Real & drho_dT) const;
-
-  virtual void rho_e(Real p, Real T, Real & rho, Real & e) const;
+  virtual void rho_from_p_T(Real p, Real T, Real & rho, Real & drho_dp, Real & drho_dT) const = 0;
 
   /**
    * Specific internal energy from pressure and density
@@ -255,8 +225,7 @@ public:
    * @param[in] p     pressure
    * @param[in] rho   density
    */
-  virtual Real e_from_p_rho(Real p, Real rho) const;
-  virtual Real e(Real p, Real rho) const;
+  virtual Real e_from_p_rho(Real p, Real rho) const = 0;
 
   /**
    * Specific internal energy and its derivatives from pressure and density
@@ -267,8 +236,7 @@ public:
    * @param[out] de_dp     derivative of specific internal energy w.r.t. pressure
    * @param[out] de_drho   derivative of specific internal energy w.r.t. density
    */
-  virtual void e_from_p_rho(Real p, Real rho, Real & e, Real & de_dp, Real & de_drho) const;
-  virtual void e_dprho(Real p, Real rho, Real & e, Real & de_dp, Real & de_drho) const;
+  virtual void e_from_p_rho(Real p, Real rho, Real & e, Real & de_dp, Real & de_drho) const = 0;
 
   /**
    * Specific enthalpy from pressure and temperature
@@ -276,8 +244,7 @@ public:
    * @param[in] p   pressure
    * @param[in] T   temperature
    */
-  virtual Real h_from_p_T(Real p, Real T) const;
-  virtual Real h(Real p, Real T) const;
+  virtual Real h_from_p_T(Real p, Real T) const = 0;
 
   /**
    * Specific enthalpy and its derivatives from pressure and temperature
@@ -288,8 +255,7 @@ public:
    * @param[out] dh_dp   derivative of specific enthalpy w.r.t. pressure
    * @param[out] dh_dT   derivative of specific enthalpy w.r.t. temperature
    */
-  virtual void h_from_p_T(Real p, Real T, Real & h, Real & dh_dp, Real & dh_dT) const;
-  virtual void h_dpT(Real p, Real T, Real & h, Real & dh_dp, Real & dh_dT) const;
+  virtual void h_from_p_T(Real p, Real T, Real & h, Real & dh_dp, Real & dh_dT) const = 0;
 
   /**
    * Pressure from specific enthalpy and specific entropy
@@ -297,7 +263,7 @@ public:
    * @param[in] h   specific enthalpy
    * @param[in] s   specific entropy
    */
-  virtual Real p_from_h_s(Real h, Real s) const;
+  virtual Real p_from_h_s(Real h, Real s) const = 0;
 
   /**
    * Pressure and its derivatives from specific enthalpy and specific entropy
@@ -305,9 +271,7 @@ public:
    * @param[in] h   specific enthalpy
    * @param[in] s   specific entropy
    */
-  virtual void p_from_h_s(Real h, Real s, Real & p, Real & dp_dh, Real & dp_ds) const;
-  virtual Real dpdh_from_h_s(Real h, Real s) const;
-  virtual Real dpds_from_h_s(Real h, Real s) const;
+  virtual void p_from_h_s(Real h, Real s, Real & p, Real & dp_dh, Real & dp_ds) const = 0;
 
   /**
    * Gibbs free energy from specific volume and specific internal energy
@@ -315,8 +279,7 @@ public:
    * @param[in] v   specific volume
    * @param[in] e   specific internal energy
    */
-  virtual Real g_from_v_e(Real v, Real e) const;
-  virtual Real g(Real v, Real e) const;
+  virtual Real g_from_v_e(Real v, Real e) const = 0;
 
   /**
    * Thermal expansion coefficient from pressure and temperature
@@ -324,8 +287,7 @@ public:
    * @param[in] p   pressure
    * @param[in] T   temperature
    */
-  virtual Real beta_from_p_T(Real p, Real T) const;
-  virtual Real beta(Real p, Real T) const;
+  virtual Real beta_from_p_T(Real p, Real T) const = 0;
 };
 
 #endif /* SINGLEPHASEFLUIDPROPERTIES_H */

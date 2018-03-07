@@ -32,10 +32,10 @@
     function_x = growth_func_x
     function_y = growth_func_y
     function_z = growth_func_z
-    time_start_cut = 0.0
-    time_end_cut = 0.0
-    size_control = 0.05
-    n_step_growth = 50
+# The current gold file does not grow the cutting mesh, but this is something
+# that needs to be tested more in the future.
+#    size_control = 0.05
+#    n_step_growth = 50
   [../]
 []
 

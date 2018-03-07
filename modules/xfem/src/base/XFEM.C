@@ -10,6 +10,7 @@
 #include "XFEM.h"
 
 // XFEM includes
+#include "XFEMAppTypes.h"
 #include "XFEMCutElem2D.h"
 #include "XFEMCutElem3D.h"
 #include "XFEMFuncs.h"
@@ -26,6 +27,7 @@
 #include "NonlinearSystem.h"
 #include "FEProblem.h"
 #include "Assembly.h"
+#include "MooseUtils.h"
 
 #include "libmesh/mesh_communication.h"
 
@@ -151,6 +153,27 @@ XFEM::clearStateMarkedElems()
 }
 
 void
+XFEM::addGeomMarkedElem2D(const unsigned int elem_id, const Xfem::GeomMarkedElemInfo2D geom_info)
+{
+  Elem * elem = _mesh->elem(elem_id);
+  _geom_marked_elems_2d[elem].push_back(geom_info);
+}
+
+void
+XFEM::addGeomMarkedElem3D(const unsigned int elem_id, const Xfem::GeomMarkedElemInfo3D geom_info)
+{
+  Elem * elem = _mesh->elem(elem_id);
+  _geom_marked_elems_3d[elem].push_back(geom_info);
+}
+
+void
+XFEM::clearGeomMarkedElems()
+{
+  _geom_marked_elems_2d.clear();
+  _geom_marked_elems_3d.clear();
+}
+
+void
 XFEM::storeCrackTipOriginAndDirection()
 {
   _elem_crack_origin_direction_map.clear();
@@ -192,9 +215,14 @@ XFEM::storeCrackTipOriginAndDirection()
 bool
 XFEM::update(Real time, NonlinearSystemBase & nl, AuxiliarySystem & aux)
 {
+  if (_moose_mesh->isDistributedMesh())
+    mooseError("Use of XFEM with distributed mesh is not yet supported");
+
   bool mesh_changed = false;
 
   buildEFAMesh();
+
+  _fe_problem->execute(EXEC_XFEM_MARK);
 
   storeCrackTipOriginAndDirection();
 
@@ -233,6 +261,7 @@ XFEM::update(Real time, NonlinearSystemBase & nl, AuxiliarySystem & aux)
   }
 
   clearStateMarkedElems();
+  clearGeomMarkedElems();
 
   return mesh_changed;
 }
@@ -313,89 +342,59 @@ XFEM::markCuts(Real time)
   bool marked_sides = false;
   if (_mesh->mesh_dimension() == 2)
   {
-    marked_sides = markCutEdgesByGeometry(time);
+    marked_sides = markCutEdgesByGeometry();
     marked_sides |= markCutEdgesByState(time);
   }
   else if (_mesh->mesh_dimension() == 3)
   {
-    marked_sides = markCutFacesByGeometry(time);
+    marked_sides = markCutFacesByGeometry();
     marked_sides |= markCutFacesByState();
   }
   return marked_sides;
 }
 
 bool
-XFEM::markCutEdgesByGeometry(Real time)
+XFEM::markCutEdgesByGeometry()
 {
   bool marked_edges = false;
   bool marked_nodes = false;
 
-  std::vector<const GeometricCutUserObject *> active_geometric_cuts;
-  for (unsigned int i = 0; i < _geometric_cuts.size(); ++i)
-    if (_geometric_cuts[i]->active(time))
-    {
-      active_geometric_cuts.push_back(_geometric_cuts[i]);
-    }
-
-  if (active_geometric_cuts.size() > 0)
+  for (const auto & gme : _geom_marked_elems_2d)
   {
-    for (MeshBase::element_iterator elem_it = _mesh->elements_begin();
-         elem_it != _mesh->elements_end();
-         ++elem_it)
+    for (const auto & gmei : gme.second)
     {
-      const Elem * elem = *elem_it;
-      std::vector<CutEdge> elem_cut_edges;
-      std::vector<CutNode> elem_cut_nodes;
-      std::vector<CutEdge> frag_cut_edges;
-      std::vector<std::vector<Point>> frag_edges;
-      EFAElement * EFAelem = _efa_mesh.getElemByID(elem->id());
-      EFAElement2D * CEMElem = dynamic_cast<EFAElement2D *>(EFAelem);
+      EFAElement2D * EFAElem = getEFAElem2D(gme.first);
 
-      if (!CEMElem)
-        mooseError("EFAelem is not of EFAelement2D type");
-
-      // continue if elem has been already cut twice - IMPORTANT
-      if (CEMElem->isFinalCut())
-        continue;
-
-      // get fragment edges
-      getFragmentEdges(elem, CEMElem, frag_edges);
-
-      // mark cut edges for the element and its fragment
-      for (unsigned int i = 0; i < active_geometric_cuts.size(); ++i)
+      for (unsigned int i = 0; i < gmei._elem_cut_edges.size(); ++i) // mark element edges
       {
-        active_geometric_cuts[i]->cutElementByGeometry(elem, elem_cut_edges, elem_cut_nodes, time);
-        if (CEMElem->numFragments() > 0)
-          active_geometric_cuts[i]->cutFragmentByGeometry(frag_edges, frag_cut_edges, time);
-      }
-
-      for (unsigned int i = 0; i < elem_cut_edges.size(); ++i) // mark element edges
-      {
-        if (!CEMElem->isEdgePhantom(elem_cut_edges[i].host_side_id)) // must not be phantom edge
+        if (!EFAElem->isEdgePhantom(
+                gmei._elem_cut_edges[i]._host_side_id)) // must not be phantom edge
         {
-          _efa_mesh.addElemEdgeIntersection(
-              elem->id(), elem_cut_edges[i].host_side_id, elem_cut_edges[i].distance);
+          _efa_mesh.addElemEdgeIntersection(gme.first->id(),
+                                            gmei._elem_cut_edges[i]._host_side_id,
+                                            gmei._elem_cut_edges[i]._distance);
           marked_edges = true;
         }
       }
 
-      for (unsigned int i = 0; i < elem_cut_nodes.size(); ++i) // mark element edges
+      for (unsigned int i = 0; i < gmei._elem_cut_nodes.size(); ++i) // mark element edges
       {
-        _efa_mesh.addElemNodeIntersection(elem->id(), elem_cut_nodes[i].host_id);
+        _efa_mesh.addElemNodeIntersection(gme.first->id(), gmei._elem_cut_nodes[i]._host_id);
         marked_nodes = true;
       }
 
-      for (unsigned int i = 0; i < frag_cut_edges.size();
+      for (unsigned int i = 0; i < gmei._frag_cut_edges.size();
            ++i) // MUST DO THIS AFTER MARKING ELEMENT EDGES
       {
-        if (!CEMElem->getFragment(0)->isSecondaryInteriorEdge(frag_cut_edges[i].host_side_id))
+        if (!EFAElem->getFragment(0)->isSecondaryInteriorEdge(
+                gmei._frag_cut_edges[i]._host_side_id))
         {
-          if (_efa_mesh.addFragEdgeIntersection(
-                  elem->id(), frag_cut_edges[i].host_side_id, frag_cut_edges[i].distance))
+          if (_efa_mesh.addFragEdgeIntersection(gme.first->id(),
+                                                gmei._frag_cut_edges[i]._host_side_id,
+                                                gmei._frag_cut_edges[i]._distance))
           {
             marked_edges = true;
-
-            if (!isElemAtCrackTip(elem))
+            if (!isElemAtCrackTip(gme.first))
               _has_secondary_cut = true;
           }
         }
@@ -557,15 +556,11 @@ XFEM::markCutEdgesByState(Real time)
   {
     const Elem * elem = pmeit->first;
     RealVectorValue normal = pmeit->second;
-    EFAElement * EFAelem = _efa_mesh.getElemByID(elem->id());
-    EFAElement2D * CEMElem = dynamic_cast<EFAElement2D *>(EFAelem);
+    EFAElement2D * CEMElem = getEFAElem2D(elem);
 
     Real volfrac_elem = getPhysicalVolumeFraction(elem);
     if (volfrac_elem < 0.25)
       continue;
-
-    if (!CEMElem)
-      mooseError("EFAelem is not of EFAelement2D type");
 
     // continue if elem is already cut twice - IMPORTANT
     if (CEMElem->isFinalCut())
@@ -766,11 +761,7 @@ XFEM::markCutEdgesByState(Real time)
         {
           const Elem * elem = *elem_it;
           std::vector<CutEdgeForCrackGrowthIncr> elem_cut_edges;
-          EFAElement * EFAelem = _efa_mesh.getElemByID(elem->id());
-          EFAElement2D * CEMElem = dynamic_cast<EFAElement2D *>(EFAelem);
-
-          if (!CEMElem)
-            mooseError("EFAelem is not of EFAelement2D type");
+          EFAElement2D * CEMElem = getEFAElem2D(elem);
 
           // continue if elem has been already cut twice - IMPORTANT
           if (CEMElem->isFinalCut())
@@ -781,10 +772,11 @@ XFEM::markCutEdgesByState(Real time)
 
           for (unsigned int i = 0; i < elem_cut_edges.size(); ++i) // mark element edges
           {
-            if (!CEMElem->isEdgePhantom(elem_cut_edges[i].host_side_id)) // must not be phantom edge
+            if (!CEMElem->isEdgePhantom(
+                    elem_cut_edges[i]._host_side_id)) // must not be phantom edge
             {
               _efa_mesh.addElemEdgeIntersection(
-                  elem->id(), elem_cut_edges[i].host_side_id, elem_cut_edges[i].distance);
+                  elem->id(), elem_cut_edges[i]._host_side_id, elem_cut_edges[i]._distance);
             }
           }
         }
@@ -823,70 +815,37 @@ XFEM::markCutEdgesByState(Real time)
 }
 
 bool
-XFEM::markCutFacesByGeometry(Real time)
+XFEM::markCutFacesByGeometry()
 {
   bool marked_faces = false;
 
-  MeshBase::element_iterator elem_it = _mesh->elements_begin();
-  const MeshBase::element_iterator elem_end = _mesh->elements_end();
-
-  std::vector<const GeometricCutUserObject *> active_geometric_cuts;
-  for (unsigned int i = 0; i < _geometric_cuts.size(); ++i)
-    if (_geometric_cuts[i]->active(time))
-      active_geometric_cuts.push_back(_geometric_cuts[i]);
-
-  if (active_geometric_cuts.size() > 0)
+  for (const auto & gme : _geom_marked_elems_3d)
   {
-    for (MeshBase::element_iterator elem_it = _mesh->elements_begin();
-         elem_it != _mesh->elements_end();
-         ++elem_it)
+    for (const auto & gmei : gme.second)
     {
-      const Elem * elem = *elem_it;
-      std::vector<CutFace> elem_cut_faces;
-      std::vector<CutFace> frag_cut_faces;
-      std::vector<std::vector<Point>> frag_faces;
-      EFAElement * EFAelem = _efa_mesh.getElemByID(elem->id());
-      EFAElement3D * CEMElem = dynamic_cast<EFAElement3D *>(EFAelem);
-      if (!CEMElem)
-        mooseError("EFAelem is not of EFAelement3D type");
+      EFAElement3D * EFAElem = getEFAElem3D(gme.first);
 
-      // continue if elem has been already cut twice - IMPORTANT
-      if (CEMElem->isFinalCut())
-        continue;
-
-      // get fragment faces
-      getFragmentFaces(elem, CEMElem, frag_faces);
-
-      // mark cut faces for the element and its fragment
-      for (unsigned int i = 0; i < active_geometric_cuts.size(); ++i)
+      for (unsigned int i = 0; i < gmei._elem_cut_faces.size(); ++i) // mark element faces
       {
-        active_geometric_cuts[i]->cutElementByGeometry(elem, elem_cut_faces, time);
-        // TODO: This would be done for branching, which is not yet supported in 3D
-        //      if (CEMElem->numFragments() > 0)
-        //        active_geometric_cuts[i]->cutFragmentByGeometry(frag_faces, frag_cut_faces, time);
-      }
-
-      for (unsigned int i = 0; i < elem_cut_faces.size(); ++i) // mark element faces
-      {
-        if (!CEMElem->isFacePhantom(elem_cut_faces[i].face_id)) // must not be phantom face
+        if (!EFAElem->isFacePhantom(gmei._elem_cut_faces[i]._face_id)) // must not be phantom face
         {
-          _efa_mesh.addElemFaceIntersection(elem->id(),
-                                            elem_cut_faces[i].face_id,
-                                            elem_cut_faces[i].face_edge,
-                                            elem_cut_faces[i].position);
+          _efa_mesh.addElemFaceIntersection(gme.first->id(),
+                                            gmei._elem_cut_faces[i]._face_id,
+                                            gmei._elem_cut_faces[i]._face_edge,
+                                            gmei._elem_cut_faces[i]._position);
           marked_faces = true;
         }
       }
 
-      for (unsigned int i = 0; i < frag_cut_faces.size();
+      for (unsigned int i = 0; i < gmei._frag_cut_faces.size();
            ++i) // MUST DO THIS AFTER MARKING ELEMENT EDGES
       {
-        if (!CEMElem->getFragment(0)->isThirdInteriorFace(frag_cut_faces[i].face_id))
+        if (!EFAElem->getFragment(0)->isThirdInteriorFace(gmei._frag_cut_faces[i]._face_id))
         {
-          _efa_mesh.addFragFaceIntersection(elem->id(),
-                                            frag_cut_faces[i].face_id,
-                                            frag_cut_faces[i].face_edge,
-                                            frag_cut_faces[i].position);
+          _efa_mesh.addFragFaceIntersection(gme.first->id(),
+                                            gmei._frag_cut_faces[i]._face_id,
+                                            gmei._frag_cut_faces[i]._face_edge,
+                                            gmei._frag_cut_faces[i]._position);
           marked_faces = true;
         }
       }
@@ -1434,6 +1393,30 @@ XFEM::getFragmentFaces(const Elem * elem,
   }
 }
 
+EFAElement2D *
+XFEM::getEFAElem2D(const Elem * elem)
+{
+  EFAElement * EFAelem = _efa_mesh.getElemByID(elem->id());
+  EFAElement2D * EFAelem2D = dynamic_cast<EFAElement2D *>(EFAelem);
+
+  if (!EFAelem2D)
+    mooseError("EFAelem is not of EFAelement2D type");
+
+  return EFAelem2D;
+}
+
+EFAElement3D *
+XFEM::getEFAElem3D(const Elem * elem)
+{
+  EFAElement * EFAelem = _efa_mesh.getElemByID(elem->id());
+  EFAElement3D * EFAelem3D = dynamic_cast<EFAElement3D *>(EFAelem);
+
+  if (!EFAelem3D)
+    mooseError("EFAelem is not of EFAelement3D type");
+
+  return EFAelem3D;
+}
+
 void
 XFEM::getFragmentEdges(const Elem * elem,
                        EFAElement2D * CEMElem,
@@ -1444,7 +1427,7 @@ XFEM::getFragmentEdges(const Elem * elem,
   if (CEMElem->numFragments() > 0)
   {
     if (CEMElem->numFragments() > 1)
-      mooseError("element ", elem->id(), " has more than one fragments at this point");
+      mooseError("element ", elem->id(), " has more than one fragment at this point");
     for (unsigned int i = 0; i < CEMElem->getFragment(0)->numEdges(); ++i)
     {
       std::vector<Point> p_line(2, Point(0.0, 0.0, 0.0));
@@ -1465,7 +1448,7 @@ XFEM::getFragmentFaces(const Elem * elem,
   if (CEMElem->numFragments() > 0)
   {
     if (CEMElem->numFragments() > 1)
-      mooseError("element ", elem->id(), " has more than one fragments at this point");
+      mooseError("element ", elem->id(), " has more than one fragment at this point");
     for (unsigned int i = 0; i < CEMElem->getFragment(0)->numFaces(); ++i)
     {
       unsigned int num_face_nodes = CEMElem->getFragmentFace(0, i)->numNodes();
