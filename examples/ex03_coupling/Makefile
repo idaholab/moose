@@ -24,7 +24,7 @@ APPLICATION_NAME := ex03
 APPLICATION_DIR    := $(shell pwd)
 APPLICATION_NAME   := ex03
 BUILD_EXEC         := yes
-DEP_APPS           := $(shell $(FRAMEWORK_DIR)/scripts/find_dep_apps.py $(APPLICATION_NAME))
+GEN_REVISION       := no
 include            $(FRAMEWORK_DIR)/app.mk
 include            ../test.mk
 
@@ -36,5 +36,5 @@ ex_deps     := $(patsubst %.C, %.$(obj-suffix).d, $(ex_srcfiles))
 ###############################################################################
 # Additional special case targets should be added here
 
-test: all 
+test: all
 	$(call TEST_exodiff,ex03.i,ex03_out.e)

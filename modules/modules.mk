@@ -51,6 +51,7 @@ MODULE_NAMES := "chemical_reactions contact fluid_properties functional_expansio
 ###############################################################################
 ########################## MODULE REGISTRATION ################################
 ###############################################################################
+GEN_REVISION  := no
 
 ifeq ($(CHEMICAL_REACTIONS),yes)
   APPLICATION_DIR    := $(MOOSE_DIR)/modules/chemical_reactions
@@ -204,3 +205,6 @@ ifneq ($(SKIP_LOADER),yes)
   LIBRARY_SUFFIX     := yes
   include $(FRAMEWORK_DIR)/app.mk
 endif
+
+# Default to Generating revision for most applications
+GEN_REVISION := yes

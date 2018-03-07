@@ -1,6 +1,7 @@
 # This file contains common MOOSE application settings
 # Note: MOOSE applications are assumed to reside in peer directories relative to MOOSE and its modules.
 #       This can be overridden by using the MOOSE_DIR environment variable
+GEN_REVISION ?= yes
 
 # list of application-wide excluded source files
 excluded_srcfiles :=
@@ -13,6 +14,7 @@ STACK := $(STACK).X
 $APPLICATION_DIR$(STACK) := $(APPLICATION_DIR)
 $APPLICATION_NAME$(STACK) := $(APPLICATION_NAME)
 $DEPEND_MODULES$(STACK) := $(DEPEND_MODULES)
+$GEN_REVISION$(STACK) := $(GEN_REVISION)
 $BUILD_EXEC$(STACK) := $(BUILD_EXEC)
 $DEP_APPS$(STACK) := $(DEP_APPS)
 
@@ -24,6 +26,7 @@ $DEP_APPS$(STACK) := $(DEP_APPS)
 APPLICATION_DIR := $($APPLICATION_DIR$(STACK))
 APPLICATION_NAME := $($APPLICATION_NAME$(STACK))
 DEPEND_MODULES := $($DEPEND_MODULES$(STACK))
+GEN_REVISION := $($GEN_REVISION$(STACK))
 BUILD_EXEC := $($BUILD_EXEC$(STACK))
 DEP_APPS := $($DEP_APPS$(STACK))
 STACK := $(basename $(STACK))
@@ -190,9 +193,12 @@ header_symlinks:: $(all_header_dir) $(link_names)
 app_EXEC    := $(APPLICATION_DIR)/$(APPLICATION_NAME)-$(METHOD)
 
 # revision header
-CAMEL_CASE_NAME := $(shell echo $(APPLICATION_NAME) | perl -pe 's/(?:^|_)([a-z])/\u$$1/g')
-app_BASE_DIR    ?= base/
-app_HEADER      ?= $(APPLICATION_DIR)/include/$(app_BASE_DIR)$(CAMEL_CASE_NAME)Revision.h
+ifeq ($(GEN_REVISION),yes)
+  CAMEL_CASE_NAME := $(shell echo $(APPLICATION_NAME) | perl -pe 's/(?:^|_)([a-z])/\u$$1/g')
+  app_BASE_DIR    ?= base/
+  app_HEADER      ?= $(APPLICATION_DIR)/include/$(app_BASE_DIR)$(CAMEL_CASE_NAME)Revision.h
+endif
+
 # depend modules
 depend_libs  := $(foreach i, $(DEPEND_MODULES), $(MOOSE_DIR)/modules/$(i)/lib/lib$(i)-$(METHOD).la)
 

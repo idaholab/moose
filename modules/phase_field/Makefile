@@ -26,7 +26,7 @@ include $(MODULE_DIR)/modules.mk
 APPLICATION_DIR    := $(MODULE_DIR)/phase_field
 APPLICATION_NAME   := phase_field
 BUILD_EXEC         := yes
-DEP_APPS           := $(shell $(FRAMEWORK_DIR)/scripts/find_dep_apps.py $(APPLICATION_NAME))
+GEN_REVISION       := no
 include            $(FRAMEWORK_DIR)/app.mk
 
 ###############################################################################

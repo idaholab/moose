@@ -27,7 +27,7 @@ APPLICATION_DIR    := $(MODULE_DIR)/xfem
 APPLICATION_NAME   := xfem
 BUILD_EXEC         := yes
 DEPEND_MODULES     := solid_mechanics
-DEP_APPS           := $(shell $(FRAMEWORK_DIR)/scripts/find_dep_apps.py $(APPLICATION_NAME))
+GEN_REVISION       := no
 include            $(FRAMEWORK_DIR)/app.mk
 
 ###############################################################################
