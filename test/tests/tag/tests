@@ -1,0 +1,7 @@
+[Tests]
+  [./testtagvector]
+    type = 'Exodiff'
+    input = '2d_diffusion_tag_vector.i'
+    exodiff = 'tag_vector_out.e'
+  [../]
+[]
