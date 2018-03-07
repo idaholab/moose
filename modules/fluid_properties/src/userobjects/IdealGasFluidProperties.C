@@ -119,15 +119,40 @@ Real IdealGasFluidProperties::mu_from_v_e(Real, Real) const { return _mu; }
 
 Real IdealGasFluidProperties::k_from_v_e(Real, Real) const { return _k; }
 
-Real IdealGasFluidProperties::s_from_v_e(Real, Real) const
+Real
+IdealGasFluidProperties::s_from_v_e(Real v, Real e) const
 {
-  mooseError(name(), ": s() not implemented.");
+  const Real T = T_from_v_e(v, e);
+  const Real p = p_from_v_e(v, e);
+  const Real n = std::pow(T, _gamma) / std::pow(p, _gamma - 1.0);
+  if (n <= 0.0)
+    throw MooseException(name() + ": Negative argument in the ln() function.");
+  return _cv * std::log(n);
 }
 
 void
-IdealGasFluidProperties::s_from_v_e(Real, Real, Real &, Real &, Real &) const
+IdealGasFluidProperties::s_from_v_e(Real v, Real e, Real & s, Real & ds_dv, Real & ds_de) const
 {
-  mooseError("Not implemented");
+  Real T, dT_dv, dT_de;
+  T_from_v_e(v, e, T, dT_dv, dT_de);
+
+  Real p, dp_dv, dp_de;
+  p_from_v_e(v, e, p, dp_dv, dp_de);
+
+  const Real n = std::pow(T, _gamma) / std::pow(p, _gamma - 1.0);
+  if (n <= 0.0)
+    throw MooseException(name() + ": Negative argument in the ln() function.");
+
+  s = _cv * std::log(n);
+
+  const Real dn_dT = _gamma * std::pow(T, _gamma - 1.0) / std::pow(p, _gamma - 1.0);
+  const Real dn_dp = std::pow(T, _gamma) * (1.0 - _gamma) * std::pow(p, -_gamma);
+
+  const Real dn_dv = dn_dT * dT_dv + dn_dp * dp_dv;
+  const Real dn_de = dn_dT * dT_de + dn_dp * dp_de;
+
+  ds_dv = _cv / n * dn_dv;
+  ds_de = _cv / n * dn_de;
 }
 
 Real

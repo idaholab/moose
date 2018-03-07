@@ -29,6 +29,9 @@ TEST_F(IdealGasFluidPropertiesTest, testAll)
 
   REL_TEST(_fp->h_from_p_T(p, T), 388093, 4e-7);
 
+  REL_TEST(_fp->s_from_v_e(v, e), 2588.90011905277, REL_TOL_SAVED_VALUE);
+  DERIV_TEST(_fp->s_from_v_e, v, e, REL_TOL_DERIVATIVE)
+
   // derivatives
   p = 1e6;
   T = 500;
