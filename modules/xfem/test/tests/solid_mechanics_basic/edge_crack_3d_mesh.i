@@ -32,9 +32,6 @@
     function_x = null
     function_y = null
     function_z = null
-    time_start_cut = 0.0
-    time_end_cut = 0.0
-    execute_on = timestep_end
   [../]
 []
 

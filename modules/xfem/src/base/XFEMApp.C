@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "XFEMApp.h"
+#include "XFEMAppTypes.h"
 #include "SolidMechanicsApp.h"
 #include "TensorMechanicsApp.h"
 #include "Moose.h"
@@ -17,7 +18,6 @@
 #include "XFEMVolFracAux.h"
 #include "XFEMCutPlaneAux.h"
 #include "XFEMMarkerAux.h"
-#include "XFEMMarkerUserObject.h"
 #include "XFEMMaterialTensorMarkerUserObject.h"
 #include "XFEMRankTwoTensorMarkerUserObject.h"
 #include "XFEMAction.h"
@@ -97,7 +97,6 @@ XFEMApp::registerObjects(Factory & factory)
   registerConstraint(XFEMSingleVariableConstraint);
 
   // UserObjects
-  registerUserObject(XFEMMarkerUserObject);
   registerUserObject(XFEMMaterialTensorMarkerUserObject);
   registerUserObject(XFEMRankTwoTensorMarkerUserObject);
 
@@ -157,6 +156,7 @@ XFEMApp__registerExecFlags(Factory & factory)
   XFEMApp::registerExecFlags(factory);
 }
 void
-XFEMApp::registerExecFlags(Factory & /*factory*/)
+XFEMApp::registerExecFlags(Factory & factory)
 {
+  registerExecFlag(EXEC_XFEM_MARK);
 }

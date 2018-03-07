@@ -28,7 +28,7 @@ protected:
   const Real _factor;
   Function * const _function;
 
-  std::map<unsigned int, MooseSharedPointer<ElementPairLocator>> * _element_pair_locators;
+  std::map<unsigned int, std::shared_ptr<ElementPairLocator>> * _element_pair_locators;
   std::map<const Elem *, std::map<unsigned int, Point>> _elem_qp_normal;
   std::map<const Elem *, std::map<unsigned int, Real>> _elem_qp_JxW;
 };

@@ -19,38 +19,84 @@
 
 using namespace libMesh;
 
+class XFEM;
+
+namespace Xfem
+{
+/// Data structure defining a cut on an element edge
 struct CutEdge
 {
-  unsigned int id1;
-  unsigned int id2;
-  Real distance;
-  unsigned int host_side_id;
+  /// ID of the first node on the edge
+  unsigned int _id1;
+  /// ID of the second node on the edge
+  unsigned int _id2;
+  /// Fractional distance along the edge (from node 1 to 2) where the cut is located
+  Real _distance;
+  /// Local ID of this side in the host element
+  unsigned int _host_side_id;
 };
 
 /**
- * To allow the use of std::set<CutEdge>, the operator of < has to be overloaded for CutEdge.
+ * Operator < for two CutEdge Objects
+ * Needed to allow the use of std::set<CutEdge>
+ * @param  lhs  CutEdge object on the left side of the comparison
+ * @param  rhs  CutEdge object on the right side of the comparison
+ * @return bool true if lhs < rhs
  */
 inline bool
 operator<(const CutEdge & lhs, const CutEdge & rhs)
 {
-  if (lhs.id1 != rhs.id1)
-    return lhs.id1 < rhs.id1;
+  if (lhs._id1 != rhs._id1)
+    return lhs._id1 < rhs._id1;
   else
-    return lhs.id2 < rhs.id2;
+    return lhs._id2 < rhs._id2;
 }
 
+/// Data structure defining a cut through a node
 struct CutNode
 {
-  unsigned int id;
-  unsigned int host_id;
+  /// ID of the cut node
+  unsigned int _id;
+  /// Local ID of this node in the host element
+  unsigned int _host_id;
 };
 
+/// Data structure defining a cut through a face
 struct CutFace
 {
-  unsigned int face_id;
-  std::vector<unsigned int> face_edge;
-  std::vector<Real> position;
+  /// ID of the cut face
+  unsigned int _face_id;
+  /// IDs of all cut faces
+  std::vector<unsigned int> _face_edge;
+  /// Fractional distance along the cut edges where the cut is located
+  std::vector<Real> _position;
 };
+
+/// Data structure describing geometrically described cut through 2D element
+struct GeomMarkedElemInfo2D
+{
+  /// Container for data about all cut edges in this element
+  std::vector<CutEdge> _elem_cut_edges;
+  /// Container for data about all cut nodes in this element
+  std::vector<CutNode> _elem_cut_nodes;
+  /// Container for data about all cut fragments in this element
+  std::vector<CutEdge> _frag_cut_edges;
+  /// Container for data about all cut edges in cut fragments in this element
+  std::vector<std::vector<Point>> _frag_edges;
+};
+
+/// Data structure describing geometrically described cut through 3D element
+struct GeomMarkedElemInfo3D
+{
+  /// Container for data about all cut faces in this element
+  std::vector<CutFace> _elem_cut_faces;
+  /// Container for data about all faces this element's fragment
+  std::vector<CutFace> _frag_cut_faces;
+  /// Container for data about all cut faces in cut fragments in this element
+  std::vector<std::vector<Point>> _frag_faces;
+};
+
+} // namespace Xfem
 
 // Forward declarations
 class GeometricCutUserObject;
@@ -67,26 +113,72 @@ public:
    */
   GeometricCutUserObject(const InputParameters & parameters);
 
-  virtual bool active(Real time) const = 0;
+  virtual void initialize() override;
+  virtual void execute() override;
+  virtual void threadJoin(const UserObject & y) override;
+  virtual void finalize() override;
 
+  /**
+   * Check to see whether a specified 2D element should be cut based on geometric
+   * conditions
+   * @param elem      Pointer to the libMesh element to be considered for cutting
+   * @param cut_edges Data structure filled with information about edges to be cut
+   * @param cut_nodes Data structure filled with information about nodes to be cut
+   * @param time      Current simulation time
+   * @return bool     true if element is to be cut
+   */
   virtual bool cutElementByGeometry(const Elem * elem,
-                                    std::vector<CutEdge> & cut_edges,
-                                    std::vector<CutNode> & cut_nodes,
+                                    std::vector<Xfem::CutEdge> & cut_edges,
+                                    std::vector<Xfem::CutNode> & cut_nodes,
                                     Real time) const = 0;
-  virtual bool
-  cutElementByGeometry(const Elem * elem, std::vector<CutFace> & cut_faces, Real time) const = 0;
 
+  /**
+   * Check to see whether a specified 3D element should be cut based on geometric
+   * conditions
+   * @param elem      Pointer to the libMesh element to be considered for cutting
+   * @param cut_faces Data structure filled with information about edges to be cut
+   * @param time      Current simulation time
+   * @return bool     true if element is to be cut
+   */
+  virtual bool cutElementByGeometry(const Elem * elem,
+                                    std::vector<Xfem::CutFace> & cut_faces,
+                                    Real time) const = 0;
+
+  /**
+   * Check to see whether a fragment of a 2D element should be cut based on geometric conditions
+   * @param frag_edges Data structure defining the current fragment to be considered
+   * @param cut_edges  Data structure filled with information about fragment edges to be cut
+   * @param time       Current simulation time
+   * @return bool      true if fragment is to be cut
+   */
   virtual bool cutFragmentByGeometry(std::vector<std::vector<Point>> & frag_edges,
-                                     std::vector<CutEdge> & cut_edges,
-                                     Real time) const = 0;
-  virtual bool cutFragmentByGeometry(std::vector<std::vector<Point>> & frag_faces,
-                                     std::vector<CutFace> & cut_faces,
+                                     std::vector<Xfem::CutEdge> & cut_edges,
                                      Real time) const = 0;
 
-  Real cutFraction(unsigned int cut_num, Real time) const;
+  /**
+   * Check to see whether a fragment of a 3D element should be cut based on geometric conditions
+   * @param frag_faces Data structure defining the current fragment to be considered
+   * @param cut_faces  Data structure filled with information about fragment faces to be cut
+   * @param time       Current simulation time
+   * @return bool      true if fragment is to be cut
+   */
+  virtual bool cutFragmentByGeometry(std::vector<std::vector<Point>> & frag_faces,
+                                     std::vector<Xfem::CutFace> & cut_faces,
+                                     Real time) const = 0;
 
 protected:
-  std::vector<std::pair<Real, Real>> _cut_time_ranges;
+  /// Pointer to the XFEM controller object
+  std::shared_ptr<XFEM> _xfem;
+
+  ///@{Containers with information about all 2D and 3D elements marked for cutting by this object
+  std::map<unsigned int, std::vector<Xfem::GeomMarkedElemInfo2D>> _marked_elems_2d;
+  std::map<unsigned int, std::vector<Xfem::GeomMarkedElemInfo3D>> _marked_elems_3d;
+  ///@}
+
+  ///@{ Methods to pack/unpack the _marked_elems_2d and _marked_elems_3d data into a structure suitable for parallel communication
+  void serialize(std::string & serialized_buffer);
+  void deserialize(std::vector<std::string> & serialized_buffers);
+  ///@}
 };
 
 #endif // GEOMETRICCUTUSEROBJECT_H

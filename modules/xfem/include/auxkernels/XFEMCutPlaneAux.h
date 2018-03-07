@@ -28,7 +28,7 @@ protected:
 
 private:
   Xfem::XFEM_CUTPLANE_QUANTITY _quantity;
-  MooseSharedPointer<XFEM> _xfem;
+  std::shared_ptr<XFEM> _xfem;
   unsigned int _plane_id;
 };
 

@@ -4,7 +4,6 @@
 []
 
 [XFEM]
-  geometric_cut_userobjects = 'circle_cut_uo'
   qrule = volfrac
   output_cut_plane = true
 []

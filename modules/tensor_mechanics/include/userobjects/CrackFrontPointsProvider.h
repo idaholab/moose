@@ -10,7 +10,7 @@
 #ifndef CRACKFRONTPOINTSPROVIDER_H
 #define CRACKFRONTPOINTSPROVIDER_H
 
-#include "GeneralUserObject.h"
+#include "ElementUserObject.h"
 
 class CrackFrontPointsProvider;
 
@@ -20,7 +20,7 @@ InputParameters validParams<CrackFrontPointsProvider>();
 /**
  * Base class for crack front points provider
  */
-class CrackFrontPointsProvider : public GeneralUserObject
+class CrackFrontPointsProvider : public ElementUserObject
 {
 public:
   CrackFrontPointsProvider(const InputParameters & parameters);

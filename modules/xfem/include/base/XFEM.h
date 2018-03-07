@@ -75,6 +75,25 @@ public:
   void clearStateMarkedElems();
 
   /**
+   * Add information about a new cut to be performed on a specific 2d element
+   * @param elem_id   The id of the element to be cut
+   * @param geom_info The object containing information about the cut to be performed
+   */
+  void addGeomMarkedElem2D(const unsigned int elem_id, const Xfem::GeomMarkedElemInfo2D geom_info);
+
+  /**
+   * Add information about a new cut to be performed on a specific 3d element
+   * @param elem_id   The id of the element to be cut
+   * @param geom_info The object containing information about the cut to be performed
+   */
+  void addGeomMarkedElem3D(const unsigned int elem_id, const Xfem::GeomMarkedElemInfo3D geom_info);
+
+  /**
+   * Clear out the list of elements to be marked for cutting. Called after cutting is done.
+   */
+  void clearGeomMarkedElems();
+
+  /**
    * Method to update the mesh due to modified cut planes
    */
   virtual bool update(Real time, NonlinearSystemBase & nl, AuxiliarySystem & aux);
@@ -86,9 +105,9 @@ public:
 
   void buildEFAMesh();
   bool markCuts(Real time);
-  bool markCutEdgesByGeometry(Real time);
+  bool markCutEdgesByGeometry();
   bool markCutEdgesByState(Real time);
-  bool markCutFacesByGeometry(Real time);
+  bool markCutFacesByGeometry();
   bool markCutFacesByState();
   bool initCutIntersectionEdge(
       Point cut_origin, RealVectorValue cut_normal, Point & edge_p1, Point & edge_p2, Real & dist);
@@ -172,7 +191,18 @@ public:
                                      std::vector<Real> & quad_wts) const;
   bool has_secondary_cut() { return _has_secondary_cut; }
 
-private:
+  /**
+   * Get the EFAElement2D object for a specified libMesh element
+   * @param elem Pointer to the libMesh element for which the object is requested
+   */
+  EFAElement2D * getEFAElem2D(const Elem * elem);
+
+  /**
+   * Get the EFAElement3D object for a specified libMesh element
+   * @param elem Pointer to the libMesh element for which the object is requested
+   */
+  EFAElement3D * getEFAElem3D(const Elem * elem);
+
   void getFragmentEdges(const Elem * elem,
                         EFAElement2D * CEMElem,
                         std::vector<std::vector<Point>> & frag_edges) const;
@@ -202,6 +232,12 @@ private:
   std::map<const Elem *, RealVectorValue> _state_marked_elems;
   std::set<const Elem *> _state_marked_frags;
   std::map<const Elem *, unsigned int> _state_marked_elem_sides;
+
+  /// Data structure for storing information about all 2D elements to be cut by geometry
+  std::map<const Elem *, std::vector<Xfem::GeomMarkedElemInfo2D>> _geom_marked_elems_2d;
+
+  /// Data structure for storing information about all 3D elements to be cut by geometry
+  std::map<const Elem *, std::vector<Xfem::GeomMarkedElemInfo3D>> _geom_marked_elems_3d;
 
   ElementFragmentAlgorithm _efa_mesh;
 

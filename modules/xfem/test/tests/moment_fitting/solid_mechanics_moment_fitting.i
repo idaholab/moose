@@ -7,7 +7,6 @@
 []
 
 [XFEM]
-  geometric_cut_userobjects = 'line_seg_cut_uo0  line_seg_cut_uo1'
   qrule = moment_fitting
   output_cut_plane = true
 []
