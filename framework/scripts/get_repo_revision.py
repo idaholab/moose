@@ -116,11 +116,11 @@ def svnVersionString( cwd=None ):
 
 
 def repoVersionString( cwd=None ):
-    version = svnVersionString( cwd )
+    version = gitVersionString( cwd )
+    if version is None:
+        version = svnVersionString( cwd )
     if version is None:
         version = gitSvnVersionString( cwd )
-    if version is None:
-        version = gitVersionString( cwd )
     if version is None:
         version = "unknown"
     return version
