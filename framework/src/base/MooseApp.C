@@ -94,6 +94,10 @@ validParams<MooseApp>()
       "definition", "--definition", "Shows a SON style input definition dump for input validation");
   params.addCommandLineParam<std::string>(
       "dump", "--dump [search_string]", "Shows a dump of available input file syntax.");
+  params.addCommandLineParam<bool>(
+      "registry", "--registry", "Lists all known objects and actions.");
+  params.addCommandLineParam<bool>(
+      "registry_hit", "--registry-hit", "Lists all known objects and actions in hit format.");
   params.addCommandLineParam<std::string>(
       "yaml", "--yaml", "Dumps input file syntax in YAML format.");
   params.addCommandLineParam<std::string>(
@@ -437,6 +441,89 @@ MooseApp::setupOptions()
     JsonInputFileFormatter formatter;
     Moose::out << "### START DUMP DATA ###\n"
                << formatter.toString(tree.getRoot()) << "\n### END DUMP DATA ###\n";
+    _ready_to_exit = true;
+  }
+  else if (isParamValid("registry"))
+  {
+    Moose::out << "Label\tType\tName\tClass\tFile\n";
+
+    auto & objmap = Registry::allObjects();
+    for (auto & entry : objmap)
+    {
+      for (auto & obj : entry.second)
+      {
+        std::string name = obj._name;
+        if (name.empty())
+          name = obj._alias;
+        if (name.empty())
+          name = obj._classname;
+
+        Moose::out << entry.first << "\tobject\t" << name << "\t" << obj._classname << "\t"
+                   << obj._file << "\n";
+      }
+    }
+
+    auto & actmap = Registry::allActions();
+    for (auto & entry : actmap)
+    {
+      for (auto & act : entry.second)
+        Moose::out << entry.first << "\taction\t" << act._name << "\t" << act._classname << "\t"
+                   << act._file << "\n";
+    }
+
+    _ready_to_exit = true;
+  }
+  else if (isParamValid("registry_hit"))
+  {
+    Moose::out << "### START REGISTRY DATA ###\n";
+
+    hit::Section root("");
+    auto sec = new hit::Section("registry");
+    root.addChild(sec);
+    auto objsec = new hit::Section("objects");
+    sec->addChild(objsec);
+
+    auto & objmap = Registry::allObjects();
+    for (auto & entry : objmap)
+    {
+      for (auto & obj : entry.second)
+      {
+        std::string name = obj._name;
+        if (name.empty())
+          name = obj._alias;
+        if (name.empty())
+          name = obj._classname;
+
+        auto ent = new hit::Section("entry");
+        objsec->addChild(ent);
+        ent->addChild(new hit::Field("label", hit::Field::Kind::String, entry.first));
+        ent->addChild(new hit::Field("type", hit::Field::Kind::String, "object"));
+        ent->addChild(new hit::Field("name", hit::Field::Kind::String, name));
+        ent->addChild(new hit::Field("class", hit::Field::Kind::String, obj._classname));
+        ent->addChild(new hit::Field("file", hit::Field::Kind::String, obj._file));
+      }
+    }
+
+    auto actsec = new hit::Section("actions");
+    sec->addChild(actsec);
+    auto & actmap = Registry::allActions();
+    for (auto & entry : actmap)
+    {
+      for (auto & act : entry.second)
+      {
+        auto ent = new hit::Section("entry");
+        actsec->addChild(ent);
+        ent->addChild(new hit::Field("label", hit::Field::Kind::String, entry.first));
+        ent->addChild(new hit::Field("type", hit::Field::Kind::String, "action"));
+        ent->addChild(new hit::Field("task", hit::Field::Kind::String, act._name));
+        ent->addChild(new hit::Field("class", hit::Field::Kind::String, act._classname));
+        ent->addChild(new hit::Field("file", hit::Field::Kind::String, act._file));
+      }
+    }
+
+    Moose::out << root.render();
+
+    Moose::out << "\n### END REGISTRY DATA ###\n";
     _ready_to_exit = true;
   }
   else if (isParamValid("definition"))
