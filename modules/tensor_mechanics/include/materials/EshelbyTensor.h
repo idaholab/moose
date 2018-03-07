@@ -39,13 +39,13 @@ protected:
   MaterialProperty<RankTwoTensor> & _eshelby_tensor;
   const MaterialProperty<RankTwoTensor> & _stress;
   const MaterialProperty<RankTwoTensor> & _stress_old;
-  const MaterialProperty<RankTwoTensor> * _strain_increment;
-  const MaterialProperty<RankTwoTensor> * _mechanical_strain;
   std::vector<const VariableGradient *> _grad_disp;
 
   MaterialProperty<RealVectorValue> & _J_thermal_term_vec;
-  const bool _has_temp;
   const VariableGradient & _grad_temp;
+  const bool _has_temp;
+  const MaterialProperty<RankTwoTensor> & _mechanical_strain;
+  const MaterialProperty<RankTwoTensor> & _mechanical_strain_old;
   const MaterialProperty<RankTwoTensor> * _total_deigenstrain_dT;
 };
 
