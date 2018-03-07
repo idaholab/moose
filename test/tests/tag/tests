@@ -4,4 +4,10 @@
     input = '2d_diffusion_tag_vector.i'
     exodiff = 'tag_vector_out.e'
   [../]
+
+  [./testtagmatrix]
+    type = 'Exodiff'
+    input = '2d_diffusion_tag_matrix.i'
+    exodiff = 'tag_matrix_out.e'
+  [../]
 []
