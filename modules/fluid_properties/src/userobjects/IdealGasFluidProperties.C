@@ -119,15 +119,40 @@ Real IdealGasFluidProperties::mu_from_v_e(Real, Real) const { return _mu; }
 
 Real IdealGasFluidProperties::k_from_v_e(Real, Real) const { return _k; }
 
-Real IdealGasFluidProperties::s_from_v_e(Real, Real) const
+Real
+IdealGasFluidProperties::s_from_v_e(Real v, Real e) const
 {
-  mooseError(name(), ": s() not implemented.");
+  const Real T = T_from_v_e(v, e);
+  const Real p = p_from_v_e(v, e);
+  const Real n = std::pow(T, _gamma) / std::pow(p, _gamma - 1.0);
+  if (n <= 0.0)
+    throw MooseException(name() + ": Negative argument in the ln() function.");
+  return _cv * std::log(n);
 }
 
 void
-IdealGasFluidProperties::s_from_v_e(Real, Real, Real &, Real &, Real &) const
+IdealGasFluidProperties::s_from_v_e(Real v, Real e, Real & s, Real & ds_dv, Real & ds_de) const
 {
-  mooseError("Not implemented");
+  Real T, dT_dv, dT_de;
+  T_from_v_e(v, e, T, dT_dv, dT_de);
+
+  Real p, dp_dv, dp_de;
+  p_from_v_e(v, e, p, dp_dv, dp_de);
+
+  const Real n = std::pow(T, _gamma) / std::pow(p, _gamma - 1.0);
+  if (n <= 0.0)
+    throw MooseException(name() + ": Negative argument in the ln() function.");
+
+  s = _cv * std::log(n);
+
+  const Real dn_dT = _gamma * std::pow(T, _gamma - 1.0) / std::pow(p, _gamma - 1.0);
+  const Real dn_dp = std::pow(T, _gamma) * (1.0 - _gamma) * std::pow(p, -_gamma);
+
+  const Real dn_dv = dn_dT * dT_dv + dn_dp * dp_dv;
+  const Real dn_de = dn_dT * dT_de + dn_dp * dp_de;
+
+  ds_dv = _cv / n * dn_dv;
+  ds_de = _cv / n * dn_de;
 }
 
 Real
@@ -152,12 +177,37 @@ IdealGasFluidProperties::s_from_h_p(Real h, Real p, Real & s, Real & ds_dh, Real
   ds_dp = -(_gamma - 1) * _cv / aux * daux_dp;
 }
 
-Real IdealGasFluidProperties::rho_from_p_s(Real, Real) const { mooseError("Not implemented"); }
+Real
+IdealGasFluidProperties::rho_from_p_s(Real p, Real s) const
+{
+  const Real aux = (s + _cv * std::log(std::pow(p, _gamma - 1.0))) / _cv;
+  const Real T = std::pow(std::exp(aux), 1.0 / _gamma);
+  return rho_from_p_T(p, T);
+}
 
 void
-IdealGasFluidProperties::rho_from_p_s(Real, Real, Real &, Real &, Real &) const
+IdealGasFluidProperties::rho_from_p_s(
+    Real p, Real s, Real & rho, Real & drho_dp, Real & drho_ds) const
 {
-  mooseError("Not implemented");
+  // T(p,s)
+  const Real aux = (s + _cv * std::log(std::pow(p, _gamma - 1.0))) / _cv;
+  const Real T = std::pow(std::exp(aux), 1 / _gamma);
+
+  // dT/dp
+  const Real dT_dp = 1.0 / _gamma * std::pow(std::exp(aux), 1.0 / _gamma - 1.0) * std::exp(aux) /
+                     std::pow(p, _gamma - 1.0) * (_gamma - 1.0) * std::pow(p, _gamma - 2.0);
+
+  // dT/ds
+  const Real dT_ds =
+      1.0 / _gamma * std::pow(std::exp(aux), 1.0 / _gamma - 1.0) * std::exp(aux) / _cv;
+
+  // Drho/Dp = d/dp[rho(p, T(p,s))] = drho/dp + drho/dT * dT/dp
+  Real drho_dp_partial, drho_dT;
+  rho_from_p_T(p, T, rho, drho_dp_partial, drho_dT);
+  drho_dp = drho_dp_partial + drho_dT * dT_dp;
+
+  // Drho/Ds = d/ds[rho(p, T(p,s))] = drho/dT * dT/ds
+  drho_ds = drho_dT * dT_ds;
 }
 
 Real
@@ -227,15 +277,22 @@ IdealGasFluidProperties::h_from_p_T(Real p, Real T, Real & h, Real & dh_dp, Real
   dh_dT = _cv + p / rho / T;
 }
 
-Real IdealGasFluidProperties::p_from_h_s(Real /*h*/, Real /*s*/) const
+Real
+IdealGasFluidProperties::p_from_h_s(Real h, Real s) const
 {
-  mooseError(name(), ": p_from_h_s() not implemented.");
+  return std::pow(h / (_gamma * _cv), _gamma / (_gamma - 1.0)) *
+         std::exp(-s / ((_gamma - 1.0) * _cv));
 }
 
 void
-IdealGasFluidProperties::p_from_h_s(Real, Real, Real &, Real &, Real &) const
+IdealGasFluidProperties::p_from_h_s(Real h, Real s, Real & p, Real & dp_dh, Real & dp_ds) const
 {
-  mooseError("Not implemented");
+  p = p_from_h_s(h, s);
+  dp_dh = _gamma / (_gamma - 1.0) / (_gamma * _cv) *
+          std::pow(h / (_gamma * _cv), 1.0 / (_gamma - 1.0)) *
+          std::exp(-s / ((_gamma - 1.0) * _cv));
+  dp_ds = std::pow(h / (_gamma * _cv), _gamma / (_gamma - 1)) *
+          std::exp(-s / ((_gamma - 1) * _cv)) / ((1 - _gamma) * _cv);
 }
 
 Real
