@@ -263,7 +263,7 @@ class TestJSON(unittest.TestCase):
         fi = adapt["tasks"]["set_adaptivity_options"]["file_info"]
         self.assertEqual(len(fi.keys()), 1)
         fname = fi.keys()[0]
-        self.assertTrue(fname.endswith(os.path.join("src", "base", "Moose.C")))
+        self.assertTrue(fname.endswith(os.path.join("src", "actions", "SetAdaptivityOptionsAction.C")))
         self.assertGreater(fi[fname], 0)
 
 if __name__ == '__main__':
