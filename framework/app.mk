@@ -1,6 +1,9 @@
 # This file contains common MOOSE application settings
 # Note: MOOSE applications are assumed to reside in peer directories relative to MOOSE and its modules.
-#       This can be overridden by using the MOOSE_DIR environment variable
+#       This can be overridden by using the MOOSE_DIR environment variable.
+
+# This variable is used to determine whether a C++ header revision file is generated for use
+# in your application. You can turn it on/off by changing it in your application Makefile.
 GEN_REVISION ?= yes
 
 # list of application-wide excluded source files
