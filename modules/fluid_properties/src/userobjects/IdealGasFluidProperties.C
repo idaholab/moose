@@ -277,15 +277,22 @@ IdealGasFluidProperties::h_from_p_T(Real p, Real T, Real & h, Real & dh_dp, Real
   dh_dT = _cv + p / rho / T;
 }
 
-Real IdealGasFluidProperties::p_from_h_s(Real /*h*/, Real /*s*/) const
+Real
+IdealGasFluidProperties::p_from_h_s(Real h, Real s) const
 {
-  mooseError(name(), ": p_from_h_s() not implemented.");
+  return std::pow(h / (_gamma * _cv), _gamma / (_gamma - 1.0)) *
+         std::exp(-s / ((_gamma - 1.0) * _cv));
 }
 
 void
-IdealGasFluidProperties::p_from_h_s(Real, Real, Real &, Real &, Real &) const
+IdealGasFluidProperties::p_from_h_s(Real h, Real s, Real & p, Real & dp_dh, Real & dp_ds) const
 {
-  mooseError("Not implemented");
+  p = p_from_h_s(h, s);
+  dp_dh = _gamma / (_gamma - 1.0) / (_gamma * _cv) *
+          std::pow(h / (_gamma * _cv), 1.0 / (_gamma - 1.0)) *
+          std::exp(-s / ((_gamma - 1.0) * _cv));
+  dp_ds = std::pow(h / (_gamma * _cv), _gamma / (_gamma - 1)) *
+          std::exp(-s / ((_gamma - 1) * _cv)) / ((1 - _gamma) * _cv);
 }
 
 Real

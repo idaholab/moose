@@ -18,6 +18,10 @@ TEST_F(IdealGasFluidPropertiesTest, testAll)
   const Real v = 1 / rho;
   const Real e = _fp->e_from_p_rho(p, rho);
   const Real s = _fp->s_from_v_e(v, e);
+  const Real h = _fp->h_from_p_T(p, T);
+
+  REL_TEST(_fp->p_from_h_s(h, s), p, REL_TOL_CONSISTENCY);
+  DERIV_TEST(_fp->p_from_h_s, h, s, REL_TOL_DERIVATIVE);
 
   REL_TEST(rho, 0.897875065343506, 1e-15);
   REL_TEST(_fp->rho_from_p_s(p, s), rho, REL_TOL_CONSISTENCY);
@@ -31,7 +35,7 @@ TEST_F(IdealGasFluidPropertiesTest, testAll)
   REL_TEST(_fp->cp_from_v_e(v, e), 987.13756097561, 1e-15);
   REL_TEST(_fp->cv_from_v_e(v, e), 700.09756097561, 1e-15);
 
-  REL_TEST(_fp->h_from_p_T(p, T), 388093, 4e-7);
+  REL_TEST(h, 388093, 4e-7);
 
   REL_TEST(s, 2588.90011905277, REL_TOL_SAVED_VALUE);
   DERIV_TEST(_fp->s_from_v_e, v, e, REL_TOL_DERIVATIVE);
