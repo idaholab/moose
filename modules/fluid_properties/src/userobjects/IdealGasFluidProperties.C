@@ -177,12 +177,37 @@ IdealGasFluidProperties::s_from_h_p(Real h, Real p, Real & s, Real & ds_dh, Real
   ds_dp = -(_gamma - 1) * _cv / aux * daux_dp;
 }
 
-Real IdealGasFluidProperties::rho_from_p_s(Real, Real) const { mooseError("Not implemented"); }
+Real
+IdealGasFluidProperties::rho_from_p_s(Real p, Real s) const
+{
+  const Real aux = (s + _cv * std::log(std::pow(p, _gamma - 1.0))) / _cv;
+  const Real T = std::pow(std::exp(aux), 1.0 / _gamma);
+  return rho_from_p_T(p, T);
+}
 
 void
-IdealGasFluidProperties::rho_from_p_s(Real, Real, Real &, Real &, Real &) const
+IdealGasFluidProperties::rho_from_p_s(
+    Real p, Real s, Real & rho, Real & drho_dp, Real & drho_ds) const
 {
-  mooseError("Not implemented");
+  // T(p,s)
+  const Real aux = (s + _cv * std::log(std::pow(p, _gamma - 1.0))) / _cv;
+  const Real T = std::pow(std::exp(aux), 1 / _gamma);
+
+  // dT/dp
+  const Real dT_dp = 1.0 / _gamma * std::pow(std::exp(aux), 1.0 / _gamma - 1.0) * std::exp(aux) /
+                     std::pow(p, _gamma - 1.0) * (_gamma - 1.0) * std::pow(p, _gamma - 2.0);
+
+  // dT/ds
+  const Real dT_ds =
+      1.0 / _gamma * std::pow(std::exp(aux), 1.0 / _gamma - 1.0) * std::exp(aux) / _cv;
+
+  // Drho/Dp = d/dp[rho(p, T(p,s))] = drho/dp + drho/dT * dT/dp
+  Real drho_dp_partial, drho_dT;
+  rho_from_p_T(p, T, rho, drho_dp_partial, drho_dT);
+  drho_dp = drho_dp_partial + drho_dT * dT_dp;
+
+  // Drho/Ds = d/ds[rho(p, T(p,s))] = drho/dT * dT/ds
+  drho_ds = drho_dT * dT_ds;
 }
 
 Real
