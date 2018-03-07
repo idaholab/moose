@@ -13,7 +13,7 @@
 #include "gtest_include.h"
 
 #include "MooseApp.h"
-#include "Utils.h"
+#include "SinglePhaseFluidPropertiesUtils.h"
 #include "FEProblem.h"
 #include "AppFactory.h"
 #include "GeneratedMesh.h"

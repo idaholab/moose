@@ -18,16 +18,16 @@ TEST_F(IdealGasFluidPropertiesTest, testAll)
   Real v = 1 / rho;
   Real e = _fp->e_from_p_rho(p, rho);
 
-  REL_TEST("rho", _fp->rho_from_p_T(p, T), 0.897875065343506, 1e-15);
-  REL_TEST("e", e, 275243.356097561, 1e-15);
+  REL_TEST(_fp->rho_from_p_T(p, T), 0.897875065343506, 1e-15);
+  REL_TEST(e, 275243.356097561, 1e-15);
 
-  REL_TEST("p", _fp->p_from_v_e(v, e), p, 1e-15);
-  REL_TEST("T", _fp->T_from_v_e(v, e), T, 1e-15);
-  REL_TEST("c", _fp->c_from_v_e(v, e), 398.896207251962, 1e-15);
-  REL_TEST("cp", _fp->cp_from_v_e(v, e), 987.13756097561, 1e-15);
-  REL_TEST("cv", _fp->cv_from_v_e(v, e), 700.09756097561, 1e-15);
+  REL_TEST(_fp->p_from_v_e(v, e), p, 1e-15);
+  REL_TEST(_fp->T_from_v_e(v, e), T, 1e-15);
+  REL_TEST(_fp->c_from_v_e(v, e), 398.896207251962, 1e-15);
+  REL_TEST(_fp->cp_from_v_e(v, e), 987.13756097561, 1e-15);
+  REL_TEST(_fp->cv_from_v_e(v, e), 700.09756097561, 1e-15);
 
-  REL_TEST("h", _fp->h_from_p_T(p, T), 388093, 4e-7);
+  REL_TEST(_fp->h_from_p_T(p, T), 388093, 4e-7);
 
   // derivatives
   p = 1e6;
@@ -48,10 +48,10 @@ TEST_F(IdealGasFluidPropertiesTest, testAll)
     Real T, dT_dv, dT_de;
     _fp->T_from_v_e(v, e, T, dT_dv, dT_de);
 
-    ABS_TEST("dp_dv", dp_dv, dp_dv_fd, 4e-6);
-    ABS_TEST("dp_de", dp_de, dp_de_fd, 1e-8);
-    ABS_TEST("dT_dv", dT_dv, dT_dv_fd, 1e-15);
-    ABS_TEST("dT_de", dT_de, dT_de_fd, 1e-11);
+    ABS_TEST(dp_dv, dp_dv_fd, 4e-6);
+    ABS_TEST(dp_de, dp_de_fd, 1e-8);
+    ABS_TEST(dT_dv, dT_dv_fd, 1e-15);
+    ABS_TEST(dT_de, dT_de_fd, 1e-11);
   }
 
   Real dp = 1e1;
@@ -64,9 +64,9 @@ TEST_F(IdealGasFluidPropertiesTest, testAll)
     Real rho = 0, drho_dp = 0, drho_dT = 0;
     _fp->rho_from_p_T(p, T, rho, drho_dp, drho_dT);
 
-    ABS_TEST("rho", rho, _fp->rho_from_p_T(p, T), 1e-15);
-    ABS_TEST("drho_dp", drho_dp, drho_dp_fd, 1e-15);
-    ABS_TEST("drho_dT", drho_dT, drho_dT_fd, 1e-11);
+    ABS_TEST(rho, _fp->rho_from_p_T(p, T), 1e-15);
+    ABS_TEST(drho_dp, drho_dp_fd, 1e-15);
+    ABS_TEST(drho_dT, drho_dT_fd, 1e-11);
   }
 
   rho = _fp->rho_from_p_T(p, T);
@@ -80,9 +80,9 @@ TEST_F(IdealGasFluidPropertiesTest, testAll)
     Real de_dp = 0, de_drho = 0;
     _fp->e_from_p_rho(p, rho, e, de_dp, de_drho);
 
-    ABS_TEST("e", e, _fp->e_from_p_rho(p, rho), 1e-16);
-    ABS_TEST("de_dp", de_dp, de_dp_fd, 5e-11);
-    ABS_TEST("de_drho", de_drho, de_drho_fd, 5e-5);
+    ABS_TEST(e, _fp->e_from_p_rho(p, rho), 1e-16);
+    ABS_TEST(de_dp, de_dp_fd, 5e-11);
+    ABS_TEST(de_drho, de_drho_fd, 5e-5);
   }
 
   {
@@ -93,9 +93,9 @@ TEST_F(IdealGasFluidPropertiesTest, testAll)
     Real h = 0, dh_dp = 0, dh_dT = 0;
     _fp->h_from_p_T(p, T, h, dh_dp, dh_dT);
 
-    ABS_TEST("h", h, _fp->h_from_p_T(p, T), 1e-16);
-    ABS_TEST("dh_dp", dh_dp, dh_dp_fd, 1e-12);
-    ABS_TEST("dh_dT", dh_dT, dh_dT_fd, 6e-7);
+    ABS_TEST(h, _fp->h_from_p_T(p, T), 1e-16);
+    ABS_TEST(dh_dp, dh_dp_fd, 1e-12);
+    ABS_TEST(dh_dT, dh_dT_fd, 6e-7);
   }
 
   {
@@ -117,7 +117,7 @@ TEST_F(IdealGasFluidPropertiesTest, testAll)
     const Real ds_dp_fd = (s_dp - s) / dp;
 
     const Real rel_tol = 1e-5;
-    REL_TEST("ds_dh", ds_dh, ds_dh_fd, rel_tol);
-    REL_TEST("ds_dp", ds_dp, ds_dp_fd, rel_tol);
+    REL_TEST(ds_dh, ds_dh_fd, rel_tol);
+    REL_TEST(ds_dp, ds_dp_fd, rel_tol);
   }
 }
