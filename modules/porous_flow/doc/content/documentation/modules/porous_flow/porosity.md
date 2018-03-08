@@ -1,7 +1,7 @@
 #Porosity
 
-Porosity may be fixed at a constant value, or it may be a function of the effective porepressure, the
-volumetric strain and/or the temperature.
+Porosity may be fixed at a constant value, or it may be a function of the
+effective porepressure, the volumetric strain, the temperature and/or chemical precipitates
 
 Available porosity formulations include:
 

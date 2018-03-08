@@ -42,6 +42,16 @@ validParams<PorousFlowActionBase>()
                        "N=num_components and P=num_phases, and it is assumed that "
                        "f_ph^cN=1-sum(f_ph^c,{c,0,N-1}) so that f_ph^cN need not be given.  If no "
                        "variables are provided then num_phases=1=num_components.");
+  params.addParam<unsigned int>("number_aqueous_equilibrium",
+                                0,
+                                "The number of secondary species in the aqueous-equilibrium "
+                                "reaction system.  (Leave as zero if the simulation does not "
+                                "involve chemistry)");
+  params.addParam<unsigned int>("number_aqueous_kinetic",
+                                0,
+                                "The number of secondary species in the aqueous-kinetic reaction "
+                                "system involved in precipitation and dissolution.  (Leave as zero "
+                                "if the simulation does not involve chemistry)");
   params.addParam<std::vector<NonlinearVariableName>>(
       "displacements",
       "The name of the displacement variables (relevant only for "
@@ -61,6 +71,8 @@ PorousFlowActionBase::PorousFlowActionBase(const InputParameters & params)
     PorousFlowDependencies(),
     _objects_to_add(),
     _dictator_name(getParam<std::string>("dictator_name")),
+    _num_aqueous_equilibrium(getParam<unsigned int>("number_aqueous_equilibrium")),
+    _num_aqueous_kinetic(getParam<unsigned int>("number_aqueous_kinetic")),
     _gravity(getParam<RealVectorValue>("gravity")),
     _mass_fraction_vars(getParam<std::vector<VariableName>>("mass_fraction_vars")),
     _num_mass_fraction_vars(_mass_fraction_vars.size()),

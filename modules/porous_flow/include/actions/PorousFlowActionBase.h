@@ -43,6 +43,12 @@ protected:
   /// The name of the PorousFlowDictator object to be added
   const std::string _dictator_name;
 
+  /// number of aqueous-equilibrium secondary species
+  const unsigned int _num_aqueous_equilibrium;
+
+  /// number of aqeuous-kinetic secondary species that are involved in mineralisation
+  const unsigned int _num_aqueous_kinetic;
+
   /// gravity
   const RealVectorValue _gravity;
 

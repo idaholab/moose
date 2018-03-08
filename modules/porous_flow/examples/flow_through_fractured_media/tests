@@ -44,4 +44,9 @@
     prereq = fine_thick_fracture_steady
     abs_zero = 1E-7
   [../]
+  [./diffusion]
+    type = Exodiff
+    input = 'diffusion.i'
+    exodiff = 'diffusion_out.e'
+  [../]
 []
