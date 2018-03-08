@@ -9,6 +9,8 @@
 
 #include "PackedColumn.h"
 
+registerMooseObject("DarcyThermoMechApp", PackedColumn);
+
 template <>
 InputParameters
 validParams<PackedColumn>()

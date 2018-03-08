@@ -46,7 +46,7 @@ namespace Moose
 void
 registerObjects(Factory & factory)
 {
-  registerObjects(factory, {"MooseApp", factory.app().type()});
+  registerObjects(factory, {"MooseApp"});
 }
 
 void
