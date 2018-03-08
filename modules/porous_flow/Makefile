@@ -28,7 +28,7 @@ include $(MODULE_DIR)/modules.mk
 APPLICATION_DIR    := $(MODULE_DIR)/porous_flow
 APPLICATION_NAME   := porous_flow
 BUILD_EXEC         := yes
-DEP_APPS           := $(shell $(FRAMEWORK_DIR)/scripts/find_dep_apps.py $(APPLICATION_NAME))
+GEN_REVISION       := no
 include            $(FRAMEWORK_DIR)/app.mk
 
 ###############################################################################

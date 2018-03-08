@@ -20,9 +20,7 @@ APPLICATION_DIR    := $(MOOSE_DIR)/test
 APPLICATION_NAME   := moose_test
 BUILD_EXEC         := yes
 BUILD_TEST_OBJECTS_LIB := no
-# Note: There are no applications that depend on moose_test so the test_up and up
-# targets are not very useful here.  Instead we will test up like this is MOOSE
-DEP_APPS           ?= $(shell $(FRAMEWORK_DIR)/scripts/find_dep_apps.py moose)
+GEN_REVISION       := no
 include            $(FRAMEWORK_DIR)/app.mk
 
 ###############################################################################

@@ -3,7 +3,7 @@
 ###############################################################################
 #
 # Optional Environment variables
-# MOOSE_DIR        - Root directory of the MOOSE project 
+# MOOSE_DIR        - Root directory of the MOOSE project
 # HERD_TRUNK_DIR   - Location of the HERD repository
 # FRAMEWORK_DIR    - Location of the MOOSE framework
 #
@@ -21,7 +21,7 @@ include $(FRAMEWORK_DIR)/moose.mk
 APPLICATION_DIR    := $(MODULE_DIR)/stochastic_tools
 APPLICATION_NAME   := stochastic_tools
 BUILD_EXEC         := yes
-DEP_APPS           := $(shell $(FRAMEWORK_DIR)/scripts/find_dep_apps.py $(APPLICATION_NAME))
+GEN_REVISION       := no
 include            $(FRAMEWORK_DIR)/app.mk
 
 ###############################################################################

@@ -54,6 +54,7 @@ ADDITIONAL_LIBS   := $(FRAMEWORK_DIR)/contrib/gtest/libgtest.la
 CURRENT_DIR        := $(shell pwd)
 APPLICATION_DIR    := $(CURRENT_DIR)/..
 APPLICATION_NAME   := functional_expansion_tools
+GEN_REVISION       := no
 include            $(FRAMEWORK_DIR)/app.mk
 
 APPLICATION_DIR    := $(CURRENT_DIR)
@@ -61,6 +62,7 @@ APPLICATION_NAME   := functional_expansion_tools-unit
 BUILD_EXEC         := yes
 
 DEP_APPS    ?= $(shell $(FRAMEWORK_DIR)/scripts/find_dep_apps.py $(APPLICATION_NAME))
+GEN_REVISION       := no
 include $(FRAMEWORK_DIR)/app.mk
 
 # Find all the FunctionalExpansionTools unit test source files and include their dependencies.
