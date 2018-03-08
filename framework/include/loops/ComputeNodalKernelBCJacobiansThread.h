@@ -17,7 +17,7 @@ class AuxiliarySystem;
 class NodalKernel;
 
 class ComputeNodalKernelBCJacobiansThread
-    : public ThreadedNodeLoop<ConstBndNodeRange, ConstBndNodeRange::const_iterator>
+  : public ThreadedNodeLoop<ConstBndNodeRange, ConstBndNodeRange::const_iterator>
 {
 public:
   ComputeNodalKernelBCJacobiansThread(FEProblemBase & fe_problem,

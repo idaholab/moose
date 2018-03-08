@@ -19,7 +19,7 @@
 class FEProblemBase;
 
 class ComputeBoundaryInitialConditionThread
-    : public ThreadedNodeLoop<ConstBndNodeRange, ConstBndNodeRange::const_iterator>
+  : public ThreadedNodeLoop<ConstBndNodeRange, ConstBndNodeRange::const_iterator>
 {
 public:
   ComputeBoundaryInitialConditionThread(FEProblemBase & fe_problem);

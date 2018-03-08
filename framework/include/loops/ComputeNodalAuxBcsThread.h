@@ -20,7 +20,7 @@ class MooseObjectWarehouse;
 class AuxKernel;
 
 class ComputeNodalAuxBcsThread
-    : public ThreadedNodeLoop<ConstBndNodeRange, ConstBndNodeRange::const_iterator>
+  : public ThreadedNodeLoop<ConstBndNodeRange, ConstBndNodeRange::const_iterator>
 {
 public:
   ComputeNodalAuxBcsThread(FEProblemBase & fe_problem,

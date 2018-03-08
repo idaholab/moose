@@ -23,7 +23,7 @@ template <typename T>
 class MooseObjectWarehouse;
 
 class ComputeNodalAuxVarsThread
-    : public ThreadedNodeLoop<ConstNodeRange, ConstNodeRange::const_iterator>
+  : public ThreadedNodeLoop<ConstNodeRange, ConstNodeRange::const_iterator>
 {
 public:
   ComputeNodalAuxVarsThread(FEProblemBase & fe_problem,

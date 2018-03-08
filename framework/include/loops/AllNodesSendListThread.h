@@ -22,7 +22,7 @@ class NumericVector;
 }
 
 class AllNodesSendListThread
-    : public ThreadedNodeLoop<ConstNodeRange, ConstNodeRange::const_iterator>
+  : public ThreadedNodeLoop<ConstNodeRange, ConstNodeRange::const_iterator>
 {
 public:
   AllNodesSendListThread(FEProblemBase & fe_problem,

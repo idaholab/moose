@@ -18,7 +18,7 @@
 class SubProblem;
 
 class ComputeNodalUserObjectsThread
-    : public ThreadedNodeLoop<ConstNodeRange, ConstNodeRange::const_iterator>
+  : public ThreadedNodeLoop<ConstNodeRange, ConstNodeRange::const_iterator>
 {
 public:
   ComputeNodalUserObjectsThread(FEProblemBase & fe_problem,

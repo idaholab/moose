@@ -27,7 +27,7 @@ class SparseMatrix;
 }
 
 class ComputeNodalKernelJacobiansThread
-    : public ThreadedNodeLoop<ConstNodeRange, ConstNodeRange::const_iterator>
+  : public ThreadedNodeLoop<ConstNodeRange, ConstNodeRange::const_iterator>
 {
 public:
   ComputeNodalKernelJacobiansThread(FEProblemBase & fe_problem,
