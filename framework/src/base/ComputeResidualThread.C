@@ -153,9 +153,6 @@ ComputeResidualThread::onInterface(const Elem * elem, unsigned int side, Boundar
     // Pointer to the neighbor we are currently working on.
     const Elem * neighbor = elem->neighbor_ptr(side);
 
-    if (!(neighbor->level() == elem->level()))
-      mooseError("Sorry, interface kernels do not work with mesh adaptivity");
-
     if (neighbor->active())
     {
       _fe_problem.reinitNeighbor(elem, side, _tid);
