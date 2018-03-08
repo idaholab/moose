@@ -21,7 +21,7 @@ include $(FRAMEWORK_DIR)/moose.mk
 APPLICATION_NAME   := fluid_properties
 APPLICATION_DIR    := $(MODULE_DIR)/$(APPLICATION_NAME)
 BUILD_EXEC         := yes
-DEP_APPS           := $(shell $(FRAMEWORK_DIR)/scripts/find_dep_apps.py $(APPLICATION_NAME))
+GEN_REVISION       := no
 include            $(FRAMEWORK_DIR)/app.mk
 
 ###############################################################################

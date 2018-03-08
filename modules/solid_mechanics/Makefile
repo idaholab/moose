@@ -26,7 +26,7 @@ include $(MODULE_DIR)/modules.mk
 APPLICATION_DIR    := $(MODULE_DIR)/solid_mechanics
 APPLICATION_NAME   := solid_mechanics
 BUILD_EXEC         := yes
-DEP_APPS           := $(shell $(FRAMEWORK_DIR)/scripts/find_dep_apps.py $(APPLICATION_NAME))
+GEN_REVISION       := no
 include            $(FRAMEWORK_DIR)/app.mk
 
 ###############################################################################
