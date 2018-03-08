@@ -35,6 +35,9 @@ protected:
   /// Name of the input
   std::string _input;
 
+  /// rDG flux user object name
+  UserObjectName _rdg_flux_name;
+
 private:
   virtual std::string createBoundaryName(const std::string & comp_name) const override;
 };

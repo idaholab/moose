@@ -19,19 +19,47 @@ SolidWall::SolidWall(const InputParameters & params) : FlowBoundary(params) {}
 void
 SolidWall::check()
 {
-  if (_spatial_discretization == FlowModel::rDG)
+  if ((_spatial_discretization == FlowModel::rDG) && (_flow_model_id == RELAP7::FM_TWO_PHASE))
     logSpatialDiscretizationNotImplementedError(_spatial_discretization);
 }
 
 void
 SolidWall::addMooseObjects1Phase()
 {
+  if (_spatial_discretization == FlowModel::CG)
   {
     InputParameters params = _factory.getValidParams("DirichletBC");
     params.set<NonlinearVariableName>("variable") = FlowModelSinglePhase::RHOUA;
     params.set<std::vector<BoundaryName>>("boundary") = getBoundaryNames();
     params.set<Real>("value") = 0.;
     _sim.addBoundaryCondition("DirichletBC", genName(name(), "rhou"), params);
+  }
+  else if (_spatial_discretization == FlowModel::rDG)
+  {
+    const std::string class_name = "Euler1DVarAreaWallGhostCellBC";
+    InputParameters params = _factory.getValidParams(class_name);
+    params.set<std::vector<BoundaryName>>("boundary") = getBoundaryNames();
+    params.set<std::vector<VariableName>>("A") = {FlowModelSinglePhase::AREA};
+    params.set<std::vector<VariableName>>("rhoA") = {FlowModelSinglePhase::RHOA};
+    params.set<std::vector<VariableName>>("rhouA") = {FlowModelSinglePhase::RHOUA};
+    params.set<std::vector<VariableName>>("rhoEA") = {FlowModelSinglePhase::RHOEA};
+    params.set<UserObjectName>("rdg_flux") = _rdg_flux_name;
+    params.set<bool>("implicit") = _implicit_rdg;
+
+    // mass
+    params.set<NonlinearVariableName>("variable") = FlowModelSinglePhase::RHOA;
+    _sim.addBoundaryCondition(
+        class_name, Component::genName(name(), class_name, FlowModelSinglePhase::RHOA), params);
+
+    // momentum
+    params.set<NonlinearVariableName>("variable") = FlowModelSinglePhase::RHOUA;
+    _sim.addBoundaryCondition(
+        class_name, Component::genName(name(), class_name, FlowModelSinglePhase::RHOUA), params);
+
+    // energy
+    params.set<NonlinearVariableName>("variable") = FlowModelSinglePhase::RHOEA;
+    _sim.addBoundaryCondition(
+        class_name, Component::genName(name(), class_name, FlowModelSinglePhase::RHOEA), params);
   }
 }
 
