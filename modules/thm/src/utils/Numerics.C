@@ -1,23 +1,4 @@
 #include "Numerics.h"
-#include "SBTL.h"
-
-extern "C" double SIGMA_TS(double t);
-extern "C" double U_V_TMAX_AUX_T(double vt);
-extern "C" double U2_V_AUX_T(double vt);
-extern "C" double V_U_PMAX_AUX(double u);
-extern "C" double V1_U_AUX(double u);
-extern "C" int SAT_U1_SPL(double u, double & ps, double & ts, double & vl);
-extern "C" int SAT_V2_SPL_T(double vt, double & ps, double & ts, double & uv);
-extern "C" int SAT_VU_SPL(double v,
-                          double u,
-                          double & ps,
-                          double & ts,
-                          double & x,
-                          double & vl,
-                          double & vv,
-                          double & vvt,
-                          double & ul,
-                          double & uv);
 
 namespace RELAP7
 {
@@ -60,12 +41,6 @@ Real
 wallHeatTransferCoefficient(Real Nu, Real k, Real Dh)
 {
   return Nu * k / Dh;
-}
-
-Real
-surfaceTension(Real temperature)
-{
-  return SIGMA_TS(temperature) * 1e-3; // [ N/m]
 }
 
 Real

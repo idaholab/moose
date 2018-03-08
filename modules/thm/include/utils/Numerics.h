@@ -85,13 +85,6 @@ Real viscosityNumber(Real viscosity, Real surf_tension, Real rho_k, Real delta_r
 Real wallHeatTransferCoefficient(Real Nu, Real k, Real D_h);
 
 /**
- * Computes surface tension [N/m]
- * @param temperature
- * @return returns the surface tension [N/m]
- */
-Real surfaceTension(Real temperature);
-
-/**
  * Derivative of velocity w.r.t. alpha*rho*A
  *
  * @param[in] arhoA    alpha*rho*A
