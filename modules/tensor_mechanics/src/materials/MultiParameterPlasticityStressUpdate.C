@@ -8,9 +8,13 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "MultiParameterPlasticityStressUpdate.h"
-
 #include "Conversion.h"      // for stringify
+
+// libMesh includes
 #include "libmesh/utility.h" // for Utility::pow
+
+// PETSc includes
+#include <petscblaslapack.h> // LAPACKgesv_
 
 template <>
 InputParameters
