@@ -82,8 +82,7 @@ ComputeResidualThread::subdomainChanged()
     _tag_kernels = &(_kernels.getVectorTagObjectWarehouse(*(_tags.begin()), _tid));
   // This one may be expensive
   else
-    mooseError("Not supported yet");
-  //_tag_kernels = &(_kernels.getVectorTagsObjectWarehouse(_tags, _tid));
+    _tag_kernels = &(_kernels.getVectorTagsObjectWarehouse(_tags, _tid));
 }
 
 void

@@ -61,7 +61,7 @@ protected:
   MooseObjectTagWarehouse<KernelBase> & _kernels;
 
   // A pointer to different warehouse
-  MooseObjectTagWarehouse<KernelBase> * _warehouse;
+  MooseObjectWarehouse<KernelBase> * _warehouse;
 
   std::set<TagID> & _tags;
 

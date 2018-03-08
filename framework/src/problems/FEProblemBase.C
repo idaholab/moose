@@ -4058,6 +4058,18 @@ FEProblemBase::computeResidual(NonlinearImplicitSystem & /*sys*/,
 void
 FEProblemBase::computeResidual(const NumericVector<Number> & soln,
                                NumericVector<Number> & residual,
+                               TagID tag)
+{
+  _fe_vector_tags.clear();
+
+  _fe_vector_tags.insert(tag);
+
+  computeResidual(soln, residual, _fe_vector_tags);
+}
+
+void
+FEProblemBase::computeResidual(const NumericVector<Number> & soln,
+                               NumericVector<Number> & residual,
                                std::set<TagID> & tags)
 {
   try
@@ -4080,18 +4092,6 @@ FEProblemBase::computeResidual(const NumericVector<Number> & soln,
     mooseError("An unhandled MooseException was raised during residual computation.  Please "
                "contact the MOOSE team for assistance.");
   }
-}
-
-void
-FEProblemBase::computeResidual(const NumericVector<Number> & soln,
-                               NumericVector<Number> & residual,
-                               TagID tag)
-{
-  _fe_vector_tags.clear();
-
-  _fe_vector_tags.insert(tag);
-
-  computeResidual(soln, residual, _fe_vector_tags);
 }
 
 void

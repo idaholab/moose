@@ -63,7 +63,7 @@ protected:
   /// Reference to Kernel storage structures
   MooseObjectTagWarehouse<KernelBase> & _kernels;
 
-  MooseObjectTagWarehouse<KernelBase> * _tag_kernels;
+  MooseObjectWarehouse<KernelBase> * _tag_kernels;
   ///@}
 };
 

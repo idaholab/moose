@@ -540,6 +540,7 @@ NonlinearSystemBase::computeResidual(NumericVector<Number> & residual, TagID tag
 
   _nl_vector_tags.clear();
   _nl_vector_tags.insert(tag_id);
+  _nl_vector_tags.insert(residualVectorTag());
 
   associateVectorToTag(residual, residualVectorTag());
 
@@ -549,15 +550,23 @@ NonlinearSystemBase::computeResidual(NumericVector<Number> & residual, TagID tag
 void
 NonlinearSystemBase::computeResidual(NumericVector<Number> & residual, std::set<TagID> & tags)
 {
+  _nl_vector_tags.clear();
+  for (auto tag : tags)
+    _nl_vector_tags.insert(tag);
+
+  _nl_vector_tags.insert(residualVectorTag());
+
   associateVectorToTag(residual, residualVectorTag());
 
-  computeResidual(tags);
+  computeResidual(_nl_vector_tags);
 }
 
 void
 NonlinearSystemBase::computeResidual(std::set<TagID> & tags)
 {
   Moose::perf_log.push("compute_residual()", "Execution");
+
+  bool reuired_residual = tags.find(residualVectorTag()) == tags.end() ? false : true;
 
   _n_residual_evaluations++;
 
@@ -573,28 +582,28 @@ NonlinearSystemBase::computeResidual(std::set<TagID> & tags)
 
   try
   {
-    NumericVector<Number> & residual = getVector(residualVectorTag());
-    // Residual tag is not passed in
-    if (tags.find(residualVectorTag()) == tags.end())
-      residual.zero();
     zeroTaggedVectors(tags);
     computeResidualInternal(tags);
     closeTaggedVectors(tags);
-    if (tags.find(residualVectorTag()) == tags.end())
-      residual.close();
 
-    if (_time_integrator)
-      _time_integrator->postResidual(residual);
-    else
-      residual += *_Re_non_time;
-    residual.close();
+    if (reuired_residual)
+    {
+      auto & residual = getVector(residualVectorTag());
+      if (_time_integrator)
+        _time_integrator->postResidual(residual);
+      else
+        residual += *_Re_non_time;
+      residual.close();
+    }
 
     computeNodalBCs(tags);
     closeTaggedVectors(tags);
 
     // If we are debugging residuals we need one more assignment to have the ghosted copy up to date
-    if (_need_residual_ghosted && _debugging_residuals)
+    if (_need_residual_ghosted && _debugging_residuals && reuired_residual)
     {
+      auto & residual = getVector(residualVectorTag());
+
       *_residual_ghosted = residual;
       _residual_ghosted->close();
     }
@@ -1171,11 +1180,11 @@ NonlinearSystemBase::computeResidualInternal(std::set<TagID> & tags)
       // Should redo this based on Warehouse
       if (!tags.size() || tags.size() == _fe_problem.numVectorTags())
         scalars = &(_scalar_kernels.getActiveObjects());
-      else if (tags.size() == 1)
+      else if (tags.size() == 2)
       {
-        if (*(tags.begin()) == timeVectorTag())
+        if (tags.find(timeVectorTag()) != tags.end())
           scalars = &(_time_scalar_kernels.getActiveObjects());
-        else if (*(tags.begin()) == nonTimeVectorTag())
+        else if (tags.find(nonTimeVectorTag()) != tags.end())
           scalars = &(_non_time_scalar_kernels.getActiveObjects());
         else
           mooseError("Wrong tags for scalar kernels ");
@@ -1341,7 +1350,7 @@ NonlinearSystemBase::computeNodalBCs(std::set<TagID> & tags)
     {
       Moose::perf_log.push("computeNodalBCs()", "Execution");
 
-      MooseObjectTagWarehouse<NodalBCBase> * nbc_warehouse;
+      MooseObjectWarehouse<NodalBCBase> * nbc_warehouse;
 
       // Select nodal kernels
       if (tags.size() == _fe_problem.numVectorTags() || !tags.size())
@@ -1349,8 +1358,7 @@ NonlinearSystemBase::computeNodalBCs(std::set<TagID> & tags)
       else if (tags.size() == 1)
         nbc_warehouse = &(_nodal_bcs.getVectorTagObjectWarehouse(*(tags.begin()), 0));
       else
-        mooseError("Not implemented yet");
-      // nbc_warehouse = &(_nodal_bcs.getVectorTagsObjectWarehouse(tags, 0));
+        nbc_warehouse = &(_nodal_bcs.getVectorTagsObjectWarehouse(tags, 0));
 
       for (const auto & bnode : bnd_nodes)
       {
@@ -2078,15 +2086,14 @@ NonlinearSystemBase::computeJacobianInternal(std::set<TagID> & tags)
 
   PARALLEL_TRY
   {
-    MooseObjectTagWarehouse<NodalBCBase> * nbc_warehouse;
+    MooseObjectWarehouse<NodalBCBase> * nbc_warehouse;
     // Select nodal kernels
     if (tags.size() == _fe_problem.numMatrixTags() || !tags.size())
       nbc_warehouse = &_nodal_bcs;
     else if (tags.size() == 1)
       nbc_warehouse = &(_nodal_bcs.getMatrixTagObjectWarehouse(*(tags.begin()), 0));
     else
-      mooseError(" Not implemented yet");
-    // nbc_warehouse = &(_nodal_bcs.getMatrixTagsObjectWarehouse(tags, 0));
+      nbc_warehouse = &(_nodal_bcs.getMatrixTagsObjectWarehouse(tags, 0));
 
     // Cache the information about which BCs are coupled to which
     // variables, so we don't have to figure it out for each node.

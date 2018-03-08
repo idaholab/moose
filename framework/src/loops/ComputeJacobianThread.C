@@ -158,8 +158,7 @@ ComputeJacobianThread::subdomainChanged()
     _warehouse = &(_kernels.getMatrixTagObjectWarehouse(*(_tags.begin()), _tid));
   // This one may be expensive, and hopefully we do not use it so often
   else
-    mooseError("Not implemented yet");
-  //_warehouse = &(_kernels.getMatrixTagsObjectWarehouse(_tags, _tid));
+    _warehouse = &(_kernels.getMatrixTagsObjectWarehouse(_tags, _tid));
 }
 
 void

@@ -18,9 +18,9 @@
 // MOOSE includes
 #include "MultiMooseEnum.h"
 #include "InputParameters.h"
-#include "EigenProblem.h"
 #include "Conversion.h"
 #include "EigenProblem.h"
+#include "FEProblemBase.h"
 #include "NonlinearEigenSystem.h"
 
 #include "libmesh/petsc_vector.h"
@@ -551,15 +551,8 @@ mooseSlepcEigenFormFunctionAB(SNES /*snes*/, Vec x, Vec Ax, Vec Bx, void * ctx)
   AX.zero();
   BX.zero();
 
-  std::set<TagID> tags;
-
-  tags.insert(nl.nonEigenVectorTag());
-  tags.insert(nl.eigenVectorTag());
-  nl.setSolution(*sys.current_local_solution.get());
-  nl.associateVectorToTag(AX, nl.nonEigenVectorTag());
-  nl.associateVectorToTag(BX, nl.eigenVectorTag());
-
-  eigen_problem->computeResidual(tags);
+  eigen_problem->computeResidualAB(
+      *sys.current_local_solution.get(), AX, BX, nl.nonEigenVectorTag(), nl.eigenVectorTag());
 
   AX.close();
   BX.close();

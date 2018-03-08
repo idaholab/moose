@@ -105,6 +105,65 @@ EigenProblem::setEigenproblemType(Moose::EigenProblemType eigen_problem_type)
       mooseError("Unknown eigen solver type \n");
   }
 }
+
+void
+EigenProblem::computeJacobian(const NumericVector<Number> & soln,
+                              SparseMatrix<Number> & jacobian,
+                              TagID tag)
+{
+  _fe_matrix_tags.clear();
+
+  _fe_matrix_tags.insert(tag);
+
+  _nl_eigen->setSolution(soln);
+
+  _nl_eigen->associateMatirxToTag(jacobian, tag);
+
+  FEProblemBase::computeJacobian(_fe_matrix_tags);
+}
+
+void
+EigenProblem::computeResidual(const NumericVector<Number> & soln,
+                              NumericVector<Number> & residual,
+                              TagID tag)
+{
+  _fe_vector_tags.clear();
+
+  _fe_vector_tags.insert(tag);
+
+  _nl_eigen->setSolution(soln);
+
+  _nl_eigen->clearTaggedVectors();
+
+  _nl_eigen->associateVectorToTag(residual, tag);
+
+  FEProblemBase::computeResidual(_fe_vector_tags);
+}
+
+void
+EigenProblem::computeResidualAB(const NumericVector<Number> & soln,
+                                NumericVector<Number> & residualA,
+                                NumericVector<Number> & residualB,
+                                TagID tagA,
+                                TagID tagB)
+{
+  _fe_vector_tags.clear();
+
+  _fe_vector_tags.insert(tagA);
+
+  _fe_vector_tags.insert(tagB);
+
+  _nl_eigen->setSolution(soln);
+
+  _nl_eigen->clearTaggedVectors();
+
+  _nl_eigen->associateVectorToTag(residualA, tagA);
+
+  _nl_eigen->associateVectorToTag(residualB, tagB);
+
+  FEProblemBase::computeResidual(_fe_vector_tags);
+}
+
 #endif
 
 void

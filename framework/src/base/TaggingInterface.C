@@ -176,7 +176,6 @@ void
 TaggingInterface::prepareMatrixTag(Assembly & assembly, unsigned int ivar, unsigned int jvar)
 {
   _ke_blocks.resize(_matrix_tags.size());
-
   mooseAssert(_matrix_tags.size() >= 1, "we need at least one active tag");
   auto mat_vector = _matrix_tags.begin();
   for (auto i = beginIndex(_matrix_tags); i < _matrix_tags.size(); i++, ++mat_vector)

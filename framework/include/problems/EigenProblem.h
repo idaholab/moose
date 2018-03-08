@@ -42,7 +42,6 @@ public:
   }
   virtual bool isGeneralizedEigenvalueProblem() { return _generalized_eigenvalue_problem; }
   virtual bool isNonlinearEigenvalueSolver();
-
   // silences warning in debug mode about the other computeJacobian signature being hidden
   using FEProblemBase::computeJacobian;
 
@@ -51,6 +50,20 @@ public:
   virtual void checkProblemIntegrity() override;
 #if LIBMESH_HAVE_SLEPC
   void setEigenproblemType(Moose::EigenProblemType eigen_problem_type);
+
+  virtual void computeJacobian(const NumericVector<Number> & soln,
+                               SparseMatrix<Number> & jacobian,
+                               TagID tag) override;
+
+  virtual void computeResidual(const NumericVector<Number> & soln,
+                               NumericVector<Number> & residual,
+                               TagID tag) override;
+
+  void computeResidualAB(const NumericVector<Number> & soln,
+                         NumericVector<Number> & residualA,
+                         NumericVector<Number> & residualB,
+                         TagID tagA,
+                         TagID tagB);
 #endif
 protected:
   unsigned int _n_eigen_pairs_required;

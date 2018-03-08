@@ -45,6 +45,8 @@ public:
 
   virtual void clearTaggedVectors() override { _undisplaced_system.clearTaggedVectors(); }
 
+  virtual void clearTaggedVector(TagID tag) override { _undisplaced_system.clearTaggedVector(tag); }
+
   virtual void associateMatirxToTag(SparseMatrix<Number> & matrix, TagID tag) override
   {
     _undisplaced_system.associateMatirxToTag(matrix, tag);

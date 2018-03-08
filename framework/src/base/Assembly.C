@@ -1547,21 +1547,15 @@ Assembly::addResidualScalar(std::map<TagName, TagID> & tags)
 void
 Assembly::cacheResidual()
 {
-  auto & tag_name_to_tag_id = _sys.subproblem().getVectorTag();
-  auto tag_it = tag_name_to_tag_id.begin();
-
-  mooseAssert(tag_name_to_tag_id.size() == _sub_Re.size(),
-              "the number of tags does not equal to the number of residuals ");
-
   const std::vector<MooseVariableFEBase *> & vars = _sys.getVariables(_tid);
   for (const auto & var : vars)
   {
-    tag_it = tag_name_to_tag_id.begin();
-    for (unsigned int i = 0; tag_it != tag_name_to_tag_id.end(); i++, ++tag_it)
-      if (_sys.hasVector(tag_it->second))
-        cacheResidualBlock(_cached_residual_values[i],
-                           _cached_residual_rows[i],
-                           _sub_Re[i][var->number()],
+    for (auto tag = beginIndex(_cached_residual_values); tag < _cached_residual_values.size();
+         tag++)
+      if (_sys.hasVector(tag))
+        cacheResidualBlock(_cached_residual_values[tag],
+                           _cached_residual_rows[tag],
+                           _sub_Re[tag][var->number()],
                            var->dofIndices(),
                            var->scalingFactor());
   }
@@ -1587,21 +1581,15 @@ Assembly::cacheResidualNeighbor()
   const std::vector<MooseVariableFEBase *> & vars = _sys.getVariables(_tid);
   for (const auto & var : vars)
   {
-    auto & tag_name_to_tag_id = _sys.subproblem().getVectorTag();
-
-    mooseAssert(tag_name_to_tag_id.size() == _sub_Rn.size(),
-                "the number of tags does not equal to the number of residuals ");
-
-    for (auto tag_it = tag_name_to_tag_id.begin(); tag_it != tag_name_to_tag_id.end(); ++tag_it)
+    for (auto tag = beginIndex(_cached_residual_values); tag < _cached_residual_values.size();
+         tag++)
     {
-      if (_sys.hasVector(tag_it->second))
-      {
-        cacheResidualBlock(_cached_residual_values[tag_it->second],
-                           _cached_residual_rows[tag_it->second],
-                           _sub_Rn[tag_it->second][var->number()],
+      if (_sys.hasVector(tag))
+        cacheResidualBlock(_cached_residual_values[tag],
+                           _cached_residual_rows[tag],
+                           _sub_Rn[tag][var->number()],
                            var->dofIndicesNeighbor(),
                            var->scalingFactor());
-      }
     }
   }
 }
@@ -1622,20 +1610,15 @@ Assembly::cacheResidualNodes(DenseVector<Number> & res, std::vector<dof_id_type>
 void
 Assembly::addCachedResiduals()
 {
-  auto & tag_name_to_tag_id = _sys.subproblem().getVectorTag();
-
-  mooseAssert(tag_name_to_tag_id.size() == _sub_Re.size(),
-              "the number of tags does not equal to the number of residuals ");
-
-  for (auto tag_it = tag_name_to_tag_id.begin(); tag_it != tag_name_to_tag_id.end(); ++tag_it)
+  for (auto tag = beginIndex(_cached_residual_values); tag < _cached_residual_values.size(); tag++)
   {
-    if (!_sys.hasVector(tag_it->second))
+    if (!_sys.hasVector(tag))
     {
-      _cached_residual_values[tag_it->second].clear();
-      _cached_residual_rows[tag_it->second].clear();
+      _cached_residual_values[tag].clear();
+      _cached_residual_rows[tag].clear();
       continue;
     }
-    addCachedResidual(_sys.getVector(tag_it->second), tag_it->second);
+    addCachedResidual(_sys.getVector(tag), tag);
   }
 }
 
@@ -1654,8 +1637,8 @@ Assembly::addCachedResidual(NumericVector<Number> & residual, TagID tag_id)
 
   mooseAssert(cached_residual_values.size() == cached_residual_rows.size(),
               "Number of cached residuals and number of rows must match!");
-
-  residual.add_vector(cached_residual_values, cached_residual_rows);
+  if (cached_residual_values.size())
+    residual.add_vector(cached_residual_values, cached_residual_rows);
 
   if (_max_cached_residuals < cached_residual_values.size())
     _max_cached_residuals = cached_residual_values.size();
@@ -2198,7 +2181,7 @@ Assembly::setCachedJacobianContributions()
   for (auto tag = beginIndex(_cached_jacobian_contribution_rows);
        tag < _cached_jacobian_contribution_rows.size();
        tag++)
-    if (_sys.hasMatrix(tag))
+    if (_sys.hasMatrix(tag) && _cached_jacobian_contribution_rows[tag].size())
     {
       // First zero the rows (including the diagonals) to prepare for
       // setting the cached values.
@@ -2220,7 +2203,7 @@ Assembly::zeroCachedJacobianContributions()
   for (auto tag = beginIndex(_cached_jacobian_contribution_rows);
        tag < _cached_jacobian_contribution_rows.size();
        tag++)
-    if (_sys.hasMatrix(tag))
+    if (_sys.hasMatrix(tag) && _cached_jacobian_contribution_rows[tag].size())
       _sys.getMatrix(tag).zero_rows(_cached_jacobian_contribution_rows[tag], 0.0);
 
   clearCachedJacobianContributions();

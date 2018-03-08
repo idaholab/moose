@@ -39,7 +39,7 @@ assemble_matrix(EquationSystems & es, const std::string & system_name)
   {
     p->computeJacobian(*eigen_system.current_local_solution.get(),
                        *eigen_system.matrix_A,
-                       eigen_nl.nonEigenVectorTag());
+                       eigen_nl.nonEigenMatrixTag());
   }
   else
   {
@@ -76,7 +76,7 @@ assemble_matrix(EquationSystems & es, const std::string & system_name)
       {
         p->computeJacobian(*eigen_system.current_local_solution.get(),
                            *eigen_system.matrix_B,
-                           eigen_nl.eigenVectorTag());
+                           eigen_nl.eigenMatrixTag());
       }
       else
       {
@@ -115,10 +115,8 @@ NonlinearEigenSystem::NonlinearEigenSystem(EigenProblem & eigen_problem, const s
   sys().attach_assemble_function(Moose::assemble_matrix);
 
   _Ax_tag = eigen_problem.addVectorTag("Ax_tag");
-  addVector(_Ax_tag, false, GHOSTED);
 
   _Bx_tag = eigen_problem.addVectorTag("Bx_tag");
-  addVector(_Bx_tag, false, GHOSTED);
 
   _A_tag = eigen_problem.addMatrixTag("A_tag");
 
