@@ -11,8 +11,9 @@ validParams<GeometricalFlowComponent>()
 
   params.addRequiredParam<UserObjectName>("fp", "Name of fluid properties user object");
   params.addParam<MooseEnum>("slope_limiter",
-                             FlowModel::getSlopeLimiterType("None"),
+                             FlowModel::getSlopeLimiterMooseEnum("None"),
                              "Slope limiter type for rDG spatial discretization");
+  params.addParam<bool>("implicit_rdg", true, "Use implicit time integration for rDG");
 
   return params;
 }
@@ -20,8 +21,12 @@ validParams<GeometricalFlowComponent>()
 GeometricalFlowComponent::GeometricalFlowComponent(const InputParameters & parameters)
   : GeometricalComponent(parameters),
     _fp_name(getParam<UserObjectName>("fp")),
-    _slope_limiter(getEnumParam<FlowModel::ESlopeLimiterType>("slope_limiter"))
+    _rdg_flux_name(genName(name(), "rdg_flux")),
+    _slope_limiter(getEnumParam<FlowModel::ESlopeLimiterType>("slope_limiter")),
+    _implicit_rdg(getParam<bool>("implicit_rdg"))
 {
+  if (_spatial_discretization == FlowModel::rDG)
+    checkRDGRequiredParameter("implicit_rdg");
 }
 
 void

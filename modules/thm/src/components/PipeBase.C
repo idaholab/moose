@@ -35,6 +35,8 @@ PipeBase::init()
     pars.set<Simulation *>("_sim") = &_sim;
     pars.set<PipeBase *>("_pipe") = this;
     pars.set<bool>("2nd_order_mesh") = _2nd_order_mesh;
+    pars.set<UserObjectName>("rdg_flux") = _rdg_flux_name;
+    pars.set<bool>("implicit_rdg") = _implicit_rdg;
     _flow_model = std::make_shared<FlowModelSinglePhase>(name(), pars);
     _flow_model->init();
   }
@@ -44,6 +46,8 @@ PipeBase::init()
     pars.set<Simulation *>("_sim") = &_sim;
     pars.set<PipeBase *>("_pipe") = this;
     pars.set<bool>("2nd_order_mesh") = _2nd_order_mesh;
+    pars.set<UserObjectName>("rdg_flux") = _rdg_flux_name;
+    pars.set<bool>("implicit_rdg") = _implicit_rdg;
     _flow_model = std::make_shared<FlowModelTwoPhase>(name(), pars);
     _flow_model->init();
   }

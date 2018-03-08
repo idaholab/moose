@@ -220,6 +220,13 @@ Component::checkMutuallyExclusiveParameters(const std::vector<std::string> & par
 }
 
 void
+Component::checkRDGRequiredParameter(const std::string & param) const
+{
+  if (!_pars.isParamSetByUser(param))
+    logError("The parameter '", param, "' must be provided when using rDG");
+}
+
+void
 Component::check1PhaseRequiredParameter(const std::string & param) const
 {
   if (!isParamValid(param))

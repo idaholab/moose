@@ -310,6 +310,13 @@ protected:
   void checkMutuallyExclusiveParameters(const std::vector<std::string> & params) const;
 
   /**
+   * Checks that an rDG parameter was provided
+   *
+   * @param[in] param   parameter name
+   */
+  void checkRDGRequiredParameter(const std::string & param) const;
+
+  /**
    * Checks that a 1-phase parameter was provided
    *
    * @param[in] param   parameter name

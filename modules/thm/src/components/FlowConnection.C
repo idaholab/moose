@@ -63,6 +63,7 @@ FlowConnection::init()
 
   std::vector<UserObjectName> fp_names;
   std::vector<RELAP7::FlowModelID> flow_model_ids;
+  std::vector<bool> implicit_rdg_flags;
   std::vector<FlowModel::ESpatialDiscretizationType> spatial_discretizations;
   for (const auto & connection : _connections)
   {
@@ -76,6 +77,8 @@ FlowConnection::init()
 
     fp_names.push_back(comp.getFluidPropertiesName());
     flow_model_ids.push_back(comp.getFlowModelID());
+    _rdg_flux_names.push_back(comp.getRDGFluxUserObjectName());
+    implicit_rdg_flags.push_back(comp.getImplicitRDGFlag());
     spatial_discretizations.push_back(comp.getSpatialDiscretizationType());
   }
 
@@ -84,6 +87,9 @@ FlowConnection::init()
 
   checkAllConnectionsHaveSame<RELAP7::FlowModelID>(flow_model_ids, "flow model ID");
   _flow_model_id = flow_model_ids[0];
+
+  checkAllConnectionsHaveSame<bool>(implicit_rdg_flags, "implicit rDG flag");
+  _implicit_rdg = implicit_rdg_flags[0];
 
   checkAllConnectionsHaveSame<FlowModel::ESpatialDiscretizationType>(spatial_discretizations,
                                                                      "spatial discretization");

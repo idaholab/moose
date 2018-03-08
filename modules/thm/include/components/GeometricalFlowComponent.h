@@ -52,6 +52,16 @@ public:
    */
   const RELAP7::FlowModelID & getFlowModelID() const;
 
+  /**
+   * Gets the flow model ID
+   */
+  const UserObjectName & getRDGFluxUserObjectName() const { return _rdg_flux_name; }
+
+  /**
+   * Gets the flow model ID
+   */
+  const bool & getImplicitRDGFlag() const { return _implicit_rdg; }
+
 protected:
   virtual void init() override;
 
@@ -61,8 +71,14 @@ protected:
   /// Name of fluid properties user object
   const UserObjectName & _fp_name;
 
+  /// rDG flux user object name
+  const UserObjectName _rdg_flux_name;
+
   /// Slope limiter type for rDG
   const FlowModel::ESlopeLimiterType _slope_limiter;
+
+  /// Use implicit time integration for rDG
+  const bool _implicit_rdg;
 
   /// Flow model type
   RELAP7::FlowModelID _model_id;

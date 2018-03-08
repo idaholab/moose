@@ -153,6 +153,10 @@ protected:
   RELAP7::FlowModelID _flow_model_id;
   /// The name of the fluid property user object
   UserObjectName _fp_name;
+  /// rDG flux user object names
+  std::vector<UserObjectName> _rdg_flux_names;
+  /// Use implicit time integration for rDG
+  bool _implicit_rdg;
   /// Spatial discretization
   FlowModel::ESpatialDiscretizationType _spatial_discretization;
 

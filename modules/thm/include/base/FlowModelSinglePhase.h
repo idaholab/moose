@@ -4,7 +4,7 @@
 #include "FlowModel.h"
 
 /**
- * Sets up the singel phase flow model using Euler's equations
+ * Sets up the single-phase flow model using Euler's equations
  */
 class FlowModelSinglePhase : public FlowModel
 {
@@ -16,6 +16,8 @@ public:
   virtual void addMooseObjects() override;
 
 public:
+  void addRDGMooseObjects();
+
   static const std::string DENSITY;
   static const std::string DRAG_COEFFICIENT;
   static const std::string DYNAMIC_VISCOSITY;

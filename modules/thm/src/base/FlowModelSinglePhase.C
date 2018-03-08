@@ -66,6 +66,9 @@ FlowModelSinglePhase::addMooseObjects()
 {
   FlowModel::addCommonMooseObjects();
 
+  if (_spatial_discretization == rDG)
+    addRDGMooseObjects();
+
   const InputParameters & pars = _pipe.parameters();
   const std::string fp_name = pars.get<UserObjectName>("fp");
 
@@ -90,7 +93,7 @@ FlowModelSinglePhase::addMooseObjects()
   std::vector<VariableName> cv_gx(1, GRAVITY_X);
 
   ////////////////////////////////////////////////////////
-  // Adding kernels (basically flow equations)
+  // Adding kernels
   ////////////////////////////////////////////////////////
 
   // Density equation (transient term + advection term)
@@ -103,6 +106,7 @@ FlowModelSinglePhase::addMooseObjects()
       params.set<bool>("lumping") = true;
     _sim.addKernel(class_name, Component::genName(_comp_name, "rho_ie"), params);
   }
+  if (_spatial_discretization == CG)
   {
     std::string class_name = "OneDMassFlux";
     InputParameters params = _factory.getValidParams(class_name);
@@ -128,6 +132,7 @@ FlowModelSinglePhase::addMooseObjects()
       params.set<bool>("lumping") = true;
     _sim.addKernel(class_name, Component::genName(_comp_name, "rhou_ie"), params);
   }
+  if (_spatial_discretization == CG)
   {
     std::string class_name = "OneDMomentumFlux";
     InputParameters params = _factory.getValidParams(class_name);
@@ -195,6 +200,7 @@ FlowModelSinglePhase::addMooseObjects()
       params.set<bool>("lumping") = true;
     _sim.addKernel(class_name, Component::genName(_comp_name, "rhoE_ie"), params);
   }
+  if (_spatial_discretization == CG)
   {
     std::string class_name = "OneDEnergyFlux";
     InputParameters params = _factory.getValidParams(class_name);
@@ -323,5 +329,48 @@ FlowModelSinglePhase::addMooseObjects()
     params.set<std::vector<VariableName>>("numerator") = cv_rhoEA;
     params.set<std::vector<VariableName>>("denominator") = cv_area;
     _sim.addAuxKernel("QuotientAux", Component::genName(_comp_name, "rhoE_auxkernel"), params);
+  }
+}
+
+void
+FlowModelSinglePhase::addRDGMooseObjects()
+{
+  const UserObjectName & fp_name = _pipe.parameters().get<UserObjectName>("fp");
+  ExecFlagEnum lin_execute_on(MooseUtils::getDefaultExecFlagEnum());
+  lin_execute_on = {EXEC_LINEAR};
+
+  // numerical flux user object
+  {
+    const std::string class_name = "Euler1DVarAreaHLLCFlux";
+    InputParameters params = _factory.getValidParams(class_name);
+    params.set<std::vector<SubdomainName>>("block") = _pipe.getSubdomainNames();
+    params.set<UserObjectName>("fluid_properties") = fp_name;
+    params.set<ExecFlagEnum>("execute_on") = lin_execute_on;
+    params.set<bool>("implicit") = _implicit_rdg;
+    _sim.addUserObject(class_name, _rdg_flux_name, params);
+  }
+
+  // advection
+  {
+    // mass
+    const std::string class_name = "Euler1DVarAreaDGKernel";
+    InputParameters params = _factory.getValidParams(class_name);
+    params.set<NonlinearVariableName>("variable") = RHOA;
+    params.set<std::vector<SubdomainName>>("block") = _pipe.getSubdomainNames();
+    params.set<std::vector<VariableName>>("A") = {AREA};
+    params.set<std::vector<VariableName>>("rhoA") = {RHOA};
+    params.set<std::vector<VariableName>>("rhouA") = {RHOUA};
+    params.set<std::vector<VariableName>>("rhoEA") = {RHOEA};
+    params.set<UserObjectName>("rdg_flux") = _rdg_flux_name;
+    params.set<bool>("implicit") = _implicit_rdg;
+    _sim.addDGKernel(class_name, Component::genName(_comp_name, "mass_advection"), params);
+
+    // momentum
+    params.set<NonlinearVariableName>("variable") = RHOUA;
+    _sim.addDGKernel(class_name, Component::genName(_comp_name, "momentum_advection"), params);
+
+    // energy
+    params.set<NonlinearVariableName>("variable") = RHOEA;
+    _sim.addDGKernel(class_name, Component::genName(_comp_name, "energy_advection"), params);
   }
 }

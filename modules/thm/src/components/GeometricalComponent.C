@@ -40,7 +40,9 @@ GeometricalComponent::GeometricalComponent(const InputParameters & parameters)
         getEnumParam<FlowModel::ESpatialDiscretizationType>("spatial_discretization")),
     _n_nodes(computeNumberOfNodes(_n_elem)),
     _n_sections(_lengths.size()),
-    _fe_type(_2nd_order_mesh ? FEType(SECOND, LAGRANGE) : FEType(FIRST, LAGRANGE)),
+    _fe_type(_spatial_discretization == FlowModel::rDG
+                 ? FEType(CONSTANT, MONOMIAL)
+                 : (_2nd_order_mesh ? FEType(SECOND, LAGRANGE) : FEType(FIRST, LAGRANGE))),
     _displace_node_user_object_name(genName(name(), "displace_node"))
 {
   checkSizeGreaterThan<Real>("length", 0);
