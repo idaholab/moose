@@ -12,9 +12,6 @@
 #include "AppFactory.h"
 #include "MooseSyntax.h"
 
-// Example 10 Includes
-#include "ExampleAux.h"
-
 template <>
 InputParameters
 validParams<ExampleApp>()
@@ -37,8 +34,7 @@ ExampleApp::ExampleApp(InputParameters parameters) : MooseApp(parameters)
 void
 ExampleApp::registerObjects(Factory & factory)
 {
-  // Register our Example AuxKernel with the AuxFactory
-  registerAux(ExampleAux);
+  Registry::registerObjectsTo(factory, {"ExampleApp"});
 }
 
 void
@@ -48,6 +44,7 @@ ExampleApp::registerApps()
 }
 
 void
-ExampleApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & /*action_factory*/)
+ExampleApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & action_factory)
 {
+  Registry::registerActionsTo(action_factory, {"ExampleApp"});
 }

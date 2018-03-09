@@ -9,6 +9,8 @@
 
 #include "BlockAverageDiffusionMaterial.h"
 
+registerMooseObject("ExampleApp", BlockAverageDiffusionMaterial);
+
 template <>
 InputParameters
 validParams<BlockAverageDiffusionMaterial>()

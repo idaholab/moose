@@ -32,8 +32,9 @@ ExampleApp::ExampleApp(InputParameters parameters) : MooseApp(parameters)
 }
 
 void
-ExampleApp::registerObjects(Factory & /*factory*/)
+ExampleApp::registerObjects(Factory & factory)
 {
+  Registry::registerObjectsTo(factory, {"ExampleApp"});
 }
 
 void
@@ -43,6 +44,7 @@ ExampleApp::registerApps()
 }
 
 void
-ExampleApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & /*action_factory*/)
+ExampleApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & action_factory)
 {
+  Registry::registerActionsTo(action_factory, {"ExampleApp"});
 }

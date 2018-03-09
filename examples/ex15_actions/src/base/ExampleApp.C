@@ -13,10 +13,6 @@
 #include "ActionFactory.h" // <- Actions are special (they have their own factory)
 #include "MooseSyntax.h"
 
-// Example 15 Includes
-#include "ExampleConvection.h"
-#include "ConvectionDiffusionAction.h"
-
 template <>
 InputParameters
 validParams<ExampleApp>()
@@ -37,30 +33,30 @@ ExampleApp::ExampleApp(InputParameters parameters) : MooseApp(parameters)
 }
 
 void
+ExampleApp::registerObjects(Factory & factory)
+{
+  Registry::registerObjectsTo(factory, {"ExampleApp"});
+}
+
+void
 ExampleApp::registerApps()
 {
   registerApp(ExampleApp);
 }
 
 void
-ExampleApp::registerObjects(Factory & factory)
-{
-  registerKernel(ExampleConvection);
-}
-
-void
 ExampleApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
 {
-  /**
-   * Registering an Action is a little different than registering the other MOOSE
-   * objects.  First, you need to register your Action in the associateSyntax method.
-   * Also, you register your Action class with an "action_name" that can be
-   * satisfied by executing the Action (running the "act" virtual method).
-   */
-  registerAction(ConvectionDiffusionAction, "add_kernel");
+  Registry::registerActionsTo(action_factory, {"ExampleApp"});
 
   /**
-   * We need to tell the parser what new section name to look for and what
+   * An Action is a little different than registering the other MOOSE
+   * objects.  First, you need to register your Action like normal in its file with
+   * the registerMooseAction macro. - e.g.:
+   *
+   *     registerAction("ExampleApp", ConvectionDiffusionAction, "add_kernel");
+   *
+   * Then we need to tell the parser what new section name to look for and what
    * Action object to build when it finds it.  This is done directly on the syntax
    * with the registerActionSyntax method.
    *

@@ -9,6 +9,8 @@
 
 #include "ExampleMaterial.h"
 
+registerMooseObject("ExampleApp", ExampleMaterial);
+
 template <>
 InputParameters
 validParams<ExampleMaterial>()

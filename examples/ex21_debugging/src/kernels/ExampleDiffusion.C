@@ -13,6 +13,8 @@
  * This function defines the valid parameters for
  * this Kernel and their default values
  */
+registerMooseObject("ExampleApp", ExampleDiffusion);
+
 template <>
 InputParameters
 validParams<ExampleDiffusion>()

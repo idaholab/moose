@@ -9,6 +9,8 @@
 
 #include "CoupledNeumannBC.h"
 
+registerMooseObject("ExampleApp", CoupledNeumannBC);
+
 template <>
 InputParameters
 validParams<CoupledNeumannBC>()

@@ -9,6 +9,8 @@
 
 #include "ExampleDiffusion.h"
 
+registerMooseObject("ExampleApp", ExampleDiffusion);
+
 template <>
 InputParameters
 validParams<ExampleDiffusion>()

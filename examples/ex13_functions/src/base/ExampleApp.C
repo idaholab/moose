@@ -12,9 +12,6 @@
 #include "AppFactory.h"
 #include "MooseSyntax.h"
 
-// Example 13 Includes
-#include "ExampleFunction.h"
-
 template <>
 InputParameters
 validParams<ExampleApp>()
@@ -35,18 +32,19 @@ ExampleApp::ExampleApp(InputParameters parameters) : MooseApp(parameters)
 }
 
 void
+ExampleApp::registerObjects(Factory & factory)
+{
+  Registry::registerObjectsTo(factory, {"ExampleApp"});
+}
+
+void
 ExampleApp::registerApps()
 {
   registerApp(ExampleApp);
 }
 
 void
-ExampleApp::registerObjects(Factory & factory)
+ExampleApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & action_factory)
 {
-  registerFunction(ExampleFunction);
-}
-
-void
-ExampleApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & /*action_factory*/)
-{
+  Registry::registerActionsTo(action_factory, {"ExampleApp"});
 }

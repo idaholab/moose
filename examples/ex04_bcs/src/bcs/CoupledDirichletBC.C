@@ -9,6 +9,8 @@
 
 #include "CoupledDirichletBC.h"
 
+registerMooseObject("ExampleApp", CoupledDirichletBC);
+
 template <>
 InputParameters
 validParams<CoupledDirichletBC>()

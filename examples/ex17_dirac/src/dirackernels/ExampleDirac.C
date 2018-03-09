@@ -9,6 +9,8 @@
 
 #include "ExampleDirac.h"
 
+registerMooseObject("ExampleApp", ExampleDirac);
+
 template <>
 InputParameters
 validParams<ExampleDirac>()

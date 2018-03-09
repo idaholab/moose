@@ -9,6 +9,8 @@
 
 #include "ScalarDirichletBC.h"
 
+registerMooseObject("ExampleApp", ScalarDirichletBC);
+
 template <>
 InputParameters
 validParams<ScalarDirichletBC>()

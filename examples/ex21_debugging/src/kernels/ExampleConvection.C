@@ -9,6 +9,8 @@
 
 #include "ExampleConvection.h"
 
+registerMooseObject("ExampleApp", ExampleConvection);
+
 template <>
 InputParameters
 validParams<ExampleConvection>()

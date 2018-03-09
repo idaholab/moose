@@ -11,6 +11,8 @@
 
 #include "Material.h"
 
+registerMooseObject("ExampleApp", ExampleTimeDerivative);
+
 template <>
 InputParameters
 validParams<ExampleTimeDerivative>()
