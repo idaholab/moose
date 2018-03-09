@@ -190,7 +190,7 @@ class VersionInfo:
                      '\n'
                      '#endif // ' + app_definition + '_H\n')
             f.close()
-        else:
+        elif self.is_git_repo:
             # Nothing has changed, but if we don't do anything the revision file
             # will still appear to be out of date every time we re-run make.
             # We could touch the revision file, but that might spawn off another big
@@ -204,7 +204,7 @@ class VersionInfo:
             timestamps_to_modify.append(os.path.join(cdup, '.git', 'index'))
 
             for touch_file in timestamps_to_modify:
-                shellCommand("touch -r " + revision_header + " " + touch_file)
+                shellCommand("touch -r " + revision_header + " " + touch_file, repo_location)
 
 
 # Entry point
