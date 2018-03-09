@@ -1569,6 +1569,9 @@ private:
   /// At or beyond initialSteup stage
   bool _started_initial_setup;
 
+  /// Whether the problem has dgkernels or interface kernels
+  bool _has_internal_edge_residual_objects;
+
   friend class AuxiliarySystem;
   friend class NonlinearSystemBase;
   friend class MooseEigenSystem;

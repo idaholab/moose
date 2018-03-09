@@ -1,0 +1,20 @@
+[Tests]
+  [./dg_adaptivity]
+    type = 'Exodiff'
+    input = 'adaptivity.i'
+    exodiff = 'adaptivity_out.e adaptivity_out.e-s002'
+    abs_zero = 1e-8
+    requirement = "Adaptivity shall work with dg kernels as long as stateful properties aren't used"
+    design = "/DGKernels/index.md"
+    issues = '#10977'
+  [../]
+  [./error_stateful_dg_adaptivity]
+    type = 'RunException'
+    input = 'adaptivity.i'
+    expect_err = 'Stateful neighbor material properties do not work with mesh adaptivity'
+    cli_args = "Materials/active='stateful'"
+    requirement = "The triad of dg kernels, adaptivity, and stateful properties do not work together"
+    design = "/DGKernels/index.md"
+    issues = '#10977'
+  [../]
+[]
