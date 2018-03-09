@@ -9,6 +9,8 @@
 
 #include "TagMatrixAux.h"
 
+registerMooseObject("MooseApp", TagMatrixAux);
+
 template <>
 InputParameters
 validParams<TagMatrixAux>()

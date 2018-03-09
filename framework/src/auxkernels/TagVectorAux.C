@@ -9,6 +9,8 @@
 
 #include "TagVectorAux.h"
 
+registerMooseObject("MooseApp", TagVectorAux);
+
 template <>
 InputParameters
 validParams<TagVectorAux>()
