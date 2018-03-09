@@ -25,6 +25,9 @@ protected:
   Real _a;
   Real _b;
 
+  Real _d;
+  Real _h;
+
   Real _g0_real;
   Real _g0_imag;
 
