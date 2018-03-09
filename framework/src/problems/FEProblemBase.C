@@ -4195,13 +4195,7 @@ FEProblemBase::computeJacobian(NonlinearImplicitSystem & /*sys*/,
                                const NumericVector<Number> & soln,
                                SparseMatrix<Number> & jacobian)
 {
-  _fe_matrix_tags.clear();
-
-  auto & tags = getMatrixTag();
-  for (auto & tag : tags)
-    _fe_matrix_tags.insert(tag.second);
-
-  computeJacobian(soln, jacobian, _fe_matrix_tags);
+  computeJacobian(soln, jacobian);
 }
 
 void

@@ -10,4 +10,16 @@
     input = '2d_diffusion_tag_matrix.i'
     exodiff = 'tag_matrix_out.e'
   [../]
+
+  [./test_tag_two_vectors]
+    type = 'Exodiff'
+    input = '2d_diffusion_vector_tag_test.i'
+    exodiff = 'vector_tag_test_out.e'
+  [../]
+
+  [./test_tag_two_matrices]
+    type = 'Exodiff'
+    input = '2d_diffusion_matrix_tag_test.i'
+    exodiff = 'matrix_tag_test_out.e'
+  [../]
 []
