@@ -10,6 +10,8 @@
 #include "MMSCoupledDirichletBC.h"
 #include "MooseMesh.h"
 
+registerMooseObject("MooseTestApp", MMSCoupledDirichletBC);
+
 template <>
 InputParameters
 validParams<MMSCoupledDirichletBC>()

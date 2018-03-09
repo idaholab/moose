@@ -11,6 +11,8 @@
 #include "MooseEnum.h"
 #include "MooseTypes.h"
 
+registerMooseObject("MooseTestApp", BlkResTestDiffusion);
+
 template <>
 InputParameters
 validParams<BlkResTestDiffusion>()

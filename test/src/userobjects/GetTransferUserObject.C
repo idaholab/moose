@@ -11,6 +11,8 @@
 #include "libmesh/quadrature.h"
 #include "MultiAppTransfer.h"
 
+registerMooseObject("MooseTestApp", GetTransferUserObject);
+
 template <>
 InputParameters
 validParams<GetTransferUserObject>()

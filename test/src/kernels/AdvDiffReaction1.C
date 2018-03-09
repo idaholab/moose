@@ -9,6 +9,8 @@
 
 #include "AdvDiffReaction1.h"
 
+registerMooseObject("MooseTestApp", AdvDiffReaction1);
+
 template <>
 InputParameters
 validParams<AdvDiffReaction1>()

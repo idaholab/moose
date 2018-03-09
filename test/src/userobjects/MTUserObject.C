@@ -11,6 +11,8 @@
 
 #include <fstream>
 
+registerMooseObject("MooseTestApp", MTUserObject);
+
 template <>
 InputParameters
 validParams<MTUserObject>()

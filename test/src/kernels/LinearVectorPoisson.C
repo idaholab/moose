@@ -14,6 +14,8 @@
 #include "LinearVectorPoisson.h"
 #include "Function.h"
 
+registerMooseObject("MooseTestApp", LinearVectorPoisson);
+
 template <>
 InputParameters
 validParams<LinearVectorPoisson>()

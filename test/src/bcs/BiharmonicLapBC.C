@@ -10,6 +10,8 @@
 #include "BiharmonicLapBC.h"
 #include "Function.h"
 
+registerMooseObject("MooseTestApp", BiharmonicLapBC);
+
 template <>
 InputParameters
 validParams<BiharmonicLapBC>()

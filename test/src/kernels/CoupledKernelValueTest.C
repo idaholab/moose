@@ -9,6 +9,8 @@
 
 #include "CoupledKernelValueTest.h"
 
+registerMooseObject("MooseTestApp", CoupledKernelValueTest);
+
 template <>
 InputParameters
 validParams<CoupledKernelValueTest>()

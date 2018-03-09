@@ -9,6 +9,8 @@
 
 #include "MatDivergenceBC.h"
 
+registerMooseObject("MooseTestApp", MatDivergenceBC);
+
 template <>
 InputParameters
 validParams<MatDivergenceBC>()

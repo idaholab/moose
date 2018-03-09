@@ -27,6 +27,12 @@
 #include "libmesh/string_to_enum.h"
 #include "libmesh/fe.h"
 
+registerMooseAction("MooseTestApp", AddMatAndKernel, "add_kernel");
+
+registerMooseAction("MooseTestApp", AddMatAndKernel, "add_material");
+
+registerMooseAction("MooseTestApp", AddMatAndKernel, "add_variable");
+
 template <>
 InputParameters
 validParams<AddMatAndKernel>()

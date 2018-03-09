@@ -9,6 +9,8 @@
 
 #include "ImplicitODEx.h"
 
+registerMooseObject("MooseTestApp", ImplicitODEx);
+
 template <>
 InputParameters
 validParams<ImplicitODEx>()

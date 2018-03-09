@@ -11,6 +11,8 @@
 #include "NumAdaptivityCycles.h"
 #include "FEProblem.h"
 
+registerMooseObject("MooseTestApp", NumAdaptivityCycles);
+
 template <>
 InputParameters
 validParams<NumAdaptivityCycles>()

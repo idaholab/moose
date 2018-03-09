@@ -10,6 +10,8 @@
 // MOOSE includes
 #include "ScalarCoupledPostprocessor.h"
 
+registerMooseObject("MooseTestApp", ScalarCoupledPostprocessor);
+
 template <>
 InputParameters
 validParams<ScalarCoupledPostprocessor>()

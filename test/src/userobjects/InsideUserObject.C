@@ -9,6 +9,8 @@
 
 #include "InsideUserObject.h"
 
+registerMooseObject("MooseTestApp", InsideUserObject);
+
 template <>
 InputParameters
 validParams<InsideUserObject>()

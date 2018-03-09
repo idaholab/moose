@@ -10,6 +10,8 @@
 #include "MatSideUserObject.h"
 #include "MooseMesh.h"
 
+registerMooseObject("MooseTestApp", MatSideUserObject);
+
 template <>
 InputParameters
 validParams<MatSideUserObject>()

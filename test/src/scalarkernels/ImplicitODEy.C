@@ -9,6 +9,8 @@
 
 #include "ImplicitODEy.h"
 
+registerMooseObject("MooseTestApp", ImplicitODEy);
+
 template <>
 InputParameters
 validParams<ImplicitODEy>()

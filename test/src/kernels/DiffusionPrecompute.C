@@ -9,6 +9,8 @@
 
 #include "DiffusionPrecompute.h"
 
+registerMooseObject("MooseTestApp", DiffusionPrecompute);
+
 template <>
 InputParameters
 validParams<DiffusionPrecompute>()

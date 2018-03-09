@@ -9,6 +9,8 @@
 
 #include "NanAtCountKernel.h"
 
+registerMooseObject("MooseTestApp", NanAtCountKernel);
+
 template <>
 InputParameters
 validParams<NanAtCountKernel>()

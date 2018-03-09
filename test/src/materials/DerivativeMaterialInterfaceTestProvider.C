@@ -11,6 +11,8 @@
 
 #include "libmesh/quadrature.h"
 
+registerMooseObject("MooseTestApp", DerivativeMaterialInterfaceTestProvider);
+
 template <>
 InputParameters
 validParams<DerivativeMaterialInterfaceTestProvider>()

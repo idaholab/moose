@@ -9,6 +9,8 @@
 
 #include "PointerStoreError.h"
 
+registerMooseObject("MooseTestApp", PointerStoreError);
+
 template <>
 InputParameters
 validParams<PointerStoreError>()

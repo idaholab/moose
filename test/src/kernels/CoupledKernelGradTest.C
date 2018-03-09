@@ -9,6 +9,8 @@
 
 #include "CoupledKernelGradTest.h"
 
+registerMooseObject("MooseTestApp", CoupledKernelGradTest);
+
 template <>
 InputParameters
 validParams<CoupledKernelGradTest>()

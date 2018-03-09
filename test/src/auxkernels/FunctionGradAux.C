@@ -11,6 +11,8 @@
 #include "Function.h"
 #include "MooseMesh.h"
 
+registerMooseObject("MooseTestApp", FunctionGradAux);
+
 template <>
 InputParameters
 validParams<FunctionGradAux>()

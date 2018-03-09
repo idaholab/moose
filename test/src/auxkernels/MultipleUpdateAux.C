@@ -9,6 +9,8 @@
 
 #include "MultipleUpdateAux.h"
 
+registerMooseObject("MooseTestApp", MultipleUpdateAux);
+
 template <>
 InputParameters
 validParams<MultipleUpdateAux>()

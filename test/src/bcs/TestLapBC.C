@@ -9,6 +9,8 @@
 
 #include "TestLapBC.h"
 
+registerMooseObject("MooseTestApp", TestLapBC);
+
 template <>
 InputParameters
 validParams<TestLapBC>()

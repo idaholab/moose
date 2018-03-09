@@ -9,6 +9,8 @@
 
 #include "ExplicitODE.h"
 
+registerMooseObject("MooseTestApp", ExplicitODE);
+
 template <>
 InputParameters
 validParams<ExplicitODE>()

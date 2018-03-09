@@ -11,6 +11,8 @@
 #include "NonlinearSystem.h"
 #include "AuxiliarySystem.h"
 
+registerMooseObject("MooseTestApp", SteadyWithNull);
+
 template <>
 InputParameters
 validParams<SteadyWithNull>()

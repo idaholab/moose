@@ -1,6 +1,8 @@
 #include "LinearVectorPenaltyDirichletBC.h"
 #include "Function.h"
 
+registerMooseObject("MooseTestApp", LinearVectorPenaltyDirichletBC);
+
 template <>
 InputParameters
 validParams<LinearVectorPenaltyDirichletBC>()

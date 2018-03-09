@@ -9,6 +9,8 @@
 
 #include "ExampleShapeSideIntegratedBC.h"
 
+registerMooseObject("MooseTestApp", ExampleShapeSideIntegratedBC);
+
 template <>
 InputParameters
 validParams<ExampleShapeSideIntegratedBC>()

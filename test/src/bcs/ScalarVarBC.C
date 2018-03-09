@@ -9,6 +9,8 @@
 
 #include "ScalarVarBC.h"
 
+registerMooseObject("MooseTestApp", ScalarVarBC);
+
 template <>
 InputParameters
 validParams<ScalarVarBC>()

@@ -9,6 +9,8 @@
 
 #include "MatDiffusion.h"
 
+registerMooseObject("MooseTestApp", MatDiffusion);
+
 template <>
 InputParameters
 validParams<MatDiffusion>()

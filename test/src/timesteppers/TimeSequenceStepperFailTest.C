@@ -9,6 +9,8 @@
 
 #include "TimeSequenceStepperFailTest.h"
 
+registerMooseObject("MooseTestApp", TimeSequenceStepperFailTest);
+
 template <>
 InputParameters
 validParams<TimeSequenceStepperFailTest>()

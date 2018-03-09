@@ -10,6 +10,8 @@
 #include "RandomAux.h"
 #include "RandomElementalUserObject.h"
 
+registerMooseObject("MooseTestApp", RandomAux);
+
 template <>
 InputParameters
 validParams<RandomAux>()

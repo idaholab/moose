@@ -9,6 +9,8 @@
 
 #include "PolyDiffusion.h"
 
+registerMooseObject("MooseTestApp", PolyDiffusion);
+
 template <>
 InputParameters
 validParams<PolyDiffusion>()

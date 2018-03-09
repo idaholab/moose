@@ -10,6 +10,8 @@
 #include "ChannelGradientVectorPostprocessor.h"
 #include "VectorPostprocessorInterface.h"
 
+registerMooseObject("MooseTestApp", ChannelGradientVectorPostprocessor);
+
 template <>
 InputParameters
 validParams<ChannelGradientVectorPostprocessor>()

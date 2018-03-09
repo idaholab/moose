@@ -9,6 +9,8 @@
 
 #include "DiffMKernel.h"
 
+registerMooseObject("MooseTestApp", DiffMKernel);
+
 template <>
 InputParameters
 validParams<DiffMKernel>()

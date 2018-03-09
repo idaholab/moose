@@ -9,6 +9,8 @@
 
 #include "PolyReaction.h"
 
+registerMooseObject("MooseTestApp", PolyReaction);
+
 template <>
 InputParameters
 validParams<PolyReaction>()

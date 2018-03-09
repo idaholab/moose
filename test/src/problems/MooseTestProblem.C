@@ -9,6 +9,8 @@
 
 #include "MooseTestProblem.h"
 
+registerMooseObject("MooseTestApp", MooseTestProblem);
+
 template <>
 InputParameters
 validParams<MooseTestProblem>()

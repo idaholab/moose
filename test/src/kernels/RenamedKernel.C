@@ -9,6 +9,8 @@
 
 #include "RenamedKernel.h"
 
+registerMooseObjectRenamed("MooseTestApp", OldNamedKernel, "01/01/2050 00:00", RenamedKernel);
+
 template <>
 InputParameters
 validParams<RenamedKernel>()

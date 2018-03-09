@@ -11,6 +11,8 @@
 #include "FEProblem.h"
 #include "MooseEnum.h"
 
+registerMooseObject("MooseTestApp", QPointMarker);
+
 template <>
 InputParameters
 validParams<QPointMarker>()

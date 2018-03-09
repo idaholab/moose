@@ -9,6 +9,8 @@
 
 #include "MTMaterial.h"
 
+registerMooseObject("MooseTestApp", MTMaterial);
+
 template <>
 InputParameters
 validParams<MTMaterial>()

@@ -9,6 +9,8 @@
 
 #include "StatefulSpatialTest.h"
 
+registerMooseObject("MooseTestApp", StatefulSpatialTest);
+
 template <>
 InputParameters
 validParams<StatefulSpatialTest>()

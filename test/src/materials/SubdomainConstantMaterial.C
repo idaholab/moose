@@ -12,6 +12,8 @@
 #include "MooseMesh.h"
 #include "FEProblem.h"
 
+registerMooseObject("MooseTestApp", SubdomainConstantMaterial);
+
 template <>
 InputParameters
 validParams<SubdomainConstantMaterial>()

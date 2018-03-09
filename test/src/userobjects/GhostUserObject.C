@@ -13,6 +13,8 @@
 // invalid_processor_id
 #include "libmesh/dof_object.h"
 
+registerMooseObject("MooseTestApp", GhostUserObject);
+
 template <>
 InputParameters
 validParams<GhostUserObject>()

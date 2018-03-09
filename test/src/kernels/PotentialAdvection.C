@@ -9,6 +9,8 @@
 
 #include "PotentialAdvection.h"
 
+registerMooseObject("MooseTestApp", PotentialAdvection);
+
 template <>
 InputParameters
 validParams<PotentialAdvection>()

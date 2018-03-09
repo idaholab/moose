@@ -9,6 +9,8 @@
 
 #include "BadCachingPointSource.h"
 
+registerMooseObject("MooseTestApp", BadCachingPointSource);
+
 template <>
 InputParameters
 validParams<BadCachingPointSource>()

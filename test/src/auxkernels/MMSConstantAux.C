@@ -10,6 +10,8 @@
 #include "MMSConstantAux.h"
 #include "MooseMesh.h"
 
+registerMooseObject("MooseTestApp", MMSConstantAux);
+
 template <>
 InputParameters
 validParams<MMSConstantAux>()

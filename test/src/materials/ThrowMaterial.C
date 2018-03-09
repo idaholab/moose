@@ -9,6 +9,8 @@
 
 #include "ThrowMaterial.h"
 
+registerMooseObject("MooseTestApp", ThrowMaterial);
+
 template <>
 InputParameters
 validParams<ThrowMaterial>()

@@ -9,6 +9,8 @@
 
 #include "LinearInterpolationMaterial.h"
 
+registerMooseObject("MooseTestApp", LinearInterpolationMaterial);
+
 template <>
 InputParameters
 validParams<LinearInterpolationMaterial>()

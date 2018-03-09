@@ -9,6 +9,8 @@
 
 #include "SimpleTestShapeElementKernel.h"
 
+registerMooseObject("MooseTestApp", SimpleTestShapeElementKernel);
+
 template <>
 InputParameters
 validParams<SimpleTestShapeElementKernel>()

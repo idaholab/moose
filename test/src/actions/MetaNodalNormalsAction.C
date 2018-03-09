@@ -11,6 +11,8 @@
 #include "ActionFactory.h"
 #include "ActionWarehouse.h"
 
+registerMooseAction("MooseTestApp", MetaNodalNormalsAction, "meta_action");
+
 template <>
 InputParameters
 validParams<MetaNodalNormalsAction>()

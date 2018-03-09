@@ -10,6 +10,8 @@
 #include "TrackDiracFront.h"
 #include "MooseMesh.h"
 
+registerMooseObject("MooseTestApp", TrackDiracFront);
+
 template <>
 InputParameters
 validParams<TrackDiracFront>()

@@ -9,6 +9,8 @@
 
 #include "DotCouplingKernel.h"
 
+registerMooseObject("MooseTestApp", DotCouplingKernel);
+
 template <>
 InputParameters
 validParams<DotCouplingKernel>()

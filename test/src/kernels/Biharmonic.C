@@ -9,6 +9,8 @@
 
 #include "Biharmonic.h"
 
+registerMooseObject("MooseTestApp", Biharmonic);
+
 template <>
 InputParameters
 validParams<Biharmonic>()

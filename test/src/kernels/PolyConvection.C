@@ -9,6 +9,8 @@
 
 #include "PolyConvection.h"
 
+registerMooseObject("MooseTestApp", PolyConvection);
+
 template <>
 InputParameters
 validParams<PolyConvection>()

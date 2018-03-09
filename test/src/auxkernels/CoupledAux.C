@@ -9,6 +9,8 @@
 
 #include "CoupledAux.h"
 
+registerMooseObject("MooseTestApp", CoupledAux);
+
 template <>
 InputParameters
 validParams<CoupledAux>()

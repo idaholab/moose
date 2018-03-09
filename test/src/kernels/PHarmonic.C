@@ -9,6 +9,8 @@
 
 #include "PHarmonic.h"
 
+registerMooseObject("MooseTestApp", PHarmonic);
+
 template <>
 InputParameters
 validParams<PHarmonic>()

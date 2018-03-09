@@ -9,6 +9,8 @@
 
 #include "CoupledMaterial2.h"
 
+registerMooseObject("MooseTestApp", CoupledMaterial2);
+
 template <>
 InputParameters
 validParams<CoupledMaterial2>()

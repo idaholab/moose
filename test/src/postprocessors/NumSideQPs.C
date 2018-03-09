@@ -11,6 +11,8 @@
 
 #include "libmesh/quadrature.h"
 
+registerMooseObject("MooseTestApp", NumSideQPs);
+
 template <>
 InputParameters
 validParams<NumSideQPs>()

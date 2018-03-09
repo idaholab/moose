@@ -9,6 +9,8 @@
 
 #include "MTICSum.h"
 
+registerMooseObject("MooseTestApp", MTICSum);
+
 template <>
 InputParameters
 validParams<MTICSum>()

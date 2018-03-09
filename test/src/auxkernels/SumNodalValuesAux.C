@@ -9,6 +9,8 @@
 
 #include "SumNodalValuesAux.h"
 
+registerMooseObject("MooseTestApp", SumNodalValuesAux);
+
 template <>
 InputParameters
 validParams<SumNodalValuesAux>()

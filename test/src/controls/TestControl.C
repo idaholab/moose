@@ -10,6 +10,8 @@
 #include "TestControl.h"
 #include "FEProblem.h"
 
+registerMooseObject("MooseTestApp", TestControl);
+
 template <>
 InputParameters
 validParams<TestControl>()

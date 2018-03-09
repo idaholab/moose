@@ -9,6 +9,8 @@
 
 #include "OutputTestMaterial.h"
 
+registerMooseObject("MooseTestApp", OutputTestMaterial);
+
 template <>
 InputParameters
 validParams<OutputTestMaterial>()

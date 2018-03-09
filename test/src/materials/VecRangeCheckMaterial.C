@@ -9,6 +9,8 @@
 
 #include "VecRangeCheckMaterial.h"
 
+registerMooseObject("MooseTestApp", VecRangeCheckMaterial);
+
 template <>
 InputParameters
 validParams<VecRangeCheckMaterial>()

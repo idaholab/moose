@@ -8,6 +8,8 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 #include "RandomMaterial.h"
 
+registerMooseObject("MooseTestApp", RandomMaterial);
+
 template <>
 InputParameters
 validParams<RandomMaterial>()

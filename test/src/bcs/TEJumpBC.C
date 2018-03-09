@@ -9,6 +9,8 @@
 
 #include "TEJumpBC.h"
 
+registerMooseObject("MooseTestApp", TEJumpBC);
+
 template <>
 InputParameters
 validParams<TEJumpBC>()

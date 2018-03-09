@@ -9,6 +9,8 @@
 
 #include "DataStructIC.h"
 
+registerMooseObject("MooseTestApp", DataStructIC);
+
 template <>
 InputParameters
 validParams<DataStructIC>()

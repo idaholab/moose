@@ -10,6 +10,8 @@
 #include "MMSForcing.h"
 #include "MooseMesh.h"
 
+registerMooseObject("MooseTestApp", MMSForcing);
+
 template <>
 InputParameters
 validParams<MMSForcing>()

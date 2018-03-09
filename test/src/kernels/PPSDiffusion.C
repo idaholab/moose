@@ -9,6 +9,8 @@
 
 #include "PPSDiffusion.h"
 
+registerMooseObject("MooseTestApp", PPSDiffusion);
+
 template <>
 InputParameters
 validParams<PPSDiffusion>()

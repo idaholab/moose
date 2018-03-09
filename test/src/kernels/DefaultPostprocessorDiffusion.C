@@ -9,6 +9,8 @@
 
 #include "DefaultPostprocessorDiffusion.h"
 
+registerMooseObject("MooseTestApp", DefaultPostprocessorDiffusion);
+
 template <>
 InputParameters
 validParams<DefaultPostprocessorDiffusion>()

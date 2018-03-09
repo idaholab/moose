@@ -9,6 +9,8 @@
 
 #include "CoupledGradAux.h"
 
+registerMooseObject("MooseTestApp", CoupledGradAux);
+
 template <>
 InputParameters
 validParams<CoupledGradAux>()
