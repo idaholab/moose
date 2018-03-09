@@ -43,7 +43,9 @@ validParams<InertialForceBeam>()
                         "alpha parameter for mass dependent numerical damping induced "
                         "by HHT time integration scheme");
   params.addParam<MaterialPropertyName>(
-      "density", "density", "Name of Material Property that provides the density");
+      "density",
+      "density",
+      "Name of Material Property  or a constant real number defining the density of the beam.");
   params.addCoupledVar("area", "Variable containing cross-section area");
   params.addCoupledVar("Ay", "Variable containing first moment of area about y axis");
   params.addCoupledVar("Az", "Variable containing first moment of area about z axis");
@@ -59,7 +61,7 @@ validParams<InertialForceBeam>()
 
 InertialForceBeam::InertialForceBeam(const InputParameters & parameters)
   : Kernel(parameters),
-    _density(getMaterialPropertyByName<Real>("density")),
+    _density(getMaterialProperty<Real>("density")),
     _nrot(coupledComponents("rotations")),
     _ndisp(coupledComponents("displacements")),
     _rot_num(3),

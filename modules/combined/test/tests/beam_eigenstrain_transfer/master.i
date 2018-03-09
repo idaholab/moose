@@ -150,7 +150,7 @@
     block = 1
   [../]
   [./thermal]
-    type = ComputeBeamEigenstrainFromAuxVar
+    type = ComputeEigenstrainBeamFromVariable
     disp_eigenstrain = 'zero1 zero2 to_var'
     eigenstrain_name = thermal
   [../]
@@ -196,7 +196,7 @@
 
 [Transfers]
   [./fromsub]
-    type = VectorPostprocessorToAuxVar
+    type = VectorPostprocessorTransfer
     direction = from_multiapp
     multi_app = sub
     vector_postprocessor = axial_str

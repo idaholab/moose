@@ -7,13 +7,13 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "ComputeBeamEigenstrainBase.h"
+#include "ComputeEigenstrainBeamBase.h"
 
 #include "RankTwoTensor.h"
 
 template <>
 InputParameters
-validParams<ComputeBeamEigenstrainBase>()
+validParams<ComputeEigenstrainBeamBase>()
 {
   InputParameters params = validParams<Material>();
   params.addRequiredParam<std::string>("eigenstrain_name",
@@ -23,7 +23,7 @@ validParams<ComputeBeamEigenstrainBase>()
   return params;
 }
 
-ComputeBeamEigenstrainBase::ComputeBeamEigenstrainBase(const InputParameters & parameters)
+ComputeEigenstrainBeamBase::ComputeEigenstrainBeamBase(const InputParameters & parameters)
   : Material(parameters),
     _eigenstrain_name(getParam<std::string>("eigenstrain_name")),
     _disp_eigenstrain(declareProperty<RealVectorValue>("disp_" + _eigenstrain_name)),
@@ -33,7 +33,7 @@ ComputeBeamEigenstrainBase::ComputeBeamEigenstrainBase(const InputParameters & p
 }
 
 void
-ComputeBeamEigenstrainBase::initQpStatefulProperties()
+ComputeEigenstrainBeamBase::initQpStatefulProperties()
 {
   // This property can be promoted to be stateful by other models that use it,
   // so it needs to be initalized.
@@ -42,7 +42,7 @@ ComputeBeamEigenstrainBase::initQpStatefulProperties()
 }
 
 void
-ComputeBeamEigenstrainBase::computeQpProperties()
+ComputeEigenstrainBeamBase::computeQpProperties()
 {
   if (_t_step >= 1)
     _step_zero = false;

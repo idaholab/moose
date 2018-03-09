@@ -7,13 +7,13 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "ComputeBeamThermalExpansionEigenstrainBase.h"
+#include "ComputeThermalExpansionEigenstrainBeamBase.h"
 
 template <>
 InputParameters
-validParams<ComputeBeamThermalExpansionEigenstrainBase>()
+validParams<ComputeThermalExpansionEigenstrainBeamBase>()
 {
-  InputParameters params = validParams<ComputeBeamEigenstrainBase>();
+  InputParameters params = validParams<ComputeEigenstrainBeamBase>();
   params.addCoupledVar("temperature", "Coupled temperature");
   params.addRequiredCoupledVar("stress_free_temperature",
                                "Reference temperature at which there is no "
@@ -22,9 +22,9 @@ validParams<ComputeBeamThermalExpansionEigenstrainBase>()
   return params;
 }
 
-ComputeBeamThermalExpansionEigenstrainBase::ComputeBeamThermalExpansionEigenstrainBase(
+ComputeThermalExpansionEigenstrainBeamBase::ComputeThermalExpansionEigenstrainBeamBase(
     const InputParameters & parameters)
-  : DerivativeMaterialInterface<ComputeBeamEigenstrainBase>(parameters),
+  : DerivativeMaterialInterface<ComputeEigenstrainBeamBase>(parameters),
     _temperature(coupledValue("temperature")),
     _stress_free_temperature(coupledValue("stress_free_temperature")),
     _initial_axis(declareProperty<RealGradient>("initial_axis"))
@@ -32,7 +32,7 @@ ComputeBeamThermalExpansionEigenstrainBase::ComputeBeamThermalExpansionEigenstra
 }
 
 void
-ComputeBeamThermalExpansionEigenstrainBase::initQpStatefulProperties()
+ComputeThermalExpansionEigenstrainBeamBase::initQpStatefulProperties()
 {
   // compute initial orientation of the beam
   const std::vector<RealGradient> * orientation =
@@ -44,7 +44,7 @@ ComputeBeamThermalExpansionEigenstrainBase::initQpStatefulProperties()
   _initial_axis[_qp] = x_orientation;
 }
 void
-ComputeBeamThermalExpansionEigenstrainBase::computeQpEigenstrain()
+ComputeThermalExpansionEigenstrainBeamBase::computeQpEigenstrain()
 {
   Real thermal_strain = 0.0;
   Real instantaneous_cte = 0.0;

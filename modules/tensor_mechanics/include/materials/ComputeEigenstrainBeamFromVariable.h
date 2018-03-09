@@ -7,24 +7,24 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef COMPUTEBEAMEIGENSTRAINFROMAUXVAR_H
-#define COMPUTEBEAMEIGENSTRAINFROMAUXVAR_H
+#ifndef COMPUTEEIGENSTRAINBEAMFROMVARIABLE_H
+#define COMPUTEEIGENSTRAINBEAMFROMVARIABLE_H
 
-#include "ComputeBeamEigenstrainBase.h"
+#include "ComputeEigenstrainBeamBase.h"
 
-class ComputeBeamEigenstrainFromAuxVar;
+class ComputeEigenstrainBeamFromVariable;
 
 template <>
-InputParameters validParams<ComputeBeamEigenstrainFromAuxVar>();
+InputParameters validParams<ComputeEigenstrainBeamFromVariable>();
 
 /**
- * ComputeBeamEigenstrainFromAuxVar computes an Eigenstrain from displacement and rotational
- * eigenstrain aux variables
+ * ComputeEigenstrainBeamFromVariable computes an Eigenstrain from displacement and rotational
+ * eigenstrain variables
  */
-class ComputeBeamEigenstrainFromAuxVar : public ComputeBeamEigenstrainBase
+class ComputeEigenstrainBeamFromVariable : public ComputeEigenstrainBeamBase
 {
 public:
-  ComputeBeamEigenstrainFromAuxVar(const InputParameters & parameters);
+  ComputeEigenstrainBeamFromVariable(const InputParameters & parameters);
 
 protected:
   virtual void computeQpEigenstrain() override;
@@ -42,4 +42,4 @@ protected:
   std::vector<const VariableValue *> _rot;
 };
 
-#endif // COMPUTEBEAMEIGENSTRAINFROMAUXVAR_H
+#endif // COMPUTEEIGENSTRAINBEAMFROMVARIABLE_H

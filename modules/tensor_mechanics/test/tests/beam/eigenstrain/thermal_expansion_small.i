@@ -177,7 +177,7 @@
     block = 1
   [../]
   [./thermal]
-    type = ComputeBeamThermalExpansionEigenstrain
+    type = ComputeThermalExpansionEigenstrainBeam
     thermal_expansion_coeff = 1e-4
     temperature = 100
     stress_free_temperature = 0

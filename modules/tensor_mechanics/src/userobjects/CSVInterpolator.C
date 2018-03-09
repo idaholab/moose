@@ -9,56 +9,53 @@
 
 #include "DelimitedFileReader.h"
 #include <glob.h>
-#include "VectorPostprocessorToInterpolator.h"
+#include "CSVInterpolator.h"
 #include "BilinearInterpolation.h"
 
 template <>
 InputParameters
-validParams<VectorPostprocessorToInterpolator>()
+validParams<CSVInterpolator>()
 {
   InputParameters params = validParams<GeneralUserObject>();
-  params.addClassDescription("Reads a given position column and variable data from set of "
-                             "VectorPostprocessor files and creates a bilinear interpolation "
-                             "object in position and time.");
+  params.addClassDescription(
+      "Reads a given position column and variable data from set of "
+      "CSV files and creates a bilinear interpolation "
+      "object in position and time. Note that each CSV file contains output from one time step.");
   params.set<ExecFlagEnum>("execute_on") = EXEC_NONE;
   params.suppressParameter<ExecFlagEnum>("execute_on");
-  params.addRequiredParam<std::string>(
-      "vector_postprocessor_pattern",
-      "The filename pattern (glob) for the vector postprocessor csvs files.");
+  params.addRequiredParam<std::string>("csv_filename_pattern",
+                                       "The filename pattern (glob) for the csv files.");
   params.addRequiredParam<unsigned int>(
       "from_component",
-      "Component that need to extracted from the vector postprocessor. x = 0, y = 1 and z = 2.");
+      "Component that need to extracted from the csv FileMesh. x = 0, y = 1 and z = 2.");
   params.addRequiredParam<std::vector<std::string>>(
-      "variable_vectors",
-      "Names of variable vectors that need to be extracted from Vectorpostprocessor.");
-  params.addParam<Real>(
-      "time_step", "The constant time step at which the VectorPostprocessor output is generated.");
+      "variable_vectors", "Names of variable vectors that need to be extracted from csv files.");
+  params.addParam<Real>("time_step",
+                        "The constant time step at which the csv file output is provided.");
   params.addParam<FileName>("time_file",
                             "The file that contains the time information if a "
                             "constant time step is not used to generate "
-                            "VectorPostprocessor output. The column corresponding to "
+                            "CSV output. The column corresponding to "
                             "time is obtained using the 'time' header flag.");
   return params;
 }
 
-VectorPostprocessorToInterpolator::VectorPostprocessorToInterpolator(
-    const InputParameters & parameters)
+CSVInterpolator::CSVInterpolator(const InputParameters & parameters)
   : GeneralUserObject(parameters),
-    _pattern(getParam<std::string>("vector_postprocessor_pattern")),
+    _pattern(getParam<std::string>("csv_filename_pattern")),
     _from_component(getParam<unsigned int>("from_component")),
     _variable_vectors(getParam<std::vector<std::string>>("variable_vectors")),
     _bilinear_interp(_variable_vectors.size())
 {
   if (_variable_vectors.size() == 0)
-    mooseError(
-        "VectorPostprocessorToInterpolator: Please provide a non-empty list of variable vectors.");
+    mooseError("CSVInterpolator: Please provide a non-empty list of variable vectors.");
 
   // Get all file names matching the given pattern
   std::vector<std::string> file_names = glob(_pattern);
   if (file_names.empty())
     mooseError("Unable to locate files with the given pattern (",
                _pattern,
-               ") in the VectorPostprocessorToInterpolator object '",
+               ") in the CSVInterpolator object '",
                name(),
                "'.");
 
@@ -84,17 +81,16 @@ VectorPostprocessorToInterpolator::VectorPostprocessorToInterpolator(
     file.read();
     t = file.getData("time");
     if (t.size() != file_names.size())
-      mooseError("VectorPostprocessorToInterpolator: The number of VectorPostprocessor files and "
+      mooseError("CSVInterpolator: The number of CSV files and "
                  "the length of the time vector should be same.");
   }
   else if (isParamValid("time_step") && isParamValid("time_file"))
-    mooseError("VectorPostprocessorToInterpolator: Please provide either time step or time file "
+    mooseError("CSVInterpolator: Please provide either time step or time file "
                "not both.");
   else
-    mooseError(
-        "VectorPostprocessorToInterpolator: Either time step or time file should be provided.");
+    mooseError("CSVInterpolator: Either time step or time file should be provided.");
 
-  // First vectorpostprocessor file does not usually contain any data
+  // First CSV file does not usually contain any data
   if (file_names.size() > 1)
   {
     for (unsigned int i = 1; i < file_names.size(); ++i)
@@ -113,7 +109,7 @@ VectorPostprocessorToInterpolator::VectorPostprocessorToInterpolator(
         else if (_from_component == 2)
           position = reader.getData("z");
         else
-          mooseError("VectorPostprocessorToInterpolator: from_component should be 0, 1 or 2.");
+          mooseError("CSVInterpolator: from_component should be 0, 1 or 2.");
 
         // Resize the ColumnMajorMatrix corresponding to each variable value
         for (unsigned int j = 0; j < _variable_vectors.size(); ++j)
@@ -137,7 +133,7 @@ VectorPostprocessorToInterpolator::VectorPostprocessorToInterpolator(
 }
 
 std::vector<Real>
-VectorPostprocessorToInterpolator::getValue(const Real & x, const Real & y) const
+CSVInterpolator::getValue(const Real & x, const Real & y) const
 {
   std::vector<Real> value(_variable_vectors.size());
   for (unsigned int i = 0; i < _variable_vectors.size(); ++i)
@@ -147,7 +143,7 @@ VectorPostprocessorToInterpolator::getValue(const Real & x, const Real & y) cons
 }
 
 std::vector<std::string>
-VectorPostprocessorToInterpolator::glob(const std::string & pattern)
+CSVInterpolator::glob(const std::string & pattern)
 {
   glob_t glob_result;
   ::glob(pattern.c_str(), GLOB_TILDE, NULL, &glob_result);

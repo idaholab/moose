@@ -1,12 +1,8 @@
-# Test for eigenstrain from VPP
+# Test for eigenstrain from variables
 
-# A beam of length 4 m is fixed at one end. Axial eigenstrains
-# are read in from vector postprocessor csv files. The variation of
-# axial strains in the y direction and in time are mapped into the
-# the eigenstrain variation along axis of the beam (x) and time.
-# For the first time step, the eigenstrain is 0.01 leading to 0.04m
-# axial elongation. For the second time step, the eigenstrain is 0.02
-# leading to 0.08 m axial elongation.
+# A constant axial eigenstrain of 0.01 is applied to a beam of length
+# 4 m. The beam is fixed at one end. The eigenstrain causes a change in
+# length of 0.04 m irrespective of the material properties of the beam.
 
 [Mesh]
   type = FileMesh
@@ -38,6 +34,23 @@
   [./rot_z]
     order = FIRST
     family = LAGRANGE
+  [../]
+[]
+
+[AuxVariables]
+  [./thermal_eig]
+  [../]
+  [./zero1]
+  [../]
+  [./zero2]
+  [../]
+[]
+
+[AuxKernels]
+  [./thermal_eig]
+    type = ConstantAux
+    value = 0.01
+    variable = thermal_eig
   [../]
 []
 
@@ -179,21 +192,9 @@
     block = 1
   [../]
   [./thermal]
-    type = ComputeBeamEigenstrainFromVPP
-    disp_eigenstrain_uo = disp_uo
-    to_component = 0
-    position_vector = '0.0 0.0'
+    type = ComputeEigenstrainBeamFromVariable
+    disp_eigenstrain = 'thermal_eig zero1 zero2'
     eigenstrain_name = thermal
-  [../]
-[]
-
-[UserObjects]
-  [./disp_uo]
-    type = VectorPostprocessorToInterpolator
-    vector_postprocessor_pattern = eigenstrain_vpp_*.csv
-    from_component = 1
-    variable_vectors = 'axial_str'
-    time_step = 1.0
   [../]
 []
 
@@ -211,5 +212,8 @@
 []
 
 [Outputs]
-  exodus = true
+  [./out]
+    type = Exodus
+    hide = 'thermal_eig zero1 zero2'
+  [../]
 []

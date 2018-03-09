@@ -7,13 +7,13 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "ComputeBeamThermalExpansionEigenstrain.h"
+#include "ComputeThermalExpansionEigenstrainBeam.h"
 
 template <>
 InputParameters
-validParams<ComputeBeamThermalExpansionEigenstrain>()
+validParams<ComputeThermalExpansionEigenstrainBeam>()
 {
-  InputParameters params = validParams<ComputeBeamThermalExpansionEigenstrainBase>();
+  InputParameters params = validParams<ComputeThermalExpansionEigenstrainBeamBase>();
   params.addClassDescription("Computes eigenstrain due to thermal expansion "
                              "with a constant coefficient");
   params.addParam<Real>("thermal_expansion_coeff", "Thermal expansion coefficient");
@@ -21,15 +21,15 @@ validParams<ComputeBeamThermalExpansionEigenstrain>()
   return params;
 }
 
-ComputeBeamThermalExpansionEigenstrain::ComputeBeamThermalExpansionEigenstrain(
+ComputeThermalExpansionEigenstrainBeam::ComputeThermalExpansionEigenstrainBeam(
     const InputParameters & parameters)
-  : ComputeBeamThermalExpansionEigenstrainBase(parameters),
+  : ComputeThermalExpansionEigenstrainBeamBase(parameters),
     _thermal_expansion_coeff(getParam<Real>("thermal_expansion_coeff"))
 {
 }
 
 void
-ComputeBeamThermalExpansionEigenstrain::computeThermalStrain(Real & thermal_strain,
+ComputeThermalExpansionEigenstrainBeam::computeThermalStrain(Real & thermal_strain,
                                                              Real & instantaneous_cte)
 {
   thermal_strain = _thermal_expansion_coeff * (_temperature[_qp] - _stress_free_temperature[_qp]);

@@ -7,26 +7,26 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "ComputeBeamEigenstrainFromVPP.h"
-#include "VectorPostprocessorToInterpolator.h"
+#include "ComputeEigenstrainBeamFromCSVInterpolator.h"
+#include "CSVInterpolator.h"
 
 template <>
 InputParameters
-validParams<ComputeBeamEigenstrainFromVPP>()
+validParams<ComputeEigenstrainBeamFromCSVInterpolator>()
 {
-  InputParameters params = validParams<ComputeBeamEigenstrainBase>();
+  InputParameters params = validParams<ComputeEigenstrainBeamBase>();
   params.addClassDescription("Computes the displacement and rotational eigenstrains from a two "
-                             "different vectorpostprocessor files.");
+                             "different sets of csv files.");
   params.addParam<UserObjectName>("disp_eigenstrain_uo",
                                   "Name of userobject that reads the "
-                                  "VectorPostprocessor csv files for "
+                                  "csv files for "
                                   "displacement eigenstrains.");
   params.addParam<UserObjectName>("rot_eigenstrain_uo",
                                   "Name of userobject that reads the "
-                                  "VectorPostprocessor csv files for "
+                                  "csv files for "
                                   "rotational eigenstrains.");
   params.addRequiredParam<unsigned int>(
-      "to_component", "Component to which the information from VPP needs to be mapped to.");
+      "to_component", "Component to which the information from csv files needs to be mapped to.");
   params.addRequiredParam<std::vector<Real>>(
       "position_vector",
       "Vector containing 2 entries specifing the position in directions other "
@@ -36,30 +36,32 @@ validParams<ComputeBeamEigenstrainFromVPP>()
   return params;
 }
 
-ComputeBeamEigenstrainFromVPP::ComputeBeamEigenstrainFromVPP(const InputParameters & parameters)
-  : ComputeBeamEigenstrainBase(parameters),
+ComputeEigenstrainBeamFromCSVInterpolator::ComputeEigenstrainBeamFromCSVInterpolator(
+    const InputParameters & parameters)
+  : ComputeEigenstrainBeamBase(parameters),
     _to_component(getParam<unsigned int>("to_component")),
     _position_vector(getParam<std::vector<Real>>("position_vector")),
     _other_components(2),
-    _disp_eigenstrain_uo(
-        isParamValid("disp_eigenstrain_uo")
-            ? &getUserObject<VectorPostprocessorToInterpolator>("disp_eigenstrain_uo")
-            : nullptr),
-    _rot_eigenstrain_uo(
-        isParamValid("rot_eigenstrain_uo")
-            ? &getUserObject<VectorPostprocessorToInterpolator>("rot_eigenstrain_uo")
-            : nullptr),
+    _disp_eigenstrain_uo(isParamValid("disp_eigenstrain_uo")
+                             ? &getUserObject<CSVInterpolator>("disp_eigenstrain_uo")
+                             : nullptr),
+    _rot_eigenstrain_uo(isParamValid("rot_eigenstrain_uo")
+                            ? &getUserObject<CSVInterpolator>("rot_eigenstrain_uo")
+                            : nullptr),
     _ndisp(isParamValid("disp_eigenstrain_uo") ? _disp_eigenstrain_uo->getNumberOfVariables() : 0),
     _nrot(isParamValid("rot_eigenstrain_uo") ? _rot_eigenstrain_uo->getNumberOfVariables() : 0)
 {
   if (_to_component > 2)
-    mooseError("ComputeBeamEigenstrainFromVPP: to_component should be between 0 and 2.");
+    mooseError(
+        "ComputeEigenstrainBeamFromCSVInterpolator: to_component should be between 0 and 2.");
 
   if (_position_vector.size() != 2)
-    mooseError("ComputeBeamEigenstrainFromVPP: position_vector should contain 2 entries.");
+    mooseError(
+        "ComputeEigenstrainBeamFromCSVInterpolator: position_vector should contain 2 entries.");
 
   if (!isParamValid("disp_eigenstrain_uo") && !isParamValid("rot_eigenstrain_uo"))
-    mooseError("ComputeBeamEigenstrainFromVPP: Neither disp_eigenstrain_uo nor rot_eigenstrain_uo "
+    mooseError("ComputeEigenstrainBeamFromCSVInterpolator: Neither disp_eigenstrain_uo nor "
+               "rot_eigenstrain_uo "
                "have been provided as input.");
 
   if (_to_component == 0)
@@ -80,7 +82,7 @@ ComputeBeamEigenstrainFromVPP::ComputeBeamEigenstrainFromVPP(const InputParamete
 }
 
 void
-ComputeBeamEigenstrainFromVPP::computeQpEigenstrain()
+ComputeEigenstrainBeamFromCSVInterpolator::computeQpEigenstrain()
 {
   for (unsigned int i = 0; i < 3; ++i)
   {

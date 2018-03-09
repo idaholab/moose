@@ -7,38 +7,38 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "ComputeBeamEigenstrainFromAuxVar.h"
+#include "ComputeEigenstrainBeamFromVariable.h"
 
 template <>
 InputParameters
-validParams<ComputeBeamEigenstrainFromAuxVar>()
+validParams<ComputeEigenstrainBeamFromVariable>()
 {
-  InputParameters params = validParams<ComputeBeamEigenstrainBase>();
-  params.addClassDescription("Computes an eigenstrain from a set of aux variables");
+  InputParameters params = validParams<ComputeEigenstrainBeamBase>();
+  params.addClassDescription("Computes an eigenstrain from a set of variables");
   params.addCoupledVar("disp_eigenstrain",
-                       "A list of aux variable names describing the "
+                       "A list of variable names describing the "
                        "displacement eigenstrain. If provided, there must be 3 "
                        "of these, corresponding to the axial and shear "
                        "eigenstrains in the global coordinate system.");
   params.addCoupledVar("rot_eigenstrain",
-                       "A list of aux variable names describing the rotational "
+                       "A list of variable names describing the rotational "
                        "eigenstrain. If provided, there must be 3 of these, "
                        "corresponding to the rotational eigenstrain in the "
                        "global coordinate system.");
   return params;
 }
 
-ComputeBeamEigenstrainFromAuxVar::ComputeBeamEigenstrainFromAuxVar(
+ComputeEigenstrainBeamFromVariable::ComputeEigenstrainBeamFromVariable(
     const InputParameters & parameters)
-  : ComputeBeamEigenstrainBase(parameters),
+  : ComputeEigenstrainBeamBase(parameters),
     _ndisp(coupledComponents("disp_eigenstrain")),
     _nrot(coupledComponents("rot_eigenstrain")),
     _disp(3),
     _rot(3)
 {
   if ((_ndisp != 3 && _ndisp != 0) || (_nrot != 3 && _nrot != 0))
-    mooseError("ComputeBeamEigenstrainFromAuxVar: If the displacement or rotational eigenstrains "
-               "are provided, it should contain 3 auxvariables corresponding to the three "
+    mooseError("ComputeEigenstrainBeamFromVariable: If the displacement or rotational eigenstrains "
+               "are provided, it should contain 3 variables corresponding to the three "
                "components in the global coordinate system.");
 
   // fetch coupled variables
@@ -58,7 +58,7 @@ ComputeBeamEigenstrainFromAuxVar::ComputeBeamEigenstrainFromAuxVar(
 }
 
 void
-ComputeBeamEigenstrainFromAuxVar::computeQpEigenstrain()
+ComputeEigenstrainBeamFromVariable::computeQpEigenstrain()
 {
   for (unsigned int i = 0; i < 3; ++i)
   {

@@ -7,25 +7,25 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef COMPUTEBEAMTHERMALEXPANSIONEIGENSTRAIN_H
-#define COMPUTEBEAMTHERMALEXPANSIONEIGENSTRAIN_H
+#ifndef COMPUTETHERMALEXPANSIONEIGENSTRAINBEAM_H
+#define COMPUTETHERMALEXPANSIONEIGENSTRAINBEAM_H
 
-#include "ComputeBeamThermalExpansionEigenstrainBase.h"
+#include "ComputeThermalExpansionEigenstrainBeamBase.h"
 #include "DerivativeMaterialInterface.h"
 
-class ComputeBeamThermalExpansionEigenstrain;
+class ComputeThermalExpansionEigenstrainBeam;
 
 template <>
-InputParameters validParams<ComputeBeamThermalExpansionEigenstrain>();
+InputParameters validParams<ComputeThermalExpansionEigenstrainBeam>();
 
 /**
- * ComputeBeamThermalExpansionEigenstrain computes an eigenstrain for thermal expansion
+ * ComputeThermalExpansionEigenstrainBeam computes an eigenstrain for thermal expansion
  * with a constant expansion coefficient.
  */
-class ComputeBeamThermalExpansionEigenstrain : public ComputeBeamThermalExpansionEigenstrainBase
+class ComputeThermalExpansionEigenstrainBeam : public ComputeThermalExpansionEigenstrainBeamBase
 {
 public:
-  ComputeBeamThermalExpansionEigenstrain(const InputParameters & parameters);
+  ComputeThermalExpansionEigenstrainBeam(const InputParameters & parameters);
 
 protected:
   virtual void computeThermalStrain(Real & thermal_strain, Real & instantaneous_cte) override;
@@ -34,4 +34,4 @@ protected:
   const Real & _thermal_expansion_coeff;
 };
 
-#endif // COMPUTEBEAMTHERMALEXPANSIONEIGENSTRAIN_H
+#endif // COMPUTETHERMALEXPANSIONEIGENSTRAINBEAM_H

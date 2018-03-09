@@ -88,6 +88,9 @@ TensorMechanicsApp::associateSyntax(Syntax & syntax, ActionFactory & action_fact
   registerSyntax("CommonTensorMechanicsAction", "Modules/TensorMechanics/Master");
   registerSyntax("TensorMechanicsAction", "Modules/TensorMechanics/Master/*");
 
+  registerSyntax("CommonLineElementAction", "Modules/LineElement");
+  registerSyntax("LineElementAction", "Modules/LineElement/*");
+
   registerSyntaxTask("DomainIntegralAction", "DomainIntegral", "add_user_object");
   registerSyntaxTask("DomainIntegralAction", "DomainIntegral", "add_aux_variable");
   registerSyntaxTask("DomainIntegralAction", "DomainIntegral", "add_aux_kernel");

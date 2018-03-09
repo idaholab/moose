@@ -1,6 +1,6 @@
-# ComputeBeamThermalExpansionEigenstrain
+# ComputeThermalExpansionEigenstrainBeam
 
-!syntax description /Materials/ComputeBeamThermalExpansionEigenstrain
+!syntax description /Materials/ComputeThermalExpansionEigenstrainBeam
 
 ## Description
 `ComputeBeamThemalExpansionEigenstrain` calculates the thermal strain due to a change in temperature (from the stress-free temperature) using a constant thermal expansion coefficient. This thermal strain is applied only along the axial direction of the beam.
@@ -8,8 +8,8 @@
 ## Example Input File Syntax
 !listing modules/tensor_mechanics/test/tests/beam/thermal_expansion_small.i block=Materials/thermal
 
-!syntax parameters /Materials/ComputeBeamThermalExpansionEigenstrain
+!syntax parameters /Materials/ComputeThermalExpansionEigenstrainBeam
 
-!syntax inputs /Materials/ComputeBeamThermalExpansionEigenstrain
+!syntax inputs /Materials/ComputeThermalExpansionEigenstrainBeam
 
-!syntax children /Materials/ComputeBeamThermalExpansionEigenstrain
+!syntax children /Materials/ComputeThermalExpansionEigenstrainBeam

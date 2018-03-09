@@ -16,9 +16,16 @@ validParams<ComputeElasticityBeam>()
   params.addParam<FunctionName>(
       "elasticity_prefactor",
       "Optional function to use as a scalar prefactor on the elasticity vector for the beam.");
-  params.addCoupledVar("youngs_modulus", "Variable containing Youngs modulus");
-  params.addCoupledVar("shear_modulus", "Variable contiaining shear modulus");
-  params.addCoupledVar("shear_coefficient", "Reduction factor for the shear modulus");
+  params.addRequiredCoupledVar(
+      "youngs_modulus",
+      "Young's modulus of the material. Can be supplied as either a number or a variable name.");
+  params.addRequiredCoupledVar(
+      "shear_modulus",
+      "Shear modulus of the material. Can be supplied as either a number or a variable name.");
+  params.addCoupledVar(
+      "shear_coefficient",
+      1.0,
+      "Scale factor for the shear modulus. Can be supplied as either a number or a variable name.");
   return params;
 }
 

@@ -81,7 +81,7 @@ protected:
   const MaterialProperty<RankTwoTensor> * _total_rotation;
 
   /// Stiffness proportional Rayleigh damping parameter
-  const Real & _zeta;
+  const MaterialProperty<Real> & _zeta;
 
   /// HHT time integration parameter
   const Real & _alpha;

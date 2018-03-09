@@ -7,26 +7,26 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef COMPUTEBEAMTHERMALEXPANSIONEIGENSTRAINBASE_H
-#define COMPUTEBEAMTHERMALEXPANSIONEIGENSTRAINBASE_H
+#ifndef COMPUTETHERMALEXPANSIONEIGENSTRAINBEAMBASE_H
+#define COMPUTETHERMALEXPANSIONEIGENSTRAINBEAMBASE_H
 
-#include "ComputeBeamEigenstrainBase.h"
+#include "ComputeEigenstrainBeamBase.h"
 #include "DerivativeMaterialInterface.h"
 
-class ComputeBeamThermalExpansionEigenstrainBase;
+class ComputeThermalExpansionEigenstrainBeamBase;
 
 template <>
-InputParameters validParams<ComputeBeamThermalExpansionEigenstrainBase>();
+InputParameters validParams<ComputeThermalExpansionEigenstrainBeamBase>();
 
 /**
- * ComputeBeamThermalExpansionEigenstrainBase is a base class for all models that
+ * ComputeThermalExpansionEigenstrainBeamBase is a base class for all models that
  * compute beam eigenstrains due to thermal expansion of a material.
  */
-class ComputeBeamThermalExpansionEigenstrainBase
-  : public DerivativeMaterialInterface<ComputeBeamEigenstrainBase>
+class ComputeThermalExpansionEigenstrainBeamBase
+  : public DerivativeMaterialInterface<ComputeEigenstrainBeamBase>
 {
 public:
-  ComputeBeamThermalExpansionEigenstrainBase(const InputParameters & parameters);
+  ComputeThermalExpansionEigenstrainBeamBase(const InputParameters & parameters);
 
 protected:
   virtual void initQpStatefulProperties() override;
@@ -54,4 +54,4 @@ protected:
   MaterialProperty<RealGradient> & _initial_axis;
 };
 
-#endif // COMPUTEBEAMTHERMALEXPANSIONEIGENSTRAINBASE_H
+#endif // COMPUTTHERMALEXPANSIONEIGENSTRAINBEAMBASE_H

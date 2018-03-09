@@ -7,23 +7,23 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef COMPUTEBEAMEIGENSTRAINBASE_H
-#define COMPUTEBEAMEIGENSTRAINBASE_H
+#ifndef COMPUTEEIGENSTRAINBEAMBASE_H
+#define COMPUTEEIGENSTRAINBEAMBASE_H
 
 #include "Material.h"
 
-class ComputeBeamEigenstrainBase;
+class ComputeEigenstrainBeamBase;
 
 template <>
-InputParameters validParams<ComputeBeamEigenstrainBase>();
+InputParameters validParams<ComputeEigenstrainBeamBase>();
 
 /**
- * ComputeBeamEigenstrainBase is the base class for beam eigenstrain vectors
+ * ComputeEigenstrainBeamBase is the base class for beam eigenstrain vectors
  */
-class ComputeBeamEigenstrainBase : public Material
+class ComputeEigenstrainBeamBase : public Material
 {
 public:
-  ComputeBeamEigenstrainBase(const InputParameters & parameters);
+  ComputeEigenstrainBeamBase(const InputParameters & parameters);
 
 protected:
   virtual void initQpStatefulProperties();
@@ -45,4 +45,4 @@ protected:
   bool & _step_zero;
 };
 
-#endif // COMPUTEBEAMEIGENSTRAINBASE_H
+#endif // COMPUTEEIGENSTRAINBEAMBASE_H

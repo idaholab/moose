@@ -7,7 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "VectorPostprocessorToAuxVar.h"
+#include "VectorPostprocessorTransfer.h"
 
 // MOOSE includes
 #include "FEProblem.h"
@@ -22,7 +22,7 @@
 
 template <>
 InputParameters
-validParams<VectorPostprocessorToAuxVar>()
+validParams<VectorPostprocessorTransfer>()
 {
   InputParameters params = validParams<MultiAppTransfer>();
   params.addRequiredParam<std::vector<AuxVariableName>>(
@@ -51,7 +51,7 @@ validParams<VectorPostprocessorToAuxVar>()
   return params;
 }
 
-VectorPostprocessorToAuxVar::VectorPostprocessorToAuxVar(const InputParameters & parameters)
+VectorPostprocessorTransfer::VectorPostprocessorTransfer(const InputParameters & parameters)
   : MultiAppTransfer(parameters),
     _vector_postprocessor(getParam<VectorPostprocessorName>("vector_postprocessor")),
     _to_var_names(getParam<std::vector<AuxVariableName>>("variables")),
@@ -69,14 +69,14 @@ VectorPostprocessorToAuxVar::VectorPostprocessorToAuxVar(const InputParameters &
   _horizontal_location_2 = positions.getData("column_1");
 
   if (_to_var_names.size() != _variable_vector_names.size())
-    mooseError("Vector Postprocessor To AuxVar Transfer: variables and variable_vector_names must "
+    mooseError("Vector Postprocessor Transfer: variables and variable_vector_names must "
                "be of the same size");
 }
 
 void
-VectorPostprocessorToAuxVar::execute()
+VectorPostprocessorTransfer::execute()
 {
-  _console << "Beginning Vector Postprocessor To AuxVar Transfer " << name() << std::endl;
+  _console << "Beginning Vector Postprocessor Transfer " << name() << std::endl;
 
   switch (_direction)
   {
@@ -234,8 +234,7 @@ VectorPostprocessorToAuxVar::execute()
                 }
 
                 else
-                  mooseError(
-                      "Vector Postprocessor To AuxVar Transfer: Should not be getting here!");
+                  mooseError("Vector Postprocessor Transfer: Should not be getting here!");
               }
             }
 
@@ -261,5 +260,5 @@ VectorPostprocessorToAuxVar::execute()
     }
   }
 
-  _console << "Finished Vector Postprocessor To AuxVar Transfer " << name() << std::endl;
+  _console << "Finished Vector Postprocessor Transfer " << name() << std::endl;
 }

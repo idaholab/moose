@@ -7,24 +7,24 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef VECTORPOSTPROCESSORTOAUXVAR_H
-#define VECTORPOSTPROCESSORTOAUXVAR_H
+#ifndef VECTORPOSTPROCESSORTRANSFER_H
+#define VECTORPOSTPROCESSORTRANSFER_H
 
 #include "MultiAppTransfer.h"
 
 // Forward declarations
-class VectorPostprocessorToAuxVar;
+class VectorPostprocessorTransfer;
 
 template <>
-InputParameters validParams<VectorPostprocessorToAuxVar>();
+InputParameters validParams<VectorPostprocessorTransfer>();
 
 /**
  * Copies the value of a vector postprocessor from the Multiapp to a aux variable in the master.
  */
-class VectorPostprocessorToAuxVar : public MultiAppTransfer
+class VectorPostprocessorTransfer : public MultiAppTransfer
 {
 public:
-  VectorPostprocessorToAuxVar(const InputParameters & parameters);
+  VectorPostprocessorTransfer(const InputParameters & parameters);
 
   virtual void execute() override;
 
@@ -54,4 +54,4 @@ protected:
   std::vector<Real> _horizontal_location_2;
 };
 
-#endif /* VECTORPOSTPROCESSORTOAUXVAR_H */
+#endif /* VECTORPOSTPROCESSORTRANSFER_H */

@@ -11,7 +11,8 @@
 
 /**
  * ComputeFiniteBeamStrain calculates rotation increment to account for finite rotations of the
- * beam.
+ * beam. The small/large strain increments in the current rotated configuration of the beam are also
+ * computed.
  */
 
 class ComputeFiniteBeamStrain;

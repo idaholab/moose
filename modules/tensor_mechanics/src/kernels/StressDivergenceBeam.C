@@ -34,10 +34,11 @@ validParams<StressDivergenceBeam>()
       "The displacements appropriate for the simulation geometry and coordinate system");
   params.addRequiredCoupledVar(
       "rotations", "The rotations appropriate for the simulation geometry and coordinate system");
-  params.addParam<Real>("zeta",
-                        0.0,
-                        "Constant real number defining the zeta parameter for the "
-                        "Rayleigh damping.");
+  params.addParam<MaterialPropertyName>(
+      "zeta",
+      0.0,
+      "Name of material property or a constant real number defining the zeta parameter for the "
+      "Rayleigh damping.");
   params.addParam<Real>("alpha", 0.0, "alpha parameter for HHT time integration");
 
   params.set<bool>("use_displaced_mesh") = true;
@@ -60,15 +61,15 @@ StressDivergenceBeam::StressDivergenceBeam(const InputParameters & parameters)
     _K21(getMaterialPropertyByName<RankTwoTensor>("Jacobian_21")),
     _original_length(getMaterialPropertyByName<Real>("original_length")),
     _total_rotation(&getMaterialPropertyByName<RankTwoTensor>("total_rotation")),
-    _zeta(getParam<Real>("zeta")),
+    _zeta(getMaterialProperty<Real>("zeta")),
     _alpha(getParam<Real>("alpha")),
-    _force_old(_zeta > 0.0 || std::abs(_alpha) > 0.0
+    _force_old(getParam<MaterialPropertyName>("zeta") != "0.0" || std::abs(_alpha) > 0.0
                    ? &getMaterialPropertyOld<RealVectorValue>("forces")
                    : nullptr),
-    _moment_old(_zeta > 0.0 || std::abs(_alpha) > 0.0
+    _moment_old(getParam<MaterialPropertyName>("zeta") != "0.0" || std::abs(_alpha) > 0.0
                     ? &getMaterialPropertyOld<RealVectorValue>("moments")
                     : nullptr),
-    _total_rotation_old(_zeta > 0.0 || std::abs(_alpha) > 0.0
+    _total_rotation_old(getParam<MaterialPropertyName>("zeta") != "0.0" || std::abs(_alpha) > 0.0
                             ? &getMaterialPropertyOld<RankTwoTensor>("total_rotation")
                             : nullptr),
     _force_older(std::abs(_alpha) > 0.0 ? &getMaterialPropertyOlder<RealVectorValue>("forces")
@@ -104,7 +105,7 @@ StressDivergenceBeam::computeResidual()
 
   // add contributions from stiffness proportional damping (non-zero _zeta) or HHT time integration
   // (non-zero _alpha)
-  if ((std::abs(_alpha) > 0.0 || _zeta > 0.0) && _dt > 0.0)
+  if ((std::abs(_alpha) > 0.0 || _zeta[0] > 0.0) && _dt > 0.0)
     computeDynamicTerms(global_force_res, global_moment_res);
 
   for (_i = 0; _i < _test.size(); ++_i)
@@ -145,8 +146,8 @@ StressDivergenceBeam::computeJacobian()
       }
 
   // scaling factor for Rayliegh damping and HHT time integration
-  if ((std::abs(_alpha) > 0.0 || _zeta > 0.0) && _dt > 0.0)
-    _local_ke *= (1.0 + _alpha + (1.0 + _alpha) * _zeta / _dt);
+  if ((std::abs(_alpha) > 0.0 || _zeta[0] > 0.0) && _dt > 0.0)
+    _local_ke *= (1.0 + _alpha + (1.0 + _alpha) * _zeta[0] / _dt);
 
   ke += _local_ke;
 
@@ -220,8 +221,8 @@ StressDivergenceBeam::computeOffDiagJacobian(unsigned int jvar)
     }
 
     // scaling factor for Rayliegh damping and HHT time integration
-    if ((std::abs(_alpha) > 0.0 || _zeta > 0.0) && _dt > 0.0)
-      _local_ke *= (1.0 + _alpha + (1.0 + _alpha) * _zeta / _dt);
+    if ((std::abs(_alpha) > 0.0 || _zeta[0] > 0.0) && _dt > 0.0)
+      _local_ke *= (1.0 + _alpha + (1.0 + _alpha) * _zeta[0] / _dt);
 
     ke += _local_ke;
   }
@@ -253,13 +254,13 @@ StressDivergenceBeam::computeDynamicTerms(std::vector<RealVectorValue> & global_
   for (_i = 0; _i < _test.size(); ++_i)
   {
     global_force_res[_i] =
-        global_force_res[_i] * (1.0 + _alpha + (1.0 + _alpha) * _zeta / _dt) -
-        global_force_res_old[_i] * (_alpha + (1.0 + 2.0 * _alpha) * _zeta / _dt) +
-        global_force_res_older[_i] * (_alpha * _zeta / _dt);
+        global_force_res[_i] * (1.0 + _alpha + (1.0 + _alpha) * _zeta[0] / _dt) -
+        global_force_res_old[_i] * (_alpha + (1.0 + 2.0 * _alpha) * _zeta[0] / _dt) +
+        global_force_res_older[_i] * (_alpha * _zeta[0] / _dt);
     global_moment_res[_i] =
-        global_moment_res[_i] * (1.0 + _alpha + (1.0 + _alpha) * _zeta / _dt) -
-        global_moment_res_old[_i] * (_alpha + (1.0 + 2.0 * _alpha) * _zeta / _dt) +
-        global_moment_res_older[_i] * (_alpha * _zeta / _dt);
+        global_moment_res[_i] * (1.0 + _alpha + (1.0 + _alpha) * _zeta[0] / _dt) -
+        global_moment_res_old[_i] * (_alpha + (1.0 + 2.0 * _alpha) * _zeta[0] / _dt) +
+        global_moment_res_older[_i] * (_alpha * _zeta[0] / _dt);
   }
 }
 

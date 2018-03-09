@@ -4,14 +4,14 @@
     input = 'thermal_expansion_small.i'
     exodiff = 'thermal_expansion_small_out.e'
   [../]
-  [./eigenstrain_from_aux_var]
+  [./eigenstrain_from_var]
     type = 'Exodiff'
-    input = 'eigenstrain_from_aux_var.i'
-    exodiff = 'eigenstrain_from_aux_var_out.e'
+    input = 'eigenstrain_from_var.i'
+    exodiff = 'eigenstrain_from_var_out.e'
   [../]
-  [./eigenstrain_from_vpp]
+  [./eigenstrain_from_csv]
     type = 'Exodiff'
-    input = 'eigenstrain_from_vpp.i'
-    exodiff = 'eigenstrain_from_vpp_out.e'
+    input = 'eigenstrain_from_csv.i'
+    exodiff = 'eigenstrain_from_csv_out.e'
   [../]
 []

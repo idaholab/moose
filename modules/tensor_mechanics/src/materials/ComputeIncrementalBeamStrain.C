@@ -29,15 +29,27 @@ validParams<ComputeIncrementalBeamStrain>()
                                         "Orientation of the y direction along "
                                         "with Iyy is provided. This should be "
                                         "perpendicular to the axis of the beam.");
-  params.addCoupledVar("area", "Variable containing cross-section area");
-  params.addCoupledVar("Ay", "Variable containing first moment of area about y axis");
-  params.addCoupledVar("Az", "Variable containing first moment of area about z axis");
-  params.addCoupledVar("Iy", "Variable containing second moment of area about y axis");
-  params.addCoupledVar("Iz", "Variable containing second moment of area about z axis");
+  params.addRequiredCoupledVar(
+      "area",
+      "Cross-section area of the beam. Can be supplied as either a number or a variable name.");
+  params.addCoupledVar("Ay",
+                       0.0,
+                       "First moment of area of the beam about y axis. Can be supplied "
+                       "as either a number or a variable name.");
+  params.addCoupledVar("Az",
+                       0.0,
+                       "First moment of area of the beam about z asix. Can be supplied "
+                       "as either a number or a variable name.");
+  params.addRequiredCoupledVar("Iy",
+                               "Second moment of area of the beam about y axis. Can be "
+                               "supplied as either a number or a variable name.");
+  params.addRequiredCoupledVar("Iz",
+                               "Second moment of area of the beam about z axis. Can be "
+                               "supplied as either a number or a variable name.");
   params.addParam<bool>(
       "large_strain", false, "Set to true if large strain have to be calculated.");
   params.addParam<std::vector<MaterialPropertyName>>(
-      "eigenstrain_names", "List of beam eigenstrains to be applied in this strain calcualtion.");
+      "eigenstrain_names", "List of beam eigenstrains to be applied in this strain calculation.");
   return params;
 }
 
