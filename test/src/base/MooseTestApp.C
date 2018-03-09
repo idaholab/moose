@@ -323,11 +323,8 @@ validParams<MooseTestApp>()
 MooseTestApp::MooseTestApp(const InputParameters & parameters) : MooseApp(parameters)
 {
   bool use_test_objs = !getParam<bool>("disallow_test_objects");
-  std::set<std::string> obj_labels = {"MooseApp"};
-  if (use_test_objs)
-    obj_labels.insert(type());
 
-  Moose::registerObjects(_factory, obj_labels);
+  Moose::registerObjects(_factory);
   Moose::associateSyntax(_syntax, _action_factory);
   Moose::registerExecFlags(_factory);
   if (use_test_objs)
@@ -361,6 +358,8 @@ MooseTestApp__registerObjects(Factory & factory)
 void
 MooseTestApp::registerObjects(Factory & factory)
 {
+  Registry::registerObjectsTo(factory, {"MooseTestApp"});
+
   // Kernels
   registerKernel(PotentialAdvection);
   registerKernel(EFieldAdvection);
@@ -649,6 +648,7 @@ MooseTestApp__associateSyntax(Syntax & syntax, ActionFactory & action_factory)
 {
   MooseTestApp::associateSyntax(syntax, action_factory);
 }
+
 void
 MooseTestApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
 {
