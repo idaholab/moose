@@ -11,6 +11,7 @@
 #include "Factory.h"
 #include "FEProblem.h"
 #include "EigenProblem.h"
+#include "NonlinearSystemBase.h"
 #include "MooseApp.h"
 
 registerMooseAction("MooseApp", CreateProblemAction, "create_problem");

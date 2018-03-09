@@ -11,6 +11,7 @@
 
 // MOOSE includes
 #include "NonlinearSystemBase.h"
+#include "FEProblemBase.h"
 
 #include "libmesh/libmesh_config.h"
 #include "libmesh/sparse_matrix.h"
