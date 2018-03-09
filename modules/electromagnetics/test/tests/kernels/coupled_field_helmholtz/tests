@@ -1,0 +1,7 @@
+[Tests]
+  [./test]
+    type = 'Exodiff'
+    input = 'coupled_field_helmholtz.i'
+    exodiff = 'coupled_field_helmholtz_out.e'
+  [../]
+[]
