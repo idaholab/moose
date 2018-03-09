@@ -55,6 +55,12 @@ public:
                                SparseMatrix<Number> & jacobian,
                                TagID tag) override;
 
+  void computeJacobianAB(const NumericVector<Number> & soln,
+                         SparseMatrix<Number> & jacobianA,
+                         SparseMatrix<Number> & jacobianB,
+                         TagID tagA,
+                         TagID tagB);
+
   virtual void computeResidual(const NumericVector<Number> & soln,
                                NumericVector<Number> & residual,
                                TagID tag) override;

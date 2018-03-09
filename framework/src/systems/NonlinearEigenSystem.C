@@ -35,6 +35,17 @@ assemble_matrix(EquationSystems & es, const std::string & system_name)
   EigenSystem & eigen_system = es.get_system<EigenSystem>(system_name);
   NonlinearEigenSystem & eigen_nl = p->getNonlinearEigenSystem();
 
+  // If it is a linear generalized eigenvalue problem,
+  // we assemble A and B together
+  if (!p->isNonlinearEigenvalueSolver() && eigen_system.generalized())
+  {
+    p->computeJacobianAB(*eigen_system.current_local_solution.get(),
+                         *eigen_system.matrix_A,
+                         *eigen_system.matrix_B,
+                         eigen_nl.nonEigenMatrixTag(),
+                         eigen_nl.eigenMatrixTag());
+  }
+
   if (!p->isNonlinearEigenvalueSolver())
   {
     p->computeJacobian(*eigen_system.current_local_solution.get(),

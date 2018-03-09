@@ -117,7 +117,30 @@ EigenProblem::computeJacobian(const NumericVector<Number> & soln,
 
   _nl_eigen->setSolution(soln);
 
+  _nl_eigen->clearTaggedMatrices();
+
   _nl_eigen->associateMatirxToTag(jacobian, tag);
+
+  FEProblemBase::computeJacobian(_fe_matrix_tags);
+}
+
+void
+EigenProblem::computeJacobianAB(const NumericVector<Number> & soln,
+                                SparseMatrix<Number> & jacobianA,
+                                SparseMatrix<Number> & jacobianB,
+                                TagID tagA,
+                                TagID tagB)
+{
+  _fe_matrix_tags.clear();
+
+  _fe_matrix_tags.insert(tagA);
+  _fe_matrix_tags.insert(tagB);
+
+  _nl_eigen->setSolution(soln);
+
+  _nl_eigen->clearTaggedMatrices();
+  _nl_eigen->associateMatirxToTag(jacobianA, tagA);
+  _nl_eigen->associateMatirxToTag(jacobianB, tagB);
 
   FEProblemBase::computeJacobian(_fe_matrix_tags);
 }
