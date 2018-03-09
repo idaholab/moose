@@ -16,6 +16,8 @@
 #include "FEProblem.h"
 #include "EigenProblem.h"
 
+registerMooseAction("MooseApp", CreateExecutionerAction, "setup_executioner");
+
 template <>
 InputParameters
 validParams<CreateExecutionerAction>()

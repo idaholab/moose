@@ -16,6 +16,8 @@
 
 #include "libmesh/node.h"
 
+registerMooseObject("MooseApp", NodalVariableValue);
+
 template <>
 InputParameters
 validParams<NodalVariableValue>()

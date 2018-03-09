@@ -16,6 +16,8 @@
 
 #include "libmesh/equation_systems.h"
 
+registerMooseObject("MooseApp", Steady);
+
 template <>
 InputParameters
 validParams<Steady>()

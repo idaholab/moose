@@ -18,6 +18,8 @@
 // C++ includes
 #include <cmath> // provides round, not std::round (see http://www.cplusplus.com/reference/cmath/round/)
 
+registerMooseObject("MooseApp", GeneratedMesh);
+
 template <>
 InputParameters
 validParams<GeneratedMesh>()

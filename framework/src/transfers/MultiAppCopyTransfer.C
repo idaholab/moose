@@ -22,6 +22,8 @@
 #include "libmesh/id_types.h"
 #include "libmesh/string_to_enum.h"
 
+registerMooseObject("MooseApp", MultiAppCopyTransfer);
+
 template <>
 InputParameters
 validParams<MultiAppCopyTransfer>()

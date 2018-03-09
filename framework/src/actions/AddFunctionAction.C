@@ -10,6 +10,8 @@
 #include "AddFunctionAction.h"
 #include "FEProblem.h"
 
+registerMooseAction("MooseApp", AddFunctionAction, "add_function");
+
 template <>
 InputParameters
 validParams<AddFunctionAction>()

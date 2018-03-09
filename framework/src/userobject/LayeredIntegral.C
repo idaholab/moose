@@ -11,6 +11,8 @@
 
 #include "libmesh/mesh_tools.h"
 
+registerMooseObject("MooseApp", LayeredIntegral);
+
 template <>
 InputParameters
 validParams<LayeredIntegral>()

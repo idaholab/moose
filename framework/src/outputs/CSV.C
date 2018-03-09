@@ -12,6 +12,8 @@
 #include "FEProblem.h"
 #include "MooseApp.h"
 
+registerMooseObject("MooseApp", CSV);
+
 template <>
 InputParameters
 validParams<CSV>()

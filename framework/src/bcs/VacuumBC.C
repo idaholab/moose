@@ -9,6 +9,8 @@
 
 #include "VacuumBC.h"
 
+registerMooseObject("MooseApp", VacuumBC);
+
 template <>
 InputParameters
 validParams<VacuumBC>()

@@ -9,6 +9,8 @@
 
 #include "DiffusionFluxAux.h"
 
+registerMooseObject("MooseApp", DiffusionFluxAux);
+
 template <>
 InputParameters
 validParams<DiffusionFluxAux>()

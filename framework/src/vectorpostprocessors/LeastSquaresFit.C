@@ -11,6 +11,8 @@
 #include "VectorPostprocessorInterface.h"
 #include "PolynomialFit.h"
 
+registerMooseObject("MooseApp", LeastSquaresFit);
+
 template <>
 InputParameters
 validParams<LeastSquaresFit>()

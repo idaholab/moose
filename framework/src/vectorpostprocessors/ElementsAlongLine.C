@@ -14,6 +14,8 @@
 #include "RayTracing.h"
 #include "MooseMesh.h"
 
+registerMooseObject("MooseApp", ElementsAlongLine);
+
 template <>
 InputParameters
 validParams<ElementsAlongLine>()

@@ -13,6 +13,14 @@
 #include "Adaptivity.h"
 #include "MooseApp.h"
 
+registerMooseAction("MooseApp", SetupMeshCompleteAction, "prepare_mesh");
+
+registerMooseAction("MooseApp", SetupMeshCompleteAction, "execute_mesh_modifiers");
+
+registerMooseAction("MooseApp", SetupMeshCompleteAction, "uniform_refine_mesh");
+
+registerMooseAction("MooseApp", SetupMeshCompleteAction, "setup_mesh_complete");
+
 template <>
 InputParameters
 validParams<SetupMeshCompleteAction>()

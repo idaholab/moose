@@ -15,6 +15,8 @@
 #include "Conversion.h"
 #include "NonlinearSystem.h"
 
+registerMooseObject("MooseApp", Split);
+
 template <>
 InputParameters
 validParams<Split>()

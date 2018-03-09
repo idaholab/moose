@@ -12,6 +12,8 @@
 #include "MooseTypes.h"
 #include "MooseUtils.h"
 
+registerMooseAction("MooseApp", AddICAction, "add_ic");
+
 template <>
 InputParameters
 validParams<AddICAction>()

@@ -12,6 +12,8 @@
 #include "Factory.h"
 #include "TimeStepper.h"
 
+registerMooseAction("MooseApp", SetupTimeStepperAction, "setup_time_stepper");
+
 template <>
 InputParameters
 validParams<SetupTimeStepperAction>()

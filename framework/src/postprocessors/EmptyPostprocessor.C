@@ -11,6 +11,8 @@
 
 #include "libmesh/parallel.h"
 
+registerMooseObject("MooseApp", EmptyPostprocessor);
+
 template <>
 InputParameters
 validParams<EmptyPostprocessor>()

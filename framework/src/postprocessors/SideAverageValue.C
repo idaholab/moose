@@ -9,6 +9,8 @@
 
 #include "SideAverageValue.h"
 
+registerMooseObject("MooseApp", SideAverageValue);
+
 template <>
 InputParameters
 validParams<SideAverageValue>()

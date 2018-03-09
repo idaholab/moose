@@ -15,6 +15,8 @@
 
 #include "libmesh/fparser_ad.hh"
 
+registerMooseObject("MooseApp", ParsedODEKernel);
+
 template <>
 InputParameters
 validParams<ParsedODEKernel>()

@@ -22,6 +22,8 @@
 #include "libmesh/mesh_tools.h"
 #include "libmesh/parallel_algebra.h" // for communicator send and receive stuff
 
+registerMooseObject("MooseApp", MultiAppMeshFunctionTransfer);
+
 template <>
 InputParameters
 validParams<MultiAppMeshFunctionTransfer>()

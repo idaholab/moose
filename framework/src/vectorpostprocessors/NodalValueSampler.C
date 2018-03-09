@@ -15,6 +15,8 @@
 // C++ includes
 #include <numeric>
 
+registerMooseObject("MooseApp", NodalValueSampler);
+
 template <>
 InputParameters
 validParams<NodalValueSampler>()

@@ -12,6 +12,8 @@
 #include "FEProblem.h"
 #include "PetscSupport.h"
 
+registerMooseObject("MooseApp", LStableDirk4);
+
 template <>
 InputParameters
 validParams<LStableDirk4>()

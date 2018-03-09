@@ -13,6 +13,8 @@
 
 #include "libmesh/mesh_tools.h"
 
+registerMooseObject("DarcyThermoMechApp", RandomCorrosion);
+
 template <>
 InputParameters
 validParams<RandomCorrosion>()

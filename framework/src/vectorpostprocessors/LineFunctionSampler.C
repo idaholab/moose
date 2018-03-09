@@ -13,6 +13,8 @@
 #include "Function.h"
 #include "LineValueSampler.h"
 
+registerMooseObject("MooseApp", LineFunctionSampler);
+
 template <>
 InputParameters
 validParams<LineFunctionSampler>()

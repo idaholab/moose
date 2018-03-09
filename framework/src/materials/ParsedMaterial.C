@@ -9,6 +9,8 @@
 
 #include "ParsedMaterial.h"
 
+registerMooseObject("MooseApp", ParsedMaterial);
+
 template <>
 InputParameters
 validParams<ParsedMaterial>()

@@ -12,6 +12,8 @@
 #include "FEProblem.h"
 #include "PetscSupport.h"
 
+registerMooseObject("MooseApp", ExplicitTVDRK2);
+
 template <>
 InputParameters
 validParams<ExplicitTVDRK2>()

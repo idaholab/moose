@@ -10,6 +10,8 @@
 #include "GenericFunctionMaterial.h"
 #include "Function.h"
 
+registerMooseObject("MooseApp", GenericFunctionMaterial);
+
 template <>
 InputParameters
 validParams<GenericFunctionMaterial>()

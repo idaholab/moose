@@ -10,6 +10,8 @@
 #include "BoundingBoxIC.h"
 #include "libmesh/point.h"
 
+registerMooseObject("MooseApp", BoundingBoxIC);
+
 template <>
 InputParameters
 validParams<BoundingBoxIC>()

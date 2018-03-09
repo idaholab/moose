@@ -34,6 +34,8 @@ assemble_l2(EquationSystems & es, const std::string & system_name)
   transfer->assembleL2(es, system_name);
 }
 
+registerMooseObject("MooseApp", MultiAppProjectionTransfer);
+
 template <>
 InputParameters
 validParams<MultiAppProjectionTransfer>()

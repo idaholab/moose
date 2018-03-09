@@ -13,6 +13,8 @@
 #include "SubProblem.h"
 #include "NonlinearSystem.h"
 
+registerMooseObject("MooseApp", NumResidualEvaluations);
+
 template <>
 InputParameters
 validParams<NumResidualEvaluations>()

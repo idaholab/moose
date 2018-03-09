@@ -14,6 +14,8 @@
 
 #include "libmesh/fparser_ad.hh"
 
+registerMooseObject("MooseApp", ParsedSubdomainMeshModifier);
+
 template <>
 InputParameters
 validParams<ParsedSubdomainMeshModifier>()

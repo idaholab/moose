@@ -12,6 +12,8 @@
 #include "MooseMesh.h"
 #include "MooseTypes.h"
 
+registerMooseObject("MooseApp", AddSideSetsFromBoundingBox);
+
 template <>
 InputParameters
 validParams<AddSideSetsFromBoundingBox>()

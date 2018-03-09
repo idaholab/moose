@@ -17,6 +17,8 @@
 
 #include "libmesh/transient_system.h"
 
+registerMooseObject("MooseApp", MaterialPropertyDebugOutput);
+
 template <>
 InputParameters
 validParams<MaterialPropertyDebugOutput>()

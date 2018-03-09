@@ -12,6 +12,8 @@
 #include "SolutionUserObject.h"
 #include "MooseMesh.h"
 
+registerMooseObject("MooseApp", SolutionFunction);
+
 template <>
 InputParameters
 validParams<SolutionFunction>()

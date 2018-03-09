@@ -13,6 +13,7 @@
 // MOOSE includes
 #include "InputParameters.h"
 #include "ConsoleStreamInterface.h"
+#include "Registry.h"
 
 #include "libmesh/parallel_object.h"
 

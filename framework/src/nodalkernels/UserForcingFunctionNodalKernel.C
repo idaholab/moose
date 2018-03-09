@@ -11,6 +11,8 @@
 
 #include "Function.h"
 
+registerMooseObject("MooseApp", UserForcingFunctionNodalKernel);
+
 template <>
 InputParameters
 validParams<UserForcingFunctionNodalKernel>()

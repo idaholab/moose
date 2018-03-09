@@ -9,6 +9,8 @@
 
 #include "DeprecatedBlockAction.h"
 
+registerMooseAction("MooseApp", DeprecatedBlockAction, "deprecated_block");
+
 template <>
 InputParameters
 validParams<DeprecatedBlockAction>()

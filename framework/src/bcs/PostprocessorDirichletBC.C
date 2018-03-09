@@ -9,6 +9,8 @@
 
 #include "PostprocessorDirichletBC.h"
 
+registerMooseObject("MooseApp", PostprocessorDirichletBC);
+
 template <>
 InputParameters
 validParams<PostprocessorDirichletBC>()

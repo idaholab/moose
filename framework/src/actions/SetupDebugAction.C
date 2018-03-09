@@ -16,6 +16,8 @@
 #include "MooseObjectAction.h"
 #include "ActionFactory.h"
 
+registerMooseAction("MooseApp", SetupDebugAction, "setup_debug");
+
 template <>
 InputParameters
 validParams<SetupDebugAction>()

@@ -9,6 +9,8 @@
 
 #include "NullKernel.h"
 
+registerMooseObject("MooseApp", NullKernel);
+
 template <>
 InputParameters
 validParams<NullKernel>()

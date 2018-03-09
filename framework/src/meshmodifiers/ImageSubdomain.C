@@ -14,6 +14,8 @@
 #include "ImageSubdomain.h"
 #include "MooseMesh.h"
 
+registerMooseObject("MooseApp", ImageSubdomain);
+
 template <>
 InputParameters
 validParams<ImageSubdomain>()

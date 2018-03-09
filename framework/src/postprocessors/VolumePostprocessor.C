@@ -9,6 +9,8 @@
 
 #include "VolumePostprocessor.h"
 
+registerMooseObject("MooseApp", VolumePostprocessor);
+
 template <>
 InputParameters
 validParams<VolumePostprocessor>()

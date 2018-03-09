@@ -10,6 +10,8 @@
 #include "FunctionValuePostprocessor.h"
 #include "Function.h"
 
+registerMooseObject("MooseApp", FunctionValuePostprocessor);
+
 template <>
 InputParameters
 validParams<FunctionValuePostprocessor>()

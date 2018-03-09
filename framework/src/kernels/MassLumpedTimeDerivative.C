@@ -15,6 +15,8 @@
 
 #include "libmesh/quadrature.h"
 
+registerMooseObject("MooseApp", MassLumpedTimeDerivative);
+
 template <>
 InputParameters
 validParams<MassLumpedTimeDerivative>()

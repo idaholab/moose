@@ -9,6 +9,8 @@
 
 #include "PiecewiseLinear.h"
 
+registerMooseObject("MooseApp", PiecewiseLinear);
+
 template <>
 InputParameters
 validParams<PiecewiseLinear>()

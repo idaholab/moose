@@ -14,6 +14,8 @@
 #include "MooseVariableScalar.h"
 #include "SubProblem.h"
 
+registerMooseObject("MooseApp", ScalarL2Error);
+
 template <>
 InputParameters
 validParams<ScalarL2Error>()

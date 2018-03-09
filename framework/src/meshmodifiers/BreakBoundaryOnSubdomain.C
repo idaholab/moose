@@ -12,6 +12,8 @@
 #include "MooseMesh.h"
 #include "MooseUtils.h"
 
+registerMooseObject("MooseApp", BreakBoundaryOnSubdomain);
+
 template <>
 InputParameters
 validParams<BreakBoundaryOnSubdomain>()

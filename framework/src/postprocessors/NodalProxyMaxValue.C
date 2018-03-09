@@ -13,6 +13,8 @@
 // libMesh
 #include "libmesh/boundary_info.h"
 
+registerMooseObject("MooseApp", NodalProxyMaxValue);
+
 template <>
 InputParameters
 validParams<NodalProxyMaxValue>()

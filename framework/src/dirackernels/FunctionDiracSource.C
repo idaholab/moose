@@ -10,6 +10,8 @@
 #include "FunctionDiracSource.h"
 #include "Function.h"
 
+registerMooseObject("MooseApp", FunctionDiracSource);
+
 template <>
 InputParameters
 validParams<FunctionDiracSource>()

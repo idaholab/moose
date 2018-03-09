@@ -9,6 +9,8 @@
 
 #include "VariableTimeIntegrationAux.h"
 
+registerMooseObject("MooseApp", VariableTimeIntegrationAux);
+
 template <>
 InputParameters
 validParams<VariableTimeIntegrationAux>()

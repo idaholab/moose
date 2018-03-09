@@ -18,6 +18,8 @@
 #include "libmesh/quadrature_gauss.h"
 #include "libmesh/point_locator_base.h"
 
+registerMooseObject("MooseApp", SideSetsFromPoints);
+
 template <>
 InputParameters
 validParams<SideSetsFromPoints>()

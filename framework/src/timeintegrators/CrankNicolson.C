@@ -11,6 +11,8 @@
 #include "NonlinearSystem.h"
 #include "FEProblem.h"
 
+registerMooseObject("MooseApp", CrankNicolson);
+
 template <>
 InputParameters
 validParams<CrankNicolson>()

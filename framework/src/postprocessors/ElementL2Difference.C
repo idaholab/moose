@@ -10,6 +10,8 @@
 #include "ElementL2Difference.h"
 #include "Function.h"
 
+registerMooseObject("MooseApp", ElementL2Difference);
+
 template <>
 InputParameters
 validParams<ElementL2Difference>()

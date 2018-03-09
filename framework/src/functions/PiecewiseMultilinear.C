@@ -10,6 +10,8 @@
 #include "PiecewiseMultilinear.h"
 #include "GriddedData.h"
 
+registerMooseObject("MooseApp", PiecewiseMultilinear);
+
 template <>
 InputParameters
 validParams<PiecewiseMultilinear>()

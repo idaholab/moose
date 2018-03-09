@@ -9,6 +9,8 @@
 
 #include "UniformMarker.h"
 
+registerMooseObject("MooseApp", UniformMarker);
+
 template <>
 InputParameters
 validParams<UniformMarker>()

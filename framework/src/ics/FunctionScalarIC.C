@@ -13,6 +13,8 @@
 #include "Function.h"
 #include "MooseVariableScalar.h"
 
+registerMooseObject("MooseApp", FunctionScalarIC);
+
 template <>
 InputParameters
 validParams<FunctionScalarIC>()

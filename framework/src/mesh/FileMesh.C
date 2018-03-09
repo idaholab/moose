@@ -17,6 +17,8 @@
 #include "libmesh/nemesis_io.h"
 #include "libmesh/parallel_mesh.h"
 
+registerMooseObject("MooseApp", FileMesh);
+
 template <>
 InputParameters
 validParams<FileMesh>()

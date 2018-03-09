@@ -9,6 +9,8 @@
 
 #include "PiecewiseConstant.h"
 
+registerMooseObject("MooseApp", PiecewiseConstant);
+
 template <>
 InputParameters
 validParams<PiecewiseConstant>()

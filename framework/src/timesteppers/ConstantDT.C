@@ -9,6 +9,8 @@
 
 #include "ConstantDT.h"
 
+registerMooseObject("MooseApp", ConstantDT);
+
 template <>
 InputParameters
 validParams<ConstantDT>()

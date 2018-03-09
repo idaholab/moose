@@ -28,6 +28,8 @@ ElementQualityChecker::FailureMessageType()
   return MooseEnum("WARNING ERROR", "WARNING");
 }
 
+registerMooseObject("MooseApp", ElementQualityChecker);
+
 template <>
 InputParameters
 validParams<ElementQualityChecker>()

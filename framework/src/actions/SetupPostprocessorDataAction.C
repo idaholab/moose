@@ -11,6 +11,8 @@
 #include "SetupPostprocessorDataAction.h"
 #include "FEProblem.h"
 
+registerMooseAction("MooseApp", SetupPostprocessorDataAction, "setup_postprocessor_data");
+
 template <>
 InputParameters
 validParams<SetupPostprocessorDataAction>()

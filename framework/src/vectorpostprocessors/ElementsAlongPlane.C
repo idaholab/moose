@@ -12,6 +12,8 @@
 #include "ElementsIntersectedByPlane.h"
 #include "MooseMesh.h"
 
+registerMooseObject("MooseApp", ElementsAlongPlane);
+
 template <>
 InputParameters
 validParams<ElementsAlongPlane>()

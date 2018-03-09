@@ -10,6 +10,8 @@
 #include "BlockDeleter.h"
 #include "MooseMesh.h"
 
+registerMooseObject("MooseApp", BlockDeleter);
+
 template <>
 InputParameters
 validParams<BlockDeleter>()

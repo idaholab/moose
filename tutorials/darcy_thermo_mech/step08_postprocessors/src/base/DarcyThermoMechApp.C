@@ -1,1 +1,1 @@
-../../../step07_adaptivity/src/base/DarcyThermoMechApp.C
+../../../step01_diffusion/src/base/DarcyThermoMechApp.C

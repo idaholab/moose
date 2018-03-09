@@ -22,6 +22,8 @@
 #include "libmesh/petsc_nonlinear_solver.h"
 #include "libmesh/coupling_matrix.h"
 
+registerMooseObjectAliased("MooseApp", FieldSplitPreconditioner, "FSP");
+
 template <>
 InputParameters
 validParams<FieldSplitPreconditioner>()

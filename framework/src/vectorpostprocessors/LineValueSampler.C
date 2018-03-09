@@ -9,6 +9,8 @@
 
 #include "LineValueSampler.h"
 
+registerMooseObject("MooseApp", LineValueSampler);
+
 template <>
 InputParameters
 validParams<LineValueSampler>()

@@ -9,6 +9,8 @@
 
 #include "NodalL2Norm.h"
 
+registerMooseObject("MooseApp", NodalL2Norm);
+
 template <>
 InputParameters
 validParams<NodalL2Norm>()

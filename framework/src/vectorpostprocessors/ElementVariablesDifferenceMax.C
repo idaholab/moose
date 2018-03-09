@@ -14,6 +14,8 @@
 
 #include "libmesh/quadrature.h"
 
+registerMooseObject("MooseApp", ElementVariablesDifferenceMax);
+
 template <>
 InputParameters
 validParams<ElementVariablesDifferenceMax>()

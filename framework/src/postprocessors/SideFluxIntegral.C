@@ -9,6 +9,8 @@
 
 #include "SideFluxIntegral.h"
 
+registerMooseObject("MooseApp", SideFluxIntegral);
+
 template <>
 InputParameters
 validParams<SideFluxIntegral>()

@@ -9,6 +9,8 @@
 
 #include "LinearCombinationPostprocessor.h"
 
+registerMooseObject("MooseApp", LinearCombinationPostprocessor);
+
 template <>
 InputParameters
 validParams<LinearCombinationPostprocessor>()

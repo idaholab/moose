@@ -12,6 +12,8 @@
 #include <algorithm>
 #include <limits>
 
+registerMooseObject("MooseApp", NodalMaxValue);
+
 template <>
 InputParameters
 validParams<NodalMaxValue>()

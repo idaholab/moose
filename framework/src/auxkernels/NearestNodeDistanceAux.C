@@ -12,6 +12,8 @@
 #include "NearestNodeLocator.h"
 #include "MooseMesh.h"
 
+registerMooseObject("MooseApp", NearestNodeDistanceAux);
+
 template <>
 InputParameters
 validParams<NearestNodeDistanceAux>()

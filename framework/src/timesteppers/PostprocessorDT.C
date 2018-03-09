@@ -9,6 +9,8 @@
 
 #include "PostprocessorDT.h"
 
+registerMooseObject("MooseApp", PostprocessorDT);
+
 template <>
 InputParameters
 validParams<PostprocessorDT>()

@@ -9,6 +9,8 @@
 
 #include "DiffusionFluxBC.h"
 
+registerMooseObject("MooseApp", DiffusionFluxBC);
+
 template <>
 InputParameters
 validParams<DiffusionFluxBC>()

@@ -14,6 +14,8 @@
 #include "MooseUtils.h"
 #include "MooseVariable.h"
 
+registerMooseObject("MooseApp", FindValueOnLine);
+
 template <>
 InputParameters
 validParams<FindValueOnLine>()

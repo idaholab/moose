@@ -11,6 +11,8 @@
 #include "MooseMesh.h"
 #include "Conversion.h"
 
+registerMooseObject("MooseApp", ElementSideNeighborLayers);
+
 template <>
 InputParameters
 validParams<ElementSideNeighborLayers>()

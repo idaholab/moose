@@ -10,6 +10,8 @@
 #include "AddDGKernelAction.h"
 #include "FEProblem.h"
 
+registerMooseAction("MooseApp", AddDGKernelAction, "add_dg_kernel");
+
 template <>
 InputParameters
 validParams<AddDGKernelAction>()

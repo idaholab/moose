@@ -10,6 +10,8 @@
 #include "FunctionIC.h"
 #include "Function.h"
 
+registerMooseObject("MooseApp", FunctionIC);
+
 template <>
 InputParameters
 validParams<FunctionIC>()

@@ -15,6 +15,8 @@
 #include "libmesh/elem.h"
 #include "libmesh/boundary_info.h"
 
+registerMooseObject("MooseApp", MeshExtruder);
+
 template <>
 InputParameters
 validParams<MeshExtruder>()

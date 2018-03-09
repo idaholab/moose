@@ -9,6 +9,8 @@
 
 #include "TimeSequenceStepper.h"
 
+registerMooseObject("MooseApp", TimeSequenceStepper);
+
 template <>
 InputParameters
 validParams<TimeSequenceStepper>()

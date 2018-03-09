@@ -10,6 +10,8 @@
 #include "BoundingBoxNodeSet.h"
 #include "MooseMesh.h"
 
+registerMooseObject("MooseApp", BoundingBoxNodeSet);
+
 template <>
 InputParameters
 validParams<BoundingBoxNodeSet>()

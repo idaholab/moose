@@ -10,6 +10,8 @@
 // MOOSE includes
 #include "Gnuplot.h"
 
+registerMooseObject("MooseApp", Gnuplot);
+
 template <>
 InputParameters
 validParams<Gnuplot>()

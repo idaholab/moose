@@ -12,6 +12,8 @@
 
 #include "libmesh/mesh_modification.h"
 
+registerMooseObject("MooseApp", MeshSideSet);
+
 template <>
 InputParameters
 validParams<MeshSideSet>()

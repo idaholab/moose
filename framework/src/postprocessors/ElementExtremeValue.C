@@ -12,6 +12,8 @@
 #include <algorithm>
 #include <limits>
 
+registerMooseObject("MooseApp", ElementExtremeValue);
+
 template <>
 InputParameters
 validParams<ElementExtremeValue>()

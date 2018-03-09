@@ -11,6 +11,8 @@
 #include "FEProblem.h"
 #include "MooseEnum.h"
 
+registerMooseObject("MooseApp", ValueRangeMarker);
+
 template <>
 InputParameters
 validParams<ValueRangeMarker>()

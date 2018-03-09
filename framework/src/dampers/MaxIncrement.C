@@ -9,6 +9,8 @@
 
 #include "MaxIncrement.h"
 
+registerMooseObject("MooseApp", MaxIncrement);
+
 template <>
 InputParameters
 validParams<MaxIncrement>()

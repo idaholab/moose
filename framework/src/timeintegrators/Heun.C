@@ -9,6 +9,8 @@
 
 #include "Heun.h"
 
+registerMooseObject("MooseApp", Heun);
+
 template <>
 InputParameters
 validParams<Heun>()

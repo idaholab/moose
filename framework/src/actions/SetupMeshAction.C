@@ -15,6 +15,10 @@
 #include "ActionWarehouse.h"
 #include "Factory.h"
 
+registerMooseAction("MooseApp", SetupMeshAction, "setup_mesh");
+
+registerMooseAction("MooseApp", SetupMeshAction, "init_mesh");
+
 template <>
 InputParameters
 validParams<SetupMeshAction>()

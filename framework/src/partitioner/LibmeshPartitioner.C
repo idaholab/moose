@@ -18,6 +18,8 @@
 #include "libmesh/morton_sfc_partitioner.h"
 #include "libmesh/subdomain_partitioner.h"
 
+registerMooseObject("MooseApp", LibmeshPartitioner);
+
 template <>
 InputParameters
 validParams<LibmeshPartitioner>()

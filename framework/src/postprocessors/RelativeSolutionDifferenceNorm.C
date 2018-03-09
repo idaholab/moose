@@ -10,6 +10,8 @@
 #include "RelativeSolutionDifferenceNorm.h"
 #include "Transient.h"
 
+registerMooseObject("MooseApp", RelativeSolutionDifferenceNorm);
+
 template <>
 InputParameters
 validParams<RelativeSolutionDifferenceNorm>()

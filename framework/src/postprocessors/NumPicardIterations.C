@@ -12,6 +12,8 @@
 #include "Transient.h"
 #include "MooseApp.h"
 
+registerMooseObject("MooseApp", NumPicardIterations);
+
 template <>
 InputParameters
 validParams<NumPicardIterations>()

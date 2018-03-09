@@ -9,6 +9,8 @@
 
 #include "TimeDerivativeNodalKernel.h"
 
+registerMooseObject("MooseApp", TimeDerivativeNodalKernel);
+
 template <>
 InputParameters
 validParams<TimeDerivativeNodalKernel>()

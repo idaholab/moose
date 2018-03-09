@@ -14,6 +14,8 @@
 #include "MooseEnum.h"
 #include "MooseMesh.h"
 
+registerMooseAction("MooseApp", PartitionerAction, "add_partitioner");
+
 template <>
 InputParameters
 validParams<PartitionerAction>()

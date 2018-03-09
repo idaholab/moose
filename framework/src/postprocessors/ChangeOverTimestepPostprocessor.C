@@ -9,6 +9,8 @@
 
 #include "ChangeOverTimestepPostprocessor.h"
 
+registerMooseObject("MooseApp", ChangeOverTimestepPostprocessor);
+
 template <>
 InputParameters
 validParams<ChangeOverTimestepPostprocessor>()

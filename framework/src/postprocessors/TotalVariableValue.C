@@ -9,6 +9,8 @@
 
 #include "TotalVariableValue.h"
 
+registerMooseObject("MooseApp", TotalVariableValue);
+
 template <>
 InputParameters
 validParams<TotalVariableValue>()

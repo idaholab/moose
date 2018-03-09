@@ -23,6 +23,8 @@
 #include <cxxabi.h>
 #include <fstream>
 
+registerMooseObjectAliased("MooseApp", DOFMapOutput, "DOFMap");
+
 template <>
 InputParameters
 validParams<DOFMapOutput>()

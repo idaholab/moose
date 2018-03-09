@@ -11,6 +11,8 @@
 #include "NearestPointLayeredAverage.h"
 #include "LayeredAverage.h"
 
+registerMooseObject("MooseApp", NearestPointLayeredAverage);
+
 template <>
 InputParameters
 validParams<NearestPointLayeredAverage>()

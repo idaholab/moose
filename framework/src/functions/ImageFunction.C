@@ -10,6 +10,8 @@
 #include "ImageFunction.h"
 #include "MooseMesh.h"
 
+registerMooseObject("MooseApp", ImageFunction);
+
 template <>
 InputParameters
 validParams<ImageFunction>()

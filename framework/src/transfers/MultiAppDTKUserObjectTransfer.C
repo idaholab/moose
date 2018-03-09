@@ -20,6 +20,8 @@
 #include "FEProblem.h"
 #include "MooseVariableField.h"
 
+registerMooseObject("MooseApp", MultiAppDTKUserObjectTransfer);
+
 template <>
 InputParameters
 validParams<MultiAppDTKUserObjectTransfer>()

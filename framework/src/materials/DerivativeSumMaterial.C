@@ -11,6 +11,8 @@
 
 #include "libmesh/quadrature.h"
 
+registerMooseObject("MooseApp", DerivativeSumMaterial);
+
 template <>
 InputParameters
 validParams<DerivativeSumMaterial>()

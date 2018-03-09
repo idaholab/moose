@@ -9,6 +9,8 @@
 
 #include "NonlinearEigen.h"
 
+registerMooseObject("MooseApp", NonlinearEigen);
+
 template <>
 InputParameters
 validParams<NonlinearEigen>()

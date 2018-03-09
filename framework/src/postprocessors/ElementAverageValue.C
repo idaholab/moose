@@ -9,6 +9,8 @@
 
 #include "ElementAverageValue.h"
 
+registerMooseObject("MooseApp", ElementAverageValue);
+
 template <>
 InputParameters
 validParams<ElementAverageValue>()

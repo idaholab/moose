@@ -19,6 +19,8 @@
 // C++ includes
 #include <cmath>
 
+registerMooseObject("MooseApp", DGFunctionDiffusionDirichletBC);
+
 template <>
 InputParameters
 validParams<DGFunctionDiffusionDirichletBC>()

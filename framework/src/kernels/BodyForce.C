@@ -12,6 +12,8 @@
 // MOOSE
 #include "Function.h"
 
+registerMooseObject("MooseApp", BodyForce);
+
 template <>
 InputParameters
 validParams<BodyForce>()

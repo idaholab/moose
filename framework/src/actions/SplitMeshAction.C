@@ -14,6 +14,8 @@
 #include "MooseMesh.h"
 #include "libmesh/checkpoint_io.h"
 
+registerMooseAction("MooseApp", SplitMeshAction, "split_mesh");
+
 template <>
 InputParameters
 validParams<SplitMeshAction>()

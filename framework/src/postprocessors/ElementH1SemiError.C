@@ -10,6 +10,8 @@
 #include "ElementH1SemiError.h"
 #include "Function.h"
 
+registerMooseObject("MooseApp", ElementH1SemiError);
+
 template <>
 InputParameters
 validParams<ElementH1SemiError>()

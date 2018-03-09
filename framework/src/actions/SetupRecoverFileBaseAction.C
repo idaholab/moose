@@ -14,6 +14,8 @@
 #include "Checkpoint.h"
 #include "MooseObjectAction.h"
 
+registerMooseAction("MooseApp", SetupRecoverFileBaseAction, "setup_recover_file_base");
+
 template <>
 InputParameters
 validParams<SetupRecoverFileBaseAction>()

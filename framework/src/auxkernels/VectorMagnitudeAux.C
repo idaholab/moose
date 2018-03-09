@@ -11,6 +11,8 @@
 #include "VectorMagnitudeAux.h"
 #include "MooseMesh.h"
 
+registerMooseObject("MooseApp", VectorMagnitudeAux);
+
 template <>
 InputParameters
 validParams<VectorMagnitudeAux>()

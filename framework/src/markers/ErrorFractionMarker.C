@@ -11,6 +11,8 @@
 
 #include "libmesh/error_vector.h"
 
+registerMooseObject("MooseApp", ErrorFractionMarker);
+
 template <>
 InputParameters
 validParams<ErrorFractionMarker>()

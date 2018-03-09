@@ -9,6 +9,8 @@
 
 #include "MaterialStdVectorRealGradientAux.h"
 
+registerMooseObject("MooseApp", MaterialStdVectorRealGradientAux);
+
 template <>
 InputParameters
 validParams<MaterialStdVectorRealGradientAux>()

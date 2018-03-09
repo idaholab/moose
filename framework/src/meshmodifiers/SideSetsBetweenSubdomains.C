@@ -14,6 +14,8 @@
 
 #include "libmesh/remote_elem.h"
 
+registerMooseObject("MooseApp", SideSetsBetweenSubdomains);
+
 template <>
 InputParameters
 validParams<SideSetsBetweenSubdomains>()

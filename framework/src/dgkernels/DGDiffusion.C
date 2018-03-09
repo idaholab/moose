@@ -14,6 +14,8 @@
 
 #include "libmesh/utility.h"
 
+registerMooseObject("MooseApp", DGDiffusion);
+
 template <>
 InputParameters
 validParams<DGDiffusion>()

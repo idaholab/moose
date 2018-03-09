@@ -10,6 +10,8 @@
 #include "DebugResidualAux.h"
 #include "NonlinearSystem.h"
 
+registerMooseObject("MooseApp", DebugResidualAux);
+
 template <>
 InputParameters
 validParams<DebugResidualAux>()

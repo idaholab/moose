@@ -10,6 +10,8 @@
 #include "SpatialUserObjectAux.h"
 #include "UserObject.h"
 
+registerMooseObject("MooseApp", SpatialUserObjectAux);
+
 template <>
 InputParameters
 validParams<SpatialUserObjectAux>()

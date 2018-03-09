@@ -12,6 +12,8 @@
 
 #include <ostream>
 
+registerMooseObject("MooseApp", PerflogDumper);
+
 template <>
 InputParameters
 validParams<PerflogDumper>()

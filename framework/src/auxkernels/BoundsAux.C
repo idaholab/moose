@@ -10,6 +10,8 @@
 #include "BoundsAux.h"
 #include "SystemBase.h"
 
+registerMooseObject("MooseApp", BoundsAux);
+
 template <>
 InputParameters
 validParams<BoundsAux>()

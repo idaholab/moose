@@ -9,6 +9,8 @@
 
 #include "RelativeDifferencePostprocessor.h"
 
+registerMooseObject("MooseApp", RelativeDifferencePostprocessor);
+
 template <>
 InputParameters
 validParams<RelativeDifferencePostprocessor>()

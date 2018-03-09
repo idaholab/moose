@@ -16,6 +16,8 @@
 
 #include "libmesh/transient_system.h"
 
+registerMooseObject("MooseApp", VariableResidualNormsDebugOutput);
+
 template <>
 InputParameters
 validParams<VariableResidualNormsDebugOutput>()

@@ -9,6 +9,8 @@
 
 #include "PresetBC.h"
 
+registerMooseObject("MooseApp", PresetBC);
+
 template <>
 InputParameters
 validParams<PresetBC>()
