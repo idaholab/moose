@@ -460,7 +460,7 @@ moosePetscSNESFormJacobian(SNES /*snes*/, Vec x, Mat jac, Mat pc, void * ctx, Ta
 
   PC.zero();
 
-  eigen_problem->computeJacobian(*sys.current_local_solution.get(), PC, tag);
+  eigen_problem->computeJacobianTag(*sys.current_local_solution.get(), PC, tag);
 
   PC.close();
   if (jac != pc)
@@ -505,7 +505,7 @@ moosePetscSNESFormFunction(SNES /*snes*/, Vec x, Vec r, void * ctx, TagID tag)
 
   R.zero();
 
-  eigen_problem->computeResidual(*sys.current_local_solution.get(), R, tag);
+  eigen_problem->computeResidualTag(*sys.current_local_solution.get(), R, tag);
 
   R.close();
 }

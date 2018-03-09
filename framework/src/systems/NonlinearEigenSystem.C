@@ -48,9 +48,9 @@ assemble_matrix(EquationSystems & es, const std::string & system_name)
 
   if (!p->isNonlinearEigenvalueSolver())
   {
-    p->computeJacobian(*eigen_system.current_local_solution.get(),
-                       *eigen_system.matrix_A,
-                       eigen_nl.nonEigenMatrixTag());
+    p->computeJacobianTag(*eigen_system.current_local_solution.get(),
+                          *eigen_system.matrix_A,
+                          eigen_nl.nonEigenMatrixTag());
   }
   else
   {
@@ -85,9 +85,9 @@ assemble_matrix(EquationSystems & es, const std::string & system_name)
     {
       if (!p->isNonlinearEigenvalueSolver())
       {
-        p->computeJacobian(*eigen_system.current_local_solution.get(),
-                           *eigen_system.matrix_B,
-                           eigen_nl.eigenMatrixTag());
+        p->computeJacobianTag(*eigen_system.current_local_solution.get(),
+                              *eigen_system.matrix_B,
+                              eigen_nl.eigenMatrixTag());
       }
       else
       {

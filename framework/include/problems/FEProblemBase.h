@@ -871,38 +871,45 @@ public:
    */
   virtual Real computeResidualL2Norm();
 
-  virtual void computeResidual(NonlinearImplicitSystem & sys,
-                               const NumericVector<Number> & soln,
-                               NumericVector<Number> & residual);
+  virtual void computeResidualSys(NonlinearImplicitSystem & sys,
+                                  const NumericVector<Number> & soln,
+                                  NumericVector<Number> & residual);
+
+  void computeResidual(NonlinearImplicitSystem & sys,
+                       const NumericVector<Number> & soln,
+                       NumericVector<Number> & residual);
+
   virtual void computeResidual(const NumericVector<Number> & soln,
                                NumericVector<Number> & residual);
 
-  virtual void
-  computeResidual(const NumericVector<Number> & soln, NumericVector<Number> & residual, TagID tag);
+  virtual void computeResidualTag(const NumericVector<Number> & soln,
+                                  NumericVector<Number> & residual,
+                                  TagID tag);
 
   virtual void computeResidualType(const NumericVector<Number> & soln,
                                    NumericVector<Number> & residual,
                                    TagID tag);
 
-  virtual void computeResidual(const NumericVector<Number> & soln,
-                               NumericVector<Number> & residual,
-                               std::set<TagID> & tags);
+  virtual void computeResidualInternal(const NumericVector<Number> & soln,
+                                       NumericVector<Number> & residual,
+                                       std::set<TagID> & tags);
 
-  virtual void computeResidual(std::set<TagID> & tags);
+  virtual void computeResidualTags(std::set<TagID> & tags);
 
-  virtual void computeJacobian(NonlinearImplicitSystem & sys,
-                               const NumericVector<Number> & soln,
-                               SparseMatrix<Number> & jacobian);
+  virtual void computeJacobianSys(NonlinearImplicitSystem & sys,
+                                  const NumericVector<Number> & soln,
+                                  SparseMatrix<Number> & jacobian);
   virtual void computeJacobian(const NumericVector<Number> & soln, SparseMatrix<Number> & jacobian);
 
-  virtual void
-  computeJacobian(const NumericVector<Number> & soln, SparseMatrix<Number> & jacobian, TagID tag);
+  virtual void computeJacobianTag(const NumericVector<Number> & soln,
+                                  SparseMatrix<Number> & jacobian,
+                                  TagID tag);
 
-  virtual void computeJacobian(const NumericVector<Number> & soln,
-                               SparseMatrix<Number> & jacobian,
-                               std::set<TagID> & tags);
+  virtual void computeJacobianInternal(const NumericVector<Number> & soln,
+                                       SparseMatrix<Number> & jacobian,
+                                       std::set<TagID> & tags);
 
-  virtual void computeJacobian(std::set<TagID> & tags);
+  virtual void computeJacobianTags(std::set<TagID> & tags);
 
   /**
    * Computes several Jacobian blocks simultaneously, summing their contributions into smaller

@@ -51,9 +51,9 @@ public:
 #if LIBMESH_HAVE_SLEPC
   void setEigenproblemType(Moose::EigenProblemType eigen_problem_type);
 
-  virtual void computeJacobian(const NumericVector<Number> & soln,
-                               SparseMatrix<Number> & jacobian,
-                               TagID tag) override;
+  virtual void computeJacobianTag(const NumericVector<Number> & soln,
+                                  SparseMatrix<Number> & jacobian,
+                                  TagID tag) override;
 
   void computeJacobianAB(const NumericVector<Number> & soln,
                          SparseMatrix<Number> & jacobianA,
@@ -61,9 +61,9 @@ public:
                          TagID tagA,
                          TagID tagB);
 
-  virtual void computeResidual(const NumericVector<Number> & soln,
-                               NumericVector<Number> & residual,
-                               TagID tag) override;
+  virtual void computeResidualTag(const NumericVector<Number> & soln,
+                                  NumericVector<Number> & residual,
+                                  TagID tag) override;
 
   void computeResidualAB(const NumericVector<Number> & soln,
                          NumericVector<Number> & residualA,

@@ -243,13 +243,11 @@ public:
    * @param residual Residual is formed in here
    * @param the tag of kernels for which the residual is to be computed.
    */
+  void computeResidualTag(NumericVector<Number> & residual, TagID tag_id);
+
+  void computeResidualTags(std::set<TagID> & tags);
+
   void computeResidual(NumericVector<Number> & residual, TagID tag_id);
-
-  void computeResidual(NumericVector<Number> & residual);
-
-  void computeResidual(std::set<TagID> & tags);
-
-  void computeResidual(NumericVector<Number> & residual, std::set<TagID> & tags);
 
   /**
    * Finds the implicit sparsity graph between geometrically related dofs.
@@ -281,13 +279,11 @@ public:
    * Computes Jacobian
    * @param jacobian Jacobian is formed in here
    */
-  void computeJacobian(SparseMatrix<Number> & jacobian);
-
-  void computeJacobian(SparseMatrix<Number> & jacobian, TagID tag);
+  void computeJacobianTags(std::set<TagID> & tags);
 
   void computeJacobian(SparseMatrix<Number> & jacobian, std::set<TagID> & tags);
 
-  void computeJacobian(std::set<TagID> & tags);
+  void computeJacobian(SparseMatrix<Number> & jacobian);
 
   /**
    * Computes several Jacobian blocks simultaneously, summing their contributions into smaller

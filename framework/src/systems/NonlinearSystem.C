@@ -30,7 +30,7 @@ compute_jacobian(const NumericVector<Number> & soln,
 {
   FEProblemBase * p =
       sys.get_equation_systems().parameters.get<FEProblemBase *>("_fe_problem_base");
-  p->computeJacobian(sys, soln, jacobian);
+  p->computeJacobianSys(sys, soln, jacobian);
 }
 
 void
@@ -151,7 +151,7 @@ NonlinearSystem::solve()
   {
     // Calculate the initial residual for use in the convergence criterion.
     _computing_initial_residual = true;
-    _fe_problem.computeResidual(_transient_sys, *_current_solution, *_transient_sys.rhs);
+    _fe_problem.computeResidualSys(_transient_sys, *_current_solution, *_transient_sys.rhs);
     _computing_initial_residual = false;
     _transient_sys.rhs->close();
     _initial_residual_before_preset_bcs = _transient_sys.rhs->l2_norm();

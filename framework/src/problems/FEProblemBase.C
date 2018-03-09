@@ -4048,29 +4048,52 @@ FEProblemBase::computeResidualL2Norm()
 }
 
 void
-FEProblemBase::computeResidual(NonlinearImplicitSystem & /*sys*/,
-                               const NumericVector<Number> & soln,
-                               NumericVector<Number> & residual)
+FEProblemBase::computeResidualSys(NonlinearImplicitSystem & /*sys*/,
+                                  const NumericVector<Number> & soln,
+                                  NumericVector<Number> & residual)
 {
   computeResidual(soln, residual);
 }
 
 void
-FEProblemBase::computeResidual(const NumericVector<Number> & soln,
-                               NumericVector<Number> & residual,
-                               TagID tag)
+FEProblemBase::computeResidual(NonlinearImplicitSystem & sys,
+                               const NumericVector<Number> & soln,
+                               NumericVector<Number> & residual)
+{
+  mooseDeprecated("Please use computeResidualSys");
+
+  computeResidualSys(sys, soln, residual);
+}
+
+void
+FEProblemBase::computeResidual(const NumericVector<Number> & soln, NumericVector<Number> & residual)
+{
+  auto & tags = getVectorTag();
+
+  _fe_vector_tags.clear();
+
+  for (auto & tag : tags)
+    _fe_vector_tags.insert(tag.second);
+
+  computeResidualInternal(soln, residual, _fe_vector_tags);
+}
+
+void
+FEProblemBase::computeResidualTag(const NumericVector<Number> & soln,
+                                  NumericVector<Number> & residual,
+                                  TagID tag)
 {
   _fe_vector_tags.clear();
 
   _fe_vector_tags.insert(tag);
 
-  computeResidual(soln, residual, _fe_vector_tags);
+  computeResidualInternal(soln, residual, _fe_vector_tags);
 }
 
 void
-FEProblemBase::computeResidual(const NumericVector<Number> & soln,
-                               NumericVector<Number> & residual,
-                               std::set<TagID> & tags)
+FEProblemBase::computeResidualInternal(const NumericVector<Number> & soln,
+                                       NumericVector<Number> & residual,
+                                       std::set<TagID> & tags)
 {
   try
   {
@@ -4078,7 +4101,7 @@ FEProblemBase::computeResidual(const NumericVector<Number> & soln,
 
     _nl->associateVectorToTag(residual, _nl->residualVectorTag());
 
-    computeResidual(tags);
+    computeResidualTags(tags);
   }
   catch (MooseException & e)
   {
@@ -4099,21 +4122,8 @@ FEProblemBase::computeResidualType(const NumericVector<Number> & soln,
                                    NumericVector<Number> & residual,
                                    TagID tag)
 {
-  mooseDeprecated("Please use computeResidual()");
-  computeResidual(soln, residual, tag);
-}
-
-void
-FEProblemBase::computeResidual(const NumericVector<Number> & soln, NumericVector<Number> & residual)
-{
-  auto & tags = getVectorTag();
-
-  _fe_vector_tags.clear();
-
-  for (auto & tag : tags)
-    _fe_vector_tags.insert(tag.second);
-
-  computeResidual(soln, residual, _fe_vector_tags);
+  mooseDeprecated("Please use computeResidualTag()");
+  computeResidualTag(soln, residual, tag);
 }
 
 void
@@ -4128,7 +4138,7 @@ FEProblemBase::computeTransientImplicitResidual(Real time,
 }
 
 void
-FEProblemBase::computeResidual(std::set<TagID> & tags)
+FEProblemBase::computeResidualTags(std::set<TagID> & tags)
 {
   _nl->zeroVariablesForResidual();
   _aux->zeroVariablesForResidual();
@@ -4187,27 +4197,27 @@ FEProblemBase::computeResidual(std::set<TagID> & tags)
 
   _app.getOutputWarehouse().residualSetup();
 
-  _nl->computeResidual(tags);
+  _nl->computeResidualTags(tags);
 }
 
 void
-FEProblemBase::computeJacobian(NonlinearImplicitSystem & /*sys*/,
-                               const NumericVector<Number> & soln,
-                               SparseMatrix<Number> & jacobian)
+FEProblemBase::computeJacobianSys(NonlinearImplicitSystem & /*sys*/,
+                                  const NumericVector<Number> & soln,
+                                  SparseMatrix<Number> & jacobian)
 {
   computeJacobian(soln, jacobian);
 }
 
 void
-FEProblemBase::computeJacobian(const NumericVector<Number> & soln,
-                               SparseMatrix<Number> & jacobian,
-                               TagID tag)
+FEProblemBase::computeJacobianTag(const NumericVector<Number> & soln,
+                                  SparseMatrix<Number> & jacobian,
+                                  TagID tag)
 {
   _fe_matrix_tags.clear();
 
   _fe_matrix_tags.insert(tag);
 
-  computeJacobian(soln, jacobian, _fe_matrix_tags);
+  computeJacobianInternal(soln, jacobian, _fe_matrix_tags);
 }
 
 void
@@ -4219,23 +4229,23 @@ FEProblemBase::computeJacobian(const NumericVector<Number> & soln, SparseMatrix<
   for (auto & tag : tags)
     _fe_matrix_tags.insert(tag.second);
 
-  computeJacobian(soln, jacobian, _fe_matrix_tags);
+  computeJacobianInternal(soln, jacobian, _fe_matrix_tags);
 }
 
 void
-FEProblemBase::computeJacobian(const NumericVector<Number> & soln,
-                               SparseMatrix<Number> & jacobian,
-                               std::set<TagID> & tags)
+FEProblemBase::computeJacobianInternal(const NumericVector<Number> & soln,
+                                       SparseMatrix<Number> & jacobian,
+                                       std::set<TagID> & tags)
 {
   _nl->setSolution(soln);
 
   _nl->associateMatirxToTag(jacobian, _nl->systemMatrixTag());
 
-  computeJacobian(tags);
+  computeJacobianTags(tags);
 }
 
 void
-FEProblemBase::computeJacobian(std::set<TagID> & tags)
+FEProblemBase::computeJacobianTags(std::set<TagID> & tags)
 {
   if (!_has_jacobian || !_const_jacobian)
   {
@@ -4282,7 +4292,7 @@ FEProblemBase::computeJacobian(std::set<TagID> & tags)
 
     _app.getOutputWarehouse().jacobianSetup();
 
-    _nl->computeJacobian(tags);
+    _nl->computeJacobianTags(tags);
 
     _current_execute_on_flag = EXEC_NONE;
     _currently_computing_jacobian = false;

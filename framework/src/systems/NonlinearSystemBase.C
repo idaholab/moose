@@ -521,21 +521,7 @@ NonlinearSystemBase::zeroVectorForResidual(const std::string & vector_name)
 }
 
 void
-NonlinearSystemBase::computeResidual(NumericVector<Number> & residual)
-{
-  auto & tags = _fe_problem.getVectorTag();
-  _nl_vector_tags.clear();
-
-  for (auto & tag : tags)
-    _nl_vector_tags.insert(tag.second);
-
-  associateVectorToTag(residual, residualVectorTag());
-
-  computeResidual(_nl_vector_tags);
-}
-
-void
-NonlinearSystemBase::computeResidual(NumericVector<Number> & residual, TagID tag_id)
+NonlinearSystemBase::computeResidualTag(NumericVector<Number> & residual, TagID tag_id)
 {
 
   _nl_vector_tags.clear();
@@ -544,25 +530,19 @@ NonlinearSystemBase::computeResidual(NumericVector<Number> & residual, TagID tag
 
   associateVectorToTag(residual, residualVectorTag());
 
-  computeResidual(_nl_vector_tags);
+  computeResidualTags(_nl_vector_tags);
 }
 
 void
-NonlinearSystemBase::computeResidual(NumericVector<Number> & residual, std::set<TagID> & tags)
+NonlinearSystemBase::computeResidual(NumericVector<Number> & residual, TagID tag_id)
 {
-  _nl_vector_tags.clear();
-  for (auto tag : tags)
-    _nl_vector_tags.insert(tag);
+  mooseDeprecated(" Please use computeResidualTag");
 
-  _nl_vector_tags.insert(residualVectorTag());
-
-  associateVectorToTag(residual, residualVectorTag());
-
-  computeResidual(_nl_vector_tags);
+  computeResidualTag(residual, tag_id);
 }
 
 void
-NonlinearSystemBase::computeResidual(std::set<TagID> & tags)
+NonlinearSystemBase::computeResidualTags(std::set<TagID> & tags)
 {
   Moose::perf_log.push("compute_residual()", "Execution");
 
@@ -2207,25 +2187,15 @@ NonlinearSystemBase::computeJacobian(SparseMatrix<Number> & jacobian)
 }
 
 void
-NonlinearSystemBase::computeJacobian(SparseMatrix<Number> & jacobian, TagID tag)
-{
-  _nl_matrix_tags.clear();
-
-  _nl_matrix_tags.insert(tag);
-
-  computeJacobian(jacobian, _nl_matrix_tags);
-}
-
-void
 NonlinearSystemBase::computeJacobian(SparseMatrix<Number> & jacobian, std::set<TagID> & tags)
 {
   associateMatirxToTag(jacobian, systemMatrixTag());
 
-  computeJacobian(tags);
+  computeJacobianTags(tags);
 }
 
 void
-NonlinearSystemBase::computeJacobian(std::set<TagID> & tags)
+NonlinearSystemBase::computeJacobianTags(std::set<TagID> & tags)
 {
   Moose::perf_log.push("compute_jacobian()", "Execution");
 

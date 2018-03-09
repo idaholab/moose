@@ -107,9 +107,9 @@ EigenProblem::setEigenproblemType(Moose::EigenProblemType eigen_problem_type)
 }
 
 void
-EigenProblem::computeJacobian(const NumericVector<Number> & soln,
-                              SparseMatrix<Number> & jacobian,
-                              TagID tag)
+EigenProblem::computeJacobianTag(const NumericVector<Number> & soln,
+                                 SparseMatrix<Number> & jacobian,
+                                 TagID tag)
 {
   _fe_matrix_tags.clear();
 
@@ -121,7 +121,7 @@ EigenProblem::computeJacobian(const NumericVector<Number> & soln,
 
   _nl_eigen->associateMatirxToTag(jacobian, tag);
 
-  FEProblemBase::computeJacobian(_fe_matrix_tags);
+  computeJacobianTags(_fe_matrix_tags);
 }
 
 void
@@ -142,13 +142,13 @@ EigenProblem::computeJacobianAB(const NumericVector<Number> & soln,
   _nl_eigen->associateMatirxToTag(jacobianA, tagA);
   _nl_eigen->associateMatirxToTag(jacobianB, tagB);
 
-  FEProblemBase::computeJacobian(_fe_matrix_tags);
+  computeJacobianTags(_fe_matrix_tags);
 }
 
 void
-EigenProblem::computeResidual(const NumericVector<Number> & soln,
-                              NumericVector<Number> & residual,
-                              TagID tag)
+EigenProblem::computeResidualTag(const NumericVector<Number> & soln,
+                                 NumericVector<Number> & residual,
+                                 TagID tag)
 {
   _fe_vector_tags.clear();
 
@@ -160,7 +160,7 @@ EigenProblem::computeResidual(const NumericVector<Number> & soln,
 
   _nl_eigen->associateVectorToTag(residual, tag);
 
-  FEProblemBase::computeResidual(_fe_vector_tags);
+  computeResidualTags(_fe_vector_tags);
 }
 
 void
@@ -184,7 +184,7 @@ EigenProblem::computeResidualAB(const NumericVector<Number> & soln,
 
   _nl_eigen->associateVectorToTag(residualB, tagB);
 
-  FEProblemBase::computeResidual(_fe_vector_tags);
+  computeResidualTags(_fe_vector_tags);
 }
 
 #endif
