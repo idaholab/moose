@@ -1,0 +1,24 @@
+Content:
+    - framework/doc/content
+    - modules/chemical_reactions/doc/content
+
+Renderer:
+    type: MooseDocs.base.MaterializeRenderer
+    name: MOOSE Chemical Reactions Module
+    repo: https://github.com/idaholab/moose
+    home: /documentation/modules/chemical_reactions
+
+Extensions:
+    appsyntax:
+        type: MooseDocs.extensions.appsyntax
+        executable: ${MOOSE_DIR}/modules/chemical_reactions
+        hide:
+            framework: !include framework/doc/hidden.yml
+            chemical_reactions: !include modules/chemical_reactions/doc/hidden.yml
+        remove: !include framework/doc/remove.yml
+        includes:
+            - framework/include
+            - modules/chemical_reactions/include
+    globals:
+        type: MooseDocs.extensions.panoptic
+        shortcuts: !include framework/doc/globals.yml

@@ -1,0 +1,99 @@
+"""Tools for extracting C++ class information."""
+import os
+import re
+
+import MooseDocs
+from eval_path import eval_path
+
+#: Locates class definitions in header files
+DEFINITION_RE = re.compile(r'class\s*(?P<class>\w+)\b[^;]')
+
+#: Locates class inhertence
+CHILD_RE = re.compile(r'\bpublic\s+(?P<key>\w+)\b')
+
+#: Locates class use in input files
+INPUT_RE = re.compile(r'\btype\s*=\s*(?P<key>\w+)\b')
+
+class DatabaseItem(object):
+    """Storage container for class information."""
+    def __init__(self, name, header, source):
+        self.name = name
+        self.source = source
+        self.header = header
+        self.inputs = set()
+        self.children = set()
+
+def build_class_database(include_dirs, input_dirs):
+    """
+    Create the class database.
+
+    Returns a dict() of DatabaseItem objects. The key is the class name e.g., Diffusion.
+
+    Inputs:
+        include_dirs[str,list]: A space separated str or a list of include directories.
+        input_dirs[str,list]: A space separated str or a list of input file directories.
+    """
+
+    # Build the lists from strings
+    if isinstance(include_dirs, str):
+        include_dirs = [eval_path(x) for x in include_dirs.split()]
+    if isinstance(input_dirs, str):
+        input_dirs = [eval_path(x) for x in input_dirs.split()]
+
+    # Locate filenames
+    headers = _locate_filenames(include_dirs, '.h')
+    inputs = _locate_filenames(input_dirs, '.i')
+
+    # Create the database
+    objects = dict()
+    _process(objects, headers, DEFINITION_RE, _match_definition)
+    _process(objects, headers, CHILD_RE, _match_child)
+    _process(objects, inputs, INPUT_RE, _match_input)
+    return objects
+
+def _locate_filenames(directories, ext):
+    """Locate files in the directories with the given extension."""
+
+    out = set()
+    for location in directories:
+        for base, _, files in os.walk(location):
+            for fname in files:
+                full_file = os.path.join(base, fname)
+                if fname.endswith(ext) and not os.path.islink(full_file):
+                    out.add(full_file)
+    return out
+
+def _process(objects, filenames, regex, func):
+    """Process regex"""
+    for filename in filenames:
+        with open(filename, 'r') as fid:
+            content = fid.read()
+
+        for match in regex.finditer(content):
+            func(objects, filename, match)
+
+def _match_definition(objects, filename, match):
+    """Class definition match function."""
+    name = match.group('class')
+    src = filename.replace('/include/', '/src/')[:-2] + '.C'
+    if not os.path.exists(src):
+        src = None
+    else:
+        src = os.path.relpath(src, MooseDocs.ROOT_DIR)
+
+    hdr = os.path.relpath(filename, MooseDocs.ROOT_DIR)
+    objects[name] = DatabaseItem(name, hdr, src)
+
+def _match_child(objects, filename, match):
+    """Child class match function."""
+    key = match.group('key')
+    if key in objects:
+        filename = os.path.relpath(filename, MooseDocs.ROOT_DIR)
+        objects[key].children.add(filename)
+
+def _match_input(objects, filename, match):
+    """Input use match function."""
+    key = match.group('key')
+    if key in objects:
+        filename = os.path.relpath(filename, MooseDocs.ROOT_DIR)
+        objects[key].inputs.add(filename)

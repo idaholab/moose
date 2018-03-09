@@ -1,0 +1,14 @@
+- /Kernels/DarcyFluxPressure
+- /Kernels/DesorptionFromMatrix
+- /Kernels/DesorptionToPorespace
+- /Materials/LangmuirMaterial
+- /Materials/MollifiedLangmuirMaterial
+- /ReactionNetwork
+- /ReactionNetwork/AqueousEquilibriumReactions
+- /ReactionNetwork/AqueousEquilibriumReactions/AddCoupledEqSpeciesAction
+- /ReactionNetwork/AqueousEquilibriumReactions/AddPrimarySpeciesAction
+- /ReactionNetwork/AqueousEquilibriumReactions/AddSecondarySpeciesAction
+- /ReactionNetwork/SolidKineticReactions
+- /ReactionNetwork/SolidKineticReactions/AddCoupledSolidKinSpeciesAction
+- /ReactionNetwork/SolidKineticReactions/AddPrimarySpeciesAction
+- /ReactionNetwork/SolidKineticReactions/AddSecondarySpeciesAction

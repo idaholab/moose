@@ -1,0 +1,24 @@
+Content:
+    - framework/doc/content
+    - modules/phase_field/doc/content
+
+Renderer:
+    type: MooseDocs.base.MaterializeRenderer
+    name: MOOSE Phase Field Module
+    repo: https://github.com/idaholab/moose
+    home: /documentation/modules/phase_field
+
+Extensions:
+    appsyntax:
+        type: MooseDocs.extensions.appsyntax
+        executable: ${MOOSE_DIR}/modules/phase_field
+        hide:
+            framework: !include framework/doc/hidden.yml
+            phase_field: !include modules/phase_field/doc/hidden.yml
+        remove: !include framework/doc/remove.yml
+        includes:
+            - framework/include
+            - modules/phase_field/include
+    globals:
+        type: MooseDocs.extensions.panoptic
+        shortcuts: !include framework/doc/globals.yml

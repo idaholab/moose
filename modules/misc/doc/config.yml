@@ -1,0 +1,24 @@
+Content:
+    - framework/doc/content
+    - modules/misc/doc/content
+
+Renderer:
+    type: MooseDocs.base.MaterializeRenderer
+    name: MOOSE Misc Module
+    repo: https://github.com/idaholab/moose
+    home: /documentation/modules/misc
+
+Extensions:
+    appsyntax:
+        type: MooseDocs.extensions.appsyntax
+        executable: ${MOOSE_DIR}/modules/misc
+        hide:
+            framework: !include framework/doc/hidden.yml
+            misc: !include modules/misc/doc/hidden.yml
+        remove: !include framework/doc/remove.yml
+        includes:
+            - framework/include
+            - modules/misc/include
+    globals:
+        type: MooseDocs.extensions.panoptic
+        shortcuts: !include framework/doc/globals.yml

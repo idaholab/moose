@@ -1,0 +1,33 @@
+Content:
+    - framework/doc/content
+    - modules/porous_flow/doc/content
+    - modules/tensor_mechanics/doc/content
+    - modules/fluid_properties/doc/content
+    - modules/chemical_reactions/doc/content
+
+Renderer:
+    type: MooseDocs.base.MaterializeRenderer
+    name: MOOSE Tensor_Mechanics Module
+    repo: https://github.com/idaholab/moose
+    home: /documentation/modules/porous_flow
+
+Extensions:
+    appsyntax:
+        type: MooseDocs.extensions.appsyntax
+        executable: ${MOOSE_DIR}/modules/porous_flow
+        hide:
+            framework: !include framework/doc/hidden.yml
+            porous_flow: !include modules/porous_flow/doc/hidden.yml
+            tensor_mechanics: !include modules/tensor_mechanics/doc/hidden.yml
+            fluid_properties: !include modules/fluid_properties/doc/hidden.yml
+            chemical_reactions: !include modules/chemical_reactions/doc/hidden.yml
+        remove: !include framework/doc/remove.yml
+        includes:
+            - framework/include
+            - modules/porous_flow/include
+            - modules/tensor_mechanics/include
+            - modules/fluid_properties/include
+            - modules/chemical_reactions/include
+    globals:
+        type: MooseDocs.extensions.panoptic
+        shortcuts: !include framework/doc/globals.yml

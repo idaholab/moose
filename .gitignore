@@ -126,8 +126,7 @@ framework/contrib/exodiff/exodiff
 .DS_Store
 *.dSYM
 
-# Unit testing stuff
-moose_unit/test_results.xml
+# Unit testing stuffbmoose_unit/test_results.xml
 !unit/data/csv/*.csv
 
 # gcov code coverage files
@@ -173,6 +172,7 @@ out.xyz
 # JIT and automatic differentiation cache files
 .jitcache/
 .jitdir/
+tmp_jit_*
 
 # Do not store ipython notebook checkpoints
 *-checkpoint.ipynb*

@@ -1,6 +1,0 @@
-[Tests]
-  [./line]
-    type = PythonUnitTest
-    input = test_gchart.py
-  [../]
-[]

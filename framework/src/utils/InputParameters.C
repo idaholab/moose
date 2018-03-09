@@ -262,6 +262,12 @@ InputParameters::isParamSetByAddParam(const std::string & name) const
 }
 
 bool
+InputParameters::isParamDeprecated(const std::string & name) const
+{
+  return _params.count(name) > 0 && !_params.at(name)._deprecation_message.empty();
+}
+
+bool
 InputParameters::areAllRequiredParamsValid() const
 {
   for (const auto & it : *this)

@@ -1,0 +1,9 @@
+# PorousFlowThermalConductivityFromPorosity
+
+!syntax description /Materials/PorousFlowThermalConductivityFromPorosity
+
+!syntax parameters /Materials/PorousFlowThermalConductivityFromPorosity
+
+!syntax inputs /Materials/PorousFlowThermalConductivityFromPorosity
+
+!syntax children /Materials/PorousFlowThermalConductivityFromPorosity

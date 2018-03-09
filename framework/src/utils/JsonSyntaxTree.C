@@ -118,6 +118,7 @@ JsonSyntaxTree::setParams(InputParameters * params,
     std::string doc = params->getDocString(iter.first);
     MooseUtils::escape(doc);
     param_json["description"] = doc;
+    param_json["deprecated"] = params->isParamDeprecated(iter.first);
     all_params[iter.first] = param_json;
   }
   return count;

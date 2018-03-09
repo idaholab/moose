@@ -1,0 +1,24 @@
+Content:
+    - framework/doc/content
+    - modules/tensor_mechanics/doc/content
+
+Renderer:
+    type: MooseDocs.base.MaterializeRenderer
+    name: MOOSE Tensor_Mechanics Module
+    repo: https://github.com/idaholab/moose
+    home: /documentation/modules/tensor_mechanics
+
+Extensions:
+    appsyntax:
+        type: MooseDocs.extensions.appsyntax
+        executable: ${MOOSE_DIR}/modules/tensor_mechanics
+        hide:
+            framework: !include framework/doc/hidden.yml
+            tensor_mechanics: !include modules/tensor_mechanics/doc/hidden.yml
+        remove: !include framework/doc/remove.yml
+        includes:
+            - framework/include
+            - modules/tensor_mechanics/include
+    globals:
+        type: MooseDocs.extensions.panoptic
+        shortcuts: !include framework/doc/globals.yml
