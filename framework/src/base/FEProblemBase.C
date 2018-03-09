@@ -215,7 +215,8 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
     _force_restart(getParam<bool>("force_restart")),
     _skip_additional_restart_data(getParam<bool>("skip_additional_restart_data")),
     _fail_next_linear_convergence_check(false),
-    _started_initial_setup(false)
+    _started_initial_setup(false),
+    _has_internal_edge_residual_objects(false)
 {
 
   _time = 0.0;
@@ -462,6 +463,9 @@ FEProblemBase::initialSetup()
   if (_adaptivity.isOn() &&
       (_material_props.hasStatefulProperties() || _bnd_material_props.hasStatefulProperties()))
   {
+    if (_has_internal_edge_residual_objects)
+      mooseError("Stateful neighbor material properties do not work with mesh adaptivity");
+
     Moose::perf_log.push("mesh.buildRefinementAndCoarseningMaps()", "Setup");
     _mesh.buildRefinementAndCoarseningMaps(_assembly[0]);
     Moose::perf_log.pop("mesh.buildRefinementAndCoarseningMaps()", "Setup");
@@ -2044,6 +2048,8 @@ FEProblemBase::addDGKernel(const std::string & dg_kernel_name,
     parameters.set<SystemBase *>("_sys") = _nl.get();
   }
   _nl->addDGKernel(dg_kernel_name, name, parameters);
+
+  _has_internal_edge_residual_objects = true;
 }
 
 // InterfaceKernels ////
@@ -2076,6 +2082,8 @@ FEProblemBase::addInterfaceKernel(const std::string & interface_kernel_name,
     parameters.set<SystemBase *>("_sys") = _nl.get();
   }
   _nl->addInterfaceKernel(interface_kernel_name, name, parameters);
+
+  _has_internal_edge_residual_objects = true;
 }
 
 void

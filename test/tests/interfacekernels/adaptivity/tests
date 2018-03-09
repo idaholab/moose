@@ -1,0 +1,20 @@
+[Tests]
+  [./ik_adaptivity]
+    type = 'Exodiff'
+    input = 'adaptivity.i'
+    exodiff = 'adaptivity_out.e adaptivity_out.e-s002'
+    abs_zero = 1e-8
+    requirement = "Adaptivity shall work with interface kernels as long as stateful properties aren't used"
+    design = "/InterfaceKernels/index.md"
+    issues = '#10977'
+  [../]
+  [./error_stateful_ik_adaptivity]
+    type = 'RunException'
+    input = 'adaptivity.i'
+    expect_err = 'Stateful neighbor material properties do not work with mesh adaptivity'
+    cli_args = "Materials/active='stateful'"
+    requirement = "The triad of interface kernels, adaptivity, and stateful properties do not work together"
+    design = "/InterfaceKernels/index.md"
+    issues = '#10977'
+  [../]
+[]
