@@ -11,6 +11,8 @@
 #include "ActionWarehouse.h"
 #include "FEProblem.h"
 
+registerMooseAction("MooseApp", CheckIntegrityAction, "check_integrity");
+
 template <>
 InputParameters
 validParams<CheckIntegrityAction>()

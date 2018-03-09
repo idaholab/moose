@@ -13,6 +13,8 @@
 
 #include <chrono>
 
+registerMooseObject("MooseApp", SolutionTimeAdaptiveDT);
+
 template <>
 InputParameters
 validParams<SolutionTimeAdaptiveDT>()

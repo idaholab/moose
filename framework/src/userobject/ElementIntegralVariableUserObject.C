@@ -9,6 +9,8 @@
 
 #include "ElementIntegralVariableUserObject.h"
 
+registerMooseObject("MooseApp", ElementIntegralVariableUserObject);
+
 template <>
 InputParameters
 validParams<ElementIntegralVariableUserObject>()

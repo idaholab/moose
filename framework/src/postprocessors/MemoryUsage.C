@@ -19,6 +19,8 @@
 #include <mach/mach.h>
 #endif
 
+registerMooseObject("MooseApp", MemoryUsage);
+
 template <>
 InputParameters
 validParams<MemoryUsage>()

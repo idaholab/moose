@@ -9,6 +9,8 @@
 
 #include "ExplicitMidpoint.h"
 
+registerMooseObject("MooseApp", ExplicitMidpoint);
+
 template <>
 InputParameters
 validParams<ExplicitMidpoint>()

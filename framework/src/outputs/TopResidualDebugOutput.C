@@ -20,6 +20,8 @@
 #include "libmesh/transient_system.h"
 #include "libmesh/fe_type.h"
 
+registerMooseObject("MooseApp", TopResidualDebugOutput);
+
 template <>
 InputParameters
 validParams<TopResidualDebugOutput>()

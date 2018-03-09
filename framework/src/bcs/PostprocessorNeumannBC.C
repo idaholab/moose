@@ -9,6 +9,8 @@
 
 #include "PostprocessorNeumannBC.h"
 
+registerMooseObject("MooseApp", PostprocessorNeumannBC);
+
 template <>
 InputParameters
 validParams<PostprocessorNeumannBC>()

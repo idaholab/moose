@@ -21,6 +21,8 @@
 #include "libmesh/system.h"
 #include "libmesh/radial_basis_interpolation.h"
 
+registerMooseObject("MooseApp", MultiAppInterpolationTransfer);
+
 template <>
 InputParameters
 validParams<MultiAppInterpolationTransfer>()

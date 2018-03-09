@@ -9,6 +9,8 @@
 
 #include "BoundingValueNodalDamper.h"
 
+registerMooseObject("MooseApp", BoundingValueNodalDamper);
+
 template <>
 InputParameters
 validParams<BoundingValueNodalDamper>()

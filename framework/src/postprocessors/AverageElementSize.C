@@ -9,6 +9,8 @@
 
 #include "AverageElementSize.h"
 
+registerMooseObject("MooseApp", AverageElementSize);
+
 template <>
 InputParameters
 validParams<AverageElementSize>()

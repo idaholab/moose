@@ -10,6 +10,8 @@
 #include "MooseParsedGradFunction.h"
 #include "MooseParsedFunctionWrapper.h"
 
+registerMooseObjectAliased("MooseApp", MooseParsedGradFunction, "ParsedGradFunction");
+
 template <>
 InputParameters
 validParams<MooseParsedGradFunction>()

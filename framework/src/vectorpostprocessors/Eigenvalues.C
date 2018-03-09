@@ -14,6 +14,8 @@
 
 #include "libmesh/libmesh_config.h"
 
+registerMooseObject("MooseApp", Eigenvalues);
+
 template <>
 InputParameters
 validParams<Eigenvalues>()

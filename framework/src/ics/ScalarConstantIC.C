@@ -9,6 +9,8 @@
 
 #include "ScalarConstantIC.h"
 
+registerMooseObject("MooseApp", ScalarConstantIC);
+
 template <>
 InputParameters
 validParams<ScalarConstantIC>()

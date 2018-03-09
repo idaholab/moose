@@ -13,6 +13,8 @@
 #include "FEProblem.h"
 #include "ActionWarehouse.h"
 
+registerMooseObject("MooseApp", AddExtraNodeset);
+
 template <>
 InputParameters
 validParams<AddExtraNodeset>()

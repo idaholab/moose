@@ -9,6 +9,8 @@
 
 #include "SplineFunction.h"
 
+registerMooseObject("MooseApp", SplineFunction);
+
 template <>
 InputParameters
 validParams<SplineFunction>()

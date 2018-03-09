@@ -9,6 +9,8 @@
 
 #include "CSVTimeSequenceStepper.h"
 
+registerMooseObject("MooseApp", CSVTimeSequenceStepper);
+
 template <>
 InputParameters
 validParams<CSVTimeSequenceStepper>()

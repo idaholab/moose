@@ -13,6 +13,8 @@
 #include "EigenProblem.h"
 #include "MooseApp.h"
 
+registerMooseAction("MooseApp", CreateProblemAction, "create_problem");
+
 template <>
 InputParameters
 validParams<CreateProblemAction>()

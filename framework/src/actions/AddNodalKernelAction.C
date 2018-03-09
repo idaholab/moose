@@ -10,6 +10,8 @@
 #include "AddNodalKernelAction.h"
 #include "FEProblem.h"
 
+registerMooseAction("MooseApp", AddNodalKernelAction, "add_nodal_kernel");
+
 template <>
 InputParameters
 validParams<AddNodalKernelAction>()

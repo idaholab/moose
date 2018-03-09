@@ -11,6 +11,8 @@
 #include "SubProblem.h"
 #include "FEProblem.h"
 
+registerMooseObject("MooseApp", EqualValueConstraint);
+
 template <>
 InputParameters
 validParams<EqualValueConstraint>()

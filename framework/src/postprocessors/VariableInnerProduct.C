@@ -9,6 +9,8 @@
 
 #include "VariableInnerProduct.h"
 
+registerMooseObject("MooseApp", VariableInnerProduct);
+
 template <>
 InputParameters
 validParams<VariableInnerProduct>()

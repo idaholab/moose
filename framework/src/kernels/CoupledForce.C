@@ -11,6 +11,8 @@
 
 #include "MooseVariable.h"
 
+registerMooseObject("MooseApp", CoupledForce);
+
 template <>
 InputParameters
 validParams<CoupledForce>()

@@ -10,6 +10,10 @@
 #include "AddScalarKernelAction.h"
 #include "FEProblem.h"
 
+registerMooseAction("MooseApp", AddScalarKernelAction, "add_scalar_kernel");
+
+registerMooseAction("MooseApp", AddScalarKernelAction, "add_aux_scalar_kernel");
+
 template <>
 InputParameters
 validParams<AddScalarKernelAction>()

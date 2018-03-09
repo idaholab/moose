@@ -9,6 +9,8 @@
 
 #include "AreaPostprocessor.h"
 
+registerMooseObject("MooseApp", AreaPostprocessor);
+
 template <>
 InputParameters
 validParams<AreaPostprocessor>()

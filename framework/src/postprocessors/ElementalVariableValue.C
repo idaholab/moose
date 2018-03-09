@@ -14,6 +14,8 @@
 #include "MooseVariable.h"
 #include "SubProblem.h"
 
+registerMooseObject("MooseApp", ElementalVariableValue);
+
 template <>
 InputParameters
 validParams<ElementalVariableValue>()

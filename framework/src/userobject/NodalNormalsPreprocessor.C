@@ -20,6 +20,8 @@
 
 Threads::spin_mutex nodal_normals_preprocessor_mutex;
 
+registerMooseObject("MooseApp", NodalNormalsPreprocessor);
+
 template <>
 InputParameters
 validParams<NodalNormalsPreprocessor>()

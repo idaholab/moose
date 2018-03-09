@@ -25,6 +25,8 @@
 #include <iostream>
 #include <fstream>
 
+registerMooseObject("MooseApp", AB2PredictorCorrector);
+
 template <>
 InputParameters
 validParams<AB2PredictorCorrector>()

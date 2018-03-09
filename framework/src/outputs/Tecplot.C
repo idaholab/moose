@@ -15,6 +15,8 @@
 
 #include "libmesh/tecplot_io.h"
 
+registerMooseObject("MooseApp", Tecplot);
+
 template <>
 InputParameters
 validParams<Tecplot>()

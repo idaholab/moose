@@ -12,6 +12,8 @@
 #include "FEProblem.h"
 #include "NonlinearSystemBase.h"
 
+registerMooseAction("MooseApp", AddBoundsVectorsAction, "add_bounds_vectors");
+
 template <>
 InputParameters
 validParams<AddBoundsVectorsAction>()

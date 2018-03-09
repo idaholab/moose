@@ -29,6 +29,8 @@ void
 MaterialOutputAction::materialOutputHelper<RealTensorValue>(const std::string & material_name,
                                                             std::shared_ptr<Material> material);
 
+registerMooseAction("MooseApp", MaterialOutputAction, "setup_material_output");
+
 template <>
 InputParameters
 validParams<MaterialOutputAction>()

@@ -9,6 +9,8 @@
 
 #include "PercentChangePostprocessor.h"
 
+registerMooseObject("MooseApp", PercentChangePostprocessor);
+
 template <>
 InputParameters
 validParams<PercentChangePostprocessor>()

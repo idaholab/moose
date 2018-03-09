@@ -10,6 +10,8 @@
 #include "MooseParsedVectorFunction.h"
 #include "MooseParsedFunctionWrapper.h"
 
+registerMooseObjectAliased("MooseApp", MooseParsedVectorFunction, "ParsedVectorFunction");
+
 template <>
 InputParameters
 validParams<MooseParsedVectorFunction>()

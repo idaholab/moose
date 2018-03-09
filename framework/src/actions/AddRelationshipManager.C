@@ -10,6 +10,10 @@
 #include "AddRelationshipManager.h"
 #include "FEProblem.h"
 
+registerMooseAction("MooseApp", AddRelationshipManager, "add_algebraic_rm");
+
+registerMooseAction("MooseApp", AddRelationshipManager, "add_geometric_rm");
+
 template <>
 InputParameters
 validParams<AddRelationshipManager>()

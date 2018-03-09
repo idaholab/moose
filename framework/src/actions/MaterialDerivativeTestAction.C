@@ -18,6 +18,12 @@
 #include "libmesh/fe.h"
 #include "libmesh/string_to_enum.h"
 
+registerMooseAction("MooseApp", MaterialDerivativeTestAction, "add_variable");
+
+registerMooseAction("MooseApp", MaterialDerivativeTestAction, "add_kernel");
+
+registerMooseAction("MooseApp", MaterialDerivativeTestAction, "add_preconditioning");
+
 template <>
 InputParameters
 validParams<MaterialDerivativeTestAction>()

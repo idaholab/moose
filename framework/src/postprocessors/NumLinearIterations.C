@@ -12,6 +12,8 @@
 #include "FEProblem.h"
 #include "SubProblem.h"
 
+registerMooseObject("MooseApp", NumLinearIterations);
+
 template <>
 InputParameters
 validParams<NumLinearIterations>()

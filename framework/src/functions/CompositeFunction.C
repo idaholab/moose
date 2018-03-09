@@ -9,6 +9,8 @@
 
 #include "CompositeFunction.h"
 
+registerMooseObject("MooseApp", CompositeFunction);
+
 template <>
 InputParameters
 validParams<CompositeFunction>()

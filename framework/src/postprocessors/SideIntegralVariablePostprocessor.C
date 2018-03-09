@@ -9,6 +9,8 @@
 
 #include "SideIntegralVariablePostprocessor.h"
 
+registerMooseObject("MooseApp", SideIntegralVariablePostprocessor);
+
 template <>
 InputParameters
 validParams<SideIntegralVariablePostprocessor>()

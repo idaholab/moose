@@ -18,6 +18,8 @@
 #include "MultiApp.h"
 #include "MooseMesh.h"
 
+registerMooseObject("MooseApp", MultiAppDTKInterpolationTransfer);
+
 template <>
 InputParameters
 validParams<MultiAppDTKInterpolationTransfer>()

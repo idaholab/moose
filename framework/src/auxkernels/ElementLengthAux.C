@@ -11,6 +11,8 @@
 #include "ElementLengthAux.h"
 #include "MooseMesh.h"
 
+registerMooseObject("MooseApp", ElementLengthAux);
+
 template <>
 InputParameters
 validParams<ElementLengthAux>()

@@ -9,6 +9,8 @@
 
 #include "ConstantRate.h"
 
+registerMooseObject("MooseApp", ConstantRate);
+
 template <>
 InputParameters
 validParams<ConstantRate>()

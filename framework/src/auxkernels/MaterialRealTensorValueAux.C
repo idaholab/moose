@@ -9,6 +9,8 @@
 
 #include "MaterialRealTensorValueAux.h"
 
+registerMooseObject("MooseApp", MaterialRealTensorValueAux);
+
 template <>
 InputParameters
 validParams<MaterialRealTensorValueAux>()

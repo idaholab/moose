@@ -14,6 +14,8 @@
 #include "MooseParsedFunction.h"
 #include "MooseParsedFunctionWrapper.h"
 
+registerMooseObjectAliased("MooseApp", MooseParsedFunction, "ParsedFunction");
+
 template <>
 InputParameters
 validParams<MooseParsedFunction>()

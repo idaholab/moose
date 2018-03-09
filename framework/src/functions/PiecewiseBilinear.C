@@ -13,6 +13,8 @@
 
 #include <fstream>
 
+registerMooseObject("MooseApp", PiecewiseBilinear);
+
 template <>
 InputParameters
 validParams<PiecewiseBilinear>()

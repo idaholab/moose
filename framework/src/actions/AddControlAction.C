@@ -13,6 +13,8 @@
 #include "Factory.h"
 #include "Control.h"
 
+registerMooseAction("MooseApp", AddControlAction, "add_control");
+
 template <>
 InputParameters
 validParams<AddControlAction>()

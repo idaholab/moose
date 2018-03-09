@@ -9,6 +9,8 @@
 
 #include "GradientJumpIndicator.h"
 
+registerMooseObject("MooseApp", GradientJumpIndicator);
+
 template <>
 InputParameters
 validParams<GradientJumpIndicator>()

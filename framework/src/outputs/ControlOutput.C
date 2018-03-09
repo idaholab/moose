@@ -14,6 +14,8 @@
 #include "InputParameterWarehouse.h"
 #include "ConsoleUtils.h"
 
+registerMooseObject("MooseApp", ControlOutput);
+
 template <>
 InputParameters
 validParams<ControlOutput>()

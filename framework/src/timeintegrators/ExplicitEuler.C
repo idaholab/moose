@@ -11,6 +11,8 @@
 #include "NonlinearSystem.h"
 #include "FEProblem.h"
 
+registerMooseObject("MooseApp", ExplicitEuler);
+
 template <>
 InputParameters
 validParams<ExplicitEuler>()

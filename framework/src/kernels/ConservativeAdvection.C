@@ -9,6 +9,8 @@
 
 #include "ConservativeAdvection.h"
 
+registerMooseObject("MooseApp", ConservativeAdvection);
+
 template <>
 InputParameters
 validParams<ConservativeAdvection>()

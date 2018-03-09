@@ -9,6 +9,8 @@
 
 #include "QuotientAux.h"
 
+registerMooseObject("MooseApp", QuotientAux);
+
 template <>
 InputParameters
 validParams<QuotientAux>()

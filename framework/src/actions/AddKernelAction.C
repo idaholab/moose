@@ -10,6 +10,10 @@
 #include "AddKernelAction.h"
 #include "FEProblem.h"
 
+registerMooseAction("MooseApp", AddKernelAction, "add_kernel");
+
+registerMooseAction("MooseApp", AddKernelAction, "add_aux_kernel");
+
 template <>
 InputParameters
 validParams<AddKernelAction>()

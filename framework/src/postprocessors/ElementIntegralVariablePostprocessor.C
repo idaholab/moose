@@ -9,6 +9,8 @@
 
 #include "ElementIntegralVariablePostprocessor.h"
 
+registerMooseObject("MooseApp", ElementIntegralVariablePostprocessor);
+
 template <>
 InputParameters
 validParams<ElementIntegralVariablePostprocessor>()

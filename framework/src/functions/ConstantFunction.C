@@ -9,6 +9,8 @@
 
 #include "ConstantFunction.h"
 
+registerMooseObject("MooseApp", ConstantFunction);
+
 template <>
 InputParameters
 validParams<ConstantFunction>()

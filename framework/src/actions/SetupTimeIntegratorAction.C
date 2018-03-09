@@ -11,6 +11,8 @@
 #include "Transient.h"
 #include "Factory.h"
 
+registerMooseAction("MooseApp", SetupTimeIntegratorAction, "setup_time_integrator");
+
 template <>
 InputParameters
 validParams<SetupTimeIntegratorAction>()

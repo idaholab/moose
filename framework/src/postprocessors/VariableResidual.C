@@ -13,6 +13,8 @@
 #include "MooseVariable.h"
 #include "NonlinearSystemBase.h"
 
+registerMooseObject("MooseApp", VariableResidual);
+
 template <>
 InputParameters
 validParams<VariableResidual>()

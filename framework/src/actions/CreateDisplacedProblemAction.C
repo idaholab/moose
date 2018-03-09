@@ -12,6 +12,8 @@
 #include "FEProblem.h"
 #include "DisplacedProblem.h"
 
+registerMooseAction("MooseApp", CreateDisplacedProblemAction, "init_displaced_problem");
+
 template <>
 InputParameters
 validParams<CreateDisplacedProblemAction>()

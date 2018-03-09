@@ -10,6 +10,8 @@
 #include "AxisymmetricCenterlineAverageValue.h"
 #include "libmesh/quadrature.h"
 
+registerMooseObject("MooseApp", AxisymmetricCenterlineAverageValue);
+
 template <>
 InputParameters
 validParams<AxisymmetricCenterlineAverageValue>()

@@ -13,6 +13,8 @@
 #include "Factory.h"
 #include "MooseApp.h"
 
+registerMooseAction("MooseApp", AddMeshModifierAction, "add_mesh_modifier");
+
 template <>
 InputParameters
 validParams<AddMeshModifierAction>()

@@ -9,6 +9,8 @@
 
 #include "LogConstantDT.h"
 
+registerMooseObject("MooseApp", LogConstantDT);
+
 template <>
 InputParameters
 validParams<LogConstantDT>()

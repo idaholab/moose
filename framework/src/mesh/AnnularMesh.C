@@ -12,6 +12,8 @@
 #include "libmesh/face_quad4.h"
 #include "libmesh/face_tri3.h"
 
+registerMooseObject("MooseApp", AnnularMesh);
+
 template <>
 InputParameters
 validParams<AnnularMesh>()

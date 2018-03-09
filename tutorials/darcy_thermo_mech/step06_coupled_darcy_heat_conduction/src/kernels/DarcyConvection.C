@@ -9,6 +9,8 @@
 
 #include "DarcyConvection.h"
 
+registerMooseObject("DarcyThermoMechApp", DarcyConvection);
+
 template <>
 InputParameters
 validParams<DarcyConvection>()

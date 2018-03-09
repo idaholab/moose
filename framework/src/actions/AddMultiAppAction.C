@@ -10,6 +10,8 @@
 #include "AddMultiAppAction.h"
 #include "FEProblem.h"
 
+registerMooseAction("MooseApp", AddMultiAppAction, "add_multi_app");
+
 template <>
 InputParameters
 validParams<AddMultiAppAction>()

@@ -1,1 +1,1 @@
-../../../step08_postprocessors/src/base/DarcyThermoMechApp.C
+../../../step01_diffusion/src/base/DarcyThermoMechApp.C

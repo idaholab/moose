@@ -9,6 +9,8 @@
 
 #include "Receiver.h"
 
+registerMooseObject("MooseApp", Receiver);
+
 template <>
 InputParameters
 validParams<Receiver>()

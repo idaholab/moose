@@ -14,6 +14,8 @@
 // libMesh
 #include "libmesh/mesh_tools.h"
 
+registerMooseObject("MooseApp", FullSolveMultiApp);
+
 template <>
 InputParameters
 validParams<FullSolveMultiApp>()

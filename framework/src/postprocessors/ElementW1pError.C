@@ -10,6 +10,8 @@
 #include "ElementW1pError.h"
 #include "Function.h"
 
+registerMooseObject("MooseApp", ElementW1pError);
+
 template <>
 InputParameters
 validParams<ElementW1pError>()

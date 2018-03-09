@@ -10,6 +10,8 @@
 #include "AddDamperAction.h"
 #include "FEProblem.h"
 
+registerMooseAction("MooseApp", AddDamperAction, "add_damper");
+
 template <>
 InputParameters
 validParams<AddDamperAction>()

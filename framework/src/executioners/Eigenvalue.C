@@ -15,6 +15,8 @@
 #include "NonlinearEigenSystem.h"
 #include "SlepcSupport.h"
 
+registerMooseObject("MooseApp", Eigenvalue);
+
 template <>
 InputParameters
 validParams<Eigenvalue>()

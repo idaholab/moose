@@ -14,6 +14,8 @@
 #include "NonlinearSystemBase.h"
 #include "SubProblem.h"
 
+registerMooseObject("MooseApp", NumVars);
+
 template <>
 InputParameters
 validParams<NumVars>()

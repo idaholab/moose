@@ -9,6 +9,8 @@
 
 #include "CoupledTimeDerivative.h"
 
+registerMooseObject("MooseApp", CoupledTimeDerivative);
+
 template <>
 InputParameters
 validParams<CoupledTimeDerivative>()

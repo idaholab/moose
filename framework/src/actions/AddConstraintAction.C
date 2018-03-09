@@ -10,6 +10,8 @@
 #include "AddConstraintAction.h"
 #include "FEProblem.h"
 
+registerMooseAction("MooseApp", AddConstraintAction, "add_constraint");
+
 template <>
 InputParameters
 validParams<AddConstraintAction>()

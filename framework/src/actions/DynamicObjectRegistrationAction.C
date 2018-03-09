@@ -12,6 +12,8 @@
 #include "FEProblem.h"
 #include "MooseApp.h"
 
+registerMooseAction("MooseApp", DynamicObjectRegistrationAction, "dynamic_object_registration");
+
 template <>
 InputParameters
 validParams<DynamicObjectRegistrationAction>()

@@ -10,6 +10,8 @@
 #include "BDF2.h"
 #include "NonlinearSystem.h"
 
+registerMooseObject("MooseApp", BDF2);
+
 template <>
 InputParameters
 validParams<BDF2>()

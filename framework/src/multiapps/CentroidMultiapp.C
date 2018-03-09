@@ -20,6 +20,8 @@
 // libMesh includes
 #include "libmesh/parallel_algebra.h"
 
+registerMooseObject("MooseApp", CentroidMultiApp);
+
 template <>
 InputParameters
 validParams<CentroidMultiApp>()

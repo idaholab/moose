@@ -9,6 +9,8 @@
 
 #include "HeatConductionOutflow.h"
 
+registerMooseObject("DarcyThermoMechApp", HeatConductionOutflow);
+
 template <>
 InputParameters
 validParams<HeatConductionOutflow>()

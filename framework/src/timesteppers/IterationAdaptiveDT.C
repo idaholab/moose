@@ -14,6 +14,8 @@
 #include "Transient.h"
 #include "NonlinearSystem.h"
 
+registerMooseObject("MooseApp", IterationAdaptiveDT);
+
 template <>
 InputParameters
 validParams<IterationAdaptiveDT>()

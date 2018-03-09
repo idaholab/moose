@@ -11,6 +11,8 @@
 
 #include "libmesh/quadrature.h"
 
+registerMooseObject("MooseApp", GenericConstantMaterial);
+
 template <>
 InputParameters
 validParams<GenericConstantMaterial>()

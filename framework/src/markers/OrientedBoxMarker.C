@@ -18,6 +18,8 @@
 #include "OrientedBoxMarker.h"
 #include "OrientedBoxInterface.h"
 
+registerMooseObject("MooseApp", OrientedBoxMarker);
+
 template <>
 InputParameters
 validParams<OrientedBoxMarker>()

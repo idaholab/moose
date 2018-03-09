@@ -1,1 +1,1 @@
-../../../step06_coupled_darcy_heat_conduction/src/base/DarcyThermoMechApp.C
+../../../step01_diffusion/src/base/DarcyThermoMechApp.C

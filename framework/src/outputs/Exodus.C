@@ -20,6 +20,8 @@
 
 #include "libmesh/exodusII_io.h"
 
+registerMooseObject("MooseApp", Exodus);
+
 template <>
 InputParameters
 validParams<Exodus>()

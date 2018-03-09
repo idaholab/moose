@@ -12,6 +12,8 @@
 #include "FEProblem.h"
 #include "SubProblem.h"
 
+registerMooseObject("MooseApp", PerformanceData);
+
 template <>
 InputParameters
 validParams<PerformanceData>()

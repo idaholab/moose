@@ -323,7 +323,11 @@ validParams<MooseTestApp>()
 MooseTestApp::MooseTestApp(const InputParameters & parameters) : MooseApp(parameters)
 {
   bool use_test_objs = !getParam<bool>("disallow_test_objects");
-  Moose::registerObjects(_factory);
+  std::set<std::string> obj_labels = {"MooseApp"};
+  if (use_test_objs)
+    obj_labels.insert(type());
+
+  Moose::registerObjects(_factory, obj_labels);
   Moose::associateSyntax(_syntax, _action_factory);
   Moose::registerExecFlags(_factory);
   if (use_test_objs)

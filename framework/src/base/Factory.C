@@ -17,6 +17,48 @@ Factory::Factory(MooseApp & app) : _app(app) {}
 
 Factory::~Factory() {}
 
+void
+Factory::reg(const std::string & obj_name,
+             const buildPtr & build_ptr,
+             const paramsPtr & params_ptr,
+             const std::string & deprecated_time,
+             const std::string & replacement_name,
+             const std::string & file,
+             int line)
+{
+  /*
+   * If _registerable_objects has been set the user has requested that we only register some
+   * subset
+   * of the objects for a dynamically loaded application. The objects listed in *this*
+   * application's
+   * registerObjects() method will have already been registered before that member was set.
+   *
+   * If _registerable_objects is empty, the factory is unrestricted
+   */
+  if (_registerable_objects.empty() ||
+      _registerable_objects.find(obj_name) != _registerable_objects.end())
+  {
+    if (_name_to_build_pointer.find(obj_name) == _name_to_build_pointer.end())
+    {
+      _name_to_build_pointer[obj_name] = build_ptr;
+      _name_to_params_pointer[obj_name] = params_ptr;
+    }
+    else
+      mooseError("Object '" + obj_name + "' registered in multiple files: ",
+                 file,
+                 " and ",
+                 _name_to_line.getInfo(obj_name).file());
+  }
+  _name_to_line.addInfo(obj_name, file, line);
+
+  if (!replacement_name.empty())
+    _deprecated_name[obj_name] = replacement_name;
+  if (!deprecated_time.empty())
+    _deprecated_time[obj_name] = parseTime(deprecated_time);
+
+  // TODO: Possibly store and print information about objects that are skipped here?
+}
+
 InputParameters
 Factory::getValidParams(const std::string & obj_name)
 {

@@ -11,6 +11,8 @@
 #include "Axisymmetric2D3DSolutionFunction.h"
 #include "SolutionUserObject.h"
 
+registerMooseObject("MooseApp", Axisymmetric2D3DSolutionFunction);
+
 template <>
 InputParameters
 validParams<Axisymmetric2D3DSolutionFunction>()

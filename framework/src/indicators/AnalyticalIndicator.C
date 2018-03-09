@@ -10,6 +10,8 @@
 #include "AnalyticalIndicator.h"
 #include "Function.h"
 
+registerMooseObject("MooseApp", AnalyticalIndicator);
+
 template <>
 InputParameters
 validParams<AnalyticalIndicator>()

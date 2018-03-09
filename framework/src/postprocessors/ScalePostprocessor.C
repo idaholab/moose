@@ -9,6 +9,8 @@
 
 #include "ScalePostprocessor.h"
 
+registerMooseObject("MooseApp", ScalePostprocessor);
+
 template <>
 InputParameters
 validParams<ScalePostprocessor>()

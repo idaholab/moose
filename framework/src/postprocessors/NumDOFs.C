@@ -12,6 +12,8 @@
 
 #include "libmesh/system.h"
 
+registerMooseObject("MooseApp", NumDOFs);
+
 template <>
 InputParameters
 validParams<NumDOFs>()

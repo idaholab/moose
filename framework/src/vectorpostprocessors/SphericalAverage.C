@@ -14,6 +14,8 @@
 
 #include "libmesh/quadrature.h"
 
+registerMooseObject("MooseApp", SphericalAverage);
+
 template <>
 InputParameters
 validParams<SphericalAverage>()

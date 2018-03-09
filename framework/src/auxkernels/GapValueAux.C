@@ -16,6 +16,8 @@
 
 #include "libmesh/string_to_enum.h"
 
+registerMooseObject("MooseApp", GapValueAux);
+
 template <>
 InputParameters
 validParams<GapValueAux>()

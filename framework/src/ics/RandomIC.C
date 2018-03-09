@@ -12,6 +12,8 @@
 
 #include "libmesh/point.h"
 
+registerMooseObject("MooseApp", RandomIC);
+
 template <>
 InputParameters
 validParams<RandomIC>()

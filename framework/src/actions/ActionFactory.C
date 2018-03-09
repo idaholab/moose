@@ -11,11 +11,26 @@
 #include "ActionFactory.h"
 #include "MooseApp.h"
 
-unsigned int ActionFactory::_unique_id = 0;
-
 ActionFactory::ActionFactory(MooseApp & app) : _app(app) {}
 
 ActionFactory::~ActionFactory() {}
+
+void
+ActionFactory::reg(const std::string & name,
+                   const std::string & task,
+                   buildActionPtr obj_builder,
+                   paramsActionPtr ref_params,
+                   const std::string & file,
+                   int line)
+{
+  BuildInfo build_info;
+  build_info._build_pointer = obj_builder;
+  build_info._params_pointer = ref_params;
+  build_info._task = task;
+  _name_to_build_info.insert(std::make_pair(name, build_info));
+  _task_to_action_map.insert(std::make_pair(task, name));
+  _name_to_line.addInfo(name, task, file, line);
+}
 
 std::shared_ptr<Action>
 ActionFactory::create(const std::string & action,
@@ -25,31 +40,12 @@ ActionFactory::create(const std::string & action,
   parameters.addPrivateParam("_moose_app", &_app);
   parameters.addPrivateParam("action_type", action);
   std::pair<ActionFactory::iterator, ActionFactory::iterator> iters;
-  BuildInfo * build_info = NULL;
 
   // Check to make sure that all required parameters are supplied
   parameters.checkParams(action_name);
 
   iters = _name_to_build_info.equal_range(action);
-
-  // Find the Action that matches the one we have registered based on unique_id
-  unsigned short count = 0;
-  for (ActionFactory::iterator it = iters.first; it != iters.second; ++it)
-  {
-    ++count;
-    if (parameters.have_parameter<unsigned int>("unique_id") &&
-        it->second._unique_id == parameters.get<unsigned int>("unique_id"))
-    {
-      build_info = &(it->second);
-      break;
-    }
-  }
-  // For backwards compatibility - If there is only one Action registered but it doesn't contain a
-  // unique_id that
-  // matches, then surely it must still be the correct one
-  if (count == 1 && !build_info)
-    build_info = &(iters.first->second);
-
+  BuildInfo * build_info = &(iters.first->second);
   if (!build_info)
     mooseError(
         std::string("Unable to find buildable Action from supplied InputParameters Object for ") +
@@ -79,7 +75,6 @@ ActionFactory::getValidParams(const std::string & name)
     mooseError(std::string("A '") + name + "' is not a registered Action\n\n");
 
   InputParameters params = (iter->second._params_pointer)();
-  params.addPrivateParam<unsigned int>("unique_id", iter->second._unique_id);
   params.addPrivateParam("_moose_app", &_app);
   params.addPrivateParam<ActionWarehouse *>("awh", &_app.actionWarehouse());
 

@@ -17,6 +17,8 @@
 
 #include "libmesh/system.h"
 
+registerMooseObject("MooseApp", PointValue);
+
 template <>
 InputParameters
 validParams<PointValue>()

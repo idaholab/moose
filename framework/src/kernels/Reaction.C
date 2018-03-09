@@ -9,6 +9,8 @@
 
 #include "Reaction.h"
 
+registerMooseObject("MooseApp", Reaction);
+
 template <>
 InputParameters
 validParams<Reaction>()

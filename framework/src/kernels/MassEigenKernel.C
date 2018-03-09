@@ -9,6 +9,8 @@
 
 #include "MassEigenKernel.h"
 
+registerMooseObject("MooseApp", MassEigenKernel);
+
 template <>
 InputParameters
 validParams<MassEigenKernel>()

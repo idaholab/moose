@@ -20,6 +20,8 @@
 #include "libmesh/system.h"
 
 // Define the input parameters
+registerMooseObject("MooseApp", MultiAppPostprocessorToAuxScalarTransfer);
+
 template <>
 InputParameters
 validParams<MultiAppPostprocessorToAuxScalarTransfer>()

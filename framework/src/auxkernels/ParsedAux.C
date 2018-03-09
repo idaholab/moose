@@ -9,6 +9,8 @@
 
 #include "ParsedAux.h"
 
+registerMooseObject("MooseApp", ParsedAux);
+
 template <>
 InputParameters
 validParams<ParsedAux>()

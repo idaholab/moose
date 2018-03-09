@@ -9,6 +9,8 @@
 
 #include "SinDirichletBC.h"
 
+registerMooseObject("MooseApp", SinDirichletBC);
+
 template <>
 InputParameters
 validParams<SinDirichletBC>()

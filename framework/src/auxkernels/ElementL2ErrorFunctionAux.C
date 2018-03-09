@@ -11,6 +11,8 @@
 #include "ElementL2ErrorFunctionAux.h"
 #include "Function.h"
 
+registerMooseObject("MooseApp", ElementL2ErrorFunctionAux);
+
 template <>
 InputParameters
 validParams<ElementL2ErrorFunctionAux>()

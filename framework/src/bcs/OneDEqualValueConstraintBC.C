@@ -9,6 +9,8 @@
 
 #include "OneDEqualValueConstraintBC.h"
 
+registerMooseObject("MooseApp", OneDEqualValueConstraintBC);
+
 template <>
 InputParameters
 validParams<OneDEqualValueConstraintBC>()

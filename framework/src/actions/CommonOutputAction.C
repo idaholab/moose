@@ -24,6 +24,8 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
+registerMooseAction("MooseApp", CommonOutputAction, "common_output");
+
 template <>
 InputParameters
 validParams<CommonOutputAction>()

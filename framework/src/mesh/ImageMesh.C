@@ -17,6 +17,8 @@
 #include "libmesh/mesh_generation.h"
 #include "libmesh/unstructured_mesh.h"
 
+registerMooseObject("MooseApp", ImageMesh);
+
 template <>
 InputParameters
 validParams<ImageMesh>()

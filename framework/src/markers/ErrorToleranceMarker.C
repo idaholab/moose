@@ -11,6 +11,8 @@
 
 #include "libmesh/error_vector.h"
 
+registerMooseObject("MooseApp", ErrorToleranceMarker);
+
 template <>
 InputParameters
 validParams<ErrorToleranceMarker>()

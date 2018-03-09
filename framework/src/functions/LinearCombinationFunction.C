@@ -9,6 +9,8 @@
 
 #include "LinearCombinationFunction.h"
 
+registerMooseObject("MooseApp", LinearCombinationFunction);
+
 template <>
 InputParameters
 validParams<LinearCombinationFunction>()

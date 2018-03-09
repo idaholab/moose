@@ -15,6 +15,8 @@
 
 Threads::spin_mutex nodal_normals_evaluator_mutex;
 
+registerMooseObject("MooseApp", NodalNormalsEvaluator);
+
 template <>
 InputParameters
 validParams<NodalNormalsEvaluator>()

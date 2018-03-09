@@ -10,6 +10,8 @@
 #include "FunctionPresetBC.h"
 #include "Function.h"
 
+registerMooseObject("MooseApp", FunctionPresetBC);
+
 template <>
 InputParameters
 validParams<FunctionPresetBC>()

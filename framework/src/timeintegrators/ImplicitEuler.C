@@ -10,6 +10,8 @@
 #include "ImplicitEuler.h"
 #include "NonlinearSystem.h"
 
+registerMooseObject("MooseApp", ImplicitEuler);
+
 template <>
 InputParameters
 validParams<ImplicitEuler>()

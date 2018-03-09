@@ -9,6 +9,8 @@
 
 #include "WeakGradientBC.h"
 
+registerMooseObject("MooseApp", WeakGradientBC);
+
 template <>
 InputParameters
 validParams<WeakGradientBC>()

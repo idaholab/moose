@@ -23,6 +23,8 @@
 #include "libmesh/system.h"
 #include "libmesh/eigen_solver.h"
 
+registerMooseObject("MooseApp", EigenProblem);
+
 template <>
 InputParameters
 validParams<EigenProblem>()

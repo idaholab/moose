@@ -9,6 +9,8 @@
 
 #include "QuotientScalarAux.h"
 
+registerMooseObject("MooseApp", QuotientScalarAux);
+
 template <>
 InputParameters
 validParams<QuotientScalarAux>()

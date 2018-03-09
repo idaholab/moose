@@ -10,6 +10,8 @@
 #include "FunctionPenaltyDirichletBC.h"
 #include "Function.h"
 
+registerMooseObject("MooseApp", FunctionPenaltyDirichletBC);
+
 template <>
 InputParameters
 validParams<FunctionPenaltyDirichletBC>()

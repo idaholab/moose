@@ -10,6 +10,8 @@
 // MOOSE includes
 #include "LineMaterialRealSampler.h"
 
+registerMooseObject("MooseApp", LineMaterialRealSampler);
+
 template <>
 InputParameters
 validParams<LineMaterialRealSampler>()

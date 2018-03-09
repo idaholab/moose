@@ -9,6 +9,8 @@
 
 #include "BoxMarker.h"
 
+registerMooseObject("MooseApp", BoxMarker);
+
 template <>
 InputParameters
 validParams<BoxMarker>()

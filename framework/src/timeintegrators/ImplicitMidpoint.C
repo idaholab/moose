@@ -12,6 +12,8 @@
 #include "FEProblem.h"
 #include "PetscSupport.h"
 
+registerMooseObject("MooseApp", ImplicitMidpoint);
+
 template <>
 InputParameters
 validParams<ImplicitMidpoint>()

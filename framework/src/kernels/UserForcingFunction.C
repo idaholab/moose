@@ -10,6 +10,8 @@
 #include "UserForcingFunction.h"
 #include "Function.h"
 
+registerMooseObjectRenamed("MooseApp", UserForcingFunction, "04/01/2018 00:00", BodyForce);
+
 template <>
 InputParameters
 validParams<UserForcingFunction>()

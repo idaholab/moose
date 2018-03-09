@@ -9,6 +9,8 @@
 
 #include "GenericConstantRankTwoTensor.h"
 
+registerMooseObject("MooseApp", GenericConstantRankTwoTensor);
+
 template <>
 InputParameters
 validParams<GenericConstantRankTwoTensor>()

@@ -10,6 +10,8 @@
 #include "SimplePredictor.h"
 #include "NonlinearSystem.h"
 
+registerMooseObject("MooseApp", SimplePredictor);
+
 template <>
 InputParameters
 validParams<SimplePredictor>()

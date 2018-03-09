@@ -11,6 +11,8 @@
 #include "RealFunctionControl.h"
 #include "Function.h"
 
+registerMooseObject("MooseApp", RealFunctionControl);
+
 template <>
 InputParameters
 validParams<RealFunctionControl>()

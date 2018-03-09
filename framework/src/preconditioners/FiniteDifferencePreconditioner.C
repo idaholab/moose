@@ -16,6 +16,8 @@
 
 #include "libmesh/coupling_matrix.h"
 
+registerMooseObjectAliased("MooseApp", FiniteDifferencePreconditioner, "FDP");
+
 template <>
 InputParameters
 validParams<FiniteDifferencePreconditioner>()

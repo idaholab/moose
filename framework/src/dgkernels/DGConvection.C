@@ -9,6 +9,8 @@
 
 #include "DGConvection.h"
 
+registerMooseObject("MooseApp", DGConvection);
+
 template <>
 InputParameters
 validParams<DGConvection>()

@@ -14,6 +14,8 @@
 
 #include "libmesh/quadrature.h"
 
+registerMooseObject("MooseApp", VolumeHistogram);
+
 template <>
 InputParameters
 validParams<VolumeHistogram>()

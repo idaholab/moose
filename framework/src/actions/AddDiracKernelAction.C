@@ -10,6 +10,8 @@
 #include "AddDiracKernelAction.h"
 #include "FEProblem.h"
 
+registerMooseAction("MooseApp", AddDiracKernelAction, "add_dirac_kernel");
+
 template <>
 InputParameters
 validParams<AddDiracKernelAction>()

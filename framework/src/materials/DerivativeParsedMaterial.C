@@ -9,6 +9,8 @@
 
 #include "DerivativeParsedMaterial.h"
 
+registerMooseObject("MooseApp", DerivativeParsedMaterial);
+
 template <>
 InputParameters
 validParams<DerivativeParsedMaterial>()
