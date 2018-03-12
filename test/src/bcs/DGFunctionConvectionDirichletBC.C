@@ -10,6 +10,8 @@
 #include "DGFunctionConvectionDirichletBC.h"
 #include "Function.h"
 
+registerMooseObject("MooseTestApp", DGFunctionConvectionDirichletBC);
+
 template <>
 InputParameters
 validParams<DGFunctionConvectionDirichletBC>()

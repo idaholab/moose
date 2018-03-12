@@ -9,6 +9,8 @@
 
 #include "CoefReaction.h"
 
+registerMooseObject("MooseTestApp", CoefReaction);
+
 template <>
 InputParameters
 validParams<CoefReaction>()

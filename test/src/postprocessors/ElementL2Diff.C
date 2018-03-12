@@ -9,6 +9,8 @@
 
 #include "ElementL2Diff.h"
 
+registerMooseObject("MooseTestApp", ElementL2Diff);
+
 template <>
 InputParameters
 validParams<ElementL2Diff>()

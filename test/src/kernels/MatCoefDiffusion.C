@@ -9,6 +9,8 @@
 
 #include "MatCoefDiffusion.h"
 
+registerMooseObject("MooseTestApp", MatCoefDiffusion);
+
 template <>
 InputParameters
 validParams<MatCoefDiffusion>()

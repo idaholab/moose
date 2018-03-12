@@ -9,6 +9,8 @@
 
 #include "StatefulTest.h"
 
+registerMooseObject("MooseTestApp", StatefulTest);
+
 template <>
 InputParameters
 validParams<StatefulTest>()

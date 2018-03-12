@@ -9,6 +9,8 @@
 
 #include "TwoCircleMarker.h"
 
+registerMooseObject("MooseTestApp", TwoCircleMarker);
+
 template <>
 InputParameters
 validParams<TwoCircleMarker>()

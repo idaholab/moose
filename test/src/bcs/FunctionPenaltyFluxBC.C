@@ -10,6 +10,8 @@
 #include "FunctionPenaltyFluxBC.h"
 #include "Function.h"
 
+registerMooseObject("MooseTestApp", FunctionPenaltyFluxBC);
+
 template <>
 InputParameters
 validParams<FunctionPenaltyFluxBC>()

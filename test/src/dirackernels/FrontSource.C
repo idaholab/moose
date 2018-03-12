@@ -9,6 +9,8 @@
 
 #include "FrontSource.h"
 
+registerMooseObject("MooseTestApp", FrontSource);
+
 template <>
 InputParameters
 validParams<FrontSource>()

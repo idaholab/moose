@@ -11,6 +11,8 @@
 
 #include "NonlinearSystemBase.h"
 
+registerMooseObject("MooseTestApp", TestShapeElementUserObject);
+
 template <>
 InputParameters
 validParams<TestShapeElementUserObject>()

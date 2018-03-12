@@ -9,6 +9,8 @@
 
 #include "StatefulMaterial.h"
 
+registerMooseObject("MooseTestApp", StatefulMaterial);
+
 template <>
 InputParameters
 validParams<StatefulMaterial>()

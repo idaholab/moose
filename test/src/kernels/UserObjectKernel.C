@@ -9,6 +9,8 @@
 
 #include "UserObjectKernel.h"
 
+registerMooseObject("MooseTestApp", UserObjectKernel);
+
 template <>
 InputParameters
 validParams<UserObjectKernel>()

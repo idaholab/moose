@@ -9,6 +9,8 @@
 
 #include "BadStatefulMaterial.h"
 
+registerMooseObject("MooseTestApp", BadStatefulMaterial);
+
 template <>
 InputParameters
 validParams<BadStatefulMaterial>()

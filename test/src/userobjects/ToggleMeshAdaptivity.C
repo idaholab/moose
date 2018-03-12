@@ -9,6 +9,8 @@
 
 #include "ToggleMeshAdaptivity.h"
 
+registerMooseObject("MooseTestApp", ToggleMeshAdaptivity);
+
 template <>
 InputParameters
 validParams<ToggleMeshAdaptivity>()

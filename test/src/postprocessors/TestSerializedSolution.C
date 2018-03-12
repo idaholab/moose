@@ -13,6 +13,8 @@
 
 #include "libmesh/numeric_vector.h"
 
+registerMooseObject("MooseTestApp", TestSerializedSolution);
+
 template <>
 InputParameters
 validParams<TestSerializedSolution>()

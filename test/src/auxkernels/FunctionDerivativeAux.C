@@ -10,6 +10,8 @@
 #include "FunctionDerivativeAux.h"
 #include "Function.h"
 
+registerMooseObject("MooseTestApp", FunctionDerivativeAux);
+
 template <>
 InputParameters
 validParams<FunctionDerivativeAux>()

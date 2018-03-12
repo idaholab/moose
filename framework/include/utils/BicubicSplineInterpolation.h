@@ -40,7 +40,7 @@ public:
   virtual ~BicubicSplineInterpolation() = default;
 
   /**
-   * Set the x1-, x2, y- values and first derivatives
+   * Set the x1, x2 and y values, and first derivatives at the edges
    */
   void setData(const std::vector<Real> & x1,
                const std::vector<Real> & x2,
@@ -50,17 +50,47 @@ public:
                const std::vector<Real> & yx21 = std::vector<Real>(),
                const std::vector<Real> & yx2n = std::vector<Real>());
 
+  /**
+   * Sanity checks on input data
+   */
   void errorCheck();
 
+  /**
+   * Samples value at point (x1, x2)
+   */
   Real sample(Real x1, Real x2, Real yx11 = _deriv_bound, Real yx1n = _deriv_bound);
+
+  /**
+   * Samples value and first derivatives at point (x1, x2)
+   */
+  void sampleValueAndDerivatives(Real x1,
+                                 Real x2,
+                                 Real & y,
+                                 Real & dy1,
+                                 Real & dy2,
+                                 Real yx11 = _deriv_bound,
+                                 Real yx1n = _deriv_bound,
+                                 Real yx21 = _deriv_bound,
+                                 Real yx2n = _deriv_bound);
+
+  /**
+   * Samples first derivative at point (x1, x2)
+   */
   Real sampleDerivative(
       Real x1, Real x2, unsigned int deriv_var, Real yp1 = _deriv_bound, Real ypn = _deriv_bound);
+
+  /**
+   * Samples second derivative at point (x1, x2)
+   */
   Real sample2ndDerivative(
       Real x1, Real x2, unsigned int deriv_var, Real yp1 = _deriv_bound, Real ypn = _deriv_bound);
 
 protected:
+  /// Independent values in the x1 direction
   std::vector<Real> _x1;
+  /// Independent values in the x2 direction
   std::vector<Real> _x2;
+  /// The dependent values at (x1, x2) points
   std::vector<std::vector<Real>> _y;
   /// Transpose of _y
   std::vector<std::vector<Real>> _y_trans;
@@ -80,10 +110,45 @@ protected:
   std::vector<std::vector<Real>> _y2_rows;
   std::vector<std::vector<Real>> _y2_columns;
 
+  /// Vectors used during sampling
+  std::vector<Real> _row_spline_second_derivs;
+  std::vector<Real> _row_spline_eval;
+  std::vector<Real> _column_spline_second_derivs;
+  std::vector<Real> _column_spline_eval;
+
+  /**
+   * Precompute tables of row (column) spline second derivatives
+   * and store them to reduce computational demands
+   */
   void constructRowSplineSecondDerivativeTable();
   void constructColumnSplineSecondDerivativeTable();
+
+  /**
+   * Calculates the tables of second derivatives
+   */
   void solve();
 
+  /**
+   * Helper functions to evaluate column splines and construct row spline
+   * for the given point
+   */
+  void constructRowSpline(Real x1,
+                          std::vector<Real> & spline_eval,
+                          std::vector<Real> & spline_second_derivs,
+                          Real yx11 = _deriv_bound,
+                          Real yx1n = _deriv_bound);
+
+  /**
+   * Helper functions to evaluate row splines and construct column spline
+   * for the given point
+   */
+  void constructColumnSpline(Real x2,
+                             std::vector<Real> & spline_eval,
+                             std::vector<Real> & spline_second_derivs,
+                             Real yx21 = _deriv_bound,
+                             Real yx2n = _deriv_bound);
+
+  /// File number for data dump
   static int _file_number;
 };
 

@@ -225,10 +225,6 @@ protected:
   unsigned int _num_T;
   /// Number of pressure points in the tabulated data
   unsigned int _num_p;
-  /// Index for derivatives wrt pressure
-  const unsigned int _wrt_p = 1;
-  /// Index for derivatives wrt temperature
-  const unsigned int _wrt_T = 2;
 
   /// SinglePhaseFluidPropertiesPT UserObject
   const SinglePhaseFluidPropertiesPT & _fp;

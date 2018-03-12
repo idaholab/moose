@@ -32,15 +32,17 @@ StorkApp::registerApps()
 }
 
 void
-StorkApp::registerObjects(Factory & /*factory*/)
+StorkApp::registerObjects(Factory & factory)
 {
-  /* Uncomment Factory parameter and register your new objects here! */
+  Registry::registerObjectsTo(factory, {"StorkApp"});
 }
 
 void
-StorkApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & /*action_factory*/)
+StorkApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & action_factory)
 {
-  /* Uncomment Syntax and ActionFactory parameters and register your new objects here! */
+  Registry::registerActionsTo(action_factory, {"StorkApp"});
+
+  /* Uncomment Syntax parameter and register your new objects here! */
 }
 
 void

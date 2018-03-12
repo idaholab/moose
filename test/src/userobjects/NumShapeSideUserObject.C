@@ -10,6 +10,8 @@
 #include "NumShapeSideUserObject.h"
 #include "libmesh/quadrature.h"
 
+registerMooseObject("MooseTestApp", NumShapeSideUserObject);
+
 template <>
 InputParameters
 validParams<NumShapeSideUserObject>()

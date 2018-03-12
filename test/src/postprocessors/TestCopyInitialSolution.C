@@ -10,6 +10,8 @@
 #include "TestCopyInitialSolution.h"
 #include "NonlinearSystem.h"
 
+registerMooseObject("MooseTestApp", TestCopyInitialSolution);
+
 template <>
 InputParameters
 validParams<TestCopyInitialSolution>()

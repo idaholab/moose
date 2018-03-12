@@ -9,6 +9,8 @@
 
 #include "PointerLoadError.h"
 
+registerMooseObject("MooseTestApp", PointerLoadError);
+
 template <>
 InputParameters
 validParams<PointerLoadError>()

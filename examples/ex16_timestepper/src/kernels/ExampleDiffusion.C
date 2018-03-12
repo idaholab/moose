@@ -11,6 +11,8 @@
 
 #include "Material.h"
 
+registerMooseObject("ExampleApp", ExampleDiffusion);
+
 template <>
 InputParameters
 validParams<ExampleDiffusion>()

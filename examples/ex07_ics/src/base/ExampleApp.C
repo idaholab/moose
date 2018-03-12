@@ -12,9 +12,6 @@
 #include "AppFactory.h"
 #include "MooseSyntax.h"
 
-// Example 7 Includes
-#include "ExampleIC.h"
-
 template <>
 InputParameters
 validParams<ExampleApp>()
@@ -37,8 +34,7 @@ ExampleApp::ExampleApp(InputParameters parameters) : MooseApp(parameters)
 void
 ExampleApp::registerObjects(Factory & factory)
 {
-  // Register our custom Initial Condition with the Factory
-  registerInitialCondition(ExampleIC);
+  Registry::registerObjectsTo(factory, {"ExampleApp"});
 }
 
 void
@@ -48,6 +44,7 @@ ExampleApp::registerApps()
 }
 
 void
-ExampleApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & /*action_factory*/)
+ExampleApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & action_factory)
 {
+  Registry::registerActionsTo(action_factory, {"ExampleApp"});
 }

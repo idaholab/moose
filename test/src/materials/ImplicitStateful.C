@@ -9,6 +9,8 @@
 
 #include "ImplicitStateful.h"
 
+registerMooseObject("MooseTestApp", ImplicitStateful);
+
 template <>
 InputParameters
 validParams<ImplicitStateful>()

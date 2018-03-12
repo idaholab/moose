@@ -11,6 +11,8 @@
 
 #include "MooseApp.h"
 
+registerMooseObject("MooseTestApp", FailingProblem);
+
 template <>
 InputParameters
 validParams<FailingProblem>()

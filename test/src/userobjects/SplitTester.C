@@ -10,6 +10,8 @@
 #include "SplitTester.h"
 #include "MooseMesh.h"
 
+registerMooseObject("MooseTestApp", SplitTester);
+
 template <>
 InputParameters
 validParams<SplitTester>()

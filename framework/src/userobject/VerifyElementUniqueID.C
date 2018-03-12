@@ -12,6 +12,8 @@
 #include "SubProblem.h"
 #include "MooseMesh.h"
 
+registerMooseObject("MooseApp", VerifyElementUniqueID);
+
 template <>
 InputParameters
 validParams<VerifyElementUniqueID>()

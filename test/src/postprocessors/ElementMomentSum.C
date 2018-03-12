@@ -11,6 +11,8 @@
 
 #include "MooseVariableField.h"
 
+registerMooseObject("MooseTestApp", ElementMomentSum);
+
 template <>
 InputParameters
 validParams<ElementMomentSum>()

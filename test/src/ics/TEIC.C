@@ -9,6 +9,8 @@
 
 #include "TEIC.h"
 
+registerMooseObject("MooseTestApp", TEIC);
+
 template <>
 InputParameters
 validParams<TEIC>()

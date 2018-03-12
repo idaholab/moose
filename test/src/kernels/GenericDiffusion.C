@@ -9,6 +9,8 @@
 
 #include "GenericDiffusion.h"
 
+registerMooseObject("MooseTestApp", GenericDiffusion);
+
 template <>
 InputParameters
 validParams<GenericDiffusion>()

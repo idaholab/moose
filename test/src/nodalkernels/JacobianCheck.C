@@ -9,6 +9,8 @@
 
 #include "JacobianCheck.h"
 
+registerMooseObject("MooseTestApp", JacobianCheck);
+
 template <>
 InputParameters
 validParams<JacobianCheck>()

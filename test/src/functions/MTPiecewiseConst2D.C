@@ -9,6 +9,8 @@
 
 #include "MTPiecewiseConst2D.h"
 
+registerMooseObject("MooseTestApp", MTPiecewiseConst2D);
+
 template <>
 InputParameters
 validParams<MTPiecewiseConst2D>()

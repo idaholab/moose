@@ -13,7 +13,7 @@ template <>
 InputParameters
 validParams<CoupledBEKinetic>()
 {
-  InputParameters params = validParams<Kernel>();
+  InputParameters params = validParams<TimeDerivative>();
   params.addRequiredParam<std::vector<Real>>("weight",
                                              "The weight of kinetic species concentration");
   params.addCoupledVar("v", "List of kinetic species being coupled by concentration");
@@ -22,7 +22,7 @@ validParams<CoupledBEKinetic>()
 }
 
 CoupledBEKinetic::CoupledBEKinetic(const InputParameters & parameters)
-  : Kernel(parameters),
+  : TimeDerivative(parameters),
     _porosity(getMaterialProperty<Real>("porosity")),
     _weight(getParam<std::vector<Real>>("weight"))
 {
@@ -41,7 +41,8 @@ Real
 CoupledBEKinetic::computeQpResidual()
 {
   Real assemble_conc = 0.0;
-  for (unsigned int i = 0; i < _vals.size(); ++i)
+
+  for (auto i = beginIndex(_vals); i < _vals.size(); ++i)
     assemble_conc += _weight[i] * ((*_vals[i])[_qp] - (*_vals_old[i])[_qp]) / _dt;
 
   return _porosity[_qp] * _test[_i][_qp] * assemble_conc;

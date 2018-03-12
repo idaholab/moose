@@ -10,6 +10,8 @@
 #include "GhostUserObjectIC.h"
 #include "GhostUserObject.h"
 
+registerMooseObject("MooseTestApp", GhostUserObjectIC);
+
 template <>
 InputParameters
 validParams<GhostUserObjectIC>()

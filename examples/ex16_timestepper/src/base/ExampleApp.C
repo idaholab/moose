@@ -12,13 +12,6 @@
 #include "AppFactory.h"
 #include "MooseSyntax.h"
 
-// Example 16 Includes
-#include "TransientHalf.h"
-#include "ExampleDiffusion.h"
-#include "ExampleConvection.h"
-#include "ExampleImplicitEuler.h"
-#include "ExampleMaterial.h"
-
 template <>
 InputParameters
 validParams<ExampleApp>()
@@ -39,23 +32,19 @@ ExampleApp::ExampleApp(InputParameters parameters) : MooseApp(parameters)
 }
 
 void
+ExampleApp::registerObjects(Factory & factory)
+{
+  Registry::registerObjectsTo(factory, {"ExampleApp"});
+}
+
+void
 ExampleApp::registerApps()
 {
   registerApp(ExampleApp);
 }
 
 void
-ExampleApp::registerObjects(Factory & factory)
+ExampleApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & action_factory)
 {
-  // Register our new executioner
-  registerTimeStepper(TransientHalf);
-  registerKernel(ExampleDiffusion);
-  registerKernel(ExampleConvection);
-  registerKernel(ExampleImplicitEuler);
-  registerMaterial(ExampleMaterial);
-}
-
-void
-ExampleApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & /*action_factory*/)
-{
+  Registry::registerActionsTo(action_factory, {"ExampleApp"});
 }

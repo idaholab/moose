@@ -11,6 +11,8 @@
 
 #include "RandomHitUserObject.h"
 
+registerMooseObject("MooseTestApp", RandomHitMarker);
+
 template <>
 InputParameters
 validParams<RandomHitMarker>()

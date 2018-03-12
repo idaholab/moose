@@ -9,6 +9,8 @@
 
 #include "MTICMult.h"
 
+registerMooseObject("MooseTestApp", MTICMult);
+
 template <>
 InputParameters
 validParams<MTICMult>()

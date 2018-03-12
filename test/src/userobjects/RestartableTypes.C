@@ -9,6 +9,8 @@
 
 #include "RestartableTypes.h"
 
+registerMooseObject("MooseTestApp", RestartableTypes);
+
 template <>
 InputParameters
 validParams<RestartableTypes>()

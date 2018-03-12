@@ -9,6 +9,8 @@
 
 #include "FluxAverageAux.h"
 
+registerMooseObject("MooseTestApp", FluxAverageAux);
+
 template <>
 InputParameters
 validParams<FluxAverageAux>()

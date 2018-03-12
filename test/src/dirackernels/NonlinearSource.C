@@ -9,6 +9,8 @@
 
 #include "NonlinearSource.h"
 
+registerMooseObject("MooseTestApp", NonlinearSource);
+
 template <>
 InputParameters
 validParams<NonlinearSource>()

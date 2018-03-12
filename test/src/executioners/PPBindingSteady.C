@@ -11,6 +11,8 @@
 #include "NonlinearSystem.h"
 #include "AuxiliarySystem.h"
 
+registerMooseObject("MooseTestApp", PPBindingSteady);
+
 template <>
 InputParameters
 validParams<PPBindingSteady>()

@@ -9,6 +9,8 @@
 
 #include "VarCouplingMaterial.h"
 
+registerMooseObject("MooseTestApp", VarCouplingMaterial);
+
 template <>
 InputParameters
 validParams<VarCouplingMaterial>()

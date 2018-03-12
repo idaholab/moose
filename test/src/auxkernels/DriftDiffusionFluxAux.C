@@ -9,6 +9,8 @@
 
 #include "DriftDiffusionFluxAux.h"
 
+registerMooseObject("MooseTestApp", DriftDiffusionFluxAux);
+
 template <>
 InputParameters
 validParams<DriftDiffusionFluxAux>()

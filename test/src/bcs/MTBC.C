@@ -9,6 +9,8 @@
 
 #include "MTBC.h"
 
+registerMooseObject("MooseTestApp", MTBC);
+
 template <>
 InputParameters
 validParams<MTBC>()

@@ -14,6 +14,8 @@
 #include "VectorFEWave.h"
 #include "Function.h"
 
+registerMooseObject("MooseTestApp", VectorFEWave);
+
 template <>
 InputParameters
 validParams<VectorFEWave>()

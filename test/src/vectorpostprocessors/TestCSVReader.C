@@ -9,6 +9,8 @@
 
 #include "TestCSVReader.h"
 
+registerMooseObject("MooseTestApp", TestCSVReader);
+
 template <>
 InputParameters
 validParams<TestCSVReader>()

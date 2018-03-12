@@ -9,6 +9,8 @@
 
 #include "ScalarDotCouplingAux.h"
 
+registerMooseObject("MooseTestApp", ScalarDotCouplingAux);
+
 template <>
 InputParameters
 validParams<ScalarDotCouplingAux>()

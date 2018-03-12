@@ -9,6 +9,8 @@
 
 #include "DeprecatedKernel.h"
 
+registerMooseObjectDeprecated("MooseTestApp", DeprecatedKernel, "01/01/2050 00:00");
+
 template <>
 InputParameters
 validParams<DeprecatedKernel>()

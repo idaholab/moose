@@ -11,6 +11,8 @@
 
 // Moose includes
 
+registerMooseObject("ExampleApp", TransientHalf);
+
 template <>
 InputParameters
 validParams<TransientHalf>()

@@ -10,6 +10,8 @@
 #include "InsideValuePPS.h"
 #include "InsideUserObject.h"
 
+registerMooseObject("MooseTestApp", InsideValuePPS);
+
 template <>
 InputParameters
 validParams<InsideValuePPS>()

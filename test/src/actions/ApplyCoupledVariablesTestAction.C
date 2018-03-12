@@ -12,6 +12,8 @@
 #include "MooseObjectAction.h"
 #include "ActionWarehouse.h"
 
+registerMooseAction("MooseTestApp", ApplyCoupledVariablesTestAction, "meta_action");
+
 template <>
 InputParameters
 validParams<ApplyCoupledVariablesTestAction>()

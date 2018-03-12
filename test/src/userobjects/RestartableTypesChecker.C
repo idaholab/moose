@@ -9,6 +9,8 @@
 
 #include "RestartableTypesChecker.h"
 
+registerMooseObject("MooseTestApp", RestartableTypesChecker);
+
 template <>
 InputParameters
 validParams<RestartableTypesChecker>()

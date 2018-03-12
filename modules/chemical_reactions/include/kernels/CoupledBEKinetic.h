@@ -10,19 +10,17 @@
 #ifndef COUPLEDBEKINETIC_H
 #define COUPLEDBEKINETIC_H
 
-#include "Kernel.h"
+#include "TimeDerivative.h"
 
-// Forward Declarations
 class CoupledBEKinetic;
 
 template <>
 InputParameters validParams<CoupledBEKinetic>();
 
 /**
- * Define the Kernel for a CoupledBEKinetic operator that looks like:
- * delta (weight * v) / delta t.
+ * Derivative of mineral species concentration wrt time
  */
-class CoupledBEKinetic : public Kernel
+class CoupledBEKinetic : public TimeDerivative
 {
 public:
   CoupledBEKinetic(const InputParameters & parameters);
@@ -31,16 +29,13 @@ protected:
   virtual Real computeQpResidual() override;
 
 private:
-  /// Material property of porosity.
+  /// Porosity
   const MaterialProperty<Real> & _porosity;
-
-  /// Weight of the kinetic mineral concentration in the total primary species concentration.
+  /// Weight of the kinetic mineral concentration in the total primary species concentration
   const std::vector<Real> _weight;
-
-  /// Coupled kinetic mineral concentrations.
+  /// Coupled kinetic mineral concentrations
   std::vector<const VariableValue *> _vals;
-
-  /// Coupled old values of kinetic mineral concentrations.
+  /// Coupled old values of kinetic mineral concentrations
   std::vector<const VariableValue *> _vals_old;
 };
 

@@ -11,6 +11,8 @@
 
 #include "Material.h"
 
+registerMooseObject("ExampleApp", ExampleImplicitEuler);
+
 template <>
 InputParameters
 validParams<ExampleImplicitEuler>()

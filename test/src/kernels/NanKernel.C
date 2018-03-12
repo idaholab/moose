@@ -9,6 +9,8 @@
 
 #include "NanKernel.h"
 
+registerMooseObject("MooseTestApp", NanKernel);
+
 template <>
 InputParameters
 validParams<NanKernel>()

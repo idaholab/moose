@@ -10,6 +10,8 @@
 #include "MMSDiffusion.h"
 #include "MooseMesh.h"
 
+registerMooseObject("MooseTestApp", MMSDiffusion);
+
 template <>
 InputParameters
 validParams<MMSDiffusion>()

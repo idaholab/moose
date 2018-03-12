@@ -11,6 +11,8 @@
 #include "MooseTestAppTypes.h"
 #include "Conversion.h"
 
+registerMooseObject("MooseTestApp", TestPostprocessor);
+
 template <>
 InputParameters
 validParams<TestPostprocessor>()

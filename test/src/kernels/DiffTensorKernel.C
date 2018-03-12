@@ -9,6 +9,8 @@
 
 #include "DiffTensorKernel.h"
 
+registerMooseObject("MooseTestApp", DiffTensorKernel);
+
 template <>
 InputParameters
 validParams<DiffTensorKernel>()

@@ -9,6 +9,8 @@
 
 #include "TestSetupPostprocessorDataActionFunction.h"
 
+registerMooseObject("MooseApp", TestSetupPostprocessorDataActionFunction);
+
 template <>
 InputParameters
 validParams<TestSetupPostprocessorDataActionFunction>()

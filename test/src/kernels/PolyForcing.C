@@ -9,6 +9,8 @@
 
 #include "PolyForcing.h"
 
+registerMooseObject("MooseTestApp", PolyForcing);
+
 template <>
 InputParameters
 validParams<PolyForcing>()

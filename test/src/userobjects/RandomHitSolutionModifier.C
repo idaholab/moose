@@ -14,6 +14,8 @@
 #include "NonlinearSystemBase.h"
 #include "RandomHitUserObject.h"
 
+registerMooseObject("MooseTestApp", RandomHitSolutionModifier);
+
 template <>
 InputParameters
 validParams<RandomHitSolutionModifier>()

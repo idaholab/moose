@@ -9,6 +9,8 @@
 
 #include "OldMaterialAux.h"
 
+registerMooseObject("MooseTestApp", OldMaterialAux);
+
 template <>
 InputParameters
 validParams<OldMaterialAux>()

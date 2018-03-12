@@ -32,6 +32,8 @@
 // class static initialization
 const Real AddLotsOfAuxVariablesAction::_abs_zero_tol = 1e-12;
 
+registerMooseAction("MooseTestApp", AddLotsOfAuxVariablesAction, "meta_action");
+
 template <>
 InputParameters
 validParams<AddLotsOfAuxVariablesAction>()

@@ -9,6 +9,8 @@
 
 #include "VectorPostprocessorScalarKernel.h"
 
+registerMooseObject("MooseTestApp", VectorPostprocessorScalarKernel);
+
 template <>
 InputParameters
 validParams<VectorPostprocessorScalarKernel>()

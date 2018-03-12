@@ -10,6 +10,8 @@
 #include "GhostAux.h"
 #include "GhostUserObject.h"
 
+registerMooseObject("MooseTestApp", GhostAux);
+
 template <>
 InputParameters
 validParams<GhostAux>()

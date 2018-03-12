@@ -9,6 +9,8 @@
 
 #include "OptionallyCoupledForce.h"
 
+registerMooseObject("MooseTestApp", OptionallyCoupledForce);
+
 template <>
 InputParameters
 validParams<OptionallyCoupledForce>()

@@ -9,6 +9,8 @@
 
 #include "DirichletBCfuncXYZ0.h"
 
+registerMooseObject("MooseTestApp", DirichletBCfuncXYZ0);
+
 template <>
 InputParameters
 validParams<DirichletBCfuncXYZ0>()

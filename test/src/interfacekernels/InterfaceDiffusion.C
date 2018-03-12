@@ -11,6 +11,8 @@
 
 #include <cmath>
 
+registerMooseObject("MooseTestApp", InterfaceDiffusion);
+
 template <>
 InputParameters
 validParams<InterfaceDiffusion>()

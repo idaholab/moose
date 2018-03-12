@@ -10,6 +10,8 @@
 #include "PeriodicDistanceAux.h"
 #include "GeneratedMesh.h"
 
+registerMooseObject("MooseTestApp", PeriodicDistanceAux);
+
 template <>
 InputParameters
 validParams<PeriodicDistanceAux>()

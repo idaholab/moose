@@ -9,6 +9,8 @@
 
 #include "CheckCurrentExecAux.h"
 
+registerMooseObject("MooseTestApp", CheckCurrentExecAux);
+
 template <>
 InputParameters
 validParams<CheckCurrentExecAux>()

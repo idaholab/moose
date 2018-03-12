@@ -10,6 +10,8 @@
 #include "MaterialCopyUserObject.h"
 #include "MooseMesh.h"
 
+registerMooseObject("MooseTestApp", MaterialCopyUserObject);
+
 template <>
 InputParameters
 validParams<MaterialCopyUserObject>()

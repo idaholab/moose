@@ -15,6 +15,8 @@
 
 #include <libmesh/parallel_implementation.h>
 
+registerMooseAction("MooseTestApp", TestGetActionsAction, "meta_action");
+
 template <>
 InputParameters
 validParams<TestGetActionsAction>()

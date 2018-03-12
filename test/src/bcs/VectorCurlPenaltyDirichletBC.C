@@ -1,6 +1,8 @@
 #include "VectorCurlPenaltyDirichletBC.h"
 #include "Function.h"
 
+registerMooseObject("MooseTestApp", VectorCurlPenaltyDirichletBC);
+
 template <>
 InputParameters
 validParams<VectorCurlPenaltyDirichletBC>()

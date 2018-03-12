@@ -14,6 +14,8 @@
 #include "MooseVariableField.h"
 #include "SystemBase.h"
 
+registerMooseObject("MooseTestApp", MaterialTestIndicator);
+
 template <>
 InputParameters
 validParams<MaterialTestIndicator>()

@@ -9,6 +9,8 @@
 
 #include "CoupledScalarAux.h"
 
+registerMooseObject("MooseTestApp", CoupledScalarAux);
+
 template <>
 InputParameters
 validParams<CoupledScalarAux>()

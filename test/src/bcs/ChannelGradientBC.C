@@ -10,6 +10,8 @@
 #include "ChannelGradientBC.h"
 #include "MooseVariableField.h"
 
+registerMooseObject("MooseTestApp", ChannelGradientBC);
+
 template <>
 InputParameters
 validParams<ChannelGradientBC>()

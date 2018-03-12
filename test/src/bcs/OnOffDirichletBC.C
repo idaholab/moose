@@ -9,6 +9,8 @@
 
 #include "OnOffDirichletBC.h"
 
+registerMooseObject("MooseTestApp", OnOffDirichletBC);
+
 template <>
 InputParameters
 validParams<OnOffDirichletBC>()

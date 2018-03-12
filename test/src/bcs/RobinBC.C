@@ -9,6 +9,8 @@
 
 #include "RobinBC.h"
 
+registerMooseObject("MooseTestApp", RobinBC);
+
 template <>
 InputParameters
 validParams<RobinBC>()

@@ -10,6 +10,12 @@
 // MOOSE includes
 #include "SetupInterfaceCount.h"
 
+registerMooseObject("MooseTestApp", GeneralSetupInterfaceCount);
+registerMooseObject("MooseTestApp", ElementSetupInterfaceCount);
+registerMooseObject("MooseTestApp", SideSetupInterfaceCount);
+registerMooseObject("MooseTestApp", InternalSideSetupInterfaceCount);
+registerMooseObject("MooseTestApp", NodalSetupInterfaceCount);
+
 InputParameters
 setupInterfaceCountParameters()
 {

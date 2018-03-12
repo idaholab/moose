@@ -9,6 +9,8 @@
 
 #include "NumInternalSides.h"
 
+registerMooseObject("MooseTestApp", NumInternalSides);
+
 template <>
 InputParameters
 validParams<NumInternalSides>()

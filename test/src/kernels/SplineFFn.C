@@ -9,6 +9,8 @@
 
 #include "SplineFFn.h"
 
+registerMooseObject("MooseTestApp", SplineFFn);
+
 template <>
 InputParameters
 validParams<SplineFFn>()

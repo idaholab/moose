@@ -9,6 +9,8 @@
 #include "OutflowBC.h"
 #include "Function.h"
 
+registerMooseObject("MooseTestApp", OutflowBC);
+
 template <>
 InputParameters
 validParams<OutflowBC>()

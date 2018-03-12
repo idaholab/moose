@@ -16,6 +16,8 @@
 
 #include "libmesh/vector_value.h"
 
+registerMooseAction("MooseTestApp", ConvDiffMetaAction, "meta_action");
+
 template <>
 InputParameters
 validParams<ConvDiffMetaAction>()

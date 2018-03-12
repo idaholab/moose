@@ -10,6 +10,8 @@
 // moose_test includes
 #include "GetMaterialPropertyBoundaryBlockNamesTest.h"
 
+registerMooseObject("MooseTestApp", GetMaterialPropertyBoundaryBlockNamesTest);
+
 template <>
 InputParameters
 validParams<GetMaterialPropertyBoundaryBlockNamesTest>()

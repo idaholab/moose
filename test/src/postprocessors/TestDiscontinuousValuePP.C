@@ -11,6 +11,8 @@
 #include "TestDiscontinuousValuePP.h"
 #include "SolutionUserObject.h"
 
+registerMooseObject("MooseTestApp", TestDiscontinuousValuePP);
+
 template <>
 InputParameters
 validParams<TestDiscontinuousValuePP>()

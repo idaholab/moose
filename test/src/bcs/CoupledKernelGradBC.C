@@ -10,6 +10,8 @@
 #include "CoupledKernelGradBC.h"
 #include "Function.h"
 
+registerMooseObject("MooseTestApp", CoupledKernelGradBC);
+
 template <>
 InputParameters
 validParams<CoupledKernelGradBC>()

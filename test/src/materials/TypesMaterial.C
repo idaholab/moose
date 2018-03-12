@@ -10,6 +10,8 @@
 #include "TypesMaterial.h"
 #include "libmesh/dense_matrix.h"
 
+registerMooseObject("MooseTestApp", TypesMaterial);
+
 template <>
 InputParameters
 validParams<TypesMaterial>()
