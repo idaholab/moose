@@ -1,3 +1,8 @@
+# problem: -u'' - c^2 * u' = 0 , 0 < x < L, u: R -> C
+# u(x=0) = g0 , u(x=L) = gL
+# c = a + jb
+# g0 = g0_real + jg0_imaginary, gL = gL_real + jgL_imaginary
+
 [Mesh]
   type = GeneratedMesh
   dim = 1
@@ -33,7 +38,7 @@
     type = CoeffDiffusion
     variable = u_real
   [../]
-  [./kSquaredEpsField_real]
+  [./coeffField_real]
     type = CoeffField
     func = ASquaredMinusBSquared
     variable = u_real
@@ -49,7 +54,7 @@
     type = CoeffDiffusion
     variable = u_imag
   [../]
-  [./kSquaredEpsField_imag]
+  [./coeffField_imag]
     type = CoeffField
     func = ASquaredMinusBSquared
     variable = u_imag
