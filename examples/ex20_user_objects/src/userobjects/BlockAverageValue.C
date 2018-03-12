@@ -12,6 +12,8 @@
 
 #include "libmesh/mesh_tools.h"
 
+registerMooseObject("ExampleApp", BlockAverageValue);
+
 template <>
 InputParameters
 validParams<BlockAverageValue>()

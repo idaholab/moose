@@ -9,6 +9,8 @@
 
 #include "ExampleFunction.h"
 
+registerMooseObject("ExampleApp", ExampleFunction);
+
 template <>
 InputParameters
 validParams<ExampleFunction>()

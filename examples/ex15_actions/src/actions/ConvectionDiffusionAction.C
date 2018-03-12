@@ -12,6 +12,8 @@
 #include "Parser.h"
 #include "FEProblem.h"
 
+registerMooseAction("ExampleApp", ConvectionDiffusionAction, "add_kernel");
+
 template <>
 InputParameters
 validParams<ConvectionDiffusionAction>()

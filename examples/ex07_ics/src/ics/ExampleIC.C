@@ -9,6 +9,8 @@
 
 #include "ExampleIC.h"
 
+registerMooseObject("ExampleApp", ExampleIC);
+
 template <>
 InputParameters
 validParams<ExampleIC>()

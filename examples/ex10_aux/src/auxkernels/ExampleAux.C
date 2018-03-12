@@ -9,6 +9,8 @@
 
 #include "ExampleAux.h"
 
+registerMooseObject("ExampleApp", ExampleAux);
+
 template <>
 InputParameters
 validParams<ExampleAux>()
