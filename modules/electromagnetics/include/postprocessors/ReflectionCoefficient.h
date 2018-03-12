@@ -9,7 +9,7 @@ class ReflectionCoefficient;
 template <>
 InputParameters validParams<ReflectionCoefficient>();
 
-class ReflectionCoefficient : public SidePostprocessor, public MooseVariableInterface
+class ReflectionCoefficient : public SidePostprocessor, public MooseVariableInterface<Real>
 {
 public:
   ReflectionCoefficient(const InputParameters & parameters);
