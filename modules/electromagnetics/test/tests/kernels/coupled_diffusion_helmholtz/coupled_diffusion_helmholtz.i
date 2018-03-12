@@ -1,6 +1,7 @@
-# problem: (ku')' + c^2 * u' = 0 , 0 < x < L, u: R -> C
+# problem: -(ku')' - c^2 * u' = 0 , 0 < x < L, u: R -> C
 # u(x=0) = g0 , u(x=L) = gL
 # c = a + jb , k = d + jh
+# g0 = g0_real + jg0_imaginary, gL = gL_real + jgL_imaginary
 
 [Mesh]
   type = GeneratedMesh
@@ -41,22 +42,30 @@
     type = ParsedFunction
     value = '2*15*7'
   [../]
+  [./d]
+    type = ConstantFunction
+    value = 1
+  [../]
+  [./h]
+    type = ConstantFunction
+    value = 1
+  [../]
 []
 
 [Kernels]
   [./laplacian_real]
     type = CoeffDiffusion
-    coefficient = 1
+    func = d
     variable = u_real
   [../]
   [./coupledLaplacian_real]
     type = CoupledCoeffDiffusion
-    coefficient = 1
+    func = h
     sign = -1.0
     coupled_field = u_imag
     variable = u_real
   [../]
-  [./kSquaredEpsField_real]
+  [./coeffField_real]
     type = CoeffField
     func = ASquaredMinusBSquared
     variable = u_real
@@ -70,17 +79,17 @@
   [../]
   [./laplacian_imag]
     type = CoeffDiffusion
-    coefficient = 1
+    func = d
     variable = u_imag
   [../]
   [./coupledLaplacian_imag]
     type = CoupledCoeffDiffusion
-    coefficient = 1
+    func = h
     sign = 1.0
     coupled_field = u_real
     variable = u_imag
   [../]
-  [./kSquaredEpsField_imag]
+  [./coeffField_imag]
     type = CoeffField
     func = ASquaredMinusBSquared
     variable = u_imag
