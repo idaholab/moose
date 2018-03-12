@@ -488,7 +488,6 @@ public:
   void addResidual(std::map<TagName, TagID> & tags);
   void addResidualNeighbor(NumericVector<Number> & residual, TagID tag_id = 0);
   void addResidualNeighbor(std::map<TagName, TagID> & tags);
-  void addResidualScalar(NumericVector<Number> & residual, TagID tag_id = 0);
   void addResidualScalar(TagID tag_id);
   void addResidualScalar(std::map<TagName, TagID> & tags);
 
