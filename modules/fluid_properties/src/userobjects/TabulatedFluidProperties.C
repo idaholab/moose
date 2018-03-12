@@ -221,9 +221,7 @@ TabulatedFluidProperties::rho_dpT(
     Real pressure, Real temperature, Real & rho, Real & drho_dp, Real & drho_dT) const
 {
   checkInputVariables(pressure, temperature);
-  rho = _density_ipol->sample(pressure, temperature);
-  drho_dp = _density_ipol->sampleDerivative(pressure, temperature, _wrt_p);
-  drho_dT = _density_ipol->sampleDerivative(pressure, temperature, _wrt_T);
+  _density_ipol->sampleValueAndDerivatives(pressure, temperature, rho, drho_dp, drho_dT);
 }
 
 Real
@@ -238,9 +236,7 @@ TabulatedFluidProperties::e_dpT(
     Real pressure, Real temperature, Real & e, Real & de_dp, Real & de_dT) const
 {
   checkInputVariables(pressure, temperature);
-  e = _internal_energy_ipol->sample(pressure, temperature);
-  de_dp = _internal_energy_ipol->sampleDerivative(pressure, temperature, _wrt_p);
-  de_dT = _internal_energy_ipol->sampleDerivative(pressure, temperature, _wrt_T);
+  _internal_energy_ipol->sampleValueAndDerivatives(pressure, temperature, e, de_dp, de_dT);
 }
 
 void
@@ -270,9 +266,7 @@ TabulatedFluidProperties::h_dpT(
     Real pressure, Real temperature, Real & h, Real & dh_dp, Real & dh_dT) const
 {
   checkInputVariables(pressure, temperature);
-  h = _enthalpy_ipol->sample(pressure, temperature);
-  dh_dp = _enthalpy_ipol->sampleDerivative(pressure, temperature, _wrt_p);
-  dh_dT = _enthalpy_ipol->sampleDerivative(pressure, temperature, _wrt_T);
+  _enthalpy_ipol->sampleValueAndDerivatives(pressure, temperature, h, dh_dp, dh_dT);
 }
 
 Real
