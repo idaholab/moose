@@ -13,6 +13,8 @@
 /****************************************************************/
 #include "EFieldAdvection.h"
 
+registerMooseObject("MooseTestApp", EFieldAdvection);
+
 template <>
 InputParameters
 validParams<EFieldAdvection>()

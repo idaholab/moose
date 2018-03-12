@@ -10,6 +10,8 @@
 #include "DenomShapeSideUserObject.h"
 #include "libmesh/quadrature.h"
 
+registerMooseObject("MooseTestApp", DenomShapeSideUserObject);
+
 template <>
 InputParameters
 validParams<DenomShapeSideUserObject>()

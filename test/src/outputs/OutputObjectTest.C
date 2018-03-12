@@ -11,6 +11,8 @@
 #include "MooseApp.h"
 #include "Exodus.h"
 
+registerMooseObject("MooseTestApp", OutputObjectTest);
+
 template <>
 InputParameters
 validParams<OutputObjectTest>()

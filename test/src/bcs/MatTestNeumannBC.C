@@ -9,6 +9,8 @@
 
 #include "MatTestNeumannBC.h"
 
+registerMooseObject("MooseTestApp", MatTestNeumannBC);
+
 template <>
 InputParameters
 validParams<MatTestNeumannBC>()

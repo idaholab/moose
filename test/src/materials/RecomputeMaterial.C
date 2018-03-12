@@ -10,6 +10,8 @@
 // MOOSE includes
 #include "RecomputeMaterial.h"
 
+registerMooseObject("MooseTestApp", RecomputeMaterial);
+
 template <>
 InputParameters
 validParams<RecomputeMaterial>()

@@ -11,6 +11,8 @@
 #include "NewtonMaterial.h"
 #include "Material.h"
 
+registerMooseObject("MooseTestApp", NewtonMaterial);
+
 template <>
 InputParameters
 validParams<NewtonMaterial>()

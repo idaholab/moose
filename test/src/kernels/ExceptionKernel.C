@@ -25,6 +25,8 @@
 bool ExceptionKernel::_res_has_thrown = false;
 bool ExceptionKernel::_jac_has_thrown = false;
 
+registerMooseObject("MooseTestApp", ExceptionKernel);
+
 template <>
 InputParameters
 validParams<ExceptionKernel>()

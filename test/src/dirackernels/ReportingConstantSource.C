@@ -9,6 +9,8 @@
 
 #include "ReportingConstantSource.h"
 
+registerMooseObject("MooseTestApp", ReportingConstantSource);
+
 template <>
 InputParameters
 validParams<ReportingConstantSource>()

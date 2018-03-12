@@ -9,6 +9,8 @@
 
 #include "UniqueIDAux.h"
 
+registerMooseObject("MooseTestApp", UniqueIDAux);
+
 template <>
 InputParameters
 validParams<UniqueIDAux>()

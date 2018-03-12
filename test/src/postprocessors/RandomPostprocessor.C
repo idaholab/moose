@@ -10,6 +10,8 @@
 // MOOSE includes
 #include "RandomPostprocessor.h"
 
+registerMooseObject("MooseTestApp", RandomPostprocessor);
+
 template <>
 InputParameters
 validParams<RandomPostprocessor>()

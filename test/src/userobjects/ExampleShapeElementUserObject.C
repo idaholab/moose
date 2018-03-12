@@ -10,6 +10,8 @@
 #include "ExampleShapeElementUserObject.h"
 #include "libmesh/quadrature.h"
 
+registerMooseObject("MooseTestApp", ExampleShapeElementUserObject);
+
 template <>
 InputParameters
 validParams<ExampleShapeElementUserObject>()

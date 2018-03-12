@@ -9,6 +9,8 @@
 
 #include "TimestepSetupFunction.h"
 
+registerMooseObject("MooseTestApp", TimestepSetupFunction);
+
 template <>
 InputParameters
 validParams<TimestepSetupFunction>()

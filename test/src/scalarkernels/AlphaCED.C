@@ -13,6 +13,8 @@
 #include "Assembly.h"
 #include "MooseVariableScalar.h"
 
+registerMooseObject("MooseTestApp", AlphaCED);
+
 template <>
 InputParameters
 validParams<AlphaCED>()

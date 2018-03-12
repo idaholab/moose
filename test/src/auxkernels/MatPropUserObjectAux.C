@@ -10,6 +10,8 @@
 #include "MatPropUserObjectAux.h"
 #include "MaterialPropertyUserObject.h"
 
+registerMooseObject("MooseTestApp", MatPropUserObjectAux);
+
 template <>
 InputParameters
 validParams<MatPropUserObjectAux>()

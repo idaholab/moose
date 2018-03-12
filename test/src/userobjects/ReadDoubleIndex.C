@@ -10,6 +10,8 @@
 #include "ReadDoubleIndex.h"
 #include <sstream>
 
+registerMooseObject("MooseTestApp", ReadDoubleIndex);
+
 template <>
 InputParameters
 validParams<ReadDoubleIndex>()

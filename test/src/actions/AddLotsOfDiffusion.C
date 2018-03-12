@@ -27,6 +27,12 @@
 #include "libmesh/string_to_enum.h"
 #include "libmesh/fe.h"
 
+registerMooseAction("MooseTestApp", AddLotsOfDiffusion, "add_variable");
+
+registerMooseAction("MooseTestApp", AddLotsOfDiffusion, "add_kernel");
+
+registerMooseAction("MooseTestApp", AddLotsOfDiffusion, "add_bc");
+
 template <>
 InputParameters
 validParams<AddLotsOfDiffusion>()

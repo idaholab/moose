@@ -9,6 +9,8 @@
 
 #include "DivergenceBC.h"
 
+registerMooseObject("MooseTestApp", DivergenceBC);
+
 template <>
 InputParameters
 validParams<DivergenceBC>()

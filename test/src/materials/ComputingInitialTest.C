@@ -9,6 +9,8 @@
 
 #include "ComputingInitialTest.h"
 
+registerMooseObject("MooseTestApp", ComputingInitialTest);
+
 template <>
 InputParameters
 validParams<ComputingInitialTest>()

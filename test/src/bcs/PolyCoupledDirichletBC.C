@@ -9,6 +9,8 @@
 
 #include "PolyCoupledDirichletBC.h"
 
+registerMooseObject("MooseTestApp", PolyCoupledDirichletBC);
+
 template <>
 InputParameters
 validParams<PolyCoupledDirichletBC>()

@@ -11,6 +11,8 @@
 
 #include <cmath>
 
+registerMooseObject("MooseTestApp", OneSideDiffusion);
+
 template <>
 InputParameters
 validParams<OneSideDiffusion>()

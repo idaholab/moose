@@ -9,6 +9,8 @@
 
 #include "SpatialStatefulMaterial.h"
 
+registerMooseObject("MooseTestApp", SpatialStatefulMaterial);
+
 template <>
 InputParameters
 validParams<SpatialStatefulMaterial>()

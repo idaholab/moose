@@ -9,6 +9,8 @@
 
 #include "DoNotCopyParametersKernel.h"
 
+registerMooseObject("MooseTestApp", DoNotCopyParametersKernel);
+
 template <>
 InputParameters
 validParams<DoNotCopyParametersKernel>()

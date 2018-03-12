@@ -9,6 +9,8 @@
 
 #include "MaterialMultiPointSource.h"
 
+registerMooseObject("MooseTestApp", MaterialMultiPointSource);
+
 template <>
 InputParameters
 validParams<MaterialMultiPointSource>()

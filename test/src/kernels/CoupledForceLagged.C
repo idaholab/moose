@@ -9,6 +9,8 @@
 
 #include "CoupledForceLagged.h"
 
+registerMooseObject("MooseTestApp", CoupledForceLagged);
+
 template <>
 InputParameters
 validParams<CoupledForceLagged>()

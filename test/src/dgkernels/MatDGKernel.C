@@ -12,6 +12,8 @@
 // MOOSE includes
 #include "MooseVariableField.h"
 
+registerMooseObject("MooseTestApp", MatDGKernel);
+
 template <>
 InputParameters
 validParams<MatDGKernel>()

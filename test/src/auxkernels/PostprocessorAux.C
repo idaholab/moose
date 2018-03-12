@@ -9,6 +9,8 @@
 
 #include "PostprocessorAux.h"
 
+registerMooseObject("MooseTestApp", PostprocessorAux);
+
 template <>
 InputParameters
 validParams<PostprocessorAux>()

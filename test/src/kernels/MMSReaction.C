@@ -10,6 +10,8 @@
 #include "MMSReaction.h"
 #include "MooseMesh.h"
 
+registerMooseObject("MooseTestApp", MMSReaction);
+
 template <>
 InputParameters
 validParams<MMSReaction>()

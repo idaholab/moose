@@ -9,6 +9,8 @@
 
 #include "WrongJacobianDiffusion.h"
 
+registerMooseObject("MooseTestApp", WrongJacobianDiffusion);
+
 template <>
 InputParameters
 validParams<WrongJacobianDiffusion>()

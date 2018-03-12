@@ -9,6 +9,8 @@
 
 #include "VectorPostprocessorAux.h"
 
+registerMooseObject("MooseTestApp", VectorPostprocessorAux);
+
 template <>
 InputParameters
 validParams<VectorPostprocessorAux>()

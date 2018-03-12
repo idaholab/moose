@@ -9,6 +9,8 @@
 
 #include "GaussContForcing.h"
 
+registerMooseObject("MooseTestApp", GaussContForcing);
+
 template <>
 InputParameters
 validParams<GaussContForcing>()

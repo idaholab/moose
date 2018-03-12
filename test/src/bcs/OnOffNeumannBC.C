@@ -9,6 +9,8 @@
 
 #include "OnOffNeumannBC.h"
 
+registerMooseObject("MooseTestApp", OnOffNeumannBC);
+
 template <>
 InputParameters
 validParams<OnOffNeumannBC>()

@@ -9,6 +9,8 @@
 
 #include "PolyConstantAux.h"
 
+registerMooseObject("MooseTestApp", PolyConstantAux);
+
 template <>
 InputParameters
 validParams<PolyConstantAux>()

@@ -11,6 +11,8 @@
 
 #include "Assembly.h"
 
+registerMooseObject("MooseTestApp", MaterialPropertyBlockAux);
+
 template <>
 InputParameters
 validParams<MaterialPropertyBlockAux>()

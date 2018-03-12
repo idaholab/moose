@@ -9,6 +9,8 @@
 
 #include "RandomElementalUserObject.h"
 
+registerMooseObject("MooseTestApp", RandomElementalUserObject);
+
 template <>
 InputParameters
 validParams<RandomElementalUserObject>()

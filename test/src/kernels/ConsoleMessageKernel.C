@@ -9,6 +9,8 @@
 
 #include "ConsoleMessageKernel.h"
 
+registerMooseObject("MooseTestApp", ConsoleMessageKernel);
+
 template <>
 InputParameters
 validParams<ConsoleMessageKernel>()

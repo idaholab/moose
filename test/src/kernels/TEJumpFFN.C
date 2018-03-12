@@ -9,6 +9,8 @@
 
 #include "TEJumpFFN.h"
 
+registerMooseObject("MooseTestApp", TEJumpFFN);
+
 template <>
 InputParameters
 validParams<TEJumpFFN>()

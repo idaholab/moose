@@ -9,6 +9,8 @@
 
 #include "BndTestDirichletBC.h"
 
+registerMooseObject("MooseTestApp", BndTestDirichletBC);
+
 template <>
 InputParameters
 validParams<BndTestDirichletBC>()

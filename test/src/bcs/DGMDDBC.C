@@ -16,6 +16,8 @@
 // C++ includes
 #include <cmath>
 
+registerMooseObject("MooseTestApp", DGMDDBC);
+
 template <>
 InputParameters
 validParams<DGMDDBC>()

@@ -11,6 +11,8 @@
 
 #include "Assembly.h"
 
+registerMooseObject("MooseTestApp", InternalSideJump);
+
 template <>
 InputParameters
 validParams<InternalSideJump>()

@@ -12,6 +12,8 @@
 
 // Moose includes
 
+registerMooseObject("MooseTestApp", AdaptAndModify);
+
 template <>
 InputParameters
 validParams<AdaptAndModify>()

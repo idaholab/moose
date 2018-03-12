@@ -9,6 +9,8 @@
 
 #include "CoupledEigenKernel.h"
 
+registerMooseObject("MooseTestApp", CoupledEigenKernel);
+
 template <>
 InputParameters
 validParams<CoupledEigenKernel>()

@@ -9,6 +9,8 @@
 
 #include "ElementSidePP.h"
 
+registerMooseObject("MooseTestApp", ElementSidePP);
+
 template <>
 InputParameters
 validParams<ElementSidePP>()

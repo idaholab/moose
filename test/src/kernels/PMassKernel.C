@@ -9,6 +9,8 @@
 
 #include "PMassKernel.h"
 
+registerMooseObject("MooseTestApp", PMassKernel);
+
 template <>
 InputParameters
 validParams<PMassKernel>()

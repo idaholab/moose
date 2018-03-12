@@ -10,6 +10,8 @@
 #include "TestSteady.h"
 #include "MooseTestAppTypes.h"
 
+registerMooseObject("MooseTestApp", TestSteady);
+
 template <>
 InputParameters
 validParams<TestSteady>()

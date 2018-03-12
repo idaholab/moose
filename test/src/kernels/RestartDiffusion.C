@@ -9,6 +9,8 @@
 
 #include "RestartDiffusion.h"
 
+registerMooseObject("MooseTestApp", RestartDiffusion);
+
 template <>
 InputParameters
 validParams<RestartDiffusion>()

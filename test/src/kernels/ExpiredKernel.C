@@ -9,6 +9,8 @@
 
 #include "ExpiredKernel.h"
 
+registerMooseObjectDeprecated("MooseTestApp", ExpiredKernel, "01/01/2018 00:00");
+
 template <>
 InputParameters
 validParams<ExpiredKernel>()

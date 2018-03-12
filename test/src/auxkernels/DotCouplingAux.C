@@ -9,6 +9,8 @@
 
 #include "DotCouplingAux.h"
 
+registerMooseObject("MooseTestApp", DotCouplingAux);
+
 template <>
 InputParameters
 validParams<DotCouplingAux>()

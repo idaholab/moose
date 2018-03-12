@@ -9,6 +9,8 @@
 
 #include "SumMaterial.h"
 
+registerMooseObject("MooseTestApp", SumMaterial);
+
 template <>
 InputParameters
 validParams<SumMaterial>()

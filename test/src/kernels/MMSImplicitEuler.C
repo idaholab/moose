@@ -9,6 +9,8 @@
 
 #include "MMSImplicitEuler.h"
 
+registerMooseObject("MooseTestApp", MMSImplicitEuler);
+
 template <>
 InputParameters
 validParams<MMSImplicitEuler>()

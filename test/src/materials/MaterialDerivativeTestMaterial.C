@@ -9,6 +9,8 @@
 
 #include "MaterialDerivativeTestMaterial.h"
 
+registerMooseObject("MooseTestApp", MaterialDerivativeTestMaterial);
+
 template <>
 InputParameters
 validParams<MaterialDerivativeTestMaterial>()

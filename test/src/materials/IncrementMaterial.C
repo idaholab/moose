@@ -9,6 +9,8 @@
 
 #include "IncrementMaterial.h"
 
+registerMooseObject("MooseTestApp", IncrementMaterial);
+
 template <>
 InputParameters
 validParams<IncrementMaterial>()

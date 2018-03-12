@@ -9,6 +9,8 @@
 
 #include "LateDeclarationVectorPostprocessor.h"
 
+registerMooseObject("MooseTestApp", LateDeclarationVectorPostprocessor);
+
 template <>
 InputParameters
 validParams<LateDeclarationVectorPostprocessor>()

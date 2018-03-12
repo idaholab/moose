@@ -9,6 +9,8 @@
 
 #include "ForcingFunctionXYZ0.h"
 
+registerMooseObject("MooseTestApp", ForcingFunctionXYZ0);
+
 template <>
 InputParameters
 validParams<ForcingFunctionXYZ0>()

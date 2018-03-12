@@ -9,6 +9,8 @@
 
 #include "Advection0.h"
 
+registerMooseObject("MooseTestApp", Advection0);
+
 template <>
 InputParameters
 validParams<Advection0>()

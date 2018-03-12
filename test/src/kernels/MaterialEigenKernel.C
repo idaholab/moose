@@ -9,6 +9,8 @@
 
 #include "MaterialEigenKernel.h"
 
+registerMooseObject("MooseTestApp", MaterialEigenKernel);
+
 template <>
 InputParameters
 validParams<MaterialEigenKernel>()

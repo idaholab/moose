@@ -8,6 +8,8 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 #include "DefaultMatPropConsumerKernel.h"
 
+registerMooseObject("MooseTestApp", DefaultMatPropConsumerKernel);
+
 template <>
 InputParameters
 validParams<DefaultMatPropConsumerKernel>()

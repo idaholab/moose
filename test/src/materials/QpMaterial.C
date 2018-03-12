@@ -9,6 +9,8 @@
 
 #include "QpMaterial.h"
 
+registerMooseObject("MooseTestApp", QpMaterial);
+
 template <>
 InputParameters
 validParams<QpMaterial>()

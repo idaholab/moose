@@ -17,6 +17,8 @@
 
 #include "libmesh/quadrature.h"
 
+registerMooseObject("MooseTestApp", ScalarLagrangeMultiplier);
+
 template <>
 InputParameters
 validParams<ScalarLagrangeMultiplier>()

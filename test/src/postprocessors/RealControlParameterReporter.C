@@ -13,6 +13,8 @@
 #include "MooseObjectParameterName.h"
 #include "InputParameterWarehouse.h"
 
+registerMooseObject("MooseTestApp", RealControlParameterReporter);
+
 template <>
 InputParameters
 validParams<RealControlParameterReporter>()

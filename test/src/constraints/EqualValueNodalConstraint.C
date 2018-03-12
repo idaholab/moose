@@ -9,6 +9,8 @@
 
 #include "EqualValueNodalConstraint.h"
 
+registerMooseObject("MooseTestApp", EqualValueNodalConstraint);
+
 template <>
 InputParameters
 validParams<EqualValueNodalConstraint>()

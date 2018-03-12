@@ -9,6 +9,8 @@
 
 #include "StripeMesh.h"
 
+registerMooseObject("MooseTestApp", StripeMesh);
+
 template <>
 InputParameters
 validParams<StripeMesh>()
