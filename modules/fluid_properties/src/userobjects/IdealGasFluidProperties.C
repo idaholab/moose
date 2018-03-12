@@ -45,9 +45,7 @@ IdealGasFluidProperties::p_from_v_e(Real v, Real e) const
     throw MooseException(
         name() + ": Invalid value of specific volume detected (v = " + Moose::stringify(v) + ").");
 
-  // The std::max function serves as a hard limiter, which will guarantee non-negative pressure
-  // when resolving strongly nonlinear waves
-  return std::max(1.0e-8, (_gamma - 1.0) * e / v);
+  return (_gamma - 1.0) * e / v;
 }
 
 void
@@ -76,9 +74,13 @@ Real
 IdealGasFluidProperties::c_from_v_e(Real v, Real e) const
 {
   Real T = T_from_v_e(v, e);
-  // The std::max function serves as a hard limiter, which will guarantee non-negative speed of
-  // sound when resolving strongly nonlinear waves
-  return std::sqrt(std::max(1.0e-8, _gamma * _R * T));
+
+  const Real c2 = _gamma * _R * T;
+  if (c2 < 0)
+    mooseException(name() + ": Sound speed squared (gamma * R * T) is negative: c2 = " +
+                   Moose::stringify(c2) + ".");
+
+  return std::sqrt(c2);
 }
 
 void
@@ -87,7 +89,7 @@ IdealGasFluidProperties::c_from_v_e(Real v, Real e, Real & c, Real & dc_dv, Real
   Real T, dT_dv, dT_de;
   T_from_v_e(v, e, T, dT_dv, dT_de);
 
-  c = std::sqrt(std::max(1.0e-8, _gamma * _R * T));
+  c = std::sqrt(_gamma * _R * T);
 
   const Real dc_dT = 0.5 / c * _gamma * _R;
   dc_dv = dc_dT * dT_dv;
