@@ -27,7 +27,7 @@ validParams<ReflectionCoefficient>()
 ReflectionCoefficient::ReflectionCoefficient(const InputParameters & parameters)
   : SidePostprocessor(parameters),
 
-    MooseVariableInterface(this, false),
+    MooseVariableInterface<Real>(this, false),
     _u(coupledValue("variable")),
 
     _qp(0),
