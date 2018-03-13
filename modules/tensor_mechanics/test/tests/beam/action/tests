@@ -1,0 +1,13 @@
+[Tests]
+  [./2_block_action]
+    test = Exodiff
+    input = '2_block.i'
+    exodiff = '2_block_out.e'
+  [../]
+  [./2_block_common_action]
+    test = Exodiff
+    input = '2_block_common.i'
+    exodiff = '2_block_out.e'
+    prereq = '2_block_action'
+  [../]
+[]

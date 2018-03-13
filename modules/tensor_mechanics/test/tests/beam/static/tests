@@ -29,4 +29,16 @@
     input = 'euler_finite_rot_z.i'
     exodiff = 'euler_finite_rot_z_out.e'
   [../]
+  [./euler_small_y_with_action]
+    type = 'Exodiff'
+    input = 'euler_small_strain_y_action.i'
+    exodiff = 'euler_small_strain_y_out.e'
+    prereq = euler_small_strain_y
+  [../]
+  [./euler_finite_y_with_action]
+    type = 'Exodiff'
+    input = 'euler_finite_rot_y_action.i'
+    exodiff = 'euler_finite_rot_y_out.e'
+    prereq = euler_finite_rot_y
+  [../]
 []

@@ -14,4 +14,10 @@
     input = 'eigenstrain_from_csv.i'
     exodiff = 'eigenstrain_from_csv_out.e'
   [../]
+  [./eigenstrain_from_csv_action]
+    type = 'Exodiff'
+    input = 'eigenstrain_from_csv_action.i'
+    exodiff = 'eigenstrain_from_csv_out.e'
+    prereq = 'eigenstrain_from_csv'
+  [../]
 []

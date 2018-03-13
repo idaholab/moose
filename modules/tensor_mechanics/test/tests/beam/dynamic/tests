@@ -19,4 +19,16 @@
     input = 'dyn_euler_small_added_mass_inertia_damping.i'
     exodiff = 'dyn_euler_small_added_mass_inertia_damping_out.e'
   [../]
+  [./dyn_euler_rayleigh_hht_action]
+    type = 'Exodiff'
+    input = 'dyn_euler_small_rayleigh_hht_action.i'
+    exodiff = 'dyn_euler_small_rayleigh_hht_out.e'
+    prereq = 'dyn_euler_rayleigh_hht'
+  [../]
+  [./dyn_euler_added_mass_inertia_damping_action]
+    type = 'Exodiff'
+    input = 'dyn_euler_small_added_mass_inertia_damping_action.i'
+    exodiff = 'dyn_euler_small_added_mass_inertia_damping_out.e'
+    prereq = 'dyn_euler_added_mass_inertia_damping'
+  [../]
 []
