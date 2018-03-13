@@ -10,6 +10,8 @@
 #include "RigidBodyModes3D.h"
 #include "NonlinearSystem.h"
 
+registerMooseObject("MiscApp", RigidBodyModes3D);
+
 template <>
 InputParameters
 validParams<RigidBodyModes3D>()

@@ -12,6 +12,8 @@
 
 #include "libmesh/mesh_tools.h"
 
+registerMooseObject("MiscApp", CoupledDirectionalMeshHeightInterpolation);
+
 template <>
 InputParameters
 validParams<CoupledDirectionalMeshHeightInterpolation>()

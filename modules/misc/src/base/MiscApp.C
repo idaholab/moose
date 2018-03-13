@@ -12,14 +12,6 @@
 #include "AppFactory.h"
 #include "MooseSyntax.h"
 
-#include "CoefDiffusion.h"
-#include "Density.h"
-#include "InternalVolume.h"
-#include "CoefTimeDerivative.h"
-#include "RigidBodyModes3D.h"
-#include "CoupledDirectionalMeshHeightInterpolation.h"
-#include "ThermoDiffusion.h"
-
 template <>
 InputParameters
 validParams<MiscApp>()
@@ -63,17 +55,7 @@ MiscApp__registerObjects(Factory & factory)
 void
 MiscApp::registerObjects(Factory & factory)
 {
-  registerAux(CoupledDirectionalMeshHeightInterpolation);
-
-  registerKernel(CoefDiffusion);
-  registerKernel(CoefTimeDerivative);
-  registerKernel(ThermoDiffusion);
-
-  registerMaterial(Density);
-
-  registerUserObject(RigidBodyModes3D);
-
-  registerPostprocessor(InternalVolume);
+  Registry::registerObjectsTo(factory, {"MiscApp"});
 }
 
 // External entry point for dynamic syntax association
@@ -83,8 +65,9 @@ MiscApp__associateSyntax(Syntax & syntax, ActionFactory & action_factory)
   MiscApp::associateSyntax(syntax, action_factory);
 }
 void
-MiscApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & /*action_factory*/)
+MiscApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & action_factory)
 {
+  Registry::registerActionsTo(action_factory, {"MiscApp"});
 }
 
 // External entry point for dynamic execute flag registration
