@@ -10,6 +10,8 @@
 #include "FluidPropertiesMaterial.h"
 #include "SinglePhaseFluidProperties.h"
 
+registerMooseObject("FluidPropertiesApp", FluidPropertiesMaterial);
+
 template <>
 InputParameters
 validParams<FluidPropertiesMaterial>()

@@ -9,6 +9,8 @@
 
 #include "IdealGasFluidPropertiesPT.h"
 
+registerMooseObject("FluidPropertiesApp", IdealGasFluidPropertiesPT);
+
 template <>
 InputParameters
 validParams<IdealGasFluidPropertiesPT>()

@@ -9,6 +9,8 @@
 
 #include "FluidPropertiesMaterialPT.h"
 
+registerMooseObject("FluidPropertiesApp", FluidPropertiesMaterialPT);
+
 template <>
 InputParameters
 validParams<FluidPropertiesMaterialPT>()

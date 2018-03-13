@@ -10,6 +10,8 @@
 #include "IdealGasFluidProperties.h"
 #include "Conversion.h"
 
+registerMooseObject("FluidPropertiesApp", IdealGasFluidProperties);
+
 template <>
 InputParameters
 validParams<IdealGasFluidProperties>()

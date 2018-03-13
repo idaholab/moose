@@ -10,6 +10,8 @@
 #include "StagnationPressureAux.h"
 #include "SinglePhaseFluidProperties.h"
 
+registerMooseObject("FluidPropertiesApp", StagnationPressureAux);
+
 template <>
 InputParameters
 validParams<StagnationPressureAux>()

@@ -9,6 +9,8 @@
 
 #include "StiffenedGasFluidProperties.h"
 
+registerMooseObject("FluidPropertiesApp", StiffenedGasFluidProperties);
+
 template <>
 InputParameters
 validParams<StiffenedGasFluidProperties>()

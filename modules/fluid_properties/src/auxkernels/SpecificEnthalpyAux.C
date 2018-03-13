@@ -10,6 +10,8 @@
 #include "SpecificEnthalpyAux.h"
 #include "SinglePhaseFluidProperties.h"
 
+registerMooseObject("FluidPropertiesApp", SpecificEnthalpyAux);
+
 template <>
 InputParameters
 validParams<SpecificEnthalpyAux>()
