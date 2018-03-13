@@ -12,7 +12,7 @@ from MooseDocs import common
 from MooseDocs.base import components
 from MooseDocs.common import exceptions
 from MooseDocs.tree import html, tokens, syntax, app_syntax
-from MooseDocs.extensions import floats, autolink
+from MooseDocs.extensions import floats, autolink, materialicon
 
 from MooseDocs.extensions import command
 
@@ -46,11 +46,6 @@ class SyntaxToken(tokens.Token):
                   tokens.Property('objects', default=True, ptype=bool),
                   tokens.Property('subsystems', default=True, ptype=bool),
                   tokens.Property('groups', default=[], ptype=list)]
-
-
-class IconToken(tokens.Token):
-    #TODO: Move this to materialize or core extension???
-    PROPERTIES = [tokens.Property('icon', ptype=unicode, required=True)]
 
 class AppSyntaxExtension(command.CommandExtension):
 
@@ -120,7 +115,7 @@ class AppSyntaxExtension(command.CommandExtension):
 
     def extend(self, reader, renderer):
 
-        self.requires(floats, autolink)
+        self.requires(floats, autolink, materialicon)
 
         self.addCommand(SyntaxDescriptionCommand())
         self.addCommand(SyntaxParametersCommand())
@@ -133,7 +128,6 @@ class AppSyntaxExtension(command.CommandExtension):
 
         renderer.add(SyntaxToken, RenderSyntaxToken())
         renderer.add(AppSyntaxDisabledToken, RenderAppSyntaxDisabledToken())
-        renderer.add(IconToken, RenderIconToken())
 
 class SyntaxCommandBase(command.CommandComponent):
     COMMAND = 'syntax'
@@ -327,7 +321,7 @@ class SyntaxCompleteCommand(SyntaxCommandBase):
             # TODO: systems prefix is needed to be unique, there must be a better way
             url = os.path.join('systems', child.markdown())
             a = autolink.AutoLink(h, url=url)
-            IconToken(a, icon=u'input', style="padding-left:10px;")
+            materialicon.IconToken(a, icon=u'input', style="padding-left:10px;")
 
             SyntaxToken(parent,
                         syntax=child,
@@ -348,16 +342,6 @@ class SyntaxCompleteCommand(SyntaxCommandBase):
         return parent
 
 
-class RenderIconToken(components.RenderComponent):
-    def createHTML(self, token, parent):
-        pass
-
-    def createMaterialize(self, token, parent): #pylint: disable=no-self-use
-        i = html.Tag(parent, 'i', class_='material-icons', **token.attributes)
-        html.String(i, content=token.icon, hide=True)
-
-    def createLatex(self, token, parent):
-        pass
 
 class RenderSyntaxToken(components.RenderComponent):
     def createHTML(self, token, parent):

@@ -31,7 +31,7 @@ class Translator(mixins.ConfigObject):
           have access to only the Reader and RenderComponent only have the Renderer. This would
           avoid the temptation from tokenizing in the renderer and rendering in the tokenizer. To do
           this the parallel implementation needs to be improved, which is not all the easy in
-          python. For a dicussion of why, see the "execute" method below.
+          python. For a discussion of why, see the "execute" method below.
 
     Inputs:
         reader: [Reader] A Reader instance.
@@ -55,6 +55,10 @@ class Translator(mixins.ConfigObject):
         self.__extensions = extensions
         self.__reader = reader
         self.__renderer = renderer
+        self.__extension_functions = dict(preRender=list(),
+                                          postRender=list(),
+                                          preTokenize=list(),
+                                          postTokenize=list())
 
     @property
     def extensions(self):
@@ -124,11 +128,29 @@ class Translator(mixins.ConfigObject):
                 if comp.extension is None:
                     comp.extension = ext
 
+            for func_name in self.__extension_functions:
+                if hasattr(ext, func_name):
+                    self.__extension_functions[func_name].append(getattr(ext, func_name))
+
         for node in anytree.PreOrderIter(self.__root):
             node.base = destination
             node.init(self)
 
         self.__initialized = True
+
+    def executeExtensionFunction(self, name, *args):
+        """
+        Execute pre/post functions for extensions.
+        """
+        if MooseDocs.LOG_LEVEL == logging.DEBUG:
+            common.check_type('name', name, str)
+            if name not in self.__extension_functions:
+                msg = "The supplied extension function name '{}' does not exist, the possible " \
+                      "names include: {}."
+                raise exceptions.MooseDocsException(msg, name, self.__extension_functions.keys())
+
+        for func in self.__extension_functions[name]:
+            func(*args)
 
     def reinit(self):
         """
@@ -165,14 +187,14 @@ class Translator(mixins.ConfigObject):
 
         The current implementation performs all four steps together, which generally works just
         fine, with one exception. The autolink extension actually interrogates the AST from other
-        pages. Hence, if the other page was generated of process the information is not available.
+        pages. Hence, if the other page was generated off process the information is not available.
         The current implementation will just compute the AST locally (i.e., I am performing repeated
         calculations in favor of communication). This works well enough for now, but as more
         autolinking is preformed and other similar extensions are created this could cause a slow
         down.
 
         Long term this should be looked into again, for now the current approach is working well.
-        This new system is already an order of magnitude faster than the previous implementation and
+        This new system is already an order of 4 times faster than the previous implementation and
         likely could be optimized further.
         """
         common.check_type('num_threads', num_threads, int)

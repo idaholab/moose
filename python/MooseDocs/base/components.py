@@ -14,6 +14,15 @@ class Extension(mixins.ConfigObject, mixins.TranslatorObject):
 
     Inputs:
         kwargs: All key-value pairs are treated as configure options, see ConfigObject.
+
+    The Translator object allows for pre/post calls to the Extension object for tokenization
+    and rendering. Within your extension one of the following methods exist it will be called
+    automatically.
+
+        preTokenize(ast, config)
+        postTokenize(ast, config)
+        preRender(root, config)
+        postRender(root, config)
     """
     def __init__(self, **kwargs):
         mixins.ConfigObject.__init__(self, **kwargs)
@@ -43,15 +52,6 @@ class Extension(mixins.ConfigObject, mixins.TranslatorObject):
 
         if messages:
             raise exceptions.MooseDocsException('\n'.join(messages))
-
-    def postTokenize(self, ast):
-        """
-        After token creation is complete, this method is executed with the complete AST.
-
-        Inputs:
-            ast[MooseDocs.tree.tokens.Token]: The root node of the complete AST.
-        """
-        pass
 
 
 class Component(mixins.TranslatorObject):
@@ -138,8 +138,6 @@ class TokenComponent(Component):
             parent[tokens.Token]: The parent node in the AST for the token being created.
         """
 
-
-
         # Define the settings
         defaults = self.defaultSettings()
         if self.PARSE_SETTINGS and ('settings' in info):
@@ -148,7 +146,6 @@ class TokenComponent(Component):
             self.__settings = {k:v[0] for k, v in defaults.iteritems()}
 
         # Call user method and reset settings
-        #TODO: wrap this in a try catch for all exceptions, at least in debug mode
         token = self.createToken(info, parent)
         self.__settings = None
         return token

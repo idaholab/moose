@@ -205,6 +205,12 @@ class TestTokens(unittest.TestCase):
             token = tokens.Float()
         self.assertIn("The property 'label' is required.", e.exception.message)
 
+    def testErrorToken(self):
+        def func():
+            pass
+        pattern = lexers.Pattern(name='foo', regex=re.compile('\S'), function=func)
+        tokens.ErrorToken(pattern=pattern)
+
     def testExceptionToken(self):
         def func():
             pass

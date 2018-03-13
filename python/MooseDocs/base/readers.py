@@ -3,8 +3,6 @@ import logging
 
 import anytree
 
-import mooseutils
-
 import MooseDocs
 from MooseDocs import common
 from MooseDocs.common import mixins
@@ -56,20 +54,28 @@ class Reader(mixins.ConfigObject, mixins.TranslatorObject, mixins.ComponentObjec
             content[unicode:tree.page.PageNodeBase]: The content to parse, either as a unicode
                                                      string or a page node object.
         """
-
         # Type checking
         if MooseDocs.LOG_LEVEL == logging.DEBUG:
             common.check_type('root', root, tokens.Token)
             common.check_type('content', content, unicode)
 
-        # Tokenize
+        # Re-initialize
+        config = self.getConfig() #
         self.reinit()
+
+        # Pre-tokenize
+        self.translator.executeExtensionFunction('preTokenize', root, config)
+
+        # Tokenize
         self.__lexer.tokenize(root, self.__lexer.grammer(group), content)
+
+        # Post-tokenize
+        self.translator.executeExtensionFunction('postTokenize', root, config)
 
         # Report errors
         for token in anytree.PreOrderIter(root):
-            if isinstance(token, tokens.ExceptionToken):
-                self._exceptionHandler(token)
+            if isinstance(token, tokens.ErrorToken):
+                LOG.error(token.report(self.translator.current))
 
     def add(self, group, component, location='_end'):
         """
@@ -96,28 +102,6 @@ class Reader(mixins.ConfigObject, mixins.TranslatorObject, mixins.ComponentObjec
 
         # Update the lexer
         self.__lexer.add(group, name, component.RE, component, location)
-
-    def _exceptionHandler(self, token):
-        """
-        The Lexer converts all TokenizeException caught during tokenization into tokens.Exception
-        tokens. This allows the tokenization to report all errors at once and allow for the AST and
-        rendering to be performed. This method is simply a convenience function for reporting the
-        exceptions to the logging system.
-        """
-        title = 'ERROR: {}'.format(token.message)
-        if self.translator.current:
-            source = self.translator.current.source
-            filename = mooseutils.colorText('{}:{}\n'.format(source, token.info.line), 'RESET')
-        else:
-            filename = ''
-
-        box = mooseutils.colorText(MooseDocs.common.box(token.info[0],
-                                                        line=token.info.line,
-                                                        width=100), 'LIGHT_CYAN')
-
-        trace = mooseutils.colorText(token.traceback, 'GREY')
-
-        LOG.error(u'\n%s\n%s%s\n%s\n', title, filename, box, trace)
 
 class MarkdownReader(Reader):
     """
