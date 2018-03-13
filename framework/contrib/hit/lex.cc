@@ -315,20 +315,6 @@ lexEq(Lexer * l)
 void
 consumeUnquotedString(Lexer * l)
 {
-  // check for dollar substitution syntax
-  if (l->peek() == '$')
-  {
-    while (true)
-    {
-      char c = l->next();
-      // '#' is always a comment outside of quoted string
-      if (c == '\0' || charIn(c, newline + "#"))
-        break;
-    }
-    l->backup();
-    return;
-  }
-
   while (true)
   {
     char c = l->next();
