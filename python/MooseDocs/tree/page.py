@@ -36,7 +36,7 @@ class PageNodeBase(base.NodeBase, mixins.TranslatorObject):
         mixins.TranslatorObject.__init__(self)
         base.NodeBase.__init__(self, *args, **kwargs)
 
-    def build(self, *args, **kwargs): #pylint: disable=unused-argument
+    def build(self):
         """Performs a 'build', this is called by Translator."""
         self.write()
 
@@ -158,6 +158,7 @@ class FileNode(LocationNodeBase):
 
     def write(self):
         LocationNodeBase.write(self)
+        LOG.debug('COPY: %s-->%s', self.source, self.destination)
         shutil.copyfile(self.source, self.destination)
 
 class MarkdownNode(FileNode):
@@ -248,7 +249,7 @@ class MarkdownNode(FileNode):
         """
         if self._result is not None:
             LOG.debug('WRITE %s -> %s', self.source, self.destination)
-            FileNode.write(self)
+            LocationNodeBase.write(self) # Creates directories
             with codecs.open(self.destination, 'w', encoding='utf-8') as fid:
                 fid.write(self._result.write())
 
@@ -256,4 +257,9 @@ class MarkdownNode(FileNode):
         """
         Build method for livereload.
         """
-        self.translator.build(self)
+        self.translator.current = self
+        self.translator.reinit()
+        ast = self.tokenize()
+        self.render(ast)
+        self.write()
+        self.translator.current = None

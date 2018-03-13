@@ -81,6 +81,13 @@ class Translator(mixins.ConfigObject):
         """Return the current page being converted, see build method."""
         return self.__current
 
+    @current.setter
+    def current(self, value):
+        """Set the current page being translated, see page.MarkdownNode.build()."""
+        if MooseDocs.LOG_LEVEL == logging.DEBUG:
+            common.check_type('value', value, (type(None), page.PageNodeBase))
+        self.__current = value
+
     @property
     def lock(self):
         """Return a multiprocessing lock for serial operations (e.g., directory creation)."""
@@ -178,7 +185,7 @@ class Translator(mixins.ConfigObject):
         def target(nodes):
             """Helper for building multiple nodes (i.e., a chunk for a process)."""
             for node in nodes:
-                self.build(node)
+                node.build()
 
         # Complete list of nodes
         nodes = [n for n in anytree.PreOrderIter(self.root)]
@@ -201,21 +208,6 @@ class Translator(mixins.ConfigObject):
         # Done
         stop = time.time()
         LOG.info("Build time %s sec.", stop - start)
-
-    def build(self, node):
-        """
-        Perform a complete conversion read->ast->render->write of the supplied node.
-
-        Inputs:
-            node[page.PageNodeBase]: The node to convert.
-        """
-        if isinstance(node, page.MarkdownNode):
-            self.__current = node
-            self.reinit()
-            ast = node.tokenize()
-            node.render(ast)
-            node.write()
-            self.__current = None
 
     def __assertInitialize(self):
         """Helper for asserting initialize status."""
