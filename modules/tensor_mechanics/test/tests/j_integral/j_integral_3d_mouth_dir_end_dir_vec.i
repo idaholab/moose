@@ -48,6 +48,7 @@
   radius_outer = '5.5 7.0'
   output_variable = 'disp_x'
   output_q = false
+  incremental = true
 []
 
 [Modules/TensorMechanics/Master]

@@ -211,6 +211,7 @@
 #include "EshelbyTensor.h"
 #include "InteractionIntegral.h"
 #include "ThermalFractureIntegral.h"
+#include "StrainEnergyDensity.h"
 
 template <>
 InputParameters
@@ -361,6 +362,7 @@ TensorMechanicsApp::registerObjects(Factory & factory)
   registerMaterial(AbruptSoftening);
   registerMaterial(ExponentialSoftening);
   registerMaterial(PowerLawSoftening);
+  registerMaterial(StrainEnergyDensity);
 
   registerUserObject(TensorMechanicsPlasticSimpleTester);
   registerUserObject(TensorMechanicsPlasticTensile);

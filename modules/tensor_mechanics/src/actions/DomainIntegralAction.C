@@ -76,8 +76,9 @@ validParams<DomainIntegralAction>()
   params.addParam<bool>("solid_mechanics",
                         false,
                         "Set to true if the solid_mechanics system is "
-                        "used. This option is only needed for "
-                        "interaction integrals.");
+                        "used.");
+  params.addRequiredParam<bool>(
+      "incremental", "Flag to indicate whether an incremental or total model is being used.");
   params.addParam<std::vector<MaterialPropertyName>>(
       "eigenstrain_names", "List of eigenstrains applied in the strain calculation");
   return params;
@@ -106,7 +107,8 @@ DomainIntegralAction::DomainIntegralAction(const InputParameters & params)
     _get_equivalent_k(getParam<bool>("equivalent_k")),
     _use_displaced_mesh(false),
     _output_q(getParam<bool>("output_q")),
-    _solid_mechanics(getParam<bool>("solid_mechanics"))
+    _solid_mechanics(getParam<bool>("solid_mechanics")),
+    _incremental(getParam<bool>("incremental"))
 {
   if (_q_function_type == GEOMETRY)
   {
@@ -762,6 +764,30 @@ DomainIntegralAction::act()
           getParam<std::vector<MaterialPropertyName>>("eigenstrain_names");
       params.set<std::vector<VariableName>>("temperature") = {_temp};
 
+      _problem->addMaterial(mater_type_name, mater_name, params);
+    }
+    MultiMooseEnum integral_moose_enums = getParam<MultiMooseEnum>("integrals");
+    bool have_j_integral = false;
+    for (auto ime : integral_moose_enums)
+    {
+      if (ime == "JIntegral")
+        have_j_integral = true;
+    }
+    if (have_j_integral && !_solid_mechanics)
+    {
+      std::string mater_name;
+      const std::string mater_type_name("StrainEnergyDensity");
+      if (isParamValid("blocks"))
+      {
+        _blocks = getParam<std::vector<SubdomainName>>("blocks");
+        mater_name = "StrainEnergyDensity" + _blocks[0];
+      }
+      else
+        mater_name = "StrainEnergyDensity";
+
+      InputParameters params = _factory.getValidParams(mater_type_name);
+      _incremental = getParam<bool>("incremental");
+      params.set<bool>("incremental") = _incremental;
       _problem->addMaterial(mater_type_name, mater_name, params);
     }
   }

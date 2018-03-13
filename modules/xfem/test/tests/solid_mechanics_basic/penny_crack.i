@@ -74,6 +74,8 @@
   poissons_ratio = 0.3
   youngs_modulus = 207000
   block = 1
+  incremental = true
+  solid_mechanics = true
 []
 
 [SolidMechanics]
