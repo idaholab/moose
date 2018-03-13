@@ -35,6 +35,7 @@
 #include "MooseUtils.h"
 
 #include "libmesh/parallel.h"
+#include "libmesh/fparser.hh"
 
 // Regular expression includes
 #include "pcrecpp.h"
@@ -46,6 +47,50 @@
 #include <iomanip>
 #include <algorithm>
 #include <cstdlib>
+
+class FuncParseEvaler : public hit::Evaler
+{
+public:
+  virtual std::string eval(hit::Node * n, std::list<std::string> & args)
+  {
+    std::string func_text;
+    for (auto & s : args)
+      func_text += s;
+
+    FunctionParser fp;
+    std::vector<std::string> var_names;
+    auto ret = fp.ParseAndDeduceVariables(func_text, var_names);
+    if (ret != -1)
+      throw hit::Error(std::string("fparse error: ") + fp.ErrorMsg());
+
+    std::string errors;
+    std::vector<double> var_vals;
+    for (auto & var : var_names)
+    {
+      // recursively check all parent scopes for the needed variables
+      auto curr = n;
+      while ((curr = curr->parent()))
+      {
+        auto src = curr->find(var);
+        if (src && src != n && src->type() == hit::NodeType::Field)
+        {
+          var_vals.push_back(curr->param<double>(var));
+          break;
+        }
+      }
+
+      if (curr == nullptr)
+        errors += "\n    no variable '" + var + "' found for use in function parser expression";
+    }
+
+    if (!errors.empty())
+      throw hit::Error(errors);
+
+    std::stringstream ss;
+    ss << std::setprecision(17) << fp.Eval(var_vals.data());
+    return ss.str();
+  }
+};
 
 Parser::Parser(MooseApp & app, ActionWarehouse & action_wh)
   : ConsoleStreamInterface(app),
@@ -114,10 +159,11 @@ public:
       if (_duplicates.count(fullpath) == 0)
       {
         errors.push_back(
-            errormsg(_fname, existing, prefix, " '", fullpath, "' supplied multiple times"));
+            hit::errormsg(_fname, existing, prefix, " '", fullpath, "' supplied multiple times"));
         _duplicates.insert(fullpath);
       }
-      errors.push_back(errormsg(_fname, n, prefix, " '", fullpath, "' supplied multiple times"));
+      errors.push_back(
+          hit::errormsg(_fname, n, prefix, " '", fullpath, "' supplied multiple times"));
     }
     _have[n->fullpath()] = n;
   }
@@ -193,16 +239,16 @@ public:
       auto paramlist = _parser.listValidParams(section_name);
       auto candidates = findSimilar(nodename, paramlist);
       if (candidates.size() > 0)
-        errors.push_back(errormsg(_fname,
-                                  n,
-                                  "unused parameter '",
-                                  fullpath,
-                                  "'\n",
-                                  "      Did you mean '",
-                                  candidates[0],
-                                  "'?"));
+        errors.push_back(hit::errormsg(_fname,
+                                       n,
+                                       "unused parameter '",
+                                       fullpath,
+                                       "'\n",
+                                       "      Did you mean '",
+                                       candidates[0],
+                                       "'?"));
       else
-        errors.push_back(errormsg(_fname, n, "unused parameter '", fullpath, "'"));
+        errors.push_back(hit::errormsg(_fname, n, "unused parameter '", fullpath, "'"));
     }
   }
 
@@ -228,8 +274,8 @@ public:
     if (actives && inactives && actives->type() == hit::NodeType::Field &&
         inactives->type() == hit::NodeType::Field && actives->parent() == inactives->parent())
     {
-      errors.push_back(
-          errormsg(_fname, section, "'active' and 'inactive' parameters both provided in section"));
+      errors.push_back(hit::errormsg(
+          _fname, section, "'active' and 'inactive' parameters both provided in section"));
       return;
     }
 
@@ -246,13 +292,13 @@ public:
       if (msg.size() > 0)
       {
         msg = msg.substr(0, msg.size() - 2);
-        errors.push_back(errormsg(_fname,
-                                  section,
-                                  "variables listed as active (",
-                                  msg,
-                                  ") in section '",
-                                  section->fullpath(),
-                                  "' not found in input"));
+        errors.push_back(hit::errormsg(_fname,
+                                       section,
+                                       "variables listed as active (",
+                                       msg,
+                                       ") in section '",
+                                       section->fullpath(),
+                                       "' not found in input"));
       }
     }
     // ensures we don't recheck deeper nesting levels
@@ -268,13 +314,13 @@ public:
       if (msg.size() > 0)
       {
         msg = msg.substr(0, msg.size() - 2);
-        errors.push_back(errormsg(_fname,
-                                  section,
-                                  "variables listed as inactive (",
-                                  msg,
-                                  ") in section '",
-                                  section->fullpath(),
-                                  "' not found in input"));
+        errors.push_back(hit::errormsg(_fname,
+                                       section,
+                                       "variables listed as inactive (",
+                                       msg,
+                                       ") in section '",
+                                       section->fullpath(),
+                                       "' not found in input"));
       }
     }
   }
@@ -324,11 +370,11 @@ Parser::walkRaw(std::string /*fullpath*/, std::string /*nodepath*/, hit::Node * 
   auto iters = _syntax.getActions(registered_identifier);
   if (iters.first == iters.second)
   {
-    _errmsg += errormsg(getFileName(),
-                        n,
-                        "section '",
-                        curr_identifier,
-                        "' does not have an associated \"Action\".\nDid you misspell it?");
+    _errmsg += hit::errormsg(getFileName(),
+                             n,
+                             "section '",
+                             curr_identifier,
+                             "' does not have an associated \"Action\".\nDid you misspell it?");
     return;
   }
 
@@ -338,7 +384,7 @@ Parser::walkRaw(std::string /*fullpath*/, std::string /*nodepath*/, hit::Node * 
       continue;
     if (_syntax.isDeprecatedSyntax(registered_identifier))
       mooseDeprecated(
-          errormsg(getFileName(), n, "\"[", registered_identifier, "]\" is deprecated."));
+          hit::errormsg(getFileName(), n, "\"[", registered_identifier, "]\" is deprecated."));
 
     params = _action_factory.getValidParams(it->second._action);
 
@@ -509,7 +555,14 @@ Parser::parse(const std::string & input_filename)
 
   // expand ${bla} parameter values and mark/include variables used in expansions as "used".  This
   // MUST occur before parameter extraction - otherwise parameters will get wrong values.
-  ExpandWalker exw(_input_filename);
+  hit::BraceExpander expander;
+  hit::RawEvaler raw;
+  hit::EnvEvaler env;
+  FuncParseEvaler fparse_ev;
+  expander.registerEvaler("raw", raw);
+  expander.registerEvaler("env", env);
+  expander.registerEvaler("fparse", fparse_ev);
+  hit::ExpandWalker exw(_input_filename, expander);
   _root->walk(&exw);
   for (auto & var : exw.used)
     _extracted_vars.insert(var);
@@ -587,7 +640,8 @@ Parser::errorCheck(const Parallel::Communicator & comm, bool warn_unused, bool e
   {
     for (auto arg : cli->unused(comm))
       _warnmsg +=
-          errormsg("CLI_ARG", nullptr, "unused command line parameter '", cli->argv()[arg], "'") +
+          hit::errormsg(
+              "CLI_ARG", nullptr, "unused command line parameter '", cli->argv()[arg], "'") +
           "\n";
     for (auto & msg : uwcli.errors)
       _warnmsg += msg + "\n";
@@ -597,9 +651,9 @@ Parser::errorCheck(const Parallel::Communicator & comm, bool warn_unused, bool e
   else if (err_unused)
   {
     for (auto arg : cli->unused(comm))
-      _errmsg +=
-          errormsg("CLI_ARG", nullptr, "unused command line parameter '", cli->argv()[arg], "'") +
-          "\n";
+      _errmsg += hit::errormsg(
+                     "CLI_ARG", nullptr, "unused command line parameter '", cli->argv()[arg], "'") +
+                 "\n";
     for (auto & msg : uwcli.errors)
       _errmsg += msg + "\n";
     for (auto & msg : uw.errors)
@@ -1273,14 +1327,14 @@ Parser::setScalarParameter(const std::string & full_name,
       catch (std::exception & /*e*/)
       {
         const std::string format_type = (t == typeid(double)) ? "float" : "integer";
-        _errmsg += errormsg(_input_filename,
-                            _root->find(full_name),
-                            "invalid ",
-                            format_type,
-                            " syntax for parameter: ",
-                            full_name,
-                            "=",
-                            strval) +
+        _errmsg += hit::errormsg(_input_filename,
+                                 _root->find(full_name),
+                                 "invalid ",
+                                 format_type,
+                                 " syntax for parameter: ",
+                                 full_name,
+                                 "=",
+                                 strval) +
                    "\n";
       }
     }
