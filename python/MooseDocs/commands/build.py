@@ -108,7 +108,7 @@ def main(options):
     Main function for the build command.
 
     Inputs:
-        options[argparse options]: Complate options from argparse, see MooseDocs/main.py
+        options[argparse options]: Complete options from argparse, see MooseDocs/main.py
     """
 
     # Make sure "large_media" exists in MOOSE
