@@ -110,9 +110,6 @@
   [./elastic_stress]
     type = ComputeFiniteStrainElasticStress
   [../]
-  [./eshelby]
-    type = EshelbyTensor
-  [../]
 []
 
 

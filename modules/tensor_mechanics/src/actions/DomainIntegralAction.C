@@ -56,7 +56,7 @@ validParams<DomainIntegralAction>()
   params.addParam<VariableName>("disp_x", "The x displacement");
   params.addParam<VariableName>("disp_y", "The y displacement");
   params.addParam<VariableName>("disp_z", "The z displacement");
-  params.addParam<VariableName>("temp", "", "The temperature");
+  params.addParam<VariableName>("temperature", "", "The temperature");
   MooseEnum position_type("Angle Distance", "Distance");
   params.addParam<MooseEnum>(
       "position_type",
@@ -232,8 +232,8 @@ DomainIntegralAction::DomainIntegralAction(const InputParameters & params)
     _integrals.insert(INTEGRAL(int(integral_moose_enums.get(i))));
   }
 
-  if (isParamValid("temp"))
-    _temp = getParam<VariableName>("temp");
+  if (isParamValid("temperature"))
+    _temp = getParam<VariableName>("temperature");
 
   if (_temp != "" && !isParamValid("eigenstrain_names") && !_solid_mechanics)
     mooseError(
@@ -499,7 +499,7 @@ DomainIntegralAction::act()
       params.set<Real>("youngs_modulus") = _youngs_modulus;
       params.set<std::vector<VariableName>>("displacements") = _displacements;
       if (_temp != "")
-        params.set<std::vector<VariableName>>("temp") = {_temp};
+        params.set<std::vector<VariableName>>("temperature") = {_temp};
       if (_has_symmetry_plane)
         params.set<unsigned int>("symmetry_plane") = _symmetry_plane;
 
@@ -751,19 +751,13 @@ DomainIntegralAction::act()
     {
       std::string mater_name;
       const std::string mater_type_name("ThermalFractureIntegral");
-      if (isParamValid("blocks"))
-      {
-        _blocks = getParam<std::vector<SubdomainName>>("blocks");
-        mater_name = "ThermalFractureIntegral" + _blocks[0];
-      }
-      else
-        mater_name = "ThermalFractureIntegral";
+      mater_name = "ThermalFractureIntegral";
 
       InputParameters params = _factory.getValidParams(mater_type_name);
       params.set<std::vector<MaterialPropertyName>>("eigenstrain_names") =
           getParam<std::vector<MaterialPropertyName>>("eigenstrain_names");
       params.set<std::vector<VariableName>>("temperature") = {_temp};
-
+      params.set<std::vector<SubdomainName>>("block") = {_blocks};
       _problem->addMaterial(mater_type_name, mater_name, params);
     }
     MultiMooseEnum integral_moose_enums = getParam<MultiMooseEnum>("integrals");
@@ -777,18 +771,27 @@ DomainIntegralAction::act()
     {
       std::string mater_name;
       const std::string mater_type_name("StrainEnergyDensity");
-      if (isParamValid("blocks"))
-      {
-        _blocks = getParam<std::vector<SubdomainName>>("blocks");
-        mater_name = "StrainEnergyDensity" + _blocks[0];
-      }
-      else
-        mater_name = "StrainEnergyDensity";
+      mater_name = "StrainEnergyDensity";
 
       InputParameters params = _factory.getValidParams(mater_type_name);
       _incremental = getParam<bool>("incremental");
       params.set<bool>("incremental") = _incremental;
+      params.set<std::vector<SubdomainName>>("block") = {_blocks};
       _problem->addMaterial(mater_type_name, mater_name, params);
+
+      std::string mater_name2;
+      const std::string mater_type_name2("EshelbyTensor");
+      mater_name2 = "EshelbyTensor";
+
+      InputParameters params2 = _factory.getValidParams(mater_type_name2);
+      _displacements = getParam<std::vector<VariableName>>("displacements");
+      params2.set<std::vector<VariableName>>("displacements") = _displacements;
+      params2.set<std::vector<SubdomainName>>("block") = {_blocks};
+      if (_temp != "")
+      {
+        params2.set<std::vector<VariableName>>("temperature") = {_temp};
+      }
+      _problem->addMaterial(mater_type_name2, mater_name2, params2);
     }
   }
 }

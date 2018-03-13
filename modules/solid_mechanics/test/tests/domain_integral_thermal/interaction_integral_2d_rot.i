@@ -101,7 +101,7 @@
   block = 1
   youngs_modulus = 207000
   poissons_ratio = 0.3
-  temp = temp
+  temperature = temp
   solid_mechanics = true
 []
 
