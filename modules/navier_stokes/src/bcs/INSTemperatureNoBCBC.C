@@ -9,6 +9,8 @@
 
 #include "INSTemperatureNoBCBC.h"
 
+registerMooseObject("NavierStokesApp", INSTemperatureNoBCBC);
+
 template <>
 InputParameters
 validParams<INSTemperatureNoBCBC>()

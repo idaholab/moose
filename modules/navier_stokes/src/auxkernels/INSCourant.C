@@ -10,6 +10,8 @@
 #include "INSCourant.h"
 #include "MooseMesh.h"
 
+registerMooseObject("NavierStokesApp", INSCourant);
+
 template <>
 InputParameters
 validParams<INSCourant>()

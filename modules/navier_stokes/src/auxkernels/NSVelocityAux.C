@@ -11,6 +11,8 @@
 #include "NSVelocityAux.h"
 #include "NS.h"
 
+registerMooseObject("NavierStokesApp", NSVelocityAux);
+
 template <>
 InputParameters
 validParams<NSVelocityAux>()

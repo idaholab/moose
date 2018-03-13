@@ -9,6 +9,8 @@
 
 #include "NSNoPenetrationBC.h"
 
+registerMooseObject("NavierStokesApp", NSNoPenetrationBC);
+
 template <>
 InputParameters
 validParams<NSNoPenetrationBC>()

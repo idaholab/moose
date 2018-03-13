@@ -11,6 +11,8 @@
 #include "NS.h"
 #include "NSMomentumInviscidFluxWithGradP.h"
 
+registerMooseObject("NavierStokesApp", NSMomentumInviscidFluxWithGradP);
+
 template <>
 InputParameters
 validParams<NSMomentumInviscidFluxWithGradP>()

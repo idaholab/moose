@@ -15,6 +15,8 @@
 #include "MooseMesh.h"
 
 // Full specialization of the validParams function for this object
+registerMooseObject("NavierStokesApp", NSImposedVelocityDirectionBC);
+
 template <>
 InputParameters
 validParams<NSImposedVelocityDirectionBC>()

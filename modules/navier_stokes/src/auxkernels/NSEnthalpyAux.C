@@ -11,6 +11,8 @@
 #include "NSEnthalpyAux.h"
 #include "NS.h"
 
+registerMooseObject("NavierStokesApp", NSEnthalpyAux);
+
 template <>
 InputParameters
 validParams<NSEnthalpyAux>()

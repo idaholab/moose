@@ -9,6 +9,8 @@
 
 #include "NSMassUnspecifiedNormalFlowBC.h"
 
+registerMooseObject("NavierStokesApp", NSMassUnspecifiedNormalFlowBC);
+
 template <>
 InputParameters
 validParams<NSMassUnspecifiedNormalFlowBC>()

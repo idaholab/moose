@@ -12,6 +12,8 @@
 #include "NSEnergyInviscidSpecifiedDensityAndVelocityBC.h"
 #include "NS.h"
 
+registerMooseObject("NavierStokesApp", NSEnergyInviscidSpecifiedDensityAndVelocityBC);
+
 template <>
 InputParameters
 validParams<NSEnergyInviscidSpecifiedDensityAndVelocityBC>()

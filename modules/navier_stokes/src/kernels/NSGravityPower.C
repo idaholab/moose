@@ -9,6 +9,8 @@
 
 #include "NSGravityPower.h"
 
+registerMooseObject("NavierStokesApp", NSGravityPower);
+
 template <>
 InputParameters
 validParams<NSGravityPower>()

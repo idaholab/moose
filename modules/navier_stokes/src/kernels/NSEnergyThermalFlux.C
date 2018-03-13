@@ -11,6 +11,8 @@
 #include "NS.h"
 #include "NSEnergyThermalFlux.h"
 
+registerMooseObject("NavierStokesApp", NSEnergyThermalFlux);
+
 template <>
 InputParameters
 validParams<NSEnergyThermalFlux>()

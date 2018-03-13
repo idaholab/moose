@@ -12,6 +12,8 @@
 // FluidProperties includes
 #include "IdealGasFluidProperties.h"
 
+registerMooseObject("NavierStokesApp", NSSUPGMomentum);
+
 template <>
 InputParameters
 validParams<NSSUPGMomentum>()

@@ -10,6 +10,8 @@
 #include "INSMass.h"
 #include "Function.h"
 
+registerMooseObject("NavierStokesApp", INSMass);
+
 template <>
 InputParameters
 validParams<INSMass>()

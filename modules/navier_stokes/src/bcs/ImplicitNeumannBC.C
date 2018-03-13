@@ -9,6 +9,8 @@
 
 #include "ImplicitNeumannBC.h"
 
+registerMooseObject("NavierStokesApp", ImplicitNeumannBC);
+
 template <>
 InputParameters
 validParams<ImplicitNeumannBC>()

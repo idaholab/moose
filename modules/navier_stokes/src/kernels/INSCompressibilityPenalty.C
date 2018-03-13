@@ -9,6 +9,8 @@
 
 #include "INSCompressibilityPenalty.h"
 
+registerMooseObject("NavierStokesApp", INSCompressibilityPenalty);
+
 template <>
 InputParameters
 validParams<INSCompressibilityPenalty>()
