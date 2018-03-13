@@ -9,6 +9,8 @@
 
 #include "LevelSetReinitializationProblem.h"
 
+registerMooseObject("LevelSetApp", LevelSetReinitializationProblem);
+
 template <>
 InputParameters
 validParams<LevelSetReinitializationProblem>()

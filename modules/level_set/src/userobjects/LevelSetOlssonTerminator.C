@@ -10,6 +10,8 @@
 #include "LevelSetOlssonTerminator.h"
 #include "NonlinearSystem.h"
 
+registerMooseObject("LevelSetApp", LevelSetOlssonTerminator);
+
 template <>
 InputParameters
 validParams<LevelSetOlssonTerminator>()

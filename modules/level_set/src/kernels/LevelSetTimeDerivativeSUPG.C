@@ -9,6 +9,8 @@
 
 #include "LevelSetTimeDerivativeSUPG.h"
 
+registerMooseObject("LevelSetApp", LevelSetTimeDerivativeSUPG);
+
 template <>
 InputParameters
 validParams<LevelSetTimeDerivativeSUPG>()

@@ -9,6 +9,8 @@
 
 #include "LevelSetVolume.h"
 
+registerMooseObject("LevelSetApp", LevelSetVolume);
+
 template <>
 InputParameters
 validParams<LevelSetVolume>()

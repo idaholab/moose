@@ -10,6 +10,8 @@
 #include "LevelSetForcingFunctionSUPG.h"
 #include "Function.h"
 
+registerMooseObject("LevelSetApp", LevelSetForcingFunctionSUPG);
+
 template <>
 InputParameters
 validParams<LevelSetForcingFunctionSUPG>()

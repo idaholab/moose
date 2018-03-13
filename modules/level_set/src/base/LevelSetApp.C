@@ -13,32 +13,6 @@
 #include "MooseSyntax.h"
 #include "LevelSetTypes.h"
 
-// Kernels
-#include "LevelSetAdvection.h"
-#include "LevelSetAdvectionSUPG.h"
-#include "LevelSetTimeDerivativeSUPG.h"
-#include "LevelSetForcingFunctionSUPG.h"
-#include "LevelSetOlssonReinitialization.h"
-
-// Functions
-#include "LevelSetOlssonBubble.h"
-#include "LevelSetOlssonVortex.h"
-
-// Postprocessors
-#include "LevelSetCFLCondition.h"
-#include "LevelSetVolume.h"
-#include "LevelSetOlssonTerminator.h"
-
-// Problems
-#include "LevelSetProblem.h"
-#include "LevelSetReinitializationProblem.h"
-
-// MultiApps
-#include "LevelSetReinitializationMultiApp.h"
-
-// Transfers
-#include "LevelSetMeshRefinementTransfer.h"
-
 template <>
 InputParameters
 validParams<LevelSetApp>()
@@ -72,36 +46,13 @@ LevelSetApp::registerApps()
 void
 LevelSetApp::registerObjects(Factory & factory)
 {
-  // Kernels
-  registerKernel(LevelSetAdvection);
-  registerKernel(LevelSetAdvectionSUPG);
-  registerKernel(LevelSetTimeDerivativeSUPG);
-  registerKernel(LevelSetForcingFunctionSUPG);
-  registerKernel(LevelSetOlssonReinitialization);
-
-  // Functions
-  registerFunction(LevelSetOlssonBubble);
-  registerFunction(LevelSetOlssonVortex);
-
-  // Postprocessors
-  registerPostprocessor(LevelSetCFLCondition);
-  registerPostprocessor(LevelSetVolume);
-  registerPostprocessor(LevelSetOlssonTerminator);
-
-  // Problems
-  registerProblem(LevelSetProblem);
-  registerProblem(LevelSetReinitializationProblem);
-
-  // MultiApps
-  registerMultiApp(LevelSetReinitializationMultiApp);
-
-  // Transfers
-  registerTransfer(LevelSetMeshRefinementTransfer);
+  Registry::registerObjectsTo(factory, {"LevelSetApp"});
 }
 
 void
-LevelSetApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & /*action_factory*/)
+LevelSetApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & action_factory)
 {
+  Registry::registerActionsTo(action_factory, {"LevelSetApp"});
 }
 
 void

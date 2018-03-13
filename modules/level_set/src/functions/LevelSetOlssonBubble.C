@@ -10,6 +10,8 @@
 // MOOSE includes
 #include "LevelSetOlssonBubble.h"
 
+registerMooseObject("LevelSetApp", LevelSetOlssonBubble);
+
 template <>
 InputParameters
 validParams<LevelSetOlssonBubble>()

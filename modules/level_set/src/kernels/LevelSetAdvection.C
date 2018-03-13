@@ -10,6 +10,8 @@
 // MOOSE includes
 #include "LevelSetAdvection.h"
 
+registerMooseObject("LevelSetApp", LevelSetAdvection);
+
 template <>
 InputParameters
 validParams<LevelSetAdvection>()

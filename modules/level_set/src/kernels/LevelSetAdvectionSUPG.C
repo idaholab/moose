@@ -9,6 +9,8 @@
 
 #include "LevelSetAdvectionSUPG.h"
 
+registerMooseObject("LevelSetApp", LevelSetAdvectionSUPG);
+
 template <>
 InputParameters
 validParams<LevelSetAdvectionSUPG>()
