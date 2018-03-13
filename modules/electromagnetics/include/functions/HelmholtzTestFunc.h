@@ -2,16 +2,17 @@
 #define HELMHOLTZTESTFUNC_H
 
 #include "Function.h"
+#include "FunctionInterface.h"
 
 class HelmholtzTestFunc;
 
-template<>
+template <>
 InputParameters validParams<HelmholtzTestFunc>();
 
 /**
  *  Function of analytical solution for use in convergence testing with coupled_helmholtz test file
  */
-class HelmholtzTestFunc : public Function
+class HelmholtzTestFunc : public Function, public FunctionInterface
 {
 public:
   HelmholtzTestFunc(const InputParameters & parameters);
@@ -19,11 +20,10 @@ public:
   virtual Real value(Real t, const Point & p) override;
 
 protected:
-
   Real _L;
 
-  Real _a;
-  Real _b;
+  Function & _a;
+  Function & _b;
 
   Real _d;
   Real _h;
@@ -41,7 +41,6 @@ protected:
 
   Real _C2_real;
   Real _C2_imag;
-
 };
 
 #endif // HELMHOLTZTESTFUNC_H
