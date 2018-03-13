@@ -12,6 +12,8 @@
 #include "FEProblem.h"
 
 #if defined(LIBMESH_HAVE_PETSC) && !PETSC_VERSION_LESS_THAN(3, 3, 0)
+registerMooseObject("ContactApp", ContactSplit);
+
 template <>
 InputParameters
 validParams<ContactSplit>()

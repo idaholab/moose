@@ -25,6 +25,8 @@
 #include "libmesh/string_to_enum.h"
 #include "libmesh/sparse_matrix.h"
 
+registerMooseObject("ContactApp", MechanicalContactConstraint);
+
 template <>
 InputParameters
 validParams<MechanicalContactConstraint>()

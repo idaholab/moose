@@ -15,6 +15,8 @@
 #include "libmesh/petsc_macro.h"
 #include "libmesh/petsc_matrix.h"
 
+registerMooseObject("ContactApp", SparsityBasedContactConstraint);
+
 template <>
 InputParameters
 validParams<SparsityBasedContactConstraint>()

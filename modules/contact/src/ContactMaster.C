@@ -18,6 +18,8 @@
 #include "libmesh/sparse_matrix.h"
 #include "libmesh/string_to_enum.h"
 
+registerMooseObject("ContactApp", ContactMaster);
+
 template <>
 InputParameters
 validParams<ContactMaster>()

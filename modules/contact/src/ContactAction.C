@@ -14,6 +14,14 @@
 #include "Conversion.h"
 #include "AddVariableAction.h"
 
+registerMooseAction("ContactApp", ContactAction, "add_aux_kernel");
+
+registerMooseAction("ContactApp", ContactAction, "add_aux_variable");
+
+registerMooseAction("ContactApp", ContactAction, "add_dirac_kernel");
+
+registerMooseAction("ContactApp", ContactAction, "output_penetration_info_vars");
+
 template <>
 InputParameters
 validParams<ContactAction>()
