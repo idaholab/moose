@@ -11,3 +11,4 @@ from build_class_database import build_class_database
 from read import read, get_language
 from regex import regex
 from project_find import project_find
+from submodule_status import submodule_status

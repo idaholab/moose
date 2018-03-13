@@ -1,6 +1,8 @@
 """Defines the MooseDocs build command."""
 import os
 import multiprocessing
+import logging
+import subprocess
 
 import anytree
 import livereload
@@ -89,6 +91,18 @@ class MooseDocsWatcher(livereload.watcher.Watcher):
 
         return super(MooseDocsWatcher, self).examine()
 
+def _init_large_media():
+    """Check submodule for large_media."""
+    log = logging.getLogger('MooseDocs._init_large_media')
+    status = common.submodule_status()
+    large_media = os.path.realpath(os.path.join(MooseDocs.ROOT_DIR, 'large_media'))
+    for submodule, status in status.iteritems():
+        if ((os.path.realpath(os.path.join(MooseDocs.MOOSE_DIR, submodule)) == large_media)
+                and (status == '-')):
+            log.info("Initializing the 'large_media' submodule for storing images above 1MB.")
+            subprocess.call(['git', 'submodule', 'update', '--init', 'large_media'],
+                            cwd=MooseDocs.MOOSE_DIR)
+
 def main(options):
     """
     Main function for the build command.
@@ -96,6 +110,10 @@ def main(options):
     Inputs:
         options[argparse options]: Complate options from argparse, see MooseDocs/main.py
     """
+
+    # Make sure "large_media" exists in MOOSE
+    _init_large_media()
+
     # Create translator
     translator = common.load_config(options.config)
     translator.init(options.destination)
