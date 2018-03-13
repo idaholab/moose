@@ -179,17 +179,20 @@ tmp_jit_*
 
 # MooseDocs
 site
-*.moose.md
-*.moose.yml
-*.moose.svg
-tmp_*.dot
-docs/.moosedocs
-docs/examples/*.tex
-!docs/index.html
-!docs/templates/**/*.html
-!docs/content/media/**/*.png
-!docs/content/media/**/*.gif
-!python/MooseDocs/tests/**/gold/*.html
+!**/doc/content/**/*.md
+!**/doc/content/**/*.jpg
+!**/doc/content/**/*.jpeg
+!**/doc/content/**/*.gif
+!**/doc/content/**/*.png
+!**/doc/content/**/*.svg
+!**/doc/content/**/*.ogg
+!**/doc/content/**/*.webm
+!**/doc/content/**/*.mp4
+!**/doc/content/**/*.css
+!**/doc/content/**/*.js
+!**/doc/content/**/*.bib
+!**/doc/content/**/*.woff
+!**/doc/content/**/*.woff2
 
 # Chigger
 !python/chigger/tests/**/gold/*.png
