@@ -22,17 +22,6 @@
   [../]
 []
 
-[AuxVariables]
-  [./u_analytic_real]
-    order = FIRST
-    family = LAGRANGE
-  [../]
-  [./u_analytic_imag]
-    order = FIRST
-    family = LAGRANGE
-  [../]
-[]
-
 [Functions]
   [./ASquaredMinusBSquared]
     type = ParsedFunction
