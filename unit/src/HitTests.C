@@ -203,8 +203,6 @@ TEST(HitTests, ParseFields)
   {
     auto test = cases[i];
     auto root = hit::parse("TEST", test.input);
-    ExpandWalker exw("TEST");
-    root->walk(&exw);
     auto n = root->find(test.key);
     if (!n)
     {
@@ -231,9 +229,10 @@ TEST(ExpandWalkerTests, All)
 {
   ValCase cases[] = {
       {"substitute string", "foo=bar boo=${foo}", "boo", "bar", hit::Field::Kind::String},
+      {"trailing space", "foo=bar boo=${foo} ", "boo", "bar", hit::Field::Kind::String},
       {"substute number", "foo=42 boo=${foo}", "boo", "42", hit::Field::Kind::Int},
       {"multiple replacements",
-       "foo=42 boo=${foo} ${foo}",
+       "foo=42 boo='${foo} ${foo}'",
        "boo",
        "42 42",
        hit::Field::Kind::String},
@@ -243,16 +242,12 @@ TEST(ExpandWalkerTests, All)
        "src/bar",
        "foo",
        hit::Field::Kind::String},
-      {"repl-header-missing",
-       "[src] bar='${src}' []",
-       "src/bar",
-       "${src}",
-       hit::Field::Kind::String},
+      {"repl-header-missing", "[src] bar='${src}' []", "src/bar", "${src}", hit::Field::Kind::None},
       {"repl-header-shadow",
        "[src] bar='${src}' [] src=foo",
        "src/bar",
        "${src}",
-       hit::Field::Kind::String},
+       hit::Field::Kind::None},
       {"nested shadow",
        "foo=bar [hello] foo=baz boo='${foo}' []",
        "hello/boo",
@@ -263,9 +258,30 @@ TEST(ExpandWalkerTests, All)
   for (size_t i = 0; i < sizeof(cases) / sizeof(ValCase); i++)
   {
     auto test = cases[i];
-    auto root = hit::parse("TEST", test.input);
-    ExpandWalker exw("TEST");
-    root->walk(&exw);
+    hit::Node * root = nullptr;
+    try
+    {
+      root = hit::parse("TEST", test.input);
+      ExpandWalker exw("TEST");
+      root->walk(&exw);
+      if (exw.errors.size() > 0 && test.kind != hit::Field::Kind::None)
+      {
+        for (auto & err : exw.errors)
+          FAIL() << "case " << i + 1 << " unexpected error: " << err << "\n";
+        continue;
+      }
+      else if (exw.errors.size() == 0 && test.kind == hit::Field::Kind::None)
+      {
+        FAIL() << "case " << i + 1 << " missing expected error\n";
+        continue;
+      }
+    }
+    catch (std::exception & err)
+    {
+      FAIL() << "case " << i + 1 << " unexpected error: " << err.what() << "\n";
+      continue;
+    }
+
     auto n = root->find(test.key);
     if (!n)
     {
@@ -282,7 +298,7 @@ TEST(ExpandWalkerTests, All)
     auto f = dynamic_cast<hit::Field *>(n);
     if (!f)
       FAIL() << "case " << i + 1 << " node type is not NodeType::Field";
-    else if (f->kind() != test.kind)
+    else if (test.kind != hit::Field::Kind::None && f->kind() != test.kind)
       FAIL() << "case " << i + 1 << " wrong kind (key=" << test.key << "): got '"
              << strkind(f->kind()) << "', want '" << strkind(test.kind) << "'\n";
   }
