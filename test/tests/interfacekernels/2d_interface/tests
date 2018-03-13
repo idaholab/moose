@@ -14,4 +14,17 @@
     mesh_mode = REPLICATED
     prereq = test
   []
+
+  [./parallel_fdp_test]
+    type = 'Exodiff'
+    prereq = 'test'
+    exodiff = 'coupled_value_coupled_flux_out.e'
+    min_parallel = 2
+    input = 'coupled_value_coupled_flux.i'
+    cli_args = 'Preconditioning/smp/type=FDP'
+    design = 'Preconditioning/framework/FDP.md'
+    issues = '#10375'
+    requirement = 'The finite difference preconditioner shall work in parallel'
+    allow_warnings = true
+  [../]
 []
