@@ -62,6 +62,8 @@ public:
 
   /**
    * Samples value and first derivatives at point (x1, x2)
+   * Use this function for speed when computing both value and derivatives,
+   * as it minimizes the amount of spline evaluation
    */
   void sampleValueAndDerivatives(Real x1,
                                  Real x2,

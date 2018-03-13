@@ -259,9 +259,15 @@ BicubicSplineInterpolation::constructRowSpline(Real x1,
 {
   auto n = _x2.size();
 
-  // Evaluate n column-splines to get y-values for row spline construction
+  // Find the indices that bound the point x1
+  unsigned int klo, khi;
+  findInterval(_x1, x1, klo, khi);
+
+  // Evaluate n column-splines to get y-values for row spline construction using
+  // the indices above to avoid computing them for each j
   for (decltype(n) j = 0; j < n; ++j)
-    _column_spline_eval[j] = SplineInterpolationBase::sample(_x1, _y_trans[j], _y2_columns[j], x1);
+    _column_spline_eval[j] =
+        SplineInterpolationBase::sample(_x1, _y_trans[j], _y2_columns[j], x1, klo, khi);
 
   // Construct single row spline; get back the second derivatives wrt x2 coord
   // on the x2 grid points
@@ -277,9 +283,14 @@ BicubicSplineInterpolation::constructColumnSpline(Real x2,
 {
   auto m = _x1.size();
 
-  // Evaluate m row-splines to get y-values for column spline construction
+  // Find the indices that bound the point x2
+  unsigned int klo, khi;
+  findInterval(_x2, x2, klo, khi);
+
+  // Evaluate m row-splines to get y-values for column spline construction using
+  // the indices above to avoid computing them for each j
   for (decltype(m) j = 0; j < m; ++j)
-    _row_spline_eval[j] = SplineInterpolationBase::sample(_x2, _y[j], _y2_rows[j], x2);
+    _row_spline_eval[j] = SplineInterpolationBase::sample(_x2, _y[j], _y2_rows[j], x2, klo, khi);
 
   // Construct single column spline; get back the second derivatives wrt x1 coord
   // on the x1 grid points
