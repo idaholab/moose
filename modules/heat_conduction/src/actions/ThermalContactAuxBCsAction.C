@@ -14,6 +14,8 @@
 #include "Conversion.h"
 #include "AddVariableAction.h"
 
+registerMooseAction("HeatConductionApp", ThermalContactAuxBCsAction, "add_aux_kernel");
+
 template <>
 InputParameters
 validParams<ThermalContactAuxBCsAction>()

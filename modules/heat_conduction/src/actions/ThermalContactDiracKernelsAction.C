@@ -11,6 +11,8 @@
 #include "Factory.h"
 #include "FEProblem.h"
 
+registerMooseAction("HeatConductionApp", ThermalContactDiracKernelsAction, "add_dirac_kernel");
+
 template <>
 InputParameters
 validParams<ThermalContactDiracKernelsAction>()

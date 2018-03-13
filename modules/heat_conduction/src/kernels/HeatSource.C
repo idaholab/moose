@@ -9,6 +9,8 @@
 
 #include "HeatSource.h"
 
+registerMooseObject("HeatConductionApp", HeatSource);
+
 template <>
 InputParameters
 validParams<HeatSource>()

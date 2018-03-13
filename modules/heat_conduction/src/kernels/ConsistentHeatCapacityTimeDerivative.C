@@ -9,6 +9,8 @@
 
 #include "ConsistentHeatCapacityTimeDerivative.h"
 
+registerMooseObject("HeatConductionApp", ConsistentHeatCapacityTimeDerivative);
+
 template <>
 InputParameters
 validParams<ConsistentHeatCapacityTimeDerivative>()

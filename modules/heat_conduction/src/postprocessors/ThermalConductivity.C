@@ -9,6 +9,8 @@
 
 #include "ThermalConductivity.h"
 
+registerMooseObject("HeatConductionApp", ThermalConductivity);
+
 template <>
 InputParameters
 validParams<ThermalConductivity>()

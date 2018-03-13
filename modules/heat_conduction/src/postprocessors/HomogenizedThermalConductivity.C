@@ -11,6 +11,8 @@
 #include "SubProblem.h"
 #include "MooseMesh.h"
 
+registerMooseObject("HeatConductionApp", HomogenizedThermalConductivity);
+
 template <>
 InputParameters
 validParams<HomogenizedThermalConductivity>()
