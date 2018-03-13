@@ -48,6 +48,7 @@
   ring_first = 1
   ring_last = 3
   output_q = false
+  incremental = true
 []
 
 [Modules/TensorMechanics/Master]

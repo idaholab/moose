@@ -79,6 +79,7 @@
   youngs_modulus = 207000
   block = 0
   solid_mechanics = true
+  incremental = true
 []
 
 [SolidMechanics]

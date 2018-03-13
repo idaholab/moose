@@ -1,0 +1,33 @@
+[Tests]
+ [./incr_elas]
+   type = 'CSVDiff'
+   input = 'incr_model.i'
+   csvdiff = 'incr_model_out.csv'
+   rel_err = 1e-6
+   abs_zero = 1e-8
+ [../]
+ [./incr_chk1]
+   type = 'RunException'
+   input = 'incr_model.i'
+   cli_args = 'Materials/strain_energy_density/incremental=false'
+   expect_err = 'StrainEnergyDensity: Specified incremental = false, but material model is incremental.'
+ [../]
+ [./tot_elas]
+   type = 'CSVDiff'
+   input = 'tot_model.i'
+   csvdiff = 'tot_model_out.csv'
+   rel_err = 1e-6
+ [../]
+ [./tot_chk1]
+   type = 'RunException'
+   input = 'tot_model.i'
+   cli_args = 'Materials/strain_energy_density/incremental=true'
+   expect_err = 'One or more Material Properties were not supplied on block'
+ [../]
+ [./incr_elas_plas]
+   type = 'CSVDiff'
+   input = 'incr_model_elas_plas.i'
+   csvdiff = 'incr_model_elas_plas_out.csv'
+   rel_err = 1e-6
+ [../]
+[]

@@ -81,6 +81,8 @@
   number_points_from_provider = 10
   convert_J_to_K = true
   closed_loop = true
+  incremental = true
+  solid_mechanics = true
 []
 
 [SolidMechanics]

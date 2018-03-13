@@ -78,6 +78,8 @@
   intersecting_boundary = '1 2'
   symmetry_plane = 2
   position_type = angle
+  incremental = true
+  solid_mechanics = true
 []
 
 [SolidMechanics]

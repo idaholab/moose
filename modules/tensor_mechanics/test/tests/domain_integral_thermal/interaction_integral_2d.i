@@ -59,6 +59,7 @@
   radius_outer = '80.0 100.0 120.0 140.0'
   convert_J_to_K = true
   symmetry_plane = 1
+  incremental = true
 
   # interaction integral parameters
   disp_x = disp_x

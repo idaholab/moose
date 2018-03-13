@@ -89,6 +89,7 @@
    cli_args = 'DomainIntegral/output_q=true'
    exodiff = 'j_integral_2d_out.e'
    prereq = 'j_2d_noq'
+   rel_err = 1e-5
  [../]
  [./j_2d_topo_chk_q]
    type = 'Exodiff'
@@ -96,6 +97,7 @@
    cli_args = 'DomainIntegral/output_q=true'
    exodiff = 'j_integral_2d_topo_q_func_out.e'
    prereq = 'j_2d_topo_q'
+   rel_err = 1e-5
  [../]
  [./j_3d_chk_q]
    type = 'Exodiff'

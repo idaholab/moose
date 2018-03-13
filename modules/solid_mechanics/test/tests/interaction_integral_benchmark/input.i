@@ -53,6 +53,7 @@
   2d = true
   axis_2d = 2
   equivalent_k = True
+  incremental = true
   solid_mechanics = true
 []
 
