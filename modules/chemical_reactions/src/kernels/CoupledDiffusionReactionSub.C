@@ -9,6 +9,8 @@
 
 #include "CoupledDiffusionReactionSub.h"
 
+registerMooseObject("ChemicalReactionsApp", CoupledDiffusionReactionSub);
+
 template <>
 InputParameters
 validParams<CoupledDiffusionReactionSub>()

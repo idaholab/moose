@@ -9,6 +9,8 @@
 
 #include "AqueousEquilibriumRxnAux.h"
 
+registerMooseObject("ChemicalReactionsApp", AqueousEquilibriumRxnAux);
+
 template <>
 InputParameters
 validParams<AqueousEquilibriumRxnAux>()

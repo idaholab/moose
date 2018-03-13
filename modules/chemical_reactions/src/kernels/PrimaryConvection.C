@@ -9,6 +9,8 @@
 
 #include "PrimaryConvection.h"
 
+registerMooseObject("ChemicalReactionsApp", PrimaryConvection);
+
 template <>
 InputParameters
 validParams<PrimaryConvection>()

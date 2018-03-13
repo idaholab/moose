@@ -10,6 +10,8 @@
 #include "LangmuirMaterial.h"
 #include "libmesh/utility.h"
 
+registerMooseObject("ChemicalReactionsApp", LangmuirMaterial);
+
 template <>
 InputParameters
 validParams<LangmuirMaterial>()
