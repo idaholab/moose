@@ -25,10 +25,12 @@ public:
               const std::vector<Real> & y,
               const std::vector<Real> & y2,
               Real x_int) const;
+
   Real sampleDerivative(const std::vector<Real> & x,
                         const std::vector<Real> & y,
                         const std::vector<Real> & y2,
                         Real x_int) const;
+
   Real sample2ndDerivative(const std::vector<Real> & x,
                            const std::vector<Real> & y,
                            const std::vector<Real> & y2,
@@ -48,6 +50,7 @@ protected:
                     Real x_int,
                     unsigned int & klo,
                     unsigned int & khi) const;
+
   void computeCoeffs(const std::vector<Real> & x,
                      unsigned int klo,
                      unsigned int khi,
@@ -55,6 +58,19 @@ protected:
                      Real & h,
                      Real & a,
                      Real & b) const;
+
+  /**
+   * Sample value at point x_int given the indices of the vector of
+   * dependent values that bound the point. This method is useful
+   * in bicubic spline interpolation, where several spline evaluations
+   * are needed to sample from a 2D point.
+   */
+  Real sample(const std::vector<Real> & x,
+              const std::vector<Real> & y,
+              const std::vector<Real> & y2,
+              Real x_int,
+              unsigned int klo,
+              unsigned int khi) const;
 
   static const Real _deriv_bound;
 };

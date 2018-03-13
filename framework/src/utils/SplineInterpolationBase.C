@@ -105,11 +105,7 @@ SplineInterpolationBase::sample(const std::vector<Real> & x,
   unsigned int klo, khi;
   findInterval(x, x_int, klo, khi);
 
-  Real h, a, b;
-  computeCoeffs(x, klo, khi, x_int, h, a, b);
-
-  return a * y[klo] + b * y[khi] +
-         ((a * a * a - a) * y2[klo] + (b * b * b - b) * y2[khi]) * (h * h) / 6.0;
+  return sample(x, y, y2, x_int, klo, khi);
 }
 
 Real
@@ -141,4 +137,19 @@ SplineInterpolationBase::sample2ndDerivative(const std::vector<Real> & x,
   computeCoeffs(x, klo, khi, x_int, h, a, b);
 
   return a * y2[klo] + b * y2[khi];
+}
+
+Real
+SplineInterpolationBase::sample(const std::vector<Real> & x,
+                                const std::vector<Real> & y,
+                                const std::vector<Real> & y2,
+                                Real x_int,
+                                unsigned int klo,
+                                unsigned int khi) const
+{
+  Real h, a, b;
+  computeCoeffs(x, klo, khi, x_int, h, a, b);
+
+  return a * y[klo] + b * y[khi] +
+         ((a * a * a - a) * y2[klo] + (b * b * b - b) * y2[khi]) * (h * h) / 6.0;
 }
