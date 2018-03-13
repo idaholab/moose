@@ -18,51 +18,79 @@ validParams<ComputeInterfaceStress>()
   params.addClassDescription(
       "Stress in the plane of an interface defined by the gradient of an order parameter");
   params.addCoupledVar("v",
-                       "Order parameter that defines the interface. The interface is the region "
+                       "Order parameters that define the interface. The interface is the region "
                        "where the gradient of this order parameter is non-zero.");
-  params.addRequiredParam<Real>("stress", "Planar stress");
-  params.addRangeCheckedParam<Real>("op_range",
-                                    1.0,
-                                    "op_range > 0.0",
-                                    "Range over which order parameters change across an "
-                                    "interface. By default order parameters are assumed to "
-                                    "vary from 0 to 1");
-  params.addParam<MaterialPropertyName>(
-      "planar_stress_name", "extra_stress", "Material property name for the planar stress");
+  params.addRequiredParam<std::vector<Real>>("stress",
+                                             "Interfacial planar stress magnitude (one "
+                                             "value to apply to all order parameters or one value "
+                                             "per order parameter listed in 'v')");
+  params.addRangeCheckedParam<std::vector<Real>>(
+      "op_range",
+      {1.0},
+      "op_range > 0.0",
+      "Range over which order parameters change across an "
+      "interface. By default order parameters are assumed to "
+      "vary from 0 to 1");
+  params.addParam<MaterialPropertyName>("planar_stress_name",
+                                        "extra_stress",
+                                        "Material property name for the interfacial planar stress");
   return params;
 }
 
 ComputeInterfaceStress::ComputeInterfaceStress(const InputParameters & parameters)
   : Material(parameters),
-    _grad_v(coupledGradient("v")),
-    _stress(getParam<Real>("stress") / getParam<Real>("op_range")),
+    _nvar(coupledComponents("v")),
+    _grad_v(_nvar),
+    _op_range(getParam<std::vector<Real>>("op_range")),
+    _stress(getParam<std::vector<Real>>("stress")),
     _planar_stress(
         declareProperty<RankTwoTensor>(getParam<MaterialPropertyName>("planar_stress_name")))
 {
+  if (_stress.size() == 1)
+    _stress.assign(_nvar, _stress[0]);
+  if (_stress.size() != _nvar)
+    mooseError("Supply either one single stress or one per order parameter");
+
+  if (_op_range.size() == 1)
+    _op_range.assign(_nvar, _op_range[0]);
+  if (_op_range.size() != _nvar)
+    mooseError("Supply either one single op_range or one per order parameter");
+
+  for (auto i = beginIndex(_grad_v); i < _nvar; ++i)
+  {
+    _grad_v[i] = &coupledGradient("v", i);
+    _stress[i] /= _op_range[i];
+  }
 }
 
 void
 ComputeInterfaceStress::computeQpProperties()
 {
   auto & S = _planar_stress[_qp];
+  S.zero();
 
-  // no interface, return zero stress
-  const Real grad_norm_sq = _grad_v[_qp].norm_sq();
-  if (grad_norm_sq < libMesh::TOLERANCE)
+  // loop over interface variables
+  for (auto i = beginIndex(_grad_v); i < _nvar; ++i)
   {
-    S.zero();
-    return;
+    // no interface, return zero stress
+    const Real grad_norm_sq = (*_grad_v[i])[_qp].norm_sq();
+    if (grad_norm_sq < libMesh::TOLERANCE)
+      continue;
+
+    const Real nx = (*_grad_v[i])[_qp](0);
+    const Real ny = (*_grad_v[i])[_qp](1);
+    const Real nz = (*_grad_v[i])[_qp](2);
+    const Real s = _stress[i] / std::sqrt(grad_norm_sq);
+
+    S(0, 0) += (ny * ny + nz * nz) * s;
+    S(0, 1) += -nx * ny * s;
+    S(1, 1) += (nx * nx + nz * nz) * s;
+    S(0, 2) += -nx * nz * s;
+    S(1, 2) += -ny * nz * s;
+    S(2, 2) += (nx * nx + ny * ny) * s;
   }
 
-  const Real nx = _grad_v[_qp](0);
-  const Real ny = _grad_v[_qp](1);
-  const Real nz = _grad_v[_qp](2);
-  const Real s = _stress / std::sqrt(grad_norm_sq);
-
-  S(0, 0) = (ny * ny + nz * nz) * s;
-  S(1, 0) = S(0, 1) = -nx * ny * s;
-  S(1, 1) = (nx * nx + nz * nz) * s;
-  S(2, 0) = S(0, 2) = -nx * nz * s;
-  S(2, 1) = S(1, 2) = -ny * nz * s;
-  S(2, 2) = (nx * nx + ny * ny) * s;
+  S(1, 0) = S(0, 1);
+  S(2, 0) = S(0, 2);
+  S(2, 1) = S(1, 2);
 }
