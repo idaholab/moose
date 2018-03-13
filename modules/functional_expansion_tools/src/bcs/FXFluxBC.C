@@ -10,6 +10,8 @@
 #include "FXFluxBC.h"
 #include "FunctionSeries.h"
 
+registerMooseObject("FunctionalExpansionToolsApp", FXFluxBC);
+
 template <>
 InputParameters
 validParams<FXFluxBC>()

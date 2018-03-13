@@ -14,6 +14,8 @@
 
 #include "MultiAppFXTransfer.h"
 
+registerMooseObject("FunctionalExpansionToolsApp", MultiAppFXTransfer);
+
 template <>
 InputParameters
 validParams<MultiAppFXTransfer>()

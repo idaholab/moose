@@ -10,6 +10,8 @@
 #include "FunctionSeries.h"
 #include "FunctionSeriesToAux.h"
 
+registerMooseObject("FunctionalExpansionToolsApp", FunctionSeriesToAux);
+
 template <>
 InputParameters
 validParams<FunctionSeriesToAux>()

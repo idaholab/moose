@@ -10,6 +10,8 @@
 #include "FXValuePenaltyBC.h"
 #include "FunctionSeries.h"
 
+registerMooseObject("FunctionalExpansionToolsApp", FXValuePenaltyBC);
+
 template <>
 InputParameters
 validParams<FXValuePenaltyBC>()

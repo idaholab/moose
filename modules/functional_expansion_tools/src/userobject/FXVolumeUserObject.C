@@ -9,6 +9,8 @@
 
 #include "FXVolumeUserObject.h"
 
+registerMooseObject("FunctionalExpansionToolsApp", FXVolumeUserObject);
+
 template <>
 InputParameters
 validParams<FXVolumeUserObject>()
