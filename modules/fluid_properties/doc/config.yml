@@ -1,0 +1,24 @@
+Content:
+    - framework/doc/content
+    - modules/fluid_properties/doc/content
+
+Renderer:
+    type: MooseDocs.base.MaterializeRenderer
+    name: MOOSE Fluid Properties Module
+    repo: https://github.com/idaholab/moose
+    home: /documentation/modules/fluid_properties
+
+Extensions:
+    appsyntax:
+        type: MooseDocs.extensions.appsyntax
+        executable: ${MOOSE_DIR}/modules/fluid_properties
+        hide:
+            framework: !include framework/doc/hidden.yml
+            fluid_properties: !include modules/fluid_properties/doc/hidden.yml
+        remove: !include framework/doc/remove.yml
+        includes:
+            - framework/include
+            - modules/fluid_properties/include
+    globals:
+        type: MooseDocs.extensions.panoptic
+        shortcuts: !include framework/doc/globals.yml

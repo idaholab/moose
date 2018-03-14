@@ -38,17 +38,16 @@ class HitNode(NodeMixin):
     """
     def __init__(self, parent=None, hitnode=None):
         super(HitNode, self).__init__()
-        self.name = hitnode.path() # anytree.Node property
-        self.parent = parent       # anytree.Node property
-        self.__line = hitnode.line()
-        self.__hitnode = hitnode   # hit.Node object
+        self.name = hitnode.path()   # anytree.Node property
+        self.parent = parent         # anytree.Node property
+        self.__hitnode = hitnode     # hit.Node object
 
     @property
     def line(self):
         """
         Access to the line number.
         """
-        return self.__line
+        return self.__hitnode.line()
 
     @property
     def fullpath(self):
@@ -60,7 +59,7 @@ class HitNode(NodeMixin):
         while (node is not None):
             out.append(node.name)
             node = node.parent
-        return '/'.join(out)
+        return '/'.join(reversed(out))
 
     def find(self, name, fuzzy=True):
         """
@@ -74,7 +73,7 @@ class HitNode(NodeMixin):
         """
         if HAVE_ANYTREE:
             for node in anytree.PreOrderIter(self):
-                if (fuzzy and name in node.name) or (not fuzzy and name == node.name):
+                if (fuzzy and name in node.fullpath) or (not fuzzy and name == node.fullpath):
                     return node
         else:
             msg = "The 'find' method requires the 'anytree' python package. This can " \
@@ -134,7 +133,7 @@ class HitNode(NodeMixin):
         for child in self.__hitnode.children(hit.NodeType.Field):
             yield child.path(), child.param()
 
-    def get(self, name, default):
+    def get(self, name, default=None):
         """
         Return a parameter, if it does not exist return the default.
         """
@@ -151,7 +150,7 @@ class HitNode(NodeMixin):
 
     def __repr__(self):
         """
-        Dislpay the node name and parameters.
+        Display the node name and parameters.
         """
         params = {k:v for k, v in self.iterparams()}
         if params:
@@ -171,7 +170,7 @@ def hit_load(filename):
     Read and parse a hit file (MOOSE input file format).
 
     Inputs:
-        filenae[str]: The filename to open and parse.
+        filename[str]: The filename to open and parse.
 
     Returns a HitNode object, which is the root of the tree. HitNode objects are custom
     versions of the anytree.Node objects.
@@ -179,6 +178,8 @@ def hit_load(filename):
     if os.path.exists(filename):
         with open(filename, 'r') as fid:
             content = fid.read()
+    elif isinstance(filename, (str, unicode)):
+        content = filename
     else:
         message.mooseError("Unable to load the hit file ", filename)
 

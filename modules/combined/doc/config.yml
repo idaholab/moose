@@ -1,0 +1,94 @@
+Content:
+    - framework/doc/content
+    - modules/chemical_reactions/doc/content
+    - modules/combined/doc/content
+    - modules/contact/doc/content
+    - modules/fluid_properties/doc/content
+    - modules/functional_expansion_tools/doc/content
+    - modules/heat_conduction/doc/content
+    - modules/level_set/doc/content
+    - modules/misc/doc/content
+    - modules/navier_stokes/doc/content
+    - modules/phase_field/doc/content
+    - modules/porous_flow/doc/content
+    - modules/rdg/doc/content
+    - modules/richards/doc/content
+    - modules/solid_mechanics/doc/content
+    - modules/stochastic_tools/doc/content
+    - modules/tensor_mechanics/doc/content
+    - modules/water_steam_eos/doc/content
+    - modules/xfem/doc/content
+Renderer:
+    type: MooseDocs.base.MaterializeRenderer
+    name: MOOSE
+    repo: https://github.com/idaholab/moose
+    home: /
+    navigation: !include modules/combined/doc/navigation.yml
+
+Extensions:
+    appsyntax:
+        type: MooseDocs.extensions.appsyntax
+        executable: ${MOOSE_DIR}/modules/combined
+        hide:
+            framework: !include framework/doc/hidden.yml
+            chemical_reactions: !include modules/chemical_reactions/doc/hidden.yml
+            #combined: !include modules/combined/doc/hidden.yml
+            contact: !include modules/contact/doc/hidden.yml
+            fluid_properties: !include modules/fluid_properties/doc/hidden.yml
+            #functional_expansion_tools: !include modules/functional_expansion_tools/doc/hidden.yml
+            heat_conduction: !include modules/heat_conduction/doc/hidden.yml
+            #level_set: !include modules/level_set/doc/hidden.yml
+            misc: !include modules/misc/doc/hidden.yml
+            navier_stokes: !include modules/navier_stokes/doc/hidden.yml
+            phase_field: !include modules/phase_field/doc/hidden.yml
+            porous_flow: !include modules/porous_flow/doc/hidden.yml
+            #rdg: !include modules/rdg/doc/hidden.yml
+            #richards: !include modules/richards/doc/hidden.yml
+            #solid_mechanics: !include modules/solid_mechanics/doc/hidden.yml
+            #stochastic_tools: !include modules/stochastic_tools/doc/hidden.yml
+            tensor_mechanics: !include modules/tensor_mechanics/doc/hidden.yml
+            #water_steam_eos: !include modules/water_steam_eos/doc/hidden.yml
+            xfem: !include modules/xfem/doc/hidden.yml
+        remove:
+            framework: !include framework/doc/remove.yml
+            #chemical_reactions: !include modules/chemical_reactions/doc/remove.yml
+            #combined: !include modules/combined/doc/remove.yml
+            #contact: !include modules/contact/doc/remove.yml
+            #fluid_properties: !include modules/fluid_properties/doc/remove.yml
+            #functional_expansion_tools: !include modules/functional_expansion_tools/doc/remove.yml
+            #heat_conduction: !include modules/heat_conduction/doc/remove.yml
+            #level_set: !include modules/level_set/doc/remove.yml
+            #misc: !include modules/misc/doc/remove.yml
+            #navier_stokes: !include modules/navier_stokes/doc/remove.yml
+            #phase_field: !include modules/phase_field/doc/remove.yml
+            #porous_flow: !include modules/porous_flow/doc/remove.yml
+            #rdg: !include modules/rdg/doc/remove.yml
+            richards: !include modules/richards/doc/remove.yml
+            solid_mechanics: !include modules/solid_mechanics/doc/remove.yml
+            stochastic_tools: !include modules/stochastic_tools/doc/remove.yml
+            #tensor_mechanics: !include modules/tensor_mechanics/doc/remove.yml
+            #water_steam_eos: !include modules/water_steam_eos/doc/remove.yml
+            #xfem: !include modules/xfem/doc/remove.yml
+        includes:
+            - framework/include
+            - modules/chemical_reactions/include
+            - modules/combined/include
+            - modules/contact/include
+            - modules/fluid_properties/include
+            - modules/functional_expansion_tools/include
+            - modules/heat_conduction/include
+            - modules/level_set/doc/cogntent
+            - modules/misc/include
+            - modules/navier_stokes/include
+            - modules/phase_field/include
+            - modules/porous_flow/include
+            - modules/rdg/include
+            - modules/richards/include
+            - modules/solid_mechanics/include
+            - modules/stochastic_tools/include
+            - modules/tensor_mechanics/include
+            - modules/water_steam_eos/include
+            - modules/xfem/include
+    globals:
+        type: MooseDocs.extensions.panoptic
+        shortcuts: !include framework/doc/globals.yml

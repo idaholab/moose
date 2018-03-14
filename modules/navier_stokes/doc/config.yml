@@ -1,0 +1,28 @@
+Content:
+    - framework/doc/content
+    - modules/navier_stokes/doc/content
+    - modules/fluid_properties/doc/content
+
+Renderer:
+    type: MooseDocs.base.MaterializeRenderer
+    name: MOOSE Navier Stokes Module
+    repo: https://github.com/idaholab/moose
+    home: /documentation/modules/navier_stokes
+
+Extensions:
+    appsyntax:
+        type: MooseDocs.extensions.appsyntax
+        executable: ${MOOSE_DIR}/modules/navier_stokes
+        hide:
+            framework: !include framework/doc/hidden.yml
+            navier_stokes: !include modules/navier_stokes/doc/hidden.yml
+            fluid_properties: !include modules/fluid_properties/doc/hidden.yml
+        remove:
+            framework: !include framework/doc/remove.yml
+        includes:
+            - framework/include
+            - modules/navier_stokes/include
+            - modules/fluid_properties/include
+    globals:
+        type: MooseDocs.extensions.panoptic
+        shortcuts: !include framework/doc/globals.yml

@@ -1,0 +1,15 @@
+- /AuxVariables/InitialCondition/NSInitialCondition
+- /Functions/WedgeFunction
+- /Modules/NavierStokes
+- /Modules/NavierStokes/BCs
+- /Modules/NavierStokes/BCs/AddNavierStokesBCsAction
+- /Modules/NavierStokes/BCs/NSNoPenetrationBC
+- /Modules/NavierStokes/BCs/NSStaticPressureOutletBC
+- /Modules/NavierStokes/BCs/NSWeakStagnationInletBC
+- /Modules/NavierStokes/ICs
+- /Modules/NavierStokes/ICs/AddNavierStokesICsAction
+- /Modules/NavierStokes/Kernels
+- /Modules/NavierStokes/Kernels/AddNavierStokesKernelsAction
+- /Modules/NavierStokes/Variables
+- /Modules/NavierStokes/Variables/AddNavierStokesVariablesAction
+- /Variables/InitialCondition/NSInitialCondition

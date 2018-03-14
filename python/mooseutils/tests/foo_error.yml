@@ -1,0 +1,5 @@
+a: 1
+b:
+    - 1.43
+    - 543.55
+c: !include unknown.yml

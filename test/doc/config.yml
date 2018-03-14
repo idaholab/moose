@@ -1,0 +1,25 @@
+Content:
+    - framework/doc/content
+    - test/doc/content
+
+Renderer:
+    type: MooseDocs.base.MaterializeRenderer
+    name: MooseTestApp
+    repo: https://github.com/idaholab/moose
+    home: /
+    navigation: !include modules/combined/doc/navigation.yml
+
+Extensions:
+    appsyntax:
+        type: MooseDocs.extensions.appsyntax
+        executable: ${MOOSE_DIR}/test
+        hide:
+            framework: !include framework/doc/hidden.yml
+        remove:
+            framework: !include framework/doc/remove.yml
+            moose_test: !include test/doc/remove.yml
+        includes:
+            - framework/include
+    globals:
+        type: MooseDocs.extensions.panoptic
+        shortcuts: !include framework/doc/globals.yml

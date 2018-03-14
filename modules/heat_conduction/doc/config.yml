@@ -1,0 +1,24 @@
+Content:
+    - framework/doc/content
+    - modules/heat_conduction/doc/content
+
+Renderer:
+    type: MooseDocs.base.MaterializeRenderer
+    name: MOOSE Heat Conduction Module
+    repo: https://github.com/idaholab/moose
+    home: /documentation/modules/heat_conduction
+
+Extensions:
+    appsyntax:
+        type: MooseDocs.extensions.appsyntax
+        executable: ${MOOSE_DIR}/modules/heat_conduction
+        hide:
+            framework: !include framework/doc/hidden.yml
+            heat_conduction: !include modules/heat_conduction/doc/hidden.yml
+        remove: !include framework/doc/remove.yml
+        includes:
+            - framework/include
+            - modules/heat_conduction/include
+    globals:
+        type: MooseDocs.extensions.panoptic
+        shortcuts: !include framework/doc/globals.yml

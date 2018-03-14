@@ -1,0 +1,22 @@
+Content:
+    - framework/doc/content
+    - modules/functional_expansion_tools/doc/content
+
+Renderer:
+    type: MooseDocs.base.MaterializeRenderer
+    name: MOOSE Functional Expansion Tools Module
+    repo: https://github.com/idaholab/moose
+    home: /documentation/modules/functional_expansion_tools
+
+Extensions:
+    appsyntax:
+        type: MooseDocs.extensions.appsyntax
+        executable: ${MOOSE_DIR}/modules/functional_expansion_tools
+        hide: !include framework/doc/hidden.yml
+        remove: !include framework/doc/remove.yml
+        includes:
+            - framework/include
+            - modules/functional_expansion_tools/include
+    globals:
+        type: MooseDocs.extensions.panoptic
+        shortcuts: !include framework/doc/globals.yml
