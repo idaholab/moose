@@ -46,8 +46,6 @@ OneDEnergyGravity::OneDEnergyGravity(const InputParameters & parameters)
 {
 }
 
-OneDEnergyGravity::~OneDEnergyGravity() {}
-
 Real
 OneDEnergyGravity::computeQpResidual()
 {

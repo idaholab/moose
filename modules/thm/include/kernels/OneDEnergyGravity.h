@@ -16,7 +16,6 @@ class OneDEnergyGravity : public DerivativeMaterialInterfaceRelap<Kernel>
 {
 public:
   OneDEnergyGravity(const InputParameters & parameters);
-  virtual ~OneDEnergyGravity();
 
 protected:
   virtual Real computeQpResidual();
