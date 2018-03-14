@@ -22,8 +22,8 @@ public:
 protected:
   Real _L;
 
-  Function & _a;
-  Function & _b;
+  Real _a;
+  Real _b;
 
   Real _d;
   Real _h;
