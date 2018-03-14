@@ -4,7 +4,6 @@ Tests for Lexer and related objects.
 """
 import re
 import unittest
-import mock
 
 from MooseDocs.tree import tokens
 from MooseDocs.base import lexers
@@ -117,8 +116,7 @@ class TestLexer(unittest.TestCase):
         self.assertIsInstance(root(2), FooBar)
         self.assertEqual(root(2).content, u'bar')
 
-    @mock.patch('logging.Logger.error')
-    def testTokenizeWithExtraContent(self, mock):
+    def testTokenizeWithExtraContent(self):
         # Extra
         root = tokens.Token(None)
         grammer = lexers.Grammer()
@@ -128,8 +126,8 @@ class TestLexer(unittest.TestCase):
         lexer.tokenize(root, grammer, u'foo ???')
         self.assertIsInstance(root(0), FooBar)
         self.assertEqual(root(0).content, u'foo')
-        self.assertEqual(mock.call_count, 1)
-
+        self.assertIsInstance(root(1), tokens.ErrorToken)
+        self.assertIn('Unprocessed', root(1).message)
 
 class EmptyComponent(object):
     """

@@ -1,9 +1,9 @@
 # MultiAppVectorPostprocessorTransfer
 
-MultiAppVectorPostprocessorTransfer transfers values from master [VectorPostprocessors] to
-sub-app [Postprocessors] or vice versa. The number of entries in the [VectorPostprocessors] data vector
-must be equal to the number of sub-apps associated with the provided [MultiApps]. The transfer sends/receives
-the n-th entry of the VectorPostprocessor to/from the n-th sub-app.
+MultiAppVectorPostprocessorTransfer transfers values from master [VectorPostprocessors] to sub-app
+[Postprocessors] or vice versa. The number of entries in the [VectorPostprocessors] data vector must
+be equal to the number of sub-apps associated with the provided [MultiApps]. The transfer
+sends/receives the n-th entry of the VectorPostprocessor to/from the n-th sub-app.
 
 !syntax description /Transfers/MultiAppVectorPostprocessorTransfer
 

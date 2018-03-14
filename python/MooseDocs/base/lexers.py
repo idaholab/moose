@@ -246,8 +246,8 @@ class Lexer(object):
 
         # Produce Exception token if text remains that was not matched
         if pos < n:
-            msg = u'Unprocessed text exists:\n{}'.format(common.box(text[pos:], line=line))
-            LOG.error(msg)
+            msg = 'Unprocessed text exists.'
+            tokens.ErrorToken(parent, info=info, message=msg)
 
     def buildObject(self, parent, pattern, info): #pylint: disable=no-self-use
         """

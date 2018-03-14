@@ -35,6 +35,15 @@ class TestSyntaxTree(unittest.TestCase):
         self.assertTrue(node.removed)
         self.assertIn('MiscTest', root.groups)
 
+    def testAlias(self):
+        location = os.path.join(MooseDocs.MOOSE_DIR, 'test')
+        exe = mooseutils.find_moose_executable(location)
+        alias = dict()
+        alias['/VectorPostprocessors/VolumeHistogram'] = '/VPP/VolumeHistogram'
+        root = app_syntax(exe, alias=alias)
+
+        node = root.findfull('/VPP/VolumeHistogram')
+        self.assertEqual(node.fullpath, '/VPP/VolumeHistogram')
 
 if __name__ == '__main__':
     unittest.main(verbosity=2)

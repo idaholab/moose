@@ -97,7 +97,7 @@ class TestFindFiles(unittest.TestCase):
 class TestDocImport(unittest.TestCase):
     def testBasic(self):
         items = doc_import(content=['framework/doc/content/**',
-                                    '!framework/doc/content/documentation/**'],
+                                    '~framework/doc/content/documentation/**'],
                            root_dir=ROOT_DIR)
         self.assertIsInstance(items, list)
 
@@ -106,10 +106,9 @@ class TestDocImport(unittest.TestCase):
 
 
     def testFilename(self):
-        items = doc_import(content=['framework/doc/content/utilities/moose_docs/*',
-                                    'framework/doc/content/getting_started/*',
-                                    '!framework/doc/content/utilities/memory_logger/*',
-                                    '!framework/doc/**/MooseDocs/*'],
+        items = doc_import(content=['framework/doc/content/getting_started/*',
+                                    '~framework/doc/content/utilities/memory_logger/*',
+                                    '~framework/doc/**/MooseDocs/*'],
                             root_dir=ROOT_DIR)
 
         self.assertIsInstance(items, list)
@@ -167,4 +166,6 @@ class TestDocTree(unittest.TestCase):
                                       'framework/doc/content/getting_started/installation/bash_profile.md'))
 
 if __name__ == '__main__':
+    import logging
+    logging.basicConfig()
     unittest.main(verbosity=2)

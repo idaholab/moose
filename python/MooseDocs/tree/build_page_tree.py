@@ -52,9 +52,12 @@ def find_files(filenames, pattern):
     Locate files matching the given pattern.
     """
     out = set()
-    regex = build_regex(pattern)
-    for match in re.finditer(regex, '\n'.join(filenames), flags=re.MULTILINE):
-        out.add(match.group(0))
+    if '*' in pattern:
+        regex = build_regex(pattern)
+        for match in re.finditer(regex, '\n'.join(filenames), flags=re.MULTILINE):
+            out.add(match.group(0))
+    else:
+        out.add(pattern)
     return out
 
 def doc_import(root_dir, content=None):
@@ -64,7 +67,7 @@ def doc_import(root_dir, content=None):
     Args:
         root_dir[str]: The directory which all other paths should be relative to.
         content[list]: List of file/path globs to include, relative to the 'base' directory, paths
-                       beginning with '!' are excluded.
+                       beginning with '~' are excluded.
     """
 
     # Check root_dir
@@ -93,7 +96,7 @@ def doc_import(root_dir, content=None):
     include = []
     exclude = []
     for item in content:
-        if item.startswith('!'):
+        if item.startswith('~'):
             exclude.append(item[1:])
         else:
             include.append(item)
