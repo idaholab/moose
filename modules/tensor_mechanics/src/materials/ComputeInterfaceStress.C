@@ -72,8 +72,10 @@ ComputeInterfaceStress::computeQpProperties()
   // loop over interface variables
   for (auto i = beginIndex(_grad_v); i < _nvar; ++i)
   {
-    // no interface, return zero stress
+    // compute norm square of the order parameter gradient
     const Real grad_norm_sq = (*_grad_v[i])[_qp].norm_sq();
+
+    // gradient square is zero -> no interface -> no interfacial stress contribution
     if (grad_norm_sq < libMesh::TOLERANCE)
       continue;
 
@@ -90,6 +92,7 @@ ComputeInterfaceStress::computeQpProperties()
     S(2, 2) += (nx * nx + ny * ny) * s;
   }
 
+  // fill in symmetrically
   S(1, 0) = S(0, 1);
   S(2, 0) = S(0, 2);
   S(2, 1) = S(1, 2);
