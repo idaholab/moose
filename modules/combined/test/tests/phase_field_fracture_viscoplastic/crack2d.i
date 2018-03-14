@@ -1,26 +1,33 @@
 [Mesh]
   type = FileMesh
   file = crack_mesh.e
-  uniform_refine = 0
 []
 
 [GlobalParams]
   displacements = 'disp_x disp_y'
+  volumetric_locking_correction = true
 []
 
-[Variables]
-  [./disp_x]
+[Modules]
+  [./TensorMechanics]
+    [./Master]
+      [./All]
+        add_variables = true
+        strain = Finite
+        additional_generate_output = stress_yy
+        save_in = 'resid_x resid_y'
+      [../]
+    [../]
   [../]
-  [./disp_y]
+  [./PhaseField]
+    [./Nonconserved]
+      [./c]
+        free_energy = E_el
+        mobility = L
+        kappa = kappa_op
+      [../]
+    [../]
   [../]
-  [./c]
-  [../]
-  [./b]
-  [../]
-[]
-
-[GlobalParams]
-  volumetric_locking_correction=true
 []
 
 [AuxVariables]
@@ -39,21 +46,6 @@
 []
 
 [Kernels]
-  [./pfbulk]
-    type = SplitPFFractureBulkRate
-    variable = c
-    width = 0.08
-    beta = b
-    viscosity =1
-    gc = 'gc_prop'
-    G0 = 'G0'
-    dG0_dstrain = 'dG0_dstrain'
-  [../]
-  [./TensorMechanics]
-    displacements = 'disp_x disp_y'
-    save_in = 'resid_x resid_y'
-    use_displaced_mesh = true
-  [../]
   [./solid_x]
     type = PhaseFieldFractureMechanicsOffDiag
     variable = disp_x
@@ -67,19 +59,6 @@
     component = 1
     c = c
     use_displaced_mesh = true
-  [../]
-  [./dcdt]
-    type = TimeDerivative
-    variable = c
-  [../]
-  [./pfintvar]
-    type = Reaction
-    variable = b
-  [../]
-  [./pfintcoupled]
-    type = LaplacianSplit
-    variable = b
-    c = c
   [../]
 []
 
@@ -147,8 +126,26 @@
 
 [Materials]
   [./pfbulkmat]
-    type = PFFracBulkRateMaterial
-    gc = 1e-3
+    type = GenericConstantMaterial
+    prop_names = 'l visco'
+    prop_values = '0.08 1'
+  [../]
+  [./pfgc]
+    type = GenericFunctionMaterial
+    prop_names = 'gc_prop'
+    prop_values = '1.0e-3'
+  [../]
+  [./define_mobility]
+    type = ParsedMaterial
+    material_property_names = 'gc_prop visco'
+    f_name = L
+    function = '1/(gc_prop * visco)'
+  [../]
+  [./define_kappa]
+    type = ParsedMaterial
+    material_property_names = 'gc_prop l'
+    f_name = kappa_op
+    function = 'gc_prop * l'
   [../]
   [./viscop_damage]
     type = HyperElasticPhaseFieldIsoDamage
@@ -163,14 +160,12 @@
     numerical_stiffness = false
     damage_stiffness = 1e-8
     c = c
+    F_name = E_el
   [../]
   [./elasticity_tensor]
     type = ComputeElasticityTensor
     C_ijkl = '120.0 80.0'
     fill_method = symmetric_isotropic
-  [../]
-  [./strain]
-    type = ComputeFiniteStrain
   [../]
 []
 
@@ -190,7 +185,7 @@
 [Preconditioning]
   [./smp]
     type = SMP
-    coupled_groups = 'disp_x,disp_y c,b'
+    full = true
   [../]
 []
 
@@ -202,10 +197,11 @@
   petsc_options_value = 'asm      31                  preonly       lu           1'
 
   nl_rel_tol = 1e-8
+
   l_max_its = 10
   nl_max_its = 10
 
-  dt = 0.1
+  dt = 1
   dtmin = 1e-4
   num_steps = 2
 []

@@ -234,6 +234,12 @@ public:
   /// returns C_ijkl = a_jk * b_il
   RankFourTensor mixedProductJkIl(const RankTwoTensor & a) const;
 
+  /// returns C_ijkl = a_il * b_jk
+  RankFourTensor mixedProductIlJk(const RankTwoTensor & a) const;
+
+  /// return positive projection tensor of eigen-decomposition
+  RankFourTensor positveProjectionEigenDecomposition() const;
+
   /// returns A_ij - de_ij*tr(A)/3, where A are the _vals
   RankTwoTensor deviatoric() const;
 

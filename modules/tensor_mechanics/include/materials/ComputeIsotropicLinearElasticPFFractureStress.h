@@ -40,6 +40,9 @@ protected:
   /// Small number to avoid non-positive definiteness at or near complete damage
   const Real _kdamage;
 
+  /// Use current value of history variable
+  bool _use_current_hist;
+
   /// Material property defining crack width, declared elsewhere
   const MaterialProperty<Real> & _l;
 
@@ -50,8 +53,8 @@ protected:
   MaterialProperty<Real> & _F;
   MaterialProperty<Real> & _dFdc;
   MaterialProperty<Real> & _d2Fdc2;
-  MaterialProperty<RankTwoTensor> & _d2Fdcdstrain;
   MaterialProperty<RankTwoTensor> & _dstress_dc;
+  MaterialProperty<RankTwoTensor> & _d2Fdcdstrain;
 
   /// History variable that prevents crack healing, declared in this material
   MaterialProperty<Real> & _hist;

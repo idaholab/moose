@@ -1,22 +1,15 @@
 [Tests]
-  [./crack2d]
+  [./crack2d_iso]
     type = 'Exodiff'
-    input = 'crack2d.i'
-    exodiff = 'crack2d_out.e'
+    input = 'crack2d_iso.i'
+    exodiff = 'crack2d_iso_out.e'
     abs_zero = 1e-09
     use_old_floor = True
   [../]
-  [./crack2d_nonsplit]
+  [./crack2d_iso_wo_time]
     type = 'Exodiff'
-    input = 'crack2d_nonsplit.i'
-    exodiff = 'crack2d_nonsplit_out.e'
-    abs_zero = 1e-09
-    use_old_floor = True
-  [../]
-  [./crack2d_nonsplit2]
-    type = 'Exodiff'
-    input = 'crack2d_nonsplit2.i'
-    exodiff = 'crack2d_nonsplit2_out.e'
+    input = 'crack2d_iso_wo_time.i'
+    exodiff = 'crack2d_iso_wo_time_out.e'
     abs_zero = 1e-09
     use_old_floor = True
   [../]
@@ -25,17 +18,10 @@
     input = 'crack2d_aniso.i'
     exodiff = 'crack2d_aniso_out.e'
   [../]
-  [./void2d]
+  [./void2d_iso]
     type = 'Exodiff'
-    input = 'void2d.i'
-    exodiff = 'void2d_out.e'
-    abs_zero = 1e-09
-    use_old_floor = True
-  [../]
-  [./void2d_nonsplit]
-    type = 'Exodiff'
-    input = 'void2d_nonsplit.i'
-    exodiff = 'void2d_nonsplit_out.e'
+    input = 'void2d_iso.i'
+    exodiff = 'void2d_iso_out.e'
     abs_zero = 1e-09
     use_old_floor = True
   [../]
