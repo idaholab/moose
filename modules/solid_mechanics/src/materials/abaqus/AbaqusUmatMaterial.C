@@ -14,6 +14,8 @@
 #include <dlfcn.h>
 #define QUOTE(macro) stringifyName(macro)
 
+registerMooseObject("SolidMechanicsApp", AbaqusUmatMaterial);
+
 template <>
 InputParameters
 validParams<AbaqusUmatMaterial>()

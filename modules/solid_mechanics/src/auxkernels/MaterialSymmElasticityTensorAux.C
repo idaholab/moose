@@ -19,6 +19,8 @@
 
 #include "MaterialSymmElasticityTensorAux.h"
 
+registerMooseObject("SolidMechanicsApp", MaterialSymmElasticityTensorAux);
+
 template <>
 InputParameters
 validParams<MaterialSymmElasticityTensorAux>()

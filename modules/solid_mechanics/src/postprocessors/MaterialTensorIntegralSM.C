@@ -12,6 +12,8 @@
 #include "SymmTensor.h"
 #include "MaterialTensorCalculator.h"
 
+registerMooseObject("SolidMechanicsApp", MaterialTensorIntegralSM);
+
 template <>
 InputParameters
 validParams<MaterialTensorIntegralSM>()

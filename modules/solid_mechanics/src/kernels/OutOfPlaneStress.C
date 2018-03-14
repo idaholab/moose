@@ -12,6 +12,8 @@
 #include "Material.h"
 #include "SymmElasticityTensor.h"
 
+registerMooseObject("SolidMechanicsApp", OutOfPlaneStress);
+
 template <>
 InputParameters
 validParams<OutOfPlaneStress>()

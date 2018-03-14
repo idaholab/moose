@@ -11,6 +11,8 @@
 
 #include "SymmIsotropicElasticityTensor.h"
 
+registerMooseObject("SolidMechanicsApp", PowerLawCreepModel);
+
 template <>
 InputParameters
 validParams<PowerLawCreepModel>()

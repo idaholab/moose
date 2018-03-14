@@ -19,6 +19,8 @@
  * simplified to specify HCP, monoclinic, cubic, etc as needed.
  */
 
+registerMooseObject("SolidMechanicsApp", LinearGeneralAnisotropicMaterial);
+
 template <>
 InputParameters
 validParams<LinearGeneralAnisotropicMaterial>()

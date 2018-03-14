@@ -15,6 +15,8 @@
 
 #include "libmesh/quadrature.h"
 
+registerMooseObject("SolidMechanicsApp", LinearIsotropicMaterial);
+
 template <>
 InputParameters
 validParams<LinearIsotropicMaterial>()

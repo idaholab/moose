@@ -12,6 +12,8 @@
 #include "ReturnMappingModel.h"
 #include "SymmIsotropicElasticityTensor.h"
 
+registerMooseObject("SolidMechanicsApp", CombinedCreepPlasticity);
+
 template <>
 InputParameters
 validParams<CombinedCreepPlasticity>()

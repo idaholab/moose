@@ -9,6 +9,8 @@
 
 #include "RateDepSmearIsoCrackModel.h"
 
+registerMooseObject("SolidMechanicsApp", RateDepSmearIsoCrackModel);
+
 template <>
 InputParameters
 validParams<RateDepSmearIsoCrackModel>()

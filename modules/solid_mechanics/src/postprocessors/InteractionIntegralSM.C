@@ -28,6 +28,8 @@ InteractionIntegralSM::sifModeType()
   return MooseEnum("KI KII KIII T", "KI");
 }
 
+registerMooseObject("SolidMechanicsApp", InteractionIntegralSM);
+
 template <>
 InputParameters
 validParams<InteractionIntegralSM>()
