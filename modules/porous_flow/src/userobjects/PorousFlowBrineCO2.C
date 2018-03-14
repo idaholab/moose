@@ -212,14 +212,15 @@ PorousFlowBrineCO2::gasProperties(Real pressure,
   // Gas density and viscosity are approximated with pure CO2 - no correction due
   // to the small amount of water vapor is made
   Real co2_density, dco2_density_dp, dco2_density_dT;
-  Real co2_viscosity, dco2_viscosity_drho, dco2_viscosity_dT;
-  _co2_fp.rho_dpT(pressure, temperature, co2_density, dco2_density_dp, dco2_density_dT);
-  _co2_fp.mu_drhoT_from_rho_T(co2_density,
-                              temperature,
-                              dco2_density_dT,
-                              co2_viscosity,
-                              dco2_viscosity_drho,
-                              dco2_viscosity_dT);
+  Real co2_viscosity, dco2_viscosity_dp, dco2_viscosity_dT;
+  _co2_fp.rho_mu_dpT(pressure,
+                     temperature,
+                     co2_density,
+                     dco2_density_dp,
+                     dco2_density_dT,
+                     co2_viscosity,
+                     dco2_viscosity_dp,
+                     dco2_viscosity_dT);
 
   // Save the values to the FluidStateProperties object. Note that derivatives wrt z are 0
   gas.density = co2_density;
@@ -228,7 +229,7 @@ PorousFlowBrineCO2::gasProperties(Real pressure,
   gas.ddensity_dz = 0.0;
 
   gas.viscosity = co2_viscosity;
-  gas.dviscosity_dp = dco2_viscosity_drho * dco2_density_dp;
+  gas.dviscosity_dp = dco2_viscosity_dp;
   gas.dviscosity_dT = dco2_viscosity_dT;
   gas.dviscosity_dz = 0.0;
 }
