@@ -10,6 +10,8 @@
 #include "PorousFlowFluidStateBrineCO2IC.h"
 #include "PorousFlowBrineCO2.h"
 
+registerMooseObject("PorousFlowApp", PorousFlowFluidStateBrineCO2IC);
+
 template <>
 InputParameters
 validParams<PorousFlowFluidStateBrineCO2IC>()

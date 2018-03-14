@@ -9,6 +9,8 @@
 
 #include "PorousFlowMassFractionAqueousEquilibriumChemistry.h"
 
+registerMooseObject("PorousFlowApp", PorousFlowMassFractionAqueousEquilibriumChemistry);
+
 template <>
 InputParameters
 validParams<PorousFlowMassFractionAqueousEquilibriumChemistry>()

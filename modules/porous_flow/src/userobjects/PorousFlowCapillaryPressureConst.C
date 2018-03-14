@@ -9,6 +9,8 @@
 
 #include "PorousFlowCapillaryPressureConst.h"
 
+registerMooseObject("PorousFlowApp", PorousFlowCapillaryPressureConst);
+
 template <>
 InputParameters
 validParams<PorousFlowCapillaryPressureConst>()

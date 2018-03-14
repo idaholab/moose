@@ -9,6 +9,8 @@
 
 #include "PorousFlow1PhaseP_VG.h"
 
+registerMooseObject("PorousFlowApp", PorousFlow1PhaseP_VG);
+
 template <>
 InputParameters
 validParams<PorousFlow1PhaseP_VG>()

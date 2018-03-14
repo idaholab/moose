@@ -9,6 +9,8 @@
 
 #include "PorousFlowSingleComponentFluid.h"
 
+registerMooseObject("PorousFlowApp", PorousFlowSingleComponentFluid);
+
 template <>
 InputParameters
 validParams<PorousFlowSingleComponentFluid>()

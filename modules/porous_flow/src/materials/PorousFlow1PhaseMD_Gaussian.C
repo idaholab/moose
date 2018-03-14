@@ -9,6 +9,8 @@
 
 #include "PorousFlow1PhaseMD_Gaussian.h"
 
+registerMooseObject("PorousFlowApp", PorousFlow1PhaseMD_Gaussian);
+
 template <>
 InputParameters
 validParams<PorousFlow1PhaseMD_Gaussian>()

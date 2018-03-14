@@ -9,6 +9,8 @@
 
 #include "PorousFlowNearestQp.h"
 
+registerMooseObject("PorousFlowApp", PorousFlowNearestQp);
+
 template <>
 InputParameters
 validParams<PorousFlowNearestQp>()

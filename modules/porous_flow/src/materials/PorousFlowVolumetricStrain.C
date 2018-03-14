@@ -12,6 +12,8 @@
 
 #include "libmesh/quadrature.h"
 
+registerMooseObject("PorousFlowApp", PorousFlowVolumetricStrain);
+
 template <>
 InputParameters
 validParams<PorousFlowVolumetricStrain>()

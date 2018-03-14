@@ -14,6 +14,8 @@
 
 #include "libmesh/quadrature.h"
 
+registerMooseObject("PorousFlowApp", PorousFlowDesorpedMassTimeDerivative);
+
 template <>
 InputParameters
 validParams<PorousFlowDesorpedMassTimeDerivative>()

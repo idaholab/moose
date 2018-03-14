@@ -13,6 +13,16 @@
 #include "Conversion.h"
 #include "libmesh/string_to_enum.h"
 
+registerMooseAction("PorousFlowApp", PorousFlowBasicTHM, "add_user_object");
+
+registerMooseAction("PorousFlowApp", PorousFlowBasicTHM, "add_kernel");
+
+registerMooseAction("PorousFlowApp", PorousFlowBasicTHM, "add_material");
+
+registerMooseAction("PorousFlowApp", PorousFlowBasicTHM, "add_aux_variable");
+
+registerMooseAction("PorousFlowApp", PorousFlowBasicTHM, "add_aux_kernel");
+
 template <>
 InputParameters
 validParams<PorousFlowBasicTHM>()

@@ -12,6 +12,8 @@
 // MOOSE includes
 #include "MooseVariable.h"
 
+registerMooseObject("PorousFlowApp", PorousFlowMassVolumetricExpansion);
+
 template <>
 InputParameters
 validParams<PorousFlowMassVolumetricExpansion>()

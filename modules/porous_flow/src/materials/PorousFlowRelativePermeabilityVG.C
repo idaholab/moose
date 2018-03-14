@@ -10,6 +10,8 @@
 #include "PorousFlowRelativePermeabilityVG.h"
 #include "libmesh/utility.h"
 
+registerMooseObject("PorousFlowApp", PorousFlowRelativePermeabilityVG);
+
 template <>
 InputParameters
 validParams<PorousFlowRelativePermeabilityVG>()

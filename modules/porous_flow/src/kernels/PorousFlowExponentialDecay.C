@@ -10,6 +10,8 @@
 // MOOSE includes
 #include "MooseVariable.h"
 
+registerMooseObject("PorousFlowApp", PorousFlowExponentialDecay);
+
 template <>
 InputParameters
 validParams<PorousFlowExponentialDecay>()

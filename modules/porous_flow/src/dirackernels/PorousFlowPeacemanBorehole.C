@@ -11,6 +11,8 @@
 #include "RotationMatrix.h"
 #include "Function.h"
 
+registerMooseObject("PorousFlowApp", PorousFlowPeacemanBorehole);
+
 template <>
 InputParameters
 validParams<PorousFlowPeacemanBorehole>()

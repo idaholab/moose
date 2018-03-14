@@ -9,6 +9,8 @@
 
 #include "PorousFlowDiffusivityConst.h"
 
+registerMooseObject("PorousFlowApp", PorousFlowDiffusivityConst);
+
 template <>
 InputParameters
 validParams<PorousFlowDiffusivityConst>()

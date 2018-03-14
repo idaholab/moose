@@ -9,6 +9,8 @@
 
 #include "PorousFlowDarcyVelocityComponent.h"
 
+registerMooseObject("PorousFlowApp", PorousFlowDarcyVelocityComponent);
+
 template <>
 InputParameters
 validParams<PorousFlowDarcyVelocityComponent>()

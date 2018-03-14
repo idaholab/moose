@@ -17,6 +17,8 @@
 // C++ includes
 #include <limits>
 
+registerMooseObject("PorousFlowApp", PorousFlowMassRadioactiveDecay);
+
 template <>
 InputParameters
 validParams<PorousFlowMassRadioactiveDecay>()

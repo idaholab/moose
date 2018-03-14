@@ -12,6 +12,8 @@
 // MOOSE includes
 #include "MooseVariable.h"
 
+registerMooseObject("PorousFlowApp", PorousFlowFullySaturatedMassTimeDerivative);
+
 template <>
 InputParameters
 validParams<PorousFlowFullySaturatedMassTimeDerivative>()

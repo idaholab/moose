@@ -12,6 +12,8 @@
 
 #include <limits>
 
+registerMooseObject("PorousFlowApp", PorousFlow2PhasePS_VG);
+
 template <>
 InputParameters
 validParams<PorousFlow2PhasePS_VG>()

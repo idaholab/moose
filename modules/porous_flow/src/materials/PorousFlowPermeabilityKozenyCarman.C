@@ -9,6 +9,8 @@
 
 #include "PorousFlowPermeabilityKozenyCarman.h"
 
+registerMooseObject("PorousFlowApp", PorousFlowPermeabilityKozenyCarman);
+
 template <>
 InputParameters
 validParams<PorousFlowPermeabilityKozenyCarman>()

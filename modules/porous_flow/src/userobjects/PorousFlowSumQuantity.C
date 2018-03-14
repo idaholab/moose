@@ -9,6 +9,8 @@
 
 #include "PorousFlowSumQuantity.h"
 
+registerMooseObject("PorousFlowApp", PorousFlowSumQuantity);
+
 template <>
 InputParameters
 validParams<PorousFlowSumQuantity>()

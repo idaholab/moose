@@ -10,6 +10,8 @@
 #include "PorousFlowJoiner.h"
 #include "Conversion.h"
 
+registerMooseObject("PorousFlowApp", PorousFlowJoiner);
+
 template <>
 InputParameters
 validParams<PorousFlowJoiner>()
