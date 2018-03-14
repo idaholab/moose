@@ -55,7 +55,7 @@ MatVecRealGradAuxKernelAction::act()
   const unsigned int size_p = _prop.size();
 
   if (size_p != size_v)
-    mooseError("var_name_base and property must be vectors of the same dimension");
+    paramError("property", "var_name_base and property must be vectors of the same dimension");
 
   for (unsigned int op = 0; op < op_num; ++op)
   {

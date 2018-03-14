@@ -30,8 +30,8 @@ ACGrGrMulti::ACGrGrMulti(const InputParameters & parameters)
 {
   // check passed in parameter vectors
   if (_num_j != coupledComponents("v"))
-    mooseError("Need to pass in as many gamma_names as coupled variables in v in ACGrGrMulti",
-               name());
+    paramError("gamma_names",
+               "Need to pass in as many gamma_names as coupled variables in v in ACGrGrMulti");
 
   for (unsigned int n = 0; n < _num_j; ++n)
     _prop_gammas[n] = &getMaterialPropertyByName<Real>(_gamma_names[n]);

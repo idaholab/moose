@@ -33,7 +33,8 @@ void
 BimodalInverseSuperellipsoidsIC::initialSetup()
 {
   if (_size_variation_type == 2 && _size_variation > 0.0)
-    mooseError("If size_variation > 0.0, you must pass in a size_variation_type in "
+    paramError("size_variation",
+               "If size_variation > 0.0, you must pass in a size_variation_type in "
                "BimodalInverseSuperellipsoidsIC");
 
   BimodalSuperellipsoidsIC::initialSetup();

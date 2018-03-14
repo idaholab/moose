@@ -52,7 +52,7 @@ PolycrystalRandomICAction::act()
     poly_params.set<VariableName>("variable") = _var_name_base + Moose::stringify(op);
     poly_params.set<unsigned int>("op_num") = _op_num;
     poly_params.set<unsigned int>("op_index") = op;
-    poly_params.set<unsigned int>("typ") = _random_type;
+    poly_params.set<unsigned int>("random_type") = _random_type;
 
     // Add initial condition
     _problem->addInitialCondition("PolycrystalRandomIC",

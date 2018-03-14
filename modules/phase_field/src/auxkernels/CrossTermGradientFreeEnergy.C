@@ -27,7 +27,8 @@ CrossTermGradientFreeEnergy::CrossTermGradientFreeEnergy(const InputParameters &
 {
   // Error check to ensure size of interfacial_vars is the same as kappa_names
   if (_nvars * _nvars != _nkappas)
-    mooseError("Size of interfacial_vars squared is not equal to the size of kappa_names in "
+    paramError("kappa_names",
+               "Size of interfacial_vars squared is not equal to the size of kappa_names in "
                "CrossTermGradientFreeEnergy");
 
   // Assign kappa values

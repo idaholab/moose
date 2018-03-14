@@ -53,7 +53,7 @@ EBSDMesh::readEBSDHeader()
   std::ifstream stream_in(_filename.c_str());
 
   if (!stream_in)
-    mooseError("Can't open EBSD file: ", _filename);
+    paramError("filename", "Can't open EBSD file: ", _filename);
 
   // Labels to look for in the header
   std::vector<std::string> labels = {

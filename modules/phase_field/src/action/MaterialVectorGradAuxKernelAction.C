@@ -31,7 +31,7 @@ void
 MaterialVectorGradAuxKernelAction::act()
 {
   if (_num_prop != _num_var)
-    mooseError("variable_base and property must be vectors of the same size");
+    paramError("property", "variable_base and property must be vectors of the same size");
 
   // mesh dimension required for gradient variables
   unsigned int dim = _mesh->dimension();

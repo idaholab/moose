@@ -78,7 +78,7 @@ ConservedAction::ConservedAction(const InputParameters & params)
       _chempot_name = "chem_pot_" + _var_name;
       break;
     default:
-      mooseError("Incorrect solve_type in ConservedAction");
+      paramError("solve_type", "Incorrect solve_type in ConservedAction");
   }
 }
 
