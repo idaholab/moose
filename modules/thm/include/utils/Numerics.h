@@ -88,6 +88,18 @@ Real viscosityNumber(Real viscosity, Real surf_tension, Real rho_k, Real delta_r
 Real wallHeatTransferCoefficient(Real Nu, Real k, Real D_h);
 
 /**
+ * Computes velocity and its derivatives from alpha*rho*A and alpha*rho*u*A
+ *
+ * @param[in] arhoA           alpha*rho*A
+ * @param[in] arhouA          alpha*rho*u*A
+ * @param[out] vel            velocity
+ * @param[out] dvel_darhoA    derivative of velocity w.r.t. alpha*rho*A
+ * @param[out] dvel_darhouA   derivative of velocity w.r.t. alpha*rho*u*A
+ */
+void
+vel_from_arhoA_arhouA(Real arhoA, Real arhouA, Real & vel, Real & dvel_darhoA, Real & dvel_darhouA);
+
+/**
  * Derivative of velocity w.r.t. alpha*rho*A
  *
  * @param[in] arhoA    alpha*rho*A
@@ -123,6 +135,17 @@ Real dv_dalpha_liquid(Real area, Real arhoA, bool is_liquid);
 Real dv_darhoA(Real area, Real arhoA);
 
 /**
+ * Computes specific internal energy and its derivatives from specific total energy and velocity
+ *
+ * @param[in] E          specific total energy
+ * @param[in] vel        velocity
+ * @param[out] e         specific internal energy
+ * @param[out] de_dE     derivative of specific internal energy w.r.t. specific total energy
+ * @param[out] de_dvel   derivative of specific internal energy w.r.t. velocity
+ */
+void e_from_E_vel(Real E, Real vel, Real & e, Real & de_dE, Real & de_dvel);
+
+/**
  * Derivative of specific internal energy wrt density of the phase (rhoA or arhoA)
  *
  * @param arhoA - density equation solution variable: alpha*rho*A
@@ -145,6 +168,17 @@ Real de_darhouA(Real arhoA, Real arhouA);
  * @param arhoA - density equation solution variable: alpha*rho*A
  */
 Real de_darhoEA(Real arhoA);
+
+/**
+ * Computes specific total energy and its derivatives from alpha*rho*A and alpha*rho*E*A
+ *
+ * @param[in] arhoA         alpha*rho*A
+ * @param[in] arhoEA        alpha*rho*E*A
+ * @param[out] E            specific total energy
+ * @param[out] dE_darhoA    derivative of specific total energy w.r.t. alpha*rho*A
+ * @param[out] dE_darhoEA   derivative of specific total energy w.r.t. alpha*rho*E*A
+ */
+void E_from_arhoA_arhoEA(Real arhoA, Real arhoEA, Real & E, Real & dE_darhoA, Real & dE_darhoEA);
 
 /**
  * Determine if inlet boundary condition should be applied

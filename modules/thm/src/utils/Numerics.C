@@ -43,6 +43,14 @@ wallHeatTransferCoefficient(Real Nu, Real k, Real Dh)
   return Nu * k / Dh;
 }
 
+void
+vel_from_arhoA_arhouA(Real arhoA, Real arhouA, Real & vel, Real & dvel_darhoA, Real & dvel_darhouA)
+{
+  vel = arhouA / arhoA;
+  dvel_darhoA = -arhouA / (arhoA * arhoA);
+  dvel_darhouA = 1.0 / arhoA;
+}
+
 Real
 dvel_darhoA(Real arhoA, Real arhouA)
 {
@@ -68,6 +76,14 @@ dv_darhoA(Real area, Real arhoA)
   return -area / arhoA / arhoA;
 }
 
+void
+e_from_E_vel(Real E, Real vel, Real & e, Real & de_dE, Real & de_dvel)
+{
+  e = E - 0.5 * vel * vel;
+  de_dE = 1;
+  de_dvel = -vel;
+}
+
 Real
 de_darhoA(Real arhoA, Real arhouA, Real arhoEA)
 {
@@ -84,6 +100,14 @@ Real
 de_darhoEA(Real arhoA)
 {
   return (1 / arhoA);
+}
+
+void
+E_from_arhoA_arhoEA(Real arhoA, Real arhoEA, Real & E, Real & dE_darhoA, Real & dE_darhoEA)
+{
+  E = arhoEA / arhoA;
+  dE_darhoA = -arhoEA / (arhoA * arhoA);
+  dE_darhoEA = 1.0 / arhoA;
 }
 
 bool
