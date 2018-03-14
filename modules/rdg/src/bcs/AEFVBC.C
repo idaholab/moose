@@ -9,6 +9,8 @@
 
 #include "AEFVBC.h"
 
+registerMooseObject("RdgApp", AEFVBC);
+
 template <>
 InputParameters
 validParams<AEFVBC>()

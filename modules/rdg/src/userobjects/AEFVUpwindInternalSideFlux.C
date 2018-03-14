@@ -9,6 +9,8 @@
 
 #include "AEFVUpwindInternalSideFlux.h"
 
+registerMooseObject("RdgApp", AEFVUpwindInternalSideFlux);
+
 template <>
 InputParameters
 validParams<AEFVUpwindInternalSideFlux>()

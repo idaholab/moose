@@ -9,6 +9,8 @@
 
 #include "AEFVKernel.h"
 
+registerMooseObject("RdgApp", AEFVKernel);
+
 template <>
 InputParameters
 validParams<AEFVKernel>()

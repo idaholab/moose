@@ -12,20 +12,6 @@
 #include "AppFactory.h"
 #include "MooseSyntax.h"
 
-// BCs
-#include "AEFVBC.h"
-
-// Materials
-#include "AEFVMaterial.h"
-
-// DG kernels
-#include "AEFVKernel.h"
-
-// User objects
-#include "AEFVSlopeLimitingOneD.h"
-#include "AEFVUpwindInternalSideFlux.h"
-#include "AEFVFreeOutflowBoundaryFlux.h"
-
 template <>
 InputParameters
 validParams<RdgApp>()
@@ -69,19 +55,7 @@ RdgApp__registerObjects(Factory & factory)
 void
 RdgApp::registerObjects(Factory & factory)
 {
-  // DG kernels
-  registerDGKernel(AEFVKernel);
-
-  // BCs
-  registerBoundaryCondition(AEFVBC);
-
-  // Materials
-  registerMaterial(AEFVMaterial);
-
-  // User objects
-  registerUserObject(AEFVSlopeLimitingOneD);
-  registerUserObject(AEFVUpwindInternalSideFlux);
-  registerUserObject(AEFVFreeOutflowBoundaryFlux);
+  Registry::registerObjectsTo(factory, {"RdgApp"});
 }
 
 // External entry point for dynamic syntax association
@@ -91,8 +65,9 @@ RdgApp__associateSyntax(Syntax & syntax, ActionFactory & action_factory)
   RdgApp::associateSyntax(syntax, action_factory);
 }
 void
-RdgApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & /*action_factory*/)
+RdgApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & action_factory)
 {
+  Registry::registerActionsTo(action_factory, {"RdgApp"});
 }
 
 // External entry point for dynamic execute flag registration
