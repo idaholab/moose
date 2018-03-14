@@ -30,7 +30,10 @@ public:
    */
   MooseObjectTagWarehouse(bool threaded = true);
 
-  ///@{
+  /**
+   * Update the active status of Kernels
+   */
+  virtual void updateActive(THREAD_ID tid = 0) override;
 
   MooseObjectWarehouse<T> & getVectorTagObjectWarehouse(TagID tag_id, THREAD_ID tid);
 
@@ -52,12 +55,38 @@ protected:
 
   /// std::vector<TagID> based storage
   std::map<std::set<TagID>, MooseObjectWarehouse<T>> _matrix_tags_to_object_warehouse;
+
+private:
+  /// a static mutex used in warehouse
+  static Threads::spin_mutex _moose_object_tag_warehouse_mutex;
 };
+
+template <typename T>
+Threads::spin_mutex MooseObjectTagWarehouse<T>::_moose_object_tag_warehouse_mutex;
 
 template <typename T>
 MooseObjectTagWarehouse<T>::MooseObjectTagWarehouse(bool threaded /*=true*/)
   : MooseObjectWarehouse<T>(threaded)
 {
+}
+
+template <typename T>
+void
+MooseObjectTagWarehouse<T>::updateActive(THREAD_ID tid)
+{
+  MooseObjectWarehouse<T>::updateActive(tid);
+
+  for (auto & it : _vector_tag_to_object_warehouse)
+    it.second.updateActive(tid);
+
+  for (auto & it : _vector_tags_to_object_warehouse)
+    it.second.updateActive(tid);
+
+  for (auto & it : _matrix_tag_to_object_warehouse)
+    it.second.updateActive(tid);
+
+  for (auto & it : _matrix_tags_to_object_warehouse)
+    it.second.updateActive(tid);
 }
 
 template <typename T>
@@ -71,23 +100,29 @@ MooseObjectTagWarehouse<T>::getVectorTagObjectWarehouse(TagID tag_id, THREAD_ID 
     return tag_warehouse->second;
   else
   {
-    const auto & objects = MooseObjectWarehouse<T>::getActiveObjects(tid);
-    for (auto & object : objects)
-    {
-      auto & tags = object->getVectorTags();
-      for (auto & tag : tags)
-      {
-        if (tag == tag_id)
-        {
-          // Tag based storage
-          _vector_tag_to_object_warehouse[tag_id].addObject(object, tid);
+    // std::map is not thread-safe for writes
+    Threads::spin_mutex::scoped_lock lock(_moose_object_tag_warehouse_mutex);
+    _vector_tag_to_object_warehouse[tag_id];
+  }
 
-          break;
-        }
+  // Now add actual moose objects into warehouse
+  const auto & objects = MooseObjectWarehouse<T>::getActiveObjects(tid);
+  for (auto & object : objects)
+  {
+    auto & tags = object->getVectorTags();
+    for (auto & tag : tags)
+    {
+      if (tag == tag_id)
+      {
+        // Tag based storage
+        _vector_tag_to_object_warehouse[tag_id].addObject(object, tid);
+
+        break;
       }
     }
-    return _vector_tag_to_object_warehouse[tag_id];
   }
+
+  return _vector_tag_to_object_warehouse[tag_id];
 }
 
 template <typename T>
@@ -101,23 +136,31 @@ MooseObjectTagWarehouse<T>::getMatrixTagObjectWarehouse(TagID tag_id, THREAD_ID 
     return tag_warehouse->second;
   else
   {
-    const auto & objects = MooseObjectWarehouse<T>::getActiveObjects(tid);
-    for (auto & object : objects)
+    // std::map is not thread-safe for writes
     {
-      auto & tags = object->getMatrixTags();
-      for (auto & tag : tags)
-      {
-        if (tag == tag_id)
-        {
-          // Tag based storage
-          _matrix_tag_to_object_warehouse[tag_id].addObject(object, tid);
+      Threads::spin_mutex::scoped_lock lock(_moose_object_tag_warehouse_mutex);
+      _matrix_tag_to_object_warehouse[tag_id];
+    }
+  }
 
-          break;
-        }
+  // Add moose objects to matrix-tag warehouse
+  const auto & objects = MooseObjectWarehouse<T>::getActiveObjects(tid);
+  for (auto & object : objects)
+  {
+    auto & tags = object->getMatrixTags();
+    for (auto & tag : tags)
+    {
+      if (tag == tag_id)
+      {
+        // Tag based storage
+        _matrix_tag_to_object_warehouse[tag_id].addObject(object, tid);
+
+        break;
       }
     }
-    return _matrix_tag_to_object_warehouse[tag_id];
   }
+
+  return _matrix_tag_to_object_warehouse[tag_id];
 }
 
 template <typename T>
@@ -131,61 +174,70 @@ MooseObjectTagWarehouse<T>::getVectorTagsObjectWarehouse(std::set<TagID> & v_tag
     return tags_warehouse->second;
   else
   {
-    const auto & objects = MooseObjectWarehouse<T>::getActiveObjects(tid);
-    for (auto & object : objects)
-    {
-      auto & tags = object->getVectorTags();
-      const auto & tags_end = tags.end();
-      for (auto & v_tag : v_tags)
-      {
-        const auto & tag_found = tags.find(v_tag);
-        // Object contains at least one of required tags
-        if (tag_found != tags_end)
-        {
-          // std::vector<Tag> based storage
-          _vector_tags_to_object_warehouse[v_tags].addObject(object, tid);
+    // std::map is not thread-safe for writes
+    Threads::spin_mutex::scoped_lock lock(_moose_object_tag_warehouse_mutex);
+    _vector_tags_to_object_warehouse[v_tags];
+  }
 
-          // Then we should work for next object
-          break;
-        }
+  // Add moose objects to vector-tags warehouse
+  const auto & objects = MooseObjectWarehouse<T>::getActiveObjects(tid);
+  for (auto & object : objects)
+  {
+    auto & tags = object->getVectorTags();
+    const auto & tags_end = tags.end();
+    for (auto & v_tag : v_tags)
+    {
+      const auto & tag_found = tags.find(v_tag);
+      // Object contains at least one of required tags
+      if (tag_found != tags_end)
+      {
+        // std::vector<Tag> based storage
+        _vector_tags_to_object_warehouse[v_tags].addObject(object, tid);
+        // Then we should work for next object
+        break;
       }
     }
-    return _vector_tags_to_object_warehouse[v_tags];
   }
+
+  return _vector_tags_to_object_warehouse[v_tags];
 }
 
 template <typename T>
 MooseObjectWarehouse<T> &
-MooseObjectTagWarehouse<T>::getMatrixTagsObjectWarehouse(std::set<TagID> & v_tags, THREAD_ID tid)
+MooseObjectTagWarehouse<T>::getMatrixTagsObjectWarehouse(std::set<TagID> & m_tags, THREAD_ID tid)
 {
   const auto & house_end = _matrix_tags_to_object_warehouse.end();
-  const auto & tags_warehouse = _matrix_tags_to_object_warehouse.find(v_tags);
+  const auto & tags_warehouse = _matrix_tags_to_object_warehouse.find(m_tags);
 
   if (tags_warehouse != house_end)
     return tags_warehouse->second;
   else
   {
-    const auto & objects = MooseObjectWarehouse<T>::getActiveObjects(tid);
-    for (auto & object : objects)
-    {
-      auto & tags = object->getMatrixTags();
-      const auto & tags_end = tags.end();
-      for (auto & v_tag : v_tags)
-      {
-        const auto & tag_found = tags.find(v_tag);
-        // Object contains at least one of required tags
-        if (tag_found != tags_end)
-        {
-          // std::vector<Tag> based storage
-          _matrix_tags_to_object_warehouse[v_tags].addObject(object, tid);
+    // std::map is not thread-safe for writes
+    Threads::spin_mutex::scoped_lock lock(_moose_object_tag_warehouse_mutex);
+    _matrix_tags_to_object_warehouse[m_tags];
+  }
 
-          // Then we should work for next object
-          break;
-        }
+  const auto & objects = MooseObjectWarehouse<T>::getActiveObjects(tid);
+  for (auto & object : objects)
+  {
+    auto & tags = object->getMatrixTags();
+    const auto & tags_end = tags.end();
+    for (auto & m_tag : m_tags)
+    {
+      const auto & tag_found = tags.find(m_tag);
+      // Object contains at least one of required tags
+      if (tag_found != tags_end)
+      {
+        // std::vector<Tag> based storage
+        _matrix_tags_to_object_warehouse[m_tags].addObject(object, tid);
+        // Then we should work for next object
+        break;
       }
     }
-    return _matrix_tags_to_object_warehouse[v_tags];
   }
+
+  return _matrix_tags_to_object_warehouse[m_tags];
 }
 
 #endif // MOOSEOBJECTTAGWAREHOUSE_H

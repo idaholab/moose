@@ -44,6 +44,7 @@ assemble_matrix(EquationSystems & es, const std::string & system_name)
                          *eigen_system.matrix_B,
                          eigen_nl.nonEigenMatrixTag(),
                          eigen_nl.eigenMatrixTag());
+    return;
   }
 
   if (!p->isNonlinearEigenvalueSolver())
