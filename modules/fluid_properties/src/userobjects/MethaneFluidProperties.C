@@ -207,6 +207,27 @@ MethaneFluidProperties::mu_drhoT_from_rho_T(Real density,
   dmu_dT = dmudt * 1.e-6;
 }
 
+void
+MethaneFluidProperties::rho_mu(Real pressure, Real temperature, Real & rho, Real & mu) const
+{
+  rho = this->rho(pressure, temperature);
+  mu = this->mu_from_rho_T(rho, temperature);
+}
+
+void
+MethaneFluidProperties::rho_mu_dpT(Real pressure,
+                                   Real temperature,
+                                   Real & rho,
+                                   Real & drho_dp,
+                                   Real & drho_dT,
+                                   Real & mu,
+                                   Real & dmu_dp,
+                                   Real & dmu_dT) const
+{
+  this->rho_dpT(pressure, temperature, rho, drho_dp, drho_dT);
+  this->mu_dpT(pressure, temperature, mu, dmu_dp, dmu_dT);
+}
+
 Real
 MethaneFluidProperties::k(Real pressure, Real temperature) const
 {
