@@ -9,6 +9,8 @@
 
 #include "ComputeIsotropicElasticityTensor.h"
 
+registerMooseObject("TensorMechanicsApp", ComputeIsotropicElasticityTensor);
+
 template <>
 InputParameters
 validParams<ComputeIsotropicElasticityTensor>()

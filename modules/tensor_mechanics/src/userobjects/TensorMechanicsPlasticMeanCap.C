@@ -9,6 +9,8 @@
 
 #include "TensorMechanicsPlasticMeanCap.h"
 
+registerMooseObject("TensorMechanicsApp", TensorMechanicsPlasticMeanCap);
+
 template <>
 InputParameters
 validParams<TensorMechanicsPlasticMeanCap>()

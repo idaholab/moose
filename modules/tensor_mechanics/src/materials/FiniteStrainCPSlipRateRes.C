@@ -10,6 +10,8 @@
 #include "FiniteStrainCPSlipRateRes.h"
 #include "libmesh/utility.h"
 
+registerMooseObject("TensorMechanicsApp", FiniteStrainCPSlipRateRes);
+
 template <>
 InputParameters
 validParams<FiniteStrainCPSlipRateRes>()

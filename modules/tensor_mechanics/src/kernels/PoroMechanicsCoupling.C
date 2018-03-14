@@ -14,6 +14,8 @@
 #include "MooseMesh.h"
 #include "MooseVariable.h"
 
+registerMooseObject("TensorMechanicsApp", PoroMechanicsCoupling);
+
 template <>
 InputParameters
 validParams<PoroMechanicsCoupling>()

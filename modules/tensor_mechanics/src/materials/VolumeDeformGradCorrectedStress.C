@@ -9,6 +9,8 @@
 
 #include "VolumeDeformGradCorrectedStress.h"
 
+registerMooseObject("TensorMechanicsApp", VolumeDeformGradCorrectedStress);
+
 template <>
 InputParameters
 validParams<VolumeDeformGradCorrectedStress>()

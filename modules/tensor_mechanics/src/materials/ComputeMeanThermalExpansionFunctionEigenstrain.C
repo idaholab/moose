@@ -10,6 +10,8 @@
 #include "ComputeMeanThermalExpansionFunctionEigenstrain.h"
 #include "Function.h"
 
+registerMooseObject("TensorMechanicsApp", ComputeMeanThermalExpansionFunctionEigenstrain);
+
 template <>
 InputParameters
 validParams<ComputeMeanThermalExpansionFunctionEigenstrain>()

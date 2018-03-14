@@ -13,6 +13,8 @@
 
 #include <fstream>
 
+registerMooseObject("TensorMechanicsApp", FiniteStrainCrystalPlasticity);
+
 template <>
 InputParameters
 validParams<FiniteStrainCrystalPlasticity>()

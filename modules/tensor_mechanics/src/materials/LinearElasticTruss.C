@@ -9,6 +9,8 @@
 
 #include "LinearElasticTruss.h"
 
+registerMooseObject("TensorMechanicsApp", LinearElasticTruss);
+
 template <>
 InputParameters
 validParams<LinearElasticTruss>()

@@ -12,6 +12,8 @@
 #include "MooseMesh.h"
 #include "libmesh/quadrature.h"
 
+registerMooseObject("TensorMechanicsApp", ComputeReducedOrderEigenstrain);
+
 template <>
 InputParameters
 validParams<ComputeReducedOrderEigenstrain>()

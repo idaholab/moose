@@ -9,6 +9,8 @@
 
 #include "CrystalPlasticityStateVarRateComponentGSS.h"
 
+registerMooseObject("TensorMechanicsApp", CrystalPlasticityStateVarRateComponentGSS);
+
 template <>
 InputParameters
 validParams<CrystalPlasticityStateVarRateComponentGSS>()

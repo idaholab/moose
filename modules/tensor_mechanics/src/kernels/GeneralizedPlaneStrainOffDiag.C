@@ -19,6 +19,8 @@
 
 #include "libmesh/quadrature.h"
 
+registerMooseObject("TensorMechanicsApp", GeneralizedPlaneStrainOffDiag);
+
 template <>
 InputParameters
 validParams<GeneralizedPlaneStrainOffDiag>()

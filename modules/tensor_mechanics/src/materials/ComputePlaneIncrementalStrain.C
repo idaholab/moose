@@ -9,6 +9,8 @@
 
 #include "ComputePlaneIncrementalStrain.h"
 
+registerMooseObject("TensorMechanicsApp", ComputePlaneIncrementalStrain);
+
 template <>
 InputParameters
 validParams<ComputePlaneIncrementalStrain>()

@@ -10,6 +10,8 @@
 #include "ComputeIsotropicLinearElasticPFFractureStress.h"
 #include "MathUtils.h"
 
+registerMooseObject("TensorMechanicsApp", ComputeIsotropicLinearElasticPFFractureStress);
+
 template <>
 InputParameters
 validParams<ComputeIsotropicLinearElasticPFFractureStress>()

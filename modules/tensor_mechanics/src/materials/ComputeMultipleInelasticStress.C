@@ -12,6 +12,8 @@
 #include "StressUpdateBase.h"
 #include "MooseException.h"
 
+registerMooseObject("TensorMechanicsApp", ComputeMultipleInelasticStress);
+
 template <>
 InputParameters
 validParams<ComputeMultipleInelasticStress>()

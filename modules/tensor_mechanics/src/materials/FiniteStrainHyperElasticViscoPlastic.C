@@ -10,6 +10,8 @@
 #include "FiniteStrainHyperElasticViscoPlastic.h"
 #include "libmesh/utility.h"
 
+registerMooseObject("TensorMechanicsApp", FiniteStrainHyperElasticViscoPlastic);
+
 template <>
 InputParameters
 validParams<FiniteStrainHyperElasticViscoPlastic>()

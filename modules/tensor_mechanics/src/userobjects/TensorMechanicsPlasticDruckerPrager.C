@@ -10,6 +10,8 @@
 #include "TensorMechanicsPlasticDruckerPrager.h"
 #include "libmesh/utility.h"
 
+registerMooseObject("TensorMechanicsApp", TensorMechanicsPlasticDruckerPrager);
+
 template <>
 InputParameters
 validParams<TensorMechanicsPlasticDruckerPrager>()

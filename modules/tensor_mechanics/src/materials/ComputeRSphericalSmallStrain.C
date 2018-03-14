@@ -12,6 +12,8 @@
 
 #include "libmesh/quadrature.h"
 
+registerMooseObject("TensorMechanicsApp", ComputeRSphericalSmallStrain);
+
 template <>
 InputParameters
 validParams<ComputeRSphericalSmallStrain>()

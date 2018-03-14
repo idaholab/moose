@@ -10,6 +10,8 @@
 #include "RadialDisplacementSphereAux.h"
 #include "MooseMesh.h"
 
+registerMooseObject("TensorMechanicsApp", RadialDisplacementSphereAux);
+
 template <>
 InputParameters
 validParams<RadialDisplacementSphereAux>()

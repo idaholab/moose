@@ -9,6 +9,8 @@
 
 #include "GeneralizedMaxwellModel.h"
 
+registerMooseObject("TensorMechanicsApp", GeneralizedMaxwellModel);
+
 template <>
 InputParameters
 validParams<GeneralizedMaxwellModel>()

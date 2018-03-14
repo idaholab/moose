@@ -10,6 +10,8 @@
 #include "PresetVelocity.h"
 #include "Function.h"
 
+registerMooseObject("TensorMechanicsApp", PresetVelocity);
+
 template <>
 InputParameters
 validParams<PresetVelocity>()

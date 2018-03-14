@@ -9,6 +9,8 @@
 
 #include "ComputePlaneFiniteStrain.h"
 
+registerMooseObject("TensorMechanicsApp", ComputePlaneFiniteStrain);
+
 template <>
 InputParameters
 validParams<ComputePlaneFiniteStrain>()

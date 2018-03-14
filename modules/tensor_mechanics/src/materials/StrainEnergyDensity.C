@@ -11,6 +11,8 @@
 #include "RankTwoTensor.h"
 #include "MooseMesh.h"
 
+registerMooseObject("TensorMechanicsApp", StrainEnergyDensity);
+
 template <>
 InputParameters
 validParams<StrainEnergyDensity>()

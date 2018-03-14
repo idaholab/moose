@@ -9,6 +9,8 @@
 
 #include "ComputeCosseratElasticityTensor.h"
 
+registerMooseObject("TensorMechanicsApp", ComputeCosseratElasticityTensor);
+
 template <>
 InputParameters
 validParams<ComputeCosseratElasticityTensor>()

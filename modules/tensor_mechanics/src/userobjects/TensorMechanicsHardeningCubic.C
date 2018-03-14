@@ -10,6 +10,8 @@
 #include "TensorMechanicsHardeningCubic.h"
 #include "libmesh/utility.h"
 
+registerMooseObject("TensorMechanicsApp", TensorMechanicsHardeningCubic);
+
 template <>
 InputParameters
 validParams<TensorMechanicsHardeningCubic>()

@@ -17,6 +17,16 @@
 
 #include "libmesh/string_to_enum.h"
 
+registerMooseAction("TensorMechanicsApp", DomainIntegralAction, "add_user_object");
+
+registerMooseAction("TensorMechanicsApp", DomainIntegralAction, "add_aux_variable");
+
+registerMooseAction("TensorMechanicsApp", DomainIntegralAction, "add_aux_kernel");
+
+registerMooseAction("TensorMechanicsApp", DomainIntegralAction, "add_postprocessor");
+
+registerMooseAction("TensorMechanicsApp", DomainIntegralAction, "add_material");
+
 template <>
 InputParameters
 validParams<DomainIntegralAction>()

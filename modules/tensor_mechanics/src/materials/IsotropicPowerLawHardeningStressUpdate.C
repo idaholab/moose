@@ -10,6 +10,8 @@
 #include "IsotropicPowerLawHardeningStressUpdate.h"
 #include "ElasticityTensorTools.h"
 
+registerMooseObject("TensorMechanicsApp", IsotropicPowerLawHardeningStressUpdate);
+
 template <>
 InputParameters
 validParams<IsotropicPowerLawHardeningStressUpdate>()

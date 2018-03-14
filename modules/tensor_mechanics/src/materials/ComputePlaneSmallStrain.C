@@ -9,6 +9,8 @@
 
 #include "ComputePlaneSmallStrain.h"
 
+registerMooseObject("TensorMechanicsApp", ComputePlaneSmallStrain);
+
 template <>
 InputParameters
 validParams<ComputePlaneSmallStrain>()

@@ -9,6 +9,8 @@
 
 #include "GeneralizedKelvinVoigtModel.h"
 
+registerMooseObject("TensorMechanicsApp", GeneralizedKelvinVoigtModel);
+
 template <>
 InputParameters
 validParams<GeneralizedKelvinVoigtModel>()

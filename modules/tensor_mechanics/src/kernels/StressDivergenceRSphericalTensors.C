@@ -12,6 +12,8 @@
 #include "FEProblem.h"
 #include "MooseMesh.h"
 
+registerMooseObject("TensorMechanicsApp", StressDivergenceRSphericalTensors);
+
 template <>
 InputParameters
 validParams<StressDivergenceRSphericalTensors>()

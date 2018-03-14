@@ -11,6 +11,8 @@
 
 #include <fstream>
 
+registerMooseObject("TensorMechanicsApp", CrystalPlasticityRotationOutAux);
+
 template <>
 InputParameters
 validParams<CrystalPlasticityRotationOutAux>()

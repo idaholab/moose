@@ -9,6 +9,8 @@
 
 #include "CavityPressureUserObject.h"
 
+registerMooseObject("TensorMechanicsApp", CavityPressureUserObject);
+
 template <>
 InputParameters
 validParams<CavityPressureUserObject>()

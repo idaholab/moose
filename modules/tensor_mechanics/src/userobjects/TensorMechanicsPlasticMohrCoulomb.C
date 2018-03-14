@@ -10,6 +10,8 @@
 #include "TensorMechanicsPlasticMohrCoulomb.h"
 #include "libmesh/utility.h"
 
+registerMooseObject("TensorMechanicsApp", TensorMechanicsPlasticMohrCoulomb);
+
 template <>
 InputParameters
 validParams<TensorMechanicsPlasticMohrCoulomb>()

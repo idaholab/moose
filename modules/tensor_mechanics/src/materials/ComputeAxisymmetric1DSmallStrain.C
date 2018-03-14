@@ -9,6 +9,8 @@
 
 #include "ComputeAxisymmetric1DSmallStrain.h"
 
+registerMooseObject("TensorMechanicsApp", ComputeAxisymmetric1DSmallStrain);
+
 template <>
 InputParameters
 validParams<ComputeAxisymmetric1DSmallStrain>()

@@ -9,6 +9,8 @@
 
 #include "NewmarkVelAux.h"
 
+registerMooseObject("TensorMechanicsApp", NewmarkVelAux);
+
 template <>
 InputParameters
 validParams<NewmarkVelAux>()

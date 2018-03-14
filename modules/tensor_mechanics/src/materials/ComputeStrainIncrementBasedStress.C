@@ -9,6 +9,8 @@
 
 #include "ComputeStrainIncrementBasedStress.h"
 
+registerMooseObject("TensorMechanicsApp", ComputeStrainIncrementBasedStress);
+
 template <>
 InputParameters
 validParams<ComputeStrainIncrementBasedStress>()

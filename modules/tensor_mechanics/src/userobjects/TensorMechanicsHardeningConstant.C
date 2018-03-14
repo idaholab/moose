@@ -10,6 +10,8 @@
 #include "TensorMechanicsHardeningConstant.h"
 #include <math.h> // for M_PI
 
+registerMooseObject("TensorMechanicsApp", TensorMechanicsHardeningConstant);
+
 template <>
 InputParameters
 validParams<TensorMechanicsHardeningConstant>()

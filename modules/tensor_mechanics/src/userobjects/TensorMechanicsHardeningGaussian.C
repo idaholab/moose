@@ -9,6 +9,8 @@
 
 #include "TensorMechanicsHardeningGaussian.h"
 
+registerMooseObject("TensorMechanicsApp", TensorMechanicsHardeningGaussian);
+
 template <>
 InputParameters
 validParams<TensorMechanicsHardeningGaussian>()

@@ -9,6 +9,8 @@
 
 #include "PhaseFieldFractureMechanicsOffDiag.h"
 
+registerMooseObject("TensorMechanicsApp", PhaseFieldFractureMechanicsOffDiag);
+
 template <>
 InputParameters
 validParams<PhaseFieldFractureMechanicsOffDiag>()

@@ -9,6 +9,8 @@
 
 #include "TensorMechanicsHardeningCutExponential.h"
 
+registerMooseObject("TensorMechanicsApp", TensorMechanicsHardeningCutExponential);
+
 template <>
 InputParameters
 validParams<TensorMechanicsHardeningCutExponential>()

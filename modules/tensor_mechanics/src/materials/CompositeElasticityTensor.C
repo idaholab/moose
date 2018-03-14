@@ -9,6 +9,8 @@
 
 #include "CompositeElasticityTensor.h"
 
+registerMooseObject("TensorMechanicsApp", CompositeElasticityTensor);
+
 template <>
 InputParameters
 validParams<CompositeElasticityTensor>()

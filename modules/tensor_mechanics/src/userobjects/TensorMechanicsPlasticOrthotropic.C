@@ -10,6 +10,8 @@
 #include "TensorMechanicsPlasticOrthotropic.h"
 #include "libmesh/utility.h"
 
+registerMooseObject("TensorMechanicsApp", TensorMechanicsPlasticOrthotropic);
+
 template <>
 InputParameters
 validParams<TensorMechanicsPlasticOrthotropic>()

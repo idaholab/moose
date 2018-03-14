@@ -13,6 +13,8 @@
 #include "AuxiliarySystem.h"
 #include "MooseVariable.h"
 
+registerMooseObject("TensorMechanicsApp", TorqueReaction);
+
 template <>
 InputParameters
 validParams<TorqueReaction>()

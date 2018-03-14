@@ -12,6 +12,8 @@
 
 #include "Function.h"
 
+registerMooseObject("TensorMechanicsApp", PowerLawCreepStressUpdate);
+
 template <>
 InputParameters
 validParams<PowerLawCreepStressUpdate>()

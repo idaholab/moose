@@ -11,6 +11,8 @@
 #include "RankTwoTensor.h"
 #include "Function.h"
 
+registerMooseObject("TensorMechanicsApp", ComputeEigenstrainFromInitialStress);
+
 template <>
 InputParameters
 validParams<ComputeEigenstrainFromInitialStress>()

@@ -11,6 +11,8 @@
 
 #include <fstream>
 
+registerMooseObject("TensorMechanicsApp", CrystalPlasticityStateVariable);
+
 template <>
 InputParameters
 validParams<CrystalPlasticityStateVariable>()
