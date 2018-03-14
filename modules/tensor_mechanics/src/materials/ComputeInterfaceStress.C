@@ -49,12 +49,12 @@ ComputeInterfaceStress::ComputeInterfaceStress(const InputParameters & parameter
   if (_stress.size() == 1)
     _stress.assign(_nvar, _stress[0]);
   if (_stress.size() != _nvar)
-    mooseError("Supply either one single stress or one per order parameter");
+    paramError("stress", "Supply either one single stress or one per order parameter");
 
   if (_op_range.size() == 1)
     _op_range.assign(_nvar, _op_range[0]);
   if (_op_range.size() != _nvar)
-    mooseError("Supply either one single op_range or one per order parameter");
+    paramError("op_range", "Supply either one single op_range or one per order parameter");
 
   for (auto i = beginIndex(_grad_v); i < _nvar; ++i)
   {
