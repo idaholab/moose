@@ -74,6 +74,16 @@ public:
                         Real & drho_dT,
                         Real & drho_dx) const override;
 
+  virtual Real mu(Real pressure, Real temperature, Real xnacl) const override;
+
+  virtual void mu_dpTx(Real pressure,
+                       Real temperature,
+                       Real xnacl,
+                       Real & mu,
+                       Real & dmu_dp,
+                       Real & dmu_dT,
+                       Real & dmu_dx) const override;
+
   virtual Real mu_from_rho_T(Real water_density, Real temperature, Real xnacl) const override;
 
   virtual void mu_drhoTx(Real water_density,
@@ -84,6 +94,21 @@ public:
                          Real & dmu_drho,
                          Real & dmu_dT,
                          Real & dmu_dx) const override;
+
+  virtual void
+  rho_mu(Real pressure, Real temperature, Real xnacl, Real & rho, Real & mu) const override;
+
+  virtual void rho_mu_dpT(Real pressure,
+                          Real temperature,
+                          Real xnacl,
+                          Real & rho,
+                          Real & drho_dp,
+                          Real & drho_dT,
+                          Real & drho_dx,
+                          Real & mu,
+                          Real & dmu_dp,
+                          Real & dmu_dT,
+                          Real dmu_dx) const override;
 
   virtual Real h(Real pressure, Real temperature, Real xnacl) const override;
 
