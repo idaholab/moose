@@ -42,15 +42,14 @@ PorousFlowSingleComponentFluid::PorousFlowSingleComponentFluid(const InputParame
                    : &declarePropertyDerivative<Real>("PorousFlow_fluid_phase_density_qp" + _phase,
                                                       _pressure_variable_name))
             : nullptr),
-    _ddensity_dT(
-        _compute_rho_mu
-            ? (_nodal_material
-                   ? &declarePropertyDerivative<Real>("PorousFlow_fluid_phase_density_nodal" +
-                                                          _phase,
-                                                      _temperature_variable_name)
-                   : &declarePropertyDerivative<Real>("PorousFlow_fluid_phase_density_qp" + _phase,
-                                                      _temperature_variable_name))
-            : nullptr),
+    _ddensity_dT(_compute_rho_mu
+                     ? (_nodal_material ? &declarePropertyDerivative<Real>(
+                                              "PorousFlow_fluid_phase_density_nodal" + _phase,
+                                              _temperature_variable_name)
+                                        : &declarePropertyDerivative<Real>(
+                                              "PorousFlow_fluid_phase_density_qp" + _phase,
+                                              _temperature_variable_name))
+                     : nullptr),
 
     _viscosity(_compute_rho_mu
                    ? (_nodal_material
@@ -111,15 +110,14 @@ PorousFlowSingleComponentFluid::PorousFlowSingleComponentFluid(const InputParame
                    : &declarePropertyDerivative<Real>("PorousFlow_fluid_phase_enthalpy_qp" + _phase,
                                                       _pressure_variable_name))
             : nullptr),
-    _denthalpy_dT(
-        _compute_enthalpy
-            ? (_nodal_material
-                   ? &declarePropertyDerivative<Real>("PorousFlow_fluid_phase_enthalpy_nodal" +
-                                                          _phase,
-                                                      _temperature_variable_name)
-                   : &declarePropertyDerivative<Real>("PorousFlow_fluid_phase_enthalpy_qp" + _phase,
-                                                      _temperature_variable_name))
-            : nullptr),
+    _denthalpy_dT(_compute_enthalpy
+                      ? (_nodal_material ? &declarePropertyDerivative<Real>(
+                                               "PorousFlow_fluid_phase_enthalpy_nodal" + _phase,
+                                               _temperature_variable_name)
+                                         : &declarePropertyDerivative<Real>(
+                                               "PorousFlow_fluid_phase_enthalpy_qp" + _phase,
+                                               _temperature_variable_name))
+                      : nullptr),
 
     _fp(getUserObject<SinglePhaseFluidPropertiesPT>("fp"))
 {
@@ -143,19 +141,14 @@ PorousFlowSingleComponentFluid::computeQpProperties()
 
   if (_compute_rho_mu)
   {
-    // Density and derivatives wrt pressure and temperature at the qps
-    Real rho, drho_dp, drho_dT;
-    _fp.rho_dpT(_porepressure[_qp][_phase_num], Tk, rho, drho_dp, drho_dT);
+    // Density and viscosity, and derivatives wrt pressure and temperature
+    Real rho, drho_dp, drho_dT, mu, dmu_dp, dmu_dT;
+    _fp.rho_mu_dpT(_porepressure[_qp][_phase_num], Tk, rho, drho_dp, drho_dT, mu, dmu_dp, dmu_dT);
     (*_density)[_qp] = rho;
     (*_ddensity_dp)[_qp] = drho_dp;
     (*_ddensity_dT)[_qp] = drho_dT;
-
-    // Viscosity and derivatives wrt pressure and temperature at the nodes.
-    // Note that dmu_dp = dmu_drho * drho_dp
-    Real mu, dmu_drho, dmu_dT;
-    _fp.mu_drhoT_from_rho_T(rho, Tk, drho_dT, mu, dmu_drho, dmu_dT);
     (*_viscosity)[_qp] = mu;
-    (*_dviscosity_dp)[_qp] = dmu_drho * drho_dp;
+    (*_dviscosity_dp)[_qp] = dmu_dp;
     (*_dviscosity_dT)[_qp] = dmu_dT;
   }
 

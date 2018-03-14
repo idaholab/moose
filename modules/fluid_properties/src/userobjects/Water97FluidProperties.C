@@ -583,6 +583,29 @@ Water97FluidProperties::mu_drhoT_from_rho_T(Real density,
   dmu_dT = mu_star * (dmu0_dTbar * mu1 + mu0 * dmu1_dTbar) * dTbar_dT + dmu_drho * ddensity_dT;
 }
 
+void
+Water97FluidProperties::rho_mu(Real pressure, Real temperature, Real & rho, Real & mu) const
+{
+  rho = this->rho(pressure, temperature);
+  mu = this->mu_from_rho_T(rho, temperature);
+}
+
+void
+Water97FluidProperties::rho_mu_dpT(Real pressure,
+                                   Real temperature,
+                                   Real & rho,
+                                   Real & drho_dp,
+                                   Real & drho_dT,
+                                   Real & mu,
+                                   Real & dmu_dp,
+                                   Real & dmu_dT) const
+{
+  this->rho_dpT(pressure, temperature, rho, drho_dp, drho_dT);
+  Real dmu_drho;
+  this->mu_drhoT_from_rho_T(rho, temperature, drho_dT, mu, dmu_drho, dmu_dT);
+  dmu_dp = dmu_drho * drho_dp;
+}
+
 Real
 Water97FluidProperties::k(Real pressure, Real temperature) const
 {
@@ -856,9 +879,8 @@ Water97FluidProperties::vaporPressure_dT(Real temperature, Real & psat, Real & d
   Real dpsat = 4.0 * std::pow(2.0 * c / denominator, 3.0);
   dpsat *= (2.0 * dc_dtheta / denominator -
             2.0 * c / denominator / denominator *
-                (-db_dtheta +
-                 std::pow(b * b - 4.0 * a * c, -0.5) *
-                     (b * db_dtheta - 2.0 * da_dtheta * c - 2.0 * a * dc_dtheta)));
+                (-db_dtheta + std::pow(b * b - 4.0 * a * c, -0.5) *
+                                  (b * db_dtheta - 2.0 * da_dtheta * c - 2.0 * a * dc_dtheta)));
   dpsat_dT = dpsat * dtheta_dT * 1.0e6;
 }
 

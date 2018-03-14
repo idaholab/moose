@@ -155,6 +155,32 @@ BrineFluidProperties::rho_dpTx(Real pressure,
 }
 
 Real
+BrineFluidProperties::mu(Real pressure, Real temperature, Real xnacl) const
+{
+  Real water_density = _water_fp->rho(pressure, temperature);
+  return this->mu_from_rho_T(water_density, temperature, xnacl);
+}
+
+void
+BrineFluidProperties::mu_dpTx(Real pressure,
+                              Real temperature,
+                              Real xnacl,
+                              Real & mu,
+                              Real & dmu_dp,
+                              Real & dmu_dT,
+                              Real & dmu_dx) const
+{
+  Real water_density, dwater_density_dp, dwater_density_dT;
+  _water_fp->rho_dpT(pressure, temperature, water_density, dwater_density_dp, dwater_density_dT);
+
+  Real dmu_drho;
+  this->mu_drhoTx(
+      water_density, temperature, xnacl, dwater_density_dT, mu, dmu_drho, dmu_dT, dmu_dx);
+
+  dmu_dp = dmu_drho * dwater_density_dp;
+}
+
+Real
 BrineFluidProperties::mu_from_rho_T(Real water_density, Real temperature, Real xnacl) const
 {
   // Correlation requires molal concentration (mol/kg)
@@ -205,6 +231,31 @@ BrineFluidProperties::mu_drhoTx(Real water_density,
   dmu_drho = a * dmuw_drhow;
   dmu_dx = da_dx * muw;
   dmu_dT = da_dT * muw + a * dmuw_dT;
+}
+
+void
+BrineFluidProperties::rho_mu(
+    Real pressure, Real temperature, Real xnacl, Real & rho, Real & mu) const
+{
+  rho = this->rho(pressure, temperature, xnacl);
+  mu = this->mu(pressure, temperature, xnacl);
+}
+
+void
+BrineFluidProperties::rho_mu_dpT(Real pressure,
+                                 Real temperature,
+                                 Real xnacl,
+                                 Real & rho,
+                                 Real & drho_dp,
+                                 Real & drho_dT,
+                                 Real & drho_dx,
+                                 Real & mu,
+                                 Real & dmu_dp,
+                                 Real & dmu_dT,
+                                 Real dmu_dx) const
+{
+  this->rho_dpTx(pressure, temperature, xnacl, rho, drho_dp, drho_dT, drho_dx);
+  this->mu_dpTx(pressure, temperature, xnacl, mu, dmu_dp, dmu_dT, dmu_dx);
 }
 
 Real

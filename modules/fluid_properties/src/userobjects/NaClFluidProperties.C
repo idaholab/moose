@@ -193,6 +193,28 @@ NaClFluidProperties::mu_drhoT_from_rho_T(Real /*density*/,
   mooseError(name(), ": mu_drhoT() is not implemented");
 }
 
+void
+NaClFluidProperties::rho_mu(Real /*pressure*/,
+                            Real /*temperature*/,
+                            Real & /*rho*/,
+                            Real & /*mu*/) const
+{
+  mooseError(name(), ": rho_mu() is not implemented");
+}
+
+void
+NaClFluidProperties::rho_mu_dpT(Real /*pressure*/,
+                                Real /*temperature*/,
+                                Real & /*rho*/,
+                                Real & /*drho_dp*/,
+                                Real & /*drho_dT*/,
+                                Real & /*mu*/,
+                                Real & /*dmu_dp*/,
+                                Real & /*dmu_dT*/) const
+{
+  mooseError(name(), ": rho_mu_dpT() is not implemented");
+}
+
 Real NaClFluidProperties::k(Real /*pressure*/, Real /*temperature*/) const
 {
   mooseError(name(), ": k() is not implemented");

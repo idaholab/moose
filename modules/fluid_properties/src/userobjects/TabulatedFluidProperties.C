@@ -304,6 +304,25 @@ TabulatedFluidProperties::mu_drhoT_from_rho_T(Real density,
   _fp.mu_drhoT_from_rho_T(density, temperature, ddensity_dT, mu, dmu_drho, dmu_dT);
 }
 
+void
+TabulatedFluidProperties::rho_mu(Real pressure, Real temperature, Real & rho, Real & mu) const
+{
+  _fp.rho_mu(pressure, temperature, rho, mu);
+}
+
+void
+TabulatedFluidProperties::rho_mu_dpT(Real pressure,
+                                     Real temperature,
+                                     Real & rho,
+                                     Real & drho_dp,
+                                     Real & drho_dT,
+                                     Real & mu,
+                                     Real & dmu_dp,
+                                     Real & dmu_dT) const
+{
+  _fp.rho_mu_dpT(pressure, temperature, rho, drho_dp, drho_dT, mu, dmu_dp, dmu_dT);
+}
+
 Real
 TabulatedFluidProperties::c(Real pressure, Real temperature) const
 {
