@@ -23,6 +23,8 @@ validParams<NavierStokesTestApp>()
   return params;
 }
 
+registerKnownLabel("NavierStokesTestApp");
+
 NavierStokesTestApp::NavierStokesTestApp(InputParameters parameters) : MooseApp(parameters)
 {
   Moose::registerObjects(_factory);

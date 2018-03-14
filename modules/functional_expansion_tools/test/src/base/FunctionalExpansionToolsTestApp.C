@@ -22,6 +22,8 @@ validParams<FunctionalExpansionToolsTestApp>()
   return params;
 }
 
+registerKnownLabel("FunctionalExpansionToolsTestApp");
+
 FunctionalExpansionToolsTestApp::FunctionalExpansionToolsTestApp(InputParameters parameters)
   : MooseApp(parameters)
 {

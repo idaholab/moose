@@ -20,6 +20,8 @@ validParams<MiscApp>()
   return params;
 }
 
+registerKnownLabel("MiscApp");
+
 MiscApp::MiscApp(const InputParameters & parameters) : MooseApp(parameters)
 {
   Moose::registerObjects(_factory);

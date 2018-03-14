@@ -20,6 +20,8 @@ validParams<HeatConductionTestApp>()
   return params;
 }
 
+registerKnownLabel("HeatConductionTestApp");
+
 HeatConductionTestApp::HeatConductionTestApp(InputParameters parameters) : MooseApp(parameters)
 {
   Moose::registerObjects(_factory);

@@ -22,6 +22,8 @@ validParams<PorousFlowApp>()
   return params;
 }
 
+registerKnownLabel("PorousFlowApp");
+
 PorousFlowApp::PorousFlowApp(const InputParameters & parameters) : MooseApp(parameters)
 {
   Moose::registerObjects(_factory);

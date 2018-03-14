@@ -20,6 +20,8 @@ validParams<ChemicalReactionsApp>()
   return params;
 }
 
+registerKnownLabel("ChemicalReactionsApp");
+
 ChemicalReactionsApp::ChemicalReactionsApp(const InputParameters & parameters)
   : MooseApp(parameters)
 {

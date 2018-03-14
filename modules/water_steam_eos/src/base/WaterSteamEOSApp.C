@@ -20,6 +20,8 @@ validParams<WaterSteamEOSApp>()
   return params;
 }
 
+registerKnownLabel("WaterSteamEOSApp");
+
 WaterSteamEOSApp::WaterSteamEOSApp(const InputParameters & parameters) : MooseApp(parameters)
 {
   Moose::registerObjects(_factory);

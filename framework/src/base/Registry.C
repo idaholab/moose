@@ -119,9 +119,10 @@ Registry::checkLabels(const std::set<std::string> & known_labels)
   }
 }
 
-void
+char
 Registry::addKnownLabel(const std::string & label)
 {
   auto & r = getRegistry();
   r._known_labels.insert(label);
+  return 0;
 }

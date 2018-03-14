@@ -20,6 +20,8 @@ validParams<PorousFlowTestApp>()
   return params;
 }
 
+registerKnownLabel("PorousFlowTestApp");
+
 PorousFlowTestApp::PorousFlowTestApp(InputParameters parameters) : MooseApp(parameters)
 {
   Moose::registerObjects(_factory);

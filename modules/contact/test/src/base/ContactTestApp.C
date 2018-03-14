@@ -20,6 +20,8 @@ validParams<ContactTestApp>()
   return params;
 }
 
+registerKnownLabel("ContactTestApp");
+
 ContactTestApp::ContactTestApp(InputParameters parameters) : MooseApp(parameters)
 {
   Moose::registerObjects(_factory);

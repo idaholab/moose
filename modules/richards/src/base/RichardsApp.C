@@ -20,6 +20,8 @@ validParams<RichardsApp>()
   return params;
 }
 
+registerKnownLabel("RichardsApp");
+
 RichardsApp::RichardsApp(const InputParameters & parameters) : MooseApp(parameters)
 {
   Moose::registerObjects(_factory);

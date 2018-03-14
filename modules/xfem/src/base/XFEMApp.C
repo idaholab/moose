@@ -22,6 +22,8 @@ validParams<XFEMApp>()
   InputParameters params = validParams<MooseApp>();
   return params;
 }
+registerKnownLabel("XFEMApp");
+
 XFEMApp::XFEMApp(const InputParameters & parameters) : MooseApp(parameters)
 {
   srand(processor_id());

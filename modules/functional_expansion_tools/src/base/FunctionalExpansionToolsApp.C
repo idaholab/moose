@@ -21,6 +21,8 @@ validParams<FunctionalExpansionToolsApp>()
   return params;
 }
 
+registerKnownLabel("FunctionalExpansionToolsApp");
+
 FunctionalExpansionToolsApp::FunctionalExpansionToolsApp(InputParameters parameters)
   : MooseApp(parameters)
 {

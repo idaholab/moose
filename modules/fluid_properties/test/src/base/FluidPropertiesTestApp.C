@@ -28,6 +28,8 @@ validParams<FluidPropertiesTestApp>()
   return params;
 }
 
+registerKnownLabel("FluidPropertiesTestApp");
+
 FluidPropertiesTestApp::FluidPropertiesTestApp(InputParameters parameters) : MooseApp(parameters)
 {
   Moose::registerObjects(_factory);

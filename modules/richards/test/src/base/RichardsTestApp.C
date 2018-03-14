@@ -20,6 +20,8 @@ validParams<RichardsTestApp>()
   return params;
 }
 
+registerKnownLabel("RichardsTestApp");
+
 RichardsTestApp::RichardsTestApp(InputParameters parameters) : MooseApp(parameters)
 {
   Moose::registerObjects(_factory);

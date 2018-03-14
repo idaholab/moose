@@ -20,6 +20,8 @@ validParams<RdgApp>()
   return params;
 }
 
+registerKnownLabel("RdgApp");
+
 RdgApp::RdgApp(InputParameters parameters) : MooseApp(parameters)
 {
   Moose::registerObjects(_factory);

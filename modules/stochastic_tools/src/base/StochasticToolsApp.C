@@ -19,6 +19,8 @@ validParams<StochasticToolsApp>()
   return params;
 }
 
+registerKnownLabel("StochasticToolsApp");
+
 StochasticToolsApp::StochasticToolsApp(InputParameters parameters) : MooseApp(parameters)
 {
   Moose::registerObjects(_factory);

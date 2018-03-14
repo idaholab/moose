@@ -22,6 +22,8 @@ validParams<MiscTestApp>()
   return params;
 }
 
+registerKnownLabel("MiscTestApp");
+
 MiscTestApp::MiscTestApp(InputParameters parameters) : MooseApp(parameters)
 {
   Moose::registerObjects(_factory);

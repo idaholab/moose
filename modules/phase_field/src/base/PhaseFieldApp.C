@@ -20,6 +20,8 @@ validParams<PhaseFieldApp>()
   return params;
 }
 
+registerKnownLabel("PhaseFieldApp");
+
 PhaseFieldApp::PhaseFieldApp(const InputParameters & parameters) : MooseApp(parameters)
 {
   Moose::registerObjects(_factory);

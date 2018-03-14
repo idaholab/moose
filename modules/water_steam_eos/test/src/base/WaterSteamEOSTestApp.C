@@ -20,6 +20,8 @@ validParams<WaterSteamEOSTestApp>()
   return params;
 }
 
+registerKnownLabel("WaterSteamEOSTestApp");
+
 WaterSteamEOSTestApp::WaterSteamEOSTestApp(InputParameters parameters) : MooseApp(parameters)
 {
   Moose::registerObjects(_factory);

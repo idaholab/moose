@@ -20,6 +20,8 @@ validParams<SolidMechanicsTestApp>()
   return params;
 }
 
+registerKnownLabel("SolidMechanicsTestApp");
+
 SolidMechanicsTestApp::SolidMechanicsTestApp(InputParameters parameters) : MooseApp(parameters)
 {
   Moose::registerObjects(_factory);

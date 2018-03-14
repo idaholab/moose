@@ -20,6 +20,8 @@ validParams<TensorMechanicsApp>()
   return params;
 }
 
+registerKnownLabel("TensorMechanicsApp");
+
 TensorMechanicsApp::TensorMechanicsApp(const InputParameters & parameters) : MooseApp(parameters)
 {
   Moose::registerObjects(_factory);

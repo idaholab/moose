@@ -21,6 +21,8 @@ validParams<XFEMTestApp>()
   return params;
 }
 
+registerKnownLabel("XFEMTestApp");
+
 XFEMTestApp::XFEMTestApp(InputParameters parameters) : MooseApp(parameters)
 {
   Moose::registerObjects(_factory);

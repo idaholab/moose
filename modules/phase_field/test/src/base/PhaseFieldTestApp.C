@@ -22,10 +22,10 @@ validParams<PhaseFieldTestApp>()
   return params;
 }
 
+registerKnownLabel("PhaseFieldTestApp");
+
 PhaseFieldTestApp::PhaseFieldTestApp(InputParameters parameters) : MooseApp(parameters)
 {
-  Registry::addKnownLabel("TensorMechanicsApp");
-
   Moose::registerObjects(_factory);
   PhaseFieldApp::registerObjects(_factory);
 

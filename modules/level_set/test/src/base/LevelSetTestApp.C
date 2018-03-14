@@ -20,6 +20,8 @@ validParams<LevelSetTestApp>()
   return params;
 }
 
+registerKnownLabel("LevelSetTestApp");
+
 LevelSetTestApp::LevelSetTestApp(InputParameters parameters) : MooseApp(parameters)
 {
   srand(processor_id());
