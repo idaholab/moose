@@ -9,7 +9,7 @@ import exceptions
 SETTINGS_RE = re.compile(r'(?P<key>[^\s=]+)=(?P<value>.*?)(?=(?:\s[^\s=]+=|$))',
                          flags=re.MULTILINE|re.UNICODE)
 
-def match_settings(defaults, raw):
+def match_settings(known, raw):
     """
     Parses a raw string for key, value pairs separated by an equal sign.
 
@@ -17,7 +17,6 @@ def match_settings(defaults, raw):
         default[dict]: The default values for the known keys.
         raw[str]: The raw string to parse and inject into a dict().
     """
-    known = dict((k, v[0]) for k, v in copy.deepcopy(defaults).iteritems())
     unknown = dict()
 
     if not raw:
@@ -57,7 +56,8 @@ def parse_settings(defaults, local, error_on_unknown=True, exc=exceptions.Tokeni
         exc[Exception]: The Exception type to raise, by default it raises a TokenizeException since
                         this function is used during the tokenization process by MooseDocs.
     """
-    settings, unknown = match_settings(defaults, local)
+    known = dict((k, v[0]) for k, v in copy.deepcopy(defaults).iteritems())
+    settings, unknown = match_settings(known, local)
     if error_on_unknown and unknown:
         msg = "The following key, value settings are unknown:"
         for key, value in unknown.iteritems():

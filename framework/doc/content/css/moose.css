@@ -25,6 +25,7 @@ html {
   src: url('../contrib/fonts/material-icons/material-icons.woff2') format('woff2');
 }
 
+
 .material-icons {
   font-family: 'Material Icons';
   font-weight: normal;
@@ -177,6 +178,11 @@ h6 {
 
 ul {
      margin-left:1.5rem;
+}
+
+/* LAYOUT (ROWS/COLUMNS) */
+.moose-row{
+    display:flex;
 }
 
 /* BIBTEX */
@@ -506,13 +512,13 @@ height: 64px !important; /* or height of nav */
     position: relative;
 }
 
-// Class for when element is below threshold
+/* Class for when element is below threshold */
 .pin-bottom {
     width:220px;
     position: relative;
 }
 
-// Class for when element is pinned
+/* Class for when element is pinned */
 .pinned {
     width:220px;
     position: fixed !important;

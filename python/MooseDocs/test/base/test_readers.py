@@ -35,7 +35,10 @@ class TestReader(unittest.TestCase):
 
     def testParse(self):
         root = tokens.Token(None)
+        content = page.PageNodeBase(None)
         reader = readers.Reader(lexers.RecursiveLexer('foo'))
+        translator = Translator(content, reader, HTMLRenderer(), [])
+        translator.init('')
         reader.add('foo', WordComponent())
         reader.parse(root, u'foo bar')
         self.assertIsInstance(root(0), tokens.Word)
@@ -85,7 +88,10 @@ class TestReader(unittest.TestCase):
 class TestMarkdownReader(unittest.TestCase):
     def testBasic(self):
         root = tokens.Token(None)
+        content = page.PageNodeBase(None)
         reader = readers.Reader(lexers.RecursiveLexer('block', 'inline'))
+        translator = Translator(content, reader, HTMLRenderer(), [])
+        translator.init('')
         reader.add('block', BlockComponent())
         reader.add('inline', WordComponent())
         reader.parse(root, u'foo bar')

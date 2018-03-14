@@ -5,8 +5,8 @@ Tests for the Renderer objects.
 import unittest
 import logging
 from MooseDocs.common import exceptions
-from MooseDocs.tree import tokens, html
-from MooseDocs.base import renderers
+from MooseDocs.tree import tokens, html, page
+from MooseDocs.base import renderers, Translator, MarkdownReader
 from MooseDocs.base import components
 
 logging.basicConfig(level=logging.CRITICAL)
@@ -60,7 +60,10 @@ class TestHTMLRenderer(unittest.TestCase):
     def testReinit(self):
         ast = tokens.Paragraph(None)
         comp = ParComponent()
+        content = page.PageNodeBase(None)
         renderer = renderers.HTMLRenderer()
+        translator = Translator(content, MarkdownReader(), renderer, [])
+        translator.init('')
         renderer.add(tokens.Paragraph, comp)
         renderer.render(ast)
         renderer.render(ast)
@@ -85,8 +88,11 @@ class TestHTMLRenderer(unittest.TestCase):
     def testRender(self):
         ast = tokens.Paragraph(None)
         tokens.String(ast, content=u'foo')
-
+        content = page.PageNodeBase(None)
         renderer = renderers.HTMLRenderer()
+        translator = Translator(content, MarkdownReader(), renderer, [])
+        translator.init('')
+
         renderer.add(tokens.Paragraph, ParComponent())
         renderer.add(tokens.String, StringComponent())
 

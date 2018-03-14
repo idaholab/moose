@@ -210,11 +210,7 @@ class MarkdownNode(FileNode):
 
         if self._ast is None:
             self._ast = tokens.Token(None)
-            #for ext in self.translator.extensions:
-            #    ext.preTokenize(self._ast)
             self.translator.reader.parse(self._ast, self.content)
-            for ext in self.translator.extensions:
-                ext.postTokenize(self._ast)
 
         return self._ast
 

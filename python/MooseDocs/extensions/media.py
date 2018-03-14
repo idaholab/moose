@@ -112,7 +112,7 @@ class RenderImage(components.RenderComponent):
 
     def createMaterialize(self, token, parent):
         tag = self.createHTML(token, parent, **token.attributes)
-        tag['class'] = 'materialboxed moose-image'
+        tag.addClass('materialboxed', 'moose-image')
         return tag
 
     def createLatex(self, token, parent):

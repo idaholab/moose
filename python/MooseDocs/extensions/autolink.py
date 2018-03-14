@@ -57,7 +57,7 @@ class AutoLinkMixin(object):
 
     def createMaterialize(self, token, parent):
         tag = self.createHTML(token, parent)
-        tag['class'] = 'tooltipped'
+        tag.addClass('tooltipped')
         tag['data-tooltip'] = tag['href']
         tag['data-position'] = 'top'
         return tag

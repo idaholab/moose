@@ -167,9 +167,8 @@ class TableComponent(components.TokenComponent):
 
 class RenderTable(components.RenderComponent):
     def createHTML(self, token, parent): #pylint: disable=no-self-use
-        attrs = token.attributes
-        attrs['class'] = 'moose-table-div'
-        div = html.Tag(parent, 'div', **attrs)
+        div = html.Tag(parent, 'div', **token.attributes)
+        div.addClass('moose-table-div')
         tbl = html.Tag(div, 'table')
         return tbl
     def createMaterialize(self, token, parent):

@@ -153,7 +153,7 @@ class LexerInformation(object):
         """
         return self.__match[value]
 
-    def get(self, name, default):
+    def get(self, name, default=None):
         """
         Return the group or the supplied default.
         """
