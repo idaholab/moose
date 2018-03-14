@@ -10,6 +10,8 @@
 #include <cmath> // std::sinh and std::cosh
 #include "Q2PMaterial.h"
 
+registerMooseObject("RichardsApp", Q2PMaterial);
+
 template <>
 InputParameters
 validParams<Q2PMaterial>()

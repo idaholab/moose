@@ -10,6 +10,8 @@
 #include "RichardsSUPGstandard.h"
 #include "libmesh/utility.h"
 
+registerMooseObject("RichardsApp", RichardsSUPGstandard);
+
 template <>
 InputParameters
 validParams<RichardsSUPGstandard>()

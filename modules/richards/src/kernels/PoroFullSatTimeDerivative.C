@@ -9,6 +9,8 @@
 
 #include "PoroFullSatTimeDerivative.h"
 
+registerMooseObject("RichardsApp", PoroFullSatTimeDerivative);
+
 template <>
 InputParameters
 validParams<PoroFullSatTimeDerivative>()

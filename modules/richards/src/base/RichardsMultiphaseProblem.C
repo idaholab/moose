@@ -14,6 +14,8 @@
 #include "MooseVariable.h"
 #include "NonlinearSystem.h"
 
+registerMooseObject("RichardsApp", RichardsMultiphaseProblem);
+
 template <>
 InputParameters
 validParams<RichardsMultiphaseProblem>()

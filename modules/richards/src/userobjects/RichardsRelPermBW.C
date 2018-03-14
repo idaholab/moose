@@ -14,6 +14,8 @@
 #include "RichardsRelPermBW.h"
 #include "libmesh/utility.h"
 
+registerMooseObject("RichardsApp", RichardsRelPermBW);
+
 template <>
 InputParameters
 validParams<RichardsRelPermBW>()

@@ -10,6 +10,8 @@
 #include "Q2PBorehole.h"
 #include "RotationMatrix.h"
 
+registerMooseObject("RichardsApp", Q2PBorehole);
+
 template <>
 InputParameters
 validParams<Q2PBorehole>()

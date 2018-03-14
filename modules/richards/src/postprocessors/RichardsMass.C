@@ -12,6 +12,8 @@
 //
 #include "RichardsMass.h"
 
+registerMooseObject("RichardsApp", RichardsMass);
+
 template <>
 InputParameters
 validParams<RichardsMass>()

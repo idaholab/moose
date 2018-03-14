@@ -9,6 +9,8 @@
 
 #include "RichardsExcavGeom.h"
 
+registerMooseObject("RichardsApp", RichardsExcavGeom);
+
 template <>
 InputParameters
 validParams<RichardsExcavGeom>()

@@ -16,6 +16,8 @@
 
 #include "libmesh/utility.h"
 
+registerMooseObject("RichardsApp", RichardsHalfGaussianSink);
+
 template <>
 InputParameters
 validParams<RichardsHalfGaussianSink>()

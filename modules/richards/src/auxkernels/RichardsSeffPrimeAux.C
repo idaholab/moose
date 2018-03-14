@@ -11,6 +11,8 @@
 //
 #include "RichardsSeffPrimeAux.h"
 
+registerMooseObject("RichardsApp", RichardsSeffPrimeAux);
+
 template <>
 InputParameters
 validParams<RichardsSeffPrimeAux>()

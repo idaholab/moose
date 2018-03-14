@@ -11,6 +11,8 @@
 //
 #include "RichardsSatAux.h"
 
+registerMooseObject("RichardsApp", RichardsSatAux);
+
 template <>
 InputParameters
 validParams<RichardsSatAux>()

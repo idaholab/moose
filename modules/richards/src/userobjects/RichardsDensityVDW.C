@@ -10,6 +10,8 @@
 #include "RichardsDensityVDW.h"
 #include "libmesh/utility.h"
 
+registerMooseObject("RichardsApp", RichardsDensityVDW);
+
 template <>
 InputParameters
 validParams<RichardsDensityVDW>()

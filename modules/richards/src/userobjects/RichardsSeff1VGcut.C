@@ -11,6 +11,8 @@
 //
 #include "RichardsSeff1VGcut.h"
 
+registerMooseObject("RichardsApp", RichardsSeff1VGcut);
+
 template <>
 InputParameters
 validParams<RichardsSeff1VGcut>()

@@ -9,6 +9,8 @@
 
 #include "DarcyMaterial.h"
 
+registerMooseObject("RichardsApp", DarcyMaterial);
+
 template <>
 InputParameters
 validParams<DarcyMaterial>()

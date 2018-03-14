@@ -16,6 +16,8 @@
 
 #include "libmesh/quadrature.h"
 
+registerMooseObject("RichardsApp", RichardsFullyUpwindFlux);
+
 template <>
 InputParameters
 validParams<RichardsFullyUpwindFlux>()

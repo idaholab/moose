@@ -12,6 +12,8 @@
 
 #include <iostream>
 
+registerMooseObject("RichardsApp", RichardsExcav);
+
 template <>
 InputParameters
 validParams<RichardsExcav>()

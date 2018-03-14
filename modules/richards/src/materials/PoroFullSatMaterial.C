@@ -9,6 +9,8 @@
 
 #include "PoroFullSatMaterial.h"
 
+registerMooseObject("RichardsApp", PoroFullSatMaterial);
+
 template <>
 InputParameters
 validParams<PoroFullSatMaterial>()
