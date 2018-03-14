@@ -53,7 +53,7 @@ SplitMeshAction::act()
   std::string split_file_arg_ext;
   auto pos = split_file_arg.rfind(".");
   if (pos != std::string::npos)
-    split_file_arg_ext = split_file_arg.substr(pos+1, std::string::npos);
+    split_file_arg_ext = split_file_arg.substr(pos + 1, std::string::npos);
 
   // If stripExtension() returns the original string, then there is no
   // file extension or the original string was empty.
@@ -66,7 +66,9 @@ SplitMeshAction::act()
     else if (split_file_arg_ext == "cpa")
       checkpoint_binary_flag = false;
     else
-      mooseError("The argument to --split-file, ", split_file_arg, ", must not end in a file extension other than .cpr or .cpa");
+      mooseError("The argument to --split-file, ",
+                 split_file_arg,
+                 ", must not end in a file extension other than .cpr or .cpa");
   }
 
   for (std::size_t i = 0; i < splits.size(); i++)

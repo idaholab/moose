@@ -170,7 +170,7 @@ SetupMeshAction::act()
       std::string split_file_ext;
       auto pos = split_file.rfind(".");
       if (pos != std::string::npos)
-        split_file_ext = split_file.substr(pos+1, std::string::npos);
+        split_file_ext = split_file.substr(pos + 1, std::string::npos);
 
       // If split_file already has the .cpr or .cpa extension, we go with
       // that, otherwise we strip off the extension and append ".cpr".
