@@ -51,32 +51,7 @@ SolidWall::addMooseObjects1Phase()
     }
 
     // BCs
-    {
-      const std::string class_name = "Euler1DVarAreaBC";
-      InputParameters params = _factory.getValidParams(class_name);
-      params.set<std::vector<BoundaryName>>("boundary") = getBoundaryNames();
-      params.set<UserObjectName>("boundary_flux") = boundary_flux_name;
-      params.set<std::vector<VariableName>>("A") = {FlowModelSinglePhase::AREA};
-      params.set<std::vector<VariableName>>("rhoA") = {FlowModelSinglePhase::RHOA};
-      params.set<std::vector<VariableName>>("rhouA") = {FlowModelSinglePhase::RHOUA};
-      params.set<std::vector<VariableName>>("rhoEA") = {FlowModelSinglePhase::RHOEA};
-      params.set<bool>("implicit") = _implicit_rdg;
-
-      // mass
-      params.set<NonlinearVariableName>("variable") = FlowModelSinglePhase::RHOA;
-      _sim.addBoundaryCondition(
-          class_name, genName(name(), class_name, FlowModelSinglePhase::RHOA), params);
-
-      // momentum
-      params.set<NonlinearVariableName>("variable") = FlowModelSinglePhase::RHOUA;
-      _sim.addBoundaryCondition(
-          class_name, genName(name(), class_name, FlowModelSinglePhase::RHOUA), params);
-
-      // energy
-      params.set<NonlinearVariableName>("variable") = FlowModelSinglePhase::RHOEA;
-      _sim.addBoundaryCondition(
-          class_name, genName(name(), class_name, FlowModelSinglePhase::RHOEA), params);
-    }
+    createRDGBoundaryConditions1Phase(boundary_flux_name);
   }
 }
 
