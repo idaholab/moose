@@ -9,6 +9,8 @@
 
 #include "NormalDistribution.h"
 
+registerMooseObject("StochasticToolsApp", NormalDistribution);
+
 template <>
 InputParameters
 validParams<NormalDistribution>()

@@ -10,6 +10,8 @@
 #include "StateSimRunner.h"
 #include <string>
 
+registerMooseObject("StochasticToolsApp", StateSimRunner);
+
 template <>
 InputParameters
 validParams<StateSimRunner>()

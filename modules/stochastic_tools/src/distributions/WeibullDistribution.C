@@ -9,6 +9,8 @@
 
 #include "WeibullDistribution.h"
 
+registerMooseObject("StochasticToolsApp", WeibullDistribution);
+
 template <>
 InputParameters
 validParams<WeibullDistribution>()

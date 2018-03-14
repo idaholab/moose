@@ -13,6 +13,8 @@
 #include "libmesh/system.h"
 #include "StateSimRunner.h"
 
+registerMooseObject("StochasticToolsApp", StateSimTester);
+
 template <>
 InputParameters
 validParams<StateSimTester>()
