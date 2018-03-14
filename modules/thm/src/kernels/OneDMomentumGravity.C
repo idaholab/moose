@@ -39,8 +39,6 @@ OneDMomentumGravity::OneDMomentumGravity(const InputParameters & parameters)
 {
 }
 
-OneDMomentumGravity::~OneDMomentumGravity() {}
-
 Real
 OneDMomentumGravity::computeQpResidual()
 {

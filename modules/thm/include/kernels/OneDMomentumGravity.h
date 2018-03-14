@@ -16,7 +16,6 @@ class OneDMomentumGravity : public DerivativeMaterialInterfaceRelap<Kernel>
 {
 public:
   OneDMomentumGravity(const InputParameters & parameters);
-  virtual ~OneDMomentumGravity();
 
 protected:
   virtual Real computeQpResidual();
