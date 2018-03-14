@@ -10,6 +10,9 @@
 import collections
 import logging
 
+import mooseutils
+
+from MooseDocs import common
 from MooseDocs.common import exceptions
 from MooseDocs.tree.base import Property, NodeBase
 
@@ -69,12 +72,34 @@ class String(Token):
     """
     PROPERTIES = [Property('content', ptype=unicode)]
 
-class ExceptionToken(Token):
+class ErrorToken(Token):
+    PROPERTIES = [Property('message', ptype=str)]
+
+    def report(self, current):
+
+        title = 'ERROR: {}'.format(self.message)
+        filename = ''
+        if current:
+            source = current.source
+            filename = mooseutils.colorText('{}:{}\n'.format(source, self.info.line), 'RESET')
+
+        box = mooseutils.colorText(common.box(self.info[0], line=self.info.line, width=100),
+                                   'LIGHT_CYAN')
+
+        return u'\n{}\n{}{}\n'.format(title, filename, box)
+
+class ExceptionToken(ErrorToken):
     """
     When the lexer object fails create a token, an error token will be created.
     """
-    PROPERTIES = [Property('message', ptype=str),
-                  Property('traceback', required=False, ptype=str)]
+    PROPERTIES = [Property('traceback', required=False, ptype=str)]
+
+
+    def report(self, current):
+        out = ErrorToken.report(self, current)
+        trace = mooseutils.colorText(self.traceback, 'GREY')
+        return u'{}\n{}'.format(out, trace)
+
 
 class Word(String):
     """
@@ -130,7 +155,6 @@ class Heading(Token):
         id_ = self.get('id', None)
         if id_:
             Shortcut(self.root, key=id_, link=u'#{}'.format(id_), token=self)
-
 
 class Paragraph(Token):
     """

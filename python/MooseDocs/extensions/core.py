@@ -59,6 +59,7 @@ class CoreExtension(components.Extension):
         renderer.add(tokens.ShortcutLink, RenderShortcutLink())
         renderer.add(tokens.Monospace, RenderMonospace())
         renderer.add(tokens.Break, RenderBreak())
+        renderer.add(tokens.ErrorToken, RenderError())
         renderer.add(tokens.ExceptionToken, RenderException())
 
         renderer.add(tokens.Link, RenderLink())
@@ -365,7 +366,7 @@ class RenderShortcutLink(components.RenderComponent):
 
     def createMaterialize(self, token, parent):
         tag = self.createHTML(token, parent)
-        tag['class'] = 'tooltipped'
+        tag.addClass('tooltipped')
         tag['data-tooltip'] = tag['href']
         tag['data-position'] = 'top'
         return tag
@@ -421,7 +422,7 @@ class RenderLink(components.RenderComponent):
     def createMaterialize(self, token, parent):
         tag = self.createHTML(token, parent)
         if token.tooltip:
-            tag['class'] = 'tooltipped'
+            tag.addClass('tooltipped')
             tag['data-tooltip'] = tag['href']
             tag['data-position'] = 'top'
         return tag
@@ -447,7 +448,7 @@ class RenderOrderedList(components.RenderComponent):
 
     def createMaterialize(self, token, parent): #pylint: disable=no-self-use
         tag = self.createHTML(token, parent)
-        tag['class'] = 'browser-default'
+        tag.addClass('browser-default')
         tag['start'] = token.start
         return tag
 
@@ -460,7 +461,7 @@ class RenderUnorderedList(components.RenderComponent):
 
     def createMaterialize(self, token, parent): #pylint: disable=no-self-use
         tag = self.createHTML(token, parent)
-        tag['class'] = 'browser-default'
+        tag.addClass('browser-default')
         return tag
 
     def createLatex(self, token, parent): #pylint: disable=no-self-use,unused-argument
@@ -547,13 +548,14 @@ class RenderPunctuation(RenderString):
 
         return RenderString.createHTML(self, token, parent)
 
-class RenderException(components.RenderComponent):
+class RenderError(components.RenderComponent):
     def createHTML(self, token, parent): #pylint: disable=no-self-use
         div = html.Tag(parent, 'div', class_="moose-exception", **token.attributes)
         html.String(div, content=token.info[0])
         return div
 
     def createMaterialize(self, token, parent): #pylint: disable=no-self-use
+
         id_ = uuid.uuid4()
         a = html.Tag(parent, 'a', class_="moose-exception modal-trigger", href='#{}'.format(id_))
         html.String(a, content=token.info[0])
@@ -561,21 +563,18 @@ class RenderException(components.RenderComponent):
         modal = html.Tag(parent.root, 'div', id_=id_, class_="modal")
         content = html.Tag(modal, 'div', class_="modal-content")
         head = html.Tag(content, 'h2')
-        html.String(head, content=u'Tokenize Exception')
+        html.String(head, content=u'Tokenize Error')
         p = html.Tag(content, 'p')
 
-        msg = u"An exception occurred while tokenizing, the exception was " \
-              u"raised when executing the {} object while processing the " \
-              u"following content.".format(token.info.pattern)
-        html.String(p, content=msg)
+        html.String(p, content=unicode(token.message))
+        if self.translator.current:
+            html.Tag(p, 'br', close=False)
+            html.String(p, content=u'{}:{}'.format(self.translator.current.local, token.info.line))
         html.Tag(p, 'br', close=False)
 
         pre = html.Tag(content, 'pre')
         code = html.Tag(pre, 'code', class_="language-markdown")
         html.String(code, content=token.info[0], escape=True)
-
-        pre = html.Tag(content, 'pre', style="font-size:80%;")
-        html.String(pre, content=unicode(token.traceback), escape=True)
 
         footer = html.Tag(modal, 'div', class_="modal-footer grey lighten-3")
         done = html.Tag(footer, 'a', class_="modal-action modal-close btn-flat")
@@ -585,3 +584,13 @@ class RenderException(components.RenderComponent):
 
     def createLatex(self, token, parent):
         pass
+
+class RenderException(RenderError):
+
+    def createMaterialize(self, token, parent): #pylint: disable=no-self-use
+        content = RenderError.createMaterialize(self, token, parent)
+
+        pre = html.Tag(content, 'pre', style="font-size:80%;")
+        html.String(pre, content=unicode(token.traceback), escape=True)
+
+        return content

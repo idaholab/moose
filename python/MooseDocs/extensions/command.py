@@ -93,7 +93,8 @@ class CommandBase(components.TokenComponent):
         elif info['subcommand'] and info['subcommand'].startswith('http'):
             cmd = (info['command'], None)
         elif info['subcommand'] and '=' in info['subcommand']:
-            settings += ' ' + info['subcommand']
+            #settings += ' ' + info['subcommand']
+            settings = info['subcommand'] + ' ' + settings
             cmd = (info['command'], None)
 
         # Locate the command object to call

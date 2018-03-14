@@ -1,15 +1,36 @@
+!config renderer breadcrumbs=False scrollspy=False
+
+# MOOSE class=center style=font-weight:600;font-size:350%;
+
+# Multiphysics Object Oriented Simulation Environment class=center light style=font-size:300%
+
+# An open source, parallel finite element framework class=center style=font-weight:200;font-size:200%
+
+
+!row!
+!col! class=s12 m4 l4 icon=flash_on
+### Rapid Development class=center style=font-weight:200;
+
 MOOSE is a finite-element framework that aids in application development by harnessing
 state-of-the-art fully-coupled, fully-implicit multiphysics solvers while providing automatic
 parallelization, mesh adaptivity, and a growing set of physics modules.
+!col-end!
 
+!col! class=s12 m4 l4 icon=group
 MOOSE includes ever-expanding set of physics modules including solid mechanics, phase-field,
-Navier-Stokes, and heat conduction. MOOSE natively supports multi-scale models allowing linking of
+Navier-Stokes, and heat conduction. MOOSE supports multi-scale models allowing linking of
 MOOSE-based applications, thus fostering collaborations.
+!col-end!
 
+!col! class=s12 m4 l4 icon=settings
 MOOSE includes an ever-expanding, user-developed set of physics modules including solid mechanics,
 phase-field, Navier-Stokes, and heat conduction and supports multi-scale models allowing linking of
 MOOSE-based applications, thus fostering collaborations across applications, time-scales, and spatial
 domains.
+!col-end!
+!row-end!
+
+# Reliability
 
 Within MOOSE, code reliability is paramount, so MOOSE employs a rigorous and well-documented
 development strategy.  In order to accomplish this task, a comprehensive set of tools for testing and

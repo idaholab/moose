@@ -45,17 +45,17 @@ class FloatExtension(components.Extension):
 class RenderFloat(components.RenderComponent):
     def createHTML(self, token, parent): #pylint: disable=no-self-use
         div = html.Tag(parent, 'div', **token.attributes)
-        div['class'] = 'moose-float-div'
+        div.addClass('moose-float-div')
         return div
 
     def createMaterialize(self, token, parent): #pylint: disable=no-self-use
         div = html.Tag(parent, 'div', **token.attributes)
-        div['class'] = 'card'
+        div.addClass('card')
         content = html.Tag(div, 'div')
         if token.img:
-            content['class'] = 'card-image'
+            content.addClass('card-image')
         else:
-            content['class'] = 'card-content'
+            content.addClass('card-content')
 
         return content
 
@@ -84,7 +84,7 @@ class RenderModalLink(core.RenderLink):
         link = core.RenderLink.createMaterialize(self, token, parent)
 
         tag = uuid.uuid4()
-        link['class'] = 'modal-trigger'
+        link.addClass('modal-trigger')
         link['href'] = u'#{}'.format(tag)
 
         cls = "modal bottom-sheet" if token.bottom else "modal"

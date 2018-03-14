@@ -648,6 +648,16 @@ class TestRenderExceptionLatex(testing.MooseDocsTestCase):
         node = self.render(u'!unknown command').find('document')
         self.assertString(node.write(), '\n\\begin{document}\n\n\\par\n!unknown command\n\\end{document}\n')
 
+class TestRenderErrorHTML(testing.MooseDocsTestCase):
+    pass # same as TestRenderException
+
+class TestRenderErrorMaterialize(TestRenderErrorHTML):
+    pass # same as TestRenderException
+
+class TestRenderErrorLatex(testing.MooseDocsTestCase):
+    pass # same as TestRenderException
+
+
 class TestRenderHeadingHTML(testing.MooseDocsTestCase):
     """Test renderering of RenderHeading with HTMLRenderer"""
 
@@ -681,7 +691,7 @@ class TestRenderHeadingHTML(testing.MooseDocsTestCase):
         self.assertEqual(h(2).content, 'with')
         self.assertEqual(h(3).content, ' ')
         self.assertEqual(h(4).content, 'Spaces')
-        self.assertEqual(h.style, {'font-size':'42pt'})
+        self.assertEqual(h['style'], 'font-size:42pt;')
 
         self.assertString(h.write(), '<h1 style="font-size:42pt;">Heading with Spaces</h1>')
 
@@ -797,13 +807,13 @@ class TestRenderLinkMaterialize(TestRenderLinkHTML):
 
     def testWrite(self):
         link = self.node(u'[link](url.html)')
-        self.assertString(link.write(), '<a data-position="top" href="url.html" ' \
-                                        'data-tooltip="url.html" class="tooltipped">link</a>')
+        self.assertString(link.write(), '<a href="url.html" data-tooltip="url.html" ' \
+                                        'data-position="top" class="tooltipped">link</a>')
 
     def testWriteSettings(self):
         link = self.node(u'[link](url.html id=bar)')
-        self.assertString(link.write(), '<a data-position="top" href="url.html" id="bar" ' \
-                                        'data-tooltip="url.html" class="tooltipped">link</a>')
+        self.assertString(link.write(), '<a id="bar" href="url.html" data-tooltip="url.html" ' \
+                                        'data-position="top" class="tooltipped">link</a>')
 
 class TestRenderLinkLatex(testing.MooseDocsTestCase):
     """Test renderering of RenderLink with LatexRenderer"""
@@ -1210,13 +1220,13 @@ class TestRenderShortcutLinkMaterialize(TestRenderShortcutLinkHTML):
 
     def testWrite(self):
         node = self.node(u'[key]\n\n[key]: content')
-        self.assertString(node.write(), '<a data-position="top" href="content" ' \
-                                        'data-tooltip="content" class="tooltipped">key</a>')
+        self.assertString(node.write(), '<a class="tooltipped" href="content" ' \
+                                        'data-tooltip="content" data-position="top">key</a>')
 
     def testWriteSettings(self):
         link = self.node(u'[test id=bar]\n\n[test]: foo')
-        self.assertString(link.write(), '<a data-position="top" href="foo" id="bar" ' \
-                                        'data-tooltip="foo" class="tooltipped">test</a>')
+        self.assertString(link.write(), '<a class="tooltipped" href="foo" data-tooltip="foo" ' \
+                                        'data-position="top" id="bar">test</a>')
 
 class TestRenderShortcutLinkLatex(testing.MooseDocsTestCase):
     """Test renderering of RenderShortcutLink with LatexRenderer"""

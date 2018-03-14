@@ -45,12 +45,25 @@ class Renderer(mixins.ConfigObject, mixins.TranslatorObject, mixins.ComponentObj
         self.addComponent(component)
         self.__functions[token] = self._method(component)
 
+    def createRoot(self, config):
+        """
+        Return the rendered content root node.
+        """
+        raise NotImplementedError()
+
     def reinit(self):
         """
         Call reinit() method of the RenderComponent objects.
         """
+        # TODO: Extension.reinit()???
         for comp in self.components:
             comp.reinit()
+
+    def convert(self, root, ast, config): #pylint: disable=unused-argument
+        """
+        Convert the provided AST into rendered results within the supplied root node.
+        """
+        self.process(root, ast)
 
     def render(self, ast): #pylint: disable=unused-argument
         """
@@ -62,7 +75,13 @@ class Renderer(mixins.ConfigObject, mixins.TranslatorObject, mixins.ComponentObj
         Inputs:
             ast[tree.token]: The AST to convert.
         """
+        config = self.getConfig()
+        root = self.createRoot(config)
         self.reinit()
+        self.translator.executeExtensionFunction('preRender', root, config)
+        self.convert(root, ast, config)
+        self.translator.executeExtensionFunction('postRender', root, config)
+        return root
 
     def write(self, output): #pylint: disable=no-self-use
         """
@@ -138,14 +157,8 @@ class HTMLRenderer(Renderer):
     """
     METHOD = 'createHTML'
 
-    def render(self, ast):
-        """
-        Render the supplied AST, wrapping it in a <body> tag.
-        """
-        self.reinit()
-        root = html.Tag(None, 'body', class_='moose-content')
-        self.process(root, ast)
-        return root
+    def createRoot(self, config):
+        return html.Tag(None, 'body', class_='moose-content')
 
 class MaterializeRenderer(HTMLRenderer):
     """
@@ -193,6 +206,10 @@ class MaterializeRenderer(HTMLRenderer):
                   "the item supplied is a {} of length {}."
             raise ValueError(msg.format(type(collapsible), len(collapsible)))
 
+    def createRoot(self, config):
+        return html.Tag(None, '!DOCTYPE html', close=False)
+
+
     def _method(self, component):
         """
         Fallback to the HTMLRenderer method if the MaterializeRenderer method is not located.
@@ -208,18 +225,9 @@ class MaterializeRenderer(HTMLRenderer):
             msg = "The component object {} does not have a {} method."
             raise exceptions.MooseDocsException(msg, type(component), self.METHOD)
 
-    def render(self, ast):
-        """
-        Convert supplied AST into a Materialize HTML tree.
+    def convert(self, root, ast, config):
 
-        Inputs:
-            ast[tokens.Token]: The root of the tokenized content to be converted.
-        """
-        Renderer.render(self, ast) # calls reinit()
-
-        root = html.Tag(None, '!DOCTYPE html', close=False)
         html.Tag(root, 'html')
-
         head = html.Tag(root, 'head')
         body = html.Tag(root, 'body')
         wrap = html.Tag(body, 'div', class_='page-wrap')
@@ -231,30 +239,27 @@ class MaterializeRenderer(HTMLRenderer):
         container = html.Tag(main, 'div', class_="container")
 
         # <head> content
-        self.addHead(head, self.translator.current)
-        self.addRepo(nav, self.translator.current)
-        self.addName(nav, self.translator.current)
-        self.addNavigation(nav, self.translator.current)
-        self.addBreadcrumbs(container, self.translator.current)
+        self._addHead(config, head, self.translator.current)
+        self._addRepo(config, nav, self.translator.current)
+        self._addName(config, nav, self.translator.current)
+        self._addNavigation(config, nav, self.translator.current)
+        self._addBreadcrumbs(config, container, self.translator.current)
 
-        # Content
         row = html.Tag(container, 'div', class_="row")
         col = html.Tag(row, 'div', class_="moose-content")
-        HTMLRenderer.process(self, col, ast)
+        HTMLRenderer.convert(self, col, ast, config)
 
         # Sections
-        self.addSections(col, self.translator.current)
+        self._addSections(config, col, self.translator.current)
 
-        if self['scrollspy']:
-            col['class'] = 'col s12 m12 l10'
+        if config['scrollspy']:
+            col.addClass('col', 's12', 'm12', 'l10')
             toc = html.Tag(row, 'div', class_="col hide-on-med-and-down l2")
-            self.addContents(toc, col, self.translator.current)
+            self._addContents(config, toc, col, self.translator.current)
         else:
-            col['class'] = 'col s12 m12 l12'
+            col.addClass('col', 's12', 'm12', 'l12')
 
-        return root
-
-    def addHead(self, head, root_page): #pylint: disable=unused-argument,no-self-use
+    def _addHead(self, config, head, root_page): #pylint: disable=unused-argument,no-self-use
         """
         Add content to <head> element with the required CSS/JS for materialize.
 
@@ -287,7 +292,7 @@ class MaterializeRenderer(HTMLRenderer):
         html.Tag(head, 'script', type="text/javascript", src=rel("contrib/katex/katex.min.js"))
         html.Tag(head, 'script', type="text/javascript", src=rel("js/init.js"))
 
-    def addContents(self, toc, content, root_page): #pylint: disable=unused-argument,no-self-use
+    def _addContents(self, config, toc, content, root_page): #pylint: disable=unused-argument,no-self-use
         """
         Add the table of contents right-side bar that used scrollspy.
 
@@ -301,7 +306,7 @@ class MaterializeRenderer(HTMLRenderer):
         ul = html.Tag(div, 'ul', class_='section table-of-contents')
         for node in anytree.PreOrderIter(content):
             if node.name == 'section' and node['data-section-level'] == 2:
-                node['class'] = 'section scrollspy'
+                node.addClass('section', 'scrollspy')
                 li = html.Tag(ul, 'li')
                 a = html.Tag(li, 'a',
                              href='#{}'.format(node['id']),
@@ -311,16 +316,16 @@ class MaterializeRenderer(HTMLRenderer):
                 a['data-position'] = 'left'
                 a['data-tooltip'] = node['data-section-text']
 
-    def addRepo(self, nav, root_page):
+    def _addRepo(self, config, nav, root_page): #pylint: disable=no-self-use
         """
         Add the repository link to the navigation bar.
 
-        Inputs:
+        Inputs:Mo
             nav[html.Tag]: The <div> containing the navigation for the page being generated.
             root_page[page.PageNodeBase]: The current page being converted.
         """
 
-        repo = self.get('repo', None)
+        repo = config.get('repo', None)
         if (repo is None) or (root_page is None):
             return
 
@@ -337,7 +342,7 @@ class MaterializeRenderer(HTMLRenderer):
             img = root_page.findall('gitlab-logo.png')[0]
             html.Tag(a, 'img', src=img.relativeDestination(root_page), class_='gitlab-logo')
 
-    def addNavigation(self, nav, root_page):
+    def _addNavigation(self, config, nav, root_page):
         """
         Add the repository navigation links.
 
@@ -347,7 +352,7 @@ class MaterializeRenderer(HTMLRenderer):
         """
 
         # Do nothing if navigation is not probided
-        navigation = self.get('navigation', None)
+        navigation = config.get('navigation', None)
         if (navigation is None) or (root_page is None):
             return
 
@@ -370,6 +375,7 @@ class MaterializeRenderer(HTMLRenderer):
             top_li = html.Tag(top_ul, 'li')
             a = html.Tag(top_li, 'a', class_="dropdown-button", href="#!", string=unicode(key1))
             a['data-activates'] = id_
+            a['data-constrainWidth'] = "false"
             html.Tag(a, "i", class_='material-icons right', string=u'arrow_drop_down')
 
             bot_ul = html.Tag(nav, 'ul', id_=id_, class_='dropdown-content')
@@ -378,7 +384,7 @@ class MaterializeRenderer(HTMLRenderer):
                 href = node.relativeDestination(root_page)
                 a = html.Tag(bot_li, 'a', href=href, string=unicode(key2))
 
-    def addName(self, nav, root_page): #pylint: disable=unused-argument
+    def _addName(self, config, nav, root_page): #pylint: disable=unused-argument
         """
         Add the page name to the left-hand side of the top bar.
 
@@ -386,13 +392,12 @@ class MaterializeRenderer(HTMLRenderer):
             nav[html.Tag]: The <div> containing the navigation for the page being generated.
             root_page[page.PageNodeBase]: The current page being converted.
         """
-
-        name = self.get('name', None)
+        name = config.get('name', None)
         if name:
             html.Tag(nav, 'a', class_='left', href=unicode(self.get('home', '#!')),
                      string=unicode(name))
 
-    def addBreadcrumbs(self, container, root_page):
+    def _addBreadcrumbs(self, config, container, root_page): #pylint: disable=no-self-use
         """
         Inserts breadcrumb links at the top of the page.
 
@@ -402,7 +407,7 @@ class MaterializeRenderer(HTMLRenderer):
         TODO: This is relying on hard-coded .md/.html extensions, that should not be the case.
         """
 
-        if not (self.get('breadcrumbs', None) and root_page):
+        if not (config.get('breadcrumbs', None) and root_page):
             return
 
         row = html.Tag(container, 'div', class_="row")
@@ -431,7 +436,7 @@ class MaterializeRenderer(HTMLRenderer):
                 a = html.Tag(div, 'a', href=url, class_="breadcrumb")
                 html.String(a, content=unicode(os.path.splitext(n.name)[0]))
 
-    def addSections(self, container, root_page): #pylint: disable=unused-argument
+    def _addSections(self, config, container, root_page): #pylint: disable=unused-argument
         """
         Group content into <section> tags based on the heading tag.
 
@@ -443,7 +448,7 @@ class MaterializeRenderer(HTMLRenderer):
         if not self.get('sections', False):
             return
 
-        collapsible = self.get('collapsible-sections', False)
+        collapsible = config.get('collapsible-sections', False)
 
         section = container
         for child in section.children:
@@ -497,11 +502,16 @@ class LatexRenderer(Renderer):
         self._packages = set()
         Renderer.__init__(self, *args, **kwargs)
 
-    def render(self, ast):
+    def createRoot(self, config): #pylint: disable=unused-argument
+        """
+        Return LaTeX root node.
+        """
+        return base.NodeBase()
+
+    def convert(self, root, ast, config): #pylint: disable=unused-argument
         """
         Built LaTeX tree from AST.
         """
-        root = base.NodeBase()
         latex.Command(root, 'documentclass', string=u'book', end='\n')
 
         for package in self._packages:

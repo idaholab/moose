@@ -1,4 +1,5 @@
 #pylint: disable=missing-docstring
+import os
 import MooseDocs
 from MooseDocs.base import components
 from MooseDocs.extensions import command
@@ -91,12 +92,16 @@ class RenderAlertToken(components.RenderComponent):
         card_content = html.Tag(card, 'div', class_='card-content')
         title = self.createTitle(card_content, token)
         if title:
-            title['class'] = 'card-title'
+            title.addClass('card-title')
         content = html.Tag(card_content, 'div', class_='moose-alert-content')
 
         if token.brand == 'construction':
-            html.Tag(content, 'img', class_='moose-alert-construction-img',
-                     src='/media/under-construction.gif') # TODO: Make this relative
+            if self.translator.current:
+                src = os.path.relpath('media/under-construction.gif',
+                                      os.path.dirname(self.translator.current.local))
+            else:
+                src = '/media/under-construction.gif'
+            html.Tag(content, 'img', class_='moose-alert-construction-img', src=src)
 
         return html.Tag(content, 'p')
 

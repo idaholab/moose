@@ -20,51 +20,35 @@ class Tag(NodeBase):
 
     def __init__(self, parent, name, **kwargs):
 
-        style = kwargs.pop('style', None)
-        self.__style = dict()
-        if style:
-            for pair in style.split(';'):
-                if pair:
-                    key, value = pair.split(':')
-                    self.__style[key.strip()] = value.strip()
-
         super(Tag, self).__init__(name=name, parent=parent, **kwargs)
 
         #pylint: disable=no-member
         if self.string:
             String(self, content=self.string)
 
-    def __setitem__(self, key, value):
+    def addStyle(self, style):
         """
-        Create/set an attribute.
+        Add to the existing style settings.
         """
-        if (key == 'class') and (key in self):
-            NodeBase.__setitem__(self, key, '{} {}'.format(self.get(key), value))
-        else:
-            NodeBase.__setitem__(self, key, value)
+        s = self.get('style', '').split(';')
+        s += style.split(';')
+        self['style'] = ';'.join(s)
 
-    @property
-    def style(self):
-        """Return the HTML style attribute."""
-        return self.__style
+    def addClass(self, *args):
+        """
+        Add to the existing class list.
+        """
+        c = self.get('class', '').split(' ')
+        c += args
+        self['class'] = ' '.join(c)
 
     def write(self):
         """Write the HTML as a string, e.g., <foo>...</foo>."""
         out = ''
         attr_list = []
         for key, value in self.attributes.iteritems():
-            if value:
+            if value:# and (key != 'class'):
                 attr_list.append('{}="{}"'.format(key, str(value).strip()))
-
-        if self.__style:
-            style_list = []
-            for key, value in self.__style.iteritems():
-                if value:
-                    style_list.append('{}:{}'.format(key, str(value).strip()))
-            style_string = ';'.join(style_list)
-            if not style_string.endswith(';'):
-                style_string += ';'
-            attr_list.append('style="{}"'.format(style_string))
 
         attr = ' '.join(attr_list)
         if attr:
