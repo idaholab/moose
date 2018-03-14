@@ -86,8 +86,9 @@
     prop_values = '0.01 0.1'
   [../]
   [./pfgc]
-    type = PFFracBulkRateMaterial
-    function = gb_prop_func
+    type = GenericFunctionMaterial
+    prop_names = 'gc_prop'
+    prop_values = 'gb_prop_func'
   [../]
   [./define_mobility]
     type = ParsedMaterial

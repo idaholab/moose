@@ -91,7 +91,6 @@
 #include "ComputeVolumetricEigenstrain.h"
 #include "ComputeConcentrationDependentElasticityTensor.h"
 #include "FiniteStrainHyperElasticViscoPlastic.h"
-#include "LinearIsoElasticPFDamage.h"
 #include "HyperElasticPhaseFieldIsoDamage.h"
 #include "ComputeVolumetricDeformGrad.h"
 #include "ComputeDeformGradBasedStress.h"
@@ -327,7 +326,6 @@ TensorMechanicsApp::registerObjects(Factory & factory)
   registerMaterial(ComputeVolumetricEigenstrain);
   registerMaterial(ComputeConcentrationDependentElasticityTensor);
   registerMaterial(FiniteStrainHyperElasticViscoPlastic);
-  registerMaterial(LinearIsoElasticPFDamage);
   registerMaterial(HyperElasticPhaseFieldIsoDamage);
   registerMaterial(ComputeVolumetricDeformGrad);
   registerMaterial(ComputeDeformGradBasedStress);
