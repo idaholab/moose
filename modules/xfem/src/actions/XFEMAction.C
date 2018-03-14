@@ -28,6 +28,18 @@
 #include "XFEM.h"
 #include "XFEMElementPairLocator.h"
 
+registerMooseAction("XFEMApp", XFEMAction, "setup_xfem");
+
+registerMooseAction("XFEMApp", XFEMAction, "add_aux_variable");
+
+registerMooseAction("XFEMApp", XFEMAction, "add_aux_kernel");
+
+registerMooseAction("XFEMApp", XFEMAction, "add_variable");
+
+registerMooseAction("XFEMApp", XFEMAction, "add_kernel");
+
+registerMooseAction("XFEMApp", XFEMAction, "add_bc");
+
 template <>
 InputParameters
 validParams<XFEMAction>()

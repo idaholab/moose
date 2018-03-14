@@ -9,6 +9,8 @@
 
 #include "CrackTipEnrichmentCutOffBC.h"
 
+registerMooseObject("XFEMApp", CrackTipEnrichmentCutOffBC);
+
 template <>
 InputParameters
 validParams<CrackTipEnrichmentCutOffBC>()

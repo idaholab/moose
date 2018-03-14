@@ -15,6 +15,8 @@
 // XFEM includes
 #include "XFEMFuncs.h"
 
+registerMooseObject("XFEMApp", EllipseCutUserObject);
+
 template <>
 InputParameters
 validParams<EllipseCutUserObject>()

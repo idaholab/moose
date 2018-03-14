@@ -15,6 +15,8 @@
 // XFEM includes
 #include "XFEMFuncs.h"
 
+registerMooseObject("XFEMApp", CircleCutUserObject);
+
 template <>
 InputParameters
 validParams<CircleCutUserObject>()

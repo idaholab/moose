@@ -11,6 +11,8 @@
 
 #include "XFEM.h"
 
+registerMooseObject("XFEMApp", XFEMVolFracAux);
+
 template <>
 InputParameters
 validParams<XFEMVolFracAux>()

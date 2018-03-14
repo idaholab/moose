@@ -11,6 +11,8 @@
 
 #include "XFEM.h"
 
+registerMooseObject("XFEMApp", XFEMCutPlaneAux);
+
 template <>
 InputParameters
 validParams<XFEMCutPlaneAux>()
