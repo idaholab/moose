@@ -285,14 +285,16 @@ CO2FluidProperties::d2phiSW_dd2(Real delta, Real tau) const
 
   for (std::size_t i = 0; i < _n2.size(); ++i)
     d2phirdd2 += _n2[i] * std::exp(-std::pow(delta, _c2[i])) * std::pow(delta, _d2[i] - 2.0) *
-                 std::pow(tau, _t2[i]) * ((_d2[i] - _c2[i] * std::pow(delta, _c2[i])) *
-                                              (_d2[i] - 1.0 - _c2[i] * std::pow(delta, _c2[i])) -
-                                          _c2[i] * _c2[i] * std::pow(delta, _c2[i]));
+                 std::pow(tau, _t2[i]) *
+                 ((_d2[i] - _c2[i] * std::pow(delta, _c2[i])) *
+                      (_d2[i] - 1.0 - _c2[i] * std::pow(delta, _c2[i])) -
+                  _c2[i] * _c2[i] * std::pow(delta, _c2[i]));
 
   for (std::size_t i = 0; i < _n3.size(); ++i)
     d2phirdd2 +=
-        _n3[i] * std::pow(tau, _t3[i]) * std::exp(-_alpha3[i] * std::pow(delta - _eps3[i], 2.0) -
-                                                  _beta3[i] * std::pow(tau - _gamma3[i], 2.0)) *
+        _n3[i] * std::pow(tau, _t3[i]) *
+        std::exp(-_alpha3[i] * std::pow(delta - _eps3[i], 2.0) -
+                 _beta3[i] * std::pow(tau - _gamma3[i], 2.0)) *
         (-2.0 * _alpha3[i] * std::pow(delta, _d3[i]) +
          4.0 * _alpha3[i] * _alpha3[i] * std::pow(delta, _d3[i]) * std::pow(delta - _eps3[i], 2.0) -
          4.0 * _d3[i] * _alpha3[i] * std::pow(delta, _d3[i] - 1.0) * (delta - _eps3[i]) +
@@ -324,8 +326,9 @@ CO2FluidProperties::d2phiSW_dd2(Real delta, Real tau) const
         _n4[i] *
         (std::pow(Delta, _b4[i]) * (2.0 * dPsi_dd + delta * d2Psi_dd2) +
          2.0 * _b4[i] * std::pow(Delta, _b4[i] - 1.0) * dDelta_dd * (Psi + delta * dPsi_dd) +
-         _b4[i] * (std::pow(Delta, _b4[i] - 1.0) * d2Delta_dd2 +
-                   (_b4[i] - 1.0) * std::pow(Delta, _b4[i] - 2.0) * std::pow(dDelta_dd, 2.0)) *
+         _b4[i] *
+             (std::pow(Delta, _b4[i] - 1.0) * d2Delta_dd2 +
+              (_b4[i] - 1.0) * std::pow(Delta, _b4[i] - 2.0) * std::pow(dDelta_dd, 2.0)) *
              delta * Psi);
   }
   // The second derivative of the free energy wrt delta is the sum of these components
@@ -372,8 +375,9 @@ CO2FluidProperties::d2phiSW_dt2(Real delta, Real tau) const
                   4.0 * theta * theta * _b4[i] * (_b4[i] - 1.0) * std::pow(Delta, _b4[i] - 2.0);
     dPsi_dt = -2.0 * _D4[i] * (tau - 1.0) * Psi;
     d2Psi_dt2 = 2.0 * _D4[i] * (2.0 * _D4[i] * (tau - 1.0) * (tau - 1.0) - 1.0) * Psi;
-    d2phirdt2 += _n4[i] * delta * (Psi * d2Delta_dt2 + 2.0 * dDelta_dt * dPsi_dt +
-                                   std::pow(Delta, _b4[i]) * d2Psi_dt2);
+    d2phirdt2 +=
+        _n4[i] * delta *
+        (Psi * d2Delta_dt2 + 2.0 * dDelta_dt * dPsi_dt + std::pow(Delta, _b4[i]) * d2Psi_dt2);
   }
 
   // The second derivative of the free energy wrt tau is the sum of these components
@@ -609,6 +613,29 @@ CO2FluidProperties::mu_drhoT_from_rho_T(Real density,
   dmu_dT = (dmu0_dT + dmue_dT) * 1.0e-6 + dmu_drho * ddensity_dT;
 }
 
+void
+CO2FluidProperties::rho_mu(Real pressure, Real temperature, Real & rho, Real & mu) const
+{
+  rho = this->rho(pressure, temperature);
+  mu = this->mu_from_rho_T(rho, temperature);
+}
+
+void
+CO2FluidProperties::rho_mu_dpT(Real pressure,
+                               Real temperature,
+                               Real & rho,
+                               Real & drho_dp,
+                               Real & drho_dT,
+                               Real & mu,
+                               Real & dmu_dp,
+                               Real & dmu_dT) const
+{
+  this->rho_dpT(pressure, temperature, rho, drho_dp, drho_dT);
+  Real dmu_drho;
+  this->mu_drhoT_from_rho_T(rho, temperature, drho_dT, mu, dmu_drho, dmu_dT);
+  dmu_dp = dmu_drho * drho_dp;
+}
+
 Real
 CO2FluidProperties::partialDensity(Real temperature) const
 {
@@ -771,8 +798,9 @@ CO2FluidProperties::k_from_rho_T(Real density, Real temperature) const
   // Near-critical enhancement
   Real alpha = 1.0 - a[9] * std::acosh(1.0 + a[10] * std::pow(std::pow(1.0 - Tr, 2.0), a[11]));
   Real lambdac =
-      rhor * std::exp(-std::pow(rhor, a[0]) / a[0] - std::pow(a[1] * (Tr - 1.0), 2.0) -
-                      std::pow(a[2] * (rhor - 1.0), 2.0)) /
+      rhor *
+      std::exp(-std::pow(rhor, a[0]) / a[0] - std::pow(a[1] * (Tr - 1.0), 2.0) -
+               std::pow(a[2] * (rhor - 1.0), 2.0)) /
       std::pow(std::pow(std::pow(1.0 - 1.0 / Tr +
                                      a[3] * std::pow(std::pow(rhor - 1.0, 2.0), 1.0 / (2.0 * a[4])),
                                  2.0),

@@ -188,6 +188,27 @@ SimpleFluidProperties::mu_drhoT_from_rho_T(Real density,
   dmu_dT = 0.0;
 }
 
+void
+SimpleFluidProperties::rho_mu(Real pressure, Real temperature, Real & rho, Real & mu) const
+{
+  rho = this->rho(pressure, temperature);
+  mu = this->mu(pressure, temperature);
+}
+
+void
+SimpleFluidProperties::rho_mu_dpT(Real pressure,
+                                  Real temperature,
+                                  Real & rho,
+                                  Real & drho_dp,
+                                  Real & drho_dT,
+                                  Real & mu,
+                                  Real & dmu_dp,
+                                  Real & dmu_dT) const
+{
+  this->rho_dpT(pressure, temperature, rho, drho_dp, drho_dT);
+  this->mu_dpT(pressure, temperature, mu, dmu_dp, dmu_dT);
+}
+
 Real
 SimpleFluidProperties::h(Real pressure, Real temperature) const
 {

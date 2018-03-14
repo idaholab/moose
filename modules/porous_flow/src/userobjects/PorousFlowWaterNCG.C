@@ -217,56 +217,65 @@ PorousFlowWaterNCG::gasProperties(Real pressure,
   Real dXncg_dT = liquid.dmass_fraction_dT[_gas_fluid_component];
   Real dXncg_dz = liquid.dmass_fraction_dz[_gas_fluid_component];
 
+  // Note: take derivative wrt (Yncg * p) etc, hence the dp0
   Real ncg_density, dncg_density_dp0, dncg_density_dT;
+  Real ncg_viscosity, dncg_viscosity_dp0, dncg_viscosity_dT;
   Real vapor_density, dvapor_density_dp0, dvapor_density_dT;
-  // NCG density calculated using partial pressure Yncg * gas_poreressure (Dalton's law)
-  _ncg_fp.rho_dpT(Yncg * pressure, temperature, ncg_density, dncg_density_dp0, dncg_density_dT);
-  // Vapor density calculated using partial pressure X1 * psat (Raoult's law)
-  _water_fp.rho_dpT(
-      (1.0 - Xncg) * psat, temperature, vapor_density, dvapor_density_dp0, dvapor_density_dT);
+  Real vapor_viscosity, dvapor_viscosity_dp0, dvapor_viscosity_dT;
+
+  // NCG density and viscosity calculated using partial pressure Yncg * gas_poreressure
+  // (Dalton's law)
+  _ncg_fp.rho_mu_dpT(Yncg * pressure,
+                     temperature,
+                     ncg_density,
+                     dncg_density_dp0,
+                     dncg_density_dT,
+                     ncg_viscosity,
+                     dncg_viscosity_dp0,
+                     dncg_viscosity_dT);
+
+  // Vapor density and viscosity calculated using partial pressure X1 * psat (Raoult's law)
+  _water_fp.rho_mu_dpT((1.0 - Xncg) * psat,
+                       temperature,
+                       vapor_density,
+                       dvapor_density_dp0,
+                       dvapor_density_dT,
+                       vapor_viscosity,
+                       dvapor_viscosity_dp0,
+                       dvapor_viscosity_dT);
 
   // Derivative wrt z by the chain rule
   Real dncg_density_dz = dYncg_dz * pressure * dncg_density_dp0;
   Real dvapor_density_dz = -dXncg_dz * psat * dvapor_density_dp0;
+  Real dncg_viscosity_dz = dYncg_dz * pressure * dncg_viscosity_dp0;
+  Real dvapor_viscosity_dz = -dXncg_dz * psat * dvapor_viscosity_dp0;
+
   // The derivatives wrt pressure and temperature above also depend on the derivative
   // of the pressure variable using the chain rule
   Real dncg_density_dp = (Yncg + dYncg_dp * pressure) * dncg_density_dp0;
   dncg_density_dT += dYncg_dT * pressure * dncg_density_dp0;
   Real dvapor_density_dp = -dXncg_dp * psat * dvapor_density_dp0;
   dvapor_density_dT += ((1.0 - Xncg) * dpsat_dT - dXncg_dT * psat) * dvapor_density_dp0;
+  Real dncg_viscosity_dp = (Yncg + dYncg_dp * pressure) * dncg_viscosity_dp0;
+  Real dvapor_viscosity_dp = -dXncg_dp * psat * dvapor_viscosity_dp0;
+  dncg_viscosity_dT += dYncg_dT * pressure * dncg_viscosity_dp0;
+  dvapor_viscosity_dT += ((1.0 - Xncg) * dpsat_dT - dXncg_dT * psat) * dvapor_viscosity_dp0;
 
+  // Density is just the sum of individual component densities
   gas.density = ncg_density + vapor_density;
   gas.ddensity_dp = dncg_density_dp + dvapor_density_dp;
   gas.ddensity_dT = dncg_density_dT + dvapor_density_dT;
   gas.ddensity_dz = dncg_density_dz + dvapor_density_dz;
 
-  // Viscosity
-  Real ncg_viscosity, dncg_viscosity_drho, dncg_viscosity_dT;
-  Real vapor_viscosity, dvapor_viscosity_drho, dvapor_viscosity_dT;
-  _ncg_fp.mu_drhoT_from_rho_T(ncg_density,
-                              temperature,
-                              dncg_density_dT,
-                              ncg_viscosity,
-                              dncg_viscosity_drho,
-                              dncg_viscosity_dT);
-  _water_fp.mu_drhoT_from_rho_T(vapor_density,
-                                temperature,
-                                dvapor_density_dT,
-                                vapor_viscosity,
-                                dvapor_viscosity_drho,
-                                dvapor_viscosity_dT);
-
   // Assume that the viscosity of the gas phase is a weighted sum of the
   // individual viscosities
   gas.viscosity = Yncg * ncg_viscosity + (1.0 - Yncg) * vapor_viscosity;
-  gas.dviscosity_dp = dYncg_dp * (ncg_viscosity - vapor_viscosity) +
-                      Yncg * dncg_viscosity_drho * dncg_density_dp +
-                      (1.0 - Yncg) * dvapor_viscosity_drho * dvapor_density_dp;
+  gas.dviscosity_dp = dYncg_dp * (ncg_viscosity - vapor_viscosity) + Yncg * dncg_viscosity_dp +
+                      (1.0 - Yncg) * dvapor_viscosity_dp;
   gas.dviscosity_dT = dYncg_dT * (ncg_viscosity - vapor_viscosity) + Yncg * dncg_viscosity_dT +
                       (1.0 - Yncg) * dvapor_viscosity_dT;
-  gas.dviscosity_dz = dYncg_dz * (ncg_viscosity - vapor_viscosity) +
-                      Yncg * dncg_viscosity_drho * dncg_density_dz +
-                      (1.0 - Yncg) * dvapor_viscosity_drho * dvapor_density_dz;
+  gas.dviscosity_dz = dYncg_dz * (ncg_viscosity - vapor_viscosity) + Yncg * dncg_viscosity_dz +
+                      (1.0 - Yncg) * dvapor_viscosity_dz;
 }
 
 void
@@ -281,24 +290,23 @@ PorousFlowWaterNCG::liquidProperties(Real pressure,
   // NCG. Note: the (small) contribution due to derivative of capillary pressure
   // wrt pressure (using the chain rule) is not implemented.
   Real liquid_density, dliquid_density_dp, dliquid_density_dT;
-  _water_fp.rho_dpT(pressure, temperature, liquid_density, dliquid_density_dp, dliquid_density_dT);
+  Real liquid_viscosity, dliquid_viscosity_dp, dliquid_viscosity_dT;
+  _water_fp.rho_mu_dpT(pressure,
+                       temperature,
+                       liquid_density,
+                       dliquid_density_dp,
+                       dliquid_density_dT,
+                       liquid_viscosity,
+                       dliquid_viscosity_dp,
+                       dliquid_viscosity_dT);
 
   liquid.density = liquid_density;
   liquid.ddensity_dp = dliquid_density_dp;
   liquid.ddensity_dT = dliquid_density_dT;
   liquid.ddensity_dz = 0.0;
 
-  Real liquid_viscosity, dliquid_viscosity_drho, dliquid_viscosity_dT;
-  _water_fp.mu_drhoT_from_rho_T(liquid_density,
-                                temperature,
-                                dliquid_density_dT,
-                                liquid_viscosity,
-                                dliquid_viscosity_drho,
-                                dliquid_viscosity_dT);
-
-  // The derivative of viscosity wrt pressure is given by the chain rule
   liquid.viscosity = liquid_viscosity;
-  liquid.dviscosity_dp = dliquid_viscosity_drho * dliquid_density_dp;
+  liquid.dviscosity_dp = dliquid_viscosity_dp;
   liquid.dviscosity_dT = dliquid_viscosity_dT;
   liquid.dviscosity_dz = 0.0;
 }

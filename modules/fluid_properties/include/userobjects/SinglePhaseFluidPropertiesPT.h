@@ -170,6 +170,35 @@ public:
                                    Real & mu,
                                    Real & dmu_drho,
                                    Real & dmu_dT) const = 0;
+
+  /**
+   * Density and viscosity
+   * @param pressure fluid pressure (Pa)
+   * @param temperature fluid temperature (K)
+   * @param[out] rho density (kg/m^3)
+   * @param[out] mu viscosity (Pa.s)
+   */
+  virtual void rho_mu(Real pressure, Real temperature, Real & rho, Real & mu) const = 0;
+
+  /**
+   * Density and viscosity and their derivatives wrt pressure and temperature
+   * @param pressure fluid pressure (Pa)
+   * @param temperature fluid temperature (K)
+   * @param[out] rho density (kg/m^3)
+   * @param[out] drho_dp derivative of density wrt pressure
+   * @param[out] drho_dT derivative of density wrt temperature
+   * @param[out] mu viscosity (Pa.s)
+   * @param[out] dmu_dp derivative of viscosity wrt pressure
+   * @param[out] dmu_dT derivative of viscosity wrt temperature
+   */
+  virtual void rho_mu_dpT(Real pressure,
+                          Real temperature,
+                          Real & rho,
+                          Real & drho_dp,
+                          Real & drho_dT,
+                          Real & mu,
+                          Real & dmu_dp,
+                          Real & dmu_dT) const = 0;
   /**
    * Thermal conductivity
    * @param pressure fluid pressure (Pa)

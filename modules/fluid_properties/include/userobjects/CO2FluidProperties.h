@@ -64,6 +64,17 @@ public:
                                    Real & dmu_drho,
                                    Real & dmu_dT) const override;
 
+  virtual void rho_mu(Real pressure, Real temperature, Real & rho, Real & mu) const override;
+
+  virtual void rho_mu_dpT(Real pressure,
+                          Real temperature,
+                          Real & rho,
+                          Real & drho_dp,
+                          Real & drho_dT,
+                          Real & mu,
+                          Real & dmu_dp,
+                          Real & dmu_dT) const override;
+
   virtual std::string fluidName() const override;
 
   Real molarMass() const override;
