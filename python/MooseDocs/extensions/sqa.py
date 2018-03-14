@@ -1,96 +1,35 @@
 #pylint: disable=missing-docstring
-#* This file is part of the MOOSE framework
-#* https://www.mooseframework.org
-#*
-#* All rights reserved, see COPYRIGHT for full restrictions
-#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
-#*
-#* Licensed under LGPL 2.1, please see LICENSE for details
-#* https://www.gnu.org/licenses/lgpl-2.1.html
-#pylint: enable=missing-docstring
-
 import re
 import os
 import collections
-import logging
+import codecs
 
-import jinja2
-from markdown.util import etree
-from markdown.inlinepatterns import Pattern
-from markdown.preprocessors import Preprocessor
-from markdown.blockprocessors import BlockProcessor
+import anytree
 
 import mooseutils
 
 import MooseDocs
-from MooseMarkdownExtension import MooseMarkdownExtension
-from MooseMarkdownCommon import MooseMarkdownCommon
+from MooseDocs import common
+from MooseDocs.common import exceptions
+from MooseDocs.base import components
+from MooseDocs.extensions import command, alert, floats, core, autolink
+from MooseDocs.tree import tokens, html
 
-LOG = logging.getLogger(__name__)
+def make_extension(**kwargs):
+    return SQAExtension(**kwargs)
 
-class SQAExtension(MooseMarkdownExtension):
+#: tuple for storing "requirement" from test specification
+Requirement = collections.namedtuple('Requirement', "name path filename requirement design issues")
+
+def _get_requirements():
     """
-    Extension for create software quality documents from a template markdown file.
+
+    Helper for examining test specification for "requirements."
+
+    TODO: This should be updated to accept an arbitrary directories and re-factored a bit to avoid
+          the six levels of nesting.
     """
-    @staticmethod
-    def defaultConfig():
-        """
-        Default configuration options for SQAExtension
-        """
-        config = MooseMarkdownExtension.defaultConfig()
-        config['PROJECT'] = ['UNKNOWN PROJECT', "Project name to use throughout the template."]
-        config['repo'] = ['', "The remote repository to create hyperlinks."]
-        config['branch'] = ['master', "The branch name to consider in repository links."]
-        return config
 
-    def extendMarkdown(self, md, md_globals):
-        """
-        Adds components to SQAExtension.
-        """
-        md.registerExtension(self)
-        config = self.getConfigs()
-
-        repo = os.path.join(config.pop('repo'), 'blob', config['branch'])
-        database = SQAInputTagDatabase(repo)
-
-        md.preprocessors.add('moose_sqa',
-                             SQAPreprocessor(markdown_instance=md, **config), '_begin')
-
-        md.parser.blockprocessors.add('moose_sqa_input_tags',
-                                      SQAInputTags(markdown_instance=md, **config),
-                                      '_begin')
-
-        md.inlinePatterns.add('moose_sqa_matrix',
-                              SQAInputTagMatrix(markdown_instance=md, database=database, **config),
-                              '_begin')
-
-        md.inlinePatterns.add('moose-sqa-page-status',
-                              SQAPageStatus(markdown_instance=md, **config),
-                              '_begin')
-
-        md.inlinePatterns.add('moose-sqa-link',
-                              SQALink(markdown_instance=md, **config),
-                              '_begin')
-
-        md.inlinePatterns.add('moose-requirements',
-                              SQARequirements(markdown_instance=md, repo=repo, **config),
-                              '_begin')
-
-
-def makeExtension(*args, **kwargs): #pylint: disable=invalid-name
-    """
-    Create SQAExtension
-    """
-    return SQAExtension(*args, **kwargs)
-
-Requirement = collections.namedtuple('Requirement',
-                                     "name path filename requirement design issues")
-
-def get_requirements():
-    """
-    Extracts the requirements from the moose/test/tests directory. This is only a
-    temporary solution to a larger effort.
-    """
     directories = [os.path.join(MooseDocs.ROOT_DIR, 'test', 'tests')]
     spec = 'tests'
     out = set()
@@ -101,532 +40,225 @@ def get_requirements():
                     full_file = os.path.join(base, fname)
                     root = mooseutils.hit_load(full_file)
                     for child in root.children[0]:
-                        if 'requirement' in child:
-                            design = child['design'] if 'design' in child else None
-                            issues = child['issues'] if 'issues' in child else None
+                        #TODO: Make 'issues' optional?
+                        if ('requirement' in child) and ('design' in child) and ('issues' in child):
                             req = Requirement(name=child.name,
-                                              path=os.path.relpath(full_file, MooseDocs.ROOT_DIR),
+                                              path=os.path.relpath(base, location),
                                               filename=full_file,
                                               requirement=child['requirement'],
-                                              design=design,
-                                              issues=issues)
+                                              design=child['design'],
+                                              issues=child['issues'])
                             out.add(req)
-
     return out
 
-class SQARequirements(MooseMarkdownCommon, Pattern):
-    """
-    Builds SQA requirement list from test specification files.
-    """
-    RE = r'(?<!`)!sqa requirements'
+class SQAExtension(command.CommandExtension):
+
+    @staticmethod
+    def defaultConfig():
+        config = command.CommandExtension.defaultConfig()
+        return config
+
+    def __init__(self, *args, **kwargs):
+        command.CommandExtension.__init__(self, *args, **kwargs)
+
+         #TODO: re-compute on reinit and move to the command object
+        self.requirements = _get_requirements()
+
+
+    def extend(self, reader, renderer):
+        self.requires(command, alert, floats, core)
+
+        self.addCommand(SQATemplateLoadCommand())
+        self.addCommand(SQATemplateItemCommand())
+
+        self.addCommand(SQARequirementsCommand())
+
+        self.addCommand(SQADocumentItemCommand())
+
+        renderer.add(SQATemplateItem, RenderSQATemplateItem())
+        renderer.add(SQARequirementMatrix, RenderSQARequirementMatrix())
+        renderer.add(SQARequirementMatrixItem, RenderSQARequirementMatrixItem())
+
+class SQADocumentItem(tokens.Token):
+    PROPERTIES = [tokens.Property('key', ptype=unicode, required=True)]
+
+class SQATemplateItem(tokens.Token):
+    PROPERTIES = [tokens.Property('key', ptype=unicode, required=True),
+                  tokens.Property('use_default', ptype=bool, required=True)]
+class SQARequirementMatrix(tokens.OrderedList):
+    pass
+
+class SQARequirementMatrixItem(tokens.ListItem):
+    pass
+
+class SQARequirementsCommand(command.CommandComponent):
+    COMMAND = 'sqa'
+    SUBCOMMAND = 'requirements'
 
     @staticmethod
     def defaultSettings():
-        settings = MooseMarkdownCommon.defaultSettings()
-        return settings
+        config = command.CommandComponent.defaultSettings()
+        config['link_tests'] = (True, "Enable/disable the linking of test specifications and " \
+                                      "test files.")
+        return config
 
-    def __init__(self, markdown_instance=None, repo=None, **kwargs):
-        MooseMarkdownCommon.__init__(self, **kwargs)
-        Pattern.__init__(self, self.RE, markdown_instance)
-        self._repo = repo
+    def createToken(self, info, parent):
+        matrix = SQARequirementMatrix(parent)
+        for req in self.extension.requirements:
+            item = SQARequirementMatrixItem(matrix)
+            self.translator.reader.parse(item, unicode(req.requirement))
 
-    def handleMatch(self, match): #pylint: disable=unused-argument
-        """
-        Build the matrix.
-        """
-        repo_issue = "https://github.com/idaholab/moose/issues"
+            #TODO: Make option
+            p = tokens.Paragraph(item, 'p')
+            tokens.String(p, content=u'Specification: ')
 
-        ol = etree.Element('ol')
-        ol.set('class', 'collection browser-default')
-        for req in get_requirements():
-            li = etree.SubElement(ol, 'li')
-            li.set('class', 'collection-item')
 
-            p = etree.SubElement(li, 'p')
-            p.text = req.requirement
+            with codecs.open(req.filename, encoding='utf-8') as fid:
+                content = fid.read()
 
-            p = etree.SubElement(li, 'p')
-            p.text = 'Specification: '
-            a = etree.SubElement(p, 'a')
-            a.set('href', '{}/{}'.format(self._repo, req.path))
-            a.text = '{}:{}'.format(req.path, req.name)
+            floats.ModalLink(p, 'a', tooltip=False, url=u"#",
+                             string=u"{}:{}".format(req.path, req.name),
+                             title=tokens.String(None, content=unicode(req.filename)),
+                             content=tokens.Code(None, language=u'text', code=content))
 
+            #TODO: Make option
             if req.design:
-                p = etree.SubElement(li, 'p')
-                p.text = 'Design: '
+                p = tokens.Paragraph(item, 'p')
+                tokens.String(p, content=u'Design: ')
                 for design in req.design.split():
-                    node = self.getFilename(design)
-                    a = etree.SubElement(p, 'a')
-                    a.set("href", '/' + node[1].destination)
-                    a.text = node[1].name + ' '
+                    autolink.AutoShortcutLink(p, key=unicode(design))
 
+            #TODO: Make option
             if req.issues:
-                p = etree.SubElement(li, 'p')
-                p.text = 'Issues: '
+                p = tokens.Paragraph(item, 'p')
+                tokens.String(p, content=u'Issues: ')
                 for issue in req.issues.split():
-                    a = etree.SubElement(p, 'a')
-                    a.set("href", "{}/{}".format(repo_issue, issue[1:]))
-                    a.text = issue + ' '
+                    url = u"https://github.com/idaholab/moose/issues/{}".format(issue[1:])
+                    tokens.Link(p, url=url, string=unicode(issue))
 
-        return ol
+        return parent
 
-class SQAPreprocessor(MooseMarkdownCommon, Preprocessor):
-    """
-    Preprocessor to read the template and create the complete markdown content.
-    """
-
-    SQA_LOAD_RE = r'(?<!`)!SQA-load\s+(?P<filename>.*\.md)(?:$|\s+)(?P<settings>.*)'
-    SQA_TEMPLATE_RE = r'!SQA-template\s+(?P<name>\w+)(?P<settings>.*?)' \
-                      r'\n(?P<markdown>.*?)!END-template'
+class SQATemplateLoadCommand(command.CommandComponent):
+    COMMAND = 'sqa'
+    SUBCOMMAND = 'load'
 
     @staticmethod
     def defaultSettings():
-        """Default settings for SQAPreprocessor"""
-        settings = dict()
-        settings['default'] = [False, "Use the template text as the default."]
-        return settings
+        config = command.CommandComponent.defaultSettings()
+        config['template'] = (None, "The name of the template to load.")
+        return config
 
-    def __init__(self, markdown_instance=None, **kwargs):
-        MooseMarkdownCommon.__init__(self)
-        Preprocessor.__init__(self, markdown_instance)
-        self.__database = None
-        self._template_args = kwargs
+    def createToken(self, info, parent):
 
-    def run(self, lines):
-        """
-        Load the SQA template file and replace content.
-        """
+        #TODO: make root path a config item in extension
+        location = os.path.join(MooseDocs.ROOT_DIR, 'framework', 'doc', 'templates', 'sqa',
+                                self.settings['template'])
 
-        # Do nothing if the document doesn't contain the template name at the top
-        match = re.search(self.SQA_LOAD_RE, lines[0])
-        if not match:
-            return lines
+        if not os.path.exists(location):
+            msg = "The template file does not exist: {}."
+            raise exceptions.TokenizeException(msg, location)
 
-        # Populate the data base
-        self.__database = SQADatabase('\n'.join(lines))
-
-        # Define the template locations
-        paths = [MooseDocs.ROOT_DIR,
-                 os.path.join(MooseDocs.ROOT_DIR, 'doc', 'templates', 'sqa'),
-                 os.path.join(MooseDocs.ROOT_DIR, 'docs', 'templates', 'sqa'),
-                 MooseDocs.MOOSE_DIR,
-                 os.path.join(MooseDocs.MOOSE_DIR, 'docs', 'templates', 'sqa')]
-
-        # Read the SQA template filename
-        filename = match.group('filename')
-        for root in paths:
-            fullname = os.path.join(root, filename)
-            if os.path.exists(fullname):
-                filename = fullname
-                break
-
-        if not os.path.exists(filename):
-            raise IOError("The file '{}' does not exist.".format(filename))
-
-        with open(filename, 'r') as fid:
+        with codecs.open(location, 'r', encoding='utf-8') as fid:
             content = fid.read()
 
-        # Replace the SQA template sections with content
-        content = re.sub(self.SQA_TEMPLATE_RE, self.__sub, content, flags=re.DOTALL|re.MULTILINE)
-        template = jinja2.Template(content)
-        content = template.render(**self._template_args)
-        return content.split('\n')
 
-    def __sub(self, match):
-        """
-        Substitution method for regex replacement.
-        """
+        # Replace key/value arguments
+        template_args = info['inline'] if 'inline' in info else info['block']
+        _, key_values = common.match_settings(dict(), template_args)
 
-        name = match.group('name')
-        markdown = match.group('markdown')
-        settings = self.getSettings(match.group('settings'))
+        def sub(match):
+            key = match.group('key')
+            if key not in key_values:
+                msg = "The template argument '{}' was not defined in the !sqa load command."
+                raise exceptions.TokenizeException(msg, key)
 
-        # Use the content in database
-        if name in self.__database:
-            div = etree.Element('div')
-            div.set('markdown', '1')
-            item = self.__database[name]
-            div.text = item.markdown
+            return key_values[key]
 
-        # Use the default
-        elif settings['default']:
-            div = etree.Element('div')
-            div.set('markdown', '1')
-            div.text = markdown
+        content = re.sub(r'{{(?P<key>.*?)}}', sub, content)
 
-        # Produce error
-        else:
+        # Tokenize the template
+        self.translator.reader.parse(parent, content)
 
-            help_div = etree.Element('div')
-            heading = etree.SubElement(help_div, 'h3')
-            heading.text = "Adding Markdown for '{}' Item.".format(name)
+        return parent
 
-            p = etree.SubElement(help_div, 'p')
-            p.text = "To add content for the '{}' item, simply add a block similar to what is ' \
-                     'shown below in the markdown file '{}'.".format(name,
-                                                                     self.markdown.current.filename)
-
-            pre = etree.SubElement(help_div, 'pre')
-            code = etree.SubElement(pre, 'code')
-            code.set('class', 'language-text')
-            code.text = '!SQA-template-item {}\nThe content placed here should be valid markdown ' \
-                        'that will replace the template description.\n!END-template-item' \
-                        .format(name)
-
-            title = 'Missing Template Item: {}'.format(name)
-            div = self.createErrorElement(title=title, message=markdown, markdown=True,
-                                          help_button=help_div)
-
-        return etree.tostring(div)
-
-    @staticmethod
-    def createModalElement(parent, button=None, id_=None, heading=None, color='blue'):
-        """
-        Creates the modal help box.
-        """
-
-        a = etree.Element('a')
-        a.set('class', 'waves-effect waves-light btn-floating {}'.format(color))
-        a.set('data-target', id_)
-        i = etree.SubElement(a, 'i')
-        i.set('class', 'material-icons')
-        i.text = button
-
-        modal = etree.SubElement(parent, 'div')
-        modal.set('id', id_)
-        modal.set('class', 'modal')
-
-        content = etree.SubElement(modal, 'div')
-        content.set('class', 'modal-content')
-
-        if heading:
-            h = etree.SubElement(content, 'h3')
-            h.text = heading
-
-        div = etree.SubElement(content, 'div')
-
-        return div, a
-
-class SQADatabase(object):
-    """
-    Helper object for creating a database of items.
-    """
-
-    SQA_ITEM_RE = r'!SQA-template-item\s+(?P<name>\w+)(?P<settings>.*?)' \
-                  r'\n(?P<markdown>.*?)!END-template-item'
-    ITEMINFO = collections.namedtuple('ItemInfo', 'name settings markdown')
-
-    def __init__(self, content):
-        self.__items = dict()
-        re.sub(self.SQA_ITEM_RE, self.__sub, content, flags=re.DOTALL|re.MULTILINE)
-
-    def __sub(self, match):
-        """
-        Regex sub method (see __init__)
-        """
-
-        name = match.group('name')
-        markdown = match.group('markdown')
-
-        settings = dict()
-        for entry in re.findall(MooseMarkdownCommon.SETTINGS_RE, match.group('settings')):
-            settings[entry[0].strip()] = entry[1].strip()
-
-        if name in self.__items:
-            msg = "The supplied SQA item name ({}) is already defined.".format(name)
-            raise mooseutils.MooseException(msg)
-
-        self.__items[name] = self.ITEMINFO(name=name, markdown=markdown, settings=settings)
-
-    def __getitem__(self, name):
-        """
-        [] operator access to content
-        """
-        return self.__items[name]
-
-    def __contains__(self, name):
-        """
-        "in" operator testing for content
-        """
-        return name in self.__items
-
-class SQAInputTags(MooseMarkdownCommon, BlockProcessor):
-    """
-    Adds command for defining groups of requirements, validation, etc. lists that are linked to
-    input files.
-    """
-    RE = re.compile(r'(?<!`)!SQA-(?P<key>\w+)-list' \
-                    r'(?:$|(?P<settings>.*?))\n' \
-                    r'(?P<items>.*?)(?:\Z|\n{2,})',
-                    flags=re.DOTALL)
+class SQATemplateItemCommand(command.CommandComponent):
+    COMMAND = 'sqa'
+    SUBCOMMAND = 'template'
 
     @staticmethod
     def defaultSettings():
-        """Settings for SQARequirement"""
-        settings = MooseMarkdownCommon.defaultSettings()
-        settings['title'] = ('', "Title to assign to the list of items.")
-        settings['require-markdown'] = (False, "")
-        settings['status'] = (False, "When enabled with 'require-markdown' the status of the " \
-                                     "page is added to the list.")
-        settings['markdown-folder'] = ('', "When supplied the value provided should be a " \
-                                           "directory relative to the repository root directory " \
-                                           "where the required files are located " \
-                                           "(require-markdown must be enabled).")
-        return settings
+        config = command.CommandComponent.defaultSettings()
+        config['key'] = (None, "The name of the template item which the content is to replace.")
+        config['use_default'] = (False, "Dislpay the default if template item is not provided in " \
+                                        "the parent document.")
+        return config
 
-    def __init__(self, markdown_instance=None, **kwargs):
-        MooseMarkdownCommon.__init__(self, **kwargs)
-        BlockProcessor.__init__(self, markdown_instance.parser)
-        self.markdown = markdown_instance
+    def createToken(self, info, parent):
+        return SQATemplateItem(parent,
+                               key=self.settings['key'],
+                               use_default=self.settings['use_default'])
 
-    def test(self, parent, block):
-        """
-        Check that block contains the defined RE.
-        """
-        return self.RE.search(block)
-
-    def run(self, parent, blocks):
-        """
-        Create the collapsible region with the listed requirements.
-        """
-        block = blocks.pop(0)
-        match = self.RE.search(block)
-        settings = self.getSettings(match.group('settings'))
-        key = match.group('key')
-
-        # Set the default directory
-        require_md = settings['require-markdown']
-        status = settings['status']
-        if require_md:
-            folder = settings['markdown-folder']
-            if not folder:
-                folder = os.path.join(os.path.dirname(self.markdown.current.filename), key)
-            else:
-                folder = os.path.join(MooseDocs.ROOT_DIR, folder)
-
-        ul = MooseDocs.common.MooseCollapsible()
-        if settings['title']:
-            ul.addHeader(settings['title'])
-
-        for item in match.group('items').split('\n'):
-            tag_id, text = re.split(r'\s+', item.strip(), maxsplit=1)
-            desc = text
-            if require_md:
-                slug, _ = MooseDocs.common.slugify(tag_id, ('.', '-'))
-                slug += '.md'
-                full_name = os.path.join(folder, slug)
-                if not os.path.exists(full_name):
-                    LOG.error("The required markdown file (%s) does not exist.", full_name)
-                tag_id = '<a href="{}">{}</a>'.format(full_name, tag_id)
-                if status:
-                    _, found = self.getFilename(slug)
-                    if found:
-                        status_el = SQAPageStatus.createStatusElement(found, self.markdown.current)
-                        desc += etree.tostring(status_el)
-
-            ul.addItem(tag_id, desc, text, id_='{}-{}'.format(key, tag_id))
-
-        parent.append(ul.element())
-
-class SQAInputTagMatrix(MooseMarkdownCommon, Pattern):
-    """
-    Adds input tag matrix creation (e.g., Requirements Traceability Matrix)
-    """
-    RE = r'(?<!`)!SQA-(?P<key>\w+)-matrix\s+(?P<filename>.*\.md)(?:\n|\s*(?P<settings>.*))'
+class SQADocumentItemCommand(command.CommandComponent):
+    COMMAND = 'sqa'
+    SUBCOMMAND = 'item'
 
     @staticmethod
     def defaultSettings():
-        settings = MooseMarkdownCommon.defaultSettings()
-        return settings
+        config = command.CommandComponent.defaultSettings()
+        config['key'] = (None, "The name of the template item which the content is to replace.")
+        return config
 
-    def __init__(self, markdown_instance=None, database=None, **kwargs):
-        MooseMarkdownCommon.__init__(self, **kwargs)
-        Pattern.__init__(self, self.RE, markdown_instance)
-        self._database = database
+    def createToken(self, info, parent):
+        return SQADocumentItem(parent, key=self.settings['key'])
 
-    def handleMatch(self, match):
-        """
-        Build the matrix.
-        """
-        # Determine the items to include in the matrix
-        key = match.group('key')
+class RenderSQATemplateItem(components.RenderComponent):
 
-        # Report error if the key is not located
-        if key not in self._database:
-            return self.createErrorElement("The desired key ({0}) does not exist in any input " \
-                                           "file using the expected '@{0} <tag>' syntax." \
-                                           .format(key))
+    def createHTML(self, token, parent):
+        pass
 
-        # Load the desired items
-        filename = match.group('filename')
-        full_file, _ = self.markdown.getFilename(filename, check_local=True)
-        if os.path.exists(full_file):
-            items = self.getItems(full_file, key)
+    def createMaterialize(self, token, parent):
+
+
+        key = token.key
+
+        #def func(node):
+        func = lambda n: isinstance(n, SQADocumentItem) and (n.key == key)
+        replacement = anytree.search.find(token.root, filter_=func, maxlevel=2)
+
+        if replacement:
+            self.translator.renderer.process(parent, replacement)
+
+        elif token.use_default:
+            for child in token.children:
+                self.translator.renderer.process(parent, child)
+
         else:
-            return self.createErrorElement("Unable to locate markdown file {}.".format(filename))
+            err = alert.AlertToken(token.parent, brand='error',
+                                   title=u'Missing Template Item "{}"'.format(key))
 
-        # Create the table
-        ul = MooseDocs.common.MooseCollapsible()
-        for title in sorted(items.keys()):
-            ul.addHeader(title)
-            for tag_id, text in items[title]:
-                tag, desc, body = self.buildText(key, filename, tag_id, text)
-                ul.addItem(tag, desc, body)
+            filename = token.root.page.source
+            self.translator.reader.parse(err, ERROR_CONTENT.format(key, filename))
 
-        # Return the element
-        return ul.element()
+            for child in token.children:
+                child.parent = err
 
-    @staticmethod
-    def getItems(filename, key):
-        """
-        Extract the matrix items from a markdown file.
-        """
-        out = collections.defaultdict(list)
-        with open(filename) as fid:
-            for match in SQAInputTags.RE.finditer(fid.read()):
-                if key == match.group('key'):
-                    options = dict(title='')
-                    settings = MooseMarkdownCommon.getSettingsHelper(options,
-                                                                     match.group('settings'),
-                                                                     legacy_style=False)
-                    title = settings['title']
-                    for item in match.group('items').split('\n'):
-                        tag_id, text = re.split(r'\s+', item.strip(), maxsplit=1)
-                        out[title].append((tag_id, text))
-        return out
+            self.translator.renderer.process(parent, err)
 
-    def buildText(self, key, filename, tag_id, text):
-        """
-        Create the content for the collapsible body
-        """
-        if tag_id not in self._database[key]:
-            tag = '<span class="moose-sqa-error">{}</span>'.format(tag_id)
-            desc = '<span class="moose-sqa-error">{}</span>'.format(text)
-            body = desc
-        else:
-            desc = '<div class="moose-sqa-list-description">{}</div>'.format(text)
-            body = desc
-            tag = '<a href="{}">{}</a>'.format(filename, tag_id)
-            for item in self._database[key][tag_id]:
-                body += '<div class="moose-sqa-list-link"><a href="{}">{}</a></div>'.format(*item)
-        return tag, desc, body
+ERROR_CONTENT = u"""
+The document must include the \"{0}\" template item, this can be included by add adding the
+following to the markdown file ({1}):
 
-class SQAInputTagDatabase(object):
-    """
-    Storage container for SQA tagged groups (e.g., requirements).
+```
+!sqa! item key={0}
+Include text (in MooseDocs format) regarding the "{0}"
+template item here.
+!sqa-end!
+```"""
 
-    This storage is used for recall by the traceability matrix.
-    """
-    RE = re.compile(r'@(?P<key>\w+)\s+(?P<tag>.*?)(?:$|\s+)', flags=re.IGNORECASE)
+class RenderSQARequirementMatrix(core.RenderUnorderedList):
+    def createMaterialize(self, token, parent):
+        return html.Tag(parent, 'ol', class_="collection")
 
-    def __init__(self, repo):
-        self.__repo = repo
-        self.__database = collections.defaultdict(lambda: collections.defaultdict(list))
-        for base, _, files in os.walk(MooseDocs.ROOT_DIR):
-            for filename in files:
-                full_name = os.path.join(base, filename)
-                if filename.endswith('.i'):
-                    self.search(full_name)
-
-    def __getitem__(self, value):
-        """
-        Operator[] access to the top-level of the storage dict.
-        """
-        return self.__database[value]
-
-    def __contains__(self, key):
-        """
-        Keyword "in" access to the top-level of the storage dict.
-        """
-        return key in self.__database
-
-    def search(self, filename):
-        """
-        Locates @<keyword> tags within input file.
-        """
-        with open(filename) as fid:
-            for match in self.RE.finditer(fid.read()):
-                key = match.group('key').lower()
-                tag = match.group('tag')
-                local = filename.replace(MooseDocs.ROOT_DIR, '').lstrip('/')
-                remote = '{}/{}'.format(self.__repo.rstrip('/'), local)
-                self.__database[key][tag].append((remote, local))
-
-class SQAPageStatus(MooseMarkdownCommon, Pattern):
-    """
-    Creates tag that displays the pages status, which is updated from a script in init.js
-    """
-    RE = r'(?<!`)!SQA-status\s*(?P<filename>.*?)!'
-
-    @staticmethod
-    def defaultSettings():
-        settings = MooseMarkdownCommon.defaultSettings()
-        return settings
-
-    def __init__(self, markdown_instance=None, **kwargs):
-        MooseMarkdownCommon.__init__(self, **kwargs)
-        Pattern.__init__(self, self.RE, markdown_instance)
-
-    def handleMatch(self, match):
-        """
-        Return a div that will be replaced.
-        """
-        _, found = self.markdown.getFilename(match.group('filename').strip())
-        if not found:
-            return self.createErrorElement("Unable to locate filename {} in !status command." \
-                                           .format(match.group('filename')))
-        return self.createStatusElement(found, self.markdown.current)
-
-    @staticmethod
-    def createStatusElement(found, current):
-        """
-        Helper for creating status span tag.
-        """
-        el = etree.Element('span')
-        el.set('class', 'moose-page-status')
-        local = os.path.relpath(found.destination, os.path.dirname(current.destination))
-        el.set('data-filename', local)
-        return el
-
-class SQALink(MooseMarkdownCommon, Pattern):
-    """
-    Creates markdown link syntax that accept key, value pairs.
-    """
-    RE = r'(?<!`)\[(?P<text>.*?)\]\((?P<filename>.*?)(?:\s+(?P<settings>.*?))?\)'
-
-    @staticmethod
-    def defaultSettings():
-        settings = MooseMarkdownCommon.defaultSettings()
-        settings['status'] = (False, "When True status badge(s) are created that display the "
-                                     "status of the linked page.")
-        return settings
-
-    def __init__(self, markdown_instance=None, **kwargs):
-        MooseMarkdownCommon.__init__(self, **kwargs)
-        Pattern.__init__(self, self.RE, markdown_instance)
-
-    def handleMatch(self, match):
-        """
-        Return a div that will be replaced.
-        """
-        # Do nothing if settings not given
-        if not match.group('settings'):
-            return None
-
-        # Extract data
-        settings = self.getSettings(match.group('settings'))
-        filename = match.group('filename')
-        text = match.group('text')
-
-        # Create a element
-        el = etree.Element('a')
-        el.set('href', match.group('filename'))
-        if settings['status']:
-            span = etree.SubElement(el, 'span')
-            span.text = text
-            _, found = self.markdown.getFilename(filename)
-            if found:
-                el.append(SQAPageStatus.createStatusElement(found, self.markdown.current))
-        else:
-            el.text = text
-        return el
+class RenderSQARequirementMatrixItem(core.RenderListItem):
+    def createMaterialize(self, token, parent): #pylint: disable=no-self-use,unused-argument
+        return html.Tag(parent, 'li', class_="collection-item")

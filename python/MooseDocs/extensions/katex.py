@@ -1,190 +1,135 @@
 #pylint: disable=missing-docstring
-#* This file is part of the MOOSE framework
-#* https://www.mooseframework.org
-#*
-#* All rights reserved, see COPYRIGHT for full restrictions
-#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
-#*
-#* Licensed under LGPL 2.1, please see LICENSE for details
-#* https://www.gnu.org/licenses/lgpl-2.1.html
-#pylint: enable=missing-docstring
-
 import re
 import uuid
-import logging
 
-from markdown.inlinepatterns import Pattern
-from markdown.util import etree
+from MooseDocs.base import components
+from MooseDocs.common import exceptions
+from MooseDocs.tree import tokens, html, latex
+from MooseDocs.tree.base import Property
 
-from MooseMarkdownExtension import MooseMarkdownExtension
-from MooseMarkdownCommon import MooseMarkdownCommon
+def make_extension(**kwargs):
+    """Create an instance of the Extension object."""
+    return KatexExtension(**kwargs)
 
-LOG = logging.getLogger(__file__)
-
-class KatexExtension(MooseMarkdownExtension):
+class LatexBlockEquation(tokens.CountToken):
+    r"""
+    Token for LaTeX block level equations (e.g., \begin{equation} ... \end{equation}.
     """
-    Adds KaTeX support for MooseDocs markdown.
+    PROPERTIES = [Property('tex', required=True, ptype=str)]
+
+class LatexInlineEquation(LatexBlockEquation):
+    """Token for inline equations."""
+    pass
+
+class KatexExtension(components.Extension):
+    """
+    Extension object for parsing and rendering LaTeX equations with KaTeX.
     """
     @staticmethod
     def defaultConfig():
-        config = MooseMarkdownExtension.defaultConfig()
+        config = components.Extension.defaultConfig()
+        config['prefix'] = ('Eq.', r"The prefix to used when referring to an equation by " \
+                                   r"the \\label content.")
         return config
 
-    def extendMarkdown(self, md, md_globals):
+    def extend(self, reader, renderer):
         """
-        Add support for KaTeX math.
+        Add the necessary components for reading and rendering LaTeX.
         """
-        md.registerExtension(self)
-        config = self.getConfigs()
+        reader.addInline(KatexBlockEquationComponent(), location='_begin')
+        reader.addInline(KatexInlineEquationComponent(), location='_begin')
 
-        md.inlinePatterns.add('katex-inline',
-                              KatexInline(markdown_instance=md, **config),
-                              '>backtick')
+        renderer.add(LatexBlockEquation, RenderLatexEquation())
+        renderer.add(LatexInlineEquation, RenderLatexEquation())
 
-        md.inlinePatterns.add('katex-equation',
-                              KatexEquation(markdown_instance=md, **config),
-                              '_begin')
-
-        md.inlinePatterns.add('katex-star-equation',
-                              KatexStarEquation(markdown_instance=md, **config),
-                              '_begin')
-
-        md.inlinePatterns.add('katex-double-dollar-equation',
-                              KatexDoubleDollarEquation(markdown_instance=md, **config),
-                              '_begin')
-
-def makeExtension(*args, **kwargs): #pylint: disable=invalid-name
-    """Create KatexExtension"""
-    return KatexExtension(*args, **kwargs)
-
-class KatexBase(MooseMarkdownCommon, Pattern):
+class KatexBlockEquationComponent(components.TokenComponent):
     """
-    Base class for Pattern extensions.
+    Component for reading LaTeX block equations.
     """
-    RE = None
-    DISPLAY_MODE = 'true'
+    RE = re.compile(r'^\\begin{(?P<cmd>equation\*{0,1})}' # start equation block
+                    r'(?P<equation>.*?)'                  # tex equation
+                    r'^\\end{(?P=cmd)}',                  # end equation block
+                    flags=re.DOTALL|re.MULTILINE|re.UNICODE)
+    LABEL_RE = re.compile(r'\\label{(?P<id>.*?)}', flags=re.UNICODE)
 
-    @staticmethod
-    def defaultSettings():
-        settings = MooseMarkdownCommon.defaultSettings()
-        return settings
+    def createToken(self, info, parent):
+        """Create a LatexBlockEquation token."""
 
-    def __init__(self, markdown_instance=None, **kwargs):
-        MooseMarkdownCommon.__init__(self, **kwargs)
-        Pattern.__init__(self, self.RE, markdown_instance)
+        # Raw LaTeX appropriate for passing to KaTeX render method
+        tex = r'{}'.format(info['equation']).strip('\n').replace('\n', ' ').encode('string-escape')
 
-    def equationID(self, tex): #pylint: disable=unused-argument, no-self-use
-        """
-        Return the equation id.
-        """
-        return 'moose-katex-equation-{}'.format(uuid.uuid4()), tex
+        # Define a unique equation ID for use by KaTeX
+        eq_id = 'moose-equation-{}'.format(uuid.uuid4())
 
-    def equationDiv(self, eq_id): #pylint: disable=unused-argument
-        """
-        Return the div object where the equation will be displayed.
-        """
-        raise NotImplementedError("The equationDiv method is abstract and must be overridden.")
+        # Build the token
+        is_numbered = not info['cmd'].endswith('*')
+        prefix = unicode(self.extension.get('prefix')) if is_numbered else None
+        token = LatexBlockEquation(parent, tex=tex, prefix=prefix, id_=eq_id)
 
-    def handleMatch(self, match):
-        """
-        Create KaTeX code.
-        """
-        try:
-            tex = r'{}'.format(match.group('tex')).replace('\n', ' ').encode('string-escape')
-        except UnicodeEncodeError:
-            msg = "Unable to escape latex in {}.".format(self.markdown.current.filename)
-            return self.createErrorElement(msg)
+        # Add a label
+        label = self.LABEL_RE.search(info['equation'])
+        if label and not is_numbered:
+            msg = "TeX non-numbered equations (e.g., equations*) may not include a \\label, since" \
+                  "it will not be possible to refer to the equation."
+            raise exceptions.TokenizeException(msg)
 
-        eq_id, tex = self.equationID(tex)
-        tag = self.equationDiv(eq_id)
-        self.buildScript(tag, eq_id, tex)
-        return tag
+        elif label:
+            token.tex = token.tex.replace(label.group().encode('ascii'), '') #pylint: disable=attribute-defined-outside-init
+            tokens.Shortcut(parent.root, key=label.group('id'),
+                            link=u'#{}'.format(eq_id),
+                            content=u'{} {}'.format(prefix, token.number))
 
-    def buildScript(self, parent, eq_id, tex):
-        """
-        Create the KaTeX script element.
-        """
-        script = etree.SubElement(parent, 'script')
-        text = 'var element = document.getElementById("{}");'.format(eq_id)
-        text += 'try{katex.render("%s", element, {displayMode:%s});}' % (tex, self.DISPLAY_MODE)
-        text += 'catch (exception){'
-        text += 'console.log("KaTeX render failed: {}");'.format(tex)
-        text += 'var err=document.createElement("span");'
-        text += 'err.setAttribute("class", "moose-katex-error");'
-        text += 'err.textContent = "LaTeX Error: {}";'.format(tex)
-        text += 'element.appendChild(err);'
-        text += '}'
-        script.text = self.markdown.htmlStash.store(text)
+        return parent
 
-class KatexInline(KatexBase):
-    """
-    Inline math support with KaTex.
-    """
-    RE = r'\$(?P<tex>.*?)\$'
-    DISPLAY_MODE = 'false'
+class KatexInlineEquationComponent(components.TokenComponent):
+    RE = re.compile(r'(?P<token>\$)(?=\S)(?P<equation>.*?)(?<=\S)(?:\1)',
+                    flags=re.MULTILINE|re.DOTALL|re.DOTALL)
 
-    def equationDiv(self, eq_id):
-        span = etree.Element('span')
-        span.set('class', 'moose-katex-inline')
-        span.set('id', eq_id)
-        return span
+    def createToken(self, info, parent):
+        """Create LatexInlineEquation"""
 
-class KatexEquation(KatexBase):
-    """
-    Block math support with KaTeX.
-    """
-    RE = r'\\begin{equation}(?P<tex>.*?)\\end{equation}'
+        # Raw LaTeX appropriate for passing to KaTeX render method
+        tex = r'{}'.format(info['equation']).strip('\n').replace('\n', ' ').encode('string-escape')
 
-    def equationID(self, tex):
-        """
-        Determine the equation ID.
-        """
+        # Define a unique equation ID for use by KaTeX
+        eq_id = 'moose-equation-{}'.format(uuid.uuid4())
 
-        self.markdown.EQUATION_COUNT += 1
-        label = re.search(r'\\\\label{(?P<label>.*?)}', tex)
-        if label:
-            eq_id = 'moose-katex-equation-{}'.format(label.group('label')).replace(':', '-')
-            tex = tex[:label.start()] + tex[label.end():] # KaTeX can't parse the \label
+        # Create token
+        LatexInlineEquation(parent, tex=tex, id_=eq_id)
+        return parent
+
+class RenderLatexEquation(components.RenderComponent):
+    """Render LatexBlockEquation and LatexInlineEquation tokens"""
+    def createHTML(self, token, parent): #pylint: disable=no-self-use
+
+        if isinstance(token, LatexInlineEquation):
+            div = html.Tag(parent, 'span', class_='moose-katex-inline-equation', **token.attributes)
+            display = 'false'
+
         else:
-            eq_id = 'moose-katex-equation-{}'.format(self.markdown.EQUATION_COUNT)
+            # Wrap all equation related items in an outer div
+            div = html.Tag(parent, 'span', class_='moose-katex-block-equation')
+            display = 'true'
 
-        return eq_id, tex
+            # Create equation content and number (if it is valid)
+            html.Tag(div, 'span', class_='moose-katex-equation table-cell', **token.attributes)
+            if token.number is not None:
+                num = html.Tag(div, 'span', class_='moose-katex-equation-number')
+                html.String(num, content=u'({})'.format(token.number))
 
-    def equationDiv(self, eq_id):
-        """
-        Create tags for numbered equations.
-        """
-        div = etree.Element('div')
-        div.set('class', 'moose-katex-block')
+        # Build the KaTeX script
+        script = html.Tag(div, 'script')
+        content = u'var element = document.getElementById("%s");' % token['id']
+        content += u'katex.render("%s", element, {displayMode:%s,throwOnError:false});' % \
+                   (token.tex, display)
+        html.String(script, content=content)
 
-        eqn = etree.SubElement(div, 'div')
-        eqn.set('class', 'moose-katex-equation')
-        eqn.set('id', eq_id)
-        eqn.set('data-moose-katex-equation-number', str(self.markdown.EQUATION_COUNT))
+        return parent
 
-        num = etree.SubElement(div, 'div')
-        num.set('class', 'moose-katex-block-number')
-        num.text = '({})'.format(self.markdown.EQUATION_COUNT)
-
-        return div
-
-class KatexStarEquation(KatexBase):
-    """
-    Block math support with KaTeX.
-    """
-    RE = r'\\begin{equation\*}(?P<tex>.*?)\\end{equation\*}'
-
-    def equationDiv(self, eq_id):
-        """
-        Create equation container tag.
-        """
-        eqn = etree.Element('div')
-        eqn.set('class', 'moose-katex-equation')
-        eqn.set('id', eq_id)
-        return eqn
-
-class KatexDoubleDollarEquation(KatexStarEquation):
-    """
-    Block math support with KaTex.
-    """
-    RE = r'\$\$(?P<tex>.*?)\$\$'
+    def createLatex(self, token, parent): #pylint: disable=no-self-use
+        if isinstance(token, LatexInlineEquation):
+            latex.String(parent, content=u'${}$'.format(token.tex))
+        else:
+            cmd = 'equation' if token.number else 'equation*'
+            latex.Environment(parent, cmd, string=unicode(token.tex))
+        return parent

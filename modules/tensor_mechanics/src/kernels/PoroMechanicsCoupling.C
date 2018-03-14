@@ -19,10 +19,9 @@ InputParameters
 validParams<PoroMechanicsCoupling>()
 {
   InputParameters params = validParams<Kernel>();
-  params.addClassDescription("Adds -BiotCoefficient*porepressure*grad_test[component]");
-  params.addRequiredCoupledVar(
-      "porepressure",
-      "Porepressure.  This kernel adds -BiotCoefficient*porepressure*grad_test[component]");
+  params.addClassDescription(
+      "Adds $-Bi \\cdot p_s \\cdot \\nabla \\Psi_c$, where the subscript $c$ is the component.");
+  params.addRequiredCoupledVar("porepressure", "Porepressure, $p_s$.");
   params.addRequiredParam<unsigned int>("component",
                                         "The gradient direction (0 for x, 1 for y and 2 for z)");
   return params;

@@ -34,7 +34,7 @@ include            $(FRAMEWORK_DIR)/app.mk
 
 # This target will build the individual executables in each module
 # and run their respective tests.
-MODULE_DIRS    := $(shell find $(MOOSE_DIR)/modules -maxdepth 1 -mindepth 1 -type d -not -name doc)
+MODULE_DIRS    := $(shell find $(MOOSE_DIR)/modules -maxdepth 1 -mindepth 1 -type d -not -name doc -not -name module_loader)
 MOOSE_COLOR        ?= true
 ifneq ($(MOOSE_COLOR),true)
   COLOR_STRING = '--no-color'
@@ -57,5 +57,20 @@ test_subs: all builds
 	do \
 		echo ====== Testing in $${app} ====== ; \
 		cd $${app} && ./run_tests $(COLOR_STRING) -j $(MOOSE_JOBS) $(MOOSE_LOAD) -t || ret_val=1; \
+	done; \
+	exit $$ret_val;)
+
+MOOSE_DOCS_DIR ?= $(MOOSE_DIR)/site
+test_doc: all builds
+	@echo ======================================================
+	@echo Testing MooseDocs for the following modules:
+	@for app in $(MODULE_DIRS); do echo \ $$app; done
+	@echo ======================================================
+	@echo
+	@(ret_val=0; \
+	for app in $(MODULE_DIRS); \
+	do \
+		echo ====== Testing MooseDocs in $${app} ====== ; \
+		cd $${app}/doc && ./moosedocs.py check && ./moosedocs.py build --destination=$(MOOSE_DOCS_DIR) || ret_val=1; \
 	done; \
 	exit $$ret_val;)

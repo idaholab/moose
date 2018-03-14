@@ -1,0 +1,24 @@
+Content:
+    - framework/doc/content
+    - modules/contact/doc/content
+
+Renderer:
+    type: MooseDocs.base.MaterializeRenderer
+    name: MOOSE Contact Module
+    repo: https://github.com/idaholab/moose
+    home: /documentation/modules/contact
+
+Extensions:
+    appsyntax:
+        type: MooseDocs.extensions.appsyntax
+        executable: ${MOOSE_DIR}/modules/contact
+        hide:
+            framework: !include framework/doc/hidden.yml
+            contact: !include modules/contact/doc/hidden.yml
+        remove: !include framework/doc/remove.yml
+        includes:
+            - framework/include
+            - modules/contact/include
+    globals:
+        type: MooseDocs.extensions.panoptic
+        shortcuts: !include framework/doc/globals.yml

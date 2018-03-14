@@ -1,6 +1,0 @@
-[Tests]
-  [./basic]
-    type = PythonUnitTest
-    input = test_misc.py
-  [../]
-[]

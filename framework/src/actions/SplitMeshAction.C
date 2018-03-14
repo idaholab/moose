@@ -29,8 +29,9 @@ void
 SplitMeshAction::act()
 {
   auto mesh = _app.actionWarehouse().mesh();
+  auto split_file_arg = _app.parameters().get<std::string>("split_file");
 
-  if (mesh->getFileName() == "" && _app.parameters().get<std::string>("split_file") == "")
+  if (mesh->getFileName() == "" && split_file_arg == "")
     mooseError("Output mesh file name must be specified (with --split-file) when splitting "
                "non-file-based meshes");
 
@@ -40,19 +41,54 @@ SplitMeshAction::act()
   if (!success)
     mooseError("invalid argument for --split-mesh: '", splitstr, "'");
 
+  // Decide whether to create ASCII or binary splits based on the split_file_arg. We use the
+  // following rules to decide:
+  // 1.) No file extension -> binary
+  // 2.) .cpr file extension -> binary
+  // 3.) .cpa file extension -> ASCII
+  // 4.) Any other file extension -> mooseError
+
+  // Get the file extension without the dot.
+  // TODO: Maybe this should be in MooseUtils?
+  std::string split_file_arg_ext;
+  auto pos = split_file_arg.rfind(".");
+  if (pos != std::string::npos)
+    split_file_arg_ext = split_file_arg.substr(pos + 1, std::string::npos);
+
+  // If stripExtension() returns the original string, then there is no
+  // file extension or the original string was empty.
+  bool checkpoint_binary_flag = true;
+
+  if (split_file_arg_ext != "")
+  {
+    if (split_file_arg_ext == "cpr")
+      checkpoint_binary_flag = true;
+    else if (split_file_arg_ext == "cpa")
+      checkpoint_binary_flag = false;
+    else
+      mooseError("The argument to --split-file, ",
+                 split_file_arg,
+                 ", must not end in a file extension other than .cpr or .cpa");
+  }
+
   for (std::size_t i = 0; i < splits.size(); i++)
   {
     processor_id_type n = splits[i];
     Moose::out << "Splitting " << n << " ways..." << std::endl;
 
-    auto cpr = libMesh::split_mesh(*mesh, n);
-    Moose::out << "    - writing " << cpr->current_processor_ids().size() << " files per process..."
+    auto cp = libMesh::split_mesh(*mesh, n);
+    Moose::out << "    - writing " << cp->current_processor_ids().size() << " files per process..."
                << std::endl;
-    cpr->binary() = true;
+    cp->binary() = checkpoint_binary_flag;
+
+    // To name the split files, we start with the given mesh filename
+    // (if set) or the argument to --split-file, strip any existing
+    // extension, and then append either .cpr or .cpa depending on the
+    // checkpoint_binary_flag.
     auto fname = mesh->getFileName();
     if (fname == "")
-      fname = _app.parameters().get<std::string>("split_file");
-    fname = MooseUtils::stripExtension(fname) + ".cpr";
-    cpr->write(fname);
+      fname = split_file_arg;
+    fname = MooseUtils::stripExtension(fname) + (checkpoint_binary_flag ? ".cpr" : ".cpa");
+    cp->write(fname);
   }
 }

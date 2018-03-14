@@ -12,7 +12,7 @@ import os
 import re
 import collections
 import math
-import errno
+import difflib
 import multiprocessing
 
 def colorText(string, color, **kwargs):
@@ -33,7 +33,22 @@ def colorText(string, color, **kwargs):
     colored = kwargs.pop('colored', True)
 
     # ANSI color codes for colored terminal output
-    color_codes = dict(RESET='\033[0m', BOLD='\033[1m',RED='\033[31m', MAGENTA='\033[32m', YELLOW='\033[33m', BLUE='\033[34m', GREEN='\033[35m', CYAN='\033[36m', GREY='\033[90m')
+    color_codes = dict(RESET='\033[0m',
+                       BOLD='\033[1m',
+                       RED='\033[31m',
+                       GREEN='\033[32m',
+                       YELLOW='\033[33m',
+                       BLUE='\033[34m',
+                       MAGENTA='\033[35m',
+                       CYAN='\033[36m',
+                       GREY='\033[90m',
+                       LIGHT_RED='\033[91m',
+                       LIGHT_GREEN='\033[92m',
+                       LIGHT_YELLOW='\033[93m',
+                       LIGHT_BLUE='\033[94m',
+                       LIGHT_MAGENTA='\033[95m',
+                       LIGHT_CYAN='\033[96m',
+                       LIGHT_GREY='\033[37m')
     if code:
         color_codes['GREEN'] = '\033[32m'
         color_codes['CYAN']  = '\033[36m'
@@ -76,6 +91,7 @@ def find_moose_executable(loc, **kwargs):
     Kwargs:
         methods[list]: (Default: ['opt', 'oprof', 'dbg', 'devel']) The list of build types to consider.
         name[str]: (Default: opt.path.basename(loc)) The name of the executable to locate.
+        show_error[bool]: (Default: True) Display error messages.
     """
 
     # Set the methods and name local variables
@@ -85,6 +101,7 @@ def find_moose_executable(loc, **kwargs):
         methods = ['opt', 'oprof', 'dbg', 'devel']
     methods = kwargs.pop('methods', methods)
     name = kwargs.pop('name', os.path.basename(loc))
+    show_error = kwargs.pop('show_error', True)
 
     # Handle 'combined' and 'tests'
     if os.path.isdir(loc):
@@ -92,21 +109,23 @@ def find_moose_executable(loc, **kwargs):
             name = 'moose_test'
 
     # Check that the location exists and that it is a directory
+    exe = None
     loc = os.path.abspath(loc)
     if not os.path.isdir(loc):
-        print('ERROR: The supplied path must be a valid directory:', loc)
-        return errno.ENOTDIR
+        if show_error:
+            print('ERROR: The supplied path must be a valid directory:', loc)
 
     # Search for executable with the given name
-    exe = errno.ENOENT
-    for method in methods:
-        exe = os.path.join(loc, name + '-' + method)
-        if os.path.isfile(exe):
+    else:
+        for method in methods:
+            exe_name = os.path.join(loc, name + '-' + method)
+            if os.path.isfile(exe_name):
+                exe = exe_name
             break
 
     # Returns the executable or error code
-    if not errno.ENOENT:
-        print('ERROR: Unable to locate a valid MOOSE executable in directory')
+    if (exe is None) and show_error:
+        print('ERROR: Unable to locate a valid MOOSE executable in directory:', loc)
     return exe
 
 def runExe(app_path, args):
@@ -241,3 +260,25 @@ def camel_to_space(text):
         index = match.start(0)
     out.append(text[index:])
     return ' '.join(out)
+
+def text_diff(text, gold):
+    """
+    Helper for creating nicely formatted text diff message.
+
+    Inputs:
+        text[list|str]: A list of strings or single string to compare.
+        gold[list|str]: The "gold" standard to which the first arguments is to be compared against.
+    """
+
+    # Convert to line
+    if isinstance(text, (str, unicode)):
+        text = text.splitlines(True)
+    if isinstance(gold, (str, unicode)):
+        gold = gold.splitlines(True)
+
+    # Perform diff
+    result = list(difflib.ndiff(gold, text))
+    n = len(max(result, key=len))
+    msg = "\nThe supplied text differs from the gold as follows:\n{0}\n{1}\n{0}" \
+         .format('~'*n, '\n'.join(result).encode('utf-8'))
+    return msg

@@ -381,6 +381,11 @@ public:
   bool isParamSetByAddParam(const std::string & name) const;
 
   /**
+   * Returns True if the parameters is deprecated.
+   */
+  bool isParamDeprecated(const std::string & name) const;
+
+  /**
    * This method returns true if all of the parameters in this object are valid
    * (i.e. isParamValid(name) == true - for all parameters)
    */

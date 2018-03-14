@@ -25,3 +25,12 @@ include            $(FRAMEWORK_DIR)/app.mk
 
 ###############################################################################
 # Additional special case targets should be added here
+
+MOOSE_DOCS_DIR ?= $(MOOSE_DIR)/site
+test_doc: all
+	@echo ======================================================
+	@echo Testing MooseDocs for the framework and MooseTestApp
+	@echo ======================================================
+	@(ret_val=0; \
+	cd doc && ./moosedocs.py check && ./moosedocs.py build --destination=$(MOOSE_DOCS_DIR) || ret_val=1; \
+	exit $$ret_val;)

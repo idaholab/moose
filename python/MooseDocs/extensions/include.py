@@ -1,115 +1,52 @@
 #pylint: disable=missing-docstring
-#* This file is part of the MOOSE framework
-#* https://www.mooseframework.org
-#*
-#* All rights reserved, see COPYRIGHT for full restrictions
-#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
-#*
-#* Licensed under LGPL 2.1, please see LICENSE for details
-#* https://www.gnu.org/licenses/lgpl-2.1.html
-#pylint: enable=missing-docstring
-
 import re
+from MooseDocs import common
+from MooseDocs.common import exceptions
+from MooseDocs.extensions import command
 
-from markdown.preprocessors import Preprocessor
-from markdown.util import etree
+assert re
 
-from MooseMarkdownExtension import MooseMarkdownExtension
-from MooseMarkdownCommon import MooseMarkdownCommon
-from listings import ListingPattern
+def make_extension(**kwargs):
+    return IncludeExtension(**kwargs)
 
-class IncludeExtension(MooseMarkdownExtension):
-    """
-    Extension for recursive including of partial or complete markdown files.
-    """
-    @staticmethod
-    def defaultConfig():
-        """Default IncludeExtension configuration options."""
-        config = MooseMarkdownExtension.defaultConfig()
-        return config
+class IncludeExtension(command.CommandExtension):
+    """Enables the !include command for including files in other files."""
 
-    def extendMarkdown(self, md, md_globals):
-        """
-        Adds include support for MOOSE flavored markdown.
-        """
-        md.registerExtension(self)
-        config = self.getConfigs()
-        md.preprocessors.add('moose-markdown-include',
-                             MarkdownPreprocessor(markdown_instance=md, **config), '_begin')
+    def extend(self, reader, renderer):
+        self.requires(command)
+        self.addCommand(IncludeCommand())
 
-def makeExtension(*args, **kwargs): #pylint: disable=invalid-name
-    """Create IncludeExtension"""
-    return IncludeExtension(*args, **kwargs)
-
-class MarkdownPreprocessor(MooseMarkdownCommon, Preprocessor):
-    """
-    An recursive include command for including a markdown file from within another. This adds the
-    ability to specify start/end string to include only portions for the markdown.
-    """
-    REGEX = r'(?<!^```\n)^!include\s+(.*?)(?:$|\s+)(.*)'
+class IncludeCommand(command.CommandComponent):
+    COMMAND = 'include'
+    SUBCOMMAND = 'md' #TODO: get this from the reader inside the __init__ method.
 
     @staticmethod
     def defaultSettings():
-        """Settigns for MarkdownPreprocessor"""
-        settings = MooseMarkdownCommon.defaultSettings()
-        l_settings = ListingPattern.defaultSettings()
-        settings['re'] = (None, "Python regular expression to use for removing text, with flags " \
-                                "set to MULTILINE|DOTALL. If a 'markdown' group is set, only the" \
-                                "text in that group will be included.")
-        settings['start'] = l_settings['start']
-        settings['end'] = l_settings['end']
-        settings['include-end'] = l_settings['include-end']
-        settings['include-start'] = l_settings['include-start']
+        settings = command.CommandComponent.defaultSettings()
+        settings['re'] = (None, "Extract content via a regex, if the 'content' group exists it " \
+                                 "is used as the desired content, otherwise group zero is used.")
+        settings['re-flags'] = ('re.M|re.S|re.U', "Regular expression flags commands pass to the " \
+                                                  "Python re module.")
         return settings
 
-    def __init__(self, markdown_instance=None, **kwargs):
-        super(MarkdownPreprocessor, self).__init__(markdown_instance=markdown_instance, **kwargs)
-        self.markdown = markdown_instance
-        self._found = False
-
-    def replace(self, match):
+    def createToken(self, info, parent):
         """
-        Substitution function for the re.sub function.
+        NOTICE:
+        Ideally, this method would create a connection between the two pages so that when you
+        update the included page the livereload would run the including page. This doesn't work
+        because of the multiprocessing, which would be making a connection between object that
+        are on copies working on other processes from those that the livereload is watching.
+
+        TODO: A possible fix would be to just hack in a regex for !include into the livereload
+              watcher object itself, just need to implement it.
         """
-        filename, _ = self.getFilename(match.group(1))
-        if not filename:
-            msg = "Failed to located filename in following command in file {}.\n    {}"
-            el = self.createErrorElement(msg.format(self.markdown.current.filename, match.group(0)),
-                                         title="Unknown Markdown File")
-            return etree.tostring(el)
 
-        settings = self.getSettings(match.group(2))
-        if settings['start'] or settings['end']:
-            content = ListingPattern.extractLineRange(filename, settings['start'],
-                                                      settings['end'], settings['include-start'],
-                                                      settings['include-end'])
-        else:
-            with open(filename, 'r') as fid:
-                content = fid.read()
+        master_page = self.translator.current
+        include_page = master_page.findall(info['subcommand'], exc=exceptions.TokenizeException)[0]
 
-        if settings['re']:
-            match = re.search(settings['re'], content, flags=re.MULTILINE|re.DOTALL)
-            if not match:
-                msg = "Failed to located regex in following command.\n{}"
-                el = self.createErrorElement(msg.format(settings['re']), title="Failed Regex")
-                return etree.tostring(el)
-            if 'markdown' in match.groupdict():
-                content = match.group('markdown')
-            else:
-                content = match.group(0)
+        content = common.read(include_page.source) #TODO: copy existing tokens when not using re
+        if self.settings['re']:
+            content = common.regex(self.settings['re'], content, eval(self.settings['re-flags']))
 
-        self._found = True
-        return content
-
-    def run(self, lines):
-        """
-        Recursive markdown replacement.
-        """
-        content = '\n'.join(lines)
-        match = True
-        while match:
-            self._found = False
-            content = re.sub(self.REGEX, self.replace, content, flags=re.MULTILINE)
-            if not self._found:
-                break
-        return content.splitlines()
+        self.translator.reader.parse(parent, content)
+        return parent

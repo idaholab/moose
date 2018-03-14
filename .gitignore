@@ -126,8 +126,7 @@ framework/contrib/exodiff/exodiff
 .DS_Store
 *.dSYM
 
-# Unit testing stuff
-moose_unit/test_results.xml
+# Unit testing stuffbmoose_unit/test_results.xml
 !unit/data/csv/*.csv
 
 # gcov code coverage files
@@ -173,23 +172,27 @@ out.xyz
 # JIT and automatic differentiation cache files
 .jitcache/
 .jitdir/
+tmp_jit_*
 
 # Do not store ipython notebook checkpoints
 *-checkpoint.ipynb*
 
 # MooseDocs
 site
-*.moose.md
-*.moose.yml
-*.moose.svg
-tmp_*.dot
-docs/.moosedocs
-docs/examples/*.tex
-!docs/index.html
-!docs/templates/**/*.html
-!docs/content/media/**/*.png
-!docs/content/media/**/*.gif
-!python/MooseDocs/tests/**/gold/*.html
+!**/doc/content/**/*.md
+!**/doc/content/**/*.jpg
+!**/doc/content/**/*.jpeg
+!**/doc/content/**/*.gif
+!**/doc/content/**/*.png
+!**/doc/content/**/*.svg
+!**/doc/content/**/*.ogg
+!**/doc/content/**/*.webm
+!**/doc/content/**/*.mp4
+!**/doc/content/**/*.css
+!**/doc/content/**/*.js
+!**/doc/content/**/*.bib
+!**/doc/content/**/*.woff
+!**/doc/content/**/*.woff2
 
 # Chigger
 !python/chigger/tests/**/gold/*.png

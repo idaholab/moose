@@ -1,56 +1,62 @@
 [Tests]
   [./test_2]
+    # To generate the splits for this test, run
+    # moose_test-opt -i checkpoint_split.i --split-mesh 2 --split-file checkpoint_split_in
     type = 'Exodiff'
     input = 'checkpoint_split.i'
     exodiff = 'test_2.e'
-    cli_args = 'Outputs/file_base=test_2  Mesh/file=checkpoint_split_in.2.cpr'
-    max_parallel = 2  # workaround until libMesh/libmesh#1408
-    min_parallel = 2  # workaround until libMesh/libmesh#1409
-    skip = 'Requires libMesh/libmesh#1409'
+    cli_args = 'Outputs/file_base=test_2 --use-split --split-file checkpoint_split_in'
+    max_parallel = 2
+    min_parallel = 2
   [../]
   [./test_2a]
+    # To generate the splits for this test, run
+    # moose_test-opt -i checkpoint_split.i --split-mesh 2 --split-file checkpoint_split_in.cpa
     type = 'Exodiff'
     input = 'checkpoint_split.i'
     exodiff = 'test_2a.e'
-    cli_args = 'Outputs/file_base=test_2a Mesh/file=checkpoint_split_in.2.cpa'
-    max_parallel = 2  # workaround until libMesh/libmesh#1408
-    min_parallel = 2  # workaround until libMesh/libmesh#1409
-    skip = 'Requires libMesh/libmesh#1409'
+    cli_args = 'Outputs/file_base=test_2a --use-split --split-file checkpoint_split_in.cpa'
+    max_parallel = 2
+    min_parallel = 2
   [../]
   [./test_4]
+    # To generate the splits for this test, run
+    # moose_test-opt -i checkpoint_split.i --split-mesh 4 --split-file checkpoint_split_in
     type = 'Exodiff'
     input = 'checkpoint_split.i'
     exodiff = 'test_4.e'
-    cli_args = 'Outputs/file_base=test_4  Mesh/file=checkpoint_split_in.4.cpr'
-    max_parallel = 4  # workaround until libMesh/libmesh#1408
-    min_parallel = 4  # workaround until libMesh/libmesh#1409
-    skip = 'Requires libMesh/libmesh#1409'
+    cli_args = 'Outputs/file_base=test_4 --use-split --split-file checkpoint_split_in'
+    max_parallel = 4
+    min_parallel = 4
   [../]
   [./test_4a]
+    # To generate the splits for this test, run
+    # moose_test-opt -i checkpoint_split.i --split-mesh 4 --split-file checkpoint_split_in.cpa
     type = 'Exodiff'
     input = 'checkpoint_split.i'
     exodiff = 'test_4a.e'
-    cli_args = 'Outputs/file_base=test_4a Mesh/file=checkpoint_split_in.4.cpa'
-    max_parallel = 4  # workaround until libMesh/libmesh#1408
-    min_parallel = 4  # workaround until libMesh/libmesh#1409
-    skip = 'Requires libMesh/libmesh#1409'
+    cli_args = 'Outputs/file_base=test_4a --use-split --split-file checkpoint_split_in.cpa'
+    max_parallel = 4
+    min_parallel = 4
   [../]
   [./test_8]
+    # To generate the splits for this test, run
+    # moose_test-opt -i checkpoint_split.i --split-mesh 8 --split-file checkpoint_split_in
     type = 'Exodiff'
     input = 'checkpoint_split.i'
     exodiff = 'test_8.e'
-    cli_args = 'Outputs/file_base=test_8  Mesh/file=checkpoint_split_in.8.cpr'
-    max_parallel = 8  # workaround until libMesh/libmesh#1408
-    min_parallel = 8  # workaround until libMesh/libmesh#1409
-    skip = 'Requires libMesh/libmesh#1409'
+    cli_args = 'Outputs/file_base=test_8 --use-split --split-file checkpoint_split_in'
+    max_parallel = 8
+    min_parallel = 8
   [../]
   [./test_8a]
+    # To generate the splits for this test, run
+    # moose_test-opt -i checkpoint_split.i --split-mesh 8 --split-file checkpoint_split_in.cpa
     type = 'Exodiff'
     input = 'checkpoint_split.i'
     exodiff = 'test_8a.e'
-    cli_args = 'Outputs/file_base=test_8a Mesh/file=checkpoint_split_in.8.cpa'
-    max_parallel = 8  # workaround until libMesh/libmesh#1408
-    min_parallel = 8  # workaround until libMesh/libmesh#1409
-    skip = 'Requires libMesh/libmesh#1409'
+    cli_args = 'Outputs/file_base=test_8a --use-split --split-file checkpoint_split_in.cpa'
+    max_parallel = 8
+    min_parallel = 8
   [../]
 []
