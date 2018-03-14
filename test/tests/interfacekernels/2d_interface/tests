@@ -22,7 +22,7 @@
     min_parallel = 2
     input = 'coupled_value_coupled_flux.i'
     cli_args = 'Preconditioning/smp/type=FDP'
-    design = 'Preconditioning/framework/FDP.md'
+    design = 'Preconditioning/FDP.md'
     issues = '#10375'
     requirement = 'The finite difference preconditioner shall work in parallel'
     allow_warnings = true

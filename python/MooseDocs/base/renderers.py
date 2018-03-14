@@ -158,7 +158,6 @@ class MaterializeRenderer(HTMLRenderer):
         """
         Return the default configuration.
         """
-        #config['scrollspy'] = (True, "Toggle the use of the right scrollable navigation.")
         config = HTMLRenderer.defaultConfig()
         config['breadcrumbs'] = (True, "Toggle for the breadcrumb links at the top of page.")
         config['sections'] = (True, "Group heading content into <section> tags.")
@@ -264,22 +263,29 @@ class MaterializeRenderer(HTMLRenderer):
             root_page[page.PageNodeBase]: The current page being converted.
         """
 
-        html.Tag(head, 'meta', close=False, charset="UTF-8")
-        html.Tag(head, 'link', href="/contrib/materialize/materialize.min.css", type="text/css",
-                 rel="stylesheet", media="screen,projection")
-        html.Tag(head, 'link', href="/contrib/katex/katex.min.css", type="text/css",
-                 rel="stylesheet")
-        html.Tag(head, 'link', href="/css/moose.css", type="text/css", rel="stylesheet")
-        html.Tag(head, 'link', href="/contrib/prism/prism.min.css", type="text/css",
-                 rel="stylesheet")
-        html.Tag(head, 'script', type="text/javascript", src="/contrib/jquery/jquery.min.js")
-        html.Tag(head, 'script', type="text/javascript",
-                 src="/contrib/materialize/materialize.min.js")
+        def rel(path):
+            """Helper to create relative paths for js/css dependencies."""
+            if self.translator.current:
+                return os.path.relpath(path, os.path.dirname(self.translator.current.local))
+            return '/' + path
 
-        html.Tag(head, 'script', type="text/javascript", src="/contrib/clipboard/clipboard.min.js")
-        html.Tag(head, 'script', type="text/javascript", src="/contrib/prism/prism.min.js")
-        html.Tag(head, 'script', type="text/javascript", src="/contrib/katex/katex.min.js")
-        html.Tag(head, 'script', type="text/javascript", src="/js/init.js")
+        html.Tag(head, 'meta', close=False, charset="UTF-8")
+        html.Tag(head, 'link', href=rel("contrib/materialize/materialize.min.css"), type="text/css",
+                 rel="stylesheet", media="screen,projection")
+        html.Tag(head, 'link', href=rel("contrib/katex/katex.min.css"), type="text/css",
+                 rel="stylesheet")
+        html.Tag(head, 'link', href=rel("css/moose.css"), type="text/css", rel="stylesheet")
+        html.Tag(head, 'link', href=rel("contrib/prism/prism.min.css"), type="text/css",
+                 rel="stylesheet")
+        html.Tag(head, 'script', type="text/javascript", src=rel("contrib/jquery/jquery.min.js"))
+        html.Tag(head, 'script', type="text/javascript",
+                 src=rel("contrib/materialize/materialize.min.js"))
+
+        html.Tag(head, 'script', type="text/javascript",
+                 src=rel("contrib/clipboard/clipboard.min.js"))
+        html.Tag(head, 'script', type="text/javascript", src=rel("contrib/prism/prism.min.js"))
+        html.Tag(head, 'script', type="text/javascript", src=rel("contrib/katex/katex.min.js"))
+        html.Tag(head, 'script', type="text/javascript", src=rel("js/init.js"))
 
     def addContents(self, toc, content, root_page): #pylint: disable=unused-argument,no-self-use
         """
