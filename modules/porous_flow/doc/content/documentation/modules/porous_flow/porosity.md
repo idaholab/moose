@@ -1,4 +1,4 @@
-#Porosity
+# Porosity
 
 Porosity may be fixed at a constant value, or it may be a function of the
 effective porepressure, the volumetric strain, the temperature and/or chemical precipitates
@@ -26,14 +26,15 @@ porosity can depend on:
 A combination of these may be used, to simulate, for instance, THM or HM coupling.
 
 ## Evolution of porosity
-The evolution of the porosity is governed by \citep{chen2009}
+
+The evolution of the porosity is governed by [citep:chen2009]
 \begin{equation}
+\label{eq:phi_dog}
 \frac{\partial}{\partial t}(\phi + M) = (\alpha_{B} -
 (\phi + M))\frac{\partial}{\partial t}
 \left(\epsilon^{\mathrm{total}}_{ii} - \alpha_{T} T +
 \frac{1-\alpha_{B}}{K}
 P_{\mathrm{f}} \right) \ .
-\label{eq:phi_dog}
 \end{equation}
 Here $K$ is the bulk modulus of the drained porous skeleton: $1/K
 = \delta_{ij}\delta_{kl}C_{ijkl}$.  Also $\alpha_{T}$ is the volumetric coefficient of thermal expansion.  $M$ denotes the total precipitated mineral concentration:
@@ -45,9 +46,9 @@ of precipitated mineral.
 
 The equation for porosity has solution
 \begin{equation}
+\label{eq:poro_evolve}
 \phi + M = \alpha_{B} + (\phi_{0} + M_{\mathrm{ref}} - \alpha_{B})\times \exp \left( \frac{\alpha_{B}
   - 1}{K}(P_{f} - P_{f}^{\mathrm{ref}}) - \epsilon^{\mathrm{total}}_{ii} + \alpha_{T}(T - T^{\mathrm{ref}}) \right) \ ,
-\label{eq:poro_evolve}
 \end{equation}
 where $\phi_{0}$ is the porosity at reference porepressure, zero elastic strain, reference
 temperature and reference mineral concentration.  Note this porosity can become negative, and an
@@ -67,9 +68,9 @@ Note that the *old* value of porosity is used on the right-hand-side, which brea
 Without porepressure and mineralisation effects, the correct expression for porosity as a
 function of volumetric strain and temperature is
 \begin{equation}
+\label{eq:poroTM_evolve}
 \phi = 1 + (\phi_{0} - 1)\times \exp \left(-
 \epsilon^{\mathrm{total}}_{ii} + \alpha_{T}(T - T^{\mathrm{ref}}) \right) \ .
-\label{eq:poroTM_evolve}
 \end{equation}
 
 These expressions may be modified to include the effects of plasticity.
@@ -133,9 +134,9 @@ Taking the trace of this equation, and using $V^{-1}\Delta V = \Delta
 \end{equation}
 In most instances it is appropriate to write this equation as
 \begin{equation}
+\label{eq:fund_volstrain}
 \frac{\Delta V}{V} = -\frac{1}{K}(P_{\mathrm{mech}} - \alpha_{B} \delta_{ij}\Delta P_{\mathrm{f}})
 \ .
-\label{eq:fund_volstrain}
 \end{equation}
 where the total mechanical pressure is
 \begin{equation}
@@ -147,10 +148,10 @@ $\Delta V_{\mathrm{f}}/V_{\mathrm{f}}$ must be derived.
 
 Assuming linearity
 \begin{equation}
+\label{eq:deltavf}
 \frac{\Delta V_{\mathrm{f}}}{V_{\mathrm{f}}} = A_{ij}
 (\Delta\sigma_{ij}^{\mathrm{tot}} + B \delta_{ij}\Delta
 P_{\mathrm{f}}) \ .
-\label{eq:deltavf}
 \end{equation}
 The Betti-Maxwell reciprocal theorem yields $A_{ij}$ and $B$, as is
 now shown.
@@ -189,8 +190,8 @@ Now consider two experiments:
 The two experiments must give the same work done (this is called the
 Betti-Maxwell reciprocal theorem), which yields
 \begin{equation}
-A_{ij} = \alpha_{B} C_{ijkl}\delta_{kl}/\phi \ .
 \label{eq:tildek}
+A_{ij} = \alpha_{B} C_{ijkl}\delta_{kl}/\phi \ .
 \end{equation}
 
 Now to identify $B$.  Consider a so-called *ideal porous material*, which is characterised by a

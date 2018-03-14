@@ -12,7 +12,7 @@ If MOOSE keeps sampling outside the region of validity of your equation of state
 
 Inspect your boundary conditions very closely.  If variable $v$ is associated to the mass-balance equation for component $c$, then a `PresetBC` for `variable = v` is physically saying "add or remove component $c$ in order to keep variable $v$ fixed".  Is this really what you want?  What if you're trying to remove component $c$ but there is no component $c$ at the node in question?
 
-Almost always it is better to use a [`PorousFlowSink`](/systems/BCs/porous_flow/PorousFlowSink.md) instead.  This is numerically "smoother" than a `PresetBC` and also may be more easily interpreted physically as the influence of a boundary situated at $\infty$.
+Almost always it is better to use a [`PorousFlowSink`](PorousFlowSink.md) (see also [boundaries](boundaries.md)) instead.  This is numerically "smoother" than a `PresetBC` and also may be more easily interpreted physically as the influence of a boundary situated at $\infty$.
 
 ## External fluxes
 

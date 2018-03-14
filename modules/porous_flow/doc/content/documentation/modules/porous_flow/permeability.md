@@ -15,6 +15,7 @@ enabling permeability to vary spatially. This is implemented in
 [`PorousFlowPermeabilityConstFromVar`](/PorousFlowPermeabilityConstFromVar.md)
 
 ## Exponential
+
 [`PorousFlowPermeabilityExponential`](/PorousFlowPermeabilityExponential.md)
 
 A simple porosity-permeability model where
@@ -24,6 +25,7 @@ k_{ij} = k_{ij}^{0} e^{a\phi} \ ,
 where $\phi$ is the porosity, and $a$ is a user-defined constant.
 
 ## Kozeny-Carman
+
 [`PorousFlowPermeabilityKozenyCarman`](/PorousFlowPermeabilityKozenyCarman.md)
 
 Permeability is calculated from porosity using the Kozeny-Carman relationship [citep:oelkers1996]
