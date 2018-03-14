@@ -13,6 +13,8 @@
 #include "GrainTrackerInterface.h"
 #include "MooseVariable.h"
 
+registerMooseObject("PhaseFieldApp", MultiGrainRigidBodyMotion);
+
 template <>
 InputParameters
 validParams<MultiGrainRigidBodyMotion>()

@@ -9,6 +9,8 @@
 
 #include "VanDerWaalsFreeEnergy.h"
 
+registerMooseObject("PhaseFieldApp", VanDerWaalsFreeEnergy);
+
 template <>
 InputParameters
 validParams<VanDerWaalsFreeEnergy>()

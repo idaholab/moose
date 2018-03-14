@@ -11,6 +11,8 @@
 #include "EBSDReader.h"
 #include "GrainTrackerInterface.h"
 
+registerMooseObject("PhaseFieldApp", EBSDReaderAvgDataAux);
+
 template <>
 InputParameters
 validParams<EBSDReaderAvgDataAux>()

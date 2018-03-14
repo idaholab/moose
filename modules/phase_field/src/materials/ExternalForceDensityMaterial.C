@@ -10,6 +10,8 @@
 #include "ExternalForceDensityMaterial.h"
 #include "Function.h"
 
+registerMooseObject("PhaseFieldApp", ExternalForceDensityMaterial);
+
 template <>
 InputParameters
 validParams<ExternalForceDensityMaterial>()

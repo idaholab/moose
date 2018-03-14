@@ -17,6 +17,8 @@
 #include "MooseUtils.h"
 #include "MooseVariable.h"
 
+registerMooseObject("PhaseFieldApp", MultiSmoothSuperellipsoidIC);
+
 template <>
 InputParameters
 validParams<MultiSmoothSuperellipsoidIC>()

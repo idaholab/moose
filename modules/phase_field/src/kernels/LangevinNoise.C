@@ -10,6 +10,8 @@
 #include "LangevinNoise.h"
 #include "MooseRandom.h"
 
+registerMooseObject("PhaseFieldApp", LangevinNoise);
+
 template <>
 InputParameters
 validParams<LangevinNoise>()

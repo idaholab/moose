@@ -12,6 +12,8 @@
 
 #include "libmesh/quadrature.h"
 
+registerMooseObject("PhaseFieldApp", DiscreteNucleationMap);
+
 template <>
 InputParameters
 validParams<DiscreteNucleationMap>()

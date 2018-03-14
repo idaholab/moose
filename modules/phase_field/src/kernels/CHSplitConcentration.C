@@ -9,6 +9,8 @@
 
 #include "CHSplitConcentration.h"
 
+registerMooseObject("PhaseFieldApp", CHSplitConcentration);
+
 template <>
 InputParameters
 validParams<CHSplitConcentration>()

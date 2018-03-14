@@ -12,6 +12,8 @@
 #include "FEProblem.h"
 #include "Conversion.h"
 
+registerMooseAction("PhaseFieldApp", PolycrystalElasticDrivingForceAction, "add_kernel");
+
 template <>
 InputParameters
 validParams<PolycrystalElasticDrivingForceAction>()

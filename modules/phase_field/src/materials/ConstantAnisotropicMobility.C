@@ -9,6 +9,8 @@
 
 #include "ConstantAnisotropicMobility.h"
 
+registerMooseObject("PhaseFieldApp", ConstantAnisotropicMobility);
+
 template <>
 InputParameters
 validParams<ConstantAnisotropicMobility>()

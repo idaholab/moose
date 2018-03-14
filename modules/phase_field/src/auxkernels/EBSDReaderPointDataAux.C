@@ -9,6 +9,8 @@
 
 #include "EBSDReaderPointDataAux.h"
 
+registerMooseObject("PhaseFieldApp", EBSDReaderPointDataAux);
+
 template <>
 InputParameters
 validParams<EBSDReaderPointDataAux>()

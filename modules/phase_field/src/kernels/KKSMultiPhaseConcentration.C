@@ -9,6 +9,8 @@
 
 #include "KKSMultiPhaseConcentration.h"
 
+registerMooseObject("PhaseFieldApp", KKSMultiPhaseConcentration);
+
 template <>
 InputParameters
 validParams<KKSMultiPhaseConcentration>()

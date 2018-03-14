@@ -13,6 +13,12 @@
 
 #include "libmesh/string_to_enum.h"
 
+registerMooseAction("PhaseFieldApp", DisplacementGradientsAction, "add_kernel");
+
+registerMooseAction("PhaseFieldApp", DisplacementGradientsAction, "add_material");
+
+registerMooseAction("PhaseFieldApp", DisplacementGradientsAction, "add_variable");
+
 template <>
 InputParameters
 validParams<DisplacementGradientsAction>()

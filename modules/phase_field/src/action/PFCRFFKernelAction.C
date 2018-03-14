@@ -12,6 +12,8 @@
 #include "FEProblem.h"
 #include "Conversion.h"
 
+registerMooseAction("PhaseFieldApp", PFCRFFKernelAction, "add_kernel");
+
 template <>
 InputParameters
 validParams<PFCRFFKernelAction>()

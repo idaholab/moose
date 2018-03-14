@@ -9,6 +9,8 @@
 
 #include "GrainForceAndTorqueSum.h"
 
+registerMooseObject("PhaseFieldApp", GrainForceAndTorqueSum);
+
 template <>
 InputParameters
 validParams<GrainForceAndTorqueSum>()

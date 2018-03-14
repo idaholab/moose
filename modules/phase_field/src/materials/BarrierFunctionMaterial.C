@@ -9,6 +9,8 @@
 
 #include "BarrierFunctionMaterial.h"
 
+registerMooseObject("PhaseFieldApp", BarrierFunctionMaterial);
+
 template <>
 InputParameters
 validParams<BarrierFunctionMaterial>()

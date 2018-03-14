@@ -13,6 +13,8 @@
 #include "RankFourTensor.h"
 #include "RankTwoTensor.h"
 
+registerMooseObject("PhaseFieldApp", ACGrGrElasticDrivingForce);
+
 template <>
 InputParameters
 validParams<ACGrGrElasticDrivingForce>()

@@ -12,6 +12,8 @@
 #include "FEProblem.h"
 #include "Conversion.h"
 
+registerMooseAction("PhaseFieldApp", PolycrystalRandomICAction, "add_ic");
+
 template <>
 InputParameters
 validParams<PolycrystalRandomICAction>()

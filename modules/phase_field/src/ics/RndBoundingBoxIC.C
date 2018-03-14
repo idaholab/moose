@@ -10,6 +10,8 @@
 #include "RndBoundingBoxIC.h"
 #include "MooseRandom.h"
 
+registerMooseObject("PhaseFieldApp", RndBoundingBoxIC);
+
 template <>
 InputParameters
 validParams<RndBoundingBoxIC>()

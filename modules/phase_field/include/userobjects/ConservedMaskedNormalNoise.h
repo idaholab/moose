@@ -16,11 +16,7 @@
 class ConservedMaskedNormalNoise;
 
 template <>
-InputParameters
-validParams<ConservedMaskedNormalNoise>()
-{
-  return validParams<ConservedMaskedNoiseBase>();
-}
+InputParameters validParams<ConservedMaskedNormalNoise>();
 
 /**
  * Userobject that generates a normaly distributed random number

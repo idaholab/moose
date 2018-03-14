@@ -15,6 +15,8 @@
 #include "GrainTrackerInterface.h"
 #include "PolycrystalUserObjectBase.h"
 
+registerMooseObject("PhaseFieldApp", PolycrystalColoringIC);
+
 template <>
 InputParameters
 validParams<PolycrystalColoringIC>()

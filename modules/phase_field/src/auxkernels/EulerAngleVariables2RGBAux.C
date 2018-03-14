@@ -10,6 +10,8 @@
 #include "EulerAngleVariables2RGBAux.h"
 #include "Euler2RGB.h"
 
+registerMooseObject("PhaseFieldApp", EulerAngleVariables2RGBAux);
+
 template <>
 InputParameters
 validParams<EulerAngleVariables2RGBAux>()

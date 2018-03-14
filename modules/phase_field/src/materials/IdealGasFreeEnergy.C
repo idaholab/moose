@@ -9,6 +9,8 @@
 
 #include "IdealGasFreeEnergy.h"
 
+registerMooseObject("PhaseFieldApp", IdealGasFreeEnergy);
+
 template <>
 InputParameters
 validParams<IdealGasFreeEnergy>()

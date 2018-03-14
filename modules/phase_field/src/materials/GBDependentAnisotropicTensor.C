@@ -9,6 +9,8 @@
 
 #include "GBDependentAnisotropicTensor.h"
 
+registerMooseObject("PhaseFieldApp", GBDependentAnisotropicTensor);
+
 template <>
 InputParameters
 validParams<GBDependentAnisotropicTensor>()

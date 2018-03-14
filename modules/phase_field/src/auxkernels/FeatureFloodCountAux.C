@@ -14,6 +14,8 @@
 
 #include <algorithm>
 
+registerMooseObject("PhaseFieldApp", FeatureFloodCountAux);
+
 template <>
 InputParameters
 validParams<FeatureFloodCountAux>()

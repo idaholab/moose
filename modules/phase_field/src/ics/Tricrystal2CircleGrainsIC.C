@@ -11,6 +11,8 @@
 #include "MooseRandom.h"
 #include "MooseMesh.h"
 
+registerMooseObject("PhaseFieldApp", Tricrystal2CircleGrainsIC);
+
 template <>
 InputParameters
 validParams<Tricrystal2CircleGrainsIC>()

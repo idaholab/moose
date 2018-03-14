@@ -12,6 +12,8 @@
 
 using namespace MathUtils;
 
+registerMooseObject("PhaseFieldApp", KKSPhaseChemicalPotential);
+
 template <>
 InputParameters
 validParams<KKSPhaseChemicalPotential>()

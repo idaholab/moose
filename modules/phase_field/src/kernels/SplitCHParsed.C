@@ -9,6 +9,8 @@
 
 #include "SplitCHParsed.h"
 
+registerMooseObject("PhaseFieldApp", SplitCHParsed);
+
 template <>
 InputParameters
 validParams<SplitCHParsed>()

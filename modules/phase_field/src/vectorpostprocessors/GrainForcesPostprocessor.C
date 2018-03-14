@@ -10,6 +10,8 @@
 #include "GrainForceAndTorqueInterface.h"
 #include "GrainForcesPostprocessor.h"
 
+registerMooseObject("PhaseFieldApp", GrainForcesPostprocessor);
+
 template <>
 InputParameters
 validParams<GrainForcesPostprocessor>()

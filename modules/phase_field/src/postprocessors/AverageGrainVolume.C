@@ -15,6 +15,8 @@
 
 #include "libmesh/quadrature.h"
 
+registerMooseObject("PhaseFieldApp", AverageGrainVolume);
+
 template <>
 InputParameters
 validParams<AverageGrainVolume>()

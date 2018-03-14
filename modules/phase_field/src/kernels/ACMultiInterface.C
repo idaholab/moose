@@ -13,6 +13,8 @@
 #include "MooseVariable.h"
 #include "NonlinearSystem.h"
 
+registerMooseObject("PhaseFieldApp", ACMultiInterface);
+
 template <>
 InputParameters
 validParams<ACMultiInterface>()

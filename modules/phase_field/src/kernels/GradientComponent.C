@@ -9,6 +9,8 @@
 
 #include "GradientComponent.h"
 
+registerMooseObject("PhaseFieldApp", GradientComponent);
+
 template <>
 InputParameters
 validParams<GradientComponent>()

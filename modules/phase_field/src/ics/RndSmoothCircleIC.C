@@ -13,6 +13,8 @@
 #include "MooseMesh.h"
 #include "MooseVariable.h"
 
+registerMooseObject("PhaseFieldApp", RndSmoothCircleIC);
+
 template <>
 InputParameters
 validParams<RndSmoothCircleIC>()

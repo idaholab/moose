@@ -11,6 +11,8 @@
 #include "MooseMesh.h"
 #include "Conversion.h"
 
+registerMooseObject("PhaseFieldApp", GrainTrackerHaloRM);
+
 template <>
 InputParameters
 validParams<GrainTrackerHaloRM>()

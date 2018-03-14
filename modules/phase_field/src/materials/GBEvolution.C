@@ -9,6 +9,8 @@
 
 #include "GBEvolution.h"
 
+registerMooseObject("PhaseFieldApp", GBEvolution);
+
 template <>
 InputParameters
 validParams<GBEvolution>()

@@ -9,6 +9,8 @@
 
 #include "KKSACBulkF.h"
 
+registerMooseObject("PhaseFieldApp", KKSACBulkF);
+
 template <>
 InputParameters
 validParams<KKSACBulkF>()

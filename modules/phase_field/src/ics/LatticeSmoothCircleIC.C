@@ -10,6 +10,8 @@
 #include "LatticeSmoothCircleIC.h"
 #include "MooseMesh.h"
 
+registerMooseObject("PhaseFieldApp", LatticeSmoothCircleIC);
+
 template <>
 InputParameters
 validParams<LatticeSmoothCircleIC>()

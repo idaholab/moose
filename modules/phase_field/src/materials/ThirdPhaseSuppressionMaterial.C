@@ -9,6 +9,8 @@
 
 #include "ThirdPhaseSuppressionMaterial.h"
 
+registerMooseObject("PhaseFieldApp", ThirdPhaseSuppressionMaterial);
+
 template <>
 InputParameters
 validParams<ThirdPhaseSuppressionMaterial>()

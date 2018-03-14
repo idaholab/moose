@@ -9,6 +9,8 @@
 
 #include "CHSplitFlux.h"
 
+registerMooseObject("PhaseFieldApp", CHSplitFlux);
+
 template <>
 InputParameters
 validParams<CHSplitFlux>()

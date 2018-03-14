@@ -10,6 +10,8 @@
 #include "PolycrystalRandomIC.h"
 #include "MooseRandom.h"
 
+registerMooseObject("PhaseFieldApp", PolycrystalRandomIC);
+
 template <>
 InputParameters
 validParams<PolycrystalRandomIC>()

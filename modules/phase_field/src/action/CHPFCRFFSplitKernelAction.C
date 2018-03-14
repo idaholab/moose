@@ -12,6 +12,8 @@
 #include "Conversion.h"
 #include "FEProblem.h"
 
+registerMooseAction("PhaseFieldApp", CHPFCRFFSplitKernelAction, "add_kernel");
+
 template <>
 InputParameters
 validParams<CHPFCRFFSplitKernelAction>()

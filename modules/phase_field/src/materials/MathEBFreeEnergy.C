@@ -9,6 +9,8 @@
 
 #include "MathEBFreeEnergy.h"
 
+registerMooseObject("PhaseFieldApp", MathEBFreeEnergy);
+
 template <>
 InputParameters
 validParams<MathEBFreeEnergy>()

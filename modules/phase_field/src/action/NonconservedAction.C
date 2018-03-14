@@ -18,6 +18,10 @@
 
 #include "libmesh/string_to_enum.h"
 
+registerMooseAction("PhaseFieldApp", NonconservedAction, "add_variable");
+
+registerMooseAction("PhaseFieldApp", NonconservedAction, "add_kernel");
+
 template <>
 InputParameters
 validParams<NonconservedAction>()

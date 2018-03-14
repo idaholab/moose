@@ -11,6 +11,8 @@
 #include "Material.h"
 #include "GrainTrackerInterface.h"
 
+registerMooseObject("PhaseFieldApp", ACSEDGPoly);
+
 template <>
 InputParameters
 validParams<ACSEDGPoly>()

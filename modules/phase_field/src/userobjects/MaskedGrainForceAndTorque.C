@@ -9,6 +9,8 @@
 
 #include "MaskedGrainForceAndTorque.h"
 
+registerMooseObject("PhaseFieldApp", MaskedGrainForceAndTorque);
+
 template <>
 InputParameters
 validParams<MaskedGrainForceAndTorque>()

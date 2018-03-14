@@ -9,6 +9,8 @@
 
 #include "ACInterfaceKobayashi2.h"
 
+registerMooseObject("PhaseFieldApp", ACInterfaceKobayashi2);
+
 template <>
 InputParameters
 validParams<ACInterfaceKobayashi2>()

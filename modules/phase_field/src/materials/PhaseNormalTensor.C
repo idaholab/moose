@@ -9,6 +9,8 @@
 
 #include "PhaseNormalTensor.h"
 
+registerMooseObject("PhaseFieldApp", PhaseNormalTensor);
+
 template <>
 InputParameters
 validParams<PhaseNormalTensor>()

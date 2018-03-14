@@ -9,6 +9,8 @@
 
 #include "CoupledSwitchingTimeDerivative.h"
 
+registerMooseObject("PhaseFieldApp", CoupledSwitchingTimeDerivative);
+
 template <>
 InputParameters
 validParams<CoupledSwitchingTimeDerivative>()

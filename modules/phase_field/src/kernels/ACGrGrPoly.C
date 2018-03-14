@@ -9,6 +9,8 @@
 
 #include "ACGrGrPoly.h"
 
+registerMooseObject("PhaseFieldApp", ACGrGrPoly);
+
 template <>
 InputParameters
 validParams<ACGrGrPoly>()

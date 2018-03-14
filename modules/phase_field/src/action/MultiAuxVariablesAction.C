@@ -12,6 +12,8 @@
 #include "Conversion.h"
 #include "MooseMesh.h"
 
+registerMooseAction("PhaseFieldApp", MultiAuxVariablesAction, "add_aux_variable");
+
 template <>
 InputParameters
 validParams<MultiAuxVariablesAction>()

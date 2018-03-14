@@ -9,6 +9,8 @@
 
 #include "SwitchingFunctionMultiPhaseMaterial.h"
 
+registerMooseObject("PhaseFieldApp", SwitchingFunctionMultiPhaseMaterial);
+
 template <>
 InputParameters
 validParams<SwitchingFunctionMultiPhaseMaterial>()

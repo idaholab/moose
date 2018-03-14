@@ -8,6 +8,8 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 #include "PolynomialFreeEnergy.h"
 
+registerMooseObject("PhaseFieldApp", PolynomialFreeEnergy);
+
 template <>
 InputParameters
 validParams<PolynomialFreeEnergy>()

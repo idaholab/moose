@@ -10,6 +10,8 @@
 #include "SpecifiedSmoothCircleIC.h"
 #include "MooseRandom.h"
 
+registerMooseObject("PhaseFieldApp", SpecifiedSmoothCircleIC);
+
 template <>
 InputParameters
 validParams<SpecifiedSmoothCircleIC>()

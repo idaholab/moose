@@ -9,6 +9,8 @@
 
 #include "ACSwitching.h"
 
+registerMooseObject("PhaseFieldApp", ACSwitching);
+
 template <>
 InputParameters
 validParams<ACSwitching>()

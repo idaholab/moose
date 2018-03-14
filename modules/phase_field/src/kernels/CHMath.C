@@ -9,6 +9,8 @@
 
 #include "CHMath.h"
 
+registerMooseObject("PhaseFieldApp", CHMath);
+
 template <>
 InputParameters
 validParams<CHMath>()

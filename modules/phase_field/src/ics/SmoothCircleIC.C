@@ -9,6 +9,8 @@
 
 #include "SmoothCircleIC.h"
 
+registerMooseObject("PhaseFieldApp", SmoothCircleIC);
+
 template <>
 InputParameters
 validParams<SmoothCircleIC>()

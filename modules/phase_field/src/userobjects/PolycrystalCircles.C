@@ -13,6 +13,8 @@
 
 #include <fstream>
 
+registerMooseObject("PhaseFieldApp", PolycrystalCircles);
+
 template <>
 InputParameters
 validParams<PolycrystalCircles>()

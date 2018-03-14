@@ -30,6 +30,8 @@ PolycrystalVoronoiVoidIC::actionParameters()
   return params;
 }
 
+registerMooseObject("PhaseFieldApp", PolycrystalVoronoiVoidIC);
+
 template <>
 InputParameters
 validParams<PolycrystalVoronoiVoidIC>()

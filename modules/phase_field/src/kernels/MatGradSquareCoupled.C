@@ -9,6 +9,8 @@
 
 #include "MatGradSquareCoupled.h"
 
+registerMooseObject("PhaseFieldApp", MatGradSquareCoupled);
+
 template <>
 InputParameters
 validParams<MatGradSquareCoupled>()

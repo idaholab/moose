@@ -8,6 +8,8 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 #include "PFParamsPolyFreeEnergy.h"
 
+registerMooseObject("PhaseFieldApp", PFParamsPolyFreeEnergy);
+
 template <>
 InputParameters
 validParams<PFParamsPolyFreeEnergy>()

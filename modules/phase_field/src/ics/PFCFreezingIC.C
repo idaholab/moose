@@ -10,6 +10,8 @@
 #include "PFCFreezingIC.h"
 #include "MooseRandom.h"
 
+registerMooseObject("PhaseFieldApp", PFCFreezingIC);
+
 template <>
 InputParameters
 validParams<PFCFreezingIC>()
