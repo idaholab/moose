@@ -31,7 +31,7 @@ public:
 private:
   const unsigned int _op_num;
   const unsigned int _op_index;
-  const unsigned int _typ;
+  const unsigned int _random_type;
 };
 
 #endif // POLYCRYSTALRANDOMIC_H

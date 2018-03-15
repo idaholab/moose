@@ -102,6 +102,21 @@ public:
   void appendTask(const std::string & task) { _all_tasks.insert(task); }
 
 protected:
+  /**
+   * Emits an error prefixed with the file and line number of the given param (from the input
+   * file) along with the full parameter path+name followed by the given args as the message.
+   * If this object's parameters were not created directly by the Parser, then this function falls
+   * back to the normal behavior of mooseError - only printing a message using the given args.
+   */
+  template <typename... Args>
+  [[noreturn]] void paramError(const std::string & param, Args... args)
+  {
+    auto prefix = param + ": ";
+    if (!_pars.inputLocation(param).empty())
+      prefix = _pars.inputLocation(param) + ": (" + _pars.paramFullpath(param) + ") ";
+    mooseError(prefix, args...);
+  }
+
   /// Input parameters for the action
   InputParameters _pars;
 

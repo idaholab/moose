@@ -27,8 +27,7 @@ CrossTermBarrierFunctionMaterial::CrossTermBarrierFunctionMaterial(
   for (unsigned int i = 0; i < _num_eta; ++i)
     for (unsigned int j = 0; j < i; ++j)
       if (_W_ij[_num_eta * i + j] != _W_ij[_num_eta * j + i])
-        mooseError("Please supply a symmetric W_ij matrix for CrossTermBarrierFunctionMaterial ",
-                   name());
+        paramError("W_ij", "Please supply a symmetric W_ij matrix");
 }
 
 void

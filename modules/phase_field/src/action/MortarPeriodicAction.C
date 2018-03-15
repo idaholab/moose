@@ -104,7 +104,7 @@ MortarPeriodicAction::act()
               break;
 
             default:
-              mooseError("Periodicity type not implemented");
+              paramError("periodicity", "Periodicity type not implemented");
           }
         }
       }

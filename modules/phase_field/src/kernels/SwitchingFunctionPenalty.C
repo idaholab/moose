@@ -36,8 +36,7 @@ SwitchingFunctionPenalty::SwitchingFunctionPenalty(const InputParameters & param
 {
   // parameter check. We need exactly one eta per h
   if (_num_h != coupledComponents("etas"))
-    mooseError("Need to pass in as many h_names as etas in SwitchingFunctionPenalty kernel ",
-               name());
+    paramError("h_names", "Need to pass in as many h_names as etas");
 
   // fetch switching functions (for the residual) and h derivatives (for the Jacobian)
   for (unsigned int i = 0; i < _num_h; ++i)
@@ -56,8 +55,7 @@ SwitchingFunctionPenalty::SwitchingFunctionPenalty(const InputParameters & param
   }
 
   if (_a < 0)
-    mooseError("Kernel variable must be listed in etas for SwitchingFunctionPenalty kernel ",
-               name());
+    paramError("etas", "Kernel variable must be listed in etas");
 
   _d2h = &getMaterialPropertyDerivative<Real>(_h_names[_a], _var.name(), _var.name());
 }

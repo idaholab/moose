@@ -86,7 +86,7 @@ GBAnisotropyBase::GBAnisotropyBase(const InputParameters & parameters)
   std::ifstream inFile(_Anisotropic_GB_file_name.c_str());
 
   if (!inFile)
-    mooseError("Can't open GB anisotropy input file");
+    paramError("Anisotropic_GB_file_name", "Can't open GB anisotropy input file");
 
   for (unsigned int i = 0; i < 2; ++i)
     inFile.ignore(255, '\n'); // ignore line

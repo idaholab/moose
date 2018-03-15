@@ -29,9 +29,7 @@ AsymmetricCrossTermBarrierFunctionMaterial::AsymmetricCrossTermBarrierFunctionMa
   const std::vector<MaterialPropertyName> & hi_names =
       getParam<std::vector<MaterialPropertyName>>("hi_names");
   if (hi_names.size() != _num_eta)
-    mooseError("The number of coupled etas must be equal to the number of hi_names in "
-               "AsymmetricCrossTermBarrierFunctionMaterial ",
-               name());
+    paramError("hi_names", "The number of hi_names must be equal to the number of coupled etas");
 
   for (unsigned int i = 0; i < _num_eta; ++i)
   {
