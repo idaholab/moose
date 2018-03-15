@@ -216,7 +216,6 @@
   type = Transient
   scheme = 'bdf2'
 
-  # Preconditioned JFNK (default)
   solve_type = 'PJFNK'
   #petsc_options = '-snes_ksp -snes_ksp_ew'
   #petsc_options = '-ksp_monitor_snes_lg-snes_ksp_ew'

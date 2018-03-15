@@ -122,7 +122,6 @@
 [Executioner]
   type = Transient
 
-  # Preconditioned JFNK (default)
   solve_type = 'PJFNK'
 
   # I don't know enough about this test to say why it needs such a

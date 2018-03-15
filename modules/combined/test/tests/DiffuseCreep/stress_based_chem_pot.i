@@ -262,7 +262,6 @@
 []
 
 [Executioner]
-  # Preconditioned JFNK (default)
   type = Transient
   solve_type = PJFNK
 
