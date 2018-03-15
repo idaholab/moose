@@ -30,8 +30,10 @@ public:
 protected:
   virtual void computeQpProperties() override;
 
-  const VariableGradient & _grad_v;
-  const Real _stress;
+  std::size_t _nvar;
+  std::vector<const VariableGradient *> _grad_v;
+  std::vector<Real> _op_range;
+  std::vector<Real> _stress;
 
   MaterialProperty<RankTwoTensor> & _planar_stress;
 };
