@@ -96,3 +96,8 @@ SinglePhaseFluidPropertiesPT::mu_drhoT_from_rho_T(Real, Real, Real, Real &, Real
 {
   mooseError(name(), ": mu_drhoT_from_rho_T is not implemented.");
 }
+
+Real SinglePhaseFluidPropertiesPT::k_from_rho_T(Real /*density*/, Real /*temperature*/) const
+{
+  mooseError(name(), ": k_from_rho_T is not implemented.");
+}

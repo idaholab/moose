@@ -224,7 +224,7 @@ public:
    * @param temperature fluid temperature (K)
    * @return thermal conductivity  (W/m/K)
    */
-  virtual Real k_from_rho_T(Real density, Real temperature) const = 0;
+  virtual Real k_from_rho_T(Real density, Real temperature) const;
 
   /**
    * Specific entropy
