@@ -117,6 +117,15 @@ Real dvel_darhoA(Real arhoA, Real arhouA);
 Real dvel_darhouA(Real arhoA);
 
 /**
+ * Computes specific volume and its derivative with respect to density
+ *
+ * @param[in] rho       density
+ * @param[in] v         specific volume
+ * @param[in] dv_drho   derivative of specific volume w.r.t. density
+ */
+void v_from_rho(Real rho, Real & v, Real & dv_drho);
+
+/**
  * Derivative of specific volume wrt alpha_liquid
  *
  * Makes sense only when using 7-equation model
@@ -179,6 +188,17 @@ Real de_darhoEA(Real arhoA);
  * @param[out] dE_darhoEA   derivative of specific total energy w.r.t. alpha*rho*E*A
  */
 void E_from_arhoA_arhoEA(Real arhoA, Real arhoEA, Real & E, Real & dE_darhoA, Real & dE_darhoEA);
+
+/**
+ * Computes specific total energy and its derivatives from specific internal energy and velocity
+ *
+ * @param[in] e          specific internal energy
+ * @param[in] vel        velocity
+ * @param[out] E         specific total energy
+ * @param[out] dE_de     derivative of specific total energy w.r.t. specific internal energy
+ * @param[out] dE_dvel   derivative of specific total energy w.r.t. velocity
+ */
+void E_from_e_vel(Real e, Real vel, Real & E, Real & dE_de, Real & dE_dvel);
 
 /**
  * Determine if inlet boundary condition should be applied

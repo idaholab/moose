@@ -63,6 +63,13 @@ dvel_darhouA(Real arhoA)
   return 1.0 / arhoA;
 }
 
+void
+v_from_rho(Real rho, Real & v, Real & dv_drho)
+{
+  v = 1.0 / rho;
+  dv_drho = -1.0 / (rho * rho);
+}
+
 Real
 dv_dalpha_liquid(Real area, Real arhoA, bool is_liquid)
 {
@@ -108,6 +115,14 @@ E_from_arhoA_arhoEA(Real arhoA, Real arhoEA, Real & E, Real & dE_darhoA, Real & 
   E = arhoEA / arhoA;
   dE_darhoA = -arhoEA / (arhoA * arhoA);
   dE_darhoEA = 1.0 / arhoA;
+}
+
+void
+E_from_e_vel(Real e, Real vel, Real & E, Real & dE_de, Real & dE_dvel)
+{
+  E = e + 0.5 * vel * vel;
+  dE_de = 1.0;
+  dE_dvel = vel;
 }
 
 bool
