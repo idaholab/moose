@@ -38,7 +38,6 @@
 []
 
 [Executioner]
-  # Preconditioned JFNK (default)
   type = Transient
   start_time = -1
   end_time = 0

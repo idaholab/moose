@@ -132,7 +132,6 @@
   dt = 0.01
   num_steps = 100
 
-  # Preconditioned JFNK (default)
   solve_type = 'PJFNK'
 []
 

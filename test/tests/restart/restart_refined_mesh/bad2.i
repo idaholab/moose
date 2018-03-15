@@ -777,7 +777,6 @@ active = ' '
 #  type =  SolutionTimeAdaptive
   perf_log =  true
 
-  # Preconditioned JFNK (default)
   solve_type = 'PJFNK'
   petsc_options_iname =  '-pc_type -pc_hypre_type -ksp_gmres_restart'
   petsc_options_value =  'hypre    boomeramg      51'

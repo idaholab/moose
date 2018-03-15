@@ -98,7 +98,6 @@
 []
 
 [Executioner]
-  # Preconditioned JFNK (default)
   type = Transient
   nl_max_its = 15
   scheme = bdf2

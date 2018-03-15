@@ -38,7 +38,6 @@
 []
 
 [Executioner]
-  # Preconditioned JFNK (default)
   type = Transient
   num_steps = 5 # Gold file only has 4 steps
   dt = 0.1

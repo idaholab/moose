@@ -96,7 +96,6 @@
   type = Transient
   scheme = 'bdf2'
 
-  # Preconditioned JFNK (default)
   solve_type = 'PJFNK'
 
   l_max_its = 15

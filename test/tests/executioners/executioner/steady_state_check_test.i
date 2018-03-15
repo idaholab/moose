@@ -84,7 +84,6 @@
   type = Transient
   scheme = 'implicit-euler'
 
-  # Preconditioned JFNK (default)
   solve_type = 'PJFNK'
 
   nl_abs_tol = 1e-14

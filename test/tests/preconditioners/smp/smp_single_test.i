@@ -96,7 +96,6 @@
 #  nl_rel_tol = 1e-10
 
 
-  # Preconditioned JFNK (default)
   solve_type = 'PJFNK'
 []
 

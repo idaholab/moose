@@ -55,7 +55,6 @@
 [Executioner]
   type = Transient
 
-  # Preconditioned JFNK (default)
   solve_type = 'PJFNK'
 
   start_time = 0.0
