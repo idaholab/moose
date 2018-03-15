@@ -97,9 +97,6 @@
   [./elastic_stress]
     type = ComputeLinearElasticStress
   [../]
-  [./eshelby]
-    type = EshelbyTensor
-  [../]
 []
 
 [Executioner]

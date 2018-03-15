@@ -14,8 +14,6 @@ It is necessary to include this material within the input file when computing fr
 
 ## Example Input File Syntax
 
-!listing modules/tensor_mechanics/test/tests/j_integral/j_integral_2d.i block=Materials/eshelby
-
 !syntax parameters /Materials/EshelbyTensor
 
 !syntax inputs /Materials/EshelbyTensor

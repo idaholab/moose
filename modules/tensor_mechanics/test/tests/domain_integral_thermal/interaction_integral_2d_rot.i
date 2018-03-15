@@ -76,7 +76,7 @@
   block = 1
   youngs_modulus = 207000
   poissons_ratio = 0.3
-  temp = temp
+  temperature = temp
   eigenstrain_names = thermal_expansion
 []
 
@@ -135,10 +135,6 @@
   [../]
   [./elastic_stress]
     type = ComputeFiniteStrainElasticStress
-  [../]
-  [./eshelby]
-    type = EshelbyTensor
-    temperature = temp
   [../]
   [./thermal_expansion_strain]
     type = ComputeThermalExpansionEigenstrain

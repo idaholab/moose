@@ -37,7 +37,7 @@ validParams<InteractionIntegral>()
   params.addRequiredCoupledVar(
       "displacements",
       "The displacements appropriate for the simulation geometry and coordinate system");
-  params.addCoupledVar("temp",
+  params.addCoupledVar("temperature",
                        "The temperature (optional). Must be provided to correctly compute "
                        "stress intensity factors in models with thermal strain gradients.");
   params.addRequiredParam<UserObjectName>("crack_front_definition",
@@ -82,8 +82,8 @@ InteractionIntegral::InteractionIntegral(const InputParameters & parameters)
                 ? &getMaterialPropertyByName<RankTwoTensor>("elastic_strain")
                 : nullptr),
     _grad_disp(3),
-    _has_temp(isCoupled("temp")),
-    _grad_temp(_has_temp ? coupledGradient("temp") : _grad_zero),
+    _has_temp(isCoupled("temperature")),
+    _grad_temp(_has_temp ? coupledGradient("temperature") : _grad_zero),
     _K_factor(getParam<Real>("K_factor")),
     _has_symmetry_plane(isParamValid("symmetry_plane")),
     _poissons_ratio(getParam<Real>("poissons_ratio")),

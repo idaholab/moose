@@ -42,7 +42,7 @@
   axis_2d = 2
   radius_inner = '60.0 80.0 100.0 120.0'
   radius_outer = '80.0 100.0 120.0 140.0'
-  temp = temp
+  temperature = temp
   incremental = true
   eigenstrain_names = thermal_expansion
 []
@@ -104,10 +104,6 @@
   [../]
   [./elastic_stress]
     type = ComputeFiniteStrainElasticStress
-  [../]
-  [./eshelby]
-    type = EshelbyTensor
-    temperature = temp
   [../]
   [./thermal_expansion_strain]
     type = ComputeMeanThermalExpansionFunctionEigenstrain

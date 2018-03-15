@@ -36,7 +36,7 @@ validParams<InteractionIntegralSM>()
   params.addRequiredCoupledVar(
       "displacements",
       "The displacements appropriate for the simulation geometry and coordinate system");
-  params.addCoupledVar("temp",
+  params.addCoupledVar("temperature",
                        "The temperature (optional). Must be provided to correctly compute "
                        "stress intensity factors in models with thermal strain gradients.");
   params.addRequiredParam<UserObjectName>("crack_front_definition",
@@ -77,8 +77,8 @@ InteractionIntegralSM::InteractionIntegralSM(const InputParameters & parameters)
     _stress(getMaterialPropertyByName<SymmTensor>("stress")),
     _strain(getMaterialPropertyByName<SymmTensor>("elastic_strain")),
     _grad_disp(3),
-    _has_temp(isCoupled("temp")),
-    _grad_temp(_has_temp ? coupledGradient("temp") : _grad_zero),
+    _has_temp(isCoupled("temperature")),
+    _grad_temp(_has_temp ? coupledGradient("temperature") : _grad_zero),
     _current_instantaneous_thermal_expansion_coef(
         hasMaterialProperty<Real>("current_instantaneous_thermal_expansion_coef")
             ? &getMaterialProperty<Real>("current_instantaneous_thermal_expansion_coef")
