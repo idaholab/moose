@@ -35,7 +35,7 @@ BicrystalBoundingBoxICAction::BicrystalBoundingBoxICAction(const InputParameters
     _op_num(getParam<unsigned int>("op_num"))
 {
   if (_op_num != 2)
-    mooseError("op_num must equal 2 for bicrystal ICs");
+    paramError("op_num", "op_num must equal 2 for bicrystal ICs");
 }
 
 void

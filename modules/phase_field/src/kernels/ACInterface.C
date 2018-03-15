@@ -47,7 +47,8 @@ ACInterface::ACInterface(const InputParameters & parameters)
     MooseVariable * ivar = _coupled_standard_moose_vars[i];
     const VariableName iname = ivar->name();
     if (iname == _var.name())
-      mooseError("The kernel variable should not be specified in the coupled `args` parameter.");
+      paramError("args",
+                 "The kernel variable should not be specified in the coupled `args` parameter.");
 
     _dLdarg[i] = &getMaterialPropertyDerivative<Real>("mob_name", iname);
     _dkappadarg[i] = &getMaterialPropertyDerivative<Real>("kappa_name", iname);

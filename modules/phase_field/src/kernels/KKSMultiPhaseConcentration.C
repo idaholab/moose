@@ -44,10 +44,10 @@ KKSMultiPhaseConcentration::KKSMultiPhaseConcentration(const InputParameters & p
 {
   // Check to make sure the the number of hj's is the same as the number of cj's
   if (_num_j != _hj_names.size())
-    mooseError("Need to pass in as many hj_names as cjs in KKSMultiPhaseConcentration", name());
+    paramError("hj_names", "Need to pass in as many hj_names as cjs");
   // Check to make sure the the number of etas is the same as the number of cj's
   if (_num_j != _eta_names.size())
-    mooseError("Need to pass in as many etas as cjs in KKSMultiPhaseConcentration", name());
+    paramError("etas", "Need to pass in as many etas as cjs");
 
   if (_num_j == 0)
     mooseError("Need to supply at least 1 phase concentration cj in KKSMultiPhaseConcentration",

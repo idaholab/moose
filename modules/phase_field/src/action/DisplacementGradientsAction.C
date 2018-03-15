@@ -66,7 +66,8 @@ DisplacementGradientsAction::act()
   {
     unsigned int ndisp = _displacements.size();
     if (ndisp * ndisp != ngrad)
-      mooseError("Number of displacement gradient variables must be the square of the number of "
+      paramError("displacement_gradients",
+                 "Number of displacement gradient variables must be the square of the number of "
                  "displacement variables.");
 
     // Loop through the displacements
