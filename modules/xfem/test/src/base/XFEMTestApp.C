@@ -66,8 +66,9 @@ XFEMTestApp__registerObjects(Factory & factory)
   XFEMTestApp::registerObjects(factory);
 }
 void
-XFEMTestApp::registerObjects(Factory & /*factory*/)
+XFEMTestApp::registerObjects(Factory & factory)
 {
+  Registry::registerObjectsTo(factory, {"XFEMTestApp"});
 }
 
 // External entry point for dynamic syntax association
@@ -77,8 +78,9 @@ XFEMTestApp__associateSyntax(Syntax & syntax, ActionFactory & action_factory)
   XFEMTestApp::associateSyntax(syntax, action_factory);
 }
 void
-XFEMTestApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & /*action_factory*/)
+XFEMTestApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & action_factory)
 {
+  Registry::registerActionsTo(action_factory, {"XFEMTestApp"});
 }
 
 // External entry point for dynamic execute flag registration

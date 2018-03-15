@@ -65,8 +65,9 @@ PorousFlowTestApp__registerObjects(Factory & factory)
   PorousFlowTestApp::registerObjects(factory);
 }
 void
-PorousFlowTestApp::registerObjects(Factory & /*factory*/)
+PorousFlowTestApp::registerObjects(Factory & factory)
 {
+  Registry::registerObjectsTo(factory, {"PorousFlowTestApp"});
 }
 
 // External entry point for dynamic syntax association
@@ -76,8 +77,9 @@ PorousFlowTestApp__associateSyntax(Syntax & syntax, ActionFactory & action_facto
   PorousFlowTestApp::associateSyntax(syntax, action_factory);
 }
 void
-PorousFlowTestApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & /*action_factory*/)
+PorousFlowTestApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & action_factory)
 {
+  Registry::registerActionsTo(action_factory, {"PorousFlowTestApp"});
 }
 
 // External entry point for dynamic execute flag registration

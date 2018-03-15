@@ -9,6 +9,8 @@
 
 #include "TestSampler.h"
 
+registerMooseObject("StochasticToolsTestApp", TestSampler);
+
 template <>
 InputParameters
 validParams<TestSampler>()

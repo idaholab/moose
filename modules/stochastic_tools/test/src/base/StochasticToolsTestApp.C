@@ -11,8 +11,6 @@
 #include "Moose.h"
 #include "AppFactory.h"
 #include "MooseSyntax.h"
-#include "TestDistributionPostprocessor.h"
-#include "TestSampler.h"
 
 template <>
 InputParameters
@@ -67,8 +65,7 @@ StochasticToolsTestApp__registerObjects(Factory & factory)
 void
 StochasticToolsTestApp::registerObjects(Factory & factory)
 {
-  registerPostprocessor(TestDistributionPostprocessor);
-  registerUserObject(TestSampler);
+  Registry::registerObjectsTo(factory, {"StochasticToolsTestApp"});
 }
 
 // External entry point for dynamic syntax association
@@ -78,8 +75,9 @@ StochasticToolsTestApp__associateSyntax(Syntax & syntax, ActionFactory & action_
   StochasticToolsTestApp::associateSyntax(syntax, action_factory);
 }
 void
-StochasticToolsTestApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & /*action_factory*/)
+StochasticToolsTestApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & action_factory)
 {
+  Registry::registerActionsTo(action_factory, {"StochasticToolsTestApp"});
 }
 
 // External entry point for dynamic execute flag registration

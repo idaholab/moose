@@ -65,8 +65,9 @@ SolidMechanicsTestApp__registerObjects(Factory & factory)
   SolidMechanicsTestApp::registerObjects(factory);
 }
 void
-SolidMechanicsTestApp::registerObjects(Factory & /*factory*/)
+SolidMechanicsTestApp::registerObjects(Factory & factory)
 {
+  Registry::registerObjectsTo(factory, {"SolidMechanicsTestApp"});
 }
 
 // External entry point for dynamic syntax association
@@ -76,8 +77,9 @@ SolidMechanicsTestApp__associateSyntax(Syntax & syntax, ActionFactory & action_f
   SolidMechanicsTestApp::associateSyntax(syntax, action_factory);
 }
 void
-SolidMechanicsTestApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & /*action_factory*/)
+SolidMechanicsTestApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & action_factory)
 {
+  Registry::registerActionsTo(action_factory, {"SolidMechanicsTestApp"});
 }
 
 // External entry point for dynamic execute flag registration

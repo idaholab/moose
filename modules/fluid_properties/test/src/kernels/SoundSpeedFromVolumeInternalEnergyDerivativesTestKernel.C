@@ -9,6 +9,9 @@
 
 #include "SoundSpeedFromVolumeInternalEnergyDerivativesTestKernel.h"
 
+registerMooseObject("FluidPropertiesTestApp",
+                    SoundSpeedFromVolumeInternalEnergyDerivativesTestKernel);
+
 template <>
 InputParameters
 validParams<SoundSpeedFromVolumeInternalEnergyDerivativesTestKernel>()

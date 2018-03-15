@@ -9,6 +9,8 @@
 
 #include "MultiComponentFluidPropertiesMaterialPT.h"
 
+registerMooseObject("FluidPropertiesTestApp", MultiComponentFluidPropertiesMaterialPT);
+
 template <>
 InputParameters
 validParams<MultiComponentFluidPropertiesMaterialPT>()

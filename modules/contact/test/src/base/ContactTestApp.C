@@ -63,8 +63,9 @@ ContactTestApp__registerObjects(Factory & factory)
   ContactTestApp::registerObjects(factory);
 }
 void
-ContactTestApp::registerObjects(Factory & /*factory*/)
+ContactTestApp::registerObjects(Factory & factory)
 {
+  Registry::registerObjectsTo(factory, {"ContactTestApp"});
 }
 
 // External entry point for dynamic syntax association
@@ -74,8 +75,9 @@ ContactTestApp__associateSyntax(Syntax & syntax, ActionFactory & action_factory)
   ContactTestApp::associateSyntax(syntax, action_factory);
 }
 void
-ContactTestApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & /*action_factory*/)
+ContactTestApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & action_factory)
 {
+  Registry::registerActionsTo(action_factory, {"ContactTestApp"});
 }
 
 // External entry point for dynamic execute flag registration
