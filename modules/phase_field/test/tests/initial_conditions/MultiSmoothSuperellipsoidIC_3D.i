@@ -42,7 +42,6 @@
 []
 
 [Executioner]
-  # Preconditioned JFNK (default)
   type = Transient
   scheme = bdf2
   solve_type = PJFNK
