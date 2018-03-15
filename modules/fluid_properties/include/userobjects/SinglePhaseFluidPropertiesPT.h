@@ -153,7 +153,7 @@ public:
    * @param temperature fluid temperature (K)
    * @return viscosity (Pa.s)
    */
-  virtual Real mu_from_rho_T(Real density, Real temperature) const = 0;
+  virtual Real mu_from_rho_T(Real density, Real temperature) const;
 
   /**
    * Dynamic viscosity and its derivatives wrt density and temperature
@@ -169,7 +169,7 @@ public:
                                    Real ddensity_dT,
                                    Real & mu,
                                    Real & dmu_drho,
-                                   Real & dmu_dT) const = 0;
+                                   Real & dmu_dT) const;
 
   /**
    * Density and viscosity

@@ -85,3 +85,14 @@ SinglePhaseFluidPropertiesPT::henryConstantIAPWS_dT(
   Kh = p * std::exp(lnkh);
   dKh_dT = (p * dlnkh_dT + dp_dT) * std::exp(lnkh);
 }
+
+Real SinglePhaseFluidPropertiesPT::mu_from_rho_T(Real, Real) const
+{
+  mooseError(name(), ": mu_from_rho_T is not implemented.");
+}
+
+void
+SinglePhaseFluidPropertiesPT::mu_drhoT_from_rho_T(Real, Real, Real, Real &, Real &, Real &) const
+{
+  mooseError(name(), ": mu_drhoT_from_rho_T is not implemented.");
+}
