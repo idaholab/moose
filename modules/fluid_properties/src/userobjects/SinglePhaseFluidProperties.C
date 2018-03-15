@@ -30,3 +30,18 @@ SinglePhaseFluidProperties::gamma_from_v_e(Real v, Real e) const
 {
   return cp_from_v_e(v, e) / cv_from_v_e(v, e);
 }
+
+Real
+SinglePhaseFluidProperties::beta_from_p_T(Real p, Real T) const
+{
+  // The volumetric thermal expansion coefficient is defined as
+  //   1/v dv/dT)_p
+  // It is the fractional change rate of volume with respect to temperature change
+  // at constant pressure. Here it is coded as
+  //   - 1/rho drho/dT)_p
+  // using chain rule with v = v(rho)
+
+  Real rho, drho_dp, drho_dT;
+  rho_from_p_T(p, T, rho, drho_dp, drho_dT);
+  return -drho_dT / rho;
+}
