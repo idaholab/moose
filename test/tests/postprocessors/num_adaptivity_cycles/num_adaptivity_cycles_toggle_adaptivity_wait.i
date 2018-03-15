@@ -54,7 +54,6 @@
   num_steps = 4
   dt = 1
 
-  # Preconditioned JFNK (default)
   solve_type = 'PJFNK'
 
 []

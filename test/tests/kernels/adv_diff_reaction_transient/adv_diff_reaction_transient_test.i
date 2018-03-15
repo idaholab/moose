@@ -112,7 +112,6 @@
   scheme               = bdf2
   nl_rel_tol           = 1e-10
 
-  # Preconditioned JFNK (default)
   solve_type = 'PJFNK'
 
   petsc_options_iname  = '-pc_factor_levels -pc_factor_mat_ordering_type'

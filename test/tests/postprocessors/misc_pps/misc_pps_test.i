@@ -110,7 +110,6 @@
 []
 
 [Executioner]
-  # Preconditioned JFNK (default)
   type = Transient
   scheme = implicit-euler
   solve_type = PJFNK

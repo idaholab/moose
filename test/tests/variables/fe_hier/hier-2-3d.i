@@ -152,7 +152,6 @@
   type = Steady
   nl_rel_tol = 1e-11
 
-  # Preconditioned JFNK (default)
   solve_type = 'PJFNK'
 []
 
