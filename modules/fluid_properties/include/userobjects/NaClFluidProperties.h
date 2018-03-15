@@ -121,10 +121,6 @@ public:
   virtual void
   h_dpT(Real pressure, Real temperature, Real & h, Real & dh_dp, Real & dh_dT) const override;
 
-  virtual Real henryConstant(Real temperature) const override;
-
-  virtual void henryConstant_dT(Real temperature, Real & Kh, Real & dKh_dT) const override;
-
 protected:
   /// NaCl molar mass (kg/mol)
   const Real _Mnacl;
