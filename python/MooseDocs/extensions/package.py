@@ -24,7 +24,7 @@ class PackageExtension(command.CommandExtension):
 
         config = command.CommandExtension.defaultConfig()
         config['packages'] = (packages, "A dict of packages by name.")
-        config['link'] = (r'http://mooseframework.org/static/media/uploads/files',
+        config['link'] = (r'http://www.mooseframework.org/moose_packages',
                           "Location of packages.")
         return config
 
