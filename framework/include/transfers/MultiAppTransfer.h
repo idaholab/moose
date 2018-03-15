@@ -83,7 +83,9 @@ protected:
   std::vector<Point> _to_positions;
   std::vector<Point> _from_positions;
 
+  /// True if displaced mesh is used for the source mesh, otherwise false
   bool _displaced_source_mesh;
+  /// True if displaced mesh is used for the target mesh, otherwise false
   bool _displaced_target_mesh;
 
   /**

@@ -38,12 +38,6 @@ validParams<MultiAppNearestNodeTransfer>()
   params.addParam<BoundaryName>(
       "target_boundary",
       "The boundary we are transferring to (if not specified, whole domain is used).");
-  params.addParam<bool>("displaced_source_mesh",
-                        false,
-                        "Whether or not to use the displaced mesh for the source mesh.");
-  params.addParam<bool>("displaced_target_mesh",
-                        false,
-                        "Whether or not to use the displaced mesh for the target mesh.");
   params.addParam<bool>("fixed_meshes",
                         false,
                         "Set to true when the meshes are not changing (ie, "
@@ -69,9 +63,6 @@ MultiAppNearestNodeTransfer::MultiAppNearestNodeTransfer(const InputParameters &
         declareRestartableData<std::map<dof_id_type, unsigned int>>("cached_from_ids")),
     _cached_qp_inds(declareRestartableData<std::map<dof_id_type, unsigned int>>("cached_qp_inds"))
 {
-  // This transfer does not work with DistributedMesh
-  _displaced_source_mesh = getParam<bool>("displaced_source_mesh");
-  _displaced_target_mesh = getParam<bool>("displaced_target_mesh");
 }
 
 void

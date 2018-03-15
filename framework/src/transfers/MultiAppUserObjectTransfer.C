@@ -38,18 +38,13 @@ validParams<MultiAppUserObjectTransfer>()
       "The UserObject you want to transfer values from.  Note: This might be a "
       "UserObject from your MultiApp's input file!");
 
-  params.addParam<bool>("displaced_target_mesh",
-                        false,
-                        "Whether or not to use the displaced mesh for the target mesh.");
-
   return params;
 }
 
 MultiAppUserObjectTransfer::MultiAppUserObjectTransfer(const InputParameters & parameters)
   : MultiAppTransfer(parameters),
     _to_var_name(getParam<AuxVariableName>("variable")),
-    _user_object_name(getParam<UserObjectName>("user_object")),
-    _displaced_target_mesh(getParam<bool>("displaced_target_mesh"))
+    _user_object_name(getParam<UserObjectName>("user_object"))
 {
   // This transfer does not work with DistributedMesh
   _fe_problem.mesh().errorIfDistributedMesh("MultiAppUserObjectTransfer");
