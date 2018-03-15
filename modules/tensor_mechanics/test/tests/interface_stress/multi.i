@@ -19,9 +19,13 @@
 []
 
 [Functions]
-  [./sphere]
+  [./sphere1]
     type = ParsedFunction
     value = 'r:=sqrt(x^2+y^2+z^2); if(r>1,0,1-3*r^2+2*r^3)'
+  [../]
+  [./sphere2]
+    type = ParsedFunction
+    value = 'r:=sqrt(x^2+y^2+z^2); 0.5-0.5*if(r>1,0,1-3*r^2+2*r^3)'
   [../]
 []
 
@@ -38,10 +42,18 @@
 []
 
 [AuxVariables]
-  [./eta]
+  [./eta1]
     [./InitialCondition]
       type = FunctionIC
-      function = sphere
+      function = sphere1
+    [../]
+    order = FIRST
+    family = LAGRANGE
+  [../]
+  [./eta2]
+    [./InitialCondition]
+      type = FunctionIC
+      function = sphere2
     [../]
     order = FIRST
     family = LAGRANGE
@@ -126,8 +138,9 @@
 [Materials]
   [./interface]
     type = ComputeInterfaceStress
-    v = eta
-    stress = 3.0
+    v = 'eta1 eta2'
+    stress   = '1.0 2.0'
+    op_range = '1.0 0.5'
   [../]
 []
 
@@ -137,6 +150,7 @@
 
 [Outputs]
   exodus = true
+  file_base = test_out
   execute_on = timestep_end
-  hide = 'dummy eta'
+  hide = 'dummy eta1 eta2'
 []
