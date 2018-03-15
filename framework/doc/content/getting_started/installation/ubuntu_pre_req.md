@@ -21,5 +21,5 @@ libhwloc-dev
 
 Download and install one of our redistributable packages according to your version of Ubuntu.
 
-  * Ubuntu 16.04: !moosepackage arch=ubuntu16.04 return=link!
-  * Ubuntu 14.04: !moosepackage arch=ubuntu14.04 return=link!
+- Ubuntu 16.04: !!package name arch=ubuntu16.04!!
+- Ubuntu 14.04: !!package name arch=ubuntu14.04!!
