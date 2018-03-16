@@ -96,11 +96,6 @@ SimpleFluidProperties::k_dpT(
   dk_dT = 0;
 }
 
-Real SimpleFluidProperties::k_from_rho_T(Real /*density*/, Real /*temperature*/) const
-{
-  return _thermal_conductivity;
-}
-
 Real SimpleFluidProperties::s(Real /*pressure*/, Real /*temperature*/) const
 {
   return _specific_entropy;
@@ -167,24 +162,6 @@ SimpleFluidProperties::mu_dpT(
 {
   mu = this->mu(pressure, temperature);
   dmu_dp = 0.0;
-  dmu_dT = 0.0;
-}
-
-Real SimpleFluidProperties::mu_from_rho_T(Real /*density*/, Real /*temperature*/) const
-{
-  return _viscosity;
-}
-
-void
-SimpleFluidProperties::mu_drhoT_from_rho_T(Real density,
-                                           Real temperature,
-                                           Real /*ddensity_dT*/,
-                                           Real & mu,
-                                           Real & dmu_drho,
-                                           Real & dmu_dT) const
-{
-  mu = this->mu_from_rho_T(density, temperature);
-  dmu_drho = 0.0;
   dmu_dT = 0.0;
 }
 

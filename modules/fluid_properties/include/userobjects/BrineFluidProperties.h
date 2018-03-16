@@ -84,17 +84,6 @@ public:
                        Real & dmu_dT,
                        Real & dmu_dx) const override;
 
-  virtual Real mu_from_rho_T(Real water_density, Real temperature, Real xnacl) const override;
-
-  virtual void mu_drhoTx(Real water_density,
-                         Real temperature,
-                         Real xnacl,
-                         Real dwater_density_dT,
-                         Real & mu,
-                         Real & dmu_drho,
-                         Real & dmu_dT,
-                         Real & dmu_dx) const override;
-
   virtual void
   rho_mu(Real pressure, Real temperature, Real xnacl, Real & rho, Real & mu) const override;
 
@@ -132,7 +121,7 @@ public:
                       Real & de_dT,
                       Real & de_dx) const override;
 
-  virtual Real k_from_rho_T(Real water_density, Real temperature, Real xnacl) const override;
+  virtual Real k(Real pressure, Real temperature, Real xnacl) const override;
 
   /**
    * Brine vapour pressure

@@ -152,30 +152,12 @@ MethaneFluidProperties::cv(Real pressure, Real temperature) const
 }
 
 Real
-MethaneFluidProperties::mu(Real pressure, Real temperature) const
-{
-  Real rho = this->rho(pressure, temperature);
-  return this->mu_from_rho_T(rho, temperature);
-}
-
-void
-MethaneFluidProperties::mu_dpT(
-    Real pressure, Real temperature, Real & mu, Real & dmu_dp, Real & dmu_dT) const
-{
-  Real rho, drho_dp, drho_dT;
-  this->rho_dpT(pressure, temperature, rho, drho_dp, drho_dT);
-  Real dmu_drho;
-  this->mu_drhoT_from_rho_T(rho, temperature, drho_dT, mu, dmu_drho, dmu_dT);
-  dmu_dp = dmu_drho * drho_dp;
-}
-
-Real
-MethaneFluidProperties::mu_from_rho_T(Real /*density*/, Real temperature) const
+MethaneFluidProperties::mu(Real /*pressure*/, Real temperature) const
 {
   // Check the temperature is in the range of validity (200 K <= T <= 1000 K)
   if (temperature <= 200.0 || temperature >= 1000.0)
     throw MooseException("Temperature " + Moose::stringify(temperature) +
-                         "K out of range (200K, 1000K) in " + name() + ": mu_from_rho_T()");
+                         "K out of range (200K, 1000K) in " + name() + ": mu()");
 
   const std::vector<Real> a{
       2.968267e-1, 3.711201e-2, 1.218298e-5, -7.02426e-8, 7.543269e-11, -2.7237166e-14};
@@ -188,18 +170,14 @@ MethaneFluidProperties::mu_from_rho_T(Real /*density*/, Real temperature) const
 }
 
 void
-MethaneFluidProperties::mu_drhoT_from_rho_T(Real density,
-                                            Real temperature,
-                                            Real /*ddensity_dT*/,
-                                            Real & mu,
-                                            Real & dmu_drho,
-                                            Real & dmu_dT) const
+MethaneFluidProperties::mu_dpT(
+    Real pressure, Real temperature, Real & mu, Real & dmu_dp, Real & dmu_dT) const
 {
   const std::vector<Real> a{
       2.968267e-1, 3.711201e-2, 1.218298e-5, -7.02426e-8, 7.543269e-11, -2.7237166e-14};
 
-  mu = this->mu_from_rho_T(density, temperature);
-  dmu_drho = 0.0;
+  mu = this->mu(pressure, temperature);
+  dmu_dp = 0.0;
 
   Real dmudt = 0.0;
   for (std::size_t i = 0; i < a.size(); ++i)
@@ -211,7 +189,7 @@ void
 MethaneFluidProperties::rho_mu(Real pressure, Real temperature, Real & rho, Real & mu) const
 {
   rho = this->rho(pressure, temperature);
-  mu = this->mu_from_rho_T(rho, temperature);
+  mu = this->mu(pressure, temperature);
 }
 
 void
@@ -229,21 +207,7 @@ MethaneFluidProperties::rho_mu_dpT(Real pressure,
 }
 
 Real
-MethaneFluidProperties::k(Real pressure, Real temperature) const
-{
-  Real rho = this->rho(pressure, temperature);
-  return this->k_from_rho_T(rho, temperature);
-}
-
-void
-MethaneFluidProperties::k_dpT(
-    Real /*pressure*/, Real /*temperature*/, Real & /*k*/, Real & /*dk_dp*/, Real & /*dk_dT*/) const
-{
-  mooseError(name(), ": k_dpT() is not implemented");
-}
-
-Real
-MethaneFluidProperties::k_from_rho_T(Real /*density*/, Real temperature) const
+MethaneFluidProperties::k(Real /*pressure*/, Real temperature) const
 {
   // Check the temperature is in the range of validity (200 K <= T <= 1000 K)
   if (temperature <= 200.0 || temperature >= 1000.0)
@@ -263,6 +227,36 @@ MethaneFluidProperties::k_from_rho_T(Real /*density*/, Real temperature) const
     kt += a[i] * std::pow(temperature, i);
 
   return kt;
+}
+
+void
+MethaneFluidProperties::k_dpT(
+    Real /*pressure*/, Real temperature, Real & k, Real & dk_dp, Real & dk_dT) const
+{
+  // Check the temperature is in the range of validity (200 K <= T <= 1000 K)
+  if (temperature <= 200.0 || temperature >= 1000.0)
+    throw MooseException("Temperature " + Moose::stringify(temperature) +
+                         "K out of range (200K, 1000K) in " + name() + ": k()");
+
+  const std::vector<Real> a{-1.3401499e-2,
+                            3.663076e-4,
+                            -1.82248608e-6,
+                            5.93987998e-9,
+                            -9.1405505e-12,
+                            6.7896889e-15,
+                            -1.95048736e-18};
+
+  Real kt = 0.0, dkt_dT = 0.0;
+
+  for (std::size_t i = 0; i < a.size(); ++i)
+    kt += a[i] * std::pow(temperature, i);
+
+  for (std::size_t i = 1; i < a.size(); ++i)
+    dkt_dT += i * a[i] * std::pow(temperature, i - 1);
+
+  k = kt;
+  dk_dp = 0.0;
+  dk_dT = dkt_dT;
 }
 
 Real

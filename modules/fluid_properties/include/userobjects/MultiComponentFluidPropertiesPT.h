@@ -88,35 +88,6 @@ public:
                        Real & dmu_dT,
                        Real & dmu_dx) const = 0;
 
-  /*
-   * Dynamic viscosity
-   * @param density fluid density (kg/m^3)
-   * @param temperature fluid temperature (K)
-   * @param xmass mass fraction (-)
-   * @return viscosity (Pa.s)
-   */
-  virtual Real mu_from_rho_T(Real density, Real temperature, Real xmass) const = 0;
-
-  /**
-   * Dynamic viscosity and its derivatives wrt density, temperature and mass fraction
-   * @param density fluid density (kg/m^3)
-   * @param temperature fluid temperature (K)
-   * @param xmass mass fraction (-)
-   * @param ddensity_dT derivative of density wrt temperature
-   * @param[out] mu viscosity (Pa.s)
-   * @param[out] dmu_drho derivative of viscosity wrt density
-   * @param[out] dmu_dT derivative of viscosity wrt temperature
-   * @param[out] dmu_dx derivative of viscosity wrt mass fraction
-   */
-  virtual void mu_drhoTx(Real density,
-                         Real temperature,
-                         Real xmass,
-                         Real ddensity_dT,
-                         Real & mu,
-                         Real & dmu_drho,
-                         Real & dmu_dT,
-                         Real & dmu_dx) const = 0;
-
   /**
    * Density and viscosity
    * @param pressure fluid pressure (Pa)
@@ -217,12 +188,12 @@ public:
 
   /**
    * Thermal conductivity
-   * @param water_density water density (kg/m^3)
+   * @param pressure fluid pressure (Pa)
    * @param temperature fluid temperature (K)
    * @param xmass mass fraction (-)
    * @return thermal conductivity (W/m/K)
    */
-  virtual Real k_from_rho_T(Real density, Real temperature, Real xmass) const = 0;
+  virtual Real k(Real pressure, Real temperature, Real xmass) const = 0;
 
   /**
    * Get UserObject for specified component
