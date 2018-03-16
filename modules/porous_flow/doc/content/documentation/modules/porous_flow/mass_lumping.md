@@ -4,8 +4,8 @@ Consider here just the fluid-flow equation, as the heat-energy equation is analo
 time-derivative term is discretised as
 
 \begin{equation}
-\psi \frac{M^{\kappa} - M^{\kappa}_{\mathrm{old}}}{\mathrm{d}t} \ .
 \label{eq:lump_begin}
+\psi \frac{M^{\kappa} - M^{\kappa}_{\mathrm{old}}}{\mathrm{d}t} \ .
 \end{equation}
 
 Here $\psi$ is the test function that we are integrating against.  An alternative discretisation

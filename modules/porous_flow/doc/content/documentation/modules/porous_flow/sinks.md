@@ -2,6 +2,7 @@
 A number of sources/sinks are available in Porous Flow, implemented as `DiracKernels`.
 
 ## Constant point source
+
 [`PorousFlowSquarePulsePointSource`](/PorousFlowSquarePulsePointSource.md).
 
 A constant mass point source that adds (removes) fluid at a constant mass flux rate for times between
@@ -16,8 +17,8 @@ Polyline sinks and sources are modelled as sequences of discrete points:
 \end{equation}
 The sink is
 \begin{equation}
-s = \sum_{i}f(P_{i})w_{i}\delta(x - x_{i}) \ .
 \label{eq:line_sink}
+s = \sum_{i}f(P_{i})w_{i}\delta(x - x_{i}) \ .
 \end{equation}
 
 Here $s$ is a volume source, measured in kg.m$^{-3}$.s$^{-1}$ (or J.m$^{-3}$.s$^{-1}$ for heat flow),
@@ -33,8 +34,8 @@ enumerated below. The convention followed is:
 The input parameters for each PorousFlow line sink involve a plain text file whose lines are
 space-separated quantities:
 \begin{equation}
-{\mathtt{w_{i}\ x_{i}\ y_{i}\ z_{i}}}
 \label{eq:bh_plaintext_format}
+{\mathtt{w_{i}\ x_{i}\ y_{i}\ z_{i}}}
 \end{equation}
 
 The weighting terms, $w_{i}$, are for user convenience, but for the Peaceman borehole case they are
@@ -58,6 +59,7 @@ For instance, a fluid sink may extract fluid at a given rate, and therefore in a
 includes, the same sink multiplied by fluid enthalpy should be applied to the temperature variable.
 
 ### Poly-line sinks as functions of porepressure or temperature
+
 [`PorousFlowPolyLineSink`](/PorousFlowPolyLineSink.md).
 
 A poly-line sink is a special case of the general line sink.  The function, $f$ in
@@ -66,9 +68,9 @@ In addition, a multiplication by the line-length associated to $x_{i}$ is also p
 Specifically:
 
 \begin{equation}
+\label{eq:pls}
 f(P_{i}) = \frac{1}{2}\left( |x_{i} - x_{i-1}| + |x_{i} - x_{i+1}|
 \right) L(P_{i}) \ ,
-\label{eq:pls}
 \end{equation}
 where $L$ is a piecewise-linear function, specified by the user in the MOOSE input file.
 
@@ -96,6 +98,7 @@ into the piecewise linear function, $L$.  Three standard types of $L$ are used i
   limited.  This can be modelled by using a piecewise linear $L$ that does not exceed given limits.
 
 ## Peaceman Boreholes
+
 [`PorousFlowPeacemanBorehole`](/PorousFlowPeacemanBorehole.md)
 
 Wellbores are implemented using the method first described by [citet:peaceman1983].  Here $f$ is a

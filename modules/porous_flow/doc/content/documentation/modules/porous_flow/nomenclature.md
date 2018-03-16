@@ -39,6 +39,9 @@
 | $\gamma_{\beta}^{i}$ | dimensionless | Activity coefficient of species $i$ in phase $\beta$ |
 | $h_{\beta}$ | J.kg$^{-1}$ | Specific enthalpy of fluid phase $\beta$ |
 | $H_{\kappa}$ | Pa | Henry coefficient for species $\kappa$ which describes the solubility of the species in the aqueous phase |
+| $I_{m}$ | mol.L$^{-1}$.s$^{-1}$ | Mineral reaction rate |
+| $I_{\mathrm{chem}}$ | kg.m$^{-3}$.s$^{-1}$ | Chemical precipitation and dissolution rate |
+| $\kappa$ | dimensionless | Index representing species.  For example, $\kappa$ might parameterise water ($\kappa=0$), air ($\kappa=1$), and H$_{2}$ ($\kappa=2$).  It parameterises things that cannot be decomposed into other species, but can change phase.  For instance, sometimes it might be appropriate to consider air as a single species, while at other times it might be appropriate to consider it to be a mixture of nitrogen and oxygen ($\kappa=0$ and $\kappa=1$, say) |
 | $k$ | m$^{2}$ | Permeability tensor of rock |
 | $k_{\mathrm{r,}\beta}$ | dimensionless | Relative permeability of phase $\beta$. This is a nonlinear function of the independent variables.  Often it is just a function of the phase's saturation, but with Klinkenberg effects it will be a function of the gas pressure too.  In the single-phase, fully-saturated case it is unity  |
 | $K$ | Pa | Bulk modulus of the drained porous skeleton.  In the anisotropic situation $1/K = = \delta_{ij}\delta_{kl}C_{ijkl}$ |
