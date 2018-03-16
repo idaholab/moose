@@ -387,8 +387,7 @@ TEST_F(PorousFlowBrineCO2Test, liquidProperties)
 
   Real density = 1.0 / (z / co2_partial_density + (1.0 - z) / brine_density);
 
-  Real water_density = _water_fp->rho(p, T);
-  Real viscosity = _brine_fp->mu_from_rho_T(water_density, T, xnacl);
+  Real viscosity = _brine_fp->mu(p, T, xnacl);
 
   ABS_TEST("liquid density", liquid_density, density, 1.0e-12);
   ABS_TEST("liquid viscosity", liquid_viscosity, viscosity, 1.0e-12);
