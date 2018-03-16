@@ -291,5 +291,7 @@ PorousFlowSinglePhaseBase::addDictator()
   params.set<std::vector<VariableName>>("porous_flow_vars") = pf_vars;
   params.set<unsigned int>("number_fluid_phases") = 1;
   params.set<unsigned int>("number_fluid_components") = _num_mass_fraction_vars + 1;
+  params.set<unsigned int>("number_aqueous_equilibrium") = _num_aqueous_equilibrium;
+  params.set<unsigned int>("number_aqueous_kinetic") = _num_aqueous_kinetic;
   _problem->addUserObject(uo_type, uo_name, params);
 }

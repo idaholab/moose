@@ -1,0 +1,72 @@
+[Tests]
+  [./00]
+    type = Exodiff
+    input = '00.i'
+    exodiff = '3D_mesh.e'
+  [../]
+  [./00_2D]
+    type = Exodiff
+    input = '00_2D.i'
+    exodiff = '2D_mesh.e'
+  [../]
+  [./01]
+    type = Exodiff
+    input = '01.i'
+    exodiff = '01_out.e'
+  [../]
+  [./03]
+    type = Exodiff
+    input = '03.i'
+    exodiff = '03_out.e'
+  [../]
+  [./04]
+    type = Exodiff
+    input = '04.i'
+    exodiff = '04_out.e'
+    abs_zero = 1E-6
+    heavy = true
+  [../]
+  [./05]
+    type = Exodiff
+    input = '05.i'
+    exodiff = '05_out.e'
+    abs_zero = 1E-6
+    heavy = true
+  [../]
+  [./05_tabulated]
+    type = Exodiff
+    input = '05_tabulated.i'
+    exodiff = '05_tabulated_out.e'
+    abs_zero = 1E-6
+    heavy = true
+  [../]
+  [./06]
+    type = Exodiff
+    input = '06.i'
+    exodiff = '06_out.e'
+  [../]
+  [./07]
+    type = Exodiff
+    input = '07.i'
+    exodiff = '07_out.e'
+    heavy = true
+  [../]
+  [./08]
+    type = Exodiff
+    input = '08.i'
+    exodiff = '08_out.e'
+  [../]
+  [./10]
+    type = Exodiff
+    input = '10.i'
+    exodiff = '10_out.e'
+  [../]
+  [./11]
+    type = Exodiff
+    input = '11.i'
+    exodiff = '11_out.e'
+    cli_args = 'Executioner/end_time=1E3'
+    abs_zero = 1E-3
+    heavy = true
+  [../]
+[]

@@ -7,9 +7,10 @@ This `Kernel` implements the residual
   \phi_{\mathrm{old}} \sum_{m}\nu_{m}\rho_{m}I_{m} \ .
 \end{equation*}
 In this equation, $\phi$ is the porosity (only the *old* value is used), the sum over $m$ is a sum
-over all the precipitated-or-dissolved (`PreDis`) mineral species, $\nu_{m}$ are stoichiometric
-coefficients, $\rho_{m}$ is the density of a solid lump of the mineral, and $I_{m}$ is the mineral
-reaction rate ($m^{3}.m^{-3}.s^{-1}$) which is computed by
+over all the precipitated-or-dissolved (`PreDis`) mineral species,
+$\nu_{m}$ are stoichiometric coefficients, $\rho_{m}$ is the density
+of a solid lump of the mineral, and $I_{m}$ is the mineral
+reaction rate (m$^{3}$(precipitate)/m$^{3}$(solution).s$^{-1}$) which is computed by
 [PorousFlowAqueousPreDisChemistry](PorousFlowAqueousPreDisChemistry.md).
 
 Details concerning precipitation-dissolution kinetic chemistry may be found in the
