@@ -16,4 +16,4 @@ git
 
 Download and install one our redistributable packages according to your version of OpenSUSE.
 
-  * OpenSuSE Leap: !moosepackage arch=opensuseleap return=link!
+  * OpenSuSE Leap: !!package name arch=opensuseleap!!
