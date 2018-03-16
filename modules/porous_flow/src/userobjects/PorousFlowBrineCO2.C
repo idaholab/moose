@@ -279,19 +279,14 @@ PorousFlowBrineCO2::liquidProperties(Real pressure,
       (dXco2_dz / brine_density - dXco2_dz / co2_partial_density) * liquid_density * liquid_density;
 
   // Assume that liquid viscosity is just the brine viscosity
-  // Note: brine viscosity (and derivatives) requires water density (and derivatives)
-  Real water_density, dwater_density_dp, dwater_density_dT;
-  _water_fp.rho_dpT(pressure, temperature, water_density, dwater_density_dp, dwater_density_dT);
-
-  Real liquid_viscosity, dliquid_viscosity_drho, dliquid_viscosity_dT, dliquid_viscosity_dx;
-  _brine_fp.mu_drhoTx(water_density,
-                      temperature,
-                      xnacl,
-                      dwater_density_dT,
-                      liquid_viscosity,
-                      dliquid_viscosity_drho,
-                      dliquid_viscosity_dT,
-                      dliquid_viscosity_dx);
+  Real liquid_viscosity, dliquid_viscosity_dp, dliquid_viscosity_dT, dliquid_viscosity_dx;
+  _brine_fp.mu_dpTx(pressure,
+                    temperature,
+                    xnacl,
+                    liquid_viscosity,
+                    dliquid_viscosity_dp,
+                    dliquid_viscosity_dT,
+                    dliquid_viscosity_dx);
 
   // Save the values to the FluidStateProperties object
   liquid.density = liquid_density;
@@ -300,7 +295,7 @@ PorousFlowBrineCO2::liquidProperties(Real pressure,
   liquid.ddensity_dz = dliquid_density_dz;
 
   liquid.viscosity = liquid_viscosity;
-  liquid.dviscosity_dp = dliquid_viscosity_drho * dwater_density_dp;
+  liquid.dviscosity_dp = dliquid_viscosity_dp;
   liquid.dviscosity_dT = dliquid_viscosity_dT;
   liquid.dviscosity_dz = 0.0;
 }
