@@ -19,7 +19,6 @@ InputParameters
 validParams<MethaneFluidProperties>()
 {
   InputParameters params = validParams<SinglePhaseFluidPropertiesPT>();
-  params.addParam<Real>("beta", 0, "Coefficient of thermal expansion");
   params.addClassDescription("Fluid properties for methane (CH4)");
   return params;
 }
@@ -29,8 +28,7 @@ MethaneFluidProperties::MethaneFluidProperties(const InputParameters & parameter
     _Mch4(16.0425e-3),
     _p_critical(4.5992e6),
     _T_critical(190.564),
-    _rho_critical(162.66),
-    _beta(getParam<Real>("beta"))
+    _rho_critical(162.66)
 {
 }
 
@@ -328,8 +326,6 @@ MethaneFluidProperties::h_dpT(
   // convert to J/kg/K by multiplying by 1000
   dh_dT = dhdt * 1000.0;
 }
-
-Real MethaneFluidProperties::beta(Real /*pressure*/, Real /*temperature*/) const { return _beta; }
 
 Real
 MethaneFluidProperties::henryConstant(Real temperature) const

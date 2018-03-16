@@ -151,8 +151,6 @@ public:
 
   virtual Real s(Real pressure, Real temperature) const override;
 
-  virtual Real beta(Real pressure, Real temperature) const override;
-
   virtual Real henryConstant(Real temperature) const override;
 
   virtual void henryConstant_dT(Real temperature, Real & Kh, Real & dKh_dT) const override;
