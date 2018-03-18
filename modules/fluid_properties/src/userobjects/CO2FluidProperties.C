@@ -756,8 +756,9 @@ CO2FluidProperties::cv(Real pressure, Real temperature) const
 Real
 CO2FluidProperties::k(Real pressure, Real temperature) const
 {
-  Real rho = this->rho(pressure, temperature);
-  return this->k_from_rho_T(rho, temperature);
+  // Require density first
+  Real density = rho(pressure, temperature);
+  return this->k_from_rho_T(density, temperature);
 }
 
 void
