@@ -12,6 +12,8 @@
 #include "SubProblem.h"
 #include "MooseMesh.h"
 
+registerMooseObject("SolidMechanicsApp", HomogenizedElasticConstants);
+
 template <>
 InputParameters
 validParams<HomogenizedElasticConstants>()

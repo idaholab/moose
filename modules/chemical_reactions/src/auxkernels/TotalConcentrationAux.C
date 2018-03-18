@@ -6,6 +6,8 @@
 /****************************************************************/
 #include "TotalConcentrationAux.h"
 
+registerMooseObject("ChemicalReactionsApp", TotalConcentrationAux);
+
 template <>
 InputParameters
 validParams<TotalConcentrationAux>()

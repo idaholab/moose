@@ -15,6 +15,8 @@
 
 #include "libmesh/string_to_enum.h"
 
+registerMooseAction("PhaseFieldApp", CHPFCRFFSplitVariablesAction, "add_variable");
+
 template <>
 InputParameters
 validParams<CHPFCRFFSplitVariablesAction>()

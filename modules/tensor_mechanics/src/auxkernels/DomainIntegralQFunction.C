@@ -9,6 +9,8 @@
 
 #include "DomainIntegralQFunction.h"
 
+registerMooseObject("TensorMechanicsApp", DomainIntegralQFunction);
+
 template <>
 InputParameters
 validParams<DomainIntegralQFunction>()

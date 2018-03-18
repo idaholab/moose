@@ -12,6 +12,8 @@
 #include "FEProblem.h"
 #include "Conversion.h"
 
+registerMooseAction("TensorMechanicsApp", CavityPressureAction, "add_bc");
+
 template <>
 InputParameters
 validParams<CavityPressureAction>()

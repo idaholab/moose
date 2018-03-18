@@ -9,6 +9,8 @@
 
 #include "GBDependentDiffusivity.h"
 
+registerMooseObject("PhaseFieldApp", GBDependentDiffusivity);
+
 template <>
 InputParameters
 validParams<GBDependentDiffusivity>()

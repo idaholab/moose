@@ -12,6 +12,8 @@
 
 #include <fstream>
 
+registerMooseObject("PhaseFieldApp", EBSDMesh);
+
 template <>
 InputParameters
 validParams<EBSDMesh>()

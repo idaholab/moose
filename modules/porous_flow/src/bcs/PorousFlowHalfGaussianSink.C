@@ -9,6 +9,8 @@
 
 #include "PorousFlowHalfGaussianSink.h"
 
+registerMooseObject("PorousFlowApp", PorousFlowHalfGaussianSink);
+
 template <>
 InputParameters
 validParams<PorousFlowHalfGaussianSink>()

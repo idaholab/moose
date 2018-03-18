@@ -9,6 +9,8 @@
 
 #include "LevelSetCFLCondition.h"
 
+registerMooseObject("LevelSetApp", LevelSetCFLCondition);
+
 template <>
 InputParameters
 validParams<LevelSetCFLCondition>()

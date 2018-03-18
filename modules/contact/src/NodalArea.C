@@ -16,6 +16,8 @@
 #include "libmesh/numeric_vector.h"
 #include "libmesh/quadrature.h"
 
+registerMooseObject("ContactApp", NodalArea);
+
 template <>
 InputParameters
 validParams<NodalArea>()

@@ -17,6 +17,8 @@
 // C++ includes
 #include <limits>
 
+registerMooseObject("PorousFlowApp", PorousFlowMassTimeDerivative);
+
 template <>
 InputParameters
 validParams<PorousFlowMassTimeDerivative>()

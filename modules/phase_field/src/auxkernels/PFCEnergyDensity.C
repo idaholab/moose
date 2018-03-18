@@ -10,6 +10,8 @@
 #include "PFCEnergyDensity.h"
 #include "libmesh/utility.h"
 
+registerMooseObject("PhaseFieldApp", PFCEnergyDensity);
+
 template <>
 InputParameters
 validParams<PFCEnergyDensity>()

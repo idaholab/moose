@@ -10,6 +10,8 @@
 #include "FluxBasedStrainIncrement.h"
 #include "libmesh/quadrature.h"
 
+registerMooseObject("TensorMechanicsApp", FluxBasedStrainIncrement);
+
 template <>
 InputParameters
 validParams<FluxBasedStrainIncrement>()

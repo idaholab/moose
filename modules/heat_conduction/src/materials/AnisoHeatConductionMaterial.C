@@ -13,6 +13,8 @@
 
 #include "libmesh/quadrature.h"
 
+registerMooseObject("HeatConductionApp", AnisoHeatConductionMaterial);
+
 template <>
 InputParameters
 validParams<AnisoHeatConductionMaterial>()

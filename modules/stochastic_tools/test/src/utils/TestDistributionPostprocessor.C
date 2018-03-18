@@ -10,6 +10,8 @@
 #include "TestDistributionPostprocessor.h"
 #include "Distribution.h"
 
+registerMooseObject("StochasticToolsTestApp", TestDistributionPostprocessor);
+
 template <>
 InputParameters
 validParams<TestDistributionPostprocessor>()

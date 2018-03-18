@@ -9,6 +9,8 @@
 
 #include "NaClFluidProperties.h"
 
+registerMooseObject("FluidPropertiesApp", NaClFluidProperties);
+
 template <>
 InputParameters
 validParams<NaClFluidProperties>()

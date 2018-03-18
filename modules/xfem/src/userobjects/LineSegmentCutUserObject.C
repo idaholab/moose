@@ -9,6 +9,8 @@
 
 #include "LineSegmentCutUserObject.h"
 
+registerMooseObject("XFEMApp", LineSegmentCutUserObject);
+
 template <>
 InputParameters
 validParams<LineSegmentCutUserObject>()

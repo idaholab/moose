@@ -10,6 +10,8 @@
 #include "CHPFCRFF.h"
 #include "MathUtils.h"
 
+registerMooseObject("PhaseFieldApp", CHPFCRFF);
+
 template <>
 InputParameters
 validParams<CHPFCRFF>()

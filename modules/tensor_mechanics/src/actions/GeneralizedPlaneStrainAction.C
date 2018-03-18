@@ -14,6 +14,12 @@
 #include "MooseMesh.h"
 #include "NonlinearSystemBase.h"
 
+registerMooseAction("TensorMechanicsApp", GeneralizedPlaneStrainAction, "add_scalar_kernel");
+
+registerMooseAction("TensorMechanicsApp", GeneralizedPlaneStrainAction, "add_kernel");
+
+registerMooseAction("TensorMechanicsApp", GeneralizedPlaneStrainAction, "add_user_object");
+
 template <>
 InputParameters
 validParams<GeneralizedPlaneStrainAction>()

@@ -12,6 +12,8 @@
 // MOOSE includes
 #include "MooseVariable.h"
 
+registerMooseObject("PhaseFieldApp", PFCElementEnergyIntegral);
+
 template <>
 InputParameters
 validParams<PFCElementEnergyIntegral>()

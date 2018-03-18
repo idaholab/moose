@@ -12,6 +12,8 @@
 #include "FEProblem.h"
 #include "MooseMesh.h"
 
+registerMooseObject("TensorMechanicsApp", ComputeAxisymmetricRZFiniteStrain);
+
 template <>
 InputParameters
 validParams<ComputeAxisymmetricRZFiniteStrain>()

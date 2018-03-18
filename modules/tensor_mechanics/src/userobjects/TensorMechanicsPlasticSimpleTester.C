@@ -9,6 +9,8 @@
 
 #include "TensorMechanicsPlasticSimpleTester.h"
 
+registerMooseObject("TensorMechanicsApp", TensorMechanicsPlasticSimpleTester);
+
 template <>
 InputParameters
 validParams<TensorMechanicsPlasticSimpleTester>()

@@ -15,6 +15,8 @@
 #include "FEProblem.h"
 #include "MooseMesh.h"
 
+registerMooseAction("NavierStokesApp", AddNavierStokesBCsAction, "add_navier_stokes_bcs");
+
 template <>
 InputParameters
 validParams<AddNavierStokesBCsAction>()

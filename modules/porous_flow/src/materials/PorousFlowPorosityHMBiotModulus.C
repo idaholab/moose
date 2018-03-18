@@ -10,6 +10,8 @@
 #include "PorousFlowPorosityHMBiotModulus.h"
 #include "libmesh/utility.h"
 
+registerMooseObject("PorousFlowApp", PorousFlowPorosityHMBiotModulus);
+
 template <>
 InputParameters
 validParams<PorousFlowPorosityHMBiotModulus>()

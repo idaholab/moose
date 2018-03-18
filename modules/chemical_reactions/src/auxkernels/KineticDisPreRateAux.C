@@ -9,6 +9,8 @@
 
 #include "KineticDisPreRateAux.h"
 
+registerMooseObject("ChemicalReactionsApp", KineticDisPreRateAux);
+
 template <>
 InputParameters
 validParams<KineticDisPreRateAux>()

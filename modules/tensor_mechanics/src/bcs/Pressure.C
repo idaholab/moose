@@ -11,6 +11,8 @@
 #include "Function.h"
 #include "MooseError.h"
 
+registerMooseObject("TensorMechanicsApp", Pressure);
+
 template <>
 InputParameters
 validParams<Pressure>()

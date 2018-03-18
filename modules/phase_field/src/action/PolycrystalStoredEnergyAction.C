@@ -12,6 +12,8 @@
 #include "Conversion.h"
 #include "FEProblem.h"
 
+registerMooseAction("PhaseFieldApp", PolycrystalStoredEnergyAction, "add_kernel");
+
 template <>
 InputParameters
 validParams<PolycrystalStoredEnergyAction>()

@@ -9,6 +9,8 @@
 
 #include "WedgeFunction.h"
 
+registerMooseObject("NavierStokesApp", WedgeFunction);
+
 template <>
 InputParameters
 validParams<WedgeFunction>()

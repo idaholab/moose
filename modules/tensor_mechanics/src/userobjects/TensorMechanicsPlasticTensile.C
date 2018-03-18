@@ -10,6 +10,8 @@
 #include "TensorMechanicsPlasticTensile.h"
 #include "libmesh/utility.h"
 
+registerMooseObject("TensorMechanicsApp", TensorMechanicsPlasticTensile);
+
 template <>
 InputParameters
 validParams<TensorMechanicsPlasticTensile>()

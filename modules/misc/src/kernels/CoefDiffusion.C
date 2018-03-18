@@ -9,6 +9,8 @@
 
 #include "CoefDiffusion.h"
 
+registerMooseObject("MiscApp", CoefDiffusion);
+
 template <>
 InputParameters
 validParams<CoefDiffusion>()

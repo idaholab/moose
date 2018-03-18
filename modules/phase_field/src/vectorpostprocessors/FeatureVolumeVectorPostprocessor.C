@@ -18,6 +18,8 @@
 
 #include "libmesh/quadrature.h"
 
+registerMooseObject("PhaseFieldApp", FeatureVolumeVectorPostprocessor);
+
 template <>
 InputParameters
 validParams<FeatureVolumeVectorPostprocessor>()

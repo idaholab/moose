@@ -11,6 +11,8 @@
 #include "Material.h"
 #include "SymmElasticityTensor.h"
 
+registerMooseObject("SolidMechanicsApp", HomogenizationKernel);
+
 template <>
 InputParameters
 validParams<HomogenizationKernel>()

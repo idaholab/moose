@@ -12,6 +12,8 @@
 #include "GrainForceAndTorqueInterface.h"
 #include "RotationTensor.h"
 
+registerMooseObject("PhaseFieldApp", EulerAngleUpdater);
+
 template <>
 InputParameters
 validParams<EulerAngleUpdater>()

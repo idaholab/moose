@@ -9,6 +9,8 @@
 
 #include "LevelSetOlssonVortex.h"
 
+registerMooseObject("LevelSetApp", LevelSetOlssonVortex);
+
 template <>
 InputParameters
 validParams<LevelSetOlssonVortex>()

@@ -10,6 +10,8 @@
 #include "SolidMechImplicitEuler.h"
 #include "SubProblem.h"
 
+registerMooseObject("SolidMechanicsApp", SolidMechImplicitEuler);
+
 template <>
 InputParameters
 validParams<SolidMechImplicitEuler>()

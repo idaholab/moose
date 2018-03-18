@@ -9,6 +9,8 @@
 
 #include "ComputeExtraStressConstant.h"
 
+registerMooseObject("TensorMechanicsApp", ComputeExtraStressConstant);
+
 template <>
 InputParameters
 validParams<ComputeExtraStressConstant>()

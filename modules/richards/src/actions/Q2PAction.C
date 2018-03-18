@@ -14,6 +14,14 @@
 #include "Parser.h"
 #include "libmesh/string_to_enum.h"
 
+registerMooseAction("RichardsApp", Q2PAction, "add_kernel");
+
+registerMooseAction("RichardsApp", Q2PAction, "add_aux_variable");
+
+registerMooseAction("RichardsApp", Q2PAction, "add_function");
+
+registerMooseAction("RichardsApp", Q2PAction, "add_postprocessor");
+
 template <>
 InputParameters
 validParams<Q2PAction>()

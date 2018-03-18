@@ -9,6 +9,8 @@
 
 #include "RegularSolutionFreeEnergy.h"
 
+registerMooseObject("PhaseFieldApp", RegularSolutionFreeEnergy);
+
 template <>
 InputParameters
 validParams<RegularSolutionFreeEnergy>()

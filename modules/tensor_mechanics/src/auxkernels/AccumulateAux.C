@@ -9,6 +9,8 @@
 
 #include "AccumulateAux.h"
 
+registerMooseObject("TensorMechanicsApp", AccumulateAux);
+
 template <>
 InputParameters
 validParams<AccumulateAux>()

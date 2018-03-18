@@ -9,6 +9,8 @@
 
 #include "NSMomentumInviscidSpecifiedPressureBC.h"
 
+registerMooseObject("NavierStokesApp", NSMomentumInviscidSpecifiedPressureBC);
+
 template <>
 InputParameters
 validParams<NSMomentumInviscidSpecifiedPressureBC>()

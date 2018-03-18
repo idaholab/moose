@@ -10,6 +10,8 @@
 #include "MethaneFluidProperties.h"
 #include "Conversion.h"
 
+registerMooseObject("FluidPropertiesApp", MethaneFluidProperties);
+
 template <>
 InputParameters
 validParams<MethaneFluidProperties>()

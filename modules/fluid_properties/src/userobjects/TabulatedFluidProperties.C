@@ -16,6 +16,8 @@
 #include <fstream>
 #include <ctime>
 
+registerMooseObject("FluidPropertiesApp", TabulatedFluidProperties);
+
 template <>
 InputParameters
 validParams<TabulatedFluidProperties>()

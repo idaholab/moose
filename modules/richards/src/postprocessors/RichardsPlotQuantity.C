@@ -10,6 +10,8 @@
 #include "RichardsPlotQuantity.h"
 #include "RichardsSumQuantity.h"
 
+registerMooseObject("RichardsApp", RichardsPlotQuantity);
+
 template <>
 InputParameters
 validParams<RichardsPlotQuantity>()

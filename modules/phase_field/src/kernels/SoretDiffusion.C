@@ -12,6 +12,8 @@
 // MOOSE includes
 #include "MooseVariable.h"
 
+registerMooseObject("PhaseFieldApp", SoretDiffusion);
+
 template <>
 InputParameters
 validParams<SoretDiffusion>()

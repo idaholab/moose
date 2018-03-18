@@ -14,6 +14,8 @@
 // MOOSE includes
 #include "FEProblem.h"
 
+registerMooseAction("NavierStokesApp", AddNavierStokesKernelsAction, "add_navier_stokes_kernels");
+
 template <>
 InputParameters
 validParams<AddNavierStokesKernelsAction>()

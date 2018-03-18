@@ -11,6 +11,8 @@
 #include "PorousFlowCapillaryPressure.h"
 #include "PorousFlowWaterNCG.h"
 
+registerMooseObject("PorousFlowApp", PorousFlowFluidStateWaterNCG);
+
 template <>
 InputParameters
 validParams<PorousFlowFluidStateWaterNCG>()

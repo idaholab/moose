@@ -9,6 +9,8 @@
 
 #include "ComputeVariableEigenstrain.h"
 
+registerMooseObject("TensorMechanicsApp", ComputeVariableEigenstrain);
+
 template <>
 InputParameters
 validParams<ComputeVariableEigenstrain>()

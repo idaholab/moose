@@ -9,6 +9,8 @@
 
 #include "HEVPEqvPlasticStrainRate.h"
 
+registerMooseObject("TensorMechanicsApp", HEVPEqvPlasticStrainRate);
+
 template <>
 InputParameters
 validParams<HEVPEqvPlasticStrainRate>()

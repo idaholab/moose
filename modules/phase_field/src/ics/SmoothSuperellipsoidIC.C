@@ -9,6 +9,8 @@
 
 #include "SmoothSuperellipsoidIC.h"
 
+registerMooseObject("PhaseFieldApp", SmoothSuperellipsoidIC);
+
 template <>
 InputParameters
 validParams<SmoothSuperellipsoidIC>()

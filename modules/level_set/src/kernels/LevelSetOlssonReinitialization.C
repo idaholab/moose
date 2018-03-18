@@ -10,6 +10,8 @@
 // MOOSE includes
 #include "LevelSetOlssonReinitialization.h"
 
+registerMooseObject("LevelSetApp", LevelSetOlssonReinitialization);
+
 template <>
 InputParameters
 validParams<LevelSetOlssonReinitialization>()

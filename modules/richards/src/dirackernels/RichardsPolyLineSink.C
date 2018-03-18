@@ -11,6 +11,8 @@
 
 #include <fstream>
 
+registerMooseObject("RichardsApp", RichardsPolyLineSink);
+
 template <>
 InputParameters
 validParams<RichardsPolyLineSink>()

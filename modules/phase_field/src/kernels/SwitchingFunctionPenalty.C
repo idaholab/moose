@@ -9,6 +9,8 @@
 
 #include "SwitchingFunctionPenalty.h"
 
+registerMooseObject("PhaseFieldApp", SwitchingFunctionPenalty);
+
 template <>
 InputParameters
 validParams<SwitchingFunctionPenalty>()

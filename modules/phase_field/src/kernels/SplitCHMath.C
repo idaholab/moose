@@ -9,6 +9,8 @@
 
 #include "SplitCHMath.h"
 
+registerMooseObject("PhaseFieldApp", SplitCHMath);
+
 template <>
 InputParameters
 validParams<SplitCHMath>()

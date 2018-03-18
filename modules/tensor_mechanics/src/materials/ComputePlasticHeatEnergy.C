@@ -9,6 +9,8 @@
 
 #include "ComputePlasticHeatEnergy.h"
 
+registerMooseObject("TensorMechanicsApp", ComputePlasticHeatEnergy);
+
 template <>
 InputParameters
 validParams<ComputePlasticHeatEnergy>()

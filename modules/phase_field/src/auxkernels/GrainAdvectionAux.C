@@ -9,6 +9,8 @@
 
 #include "GrainAdvectionAux.h"
 
+registerMooseObject("PhaseFieldApp", GrainAdvectionAux);
+
 template <>
 InputParameters
 validParams<GrainAdvectionAux>()

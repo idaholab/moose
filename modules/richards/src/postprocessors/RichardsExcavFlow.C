@@ -11,6 +11,8 @@
 #include "Function.h"
 #include "Material.h"
 
+registerMooseObject("RichardsApp", RichardsExcavFlow);
+
 template <>
 InputParameters
 validParams<RichardsExcavFlow>()

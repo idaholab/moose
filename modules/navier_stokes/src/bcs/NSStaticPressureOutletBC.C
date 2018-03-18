@@ -9,6 +9,8 @@
 
 #include "NSStaticPressureOutletBC.h"
 
+registerMooseObject("NavierStokesApp", NSStaticPressureOutletBC);
+
 template <>
 InputParameters
 validParams<NSStaticPressureOutletBC>()

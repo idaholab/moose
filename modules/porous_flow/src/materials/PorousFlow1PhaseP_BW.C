@@ -10,6 +10,8 @@
 #include "PorousFlow1PhaseP_BW.h"
 #include "libmesh/utility.h"
 
+registerMooseObject("PorousFlowApp", PorousFlow1PhaseP_BW);
+
 template <>
 InputParameters
 validParams<PorousFlow1PhaseP_BW>()

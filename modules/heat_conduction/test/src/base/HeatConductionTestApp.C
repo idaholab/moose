@@ -20,6 +20,8 @@ validParams<HeatConductionTestApp>()
   return params;
 }
 
+registerKnownLabel("HeatConductionTestApp");
+
 HeatConductionTestApp::HeatConductionTestApp(InputParameters parameters) : MooseApp(parameters)
 {
   Moose::registerObjects(_factory);
@@ -61,8 +63,9 @@ HeatConductionTestApp__registerObjects(Factory & factory)
   HeatConductionTestApp::registerObjects(factory);
 }
 void
-HeatConductionTestApp::registerObjects(Factory & /*factory*/)
+HeatConductionTestApp::registerObjects(Factory & factory)
 {
+  Registry::registerObjectsTo(factory, {"HeatConductionTestApp"});
 }
 
 // External entry point for dynamic syntax association
@@ -72,8 +75,9 @@ HeatConductionTestApp__associateSyntax(Syntax & syntax, ActionFactory & action_f
   HeatConductionTestApp::associateSyntax(syntax, action_factory);
 }
 void
-HeatConductionTestApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & /*action_factory*/)
+HeatConductionTestApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & action_factory)
 {
+  Registry::registerActionsTo(action_factory, {"HeatConductionTestApp"});
 }
 
 // External entry point for dynamic execute flag registration

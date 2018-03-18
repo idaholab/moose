@@ -13,6 +13,8 @@
 #include "ElementPairLocator.h"
 #include "FEProblem.h"
 
+registerMooseObject("XFEMApp", XFEMPressure);
+
 template <>
 InputParameters
 validParams<XFEMPressure>()

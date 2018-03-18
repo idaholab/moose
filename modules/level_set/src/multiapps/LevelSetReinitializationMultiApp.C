@@ -15,6 +15,8 @@
 // libMesh
 #include "libmesh/mesh_tools.h"
 
+registerMooseObject("LevelSetApp", LevelSetReinitializationMultiApp);
+
 template <>
 InputParameters
 validParams<LevelSetReinitializationMultiApp>()

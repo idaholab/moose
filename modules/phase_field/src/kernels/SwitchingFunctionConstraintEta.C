@@ -9,6 +9,8 @@
 
 #include "SwitchingFunctionConstraintEta.h"
 
+registerMooseObject("PhaseFieldApp", SwitchingFunctionConstraintEta);
+
 template <>
 InputParameters
 validParams<SwitchingFunctionConstraintEta>()

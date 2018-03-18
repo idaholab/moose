@@ -12,6 +12,8 @@
 #include "StressUpdateBase.h"
 #include "Conversion.h"
 
+registerMooseObject("TensorMechanicsApp", ComputeSmearedCrackingStress);
+
 template <>
 InputParameters
 validParams<ComputeSmearedCrackingStress>()

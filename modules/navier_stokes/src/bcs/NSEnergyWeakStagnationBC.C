@@ -12,6 +12,8 @@
 // FluidProperties includes
 #include "IdealGasFluidProperties.h"
 
+registerMooseObject("NavierStokesApp", NSEnergyWeakStagnationBC);
+
 template <>
 InputParameters
 validParams<NSEnergyWeakStagnationBC>()

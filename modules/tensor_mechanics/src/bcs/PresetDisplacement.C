@@ -10,6 +10,8 @@
 #include "PresetDisplacement.h"
 #include "Function.h"
 
+registerMooseObject("TensorMechanicsApp", PresetDisplacement);
+
 template <>
 InputParameters
 validParams<PresetDisplacement>()

@@ -19,6 +19,8 @@
 #include "libmesh/plane.h"
 #include "Function.h"
 
+registerMooseObject("XFEMApp", MeshCut3DUserObject);
+
 template <>
 InputParameters
 validParams<MeshCut3DUserObject>()

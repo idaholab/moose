@@ -15,6 +15,8 @@
 #include "Assembly.h"
 #include <limits>
 
+registerMooseObject("XFEMApp", XFEMRankTwoTensorMarkerUserObject);
+
 template <>
 InputParameters
 validParams<XFEMRankTwoTensorMarkerUserObject>()

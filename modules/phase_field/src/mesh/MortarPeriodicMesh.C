@@ -11,6 +11,8 @@
 
 #include "libmesh/mesh_modification.h"
 
+registerMooseObject("PhaseFieldApp", MortarPeriodicMesh);
+
 template <>
 InputParameters
 validParams<MortarPeriodicMesh>()

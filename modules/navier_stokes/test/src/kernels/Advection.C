@@ -10,6 +10,8 @@
 #include "Advection.h"
 #include "Function.h"
 
+registerMooseObject("NavierStokesTestApp", Advection);
+
 template <>
 InputParameters
 validParams<Advection>()

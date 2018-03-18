@@ -12,6 +12,8 @@
 #include "PorousFlowDictator.h"
 #include "NonlinearSystem.h"
 
+registerMooseObject("PorousFlowApp", PorousFlowDictator);
+
 template <>
 InputParameters
 validParams<PorousFlowDictator>()

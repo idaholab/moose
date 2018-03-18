@@ -19,6 +19,8 @@ ComputeFiniteStrain::decompositionType()
   return MooseEnum("TaylorExpansion EigenSolution", "TaylorExpansion");
 }
 
+registerMooseObject("TensorMechanicsApp", ComputeFiniteStrain);
+
 template <>
 InputParameters
 validParams<ComputeFiniteStrain>()

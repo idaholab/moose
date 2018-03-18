@@ -10,6 +10,8 @@
 #include "TensorMechanicsPlasticMeanCapTC.h"
 #include "libmesh/utility.h"
 
+registerMooseObject("TensorMechanicsApp", TensorMechanicsPlasticMeanCapTC);
+
 template <>
 InputParameters
 validParams<TensorMechanicsPlasticMeanCapTC>()

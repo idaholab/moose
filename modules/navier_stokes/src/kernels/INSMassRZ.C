@@ -9,6 +9,8 @@
 
 #include "INSMassRZ.h"
 
+registerMooseObject("NavierStokesApp", INSMassRZ);
+
 template <>
 InputParameters
 validParams<INSMassRZ>()

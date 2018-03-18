@@ -19,6 +19,8 @@
 * Yield stress is the point of intersection of these two curves.
 **/
 
+registerMooseObject("SolidMechanicsApp", IsotropicPowerLawHardening);
+
 template <>
 InputParameters
 validParams<IsotropicPowerLawHardening>()

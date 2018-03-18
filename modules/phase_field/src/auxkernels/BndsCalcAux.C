@@ -9,6 +9,8 @@
 
 #include "BndsCalcAux.h"
 
+registerMooseObject("PhaseFieldApp", BndsCalcAux);
+
 template <>
 InputParameters
 validParams<BndsCalcAux>()

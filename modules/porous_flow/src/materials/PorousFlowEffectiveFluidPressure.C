@@ -9,6 +9,8 @@
 
 #include "PorousFlowEffectiveFluidPressure.h"
 
+registerMooseObject("PorousFlowApp", PorousFlowEffectiveFluidPressure);
+
 template <>
 InputParameters
 validParams<PorousFlowEffectiveFluidPressure>()

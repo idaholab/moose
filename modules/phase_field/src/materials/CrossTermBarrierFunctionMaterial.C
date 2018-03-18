@@ -9,6 +9,8 @@
 
 #include "CrossTermBarrierFunctionMaterial.h"
 
+registerMooseObject("PhaseFieldApp", CrossTermBarrierFunctionMaterial);
+
 template <>
 InputParameters
 validParams<CrossTermBarrierFunctionMaterial>()

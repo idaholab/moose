@@ -14,6 +14,8 @@
 #include "PenetrationLocator.h"
 #include "NearestNodeLocator.h"
 
+registerMooseObject("ContactApp", ContactSlipDamper);
+
 template <>
 InputParameters
 validParams<ContactSlipDamper>()

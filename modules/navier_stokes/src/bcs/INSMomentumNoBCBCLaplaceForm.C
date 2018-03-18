@@ -10,6 +10,8 @@
 #include "INSMomentumNoBCBCLaplaceForm.h"
 #include "MooseMesh.h"
 
+registerMooseObject("NavierStokesApp", INSMomentumNoBCBCLaplaceForm);
+
 template <>
 InputParameters
 validParams<INSMomentumNoBCBCLaplaceForm>()

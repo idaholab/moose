@@ -10,6 +10,8 @@
 #include "DarcyFlux.h"
 #include "Material.h"
 
+registerMooseObject("RichardsApp", DarcyFlux);
+
 template <>
 InputParameters
 validParams<DarcyFlux>()

@@ -9,6 +9,8 @@
 
 #include "InterfaceDiffusionFluxMatch.h"
 
+registerMooseObject("PhaseFieldApp", InterfaceDiffusionFluxMatch);
+
 template <>
 InputParameters
 validParams<InterfaceDiffusionFluxMatch>()

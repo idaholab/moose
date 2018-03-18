@@ -10,6 +10,8 @@
 #include "PorousFlowCapillaryPressureRSC.h"
 #include "PorousFlowRogersStallybrassClements.h"
 
+registerMooseObject("PorousFlowApp", PorousFlowCapillaryPressureRSC);
+
 template <>
 InputParameters
 validParams<PorousFlowCapillaryPressureRSC>()

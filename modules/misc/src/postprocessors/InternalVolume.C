@@ -12,6 +12,8 @@
 #include "MooseMesh.h"
 #include "Function.h"
 
+registerMooseObject("MiscApp", InternalVolume);
+
 template <>
 InputParameters
 validParams<InternalVolume>()

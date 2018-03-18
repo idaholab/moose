@@ -9,6 +9,8 @@
 
 #include "GrainAdvectionVelocity.h"
 
+registerMooseObject("PhaseFieldApp", GrainAdvectionVelocity);
+
 template <>
 InputParameters
 validParams<GrainAdvectionVelocity>()

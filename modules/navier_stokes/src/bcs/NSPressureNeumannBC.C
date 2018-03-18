@@ -11,6 +11,8 @@
 #include "NS.h"
 #include "NSPressureNeumannBC.h"
 
+registerMooseObject("NavierStokesApp", NSPressureNeumannBC);
+
 template <>
 InputParameters
 validParams<NSPressureNeumannBC>()

@@ -9,6 +9,8 @@
 
 #include "MollifiedLangmuirMaterial.h"
 
+registerMooseObject("ChemicalReactionsApp", MollifiedLangmuirMaterial);
+
 template <>
 InputParameters
 validParams<MollifiedLangmuirMaterial>()

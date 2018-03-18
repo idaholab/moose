@@ -9,6 +9,8 @@
 
 #include "StressBasedChemicalPotential.h"
 
+registerMooseObject("TensorMechanicsApp", StressBasedChemicalPotential);
+
 template <>
 InputParameters
 validParams<StressBasedChemicalPotential>()

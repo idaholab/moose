@@ -11,6 +11,8 @@
 //
 #include "RichardsRelPermPower.h"
 
+registerMooseObject("RichardsApp", RichardsRelPermPower);
+
 template <>
 InputParameters
 validParams<RichardsRelPermPower>()

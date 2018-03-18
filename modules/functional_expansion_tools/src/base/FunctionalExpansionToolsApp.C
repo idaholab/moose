@@ -7,20 +7,11 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
+#include "FunctionalExpansionToolsApp.h"
+
 #include "Moose.h"
 #include "AppFactory.h"
 #include "MooseSyntax.h"
-
-#include "FunctionalExpansionToolsApp.h"
-#include "FunctionSeries.h"
-#include "FunctionSeriesToAux.h"
-#include "FXBoundaryValueUserObject.h"
-#include "FXBoundaryFluxUserObject.h"
-#include "FXFluxBC.h"
-#include "FXValueBC.h"
-#include "FXValuePenaltyBC.h"
-#include "FXVolumeUserObject.h"
-#include "MultiAppFXTransfer.h"
 
 template <>
 InputParameters
@@ -29,6 +20,8 @@ validParams<FunctionalExpansionToolsApp>()
   InputParameters params = validParams<MooseApp>();
   return params;
 }
+
+registerKnownLabel("FunctionalExpansionToolsApp");
 
 FunctionalExpansionToolsApp::FunctionalExpansionToolsApp(InputParameters parameters)
   : MooseApp(parameters)
@@ -53,26 +46,14 @@ FunctionalExpansionToolsApp::registerApps()
 void
 FunctionalExpansionToolsApp::registerObjects(Factory & factory)
 {
-  registerAuxKernel(FunctionSeriesToAux);
-
-  registerBoundaryCondition(FXValueBC);
-  registerBoundaryCondition(FXValuePenaltyBC);
-  registerBoundaryCondition(FXFluxBC);
-
-  registerFunction(FunctionSeries);
-
-  registerUserObject(FXBoundaryValueUserObject);
-  registerUserObject(FXBoundaryFluxUserObject);
-  registerUserObject(FXVolumeUserObject);
-
-  registerTransfer(MultiAppFXTransfer);
+  Registry::registerObjectsTo(factory, {"FunctionalExpansionToolsApp"});
 }
 
 void
-FunctionalExpansionToolsApp::associateSyntax(Syntax & /*syntax*/,
-                                             ActionFactory & /*action_factory*/)
+FunctionalExpansionToolsApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & action_factory)
 {
-  /* Uncomment Syntax and ActionFactory parameters and register your new objects here! */
+  Registry::registerActionsTo(action_factory, {"FunctionalExpansionToolsApp"});
+  /* Uncomment Syntax parameters and register your new objects here! */
 }
 
 void

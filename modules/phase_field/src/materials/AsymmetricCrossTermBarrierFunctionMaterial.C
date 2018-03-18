@@ -9,6 +9,8 @@
 
 #include "AsymmetricCrossTermBarrierFunctionMaterial.h"
 
+registerMooseObject("PhaseFieldApp", AsymmetricCrossTermBarrierFunctionMaterial);
+
 template <>
 InputParameters
 validParams<AsymmetricCrossTermBarrierFunctionMaterial>()

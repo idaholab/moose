@@ -9,6 +9,8 @@
 
 #include "ConstantGrainForceAndTorque.h"
 
+registerMooseObject("PhaseFieldApp", ConstantGrainForceAndTorque);
+
 template <>
 InputParameters
 validParams<ConstantGrainForceAndTorque>()

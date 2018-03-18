@@ -9,6 +9,8 @@
 
 #include "KKSSplitCHCRes.h"
 
+registerMooseObject("PhaseFieldApp", KKSSplitCHCRes);
+
 template <>
 InputParameters
 validParams<KKSSplitCHCRes>()

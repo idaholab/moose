@@ -12,6 +12,8 @@
 #include "Conversion.h"
 #include "FEProblem.h"
 
+registerMooseAction("PhaseFieldApp", MaterialVectorAuxKernelAction, "add_aux_kernel");
+
 template <>
 InputParameters
 validParams<MaterialVectorAuxKernelAction>()

@@ -10,6 +10,8 @@
 #include "TensorMechanicsPlasticWeakPlaneShear.h"
 #include "libmesh/utility.h"
 
+registerMooseObject("TensorMechanicsApp", TensorMechanicsPlasticWeakPlaneShear);
+
 template <>
 InputParameters
 validParams<TensorMechanicsPlasticWeakPlaneShear>()

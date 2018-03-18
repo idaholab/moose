@@ -12,14 +12,6 @@
 #include "AppFactory.h"
 #include "MooseSyntax.h"
 
-// kernels
-#include "EntropyFromEnthalpyPressureDerivativesTestKernel.h"
-#include "InternalEnergyFromVolumeEnthalpyDerivativesTestKernel.h"
-#include "SoundSpeedFromVolumeInternalEnergyDerivativesTestKernel.h"
-
-// materials
-#include "MultiComponentFluidPropertiesMaterialPT.h"
-
 template <>
 InputParameters
 validParams<FluidPropertiesTestApp>()
@@ -27,6 +19,8 @@ validParams<FluidPropertiesTestApp>()
   InputParameters params = validParams<FluidPropertiesApp>();
   return params;
 }
+
+registerKnownLabel("FluidPropertiesTestApp");
 
 FluidPropertiesTestApp::FluidPropertiesTestApp(InputParameters parameters) : MooseApp(parameters)
 {
@@ -71,11 +65,7 @@ FluidPropertiesTestApp__registerObjects(Factory & factory)
 void
 FluidPropertiesTestApp::registerObjects(Factory & factory)
 {
-  registerKernel(EntropyFromEnthalpyPressureDerivativesTestKernel);
-  registerKernel(InternalEnergyFromVolumeEnthalpyDerivativesTestKernel);
-  registerKernel(SoundSpeedFromVolumeInternalEnergyDerivativesTestKernel);
-
-  registerMaterial(MultiComponentFluidPropertiesMaterialPT);
+  Registry::registerObjectsTo(factory, {"FluidPropertiesTestApp"});
 }
 
 // External entry point for dynamic syntax association
@@ -85,8 +75,9 @@ FluidPropertiesTestApp__associateSyntax(Syntax & syntax, ActionFactory & action_
   FluidPropertiesTestApp::associateSyntax(syntax, action_factory);
 }
 void
-FluidPropertiesTestApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & /*action_factory*/)
+FluidPropertiesTestApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & action_factory)
 {
+  Registry::registerActionsTo(action_factory, {"FluidPropertiesTestApp"});
 }
 
 // External entry point for dynamic execute flag registration

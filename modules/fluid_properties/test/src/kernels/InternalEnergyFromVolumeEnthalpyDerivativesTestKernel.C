@@ -9,6 +9,9 @@
 
 #include "InternalEnergyFromVolumeEnthalpyDerivativesTestKernel.h"
 
+registerMooseObject("FluidPropertiesTestApp",
+                    InternalEnergyFromVolumeEnthalpyDerivativesTestKernel);
+
 template <>
 InputParameters
 validParams<InternalEnergyFromVolumeEnthalpyDerivativesTestKernel>()

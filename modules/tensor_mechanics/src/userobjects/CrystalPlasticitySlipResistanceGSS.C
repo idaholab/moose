@@ -9,6 +9,8 @@
 
 #include "CrystalPlasticitySlipResistanceGSS.h"
 
+registerMooseObject("TensorMechanicsApp", CrystalPlasticitySlipResistanceGSS);
+
 template <>
 InputParameters
 validParams<CrystalPlasticitySlipResistanceGSS>()

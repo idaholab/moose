@@ -10,6 +10,8 @@
 #include "AddPrimarySpeciesAction.h"
 #include "FEProblem.h"
 
+registerMooseAction("ChemicalReactionsApp", AddPrimarySpeciesAction, "add_variable");
+
 template <>
 InputParameters
 validParams<AddPrimarySpeciesAction>()

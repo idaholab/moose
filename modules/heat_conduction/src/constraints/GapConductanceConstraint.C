@@ -9,6 +9,8 @@
 
 #include "GapConductanceConstraint.h"
 
+registerMooseObject("HeatConductionApp", GapConductanceConstraint);
+
 template <>
 InputParameters
 validParams<GapConductanceConstraint>()

@@ -10,6 +10,8 @@
 #include "PorousFlowFluidStateWaterNCGIC.h"
 #include "PorousFlowWaterNCG.h"
 
+registerMooseObject("PorousFlowApp", PorousFlowFluidStateWaterNCGIC);
+
 template <>
 InputParameters
 validParams<PorousFlowFluidStateWaterNCGIC>()

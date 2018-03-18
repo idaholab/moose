@@ -17,6 +17,8 @@
 
 static unsigned int na_counter = 0;
 
+registerMooseAction("ContactApp", NodalAreaAction, "add_user_object");
+
 template <>
 InputParameters
 validParams<NodalAreaAction>()

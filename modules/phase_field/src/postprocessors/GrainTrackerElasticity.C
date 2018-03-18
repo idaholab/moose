@@ -11,6 +11,8 @@
 #include "EulerAngleProvider.h"
 #include "RotationTensor.h"
 
+registerMooseObject("PhaseFieldApp", GrainTrackerElasticity);
+
 template <>
 InputParameters
 validParams<GrainTrackerElasticity>()

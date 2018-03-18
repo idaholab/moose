@@ -18,6 +18,13 @@
 #define combineNames1(X, Y) X##Y
 #define combineNames(X, Y) combineNames1(X, Y)
 
+/// This is provided as a convenience to globally set certain app names or labels used for
+/// objects/actions as allowable.  While usually not needed, this macro can be useful for cases
+/// when your app/module code may be compiled with other apps without your objects being
+/// registered.  Calling this multiple times with the same argument is safe.
+#define registerKnownLabel(X)                                                                      \
+  static char combineNames1(dummy_var_for_known_label, __LINE__) = Registry::addKnownLabel(X)
+
 /// add an Action to the registry with the given app name/label as being associated with the given
 /// task (quoted string).  classname is the (unquoted) c++ class.
 #define registerMooseAction(app, classname, task)                                                  \
@@ -186,7 +193,7 @@ public:
   static void checkLabels(const std::set<std::string> & known_labels = {});
 
   /// addKnownLabel whitelists a label as valid for purposes of the checkLabels function.
-  static void addKnownLabel(const std::string & label);
+  static char addKnownLabel(const std::string & label);
 
   /// Returns a per-label keyed map of all MooseObjects in the registry.
   static const std::map<std::string, std::vector<RegistryEntry>> & allObjects();

@@ -19,6 +19,8 @@
 // C++ includes
 #include <iostream>
 
+registerMooseObject("RichardsApp", Q2PPorepressureFlux);
+
 template <>
 InputParameters
 validParams<Q2PPorepressureFlux>()

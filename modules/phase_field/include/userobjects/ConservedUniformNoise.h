@@ -16,11 +16,7 @@
 class ConservedUniformNoise;
 
 template <>
-InputParameters
-validParams<ConservedUniformNoise>()
-{
-  return validParams<ConservedNoiseBase>();
-}
+InputParameters validParams<ConservedUniformNoise>();
 
 /**
  * Userobject that generates a uniformly distributed random number in the interval [-1:1]

@@ -13,6 +13,8 @@
 
 #include <fstream>
 
+registerMooseObject("TensorMechanicsApp", ElementPropertyReadFile);
+
 template <>
 InputParameters
 validParams<ElementPropertyReadFile>()

@@ -9,6 +9,8 @@
 
 #include "VariableGradientMaterial.h"
 
+registerMooseObject("PhaseFieldApp", VariableGradientMaterial);
+
 template <>
 InputParameters
 validParams<VariableGradientMaterial>()

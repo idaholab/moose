@@ -25,6 +25,8 @@
 #include "AddVariableAction.h"
 #include "ConstraintWarehouse.h"
 
+registerMooseObject("ContactApp", AugmentedLagrangianContactProblem);
+
 template <>
 InputParameters
 validParams<AugmentedLagrangianContactProblem>()

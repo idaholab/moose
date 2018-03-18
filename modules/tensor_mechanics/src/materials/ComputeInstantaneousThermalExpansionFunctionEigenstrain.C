@@ -11,6 +11,8 @@
 #include "Function.h"
 #include "RankTwoTensor.h"
 
+registerMooseObject("TensorMechanicsApp", ComputeInstantaneousThermalExpansionFunctionEigenstrain);
+
 template <>
 InputParameters
 validParams<ComputeInstantaneousThermalExpansionFunctionEigenstrain>()

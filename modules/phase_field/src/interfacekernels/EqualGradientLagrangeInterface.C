@@ -12,6 +12,8 @@
 // MOOSE includes
 #include "MooseVariable.h"
 
+registerMooseObject("PhaseFieldApp", EqualGradientLagrangeInterface);
+
 template <>
 InputParameters
 validParams<EqualGradientLagrangeInterface>()

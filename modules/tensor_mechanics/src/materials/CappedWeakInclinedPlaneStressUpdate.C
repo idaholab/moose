@@ -11,6 +11,8 @@
 #include "RotationMatrix.h" // for rotVecToZ
 #include "libmesh/utility.h"
 
+registerMooseObject("TensorMechanicsApp", CappedWeakInclinedPlaneStressUpdate);
+
 template <>
 InputParameters
 validParams<CappedWeakInclinedPlaneStressUpdate>()

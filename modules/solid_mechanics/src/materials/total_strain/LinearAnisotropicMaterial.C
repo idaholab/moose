@@ -10,6 +10,8 @@
 #include "LinearAnisotropicMaterial.h"
 #include "SymmAnisotropicElasticityTensor.h"
 
+registerMooseObject("SolidMechanicsApp", LinearAnisotropicMaterial);
+
 template <>
 InputParameters
 validParams<LinearAnisotropicMaterial>()

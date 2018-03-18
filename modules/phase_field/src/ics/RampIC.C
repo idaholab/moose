@@ -11,6 +11,8 @@
 #include "FEProblem.h"
 #include "MooseMesh.h"
 
+registerMooseObject("PhaseFieldApp", RampIC);
+
 template <>
 InputParameters
 validParams<RampIC>()

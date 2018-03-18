@@ -9,6 +9,8 @@
 
 #include "MatReaction.h"
 
+registerMooseObject("PhaseFieldApp", MatReaction);
+
 template <>
 InputParameters
 validParams<MatReaction>()

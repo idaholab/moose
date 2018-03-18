@@ -15,6 +15,8 @@
 #include "MooseApp.h"
 #include "libmesh/string_to_enum.h"
 
+registerMooseAction("ContactApp", NodalAreaVarAction, "add_aux_variable");
+
 template <>
 InputParameters
 validParams<NodalAreaVarAction>()

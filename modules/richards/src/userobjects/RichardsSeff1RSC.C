@@ -18,6 +18,8 @@
 //
 #include "RichardsSeff1RSC.h"
 
+registerMooseObject("RichardsApp", RichardsSeff1RSC);
+
 template <>
 InputParameters
 validParams<RichardsSeff1RSC>()

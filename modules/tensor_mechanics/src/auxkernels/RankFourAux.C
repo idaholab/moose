@@ -9,6 +9,8 @@
 
 #include "RankFourAux.h"
 
+registerMooseObject("TensorMechanicsApp", RankFourAux);
+
 template <>
 InputParameters
 validParams<RankFourAux>()

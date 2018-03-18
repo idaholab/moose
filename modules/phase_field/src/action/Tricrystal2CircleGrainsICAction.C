@@ -25,6 +25,8 @@
 
 const Real Tricrystal2CircleGrainsICAction::_abs_zero_tol = 1e-12;
 
+registerMooseAction("PhaseFieldApp", Tricrystal2CircleGrainsICAction, "add_ic");
+
 template <>
 InputParameters
 validParams<Tricrystal2CircleGrainsICAction>()

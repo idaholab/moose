@@ -10,6 +10,8 @@
 #include "Gravity.h"
 #include "Function.h"
 
+registerMooseObject("TensorMechanicsApp", Gravity);
+
 template <>
 InputParameters
 validParams<Gravity>()

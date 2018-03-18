@@ -9,6 +9,8 @@
 
 #include "ChemicalOutFlowBC.h"
 
+registerMooseObject("ChemicalReactionsApp", ChemicalOutFlowBC);
+
 template <>
 InputParameters
 validParams<ChemicalOutFlowBC>()

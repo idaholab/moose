@@ -10,6 +10,8 @@
 #include "PorousFlowHalfCubicSink.h"
 #include "libmesh/utility.h"
 
+registerMooseObject("PorousFlowApp", PorousFlowHalfCubicSink);
+
 template <>
 InputParameters
 validParams<PorousFlowHalfCubicSink>()

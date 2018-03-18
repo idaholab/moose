@@ -9,6 +9,8 @@
 
 #include "PorousFlowAdvectiveFlux.h"
 
+registerMooseObject("PorousFlowApp", PorousFlowAdvectiveFlux);
+
 template <>
 InputParameters
 validParams<PorousFlowAdvectiveFlux>()

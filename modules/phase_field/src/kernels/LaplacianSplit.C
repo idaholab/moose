@@ -9,6 +9,8 @@
 
 #include "LaplacianSplit.h"
 
+registerMooseObject("PhaseFieldApp", LaplacianSplit);
+
 template <>
 InputParameters
 validParams<LaplacianSplit>()

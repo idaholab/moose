@@ -10,6 +10,8 @@
 #include "StrainGradDispDerivatives.h"
 #include "RankTwoTensor.h"
 
+registerMooseObject("PhaseFieldApp", StrainGradDispDerivatives);
+
 template <>
 InputParameters
 validParams<StrainGradDispDerivatives>()

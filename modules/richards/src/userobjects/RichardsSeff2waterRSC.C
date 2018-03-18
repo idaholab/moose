@@ -16,6 +16,8 @@
 //
 #include "RichardsSeff2waterRSC.h"
 
+registerMooseObject("RichardsApp", RichardsSeff2waterRSC);
+
 template <>
 InputParameters
 validParams<RichardsSeff2waterRSC>()

@@ -11,6 +11,8 @@
 //
 #include "RichardsDensityConstBulk.h"
 
+registerMooseObject("RichardsApp", RichardsDensityConstBulk);
+
 template <>
 InputParameters
 validParams<RichardsDensityConstBulk>()

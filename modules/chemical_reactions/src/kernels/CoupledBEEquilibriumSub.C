@@ -9,6 +9,8 @@
 
 #include "CoupledBEEquilibriumSub.h"
 
+registerMooseObject("ChemicalReactionsApp", CoupledBEEquilibriumSub);
+
 template <>
 InputParameters
 validParams<CoupledBEEquilibriumSub>()

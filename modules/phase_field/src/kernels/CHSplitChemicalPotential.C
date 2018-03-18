@@ -9,6 +9,8 @@
 
 #include "CHSplitChemicalPotential.h"
 
+registerMooseObject("PhaseFieldApp", CHSplitChemicalPotential);
+
 template <>
 InputParameters
 validParams<CHSplitChemicalPotential>()

@@ -10,6 +10,8 @@
 #include "MaterialTensorIntegral.h"
 #include "RankTwoScalarTools.h"
 
+registerMooseObject("TensorMechanicsApp", MaterialTensorIntegral);
+
 template <>
 InputParameters
 validParams<MaterialTensorIntegral>()

@@ -9,6 +9,8 @@
 
 #include "PorousFlowPermeabilityConst.h"
 
+registerMooseObject("PorousFlowApp", PorousFlowPermeabilityConst);
+
 template <>
 InputParameters
 validParams<PorousFlowPermeabilityConst>()

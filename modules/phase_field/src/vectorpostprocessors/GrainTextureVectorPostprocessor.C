@@ -11,6 +11,8 @@
 #include "EulerAngleProvider.h"
 #include "Assembly.h"
 
+registerMooseObject("PhaseFieldApp", GrainTextureVectorPostprocessor);
+
 template <>
 InputParameters
 validParams<GrainTextureVectorPostprocessor>()

@@ -9,6 +9,8 @@
 
 #include "AddFluidPropertiesAction.h"
 
+registerMooseAction("FluidPropertiesApp", AddFluidPropertiesAction, "add_fluid_properties");
+
 template <>
 InputParameters
 validParams<AddFluidPropertiesAction>()

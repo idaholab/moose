@@ -13,6 +13,8 @@
 #include "FEProblem.h"
 #include "Conversion.h"
 
+registerMooseAction("PhaseFieldApp", PolycrystalVoronoiVoidICAction, "add_ic");
+
 template <>
 InputParameters
 validParams<PolycrystalVoronoiVoidICAction>()

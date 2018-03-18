@@ -10,6 +10,8 @@
 #include "LinearStrainHardening.h"
 #include "IsotropicPlasticity.h"
 
+registerMooseObject("SolidMechanicsApp", LinearStrainHardening);
+
 template <>
 InputParameters
 validParams<LinearStrainHardening>()

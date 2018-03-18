@@ -13,6 +13,10 @@
 
 #include "libmesh/string_to_enum.h"
 
+registerMooseAction("PhaseFieldApp", EulerAngle2RGBAction, "add_aux_kernel");
+
+registerMooseAction("PhaseFieldApp", EulerAngle2RGBAction, "add_aux_variable");
+
 template <>
 InputParameters
 validParams<EulerAngle2RGBAction>()

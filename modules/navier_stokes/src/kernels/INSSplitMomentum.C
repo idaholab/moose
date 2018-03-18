@@ -10,6 +10,8 @@
 #include "INSSplitMomentum.h"
 #include "MooseMesh.h"
 
+registerMooseObject("NavierStokesApp", INSSplitMomentum);
+
 template <>
 InputParameters
 validParams<INSSplitMomentum>()

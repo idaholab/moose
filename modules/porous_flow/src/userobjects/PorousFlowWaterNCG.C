@@ -10,6 +10,8 @@
 #include "PorousFlowWaterNCG.h"
 #include "Water97FluidProperties.h"
 
+registerMooseObject("PorousFlowApp", PorousFlowWaterNCG);
+
 template <>
 InputParameters
 validParams<PorousFlowWaterNCG>()

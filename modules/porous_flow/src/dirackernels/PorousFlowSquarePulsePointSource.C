@@ -9,6 +9,8 @@
 
 #include "PorousFlowSquarePulsePointSource.h"
 
+registerMooseObject("PorousFlowApp", PorousFlowSquarePulsePointSource);
+
 template <>
 InputParameters
 validParams<PorousFlowSquarePulsePointSource>()

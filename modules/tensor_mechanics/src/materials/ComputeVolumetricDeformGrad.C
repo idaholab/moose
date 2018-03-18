@@ -9,6 +9,8 @@
 
 #include "ComputeVolumetricDeformGrad.h"
 
+registerMooseObject("TensorMechanicsApp", ComputeVolumetricDeformGrad);
+
 template <>
 InputParameters
 validParams<ComputeVolumetricDeformGrad>()

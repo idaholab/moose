@@ -10,6 +10,8 @@
 #include "GrainBoundaryArea.h"
 #include "MooseUtils.h"
 
+registerMooseObject("PhaseFieldApp", GrainBoundaryArea);
+
 template <>
 InputParameters
 validParams<GrainBoundaryArea>()

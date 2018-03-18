@@ -22,6 +22,8 @@ validParams<FunctionalExpansionToolsTestApp>()
   return params;
 }
 
+registerKnownLabel("FunctionalExpansionToolsTestApp");
+
 FunctionalExpansionToolsTestApp::FunctionalExpansionToolsTestApp(InputParameters parameters)
   : MooseApp(parameters)
 {
@@ -51,16 +53,16 @@ FunctionalExpansionToolsTestApp::registerApps()
 }
 
 void
-FunctionalExpansionToolsTestApp::registerObjects(Factory & /*factory*/)
+FunctionalExpansionToolsTestApp::registerObjects(Factory & factory)
 {
-  /* Uncomment Factory parameter and register your new test objects here! */
+  Registry::registerObjectsTo(factory, {"FunctionalExpansionToolsTestApp"});
 }
 
 void
 FunctionalExpansionToolsTestApp::associateSyntax(Syntax & /*syntax*/,
-                                                 ActionFactory & /*action_factory*/)
+                                                 ActionFactory & action_factory)
 {
-  /* Uncomment Syntax and ActionFactory parameters and register your new test objects here! */
+  Registry::registerActionsTo(action_factory, {"FunctionalExpansionToolsTestApp"});
 }
 
 /***************************************************************************************************

@@ -10,6 +10,8 @@
 #include "MaterialTensorAux.h"
 #include "SymmTensor.h"
 
+registerMooseObject("SolidMechanicsApp", MaterialTensorAux);
+
 template <>
 InputParameters
 validParams<MaterialTensorAux>()

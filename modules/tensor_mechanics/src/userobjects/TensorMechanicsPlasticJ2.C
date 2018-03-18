@@ -9,6 +9,8 @@
 
 #include "TensorMechanicsPlasticJ2.h"
 
+registerMooseObject("TensorMechanicsApp", TensorMechanicsPlasticJ2);
+
 template <>
 InputParameters
 validParams<TensorMechanicsPlasticJ2>()

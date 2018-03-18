@@ -9,6 +9,8 @@
 
 #include "PorousFlowConstantThermalExpansionCoefficient.h"
 
+registerMooseObject("PorousFlowApp", PorousFlowConstantThermalExpansionCoefficient);
+
 template <>
 InputParameters
 validParams<PorousFlowConstantThermalExpansionCoefficient>()

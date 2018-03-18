@@ -10,6 +10,8 @@
 #include "INSDivergenceAux.h"
 #include "MooseMesh.h"
 
+registerMooseObject("NavierStokesApp", INSDivergenceAux);
+
 template <>
 InputParameters
 validParams<INSDivergenceAux>()

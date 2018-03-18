@@ -9,6 +9,8 @@
 
 #include "CHInterface.h"
 
+registerMooseObject("PhaseFieldApp", CHInterface);
+
 template <>
 InputParameters
 validParams<CHInterface>()

@@ -10,6 +10,8 @@
 #include "RichardsRelPermVG.h"
 #include "libmesh/utility.h"
 
+registerMooseObject("RichardsApp", RichardsRelPermVG);
+
 template <>
 InputParameters
 validParams<RichardsRelPermVG>()

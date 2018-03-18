@@ -9,6 +9,8 @@
 
 #include "ComputeAxisymmetric1DFiniteStrain.h"
 
+registerMooseObject("TensorMechanicsApp", ComputeAxisymmetric1DFiniteStrain);
+
 template <>
 InputParameters
 validParams<ComputeAxisymmetric1DFiniteStrain>()

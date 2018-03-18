@@ -9,6 +9,8 @@
 
 #include "HHPFCRFF.h"
 
+registerMooseObject("PhaseFieldApp", HHPFCRFF);
+
 template <>
 InputParameters
 validParams<HHPFCRFF>()

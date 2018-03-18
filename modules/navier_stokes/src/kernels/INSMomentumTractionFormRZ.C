@@ -9,6 +9,8 @@
 
 #include "INSMomentumTractionFormRZ.h"
 
+registerMooseObject("NavierStokesApp", INSMomentumTractionFormRZ);
+
 template <>
 InputParameters
 validParams<INSMomentumTractionFormRZ>()

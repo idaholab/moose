@@ -20,6 +20,8 @@ validParams<RichardsTestApp>()
   return params;
 }
 
+registerKnownLabel("RichardsTestApp");
+
 RichardsTestApp::RichardsTestApp(InputParameters parameters) : MooseApp(parameters)
 {
   Moose::registerObjects(_factory);
@@ -64,8 +66,9 @@ RichardsTestApp__registerObjects(Factory & factory)
   RichardsTestApp::registerObjects(factory);
 }
 void
-RichardsTestApp::registerObjects(Factory & /*factory*/)
+RichardsTestApp::registerObjects(Factory & factory)
 {
+  Registry::registerObjectsTo(factory, {"RichardsTestApp"});
 }
 
 // External entry point for dynamic syntax association
@@ -75,8 +78,9 @@ RichardsTestApp__associateSyntax(Syntax & syntax, ActionFactory & action_factory
   RichardsTestApp::associateSyntax(syntax, action_factory);
 }
 void
-RichardsTestApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & /*action_factory*/)
+RichardsTestApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & action_factory)
 {
+  Registry::registerActionsTo(action_factory, {"RichardsTestApp"});
 }
 
 // External entry point for dynamic execute flag registration

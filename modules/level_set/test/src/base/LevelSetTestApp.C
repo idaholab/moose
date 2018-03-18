@@ -20,6 +20,8 @@ validParams<LevelSetTestApp>()
   return params;
 }
 
+registerKnownLabel("LevelSetTestApp");
+
 LevelSetTestApp::LevelSetTestApp(InputParameters parameters) : MooseApp(parameters)
 {
   srand(processor_id());
@@ -64,8 +66,9 @@ LevelSetTestApp__registerObjects(Factory & factory)
   LevelSetTestApp::registerObjects(factory);
 }
 void
-LevelSetTestApp::registerObjects(Factory & /*factory*/)
+LevelSetTestApp::registerObjects(Factory & factory)
 {
+  Registry::registerObjectsTo(factory, {"LevelSetTestApp"});
 }
 
 // External entry point for dynamic syntax association
@@ -75,8 +78,9 @@ LevelSetTestApp__associateSyntax(Syntax & syntax, ActionFactory & action_factory
   LevelSetTestApp::associateSyntax(syntax, action_factory);
 }
 void
-LevelSetTestApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & /*action_factory*/)
+LevelSetTestApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & action_factory)
 {
+  Registry::registerActionsTo(action_factory, {"LevelSetTestApp"});
 }
 
 // External entry point for dynamic execute flag registration

@@ -10,6 +10,8 @@
 #include "CrackTipEnrichmentStressDivergenceTensors.h"
 #include "ElasticityTensorTools.h"
 
+registerMooseObject("XFEMApp", CrackTipEnrichmentStressDivergenceTensors);
+
 template <>
 InputParameters
 validParams<CrackTipEnrichmentStressDivergenceTensors>()

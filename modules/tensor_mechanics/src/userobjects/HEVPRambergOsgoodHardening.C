@@ -9,6 +9,8 @@
 
 #include "HEVPRambergOsgoodHardening.h"
 
+registerMooseObject("TensorMechanicsApp", HEVPRambergOsgoodHardening);
+
 template <>
 InputParameters
 validParams<HEVPRambergOsgoodHardening>()

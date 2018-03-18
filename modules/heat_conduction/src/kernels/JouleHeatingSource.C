@@ -8,6 +8,8 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 #include "JouleHeatingSource.h"
 
+registerMooseObject("HeatConductionApp", JouleHeatingSource);
+
 template <>
 InputParameters
 validParams<JouleHeatingSource>()

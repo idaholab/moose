@@ -9,6 +9,8 @@
 
 #include "ComputeCosseratLinearElasticStress.h"
 
+registerMooseObject("TensorMechanicsApp", ComputeCosseratLinearElasticStress);
+
 template <>
 InputParameters
 validParams<ComputeCosseratLinearElasticStress>()

@@ -11,6 +11,8 @@
 #include "MooseMesh.h"
 #include "Assembly.h"
 
+registerMooseObject("PorousFlowApp", PorousFlowDarcyVelocityComponentLowerDimensional);
+
 template <>
 InputParameters
 validParams<PorousFlowDarcyVelocityComponentLowerDimensional>()

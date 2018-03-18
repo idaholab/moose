@@ -11,6 +11,8 @@
 //
 #include "RichardsSUPGnone.h"
 
+registerMooseObject("RichardsApp", RichardsSUPGnone);
+
 template <>
 InputParameters
 validParams<RichardsSUPGnone>()

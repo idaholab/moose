@@ -11,6 +11,8 @@
 #include "GrainTracker.h"
 #include "EulerAngleProvider.h"
 
+registerMooseObject("PhaseFieldApp", OutputEulerAngles);
+
 template <>
 InputParameters
 validParams<OutputEulerAngles>()

@@ -11,6 +11,8 @@
 #include "BrentsMethod.h"
 #include "Conversion.h"
 
+registerMooseObject("FluidPropertiesApp", CO2FluidProperties);
+
 template <>
 InputParameters
 validParams<CO2FluidProperties>()

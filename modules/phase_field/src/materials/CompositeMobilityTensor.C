@@ -9,6 +9,8 @@
 
 #include "CompositeMobilityTensor.h"
 
+registerMooseObject("PhaseFieldApp", CompositeMobilityTensor);
+
 template <>
 InputParameters
 validParams<CompositeMobilityTensor>()

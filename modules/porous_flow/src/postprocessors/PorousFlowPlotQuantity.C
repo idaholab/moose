@@ -10,6 +10,8 @@
 #include "PorousFlowPlotQuantity.h"
 #include "PorousFlowSumQuantity.h"
 
+registerMooseObject("PorousFlowApp", PorousFlowPlotQuantity);
+
 template <>
 InputParameters
 validParams<PorousFlowPlotQuantity>()

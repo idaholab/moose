@@ -20,6 +20,8 @@ validParams<WaterSteamEOSTestApp>()
   return params;
 }
 
+registerKnownLabel("WaterSteamEOSTestApp");
+
 WaterSteamEOSTestApp::WaterSteamEOSTestApp(InputParameters parameters) : MooseApp(parameters)
 {
   Moose::registerObjects(_factory);
@@ -61,8 +63,9 @@ WaterSteamEOSTestApp__registerObjects(Factory & factory)
   WaterSteamEOSTestApp::registerObjects(factory);
 }
 void
-WaterSteamEOSTestApp::registerObjects(Factory & /*factory*/)
+WaterSteamEOSTestApp::registerObjects(Factory & factory)
 {
+  Registry::registerObjectsTo(factory, {"WaterSteamEOSTestApp"});
 }
 
 // External entry point for dynamic syntax association
@@ -72,8 +75,9 @@ WaterSteamEOSTestApp__associateSyntax(Syntax & syntax, ActionFactory & action_fa
   WaterSteamEOSTestApp::associateSyntax(syntax, action_factory);
 }
 void
-WaterSteamEOSTestApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & /*action_factory*/)
+WaterSteamEOSTestApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & action_factory)
 {
+  Registry::registerActionsTo(action_factory, {"WaterSteamEOSTestApp"});
 }
 
 // External entry point for dynamic execute flag registration

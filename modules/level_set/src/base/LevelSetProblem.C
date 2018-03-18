@@ -12,6 +12,8 @@
 
 #include "MultiAppTransfer.h"
 
+registerMooseObject("LevelSetApp", LevelSetProblem);
+
 template <>
 InputParameters
 validParams<LevelSetProblem>()

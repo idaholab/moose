@@ -9,6 +9,8 @@
 
 #include "PorousFlowPolyLineSink.h"
 
+registerMooseObject("PorousFlowApp", PorousFlowPolyLineSink);
+
 template <>
 InputParameters
 validParams<PorousFlowPolyLineSink>()

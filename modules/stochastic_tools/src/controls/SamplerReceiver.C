@@ -11,6 +11,8 @@
 #include "SamplerReceiver.h"
 #include "Function.h"
 
+registerMooseObject("StochasticToolsApp", SamplerReceiver);
+
 template <>
 InputParameters
 validParams<SamplerReceiver>()

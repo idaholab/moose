@@ -10,6 +10,8 @@
 #include "ACInterfaceStress.h"
 #include "RankTwoTensor.h"
 
+registerMooseObject("PhaseFieldApp", ACInterfaceStress);
+
 template <>
 InputParameters
 validParams<ACInterfaceStress>()

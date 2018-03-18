@@ -18,6 +18,8 @@
 
 #include "libmesh/quadrature.h"
 
+registerMooseObject("SolidMechanicsApp", StressDivergenceRZ);
+
 template <>
 InputParameters
 validParams<StressDivergenceRZ>()

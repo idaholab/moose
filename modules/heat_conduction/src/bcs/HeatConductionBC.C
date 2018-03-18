@@ -9,6 +9,8 @@
 
 #include "HeatConductionBC.h"
 
+registerMooseObject("HeatConductionApp", HeatConductionBC);
+
 template <>
 InputParameters
 validParams<HeatConductionBC>()

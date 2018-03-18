@@ -29,6 +29,8 @@ InteractionIntegral::sifModeType()
   return MooseEnum("KI KII KIII T", "KI");
 }
 
+registerMooseObject("TensorMechanicsApp", InteractionIntegral);
+
 template <>
 InputParameters
 validParams<InteractionIntegral>()

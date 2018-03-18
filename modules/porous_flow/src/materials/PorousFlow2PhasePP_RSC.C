@@ -9,6 +9,8 @@
 
 #include "PorousFlow2PhasePP_RSC.h"
 
+registerMooseObject("PorousFlowApp", PorousFlow2PhasePP_RSC);
+
 template <>
 InputParameters
 validParams<PorousFlow2PhasePP_RSC>()

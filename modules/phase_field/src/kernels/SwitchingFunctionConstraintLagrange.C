@@ -9,6 +9,8 @@
 
 #include "SwitchingFunctionConstraintLagrange.h"
 
+registerMooseObject("PhaseFieldApp", SwitchingFunctionConstraintLagrange);
+
 template <>
 InputParameters
 validParams<SwitchingFunctionConstraintLagrange>()

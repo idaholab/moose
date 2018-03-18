@@ -9,6 +9,8 @@
 
 #include "HEVPFlowRatePowerLawJ2.h"
 
+registerMooseObject("TensorMechanicsApp", HEVPFlowRatePowerLawJ2);
+
 template <>
 InputParameters
 validParams<HEVPFlowRatePowerLawJ2>()

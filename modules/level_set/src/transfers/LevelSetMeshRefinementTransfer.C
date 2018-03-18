@@ -16,6 +16,8 @@
 #include "MultiApp.h"
 #include "LevelSetTypes.h"
 
+registerMooseObject("LevelSetApp", LevelSetMeshRefinementTransfer);
+
 template <>
 InputParameters
 validParams<LevelSetMeshRefinementTransfer>()

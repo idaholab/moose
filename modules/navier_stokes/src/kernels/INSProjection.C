@@ -10,6 +10,8 @@
 #include "INSProjection.h"
 #include "MooseMesh.h"
 
+registerMooseObject("NavierStokesApp", INSProjection);
+
 template <>
 InputParameters
 validParams<INSProjection>()

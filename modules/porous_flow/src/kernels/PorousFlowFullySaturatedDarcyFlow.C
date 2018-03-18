@@ -9,6 +9,8 @@
 
 #include "PorousFlowFullySaturatedDarcyFlow.h"
 
+registerMooseObject("PorousFlowApp", PorousFlowFullySaturatedDarcyFlow);
+
 template <>
 InputParameters
 validParams<PorousFlowFullySaturatedDarcyFlow>()

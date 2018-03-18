@@ -10,6 +10,8 @@
 #include "SingleGrainRigidBodyMotion.h"
 #include "GrainTrackerInterface.h"
 
+registerMooseObject("PhaseFieldApp", SingleGrainRigidBodyMotion);
+
 template <>
 InputParameters
 validParams<SingleGrainRigidBodyMotion>()

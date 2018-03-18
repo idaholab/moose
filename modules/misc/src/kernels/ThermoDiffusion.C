@@ -9,6 +9,8 @@
 
 #include "ThermoDiffusion.h"
 
+registerMooseObject("MiscApp", ThermoDiffusion);
+
 template <>
 InputParameters
 validParams<ThermoDiffusion>()

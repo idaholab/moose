@@ -15,6 +15,8 @@
 
 #include "libmesh/quadrature.h"
 
+registerMooseObject("RichardsApp", RichardsMaterial);
+
 template <>
 InputParameters
 validParams<RichardsMaterial>()

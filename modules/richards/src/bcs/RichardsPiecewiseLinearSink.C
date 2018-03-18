@@ -15,6 +15,8 @@
 // C++ includes
 #include <iostream>
 
+registerMooseObject("RichardsApp", RichardsPiecewiseLinearSink);
+
 template <>
 InputParameters
 validParams<RichardsPiecewiseLinearSink>()

@@ -10,6 +10,8 @@
 #include "FeatureVolumeFraction.h"
 #include <cmath>
 
+registerMooseObject("PhaseFieldApp", FeatureVolumeFraction);
+
 template <>
 InputParameters
 validParams<FeatureVolumeFraction>()

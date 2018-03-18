@@ -9,6 +9,8 @@
 
 #include "PorousFlowPropertyAux.h"
 
+registerMooseObject("PorousFlowApp", PorousFlowPropertyAux);
+
 template <>
 InputParameters
 validParams<PorousFlowPropertyAux>()

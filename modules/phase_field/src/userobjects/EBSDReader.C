@@ -15,6 +15,8 @@
 
 #include <fstream>
 
+registerMooseObject("PhaseFieldApp", EBSDReader);
+
 template <>
 InputParameters
 validParams<EBSDReader>()

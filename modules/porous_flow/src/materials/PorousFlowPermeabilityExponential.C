@@ -9,6 +9,8 @@
 
 #include "PorousFlowPermeabilityExponential.h"
 
+registerMooseObject("PorousFlowApp", PorousFlowPermeabilityExponential);
+
 template <>
 InputParameters
 validParams<PorousFlowPermeabilityExponential>()

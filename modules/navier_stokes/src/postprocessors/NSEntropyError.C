@@ -14,6 +14,8 @@
 // FluidProperties includes
 #include "IdealGasFluidProperties.h"
 
+registerMooseObject("NavierStokesApp", NSEntropyError);
+
 template <>
 InputParameters
 validParams<NSEntropyError>()

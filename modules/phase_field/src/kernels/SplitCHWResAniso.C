@@ -9,6 +9,8 @@
 
 #include "SplitCHWResAniso.h"
 
+registerMooseObject("PhaseFieldApp", SplitCHWResAniso);
+
 template <>
 InputParameters
 validParams<SplitCHWResAniso>()

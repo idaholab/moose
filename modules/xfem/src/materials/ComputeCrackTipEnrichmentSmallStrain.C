@@ -14,6 +14,8 @@
 
 #include "libmesh/quadrature_gauss.h"
 
+registerMooseObject("XFEMApp", ComputeCrackTipEnrichmentSmallStrain);
+
 template <>
 InputParameters
 validParams<ComputeCrackTipEnrichmentSmallStrain>()

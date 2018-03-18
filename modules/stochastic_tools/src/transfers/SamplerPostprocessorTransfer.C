@@ -13,6 +13,8 @@
 #include "SamplerReceiver.h"
 #include "StochasticResults.h"
 
+registerMooseObject("StochasticToolsApp", SamplerPostprocessorTransfer);
+
 template <>
 InputParameters
 validParams<SamplerPostprocessorTransfer>()

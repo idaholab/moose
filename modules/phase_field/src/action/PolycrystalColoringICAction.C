@@ -13,6 +13,8 @@
 #include "Conversion.h"
 #include "PolycrystalICTools.h"
 
+registerMooseAction("PhaseFieldApp", PolycrystalColoringICAction, "add_ic");
+
 template <>
 InputParameters
 validParams<PolycrystalColoringICAction>()

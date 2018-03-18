@@ -14,6 +14,8 @@
 #include "RichardsSeff1BWsmall.h"
 #include "libmesh/utility.h"
 
+registerMooseObject("RichardsApp", RichardsSeff1BWsmall);
+
 template <>
 InputParameters
 validParams<RichardsSeff1BWsmall>()

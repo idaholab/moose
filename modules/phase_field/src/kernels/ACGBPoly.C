@@ -10,6 +10,8 @@
 #include "ACGBPoly.h"
 #include "Material.h"
 
+registerMooseObject("PhaseFieldApp", ACGBPoly);
+
 template <>
 InputParameters
 validParams<ACGBPoly>()

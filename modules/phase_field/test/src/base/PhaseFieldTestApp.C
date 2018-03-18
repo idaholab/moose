@@ -22,6 +22,8 @@ validParams<PhaseFieldTestApp>()
   return params;
 }
 
+registerKnownLabel("PhaseFieldTestApp");
+
 PhaseFieldTestApp::PhaseFieldTestApp(InputParameters parameters) : MooseApp(parameters)
 {
   Moose::registerObjects(_factory);
@@ -65,7 +67,7 @@ PhaseFieldTestApp__registerObjects(Factory & factory)
 void
 PhaseFieldTestApp::registerObjects(Factory & factory)
 {
-  registerKernel(GaussContForcing);
+  Registry::registerObjectsTo(factory, {"PhaseFieldTestApp"});
 }
 
 // External entry point for dynamic syntax association
@@ -75,8 +77,9 @@ PhaseFieldTestApp__associateSyntax(Syntax & syntax, ActionFactory & action_facto
   PhaseFieldTestApp::associateSyntax(syntax, action_factory);
 }
 void
-PhaseFieldTestApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & /*action_factory*/)
+PhaseFieldTestApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & action_factory)
 {
+  Registry::registerActionsTo(action_factory, {"PhaseFieldTestApp"});
 }
 
 // External entry point for dynamic execute flag registration

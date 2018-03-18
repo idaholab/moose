@@ -11,6 +11,8 @@
 
 #include <fstream>
 
+registerMooseObject("TensorMechanicsApp", CrystalPlasticitySlipRateGSS);
+
 template <>
 InputParameters
 validParams<CrystalPlasticitySlipRateGSS>()

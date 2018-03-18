@@ -10,6 +10,8 @@
 #include "CappedMohrCoulombCosseratStressUpdate.h"
 #include "libmesh/utility.h"
 
+registerMooseObject("TensorMechanicsApp", CappedMohrCoulombCosseratStressUpdate);
+
 template <>
 InputParameters
 validParams<CappedMohrCoulombCosseratStressUpdate>()

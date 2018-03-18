@@ -9,6 +9,8 @@
 
 #include "CHCpldPFCTrad.h"
 
+registerMooseObjectDeprecated("PhaseFieldApp", CHCpldPFCTrad, "08/01/2018 00:00");
+
 template <>
 InputParameters
 validParams<CHCpldPFCTrad>()

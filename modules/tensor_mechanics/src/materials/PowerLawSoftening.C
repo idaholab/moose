@@ -11,6 +11,8 @@
 
 #include "MooseMesh.h"
 
+registerMooseObject("TensorMechanicsApp", PowerLawSoftening);
+
 template <>
 InputParameters
 validParams<PowerLawSoftening>()

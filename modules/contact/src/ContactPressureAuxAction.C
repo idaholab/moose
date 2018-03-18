@@ -17,6 +17,8 @@
 
 static unsigned int cp_counter = 0;
 
+registerMooseAction("ContactApp", ContactPressureAuxAction, "add_aux_kernel");
+
 template <>
 InputParameters
 validParams<ContactPressureAuxAction>()

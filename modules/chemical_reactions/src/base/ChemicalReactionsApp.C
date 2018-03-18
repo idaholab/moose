@@ -12,36 +12,6 @@
 #include "AppFactory.h"
 #include "MooseSyntax.h"
 
-#include "PrimaryTimeDerivative.h"
-#include "PrimaryConvection.h"
-#include "PrimaryDiffusion.h"
-#include "CoupledBEEquilibriumSub.h"
-#include "CoupledConvectionReactionSub.h"
-#include "CoupledDiffusionReactionSub.h"
-#include "CoupledBEKinetic.h"
-#include "DesorptionFromMatrix.h"
-#include "DesorptionToPorespace.h"
-#include "DarcyFluxPressure.h"
-
-#include "AqueousEquilibriumRxnAux.h"
-#include "KineticDisPreConcAux.h"
-#include "KineticDisPreRateAux.h"
-#include "PHAux.h"
-#include "TotalConcentrationAux.h"
-#include "EquilibriumConstantAux.h"
-
-#include "AddPrimarySpeciesAction.h"
-#include "AddSecondarySpeciesAction.h"
-#include "AddCoupledEqSpeciesAction.h"
-#include "AddCoupledSolidKinSpeciesAction.h"
-
-#include "ChemicalOutFlowBC.h"
-
-#include "LangmuirMaterial.h"
-#include "MollifiedLangmuirMaterial.h"
-
-#include "TotalMineralVolumeFraction.h"
-
 template <>
 InputParameters
 validParams<ChemicalReactionsApp>()
@@ -49,6 +19,8 @@ validParams<ChemicalReactionsApp>()
   InputParameters params = validParams<MooseApp>();
   return params;
 }
+
+registerKnownLabel("ChemicalReactionsApp");
 
 ChemicalReactionsApp::ChemicalReactionsApp(const InputParameters & parameters)
   : MooseApp(parameters)
@@ -86,30 +58,7 @@ ChemicalReactionsApp__registerObjects(Factory & factory)
 void
 ChemicalReactionsApp::registerObjects(Factory & factory)
 {
-  registerKernel(PrimaryTimeDerivative);
-  registerKernel(PrimaryConvection);
-  registerKernel(PrimaryDiffusion);
-  registerKernel(CoupledBEEquilibriumSub);
-  registerKernel(CoupledConvectionReactionSub);
-  registerKernel(CoupledDiffusionReactionSub);
-  registerKernel(CoupledBEKinetic);
-  registerKernel(DesorptionFromMatrix);
-  registerKernel(DesorptionToPorespace);
-  registerKernel(DarcyFluxPressure);
-
-  registerAux(AqueousEquilibriumRxnAux);
-  registerAux(KineticDisPreConcAux);
-  registerAux(KineticDisPreRateAux);
-  registerAux(PHAux);
-  registerAux(TotalConcentrationAux);
-  registerAux(EquilibriumConstantAux);
-
-  registerBoundaryCondition(ChemicalOutFlowBC);
-
-  registerMaterial(LangmuirMaterial);
-  registerMaterial(MollifiedLangmuirMaterial);
-
-  registerPostprocessor(TotalMineralVolumeFraction);
+  Registry::registerObjectsTo(factory, {"ChemicalReactionsApp"});
 }
 
 // External entry point for dynamic syntax association
@@ -121,18 +70,13 @@ ChemicalReactionsApp__associateSyntax(Syntax & syntax, ActionFactory & action_fa
 void
 ChemicalReactionsApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
 {
+  Registry::registerActionsTo(action_factory, {"ChemicalReactionsApp"});
   registerSyntax("AddPrimarySpeciesAction", "ReactionNetwork/AqueousEquilibriumReactions");
   registerSyntax("AddPrimarySpeciesAction", "ReactionNetwork/SolidKineticReactions");
   registerSyntax("AddSecondarySpeciesAction", "ReactionNetwork/AqueousEquilibriumReactions");
   registerSyntax("AddSecondarySpeciesAction", "ReactionNetwork/SolidKineticReactions");
   registerSyntax("AddCoupledEqSpeciesAction", "ReactionNetwork/AqueousEquilibriumReactions");
   registerSyntax("AddCoupledSolidKinSpeciesAction", "ReactionNetwork/SolidKineticReactions");
-  registerAction(AddPrimarySpeciesAction, "add_variable");
-  registerAction(AddSecondarySpeciesAction, "add_aux_variable");
-  registerAction(AddCoupledEqSpeciesAction, "add_kernel");
-  registerAction(AddCoupledEqSpeciesAction, "add_aux_kernel");
-  registerAction(AddCoupledSolidKinSpeciesAction, "add_kernel");
-  registerAction(AddCoupledSolidKinSpeciesAction, "add_aux_kernel");
 }
 
 // External entry point for dynamic execute flag registration
