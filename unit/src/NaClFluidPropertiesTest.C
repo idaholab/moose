@@ -49,9 +49,9 @@ TEST_F(NaClFluidPropertiesTest, halite)
   REL_TEST("enthalpy", _fp->h(pt, 673.15), 366.55e3, 1.0e-3);
 
   // Thermal conductivity (function of T only)
-  REL_TEST("k", _fp->k_from_rho_T(p0, 323.15), 5.488, 1.0e-2);
-  REL_TEST("k", _fp->k_from_rho_T(p0, 423.15), 3.911, 1.0e-2);
-  REL_TEST("k", _fp->k_from_rho_T(p0, 523.15), 3.024, 2.0e-2);
+  REL_TEST("k", _fp->k(p0, 323.15), 5.488, 1.0e-2);
+  REL_TEST("k", _fp->k(p0, 423.15), 3.911, 1.0e-2);
+  REL_TEST("k", _fp->k(p0, 523.15), 3.024, 2.0e-2);
 }
 
 /**

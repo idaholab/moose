@@ -136,6 +136,7 @@ public:
    * @return viscosity (Pa.s)
    */
   virtual Real mu(Real pressure, Real temperature) const = 0;
+
   /*
    * Dynamic viscosity and its derivatives wrt pressure and temperature
    * @param pressure fluid pressure (Pa)
