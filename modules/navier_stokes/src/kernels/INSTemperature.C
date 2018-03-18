@@ -10,6 +10,8 @@
 #include "INSTemperature.h"
 #include "MooseMesh.h"
 
+registerMooseObject("NavierStokesApp", INSTemperature);
+
 template <>
 InputParameters
 validParams<INSTemperature>()

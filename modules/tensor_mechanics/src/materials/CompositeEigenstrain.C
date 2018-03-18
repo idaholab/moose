@@ -9,6 +9,8 @@
 
 #include "CompositeEigenstrain.h"
 
+registerMooseObject("TensorMechanicsApp", CompositeEigenstrain);
+
 template <>
 InputParameters
 validParams<CompositeEigenstrain>()

@@ -39,6 +39,8 @@ validParams<CombinedTestApp>()
   return params;
 }
 
+registerKnownLabel("CombinedTestApp");
+
 CombinedTestApp::CombinedTestApp(const InputParameters & parameters) : MooseApp(parameters)
 {
   Moose::registerObjects(_factory);

@@ -9,6 +9,8 @@
 
 #include "ThumbIC.h"
 
+registerMooseObject("PhaseFieldApp", ThumbIC);
+
 template <>
 InputParameters
 validParams<ThumbIC>()

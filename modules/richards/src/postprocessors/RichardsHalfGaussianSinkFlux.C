@@ -13,6 +13,8 @@
 #include "RichardsHalfGaussianSinkFlux.h"
 #include "Function.h"
 
+registerMooseObject("RichardsApp", RichardsHalfGaussianSinkFlux);
+
 template <>
 InputParameters
 validParams<RichardsHalfGaussianSinkFlux>()

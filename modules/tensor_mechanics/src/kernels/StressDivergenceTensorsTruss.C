@@ -15,6 +15,8 @@
 #include "MooseVariable.h"
 #include "SystemBase.h"
 
+registerMooseObject("TensorMechanicsApp", StressDivergenceTensorsTruss);
+
 template <>
 InputParameters
 validParams<StressDivergenceTensorsTruss>()

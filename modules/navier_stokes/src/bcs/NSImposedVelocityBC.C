@@ -11,6 +11,8 @@
 #include "NSImposedVelocityBC.h"
 #include "NS.h"
 
+registerMooseObject("NavierStokesApp", NSImposedVelocityBC);
+
 template <>
 InputParameters
 validParams<NSImposedVelocityBC>()

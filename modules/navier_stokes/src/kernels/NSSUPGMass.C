@@ -9,6 +9,8 @@
 
 #include "NSSUPGMass.h"
 
+registerMooseObject("NavierStokesApp", NSSUPGMass);
+
 template <>
 InputParameters
 validParams<NSSUPGMass>()

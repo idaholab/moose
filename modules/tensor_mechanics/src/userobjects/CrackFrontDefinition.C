@@ -18,6 +18,8 @@
 #include "libmesh/string_to_enum.h"
 #include "libmesh/quadrature.h"
 
+registerMooseObject("TensorMechanicsApp", CrackFrontDefinition);
+
 template <>
 InputParameters
 validParams<CrackFrontDefinition>()

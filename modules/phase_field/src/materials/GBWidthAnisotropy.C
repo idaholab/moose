@@ -9,6 +9,8 @@
 
 #include "GBWidthAnisotropy.h"
 
+registerMooseObject("PhaseFieldApp", GBWidthAnisotropy);
+
 template <>
 InputParameters
 validParams<GBWidthAnisotropy>()

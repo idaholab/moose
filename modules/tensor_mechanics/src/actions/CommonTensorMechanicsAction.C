@@ -10,6 +10,8 @@
 #include "CommonTensorMechanicsAction.h"
 #include "TensorMechanicsAction.h"
 
+registerMooseAction("TensorMechanicsApp", CommonTensorMechanicsAction, "meta_action");
+
 template <>
 InputParameters
 validParams<CommonTensorMechanicsAction>()

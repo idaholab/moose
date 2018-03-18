@@ -12,6 +12,8 @@
 #include "EulerAngleProvider.h"
 #include "Euler2RGB.h"
 
+registerMooseObject("PhaseFieldApp", EulerAngleProvider2RGBAux);
+
 template <>
 InputParameters
 validParams<EulerAngleProvider2RGBAux>()

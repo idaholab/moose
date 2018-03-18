@@ -11,6 +11,8 @@
 //
 #include "RichardsDensityPrimePrimeAux.h"
 
+registerMooseObject("RichardsApp", RichardsDensityPrimePrimeAux);
+
 template <>
 InputParameters
 validParams<RichardsDensityPrimePrimeAux>()

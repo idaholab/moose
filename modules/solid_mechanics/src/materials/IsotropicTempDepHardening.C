@@ -13,6 +13,8 @@
 
 #include "PiecewiseLinear.h"
 
+registerMooseObject("SolidMechanicsApp", IsotropicTempDepHardening);
+
 template <>
 InputParameters
 validParams<IsotropicTempDepHardening>()

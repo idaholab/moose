@@ -10,6 +10,8 @@
 #include "FiniteStrainPlasticMaterial.h"
 #include "libmesh/utility.h"
 
+registerMooseObject("TensorMechanicsApp", FiniteStrainPlasticMaterial);
+
 template <>
 InputParameters
 validParams<FiniteStrainPlasticMaterial>()

@@ -12,6 +12,8 @@
 #include "FEProblem.h"
 #include "NonlinearSystem.h"
 
+registerMooseAction("HeatConductionApp", AddSlaveFluxVectorAction, "add_slave_flux_vector");
+
 template <>
 InputParameters
 validParams<AddSlaveFluxVectorAction>()

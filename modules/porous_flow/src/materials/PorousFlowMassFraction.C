@@ -9,6 +9,8 @@
 
 #include "PorousFlowMassFraction.h"
 
+registerMooseObject("PorousFlowApp", PorousFlowMassFraction);
+
 template <>
 InputParameters
 validParams<PorousFlowMassFraction>()

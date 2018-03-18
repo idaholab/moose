@@ -11,6 +11,8 @@
 
 #include "SymmElasticityTensor.h"
 
+registerMooseObject("SolidMechanicsApp", MacroElastic);
+
 template <>
 InputParameters
 validParams<MacroElastic>()

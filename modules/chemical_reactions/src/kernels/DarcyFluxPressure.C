@@ -9,6 +9,8 @@
 
 #include "DarcyFluxPressure.h"
 
+registerMooseObject("ChemicalReactionsApp", DarcyFluxPressure);
+
 template <>
 InputParameters
 validParams<DarcyFluxPressure>()

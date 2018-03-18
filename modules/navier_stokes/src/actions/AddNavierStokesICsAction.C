@@ -20,6 +20,8 @@
 #include "libmesh/string_to_enum.h"
 #include "libmesh/fe.h"
 
+registerMooseAction("NavierStokesApp", AddNavierStokesICsAction, "add_navier_stokes_ics");
+
 template <>
 InputParameters
 validParams<AddNavierStokesICsAction>()

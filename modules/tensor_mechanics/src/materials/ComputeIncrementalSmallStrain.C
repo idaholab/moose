@@ -11,6 +11,8 @@
 #include "Assembly.h"
 #include "libmesh/quadrature.h"
 
+registerMooseObject("TensorMechanicsApp", ComputeIncrementalSmallStrain);
+
 template <>
 InputParameters
 validParams<ComputeIncrementalSmallStrain>()

@@ -11,33 +11,6 @@
 #include "AppFactory.h"
 #include "MooseSyntax.h"
 
-#include "StateSimTester.h"
-#include "StateSimRunner.h"
-
-// Distributions
-#include "UniformDistribution.h"
-#include "WeibullDistribution.h"
-#include "NormalDistribution.h"
-#include "LognormalDistribution.h"
-
-// Samplers
-#include "MonteCarloSampler.h"
-#include "SobolSampler.h"
-
-// VectorPostprocessors
-#include "SamplerData.h"
-#include "StochasticResults.h"
-
-// MultiApps
-#include "SamplerMultiApp.h"
-
-// Transfers
-#include "SamplerTransfer.h"
-#include "SamplerPostprocessorTransfer.h"
-
-// Controls
-#include "SamplerReceiver.h"
-
 template <>
 InputParameters
 validParams<StochasticToolsApp>()
@@ -45,6 +18,8 @@ validParams<StochasticToolsApp>()
   InputParameters params = validParams<MooseApp>();
   return params;
 }
+
+registerKnownLabel("StochasticToolsApp");
 
 StochasticToolsApp::StochasticToolsApp(InputParameters parameters) : MooseApp(parameters)
 {
@@ -81,32 +56,7 @@ StochasticToolsApp__registerObjects(Factory & factory)
 void
 StochasticToolsApp::registerObjects(Factory & factory)
 {
-  registerUserObject(StateSimRunner);
-  registerPostprocessor(StateSimTester);
-
-  // Distributions
-  registerDistribution(UniformDistribution);
-  registerDistribution(WeibullDistribution);
-  registerDistribution(NormalDistribution);
-  registerDistribution(LognormalDistribution);
-
-  // Samplers
-  registerSampler(MonteCarloSampler);
-  registerSampler(SobolSampler);
-
-  // VectorPostprocessors
-  registerVectorPostprocessor(SamplerData);
-  registerVectorPostprocessor(StochasticResults);
-
-  // MultiApps
-  registerMultiApp(SamplerMultiApp);
-
-  // Transfers
-  registerTransfer(SamplerTransfer);
-  registerTransfer(SamplerPostprocessorTransfer);
-
-  // Controls
-  registerControl(SamplerReceiver);
+  Registry::registerObjectsTo(factory, {"StochasticToolsApp"});
 }
 
 // External entry point for dynamic syntax association
@@ -116,8 +66,9 @@ StochasticToolsApp__associateSyntax(Syntax & syntax, ActionFactory & action_fact
   StochasticToolsApp::associateSyntax(syntax, action_factory);
 }
 void
-StochasticToolsApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & /*action_factory*/)
+StochasticToolsApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & action_factory)
 {
+  Registry::registerActionsTo(action_factory, {"StochasticToolsApp"});
 }
 
 // External entry point for dynamic execute flag registration

@@ -16,6 +16,8 @@
 
 #include "libmesh/quadrature.h"
 
+registerMooseObject("XFEMApp", XFEMSingleVariableConstraint);
+
 template <>
 InputParameters
 validParams<XFEMSingleVariableConstraint>()

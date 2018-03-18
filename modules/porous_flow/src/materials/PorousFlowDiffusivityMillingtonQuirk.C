@@ -9,6 +9,8 @@
 
 #include "PorousFlowDiffusivityMillingtonQuirk.h"
 
+registerMooseObject("PorousFlowApp", PorousFlowDiffusivityMillingtonQuirk);
+
 template <>
 InputParameters
 validParams<PorousFlowDiffusivityMillingtonQuirk>()

@@ -17,6 +17,8 @@
 // the solution.
 #include "RichardsDensityMethane20degC.h"
 
+registerMooseObject("RichardsApp", RichardsDensityMethane20degC);
+
 template <>
 InputParameters
 validParams<RichardsDensityMethane20degC>()

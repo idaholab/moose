@@ -9,6 +9,8 @@
 
 #include "CoupledBEKinetic.h"
 
+registerMooseObject("ChemicalReactionsApp", CoupledBEKinetic);
+
 template <>
 InputParameters
 validParams<CoupledBEKinetic>()

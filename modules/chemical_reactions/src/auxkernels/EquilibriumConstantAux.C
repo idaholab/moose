@@ -9,6 +9,8 @@
 
 #include "EquilibriumConstantAux.h"
 
+registerMooseObject("ChemicalReactionsApp", EquilibriumConstantAux);
+
 template <>
 InputParameters
 validParams<EquilibriumConstantAux>()

@@ -9,6 +9,8 @@
 
 #include "KKSXeVacSolidMaterial.h"
 
+registerMooseObject("PhaseFieldApp", KKSXeVacSolidMaterial);
+
 template <>
 InputParameters
 validParams<KKSXeVacSolidMaterial>()

@@ -10,6 +10,8 @@
 #include "VolumetricFlowRate.h"
 #include <math.h>
 
+registerMooseObject("NavierStokesApp", VolumetricFlowRate);
+
 template <>
 InputParameters
 validParams<VolumetricFlowRate>()

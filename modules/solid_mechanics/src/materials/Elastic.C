@@ -9,6 +9,8 @@
 
 #include "Elastic.h"
 
+registerMooseObject("SolidMechanicsApp", Elastic);
+
 template <>
 InputParameters
 validParams<Elastic>()

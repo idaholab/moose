@@ -9,6 +9,8 @@
 
 #include "TensorMechanicsPlasticIsotropicSD.h"
 
+registerMooseObject("TensorMechanicsApp", TensorMechanicsPlasticIsotropicSD);
+
 template <>
 InputParameters
 validParams<TensorMechanicsPlasticIsotropicSD>()

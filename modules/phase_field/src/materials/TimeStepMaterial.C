@@ -9,6 +9,8 @@
 
 #include "TimeStepMaterial.h"
 
+registerMooseObject("PhaseFieldApp", TimeStepMaterial);
+
 template <>
 InputParameters
 validParams<TimeStepMaterial>()

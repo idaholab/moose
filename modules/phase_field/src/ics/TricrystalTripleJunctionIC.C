@@ -12,6 +12,8 @@
 #include "MooseMesh.h"
 #include "MathUtils.h"
 
+registerMooseObject("PhaseFieldApp", TricrystalTripleJunctionIC);
+
 template <>
 InputParameters
 validParams<TricrystalTripleJunctionIC>()

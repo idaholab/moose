@@ -9,6 +9,8 @@
 
 #include "KKSMultiFreeEnergy.h"
 
+registerMooseObject("PhaseFieldApp", KKSMultiFreeEnergy);
+
 template <>
 InputParameters
 validParams<KKSMultiFreeEnergy>()

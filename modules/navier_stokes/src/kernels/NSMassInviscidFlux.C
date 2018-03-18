@@ -9,6 +9,8 @@
 
 #include "NSMassInviscidFlux.h"
 
+registerMooseObject("NavierStokesApp", NSMassInviscidFlux);
+
 template <>
 InputParameters
 validParams<NSMassInviscidFlux>()

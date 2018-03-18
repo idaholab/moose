@@ -9,6 +9,8 @@
 
 #include "SobolSampler.h"
 
+registerMooseObject("StochasticToolsApp", SobolSampler);
+
 template <>
 InputParameters
 validParams<SobolSampler>()

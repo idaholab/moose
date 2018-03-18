@@ -9,6 +9,8 @@
 #include "ElectricalConductivity.h"
 #include "libmesh/quadrature.h"
 
+registerMooseObject("HeatConductionApp", ElectricalConductivity);
+
 template <>
 InputParameters
 validParams<ElectricalConductivity>()

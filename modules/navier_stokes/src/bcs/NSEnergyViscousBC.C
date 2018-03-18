@@ -11,6 +11,8 @@
 #include "NS.h"
 #include "NSEnergyViscousBC.h"
 
+registerMooseObject("NavierStokesApp", NSEnergyViscousBC);
+
 template <>
 InputParameters
 validParams<NSEnergyViscousBC>()

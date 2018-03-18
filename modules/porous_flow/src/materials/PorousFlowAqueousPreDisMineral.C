@@ -9,6 +9,8 @@
 
 #include "PorousFlowAqueousPreDisMineral.h"
 
+registerMooseObject("PorousFlowApp", PorousFlowAqueousPreDisMineral);
+
 template <>
 InputParameters
 validParams<PorousFlowAqueousPreDisMineral>()

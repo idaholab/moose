@@ -11,6 +11,8 @@
 #include "RankTwoTensor.h"
 #include "MooseMesh.h"
 
+registerMooseObject("TensorMechanicsApp", EshelbyTensor);
+
 template <>
 InputParameters
 validParams<EshelbyTensor>()

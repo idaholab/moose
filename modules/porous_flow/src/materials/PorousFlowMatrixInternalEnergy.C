@@ -9,6 +9,8 @@
 
 #include "PorousFlowMatrixInternalEnergy.h"
 
+registerMooseObject("PorousFlowApp", PorousFlowMatrixInternalEnergy);
+
 template <>
 InputParameters
 validParams<PorousFlowMatrixInternalEnergy>()

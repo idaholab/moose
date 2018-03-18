@@ -15,6 +15,8 @@
 #include "IdealGasFluidProperties.h"
 
 // Full specialization of the validParams function for this object
+registerMooseObject("NavierStokesApp", NSStagnationPressureBC);
+
 template <>
 InputParameters
 validParams<NSStagnationPressureBC>()

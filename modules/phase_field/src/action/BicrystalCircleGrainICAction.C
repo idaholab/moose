@@ -12,6 +12,8 @@
 #include "FEProblem.h"
 #include "Conversion.h"
 
+registerMooseAction("PhaseFieldApp", BicrystalCircleGrainICAction, "add_ic");
+
 template <>
 InputParameters
 validParams<BicrystalCircleGrainICAction>()

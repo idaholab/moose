@@ -20,6 +20,8 @@ validParams<ChemicalReactionsTestApp>()
   return params;
 }
 
+registerKnownLabel("ChemicalReactionsTestApp");
+
 ChemicalReactionsTestApp::ChemicalReactionsTestApp(InputParameters parameters)
   : MooseApp(parameters)
 {
@@ -62,8 +64,9 @@ ChemicalReactionsTestApp__registerObjects(Factory & factory)
   ChemicalReactionsTestApp::registerObjects(factory);
 }
 void
-ChemicalReactionsTestApp::registerObjects(Factory & /*factory*/)
+ChemicalReactionsTestApp::registerObjects(Factory & factory)
 {
+  Registry::registerObjectsTo(factory, {"ChemicalReactionsTestApp"});
 }
 
 // External entry point for dynamic syntax association
@@ -73,8 +76,9 @@ ChemicalReactionsTestApp__associateSyntax(Syntax & syntax, ActionFactory & actio
   ChemicalReactionsTestApp::associateSyntax(syntax, action_factory);
 }
 void
-ChemicalReactionsTestApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & /*action_factory*/)
+ChemicalReactionsTestApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & action_factory)
 {
+  Registry::registerActionsTo(action_factory, {"ChemicalReactionsTestApp"});
 }
 
 // External entry point for dynamic execute flag registration

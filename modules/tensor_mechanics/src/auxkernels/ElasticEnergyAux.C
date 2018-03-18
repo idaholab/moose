@@ -9,6 +9,8 @@
 
 #include "ElasticEnergyAux.h"
 
+registerMooseObject("TensorMechanicsApp", ElasticEnergyAux);
+
 template <>
 InputParameters
 validParams<ElasticEnergyAux>()

@@ -9,6 +9,8 @@
 
 #include "HEVPLinearHardening.h"
 
+registerMooseObject("TensorMechanicsApp", HEVPLinearHardening);
+
 template <>
 InputParameters
 validParams<HEVPLinearHardening>()

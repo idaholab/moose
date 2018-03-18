@@ -9,6 +9,8 @@
 
 #include "InterfaceDiffusionBoundaryTerm.h"
 
+registerMooseObject("PhaseFieldApp", InterfaceDiffusionBoundaryTerm);
+
 template <>
 InputParameters
 validParams<InterfaceDiffusionBoundaryTerm>()

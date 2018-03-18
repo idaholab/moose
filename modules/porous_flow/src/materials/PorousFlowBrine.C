@@ -9,6 +9,8 @@
 
 #include "PorousFlowBrine.h"
 
+registerMooseObject("PorousFlowApp", PorousFlowBrine);
+
 template <>
 InputParameters
 validParams<PorousFlowBrine>()

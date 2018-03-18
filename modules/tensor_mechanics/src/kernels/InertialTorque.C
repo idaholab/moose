@@ -12,6 +12,8 @@
 #include "MooseVariable.h"
 #include "PermutationTensor.h"
 
+registerMooseObject("TensorMechanicsApp", InertialTorque);
+
 template <>
 InputParameters
 validParams<InertialTorque>()

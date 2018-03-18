@@ -18,6 +18,10 @@
 // Regular expression includes
 #include "pcrecpp.h"
 
+registerMooseAction("ChemicalReactionsApp", AddCoupledSolidKinSpeciesAction, "add_kernel");
+
+registerMooseAction("ChemicalReactionsApp", AddCoupledSolidKinSpeciesAction, "add_aux_kernel");
+
 template <>
 InputParameters
 validParams<AddCoupledSolidKinSpeciesAction>()

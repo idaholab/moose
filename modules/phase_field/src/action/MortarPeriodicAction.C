@@ -15,6 +15,12 @@
 
 #include "libmesh/string_to_enum.h"
 
+registerMooseAction("PhaseFieldApp", MortarPeriodicAction, "add_constraint");
+
+registerMooseAction("PhaseFieldApp", MortarPeriodicAction, "add_mortar_interface");
+
+registerMooseAction("PhaseFieldApp", MortarPeriodicAction, "add_variable");
+
 template <>
 InputParameters
 validParams<MortarPeriodicAction>()

@@ -43,6 +43,8 @@ dataLoad(std::istream & stream, GrainTracker::PartialFeatureData & feature, void
   loadHelper(stream, feature.status, context);
 }
 
+registerMooseObject("PhaseFieldApp", GrainTracker);
+
 template <>
 InputParameters
 validParams<GrainTracker>()

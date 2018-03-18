@@ -11,6 +11,8 @@
 
 #include "libmesh/quadrature.h"
 
+registerMooseObject("XFEMApp", XFEMMaterialTensorMarkerUserObject);
+
 template <>
 InputParameters
 validParams<XFEMMaterialTensorMarkerUserObject>()

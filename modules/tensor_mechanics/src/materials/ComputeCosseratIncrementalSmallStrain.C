@@ -14,6 +14,8 @@
 
 #include "libmesh/quadrature.h"
 
+registerMooseObject("TensorMechanicsApp", ComputeCosseratIncrementalSmallStrain);
+
 template <>
 InputParameters
 validParams<ComputeCosseratIncrementalSmallStrain>()

@@ -16,6 +16,8 @@
 
 static unsigned int counter = 0;
 
+registerMooseAction("ContactApp", ContactPenetrationAuxAction, "add_aux_kernel");
+
 template <>
 InputParameters
 validParams<ContactPenetrationAuxAction>()

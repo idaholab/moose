@@ -11,6 +11,8 @@
 
 #include "XFEM.h"
 
+registerMooseObject("XFEMApp", XFEMMarkerAux);
+
 template <>
 InputParameters
 validParams<XFEMMarkerAux>()

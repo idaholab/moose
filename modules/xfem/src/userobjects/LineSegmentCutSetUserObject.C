@@ -12,6 +12,8 @@
 // MOOSE includes
 #include "MooseError.h"
 
+registerMooseObject("XFEMApp", LineSegmentCutSetUserObject);
+
 template <>
 InputParameters
 validParams<LineSegmentCutSetUserObject>()

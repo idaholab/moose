@@ -9,6 +9,8 @@
 
 #include "INSTemperatureTimeDerivative.h"
 
+registerMooseObject("NavierStokesApp", INSTemperatureTimeDerivative);
+
 template <>
 InputParameters
 validParams<INSTemperatureTimeDerivative>()

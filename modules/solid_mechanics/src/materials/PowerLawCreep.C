@@ -10,6 +10,8 @@
 #include "PowerLawCreep.h"
 #include "PowerLawCreepModel.h"
 
+registerMooseObject("SolidMechanicsApp", PowerLawCreep);
+
 template <>
 InputParameters
 validParams<PowerLawCreep>()

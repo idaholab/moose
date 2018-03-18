@@ -10,6 +10,8 @@
 #include "ComputeConcentrationDependentElasticityTensor.h"
 #include "RotationTensor.h"
 
+registerMooseObject("TensorMechanicsApp", ComputeConcentrationDependentElasticityTensor);
+
 template <>
 InputParameters
 validParams<ComputeConcentrationDependentElasticityTensor>()

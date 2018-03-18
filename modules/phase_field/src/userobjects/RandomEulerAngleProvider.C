@@ -10,6 +10,8 @@
 #include "RandomEulerAngleProvider.h"
 #include "GrainTrackerInterface.h"
 
+registerMooseObject("PhaseFieldApp", RandomEulerAngleProvider);
+
 template <>
 InputParameters
 validParams<RandomEulerAngleProvider>()

@@ -10,6 +10,8 @@
 #include "PFCRFFEnergyDensity.h"
 #include "libmesh/utility.h"
 
+registerMooseObject("PhaseFieldApp", PFCRFFEnergyDensity);
+
 template <>
 InputParameters
 validParams<PFCRFFEnergyDensity>()

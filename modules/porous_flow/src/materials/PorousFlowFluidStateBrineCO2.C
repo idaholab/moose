@@ -11,6 +11,8 @@
 #include "PorousFlowCapillaryPressure.h"
 #include "PorousFlowBrineCO2.h"
 
+registerMooseObject("PorousFlowApp", PorousFlowFluidStateBrineCO2);
+
 template <>
 InputParameters
 validParams<PorousFlowFluidStateBrineCO2>()

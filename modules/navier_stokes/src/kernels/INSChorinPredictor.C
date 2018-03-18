@@ -10,6 +10,8 @@
 #include "INSChorinPredictor.h"
 #include "MooseMesh.h"
 
+registerMooseObject("NavierStokesApp", INSChorinPredictor);
+
 template <>
 InputParameters
 validParams<INSChorinPredictor>()

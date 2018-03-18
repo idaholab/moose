@@ -9,6 +9,8 @@
 
 #include "TensorMechanicsHardeningPowerRule.h"
 
+registerMooseObject("TensorMechanicsApp", TensorMechanicsHardeningPowerRule);
+
 template <>
 InputParameters
 validParams<TensorMechanicsHardeningPowerRule>()

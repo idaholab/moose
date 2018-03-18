@@ -9,6 +9,8 @@
 
 #include "PFCTradMaterial.h"
 
+registerMooseObject("PhaseFieldApp", PFCTradMaterial);
+
 template <>
 InputParameters
 validParams<PFCTradMaterial>()

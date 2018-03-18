@@ -11,6 +11,8 @@
 #include "BrineFluidProperties.h"
 #include "SinglePhaseFluidPropertiesPT.h"
 
+registerMooseObject("PorousFlowApp", PorousFlowBrineCO2);
+
 template <>
 InputParameters
 validParams<PorousFlowBrineCO2>()

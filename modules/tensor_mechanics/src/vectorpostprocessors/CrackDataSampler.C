@@ -11,6 +11,8 @@
 #include "PostprocessorInterface.h"
 #include "SamplerBase.h"
 
+registerMooseObject("TensorMechanicsApp", CrackDataSampler);
+
 template <>
 InputParameters
 validParams<CrackDataSampler>()

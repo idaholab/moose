@@ -16,6 +16,8 @@
 // C++ includes
 #include <iostream>
 
+registerMooseObject("RichardsApp", RichardsMassChange);
+
 template <>
 InputParameters
 validParams<RichardsMassChange>()

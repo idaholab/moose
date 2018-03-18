@@ -9,6 +9,8 @@
 
 #include "CrossTermGradientFreeEnergy.h"
 
+registerMooseObject("PhaseFieldApp", CrossTermGradientFreeEnergy);
+
 template <>
 InputParameters
 validParams<CrossTermGradientFreeEnergy>()

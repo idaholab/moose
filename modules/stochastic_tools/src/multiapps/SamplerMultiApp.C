@@ -10,6 +10,8 @@
 // StochasticTools includes
 #include "SamplerMultiApp.h"
 
+registerMooseObject("StochasticToolsApp", SamplerMultiApp);
+
 template <>
 InputParameters
 validParams<SamplerMultiApp>()

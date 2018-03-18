@@ -10,6 +10,8 @@
 #include "TensorMechanicsPlasticDruckerPragerHyperbolic.h"
 #include "libmesh/utility.h"
 
+registerMooseObject("TensorMechanicsApp", TensorMechanicsPlasticDruckerPragerHyperbolic);
+
 template <>
 InputParameters
 validParams<TensorMechanicsPlasticDruckerPragerHyperbolic>()

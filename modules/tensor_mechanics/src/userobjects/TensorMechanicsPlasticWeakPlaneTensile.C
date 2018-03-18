@@ -9,6 +9,8 @@
 
 #include "TensorMechanicsPlasticWeakPlaneTensile.h"
 
+registerMooseObject("TensorMechanicsApp", TensorMechanicsPlasticWeakPlaneTensile);
+
 template <>
 InputParameters
 validParams<TensorMechanicsPlasticWeakPlaneTensile>()

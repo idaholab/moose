@@ -9,6 +9,8 @@
 
 #include "CoupledMaterialDerivative.h"
 
+registerMooseObject("PhaseFieldApp", CoupledMaterialDerivative);
+
 template <>
 InputParameters
 validParams<CoupledMaterialDerivative>()

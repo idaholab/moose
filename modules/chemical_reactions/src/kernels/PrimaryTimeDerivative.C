@@ -9,6 +9,8 @@
 
 #include "PrimaryTimeDerivative.h"
 
+registerMooseObject("ChemicalReactionsApp", PrimaryTimeDerivative);
+
 template <>
 InputParameters
 validParams<PrimaryTimeDerivative>()

@@ -12,6 +12,8 @@
 #include "Function.h"
 #include "ElasticityTensorTools.h"
 
+registerMooseObject("TensorMechanicsApp", IsotropicPlasticityStressUpdate);
+
 template <>
 InputParameters
 validParams<IsotropicPlasticityStressUpdate>()

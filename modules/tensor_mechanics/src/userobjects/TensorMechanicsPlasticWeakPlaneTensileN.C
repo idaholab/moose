@@ -10,6 +10,8 @@
 #include "TensorMechanicsPlasticWeakPlaneTensileN.h"
 #include "RotationMatrix.h" // for rotVecToZ
 
+registerMooseObject("TensorMechanicsApp", TensorMechanicsPlasticWeakPlaneTensileN);
+
 template <>
 InputParameters
 validParams<TensorMechanicsPlasticWeakPlaneTensileN>()

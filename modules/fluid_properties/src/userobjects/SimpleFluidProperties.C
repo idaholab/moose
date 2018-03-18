@@ -9,6 +9,8 @@
 
 #include "SimpleFluidProperties.h"
 
+registerMooseObject("FluidPropertiesApp", SimpleFluidProperties);
+
 template <>
 InputParameters
 validParams<SimpleFluidProperties>()

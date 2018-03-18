@@ -9,6 +9,8 @@
 
 #include "MonteCarloSampler.h"
 
+registerMooseObject("StochasticToolsApp", MonteCarloSampler);
+
 template <>
 InputParameters
 validParams<MonteCarloSampler>()

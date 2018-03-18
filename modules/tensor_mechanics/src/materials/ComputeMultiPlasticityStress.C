@@ -16,6 +16,8 @@
 
 #include "libmesh/utility.h"
 
+registerMooseObject("TensorMechanicsApp", ComputeMultiPlasticityStress);
+
 template <>
 InputParameters
 validParams<ComputeMultiPlasticityStress>()

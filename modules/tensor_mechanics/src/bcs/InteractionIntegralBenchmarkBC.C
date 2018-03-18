@@ -10,6 +10,8 @@
 #include "InteractionIntegralBenchmarkBC.h"
 #include "Function.h"
 
+registerMooseObject("TensorMechanicsApp", InteractionIntegralBenchmarkBC);
+
 template <>
 InputParameters
 validParams<InteractionIntegralBenchmarkBC>()

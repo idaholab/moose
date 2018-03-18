@@ -12,6 +12,8 @@
 
 #include "libmesh/quadrature.h"
 
+registerMooseObject("PhaseFieldApp", ComputeGrainForceAndTorque);
+
 template <>
 InputParameters
 validParams<ComputeGrainForceAndTorque>()

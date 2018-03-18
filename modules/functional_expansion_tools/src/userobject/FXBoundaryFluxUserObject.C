@@ -9,6 +9,8 @@
 
 #include "FXBoundaryFluxUserObject.h"
 
+registerMooseObject("FunctionalExpansionToolsApp", FXBoundaryFluxUserObject);
+
 template <>
 InputParameters
 validParams<FXBoundaryFluxUserObject>()

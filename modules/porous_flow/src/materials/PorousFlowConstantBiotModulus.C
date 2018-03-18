@@ -9,6 +9,8 @@
 
 #include "PorousFlowConstantBiotModulus.h"
 
+registerMooseObject("PorousFlowApp", PorousFlowConstantBiotModulus);
+
 template <>
 InputParameters
 validParams<PorousFlowConstantBiotModulus>()

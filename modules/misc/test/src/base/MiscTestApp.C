@@ -12,8 +12,6 @@
 #include "AppFactory.h"
 #include "MooseSyntax.h"
 
-#include "Convection.h"
-
 template <>
 InputParameters
 validParams<MiscTestApp>()
@@ -21,6 +19,8 @@ validParams<MiscTestApp>()
   InputParameters params = validParams<MiscApp>();
   return params;
 }
+
+registerKnownLabel("MiscTestApp");
 
 MiscTestApp::MiscTestApp(InputParameters parameters) : MooseApp(parameters)
 {
@@ -66,7 +66,7 @@ MiscTestApp__registerObjects(Factory & factory)
 void
 MiscTestApp::registerObjects(Factory & factory)
 {
-  registerKernel(Convection);
+  Registry::registerObjectsTo(factory, {"MiscTestApp"});
 }
 
 // External entry point for dynamic syntax association
@@ -76,8 +76,9 @@ MiscTestApp__associateSyntax(Syntax & syntax, ActionFactory & action_factory)
   MiscTestApp::associateSyntax(syntax, action_factory);
 }
 void
-MiscTestApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & /*action_factory*/)
+MiscTestApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & action_factory)
 {
+  Registry::registerActionsTo(action_factory, {"MiscTestApp"});
 }
 
 // External entry point for dynamic execute flag registration

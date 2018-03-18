@@ -9,6 +9,8 @@
 
 #include "ComputeLinearViscoelasticStress.h"
 
+registerMooseObject("TensorMechanicsApp", ComputeLinearViscoelasticStress);
+
 template <>
 InputParameters
 validParams<ComputeLinearViscoelasticStress>()

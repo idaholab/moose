@@ -9,6 +9,8 @@
 
 #include "PrimaryDiffusion.h"
 
+registerMooseObject("ChemicalReactionsApp", PrimaryDiffusion);
+
 template <>
 InputParameters
 validParams<PrimaryDiffusion>()

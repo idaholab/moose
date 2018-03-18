@@ -17,6 +17,8 @@
 // MOOSE includes
 #include "MooseVariable.h"
 
+registerMooseObject("NavierStokesApp", NSInitialCondition);
+
 template <>
 InputParameters
 validParams<NSInitialCondition>()

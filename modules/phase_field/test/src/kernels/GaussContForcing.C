@@ -9,6 +9,8 @@
 
 #include "GaussContForcing.h"
 
+registerMooseObject("PhaseFieldTestApp", GaussContForcing);
+
 template <>
 InputParameters
 validParams<GaussContForcing>()

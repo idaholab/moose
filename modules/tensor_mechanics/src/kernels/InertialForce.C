@@ -10,6 +10,8 @@
 #include "InertialForce.h"
 #include "SubProblem.h"
 
+registerMooseObject("TensorMechanicsApp", InertialForce);
+
 template <>
 InputParameters
 validParams<InertialForce>()

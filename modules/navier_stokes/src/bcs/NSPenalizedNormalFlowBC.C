@@ -9,6 +9,8 @@
 
 #include "NSPenalizedNormalFlowBC.h"
 
+registerMooseObject("NavierStokesApp", NSPenalizedNormalFlowBC);
+
 template <>
 InputParameters
 validParams<NSPenalizedNormalFlowBC>()

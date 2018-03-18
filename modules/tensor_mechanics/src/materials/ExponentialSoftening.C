@@ -11,6 +11,8 @@
 
 #include "MooseMesh.h"
 
+registerMooseObject("TensorMechanicsApp", ExponentialSoftening);
+
 template <>
 InputParameters
 validParams<ExponentialSoftening>()

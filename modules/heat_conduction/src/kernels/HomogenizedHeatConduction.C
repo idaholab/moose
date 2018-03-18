@@ -9,6 +9,8 @@
 
 #include "HomogenizedHeatConduction.h"
 
+registerMooseObject("HeatConductionApp", HomogenizedHeatConduction);
+
 template <>
 InputParameters
 validParams<HomogenizedHeatConduction>()

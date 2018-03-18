@@ -24,6 +24,8 @@
 
 #include "libmesh/quadrature.h"
 
+registerMooseObject("SolidMechanicsApp", SolidModel);
+
 template <>
 InputParameters
 validParams<SolidModel>()

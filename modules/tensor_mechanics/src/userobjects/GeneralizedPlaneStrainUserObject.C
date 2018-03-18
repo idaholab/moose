@@ -15,6 +15,8 @@
 
 #include "libmesh/quadrature.h"
 
+registerMooseObject("TensorMechanicsApp", GeneralizedPlaneStrainUserObject);
+
 template <>
 InputParameters
 validParams<GeneralizedPlaneStrainUserObject>()

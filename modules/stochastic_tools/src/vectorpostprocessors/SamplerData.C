@@ -13,6 +13,8 @@
 // MOOSE includes
 #include "Sampler.h"
 
+registerMooseObject("StochasticToolsApp", SamplerData);
+
 template <>
 InputParameters
 validParams<SamplerData>()

@@ -14,6 +14,8 @@
 #include "MooseMesh.h"
 #include "MooseVariable.h"
 
+registerMooseObject("PorousFlowApp", PorousFlowEffectiveStressCoupling);
+
 template <>
 InputParameters
 validParams<PorousFlowEffectiveStressCoupling>()

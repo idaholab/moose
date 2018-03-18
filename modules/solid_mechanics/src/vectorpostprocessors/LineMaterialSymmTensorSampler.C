@@ -9,6 +9,8 @@
 
 #include "LineMaterialSymmTensorSampler.h"
 
+registerMooseObject("SolidMechanicsApp", LineMaterialSymmTensorSampler);
+
 template <>
 InputParameters
 validParams<LineMaterialSymmTensorSampler>()

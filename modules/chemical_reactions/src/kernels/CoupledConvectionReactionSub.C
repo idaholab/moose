@@ -9,6 +9,8 @@
 
 #include "CoupledConvectionReactionSub.h"
 
+registerMooseObject("ChemicalReactionsApp", CoupledConvectionReactionSub);
+
 template <>
 InputParameters
 validParams<CoupledConvectionReactionSub>()

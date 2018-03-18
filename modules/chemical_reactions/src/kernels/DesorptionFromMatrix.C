@@ -11,6 +11,8 @@
 
 #include <iostream>
 
+registerMooseObject("ChemicalReactionsApp", DesorptionFromMatrix);
+
 template <>
 InputParameters
 validParams<DesorptionFromMatrix>()

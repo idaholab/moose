@@ -9,6 +9,8 @@
 
 #include "AEFVSlopeLimitingOneD.h"
 
+registerMooseObject("RdgApp", AEFVSlopeLimitingOneD);
+
 template <>
 InputParameters
 validParams<AEFVSlopeLimitingOneD>()

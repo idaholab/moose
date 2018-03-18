@@ -11,6 +11,8 @@
 //
 #include "RichardsRelPermMonomial.h"
 
+registerMooseObject("RichardsApp", RichardsRelPermMonomial);
+
 template <>
 InputParameters
 validParams<RichardsRelPermMonomial>()

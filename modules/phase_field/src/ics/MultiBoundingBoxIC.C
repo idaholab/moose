@@ -10,6 +10,8 @@
 #include "MultiBoundingBoxIC.h"
 #include "MooseMesh.h"
 
+registerMooseObject("PhaseFieldApp", MultiBoundingBoxIC);
+
 template <>
 InputParameters
 validParams<MultiBoundingBoxIC>()

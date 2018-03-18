@@ -12,6 +12,8 @@
 #include "Q2PPiecewiseLinearSinkFlux.h"
 #include "Function.h"
 
+registerMooseObject("RichardsApp", Q2PPiecewiseLinearSinkFlux);
+
 template <>
 InputParameters
 validParams<Q2PPiecewiseLinearSinkFlux>()

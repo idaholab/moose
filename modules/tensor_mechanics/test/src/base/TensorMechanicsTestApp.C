@@ -20,6 +20,8 @@ validParams<TensorMechanicsTestApp>()
   return params;
 }
 
+registerKnownLabel("TensorMechanicsTestApp");
+
 TensorMechanicsTestApp::TensorMechanicsTestApp(InputParameters parameters) : MooseApp(parameters)
 {
   Moose::registerObjects(_factory);
@@ -61,8 +63,9 @@ TensorMechanicsTestApp__registerObjects(Factory & factory)
   TensorMechanicsTestApp::registerObjects(factory);
 }
 void
-TensorMechanicsTestApp::registerObjects(Factory & /*factory*/)
+TensorMechanicsTestApp::registerObjects(Factory & factory)
 {
+  Registry::registerObjectsTo(factory, {"TensorMechanicsTestApp"});
 }
 
 // External entry point for dynamic syntax association
@@ -72,8 +75,9 @@ TensorMechanicsTestApp__associateSyntax(Syntax & syntax, ActionFactory & action_
   TensorMechanicsTestApp::associateSyntax(syntax, action_factory);
 }
 void
-TensorMechanicsTestApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & /*action_factory*/)
+TensorMechanicsTestApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & action_factory)
 {
+  Registry::registerActionsTo(action_factory, {"TensorMechanicsTestApp"});
 }
 
 // External entry point for dynamic execute flag registration

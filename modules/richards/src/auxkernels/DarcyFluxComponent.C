@@ -9,6 +9,8 @@
 
 #include "DarcyFluxComponent.h"
 
+registerMooseObject("RichardsApp", DarcyFluxComponent);
+
 template <>
 InputParameters
 validParams<DarcyFluxComponent>()

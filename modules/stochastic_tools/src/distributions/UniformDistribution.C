@@ -9,6 +9,8 @@
 
 #include "UniformDistribution.h"
 
+registerMooseObject("StochasticToolsApp", UniformDistribution);
+
 template <>
 InputParameters
 validParams<UniformDistribution>()

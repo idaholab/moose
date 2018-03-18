@@ -9,6 +9,8 @@
 
 #include "ForceDensityMaterial.h"
 
+registerMooseObject("PhaseFieldApp", ForceDensityMaterial);
+
 template <>
 InputParameters
 validParams<ForceDensityMaterial>()

@@ -11,6 +11,8 @@
 
 #include "libmesh/quadrature.h"
 
+registerMooseObject("NavierStokesApp", Air);
+
 template <>
 InputParameters
 validParams<Air>()

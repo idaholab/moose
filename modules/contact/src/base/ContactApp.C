@@ -12,28 +12,6 @@
 #include "AppFactory.h"
 #include "MooseSyntax.h"
 
-#include "ContactAction.h"
-#include "ContactMaster.h"
-#include "ContactPenetrationAuxAction.h"
-#include "ContactPenetrationVarAction.h"
-#include "ContactPressureAux.h"
-#include "ContactPressureAuxAction.h"
-#include "ContactPressureVarAction.h"
-#include "NodalAreaAction.h"
-#include "SlaveConstraint.h"
-#include "OneDContactConstraint.h"
-#include "MultiDContactConstraint.h"
-#include "GluedContactConstraint.h"
-#include "MechanicalContactConstraint.h"
-#include "SparsityBasedContactConstraint.h"
-#include "AugmentedLagrangianContactProblem.h"
-#include "ReferenceResidualProblem.h"
-#include "NodalArea.h"
-#include "NodalAreaAction.h"
-#include "NodalAreaVarAction.h"
-#include "ContactSlipDamper.h"
-#include "ContactSplit.h"
-
 template <>
 InputParameters
 validParams<ContactApp>()
@@ -41,6 +19,8 @@ validParams<ContactApp>()
   InputParameters params = validParams<MooseApp>();
   return params;
 }
+
+registerKnownLabel("ContactApp");
 
 ContactApp::ContactApp(const InputParameters & parameters) : MooseApp(parameters)
 {
@@ -77,19 +57,7 @@ ContactApp__registerObjects(Factory & factory)
 void
 ContactApp::registerObjects(Factory & factory)
 {
-  registerDiracKernel(ContactMaster);
-  registerDiracKernel(SlaveConstraint);
-  registerConstraint(OneDContactConstraint);
-  registerConstraint(MultiDContactConstraint);
-  registerConstraint(GluedContactConstraint);
-  registerConstraint(MechanicalContactConstraint);
-  registerConstraint(SparsityBasedContactConstraint);
-  registerProblem(AugmentedLagrangianContactProblem);
-  registerProblem(ReferenceResidualProblem);
-  registerUserObject(NodalArea);
-  registerAux(ContactPressureAux);
-  registerDamper(ContactSlipDamper);
-  registerSplit(ContactSplit);
+  Registry::registerObjectsTo(factory, {"ContactApp"});
 }
 
 // External entry point for dynamic syntax association
@@ -101,6 +69,8 @@ ContactApp__associateSyntax(Syntax & syntax, ActionFactory & action_factory)
 void
 ContactApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
 {
+  Registry::registerActionsTo(action_factory, {"ContactApp"});
+
   registerSyntax("ContactAction", "Contact/*");
 
   registerSyntax("ContactPenetrationAuxAction", "Contact/*");
@@ -112,22 +82,8 @@ ContactApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
   registerSyntax("NodalAreaAction", "Contact/*");
   registerSyntax("NodalAreaVarAction", "Contact/*");
 
-  registerAction(ContactAction, "add_aux_kernel");
-  registerAction(ContactAction, "add_aux_variable");
-  registerAction(ContactAction, "add_dirac_kernel");
-
   registerTask("output_penetration_info_vars", false);
-  registerAction(ContactAction, "output_penetration_info_vars");
   syntax.addDependency("output_penetration_info_vars", "add_output");
-
-  registerAction(ContactPenetrationAuxAction, "add_aux_kernel");
-  registerAction(ContactPenetrationVarAction, "add_aux_variable");
-
-  registerAction(ContactPressureAuxAction, "add_aux_kernel");
-  registerAction(ContactPressureVarAction, "add_aux_variable");
-
-  registerAction(NodalAreaAction, "add_user_object");
-  registerAction(NodalAreaVarAction, "add_aux_variable");
 }
 
 // External entry point for dynamic execute flag registration

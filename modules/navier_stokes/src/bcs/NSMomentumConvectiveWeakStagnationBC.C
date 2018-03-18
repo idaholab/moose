@@ -9,6 +9,8 @@
 
 #include "NSMomentumConvectiveWeakStagnationBC.h"
 
+registerMooseObject("NavierStokesApp", NSMomentumConvectiveWeakStagnationBC);
+
 template <>
 InputParameters
 validParams<NSMomentumConvectiveWeakStagnationBC>()

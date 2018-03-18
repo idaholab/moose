@@ -17,6 +17,8 @@
 // C++ includes
 #include <iostream>
 
+registerMooseObject("PorousFlowApp", PorousFlowSink);
+
 template <>
 InputParameters
 validParams<PorousFlowSink>()

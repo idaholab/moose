@@ -11,6 +11,8 @@
 
 #include "libmesh/utility.h"
 
+registerMooseObject("TensorMechanicsApp", CappedWeakPlaneStressUpdate);
+
 template <>
 InputParameters
 validParams<CappedWeakPlaneStressUpdate>()

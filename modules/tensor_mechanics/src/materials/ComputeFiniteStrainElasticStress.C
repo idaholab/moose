@@ -9,6 +9,8 @@
 
 #include "ComputeFiniteStrainElasticStress.h"
 
+registerMooseObject("TensorMechanicsApp", ComputeFiniteStrainElasticStress);
+
 template <>
 InputParameters
 validParams<ComputeFiniteStrainElasticStress>()

@@ -95,6 +95,8 @@ bool areElemListsMergeable(const std::list<dof_id_type> & elem_list1,
                            const std::list<dof_id_type> & elem_list2,
                            MeshBase & mesh);
 
+registerMooseObject("PhaseFieldApp", FeatureFloodCount);
+
 template <>
 InputParameters
 validParams<FeatureFloodCount>()

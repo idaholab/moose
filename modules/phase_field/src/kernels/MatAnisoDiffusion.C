@@ -9,6 +9,8 @@
 
 #include "MatAnisoDiffusion.h"
 
+registerMooseObject("PhaseFieldApp", MatAnisoDiffusion);
+
 template <>
 InputParameters
 validParams<MatAnisoDiffusion>()

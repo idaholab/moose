@@ -10,6 +10,8 @@
 #include "PolycrystalEBSD.h"
 #include "EBSDReader.h"
 
+registerMooseObject("PhaseFieldApp", PolycrystalEBSD);
+
 template <>
 InputParameters
 validParams<PolycrystalEBSD>()

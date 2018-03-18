@@ -9,6 +9,8 @@
 
 #include "CoefReaction.h"
 
+registerMooseObject("PhaseFieldApp", CoefReaction);
+
 template <>
 InputParameters
 validParams<CoefReaction>()

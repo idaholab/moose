@@ -10,6 +10,8 @@
 #include "DisplacementAboutAxis.h"
 #include "Function.h"
 
+registerMooseObject("TensorMechanicsApp", DisplacementAboutAxis);
+
 template <>
 InputParameters
 validParams<DisplacementAboutAxis>()

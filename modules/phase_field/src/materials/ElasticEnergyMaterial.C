@@ -11,6 +11,8 @@
 #include "RankTwoTensor.h"
 #include "RankFourTensor.h"
 
+registerMooseObject("PhaseFieldApp", ElasticEnergyMaterial);
+
 template <>
 InputParameters
 validParams<ElasticEnergyMaterial>()

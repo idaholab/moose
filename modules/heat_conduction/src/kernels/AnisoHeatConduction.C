@@ -10,6 +10,8 @@
 #include "AnisoHeatConduction.h"
 #include "MooseMesh.h"
 
+registerMooseObject("HeatConductionApp", AnisoHeatConduction);
+
 template <>
 InputParameters
 validParams<AnisoHeatConduction>()

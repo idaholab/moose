@@ -14,6 +14,8 @@
 // FluidProperties includes
 #include "IdealGasFluidProperties.h"
 
+registerMooseObject("NavierStokesApp", NSThermalBC);
+
 template <>
 InputParameters
 validParams<NSThermalBC>()

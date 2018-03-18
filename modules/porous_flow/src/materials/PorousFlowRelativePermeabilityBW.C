@@ -9,6 +9,8 @@
 
 #include "PorousFlowRelativePermeabilityBW.h"
 
+registerMooseObject("PorousFlowApp", PorousFlowRelativePermeabilityBW);
+
 template <>
 InputParameters
 validParams<PorousFlowRelativePermeabilityBW>()

@@ -9,6 +9,8 @@
 
 #include "MixedModeEquivalentK.h"
 
+registerMooseObject("TensorMechanicsApp", MixedModeEquivalentK);
+
 template <>
 InputParameters
 validParams<MixedModeEquivalentK>()

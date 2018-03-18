@@ -9,6 +9,8 @@
 
 #include "TotalMineralVolumeFraction.h"
 
+registerMooseObject("ChemicalReactionsApp", TotalMineralVolumeFraction);
+
 template <>
 InputParameters
 validParams<TotalMineralVolumeFraction>()

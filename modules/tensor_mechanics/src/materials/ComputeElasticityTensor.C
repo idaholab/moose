@@ -10,6 +10,8 @@
 #include "ComputeElasticityTensor.h"
 #include "RotationTensor.h"
 
+registerMooseObject("TensorMechanicsApp", ComputeElasticityTensor);
+
 template <>
 InputParameters
 validParams<ComputeElasticityTensor>()

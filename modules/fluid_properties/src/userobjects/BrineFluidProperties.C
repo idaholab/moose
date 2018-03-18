@@ -9,6 +9,8 @@
 
 #include "BrineFluidProperties.h"
 
+registerMooseObject("FluidPropertiesApp", BrineFluidProperties);
+
 template <>
 InputParameters
 validParams<BrineFluidProperties>()

@@ -10,6 +10,8 @@
 #include "ComputeVolumetricEigenstrain.h"
 #include "RankTwoTensor.h"
 
+registerMooseObject("TensorMechanicsApp", ComputeVolumetricEigenstrain);
+
 template <>
 InputParameters
 validParams<ComputeVolumetricEigenstrain>()

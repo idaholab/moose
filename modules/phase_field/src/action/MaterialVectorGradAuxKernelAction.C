@@ -14,6 +14,8 @@
 #include "FEProblem.h"
 #include "MooseMesh.h"
 
+registerMooseAction("PhaseFieldApp", MaterialVectorGradAuxKernelAction, "add_aux_kernel");
+
 template <>
 InputParameters
 validParams<MaterialVectorGradAuxKernelAction>()

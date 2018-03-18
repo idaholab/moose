@@ -9,6 +9,8 @@
 
 #include "NSMomentumViscousFlux.h"
 
+registerMooseObject("NavierStokesApp", NSMomentumViscousFlux);
+
 template <>
 InputParameters
 validParams<NSMomentumViscousFlux>()

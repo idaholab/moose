@@ -11,6 +11,8 @@
 
 #include "libmesh/quadrature.h"
 
+registerMooseObject("NavierStokesApp", INSExplicitTimestepSelector);
+
 template <>
 InputParameters
 validParams<INSExplicitTimestepSelector>()

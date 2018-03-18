@@ -14,6 +14,8 @@
 // MOOSE includes
 #include "MooseMesh.h"
 
+registerMooseObject("NavierStokesApp", NSSpecificVolumeAux);
+
 template <>
 InputParameters
 validParams<NSSpecificVolumeAux>()

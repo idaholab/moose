@@ -14,6 +14,8 @@
 // MOOSE includes
 #include "MooseMesh.h"
 
+registerMooseObject("NavierStokesApp", NSTemperatureL2);
+
 template <>
 InputParameters
 validParams<NSTemperatureL2>()

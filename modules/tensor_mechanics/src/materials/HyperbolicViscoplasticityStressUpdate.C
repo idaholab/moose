@@ -12,6 +12,8 @@
 #include "Function.h"
 #include "ElasticityTensorTools.h"
 
+registerMooseObject("TensorMechanicsApp", HyperbolicViscoplasticityStressUpdate);
+
 template <>
 InputParameters
 validParams<HyperbolicViscoplasticityStressUpdate>()

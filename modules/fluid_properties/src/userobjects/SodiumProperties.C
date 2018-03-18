@@ -10,6 +10,8 @@
 #include "SodiumProperties.h"
 #include "MooseError.h"
 
+registerMooseObject("FluidPropertiesApp", SodiumProperties);
+
 template <>
 InputParameters
 validParams<SodiumProperties>()

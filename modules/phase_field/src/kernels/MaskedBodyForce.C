@@ -10,6 +10,8 @@
 #include "MaskedBodyForce.h"
 #include "Function.h"
 
+registerMooseObject("PhaseFieldApp", MaskedBodyForce);
+
 template <>
 InputParameters
 validParams<MaskedBodyForce>()

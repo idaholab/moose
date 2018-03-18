@@ -16,6 +16,8 @@
 // C++ includes
 #include <iostream>
 
+registerMooseObject("RichardsApp", RichardsFlux);
+
 template <>
 InputParameters
 validParams<RichardsFlux>()

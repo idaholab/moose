@@ -12,6 +12,8 @@
 //
 #include "RichardsSeff2waterVGshifted.h"
 
+registerMooseObject("RichardsApp", RichardsSeff2waterVGshifted);
+
 template <>
 InputParameters
 validParams<RichardsSeff2waterVGshifted>()

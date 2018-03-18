@@ -12,6 +12,8 @@
 #include "MooseMesh.h"
 #include "MathUtils.h"
 
+registerMooseObject("PhaseFieldApp", PolycrystalHex);
+
 template <>
 InputParameters
 validParams<PolycrystalHex>()

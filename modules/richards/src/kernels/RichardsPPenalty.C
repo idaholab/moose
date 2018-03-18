@@ -11,6 +11,8 @@
 
 #include <iostream>
 
+registerMooseObject("RichardsApp", RichardsPPenalty);
+
 template <>
 InputParameters
 validParams<RichardsPPenalty>()

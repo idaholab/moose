@@ -10,6 +10,8 @@
 #include "ComputePolycrystalElasticityTensor.h"
 #include "RotationTensor.h"
 
+registerMooseObject("PhaseFieldApp", ComputePolycrystalElasticityTensor);
+
 template <>
 InputParameters
 validParams<ComputePolycrystalElasticityTensor>()

@@ -9,6 +9,8 @@
 
 #include "PorousFlowPiecewiseLinearSink.h"
 
+registerMooseObject("PorousFlowApp", PorousFlowPiecewiseLinearSink);
+
 template <>
 InputParameters
 validParams<PorousFlowPiecewiseLinearSink>()

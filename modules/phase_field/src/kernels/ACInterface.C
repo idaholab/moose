@@ -9,6 +9,8 @@
 
 #include "ACInterface.h"
 
+registerMooseObject("PhaseFieldApp", ACInterface);
+
 template <>
 InputParameters
 validParams<ACInterface>()

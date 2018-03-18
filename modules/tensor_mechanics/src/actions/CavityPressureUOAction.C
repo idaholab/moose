@@ -11,6 +11,8 @@
 #include "Factory.h"
 #include "FEProblem.h"
 
+registerMooseAction("TensorMechanicsApp", CavityPressureUOAction, "add_user_object");
+
 template <>
 InputParameters
 validParams<CavityPressureUOAction>()

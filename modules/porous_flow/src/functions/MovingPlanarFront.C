@@ -9,6 +9,8 @@
 
 #include "MovingPlanarFront.h"
 
+registerMooseObject("PorousFlowApp", MovingPlanarFront);
+
 template <>
 InputParameters
 validParams<MovingPlanarFront>()

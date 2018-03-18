@@ -9,6 +9,8 @@
 
 #include "CylindricalRankTwoAux.h"
 
+registerMooseObject("TensorMechanicsApp", CylindricalRankTwoAux);
+
 template <>
 InputParameters
 validParams<CylindricalRankTwoAux>()

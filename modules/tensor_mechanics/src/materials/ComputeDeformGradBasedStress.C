@@ -9,6 +9,8 @@
 
 #include "ComputeDeformGradBasedStress.h"
 
+registerMooseObject("TensorMechanicsApp", ComputeDeformGradBasedStress);
+
 template <>
 InputParameters
 validParams<ComputeDeformGradBasedStress>()

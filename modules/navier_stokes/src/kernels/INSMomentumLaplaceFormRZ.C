@@ -9,6 +9,8 @@
 
 #include "INSMomentumLaplaceFormRZ.h"
 
+registerMooseObject("NavierStokesApp", INSMomentumLaplaceFormRZ);
+
 template <>
 InputParameters
 validParams<INSMomentumLaplaceFormRZ>()

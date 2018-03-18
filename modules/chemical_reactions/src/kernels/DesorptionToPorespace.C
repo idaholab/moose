@@ -11,6 +11,8 @@
 
 #include <iostream>
 
+registerMooseObject("ChemicalReactionsApp", DesorptionToPorespace);
+
 template <>
 InputParameters
 validParams<DesorptionToPorespace>()

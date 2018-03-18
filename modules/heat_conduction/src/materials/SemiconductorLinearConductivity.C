@@ -10,6 +10,8 @@
 #include "SemiconductorLinearConductivity.h"
 #include "libmesh/quadrature.h"
 
+registerMooseObject("HeatConductionApp", SemiconductorLinearConductivity);
+
 template <>
 InputParameters
 validParams<SemiconductorLinearConductivity>()

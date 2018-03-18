@@ -9,6 +9,8 @@
 
 #include "PorousFlow1PhaseFullySaturated.h"
 
+registerMooseObject("PorousFlowApp", PorousFlow1PhaseFullySaturated);
+
 template <>
 InputParameters
 validParams<PorousFlow1PhaseFullySaturated>()

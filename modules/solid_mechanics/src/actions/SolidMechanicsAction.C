@@ -13,6 +13,8 @@
 #include "Parser.h"
 #include "MooseMesh.h"
 
+registerMooseAction("SolidMechanicsApp", SolidMechanicsAction, "add_kernel");
+
 template <>
 InputParameters
 validParams<SolidMechanicsAction>()

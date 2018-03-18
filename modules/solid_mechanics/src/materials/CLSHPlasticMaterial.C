@@ -10,6 +10,8 @@
 #include "CLSHPlasticMaterial.h"
 #include "CLSHPlasticModel.h"
 
+registerMooseObject("SolidMechanicsApp", CLSHPlasticMaterial);
+
 template <>
 InputParameters
 validParams<CLSHPlasticMaterial>()

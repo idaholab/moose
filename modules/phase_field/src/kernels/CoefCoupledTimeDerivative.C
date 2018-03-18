@@ -9,6 +9,8 @@
 
 #include "CoefCoupledTimeDerivative.h"
 
+registerMooseObject("PhaseFieldApp", CoefCoupledTimeDerivative);
+
 template <>
 InputParameters
 validParams<CoefCoupledTimeDerivative>()

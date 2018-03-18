@@ -14,6 +14,8 @@
 #include "MooseVariable.h"
 #include "NonlinearSystemBase.h"
 
+registerMooseObject("PhaseFieldApp", PolycrystalVoronoi);
+
 template <>
 InputParameters
 validParams<PolycrystalVoronoi>()

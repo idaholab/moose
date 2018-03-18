@@ -14,6 +14,8 @@
 #include "RankTwoTensor.h"
 #include "MooseMesh.h"
 
+registerMooseObject("TensorMechanicsApp", CosseratStressDivergenceTensors);
+
 template <>
 InputParameters
 validParams<CosseratStressDivergenceTensors>()

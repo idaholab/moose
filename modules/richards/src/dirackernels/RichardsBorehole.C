@@ -10,6 +10,8 @@
 #include "RichardsBorehole.h"
 #include "RotationMatrix.h"
 
+registerMooseObject("RichardsApp", RichardsBorehole);
+
 template <>
 InputParameters
 validParams<RichardsBorehole>()

@@ -11,6 +11,8 @@
 #include "NS.h"
 #include "NSEnergyInviscidUnspecifiedBC.h"
 
+registerMooseObject("NavierStokesApp", NSEnergyInviscidUnspecifiedBC);
+
 template <>
 InputParameters
 validParams<NSEnergyInviscidUnspecifiedBC>()

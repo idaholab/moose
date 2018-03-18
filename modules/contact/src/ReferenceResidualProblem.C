@@ -17,6 +17,8 @@
 #include "MooseVariableScalar.h"
 #include "NonlinearSystem.h"
 
+registerMooseObject("ContactApp", ReferenceResidualProblem);
+
 template <>
 InputParameters
 validParams<ReferenceResidualProblem>()

@@ -11,6 +11,8 @@
 #include "RankTwoTensor.h"
 #include "RankFourTensor.h"
 
+registerMooseObject("TensorMechanicsApp", MultiPhaseStressMaterial);
+
 template <>
 InputParameters
 validParams<MultiPhaseStressMaterial>()

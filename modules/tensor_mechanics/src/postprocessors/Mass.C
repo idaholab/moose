@@ -13,6 +13,8 @@
 //
 #include "Mass.h"
 
+registerMooseObject("TensorMechanicsApp", Mass);
+
 template <>
 InputParameters
 validParams<Mass>()

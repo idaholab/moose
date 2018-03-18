@@ -16,6 +16,8 @@
 //
 #include "RichardsSeff2gasRSC.h"
 
+registerMooseObject("RichardsApp", RichardsSeff2gasRSC);
+
 template <>
 InputParameters
 validParams<RichardsSeff2gasRSC>()

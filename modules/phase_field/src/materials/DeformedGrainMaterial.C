@@ -9,6 +9,8 @@
 #include "DeformedGrainMaterial.h"
 #include "GrainTrackerInterface.h"
 
+registerMooseObject("PhaseFieldApp", DeformedGrainMaterial);
+
 template <>
 InputParameters
 validParams<DeformedGrainMaterial>()

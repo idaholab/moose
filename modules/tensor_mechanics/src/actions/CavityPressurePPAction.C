@@ -11,6 +11,8 @@
 #include "Factory.h"
 #include "FEProblem.h"
 
+registerMooseAction("TensorMechanicsApp", CavityPressurePPAction, "add_postprocessor");
+
 template <>
 InputParameters
 validParams<CavityPressurePPAction>()

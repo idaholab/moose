@@ -10,6 +10,8 @@
 #include "InclusionProperties.h"
 #include "libmesh/utility.h"
 
+registerMooseObject("TensorMechanicsApp", InclusionProperties);
+
 template <>
 InputParameters
 validParams<InclusionProperties>()

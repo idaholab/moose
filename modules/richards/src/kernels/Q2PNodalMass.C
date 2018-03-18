@@ -15,6 +15,8 @@
 // C++ includes
 #include <iostream>
 
+registerMooseObject("RichardsApp", Q2PNodalMass);
+
 template <>
 InputParameters
 validParams<Q2PNodalMass>()

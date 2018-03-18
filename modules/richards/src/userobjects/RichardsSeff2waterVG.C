@@ -12,6 +12,8 @@
 //
 #include "RichardsSeff2waterVG.h"
 
+registerMooseObject("RichardsApp", RichardsSeff2waterVG);
+
 template <>
 InputParameters
 validParams<RichardsSeff2waterVG>()

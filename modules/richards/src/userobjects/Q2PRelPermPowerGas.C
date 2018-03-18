@@ -11,6 +11,8 @@
 //
 #include "Q2PRelPermPowerGas.h"
 
+registerMooseObject("RichardsApp", Q2PRelPermPowerGas);
+
 template <>
 InputParameters
 validParams<Q2PRelPermPowerGas>()

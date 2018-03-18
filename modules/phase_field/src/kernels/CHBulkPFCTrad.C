@@ -8,6 +8,8 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 #include "CHBulkPFCTrad.h"
 
+registerMooseObject("PhaseFieldApp", CHBulkPFCTrad);
+
 template <>
 InputParameters
 validParams<CHBulkPFCTrad>()

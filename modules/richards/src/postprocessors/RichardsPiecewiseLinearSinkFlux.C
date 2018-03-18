@@ -12,6 +12,8 @@
 #include "RichardsPiecewiseLinearSinkFlux.h"
 #include "Function.h"
 
+registerMooseObject("RichardsApp", RichardsPiecewiseLinearSinkFlux);
+
 template <>
 InputParameters
 validParams<RichardsPiecewiseLinearSinkFlux>()

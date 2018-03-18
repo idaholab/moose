@@ -19,6 +19,14 @@
 
 #include "libmesh/string_to_enum.h"
 
+registerMooseAction("PhaseFieldApp", GrainGrowthAction, "add_aux_variable");
+
+registerMooseAction("PhaseFieldApp", GrainGrowthAction, "add_aux_kernel");
+
+registerMooseAction("PhaseFieldApp", GrainGrowthAction, "add_variable");
+
+registerMooseAction("PhaseFieldApp", GrainGrowthAction, "add_kernel");
+
 template <>
 InputParameters
 validParams<GrainGrowthAction>()

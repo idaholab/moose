@@ -13,6 +13,8 @@
 #include "MooseMesh.h"
 #include "MooseVariable.h"
 
+registerMooseObject("PhaseFieldApp", BimodalSuperellipsoidsIC);
+
 template <>
 InputParameters
 validParams<BimodalSuperellipsoidsIC>()

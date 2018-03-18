@@ -17,6 +17,8 @@
 #include <algorithm>
 #include <limits>
 
+registerMooseObject("TensorMechanicsApp", MaterialTimeStepPostprocessor);
+
 template <>
 InputParameters
 validParams<MaterialTimeStepPostprocessor>()

@@ -9,6 +9,8 @@
 
 #include "PHAux.h"
 
+registerMooseObject("ChemicalReactionsApp", PHAux);
+
 template <>
 InputParameters
 validParams<PHAux>()

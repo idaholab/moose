@@ -9,6 +9,8 @@
 
 #include "Density.h"
 
+registerMooseObject("MiscApp", Density);
+
 template <>
 InputParameters
 validParams<Density>()

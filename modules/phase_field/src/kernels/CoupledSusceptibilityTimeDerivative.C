@@ -9,6 +9,8 @@
 
 #include "CoupledSusceptibilityTimeDerivative.h"
 
+registerMooseObject("PhaseFieldApp", CoupledSusceptibilityTimeDerivative);
+
 template <>
 InputParameters
 validParams<CoupledSusceptibilityTimeDerivative>()

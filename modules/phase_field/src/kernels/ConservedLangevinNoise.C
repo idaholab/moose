@@ -9,6 +9,8 @@
 
 #include "ConservedLangevinNoise.h"
 
+registerMooseObject("PhaseFieldApp", ConservedLangevinNoise);
+
 template <>
 InputParameters
 validParams<ConservedLangevinNoise>()

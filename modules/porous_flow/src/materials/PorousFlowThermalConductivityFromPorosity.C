@@ -9,6 +9,8 @@
 
 #include "PorousFlowThermalConductivityFromPorosity.h"
 
+registerMooseObject("PorousFlowApp", PorousFlowThermalConductivityFromPorosity);
+
 template <>
 InputParameters
 validParams<PorousFlowThermalConductivityFromPorosity>()

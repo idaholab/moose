@@ -13,6 +13,8 @@
 
 #include "libmesh/mesh_tools.h"
 
+registerMooseObject("PhaseFieldApp", ClosePackIC);
+
 template <>
 InputParameters
 validParams<ClosePackIC>()

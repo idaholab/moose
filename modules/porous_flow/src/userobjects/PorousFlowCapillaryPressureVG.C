@@ -10,6 +10,8 @@
 #include "PorousFlowCapillaryPressureVG.h"
 #include "PorousFlowVanGenuchten.h"
 
+registerMooseObject("PorousFlowApp", PorousFlowCapillaryPressureVG);
+
 template <>
 InputParameters
 validParams<PorousFlowCapillaryPressureVG>()

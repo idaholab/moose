@@ -9,6 +9,8 @@
 
 #include "EntropyFromEnthalpyPressureDerivativesTestKernel.h"
 
+registerMooseObject("FluidPropertiesTestApp", EntropyFromEnthalpyPressureDerivativesTestKernel);
+
 template <>
 InputParameters
 validParams<EntropyFromEnthalpyPressureDerivativesTestKernel>()

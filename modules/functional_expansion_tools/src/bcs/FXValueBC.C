@@ -10,6 +10,8 @@
 #include "FXValueBC.h"
 #include "FunctionSeries.h"
 
+registerMooseObject("FunctionalExpansionToolsApp", FXValueBC);
+
 template <>
 InputParameters
 validParams<FXValueBC>()

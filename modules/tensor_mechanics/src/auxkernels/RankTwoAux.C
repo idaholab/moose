@@ -10,6 +10,8 @@
 #include "RankTwoAux.h"
 #include "RankTwoScalarTools.h"
 
+registerMooseObject("TensorMechanicsApp", RankTwoAux);
+
 template <>
 InputParameters
 validParams<RankTwoAux>()

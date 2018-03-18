@@ -9,6 +9,8 @@
 
 #include "DashpotBC.h"
 
+registerMooseObject("TensorMechanicsApp", DashpotBC);
+
 template <>
 InputParameters
 validParams<DashpotBC>()

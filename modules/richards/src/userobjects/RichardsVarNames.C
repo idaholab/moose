@@ -12,6 +12,8 @@
 //
 #include "RichardsVarNames.h"
 
+registerMooseObject("RichardsApp", RichardsVarNames);
+
 template <>
 InputParameters
 validParams<RichardsVarNames>()

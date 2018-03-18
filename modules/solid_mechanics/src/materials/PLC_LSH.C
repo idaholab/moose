@@ -11,6 +11,8 @@
 
 #include "SymmIsotropicElasticityTensor.h"
 
+registerMooseObject("SolidMechanicsApp", PLC_LSH);
+
 template <>
 InputParameters
 validParams<PLC_LSH>()

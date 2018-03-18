@@ -9,6 +9,8 @@
 
 #include "Q2PSaturationDiffusion.h"
 
+registerMooseObject("RichardsApp", Q2PSaturationDiffusion);
+
 template <>
 InputParameters
 validParams<Q2PSaturationDiffusion>()

@@ -9,6 +9,8 @@
 
 #include "DerivativeMultiPhaseMaterial.h"
 
+registerMooseObject("PhaseFieldApp", DerivativeMultiPhaseMaterial);
+
 template <>
 InputParameters
 validParams<DerivativeMultiPhaseMaterial>()

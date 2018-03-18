@@ -9,6 +9,8 @@
 
 #include "PorousFlowTotalGravitationalDensityFullySaturatedFromPorosity.h"
 
+registerMooseObject("PorousFlowApp", PorousFlowTotalGravitationalDensityFullySaturatedFromPorosity);
+
 template <>
 InputParameters
 validParams<PorousFlowTotalGravitationalDensityFullySaturatedFromPorosity>()

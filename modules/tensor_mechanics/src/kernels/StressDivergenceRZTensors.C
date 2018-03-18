@@ -12,6 +12,8 @@
 #include "ElasticityTensorTools.h"
 #include "libmesh/quadrature.h"
 
+registerMooseObject("TensorMechanicsApp", StressDivergenceRZTensors);
+
 template <>
 InputParameters
 validParams<StressDivergenceRZTensors>()

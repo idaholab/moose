@@ -9,6 +9,8 @@
 
 #include "KineticDisPreConcAux.h"
 
+registerMooseObject("ChemicalReactionsApp", KineticDisPreConcAux);
+
 template <>
 InputParameters
 validParams<KineticDisPreConcAux>()

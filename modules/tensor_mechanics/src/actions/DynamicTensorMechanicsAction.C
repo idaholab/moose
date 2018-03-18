@@ -12,6 +12,14 @@
 #include "FEProblem.h"
 #include "Parser.h"
 
+registerMooseAction("TensorMechanicsApp", DynamicTensorMechanicsAction, "setup_mesh_complete");
+
+registerMooseAction("TensorMechanicsApp",
+                    DynamicTensorMechanicsAction,
+                    "validate_coordinate_systems");
+
+registerMooseAction("TensorMechanicsApp", DynamicTensorMechanicsAction, "add_kernel");
+
 template <>
 InputParameters
 validParams<DynamicTensorMechanicsAction>()

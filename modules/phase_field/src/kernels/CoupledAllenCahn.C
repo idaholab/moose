@@ -9,6 +9,8 @@
 
 #include "CoupledAllenCahn.h"
 
+registerMooseObject("PhaseFieldApp", CoupledAllenCahn);
+
 template <>
 InputParameters
 validParams<CoupledAllenCahn>()

@@ -9,6 +9,8 @@
 
 #include "PorousFlowFullySaturatedHeatAdvection.h"
 
+registerMooseObject("PorousFlowApp", PorousFlowFullySaturatedHeatAdvection);
+
 template <>
 InputParameters
 validParams<PorousFlowFullySaturatedHeatAdvection>()

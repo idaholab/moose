@@ -9,6 +9,8 @@
 
 #include "HeatCapacityConductionTimeDerivative.h"
 
+registerMooseObject("HeatConductionApp", HeatCapacityConductionTimeDerivative);
+
 template <>
 InputParameters
 validParams<HeatCapacityConductionTimeDerivative>()

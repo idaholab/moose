@@ -9,6 +9,8 @@
 
 #include "ComputeAxisymmetric1DIncrementalStrain.h"
 
+registerMooseObject("TensorMechanicsApp", ComputeAxisymmetric1DIncrementalStrain);
+
 template <>
 InputParameters
 validParams<ComputeAxisymmetric1DIncrementalStrain>()

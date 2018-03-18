@@ -14,6 +14,8 @@
 #include "Cartesian.h"
 #include "CylindricalDuo.h"
 
+registerMooseObject("FunctionalExpansionToolsApp", FunctionSeries);
+
 template <>
 InputParameters
 validParams<FunctionSeries>()

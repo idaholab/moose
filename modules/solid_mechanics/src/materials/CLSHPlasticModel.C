@@ -12,6 +12,8 @@
 #include "SymmIsotropicElasticityTensor.h"
 #include <cmath>
 
+registerMooseObject("SolidMechanicsApp", CLSHPlasticModel);
+
 template <>
 InputParameters
 validParams<CLSHPlasticModel>()

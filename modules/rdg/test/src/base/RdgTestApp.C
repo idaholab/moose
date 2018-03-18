@@ -20,6 +20,8 @@ validParams<RdgTestApp>()
   return params;
 }
 
+registerKnownLabel("RdgTestApp");
+
 RdgTestApp::RdgTestApp(InputParameters parameters) : MooseApp(parameters)
 {
   Moose::registerObjects(_factory);
@@ -61,8 +63,9 @@ RdgTestApp__registerObjects(Factory & factory)
   RdgTestApp::registerObjects(factory);
 }
 void
-RdgTestApp::registerObjects(Factory & /*factory*/)
+RdgTestApp::registerObjects(Factory & factory)
 {
+  Registry::registerObjectsTo(factory, {"RdgTestApp"});
 }
 
 // External entry point for dynamic syntax association
@@ -72,8 +75,9 @@ RdgTestApp__associateSyntax(Syntax & syntax, ActionFactory & action_factory)
   RdgTestApp::associateSyntax(syntax, action_factory);
 }
 void
-RdgTestApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & /*action_factory*/)
+RdgTestApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & action_factory)
 {
+  Registry::registerActionsTo(action_factory, {"RdgTestApp"});
 }
 
 // External entry point for dynamic execute flag registration

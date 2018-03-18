@@ -12,9 +12,6 @@
 #include "AppFactory.h"
 #include "MooseSyntax.h"
 
-// Scalar advection equation stabilized by SUPG.
-#include "Advection.h"
-
 template <>
 InputParameters
 validParams<NavierStokesTestApp>()
@@ -22,6 +19,8 @@ validParams<NavierStokesTestApp>()
   InputParameters params = validParams<NavierStokesApp>();
   return params;
 }
+
+registerKnownLabel("NavierStokesTestApp");
 
 NavierStokesTestApp::NavierStokesTestApp(InputParameters parameters) : MooseApp(parameters)
 {
@@ -68,8 +67,7 @@ NavierStokesTestApp__registerObjects(Factory & factory)
 void
 NavierStokesTestApp::registerObjects(Factory & factory)
 {
-  // Scalar advection equation stabilized by SUPG.
-  registerKernel(Advection);
+  Registry::registerObjectsTo(factory, {"NavierStokesTestApp"});
 }
 
 // External entry point for dynamic syntax association
@@ -79,8 +77,9 @@ NavierStokesTestApp__associateSyntax(Syntax & syntax, ActionFactory & action_fac
   NavierStokesTestApp::associateSyntax(syntax, action_factory);
 }
 void
-NavierStokesTestApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & /*action_factory*/)
+NavierStokesTestApp::associateSyntax(Syntax & /*syntax*/, ActionFactory & action_factory)
 {
+  Registry::registerActionsTo(action_factory, {"NavierStokesTestApp"});
 }
 
 // External entry point for dynamic execute flag registration

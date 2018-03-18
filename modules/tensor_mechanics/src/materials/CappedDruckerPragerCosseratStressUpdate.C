@@ -9,6 +9,8 @@
 
 #include "CappedDruckerPragerCosseratStressUpdate.h"
 
+registerMooseObject("TensorMechanicsApp", CappedDruckerPragerCosseratStressUpdate);
+
 template <>
 InputParameters
 validParams<CappedDruckerPragerCosseratStressUpdate>()

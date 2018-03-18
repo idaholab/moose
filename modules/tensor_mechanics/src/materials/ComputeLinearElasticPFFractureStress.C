@@ -9,6 +9,8 @@
 
 #include "ComputeLinearElasticPFFractureStress.h"
 
+registerMooseObject("TensorMechanicsApp", ComputeLinearElasticPFFractureStress);
+
 template <>
 InputParameters
 validParams<ComputeLinearElasticPFFractureStress>()

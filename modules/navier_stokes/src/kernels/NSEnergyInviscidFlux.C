@@ -14,6 +14,8 @@
 // FluidProperties includes
 #include "IdealGasFluidProperties.h"
 
+registerMooseObject("NavierStokesApp", NSEnergyInviscidFlux);
+
 template <>
 InputParameters
 validParams<NSEnergyInviscidFlux>()

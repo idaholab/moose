@@ -13,6 +13,8 @@
 #include "Conversion.h"
 #include "FEProblem.h"
 
+registerMooseAction("PhaseFieldApp", RigidBodyMultiKernelAction, "add_kernel");
+
 template <>
 InputParameters
 validParams<RigidBodyMultiKernelAction>()

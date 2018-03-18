@@ -12,6 +12,8 @@
 // Following is for perturbing eigvenvalues.  This looks really bodgy, but works quite well!
 #include "MooseRandom.h"
 
+registerMooseObject("TensorMechanicsApp", TensorMechanicsPlasticTensileMulti);
+
 template <>
 InputParameters
 validParams<TensorMechanicsPlasticTensileMulti>()

@@ -11,6 +11,8 @@
 
 #include <fstream>
 
+registerMooseObject("PhaseFieldApp", SolutionRasterizer);
+
 template <>
 InputParameters
 validParams<SolutionRasterizer>()

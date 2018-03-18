@@ -9,6 +9,8 @@
 
 #include "AEFVFreeOutflowBoundaryFlux.h"
 
+registerMooseObject("RdgApp", AEFVFreeOutflowBoundaryFlux);
+
 template <>
 InputParameters
 validParams<AEFVFreeOutflowBoundaryFlux>()

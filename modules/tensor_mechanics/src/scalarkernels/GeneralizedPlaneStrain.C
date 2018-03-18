@@ -15,6 +15,8 @@
 #include "MooseVariableScalar.h"
 #include "SystemBase.h"
 
+registerMooseObject("TensorMechanicsApp", GeneralizedPlaneStrain);
+
 template <>
 InputParameters
 validParams<GeneralizedPlaneStrain>()

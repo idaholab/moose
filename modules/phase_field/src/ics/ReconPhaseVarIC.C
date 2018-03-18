@@ -9,6 +9,8 @@
 
 #include "ReconPhaseVarIC.h"
 
+registerMooseObject("PhaseFieldApp", ReconPhaseVarIC);
+
 template <>
 InputParameters
 validParams<ReconPhaseVarIC>()

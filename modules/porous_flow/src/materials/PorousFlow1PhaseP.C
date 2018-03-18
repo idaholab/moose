@@ -10,6 +10,8 @@
 #include "PorousFlow1PhaseP.h"
 #include "PorousFlowCapillaryPressure.h"
 
+registerMooseObject("PorousFlowApp", PorousFlow1PhaseP);
+
 template <>
 InputParameters
 validParams<PorousFlow1PhaseP>()

@@ -10,6 +10,8 @@
 #include "StickyBC.h"
 #include "MooseVariable.h"
 
+registerMooseObject("TensorMechanicsApp", StickyBC);
+
 template <>
 InputParameters
 validParams<StickyBC>()

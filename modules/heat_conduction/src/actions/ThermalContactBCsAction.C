@@ -17,6 +17,8 @@
 #include "AddVariableAction.h"
 #include "GapConductance.h"
 
+registerMooseAction("HeatConductionApp", ThermalContactBCsAction, "add_bc");
+
 template <>
 InputParameters
 validParams<ThermalContactBCsAction>()

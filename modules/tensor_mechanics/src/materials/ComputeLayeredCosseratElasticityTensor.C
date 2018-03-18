@@ -12,6 +12,8 @@
 #include "Function.h"
 #include "RankTwoTensor.h"
 
+registerMooseObject("TensorMechanicsApp", ComputeLayeredCosseratElasticityTensor);
+
 template <>
 InputParameters
 validParams<ComputeLayeredCosseratElasticityTensor>()

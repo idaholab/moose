@@ -10,6 +10,8 @@
 #include "Water97FluidProperties.h"
 #include "Conversion.h"
 
+registerMooseObject("FluidPropertiesApp", Water97FluidProperties);
+
 template <>
 InputParameters
 validParams<Water97FluidProperties>()

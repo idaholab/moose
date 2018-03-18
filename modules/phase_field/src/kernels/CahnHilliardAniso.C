@@ -9,6 +9,8 @@
 
 #include "CahnHilliardAniso.h"
 
+registerMooseObject("PhaseFieldApp", CahnHilliardAniso);
+
 template <>
 InputParameters
 validParams<CahnHilliardAniso>()

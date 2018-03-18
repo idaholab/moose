@@ -11,6 +11,8 @@
 #include "MooseMesh.h"
 #include "MathUtils.h"
 
+registerMooseObject("PhaseFieldApp", InterfaceOrientationMaterial);
+
 template <>
 InputParameters
 validParams<InterfaceOrientationMaterial>()
