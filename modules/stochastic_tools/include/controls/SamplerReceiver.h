@@ -31,20 +31,18 @@ public:
 
 protected:
   /**
-   * Clears the list of parameters to modify
+   * Update the parameter names and associated values.
    */
-  void reset();
+  void transfer(const std::vector<std::string> & names, const std::vector<Real> & values);
 
-  /**
-   * Appends the list of parameters to modify
-   */
-  void addControlParameter(const std::string & name, const Real & value);
+  /// Parameter names to modify
+  std::vector<std::string> _parameters;
 
-  /// Storage for the parameters to control
-  std::map<std::string, Real> _parameters;
+  /// Values to use when modifying parameters
+  std::vector<Real> _values;
 
-  /// Allows the SamplerTransfer to call the reset and addControlParameter methods, which
-  /// should only be called by that object so making the public is dangerous.
+  /// Allows the SamplerTransfer to call the transfer method, which
+  /// should only be called by that object so making it public is dangerous.
   friend class SamplerTransfer;
 };
 

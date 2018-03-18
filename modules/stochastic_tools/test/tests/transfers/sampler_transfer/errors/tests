@@ -17,6 +17,6 @@
   [./num_pararameters_wrong]
     type = RunException
     input = master_num_parameters_wrong.i
-    expect_err = "The number of parameters \(3\) does not match the number of columns \(2\) in the Sampler data matrix with index 0."
+    expect_err = "The supplied vector of Real values is not sized correctly, the Real parameter 'BCs/right/value requires a value but no more values are available in the supplied values which have a size of 2."
   [../]
 []

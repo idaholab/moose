@@ -67,7 +67,8 @@ public:
    */
   template <typename T>
   ControllableParameter<T> getControllableParameter(const MooseObjectParameterName & desired,
-                                                    bool mark_as_controlled = false);
+                                                    bool mark_as_controlled = false,
+                                                    bool error_on_empty = true);
 
   /**
    * Method for linking control parameters of different names
@@ -145,7 +146,8 @@ private:
 template <typename T>
 ControllableParameter<T>
 InputParameterWarehouse::getControllableParameter(const MooseObjectParameterName & input,
-                                                  bool mark_as_controlled /*=false*/)
+                                                  bool mark_as_controlled /*=false*/,
+                                                  bool error_on_empty /*=true*/)
 {
 
   // The ControllableParameter object to return
@@ -193,7 +195,7 @@ InputParameterWarehouse::getControllableParameter(const MooseObjectParameterName
   }
 
   // Error if nothing was found
-  if (output.size() == 0)
+  if (output.size() == 0 && error_on_empty)
     mooseError("The controlled parameter was not found: ", input);
 
   return output;
