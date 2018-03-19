@@ -12,7 +12,7 @@ def __sub(match):
 
 def eval_path(path):
     """
-    Import envirornment variables into paths.
+    Import environment variables into paths.
 
     Inputs:
         path[str]: Path containing environment variable: e.g., ${MOOSE_DIR}/python

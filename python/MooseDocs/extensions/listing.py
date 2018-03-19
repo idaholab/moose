@@ -109,10 +109,17 @@ class FileListingCommand(LocalListingCommand):
         """
 
         # Read filename
-        filename = os.path.join(MooseDocs.ROOT_DIR, info['subcommand'])
-        if not os.path.exists(filename):
+        filenames = common.project_find(info['subcommand'])
+        if len(filenames) == 0:
             msg = "{} does not exist."
-            raise exceptions.TokenizeException(msg, filename)
+            raise exceptions.TokenizeException(msg, info['subcommand'])
+        elif len(filenames) > 1:
+            msg = "Multiple files located with matching name '{}':\n".format(info['subcommand'])
+            for f in filenames:
+                msg += '    {}\n'.format(f)
+            raise exceptions.TokenizeException(msg)
+        else:
+            filename = filenames[0]
 
         # Listing container
         flt = floats.Float(parent)
@@ -127,9 +134,9 @@ class FileListingCommand(LocalListingCommand):
         # Add bottom modal
         if self.settings['link']:
             code = tokens.Code(None, language=lang, code=common.read(filename))
-            floats.ModalLink(flt, url=filename, bottom=True, content=code,
+            floats.ModalLink(flt, url=unicode(filename), bottom=True, content=code,
                              string=u'({})'.format(os.path.relpath(filename, MooseDocs.ROOT_DIR)),
-                             title=tokens.String(None, content=filename))
+                             title=tokens.String(None, content=unicode(filename)))
 
         return parent
 

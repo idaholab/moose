@@ -15,6 +15,7 @@ from hit_load import hit_load, HitNode, hit_parse
 from MooseException import MooseException
 from hit_load import hit_load
 from yaml_load import yaml_load
+from eval_path import eval_path
 
 try:
     from MooseDataFrame import MooseDataFrame

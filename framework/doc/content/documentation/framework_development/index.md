@@ -1,5 +1,5 @@
 # Framework Development
 
-[Interfaces](/interfaces/index.md)
+[Interfaces](framework_development/interfaces/index.md)
 
-[MooseVariables](/moose_variables.md)
+[MooseVariables](moose_variables.md)
