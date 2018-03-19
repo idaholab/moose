@@ -8,6 +8,7 @@
     cli_args = 'Outputs/file_base=test_2 --use-split --split-file checkpoint_split_in'
     max_parallel = 2
     min_parallel = 2
+    queue_scheduler = False
   [../]
   [./test_2a]
     # To generate the splits for this test, run
@@ -18,6 +19,7 @@
     cli_args = 'Outputs/file_base=test_2a --use-split --split-file checkpoint_split_in.cpa'
     max_parallel = 2
     min_parallel = 2
+    queue_scheduler = False
   [../]
   [./test_4]
     # To generate the splits for this test, run
@@ -28,6 +30,7 @@
     cli_args = 'Outputs/file_base=test_4 --use-split --split-file checkpoint_split_in'
     max_parallel = 4
     min_parallel = 4
+    queue_scheduler = False
   [../]
   [./test_4a]
     # To generate the splits for this test, run
@@ -38,6 +41,7 @@
     cli_args = 'Outputs/file_base=test_4a --use-split --split-file checkpoint_split_in.cpa'
     max_parallel = 4
     min_parallel = 4
+    queue_scheduler = False
   [../]
   [./test_8]
     # To generate the splits for this test, run
@@ -48,6 +52,7 @@
     cli_args = 'Outputs/file_base=test_8 --use-split --split-file checkpoint_split_in'
     max_parallel = 8
     min_parallel = 8
+    queue_scheduler = False
   [../]
   [./test_8a]
     # To generate the splits for this test, run
@@ -58,5 +63,6 @@
     cli_args = 'Outputs/file_base=test_8a --use-split --split-file checkpoint_split_in.cpa'
     max_parallel = 8
     min_parallel = 8
+    queue_scheduler = False
   [../]
 []
