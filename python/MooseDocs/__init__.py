@@ -39,4 +39,8 @@ os.environ['MOOSE_DIR'] = MOOSE_DIR
 os.environ['ROOT_DIR'] = ROOT_DIR
 
 # List all files with git, this is done here to avoid running this command many times
-PROJECT_FILES = subprocess.check_output(['git', 'ls-files'], cwd=ROOT_DIR).split('\n')
+PROJECT_FILES = set()
+for fname in subprocess.check_output(['git', 'ls-files'], cwd=ROOT_DIR).split('\n'):
+    PROJECT_FILES.add(os.path.join(ROOT_DIR, fname))
+for fname in subprocess.check_output(['git', 'ls-files'], cwd=MOOSE_DIR).split('\n'):
+    PROJECT_FILES.add(os.path.join(MOOSE_DIR, fname))

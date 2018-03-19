@@ -17,6 +17,8 @@ import os
 import collections
 import yaml
 
+from eval_path import eval_path
+
 class Loader(yaml.Loader):
     """
     A custom loader that handles nested includes. The nested includes should use absolute paths from
@@ -34,7 +36,10 @@ class Loader(yaml.Loader):
         """
         Allow for the embedding of yaml files.
         """
-        filename = os.path.join(self._root, self.construct_scalar(node))
+        filename = eval_path(self.construct_scalar(node))
+        if not os.path.isabs(filename):
+            filename = os.path.join(self._root, filename)
+
         if os.path.exists(filename):
             with open(filename, 'r') as f:
                 return yaml.load(f, Loader)

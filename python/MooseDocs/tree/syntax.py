@@ -14,6 +14,8 @@ import copy
 
 import anytree
 
+import mooseutils
+
 import MooseDocs
 from MooseDocs import common
 from .base import NodeBase, Property
@@ -32,25 +34,33 @@ class SyntaxNodeBase(NodeBase):
     # Default documentation destinations for MOOSE and Modules
     #TODO: Build this automatically from source or --registry, not sure how yet.
     DESTINATIONS = dict()
-    DESTINATIONS['XFEM'] = 'modules/xfem/doc/content/documentation/systems'
-    DESTINATIONS['NavierStokes'] = 'modules/navier_stokes/doc/content/documentation/systems'
-    DESTINATIONS['TensorMechanics'] = 'modules/tensor_mechanics/doc/content/documentation/systems'
-    DESTINATIONS['PhaseField'] = 'modules/phase_field/doc/content/documentation/systems'
-    DESTINATIONS['Rdg'] = 'modules/rdg/doc/content/documentation/systems'
-    DESTINATIONS['Contact'] = 'modules/contact/doc/content/documentation/systems'
-    DESTINATIONS['SolidMechanics'] = 'modules/solid_mechanics/doc/content/documentation/systems'
-    DESTINATIONS['HeatConduction'] = 'modules/heat_conduction/doc/content/documentation/systems'
-    DESTINATIONS['MOOSE'] = 'framework/doc/content/documentation/systems'
-    DESTINATIONS['StochasticTools'] = 'modules/stochastic_tools/doc/content/documentation/systems'
-    DESTINATIONS['Misc'] = 'modules/misc/doc/content/documentation/systems'
-    DESTINATIONS['FluidProperties'] = 'modules/fluid_properties/doc/content/documentation/systems'
-    DESTINATIONS['ChemicalReactions'] = 'modules/chemical_reactions/doc/content/documentation' \
-                                        '/systems'
-    DESTINATIONS['LevelSet'] = 'modules/level_set/doc/content/documentation/systems'
-    DESTINATIONS['PorousFlow'] = 'modules/porous_flow/doc/content/documentation/systems'
-    DESTINATIONS['Richards'] = 'modules/richards/doc/content/documentation/systems'
-    DESTINATIONS['FunctionalExpansionTools'] = 'modules/functional_expansion_tools/doc/content/' \
-                                               'documentation/systems'
+    DESTINATIONS['XFEM'] = '${MOOSE_DIR}/modules/xfem/doc/content/documentation/systems'
+    DESTINATIONS['NavierStokes'] = '${MOOSE_DIR}/modules/navier_stokes/doc/content/documentation/' \
+                                   'systems'
+    DESTINATIONS['TensorMechanics'] = '${MOOSE_DIR}/modules/tensor_mechanics/doc/content/' \
+                                      'documentation/systems'
+    DESTINATIONS['PhaseField'] = '${MOOSE_DIR}/modules/phase_field/doc/content/documentation/' \
+                                 'systems'
+    DESTINATIONS['Rdg'] = '${MOOSE_DIR}/modules/rdg/doc/content/documentation/systems'
+    DESTINATIONS['Contact'] = '${MOOSE_DIR}/modules/contact/doc/content/documentation/systems'
+    DESTINATIONS['SolidMechanics'] = '${MOOSE_DIR}/modules/solid_mechanics/doc/content/' \
+                                     'documentation/systems'
+    DESTINATIONS['HeatConduction'] = '${MOOSE_DIR}/modules/heat_conduction/doc/content/' \
+                                     'documentation/systems'
+    DESTINATIONS['MOOSE'] = '${MOOSE_DIR}/framework/doc/content/documentation/systems'
+    DESTINATIONS['StochasticTools'] = '${MOOSE_DIR}/modules/stochastic_tools/doc/content/' \
+                                      'documentation/systems'
+    DESTINATIONS['Misc'] = '${MOOSE_DIR}/modules/misc/doc/content/documentation/systems'
+    DESTINATIONS['FluidProperties'] = '${MOOSE_DIR}/modules/fluid_properties/doc/content/' \
+                                      'documentation/systems'
+    DESTINATIONS['ChemicalReactions'] = '${MOOSE_DIR}/modules/chemical_reactions/doc/content/' \
+                                        'documentation/systems'
+    DESTINATIONS['LevelSet'] = '${MOOSE_DIR}/modules/level_set/doc/content/documentation/systems'
+    DESTINATIONS['PorousFlow'] = '${MOOSE_DIR}/modules/porous_flow/doc/content/documentation/' \
+                                 'systems'
+    DESTINATIONS['Richards'] = '${MOOSE_DIR}/modules/richards/doc/content/documentation/systems'
+    DESTINATIONS['FunctionalExpansionTools'] = '${MOOSE_DIR}/modules/functional_expansion_tools/' \
+                                               'doc/content/documentation/systems'
 
     STUB_HEADER = '<!-- MOOSE Documentation Stub: Remove this when content is added. -->'
 
@@ -127,6 +137,8 @@ class SyntaxNodeBase(NodeBase):
             page does not exist or doesn't contain content, and None indicates that the page is
             hidden.
         """
+        if self.is_root:
+            return
 
         if self.removed:
             LOG.debug("Skipping documentation check for %s, it is REMOVED.", self.fullpath)
@@ -140,7 +152,11 @@ class SyntaxNodeBase(NodeBase):
             for group in self.groups:
                 install = SyntaxNodeBase.DESTINATIONS.get(group,
                                                           'doc/content/documentation/systems')
-                filename = os.path.join(MooseDocs.ROOT_DIR, install, self.markdown())
+                install = mooseutils.eval_path(install)
+                if not os.path.isabs(install):
+                    filename = os.path.join(MooseDocs.ROOT_DIR, install, self.markdown())
+                else:
+                    filename = os.path.join(install, self.markdown())
                 filenames.append((filename, os.path.isfile(filename)))
 
             # Determine the number of files that exist
@@ -154,11 +170,12 @@ class SyntaxNodeBase(NodeBase):
 
             # Error if multiple files exist
             if count > 1 and not self.hidden:
-                msg = "Multiple markdown files were located for the '%s' syntax:"
+                msg = "Multiple markdown files were located for the '{}' syntax:". \
+                      format(self.fullpath)
                 for filename, exists in filenames:
                     if exists:
                         msg += '\n  {}'.format(filename)
-                LOG.error(msg, self.fullpath)
+                LOG.error(msg)
 
             # Error if no files exist
             elif count == 0:

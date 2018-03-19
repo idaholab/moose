@@ -77,7 +77,9 @@ Code starting and ending on lines containing a string is also possible by using 
 Similarly, if 'end' is omitted the snippet will include the remainder of the file content.
 
 !devel! example id=example-listing-start-end caption=Example listing using the "start" and "end" settings.
-!listing test/tests/kernels/simple_diffusion/simple_diffusion.i start=Kernels end=Executioner
+!listing moose/test/tests/kernels/simple_diffusion/simple_diffusion.i
+         start=Kernels
+         end=Executioner
 !devel-end!
 
 ## Input File Content id=moose-input
@@ -88,7 +90,7 @@ will be limited to the content matching the supplied name. Notice that the suppl
 approximate; however, if it is not unique only the first match will appear.
 
 !devel! example id=example-listing-input caption=Example use of "block" setting for input files.
-!listing test/tests/kernels/simple_diffusion/simple_diffusion.i
+!listing moose/test/tests/kernels/simple_diffusion/simple_diffusion.i
          block=Kernels
          id=input
          caption=Code listing of [MOOSE] input file block.

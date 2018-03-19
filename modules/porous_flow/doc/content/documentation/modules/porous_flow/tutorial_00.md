@@ -25,7 +25,7 @@ in porous media. It is formulated in a general manner, so is capable
 of solving problems with an arbitrary number of phases, fluid
 components and chemical reactants.  This tutorial guides the user
 through some commonly-used aspects of PorousFlow.  Lots of core
-documentation may be found in [Porous Flow](index.md).
+documentation may be found in [Porous Flow](porous_flow/index.md).
 
 
 
@@ -84,8 +84,3 @@ called "RZ" coordinates in MOOSE.  The mesh-generation process is
 with `MeshModifiers`:
 
 !listing modules/porous_flow/examples/tutorial/00_2D.i start=[MeshModifiers] end=[Variables]
-
-
-
-
-

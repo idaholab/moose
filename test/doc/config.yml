@@ -7,7 +7,6 @@ Renderer:
     name: MooseTestApp
     repo: https://github.com/idaholab/moose
     home: /
-    navigation: !include modules/combined/doc/navigation.yml
 
 Extensions:
     appsyntax:
