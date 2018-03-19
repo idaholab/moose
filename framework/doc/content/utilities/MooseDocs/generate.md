@@ -119,6 +119,3 @@ must provide three items with each test of the test specification.
 
 1. +issues+: A list of [github issues](https://github.com/idaholab/moose/issues/) that are
    associated with the test and items being tested.
-
-The complete list of all the requirements and associated test for MOOSE is provided in the
-[Software Requirement Specification](/moose_srs.md).

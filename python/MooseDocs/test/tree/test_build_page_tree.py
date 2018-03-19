@@ -128,17 +128,17 @@ class TestDocImport(unittest.TestCase):
     @mock.patch('logging.Logger.error')
     def testErrors(self, mock):
 
-        doc_import('', content=dict())
+        doc_import(os.getcwd(), content=dict())
         args, _ = mock.call_args
         self.assertIn('The "content" must be a list of str items.', args[-1])
 
-        doc_import('', content=[1])
+        doc_import(os.getcwd(), content=[1])
         args, _ = mock.call_args
         self.assertIn('The "content" must be a list of str items.', args[-1])
 
         doc_import('not/valid', content=['foo'])
         args, _ = mock.call_args
-        self.assertIn('The "root_dir" must be a valid directory', args[-1])
+        self.assertIn('The "root_dir" must be a valid directory', args[-2])
 
 class TestDocTree(unittest.TestCase):
     def testBasic(self):

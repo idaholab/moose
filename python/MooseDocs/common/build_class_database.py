@@ -2,8 +2,9 @@
 import os
 import re
 
+import mooseutils
+
 import MooseDocs
-from eval_path import eval_path
 
 #: Locates class definitions in header files
 DEFINITION_RE = re.compile(r'class\s*(?P<class>\w+)\b[^;]')
@@ -36,9 +37,9 @@ def build_class_database(include_dirs, input_dirs):
 
     # Build the lists from strings
     if isinstance(include_dirs, str):
-        include_dirs = [eval_path(x) for x in include_dirs.split()]
+        include_dirs = [mooseutils.eval_path(x) for x in include_dirs.split()]
     if isinstance(input_dirs, str):
-        input_dirs = [eval_path(x) for x in input_dirs.split()]
+        input_dirs = [mooseutils.eval_path(x) for x in input_dirs.split()]
 
     # Locate filenames
     headers = _locate_filenames(include_dirs, '.h')

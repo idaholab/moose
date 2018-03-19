@@ -12,6 +12,8 @@ import os
 import re
 import logging
 
+import mooseutils
+
 import MooseDocs
 from MooseDocs.tree import page
 
@@ -66,9 +68,8 @@ def doc_import(root_dir, content=None):
     """
 
     # Check root_dir
-    root_dir = os.path.join(MooseDocs.ROOT_DIR, root_dir)
     if not os.path.isdir(root_dir):
-        LOG.error('The "root_dir" must be a valid directory.')
+        LOG.error('The "root_dir" must be a valid directory: %s', root_dir)
         return None
 
     # Loop through the base directory and create a set of matching filenames
@@ -144,9 +145,11 @@ def doc_tree(items):
             LOG.error('The supplied items must be a list of dict items, each with a "root_dir" and '
                       'optionally a "content" entry.')
 
-        root = os.path.join(MooseDocs.ROOT_DIR, value['root_dir'])
-        files = doc_import(root, content=value.get('content', None))
+        root = mooseutils.eval_path(value['root_dir'])
+        if not os.path.isabs(root):
+            root = os.path.join(MooseDocs.ROOT_DIR, root)
 
+        files = doc_import(root, content=value.get('content', None))
         for filename in files:
             key = tuple(filename.replace(root, '').strip('/').split('/'))
 
