@@ -55,7 +55,7 @@
     type = TagVectorAux
     variable = tag_variable1
     v = u
-    vector_tags = vec_tag1
+    vector_tag = vec_tag1
     execute_on = timestep_end
   [../]
 
@@ -63,7 +63,7 @@
     type = TagVectorAux
     variable = tag_variable2
     v = u
-    vector_tags = vec_tag2
+    vector_tag = vec_tag2
     execute_on = timestep_end
   [../]
 []

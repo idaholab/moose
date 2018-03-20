@@ -64,6 +64,9 @@ TagTestProblem::computeResidual(const NumericVector<Number> & soln,
     _nl->associateVectorToTag(residual, _nl->residualVectorTag());
 
   computeResidualTags(_fe_vector_tags);
+
+  if (_fe_vector_tags.find(_nl->residualVectorTag()) != _fe_vector_tags.end())
+    _nl->disassociateVectorFromTag(residual, _nl->residualVectorTag());
 }
 
 void
@@ -86,4 +89,7 @@ TagTestProblem::computeJacobian(const NumericVector<Number> & soln, SparseMatrix
     _nl->associateMatirxToTag(jacobian, *_fe_matrix_tags.begin());
 
   computeJacobianTags(_fe_matrix_tags);
+
+  if (_fe_matrix_tags.size() > 0)
+    _nl->disassociateMatrixFromTag(jacobian, *_fe_matrix_tags.begin());
 }

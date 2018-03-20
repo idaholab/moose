@@ -274,6 +274,36 @@ Coupleable::coupledValue(const std::string & var_name, unsigned int comp)
   }
 }
 
+const VariableValue &
+Coupleable::coupledVectorTagValue(const std::string & var_name, TagID tag, unsigned int comp)
+{
+  checkVar(var_name);
+  if (!isCoupled(var_name))
+    return *getDefaultValue(var_name);
+
+  coupledCallback(var_name, false);
+  MooseVariable * var = getVar(var_name, comp);
+  if (var == NULL)
+    mooseError("Call coupledVectorValue for coupled vector variables");
+
+  return var->nodalVectorTagValue(tag);
+}
+
+const VariableValue &
+Coupleable::coupledMatrixTagValue(const std::string & var_name, TagID tag, unsigned int comp)
+{
+  checkVar(var_name);
+  if (!isCoupled(var_name))
+    return *getDefaultValue(var_name);
+
+  coupledCallback(var_name, false);
+  MooseVariable * var = getVar(var_name, comp);
+  if (var == NULL)
+    mooseError("Call coupledVectorValue for coupled vector variables");
+
+  return var->nodalMatrixTagValue(tag);
+}
+
 const VectorVariableValue &
 Coupleable::coupledVectorValue(const std::string & var_name, unsigned int comp)
 {

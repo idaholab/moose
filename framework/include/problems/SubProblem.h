@@ -88,7 +88,7 @@ public:
   /**
    * Get a TagID from a TagName.
    */
-  virtual TagID getVectorTagID(TagName tag_name);
+  virtual TagID getVectorTagID(const TagName & tag_name);
 
   /**
    * Retrieve the name associated with a TagID
@@ -132,7 +132,7 @@ public:
   /**
    * Get a TagID from a TagName.
    */
-  virtual TagID getMatrixTagID(TagName tag_name);
+  virtual TagID getMatrixTagID(const TagName & tag_name);
 
   /**
    * Retrieve the name associated with a TagID

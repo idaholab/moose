@@ -29,13 +29,8 @@ public:
 protected:
   virtual Real computeValue() override;
 
-  unsigned int _v_var;
-
-  MooseVariableFE & _nl_var;
-
   TagID _tag_id;
-  /// The tagged vector we are currently working on
-  NumericVector<Number> * _tag_vector;
+  const VariableValue & _v;
 };
 
 #endif // TAGVECTORAUX_H

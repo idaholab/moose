@@ -34,7 +34,7 @@
     type = TagMatrixAux
     variable = tag_variable1
     v = u
-    matrix_tags = mat_tag1
+    matrix_tag = mat_tag1
     execute_on = timestep_end
   [../]
 
@@ -42,7 +42,7 @@
     type = TagMatrixAux
     variable = tag_variable2
     v = u
-    matrix_tags = mat_tag2
+    matrix_tag = mat_tag2
     execute_on = timestep_end
   [../]
 []

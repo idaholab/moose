@@ -21,7 +21,7 @@ InputParameters validParams<TagMatrixAux>();
 /**
  * Constant auxiliary value
  */
-class TagMatrixAux : public TagVectorAux
+class TagMatrixAux : public AuxKernel
 {
 public:
   TagMatrixAux(const InputParameters & parameters);
@@ -29,7 +29,8 @@ public:
 protected:
   virtual Real computeValue() override;
 
-  SparseMatrix<Number> * _tag_matrix;
+  TagID _tag_id;
+  const VariableValue & _v;
 };
 
 #endif // TAGMATRIXAUX_H

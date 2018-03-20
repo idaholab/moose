@@ -121,6 +121,28 @@ protected:
   virtual const VariableValue & coupledValue(const std::string & var_name, unsigned int comp = 0);
 
   /**
+   * Returns value of a coupled variable for a given tag
+   * @param var_name Name of coupled variable
+   * @param tag vector tag ID
+   * @param comp Component number for vector of coupled variables
+   * @return Reference to a VariableValue for the coupled variable
+   * @see Kernel::_u
+   */
+  virtual const VariableValue &
+  coupledVectorTagValue(const std::string & var_name, TagID tag, unsigned int comp = 0);
+
+  /**
+   * Returns value of a coupled variable for a given tag. This couples the diag vector of matrix
+   * @param var_name Name of coupled variable
+   * @param tag matrix tag ID
+   * @param comp Component number for vector of coupled variables
+   * @return Reference to a VariableValue for the coupled variable
+   * @see Kernel::_u
+   */
+  virtual const VariableValue &
+  coupledMatrixTagValue(const std::string & var_name, TagID tag, unsigned int comp = 0);
+
+  /**
    * Returns value of a coupled vector variable
    * @param var_name Name of coupled vector variable
    * @param comp Component number for vector of coupled vector variables

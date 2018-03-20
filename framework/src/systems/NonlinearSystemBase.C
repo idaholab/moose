@@ -550,6 +550,9 @@ NonlinearSystemBase::computeResidualTags(std::set<TagID> & tags)
 
   _n_residual_evaluations++;
 
+  // not suppose to do anythin on matrix
+  deactiveAllMatrixTags();
+
   Moose::enableFPE();
 
   for (const auto & numeric_vec : _vecs_to_zero_for_residual)
@@ -601,6 +604,8 @@ NonlinearSystemBase::computeResidualTags(std::set<TagID> & tags)
     // "diverged" reason during the next solve.
   }
 
+  // not suppose to do anythin on matrix
+  activeAllMatrixTags();
   Moose::enableFPE(false);
   Moose::perf_log.pop("compute_residual()", "Execution");
 }
@@ -617,6 +622,8 @@ NonlinearSystemBase::onTimestepBegin()
 void
 NonlinearSystemBase::setInitialSolution()
 {
+  deactiveAllMatrixTags();
+
   NumericVector<Number> & initial_solution(solution());
   if (_predictor.get() && _predictor->shouldApply())
   {
@@ -1882,6 +1889,9 @@ NonlinearSystemBase::computeScalarKernelsJacobians()
 void
 NonlinearSystemBase::computeJacobianInternal(std::set<TagID> & tags)
 {
+  // Make matrice ready to use
+  activeAllMatrixTags();
+
   for (auto tag : tags)
   {
     if (!hasMatrix(tag))

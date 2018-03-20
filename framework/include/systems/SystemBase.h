@@ -212,6 +212,11 @@ public:
    */
   virtual void associateVectorToTag(NumericVector<Number> & vec, TagID tag);
 
+  /**
+   * Associate a vector for a given tag
+   */
+  virtual void disassociateVectorFromTag(NumericVector<Number> & vec, TagID tag);
+
   virtual void clearTaggedVectors();
 
   /**
@@ -225,6 +230,31 @@ public:
   virtual SparseMatrix<Number> & getMatrix(TagID tag);
 
   /**
+  *  Make all exsiting matrices ative
+  */
+  virtual void activeAllMatrixTags();
+
+  /**
+  *  Active a matrix for tag
+  */
+  virtual void activeMatrixTag(TagID tag);
+
+  /**
+  *  If or not a matrix tag is active
+  */
+  virtual bool matrixTagActive(TagID tag);
+
+  /**
+  *  deactive a matrix for tag
+  */
+  virtual void deactiveMatrixTag(TagID tag);
+
+  /**
+  * Make matrices inactive
+  */
+  virtual void deactiveAllMatrixTags();
+
+  /**
    * Close all matrices for tags
    */
   void closeTaggedMatrices(std::set<TagID> & tags);
@@ -233,6 +263,11 @@ public:
    * associate a matirx to a tag
    */
   virtual void associateMatirxToTag(SparseMatrix<Number> & matrix, TagID tag);
+
+  /**
+   * disassociate a matirx from a tag
+   */
+  virtual void disassociateMatrixFromTag(SparseMatrix<Number> & matrix, TagID tag);
 
   /**
    * Clear all tagged matrices
@@ -628,6 +663,8 @@ protected:
 
   std::vector<NumericVector<Number> *> _tagged_vectors;
   std::vector<SparseMatrix<Number> *> _tagged_matrices;
+
+  std::vector<bool> _matrix_tag_active_flags;
 
   NumericVector<Number> * _dummy_vec; // to satisfy the interface
 

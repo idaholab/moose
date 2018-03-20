@@ -225,7 +225,7 @@ DisplacedProblem::addVectorTag(TagName tag_name)
 }
 
 TagID
-DisplacedProblem::getVectorTagID(TagName tag_name)
+DisplacedProblem::getVectorTagID(const TagName & tag_name)
 {
   return _mproblem.getVectorTagID(tag_name);
 }
@@ -261,7 +261,7 @@ DisplacedProblem::addMatrixTag(TagName tag_name)
 }
 
 TagID
-DisplacedProblem::getMatrixTagID(TagName tag_name)
+DisplacedProblem::getMatrixTagID(const TagName & tag_name)
 {
   return _mproblem.getMatrixTagID(tag_name);
 }

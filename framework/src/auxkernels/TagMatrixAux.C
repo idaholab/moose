@@ -15,29 +15,19 @@ template <>
 InputParameters
 validParams<TagMatrixAux>()
 {
-  InputParameters params = validParams<TagVectorAux>();
-
-  MultiMooseEnum mtags("system", "system", true);
-
-  params.addParam<MultiMooseEnum>("matrix_tags", mtags, "matrix tag this auxkernel is working on");
+  InputParameters params = validParams<AuxKernel>();
+  params.addParam<std::string>("matrix_tag", "TagName", "Tag Name this Aux works on");
+  params.addRequiredCoupledVar("v",
+                               "The coupled variable whose components are coupled to AuxVariable");
 
   return params;
 }
 
-TagMatrixAux::TagMatrixAux(const InputParameters & parameters) : TagVectorAux(parameters)
+TagMatrixAux::TagMatrixAux(const InputParameters & parameters)
+  : AuxKernel(parameters),
+    _tag_id(_subproblem.getMatrixTagID(getParam<std::string>("matrix_tag"))),
+    _v(coupledMatrixTagValue("v", _tag_id))
 {
-  auto & mtags = getParam<MultiMooseEnum>("matrix_tags");
-
-  if (mtags.size() > 1)
-    mooseError("TagMatrixAux takes one tag only");
-
-  for (auto & tag : mtags)
-    if (_subproblem.matrixTagExists(tag.name()))
-      _tag_id = _subproblem.getMatrixTagID(tag.name());
-    else
-      mooseError("Required tag: ", tag.name(), " does not exist");
-
-  _tag_matrix = &_nl_sys.getMatrix(_tag_id);
 }
 
 Real
@@ -45,11 +35,7 @@ TagMatrixAux::computeValue()
 {
   if (_var.isNodal())
   {
-    auto node_index = _nl_var.nodalDofIndex();
-    if (_tag_matrix->row_start() <= node_index && node_index < _tag_matrix->row_stop())
-      return (*_tag_matrix)(node_index, node_index);
-    else
-      return 0.0;
+    return _v[_qp];
   }
   else
     mooseError("Require a nodal variable");

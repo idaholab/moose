@@ -730,6 +730,20 @@ SystemBase::associateVectorToTag(NumericVector<Number> & vec, TagID tag)
 }
 
 void
+SystemBase::disassociateVectorFromTag(NumericVector<Number> & vec, TagID tag)
+{
+  mooseAssert(_subproblem.vectorTagExists(tag),
+              "You can't associate a tag that does not exist " << tag);
+  if (_tagged_vectors.size() < tag + 1)
+    _tagged_vectors.resize(tag + 1);
+
+  if (_tagged_vectors[tag] != &vec)
+    mooseError("You can not disassociate a vector from a tag which it was not associated to");
+
+  _tagged_vectors[tag] = nullptr;
+}
+
+void
 SystemBase::clearTaggedVectors()
 {
   _tagged_vectors.clear();
@@ -767,6 +781,78 @@ SystemBase::associateMatirxToTag(SparseMatrix<Number> & matrix, TagID tag)
     _tagged_matrices.resize(tag + 1);
 
   _tagged_matrices[tag] = &matrix;
+}
+
+void
+SystemBase::disassociateMatrixFromTag(SparseMatrix<Number> & matrix, TagID tag)
+{
+  mooseAssert(_subproblem.matrixTagExists(tag),
+              "Cannot disassociate Matirx with matrix_tag : " << tag << "that does not exsit");
+
+  if (_tagged_matrices.size() < tag + 1)
+    _tagged_matrices.resize(tag + 1);
+
+  if (_tagged_matrices[tag] != &matrix)
+    mooseError("You can not disassociate a matrix from a tag which it was not associated to");
+
+  _tagged_matrices[tag] = nullptr;
+}
+
+void
+SystemBase::activeMatrixTag(TagID tag)
+{
+  mooseAssert(_subproblem.matrixTagExists(tag),
+              "Cannot active Matirx with matrix_tag : " << tag << "that does not exsit");
+
+  if (_matrix_tag_active_flags.size() < tag + 1)
+    _matrix_tag_active_flags.resize(tag + 1);
+
+  _matrix_tag_active_flags[tag] = true;
+}
+
+void
+SystemBase::deactiveMatrixTag(TagID tag)
+{
+  mooseAssert(_subproblem.matrixTagExists(tag),
+              "Cannot deactive Matirx with matrix_tag : " << tag << "that does not exsit");
+
+  if (_matrix_tag_active_flags.size() < tag + 1)
+    _matrix_tag_active_flags.resize(tag + 1);
+
+  _matrix_tag_active_flags[tag] = false;
+}
+
+void
+SystemBase::deactiveAllMatrixTags()
+{
+  auto num_matrix_tags = _subproblem.numMatrixTags();
+
+  _matrix_tag_active_flags.resize(num_matrix_tags);
+
+  for (unsigned int tag = 0; tag < num_matrix_tags; tag++)
+    _matrix_tag_active_flags[tag] = false;
+}
+
+void
+SystemBase::activeAllMatrixTags()
+{
+  auto num_matrix_tags = _subproblem.numMatrixTags();
+
+  _matrix_tag_active_flags.resize(num_matrix_tags);
+
+  for (unsigned int tag = 0; tag < num_matrix_tags; tag++)
+    if (hasMatrix(tag))
+      _matrix_tag_active_flags[tag] = true;
+    else
+      _matrix_tag_active_flags[tag] = false;
+}
+
+bool
+SystemBase::matrixTagActive(TagID tag)
+{
+  mooseAssert(_subproblem.matrixTagExists(tag), "Matrix tag " << tag << " does not exsit");
+
+  return tag < _matrix_tag_active_flags.size() && _matrix_tag_active_flags[tag];
 }
 
 void

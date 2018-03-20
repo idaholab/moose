@@ -43,6 +43,11 @@ public:
     _undisplaced_system.associateVectorToTag(vec, tag);
   }
 
+  virtual void disassociateVectorFromTag(NumericVector<Number> & vec, TagID tag) override
+  {
+    _undisplaced_system.disassociateVectorFromTag(vec, tag);
+  }
+
   virtual void clearTaggedVectors() override { _undisplaced_system.clearTaggedVectors(); }
 
   virtual void clearTaggedVector(TagID tag) override { _undisplaced_system.clearTaggedVector(tag); }
@@ -50,6 +55,11 @@ public:
   virtual void associateMatirxToTag(SparseMatrix<Number> & matrix, TagID tag) override
   {
     _undisplaced_system.associateMatirxToTag(matrix, tag);
+  }
+
+  virtual void disassociateMatrixFromTag(SparseMatrix<Number> & matrix, TagID tag) override
+  {
+    _undisplaced_system.disassociateMatrixFromTag(matrix, tag);
   }
 
   virtual void clearTaggedMatrices() override { _undisplaced_system.clearTaggedMatrices(); }

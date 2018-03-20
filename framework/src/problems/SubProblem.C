@@ -88,9 +88,11 @@ SubProblem::removeVectorTag(TagName tag_name)
 }
 
 TagID
-SubProblem::getVectorTagID(TagName tag_name)
+SubProblem::getVectorTagID(const TagName & tag_name)
 {
-  return _vector_tag_name_to_tag_id.at(tag_name);
+  auto tag_name_upper = MooseUtils::toUpper(tag_name);
+
+  return _vector_tag_name_to_tag_id.at(tag_name_upper);
 }
 
 TagName
@@ -141,9 +143,11 @@ SubProblem::removeMatrixTag(TagName tag_name)
 }
 
 TagID
-SubProblem::getMatrixTagID(TagName tag_name)
+SubProblem::getMatrixTagID(const TagName & tag_name)
 {
-  return _matrix_tag_name_to_tag_id.at(tag_name);
+  auto tag_name_upper = MooseUtils::toUpper(tag_name);
+
+  return _matrix_tag_name_to_tag_id.at(tag_name_upper);
 }
 
 TagName
