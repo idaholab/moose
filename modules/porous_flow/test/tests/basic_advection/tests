@@ -1,0 +1,23 @@
+[Tests]
+  [./except1]
+    type = RunException
+    input = except1.i
+    expect_err = 'The Dictator proclaims that the number of phases is 1 whereas you have provided the phase number as 1'
+  [../]
+  [./except2]
+    type = RunException
+    input = except2.i
+    expect_err = 'PorousFlowDarcyVelocityMaterial is only defined for at_nodes = false'
+  [../]
+  
+  [./1phase]
+    type = Exodiff
+    input = 1phase.i
+    exodiff = 1phase_out.e
+  [../]
+  [./2phase]
+    type = Exodiff
+    input = 2phase.i
+    exodiff = 2phase_out.e
+  [../]
+[]

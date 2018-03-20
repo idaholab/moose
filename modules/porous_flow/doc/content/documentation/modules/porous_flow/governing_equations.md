@@ -329,6 +329,10 @@ one must subtract $\alpha_{B}\nabla_{j} P_{f}$ from MOOSE's stress.
 
 ## Chemical reactions
 
+### Aqueous chemistry
+
+Aqueous equilibrium chemistry and precipitation/dissolution kinetic chemistry have been implemented in the same way as the [chemical reactions module](/chemical_reactions/index.md).
+
 ### Adsorption and desorption
 
 The fluid mass [eq:msph] contains
@@ -411,5 +415,6 @@ input file.
 | $\left((1 - \phi)C^{\kappa}\right)\nabla\cdot\mathbf{v}_{s}$ | [`PorousFlowDesorpedMassVolumetricExpansion`](PorousFlowDesorpedMassVolumetricExpansion.md)|
 | $\Lambda \phi\sum_{\beta}S_{\beta}\rho_{\beta}\chi_{\beta}^{\kappa}$ | [`PorousFlowMassRadioactiveDecay`](PorousFlowMassRadioactiveDecay.md) |
 | $\phi I_{\mathrm{chem}}$ | [`PorousFlowPreDis`](PorousFlowPreDis.md) |
+| $\nabla\cdot(\mathbf{v}_{\beta} u)$ | [`PorousFlowBasicAdvection`](PorousFlowBasicAdvection.md) |
 
 !bibtex bibliography
