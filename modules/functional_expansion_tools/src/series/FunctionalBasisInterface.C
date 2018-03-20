@@ -18,7 +18,7 @@ MooseEnum FunctionalBasisInterface::_domain_options("x=0 y=1 z=2");
  * non-default constructor.
  */
 FunctionalBasisInterface::FunctionalBasisInterface()
-  : _is_cache_invalid(true), _is_orthonormal(false)
+  : _is_cache_invalid(true), _is_generation(false)
 {
 }
 
@@ -30,7 +30,7 @@ FunctionalBasisInterface::FunctionalBasisInterface(const unsigned int number_of_
   : _number_of_terms(number_of_terms),
     _is_cache_invalid(true),
     _basis_evaluation(_number_of_terms, 0.0),
-    _is_orthonormal(false)
+    _is_generation(false)
 {
   _basis_evaluation.shrink_to_fit();
 }
@@ -41,27 +41,27 @@ Real FunctionalBasisInterface::operator[](std::size_t index) const
 }
 
 bool
-FunctionalBasisInterface::isOrthonormal() const
+FunctionalBasisInterface::isGeneration() const
 {
-  return _is_orthonormal;
+  return _is_generation;
 }
 
 bool
-FunctionalBasisInterface::isStandard() const
+FunctionalBasisInterface::isExpansion() const
 {
-  return !_is_orthonormal;
+  return !_is_generation;
 }
 
 const std::vector<Real> &
-FunctionalBasisInterface::getAllOrthonormal()
+FunctionalBasisInterface::getAllGeneration()
 {
-  if (isStandard() || isCacheInvalid())
+  if (isExpansion() || isCacheInvalid())
   {
     clearBasisEvaluation(_number_of_terms);
 
-    evaluateOrthonormal();
+    evaluateGeneration();
 
-    _is_orthonormal = true;
+    _is_generation = true;
     _is_cache_invalid = false;
   }
 
@@ -69,15 +69,15 @@ FunctionalBasisInterface::getAllOrthonormal()
 }
 
 const std::vector<Real> &
-FunctionalBasisInterface::getAllStandard()
+FunctionalBasisInterface::getAllExpansion()
 {
-  if (isOrthonormal() || isCacheInvalid())
+  if (isGeneration() || isCacheInvalid())
   {
     clearBasisEvaluation(_number_of_terms);
 
-    evaluateStandard();
+    evaluateExpansion();
 
-    _is_orthonormal = false;
+    _is_generation = false;
     _is_cache_invalid = false;
   }
 
@@ -91,38 +91,38 @@ FunctionalBasisInterface::getNumberOfTerms() const
 }
 
 Real
-FunctionalBasisInterface::getOrthonormal()
+FunctionalBasisInterface::getGeneration()
 {
-  // Use getAllOrthonormal() which will lazily evaluate the series as needed
-  return getAllOrthonormal().back();
+  // Use getAllGeneration() which will lazily evaluate the series as needed
+  return getAllGeneration().back();
 }
 
 Real
-FunctionalBasisInterface::getOrthonormalSeriesSum()
+FunctionalBasisInterface::getGenerationSeriesSum()
 {
   Real sum = 0.0;
 
-  // Use getAllOrthonormal() which will lazily evaluate the series as needed
-  for (auto term : getAllOrthonormal())
+  // Use getAllGeneration() which will lazily evaluate the series as needed
+  for (auto term : getAllGeneration())
     sum += term;
 
   return sum;
 }
 
 Real
-FunctionalBasisInterface::getStandard()
+FunctionalBasisInterface::getExpansion()
 {
-  // Use getAllStandard() which will lazily evaluate the series as needed
-  return getAllStandard().back();
+  // Use getAllExpansion() which will lazily evaluate the series as needed
+  return getAllExpansion().back();
 }
 
 Real
-FunctionalBasisInterface::getStandardSeriesSum()
+FunctionalBasisInterface::getExpansionSeriesSum()
 {
   Real sum = 0.0;
 
-  // Use getAllStandard() which will lazily evaluate the series as needed
-  for (auto term : getAllStandard())
+  // Use getAllExpansion() which will lazily evaluate the series as needed
+  for (auto term : getAllExpansion())
     sum += term;
 
   return sum;

@@ -33,14 +33,14 @@ public:
   Real operator[](std::size_t index) const;
 
   /**
-   * Returns an array reference containing the value of each orthonormalized term
+   * Returns an array reference containing the value of each generation term
    */
-  const std::vector<Real> & getAllOrthonormal();
+  const std::vector<Real> & getAllGeneration();
 
   /**
-   * Returns an array reference containing the value of each standardized term
+   * Returns an array reference containing the value of each expansion term
    */
-  const std::vector<Real> & getAllStandard();
+  const std::vector<Real> & getAllExpansion();
 
   /**
    * Returns the number of terms in the series
@@ -48,27 +48,27 @@ public:
   std::size_t getNumberOfTerms() const;
 
   /**
-   * Gets the last term of the orthonormalized functional basis
+   * Gets the last term of the generation functional basis
    */
-  Real getOrthonormal();
+  Real getGeneration();
 
   /**
-   * Gets the sum of all terms in the orthonormalized functional basis
+   * Gets the sum of all terms in the generation functional basis
    */
-  Real getOrthonormalSeriesSum();
+  Real getGenerationSeriesSum();
 
   /**
-   * Gets the #_order-th term of the standardized functional basis
+   * Gets the #_order-th term of the expansion functional basis
    */
-  Real getStandard();
+  Real getExpansion();
 
   /**
-   * Evaluates the sum of all terms in the standardized functional basis up to #_order
+   * Evaluates the sum of all terms in the expansion functional basis up to #_order
    */
-  Real getStandardSeriesSum();
+  Real getExpansionSeriesSum();
 
   /**
-   * Returns a vector of the lower and upper bounds of the standardized functional space
+   * Returns a vector of the lower and upper bounds of the standard functional space
    */
   virtual const std::vector<Real> & getStandardizedFunctionLimits() const = 0;
 
@@ -78,14 +78,14 @@ public:
   virtual Real getStandardizedFunctionVolume() const = 0;
 
   /**
-   * Returns true if the current evaluation is orthonormalized
+   * Returns true if the current evaluation is generation
    */
-  bool isOrthonormal() const;
+  bool isGeneration() const;
 
   /**
-   * Returns true if the current evaluation is standardized
+   * Returns true if the current evaluation is expansion
    */
-  bool isStandard() const;
+  bool isExpansion() const;
 
   /**
    * Whether the cached values correspond to the current point
@@ -122,14 +122,14 @@ protected:
   virtual void clearBasisEvaluation(const unsigned int & number_of_terms);
 
   /**
-   * Evaluate the orthonormal form of the functional basis
+   * Evaluate the generation form of the functional basis
    */
-  virtual void evaluateOrthonormal() = 0;
+  virtual void evaluateGeneration() = 0;
 
   /**
-   * Evaluate the standardized form of the functional basis
+   * Evaluate the expansion form of the functional basis
    */
-  virtual void evaluateStandard() = 0;
+  virtual void evaluateExpansion() = 0;
 
   /**
    * Helper function to load a value from #_series
@@ -151,8 +151,8 @@ private:
   /// Stores the values of the basis evaluation
   std::vector<Real> _basis_evaluation;
 
-  /// Indicates whether the current evaluation is standardized or orthonormalized
-  bool _is_orthonormal;
+  /// Indicates whether the current evaluation is expansion or generation
+  bool _is_generation;
 };
 
 #endif // FUNCTIONALBASISINTERFACE_H

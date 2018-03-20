@@ -11,6 +11,7 @@
 #define SINGLESERIESBASISINTERFACE_H
 
 #include "FunctionalBasisInterface.h"
+#include <functional>
 
 /**
  * This class is a simple wrapper around FunctionalBasisInterface, and intended for use by any
@@ -60,6 +61,10 @@ public:
   const std::vector<MooseEnum> _domains;
 
 protected:
+  // Overrides from FunctionalBasisInterface
+  virtual void evaluateGeneration() override;
+  virtual void evaluateExpansion() override;
+
   /**
    * Checks the physical bounds according to the actual implementation
    */
@@ -79,6 +84,12 @@ protected:
 
   /// The standardized location of evaluation
   std::vector<Real> _standardized_location;
+
+  /// The expansion evaluation wrapper
+  std::function<void()> _evaluateExpansionWrapper;
+
+  /// The generation evaluation wrapper
+  std::function<void()> _evaluateGenerationWrapper;
 
 private:
   /// Flag for if the physical bounds are specified for this series

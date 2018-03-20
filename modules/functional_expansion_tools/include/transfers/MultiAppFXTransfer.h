@@ -60,6 +60,7 @@ private:
   typedef MutableCoefficientsInterface & (MultiAppFXTransfer::*GetProblemObject)(
       FEProblemBase & base, const std::string & object_name, THREAD_ID thread);
 
+protected:
   /**
    * Searches an FEProblemBase for a MutableCoefficientsInterface-based object and returns a
    * function pointer to the matched function type.

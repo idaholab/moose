@@ -58,6 +58,12 @@ MutableCoefficientsInterface::getCoefficients() const
   return _coefficients;
 }
 
+std::vector<Real> &
+MutableCoefficientsInterface::getCoefficients()
+{
+  return _coefficients;
+}
+
 std::string
 MutableCoefficientsInterface::getCoefficientsTable() const
 {
