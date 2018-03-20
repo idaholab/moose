@@ -35,7 +35,7 @@ Real poly3Log(Real x, Real tol, int order);
 Real poly4Log(Real x, Real tol, int order);
 Real taylorLog(Real x);
 
-Real pow(Real x, unsigned int e);
+Real pow(Real x, int e);
 
 inline Real
 heavyside(Real x)
