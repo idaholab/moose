@@ -25,10 +25,10 @@ GeneralizedKelvinVoigtBase::GeneralizedKelvinVoigtBase(const InputParameters & p
         getMaterialPropertyOld<RankFourTensor>(_base_name + "first_elasticity_tensor")),
     _first_elasticity_tensor_inv_old(
         getMaterialPropertyOld<RankFourTensor>(_base_name + "first_elasticity_tensor_inv")),
-    _springs_elasticity_tensors_inv_old(
-        getMaterialPropertyOld<std::vector<RankFourTensor>>(_base_name + "springs_elasticity_tensors_inv"))
+    _springs_elasticity_tensors_inv_old(getMaterialPropertyOld<std::vector<RankFourTensor>>(
+        _base_name + "springs_elasticity_tensors_inv"))
 {
-//  _need_viscoelastic_properties_inverse = true;
+  //  _need_viscoelastic_properties_inverse = true;
 }
 
 void

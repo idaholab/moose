@@ -91,8 +91,8 @@ LinearViscoelasticityBase::LinearViscoelasticityBase(const InputParameters & par
                              ? &getMaterialPropertyByName<RankTwoTensor>(_driving_eigenstrain_name)
                              : nullptr),
     _driving_eigenstrain_old(_has_driving_eigenstrain
-                             ? &getMaterialPropertyOld<RankTwoTensor>(_driving_eigenstrain_name)
-                             : nullptr),
+                                 ? &getMaterialPropertyOld<RankTwoTensor>(_driving_eigenstrain_name)
+                                 : nullptr),
     _force_recompute_properties(getParam<bool>("force_recompute_properties")),
     _step_zero(declareRestartableData<bool>("step_zero", true))
 {
