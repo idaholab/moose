@@ -55,13 +55,13 @@ temperature and reference mineral concentration.  Note this porosity can become 
 option for ensuring positivity is detailed below.
 
 With mineralisation, $\phi$ now depends on total mineral concentration, $M$.  However, the evolution
-of $M$ is governed by $\dot{M} = \phi I$, where $I$ is a reaction rate which is independent of
-porosity (but dependent on the primary chemical species, temperature, etc).  Therefore a circular
+of $M$ is governed by $\dot{M} = \phi S_{\mathrm{aq}} I$, where $I$ is a reaction rate which is independent of
+porosity (but dependent on the primary chemical species, temperature, etc) and $S_{\mathrm{aq}}$ is the aqueous phase saturation.  Therefore a circular
 dependency exists: $\phi$ depends on $M$, and $M$ depends on $\phi$.  This could be broken by
 promoting porosity to a MOOSE Variable, and solving for it.  Instead, PorousFlow replaces $M$ in
 [eq:poro_evolve] by the approximate form
 \begin{equation}
-M \rightarrow M_{\mathrm{old}} + \phi_{\mathrm{old}} I \mathrm{d}t \ .
+M \rightarrow M_{\mathrm{old}} + \phi_{\mathrm{old}} S_{\mathrm{aq}} I \mathrm{d}t \ .
 \end{equation}
 Note that the *old* value of porosity is used on the right-hand-side, which breaks the cyclic dependency problem.
 

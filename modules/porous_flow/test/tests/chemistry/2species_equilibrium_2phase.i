@@ -1,3 +1,6 @@
+# Using a two-phase system (see 2species_equilibrium for the single-phase)
+# The saturations, porosity, mass fractions, tortuosity and diffusion coefficients are chosen so that the results are identical to 2species_equilibrium
+#
 # PorousFlow analogy of chemical_reactions/test/tests/aqueous_equilibrium/2species.i
 #
 # Simple equilibrium reaction example to illustrate the use of PorousFlowMassFractionAqueousEquilibriumChemistry
@@ -46,7 +49,16 @@
 []
 
 [AuxVariables]
-  [./pressure]
+  [./pressure0]
+  [../]
+  [./saturation1]
+    initial_condition = 0.25
+  [../]
+  [./a_in_phase0]
+    initial_condition = 0.0
+  [../]
+  [./b_in_phase0]
+    initial_condition = 0.0
   [../]
   [./pa2]
     family = MONOMIAL
@@ -74,9 +86,9 @@
 []
 
 [ICs]
-  [./pressure]
+  [./pressure0]
     type = FunctionIC
-    variable = pressure
+    variable = pressure0
     function = 2-x
   [../]
 []
@@ -93,7 +105,7 @@
     variable = a
   [../]
   [./flux_a]
-    type = PorousFlowFullySaturatedDarcyFlow
+    type = PorousFlowAdvectiveFlux
     variable = a
     fluid_component = 0
   [../]
@@ -101,8 +113,8 @@
     type = PorousFlowDispersiveFlux
     variable = a
     fluid_component = 0
-    disp_trans = 0
-    disp_long = 0
+    disp_trans = '0 0'
+    disp_long = '0 0'
   [../]
   [./mass_b]
     type = PorousFlowMassTimeDerivative
@@ -110,7 +122,7 @@
     variable = b
   [../]
   [./flux_b]
-    type = PorousFlowFullySaturatedDarcyFlow
+    type = PorousFlowAdvectiveFlux
     variable = b
     fluid_component = 1
   [../]
@@ -118,8 +130,8 @@
     type = PorousFlowDispersiveFlux
     variable = b
     fluid_component = 1
-    disp_trans = 0
-    disp_long = 0
+    disp_trans = '0 0'
+    disp_long = '0 0'
   [../]
 []
 
@@ -127,9 +139,13 @@
   [./dictator]
     type = PorousFlowDictator
     porous_flow_vars = 'a b'
-    number_fluid_phases = 1
+    number_fluid_phases = 2
     number_fluid_components = 3
     number_aqueous_equilibrium = 2
+    aqueous_phase_number = 1
+  [../]
+  [./pc]
+    type = PorousFlowCapillaryPressureConst
   [../]
 []
 
@@ -154,17 +170,21 @@
     type = PorousFlowTemperature
   [../]
   [./ppss]
-    type = PorousFlow1PhaseFullySaturated
+    type = PorousFlow2PhasePS
     at_nodes = true
-    porepressure = pressure
+    capillary_pressure = pc
+    phase0_porepressure = pressure0
+    phase1_saturation = saturation1
   [../]
   [./ppss_qp]
-    type = PorousFlow1PhaseFullySaturated
-    porepressure = pressure
+    type = PorousFlow2PhasePS
+    capillary_pressure = pc
+    phase0_porepressure = pressure0
+    phase1_saturation = saturation1
   [../]
   [./massfrac_nodes]
     type = PorousFlowMassFractionAqueousEquilibriumChemistry
-    mass_fraction_vars = 'a b'
+    mass_fraction_vars = 'a_in_phase0 b_in_phase0 a b'
     num_reactions = 2
     equilibrium_constants = '1E2 1E-2'
     primary_activity_coefficients = '1 1'
@@ -175,7 +195,7 @@
   [../]
   [./massfrac_qp]
     type = PorousFlowMassFractionAqueousEquilibriumChemistry
-    mass_fraction_vars = 'a b'
+    mass_fraction_vars = 'a_in_phase0 b_in_phase0 a b'
     num_reactions = 2
     equilibrium_constants = '1E2 1E-2'
     primary_activity_coefficients = '1 1'
@@ -183,16 +203,27 @@
     reactions = '2 0
                  1 1'
   [../]
-  [./simple_fluid]
+  [./simple_fluid0]
     type = PorousFlowSingleComponentFluid
     fp = simple_fluid
     phase = 0
     at_nodes = true
   [../]
-  [./simple_fluid_qp]
+  [./simple_fluid1]
+    type = PorousFlowSingleComponentFluid
+    fp = simple_fluid
+    phase = 1
+    at_nodes = true
+  [../]
+  [./simple_fluid_qp0]
     type = PorousFlowSingleComponentFluid
     fp = simple_fluid
     phase = 0
+  [../]
+  [./simple_fluid_qp1]
+    type = PorousFlowSingleComponentFluid
+    fp = simple_fluid
+    phase = 1
   [../]
   [./dens_all]
     type = PorousFlowJoiner
@@ -207,35 +238,60 @@
   [../]
   [./visc_all]
     type = PorousFlowJoiner
+    at_nodes = true
+    material_property = PorousFlow_viscosity_nodal
+  [../]
+  [./visc_all_qp]
+    type = PorousFlowJoiner
     material_property = PorousFlow_viscosity_qp
   [../]
   [./porosity]
     type = PorousFlowPorosityConst
     at_nodes = true
-    porosity = 0.2
+    porosity = 0.8
   [../]
   [./porosity_qp]
     type = PorousFlowPorosityConst
-    porosity = 0.2
+    porosity = 0.8
   [../]
   [./permeability]
     type = PorousFlowPermeabilityConst
     # porous_flow permeability / porous_flow viscosity = chemical_reactions conductivity = 1E-4
     permeability = '1E-7 0 0 0 1E-7 0 0 0 1E-7'
   [../]
-  [./relp]
+  [./relp0_qp]
     type = PorousFlowRelativePermeabilityConst
     phase = 0
   [../]
-  [./relp_all]
+  [./relp1_qp]
+    type = PorousFlowRelativePermeabilityConst
+    phase = 1
+  [../]
+  [./relp_all_qp]
     type = PorousFlowJoiner
     material_property = PorousFlow_relative_permeability_qp
+  [../]
+  [./relp0]
+    type = PorousFlowRelativePermeabilityConst
+    at_nodes = true
+    phase = 0
+  [../]
+  [./relp1]
+    type = PorousFlowRelativePermeabilityConst
+    at_nodes = true
+    phase = 1
+  [../]
+  [./relp_all]
+    type = PorousFlowJoiner
+    at_nodes = true
+    material_property = PorousFlow_relative_permeability_nodal
   [../]
   [./diff]
     type = PorousFlowDiffusivityConst
     # porous_flow diffusion_coeff * tortuousity * porosity = chemical_reactions diffusivity = 1E-4
-    diffusion_coeff = '5E-4 5E-4 5E-4'
-    tortuosity = 1.0
+    diffusion_coeff = '5E-4 5E-4 5E-4
+                       5E-4 5E-4 5E-4'
+    tortuosity = '0.25 0.25'
   [../]
 []
 

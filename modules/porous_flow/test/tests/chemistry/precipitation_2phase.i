@@ -1,10 +1,13 @@
-# The dissolution reaction
+# Using a two-phase system (see precipitation.i for the single-phase)
+# The saturation and porosity are chosen so that the results are identical to precipitation.i
+#
+# The precipitation reaction
 #
 # a <==> mineral
 #
 # produces "mineral".  Using mineral_density = fluid_density, theta = 1 = eta, the DE is
 #
-# a' = -(mineral / porosity)' = rate * surf_area * molar_vol (1 - (1 / eqm_const) * (act_coeff * a)^stoi)
+# a' = -(mineral / (porosity * saturation))' = rate * surf_area * molar_vol (1 - (1 / eqm_const) * (act_coeff * a)^stoi)
 #
 # The following parameters are used
 #
@@ -22,14 +25,14 @@
 # equilibrium_constant = 0.5 (dimensionless)
 # primary_activity_coefficient = 2 (dimensionless)
 # stoichiometry = 1 (dimensionless)
-# This means that 1 - (1 / eqm_const) * (act_coeff * a)^stoi = 1 - 4 a, which is positive for a < 0.25, ie dissolution for a(t=0) < 0.25
+# This means that 1 - (1 / eqm_const) * (act_coeff * a)^stoi = 1 - 4 a, which is negative for a > 0.25, ie precipitation for a(t=0) > 0.25
 #
 # The solution of the DE is
 # a = eqm_const / act_coeff + (a(t=0) - eqm_const / act_coeff) exp(-rate * surf_area * molar_vol * act_coeff * t / eqm_const)
 #   = 0.25 + (a(t=0) - 0.25) exp(-4 * t)
-# c = c(t=0) - (a - a(t=0)) * porosity
+# c = c(t=0) - (a - a(t=0)) * (porosity * saturation)
 #
-# This test checks that (a + c / porosity) is time-independent, and that a follows the above solution
+# This test checks that (a + c / (porosity * saturation)) is time-independent, and that a follows the above solution
 #
 # Aside:
 #    The exponential curve is not followed exactly because moose actually solves
@@ -42,15 +45,21 @@
 
 [Variables]
   [./a]
-    initial_condition = 0.05
+    initial_condition = 0.9
   [../]
 []
 
 [AuxVariables]
-  [./pressure]
+  [./pressure0]
+  [../]
+  [./saturation1]
+    initial_condition = 0.25
+  [../]
+  [./b]
+    initial_condition = 0.123
   [../]
   [./ini_mineral_conc]
-    initial_condition = 0.3
+    initial_condition = 0.2
   [../]
   [./mineral]
     family = MONOMIAL
@@ -99,9 +108,13 @@
   [./dictator]
     type = PorousFlowDictator
     porous_flow_vars = a
-    number_fluid_phases = 1
+    number_fluid_phases = 2
     number_fluid_components = 2
     number_aqueous_kinetic = 1
+    aqueous_phase_number = 1
+  [../]
+  [./pc]
+    type = PorousFlowCapillaryPressureConst
   [../]
 []
 
@@ -128,17 +141,21 @@
     temperature = 1
   [../]
   [./ppss]
-    type = PorousFlow1PhaseFullySaturated
+    type = PorousFlow2PhasePS
     at_nodes = true
-    porepressure = pressure
+    capillary_pressure = pc
+    phase0_porepressure = pressure0
+    phase1_saturation = saturation1
   [../]
   [./ppss_qp]
-    type = PorousFlow1PhaseFullySaturated
-    porepressure = pressure
+    type = PorousFlow2PhasePS
+    capillary_pressure = pc
+    phase0_porepressure = pressure0
+    phase1_saturation = saturation1
   [../]
   [./mass_frac]
     type = PorousFlowMassFraction
-    mass_fraction_vars = a
+    mass_fraction_vars = 'b a'
     at_nodes = true
   [../]
   [./predis]
@@ -179,10 +196,16 @@
     type = PorousFlowAqueousPreDisMineral
     initial_concentrations = ini_mineral_conc
   [../]
-  [./simple_fluid]
+  [./simple_fluid0]
     type = PorousFlowSingleComponentFluid
     fp = simple_fluid
     phase = 0
+    at_nodes = true
+  [../]
+  [./simple_fluid1]
+    type = PorousFlowSingleComponentFluid
+    fp = simple_fluid
+    phase = 1
     at_nodes = true
   [../]
   [./dens_all]
@@ -194,11 +217,11 @@
   [./porosity]
     type = PorousFlowPorosityConst
     at_nodes = true
-    porosity = 0.1
+    porosity = 0.4
   [../]
   [./porosity_qp]
     type = PorousFlowPorosityConst
-    porosity = 0.1
+    porosity = 0.4
   [../]
 []
 

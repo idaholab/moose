@@ -16,11 +16,14 @@ mineralisation doesn't cause porosity to become negative or exceed unity.
 
 The computation uses a *lagged* approach for porosity to calculate the mineral concentration, $C$:
 \begin{equation}
-C = C_{\mathrm{old}} + \phi_{\mathrm{old}} I \mathrm{d}t \ ,
+C = C_{\mathrm{old}} + \phi_{\mathrm{old}} I S_{\mathrm{aq}} \mathrm{d}t \ ,
 \end{equation}
-where $I$ is the reaction rate (dependent on primary concentrations, etc).  Notice the use of the
-*old* value for porosity.  This is an approximation.  It breaks the cyclic dependency between mineral
-concentration and porosity: see [Porosity](porous_flow/porosity.md) for more details.
+where $I$ is the reaction rate (dependent on primary concentrations,
+etc) and $S_{\mathrm{aq}}$ is the saturation of the aqueous phase.
+Notice the use of the *old* value for porosity.  This is an
+approximation.  It breaks the cyclic dependency between mineral
+concentration and porosity: see [Porosity](porous_flow/porosity.md)
+for more details.
 
 !syntax parameters /Materials/PorousFlowAqueousPreDisMineral
 

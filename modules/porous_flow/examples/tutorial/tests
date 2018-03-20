@@ -67,6 +67,7 @@
     exodiff = '11_out.e'
     cli_args = 'Executioner/end_time=1E3'
     abs_zero = 1E-3
+    rel_err = 1E-4
     heavy = true
   [../]
 []
