@@ -39,14 +39,11 @@ protected:
   dof_id_type _node;
   /// out norm on this boundary
   Real _normal;
-  /// Name of the input
-  std::string _input;
+  /// Name of the boundary this component attaches to
+  BoundaryName _input;
 
   /// rDG flux user object name
   UserObjectName _rdg_flux_name;
-
-private:
-  virtual std::string createBoundaryName(const std::string & comp_name) const override;
 };
 
 #endif /* FLOWBOUNDARY_H */
