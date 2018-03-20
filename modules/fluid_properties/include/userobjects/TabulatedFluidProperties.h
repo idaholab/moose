@@ -14,7 +14,7 @@
 #include "DelimitedFileReader.h"
 
 class SinglePhaseFluidPropertiesPT;
-class BicubicSplineInterpolation;
+class BicubicInterpolation;
 class TabulatedFluidProperties;
 
 template <>
@@ -203,11 +203,11 @@ protected:
   /// Tabulated enthalpy
   std::vector<std::vector<Real>> _enthalpy;
   /// Interpoled density
-  std::unique_ptr<BicubicSplineInterpolation> _density_ipol;
+  std::unique_ptr<BicubicInterpolation> _density_ipol;
   /// Interpoled internal energy
-  std::unique_ptr<BicubicSplineInterpolation> _internal_energy_ipol;
+  std::unique_ptr<BicubicInterpolation> _internal_energy_ipol;
   /// Interpoled enthalpy
-  std::unique_ptr<BicubicSplineInterpolation> _enthalpy_ipol;
+  std::unique_ptr<BicubicInterpolation> _enthalpy_ipol;
   /// Derivatives along the boundary
   std::vector<Real> _drho_dp_0, _drho_dp_n, _drho_dT_0, _drho_dT_n;
   std::vector<Real> _de_dp_0, _de_dp_n, _de_dT_0, _de_dT_n;
