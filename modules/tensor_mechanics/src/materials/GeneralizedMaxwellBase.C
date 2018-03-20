@@ -28,7 +28,7 @@ GeneralizedMaxwellBase::updateQpViscousStrains()
 {
   RankTwoTensor effective_strain = _elastic_strain_old[_qp] + _creep_strain_old[_qp];
   if (_has_driving_eigenstrain)
-    effective_strain += (*_driving_eigenstrain)[_qp];
+    effective_strain += (*_driving_eigenstrain_old)[_qp];
 
   for (unsigned int i = 0; i < _springs_elasticity_tensors[_qp].size(); ++i)
   {

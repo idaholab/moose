@@ -28,7 +28,6 @@ validParams<LinearViscoelasticityBase>()
                                "name of the eigenstrain that increases the creep strains");
   params.addParam<std::string>(
       "elastic_strain_name", "elastic_strain", "name of the true elastic strain of the material");
-  params.addParam<std::string>("stress_name", "stress", "name of the true stress of the material");
   params.addParam<std::string>("creep_strain_name",
                                "creep_strain",
                                "name of the true creep strain of the material"
@@ -85,12 +84,14 @@ LinearViscoelasticityBase::LinearViscoelasticityBase(const InputParameters & par
         getMaterialPropertyOld<RankTwoTensor>(getParam<std::string>("elastic_strain_name"))),
     _creep_strain_old(
         getMaterialPropertyOld<RankTwoTensor>(getParam<std::string>("creep_strain_name"))),
-    _stress_old(getMaterialPropertyOld<RankTwoTensor>(getParam<std::string>("stress_name"))),
     _has_driving_eigenstrain(isParamValid("driving_eigenstrain")),
     _driving_eigenstrain_name(
         _has_driving_eigenstrain ? getParam<std::string>("driving_eigenstrain") : ""),
     _driving_eigenstrain(_has_driving_eigenstrain
                              ? &getMaterialPropertyByName<RankTwoTensor>(_driving_eigenstrain_name)
+                             : nullptr),
+    _driving_eigenstrain_old(_has_driving_eigenstrain
+                             ? &getMaterialPropertyOld<RankTwoTensor>(_driving_eigenstrain_name)
                              : nullptr),
     _force_recompute_properties(getParam<bool>("force_recompute_properties")),
     _step_zero(declareRestartableData<bool>("step_zero", true))
