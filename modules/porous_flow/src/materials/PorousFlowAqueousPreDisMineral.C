@@ -28,6 +28,10 @@ validParams<PorousFlowAqueousPreDisMineral>()
 PorousFlowAqueousPreDisMineral::PorousFlowAqueousPreDisMineral(const InputParameters & parameters)
   : PorousFlowMaterialVectorBase(parameters),
     _num_reactions(_dictator.numAqueousKinetic()),
+    _aq_ph(_dictator.aqueousPhaseNumber()),
+    _saturation(_nodal_material
+                    ? getMaterialProperty<std::vector<Real>>("PorousFlow_saturation_nodal")
+                    : getMaterialProperty<std::vector<Real>>("PorousFlow_saturation_qp")),
     _sec_conc(_nodal_material
                   ? declareProperty<std::vector<Real>>("PorousFlow_mineral_concentration_nodal")
                   : declareProperty<std::vector<Real>>("PorousFlow_mineral_concentration_qp")),
@@ -47,6 +51,11 @@ PorousFlowAqueousPreDisMineral::PorousFlowAqueousPreDisMineral(const InputParame
     _num_initial_conc(_initial_conc_supplied ? coupledComponents("initial_concentrations")
                                              : _num_reactions)
 {
+  /* Not needed due to PorousFlow_mineral_reaction_rate already checking this condition
+  if (_dictator.numPhases() < 1)
+    mooseError("PorousFlowAqueousPreDisMineral: The number of fluid phases must not be zero");
+  */
+
   if (_num_initial_conc != _dictator.numAqueousKinetic())
     mooseError("PorousFlowAqueousPreDisMineral: The number of initial concentrations is ",
                _num_initial_conc,
@@ -87,5 +96,6 @@ PorousFlowAqueousPreDisMineral::computeQpProperties()
    *
    */
   for (unsigned r = 0; r < _num_reactions; ++r)
-    _sec_conc[_qp][r] = _sec_conc_old[_qp][r] + _porosity_old[_qp] * _reaction_rate[_qp][r] * _dt;
+    _sec_conc[_qp][r] = _sec_conc_old[_qp][r] + _porosity_old[_qp] * _reaction_rate[_qp][r] *
+                                                    _saturation[_qp][_aq_ph] * _dt;
 }

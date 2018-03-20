@@ -72,6 +72,12 @@ protected:
   /// old values of the porosity
   const MaterialProperty<Real> & _porosity_old;
 
+  /// Aqueous phase number
+  const unsigned int _aq_ph;
+
+  /// saturation
+  const MaterialProperty<std::vector<Real>> & _saturation;
+
   /// temperature
   const MaterialProperty<Real> & _temperature;
 

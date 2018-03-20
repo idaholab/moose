@@ -125,7 +125,19 @@ PorousFlowPorosity::PorousFlowPorosity(const InputParameters & parameters)
                                                 "dPorousFlow_mineral_reaction_rate_nodal_dvar")
                                           : &getMaterialProperty<std::vector<std::vector<Real>>>(
                                                 "dPorousFlow_mineral_reaction_rate_qp_dvar"))
-                                   : nullptr)
+                                   : nullptr),
+    _aq_ph(_dictator.aqueousPhaseNumber()),
+    _saturation(_chemical
+                    ? (_nodal_material
+                           ? &getMaterialProperty<std::vector<Real>>("PorousFlow_saturation_nodal")
+                           : &getMaterialProperty<std::vector<Real>>("PorousFlow_saturation_qp"))
+                    : nullptr),
+    _dsaturation_dvar(_chemical
+                          ? (_nodal_material ? &getMaterialProperty<std::vector<std::vector<Real>>>(
+                                                   "dPorousFlow_saturation_nodal_dvar")
+                                             : &getMaterialProperty<std::vector<std::vector<Real>>>(
+                                                   "dPorousFlow_saturation_qp_dvar"))
+                          : nullptr)
 {
   if (_thermal && !isParamValid("thermal_expansion_coeff"))
     mooseError("PorousFlowPorosity: When thermal=true you must provide a thermal_expansion_coeff");
@@ -180,8 +192,9 @@ PorousFlowPorosity::atNegInfinityQp() const
         result -= _c_weights[i] * (*_initial_c[i])[_qp];
     else
       for (unsigned i = 0; i < _num_c_ref; ++i)
-        result -= _c_weights[i] * ((*_mineral_conc_old)[_qp][i] +
-                                   _dt * _porosity_old[_qp] * (*_reaction_rate)[_qp][i]);
+        result -= _c_weights[i] * ((*_mineral_conc_old)[_qp][i] + _dt * _porosity_old[_qp] *
+                                                                      (*_saturation)[_qp][_aq_ph] *
+                                                                      (*_reaction_rate)[_qp][i]);
   }
   return result;
 }
@@ -192,7 +205,9 @@ PorousFlowPorosity::datNegInfinityQp(unsigned pvar) const
   Real result = 0.0;
   if (_chemical && (_t_step >= 1 || _app.isRestarting()))
     for (unsigned i = 0; i < _num_c_ref; ++i)
-      result -= _c_weights[i] * _dt * _porosity_old[_qp] * (*_dreaction_rate_dvar)[_qp][i][pvar];
+      result -= _c_weights[i] * _dt * _porosity_old[_qp] *
+                ((*_saturation)[_qp][_aq_ph] * (*_dreaction_rate_dvar)[_qp][i][pvar] +
+                 (*_dsaturation_dvar)[_qp][_aq_ph][pvar] * (*_reaction_rate)[_qp][i]);
   return result;
 }
 
@@ -207,9 +222,10 @@ PorousFlowPorosity::atZeroQp() const
         result -= _c_weights[i] * ((*_initial_c[i])[_qp] - (*_c_reference[i])[_qp]);
     else
       for (unsigned i = 0; i < _num_c_ref; ++i)
-        result -= _c_weights[i] *
-                  ((*_mineral_conc_old)[_qp][i] +
-                   _dt * _porosity_old[_qp] * (*_reaction_rate)[_qp][i] - (*_c_reference[i])[_qp]);
+        result -= _c_weights[i] * ((*_mineral_conc_old)[_qp][i] +
+                                   _dt * _porosity_old[_qp] * (*_saturation)[_qp][_aq_ph] *
+                                       (*_reaction_rate)[_qp][i] -
+                                   (*_c_reference[i])[_qp]);
   }
   return result;
 }
@@ -220,7 +236,9 @@ PorousFlowPorosity::datZeroQp(unsigned pvar) const
   Real result = 0.0;
   if (_chemical && (_t_step >= 1 || _app.isRestarting()))
     for (unsigned i = 0; i < _num_c_ref; ++i)
-      result -= _c_weights[i] * _dt * _porosity_old[_qp] * (*_dreaction_rate_dvar)[_qp][i][pvar];
+      result -= _c_weights[i] * _dt * _porosity_old[_qp] *
+                ((*_saturation)[_qp][_aq_ph] * (*_dreaction_rate_dvar)[_qp][i][pvar] +
+                 (*_dsaturation_dvar)[_qp][_aq_ph][pvar] * (*_reaction_rate)[_qp][i]);
   return result;
 }
 

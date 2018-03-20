@@ -40,6 +40,10 @@ validParams<PorousFlowDictator>()
                                 "The number of secondary species in the aqueous-kinetic reaction "
                                 "system involved in precipitation and dissolution.  (Leave as zero "
                                 "if the simulation does not involve chemistry)");
+  params.addParam<unsigned int>("aqueous_phase_number",
+                                0,
+                                "The fluid phase number of the aqueous phase in which the "
+                                "equilibrium and kinetic chemical reactions occur");
   return params;
 }
 
@@ -50,7 +54,8 @@ PorousFlowDictator::PorousFlowDictator(const InputParameters & parameters)
     _num_phases(getParam<unsigned int>("number_fluid_phases")),
     _num_components(getParam<unsigned int>("number_fluid_components")),
     _num_aqueous_equilibrium(getParam<unsigned int>("number_aqueous_equilibrium")),
-    _num_aqueous_kinetic(getParam<unsigned int>("number_aqueous_kinetic"))
+    _num_aqueous_kinetic(getParam<unsigned int>("number_aqueous_kinetic")),
+    _aqueous_phase_number(getParam<unsigned int>("aqueous_phase_number"))
 {
   _moose_var_num.resize(_num_variables);
   for (unsigned int i = 0; i < _num_variables; ++i)
@@ -69,6 +74,10 @@ PorousFlowDictator::PorousFlowDictator(const InputParameters & parameters)
                  "for this is against specification #1984.  Variable number ",
                  i,
                  " is an AuxVariable.");
+
+  if ((_num_phases > 0) && (_aqueous_phase_number >= _num_phases))
+    mooseError("PorousflowDictator: The aqueous phase number must be less than the number of fluid "
+               "phases.  The Dictator does not appreciate jokes.");
 }
 
 unsigned int
@@ -99,6 +108,12 @@ unsigned int
 PorousFlowDictator::numAqueousKinetic() const
 {
   return _num_aqueous_kinetic;
+}
+
+unsigned int
+PorousFlowDictator::aqueousPhaseNumber() const
+{
+  return _aqueous_phase_number;
 }
 
 unsigned int

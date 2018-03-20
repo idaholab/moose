@@ -35,6 +35,12 @@ protected:
   /// number of equations in the aqueous geochemistry system
   const unsigned int _num_reactions;
 
+  /// Aqueous phase number
+  const unsigned int _aq_ph;
+
+  /// saturation
+  const MaterialProperty<std::vector<Real>> & _saturation;
+
   /// Mineral concentrations at quadpoint or nodes
   MaterialProperty<std::vector<Real>> & _sec_conc;
 
