@@ -24,6 +24,9 @@ BadAddKernelAction::BadAddKernelAction(InputParameters params) : MooseObjectActi
 void
 BadAddKernelAction::act()
 {
-  // Wrong method being called for adding *Kernel* object
-  _problem->addScalarKernel(_type, _name, _moose_object_pars);
+  // Wrong method being called for adding *Kernel* object.
+  // Note: we chose addIndicator() for this Action so that a specific
+  // Factory error is triggered (and not some other error check on
+  // e.g. variable types).
+  _problem->addIndicator(_type, _name, _moose_object_pars);
 }

@@ -10,7 +10,9 @@
   [../]
 []
 
-# Custom block to add Kernels (incorrectly)
+# Note: the BadKernels syntax is set up to incorrectly call addIndicator()
+# when it should actually call addKernel() to test that we can detect when
+# people call the wrong FEProblem methods in their Actions.
 [BadKernels]
   [./diff]
     type = Diffusion
