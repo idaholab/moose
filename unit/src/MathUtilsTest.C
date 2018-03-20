@@ -15,4 +15,6 @@ TEST(MathUtilsTest, pow)
 {
   ASSERT_DOUBLE_EQ(MathUtils::pow(1.2345, 73), std::pow(1.2345, 73));
   ASSERT_DOUBLE_EQ(MathUtils::pow(-0.99542, 58), std::pow(-0.99542, 58));
+  ASSERT_DOUBLE_EQ(MathUtils::pow(1.2345, -13), std::pow(1.2345, -13));
+  ASSERT_DOUBLE_EQ(MathUtils::pow(-0.99542, -8), std::pow(-0.99542, -8));
 }

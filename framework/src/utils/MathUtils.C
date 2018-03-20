@@ -206,11 +206,19 @@ taylorLog(Real x)
   return val * 2.0 * y;
 }
 
-// fast positive integer powers
+// fast integer powers
 Real
-pow(Real x, unsigned int e)
+pow(Real x, int e)
 {
+  bool neg = false;
   Real result = 1.0;
+
+  if (e < 0)
+  {
+    neg = true;
+    e = -e;
+  }
+
   while (e)
   {
     // if bit 0 is set multiply the current power of two factor of the exponent
@@ -224,7 +232,7 @@ pow(Real x, unsigned int e)
     e >>= 1;
   }
 
-  return result;
+  return neg ? 1.0 / result : result;
 }
 
 } // namespace MathUtils
