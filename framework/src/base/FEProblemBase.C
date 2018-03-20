@@ -1777,7 +1777,7 @@ FEProblemBase::addKernel(const std::string & kernel_name,
 
   // Check that "variable" is in the NonlinearSystem.
   if (!_nl->hasVariable(parameters.get<NonlinearVariableName>("variable")))
-    mooseError("Cannot add Kernel for variable ",
+    mooseError(name, ": Cannot add Kernel for variable ",
                parameters.get<NonlinearVariableName>("variable"),
                ", it is not a nonlinear variable!");
 
@@ -1815,7 +1815,7 @@ FEProblemBase::addNodalKernel(const std::string & kernel_name,
 
   // Check that "variable" is in the NonlinearSystem.
   if (!_nl->hasVariable(parameters.get<NonlinearVariableName>("variable")))
-    mooseError("Cannot add NodalKernel for variable ",
+    mooseError(name, ": Cannot add NodalKernel for variable ",
                parameters.get<NonlinearVariableName>("variable"),
                ", it is not a nonlinear variable!");
 }
@@ -1849,7 +1849,7 @@ FEProblemBase::addScalarKernel(const std::string & kernel_name,
 
   // Check that "variable" is a Scalar variable on the NonlinearSystem
   if (!_nl->hasScalarVariable(parameters.get<NonlinearVariableName>("variable")))
-    mooseError("Cannot add ScalarKernel for variable ",
+    mooseError(name, ": Cannot add ScalarKernel for variable ",
                parameters.get<NonlinearVariableName>("variable"),
                ", it is not a Scalar variable!");
 
@@ -1886,7 +1886,7 @@ FEProblemBase::addBoundaryCondition(const std::string & bc_name,
 
   // Check that "variable" is in the NonlinearSystem.
   if (!_nl->hasVariable(parameters.get<NonlinearVariableName>("variable")))
-    mooseError("Cannot add BoundaryCondition for variable ",
+    mooseError(name, ": Cannot add BoundaryCondition for variable ",
                parameters.get<NonlinearVariableName>("variable"),
                ", it is not a nonlinear variable!");
 
@@ -1919,7 +1919,7 @@ FEProblemBase::addConstraint(const std::string & c_name,
 
   // Check that "variable" is in the NonlinearSystem.
   if (!_nl->hasVariable(parameters.get<NonlinearVariableName>("variable")))
-    mooseError("Cannot add Constraint for variable ",
+    mooseError(name, ": Cannot add Constraint for variable ",
                parameters.get<NonlinearVariableName>("variable"),
                ", it is not a nonlinear variable!");
 
@@ -1992,7 +1992,7 @@ FEProblemBase::addAuxKernel(const std::string & kernel_name,
 
   // Check that "variable" is in the AuxiliarySystem.
   if (!_aux->hasVariable(parameters.get<AuxVariableName>("variable")))
-    mooseError("Cannot add AuxKernel for variable ",
+    mooseError(name, ": Cannot add AuxKernel for variable ",
                parameters.get<AuxVariableName>("variable"),
                ", it is not an AuxVariable!");
 
@@ -2028,7 +2028,7 @@ FEProblemBase::addAuxScalarKernel(const std::string & kernel_name,
 
   // Check that "variable" is in the AuxiliarySystem.
   if (!_aux->hasScalarVariable(parameters.get<AuxVariableName>("variable")))
-    mooseError("Cannot add AuxScalarKernel for variable ",
+    mooseError(name, ": Cannot add AuxScalarKernel for variable ",
                parameters.get<AuxVariableName>("variable"),
                ", it is not a Scalar AuxVariable!");
 
@@ -2065,7 +2065,7 @@ FEProblemBase::addDiracKernel(const std::string & kernel_name,
 
   // Check that "variable" is in the NonlinearSystem.
   if (!_nl->hasVariable(parameters.get<NonlinearVariableName>("variable")))
-    mooseError("Cannot add DiracKernel for variable ",
+    mooseError(name, ": Cannot add DiracKernel for variable ",
                parameters.get<NonlinearVariableName>("variable"),
                ", it is not a nonlinear variable!");
 
@@ -2104,7 +2104,7 @@ FEProblemBase::addDGKernel(const std::string & dg_kernel_name,
 
   // Check that "variable" is in the NonlinearSystem.
   if (!_nl->hasVariable(parameters.get<NonlinearVariableName>("variable")))
-    mooseError("Cannot add DGKernel for variable ",
+    mooseError(name, ": Cannot add DGKernel for variable ",
                parameters.get<NonlinearVariableName>("variable"),
                ", it is not a nonlinear variable!");
 
@@ -2145,7 +2145,7 @@ FEProblemBase::addInterfaceKernel(const std::string & interface_kernel_name,
 
   // Check that "variable" is in the NonlinearSystem.
   if (!_nl->hasVariable(parameters.get<NonlinearVariableName>("variable")))
-    mooseError("Cannot add InterfaceKernel for variable ",
+    mooseError(name, ": Cannot add InterfaceKernel for variable ",
                parameters.get<NonlinearVariableName>("variable"),
                ", it is not a nonlinear variable!");
 
