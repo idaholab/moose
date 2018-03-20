@@ -343,7 +343,7 @@
   [./missing_req_par_moose_obj_test]
     type = 'RunException'
     input = 'missing_req_par_moose_obj_test.i'
-    expect_err = "Cannot add Kernel for variable , it is not a nonlinear variable"
+    expect_err = "missing required parameter 'Kernels/diff/type'"
   [../]
 
   [./missing_required_coupled_test]

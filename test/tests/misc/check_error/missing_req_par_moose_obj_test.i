@@ -14,9 +14,9 @@
 [Kernels]
   active = 'diff'
 
-  # Test missing required param (variable in this case)
+  # Test missing required param (type in this case)
   [./diff]
-    type = Diffusion
+    variable = u
   [../]
 []
 
