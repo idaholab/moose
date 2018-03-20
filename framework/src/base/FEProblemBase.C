@@ -1994,7 +1994,7 @@ FEProblemBase::addAuxKernel(const std::string & kernel_name,
   if (!_aux->hasVariable(parameters.get<AuxVariableName>("variable")))
     mooseError(name, ": Cannot add AuxKernel for variable ",
                parameters.get<AuxVariableName>("variable"),
-               ", it is not an AuxVariable!");
+               ", it is not an auxiliary variable!");
 
   _aux->addKernel(kernel_name, name, parameters);
 }
