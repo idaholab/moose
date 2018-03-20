@@ -9,15 +9,15 @@ validParams<FlowJunction>()
 {
   InputParameters params = validParams<FlowConnection>();
   params.addPrivateParam<std::string>("component_type", "flow_junction");
-  params.addRequiredParam<std::vector<std::string>>("inputs", "Inputs of this junction");
-  params.addRequiredParam<std::vector<std::string>>("outputs", "Outputs of this junction");
+  params.addRequiredParam<std::vector<BoundaryName>>("inputs", "Inputs of this junction");
+  params.addRequiredParam<std::vector<BoundaryName>>("outputs", "Outputs of this junction");
   return params;
 }
 
 FlowJunction::FlowJunction(const InputParameters & params) : FlowConnection(params)
 {
-  const std::vector<std::string> & inputs = getParam<std::vector<std::string>>("inputs");
-  const std::vector<std::string> & outputs = getParam<std::vector<std::string>>("outputs");
+  const std::vector<BoundaryName> & inputs = getParam<std::vector<BoundaryName>>("inputs");
+  const std::vector<BoundaryName> & outputs = getParam<std::vector<BoundaryName>>("outputs");
   for (const auto & connection_string : inputs)
     addConnection(connection_string);
   for (const auto & connection_string : outputs)
@@ -46,10 +46,4 @@ FlowJunction::setupMesh()
         _mesh.getMesh().boundary_info->add_node(conn._node, boundary_id);
     }
   }
-}
-
-std::string
-FlowJunction::createBoundaryName(const std::string & comp_name) const
-{
-  return name() + ":" + comp_name;
 }

@@ -34,21 +34,16 @@ FlowConnection::setupMesh()
 
     if (hasComponentByName<GeometricalFlowComponent>(comp_name))
     {
+      _boundary_names.push_back(connection._boundary_name);
+
       const GeometricalFlowComponent & gc = getComponentByName<GeometricalFlowComponent>(comp_name);
       for (auto && conn : gc.getConnections(connection._end_type))
       {
-        const BoundaryName boundary_name = createBoundaryName(comp_name);
-
         // get info from the connection
         _positions.push_back(conn._position);
         _nodes.push_back(conn._node->id());
         _normals.push_back(conn._normal);
         _boundary_ids.push_back(conn._boundary_id);
-        _boundary_names.push_back(boundary_name);
-        _connection_strings.push_back(connection._string);
-
-        // name the nodeset/sideset corresponding to the node of the connected pipe end
-        _mesh.setBoundaryName(conn._boundary_id, boundary_name);
 
         // add connection's node to nodeset of all boundary nodes
         _mesh.getMesh().boundary_info->add_node(conn._node, RELAP7::bnd_nodeset_id);
@@ -123,28 +118,29 @@ FlowConnection::check()
 }
 
 void
-FlowConnection::addConnection(const std::string & connection_string)
+FlowConnection::addConnection(const BoundaryName & boundary_name)
 {
-  // check for correct format
-  const size_t bpos = connection_string.find('(');
-  const size_t epos = connection_string.find(')', bpos);
-  if ((bpos == std::string::npos) || (epos == std::string::npos))
-    mooseError("Incorrect connection format");
+  const size_t colon_pos = boundary_name.rfind(':');
+  // if it has a colon, assume 'component_name:end_type' format
+  if (colon_pos != std::string::npos)
+  {
+    const std::string connected_component_name = boundary_name.substr(0, colon_pos);
+    const std::string str_end =
+        boundary_name.substr(colon_pos + 1, boundary_name.length() - colon_pos - 1);
+    const EEndType end_type = RELAP7::stringToEnum<EEndType>(str_end);
 
-  // extract component name
-  const std::string connected_component_name = connection_string.substr(0, bpos);
+    _connections.push_back(Connection(boundary_name, connected_component_name, end_type));
+    _connected_component_names.push_back(connected_component_name);
 
-  // extract end type
-  const std::string end = connection_string.substr(bpos + 1, epos - bpos - 1);
-  const EEndType end_type = RELAP7::stringToEnum<EEndType>(end);
-
-  // store connection data
-  _connections.push_back(Connection(connection_string, connected_component_name, end_type));
-  _connected_component_names.push_back(connected_component_name);
-
-  // Add dependency because the connected component's setupMesh() must be called
-  // before this component's setupMesh().
-  addDependency(connected_component_name);
+    // Add dependency because the connected component's setupMesh() must be called
+    // before this component's setupMesh().
+    addDependency(connected_component_name);
+  }
+  else
+  {
+    logError("You are using the old connection format 'comp_name(end)'. Please update your input "
+             "file to the new one 'comp_name:end'.");
+  }
 }
 
 void

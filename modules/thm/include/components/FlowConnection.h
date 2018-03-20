@@ -29,8 +29,8 @@ public:
   /// Structure for holding data for a connection
   struct Connection
   {
-    /// String for the connection
-    const std::string _string;
+    /// The name of the boundary this connection is attached to
+    const BoundaryName _boundary_name;
 
     /// Name of the geometrical component in the connection
     const std::string _geometrical_component_name;
@@ -38,10 +38,10 @@ public:
     /// End type for the connection
     const EEndType _end_type;
 
-    Connection(const std::string & connection_string,
+    Connection(const BoundaryName & boundary_name,
                const std::string & geometrical_component_name,
                const EEndType & end_type)
-      : _string(connection_string),
+      : _boundary_name(boundary_name),
         _geometrical_component_name(geometrical_component_name),
         _end_type(end_type)
     {
@@ -105,9 +105,9 @@ protected:
    * Components using this interface must call this function on all of their
    * connection strings.
    *
-   * @param[in] connection_string   connection string to parse to create connection
+   * @param[in] boundary_name   The name of the boundary
    */
-  void addConnection(const std::string & connection_string);
+  void addConnection(const BoundaryName & boundary_name);
 
   /**
    * Checks that the number of connections is equal to the supplied value
@@ -163,18 +163,6 @@ protected:
   bool _phase_interaction;
 
 private:
-  /**
-   * Creates a nodeset/sideset name from the connected component name
-   *
-   * Generally, for boundaries, this will be the name of this component, but
-   * junctions will need to combine this component's name with the connected
-   * component's name.
-   *
-   * @param[in] comp_name   name of the connected component
-   * @returns nodeset/sideset name for a particular connection
-   */
-  virtual std::string createBoundaryName(const std::string & comp_name) const = 0;
-
   /// Vector of connections of this component
   std::vector<Connection> _connections;
 

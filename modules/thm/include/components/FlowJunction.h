@@ -18,9 +18,6 @@ public:
 
 protected:
   virtual void setupMesh() override;
-
-private:
-  virtual std::string createBoundaryName(const std::string & comp_name) const override;
 };
 
 #endif /* FLOWJUNCTION_H */
