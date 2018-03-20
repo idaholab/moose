@@ -1851,7 +1851,7 @@ FEProblemBase::addScalarKernel(const std::string & kernel_name,
   if (!_nl->hasScalarVariable(parameters.get<NonlinearVariableName>("variable")))
     mooseError(name, ": Cannot add ScalarKernel for variable ",
                parameters.get<NonlinearVariableName>("variable"),
-               ", it is not a Scalar variable!");
+               ", it is not a SCALAR variable!");
 
   _nl->addScalarKernel(kernel_name, name, parameters);
 }

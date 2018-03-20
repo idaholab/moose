@@ -635,7 +635,7 @@
   [./scalar_kernel_with_var]
     type = 'RunException'
     input = 'scalar_kernel_with_var.i'
-    expect_err = "Cannot add ScalarKernel for variable u, it is not a Scalar variable"
+    expect_err = "Cannot add ScalarKernel for variable u, it is not a SCALAR variable"
   [../]
   [./nodal_kernel_with_aux_var]
     type = 'RunException'
