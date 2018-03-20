@@ -1,21 +1,21 @@
-#ifndef HELMHOLTZTESTFUNC_H
-#define HELMHOLTZTESTFUNC_H
+#ifndef MMSTESTFUNC_H
+#define MMSTESTFUNC_H
 
 #include "Function.h"
 #include "FunctionInterface.h"
 
-class HelmholtzTestFunc;
+class MMSTestFunc;
 
 template <>
-InputParameters validParams<HelmholtzTestFunc>();
+InputParameters validParams<MMSTestFunc>();
 
 /**
- *  Function of analytical solution for use in convergence testing with coupled_helmholtz test file
+ *  Function of RHS for manufactured solution in spatial_constant_helmholtz test
  */
-class HelmholtzTestFunc : public Function, public FunctionInterface
+class MMSTestFunc : public Function, public FunctionInterface
 {
 public:
-  HelmholtzTestFunc(const InputParameters & parameters);
+  MMSTestFunc(const InputParameters & parameters);
 
   virtual Real value(Real t, const Point & p) override;
 
@@ -43,4 +43,4 @@ protected:
   Real _C2_imag;
 };
 
-#endif // HELMHOLTZTESTFUNC_H
+#endif // MMSTESTFUNC_H
