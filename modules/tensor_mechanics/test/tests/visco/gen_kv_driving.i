@@ -1,6 +1,6 @@
 # represents a unique Maxwell module with E = 10GPa and eta = 10 days with an imposed eigenstrain alpha = 0.001
 # the specimen is free (sigma = 0) but the eigenstrain contributes to the creep deformation
-# 
+#
 # the total strain to be expected is:
 #     epsilon = alpha * (1 + t / eta)
 #
