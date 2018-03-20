@@ -1,28 +1,43 @@
 [Mesh]
-  file = square.e
+  type = GeneratedMesh
+  dim = 2
+  nx = 2
+  ny = 2
 []
 
 [Variables]
-  active = 'u'
-
   [./u]
     order = FIRST
     family = LAGRANGE
   [../]
 []
 
-[Kernels]
-  active = 'diff'
+[AuxVariables]
+  [./v]
+  [../]
+[]
 
-  # Test missing required param (type in this case)
+[Kernels]
   [./diff]
+    type = Diffusion
+    variable = u
+  [../]
+  [./rea]
+    type = Reaction
     variable = u
   [../]
 []
 
-[BCs]
-  active = 'left right'
+[DGKernels]
+  [./nope]
+    type = DGDiffusion
+    variable = v
+    epsilon = -1
+    sigma = 6
+  [../]
+[]
 
+[BCs]
   [./left]
     type = DirichletBC
     variable = u
@@ -40,8 +55,7 @@
 
 [Executioner]
   type = Steady
-
-  solve_type = 'PJFNK'
+  solve_type = 'NEWTON'
 []
 
 [Outputs]

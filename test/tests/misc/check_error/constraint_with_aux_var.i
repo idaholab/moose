@@ -1,28 +1,33 @@
 [Mesh]
-  file = square.e
+  type = GeneratedMesh
+  dim = 2
+  nx = 2
+  ny = 2
 []
 
 [Variables]
-  active = 'u'
-
   [./u]
     order = FIRST
     family = LAGRANGE
   [../]
 []
 
-[Kernels]
-  active = 'diff'
+[AuxVariables]
+  [./v]
+  [../]
+[]
 
-  # Test missing required param (type in this case)
-  [./diff]
-    variable = u
+[Constraints]
+  [./nope]
+    type = CoupledTiedValueConstraint
+    variable = v
+    slave = 2
+    master = 3
+    master_variable = u
   [../]
 []
 
 [BCs]
-  active = 'left right'
-
   [./left]
     type = DirichletBC
     variable = u
@@ -40,8 +45,7 @@
 
 [Executioner]
   type = Steady
-
-  solve_type = 'PJFNK'
+  solve_type = 'NEWTON'
 []
 
 [Outputs]
