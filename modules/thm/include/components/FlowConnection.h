@@ -146,8 +146,6 @@ protected:
   std::vector<BoundaryName> _boundary_names;
   /// Outward normals associated with connected pipes
   std::vector<Real> _normals;
-  /// Connection strings
-  std::vector<std::string> _connection_strings;
 
   /// Convenience variable that stores model type
   RELAP7::FlowModelID _flow_model_id;
