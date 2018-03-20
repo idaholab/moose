@@ -2030,7 +2030,7 @@ FEProblemBase::addAuxScalarKernel(const std::string & kernel_name,
   if (!_aux->hasScalarVariable(parameters.get<AuxVariableName>("variable")))
     mooseError(name, ": Cannot add AuxScalarKernel for variable ",
                parameters.get<AuxVariableName>("variable"),
-               ", it is not a Scalar AuxVariable!");
+               ", it is not a SCALAR auxiliary variable!");
 
   _aux->addScalarKernel(kernel_name, name, parameters);
 }

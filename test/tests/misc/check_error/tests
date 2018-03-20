@@ -650,7 +650,7 @@
   [./scalar_aux_kernel_with_var]
     type = 'RunException'
     input = 'scalar_aux_kernel_with_var.i'
-    expect_err = "Cannot add AuxScalarKernel for variable u, it is not a Scalar AuxVariable"
+    expect_err = "Cannot add AuxScalarKernel for variable u, it is not a SCALAR auxiliary variable"
   [../]
   [./dirac_kernel_with_aux_var]
     type = 'RunException'
