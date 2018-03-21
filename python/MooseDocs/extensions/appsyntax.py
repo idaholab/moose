@@ -61,10 +61,12 @@ class AppSyntaxExtension(command.CommandExtension):
         config['disable'] = (False,
                              "Disable running the MOOSE application executable and simply use " \
                              "place holder text.")
-        config['hide'] = (None, "List or Dictionary of lists of syntax to hide.")
+        config['hide'] = (None, "Dictionary of syntax to hide.")
         config['remove'] = (None, "List or Dictionary of lists of syntax to remove.")
         config['visible'] = (set(['required', 'optional']),
                              "Parameter groups to show as un-collapsed.")
+        config['alias'] = (None, "List of Dictionary of lists of syntax aliases.")
+        config['allow-test-objects'] = (False, "Enable the test objects.")
 
         return config
 
@@ -81,7 +83,11 @@ class AppSyntaxExtension(command.CommandExtension):
                 LOG.error("Failed to locate a valid executable in %s.", self['executable'])
 
             try:
-                self._app_syntax = app_syntax(exe, remove=self['remove'], hide=self['hide'])
+                self._app_syntax = app_syntax(exe,
+                                              alias=self['alias'],
+                                              remove=self['remove'],
+                                              hide=self['hide'],
+                                              allow_test_objects=self['allow-test-objects'])
             except Exception as e: #pylint: disable=broad-except
                 msg = "Failed to load application executable from '%s', " \
                       "application syntax is being disabled:\n%s"
