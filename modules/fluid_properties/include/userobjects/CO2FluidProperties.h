@@ -290,8 +290,6 @@ public:
   virtual void
   h_dpT(Real pressure, Real temperature, Real & h, Real & dh_dp, Real & dh_dT) const override;
 
-  virtual Real beta(Real pressure, Real temperature) const override;
-
 protected:
   /// Molar mass of CO2 (kg/mol)
   const Real _Mco2 = 44.0098e-3;

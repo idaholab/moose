@@ -31,8 +31,6 @@ public:
 
   virtual Real molarMass() const override;
 
-  virtual Real beta(Real pressure, Real temperature) const override;
-
   virtual Real cp(Real pressure, Real temperature) const override;
 
   virtual Real cv(Real pressure, Real temperature) const override;
@@ -93,8 +91,6 @@ public:
 protected:
   /// molar mass
   const Real _molar_mass;
-  /// thermal expansion coefficient
-  const Real _thermal_expansion;
   /// specific heat at constant volume
   const Real _cv;
   /// specific heat at constant pressure

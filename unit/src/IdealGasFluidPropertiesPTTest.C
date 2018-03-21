@@ -15,7 +15,6 @@
 TEST_F(IdealGasFluidPropertiesPTTest, properties)
 {
   const Real molar_mass = 0.029;
-  const Real thermal_expansion = 3.43e-3;
   const Real cv = 718.0;
   const Real cp = 1005.0;
   const Real thermal_conductivity = 0.02568;
@@ -30,7 +29,7 @@ TEST_F(IdealGasFluidPropertiesPTTest, properties)
 
   p = 1.0e6;
   T = 300.0;
-  REL_TEST("beta", _fp->beta(p, T), thermal_expansion, tol);
+  REL_TEST("beta", _fp->beta(p, T), 1.0 / T, tol);
   REL_TEST("cp", _fp->cp(p, T), cp, tol);
   REL_TEST("cv", _fp->cv(p, T), cv, tol);
   REL_TEST("c", _fp->c(p, T), std::sqrt(cp * R * T / (cv * molar_mass)), tol);

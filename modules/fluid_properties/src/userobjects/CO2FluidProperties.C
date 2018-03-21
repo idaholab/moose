@@ -858,8 +858,3 @@ CO2FluidProperties::h_dpT(
               (2.0 + delta * d2pdd2 / dpdd) -
           _Rco2 * tau * tau * d2phiSW_dt2(delta, tau);
 }
-
-Real CO2FluidProperties::beta(Real /*pressure*/, Real /*temperature*/) const
-{
-  mooseError(name(), ": beta() not implemented yet");
-}
