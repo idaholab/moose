@@ -86,91 +86,80 @@ MMSTestFunc::value(Real t, const Point & p)
 
   Real _F = 0;
 
+  Real Re11 = 0;
+  Real Re12 = 0;
+  Real Im11 = 0;
+  Real Im12 = 0;
+  Real Re23 = 0;
+  Real Re24 = 0;
+  Real Im23 = 0;
+  Real Im24 = 0;
+
+  Real sinSinh = std::sin(_a_func * p(0)) * std::sinh(_b_func * p(0));
+  Real cosCosh = std::cos(_a_func * p(0)) * std::cosh(_b_func * p(0));
+  Real sinCosh = std::sin(_a_func * p(0)) * std::cosh(_b_func * p(0));
+  Real cosSinh = std::cos(_a_func * p(0)) * std::sinh(_b_func * p(0));
+
+  // Real _a_second_x = _a_secondDeriv * p(0);
+  // Real _b_second_x = _b_secondDeriv * p(0);
+  // Real _two_aPrime = 2 * _a_grad;
+  // Real _two_bPrime = 2 * _b_grad;
+  // Real _aPrimeSq = _a_grad * _a_grad * p(0) * p(0);
+  // Real _bPrimeSq = _b_grad * _b_grad * p(0) * p(0);
+  // Real _aPrime_a = 2 * _a_grad * _a_func * p(0);
+  // Real _aPrime_b = 2 * _a_grad * _b_func * p(0);
+  // Real _bPrime_a = 2 * _b_grad * _a_func * p(0);
+  // Real _bPrime_b = 2 * _b_grad * _b_func * p(0);
+
+  Real _a_second_plus_aPrime = _a_secondDeriv * p(0) + 2 * _a_grad;
+  Real _b_second_plus_bPrime = _b_secondDeriv * p(0) + 2 * _b_grad;
+
+  Real _abSq = _a_grad * _a_grad * p(0) * p(0) - _b_grad * _b_grad * p(0) * p(0) +
+               2 * _a_grad * _a_func * p(0) - 2 * _b_grad * _b_func * p(0);
+  Real _aPrime_bPrime = 2 * _a_grad * _b_grad * p(0) * p(0) + 2 * _a_grad * _b_func * p(0) +
+                        2 * _b_grad * _a_func * p(0);
+
   if (_component == "real")
   {
-    _F = _C1_real * (std::sin(_a_func * p(0)) * std::cosh(_b_func * p(0)) *
-                         (-_a_secondDeriv * p(0) - 2 * _a_grad) +
-                     std::cos(_a_func * p(0)) * std::sinh(_b_func * p(0)) *
-                         (_b_secondDeriv * p(0) + 2 * _b_grad) +
-                     std::cos(_a_func * p(0)) * std::cosh(_b_func * p(0)) *
-                         (-_a_grad * _a_grad * p(0) * p(0) + _b_grad * _b_grad * p(0) * p(0) -
-                          2 * _a_grad * _a_func * p(0) + 2 * _b_grad * _b_func * p(0)) +
-                     std::sin(_a_func * p(0)) * std::sinh(_b_func * p(0)) *
-                         (-2 * _a_grad * _b_grad * p(0) * p(0) - 2 * _a_grad * _b_func * p(0) -
-                          2 * _b_grad * _a_func * p(0))) +
-         _C1_imag * (std::cos(_a_func * p(0)) * std::sinh(_b_func * p(0)) *
-                         (_a_secondDeriv * p(0) + 2 * _a_grad) +
-                     std::sin(_a_func * p(0)) * std::cosh(_b_func * p(0)) *
-                         (_b_secondDeriv * p(0) + 2 * _b_grad) +
-                     std::sin(_a_func * p(0)) * std::sinh(_b_func * p(0)) *
-                         (-_a_grad * _a_grad * p(0) * p(0) + _b_grad * _b_grad * p(0) * p(0) -
-                          2 * _a_grad * _a_func * p(0) + 2 * _b_grad * _b_func * p(0)) +
-                     std::cos(_a_func * p(0)) * std::cosh(_b_func * p(0)) *
-                         (2 * _a_grad * _b_grad * p(0) * p(0) + 2 * _a_grad * _b_func * p(0) +
-                          2 * _b_grad * _a_func * p(0))) +
-         _C2_real * (std::cos(_a_func * p(0)) * std::cosh(_b_func * p(0)) *
-                         (_a_secondDeriv * p(0) + 2 * _a_grad) +
-                     std::sin(_a_func * p(0)) * std::sinh(_b_func * p(0)) *
-                         (_b_secondDeriv * p(0) + 2 * _b_grad) +
-                     std::sin(_a_func * p(0)) * std::cosh(_b_func * p(0)) *
-                         (-_a_grad * _a_grad * p(0) * p(0) + _b_grad * _b_grad * p(0) * p(0) -
-                          2 * _a_grad * _a_func * p(0) + 2 * _b_grad * _b_func * p(0)) +
-                     std::cos(_a_func * p(0)) * std::sinh(_b_func * p(0)) *
-                         (2 * _a_grad * _b_grad * p(0) * p(0) + 2 * _a_grad * _b_func * p(0) +
-                          2 * _b_grad * _a_func * p(0))) +
-         _C2_imag * (std::sin(_a_func * p(0)) * std::sinh(_b_func * p(0)) *
-                         (_a_secondDeriv * p(0) + 2 * _a_grad) +
-                     std::cos(_a_func * p(0)) * std::cosh(_b_func * p(0)) *
-                         (-_b_secondDeriv * p(0) - 2 * _b_grad) +
-                     std::cos(_a_func * p(0)) * std::sinh(_b_func * p(0)) *
-                         (_a_grad * _a_grad * p(0) * p(0) - _b_grad * _b_grad * p(0) * p(0) +
-                          2 * _a_grad * _a_func * p(0) - 2 * _b_grad * _b_func * p(0)) +
-                     std::sin(_a_func * p(0)) * std::cosh(_b_func * p(0)) *
-                         (2 * _a_grad * _b_grad * p(0) * p(0) + 2 * _a_grad * _b_func * p(0) +
-                          2 * _b_grad * _a_func * p(0)));
+
+    Re11 = _C1_real * (-sinCosh * _a_second_plus_aPrime + cosSinh * _b_second_plus_bPrime);
+
+    Re12 = _C1_real * (-cosCosh * _abSq - sinSinh * _aPrime_bPrime);
+
+    Im11 = _C1_imag * (cosSinh * _a_second_plus_aPrime + sinCosh * _b_second_plus_bPrime);
+
+    Im12 = _C1_imag * (-sinSinh * _abSq + cosCosh * _aPrime_bPrime);
+
+    Re23 = _C2_real * (cosCosh * _a_second_plus_aPrime + sinSinh * _b_second_plus_bPrime);
+
+    Re24 = _C2_real * (-sinCosh * _abSq + cosSinh * _aPrime_bPrime);
+
+    Im23 = _C2_imag * (sinSinh * _a_second_plus_aPrime - cosCosh * _a_second_plus_aPrime);
+
+    Im24 = _C2_imag * (cosSinh * _abSq + sinCosh * _aPrime_bPrime);
+
+    _F = Re11 + Re12 + Im11 + Im12 + Re23 + Re24 + Im23 + Im24;
   }
   else
   {
-    _F = _C1_real * (std::cos(_a_func * p(0)) * std::sinh(_b_func * p(0)) *
-                         (-_a_secondDeriv * p(0) - 2 * _a_grad) +
-                     std::sin(_a_func * p(0)) * std::cosh(_b_func * p(0)) *
-                         (-_b_secondDeriv * p(0) - 2 * _b_grad) +
-                     std::sin(_a_func * p(0)) * std::sinh(_b_func * p(0)) *
-                         (_a_grad * _a_grad * p(0) * p(0) - _b_grad * _b_grad * p(0) * p(0) +
-                          2 * _a_grad * _a_func * p(0) - 2 * _b_grad * _b_func * p(0)) +
-                     std::cos(_a_func * p(0)) * std::cosh(_b_func * p(0)) *
-                         (-2 * _a_grad * _b_grad * p(0) * p(0) - 2 * _a_grad * _b_func * p(0) -
-                          2 * _b_grad * _a_func * p(0))) +
-         _C1_imag * (std::sin(_a_func * p(0)) * std::cosh(_b_func * p(0)) *
-                         (-_a_secondDeriv * p(0) - 2 * _a_grad) +
-                     std::cos(_a_func * p(0)) * std::sinh(_b_func * p(0)) *
-                         (_b_secondDeriv * p(0) + 2 * _b_grad) +
-                     std::cos(_a_func * p(0)) * std::cosh(_b_func * p(0)) *
-                         (-_a_grad * _a_grad * p(0) * p(0) + _b_grad * _b_grad * p(0) * p(0) -
-                          2 * _a_grad * _a_func * p(0) + 2 * _b_grad * _b_func * p(0)) +
-                     std::sin(_a_func * p(0)) * std::sinh(_b_func * p(0)) *
-                         (-2 * _a_grad * _b_grad * p(0) * p(0) - 2 * _a_grad * _b_func * p(0) -
-                          2 * _b_grad * _a_func * p(0))) +
-         _C2_real * (std::sin(_a_func * p(0)) * std::sinh(_b_func * p(0)) *
-                         (-_a_secondDeriv * p(0) - 2 * _a_grad) +
-                     std::cos(_a_func * p(0)) * std::cosh(_b_func * p(0)) *
-                         (_b_secondDeriv * p(0) + 2 * _b_grad) +
-                     std::cos(_a_func * p(0)) * std::sinh(_b_func * p(0)) *
-                         (-_a_grad * _a_grad * p(0) * p(0) + _b_grad * _b_grad * p(0) * p(0) -
-                          2 * _a_grad * _a_func * p(0) + 2 * _b_grad * _b_func * p(0)) +
-                     std::sin(_a_func * p(0)) * std::cosh(_b_func * p(0)) *
-                         (-2 * _a_grad * _b_grad * p(0) * p(0) - 2 * _a_grad * _b_func * p(0) -
-                          2 * _b_grad * _a_func * p(0))) +
-         _C2_imag * (std::cos(_a_func * p(0)) * std::cosh(_b_func * p(0)) *
-                         (_a_secondDeriv * p(0) + 2 * _a_grad) +
-                     std::sin(_a_func * p(0)) * std::sinh(_b_func * p(0)) *
-                         (_b_secondDeriv * p(0) + 2 * _b_grad) +
-                     std::sin(_a_func * p(0)) * std::cosh(_b_func * p(0)) *
-                         (-_a_grad * _a_grad * p(0) * p(0) + _b_grad * _b_grad * p(0) * p(0) -
-                          2 * _a_grad * _a_func * p(0) + 2 * _b_grad * _b_func * p(0)) +
-                     std::cos(_a_func * p(0)) * std::sinh(_b_func * p(0)) *
-                         (2 * _a_grad * _b_grad * p(0) * p(0) + 2 * _a_grad * _b_func * p(0) +
-                          2 * _b_grad * _a_func * p(0)));
+
+    Re11 = _C1_real * (-cosSinh * _a_second_plus_aPrime - sinCosh * _b_second_plus_bPrime);
+
+    Re12 = _C1_real * (sinSinh * _abSq - cosCosh * _aPrime_bPrime);
+
+    Im11 = _C1_imag * (-sinCosh * _a_second_plus_aPrime + cosSinh * _b_second_plus_bPrime);
+
+    Im12 = _C1_imag * (-cosCosh * _abSq - sinSinh * _aPrime_bPrime);
+
+    Re23 = _C2_real * (-sinSinh * _a_second_plus_aPrime + cosCosh * _b_second_plus_bPrime);
+
+    Re24 = _C2_real * (-cosSinh * _abSq - sinCosh * _aPrime_bPrime);
+
+    Im23 = _C2_imag * (cosCosh * _a_second_plus_aPrime + sinSinh * _b_second_plus_bPrime);
+
+    Im24 = _C2_imag * (-sinCosh * _abSq + cosSinh * _aPrime_bPrime);
+
+    _F = Re11 + Re12 + Im11 + Im12 + Re23 + Re24 + Im23 + Im24;
   }
 
   return _F;
