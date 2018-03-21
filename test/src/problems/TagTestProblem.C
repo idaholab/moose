@@ -10,6 +10,8 @@
 #include "TagTestProblem.h"
 #include "NonlinearSystem.h"
 
+registerMooseObject("MooseTestApp", TagTestProblem);
+
 template <>
 InputParameters
 validParams<TagTestProblem>()
