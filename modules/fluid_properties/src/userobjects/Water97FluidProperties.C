@@ -501,31 +501,22 @@ Water97FluidProperties::mu_dpT(
 Real
 Water97FluidProperties::mu_from_rho_T(Real density, Real temperature) const
 {
-  // Constants from Release on the IAPWS Formulation 2008 for the Viscosity of
-  // Ordinary Water Substance
-  const std::vector<int> I{0, 1, 2, 3, 0, 1, 2, 3, 5, 0, 1, 2, 3, 4, 0, 1, 0, 3, 4, 3, 5};
-  const std::vector<int> J{0, 0, 0, 0, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 3, 3, 4, 4, 5, 6, 6};
-  const std::vector<Real> H0{1.67752, 2.20462, 0.6366564, -0.241605};
-  const std::vector<Real> H1{
-      5.20094e-1, 8.50895e-2, -1.08374,    -2.89555e-1, 2.22531e-1,  9.99115e-1,  1.88797,
-      1.26613,    1.20573e-1, -2.81378e-1, -9.06851e-1, -7.72479e-1, -4.89837e-1, -2.57040e-1,
-      1.61913e-1, 2.57399e-1, -3.25372e-2, 6.98452e-2,  8.72102e-3,  -4.35673e-3, -5.93264e-4};
-
   Real mu_star = 1.e-6;
   Real rhobar = density / _rho_critical;
   Real Tbar = temperature / _T_critical;
 
   // Viscosity in limit of zero density
   Real sum0 = 0.0;
-  for (std::size_t i = 0; i < H0.size(); ++i)
-    sum0 += H0[i] / MathUtils::pow(Tbar, i);
+  for (std::size_t i = 0; i < _mu_H0.size(); ++i)
+    sum0 += _mu_H0[i] / MathUtils::pow(Tbar, i);
 
   Real mu0 = 100.0 * std::sqrt(Tbar) / sum0;
 
   // Residual component due to finite density
   Real sum1 = 0.0;
-  for (std::size_t i = 0; i < H1.size(); ++i)
-    sum1 += MathUtils::pow(1.0 / Tbar - 1.0, I[i]) * H1[i] * MathUtils::pow(rhobar - 1.0, J[i]);
+  for (std::size_t i = 0; i < _mu_H1.size(); ++i)
+    sum1 += MathUtils::pow(1.0 / Tbar - 1.0, _mu_I[i]) * _mu_H1[i] *
+            MathUtils::pow(rhobar - 1.0, _mu_J[i]);
 
   Real mu1 = std::exp(rhobar * sum1);
 
@@ -541,16 +532,6 @@ Water97FluidProperties::mu_drhoT_from_rho_T(Real density,
                                             Real & dmu_drho,
                                             Real & dmu_dT) const
 {
-  // Constants from Release on the IAPWS Formulation 2008 for the Viscosity of
-  // Ordinary Water Substance
-  const std::vector<int> I{0, 1, 2, 3, 0, 1, 2, 3, 5, 0, 1, 2, 3, 4, 0, 1, 0, 3, 4, 3, 5};
-  const std::vector<int> J{0, 0, 0, 0, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 3, 3, 4, 4, 5, 6, 6};
-  const std::vector<Real> H0{1.67752, 2.20462, 0.6366564, -0.241605};
-  const std::vector<Real> H1{
-      5.20094e-1, 8.50895e-2, -1.08374,    -2.89555e-1, 2.22531e-1,  9.99115e-1,  1.88797,
-      1.26613,    1.20573e-1, -2.81378e-1, -9.06851e-1, -7.72479e-1, -4.89837e-1, -2.57040e-1,
-      1.61913e-1, 2.57399e-1, -3.25372e-2, 6.98452e-2,  8.72102e-3,  -4.35673e-3, -5.93264e-4};
-
   Real mu_star = 1.0e-6;
   Real rhobar = density / _rho_critical;
   Real Tbar = temperature / _T_critical;
@@ -559,10 +540,10 @@ Water97FluidProperties::mu_drhoT_from_rho_T(Real density,
 
   // Limit of zero density. Derivative wrt rho is 0
   Real sum0 = 0.0, dsum0_dTbar = 0.0;
-  for (std::size_t i = 0; i < H0.size(); ++i)
+  for (std::size_t i = 0; i < _mu_H0.size(); ++i)
   {
-    sum0 += H0[i] / MathUtils::pow(Tbar, i);
-    dsum0_dTbar -= i * H0[i] / MathUtils::pow(Tbar, i + 1);
+    sum0 += _mu_H0[i] / MathUtils::pow(Tbar, i);
+    dsum0_dTbar -= i * _mu_H0[i] / MathUtils::pow(Tbar, i + 1);
   }
 
   Real mu0 = 100.0 * std::sqrt(Tbar) / sum0;
@@ -571,13 +552,14 @@ Water97FluidProperties::mu_drhoT_from_rho_T(Real density,
 
   // Residual component due to finite density
   Real sum1 = 0.0, dsum1_drho = 0.0, dsum1_dTbar = 0.0;
-  for (std::size_t i = 0; i < H1.size(); ++i)
+  for (std::size_t i = 0; i < _mu_H1.size(); ++i)
   {
-    sum1 += MathUtils::pow(1.0 / Tbar - 1.0, I[i]) * H1[i] * MathUtils::pow(rhobar - 1.0, J[i]);
-    dsum1_drho += MathUtils::pow(1.0 / Tbar - 1.0, I[i]) * H1[i] * J[i] *
-                  MathUtils::pow(rhobar - 1.0, J[i] - 1);
-    dsum1_dTbar -= I[i] * MathUtils::pow(1.0 / Tbar - 1.0, I[i] - 1) * H1[i] *
-                   MathUtils::pow(rhobar - 1.0, J[i]) / Tbar / Tbar;
+    sum1 += MathUtils::pow(1.0 / Tbar - 1.0, _mu_I[i]) * _mu_H1[i] *
+            MathUtils::pow(rhobar - 1.0, _mu_J[i]);
+    dsum1_drho += MathUtils::pow(1.0 / Tbar - 1.0, _mu_I[i]) * _mu_H1[i] * _mu_J[i] *
+                  MathUtils::pow(rhobar - 1.0, _mu_J[i] - 1);
+    dsum1_dTbar -= _mu_I[i] * MathUtils::pow(1.0 / Tbar - 1.0, _mu_I[i] - 1) * _mu_H1[i] *
+                   MathUtils::pow(rhobar - 1.0, _mu_J[i]) / Tbar / Tbar;
   }
 
   Real mu1 = std::exp(rhobar * sum1);
@@ -634,13 +616,12 @@ Water97FluidProperties::k_from_rho_T(Real density, Real temperature) const
   // different to the critical values used in IAPWS-IF97
   Real Tbar = temperature / 647.26;
   Real rhobar = density / 317.7;
-  std::vector<Real> a{0.0102811, 0.0299621, 0.0156146, -0.00422464};
 
   // Ideal gas component
   Real sum0 = 0.0;
 
-  for (std::size_t i = 0; i < a.size(); ++i)
-    sum0 += a[i] * MathUtils::pow(Tbar, i);
+  for (std::size_t i = 0; i < _k_a.size(); ++i)
+    sum0 += _k_a[i] * MathUtils::pow(Tbar, i);
 
   Real lambda0 = std::sqrt(Tbar) * sum0;
 
@@ -817,24 +798,12 @@ Water97FluidProperties::vaporPressure(Real temperature) const
     throw MooseException(name() + ": vaporPressure(): Temperature is outside range 273.15 K <= T "
                                   "<= 647.096 K");
 
-  // Constants for region 4 (the saturation curve up to the critical point)
-  const std::vector<Real> n4{0.11670521452767e4,
-                             -0.72421316703206e6,
-                             -0.17073846940092e2,
-                             0.12020824702470e5,
-                             -0.32325550322333e7,
-                             0.14915108613530e2,
-                             -0.48232657361591e4,
-                             0.40511340542057e6,
-                             -0.238555575678490,
-                             0.65017534844798e3};
-
   Real theta, theta2, a, b, c, p;
-  theta = temperature + n4[8] / (temperature - n4[9]);
+  theta = temperature + _n4[8] / (temperature - _n4[9]);
   theta2 = theta * theta;
-  a = theta2 + n4[0] * theta + n4[1];
-  b = n4[2] * theta2 + n4[3] * theta + n4[4];
-  c = n4[5] * theta2 + n4[6] * theta + n4[7];
+  a = theta2 + _n4[0] * theta + _n4[1];
+  b = _n4[2] * theta2 + _n4[3] * theta + _n4[4];
+  c = _n4[5] * theta2 + _n4[6] * theta + _n4[7];
   p = Utility::pow<4>(2.0 * c / (-b + std::sqrt(b * b - 4.0 * a * c)));
 
   return p * 1.e6;
@@ -849,30 +818,18 @@ Water97FluidProperties::vaporPressure_dT(Real temperature, Real & psat, Real & d
     throw MooseException(name() + ": vaporPressure_dT(): Temperature is outside range 273.15 K <= "
                                   "T <= 647.096 K");
 
-  // Constants for region 4 (the saturation curve up to the critical point)
-  const std::vector<Real> n4{0.11670521452767e4,
-                             -0.72421316703206e6,
-                             -0.17073846940092e2,
-                             0.12020824702470e5,
-                             -0.32325550322333e7,
-                             0.14915108613530e2,
-                             -0.48232657361591e4,
-                             0.40511340542057e6,
-                             -0.238555575678490,
-                             0.65017534844798e3};
-
   Real theta, dtheta_dT, theta2, a, b, c, da_dtheta, db_dtheta, dc_dtheta;
-  theta = temperature + n4[8] / (temperature - n4[9]);
-  dtheta_dT = 1.0 - n4[8] / (temperature - n4[9]) / (temperature - n4[9]);
+  theta = temperature + _n4[8] / (temperature - _n4[9]);
+  dtheta_dT = 1.0 - _n4[8] / (temperature - _n4[9]) / (temperature - _n4[9]);
   theta2 = theta * theta;
 
-  a = theta2 + n4[0] * theta + n4[1];
-  b = n4[2] * theta2 + n4[3] * theta + n4[4];
-  c = n4[5] * theta2 + n4[6] * theta + n4[7];
+  a = theta2 + _n4[0] * theta + _n4[1];
+  b = _n4[2] * theta2 + _n4[3] * theta + _n4[4];
+  c = _n4[5] * theta2 + _n4[6] * theta + _n4[7];
 
-  da_dtheta = 2.0 * theta + n4[0];
-  db_dtheta = 2.0 * n4[2] * theta + n4[3];
-  dc_dtheta = 2.0 * n4[5] * theta + n4[6];
+  da_dtheta = 2.0 * theta + _n4[0];
+  db_dtheta = 2.0 * _n4[2] * theta + _n4[3];
+  dc_dtheta = 2.0 * _n4[5] * theta + _n4[6];
 
   Real denominator = -b + std::sqrt(b * b - 4.0 * a * c);
 
@@ -896,27 +853,15 @@ Water97FluidProperties::vaporTemperature(Real pressure) const
     throw MooseException(name() + ": vaporTemperature(): Pressure is outside range 611.213 Pa <= "
                                   "p <= 22.064 MPa");
 
-  // Constants for region 4 (the saturation curve up to the critical point)
-  const std::vector<Real> n4{0.11670521452767e4,
-                             -0.72421316703206e6,
-                             -0.17073846940092e2,
-                             0.12020824702470e5,
-                             -0.32325550322333e7,
-                             0.14915108613530e2,
-                             -0.48232657361591e4,
-                             0.40511340542057e6,
-                             -0.238555575678490,
-                             0.65017534844798e3};
-
   Real beta, beta2, e, f, g, d;
   beta = std::pow(pressure / 1.e6, 0.25);
   beta2 = beta * beta;
-  e = beta2 + n4[2] * beta + n4[5];
-  f = n4[0] * beta2 + n4[3] * beta + n4[6];
-  g = n4[1] * beta2 + n4[4] * beta + n4[7];
+  e = beta2 + _n4[2] * beta + _n4[5];
+  f = _n4[0] * beta2 + _n4[3] * beta + _n4[6];
+  g = _n4[1] * beta2 + _n4[4] * beta + _n4[7];
   d = 2.0 * g / (-f - std::sqrt(f * f - 4.0 * e * g));
 
-  return (n4[9] + d - std::sqrt((n4[9] + d) * (n4[9] + d) - 4.0 * (n4[8] + n4[9] * d))) / 2.0;
+  return (_n4[9] + d - std::sqrt((_n4[9] + d) * (_n4[9] + d) - 4.0 * (_n4[8] + _n4[9] * d))) / 2.0;
 }
 
 Real
@@ -928,14 +873,7 @@ Water97FluidProperties::b23p(Real temperature) const
     throw MooseException(name() +
                          ": b23p(): Temperature is outside range of 623.15 K <= T <= 863.15 K");
 
-  // Constants for the boundary between regions 2 and 3
-  const std::vector<Real> n23{0.34805185628969e3,
-                              -0.11671859879975e1,
-                              0.10192970039326e-2,
-                              0.57254459862746e3,
-                              0.13918839778870e2};
-
-  return (n23[0] + n23[1] * temperature + n23[2] * temperature * temperature) * 1.e6;
+  return (_n23[0] + _n23[1] * temperature + _n23[2] * temperature * temperature) * 1.e6;
 }
 
 Real
@@ -946,14 +884,7 @@ Water97FluidProperties::b23T(Real pressure) const
   if (pressure < 16.529e6 || pressure > 100.0e6)
     throw MooseException(name() + ": b23T(): Pressure is outside range 16.529 MPa <= p <= 100 MPa");
 
-  // Constants for the boundary between regions 2 and 3
-  const std::vector<Real> n23{0.34805185628969e3,
-                              -0.11671859879975e1,
-                              0.10192970039326e-2,
-                              0.57254459862746e3,
-                              0.13918839778870e2};
-
-  return n23[3] + std::sqrt((pressure / 1.e6 - n23[4]) / n23[2]);
+  return _n23[3] + std::sqrt((pressure / 1.e6 - _n23[4]) / _n23[2]);
 }
 
 unsigned int
@@ -1514,55 +1445,6 @@ Water97FluidProperties::tempXY(Real pressure, subregionEnum xy) const
 {
   Real pi = pressure / 1.0e6;
 
-  const std::vector<std::vector<int>> I{{0, 1, 2, -1, -2},
-                                        {0, 1, 2, 3},
-                                        {0, 1, 2, 3, 4},
-                                        {0, 1, 2, 3, 4},
-                                        {0, 1, 2, 3, 4},
-                                        {0, 1, 2, 3},
-                                        {0, 1, 2, -1, -2},
-                                        {0, 1, 2, 3},
-                                        {0, 1, 2, 3},
-                                        {0, 1, 2, 3, 4},
-                                        {0, 1, 2, -1, -2}};
-
-  const std::vector<std::vector<Real>> n{
-      {0.154793642129415e4,
-       -0.187661219490113e3,
-       0.213144632222113e2,
-       -0.191887498864292e4,
-       0.918419702359447e3},
-      {0.585276966696349e3, 0.278233532206915e1, -0.127283549295878e-1, 0.159090746562729e-3},
-      {-0.249284240900418e5,
-       0.428143584791546e4,
-       -0.269029173140130e3,
-       0.751608051114157e1,
-       -0.787105249910383e-1},
-      {0.584814781649163e3,
-       -0.616179320924617,
-       0.260763050899562,
-       -0.587071076864459e-2,
-       0.515308185433082e-4},
-      {0.617229772068439e3,
-       -0.770600270141675e1,
-       0.697072596851896,
-       -0.157391839848015e-1,
-       0.137897492684194e-3},
-      {0.535339483742384e3, 0.761978122720128e1, -0.158365725441648, 0.192871054508108e-2},
-      {0.969461372400213e3,
-       -0.332500170441278e3,
-       0.642859598466067e2,
-       0.773845935768222e3,
-       -0.152313732937084e4},
-      {0.565603648239126e3, 0.529062258221222e1, -0.102020639611016, 0.122240301070145e-2},
-      {0.584561202520006e3, -0.102961025163669e1, 0.243293362700452, -0.294905044740799e-2},
-      {0.528199646263062e3, 0.890579602135307e1, -0.222814134903755, 0.286791682263697e-2},
-      {0.728052609145380e1,
-       0.973505869861952e2,
-       0.147370491183191e2,
-       0.329196213998375e3,
-       0.873371668682417e3}};
-
   // Choose the constants based on the string xy
   unsigned int row;
 
@@ -1608,13 +1490,13 @@ Water97FluidProperties::tempXY(Real pressure, subregionEnum xy) const
   Real sum = 0.0;
 
   if (xy == AB || xy == OP || xy == WX)
-    for (std::size_t i = 0; i < n[row].size(); ++i)
-      sum += n[row][i] * MathUtils::pow(std::log(pi), I[row][i]);
+    for (std::size_t i = 0; i < _tempXY_n[row].size(); ++i)
+      sum += _tempXY_n[row][i] * MathUtils::pow(std::log(pi), _tempXY_I[row][i]);
   else if (xy == EF)
     sum += 3.727888004 * (pi - _p_critical / 1.0e6) + _T_critical;
   else
-    for (std::size_t i = 0; i < n[row].size(); ++i)
-      sum += n[row][i] * MathUtils::pow(pi, I[row][i]);
+    for (std::size_t i = 0; i < _tempXY_n[row].size(); ++i)
+      sum += _tempXY_n[row][i] * MathUtils::pow(pi, _tempXY_I[row][i]);
 
   return sum;
 }
