@@ -28,7 +28,7 @@ REGISTER_PAIRS = [('Postprocessor', 'UserObjects/*'),
 
 def app_syntax(exe, remove=None, allow_test_objects=False, hide=None, alias=None):
     """
-    Creates a tree structaure representing the MooseApp syntax for the given executable.
+    Creates a tree structure representing the MooseApp syntax for the given executable.
     """
     common.check_type('exe', exe, str)
     common.check_type('remove', remove, (type(None), dict, list, set))

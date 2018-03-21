@@ -361,11 +361,14 @@ class MaterializeRenderer(HTMLRenderer):
             self.__navigation = navigation
             for key1, value1 in navigation.iteritems():
                 for key2, value2 in value1.iteritems():
-                    node = root_page.findall(value2)
-                    if node is None:
-                        msg = 'Failed to locate navigation item: {}.'
-                        raise exceptions.MooseDocsException(msg, value2)
-                    self.__navigation[key1][key2] = node[0]
+                    if value2.startswith('http'):
+                        self.__navigation[key1][key2] = value2
+                    else:
+                        node = root_page.findall(value2)
+                        if node is None:
+                            msg = 'Failed to locate navigation item: {}.'
+                            raise exceptions.MooseDocsException(msg, value2)
+                        self.__navigation[key1][key2] = node[0]
 
         # Build the links
         top_ul = html.Tag(nav, 'ul', id="nav-mobile", class_="right hide-on-med-and-down")
@@ -381,8 +384,11 @@ class MaterializeRenderer(HTMLRenderer):
             bot_ul = html.Tag(nav, 'ul', id_=id_, class_='dropdown-content')
             for key2, node in value1.iteritems():
                 bot_li = html.Tag(bot_ul, 'li')
-                href = node.relativeDestination(root_page)
-                a = html.Tag(bot_li, 'a', href=href, string=unicode(key2))
+                if isinstance(node, str):
+                    a = html.Tag(bot_li, 'a', href=node, string=unicode(key2))
+                else:
+                    href = node.relativeDestination(root_page)
+                    a = html.Tag(bot_li, 'a', href=href, string=unicode(key2))
 
     def _addName(self, config, nav, root_page): #pylint: disable=unused-argument
         """
