@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "RankTwoTensorTest.h"
+#include "RankTwoScalarTools.h"
 
 TEST_F(RankTwoTensorTest, L2norm)
 {
@@ -493,4 +494,27 @@ TEST_F(RankTwoTensorTest, initialContraction)
   const RankTwoTensor ic = _unsymmetric1.initialContraction(a);
   const RankTwoTensor ic1 = a.transposeMajor() * _unsymmetric1;
   EXPECT_NEAR(0.0, (ic - ic1).L2norm(), 0.0001);
+}
+
+TEST_F(RankTwoTensorTest, ErrorComputingEV)
+{
+  // generate tensor that does not allow computation of eigenvectors
+  // and fails because of nan entries
+
+  RankTwoTensor a;
+  a(0, 0) = a(0, 1) = a(0, 2) = std::numeric_limits<double>::quiet_NaN();
+  a(1, 0) = a(1, 1) = a(1, 2) = a(0, 0);
+  a(2, 0) = a(2, 1) = a(2, 2) = a(0, 0);
+
+  try
+  {
+    Point p(1, 0, 0);
+    RankTwoScalarTools::calcEigenValuesEigenVectors(a, 0, p);
+    FAIL();
+  }
+  catch (const std::exception & err)
+  {
+    std::size_t pos = std::string(err.what()).find("In computing the eigenvalues and eigenvectors");
+    ASSERT_TRUE(pos != std::string::npos);
+  }
 }
