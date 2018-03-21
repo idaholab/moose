@@ -83,7 +83,7 @@ be hosted at [http://127.0.0.1:8000](http://127.0.0.1:8000).
 
 ```bash
 cd ~/projects/moose/modules/doc
-./moosedocs build --serve
+./moosedocs.py build --serve
 ```
 
 Once the server is running the markdown files within the repository may be modified, when the

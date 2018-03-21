@@ -28,7 +28,7 @@ def command_line_options(subparser, parent):
                         help="Create a local live server.")
     parser.add_argument('--dump', action='store_true',
                         help="Show page tree to the screen.")
-    parser.add_argument('--grammer', action='store_true',
+    parser.add_argument('--grammar', action='store_true',
                         help='Show the lexer components in order.')
     parser.add_argument('--num-threads', '-j', type=int, default=multiprocessing.cpu_count(),
                         help="Specify the number of threads to build pages with.")
