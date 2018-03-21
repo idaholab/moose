@@ -1243,6 +1243,20 @@ Parser::extractParams(const std::string & prefix, InputParameters & p)
   }
 }
 
+template <typename T>
+bool
+toBool(const std::string & /*s*/, T & /*val*/)
+{
+  return false;
+}
+
+template <>
+bool
+toBool<bool>(const std::string & s, bool & val)
+{
+  return hit::toBool(s, &val);
+}
+
 template <typename T, typename Base>
 void
 Parser::setScalarParameter(const std::string & full_name,
@@ -1283,6 +1297,18 @@ Parser::setScalarParameter(const std::string & full_name,
                             strval) +
                    "\n";
       }
+    }
+    else if (t == typeid(bool))
+    {
+      bool isbool = toBool(strval, param->set());
+      if (!isbool)
+        _errmsg += errormsg(_input_filename,
+                            _root->find(full_name),
+                            "invalid boolean syntax for parameter: ",
+                            full_name,
+                            "=",
+                            strval) +
+                   "\n";
     }
     else
       throw;
