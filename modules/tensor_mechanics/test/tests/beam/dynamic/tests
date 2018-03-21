@@ -31,4 +31,9 @@
     exodiff = 'dyn_euler_small_added_mass_inertia_damping_out.e'
     prereq = 'dyn_euler_added_mass_inertia_damping'
   [../]
+  [./dyn_euler_added_mass2]
+    type = 'CSVDiff'
+    input = 'dyn_euler_small_added_mass2.i'
+    csvdiff = 'dyn_euler_small_added_mass2_out.csv'
+  [../]
 []

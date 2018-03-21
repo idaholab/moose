@@ -41,4 +41,19 @@
     exodiff = 'euler_finite_rot_y_out.e'
     prereq = euler_finite_rot_y
   [../]
+  [./euler_pipe_axial_disp]
+    type = 'CSVDiff'
+    input = 'euler_pipe_axial_disp.i'
+    csvdiff = 'euler_pipe_axial_disp_out.csv'
+  [../]
+  [./euler_pipe_axial_force]
+    type = 'CSVDiff'
+    input = 'euler_pipe_axial_force.i'
+    csvdiff = 'euler_pipe_axial_force_out.csv'
+  [../]
+  [./euler_pipe_bend]
+    type = 'CSVDiff'
+    input = 'euler_pipe_bend.i'
+    csvdiff = 'euler_pipe_bend_out.csv'
+  [../]
 []

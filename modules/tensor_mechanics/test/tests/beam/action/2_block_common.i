@@ -136,6 +136,6 @@
 []
 
 [Outputs]
-  file_base = '2_block_common_out'
+  file_base = '2_block_out'
   exodus = true
 []

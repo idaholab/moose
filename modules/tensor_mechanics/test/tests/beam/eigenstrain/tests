@@ -20,4 +20,22 @@
     exodiff = 'eigenstrain_from_csv_out.e'
     prereq = 'eigenstrain_from_csv'
   [../]
+  [./csv_interp_test1]
+    type = 'RunException'
+    input = 'eigenstrain_from_csv.i'
+    cli_args = 'UserObjects/disp_uo/variable_vectors=""'
+    expect_err = 'CSVInterpolator: Please provide a non-empty list of variable vectors.'
+  [../]
+  [./eigenstrain_from_csv_test1]
+    type = 'RunException'
+    input = 'eigenstrain_from_csv.i'
+    cli_args = 'Materials/thermal/to_component=3'
+    expect_err = 'ComputeEigenstrainBeamFromCSVInterpolator: to_component should be between 0 and 2'
+  [../]
+  [./eigenstrain_from_csv_test2]
+    type = 'RunException'
+    input = 'eigenstrain_from_csv.i'
+    cli_args = 'Materials/thermal/position_vector=1. 2. 3.'
+    expect_err = 'ComputeEigenstrainBeamFromCSVInterpolator: position_vector should contain 2 entries.'
+  [../]
 []

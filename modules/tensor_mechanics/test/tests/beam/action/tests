@@ -1,13 +1,30 @@
 [Tests]
   [./2_block_action]
-    test = Exodiff
+    type = 'Exodiff'
     input = '2_block.i'
     exodiff = '2_block_out.e'
   [../]
   [./2_block_common_action]
-    test = Exodiff
+    type = 'Exodiff'
     input = '2_block_common.i'
     exodiff = '2_block_out.e'
     prereq = '2_block_action'
+  [../]
+  [./beam_action_test1]
+    type = 'RunException'
+    input = 'beam_action_chk.i'
+    expect_err = 'LineElementAction: A vector of displacement variable names should be provided as'
+  [../]
+  [./beam_action_test2]
+    type = 'RunException'
+    input = 'beam_action_chk.i'
+    cli_args = 'Modules/LineElement/block_1/displacements=""'
+    expect_err = 'LineElementAction: Rotational variable names should be provided for beam elements using `rotations` parameter'
+  [../]
+  [./beam_action_test3]
+    type = 'RunException'
+    input = 'beam_action_chk.i'
+    cli_args = 'Modules/LineElement/block_1/displacements="disp_x" Modules/LineElement/block_1/rotations=""'
+    expect_err = 'LineElementAction: Number of rotational and displacement variable names provided as input for beam should be same.'
   [../]
 []
