@@ -74,7 +74,8 @@ LinearViscoelasticityBase::LinearViscoelasticityBase(const InputParameters & par
                                               _base_name + "springs_elasticity_tensors_inv")
                                         : nullptr),
     _dashpot_viscosities(declareProperty<std::vector<Real>>(_base_name + "dashpot_viscosities")),
-    _dashpot_viscosities_old(getMaterialPropertyOld<std::vector<Real>>(_base_name + "dashpot_viscosities")),
+    _dashpot_viscosities_old(
+        getMaterialPropertyOld<std::vector<Real>>(_base_name + "dashpot_viscosities")),
     _viscous_strains(declareProperty<std::vector<RankTwoTensor>>(_base_name + "viscous_strains")),
     _viscous_strains_old(
         getMaterialPropertyOld<std::vector<RankTwoTensor>>(_base_name + "viscous_strains")),
