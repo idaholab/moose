@@ -1,8 +1,11 @@
-# represents a unique Maxwell module with E = 10GPa and eta = 10 days with an imposed eigenstrain alpha = 0.001
-# the specimen is free (sigma = 0) but the eigenstrain contributes to the creep deformation
+# Represents a unique Maxwell module with E = 10GPa and eta = 10 days with an imposed eigenstrain alpha = 0.001.
+# The behavior is set up so that the creep strain is driven by both the elastic stress and the internal
+# stress induced by the eigenstrain (E * alpha).
 #
-# the total strain to be expected is:
+# In this test, the specimen is free of external stress (sigma = 0) so the creep deformation only derives from
+# the eigenstrain. The total strain to be expected is:
 #     epsilon = alpha * (1 + t / eta)
+# Both the stress and the elastic strain are 0.
 #
 [Mesh]
   type = GeneratedMesh

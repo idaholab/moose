@@ -28,7 +28,6 @@ GeneralizedKelvinVoigtBase::GeneralizedKelvinVoigtBase(const InputParameters & p
     _springs_elasticity_tensors_inv_old(getMaterialPropertyOld<std::vector<RankFourTensor>>(
         _base_name + "springs_elasticity_tensors_inv"))
 {
-  //  _need_viscoelastic_properties_inverse = true;
 }
 
 void
