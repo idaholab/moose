@@ -189,6 +189,9 @@ class SyntaxNodeBase(NodeBase):
                           "created in one of the following locations:"
                     for filename, _ in filenames:
                         msg += '\n  {}'.format(filename)
+                    msg += "\nIt is possible to generate stub pages for your documentation " \
+                           "using the './moosedocs.py check --generate' command."
+
                     LOG.error(msg, self.fullpath)
 
                 if generate:

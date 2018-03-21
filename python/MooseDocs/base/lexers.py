@@ -231,7 +231,7 @@ class Lexer(object):
                     except Exception as e: #pylint: disable=broad-except
                         obj = tokens.ExceptionToken(parent,
                                                     info=info,
-                                                    message=e.message,
+                                                    message=unicode(e.message),
                                                     traceback=traceback.format_exc())
                     if obj is not None:
                         obj.info = info #TODO: set ptype on base Token, change to info
@@ -246,7 +246,7 @@ class Lexer(object):
 
         # Produce Exception token if text remains that was not matched
         if pos < n:
-            msg = 'Unprocessed text exists.'
+            msg = u'Unprocessed text exists.'
             tokens.ErrorToken(parent, info=info, message=msg)
 
     def buildObject(self, parent, pattern, info): #pylint: disable=no-self-use
