@@ -1,3 +1,12 @@
+# Represents a unique Maxwell module with E = 10GPa and eta = 10 days with an imposed eigenstrain alpha = 0.001.
+# The behavior is set up so that the creep strain is driven by both the elastic stress and the internal
+# stress induced by the eigenstrain (E * alpha).
+#
+# In this test, the specimen is free of external stress (sigma = 0) so the creep deformation only derives from
+# the eigenstrain. The total strain to be expected is:
+#     epsilon = alpha * (1 + t / eta)
+# Both the stress and the elastic strain are 0.
+#
 [Mesh]
   type = GeneratedMesh
   dim = 3
@@ -101,8 +110,8 @@
   [../]
   [./kelvin_voigt]
     type = GeneralizedKelvinVoigtModel
-    creep_modulus = '10e9 10e9'
-    creep_viscosity = '1 10'
+    creep_modulus = ''
+    creep_viscosity = '10'
     poisson_ratio = 0.2
     young_modulus = 10e9
     driving_eigenstrain = eigen_true
@@ -159,7 +168,7 @@
   l_max_its  = 50
   l_tol      = 1e-8
   nl_max_its = 20
-  nl_rel_tol = 1e-10
+  nl_rel_tol = 1e-11
   nl_abs_tol = 1e-8
 
   dtmin = 0.01
@@ -175,4 +184,5 @@
 [Outputs]
   file_base = gen_kv_driving_out
   exodus = true
+  csv = true
 []

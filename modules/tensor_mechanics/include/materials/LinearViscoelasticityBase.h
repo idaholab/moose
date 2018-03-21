@@ -214,6 +214,7 @@ protected:
   MaterialProperty<std::vector<RankFourTensor>> * _springs_elasticity_tensors_inv;
   /// List of viscosities of each subsequent spring in the chain
   MaterialProperty<std::vector<Real>> & _dashpot_viscosities;
+  const MaterialProperty<std::vector<Real>> & _dashpot_viscosities_old;
 
   /**
    * The internal strain variables required by the time-stepping procedure (generally, on a
@@ -235,15 +236,13 @@ protected:
    */
   const MaterialProperty<RankTwoTensor> & _creep_strain_old;
 
-  /// previous value of the stress for update purposes
-  const MaterialProperty<RankTwoTensor> & _stress_old;
-
   /// Indicates if the model is only driven by the stress, or also by an additional eigenstrain
   bool _has_driving_eigenstrain;
   /// Name of the eigenstrain that drives the additional creep strain
   std::string _driving_eigenstrain_name;
   /// Pointer to the value of the driving eigenstrain
   const MaterialProperty<RankTwoTensor> * _driving_eigenstrain;
+  const MaterialProperty<RankTwoTensor> * _driving_eigenstrain_old;
 
   /**
    * If activated, the time-stepping scheme will be re-initialized at each step of the solver. This

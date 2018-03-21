@@ -28,7 +28,6 @@ validParams<LinearViscoelasticityBase>()
                                "name of the eigenstrain that increases the creep strains");
   params.addParam<std::string>(
       "elastic_strain_name", "elastic_strain", "name of the true elastic strain of the material");
-  params.addParam<std::string>("stress_name", "stress", "name of the true stress of the material");
   params.addParam<std::string>("creep_strain_name",
                                "creep_strain",
                                "name of the true creep strain of the material"
@@ -75,6 +74,8 @@ LinearViscoelasticityBase::LinearViscoelasticityBase(const InputParameters & par
                                               _base_name + "springs_elasticity_tensors_inv")
                                         : nullptr),
     _dashpot_viscosities(declareProperty<std::vector<Real>>(_base_name + "dashpot_viscosities")),
+    _dashpot_viscosities_old(
+        getMaterialPropertyOld<std::vector<Real>>(_base_name + "dashpot_viscosities")),
     _viscous_strains(declareProperty<std::vector<RankTwoTensor>>(_base_name + "viscous_strains")),
     _viscous_strains_old(
         getMaterialPropertyOld<std::vector<RankTwoTensor>>(_base_name + "viscous_strains")),
@@ -85,13 +86,15 @@ LinearViscoelasticityBase::LinearViscoelasticityBase(const InputParameters & par
         getMaterialPropertyOld<RankTwoTensor>(getParam<std::string>("elastic_strain_name"))),
     _creep_strain_old(
         getMaterialPropertyOld<RankTwoTensor>(getParam<std::string>("creep_strain_name"))),
-    _stress_old(getMaterialPropertyOld<RankTwoTensor>(getParam<std::string>("stress_name"))),
     _has_driving_eigenstrain(isParamValid("driving_eigenstrain")),
     _driving_eigenstrain_name(
         _has_driving_eigenstrain ? getParam<std::string>("driving_eigenstrain") : ""),
     _driving_eigenstrain(_has_driving_eigenstrain
                              ? &getMaterialPropertyByName<RankTwoTensor>(_driving_eigenstrain_name)
                              : nullptr),
+    _driving_eigenstrain_old(_has_driving_eigenstrain
+                                 ? &getMaterialPropertyOld<RankTwoTensor>(_driving_eigenstrain_name)
+                                 : nullptr),
     _force_recompute_properties(getParam<bool>("force_recompute_properties")),
     _step_zero(declareRestartableData<bool>("step_zero", true))
 {
@@ -106,7 +109,6 @@ LinearViscoelasticityBase::LinearViscoelasticityBase(const InputParameters & par
   getMaterialPropertyOld<RankFourTensor>(_base_name + "instantaneous_elasticity_tensor_inv");
   getMaterialPropertyOld<RankFourTensor>(_base_name + "first_elasticity_tensor");
   getMaterialPropertyOld<std::vector<RankFourTensor>>(_base_name + "springs_elasticity_tensors");
-  getMaterialPropertyOld<std::vector<Real>>(_base_name + "dashpot_viscosities");
 
   if (_need_viscoelastic_properties_inverse)
   {
