@@ -265,11 +265,6 @@ NaClFluidProperties::h_dpT(
   dh_dT = 8.7664e2 + 2.0 * 6.4139e-2 * Tc + 3.0 * 8.8101e-5 * Tc * Tc;
 }
 
-Real NaClFluidProperties::beta(Real /*pressure*/, Real /*temperature*/) const
-{
-  mooseError(name(), ": beta() is not implemented");
-}
-
 Real NaClFluidProperties::henryConstant(Real /*temperature*/) const
 {
   mooseError(name(), ": henryConstant() is not defined");

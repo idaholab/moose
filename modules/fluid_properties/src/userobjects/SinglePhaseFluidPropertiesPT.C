@@ -32,6 +32,14 @@ SinglePhaseFluidPropertiesPT::gamma(Real pressure, Real temperature) const
 }
 
 Real
+SinglePhaseFluidPropertiesPT::beta(Real pressure, Real temperature) const
+{
+  Real rho, drho_dp, drho_dT;
+  rho_dpT(pressure, temperature, rho, drho_dp, drho_dT);
+  return -drho_dT / rho;
+}
+
+Real
 SinglePhaseFluidPropertiesPT::henryConstantIAPWS(Real temperature, Real A, Real B, Real C) const
 {
   Real Tr = temperature / 647.096;

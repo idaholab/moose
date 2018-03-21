@@ -808,11 +808,6 @@ Water97FluidProperties::h_dpT(
   dh_dT = denthalpy_dT;
 }
 
-Real Water97FluidProperties::beta(Real /*pressure*/, Real /*temperature*/) const
-{
-  mooseError(name(), ": beta() not implemented yet");
-}
-
 Real
 Water97FluidProperties::vaporPressure(Real temperature) const
 {

@@ -89,8 +89,6 @@ public:
   virtual void
   h_dpT(Real pressure, Real temperature, Real & h, Real & dh_dp, Real & dh_dT) const override;
 
-  virtual Real beta(Real pressure, Real temperature) const override;
-
   virtual Real henryConstant(Real temperature) const override;
 
   virtual void henryConstant_dT(Real temperature, Real & Kh, Real & dKh_dT) const override;
@@ -122,8 +120,6 @@ protected:
   const Real _T_critical;
   /// Critical density (kg/m^3)
   const Real _rho_critical;
-  /// Coefficient of thermal expansion (1/K)
-  const Real _beta;
 };
 
 #endif /* METHANEFLUIDPROPERTIES_H */

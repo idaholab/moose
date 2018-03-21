@@ -18,8 +18,6 @@ validParams<IdealGasFluidPropertiesPT>()
   InputParameters params = validParams<SinglePhaseFluidPropertiesPT>();
   params.addParam<Real>("molar_mass", 29.0e-3, "Constant molar mass of the fluid (kg/mol)");
   params.addParam<Real>(
-      "thermal_expansion", 3.43e-3, "Constant coefficient of thermal expansion (1/K)");
-  params.addParam<Real>(
       "cv", 0.718e3, "Constant specific heat capacity at constant volume (J/kg/K)");
   params.addParam<Real>(
       "cp", 1.005e3, "Constant specific heat capacity at constant pressure (J/kg/K)");
@@ -34,7 +32,6 @@ validParams<IdealGasFluidPropertiesPT>()
 IdealGasFluidPropertiesPT::IdealGasFluidPropertiesPT(const InputParameters & parameters)
   : SinglePhaseFluidPropertiesPT(parameters),
     _molar_mass(getParam<Real>("molar_mass")),
-    _thermal_expansion(getParam<Real>("thermal_expansion")),
     _cv(getParam<Real>("cv")),
     _cp(getParam<Real>("cp")),
     _thermal_conductivity(getParam<Real>("thermal_conductivity")),
@@ -56,11 +53,6 @@ Real
 IdealGasFluidPropertiesPT::molarMass() const
 {
   return _molar_mass;
-}
-
-Real IdealGasFluidPropertiesPT::beta(Real /*pressure*/, Real /*temperature*/) const
-{
-  return _thermal_expansion;
 }
 
 Real IdealGasFluidPropertiesPT::cp(Real /*pressure*/, Real /*temperature*/) const { return _cp; }

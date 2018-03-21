@@ -341,12 +341,6 @@ TabulatedFluidProperties::s(Real pressure, Real temperature) const
 }
 
 Real
-TabulatedFluidProperties::beta(Real pressure, Real temperature) const
-{
-  return _fp.beta(pressure, temperature);
-}
-
-Real
 TabulatedFluidProperties::henryConstant(Real temperature) const
 {
   return _fp.henryConstant(temperature);

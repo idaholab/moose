@@ -255,12 +255,15 @@ public:
   h_dpT(Real pressure, Real temperature, Real & h, Real & dh_dp, Real & dh_dT) const = 0;
 
   /**
-   * Thermal expansion coefficient
+   * Isobaric thermal expansion coefficient, defined as
+   * 1/v (dv/dT)_p, where v is the volume, and the derivative wrt temperature is
+   * taken at constant pressure.
+   * Note: this is equivalent to -1/rho (drho/dT)_p, which is used in the calculation
    * @param pressure fluid pressure (Pa)
    * @param temperature fluid temperature (K)
    * @return beta (1/K)
    */
-  virtual Real beta(Real pressure, Real temperature) const = 0;
+  virtual Real beta(Real pressure, Real temperature) const;
 
   /**
    * Henry's law constant for dissolution in water
