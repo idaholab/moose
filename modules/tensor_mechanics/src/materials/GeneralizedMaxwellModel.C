@@ -65,7 +65,10 @@ GeneralizedMaxwellModel::GeneralizedMaxwellModel(const InputParameters & paramet
     _C0 -= _Ci[i];
   }
 
-  _S0 = _C0.invSymm();
+  if (MooseUtils::absoluteFuzzyEqual(_C0.L2norm(), 0.0))
+    _S0.zero();
+  else
+    _S0 = _C0.invSymm();
 
   for (unsigned int i = 0; i < _eta_i.size(); ++i)
   {
