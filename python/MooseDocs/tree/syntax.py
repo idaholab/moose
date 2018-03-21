@@ -29,7 +29,8 @@ class SyntaxNodeBase(NodeBase):
     PROPERTIES = [Property('hidden', ptype=bool, default=False),
                   Property('removed', ptype=bool, default=False),
                   Property('parameters', ptype=dict),
-                  Property('description', ptype=unicode)]
+                  Property('description', ptype=unicode),
+                  Property('alias', ptype=unicode)]
 
     # Default documentation destinations for MOOSE and Modules
     #TODO: Build this automatically from source or --registry, not sure how yet.
@@ -86,6 +87,9 @@ class SyntaxNodeBase(NodeBase):
         """
         Return the node full path.
         """
+        if self.alias:
+            return self.alias
+
         out = []
         node = self
         while node is not None:
@@ -93,14 +97,15 @@ class SyntaxNodeBase(NodeBase):
             node = node.parent
         return '/'.join(reversed(out))
 
-    def markdown(self):
-        """Return the 'required' markdown filename."""
-        raise NotImplementedError()
-
     @property
     def content(self):
         """Return the markdown content."""
         return common.read(self._filename)
+
+    def markdown(self):
+        """Return the 'required' markdown filename."""
+        #TODO: Make this a property
+        raise NotImplementedError()
 
     def findfull(self, name, maxlevel=None):
         """
@@ -264,11 +269,12 @@ class SyntaxNodeBase(NodeBase):
         elif self.hidden:
             self.COLOR = self.COLOR.replace('LIGHT_', '')
 
-        msg = '{}: {} hidden={} removed={} groups={}'.format(self.name,
-                                                             str(self.fullpath),
-                                                             self.hidden,
-                                                             self.removed,
-                                                             self.groups)
+        msg = '{}: {} hidden={} removed={} groups={} alias={}'.format(self.name,
+                                                                      str(self.fullpath),
+                                                                      self.hidden,
+                                                                      self.removed,
+                                                                      self.groups,
+                                                                      self.alias)
         return msg
 
 class SyntaxNode(SyntaxNodeBase):

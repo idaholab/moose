@@ -26,14 +26,14 @@ LOG = logging.getLogger(__name__)
 REGISTER_PAIRS = [('Postprocessor', 'UserObjects/*'),
                   ('AuxKernel', 'Bounds/*')]
 
-def app_syntax(exe, remove=None, remove_test_apps=True, hide=None):
+def app_syntax(exe, remove=None, allow_test_objects=False, hide=None, alias=None):
     """
     Creates a tree structure representing the MooseApp syntax for the given executable.
     """
     common.check_type('exe', exe, str)
     common.check_type('remove', remove, (type(None), dict, list, set))
     common.check_type('hide', hide, (type(None), dict, list, set))
-    common.check_type('remove_test_apps', remove_test_apps, bool)
+    common.check_type('allow_test_objects', allow_test_objects, bool)
 
     try:
         raw = mooseutils.runExe(exe, ['--json', '--allow-test-objects'])
@@ -86,6 +86,7 @@ def app_syntax(exe, remove=None, remove_test_apps=True, hide=None):
             for task in node.tasks:
                 node._groups.update(action_groups[task]) #pylint: disable=protected-access
 
+    # Remove
     removed = set()
     if isinstance(remove, dict):
         for value in remove.itervalues():
@@ -98,10 +99,17 @@ def app_syntax(exe, remove=None, remove_test_apps=True, hide=None):
             if any(n.fullpath == prefix for n in node.path for prefix in removed):
                 node.removed = True
 
-    if remove_test_apps:
+    if not allow_test_objects:
         for node in anytree.PreOrderIter(root):
             if all([group.endswith('Test') for group in node.groups]):
                 node.removed = True
+
+    # Alias
+    if alias:
+        for node in anytree.PreOrderIter(root):
+            for k, v in alias.iteritems():
+                if node.fullpath == k:
+                    node.alias = unicode(v)
 
     return root
 

@@ -18,16 +18,17 @@ class PanopticExtension(command.CommandExtension):
     def defaultConfig():
         config = command.CommandExtension.defaultConfig()
         config['shortcuts'] = (dict(), "Key-value pairs to insert as shortcuts, this should be " \
-                                       "a dictionary or a list of dictionaries.")
+                                       "a dictionary or a dictionary of dictionaries.")
         return config
 
     def extend(self, reader, renderer):
         pass
 
     def postTokenize(self, ast, config): #pylint: disable=unused-argument
-        shortcuts = self.get('shortcuts', [])
-        if isinstance(shortcuts, dict):
-            shortcuts = [shortcuts]
-        for item in shortcuts:
-            for key, value in item.iteritems():
+        shortcuts = self.get('shortcuts', dict())
+        for key, value in shortcuts.iteritems():
+            if isinstance(value, dict):
+                for k, v in value.iteritems():
+                    tokens.Shortcut(ast, key=unicode(k), link=unicode(k), content=unicode(v))
+            else:
                 tokens.Shortcut(ast, key=unicode(key), link=unicode(key), content=unicode(value))

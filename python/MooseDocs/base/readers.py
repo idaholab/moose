@@ -60,7 +60,7 @@ class Reader(mixins.ConfigObject, mixins.TranslatorObject, mixins.ComponentObjec
             common.check_type('content', content, unicode)
 
         # Re-initialize
-        config = self.getConfig() #
+        config = self.getConfig()
         self.reinit()
 
         # Pre-tokenize
