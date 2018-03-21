@@ -649,7 +649,7 @@ MooseApp::setInputFileName(std::string input_filename)
 }
 
 std::string
-MooseApp::getOutputFileBase()
+MooseApp::getOutputFileBase() const
 {
   return _output_file_base;
 }
@@ -833,16 +833,16 @@ MooseApp::setOutputPosition(Point p)
 }
 
 std::list<std::string>
-MooseApp::getCheckpointFiles()
+MooseApp::getCheckpointDirectories() const
 {
+  // Storage for the directory names
+  std::list<std::string> checkpoint_dirs;
+
   // Extract the CommonOutputAction
   const auto & common_actions = _action_warehouse.getActionListByName("common_output");
   mooseAssert(common_actions.size() == 1, "Should be only one common_output Action");
 
   const Action * common = *common_actions.begin();
-
-  // Storage for the directory names
-  std::list<std::string> checkpoint_dirs;
 
   // If file_base is set in CommonOutputAction, add this file to the list of potential checkpoint
   // files
@@ -877,6 +877,13 @@ MooseApp::getCheckpointFiles()
     }
   }
 
+  return checkpoint_dirs;
+}
+
+std::list<std::string>
+MooseApp::getCheckpointFiles() const
+{
+  auto checkpoint_dirs = getCheckpointDirectories();
   return MooseUtils::getFilesInDirs(checkpoint_dirs);
 }
 

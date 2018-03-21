@@ -149,7 +149,7 @@ public:
   /**
    * Override the selection of the output file base name.
    */
-  std::string getOutputFileBase();
+  std::string getOutputFileBase() const;
 
   /**
    * Tell the app to output in a specific position.
@@ -157,10 +157,16 @@ public:
   void setOutputPosition(Point p);
 
   /**
-   * Extract all possible checkpoint file names
-   * @param files A Set of checkpoint filenames to populate
+   * Get all checkpoint directories
+   * @return A Set of checkpoint directories
    */
-  std::list<std::string> getCheckpointFiles();
+  std::list<std::string> getCheckpointDirectories() const;
+
+  /**
+   * Extract all possible checkpoint file names
+   * @return A Set of checkpoint filenames
+   */
+  std::list<std::string> getCheckpointFiles() const;
 
   /**
    * Whether or not an output position has been set.
