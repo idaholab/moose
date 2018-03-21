@@ -1125,7 +1125,9 @@ RankTwoTensor::syev(const char * calculation_type,
 
   if (info != 0)
     mooseError("In computing the eigenvalues and eigenvectors for the symmetric rank-2 tensor (",
-                Moose::stringify(a), "), the PETSC LAPACK syev routine returned error code ", info);
+               Moose::stringify(a),
+               "), the PETSC LAPACK syev routine returned error code ",
+               info);
 }
 
 void
