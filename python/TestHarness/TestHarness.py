@@ -200,8 +200,16 @@ class TestHarness:
         if self.options.input_file_name != '':
             self._infiles = self.options.input_file_name.split(',')
 
-        try:
+        if self.options.spec_file:
+            if os.path.isdir(self.options.spec_file):
+                self.base_dir = self.options.spec_file
+            else:
+                self.base_dir = os.path.dirname(self.options.spec_file)
+                self._infiles = [os.path.basename(self.options.spec_file)]
+        else:
             self.base_dir = os.getcwd()
+
+        try:
             for dirpath, dirnames, filenames in os.walk(self.base_dir, followlinks=True):
                 # Prune submdule paths when searching for tests
 
@@ -663,6 +671,7 @@ class TestHarness:
         parser.add_argument('--failed-tests', action='store_true', dest='failed_tests', help='Run tests that previously failed')
         parser.add_argument('--check-input', action='store_true', dest='check_input', help='Run check_input (syntax) tests only')
         parser.add_argument('--no-check-input', action='store_true', dest='no_check_input', help='Do not run check_input (syntax) tests')
+        parser.add_argument('--spec-file', action='store', type=str, dest='spec_file', help='Supply a relative path (from run_tests) to the tests spec file to run the tests found therein. Or supply a path to a directory in which the TestHarness will search for tests. You can further alter which tests spec files are found through the use of -i and --re')
 
         # Options that pass straight through to the executable
         parser.add_argument('--parallel-mesh', action='store_true', dest='parallel_mesh', help='Deprecated, use --distributed-mesh instead')
