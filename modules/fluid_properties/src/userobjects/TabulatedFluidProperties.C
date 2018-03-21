@@ -8,7 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "TabulatedFluidProperties.h"
-#include "BicubicSplineInterpolation.h"
+#include "BicubicInterpolation.h"
 #include "MooseUtils.h"
 #include "Conversion.h"
 
@@ -185,18 +185,10 @@ TabulatedFluidProperties::initialSetup()
   }
 
   // Construct bicubic splines from tabulated data
-  _density_ipol = libmesh_make_unique<BicubicSplineInterpolation>();
-  _internal_energy_ipol = libmesh_make_unique<BicubicSplineInterpolation>();
-  _enthalpy_ipol = libmesh_make_unique<BicubicSplineInterpolation>();
-
-  _density_ipol->setData(
-      _pressure, _temperature, _density, _drho_dp_0, _drho_dp_n, _drho_dT_0, _drho_dT_n);
-
-  _internal_energy_ipol->setData(
-      _pressure, _temperature, _internal_energy, _de_dp_0, _de_dp_n, _de_dT_0, _de_dT_n);
-
-  _enthalpy_ipol->setData(
-      _pressure, _temperature, _enthalpy, _dh_dp_0, _dh_dp_n, _dh_dT_0, _dh_dT_n);
+  _density_ipol = libmesh_make_unique<BicubicInterpolation>(_pressure, _temperature, _density);
+  _internal_energy_ipol =
+      libmesh_make_unique<BicubicInterpolation>(_pressure, _temperature, _internal_energy);
+  _enthalpy_ipol = libmesh_make_unique<BicubicInterpolation>(_pressure, _temperature, _enthalpy);
 }
 
 std::string
