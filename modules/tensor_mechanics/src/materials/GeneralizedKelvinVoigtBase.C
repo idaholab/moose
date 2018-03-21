@@ -33,6 +33,9 @@ GeneralizedKelvinVoigtBase::GeneralizedKelvinVoigtBase(const InputParameters & p
 void
 GeneralizedKelvinVoigtBase::updateQpViscousStrains()
 {
+  if (_t_step <= 1)
+    return;
+
   RankTwoTensor effective_stress = _first_elasticity_tensor_old[_qp] * _elastic_strain_old[_qp];
 
   if (_has_driving_eigenstrain)
@@ -40,8 +43,8 @@ GeneralizedKelvinVoigtBase::updateQpViscousStrains()
 
   for (unsigned int i = 0; i < _springs_elasticity_tensors[_qp].size(); ++i)
   {
-    Real theta_i = computeTheta(_dt_old, _dashpot_viscosities[_qp][i]);
-    Real gamma = _dashpot_viscosities[_qp][i] / (_dt_old * theta_i);
+    Real theta_i = computeTheta(_dt_old, _dashpot_viscosities_old[_qp][i]);
+    Real gamma = _dashpot_viscosities_old[_qp][i] / (_dt_old * theta_i);
     _viscous_strains[_qp][i] =
         (_springs_elasticity_tensors_inv_old[_qp][i] * effective_stress) / (theta_i * (1. + gamma));
     _viscous_strains[_qp][i] += _viscous_strains_old[_qp][i] *
@@ -51,7 +54,7 @@ GeneralizedKelvinVoigtBase::updateQpViscousStrains()
   if (_has_longterm_dashpot)
   {
     _viscous_strains[_qp].back() = (_first_elasticity_tensor_inv_old[_qp] * effective_stress) *
-                                   (_dt_old / _dashpot_viscosities[_qp].back());
+                                   (_dt_old / _dashpot_viscosities_old[_qp].back());
     _viscous_strains[_qp].back() += _viscous_strains_old[_qp].back();
   }
 }

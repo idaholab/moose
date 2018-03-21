@@ -214,6 +214,7 @@ protected:
   MaterialProperty<std::vector<RankFourTensor>> * _springs_elasticity_tensors_inv;
   /// List of viscosities of each subsequent spring in the chain
   MaterialProperty<std::vector<Real>> & _dashpot_viscosities;
+  const MaterialProperty<std::vector<Real>> & _dashpot_viscosities_old;
 
   /**
    * The internal strain variables required by the time-stepping procedure (generally, on a
