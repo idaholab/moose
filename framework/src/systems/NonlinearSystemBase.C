@@ -2199,7 +2199,7 @@ NonlinearSystemBase::computeJacobian(SparseMatrix<Number> & jacobian)
 void
 NonlinearSystemBase::computeJacobian(SparseMatrix<Number> & jacobian, std::set<TagID> & tags)
 {
-  associateMatirxToTag(jacobian, systemMatrixTag());
+  associateMatrixToTag(jacobian, systemMatrixTag());
 
   computeJacobianTags(tags);
 }

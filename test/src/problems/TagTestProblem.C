@@ -86,7 +86,7 @@ TagTestProblem::computeJacobian(const NumericVector<Number> & soln, SparseMatrix
   _nl->setSolution(soln);
 
   if (_fe_matrix_tags.size() > 0)
-    _nl->associateMatirxToTag(jacobian, *_fe_matrix_tags.begin());
+    _nl->associateMatrixToTag(jacobian, *_fe_matrix_tags.begin());
 
   computeJacobianTags(_fe_matrix_tags);
 

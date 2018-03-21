@@ -4241,7 +4241,7 @@ FEProblemBase::computeJacobianInternal(const NumericVector<Number> & soln,
 {
   _nl->setSolution(soln);
 
-  _nl->associateMatirxToTag(jacobian, _nl->systemMatrixTag());
+  _nl->associateMatrixToTag(jacobian, _nl->systemMatrixTag());
 
   computeJacobianTags(tags);
 

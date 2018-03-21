@@ -262,7 +262,7 @@ public:
   /**
    * associate a matirx to a tag
    */
-  virtual void associateMatirxToTag(SparseMatrix<Number> & matrix, TagID tag);
+  virtual void associateMatrixToTag(SparseMatrix<Number> & matrix, TagID tag);
 
   /**
    * disassociate a matirx from a tag

@@ -119,9 +119,11 @@ EigenProblem::computeJacobianTag(const NumericVector<Number> & soln,
 
   _nl_eigen->clearTaggedMatrices();
 
-  _nl_eigen->associateMatirxToTag(jacobian, tag);
+  _nl_eigen->associateMatrixToTag(jacobian, tag);
 
   computeJacobianTags(_fe_matrix_tags);
+
+  _nl_eigen->disassociateMatrixFromTag(jacobian, tag);
 }
 
 void
@@ -139,10 +141,13 @@ EigenProblem::computeJacobianAB(const NumericVector<Number> & soln,
   _nl_eigen->setSolution(soln);
 
   _nl_eigen->clearTaggedMatrices();
-  _nl_eigen->associateMatirxToTag(jacobianA, tagA);
-  _nl_eigen->associateMatirxToTag(jacobianB, tagB);
+  _nl_eigen->associateMatrixToTag(jacobianA, tagA);
+  _nl_eigen->associateMatrixToTag(jacobianB, tagB);
 
   computeJacobianTags(_fe_matrix_tags);
+
+  _nl_eigen->disassociateMatrixFromTag(jacobianA, tagA);
+  _nl_eigen->disassociateMatrixFromTag(jacobianB, tagB);
 }
 
 void
@@ -161,6 +166,8 @@ EigenProblem::computeResidualTag(const NumericVector<Number> & soln,
   _nl_eigen->associateVectorToTag(residual, tag);
 
   computeResidualTags(_fe_vector_tags);
+
+  _nl_eigen->disassociateVectorFromTag(residual, tag);
 }
 
 void
@@ -185,6 +192,10 @@ EigenProblem::computeResidualAB(const NumericVector<Number> & soln,
   _nl_eigen->associateVectorToTag(residualB, tagB);
 
   computeResidualTags(_fe_vector_tags);
+
+  _nl_eigen->disassociateVectorFromTag(residualA, tagA);
+
+  _nl_eigen->disassociateVectorFromTag(residualB, tagB);
 }
 
 #endif
