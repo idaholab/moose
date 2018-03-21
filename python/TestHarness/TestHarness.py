@@ -227,6 +227,8 @@ class TestHarness:
 
                             if self.prunePath(file):
                                 continue
+                            elif self.notMySpecFile(dirpath, file):
+                                continue
 
                             saved_cwd = os.getcwd()
                             sys.path.append(os.path.abspath(dirpath))
@@ -322,6 +324,13 @@ class TestHarness:
 
         # Return the inverse of will_run to indicate that this path should be pruned
         return prune
+
+    def notMySpecFile(self, dirpath, filename):
+        """ true if dirpath/filename matches supplied --spec-file """
+        if (self.options.spec_file
+            and os.path.isfile(self.options.spec_file)
+            and os.path.join(dirpath, filename) != self.options.spec_file):
+            return True
 
     def augmentParameters(self, filename, tester):
         params = tester.parameters()
