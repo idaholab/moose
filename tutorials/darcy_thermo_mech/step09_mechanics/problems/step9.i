@@ -40,6 +40,7 @@
     # for TensorMechanics in the correct coordinate system (autodetected)
     add_variables = true
     strain = FINITE
+    eigenstrain_names = eigenstrain
   [../]
 []
 
@@ -144,6 +145,13 @@
   [../]
   [./elastic_stress]
     type = ComputeFiniteStrainElasticStress
+  [../]
+  [./thermal_strain]
+    type = ComputeThermalExpansionEigenstrain
+    stress_free_temperature = 300
+    thermal_expansion_coeff = 1e-6
+    eigenstrain_name = eigenstrain
+    temperature = temperature
   [../]
 []
 
