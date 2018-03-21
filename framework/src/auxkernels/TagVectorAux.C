@@ -20,6 +20,8 @@ validParams<TagVectorAux>()
   params.addParam<std::string>("vector_tag", "TagName", "Tag Name this Aux works on");
   params.addRequiredCoupledVar("v",
                                "The coupled variable whose components are coupled to AuxVariable");
+
+  params.addClassDescription("Couple a tag vector, and return its nodal value");
   return params;
 }
 

@@ -230,28 +230,28 @@ public:
   virtual SparseMatrix<Number> & getMatrix(TagID tag);
 
   /**
-  *  Make all exsiting matrices ative
-  */
+   *  Make all exsiting matrices ative
+   */
   virtual void activeAllMatrixTags();
 
   /**
-  *  Active a matrix for tag
-  */
+   *  Active a matrix for tag
+   */
   virtual void activeMatrixTag(TagID tag);
 
   /**
-  *  If or not a matrix tag is active
-  */
+   *  If or not a matrix tag is active
+   */
   virtual bool matrixTagActive(TagID tag);
 
   /**
-  *  deactive a matrix for tag
-  */
+   *  deactive a matrix for tag
+   */
   virtual void deactiveMatrixTag(TagID tag);
 
   /**
-  * Make matrices inactive
-  */
+   * Make matrices inactive
+   */
   virtual void deactiveAllMatrixTags();
 
   /**

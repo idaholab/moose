@@ -20,6 +20,7 @@ validParams<TagMatrixAux>()
   params.addRequiredCoupledVar("v",
                                "The coupled variable whose components are coupled to AuxVariable");
 
+  params.addClassDescription("Couple the diag of a tag matrix, and return its nodal value");
   return params;
 }
 
