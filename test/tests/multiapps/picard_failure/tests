@@ -8,5 +8,6 @@
     recover = false
     petsc_version = '>=3.6.1'
     allow_warnings = true
+    petsc_version_release = true
   [../]
 []
