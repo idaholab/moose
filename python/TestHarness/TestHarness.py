@@ -327,7 +327,7 @@ class TestHarness:
         return prune
 
     def notMySpecFile(self, dirpath, filename):
-        """ true if dirpath/filename matches supplied --spec-file """
+        """ true if dirpath/filename does not match supplied --spec-file """
         if (self.options.spec_file
             and os.path.isfile(self.options.spec_file)
             and os.path.join(dirpath, filename) != self.options.spec_file):
@@ -761,6 +761,9 @@ class TestHarness:
             sys.exit(1)
         if opts.check_input and opts.enable_recover:
             print('ERROR: --check-input and --recover can not be used together')
+            sys.exit(1)
+        if opts.spec_file and not os.path.exists(opts.spec_file):
+            print('ERROR: --spec-file supplied but path does not exist')
             sys.exit(1)
 
         # Update any keys from the environment as necessary
