@@ -67,7 +67,7 @@ The DE of [eq:basicthm] is implemented in the following way
 
 !listing modules/porous_flow/examples/tutorial/01.i start=[Variables] end=[BCs]
 
-There is just one variable --- the porepressure --- and there is no coupling with heat or mechanics.  Gravity is set to zero.  In this tutorial page, the only boundary condition is to fix the porepressure to 1$\,$MPa at the injection area:
+There is just one variable --- the porepressure --- and there is no coupling with heat or mechanics.  Gravity is set to zero.  In this tutorial page, the only boundary condition is to fix the porepressure to 1$\,$MPa at the injection area (the other boundaries default to zero flux):
 
 !listing modules/porous_flow/examples/tutorial/01.i start=[BCs] end=[Modules]
 

@@ -9,7 +9,7 @@ In this Page, solid mechanics is added to the thermo-hydro simulation of preious
 \sigma_{ij}^{\mathrm{eff}}  = \sigma_{ij}^{\mathrm{tot}} + \alpha_{B}\delta_{ij}P
 \end{equation}
 \begin{equation}
-\sigma_{ij}^{\mathrm{eff}}  =  E_{ijkl}(\epsilon_{kl}^{\mathrm{elastic}} - \delta_{kl}\alpha^{\mathrm{linear}}_{T}T) 
+\sigma_{ij}^{\mathrm{eff}}  =  E_{ijkl}(\epsilon_{kl}^{\mathrm{elastic}} - \delta_{kl}\alpha^{\mathrm{linear}}_{T}(T - T_{\mathrm{ref}}))
 \end{equation}
 \begin{equation}
 \label{eq:solid}
@@ -57,7 +57,7 @@ Finally, some mechanics-related `Materials` need to be defined
 
 An animation of the results is shown in [tut04_gif_fig].
 
-!media porous_flow/tut04.gif style=width:50%;margin-left:10px caption=Displacement (magnified by 100 times) and hoop-stress evolution in the borehole-aquifer-caprock system.  id=tut04_gif_fig
+!media porous_flow/tut04.gif style=width:50%;margin-left:10px caption=Displacement (magnified by 100 times) and effective hoop-stress evolution in the borehole-aquifer-caprock system.  id=tut04_gif_fig
 
 The dynamics of this model are fascinating, and readers are encouraged to pause and play with parameters to explore how they effect the final result.  In fact, this model is very similar to the "THM Rehbinder" test in PorousFlow's test suite.  Rehbinder [citep:rehbinder1995] derived analytical solutions for a similar THM problem, and MOOSE replicates his result exactly:
 

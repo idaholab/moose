@@ -14,7 +14,7 @@ equation
 0 = \frac{\partial M^{\kappa}}{\partial t} + M^{\kappa}\nabla\cdot{\mathbf
   v}_{s} + \nabla\cdot \mathbf{F}^{\kappa} + \Lambda M^{\kappa} - \phi I_{\mathrm{chem}} - q^{\kappa} \ .
 \end{equation}
-Here $M$ is the mass of fluid per volume of rock (measured in
+Here $M$ is the mass of fluid per bulk volume (measured in
 kg.m$^{-3}$), $\mathbf{v}_{s}$ is the velocity of the porous solid
 skeleton (measured in m.s$^{-1}$), $\mathbf{F}$ is the flux (a vector,
 measured kg.s$^{-1}$.m$^{-2}$), $\Lambda$ is a radioactive decay rate, $\phi I_{\mathrm{chem}}$ represents chemical precipitation or dissolution
@@ -180,7 +180,7 @@ equation
     t}\epsilon_{ij}^{\mathrm{plastic}}
  - q^{T}
 \end{equation}
-Here $\mathcal{E}$ is the energy per unit volume in the rock-fluid
+Here $\mathcal{E}$ is the heat energy per unit volume in the rock-fluid
 system, ${\mathbf v}_{s}$ is velocity of the porous solid skeleton,
 $\mathbf{F}^{T}$ is the heat flux, $\nu$ describes the ratio of
 plastic-deformation energy that gets transferred to heat energy,
@@ -196,7 +196,7 @@ t}\epsilon_{ij}^{\mathrm{plastic}}$ term, as well as via changes in porosity and
 permeability described in [porosity](/porous_flow/porosity.md) and
 [permeability](/porous_flow/permeability.md). Coupling to the fluid flow and
 chemical reactions is via the equations of state used within the terms of [eq:heat_cons], as well as the source term $q^{T}$.  Joule-Thompson
-effects (See for instance Eq. (1) of \citet{mathias2010}) may be included via
+effects (See for instance Eq. (1) of [citet:mathias2010]) may be included via
 the fluid properties.
 
 Here it is assumed the liquids and solid are in local thermal equilibrium i.e.
@@ -211,7 +211,7 @@ module currently.
 
 ### Energy density: $\mathcal{E}$
 
-The energy per unit volume is
+The heat energy per unit volume is
 \begin{equation}
 \label{eq:en_per_vol}
 \mathcal{E} = (1-\phi)\rho_{R}C_{R}T +
