@@ -1,1 +1,11 @@
-# System Design Description
+# {{project}} System Design Description
+
+## Introduction
+
+### System Purpose
+
+!sqa template key=system_purpose
+Briefly describe the objectives and rationale of the System Design Description (e.g., describing the
+system design in the user’s terminology, providing a guide for a more technical design document, or
+ensuring that customers and technical staff have a common understanding of the system
+design). Explain how this document might evolve throughout the product life cycle.

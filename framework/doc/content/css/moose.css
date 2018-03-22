@@ -572,6 +572,22 @@ footer.page-footer {
     padding: 5px;
 }
 
+/* REQUIREMENTS */
+.moose-requirements.collection.with-header .collection-header{
+    background-color: var(--inl-blue);
+    color:white;
+    background-color: var(--inl-blue);
+    font-size:larger;
+    font-weight:100;
+}
+
+.moose-requirements.collection .collection-item{
+    display:flex;
+}
+
+.moose-requirement-number{
+    margin-right:1em;
+}g
 
 /* MOOSE SYNTAX LISTS */
 .collection.with-header .moose-syntax-header{

@@ -16,4 +16,4 @@ m4
 
 Download and install one of our redistributable packages according to your version of Mint.
 
-  * Mint 18: !!package name arch=mint18!!
+- Mint 18: !!package name arch=mint18!!

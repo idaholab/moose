@@ -1,12 +1,10 @@
 #pylint: disable=missing-docstring
 import re
 import os
-import collections
 import codecs
+import logging
 
 import anytree
-
-import mooseutils
 
 import MooseDocs
 from MooseDocs import common
@@ -15,64 +13,43 @@ from MooseDocs.base import components
 from MooseDocs.extensions import command, alert, floats, core, autolink
 from MooseDocs.tree import tokens, html
 
+LOG = logging.getLogger(__name__)
+
 def make_extension(**kwargs):
     return SQAExtension(**kwargs)
-
-#: tuple for storing "requirement" from test specification
-Requirement = collections.namedtuple('Requirement', "name path filename requirement design issues")
-
-def _get_requirements():
-    """
-
-    Helper for examining test specification for "requirements."
-
-    TODO: This should be updated to accept an arbitrary directories and re-factored a bit to avoid
-          the six levels of nesting.
-    """
-
-    directories = [os.path.join(MooseDocs.ROOT_DIR, 'test', 'tests')]
-    spec = 'tests'
-    out = set()
-    for location in directories:
-        for base, _, files in os.walk(location):
-            for fname in files:
-                if fname == spec:
-                    full_file = os.path.join(base, fname)
-                    root = mooseutils.hit_load(full_file)
-                    for child in root.children[0]:
-                        #TODO: Make 'issues' optional?
-                        if ('requirement' in child) and ('design' in child) and ('issues' in child):
-                            req = Requirement(name=child.name,
-                                              path=os.path.relpath(base, location),
-                                              filename=full_file,
-                                              requirement=child['requirement'],
-                                              design=child['design'],
-                                              issues=child['issues'])
-                            out.add(req)
-    return out
 
 class SQAExtension(command.CommandExtension):
 
     @staticmethod
     def defaultConfig():
         config = command.CommandExtension.defaultConfig()
+        config['directories'] = ([os.path.join(MooseDocs.ROOT_DIR, 'test', 'tests')],
+                                 "List of directories used to build requirements.")
+        config['specs'] = (['tests'], "List of test specification names to use for building " \
+                                      "requirements.")
         return config
 
     def __init__(self, *args, **kwargs):
         command.CommandExtension.__init__(self, *args, **kwargs)
+        self.__requirements = None
 
-         #TODO: re-compute on reinit and move to the command object
-        self.requirements = _get_requirements()
+    @property
+    def requirements(self):
+        """Return the requirements dictionary."""
+        return self.__requirements
 
+    def reinit(self):
+        """
+        Recreate the requirements.
+        """
+        self.__requirements = common.get_requirements(self.get('directories'), self.get('specs'))
 
     def extend(self, reader, renderer):
         self.requires(command, alert, floats, core)
 
         self.addCommand(SQATemplateLoadCommand())
         self.addCommand(SQATemplateItemCommand())
-
         self.addCommand(SQARequirementsCommand())
-
         self.addCommand(SQADocumentItemCommand())
 
         renderer.add(SQATemplateItem, RenderSQATemplateItem())
@@ -84,12 +61,14 @@ class SQADocumentItem(tokens.Token):
 
 class SQATemplateItem(tokens.Token):
     PROPERTIES = [tokens.Property('key', ptype=unicode, required=True),
-                  tokens.Property('use_default', ptype=bool, required=True)]
+                  tokens.Property('heading', ptype=tokens.Token)]
+
 class SQARequirementMatrix(tokens.OrderedList):
-    pass
+    PROPERTIES = [tokens.Property('heading', ptype=unicode),
+                  tokens.Property('prefix', ptype=unicode, required=True)]
 
 class SQARequirementMatrixItem(tokens.ListItem):
-    pass
+    PROPERTIES = [tokens.Property('number', ptype=int, default=1)]
 
 class SQARequirementsCommand(command.CommandComponent):
     COMMAND = 'sqa'
@@ -98,45 +77,60 @@ class SQARequirementsCommand(command.CommandComponent):
     @staticmethod
     def defaultSettings():
         config = command.CommandComponent.defaultSettings()
-        config['link_tests'] = (True, "Enable/disable the linking of test specifications and " \
-                                      "test files.")
+        config['link'] = (True, "Enable/disable the linking of test specifications and " \
+                                 "test files.")
+        config['link-spec'] = (True, "Enable/disable the link of the test specification only, " \
+                               "the 'link' setting must be true.")
+        config['link-design'] = (True, "Enable/disable the link of the test design only, " \
+                                 "the 'link' setting must be true.")
+        config['link-issues'] = (True, "Enable/disable the link of the test issues only, " \
+                                 "the 'link' setting must be true.")
+
         return config
 
     def createToken(self, info, parent):
-        matrix = SQARequirementMatrix(parent)
-        for req in self.extension.requirements:
-            item = SQARequirementMatrixItem(matrix)
-            self.translator.reader.parse(item, unicode(req.requirement))
 
-            #TODO: Make option
-            p = tokens.Paragraph(item, 'p')
-            tokens.String(p, content=u'Specification: ')
+        number = 0
+        for group, requirements in self.extension.requirements.iteritems():
+            number += 1
+            matrix = SQARequirementMatrix(parent,
+                                          heading=unicode(group),
+                                          prefix=u'F{}'.format(number))
+            for i, req in enumerate(requirements):
+                self._addRequirement(matrix, req, i+1)
 
+        return parent
 
-            with codecs.open(req.filename, encoding='utf-8') as fid:
-                content = fid.read()
+    def _addRequirement(self, parent, req, number):
+        item = SQARequirementMatrixItem(parent, number=number, id_=req.path)
+        self.translator.reader.parse(item, unicode(req.requirement))
 
-            floats.ModalLink(p, 'a', tooltip=False, url=u"#",
-                             string=u"{}:{}".format(req.path, req.name),
-                             title=tokens.String(None, content=unicode(req.filename)),
-                             content=tokens.Code(None, language=u'text', code=content))
+        if self.settings['link']:
+            if self.settings['link-spec']:
+                p = tokens.Paragraph(item, 'p')
+                tokens.String(p, content=u'Specification: ')
 
-            #TODO: Make option
-            if req.design:
+                with codecs.open(req.filename, encoding='utf-8') as fid:
+                    content = fid.read()
+
+                floats.ModalLink(p, 'a', tooltip=False, url=u"#",
+                                 string=u"{}:{}".format(req.path, req.name),
+                                 title=tokens.String(None, content=unicode(req.filename)),
+                                 content=tokens.Code(None, language=u'text', code=content))
+
+            if self.settings['link-design'] and req.design:
                 p = tokens.Paragraph(item, 'p')
                 tokens.String(p, content=u'Design: ')
                 for design in req.design.split():
                     autolink.AutoShortcutLink(p, key=unicode(design))
 
-            #TODO: Make option
-            if req.issues:
+            if self.settings['link-issues'] and req.issues:
                 p = tokens.Paragraph(item, 'p')
                 tokens.String(p, content=u'Issues: ')
                 for issue in req.issues.split():
                     url = u"https://github.com/idaholab/moose/issues/{}".format(issue[1:])
                     tokens.Link(p, url=url, string=unicode(issue))
 
-        return parent
 
 class SQATemplateLoadCommand(command.CommandComponent):
     COMMAND = 'sqa'
@@ -189,14 +183,22 @@ class SQATemplateItemCommand(command.CommandComponent):
     def defaultSettings():
         config = command.CommandComponent.defaultSettings()
         config['key'] = (None, "The name of the template item which the content is to replace.")
-        config['use_default'] = (False, "Dislpay the default if template item is not provided in " \
-                                        "the parent document.")
+        config['heading'] = (None, "The section heading (optional).")
+        config['heading-level'] = (3, "The heading level, if 'heading' is used.")
+        config['required'] = (True, "The section is required.")
         return config
 
     def createToken(self, info, parent):
-        return SQATemplateItem(parent,
-                               key=self.settings['key'],
-                               use_default=self.settings['use_default'])
+        key = self.settings['key']
+        item = SQATemplateItem(parent, key=key)
+
+        heading = self.settings.get('heading', None)
+        if heading:
+            item.heading = tokens.Heading(None, #pylint: disable=attribute-defined-outside-init
+                                          level=int(self.settings['heading-level']), id_=key)
+            self.translator.reader.parse(item.heading, heading)
+
+        return item
 
 class SQADocumentItemCommand(command.CommandComponent):
     COMMAND = 'sqa'
@@ -218,25 +220,27 @@ class RenderSQATemplateItem(components.RenderComponent):
 
     def createMaterialize(self, token, parent):
 
-
         key = token.key
-
-        #def func(node):
         func = lambda n: isinstance(n, SQADocumentItem) and (n.key == key)
         replacement = anytree.search.find(token.root, filter_=func, maxlevel=2)
 
         if replacement:
+
+            if token.heading is not None:
+                self.translator.renderer.process(parent, token.heading)
+
             self.translator.renderer.process(parent, replacement)
 
-        elif token.use_default:
-            for child in token.children:
-                self.translator.renderer.process(parent, child)
-
+            # Remove item so it doesn't render again
+            replacement.parent = None
+            for child in replacement:
+                child.parent = None
+#
         else:
-            err = alert.AlertToken(token.parent, brand='error',
-                                   title=u'Missing Template Item "{}"'.format(key))
+            content = tokens.String(None, content=u'Missing Template Item "{}"'.format(key))
+            err = alert.AlertToken(token.parent, brand=u'error', title=content)
 
-            filename = token.root.page.source
+            filename = self.translator.current.local
             self.translator.reader.parse(err, ERROR_CONTENT.format(key, filename))
 
             for child in token.children:
@@ -257,8 +261,20 @@ template item here.
 
 class RenderSQARequirementMatrix(core.RenderUnorderedList):
     def createMaterialize(self, token, parent):
-        return html.Tag(parent, 'ol', class_="collection")
+        if token.heading:
+            collection = html.Tag(parent, 'ul', class_="moose-requirements collection with-header")
+            html.Tag(collection, 'li', string=token.heading, class_='collection-header')
+            return collection
+        else:
+            return html.Tag(parent, 'ul', class_="collection")
 
 class RenderSQARequirementMatrixItem(core.RenderListItem):
     def createMaterialize(self, token, parent): #pylint: disable=no-self-use,unused-argument
-        return html.Tag(parent, 'li', class_="collection-item")
+        li = html.Tag(parent, 'li', class_="collection-item", **token.attributes)
+        num = html.Tag(li, 'span', string=u'{}.{}'.format(token.parent.prefix, token.number),
+                       class_='moose-requirement-number')
+        id_ = token.get('id', None)
+        if id_:
+            num.addClass('tooltipped')
+            num['data-tooltip'] = id_
+        return html.Tag(li, 'span', class_='moose-requirement-content')

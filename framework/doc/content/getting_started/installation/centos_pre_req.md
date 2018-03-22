@@ -16,4 +16,4 @@ libX11-devel
 
 Download and install one our redistributable packages according to your version of CentOS
 
-  * CentOS 7: !!package name arch=centos7!!
+- CentOS 7: !!package name arch=centos7!!
