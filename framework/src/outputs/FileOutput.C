@@ -108,7 +108,7 @@ FileOutput::FileOutput(const InputParameters & parameters)
 }
 
 std::string
-FileOutput::getOutputFileBase(MooseApp & app, std::string suffix)
+FileOutput::getOutputFileBase(const MooseApp & app, std::string suffix)
 {
   // If the App has an outputfile, then use it (MultiApp scenario)
   if (!app.getOutputFileBase().empty())
