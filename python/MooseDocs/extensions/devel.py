@@ -47,8 +47,8 @@ class Example(command.CommandComponent):
         master = floats.Float(parent, **self.attributes)
         caption = floats.Caption(master, prefix=self.settings['prefix'], key=self.attributes['id'])
 
-        grammer = self.reader.lexer.grammer('inline')
-        self.reader.lexer.tokenize(caption, grammer, unicode(self.settings['caption']), match.line)
+        grammar = self.reader.lexer.grammar('inline')
+        self.reader.lexer.tokenize(caption, grammar, unicode(self.settings['caption']), match.line)
 
         data = match['block'] if 'block' in match else match['inline']
         example = ExampleToken(master, data=data)
@@ -80,8 +80,8 @@ class ComponentSettings(command.CommandComponent):
         if self.settings['caption']:
             caption = floats.Caption(master, prefix=self.settings['prefix'],
                                      key=self.attributes['id'])
-            grammer = self.reader.lexer.grammer('inline')
-            self.reader.lexer.tokenize(caption, grammer, self.settings['caption'], match.line)
+            grammar = self.reader.lexer.grammar('inline')
+            self.reader.lexer.tokenize(caption, grammar, self.settings['caption'], match.line)
 
         try:
             mod = importlib.import_module(self.settings['module'])

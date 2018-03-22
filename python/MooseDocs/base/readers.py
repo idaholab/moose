@@ -67,7 +67,7 @@ class Reader(mixins.ConfigObject, mixins.TranslatorObject, mixins.ComponentObjec
         self.translator.executeExtensionFunction('preTokenize', root, config)
 
         # Tokenize
-        self.__lexer.tokenize(root, self.__lexer.grammer(group), content)
+        self.__lexer.tokenize(root, self.__lexer.grammar(group), content)
 
         # Post-tokenize
         self.translator.executeExtensionFunction('postTokenize', root, config)
@@ -84,14 +84,14 @@ class Reader(mixins.ConfigObject, mixins.TranslatorObject, mixins.ComponentObjec
         Inputs:
             group[str]: Name of the lexer group to append.
             component[components.TokenComponent]: The tokenize component to add.
-            location[str|int]: The location to insert this component (see Grammer.py)
+            location[str|int]: The location to insert this component (see Grammar.py)
         """
         if MooseDocs.LOG_LEVEL == logging.DEBUG:
             common.check_type("group", group, str)
             common.check_type("component", component, MooseDocs.base.components.TokenComponent)
             common.check_type("location", location, (str, int))
 
-        # Define the name of the component being added (for sorting within Grammer)
+        # Define the name of the component being added (for sorting within Grammar)
         name = component.__class__.__name__
 
         # Store and init component, checking self.initialized() allows this object to be used
@@ -118,12 +118,12 @@ class MarkdownReader(Reader):
 
     def addBlock(self, component, location='_end'):
         """
-        Add a component to the 'block' grammer.
+        Add a component to the 'block' grammar.
         """
         Reader.add(self, MooseDocs.BLOCK, component, location)
 
     def addInline(self, component, location='_end'):
         """
-        Add an inline component to the 'inline' grammer.
+        Add an inline component to the 'inline' grammar.
         """
         Reader.add(self, MooseDocs.INLINE, component, location)

@@ -34,9 +34,9 @@ class Pattern(object):
         self.regex = regex
         self.function = function
 
-class Grammer(object):
+class Grammar(object):
     """
-    Defines a generic Grammer that contains the Token objects necessary to build an
+    Defines a generic Grammar that contains the Token objects necessary to build an
     abstract syntax tree (AST). This class defines the order that the tokens will be
     applied to the Lexer object and the associated regular expression that define the
     text associated with the Token object.
@@ -50,10 +50,10 @@ class Grammer(object):
 
     def add(self, name, regex, function, location='_end'):
         """
-        Method for adding a Token definition to the Grammer object.
+        Method for adding a Token definition to the Grammar object.
 
         Inputs:
-            name[str]: The name of the grammer definition, this is utilized for
+            name[str]: The name of the grammar definition, this is utilized for
                        ordering of the definitions.
             regex[re]: A compiled re object that defines what text the token should
                        be associated.
@@ -101,7 +101,7 @@ class Grammer(object):
         out = []
         for obj in self.__patterns:
             out.append(str(obj))
-        return 'Grammer:\n' + ', '.join(out)
+        return 'Grammar:\n' + ', '.join(out)
 
 class LexerInformation(object):
     """
@@ -109,7 +109,7 @@ class LexerInformation(object):
 
     Inputs:
         match[re.Match]: The regex match object from which a Token object is to be created.
-        pattern[Grammer.Pattern]: Grammer pattern definition, see Grammer.py.
+        pattern[Grammar.Pattern]: Grammar pattern definition, see Grammar.py.
         line[int]: Current line number in supplied parsed text.
     """
     def __init__(self, match=None, pattern=None, line=None):
@@ -133,7 +133,7 @@ class LexerInformation(object):
     @property
     def pattern(self):
         """
-        Return the Grammer.Pattern for the regex match.
+        Return the Grammar.Pattern for the regex match.
         """
         return self.__pattern
 
@@ -189,8 +189,8 @@ class Lexer(object):
     Simple regex base lexer.
 
     This provides a basic linear means to use regular expressions to tokenize text. The tokenize
-    method starts with the complete text, loops through all the patterns (defined in Grammer
-    object). When a match is found the function attached to the grammer is called. The text is then
+    method starts with the complete text, loops through all the patterns (defined in Grammar
+    object). When a match is found the function attached to the grammar is called. The text is then
     searched again starting at the end position of the last match.
 
     Generally, this object should not be used. It is designed to provide the general capability
@@ -199,18 +199,18 @@ class Lexer(object):
     def __init__(self):
         pass
 
-    def tokenize(self, parent, grammer, text, line=1):
+    def tokenize(self, parent, grammar, text, line=1):
         """
         Perform tokenization of the supplied text.
 
         Inputs:
             parent[tree.tokens]: The parent token to which the new token(s) should be attached.
-            grammer[Grammer]: Object containing the grammer (defined by regexs) to search.
+            grammar[Grammar]: Object containing the grammar (defined by regexs) to search.
             text[unicode]: The text to tokenize.
             line[int]: The line number to startwith, this allows for nested calls to begin with
                        the correct line.
 
-        NOTE: If the functions attached to the Grammer object raise a TokenizeException it will
+        NOTE: If the functions attached to the Grammar object raise a TokenizeException it will
               be caught by this object and converted into an Exception token. This allows for
               the entire text to be tokenized and have the errors report upon completion. The
               TokenizeException also contains information about the error, via a LexerInformation
@@ -222,7 +222,7 @@ class Lexer(object):
         pos = 0
         while pos < n:
             match = None
-            for pattern in grammer:
+            for pattern in grammar:
                 match = pattern.regex.match(text, pos)
                 if match:
                     info = LexerInformation(match, pattern, line)
@@ -231,7 +231,7 @@ class Lexer(object):
                     except Exception as e: #pylint: disable=broad-except
                         obj = tokens.ExceptionToken(parent,
                                                     info=info,
-                                                    message=e.message,
+                                                    message=unicode(e.message),
                                                     traceback=traceback.format_exc())
                     if obj is not None:
                         obj.info = info #TODO: set ptype on base Token, change to info
@@ -246,7 +246,7 @@ class Lexer(object):
 
         # Produce Exception token if text remains that was not matched
         if pos < n:
-            msg = 'Unprocessed text exists.'
+            msg = u'Unprocessed text exists.'
             tokens.ErrorToken(parent, info=info, message=msg)
 
     def buildObject(self, parent, pattern, info): #pylint: disable=no-self-use
@@ -261,47 +261,47 @@ class Lexer(object):
 
 class RecursiveLexer(Lexer):
     """
-    A lexer that accepts mulitple grammers and automatically processes the content recusively
+    A lexer that accepts mulitple grammars and automatically processes the content recusively
     base on regex group names.
 
     Inputs:
-        base[str]: The starting (or base) grammer group name to begin tokenization.
-        *args: Additional grammer group names that will be included.
+        base[str]: The starting (or base) grammar group name to begin tokenization.
+        *args: Additional grammar group names that will be included.
 
     Example:
-       Given a regular expression such as '(?P<foo>.*>)'. If this object has a 'grammer' object
+       Given a regular expression such as '(?P<foo>.*>)'. If this object has a 'grammar' object
        defined with the name 'foo', tokenize will automatically be called with the content
-       of the 'foo' group using the 'foo' grammer.
+       of the 'foo' group using the 'foo' grammar.
     """
     def __init__(self, base, *args):
         Lexer.__init__(self)
-        self._grammers = collections.OrderedDict()
-        self._grammers[base] = Grammer()
+        self._grammars = collections.OrderedDict()
+        self._grammars[base] = Grammar()
         for name in args:
-            self._grammers[name] = Grammer()
+            self._grammars[name] = Grammar()
 
-    def grammer(self, group=None):
+    def grammar(self, group=None):
         """
-        Return the Grammer object by group name.
+        Return the Grammar object by group name.
 
         Inputs:
-            group[str]: The name of the grammer group to return, if not given the base is returned.
+            group[str]: The name of the grammar group to return, if not given the base is returned.
         """
         if group is None:
-            group = self._grammers.keys()[0]
-        return self._grammers[group]
+            group = self._grammars.keys()[0]
+        return self._grammars[group]
 
-    def grammers(self):
+    def grammars(self):
         """
-        Return the complete dictionary of Grammer objects.
+        Return the complete dictionary of Grammar objects.
         """
-        return self._grammers
+        return self._grammars
 
     def add(self, group, *args):
         """
         Append a component to the provided group.
         """
-        self.grammer(group).add(*args)
+        self.grammar(group).add(*args)
 
     def buildObject(self, parent, pattern, info):
         """
@@ -314,9 +314,9 @@ class RecursiveLexer(Lexer):
         obj = super(RecursiveLexer, self).buildObject(parent, pattern, info)
 
         if (obj is not None) and (obj is not parent) and obj.recursive:
-            for key, grammer in self._grammers.iteritems():
+            for key, grammar in self._grammars.iteritems():
                 if key in info.keys():
                     text = info[key]
                     if text is not None:
-                        self.tokenize(obj, grammer, text, info.line)
+                        self.tokenize(obj, grammar, text, info.line)
         return obj

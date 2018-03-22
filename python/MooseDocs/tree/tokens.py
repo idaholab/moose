@@ -73,7 +73,7 @@ class String(Token):
     PROPERTIES = [Property('content', ptype=unicode)]
 
 class ErrorToken(Token):
-    PROPERTIES = [Property('message', ptype=str)]
+    PROPERTIES = [Property('message', ptype=unicode)]
 
     def report(self, current):
 

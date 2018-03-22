@@ -1672,19 +1672,6 @@ Water97FluidProperties::densityRegion3(Real pressure, Real temperature) const
   return 1.0 / volume;
 }
 
-Real Water97FluidProperties::henryConstant(Real /*temperature*/) const
-{
-  mooseError(name(), ": henryConstant() not defined");
-}
-
-void
-Water97FluidProperties::henryConstant_dT(Real /* temperature */,
-                                         Real & /* Kh */,
-                                         Real & /* dKh_dT */) const
-{
-  mooseError(name(), ": henryConstant_dT() not defined");
-}
-
 unsigned int
 Water97FluidProperties::inRegionPH(Real pressure, Real enthalpy) const
 {

@@ -264,16 +264,3 @@ NaClFluidProperties::h_dpT(
   dh_dp = 44.14 * 1.0e-5;
   dh_dT = 8.7664e2 + 2.0 * 6.4139e-2 * Tc + 3.0 * 8.8101e-5 * Tc * Tc;
 }
-
-Real NaClFluidProperties::henryConstant(Real /*temperature*/) const
-{
-  mooseError(name(), ": henryConstant() is not defined");
-}
-
-void
-NaClFluidProperties::henryConstant_dT(Real /* temperature */,
-                                      Real & /* Kh */,
-                                      Real & /* dKh_dT */) const
-{
-  mooseError(name(), ": henryConstant_dT() is not defined");
-}

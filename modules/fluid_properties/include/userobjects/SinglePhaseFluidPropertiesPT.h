@@ -270,7 +270,7 @@ public:
    * @param temperature fluid temperature (K)
    * @return Henry's constant
    */
-  virtual Real henryConstant(Real temperature) const = 0;
+  virtual Real henryConstant(Real temperature) const;
 
   /**
    * Henry's law constant for dissolution in water and derivative wrt temperature
@@ -278,7 +278,7 @@ public:
    * @param[out] Kh Henry's constant
    * @param[out] dKh_dT derivative of Kh wrt temperature
    */
-  virtual void henryConstant_dT(Real temperature, Real & Kh, Real & dKh_dT) const = 0;
+  virtual void henryConstant_dT(Real temperature, Real & Kh, Real & dKh_dT) const;
 
 protected:
   /**

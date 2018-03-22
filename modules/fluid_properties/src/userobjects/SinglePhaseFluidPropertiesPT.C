@@ -109,3 +109,16 @@ Real SinglePhaseFluidPropertiesPT::k_from_rho_T(Real /*density*/, Real /*tempera
 {
   mooseError(name(), ": k_from_rho_T is not implemented.");
 }
+
+Real SinglePhaseFluidPropertiesPT::henryConstant(Real /*temperature*/) const
+{
+  mooseError(name(), ": henryConstant() is not implemented");
+}
+
+void
+SinglePhaseFluidPropertiesPT::henryConstant_dT(Real /*temperature*/,
+                                               Real & /*Kh*/,
+                                               Real & /*dKh_dT*/) const
+{
+  mooseError(name(), ": henryConstant_dT() is not implemented");
+}

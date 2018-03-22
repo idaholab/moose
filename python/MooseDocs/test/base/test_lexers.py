@@ -16,43 +16,43 @@ class Proxy(object):
     def __call__(self, *args):
         pass
 
-class TestGrammer(unittest.TestCase):
+class TestGrammar(unittest.TestCase):
     """
-    Test Grammer object.
+    Test Grammar object.
     """
-    def testGrammer(self):
-        grammer = lexers.Grammer()
+    def testGrammar(self):
+        grammar = lexers.Grammar()
 
         with self.assertRaises(exceptions.MooseDocsException) as e:
-            grammer.add(1, [], [], '_end')
+            grammar.add(1, [], [], '_end')
         self.assertIn("'name' must be of type", e.exception.message)
 
         with self.assertRaises(exceptions.MooseDocsException) as e:
-            grammer.add('foo', 1, [], '_end')
+            grammar.add('foo', 1, [], '_end')
         self.assertIn("'regex' must be of type", e.exception.message)
 
         with self.assertRaises(exceptions.MooseDocsException) as e:
-            grammer.add('foo', re.compile(''), 1, '_end')
+            grammar.add('foo', re.compile(''), 1, '_end')
         self.assertIn("'function' must be callable", e.exception.message)
 
         with self.assertRaises(exceptions.MooseDocsException) as e:
-            grammer.add('foo', re.compile(''), Proxy(), [])
+            grammar.add('foo', re.compile(''), Proxy(), [])
         self.assertIn("'location' must be of type", e.exception.message)
 
     def testPatterns(self):
         """
         Test the multiple patterns can be added.
 
-        NOTE: The underlying Storage object that the Grammer class uses is thoroughly tested
+        NOTE: The underlying Storage object that the Grammar class uses is thoroughly tested
               in the test/common/test_Storage.py.
         """
-        grammer = lexers.Grammer()
-        grammer.add('foo', re.compile(''), Proxy())
-        grammer.add('bar', re.compile(''), Proxy())
-        self.assertEqual(grammer[0].name, 'foo')
-        self.assertEqual(grammer[1].name, 'bar')
-        self.assertEqual(grammer['foo'].name, 'foo')
-        self.assertEqual(grammer['bar'].name, 'bar')
+        grammar = lexers.Grammar()
+        grammar.add('foo', re.compile(''), Proxy())
+        grammar.add('bar', re.compile(''), Proxy())
+        self.assertEqual(grammar[0].name, 'foo')
+        self.assertEqual(grammar[1].name, 'bar')
+        self.assertEqual(grammar['foo'].name, 'foo')
+        self.assertEqual(grammar['bar'].name, 'bar')
 
 class TestLexerInformation(unittest.TestCase):
     """
@@ -92,14 +92,14 @@ class TestLexer(unittest.TestCase):
     """
     def testTokenize(self):
         root = tokens.Token(None)
-        grammer = lexers.Grammer()
-        grammer.add('foo', re.compile('(?P<content>\w+) *'), FooBarComponent())
-        grammer.add('word', re.compile('(?P<content>\w+) *'), WordComponent())
+        grammar = lexers.Grammar()
+        grammar.add('foo', re.compile('(?P<content>\w+) *'), FooBarComponent())
+        grammar.add('word', re.compile('(?P<content>\w+) *'), WordComponent())
 
         lexer = lexers.Lexer()
 
         # Basic
-        lexer.tokenize(root, grammer, u'foo bar')
+        lexer.tokenize(root, grammar, u'foo bar')
         self.assertIsInstance(root(0), FooBar)
         self.assertEqual(root(0).content, u'foo')
         self.assertIsInstance(root(1), FooBar)
@@ -107,7 +107,7 @@ class TestLexer(unittest.TestCase):
 
         # Fall through
         root = tokens.Token(None)
-        lexer.tokenize(root, grammer, u'foo other bar')
+        lexer.tokenize(root, grammar, u'foo other bar')
         self.assertIsInstance(root(0), FooBar)
         self.assertEqual(root(0).content, u'foo')
         self.assertIsInstance(root(1), tokens.Word)
@@ -119,11 +119,11 @@ class TestLexer(unittest.TestCase):
     def testTokenizeWithExtraContent(self):
         # Extra
         root = tokens.Token(None)
-        grammer = lexers.Grammer()
-        grammer.add('foo', re.compile('(?P<content>\w+) *'), FooBarComponent())
+        grammar = lexers.Grammar()
+        grammar.add('foo', re.compile('(?P<content>\w+) *'), FooBarComponent())
 
         lexer = lexers.Lexer()
-        lexer.tokenize(root, grammer, u'foo ???')
+        lexer.tokenize(root, grammar, u'foo ???')
         self.assertIsInstance(root(0), FooBar)
         self.assertEqual(root(0).content, u'foo')
         self.assertIsInstance(root(1), tokens.ErrorToken)
@@ -146,7 +146,7 @@ class TestRecursiveLexer(unittest.TestCase):
         lexer.add('inline', 'bar', re.compile('(?P<content>\w)'), WordComponent())
 
         root = tokens.Token(None)
-        lexer.tokenize(root, lexer.grammer(), u'foo')
+        lexer.tokenize(root, lexer.grammar(), u'foo')
         self.assertIsInstance(root(0), tokens.Token)
         self.assertNotIsInstance(root(0), tokens.Word)
         self.assertIsInstance(root(0)(0), tokens.Word)

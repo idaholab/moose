@@ -266,10 +266,6 @@ public:
    */
   Real densityRegion3(Real pressure, Real temperature) const;
 
-  virtual Real henryConstant(Real temperature) const override;
-
-  virtual void henryConstant_dT(Real temperature, Real & Kh, Real & dKh_dT) const override;
-
   /**
    * Backwards equation T(p, h)
    * From Revised Release on the IAPWS Industrial Formulation 1997 for the
