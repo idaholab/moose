@@ -95,4 +95,8 @@
     type = PythonUnitTest
     input = test_DuplicateTestNames.py
   [../]
+  [./arbitrary_tests]
+    type = PythonUnitTest
+    input = test_ArbitrarySpecFile.py
+  [../]
 []
