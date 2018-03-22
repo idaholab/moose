@@ -36,11 +36,6 @@ protected:
 
   MooseEnum _component;
 
-  Real _C1_real;
-  Real _C1_imag;
-
-  Real _C2_real;
-  Real _C2_imag;
 };
 
 #endif // MMSTESTFUNC_H
