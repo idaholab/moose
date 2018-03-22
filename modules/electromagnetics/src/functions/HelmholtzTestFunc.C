@@ -1,4 +1,5 @@
 #include "HelmholtzTestFunc.h"
+#include <complex>
 
 template <>
 InputParameters
@@ -43,66 +44,32 @@ HelmholtzTestFunc::HelmholtzTestFunc(const InputParameters & parameters)
 Real
 HelmholtzTestFunc::value(Real t, const Point & p)
 {
-  // Initialize angle for calculation of polar form of complex number d - jh
-  Real _theta = std::atan2(-_h, _d);
+  std::complex<double> _C1(0, 0);
+  std::complex<double> _C2(0, 0);
+  std::complex<double> _lambda(0, 0);
+  std::complex<double> _lambda_L(0, 0);
+  std::complex<double> val(0, 0);
 
-  Real _lambda_real =
-      std::pow((_d * _d + _h * _h), -0.25) *
-      (_a.value(t, p) * std::cos(_theta / 2) - _b.value(t, p) * std::sin(_theta / 2));
+  std::complex<double> _g0(_g0_real, _g0_imag);
+  std::complex<double> _gL(_gL_real, _gL_imag);
+  std::complex<double> _c(_a.value(t, p), _b.value(t, p));
+  std::complex<double> _c_L(_a.value(t, _L), _b.value(t, _L));
+  std::complex<double> _k(_d, _h);
 
-  Real _lambda_real_L =
-      std::pow((_d * _d + _h * _h), -0.25) *
-      (_a.value(t, _L) * std::cos(_theta / 2) - _b.value(t, _L) * std::sin(_theta / 2));
+  _lambda = _c / std::sqrt(_k);
+  _lambda_L = _c_L / std::sqrt(_k);
 
-  Real _lambda_imag =
-      std::pow((_d * _d + _h * _h), -0.25) *
-      (_a.value(t, p) * std::sin(_theta / 2) + _b.value(t, p) * std::cos(_theta / 2));
+  _C1 = _g0;
+  _C2 = (_gL - _g0 * std::cos(_lambda_L * _L)) / std::sin(_lambda_L * _L);
 
-  Real _lambda_imag_L =
-      std::pow((_d * _d + _h * _h), -0.25) *
-      (_a.value(t, _L) * std::sin(_theta / 2) + _b.value(t, _L) * std::cos(_theta / 2));
-
-  Real _coeff = std::pow((std::sin(_lambda_real_L * _L) * std::cosh(_lambda_imag_L * _L)), 2) +
-                std::pow((std::cos(_lambda_real_L * _L) * std::sinh(_lambda_imag_L * _L)), 2);
-
-  _C1_real = _g0_real;
-  _C2_real = (_gL_real * std::sin(_lambda_real_L * _L) * std::cosh(_lambda_imag_L * _L) +
-              _gL_imag * std::cos(_lambda_real_L * _L) * std::sinh(_lambda_imag_L * _L) -
-              _g0_real * std::cos(_lambda_real_L * _L) * std::sin(_lambda_real_L * _L) *
-                  std::pow(std::cosh(_lambda_imag_L * _L), 2) +
-              _g0_real * std::cos(_lambda_real_L * _L) * std::sin(_lambda_real_L * _L) *
-                  std::pow(std::sinh(_lambda_imag_L * _L), 2) -
-              _g0_imag * std::pow(std::cos(_lambda_real_L * _L), 2) *
-                  std::cosh(_lambda_imag_L * _L) * std::sinh(_lambda_imag_L * _L) -
-              _g0_imag * std::pow(std::sin(_lambda_real_L * _L), 2) *
-                  std::sinh(_lambda_imag_L * _L) * std::cosh(_lambda_imag_L * _L)) /
-             _coeff;
-
-  _C1_imag = _g0_imag;
-  _C2_imag = (-_gL_real * std::cos(_lambda_real_L * _L) * std::sinh(_lambda_imag_L * _L) +
-              _gL_imag * std::sin(_lambda_real_L * _L) * std::cosh(_lambda_imag_L * _L) +
-              _g0_real * std::pow(std::cos(_lambda_real_L * _L), 2) *
-                  std::cosh(_lambda_imag_L * _L) * std::sinh(_lambda_imag_L * _L) +
-              _g0_real * std::pow(std::sin(_lambda_real_L * _L), 2) *
-                  std::sinh(_lambda_imag_L * _L) * std::cosh(_lambda_imag_L * _L) -
-              _g0_imag * std::cos(_lambda_real_L * _L) * std::sin(_lambda_real_L * _L) *
-                  std::pow(std::cosh(_lambda_imag_L * _L), 2) +
-              _g0_imag * std::sin(_lambda_real_L * _L) * std::cos(_lambda_real_L * _L) *
-                  std::pow(std::sinh(_lambda_imag_L * _L), 2)) /
-             _coeff;
+  val = _C1 * std::cos(_lambda * p(0)) + _C2 * std::sin(_lambda * p(0));
 
   if (_component == "real")
   {
-    return _C1_real * std::cos(_lambda_real * p(0)) * std::cosh(_lambda_imag * p(0)) +
-           _C1_imag * std::sin(_lambda_real * p(0)) * std::sinh(_lambda_imag * p(0)) +
-           _C2_real * std::sin(_lambda_real * p(0)) * std::cosh(_lambda_imag * p(0)) -
-           _C2_imag * std::cos(_lambda_real * p(0)) * std::sinh(_lambda_imag * p(0));
+    return val.real();
   }
   else
   {
-    return -_C1_real * std::sin(_lambda_real * p(0)) * std::sinh(_lambda_imag * p(0)) +
-           _C1_imag * std::cos(_lambda_real * p(0)) * std::cosh(_lambda_imag * p(0)) +
-           _C2_real * std::cos(_lambda_real * p(0)) * std::sinh(_lambda_imag * p(0)) +
-           _C2_imag * std::sin(_lambda_real * p(0)) * std::cosh(_lambda_imag * p(0));
+    return val.imag();
   }
 }
