@@ -1,4 +1,5 @@
 #include "MMSTestFunc.h"
+#include <complex>
 
 template <>
 InputParameters
@@ -8,11 +9,11 @@ validParams<MMSTestFunc>()
   params.addClassDescription(
       "Function of RHS for manufactured solution in spatial_constant_helmholtz test.");
   params.addRequiredParam<Real>("L", "Length of 1D test domain, where 0 < x < L");
+  params.addRequiredParam<FunctionName>("a",
+                                        "Real component constant of function of squared "
+                                        "coefficient c in the PDE, -u'' - c^2 * u = -F");
   params.addRequiredParam<FunctionName>(
-      "a",
-      "Real component constant of function of squared coefficient c in the PDE, u'' + c^2 * u = 0");
-  params.addRequiredParam<FunctionName>(
-      "b", "Imaginary component function of squared coefficient c in the PDE, u'' + c^2 * u = 0");
+      "b", "Imaginary component function of squared coefficient c in the PDE, -u'' - c^2 * u = -F");
   params.addParam<Real>("d", 1.0, "Real component of optional laplacian coefficient");
   params.addParam<Real>("h", 0.0, "Imaginary component of optional laplacian coefficient");
   params.addRequiredParam<Real>("g0_real", "Real component of DirichletBC where x = 0.");
@@ -45,122 +46,42 @@ Real
 MMSTestFunc::value(Real t, const Point & p)
 {
 
-  Real _a_func = _a.value(t, p);
-  Real _a_func_L = _a.value(t, _L);
+  Real _val = 0;
+  std::complex<double> _F(0, 0);
+
+  std::complex<double> _g0(_g0_real, _g0_imag);
+  std::complex<double> _gL(_gL_real, _gL_imag);
+
   Real _a_grad = _a.gradient(t, p)(0);
-  Real _a_secondDeriv = 0; // 2 * _a_func / (_L * _L);
-
-  Real _b_func = _b.value(t, p);
-  Real _b_func_L = _b.value(t, _L);
   Real _b_grad = _b.gradient(t, p)(0);
-  Real _b_secondDeriv = 0; // 2 * _b_func / (_L * _L);
+  // assuming a constant * (1 + x / _L)^2 structure for functions
+  Real _a_second = 2 * _a.value(t, 0) / (_L * _L);
+  Real _b_second = 2 * _b.value(t, 0) / (_L * _L);
 
-  Real _coeff = std::pow((std::sin(_a_func_L * _L) * std::cosh(_b_func_L * _L)), 2) +
-                std::pow((std::cos(_a_func_L * _L) * std::sinh(_b_func_L * _L)), 2);
+  std::complex<double> _c(_a.value(t, p), _b.value(t, p));
+  std::complex<double> _c_L(_a.value(t, _L), _b.value(t, _L));
 
-  _C1_real = _g0_real;
-  _C2_real = (_gL_real * std::sin(_a_func_L * _L) * std::cosh(_b_func_L * _L) +
-              _gL_imag * std::cos(_a_func_L * _L) * std::sinh(_b_func_L * _L) -
-              _g0_real * std::cos(_a_func_L * _L) * std::sin(_a_func_L * _L) *
-                  std::pow(std::cosh(_b_func_L * _L), 2) +
-              _g0_real * std::cos(_a_func_L * _L) * std::sin(_a_func_L * _L) *
-                  std::pow(std::sinh(_b_func_L * _L), 2) -
-              _g0_imag * std::pow(std::cos(_a_func_L * _L), 2) * std::cosh(_b_func_L * _L) *
-                  std::sinh(_b_func_L * _L) -
-              _g0_imag * std::pow(std::sin(_a_func_L * _L), 2) * std::sinh(_b_func_L * _L) *
-                  std::cosh(_b_func_L * _L)) /
-             _coeff;
+  std::complex<double> _c_grad(_a_grad, _b_grad);
+  std::complex<double> _c_second(_a_second, _b_second);
 
-  _C1_imag = _g0_imag;
-  _C2_imag = (-_gL_real * std::cos(_a_func_L * _L) * std::sinh(_b_func_L * _L) +
-              _gL_imag * std::sin(_a_func_L * _L) * std::cosh(_b_func_L * _L) +
-              _g0_real * std::pow(std::cos(_a_func_L * _L), 2) * std::cosh(_b_func_L * _L) *
-                  std::sinh(_b_func_L * _L) +
-              _g0_real * std::pow(std::sin(_a_func_L * _L), 2) * std::sinh(_b_func_L * _L) *
-                  std::cosh(_b_func_L * _L) -
-              _g0_imag * std::cos(_a_func_L * _L) * std::sin(_a_func_L * _L) *
-                  std::pow(std::cosh(_b_func_L * _L), 2) +
-              _g0_imag * std::sin(_a_func_L * _L) * std::cos(_a_func_L * _L) *
-                  std::pow(std::sinh(_b_func_L * _L), 2)) /
-             _coeff;
+  std::complex<double> _C1 = _g0;
 
-  Real _F = 0;
+  std::complex<double> _C2 = (_gL - _g0 * std::cos(_c_L * _L)) / std::sin(_c_L * _L);
 
-  Real Re11 = 0;
-  Real Re12 = 0;
-  Real Im11 = 0;
-  Real Im12 = 0;
-  Real Re23 = 0;
-  Real Re24 = 0;
-  Real Im23 = 0;
-  Real Im24 = 0;
-
-  Real sinSinh = std::sin(_a_func * p(0)) * std::sinh(_b_func * p(0));
-  Real cosCosh = std::cos(_a_func * p(0)) * std::cosh(_b_func * p(0));
-  Real sinCosh = std::sin(_a_func * p(0)) * std::cosh(_b_func * p(0));
-  Real cosSinh = std::cos(_a_func * p(0)) * std::sinh(_b_func * p(0));
-
-  // Real _a_second_x = _a_secondDeriv * p(0);
-  // Real _b_second_x = _b_secondDeriv * p(0);
-  // Real _two_aPrime = 2 * _a_grad;
-  // Real _two_bPrime = 2 * _b_grad;
-  // Real _aPrimeSq = _a_grad * _a_grad * p(0) * p(0);
-  // Real _bPrimeSq = _b_grad * _b_grad * p(0) * p(0);
-  // Real _aPrime_a = 2 * _a_grad * _a_func * p(0);
-  // Real _aPrime_b = 2 * _a_grad * _b_func * p(0);
-  // Real _bPrime_a = 2 * _b_grad * _a_func * p(0);
-  // Real _bPrime_b = 2 * _b_grad * _b_func * p(0);
-
-  Real _a_second_plus_aPrime = _a_secondDeriv * p(0) + 2 * _a_grad;
-  Real _b_second_plus_bPrime = _b_secondDeriv * p(0) + 2 * _b_grad;
-
-  Real _abSq = _a_grad * _a_grad * p(0) * p(0) - _b_grad * _b_grad * p(0) * p(0) +
-               2 * _a_grad * _a_func * p(0) - 2 * _b_grad * _b_func * p(0);
-  Real _aPrime_bPrime = 2 * _a_grad * _b_grad * p(0) * p(0) + 2 * _a_grad * _b_func * p(0) +
-                        2 * _b_grad * _a_func * p(0);
+  _F = -_C1 * ((_c_second * p(0) + 2.0 * _c_grad) * std::sin(_c * p(0)) +
+               (std::pow(_c_grad * p(0), 2) + 2.0 * _c_grad * _c * p(0)) * std::cos(_c * p(0))) +
+       _C2 * ((_c_second * p(0) + 2.0 * _c_grad) * std::cos(_c * p(0)) -
+              (std::pow(_c_grad * p(0), 2) + 2.0 * _c_grad * _c * p(0)) * std::sin(_c * p(0)));
 
   if (_component == "real")
   {
-
-    Re11 = _C1_real * (-sinCosh * _a_second_plus_aPrime + cosSinh * _b_second_plus_bPrime);
-
-    Re12 = _C1_real * (-cosCosh * _abSq - sinSinh * _aPrime_bPrime);
-
-    Im11 = _C1_imag * (cosSinh * _a_second_plus_aPrime + sinCosh * _b_second_plus_bPrime);
-
-    Im12 = _C1_imag * (-sinSinh * _abSq + cosCosh * _aPrime_bPrime);
-
-    Re23 = _C2_real * (cosCosh * _a_second_plus_aPrime + sinSinh * _b_second_plus_bPrime);
-
-    Re24 = _C2_real * (-sinCosh * _abSq + cosSinh * _aPrime_bPrime);
-
-    Im23 = _C2_imag * (sinSinh * _a_second_plus_aPrime - cosCosh * _a_second_plus_aPrime);
-
-    Im24 = _C2_imag * (cosSinh * _abSq + sinCosh * _aPrime_bPrime);
-
-    _F = Re11 + Re12 + Im11 + Im12 + Re23 + Re24 + Im23 + Im24;
+    _val = _F.real();
   }
   else
   {
-
-    Re11 = _C1_real * (-cosSinh * _a_second_plus_aPrime - sinCosh * _b_second_plus_bPrime);
-
-    Re12 = _C1_real * (sinSinh * _abSq - cosCosh * _aPrime_bPrime);
-
-    Im11 = _C1_imag * (-sinCosh * _a_second_plus_aPrime + cosSinh * _b_second_plus_bPrime);
-
-    Im12 = _C1_imag * (-cosCosh * _abSq - sinSinh * _aPrime_bPrime);
-
-    Re23 = _C2_real * (-sinSinh * _a_second_plus_aPrime + cosCosh * _b_second_plus_bPrime);
-
-    Re24 = _C2_real * (-cosSinh * _abSq - sinCosh * _aPrime_bPrime);
-
-    Im23 = _C2_imag * (cosCosh * _a_second_plus_aPrime + sinSinh * _b_second_plus_bPrime);
-
-    Im24 = _C2_imag * (-sinCosh * _abSq + cosSinh * _aPrime_bPrime);
-
-    _F = Re11 + Re12 + Im11 + Im12 + Re23 + Re24 + Im23 + Im24;
+    _val = _F.imag();
   }
 
-  return _F;
+  // sign flip because being used in -u'' - c^2 * u = -F(x) strong form
+  return -_val;
 }
