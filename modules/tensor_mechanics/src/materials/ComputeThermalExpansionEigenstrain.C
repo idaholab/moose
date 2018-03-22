@@ -18,7 +18,7 @@ validParams<ComputeThermalExpansionEigenstrain>()
   InputParameters params = validParams<ComputeThermalExpansionEigenstrainBase>();
   params.addClassDescription("Computes eigenstrain due to thermal expansion "
                              "with a constant coefficient");
-  params.addParam<Real>("thermal_expansion_coeff", "Thermal expansion coefficient");
+  params.addRequiredParam<Real>("thermal_expansion_coeff", "Thermal expansion coefficient");
 
   return params;
 }
