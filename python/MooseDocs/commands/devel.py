@@ -99,7 +99,7 @@ def main(options):
 RENDERERS = ['HTMLRenderer', 'MaterializeRenderer', 'LatexRenderer']
 
 HEAD = """
-#!/usr/bin/env python
+#!/usr/bin/env python2
 \"\"\"Testing for <MODULE> MooseDocs extension.\"\"\"
 import unittest
 

@@ -8,7 +8,7 @@
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#!/usr/bin/env python
+#!/usr/bin/env python2
 import sys
 import textwrap
 from collections import OrderedDict
