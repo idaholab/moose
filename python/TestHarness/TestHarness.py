@@ -200,8 +200,17 @@ class TestHarness:
         if self.options.input_file_name != '':
             self._infiles = self.options.input_file_name.split(',')
 
-        try:
+        if self.options.spec_file and os.path.isdir(self.options.spec_file):
+            self.base_dir = self.options.spec_file
+
+        elif self.options.spec_file and os.path.isfile(self.options.spec_file):
+            self.base_dir = os.path.dirname(self.options.spec_file)
+            self._infiles = [os.path.basename(self.options.spec_file)]
+
+        else:
             self.base_dir = os.getcwd()
+
+        try:
             for dirpath, dirnames, filenames in os.walk(self.base_dir, followlinks=True):
                 # Prune submdule paths when searching for tests
 
@@ -218,6 +227,8 @@ class TestHarness:
                                and os.path.abspath(os.path.join(dirpath, file)) not in launched_tests:
 
                             if self.prunePath(file):
+                                continue
+                            elif self.notMySpecFile(dirpath, file):
                                 continue
 
                             saved_cwd = os.getcwd()
@@ -314,6 +325,13 @@ class TestHarness:
 
         # Return the inverse of will_run to indicate that this path should be pruned
         return prune
+
+    def notMySpecFile(self, dirpath, filename):
+        """ true if dirpath/filename does not match supplied --spec-file """
+        if (self.options.spec_file
+            and os.path.isfile(self.options.spec_file)
+            and os.path.join(dirpath, filename) != self.options.spec_file):
+            return True
 
     def augmentParameters(self, filename, tester):
         params = tester.parameters()
@@ -663,6 +681,7 @@ class TestHarness:
         parser.add_argument('--failed-tests', action='store_true', dest='failed_tests', help='Run tests that previously failed')
         parser.add_argument('--check-input', action='store_true', dest='check_input', help='Run check_input (syntax) tests only')
         parser.add_argument('--no-check-input', action='store_true', dest='no_check_input', help='Do not run check_input (syntax) tests')
+        parser.add_argument('--spec-file', action='store', type=str, dest='spec_file', help='Supply a relative path (from run_tests) to the tests spec file to run the tests found therein. Or supply a path to a directory in which the TestHarness will search for tests. You can further alter which tests spec files are found through the use of -i and --re')
 
         # Options that pass straight through to the executable
         parser.add_argument('--parallel-mesh', action='store_true', dest='parallel_mesh', help='Deprecated, use --distributed-mesh instead')
@@ -742,6 +761,9 @@ class TestHarness:
             sys.exit(1)
         if opts.check_input and opts.enable_recover:
             print('ERROR: --check-input and --recover can not be used together')
+            sys.exit(1)
+        if opts.spec_file and not os.path.exists(opts.spec_file):
+            print('ERROR: --spec-file supplied but path does not exist')
             sys.exit(1)
 
         # Update any keys from the environment as necessary
