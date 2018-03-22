@@ -57,11 +57,9 @@ def _locate_filenames(directories, ext):
 
     out = set()
     for location in directories:
-        for base, _, files in os.walk(location):
-            for fname in files:
-                full_file = os.path.join(base, fname)
-                if fname.endswith(ext) and not os.path.islink(full_file):
-                    out.add(full_file)
+        for filename in mooseutils.git_ls_files(os.path.join(MooseDocs.ROOT_DIR, location)):
+            if filename.endswith(ext) and not os.path.islink(filename):
+                out.add(filename)
     return out
 
 def _process(objects, filenames, regex, func):

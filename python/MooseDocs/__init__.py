@@ -11,6 +11,8 @@ import os
 import subprocess
 import logging
 
+import mooseutils
+
 # Markdown component types TODO: Move these to reader
 BLOCK = 'block'
 INLINE = 'inline'
@@ -39,8 +41,5 @@ os.environ['MOOSE_DIR'] = MOOSE_DIR
 os.environ['ROOT_DIR'] = ROOT_DIR
 
 # List all files with git, this is done here to avoid running this command many times
-PROJECT_FILES = set()
-for fname in subprocess.check_output(['git', 'ls-files'], cwd=ROOT_DIR).split('\n'):
-    PROJECT_FILES.add(os.path.join(ROOT_DIR, fname))
-for fname in subprocess.check_output(['git', 'ls-files'], cwd=MOOSE_DIR).split('\n'):
-    PROJECT_FILES.add(os.path.join(MOOSE_DIR, fname))
+PROJECT_FILES = mooseutils.git_ls_files(ROOT_DIR)
+PROJECT_FILES.update(mooseutils.git_ls_files(MOOSE_DIR))

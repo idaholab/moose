@@ -14,14 +14,14 @@ custom material models can limit the parallel scalability, forcing serial runs i
 cases. When comparing high-end capabilities, many !!acro MOOSE!! competitors target modest-sized
 clusters with just a few thousand processing cores. !!acro MOOSE!!, however, will be required to
 routinely executed on much larger clusters with scalability to clusters available in the top 500
-systems ([top500.org](http://www.top500.org)). !!acro MOOSE!! will also be targeted at smaller systems such as high-end
-laptop computers.
+systems ([top500.org](http://www.top500.org)). !!acro MOOSE!! will also be targeted at smaller systems
+such as high-end laptop computers.
 
 The design goal of !!acro MOOSE!! is to give developers ultimate control over their physical models
 and applications. Designing new models or solving completely new classes of problems will be
-accomplished by writing standard C++ source code within the framework’s class hierarchy. Scientists
+accomplished by writing standard C++ source code within the framework's class hierarchy. Scientists
 and engineers will be free to implement completely new algorithms using pieces of the framework where
-possible, and extending the framework’s capabilities where it makes sense to do so. Commercial
+possible, and extending the framework's capabilities where it makes sense to do so. Commercial
 applications do not have this capability, and instead opt for either a more rigid parameter system or
 a limited application-specific metalanguage.
 !sqa-end!
@@ -48,7 +48,7 @@ the complex chemical reactions taking place inside the fuel rods.  We call such 
 modeling strategies to avoid performing unnecessary computations or incorrectly predicting behavior
 in situations such as these.
 
-!!acro MOOSE!!’s Multiapp system will allow modelers to group physics into logical categories where
+!!acro MOOSE!!'s Multiapp system will allow modelers to group physics into logical categories where
 !!acro MOOSE!! can solve some groups fully-coupled and others loosely-coupled. The Multiapp system
 goes even further by also supporting a "tightly-coupled" strategy, which falls somewhere between the
 "fully-coupled" and "loosely-coupled" approaches. Several sets of physics can then be linked together
@@ -56,7 +56,7 @@ into logical hierarchies using any one of these coupling strategies, allowing fo
 solution strategies. For instance, a complex nuclear reactor model might consist of several
 tightly-coupled systems of fully-coupled equations.
 
-Finally, !!acro MOOSE!!’s Transfers system ties all of the physics groups contained within the
+Finally, !!acro MOOSE!!'s Transfers system ties all of the physics groups contained within the
 Multiapp system together and allows for full control over the flow of information among the various
 groups. This capability bridges physical phenomena from several different complementary scales
 simultaneously. When these three !!acro MOOSE!! systems are combined, myriad coupling combinations
@@ -78,7 +78,7 @@ the project and keeps the size of the !!acro MOOSE!! code base maintainable. Thi
 users with state-of-the-art finite element and solver technology as a basis for the advanced coupling
 and solution strategies mentioned previously.
 
-!!acro MOOSE!!’s developers work openly with other package developers to make sure that cutting-edge
+!!acro MOOSE!!'s developers work openly with other package developers to make sure that cutting-edge
 technologies are available through !!acro MOOSE!!, providing researchers with competitive research
 opportunities. !!acro MOOSE!! maintains a set of objects that hide parallel interfaces while exposing
 advanced spatial and temporal coupling algorithms in the framework.  This accessible approach places
