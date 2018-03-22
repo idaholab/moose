@@ -200,12 +200,13 @@ class TestHarness:
         if self.options.input_file_name != '':
             self._infiles = self.options.input_file_name.split(',')
 
-        if self.options.spec_file:
-            if os.path.isdir(self.options.spec_file):
-                self.base_dir = self.options.spec_file
-            else:
-                self.base_dir = os.path.dirname(self.options.spec_file)
-                self._infiles = [os.path.basename(self.options.spec_file)]
+        if self.options.spec_file and os.path.isdir(self.options.spec_file):
+            self.base_dir = self.options.spec_file
+
+        elif self.options.spec_file and os.path.isfile(self.options.spec_file):
+            self.base_dir = os.path.dirname(self.options.spec_file)
+            self._infiles = [os.path.basename(self.options.spec_file)]
+
         else:
             self.base_dir = os.getcwd()
 
