@@ -30,22 +30,25 @@ InputParameters validParams<TabulatedFluidProperties>();
  * included or not monotonic, and an error is also thrown if this UserObject is
  * requested to provide a fluid property outside this phase space.
  *
- * This class is intended to be used when complicated formulations for density,
- * internal energy or enthalpy are required, which can be computationally expensive.
+ * This class is intended to be used when complicated formulations for fluid properties
+ * (for example, density or enthalpy) are required, which can be computationally expensive.
  * This is particularly the case where the fluid equation of state is based on a
  * Helmholtz free energy that is a function of density and temperature, like that
  * used in CO2FluidProperties. In this case, density must be solved iteratively using
  * pressure and temperature, which increases the computational burden.
  *
- * In these cases, using an interpolation of the tabulated fluid properties can
- * significantly reduce the computational time for computing density, internal energy,
- * and enthalpy.
+ * Using interpolation to calculate these fluid properties can significantly reduce
+ * the computational time for these cases.
  *
  * The expected file format for the tabulated fluid properties is now described.
  * The first line must be the header containing the required column
- * names "pressure", "temperature", "density", "enthalpy", "internal_energy" (note: the
- * order is not important, although having pressure and temperature first makes the data
- * easier for a human to read).
+ * names "pressure" and "temperature", and the names of the fluid properties to be
+ * read. Available fluid property names are:
+ * "density", "enthalpy", "internal_energy", "viscosity", "k" (thermal conductivity),
+ * "cp" (isobaric specific heat capacity), "cv" (isochoric specific heat capacity),
+ * and "entropy".
+ * Note: the order is not important, although having pressure and temperature first
+ * makes the data easier for a human to read).
  *
  * The data in the pressure and temperature columns must be monotonically increasing. This file
  * format does require duplication of the pressure and temperature data - each pressure value
@@ -65,9 +68,11 @@ InputParameters validParams<TabulatedFluidProperties>();
  *
  * and so on.
  *
- * If no tabulated fluid property data file exists, then data for density, internal energy
- * and enthalpy will be generated using the pressure and temperature ranges specified
- * in the input file at the beginning of the simulation.
+ * If no tabulated fluid property data file exists, then data for the fluid supplied
+ * by the required FluidProperties UserObject will be generated using the pressure
+ * and temperature ranges specified in the input file at the beginning of the simulation.
+ * The properties to be tabulated are provided in the "interpolated_properties" input
+ * parameter (the properties that can be tabulated are listed above).
  *
  * This tabulated data will be written to file in the correct format,
  * enabling suitable data files to be created for future use. There is an upfront
@@ -78,13 +83,9 @@ InputParameters validParams<TabulatedFluidProperties>();
  * the initial time to generate the data and the subsequent interpolation time can be much
  * less than using the original FluidProperties UserObject.
  *
- * Density, internal_energy and enthalpy and their derivatives wrt pressure and
- * temperature are always calculated using bicubic spline interpolation, while all
- * remaining fluid properties are calculated using the FluidProperties UserObject _fp.
- *
- * A function to write generated data to file using the correct format is provided
- * to allow suitable files of fluid property data to be generated using the FluidProperties
- * module UserObjects.
+ * Properties specified in the data file or listed in the input file (and their derivatives
+ * wrt pressure and temperature) will be calculated using bicubic interpolation, while all
+ * remaining fluid properties are calculated using the supplied FluidProperties UserObject.
  */
 class TabulatedFluidProperties : public SinglePhaseFluidPropertiesPT
 {
@@ -194,22 +195,11 @@ protected:
   std::vector<Real> _pressure;
   /// Temperature vector
   std::vector<Real> _temperature;
-  /// Tabulated density
-  std::vector<std::vector<Real>> _density;
-  /// Tabulated internal energy
-  std::vector<std::vector<Real>> _internal_energy;
-  /// Tabulated enthalpy
-  std::vector<std::vector<Real>> _enthalpy;
-  /// Interpoled density
-  std::unique_ptr<BicubicInterpolation> _density_ipol;
-  /// Interpoled internal energy
-  std::unique_ptr<BicubicInterpolation> _internal_energy_ipol;
-  /// Interpoled enthalpy
-  std::unique_ptr<BicubicInterpolation> _enthalpy_ipol;
-  /// Derivatives along the boundary
-  std::vector<Real> _drho_dp_0, _drho_dp_n, _drho_dT_0, _drho_dT_n;
-  std::vector<Real> _de_dp_0, _de_dp_n, _de_dT_0, _de_dT_n;
-  std::vector<Real> _dh_dp_0, _dh_dp_n, _dh_dT_0, _dh_dT_n;
+  /// Tabulated fluid properties
+  std::vector<std::vector<Real>> _properties;
+
+  /// Interpolated fluid property
+  std::vector<std::unique_ptr<BicubicInterpolation>> _property_ipol;
 
   /// Minimum temperature in tabulated data
   Real _temperature_min;
@@ -228,8 +218,34 @@ protected:
   const SinglePhaseFluidPropertiesPT & _fp;
 
   /// List of required column names to be read
-  const std::vector<std::string> _required_columns{
-      "pressure", "temperature", "density", "enthalpy", "internal_energy"};
+  const std::vector<std::string> _required_columns{"pressure", "temperature"};
+  /// List of possible property column names to be read
+  const std::vector<std::string> _property_columns{
+      "density", "enthalpy", "internal_energy", "viscosity", "k", "cv", "cp", "entropy"};
+  /// Properties to be interpolated entered in the input file
+  MultiMooseEnum _interpolated_properties_enum;
+  /// List of properties to be interpolated
+  std::vector<std::string> _interpolated_properties;
+  /// Set of flags to note whether a property is to be interpolated
+  bool _interpolate_density;
+  bool _interpolate_enthalpy;
+  bool _interpolate_internal_energy;
+  bool _interpolate_viscosity;
+  bool _interpolate_k;
+  bool _interpolate_cp;
+  bool _interpolate_cv;
+  bool _interpolate_entropy;
+
+  /// Index of each property
+  unsigned int _density_idx;
+  unsigned int _enthalpy_idx;
+  unsigned int _internal_energy_idx;
+  unsigned int _viscosity_idx;
+  unsigned int _k_idx;
+  unsigned int _cp_idx;
+  unsigned int _cv_idx;
+  unsigned int _entropy_idx;
+
   /// The MOOSE delimited file reader.
   MooseUtils::DelimitedFileReader _csv_reader;
 };
