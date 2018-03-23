@@ -153,7 +153,7 @@ class SyntaxNodeBase(NodeBase):
         for group in groups:
 
             # Locate all the possible locations for the markdown
-            filenames = []
+            filenames = set()
             for group in self.groups:
                 install = SyntaxNodeBase.DESTINATIONS.get(group,
                                                           'doc/content/documentation/systems')
@@ -162,7 +162,7 @@ class SyntaxNodeBase(NodeBase):
                     filename = os.path.join(MooseDocs.ROOT_DIR, install, self.markdown())
                 else:
                     filename = os.path.join(install, self.markdown())
-                filenames.append((filename, os.path.isfile(filename)))
+                filenames.add((filename, os.path.isfile(filename)))
 
             # Determine the number of files that exist
             count = sum([x[1] for x in filenames])
