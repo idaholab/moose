@@ -31,18 +31,14 @@ class SQAExtension(command.CommandExtension):
 
     def __init__(self, *args, **kwargs):
         command.CommandExtension.__init__(self, *args, **kwargs)
-        self.__requirements = None
+
+        #NOTE: This is too slow to perform on reinit()
+        self.__requirements = common.get_requirements(self.get('directories'), self.get('specs'))
 
     @property
     def requirements(self):
         """Return the requirements dictionary."""
         return self.__requirements
-
-    def reinit(self):
-        """
-        Recreate the requirements.
-        """
-        self.__requirements = common.get_requirements(self.get('directories'), self.get('specs'))
 
     def extend(self, reader, renderer):
         self.requires(command, alert, floats, core)
