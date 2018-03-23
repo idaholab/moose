@@ -28,17 +28,29 @@ protected:
   unsigned int _qp;
 
 private:
-  Function & _incoming_real;
+  const VariableValue & _field_imag;
 
-  Function & _incoming_imag;
+  Real _theta;
 
-  Function & _reflected_real;
+  Real _L;
 
-  Function & _reflected_imag;
+  Real _k;
+
+  Real _coeff;
 
   Real _R;
 
-  const VariableValue & _coupled_imag;
+  // Function & _incoming_real;
+  //
+  // Function & _incoming_imag;
+  //
+  // Function & _reflected_real;
+  //
+  // Function & _reflected_imag;
+  //
+  // Real _R;
+  //
+  // const VariableValue & _coupled_imag;
 };
 
 #endif // REFLECTIONCOEFFICIENT_H
