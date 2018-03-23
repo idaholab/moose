@@ -16,6 +16,7 @@
 #include "Parser.h"
 #include "pcrecpp.h"
 #include "Action.h"
+#include "AppFactory.h"
 
 // C++ includes
 #include <algorithm>
@@ -134,6 +135,14 @@ JsonSyntaxTree::addGlobal()
     moosecontrib::Json::Value jparams;
     setParams(&params, true, jparams);
     _root["global"]["parameters"] = jparams;
+
+    // Just create a list of registered app names
+    moosecontrib::Json::Value apps;
+    auto factory = AppFactory::instance();
+    for (auto app = factory.registeredObjectsBegin(); app != factory.registeredObjectsEnd(); ++app)
+      apps.append(app->first);
+
+    _root["global"]["registered_apps"] = apps;
   }
 }
 
