@@ -121,6 +121,7 @@ class TestHarness:
         checks['platform'] = util.getPlatforms()
         checks['submodules'] = util.getInitializedSubmodules(self.run_tests_dir)
         checks['exe_objects'] = None # This gets calculated on demand
+        checks['registered_apps'] = None # This gets extracted on demand
 
         # The TestHarness doesn't strictly require the existence of libMesh in order to run. Here we allow the user
         # to select whether they want to probe for libMesh configuration options.
