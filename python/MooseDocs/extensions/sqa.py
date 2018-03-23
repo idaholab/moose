@@ -10,7 +10,7 @@ import MooseDocs
 from MooseDocs import common
 from MooseDocs.common import exceptions
 from MooseDocs.base import components
-from MooseDocs.extensions import command, alert, floats, core, autolink
+from MooseDocs.extensions import command, alert, floats, core, autolink, materialicon
 from MooseDocs.tree import tokens, html
 
 LOG = logging.getLogger(__name__)
@@ -41,7 +41,7 @@ class SQAExtension(command.CommandExtension):
         return self.__requirements
 
     def extend(self, reader, renderer):
-        self.requires(command, alert, floats, core)
+        self.requires(command, alert, floats, core, materialicon)
 
         self.addCommand(SQATemplateLoadCommand())
         self.addCommand(SQATemplateItemCommand())
@@ -233,12 +233,20 @@ class RenderSQATemplateItem(components.RenderComponent):
                 child.parent = None
 #
         else:
-            content = tokens.String(None, content=u'Missing Template Item "{}"'.format(key))
-            err = alert.AlertToken(token.parent, brand=u'error', title=content)
-
             filename = self.translator.current.local
-            self.translator.reader.parse(err, ERROR_CONTENT.format(key, filename))
 
+            content = tokens.Token(None)
+            self.translator.reader.parse(content, ERROR_CONTENT.format(key, filename))
+
+            modal_title = tokens.String(None, content=u'Missing Template Item "{}"'.format(key))
+
+            alert_title = tokens.Token(None)
+            tokens.String(alert_title, content=u'Missing Template Item "{}"'.format(key))
+            h_token = floats.ModalLink(alert_title, url=unicode(filename), content=content,
+                                       title=modal_title, class_='moose-help')
+            materialicon.IconToken(h_token, icon=u'help_outline')
+
+            err = alert.AlertToken(token.parent, brand=u'error', title=alert_title)
             for child in token.children:
                 child.parent = err
 

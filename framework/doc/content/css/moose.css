@@ -42,6 +42,11 @@ html {
   -webkit-font-smoothing: antialiased;
 }
 
+.moose-help .material-icons{
+    color:white;
+    margin-left:5px;
+}
+
 .tabs .tab a:hover, .tabs .tab a.active {
 	background-color: transparent;
   color: var(--inl-blue);
