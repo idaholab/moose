@@ -7,7 +7,7 @@ validParams<RobinTestFunc>()
 {
   InputParameters params = validParams<Function>();
   params.addClassDescription("Function of analytical solution for use in convergence testing with "
-                             "coupled_helmholtz test file.");
+                             "RobinTest test file.");
   params.addRequiredParam<Real>("L", "Length of 1D test domain, where 0 < x < L");
   params.addRequiredParam<Real>(
       "a", "Real component of squared coefficient c in the PDE, u'' + c^2 * u = 0");
