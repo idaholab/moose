@@ -1,4 +1,4 @@
-#!/usr/bin/env python222222222222222222
+#!/usr/bin/env python2
 #* This file is part of the MOOSE framework
 #* https://www.mooseframework.org
 #*
