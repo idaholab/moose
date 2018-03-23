@@ -1,4 +1,4 @@
-#Boundary conditions
+# Boundary conditions
 
 MOOSE's Dirichlet and Neumann boundary conditions enable simulation of simple scenarios.
 The Porous Flow module includes a very flexible boundary condition that allows many different
@@ -42,7 +42,7 @@ In addition, the sink may be multiplied by any or all of the following
 quantities
 
 - Fluid relative permeability
-- Fluid mobility ($k_{ij}n_{i}n_{j}k_{r} \rho / \nu$, where $n$ is the normal vector to the boundary)
+- Fluid mobility ($k_{ij}n_{i}n_{j}k_{r} \rho / \mu$, where $n$ is the normal vector to the boundary)
 - Fluid mass fraction
 - Fluid internal energy
 - Thermal conductivity
@@ -102,8 +102,12 @@ almost zero and does nothing.
 Eq \eqref{eq:fix_pp_bc} may
 be implemented in a number of ways.  A
 [`PorousFlowPiecewiseLinearSink`](PorousFlowPiecewiseLinearSink.md)
-may be constructed that models \begin{equation} f = C (P -
-P_{\mathrm{e}}) \ , \end{equation} that is, with `pt_vals = '-1E9
+may be constructed that models
+\begin{equation}
+f = C (P -
+P_{\mathrm{e}}) \ ,
+\end{equation}
+that is, with `pt_vals = '-1E9
 1E9'` and `multipliers = '-C C'` (the `1E9` is just an example: the
 point is that it should be much greater than any expected
 porepressure) and $P_{\mathrm{e}}$ provided by an AuxVariable (or set
@@ -120,8 +124,11 @@ mobility and relative permeability to use; (3) these parameters are
 appropriate to the model so it reduces the potential for difficult
 numerical situations occuring.
 
-Finally, if $P_{\mathrm{e}}$ is varying over the boundary it must be constructed as an AuxVariable.  An alternative is to split the flux \begin{equation} f = CP - CP_{\mathrm{e}}\ .
-\end{equation} Two PorousFlowSinks may be used.  The first term is a
+Finally, if $P_{\mathrm{e}}$ is varying over the boundary it must be constructed as an AuxVariable.  An alternative is to split the flux
+\begin{equation}
+f = CP - CP_{\mathrm{e}}\ .
+\end{equation}
+Two PorousFlowSinks may be used.  The first term is a
 `PorousFlowPiecewiseLinearSink` as just described (with
 $P_{\mathrm{e}} = 0$).  The second term is a plain
 [`PorousFlowSink`](PorousFlowSink.md) with a
