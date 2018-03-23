@@ -63,7 +63,11 @@
     type = PythonUnitTest
     input = test_RequiredObjects.py
   [../]
-   [./should_execute]
+  [./required_apps]
+    type = PythonUnitTest
+    input = test_RequiredApps.py
+  [../]
+  [./should_execute]
     type = PythonUnitTest
     input = test_ShouldExecute.py
   [../]
