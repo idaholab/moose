@@ -1,5 +1,6 @@
 #include "RobinReflectionBC.h"
 #include "Function.h"
+#include <complex>
 
 template <>
 InputParameters
@@ -7,28 +8,27 @@ validParams<RobinReflectionBC>()
 {
   InputParameters params = validParams<IntegratedBC>();
 
-  params.addRequiredParam<Real>("theta", "Incidence angle");
-  params.addRequiredCoupledVar("coupled_field", "Coupled field variable");
-  params.addRequiredParam<Real>("length", "length of slab");
+  params.addRequiredCoupledVar("coupled_variable", "Coupled variable.");
   MooseEnum component("imaginary real", "real");
   params.addParam<MooseEnum>("component", component, "Real or Imaginary wave component.");
-  params.addRequiredParam<Real>("k", "Wave number");
-  params.addRequiredParam<FunctionName>("inverseMuR", "Inverse relative permeability");
-  params.addParam<Real>("sign", -1.0, "Sign of term in weak form (1.0, -1.0, negative is default).");
+  params.addRequiredParam<Real>("length", "Length of domain.");
+  params.addParam<FunctionName>("func_real", 1.0, "Function coefficient, real component.");
+  params.addParam<FunctionName>("func_imag", 0.0, "Function coefficient, imaginary component.");
+  params.addParam<Real>("coeff_real", 1.0, "Constant coefficient, real component.");
+  params.addParam<Real>("coeff_imag", 0.0, "Constant coefficient, real component.");
   return params;
 }
 
 RobinReflectionBC::RobinReflectionBC(const InputParameters & parameters)
   : IntegratedBC(parameters),
 
-    _theta(getParam<Real>("theta")),
-    _coupled_val(coupledValue("coupled_field")),
-    _L(getParam<Real>("length")),
+    _coupled_val(coupledValue("coupled_variable")),
     _component(getParam<MooseEnum>("component")),
-    _k(getParam<Real>("k")),
-    _inverseMuR(getFunction("inverseMuR")),
-    _sign(getParam<Real>("sign"))
-
+    _L(getParam<Real>("length")),
+    _func_real(getFunction("func_real")),
+    _func_imag(getFunction("func_imag")),
+    _coeff_real(getParam<Real>("coeff_real")),
+    _coeff_imag(getParam<Real>("coeff_imag"))
 {
 }
 
@@ -36,16 +36,22 @@ Real
 RobinReflectionBC::computeQpResidual()
 {
 
-  Real _coefficient = _k * std::cos(_theta * 2 * libMesh::pi / 360.);
+  std::complex<double> _func(_func_real.value(_t, _q_point[_qp]),
+                             _func_imag.value(_t, _q_point[_qp]));
+  std::complex<double> _coeff(_coeff_real, _coeff_imag);
+  std::complex<double> _j(0, 1);
+
+  std::complex<double> _common = _j * _coeff * _func;
+  std::complex<double> _RHS = 2.0 * _common * std::exp(_common * _L);
 
   if (_component == "real")
   {
-    return _sign * _test[_i][_qp] * _inverseMuR.value(_t, _q_point[_qp]) * _coefficient *
-           (_coupled_val[_qp] - 2 * std::sin(_coefficient * _q_point[_qp](0)));
+    return -_test[_i][_qp] *
+           (_RHS.real() - (_common.real() * _u[_qp] - _common.imag() * _coupled_val[_qp]));
   }
   else
   {
-    return _sign * _test[_i][_qp] * _inverseMuR.value(_t, _q_point[_qp]) * _coefficient *
-           (2 * std::cos(_coefficient * _q_point[_qp](0)) - _coupled_val[_qp]);
+    return -_test[_i][_qp] *
+           (_RHS.imag() - (_common.real() * _u[_qp] + _common.imag() * _coupled_val[_qp]));
   }
 }

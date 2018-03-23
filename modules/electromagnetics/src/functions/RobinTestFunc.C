@@ -40,8 +40,6 @@ RobinTestFunc::value(Real t, const Point & p)
 {
   std::complex<double> _C1(0, 0);
   std::complex<double> _C2(0, 0);
-  std::complex<double> _lambda(0, 0);
-  std::complex<double> _lambda_L(0, 0);
   std::complex<double> val(0, 0);
 
   std::complex<double> _g0(_g0_real, _g0_imag);
@@ -49,12 +47,15 @@ RobinTestFunc::value(Real t, const Point & p)
 
   std::complex<double> _j(0, 1);
 
-  _C1 = _g0;
-  _C2 = ((2.0 * _j * _c * _func.value(t, p) * std::exp(_j * _c * _func.value(t, p) * _L)) -
-         (-_g0 * _c * std::sin(_c * _L) + _j * _c * _func.value(t, p) * _g0 * std::cos(_c * _L))) /
-        (_c * std::cos(_c * _L) + _j * _c * _func.value(t, p) * std::sin(_c * _L));
+  Real _x = p(0);
 
-  val = _C1 * std::cos(_c * p(0)) + _C2 * std::sin(_c * p(0));
+  _C1 = _g0;
+  _C2 = (_func.value(t, _L) * _g0 * std::cos(_c * _L) -
+         2 * _func.value(t, _L) * std::exp(_j * _c * _L * _func.value(t, _L)) +
+         _j * _g0 * std::sin(_c * _L)) /
+        (-_func.value(t, _L) * std::sin(_c * _L) + _j * std::cos(_c * _L));
+
+  val = _C1 * std::cos(_c * _x) + _C2 * std::sin(_c * _x);
 
   if (_component == "real")
   {

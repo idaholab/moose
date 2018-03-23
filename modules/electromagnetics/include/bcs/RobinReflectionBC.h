@@ -17,19 +17,19 @@ protected:
   virtual Real computeQpResidual() override;
 
 private:
-  Real _theta;
-
   const VariableValue & _coupled_val;
-
-  Real _L;
 
   MooseEnum _component;
 
-  Real _k;
+  Real _L;
 
-  Function & _inverseMuR;
+  Function & _func_real;
 
-  Real _sign;
+  Function & _func_imag;
+
+  Real _coeff_real;
+
+  Real _coeff_imag;
 };
 
 #endif // ROBINREFLECTIONBC_H
