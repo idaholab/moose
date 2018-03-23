@@ -61,8 +61,6 @@ trim(const std::string & str)
   return str.substr(first, (last - first + 1));
 }
 
-// toBool converts the given val to a boolean value which is stored in dst.  It returns true if
-// val was successfully converted to a boolean and returns false otherwise.
 bool
 toBool(const std::string & val, bool * dst)
 {
