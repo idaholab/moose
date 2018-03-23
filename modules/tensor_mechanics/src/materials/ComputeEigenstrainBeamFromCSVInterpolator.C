@@ -10,6 +10,8 @@
 #include "ComputeEigenstrainBeamFromCSVInterpolator.h"
 #include "CSVInterpolator.h"
 
+registerMooseObject("TensorMechanicsApp", ComputeEigenstrainBeamFromCSVInterpolator);
+
 template <>
 InputParameters
 validParams<ComputeEigenstrainBeamFromCSVInterpolator>()

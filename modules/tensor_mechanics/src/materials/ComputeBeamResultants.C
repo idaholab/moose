@@ -6,6 +6,8 @@
 /****************************************************************/
 #include "ComputeBeamResultants.h"
 
+registerMooseObject("TensorMechanicsApp", ComputeBeamResultants);
+
 template <>
 InputParameters
 validParams<ComputeBeamResultants>()

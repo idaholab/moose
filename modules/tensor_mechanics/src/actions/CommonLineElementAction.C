@@ -10,6 +10,8 @@
 #include "CommonLineElementAction.h"
 #include "LineElementAction.h"
 
+registerMooseAction("TensorMechanicsApp", CommonLineElementAction, "meta_action");
+
 template <>
 InputParameters
 validParams<CommonLineElementAction>()

@@ -18,6 +18,8 @@
 
 #include "libmesh/quadrature.h"
 
+registerMooseObject("TensorMechanicsApp", StressDivergenceBeam);
+
 template <>
 InputParameters
 validParams<StressDivergenceBeam>()

@@ -16,6 +16,8 @@
 #include "MooseVariable.h"
 #include "AuxiliarySystem.h"
 
+registerMooseObject("TensorMechanicsApp", NodalTranslationalInertia);
+
 template <>
 InputParameters
 validParams<NodalTranslationalInertia>()

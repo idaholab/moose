@@ -1,7 +1,9 @@
-# ComputeIncrementalBeamStrain
+# Compute Incremental Beam Strain
+
 !syntax description /Materials/ComputeIncrementalBeamStrain
 
-##Description
+## Description
+
 This class computes the small (and finite) displacement and rotational strain increments for beam elements. Please refer to [C0TimoshenkoBeam](/C0TimoshenkoBeam.md) for details. 
 
 !syntax parameters /Materials/ComputeIncrementalBeamStrain

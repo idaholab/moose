@@ -20,11 +20,15 @@
 #include "libmesh/system.h"
 #include "libmesh/parallel_algebra.h"
 
+registerMooseObject("TensorMechanicsApp", VectorPostprocessorTransfer);
+
 template <>
 InputParameters
 validParams<VectorPostprocessorTransfer>()
 {
   InputParameters params = validParams<MultiAppTransfer>();
+  params.addClassDescription("Transfers values from a vector postprocessor in the master "
+                             "application to aux variables in the sub application.");
   params.addRequiredParam<std::vector<AuxVariableName>>(
       "variables",
       "The vector of auxiliary variables to store the transferred values in master model.");

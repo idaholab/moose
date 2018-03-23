@@ -17,6 +17,8 @@
 #include "AuxiliarySystem.h"
 #include "MooseMesh.h"
 
+registerMooseObject("TensorMechanicsApp", NodalRotationalInertia);
+
 template <>
 InputParameters
 validParams<NodalRotationalInertia>()

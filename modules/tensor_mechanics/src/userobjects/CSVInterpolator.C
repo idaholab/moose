@@ -12,6 +12,8 @@
 #include "CSVInterpolator.h"
 #include "BilinearInterpolation.h"
 
+registerMooseObject("TensorMechanicsApp", CSVInterpolator);
+
 template <>
 InputParameters
 validParams<CSVInterpolator>()

@@ -15,7 +15,7 @@
 
 # This implies that the corresponding time period of this beam is 0.175 s.
 
-# The FEM solution for this beam with 10 elements gives 
+# The FEM solution for this beam with 10 elements gives
 # a time period of 0.175 s with time step of 0.005 s.
 
 # Reference: Strength of Materials by Marin ans Sauer, 2nd Ed.

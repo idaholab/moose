@@ -14,6 +14,8 @@
 #include "libmesh/quadrature.h"
 #include "libmesh/utility.h"
 
+registerMooseObject("TensorMechanicsApp", ComputeIncrementalBeamStrain);
+
 template <>
 InputParameters
 validParams<ComputeIncrementalBeamStrain>()

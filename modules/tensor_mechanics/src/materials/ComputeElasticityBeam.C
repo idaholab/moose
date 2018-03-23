@@ -8,11 +8,16 @@
 #include "ComputeElasticityBeam.h"
 #include "Function.h"
 
+registerMooseObject("TensorMechanicsApp", ComputeElasticityBeam);
+
 template <>
 InputParameters
 validParams<ComputeElasticityBeam>()
 {
   InputParameters params = validParams<Material>();
+  params.addClassDescription("Computes the equivalent of the elasticity tensor for the beam "
+                             "element, which are vectors of material translational and flexural "
+                             "stiffness.");
   params.addParam<FunctionName>(
       "elasticity_prefactor",
       "Optional function to use as a scalar prefactor on the elasticity vector for the beam.");

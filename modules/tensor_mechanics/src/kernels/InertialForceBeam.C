@@ -13,6 +13,8 @@
 #include "AuxiliarySystem.h"
 #include "MooseMesh.h"
 
+registerMooseObject("TensorMechanicsApp", InertialForceBeam);
+
 template <>
 InputParameters
 validParams<InertialForceBeam>()

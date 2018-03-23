@@ -9,6 +9,8 @@
 
 #include "ComputeEigenstrainBeamFromVariable.h"
 
+registerMooseObject("TensorMechanicsApp", ComputeEigenstrainBeamFromVariable);
+
 template <>
 InputParameters
 validParams<ComputeEigenstrainBeamFromVariable>()

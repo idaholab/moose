@@ -9,6 +9,8 @@
 
 #include "ComputeThermalExpansionEigenstrainBeam.h"
 
+registerMooseObject("TensorMechanicsApp", ComputeThermalExpansionEigenstrainBeam);
+
 template <>
 InputParameters
 validParams<ComputeThermalExpansionEigenstrainBeam>()
