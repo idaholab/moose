@@ -27,7 +27,9 @@ applicable:
 1. Disposition unexpected results. Performance of system test is by personnel other than the
    development staff.
 
-!alert note title=Software test records shall include
+!alert! note
+Software test records shall include:
+
 1. Computer program tested and support software used
 1. Computer hardware used
 1. Test equipment and calibrations, where applicable
@@ -37,6 +39,7 @@ applicable:
 1. Test problems. Results and applicability
 1. Action taken in connection with any deviations
 1. Person evaluating the test results 11. Customer approval.
+!alert-end!
 !sqa-end!
 
 ### System Purpose id=system-purpose
