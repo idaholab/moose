@@ -1,0 +1,12 @@
+[Tests]
+  [./bad_app]
+    type = RunApp
+    input = foo.i
+    required_applications = 'MooseTestApp DoesNotExist'
+  [../]
+  [./good_app]
+    type = RunApp
+    input = good.i
+    required_applications = 'MooseTestApp'
+  [../]
+[]

@@ -524,17 +524,30 @@ def addObjectNames(objs, node):
     if star:
         addObjectNames(objs, star)
 
-def getExeObjects(exe):
+def getExeJSON(exe):
     """
-    Gets a set of object names that are in the executable JSON dump.
+    Extracts the JSON from the dump
     """
     output = runCommand("%s --json" % exe)
     output = output.split('**START JSON DATA**\n')[1]
     output = output.split('**END JSON DATA**\n')[0]
+    return json.loads(output)
+
+def getExeObjects(exe):
+    """
+    Gets a set of object names that are in the executable JSON dump.
+    """
+    data = getExeJSON(exe)
     obj_names = set()
-    data = json.loads(output)
     addObjectsFromBlock(obj_names, data, "blocks")
     return obj_names
+
+def getExeRegisteredApps(exe):
+    """
+    Gets a list of registered applications
+    """
+    data = getExeJSON(exe)
+    return data.get('global', {}).get('registered_apps', [])
 
 def checkOutputForPattern(output, re_pattern):
     """

@@ -70,6 +70,7 @@ class Tester(MooseObject):
         params.addParam('should_execute', True, 'Whether or not the executable needs to be run.  Use this to chain together multiple tests based off of one executeable invocation')
         params.addParam('required_submodule', [], "A list of initialized submodules for which this test requires.")
         params.addParam('required_objects', [], "A list of required objects that are in the executable.")
+        params.addParam('required_applications', [], "A list of required registered applications that are in the executable.")
         params.addParam('check_input',    False, "Check for correct input file syntax")
         params.addParam('display_required', False, "The test requires and active display for rendering (i.e., ImageDiff tests).")
         params.addParam('timing',         True, "If True, the test will be allowed to run with the timing flag (i.e. Manually turning on performance logging).")
@@ -600,6 +601,16 @@ class Tester(MooseObject):
         for var in self.specs['required_objects']:
             if var not in checks["exe_objects"]:
                 reasons['required_objects'] = '%s not found in executable' % var
+                break
+
+        # We extract the registered apps only if we need them
+        if self.specs["required_applications"] and checks["registered_apps"] is None:
+            checks["registered_apps"] = util.getExeRegisteredApps(self.specs["executable"])
+
+        # Check to see if we have the required application names
+        for var in self.specs['required_applications']:
+            if var not in checks["registered_apps"]:
+                reasons['required_applications'] = 'App %s not registered in executable' % var
                 break
 
         # Check to make sure required submodules are initialized
