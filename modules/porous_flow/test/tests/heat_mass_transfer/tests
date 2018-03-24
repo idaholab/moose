@@ -1,0 +1,20 @@
+[Tests]
+  [./testvariable_transfer_0D]
+    type = 'CSVDiff'
+    input = 'variable_transfer_0D.i'
+    csvdiff = 'variable_transfer_0D_out.csv'
+    requirement = 'PorousFlow shall be able to transfer heat or mass from one '
+                  'Variable to another when the transfer coefficient is a constant.'
+    design = 'PorousFlowHeatMassTransfer.md'
+    issues = '#11050'
+  [../]
+  [./testvariable_transfer_variable_0D]
+    type = 'CSVDiff'
+    input = 'variable_transfer_variable_0D.i'
+    csvdiff = 'variable_transfer_variable_0D_out.csv'
+    requirement = 'PorousFlow shall be able to transfer heat or mass from one '
+                  'Variable to another when the transfer coefficient is a variable.'
+    design = 'PorousFlowHeatMassTransfer.md'
+    issues = '#11050'
+  [../]
+[]
