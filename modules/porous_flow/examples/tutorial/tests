@@ -69,4 +69,9 @@
     abs_zero = 1E-3
     heavy = true
   [../]
+  [./13]
+    type = Exodiff
+    input = '13.i'
+    exodiff = '13_out.e'
+  [../]
 []
