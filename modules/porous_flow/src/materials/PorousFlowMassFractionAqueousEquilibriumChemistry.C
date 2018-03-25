@@ -27,10 +27,15 @@ validParams<PorousFlowMassFractionAqueousEquilibriumChemistry>()
       "f_ph^cN=1-sum(f_ph^c,{c,0,N-1}) so that f_ph^cN need not be given.");
   params.addRequiredParam<unsigned>("num_reactions",
                                     "Number of equations in the system of chemical reactions");
-  params.addRequiredParam<std::vector<Real>>("equilibrium_constants",
-                                             "Equilibrium constant for each equation "
-                                             "(dimensionless) (written in absolute terms, not as a "
-                                             "log10)");
+  params.addParam<bool>("equilibrium_constants_as_log10",
+                        false,
+                        "If true, the equilibrium constants are written in their log10 form, eg, "
+                        "-2.  If false, the equilibrium constants are written in absolute terms, "
+                        "eg, 0.01");
+  params.addRequiredCoupledVar("equilibrium_constants",
+                               "Equilibrium constant for each equation (dimensionless).  If these "
+                               "are temperature dependent AuxVariables, the Jacobian will not be "
+                               "exact");
   params.addRequiredParam<std::vector<Real>>(
       "primary_activity_coefficients",
       "Activity coefficients for the primary species (dimensionless) (one for each)");
@@ -80,7 +85,9 @@ PorousFlowMassFractionAqueousEquilibriumChemistry::
     _aq_ph(_dictator.aqueousPhaseNumber()),
     _aq_i(_aq_ph * _num_primary),
     _num_reactions(getParam<unsigned>("num_reactions")),
-    _equilibrium_constants(getParam<std::vector<Real>>("equilibrium_constants")),
+    _equilibrium_constants_as_log10(getParam<bool>("equilibrium_constants_as_log10")),
+    _num_equilibrium_constants(coupledComponents("equilibrium_constants")),
+    _equilibrium_constants(_num_equilibrium_constants),
     _primary_activity_coefficients(getParam<std::vector<Real>>("primary_activity_coefficients")),
     _reactions(getParam<std::vector<Real>>("reactions")),
     _secondary_activity_coefficients(getParam<std::vector<Real>>("secondary_activity_coefficients"))
@@ -90,10 +97,10 @@ PorousFlowMassFractionAqueousEquilibriumChemistry::
                "not be zero");
 
   // correct number of equilibrium constants
-  if (_equilibrium_constants.size() != _num_reactions)
+  if (_num_equilibrium_constants != _num_reactions)
     mooseError("PorousFlowMassFractionAqueousEquilibriumChemistry: The number of "
                "equilibrium constants is ",
-               _equilibrium_constants.size(),
+               _num_equilibrium_constants,
                " which must be equal to the number of reactions (",
                _num_reactions,
                ")");
@@ -135,6 +142,21 @@ PorousFlowMassFractionAqueousEquilibriumChemistry::
                _num_reactions,
                " but the Dictator knows that the number of aqueous equilibrium reactions is ",
                _dictator.numAqueousEquilibrium());
+
+  _primary_var_num.resize(_num_primary);
+  _primary.resize(_num_primary);
+  _grad_primary.resize(_num_primary);
+  for (unsigned i = 0; i < _num_primary; ++i)
+  {
+    _primary_var_num[i] = coupled("primary_concentrations", i);
+    _primary[i] = (_nodal_material ? &coupledNodalValue("primary_concentrations", i)
+                                   : &coupledValue("primary_concentrations", i));
+    _grad_primary[i] = &coupledGradient("primary_concentrations", i);
+  }
+
+  for (unsigned i = 0; i < _num_equilibrium_constants; ++i)
+    _equilibrium_constants[i] = (_nodal_material ? &coupledNodalValue("equilibrium_constants", i)
+                                                 : &coupledValue("equilibrium_constants", i));
 }
 
 void
@@ -311,7 +333,10 @@ PorousFlowMassFractionAqueousEquilibriumChemistry::computeQpSecondaryConcentrati
       else
         _sec_conc[_qp][r] *= std::pow(gamp, stoichiometry(r, i));
     }
-    _sec_conc[_qp][r] *= _equilibrium_constants[r] / _secondary_activity_coefficients[r];
+    _sec_conc[_qp][r] *=
+        (_equilibrium_constants_as_log10 ? std::pow(10.0, (*_equilibrium_constants[r])[_qp])
+                                         : (*_equilibrium_constants[r])[_qp]);
+    _sec_conc[_qp][r] /= _secondary_activity_coefficients[r];
   }
 }
 
@@ -360,8 +385,10 @@ PorousFlowMassFractionAqueousEquilibriumChemistry::dQpSecondaryConcentration_dpr
               std::pow(_primary_activity_coefficients[i] * (*_mf_vars[_aq_i + i])[_qp],
                        stoichiometry(reaction_num, i));
       }
-      conc_without_zero *=
-          _equilibrium_constants[reaction_num] / _secondary_activity_coefficients[reaction_num];
+      conc_without_zero *= (_equilibrium_constants_as_log10
+                                ? std::pow(10.0, (*_equilibrium_constants[reaction_num])[_qp])
+                                : (*_equilibrium_constants[reaction_num])[_qp]);
+      conc_without_zero /= _secondary_activity_coefficients[reaction_num];
       dsc[zero_conc_index] = conc_without_zero;
     }
     else if (zero_count == 1 && stoichiometry(reaction_num, zero_conc_index) < 1.0)
