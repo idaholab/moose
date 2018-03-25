@@ -3,6 +3,7 @@ import re
 import os
 import codecs
 import logging
+import collections
 
 import anytree
 
@@ -27,6 +28,7 @@ class SQAExtension(command.CommandExtension):
                                  "List of directories used to build requirements.")
         config['specs'] = (['tests'], "List of test specification names to use for building " \
                                       "requirements.")
+        config['requirement-groups'] = (dict(), "Allows requirement group names to be changed.")
         return config
 
     def __init__(self, *args, **kwargs):
@@ -47,6 +49,7 @@ class SQAExtension(command.CommandExtension):
         self.addCommand(SQATemplateItemCommand())
         self.addCommand(SQARequirementsCommand())
         self.addCommand(SQADocumentItemCommand())
+        self.addCommand(SQACrossReferenceCommand())
 
         renderer.add(SQATemplateItem, RenderSQATemplateItem())
         renderer.add(SQARequirementMatrix, RenderSQARequirementMatrix())
@@ -60,11 +63,13 @@ class SQATemplateItem(tokens.Token):
                   tokens.Property('heading', ptype=tokens.Token)]
 
 class SQARequirementMatrix(tokens.OrderedList):
-    PROPERTIES = [tokens.Property('heading', ptype=unicode),
-                  tokens.Property('prefix', ptype=unicode, required=True)]
+    PROPERTIES = [tokens.Property('heading', ptype=tokens.Token)]
 
 class SQARequirementMatrixItem(tokens.ListItem):
-    PROPERTIES = [tokens.Property('number', ptype=int, default=1)]
+    PROPERTIES = [tokens.Property('label', ptype=unicode, required=True)]
+
+class SQARequirementCrossReference(tokens.Token):
+    pass
 
 class SQARequirementsCommand(command.CommandComponent):
     COMMAND = 'sqa'
@@ -85,21 +90,19 @@ class SQARequirementsCommand(command.CommandComponent):
         return config
 
     def createToken(self, info, parent):
-
-        number = 0
+        group_map = self.extension.get('requirement-groups')
         for group, requirements in self.extension.requirements.iteritems():
-            number += 1
+            group = group_map.get(group, group.replace('_', ' ').title())
             matrix = SQARequirementMatrix(parent,
-                                          heading=unicode(group),
-                                          prefix=u'F{}'.format(number))
-            for i, req in enumerate(requirements):
-                self._addRequirement(matrix, req, i+1)
+                                          heading=tokens.String(None, content=unicode(group)))
+            for req in requirements:
+                self._addRequirement(matrix, req)
 
         return parent
 
-    def _addRequirement(self, parent, req, number):
-        item = SQARequirementMatrixItem(parent, number=number, id_=req.path)
-        self.translator.reader.parse(item, unicode(req.requirement))
+    def _addRequirement(self, parent, req):
+        item = SQARequirementMatrixItem(parent, label=unicode(req.label), id_=req.path)
+        self.translator.reader.parse(item, req.text)
 
         if self.settings['link']:
             if self.settings['link-spec']:
@@ -117,16 +120,36 @@ class SQARequirementsCommand(command.CommandComponent):
             if self.settings['link-design'] and req.design:
                 p = tokens.Paragraph(item, 'p')
                 tokens.String(p, content=u'Design: ')
-                for design in req.design.split():
+                for design in req.design:
                     autolink.AutoShortcutLink(p, key=unicode(design))
 
             if self.settings['link-issues'] and req.issues:
                 p = tokens.Paragraph(item, 'p')
                 tokens.String(p, content=u'Issues: ')
-                for issue in req.issues.split():
+                for issue in req.issues:
                     url = u"https://github.com/idaholab/moose/issues/{}".format(issue[1:])
                     tokens.Link(p, url=url, string=unicode(issue))
 
+class SQACrossReferenceCommand(SQARequirementsCommand):
+    COMMAND = 'sqa'
+    SUBCOMMAND = 'cross-reference'
+
+    def createToken(self, info, parent):
+        design = collections.defaultdict(list)
+        for requirements in self.extension.requirements.itervalues():
+            for req in requirements:
+                for d in req.design:
+                    node = self.translator.current.findall(d)[0]
+                    design[node].append(req)
+
+        for node, requirements in design.iteritems():
+            link = autolink.AutoShortcutLink(None, key=unicode(node.fullpath))
+            matrix = SQARequirementMatrix(parent, heading=link)
+
+            for req in requirements:
+                self._addRequirement(matrix, req)
+
+        return parent
 
 class SQATemplateLoadCommand(command.CommandComponent):
     COMMAND = 'sqa'
@@ -267,7 +290,8 @@ class RenderSQARequirementMatrix(core.RenderUnorderedList):
     def createMaterialize(self, token, parent):
         if token.heading:
             collection = html.Tag(parent, 'ul', class_="moose-requirements collection with-header")
-            html.Tag(collection, 'li', string=token.heading, class_='collection-header')
+            h = html.Tag(collection, 'li', class_='collection-header')
+            self.translator.renderer.process(h, token.heading)
             return collection
         else:
             return html.Tag(parent, 'ul', class_="collection")
@@ -275,8 +299,8 @@ class RenderSQARequirementMatrix(core.RenderUnorderedList):
 class RenderSQARequirementMatrixItem(core.RenderListItem):
     def createMaterialize(self, token, parent): #pylint: disable=no-self-use,unused-argument
         li = html.Tag(parent, 'li', class_="collection-item", **token.attributes)
-        num = html.Tag(li, 'span', string=u'{}.{}'.format(token.parent.prefix, token.number),
-                       class_='moose-requirement-number')
+        num = html.Tag(li, 'span', string=token.label, class_='moose-requirement-number')
+
         id_ = token.get('id', None)
         if id_:
             num.addClass('tooltipped')

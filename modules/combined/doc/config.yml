@@ -95,3 +95,8 @@ Extensions:
     acronyms:
         type: MooseDocs.extensions.acronym
         acronyms: !include framework/doc/acronyms.yml
+    sqa:
+        type: MooseDocs.extensions.sqa
+        requirement-groups:
+            dgkernels: DGKernel Objects
+            interfacekernels: InterfaceKernel Objects
