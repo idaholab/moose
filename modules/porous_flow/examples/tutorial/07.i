@@ -69,6 +69,9 @@
 []
 
 [AuxVariables]
+  [./eqm_k]
+    initial_condition = 0.1
+  [../]
   [./mineral_conc]
     family = MONOMIAL
     order = CONSTANT
@@ -180,7 +183,7 @@
     type = PorousFlowAqueousPreDisChemistry
     reference_temperature = 283.0
     activation_energy = 1 # irrelevant because T=Tref
-    equilibrium_constants = 0.1 # equilibrium tracer concentration
+    equilibrium_constants = eqm_k # equilibrium tracer concentration
     kinetic_rate_constant = 1E-8
     molar_volume = 1
     num_reactions = 1
@@ -193,7 +196,7 @@
     type = PorousFlowAqueousPreDisChemistry
     reference_temperature = 283.0
     activation_energy = 1 # irrelevant because T=Tref
-    equilibrium_constants = 0.1 # equilibrium tracer concentration
+    equilibrium_constants = eqm_k # equilibrium tracer concentration
     kinetic_rate_constant = 1E-8
     molar_volume = 1
     num_reactions = 1

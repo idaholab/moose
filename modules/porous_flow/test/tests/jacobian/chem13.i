@@ -21,6 +21,18 @@
 []
 
 [AuxVariables]
+  [./eqm_k0]
+    initial_condition = 1.234
+  [../]
+  [./eqm_k1]
+    initial_condition = 1.999
+  [../]
+  [./eqm_k2]
+    initial_condition = 0.789
+  [../]
+  [./eqm_k3]
+    initial_condition = 1.111
+  [../]
   [./ini_sec_conc0]
     initial_condition = 0.02
   [../]
@@ -112,7 +124,7 @@
     type = PorousFlowAqueousPreDisChemistry
     primary_concentrations = 'a b c'
     num_reactions = 4
-    equilibrium_constants = '1.234 1.999 0.789 1.111'
+    equilibrium_constants = 'eqm_k0 eqm_k1 eqm_k2 eqm_k3'
     primary_activity_coefficients = '0.5 0.8 0.9'
     reactions = '0.5 2 3
                  1.5 -2 3

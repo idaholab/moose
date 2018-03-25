@@ -11,6 +11,12 @@
 []
 
 [AuxVariables]
+  [./eqm_k0]
+    initial_condition = 1.234
+  [../]
+  [./eqm_k1]
+    initial_condition = 0.987
+  [../]
   [./temp]
     initial_condition = 0.5
   [../]
@@ -77,7 +83,7 @@
     type = PorousFlowAqueousPreDisChemistry
     primary_concentrations = a
     num_reactions = 2
-    equilibrium_constants = '1.234 0.987'
+    equilibrium_constants = 'eqm_k0 eqm_k1'
     primary_activity_coefficients = 1
     reactions = '1E-10
                  2E-10'  # so that mass_frac = a

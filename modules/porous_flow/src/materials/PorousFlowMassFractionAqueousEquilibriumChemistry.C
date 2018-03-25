@@ -143,17 +143,6 @@ PorousFlowMassFractionAqueousEquilibriumChemistry::
                " but the Dictator knows that the number of aqueous equilibrium reactions is ",
                _dictator.numAqueousEquilibrium());
 
-  _primary_var_num.resize(_num_primary);
-  _primary.resize(_num_primary);
-  _grad_primary.resize(_num_primary);
-  for (unsigned i = 0; i < _num_primary; ++i)
-  {
-    _primary_var_num[i] = coupled("primary_concentrations", i);
-    _primary[i] = (_nodal_material ? &coupledNodalValue("primary_concentrations", i)
-                                   : &coupledValue("primary_concentrations", i));
-    _grad_primary[i] = &coupledGradient("primary_concentrations", i);
-  }
-
   for (unsigned i = 0; i < _num_equilibrium_constants; ++i)
     _equilibrium_constants[i] = (_nodal_material ? &coupledNodalValue("equilibrium_constants", i)
                                                  : &coupledValue("equilibrium_constants", i));
