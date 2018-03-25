@@ -30,7 +30,7 @@
     function = 'if(x<0.1,0,if(x>0.3,0,1))'
   [../]
 []
-  
+
 [PorousFlowFullySaturated]
   porepressure = porepressure
   coupling_type = Hydro
@@ -130,7 +130,7 @@
     variable = tracer
   [../]
 []
-  
+
 [Executioner]
   type = Transient
   solve_type = Newton

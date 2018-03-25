@@ -115,7 +115,7 @@
     type = PorousFlowCapillaryPressureConst
   [../]
 []
-  
+
 [Materials]
   [./temperature_qp]
     type = PorousFlowTemperature
