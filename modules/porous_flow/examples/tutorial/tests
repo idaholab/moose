@@ -68,5 +68,14 @@
     cli_args = 'Executioner/end_time=1E3'
     abs_zero = 1E-3
     heavy = true
+    rel_err = 1E-4
+  [../]
+  [./11_2D]
+    type = Exodiff
+    input = '11_2D.i'
+    exodiff = '11_2D_out.e'
+    cli_args = 'Executioner/end_time=1E3'
+    abs_zero = 1E-3
+    rel_err = 1E-4
   [../]
 []
