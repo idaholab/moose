@@ -159,14 +159,10 @@ protected:
   FlowModel::ESpatialDiscretizationType _spatial_discretization;
   /// flag signalling that there is phase interaction (relevant only in 2-phase)
   bool _phase_interaction;
-
-private:
   /// Vector of connections of this component
   std::vector<Connection> _connections;
-
   /// Vector of connected component names
   std::vector<std::string> _connected_component_names;
-
   /// Vector of subdomain IDs of the connected geometrical flow components
   std::vector<unsigned int> _connected_subdomain_ids;
 };
