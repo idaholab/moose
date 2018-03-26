@@ -287,7 +287,7 @@ public:
    * @param[in] p   pressure
    * @param[in] T   temperature
    */
-  virtual Real beta_from_p_T(Real p, Real T) const = 0;
+  virtual Real beta_from_p_T(Real p, Real T) const;
 };
 
 #endif /* SINGLEPHASEFLUIDPROPERTIES_H */
