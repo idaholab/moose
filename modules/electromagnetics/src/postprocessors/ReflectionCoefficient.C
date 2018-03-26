@@ -106,7 +106,7 @@ ReflectionCoefficient::computeReflection()
         (_field - _coeff * std::exp(_j * _k * _L * std::cos(_theta * libMesh::pi / 180.))) /
         (_coeff * std::exp(-_j * _k * _L * std::cos(_theta * libMesh::pi / 180.)));
 
-    _ref = std::abs(_R_complex);
+    _ref = std::pow(std::abs(_R_complex), 2);
   }
   return _ref;
 }
