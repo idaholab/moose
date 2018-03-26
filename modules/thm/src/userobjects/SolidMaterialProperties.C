@@ -1,5 +1,7 @@
 #include "SolidMaterialProperties.h"
 
+registerMooseObject("RELAP7App", SolidMaterialProperties);
+
 template <>
 InputParameters
 validParams<SolidMaterialProperties>()

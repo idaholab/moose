@@ -2,6 +2,8 @@
 #include "SinglePhaseFluidProperties.h"
 #include "Numerics.h"
 
+registerMooseObject("RELAP7App", FluidProperties3EqnMaterial);
+
 template <>
 InputParameters
 validParams<FluidProperties3EqnMaterial>()
