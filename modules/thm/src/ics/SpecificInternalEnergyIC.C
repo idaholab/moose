@@ -1,5 +1,7 @@
 #include "SpecificInternalEnergyIC.h"
 
+registerMooseObject("RELAP7App", SpecificInternalEnergyIC);
+
 template <>
 InputParameters
 validParams<SpecificInternalEnergyIC>()

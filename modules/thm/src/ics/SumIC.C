@@ -1,5 +1,7 @@
 #include "SumIC.h"
 
+registerMooseObject("RELAP7App", SumIC);
+
 template <>
 InputParameters
 validParams<SumIC>()

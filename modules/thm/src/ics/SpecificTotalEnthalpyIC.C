@@ -1,5 +1,7 @@
 #include "SpecificTotalEnthalpyIC.h"
 
+registerMooseObject("RELAP7App", SpecificTotalEnthalpyIC);
+
 template <>
 InputParameters
 validParams<SpecificTotalEnthalpyIC>()
