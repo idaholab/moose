@@ -1,5 +1,7 @@
 #include "HeatExchangeCoefficientPartitioning.h"
 
+registerMooseObject("RELAP7App", HeatExchangeCoefficientPartitioning);
+
 template <>
 InputParameters
 validParams<HeatExchangeCoefficientPartitioning>()
