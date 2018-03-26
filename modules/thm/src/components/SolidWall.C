@@ -6,6 +6,8 @@
 #include "FlowModelSinglePhase.h"
 #include "FlowModelTwoPhase.h"
 
+registerMooseObject("RELAP7App", SolidWall);
+
 template <>
 InputParameters
 validParams<SolidWall>()
