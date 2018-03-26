@@ -31,15 +31,13 @@ def build_class_database(include_dirs, input_dirs):
     Returns a dict() of DatabaseItem objects. The key is the class name e.g., Diffusion.
 
     Inputs:
-        include_dirs[str,list]: A space separated str or a list of include directories.
-        input_dirs[str,list]: A space separated str or a list of input file directories.
+        include_dirs[list]: A space separated str or a list of include directories.
+        input_dirs[list]: A space separated str or a list of input file directories.
     """
 
-    # Build the lists from strings
-    if isinstance(include_dirs, str):
-        include_dirs = [mooseutils.eval_path(x) for x in include_dirs.split()]
-    if isinstance(input_dirs, str):
-        input_dirs = [mooseutils.eval_path(x) for x in input_dirs.split()]
+    # Handle environment variables
+    include_dirs = [mooseutils.eval_path(x) for x in include_dirs]
+    input_dirs = [mooseutils.eval_path(x) for x in input_dirs]
 
     # Locate filenames
     headers = _locate_filenames(include_dirs, '.h')
