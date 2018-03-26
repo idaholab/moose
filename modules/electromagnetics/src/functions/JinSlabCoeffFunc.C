@@ -6,12 +6,12 @@ InputParameters
 validParams<JinSlabCoeffFunc>()
 {
   InputParameters params = validParams<Function>();
-  params.addRequiredParam<FunctionName>("epsR_real", "Relative permittivity, real component");
-  params.addRequiredParam<FunctionName>("epsR_imag", "Relative permittivity, imaginary component");
+  params.addParam<FunctionName>("epsR_real", 1.0, "Relative permittivity, real component");
+  params.addParam<FunctionName>("epsR_imag", 0.0, "Relative permittivity, imaginary component");
   params.addParam<Real>("muR_real", 1.0, "Relative permeability, real component");
   params.addParam<Real>("muR_imag", 0.0, "Relative permeability, imaginary component");
-  params.addParam<Real>("k", "Wave Number");
-  params.addParam<Real>("theta", "Wave Incidence angle, in degrees");
+  params.addRequiredParam<Real>("k", "Wave Number");
+  params.addRequiredParam<Real>("theta", "Wave Incidence angle, in degrees");
   MooseEnum component("imaginary real", "real");
   params.addParam<MooseEnum>("component", component, "Real or Imaginary wave component");
   return params;
