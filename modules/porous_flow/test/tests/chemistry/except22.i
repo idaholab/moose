@@ -1,47 +1,5 @@
-# Test to illustrate porosity evolution due to precipitation
-#
-# The precipitation reaction
-#
-# a <==> mineral
-#
-# produces "mineral".  Using theta = 1 = eta, the DE that describes the prcipitation is
-# reaction_rate = rate * surf_area * molar_vol (1 - (1 / eqm_const) * (act_coeff * a)^stoi)
-#
-# The following parameters are used
-#
-# T_ref = 0.5 K
-# T = 1 K
-# activation_energy = 3 J/mol
-# gas_constant = 6 J/(mol K)
-# kinetic_rate_at_ref_T = 0.60653 mol/(m^2 s)
-# These give rate = 0.60653 * exp(1/2) = 1 mol/(m^2 s)
-#
-# surf_area = 0.5 m^2/L
-# molar_volume = 2 L/mol
-# These give rate * surf_area * molar_vol = 1 s^-1
-#
-# equilibrium_constant = 0.5 (dimensionless)
-# primary_activity_coefficient = 2 (dimensionless)
-# stoichiometry = 1 (dimensionless)
-# This means that 1 - (1 / eqm_const) * (act_coeff * a)^stoi = 1 - 4 a, which is negative (ie precipitation) for a > 0.25
-#
-# a is held fixed at 0.5, so
-# reaction_rate = - (1 - 2) = 1
-#
-# The mineral volume fraction evolves according to
-# Mineral = mineral_old + dt * porosity_old * reaction_rate = mineral_old + dt * porosity_old
-#
-# Porosity evolves according to
-# porosity = porosity(t=0) - (mineral - mineral(t=0))
-#          = porosity(t=0) - (mineral_old + dt * porosity_old * reaction_rate - mineral(t=0))
-#
-# Specifically:
-# time mineral porosity
-# 0    0.2     0.6
-# 0.1  0.26    0.54
-# 0.2  0.314   0.486
-# 0.3  0.3626  0.4374
-# 0.4  0.40634 0.39366
+# Exception test
+# Zero fluid phases
 [Mesh]
   type = GeneratedMesh
   dim = 1
@@ -98,7 +56,7 @@
   [./dictator]
     type = PorousFlowDictator
     porous_flow_vars = dummy
-    number_fluid_phases = 1
+    number_fluid_phases = 0
     number_fluid_components = 2
     number_aqueous_kinetic = 1
   [../]
@@ -116,10 +74,6 @@
   [./temperature_qp]
     type = PorousFlowTemperature
     temperature = 1
-  [../]
-  [./ppss_qp]
-    type = PorousFlow1PhaseFullySaturated
-    porepressure = dummy
   [../]
   [./predis_qp]
     type = PorousFlowAqueousPreDisChemistry
@@ -144,7 +98,6 @@
     chemical = true
     porosity_zero = 0.6
     reference_chemistry = ini_mineral_conc
-    initial_mineral_concentrations = ini_mineral_conc
   [../]
 []
 

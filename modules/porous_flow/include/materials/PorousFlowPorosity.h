@@ -114,6 +114,15 @@ protected:
 
   /// d(reaction_rate_conc)/d(porflow variable)
   const MaterialProperty<std::vector<std::vector<Real>>> * const _dreaction_rate_dvar;
+
+  /// Aqueous phase number
+  const unsigned int _aq_ph;
+
+  /// saturation
+  const MaterialProperty<std::vector<Real>> * const _saturation;
+
+  /// d(saturation)/d(PorousFlow var)
+  const MaterialProperty<std::vector<std::vector<Real>>> * const _dsaturation_dvar;
 };
 
 #endif // POROUSFLOWPOROSITY_H

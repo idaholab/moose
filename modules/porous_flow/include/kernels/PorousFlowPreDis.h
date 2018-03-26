@@ -20,7 +20,7 @@ template <>
 InputParameters validParams<PorousFlowPreDis>();
 
 /**
- * Kernel = sum (stoichiometry * density * porosity_old * reaction_rate)
+ * Kernel = sum (stoichiometry * density * porosity_old * saturation * reaction_rate)
  * where the sum is over secondary chemical species in
  * a precipitation-dissolution reaction system.
  */
@@ -40,8 +40,17 @@ protected:
   /// holds info on the PorousFlow variables
   const PorousFlowDictator & _dictator;
 
+  /// Aqueous phase number
+  const unsigned int _aq_ph;
+
   /// old value of porosity
   const MaterialProperty<Real> & _porosity_old;
+
+  /// saturation
+  const MaterialProperty<std::vector<Real>> & _saturation;
+
+  /// d(saturation)/d(PorousFlow var)
+  const MaterialProperty<std::vector<std::vector<Real>>> & _dsaturation_dvar;
 
   /// reaction rate of the yielding the secondary species
   const MaterialProperty<std::vector<Real>> & _reaction_rate;

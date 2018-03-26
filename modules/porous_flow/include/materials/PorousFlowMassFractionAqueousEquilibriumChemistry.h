@@ -10,7 +10,7 @@
 #ifndef POROUSFLOWMASSFRACTIONAQUEOUSCHEMISTRYCHEMISTRY_H
 #define POROUSFLOWMASSFRACTIONAQUEOUSCHEMISTRYCHEMISTRY_H
 
-#include "PorousFlowMaterialVectorBase.h"
+#include "PorousFlowMassFraction.h"
 
 // Forward Declarations
 class PorousFlowMassFractionAqueousEquilibriumChemistry;
@@ -24,7 +24,7 @@ InputParameters validParams<PorousFlowMassFractionAqueousEquilibriumChemistry>()
  * and secondary-species concentrations
  * for an equilibrium aqueous chemistry reaction system
  */
-class PorousFlowMassFractionAqueousEquilibriumChemistry : public PorousFlowMaterialVectorBase
+class PorousFlowMassFractionAqueousEquilibriumChemistry : public PorousFlowMassFraction
 {
 public:
   PorousFlowMassFractionAqueousEquilibriumChemistry(const InputParameters & parameters);
@@ -78,15 +78,6 @@ protected:
    */
   virtual Real dQpSecondaryConcentration_dT(unsigned reaction_num) const;
 
-  /// Mass fraction matrix at quadpoint or nodes
-  MaterialProperty<std::vector<std::vector<Real>>> & _mass_frac;
-
-  /// Gradient of the mass fraction matrix at the quad points
-  MaterialProperty<std::vector<std::vector<RealGradient>>> * const _grad_mass_frac;
-
-  /// Derivative of the mass fraction matrix with respect to the porous flow variables
-  MaterialProperty<std::vector<std::vector<std::vector<Real>>>> & _dmass_frac_dvar;
-
   /// Secondary concentrations at quadpoint or nodes
   MaterialProperty<std::vector<Real>> & _sec_conc;
 
@@ -102,6 +93,12 @@ protected:
   /// Number of primary species
   const unsigned int _num_primary;
 
+  /// aqueous phase number
+  const unsigned int _aq_ph;
+
+  /// index (into _mf_vars) of the first of the primary species
+  const unsigned int _aq_i;
+
   /// number of equations in the aqueous geochemistry system
   const unsigned int _num_reactions;
 
@@ -113,15 +110,6 @@ protected:
 
   /// stoichiometry defining the aqeuous geochemistry equilibrium reactions
   const std::vector<Real> _reactions;
-
-  /// the variable number of the primary variables
-  std::vector<unsigned int> _primary_var_num;
-
-  /// Values of the primary species' concentrations (dimensionless)
-  std::vector<const VariableValue *> _primary;
-
-  /// the gradient of the primary variables (units = m^-1)
-  std::vector<const VariableGradient *> _grad_primary;
 
   /// activity coefficients for the secondary species
   const std::vector<Real> _secondary_activity_coefficients;

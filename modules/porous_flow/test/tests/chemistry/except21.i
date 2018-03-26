@@ -1,5 +1,5 @@
 # Exception test.
-# Incorrect number of mass-fractions
+# Incorrect aqueous_phase_number
 
 [Mesh]
   type = GeneratedMesh
@@ -33,8 +33,9 @@
     type = PorousFlowDictator
     porous_flow_vars = 'a b'
     number_fluid_phases = 1
-    number_fluid_components = 2
+    number_fluid_components = 3
     number_aqueous_equilibrium = 2
+    aqueous_phase_number = 1
   [../]
 []
 

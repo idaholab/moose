@@ -12,7 +12,7 @@
   [./except3]
     type = RunException
     input = except3.i
-    expect_err = 'PorousFlowMassFractionAqueousEquilibriumChemistry: The number of mass_fraction_vars is 2 which must be one greater than the number of primary concentrations \(which is 2\)'
+    expect_err = 'PorousFlowMassFraction: The number of mass_fraction_vars is 2 which must be equal to the Dictator\'s num_phases \(1\) multiplied by num_components-1 \(1\)'
   [../]
   [./except5]
     type = RunException
@@ -94,6 +94,16 @@
     input = except20.i
     expect_err = 'PorousFlowPorosity: When chemical=true you must provide the reference_chemistry values.  The Dictator proclaims there should be 1 of these'
   [../]
+  [./except21]
+    type = RunException
+    input = except21.i
+    expect_err = 'PorousflowDictator: The aqueous phase number must be less than the number of fluid phases.  The Dictator does not appreciate jokes.'
+  [../]
+  [./except22]
+    type = RunException
+    input = except22.i
+    expect_err = 'PorousFlowAqueousPreDisChemistry: The number of fluid phases must not be zero'
+  [../]
 
   [./precipitation]
     type = CSVDiff
@@ -124,5 +134,20 @@
     type = Exodiff
     input = 2species_predis.i
     exodiff = 2species_predis_out.e
+  [../]
+  [./precipitation_2phase]
+    type = CSVDiff
+    input = precipitation_2phase.i
+    csvdiff = precipitation_2phase_out.csv
+  [../]
+  [./dissolution_limited_2phase]
+    type = CSVDiff
+    input = dissolution_limited_2phase.i
+    csvdiff = dissolution_limited_2phase_out.csv
+  [../]
+  [./2species_equilibrium_2phase]
+    type = Exodiff
+    input = 2species_equilibrium_2phase.i
+    exodiff = 2species_equilibrium_2phase_out.e
   [../]
 []

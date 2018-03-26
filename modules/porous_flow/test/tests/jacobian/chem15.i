@@ -91,7 +91,7 @@
   [../]
   [./massfrac]
     type = PorousFlowMassFractionAqueousEquilibriumChemistry
-    primary_concentrations = 'a b'
+    mass_fraction_vars = 'a b'
     num_reactions = 3
     equilibrium_constants = '1.234E-4 0.987E-4 0.5E-4'
     primary_activity_coefficients = '1 1.2'

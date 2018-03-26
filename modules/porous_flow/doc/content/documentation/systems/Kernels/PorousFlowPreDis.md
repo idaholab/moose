@@ -4,9 +4,9 @@
 
 This `Kernel` implements the residual
 \begin{equation*}
-  \phi_{\mathrm{old}} \sum_{m}\nu_{m}\rho_{m}I_{m} \ .
+  \phi_{\mathrm{old}} S_{\mathrm{aq}} \sum_{m}\nu_{m}\rho_{m}I_{m} \ .
 \end{equation*}
-In this equation, $\phi$ is the porosity (only the *old* value is used), the sum over $m$ is a sum
+In this equation, $\phi$ is the porosity (only the *old* value is used), $S_{\mathrm{aq}}$ is the aqueous saturation, the sum over $m$ is a sum
 over all the precipitated-or-dissolved (`PreDis`) mineral species,
 $\nu_{m}$ are stoichiometric coefficients, $\rho_{m}$ is the density
 of a solid lump of the mineral, and $I_{m}$ is the mineral
