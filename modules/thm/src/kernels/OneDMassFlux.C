@@ -1,5 +1,7 @@
 #include "OneDMassFlux.h"
 
+registerMooseObject("RELAP7App", OneDMassFlux);
+
 template <>
 InputParameters
 validParams<OneDMassFlux>()
