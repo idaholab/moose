@@ -18,14 +18,16 @@
 ContactLineSearch::ContactLineSearch(FEProblemBase & fe_problem,
                                      MooseApp & app,
                                      size_t allowed_lambda_cuts,
-                                     Real contact_ltol)
+                                     Real contact_ltol,
+                                     bool affect_ltol)
   : ConsoleStreamInterface(app),
     ParallelObject(app),
     _fe_problem(fe_problem),
     _nl_its(0),
     _user_ksp_rtol_set(false),
     _allowed_lambda_cuts(allowed_lambda_cuts),
-    _contact_ltol(contact_ltol)
+    _contact_ltol(contact_ltol),
+    _affect_ltol(affect_ltol)
 {
 }
 
@@ -92,13 +94,16 @@ ContactLineSearch::linesearch(SNESLineSearch linesearch)
   std::set<dof_id_type> contact_state_stored = _current_contact_state;
   printContactInfo();
 
-  if (_current_contact_state != _old_contact_state)
+  if (_affect_ltol)
   {
-    KSPSetTolerances(ksp, _contact_ltol, ksp_abstol, ksp_dtol, ksp_maxits);
-    _console << "Contact set changed since previous non-linear iteration!\n";
+    if (_current_contact_state != _old_contact_state)
+    {
+      KSPSetTolerances(ksp, _contact_ltol, ksp_abstol, ksp_dtol, ksp_maxits);
+      _console << "Contact set changed since previous non-linear iteration!\n";
+    }
+    else
+      KSPSetTolerances(ksp, _user_ksp_rtol, ksp_abstol, ksp_dtol, ksp_maxits);
   }
-  else
-    KSPSetTolerances(ksp, _user_ksp_rtol, ksp_abstol, ksp_dtol, ksp_maxits);
 
   size_t ls_its = 0;
   while (ls_its < _allowed_lambda_cuts)

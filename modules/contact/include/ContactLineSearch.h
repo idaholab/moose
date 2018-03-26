@@ -31,7 +31,8 @@ public:
   ContactLineSearch(FEProblemBase & fe_problem,
                     MooseApp & app,
                     size_t allowed_lambda_cuts,
-                    Real contact_ltol);
+                    Real contact_ltol,
+                    bool affect_ltol);
 
   /**
    * The custom linesearch implementation method
@@ -88,6 +89,9 @@ protected:
 
   /// What the linear tolerance should be while the contact state is changing
   Real _contact_ltol;
+
+  /// Whether to modify the linear tolerance
+  bool _affect_ltol;
 };
 
 #endif
