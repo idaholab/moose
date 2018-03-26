@@ -6,7 +6,7 @@ InputParameters
 validParams<CoupledCoeffField>()
 {
   InputParameters params = validParams<Kernel>();
-  params.addParam<Real>("k", 1.0, "Coefficient multiplier (to be squared) for field.");
+  params.addParam<Real>("coeff", 1.0, "Coefficient multiplier for field.");
   params.addParam<FunctionName>("func", 1.0, "Function multiplier for field.");
   params.addRequiredCoupledVar("coupled_field", "Coupled field variable.");
   params.addParam<Real>("sign", 1.0, "Sign of term in weak form.");
@@ -16,7 +16,7 @@ validParams<CoupledCoeffField>()
 CoupledCoeffField::CoupledCoeffField(const InputParameters & parameters)
   : Kernel(parameters),
 
-    _coefficient(getParam<Real>("k")),
+    _coefficient(getParam<Real>("coeff")),
 
     _func(getFunction("func")),
 
@@ -30,8 +30,7 @@ CoupledCoeffField::CoupledCoeffField(const InputParameters & parameters)
 Real
 CoupledCoeffField::computeQpResidual()
 {
-  return _sign * std::pow(_coefficient, 2) * _func.value(_t, _q_point[_qp]) * _test[_i][_qp] *
-         _coupled_val[_qp];
+  return _sign * _coefficient * _func.value(_t, _q_point[_qp]) * _test[_i][_qp] * _coupled_val[_qp];
 }
 
 Real
