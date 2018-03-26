@@ -150,3 +150,49 @@ in a MOOSE input file: one involving *production* which is only active for $P>P_
 Piecewise-linear sink (here $P_{\mathrm{e}}$ is the environmental pressure); and one involving
 *injection*, which is only active for $P<P_{\mathrm{e}}$ using a piecewise-linear sink multiplied
 by the appropriate factors.
+
+## A 2-phase example
+
+To illustrate that the "sink" part of the `PorousFlowSink` boundary condition works as planned, consider 2-phase flow along a line.  The simulation is initially saturated with water, and CO$_{2}$ is injected at the left-side.  The CO$_{2}$ front moves towards the right, but what boundary conditions should be placed on the right so that they don't interfere with the flow?
+
+The answer is that two [`PorousFlowPiecewiseLinearSink`](PorousFlowPiecewiseLinearSink.md) are needed.  One pulls out water and the other pulls out CO$_{2}$.  They extract the fluids in proportion to their mass fractions, mobilities and relative permeabilities, in the way described above.  Let us explore the input file a little.
+
+In this example there are two fluid components:
+
+- fluid component 0 is water
+- fluid component 1 is CO$_{2}$
+
+and two phases:
+
+- phase 0 is liquid
+- phase 1 is gas
+
+The water component only exists in the liquid phase and the CO$_{2}$ component only exists in the gaseous phase (the fluids are immiscible).  The Variables are the water and gas porepressures:
+
+!listing modules/porous_flow/test/tests/sinks/injection_production_eg.i start=[Variables] end=[Kernels]
+
+The `pwater` Variable is associated with the water component, while the `pgas` Variable is associated with the CO$_{2}$ component:
+
+!listing modules/porous_flow/test/tests/sinks/injection_production_eg.i start=[Kernels] end=[UserObjects]
+
+A van Genuchten capillary pressure is used
+
+!listing modules/porous_flow/test/tests/sinks/injection_production_eg.i start=[./pc] end=[]
+
+The remainder of the input file is pretty standard, save for the important `BCs` block:
+
+!listing modules/porous_flow/test/tests/sinks/injection_production_eg.i start=[BCs] end=[Preconditioning]
+
+Below are shown some outputs.  Evidently the boundary condition satisfies the requirements.
+
+!media injection_production_eg_sg0.png style=width:50%;margin-left:10px caption=Gas saturation at breakthrough (the jaggedness of the line is because gas saturation is an elemental variable).  id=injection_production_eg_sg0
+
+!media injection_production_eg_pp0.png style=width:50%;margin-left:10px caption=Porepressures at breakthrough.  id=injection_production_eg_pp0
+
+!media injection_production_eg_sg1.png style=width:50%;margin-left:10px caption=Gas saturation at the end of simulation.  id=injection_production_eg_sg1
+
+!media injection_production_eg_pp1.png style=width:50%;margin-left:10px caption=Porepressures at the end of simulation.  id=injection_production_eg_pp1
+
+!media injection_production_eg.gif style=width:50%;margin-left:10px caption=Evolution of gas saturation (the jaggedness of the line is because gas saturation is an elemental variable).  id=injection_production_eg
+
+
