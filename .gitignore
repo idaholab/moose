@@ -84,6 +84,7 @@ temp_print_trace.*
 *.processor.*
 .clang_complete
 .failed_tests
+.previous_test_results
 compile_commands.json
 build
 

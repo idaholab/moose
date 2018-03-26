@@ -12,7 +12,7 @@ if sys.version_info[0:2] != (2, 7):
     print("python 2.7 is required to run the test harness")
     sys.exit(1)
 
-import os, re, inspect, errno, copy
+import os, re, inspect, errno, copy, json
 import shlex
 
 from socket import gethostname
@@ -102,6 +102,7 @@ class TestHarness:
         self.moose_dir = moose_dir
         self.base_dir = os.getcwd()
         self.run_tests_dir = os.path.abspath('.')
+        self.results_storage = os.path.join(self.base_dir, '.previous_test_results')
         self.code = '2d2d6769726c2d6d6f6465'
         self.error_code = 0x0
         # Assume libmesh is a peer directory to MOOSE if not defined
@@ -273,8 +274,6 @@ class TestHarness:
             # Attempt to kill jobs currently running
             self.scheduler.killRemaining()
 
-            if self.writeFailedTest != None:
-                self.writeFailedTest.close()
             print('\nExiting due to keyboard interrupt...')
             sys.exit(1)
 
@@ -433,95 +432,85 @@ class TestHarness:
 
         return True
 
-    # Format the caveats contained in tester so they are easy to read when printed
-    def formatCaveats(self, tester):
+    def formatStatusMessage(self, tester):
         # PASS and DRY_RUN fall into this catagory
         if tester.didPass():
-            result = tester.success_message
+            result = tester.getStatusMessage()
+            if result == '':
+                result = tester.success_message
             if self.options.extra_info:
                 for check in self.options._checks.keys():
                     if tester.specs.isValid(check) and not 'ALL' in tester.specs[check]:
                         tester.addCaveats(check)
 
         # FAIL, DIFF and DELETED fall into this catagory
-        elif tester.didFail() or tester.didDiff() or tester.isDeleted():
-            result = 'FAILED (%s)' % tester.getStatusMessage()
+        elif tester.didFail() or (tester.isDeleted() and self.options.extra_info):
+            message = tester.getStatusMessage()
+            if message == '':
+                message = tester.getStatus().status
 
-        # Silent tests have no results
-        elif tester.isSilent():
-            result = ''
+            result = 'FAILED (%s)' % (message)
 
-        # Some other finished status... skipped, queued, etc
+        # Some other finished status... skipped, silent, etc
         else:
             result = tester.getStatusMessage()
 
+        # No one set a unique status message? In that case, use the name of
+        # the status itself as the status message.
+        if not result:
+            result = tester.getStatus().status
+
         return result
 
-    # Print and return formatted current tester status output
-    def printResult(self, tester_data):
-        """ Method to print a testers status to the screen """
-        tester = tester_data.getTester()
-        formatted_results = None
+    def getTesterOutput(self, job):
+        """ Method to return a testers stdout """
+        tester = job.getTester()
+        output = 'Working Directory: ' + tester.getTestDir() + '\nRunning command: ' + tester.getCommand(self.options) + '\n'
+        output += job.getOutput()
+        output = output.replace('\r', '\n')  # replace the carriage returns with newlines
+        lines = output.split('\n')
+        # Obtain color based on test status
+        color = tester.getColor()
 
-        # Print what ever status the tester has at the time
+        if output != '':
+            test_name = util.colorText(tester.getTestName()  + ": ", color, colored=self.options.colored, code=self.options.code)
+            output = test_name + ("\n" + test_name).join(lines)
+        return output
+
+    def handleTestStatus(self, job):
+        """ Method to handle a test status """
+        tester = job.getTester()
         if self.canPrint(tester):
-            if self.options.verbose or (tester.didFail() and not self.options.quiet):
-                output = 'Working Directory: ' + tester.getTestDir() + '\nRunning command: ' + tester.getCommand(self.options) + '\n'
+            # Print results and perform any desired post job processing
+            if tester.isFinished():
 
-                output += tester_data.getOutput()
-                output = output.replace('\r', '\n')  # replace the carriage returns with newlines
-                lines = output.split('\n')
+                # perform printing of application output if so desired (verbose/failed, etc)
+                if self.options.verbose or (tester.didFail() and not self.options.quiet):
+                    print(self.getTesterOutput(job))
 
-                # Obtain color based on test status
-                color = tester.getColor()
+                # Print status with caveats
+                result = self.formatStatusMessage(tester)
+                print(util.formatResult(job, result, self.options))
 
-                if output != '':
-                    test_name = util.colorText(tester.getTestName()  + ": ", color, colored=self.options.colored, code=self.options.code)
-                    output = test_name + ("\n" + test_name).join(lines)
-                    print(output)
+                timing = job.getTiming()
 
-            formatted_results = self.formatCaveats(tester)
-            print(util.formatResult(tester_data, formatted_results, self.options))
-        return formatted_results
+                # Save these results for 'Final Test Result' summary
+                self.test_table.append( (job, result, timing) )
 
-    def handleTestStatus(self, tester_data):
-        """ Method to handle a testers status """
-        tester = tester_data.getTester()
+                self.postRun(tester.specs, timing)
 
-        # print and store those results
-        result = self.printResult(tester_data)
+                if tester.isSkipped():
+                    self.num_skipped += 1
+                elif tester.didPass():
+                    self.num_passed += 1
+                elif tester.isQueued() or tester.isWaiting():
+                    self.num_pending += 1
+                else:
+                    self.num_failed += 1
 
-        # Test is finished and had some results to print
-        if tester.isFinished() and self.canPrint(tester):
-            timing = tester_data.getTiming()
-
-            # Store these results to a table we will use when we print final results
-            self.test_table.append( (tester_data, result, timing) )
-
-            self.postRun(tester.specs, timing)
-            # Tally the results of this test to be used in our Final Test Results footer
-            if tester.isSkipped():
-                self.num_skipped += 1
-            elif tester.didPass():
-                self.num_passed += 1
-            elif tester.isQueued() or tester.isWaiting():
-                self.num_pending += 1
+            # Just print current status without saving results
             else:
-                self.num_failed += 1
-
-            # Write results to a file if asked to do so
-            if not tester.isSkipped():
-                if not tester.didPass() and not self.options.failed_tests:
-                    self.writeFailedTest.write(tester.getTestName() + '\n')
-
-                if self.options.file:
-                    self.file.write(util.formatResult( tester_data, result, self.options, color=False) + '\n')
-
-                if self.options.sep_files or (self.options.fail_files and not tester.didPass()) or (self.options.ok_files and tester.didPass()):
-                    fname = os.path.join(tester.getTestDir(), tester.getTestName().split('/')[-1] + '.' + result[:6] + '.txt')
-                    f = open(fname, 'w')
-                    f.write(util.formatResult( tester_data, tester_data.getOutput(), self.options, color=False) + '\n')
-                    f.close()
+                print(util.formatResult(job, 'RUNNING...', self.options))
 
     # Print final results, close open files, and exit with the correct error code
     def cleanup(self):
@@ -583,12 +572,93 @@ class TestHarness:
             print(util.colorText( summary % (self.num_passed, self.num_skipped, self.num_pending, self.num_failed),  "", html = True, \
                              colored=self.options.colored, code=self.options.code ))
 
-        if self.file:
-            self.file.close()
+            # Perform any write-to-disc operations
+            self.writeResults()
 
-        # Close the failed_tests file
-        if self.writeFailedTest != None:
-            self.writeFailedTest.close()
+    # TODO: put this in utils?
+    def writeResults(self):
+        """ write test results to disc in some fashion the user has requested """
+        all_jobs = self.scheduler.retrieveJobs()
+
+        # Write to our results_storage
+        results_data = {}
+        for job in all_jobs:
+            tester = job.getTester()
+            # Optimize how we store and retreive tests (key off of testDir instead of absolute path to test)
+            results_data[tester.getTestDir()] = results_data.get(tester.getTestDir(), {})
+
+            # Convert tester specs generator into something json dump can write
+            params = {}
+            for param in [x for x in tester.specs.keys() if tester.specs.isValid(x)]:
+                params[param] = tester.specs[param]
+
+            results_data[tester.getTestDir()][tester.getTestName()] = {'NAME'      : job.getTestNameShort(),
+                                                                       'LONG_NAME' : tester.getTestName(),
+                                                                       'TIMING'    : job.getTiming(),
+                                                                       'STATUS'    : tester.getStatus().status,
+                                                                       'COLOR'     : tester.getStatus().color,
+                                                                       'STDOUT'    : job.getOutput(),
+                                                                       'CAVEATS'   : ','.join(tester.getCaveats()),
+                                                                       'PARAMS'    : params}
+
+        if results_data:
+            with open(self.results_storage, 'w') as data_file:
+                json.dump(results_data, data_file, indent=2)
+
+        # Write to specific files if asked to do so
+        if (self.options.file
+            or self.options.sep_files
+            or (self.options.ok_files and self.num_passed)
+            or (self.options.fail_files and self.num_failed)):
+            all_jobs = self.scheduler.retrieveJobs()
+
+            try:
+                # Write one file, with verbose information (--file)
+                if self.options.file:
+                    with open(os.path.join(self.output_dir, self.options.file), 'w') as f:
+                        for job in all_jobs:
+                            formated_results = util.formatResult( job, job.getOutput(), self.options, color=False)
+                            f.write(formated_results + '\n')
+
+                # Write a separate file for each test with verbose information (--sep-files, --sep-files-ok, --sep-files-fail)
+                if (self.options.sep_files
+                    or self.options.ok_files
+                    or self.options.fail_files):
+                    for job in all_jobs:
+                        tester = job.getTester()
+                        if self.options.output_dir:
+                            output_dir = self.options.output_dir
+                        else:
+                            output_dir = tester.getTestDir()
+
+                        # Yes, by design test dir will be apart of the output file name
+                        output_file = os.path.join(output_dir, '.'.join([os.path.basename(tester.getTestDir()),
+                                                                         job.getTestNameShort(),
+                                                                         tester.getStatus().status,
+                                                                         'txt']))
+                        formated_results = util.formatResult(job, job.getOutput(), self.options, color=False)
+
+                        # All tests
+                        if self.options.sep_files:
+                            with open(output_file, 'w') as f:
+                                f.write(formated_results)
+
+                        # Passing tests
+                        elif self.options.ok_files and tester.didPass():
+                            with open(output_file, 'w') as f:
+                                f.write(formated_results)
+
+                        # Failing tests
+                        elif self.options.fail_files and tester.didFail():
+                            with open(output_file, 'w') as f:
+                                f.write(formated_results)
+
+            except IOError:
+                print('Permission error while writing results to disc')
+                sys.exit(1)
+            except:
+                print('Error while writing results to disc')
+                sys.exit(1)
 
     def initialize(self, argv, app_name):
         # Load the scheduler plugins
@@ -637,11 +707,22 @@ class TestHarness:
                 if ex.errno == errno.EEXIST: pass
                 else: raise
 
-        # Open the file to redirect output to and set the quiet option for file output
-        if self.options.file:
-            self.file = open(os.path.join(self.output_dir, self.options.file), 'w')
-        if self.options.file or self.options.fail_files or self.options.sep_files:
-            self.options.quiet = True
+        # Use a previous results file, or declare the variable
+        self.options.results_storage = None
+        if self.useExistingStorage():
+            with open(self.results_storage, 'r') as f:
+                try:
+                    self.options.results_storage = json.load(f)
+                except ValueError:
+                    # This is a hidden file, controled by the TestHarness. So we probably shouldn't error
+                    # and exit. Perhaps a warning instead, and create a new file? Down the road, when
+                    # we use this file for PBS etc, this should probably result in an exception.
+                    print('INFO: Previous .test_restults file is damaged. Creating a new one...')
+
+    def useExistingStorage(self):
+        """ reasons for returning bool if we should use a previous results_storage file """
+        if os.path.exists(self.results_storage) and self.options.failed_tests:
+            return True
 
     ## Parse command line options and assign them to self.options
     def parseCLArgs(self, argv):
@@ -730,15 +811,6 @@ class TestHarness:
         for key, value in vars(self.options).items():
             if type(value) == list and len(value) == 1:
                 setattr(self.options, key, value[0])
-
-        # If attempting to test only failed_tests, open the .failed_tests file and create a list object
-        # otherwise, open the failed_tests file object for writing (clobber).
-        failed_tests_file = os.path.join(os.getcwd(), '.failed_tests')
-        if self.options.failed_tests:
-            with open(failed_tests_file, 'r') as tmp_failed_tests:
-                self.options._test_list = tmp_failed_tests.read().split('\n')
-        else:
-            self.writeFailedTest = open(failed_tests_file, 'w')
 
         self.checkAndUpdateCLArgs()
 
