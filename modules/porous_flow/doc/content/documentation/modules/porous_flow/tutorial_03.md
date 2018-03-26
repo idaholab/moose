@@ -1,8 +1,8 @@
-# Porous Flow Tutorial Page 03.  Adding heat advection and conduction
-
 [Start](porous_flow/tutorial_00.md) |
 [Previous](porous_flow/tutorial_02.md) |
 [Next](porous_flow/tutorial_04.md)
+
+# Porous Flow Tutorial Page 03.  Adding heat advection and conduction
 
 This Page adds heat conduction and advection with the fluid.  The differential equation governing the temperature evolution is
 \begin{equation}
