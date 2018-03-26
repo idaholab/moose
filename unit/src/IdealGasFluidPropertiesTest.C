@@ -36,6 +36,7 @@ TEST_F(IdealGasFluidPropertiesTest, testAll)
   REL_TEST(_fp->cv_from_v_e(v, e), 700.09756097561, 1e-15);
 
   REL_TEST(h, 388093, 4e-7);
+  REL_TEST(_fp->beta_from_p_T(p, T), 0.00254355843825512, REL_TOL_SAVED_VALUE);
 
   REL_TEST(s, 2588.90011905277, REL_TOL_SAVED_VALUE);
   DERIV_TEST(_fp->s_from_v_e, v, e, REL_TOL_DERIVATIVE);

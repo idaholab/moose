@@ -57,7 +57,6 @@ public:
   virtual Real p_from_h_s(Real h, Real s) const override;
   virtual void p_from_h_s(Real h, Real s, Real & p, Real & dp_dh, Real & dp_ds) const override;
   virtual Real g_from_v_e(Real v, Real e) const override;
-  virtual Real beta_from_p_T(Real p, Real T) const override;
 
   virtual Real c2_from_p_rho(Real pressure, Real rho) const;
 

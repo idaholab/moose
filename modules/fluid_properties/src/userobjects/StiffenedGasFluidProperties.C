@@ -211,21 +211,6 @@ StiffenedGasFluidProperties::e_from_v_h(Real v, Real h, Real & e, Real & de_dv, 
 }
 
 Real
-StiffenedGasFluidProperties::beta_from_p_T(Real p, Real T) const
-{
-  // The volumetric thermal expansion coefficient is defined as
-  //   1/v dv/dT)_p
-  // It is the fractional change rate of volume with respect to temperature change
-  // at constant pressure. Here it is coded as
-  //   - 1/rho drho/dT)_p
-  // using chain rule with v = v(rho)
-
-  Real rho, drho_dp, drho_dT;
-  rho_from_p_T(p, T, rho, drho_dp, drho_dT);
-  return -drho_dT / rho;
-}
-
-Real
 StiffenedGasFluidProperties::rho_from_p_T(Real p, Real T) const
 {
   mooseAssert(((_gamma - 1.0) * _cv * T) != 0.0, "Invalid gamma or cv or temperature detected!");
