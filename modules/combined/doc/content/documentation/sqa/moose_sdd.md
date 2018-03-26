@@ -103,10 +103,6 @@ request system on the Github.org website.
 
 !sqa! item key=requirements-cross-reference
 
-!alert construction
-It is possible to use the "design" links from within the test specifications to determine what
-requirements are associated with each system and build this automatically.
-
 !sqa cross-reference
 
 !sqa-end!
