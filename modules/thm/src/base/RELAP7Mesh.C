@@ -1,5 +1,7 @@
 #include "RELAP7Mesh.h"
 
+registerMooseObject("RELAP7App", RELAP7Mesh);
+
 template <>
 InputParameters
 validParams<RELAP7Mesh>()

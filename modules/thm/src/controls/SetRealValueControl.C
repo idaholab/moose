@@ -1,6 +1,8 @@
 #include "SetRealValueControl.h"
 #include "Function.h"
 
+registerMooseObject("RELAP7App", SetRealValueControl);
+
 template <>
 InputParameters
 validParams<SetRealValueControl>()

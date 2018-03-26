@@ -1,5 +1,7 @@
 #include "UnitTripControl.h"
 
+registerMooseObject("RELAP7App", UnitTripControl);
+
 template <>
 InputParameters
 validParams<UnitTripControl>()

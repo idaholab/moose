@@ -1,6 +1,8 @@
 #include "TerminateControl.h"
 #include "Function.h"
 
+registerMooseObject("RELAP7App", TerminateControl);
+
 template <>
 InputParameters
 validParams<TerminateControl>()

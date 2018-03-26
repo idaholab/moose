@@ -1,6 +1,8 @@
 #include "TimeFunctionControl.h"
 #include "Function.h"
 
+registerMooseObject("RELAP7App", TimeFunctionControl);
+
 template <>
 InputParameters
 validParams<TimeFunctionControl>()

@@ -1,6 +1,8 @@
 #include "GetFunctionValueControl.h"
 #include "Function.h"
 
+registerMooseObject("RELAP7App", GetFunctionValueControl);
+
 template <>
 InputParameters
 validParams<GetFunctionValueControl>()

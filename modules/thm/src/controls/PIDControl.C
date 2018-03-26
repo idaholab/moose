@@ -1,5 +1,7 @@
 #include "PIDControl.h"
 
+registerMooseObject("RELAP7App", PIDControl);
+
 template <>
 InputParameters
 validParams<PIDControl>()
