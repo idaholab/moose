@@ -15,6 +15,8 @@
 #include "MooseUtils.h"
 #include "ColumnMajorMatrix.h"
 
+#include "Conversion.h"
+
 #include "libmesh/libmesh.h"
 #include "libmesh/tensor_value.h"
 #include "libmesh/utility.h"
@@ -1122,8 +1124,9 @@ RankTwoTensor::syev(const char * calculation_type,
   LAPACKsyev_(calculation_type, "U", &nd, &a[0], &nd, &eigvals[0], &work[0], &lwork, &info);
 
   if (info != 0)
-    mooseError("In computing the eigenvalues and eigenvectors of a symmetric rank-2 tensor, the "
-               "PETSC LAPACK syev routine returned error code ",
+    mooseError("In computing the eigenvalues and eigenvectors for the symmetric rank-2 tensor (",
+               Moose::stringify(a),
+               "), the PETSC LAPACK syev routine returned error code ",
                info);
 }
 
