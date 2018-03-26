@@ -7,6 +7,7 @@
     recover = false
     mesh_mode = REPLICATED
     issues = '#10623'
+    design = 'Mesh/splitting.md'
     requirement = 'A mesh can be split into a specified number of files using command line options.'
   [../]
   [./use_split]
@@ -17,6 +18,7 @@
     prereq = 'make_split'
     min_parallel = 3
     max_parallel = 3
+    design = 'Mesh/splitting.md'
     issues = '#10623'
     requirement = 'A mesh can be pre-split properly and used to generate equivalent results to running a simulation with the unsplit mesh.'
   [../]
