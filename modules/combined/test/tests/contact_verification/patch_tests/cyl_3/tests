@@ -100,7 +100,6 @@
     abs_zero = 1e-4
     max_parallel = 1
     superlu = true
-    compiler = 'GCC CLANG' #superlu bug, see MOOSE issue #10084
   [../]
   [./frictionless_pen_sm]
     type = 'CSVDiff'

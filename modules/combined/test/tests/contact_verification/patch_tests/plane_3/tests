@@ -10,7 +10,6 @@
     superlu = true
     prereq = 'glued_kin_sm'
     petsc_version = '>=3.7.6'
-    compiler = 'GCC CLANG' #superlu bug, see MOOSE issue #10084
   [../]
   [./glued_pen]
     type = 'CSVDiff'
@@ -69,7 +68,6 @@
     max_parallel = 1
     superlu = true
     petsc_version = '>=3.7.6'
-    compiler = 'GCC CLANG' #superlu bug, see MOOSE issue #10084
   [../]
   [./glued_pen_sm]
     type = 'CSVDiff'
@@ -94,7 +92,6 @@
     abs_zero = 1e-8
     max_parallel = 1
     superlu = true
-    compiler = 'GCC CLANG' #superlu bug, see MOOSE issue #10084
   [../]
   [./frictionless_pen_sm]
     type = 'CSVDiff'
