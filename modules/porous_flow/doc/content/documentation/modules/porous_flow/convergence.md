@@ -112,3 +112,6 @@ $10^9$ on the porepressure variable (or whatever MOOSE variable is associated to
 the fluid equation) would be appropriate.  Similarly, a scaling of around $10^3$
 on the temperature variable would be appropriate.
 
+Scaling the variables is implemented in the input file using the `scaling` parameter, for instance:
+
+!listing modules/porous_flow/examples/tutorial/03.i start=[Variables] end=[PorousFlowBasicTHM]
