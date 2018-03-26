@@ -1,5 +1,7 @@
 #include "SpecificTotalEnthalpyAux.h"
 
+registerMooseObject("RELAP7App", SpecificTotalEnthalpyAux);
+
 template <>
 InputParameters
 validParams<SpecificTotalEnthalpyAux>()

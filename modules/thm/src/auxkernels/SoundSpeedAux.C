@@ -1,6 +1,8 @@
 #include "SoundSpeedAux.h"
 #include "SinglePhaseFluidProperties.h"
 
+registerMooseObject("RELAP7App", SoundSpeedAux);
+
 template <>
 InputParameters
 validParams<SoundSpeedAux>()

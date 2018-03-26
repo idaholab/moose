@@ -2,6 +2,8 @@
 #include "SinglePhaseFluidProperties.h"
 #include "Numerics.h"
 
+registerMooseObject("RELAP7App", MachNumberAux);
+
 template <>
 InputParameters
 validParams<MachNumberAux>()

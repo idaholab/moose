@@ -1,5 +1,7 @@
 #include "SpecificVolumeAux.h"
 
+registerMooseObject("RELAP7App", SpecificVolumeAux);
+
 template <>
 InputParameters
 validParams<SpecificVolumeAux>()
