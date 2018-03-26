@@ -1,5 +1,7 @@
 #include "ConstantMaterial.h"
 
+registerMooseObject("RELAP7App", ConstantMaterial);
+
 template <>
 InputParameters
 validParams<ConstantMaterial>()
