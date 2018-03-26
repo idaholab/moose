@@ -1,5 +1,7 @@
 #include "OneDMomentumFriction.h"
 
+registerMooseObject("RELAP7App", OneDMomentumFriction);
+
 template <>
 InputParameters
 validParams<OneDMomentumFriction>()

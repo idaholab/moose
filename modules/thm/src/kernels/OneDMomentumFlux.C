@@ -1,5 +1,7 @@
 #include "OneDMomentumFlux.h"
 
+registerMooseObject("RELAP7App", OneDMomentumFlux);
+
 template <>
 InputParameters
 validParams<OneDMomentumFlux>()
