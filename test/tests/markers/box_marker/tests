@@ -1,4 +1,5 @@
 [Tests]
+  group = 'Box Marker'
   [./mark_only]
     type = 'Exodiff'
     input = 'box_marker_test.i'

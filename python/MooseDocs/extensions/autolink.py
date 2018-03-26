@@ -136,12 +136,18 @@ class AutoShortcutLinkComponent(core.ShortcutLink):
 
         # Markdown files
         match = LINK_RE.search(info['key'])
-#        if match and (parent.root.page is not None):
         if match and (self.translator.current is not None):
             return AutoShortcutLink(parent,
                                     key=match.group('filename'),
                                     bookmark=match.group('bookmark'),
                                     header=self.extension.get('include-page-header', True))
+
+        elif info['key'].startswith('#') and (self.translator.current is not None):
+            return AutoShortcutLink(parent,
+                                    key=unicode(self.translator.current.local),
+                                    bookmark=info['key'],
+                                    header=False)
+
 
         link = _source_token(parent, info['key'])
         if link:

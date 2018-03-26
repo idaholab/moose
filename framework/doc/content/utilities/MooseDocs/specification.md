@@ -55,7 +55,7 @@ tables. [user-ext] provides a list of extensions that are useful for those writi
 | [/appsyntax.md] | Enables the use of MOOSE application syntax within markdown files. |
 | [/sqa.md] | Provides tools for writing software quality documentation using templates. |
 | [/layout.md] | Provides tools for creating columns and tabs via markdown. |
-
+| [/acronym.md] | Provides means for defining and listing acronyms across pages. |
 
 !table id=devel-ext caption=List of extensions useful for writing extensions for "MooseDown".
 | Extension | Description |

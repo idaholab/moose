@@ -77,7 +77,7 @@ Extensions:
             - modules/fluid_properties/include
             - modules/functional_expansion_tools/include
             - modules/heat_conduction/include
-            - modules/level_set/doc/cogntent
+            - modules/level_set/doc/content
             - modules/misc/include
             - modules/navier_stokes/include
             - modules/phase_field/include
@@ -92,3 +92,6 @@ Extensions:
     globals:
         type: MooseDocs.extensions.panoptic
         shortcuts: !include framework/doc/globals.yml
+    acronyms:
+        type: MooseDocs.extensions.acronym
+        acronyms: !include framework/doc/acronyms.yml

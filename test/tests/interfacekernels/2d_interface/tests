@@ -1,9 +1,13 @@
 [Tests]
+  group = "InterfaceKernel with 2D Interface"
   [./test]
     type = 'Exodiff'
     input = 'coupled_value_coupled_flux.i'
     exodiff = 'coupled_value_coupled_flux_out.e'
     mesh_mode = REPLICATED
+    issues = "#7885"
+    design = "InterfaceKernels/index.md"
+    requirement = "The InterfaceKernel system shall operate with coupled variables in 2D."
   [../]
 
   [./jacobian_test]
@@ -13,6 +17,9 @@
     recover = false
     mesh_mode = REPLICATED
     prereq = test
+    issues = "#7437"
+    design = "InterfaceKernels/index.md"
+    requirement = "The Jacobian evaluation for InterfaceKernel objects in 2D shall be analytically correct."
   []
 
   [./parallel_fdp_test]
@@ -22,9 +29,9 @@
     min_parallel = 2
     input = 'coupled_value_coupled_flux.i'
     cli_args = 'Preconditioning/smp/type=FDP'
-    design = 'Preconditioning/FDP.md'
     issues = '#10375'
-    requirement = 'The finite difference preconditioner shall work in parallel'
+    design = 'Preconditioning/FDP.md'
+    requirement = 'The finite difference preconditioner shall work in parallel.'
     allow_warnings = true
   [../]
 []

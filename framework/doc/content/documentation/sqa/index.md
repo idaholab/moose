@@ -1,6 +1,6 @@
 # Software Quality
 
-!alert warning
+!alert construction
 The software quality documents as well as the system to create them is under heavy development, this
 page will be expanding shortly to include more information about the software quality standards
 employed by MOOSE.

@@ -271,7 +271,6 @@ class SyntaxChildrenCommand(SyntaxCommandHeadingBase):
         item = self.extension.database.get(obj.name, None)
         if item and hasattr(item, self.SUBCOMMAND):
             attr = getattr(item, self.SUBCOMMAND)
-
             self.createHeading(parent)
 
             ul = tokens.UnorderedList(parent)
@@ -279,10 +278,10 @@ class SyntaxChildrenCommand(SyntaxCommandHeadingBase):
                 filename = unicode(filename)
                 li = tokens.ListItem(ul)
                 lang = common.get_language(filename)
-                code = tokens.Code(None, language=lang, code=common.read(filename))
+                code = tokens.Code(None, language=lang,
+                                   code=common.read(os.path.join(MooseDocs.ROOT_DIR, filename)))
                 floats.ModalLink(li, url=filename, bottom=True, content=code,
-                                 string=u'({})'.format(os.path.relpath(filename,
-                                                                       MooseDocs.ROOT_DIR)),
+                                 string=u'({})'.format(filename),
                                  title=tokens.String(None, content=filename))
         return parent
 

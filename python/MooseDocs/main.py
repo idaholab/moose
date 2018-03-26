@@ -15,7 +15,7 @@ MOOSE run_tests.
 import argparse
 import logging
 
-from commands import build, devel, check, update
+from commands import build, devel, check, update, profiler
 from common import log
 
 def command_line_options():
@@ -39,6 +39,7 @@ def command_line_options():
     devel.command_line_options(subparser, parent)
     check.command_line_options(subparser, parent)
     update.command_line_options(subparser, parent)
+    profiler.command_line_options(subparser, parent)
 
     return parser.parse_args()
 
@@ -58,6 +59,8 @@ def run():
         check.main(options)
     elif options.command == 'update':
         update.main(options)
+    elif options.command == 'profile':
+        profiler.main(options)
 
     critical = log.MooseDocsFormatter.COUNTS['CRITICAL'].value
     errors = log.MooseDocsFormatter.COUNTS['ERROR'].value

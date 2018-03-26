@@ -87,25 +87,9 @@ class TableCommandComponent(command.CommandComponent):
 
         content = info['block'] if 'block' in info else info['inline']
         flt = floats.Float(parent, **self.attributes)
-        self.addCaption(flt)
+        floats.add_caption(flt, self.extension, self.settings)
         self.translator.reader.parse(flt, content, group=MooseDocs.BLOCK)
         return parent
-
-    def addCaption(self, flt):
-
-        cap = self.settings['caption']
-        key = self.settings['id']
-        if key:
-            if self.settings['prefix'] is not None:
-                prefix = self.settings['prefix']
-            else:
-                prefix = self.extension.get('prefix')
-            caption = floats.Caption(flt, key=key, prefix=prefix)
-            if cap:
-                self.translator.reader.parse(caption, cap, MooseDocs.INLINE)
-        elif cap:
-            caption = floats.Caption(flt)
-            self.translator.reader.parse(caption, cap, MooseDocs.INLINE)
 
 
 class TableComponent(components.TokenComponent):

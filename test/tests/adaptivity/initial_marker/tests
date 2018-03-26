@@ -1,10 +1,11 @@
 [Tests]
+  group = "Initial Adaptivity"
   [./test]
     type = 'Exodiff'
     input = 'initial_marker.i'
     exodiff = 'initial_marker_out.e-s003'
-    requirement = "The system shall support marking elements for refinement during initial execution."
-    design = "/core.md /autolink.md"
-    issues = "#1234 #546"
-  [../]
+    issues = "#1700"
+    design = "/Markers/index.md"
+    requirement = "The system shall support marking elements for refinement during initial setup using a different marker than used during execution."
+[../]
 []

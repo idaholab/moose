@@ -14,6 +14,7 @@ import collections
 import math
 import difflib
 import multiprocessing
+import subprocess
 
 def colorText(string, color, **kwargs):
     """
@@ -282,3 +283,12 @@ def text_diff(text, gold):
     msg = "\nThe supplied text differs from the gold as follows:\n{0}\n{1}\n{0}" \
          .format('~'*n, '\n'.join(result).encode('utf-8'))
     return msg
+
+def git_ls_files(working_dir=os.getcwd()):
+    """
+    Return a list of files via 'git ls-files'.
+    """
+    out = set()
+    for fname in subprocess.check_output(['git', 'ls-files'], cwd=working_dir).split('\n'):
+        out.add(os.path.join(working_dir, fname))
+    return out
