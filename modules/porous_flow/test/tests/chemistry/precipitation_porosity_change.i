@@ -117,6 +117,10 @@
     type = PorousFlowTemperature
     temperature = 1
   [../]
+  [./ppss_qp]
+    type = PorousFlow1PhaseFullySaturated
+    porepressure = dummy
+  [../]
   [./predis_qp]
     type = PorousFlowAqueousPreDisChemistry
     primary_concentrations = a

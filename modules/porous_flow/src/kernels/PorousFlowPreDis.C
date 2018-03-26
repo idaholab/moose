@@ -35,13 +35,22 @@ PorousFlowPreDis::PorousFlowPreDis(const InputParameters & parameters)
   : TimeKernel(parameters),
     _mineral_density(getParam<std::vector<Real>>("mineral_density")),
     _dictator(getUserObject<PorousFlowDictator>("PorousFlowDictator")),
+    _aq_ph(_dictator.aqueousPhaseNumber()),
     _porosity_old(getMaterialPropertyOld<Real>("PorousFlow_porosity_nodal")),
+    _saturation(getMaterialProperty<std::vector<Real>>("PorousFlow_saturation_nodal")),
+    _dsaturation_dvar(
+        getMaterialProperty<std::vector<std::vector<Real>>>("dPorousFlow_saturation_nodal_dvar")),
     _reaction_rate(
         getMaterialProperty<std::vector<Real>>("PorousFlow_mineral_reaction_rate_nodal")),
     _dreaction_rate_dvar(getMaterialProperty<std::vector<std::vector<Real>>>(
         "dPorousFlow_mineral_reaction_rate_nodal_dvar")),
     _stoichiometry(getParam<std::vector<Real>>("stoichiometry"))
 {
+  /* Not needed due to PorousFlow_mineral_reaction_rate already checking this condition
+  if (_dictator.numPhases() < 1)
+    mooseError("PorousFlowPreDis: The number of fluid phases must not be zero");
+  */
+
   if (_mineral_density.size() != _dictator.numAqueousKinetic())
     mooseError("The Dictator proclaims that the number of precipitation-dissolution secondary "
                "species in this simulation is ",
@@ -77,7 +86,7 @@ PorousFlowPreDis::computeQpResidual()
   Real res = 0.0;
   for (unsigned r = 0; r < _dictator.numAqueousKinetic(); ++r)
     res += _stoichiometry[r] * _mineral_density[r] * _reaction_rate[_i][r];
-  return _test[_i][_qp] * res * _porosity_old[_i];
+  return _test[_i][_qp] * res * _porosity_old[_i] * _saturation[_i][_aq_ph];
 }
 
 Real
@@ -105,8 +114,14 @@ PorousFlowPreDis::computeQpJac(unsigned int pvar)
     return 0.0;
 
   Real res = 0.0;
+  Real dres = 0.0;
   for (unsigned r = 0; r < _dictator.numAqueousKinetic(); ++r)
-    res += _stoichiometry[r] * _mineral_density[r] * _dreaction_rate_dvar[_i][r][pvar];
+  {
+    dres += _stoichiometry[r] * _mineral_density[r] * _dreaction_rate_dvar[_i][r][pvar];
+    res += _stoichiometry[r] * _mineral_density[r] * _reaction_rate[_i][r];
+  }
 
-  return _test[_i][_qp] * res * _porosity_old[_i];
+  return _test[_i][_qp] *
+         (dres * _saturation[_i][_aq_ph] + res * _dsaturation_dvar[_i][_aq_ph][pvar]) *
+         _porosity_old[_i];
 }

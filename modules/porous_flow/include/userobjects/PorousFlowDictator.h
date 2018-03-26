@@ -97,6 +97,9 @@ public:
   /// the number of aqueous kinetic secondary species
   unsigned int numAqueousKinetic() const;
 
+  /// the aqueous phase number
+  unsigned int aqueousPhaseNumber() const;
+
   /**
    * the PorousFlow variable number
    * @param moose_var_num the MOOSE variable number
@@ -163,6 +166,9 @@ protected:
 
   /// number of aqeuous-kinetic secondary species that are involved in mineralisation
   const unsigned int _num_aqueous_kinetic;
+
+  /// aqueous phase number
+  const unsigned int _aqueous_phase_number;
 
 private:
   /// _moose_var_num[i] = the moose variable number corresponding to porous flow variable i

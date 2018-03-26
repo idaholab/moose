@@ -67,6 +67,10 @@ PorousFlowAqueousPreDisChemistry::PorousFlowAqueousPreDisChemistry(
   : PorousFlowMaterialVectorBase(parameters),
     _porosity_old(_nodal_material ? getMaterialPropertyOld<Real>("PorousFlow_porosity_nodal")
                                   : getMaterialPropertyOld<Real>("PorousFlow_porosity_qp")),
+    _aq_ph(_dictator.aqueousPhaseNumber()),
+    _saturation(_nodal_material
+                    ? getMaterialProperty<std::vector<Real>>("PorousFlow_saturation_nodal")
+                    : getMaterialProperty<std::vector<Real>>("PorousFlow_saturation_qp")),
 
     _temperature(_nodal_material ? getMaterialProperty<Real>("PorousFlow_temperature_nodal")
                                  : getMaterialProperty<Real>("PorousFlow_temperature_qp")),
@@ -108,9 +112,9 @@ PorousFlowAqueousPreDisChemistry::PorousFlowAqueousPreDisChemistry(
     _eta_exponent(isParamValid("eta_exponent") ? getParam<std::vector<Real>>("eta_exponent")
                                                : std::vector<Real>(_num_reactions, 1.0))
 {
-  // only multi-component, single-phase PorousFlow
-  if (_num_phases != 1)
-    mooseError("PorousFlowAqueousPreDisChemistry is designed for single-phase simulations only");
+  if (_dictator.numPhases() < 1)
+    mooseError("PorousFlowAqueousPreDisChemistry: The number of fluid phases must not be zero");
+
   if (_num_primary != _num_components - 1)
     mooseError("PorousFlowAqueousPreDisChemistry: The number of mass_fraction_vars is ",
                _num_components,
@@ -323,16 +327,18 @@ PorousFlowAqueousPreDisChemistry::computeQpReactionRates()
      */
 
     // bound the reaction so _sec_conc lies between zero and unity
-    const Real por_times_rr_dt = _porosity_old[_qp] * unbounded_rr * _dt;
+    const Real por_times_rr_dt = _porosity_old[_qp] * _saturation[_qp][_aq_ph] * unbounded_rr * _dt;
     if (_sec_conc_old[_qp][r] + por_times_rr_dt > 1.0)
     {
       _bounded_rate[r] = true;
-      _reaction_rate[_qp][r] = (1.0 - _sec_conc_old[_qp][r]) / _porosity_old[_qp] / _dt;
+      _reaction_rate[_qp][r] =
+          (1.0 - _sec_conc_old[_qp][r]) / _porosity_old[_qp] / _saturation[_qp][_aq_ph] / _dt;
     }
     else if (_sec_conc_old[_qp][r] + por_times_rr_dt < 0.0)
     {
       _bounded_rate[r] = true;
-      _reaction_rate[_qp][r] = -_sec_conc_old[_qp][r] / _porosity_old[_qp] / _dt;
+      _reaction_rate[_qp][r] =
+          -_sec_conc_old[_qp][r] / _porosity_old[_qp] / _saturation[_qp][_aq_ph] / _dt;
     }
     else
     {

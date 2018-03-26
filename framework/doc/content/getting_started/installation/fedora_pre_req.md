@@ -21,4 +21,4 @@ git
 
 Download and install one our redistributable packages according to your version of Fedora.
 
-  * Fedora 25: !!package name arch=fedora25!!
+- Fedora 25: !!package name arch=fedora25!!

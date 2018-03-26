@@ -134,5 +134,5 @@ class BlockBlockCommand(CommandBase):
                     flags=re.UNICODE|re.MULTILINE|re.DOTALL)
 
 class InlineCommand(CommandBase):
-    RE = re.compile(r'!{2}(?P<command>\w+) *(?P<subcommand>\S+)? *(?P<settings>.*?)!{2}',
+    RE = re.compile(r'!{2}(?P<command>\w+) *(?P<subcommand>\w+)? *(?P<settings>.*?)!{2}',
                     flags=re.UNICODE)

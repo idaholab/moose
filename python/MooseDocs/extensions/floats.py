@@ -1,6 +1,7 @@
 #pylint: disable=missing-docstring
 import uuid
 
+import MooseDocs
 from MooseDocs.base import components
 from MooseDocs.extensions import core
 from MooseDocs.tree import tokens, html
@@ -8,6 +9,33 @@ from MooseDocs.tree.base import Property
 
 def make_extension():
     return FloatExtension()
+
+def create_float(parent, extension, settings, **kwargs):
+    """Helper for optionally creating a float based on the existence of caption and/or id."""
+    cap = add_caption(None, extension, settings)
+    if cap:
+        flt = Float(parent, **kwargs)
+        cap.parent = flt
+        return flt
+    return parent
+
+def add_caption(parent, extension, settings):
+    """Helper for adding captions to float tokens."""
+    cap = settings['caption']
+    key = settings['id']
+    caption = None
+    if key:
+        if settings['prefix'] is not None:
+            prefix = settings['prefix']
+        else:
+            prefix = extension.get('prefix')
+        caption = Caption(parent, key=key, prefix=prefix)
+        if cap:
+            extension.translator.reader.parse(caption, cap, MooseDocs.INLINE)
+    elif cap:
+        caption = Caption(parent)
+        extension.translator.reader.parse(caption, cap, MooseDocs.INLINE)
+    return caption
 
 class Float(tokens.Token):
     PROPERTIES = [tokens.Property('img', default=False, ptype=bool)]

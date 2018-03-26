@@ -11,3 +11,4 @@ from read import read, get_language
 from regex import regex
 from project_find import project_find
 from submodule_status import submodule_status
+from get_requirements import get_requirements

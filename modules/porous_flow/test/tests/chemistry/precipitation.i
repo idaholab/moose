@@ -132,6 +132,10 @@
     at_nodes = true
     porepressure = pressure
   [../]
+  [./ppss_qp]
+    type = PorousFlow1PhaseFullySaturated
+    porepressure = pressure
+  [../]
   [./mass_frac]
     type = PorousFlowMassFraction
     mass_fraction_vars = a
