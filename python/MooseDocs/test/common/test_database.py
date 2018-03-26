@@ -18,7 +18,8 @@ class TestClassDatabase(unittest.TestCase):
         """
         Create class database.
         """
-        cls.database = build_class_database('${MOOSE_DIR}/framework/include', '${MOOSE_DIR}/test/tests')
+        cls.database = build_class_database(['${MOOSE_DIR}/framework/include'],
+                                            ['${MOOSE_DIR}/test/tests'])
 
     def testBasic(self):
         """
