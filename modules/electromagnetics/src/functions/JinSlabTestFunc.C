@@ -43,8 +43,8 @@ JinSlabTestFunc::value(Real t, const Point & p)
   std::complex<double> _muR(_muR_real, _muR_imag);
 
   std::complex<double> _c =
-      std::pow(_k, 2) * (_muR * _epsR - std::sin(_theta * libMesh::pi / 180.) *
-                                            std::sin(_theta * libMesh::pi / 180.));
+      _k * std::sqrt(_muR * _epsR -
+                     std::sin(_theta * libMesh::pi / 180.) * std::sin(_theta * libMesh::pi / 180.));
 
   std::complex<double> _C1 =
       (2 * std::cos(_theta * libMesh::pi / 180.) *

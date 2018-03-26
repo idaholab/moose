@@ -37,9 +37,9 @@ JinSlabCoeffFunc::value(Real t, const Point & p)
   std::complex<double> _epsR(_epsR_real.value(t, p), _epsR_imag.value(t, p));
   std::complex<double> _muR(_muR_real, _muR_imag);
 
-  std::complex<double> _val = _k * _k *
-                              (_epsR * _muR - std::sin(_theta * libMesh::pi / 180.) *
-                                                  std::sin(_theta * libMesh::pi / 180.));
+  std::complex<double> _val =
+      _k * std::sqrt(_epsR * _muR -
+                     std::sin(_theta * libMesh::pi / 180.) * std::sin(_theta * libMesh::pi / 180.));
 
   if (_component == "real")
   {
