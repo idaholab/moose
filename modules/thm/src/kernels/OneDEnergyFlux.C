@@ -1,5 +1,7 @@
 #include "OneDEnergyFlux.h"
 
+registerMooseObject("RELAP7App", OneDEnergyFlux);
+
 template <>
 InputParameters
 validParams<OneDEnergyFlux>()

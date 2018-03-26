@@ -1,5 +1,7 @@
 #include "OneDHeatForcingFunction.h"
 
+registerMooseObject("RELAP7App", OneDHeatForcingFunction);
+
 template <>
 InputParameters
 validParams<OneDHeatForcingFunction>()

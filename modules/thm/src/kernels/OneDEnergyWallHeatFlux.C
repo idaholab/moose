@@ -1,5 +1,7 @@
 #include "OneDEnergyWallHeatFlux.h"
 
+registerMooseObject("RELAP7App", OneDEnergyWallHeatFlux);
+
 template <>
 InputParameters
 validParams<OneDEnergyWallHeatFlux>()

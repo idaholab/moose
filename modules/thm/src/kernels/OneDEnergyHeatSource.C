@@ -1,6 +1,8 @@
 #include "OneDEnergyHeatSource.h"
 #include "Function.h"
 
+registerMooseObject("RELAP7App", OneDEnergyHeatSource);
+
 template <>
 InputParameters
 validParams<OneDEnergyHeatSource>()
