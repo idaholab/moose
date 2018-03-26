@@ -213,6 +213,36 @@ An animation of the results is shown in [tut11.gif.fig].  The porepressure front
 
 !media porous_flow/tut11.gif style=width:90%;margin-left:10px caption=CO$_{2}$ saturation, CO$_{2}$ porepressure, temperature and hoop stress in the 2-phase CO$_{2}$ injection simulation.  id=tut11.gif.fig
 
+## Postscript: the same again in 2D
+
+As mentioned on [Page 00](porous_flow/tutorial_00.md), this problem is really an axially-symmetric problem, so may be better modelled by MOOSE using its "RZ" coordinate system.  The changes to the input file are minimal.  Apart from the mesh generation (discussed in [Page 00](porous_flow/tutorial_00.md)) the changes are itemized below.
+
+There only need by a `disp_r` Variable in place of `disp_x` and `disp_y`:
+
+!listing modules/porous_flow/examples/tutorial/11_2D.i start=[./disp_r] end=[]
+
+!listing modules/porous_flow/examples/tutorial/11_2D.i start=[GlobalParams] end=[]
+
+!listing modules/porous_flow/examples/tutorial/11_2D.i start=[./dictator] end=[./pc]
+
+There are mechanical Kernels only for `disp_r`, and the `StressDivergenceTensors` Kernel is modified:
+
+!listing modules/porous_flow/examples/tutorial/11_2D.i start=[./grad_stress_r] end=[./poro_r]
+
+The stress `AuxKernels` are modified.  In TensorMechanics with RZ coordinates, the 00 component is $rr$, the 11 component is $zz$ and the 22 component is $\theta\theta$.  Therefore, these `AuxKernels` read
+
+!listing modules/porous_flow/examples/tutorial/11_2D.i start=[./stress_rr_aux] end=[./porosity]
+
+The boundary conditions for the mechanics become simpler:
+
+!listing modules/porous_flow/examples/tutorial/11_2D.i start=[./pinned_top_bottom_r] end=[./cold_co2]
+
+Finally, the strain calculator needs to be of RZ type:
+
+!listing modules/porous_flow/examples/tutorial/11_2D.i start=[./strain] end=[./thermal_contribution]
+
+The reader may check that the 3D and 2D models produce the same answer, although of course the 2D version is much faster due to it having only 176 degrees of freedom compared with the 3D's 1100.
+
 
 [Start](porous_flow/tutorial_00.md) |
 [Previous](porous_flow/tutorial_10.md) |
