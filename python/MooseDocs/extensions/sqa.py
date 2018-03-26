@@ -141,7 +141,7 @@ class SQATemplateLoadCommand(command.CommandComponent):
     def createToken(self, info, parent):
 
         #TODO: make root path a config item in extension
-        location = os.path.join(MooseDocs.ROOT_DIR, 'framework', 'doc', 'templates', 'sqa',
+        location = os.path.join(MooseDocs.MOOSE_DIR, 'framework', 'doc', 'templates', 'sqa',
                                 self.settings['template'])
 
         if not os.path.exists(location):
