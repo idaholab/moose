@@ -38,6 +38,14 @@ public:
   Component * parent() { return _parent; }
 
   /**
+   * Test if a parameter exists in the object's input parameters
+   * @param name The name of the parameter
+   * @return true if the parameter exists, false otherwise
+   */
+  template <typename T>
+  bool hasParam(const std::string & name) const;
+
+  /**
    * Returns a list of names of components that this component depends upon
    */
   const std::vector<std::string> & getDependencies() const { return _dependencies; }
@@ -127,7 +135,6 @@ public:
    */
   void checkSetupStatus(const EComponentSetupStatus & status) const;
 
-public:
   static std::string
   genName(const std::string & prefix, unsigned int id, const std::string & suffix = "");
   static std::string genName(const std::string & prefix,
@@ -197,6 +204,21 @@ protected:
    */
   template <typename T>
   T getEnumParam(const std::string & param) const;
+
+  /**
+   * Runtime check to make sure that a parameter of specified type exists in the component's input
+   * parameters
+   *
+   * This is intended to help developers write code.  The idea is to provide a useful message when
+   * developers make typos, etc.  If this check fails, the code execution will be stopped.
+   *
+   * @tparam T The type of the parameter to be checked
+   * @param function_name The name of the function calling this method
+   * @param param_name The name of the parameter to be checked
+   */
+  template <typename T>
+  void insistParameterExists(const std::string & function_name,
+                             const std::string & param_name) const;
 
   /**
    * Checks that a component exists
@@ -416,6 +438,13 @@ private:
 };
 
 template <typename T>
+bool
+Component::hasParam(const std::string & name) const
+{
+  return parameters().have_parameter<T>(name);
+}
+
+template <typename T>
 const T &
 Component::getComponent(const std::string & pname) const
 {
@@ -481,8 +510,25 @@ Component::getEnumParam(const std::string & param) const
 
 template <typename T>
 void
+Component::insistParameterExists(const std::string & function_name,
+                                 const std::string & param_name) const
+{
+  if (!hasParam<T>(param_name))
+    mooseError(name(),
+               ": Calling ",
+               function_name,
+               " failed, parameter '",
+               param_name,
+               "' does not exist or does not have the type you requested. Double check your "
+               "spelling and/or type of the parameter.");
+}
+
+template <typename T>
+void
 Component::checkComponentOfTypeExists(const std::string & param) const
 {
+  insistParameterExists<std::string>(__FUNCTION__, param);
+
   const std::string & comp_name = getParam<std::string>(param);
   checkComponentOfTypeExistsByName<T>(comp_name);
 }
@@ -504,6 +550,8 @@ template <typename T>
 void
 Component::checkParameterValueLessThan(const std::string & param, const T & value_max) const
 {
+  insistParameterExists<T>(__FUNCTION__, param);
+
   const auto & value = getParam<T>(param);
   if (value >= value_max)
     logError("The value of parameter '", param, "' (", value, ") must be less than ", value_max);
@@ -513,6 +561,8 @@ template <typename T>
 void
 Component::checkSizeLessThan(const std::string & param, const unsigned int & n_entries) const
 {
+  insistParameterExists<std::vector<T>>(__FUNCTION__, param);
+
   const auto & value = getParam<std::vector<T>>(param);
   if (value.size() >= n_entries)
     logError("The number of entries in the parameter '",
@@ -527,6 +577,8 @@ template <typename T>
 void
 Component::checkSizeGreaterThan(const std::string & param, const unsigned int & n_entries) const
 {
+  insistParameterExists<std::vector<T>>(__FUNCTION__, param);
+
   const auto & value = getParam<std::vector<T>>(param);
   if (value.size() <= n_entries)
     logError("The number of entries in the parameter '",
@@ -541,6 +593,9 @@ template <typename T1, typename T2>
 void
 Component::checkEqualSize(const std::string & param1, const std::string & param2) const
 {
+  insistParameterExists<std::vector<T1>>(__FUNCTION__, param1);
+  insistParameterExists<std::vector<T2>>(__FUNCTION__, param2);
+
   const auto & value1 = getParam<std::vector<T1>>(param1);
   const auto & value2 = getParam<std::vector<T2>>(param2);
   if (value1.size() != value2.size())
@@ -559,6 +614,8 @@ template <typename T>
 void
 Component::checkSizeEqualsValue(const std::string & param, const unsigned int & n_entries) const
 {
+  insistParameterExists<std::vector<T>>(__FUNCTION__, param);
+
   const auto & param_value = getParam<std::vector<T>>(param);
   if (param_value.size() != n_entries)
     logError("The number of entries in parameter '",
@@ -575,6 +632,8 @@ Component::checkSizeEqualsValue(const std::string & param,
                                 const unsigned int & n_entries,
                                 const std::string & description) const
 {
+  insistParameterExists<std::vector<T>>(__FUNCTION__, param);
+
   const auto & param_value = getParam<std::vector<T>>(param);
   if (param_value.size() != n_entries)
     logError("The number of entries in parameter '",
@@ -593,6 +652,9 @@ void
 Component::checkSizeEqualsParameterValue(const std::string & param1,
                                          const std::string & param2) const
 {
+  insistParameterExists<std::vector<T1>>(__FUNCTION__, param1);
+  insistParameterExists<T2>(__FUNCTION__, param2);
+
   const auto & value1 = getParam<std::vector<T1>>(param1);
   const auto & value2 = getParam<T2>(param2);
   if (value1.size() != value2)
