@@ -102,7 +102,7 @@ class TestHarness:
         self.moose_dir = moose_dir
         self.base_dir = os.getcwd()
         self.run_tests_dir = os.path.abspath('.')
-        self.results_storage = os.path.join(self.base_dir, '.previous_test_results')
+        self.results_storage = os.path.join(self.base_dir, '.previous_test_results.json')
         self.code = '2d2d6769726c2d6d6f6465'
         self.error_code = 0x0
         # Assume libmesh is a peer directory to MOOSE if not defined
@@ -580,85 +580,70 @@ class TestHarness:
         """ write test results to disc in some fashion the user has requested """
         all_jobs = self.scheduler.retrieveJobs()
 
-        # Write to our results_storage
+        # Write some useful data to our results_storage
         results_data = {}
         for job in all_jobs:
             tester = job.getTester()
-            # Optimize how we store and retreive tests (key off of testDir instead of absolute path to test)
+            # Create empty key based on TestDir, or re-inialize with existing data so we can append to it
             results_data[tester.getTestDir()] = results_data.get(tester.getTestDir(), {})
-
-            # Convert tester specs generator into something json dump can write
-            params = {}
-            for param in [x for x in tester.specs.keys() if tester.specs.isValid(x)]:
-                params[param] = tester.specs[param]
-
             results_data[tester.getTestDir()][tester.getTestName()] = {'NAME'      : job.getTestNameShort(),
                                                                        'LONG_NAME' : tester.getTestName(),
                                                                        'TIMING'    : job.getTiming(),
                                                                        'STATUS'    : tester.getStatus().status,
                                                                        'COLOR'     : tester.getStatus().color,
-                                                                       'STDOUT'    : job.getOutput(),
                                                                        'CAVEATS'   : ','.join(tester.getCaveats()),
-                                                                       'PARAMS'    : params}
-
+                                                                       'COMMAND'   : tester.getCommand(self.options)}
         if results_data:
             with open(self.results_storage, 'w') as data_file:
                 json.dump(results_data, data_file, indent=2)
 
-        # Write to specific files if asked to do so
-        if (self.options.file
-            or self.options.sep_files
-            or (self.options.ok_files and self.num_passed)
-            or (self.options.fail_files and self.num_failed)):
-            all_jobs = self.scheduler.retrieveJobs()
-
-            try:
-                # Write one file, with verbose information (--file)
-                if self.options.file:
-                    with open(os.path.join(self.output_dir, self.options.file), 'w') as f:
-                        for job in all_jobs:
-                            formated_results = util.formatResult( job, job.getOutput(), self.options, color=False)
-                            f.write(formated_results + '\n')
-
-                # Write a separate file for each test with verbose information (--sep-files, --sep-files-ok, --sep-files-fail)
-                if (self.options.sep_files
-                    or self.options.ok_files
-                    or self.options.fail_files):
+        try:
+            # Write one file, with verbose information (--file)
+            if self.options.file:
+                with open(os.path.join(self.output_dir, self.options.file), 'w') as f:
                     for job in all_jobs:
-                        tester = job.getTester()
-                        if self.options.output_dir:
-                            output_dir = self.options.output_dir
-                        else:
-                            output_dir = tester.getTestDir()
+                        formated_results = util.formatResult( job, job.getOutput(), self.options, color=False)
+                        f.write(formated_results + '\n')
 
-                        # Yes, by design test dir will be apart of the output file name
-                        output_file = os.path.join(output_dir, '.'.join([os.path.basename(tester.getTestDir()),
-                                                                         job.getTestNameShort(),
-                                                                         tester.getStatus().status,
-                                                                         'txt']))
-                        formated_results = util.formatResult(job, job.getOutput(), self.options, color=False)
+            # Write a separate file for each test with verbose information (--sep-files, --sep-files-ok, --sep-files-fail)
+            if (self.options.sep_files
+                or (self.options.ok_files and self.num_passed)
+                or (self.options.fail_files and self.num_failed)):
+                for job in all_jobs:
+                    tester = job.getTester()
+                    if self.options.output_dir:
+                        output_dir = self.options.output_dir
+                    else:
+                        output_dir = tester.getTestDir()
 
-                        # All tests
-                        if self.options.sep_files:
-                            with open(output_file, 'w') as f:
-                                f.write(formated_results)
+                    # Yes, by design test dir will be apart of the output file name
+                    output_file = os.path.join(output_dir, '.'.join([os.path.basename(tester.getTestDir()),
+                                                                     job.getTestNameShort(),
+                                                                     tester.getStatus().status,
+                                                                     'txt']))
+                    formated_results = util.formatResult(job, job.getOutput(), self.options, color=False)
 
-                        # Passing tests
-                        elif self.options.ok_files and tester.didPass():
-                            with open(output_file, 'w') as f:
-                                f.write(formated_results)
+                    # All tests
+                    if self.options.sep_files:
+                        with open(output_file, 'w') as f:
+                            f.write(formated_results)
 
-                        # Failing tests
-                        elif self.options.fail_files and tester.didFail():
-                            with open(output_file, 'w') as f:
-                                f.write(formated_results)
+                    # Passing tests
+                    elif self.options.ok_files and tester.didPass():
+                        with open(output_file, 'w') as f:
+                            f.write(formated_results)
 
-            except IOError:
-                print('Permission error while writing results to disc')
-                sys.exit(1)
-            except:
-                print('Error while writing results to disc')
-                sys.exit(1)
+                    # Failing tests
+                    elif self.options.fail_files and tester.didFail():
+                        with open(output_file, 'w') as f:
+                            f.write(formated_results)
+
+        except IOError:
+            print('Permission error while writing results to disc')
+            sys.exit(1)
+        except:
+            print('Error while writing results to disc')
+            sys.exit(1)
 
     def initialize(self, argv, app_name):
         # Load the scheduler plugins
@@ -717,7 +702,7 @@ class TestHarness:
                     # This is a hidden file, controled by the TestHarness. So we probably shouldn't error
                     # and exit. Perhaps a warning instead, and create a new file? Down the road, when
                     # we use this file for PBS etc, this should probably result in an exception.
-                    print('INFO: Previous .test_restults file is damaged. Creating a new one...')
+                    print('INFO: Previous %s file is damaged. Creating a new one...' % (self.results_storage))
 
     def useExistingStorage(self):
         """ reasons for returning bool if we should use a previous results_storage file """
