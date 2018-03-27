@@ -343,10 +343,8 @@ FlowModelSinglePhase::addRDGMooseObjects()
   {
     const std::string class_name = "Euler1DVarAreaHLLCFlux";
     InputParameters params = _factory.getValidParams(class_name);
-    params.set<std::vector<SubdomainName>>("block") = _pipe.getSubdomainNames();
     params.set<UserObjectName>("fluid_properties") = fp_name;
     params.set<ExecFlagEnum>("execute_on") = lin_execute_on;
-    params.set<bool>("implicit") = _implicit_rdg;
     _sim.addUserObject(class_name, _rdg_flux_name, params);
   }
 

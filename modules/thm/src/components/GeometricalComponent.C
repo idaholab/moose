@@ -102,7 +102,6 @@ GeometricalComponent::displaceMesh(const std::vector<SubdomainName> & blocks)
   params.set<RealVectorValue>("orientation") = _dir;
   params.set<Real>("rotation") = _rotation;
   params.set<unsigned int>("id") = id();
-  params.set<bool>("force_preaux") = true;
   _sim.addUserObject(class_name, genName(name(), "displace_node"), params);
 }
 

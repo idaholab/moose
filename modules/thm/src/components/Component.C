@@ -14,6 +14,7 @@ validParams<Component>()
   InputParameters params = validParams<RELAP7Object>();
   params.addParam<RealVectorValue>("gravity", RELAP7::default_gravity_vector, "Gravity vector");
   params.addPrivateParam<Simulation *>("_sim");
+  params.addPrivateParam<Component *>("_parent", nullptr);
   params.addPrivateParam<std::string>("built_by_action", "add_component");
 
   params.registerBase("Component");
@@ -87,9 +88,7 @@ Component::split(const std::string & rname)
 Component::Component(const InputParameters & parameters)
   : RELAP7Object(parameters),
     _id(comp_id++),
-    _parent(parameters.have_parameter<Component *>("_parent")
-                ? getCheckedPointerParam<Component *>("_parent")
-                : nullptr),
+    _parent(getParam<Component *>("_parent")),
     _sim(*getCheckedPointerParam<Simulation *>("_sim")),
     _app(dynamic_cast<RELAP7App &>(MooseObject::_app)),
     _factory(_app.getFactory()),
