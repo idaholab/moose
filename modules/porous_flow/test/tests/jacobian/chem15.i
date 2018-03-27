@@ -16,6 +16,15 @@
 []
 
 [AuxVariables]
+  [./eqm_k0]
+    initial_condition = 1.234E-4
+  [../]
+  [./eqm_k1]
+    initial_condition = 0.987E-4
+  [../]
+  [./eqm_k2]
+    initial_condition = 0.5E-4
+  [../]
   [./temp]
     initial_condition = 0.5
   [../]
@@ -93,7 +102,7 @@
     type = PorousFlowMassFractionAqueousEquilibriumChemistry
     mass_fraction_vars = 'a b'
     num_reactions = 3
-    equilibrium_constants = '1.234E-4 0.987E-4 0.5E-4'
+    equilibrium_constants = 'eqm_k0 eqm_k1 eqm_k2'
     primary_activity_coefficients = '1 1.2'
     secondary_activity_coefficients = '1 2 3'
     reactions = '1 2

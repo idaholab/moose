@@ -16,14 +16,11 @@ reactions so that the primary species concentrations remain small, but nonzero.
 Details concerning aqueous equilibrium chemistry may be found in the
 [`chemical reactions`](/chemical_reactions/index.md) module.  The
 `PorousFlowMassFractionAqueousEquilibriumChemistry` computes the secondary concentrations, and adds
-them appropriately to the primary concentrations to form the mass-fractions.  There are three main
+them appropriately to the primary concentrations to form the mass-fractions.  There are two main
 differences between the `chemical reactions` module and `PorousFlow`.  These are:
 
 - The molar volumes must be specified in `PorousFlow`.  This is so that the concentrations may be
   measured in $m^{3}/m^{3}$ rather than mol.m$^{-3}$.
-
-- The equilibrium constants are defined in absolute terms, not as a log10.  Therefore a `PorousFlow`
-  equilibrium constant might be $10^{-6}$, while in `chemical_reactions` it is simply $-6$.
 
 - Unlike the `chemical reactions` module, users of `PorousFlow` must specify the stoichiometric
   coefficients themselves.  In each reaction, the primary concentrations (variables) must be brought
@@ -37,6 +34,10 @@ differences between the `chemical reactions` module and `PorousFlow`.  These are
   \end{array}
   \end{equation}
   Then the `reactions` input is `1 2 -3 4 -5 6`.
+
+!alert note
+If the equilibrium constants are AuxVariables that depend on temperature (or other Variables) the computed Jacobian will not be exact and you may experience poor nonlinear convergence.  If this becomes frustrating, please contact the moose-users email group.
+
 
 !syntax parameters /Materials/PorousFlowMassFractionAqueousEquilibriumChemistry
 

@@ -15,6 +15,9 @@
 []
 
 [AuxVariables]
+  [./eqm_k]
+    initial_condition = 1.234
+  [../]
   [./temp]
     initial_condition = 0.5
   [../]
@@ -90,7 +93,7 @@
     type = PorousFlowAqueousPreDisChemistry
     primary_concentrations = 'a b'
     num_reactions = 1
-    equilibrium_constants = 1.234
+    equilibrium_constants = eqm_k
     primary_activity_coefficients = '2.5 3.8'
     reactions = '1.1 1.2'
     specific_reactive_surface_area = -44.4E-2

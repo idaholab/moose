@@ -102,8 +102,14 @@ protected:
   /// number of equations in the aqueous geochemistry system
   const unsigned int _num_reactions;
 
+  /// Whether the equilibium constants are written in their log10 form, or in absolute terms
+  const bool _equilibrium_constants_as_log10;
+
+  /// number of equilibrium_constants provided
+  const unsigned _num_equilibrium_constants;
+
   /// equilibrium constants (dimensionless)
-  const std::vector<Real> _equilibrium_constants;
+  std::vector<const VariableValue *> _equilibrium_constants;
 
   /// activity coefficients for the primary species (dimensionless)
   const std::vector<Real> _primary_activity_coefficients;
