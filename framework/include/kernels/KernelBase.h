@@ -68,7 +68,7 @@ public:
   virtual void computeJacobian() = 0;
 
   /// Computes d-residual / d-jvar... storing the result in Ke.
-  virtual void computeOffDiagJacobian(unsigned int jvar) = 0;
+  virtual void computeOffDiagJacobian(MooseVariableFE & jvar) = 0;
 
   /**
    * Computes jacobian block with respect to a scalar variable

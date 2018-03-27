@@ -188,7 +188,7 @@ Q2PPiecewiseLinearSink::computeQpJacobian()
 }
 
 void
-Q2PPiecewiseLinearSink::computeJacobianBlock(unsigned int jvar)
+Q2PPiecewiseLinearSink::computeJacobianBlock(MooseVariableFE & jvar)
 {
   prepareNodalValues();
   IntegratedBC::computeJacobianBlock(jvar);

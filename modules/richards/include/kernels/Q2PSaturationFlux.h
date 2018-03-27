@@ -55,16 +55,17 @@ protected:
    * In computeResidual we sum over the quadpoints and then add
    * the upwind mobility parts
    */
-  virtual Real computeQpResidual();
+  virtual Real computeQpResidual() override;
 
   /// This simply calls upwind
-  virtual void computeResidual();
+  virtual void computeResidual() override;
 
   /// this simply calls upwind
-  virtual void computeOffDiagJacobian(unsigned int jvar);
+  virtual void computeOffDiagJacobian(MooseVariableFE & jvar) override;
+  using Kernel::computeOffDiagJacobian;
 
   /// this simply calls upwind
-  virtual void computeJacobian();
+  virtual void computeJacobian() override;
 
   /// the derivative of the flux without the upstream mobility terms
   Real computeQpJac(unsigned int dvar);

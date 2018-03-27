@@ -39,7 +39,7 @@ public:
   /**
    * Computes d-ivar-residual / d-jvar...
    */
-  virtual void computeJacobianBlock(unsigned int jvar) override;
+  virtual void computeJacobianBlock(MooseVariableFE & jvar) override;
   /**
    * Computes jacobian block with respect to a scalar variable
    * @param jvar The number of the scalar variable

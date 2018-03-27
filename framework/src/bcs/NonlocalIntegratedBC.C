@@ -66,22 +66,23 @@ NonlocalIntegratedBC::computeJacobian()
 }
 
 void
-NonlocalIntegratedBC::computeJacobianBlock(unsigned int jvar)
+NonlocalIntegratedBC::computeJacobianBlock(MooseVariableFE & jvar)
 {
-  if (jvar == _var.number())
+  size_t jvar_num = jvar.number();
+  if (jvar_num == _var.number())
     computeJacobian();
   else
   {
-    MooseVariableFE & jv = _sys.getVariable(_tid, jvar);
-    DenseMatrix<Number> & ke = _assembly.jacobianBlock(_var.number(), jvar);
+    MooseVariableFE & jv = _sys.getVariable(_tid, jvar_num);
+    DenseMatrix<Number> & ke = _assembly.jacobianBlock(_var.number(), jvar_num);
 
-    for (_j = 0; _j < _phi.size();
+    for (_j = 0; _j < jvar.phiFaceSize();
          _j++) // looping order for _i & _j are reversed for performance improvement
     {
-      getUserObjectJacobian(jvar, jv.dofIndices()[_j]);
+      getUserObjectJacobian(jvar_num, jv.dofIndices()[_j]);
       for (_i = 0; _i < _test.size(); _i++)
         for (_qp = 0; _qp < _qrule->n_points(); _qp++)
-          ke(_i, _j) += _JxW[_qp] * _coord[_qp] * computeQpOffDiagJacobian(jvar);
+          ke(_i, _j) += _JxW[_qp] * _coord[_qp] * computeQpOffDiagJacobian(jvar_num);
     }
   }
 }

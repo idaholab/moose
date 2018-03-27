@@ -82,7 +82,7 @@ protected:
    *
    * @return The reference to be stored off and used later.
    */
-  virtual const typename OutputTools<T>::VariableValue & dotDu();
+  virtual const VariableValue & dotDu();
 
   /**
    * The gradient of the variable this object is operating on.

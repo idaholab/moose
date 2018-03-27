@@ -24,12 +24,13 @@ public:
   StressDivergenceTensorsTruss(const InputParameters & parameters);
 
 protected:
-  virtual void initialSetup();
-  virtual void computeResidual();
-  virtual Real computeQpResidual() { return 0.0; }
+  virtual void initialSetup() override;
+  virtual void computeResidual() override;
+  virtual Real computeQpResidual() override { return 0.0; }
   virtual Real computeStiffness(unsigned int i, unsigned int j);
-  virtual void computeJacobian();
-  virtual void computeOffDiagJacobian(unsigned int jvar);
+  virtual void computeJacobian() override;
+  virtual void computeOffDiagJacobian(MooseVariableFE & jvar) override;
+  using Kernel::computeOffDiagJacobian;
 
   std::string _base_name;
 

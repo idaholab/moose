@@ -40,17 +40,18 @@ public:
   Q2PPiecewiseLinearSink(const InputParameters & parameters);
 
 protected:
-  virtual void computeResidual();
+  virtual void computeResidual() override;
 
-  virtual Real computeQpResidual();
+  virtual Real computeQpResidual() override;
 
-  virtual void computeJacobian();
+  virtual void computeJacobian() override;
 
-  virtual Real computeQpJacobian();
+  virtual Real computeQpJacobian() override;
 
-  virtual void computeJacobianBlock(unsigned int jvar);
+  virtual void computeJacobianBlock(MooseVariableFE & jvar) override;
+  using IntegratedBC::computeJacobianBlock;
 
-  virtual Real computeQpOffDiagJacobian(unsigned int jvar);
+  virtual Real computeQpOffDiagJacobian(unsigned int jvar) override;
 
   /// whether to multiply the sink flux by permeability*density/viscosity
   bool _use_mobility;

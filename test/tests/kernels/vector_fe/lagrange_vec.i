@@ -28,12 +28,14 @@
 
 [BCs]
   [./bnd]
-    type = LinearVectorPenaltyDirichletBC
+    type = VectorPenaltyDirichletBC
     variable = u
     x_exact_sln = 'x_exact_sln'
     y_exact_sln = 'y_exact_sln'
+    z_exact_sln = '0'
     penalty = 1e10
     boundary = 'left right top bottom'
+    linear = true
   [../]
 []
 

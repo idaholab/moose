@@ -120,14 +120,17 @@ struct OutputTools
 typedef MooseArray<Real> VariableValue;
 typedef MooseArray<VectorValue<Real>> VariableGradient;
 typedef MooseArray<TensorValue<Real>> VariableSecond;
+typedef MooseArray<Real> VariableCurl;
 
 typedef MooseArray<std::vector<Real>> VariablePhiValue;
 typedef MooseArray<std::vector<VectorValue<Real>>> VariablePhiGradient;
 typedef MooseArray<std::vector<TensorValue<Real>>> VariablePhiSecond;
+typedef MooseArray<std::vector<Real>> VariablePhiCurl;
 
 typedef MooseArray<std::vector<Real>> VariableTestValue;
 typedef MooseArray<std::vector<VectorValue<Real>>> VariableTestGradient;
 typedef MooseArray<std::vector<TensorValue<Real>>> VariableTestSecond;
+typedef MooseArray<std::vector<Real>> VariableTestCurl;
 
 typedef MooseArray<VectorValue<Real>> VectorVariableValue;
 typedef MooseArray<TensorValue<Real>> VectorVariableGradient;
