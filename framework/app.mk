@@ -207,7 +207,7 @@ depend_libs  := $(foreach i, $(DEPEND_MODULES), $(MOOSE_DIR)/modules/$(i)/lib/li
 
 ifeq ($(USE_TEST_LIBS),yes)
   depend_test_libs := $(depend_test_libs) $(app_test_LIB)
-  depend_test_libs_flags := $(foreach i, $(depend_test_libs), -L$(dir $(i)) -l$(shell echo $(notdir $(i)) | perl -pe 's/^lib(.*?)\.la/$$1/'))
+  depend_test_libs_flags :=   $(depend_test_libs)
 endif
 
 
@@ -221,7 +221,7 @@ endif
 # Here we'll filter out MOOSE libs since we'll assume our application already has MOOSE compiled in
 depend_libs := $(filter-out $(moose_LIBS),$(depend_libs))
 # Create -L/-l versions of the depend libs
-depend_libs_flags := $(foreach i, $(depend_libs), -L$(dir $(i)) -l$(shell echo $(notdir $(i)) | perl -pe 's/^lib(.*?)\.la/$$1/'))
+depend_libs_flags :=  $(depend_libs)
 
 # If building shared libs, make the plugins a dependency, otherwise don't.
 ifeq ($(libmesh_shared),yes)
