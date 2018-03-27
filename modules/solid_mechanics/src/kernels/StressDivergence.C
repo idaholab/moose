@@ -258,9 +258,10 @@ StressDivergence::computeQpJacobian()
 }
 
 void
-StressDivergence::computeOffDiagJacobian(unsigned int jvar)
+StressDivergence::computeOffDiagJacobian(MooseVariableFE & jvar)
 {
-  if (jvar == _var.number())
+  size_t jvar_num = jvar.number();
+  if (jvar_num == _var.number())
     computeJacobian();
   else
   {
@@ -279,8 +280,8 @@ StressDivergence::computeOffDiagJacobian(unsigned int jvar)
         _avg_grad_test[_i][_component] /= _current_elem_volume;
       }
 
-      _avg_grad_phi.resize(_phi.size());
-      for (_i = 0; _i < _phi.size(); _i++)
+      _avg_grad_phi.resize(jvar.phiSize());
+      for (_i = 0; _i < jvar.phiSize(); _i++)
       {
         _avg_grad_phi[_i].resize(3);
         for (unsigned int component = 0; component < _mesh.dimension(); component++)
@@ -294,12 +295,12 @@ StressDivergence::computeOffDiagJacobian(unsigned int jvar)
       }
     }
 
-    DenseMatrix<Number> & ke = _assembly.jacobianBlock(_var.number(), jvar);
+    DenseMatrix<Number> & ke = _assembly.jacobianBlock(_var.number(), jvar_num);
 
     for (_i = 0; _i < _test.size(); _i++)
-      for (_j = 0; _j < _phi.size(); _j++)
+      for (_j = 0; _j < jvar.phiSize(); _j++)
         for (_qp = 0; _qp < _qrule->n_points(); _qp++)
-          ke(_i, _j) += _JxW[_qp] * _coord[_qp] * computeQpOffDiagJacobian(jvar);
+          ke(_i, _j) += _JxW[_qp] * _coord[_qp] * computeQpOffDiagJacobian(jvar_num);
   }
 }
 

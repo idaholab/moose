@@ -137,8 +137,28 @@ Kernel::computeJacobian()
 }
 
 void
+Kernel::computeOffDiagJacobian(MooseVariableFE & jvar)
+{
+  size_t jvar_num = jvar.number();
+  if (jvar_num == _var.number())
+    computeJacobian();
+  else
+  {
+    DenseMatrix<Number> & ke = _assembly.jacobianBlock(_var.number(), jvar_num);
+
+    precalculateOffDiagJacobian(jvar_num);
+    for (_i = 0; _i < _test.size(); _i++)
+      for (_j = 0; _j < jvar.phiSize(); _j++)
+        for (_qp = 0; _qp < _qrule->n_points(); _qp++)
+          ke(_i, _j) += _JxW[_qp] * _coord[_qp] * computeQpOffDiagJacobian(jvar_num);
+  }
+}
+
+void
 Kernel::computeOffDiagJacobian(unsigned int jvar)
 {
+  mooseDeprecated("The computeOffDiagJacobian method signature has changed. Developers, please "
+                  "pass in a MooseVariableFE reference instead of the variable number");
   if (jvar == _var.number())
     computeJacobian();
   else

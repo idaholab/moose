@@ -26,15 +26,16 @@ public:
   StressDivergenceRZ(const InputParameters & parameters);
 
 protected:
-  virtual void computeResidual();
-  virtual void computeJacobian();
-  virtual void computeOffDiagJacobian(unsigned int jvar);
+  virtual void computeResidual() override;
+  virtual void computeJacobian() override;
+  virtual void computeOffDiagJacobian(MooseVariableFE & jvar) override;
+  using Kernel::computeOffDiagJacobian;
 
-  virtual Real computeQpResidual();
+  virtual Real computeQpResidual() override;
 
-  virtual Real computeQpJacobian();
+  virtual Real computeQpJacobian() override;
 
-  virtual Real computeQpOffDiagJacobian(unsigned int jvar);
+  virtual Real computeQpOffDiagJacobian(unsigned int jvar) override;
 
   Real calculateJacobian(unsigned int ivar, unsigned int jvar);
 

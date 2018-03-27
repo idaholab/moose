@@ -850,32 +850,36 @@ public:
     return _fe_shape_data_face_neighbor[type]->_second_phi;
   }
 
-  const VectorVariablePhiCurl & feCurlPhi(FEType type)
+  template <typename OutputType>
+  const typename OutputTools<OutputType>::VariablePhiCurl & feCurlPhi(FEType type)
   {
     _need_curl[type] = true;
-    buildVectorFE(type);
-    return _vector_fe_shape_data[type]->_curl_phi;
+    buildFE(type);
+    return _fe_shape_data[type]->_curl_phi;
   }
 
-  const VectorVariablePhiCurl & feCurlPhiFace(FEType type)
+  template <typename OutputType>
+  const typename OutputTools<OutputType>::VariablePhiCurl & feCurlPhiFace(FEType type)
   {
     _need_curl[type] = true;
-    buildVectorFaceFE(type);
-    return _vector_fe_shape_data_face[type]->_curl_phi;
+    buildFaceFE(type);
+    return _fe_shape_data_face[type]->_curl_phi;
   }
 
-  const VectorVariablePhiCurl & feCurlPhiNeighbor(FEType type)
+  template <typename OutputType>
+  const typename OutputTools<OutputType>::VariablePhiCurl & feCurlPhiNeighbor(FEType type)
   {
     _need_curl[type] = true;
-    buildVectorNeighborFE(type);
-    return _vector_fe_shape_data_neighbor[type]->_curl_phi;
+    buildNeighborFE(type);
+    return _fe_shape_data_neighbor[type]->_curl_phi;
   }
 
-  const VectorVariablePhiCurl & feCurlPhiFaceNeighbor(FEType type)
+  template <typename OutputType>
+  const typename OutputTools<OutputType>::VariablePhiCurl & feCurlPhiFaceNeighbor(FEType type)
   {
     _need_curl[type] = true;
-    buildVectorFaceNeighborFE(type);
-    return _vector_fe_shape_data_face_neighbor[type]->_curl_phi;
+    buildFaceNeighborFE(type);
+    return _fe_shape_data_face_neighbor[type]->_curl_phi;
   }
 
   std::map<FEType, bool> _need_second_derivative;
@@ -1213,6 +1217,7 @@ protected:
     VariablePhiValue _phi;
     VariablePhiGradient _grad_phi;
     VariablePhiSecond _second_phi;
+    VariablePhiCurl _curl_phi;
   };
 
   class VectorFEShapeData
@@ -1317,5 +1322,21 @@ Assembly::feGradPhiFaceNeighbor<VectorValue<Real>>(FEType type);
 template <>
 const typename OutputTools<VectorValue<Real>>::VariablePhiSecond &
 Assembly::feSecondPhiFaceNeighbor<VectorValue<Real>>(FEType type);
+
+template <>
+const typename OutputTools<VectorValue<Real>>::VariablePhiCurl &
+Assembly::feCurlPhi<VectorValue<Real>>(FEType type);
+
+template <>
+const typename OutputTools<VectorValue<Real>>::VariablePhiCurl &
+Assembly::feCurlPhiFace<VectorValue<Real>>(FEType type);
+
+template <>
+const typename OutputTools<VectorValue<Real>>::VariablePhiCurl &
+Assembly::feCurlPhiNeighbor<VectorValue<Real>>(FEType type);
+
+template <>
+const typename OutputTools<VectorValue<Real>>::VariablePhiCurl &
+Assembly::feCurlPhiFaceNeighbor<VectorValue<Real>>(FEType type);
 
 #endif /* ASSEMBLY_H */

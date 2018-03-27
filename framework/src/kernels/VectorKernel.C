@@ -102,19 +102,20 @@ VectorKernel::computeJacobian()
 }
 
 void
-VectorKernel::computeOffDiagJacobian(unsigned int jvar)
+VectorKernel::computeOffDiagJacobian(MooseVariableFE & jvar)
 {
-  if (jvar == _var.number())
+  size_t jvar_num = jvar.number();
+  if (jvar_num == _var.number())
     computeJacobian();
   else
   {
-    DenseMatrix<Number> & ke = _assembly.jacobianBlock(_var.number(), jvar);
+    DenseMatrix<Number> & ke = _assembly.jacobianBlock(_var.number(), jvar_num);
 
-    precalculateOffDiagJacobian(jvar);
+    precalculateOffDiagJacobian(jvar_num);
     for (_i = 0; _i < _test.size(); _i++)
-      for (_j = 0; _j < _phi.size(); _j++)
+      for (_j = 0; _j < jvar.phiSize(); _j++)
         for (_qp = 0; _qp < _qrule->n_points(); _qp++)
-          ke(_i, _j) += _JxW[_qp] * _coord[_qp] * computeQpOffDiagJacobian(jvar);
+          ke(_i, _j) += _JxW[_qp] * _coord[_qp] * computeQpOffDiagJacobian(jvar_num);
   }
 }
 

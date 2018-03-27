@@ -133,21 +133,11 @@ MooseVariableInterface<RealVectorValue>::dot()
 }
 
 template <typename T>
-const typename OutputTools<T>::VariableValue &
+const VariableValue &
 MooseVariableInterface<T>::dotDu()
 {
   if (_nodal)
     return _variable->nodalValueDuDotDu();
-  else
-    return _variable->duDotDu();
-}
-
-template <>
-const VectorVariableValue &
-MooseVariableInterface<RealVectorValue>::dotDu()
-{
-  if (_nodal)
-    mooseError("Dofs are scalars while vector variables have vector values. Mismatch");
   else
     return _variable->duDotDu();
 }

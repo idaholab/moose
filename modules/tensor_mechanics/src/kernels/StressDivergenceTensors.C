@@ -171,7 +171,7 @@ StressDivergenceTensors::computeJacobian()
 }
 
 void
-StressDivergenceTensors::computeOffDiagJacobian(unsigned int jvar)
+StressDivergenceTensors::computeOffDiagJacobian(MooseVariableFE & jvar)
 {
   if (_use_finite_deform_jacobian)
   {

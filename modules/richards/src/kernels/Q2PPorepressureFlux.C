@@ -106,9 +106,9 @@ Q2PPorepressureFlux::computeJacobian()
 }
 
 void
-Q2PPorepressureFlux::computeOffDiagJacobian(unsigned int jvar)
+Q2PPorepressureFlux::computeOffDiagJacobian(MooseVariableFE & jvar)
 {
-  upwind(false, true, jvar);
+  upwind(false, true, jvar.number());
 }
 
 Real

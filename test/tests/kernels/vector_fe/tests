@@ -22,7 +22,24 @@
     type = PetscJacobianTester
     input = 'coupled_scalar_vector_jacobian.i'
     recover = false
+    state = 'const_positive'
     ratio_tol = 1e-7
     difference_tol = 5e-6
+  [../]
+  [./coupled_gradient_dot_em_gauge]
+    type = Exodiff
+    input = 'electromagnetic_coulomb_gauge.i'
+    exodiff = 'electromagnetic_coulomb_gauge_out.e'
+    abs_zero = 6e-8
+    rel_err = 3e-5
+  [../]
+  [./coupled_gradient_dot_jacobian]
+    type = PetscJacobianTester
+    input = 'electromagnetic_coulomb_gauge.i'
+    recover = false
+    state = 'const_positive'
+    ratio_tol = 1e-7
+    difference_tol = 5e-6
+    cli_args = 'BCs/active="" Mesh/nx=4 Mesh/ny=4 Outputs/exodus=false'
   [../]
 []

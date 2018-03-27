@@ -37,8 +37,9 @@ public:
    * additional getUserObjectJacobian method is provided as an option to obtain
    * jocobians of the integral term from userobject once per dof
    */
-  virtual void computeJacobian();
-  virtual void computeOffDiagJacobian(unsigned int jvar);
+  virtual void computeJacobian() override;
+  virtual void computeOffDiagJacobian(MooseVariableFE & jvar) override;
+  using Kernel::computeOffDiagJacobian;
 
   /**
    * computeNonlocalJacobian and computeNonlocalOffDiagJacobian methods are
@@ -48,8 +49,8 @@ public:
    * additional globalDoFEnabled method is provided as an option to execute nonlocal
    * jocobian calculations only for nonlocal dofs that has nonzero jacobian contribution.
    */
-  virtual void computeNonlocalJacobian();
-  virtual void computeNonlocalOffDiagJacobian(unsigned int jvar);
+  virtual void computeNonlocalJacobian() override;
+  virtual void computeNonlocalOffDiagJacobian(unsigned int jvar) override;
 
 protected:
   /// Compute this Kernel's contribution to the Jacobian corresponding to nolocal dof at the current quadrature point

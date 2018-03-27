@@ -40,7 +40,9 @@ public:
 
   virtual void computeJacobian() override;
 
-  virtual void computeOffDiagJacobian(unsigned int jvar) override;
+  virtual void computeOffDiagJacobian(MooseVariableFE & jvar) override;
+
+  using Kernel::computeOffDiagJacobian;
 
 protected:
   /**

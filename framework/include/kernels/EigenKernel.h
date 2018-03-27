@@ -31,11 +31,13 @@ class EigenKernel : public Kernel
 public:
   virtual void computeResidual() override;
   virtual void computeJacobian() override;
-  virtual void computeOffDiagJacobian(unsigned int /*jvar*/) override;
+  virtual void computeOffDiagJacobian(MooseVariableFE & /*jvar*/) override;
   virtual void computeOffDiagJacobianScalar(unsigned int /*jvar*/) override {}
 
   EigenKernel(const InputParameters & parameters);
   virtual bool enabled() const override;
+
+  using Kernel::computeOffDiagJacobian;
 
 protected:
   /// flag for as an eigen kernel or a normal kernel
