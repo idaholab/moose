@@ -25,7 +25,7 @@ def shellCommand(command, cwd=None):
         p.wait()
         retcode = p.returncode
         if retcode != 0:
-            raise Exception()
+            raise Exception("Exception raised while running the command: " + command + " in directory: " + cwd)
 
         return p.communicate()[0]
 
