@@ -17,7 +17,6 @@
 #include "InterfaceKernel.h"
 #include "Material.h"
 #include "TimeKernel.h"
-#include "KernelWarehouse.h"
 #include "SwapBackSentinel.h"
 
 #include "libmesh/threads.h"

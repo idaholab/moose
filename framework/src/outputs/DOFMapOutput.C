@@ -117,7 +117,7 @@ DOFMapOutput::output(const ExecFlagType & /*type*/)
 
   // fetch the KernelWarehouse through the NonlinearSystem
   NonlinearSystemBase & _nl = _problem_ptr->getNonlinearSystemBase();
-  const KernelWarehouse & kernels = _nl.getKernelWarehouse();
+  auto & kernels = _nl.getKernelWarehouse();
 
   // get a set of all subdomains
   const std::set<SubdomainID> & subdomains = _mesh.meshSubdomains();

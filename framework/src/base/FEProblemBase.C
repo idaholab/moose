@@ -834,7 +834,7 @@ FEProblemBase::checkNonlocalCoupling()
 {
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
   {
-    const KernelWarehouse & all_kernels = _nl->getKernelWarehouse();
+    const auto & all_kernels = _nl->getKernelWarehouse();
     const auto & kernels = all_kernels.getObjects(tid);
     for (const auto & kernel : kernels)
     {

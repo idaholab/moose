@@ -91,8 +91,7 @@ ComputeFullJacobianThread::computeJacobian()
     {
       // only if there are dofs for j-variable (if it is subdomain restricted var, there may not be
       // any)
-      const std::vector<std::shared_ptr<KernelBase>> & kernels =
-          _warehouse->getActiveVariableBlockObjects(ivar, _subdomain, _tid);
+      const auto & kernels = _warehouse->getActiveVariableBlockObjects(ivar, _subdomain, _tid);
       for (const auto & kernel : kernels)
         if ((kernel->variable().number() == ivar) && kernel->isImplicit())
         {
@@ -118,8 +117,7 @@ ComputeFullJacobianThread::computeJacobian()
       if (ivariable.activeOnSubdomain(_subdomain) && jvariable.activeOnSubdomain(_subdomain) &&
           _warehouse->hasActiveVariableBlockObjects(ivar, _subdomain, _tid))
       {
-        const std::vector<std::shared_ptr<KernelBase>> & kernels =
-            _warehouse->getActiveVariableBlockObjects(ivar, _subdomain, _tid);
+        const auto & kernels = _warehouse->getActiveVariableBlockObjects(ivar, _subdomain, _tid);
         for (const auto & kernel : kernels)
         {
           std::shared_ptr<NonlocalKernel> nonlocal_kernel =
@@ -145,7 +143,7 @@ ComputeFullJacobianThread::computeJacobian()
           _warehouse->hasActiveVariableBlockObjects(ivariable->number(), _subdomain, _tid))
       {
         // for each variable get the list of active kernels
-        const std::vector<std::shared_ptr<KernelBase>> & kernels =
+        const auto & kernels =
             _warehouse->getActiveVariableBlockObjects(ivariable->number(), _subdomain, _tid);
         for (const auto & kernel : kernels)
           if (kernel->isImplicit())
