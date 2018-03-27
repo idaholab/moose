@@ -160,12 +160,12 @@ endif
 
 #ifort
 ifneq (,$(findstring ifort,$(mpif90_command)))
-	module_dir_flag := -module ${@D}
+	module_dir_flag = -module ${@D}
 endif
 
 #gfortran
 ifneq (,$(findstring gfortran,$(mpif90_command)))
-	module_dir_flag := -J${@D}
+	module_dir_flag = -J ${@D}
 endif
 
 %.$(obj-suffix) : %.f90
