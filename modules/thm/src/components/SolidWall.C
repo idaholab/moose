@@ -47,7 +47,6 @@ SolidWall::addMooseObjects1Phase()
       const std::string class_name = "Euler1DVarAreaWallBoundaryFlux";
       InputParameters params = _factory.getValidParams(class_name);
       params.set<UserObjectName>("rdg_flux") = _rdg_flux_name;
-      params.set<bool>("implicit") = _implicit_rdg;
       params.set<ExecFlagEnum>("execute_on") = userobject_execute_on;
       _sim.addUserObject(class_name, boundary_flux_name, params);
     }
