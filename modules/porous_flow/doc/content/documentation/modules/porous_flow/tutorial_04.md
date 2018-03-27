@@ -1,8 +1,8 @@
+# Porous Flow Tutorial Page 04.  Adding solid mechanics
+
 [Start](porous_flow/tutorial_00.md) |
 [Previous](porous_flow/tutorial_03.md) |
 [Next](porous_flow/tutorial_05.md)
-
-# Porous Flow Tutorial Page 04.  Adding solid mechanics
 
 In this Page, solid mechanics is added to the thermo-hydro simulation of preious Pages.  The equations are discussed in [governing equations](porous_flow/governing_equations.md).  Only quasi-static solid mechanics is considered here, without gravity, so the equations read
 \begin{equation}
