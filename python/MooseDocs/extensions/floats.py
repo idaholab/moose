@@ -49,7 +49,7 @@ class Caption(tokens.CountToken):
         #pylint: disable=no-member
         if self.key:
             tokens.Shortcut(self.root, key=self.key, link=u'#{}'.format(self.key),
-                            content=u'{} {}'.format(self.prefix.title(), self.number))
+                            string=u'{} {}'.format(self.prefix.title(), self.number))
 
 class ModalLink(tokens.Link):
     PROPERTIES = [Property("title", ptype=tokens.Token, required=True),

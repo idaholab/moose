@@ -2,8 +2,6 @@ libMesh: http://libmesh.github.io/
 MOOSE: http://www.mooseframework.org
 YAML: http://yaml.org/
 python: https://www.python.org/
-markdown: http://daringfireball.net/projects/markdown/
-python-markdown: http://pythonhosted.org/Markdown/
 BCs: systems/BCs/index.md
 AuxVariables: systems/AuxVariables/index.md
 AuxKernels: systems/AuxKernels/index.md

@@ -131,6 +131,7 @@ def main(options):
 
     # Perform build
     translator.execute(options.num_threads)
+
     if options.serve:
         watcher = MooseDocsWatcher(translator, options)
         server = livereload.Server(watcher=watcher)

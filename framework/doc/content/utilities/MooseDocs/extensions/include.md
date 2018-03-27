@@ -22,3 +22,5 @@ file and [example-include-re] imports a portion of a file using the "re" setting
                 caption=Example use of the `!include` command to import a portion of another file.
 !include /core.md re=(?P<content>^The core.*?)^Syntax
 !devel-end!
+
+[markdown]: https://en.wikipedia.org/wiki/Markdown
