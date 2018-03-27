@@ -12,6 +12,7 @@ Documentation:
     Systems: documentation/systems/index.md
     Application Development: documentation/application_development/index.md
     Framework Development: documentation/framework_development/index.md
+    Finite Element Concepts: documentation/finite_element_concepts/index.md
     Modules: documentation/modules/index.md
     Software Quality: documentation/sqa/index.md
 Utilites:

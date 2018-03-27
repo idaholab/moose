@@ -17,7 +17,7 @@ InputParameters
 validParams<VectorCoupledGradientTimeDerivative>()
 {
   InputParameters params = validParams<VectorKernel>();
-  params.addRequiredCoupledVar("V",
+  params.addRequiredCoupledVar("v",
                                "The standard MooseVariable whose time derivative of the gradient "
                                "we will add to the residual. A physical realization of this is in "
                                "the Coulomb gauge formulation of Maxwells' equations.");
@@ -27,18 +27,18 @@ validParams<VectorCoupledGradientTimeDerivative>()
 VectorCoupledGradientTimeDerivative::VectorCoupledGradientTimeDerivative(
     const InputParameters & parameters)
   : VectorKernel(parameters),
-    _grad_V_dot(coupledGradientDot("V")),
-    _d_grad_V_dot_dV(coupledDotDu("V")),
-    _V_id(coupled("V")),
-    _V_var(*getVar("V", 0)),
-    _V_grad_phi(_assembly.gradPhi(_V_var))
+    _grad_v_dot(coupledGradientDot("v")),
+    _d_grad_v_dot_dv(coupledDotDu("v")),
+    _v_id(coupled("v")),
+    _v_var(*getVar("v", 0)),
+    _standard_grad_phi(_assembly.gradPhi(_v_var))
 {
 }
 
 Real
 VectorCoupledGradientTimeDerivative::computeQpResidual()
 {
-  return _test[_i][_qp] * _grad_V_dot[_qp];
+  return _test[_i][_qp] * _grad_v_dot[_qp];
 }
 
 Real
@@ -50,8 +50,8 @@ VectorCoupledGradientTimeDerivative::computeQpJacobian()
 Real
 VectorCoupledGradientTimeDerivative::computeQpOffDiagJacobian(unsigned jvar)
 {
-  if (jvar == _V_id)
-    return _test[_i][_qp] * _d_grad_V_dot_dV[_qp] * _V_grad_phi[_j][_qp];
+  if (jvar == _v_id)
+    return _test[_i][_qp] * _d_grad_v_dot_dv[_qp] * _standard_grad_phi[_j][_qp];
 
   else
     return 0.;

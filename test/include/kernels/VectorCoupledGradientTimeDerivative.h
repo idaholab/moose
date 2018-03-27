@@ -29,11 +29,11 @@ protected:
   virtual Real computeQpJacobian() override;
   virtual Real computeQpOffDiagJacobian(unsigned jvar) override;
 
-  const VariableGradient & _grad_V_dot;
-  const VariableValue & _d_grad_V_dot_dV;
-  const unsigned _V_id;
-  MooseVariable & _V_var;
-  const VariablePhiGradient & _V_grad_phi;
+  const VariableGradient & _grad_v_dot;
+  const VariableValue & _d_grad_v_dot_dv;
+  const unsigned _v_id;
+  MooseVariable & _v_var;
+  const VariablePhiGradient & _standard_grad_phi;
 };
 
 #endif // VECTORCOUPLEDGRADIENTTIMEDERIVATIVE_H
