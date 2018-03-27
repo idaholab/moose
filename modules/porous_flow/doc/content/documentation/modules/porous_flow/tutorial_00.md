@@ -16,6 +16,7 @@
 - [Page 11](tutorial_11.md)  Two-phase THM borehole injection
 - [Page 12](tutorial_12.md) Boundary sinks and sources, and polyline
   sinks and sources (boreholes and rivers)
+- [Page 13](tutorial_13.md) More elaborate chemistry
 
 
 # Introduction
