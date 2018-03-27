@@ -1,11 +1,11 @@
 # Volumetric Locking Correction
 
 Volumetric locking is the over stiffening of elements when the material is close to being
-incompressible (Poisson's ratio $\nu$ nearing 0.5). This happens when a fully integrated element
+incompressible (Poisson's ratio $\nu$ nearing 0.5). This stiffening happens when a fully integrated element
 (such as Hex8 elements with 8 quadrature points or Quad4 elements with 4 quadrature points) is
 used. This is a numerical artifact introduced because shape functions used in finite element analysis
 cannot properly approximate the incompressibility condition throughout the element. To avoid this
-locking of elements, B-bar correction [citep:hughes1987finite] is implemented in MOOSE.
+locking of elements, B-bar correction [cite:hughes1987finite] is implemented in MOOSE.
 
 ## Theory
 
@@ -46,7 +46,7 @@ The modified equation of motion is:
 \int_V \sigma(\bar{\epsilon})\bar{\delta \epsilon} dV - \int_V b \delta v dV - \int_{\partial V} t \delta v dA = 0
 \end{aligned}
 \end{equation}
-More details about this method can be found in section 8.6 of [citet:bower2009applied].
+More details about this method can be found in [Section 8.6](http://solidmechanics.org/Text/Chapter8_6/Chapter8_6.php) of [cite:bower2009applied].
 
 When finite strain formulation is used, the volumetric component of the strain is separated using the
 determinant of the deformation matrix.
@@ -65,3 +65,5 @@ the following pre-conditioner block may be used:
 !listing modules/tensor_mechanics/test/tests/finite_strain_elastic/elastic_rotation_test.i
          start=Preconditioning
          end=Executioner
+
+!bibtex bibliography

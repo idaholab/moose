@@ -14,7 +14,7 @@ of the system.
 This model assumes linear elastic mechanical deformation with an isotropic elasticity tensor, where
 $\lambda$ and $\mu$ are the first and second Lam&egrave; constants.
 
-### Free energy definition
+## Free Energy Definition
 
 The total strain energy density is defined as
 \begin{equation}
@@ -38,12 +38,13 @@ where $l$ is the width of the crack interface and $g_c$ is a parameter related t
 The total local free energy density is defined as
 \begin{equation}
 \begin{aligned}
-F &=& \Psi + \gamma \\
-&=&[(1-c)^2(1-k) + k] \Psi^{+} +\Psi^{-} + \frac{g_c}{2l}c^2 + \frac{g_c l}{2} {|{\nabla c}|}^2.
+F =& \Psi + \gamma \\
+  =&[(1-c)^2(1-k) + k] \Psi^{+} +\Psi^{-} + \frac{g_c}{2l}c^2 + \frac{g_c l}{2} {|{\nabla c}|}^2.
 \end{aligned}
 \end{equation}
 
-### Stress definition
+## Stress Definition
+
 To be thermodynamically consistent, the stress is related to the deformation energy density according
 to
 \begin{equation}
@@ -53,13 +54,14 @@ Thus,
 \begin{equation}
 \mathbf{\sigma}^{\pm} = \frac{\partial \Psi^{\pm}}{\partial \mathbf{\epsilon}} = \sum_{a=1}^3 \left( \lambda \left< \epsilon_1 + \epsilon_2 + \epsilon_3 \right>_{\pm} + 2 \mu \left< \epsilon_a \right>_{\pm} \right) \mathbf{n}_a \otimes \mathbf{n}_a,
 \end{equation}
-where \mathbf{n}_a is the $a$th eigenvector.
+where $\mathbf{n}_a$ is the $a$th eigenvector.
 The stress becomes
 \begin{equation}
 \mathbf{\sigma} = \left[(1-c)^2(1-k) + k \right] \mathbf{\sigma}^{+} - \mathbf{\sigma}^{-}.
 \end{equation}
 
-### Evolution equation and History variable
+## Evolution Equation and History Variable
+
 To avoid crack healing, a history variable $H$ is defined that is the maximum energy density over the
 time interval $t=[0,t_0]$, where $t_0$ is the current time step, i.e.
 \begin{equation}
@@ -69,8 +71,8 @@ H = \max_t (\Psi^{+})
 Now, the total free energy is redefined as:
 \begin{equation}
 \begin{aligned}
-F &=& \left[ (1-c)^2(1-k) + k \right] H +\Psi^{-} + \frac{g_c}{2l}c^2 + \frac{g_c l}{2} {|{\nabla c}|}^2 \\
-&=& f_{loc} + \frac{g_c l}{2} {|{\nabla c}|}^2
+F =& \left[ (1-c)^2(1-k) + k \right] H +\Psi^{-} + \frac{g_c}{2l}c^2 + \frac{g_c l}{2} {|{\nabla c}|}^2 \\
+  =& f_{loc} + \frac{g_c l}{2} {|{\nabla c}|}^2
 \end{aligned}
 \end{equation}
 with
@@ -80,8 +82,8 @@ f_{loc} = \left[ (1-c)^2(1-k) + k \right] H +\Psi^{-} + \frac{g_c}{2l}c^2.
 Its derivatives are
 \begin{equation}
 \begin{aligned}
-\frac{\partial f_{loc}}{\partial c} &=& -2 (1-c)(1-k) H + 2 \frac{g_c}{2l} c\\
-\frac{\partial^2 f_{loc}}{\partial c^2} &=& 2 (1-k) H + 2 \frac{g_c}{2l}.
+\frac{\partial f_{loc}}{\partial c} =& -2 (1-c)(1-k) H + 2 \frac{g_c}{2l} c\\
+\frac{\partial^2 f_{loc}}{\partial c^2} =& 2 (1-k) H + 2 \frac{g_c}{2l}.
 \end{aligned}
 \end{equation}
 
@@ -89,12 +91,11 @@ The evolution equation for the damage parameter follows the Allen-Cahn equation
 \begin{equation}
 \dot{c} = -L \frac{\delta F}{\delta c} = -L \left( \frac{\partial f_{loc}}{\partial c} - \nabla \cdot \kappa \nabla c \right),
 \end{equation}
-where $ L = (g_c \eta)^{-1}$ and $\kappa = g_c l$.
+where $L = (g_c \eta)^{-1}$ and $\kappa = g_c l$.
 
 This equation follows the standard Allen-Cahn and thus can be implemented in MOOSE using the standard
-Allen-Cahn kernels, [TimeDerivative](/TimeDerivative.md), [AllenCahn](/AllenCahn), and
-[ACInterface](/ACInterface). There is now an action that automatically generates these kernels:
-NonconservedAction.
+Allen-Cahn kernels, TimeDerivative, AllenCahn, and ACInterface. There is now an action that automatically generates these kernels:
+NonconservedAction. See the +PhaseField module documentation+ for more information.
 
 ## Example Input File Syntax
 

@@ -93,6 +93,8 @@ and thus
 \hat{\mathbf{R}} = \hat{\mathbf{F}} \hat{\mathbf{U}}^{-1}
 \end{equation}
 
+## Volumetric Locking Correction
+
 In `ComputeFiniteStrain`, $\hat{\mathbf{F}}$ is calculated in the computeStrain method, including a
 volumetric locking correction of
 \begin{equation}

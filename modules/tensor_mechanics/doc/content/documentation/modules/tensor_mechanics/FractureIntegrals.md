@@ -2,7 +2,7 @@
 
 ## J-Integral
 
-A finite element calculation in which a crack is represented in the mesh geometry can be used to calculate the displacement and stress fields in the vicinity of the crack.  One straightforward way to evaluate the stress intensity from a finite element solution is through the $J$-integral [cite:rice_path_1968], which provides the mechanical energy release rate. If the crack is subjected to pure mode-$I$ loading, $K_I$ can be calculated from $J$ using the following relationship:
+A finite element calculation in which a crack is represented in the mesh geometry can be used to calculate the displacement and stress fields in the vicinity of the crack.  One straightforward way to evaluate the stress intensity from a finite element solution is through the $J$-integral [citep:rice_path_1968], which provides the mechanical energy release rate. If the crack is subjected to pure mode-$I$ loading, $K_I$ can be calculated from $J$ using the following relationship:
 \begin{equation}
 J=
 \begin{cases}
@@ -68,7 +68,7 @@ To use the $J$-integral capability in MOOSE, a user specifies a set of nodes alo
 
 ## Interaction Integral
 
-The interaction integral method is based on the $J$-integral and makes it possible to evaluate mixed-mode stress intensity factors $K_I$, $K_{II}$ and $K_{III}$, as well as the T-stress, in the vicinity of three-dimensional cracks. The formulation relies on superimposing Williams' solution for stress and displacement around a crack (in this context called 'auxiliary fields') and the computed finite element stress and displacement fields (called 'actual fields'). The total superimposed $J$ can be separated into three parts: the $J$ of the actual fields, the $J$ of the auxiliary fields, and an interaction part containing the terms with both actual and auxiliary field quantities. The last part is called the interaction integral and for a fairly straight crack without body forces, thermal loading or crack face tractions, the interaction integral over a crack front segment can be written [cite:walters_interaction_2005]:
+The interaction integral method is based on the $J$-integral and makes it possible to evaluate mixed-mode stress intensity factors $K_I$, $K_{II}$ and $K_{III}$, as well as the T-stress, in the vicinity of three-dimensional cracks. The formulation relies on superimposing Williams' solution for stress and displacement around a crack (in this context called 'auxiliary fields') and the computed finite element stress and displacement fields (called 'actual fields'). The total superimposed $J$ can be separated into three parts: the $J$ of the actual fields, the $J$ of the auxiliary fields, and an interaction part containing the terms with both actual and auxiliary field quantities. The last part is called the interaction integral and for a fairly straight crack without body forces, thermal loading or crack face tractions, the interaction integral over a crack front segment can be written [citep:walters_interaction_2005]:
 \begin{equation}
 \bar{I}(s) = \int_V \left[ \sigma_{ij} u_{j,1}^{(aux)} + \sigma_{ij}^{(aux)} u_{j,1} - \sigma_{jk} \epsilon_{jk}^{(aux)} \delta_{1i} \right] q_{,i} \, \mathrm{d}V
 \end{equation}
@@ -99,7 +99,7 @@ If all three interaction integral stress intensity factors are computed, there i
 \begin{equation}
 K_{eq} = \sqrt{ K_I^2 + K_{II}^2 + \frac{K_{III}^2}{1-\nu}}.
 \end{equation}
-The $T$-stress is the first second-order parameter in Williams' expansion of stress at a crack tip and is a constant stress parallel to the crack [cite:larsson_influence_1973], [cite:rice_limitations_1974]. Contrary to $J$, $T$-stress depends on geometry and size and can give a more accurate description of the stresses and strains around a crack tip than $J$ alone. The $T$-stress characterizes the crack-tip constraint and a negative $T$-stress is associated with loss of constraint and a higher fracture toughness than would be predicted from a one-parameter $J$ description of the load on the crack. $T$-stresses can be calculated with the interaction integral methodology using appropriate auxiliary fields [cite:toshio_determination_1992]. The current implementation of the $T$-stress computation is valid for two-dimensional and three-dimensional cracks under Mode I loading.
+The $T$-stress is the first second-order parameter in Williams' expansion of stress at a crack tip and is a constant stress parallel to the crack [citep:larsson_influence_1973] [citep:rice_limitations_1974]. Contrary to $J$, $T$-stress depends on geometry and size and can give a more accurate description of the stresses and strains around a crack tip than $J$ alone. The $T$-stress characterizes the crack-tip constraint and a negative $T$-stress is associated with loss of constraint and a higher fracture toughness than would be predicted from a one-parameter $J$ description of the load on the crack. $T$-stresses can be calculated with the interaction integral methodology using appropriate auxiliary fields [citep:toshio_determination_1992]. The current implementation of the $T$-stress computation is valid for two-dimensional and three-dimensional cracks under Mode I loading.
 
 ## Usage
 

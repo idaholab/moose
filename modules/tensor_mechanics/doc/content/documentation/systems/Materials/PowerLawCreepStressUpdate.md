@@ -22,6 +22,7 @@ This class is based on the implicit integration algorithm in [cite:dunne2005intr
 !listing modules/tensor_mechanics/test/tests/material_limit_time_step/creep/nafems_test5a_lim.i block=Materials/powerlawcrp
 
 `PowerLawCreepStressUpdate` must be run in conjunction with the inelastic strain return mapping stress calculator as shown below:
+
 !listing modules/tensor_mechanics/test/tests/material_limit_time_step/creep/nafems_test5a_lim.i block=Materials/radial_return_stress
 
 !syntax parameters /Materials/PowerLawCreepStressUpdate
@@ -33,4 +34,3 @@ This class is based on the implicit integration algorithm in [cite:dunne2005intr
 
 
 !bibtex bibliography
-

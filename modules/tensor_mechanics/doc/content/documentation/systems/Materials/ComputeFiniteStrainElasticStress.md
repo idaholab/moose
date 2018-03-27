@@ -13,7 +13,7 @@ Elastic materials do not experience permanent deformation, and all elastic strai
   \sigma_{ij} = C_{ijkl} \Delta \epsilon_{kl}
 \end{equation}
 where $\Delta \boldsymbol{\epsilon}$ is the strain increment; this strain measure is also the sum of the mechanical elastic strain and any eigenstrains in the system.
-$\boldsymbol{\sigma}^{old}$ is the stress calculated at the previous timestep.
+
 
 ## Example Input File Syntax
 

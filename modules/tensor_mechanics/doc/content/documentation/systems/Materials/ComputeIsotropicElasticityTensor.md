@@ -6,7 +6,7 @@
 
 The material `ComputeIsotropicElasticityTensor` builds the isotropic elasticity (stiffness) tensor with two user provided elastic constants.
 
-The isotropic elasticity tensor is given, in engineering matrix notation [cite:malvern1969introduction], as
+The isotropic elasticity tensor is given, in engineering matrix notation [citep:malvern1969introduction], as
 \begin{equation}
 \label{eq:isotropic_fill_method}
 C_{ijkl}^{isotropic} = \begin{bmatrix}
@@ -32,7 +32,4 @@ The material includes the conversions into Lame constants, see [cite:slaughter20
 
 !syntax children /Materials/ComputeIsotropicElasticityTensor
 
-
-
 !bibtex bibliography
-

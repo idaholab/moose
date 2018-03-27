@@ -4,28 +4,24 @@
  RankTwoTensor and RankFourTensor, which as expected hold 3x3 values and 3x3x3x3 values,
  respectively.  A suite of operators and get/set methods are available.
 
-## Specifying values from an input file
+## Specifying Values from an Input File
 
 
 Both `RankTwoTensor` and `RankFourTensor` allow a user to specify how to the tensor from an input
-file.  `RankTwoTensor` takes a vector of six or nine inputs.  If six inputs are used, the appropriate
-symmetries are maintained ($ \sigma_{ij} = \sigma_{ji} $). `RankFourTensor` takes a vector of inputs
-of the appropriate length to fill in the tensor, with the appropriate symmetries maintained ($
-C_{ijkl} = C_{klij}, C_{ijkl} = C_{ijlk}, C_{ijkl} = C_{jikl} $). Several fill methods are available
-to specify additional symmetries:
+file.
 
-- `antisymmetric`
-- `symmetric9`
-- `symmetric21`
-- `general_isotropic`
-- `symmetric_isotropic`
-- `antisymmetric_isotropic`
-- `axisymmetric_rz`
-- `general`
+- `RankTwoTensor` takes a vector of six or nine inputs.  If six inputs are used, the appropriate
+  symmetries are maintained ($\sigma_{ij} = \sigma_{ji}$).
 
-There is error checking on the input vector length and the enumerator type.
+- `RankFourTensor` takes a vector of inputs of the appropriate length to fill in
+  the tensor, with the appropriate symmetries maintained
+  \begin{equation}
+    C_{ijkl} = C_{klij}, C_{ijkl} = C_{ijlk}, C_{ijkl} = C_{jikl}
+  \end{equation}
+  Several fill methods are available to specify additional symmetries as described
+  in [ComputeElasticityTensor](/ComputeElasticityTensor.md).
 
-### Getting and setting values
+## Getting and Setting Specific Component Values
 
 Both RankTwoTensor and RankFourTensor allow a user to get and set values from the tensor using the
 bracket `()` notation.
@@ -56,11 +52,7 @@ c = a(0,0);
 c = b(0,0,0,0);
 ```
 
-## Operators
-
-A wide array of mathematical operators exist for the tensors in TensorMechanics.
-
-### RankTwoTensor
+## RankTwoTensor Operators
 
 The following operators are available for RankTwoTensor, with the values in parentheses indicating
 what the type of the other object to be subject to the operation.
@@ -80,6 +72,7 @@ what the type of the other object to be subject to the operation.
 In addition, many methods are available for additional matrix operations:
 
 - `zero()`
+- `print()`
 - `transpose()`
 - `L2norm()`
 - `row(int)` returns a TypeVector<Real>
@@ -87,7 +80,7 @@ In addition, many methods are available for additional matrix operations:
 - `rotate(RankTwoTensor)`
 - `rotateXyPlane(Real)`
 - `doubleContraction()`
-- `deviatoric() `traceless part
+- `deviatoric()` traceless part
 - `trace()`
 - `dtrace()` derivatives of `trace()` wrt tensor entries
 - `secondInvariant()` second invariant of the symmetric part of `deviatoric()`
@@ -108,7 +101,37 @@ In addition, many methods are available for additional matrix operations:
 
 These methods are thoroughly tested using CPPUNIT.
 
-### RankFourTensor
+## RankThreeTensor Operators
+
+The following operators are available for RankThreeTensor, with the values in parentheses indicating
+what the type of the other object to be subject to the operation.
+
+```text
+=
++= (RankThreeTensor)
+-= (RankThreeTensor)
+*= (Real)
+/= (Real)
++ (RankThreeTensor)
+- (RankThreeTensor)
+* (RankThreeTensor, RankTwoTensor, Real)
+/ (Real)
+```
+
+In addition, many methods are available for additional matrix operations:
+
+- `zero()`
+- `print()`
+- `L2norm()`
+- `rotate(Real)`
+- `rotate(RealTensorValue)`
+- `rotate(RankTwoTensor)`
+- fillFromInputVector(TypeVector<Real>)
+- `fillFromPlaneNormal(TypeVector<Real>)`
+- `mixedProjectRankFour(RankTwoTensor)` creates a Rank-4 tensor from the contraction $D_{ijkl} = T_{mij}b_{mn}T_{nkl}$
+- `doubleContraction(RankTwoTensor)` creates a vector from the contraction $v_i = T_{ijk}b_{jk}$
+
+## RankFourTensor Operators
 
 The following operators are available for RankFourTensor, with the values in parentheses indicating
 what the type of the other object to be subject to the operation.
@@ -121,8 +144,27 @@ what the type of the other object to be subject to the operation.
 /= (Real)
 + (RankFourTensor)
 - (RankFourTensor)
-* (RankTwoTensor, RealTensorValue, Real)
+* (RankFourTensor, RankTwoTensor, RealTensorValue, Real)
 / (Real)
 ```
 
 In addition, many methods are available for additional matrix operations:
+
+- `zero()`
+- `print()`
+- `L2norm()`
+- `invSymm()` returns A$_{ijkl}$ from the input C$_{ijkl}$ such that $C_{ijkl} \cdot A_{ijkl} = 0.5 \left( \delta_{im} \delta_{jn} + \delta_{in} \delta_{jm} \right)$
+- `rotate(RealTensorValue)`
+- `rotate(RankTwoTensor)`
+- `transposeMajor()` witch first pair and second pair of indices
+- `surfaceFillFromInputVector(TypeVector<Real>)` Fills tensor entries by ignoring the last dimension
+- `fillFromInputVector(TypeVector<Real>, FillMethod)` used to build elasticity tensors, see [ComputeElasticityTensor](/ComputeElasticityTensor.md)
+- `fillGeneralIsotropic(TypeVector<Real>)`
+- `fillAntisymmetricIsotropic(Real)`
+- `fillSymmetricIsotropic(Real, Real)`
+- `fillSymmetricIsotropicEandNu(Real, Real)`
+- `innerProductTranspose`
+- `sum3x3()` calculates the sum of C$_{iijj}$ over $i$ and $j$
+- `sum1x3()` calculates the vector from summing over $j$ in C$_{iijj}$
+- `isSymmetric()`
+- `isIsotropic()`
