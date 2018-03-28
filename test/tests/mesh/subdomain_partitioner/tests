@@ -10,7 +10,20 @@
     # do not run this test against development version of PETSc
     # metis and parmetis will generate different partitions
     petsc_version_release = true
+    petsc_version = '>=3.5.0&&<3.8.0'
   [../]
+
+  [./subdomain_partitioner_new_petsc]
+    type = 'Exodiff'
+    input = 'subdomain_partitioner.i'
+    exodiff = 'subdomain_partitioner_out_new_petsc.e'
+    cli_args = 'Outputs/file_base=subdomain_partitioner_out_new_petsc'
+    dof_id_bytes = 4
+    min_parallel = 4
+    max_parallel = 4
+    petsc_version = '>=3.8.0'
+  [../]
+
   [./subdomain_partitioner_linux]
     type = 'Exodiff'
     input = 'subdomain_partitioner.i'
@@ -21,6 +34,6 @@
     min_parallel = 4
     max_parallel = 4
     petsc_version_release = true
-    petsc_version = '>=3.5.0'
+    petsc_version = '>=3.5.0&&<3.8.0'
   [../]
 []
