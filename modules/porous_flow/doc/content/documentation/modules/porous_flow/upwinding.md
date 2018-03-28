@@ -5,7 +5,11 @@ physics modelled by PorousFlow [citep:huyakorn1978, Dalen1979, helmig1998]. For
 multi-phase situations many upwinding schemes can lead to disaster as the
 algorithm attempts to withdraw fluid from a node where there is no fluid.  In
 situations where one phase disappears, or almost disappears, full upwinding is
-advisable, and hence PorousFlow always employs full upwinding.
+advisable, and hence PorousFlow employs full upwinding by default.
+
+The [`PorousFlowBasicAdvection`](PorousFlowBasicAdvection.md) kernel
+implements a very naive non-upwinded version of advection.  Its use is
+not recommended.
 
 Full upwinding has the numerical disadvantage that it is not smooth (in contrast
 to the SUPG upwinding scheme, see  [citet:brooks1982, hughes1986, hughes1986b],
