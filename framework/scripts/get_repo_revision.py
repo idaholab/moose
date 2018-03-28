@@ -204,7 +204,8 @@ class VersionInfo:
             timestamps_to_modify.append(os.path.join(cdup, '.git', 'index'))
 
             for touch_file in timestamps_to_modify:
-                shellCommand("touch -r " + revision_header + " " + touch_file, repo_location)
+                if os.path.isfile(os.path.join(repo_location, touch_file)):
+                    shellCommand("touch -r " + revision_header + " " + touch_file, repo_location)
 
 
 # Entry point
