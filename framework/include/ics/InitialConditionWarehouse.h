@@ -31,7 +31,7 @@ public:
   /**
    * Add object to the warehouse.
    */
-  void addObject(std::shared_ptr<InitialCondition> object, THREAD_ID tid);
+  void addObject(std::shared_ptr<InitialCondition> object, THREAD_ID tid, bool recurse = true);
 
   /**
    * Get a list of dependent UserObjects for this exec type

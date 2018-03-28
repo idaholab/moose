@@ -22,7 +22,7 @@ class DGKernel;
 class InterfaceKernel;
 class TimeKernel;
 class KernelBase;
-class KernelWarehouse;
+class Kernel;
 
 class ComputeResidualThread : public ThreadedElementLoop<ConstElemRange>
 {
@@ -59,7 +59,7 @@ protected:
 
   ///@{
   /// Reference to Kernel storage structures
-  const KernelWarehouse & _kernels;
+  const MooseObjectWarehouse<KernelBase> & _kernels;
   ///@}
 };
 

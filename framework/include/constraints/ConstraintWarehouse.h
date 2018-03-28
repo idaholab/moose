@@ -33,7 +33,7 @@ public:
    * @param object A std::shared_ptr of the object
    * @param tid Not used.
    */
-  void addObject(std::shared_ptr<Constraint> object, THREAD_ID tid = 0);
+  void addObject(std::shared_ptr<Constraint> object, THREAD_ID tid = 0, bool recurse = true);
 
   ///@{
   /**

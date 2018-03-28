@@ -16,6 +16,7 @@
 
 // Forward declarations
 class InputParameters;
+class UserObject;
 
 /**
  * Interface for objects that need to use UserObjects.
