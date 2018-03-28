@@ -80,6 +80,19 @@ TEST_F(StiffenedGasFluidPropertiesTest, testAll)
     ABS_TEST(dh_dT, dh_dT_fd, 2e-6);
   }
 
+  {
+    // internal energy from (p, T)
+    Real de_dp_fd = (_fp->e_from_p_T(p + dp, T) - _fp->e_from_p_T(p - dp, T)) / (2 * dp);
+    Real de_dT_fd = (_fp->e_from_p_T(p, T + dT) - _fp->e_from_p_T(p, T - dT)) / (2 * dT);
+
+    Real e = 0, de_dp = 0, de_dT = 0;
+    _fp->e_from_p_T(p, T, e, de_dp, de_dT);
+
+    ABS_TEST(e, _fp->e_from_p_T(p, T), 1e-15);
+    ABS_TEST(de_dp, de_dp_fd, 1e-10);
+    ABS_TEST(de_dT, de_dT_fd, 2e-6);
+  }
+
   // dp/dh and dp/ds for p(h,s)
   {
     Real h = 400.0;
