@@ -71,7 +71,7 @@ that generates a documentation string that includes the available options in the
 The SetupInterface includes virtual methods that correspond to the primary execute flags
 with MOOSE, these methods are listed in the header as shown here.
 
-!listing framework/include/base/SetupInterface.h
+!listing framework/include/interfaces/SetupInterface.h
          start=~SetupInterface()
          end=subdomainSetup
          include-end=True

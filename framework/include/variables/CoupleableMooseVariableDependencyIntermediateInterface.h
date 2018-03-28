@@ -19,9 +19,9 @@
  * MooseVariableFEs with the MooseVariableDependencyInterface
  */
 class CoupleableMooseVariableDependencyIntermediateInterface
-    : public Coupleable,
-      public ScalarCoupleable,
-      public MooseVariableDependencyInterface
+  : public Coupleable,
+    public ScalarCoupleable,
+    public MooseVariableDependencyInterface
 {
 public:
   CoupleableMooseVariableDependencyIntermediateInterface(const MooseObject * moose_object,

@@ -20,7 +20,7 @@ class AuxiliarySystem;
 class NodalKernel;
 
 class ComputeNodalKernelsThread
-    : public ThreadedNodeLoop<ConstNodeRange, ConstNodeRange::const_iterator>
+  : public ThreadedNodeLoop<ConstNodeRange, ConstNodeRange::const_iterator>
 {
 public:
   ComputeNodalKernelsThread(FEProblemBase & fe_problem,

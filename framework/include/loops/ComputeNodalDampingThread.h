@@ -22,7 +22,7 @@ class NodalDamper;
 class NonlinearSystemBase;
 
 class ComputeNodalDampingThread
-    : public ThreadedNodeLoop<ConstNodeRange, ConstNodeRange::const_iterator>
+  : public ThreadedNodeLoop<ConstNodeRange, ConstNodeRange::const_iterator>
 {
 public:
   ComputeNodalDampingThread(FEProblemBase & feproblem);
