@@ -24,13 +24,6 @@
     ratio_tol = 1e-6
     difference_tol = 1e-6
   [../]
-  [./e_from_p_T_derivatives]
-    type = PetscJacobianTester
-    input = 'e_from_p_T_derivatives.i'
-    cli_args = '--allow-test-objects'
-    ratio_tol = 1e-6
-    difference_tol = 1e-6
-  [../]
   [./s_from_h_p_derivatives]
     type = PetscJacobianTester
     input = 's_from_h_p_derivatives.i'
