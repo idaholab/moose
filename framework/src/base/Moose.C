@@ -289,7 +289,7 @@ addActionTypes(Syntax & syntax)
 void
 registerActions(Syntax & syntax, ActionFactory & action_factory)
 {
-  registerActions(syntax, action_factory, {"MooseApp", action_factory.app().type()});
+  registerActions(syntax, action_factory, {"MooseApp"});
 }
 
 void
