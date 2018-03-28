@@ -238,6 +238,16 @@ protected:
                                                       unsigned int comp = 0);
 
   /**
+   * Returns gradient of a coupled vector variable
+   * @param var_name Name of coupled vector variable
+   * @param comp Component number for vector of coupled vector variables
+   * @return Reference to a VectorVariableGradient containing the gradient of the coupled vector
+   * variable
+   */
+  virtual const VectorVariableGradient & coupledVectorGradient(const std::string & var_name,
+                                                               unsigned int comp = 0);
+
+  /**
    * Returns curl of a coupled variable
    * @param var_name Name of coupled variable
    * @param comp Component number for vector of coupled variables
