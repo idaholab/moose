@@ -74,6 +74,7 @@ Details about numerical issues.
 - [Preconditioning and solvers](solvers.md)
 - [Convergence criteria](convergence.md)
 - [Nonlinear convergence problems](nonlinear_convergence_problems.md)
+- [Numerical diffusion](numerical_diffusion.md)
 
 ## The Dictator
 

@@ -14,7 +14,7 @@ upwind direction can oscillate, leading to nonconvergence, however this is dealt
 with by placing a cutoff on the upwinding in PorousFlow. The remainder of this
 section describes full upwinding for the single-phase unsaturated situation.
 The multi-phase, multi-component scenario, and the advective term in the
-heat-flow equation are analogous.
+heat-flow equation are analogous.  Upwinding is adding numerical diffusion, which can be critical in some simulations: see [numerical diffusion](numerical_diffusion.md) for a discussion.
 
 The weak form of the Darcy flux of for a single element is
 \begin{equation}
