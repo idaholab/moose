@@ -24,7 +24,7 @@ class DatabaseItem(object):
         self.inputs = set()
         self.children = set()
 
-def build_class_database(include_dirs, input_dirs):
+def build_class_database(include_dirs=None, input_dirs=None):
     """
     Create the class database.
 
@@ -36,8 +36,15 @@ def build_class_database(include_dirs, input_dirs):
     """
 
     # Handle environment variables
-    include_dirs = [mooseutils.eval_path(x) for x in include_dirs]
-    input_dirs = [mooseutils.eval_path(x) for x in input_dirs]
+    if include_dirs:
+        include_dirs = [mooseutils.eval_path(x) for x in include_dirs]
+    else:
+        include_dirs = [MooseDocs.ROOT_DIR]
+
+    if input_dirs:
+        input_dirs = [mooseutils.eval_path(x) for x in input_dirs]
+    else:
+        input_dirs = [MooseDocs.ROOT_DIR]
 
     # Locate filenames
     headers = _locate_filenames(include_dirs, '.h')

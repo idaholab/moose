@@ -69,26 +69,6 @@ Extensions:
             #tensor_mechanics: !include modules/tensor_mechanics/doc/remove.yml
             #water_steam_eos: !include modules/water_steam_eos/doc/remove.yml
             #xfem: !include modules/xfem/doc/remove.yml
-        includes:
-            - framework/include
-            - modules/chemical_reactions/include
-            - modules/combined/include
-            - modules/contact/include
-            - modules/fluid_properties/include
-            - modules/functional_expansion_tools/include
-            - modules/heat_conduction/include
-            - modules/level_set/doc/content
-            - modules/misc/include
-            - modules/navier_stokes/include
-            - modules/phase_field/include
-            - modules/porous_flow/include
-            - modules/rdg/include
-            - modules/richards/include
-            - modules/solid_mechanics/include
-            - modules/stochastic_tools/include
-            - modules/tensor_mechanics/include
-            - modules/water_steam_eos/include
-            - modules/xfem/include
     globals:
         type: MooseDocs.extensions.panoptic
         shortcuts: !include framework/doc/globals.yml

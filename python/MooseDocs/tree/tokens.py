@@ -206,22 +206,9 @@ class Shortcut(Token):
                       is also used for the shortcut text, see RenderShortcutLink.
         link[unicode]: (Required) The content to which the shortcut links against, e.g., the value
                        of 'href' for HTML.
-        content[unicode]: (Optional) When present the text provided is used for the link text, this
-                          option may not be used with 'tokens'.
-        tokens[tuple]: (Optional) When present the tokens provided are rendered and used for the
-                       link text, this option may not be used with 'content'.
     """
     PROPERTIES = [Property('key', required=True, ptype=unicode),
-                  Property('link', required=True, ptype=unicode),
-                  Property('content', required=False, ptype=unicode),
-                  Property('token', required=False, ptype=Token)]
-
-    def __init__(self, *args, **kwargs):
-        Token.__init__(self, *args, **kwargs)
-
-        if self.content and self.token:
-            msg = "Both the 'content' and 'token' properties may not be set."
-            raise exceptions.MooseDocsException(msg)
+                  Property('link', required=True, ptype=unicode)]
 
 class ShortcutLink(Token):
     PROPERTIES = [Property('key', ptype=unicode, required=True)]

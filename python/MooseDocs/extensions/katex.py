@@ -77,7 +77,7 @@ class KatexBlockEquationComponent(components.TokenComponent):
             token.tex = token.tex.replace(label.group().encode('ascii'), '') #pylint: disable=attribute-defined-outside-init
             tokens.Shortcut(parent.root, key=label.group('id'),
                             link=u'#{}'.format(eq_id),
-                            content=u'{} {}'.format(prefix, token.number))
+                            string=u'{} {}'.format(prefix, token.number))
 
         return parent
 
