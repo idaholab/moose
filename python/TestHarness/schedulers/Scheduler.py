@@ -100,8 +100,7 @@ class Scheduler(MooseObject):
         # Jobs waiting to finish (includes actively running jobs)
         self.job_queue_count = 0
 
-        # Set containing our Job containers. We use this in the event of a KeyboardInterrupt to
-        # iterate over and kill any subprocesses
+        # Set containing all submitted jobs
         self.tester_datas = set([])
 
         # Allow threads to set an exception state
@@ -123,6 +122,10 @@ class Scheduler(MooseObject):
 
         with self.job_queue_lock:
             self.job_queue_count = 0
+
+    def retrieveJobs(self):
+        """ return all the jobs the scheduler was tasked to perform work for """
+        return self.tester_datas
 
     def schedulerError(self):
         """
