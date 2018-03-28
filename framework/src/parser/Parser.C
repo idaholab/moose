@@ -1281,9 +1281,9 @@ Parser::setScalarParameter(const std::string & full_name,
     {
       try
       {
-        param->set() = MooseUtils::convert<T>(strval);
+        param->set() = MooseUtils::convert<T>(strval, true);
       }
-      catch (std::exception & /*e*/)
+      catch (std::invalid_argument & /*e*/)
       {
         const std::string format_type = (t == typeid(double)) ? "float" : "integer";
         _errmsg += errormsg(_input_filename,
