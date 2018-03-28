@@ -9,7 +9,7 @@
 ###############################################################################
 MOOSE_DIR          ?= $(shell dirname `pwd`)
 FRAMEWORK_DIR      ?= $(MOOSE_DIR)/framework
-ADDITIONAL_CPPFLAGS += -Wall -Wextra -Werror
+ADDITIONAL_CPPFLAGS += -Wall -Wextra
 ###############################################################################
 
 TEST := test_ignore
