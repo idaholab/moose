@@ -112,7 +112,9 @@
     boundary = right
     component = real
     variable = u_real
-    coupled_variable = u_imag
+    field_real = u_real
+    field_imaginary = u_imag
+    sign = -1.0
   [../]
   [./right_imag]
     type = RobinReflectionBC
@@ -120,7 +122,9 @@
     boundary = right
     component = imaginary
     variable = u_imag
-    coupled_variable = u_real
+    field_real = u_real
+    field_imaginary = u_imag
+    sign = -1.0
   [../]
 []
 

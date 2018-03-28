@@ -17,7 +17,9 @@ protected:
   virtual Real computeQpResidual() override;
 
 private:
-  const VariableValue & _coupled_val;
+  const VariableValue & _field_real;
+
+  const VariableValue & _field_imag;
 
   MooseEnum _component;
 
@@ -30,6 +32,8 @@ private:
   Real _coeff_real;
 
   Real _coeff_imag;
+
+  Real _sign;
 };
 
 #endif // ROBINREFLECTIONBC_H
