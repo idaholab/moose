@@ -234,7 +234,19 @@ class EndOfFile(components.TokenComponent):
         return parent
 
 class Link(components.TokenComponent):
-    RE = re.compile(r'\[(?P<inline>.*?)\]'          # link text
+    """
+    Links are defined as: [link text](link address).
+
+    The regex is a bit tricky for this when the line also contains a "shortcut link", as follows:
+
+       [shortcut link] and regular [link text](link address).
+
+    Without the negative lookahead after the first "[" the match would capture the beginning at
+    the shortcut link.
+    """
+
+    RE = re.compile(r'\[(?!\w+?\] )'                # start of link, see note above
+                    r'(?P<inline>.*?)\]'            # link text and end of text
                     r'\((?P<url>.*?)'               # link url
                     r'(?:\s+(?P<settings>.*?))?\)', # settings
                     flags=re.UNICODE)
@@ -243,10 +255,10 @@ class Link(components.TokenComponent):
         return tokens.Link(parent, url=info['url'], **self.attributes)
 
 class ShortcutLink(components.TokenComponent):
-    RE = re.compile(r'\['                         # opening [
-                    r'(?P<key>.+?)'               # key
-                    r'(?:\s+(?P<settings>.*?))?'  # settings
-                    r'\]',                        # closing ]
+    RE = re.compile(r'\['                        # opening [
+                    r'(?P<key>.+?)'              # key
+                    r'(?:\s+(?P<settings>.*?))?' # settings
+                    r'\]',                       # closing ]
                     flags=re.UNICODE)
     def createToken(self, info, parent):
         tokens.ShortcutLink(parent, key=info['key'], **self.attributes)
