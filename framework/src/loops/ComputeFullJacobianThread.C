@@ -63,12 +63,10 @@ ComputeFullJacobianThread::computeJacobian()
       // any)
       const auto & kernels = _warehouse->getActiveVariableBlockObjects(ivar, _subdomain, _tid);
       for (const auto & kernel : kernels)
+        if ((kernel->variable().number() == ivar) && kernel->isImplicit())
         {
-          if ((kernel->variable().number() == ivar) && kernel->isImplicit())
-          {
-            kernel->subProblem().prepareShapes(jvar, _tid);
-            kernel->computeOffDiagJacobian(jvariable);
-          }
+          kernel->subProblem().prepareShapes(jvar, _tid);
+          kernel->computeOffDiagJacobian(jvariable);
         }
     }
   }
