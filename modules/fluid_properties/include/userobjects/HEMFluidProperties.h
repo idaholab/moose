@@ -114,12 +114,12 @@ public:
   virtual Real k(Real v, Real e) const = 0;
 
   /**
-   * Liquid Void Fraction as a function of specific volume and specific
+   * Vapor void fraction as a function of specific volume and specific
    * internal energy
    * @param v Specific volume
    * @param e Specific internal energy
    */
-  virtual Real alpha_liquid(Real v, Real e) const = 0;
+  virtual Real alpha_vapor(Real v, Real e) const = 0;
 
   /**
    * dT/dp along the saturation line
