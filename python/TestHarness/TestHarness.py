@@ -575,7 +575,6 @@ class TestHarness:
             # Perform any write-to-disc operations
             self.writeResults()
 
-    # TODO: put this in utils?
     def writeResults(self):
         """ write test results to disc in some fashion the user has requested """
         all_jobs = self.scheduler.retrieveJobs()
@@ -591,7 +590,7 @@ class TestHarness:
                                                                        'TIMING'    : job.getTiming(),
                                                                        'STATUS'    : tester.getStatus().status,
                                                                        'COLOR'     : tester.getStatus().color,
-                                                                       'CAVEATS'   : ','.join(tester.getCaveats()),
+                                                                       'CAVEATS'   : list(tester.getCaveats()),
                                                                        'COMMAND'   : tester.getCommand(self.options)}
         if results_data:
             with open(self.results_storage, 'w') as data_file:
@@ -602,15 +601,21 @@ class TestHarness:
             if self.options.file:
                 with open(os.path.join(self.output_dir, self.options.file), 'w') as f:
                     for job in all_jobs:
+                        tester = job.getTester()
+
+                        # Do not write information about silent tests
+                        if tester.isSilent():
+                            continue
+
                         formated_results = util.formatResult( job, job.getOutput(), self.options, color=False)
                         f.write(formated_results + '\n')
 
             # Write a separate file for each test with verbose information (--sep-files, --sep-files-ok, --sep-files-fail)
-            if (self.options.sep_files
-                or (self.options.ok_files and self.num_passed)
+            if ((self.options.ok_files and self.num_passed)
                 or (self.options.fail_files and self.num_failed)):
                 for job in all_jobs:
                     tester = job.getTester()
+
                     if self.options.output_dir:
                         output_dir = self.options.output_dir
                     else:
@@ -623,18 +628,13 @@ class TestHarness:
                                                                      'txt']))
                     formated_results = util.formatResult(job, job.getOutput(), self.options, color=False)
 
-                    # All tests
-                    if self.options.sep_files:
-                        with open(output_file, 'w') as f:
-                            f.write(formated_results)
-
                     # Passing tests
-                    elif self.options.ok_files and tester.didPass():
+                    if self.options.ok_files and tester.didPass():
                         with open(output_file, 'w') as f:
                             f.write(formated_results)
 
                     # Failing tests
-                    elif self.options.fail_files and tester.didFail():
+                    if self.options.fail_files and tester.didFail():
                         with open(output_file, 'w') as f:
                             f.write(formated_results)
 
@@ -841,6 +841,11 @@ class TestHarness:
         # When running heavy tests, we'll make sure we use --no-report
         if opts.heavy_tests:
             self.options.report_skipped = False
+
+        # User wants to write all output, so unify the options involved
+        if opts.sep_files:
+            opts.ok_files = True
+            opts.fail_files = True
 
     def postRun(self, specs, timing):
         return
