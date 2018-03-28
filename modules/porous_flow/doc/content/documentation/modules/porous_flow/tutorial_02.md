@@ -1,8 +1,8 @@
-# Porous Flow Tutorial Page 02.  Numerical issues
-
 [Start](porous_flow/tutorial_00.md) |
 [Previous](porous_flow/tutorial_01.md) |
 [Next](porous_flow/tutorial_03.md)
+
+# Porous Flow Tutorial Page 02.  Numerical issues
 
 This tutorial page discusses a number of numerical issues involved in the very simple model presented in [Page 01](porous_flow/tutorial_01.md).  *To run PorousFlow effectively, the user must be keenly aware of all these numerical issues,* so it is useful to discuss them in full in such a simple setting.
 
