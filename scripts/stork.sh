@@ -114,10 +114,10 @@ if [[ "$kind" == "app" ]]; then
     echo ""
     echo "To store your changes on github:"
     echo "    1. log in to your account"
-    echo "    2. Create a new repository named $dstname"
+    echo "    2. Create a new repository named $dstnamelow"
     echo "    3. in this terminal run the following commands:"
     echo "         cd $dir"
-    echo "         git remote add origin https://github.com/YourGitHubUserName/$dstname"
+    echo "         git remote add origin https://github.com/YourGitHubUserName/$dstnamelow"
     echo '         git commit -m "initial commit"'
     echo "         git push -u origin master"
     echo ""
