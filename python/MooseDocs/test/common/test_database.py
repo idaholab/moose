@@ -44,7 +44,7 @@ class TestClassDatabase(unittest.TestCase):
         Test that named objects with h and C files are located.
         """
         info = self.database['MooseObjectWarehouse']
-        self.assertEqual(info.header, 'framework/include/base/MooseObjectWarehouse.h')
+        self.assertEqual(info.header, 'framework/include/warehouses/MooseObjectWarehouse.h')
         self.assertIsNone(info.source)
 
 class TestClassDatabaseEmptyInput(unittest.TestCase):

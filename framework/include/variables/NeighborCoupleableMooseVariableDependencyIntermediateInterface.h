@@ -20,9 +20,9 @@
  * MooseVariables with the MooseVariableDependencyInterface
  */
 class NeighborCoupleableMooseVariableDependencyIntermediateInterface
-    : public NeighborCoupleable,
-      public ScalarCoupleable,
-      public MooseVariableDependencyInterface
+  : public NeighborCoupleable,
+    public ScalarCoupleable,
+    public MooseVariableDependencyInterface
 {
 public:
   NeighborCoupleableMooseVariableDependencyIntermediateInterface(const MooseObject * moose_object,
