@@ -12,6 +12,7 @@
 ###############################################################################
 MOOSE_DIR          ?= $(shell dirname `pwd`)
 FRAMEWORK_DIR      ?= $(MOOSE_DIR)/framework
+ADDITIONAL_CPPFLAGS += -Wall -Wextra
 ###############################################################################
 
 # Extra stuff for GTEST
