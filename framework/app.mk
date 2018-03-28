@@ -55,7 +55,7 @@ srcfiles    := $(shell find $(SRC_DIRS) -name "*.C" $(find_excludes))
 ### Unity Build ###
 ifeq ($(MOOSE_UNITY),true)
 
-unity_src_dir = $(APPLICATION_DIR)/build/unity_src
+unity_src_dir := $(APPLICATION_DIR)/build/unity_src
 
 # Build unity buiild directory
 $(eval $(call unity_dir_rule, $(unity_src_dir)))
@@ -84,7 +84,7 @@ non_unity_srcsubdirs := $(filter $(non_unity_dirs), $(srcsubdirs))
 $(foreach srcsubdir,$(unity_srcsubdirs),$(eval $(call unity_file_rule,$(call unity_unique_name,$(unity_src_dir),$(APPLICATION_DIR),$(srcsubdir)),$(shell find $(srcsubdir) -maxdepth 1 \( -type f -o -type l \) -name "*.C"),$(srcsubdir),$(unity_src_dir))))
 
 # This creates the whole list of Unity source files so we can use it as a dependency
-app_unity_srcfiles = $(foreach srcsubdir,$(unity_srcsubdirs),$(call unity_unique_name,$(unity_src_dir),$(APPLICATION_DIR),$(srcsubdir)))
+app_unity_srcfiles := $(foreach srcsubdir,$(unity_srcsubdirs),$(call unity_unique_name,$(unity_src_dir),$(APPLICATION_DIR),$(srcsubdir)))
 
 # Add to the global list of unity source files
 unity_srcfiles += $(app_unity_srcfiles)
@@ -207,7 +207,7 @@ depend_libs  := $(foreach i, $(DEPEND_MODULES), $(MOOSE_DIR)/modules/$(i)/lib/li
 
 ifeq ($(USE_TEST_LIBS),yes)
   depend_test_libs := $(depend_test_libs) $(app_test_LIB)
-  depend_test_libs_flags := $(foreach i, $(depend_test_libs), -L$(dir $(i)) -l$(shell echo $(notdir $(i)) | perl -pe 's/^lib(.*?)\.la/$$1/'))
+  depend_test_libs_flags :=   $(depend_test_libs)
 endif
 
 
@@ -221,7 +221,7 @@ endif
 # Here we'll filter out MOOSE libs since we'll assume our application already has MOOSE compiled in
 depend_libs := $(filter-out $(moose_LIBS),$(depend_libs))
 # Create -L/-l versions of the depend libs
-depend_libs_flags := $(foreach i, $(depend_libs), -L$(dir $(i)) -l$(shell echo $(notdir $(i)) | perl -pe 's/^lib(.*?)\.la/$$1/'))
+depend_libs_flags :=  $(depend_libs)
 
 # If building shared libs, make the plugins a dependency, otherwise don't.
 ifeq ($(libmesh_shared),yes)

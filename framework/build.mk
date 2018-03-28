@@ -54,7 +54,7 @@ libmesh_shared  := $(shell $(libmesh_LIBTOOL) --config | grep build_libtool_libs
 # to determine the base compiler
 cxx_compiler := $(libmesh_CXX)
 ifneq (,$(findstring mpi,$(cxx_compiler)))
-	cxx_compiler = $(shell $(libmesh_CXX) -show)
+	cxx_compiler := $(shell $(libmesh_CXX) -show)
 endif
 
 all::
@@ -152,7 +152,7 @@ mpif90_command := $(libmesh_F90)
 # If $(libmesh_f90) is an mpiXXX compiler script, use -show
 # to determine the base compiler
 ifneq (,$(findstring mpi,$(mpif90_command)))
-	mpif90_command = $(shell $(libmesh_F90) -show)
+	mpif90_command := $(shell $(libmesh_F90) -show)
 endif
 
 # module_dir_flag is a flag that, if defined, instructs the compiler
@@ -165,7 +165,7 @@ endif
 
 #gfortran
 ifneq (,$(findstring gfortran,$(mpif90_command)))
-	module_dir_flag = -J${@D}
+	module_dir_flag = -J ${@D}
 endif
 
 %.$(obj-suffix) : %.f90
@@ -241,10 +241,10 @@ endif
 CURRENT_APP ?= $(shell basename `pwd`)
 
 ifeq ($(CURRENT_APP),moose)
-  CONTAINING_DIR_FULLPATH = $(shell dirname `pwd`)
-  CONTAINING_DIR = $(shell basename $(CONTAINING_DIR_FULLPATH))
+  CONTAINING_DIR_FULLPATH := $(shell dirname `pwd`)
+  CONTAINING_DIR := $(shell basename $(CONTAINING_DIR_FULLPATH))
   ifeq ($(CONTAINING_DIR), devel)
-    CURRENT_APP = "devel/moose"
+    CURRENT_APP := "devel/moose"
   endif
 endif
 
