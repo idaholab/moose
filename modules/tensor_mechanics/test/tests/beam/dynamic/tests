@@ -1,0 +1,39 @@
+[Tests]
+  [./dyn_euler]
+    type = 'Exodiff'
+    input = 'dyn_euler_small.i'
+    exodiff = 'dyn_euler_small_out.e'
+  [../]
+  [./dyn_euler_rayleigh_hht]
+    type = 'Exodiff'
+    input = 'dyn_euler_small_rayleigh_hht.i'
+    exodiff = 'dyn_euler_small_rayleigh_hht_out.e'
+  [../]
+  [./dyn_euler_added_mass]
+    type = 'Exodiff'
+    input = 'dyn_euler_small_added_mass.i'
+    exodiff = 'dyn_euler_small_added_mass_out.e'
+  [../]
+  [./dyn_euler_added_mass_inertia_damping]
+    type = 'Exodiff'
+    input = 'dyn_euler_small_added_mass_inertia_damping.i'
+    exodiff = 'dyn_euler_small_added_mass_inertia_damping_out.e'
+  [../]
+  [./dyn_euler_rayleigh_hht_action]
+    type = 'Exodiff'
+    input = 'dyn_euler_small_rayleigh_hht_action.i'
+    exodiff = 'dyn_euler_small_rayleigh_hht_out.e'
+    prereq = 'dyn_euler_rayleigh_hht'
+  [../]
+  [./dyn_euler_added_mass_inertia_damping_action]
+    type = 'Exodiff'
+    input = 'dyn_euler_small_added_mass_inertia_damping_action.i'
+    exodiff = 'dyn_euler_small_added_mass_inertia_damping_out.e'
+    prereq = 'dyn_euler_added_mass_inertia_damping'
+  [../]
+  [./dyn_euler_added_mass2]
+    type = 'CSVDiff'
+    input = 'dyn_euler_small_added_mass2.i'
+    csvdiff = 'dyn_euler_small_added_mass2_out.csv'
+  [../]
+[]

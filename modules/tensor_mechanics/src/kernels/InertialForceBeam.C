@@ -1,0 +1,466 @@
+/****************************************************************/
+/* MOOSE - Multiphysics Object Oriented Simulation Environment  */
+/*                                                              */
+/*          All contents are licensed under LGPL V2.1           */
+/*             See LICENSE for full restrictions                */
+/****************************************************************/
+#include "InertialForceBeam.h"
+#include "SubProblem.h"
+#include "libmesh/utility.h"
+#include "MooseVariable.h"
+#include "Assembly.h"
+#include "NonlinearSystem.h"
+#include "AuxiliarySystem.h"
+#include "MooseMesh.h"
+
+registerMooseObject("TensorMechanicsApp", InertialForceBeam);
+
+template <>
+InputParameters
+validParams<InertialForceBeam>()
+{
+  InputParameters params = validParams<Kernel>();
+  params.addClassDescription("Calculates the residual for the interial force/moment and the "
+                             "contribution of mass dependent Rayleigh damping and HHT time "
+                             "integration scheme.");
+  params.set<bool>("use_displaced_mesh") = true;
+  params.addRequiredCoupledVar(
+      "rotations", "The rotations appropriate for the simulation geometry and coordinate system");
+  params.addRequiredCoupledVar(
+      "displacements",
+      "The displacements appropriate for the simulation geometry and coordinate system");
+  params.addRequiredCoupledVar("velocities", "Translational velocity variables");
+  params.addRequiredCoupledVar("accelerations", "Translational acceleration variables");
+  params.addRequiredCoupledVar("rot_velocities", "Rotational velocity variables");
+  params.addRequiredCoupledVar("rot_accelerations", "Rotational acceleration variables");
+  params.addRequiredParam<Real>("beta", "beta parameter for Newmark Time integration");
+  params.addRequiredParam<Real>("gamma", "gamma parameter for Newmark Time integration");
+  params.addParam<MaterialPropertyName>("eta",
+                                        0.0,
+                                        "Name of material property or a constant real "
+                                        "number defining the eta parameter for the "
+                                        "Rayleigh damping.");
+  params.addParam<Real>("alpha",
+                        0,
+                        "alpha parameter for mass dependent numerical damping induced "
+                        "by HHT time integration scheme");
+  params.addParam<MaterialPropertyName>(
+      "density",
+      "density",
+      "Name of Material Property  or a constant real number defining the density of the beam.");
+  params.addCoupledVar("area", "Variable containing cross-section area");
+  params.addCoupledVar("Ay", "Variable containing first moment of area about y axis");
+  params.addCoupledVar("Az", "Variable containing first moment of area about z axis");
+  params.addCoupledVar("Iy", "Variable containing second moment of area about y axis");
+  params.addCoupledVar("Iz", "Variable containing second moment of area about z axis");
+  params.addRequiredParam<unsigned int>(
+      "component",
+      "An integer corresponding to the direction "
+      "the variable this kernel acts in. (0 for disp_x, "
+      "1 for disp_y, 2 for disp_z, 3 for rot_x, 4 for rot_y and 5 for rot_z)");
+  return params;
+}
+
+InertialForceBeam::InertialForceBeam(const InputParameters & parameters)
+  : Kernel(parameters),
+    _density(getMaterialProperty<Real>("density")),
+    _nrot(coupledComponents("rotations")),
+    _ndisp(coupledComponents("displacements")),
+    _rot_num(3),
+    _disp_num(3),
+    _vel_num(3),
+    _accel_num(3),
+    _rot_vel_num(3),
+    _rot_accel_num(3),
+    _area(coupledValue("area")),
+    _Ay(coupledValue("Ay")),
+    _Az(coupledValue("Az")),
+    _Iy(coupledValue("Iy")),
+    _Iz(coupledValue("Iz")),
+    _beta(getParam<Real>("beta")),
+    _gamma(getParam<Real>("gamma")),
+    _eta(getMaterialProperty<Real>("eta")),
+    _alpha(getParam<Real>("alpha")),
+    _original_local_config(getMaterialPropertyByName<RankTwoTensor>("original_local_config")),
+    _original_length(getMaterialPropertyByName<Real>("original_length")),
+    _component(getParam<unsigned int>("component"))
+{
+  // Checking for consistency between mesh dimension and length of the provided displacements vector
+  if (_ndisp != _nrot)
+    mooseError("The number of variables supplied in 'displacements' and 'rotations' must match.");
+
+  // fetch coupled variables and gradients (as stateful properties if necessary)
+  for (unsigned int i = 0; i < _ndisp; ++i)
+  {
+    MooseVariable * disp_variable = getVar("displacements", i);
+    _disp_num[i] = disp_variable->number();
+
+    MooseVariable * rot_variable = getVar("rotations", i);
+    _rot_num[i] = rot_variable->number();
+
+    MooseVariable * vel_variable = getVar("velocities", i);
+    _vel_num[i] = vel_variable->number();
+
+    MooseVariable * accel_variable = getVar("accelerations", i);
+    _accel_num[i] = accel_variable->number();
+
+    MooseVariable * rot_vel_variable = getVar("rot_velocities", i);
+    _rot_vel_num[i] = rot_vel_variable->number();
+
+    MooseVariable * rot_accel_variable = getVar("rot_accelerations", i);
+    _rot_accel_num[i] = rot_accel_variable->number();
+  }
+}
+
+void
+InertialForceBeam::computeResidual()
+{
+  DenseVector<Number> & re = _assembly.residualBlock(_var.number());
+  mooseAssert(re.size() == 2, "Beam element has and only has two nodes.");
+  _local_re.resize(re.size());
+  _local_re.zero();
+
+  if (_dt != 0.0)
+  {
+    // fetch the two end nodes for _current_elem
+    std::vector<Node *> node;
+    for (unsigned int i = 0; i < 2; ++i)
+      node.push_back(_current_elem->get_node(i));
+
+    // Fetch the solution for the two end nodes at time t
+    NonlinearSystemBase & nonlinear_sys = _fe_problem.getNonlinearSystemBase();
+    const NumericVector<Number> & sol = *nonlinear_sys.currentSolution();
+    const NumericVector<Number> & sol_old = nonlinear_sys.solutionOld();
+
+    AuxiliarySystem & aux = _fe_problem.getAuxiliarySystem();
+    const NumericVector<Number> & aux_sol_old = aux.solutionOld();
+
+    RealVectorValue vel_old_0(3, 0.0), vel_old_1(3, 0.0);
+    RealVectorValue rot_vel_old_0(3, 0.0), rot_vel_old_1(3, 0.0);
+    RealVectorValue vel0(3, 0.0), vel1(3, 0.0);
+    RealVectorValue accel0(3, 0.0), accel1(3, 0.0);
+    RealVectorValue rot_vel0(3, 0.0), rot_vel1(3, 0.0);
+    RealVectorValue rot_accel0(3, 0.0), rot_accel1(3, 0.0);
+
+    for (unsigned int i = 0; i < _ndisp; ++i)
+    {
+      // obtain delta displacement
+      Real disp0 = sol(node[0]->dof_number(nonlinear_sys.number(), _disp_num[i], 0)) -
+                   sol_old(node[0]->dof_number(nonlinear_sys.number(), _disp_num[i], 0));
+      Real disp1 = sol(node[1]->dof_number(nonlinear_sys.number(), _disp_num[i], 0)) -
+                   sol_old(node[1]->dof_number(nonlinear_sys.number(), _disp_num[i], 0));
+      Real rot0 = sol(node[0]->dof_number(nonlinear_sys.number(), _rot_num[i], 0)) -
+                  sol_old(node[0]->dof_number(nonlinear_sys.number(), _rot_num[i], 0));
+      Real rot1 = sol(node[1]->dof_number(nonlinear_sys.number(), _rot_num[i], 0)) -
+                  sol_old(node[1]->dof_number(nonlinear_sys.number(), _rot_num[i], 0));
+
+      // obtain new translational and rotational velocities and accelerations using newmark-beta
+      // time integration
+      vel_old_0(i) = aux_sol_old(node[0]->dof_number(aux.number(), _vel_num[i], 0));
+      vel_old_1(i) = aux_sol_old(node[1]->dof_number(aux.number(), _vel_num[i], 0));
+      Real accel_old_0 = aux_sol_old(node[0]->dof_number(aux.number(), _accel_num[i], 0));
+      Real accel_old_1 = aux_sol_old(node[1]->dof_number(aux.number(), _accel_num[i], 0));
+
+      rot_vel_old_0(i) = aux_sol_old(node[0]->dof_number(aux.number(), _rot_vel_num[i], 0));
+      rot_vel_old_1(i) = aux_sol_old(node[1]->dof_number(aux.number(), _rot_vel_num[i], 0));
+      Real rot_accel_old_0 = aux_sol_old(node[0]->dof_number(aux.number(), _rot_accel_num[i], 0));
+      Real rot_accel_old_1 = aux_sol_old(node[1]->dof_number(aux.number(), _rot_accel_num[i], 0));
+
+      accel0(i) =
+          1. / _beta * (disp0 / (_dt * _dt) - vel_old_0(i) / _dt - accel_old_0 * (0.5 - _beta));
+      accel1(i) =
+          1. / _beta * (disp1 / (_dt * _dt) - vel_old_1(i) / _dt - accel_old_1 * (0.5 - _beta));
+      rot_accel0(i) =
+          1. / _beta *
+          (rot0 / (_dt * _dt) - rot_vel_old_0(i) / _dt - rot_accel_old_0 * (0.5 - _beta));
+      rot_accel1(i) =
+          1. / _beta *
+          (rot1 / (_dt * _dt) - rot_vel_old_1(i) / _dt - rot_accel_old_1 * (0.5 - _beta));
+
+      vel0(i) = vel_old_0(i) + (_dt * (1 - _gamma)) * accel_old_0 + _gamma * _dt * accel0(i);
+      vel1(i) = vel_old_1(i) + (_dt * (1 - _gamma)) * accel_old_1 + _gamma * _dt * accel1(i);
+      rot_vel0(i) =
+          rot_vel_old_0(i) + (_dt * (1 - _gamma)) * rot_accel_old_0 + _gamma * _dt * rot_accel0(i);
+      rot_vel1(i) =
+          rot_vel_old_1(i) + (_dt * (1 - _gamma)) * rot_accel_old_1 + _gamma * _dt * rot_accel1(i);
+    }
+
+    // transform translational and rotational velocities and accelerations to the initial local
+    // configuration of the beam
+    RealVectorValue local_vel_old_0 = _original_local_config[0] * vel_old_0;
+    RealVectorValue local_vel_old_1 = _original_local_config[0] * vel_old_1;
+    RealVectorValue local_vel_0 = _original_local_config[0] * vel0;
+    RealVectorValue local_vel_1 = _original_local_config[0] * vel1;
+    RealVectorValue local_accel_0 = _original_local_config[0] * accel0;
+    RealVectorValue local_accel_1 = _original_local_config[0] * accel1;
+
+    RealVectorValue local_rot_vel_old_0 = _original_local_config[0] * rot_vel_old_0;
+    RealVectorValue local_rot_vel_old_1 = _original_local_config[0] * rot_vel_old_1;
+    RealVectorValue local_rot_vel_0 = _original_local_config[0] * rot_vel0;
+    RealVectorValue local_rot_vel_1 = _original_local_config[0] * rot_vel1;
+    RealVectorValue local_rot_accel_0 = _original_local_config[0] * rot_accel0;
+    RealVectorValue local_rot_accel_1 = _original_local_config[0] * rot_accel1;
+
+    // local residual
+    RealVectorValue a(3, 0.0);
+    std::vector<RealVectorValue> local_force(2, a);
+    std::vector<RealVectorValue> local_moment(2, a);
+
+    for (unsigned int i = 0; i < _ndisp; ++i)
+    {
+      if (_component < 3)
+      {
+        local_force[0](i) = _density[0] * _area[0] * _original_length[0] / 3.0 *
+                            (local_accel_0(i) + local_accel_1(i) / 2.0 +
+                             _eta[0] * (1.0 + _alpha) * (local_vel_0(i) + local_vel_1(i) / 2.0) -
+                             _alpha * _eta[0] * (local_vel_old_0(i) + local_vel_old_1(i) / 2.0));
+        local_force[1](i) = _density[0] * _area[0] * _original_length[0] / 3.0 *
+                            (local_accel_1(i) + local_accel_0(i) / 2.0 +
+                             _eta[0] * (1.0 + _alpha) * (local_vel_1(i) + local_vel_0(i) / 2.0) -
+                             _alpha * _eta[0] * (local_vel_old_1(i) + local_vel_old_0(i) / 2.0));
+      }
+
+      if (_component > 2)
+      {
+        Real I = _Iy[0] + _Iz[0];
+        if (i == 1)
+          I = _Iz[0];
+        else if (i == 2)
+          I = _Iy[0];
+
+        local_moment[0](i) =
+            _density[0] * I * _original_length[0] / 3.0 *
+            (local_rot_accel_0(i) + local_rot_accel_1(i) / 2.0 +
+             _eta[0] * (1.0 + _alpha) * (local_rot_vel_0(i) + local_rot_vel_1(i) / 2.0) -
+             _alpha * _eta[0] * (local_rot_vel_old_0(i) + local_rot_vel_old_1(i) / 2.0));
+        local_moment[1](i) =
+            _density[0] * I * _original_length[0] / 3.0 *
+            (local_rot_accel_1(i) + local_rot_accel_0(i) / 2.0 +
+             _eta[0] * (1.0 + _alpha) * (local_rot_vel_1(i) + local_rot_vel_0(i) / 2.0) -
+             _alpha * _eta[0] * (local_rot_vel_old_1(i) + local_rot_vel_old_0(i) / 2.0));
+      }
+    }
+
+    // If Ay or Az are non-zero, contribution of rotational accelerations to translational forces
+    // and vice versa have to be added
+    if (_component < 3)
+    {
+      local_force[0](0) +=
+          _density[0] * _original_length[0] / 3.0 *
+          (_Az[0] * (local_rot_accel_0(1) + local_rot_accel_1(1) / 2.0 +
+                     _eta[0] * (1.0 + _alpha) * (local_rot_vel_0(1) + local_rot_vel_1(1) / 2.0) -
+                     _alpha * _eta[0] * (local_rot_vel_old_0(1) + local_rot_vel_old_1(1) / 2.0)) -
+           _Ay[0] * (local_rot_accel_0(2) + local_rot_accel_1(2) / 2.0 +
+                     _eta[0] * (1.0 + _alpha) * (local_rot_vel_0(2) + local_rot_vel_1(2) / 2.0) -
+                     _alpha * _eta[0] * (local_rot_vel_old_0(2) + local_rot_vel_old_1(2) / 2.0)));
+      local_force[1](0) +=
+          _density[0] * _original_length[0] / 3.0 *
+          (_Az[0] * (local_rot_accel_1(1) + local_rot_accel_0(1) / 2.0 +
+                     _eta[0] * (1.0 + _alpha) * (local_rot_vel_1(1) + local_rot_vel_0(1) / 2.0) -
+                     _alpha * _eta[0] * (local_rot_vel_old_1(1) + local_rot_vel_old_0(1) / 2.0)) -
+           _Ay[0] * (local_rot_accel_1(2) + local_rot_accel_0(2) / 2.0 +
+                     _eta[0] * (1.0 + _alpha) * (local_rot_vel_1(2) + local_rot_vel_0(2) / 2.0) -
+                     _alpha * _eta[0] * (local_rot_vel_old_1(2) + local_rot_vel_old_0(2) / 2.0)));
+
+      local_force[0](1) +=
+          -_density[0] * _original_length[0] / 3.0 * _Az[0] *
+          (local_rot_accel_0(0) + local_rot_accel_1(0) / 2.0 +
+           _eta[0] * (1.0 + _alpha) * (local_rot_vel_0(0) + local_rot_vel_1(0) / 2.0) -
+           _alpha * _eta[0] * (local_rot_vel_old_0(0) + local_rot_vel_old_1(0) / 2.0));
+      local_force[1](1) +=
+          -_density[0] * _original_length[0] / 3.0 * _Az[0] *
+          (local_rot_accel_1(0) + local_rot_accel_0(0) / 2.0 +
+           _eta[0] * (1.0 + _alpha) * (local_rot_vel_1(0) + local_rot_vel_0(0) / 2.0) -
+           _alpha * _eta[0] * (local_rot_vel_old_1(0) + local_rot_vel_old_0(0) / 2.0));
+
+      local_force[0](2) +=
+          _density[0] * _original_length[0] / 3.0 * _Ay[0] *
+          (local_rot_accel_0(0) + local_rot_accel_1(0) / 2.0 +
+           _eta[0] * (1.0 + _alpha) * (local_rot_vel_0(0) + local_rot_vel_1(0) / 2.0) -
+           _alpha * _eta[0] * (local_rot_vel_old_0(0) + local_rot_vel_old_1(0) / 2.0));
+      local_force[1](2) +=
+          _density[0] * _original_length[0] / 3.0 * _Ay[0] *
+          (local_rot_accel_1(0) + local_rot_accel_0(0) / 2.0 +
+           _eta[0] * (1.0 + _alpha) * (local_rot_vel_1(0) + local_rot_vel_0(0) / 2.0) -
+           _alpha * _eta[0] * (local_rot_vel_old_1(0) + local_rot_vel_old_0(0) / 2.0));
+    }
+    else
+    {
+      local_moment[0](0) += _density[0] * _original_length[0] / 3.0 *
+                            (-_Az[0] * (local_accel_0(1) + local_accel_1(1) / 2.0) +
+                             _Ay[0] * (local_accel_0(1) + local_accel_1(1) / 2.0));
+      local_moment[1](0) += _density[0] * _original_length[0] / 3.0 *
+                            (-_Az[0] * (local_accel_1(1) + local_accel_0(1) / 2.0) +
+                             _Ay[0] * (local_accel_1(1) + local_accel_0(1) / 2.0));
+
+      local_moment[0](1) += _density[0] * _original_length[0] / 3.0 * _Az[0] *
+                            (local_accel_0(0) + local_accel_1(0) / 2.0);
+      local_moment[1](1) += _density[0] * _original_length[0] / 3.0 * _Az[0] *
+                            (local_accel_1(0) + local_accel_0(0) / 2.0);
+
+      local_moment[0](2) += -_density[0] * _original_length[0] / 3.0 * _Ay[0] *
+                            (local_accel_0(0) + local_accel_1(0) / 2.0);
+      local_moment[1](2) += -_density[0] * _original_length[0] / 3.0 * _Ay[0] *
+                            (local_accel_1(0) + local_accel_0(0) / 2.0);
+    }
+
+    // Global force and moments
+    if (_component < 3)
+    {
+      RealVectorValue global_force_0 = _original_local_config[0] * local_force[0];
+      RealVectorValue global_force_1 = _original_local_config[0] * local_force[1];
+      _local_re(0) = global_force_0(_component);
+      _local_re(1) = global_force_1(_component);
+    }
+    else
+    {
+      RealVectorValue global_moment_0 = _original_local_config[0] * local_moment[0];
+      RealVectorValue global_moment_1 = _original_local_config[0] * local_moment[1];
+      _local_re(0) = global_moment_0(_component - 3);
+      _local_re(1) = global_moment_1(_component - 3);
+    }
+  }
+
+  re += _local_re;
+
+  if (_has_save_in)
+  {
+    Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
+    for (unsigned int i = 0; i < _save_in.size(); ++i)
+      _save_in[i]->sys().solution().add_vector(_local_re, _save_in[i]->dofIndices());
+  }
+}
+
+void
+InertialForceBeam::computeJacobian()
+{
+  DenseMatrix<Number> & ke = _assembly.jacobianBlock(_var.number(), _var.number());
+  _local_ke.resize(ke.m(), ke.n());
+  _local_ke.zero();
+
+  for (unsigned int i = 0; i < _test.size(); ++i)
+    for (unsigned int j = 0; j < _phi.size(); ++j)
+      if (_component < 3)
+        _local_ke(i, j) =
+            (i == j ? 1.0 / 3.0 : 1.0 / 6.0) * _density[0] * _area[0] * _original_length[0] *
+            (1.0 / (_beta * _dt * _dt) + _eta[0] * (1 + _alpha) * _gamma / _beta / _dt);
+      else if (_component > 2)
+      {
+        RankTwoTensor I;
+        I.zero();
+        I(0, 0) = _Iy[0] + _Iz[0];
+        I(1, 1) = _Iz[0];
+        I(2, 2) = _Iy[0];
+
+        // conversion from local config to global coordinate system
+        RankTwoTensor Ig = _original_local_config[0].transpose() * I * _original_local_config[0];
+
+        _local_ke(i, j) =
+            (i == j ? 1.0 / 3.0 : 1.0 / 6.0) * _density[0] * Ig(_component - 3, _component - 3) *
+            _original_length[0] *
+            (1.0 / (_beta * _dt * _dt) + _eta[0] * (1 + _alpha) * _gamma / _beta / _dt);
+      }
+
+  ke += _local_ke;
+
+  if (_has_diag_save_in)
+  {
+    unsigned int rows = ke.m();
+    DenseVector<Number> diag(rows);
+    for (unsigned int i = 0; i < rows; ++i)
+      diag(i) = _local_ke(i, i);
+
+    Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
+    for (unsigned int i = 0; i < _diag_save_in.size(); ++i)
+      _diag_save_in[i]->sys().solution().add_vector(diag, _diag_save_in[i]->dofIndices());
+  }
+}
+
+void
+InertialForceBeam::computeOffDiagJacobian(unsigned int jvar)
+{
+  if (jvar == _var.number())
+    computeJacobian();
+  else
+  {
+    unsigned int coupled_component = 0;
+    bool disp_coupled = false;
+    bool rot_coupled = false;
+
+    for (unsigned int i = 0; i < _ndisp; ++i)
+      if (jvar == _disp_num[i] && _component > 2)
+      {
+        coupled_component = i;
+        disp_coupled = true;
+        break;
+      }
+
+    for (unsigned int i = 0; i < _nrot; ++i)
+      if (jvar == _rot_num[i])
+      {
+        coupled_component = i + 3;
+        rot_coupled = true;
+        break;
+      }
+    DenseMatrix<Number> & ke = _assembly.jacobianBlock(_var.number(), jvar);
+
+    if (disp_coupled || rot_coupled)
+    {
+      for (unsigned int i = 0; i < _test.size(); ++i)
+        for (unsigned int j = 0; j < _phi.size(); ++j)
+          if (_component < 3 && coupled_component > 2)
+          {
+            RankTwoTensor A;
+            A.zero();
+            A(0, 1) = _Az[0];
+            A(0, 2) = -_Ay[0];
+            A(1, 0) = -_Az[0];
+            A(2, 0) = _Ay[0];
+
+            // conversion from local config to global coordinate system
+            RankTwoTensor Ag =
+                _original_local_config[0].transpose() * A * _original_local_config[0];
+
+            ke(i, j) += (i == j ? 1.0 / 3.0 : 1.0 / 6.0) * _density[0] *
+                        Ag(_component, coupled_component - 3) * _original_length[0] *
+                        (1.0 / (_beta * _dt * _dt) + _eta[0] * (1 + _alpha) * _gamma / _beta / _dt);
+          }
+          else if (_component > 2 && coupled_component < 3)
+          {
+            RankTwoTensor A;
+            A.zero();
+            A(0, 1) = -_Az[0];
+            A(0, 2) = _Ay[0];
+            A(1, 0) = _Az[0];
+            A(2, 0) = -_Ay[0];
+
+            // conversion from local config to global coordinate system
+            RankTwoTensor Ag =
+                _original_local_config[0].transpose() * A * _original_local_config[0];
+
+            ke(i, j) += (i == j ? 1.0 / 3.0 : 1.0 / 6.0) * _density[0] *
+                        Ag(_component - 3, coupled_component) * _original_length[0] *
+                        (1.0 / (_beta * _dt * _dt) + _eta[0] * (1 + _alpha) * _gamma / _beta / _dt);
+          }
+          else if (_component > 2 && coupled_component > 2)
+          {
+            RankTwoTensor I;
+            I.zero();
+            I(0, 0) = _Iy[0] + _Iz[0];
+            I(1, 1) = _Iz[0];
+            I(2, 2) = _Iy[0];
+
+            // conversion from local config to global coordinate system
+            RankTwoTensor Ig =
+                _original_local_config[0].transpose() * I * _original_local_config[0];
+
+            ke(i, j) += (i == j ? 1.0 / 3.0 : 1.0 / 6.0) * _density[0] *
+                        Ig(_component - 3, coupled_component - 3) * _original_length[0] *
+                        (1.0 / (_beta * _dt * _dt) + _eta[0] * (1 + _alpha) * _gamma / _beta / _dt);
+          }
+    }
+    else if (false) // Need some code here for coupling with temperature
+    {
+    }
+  }
+}
