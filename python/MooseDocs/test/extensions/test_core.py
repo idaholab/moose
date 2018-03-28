@@ -1175,6 +1175,17 @@ class TestRenderQuoteLatex(testing.MooseDocsTestCase):
         tex = node.write()
         self.assertString(tex, u'\n\\begin{quote}\n\n\\par\nfoo bar\n\\end{quote}\n')
 
+"""Shortcut tokens do not render, there use is tested in the TestRenderShortcutLink tests"""
+class TestRenderShortcutHTML(testing.MooseDocsTestCase):
+    pass
+
+class TestRenderShortcutMaterialize(testing.MooseDocsTestCase):
+    pass
+
+class TestRenderShortcutLatex(testing.MooseDocsTestCase):
+    pass
+
+
 class TestRenderShortcutLinkHTML(testing.MooseDocsTestCase):
     """Test renderering of RenderShortcutLink with HTMLRenderer"""
 
@@ -1189,7 +1200,8 @@ class TestRenderShortcutLinkHTML(testing.MooseDocsTestCase):
         self.assertIsInstance(node(0), html.String)
 
         self.assertEqual(node.name, 'a')
-        self.assertString(node(0).content, 'key')
+        self.assertIsInstance(node(0), html.String)
+        self.assertEqual(node(0).content, 'key')
         self.assertEqual(node['href'], 'content')
 
     @mock.patch('logging.Logger.error')
@@ -1228,6 +1240,7 @@ class TestRenderShortcutLinkMaterialize(TestRenderShortcutLinkHTML):
         self.assertString(link.write(), '<a class="tooltipped" href="foo" data-tooltip="foo" ' \
                                         'data-position="top" id="bar">test</a>')
 
+@unittest.skip('LaTeX WIP')
 class TestRenderShortcutLinkLatex(testing.MooseDocsTestCase):
     """Test renderering of RenderShortcutLink with LatexRenderer"""
 
