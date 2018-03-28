@@ -257,6 +257,20 @@ StiffenedGasFluidProperties::h_from_p_T(Real p, Real T, Real & h, Real & dh_dp, 
 }
 
 Real
+StiffenedGasFluidProperties::e_from_p_T(Real p, Real T) const
+{
+  return (p + _gamma * _p_inf) / (p + _p_inf) * _cv * T + _q;
+}
+
+void
+StiffenedGasFluidProperties::e_from_p_T(Real p, Real T, Real & e, Real & de_dp, Real & de_dT) const
+{
+  e = e_from_p_T(p, T);
+  de_dp = (1. - _gamma) * _p_inf / (p + _p_inf) / (p + _p_inf) * _cv * T;
+  de_dT = (p + _gamma * _p_inf) / (p + _p_inf) * _cv;
+}
+
+Real
 StiffenedGasFluidProperties::p_from_h_s(Real h, Real s) const
 {
   return std::pow((h - _q) / (_gamma * _cv), _gamma / (_gamma - 1.0)) *

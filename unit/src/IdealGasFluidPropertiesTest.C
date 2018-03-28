@@ -119,6 +119,24 @@ TEST_F(IdealGasFluidPropertiesTest, testAll)
   }
 
   {
+    const Real p = 1e6;
+    const Real T = 500;
+    const Real dp = 1e1;
+    const Real dT = 1e-4;
+
+    // internal energy from (p, T)
+    Real de_dp_fd = (_fp->e_from_p_T(p + dp, T) - _fp->e_from_p_T(p - dp, T)) / (2 * dp);
+    Real de_dT_fd = (_fp->e_from_p_T(p, T + dT) - _fp->e_from_p_T(p, T - dT)) / (2 * dT);
+
+    Real e = 0, de_dp = 0, de_dT = 0;
+    _fp->e_from_p_T(p, T, e, de_dp, de_dT);
+
+    ABS_TEST(e, _fp->e_from_p_T(p, T), 1e-16);
+    ABS_TEST(de_dp, de_dp_fd, 1e-12);
+    ABS_TEST(de_dT, de_dT_fd, 6e-7);
+  }
+
+  {
     // entropy from enthalpy and pressure
     const Real rel_diff = 1e-6;
     const Real h = 1e5;

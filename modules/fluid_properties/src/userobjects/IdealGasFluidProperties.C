@@ -278,6 +278,20 @@ IdealGasFluidProperties::h_from_p_T(Real p, Real T, Real & h, Real & dh_dp, Real
 }
 
 Real
+IdealGasFluidProperties::e_from_p_T(Real /*p*/, Real T) const
+{
+  return _cv * T;
+}
+
+void
+IdealGasFluidProperties::e_from_p_T(Real p, Real T, Real & e, Real & de_dp, Real & de_dT) const
+{
+  e = e_from_p_T(p, T);
+  de_dp = 0.;
+  de_dT = _cv;
+}
+
+Real
 IdealGasFluidProperties::p_from_h_s(Real h, Real s) const
 {
   return std::pow(h / (_gamma * _cv), _gamma / (_gamma - 1.0)) *
