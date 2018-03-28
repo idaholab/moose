@@ -47,6 +47,10 @@ class SyntaxToken(tokens.Token):
                   tokens.Property('subsystems', default=True, ptype=bool),
                   tokens.Property('groups', default=[], ptype=list)]
 
+class DatabaseListToken(tokens.Token):
+    PROPERTIES = [tokens.Property('heading', ptype=tokens.Token),
+                  tokens.Property('level', default=2, ptype=int)]
+
 class AppSyntaxExtension(command.CommandExtension):
 
     @staticmethod
@@ -140,7 +144,7 @@ class AppSyntaxExtension(command.CommandExtension):
         self.addCommand(SyntaxChildrenCommand())
 
         renderer.add(InputParametersToken, RenderInputParametersToken())
-
+        renderer.add(DatabaseListToken, RenderDatabaseListToken())
         renderer.add(SyntaxToken, RenderSyntaxToken())
         renderer.add(AppSyntaxDisabledToken, RenderAppSyntaxDisabledToken())
 
@@ -189,7 +193,7 @@ class SyntaxCommandHeadingBase(SyntaxCommandBase):
     def createHeading(self, token):
 
         heading = self.settings['heading']
-        if heading:
+        if heading is not None:
             h = tokens.Heading(None, level=int(self.settings['heading-level']))
             self.translator.reader.parse(h, heading, group=MooseDocs.INLINE)
             token.heading = h
@@ -269,19 +273,23 @@ class SyntaxChildrenCommand(SyntaxCommandHeadingBase):
     def createTokenFromSyntax(self, info, parent, obj):
 
         item = self.extension.database.get(obj.name, None)
-        if item and hasattr(item, self.SUBCOMMAND):
-            attr = getattr(item, self.SUBCOMMAND)
-            self.createHeading(parent)
-
-            ul = tokens.UnorderedList(parent)
+        attr = getattr(item, self.SUBCOMMAND, None)
+        if item and attr:
+            db = DatabaseListToken(parent)
+            self.createHeading(db)
+            ul = tokens.UnorderedList(db, class_='moose-list-{}'.format(self.SUBCOMMAND))
             for filename in attr:
                 filename = unicode(filename)
                 li = tokens.ListItem(ul)
                 lang = common.get_language(filename)
-                code = tokens.Code(None, language=lang,
+                code = tokens.Code(None,
+                                   language=lang,
                                    code=common.read(os.path.join(MooseDocs.ROOT_DIR, filename)))
-                floats.ModalLink(li, url=filename, bottom=True, content=code,
-                                 string=u'({})'.format(filename),
+                floats.ModalLink(li,
+                                 url=filename,
+                                 bottom=True,
+                                 content=code,
+                                 string=filename,
                                  title=tokens.String(None, content=filename))
         return parent
 
@@ -458,6 +466,13 @@ class RenderAppSyntaxDisabledToken(components.RenderComponent):
     def createLatex(self, token, parent):
         pass
 
+class RenderDatabaseListToken(components.RenderComponent):
+    def createMaterialize(self, token, parent):
+
+        if token.heading is not None:
+            self.translator.renderer.process(parent, token.heading)
+        return parent
+
 class RenderInputParametersToken(components.RenderComponent):
 
     def createHTML(self, token, parent):
@@ -503,7 +518,7 @@ class RenderInputParametersToken(components.RenderComponent):
                 groups[group][name] = param
 
         # Add the heading
-        if token.heading:
+        if token.heading is not None:
             self.translator.renderer.process(parent, token.heading)
 
         # Build the lists

@@ -335,6 +335,12 @@ span.moose-sqa-error{
     color:red;
 }
 
+/* Children/Input file lists */
+ul.moose-list-children,
+ul.moose-list-inputs{
+    max-height:400px;
+    overflow-y:scroll;
+}
 
 li{
     padding-left:15px;
@@ -923,7 +929,7 @@ summary::-webkit-details-marker {
   font-family: Material Icons;
   content: 'keyboard_arrow_right';
   vertical-align: middle;
-  color: #bdbdbd;g
+  color: #bdbdbd;
 }
 
 details[open] > summary .moose-section-icon::before{
@@ -936,7 +942,6 @@ details[open] hr{
 
 details[open] .moose-section-content {
    animation: sweep 0.2s ease-in-out;
-}
   @keyframes sweep {
       0% {opacity: 0; margin-top: 0px}
       100% {opacity: 1; margin-left: 0px}
