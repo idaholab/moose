@@ -1,8 +1,8 @@
-# Porous Flow Tutorial Page 07.  A chemically-reactive tracer, and porosity and permeability changes
-
 [Start](porous_flow/tutorial_00.md) |
 [Previous](porous_flow/tutorial_06.md) |
 [Next](porous_flow/tutorial_08.md)
+
+# Porous Flow Tutorial Page 07.  A chemically-reactive tracer, and porosity and permeability changes
 
 In this Page, the model from [Page 06](porous_flow/tutorial_06.md) is enhanced so that its tracer is chemically reactive.  PorousFlow has the ability to simulate [aqueous equilibrium chemistry](PorousFlowMassFractionAqueousEquilibriumChemistry.md) and [aqueous precipitation-dissolution chemistry](PorousFlowAqueousPreDisChemistry.md).
 
