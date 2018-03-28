@@ -1,0 +1,14 @@
+[Tests]
+  [./fully_saturated_action]
+    type = 'CSVDiff'
+    input = 'fully_saturated_action.i'
+    csvdiff = 'fully_saturated_action_out_tracer_0011.csv'
+    abs_zero = 1.0E-5
+  [../]
+  [./no_action]
+    type = 'CSVDiff'
+    input = 'no_action.i'
+    csvdiff = 'no_action_out_tracer_0011.csv'
+    abs_zero = 1.0E-5
+  [../]
+[]

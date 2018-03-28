@@ -544,4 +544,41 @@
     ratio_tol = 1E-6
     difference_tol = 1E10
   [../]
+
+  [./basic_advection1]
+    type = 'PetscJacobianTester'
+    input = 'basic_advection1.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+  [../]
+  [./basic_advection2]
+    type = 'PetscJacobianTester'
+    input = 'basic_advection2.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+  [../]
+  [./basic_advection3]
+    type = 'PetscJacobianTester'
+    input = 'basic_advection3.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+  [../]
+  [./basic_advection4]
+    type = 'PetscJacobianTester'
+    input = 'basic_advection4.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+  [../]
+  [./basic_advection5]
+    type = 'PetscJacobianTester'
+    input = 'basic_advection5.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+  [../]
+  [./basic_advection6]
+    type = 'PetscJacobianTester'
+    input = 'basic_advection6.i'
+    ratio_tol = 1E-5
+    difference_tol = 1E10
+  [../]
 []
