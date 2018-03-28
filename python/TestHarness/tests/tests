@@ -103,4 +103,8 @@
     type = PythonUnitTest
     input = test_ArbitrarySpecFile.py
   [../]
+  [./write_results]
+    type = PythonUnitTest
+    input = test_WriteResults.py
+  [../]
 []

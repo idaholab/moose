@@ -633,9 +633,10 @@ def readOutput(f, e, options, max_size=100000):
     f.seek(0)
     if e:
         e.seek(0)
-    if options.no_trimmed_output or options.sep_files == True:
+    if options.no_trimmed_output:
         output += f.read()
-        output += e.read()
+        if e:
+            output += e.read()
 
     else:
         output = f.read(first_part)     # Limit the output to 1MB

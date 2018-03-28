@@ -72,6 +72,10 @@ class Job(object):
         """ Wrapper method to return the testers test name """
         return self.__tester.getTestName()
 
+    def getTestNameShort(self):
+        """ Return the shorthand Test name """
+        return self.getTestName().split('.')[1]
+
     def getUniqueIdentifier(self):
         """ A unique identifier for this job object """
         return self.__unique_identifier
