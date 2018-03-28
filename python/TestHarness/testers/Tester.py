@@ -469,8 +469,8 @@ class Tester(MooseObject):
         # Check if we only want to run failed tests
         if options.failed_tests and options.results_storage is not None:
             result_key = options.results_storage.get(self.getTestDir(), {})
-            result_status = result_key.get(self.getTestName(), {}).get('STATUS', '')
-            if result_status not in ['FAILED', 'DIFF']:
+            status = result_key.get(self.getTestName(), {}).get('FAIL', '')
+            if not status:
                 self.setStatus('not failed', self.bucket_silent)
                 return False
 

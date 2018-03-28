@@ -589,6 +589,7 @@ class TestHarness:
                                                                        'LONG_NAME' : tester.getTestName(),
                                                                        'TIMING'    : job.getTiming(),
                                                                        'STATUS'    : tester.getStatus().status,
+                                                                       'FAIL'      : tester.didFail(),
                                                                        'COLOR'     : tester.getStatus().color,
                                                                        'CAVEATS'   : list(tester.getCaveats()),
                                                                        'COMMAND'   : tester.getCommand(self.options)}
