@@ -263,10 +263,7 @@ public:
    * @param[in] p   pressure
    * @param[in] T   temperature
    */
-  virtual Real e_from_p_T(Real /*p*/, Real /*T*/) const
-  {
-    mooseError(name(), ": e_from_p_T() not implemented");
-  }
+  virtual Real e_from_p_T(Real p, Real T) const;
 
   /**
    * Internal energy and its derivatives from pressure and temperature
@@ -277,11 +274,7 @@ public:
    * @param[out] de_dp   derivative of internal energy w.r.t. pressure
    * @param[out] de_dT   derivative of internal energy w.r.t. temperature
    */
-  virtual void
-  e_from_p_T(Real /*p*/, Real /*T*/, Real & /*e*/, Real & /*de_dp*/, Real & /*de_dT*/) const
-  {
-    mooseError(name(), ": e_from_p_T() not implemented");
-  }
+  virtual void e_from_p_T(Real p, Real T, Real & e, Real & de_dp, Real & de_dT) const;
 
   /**
    * Pressure from specific enthalpy and specific entropy
