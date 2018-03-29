@@ -10,31 +10,19 @@
 #ifndef VECTORNODALBC_H
 #define VECTORNODALBC_H
 
-#include "BoundaryCondition.h"
-#include "RandomInterface.h"
-#include "CoupleableMooseVariableDependencyIntermediateInterface.h"
+#include "NodalBCBase.h"
 #include "MooseVariableInterface.h"
 
 // Forward declarations
 class VectorNodalBC;
 
-// libMesh forward declarations
-namespace libMesh
-{
-template <typename T>
-class NumericVector;
-}
-
 template <>
 InputParameters validParams<VectorNodalBC>();
 
 /**
- * Base class for deriving any boundary condition that works at nodes
+ * Base class for deriving any boundary condition that works at nodes on vector variables
  */
-class VectorNodalBC : public BoundaryCondition,
-                      public RandomInterface,
-                      public CoupleableMooseVariableDependencyIntermediateInterface,
-                      public MooseVariableInterface<RealVectorValue>
+class VectorNodalBC : public NodalBCBase, public MooseVariableInterface<RealVectorValue>
 {
 public:
   VectorNodalBC(const InputParameters & parameters);
@@ -45,11 +33,9 @@ public:
    */
   virtual VectorMooseVariable & variable() override { return _var; }
 
-  virtual void computeResidual(NumericVector<Number> & residual);
-  virtual void computeJacobian();
-  virtual void computeOffDiagJacobian(unsigned int jvar);
-
-  void setBCOnEigen(bool iseigen) { _is_eigen = iseigen; }
+  virtual void computeResidual(NumericVector<Number> & residual) override;
+  virtual void computeJacobian() override;
+  virtual void computeOffDiagJacobian(unsigned int jvar) override;
 
 protected:
   VectorMooseVariable & _var;
@@ -57,14 +43,8 @@ protected:
   /// current node being processed
   const Node *& _current_node;
 
-  /// Quadrature point index
-  unsigned int _qp;
   /// Value of the unknown variable this BC is acting on
   const MooseArray<Number> & _u;
-
-  /// Indicate whether or not the boundary condition is applied to the right
-  /// hand side of eigenvalue problems
-  bool _is_eigen;
 
   virtual Real computeQpResidual(size_t comp) = 0;
 

@@ -17,20 +17,15 @@ template <>
 InputParameters
 validParams<VectorNodalBC>()
 {
-  InputParameters params = validParams<BoundaryCondition>();
-  params += validParams<RandomInterface>();
-  return params;
+  return validParams<NodalBCBase>();
 }
 
 VectorNodalBC::VectorNodalBC(const InputParameters & parameters)
-  : BoundaryCondition(parameters, true), // true is for being Nodal
-    RandomInterface(parameters, _fe_problem, _tid, true),
-    CoupleableMooseVariableDependencyIntermediateInterface(this, true),
+  : NodalBCBase(parameters),
     MooseVariableInterface<RealVectorValue>(this, true),
     _var(*mooseVariable()),
     _current_node(_var.node()),
-    _u(_var.dofValue()),
-    _is_eigen(false)
+    _u(_var.dofValue())
 {
   if (_var.feType().family != LAGRANGE_VEC)
     mooseError("Vector nodal boundary conditions only make sense for LAGRANGE_VEC variables");
@@ -42,7 +37,6 @@ VectorNodalBC::computeResidual(NumericVector<Number> & residual)
 {
   const std::vector<dof_id_type> & dof_indices = _var.dofIndices();
 
-  _qp = 0;
   RealVectorValue res(0, 0, 0);
 
   if (!_is_eigen)
@@ -56,7 +50,6 @@ VectorNodalBC::computeResidual(NumericVector<Number> & residual)
 void
 VectorNodalBC::computeJacobian()
 {
-  _qp = 0;
   RealVectorValue cached_val = computeQpJacobian();
   const std::vector<dof_id_type> & cached_rows = _var.dofIndices();
 
@@ -73,7 +66,6 @@ VectorNodalBC::computeOffDiagJacobian(unsigned int jvar)
     computeJacobian();
   else
   {
-    _qp = 0;
     Real cached_val = computeQpOffDiagJacobian(jvar);
     const std::vector<dof_id_type> & cached_rows = _var.dofIndices();
     // Note: this only works for Lagrange variables...

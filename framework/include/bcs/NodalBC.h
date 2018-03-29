@@ -10,7 +10,7 @@
 #ifndef NODALBC_H
 #define NODALBC_H
 
-#include "BoundaryCondition.h"
+#include "NodalBCBase.h"
 #include "RandomInterface.h"
 #include "CoupleableMooseVariableDependencyIntermediateInterface.h"
 #include "MooseVariableInterface.h"
@@ -18,23 +18,13 @@
 // Forward declarations
 class NodalBC;
 
-// libMesh forward declarations
-namespace libMesh
-{
-template <typename T>
-class NumericVector;
-}
-
 template <>
 InputParameters validParams<NodalBC>();
 
 /**
  * Base class for deriving any boundary condition that works at nodes
  */
-class NodalBC : public BoundaryCondition,
-                public RandomInterface,
-                public CoupleableMooseVariableDependencyIntermediateInterface,
-                public MooseVariableInterface<Real>
+class NodalBC : public NodalBCBase, public MooseVariableInterface<Real>
 {
 public:
   NodalBC(const InputParameters & parameters);
@@ -45,11 +35,9 @@ public:
    */
   virtual MooseVariable & variable() override { return _var; }
 
-  virtual void computeResidual(NumericVector<Number> & residual);
-  virtual void computeJacobian();
-  virtual void computeOffDiagJacobian(unsigned int jvar);
-
-  void setBCOnEigen(bool iseigen) { _is_eigen = iseigen; }
+  virtual void computeResidual(NumericVector<Number> & residual) override;
+  virtual void computeJacobian() override;
+  virtual void computeOffDiagJacobian(unsigned int jvar) override;
 
 protected:
   MooseVariable & _var;
@@ -61,20 +49,6 @@ protected:
   unsigned int _qp;
   /// Value of the unknown variable this BC is acting on
   const VariableValue & _u;
-
-  /// The aux variables to save the residual contributions to
-  bool _has_save_in;
-  std::vector<MooseVariableFE *> _save_in;
-  std::vector<AuxVariableName> _save_in_strings;
-
-  /// The aux variables to save the diagonal Jacobian contributions to
-  bool _has_diag_save_in;
-  std::vector<MooseVariableFE *> _diag_save_in;
-  std::vector<AuxVariableName> _diag_save_in_strings;
-
-  /// Indicate whether or not the boundary condition is applied to the right
-  /// hand side of eigenvalue problems
-  bool _is_eigen;
 
   virtual Real computeQpResidual() = 0;
 
