@@ -4083,17 +4083,34 @@ FEProblemBase::computeResidualTag(const NumericVector<Number> & soln,
                                   NumericVector<Number> & residual,
                                   TagID tag)
 {
-  _fe_vector_tags.clear();
+  try
+  {
+    _nl->setSolution(soln);
 
-  _fe_vector_tags.insert(tag);
+    _nl->associateVectorToTag(residual, tag);
 
-  computeResidualInternal(soln, residual, _fe_vector_tags);
+    computeResidualTags({tag});
+
+    _nl->disassociateVectorFromTag(residual, tag);
+  }
+  catch (MooseException & e)
+  {
+    // If a MooseException propagates all the way to here, it means
+    // that it was thrown from a MOOSE system where we do not
+    // (currently) properly support the throwing of exceptions, and
+    // therefore we have no choice but to error out.  It may be
+    // *possible* to handle exceptions from other systems, but in the
+    // meantime, we don't want to silently swallow any unhandled
+    // exceptions here.
+    mooseError("An unhandled MooseException was raised during residual computation.  Please "
+               "contact the MOOSE team for assistance.");
+  }
 }
 
 void
 FEProblemBase::computeResidualInternal(const NumericVector<Number> & soln,
                                        NumericVector<Number> & residual,
-                                       std::set<TagID> & tags)
+                                       const std::set<TagID> & tags)
 {
   try
   {
@@ -4140,7 +4157,7 @@ FEProblemBase::computeTransientImplicitResidual(Real time,
 }
 
 void
-FEProblemBase::computeResidualTags(std::set<TagID> & tags)
+FEProblemBase::computeResidualTags(const std::set<TagID> & tags)
 {
   _nl->zeroVariablesForResidual();
   _aux->zeroVariablesForResidual();
@@ -4215,7 +4232,13 @@ FEProblemBase::computeJacobianTag(const NumericVector<Number> & soln,
                                   SparseMatrix<Number> & jacobian,
                                   TagID tag)
 {
-  computeJacobianInternal(soln, jacobian, {tag});
+  _nl->setSolution(soln);
+
+  _nl->associateMatrixToTag(jacobian, tag);
+
+  computeJacobianTags({tag});
+
+  _nl->disassociateMatrixFromTag(jacobian, tag);
 }
 
 void

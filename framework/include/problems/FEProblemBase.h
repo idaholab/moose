@@ -892,9 +892,9 @@ public:
 
   virtual void computeResidualInternal(const NumericVector<Number> & soln,
                                        NumericVector<Number> & residual,
-                                       std::set<TagID> & tags);
+                                       const std::set<TagID> & tags);
 
-  virtual void computeResidualTags(std::set<TagID> & tags);
+  virtual void computeResidualTags(const std::set<TagID> & tags);
 
   virtual void computeJacobianSys(NonlinearImplicitSystem & sys,
                                   const NumericVector<Number> & soln,
