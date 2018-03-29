@@ -15,7 +15,7 @@
 
 // Forward Declarations
 class NSMachAux;
-class IdealGasFluidProperties;
+class SinglePhaseFluidProperties;
 
 template <>
 InputParameters validParams<NSMachAux>();
@@ -40,7 +40,7 @@ protected:
   const VariableValue & _internal_energy;
 
   // Fluid properties
-  const IdealGasFluidProperties & _fp;
+  const SinglePhaseFluidProperties & _fp;
 };
 
 #endif
