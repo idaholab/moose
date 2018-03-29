@@ -42,10 +42,17 @@ class TestVideoCommandTokenize(testing.MooseDocsTestCase):
     EXTENSIONS = [core, command, floats, media]
 
     def testToken(self):
-        ast = self.ast(u'!media http://link_to_movie.webm')
+        ast = self.ast(u'!media http://link_to_movie.webm id=foo')
         self.assertIsInstance(ast(0), floats.Float)
         self.assertIsInstance(ast(0)(0), media.Video)
         self.assertEqual(ast(0)(0).src, 'http://link_to_movie.webm')
+
+    def testTokenNoFrame(self):
+        ast = self.ast(u'!media http://link_to_movie.webm')
+        self.assertNotIsInstance(ast(0), floats.Float)
+        self.assertIsInstance(ast(0), media.Video)
+        self.assertEqual(ast(0).src, 'http://link_to_movie.webm')
+
 
 class TestImageCommandTokenize(testing.MooseDocsTestCase):
     """Test tokenization of ImageCommand"""
@@ -53,7 +60,7 @@ class TestImageCommandTokenize(testing.MooseDocsTestCase):
     EXTENSIONS = [core, command, floats, media]
 
     def testToken(self):
-        ast = self.ast(u'!media inl_blue.png')
+        ast = self.ast(u'!media inl_blue.png id=foo')
         self.assertIsInstance(ast(0), floats.Float)
         self.assertIsInstance(ast(0)(0), media.Image)
         self.assertEqual(ast(0)(0).src, 'inl_blue.png')
@@ -64,7 +71,7 @@ class TestRenderImageHTML(testing.MooseDocsTestCase):
 
     EXTENSIONS = [core, command, floats, media]
     RENDERER = renderers.HTMLRenderer
-    TEXT = u'!media inl_blue.png'
+    TEXT = u'!media inl_blue.png id=foo'
 
     def node(self):
         return self.render(self.TEXT).find('moose-content', attr='class')(0)
@@ -81,8 +88,8 @@ class TestRenderImageHTML(testing.MooseDocsTestCase):
     def testWrite(self):
         node = self.node()
         content = node.write()
-        self.assertIn('<div class="moose-float-div">', content)
-        self.assertIn('<img src="inl_blue.png"></img></div>', content)
+        self.assertIn('class="moose-float-div">', content)
+        self.assertIn('<img src="inl_blue.png"></img>', content)
 
 class TestRenderImageMaterialize(TestRenderImageHTML):
     """Test renderering of RenderImage with MaterializeRenderer"""
@@ -104,7 +111,7 @@ class TestRenderImageMaterialize(TestRenderImageHTML):
     def testWrite(self):
         node = self.node()
         content = node.write()
-        self.assertIn('<div class="card">', content)
+        self.assertIn('class="card">', content)
         self.assertIn('<div class="card-image">', content)
         self.assertIn('<img src="inl_blue.png"', content)
 
@@ -132,7 +139,7 @@ class TestRenderVideoHTML(testing.MooseDocsTestCase):
 
     EXTENSIONS = [core, command, floats, media]
     RENDERER = renderers.HTMLRenderer
-    TEXT = u'!media http://foo.webm loop=True autoplay=True'
+    TEXT = u'!media http://foo.webm loop=True autoplay=True id=foo'
 
     def node(self):
         return self.render(self.TEXT).find('moose-content', attr='class')(0)
@@ -154,7 +161,7 @@ class TestRenderVideoHTML(testing.MooseDocsTestCase):
     def testWrite(self):
         node = self.node()
         content = node.write()
-        self.assertIn('<div class="moose-float-div">', content)
+        self.assertIn('class="moose-float-div"', content)
         self.assertIn('<video width="100%" loop="loop" controls="controls"', content)
         self.assertIn('<source src="http://foo.webm', content)
 
@@ -180,7 +187,7 @@ class TestRenderVideoMaterialize(TestRenderVideoHTML):
     def testWrite(self):
         node = self.node()
         content = node.write()
-        self.assertIn('<div class="card">', content)
+        self.assertIn('class="card"', content)
         self.assertIn('<div class="card-image">', content)
         self.assertIn('<source src="http://foo.webm', content)
 

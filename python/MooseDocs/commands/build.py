@@ -36,6 +36,10 @@ def command_line_options(subparser, parent):
                         help="The local host port for live web server (default: %(default)s).")
     parser.add_argument('--clean', action='store_true',
                         help="Clean the destination directory.")
+    parser.add_argument('-f', '--files', default=[], nargs='*',
+                        help="A list of file to build, this is useful for testing. The paths " \
+                             "should be as complete as necessary to make the name unique, just " \
+                             "as done within the markdown itself.")
 
 class MooseDocsWatcher(livereload.watcher.Watcher):
     """
@@ -130,7 +134,12 @@ def main(options):
         shutil.rmtree(options.destination)
 
     # Perform build
-    translator.execute(options.num_threads)
+    if options.files:
+        for filename in options.files:
+            node = translator.root.findall(filename)[0]
+            node.build()
+    else:
+        translator.execute(options.num_threads)
 
     if options.serve:
         watcher = MooseDocsWatcher(translator, options)

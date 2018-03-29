@@ -49,7 +49,7 @@ class MediaCommandBase(command.CommandComponent):
         settings['prefix'] = (None, "The caption prefix.")
         return settings
 
-    def createMedia(self, parent, src):
+    def createMedia(self, parent, src, **kwargs):
         pass # a required method for base classes
 
     def createToken(self, info, parent):
@@ -62,22 +62,29 @@ class MediaCommandBase(command.CommandComponent):
             node = self.translator.current.findall(src, exc=exceptions.TokenizeException)[0]
             location = unicode(node.relativeSource(self.translator.current))
 
-        # Create the float and insert the media content
-        flt = floats.Float(parent, img=True, **self.attributes)
-        self.createMedia(flt, location)
-
-        # Add caption
+        # Caption settings
         cap = self.settings['caption']
         key = self.settings['id']
         prefix = self.settings['prefix'] if self.settings['prefix'] \
                  is not None else self.extension['prefix']
-        if key:
-            caption = floats.Caption(flt, key=key, prefix=prefix)
-            if cap:
+
+        # Create float image
+        if cap or key:
+            flt = floats.Float(parent, img=True, **self.attributes)
+            self.createMedia(flt, location)
+
+            # Add caption
+            if key:
+                caption = floats.Caption(flt, key=key, prefix=prefix)
+                if cap:
+                    self.translator.reader.parse(caption, cap, MooseDocs.INLINE)
+            elif cap:
+                caption = floats.Caption(flt)
                 self.translator.reader.parse(caption, cap, MooseDocs.INLINE)
-        elif cap:
-            caption = floats.Caption(flt)
-            self.translator.reader.parse(caption, cap, MooseDocs.INLINE)
+
+        # Create regular image
+        else:
+            self.createMedia(parent, location, **self.attributes)
 
         return parent
 
@@ -85,8 +92,8 @@ class ImageCommand(MediaCommandBase):
     COMMAND = 'media'
     SUBCOMMAND = ('jpg', 'jpeg', 'gif', 'png', 'svg', None)
 
-    def createMedia(self, parent, src):
-        return Image(parent, src=src)
+    def createMedia(self, parent, src, **kwargs):
+        return Image(parent, src=src, **kwargs)
 
 class VideoCommand(MediaCommandBase):
     COMMAND = 'media'
@@ -100,10 +107,13 @@ class VideoCommand(MediaCommandBase):
         settings['autoplay'] = (False, "Automatically start playing the video.")
         return settings
 
-    def createMedia(self, parent, src):
-        return Video(parent, src=src, controls=self.settings['controls'],
+    def createMedia(self, parent, src, **kwargs):
+        return Video(parent,
+                     src=src,
+                     controls=self.settings['controls'],
                      loop=self.settings['loop'],
-                     autoplay=self.settings['autoplay'])
+                     autoplay=self.settings['autoplay'],
+                     **kwargs)
 
 class RenderImage(components.RenderComponent):
 
@@ -111,7 +121,7 @@ class RenderImage(components.RenderComponent):
         return html.Tag(parent, 'img', src=token.src, **token.attributes)
 
     def createMaterialize(self, token, parent):
-        tag = self.createHTML(token, parent, **token.attributes)
+        tag = self.createHTML(token, parent)
         tag.addClass('materialboxed', 'moose-image')
         return tag
 
