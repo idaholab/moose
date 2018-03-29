@@ -120,26 +120,36 @@ FlowConnection::check()
 void
 FlowConnection::addConnection(const BoundaryName & boundary_name)
 {
-  const size_t colon_pos = boundary_name.rfind(':');
-  // if it has a colon, assume 'component_name:end_type' format
-  if (colon_pos != std::string::npos)
-  {
-    const std::string connected_component_name = boundary_name.substr(0, colon_pos);
-    const std::string str_end =
-        boundary_name.substr(colon_pos + 1, boundary_name.length() - colon_pos - 1);
-    const EEndType end_type = RELAP7::stringToEnum<EEndType>(str_end);
-
-    _connections.push_back(Connection(boundary_name, connected_component_name, end_type));
-    _connected_component_names.push_back(connected_component_name);
-
-    // Add dependency because the connected component's setupMesh() must be called
-    // before this component's setupMesh().
-    addDependency(connected_component_name);
-  }
-  else
+  const size_t oparenthesis_pos = boundary_name.find('(');
+  if (oparenthesis_pos != std::string::npos)
   {
     logError("You are using the old connection format 'comp_name(end)'. Please update your input "
              "file to the new one 'comp_name:end'.");
+  }
+  else
+  {
+    const size_t colon_pos = boundary_name.rfind(':');
+    // if it has a colon, assume 'component_name:end_type' format
+    if (colon_pos != std::string::npos)
+    {
+      const std::string connected_component_name = boundary_name.substr(0, colon_pos);
+      const std::string str_end =
+          boundary_name.substr(colon_pos + 1, boundary_name.length() - colon_pos - 1);
+      const EEndType end_type = RELAP7::stringToEnum<EEndType>(str_end);
+
+      _connections.push_back(Connection(boundary_name, connected_component_name, end_type));
+      _connected_component_names.push_back(connected_component_name);
+
+      // Add dependency because the connected component's setupMesh() must be called
+      // before this component's setupMesh().
+      addDependency(connected_component_name);
+    }
+    else
+    {
+      logError("Incorrect connection specified '",
+               boundary_name,
+               "'. Valid connection format is 'component_name:end_type'.");
+    }
   }
 }
 
