@@ -27,6 +27,8 @@ class IncludeCommand(command.CommandComponent):
                                  "is used as the desired content, otherwise group zero is used.")
         settings['re-flags'] = ('re.M|re.S|re.U', "Regular expression flags commands pass to the " \
                                                   "Python re module.")
+        settings['start'] = (None, "String contained on the starting line.")
+        settings['end'] = (None, "String contained on the ending line.")
         return settings
 
     def createToken(self, info, parent):
@@ -47,6 +49,26 @@ class IncludeCommand(command.CommandComponent):
         content = common.read(include_page.source) #TODO: copy existing tokens when not using re
         if self.settings['re']:
             content = common.regex(self.settings['re'], content, eval(self.settings['re-flags']))
+
+        elif self.settings['start'] or self.settings['end']:
+            lines = content.split('\n')
+            start_idx = None
+            end_idx = None
+            start = self.settings['start']
+            end = self.settings['end']
+
+            for i, line in enumerate(lines):
+                if (not start_idx) and (start in line):
+                    start_idx = i
+                if (not end_idx) and (end in line):
+                    end_idx = i
+
+            if start_idx is None:
+                start_idx = 0
+            if end_idx is None:
+                end_idx = -1
+
+            content = lines[start_idx:end_idx]
 
         self.translator.reader.parse(parent, content)
         return parent
