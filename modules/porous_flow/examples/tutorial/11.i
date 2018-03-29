@@ -431,7 +431,6 @@
   [./density_all_nodal]
     type = PorousFlowJoiner
     at_nodes = true
-    include_old = true
     material_property = PorousFlow_fluid_phase_density_nodal
   [../]
   [./density_all_qp]
@@ -446,7 +445,6 @@
   [./energy_all_nodal]
     type = PorousFlowJoiner
     at_nodes = true
-    include_old = true
     material_property = PorousFlow_fluid_phase_internal_energy_nodal
   [../]
   [./enthalpy_all_nodal]
@@ -622,4 +620,3 @@
 [Outputs]
   exodus = true
 []
-
