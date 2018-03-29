@@ -23,8 +23,8 @@ The Cavity Pressure Action system consists of three separate actions, listed in
 | Calculation of the initial moles quantity | [CavityPressureUserObject](/UserObjects/CavityPressureUserObject.md) | [CavityPressureUOAction](/CavityPressureUOAction.md) | `volume`: the name of the internal volume postprocessor |
 |  |  |  | `R`: the universal gas constant |
 |  |  |  | `temperature` : the name of the average temperature postprocessor |
-| Store the value of the initial moles | [CavityPressurePostprocessor](/Postprocessors/CavityPressurePostprocessor.md) | [CavityPressurePPAction](/CavityPressurePPAction.md) | `output_initial_moles`: the postprocessor name to used to report the initial moles of gas |
-| Calculation of the current internal pressure | [CavityPressureUserObject](/UserObjects/CavityPressureUserObject.md) | [CavityPressureUOAction](/CavityPressureUOAction.md) | `output`: the name of the cavity pressure postprocessor |
-| Store the internal pressure value | [CavityPressurePostprocessor](/Postprocessors/CavityPressurePostprocessor.md) | [CavityPressurePPAction](/CavityPressurePPAction.md) | `output`: the name of the cavity pressure postprocessor |
-| Apply the calculated internal pressure traction | [Pressure](/BCs/Pressure.md) | [CavityPressureAction](/CavityPressureAction.md) | `boundary`: the list of boundary IDs to which the pressure should be applied |
+| Store the value of the initial moles | [CavityPressurePostprocessor](/Postprocessors/CavityPressurePostprocessor.md) | [CavityPressurePPAction](CavityPressure/CavityPressurePPAction.md) | `output_initial_moles`: the postprocessor name to used to report the initial moles of gas |
+| Calculation of the current internal pressure | [CavityPressureUserObject](/UserObjects/CavityPressureUserObject.md) | [CavityPressureUOAction](CavityPressure/CavityPressureUOAction.md) | `output`: the name of the cavity pressure postprocessor |
+| Store the internal pressure value | [CavityPressurePostprocessor](/Postprocessors/CavityPressurePostprocessor.md) | [CavityPressurePPAction](CavityPressure/CavityPressurePPAction.md) | `output`: the name of the cavity pressure postprocessor |
+| Apply the calculated internal pressure traction | [Pressure](/BCs/Pressure.md) | [CavityPressureAction](CavityPressure/CavityPressureAction.md) | `boundary`: the list of boundary IDs to which the pressure should be applied |
 |  |  |  | `displacements` : a string of the displacement variables to which the Pressure BC should be applied |
