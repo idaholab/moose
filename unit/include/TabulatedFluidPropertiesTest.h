@@ -76,6 +76,12 @@ protected:
     _fe_problem->addUserObject("TabulatedFluidProperties", "missing_col_fp", missing_col_uo_params);
     _missing_col_fp = &_fe_problem->getUserObject<TabulatedFluidProperties>("missing_col_fp");
 
+    InputParameters unknown_col_uo_params = _factory->getValidParams("TabulatedFluidProperties");
+    unknown_col_uo_params.set<UserObjectName>("fp") = "co2_fp";
+    unknown_col_uo_params.set<FileName>("fluid_property_file") = "data/csv/unknown_fluid_props.csv";
+    _fe_problem->addUserObject("TabulatedFluidProperties", "unknown_col_fp", unknown_col_uo_params);
+    _unknown_col_fp = &_fe_problem->getUserObject<TabulatedFluidProperties>("unknown_col_fp");
+
     InputParameters missing_data_uo_params = _factory->getValidParams("TabulatedFluidProperties");
     missing_data_uo_params.set<UserObjectName>("fp") = "co2_fp";
     missing_data_uo_params.set<FileName>("fluid_property_file") =
@@ -105,6 +111,7 @@ protected:
   const TabulatedFluidProperties * _unordered_fp;
   const TabulatedFluidProperties * _unequal_fp;
   const TabulatedFluidProperties * _missing_col_fp;
+  const TabulatedFluidProperties * _unknown_col_fp;
   const TabulatedFluidProperties * _missing_data_fp;
 };
 
