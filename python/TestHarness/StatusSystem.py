@@ -22,6 +22,7 @@ class TestStatus(object):
     fail = test_status(status='FAIL', color='RED')
     diff = test_status(status='DIFF', color='YELLOW')
     deleted = test_status(status='DELETED', color='RED')
+    finished = test_status(status='FINISHED', color='GREY')
 
     def __init__(self, status=no_status):
         self.__status = status
@@ -80,6 +81,10 @@ class TestStatus(object):
     def isDiff(self):
         """ boolean failed diff status """
         return self.__status == self.diff
+
+    def isFinished(self):
+        """ boolean finished status """
+        return self.__status == self.finished or self.__status != self.no_status
 
 class JobStatus(object):
     """ Class for handling all possible job statuses """

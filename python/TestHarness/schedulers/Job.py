@@ -48,13 +48,13 @@ class Job(object):
         self.options = options
         self.__tester = tester
         self.timer = Timer()
-        self.__dag = tester_dag
         self.__outfile = None
         self.__start_time = clock()
         self.__end_time = None
         self.__joined_out = ''
         self.report_timer = None
         self.__slots = None
+        self.__meta_data = {}
 
         # Enumerate available job statuses
         self.status = StatusSystem.JobStatus()
@@ -70,14 +70,6 @@ class Job(object):
     def getTester(self):
         """ Return the tester object """
         return self.__tester
-
-    def getDAG(self):
-        """ Return the DAG object """
-        return self.__dag
-
-    def getOriginalDAG(self):
-        """ Return the DAG object as it was in its original form """
-        return self.__dag.getOriginalDAG()
 
     def getTestName(self):
         """ Wrapper method to return the testers test name """
@@ -122,6 +114,15 @@ class Job(object):
         for prereq in prereqs:
             unique_prereqs.append(os.path.join(self.getTestDir(), prereq))
         return unique_prereqs
+
+    def addMetaData(self, **kwargs):
+        """ Allow derived methods to store additional data which ends up in the data storage file """
+        for key, value in kwargs.iteritems():
+            self.__meta_data[key] = value
+
+    def getMetaData(self):
+        """ return data stored by addMetaData """
+        return self.__meta_data
 
     def getSlots(self):
         """ Return the number of slots this job consumes """

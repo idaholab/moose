@@ -149,14 +149,6 @@ class Scheduler(MooseObject):
         return ((self.options.valgrind_mode and self.__failures >= self.options.valgrind_max_fails)
                 or self.__failures >= self.options.max_fails)
 
-    def reportSkipped(self, jobs):
-        """ Allow derived schedulers to do something with skipped jobs """
-        return
-
-    def preLaunch(self, job_dag):
-        """ Allow derived schedulers to modify the DAG before jobs are launched """
-        return
-
     def run(self, job):
         """ Call derived run method """
         return
@@ -167,12 +159,17 @@ class Scheduler(MooseObject):
         """
         return
 
-    def cleanUp(self):
-        """ Allow derived schedulers to perform cleanup operations """
-        return
-
     def notifyFinishedSchedulers(self):
         """ Notify derived schedulers we are finished """
+        return
+
+    def augmentJobs(self, Jobs):
+        """
+        Allow derived schedulers to augment Jobs before they perform work.
+        Note: This occurs before we perform a job count sanity check. So
+        any additions or subtractions to the number of jobs will result in
+        an exception.
+        """
         return
 
     def waitFinish(self):
@@ -200,7 +197,6 @@ class Scheduler(MooseObject):
 
             # Reporting sanity check
             if not self.__error_state and self.job_count:
-                print self.job_count
                 raise SchedulerError('Scheduler exiting with different amount of work than what was tasked!')
 
             if not self.__error_state:
@@ -209,31 +205,40 @@ class Scheduler(MooseObject):
                 self.status_pool.close()
                 self.status_pool.join()
 
+            # allow derived schedulers to perform any exit routines
+            self.notifyFinishedSchedulers()
+
         except KeyboardInterrupt:
             self.killRemaining(keyboard=True)
 
     def schedule(self, testers):
         """
-        Generate and submit a DAG based on incoming list of testers
-        to the queue for execution.
+        Generate and submit a group of testers to a thread pool queue for execution.
         """
-        # If we are not to scheduler any more jobs for some reason, return now
+        # If we are not to schedule any more jobs for some reason, return now
         if self.__error_state:
             return
 
-        # Instance our job DAG, and private lock for this group of testers
+        # Instance our job DAG, create jobs, and a private lock for this group of jobs (testers)
         Jobs = JobDAG(self.options)
         j_dag = Jobs.createJobs(testers)
         j_lock = threading.Lock()
 
-        # DAG sanity check
+        # Allow derived schedulers access to the jobs before they launch
+        self.augmentJobs(Jobs)
+
+        # job-count to tester-count sanity check
         if j_dag.size() != len(testers):
             raise SchedulerError('Scheduler was going to run a different amount of testers than what was received (something bad happened)!')
 
-        # Reporting sanity check (see waitFinish)
+        # Final reporting job-count sanity check
         with self.job_count_lock:
             self.job_count += j_dag.size()
 
+        # Store all processed jobs in the global job bank
+        self.__job_bank.update(j_dag.topological_sort())
+
+        # Launch these jobs to perform work
         self.queueJobs(Jobs, j_lock)
 
     def queueJobs(self, Jobs, j_lock):
@@ -374,12 +379,10 @@ class Scheduler(MooseObject):
         if self.__error_state:
             return
 
-        jobs = job.getDAG()
         try:
             # see if we have enough slots to start this job
             if self.reserveSlots(job, j_lock):
                 with j_lock:
-                    #print 'RUNNING JOB %s...' % (job.getTestName())
                     job.setStatus(job.running)
 
                 with self.activity_lock:

@@ -32,6 +32,10 @@ class JobDAG(object):
 
         return self._checkDAG()
 
+    def getDAG(self):
+        """ return the running DAG object """
+        return self.__job_dag
+
     def getJobs(self):
         """ return current job group """
         return self.__job_dag.ind_nodes()

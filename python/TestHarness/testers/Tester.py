@@ -152,7 +152,7 @@ class Tester(MooseObject):
         return self.status.getStatus()
 
     def setStatus(self, status, message=''):
-        # Assign a fail message (so I can see what application this will break) <-Temporary
+        # Assign a fail message (so I can see what applications this will break) <-Temporary
         if message == None or type(status) != type(self.no_status):
             return self.status.setStatus(self.fail, 'deprecated status bucket')
 
@@ -404,7 +404,7 @@ class Tester(MooseObject):
             result_key = options.results_storage.get(self.getTestDir(), {})
             status = result_key.get(self.getTestName(), {}).get('FAIL', '')
             if not status:
-                self.setStatus('not failed', self.bucket_silent)
+                self.setStatus(self.bucket_silent)
                 return False
 
         # Check if we only want to run syntax tests

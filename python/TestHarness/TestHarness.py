@@ -519,7 +519,7 @@ class TestHarness:
                 self.printOutput(job)
 
                 # Print status with caveats
-                result = self.formatCaveats(tester)
+                result = self.formatStatusMessage(tester)
                 print(util.formatResult(job, result, self.options, caveats=True))
 
                 timing = job.getTiming()
@@ -623,7 +623,8 @@ class TestHarness:
                                                                        'FAIL'      : tester.isFail(),
                                                                        'COLOR'     : tester.getStatus().color,
                                                                        'CAVEATS'   : list(tester.getCaveats()),
-                                                                       'COMMAND'   : tester.getCommand(self.options)}
+                                                                       'COMMAND'   : tester.getCommand(self.options),
+                                                                       'META'      : job.getMetaData()}
         if results_data:
             with open(self.results_storage, 'w') as data_file:
                 json.dump(results_data, data_file, indent=2)
@@ -658,15 +659,16 @@ class TestHarness:
                                                                      job.getTestNameShort(),
                                                                      tester.getStatus().status,
                                                                      'txt']))
+
                     formated_results = util.formatResult(job, job.getOutput(), self.options, color=False)
 
                     # Passing tests
-                    if self.options.ok_files and tester.didPass():
+                    if self.options.ok_files and tester.isPass():
                         with open(output_file, 'w') as f:
                             f.write(formated_results)
 
                     # Failing tests
-                    if self.options.fail_files and tester.didFail():
+                    if self.options.fail_files and tester.isFail():
                         with open(output_file, 'w') as f:
                             f.write(formated_results)
 
