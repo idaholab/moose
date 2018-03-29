@@ -20,7 +20,7 @@ validParams<LagrangeVecDirichletBC>()
                                       "The values the components must take on the boundary");
   p.declareControllable("values");
   p.addClassDescription(
-      "Imposes the essential boundary condition $\vec{u}=\vec{g}$, where $\vec{g}$ "
+      "Imposes the essential boundary condition $\\vec{u}=\\vec{g}$, where $\\vec{g}$ "
       "are constant, controllable values.");
   return p;
 }

@@ -18,7 +18,7 @@ validParams<LagrangeVecFunctionDirichletBC>()
 {
   InputParameters p = validParams<VectorNodalBC>();
   p.addClassDescription(
-      "Imposes the essential boundary condition $\vec{u}=\vec{g}$, where $\vec{g}$ "
+      "Imposes the essential boundary condition $\\vec{u}=\\vec{g}$, where $\\vec{g}$ "
       "components are calculated with functions.");
   p.addParam<FunctionName>("x_exact_soln", 0, "The exact solution for the x component");
   p.addParam<FunctionName>("y_exact_soln", 0, "The exact solution for the y component");
