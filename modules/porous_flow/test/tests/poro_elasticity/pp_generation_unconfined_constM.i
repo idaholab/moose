@@ -294,7 +294,6 @@
   [./dens_all]
     type = PorousFlowJoiner
     at_nodes = true
-    include_old = true
     material_property = PorousFlow_fluid_phase_density_nodal
   [../]
   [./dens_all_at_quadpoints]

@@ -84,7 +84,6 @@
     type = PorousFlowJoiner
     at_nodes = true
     material_property = PorousFlow_fluid_phase_density_nodal
-    include_old = true
   [../]
   [./visc_all]
     type = PorousFlowJoiner
