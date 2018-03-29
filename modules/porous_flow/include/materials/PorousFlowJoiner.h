@@ -23,7 +23,6 @@ InputParameters validParams<PorousFlowJoiner>();
  * and derivatives of these wrt the nonlinear variables
  * from the individual phase properties.
  *
- * Old values are included if include_old=true
  * Values at the quadpoint or the nodes are formed depending on _at_qps
  *
  * Properties can be viscosities, densities, thermal conductivities , etc
@@ -59,9 +58,6 @@ protected:
 
   /// Name of material property to be joined
   const std::string _pf_prop;
-
-  /// Whether to include old variables
-  const bool _include_old;
 
   /// Derivatives of porepressure variable wrt PorousFlow variables at the qps or nodes
   const MaterialProperty<std::vector<std::vector<Real>>> & _dporepressure_dvar;

@@ -174,7 +174,6 @@
   [./density_all_nodal]
     type = PorousFlowJoiner
     at_nodes = true
-    include_old = true
     material_property = PorousFlow_fluid_phase_density_nodal
   [../]
   [./density_all_qp]
@@ -229,4 +228,3 @@
 [Outputs]
   exodus = true
 []
-

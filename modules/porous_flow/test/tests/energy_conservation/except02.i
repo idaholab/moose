@@ -105,12 +105,10 @@
   [./dens_all]
     type = PorousFlowJoiner
     at_nodes = true
-    include_old = true
     material_property = PorousFlow_fluid_phase_density_nodal
   [../]
   [./internal_energy_fluids]
     type = PorousFlowJoiner
-    include_old = false
     at_nodes = true
     material_property = PorousFlow_fluid_phase_internal_energy_nodal
   [../]
