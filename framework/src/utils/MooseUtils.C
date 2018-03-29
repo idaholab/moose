@@ -579,39 +579,36 @@ template <typename T>
 T
 convertStringToInt(const std::string & str, bool throw_on_failure)
 {
-  std::stringstream ss(str);
   T val;
-  if ((ss >> val).fail() || !ss.eof())
+
+  // Let's try to read a double and see if we can cast it to an int
+  // This would be the case for scientific notation
+  long double double_val;
+  std::stringstream double_ss(str);
+
+  if ((double_ss >> double_val).fail() || !double_ss.eof())
   {
-    // Let's try to read a double and see if we can cast it to an int
-    // This would be the case for scientific notation
-    long double double_val;
-    std::stringstream double_ss(str);
+    std::string msg =
+        std::string("Unable to convert ") + str + " to type " + demangle(typeid(T).name());
 
-    if ((double_ss >> double_val).fail() || !double_ss.eof())
-    {
-      std::string msg =
-          std::string("Unable to convert ") + str + " to type " + demangle(typeid(T).name());
+    if (throw_on_failure)
+      throw std::invalid_argument(msg);
+    else
+      mooseError(msg);
+  }
 
-      if (throw_on_failure)
-        throw std::invalid_argument(msg);
-      else
-        mooseError(msg);
-    }
+  // Check to see if it's an integer (and within range of an integer
+  if (double_val == static_cast<T>(double_val))
+    val = double_val;
+  else // Still failure
+  {
+    std::string msg =
+        std::string("Unable to convert ") + str + " to type " + demangle(typeid(T).name());
 
-    // Check to see if it's an integer (and within range of an integer
-    if (double_val == static_cast<T>(double_val))
-      val = double_val;
-    else // Still failure
-    {
-      std::string msg =
-          std::string("Unable to convert ") + str + " to type " + demangle(typeid(T).name());
-
-      if (throw_on_failure)
-        throw std::invalid_argument(msg);
-      else
-        mooseError(msg);
-    }
+    if (throw_on_failure)
+      throw std::invalid_argument(msg);
+    else
+      mooseError(msg);
   }
 
   return val;
