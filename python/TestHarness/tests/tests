@@ -106,5 +106,6 @@
   [./write_results]
     type = PythonUnitTest
     input = test_WriteResults.py
+    prereq = 'diff'
   [../]
 []

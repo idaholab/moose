@@ -23,6 +23,12 @@ class TestHarnessTester(TestHarnessTestCase):
         except:
             pass
 
+    def tearDown(self):
+        """
+        tearDown occurs after every test.
+        """
+        self.setUp()
+
     def testWriteOK(self):
         """ Test ability to write separate OK test --sep-files-ok """
         self.runTests('--no-color', '-i', 'always_ok', '--sep-files-ok', '--output-dir', self.output_dir)
