@@ -219,7 +219,8 @@ GeometricSearchData::getMortarPenetrationLocator(const BoundaryName & master,
 
   // Generate a new boundary id
   // TODO: Make this better!
-  unsigned int mortar_boundary_id, boundary_id;
+  unsigned int mortar_boundary_id = 0;
+  unsigned int boundary_id = 0;
   switch (side_type)
   {
     case Moose::Master:
