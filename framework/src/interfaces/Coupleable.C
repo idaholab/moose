@@ -705,6 +705,55 @@ Coupleable::coupledVectorGradient(const std::string & var_name, unsigned int com
     return (_c_is_implicit) ? var->gradSlnNeighbor() : var->gradSlnOldNeighbor();
 }
 
+const VectorVariableGradient &
+Coupleable::coupledVectorGradientOld(const std::string & var_name, unsigned int comp)
+{
+  checkVar(var_name);
+  if (!isCoupled(var_name)) // Return default 0
+    return _default_vector_gradient;
+
+  coupledCallback(var_name, true);
+  if (_c_nodal)
+    mooseError(_c_name, ": Gradients are non-sensical with nodal compute objects");
+
+  validateExecutionerType(var_name, "coupledGradientOld");
+  VectorMooseVariable * var = getVectorVar(var_name, comp);
+  if (var == NULL)
+    mooseError("Call corresponding standard variable method");
+
+  if (!_coupleable_neighbor)
+    return (_c_is_implicit) ? var->gradSlnOld() : var->gradSlnOlder();
+  else
+    return (_c_is_implicit) ? var->gradSlnOldNeighbor() : var->gradSlnOlderNeighbor();
+}
+
+const VectorVariableGradient &
+Coupleable::coupledVectorGradientOlder(const std::string & var_name, unsigned int comp)
+{
+  checkVar(var_name);
+  if (!isCoupled(var_name)) // Return default 0
+    return _default_vector_gradient;
+
+  coupledCallback(var_name, true);
+  if (_c_nodal)
+    mooseError(_c_name, ": Gradients are non-sensical with nodal compute objects");
+
+  validateExecutionerType(var_name, "coupledGradientOlder");
+  VectorMooseVariable * var = getVectorVar(var_name, comp);
+  if (var == NULL)
+    mooseError("Call corresponding standard variable method");
+
+  if (_c_is_implicit)
+  {
+    if (!_coupleable_neighbor)
+      return var->gradSlnOlder();
+    else
+      return var->gradSlnOlderNeighbor();
+  }
+  else
+    mooseError(_c_name, ": Older values not available for explicit schemes");
+}
+
 const VectorVariableCurl &
 Coupleable::coupledCurl(const std::string & var_name, unsigned int comp)
 {

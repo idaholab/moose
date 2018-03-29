@@ -248,6 +248,26 @@ protected:
                                                                unsigned int comp = 0);
 
   /**
+   * Returns an old gradient from previous time step of a coupled vector variable
+   * @param var_name Name of coupled vector variable
+   * @param comp Component number for vector of coupled vector variables
+   * @return Reference to a VectorVariableGradient containing the old gradient of the coupled vector
+   * variable
+   */
+  virtual const VectorVariableGradient & coupledVectorGradientOld(const std::string & var_name,
+                                                                  unsigned int comp = 0);
+
+  /**
+   * Returns an old gradient from two time steps previous of a coupled vector variable
+   * @param var_name Name of coupled vector variable
+   * @param comp Component number for vector of coupled vector variables
+   * @return Reference to a VectorVariableGradient containing the older gradient of the coupled
+   * vector variable
+   */
+  virtual const VectorVariableGradient & coupledVectorGradientOlder(const std::string & var_name,
+                                                                    unsigned int comp = 0);
+
+  /**
    * Returns curl of a coupled variable
    * @param var_name Name of coupled variable
    * @param comp Component number for vector of coupled variables
