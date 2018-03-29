@@ -98,7 +98,7 @@ def _init_large_media():
     """Check submodule for large_media."""
     log = logging.getLogger('MooseDocs._init_large_media')
     status = common.submodule_status()
-    large_media = os.path.realpath(os.path.join(MooseDocs.ROOT_DIR, 'large_media'))
+    large_media = os.path.realpath(os.path.join(MooseDocs.MOOSE_DIR, 'large_media'))
     for submodule, status in status.iteritems():
         if ((os.path.realpath(os.path.join(MooseDocs.MOOSE_DIR, submodule)) == large_media)
                 and (status == '-')):
