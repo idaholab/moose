@@ -257,7 +257,7 @@ public:
   /**
    * Close all matrices for tags
    */
-  void closeTaggedMatrices(std::set<TagID> & tags);
+  void closeTaggedMatrices(const std::set<TagID> & tags);
 
   /**
    * associate a matirx to a tag
@@ -584,11 +584,11 @@ public:
    */
   NumericVector<Number> & addVector(TagID tag, const bool project, const ParallelType type);
 
-  virtual void closeTaggedVectors(std::set<TagID> & tags);
+  virtual void closeTaggedVectors(const std::set<TagID> & tags);
 
   virtual void clearTaggedVector(TagID TagID);
 
-  virtual void zeroTaggedVectors(std::set<TagID> & tags);
+  virtual void zeroTaggedVectors(const std::set<TagID> & tags);
 
   /**
    * Remove a solution length vector from the system with the specified TagID

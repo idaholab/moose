@@ -21,7 +21,8 @@
 
 #include "libmesh/threads.h"
 
-ComputeResidualThread::ComputeResidualThread(FEProblemBase & fe_problem, std::set<TagID> & tags)
+ComputeResidualThread::ComputeResidualThread(FEProblemBase & fe_problem,
+                                             const std::set<TagID> & tags)
   : ThreadedElementLoop<ConstElemRange>(fe_problem),
     _nl(fe_problem.getNonlinearSystemBase()),
     _tags(tags),

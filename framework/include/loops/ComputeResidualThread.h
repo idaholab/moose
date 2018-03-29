@@ -28,7 +28,7 @@ class Kernel;
 class ComputeResidualThread : public ThreadedElementLoop<ConstElemRange>
 {
 public:
-  ComputeResidualThread(FEProblemBase & fe_problem, std::set<TagID> & tags);
+  ComputeResidualThread(FEProblemBase & fe_problem, const std::set<TagID> & tags);
 
   // Splitting Constructor
   ComputeResidualThread(ComputeResidualThread & x, Threads::split split);
@@ -47,7 +47,7 @@ public:
 
 protected:
   NonlinearSystemBase & _nl;
-  std::set<TagID> & _tags;
+  const std::set<TagID> & _tags;
   unsigned int _num_cached;
 
   /// Reference to BC storage structures

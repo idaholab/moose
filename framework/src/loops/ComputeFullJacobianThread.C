@@ -21,7 +21,7 @@
 #include "libmesh/threads.h"
 
 ComputeFullJacobianThread::ComputeFullJacobianThread(FEProblemBase & fe_problem,
-                                                     std::set<TagID> & tags)
+                                                     const std::set<TagID> & tags)
   : ComputeJacobianThread(fe_problem, tags),
     _nl(fe_problem.getNonlinearSystemBase()),
     _integrated_bcs(_nl.getIntegratedBCWarehouse()),

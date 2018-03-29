@@ -245,7 +245,7 @@ public:
    */
   void computeResidualTag(NumericVector<Number> & residual, TagID tag_id);
 
-  void computeResidualTags(std::set<TagID> & tags);
+  void computeResidualTags(const std::set<TagID> & tags);
 
   void computeResidual(NumericVector<Number> & residual, TagID tag_id);
 
@@ -279,9 +279,9 @@ public:
    * Computes Jacobian
    * @param jacobian Jacobian is formed in here
    */
-  void computeJacobianTags(std::set<TagID> & tags);
+  void computeJacobianTags(const std::set<TagID> & tags);
 
-  void computeJacobian(SparseMatrix<Number> & jacobian, std::set<TagID> & tags);
+  void computeJacobian(SparseMatrix<Number> & jacobian, const std::set<TagID> & tags);
 
   void computeJacobian(SparseMatrix<Number> & jacobian);
 
@@ -295,7 +295,7 @@ public:
    */
   void computeJacobianBlocks(std::vector<JacobianBlock *> & blocks);
 
-  void computeJacobianBlocks(std::vector<JacobianBlock *> & blocks, std::set<TagID> & tags);
+  void computeJacobianBlocks(std::vector<JacobianBlock *> & blocks, const std::set<TagID> & tags);
 
   /**
    * Compute damping
@@ -577,7 +577,7 @@ protected:
    * Compute the residual for a given tag
    * @param tags The tags of kernels for which the residual is to be computed.
    */
-  void computeResidualInternal(std::set<TagID> & tags);
+  void computeResidualInternal(const std::set<TagID> & tags);
 
   /**
    * Enforces nodal boundary conditions
@@ -585,11 +585,11 @@ protected:
    */
   void computeNodalBCs(NumericVector<Number> & residual);
 
-  void computeNodalBCs(NumericVector<Number> & residual, std::set<TagID> & tags);
+  void computeNodalBCs(NumericVector<Number> & residual, const std::set<TagID> & tags);
 
-  void computeNodalBCs(std::set<TagID> & tags);
+  void computeNodalBCs(const std::set<TagID> & tags);
 
-  void computeJacobianInternal(std::set<TagID> & tags);
+  void computeJacobianInternal(const std::set<TagID> & tags);
 
   void computeDiracContributions(bool is_jacobian);
 

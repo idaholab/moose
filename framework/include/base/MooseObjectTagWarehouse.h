@@ -37,11 +37,13 @@ public:
 
   MooseObjectWarehouse<T> & getVectorTagObjectWarehouse(TagID tag_id, THREAD_ID tid);
 
-  MooseObjectWarehouse<T> & getVectorTagsObjectWarehouse(std::set<TagID> & tags, THREAD_ID tid);
+  MooseObjectWarehouse<T> & getVectorTagsObjectWarehouse(const std::set<TagID> & tags,
+                                                         THREAD_ID tid);
 
   MooseObjectWarehouse<T> & getMatrixTagObjectWarehouse(TagID tag_id, THREAD_ID tid);
 
-  MooseObjectWarehouse<T> & getMatrixTagsObjectWarehouse(std::set<TagID> & tags, THREAD_ID tid);
+  MooseObjectWarehouse<T> & getMatrixTagsObjectWarehouse(const std::set<TagID> & tags,
+                                                         THREAD_ID tid);
 
 protected:
   const THREAD_ID _num_threads;
@@ -158,7 +160,8 @@ MooseObjectTagWarehouse<T>::getMatrixTagObjectWarehouse(TagID tag_id, THREAD_ID 
 
 template <typename T>
 MooseObjectWarehouse<T> &
-MooseObjectTagWarehouse<T>::getVectorTagsObjectWarehouse(std::set<TagID> & v_tags, THREAD_ID tid)
+MooseObjectTagWarehouse<T>::getVectorTagsObjectWarehouse(const std::set<TagID> & v_tags,
+                                                         THREAD_ID tid)
 {
   // std::map is not thread-safe for writes
   auto & vector_tags_to_object_warehouse = _vector_tags_to_object_warehouse[tid];
@@ -196,7 +199,8 @@ MooseObjectTagWarehouse<T>::getVectorTagsObjectWarehouse(std::set<TagID> & v_tag
 
 template <typename T>
 MooseObjectWarehouse<T> &
-MooseObjectTagWarehouse<T>::getMatrixTagsObjectWarehouse(std::set<TagID> & m_tags, THREAD_ID tid)
+MooseObjectTagWarehouse<T>::getMatrixTagsObjectWarehouse(const std::set<TagID> & m_tags,
+                                                         THREAD_ID tid)
 {
   auto & matrix_tags_to_object_warehouse = _matrix_tags_to_object_warehouse[tid];
 

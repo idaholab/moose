@@ -22,7 +22,8 @@
 
 #include "libmesh/threads.h"
 
-ComputeJacobianThread::ComputeJacobianThread(FEProblemBase & fe_problem, std::set<TagID> & tags)
+ComputeJacobianThread::ComputeJacobianThread(FEProblemBase & fe_problem,
+                                             const std::set<TagID> & tags)
   : ThreadedElementLoop<ConstElemRange>(fe_problem),
     _nl(fe_problem.getNonlinearSystemBase()),
     _num_cached(0),

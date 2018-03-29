@@ -907,9 +907,9 @@ public:
 
   virtual void computeJacobianInternal(const NumericVector<Number> & soln,
                                        SparseMatrix<Number> & jacobian,
-                                       std::set<TagID> & tags);
+                                       const std::set<TagID> & tags);
 
-  virtual void computeJacobianTags(std::set<TagID> & tags);
+  virtual void computeJacobianTags(const std::set<TagID> & tags);
 
   /**
    * Computes several Jacobian blocks simultaneously, summing their contributions into smaller

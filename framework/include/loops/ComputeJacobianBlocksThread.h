@@ -42,7 +42,7 @@ class ComputeJacobianBlocksThread : public ComputeFullJacobianThread
 public:
   ComputeJacobianBlocksThread(FEProblemBase & fe_problem,
                               std::vector<JacobianBlock *> & blocks,
-                              std::set<TagID> & tags);
+                              const std::set<TagID> & tags);
 
   // Splitting Constructor
   ComputeJacobianBlocksThread(ComputeJacobianBlocksThread & x, Threads::split split);

@@ -20,7 +20,7 @@
 
 ComputeJacobianBlocksThread::ComputeJacobianBlocksThread(FEProblemBase & fe_problem,
                                                          std::vector<JacobianBlock *> & blocks,
-                                                         std::set<TagID> & tags)
+                                                         const std::set<TagID> & tags)
   : ComputeFullJacobianThread(fe_problem, tags), _blocks(blocks)
 {
 }
