@@ -147,11 +147,14 @@ MooseVariableFE::prepareAux()
 void
 MooseVariableFE::reinitNode()
 {
-  if (_node->n_dofs(_sys.number(), _var_num) > 0)
+  if (size_t n_dofs = _node->n_dofs(_sys.number(), _var_num))
   {
-    _nodal_dof_index = _node->dof_number(_sys.number(), _var_num, 0);
-    _dof_indices.resize(1);
-    _dof_indices[0] = _nodal_dof_index;
+    _dof_indices.resize(n_dofs);
+    for (size_t i = 0; i < n_dofs; ++i)
+      _dof_indices[i] = _node->dof_number(_sys.number(), _var_num, i);
+    // For standard variables. _nodal_dof_index is retrieved by nodalDofIndex() which is used in
+    // NodalBC for example
+    _nodal_dof_index = _dof_indices[0];
     _has_dofs = true;
   }
   else
