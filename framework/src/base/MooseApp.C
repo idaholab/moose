@@ -50,6 +50,11 @@
 // C++ includes
 #include <numeric> // std::accumulate
 #include <fstream>
+#include <sys/types.h>
+#include <unistd.h>
+#include <stdlib.h> // for system()
+#include <chrono>
+#include <thread>
 
 #define QUOTE(macro) stringifyName(macro)
 
@@ -215,6 +220,13 @@ validParams<MooseApp>()
       false,
       "Keep standard output from all processors when running in parallel");
 
+  // Options for debugging
+  params.addCommandLineParam<std::string>("start_in_debugger",
+                                          "--start-in-debugger [debugger]",
+                                          "Start the application and attach a debugger.  This will "
+                                          "launch xterm windows using the command you specify for "
+                                          "'debugger'");
+
   params.addPrivateParam<std::string>("_app_name"); // the name passed to AppFactory::create
   params.addPrivateParam<std::string>("_type");
   params.addPrivateParam<int>("_argc");
@@ -279,6 +291,37 @@ MooseApp::MooseApp(InputParameters parameters)
 
   if (_check_input && isParamValid("recover"))
     mooseError("Cannot run --check-input with --recover. Recover files might not exist");
+
+  if (isParamValid("start_in_debugger"))
+  {
+    auto command = getParam<std::string>("start_in_debugger");
+
+    if (command == "")
+      mooseError("Must specify debugging command to use for --start-in-debugger");
+
+    Moose::out << "Starting in debugger using: " << command << std::endl;
+
+    std::stringstream command_stream;
+
+    command_stream << "xterm -e ";
+
+    if (command.find("lldb") != std::string::npos || command.find("gdb") != std::string::npos)
+      command_stream << command << " -p " << getpid() << " & ";
+    else
+      mooseError("Unknown debugger: ",
+                 command,
+                 "\nIf this is truly what you meant then contact moose-users to have a discussion "
+                 "about adding your debugger.");
+
+    std::string command_string = command_stream.str();
+
+    std::cout << "Running: " << command_string << std::endl;
+
+    system(command_string.c_str());
+
+    // Sleep to allow time for the debugger to attach
+    std::this_thread::sleep_for(std::chrono::seconds(10));
+  }
 }
 
 void
