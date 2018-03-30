@@ -52,8 +52,6 @@ public:
   CommandLine(int argc, char * argv[]);
   virtual ~CommandLine();
 
-  void parseInputParams(const InputParameters & params);
-
   void addCommandLineOptionsFromParams(InputParameters & params);
 
   void populateInputParams(InputParameters & params);
