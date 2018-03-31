@@ -11,3 +11,5 @@
 [Hypre/BoomerAMG Preconditioning](hypre.md)
 
 [Code Standards](code_standards.md)
+
+[Debugging](/debugging.md)
