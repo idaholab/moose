@@ -356,7 +356,11 @@ hostname()
   // This is from: https://stackoverflow.com/a/505546
   char hostname[1024];
   hostname[1023] = '\0';
-  gethostname(hostname, 1023);
+
+  auto failure = gethostname(hostname, 1023);
+
+  if (failure)
+    mooseError("Failed to retrieve hostname!");
 
   return hostname;
 }
