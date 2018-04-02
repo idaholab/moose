@@ -33,8 +33,10 @@ protected:
   const MaterialProperty<Real> * const _drho_dbeta;
   const MaterialProperty<Real> & _drho_darhoA;
 
-  /// x-component of gravity
-  const VariableValue & _gx;
+  /// The direction of the pipe
+  const MaterialProperty<RealVectorValue> & _dir;
+  /// The global gravity vector
+  RealVectorValue _gravity_vector;
 
   const unsigned int _beta_var_number;
   const unsigned int _arhoA_var_number;

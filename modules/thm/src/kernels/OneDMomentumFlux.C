@@ -15,6 +15,8 @@ validParams<OneDMomentumFlux>()
   params.addRequiredCoupledVar("arhouA", "alpha*rho*u*A");
   params.addRequiredCoupledVar("arhoEA", "alpha*rho*E*A");
 
+  params.addRequiredParam<MaterialPropertyName>("direction",
+                                                "The direction of the pipe material property");
   params.addRequiredParam<MaterialPropertyName>("alpha", "Volume fraction material property");
   params.addRequiredParam<MaterialPropertyName>("rho", "Density material property");
   params.addRequiredParam<MaterialPropertyName>("vel", "Velocity material property");
@@ -29,6 +31,8 @@ OneDMomentumFlux::OneDMomentumFlux(const InputParameters & parameters)
     _has_beta(isCoupled("beta")),
 
     _A(coupledValue("A")),
+
+    _dir(getMaterialProperty<RealVectorValue>("direction")),
 
     _alpha(getMaterialProperty<Real>("alpha")),
     _dalpha_dbeta(_has_beta ? &getMaterialPropertyDerivativeRelap<Real>("alpha", "beta") : nullptr),
@@ -57,15 +61,15 @@ OneDMomentumFlux::OneDMomentumFlux(const InputParameters & parameters)
 Real
 OneDMomentumFlux::computeQpResidual()
 {
-  return -_alpha[_qp] * (_rho[_qp] * _vel[_qp] * _vel[_qp] + _p[_qp]) * _A[_qp] *
-         _grad_test[_i][_qp](0);
+  return -_alpha[_qp] * (_rho[_qp] * _vel[_qp] * _vel[_qp] + _p[_qp]) * _A[_qp] * _dir[_qp] *
+         _grad_test[_i][_qp];
 }
 
 Real
 OneDMomentumFlux::computeQpJacobian()
 {
   return -_alpha[_qp] * (_rho[_qp] * 2.0 * _vel[_qp] * _dvel_darhouA[_qp] + _dp_darhouA[_qp]) *
-         _A[_qp] * _phi[_j][_qp] * _grad_test[_i][_qp](0);
+         _A[_qp] * _dir[_qp] * _phi[_j][_qp] * _grad_test[_i][_qp];
 }
 
 Real
@@ -73,19 +77,21 @@ OneDMomentumFlux::computeQpOffDiagJacobian(unsigned int jvar)
 {
   if (jvar == _arhoA_var_number)
   {
-    return -_alpha[_qp] * (_drho_darhoA[_qp] * _vel[_qp] * _vel[_qp] +
-                           _rho[_qp] * 2.0 * _vel[_qp] * _dvel_darhoA[_qp] + _dp_darhoA[_qp]) *
-           _A[_qp] * _phi[_j][_qp] * _grad_test[_i][_qp](0);
+    return -_alpha[_qp] *
+           (_drho_darhoA[_qp] * _vel[_qp] * _vel[_qp] +
+            _rho[_qp] * 2.0 * _vel[_qp] * _dvel_darhoA[_qp] + _dp_darhoA[_qp]) *
+           _A[_qp] * _dir[_qp] * _phi[_j][_qp] * _grad_test[_i][_qp];
   }
   else if (jvar == _arhoEA_var_number)
   {
-    return -_alpha[_qp] * _dp_darhoEA[_qp] * _A[_qp] * _phi[_j][_qp] * _grad_test[_i][_qp](0);
+    return -_alpha[_qp] * _dp_darhoEA[_qp] * _A[_qp] * _dir[_qp] * _phi[_j][_qp] *
+           _grad_test[_i][_qp];
   }
   else if (jvar == _beta_var_number)
   {
     return -((*_dalpha_dbeta)[_qp] * (_rho[_qp] * _vel[_qp] * _vel[_qp] + _p[_qp]) +
              _alpha[_qp] * ((*_drho_dbeta)[_qp] * _vel[_qp] * _vel[_qp] + (*_dp_dbeta)[_qp])) *
-           _A[_qp] * _phi[_j][_qp] * _grad_test[_i][_qp](0);
+           _A[_qp] * _dir[_qp] * _phi[_j][_qp] * _grad_test[_i][_qp];
   }
   else
     return 0.;

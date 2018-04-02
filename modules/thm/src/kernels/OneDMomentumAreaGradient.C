@@ -12,6 +12,8 @@ validParams<OneDMomentumAreaGradient>()
   params.addRequiredCoupledVar("arhoEA", "The total energy of the kth phase");
   params.addRequiredCoupledVar("A", "Cross-sectional area");
   params.addCoupledVar("beta", 0, "Remapped volume fraction of liquid (two-phase only)");
+  params.addRequiredParam<MaterialPropertyName>("direction",
+                                                "The direction of the pipe material property");
   params.addRequiredParam<MaterialPropertyName>("p", "Pressure");
   params.addRequiredParam<MaterialPropertyName>("alpha", "Volume fraction material property");
   return params;
@@ -25,6 +27,7 @@ OneDMomentumAreaGradient::OneDMomentumAreaGradient(const InputParameters & param
 
     _area(coupledValue("A")),
     _area_grad(coupledGradient("A")),
+    _dir(getMaterialProperty<RealVectorValue>("direction")),
     _pressure(getMaterialProperty<Real>("p")),
     _dp_dbeta(isCoupled("beta") ? &getMaterialPropertyDerivativeRelap<Real>("p", "beta") : nullptr),
     _dp_darhoA(getMaterialPropertyDerivativeRelap<Real>("p", "arhoA")),
@@ -40,13 +43,14 @@ OneDMomentumAreaGradient::OneDMomentumAreaGradient(const InputParameters & param
 Real
 OneDMomentumAreaGradient::computeQpResidual()
 {
-  return -_pressure[_qp] * _alpha[_qp] * _area_grad[_qp](0) * _test[_i][_qp];
+  return -_pressure[_qp] * _alpha[_qp] * _area_grad[_qp] * _dir[_qp] * _test[_i][_qp];
 }
 
 Real
 OneDMomentumAreaGradient::computeQpJacobian()
 {
-  return -_dp_darhouA[_qp] * _alpha[_qp] * _area_grad[_qp](0) * _phi[_j][_qp] * _test[_i][_qp];
+  return -_dp_darhouA[_qp] * _alpha[_qp] * _area_grad[_qp] * _dir[_qp] * _phi[_j][_qp] *
+         _test[_i][_qp];
 }
 
 Real
@@ -54,16 +58,18 @@ OneDMomentumAreaGradient::computeQpOffDiagJacobian(unsigned int jvar)
 {
   if (jvar == _arhoA_var_number)
   {
-    return -_dp_darhoA[_qp] * _alpha[_qp] * _area_grad[_qp](0) * _phi[_j][_qp] * _test[_i][_qp];
+    return -_dp_darhoA[_qp] * _alpha[_qp] * _area_grad[_qp] * _dir[_qp] * _phi[_j][_qp] *
+           _test[_i][_qp];
   }
   else if (jvar == _arhoE_var_number)
   {
-    return -_dp_darhoEA[_qp] * _alpha[_qp] * _area_grad[_qp](0) * _phi[_j][_qp] * _test[_i][_qp];
+    return -_dp_darhoEA[_qp] * _alpha[_qp] * _area_grad[_qp] * _dir[_qp] * _phi[_j][_qp] *
+           _test[_i][_qp];
   }
   else if (jvar == _beta_var_number)
   {
     return -((*_dp_dbeta)[_qp] * _alpha[_qp] + _pressure[_qp] * (*_dalpha_dbeta)[_qp]) *
-           _area_grad[_qp](0) * _phi[_j][_qp] * _test[_i][_qp];
+           _area_grad[_qp] * _dir[_qp] * _phi[_j][_qp] * _test[_i][_qp];
   }
   else
     return 0;

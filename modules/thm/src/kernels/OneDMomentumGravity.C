@@ -13,10 +13,12 @@ validParams<OneDMomentumGravity>()
   params.addCoupledVar("beta", "Remapped volume fraction of liquid (two-phase only)");
   params.addRequiredCoupledVar("arhoA", "alpha*rho*A");
 
+  params.addRequiredParam<MaterialPropertyName>("direction",
+                                                "The direction of the pipe material property");
   params.addRequiredParam<MaterialPropertyName>("alpha", "Volume fraction property");
   params.addRequiredParam<MaterialPropertyName>("rho", "Density property");
 
-  params.addRequiredCoupledVar("gx", "x-component of acceleration due to gravity");
+  params.addRequiredParam<RealVectorValue>("gravity_vector", "Gravity vector");
 
   return params;
 }
@@ -34,7 +36,8 @@ OneDMomentumGravity::OneDMomentumGravity(const InputParameters & parameters)
     _drho_dbeta(_has_beta ? &getMaterialPropertyDerivativeRelap<Real>("rho", "beta") : nullptr),
     _drho_darhoA(getMaterialPropertyDerivativeRelap<Real>("rho", "arhoA")),
 
-    _gx(coupledValue("gx")),
+    _dir(getMaterialProperty<RealVectorValue>("direction")),
+    _gravity_vector(getParam<RealVectorValue>("gravity_vector")),
 
     _beta_var_number(_has_beta ? coupled("beta") : libMesh::invalid_uint),
     _arhoA_var_number(coupled("arhoA"))
@@ -44,7 +47,7 @@ OneDMomentumGravity::OneDMomentumGravity(const InputParameters & parameters)
 Real
 OneDMomentumGravity::computeQpResidual()
 {
-  return -_alpha[_qp] * _rho[_qp] * _A[_qp] * _gx[_qp] * _test[_i][_qp];
+  return -_alpha[_qp] * _rho[_qp] * _A[_qp] * _gravity_vector * _dir[_qp] * _test[_i][_qp];
 }
 
 Real
@@ -59,11 +62,12 @@ OneDMomentumGravity::computeQpOffDiagJacobian(unsigned int jvar)
   if (jvar == _beta_var_number)
   {
     return -((*_dalpha_dbeta)[_qp] * _rho[_qp] + _alpha[_qp] * (*_drho_dbeta)[_qp]) * _A[_qp] *
-           _gx[_qp] * _phi[_j][_qp] * _test[_i][_qp];
+           _gravity_vector * _dir[_qp] * _phi[_j][_qp] * _test[_i][_qp];
   }
   else if (jvar == _arhoA_var_number)
   {
-    return -_alpha[_qp] * _drho_darhoA[_qp] * _A[_qp] * _gx[_qp] * _phi[_j][_qp] * _test[_i][_qp];
+    return -_alpha[_qp] * _drho_darhoA[_qp] * _A[_qp] * _gravity_vector * _dir[_qp] *
+           _phi[_j][_qp] * _test[_i][_qp];
   }
   else
     return 0;

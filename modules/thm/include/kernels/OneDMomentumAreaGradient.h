@@ -33,6 +33,9 @@ protected:
   const VariableValue & _area;
   const VariableGradient & _area_grad;
 
+  /// The direction of the pipe
+  const MaterialProperty<RealVectorValue> & _dir;
+
   const MaterialProperty<Real> & _pressure;
   const MaterialProperty<Real> * const _dp_dbeta;
   const MaterialProperty<Real> & _dp_darhoA;
