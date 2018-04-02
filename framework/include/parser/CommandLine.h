@@ -52,8 +52,6 @@ public:
   CommandLine(int argc, char * argv[]);
   virtual ~CommandLine();
 
-  void parseInputParams(const InputParameters & params);
-
   void addCommandLineOptionsFromParams(InputParameters & params);
 
   void populateInputParams(InputParameters & params);
@@ -102,6 +100,12 @@ public:
   }
 
 protected:
+  /**
+   * Used to set the argument value, allows specialization
+   */
+  template <typename T>
+  void setArgument(std::stringstream & stream, T & argument);
+
   /// Command line options
   std::map<std::string, Option> _cli_options;
 
@@ -112,6 +116,17 @@ private:
   char ** _argv = nullptr;
   std::vector<std::string> _args;
 };
+
+template <typename T>
+void
+CommandLine::setArgument(std::stringstream & stream, T & argument)
+{
+  stream >> argument;
+}
+
+// Specialization for std::string
+template <>
+void CommandLine::setArgument<std::string>(std::stringstream & stream, std::string & argument);
 
 template <typename T>
 bool
@@ -126,6 +141,7 @@ CommandLine::search(const std::string & option_name, T & argument)
       for (size_t j = 0; j < _args.size(); j++)
       {
         auto arg = _args[j];
+
         if (arg == pos->second.cli_switch[i])
         {
           // "Flag" CLI options are added as Boolean types, when we see them
@@ -136,7 +152,8 @@ CommandLine::search(const std::string & option_name, T & argument)
           {
             std::stringstream ss;
             ss << _args[j + 1];
-            ss >> argument;
+
+            setArgument(ss, argument);
           }
           return true;
         }

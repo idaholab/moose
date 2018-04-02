@@ -10,6 +10,7 @@ Getting Started:
     Manual Install: getting_started/installation/manual_installation.md
 Documentation:
     Systems: documentation/systems/index.md
+    Application Usage: documentation/application_usage/index.md
     Application Development: documentation/application_development/index.md
     Framework Development: documentation/framework_development/index.md
     Finite Element Concepts: documentation/finite_element_concepts/index.md
