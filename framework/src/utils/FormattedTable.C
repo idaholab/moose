@@ -82,6 +82,9 @@ FormattedTable::open(const std::string & file_name)
   }
 
   _output_file.open(file_name.c_str(), open_flags);
+  if (_output_file.fail())
+    mooseError("Unable to open file ", file_name);
+
   _stream_open = true;
 }
 
@@ -519,6 +522,8 @@ FormattedTable::makeGnuplot(const std::string & base_file, const std::string & f
   std::string dat_name = base_file + ".dat";
   std::ofstream datfile;
   datfile.open(dat_name.c_str(), std::ios::trunc | std::ios::out);
+  if (datfile.fail())
+    mooseError("Unable to open file ", dat_name);
 
   datfile << "# time";
   for (const auto & col_name : _column_names)
@@ -542,6 +547,8 @@ FormattedTable::makeGnuplot(const std::string & base_file, const std::string & f
   std::string gp_name = base_file + ".gp";
   std::ofstream gpfile;
   gpfile.open(gp_name.c_str(), std::ios::trunc | std::ios::out);
+  if (gpfile.fail())
+    mooseError("Unable to open file ", gp_name);
 
   gpfile << gnuplot::before_terminal << terminal << gnuplot::before_ext << extension
          << gnuplot::after_ext;
@@ -571,17 +578,6 @@ FormattedTable::makeGnuplot(const std::string & base_file, const std::string & f
 
   gpfile.flush();
   gpfile.close();
-
-  // Run the gnuplot script
-  /* We aren't going to run gnuplot automatically
-
-    if (!system(NULL))
-      mooseError("No way to run gnuplot on this computer");
-
-    std::string command = "gnuplot " + gp_name;
-    if (system(command.c_str()))
-      mooseError("gnuplot command failed");
-  */
 }
 
 void
