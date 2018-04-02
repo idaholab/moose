@@ -71,6 +71,7 @@ FlowModelSinglePhase::addMooseObjects()
 
   const InputParameters & pars = _pipe.parameters();
   const std::string fp_name = pars.get<UserObjectName>("fp");
+  const RealVectorValue gravity_vector = pars.get<RealVectorValue>("gravity");
 
   // coupling vectors
   std::vector<VariableName> cv_rho(1, DENSITY);
@@ -90,7 +91,6 @@ FlowModelSinglePhase::addMooseObjects()
   std::vector<VariableName> cv_rhoEA(1, RHOEA);
   std::vector<VariableName> cv_area(1, AREA);
   std::vector<VariableName> cv_D_h(1, HYDRAULIC_DIAMETER);
-  std::vector<VariableName> cv_gx(1, GRAVITY_X);
 
   ////////////////////////////////////////////////////////
   // Adding kernels
@@ -115,6 +115,7 @@ FlowModelSinglePhase::addMooseObjects()
     params.set<std::vector<VariableName>>("A") = cv_area;
     params.set<std::vector<VariableName>>("arhoA") = cv_rhoA;
     params.set<std::vector<VariableName>>("arhouA") = cv_rhouA;
+    params.set<MaterialPropertyName>("direction") = DIRECTION;
     params.set<MaterialPropertyName>("alpha") = UNITY;
     params.set<MaterialPropertyName>("rho") = DENSITY;
     params.set<MaterialPropertyName>("vel") = VELOCITY;
@@ -143,6 +144,7 @@ FlowModelSinglePhase::addMooseObjects()
     params.set<std::vector<VariableName>>("arhoA") = cv_rhoA;
     params.set<std::vector<VariableName>>("arhouA") = cv_rhouA;
     params.set<std::vector<VariableName>>("arhoEA") = cv_rhoEA;
+    params.set<MaterialPropertyName>("direction") = DIRECTION;
     params.set<MaterialPropertyName>("alpha") = UNITY;
     params.set<MaterialPropertyName>("rho") = DENSITY;
     params.set<MaterialPropertyName>("vel") = VELOCITY;
@@ -157,6 +159,7 @@ FlowModelSinglePhase::addMooseObjects()
     params.set<std::vector<VariableName>>("arhoA") = cv_rhoA;
     params.set<std::vector<VariableName>>("arhouA") = cv_rhouA;
     params.set<std::vector<VariableName>>("A") = cv_area;
+    params.set<MaterialPropertyName>("direction") = DIRECTION;
     params.set<MaterialPropertyName>("p") = PRESSURE;
     params.set<MaterialPropertyName>("alpha") = UNITY;
     params.set<std::vector<VariableName>>("arhoEA") = cv_rhoEA;
@@ -183,9 +186,10 @@ FlowModelSinglePhase::addMooseObjects()
     params.set<std::vector<SubdomainName>>("block") = _pipe.getSubdomainNames();
     params.set<std::vector<VariableName>>("A") = cv_area;
     params.set<std::vector<VariableName>>("arhoA") = cv_rhoA;
+    params.set<MaterialPropertyName>("direction") = DIRECTION;
     params.set<MaterialPropertyName>("alpha") = UNITY;
     params.set<MaterialPropertyName>("rho") = DENSITY;
-    params.set<std::vector<VariableName>>("gx") = cv_gx;
+    params.set<RealVectorValue>("gravity_vector") = gravity_vector;
     _sim.addKernel(class_name, Component::genName(_comp_name, "rhou_gravity"), params);
   }
 
@@ -210,6 +214,7 @@ FlowModelSinglePhase::addMooseObjects()
     params.set<std::vector<VariableName>>("arhoA") = cv_rhoA;
     params.set<std::vector<VariableName>>("arhouA") = cv_rhouA;
     params.set<std::vector<VariableName>>("arhoEA") = cv_rhoEA;
+    params.set<MaterialPropertyName>("direction") = DIRECTION;
     params.set<MaterialPropertyName>("alpha") = UNITY;
     params.set<MaterialPropertyName>("rho") = DENSITY;
     params.set<MaterialPropertyName>("vel") = VELOCITY;
@@ -225,10 +230,11 @@ FlowModelSinglePhase::addMooseObjects()
     params.set<std::vector<VariableName>>("A") = cv_area;
     params.set<std::vector<VariableName>>("arhoA") = cv_rhoA;
     params.set<std::vector<VariableName>>("arhouA") = cv_rhouA;
+    params.set<MaterialPropertyName>("direction") = DIRECTION;
     params.set<MaterialPropertyName>("alpha") = UNITY;
     params.set<MaterialPropertyName>("rho") = DENSITY;
     params.set<MaterialPropertyName>("vel") = VELOCITY;
-    params.set<std::vector<VariableName>>("gx") = cv_gx;
+    params.set<RealVectorValue>("gravity_vector") = gravity_vector;
     _sim.addKernel(class_name, Component::genName(_comp_name, "rhoE_gravity"), params);
   }
 
