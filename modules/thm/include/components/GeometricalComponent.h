@@ -21,14 +21,6 @@ class GeometricalComponent : public Component
 public:
   GeometricalComponent(const InputParameters & parameters);
 
-  /**
-   * Method that moves the nodes from reference space into the physical space.
-   * Child classes are required to call this in addMooseObjects() if they want to perform such a
-   * transformation. Non-straight components can override this method to do their component-specific
-   * transformation
-   */
-  virtual void displaceMesh(const std::vector<SubdomainName> & blocks);
-
   virtual Point getPosition() const { return _position; }
   virtual RealVectorValue getDirection() const { return _dir; }
   virtual Real getRotation() const { return _rotation; }
@@ -74,6 +66,7 @@ public:
 
 protected:
   virtual void check() override;
+  virtual void computeMeshTransformation();
   virtual void setupMesh() override;
 
   virtual void buildMesh() = 0;
@@ -143,6 +136,11 @@ protected:
   std::vector<SubdomainName> _subdomain_names;
   /// List of coordinate system for each subdomain
   std::vector<Moose::CoordinateSystemType> _coord_sys;
+
+  /// Rotational matrix about x-axis
+  RealTensorValue _Rx;
+  /// Rotational matrix to place the node in its final position
+  RealTensorValue _R;
 
 private:
   void generateNodeLocations();

@@ -56,18 +56,44 @@ GeometricalComponent::computeNumberOfNodes(unsigned int n_elems)
 }
 
 void
+GeometricalComponent::computeMeshTransformation()
+{
+  Real rotation_rad = M_PI * _rotation / 180.;
+  // rows of rotation matrix to rotate about x-axis
+  RealVectorValue Rx_x(1., 0., 0.);
+  RealVectorValue Rx_y(0., cos(rotation_rad), -sin(rotation_rad));
+  RealVectorValue Rx_z(0., sin(rotation_rad), cos(rotation_rad));
+  _Rx = RealTensorValue(Rx_x, Rx_y, Rx_z);
+
+  // figure out the rotation
+  Real r = _dir.norm();
+  Real theta = acos(_dir(2) / r);
+  Real aphi = atan2(_dir(1), _dir(0));
+  // rows of transformation matrix
+  RealVectorValue x(
+      cos(-aphi) * cos(M_PI / 2. - theta), sin(-aphi), -cos(-aphi) * sin(M_PI / 2. - theta));
+  RealVectorValue y(
+      -sin(-aphi) * cos(M_PI / 2. - theta), cos(-aphi), sin(-aphi) * sin(M_PI / 2. - theta));
+  RealVectorValue z(sin(M_PI / 2. - theta), 0.0, cos(M_PI / 2. - theta));
+  _R = RealTensorValue(x, y, z);
+}
+
+void
 GeometricalComponent::setupMesh()
 {
+  computeMeshTransformation();
   generateNodeLocations();
   unsigned int first_node_id = _mesh.nNodes();
   buildMesh();
   unsigned int last_node_id = _mesh.nNodes();
 
-  // shift the component in z-direction so they do not overlap
-  // NOTE: we are using 1D elements, so shifting each component by 1 is ok for now
-  // When using 2D or even 3D meshes, this has to be way smarter
+  // displace nodes
   for (unsigned int node_id = first_node_id; node_id < last_node_id; node_id++)
-    _mesh.nodeRef(node_id)(2) += id();
+  {
+    Node & curr_node = _mesh.nodeRef(node_id);
+    RealVectorValue p(curr_node(0), curr_node(1), curr_node(2));
+    curr_node = _R * (_Rx * (p + _offset)) + _position;
+  }
 }
 
 void
@@ -85,24 +111,6 @@ GeometricalComponent::check()
       logError("Cannot use TRAP quadrature rule with 2nd order elements.  Use SIMPSON or GAUSS "
                "instead.");
   }
-}
-
-void
-GeometricalComponent::displaceMesh(const std::vector<SubdomainName> & blocks)
-{
-  ExecFlagEnum execute_on(MooseUtils::getDefaultExecFlagEnum());
-  execute_on = {EXEC_INITIAL, EXEC_TIMESTEP_BEGIN};
-
-  std::string class_name = "DisplaceNodeUserObject";
-  InputParameters params = _factory.getValidParams(class_name);
-  params.set<std::vector<SubdomainName>>("block") = blocks;
-  params.set<ExecFlagEnum>("execute_on") = execute_on;
-  params.set<Point>("position") = _position;
-  params.set<RealVectorValue>("offset") = _offset;
-  params.set<RealVectorValue>("orientation") = _dir;
-  params.set<Real>("rotation") = _rotation;
-  params.set<unsigned int>("id") = id();
-  _sim.addUserObject(class_name, genName(name(), "displace_node"), params);
 }
 
 const std::vector<unsigned int> &
