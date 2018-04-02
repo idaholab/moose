@@ -184,6 +184,9 @@ MultiApp::init(unsigned int num)
   _backups.reserve(_my_num_apps);
   for (unsigned int i = 0; i < _my_num_apps; i++)
     _backups.emplace_back(std::make_shared<Backup>());
+
+  _has_bounding_box.resize(_my_num_apps, false);
+  _bounding_box.resize(_my_num_apps);
 }
 
 void
@@ -377,11 +380,20 @@ MultiApp::getBoundingBox(unsigned int app, bool displaced_mesh)
                          ? fe_problem_base.getDisplacedProblem()->mesh()
                          : fe_problem_base.mesh();
 
-  BoundingBox bbox = {};
   {
     Moose::ScopedCommSwapper swapper(_my_comm);
-    bbox = MeshTools::create_bounding_box(mesh);
+    if (displaced_mesh)
+      _bounding_box[local_app] = MeshTools::create_bounding_box(mesh);
+    else
+    {
+      if (!_has_bounding_box[local_app])
+      {
+        _bounding_box[local_app] = MeshTools::create_bounding_box(mesh);
+        _has_bounding_box[local_app] = true;
+      }
+    }
   }
+  BoundingBox bbox = _bounding_box[local_app];
 
   Point min = bbox.min();
   min -= _bounding_box_padding;

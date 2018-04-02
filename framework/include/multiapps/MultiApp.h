@@ -368,6 +368,12 @@ protected:
   /// Pointers to each of the Apps
   std::vector<std::shared_ptr<MooseApp>> _apps;
 
+  /// Flag if this multi-app computed its bounding box (valid only for non-displaced meshes)
+  std::vector<bool> _has_bounding_box;
+
+  /// This multi-app's bounding box
+  std::vector<BoundingBox> _bounding_box;
+
   /// Relative bounding box inflation
   Real _inflation;
 
