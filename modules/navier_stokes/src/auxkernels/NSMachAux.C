@@ -12,7 +12,7 @@
 #include "NS.h"
 
 // FluidProperties includes
-#include "IdealGasFluidProperties.h"
+#include "SinglePhaseFluidProperties.h"
 
 // MOOSE includes
 #include "MooseMesh.h"
@@ -45,7 +45,7 @@ NSMachAux::NSMachAux(const InputParameters & parameters)
     _w_vel(_mesh.dimension() == 3 ? coupledValue(NS::velocity_z) : _zero),
     _specific_volume(coupledValue(NS::specific_volume)),
     _internal_energy(coupledValue(NS::internal_energy)),
-    _fp(getUserObject<IdealGasFluidProperties>("fluid_properties"))
+    _fp(getUserObject<SinglePhaseFluidProperties>("fluid_properties"))
 {
 }
 
