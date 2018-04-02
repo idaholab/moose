@@ -847,6 +847,11 @@ class TestHarness:
         if opts.sep_files:
             opts.ok_files = True
             opts.fail_files = True
+            opts.quiet = True
+
+        # User wants only failed files, so unify the options involved
+        elif opts.fail_files:
+            opts.quiet = True
 
     def postRun(self, specs, timing):
         return
