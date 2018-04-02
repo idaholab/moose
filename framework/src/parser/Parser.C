@@ -1077,7 +1077,9 @@ Parser::extractParams(const std::string & prefix, InputParameters & p)
       setscalarvaltype(Real, double, Real);
       setscalarvaltype(int, int, long);
       setscalarvaltype(long, int, long);
-      setscalarvaltype(unsigned int, int, long);
+      setscalarvaltype(unsigned int, unsigned int, long);
+      setscalarvaltype(unsigned long, unsigned int, long);
+      setscalarvaltype(long int, int64_t, long);
 
       setscalar(bool, bool);
       setscalar(SubdomainID, int);

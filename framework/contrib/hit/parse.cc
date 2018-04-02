@@ -199,7 +199,7 @@ Node::boolVal()
 {
   valthrow();
 }
-int
+int64_t
 Node::intVal()
 {
   valthrow();
@@ -582,7 +582,7 @@ Field::boolVal()
   toBool(_val, &v);
   return v;
 }
-int
+int64_t
 Field::intVal()
 {
   if (_kind != Kind::Int)
@@ -591,7 +591,7 @@ Field::intVal()
   try
   {
     size_t pos = 0;
-    auto converted_val = std::stoi(_val, &pos);
+    auto converted_val = std::stoll(_val, &pos);
     if (pos != _val.size())
       throw std::invalid_argument("dummy");
     return converted_val;

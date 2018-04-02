@@ -5,6 +5,7 @@
 #include <vector>
 #include <algorithm>
 #include <typeinfo>
+#include <cstdint>
 
 #include "lex.h"
 
@@ -145,7 +146,7 @@ public:
   /// indicated in the function name. If the node holds a value of a different type or doesn't hold
   /// a value at all, an exception will be thrown.
   virtual bool boolVal();
-  virtual int intVal();
+  virtual int64_t intVal();
   virtual double floatVal();
   /// strVal is special in that it only throws an exception if the node doesn't hold a value at
   /// all.  All nodes with a value hold data that was originally represented as a string in the
@@ -237,6 +238,12 @@ inline bool
 Node::paramInner(Node * n)
 {
   return n->boolVal();
+}
+template <>
+inline int64_t
+Node::paramInner(Node * n)
+{
+  return n->intVal();
 }
 template <>
 inline int
@@ -397,7 +404,7 @@ public:
   virtual std::vector<int> vecIntVal() override;
   virtual std::vector<std::string> vecStrVal() override;
   virtual bool boolVal() override;
-  virtual int intVal() override;
+  virtual int64_t intVal() override;
   virtual double floatVal() override;
   virtual std::string strVal() override;
 
