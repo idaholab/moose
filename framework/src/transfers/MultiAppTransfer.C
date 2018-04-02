@@ -55,8 +55,8 @@ MultiAppTransfer::MultiAppTransfer(const InputParameters & parameters)
   : Transfer(parameters),
     _multi_app(_fe_problem.getMultiApp(getParam<MultiAppName>("multi_app"))),
     _direction(getParam<MooseEnum>("direction")),
-    _displaced_source_mesh(false),
-    _displaced_target_mesh(false)
+    _displaced_source_mesh(getParam<bool>("displaced_source_mesh")),
+    _displaced_target_mesh(getParam<bool>("displaced_target_mesh"))
 {
   bool check = getParam<bool>("check_multiapp_execute_on");
   if (check && (getExecuteOnEnum() != _multi_app->getExecuteOnEnum()))
