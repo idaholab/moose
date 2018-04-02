@@ -32,7 +32,7 @@ class BoundingBox;
 }
 template <typename T>
 class NumericVector;
-}
+} // namespace libMesh
 
 template <>
 InputParameters validParams<MultiApp>();
@@ -155,8 +155,9 @@ public:
    * the size it would be if the geometry were 3D (ie if you were to revolve
    * the geometry around the axis to create the 3D geometry).
    * @param app The global app number you want to get the bounding box for
+   * @param displaced_mesh True if the bounding box is retrieved for the displaced mesh, other false
    */
-  virtual BoundingBox getBoundingBox(unsigned int app);
+  virtual BoundingBox getBoundingBox(unsigned int app, bool displaced_mesh);
 
   /**
    * Get the FEProblemBase this MultiApp is part of.
@@ -367,8 +368,17 @@ protected:
   /// Pointers to each of the Apps
   std::vector<std::shared_ptr<MooseApp>> _apps;
 
+  /// Flag if this multi-app computed its bounding box (valid only for non-displaced meshes)
+  std::vector<bool> _has_bounding_box;
+
+  /// This multi-app's bounding box
+  std::vector<BoundingBox> _bounding_box;
+
   /// Relative bounding box inflation
   Real _inflation;
+
+  /// Additional padding added to the bounding box, useful for 1D meshes
+  Point _bounding_box_padding;
 
   /// Maximum number of processors to give to each app
   unsigned int _max_procs_per_app;

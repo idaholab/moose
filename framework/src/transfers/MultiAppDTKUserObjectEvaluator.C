@@ -77,7 +77,7 @@ MultiAppDTKUserObjectEvaluator::createSourceGeometry(
   {
     unsigned int global_app = _multi_app.firstLocalApp() + app;
 
-    BoundingBox bbox = _multi_app.getBoundingBox(global_app);
+    BoundingBox bbox = _multi_app.getBoundingBox(global_app, false);
 
     _boxes[app] = DataTransferKit::Box(
         bbox.min()(0), bbox.min()(1), bbox.min()(2), bbox.max()(0), bbox.max()(1), bbox.max()(2));

@@ -12,6 +12,7 @@
 
 #include "AppFactory.h"
 #include "AuxiliarySystem.h"
+#include "DisplacedProblem.h"
 #include "Console.h"
 #include "Executioner.h"
 #include "FEProblem.h"
@@ -90,6 +91,10 @@ validParams<MultiApp>()
   params.addParam<Real>("bounding_box_inflation",
                         0.01,
                         "Relative amount to 'inflate' the bounding box of this MultiApp.");
+  params.addParam<Point>("bounding_box_padding",
+                         RealVectorValue(),
+                         "Additional padding added to the dimensions of the bounding box. The "
+                         "values are added to the x, y and z dimension respectively.");
 
   params.addPrivateParam<MPI_Comm>("_mpi_comm");
 
@@ -156,6 +161,7 @@ MultiApp::MultiApp(const InputParameters & parameters)
     _my_comm(MPI_COMM_SELF),
     _my_rank(0),
     _inflation(getParam<Real>("bounding_box_inflation")),
+    _bounding_box_padding(getParam<Point>("bounding_box_padding")),
     _max_procs_per_app(getParam<unsigned int>("max_procs_per_app")),
     _output_in_position(getParam<bool>("output_in_position")),
     _reset_time(getParam<Real>("reset_time")),
@@ -178,6 +184,9 @@ MultiApp::init(unsigned int num)
   _backups.reserve(_my_num_apps);
   for (unsigned int i = 0; i < _my_num_apps; i++)
     _backups.emplace_back(std::make_shared<Backup>());
+
+  _has_bounding_box.resize(_my_num_apps, false);
+  _bounding_box.resize(_my_num_apps);
 }
 
 void
@@ -360,21 +369,36 @@ MultiApp::restore()
 }
 
 BoundingBox
-MultiApp::getBoundingBox(unsigned int app)
+MultiApp::getBoundingBox(unsigned int app, bool displaced_mesh)
 {
   if (!_has_an_app)
     mooseError("No app for ", name(), " on processor ", _orig_rank);
 
-  FEProblemBase & problem = appProblemBase(app);
+  unsigned int local_app = globalAppToLocal(app);
+  FEProblemBase & fe_problem_base = _apps[local_app]->getExecutioner()->feProblem();
+  MooseMesh & mesh = (displaced_mesh && fe_problem_base.getDisplacedProblem().get() != NULL)
+                         ? fe_problem_base.getDisplacedProblem()->mesh()
+                         : fe_problem_base.mesh();
 
-  BoundingBox bbox = {};
   {
     Moose::ScopedCommSwapper swapper(_my_comm);
-    bbox = MeshTools::create_bounding_box(problem.mesh());
+    if (displaced_mesh)
+      _bounding_box[local_app] = MeshTools::create_bounding_box(mesh);
+    else
+    {
+      if (!_has_bounding_box[local_app])
+      {
+        _bounding_box[local_app] = MeshTools::create_bounding_box(mesh);
+        _has_bounding_box[local_app] = true;
+      }
+    }
   }
+  BoundingBox bbox = _bounding_box[local_app];
 
   Point min = bbox.min();
+  min -= _bounding_box_padding;
   Point max = bbox.max();
+  max += _bounding_box_padding;
 
   Point inflation_amount = (max - min) * _inflation;
 
@@ -389,7 +413,7 @@ MultiApp::getBoundingBox(unsigned int app)
 
   // If the problem is RZ then we're going to invent a box that would cover the whole "3D" app
   // FIXME: Assuming all subdomains are the same coordinate system type!
-  if (problem.getCoordSystem(*(problem.mesh().meshSubdomains().begin())) == Moose::COORD_RZ)
+  if (fe_problem_base.getCoordSystem(*(mesh.meshSubdomains().begin())) == Moose::COORD_RZ)
   {
     shifted_min(0) = -inflated_max(0);
     shifted_min(1) = inflated_min(1);
