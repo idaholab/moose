@@ -15,6 +15,8 @@ validParams<OneDEnergyFlux>()
   params.addRequiredCoupledVar("arhouA", "alpha*rho*u*A");
   params.addRequiredCoupledVar("arhoEA", "alpha*rho*E*A");
 
+  params.addRequiredParam<MaterialPropertyName>("direction",
+                                                "The direction of the pipe material property");
   params.addRequiredParam<MaterialPropertyName>("alpha", "Volume fraction material property");
   params.addRequiredParam<MaterialPropertyName>("rho", "Density material property");
   params.addRequiredParam<MaterialPropertyName>("vel", "Velocity material property");
@@ -30,6 +32,8 @@ OneDEnergyFlux::OneDEnergyFlux(const InputParameters & parameters)
     _has_beta(isCoupled("beta")),
 
     _A(coupledValue("A")),
+
+    _dir(getMaterialProperty<RealVectorValue>("direction")),
 
     _alpha(getMaterialProperty<Real>("alpha")),
     _dalpha_dbeta(_has_beta ? &getMaterialPropertyDerivativeRelap<Real>("alpha", "beta") : nullptr),
@@ -62,16 +66,16 @@ OneDEnergyFlux::OneDEnergyFlux(const InputParameters & parameters)
 Real
 OneDEnergyFlux::computeQpResidual()
 {
-  return -_alpha[_qp] * _vel[_qp] *
+  return -_alpha[_qp] * _vel[_qp] * _dir[_qp] *
          (_rho[_qp] * (_e[_qp] + 0.5 * _vel[_qp] * _vel[_qp]) + _p[_qp]) * _A[_qp] *
-         _grad_test[_i][_qp](0);
+         _grad_test[_i][_qp];
 }
 
 Real
 OneDEnergyFlux::computeQpJacobian()
 {
-  return -_alpha[_qp] * _vel[_qp] * (_rho[_qp] * _de_darhoEA[_qp] + _dp_darhoEA[_qp]) * _A[_qp] *
-         _phi[_j][_qp] * _grad_test[_i][_qp](0);
+  return -_alpha[_qp] * _vel[_qp] * _dir[_qp] * (_rho[_qp] * _de_darhoEA[_qp] + _dp_darhoEA[_qp]) *
+         _A[_qp] * _phi[_j][_qp] * _grad_test[_i][_qp];
 }
 
 Real
@@ -84,7 +88,7 @@ OneDEnergyFlux::computeQpOffDiagJacobian(unsigned int jvar)
             _vel[_qp] *
                 (_drho_darhoA[_qp] * (_e[_qp] + 0.5 * _vel[_qp] * _vel[_qp]) +
                  _rho[_qp] * (_de_darhoA[_qp] + _vel[_qp] * _dvel_darhoA[_qp]) + _dp_darhoA[_qp])) *
-           _A[_qp] * _phi[_j][_qp] * _grad_test[_i][_qp](0);
+           _dir[_qp] * _A[_qp] * _phi[_j][_qp] * _grad_test[_i][_qp];
   }
   else if (jvar == _arhouA_var_number)
   {
@@ -92,7 +96,7 @@ OneDEnergyFlux::computeQpOffDiagJacobian(unsigned int jvar)
            (_dvel_darhouA[_qp] * (_rho[_qp] * (_e[_qp] + 0.5 * _vel[_qp] * _vel[_qp]) + _p[_qp]) +
             _vel[_qp] * (_rho[_qp] * (_de_darhouA[_qp] + _vel[_qp] * _dvel_darhouA[_qp]) +
                          _dp_darhouA[_qp])) *
-           _A[_qp] * _phi[_j][_qp] * _grad_test[_i][_qp](0);
+           _dir[_qp] * _A[_qp] * _phi[_j][_qp] * _grad_test[_i][_qp];
   }
   else if (jvar == _beta_var_number)
   {
@@ -101,7 +105,7 @@ OneDEnergyFlux::computeQpOffDiagJacobian(unsigned int jvar)
              _alpha[_qp] * _vel[_qp] *
                  ((*_drho_dbeta)[_qp] * (_e[_qp] + 0.5 * _vel[_qp] * _vel[_qp]) +
                   (*_dp_dbeta)[_qp])) *
-           _A[_qp] * _phi[_j][_qp] * _grad_test[_i][_qp](0);
+           _dir[_qp] * _A[_qp] * _phi[_j][_qp] * _grad_test[_i][_qp];
   }
   else
     return 0.;

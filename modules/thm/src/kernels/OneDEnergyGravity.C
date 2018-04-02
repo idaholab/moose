@@ -14,11 +14,13 @@ validParams<OneDEnergyGravity>()
   params.addRequiredCoupledVar("arhoA", "alpha*rho*A");
   params.addRequiredCoupledVar("arhouA", "alpha*rho*u*A");
 
+  params.addRequiredParam<MaterialPropertyName>("direction",
+                                                "The direction of the pipe material property");
   params.addRequiredParam<MaterialPropertyName>("alpha", "Volume fraction property");
   params.addRequiredParam<MaterialPropertyName>("rho", "Density property");
   params.addRequiredParam<MaterialPropertyName>("vel", "Velocity property");
 
-  params.addRequiredCoupledVar("gx", "x-component of acceleration due to gravity");
+  params.addRequiredParam<RealVectorValue>("gravity_vector", "Gravity vector");
 
   return params;
 }
@@ -40,7 +42,8 @@ OneDEnergyGravity::OneDEnergyGravity(const InputParameters & parameters)
     _dvel_darhoA(getMaterialPropertyDerivativeRelap<Real>("vel", "arhoA")),
     _dvel_darhouA(getMaterialPropertyDerivativeRelap<Real>("vel", "arhouA")),
 
-    _gx(coupledValue("gx")),
+    _dir(getMaterialProperty<RealVectorValue>("direction")),
+    _gravity_vector(getParam<RealVectorValue>("gravity_vector")),
 
     _beta_var_number(_has_beta ? coupled("beta") : libMesh::invalid_uint),
     _arhoA_var_number(coupled("arhoA")),
@@ -51,7 +54,8 @@ OneDEnergyGravity::OneDEnergyGravity(const InputParameters & parameters)
 Real
 OneDEnergyGravity::computeQpResidual()
 {
-  return -_alpha[_qp] * _rho[_qp] * _vel[_qp] * _A[_qp] * _gx[_qp] * _test[_i][_qp];
+  return -_alpha[_qp] * _rho[_qp] * _vel[_qp] * _A[_qp] * _gravity_vector * _dir[_qp] *
+         _test[_i][_qp];
 }
 
 Real
@@ -66,17 +70,17 @@ OneDEnergyGravity::computeQpOffDiagJacobian(unsigned int jvar)
   if (jvar == _beta_var_number)
   {
     return -((*_dalpha_dbeta)[_qp] * _rho[_qp] + _alpha[_qp] * (*_drho_dbeta)[_qp]) * _vel[_qp] *
-           _A[_qp] * _gx[_qp] * _phi[_j][_qp] * _test[_i][_qp];
+           _A[_qp] * _gravity_vector * _dir[_qp] * _phi[_j][_qp] * _test[_i][_qp];
   }
   else if (jvar == _arhoA_var_number)
   {
     return -_alpha[_qp] * (_drho_darhoA[_qp] * _vel[_qp] + _rho[_qp] * _dvel_darhoA[_qp]) *
-           _A[_qp] * _gx[_qp] * _phi[_j][_qp] * _test[_i][_qp];
+           _A[_qp] * _gravity_vector * _dir[_qp] * _phi[_j][_qp] * _test[_i][_qp];
   }
   else if (jvar == _arhouA_var_number)
   {
-    return -_alpha[_qp] * _rho[_qp] * _dvel_darhouA[_qp] * _A[_qp] * _gx[_qp] * _phi[_j][_qp] *
-           _test[_i][_qp];
+    return -_alpha[_qp] * _rho[_qp] * _dvel_darhouA[_qp] * _A[_qp] * _gravity_vector * _dir[_qp] *
+           _phi[_j][_qp] * _test[_i][_qp];
   }
   else
     return 0;
