@@ -28,7 +28,7 @@ public:
   LagrangeVecDirichletBC(const InputParameters & parameters);
 
 protected:
-  virtual Real computeQpResidual(size_t comp) override;
+  virtual RealVectorValue computeQpResidual() override;
 
   /// The value for this BC
   const RealVectorValue & _values;

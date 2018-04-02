@@ -78,7 +78,7 @@ protected:
    * Holds the values of pressures at all the nodes of the element
    * Eg:
    * _ps_at_nodes[_pvar] is a pointer to this variable's nodal porepressure values
-   * So: (*_ps_at_nodes[_pvar])[i] = _var.nodalValue()[i]
+   * So: (*_ps_at_nodes[_pvar])[i] = _var.dofValues()[i]
    */
   std::vector<const VariableValue *> _ps_at_nodes;
 

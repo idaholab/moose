@@ -29,7 +29,7 @@ NeighborCoupleable::coupledNeighborValue(const std::string & var_name, unsigned 
 {
   MooseVariable * var = getVar(var_name, comp);
   if (_neighbor_nodal)
-    return (_c_is_implicit) ? var->nodalValueNeighbor() : var->nodalValueOldNeighbor();
+    return (_c_is_implicit) ? var->dofValuesNeighbor() : var->dofValuesOldNeighbor();
   else
     return (_c_is_implicit) ? var->slnNeighbor() : var->slnOldNeighbor();
 }
@@ -41,7 +41,7 @@ NeighborCoupleable::coupledNeighborValueOld(const std::string & var_name, unsign
 
   MooseVariable * var = getVar(var_name, comp);
   if (_neighbor_nodal)
-    return (_c_is_implicit) ? var->nodalValueOldNeighbor() : var->nodalValueOlderNeighbor();
+    return (_c_is_implicit) ? var->dofValuesOldNeighbor() : var->dofValuesOlderNeighbor();
   else
     return (_c_is_implicit) ? var->slnOldNeighbor() : var->slnOlderNeighbor();
 }
@@ -55,7 +55,7 @@ NeighborCoupleable::coupledNeighborValueOlder(const std::string & var_name, unsi
   if (_neighbor_nodal)
   {
     if (_c_is_implicit)
-      return var->nodalValueOlderNeighbor();
+      return var->dofValuesOlderNeighbor();
     else
       mooseError("Older values not available for explicit schemes");
   }

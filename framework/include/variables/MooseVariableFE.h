@@ -127,19 +127,6 @@ public:
     return _solution_dofs_older_neighbor;
   }
 
-  const MooseArray<Number> & nodalValue();
-  const MooseArray<Number> & nodalValueOld();
-  const MooseArray<Number> & nodalValueOlder();
-  const MooseArray<Number> & nodalValuePreviousNL();
-  const MooseArray<Number> & nodalValueDot();
-  const MooseArray<Number> & nodalValueDuDotDu();
-  const MooseArray<Number> & nodalValueNeighbor();
-  const MooseArray<Number> & nodalValueOldNeighbor();
-  const MooseArray<Number> & nodalValueOlderNeighbor();
-  const MooseArray<Number> & nodalValuePreviousNLNeighbor();
-  const MooseArray<Number> & nodalValueDotNeighbor();
-  const MooseArray<Number> & nodalValueDuDotDuNeighbor();
-
   /**
    * Compute values at interior quadrature points
    */
@@ -157,13 +144,13 @@ public:
    */
   virtual void computeNeighborValues() = 0;
   /**
-   * Compute nodal values of this variable
-   */
-  virtual void computeNodalValues();
-  /**
    * Compute nodal values of this variable in the neighbor
    */
-  virtual void computeNodalNeighborValues();
+  virtual void computeNodalNeighborValues() = 0;
+  /**
+   * Compute nodal values of this variable
+   */
+  virtual void computeNodalValues() = 0;
   /**
    * Set the nodal value for this variable to keep everything up to date
    */
@@ -246,8 +233,58 @@ public:
   void insert(NumericVector<Number> & residual);
   void add(NumericVector<Number> & residual);
 
-  /// Returns dof solution on element
+  /**
+   * Deprecated method. Use dofValues
+   */
   const MooseArray<Number> & dofValue();
+  /**
+   * Returns dof solution on element
+   */
+  const MooseArray<Number> & dofValues();
+  /**
+   * Returns old dof solution on element
+   */
+  const MooseArray<Number> & dofValuesOld();
+  /**
+   * Returns older dof solution on element
+   */
+  const MooseArray<Number> & dofValuesOlder();
+  /**
+   * Returns previous nl solution on element
+   */
+  const MooseArray<Number> & dofValuesPreviousNL();
+  /**
+   * Returns dof solution on neighbor element
+   */
+  const MooseArray<Number> & dofValuesNeighbor();
+  /**
+   * Returns old dof solution on neighbor element
+   */
+  const MooseArray<Number> & dofValuesOldNeighbor();
+  /**
+   * Returns older dof solution on neighbor element
+   */
+  const MooseArray<Number> & dofValuesOlderNeighbor();
+  /**
+   * Returns previous nl solution on neighbor element
+   */
+  const MooseArray<Number> & dofValuesPreviousNLNeighbor();
+  /**
+   * Returns time derivative of degrees of freedom
+   */
+  const MooseArray<Number> & dofValuesDot();
+  /**
+   * Returns time derivative of neighboring degrees of freedom
+   */
+  const MooseArray<Number> & dofValuesDotNeighbor();
+  /**
+   * Returns derivative of time derivative of degrees of freedom
+   */
+  const MooseArray<Number> & dofValuesDuDotDu();
+  /**
+   * Returns derivative of time derivative of neighboring degrees of freedom
+   */
+  const MooseArray<Number> & dofValuesDuDotDuNeighbor();
 
   /**
    * Return phi size
@@ -334,17 +371,17 @@ protected:
   bool _need_solution_dofs_old_neighbor;
   bool _need_solution_dofs_older_neighbor;
 
-  bool _need_dof_u;
-  bool _need_dof_u_old;
-  bool _need_dof_u_older;
-  bool _need_dof_u_previous_nl;
-  bool _need_dof_u_dot;
+  bool _need_dof_values;
+  bool _need_dof_values_old;
+  bool _need_dof_values_older;
+  bool _need_dof_values_previous_nl;
+  bool _need_dof_values_dot;
   bool _need_dof_du_dot_du;
-  bool _need_dof_u_neighbor;
-  bool _need_dof_u_old_neighbor;
-  bool _need_dof_u_older_neighbor;
-  bool _need_dof_u_previous_nl_neighbor;
-  bool _need_dof_u_dot_neighbor;
+  bool _need_dof_values_neighbor;
+  bool _need_dof_values_old_neighbor;
+  bool _need_dof_values_older_neighbor;
+  bool _need_dof_values_previous_nl_neighbor;
+  bool _need_dof_values_dot_neighbor;
   bool _need_dof_du_dot_du_neighbor;
 
   /// Normals at QPs on faces
@@ -369,21 +406,21 @@ protected:
 
   // dof solution stuff (which for nodal variables corresponds to values at the nodes)
 
-  MooseArray<Real> _dof_u;
-  MooseArray<Real> _dof_u_old;
-  MooseArray<Real> _dof_u_older;
-  MooseArray<Real> _dof_u_previous_nl;
+  MooseArray<Real> _dof_values;
+  MooseArray<Real> _dof_values_old;
+  MooseArray<Real> _dof_values_older;
+  MooseArray<Real> _dof_values_previous_nl;
 
   /// nodal values of u_dot
-  MooseArray<Real> _dof_u_dot;
+  MooseArray<Real> _dof_values_dot;
   /// nodal values of derivative of u_dot wrt u
   MooseArray<Real> _dof_du_dot_du;
 
-  MooseArray<Real> _dof_u_neighbor;
-  MooseArray<Real> _dof_u_old_neighbor;
-  MooseArray<Real> _dof_u_older_neighbor;
-  MooseArray<Real> _dof_u_previous_nl_neighbor;
-  MooseArray<Real> _dof_u_dot_neighbor;
+  MooseArray<Real> _dof_values_neighbor;
+  MooseArray<Real> _dof_values_old_neighbor;
+  MooseArray<Real> _dof_values_older_neighbor;
+  MooseArray<Real> _dof_values_previous_nl_neighbor;
+  MooseArray<Real> _dof_values_dot_neighbor;
   MooseArray<Real> _dof_du_dot_du_neighbor;
 
   /// local elemental DoFs

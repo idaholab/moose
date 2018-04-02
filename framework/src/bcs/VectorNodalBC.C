@@ -25,7 +25,7 @@ VectorNodalBC::VectorNodalBC(const InputParameters & parameters)
     MooseVariableInterface<RealVectorValue>(this, true),
     _var(*mooseVariable()),
     _current_node(_var.node()),
-    _u(_var.dofValue())
+    _u(_var.nodalValue())
 {
   if (_var.feType().family != LAGRANGE_VEC)
     mooseError("Vector nodal boundary conditions only make sense for LAGRANGE_VEC variables");
@@ -40,8 +40,7 @@ VectorNodalBC::computeResidual(NumericVector<Number> & residual)
   RealVectorValue res(0, 0, 0);
 
   if (!_is_eigen)
-    for (size_t i = 0; i < dof_indices.size(); ++i)
-      res(i) = computeQpResidual(i);
+    res = computeQpResidual();
 
   for (size_t i = 0; i < dof_indices.size(); ++i)
     residual.set(dof_indices[i], res(i));

@@ -44,9 +44,9 @@ protected:
   const Node *& _current_node;
 
   /// Value of the unknown variable this BC is acting on
-  const MooseArray<Number> & _u;
+  const RealVectorValue & _u;
 
-  virtual Real computeQpResidual(size_t comp) = 0;
+  virtual RealVectorValue computeQpResidual() = 0;
 
   /**
    * The user can override this function to compute the "on-diagonal"

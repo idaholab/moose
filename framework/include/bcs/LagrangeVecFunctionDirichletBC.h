@@ -28,11 +28,7 @@ public:
   LagrangeVecFunctionDirichletBC(const InputParameters & parameters);
 
 protected:
-  virtual Real computeQpResidual(size_t comp) override;
-  /**
-   * Computes the vector of function values
-   */
-  void computeFunctionValues();
+  virtual RealVectorValue computeQpResidual() override;
 
   /// x component function
   Function & _exact_x;

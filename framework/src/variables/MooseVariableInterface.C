@@ -57,7 +57,7 @@ const typename OutputTools<T>::VariableValue &
 MooseVariableInterface<T>::value()
 {
   if (_nodal)
-    return _variable->nodalValue();
+    return _variable->dofValues();
   else
     return _variable->sln();
 }
@@ -77,7 +77,7 @@ const typename OutputTools<T>::VariableValue &
 MooseVariableInterface<T>::valueOld()
 {
   if (_nodal)
-    return _variable->nodalValueOld();
+    return _variable->dofValuesOld();
   else
     return _variable->slnOld();
 }
@@ -97,7 +97,7 @@ const typename OutputTools<T>::VariableValue &
 MooseVariableInterface<T>::valueOlder()
 {
   if (_nodal)
-    return _variable->nodalValueOlder();
+    return _variable->dofValuesOlder();
   else
     return _variable->slnOlder();
 }
@@ -117,7 +117,7 @@ const typename OutputTools<T>::VariableValue &
 MooseVariableInterface<T>::dot()
 {
   if (_nodal)
-    return _variable->nodalValueDot();
+    return _variable->dofValuesDot();
   else
     return _variable->uDot();
 }
@@ -137,7 +137,7 @@ const VariableValue &
 MooseVariableInterface<T>::dotDu()
 {
   if (_nodal)
-    return _variable->nodalValueDuDotDu();
+    return _variable->dofValuesDuDotDu();
   else
     return _variable->duDotDu();
 }

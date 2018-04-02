@@ -378,6 +378,22 @@ public:
    */
   virtual size_t phiFaceNeighborSize() override { return _phi_face_neighbor.size(); }
 
+  const OutputType & nodalValue();
+  const OutputType & nodalValueOld();
+  const OutputType & nodalValueOlder();
+  const OutputType & nodalValuePreviousNL();
+  const OutputType & nodalValueDot();
+  const OutputType & nodalValueDuDotDu();
+  const OutputType & nodalValueNeighbor();
+  const OutputType & nodalValueOldNeighbor();
+  const OutputType & nodalValueOlderNeighbor();
+  const OutputType & nodalValuePreviousNLNeighbor();
+  const OutputType & nodalValueDotNeighbor();
+  const OutputType & nodalValueDuDotDuNeighbor();
+
+  virtual void computeNodalValues() override;
+  virtual void computeNodalNeighborValues() override;
+
 protected:
   // Shape function values, gradients, second derivatives
   const FieldVariablePhiValue & _phi;
@@ -452,6 +468,15 @@ protected:
 
   /// Increment in the variable used in dampers
   FieldVariableValue _increment;
+
+  /// Nodal values
+  OutputType _nodal_value;
+  OutputType _nodal_value_old;
+  OutputType _nodal_value_older;
+  OutputType _nodal_value_previous_nl;
+
+  /// nodal values of u_dot
+  OutputType _nodal_value_dot;
 
   friend class NodeFaceConstraint;
   friend class ValueThresholdMarker;

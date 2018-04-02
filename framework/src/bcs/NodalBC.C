@@ -25,7 +25,7 @@ NodalBC::NodalBC(const InputParameters & parameters)
     MooseVariableInterface<Real>(this, true),
     _var(*mooseVariable()),
     _current_node(_var.node()),
-    _u(_var.nodalValue())
+    _u(_var.dofValues())
 {
   addMooseVariableDependency(mooseVariable());
 

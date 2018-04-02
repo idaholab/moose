@@ -30,8 +30,8 @@ LagrangeVecDirichletBC::LagrangeVecDirichletBC(const InputParameters & parameter
 {
 }
 
-Real
-LagrangeVecDirichletBC::computeQpResidual(size_t comp)
+RealVectorValue
+LagrangeVecDirichletBC::computeQpResidual()
 {
-  return _u[comp] - _values(comp);
+  return _u - _values;
 }

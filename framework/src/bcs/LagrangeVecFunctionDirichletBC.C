@@ -34,19 +34,12 @@ LagrangeVecFunctionDirichletBC::LagrangeVecFunctionDirichletBC(const InputParame
 {
 }
 
-Real
-LagrangeVecFunctionDirichletBC::computeQpResidual(size_t comp)
-{
-  if (comp == 0)
-    computeFunctionValues();
-
-  return _u[comp] - _values(comp);
-}
-
-void
-LagrangeVecFunctionDirichletBC::computeFunctionValues()
+RealVectorValue
+LagrangeVecFunctionDirichletBC::computeQpResidual()
 {
   _values = {_exact_x.value(_t, *_current_node),
              _exact_y.value(_t, *_current_node),
              _exact_z.value(_t, *_current_node)};
+
+  return _u - _values;
 }

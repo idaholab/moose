@@ -32,7 +32,7 @@ validParams<StickyBC>()
 
 StickyBC::StickyBC(const InputParameters & parameters)
   : NodalBC(parameters),
-    _u_old(_var.nodalValueOld()),
+    _u_old(_var.dofValuesOld()),
     _min_value(getParam<Real>("min_value")),
     _max_value(getParam<Real>("max_value"))
 {
