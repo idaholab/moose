@@ -23,7 +23,7 @@ class TestPostprocessorState(Testing.PeacockImageTestCase):
         """
         Creates the peacock application.
         """
-
+        Testing.setupTestCache(self.__class__)
         args = ["-size", "1024", "768", "-i", "../../common/time_data.i", "-e", Testing.find_moose_test_exe(), "-w", os.getcwd()]
         self._app = PeacockApp.PeacockApp(args, self.qapp)
         self._window = self._app.main_widget.tab_plugin.VectorPostprocessorViewer.currentWidget().FigurePlugin

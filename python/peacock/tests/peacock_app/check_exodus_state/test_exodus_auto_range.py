@@ -23,7 +23,7 @@ class TestExodusState(Testing.PeacockImageTestCase):
         """
         Creates the peacock application.
         """
-
+        Testing.setupTestCache(self.__class__)
         args = ["-size", "1024", "768", "-i", "../../common/transient_big.i", "-e", Testing.find_moose_test_exe()]
         working_dir = os.getcwd()
         self._app = PeacockApp.PeacockApp(args, self.qapp)

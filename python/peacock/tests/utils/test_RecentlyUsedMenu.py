@@ -10,7 +10,6 @@
 
 from peacock.utils.RecentlyUsedMenu import RecentlyUsedMenu
 from peacock.utils import Testing
-from PyQt5.QtCore import QSettings
 from PyQt5 import QtWidgets
 
 class Tests(Testing.PeacockTester):
@@ -18,8 +17,6 @@ class Tests(Testing.PeacockTester):
 
     def setUp(self):
         super(Tests, self).setUp()
-        settings = QSettings()
-        settings.clear()
         self.main_win = QtWidgets.QMainWindow()
         self.menubar = self.main_win.menuBar()
         self.test_menu = self.menubar.addMenu("Test recently used")
