@@ -260,14 +260,14 @@ Coupleable::coupledValue(const std::string & var_name, unsigned int comp)
   if (!_coupleable_neighbor)
   {
     if (_c_nodal)
-      return (_c_is_implicit) ? var->nodalValue() : var->nodalValueOld();
+      return (_c_is_implicit) ? var->dofValues() : var->dofValuesOld();
     else
       return (_c_is_implicit) ? var->sln() : var->slnOld();
   }
   else
   {
     if (_c_nodal)
-      return (_c_is_implicit) ? var->nodalValueNeighbor() : var->nodalValueOldNeighbor();
+      return (_c_is_implicit) ? var->dofValuesNeighbor() : var->dofValuesOldNeighbor();
     else
       return (_c_is_implicit) ? var->slnNeighbor() : var->slnOldNeighbor();
   }
@@ -324,14 +324,14 @@ Coupleable::coupledValueOld(const std::string & var_name, unsigned int comp)
   if (!_coupleable_neighbor)
   {
     if (_c_nodal)
-      return (_c_is_implicit) ? var->nodalValueOld() : var->nodalValueOlder();
+      return (_c_is_implicit) ? var->dofValuesOld() : var->dofValuesOlder();
     else
       return (_c_is_implicit) ? var->slnOld() : var->slnOlder();
   }
   else
   {
     if (_c_nodal)
-      return (_c_is_implicit) ? var->nodalValueOldNeighbor() : var->nodalValueOlderNeighbor();
+      return (_c_is_implicit) ? var->dofValuesOldNeighbor() : var->dofValuesOlderNeighbor();
     else
       return (_c_is_implicit) ? var->slnOldNeighbor() : var->slnOlderNeighbor();
   }
@@ -355,7 +355,7 @@ Coupleable::coupledValueOlder(const std::string & var_name, unsigned int comp)
     if (_c_nodal)
     {
       if (_c_is_implicit)
-        return var->nodalValueOlder();
+        return var->dofValuesOlder();
       else
         mooseError(_c_name, ": Older values not available for explicit schemes");
     }
@@ -372,7 +372,7 @@ Coupleable::coupledValueOlder(const std::string & var_name, unsigned int comp)
     if (_c_nodal)
     {
       if (_c_is_implicit)
-        return var->nodalValueOlderNeighbor();
+        return var->dofValuesOlderNeighbor();
       else
         mooseError(_c_name, ": Older values not available for explicit schemes");
     }
@@ -402,14 +402,14 @@ Coupleable::coupledValuePreviousNL(const std::string & var_name, unsigned int co
   if (!_coupleable_neighbor)
   {
     if (_c_nodal)
-      return var->nodalValuePreviousNL();
+      return var->dofValuesPreviousNL();
     else
       return var->slnPreviousNL();
   }
   else
   {
     if (_c_nodal)
-      return var->nodalValuePreviousNLNeighbor();
+      return var->dofValuesPreviousNLNeighbor();
     else
       return var->slnPreviousNLNeighbor();
   }
@@ -500,14 +500,14 @@ Coupleable::coupledDot(const std::string & var_name, unsigned int comp)
   if (!_coupleable_neighbor)
   {
     if (_c_nodal)
-      return var->nodalValueDot();
+      return var->dofValuesDot();
     else
       return var->uDot();
   }
   else
   {
     if (_c_nodal)
-      return var->nodalValueDotNeighbor();
+      return var->dofValuesDotNeighbor();
     else
       return var->uDotNeighbor();
   }
@@ -558,14 +558,14 @@ Coupleable::coupledDotDu(const std::string & var_name, unsigned int comp)
   if (!_coupleable_neighbor)
   {
     if (_c_nodal)
-      return var->nodalValueDuDotDu();
+      return var->dofValuesDuDotDu();
     else
       return var->duDotDu();
   }
   else
   {
     if (_c_nodal)
-      return var->nodalValueDuDotDu();
+      return var->dofValuesDuDotDuNeighbor();
     else
       return var->duDotDu();
   }
@@ -682,6 +682,76 @@ Coupleable::coupledGradientDot(const std::string & var_name, unsigned int comp)
     return var->gradSlnDot();
   else
     return var->gradSlnNeighborDot();
+}
+
+const VectorVariableGradient &
+Coupleable::coupledVectorGradient(const std::string & var_name, unsigned int comp)
+{
+  checkVar(var_name);
+  if (!isCoupled(var_name)) // Return default 0
+    return _default_vector_gradient;
+
+  coupledCallback(var_name, false);
+  if (_c_nodal)
+    mooseError(_c_name, ": Gradients are non-sensical with nodal compute objects");
+
+  VectorMooseVariable * var = getVectorVar(var_name, comp);
+  if (var == NULL)
+    mooseError("Call corresponding standard variable method");
+
+  if (!_coupleable_neighbor)
+    return (_c_is_implicit) ? var->gradSln() : var->gradSlnOld();
+  else
+    return (_c_is_implicit) ? var->gradSlnNeighbor() : var->gradSlnOldNeighbor();
+}
+
+const VectorVariableGradient &
+Coupleable::coupledVectorGradientOld(const std::string & var_name, unsigned int comp)
+{
+  checkVar(var_name);
+  if (!isCoupled(var_name)) // Return default 0
+    return _default_vector_gradient;
+
+  coupledCallback(var_name, true);
+  if (_c_nodal)
+    mooseError(_c_name, ": Gradients are non-sensical with nodal compute objects");
+
+  validateExecutionerType(var_name, "coupledGradientOld");
+  VectorMooseVariable * var = getVectorVar(var_name, comp);
+  if (var == NULL)
+    mooseError("Call corresponding standard variable method");
+
+  if (!_coupleable_neighbor)
+    return (_c_is_implicit) ? var->gradSlnOld() : var->gradSlnOlder();
+  else
+    return (_c_is_implicit) ? var->gradSlnOldNeighbor() : var->gradSlnOlderNeighbor();
+}
+
+const VectorVariableGradient &
+Coupleable::coupledVectorGradientOlder(const std::string & var_name, unsigned int comp)
+{
+  checkVar(var_name);
+  if (!isCoupled(var_name)) // Return default 0
+    return _default_vector_gradient;
+
+  coupledCallback(var_name, true);
+  if (_c_nodal)
+    mooseError(_c_name, ": Gradients are non-sensical with nodal compute objects");
+
+  validateExecutionerType(var_name, "coupledGradientOlder");
+  VectorMooseVariable * var = getVectorVar(var_name, comp);
+  if (var == NULL)
+    mooseError("Call corresponding standard variable method");
+
+  if (_c_is_implicit)
+  {
+    if (!_coupleable_neighbor)
+      return var->gradSlnOlder();
+    else
+      return var->gradSlnOlderNeighbor();
+  }
+  else
+    mooseError(_c_name, ": Older values not available for explicit schemes");
 }
 
 const VectorVariableCurl &
@@ -853,9 +923,9 @@ Coupleable::coupledNodalValue(const std::string & var_name, unsigned int comp)
     mooseError("Call corresponding vector variable method");
 
   if (!_coupleable_neighbor)
-    return (_c_is_implicit) ? var->nodalValue() : var->nodalValueOld();
+    return (_c_is_implicit) ? var->dofValues() : var->dofValuesOld();
   else
-    return (_c_is_implicit) ? var->nodalValueNeighbor() : var->nodalValueOldNeighbor();
+    return (_c_is_implicit) ? var->dofValuesNeighbor() : var->dofValuesOldNeighbor();
 }
 
 const VariableValue &
@@ -872,9 +942,9 @@ Coupleable::coupledNodalValueOld(const std::string & var_name, unsigned int comp
     mooseError("Call corresponding vector variable method");
 
   if (!_coupleable_neighbor)
-    return (_c_is_implicit) ? var->nodalValueOld() : var->nodalValueOlder();
+    return (_c_is_implicit) ? var->dofValuesOld() : var->dofValuesOlder();
   else
-    return (_c_is_implicit) ? var->nodalValueOldNeighbor() : var->nodalValueOlderNeighbor();
+    return (_c_is_implicit) ? var->dofValuesOldNeighbor() : var->dofValuesOlderNeighbor();
 }
 
 const VariableValue &
@@ -892,9 +962,9 @@ Coupleable::coupledNodalValueOlder(const std::string & var_name, unsigned int co
   if (_c_is_implicit)
   {
     if (!_coupleable_neighbor)
-      return var->nodalValueOlder();
+      return var->dofValuesOlder();
     else
-      return var->nodalValueOlderNeighbor();
+      return var->dofValuesOlderNeighbor();
   }
   else
     mooseError(_c_name, ": Older values not available for explicit schemes");
@@ -914,9 +984,9 @@ Coupleable::coupledNodalValuePreviousNL(const std::string & var_name, unsigned i
     mooseError("Call corresponding vector variable method");
 
   if (!_coupleable_neighbor)
-    return var->nodalValuePreviousNL();
+    return var->dofValuesPreviousNL();
   else
-    return var->nodalValuePreviousNLNeighbor();
+    return var->dofValuesPreviousNLNeighbor();
 }
 
 const VariableValue &
@@ -933,9 +1003,9 @@ Coupleable::coupledNodalDot(const std::string & var_name, unsigned int comp)
     mooseError("Call corresponding vector variable method");
 
   if (!_coupleable_neighbor)
-    return var->nodalValueDot();
+    return var->dofValuesDot();
   else
-    return var->nodalValueDotNeighbor();
+    return var->dofValuesDotNeighbor();
 }
 
 const DenseVector<Number> &

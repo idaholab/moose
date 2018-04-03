@@ -32,8 +32,8 @@ NodalConstraint::NodalConstraint(const InputParameters & parameters)
   : Constraint(parameters),
     NeighborCoupleableMooseVariableDependencyIntermediateInterface(this, true, true),
     NeighborMooseVariableInterface<Real>(this, true),
-    _u_slave(_var.nodalValueNeighbor()),
-    _u_master(_var.nodalValue())
+    _u_slave(_var.dofValuesNeighbor()),
+    _u_master(_var.dofValues())
 {
   addMooseVariableDependency(&_var);
 

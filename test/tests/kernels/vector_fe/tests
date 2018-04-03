@@ -42,4 +42,9 @@
     difference_tol = 5e-6
     cli_args = 'BCs/active="" Mesh/nx=4 Mesh/ny=4 Outputs/exodus=false'
   [../]
+  [./coupled_vector_gradient]
+    type = Exodiff
+    input = 'coupled_vector_gradient.i'
+    exodiff = 'coupled_vector_gradient_out.e'
+  [../]
 []

@@ -548,14 +548,6 @@ DisplacedProblem::reinitNeighborPhys(const Elem * neighbor,
 }
 
 void
-DisplacedProblem::reinitNodeNeighbor(const Node * node, THREAD_ID tid)
-{
-  _assembly[tid]->reinitNodeNeighbor(node);
-  _displaced_nl.reinitNodeNeighbor(node, tid);
-  _displaced_aux.reinitNodeNeighbor(node, tid);
-}
-
-void
 DisplacedProblem::reinitScalars(THREAD_ID tid)
 {
   _displaced_nl.reinitScalars(tid);

@@ -17,33 +17,15 @@ template <>
 InputParameters
 validParams<NodalBC>()
 {
-  InputParameters params = validParams<BoundaryCondition>();
-  params += validParams<RandomInterface>();
-  params.addParam<std::vector<AuxVariableName>>(
-      "save_in",
-      "The name of auxiliary variables to save this BC's residual contributions to.  "
-      "Everything about that variable must match everything about this variable (the "
-      "type, what blocks it's on, etc.)");
-  params.addParam<std::vector<AuxVariableName>>(
-      "diag_save_in",
-      "The name of auxiliary variables to save this BC's diagonal jacobian "
-      "contributions to.  Everything about that variable must match everything "
-      "about this variable (the type, what blocks it's on, etc.)");
-
-  return params;
+  return validParams<NodalBCBase>();
 }
 
 NodalBC::NodalBC(const InputParameters & parameters)
-  : BoundaryCondition(parameters, true), // true is for being Nodal
-    RandomInterface(parameters, _fe_problem, _tid, true),
-    CoupleableMooseVariableDependencyIntermediateInterface(this, true),
+  : NodalBCBase(parameters),
     MooseVariableInterface<Real>(this, true),
     _var(*mooseVariable()),
     _current_node(_var.node()),
-    _u(_var.nodalValue()),
-    _save_in_strings(parameters.get<std::vector<AuxVariableName>>("save_in")),
-    _diag_save_in_strings(parameters.get<std::vector<AuxVariableName>>("diag_save_in")),
-    _is_eigen(false)
+    _u(_var.dofValues())
 {
   addMooseVariableDependency(mooseVariable());
 

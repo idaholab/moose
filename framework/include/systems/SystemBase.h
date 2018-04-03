@@ -397,13 +397,6 @@ public:
   virtual void reinitNodeFace(const Node * node, BoundaryID bnd_id, THREAD_ID tid);
 
   /**
-   * Reinit nodal assembly info for neighbor node
-   * @param node Node to reinit for
-   * @param tid Thread ID
-   */
-  virtual void reinitNodeNeighbor(const Node * node, THREAD_ID tid);
-
-  /**
    * Reinit variables at a set of nodes
    * @param nodes List of node ids to reinit
    * @param tid Thread ID
