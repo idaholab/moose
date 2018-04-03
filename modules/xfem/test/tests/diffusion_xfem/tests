@@ -13,5 +13,25 @@
     map = false
     unique_id = true
   [../]
-
+  [./levelsetcut2d]
+    type = Exodiff
+    input = levelsetcut2d.i
+    exodiff = 'levelsetcut2d_out.e'
+    map = false
+    unique_id = true
+  [../]
+  [./levelsetcut2d_aux]
+    type = Exodiff
+    input = levelsetcut2d_aux.i
+    exodiff = 'levelsetcut2d_aux_out.e'
+    map = false
+    unique_id = true
+  [../]
+  [./levelsetcut3d]
+    type = Exodiff
+    input = levelsetcut3d.i
+    exodiff = 'levelsetcut3d_out.e'
+    map = false
+    unique_id = true
+  [../]
 []

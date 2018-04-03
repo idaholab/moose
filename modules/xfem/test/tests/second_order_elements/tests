@@ -20,6 +20,13 @@
     map = false
     unique_id = true
   [../]
+  [./diffusion_quad9_levelsetcut]
+    type = Exodiff
+    input = diffusion_quad9_levelsetcut.i
+    exodiff = 'diffusion_quad9_levelsetcut_out.e'
+    map = false
+    unique_id = true
+  [../]
   [./diffusion_3d_tet10]
     type = Exodiff
     input = diffusion_3d_tet10.i

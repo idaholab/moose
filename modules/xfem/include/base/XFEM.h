@@ -123,6 +123,12 @@ public:
   Real getPhysicalVolumeFraction(const Elem * elem) const;
 
   /**
+   * Return true if the point is inside the element physical domain
+   * Note: if this element is not cut, return true too
+   */
+  bool isPointInsidePhysicalDomain(const Elem * elem, const Point & point) const;
+
+  /**
    * Get specified component of normal or origin for cut plane for a given element
    */
   Real getCutPlane(const Elem * elem,
