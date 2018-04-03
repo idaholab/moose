@@ -13,7 +13,7 @@ from mooseutils import message
 import qtutils
 import time
 import unittest
-import glob
+import glob, shutil
 from PyQt5 import QtCore, QtWidgets
 from peacock import PeacockApp
 import inspect
@@ -92,17 +92,12 @@ def remove_file(filename):
         pass
 
 def clean_files():
-    remove_file("out_transient.csv")
-    remove_file("oversample_oversample2.e")
-    remove_file("out_transient.e")
-    remove_file("peacock_run_exe_tmp.i")
-    remove_file("peacock_run_tmp.i")
-    remove_file("peacock_run_tmp_mesh.e")
-    remove_file("peacock_run_tmp_mesh.i")
-    for i in range(21):
-        remove_file("peacock_run_tmp_out_line_sample_{0:04d}.csv".format(i))
-        remove_file("time_data_line_sample_{0:04d}.csv".format(i))
-    remove_file("time_data_line_sample_time.csv")
+    for fname in glob.glob('*.csv'):
+        remove_file(fname)
+    for fname in glob.glob('*.e'):
+        remove_file(fname)
+    for fname in glob.glob('peacock_*.[ie]'):
+        remove_file(fname)
 
 def run_tests():
     unittest.main(verbosity=2)
@@ -132,29 +127,45 @@ def findQObjectsByType(top_qobject, type_name):
     addQObjectByType(top_qobject, type_name, matched)
     return matched
 
+def setupTestCache(cls):
+    """
+    This should be called by most/all of the peacock tests. It
+    sets QCoreApplication.applicationName based on the currently
+    running test so that when running in parallel different tests don't
+    clobber the --json dump cache or overwrite settings.
+    It also clears out any existing --json dumps cached and clears the
+    settings.
+    """
+    message.MOOSE_TESTING_MODE = True
+    test_app_name = os.path.splitext(os.path.basename(inspect.getfile(cls)))[0]
+    qtutils.setAppInformation(app_name=test_app_name, force=True)
+    settings = QtCore.QSettings()
+    settings.clear()
+    settings.sync()
+    ds = QtCore.QStandardPaths.standardLocations(QtCore.QStandardPaths.CacheLocation)
+    for d in ds:
+        if os.path.isdir(d):
+            try:
+                shutil.rmtree(d)
+            except:
+                pass
+
 class PeacockTester(unittest.TestCase):
     def setUp(self):
         self.finished = False
         self.app = None
-        message.MOOSE_TESTING_MODE = True
-        qtutils.setAppInformation(app_name=self._appPrefix())
         self.starting_directory = os.getcwd()
-        self.clearSettings()
-
-    def _appPrefix(self):
-        return os.path.splitext(os.path.basename(inspect.getfile(self.__class__)))[0]
-
-    def clearSettings(self):
-        settings = QtCore.QSettings()
-        settings.clear()
-        settings.sync()
+        setupTestCache(self.__class__)
+        clean_files()
 
     def tearDown(self):
         if self.app:
             self.app.main_widget.close()
             del self.app
         os.chdir(self.starting_directory)
-        self.clearSettings()
+        # cleanup after ourselves
+        setupTestCache(self.__class__)
+        clean_files()
 
     def run_finished(self, current, total):
         if current == total:
@@ -192,9 +203,16 @@ class PeacockImageTestCase(unittest.TestCase):
         """
         super(PeacockImageTestCase, cls).setUpClass()
 
+        setupTestCache(cls)
+
         filenames = glob.glob(cls.filename('_*.png'))
         for fname in filenames:
             os.remove(fname)
+
+    @classmethod
+    def tearDownClass(cls):
+        super(PeacockImageTestCase, cls).tearDownClass()
+        setupTestCache(cls) # cleanup after ourselves
 
     @classmethod
     def filename(cls, basename):
@@ -244,7 +262,7 @@ class PeacockAppImageTestCase(PeacockImageTestCase):
         self._app = PeacockApp.PeacockApp(args)
         self._window = self._app.main_widget.tab_plugin.ExodusViewer.currentWidget().VTKWindowPlugin
         set_window_size(self._window)
-        remove_file('peacock_run_exe_tmp_out.e')
+        clean_files()
 
     def selectTab(self, tab):
         """

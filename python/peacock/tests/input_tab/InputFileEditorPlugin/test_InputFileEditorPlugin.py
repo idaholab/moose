@@ -26,6 +26,7 @@ class Tests(Testing.PeacockTester):
         self.input_file = os.path.abspath("../../common/transient.i")
 
     def tearDown(self):
+        super(Tests, self).tearDown()
         Testing.remove_file("delete_me.i")
         Testing.remove_file("delete_me2.i")
 
