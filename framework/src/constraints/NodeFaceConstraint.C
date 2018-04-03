@@ -61,7 +61,7 @@ NodeFaceConstraint::NodeFaceConstraint(const InputParameters & parameters)
 
     _current_node(_var.node()),
     _current_master(_var.neighbor()),
-    _u_slave(_var.nodalValue()),
+    _u_slave(_var.dofValues()),
     _phi_slave(1),  // One entry
     _test_slave(1), // One entry
 

@@ -67,20 +67,20 @@ MooseVariableConstMonomial::computeMonomialValuesHelper(const unsigned & nqp, co
       _second_u_older.resize(nqp);
   }
 
-  if (_need_dof_u)
-    _dof_u.resize(1);
+  if (_need_dof_values)
+    _dof_values.resize(1);
 
-  if (_need_dof_u_previous_nl)
-    _dof_u_previous_nl.resize(1);
+  if (_need_dof_values_previous_nl)
+    _dof_values_previous_nl.resize(1);
 
   if (is_transient)
   {
-    if (_need_dof_u_old)
-      _dof_u_old.resize(1);
-    if (_need_dof_u_older)
-      _dof_u_older.resize(1);
-    if (_need_dof_u_dot)
-      _dof_u_dot.resize(1);
+    if (_need_dof_values_old)
+      _dof_values_old.resize(1);
+    if (_need_dof_values_older)
+      _dof_values_older.resize(1);
+    if (_need_dof_values_dot)
+      _dof_values_dot.resize(1);
   }
 
   if (_need_solution_dofs)
@@ -100,37 +100,37 @@ MooseVariableConstMonomial::computeMonomialValuesHelper(const unsigned & nqp, co
   Real u_dot = 0;
   const Real & du_dot_du = _sys.duDotDu();
 
-  if (_need_dof_u)
-    _dof_u[0] = soln;
+  if (_need_dof_values)
+    _dof_values[0] = soln;
 
   if (_need_u_previous_nl || _need_grad_previous_nl || _need_second_previous_nl ||
-      _need_dof_u_previous_nl)
+      _need_dof_values_previous_nl)
     soln_previous_nl = (*_sys.solutionPreviousNewton())(idx);
 
-  if (_need_dof_u_previous_nl)
-    _dof_u_previous_nl[0] = soln_previous_nl;
+  if (_need_dof_values_previous_nl)
+    _dof_values_previous_nl[0] = soln_previous_nl;
 
   if (_need_solution_dofs)
     _solution_dofs(0) = soln;
 
   if (is_transient)
   {
-    if (_need_u_old || _need_grad_old || _need_second_old || _need_dof_u_old)
+    if (_need_u_old || _need_grad_old || _need_second_old || _need_dof_values_old)
       soln_old = _sys.solutionOld()(idx);
 
-    if (_need_u_older || _need_grad_older || _need_second_older || _need_dof_u_older)
+    if (_need_u_older || _need_grad_older || _need_second_older || _need_dof_values_older)
       soln_older = _sys.solutionOlder()(idx);
 
-    if (_need_dof_u_old)
-      _dof_u_old[0] = soln_old;
+    if (_need_dof_values_old)
+      _dof_values_old[0] = soln_old;
 
-    if (_need_dof_u_older)
-      _dof_u_older[0] = soln_older;
+    if (_need_dof_values_older)
+      _dof_values_older[0] = soln_older;
 
     u_dot = _sys.solutionUDot()(idx);
 
-    if (_need_dof_u_dot)
-      _dof_u_dot[0] = u_dot;
+    if (_need_dof_values_dot)
+      _dof_values_dot[0] = u_dot;
 
     if (_need_solution_dofs_old)
       _solution_dofs_old(0) = soln_old;
@@ -210,16 +210,16 @@ MooseVariableConstMonomial::computeMonomialNeighborValuesHelper(const unsigned &
       _second_u_older_neighbor.resize(nqp);
   }
 
-  if (_need_dof_u_neighbor)
-    _dof_u_neighbor.resize(1);
+  if (_need_dof_values_neighbor)
+    _dof_values_neighbor.resize(1);
   if (is_transient)
   {
-    if (_need_dof_u_old_neighbor)
-      _dof_u_old_neighbor.resize(1);
-    if (_need_dof_u_older_neighbor)
-      _dof_u_older_neighbor.resize(1);
-    if (_need_dof_u_dot_neighbor)
-      _dof_u_dot_neighbor.resize(1);
+    if (_need_dof_values_old_neighbor)
+      _dof_values_old_neighbor.resize(1);
+    if (_need_dof_values_older_neighbor)
+      _dof_values_older_neighbor.resize(1);
+    if (_need_dof_values_dot_neighbor)
+      _dof_values_dot_neighbor.resize(1);
   }
 
   if (_need_solution_dofs_neighbor)
@@ -237,8 +237,8 @@ MooseVariableConstMonomial::computeMonomialNeighborValuesHelper(const unsigned &
   Real soln_older = 0;
   Real u_dot = 0;
 
-  if (_need_dof_u_neighbor)
-    _dof_u_neighbor[0] = soln;
+  if (_need_dof_values_neighbor)
+    _dof_values_neighbor[0] = soln;
 
   if (_need_solution_dofs_neighbor)
     _solution_dofs_neighbor(0) = soln;
@@ -251,15 +251,15 @@ MooseVariableConstMonomial::computeMonomialNeighborValuesHelper(const unsigned &
     if (_need_u_older_neighbor)
       soln_older = _sys.solutionOlder()(idx);
 
-    if (_need_dof_u_old_neighbor)
-      _dof_u_old_neighbor[0] = soln_old;
-    if (_need_dof_u_older_neighbor)
-      _dof_u_older_neighbor[0] = soln_older;
+    if (_need_dof_values_old_neighbor)
+      _dof_values_old_neighbor[0] = soln_old;
+    if (_need_dof_values_older_neighbor)
+      _dof_values_older_neighbor[0] = soln_older;
 
     u_dot = _sys.solutionUDot()(idx);
 
-    if (_need_dof_u_dot_neighbor)
-      _dof_u_dot_neighbor[0] = u_dot;
+    if (_need_dof_values_dot_neighbor)
+      _dof_values_dot_neighbor[0] = u_dot;
 
     if (_need_solution_dofs_old_neighbor)
       _solution_dofs_old_neighbor(0) = soln_old;

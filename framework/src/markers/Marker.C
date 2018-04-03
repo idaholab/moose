@@ -88,7 +88,7 @@ const MooseArray<Real> &
 Marker::getMarkerValue(std::string name)
 {
   _depend.insert(name);
-  return _sys.getVariable(_tid, name).dofValue();
+  return _sys.getVariable(_tid, name).dofValues();
 }
 
 bool

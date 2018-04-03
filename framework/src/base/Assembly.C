@@ -868,12 +868,6 @@ Assembly::reinit(const Node * node)
 }
 
 void
-Assembly::reinitNodeNeighbor(const Node * node)
-{
-  _current_neighbor_node = node;
-}
-
-void
 Assembly::reinitElemAndNeighbor(const Elem * elem,
                                 unsigned int side,
                                 const Elem * neighbor,

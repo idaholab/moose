@@ -57,13 +57,13 @@ Q2PNegativeNodalMassOld::computeQpResidual()
 
   if (_var_is_pp)
   {
-    density_old = _density.density(_var.nodalValueOld()[_i]);
+    density_old = _density.density(_var.dofValuesOld()[_i]);
     mass_old = _porosity_old[_qp] * density_old * (1 - _other_var_nodal_old[_i]);
   }
   else
   {
     density_old = _density.density(_other_var_nodal_old[_i]);
-    mass_old = _porosity_old[_qp] * density_old * _var.nodalValueOld()[_i];
+    mass_old = _porosity_old[_qp] * density_old * _var.dofValuesOld()[_i];
   }
 
   return _test[_i][_qp] * (-mass_old) / _dt;

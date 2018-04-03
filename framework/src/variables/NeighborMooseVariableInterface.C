@@ -33,7 +33,7 @@ const typename OutputTools<T>::VariableValue &
 NeighborMooseVariableInterface<T>::neighborValue()
 {
   if (this->_nodal)
-    return this->_variable->nodalValueNeighbor();
+    return this->_variable->dofValuesNeighbor();
   else
     return this->_variable->slnNeighbor();
 }
@@ -53,7 +53,7 @@ const typename OutputTools<T>::VariableValue &
 NeighborMooseVariableInterface<T>::neighborValueOld()
 {
   if (this->_nodal)
-    return this->_variable->nodalValueOldNeighbor();
+    return this->_variable->dofValuesOldNeighbor();
   else
     return this->_variable->slnOldNeighbor();
 }
@@ -73,7 +73,7 @@ const typename OutputTools<T>::VariableValue &
 NeighborMooseVariableInterface<T>::neighborValueOlder()
 {
   if (this->_nodal)
-    return this->_variable->nodalValueOlderNeighbor();
+    return this->_variable->dofValuesOlderNeighbor();
   else
     return this->_variable->slnOlderNeighbor();
 }

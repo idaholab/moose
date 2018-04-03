@@ -32,7 +32,7 @@
 #include "TimeKernel.h"
 #include "BoundaryCondition.h"
 #include "PresetNodalBC.h"
-#include "NodalBC.h"
+#include "NodalBCBase.h"
 #include "IntegratedBCBase.h"
 #include "DGKernel.h"
 #include "InterfaceKernel.h"
@@ -352,10 +352,10 @@ NonlinearSystemBase::addBoundaryCondition(const std::string & bc_name,
   _vars[tid].addBoundaryVar(boundary_ids, &bc->variable());
 
   // Cast to the various types of BCs
-  std::shared_ptr<NodalBC> nbc = std::dynamic_pointer_cast<NodalBC>(bc);
+  std::shared_ptr<NodalBCBase> nbc = std::dynamic_pointer_cast<NodalBCBase>(bc);
   std::shared_ptr<IntegratedBCBase> ibc = std::dynamic_pointer_cast<IntegratedBCBase>(bc);
 
-  // NodalBC
+  // NodalBCBase
   if (nbc)
   {
     _nodal_bcs.addObject(nbc);
@@ -1262,8 +1262,8 @@ void
 NonlinearSystemBase::computeNodalBCs(NumericVector<Number> & residual,
                                      Moose::KernelType kernel_type)
 {
-  // We need to close the diag_save_in variables on the aux system before NodalBCs clear the dofs on
-  // boundary nodes
+  // We need to close the diag_save_in variables on the aux system before NodalBCBases clear the
+  // dofs on boundary nodes
   if (_has_save_in)
     _fe_problem.getAuxiliarySystem().solution().close();
 
@@ -1983,7 +1983,7 @@ NonlinearSystemBase::computeJacobianInternal(SparseMatrix<Number> & jacobian,
   PARALLEL_CATCH;
   jacobian.close();
 
-  // We need to close the save_in variables on the aux system before NodalBCs clear the dofs on
+  // We need to close the save_in variables on the aux system before NodalBCBases clear the dofs on
   // boundary nodes
   if (_has_diag_save_in)
     _fe_problem.getAuxiliarySystem().solution().close();
@@ -1996,8 +1996,8 @@ NonlinearSystemBase::computeJacobianInternal(SparseMatrix<Number> & jacobian,
     const std::set<BoundaryID> & all_boundary_ids = _mesh.getBoundaryIDs();
     for (const auto & bid : all_boundary_ids)
     {
-      // Get reference to all the NodalBCs for this ID.  This is only
-      // safe if there are NodalBCs there to be gotten...
+      // Get reference to all the NodalBCBases for this ID.  This is only
+      // safe if there are NodalBCBases there to be gotten...
       if (_nodal_bcs.hasActiveBoundaryObjects(bid))
       {
         const auto & bcs = _nodal_bcs.getActiveBoundaryObjects(bid);
@@ -2017,7 +2017,7 @@ NonlinearSystemBase::computeJacobianInternal(SparseMatrix<Number> & jacobian,
       }
     }
 
-    // Get variable coupling list.  We do all the NodalBC stuff on
+    // Get variable coupling list.  We do all the NodalBCBase stuff on
     // thread 0...  The couplingEntries() data structure determines
     // which variables are "coupled" as far as the preconditioner is
     // concerned, not what variables a boundary condition specifically
@@ -2025,7 +2025,7 @@ NonlinearSystemBase::computeJacobianInternal(SparseMatrix<Number> & jacobian,
     std::vector<std::pair<MooseVariableFE *, MooseVariableFE *>> & coupling_entries =
         _fe_problem.couplingEntries(/*_tid=*/0);
 
-    // Compute Jacobians for NodalBCs
+    // Compute Jacobians for NodalBCBases
     ConstBndNodeRange & bnd_nodes = *_mesh.getBoundaryNodeRange();
     for (const auto & bnode : bnd_nodes)
     {
@@ -2066,14 +2066,14 @@ NonlinearSystemBase::computeJacobianInternal(SparseMatrix<Number> & jacobian,
     // rows are zeroed if homogeneous Dirichlet boundary conditions are used.
     if (kernel_type == Moose::KT_EIGEN)
       _fe_problem.assembly(0).zeroCachedJacobianContributions(jacobian);
-    // Set the cached NodalBC values in the Jacobian matrix
+    // Set the cached NodalBCBase values in the Jacobian matrix
     else
       _fe_problem.assembly(0).setCachedJacobianContributions(jacobian);
   }
   PARALLEL_CATCH;
   jacobian.close();
 
-  // We need to close the save_in variables on the aux system before NodalBCs clear the dofs on
+  // We need to close the save_in variables on the aux system before NodalBCBases clear the dofs on
   // boundary nodes
   if (_has_nodalbc_diag_save_in)
     _fe_problem.getAuxiliarySystem().solution().close();

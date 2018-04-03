@@ -98,9 +98,9 @@ AuxKernel::AuxKernel(const InputParameters & parameters)
     _JxW(_bnd ? _assembly.JxWFace() : _assembly.JxW()),
     _coord(_assembly.coordTransformation()),
 
-    _u(_nodal ? _var.nodalValue() : _var.sln()),
-    _u_old(_nodal ? _var.nodalValueOld() : _var.slnOld()),
-    _u_older(_nodal ? _var.nodalValueOlder() : _var.slnOlder()),
+    _u(_nodal ? _var.dofValues() : _var.sln()),
+    _u_old(_nodal ? _var.dofValuesOld() : _var.slnOld()),
+    _u_older(_nodal ? _var.dofValuesOlder() : _var.slnOlder()),
     _test(_var.phi()),
 
     _current_elem(_assembly.elem()),

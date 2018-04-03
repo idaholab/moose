@@ -1411,18 +1411,6 @@ FEProblemBase::reinitNodesNeighbor(const std::vector<dof_id_type> & nodes, THREA
 }
 
 void
-FEProblemBase::reinitNodeNeighbor(const Node * node, THREAD_ID tid)
-{
-  _assembly[tid]->reinitNodeNeighbor(node);
-
-  if (_displaced_problem != NULL && _reinit_displaced_elem)
-    _displaced_problem->reinitNodeNeighbor(&_displaced_mesh->nodeRef(node->id()), tid);
-
-  _nl->reinitNodeNeighbor(node, tid);
-  _aux->reinitNodeNeighbor(node, tid);
-}
-
-void
 FEProblemBase::reinitScalars(THREAD_ID tid)
 {
   if (_displaced_problem != NULL && _reinit_displaced_elem)

@@ -362,20 +362,6 @@ SystemBase::reinitNodeFace(const Node * /*node*/, BoundaryID /*bnd_id*/, THREAD_
 }
 
 void
-SystemBase::reinitNodeNeighbor(const Node * /*node*/, THREAD_ID tid)
-{
-  const std::vector<MooseVariableFE *> & vars = _vars[tid].fieldVariables();
-  for (const auto & var : vars)
-  {
-    if (var->isNodal())
-    {
-      var->reinitNodeNeighbor();
-      var->computeNodalNeighborValues();
-    }
-  }
-}
-
-void
 SystemBase::reinitNodes(const std::vector<dof_id_type> & nodes, THREAD_ID tid)
 {
   const std::vector<MooseVariableFE *> & vars = _vars[tid].fieldVariables();

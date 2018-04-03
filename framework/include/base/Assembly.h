@@ -443,11 +443,6 @@ public:
   void reinit(const Node * node);
 
   /**
-   * Reinitialize assembly data for a neighbor node
-   */
-  void reinitNodeNeighbor(const Node * node);
-
-  /**
    * Initialize the Assembly object and set the CouplingMatrix for use throughout.
    */
   void init(const CouplingMatrix * cm);

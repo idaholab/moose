@@ -116,7 +116,7 @@ InternalSideIndicator::finalize()
     n_flux_faces = 1;
 
   // The 0 is because CONSTANT MONOMIALS only have one coefficient per element...
-  Real value = _field_var.dofValue()[0];
+  Real value = _field_var.dofValues()[0];
 
   {
     Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);

@@ -140,7 +140,7 @@ protected:
    * Only used if _fully_upwind = true
    * Eg:
    * _ps_at_nodes[_pvar] is a pointer to this variable's nodal porepressure values
-   * So: (*_ps_at_nodes[_pvar])[i] = _var.nodalValue()[i] = porepressure of pressure-variable _pvar
+   * So: (*_ps_at_nodes[_pvar])[i] = _var.dofValues()[i] = porepressure of pressure-variable _pvar
    * at node i
    */
   std::vector<const VariableValue *> _ps_at_nodes;
