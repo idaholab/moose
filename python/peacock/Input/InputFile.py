@@ -54,17 +54,14 @@ class InputFile(object):
         # parser doesn't do any checks.
         if not os.path.exists(filename):
             msg = "Input file %s does not exist" % filename
-            mooseutils.mooseError(msg)
             raise PeacockException(msg)
 
         if not os.path.isfile(filename):
             msg = "Input file %s is not a file" % filename
-            mooseutils.mooseError(msg)
             raise PeacockException(msg)
 
         if not filename.endswith(".i"):
             msg = "Input file %s does not have the proper extension" % filename
-            mooseutils.mooseError(msg)
             raise PeacockException(msg)
 
         with open(filename, 'r') as f:
