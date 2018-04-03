@@ -1,0 +1,20 @@
+[Tests]
+  [./glued_bimaterial]
+    type = Exodiff
+    input = glued_bimaterials_2d.i
+    exodiff = 'glued_bimaterials_2d_out.e'
+    abs_zero = 1e-8
+    use_old_floor = true
+    map = false
+    unique_id = true
+  [../]
+  [./inclusion_bimaterial]
+    type = Exodiff
+    input = inclusion_bimaterials_2d.i
+    exodiff = 'inclusion_bimaterials_2d_out.e'
+    abs_zero = 1e-8
+    use_old_floor = true
+    map = false
+    unique_id = true
+  [../]
+[]
