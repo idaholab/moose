@@ -63,6 +63,6 @@ else:
             cmd.append("-b")
         ret = subprocess.call(cmd)
         if ret != 0:
-            print("%s exited %s" % (t, ret))
+            print("%s exited %s" % (name, ret))
             final_code = 1
     sys.exit(final_code)
