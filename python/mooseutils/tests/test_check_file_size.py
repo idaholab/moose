@@ -17,8 +17,10 @@ class TestCheckFileSize(unittest.TestCase):
     """
 
     def testBasic(self):
-        results = check_file_size(size=1)
-        self.assertTrue(results)
+        results = check_file_size(size=1) # No files greater than 1Mb
+        self.assertEqual(results, [])
+        results = check_file_size(size=0)
+        self.assertNotEqual(results, [])
 
 if __name__ == '__main__':
     unittest.main(module=__name__, verbosity=2, buffer=True, exit=False)
