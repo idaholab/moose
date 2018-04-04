@@ -4,7 +4,7 @@ import types
 import importlib
 import logging
 
-import mooseutils
+from mooseutils.yaml_load import yaml_load
 import MooseDocs
 from MooseDocs.common import check_type, exceptions
 
@@ -39,7 +39,7 @@ def load_config(filename):
     """
     Read the config.yml file and create the Translator object.
     """
-    config = mooseutils.yaml_load(filename, root=MooseDocs.ROOT_DIR)
+    config = yaml_load(filename, root=MooseDocs.ROOT_DIR)
 
     content = _yaml_load_content(config)
     extensions = _yaml_load_extensions(config)
