@@ -213,6 +213,7 @@ SolidModel::SolidModel(const InputParameters & parameters)
     _d_strain_dT(),
     _d_stress_dT(createProperty<SymmTensor>("d_stress_dT")),
     _total_strain_increment(0),
+    _mechanical_strain_increment(0),
     _strain_increment(0),
     _compute_JIntegral(getParam<bool>("compute_JIntegral")),
     _compute_InteractionIntegral(getParam<bool>("compute_InteractionIntegral")),
@@ -743,6 +744,7 @@ SolidModel::computeProperties()
     _total_strain_increment = _strain_increment;
 
     modifyStrainIncrement();
+    _mechanical_strain_increment = _strain_increment;
 
     computeElasticityTensor();
 
@@ -780,8 +782,9 @@ SolidModel::computeStrainEnergyDensity()
 {
   mooseAssert(_SED, "_SED not initialized");
   mooseAssert(_SED_old, "_SED_old not initialized");
-  (*_SED)[_qp] = (*_SED_old)[_qp] + _stress[_qp].doubleContraction(_strain_increment) / 2 +
-                 _stress_old_prop[_qp].doubleContraction(_strain_increment) / 2;
+  (*_SED)[_qp] = (*_SED_old)[_qp] +
+                 _stress[_qp].doubleContraction(_mechanical_strain_increment) / 2 +
+                 _stress_old_prop[_qp].doubleContraction(_mechanical_strain_increment) / 2;
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -1298,7 +1301,7 @@ SolidModel::crackingStressRotation()
            // && (*_crack_count)[_qp](i) == 0
            )
           // || _cracked_this_step_count[_q_point[_qp]] > 5
-          )
+      )
       {
         cracked = true;
         ++((*_crack_count)[_qp](i));
@@ -1329,7 +1332,7 @@ SolidModel::crackingStressRotation()
                 sigma(i) > _cracking_stress && num_cracks < _max_cracks &&
                 _active_crack_planes[i] == 1)
                // || _cracked_this_step_count[_q_point[_qp]] > 5
-               )
+      )
       {
         // A new crack
         // _cracked_this_step[_q_point[_qp]] = 1;

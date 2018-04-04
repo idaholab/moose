@@ -142,7 +142,13 @@ protected:
   // The derivative of the stress with respect to Temperature
   MaterialProperty<SymmTensor> & _d_stress_dT;
 
+  /// Total strain increment, including mechanical strains and eigenstrains
   SymmTensor _total_strain_increment;
+  /// Mechanical strain increment, which is the total strain increment minus eigenstrains
+  SymmTensor _mechanical_strain_increment;
+  /// In most models, this is the mechanical strain increment, but for
+  /// inelastic models, it has the inelastic component subtracted from it, so it
+  /// is the elastic strain increment
   SymmTensor _strain_increment;
 
   const bool _compute_JIntegral;
