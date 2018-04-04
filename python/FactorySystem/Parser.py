@@ -118,11 +118,9 @@ class Parser:
                             elif strict_type != type(value):
                                 self.error("wrong data type for parameter value: '{}=\"{}\"'".format(child.fullpath(), value), node=child)
                                 have_err = True
-                        elif child.kind() == hit.FieldKind.Bool:
+                        else:
                             # Otherwise, just do normal assignment
                             params[key] = child.param()
-                        else:
-                            params[key] = value
             else:
                 self.error('unused parameter "{}"'.format(child.fullpath()), node=child)
 
