@@ -50,4 +50,11 @@
     input = 'exodus_nodal.i'
     exodiff = 'exodus_nodal_out.e'
   [../]
+
+  [./discontinuous]
+    # Tests the discontinuous output in ExodusII
+    type = 'Exodiff'
+    input = 'exodus_discontinuous.i'
+    exodiff = 'exodus_discontinuous_out.e'
+  [../]
 []

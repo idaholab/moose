@@ -65,6 +65,9 @@ validParams<Exodus>()
   // Set outputting of the input to be on by default
   params.set<ExecFlagEnum>("execute_input_on") = EXEC_INITIAL;
 
+  // Flag for outputting discontinuous data to Exodus
+  params.addParam<bool>("discontinuous",false,"Enables discontinuous output format for Exodus files.");
+
   // Return the InputParameters
   return params;
 }
@@ -78,7 +81,8 @@ Exodus::Exodus(const InputParameters & parameters)
     _sequence(isParamValid("sequence") ? getParam<bool>("sequence")
                                        : _use_displaced ? true : false),
     _overwrite(getParam<bool>("overwrite")),
-    _output_dimension(getParam<MooseEnum>("output_dimension"))
+    _output_dimension(getParam<MooseEnum>("output_dimension")),
+    _discontinuous(getParam<bool>("discontinuous"))
 {
   if (isParamValid("use_problem_dimension"))
   {
@@ -89,6 +93,7 @@ Exodus::Exodus(const InputParameters & parameters)
     else
       _output_dimension = "default";
   }
+  if(_discontinuous && !getParam<bool>("elemental_as_nodal")) mooseWarning("Requested discontinuous output, but 'elemental_as_nodal = false'");
 }
 
 void
@@ -241,8 +246,12 @@ Exodus::outputNodalVariables()
   _exodus_io_ptr->set_output_variables(nodal);
 
   // Write the data via libMesh::ExodusII_IO
-  _exodus_io_ptr->write_timestep(
-      filename(), *_es_ptr, _exodus_num, time() + _app.getGlobalTimeOffset());
+  if (_discontinuous)
+    _exodus_io_ptr->write_timestep_discontinuous(
+        filename(), *_es_ptr, _exodus_num, time() + _app.getGlobalTimeOffset());
+  else
+    _exodus_io_ptr->write_timestep(
+        filename(), *_es_ptr, _exodus_num, time() + _app.getGlobalTimeOffset());
 
   if (!_overwrite)
     _exodus_num++;
