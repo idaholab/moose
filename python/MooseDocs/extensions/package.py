@@ -2,7 +2,7 @@
 
 import os
 
-import mooseutils
+from mooseutils.yaml_load import yaml_load
 
 import MooseDocs
 from MooseDocs.common import exceptions
@@ -19,8 +19,7 @@ class PackageExtension(command.CommandExtension):
 
     @staticmethod
     def defaultConfig():
-        packages = mooseutils.yaml_load(os.path.join(MooseDocs.MOOSE_DIR, 'framework', 'doc',
-                                                     'packages.yml'))
+        packages = yaml_load(os.path.join(MooseDocs.MOOSE_DIR, 'framework', 'doc', 'packages.yml'))
 
         config = command.CommandExtension.defaultConfig()
         config['packages'] = (packages, "A dict of packages by name.")
