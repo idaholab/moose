@@ -205,10 +205,10 @@
 
   line_search = 'none'
 
-  l_max_its = 100
-  nl_max_its = 200
+  l_max_its = 15
+  nl_max_its = 10
   dt = 0.001
-  end_time = 0.001
+  end_time = 0.002
   num_steps = 10000
   nl_rel_tol = 1e-6
   nl_abs_tol = 1e-8
@@ -217,7 +217,6 @@
 []
 
 [Outputs]
-  file_base = single_point_2d_out_glued_kin
   exodus = true
   print_linear_residuals = true
   print_perf_log = true
@@ -232,11 +231,13 @@
   [./leftright]
     master = 2
     slave = 3
-    model = glued
+    model = frictionless
     system = constraint
     formulation = kinematic
     penalty = 1e12
     normalize_penalty = true
     tangential_tolerance = 1e-3
+    custom_line_search = true
+    allowed_lambda_cuts = 0
   [../]
 []

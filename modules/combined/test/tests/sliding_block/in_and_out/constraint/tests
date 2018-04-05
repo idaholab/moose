@@ -39,4 +39,14 @@
     abs_zero = 1e-7
     max_time = 800
   [../]
+  [./frictionless_penalty_custom_line_search]
+    type = 'Exodiff'
+    input = 'frictionless_penalty_custom_line_search.i'
+    exodiff = 'frictionless_penalty_custom_line_search_exodus.e'
+    heavy = true
+    superlu = true
+    min_parallel = 4
+    abs_zero = 1e-7
+    max_time = 800
+  [../]
 []
