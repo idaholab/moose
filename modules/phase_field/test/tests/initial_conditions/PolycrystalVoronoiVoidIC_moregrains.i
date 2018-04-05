@@ -1,8 +1,8 @@
 [Mesh]
   type = GeneratedMesh
   dim = 2
-  nx = 85
-  ny = 85
+  nx = 40
+  ny = 40
   nz = 0
   xmax = 250
   ymax = 250
