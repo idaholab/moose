@@ -11,9 +11,9 @@ The eigenstrain is added to the mechanical strain, which can be elastic or inela
 \end{equation}
 
 Eigenstrain is the term given to a strain which does not result directly from an applied force.
-[Chapter 3](http://onlinelibrary.wiley.com/doi/10.1002/9780470117835.ch3/pdf) of **Fundamentals of Micromechanics of Solids** describes the relationship between total, elastic, and eigen- strains and provides examples using thermal expansion and dislocations.
+Chapter 3 of [cite:qu2006fundamentals] describes the relationship between total, elastic, and eigen- strains and provides examples using thermal expansion and dislocations.
 Eigenstrains are also referred to as residual strains, stress-free strains, or intrinsic strains; translated from German, [Eigen](http://dict.tu-chemnitz.de/deutsch-englisch/Eigen....html) means own or intrinsic in English.
-The term eigenstrain was introduced by [T. Mura in 1982](http://link.springer.com/chapter/10.1007/978-94-011-9306-1_1).
+The term eigenstrain was introduced by [cite:mura1982general].
 
 Based on the number and values of constants provided as the argument to the `eigen_base` parameter, `ComputeEigenstrain` will build an isotropic, symmetric, or skew-symmetric Rank-2 eigenstrain tensor.
 
@@ -26,3 +26,5 @@ Based on the number and values of constants provided as the argument to the `eig
 !syntax inputs /Materials/ComputeEigenstrain
 
 !syntax children /Materials/ComputeEigenstrain
+
+!bibtex bibliography

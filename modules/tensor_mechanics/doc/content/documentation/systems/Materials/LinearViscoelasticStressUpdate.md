@@ -11,6 +11,7 @@ This computes the inelastic strain increment resulting from a linear viscoelasti
 !listing modules/tensor_mechanics/test/tests/visco/gen_maxwell_driving.i block=Materials/creep
 
 `LinearViscoelasticStressUpdate` must be run in conjunction with the inelastic strain return mapping stress calculator as shown below:
+
 !listing modules/tensor_mechanics/test/tests/visco/gen_maxwell_driving.i block=Materials/stress
 
 !syntax parameters /Materials/LinearViscoelasticStressUpdate

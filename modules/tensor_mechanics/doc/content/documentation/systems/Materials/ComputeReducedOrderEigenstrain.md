@@ -15,6 +15,7 @@ This class accepts eigenstrains and computes a reduced order eigenstrain.  If th
 !listing modules/tensor_mechanics/test/tests/eigenstrain/reducedOrderRZLinear.i block=Materials/reduced_order_eigenstrain
 
 The `eigenstrain_name` parameter value must also be set for the strain calculator, and an example parameter setting is shown below:
+
 !listing modules/tensor_mechanics/test/tests/eigenstrain/reducedOrderRZLinear.i block=Modules
 
 !syntax parameters /Materials/ComputeReducedOrderEigenstrain

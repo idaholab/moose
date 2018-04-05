@@ -1,4 +1,4 @@
-# ComputeAxisymmetricRZIncrementalStrain
+# Compute Axisymmetric RZ Incremental Strain
 
 !syntax description /Materials/ComputeAxisymmetricRZIncrementalStrain
 

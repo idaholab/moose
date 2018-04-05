@@ -3,6 +3,7 @@ increment; the trial stress calculation assumed all of the new strain increment 
 \begin{equation}
 \sigma_{trial} = C_{ijkl} \left( \Delta \epsilon_{assumed-elastic} + \epsilon_{elastic}^{old} \right)
 \end{equation}
+
 The algorithms checks to see if the trial stress state is outside of the yield surface, as shown in
 the figure to the right. If the stress state is outside of the yield surface, the algorithm
 recomputes the scalar effective inelastic strain required to return the stress state to the yield
@@ -13,6 +14,7 @@ this yield surface has the shape of a circle, and the scalar inelastic strain is
 directed at the circle center.
 
 ### Recompute Iterations on the Effective Plastic Strain Increment
+
 The recompute radial return materials each individually calculate, using the
 [Newton Method](http://mathworld.wolfram.com/NewtonsMethod.html), the amount of effective inelastic
 strain

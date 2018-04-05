@@ -75,3 +75,124 @@ After the data is read using the "read" method, there are two methods used for a
   generated based on the number of columns when a header-less file is being examined.
 - `getData`: There are three overloaded versions of this method. One returns a reference to the
 - entire data set as a vector of vectors. The others access a single vector by name or index.
+
+
+
+## Tensor Operators
+
+### RankTwoTensor Operators
+
+The following operators are available for RankTwoTensor, with the values in parentheses indicating
+what the type of the other object to be subject to the operation.
+
+```text
+=
++= (RankTwoTensor)
+-= (RankTwoTensor)
+*= (Real, RankTwoTensor)
+/= (Real)
++ (RankTwoTensor)
+- (RankTwoTensor)
+* (Real, RankTwoTensor, TypeTensor<Real>)
+/ (Real)
+```
+
+In addition, many methods are available for additional matrix operations:
+
+- `zero()`
+- `print()`
+- `transpose()`
+- `L2norm()`
+- `row(int)` returns a TypeVector<Real>
+- `rotate(RealTensorValue)`
+- `rotate(RankTwoTensor)`
+- `rotateXyPlane(Real)`
+- `doubleContraction()`
+- `deviatoric()` traceless part
+- `trace()`
+- `dtrace()` derivatives of `trace()` wrt tensor entries
+- `secondInvariant()` second invariant of the symmetric part of `deviatoric()`
+- `dsecondInvariant()`  derivatives of `secondInvariant()` wrt tensor entries
+- `d2secondInvariant()`  second derivatives of `secondInvariant()` wrt tensor entries
+- `thirdInvariant()` third invariant of the symmetric part of deviatoric, i.e. `((deviatoric() + deviatoric().transpose())/2).det()`
+- `dthirdInvariant()`  derivatives of `thirdInvariant()` wrt tensor entries
+- `d2thirdInvariant()`  second derivatives of `thirdInvariant()` wrt tensor entries
+- `sin3Lode()`  sine of three times the Lode angle
+- `dsin3Lode()`  derivatives of `sin3Lode()` wrt tensor entries
+- `d2sin3Lode()`  second derivatives of `sin3Lode()` wrt tensor entries
+- `det()` determinant
+- `ddet()` derivatives of `det()` wrt tensor entries
+- `inverse()`
+- `symmetricEigenvalues()`  eigenvalues of symmetric part of tensor
+- `dsymmetricEigenvalues()`  derivatives of symmetricEigenvalues wrt the tensor entries
+- `d2symmetricEigenvalues()` second derivatives of symmetricEigenvalues wrt the tensor entries
+
+These methods are thoroughly tested using CPPUNIT.
+
+### RankThreeTensor Operators
+
+The following operators are available for RankThreeTensor, with the values in parentheses indicating
+what the type of the other object to be subject to the operation.
+
+```text
+=
++= (RankThreeTensor)
+-= (RankThreeTensor)
+*= (Real)
+/= (Real)
++ (RankThreeTensor)
+- (RankThreeTensor)
+* (RankThreeTensor, RankTwoTensor, Real)
+/ (Real)
+```
+
+In addition, many methods are available for additional matrix operations:
+
+- `zero()`
+- `print()`
+- `L2norm()`
+- `rotate(Real)`
+- `rotate(RealTensorValue)`
+- `rotate(RankTwoTensor)`
+- fillFromInputVector(TypeVector<Real>)
+- `fillFromPlaneNormal(TypeVector<Real>)`
+- `mixedProjectRankFour(RankTwoTensor)` creates a Rank-4 tensor from the contraction $D_{ijkl} = T_{mij}b_{mn}T_{nkl}$
+- `doubleContraction(RankTwoTensor)` creates a vector from the contraction $v_i = T_{ijk}b_{jk}$
+
+### RankFourTensor Operators
+
+The following operators are available for RankFourTensor, with the values in parentheses indicating
+what the type of the other object to be subject to the operation.
+
+```text
+=
++= (RankFourTensor)
+-= (RankFourTensor)
+*= (Real)
+/= (Real)
++ (RankFourTensor)
+- (RankFourTensor)
+* (RankFourTensor, RankTwoTensor, RealTensorValue, Real)
+/ (Real)
+```
+
+In addition, many methods are available for additional matrix operations:
+
+- `zero()`
+- `print()`
+- `L2norm()`
+- `invSymm()` returns A$_{ijkl}$ from the input C$_{ijkl}$ such that $C_{ijkl} \cdot A_{ijkl} = 0.5 \left( \delta_{im} \delta_{jn} + \delta_{in} \delta_{jm} \right)$
+- `rotate(RealTensorValue)`
+- `rotate(RankTwoTensor)`
+- `transposeMajor()` witch first pair and second pair of indices
+- `surfaceFillFromInputVector(TypeVector<Real>)` Fills tensor entries by ignoring the last dimension
+- `fillFromInputVector(TypeVector<Real>, FillMethod)` used to build elasticity tensors
+- `fillGeneralIsotropic(TypeVector<Real>)`
+- `fillAntisymmetricIsotropic(Real)`
+- `fillSymmetricIsotropic(Real, Real)`
+- `fillSymmetricIsotropicEandNu(Real, Real)`
+- `innerProductTranspose`
+- `sum3x3()` calculates the sum of C$_{iijj}$ over $i$ and $j$
+- `sum1x3()` calculates the vector from summing over $j$ in C$_{iijj}$
+- `isSymmetric()`
+- `isIsotropic()`
