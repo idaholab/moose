@@ -51,7 +51,6 @@ protected:
   const VariableValue & _u;
 
   virtual Real computeQpResidual() = 0;
-
   /**
    * The user can override this function to compute the "on-diagonal"
    * Jacobian contribution for this NodalBC.  If not overriden,

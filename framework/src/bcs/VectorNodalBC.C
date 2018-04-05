@@ -12,6 +12,7 @@
 #include "Assembly.h"
 #include "MooseVariableFEImpl.h"
 #include "SystemBase.h"
+#include "NonlinearSystemBase.h"
 
 template <>
 InputParameters
