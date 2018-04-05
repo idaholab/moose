@@ -40,14 +40,14 @@ class Tests(Testing.PeacockTester):
         runner = w.tab_plugin.ExecuteTabPlugin.ExecuteRunnerPlugin
         self.assertEqual(runner._total_steps, 0)
 
-        w.tab_plugin.InputFileEditorWithMesh.setInputFile("../../common/transient.i")
+        w.tab_plugin.InputFileEditorWithMesh.setInputFile("transient.i")
         w.setTab(w.tab_plugin.ExecuteTabPlugin.tabName())
-        w.tab_plugin.ExecuteTabPlugin.ExecuteOptionsPlugin.setWorkingDir(self.starting_directory)
         self.assertIn("transient.i", w.windowTitle())
 
         self.assertEqual(runner._total_steps, 8)
 
-        w.tab_plugin.ExecuteTabPlugin.ExecuteRunnerPlugin.runClicked()
+        runner.runClicked()
+        runner.runner.process.waitForFinished()
         Testing.process_events(t=2)
         self.assertTrue(os.path.exists("out_transient.e"))
 
