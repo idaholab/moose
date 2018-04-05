@@ -260,7 +260,7 @@ Legendre::evaluateSqrtMu()
 {
   evaluateStandard();
   for (size_t i = 0; i < getNumberOfTerms(); ++i)
-    save(i, load(i) / std::sqrt(2));
+    save(i, load(i) * std::sqrt(i + 0.5));
 }
 
 const std::vector<Real> &

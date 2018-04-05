@@ -233,7 +233,7 @@ Zernike::evaluateSqrtMu()
     for (size_t m = 0; m < n + 1; ++m)
     {
       if (m != 0 && n / m == 2 && n % m == 0)
-        save(j, load(j) * std::sqrt((2 * n + 2) / (2 * M_PI)));
+        save(j, load(j) * std::sqrt((n + 1) / M_PI));
       else
         save(j, load(j) * std::sqrt((2 * n + 2) / M_PI));
       ++j;

@@ -17,6 +17,15 @@
     group = functional_expansion_tools
   [../]
 
+  [./volume_coupling_custom_norm]
+    # This test couples a master and sub app in 1D for a light but fully-functional volumetric test
+    type = Exodiff
+    input = volume_coupling_custom_norm.i
+    exodiff = volume_coupled_out.e
+    group = functional_expansion_tools
+    prereq = 'volume_coupling'
+  [../]
+
 
   [./print_coefficients]
     # If an extraneous field is provided, then so long as the 'physical_bounds' and 'orders' fields
