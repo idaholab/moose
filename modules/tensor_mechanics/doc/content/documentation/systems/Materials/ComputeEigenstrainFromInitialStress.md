@@ -20,7 +20,7 @@ calculator (eg, in `ComputeSmallStrain`), otherwise MOOSE will not add the eigen
 mechanical strain!
 
 !alert warning title=Time-dependent elasticity tensors
-The eigenstrain is computed on the first time step, using the elasticity tensor.  Hence the
+The eigenstrain is computed on the first time step, using the elasticity tensor; hence, the
 elasticity tensor should not be time-varying in the first timestep.
 
 ## Example Input File Syntax

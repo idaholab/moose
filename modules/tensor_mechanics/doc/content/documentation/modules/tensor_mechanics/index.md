@@ -1,61 +1,36 @@
 # TensorMechanics Module
-
-- [Complete System List](tensor_mechanics/systems.md)
-- [Strains](tensor_mechanics/Strains.md)
-- [Stresses](tensor_mechanics/Stresses.md)
-- [Stress Divergence](tensor_mechanics/StressDivergence.md)
-- [Visualizing Tensors](tensor_mechanics/VisualizingTensors.md)
-- [Tensor Classes](tensor_mechanics/TensorClasses.md)
-- [Convergence Criteria](tensor_mechanics/Convergence.md)
-- [Volumetric locking correction](tensor_mechanics/VolumetricLocking.md)
-- [Fracture Integrals](tensor_mechanics/FractureIntegrals.md)
-
-The MOOSE tensor mechanics module is a library for simplifying the implementation of simulation tools
-that solve mechanics problems. It provides a simple approach for implementing even advanced mechanics
+The MOOSE +Tensor Mechanics module+ is a library for simulation tools that solve
+mechanics problems. It provides a simple approach for implementing even advanced mechanics
 models.
-
-The tensor mechanics module provides a powerful system for solving solid mechanics problems using a
-simple to use syntax based on tensor forms. This approach allows the tensor equations to be
-implemented clearly and concisely.
-
-## Mathematical Introduction
-
-A material varies from its rest shape due to stress. This departure from the rest shape is called
-deformation or displacement, and the proportion of deformation to original size is called strain. To
-determine the deformed shape and the stress, a governing equation is solved to determine the
-displacement vector $\mathbf{u}$.
-
-The strong form of the governing equation on the domain $\Omega$ and boundary
-$\Gamma=\Gamma_{\mathit{t_i}}\cup\Gamma_{\mathit{g_i}}$ can be stated as follows:
-\begin{equation}
-\begin{aligned}
-\nabla \cdot (\mathbf{\sigma} + \mathbf{\sigma}_0) + \mathbf{b} =& \mathbf{0} \;\mathrm{in}\;\Omega \\
-\mathbf{u} =& \mathbf{g}\;\mathrm{in}\;\Gamma_{ \mathbf{g}} \\
-\mathbf{\sigma} \cdot \mathbf{n}=&\mathbf{t}\;\mathrm{in}\;\Gamma_{ \mathbf{t}}
-\end{aligned}
-\end{equation}
-where $\mathbf{\sigma}$  is the Cauchy stress tensor, $\mathbf{\sigma}_0$ is an additional source of stress (such as pore pressure), $\mathbf{u}$ is the displacement vector, $\mathbf{b}$ is the body force, $\mathbf{n}$ is the unit normal to the boundary, $\mathbf{g}$ is the prescribed displacement on the boundary and $\mathbf{t}$ is the prescribed traction on the boundary. The weak form of the residual equation is expressed as:
-\begin{equation}
-  \mathbb{R} = \left( \mathbf{\sigma} + \mathbf{\sigma}_0), \nabla \phi_m \right) - \left< \mathbf{t}, \phi_m \right> - \left( \mathbf{b}, \phi_m \right)  = \mathbf{0}
-\end{equation}
-where $(\cdot)$ and $\left< \cdot \right>$ represent volume and boundary integrals, respectively. The solution of the residual equation with Newton's method requires the Jacobian of the residual equation, which can be expressed as (ignoring boundary terms)
-\begin{equation}
-  \mathbb{J} = \left( \frac{\partial \mathbf{\sigma}}{\partial \nabla \mathbf{u}} , \nabla \phi_m \right),
-\end{equation}
-assuming $\mathbf{\sigma}_0$ is independent of the strain.
-
-The material stress response is described by the constitutive model, where the stress is determined
-as a function of the strain, i.e. $\tilde{\mathbf{\sigma}}( \mathbf{\epsilon} -
-\mathbf{\epsilon}_0)$, where $\mathbf{\epsilon}$ is the strain and $\mathbf{\epsilon}_0$ is a stress
-free strain. For example, in linear elasticity (only valid for small strains), the material response
-is linear, i.e.  $\mathbf{\sigma} = \mathbf{\mathcal{C}}(\mathbf{\epsilon} - \mathbf{\epsilon}_0)$.
-
 The tensor mechanics system can handle linear elasticity and finite strain mechanics, including
 elasticity, plasticity, creep, and damage.
 
+
+Find the [Complete System List](tensor_mechanics/systems.md) of all tensor mechanics code in this list.
+
+In-depth descriptions of Main Components:
+
+- [Strains](tensor_mechanics/Strains.md)
+- [Stresses](tensor_mechanics/Stresses.md)
+- [Stress Divergence](tensor_mechanics/StressDivergence.md)
+
+Introductions to more Advanced Features:
+
+- [Volumetric Locking Correction](tensor_mechanics/VolumetricLocking.md)
+- [Fracture Integrals](tensor_mechanics/FractureIntegrals.md)
+- [Convergence Criteria](tensor_mechanics/Convergence.md)
+
+Visualizing and Post Processing Simulation Results:
+
+- [Visualizing Tensors](tensor_mechanics/VisualizingTensors.md)
+- [Tensor Classes](tensor_mechanics/TensorClasses.md)
+
 ## Using Materials in Tensor Mechanics
 
-The tensor mechanics materials use a modular system where the main tensors used in the residual
+The tensor mechanics module uses code syntax based on tensor forms. This approach
+allows the tensor equations to be implemented clearly and concisely.
+
+The tensor mechanics materials use a plug-and-play system where the main tensors used in the residual
 equation are defined in individual material classes in MOOSE. The plug-and-play approach used in the
 Tensor Mechanics module requires at least three separate classes to fully describe a material model.
 
@@ -74,6 +49,7 @@ reason, all material properties can be prepended by a name defined by the input 
 `base_name`.
 
 ## Strain Materials
+
 The base material class to create strains ($\mathbf{\epsilon}$) or strain increments is
 `ComputeStrainBase`; this class is a pure virtual class, requiring that all children override the
 `computeQpProperties()` method.  For all strains the base class defines the property `total_strain`.
@@ -144,14 +120,13 @@ subtracted from the total strain in the Compute Strain classes.
 \begin{equation}
 \epsilon_{mechanical} = \epsilon_{total} - \epsilon_{eigen}
 \end{equation}
-[Chapter 3](http://onlinelibrary.wiley.com/doi/10.1002/9780470117835.ch3/pdf) of +Fundamentals of
-Micromechanics of Solids+ describes the relationship between total, elastic, and eigen- strains and
+Chapter 3 of [cite:qu2006fundamentals] describes the relationship between total, elastic, and eigen- strains and
 provides examples using thermal expansion and dislocations.
 
 Eigenstrains are also referred to as residual strains, stress-free strains, or intrinsic strains;
 translated from German, [Eigen](http://dict.tu-chemnitz.de/deutsch-englisch/Eigen....html) means own
 or intrinsic in English.  The term eigenstrain was introduced by
-[T. Mura in 1982](http://link.springer.com/chapter/10.1007/978-94-011-9306-1_1):
+[cite:mura1982general]:
 
 > Eigenstrain is a generic name given to such nonelastic strains as thermal expansion, phase
 > transformation, initial strains, plastic, misfit strains. Eigenstress is a generic name given to
@@ -204,3 +179,5 @@ An extra stress may be a residual stress, such as in large civil engineering sim
 of an extra stress material used in an input file is:
 
 !listing modules/combined/test/tests/linear_elasticity/extra_stress.i block=Materials/const_stress
+
+!bibtex bibliography

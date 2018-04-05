@@ -4,6 +4,7 @@ It is important to set appropriate convergence criteria.  If the tolerances are 
 will never converge.  If the tolerances are too weak, models will yield incorrect answers.
 
 ## Global Nonlinear Convergence Criteria
+
 Regardless of whether plasticity or only elasticity is used, MOOSE needs to know what you mean by
 "converged".  You must place a tolerance on the nonlinear residual.  In TensorMechanics this comes
 from integrating $\nabla \sigma$ over an element, and for an element of side length $L$ the integral
@@ -17,8 +18,8 @@ problem (TensorMechanics currently only works for $d=3$), and $\sigma$ is the ro
 For example, for J2 plasticity, $\sigma$ will be roughly the yield strength of the material, say
 $10^6$.  For a element of size 0.1, this yields $R \sim 10^{-15}\times 0.1 \times 10^{6} = 10^{-10}$.
 
-However, you should set your nonlinear residual tolerance **substantially larger than this
-estimate**.  This is because error is likely to be spread over the entire mesh, not just one element,
+However, you should set your nonlinear residual tolerance +substantially larger than this
+estimate+.  This is because error is likely to be spread over the entire mesh, not just one element,
 so $R$ should be multiplied by the number of elements, and also that setting $R$ this small is risky
 because it relies on maintaining full precision throughout all computations.  Instead, identify the
 crucial region of interest.  Denote its volume by $V$.  Usually this will be less than the entire
@@ -28,6 +29,7 @@ problem.  Then set $R = VE_{\nabla\sigma}$.
 
 
 ## Convergence Criteria for UserObject Based Plasticity
+
 There are three types of convergence criteria that need to be set when using plasticity:
 
 1. tolerance(s) on the yield function(s)
@@ -82,7 +84,7 @@ reasonable.  Eg, a stress change of 100Pa might be rather inconsequential, and t
 into a tolerance on $f$ of 100Pa.  Provided this 100Pa is not close to $E_{\sigma}$, the plasticity
 algorithms should converge.
 
-!alert note
+!alert note prefix=False
 Choose the tolerance on $f$ to be $10^5$ smaller than the yield stress, cohesion, tensile strength,
 etc.
 
@@ -91,6 +93,6 @@ etc.
 
 Similar arguments can be made for the plastic strain and internal constraints.
 
-!alert note
-Choose these to be $10^{-5}\epsilon$ to $10^{-3}\epsilon$, where $\epsilon$ are the typical strains
+!alert note prefix=False
+Choose the tolerance to be $10^{-5}\epsilon$ to $10^{-3}\epsilon$, where $\epsilon$ are the typical strains
 encountered in the model

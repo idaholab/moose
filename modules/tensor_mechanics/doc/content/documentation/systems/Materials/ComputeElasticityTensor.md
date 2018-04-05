@@ -12,7 +12,7 @@ angle parameters; the Bunge Euler angles provided in this class are used to perf
 sample to the crystal) rotations.
 
 For a general stiffness tensor with 21 independent components, the elasticity tensor within the
-tensor mechanics module can be represented with the notation shown in Eq
+tensor mechanics module can be represented with the notation shown in
 [eq:rank4tensor_aux_indices].  Nonetheless, the full Rank-4 tensor with all 81 components is
 created by `ComputeElasticityTensor`.
 \begin{equation}
@@ -51,9 +51,9 @@ tensor for a mechanics simulation that are discussed below.
 ## General Symmetry
 
 The fill method `symmetric21` is used to create the elasticity tensor for a linear hyperelastic
-material with 21 independent components: the symmetries shown in Eq
+material with 21 independent components: the symmetries shown in
 [eq:symmetric21_cijkl_cases] are used to determine the independent components
-[cite:slaughter2012linearized].
+[citep:slaughter2012linearized].
 \begin{equation}
 \label{eq:symmetric21_cijkl_cases}
   \begin{aligned}
@@ -72,7 +72,7 @@ which shows the expected order of the elasticity tensor components in the input 
 ## Orthotropic Symmetry
 
 The fill method `symmetric9` is appropriate for materials with three orthotropic planes of symmetry
-[cite:malvern1969introduction], and is often used for simulations of anistropic materials such as
+[citep:malvern1969introduction], and is often used for simulations of anistropic materials such as
 cubic crystals.  The enginering elasticity tensor notation, [eq:rank4tensor_aux_indices],
 for an orthotropic material is given in [eq:symmetric9_fill_method]
 \begin{equation}
@@ -120,7 +120,7 @@ where $e$ is the permutation tensor and $m$ is the summation index.
 
 ## Transverse Isotropic (Axisymmetric)
 
-The fill method `axisymmetric_rz` is used for materials which are isotropic with respect to an axis of symmetry, such as a material composed of fibers which are parallel to the axis of symmetry [cite:slaughter2012linearized].
+The fill method `axisymmetric_rz` is used for materials which are isotropic with respect to an axis of symmetry, such as a material composed of fibers which are parallel to the axis of symmetry [citep:slaughter2012linearized].
 The engineering notation matrix in this case is shown by [eq:axisymmetric_rz_fill_method].
 \begin{equation}
 \label{eq:axisymmetric_rz_fill_method}
@@ -146,7 +146,7 @@ expects the elasticity components in the order `C_ijkl = '1111, 1122, 1133, 3333
 ## Principal Directions for Stress and Strain
 
 The fill method `principal` is appropriate for the case when the principal directions of strain and
-stress align.  The engineering notation representation of the elasticity tensor is shown in Eq
+stress align.  The engineering notation representation of the elasticity tensor is shown in
 [eq:principal_fill_method].
 \begin{equation}
 \label{eq:principal_fill_method}
