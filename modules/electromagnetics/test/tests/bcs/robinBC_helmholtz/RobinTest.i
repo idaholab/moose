@@ -48,14 +48,7 @@
     coefficient = 1
     variable = u_real
   [../]
-  [./coupledLaplacian_real]
-    type = CoupledCoeffDiffusion
-    coefficient = 0
-    sign = -1.0
-    coupled_field = u_imag
-    variable = u_real
-  [../]
-  [./kSquaredEpsField_real]
+  [./coeffField_real]
     type = CoeffField
     func = ASquaredMinusBSquared
     variable = u_real
@@ -72,14 +65,7 @@
     coefficient = 1
     variable = u_imag
   [../]
-  [./coupledLaplacian_imag]
-    type = CoupledCoeffDiffusion
-    coefficient = 0
-    sign = 1.0
-    coupled_field = u_real
-    variable = u_imag
-  [../]
-  [./kSquaredEpsField_imag]
+  [./coeffField_imag]
     type = CoeffField
     func = ASquaredMinusBSquared
     variable = u_imag
