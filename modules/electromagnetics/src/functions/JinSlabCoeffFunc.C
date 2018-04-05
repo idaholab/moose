@@ -34,12 +34,15 @@ JinSlabCoeffFunc::JinSlabCoeffFunc(const InputParameters & parameters)
 Real
 JinSlabCoeffFunc::value(Real t, const Point & p)
 {
-  std::complex<double> _epsR(_epsR_real.value(t, p), _epsR_imag.value(t, p));
-  std::complex<double> _muR(_muR_real, _muR_imag);
+  // std::complex<double> _epsR(_epsR_real.value(t, p), _epsR_imag.value(t, p));
+  // std::complex<double> _muR(_muR_real, _muR_imag);
+
+  std::complex<double> _j(0, 1);
+  std::complex<double> _epsR = 4.0 + (2.0 - _j * 0.1) * std::pow((1 - p(0) * _k / 5), 2);
+  std::complex<double> _muR(2, -0.1);
 
   std::complex<double> _val =
-      _k * std::sqrt(_epsR - (1.0 / _muR) * std::sin(_theta * libMesh::pi / 180.) *
-                                 std::sin(_theta * libMesh::pi / 180.));
+      _k * std::sqrt(_epsR * _muR - std::pow(std::sin(_theta * libMesh::pi / 180.), 2));
 
   if (_component == "real")
   {
