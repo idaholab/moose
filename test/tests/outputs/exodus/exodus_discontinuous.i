@@ -11,13 +11,49 @@
   ny = 10
 []
 
-[AuxVariables]
+[Variables]
   [./disc_u]
     family = monomial
-    order = constant
-    [./InitialCondition]
-      type = RandomIC
-    [../]
+    order = first
+  [../]
+[]
+
+[Kernels]
+  [./diff]
+    type = Diffusion
+    variable = disc_u
+  [../]
+  [./forcing]
+    type = BodyForce
+    variable = disc_u
+    value = 7
+  [../]
+[]
+
+[DGKernels]
+  [./diff_dg]
+  type = DGDiffusion
+  variable = disc_u
+  sigma = 1
+  epsilon = 1
+  [../]
+[]
+
+[Functions]
+  [./zero_fn]
+    type = ParsedFunction
+    value = 0.0
+  [../]
+[]
+
+[BCs]
+  [./all]
+    type = DGFunctionDiffusionDirichletBC
+    variable = disc_u
+    boundary = 'left right top bottom'
+    function = zero_fn
+    sigma = 1
+    epsilon = 1
   [../]
 []
 
@@ -26,11 +62,6 @@
   solve_type = PJFNK
   petsc_options_iname = '-pc_type -pc_hypre_type'
   petsc_options_value = 'hypre boomeramg'
-[]
-
-[Problem]
-  solve = false
-  type = FEProblem
 []
 
 [Outputs]
