@@ -83,6 +83,12 @@ MaxQpsThread::operator()(const ConstElemRange & range)
       fe->reinit(elem, side);
       if (qrule_face->n_points() > _max)
         _max = qrule_face->n_points();
+
+      // In initial conditions nodes are enumerated as pretend quadrature points
+      // using the _qp index to access coupled variables. In order to be able to
+      // use _zero (resized according to _max_qps) with _qp, we need to count nodes.
+      if (elem->n_nodes() > _max)
+        _max = elem->n_nodes();
     }
   }
 }
