@@ -1,0 +1,12 @@
+[Tests]
+  [./test]
+    type = 'CSVDiff'
+    input = 'table_tolerance_test.i'
+    csvdiff = 'table_tolerance_test_out.csv'
+
+    requirement = 'The TableOutput object shall allow the user to override tolerance checks when determining whether new rows should be added (independent variable delta)'
+    design = "New interfaces have been added to Formatted table to allow external users to decide when new rows are added so that every insertion
+              of data doesn't require a new row tolerance check. TableOutput has been updated to use this new interface"
+    issues = '#11171'
+  [../]
+[]
