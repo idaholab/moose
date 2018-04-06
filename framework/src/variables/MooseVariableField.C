@@ -15,7 +15,68 @@ MooseVariableField<OutputType>::MooseVariableField(unsigned int var_num,
                                                    SystemBase & sys,
                                                    Assembly & assembly,
                                                    Moose::VarKindType var_kind)
-  : MooseVariableFE(var_num, fe_type, sys, var_kind, assembly),
+  : MooseVariableFE(var_num, fe_type, sys, var_kind),
+    _assembly(assembly),
+    _qrule(_assembly.qRule()),
+    _qrule_face(_assembly.qRuleFace()),
+    _qrule_neighbor(_assembly.qRuleNeighbor()),
+    _elem(_assembly.elem()),
+    _current_side(_assembly.side()),
+    _neighbor(_assembly.neighbor()),
+    _need_u_old(false),
+    _need_u_older(false),
+    _need_u_previous_nl(false),
+    _need_grad_old(false),
+    _need_grad_older(false),
+    _need_grad_previous_nl(false),
+    _need_grad_dot(false),
+    _need_second(false),
+    _need_second_old(false),
+    _need_second_older(false),
+    _need_second_previous_nl(false),
+    _need_curl(false),
+    _need_curl_old(false),
+    _need_curl_older(false),
+    _need_u_old_neighbor(false),
+    _need_u_older_neighbor(false),
+    _need_u_previous_nl_neighbor(false),
+    _need_grad_old_neighbor(false),
+    _need_grad_older_neighbor(false),
+    _need_grad_previous_nl_neighbor(false),
+    _need_grad_neighbor_dot(false),
+    _need_second_neighbor(false),
+    _need_second_old_neighbor(false),
+    _need_second_older_neighbor(false),
+    _need_second_previous_nl_neighbor(false),
+    _need_curl_neighbor(false),
+    _need_curl_old_neighbor(false),
+    _need_curl_older_neighbor(false),
+    _need_solution_dofs(false),
+    _need_solution_dofs_old(false),
+    _need_solution_dofs_older(false),
+    _need_solution_dofs_neighbor(false),
+    _need_solution_dofs_old_neighbor(false),
+    _need_solution_dofs_older_neighbor(false),
+    _need_dof_values(false),
+    _need_dof_values_old(false),
+    _need_dof_values_older(false),
+    _need_dof_values_previous_nl(false),
+    _need_dof_values_dot(false),
+    _need_dof_du_dot_du(false),
+    _need_dof_values_neighbor(false),
+    _need_dof_values_old_neighbor(false),
+    _need_dof_values_older_neighbor(false),
+    _need_dof_values_previous_nl_neighbor(false),
+    _need_dof_values_dot_neighbor(false),
+    _need_dof_du_dot_du_neighbor(false),
+    _normals(_assembly.normals()),
+    _is_nodal(true),
+    _has_dofs(false),
+    _neighbor_has_dofs(false),
+    _has_nodal_value(false),
+    _has_nodal_value_neighbor(false),
+    _node(_assembly.node()),
+    _node_neighbor(_assembly.nodeNeighbor()),
     _phi(_assembly.fePhi<OutputType>(_fe_type)),
     _grad_phi(_assembly.feGradPhi<OutputType>(_fe_type)),
     _phi_face(_assembly.fePhiFace<OutputType>(_fe_type)),
@@ -38,6 +99,20 @@ MooseVariableField<OutputType>::MooseVariableField(unsigned int var_num,
 template <typename OutputType>
 MooseVariableField<OutputType>::~MooseVariableField()
 {
+  _dof_values.release();
+  _dof_values_old.release();
+  _dof_values_older.release();
+  _dof_values_previous_nl.release();
+  _dof_values_dot.release();
+  _dof_du_dot_du.release();
+
+  _dof_values_neighbor.release();
+  _dof_values_old_neighbor.release();
+  _dof_values_older_neighbor.release();
+  _dof_values_previous_nl_neighbor.release();
+  _dof_values_dot_neighbor.release();
+  _dof_du_dot_du_neighbor.release();
+
   _u.release();
   _u_bak.release();
   _u_old.release();
@@ -100,6 +175,364 @@ MooseVariableField<OutputType>::~MooseVariableField()
   _curl_u_neighbor.release();
   _curl_u_old_neighbor.release();
   _curl_u_older_neighbor.release();
+}
+
+template <typename OutputType>
+const std::set<SubdomainID> &
+MooseVariableField<OutputType>::activeSubdomains() const
+{
+  return _sys.system().variable(_var_num).active_subdomains();
+}
+
+template <typename OutputType>
+bool
+MooseVariableField<OutputType>::activeOnSubdomain(SubdomainID subdomain) const
+{
+  return _sys.system().variable(_var_num).active_on_subdomain(subdomain);
+}
+
+template <typename OutputType>
+void
+MooseVariableField<OutputType>::clearDofIndices()
+{
+  _dof_indices.clear();
+}
+
+template <typename OutputType>
+void
+MooseVariableField<OutputType>::prepare()
+{
+  _dof_map.dof_indices(_elem, _dof_indices, _var_num);
+  _has_nodal_value = false;
+  _has_nodal_value_neighbor = false;
+
+  // FIXME: remove this when the Richard's module is migrated to use the new NodalCoupleable
+  // interface.
+  if (_dof_indices.size() > 0)
+    _has_dofs = true;
+  else
+    _has_dofs = false;
+}
+
+template <typename OutputType>
+void
+MooseVariableField<OutputType>::prepareNeighbor()
+{
+  _dof_map.dof_indices(_neighbor, _dof_indices_neighbor, _var_num);
+  _has_nodal_value = false;
+  _has_nodal_value_neighbor = false;
+}
+
+template <typename OutputType>
+void
+MooseVariableField<OutputType>::prepareAux()
+{
+  _has_nodal_value = false;
+  _has_nodal_value_neighbor = false;
+}
+
+template <typename OutputType>
+void
+MooseVariableField<OutputType>::reinitNode()
+{
+  if (size_t n_dofs = _node->n_dofs(_sys.number(), _var_num))
+  {
+    _dof_indices.resize(n_dofs);
+    for (size_t i = 0; i < n_dofs; ++i)
+      _dof_indices[i] = _node->dof_number(_sys.number(), _var_num, i);
+    // For standard variables. _nodal_dof_index is retrieved by nodalDofIndex() which is used in
+    // NodalBC for example
+    _nodal_dof_index = _dof_indices[0];
+    _has_dofs = true;
+  }
+  else
+  {
+    _dof_indices.clear(); // Clear these so Assembly doesn't think there's dofs here
+    _has_dofs = false;
+  }
+}
+
+template <typename OutputType>
+void
+MooseVariableField<OutputType>::reinitAux()
+{
+  /* FIXME: this method is only for elemental auxiliary variables, so
+   * we may want to rename it */
+  _dof_map.dof_indices(_elem, _dof_indices, _var_num);
+  if (_elem->n_dofs(_sys.number(), _var_num) > 0)
+  {
+    // FIXME: check if the following is equivalent with '_nodal_dof_index = _dof_indices[0];'?
+    _nodal_dof_index = _elem->dof_number(_sys.number(), _var_num, 0);
+    libmesh_assert(_dof_indices.size());
+    _dof_values.resize(_dof_indices.size());
+    _sys.currentSolution()->get(_dof_indices, &_dof_values[0]);
+
+    _has_dofs = true;
+  }
+  else
+    _has_dofs = false;
+}
+
+template <typename OutputType>
+void
+MooseVariableField<OutputType>::reinitAuxNeighbor()
+{
+  if (_neighbor)
+  {
+    _dof_map.dof_indices(_neighbor, _dof_indices_neighbor, _var_num);
+    if (_neighbor->n_dofs(_sys.number(), _var_num) > 0)
+    {
+      _nodal_dof_index_neighbor = _neighbor->dof_number(_sys.number(), _var_num, 0);
+
+      libmesh_assert(_dof_indices_neighbor.size());
+      _dof_values_neighbor.resize(_dof_indices_neighbor.size());
+      _sys.currentSolution()->get(_dof_indices_neighbor, &_dof_values_neighbor[0]);
+
+      _neighbor_has_dofs = true;
+    }
+    else
+      _neighbor_has_dofs = false;
+  }
+  else
+    _neighbor_has_dofs = false;
+}
+
+template <typename OutputType>
+void
+MooseVariableField<OutputType>::reinitNodes(const std::vector<dof_id_type> & nodes)
+{
+  _dof_indices.clear();
+  for (const auto & node_id : nodes)
+  {
+    Node * nd = _subproblem.mesh().getMesh().query_node_ptr(node_id);
+    if (nd && (_subproblem.mesh().isSemiLocal(nd)))
+    {
+      if (nd->n_dofs(_sys.number(), _var_num) > 0)
+      {
+        dof_id_type dof = nd->dof_number(_sys.number(), _var_num, 0);
+        _dof_indices.push_back(dof);
+      }
+    }
+  }
+
+  if (_dof_indices.size() > 0)
+    _has_dofs = true;
+  else
+    _has_dofs = false;
+}
+
+template <typename OutputType>
+void
+MooseVariableField<OutputType>::reinitNodesNeighbor(const std::vector<dof_id_type> & nodes)
+{
+  _dof_indices_neighbor.clear();
+  for (const auto & node_id : nodes)
+  {
+    Node * nd = _subproblem.mesh().getMesh().query_node_ptr(node_id);
+    if (nd && (_subproblem.mesh().isSemiLocal(nd)))
+    {
+      if (nd->n_dofs(_sys.number(), _var_num) > 0)
+      {
+        dof_id_type dof = nd->dof_number(_sys.number(), _var_num, 0);
+        _dof_indices_neighbor.push_back(dof);
+      }
+    }
+  }
+
+  if (_dof_indices_neighbor.size() > 0)
+    _neighbor_has_dofs = true;
+  else
+    _neighbor_has_dofs = false;
+}
+
+template <typename OutputType>
+void
+MooseVariableField<OutputType>::getDofIndices(const Elem * elem,
+                                              std::vector<dof_id_type> & dof_indices)
+{
+  _dof_map.dof_indices(elem, dof_indices, _var_num);
+}
+
+template <typename OutputType>
+Number
+MooseVariableField<OutputType>::getNodalValue(const Node & node)
+{
+  mooseAssert(_subproblem.mesh().isSemiLocal(const_cast<Node *>(&node)), "Node is not Semilocal");
+
+  // Make sure that the node has DOFs
+  /* Note, this is a reproduction of an assert within libMesh::Node::dof_number, this is done to
+   * produce a better error (see misc/check_error.node_value_off_block) */
+  mooseAssert(node.n_dofs(_sys.number(), _var_num) > 0,
+              "Node " << node.id() << " does not contain any dofs for the "
+                      << _sys.system().variable_name(_var_num) << " variable");
+
+  dof_id_type dof = node.dof_number(_sys.number(), _var_num, 0);
+
+  return (*_sys.currentSolution())(dof);
+}
+
+template <typename OutputType>
+Number
+MooseVariableField<OutputType>::getNodalValueOld(const Node & node)
+{
+  mooseAssert(_subproblem.mesh().isSemiLocal(const_cast<Node *>(&node)), "Node is not Semilocal");
+
+  // Make sure that the node has DOFs
+  /* Note, this is a reproduction of an assert within libMesh::Node::dof_number, this is done to
+   * produce a better error (see misc/check_error.node_value_off_block) */
+  mooseAssert(node.n_dofs(_sys.number(), _var_num) > 0,
+              "Node " << node.id() << " does not contain any dofs for the "
+                      << _sys.system().variable_name(_var_num) << " variable");
+
+  dof_id_type dof = node.dof_number(_sys.number(), _var_num, 0);
+  return _sys.solutionOld()(dof);
+}
+
+template <typename OutputType>
+Number
+MooseVariableField<OutputType>::getNodalValueOlder(const Node & node)
+{
+  mooseAssert(_subproblem.mesh().isSemiLocal(const_cast<Node *>(&node)), "Node is not Semilocal");
+
+  // Make sure that the node has DOFs
+  /* Note, this is a reproduction of an assert within libMesh::Node::dof_number, this is done to
+   * produce a better error (see misc/check_error.node_value_off_block) */
+  mooseAssert(node.n_dofs(_sys.number(), _var_num) > 0,
+              "Node " << node.id() << " does not contain any dofs for the "
+                      << _sys.system().variable_name(_var_num) << " variable");
+
+  dof_id_type dof = node.dof_number(_sys.number(), _var_num, 0);
+  return _sys.solutionOlder()(dof);
+}
+
+template <typename OutputType>
+Number
+MooseVariableField<OutputType>::getElementalValue(const Elem * elem, unsigned int idx) const
+{
+  std::vector<dof_id_type> dof_indices;
+  _dof_map.dof_indices(elem, dof_indices, _var_num);
+
+  return (*_sys.currentSolution())(dof_indices[idx]);
+}
+
+template <typename OutputType>
+void
+MooseVariableField<OutputType>::insert(NumericVector<Number> & residual)
+{
+  if (_has_nodal_value)
+    residual.insert(&_dof_values[0], _dof_indices);
+}
+
+template <typename OutputType>
+void
+MooseVariableField<OutputType>::add(NumericVector<Number> & residual)
+{
+  if (_has_nodal_value)
+    residual.add_vector(&_dof_values[0], _dof_indices);
+}
+
+template <typename OutputType>
+const MooseArray<Number> &
+MooseVariableField<OutputType>::dofValue()
+{
+  mooseDeprecated("Use dofValues instead of dofValue");
+  return dofValues();
+}
+
+template <typename OutputType>
+const MooseArray<Number> &
+MooseVariableField<OutputType>::dofValues()
+{
+  _need_dof_values = true;
+  return _dof_values;
+}
+
+template <typename OutputType>
+const MooseArray<Number> &
+MooseVariableField<OutputType>::dofValuesOld()
+{
+  _need_dof_values_old = true;
+  return _dof_values_old;
+}
+
+template <typename OutputType>
+const MooseArray<Number> &
+MooseVariableField<OutputType>::dofValuesOlder()
+{
+  _need_dof_values_older = true;
+  return _dof_values_older;
+}
+
+template <typename OutputType>
+const MooseArray<Number> &
+MooseVariableField<OutputType>::dofValuesPreviousNL()
+{
+  _need_dof_values_previous_nl = true;
+  return _dof_values_previous_nl;
+}
+
+template <typename OutputType>
+const MooseArray<Number> &
+MooseVariableField<OutputType>::dofValuesNeighbor()
+{
+  _need_dof_values_neighbor = true;
+  return _dof_values_neighbor;
+}
+
+template <typename OutputType>
+const MooseArray<Number> &
+MooseVariableField<OutputType>::dofValuesOldNeighbor()
+{
+  _need_dof_values_old_neighbor = true;
+  return _dof_values_old_neighbor;
+}
+
+template <typename OutputType>
+const MooseArray<Number> &
+MooseVariableField<OutputType>::dofValuesOlderNeighbor()
+{
+  _need_dof_values_older_neighbor = true;
+  return _dof_values_older_neighbor;
+}
+
+template <typename OutputType>
+const MooseArray<Number> &
+MooseVariableField<OutputType>::dofValuesPreviousNLNeighbor()
+{
+  _need_dof_values_previous_nl_neighbor = true;
+  return _dof_values_previous_nl_neighbor;
+}
+
+template <typename OutputType>
+const MooseArray<Number> &
+MooseVariableField<OutputType>::dofValuesDot()
+{
+  _need_dof_values_dot = true;
+  return _dof_values_dot;
+}
+
+template <typename OutputType>
+const MooseArray<Number> &
+MooseVariableField<OutputType>::dofValuesDotNeighbor()
+{
+  _need_dof_values_dot_neighbor = true;
+  return _dof_values_dot_neighbor;
+}
+
+template <typename OutputType>
+const MooseArray<Number> &
+MooseVariableField<OutputType>::dofValuesDuDotDu()
+{
+  _need_dof_du_dot_du = true;
+  return _dof_du_dot_du;
+}
+
+template <typename OutputType>
+const MooseArray<Number> &
+MooseVariableField<OutputType>::dofValuesDuDotDuNeighbor()
+{
+  _need_dof_du_dot_du_neighbor = true;
+  return _dof_du_dot_du_neighbor;
 }
 
 template <typename OutputType>

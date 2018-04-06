@@ -23,109 +23,58 @@ public:
   MooseVariableFE(unsigned int var_num,
                   const FEType & fe_type,
                   SystemBase & sys,
-                  Moose::VarKindType var_kind,
-                  Assembly & assembly);
-
-  virtual ~MooseVariableFE();
+                  Moose::VarKindType var_kind);
 
   /**
    * Clear out the dof indices.  We do this in case this variable is not going to be prepared at
    * all...
    */
-  void clearDofIndices();
+  virtual void clearDofIndices() = 0;
 
-  void prepare();
+  virtual void prepare() = 0;
 
-  void prepareNeighbor();
-  void prepareAux();
+  virtual void prepareNeighbor() = 0;
+  virtual void prepareAux() = 0;
 
-  void reinitNode();
-  void reinitNodeNeighbor();
-  void reinitAux();
-  void reinitAuxNeighbor();
+  virtual void reinitNode() = 0;
+  virtual void reinitAux() = 0;
+  virtual void reinitAuxNeighbor() = 0;
 
-  void reinitNodes(const std::vector<dof_id_type> & nodes);
-  void reinitNodesNeighbor(const std::vector<dof_id_type> & nodes);
-
-  /**
-   * Whether or not this variable is computing any second derivatives.
-   */
-  bool computingSecond()
-  {
-    return _need_second || _need_second_old || _need_second_older || _need_second_previous_nl;
-  }
-  bool computingCurl() { return _need_curl || _need_curl_old; }
-
-  const std::set<SubdomainID> & activeSubdomains() const;
-
-  /**
-   * Is the variable active on the subdomain?
-   * @param subdomain The subdomain id in question
-   * @return true if active on subdomain, false otherwise
-   */
-  bool activeOnSubdomain(SubdomainID subdomain) const;
+  virtual void reinitNodes(const std::vector<dof_id_type> & nodes) = 0;
+  virtual void reinitNodesNeighbor(const std::vector<dof_id_type> & nodes) = 0;
 
   /**
    * Is this variable nodal
    * @return true if it nodal, otherwise false
    */
-  bool isNodal() const { return _is_nodal; }
+  virtual bool isNodal() const = 0;
+  virtual dof_id_type & nodalDofIndex() = 0;
+  virtual dof_id_type & nodalDofIndexNeighbor() = 0;
 
   /**
    * Current element this variable is evaluated at
    */
-  const Elem *& currentElem() const { return _elem; }
+  virtual const Elem *& currentElem() const = 0;
+
+  virtual const MooseArray<Point> & normals() const = 0;
 
   /**
-   * Current side this variable is being evaluated on
+   * The subdomains the variable is active on
    */
-  unsigned int & currentSide() const { return _current_side; }
-
+  virtual const std::set<SubdomainID> & activeSubdomains() const = 0;
   /**
-   * Current neighboring element
+   * Is the variable active on the subdomain?
+   * @param subdomain The subdomain id in question
+   * @return true if active on subdomain, false otherwise
    */
-  const Elem *& neighbor() const { return _neighbor; }
+  virtual bool activeOnSubdomain(SubdomainID subdomain) const = 0;
 
-  const MooseArray<Point> & normals() const { return _normals; }
-
-  const Node *& node() const { return _node; }
-  dof_id_type & nodalDofIndex() { return _nodal_dof_index; }
-  bool isNodalDefined() const { return _has_dofs; }
-
-  const Node *& nodeNeighbor() const { return _node_neighbor; }
-  dof_id_type & nodalDofIndexNeighbor() { return _nodal_dof_index_neighbor; }
-  bool isNodalNeighborDefined() const { return _neighbor_has_dofs; }
-
-  const DenseVector<Number> & solutionDoFs()
-  {
-    _need_solution_dofs = true;
-    return _solution_dofs;
-  }
-  const DenseVector<Number> & solutionDoFsOld()
-  {
-    _need_solution_dofs_old = true;
-    return _solution_dofs_old;
-  }
-  const DenseVector<Number> & solutionDoFsOlder()
-  {
-    _need_solution_dofs_older = true;
-    return _solution_dofs_older;
-  }
-  const DenseVector<Number> & solutionDoFsNeighbor()
-  {
-    _need_solution_dofs_neighbor = true;
-    return _solution_dofs_neighbor;
-  }
-  const DenseVector<Number> & solutionDoFsOldNeighbor()
-  {
-    _need_solution_dofs_old_neighbor = true;
-    return _solution_dofs_old_neighbor;
-  }
-  const DenseVector<Number> & solutionDoFsOlderNeighbor()
-  {
-    _need_solution_dofs_older_neighbor = true;
-    return _solution_dofs_older_neighbor;
-  }
+  virtual const DenseVector<Number> & solutionDoFs() = 0;
+  virtual const DenseVector<Number> & solutionDoFsOld() = 0;
+  virtual const DenseVector<Number> & solutionDoFsOlder() = 0;
+  virtual const DenseVector<Number> & solutionDoFsNeighbor() = 0;
+  virtual const DenseVector<Number> & solutionDoFsOldNeighbor() = 0;
+  virtual const DenseVector<Number> & solutionDoFsOlderNeighbor() = 0;
 
   /**
    * Compute values at interior quadrature points
@@ -162,129 +111,83 @@ public:
   /**
    * Get the value of this variable at given node
    */
-  Number getNodalValue(const Node & node);
+  virtual Number getNodalValue(const Node & node) = 0;
   /**
    * Get the old value of this variable at given node
    */
-  Number getNodalValueOld(const Node & node);
+  virtual Number getNodalValueOld(const Node & node) = 0;
   /**
    * Get the t-2 value of this variable at given node
    */
-  Number getNodalValueOlder(const Node & node);
-
+  virtual Number getNodalValueOlder(const Node & node) = 0;
   /**
    * Retrieve the Elemental DOF
    * @param elem The element we are computing on
    * @return The variable value
    */
-  Number getElementalValue(const Elem * elem, unsigned int idx = 0) const;
+  virtual Number getElementalValue(const Elem * elem, unsigned int idx = 0) const = 0;
 
-  /**
-   * Whether or not this variable is actually using the shape function value.
-   *
-   * Currently hardcoded to true because we always compute the value.
-   */
-  bool usesPhi() { return true; }
-
-  /**
-   * Whether or not this variable is actually using the shape function gradient.
-   *
-   * Currently hardcoded to true because we always compute the value.
-   */
-  bool usesGradPhi() { return true; }
-
-  /**
-   * Whether or not this variable is actually using the shape function second derivative.
-   */
-  bool usesSecondPhi() { return _need_second || _need_second_old || _need_second_older; }
-
-  /**
-   * Whether or not this variable is actually using the shape function value.
-   *
-   * Currently hardcoded to true because we always compute the value.
-   */
-  bool usesPhiNeighbor() { return true; }
-
-  /**
-   * Whether or not this variable is actually using the shape function gradient.
-   *
-   * Currently hardcoded to true because we always compute the value.
-   */
-  bool usesGradPhiNeighbor() { return true; }
-
-  /**
-   * Whether or not this variable is actually using the shape function second derivative on a
-   * neighbor.
-   */
-  bool usesSecondPhiNeighbor()
-  {
-    return _need_second_neighbor || _need_second_old_neighbor || _need_second_older_neighbor;
-  }
-
-  void getDofIndices(const Elem * elem, std::vector<dof_id_type> & dof_indices);
+  virtual void getDofIndices(const Elem * elem, std::vector<dof_id_type> & dof_indices) = 0;
   /**
    * Get neighbor DOF indices for currently selected element
    * @return the neighbor degree of freedom indices
    */
-  std::vector<dof_id_type> & dofIndicesNeighbor() { return _dof_indices_neighbor; }
+  virtual std::vector<dof_id_type> & dofIndicesNeighbor() = 0;
 
-  unsigned int numberOfDofsNeighbor() { return _dof_indices_neighbor.size(); }
-
-  void insert(NumericVector<Number> & residual);
-  void add(NumericVector<Number> & residual);
+  virtual unsigned int numberOfDofsNeighbor() = 0;
 
   /**
    * Deprecated method. Use dofValues
    */
-  const MooseArray<Number> & dofValue();
+  virtual const MooseArray<Number> & dofValue() = 0;
   /**
    * Returns dof solution on element
    */
-  const MooseArray<Number> & dofValues();
+  virtual const MooseArray<Number> & dofValues() = 0;
   /**
    * Returns old dof solution on element
    */
-  const MooseArray<Number> & dofValuesOld();
+  virtual const MooseArray<Number> & dofValuesOld() = 0;
   /**
    * Returns older dof solution on element
    */
-  const MooseArray<Number> & dofValuesOlder();
+  virtual const MooseArray<Number> & dofValuesOlder() = 0;
   /**
    * Returns previous nl solution on element
    */
-  const MooseArray<Number> & dofValuesPreviousNL();
+  virtual const MooseArray<Number> & dofValuesPreviousNL() = 0;
   /**
    * Returns dof solution on neighbor element
    */
-  const MooseArray<Number> & dofValuesNeighbor();
+  virtual const MooseArray<Number> & dofValuesNeighbor() = 0;
   /**
    * Returns old dof solution on neighbor element
    */
-  const MooseArray<Number> & dofValuesOldNeighbor();
+  virtual const MooseArray<Number> & dofValuesOldNeighbor() = 0;
   /**
    * Returns older dof solution on neighbor element
    */
-  const MooseArray<Number> & dofValuesOlderNeighbor();
+  virtual const MooseArray<Number> & dofValuesOlderNeighbor() = 0;
   /**
    * Returns previous nl solution on neighbor element
    */
-  const MooseArray<Number> & dofValuesPreviousNLNeighbor();
+  virtual const MooseArray<Number> & dofValuesPreviousNLNeighbor() = 0;
   /**
    * Returns time derivative of degrees of freedom
    */
-  const MooseArray<Number> & dofValuesDot();
+  virtual const MooseArray<Number> & dofValuesDot() = 0;
   /**
    * Returns time derivative of neighboring degrees of freedom
    */
-  const MooseArray<Number> & dofValuesDotNeighbor();
+  virtual const MooseArray<Number> & dofValuesDotNeighbor() = 0;
   /**
    * Returns derivative of time derivative of degrees of freedom
    */
-  const MooseArray<Number> & dofValuesDuDotDu();
+  virtual const MooseArray<Number> & dofValuesDuDotDu() = 0;
   /**
    * Returns derivative of time derivative of neighboring degrees of freedom
    */
-  const MooseArray<Number> & dofValuesDuDotDuNeighbor();
+  virtual const MooseArray<Number> & dofValuesDuDotDuNeighbor() = 0;
 
   /**
    * Return phi size
@@ -302,134 +205,6 @@ public:
    * Return phiFaceNeighbor size
    */
   virtual size_t phiFaceNeighborSize() = 0;
-
-protected:
-  /// Our assembly
-  Assembly & _assembly;
-
-  /// Thread ID
-  THREAD_ID _tid;
-
-  /// Quadrature rule for interior
-  QBase *& _qrule;
-  /// Quadrature rule for the face
-  QBase *& _qrule_face;
-  /// Quadrature rule for the neighbor
-  QBase *& _qrule_neighbor;
-
-  /// current element
-  const Elem *& _elem;
-  /// the side of the current element (valid when doing face assembly)
-  unsigned int & _current_side;
-
-  /// neighboring element
-  const Elem *& _neighbor;
-
-  /// DOF indices (neighbor)
-  std::vector<dof_id_type> _dof_indices_neighbor;
-
-  bool _need_u_old;
-  bool _need_u_older;
-  bool _need_u_previous_nl;
-
-  bool _need_grad_old;
-  bool _need_grad_older;
-  bool _need_grad_previous_nl;
-  bool _need_grad_dot;
-
-  bool _need_second;
-  bool _need_second_old;
-  bool _need_second_older;
-  bool _need_second_previous_nl;
-
-  bool _need_curl;
-  bool _need_curl_old;
-  bool _need_curl_older;
-
-  bool _need_u_old_neighbor;
-  bool _need_u_older_neighbor;
-  bool _need_u_previous_nl_neighbor;
-
-  bool _need_grad_old_neighbor;
-  bool _need_grad_older_neighbor;
-  bool _need_grad_previous_nl_neighbor;
-  bool _need_grad_neighbor_dot;
-
-  bool _need_second_neighbor;
-  bool _need_second_old_neighbor;
-  bool _need_second_older_neighbor;
-  bool _need_second_previous_nl_neighbor;
-
-  bool _need_curl_neighbor;
-  bool _need_curl_old_neighbor;
-  bool _need_curl_older_neighbor;
-
-  bool _need_solution_dofs;
-  bool _need_solution_dofs_old;
-  bool _need_solution_dofs_older;
-  bool _need_solution_dofs_neighbor;
-  bool _need_solution_dofs_old_neighbor;
-  bool _need_solution_dofs_older_neighbor;
-
-  bool _need_dof_values;
-  bool _need_dof_values_old;
-  bool _need_dof_values_older;
-  bool _need_dof_values_previous_nl;
-  bool _need_dof_values_dot;
-  bool _need_dof_du_dot_du;
-  bool _need_dof_values_neighbor;
-  bool _need_dof_values_old_neighbor;
-  bool _need_dof_values_older_neighbor;
-  bool _need_dof_values_previous_nl_neighbor;
-  bool _need_dof_values_dot_neighbor;
-  bool _need_dof_du_dot_du_neighbor;
-
-  /// Normals at QPs on faces
-  const MooseArray<Point> & _normals;
-
-  /// if variable is nodal
-  bool _is_nodal;
-  /// If we have dofs
-  bool _has_dofs;
-  /// If the neighor has dofs
-  bool _neighbor_has_dofs;
-
-  /// If true, the nodal value gets inserted on calling insert()
-  bool _has_nodal_value;
-  bool _has_nodal_value_neighbor;
-
-  const Node *& _node;
-  const Node *& _node_neighbor;
-
-  dof_id_type _nodal_dof_index;
-  dof_id_type _nodal_dof_index_neighbor;
-
-  // dof solution stuff (which for nodal variables corresponds to values at the nodes)
-
-  MooseArray<Real> _dof_values;
-  MooseArray<Real> _dof_values_old;
-  MooseArray<Real> _dof_values_older;
-  MooseArray<Real> _dof_values_previous_nl;
-
-  /// nodal values of u_dot
-  MooseArray<Real> _dof_values_dot;
-  /// nodal values of derivative of u_dot wrt u
-  MooseArray<Real> _dof_du_dot_du;
-
-  MooseArray<Real> _dof_values_neighbor;
-  MooseArray<Real> _dof_values_old_neighbor;
-  MooseArray<Real> _dof_values_older_neighbor;
-  MooseArray<Real> _dof_values_previous_nl_neighbor;
-  MooseArray<Real> _dof_values_dot_neighbor;
-  MooseArray<Real> _dof_du_dot_du_neighbor;
-
-  /// local elemental DoFs
-  DenseVector<Number> _solution_dofs;
-  DenseVector<Number> _solution_dofs_old;
-  DenseVector<Number> _solution_dofs_older;
-  DenseVector<Number> _solution_dofs_neighbor;
-  DenseVector<Number> _solution_dofs_old_neighbor;
-  DenseVector<Number> _solution_dofs_older_neighbor;
 };
 
 #endif /* MOOSEVARIABLEFE_H */
