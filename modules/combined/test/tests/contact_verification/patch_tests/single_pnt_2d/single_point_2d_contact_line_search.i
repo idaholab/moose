@@ -203,7 +203,9 @@
   petsc_options_iname = '-pc_type -pc_factor_mat_solver_package -mat_superlu_dist_iterrefine'
   petsc_options_value = 'lu    superlu_dist 1'
 
-  line_search = 'none'
+  line_search = 'contact'
+  contact_line_search_allowed_lambda_cuts = 0
+  contact_line_search_ltol = 0.5
 
   l_max_its = 15
   nl_max_its = 10
@@ -237,7 +239,5 @@
     penalty = 1e12
     normalize_penalty = true
     tangential_tolerance = 1e-3
-    custom_line_search = true
-    allowed_lambda_cuts = 0
   [../]
 []

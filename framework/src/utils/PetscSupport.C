@@ -27,6 +27,7 @@
 #include "Conversion.h"
 #include "Executioner.h"
 #include "MooseMesh.h"
+#include "ContactLineSearch.h"
 
 #include "libmesh/equation_systems.h"
 #include "libmesh/linear_implicit_system.h"
@@ -96,6 +97,8 @@ stringify(const LineSearchType & t)
       return "bt";
     case LS_CP:
       return "cp";
+    case LS_CONTACT:
+      return "contact";
 #endif
     case LS_INVALID:
       mooseError("Invalid LineSearchType");
@@ -150,7 +153,7 @@ setSolverOptions(SolverParams & solver_params)
   if (ls_type == Moose::LS_NONE)
     ls_type = Moose::LS_BASIC;
 
-  if (ls_type != Moose::LS_DEFAULT)
+  if (ls_type != Moose::LS_DEFAULT && ls_type != Moose::LS_CONTACT)
   {
 #if PETSC_VERSION_LESS_THAN(3, 3, 0)
     setSinglePetscOption("-snes_type", "ls");
@@ -639,8 +642,24 @@ storePetscOptions(FEProblemBase & fe_problem, const InputParameters & params)
   {
     MooseEnum line_search = params.get<MooseEnum>("line_search");
     if (fe_problem.solverParams()._line_search == Moose::LS_INVALID || line_search != "default")
-      fe_problem.solverParams()._line_search =
+    {
+      Moose::LineSearchType enum_line_search =
           Moose::stringToEnum<Moose::LineSearchType>(line_search);
+      fe_problem.solverParams()._line_search = enum_line_search;
+      if (enum_line_search == LS_CONTACT)
+      {
+        PetscNonlinearSolver<Real> & petsc_nonlinear_solver =
+            dynamic_cast<PetscNonlinearSolver<Real> &>(
+                *fe_problem.getNonlinearSystemBase().system().nonlinear_solver);
+        bool affect_ltol = params.isParamValid("contact_line_search_ltol");
+        petsc_nonlinear_solver.linesearch_object = libmesh_make_unique<ContactLineSearch>(
+            fe_problem,
+            fe_problem.getMooseApp(),
+            params.get<unsigned>("contact_line_search_allowed_lambda_cuts"),
+            affect_ltol ? params.get<Real>("contact_line_search_ltol") : params.get<Real>("l_tol"),
+            affect_ltol);
+      }
+    }
   }
 
   if (params.isParamValid("mffd_type"))
@@ -799,7 +818,7 @@ getPetscValidParams()
 #if PETSC_VERSION_LESS_THAN(3, 3, 0)
   MooseEnum line_search("default cubic quadratic none basic basicnonorms", "default");
 #else
-  MooseEnum line_search("default shell none basic l2 bt cp", "default");
+  MooseEnum line_search("default shell none basic l2 bt cp contact", "default");
 #endif
   std::string addtl_doc_str(" (Note: none = basic)");
 #else
@@ -823,7 +842,14 @@ getPetscValidParams()
   params.addParam<std::vector<std::string>>(
       "petsc_options_value",
       "Values of PETSc name/value pairs (must correspond with \"petsc_options_iname\"");
-
+  params.addParam<unsigned>(
+      "contact_line_search_allowed_lambda_cuts",
+      2,
+      "The number of times lambda is allowed to be cut in half in the contact line search");
+  params.addParam<Real>("contact_line_search_ltol",
+                        "The linear relative tolerance to be used while the contact state is "
+                        "changing between non-linear iterations. We recommend that this tolerance "
+                        "be looser than the standard linear tolerance");
   return params;
 }
 

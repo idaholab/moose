@@ -174,7 +174,9 @@
   petsc_options_iname = '-pc_type -pc_factor_mat_solver_package'
   petsc_options_value = 'lu     superlu_dist'
 
-  line_search = 'none'
+  line_search = 'contact'
+  contact_line_search_ltol = .5
+  contact_line_search_allowed_lambda_cuts = 0
 
   l_max_its = 100
   nl_max_its = 20
@@ -209,8 +211,5 @@
     formulation = penalty
     system = constraint
     normal_smoothing_distance = 0.1
-    custom_line_search = true
-    contact_ltol = .5
-    allowed_lambda_cuts = 0
   [../]
 []
