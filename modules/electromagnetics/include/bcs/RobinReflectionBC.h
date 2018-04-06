@@ -36,6 +36,12 @@ private:
   Real _sign;
 
   Real _RHS_coeff;
+
+  Function & _profile_func_real;
+
+  Function & _profile_func_imag;
+
+  Real _exit;
 };
 
 #endif // ROBINREFLECTIONBC_H
