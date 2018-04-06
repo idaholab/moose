@@ -69,5 +69,6 @@
   [./exo_out]
     type = Exodus
     discontinuous = true
+    file_base = 'exodus_discontinuous_out'
   [../]
 []
