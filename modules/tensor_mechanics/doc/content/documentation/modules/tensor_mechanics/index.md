@@ -1,4 +1,5 @@
 # TensorMechanics Module
+
 The MOOSE +Tensor Mechanics module+ is a library for simulation tools that solve
 mechanics problems. It provides a simple approach for implementing even advanced mechanics
 models.
