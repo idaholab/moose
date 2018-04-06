@@ -20,6 +20,11 @@ validParams<RobinReflectionBC>()
   params.addParam<Real>("sign", 1.0, "Sign of term in weak form.");
   params.addParam<Real>(
       "RHS_coeff", 2.0, "Coefficient of right hand side of RobinBC (default=2.0)");
+  params.addParam<FunctionName>(
+      "profile_func_real", 1.0, "Incoming function spatial profile, real component.");
+  params.addParam<FunctionName>(
+      "profile_func_imag", 0.0, "Incoming function spatial profile, imaginary component.");
+  params.addRequiredParam<Real>("exit", "testing switch");
   return params;
 }
 
@@ -35,7 +40,10 @@ RobinReflectionBC::RobinReflectionBC(const InputParameters & parameters)
     _coeff_real(getParam<Real>("coeff_real")),
     _coeff_imag(getParam<Real>("coeff_imag")),
     _sign(getParam<Real>("sign")),
-    _RHS_coeff(getParam<Real>("RHS_coeff"))
+    _RHS_coeff(getParam<Real>("RHS_coeff")),
+    _profile_func_real(getFunction("profile_func_real")),
+    _profile_func_imag(getFunction("profile_func_imag")),
+    _exit(getParam<Real>("exit"))
 {
 }
 
@@ -46,20 +54,34 @@ RobinReflectionBC::computeQpResidual()
   std::complex<double> _field(_field_real[_qp], _field_imag[_qp]);
   std::complex<double> _func(_func_real.value(_t, _q_point[_qp]),
                              _func_imag.value(_t, _q_point[_qp]));
+  std::complex<double> _profile_func(_profile_func_real.value(_t, _q_point[_qp]),
+                                     _profile_func_imag.value(_t, _q_point[_qp]));
   std::complex<double> _coeff(_coeff_real, _coeff_imag);
   std::complex<double> _j(0, 1);
 
   std::complex<double> _common = _j * _coeff * _func;
-  std::complex<double> _RHS = _RHS_coeff * _common * std::exp(_common * _L);
+  std::complex<double> _RHS = _RHS_coeff * _common * _profile_func * std::exp(_common * _L);
   std::complex<double> _LHS = _common * _field;
   std::complex<double> _diff = _RHS - _LHS;
 
   if (_component == "real")
   {
+    if (_exit == 1)
+    {
+      std::cout << _sign * _test[_i][_qp] * _diff.real() -
+                       (-_test[_i][_qp] * _coeff_real * _field_imag[_qp])
+                << std::endl;
+    }
     return _sign * _test[_i][_qp] * _diff.real();
   }
   else
   {
+    if (_exit == 1)
+    {
+      std::cout << _sign * _test[_i][_qp] * _diff.imag() -
+                       (_test[_i][_qp] * _coeff_real * _field_real[_qp])
+                << std::endl;
+    }
     return _sign * _test[_i][_qp] * _diff.imag();
   }
 }
