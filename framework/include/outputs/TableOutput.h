@@ -78,11 +78,14 @@ protected:
   /// Table containing postprocessor values and scalar aux variables
   FormattedTable & _all_data_table;
 
+  /// Tolerance used when deciding whether or not to add a new row to the table
+  const Real _new_row_tol;
+
   /// Enable/disable VecptorPostprocessor time data file.
-  bool _time_data;
+  const bool _time_data;
 
   /// Enable/disable output of time column for Postprocessors
-  bool _time_column;
+  const bool _time_column;
 };
 
 #endif /* TABLEOUTPUT_H */

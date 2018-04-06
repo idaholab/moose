@@ -125,6 +125,28 @@ FormattedTable::append(bool append_existing_file)
 }
 
 void
+FormattedTable::addRow(Real time)
+{
+  _data.emplace_back(time, std::map<std::string, Real>());
+}
+
+void
+FormattedTable::addData(const std::string & name, Real value)
+{
+  if (empty())
+    mooseError("No Data stored in the the FormattedTable");
+
+  auto back_it = _data.rbegin();
+  back_it->second[name] = value;
+
+  if (std::find(_column_names.begin(), _column_names.end(), name) == _column_names.end())
+  {
+    _column_names.push_back(name);
+    _column_names_unsorted = true;
+  }
+}
+
+void
 FormattedTable::addData(const std::string & name, Real value, Real time)
 {
   auto back_it = _data.rbegin();
@@ -144,8 +166,10 @@ FormattedTable::addData(const std::string & name, Real value, Real time)
   back_it->second[name] = value;
 
   if (std::find(_column_names.begin(), _column_names.end(), name) == _column_names.end())
+  {
     _column_names.push_back(name);
-  _column_names_unsorted = true;
+    _column_names_unsorted = true;
+  }
 }
 
 void
@@ -164,8 +188,17 @@ FormattedTable::addData(const std::string & name, const std::vector<Real> & vect
   }
 
   if (std::find(_column_names.begin(), _column_names.end(), name) == _column_names.end())
+  {
     _column_names.push_back(name);
-  _column_names_unsorted = true;
+    _column_names_unsorted = true;
+  }
+}
+
+Real
+FormattedTable::getLastTime()
+{
+  mooseAssert(!empty(), "No Data stored in the FormattedTable");
+  return _data.rbegin()->first;
 }
 
 Real &

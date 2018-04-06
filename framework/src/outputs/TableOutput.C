@@ -48,6 +48,12 @@ validParams<TableOutput>()
       true,
       "Whether or not the 'time' column should be written for Postprocessor CSV files");
 
+  params.addParam<Real>("new_row_tolerance",
+                        libMesh::TOLERANCE * libMesh::TOLERANCE,
+                        "The independent variable tolerance for determining when a new row should "
+                        "be added to the table (Note: This value must be set independently for "
+                        "Postprocessor output to type=Console and type=CSV file separately.");
+
   return params;
 }
 
@@ -66,15 +72,27 @@ TableOutput::TableOutput(const InputParameters & parameters)
                                       : declareRecoverableData<FormattedTable>("scalar_table")),
     _all_data_table(_tables_restartable ? declareRestartableData<FormattedTable>("all_data_table")
                                         : declareRecoverableData<FormattedTable>("all_data_table")),
+    _new_row_tol(getParam<Real>("new_row_tolerance")),
     _time_data(getParam<bool>("time_data")),
     _time_column(getParam<bool>("time_column"))
 
 {
+  // Set a Boolean indicating whether or not we will output the time column
+  _postprocessor_table.outputTimeColumn(_time_column);
+  _all_data_table.outputTimeColumn(_time_column);
 }
 
 void
 TableOutput::outputPostprocessors()
 {
+  // Add new row to the tables
+  if (_postprocessor_table.empty() ||
+      !MooseUtils::absoluteFuzzyEqual(_postprocessor_table.getLastTime(), time(), _new_row_tol))
+  {
+    _postprocessor_table.addRow(time());
+    _all_data_table.addRow(time());
+  }
+
   // List of names of the postprocessors to output
   const std::set<std::string> & out = getPostprocessorOutput();
 
@@ -83,11 +101,8 @@ TableOutput::outputPostprocessors()
   {
     PostprocessorValue value = _problem_ptr->getPostprocessorValue(out_name);
 
-    _postprocessor_table.outputTimeColumn(_time_column);
-    _postprocessor_table.addData(out_name, value, time());
-
-    _all_data_table.outputTimeColumn(_time_column);
-    _all_data_table.addData(out_name, value, time());
+    _postprocessor_table.addData(out_name, value);
+    _all_data_table.addData(out_name, value);
   }
 }
 

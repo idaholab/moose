@@ -80,10 +80,10 @@ private:
   /// The delimiter used when writing the CSV file
   std::string _delimiter;
 
-  /// Flag for writting scalar and/or postprocessor data
+  /// Flag for writing scalar and/or postprocessor data
   bool _write_all_table;
 
-  /// Flag for writting vector postprocessor data
+  /// Flag for writing vector postprocessor data
   bool _write_vector_table;
 
   /// Flag for sorting column names

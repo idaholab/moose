@@ -67,6 +67,17 @@ public:
   void append(bool append_existing_file);
 
   /**
+   * Force a new row in the table with the passed in time.
+   */
+  void addRow(Real time);
+
+  /**
+   * Method for adding data to the output table. Data is added to the last row. Method will
+   * error if called on an empty table.
+   */
+  void addData(const std::string & name, Real value);
+
+  /**
    * Method for adding data to the output table.  The dependent variable is named "time"
    */
   void addData(const std::string & name, Real value, Real time);
@@ -76,6 +87,11 @@ public:
    * the dependent variable index lines up with the vector indices.
    */
   void addData(const std::string & name, const std::vector<Real> & vector);
+
+  /**
+   * Retrieve the last time (or independent variable) value.
+   */
+  Real getLastTime();
 
   /**
    * Retrieve Data for last value of given name
