@@ -21,13 +21,6 @@
   [../]
 []
 
-[AuxKernels]
-  [./getU]
-    type = SelfAux
-    variable = disc_u
-  [../]
-[]
-
 [Executioner]
   type = Steady
   solve_type = PJFNK
