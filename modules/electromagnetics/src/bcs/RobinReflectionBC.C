@@ -18,6 +18,8 @@ validParams<RobinReflectionBC>()
   params.addParam<Real>("coeff_real", 1.0, "Constant coefficient, real component.");
   params.addParam<Real>("coeff_imag", 0.0, "Constant coefficient, real component.");
   params.addParam<Real>("sign", 1.0, "Sign of term in weak form.");
+  params.addParam<Real>(
+      "RHS_coeff", 2.0, "Coefficient of right hand side of RobinBC (default=2.0)");
   return params;
 }
 
@@ -32,7 +34,8 @@ RobinReflectionBC::RobinReflectionBC(const InputParameters & parameters)
     _func_imag(getFunction("func_imag")),
     _coeff_real(getParam<Real>("coeff_real")),
     _coeff_imag(getParam<Real>("coeff_imag")),
-    _sign(getParam<Real>("sign"))
+    _sign(getParam<Real>("sign")),
+    _RHS_coeff(getParam<Real>("RHS_coeff"))
 {
 }
 
@@ -47,7 +50,7 @@ RobinReflectionBC::computeQpResidual()
   std::complex<double> _j(0, 1);
 
   std::complex<double> _common = _j * _coeff * _func;
-  std::complex<double> _RHS = 2.0 * _common * std::exp(_common * _L);
+  std::complex<double> _RHS = _RHS_coeff * _common * std::exp(_common * _L);
   std::complex<double> _LHS = _common * _field;
   std::complex<double> _diff = _RHS - _LHS;
 
