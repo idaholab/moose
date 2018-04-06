@@ -66,9 +66,8 @@
 
 [Outputs]
   execute_on = 'timestep_end'
-  [./out]
+  [./exo_out]
     type = Exodus
     discontinuous = true
-    elemental_as_nodal = true
   [../]
 []

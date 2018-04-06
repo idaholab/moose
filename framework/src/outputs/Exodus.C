@@ -93,10 +93,11 @@ Exodus::Exodus(const InputParameters & parameters)
     else
       _output_dimension = "default";
   }
-  // Cannot update parameters(const) to activate 'elemental_as_nodal' when 'discontinuous' is 
-  // present,so issue a warning instead. When 'elemental_as_nodal' is false while 
-  // 'discontinuous' is true, behavior reverts back to as if 'discontinuous' was set to false.
-  if(_discontinuous && !getParam<bool>("elemental_as_nodal")) mooseWarning("Requested discontinuous output, but 'elemental_as_nodal = false'");
+  // If user sets 'discontinuous = true' and 'elemental_as_nodal = false', issue an error that these are incompatible states
+  if (_discontinuous && parameters.isParamSetByUser("elemental_as_nodal") && !getParam<bool>("elemental_as_nodal"))
+    mooseError(name(),": Invalid parameters. 'elemental_as_nodal' set to false while 'discontinuous' set to true.");
+  // Discontinuous output implies that elemental values are output as nodal values
+  if (_discontinuous) _elemental_as_nodal = true;
 }
 
 void
