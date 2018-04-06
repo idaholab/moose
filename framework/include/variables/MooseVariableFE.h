@@ -136,6 +136,8 @@ public:
 
   virtual unsigned int numberOfDofsNeighbor() = 0;
 
+  virtual void insert(NumericVector<Number> & residual) = 0;
+
   /**
    * Deprecated method. Use dofValues
    */

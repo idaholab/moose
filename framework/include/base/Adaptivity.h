@@ -26,9 +26,9 @@ class FEProblemBase;
 class MooseMesh;
 class DisplacedProblem;
 template <typename>
-class MooseVariableField;
-typedef MooseVariableField<Real> MooseVariable;
-typedef MooseVariableField<VectorValue<Real>> VectorMooseVariable;
+class MooseVariableFEImpl;
+typedef MooseVariableFEImpl<Real> MooseVariable;
+typedef MooseVariableFEImpl<VectorValue<Real>> VectorMooseVariable;
 class MooseEnum;
 
 // Forward declare classes in libMesh

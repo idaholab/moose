@@ -14,7 +14,7 @@
 #include "FEProblem.h"
 #include "MooseMesh.h"
 #include "MooseTypes.h"
-#include "MooseVariableField.h"
+#include "MooseVariableFEImpl.h"
 #include "MultiApp.h"
 #include "UserObject.h"
 

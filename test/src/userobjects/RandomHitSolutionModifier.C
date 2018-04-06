@@ -10,7 +10,7 @@
 #include "RandomHitSolutionModifier.h"
 
 // MOOSE includes
-#include "MooseVariableField.h"
+#include "MooseVariableFEImpl.h"
 #include "NonlinearSystemBase.h"
 #include "RandomHitUserObject.h"
 

@@ -11,7 +11,7 @@
 #include "SystemBase.h"
 #include "Factory.h"
 #include "SubProblem.h"
-#include "MooseVariableField.h"
+#include "MooseVariableFEImpl.h"
 #include "MooseVariableScalar.h"
 #include "MooseVariableConstMonomial.h"
 #include "Conversion.h"
@@ -113,14 +113,14 @@ SystemBase::getVariable(THREAD_ID tid, unsigned int var_number)
 }
 
 template <typename T>
-MooseVariableField<T> &
+MooseVariableFEImpl<T> &
 SystemBase::getFieldVariable(THREAD_ID tid, const std::string & var_name)
 {
   return *_vars[tid].getFieldVariable<T>(var_name);
 }
 
 template <typename T>
-MooseVariableField<T> &
+MooseVariableFEImpl<T> &
 SystemBase::getFieldVariable(THREAD_ID tid, unsigned int var_number)
 {
   return *_vars[tid].getFieldVariable<T>(var_number);
@@ -707,14 +707,14 @@ SystemBase::restoreSolutions()
   system().update();
 }
 
-template MooseVariableField<Real> &
+template MooseVariableFEImpl<Real> &
 SystemBase::getFieldVariable<Real>(THREAD_ID tid, const std::string & var_name);
 
-template MooseVariableField<RealVectorValue> &
+template MooseVariableFEImpl<RealVectorValue> &
 SystemBase::getFieldVariable<RealVectorValue>(THREAD_ID tid, const std::string & var_name);
 
-template MooseVariableField<Real> & SystemBase::getFieldVariable<Real>(THREAD_ID tid,
-                                                                       unsigned int var_number);
+template MooseVariableFEImpl<Real> & SystemBase::getFieldVariable<Real>(THREAD_ID tid,
+                                                                        unsigned int var_number);
 
-template MooseVariableField<RealVectorValue> &
+template MooseVariableFEImpl<RealVectorValue> &
 SystemBase::getFieldVariable<RealVectorValue>(THREAD_ID tid, unsigned int var_number);

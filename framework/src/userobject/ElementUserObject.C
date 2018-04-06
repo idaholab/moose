@@ -8,7 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "ElementUserObject.h"
-#include "MooseVariableField.h"
+#include "MooseVariableFEImpl.h"
 #include "SubProblem.h"
 #include "Assembly.h"
 

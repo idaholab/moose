@@ -20,9 +20,9 @@
 class MooseVariableBase;
 class MooseVariableFE;
 template <typename>
-class MooseVariableField;
-typedef MooseVariableField<Real> MooseVariable;
-typedef MooseVariableField<RealVectorValue> VectorMooseVariable;
+class MooseVariableFEImpl;
+typedef MooseVariableFEImpl<Real> MooseVariable;
+typedef MooseVariableFEImpl<RealVectorValue> VectorMooseVariable;
 class MooseVariableScalar;
 
 /**
@@ -84,7 +84,7 @@ public:
    * @return The retrieved variable
    */
   template <typename T>
-  MooseVariableField<T> * getFieldVariable(const std::string & var_name);
+  MooseVariableFEImpl<T> * getFieldVariable(const std::string & var_name);
 
   /**
    * Get a finite element variable from the warehouse
@@ -93,7 +93,7 @@ public:
    * @return The retrieved variable
    */
   template <typename T>
-  MooseVariableField<T> * getFieldVariable(unsigned int var_number);
+  MooseVariableFEImpl<T> * getFieldVariable(unsigned int var_number);
 
   /**
    * Get the list of all variable names
@@ -153,11 +153,11 @@ protected:
 };
 
 template <>
-MooseVariableField<RealVectorValue> *
+MooseVariableFEImpl<RealVectorValue> *
 VariableWarehouse::getFieldVariable<RealVectorValue>(const std::string & var_name);
 
 template <>
-MooseVariableField<RealVectorValue> *
+MooseVariableFEImpl<RealVectorValue> *
 VariableWarehouse::getFieldVariable<RealVectorValue>(unsigned int var_number);
 
 #endif // VARIABLEWAREHOUSE_H

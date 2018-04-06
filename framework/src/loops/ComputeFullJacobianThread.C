@@ -14,7 +14,7 @@
 #include "IntegratedBCBase.h"
 #include "DGKernel.h"
 #include "InterfaceKernel.h"
-#include "MooseVariableField.h"
+#include "MooseVariableFEImpl.h"
 #include "MooseVariableScalar.h"
 #include "NonlocalKernel.h"
 #include "NonlocalIntegratedBC.h"

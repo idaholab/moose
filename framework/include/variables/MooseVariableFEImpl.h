@@ -31,7 +31,7 @@
  * Each variable can compute nodal or elemental (at QPs) values.
  */
 template <typename OutputType>
-class MooseVariableField : public MooseVariableFE
+class MooseVariableFEImpl : public MooseVariableFE
 {
   typedef OutputType OutputShape;
   typedef OutputType OutputValue;
@@ -58,12 +58,12 @@ class MooseVariableField : public MooseVariableFE
   typedef MooseArray<std::vector<OutputDivergence>> FieldVariableTestDivergence;
 
 public:
-  MooseVariableField(unsigned int var_num,
-                     const FEType & fe_type,
-                     SystemBase & sys,
-                     Assembly & assembly,
-                     Moose::VarKindType var_kind);
-  virtual ~MooseVariableField();
+  MooseVariableFEImpl(unsigned int var_num,
+                      const FEType & fe_type,
+                      SystemBase & sys,
+                      Assembly & assembly,
+                      Moose::VarKindType var_kind);
+  virtual ~MooseVariableFEImpl();
 
   void clearDofIndices() override;
 
@@ -441,7 +441,7 @@ public:
   std::vector<dof_id_type> & dofIndicesNeighbor() override { return _dof_indices_neighbor; }
   unsigned int numberOfDofsNeighbor() override { return _dof_indices_neighbor.size(); }
 
-  void insert(NumericVector<Number> & residual);
+  void insert(NumericVector<Number> & residual) override;
   void add(NumericVector<Number> & residual);
 
   const MooseArray<Number> & dofValue() override;

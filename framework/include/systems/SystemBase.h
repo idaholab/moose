@@ -28,9 +28,9 @@ class Factory;
 class MooseApp;
 class MooseVariableFE;
 template <typename>
-class MooseVariableField;
-typedef MooseVariableField<Real> MooseVariable;
-typedef MooseVariableField<VectorValue<Real>> VectorMooseVariable;
+class MooseVariableFEImpl;
+typedef MooseVariableFEImpl<Real> MooseVariable;
+typedef MooseVariableFEImpl<VectorValue<Real>> VectorMooseVariable;
 class MooseMesh;
 class SubProblem;
 class SystemBase;
@@ -248,7 +248,7 @@ public:
    * @return reference the variable (class)
    */
   template <typename T>
-  MooseVariableField<T> & getFieldVariable(THREAD_ID tid, const std::string & var_name);
+  MooseVariableFEImpl<T> & getFieldVariable(THREAD_ID tid, const std::string & var_name);
 
   /**
    * Gets a reference to a variable with specified number
@@ -258,7 +258,7 @@ public:
    * @return reference the variable (class)
    */
   template <typename T>
-  MooseVariableField<T> & getFieldVariable(THREAD_ID tid, unsigned int var_number);
+  MooseVariableFEImpl<T> & getFieldVariable(THREAD_ID tid, unsigned int var_number);
 
   /**
    * Gets a reference to a scalar variable with specified number

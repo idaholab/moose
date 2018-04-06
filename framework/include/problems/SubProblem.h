@@ -24,9 +24,9 @@ class Assembly;
 class MooseVariableFE;
 class MooseVariableScalar;
 template <typename>
-class MooseVariableField;
-typedef MooseVariableField<Real> MooseVariable;
-typedef MooseVariableField<RealVectorValue> VectorMooseVariable;
+class MooseVariableFEImpl;
+typedef MooseVariableFEImpl<Real> MooseVariable;
+typedef MooseVariableFEImpl<RealVectorValue> VectorMooseVariable;
 class RestartableDataValue;
 
 // libMesh forward declarations

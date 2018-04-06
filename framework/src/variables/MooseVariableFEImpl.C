@@ -7,14 +7,14 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "MooseVariableField.h"
+#include "MooseVariableFEImpl.h"
 
 template <typename OutputType>
-MooseVariableField<OutputType>::MooseVariableField(unsigned int var_num,
-                                                   const FEType & fe_type,
-                                                   SystemBase & sys,
-                                                   Assembly & assembly,
-                                                   Moose::VarKindType var_kind)
+MooseVariableFEImpl<OutputType>::MooseVariableFEImpl(unsigned int var_num,
+                                                     const FEType & fe_type,
+                                                     SystemBase & sys,
+                                                     Assembly & assembly,
+                                                     Moose::VarKindType var_kind)
   : MooseVariableFE(var_num, fe_type, sys, var_kind),
     _assembly(assembly),
     _qrule(_assembly.qRule()),
@@ -97,7 +97,7 @@ MooseVariableField<OutputType>::MooseVariableField(unsigned int var_num,
 }
 
 template <typename OutputType>
-MooseVariableField<OutputType>::~MooseVariableField()
+MooseVariableFEImpl<OutputType>::~MooseVariableFEImpl()
 {
   _dof_values.release();
   _dof_values_old.release();
@@ -179,28 +179,28 @@ MooseVariableField<OutputType>::~MooseVariableField()
 
 template <typename OutputType>
 const std::set<SubdomainID> &
-MooseVariableField<OutputType>::activeSubdomains() const
+MooseVariableFEImpl<OutputType>::activeSubdomains() const
 {
   return _sys.system().variable(_var_num).active_subdomains();
 }
 
 template <typename OutputType>
 bool
-MooseVariableField<OutputType>::activeOnSubdomain(SubdomainID subdomain) const
+MooseVariableFEImpl<OutputType>::activeOnSubdomain(SubdomainID subdomain) const
 {
   return _sys.system().variable(_var_num).active_on_subdomain(subdomain);
 }
 
 template <typename OutputType>
 void
-MooseVariableField<OutputType>::clearDofIndices()
+MooseVariableFEImpl<OutputType>::clearDofIndices()
 {
   _dof_indices.clear();
 }
 
 template <typename OutputType>
 void
-MooseVariableField<OutputType>::prepare()
+MooseVariableFEImpl<OutputType>::prepare()
 {
   _dof_map.dof_indices(_elem, _dof_indices, _var_num);
   _has_nodal_value = false;
@@ -216,7 +216,7 @@ MooseVariableField<OutputType>::prepare()
 
 template <typename OutputType>
 void
-MooseVariableField<OutputType>::prepareNeighbor()
+MooseVariableFEImpl<OutputType>::prepareNeighbor()
 {
   _dof_map.dof_indices(_neighbor, _dof_indices_neighbor, _var_num);
   _has_nodal_value = false;
@@ -225,7 +225,7 @@ MooseVariableField<OutputType>::prepareNeighbor()
 
 template <typename OutputType>
 void
-MooseVariableField<OutputType>::prepareAux()
+MooseVariableFEImpl<OutputType>::prepareAux()
 {
   _has_nodal_value = false;
   _has_nodal_value_neighbor = false;
@@ -233,7 +233,7 @@ MooseVariableField<OutputType>::prepareAux()
 
 template <typename OutputType>
 void
-MooseVariableField<OutputType>::reinitNode()
+MooseVariableFEImpl<OutputType>::reinitNode()
 {
   if (size_t n_dofs = _node->n_dofs(_sys.number(), _var_num))
   {
@@ -254,7 +254,7 @@ MooseVariableField<OutputType>::reinitNode()
 
 template <typename OutputType>
 void
-MooseVariableField<OutputType>::reinitAux()
+MooseVariableFEImpl<OutputType>::reinitAux()
 {
   /* FIXME: this method is only for elemental auxiliary variables, so
    * we may want to rename it */
@@ -275,7 +275,7 @@ MooseVariableField<OutputType>::reinitAux()
 
 template <typename OutputType>
 void
-MooseVariableField<OutputType>::reinitAuxNeighbor()
+MooseVariableFEImpl<OutputType>::reinitAuxNeighbor()
 {
   if (_neighbor)
   {
@@ -299,7 +299,7 @@ MooseVariableField<OutputType>::reinitAuxNeighbor()
 
 template <typename OutputType>
 void
-MooseVariableField<OutputType>::reinitNodes(const std::vector<dof_id_type> & nodes)
+MooseVariableFEImpl<OutputType>::reinitNodes(const std::vector<dof_id_type> & nodes)
 {
   _dof_indices.clear();
   for (const auto & node_id : nodes)
@@ -323,7 +323,7 @@ MooseVariableField<OutputType>::reinitNodes(const std::vector<dof_id_type> & nod
 
 template <typename OutputType>
 void
-MooseVariableField<OutputType>::reinitNodesNeighbor(const std::vector<dof_id_type> & nodes)
+MooseVariableFEImpl<OutputType>::reinitNodesNeighbor(const std::vector<dof_id_type> & nodes)
 {
   _dof_indices_neighbor.clear();
   for (const auto & node_id : nodes)
@@ -347,15 +347,15 @@ MooseVariableField<OutputType>::reinitNodesNeighbor(const std::vector<dof_id_typ
 
 template <typename OutputType>
 void
-MooseVariableField<OutputType>::getDofIndices(const Elem * elem,
-                                              std::vector<dof_id_type> & dof_indices)
+MooseVariableFEImpl<OutputType>::getDofIndices(const Elem * elem,
+                                               std::vector<dof_id_type> & dof_indices)
 {
   _dof_map.dof_indices(elem, dof_indices, _var_num);
 }
 
 template <typename OutputType>
 Number
-MooseVariableField<OutputType>::getNodalValue(const Node & node)
+MooseVariableFEImpl<OutputType>::getNodalValue(const Node & node)
 {
   mooseAssert(_subproblem.mesh().isSemiLocal(const_cast<Node *>(&node)), "Node is not Semilocal");
 
@@ -373,7 +373,7 @@ MooseVariableField<OutputType>::getNodalValue(const Node & node)
 
 template <typename OutputType>
 Number
-MooseVariableField<OutputType>::getNodalValueOld(const Node & node)
+MooseVariableFEImpl<OutputType>::getNodalValueOld(const Node & node)
 {
   mooseAssert(_subproblem.mesh().isSemiLocal(const_cast<Node *>(&node)), "Node is not Semilocal");
 
@@ -390,7 +390,7 @@ MooseVariableField<OutputType>::getNodalValueOld(const Node & node)
 
 template <typename OutputType>
 Number
-MooseVariableField<OutputType>::getNodalValueOlder(const Node & node)
+MooseVariableFEImpl<OutputType>::getNodalValueOlder(const Node & node)
 {
   mooseAssert(_subproblem.mesh().isSemiLocal(const_cast<Node *>(&node)), "Node is not Semilocal");
 
@@ -407,7 +407,7 @@ MooseVariableField<OutputType>::getNodalValueOlder(const Node & node)
 
 template <typename OutputType>
 Number
-MooseVariableField<OutputType>::getElementalValue(const Elem * elem, unsigned int idx) const
+MooseVariableFEImpl<OutputType>::getElementalValue(const Elem * elem, unsigned int idx) const
 {
   std::vector<dof_id_type> dof_indices;
   _dof_map.dof_indices(elem, dof_indices, _var_num);
@@ -417,7 +417,7 @@ MooseVariableField<OutputType>::getElementalValue(const Elem * elem, unsigned in
 
 template <typename OutputType>
 void
-MooseVariableField<OutputType>::insert(NumericVector<Number> & residual)
+MooseVariableFEImpl<OutputType>::insert(NumericVector<Number> & residual)
 {
   if (_has_nodal_value)
     residual.insert(&_dof_values[0], _dof_indices);
@@ -425,7 +425,7 @@ MooseVariableField<OutputType>::insert(NumericVector<Number> & residual)
 
 template <typename OutputType>
 void
-MooseVariableField<OutputType>::add(NumericVector<Number> & residual)
+MooseVariableFEImpl<OutputType>::add(NumericVector<Number> & residual)
 {
   if (_has_nodal_value)
     residual.add_vector(&_dof_values[0], _dof_indices);
@@ -433,7 +433,7 @@ MooseVariableField<OutputType>::add(NumericVector<Number> & residual)
 
 template <typename OutputType>
 const MooseArray<Number> &
-MooseVariableField<OutputType>::dofValue()
+MooseVariableFEImpl<OutputType>::dofValue()
 {
   mooseDeprecated("Use dofValues instead of dofValue");
   return dofValues();
@@ -441,7 +441,7 @@ MooseVariableField<OutputType>::dofValue()
 
 template <typename OutputType>
 const MooseArray<Number> &
-MooseVariableField<OutputType>::dofValues()
+MooseVariableFEImpl<OutputType>::dofValues()
 {
   _need_dof_values = true;
   return _dof_values;
@@ -449,7 +449,7 @@ MooseVariableField<OutputType>::dofValues()
 
 template <typename OutputType>
 const MooseArray<Number> &
-MooseVariableField<OutputType>::dofValuesOld()
+MooseVariableFEImpl<OutputType>::dofValuesOld()
 {
   _need_dof_values_old = true;
   return _dof_values_old;
@@ -457,7 +457,7 @@ MooseVariableField<OutputType>::dofValuesOld()
 
 template <typename OutputType>
 const MooseArray<Number> &
-MooseVariableField<OutputType>::dofValuesOlder()
+MooseVariableFEImpl<OutputType>::dofValuesOlder()
 {
   _need_dof_values_older = true;
   return _dof_values_older;
@@ -465,7 +465,7 @@ MooseVariableField<OutputType>::dofValuesOlder()
 
 template <typename OutputType>
 const MooseArray<Number> &
-MooseVariableField<OutputType>::dofValuesPreviousNL()
+MooseVariableFEImpl<OutputType>::dofValuesPreviousNL()
 {
   _need_dof_values_previous_nl = true;
   return _dof_values_previous_nl;
@@ -473,7 +473,7 @@ MooseVariableField<OutputType>::dofValuesPreviousNL()
 
 template <typename OutputType>
 const MooseArray<Number> &
-MooseVariableField<OutputType>::dofValuesNeighbor()
+MooseVariableFEImpl<OutputType>::dofValuesNeighbor()
 {
   _need_dof_values_neighbor = true;
   return _dof_values_neighbor;
@@ -481,7 +481,7 @@ MooseVariableField<OutputType>::dofValuesNeighbor()
 
 template <typename OutputType>
 const MooseArray<Number> &
-MooseVariableField<OutputType>::dofValuesOldNeighbor()
+MooseVariableFEImpl<OutputType>::dofValuesOldNeighbor()
 {
   _need_dof_values_old_neighbor = true;
   return _dof_values_old_neighbor;
@@ -489,7 +489,7 @@ MooseVariableField<OutputType>::dofValuesOldNeighbor()
 
 template <typename OutputType>
 const MooseArray<Number> &
-MooseVariableField<OutputType>::dofValuesOlderNeighbor()
+MooseVariableFEImpl<OutputType>::dofValuesOlderNeighbor()
 {
   _need_dof_values_older_neighbor = true;
   return _dof_values_older_neighbor;
@@ -497,7 +497,7 @@ MooseVariableField<OutputType>::dofValuesOlderNeighbor()
 
 template <typename OutputType>
 const MooseArray<Number> &
-MooseVariableField<OutputType>::dofValuesPreviousNLNeighbor()
+MooseVariableFEImpl<OutputType>::dofValuesPreviousNLNeighbor()
 {
   _need_dof_values_previous_nl_neighbor = true;
   return _dof_values_previous_nl_neighbor;
@@ -505,7 +505,7 @@ MooseVariableField<OutputType>::dofValuesPreviousNLNeighbor()
 
 template <typename OutputType>
 const MooseArray<Number> &
-MooseVariableField<OutputType>::dofValuesDot()
+MooseVariableFEImpl<OutputType>::dofValuesDot()
 {
   _need_dof_values_dot = true;
   return _dof_values_dot;
@@ -513,7 +513,7 @@ MooseVariableField<OutputType>::dofValuesDot()
 
 template <typename OutputType>
 const MooseArray<Number> &
-MooseVariableField<OutputType>::dofValuesDotNeighbor()
+MooseVariableFEImpl<OutputType>::dofValuesDotNeighbor()
 {
   _need_dof_values_dot_neighbor = true;
   return _dof_values_dot_neighbor;
@@ -521,7 +521,7 @@ MooseVariableField<OutputType>::dofValuesDotNeighbor()
 
 template <typename OutputType>
 const MooseArray<Number> &
-MooseVariableField<OutputType>::dofValuesDuDotDu()
+MooseVariableFEImpl<OutputType>::dofValuesDuDotDu()
 {
   _need_dof_du_dot_du = true;
   return _dof_du_dot_du;
@@ -529,7 +529,7 @@ MooseVariableField<OutputType>::dofValuesDuDotDu()
 
 template <typename OutputType>
 const MooseArray<Number> &
-MooseVariableField<OutputType>::dofValuesDuDotDuNeighbor()
+MooseVariableFEImpl<OutputType>::dofValuesDuDotDuNeighbor()
 {
   _need_dof_du_dot_du_neighbor = true;
   return _dof_du_dot_du_neighbor;
@@ -537,7 +537,7 @@ MooseVariableField<OutputType>::dofValuesDuDotDuNeighbor()
 
 template <typename OutputType>
 void
-MooseVariableField<OutputType>::prepareIC()
+MooseVariableFEImpl<OutputType>::prepareIC()
 {
   _dof_map.dof_indices(_elem, _dof_indices, _var_num);
   _dof_values.resize(_dof_indices.size());
@@ -548,21 +548,21 @@ MooseVariableField<OutputType>::prepareIC()
 
 template <typename OutputType>
 void
-MooseVariableField<OutputType>::computeElemValues()
+MooseVariableFEImpl<OutputType>::computeElemValues()
 {
   computeValuesHelper(_qrule, _phi, _grad_phi, _second_phi, _curl_phi);
 }
 
 template <typename OutputType>
 void
-MooseVariableField<OutputType>::computeElemValuesFace()
+MooseVariableFEImpl<OutputType>::computeElemValuesFace()
 {
   computeValuesHelper(_qrule_face, _phi_face, _grad_phi_face, _second_phi_face, _curl_phi_face);
 }
 
 template <typename OutputType>
 void
-MooseVariableField<OutputType>::computeNeighborValuesFace()
+MooseVariableFEImpl<OutputType>::computeNeighborValuesFace()
 {
   computeNeighborValuesHelper(
       _qrule_neighbor, _phi_face_neighbor, _grad_phi_face_neighbor, _second_phi_face_neighbor);
@@ -570,7 +570,7 @@ MooseVariableField<OutputType>::computeNeighborValuesFace()
 
 template <typename OutputType>
 void
-MooseVariableField<OutputType>::computeNeighborValues()
+MooseVariableFEImpl<OutputType>::computeNeighborValues()
 {
   computeNeighborValuesHelper(
       _qrule_neighbor, _phi_neighbor, _grad_phi_neighbor, _second_phi_neighbor);
@@ -578,7 +578,7 @@ MooseVariableField<OutputType>::computeNeighborValues()
 
 template <typename OutputType>
 void
-MooseVariableField<OutputType>::setNodalValue(const DenseVector<Number> & values)
+MooseVariableFEImpl<OutputType>::setNodalValue(const DenseVector<Number> & values)
 {
   for (unsigned int i = 0; i < values.size(); i++)
     _dof_values[i] = values(i);
@@ -595,7 +595,7 @@ MooseVariableField<OutputType>::setNodalValue(const DenseVector<Number> & values
 
 template <typename OutputType>
 void
-MooseVariableField<OutputType>::setNodalValue(Number value, unsigned int idx /* = 0*/)
+MooseVariableFEImpl<OutputType>::setNodalValue(Number value, unsigned int idx /* = 0*/)
 {
   _dof_values[idx] = value; // update variable nodal value
   _has_nodal_value = true;
@@ -607,7 +607,7 @@ MooseVariableField<OutputType>::setNodalValue(Number value, unsigned int idx /* 
 
 template <typename OutputType>
 void
-MooseVariableField<OutputType>::computeIncrementAtQps(const NumericVector<Number> & increment_vec)
+MooseVariableFEImpl<OutputType>::computeIncrementAtQps(const NumericVector<Number> & increment_vec)
 {
   unsigned int nqp = _qrule->n_points();
 
@@ -624,7 +624,7 @@ MooseVariableField<OutputType>::computeIncrementAtQps(const NumericVector<Number
 
 template <typename OutputType>
 void
-MooseVariableField<OutputType>::computeIncrementAtNode(const NumericVector<Number> & increment_vec)
+MooseVariableFEImpl<OutputType>::computeIncrementAtNode(const NumericVector<Number> & increment_vec)
 {
   if (!isNodal())
     mooseError("computeIncrementAtNode can only be called for nodal variables");
@@ -637,8 +637,8 @@ MooseVariableField<OutputType>::computeIncrementAtNode(const NumericVector<Numbe
 
 template <typename OutputType>
 OutputType
-MooseVariableField<OutputType>::getValue(const Elem * elem,
-                                         const std::vector<std::vector<OutputType>> & phi) const
+MooseVariableFEImpl<OutputType>::getValue(const Elem * elem,
+                                          const std::vector<std::vector<OutputType>> & phi) const
 {
   std::vector<dof_id_type> dof_indices;
   _dof_map.dof_indices(elem, dof_indices, _var_num);
@@ -663,11 +663,11 @@ MooseVariableField<OutputType>::getValue(const Elem * elem,
 
 template <typename OutputType>
 void
-MooseVariableField<OutputType>::computeValuesHelper(QBase *& qrule,
-                                                    const FieldVariablePhiValue & phi,
-                                                    const FieldVariablePhiGradient & grad_phi,
-                                                    const FieldVariablePhiSecond *& second_phi,
-                                                    const FieldVariablePhiValue *& curl_phi)
+MooseVariableFEImpl<OutputType>::computeValuesHelper(QBase *& qrule,
+                                                     const FieldVariablePhiValue & phi,
+                                                     const FieldVariablePhiGradient & grad_phi,
+                                                     const FieldVariablePhiSecond *& second_phi,
+                                                     const FieldVariablePhiValue *& curl_phi)
 
 {
   bool is_transient = _subproblem.isTransient();
@@ -967,7 +967,7 @@ MooseVariableField<OutputType>::computeValuesHelper(QBase *& qrule,
 
 template <typename OutputType>
 void
-MooseVariableField<OutputType>::computeNeighborValuesHelper(
+MooseVariableFEImpl<OutputType>::computeNeighborValuesHelper(
     QBase *& qrule,
     const FieldVariablePhiValue & phi,
     const FieldVariablePhiGradient & grad_phi,
@@ -1164,7 +1164,7 @@ MooseVariableField<OutputType>::computeNeighborValuesHelper(
 
 template <typename OutputType>
 typename OutputTools<OutputType>::OutputGradient
-MooseVariableField<OutputType>::getGradient(
+MooseVariableFEImpl<OutputType>::getGradient(
     const Elem * elem,
     const std::vector<std::vector<typename OutputTools<OutputType>::OutputGradient>> & grad_phi)
     const
@@ -1192,7 +1192,7 @@ MooseVariableField<OutputType>::getGradient(
 
 template <typename OutputType>
 const OutputType &
-MooseVariableField<OutputType>::nodalValue()
+MooseVariableFEImpl<OutputType>::nodalValue()
 {
   if (isNodal())
   {
@@ -1207,7 +1207,7 @@ MooseVariableField<OutputType>::nodalValue()
 
 template <typename OutputType>
 const OutputType &
-MooseVariableField<OutputType>::nodalValueOld()
+MooseVariableFEImpl<OutputType>::nodalValueOld()
 {
   if (isNodal())
   {
@@ -1222,7 +1222,7 @@ MooseVariableField<OutputType>::nodalValueOld()
 
 template <typename OutputType>
 const OutputType &
-MooseVariableField<OutputType>::nodalValueOlder()
+MooseVariableFEImpl<OutputType>::nodalValueOlder()
 {
   if (isNodal())
   {
@@ -1237,7 +1237,7 @@ MooseVariableField<OutputType>::nodalValueOlder()
 
 template <typename OutputType>
 const OutputType &
-MooseVariableField<OutputType>::nodalValuePreviousNL()
+MooseVariableFEImpl<OutputType>::nodalValuePreviousNL()
 {
   if (isNodal())
   {
@@ -1252,7 +1252,7 @@ MooseVariableField<OutputType>::nodalValuePreviousNL()
 
 template <typename OutputType>
 const OutputType &
-MooseVariableField<OutputType>::nodalValueDot()
+MooseVariableFEImpl<OutputType>::nodalValueDot()
 {
   if (isNodal())
   {
@@ -1267,7 +1267,7 @@ MooseVariableField<OutputType>::nodalValueDot()
 
 template <typename OutputType>
 void
-MooseVariableField<OutputType>::computeNodalValues()
+MooseVariableFEImpl<OutputType>::computeNodalValues()
 {
   if (_has_dofs)
   {
@@ -1317,7 +1317,7 @@ MooseVariableField<OutputType>::computeNodalValues()
 
 template <>
 void
-MooseVariableField<RealVectorValue>::computeNodalValues()
+MooseVariableFEImpl<RealVectorValue>::computeNodalValues()
 {
   if (_has_dofs)
   {
@@ -1374,7 +1374,7 @@ MooseVariableField<RealVectorValue>::computeNodalValues()
 
 template <typename OutputType>
 void
-MooseVariableField<OutputType>::computeNodalNeighborValues()
+MooseVariableFEImpl<OutputType>::computeNodalNeighborValues()
 {
   if (_neighbor_has_dofs)
   {
@@ -1412,5 +1412,5 @@ MooseVariableField<OutputType>::computeNodalNeighborValues()
   }
 }
 
-template class MooseVariableField<Real>;
-template class MooseVariableField<RealVectorValue>;
+template class MooseVariableFEImpl<Real>;
+template class MooseVariableFEImpl<RealVectorValue>;

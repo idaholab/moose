@@ -13,7 +13,7 @@
 #include "Assembly.h"
 #include "MooseEnum.h"
 #include "MooseMesh.h"
-#include "MooseVariableField.h"
+#include "MooseVariableFEImpl.h"
 #include "PenetrationLocator.h"
 #include "SystemBase.h"
 

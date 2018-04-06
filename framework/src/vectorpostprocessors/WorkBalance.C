@@ -10,7 +10,7 @@
 #include "WorkBalance.h"
 
 // MOOSE includes
-#include "MooseVariableField.h"
+#include "MooseVariable.h"
 #include "ThreadedElementLoopBase.h"
 #include "ThreadedNodeLoop.h"
 

@@ -11,7 +11,7 @@
 
 // MOOSE includes
 #include "Function.h"
-#include "MooseVariableField.h"
+#include "MooseVariableFEImpl.h"
 
 #include "libmesh/numeric_vector.h"
 #include "libmesh/utility.h"

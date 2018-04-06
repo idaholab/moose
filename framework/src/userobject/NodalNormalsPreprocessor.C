@@ -13,7 +13,7 @@
 #include "Assembly.h"
 #include "AuxiliarySystem.h"
 #include "MooseMesh.h"
-#include "MooseVariableField.h"
+#include "MooseVariableFEImpl.h"
 
 #include "libmesh/numeric_vector.h"
 #include "libmesh/quadrature.h"

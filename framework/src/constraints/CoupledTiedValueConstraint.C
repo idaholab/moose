@@ -10,7 +10,7 @@
 #include "CoupledTiedValueConstraint.h"
 
 // MOOSE includes
-#include "MooseVariableField.h"
+#include "MooseVariableFEImpl.h"
 #include "SystemBase.h"
 
 #include "libmesh/sparse_matrix.h"

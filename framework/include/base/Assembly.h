@@ -42,9 +42,9 @@ class ArbitraryQuadrature;
 class SystemBase;
 class MooseVariableFE;
 template <typename>
-class MooseVariableField;
-typedef MooseVariableField<Real> MooseVariable;
-typedef MooseVariableField<RealVectorValue> VectorMooseVariable;
+class MooseVariableFEImpl;
+typedef MooseVariableFEImpl<Real> MooseVariable;
+typedef MooseVariableFEImpl<RealVectorValue> VectorMooseVariable;
 class XFEMInterface;
 
 /**
@@ -473,15 +473,15 @@ public:
   void prepareOffDiagScalar();
 
   template <typename T>
-  void copyShapes(MooseVariableField<T> & v);
+  void copyShapes(MooseVariableFEImpl<T> & v);
   void copyShapes(unsigned int var);
 
   template <typename T>
-  void copyFaceShapes(MooseVariableField<T> & v);
+  void copyFaceShapes(MooseVariableFEImpl<T> & v);
   void copyFaceShapes(unsigned int var);
 
   template <typename T>
-  void copyNeighborShapes(MooseVariableField<T> & v);
+  void copyNeighborShapes(MooseVariableFEImpl<T> & v);
   void copyNeighborShapes(unsigned int var);
 
   void addResidual(NumericVector<Number> & residual, Moose::KernelType type = Moose::KT_NONTIME);

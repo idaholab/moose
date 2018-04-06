@@ -15,7 +15,7 @@
 #include "SystemBase.h"
 #include "MooseTypes.h"
 #include "MooseMesh.h"
-#include "MooseVariableField.h"
+#include "MooseVariableFEImpl.h"
 #include "MooseVariableScalar.h"
 #include "XFEMInterface.h"
 
@@ -1273,7 +1273,7 @@ Assembly::prepareOffDiagScalar()
 
 template <typename T>
 void
-Assembly::copyShapes(MooseVariableField<T> & v)
+Assembly::copyShapes(MooseVariableFEImpl<T> & v)
 {
   phi(v).shallowCopy(v.phi());
   gradPhi(v).shallowCopy(v.gradPhi());
@@ -1300,7 +1300,7 @@ Assembly::copyShapes(unsigned int var)
 
 template <typename T>
 void
-Assembly::copyFaceShapes(MooseVariableField<T> & v)
+Assembly::copyFaceShapes(MooseVariableFEImpl<T> & v)
 {
   phiFace(v).shallowCopy(v.phiFace());
   gradPhiFace(v).shallowCopy(v.gradPhiFace());
@@ -1327,7 +1327,7 @@ Assembly::copyFaceShapes(unsigned int var)
 
 template <typename T>
 void
-Assembly::copyNeighborShapes(MooseVariableField<T> & v)
+Assembly::copyNeighborShapes(MooseVariableFEImpl<T> & v)
 {
   if (v.usesPhiNeighbor())
   {

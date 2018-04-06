@@ -12,7 +12,7 @@
 #include "SubProblem.h"
 #include "FEProblem.h"
 #include "MooseVariableScalar.h"
-#include "MooseVariableField.h"
+#include "MooseVariableFEImpl.h"
 #include "InputParameters.h"
 #include "MooseObject.h"
 

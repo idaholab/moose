@@ -11,7 +11,7 @@
 
 // MOOSE includes
 #include "InitialCondition.h"
-#include "MooseVariableField.h"
+#include "MooseVariableFEImpl.h"
 
 InitialConditionWarehouse::InitialConditionWarehouse()
   : MooseObjectWarehouseBase<InitialCondition>(),

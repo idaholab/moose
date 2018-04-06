@@ -10,7 +10,7 @@
 #include "DGDiffusion.h"
 
 // MOOSE includes
-#include "MooseVariableField.h"
+#include "MooseVariableFEImpl.h"
 
 #include "libmesh/utility.h"
 

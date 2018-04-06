@@ -13,7 +13,7 @@
 #include "Conversion.h"
 #include "Function.h"
 #include "MooseApp.h"
-#include "MooseVariableField.h"
+#include "MooseVariableFEImpl.h"
 #include "MooseArray.h"
 
 template <>

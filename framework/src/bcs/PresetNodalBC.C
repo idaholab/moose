@@ -10,7 +10,7 @@
 #include "PresetNodalBC.h"
 
 // MOOSE includes
-#include "MooseVariableField.h"
+#include "MooseVariableFEImpl.h"
 
 #include "libmesh/numeric_vector.h"
 

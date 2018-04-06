@@ -11,7 +11,7 @@
 #include "Problem.h"
 #include "SubProblem.h"
 #include "SystemBase.h"
-#include "MooseVariableField.h"
+#include "MooseVariableFEImpl.h"
 #include "Assembly.h"
 
 template <>

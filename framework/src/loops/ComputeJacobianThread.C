@@ -13,7 +13,7 @@
 #include "FEProblem.h"
 #include "IntegratedBCBase.h"
 #include "InterfaceKernel.h"
-#include "MooseVariableField.h"
+#include "MooseVariableFEImpl.h"
 #include "NonlinearSystem.h"
 #include "NonlocalIntegratedBC.h"
 #include "NonlocalKernel.h"
