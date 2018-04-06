@@ -13,12 +13,14 @@
   [../]
   [./scalar_damage_material_out_of_bounds]
     type = 'RunException'
+    prereq = scalar_damage_material
     input = 'scalar_material_damage.i'
     cli_args = 'Executioner/end_time=1.2'
     expect_err = 'damage_index must be between 0 and 1. Current value is:'
   [../]
   [./scalar_damage_incompatible_model]
     type = 'RunException'
+    prereq = scalar_damage_material
     input = 'scalar_material_damage.i'
     cli_args = 'Materials/stress/damage_model=damage_index' #Point it to an incompatible model
     expect_err = 'Damage Model damage_index is not compatible with ComputeDamageStress'
