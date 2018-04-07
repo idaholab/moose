@@ -1,0 +1,9 @@
+[Tests]
+  [./test]
+    type = 'CSVDiff'
+    input = 'work_balance.i'
+    csvdiff = 'work_balance_out_work_balance_0000.csv'
+    min_parallel = 2
+    max_parallel = 2
+  [../]
+[]
