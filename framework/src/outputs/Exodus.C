@@ -66,7 +66,8 @@ validParams<Exodus>()
   params.set<ExecFlagEnum>("execute_input_on") = EXEC_INITIAL;
 
   // Flag for outputting discontinuous data to Exodus
-  params.addParam<bool>("discontinuous",false,"Enables discontinuous output format for Exodus files.");
+  params.addParam<bool>(
+      "discontinuous", false, "Enables discontinuous output format for Exodus files.");
 
   // Return the InputParameters
   return params;
@@ -93,11 +94,16 @@ Exodus::Exodus(const InputParameters & parameters)
     else
       _output_dimension = "default";
   }
-  // If user sets 'discontinuous = true' and 'elemental_as_nodal = false', issue an error that these are incompatible states
-  if (_discontinuous && parameters.isParamSetByUser("elemental_as_nodal") && !getParam<bool>("elemental_as_nodal"))
-    mooseError(name(),": Invalid parameters. 'elemental_as_nodal' set to false while 'discontinuous' set to true.");
+  // If user sets 'discontinuous = true' and 'elemental_as_nodal = false', issue an error that these
+  // are incompatible states
+  if (_discontinuous && parameters.isParamSetByUser("elemental_as_nodal") &&
+      !getParam<bool>("elemental_as_nodal"))
+    mooseError(name(),
+               ": Invalid parameters. 'elemental_as_nodal' set to false while 'discontinuous' set "
+               "to true.");
   // Discontinuous output implies that elemental values are output as nodal values
-  if (_discontinuous) _elemental_as_nodal = true;
+  if (_discontinuous)
+    _elemental_as_nodal = true;
 }
 
 void

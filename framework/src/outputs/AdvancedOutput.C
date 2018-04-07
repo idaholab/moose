@@ -123,8 +123,10 @@ AdvancedOutput::AdvancedOutput(const InputParameters & parameters) : FileOutput(
   _is_advanced = true;
   _advanced_execute_on = OutputOnWarehouse(_execute_on, parameters);
   // Set nodal output variables if they appear in valid parameters
-  if (isParamValid("elemental_as_nodal")) _elemental_as_nodal = getParam<bool>("elemental_as_nodal");
-  if (isParamValid("scalar_as_nodal"))    _scalar_as_nodal    = getParam<bool>("scalar_as_nodal");
+  if (isParamValid("elemental_as_nodal"))
+    _elemental_as_nodal = getParam<bool>("elemental_as_nodal");
+  if (isParamValid("scalar_as_nodal"))
+    _scalar_as_nodal = getParam<bool>("scalar_as_nodal");
 }
 
 void
