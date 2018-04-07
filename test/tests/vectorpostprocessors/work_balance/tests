@@ -5,5 +5,16 @@
     csvdiff = 'work_balance_out_work_balance_0000.csv'
     min_parallel = 2
     max_parallel = 2
+    mesh_mode = replicated
+  [../]
+
+  [./distributed]
+    type = 'CSVDiff'
+    input = 'work_balance.i'
+    cli_args = 'Outputs/file_base=distributed'
+    csvdiff = 'distributed_work_balance_0000.csv'
+    min_parallel = 2
+    max_parallel = 2
+    mesh_mode = distributed
   [../]
 []
