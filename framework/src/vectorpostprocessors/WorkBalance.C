@@ -23,6 +23,7 @@ InputParameters
 validParams<WorkBalance>()
 {
   InputParameters params = validParams<GeneralVectorPostprocessor>();
+  params.addClassDescription("Computes several metrics for workload balance per processor");
   return params;
 }
 
