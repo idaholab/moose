@@ -10,6 +10,15 @@
   [../]
 []
 
+[AuxVariables]
+  [./someaux]
+  [../]
+  [./otheraux]
+    family = MONOMIAL
+    order = CONSTANT
+  [../]
+[]
+
 [Kernels]
   [./diff]
     type = Diffusion
@@ -40,9 +49,22 @@
 []
 
 [VectorPostprocessors]
-  [./work_balance]
+  [./nl_wb]
     type = WorkBalance
     execute_on = initial
+    system = nl
+  []
+
+  [./aux_wb]
+    type = WorkBalance
+    execute_on = initial
+    system = aux
+  []
+
+  [./all_wb]
+    type = WorkBalance
+    execute_on = initial
+    system = all
   []
 []
 

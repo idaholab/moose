@@ -16,6 +16,8 @@
 
 #include "libmesh/quadrature.h"
 
+#include <numeric>
+
 registerMooseObject("MooseApp", StatisticsVectorPostprocessor);
 
 template <>
@@ -26,8 +28,8 @@ validParams<StatisticsVectorPostprocessor>()
   params.addClassDescription("Compute statistical values of a given VectorPostprocessor.  The "
                              "statistics are computed for each column.");
 
-  params.addParam<VectorPostprocessorName>("vpp",
-                                           "The VectorPostprocessor to compute statistics for.");
+  params.addRequiredParam<VectorPostprocessorName>(
+      "vpp", "The VectorPostprocessor to compute statistics for.");
 
   // These are directly numbered to ensure that any changes to this list will not cause a bug
   // Do not change the numbers here without changing the corresponding code in computeStatVector()
@@ -87,7 +89,8 @@ StatisticsVectorPostprocessor::execute()
       const auto & name = the_pair.first;
       const auto & values = *the_pair.second.current;
 
-      auto & stat_vector = *_stat_vectors[name];
+      mooseAssert(_stat_vectors.count(name), "Error retrieving VPP vector");
+      auto & stat_vector = *_stat_vectors.at(name);
 
       stat_vector.clear();
 
@@ -125,10 +128,12 @@ StatisticsVectorPostprocessor::computeStatValue(int stat_id, const std::vector<R
       auto mean = std::accumulate(stat_vector.begin(), stat_vector.end(), 0) /
                   static_cast<Real>(stat_vector.size());
 
-      auto the_sum = std::accumulate(
-          stat_vector.begin(), stat_vector.end(), 0, [&](Real running_value, Real current_value) {
-            return running_value + std::pow(current_value - mean, 2);
-          });
+      auto the_sum = std::accumulate(stat_vector.begin(),
+                                     stat_vector.end(),
+                                     0,
+                                     [&mean](Real running_value, Real current_value) {
+                                       return running_value + std::pow(current_value - mean, 2);
+                                     });
 
       return std::sqrt(the_sum / (stat_vector.size() - 1.));
     }
@@ -139,6 +144,6 @@ StatisticsVectorPostprocessor::computeStatValue(int stat_id, const std::vector<R
 
           }));
     default:
-      mooseError("Unknown statistics type1");
+      mooseError("Unknown statistics type: ", stat_id);
   }
 }

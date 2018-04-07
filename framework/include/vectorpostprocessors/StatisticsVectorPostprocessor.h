@@ -10,7 +10,7 @@
 #ifndef STATISTICSVECTORPOSTPROCESSOR_H
 #define STATISTICSVECTORPOSTPROCESSOR_H
 
-#include "ElementVectorPostprocessor.h"
+#include "GeneralVectorPostprocessor.h"
 
 class StatisticsVectorPostprocessor;
 

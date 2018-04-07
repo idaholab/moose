@@ -10,7 +10,7 @@
 #ifndef WORKBALANCE_H
 #define WORKBALANCE_H
 
-#include "ElementVectorPostprocessor.h"
+#include "GeneralVectorPostprocessor.h"
 
 class WorkBalance;
 
@@ -27,11 +27,22 @@ class WorkBalance : public GeneralVectorPostprocessor
 public:
   WorkBalance(const InputParameters & parameters);
 
+  enum SystemEnum
+  {
+    // Ordered this way because NL is always system 0 and Aux is 1
+    ALL = -1,
+    NL,
+    AUX,
+  };
+
   virtual void initialize() override;
   virtual void execute() override;
   virtual void finalize() override;
 
 protected:
+  // The system to count DoFs from
+  int _system;
+
   dof_id_type _local_num_elems;
   dof_id_type _local_num_nodes;
   dof_id_type _local_num_dofs;

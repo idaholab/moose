@@ -16,6 +16,8 @@
 
 #include "libmesh/quadrature.h"
 
+#include <numeric>
+
 registerMooseObject("MooseApp", WorkBalance);
 
 template <>
@@ -24,11 +26,20 @@ validParams<WorkBalance>()
 {
   InputParameters params = validParams<GeneralVectorPostprocessor>();
   params.addClassDescription("Computes several metrics for workload balance per processor");
+
+  // These are numbered this way because NL is always system 0 and Aux is system 1
+  MooseEnum system_enum("ALL=-1 NL AUX", "ALL");
+  params.addParam<MooseEnum>(
+      "system",
+      system_enum,
+      "The system(s) to retrieve the number of DOFs from (NL, AUX, ALL). Default == ALL");
+
   return params;
 }
 
 WorkBalance::WorkBalance(const InputParameters & parameters)
   : GeneralVectorPostprocessor(parameters),
+    _system(getParam<MooseEnum>("system")),
     _local_num_elems(0),
     _local_num_nodes(0),
     _local_num_dofs(0),
@@ -60,8 +71,9 @@ namespace
 class WBElementLoop : public ThreadedElementLoopBase<ConstElemRange>
 {
 public:
-  WBElementLoop(MooseMesh & mesh)
+  WBElementLoop(MooseMesh & mesh, int system)
     : ThreadedElementLoopBase(mesh),
+      _system(system),
       _local_num_elems(0),
       _local_num_dofs(0),
       _local_num_partition_sides(0),
@@ -72,6 +84,7 @@ public:
 
   WBElementLoop(WBElementLoop & x, Threads::split split)
     : ThreadedElementLoopBase(x, split),
+      _system(x._system),
       _local_num_elems(0),
       _local_num_dofs(0),
       _local_num_partition_sides(0),
@@ -94,24 +107,25 @@ public:
   {
     _local_num_elems++;
 
-    /*
     // Find out how many dofs there are on this element
-    auto n_sys = elem->n_systems();
-    for (decltype(n_sys) sys = 0; sys < n_sys; sys++)
+    if (_system == WorkBalance::ALL) // All systems
     {
-    */
+      auto n_sys = elem->n_systems();
+      for (decltype(n_sys) sys = 0; sys < n_sys; sys++)
+      {
+        auto n_vars = elem->n_vars(sys);
 
-    // For MOOSE, system 0 is the nonnlinear system - that's what we care about here
-    // I've left the other code commented out here because I might change my mind in a little while
-    // and add back the ability to set the system or compute over all
-    unsigned int sys = 0;
+        for (decltype(n_vars) var = 0; var < n_vars; var++)
+          _local_num_dofs += elem->n_dofs(sys, var);
+      }
+    }
+    else // Particular system
+    {
+      auto n_vars = elem->n_vars(static_cast<unsigned int>(_system));
 
-    auto n_vars = elem->n_vars(sys);
-
-    for (decltype(n_vars) var = 0; var < n_vars; var++)
-      _local_num_dofs += elem->n_dofs(sys, var);
-
-    //}
+      for (decltype(n_vars) var = 0; var < n_vars; var++)
+        _local_num_dofs += elem->n_dofs(static_cast<unsigned int>(_system), var);
+    }
   }
 
   virtual void onInternalSide(const Elem * elem, unsigned int side) override
@@ -134,6 +148,8 @@ public:
     _local_partition_surface_area += y._local_partition_surface_area;
   }
 
+  int _system;
+
   dof_id_type _local_num_elems;
   dof_id_type _local_num_dofs;
   dof_id_type _local_num_partition_sides;
@@ -145,15 +161,17 @@ public:
 class WBNodeLoop : public ThreadedNodeLoop<ConstNodeRange, ConstNodeRange::const_iterator>
 {
 public:
-  WBNodeLoop(FEProblemBase & fe_problem)
+  WBNodeLoop(FEProblemBase & fe_problem, int system)
     : ThreadedNodeLoop<ConstNodeRange, ConstNodeRange::const_iterator>(fe_problem),
+      _system(system),
       _local_num_nodes(0),
       _local_num_dofs(0)
   {
   }
 
-  WBNodeLoop(ThreadedNodeLoop & x, Threads::split split)
+  WBNodeLoop(WBNodeLoop & x, Threads::split split)
     : ThreadedNodeLoop<ConstNodeRange, ConstNodeRange::const_iterator>(x, split),
+      _system(x._system),
       _local_num_nodes(0),
       _local_num_dofs(0)
   {
@@ -165,12 +183,25 @@ public:
 
     _local_num_nodes++;
 
-    unsigned int sys = 0;
+    // Find out how many dofs there are on this node
+    if (_system == WorkBalance::ALL) // All systems
+    {
+      auto n_sys = node.n_systems();
+      for (decltype(n_sys) sys = 0; sys < n_sys; sys++)
+      {
+        auto n_vars = node.n_vars(sys);
 
-    auto n_vars = node.n_vars(sys);
+        for (decltype(n_vars) var = 0; var < n_vars; var++)
+          _local_num_dofs += node.n_dofs(sys, var);
+      }
+    }
+    else // Particular system
+    {
+      auto n_vars = node.n_vars(static_cast<unsigned int>(_system));
 
-    for (decltype(n_vars) var = 0; var < n_vars; var++)
-      _local_num_dofs += node.n_dofs(sys, var);
+      for (decltype(n_vars) var = 0; var < n_vars; var++)
+        _local_num_dofs += node.n_dofs(static_cast<unsigned int>(_system), var);
+    }
   }
 
   void join(WBNodeLoop & y)
@@ -178,6 +209,8 @@ public:
     _local_num_nodes += y._local_num_nodes;
     _local_num_dofs += y._local_num_dofs;
   }
+
+  int _system;
 
   dof_id_type _local_num_nodes;
   dof_id_type _local_num_dofs;
@@ -191,7 +224,7 @@ WorkBalance::execute()
   auto & mesh = _fe_problem.mesh();
 
   // Get all of the Elem info first
-  auto wb_el = WBElementLoop(mesh);
+  auto wb_el = WBElementLoop(mesh, _system);
 
   Threads::parallel_reduce(*mesh.getActiveLocalElementRange(), wb_el);
 
@@ -201,7 +234,7 @@ WorkBalance::execute()
   _local_partition_surface_area = wb_el._local_partition_surface_area;
 
   // Now Node info
-  auto wb_nl = WBNodeLoop(_fe_problem);
+  auto wb_nl = WBNodeLoop(_fe_problem, _system);
 
   Threads::parallel_reduce(*mesh.getLocalNodeRange(), wb_nl);
 
