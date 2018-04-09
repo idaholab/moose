@@ -66,22 +66,30 @@ RobinReflectionBC::computeQpResidual()
 
   if (_component == "real")
   {
-    if (_exit == 1)
+    if (_exit == 0)
     {
-      std::cout << _sign * _test[_i][_qp] * _diff.real() -
-                       (-_test[_i][_qp] * _coeff_real * _field_imag[_qp])
-                << std::endl;
+      return -_test[_i][_qp] * 1 * (-1) * _coeff_real * _field_imag[_qp] +
+             2 * _test[_i][_qp] * 1 * (-1) * _coeff_real *
+                 _profile_func_imag.value(_t, _q_point[_qp]);
     }
-    return _sign * _test[_i][_qp] * _diff.real();
+    else
+    {
+      return -_test[_i][_qp] * _coeff_real * _field_imag[_qp];
+    }
+    // return _sign * _test[_i][_qp] * _diff.real();
   }
   else
   {
-    if (_exit == 1)
+    if (_exit == 0)
     {
-      std::cout << _sign * _test[_i][_qp] * _diff.imag() -
-                       (_test[_i][_qp] * _coeff_real * _field_real[_qp])
-                << std::endl;
+      return -_test[_i][_qp] * (-1) * (-1) * _coeff_real * _field_real[_qp] +
+             2 * _test[_i][_qp] * (-1) * (-1) * _coeff_real *
+                 _profile_func_real.value(_t, _q_point[_qp]);
     }
-    return _sign * _test[_i][_qp] * _diff.imag();
+    else
+    {
+      return _test[_i][_qp] * _coeff_real * _field_real[_qp];
+    }
+    // return _sign * _test[_i][_qp] * _diff.imag();
   }
 }
