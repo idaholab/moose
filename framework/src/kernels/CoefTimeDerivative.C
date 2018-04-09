@@ -9,7 +9,7 @@
 
 #include "CoefTimeDerivative.h"
 
-registerMooseObject("MiscApp", CoefTimeDerivative);
+registerMooseObject("MooseApp", CoefTimeDerivative);
 
 template <>
 InputParameters

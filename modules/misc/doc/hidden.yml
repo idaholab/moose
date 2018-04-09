@@ -1,5 +1,4 @@
 - /AuxKernels/CoupledDirectionalMeshHeightInterpolation
 - /Kernels/CoefDiffusion
-- /Kernels/CoefTimeDerivative
 - /Kernels/ThermoDiffusion
 - /UserObjects/RigidBodyModes3D
