@@ -20,7 +20,10 @@ class Zernike : public SingleSeriesBasisInterface
 public:
   Zernike();
 
-  Zernike(const std::vector<MooseEnum> & domain, const std::vector<std::size_t> & order);
+  Zernike(const std::vector<MooseEnum> & domain,
+          const std::vector<std::size_t> & order,
+          MooseEnum expansion_type,
+          MooseEnum generation_type);
 
   // Overrides from FunctionalBasisInterface
   virtual Real getStandardizedFunctionVolume() const override;
@@ -32,9 +35,18 @@ public:
   virtual const std::vector<Real> & getStandardizedFunctionLimits() const override;
 
 protected:
-  // Overrides from FunctionalBasisInterface
-  virtual void evaluateOrthonormal() override;
-  virtual void evaluateStandard() override;
+  /**
+   * Evaluates the orthonormal form of the basis functions
+   */
+  virtual void evaluateOrthonormal();
+  /**
+   * Evaluates the standard form of the basis functions
+   */
+  virtual void evaluateStandard();
+  /**
+   * Evaluates the 1/sqrt(mu) normalized form of the basis functions
+   */
+  virtual void evaluateSqrtMu();
 
   // Overrides from SingleSeriesBasisInterface
   virtual void checkPhysicalBounds(const std::vector<Real> & bounds) const override;
@@ -42,7 +54,7 @@ protected:
   getStandardizedLocation(const std::vector<Real> & location) const override;
 
   /**
-   * Helper function used by evaluateOrthonormal() and evaluateStandard(). It
+   * Helper function used by evaluateGeneration() and evaluateExpansion(). It
    * uses the evaluated value array of the zero and positive rank terms to:
    *  1) fill out the negative rank terms
    *  2) apply the azimuthal components to all terms

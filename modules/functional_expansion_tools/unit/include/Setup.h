@@ -24,5 +24,7 @@ const std::string name = "UnitTesting";
 // Recreate the MooseEnum types used in validParams<FunctionSeries>()
 extern MooseEnum single_series_types_1D;
 extern MooseEnum single_series_types_2D;
+extern MooseEnum expansion_type;
+extern MooseEnum generation_type;
 
 #endif // SETUP_H

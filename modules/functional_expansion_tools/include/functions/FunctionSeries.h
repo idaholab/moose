@@ -64,14 +64,14 @@ public:
   const std::vector<std::size_t> & getOrders() const;
 
   /**
-   * Returns a vector of the orthogonally-evaluated functional series at the current location
+   * Returns a vector of the generation-evaluated functional series at the current location
    */
-  const std::vector<Real> & getOrthonormal();
+  const std::vector<Real> & getGeneration();
 
   /**
-   * Returns a vector of the standardly-evaluated functional series at the current location
+   * Returns a vector of the expansion-evaluated functional series at the current location
    */
-  const std::vector<Real> & getStandard();
+  const std::vector<Real> & getExpansion();
 
   /**
    * Returns true if the provided point is within the set physical boundaries
@@ -113,6 +113,10 @@ protected:
   const MooseEnum & _z;
   /// Stores the name of the single function series to use for a unit disc
   const MooseEnum & _disc;
+  /// The normalization type for expansion
+  const MooseEnum & _expansion_type;
+  /// The normalization type for generation
+  const MooseEnum & _generation_type;
 
 private:
   /**

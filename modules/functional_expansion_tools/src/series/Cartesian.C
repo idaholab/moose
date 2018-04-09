@@ -18,7 +18,9 @@ Cartesian::Cartesian(const std::string & who_is_using_me)
 Cartesian::Cartesian(const std::vector<MooseEnum> & domains,
                      const std::vector<std::size_t> & orders,
                      const std::vector<MooseEnum> & series_types,
-                     const std::string & who_is_using_me)
+                     const std::string & who_is_using_me,
+                     MooseEnum expansion_type,
+                     MooseEnum generation_type)
   : CompositeSeriesBasisInterface(orders, series_types, who_is_using_me)
 {
   // Initialize the pointers to each of the single series
@@ -27,7 +29,8 @@ Cartesian::Cartesian(const std::vector<MooseEnum> & domains,
     {
       std::vector<MooseEnum> local_domain = {domains[i]};
       std::vector<std::size_t> local_order = {orders[i]};
-      _series.push_back(libmesh_make_unique<Legendre>(local_domain, local_order));
+      _series.push_back(libmesh_make_unique<Legendre>(
+          local_domain, local_order, expansion_type, generation_type));
     }
     else
       mooseError("Cartesian: No other linear series implemented except Legendre!");

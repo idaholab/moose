@@ -46,6 +46,18 @@ SingleSeriesBasisInterface::isCacheInvalid() const
 }
 
 void
+SingleSeriesBasisInterface::evaluateGeneration()
+{
+  _evaluateGenerationWrapper();
+}
+
+void
+SingleSeriesBasisInterface::evaluateExpansion()
+{
+  _evaluateExpansionWrapper();
+}
+
+void
 SingleSeriesBasisInterface::setOrder(const std::vector<std::size_t> & orders)
 {
   if (orders.size() != _orders.size())

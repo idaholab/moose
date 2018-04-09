@@ -62,12 +62,12 @@ public:
 
 protected:
   // Overrides from FunctionalBasisInterface
-  virtual void evaluateOrthonormal() final;
-  virtual void evaluateStandard() final;
+  virtual void evaluateGeneration() final;
+  virtual void evaluateExpansion() final;
 
   /**
-   * Evaluates the values of _basis_evaluation for either evaluateOrthonormal() or
-   * evaluateStandard()
+   * Evaluates the values of _basis_evaluation for either evaluateGeneration() or
+   * evaluateExpansion()
    */
   void evaluateSeries(const std::vector<std::vector<Real>> & single_series_basis_evaluations);
 

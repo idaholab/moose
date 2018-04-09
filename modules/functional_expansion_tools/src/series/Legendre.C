@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "Legendre.h"
+#include <functional>
 
 /**
  * The highest order of Legendre polynomials calculated directly instead of via the recurrence
@@ -17,9 +18,29 @@
 
 Legendre::Legendre() : SingleSeriesBasisInterface() {}
 
-Legendre::Legendre(const std::vector<MooseEnum> & domain, const std::vector<std::size_t> & order)
+Legendre::Legendre(const std::vector<MooseEnum> & domain,
+                   const std::vector<std::size_t> & order,
+                   MooseEnum expansion_type,
+                   MooseEnum generation_type)
   : SingleSeriesBasisInterface(domain, order, calculatedNumberOfTermsBasedOnOrder(order))
 {
+  if (expansion_type == "orthonormal")
+    _evaluateExpansionWrapper = [this]() { this->evaluateOrthonormal(); };
+  else if (expansion_type == "sqrt_mu")
+    _evaluateExpansionWrapper = [this]() { this->evaluateSqrtMu(); };
+  else if (expansion_type == "standard")
+    _evaluateExpansionWrapper = [this]() { this->evaluateStandard(); };
+  else
+    mooseError("The specified type of normalization for expansion does not exist");
+
+  if (generation_type == "orthonormal")
+    _evaluateGenerationWrapper = [this]() { this->evaluateOrthonormal(); };
+  else if (generation_type == "sqrt_mu")
+    _evaluateGenerationWrapper = [this]() { this->evaluateSqrtMu(); };
+  else if (generation_type == "standard")
+    _evaluateGenerationWrapper = [this]() { this->evaluateStandard(); };
+  else
+    mooseError("The specified type of normalization for generation does not exist");
 }
 
 std::size_t
@@ -232,6 +253,14 @@ Legendre::evaluateStandard()
    */
   for (k = MAX_DIRECT_CALCULATION_LEGENDRE + 1; k <= _orders[0]; ++k)
     save(k, (((2 * k - 1) * x * load(k - 1)) - ((k - 1) * load(k - 2))) / Real(k));
+}
+
+void
+Legendre::evaluateSqrtMu()
+{
+  evaluateStandard();
+  for (size_t i = 0; i < getNumberOfTerms(); ++i)
+    save(i, load(i) * std::sqrt(i + 0.5));
 }
 
 const std::vector<Real> &

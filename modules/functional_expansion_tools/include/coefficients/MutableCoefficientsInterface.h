@@ -17,6 +17,7 @@
 #include "Restartable.h"
 
 class MutableCoefficientsInterface;
+class ConsoleStream;
 
 template <>
 InputParameters validParams<MutableCoefficientsInterface>();
@@ -43,9 +44,13 @@ public:
    */
   const std::vector<std::size_t> & getCharacteristics() const;
   /**
-   * Get a reference to the vector of coefficients
+   * Get a read-only reference to the vector of coefficients
    */
   const std::vector<Real> & getCoefficients() const;
+  /**
+   * Get a writeable reference to the vector of coefficients
+   */
+  std::vector<Real> & getCoefficients();
   /**
    * Get a formatted string of the coefficients
    */

@@ -147,7 +147,7 @@ FXIntegralBaseUserObject<IntegralBaseVariableUserObject>::computeIntegral()
   {
     // Get the functional terms for a vectorized approach
     _function_series.setLocation(_q_point[_qp]);
-    const std::vector<Real> & term_evaluations = _function_series.getOrthonormal();
+    const std::vector<Real> & term_evaluations = _function_series.getGeneration();
 
     // Evaluate the functional expansion coefficients at each quadrature point
     const Real local_contribution = computeQpIntegral();
