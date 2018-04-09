@@ -111,6 +111,81 @@ TEST(MooseUtils, stringToInteger)
   EXPECT_THROW(MooseUtils::stringToInteger("42.1", true), std::invalid_argument);
 }
 
+TEST(MooseUtils, convertStringInt)
+{
+  EXPECT_EQ(MooseUtils::convert<short int>("42"), 42);
+  EXPECT_EQ(MooseUtils::convert<short int>("-42"), -42);
+  EXPECT_THROW(MooseUtils::convert<short int>("", true), std::invalid_argument);
+  EXPECT_THROW(MooseUtils::convert<short int>("42 ", true), std::invalid_argument);
+  EXPECT_THROW(MooseUtils::convert<short int>("42foo", true), std::invalid_argument);
+  EXPECT_THROW(MooseUtils::convert<short int>("42.1", true), std::invalid_argument);
+
+  EXPECT_EQ(MooseUtils::convert<unsigned short int>("42"), 42u);
+  EXPECT_THROW(MooseUtils::convert<unsigned short int>("-42", true), std::invalid_argument);
+  EXPECT_THROW(MooseUtils::convert<unsigned short int>("", true), std::invalid_argument);
+  EXPECT_THROW(MooseUtils::convert<unsigned short int>("42 ", true), std::invalid_argument);
+  EXPECT_THROW(MooseUtils::convert<unsigned short int>("42foo", true), std::invalid_argument);
+  EXPECT_THROW(MooseUtils::convert<unsigned short int>("42.1", true), std::invalid_argument);
+
+  EXPECT_EQ(MooseUtils::convert<int>("42"), 42);
+  EXPECT_EQ(MooseUtils::convert<int>("-42"), -42);
+  EXPECT_THROW(MooseUtils::convert<int>("", true), std::invalid_argument);
+  EXPECT_THROW(MooseUtils::convert<int>("42 ", true), std::invalid_argument);
+  EXPECT_THROW(MooseUtils::convert<int>("42foo", true), std::invalid_argument);
+  EXPECT_THROW(MooseUtils::convert<int>("42.1", true), std::invalid_argument);
+
+  EXPECT_EQ(MooseUtils::convert<unsigned int>("42"), 42u);
+  EXPECT_THROW(MooseUtils::convert<unsigned int>("-42", true), std::invalid_argument);
+  EXPECT_THROW(MooseUtils::convert<unsigned int>("", true), std::invalid_argument);
+  EXPECT_THROW(MooseUtils::convert<unsigned int>("42 ", true), std::invalid_argument);
+  EXPECT_THROW(MooseUtils::convert<unsigned int>("42foo", true), std::invalid_argument);
+  EXPECT_THROW(MooseUtils::convert<unsigned int>("42.1", true), std::invalid_argument);
+
+  EXPECT_EQ(MooseUtils::convert<long int>("42"), 42l);
+  EXPECT_EQ(MooseUtils::convert<long int>("-42"), -42l);
+  EXPECT_THROW(MooseUtils::convert<long int>("", true), std::invalid_argument);
+  EXPECT_THROW(MooseUtils::convert<long int>("42 ", true), std::invalid_argument);
+  EXPECT_THROW(MooseUtils::convert<long int>("42foo", true), std::invalid_argument);
+  EXPECT_THROW(MooseUtils::convert<long int>("42.1", true), std::invalid_argument);
+
+  EXPECT_EQ(MooseUtils::convert<unsigned long int>("42"), 42ul);
+  EXPECT_THROW(MooseUtils::convert<unsigned long int>("-42", true), std::invalid_argument);
+  EXPECT_THROW(MooseUtils::convert<unsigned long int>("", true), std::invalid_argument);
+  EXPECT_THROW(MooseUtils::convert<unsigned long int>("42 ", true), std::invalid_argument);
+  EXPECT_THROW(MooseUtils::convert<unsigned long int>("42foo", true), std::invalid_argument);
+  EXPECT_THROW(MooseUtils::convert<unsigned long int>("42.1", true), std::invalid_argument);
+
+  EXPECT_EQ(MooseUtils::convert<long long int>("42"), 42ll);
+  EXPECT_EQ(MooseUtils::convert<long long int>("-42"), -42ll);
+  EXPECT_THROW(MooseUtils::convert<long long int>("", true), std::invalid_argument);
+  EXPECT_THROW(MooseUtils::convert<long long int>("42 ", true), std::invalid_argument);
+  EXPECT_THROW(MooseUtils::convert<long long int>("42foo", true), std::invalid_argument);
+  EXPECT_THROW(MooseUtils::convert<long long int>("42.1", true), std::invalid_argument);
+
+  EXPECT_EQ(MooseUtils::convert<unsigned long long int>("42"), 42ull);
+  EXPECT_EQ(MooseUtils::convert<unsigned long long int>("18446744073709551614"),
+            18446744073709551614ull);
+  EXPECT_THROW(MooseUtils::convert<unsigned long long int>("-42", true), std::invalid_argument);
+  EXPECT_THROW(MooseUtils::convert<unsigned long long int>("", true), std::invalid_argument);
+  EXPECT_THROW(MooseUtils::convert<unsigned long long int>("42 ", true), std::invalid_argument);
+  EXPECT_THROW(MooseUtils::convert<unsigned long long int>("42foo", true), std::invalid_argument);
+  EXPECT_THROW(MooseUtils::convert<unsigned long long int>("42.1", true), std::invalid_argument);
+
+  // Test scientific notation
+  EXPECT_EQ(MooseUtils::convert<int>("-1.2e5"), -120000);
+  EXPECT_EQ(MooseUtils::convert<unsigned int>("1.2e5"), 120000u);
+  EXPECT_EQ(MooseUtils::convert<long int>("-1.2e5"), -120000l);
+  EXPECT_EQ(MooseUtils::convert<unsigned long int>("1.2e5"), 120000ul);
+  EXPECT_EQ(MooseUtils::convert<long long int>("-1.2e5"), -120000ll);
+  EXPECT_EQ(MooseUtils::convert<unsigned long long int>("1.2e5"), 120000ull);
+
+  // Test scientific failure
+  EXPECT_THROW(MooseUtils::convert<unsigned int>("1e10", true), std::invalid_argument);
+
+  // Should work with bigger type
+  EXPECT_EQ(MooseUtils::convert<unsigned long int>("1e10", true), 10000000000ul);
+}
+
 struct TestCase
 {
   std::string a;

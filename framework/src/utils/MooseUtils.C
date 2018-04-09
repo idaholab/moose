@@ -575,6 +575,101 @@ wildCardMatch(std::string name, std::string search_string)
     return false;
 }
 
+template <typename T>
+T
+convertStringToInt(const std::string & str, bool throw_on_failure)
+{
+  T val;
+
+  // Let's try to read a double and see if we can cast it to an int
+  // This would be the case for scientific notation
+  long double double_val;
+  std::stringstream double_ss(str);
+
+  if ((double_ss >> double_val).fail() || !double_ss.eof())
+  {
+    std::string msg =
+        std::string("Unable to convert '") + str + "' to type " + demangle(typeid(T).name());
+
+    if (throw_on_failure)
+      throw std::invalid_argument(msg);
+    else
+      mooseError(msg);
+  }
+
+  // Check to see if it's an integer (and within range of an integer
+  if (double_val == static_cast<T>(double_val))
+    val = double_val;
+  else // Still failure
+  {
+    std::string msg =
+        std::string("Unable to convert '") + str + "' to type " + demangle(typeid(T).name());
+
+    if (throw_on_failure)
+      throw std::invalid_argument(msg);
+    else
+      mooseError(msg);
+  }
+
+  return val;
+}
+
+template <>
+short int
+convert<short int>(const std::string & str, bool throw_on_failure)
+{
+  return convertStringToInt<short int>(str, throw_on_failure);
+}
+
+template <>
+unsigned short int
+convert<unsigned short int>(const std::string & str, bool throw_on_failure)
+{
+  return convertStringToInt<unsigned short int>(str, throw_on_failure);
+}
+
+template <>
+int
+convert<int>(const std::string & str, bool throw_on_failure)
+{
+  return convertStringToInt<int>(str, throw_on_failure);
+}
+
+template <>
+unsigned int
+convert<unsigned int>(const std::string & str, bool throw_on_failure)
+{
+  return convertStringToInt<unsigned int>(str, throw_on_failure);
+}
+
+template <>
+long int
+convert<long int>(const std::string & str, bool throw_on_failure)
+{
+  return convertStringToInt<long int>(str, throw_on_failure);
+}
+
+template <>
+unsigned long int
+convert<unsigned long int>(const std::string & str, bool throw_on_failure)
+{
+  return convertStringToInt<unsigned long int>(str, throw_on_failure);
+}
+
+template <>
+long long int
+convert<long long int>(const std::string & str, bool throw_on_failure)
+{
+  return convertStringToInt<long long int>(str, throw_on_failure);
+}
+
+template <>
+unsigned long long int
+convert<unsigned long long int>(const std::string & str, bool throw_on_failure)
+{
+  return convertStringToInt<unsigned long long int>(str, throw_on_failure);
+}
+
 std::string
 toUpper(const std::string & name)
 {
@@ -601,25 +696,7 @@ getDefaultExecFlagEnum()
 int
 stringToInteger(const std::string & input, bool throw_on_failure)
 {
-  int output;            // return value
-  std::size_t count = 0; // number of characters converted with stoi
-
-  // Attempt to use std::stoi, if it fails throw or produce a mooseError
-  try
-  {
-    output = std::stoi(input, &count);
-    if (input.size() != count)
-      throw std::invalid_argument("");
-  }
-  catch (const std::invalid_argument & e)
-  {
-    std::string msg = "Failed to convert '" + input + "' to an int.";
-    if (throw_on_failure)
-      throw std::invalid_argument(msg);
-    else
-      mooseError(msg);
-  }
-  return output;
+  return convert<int>(input, throw_on_failure);
 }
 
 } // MooseUtils namespace
