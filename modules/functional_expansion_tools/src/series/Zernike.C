@@ -8,8 +8,8 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "MooseUtils.h"
-
 #include "Zernike.h"
+#include <functional>
 
 /**
  * The higherst order of Zernike polynomials calculated directly instead of via the recurrence
@@ -19,9 +19,29 @@
 
 Zernike::Zernike() : SingleSeriesBasisInterface() {}
 
-Zernike::Zernike(const std::vector<MooseEnum> & domain, const std::vector<std::size_t> & order)
+Zernike::Zernike(const std::vector<MooseEnum> & domain,
+                 const std::vector<std::size_t> & order,
+                 MooseEnum expansion_type,
+                 MooseEnum generation_type)
   : SingleSeriesBasisInterface(domain, order, calculatedNumberOfTermsBasedOnOrder(order))
 {
+  if (expansion_type == "orthonormal")
+    _evaluateExpansionWrapper = [this]() { this->evaluateOrthonormal(); };
+  else if (expansion_type == "sqrt_mu")
+    _evaluateExpansionWrapper = [this]() { this->evaluateSqrtMu(); };
+  else if (expansion_type == "standard")
+    _evaluateExpansionWrapper = [this]() { this->evaluateStandard(); };
+  else
+    mooseError("The specified type of normalization for expansion does not exist");
+
+  if (generation_type == "orthonormal")
+    _evaluateGenerationWrapper = [this]() { this->evaluateOrthonormal(); };
+  else if (generation_type == "sqrt_mu")
+    _evaluateGenerationWrapper = [this]() { this->evaluateSqrtMu(); };
+  else if (generation_type == "standard")
+    _evaluateGenerationWrapper = [this]() { this->evaluateStandard(); };
+  else
+    mooseError("The specified type of normalization for generation does not exist");
 }
 
 std::size_t
@@ -201,6 +221,25 @@ Zernike::evaluateOrthonormal()
   fillOutNegativeRankAndApplyAzimuthalComponent();
 }
 // clang-format on
+
+void
+Zernike::evaluateSqrtMu()
+{
+  evaluateStandard();
+  save(0, load(0) / std::sqrt(M_PI));
+  size_t j = 1;
+  for (size_t n = 1; n < _orders[0] + 1; ++n)
+  {
+    for (size_t m = 0; m < n + 1; ++m)
+    {
+      if (m != 0 && n / m == 2 && n % m == 0)
+        save(j, load(j) * std::sqrt((n + 1) / M_PI));
+      else
+        save(j, load(j) * std::sqrt((2 * n + 2) / M_PI));
+      ++j;
+    }
+  }
+}
 
 void
 Zernike::evaluateStandard()

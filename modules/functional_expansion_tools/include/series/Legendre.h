@@ -19,7 +19,10 @@ class Legendre final : public SingleSeriesBasisInterface
 {
 public:
   Legendre();
-  Legendre(const std::vector<MooseEnum> & domain, const std::vector<std::size_t> & order);
+  Legendre(const std::vector<MooseEnum> & domain,
+           const std::vector<std::size_t> & order,
+           MooseEnum expansion_type,
+           MooseEnum generation_type);
 
   // Overrides from FunctionalBasisInterface
   virtual Real getStandardizedFunctionVolume() const override;
@@ -31,9 +34,18 @@ public:
   virtual const std::vector<Real> & getStandardizedFunctionLimits() const override;
 
 protected:
-  // Overrides from FunctionalBasisInterface
-  virtual void evaluateOrthonormal() override;
-  virtual void evaluateStandard() override;
+  /**
+   * Evaluates the orthonormal form of the basis functions
+   */
+  virtual void evaluateOrthonormal();
+  /**
+   * Evaluates the standard form of the basis functions
+   */
+  virtual void evaluateStandard();
+  /**
+   * Evaluates the 1/sqrt(mu) normalized form of the basis functions
+   */
+  virtual void evaluateSqrtMu();
 
   // Overrides from SingleSeriesBasisInterface
   virtual void checkPhysicalBounds(const std::vector<Real> & bounds) const override;

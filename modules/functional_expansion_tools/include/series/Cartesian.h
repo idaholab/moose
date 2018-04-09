@@ -23,7 +23,9 @@ public:
   Cartesian(const std::vector<MooseEnum> & domain,
             const std::vector<std::size_t> & order,
             const std::vector<MooseEnum> & series_types,
-            const std::string & who_is_using_me);
+            const std::string & who_is_using_me,
+            MooseEnum expansion_type,
+            MooseEnum generation_type);
 
   // Overrides from FunctionalBasisInterface
   virtual void setPhysicalBounds(const std::vector<Real> & bounds) final;

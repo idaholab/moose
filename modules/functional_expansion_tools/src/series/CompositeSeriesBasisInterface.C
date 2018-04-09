@@ -39,16 +39,16 @@ CompositeSeriesBasisInterface::CompositeSeriesBasisInterface(
 }
 
 void
-CompositeSeriesBasisInterface::evaluateOrthonormal()
+CompositeSeriesBasisInterface::evaluateGeneration()
 {
   /*
-   * Evaluate the orthonormal versions of each of the single series, and collect the results before
+   * Evaluate the generation versions of each of the single series, and collect the results before
    * passing them to evaluateSeries, where they will be multiplied together correctly and stored in
    * the composite series basis evaluation.
    */
   std::vector<std::vector<Real>> single_series_basis_evaluation;
   for (auto & series : _series)
-    single_series_basis_evaluation.push_back(series->getAllOrthonormal());
+    single_series_basis_evaluation.push_back(series->getAllGeneration());
 
   evaluateSeries(single_series_basis_evaluation);
 }
@@ -96,16 +96,16 @@ CompositeSeriesBasisInterface::evaluateSeries(
 }
 
 void
-CompositeSeriesBasisInterface::evaluateStandard()
+CompositeSeriesBasisInterface::evaluateExpansion()
 {
   /*
-   * Evaluate the standard versions of each of the single series, and collect the results before
+   * Evaluate the expansion versions of each of the single series, and collect the results before
    * passing them to evaluateSeries, where they will be multiplied together correctly and stored in
    * the composite series basis evaluation.
    */
   std::vector<std::vector<Real>> single_series_basis_evaluation;
   for (auto & series : _series)
-    single_series_basis_evaluation.push_back(series->getAllStandard());
+    single_series_basis_evaluation.push_back(series->getAllExpansion());
 
   evaluateSeries(single_series_basis_evaluation);
 }

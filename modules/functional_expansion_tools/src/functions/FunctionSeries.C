@@ -58,6 +58,17 @@ validParams<FunctionSeries>()
                              single_series_types_2D,
                              "The series to use for the disc. Its direction is determined by "
                              "orthogonality to the declared direction of the axis.");
+
+  std::string normalization_types = "orthonormal sqrt_mu standard";
+  MooseEnum expansion_type(normalization_types, "standard");
+  MooseEnum generation_type(normalization_types, "orthonormal");
+  params.addParam<MooseEnum>("expansion_type",
+                             expansion_type,
+                             "The normalization used for expansion of the basis functions");
+  params.addParam<MooseEnum>(
+      "generation_type",
+      generation_type,
+      "The normalization used for generation of the basis function coefficients");
   return params;
 }
 
@@ -69,7 +80,9 @@ FunctionSeries::FunctionSeries(const InputParameters & parameters)
     _x(getParam<MooseEnum>("x")),
     _y(getParam<MooseEnum>("y")),
     _z(getParam<MooseEnum>("z")),
-    _disc(getParam<MooseEnum>("disc"))
+    _disc(getParam<MooseEnum>("disc")),
+    _expansion_type(getParam<MooseEnum>("expansion_type")),
+    _generation_type(getParam<MooseEnum>("generation_type"))
 {
   std::vector<MooseEnum> domains;
   std::vector<MooseEnum> types;
@@ -100,7 +113,8 @@ FunctionSeries::FunctionSeries(const InputParameters & parameters)
     }
     if (types.size() == 0)
       mooseError("Must specify one of 'x', 'y', or 'z' for 'Cartesian' series!");
-    _series_type = libmesh_make_unique<Cartesian>(domains, _orders, types, name());
+    _series_type = libmesh_make_unique<Cartesian>(
+        domains, _orders, types, name(), _expansion_type, _generation_type);
   }
   else if (_series_type_name == "CylindricalDuo")
   {
@@ -142,7 +156,8 @@ FunctionSeries::FunctionSeries(const InputParameters & parameters)
       mooseError("Cannot specify more than one of 'x', 'y', or 'z' for 'CylindricalDuo' series!");
 
     types.push_back(_disc);
-    _series_type = libmesh_make_unique<CylindricalDuo>(domains, _orders, types, name());
+    _series_type = libmesh_make_unique<CylindricalDuo>(
+        domains, _orders, types, name(), _expansion_type, _generation_type);
   }
   else
     mooseError("Unknown functional series type \"", _series_type_name, "\"");
@@ -193,25 +208,25 @@ FunctionSeries::getOrders() const
 }
 
 /*
- * getAllOrthonormal() is defined in the FunctionalBasisInterface, which calls the pure virtual
- * evaluateOrthonormal() method of the CompositeSeriesBasisInterface class, which then calls the
- * getAllOrthonormal() method of each of the single series.
+ * getAllGeneration() is defined in the FunctionalBasisInterface, which calls the pure virtual
+ * evaluateGeneration() method of the CompositeSeriesBasisInterface class, which then calls the
+ * getAllGeneration() method of each of the single series.
  */
 const std::vector<Real> &
-FunctionSeries::getOrthonormal()
+FunctionSeries::getGeneration()
 {
-  return _series_type->getAllOrthonormal();
+  return _series_type->getAllGeneration();
 }
 
 /*
- * getAllStandard() is defined in the FunctionalBasisInterface, which calls the pure virtual
- * evaluateStandard() method of the CompositeSeriesBasisInterface class, which then calls the
- * getAllStandard() method of each of the single series.
+ * getAllExpansion() is defined in the FunctionalBasisInterface, which calls the pure virtual
+ * evaluateExpansion() method of the CompositeSeriesBasisInterface class, which then calls the
+ * getAllExpansion() method of each of the single series.
  */
 const std::vector<Real> &
-FunctionSeries::getStandard()
+FunctionSeries::getExpansion()
 {
-  return _series_type->getAllStandard();
+  return _series_type->getAllExpansion();
 }
 
 /*
@@ -254,7 +269,7 @@ Real
 FunctionSeries::expand(const std::vector<Real> & coefficients)
 {
   // Evaluate all of the terms in the series
-  const std::vector<Real> & terms = getStandard();
+  const std::vector<Real> & terms = getExpansion();
 
   return std::inner_product(terms.begin(), terms.end(), coefficients.begin(), 0.0);
 }

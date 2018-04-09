@@ -54,7 +54,7 @@ MultiAppFXTransfer::initialSetup()
       scanProblemBaseForObject(_multi_app->problemBase(), _this_app_object_name, "MultiApp");
   if (getMultiAppObject == NULL)
     mooseError(
-        "Transfer '", name(), "': Cannot find object '", _multi_app_object_name, "' in MultiApp");
+        "Transfer '", name(), "': Cannot find object '", _this_app_object_name, "' in MultiApp");
 
   // Search for the _multi_app_object_name in each of the MultiApps
   for (std::size_t i = 0; i < _multi_app->numGlobalApps(); ++i)
