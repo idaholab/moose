@@ -1,0 +1,7 @@
+[Tests]
+  [./test]
+    type = 'CSVDiff'
+    input = 'histogram_vector_postprocessor.i'
+    csvdiff = 'histogram_vector_postprocessor_out_histo_0001.csv'
+  [../]
+[]
