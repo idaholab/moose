@@ -589,7 +589,7 @@ convertStringToInt(const std::string & str, bool throw_on_failure)
   if ((double_ss >> double_val).fail() || !double_ss.eof())
   {
     std::string msg =
-        std::string("Unable to convert ") + str + " to type " + demangle(typeid(T).name());
+        std::string("Unable to convert '") + str + "' to type " + demangle(typeid(T).name());
 
     if (throw_on_failure)
       throw std::invalid_argument(msg);
@@ -603,7 +603,7 @@ convertStringToInt(const std::string & str, bool throw_on_failure)
   else // Still failure
   {
     std::string msg =
-        std::string("Unable to convert ") + str + " to type " + demangle(typeid(T).name());
+        std::string("Unable to convert '") + str + "' to type " + demangle(typeid(T).name());
 
     if (throw_on_failure)
       throw std::invalid_argument(msg);

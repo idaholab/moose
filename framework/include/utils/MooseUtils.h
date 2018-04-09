@@ -417,7 +417,7 @@ convert(const std::string & str, bool throw_on_failure = false)
   if ((ss >> val).fail() || !ss.eof())
   {
     std::string msg =
-        std::string("Unable to convert ") + str + " to type " + demangle(typeid(T).name());
+        std::string("Unable to convert '") + str + "' to type " + demangle(typeid(T).name());
 
     if (throw_on_failure)
       throw std::invalid_argument(msg);
