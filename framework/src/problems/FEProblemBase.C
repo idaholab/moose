@@ -139,6 +139,11 @@ validParams<FEProblemBase>()
                         false,
                         "True to skip additional data in equation system for restart. It is useful "
                         "for starting a transient calculation with a steady-state solution");
+  params.addParam<bool>(
+      "reset_time_after_restart",
+      false,
+      "True to reset the time to application starting time after restart. It is useful"
+      "for starting a transient calculation from a transient solution being the initial condition");
 
   return params;
 }
@@ -665,6 +670,8 @@ FEProblemBase::initialSetup()
     // for some of the variables which should override what's coming from the restart file
     if (!_app.isRecovering())
     {
+      if (getParam<bool>("reset_time_after_restart"))
+        _time = _time_old = _app.getStartTime();
       for (THREAD_ID tid = 0; tid < n_threads; tid++)
         _ics.initialSetup(tid);
       _scalar_ics.sort();
