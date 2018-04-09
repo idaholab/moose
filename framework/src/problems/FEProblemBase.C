@@ -1743,10 +1743,10 @@ FEProblemBase::addKernel(const std::string & kernel_name,
 
   // Check that "variable" is in the NonlinearSystem.
   if (!_nl->hasVariable(parameters.get<NonlinearVariableName>("variable")))
-    mooseError(name,
-               ": Cannot add Kernel for variable ",
-               parameters.get<NonlinearVariableName>("variable"),
-               ", it is not a nonlinear variable!");
+    mooseError(
+        "Error adding Kernel ",
+        name,
+        ", \"variable\" parameter either missing or does not specify a valid nonlinear variable!");
 
   _nl->addKernel(kernel_name, name, parameters);
 }

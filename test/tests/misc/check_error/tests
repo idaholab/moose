@@ -63,7 +63,7 @@
   [./bad_kernel_var_test]
     type = 'RunException'
     input = 'bad_kernel_var_test.i'
-    expect_err = "Cannot add Kernel for variable foo, it is not a nonlinear variable"
+    expect_err = "Error adding Kernel diff, \"variable\" parameter either missing or does not specify a valid nonlinear variable"
   [../]
 
   [./Badd_material_test]
@@ -348,6 +348,12 @@
     expect_err = "missing required parameter 'Kernels/diff/type'"
   [../]
 
+  [./missing_var_in_kernel_test]
+    type = 'RunException'
+    input = 'missing_var_in_kernel_test.i'
+    expect_err = "Error adding Kernel diff, \"variable\" parameter either missing or does not specify a valid nonlinear variable"
+  [../]
+
   [./missing_required_coupled_test]
     type = 'RunException'
     input = 'missing_required_coupled.i'
@@ -622,7 +628,7 @@
   [./kernel_with_aux_var]
     type = 'RunException'
     input = 'kernel_with_aux_var.i'
-    expect_err = "Cannot add Kernel for variable v, it is not a nonlinear variable"
+    expect_err = "Error adding Kernel rea, \"variable\" parameter either missing or does not specify a valid nonlinear variable"
   [../]
   [./bc_with_aux_var]
     type = 'RunException'
