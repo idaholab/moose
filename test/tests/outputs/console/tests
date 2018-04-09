@@ -161,6 +161,6 @@
     type = RunException
     input = console.i
     cli_args = Outputs/screen/fit_mode=foo
-    expect_err = "Failed to convert 'foo' to an int."
+    expect_err = "Unable to convert 'foo' to type int"
   [../]
 []

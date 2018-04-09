@@ -410,16 +410,48 @@ tokenizeAndConvert(const std::string & str,
  */
 template <typename T>
 T
-convert(const std::string & str)
+convert(const std::string & str, bool throw_on_failure = false)
 {
   std::stringstream ss(str);
   T val;
   if ((ss >> val).fail() || !ss.eof())
-    throw std::runtime_error(std::string("Unable to convert ") + str + " to type " +
-                             demangle(typeid(T).name()));
+  {
+    std::string msg =
+        std::string("Unable to convert '") + str + "' to type " + demangle(typeid(T).name());
+
+    if (throw_on_failure)
+      throw std::invalid_argument(msg);
+    else
+      mooseError(msg);
+  }
 
   return val;
 }
+
+template <>
+short int convert<short int>(const std::string & str, bool throw_on_failure);
+
+template <>
+unsigned short int convert<unsigned short int>(const std::string & str, bool throw_on_failure);
+
+template <>
+int convert<int>(const std::string & str, bool throw_on_failure);
+
+template <>
+unsigned int convert<unsigned int>(const std::string & str, bool throw_on_failure);
+
+template <>
+long int convert<long int>(const std::string & str, bool throw_on_failure);
+
+template <>
+unsigned long int convert<unsigned long int>(const std::string & str, bool throw_on_failure);
+
+template <>
+long long int convert<long long int>(const std::string & str, bool throw_on_failure);
+
+template <>
+unsigned long long int convert<unsigned long long int>(const std::string & str,
+                                                       bool throw_on_failure);
 
 /**
  * Convert supplied string to upper case.

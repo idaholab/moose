@@ -1276,17 +1276,16 @@ Parser::setScalarParameter(const std::string & full_name,
   {
     auto strval = _root->param<std::string>(full_name);
 
-    // handle the case where the user put a number inside quotes - we really shouldn't allow this,
-    // but "backwards compatibility" :-(
+    // handle the case where the user put a number inside quotes
     auto & t = typeid(T);
     if (t == typeid(int) || t == typeid(unsigned int) || t == typeid(SubdomainID) ||
         t == typeid(BoundaryID) || t == typeid(double))
     {
       try
       {
-        param->set() = MooseUtils::convert<T>(strval);
+        param->set() = MooseUtils::convert<T>(strval, true);
       }
-      catch (std::exception & /*e*/)
+      catch (std::invalid_argument & /*e*/)
       {
         const std::string format_type = (t == typeid(double)) ? "float" : "integer";
         _errmsg += errormsg(_input_filename,
