@@ -89,8 +89,13 @@ protected:
   moosecontrib::Json::Value &
   getJson(const std::string & parent, const std::string & path, bool is_type);
   moosecontrib::Json::Value & getJson(const std::string & path);
+  std::string getObjectLabel(const std::string & obj) const;
+  std::string getActionLabel(const std::string & action) const;
+
   moosecontrib::Json::Value _root;
   std::string _search;
+  std::map<std::string, std::string> _action_label_map;
+  std::map<std::string, std::string> _object_label_map;
 };
 
 #endif // JSONSYNTAXTREE_H
