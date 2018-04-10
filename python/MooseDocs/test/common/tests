@@ -35,4 +35,8 @@
     type = PythonUnitTest
     input = test_database.py
   []
+  [get_requirement]
+    type = PythonUnitTest
+    input = test_get_requirements.py
+  []
 []
