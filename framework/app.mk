@@ -187,6 +187,7 @@ all_header_dir := $(APPLICATION_DIR)/build/header_symlinks
 
 link_names := $(foreach i, $(include_files), $(all_header_dir)/$(notdir $(i)))
 
+
 $(eval $(call all_header_dir_rule, $(all_header_dir)))
 $(call symlink_rules, $(all_header_dir), $(include_files))
 
@@ -305,10 +306,47 @@ $(app_test_LIB): $(app_HEADER) $(app_plugin_deps) $(depend_libs) $(app_test_obje
 	@$(libmesh_LIBTOOL) --mode=install --quiet install -c $@ $(curr_dir)/lib
 endif
 
+# For static compiles, there are no references to symbols in the module, etc. object archives outside of
+# themselves.  This causes linkers to omit the symbols from those archives in the final binary
+# which prevents all of the moose objects to not be included/registered in the final binary.  To
+# force this we need to ad special linker flags to static builds.  Dynamic builds are immune since
+# the linker doesn't know what symbols will be needed by any binary that will dynamically link to
+# it in the future - so all symbols remain intact in the dylib/so in that case and are present and
+# registered as expected.  See https://stackoverflow.com/questions/5202142/static-variable-initialization-over-a-library
+# and https://stackoverflow.com/questions/9459980/c-global-variable-not-initialized-when-linked-through-static-libraries-but-ok#11336506
+# for more explanations/details.
+compilertype := unknown
+applibs := $(app_LIBS)
+applibs += $(app_test_LIB)
+ifeq ($(libmesh_static),yes)
+  ifneq (,$(findstring clang,$(CXX)))
+    compilertype := clang
+  else
+  ifneq (,$(findstring g++,$(CXX)))
+    compilertype := gcc
+  else
+  ifneq (,$(findstring mpicxx,$(CXX)))
+    ifneq (,$(findstring clang,$(shell mpicxx -show)))
+      compilertype := clang
+    else
+      compilertype := gcc
+    endif
+  endif
+  endif
+  endif
+
+  ifeq ($(compilertype),clang)
+    # replace .a with .dylib for testing in dynamic configuration:
+    applibs := $(foreach lib,$(patsubst %.la,%.a,$(applibs)),-Wl,-force_load,$(lib))
+  else
+    applibs := $(foreach lib,$(patsubst %.la,%.a,$(applibs)),-Wl,--whole-archive,$(lib),--no-whole-archive)
+  endif
+endif
+
 $(app_EXEC): $(app_LIBS) $(mesh_library) $(main_object) $(app_test_LIB) $(depend_test_libs) $(ADDITIONAL_DEPEND_LIBS)
 	@echo "Linking Executable "$@"..."
 	@$(libmesh_LIBTOOL) --tag=CXX $(LIBTOOLFLAGS) --mode=link --quiet \
-	  $(libmesh_CXX) $(libmesh_CXXFLAGS) -o $@ $(main_object) $(app_test_LIB) $(app_LIBS) $(depend_test_libs) $(libmesh_LIBS) $(libmesh_LDFLAGS) $(depend_test_libs_flags) $(EXTERNAL_FLAGS) $(ADDITIONAL_LIBS)
+	  $(libmesh_CXX) $(libmesh_CXXFLAGS) -o $@ $(main_object) $(applibs) $(depend_test_libs) $(libmesh_LIBS) $(libmesh_LDFLAGS) $(depend_test_libs_flags) $(EXTERNAL_FLAGS) $(ADDITIONAL_LIBS)
 
 # Clang static analyzer
 sa:: $(app_analyzer)
