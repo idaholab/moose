@@ -17,12 +17,33 @@
 #include "pcrecpp.h"
 #include "Action.h"
 #include "AppFactory.h"
+#include "Registry.h"
 
 // C++ includes
 #include <algorithm>
 #include <cctype>
 
-JsonSyntaxTree::JsonSyntaxTree(const std::string & search_string) : _search(search_string) {}
+JsonSyntaxTree::JsonSyntaxTree(const std::string & search_string) : _search(search_string)
+{
+  // Registry holds a map with labels (ie MooseApp) as keys and a vector of RegistryEntry
+  // as values. We need the reverse map: given an action or object name then get the label.
+  auto & actmap = Registry::allActions();
+  for (auto & entry : actmap)
+    for (auto & act : entry.second)
+      _action_label_map[act._classname] = entry.first;
+
+  auto & objmap = Registry::allObjects();
+  for (auto & entry : objmap)
+    for (auto & obj : entry.second)
+    {
+      std::string name = obj._name;
+      if (name.empty())
+        name = obj._alias;
+      if (name.empty())
+        name = obj._classname;
+      _object_label_map[name] = entry.first;
+    }
+}
 
 std::vector<std::string>
 JsonSyntaxTree::splitPath(const std::string & path)
@@ -175,6 +196,7 @@ JsonSyntaxTree::addParameters(const std::string & parent,
     json[action]["parameters"] = all_params;
     json[action]["description"] = params->getClassDescription();
     json[action]["action_path"] = path;
+    json[action]["label"] = getActionLabel(action);
     if (lineinfo.isValid())
       json[action]["file_info"][lineinfo.file()] = lineinfo.line();
   }
@@ -187,6 +209,7 @@ JsonSyntaxTree::addParameters(const std::string & parent,
     json["syntax_path"] = path;
     json["parent_syntax"] = parent;
     json["description"] = params->getClassDescription();
+    json["label"] = getObjectLabel(path);
     if (lineinfo.isValid())
     {
       json["file_info"][lineinfo.file()] = lineinfo.line();
@@ -350,4 +373,25 @@ JsonSyntaxTree::prettyCppType(const std::string & cpp_type)
   // Do it again for nested vectors
   r.GlobalReplace("std::vector<\\1>", &s);
   return s;
+}
+
+std::string
+JsonSyntaxTree::getObjectLabel(const std::string & obj) const
+{
+  auto paths = splitPath(obj);
+  auto it = _object_label_map.find(paths.back());
+  if (it != _object_label_map.end())
+    return it->second;
+  else
+    return "";
+}
+
+std::string
+JsonSyntaxTree::getActionLabel(const std::string & action) const
+{
+  auto it = _action_label_map.find(action);
+  if (it != _action_label_map.end())
+    return it->second;
+  else
+    return "";
 }

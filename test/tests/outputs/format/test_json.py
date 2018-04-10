@@ -108,11 +108,13 @@ class TestJSON(unittest.TestCase):
         self.assertIn("associated_types", f)
         self.assertEquals(["FunctionName"], f["associated_types"])
         self.assertEqual(f["subblock_types"]["ParsedFunction"]["class"], "MooseParsedFunction")
+        self.assertEqual(f["subblock_types"]["ParsedFunction"]["label"], "MooseApp")
 
         a = data["Adaptivity"]
         i = a["subblocks"]["Indicators"]["star"]["subblock_types"]["AnalyticalIndicator"]
         self.assertIn("all", i["parameters"]["outputs"]["reserved_values"])
         self.assertIn("none", i["parameters"]["outputs"]["reserved_values"])
+
 
     def testJson(self):
         """
@@ -125,6 +127,7 @@ class TestJSON(unittest.TestCase):
         self.check_basic_json(data)
         # Make sure the default dump has test objects
         self.assertIn("ApplyInputParametersTest", data)
+        self.assertEqual(data["Functions"]["star"]["subblock_types"]["PostprocessorFunction"]["label"], "MooseTestApp")
 
     def testNoTestObjects(self):
         # Make sure test objects are removed from the output
