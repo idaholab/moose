@@ -56,3 +56,9 @@ MooseVariableBase::order() const
 {
   return _fe_type.order;
 }
+
+bool
+MooseVariableBase::isVector() const
+{
+  return (_fe_type.family == LAGRANGE_VEC || _fe_type.family == NEDELEC_ONE);
+}

@@ -26,7 +26,8 @@ validParams<NodalBC>()
 
 NodalBC::NodalBC(const InputParameters & parameters)
   : NodalBCBase(parameters),
-    MooseVariableInterface<Real>(this, true),
+    MooseVariableInterface<Real>(
+        this, true, Moose::VarKindType::VAR_NONLINEAR, Moose::VarFieldType::VAR_FIELD_STANDARD),
     _var(*mooseVariable()),
     _current_node(_var.node()),
     _u(_var.dofValues())

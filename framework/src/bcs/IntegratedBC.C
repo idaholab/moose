@@ -28,7 +28,8 @@ validParams<IntegratedBC>()
 
 IntegratedBC::IntegratedBC(const InputParameters & parameters)
   : IntegratedBCBase(parameters),
-    MooseVariableInterface<Real>(this, false),
+    MooseVariableInterface<Real>(
+        this, false, Moose::VarKindType::VAR_NONLINEAR, Moose::VarFieldType::VAR_FIELD_STANDARD),
     _var(*mooseVariable()),
     _normals(_var.normals()),
     _phi(_assembly.phiFace(_var)),

@@ -214,8 +214,9 @@ Coupleable::coupled(const std::string & var_name, unsigned int comp)
       return var->number();
     case Moose::VAR_AUXILIARY:
       return std::numeric_limits<unsigned int>::max() - var->number();
+    default:
+      mooseError(_c_name, ": Unknown variable kind. Corrupted binary?");
   }
-  mooseError(_c_name, ": Unknown variable kind. Corrupted binary?");
 }
 
 VariableValue *

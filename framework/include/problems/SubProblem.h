@@ -154,6 +154,15 @@ public:
   /// Returns the variable reference for requested variable which may be in any system
   virtual MooseVariableFEBase & getVariable(THREAD_ID tid, const std::string & var_name) = 0;
 
+  /**
+   * Similar to getVariable, but throws an error if the variable in
+   * question is not in the correct System.
+   */
+  virtual MooseVariableFE & getVariableWithChecks(THREAD_ID tid,
+                                                  const std::string & var_name,
+                                                  Moose::VarKindType expected_var_type,
+                                                  Moose::VarFieldType expected_var_field_type) = 0;
+
   /// Returns the variable reference for requested MooseVariable which may be in any system
   virtual MooseVariable & getStandardVariable(THREAD_ID tid, const std::string & var_name) = 0;
 

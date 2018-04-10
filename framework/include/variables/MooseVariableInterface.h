@@ -31,9 +31,12 @@ public:
    * @param nodal true if the variable is nodal
    * @param var_param_name the parameter name where we will find the coupled variable name
    */
-  MooseVariableInterface(const MooseObject * moose_object,
-                         bool nodal,
-                         std::string var_param_name = "variable");
+  MooseVariableInterface(
+      const MooseObject * moose_object,
+      bool nodal,
+      Moose::VarKindType expected_var_type = Moose::VarKindType::VAR_ANY,
+      Moose::VarFieldType expected_var_field_type = Moose::VarFieldType::VAR_FIELD_STANDARD,
+      std::string var_param_name = "variable");
 
   /**
    * Get the variable that this object is using.
@@ -165,6 +168,15 @@ protected:
 
   /// The variable this object is acting on
   MooseVariableFE<T> * _variable;
+
+  /// The _expected_ type for this variable. For example, if we are a
+  /// base class of Kernel, this will be VAR_NONLINEAR, etc.
+  const Moose::VarKindType _expected_var_type;
+
+  /// The _expected_ "field" type for this variable. For example,
+  /// LAGRANGE variables are of type VAR_FIELD_STANDARD, LAGRANGE_VEC
+  /// variables are of type VAR_FIELD_VECTOR, etc.
+  const Moose::VarFieldType _expected_var_field_type;
 
 protected:
   Assembly * _mvi_assembly;

@@ -23,7 +23,8 @@ validParams<ElementIntegralVariableUserObject>()
 ElementIntegralVariableUserObject::ElementIntegralVariableUserObject(
     const InputParameters & parameters)
   : ElementIntegralUserObject(parameters),
-    MooseVariableInterface<Real>(this, false),
+    MooseVariableInterface<Real>(
+        this, false, Moose::VarKindType::VAR_ANY, Moose::VarFieldType::VAR_FIELD_STANDARD),
     _u(coupledValue("variable")),
     _grad_u(coupledGradient("variable"))
 {

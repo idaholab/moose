@@ -30,7 +30,8 @@ validParams<Kernel>()
 
 Kernel::Kernel(const InputParameters & parameters)
   : KernelBase(parameters),
-    MooseVariableInterface<Real>(this, false),
+    MooseVariableInterface<Real>(
+        this, false, Moose::VarKindType::VAR_NONLINEAR, Moose::VarFieldType::VAR_FIELD_STANDARD),
     _var(*mooseVariable()),
     _test(_var.phi()),
     _grad_test(_var.gradPhi()),

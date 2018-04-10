@@ -12,11 +12,6 @@
   [../]
 []
 
-[AuxVariables]
-  [./v]
-  [../]
-[]
-
 [Kernels]
   [./diff]
     type = Diffusion
@@ -24,18 +19,7 @@
   [../]
   [./rea]
     type = Reaction
-    variable = u
-  [../]
-[]
-
-[InterfaceKernels]
-  [./nope]
-    type = InterfaceDiffusion
-    variable = v
-    neighbor_var = u
-    boundary = 'left'
-    D = 4
-    D_neighbor = 2
+    variable = ''
   [../]
 []
 

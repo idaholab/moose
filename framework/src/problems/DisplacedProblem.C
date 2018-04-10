@@ -312,6 +312,58 @@ DisplacedProblem::getVariable(THREAD_ID tid, const std::string & var_name)
   return _displaced_aux.getVariable(tid, var_name);
 }
 
+MooseVariableFE &
+DisplacedProblem::getVariableWithChecks(THREAD_ID tid,
+                                        const std::string & var_name,
+                                        Moose::VarKindType expected_var_type,
+                                        Moose::VarFieldType expected_var_field_type)
+{
+  // Eventual return value
+  MooseVariableFE * var = nullptr;
+
+  // First check that the variable is found on the expected system.
+  if (expected_var_type == Moose::VarKindType::VAR_ANY)
+    var = &(getVariable(tid, var_name));
+  else if (expected_var_type == Moose::VarKindType::VAR_NONLINEAR &&
+           _displaced_nl.hasVariable(var_name))
+    var = &(_displaced_nl.getVariable(tid, var_name));
+  else if (expected_var_type == Moose::VarKindType::VAR_AUXILIARY &&
+           _displaced_aux.hasVariable(var_name))
+    var = &(_displaced_aux.getVariable(tid, var_name));
+  else
+  {
+    std::string expected_var_type_string =
+        (expected_var_type == Moose::VarKindType::VAR_NONLINEAR ? "nonlinear" : "auxiliary");
+    mooseError("No ",
+               expected_var_type_string,
+               " variable named ",
+               var_name,
+               " found. "
+               "Did you specify an auxiliary variable when you meant to specify a nonlinear "
+               "variable (or vice-versa)?");
+  }
+
+  // Now make sure the var found has the expected field type.
+  bool var_is_vector = var->isVector();
+  if ((var_is_vector && expected_var_field_type == Moose::VarFieldType::VAR_FIELD_VECTOR) ||
+      (!var_is_vector && expected_var_field_type == Moose::VarFieldType::VAR_FIELD_STANDARD))
+    return *var;
+  else
+  {
+    std::string expected_var_field_type_string =
+        (expected_var_field_type == Moose::VarFieldType::VAR_FIELD_STANDARD ? "standard"
+                                                                            : "vector");
+    ;
+    mooseError("No ",
+               expected_var_field_type_string,
+               " variable named ",
+               var_name,
+               " found. "
+               "Did you specify a vector variable when you meant to specify a standard variable "
+               "(or vice-versa)?");
+  }
+}
+
 MooseVariable &
 DisplacedProblem::getStandardVariable(THREAD_ID tid, const std::string & var_name)
 {

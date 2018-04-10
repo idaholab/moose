@@ -17,9 +17,12 @@
 #include "SubProblem.h"
 
 template <typename T>
-NeighborMooseVariableInterface<T>::NeighborMooseVariableInterface(const MooseObject * moose_object,
-                                                                  bool nodal)
-  : MooseVariableInterface<T>(moose_object, nodal)
+NeighborMooseVariableInterface<T>::NeighborMooseVariableInterface(
+    const MooseObject * moose_object,
+    bool nodal,
+    Moose::VarKindType expected_var_type,
+    Moose::VarFieldType expected_var_field_type)
+  : MooseVariableInterface<T>(moose_object, nodal, expected_var_type, expected_var_field_type)
 {
 }
 

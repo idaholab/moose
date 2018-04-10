@@ -1741,13 +1741,6 @@ FEProblemBase::addKernel(const std::string & kernel_name,
     parameters.set<SystemBase *>("_sys") = _nl.get();
   }
 
-  // Check that "variable" is in the NonlinearSystem.
-  if (!_nl->hasVariable(parameters.get<NonlinearVariableName>("variable")))
-    mooseError(
-        "Error adding Kernel ",
-        name,
-        ", \"variable\" parameter either missing or does not specify a valid nonlinear variable!");
-
   _nl->addKernel(kernel_name, name, parameters);
 }
 
@@ -1778,13 +1771,6 @@ FEProblemBase::addNodalKernel(const std::string & kernel_name,
     parameters.set<SystemBase *>("_sys") = _nl.get();
   }
   _nl->addNodalKernel(kernel_name, name, parameters);
-
-  // Check that "variable" is in the NonlinearSystem.
-  if (!_nl->hasVariable(parameters.get<NonlinearVariableName>("variable")))
-    mooseError(name,
-               ": Cannot add NodalKernel for variable ",
-               parameters.get<NonlinearVariableName>("variable"),
-               ", it is not a nonlinear variable!");
 }
 
 void
@@ -1812,13 +1798,6 @@ FEProblemBase::addScalarKernel(const std::string & kernel_name,
     parameters.set<SubProblem *>("_subproblem") = this;
     parameters.set<SystemBase *>("_sys") = _nl.get();
   }
-
-  // Check that "variable" is a Scalar variable on the NonlinearSystem
-  if (!_nl->hasScalarVariable(parameters.get<NonlinearVariableName>("variable")))
-    mooseError(name,
-               ": Cannot add ScalarKernel for variable ",
-               parameters.get<NonlinearVariableName>("variable"),
-               ", it is not a SCALAR variable!");
 
   _nl->addScalarKernel(kernel_name, name, parameters);
 }
@@ -1849,13 +1828,6 @@ FEProblemBase::addBoundaryCondition(const std::string & bc_name,
     parameters.set<SubProblem *>("_subproblem") = this;
     parameters.set<SystemBase *>("_sys") = _nl.get();
   }
-
-  // Check that "variable" is in the NonlinearSystem.
-  if (!_nl->hasVariable(parameters.get<NonlinearVariableName>("variable")))
-    mooseError(name,
-               ": Cannot add BoundaryCondition for variable ",
-               parameters.get<NonlinearVariableName>("variable"),
-               ", it is not a nonlinear variable!");
 
   _nl->addBoundaryCondition(bc_name, name, parameters);
 }
@@ -1956,13 +1928,6 @@ FEProblemBase::addAuxKernel(const std::string & kernel_name,
     parameters.set<SystemBase *>("_nl_sys") = _nl.get();
   }
 
-  // Check that "variable" is in the AuxiliarySystem.
-  if (!_aux->hasVariable(parameters.get<AuxVariableName>("variable")))
-    mooseError(name,
-               ": Cannot add AuxKernel for variable ",
-               parameters.get<AuxVariableName>("variable"),
-               ", it is not an auxiliary variable!");
-
   _aux->addKernel(kernel_name, name, parameters);
 }
 
@@ -1991,13 +1956,6 @@ FEProblemBase::addAuxScalarKernel(const std::string & kernel_name,
     parameters.set<SubProblem *>("_subproblem") = this;
     parameters.set<SystemBase *>("_sys") = _aux.get();
   }
-
-  // Check that "variable" is in the AuxiliarySystem.
-  if (!_aux->hasScalarVariable(parameters.get<AuxVariableName>("variable")))
-    mooseError(name,
-               ": Cannot add AuxScalarKernel for variable ",
-               parameters.get<AuxVariableName>("variable"),
-               ", it is not a SCALAR auxiliary variable!");
 
   _aux->addScalarKernel(kernel_name, name, parameters);
 }
@@ -2028,13 +1986,6 @@ FEProblemBase::addDiracKernel(const std::string & kernel_name,
     parameters.set<SubProblem *>("_subproblem") = this;
     parameters.set<SystemBase *>("_sys") = _nl.get();
   }
-
-  // Check that "variable" is in the NonlinearSystem.
-  if (!_nl->hasVariable(parameters.get<NonlinearVariableName>("variable")))
-    mooseError(name,
-               ": Cannot add DiracKernel for variable ",
-               parameters.get<NonlinearVariableName>("variable"),
-               ", it is not a nonlinear variable!");
 
   _nl->addDiracKernel(kernel_name, name, parameters);
 }
@@ -2067,13 +2018,6 @@ FEProblemBase::addDGKernel(const std::string & dg_kernel_name,
     parameters.set<SubProblem *>("_subproblem") = this;
     parameters.set<SystemBase *>("_sys") = _nl.get();
   }
-
-  // Check that "variable" is in the NonlinearSystem.
-  if (!_nl->hasVariable(parameters.get<NonlinearVariableName>("variable")))
-    mooseError(name,
-               ": Cannot add DGKernel for variable ",
-               parameters.get<NonlinearVariableName>("variable"),
-               ", it is not a nonlinear variable!");
 
   _nl->addDGKernel(dg_kernel_name, name, parameters);
 
@@ -2108,13 +2052,6 @@ FEProblemBase::addInterfaceKernel(const std::string & interface_kernel_name,
     parameters.set<SubProblem *>("_subproblem") = this;
     parameters.set<SystemBase *>("_sys") = _nl.get();
   }
-
-  // Check that "variable" is in the NonlinearSystem.
-  if (!_nl->hasVariable(parameters.get<NonlinearVariableName>("variable")))
-    mooseError(name,
-               ": Cannot add InterfaceKernel for variable ",
-               parameters.get<NonlinearVariableName>("variable"),
-               ", it is not a nonlinear variable!");
 
   _nl->addInterfaceKernel(interface_kernel_name, name, parameters);
 
@@ -3505,6 +3442,56 @@ FEProblemBase::getVariable(THREAD_ID tid, const std::string & var_name)
     mooseError("Unknown variable " + var_name);
 
   return _aux->getVariable(tid, var_name);
+}
+
+MooseVariableFE &
+FEProblemBase::getVariableWithChecks(THREAD_ID tid,
+                                     const std::string & var_name,
+                                     Moose::VarKindType expected_var_type,
+                                     Moose::VarFieldType expected_var_field_type)
+{
+  // Eventual return value
+  MooseVariableFE * var = nullptr;
+
+  // First check that the variable is found on the expected system.
+  if (expected_var_type == Moose::VarKindType::VAR_ANY)
+    var = &(getVariable(tid, var_name));
+  else if (expected_var_type == Moose::VarKindType::VAR_NONLINEAR && _nl->hasVariable(var_name))
+    var = &(_nl->getVariable(tid, var_name));
+  else if (expected_var_type == Moose::VarKindType::VAR_AUXILIARY && _aux->hasVariable(var_name))
+    var = &(_aux->getVariable(tid, var_name));
+  else
+  {
+    std::string expected_var_type_string =
+        (expected_var_type == Moose::VarKindType::VAR_NONLINEAR ? "nonlinear" : "auxiliary");
+    mooseError("No ",
+               expected_var_type_string,
+               " variable named ",
+               var_name,
+               " found. "
+               "Did you specify an auxiliary variable when you meant to specify a nonlinear "
+               "variable (or vice-versa)?");
+  }
+
+  // Now make sure the var found has the expected field type.
+  bool var_is_vector = var->isVector();
+  if ((var_is_vector && expected_var_field_type == Moose::VarFieldType::VAR_FIELD_VECTOR) ||
+      (!var_is_vector && expected_var_field_type == Moose::VarFieldType::VAR_FIELD_STANDARD))
+    return *var;
+  else
+  {
+    std::string expected_var_field_type_string =
+        (expected_var_field_type == Moose::VarFieldType::VAR_FIELD_STANDARD ? "standard"
+                                                                            : "vector");
+    ;
+    mooseError("No ",
+               expected_var_field_type_string,
+               " variable named ",
+               var_name,
+               " found. "
+               "Did you specify a vector variable when you meant to specify a standard variable "
+               "(or vice-versa)?");
+  }
 }
 
 MooseVariable &

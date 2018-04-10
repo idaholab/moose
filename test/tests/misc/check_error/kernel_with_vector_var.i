@@ -8,12 +8,7 @@
 [Variables]
   [./u]
     order = FIRST
-    family = LAGRANGE
-  [../]
-[]
-
-[AuxVariables]
-  [./v]
+    family = LAGRANGE_VEC
   [../]
 []
 
@@ -21,21 +16,6 @@
   [./diff]
     type = Diffusion
     variable = u
-  [../]
-  [./rea]
-    type = Reaction
-    variable = u
-  [../]
-[]
-
-[InterfaceKernels]
-  [./nope]
-    type = InterfaceDiffusion
-    variable = v
-    neighbor_var = u
-    boundary = 'left'
-    D = 4
-    D_neighbor = 2
   [../]
 []
 

@@ -50,7 +50,8 @@ DiracKernel::DiracKernel(const InputParameters & parameters)
   : MooseObject(parameters),
     SetupInterface(this),
     CoupleableMooseVariableDependencyIntermediateInterface(this, false),
-    MooseVariableInterface<Real>(this, false),
+    MooseVariableInterface<Real>(
+        this, false, Moose::VarKindType::VAR_NONLINEAR, Moose::VarFieldType::VAR_FIELD_STANDARD),
     FunctionInterface(this),
     UserObjectInterface(this),
     TransientInterface(this),
