@@ -149,11 +149,16 @@ h1, h2, h3, h4, h5, h6 {
 body{
     counter-reset:h2count;
 }
+
 h1 {
     font-size:200%;
     font-weight:500;
-    margin-top:0;
+    margin-top:24px;
     margin-bottom: 12px;
+}
+
+h1:first-of-type{
+    margin-top:48px;
 }
 
 h2 {
