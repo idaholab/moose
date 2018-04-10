@@ -42,11 +42,3 @@ NodalBCBase::NodalBCBase(const InputParameters & parameters)
     _is_eigen(false)
 {
 }
-
-void
-NodalBCBase::computeResidual(NumericVector<Number> & /*residual*/)
-{
-  mooseDeprecated("Please use computeResidual()");
-
-  computeResidual();
-}

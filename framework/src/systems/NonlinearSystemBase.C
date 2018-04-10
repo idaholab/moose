@@ -1361,7 +1361,13 @@ NonlinearSystemBase::computeNodalBCs(const std::set<TagID> & tags)
             const auto & bcs = nbc_warehouse->getActiveBoundaryObjects(boundary_id);
             for (const auto & nbc : bcs)
               if (nbc->shouldApply())
+              {
                 nbc->computeResidual();
+                // This is used to have a backward compatibility, we should remove it
+                // as soon as possible
+                if (hasVector(residualVectorTag()))
+                  nbc->computeResidual(getVector(residualVectorTag()));
+              }
           }
         }
       }
