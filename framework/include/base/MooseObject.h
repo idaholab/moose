@@ -97,6 +97,37 @@ public:
     mooseError(prefix, args...);
   }
 
+  /**
+   * Emits a warning prefixed with the file and line number of the given param (from the input
+   * file) along with the full parameter path+name followed by the given args as the message.
+   * If this object's parameters were not created directly by the Parser, then this function falls
+   * back to the normal behavior of mooseWarning - only printing a message using the given args.
+   */
+  template <typename... Args>
+  void paramWarning(const std::string & param, Args... args)
+  {
+    auto prefix = param + ": ";
+    if (!_pars.inputLocation(param).empty())
+      prefix = _pars.inputLocation(param) + ": (" + _pars.paramFullpath(param) + ") ";
+    mooseWarning(prefix, args...);
+  }
+
+  /**
+   * Emits an informational message prefixed with the file and line number of the given param
+   * (from the input file) along with the full parameter path+name followed by the given args as
+   * the message.  If this object's parameters were not created directly by the Parser, then this
+   * function falls back to the normal behavior of mooseInfo - only printing a message using
+   * the given args.
+   */
+  template <typename... Args>
+  void paramInfo(const std::string & param, Args... args)
+  {
+    auto prefix = param + ": ";
+    if (!_pars.inputLocation(param).empty())
+      prefix = _pars.inputLocation(param) + ": (" + _pars.paramFullpath(param) + ") ";
+    mooseInfo(prefix, args...);
+  }
+
   template <typename... Args>
   [[noreturn]] void mooseError(Args &&... args) const
   {
