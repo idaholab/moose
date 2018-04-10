@@ -1,0 +1,57 @@
+#include "AbsorbingBC.h"
+#include "Function.h"
+#include <complex>
+
+template <>
+InputParameters
+validParams<AbsorbingBC>()
+{
+  InputParameters params = validParams<IntegratedBC>();
+
+  params.addRequiredCoupledVar("field_real", "Real component of field.");
+  params.addRequiredCoupledVar("field_imaginary", "Imaginary component of field.");
+  MooseEnum component("imaginary real", "real");
+  params.addParam<MooseEnum>("component", component, "Real or Imaginary wave component.");
+  params.addParam<FunctionName>("func_real", 1.0, "Function coefficient, real component.");
+  params.addParam<FunctionName>("func_imag", 0.0, "Function coefficient, imaginary component.");
+  params.addParam<Real>("coeff_real", 1.0, "Constant coefficient, real component.");
+  params.addParam<Real>("coeff_imag", 0.0, "Constant coefficient, real component.");
+  params.addParam<Real>("sign", 1.0, "Sign of term in weak form.");
+  return params;
+}
+
+AbsorbingBC::AbsorbingBC(const InputParameters & parameters)
+  : IntegratedBC(parameters),
+
+    _field_real(coupledValue("field_real")),
+    _field_imag(coupledValue("field_imaginary")),
+    _component(getParam<MooseEnum>("component")),
+    _func_real(getFunction("func_real")),
+    _func_imag(getFunction("func_imag")),
+    _coeff_real(getParam<Real>("coeff_real")),
+    _coeff_imag(getParam<Real>("coeff_imag")),
+    _sign(getParam<Real>("sign"))
+{
+}
+
+Real
+AbsorbingBC::computeQpResidual()
+{
+
+  std::complex<double> _field(_field_real[_qp], _field_imag[_qp]);
+  std::complex<double> _func(_func_real.value(_t, _q_point[_qp]),
+                             _func_imag.value(_t, _q_point[_qp]));
+  std::complex<double> _coeff(_coeff_real, _coeff_imag);
+  std::complex<double> _j(0, 1);
+
+  std::complex<double> _val = -_j * _coeff * _func * _field;
+
+  if (_component == "real")
+  {
+    return _sign * _test[_i][_qp] * _val.real();
+  }
+  else
+  {
+    return _sign * _test[_i][_qp] * _val.imag();
+  }
+}

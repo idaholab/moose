@@ -1,0 +1,7 @@
+[Tests]
+  [./test]
+    type = 'Exodiff'
+    input = 'waveguide2D_test.i'
+    exodiff = 'waveguide2D_test_out.e'
+  [../]
+[]
