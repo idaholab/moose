@@ -1,8 +1,11 @@
 #pylint: disable=missing-docstring
 import os
 import collections
+import logging
 
 import mooseutils
+
+LOG = logging.getLogger(__name__)
 
 class Requirement(object):
     """struct for storing Requirement information."""
@@ -40,13 +43,32 @@ def get_requirements(directories, specs):
 def _add_requirements(out, location, filename):
     """Opens tests specification and extracts requirement items."""
     root = mooseutils.hit_load(filename)
+    design = root.children[0].get('design', None)
+    issues = root.children[0].get('issues', None)
     for child in root.children[0]:
-        if ('requirement' in child) and ('design' in child) and ('issues' in child):
+        if 'requirement' in child:
+
+            local_design = child.get('design', design)
+            if local_design is None:
+                msg = "The 'design' parameter is missing from '%s' in %s. It must be defined at " \
+                      "the top level and/or within the individual test specification. It " \
+                      "should contain a space separated list of filenames."
+                LOG.error(msg, child.name, filename)
+                local_design = ''
+
+            local_issues = child.get('issues', issues)
+            if local_issues is None:
+                msg = "The 'issues' parameter is missing from '%s' in %s. It must be defined at " \
+                      "the top level and/or within the individual test specification. It " \
+                      "should contain a space separated list of issue numbers (include the #)."
+                LOG.error(msg, child.name, filename)
+                local_issues = ''
+
             req = Requirement(name=child.name,
                               path=os.path.relpath(os.path.dirname(filename), location),
                               filename=filename,
                               text=unicode(child['requirement']),
-                              design=child['design'].split(),
-                              issues=child['issues'].split())
+                              design=local_design.split(),
+                              issues=local_issues.split())
             group = os.path.relpath(filename, location).split('/')[0]
             out[group].append(req)
