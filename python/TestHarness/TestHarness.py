@@ -540,7 +540,7 @@ class TestHarness:
 
         # Alert the user to their session file
         if self.options.queueing:
-            print 'Your session file is %s' % self.options.session_file
+            print('Your session file is %s' % self.options.session_file)
 
         # Print a different footer when performing a dry run
         if self.options.dry_run:
