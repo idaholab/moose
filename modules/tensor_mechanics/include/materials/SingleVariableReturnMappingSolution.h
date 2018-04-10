@@ -45,11 +45,24 @@ protected:
                           const ConsoleStream & console);
 
   /**
+   * Compute the minimum permissible value of the scalar.  For some models, the magnitude
+   * of this may be known.
+   * @param effective_trial_stress Effective trial stress
+   */
+  virtual Real minimumPermissibleValue(const Real effective_trial_stress) const;
+
+  /**
    * Compute the maximum permissible value of the scalar.  For some models, the magnitude
    * of this may be known.
    * @param effective_trial_stress Effective trial stress
    */
   virtual Real maximumPermissibleValue(const Real effective_trial_stress) const;
+
+  /**
+   * Compute the initial guessed value of the scalar.
+   * @param effective_trial_stress Effective trial stress
+   */
+  virtual Real initialGuess(const Real /*effective_trial_stress*/) const { return 0.0; }
 
   /**
    * Compute the residual for a predicted value of the scalar.  This residual should be

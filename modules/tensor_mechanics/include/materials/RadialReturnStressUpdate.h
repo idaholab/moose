@@ -64,6 +64,11 @@ public:
   virtual Real computeReferenceResidual(const Real effective_trial_stress,
                                         const Real scalar_effective_inelastic_strain) override;
 
+  virtual Real minimumPermissibleValue(const Real /*effective_trial_stress*/) const override
+  {
+    return 0.0;
+  }
+
   virtual Real maximumPermissibleValue(const Real effective_trial_stress) const override;
 
   /**
