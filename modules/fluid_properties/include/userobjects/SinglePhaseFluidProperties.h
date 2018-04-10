@@ -220,6 +220,25 @@ public:
   virtual void rho_from_p_T(Real p, Real T, Real & rho, Real & drho_dp, Real & drho_dT) const = 0;
 
   /**
+   * Specific volume from pressure and temperature
+   *
+   * @param[in] p   pressure
+   * @param[in] T   temperature
+   */
+  virtual Real v_from_p_T(Real p, Real T) const;
+
+  /**
+   * Specific volume and its derivatives from pressure and temperature
+   *
+   * @param[in] p          pressure
+   * @param[in] T          temperature
+   * @param[out] v         specific volume
+   * @param[out] dv_dp     derivative of specific volume w.r.t. pressure
+   * @param[out] dv_dT     derivative of specific volume w.r.t. temperature
+   */
+  virtual void v_from_p_T(Real p, Real T, Real & v, Real & dv_dp, Real & dv_dT) const;
+
+  /**
    * Specific internal energy from pressure and density
    *
    * @param[in] p     pressure

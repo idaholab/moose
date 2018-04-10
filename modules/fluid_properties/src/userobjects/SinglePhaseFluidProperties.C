@@ -57,6 +57,26 @@ SinglePhaseFluidProperties::e_from_p_T(Real p, Real T, Real & e, Real & de_dp, R
 }
 
 Real
+SinglePhaseFluidProperties::v_from_p_T(Real p, Real T) const
+{
+  Real rho = rho_from_p_T(p, T);
+  return 1.0 / rho;
+}
+
+void
+SinglePhaseFluidProperties::v_from_p_T(Real p, Real T, Real & v, Real & dv_dp, Real & dv_dT) const
+{
+  Real rho, drho_dp, drho_dT;
+  rho_from_p_T(p, T, rho, drho_dp, drho_dT);
+
+  v = 1.0 / rho;
+  const Real dv_drho = -1.0 / (rho * rho);
+
+  dv_dp = dv_drho * drho_dp;
+  dv_dT = dv_drho * drho_dT;
+}
+
+Real
 SinglePhaseFluidProperties::beta_from_p_T(Real p, Real T) const
 {
   // The volumetric thermal expansion coefficient is defined as
