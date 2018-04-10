@@ -192,12 +192,14 @@
     use_displaced_mesh = false
     variable = disp_x
     alpha = 1e8
+    geometric_cut_userobject = 'level_set_cut_uo'
   [../]
   [./dispy_constraint]
     type = XFEMSingleVariableConstraint
     use_displaced_mesh = false
     variable = disp_y
     alpha = 1e8
+    geometric_cut_userobject = 'level_set_cut_uo'
   [../]
 []
 

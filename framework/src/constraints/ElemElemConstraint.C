@@ -33,6 +33,7 @@ ElemElemConstraint::ElemElemConstraint(const InputParameters & parameters)
     NeighborMooseVariableInterface<Real>(this, false),
     _fe_problem(*getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")),
     _dim(_mesh.dimension()),
+    _interface_id(getParam<unsigned int>("interface_id")),
 
     _current_elem(_assembly.elem()),
 

@@ -17,6 +17,8 @@
 #include "XFEMAppTypes.h"
 #include "EFAElement2D.h"
 #include "EFAElement3D.h"
+#include "XFEMElementPairLocator.h"
+#include "DisplacedProblem.h"
 
 template <>
 InputParameters
@@ -24,6 +26,7 @@ validParams<GeometricCutUserObject>()
 {
   InputParameters params = validParams<CrackFrontPointsProvider>();
   params.addClassDescription("Base UserObject class for XFEM Geometric Cuts");
+  params.addParam<bool>("heal_always", false, "Heal previous cuts at every time step");
   ExecFlagEnum & exec = params.set<ExecFlagEnum>("execute_on");
   exec.addAvailableFlags(EXEC_XFEM_MARK);
   params.setDocString("execute_on", exec.getDocString());
@@ -34,14 +37,23 @@ validParams<GeometricCutUserObject>()
 }
 
 GeometricCutUserObject::GeometricCutUserObject(const InputParameters & parameters)
-  : CrackFrontPointsProvider(parameters)
+  : CrackFrontPointsProvider(parameters), _heal_always(getParam<bool>("heal_always"))
 {
-  FEProblemBase * fe_problem = dynamic_cast<FEProblemBase *>(&_subproblem);
-  if (fe_problem == NULL)
-    mooseError("Problem casting _subproblem to FEProblemBase in XFEMMaterialStateMarkerBase");
-  _xfem = MooseSharedNamespace::dynamic_pointer_cast<XFEM>(fe_problem->getXFEM());
-  if (_xfem == NULL)
-    mooseError("Problem casting to XFEM in XFEMMaterialStateMarkerBase");
+  _xfem = MooseSharedNamespace::dynamic_pointer_cast<XFEM>(_fe_problem.getXFEM());
+  if (_xfem == nullptr)
+    mooseError("Problem casting to XFEM in GeometricCutUserObject");
+
+  _xfem->addGeometricCut(this);
+
+  auto new_xfem_epl = std::make_shared<XFEMElementPairLocator>(_xfem, _interface_id);
+  _fe_problem.geomSearchData().addElementPairLocator(_interface_id, new_xfem_epl);
+
+  if (_fe_problem.getDisplacedProblem() != NULL)
+  {
+    auto new_xfem_epl2 = std::make_shared<XFEMElementPairLocator>(_xfem, _interface_id, true);
+    _fe_problem.getDisplacedProblem()->geomSearchData().addElementPairLocator(_interface_id,
+                                                                              new_xfem_epl2);
+  }
 }
 
 void
@@ -262,11 +274,11 @@ GeometricCutUserObject::finalize()
 
   for (const auto & it : _marked_elems_2d)
     for (const auto & gmei : it.second)
-      _xfem->addGeomMarkedElem2D(it.first, gmei);
+      _xfem->addGeomMarkedElem2D(it.first, gmei, _interface_id);
 
   for (const auto & it : _marked_elems_3d)
     for (const auto & gmei : it.second)
-      _xfem->addGeomMarkedElem3D(it.first, gmei);
+      _xfem->addGeomMarkedElem3D(it.first, gmei, _interface_id);
 
   _marked_elems_2d.clear();
   _marked_elems_3d.clear();

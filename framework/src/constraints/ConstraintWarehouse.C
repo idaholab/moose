@@ -58,7 +58,7 @@ ConstraintWarehouse::addObject(std::shared_ptr<Constraint> object,
   {
     bool displaced = ec->parameters().have_parameter<bool>("use_displaced_mesh") &&
                      ec->getParam<bool>("use_displaced_mesh");
-    const InterfaceID interface_id = ec->getParam<InterfaceID>("interface_id");
+    const InterfaceID interface_id = ec->getInterfaceID();
 
     if (displaced)
       _displaced_element_constraints[interface_id].addObject(ec);

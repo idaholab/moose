@@ -491,7 +491,7 @@ Assembly::reinitFE(const Elem * elem)
       const_cast<std::vector<Point> &>((*_holder_fe_helper[dim])->get_xyz()));
   _current_JxW.shallowCopy(const_cast<std::vector<Real> &>((*_holder_fe_helper[dim])->get_JxW()));
 
-  if (_xfem != NULL)
+  if (_xfem != nullptr)
     modifyWeightsDueToXFEM(elem);
 }
 
@@ -547,7 +547,7 @@ Assembly::reinitFEFace(const Elem * elem, unsigned int side)
   _current_normals.shallowCopy(
       const_cast<std::vector<Point> &>((*_holder_fe_face_helper[dim])->get_normals()));
 
-  if (_xfem != NULL)
+  if (_xfem != nullptr)
     modifyFaceWeightsDueToXFEM(elem, side);
 }
 
@@ -2069,7 +2069,7 @@ Assembly::clearCachedJacobianContributions()
 void
 Assembly::modifyWeightsDueToXFEM(const Elem * elem)
 {
-  mooseAssert(_xfem != NULL, "This function should not be called if xfem is inactive");
+  mooseAssert(_xfem != nullptr, "This function should not be called if xfem is inactive");
 
   if (_current_qrule == _current_qrule_arbitrary)
     return;
@@ -2089,7 +2089,7 @@ Assembly::modifyWeightsDueToXFEM(const Elem * elem)
 void
 Assembly::modifyFaceWeightsDueToXFEM(const Elem * elem, unsigned int side)
 {
-  mooseAssert(_xfem != NULL, "This function should not be called if xfem is inactive");
+  mooseAssert(_xfem != nullptr, "This function should not be called if xfem is inactive");
 
   if (_current_qrule_face == _current_qrule_arbitrary)
     return;

@@ -17,6 +17,8 @@
 // Forward Declarations
 class XFEMSingleVariableConstraint;
 
+class XFEM;
+
 template <>
 InputParameters validParams<XFEMSingleVariableConstraint>();
 
@@ -27,20 +29,11 @@ public:
   virtual ~XFEMSingleVariableConstraint();
 
 protected:
-  /**
-   * Set information needed for constraint integration
-   */
-  virtual void reinitConstraintQuadrature(const ElementPairInfo & element_pair_info);
+  virtual void reinitConstraintQuadrature(const ElementPairInfo & element_pair_info) override;
 
-  /**
-   *  Compute the residual for one of the constraint quadrature points.
-   */
-  virtual Real computeQpResidual(Moose::DGResidualType type);
+  virtual Real computeQpResidual(Moose::DGResidualType type) override;
 
-  /**
-   *  Compute the Jacobian for one of the constraint quadrature points.
-   */
-  virtual Real computeQpJacobian(Moose::DGJacobianType type);
+  virtual Real computeQpJacobian(Moose::DGJacobianType type) override;
 
   /// Vector normal to the internal interface
   Point _interface_normal;
@@ -56,6 +49,9 @@ protected:
 
   /// Use penalty formulation
   bool _use_penalty;
+
+  /// Pointer to the XFEM controller object
+  std::shared_ptr<XFEM> _xfem;
 };
 
 #endif /* XFEMEQUALVALUECONSTRAINT_H_ */

@@ -1,0 +1,17 @@
+[Tests]
+  [./moving_interface]
+    type = Exodiff
+    input = moving_level_set.i
+    exodiff = 'moving_level_set_out.e moving_level_set_out.e-s002 moving_level_set_out.e-s003'
+    map = false
+    unique_id = true
+  [../]
+  [./moving_bimaterials]
+    type = Exodiff
+    input = moving_bimaterial.i
+    exodiff = 'moving_bimaterial_out.e moving_bimaterial_out.e-s002'
+    map = false
+    unique_id = true
+  [../]
+
+[]

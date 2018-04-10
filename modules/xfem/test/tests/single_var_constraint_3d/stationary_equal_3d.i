@@ -51,6 +51,7 @@
     variable = u
     jump = 0
     jump_flux = 0
+    geometric_cut_userobject = 'square_planar_cut_uo'
   [../]
 []
 

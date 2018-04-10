@@ -27,7 +27,7 @@ XFEMMarkerAux::XFEMMarkerAux(const InputParameters & parameters) : AuxKernel(par
   if (fe_problem == NULL)
     mooseError("Problem casting _subproblem to FEProblemBase in XFEMMarkerAux");
   _xfem = MooseSharedNamespace::dynamic_pointer_cast<XFEM>(fe_problem->getXFEM());
-  if (_xfem == NULL)
+  if (_xfem == nullptr)
     mooseError("Problem casting to XFEM in XFEMMarkerAux");
   if (isNodal())
     mooseError("XFEMMarkerAux can only be run on an element variable");

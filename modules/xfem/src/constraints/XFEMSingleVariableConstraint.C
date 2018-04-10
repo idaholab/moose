@@ -13,6 +13,8 @@
 #include "Assembly.h"
 #include "ElementPairInfo.h"
 #include "FEProblem.h"
+#include "GeometricCutUserObject.h"
+#include "XFEM.h"
 
 #include "libmesh/quadrature.h"
 
@@ -26,6 +28,9 @@ validParams<XFEMSingleVariableConstraint>()
   params.addParam<Real>("alpha", 100, "Stablization parameter in Nitsche's formulation.");
   params.addParam<Real>("jump", 0, "Jump at the interface.");
   params.addParam<Real>("jump_flux", 0, "Flux jump at the interface.");
+  params.addParam<UserObjectName>(
+      "geometric_cut_userobject",
+      "Name of GeometricCutUserObject associated with this constraint.");
   params.addParam<bool>(
       "use_penalty",
       false,
@@ -40,6 +45,17 @@ XFEMSingleVariableConstraint::XFEMSingleVariableConstraint(const InputParameters
     _jump_flux(getParam<Real>("jump_flux")),
     _use_penalty(getParam<bool>("use_penalty"))
 {
+  _xfem = std::dynamic_pointer_cast<XFEM>(_fe_problem.getXFEM());
+  if (_xfem == nullptr)
+    mooseError("Problem casting to XFEM in XFEMSingleVariableConstraint");
+
+  const UserObject * uo =
+      &(_fe_problem.getUserObjectBase(getParam<UserObjectName>("geometric_cut_userobject")));
+
+  if (dynamic_cast<const GeometricCutUserObject *>(uo) == nullptr)
+    mooseError("UserObject casting to GeometricCutUserObject in XFEMSingleVariableConstraint");
+
+  _interface_id = _xfem->getGeometricCutID(dynamic_cast<const GeometricCutUserObject *>(uo));
 }
 
 XFEMSingleVariableConstraint::~XFEMSingleVariableConstraint() {}

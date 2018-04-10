@@ -80,6 +80,7 @@
     use_penalty = true
     alpha = 1.0e8
     use_displaced_mesh = true
+    geometric_cut_userobject = 'line_seg_cut_uo'
   [../]
   [./disp_y]
     type = XFEMSingleVariableConstraint
@@ -87,6 +88,7 @@
     use_penalty = true
     alpha = 1.0e8
     use_displaced_mesh = true
+    geometric_cut_userobject = 'line_seg_cut_uo'
   [../]
 []
 
