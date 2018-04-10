@@ -30,7 +30,7 @@ public:
                                                                  bool neighbor_nodal)
     : NeighborCoupleable(moose_object, nodal, neighbor_nodal), ScalarCoupleable(moose_object)
   {
-    for (MooseVariableFE * coupled_var : getCoupledMooseVars())
+    for (MooseVariableFEBase * coupled_var : getCoupledMooseVars())
       addMooseVariableDependency(coupled_var);
   }
 };

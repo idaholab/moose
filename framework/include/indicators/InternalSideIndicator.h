@@ -51,7 +51,7 @@ public:
   virtual void finalize() override;
 
 protected:
-  MooseVariableFE & _field_var;
+  MooseVariableFEBase & _field_var;
 
   const Elem *& _current_elem;
   /// The neighboring element

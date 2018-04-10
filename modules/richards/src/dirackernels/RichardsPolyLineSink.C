@@ -84,7 +84,7 @@ RichardsPolyLineSink::RichardsPolyLineSink(const InputParameters & parameters)
 
   // To correctly compute the Jacobian terms,
   // tell MOOSE that this DiracKernel depends on all the Richards Vars
-  const std::vector<MooseVariableFE *> & coupled_vars = _richards_name_UO.getCoupledMooseVars();
+  const std::vector<MooseVariableFEBase *> & coupled_vars = _richards_name_UO.getCoupledMooseVars();
   for (unsigned int i = 0; i < coupled_vars.size(); i++)
     addMooseVariableDependency(coupled_vars[i]);
 }

@@ -126,7 +126,7 @@ IntegratedBC::computeJacobian()
 }
 
 void
-IntegratedBC::computeJacobianBlock(MooseVariableFE & jvar)
+IntegratedBC::computeJacobianBlock(MooseVariableFEBase & jvar)
 {
   size_t jvar_num = jvar.number();
   DenseMatrix<Number> & ke = _assembly.jacobianBlock(_var.number(), jvar_num);
@@ -146,7 +146,7 @@ void
 IntegratedBC::computeJacobianBlock(unsigned int jvar)
 {
   mooseDeprecated("The computeOffDiagJacobian method signature has changed. Developers, please "
-                  "pass in a MooseVariableFE reference instead of the variable number");
+                  "pass in a MooseVariableFEBase reference instead of the variable number");
   DenseMatrix<Number> & ke = _assembly.jacobianBlock(_var.number(), jvar);
 
   for (_qp = 0; _qp < _qrule->n_points(); _qp++)

@@ -21,7 +21,7 @@ class MooseMesh;
 class SubProblem;
 class Factory;
 class Assembly;
-class MooseVariableFE;
+class MooseVariableFEBase;
 class MooseVariableScalar;
 template <typename>
 class MooseVariableFEImpl;
@@ -72,7 +72,7 @@ public:
   virtual bool hasVariable(const std::string & var_name) const = 0;
 
   /// Returns the variable reference for requested variable which may be in any system
-  virtual MooseVariableFE & getVariable(THREAD_ID tid, const std::string & var_name) = 0;
+  virtual MooseVariableFEBase & getVariable(THREAD_ID tid, const std::string & var_name) = 0;
 
   /// Returns the variable reference for requested MooseVariable which may be in any system
   virtual MooseVariable & getStandardVariable(THREAD_ID tid, const std::string & var_name) = 0;
@@ -95,7 +95,7 @@ public:
    *
    * @param tid The thread id
    */
-  virtual void setActiveElementalMooseVariables(const std::set<MooseVariableFE *> & moose_vars,
+  virtual void setActiveElementalMooseVariables(const std::set<MooseVariableFEBase *> & moose_vars,
                                                 THREAD_ID tid);
 
   /**
@@ -103,7 +103,8 @@ public:
    *
    * @param tid The thread id
    */
-  virtual const std::set<MooseVariableFE *> & getActiveElementalMooseVariables(THREAD_ID tid) const;
+  virtual const std::set<MooseVariableFEBase *> &
+  getActiveElementalMooseVariables(THREAD_ID tid) const;
 
   /**
    * Whether or not a list of active elemental moose variables has been set.
@@ -113,9 +114,9 @@ public:
   virtual bool hasActiveElementalMooseVariables(THREAD_ID tid) const;
 
   /**
-   * Clear the active elemental MooseVariableFE.  If there are no active variables then they will
-   * all be reinited.
-   * Call this after finishing the computation that was using a restricted set of MooseVariableFEs
+   * Clear the active elemental MooseVariableFEBase.  If there are no active variables then they
+   * will all be reinited. Call this after finishing the computation that was using a restricted set
+   * of MooseVariableFEBases
    *
    * @param tid The thread id
    */
@@ -442,8 +443,8 @@ protected:
   std::map<BoundaryID, std::multimap<std::string, std::string>> _map_boundary_material_props_check;
   ///@}
 
-  /// This is the set of MooseVariableFEs that will actually get reinited by a call to reinit(elem)
-  std::vector<std::set<MooseVariableFE *>> _active_elemental_moose_variables;
+  /// This is the set of MooseVariableFEBases that will actually get reinited by a call to reinit(elem)
+  std::vector<std::set<MooseVariableFEBase *>> _active_elemental_moose_variables;
 
   /// Whether or not there is currently a list of active elemental moose variables
   /* This needs to remain <unsigned int> for threading purposes */

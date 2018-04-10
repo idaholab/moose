@@ -89,10 +89,10 @@
 namespace
 {
 /**
- * Method for sorting the MooseVariableFEs based on variable numbers
+ * Method for sorting the MooseVariableFEBases based on variable numbers
  */
 bool
-sortMooseVariables(MooseVariableFE * a, MooseVariableFE * b)
+sortMooseVariables(MooseVariableFEBase * a, MooseVariableFEBase * b)
 {
   return a->number() < b->number();
 }
@@ -867,7 +867,7 @@ FEProblemBase::checkNonlocalCoupling()
 void
 FEProblemBase::checkUserObjectJacobianRequirement(THREAD_ID tid)
 {
-  std::set<MooseVariableFE *> uo_jacobian_moose_vars;
+  std::set<MooseVariableFEBase *> uo_jacobian_moose_vars;
   const auto & e_objects = _elemental_user_objects.getActiveObjects(tid);
   for (const auto & uo : e_objects)
   {
@@ -876,7 +876,7 @@ FEProblemBase::checkUserObjectJacobianRequirement(THREAD_ID tid)
     if (shape_element_uo)
     {
       _calculate_jacobian_in_uo = shape_element_uo->computeJacobianFlag();
-      const std::set<MooseVariableFE *> & mv_deps = shape_element_uo->jacobianMooseVariables();
+      const std::set<MooseVariableFEBase *> & mv_deps = shape_element_uo->jacobianMooseVariables();
       uo_jacobian_moose_vars.insert(mv_deps.begin(), mv_deps.end());
     }
   }
@@ -888,7 +888,7 @@ FEProblemBase::checkUserObjectJacobianRequirement(THREAD_ID tid)
     if (shape_side_uo)
     {
       _calculate_jacobian_in_uo = shape_side_uo->computeJacobianFlag();
-      const std::set<MooseVariableFE *> & mv_deps = shape_side_uo->jacobianMooseVariables();
+      const std::set<MooseVariableFEBase *> & mv_deps = shape_side_uo->jacobianMooseVariables();
       uo_jacobian_moose_vars.insert(mv_deps.begin(), mv_deps.end());
     }
   }
@@ -898,7 +898,7 @@ FEProblemBase::checkUserObjectJacobianRequirement(THREAD_ID tid)
 }
 
 void
-FEProblemBase::setVariableAllDoFMap(const std::vector<MooseVariableFE *> moose_vars)
+FEProblemBase::setVariableAllDoFMap(const std::vector<MooseVariableFEBase *> moose_vars)
 {
   for (unsigned int i = 0; i < moose_vars.size(); ++i)
   {
@@ -952,7 +952,7 @@ FEProblemBase::prepare(const Elem * elem,
   if (_has_nonlocal_coupling)
     if (_nonlocal_cm(ivar, jvar) != 0)
     {
-      MooseVariableFE & jv = _nl->getVariable(tid, jvar);
+      MooseVariableFEBase & jv = _nl->getVariable(tid, jvar);
       _assembly[tid]->prepareBlockNonlocal(ivar, jvar, dof_indices, jv.allDofIndices());
     }
 
@@ -962,7 +962,7 @@ FEProblemBase::prepare(const Elem * elem,
     if (_has_nonlocal_coupling)
       if (_nonlocal_cm(ivar, jvar) != 0)
       {
-        MooseVariableFE & jv = _nl->getVariable(tid, jvar);
+        MooseVariableFEBase & jv = _nl->getVariable(tid, jvar);
         _displaced_problem->prepareBlockNonlocal(ivar, jvar, dof_indices, jv.allDofIndices(), tid);
       }
   }
@@ -1179,7 +1179,7 @@ FEProblemBase::addJacobianBlock(SparseMatrix<Number> & jacobian,
   if (_has_nonlocal_coupling)
     if (_nonlocal_cm(ivar, jvar) != 0)
     {
-      MooseVariableFE & jv = _nl->getVariable(tid, jvar);
+      MooseVariableFEBase & jv = _nl->getVariable(tid, jvar);
       _assembly[tid]->addJacobianBlockNonlocal(
           jacobian, ivar, jvar, dof_map, dof_indices, jv.allDofIndices());
     }
@@ -1190,7 +1190,7 @@ FEProblemBase::addJacobianBlock(SparseMatrix<Number> & jacobian,
     if (_has_nonlocal_coupling)
       if (_nonlocal_cm(ivar, jvar) != 0)
       {
-        MooseVariableFE & jv = _nl->getVariable(tid, jvar);
+        MooseVariableFEBase & jv = _nl->getVariable(tid, jvar);
         _displaced_problem->addJacobianBlockNonlocal(
             jacobian, ivar, jvar, dof_map, dof_indices, jv.allDofIndices(), tid);
       }
@@ -2170,7 +2170,7 @@ FEProblemBase::addInitialCondition(const std::string & ic_name,
   {
     for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
     {
-      MooseVariableFE & var = getVariable(tid, var_name);
+      MooseVariableFEBase & var = getVariable(tid, var_name);
       parameters.set<SystemBase *>("_sys") = &var.sys();
       std::shared_ptr<InitialCondition> ic =
           _factory.create<InitialCondition>(ic_name, name, parameters, tid);
@@ -2391,7 +2391,7 @@ FEProblemBase::addMaterial(const std::string & mat_name,
 void
 FEProblemBase::prepareMaterials(SubdomainID blk_id, THREAD_ID tid)
 {
-  std::set<MooseVariableFE *> needed_moose_vars;
+  std::set<MooseVariableFEBase *> needed_moose_vars;
   std::set<unsigned int> needed_mat_props;
 
   if (_all_materials.hasActiveBlockObjects(blk_id, tid))
@@ -2407,7 +2407,7 @@ FEProblemBase::prepareMaterials(SubdomainID blk_id, THREAD_ID tid)
     _materials.updateBoundaryMatPropDependency(id, needed_mat_props, tid);
   }
 
-  const std::set<MooseVariableFE *> & current_active_elemental_moose_variables =
+  const std::set<MooseVariableFEBase *> & current_active_elemental_moose_variables =
       getActiveElementalMooseVariables(tid);
   needed_moose_vars.insert(current_active_elemental_moose_variables.begin(),
                            current_active_elemental_moose_variables.end());
@@ -3526,7 +3526,7 @@ FEProblemBase::hasVariable(const std::string & var_name) const
     return false;
 }
 
-MooseVariableFE &
+MooseVariableFEBase &
 FEProblemBase::getVariable(THREAD_ID tid, const std::string & var_name)
 {
   if (_nl->hasVariable(var_name))
@@ -3593,7 +3593,7 @@ FEProblemBase::getSystem(const std::string & var_name)
 }
 
 void
-FEProblemBase::setActiveElementalMooseVariables(const std::set<MooseVariableFE *> & moose_vars,
+FEProblemBase::setActiveElementalMooseVariables(const std::set<MooseVariableFEBase *> & moose_vars,
                                                 THREAD_ID tid)
 {
   SubProblem::setActiveElementalMooseVariables(moose_vars, tid);
@@ -3751,13 +3751,13 @@ FEProblemBase::areCoupled(unsigned int ivar, unsigned int jvar)
   return (*_cm)(ivar, jvar);
 }
 
-std::vector<std::pair<MooseVariableFE *, MooseVariableFE *>> &
+std::vector<std::pair<MooseVariableFEBase *, MooseVariableFEBase *>> &
 FEProblemBase::couplingEntries(THREAD_ID tid)
 {
   return _assembly[tid]->couplingEntries();
 }
 
-std::vector<std::pair<MooseVariableFE *, MooseVariableFE *>> &
+std::vector<std::pair<MooseVariableFEBase *, MooseVariableFEBase *>> &
 FEProblemBase::nonlocalCouplingEntries(THREAD_ID tid)
 {
   return _assembly[tid]->nonlocalCouplingEntries();
@@ -4882,7 +4882,7 @@ FEProblemBase::checkDisplacementOrders()
 
       for (const auto & var_name : displacement_variables)
       {
-        MooseVariableFE & mv = _displaced_problem->getVariable(/*tid=*/0, var_name);
+        MooseVariableFEBase & mv = _displaced_problem->getVariable(/*tid=*/0, var_name);
         if (mv.order() != SECOND)
           mooseError("Error: mesh has SECOND order elements, so all displacement variables must be "
                      "SECOND order.");

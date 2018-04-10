@@ -75,7 +75,7 @@ GrainRigidBodyMotionBase::timestepSetup()
 }
 
 bool
-GrainRigidBodyMotionBase::globalDoFEnabled(MooseVariableFE & /*var*/, dof_id_type /*dof_index*/)
+GrainRigidBodyMotionBase::globalDoFEnabled(MooseVariableFEBase & /*var*/, dof_id_type /*dof_index*/)
 {
   if (_velocity_advection_jacobian(0) == 0 && _velocity_advection_jacobian(1) == 0 &&
       _velocity_advection_jacobian(2) == 0)

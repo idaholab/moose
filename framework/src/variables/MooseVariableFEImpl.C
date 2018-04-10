@@ -15,7 +15,7 @@ MooseVariableFEImpl<OutputType>::MooseVariableFEImpl(unsigned int var_num,
                                                      SystemBase & sys,
                                                      Assembly & assembly,
                                                      Moose::VarKindType var_kind)
-  : MooseVariableFE(var_num, fe_type, sys, var_kind),
+  : MooseVariableFEBase(var_num, fe_type, sys, var_kind),
     _assembly(assembly),
     _qrule(_assembly.qRule()),
     _qrule_face(_assembly.qRuleFace()),

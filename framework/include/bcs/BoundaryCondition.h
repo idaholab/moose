@@ -68,7 +68,7 @@ public:
    * Get a reference to the MooseVariableFE
    * @return Reference to MooseVariableFE
    */
-  virtual MooseVariableFE & variable() = 0;
+  virtual MooseVariableFEBase & variable() = 0;
 
   /**
    * Get a reference to the subproblem

@@ -16,7 +16,7 @@
 
 /**
  * Intermediate base class that ties together all the interfaces for getting
- * MooseVariableFEs with the MooseVariableDependencyInterface
+ * MooseVariableFEBases with the MooseVariableDependencyInterface
  */
 class CoupleableMooseVariableDependencyIntermediateInterface
   : public Coupleable,

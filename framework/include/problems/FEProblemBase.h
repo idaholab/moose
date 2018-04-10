@@ -165,8 +165,9 @@ public:
 
   bool areCoupled(unsigned int ivar, unsigned int jvar);
 
-  std::vector<std::pair<MooseVariableFE *, MooseVariableFE *>> & couplingEntries(THREAD_ID tid);
-  std::vector<std::pair<MooseVariableFE *, MooseVariableFE *>> &
+  std::vector<std::pair<MooseVariableFEBase *, MooseVariableFEBase *>> &
+  couplingEntries(THREAD_ID tid);
+  std::vector<std::pair<MooseVariableFEBase *, MooseVariableFEBase *>> &
   nonlocalCouplingEntries(THREAD_ID tid);
 
   /**
@@ -219,7 +220,7 @@ public:
                                                               const PetscInt maxits);
 
   virtual bool hasVariable(const std::string & var_name) const override;
-  virtual MooseVariableFE & getVariable(THREAD_ID tid, const std::string & var_name) override;
+  virtual MooseVariableFEBase & getVariable(THREAD_ID tid, const std::string & var_name) override;
   virtual MooseVariable & getStandardVariable(THREAD_ID tid, const std::string & var_name) override;
   virtual VectorMooseVariable & getVectorVariable(THREAD_ID tid,
                                                   const std::string & var_name) override;
@@ -235,13 +236,13 @@ public:
    *
    * @param tid The thread id
    */
-  virtual void setActiveElementalMooseVariables(const std::set<MooseVariableFE *> & moose_vars,
+  virtual void setActiveElementalMooseVariables(const std::set<MooseVariableFEBase *> & moose_vars,
                                                 THREAD_ID tid) override;
 
   /**
-   * Clear the active elemental MooseVariableFE.  If there are no active variables then they will
-   * all be reinited.
-   * Call this after finishing the computation that was using a restricted set of MooseVariableFEs
+   * Clear the active elemental MooseVariableFEBase.  If there are no active variables then they
+   * will all be reinited. Call this after finishing the computation that was using a restricted set
+   * of MooseVariableFEBases
    *
    * @param tid The thread id
    */
@@ -288,9 +289,9 @@ public:
    */
   void checkNonlocalCoupling();
   void checkUserObjectJacobianRequirement(THREAD_ID tid);
-  void setVariableAllDoFMap(const std::vector<MooseVariableFE *> moose_vars);
+  void setVariableAllDoFMap(const std::vector<MooseVariableFEBase *> moose_vars);
 
-  const std::vector<MooseVariableFE *> & getUserObjectJacobianVariables(THREAD_ID tid) const
+  const std::vector<MooseVariableFEBase *> & getUserObjectJacobianVariables(THREAD_ID tid) const
   {
     return _uo_jacobian_moose_vars[tid];
   }
@@ -1516,7 +1517,7 @@ protected:
   bool _has_nonlocal_coupling;
   bool _calculate_jacobian_in_uo;
 
-  std::vector<std::vector<MooseVariableFE *>> _uo_jacobian_moose_vars;
+  std::vector<std::vector<MooseVariableFEBase *>> _uo_jacobian_moose_vars;
 
   SolverParams _solver_params;
 

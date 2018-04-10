@@ -51,7 +51,7 @@ Coupleable::Coupleable(const MooseObject * moose_object, bool nodal)
       {
         if (problem.hasVariable(coupled_var_name))
         {
-          MooseVariableFE * moose_var = &problem.getVariable(_c_tid, coupled_var_name);
+          MooseVariableFEBase * moose_var = &problem.getVariable(_c_tid, coupled_var_name);
           _coupled_vars[name].push_back(moose_var);
           _coupled_moose_vars.push_back(moose_var);
           if (auto * tmp_var = dynamic_cast<MooseVariable *>(moose_var))
@@ -107,7 +107,8 @@ Coupleable::coupledCallback(const std::string & /*var_name*/, bool /*is_old*/)
 bool
 Coupleable::isCoupled(const std::string & var_name, unsigned int i)
 {
-  std::map<std::string, std::vector<MooseVariableFE *>>::iterator it = _coupled_vars.find(var_name);
+  std::map<std::string, std::vector<MooseVariableFEBase *>>::iterator it =
+      _coupled_vars.find(var_name);
   if (it != _coupled_vars.end())
     return (i < it->second.size());
   else
@@ -150,7 +151,7 @@ Coupleable::checkVar(const std::string & var_name)
   // NOTE: non-existent variables are handled in the constructor
 }
 
-MooseVariableFE *
+MooseVariableFEBase *
 Coupleable::getFEVar(const std::string & var_name, unsigned int comp)
 {
   if (comp < _coupled_vars[var_name].size())
@@ -206,7 +207,7 @@ Coupleable::coupled(const std::string & var_name, unsigned int comp)
   if (!isCoupled(var_name))
     return _optional_var_index[var_name];
 
-  MooseVariableFE * var = getFEVar(var_name, comp);
+  MooseVariableFEBase * var = getFEVar(var_name, comp);
   switch (var->kind())
   {
     case Moose::VAR_NONLINEAR:
@@ -1020,7 +1021,7 @@ Coupleable::coupledSolutionDoFs(const std::string & var_name, unsigned int comp)
     mooseError(_c_name, ": nodal objects should not call coupledSolutionDoFs");
 
   coupledCallback(var_name, false);
-  MooseVariableFE * var = getFEVar(var_name, comp);
+  MooseVariableFEBase * var = getFEVar(var_name, comp);
 
   if (!_coupleable_neighbor)
     return (_c_is_implicit) ? var->solutionDoFs() : var->solutionDoFsOld();
@@ -1041,7 +1042,7 @@ Coupleable::coupledSolutionDoFsOld(const std::string & var_name, unsigned int co
 
   validateExecutionerType(var_name, "coupledSolutionDoFsOld");
   coupledCallback(var_name, true);
-  MooseVariableFE * var = getFEVar(var_name, comp);
+  MooseVariableFEBase * var = getFEVar(var_name, comp);
 
   if (!_coupleable_neighbor)
     return (_c_is_implicit) ? var->solutionDoFsOld() : var->solutionDoFsOlder();
@@ -1062,7 +1063,7 @@ Coupleable::coupledSolutionDoFsOlder(const std::string & var_name, unsigned int 
 
   validateExecutionerType(var_name, "coupledSolutionDoFsOlder");
   coupledCallback(var_name, true);
-  MooseVariableFE * var = getFEVar(var_name, comp);
+  MooseVariableFEBase * var = getFEVar(var_name, comp);
   if (_c_is_implicit)
   {
     if (!_coupleable_neighbor)

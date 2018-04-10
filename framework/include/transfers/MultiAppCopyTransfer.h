@@ -14,7 +14,7 @@
 
 // Forward declarations
 class MultiAppCopyTransfer;
-class MooseVariableFE;
+class MooseVariableFEBase;
 
 template <>
 InputParameters validParams<MultiAppCopyTransfer>();
@@ -48,8 +48,8 @@ protected:
    */
   void transferDofObject(libMesh::DofObject * to_object,
                          libMesh::DofObject * from_object,
-                         MooseVariableFE & to_var,
-                         MooseVariableFE & from_var);
+                         MooseVariableFEBase & to_var,
+                         MooseVariableFEBase & from_var);
 
   /// The name of the variable to transfer to
   const VariableName & _to_var_name;

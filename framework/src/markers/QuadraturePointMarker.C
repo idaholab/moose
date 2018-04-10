@@ -50,7 +50,7 @@ QuadraturePointMarker::QuadraturePointMarker(const InputParameters & parameters)
     _q_point(_assembly.qPoints()),
     _qp(0)
 {
-  const std::vector<MooseVariableFE *> & coupled_vars = getCoupledMooseVars();
+  const std::vector<MooseVariableFEBase *> & coupled_vars = getCoupledMooseVars();
   for (const auto & var : coupled_vars)
     addMooseVariableDependency(var);
 }

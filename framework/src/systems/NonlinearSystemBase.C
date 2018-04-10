@@ -1572,7 +1572,7 @@ NonlinearSystemBase::constraintJacobians(SparseMatrix<Number> & jacobian, bool d
                   _fe_problem.cacheJacobianNeighbor(0);
 
                 // Do the off-diagonals next
-                const std::vector<MooseVariableFE *> coupled_vars = nfc->getCoupledMooseVars();
+                const std::vector<MooseVariableFEBase *> coupled_vars = nfc->getCoupledMooseVars();
                 for (const auto & jvar : coupled_vars)
                 {
                   // Only compute jacobians for nonlinear variables
@@ -2003,7 +2003,7 @@ NonlinearSystemBase::computeJacobianInternal(SparseMatrix<Number> & jacobian,
         const auto & bcs = _nodal_bcs.getActiveBoundaryObjects(bid);
         for (const auto & bc : bcs)
         {
-          const std::vector<MooseVariableFE *> & coupled_moose_vars = bc->getCoupledMooseVars();
+          const std::vector<MooseVariableFEBase *> & coupled_moose_vars = bc->getCoupledMooseVars();
 
           // Create the set of "involved" MOOSE nonlinear vars, which includes all coupled vars and
           // the BC's own variable
@@ -2022,7 +2022,7 @@ NonlinearSystemBase::computeJacobianInternal(SparseMatrix<Number> & jacobian,
     // which variables are "coupled" as far as the preconditioner is
     // concerned, not what variables a boundary condition specifically
     // depends on.
-    std::vector<std::pair<MooseVariableFE *, MooseVariableFE *>> & coupling_entries =
+    std::vector<std::pair<MooseVariableFEBase *, MooseVariableFEBase *>> & coupling_entries =
         _fe_problem.couplingEntries(/*_tid=*/0);
 
     // Compute Jacobians for NodalBCBases

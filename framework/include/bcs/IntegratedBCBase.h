@@ -48,7 +48,7 @@ public:
   /**
    * Computes d-ivar-residual / d-jvar...
    */
-  virtual void computeJacobianBlock(MooseVariableFE & jvar) = 0;
+  virtual void computeJacobianBlock(MooseVariableFEBase & jvar) = 0;
   /**
    * Computes jacobian block with respect to a scalar variable
    * @param jvar The number of the scalar variable
@@ -100,12 +100,12 @@ protected:
 
   /// The aux variables to save the residual contributions to
   bool _has_save_in;
-  std::vector<MooseVariableFE *> _save_in;
+  std::vector<MooseVariableFEBase *> _save_in;
   std::vector<AuxVariableName> _save_in_strings;
 
   /// The aux variables to save the diagonal Jacobian contributions to
   bool _has_diag_save_in;
-  std::vector<MooseVariableFE *> _diag_save_in;
+  std::vector<MooseVariableFEBase *> _diag_save_in;
   std::vector<AuxVariableName> _diag_save_in_strings;
 
   virtual Real computeQpResidual() = 0;

@@ -299,7 +299,7 @@ BlockRestrictable::getBlockCoordSystem()
 }
 
 void
-BlockRestrictable::checkVariable(const MooseVariableFE & variable) const
+BlockRestrictable::checkVariable(const MooseVariableFEBase & variable) const
 {
   if (!isBlockSubset(variable.activeSubdomains()))
   {

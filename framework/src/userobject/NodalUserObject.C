@@ -44,7 +44,7 @@ NodalUserObject::NodalUserObject(const InputParameters & parameters)
     _current_node(_assembly.node()),
     _unique_node_execute(getParam<bool>("unique_node_execute"))
 {
-  const std::vector<MooseVariableFE *> & coupled_vars = getCoupledMooseVars();
+  const std::vector<MooseVariableFEBase *> & coupled_vars = getCoupledMooseVars();
   for (const auto & var : coupled_vars)
     addMooseVariableDependency(var);
 }

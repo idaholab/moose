@@ -33,7 +33,7 @@ ElementLoopUserObject::ElementLoopUserObject(const InputParameters & parameters)
     _have_interface_elems(false)
 {
   // Keep track of which variables are coupled so we know what we depend on
-  const std::vector<MooseVariableFE *> & coupled_vars = getCoupledMooseVars();
+  const std::vector<MooseVariableFEBase *> & coupled_vars = getCoupledMooseVars();
   for (unsigned int i = 0; i < coupled_vars.size(); i++)
     addMooseVariableDependency(coupled_vars[i]);
 }
@@ -53,7 +53,7 @@ ElementLoopUserObject::ElementLoopUserObject(ElementLoopUserObject & x, Threads:
     _have_interface_elems(false)
 {
   // Keep track of which variables are coupled so we know what we depend on
-  const std::vector<MooseVariableFE *> & coupled_vars = x.getCoupledMooseVars();
+  const std::vector<MooseVariableFEBase *> & coupled_vars = x.getCoupledMooseVars();
   for (unsigned int i = 0; i < coupled_vars.size(); i++)
     addMooseVariableDependency(coupled_vars[i]);
 }

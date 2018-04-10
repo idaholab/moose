@@ -11,7 +11,7 @@
 #define MOOSEVARIABLEFIELD_H
 
 #include "MooseTypes.h"
-#include "MooseVariableFE.h"
+#include "MooseVariableFEBase.h"
 #include "Assembly.h"
 #include "SubProblem.h"
 #include "SystemBase.h"
@@ -31,7 +31,7 @@
  * Each variable can compute nodal or elemental (at QPs) values.
  */
 template <typename OutputType>
-class MooseVariableFEImpl : public MooseVariableFE
+class MooseVariableFEImpl : public MooseVariableFEBase
 {
   typedef OutputType OutputShape;
   typedef OutputType OutputValue;

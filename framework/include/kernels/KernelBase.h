@@ -68,7 +68,7 @@ public:
   virtual void computeJacobian() = 0;
 
   /// Computes d-residual / d-jvar... storing the result in Ke.
-  virtual void computeOffDiagJacobian(MooseVariableFE & jvar) = 0;
+  virtual void computeOffDiagJacobian(MooseVariableFEBase & jvar) = 0;
 
   /**
    * Computes jacobian block with respect to a scalar variable
@@ -91,7 +91,7 @@ public:
   /**
    * Returns the variable number that this Kernel operates on.
    */
-  virtual MooseVariableFE & variable() = 0;
+  virtual MooseVariableFEBase & variable() = 0;
 
   /**
    * Returns a reference to the SubProblem for which this Kernel is active
@@ -175,12 +175,12 @@ protected:
 
   /// The aux variables to save the residual contributions to
   bool _has_save_in;
-  std::vector<MooseVariableFE *> _save_in;
+  std::vector<MooseVariableFEBase *> _save_in;
   std::vector<AuxVariableName> _save_in_strings;
 
   /// The aux variables to save the diagonal Jacobian contributions to
   bool _has_diag_save_in;
-  std::vector<MooseVariableFE *> _diag_save_in;
+  std::vector<MooseVariableFEBase *> _diag_save_in;
   std::vector<AuxVariableName> _diag_save_in_strings;
 
   bool _eigen_kernel;

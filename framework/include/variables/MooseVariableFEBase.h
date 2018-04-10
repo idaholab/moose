@@ -7,8 +7,8 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef MOOSEVARIABLEFE_H
-#define MOOSEVARIABLEFE_H
+#ifndef MOOSEVARIABLEFEBASE_H
+#define MOOSEVARIABLEFEBASE_H
 
 #include "MooseVariableBase.h"
 
@@ -17,13 +17,13 @@
 
 class Assembly;
 
-class MooseVariableFE : public MooseVariableBase
+class MooseVariableFEBase : public MooseVariableBase
 {
 public:
-  MooseVariableFE(unsigned int var_num,
-                  const FEType & fe_type,
-                  SystemBase & sys,
-                  Moose::VarKindType var_kind);
+  MooseVariableFEBase(unsigned int var_num,
+                      const FEType & fe_type,
+                      SystemBase & sys,
+                      Moose::VarKindType var_kind);
 
   /**
    * Clear out the dof indices.  We do this in case this variable is not going to be prepared at
@@ -209,4 +209,4 @@ public:
   virtual size_t phiFaceNeighborSize() = 0;
 };
 
-#endif /* MOOSEVARIABLEFE_H */
+#endif /* MOOSEVARIABLEFEBASE_H */

@@ -84,7 +84,7 @@ KernelValue::computeJacobian()
 }
 
 void
-KernelValue::computeOffDiagJacobian(MooseVariableFE & jvar)
+KernelValue::computeOffDiagJacobian(MooseVariableFEBase & jvar)
 {
   size_t jvar_num = jvar.number();
   if (jvar_num == _var.number())

@@ -28,7 +28,7 @@ public:
 protected:
   virtual Real computeValue() override;
 
-  MooseVariableFE & _debug_var;
+  MooseVariableFEBase & _debug_var;
   NumericVector<Number> & _residual_copy;
 };
 

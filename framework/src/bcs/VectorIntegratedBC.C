@@ -79,7 +79,7 @@ VectorIntegratedBC::computeJacobian()
 }
 
 void
-VectorIntegratedBC::computeJacobianBlock(MooseVariableFE & jvar)
+VectorIntegratedBC::computeJacobianBlock(MooseVariableFEBase & jvar)
 {
   size_t jvar_num = jvar.number();
   DenseMatrix<Number> & ke = _assembly.jacobianBlock(_var.number(), jvar_num);

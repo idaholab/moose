@@ -9,10 +9,10 @@
 
 #include "MooseVariableFEImpl.h"
 
-MooseVariableFE::MooseVariableFE(unsigned int var_num,
-                                 const FEType & fe_type,
-                                 SystemBase & sys,
-                                 Moose::VarKindType var_kind)
+MooseVariableFEBase::MooseVariableFEBase(unsigned int var_num,
+                                         const FEType & fe_type,
+                                         SystemBase & sys,
+                                         Moose::VarKindType var_kind)
   : MooseVariableBase(var_num, fe_type, sys, var_kind)
 {
 }

@@ -132,7 +132,7 @@ EigenKernel::computeJacobian()
 }
 
 void
-EigenKernel::computeOffDiagJacobian(MooseVariableFE & jvar)
+EigenKernel::computeOffDiagJacobian(MooseVariableFEBase & jvar)
 {
   size_t jvar_num = jvar.number();
   if (!_is_implicit)

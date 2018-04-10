@@ -34,7 +34,7 @@ InitialConditionWarehouse::addObject(std::shared_ptr<InitialCondition> object,
                                      bool recurse)
 {
   // Check that when object is boundary restricted that the variable is nodal
-  const MooseVariableFE & var = object->variable();
+  const MooseVariableFEBase & var = object->variable();
 
   // Boundary Restricted
   if (object->boundaryRestricted())
