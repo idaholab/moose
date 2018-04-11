@@ -14,7 +14,7 @@
   [./diff]
     type = CoefDiffusion
     variable = u
-    coef = 0.01
+    coef = 0.1
   [../]
   [./time]
     type = CoefTimeDerivative
@@ -41,7 +41,7 @@
 [Executioner]
   type = Transient
   num_steps = 20
-  dt = 0.1
+  dt = 0.01
   solve_type = PJFNK
   petsc_options_iname = '-pc_type -pc_hypre_type'
   petsc_options_value = 'hypre boomeramg'
