@@ -9,8 +9,6 @@ validParams<GeometricalComponent>()
   InputParameters params = validParams<Component>();
 
   params.addRequiredParam<Point>("position", "Origin (start) of the pipe");
-  params.addParam<RealVectorValue>(
-      "offset", RealVectorValue(), "Offset of the origin for mesh generation");
   params.addRequiredParam<RealVectorValue>("orientation", "Orientation vector of the pipe");
   params.addParam<Real>("rotation", 0., "Rotation of the component (in degrees)");
   params.addRequiredParam<std::vector<Real>>(
@@ -28,7 +26,6 @@ validParams<GeometricalComponent>()
 GeometricalComponent::GeometricalComponent(const InputParameters & parameters)
   : Component(parameters),
     _position(getParam<Point>("position")),
-    _offset(getParam<RealVectorValue>("offset")),
     _dir(getParam<RealVectorValue>("orientation")),
     _rotation(getParam<Real>("rotation")),
     _lengths(getParam<std::vector<Real>>("length")),
@@ -92,7 +89,7 @@ GeometricalComponent::setupMesh()
   {
     Node & curr_node = _mesh.nodeRef(node_id);
     RealVectorValue p(curr_node(0), curr_node(1), curr_node(2));
-    curr_node = _R * (_Rx * (p + _offset)) + _position;
+    curr_node = _R * (_Rx * p) + _position;
   }
 }
 

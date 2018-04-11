@@ -88,9 +88,6 @@ protected:
   /// Physical position in the space
   const Point & _position;
 
-  /// Offset for mesh generation
-  const RealVectorValue & _offset;
-
   /// Direction this pipe is going to
   const RealVectorValue & _dir;
 
