@@ -48,7 +48,10 @@ public:
     _undisplaced_system.disassociateVectorFromTag(vec, tag);
   }
 
-  virtual void clearTaggedVectors() override { _undisplaced_system.clearTaggedVectors(); }
+  virtual void disassociateAllTaggedVectors() override
+  {
+    _undisplaced_system.disassociateAllTaggedVectors();
+  }
 
   virtual void clearTaggedVector(TagID tag) override { _undisplaced_system.clearTaggedVector(tag); }
 
@@ -62,7 +65,10 @@ public:
     _undisplaced_system.disassociateMatrixFromTag(matrix, tag);
   }
 
-  virtual void clearTaggedMatrices() override { _undisplaced_system.clearTaggedMatrices(); }
+  virtual void disassociateAllTaggedMatrices() override
+  {
+    _undisplaced_system.disassociateAllTaggedMatrices();
+  }
 
   virtual NumericVector<Number> & getVector(const std::string & name) override;
 

@@ -217,7 +217,7 @@ public:
    */
   virtual void disassociateVectorFromTag(NumericVector<Number> & vec, TagID tag);
 
-  virtual void clearTaggedVectors();
+  virtual void disassociateAllTaggedVectors();
 
   /**
    * Check if the tagged matrix exists in the system.
@@ -272,7 +272,7 @@ public:
   /**
    * Clear all tagged matrices
    */
-  virtual void clearTaggedMatrices();
+  virtual void disassociateAllTaggedMatrices();
 
   /**
    * Returns a reference to a serialized version of the solution vector for this subproblem

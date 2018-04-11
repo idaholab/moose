@@ -549,8 +549,6 @@ SystemBase::removeVector(TagID tag_id)
     auto vector_name = _subproblem.vectorTagName(tag_id);
     system().remove_vector(vector_name);
     _tagged_vectors[tag_id] = nullptr;
-
-    _subproblem.removeVectorTag(vector_name);
   }
 }
 
@@ -744,9 +742,10 @@ SystemBase::disassociateVectorFromTag(NumericVector<Number> & vec, TagID tag)
 }
 
 void
-SystemBase::clearTaggedVectors()
+SystemBase::disassociateAllTaggedVectors()
 {
-  _tagged_vectors.clear();
+  for (auto & tagged_vector : _tagged_vectors)
+    tagged_vector = nullptr;
 }
 
 bool
@@ -856,9 +855,10 @@ SystemBase::matrixTagActive(TagID tag)
 }
 
 void
-SystemBase::clearTaggedMatrices()
+SystemBase::disassociateAllTaggedMatrices()
 {
-  _tagged_matrices.clear();
+  for (auto & matrix : _tagged_matrices)
+    matrix = nullptr;
 }
 
 unsigned int

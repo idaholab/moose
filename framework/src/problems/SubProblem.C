@@ -77,16 +77,6 @@ SubProblem::vectorTagExists(const TagName & tag_name)
   return _vector_tag_name_to_tag_id.find(tag_name_upper) != _vector_tag_name_to_tag_id.end();
 }
 
-void
-SubProblem::removeVectorTag(TagName tag_name)
-{
-  auto tag_id = _vector_tag_name_to_tag_id[tag_name];
-
-  _vector_tag_name_to_tag_id.erase(tag_name);
-
-  _vector_tag_id_to_tag_name.erase(tag_id);
-}
-
 TagID
 SubProblem::getVectorTagID(const TagName & tag_name)
 {
@@ -130,16 +120,6 @@ bool
 SubProblem::matrixTagExists(TagID tag_id)
 {
   return _matrix_tag_id_to_tag_name.find(tag_id) != _matrix_tag_id_to_tag_name.end();
-}
-
-void
-SubProblem::removeMatrixTag(TagName tag_name)
-{
-  auto tag_id = _vector_tag_name_to_tag_id[tag_name];
-
-  _vector_tag_name_to_tag_id.erase(tag_name);
-
-  _vector_tag_id_to_tag_name.erase(tag_id);
 }
 
 TagID
