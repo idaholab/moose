@@ -12,7 +12,7 @@
     type = RunApp
     input = 'multiple_parameters_found.i'
     expect_out = "parameters have differing values"
-    allow_warnings = 1
+    allow_warnings = true
   [../]
 
   [./no_param_found]

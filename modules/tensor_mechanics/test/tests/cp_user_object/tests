@@ -8,7 +8,7 @@
     type = 'Exodiff'
     input = 'crysp_exception.i'
     exodiff = 'crysp_exception_out.e'
-    allow_warnings = 'true'
+    allow_warnings = true
   [../]
   [./test_fileread]
     type = 'Exodiff'

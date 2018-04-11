@@ -17,7 +17,7 @@
     type = 'Exodiff'
     input = 'high_order_master.i'
     exodiff = 'high_order_master_out.e high_order_master_out_sub0.e'
-    recover = 'false' # This is because the sub-app is Steady
+    recover = false # This is because the sub-app is Steady
   [../]
 
   [./fixed_meshes]

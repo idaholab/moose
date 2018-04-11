@@ -11,7 +11,7 @@
     input = 'penetration_locator_test.i'
     exodiff = 'out.e'
     group = 'requirements geometric'
-    max_parallel = '3'
+    max_parallel = 3
     prereq = 'test'
   [../]
 []
