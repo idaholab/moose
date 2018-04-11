@@ -13,7 +13,7 @@
 #include "Assembly.h"
 #include "MooseEnum.h"
 #include "MooseMesh.h"
-#include "MooseVariableField.h"
+#include "MooseVariableFEImpl.h"
 #include "PenetrationLocator.h"
 #include "SystemBase.h"
 
@@ -237,7 +237,7 @@ NodeFaceConstraint::computeOffDiagJacobian(unsigned int jvar)
 void
 NodeFaceConstraint::getConnectedDofIndices(unsigned int var_num)
 {
-  MooseVariableFE & var = _sys.getVariable(0, var_num);
+  MooseVariableFEBase & var = _sys.getVariable(0, var_num);
 
   _connected_dof_indices.clear();
   std::set<dof_id_type> unique_dof_indices;

@@ -13,7 +13,7 @@
 // MOOSE includes
 #include "MooseObjectWarehouseBase.h"
 #include "MooseVariableInterface.h"
-#include "MooseVariableField.h"
+#include "MooseVariableFEImpl.h"
 
 /**
  * A storage container for MooseObjects that inherit from SetupInterface.

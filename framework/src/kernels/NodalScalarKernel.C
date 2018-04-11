@@ -35,7 +35,7 @@ NodalScalarKernel::NodalScalarKernel(const InputParameters & parameters)
     _boundary_names(getParam<std::vector<BoundaryName>>("boundary"))
 {
   // Fill in the MooseVariable dependencies
-  const std::vector<MooseVariableFE *> & coupled_vars = getCoupledMooseVars();
+  const std::vector<MooseVariableFEBase *> & coupled_vars = getCoupledMooseVars();
   for (const auto & var : coupled_vars)
     addMooseVariableDependency(var);
 

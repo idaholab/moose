@@ -27,9 +27,9 @@
 
 // Forward declerations
 template <typename>
-class MooseVariableField;
-typedef MooseVariableField<Real> MooseVariable;
-typedef MooseVariableField<VectorValue<Real>> VectorMooseVariable;
+class MooseVariableFEImpl;
+typedef MooseVariableFEImpl<Real> MooseVariable;
+typedef MooseVariableFEImpl<VectorValue<Real>> VectorMooseVariable;
 class MooseMesh;
 class Problem;
 class SubProblem;
@@ -68,7 +68,7 @@ public:
    * Get a reference to the MooseVariableFE
    * @return Reference to MooseVariableFE
    */
-  virtual MooseVariableFE & variable() = 0;
+  virtual MooseVariableFEBase & variable() = 0;
 
   /**
    * Get a reference to the subproblem

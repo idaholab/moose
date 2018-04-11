@@ -13,7 +13,7 @@
 #include "FEProblem.h"
 #include "IntegratedBCBase.h"
 #include "InterfaceKernel.h"
-#include "MooseVariableField.h"
+#include "MooseVariableFEImpl.h"
 #include "NonlinearSystem.h"
 #include "NonlocalIntegratedBC.h"
 #include "NonlocalKernel.h"
@@ -162,7 +162,7 @@ ComputeJacobianThread::subdomainChanged()
   _fe_problem.subdomainSetup(_subdomain, _tid);
 
   // Update variable Dependencies
-  std::set<MooseVariableFE *> needed_moose_vars;
+  std::set<MooseVariableFEBase *> needed_moose_vars;
   _kernels.updateBlockVariableDependency(_subdomain, needed_moose_vars, _tid);
   _integrated_bcs.updateBoundaryVariableDependency(needed_moose_vars, _tid);
   _dg_kernels.updateBlockVariableDependency(_subdomain, needed_moose_vars, _tid);

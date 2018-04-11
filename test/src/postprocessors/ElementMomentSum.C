@@ -9,7 +9,7 @@
 
 #include "ElementMomentSum.h"
 
-#include "MooseVariableField.h"
+#include "MooseVariableFEImpl.h"
 
 registerMooseObject("MooseTestApp", ElementMomentSum);
 

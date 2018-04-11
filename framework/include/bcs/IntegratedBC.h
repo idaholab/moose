@@ -34,7 +34,7 @@ public:
   /**
    * Computes d-ivar-residual / d-jvar...
    */
-  virtual void computeJacobianBlock(MooseVariableFE & jvar) override;
+  virtual void computeJacobianBlock(MooseVariableFEBase & jvar) override;
   /**
    * Deprecated method
    */

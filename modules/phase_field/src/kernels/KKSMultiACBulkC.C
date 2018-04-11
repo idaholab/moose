@@ -49,7 +49,7 @@ KKSMultiACBulkC::KKSMultiACBulkC(const InputParameters & parameters)
   // Iterate over all coupled variables
   for (unsigned int i = 0; i < _nvar; ++i)
   {
-    MooseVariableFE * cvar = _coupled_moose_vars[i];
+    MooseVariableFEBase * cvar = _coupled_moose_vars[i];
 
     // get second partial derivatives wrt c1 and other coupled variable
     _prop_d2F1dc1darg[i] =

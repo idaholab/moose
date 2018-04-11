@@ -26,11 +26,11 @@
 // Forward declarations
 class Factory;
 class MooseApp;
-class MooseVariableFE;
+class MooseVariableFEBase;
 template <typename>
-class MooseVariableField;
-typedef MooseVariableField<Real> MooseVariable;
-typedef MooseVariableField<VectorValue<Real>> VectorMooseVariable;
+class MooseVariableFEImpl;
+typedef MooseVariableFEImpl<Real> MooseVariable;
+typedef MooseVariableFEImpl<VectorValue<Real>> VectorMooseVariable;
 class MooseMesh;
 class SubProblem;
 class SystemBase;
@@ -229,7 +229,7 @@ public:
    * @param var_name variable name
    * @return reference the variable (class)
    */
-  MooseVariableFE & getVariable(THREAD_ID tid, const std::string & var_name);
+  MooseVariableFEBase & getVariable(THREAD_ID tid, const std::string & var_name);
 
   /**
    * Gets a reference to a variable with specified number
@@ -238,7 +238,7 @@ public:
    * @param var_number libMesh variable number
    * @return reference the variable (class)
    */
-  MooseVariableFE & getVariable(THREAD_ID tid, unsigned int var_number);
+  MooseVariableFEBase & getVariable(THREAD_ID tid, unsigned int var_number);
 
   /**
    * Gets a reference to a variable of with specified name
@@ -248,7 +248,7 @@ public:
    * @return reference the variable (class)
    */
   template <typename T>
-  MooseVariableField<T> & getFieldVariable(THREAD_ID tid, const std::string & var_name);
+  MooseVariableFEImpl<T> & getFieldVariable(THREAD_ID tid, const std::string & var_name);
 
   /**
    * Gets a reference to a variable with specified number
@@ -258,7 +258,7 @@ public:
    * @return reference the variable (class)
    */
   template <typename T>
-  MooseVariableField<T> & getFieldVariable(THREAD_ID tid, unsigned int var_number);
+  MooseVariableFEImpl<T> & getFieldVariable(THREAD_ID tid, unsigned int var_number);
 
   /**
    * Gets a reference to a scalar variable with specified number
@@ -429,7 +429,7 @@ public:
                                  const std::string & source_name,
                                  const std::string & timestep);
 
-  const std::vector<MooseVariableFE *> & getVariables(THREAD_ID tid)
+  const std::vector<MooseVariableFEBase *> & getVariables(THREAD_ID tid)
   {
     return _vars[tid].fieldVariables();
   }

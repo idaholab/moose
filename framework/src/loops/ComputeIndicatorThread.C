@@ -14,7 +14,7 @@
 #include "FEProblem.h"
 #include "Indicator.h"
 #include "InternalSideIndicator.h"
-#include "MooseVariableField.h"
+#include "MooseVariableFEImpl.h"
 #include "Problem.h"
 #include "SwapBackSentinel.h"
 
@@ -51,7 +51,7 @@ ComputeIndicatorThread::subdomainChanged()
   _indicator_whs.subdomainSetup(_tid);
   _internal_side_indicators.subdomainSetup(_tid);
 
-  std::set<MooseVariableFE *> needed_moose_vars;
+  std::set<MooseVariableFEBase *> needed_moose_vars;
   _indicator_whs.updateVariableDependency(needed_moose_vars, _tid);
   _internal_side_indicators.updateVariableDependency(needed_moose_vars, _tid);
   _fe_problem.setActiveElementalMooseVariables(needed_moose_vars, _tid);

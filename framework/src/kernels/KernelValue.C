@@ -11,7 +11,7 @@
 
 // MOOSE includes
 #include "Assembly.h"
-#include "MooseVariableField.h"
+#include "MooseVariableFEImpl.h"
 #include "SubProblem.h"
 #include "SystemBase.h"
 
@@ -84,7 +84,7 @@ KernelValue::computeJacobian()
 }
 
 void
-KernelValue::computeOffDiagJacobian(MooseVariableFE & jvar)
+KernelValue::computeOffDiagJacobian(MooseVariableFEBase & jvar)
 {
   size_t jvar_num = jvar.number();
   if (jvar_num == _var.number())

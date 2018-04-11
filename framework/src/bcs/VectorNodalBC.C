@@ -10,7 +10,7 @@
 #include "VectorNodalBC.h"
 
 #include "Assembly.h"
-#include "MooseVariableField.h"
+#include "MooseVariableFEImpl.h"
 #include "SystemBase.h"
 
 template <>

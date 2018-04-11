@@ -20,7 +20,7 @@
 class BlockRestrictable;
 class FEProblemBase;
 class MooseMesh;
-class MooseVariableFE;
+class MooseVariableFEBase;
 
 template <>
 InputParameters validParams<BlockRestrictable>();
@@ -191,7 +191,7 @@ public:
    *
    * @param variable The variable to check against.
    */
-  void checkVariable(const MooseVariableFE & variable) const;
+  void checkVariable(const MooseVariableFEBase & variable) const;
 
 protected:
   /// Pointer to the MaterialData class for this object

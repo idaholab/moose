@@ -30,7 +30,7 @@ public:
   virtual void computeJacobian() override;
 
   /// Computes d-residual / d-jvar... storing the result in Ke.
-  virtual void computeOffDiagJacobian(MooseVariableFE & jvar) override;
+  virtual void computeOffDiagJacobian(MooseVariableFEBase & jvar) override;
 
   /**
    * Deprecated method

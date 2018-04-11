@@ -30,7 +30,7 @@ public:
 
 protected:
   /// MOOSE variable we compute the residual for
-  MooseVariableFE & _var;
+  MooseVariableFEBase & _var;
   /// The residual of the variable
   Real _var_residual;
 };

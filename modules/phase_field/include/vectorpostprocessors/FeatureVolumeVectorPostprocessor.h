@@ -65,7 +65,7 @@ private:
   /// Calculate the integral value of the passed in variable (index)
   Real computeIntegral(std::size_t var_index) const;
 
-  const std::vector<MooseVariableFE *> & _vars;
+  const std::vector<MooseVariableFEBase *> & _vars;
   std::vector<const VariableValue *> _coupled_sln;
 
   MooseMesh & _mesh;

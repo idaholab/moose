@@ -40,11 +40,11 @@ class SparseMatrix;
 class MooseMesh;
 class ArbitraryQuadrature;
 class SystemBase;
-class MooseVariableFE;
+class MooseVariableFEBase;
 template <typename>
-class MooseVariableField;
-typedef MooseVariableField<Real> MooseVariable;
-typedef MooseVariableField<RealVectorValue> VectorMooseVariable;
+class MooseVariableFEImpl;
+typedef MooseVariableFEImpl<Real> MooseVariable;
+typedef MooseVariableFEImpl<RealVectorValue> VectorMooseVariable;
 class XFEMInterface;
 
 /**
@@ -461,8 +461,8 @@ public:
    *
    * @param var The variable that needs to have its datastructures prepared
    */
-  void prepareVariable(MooseVariableFE * var);
-  void prepareVariableNonlocal(MooseVariableFE * var);
+  void prepareVariable(MooseVariableFEBase * var);
+  void prepareVariableNonlocal(MooseVariableFEBase * var);
   void prepareNeighbor();
   void prepareBlock(unsigned int ivar, unsigned jvar, const std::vector<dof_id_type> & dof_indices);
   void prepareBlockNonlocal(unsigned int ivar,
@@ -473,15 +473,15 @@ public:
   void prepareOffDiagScalar();
 
   template <typename T>
-  void copyShapes(MooseVariableField<T> & v);
+  void copyShapes(MooseVariableFEImpl<T> & v);
   void copyShapes(unsigned int var);
 
   template <typename T>
-  void copyFaceShapes(MooseVariableField<T> & v);
+  void copyFaceShapes(MooseVariableFEImpl<T> & v);
   void copyFaceShapes(unsigned int var);
 
   template <typename T>
-  void copyNeighborShapes(MooseVariableField<T> & v);
+  void copyNeighborShapes(MooseVariableFEImpl<T> & v);
   void copyNeighborShapes(unsigned int var);
 
   void addResidual(NumericVector<Number> & residual, Moose::KernelType type = Moose::KT_NONTIME);
@@ -600,11 +600,11 @@ public:
                                   const std::vector<dof_id_type> & jdof_indices,
                                   Real scaling_factor);
 
-  std::vector<std::pair<MooseVariableFE *, MooseVariableFE *>> & couplingEntries()
+  std::vector<std::pair<MooseVariableFEBase *, MooseVariableFEBase *>> & couplingEntries()
   {
     return _cm_entry;
   }
-  std::vector<std::pair<MooseVariableFE *, MooseVariableFE *>> & nonlocalCouplingEntries()
+  std::vector<std::pair<MooseVariableFEBase *, MooseVariableFEBase *>> & nonlocalCouplingEntries()
   {
     return _cm_nonlocal_entry;
   }
@@ -990,8 +990,8 @@ protected:
   const CouplingMatrix * _cm;
   const CouplingMatrix & _nonlocal_cm;
   /// Entries in the coupling matrix (only for field variables)
-  std::vector<std::pair<MooseVariableFE *, MooseVariableFE *>> _cm_entry;
-  std::vector<std::pair<MooseVariableFE *, MooseVariableFE *>> _cm_nonlocal_entry;
+  std::vector<std::pair<MooseVariableFEBase *, MooseVariableFEBase *>> _cm_entry;
+  std::vector<std::pair<MooseVariableFEBase *, MooseVariableFEBase *>> _cm_nonlocal_entry;
   /// Flag that indicates if the jacobian block was used
   std::vector<std::vector<unsigned char>> _jacobian_block_used;
   std::vector<std::vector<unsigned char>> _jacobian_block_nonlocal_used;

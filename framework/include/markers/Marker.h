@@ -28,9 +28,9 @@ class FEProblemBase;
 class SystemBase;
 class Assembly;
 template <typename>
-class MooseVariableField;
-typedef MooseVariableField<Real> MooseVariable;
-typedef MooseVariableField<VectorValue<Real>> VectorMooseVariable;
+class MooseVariableFEImpl;
+typedef MooseVariableFEImpl<Real> MooseVariable;
+typedef MooseVariableFEImpl<VectorValue<Real>> VectorMooseVariable;
 class Marker;
 class Adaptivity;
 
@@ -112,7 +112,7 @@ protected:
 
   Assembly & _assembly;
 
-  MooseVariableFE & _field_var;
+  MooseVariableFEBase & _field_var;
   const Elem *& _current_elem;
 
   MooseMesh & _mesh;

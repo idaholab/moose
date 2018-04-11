@@ -115,7 +115,7 @@ Material::Material(const InputParameters & parameters)
     _has_stateful_property(false)
 {
   // Fill in the MooseVariable dependencies
-  const std::vector<MooseVariableFE *> & coupled_vars = getCoupledMooseVars();
+  const std::vector<MooseVariableFEBase *> & coupled_vars = getCoupledMooseVars();
   for (const auto & var : coupled_vars)
     addMooseVariableDependency(var);
 }

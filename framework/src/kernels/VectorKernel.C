@@ -14,7 +14,7 @@
 
 #include "VectorKernel.h"
 #include "Assembly.h"
-#include "MooseVariableField.h"
+#include "MooseVariableFEImpl.h"
 #include "MooseVariableScalar.h"
 #include "SubProblem.h"
 #include "NonlinearSystem.h"
@@ -102,7 +102,7 @@ VectorKernel::computeJacobian()
 }
 
 void
-VectorKernel::computeOffDiagJacobian(MooseVariableFE & jvar)
+VectorKernel::computeOffDiagJacobian(MooseVariableFEBase & jvar)
 {
   size_t jvar_num = jvar.number();
   if (jvar_num == _var.number())

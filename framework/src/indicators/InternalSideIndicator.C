@@ -12,7 +12,7 @@
 // MOOSE includes
 #include "Assembly.h"
 #include "MooseTypes.h"
-#include "MooseVariableField.h"
+#include "MooseVariableFEImpl.h"
 #include "Problem.h"
 #include "SubProblem.h"
 #include "SystemBase.h"
@@ -76,7 +76,7 @@ InternalSideIndicator::InternalSideIndicator(const InputParameters & parameters)
     _u_neighbor(_var.slnNeighbor()),
     _grad_u_neighbor(_var.gradSlnNeighbor())
 {
-  const std::vector<MooseVariableFE *> & coupled_vars = getCoupledMooseVars();
+  const std::vector<MooseVariableFEBase *> & coupled_vars = getCoupledMooseVars();
   for (const auto & var : coupled_vars)
     addMooseVariableDependency(var);
 

@@ -48,7 +48,7 @@ protected:
 
   virtual Real computeQpJacobian() override;
 
-  virtual void computeJacobianBlock(MooseVariableFE & jvar) override;
+  virtual void computeJacobianBlock(MooseVariableFEBase & jvar) override;
   using IntegratedBC::computeJacobianBlock;
 
   virtual Real computeQpOffDiagJacobian(unsigned int jvar) override;

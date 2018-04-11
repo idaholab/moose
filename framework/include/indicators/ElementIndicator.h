@@ -21,9 +21,9 @@
 // Forward declarations
 class ElementIndicator;
 template <typename>
-class MooseVariableField;
-typedef MooseVariableField<Real> MooseVariable;
-typedef MooseVariableField<VectorValue<Real>> VectorMooseVariable;
+class MooseVariableFEImpl;
+typedef MooseVariableFEImpl<Real> MooseVariable;
+typedef MooseVariableFEImpl<VectorValue<Real>> VectorMooseVariable;
 
 template <>
 InputParameters validParams<ElementIndicator>();
@@ -39,7 +39,7 @@ public:
   ElementIndicator(const InputParameters & parameters);
 
 protected:
-  MooseVariableFE & _field_var;
+  MooseVariableFEBase & _field_var;
 
   const Elem *& _current_elem;
   /// Volume of the current element

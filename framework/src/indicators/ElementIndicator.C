@@ -10,7 +10,7 @@
 #include "ElementIndicator.h"
 
 #include "Assembly.h"
-#include "MooseVariableField.h"
+#include "MooseVariableFEImpl.h"
 #include "SystemBase.h"
 
 #include "libmesh/threads.h"
@@ -56,7 +56,7 @@ ElementIndicator::ElementIndicator(const InputParameters & parameters)
     _u_dot(_var.uDot()),
     _du_dot_du(_var.duDotDu())
 {
-  const std::vector<MooseVariableFE *> & coupled_vars = getCoupledMooseVars();
+  const std::vector<MooseVariableFEBase *> & coupled_vars = getCoupledMooseVars();
   for (const auto & var : coupled_vars)
     addMooseVariableDependency(var);
 

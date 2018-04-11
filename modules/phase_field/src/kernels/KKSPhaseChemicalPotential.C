@@ -52,7 +52,7 @@ KKSPhaseChemicalPotential::KKSPhaseChemicalPotential(const InputParameters & par
     _d2fadca2(getMaterialPropertyDerivative<Real>("fa_name", _var.name(), _var.name())),
     _d2fbdcbca(getMaterialPropertyDerivative<Real>("fb_name", _cb_name, _var.name()))
 {
-  MooseVariableFE * arg;
+  MooseVariableFEBase * arg;
   unsigned int i;
 
 #ifdef DEBUG

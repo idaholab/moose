@@ -19,7 +19,7 @@
 #include "libmesh/enum_quadrature_type.h"
 
 // Forward declarations
-class MooseVariableFE;
+class MooseVariableFEBase;
 class AssemblyData;
 class DisplacedProblem;
 class MooseMesh;
@@ -96,7 +96,7 @@ public:
 
   // Variables /////
   virtual bool hasVariable(const std::string & var_name) const override;
-  virtual MooseVariableFE & getVariable(THREAD_ID tid, const std::string & var_name) override;
+  virtual MooseVariableFEBase & getVariable(THREAD_ID tid, const std::string & var_name) override;
   virtual MooseVariable & getStandardVariable(THREAD_ID tid, const std::string & var_name) override;
   virtual VectorMooseVariable & getVectorVariable(THREAD_ID tid,
                                                   const std::string & var_name) override;

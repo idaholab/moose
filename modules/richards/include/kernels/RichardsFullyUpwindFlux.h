@@ -62,7 +62,7 @@ protected:
   virtual void computeResidual() override;
 
   /// this simply calls upwind
-  virtual void computeOffDiagJacobian(MooseVariableFE & jvar) override;
+  virtual void computeOffDiagJacobian(MooseVariableFEBase & jvar) override;
   using Kernel::computeOffDiagJacobian;
 
   /// the derivative of the flux without the upstream mobility terms

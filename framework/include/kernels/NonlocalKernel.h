@@ -38,7 +38,7 @@ public:
    * jocobians of the integral term from userobject once per dof
    */
   virtual void computeJacobian() override;
-  virtual void computeOffDiagJacobian(MooseVariableFE & jvar) override;
+  virtual void computeOffDiagJacobian(MooseVariableFEBase & jvar) override;
   using Kernel::computeOffDiagJacobian;
 
   /**
@@ -63,7 +63,7 @@ protected:
   /// Optimization option for getting jocobinas from userobject once per dof
   virtual void getUserObjectJacobian(unsigned int /*jvar*/, dof_id_type /*dof_index*/) {}
   /// optimization option for executing nonlocal jacobian calculation only for nonzero elements
-  virtual bool globalDoFEnabled(MooseVariableFE & /*var*/, dof_id_type /*dof_index*/)
+  virtual bool globalDoFEnabled(MooseVariableFEBase & /*var*/, dof_id_type /*dof_index*/)
   {
     return true;
   }

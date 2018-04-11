@@ -23,6 +23,7 @@ class ActionFactory;
 class Factory;
 class MooseEnumItem;
 class ExecFlagEnum;
+class MooseVariableFEBase;
 
 /**
  * MOOSE now contains C++11 code, so give a reasonable error message
@@ -155,8 +156,8 @@ bool setColorConsole(bool use_color, bool force = false);
 /**
  * Import libMesh::out, and libMesh::err for use in MOOSE.
  */
-using libMesh::out;
 using libMesh::err;
+using libMesh::out;
 
 /**
  * Register objects that are in MOOSE
@@ -175,7 +176,7 @@ void setSolverDefaults(FEProblemBase & problem);
 
 /**
  * Swap the libMesh MPI communicator out for ours.  Note that you should usually use
-  * the Moose::ScopedCommSwapper class instead of calling this function.
+ * the Moose::ScopedCommSwapper class instead of calling this function.
  */
 MPI_Comm swapLibMeshComm(MPI_Comm new_comm);
 
@@ -191,11 +192,14 @@ public:
   /// was called.  Usually you should not need/use this function because MPI communicators
   /// are swapped automatically when this object is constructed/destructed.
   void forceSwap() { _orig = swapLibMeshComm(_orig); }
+
 private:
   MPI_Comm _orig;
 };
 
 void enableFPE(bool on = true);
+
+#define MooseVariableFE MooseVariableFEBase
 
 // MOOSE Requires PETSc to run, this CPP check will cause a compile error if PETSc is not found
 #ifndef LIBMESH_HAVE_PETSC

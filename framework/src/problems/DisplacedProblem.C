@@ -229,7 +229,7 @@ DisplacedProblem::hasVariable(const std::string & var_name) const
     return false;
 }
 
-MooseVariableFE &
+MooseVariableFEBase &
 DisplacedProblem::getVariable(THREAD_ID tid, const std::string & var_name)
 {
   if (_displaced_nl.hasVariable(var_name))

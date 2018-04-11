@@ -46,12 +46,12 @@ public:
 protected:
   /// The aux variables to save the residual contributions to
   bool _has_save_in;
-  std::vector<MooseVariableFE *> _save_in;
+  std::vector<MooseVariableFEBase *> _save_in;
   std::vector<AuxVariableName> _save_in_strings;
 
   /// The aux variables to save the diagonal Jacobian contributions to
   bool _has_diag_save_in;
-  std::vector<MooseVariableFE *> _diag_save_in;
+  std::vector<MooseVariableFEBase *> _diag_save_in;
   std::vector<AuxVariableName> _diag_save_in_strings;
 
   /// Indicate whether or not the boundary condition is applied to the right

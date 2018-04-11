@@ -4,7 +4,7 @@
 
 The current class hierarchy for Moose variables is shown below:
 
-!media media/framework_development/moose_variable_hierarchy.png
+!media media/framework_development/moose_variable_hierarchy.svg
        caption=Moose variable hierarchy.
        style=width:50%;
 
@@ -43,9 +43,9 @@ using `coupled`. Moreoever, this design structure mirrors that of the `FE`
 design in LibMesh, where `FEAbstract` is an abstract base class that implements
 all methods independent of `FE` type and the class
 template `FEGenericBase<T>` implements the type dependent methods analogous to
-`MooseVariableField<T>`.
+`MooseVariableFEImpl<T>`.
 
-`MooseVariableField<T>` implements methods that return the variable's solution
+`MooseVariableFEImpl<T>` implements methods that return the variable's solution
 and its associated shape functions. Additionally, it contains the methods
 responsible for computing the variable solution at quadrature points given the
 degree of freedom values computed from the previous non-linear
@@ -59,14 +59,14 @@ electromagnetic applications or for general PDEs that involve a curl
 operation. The latter is potentially useful for tensor mechanic or Navier-Stokes
 simulations where historically displacement or velocity variables have been
 broken up component-wise. To hide the templating of the Moose variable system
-from other framework code, `MooseVariableField<Real>` and
-`MooseVariableField<RealVectorValue>` have been aliased to `MooseVariable` and
+from other framework code, `MooseVariableFEImpl<Real>` and
+`MooseVariableFEImpl<RealVectorValue>` have been aliased to `MooseVariable` and
 `VectorMooseVariable` respectively.
 
 Finally, `MooseVariableConstMonomial` is a class that takes advantage of its
 finite element type (constant value on an element) to optimize its solution
 computing routines. Consequently, it overrides the `computeElemValues` and
-similar methods of `MooseVariableField<Real>`.
+similar methods of `MooseVariableFEImpl<Real>`.
 
 ## Accessors
 
