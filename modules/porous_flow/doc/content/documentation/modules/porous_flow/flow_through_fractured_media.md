@@ -59,14 +59,24 @@ sub-domains.
 When creating a mesh:
 
 - For the case of 2D elements embedded in a 3D porous matrix, the 2D
-  elements need to be QUAD or TRI elements that are connected to the
-  3D elements.
+  elements need to be QUAD or TRISHELL3 elements that are connected to
+  the 3D elements. (example journal file: coarse_3D.jou)
 - For the case of 1D elements embedded in a 2D porous
   matrix, the 1D elements need to be BAR elements that are connected
-  to 2D QUAD or TRI elements.
+  to 2D QUAD or TRI3 elements. (example journal file: coarse.jou)
 - In the case of an isolated fracture
-  network, the mesh needs to consist of QUAD or TRI elements (for 2D
+  network, the mesh needs to consist of QUAD or TRI3 elements (for 2D
   fractures) or BAR elements (for 1D fractures).
+
+When creating a 3D mesh with 2D fracture elements of type TRISHELL3 in Trelis/Cubit:
+
+- During meshing Trelis/Cubit might change the element type from TRISHELL3
+  to TRI3. However, Trelis/Cubit keeps the correct element sides that are generated
+  for the TRISHELL3 elements. This is certainly due to a bug in some
+  Trelis/Cubit versions and is not a big deal as long as the user is aware of it.
+- The element type in produced exodus mesh file needs to be modified manually.
+  The shell script *modif_trishell3_exodus_file.sh* in the example folder might
+  be used to to this.
 
 Finally, the fractures elements *need to be part of a separate
 subdomain (block)*.  This is actually a requirement of the exodus
@@ -320,5 +330,3 @@ The results after some time of simulation are shown in [retard_mesh_result_fig].
 The reason for this is the following.  Heat flows into the system through the fracture's left side.  In each mesh it has to "fill up" the nodes on the top and bottom of the fracture.  The nodal volume of these nodes contains contributions from the matrix elements that they are joined to.  So the nodal volume of the nodes in Mesh A and B is quite large compared to Mesh C.  Hence, more heat energy is needed to raise their temperature, which means that the temperature changes more slowly in Mesh A and B compared with Mesh C.
 
 We call this "retardation" of the flow by the matrix.  It is not a real physical effect: it is due to the coarse resolution in the matrix.  Although this section has concentrated on the simple diffusion equation with no upwinding or mass lumping, exactly the same phenomenom occurs in PorousFlow simulations, and users may need to be aware of this.
-
-
