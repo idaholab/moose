@@ -1233,7 +1233,7 @@ MooseVariableFEImpl<OutputType>::nodalValue()
 
 template <typename OutputType>
 const MooseArray<Real> &
-MooseVariableField<OutputType>::nodalVectorTagValue(TagID tag)
+MooseVariableFEImpl<OutputType>::nodalVectorTagValue(TagID tag)
 {
   if (isNodal())
   {
@@ -1252,7 +1252,7 @@ MooseVariableField<OutputType>::nodalVectorTagValue(TagID tag)
 
 template <typename OutputType>
 const MooseArray<Real> &
-MooseVariableField<OutputType>::nodalMatrixTagValue(TagID tag)
+MooseVariableFEImpl<OutputType>::nodalMatrixTagValue(TagID tag)
 {
   if (isNodal())
   {

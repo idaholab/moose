@@ -602,7 +602,7 @@ protected:
   bool _need_dof_values_previous_nl_neighbor;
   bool _need_dof_values_dot_neighbor;
   bool _need_dof_du_dot_du_neighbor;
-  
+
   bool _need_vector_tag_dof_u;
   bool _need_matrix_tag_dof_u;
 
