@@ -11,7 +11,7 @@
 
 // MOOSE includes
 #include "MooseMesh.h"
-#include "MooseVariableFEImpl.h"
+#include "MooseVariableFE.h"
 
 #include "libmesh/mesh_tools.h"
 

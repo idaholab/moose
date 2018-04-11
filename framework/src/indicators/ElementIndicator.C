@@ -10,7 +10,7 @@
 #include "ElementIndicator.h"
 
 #include "Assembly.h"
-#include "MooseVariableFEImpl.h"
+#include "MooseVariableFE.h"
 #include "SystemBase.h"
 
 #include "libmesh/threads.h"

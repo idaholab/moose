@@ -12,7 +12,7 @@
 // MOOSE includes
 #include "AuxiliarySystem.h"
 #include "MooseMesh.h"
-#include "MooseVariableFEImpl.h"
+#include "MooseVariableFE.h"
 
 #include "libmesh/numeric_vector.h"
 

@@ -13,7 +13,7 @@
 #include "ActionWarehouse.h"
 #include "Factory.h"
 #include "FEProblem.h"
-#include "MooseVariableFEImpl.h"
+#include "MooseVariableFE.h"
 #include "NonlinearSystemBase.h"
 #include "Conversion.h"
 

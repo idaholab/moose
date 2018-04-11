@@ -10,7 +10,7 @@
 #include "ElementIntegralIndicator.h"
 
 // MOOSE includes
-#include "MooseVariableFEImpl.h"
+#include "MooseVariableFE.h"
 
 #include "libmesh/quadrature.h"
 

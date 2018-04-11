@@ -10,7 +10,7 @@
 #ifndef JVARMAPINTERFACE_H
 #define JVARMAPINTERFACE_H
 
-#include "MooseVariableFEImpl.h"
+#include "MooseVariableFE.h"
 #include "NonlinearSystemBase.h"
 
 template <class T>

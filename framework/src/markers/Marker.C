@@ -12,7 +12,7 @@
 #include "Assembly.h"
 #include "FEProblem.h"
 #include "MooseMesh.h"
-#include "MooseVariableFEImpl.h"
+#include "MooseVariableFE.h"
 #include "SystemBase.h"
 
 template <>

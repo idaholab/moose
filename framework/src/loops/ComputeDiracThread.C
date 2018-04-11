@@ -14,7 +14,7 @@
 #include "DiracKernel.h"
 #include "Problem.h"
 #include "NonlinearSystem.h"
-#include "MooseVariableFEImpl.h"
+#include "MooseVariableFE.h"
 #include "DiracKernel.h"
 #include "Assembly.h"
 

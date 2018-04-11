@@ -10,7 +10,7 @@
 // MOOSE includes
 #include "Indicator.h"
 #include "Assembly.h"
-#include "MooseVariableFEImpl.h"
+#include "MooseVariableFE.h"
 #include "Problem.h"
 #include "SubProblem.h"
 #include "SystemBase.h"

@@ -14,7 +14,7 @@
 // MOOSE includes
 #include "FEProblem.h"
 #include "MooseEnum.h"
-#include "MooseVariableFEImpl.h"
+#include "MooseVariableFE.h"
 #include "NonlinearSystem.h"
 #include "PetscSupport.h"
 

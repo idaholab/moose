@@ -10,6 +10,6 @@
 #ifndef MOOSEVARIABLE_H
 #define MOOSEVARIABLE_H
 
-#include "MooseVariableFEImpl.h"
+#include "MooseVariableFE.h"
 
 #endif /* MOOSEVARIABLE_H */

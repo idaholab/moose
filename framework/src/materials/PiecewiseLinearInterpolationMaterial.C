@@ -10,7 +10,7 @@
 #include "PiecewiseLinearInterpolationMaterial.h"
 
 // MOOSE includes
-#include "MooseVariableFEImpl.h"
+#include "MooseVariableFE.h"
 
 registerMooseObject("MooseApp", PiecewiseLinearInterpolationMaterial);
 

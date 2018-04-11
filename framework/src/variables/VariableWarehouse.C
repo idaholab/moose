@@ -8,7 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "VariableWarehouse.h"
-#include "MooseVariableFEImpl.h"
+#include "MooseVariableFE.h"
 #include "MooseVariableScalar.h"
 #include "MooseTypes.h"
 
@@ -114,34 +114,33 @@ VariableWarehouse::boundaryVars(BoundaryID bnd)
 }
 
 template <typename T>
-MooseVariableFEImpl<T> *
+MooseVariableFE<T> *
 VariableWarehouse::getFieldVariable(const std::string & var_name)
 {
   return _regular_vars_by_name.at(var_name);
 }
 
 template <typename T>
-MooseVariableFEImpl<T> *
+MooseVariableFE<T> *
 VariableWarehouse::getFieldVariable(unsigned int var_number)
 {
   return _regular_vars_by_number.at(var_number);
 }
 
 template <>
-MooseVariableFEImpl<RealVectorValue> *
+MooseVariableFE<RealVectorValue> *
 VariableWarehouse::getFieldVariable<RealVectorValue>(const std::string & var_name)
 {
   return _vector_vars_by_name.at(var_name);
 }
 
 template <>
-MooseVariableFEImpl<RealVectorValue> *
+MooseVariableFE<RealVectorValue> *
 VariableWarehouse::getFieldVariable<RealVectorValue>(unsigned int var_number)
 {
   return _vector_vars_by_number.at(var_number);
 }
 
-template MooseVariableFEImpl<Real> *
+template MooseVariableFE<Real> *
 VariableWarehouse::getFieldVariable<Real>(const std::string & var_name);
-template MooseVariableFEImpl<Real> *
-VariableWarehouse::getFieldVariable<Real>(unsigned int var_number);
+template MooseVariableFE<Real> * VariableWarehouse::getFieldVariable<Real>(unsigned int var_number);

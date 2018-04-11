@@ -8,7 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "NodalUserObject.h"
-#include "MooseVariableFEImpl.h"
+#include "MooseVariableFE.h"
 #include "SubProblem.h"
 #include "MooseTypes.h"
 #include "Assembly.h"
