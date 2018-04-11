@@ -13,7 +13,7 @@
 #include "AddVariableAction.h"
 #include "FEProblem.h"
 #include "MooseMesh.h"
-#include "MooseVariableField.h"
+#include "MooseVariableFEImpl.h"
 #include "SystemBase.h"
 
 #include "libmesh/dof_map.h"
@@ -316,7 +316,7 @@ MultiAppProjectionTransfer::execute()
   for (unsigned int i_from = 0; i_from < _from_problems.size(); i_from++)
   {
     FEProblemBase & from_problem = *_from_problems[i_from];
-    MooseVariableFE & from_var = from_problem.getVariable(0, _from_var_name);
+    MooseVariableFEBase & from_var = from_problem.getVariable(0, _from_var_name);
     System & from_sys = from_var.sys().system();
     unsigned int from_var_num = from_sys.variable_number(from_var.name());
 
@@ -522,7 +522,7 @@ MultiAppProjectionTransfer::projectSolution(unsigned int i_to)
   // copy projected solution into target es
   MeshBase & to_mesh = proj_es.get_mesh();
 
-  MooseVariableFE & to_var = to_problem.getVariable(0, _to_var_name);
+  MooseVariableFEBase & to_var = to_problem.getVariable(0, _to_var_name);
   System & to_sys = to_var.sys().system();
   NumericVector<Number> * to_solution = to_sys.solution.get();
 

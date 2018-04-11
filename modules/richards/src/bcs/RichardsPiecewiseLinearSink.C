@@ -241,7 +241,7 @@ RichardsPiecewiseLinearSink::computeQpJacobian()
 }
 
 void
-RichardsPiecewiseLinearSink::computeJacobianBlock(MooseVariableFE & jvar)
+RichardsPiecewiseLinearSink::computeJacobianBlock(MooseVariableFEBase & jvar)
 {
   if (_fully_upwind)
     prepareNodalValues();

@@ -14,7 +14,7 @@
 #include "FEProblem.h"
 #include "MooseMesh.h"
 #include "MooseTypes.h"
-#include "MooseVariableField.h"
+#include "MooseVariableFEImpl.h"
 
 #include "libmesh/meshfree_interpolation.h"
 #include "libmesh/system.h"
@@ -226,7 +226,7 @@ MultiAppMeshFunctionTransfer::transferVariable(unsigned int i)
   for (unsigned int i_from = 0; i_from < _from_problems.size(); ++i_from)
   {
     FEProblemBase & from_problem = *_from_problems[i_from];
-    MooseVariableFE & from_var = from_problem.getVariable(0, _from_var_name[i]);
+    MooseVariableFEBase & from_var = from_problem.getVariable(0, _from_var_name[i]);
     System & from_sys = from_var.sys().system();
     unsigned int from_var_num = from_sys.variable_number(from_var.name());
 

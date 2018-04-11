@@ -9,7 +9,7 @@
 
 #include "NonlocalKernel.h"
 #include "Assembly.h"
-#include "MooseVariableField.h"
+#include "MooseVariableFEImpl.h"
 #include "Problem.h"
 #include "SubProblem.h"
 #include "SystemBase.h"
@@ -66,7 +66,7 @@ NonlocalKernel::computeJacobian()
 }
 
 void
-NonlocalKernel::computeOffDiagJacobian(MooseVariableFE & jvar)
+NonlocalKernel::computeOffDiagJacobian(MooseVariableFEBase & jvar)
 {
   size_t jvar_num = jvar.number();
   if (jvar_num == _var.number())
@@ -124,7 +124,7 @@ NonlocalKernel::computeNonlocalOffDiagJacobian(unsigned int jvar)
     computeNonlocalJacobian();
   else
   {
-    MooseVariableFE & jv = _sys.getVariable(_tid, jvar);
+    MooseVariableFEBase & jv = _sys.getVariable(_tid, jvar);
     DenseMatrix<Number> & keg = _assembly.jacobianBlockNonlocal(_var.number(), jvar);
     // compiling set of global IDs for the local DOFs on the element
     std::set<dof_id_type> local_dofindices(jv.dofIndices().begin(), jv.dofIndices().end());

@@ -14,7 +14,7 @@
 #include "DiracKernel.h"
 #include "Problem.h"
 #include "NonlinearSystem.h"
-#include "MooseVariableField.h"
+#include "MooseVariableFEImpl.h"
 #include "DiracKernel.h"
 #include "Assembly.h"
 
@@ -52,7 +52,7 @@ ComputeDiracThread::subdomainChanged()
 {
   _fe_problem.subdomainSetup(_subdomain, _tid);
 
-  std::set<MooseVariableFE *> needed_moose_vars;
+  std::set<MooseVariableFEBase *> needed_moose_vars;
   _dirac_kernels.updateVariableDependency(needed_moose_vars, _tid);
 
   // Update material dependencies
@@ -70,7 +70,7 @@ ComputeDiracThread::onElement(const Elem * elem)
   if (!has_dirac_kernels_on_elem)
     return;
 
-  std::set<MooseVariableFE *> needed_moose_vars;
+  std::set<MooseVariableFEBase *> needed_moose_vars;
   const std::vector<std::shared_ptr<DiracKernel>> & dkernels =
       _dirac_kernels.getActiveObjects(_tid);
 
@@ -99,14 +99,14 @@ ComputeDiracThread::onElement(const Elem * elem)
     }
 
     // Get a list of coupled variables from the SubProblem
-    std::vector<std::pair<MooseVariableFE *, MooseVariableFE *>> & coupling_entries =
+    std::vector<std::pair<MooseVariableFEBase *, MooseVariableFEBase *>> & coupling_entries =
         dirac_kernel->subProblem().assembly(_tid).couplingEntries();
 
     // Loop over the list of coupled variable pairs
     for (auto & it : coupling_entries)
     {
-      MooseVariableFE * ivariable = it.first;
-      MooseVariableFE * jvariable = it.second;
+      MooseVariableFEBase * ivariable = it.first;
+      MooseVariableFEBase * jvariable = it.second;
 
       // A variant of the check that is in
       // ComputeFullJacobianThread::computeJacobian().  We

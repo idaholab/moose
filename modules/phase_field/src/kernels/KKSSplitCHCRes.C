@@ -59,7 +59,7 @@ KKSSplitCHCRes::KKSSplitCHCRes(const InputParameters & parameters)
   // Iterate over all coupled variables
   for (unsigned int i = 0; i < _nvar; ++i)
   {
-    MooseVariableFE * cvar = this->_coupled_moose_vars[i];
+    MooseVariableFEBase * cvar = this->_coupled_moose_vars[i];
 
     // get the second derivative material property
     _d2Fadcadarg[i] = &getMaterialPropertyDerivative<Real>("fa_name", _ca_name, cvar->name());

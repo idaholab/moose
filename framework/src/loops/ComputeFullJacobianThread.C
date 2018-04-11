@@ -14,7 +14,7 @@
 #include "IntegratedBCBase.h"
 #include "DGKernel.h"
 #include "InterfaceKernel.h"
-#include "MooseVariableField.h"
+#include "MooseVariableFEImpl.h"
 #include "MooseVariableScalar.h"
 #include "NonlocalKernel.h"
 #include "NonlocalIntegratedBC.h"
@@ -76,12 +76,12 @@ ComputeFullJacobianThread::~ComputeFullJacobianThread() {}
 void
 ComputeFullJacobianThread::computeJacobian()
 {
-  std::vector<std::pair<MooseVariableFE *, MooseVariableFE *>> & ce =
+  std::vector<std::pair<MooseVariableFEBase *, MooseVariableFEBase *>> & ce =
       _fe_problem.couplingEntries(_tid);
   for (const auto & it : ce)
   {
-    MooseVariableFE & ivariable = *(it.first);
-    MooseVariableFE & jvariable = *(it.second);
+    MooseVariableFEBase & ivariable = *(it.first);
+    MooseVariableFEBase & jvariable = *(it.second);
 
     unsigned int ivar = ivariable.number();
     unsigned int jvar = jvariable.number();
@@ -104,12 +104,12 @@ ComputeFullJacobianThread::computeJacobian()
   /// done only when nonlocal kernels exist in the system
   if (_fe_problem.checkNonlocalCouplingRequirement())
   {
-    std::vector<std::pair<MooseVariableFE *, MooseVariableFE *>> & cne =
+    std::vector<std::pair<MooseVariableFEBase *, MooseVariableFEBase *>> & cne =
         _fe_problem.nonlocalCouplingEntries(_tid);
     for (const auto & it : cne)
     {
-      MooseVariableFE & ivariable = *(it.first);
-      MooseVariableFE & jvariable = *(it.second);
+      MooseVariableFEBase & ivariable = *(it.first);
+      MooseVariableFEBase & jvariable = *(it.second);
 
       unsigned int ivar = ivariable.number();
       unsigned int jvar = jvariable.number();
@@ -137,7 +137,7 @@ ComputeFullJacobianThread::computeJacobian()
   if (scalar_vars.size() > 0)
   {
     // go over nl-variables (non-scalar)
-    const std::vector<MooseVariableFE *> & vars = _nl.getVariables(_tid);
+    const std::vector<MooseVariableFEBase *> & vars = _nl.getVariables(_tid);
     for (const auto & ivariable : vars)
       if (ivariable->activeOnSubdomain(_subdomain) > 0 &&
           _warehouse->hasActiveVariableBlockObjects(ivariable->number(), _subdomain, _tid))
@@ -164,12 +164,12 @@ ComputeFullJacobianThread::computeJacobian()
 void
 ComputeFullJacobianThread::computeFaceJacobian(BoundaryID bnd_id)
 {
-  std::vector<std::pair<MooseVariableFE *, MooseVariableFE *>> & ce =
+  std::vector<std::pair<MooseVariableFEBase *, MooseVariableFEBase *>> & ce =
       _fe_problem.couplingEntries(_tid);
   for (const auto & it : ce)
   {
-    MooseVariableFE & ivar = *(it.first);
-    MooseVariableFE & jvar = *(it.second);
+    MooseVariableFEBase & ivar = *(it.first);
+    MooseVariableFEBase & jvar = *(it.second);
     if (ivar.activeOnSubdomain(_subdomain) && jvar.activeOnSubdomain(_subdomain) &&
         _integrated_bcs.hasActiveBoundaryObjects(bnd_id, _tid))
     {
@@ -189,12 +189,12 @@ ComputeFullJacobianThread::computeFaceJacobian(BoundaryID bnd_id)
   /// done only when nonlocal integrated_bcs exist in the system
   if (_fe_problem.checkNonlocalCouplingRequirement())
   {
-    std::vector<std::pair<MooseVariableFE *, MooseVariableFE *>> & cne =
+    std::vector<std::pair<MooseVariableFEBase *, MooseVariableFEBase *>> & cne =
         _fe_problem.nonlocalCouplingEntries(_tid);
     for (const auto & it : cne)
     {
-      MooseVariableFE & ivariable = *(it.first);
-      MooseVariableFE & jvariable = *(it.second);
+      MooseVariableFEBase & ivariable = *(it.first);
+      MooseVariableFEBase & jvariable = *(it.second);
 
       unsigned int ivar = ivariable.number();
       unsigned int jvar = jvariable.number();
@@ -223,7 +223,7 @@ ComputeFullJacobianThread::computeFaceJacobian(BoundaryID bnd_id)
   if (scalar_vars.size() > 0)
   {
     // go over nl-variables (non-scalar)
-    const std::vector<MooseVariableFE *> & vars = _nl.getVariables(_tid);
+    const std::vector<MooseVariableFEBase *> & vars = _nl.getVariables(_tid);
     for (const auto & ivar : vars)
       if (ivar->activeOnSubdomain(_subdomain) > 0 &&
           _integrated_bcs.hasActiveBoundaryObjects(bnd_id, _tid))
@@ -259,8 +259,8 @@ ComputeFullJacobianThread::computeInternalFaceJacobian(const Elem * neighbor)
           _dg_kernels.getActiveBlockObjects(_subdomain, _tid);
       for (const auto & dg : dgks)
       {
-        MooseVariableFE & ivariable = *(it.first);
-        MooseVariableFE & jvariable = *(it.second);
+        MooseVariableFEBase & ivariable = *(it.first);
+        MooseVariableFEBase & jvariable = *(it.second);
 
         unsigned int ivar = ivariable.number();
         unsigned int jvar = jvariable.number();

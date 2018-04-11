@@ -9,7 +9,7 @@
 
 #include "KernelBase.h"
 #include "Assembly.h"
-#include "MooseVariableField.h"
+#include "MooseVariableFEImpl.h"
 #include "Problem.h"
 #include "SubProblem.h"
 #include "SystemBase.h"

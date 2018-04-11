@@ -14,7 +14,7 @@
 #include "AuxiliarySystem.h"
 #include "FEProblem.h"
 #include "MooseMesh.h"
-#include "MooseVariableField.h"
+#include "MooseVariableFEImpl.h"
 #include "NodalKernel.h"
 
 #include "libmesh/sparse_matrix.h"
@@ -53,12 +53,12 @@ ComputeNodalKernelJacobiansThread::onNode(ConstNodeRange::const_iterator & node_
 {
   const Node * node = *node_it;
 
-  std::vector<std::pair<MooseVariableFE *, MooseVariableFE *>> & ce =
+  std::vector<std::pair<MooseVariableFEBase *, MooseVariableFEBase *>> & ce =
       _fe_problem.couplingEntries(_tid);
   for (const auto & it : ce)
   {
-    MooseVariableFE & ivariable = *(it.first);
-    MooseVariableFE & jvariable = *(it.second);
+    MooseVariableFEBase & ivariable = *(it.first);
+    MooseVariableFEBase & jvariable = *(it.second);
 
     unsigned int ivar = ivariable.number();
     unsigned int jvar = jvariable.number();
@@ -86,7 +86,7 @@ ComputeNodalKernelJacobiansThread::onNode(ConstNodeRange::const_iterator & node_
             }
 
             // See if this NodalKernel is coupled to the jvar
-            const std::vector<MooseVariableFE *> & coupled_vars =
+            const std::vector<MooseVariableFEBase *> & coupled_vars =
                 nodal_kernel->getCoupledMooseVars();
             for (const auto & var : coupled_vars)
               if (var->number() == jvar)

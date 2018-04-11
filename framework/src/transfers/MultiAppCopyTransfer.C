@@ -14,7 +14,7 @@
 #include "FEProblem.h"
 #include "MooseMesh.h"
 #include "MooseTypes.h"
-#include "MooseVariableField.h"
+#include "MooseVariableFEImpl.h"
 #include "MultiApp.h"
 #include "NonlinearSystem.h"
 
@@ -53,8 +53,8 @@ MultiAppCopyTransfer::initialSetup()
 void
 MultiAppCopyTransfer::transferDofObject(libMesh::DofObject * to_object,
                                         libMesh::DofObject * from_object,
-                                        MooseVariableFE & to_var,
-                                        MooseVariableFE & from_var)
+                                        MooseVariableFEBase & to_var,
+                                        MooseVariableFEBase & from_var)
 {
   if (to_object->n_dofs(to_var.sys().number(), to_var.number()) >
       0) // If this variable has dofs at this node
@@ -73,10 +73,10 @@ void
 MultiAppCopyTransfer::transfer(FEProblemBase & to_problem, FEProblemBase & from_problem)
 {
   // Populate the to/from variables needed to perform the transfer
-  MooseVariableFE & to_var = to_problem.getVariable(0, _to_var_name);
+  MooseVariableFEBase & to_var = to_problem.getVariable(0, _to_var_name);
   MeshBase & to_mesh = to_problem.mesh().getMesh();
 
-  MooseVariableFE & from_var = from_problem.getVariable(0, _from_var_name);
+  MooseVariableFEBase & from_var = from_problem.getVariable(0, _from_var_name);
   MeshBase & from_mesh = from_problem.mesh().getMesh();
 
   // Check integrity

@@ -7,9 +7,12 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef MOOSEVARIABLE_H
-#define MOOSEVARIABLE_H
-
 #include "MooseVariableFEImpl.h"
 
-#endif /* MOOSEVARIABLE_H */
+MooseVariableFEBase::MooseVariableFEBase(unsigned int var_num,
+                                         const FEType & fe_type,
+                                         SystemBase & sys,
+                                         Moose::VarKindType var_kind)
+  : MooseVariableBase(var_num, fe_type, sys, var_kind)
+{
+}

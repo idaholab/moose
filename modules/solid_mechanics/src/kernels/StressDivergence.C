@@ -258,7 +258,7 @@ StressDivergence::computeQpJacobian()
 }
 
 void
-StressDivergence::computeOffDiagJacobian(MooseVariableFE & jvar)
+StressDivergence::computeOffDiagJacobian(MooseVariableFEBase & jvar)
 {
   size_t jvar_num = jvar.number();
   if (jvar_num == _var.number())

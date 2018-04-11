@@ -120,7 +120,7 @@ StressDivergenceTensorsTruss::computeJacobian()
 }
 
 void
-StressDivergenceTensorsTruss::computeOffDiagJacobian(MooseVariableFE & jvar)
+StressDivergenceTensorsTruss::computeOffDiagJacobian(MooseVariableFEBase & jvar)
 {
   size_t jvar_num = jvar.number();
   if (jvar_num == _var.number())

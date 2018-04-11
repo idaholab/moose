@@ -19,7 +19,7 @@
 #include "InfixIterator.h"
 #include "MooseApp.h"
 #include "MooseUtils.h"
-#include "MooseVariableField.h"
+#include "MooseVariableFEImpl.h"
 #include "Postprocessor.h"
 #include "Restartable.h"
 #include "VectorPostprocessor.h"
@@ -382,7 +382,7 @@ AdvancedOutput::initAvailableLists()
   {
     if (_problem_ptr->hasVariable(var_name))
     {
-      MooseVariableFE & var = _problem_ptr->getVariable(0, var_name);
+      MooseVariableFEBase & var = _problem_ptr->getVariable(0, var_name);
       const FEType type = var.feType();
       if (type.order == CONSTANT)
         _execute_data["elemental"].available.insert(var_name);
@@ -452,7 +452,7 @@ AdvancedOutput::initShowHideLists(const std::vector<VariableName> & show,
   {
     if (_problem_ptr->hasVariable(var_name))
     {
-      MooseVariableFE & var = _problem_ptr->getVariable(0, var_name);
+      MooseVariableFEBase & var = _problem_ptr->getVariable(0, var_name);
       const FEType type = var.feType();
       if (type.order == CONSTANT)
         _execute_data["elemental"].show.insert(var_name);
@@ -493,7 +493,7 @@ AdvancedOutput::initShowHideLists(const std::vector<VariableName> & show,
   {
     if (_problem_ptr->hasVariable(var_name))
     {
-      MooseVariableFE & var = _problem_ptr->getVariable(0, var_name);
+      MooseVariableFEBase & var = _problem_ptr->getVariable(0, var_name);
       const FEType type = var.feType();
       if (type.order == CONSTANT)
         _execute_data["elemental"].hide.insert(var_name);

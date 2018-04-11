@@ -11,7 +11,7 @@
 
 // MOOSE includes
 #include "Assembly.h"
-#include "MooseVariableField.h"
+#include "MooseVariableFEImpl.h"
 #include "MooseVariableScalar.h"
 #include "SubProblem.h"
 #include "NonlinearSystem.h"
@@ -137,7 +137,7 @@ Kernel::computeJacobian()
 }
 
 void
-Kernel::computeOffDiagJacobian(MooseVariableFE & jvar)
+Kernel::computeOffDiagJacobian(MooseVariableFEBase & jvar)
 {
   size_t jvar_num = jvar.number();
   if (jvar_num == _var.number())
@@ -158,7 +158,7 @@ void
 Kernel::computeOffDiagJacobian(unsigned int jvar)
 {
   mooseDeprecated("The computeOffDiagJacobian method signature has changed. Developers, please "
-                  "pass in a MooseVariableFE reference instead of the variable number");
+                  "pass in a MooseVariableFEBase reference instead of the variable number");
   if (jvar == _var.number())
     computeJacobian();
   else

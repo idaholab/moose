@@ -11,11 +11,11 @@
 #define MOOSEVARIABLECONSTMONOMIAL_H
 
 #include "MooseTypes.h"
-#include "MooseVariableField.h"
+#include "MooseVariableFEImpl.h"
 
 class Assembly;
 
-class MooseVariableConstMonomial : public MooseVariableField<Real>
+class MooseVariableConstMonomial : public MooseVariableFEImpl<Real>
 {
 public:
   MooseVariableConstMonomial(unsigned int var_num,

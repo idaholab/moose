@@ -11,7 +11,7 @@
 #include "FEProblem.h"
 #include "SystemBase.h"
 #include "Assembly.h"
-#include "MooseVariableField.h"
+#include "MooseVariableFEImpl.h"
 
 #include "libmesh/fe_interface.h"
 #include "libmesh/quadrature.h"
@@ -68,7 +68,7 @@ InitialCondition::InitialCondition(const InputParameters & parameters)
 {
   _supplied_vars.insert(getParam<VariableName>("variable"));
 
-  std::map<std::string, std::vector<MooseVariableFE *>> coupled_vars = getCoupledVars();
+  std::map<std::string, std::vector<MooseVariableFEBase *>> coupled_vars = getCoupledVars();
   for (const auto & it : coupled_vars)
     for (const auto & var : it.second)
       _depend_vars.insert(var->name());

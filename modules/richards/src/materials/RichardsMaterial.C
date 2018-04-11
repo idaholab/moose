@@ -139,7 +139,8 @@ RichardsMaterial::RichardsMaterial(const InputParameters & parameters)
   // Need to add the variables that the user object is coupled to as dependencies so MOOSE will
   // compute them
   {
-    const std::vector<MooseVariableFE *> & coupled_vars = _richards_name_UO.getCoupledMooseVars();
+    const std::vector<MooseVariableFEBase *> & coupled_vars =
+        _richards_name_UO.getCoupledMooseVars();
     for (unsigned int i = 0; i < coupled_vars.size(); i++)
       addMooseVariableDependency(coupled_vars[i]);
   }

@@ -13,7 +13,7 @@
 #include "MooseError.h"
 #include "MooseMesh.h"
 #include "MooseUtils.h"
-#include "MooseVariableField.h"
+#include "MooseVariableFEImpl.h"
 #include "RotationMatrix.h"
 
 #include "libmesh/equation_systems.h"

@@ -13,7 +13,7 @@
 #include "ComputeJacobianBlocksThread.h"
 #include "FEProblem.h"
 #include "MooseEnum.h"
-#include "MooseVariableField.h"
+#include "MooseVariableFEImpl.h"
 #include "NonlinearSystem.h"
 #include "PetscSupport.h"
 

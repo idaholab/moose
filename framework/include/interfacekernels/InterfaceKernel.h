@@ -216,13 +216,13 @@ protected:
   bool _has_master_residuals_saved_in;
 
   /// The aux variables to save the master residual contributions to
-  std::vector<MooseVariableFE *> _master_save_in_residual_variables;
+  std::vector<MooseVariableFEBase *> _master_save_in_residual_variables;
 
   /// Whether there are slave residual aux variables
   bool _has_slave_residuals_saved_in;
 
   /// The aux variables to save the slave contributions to
-  std::vector<MooseVariableFE *> _slave_save_in_residual_variables;
+  std::vector<MooseVariableFEBase *> _slave_save_in_residual_variables;
 
   /** MultiMooseEnum specifying whether jacobian save-in
    * aux variables correspond to master or slave side
@@ -238,13 +238,13 @@ protected:
   bool _has_master_jacobians_saved_in;
 
   /// The aux variables to save the diagonal Jacobian contributions of the master variables to
-  std::vector<MooseVariableFE *> _master_save_in_jacobian_variables;
+  std::vector<MooseVariableFEBase *> _master_save_in_jacobian_variables;
 
   /// Whether there are slave jacobian aux variables
   bool _has_slave_jacobians_saved_in;
 
   /// The aux variables to save the diagonal Jacobian contributions of the slave variables to
-  std::vector<MooseVariableFE *> _slave_save_in_jacobian_variables;
+  std::vector<MooseVariableFEBase *> _slave_save_in_jacobian_variables;
 
   /// Mutex that prevents multiple threads from saving into the residual aux_var at the same time
   static Threads::spin_mutex _resid_vars_mutex;

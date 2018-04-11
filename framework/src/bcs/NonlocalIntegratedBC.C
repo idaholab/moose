@@ -9,7 +9,7 @@
 
 #include "NonlocalIntegratedBC.h"
 #include "Assembly.h"
-#include "MooseVariableField.h"
+#include "MooseVariableFEImpl.h"
 #include "Problem.h"
 #include "SubProblem.h"
 #include "SystemBase.h"
@@ -66,14 +66,14 @@ NonlocalIntegratedBC::computeJacobian()
 }
 
 void
-NonlocalIntegratedBC::computeJacobianBlock(MooseVariableFE & jvar)
+NonlocalIntegratedBC::computeJacobianBlock(MooseVariableFEBase & jvar)
 {
   size_t jvar_num = jvar.number();
   if (jvar_num == _var.number())
     computeJacobian();
   else
   {
-    MooseVariableFE & jv = _sys.getVariable(_tid, jvar_num);
+    MooseVariableFEBase & jv = _sys.getVariable(_tid, jvar_num);
     DenseMatrix<Number> & ke = _assembly.jacobianBlock(_var.number(), jvar_num);
 
     for (_j = 0; _j < jvar.phiFaceSize();
@@ -123,7 +123,7 @@ NonlocalIntegratedBC::computeNonlocalOffDiagJacobian(unsigned int jvar)
     computeNonlocalJacobian();
   else
   {
-    MooseVariableFE & jv = _sys.getVariable(_tid, jvar);
+    MooseVariableFEBase & jv = _sys.getVariable(_tid, jvar);
     DenseMatrix<Number> & keg = _assembly.jacobianBlockNonlocal(_var.number(), jvar);
     // compiling set of global IDs for the local DOFs on the element
     std::set<dof_id_type> local_dofindices(jv.dofIndices().begin(), jv.dofIndices().end());

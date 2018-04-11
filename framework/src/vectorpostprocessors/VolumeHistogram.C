@@ -10,7 +10,7 @@
 #include "VolumeHistogram.h"
 
 // MOOSE includes
-#include "MooseVariableField.h"
+#include "MooseVariableFEImpl.h"
 
 #include "libmesh/quadrature.h"
 

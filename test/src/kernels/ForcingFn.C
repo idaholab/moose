@@ -10,7 +10,7 @@
 #include "ForcingFn.h"
 
 // MOOSE includes
-#include "MooseVariableField.h"
+#include "MooseVariableFEImpl.h"
 
 registerMooseObject("MooseTestApp", ForcingFn);
 

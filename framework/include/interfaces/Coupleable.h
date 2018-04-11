@@ -18,11 +18,11 @@
 class InputParameters;
 class MooseVariableScalar;
 class MooseObject;
-class MooseVariableFE;
+class MooseVariableFEBase;
 template <typename>
-class MooseVariableField;
-typedef MooseVariableField<Real> MooseVariable;
-typedef MooseVariableField<RealVectorValue> VectorMooseVariable;
+class MooseVariableFEImpl;
+typedef MooseVariableFEImpl<Real> MooseVariable;
+typedef MooseVariableFEImpl<RealVectorValue> VectorMooseVariable;
 namespace libMesh
 {
 template <typename T>
@@ -52,7 +52,7 @@ public:
    * Get the list of coupled variables
    * @return The list of coupled variables
    */
-  const std::map<std::string, std::vector<MooseVariableFE *>> & getCoupledVars()
+  const std::map<std::string, std::vector<MooseVariableFEBase *>> & getCoupledVars()
   {
     return _coupled_vars;
   }
@@ -61,7 +61,10 @@ public:
    * Get the list of all coupled variables
    * @return The list of all coupled variables
    */
-  const std::vector<MooseVariableFE *> & getCoupledMooseVars() const { return _coupled_moose_vars; }
+  const std::vector<MooseVariableFEBase *> & getCoupledMooseVars() const
+  {
+    return _coupled_moose_vars;
+  }
 
   /**
    * Get the list of standard coupled variables
@@ -450,10 +453,10 @@ protected:
   FEProblemBase & _c_fe_problem;
 
   /// Coupled vars whose values we provide
-  std::map<std::string, std::vector<MooseVariableFE *>> _coupled_vars;
+  std::map<std::string, std::vector<MooseVariableFEBase *>> _coupled_vars;
 
   /// Vector of all coupled variables
-  std::vector<MooseVariableFE *> _coupled_moose_vars;
+  std::vector<MooseVariableFEBase *> _coupled_moose_vars;
 
   /// Vector of standard coupled variables
   std::vector<MooseVariable *> _coupled_standard_moose_vars;
@@ -526,7 +529,7 @@ protected:
    * @param comp Component number of multiple coupled variables
    * @return Pointer to the desired variable
    */
-  MooseVariableFE * getFEVar(const std::string & var_name, unsigned int comp);
+  MooseVariableFEBase * getFEVar(const std::string & var_name, unsigned int comp);
 
   /**
    * Extract pointer to a coupled variable

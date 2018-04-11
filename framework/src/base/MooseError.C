@@ -19,7 +19,7 @@ namespace internal
 {
 
 std::string
-incompatVarMsg(MooseVariableFE & var1, MooseVariableFE & var2)
+incompatVarMsg(MooseVariableFEBase & var1, MooseVariableFEBase & var2)
 {
   std::stringstream ss;
   ss << libMesh::Utility::enum_to_string<FEFamily>(var1.feType().family) << ",ORDER"
