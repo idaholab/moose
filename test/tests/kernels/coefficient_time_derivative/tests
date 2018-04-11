@@ -3,5 +3,6 @@
     type = 'Exodiff'
     input = 'coefficient_time_derivative_diffusion.i'
     exodiff = 'coefficient_time_derivative_diffusion_out.e'
+    max_parallel = 10 # see #11232 #11236 #11231 #11230
   [../]
 []
