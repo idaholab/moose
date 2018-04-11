@@ -55,18 +55,6 @@ TwoPhaseFluidProperties::TwoPhaseFluidProperties(const InputParameters & paramet
                  "object with this name already exists.");
 }
 
-const UserObjectName &
-TwoPhaseFluidProperties::getLiquidName() const
-{
-  return _liquid_name;
-}
-
-const UserObjectName &
-TwoPhaseFluidProperties::getVaporName() const
-{
-  return _vapor_name;
-}
-
 Real
 TwoPhaseFluidProperties::h_lat(Real p, Real T) const
 {
