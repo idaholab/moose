@@ -1,5 +1,8 @@
 # MooseDocs Setup
 
+The following instructions are for setting up existing applications to use the MooseDocs
+system for their own documentation.
+
 ## Dependencies
 
 If you are using a current [MOOSE package](getting_started/installation/index.md) then the setup is
@@ -24,7 +27,7 @@ To use MooseDocs, an executable is required---this main executable is simply cop
 executable within [MOOSE]:
 
 ```bash
-cp ~/projects/moose/doc/moosedocs.py ~/projects/your_application_name/docs
+cp ~/projects/moose/modules/doc/moosedocs.py ~/projects/your_application_name/doc
 ```
 
 This executable contains command-line based help, which can be accessed using the "-h" flag as
@@ -35,10 +38,11 @@ cd ~/projects/your_application_name/docs
 ./moosedocs.py -h
 ```
 
-!include MooseDocs/config.md
+Next, a configuration file must be created. Details regarding this file may be found at
+[MooseDocs/config.md].
 
 ## Source Documentation
 
 The first step for creating a web-site is to document your code, it is best to refer to the
-MOOSE instruction for documentation for more information (see [MooseDocs/generate.md]), your
-application will generally mimic the MOOSE process.
+MOOSE instructions for documentation (see [MooseDocs/generate.md]). In general, applications
+mimic the MOOSE process.
