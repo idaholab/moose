@@ -156,7 +156,7 @@ class Tester(MooseObject):
 
     def getMaxTime(self):
         """ return maximum time elapse before reporting a 'timeout' status """
-        return self.specs['max_time']
+        return float(self.specs['max_time'])
 
     def getRunnable(self, options):
         """ return bool and cache results, if this test can run """
@@ -294,9 +294,9 @@ class Tester(MooseObject):
     def setValgrindMode(self, mode):
         """ Increase the alloted time for tests when running with the valgrind option """
         if mode == 'NORMAL':
-            self.specs['max_time'] = self.specs['max_time'] * 2
+            self.specs['max_time'] = float(self.specs['max_time']) * 2
         elif mode == 'HEAVY':
-            self.specs['max_time'] = self.specs['max_time'] * 6
+            self.specs['max_time'] = float(self.specs['max_time']) * 6
 
     def checkRunnable(self, options):
         """
