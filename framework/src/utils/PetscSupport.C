@@ -842,10 +842,11 @@ getPetscValidParams()
   params.addParam<std::vector<std::string>>(
       "petsc_options_value",
       "Values of PETSc name/value pairs (must correspond with \"petsc_options_iname\"");
-  params.addParam<unsigned>(
-      "contact_line_search_allowed_lambda_cuts",
-      2,
-      "The number of times lambda is allowed to be cut in half in the contact line search");
+  params.addParam<unsigned>("contact_line_search_allowed_lambda_cuts",
+                            2,
+                            "The number of times lambda is allowed to be cut in half in the "
+                            "contact line search. We recommend this number be roughly bounded by 0 "
+                            "<= allowed_lambda_cuts <= 3");
   params.addParam<Real>("contact_line_search_ltol",
                         "The linear relative tolerance to be used while the contact state is "
                         "changing between non-linear iterations. We recommend that this tolerance "
