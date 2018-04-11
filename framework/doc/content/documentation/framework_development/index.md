@@ -2,8 +2,10 @@
 
 [Interfaces](framework_development/interfaces/index.md)
 
-[MooseUtils](moose_utils.md)
+[MooseUtils Namespace](moose_utils.md)
 
 [MooseVariables](moose_variables.md)
+
+[Utils](utils/index.md)
 
 [Warehouses](/warehouses.md)
