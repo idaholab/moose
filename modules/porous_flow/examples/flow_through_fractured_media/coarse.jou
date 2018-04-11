@@ -1,12 +1,12 @@
-create surface rectangle width 1 height 0.1 zplane 
-move Surface 1  location 0 0.05 0 include_merged 
-create surface rectangle width 1 height 0.1 zplane 
-move Surface 2  location 0 -0.05 0 include_merged 
+create surface rectangle width 1 height 0.1 zplane
+move Surface 1  location 0 0.05 0 include_merged
+create surface rectangle width 1 height 0.1 zplane
+move Surface 2  location 0 -0.05 0 include_merged
 
 merge curve 3 5
 curve 3 interval 40
 curve 3 scheme equal
-mesh curve 3 
+mesh curve 3
 
 
 curve 2 scheme equal size 0.02
@@ -24,8 +24,8 @@ mesh curve 8
 
 mesh surface 2
 
-nodeset 1 add node 2  
-nodeset 2 add node 1  
+nodeset 1 add node 2
+nodeset 2 add node 1
 
 set duplicate block elements off
 block 1 add curve 3
@@ -42,13 +42,5 @@ block 3 element type QUAD4
 undo group begin
 set exodus netcdf4 off
 set large exodus file on
-export mesh "coarse.e" overwrite 
+export mesh "coarse.e" overwrite
 undo group end
-
-
-
-
-
-
-
-
