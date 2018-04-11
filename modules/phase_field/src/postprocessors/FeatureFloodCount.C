@@ -1652,6 +1652,9 @@ FeatureFloodCount::FeatureData::merge(FeatureData && rhs)
   // Logical AND here to combine flags (INACTIVE & INACTIVE == INACTIVE, all other combos are CLEAR)
   _status &= rhs._status;
 
+  // Logical OR here to make sure we maintain boundary intersection attribute when joining
+  _intersects_boundary |= rhs._intersects_boundary;
+
   _vol_count += rhs._vol_count;
   _centroid += rhs._centroid;
 }

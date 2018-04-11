@@ -894,7 +894,9 @@ colorAdjacencyMatrix(PetscScalar * adjacency_matrix,
   IS * is;
   ISColoringGetIS(iscoloring, &nn, &is);
 
-  mooseAssert(nn <= static_cast<PetscInt>(colors), "Not enough available colors");
+  if (nn > static_cast<PetscInt>(colors))
+    throw std::runtime_error("Not able to color with designated number of colors");
+
   for (int i = 0; i < nn; i++)
   {
     PetscInt isize;

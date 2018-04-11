@@ -16,6 +16,34 @@
     csvdiff = 'grain_tracker_advanced_op_out.csv'
     recover = false # No solve
     max_parallel = 1
+
+    requirement = "The PolycrystalVoronoi object shall create a valid coloring for a given number of grains and order parameters."
+    design = "PolycrystalICs.md"
+  [../]
+
+  [./test_advanced_op_assignment_bt_error]
+    type = 'RunException'
+    input = 'grain_tracker_advanced_op.i'
+    expect_err = "Unable to find a valid grain to op coloring"
+    recover = false # No solve
+    cli_args = 'GlobalParams/op_num=4 Outputs/csv=false'
+
+    requirement = "The PolycrystalUserObject base class shall error when a valid coloring cannot be found "
+                  "when using the simple back-tracking algorithm."
+    design = "PolycrystalICs.md"
+  [../]
+
+  [./test_advanced_op_assignment_petsc_error]
+    type = 'RunException'
+    input = 'grain_tracker_advanced_op.i'
+    expect_err = "Unable to find a valid grain to op coloring"
+    recover = false # No solve
+    cli_args = 'UserObjects/voronoi/coloring_algorithm=jp GlobalParams/op_num=7 Outputs/csv=false'
+
+    requirement = "The PolycrystalUserObject base class shall error when a valid coloring cannot be found "
+                  "when using the built-in PETSc based stochastic algorithms."
+    issues = '#8804'
+    design = "PolycrystalICs.md"
   [../]
 
   [./test_halo_periodic_bc]
