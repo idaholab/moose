@@ -281,27 +281,46 @@ PolycrystalUserObjectBase::assignOpsToGrains()
 {
   mooseAssert(_is_master, "This routine should only be called on the master rank");
 
-  // Moose::perf_log.push("assignOpsToGrains()", "PolycrystalICTools");
-  //
+  Moose::perf_log.push("assignOpsToGrains()", "PolycrystalICTools");
+
   // Use a simple backtracking coloring algorithm
   if (_coloring_algorithm == "bt")
   {
+    paramInfo("coloring_algorithm",
+              "The backtracking algorithm has exponential complexity. If you are using very few "
+              "order parameters, or you have several hundred grains or more, you should use one of "
+              "the PETSc coloring algorithms such as \"jp\".");
+
     if (!colorGraph(0))
-      mooseError("Unable to find a valid grain to op coloring, do you have enough op variables?");
+      paramError("op_num",
+                 "Unable to find a valid grain to op coloring, Make sure you have created enough "
+                 "variables to hold a valid polycrystal initial condition (no grains represented "
+                 "by the same variable should be allowed to touch, ~8 for 2D, ~25 for 3D)?");
   }
   else // PETSc Coloring algorithms
   {
 #ifdef LIBMESH_HAVE_PETSC
     const std::string & ca_str = _coloring_algorithm;
     Real * am_data = _adjacency_matrix->get_values().data();
-    Moose::PetscSupport::colorAdjacencyMatrix(
-        am_data, _feature_count, _vars.size(), _grain_to_op, ca_str.c_str());
+
+    try
+    {
+      Moose::PetscSupport::colorAdjacencyMatrix(
+          am_data, _feature_count, _vars.size(), _grain_to_op, ca_str.c_str());
+    }
+    catch (std::runtime_error & e)
+    {
+      paramError("op_num",
+                 "Unable to find a valid grain to op coloring, Make sure you have created enough "
+                 "variables to hold a valid polycrystal initial condition (no grains represented "
+                 "by the same variable should be allowed to touch, ~8 for 2D, ~25 for 3D)?");
+    }
 #else
     mooseError("Selected coloring algorithm requires PETSc");
 #endif
   }
 
-  //  Moose::perf_log.pop("assignOpsToGrains()", "PolycrystalICTools");
+  Moose::perf_log.pop("assignOpsToGrains()", "PolycrystalICTools");
 }
 
 bool
