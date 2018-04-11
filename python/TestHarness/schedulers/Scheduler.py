@@ -285,6 +285,8 @@ class Scheduler(MooseObject):
 
             for job_container in concurrent_jobs:
                 tester = job_container.getTester()
+                if not tester.getRunnable(self.options):
+                    continue
                 output_files = tester.getOutputFiles()
 
                 # check if we have colliding output files
