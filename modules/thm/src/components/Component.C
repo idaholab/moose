@@ -260,6 +260,8 @@ Component::logModelNotImplementedError(const RELAP7::FlowModelID & model) const
     logError("This component is not implemented for single-phase flow");
   else if (model == RELAP7::FM_TWO_PHASE)
     logError("This component is not implemented for two-phase flow");
+  else if (model == RELAP7::FM_TWO_PHASE_NCG)
+    logError("This component is not implemented for two-phase flow with non-condensable gases");
   else
     logError("This component is not implemented for model type '", model, "'");
 }
