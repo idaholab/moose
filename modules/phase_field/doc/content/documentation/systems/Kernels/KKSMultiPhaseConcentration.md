@@ -16,35 +16,35 @@ where $c_i$ is the phase concentration for phase $i$, $c$ is the physical solute
 
 Since the non-linear variable for this kernel is $c_n$, the on-diagonal Jacobian is
 $$
-\begin{eqnarray*}
+\begin{aligned}
 J &=& \phi_j \frac{\partial R}{\partial c_n} \\
 &=& \phi_j h_n
-\end{eqnarray*}
+\end{aligned}
 $$
 
 #### Off-diagonal
 
 For the physical concentration $c$, the off-diagonal Jacobian is
 $$
-\begin{eqnarray*}
+\begin{aligned}
 J &=& \phi_j \frac{\partial R}{\partial c} \\
 &=& - \phi_j
-\end{eqnarray*}
+\end{aligned}
 $$
 For phase concentrations $c_i$ other than $c_n$,:
 $$
-\begin{eqnarray*}
+\begin{aligned}
 J &=& \phi_j \frac{\partial R}{\partial c_i} \\
 &=& \phi_j h_i
-\end{eqnarray*}
+\end{aligned}
 $$
 
 Finally for the order parameters, such as $\eta_1$,
 $$
-\begin{eqnarray*}
+\begin{aligned}
 J &=& \phi_j \frac{\partial R}{\partial \eta_1} \\
 &=& \phi_j \left( \frac{\partial h_1}{\partial \eta_1} c_1 + \frac{\partial h_2}{\partial \eta_1} c_2 +  \frac{\partial h_3}{\partial \eta_1} c_3      \right)
-\end{eqnarray*}
+\end{aligned}
 $$
 For the off-diagonal Jacobians we also need to multiply by $L$, the Allen-Cahn mobility.
 

@@ -17,10 +17,10 @@ function for phase $i$ defined in [cite:Folch05] (referred to as $g_i$ there, bu
 
 If the non-linear variable is $\eta_1$, the on-diagonal Jacobian is
 $$
-\begin{eqnarray*}
+\begin{aligned}
 J &=& \phi_j \frac{\partial R}{\partial \eta_1} \\
 &=& \phi_j \left( \frac{\partial ^2 h_1}{\partial  \eta_1^2} F_1 + \frac{\partial ^2 h_2}{\partial  \eta_1^2} F_2 + \frac{\partial ^2 h_3}{\partial  \eta_1^2} F_3 + W_1 \frac{\partial ^2 g}{\partial \eta_1^2} \right)
-\end{eqnarray*}
+\end{aligned}
 $$
 
 
@@ -28,26 +28,26 @@ $$
 
 Off-diagonal Jacobian for $\eta_2$ (similar for $\eta_3$):
 $$
-\begin{eqnarray*}
+\begin{aligned}
 J &=& \phi_j \frac{\partial R}{\partial \eta_2} \\
 &=& \phi_j \left( \frac{\partial ^2 h_1}{\partial  \eta_1 \partial  \eta_2} F_1 + \frac{\partial ^2 h_2}{\partial  \eta_1 \partial  \eta_2} F_2 + \frac{\partial ^2 h_3}{\partial  \eta_1 \partial  \eta_2} F_3 \right)
-\end{eqnarray*}
+\end{aligned}
 $$
 
 Off-diagonal Jacobian for $c_1$ (similar for $c_2, c_3$):
 $$
-\begin{eqnarray*}
+\begin{aligned}
 J &=& \phi_j \frac{\partial R}{\partial c_1} \\
 &=& \phi_j \frac{\partial  h_1}{\partial  \eta_1} \frac{\partial  F_1}{\partial  c_1}
-\end{eqnarray*}
+\end{aligned}
 $$
 
 These statements can be generalized for non-linear variable $v$ as:
 $$
-\begin{eqnarray*}
+\begin{aligned}
 J &=& \phi_j \frac{\partial R}{\partial v} \\
 &=& \left( \frac{\partial ^2 h_1}{\partial  \eta_1 \partial  v} F_1 + \frac{\partial ^2 h_2}{\partial  \eta_1 \partial  v} F_2 + \frac{\partial ^2 h_3}{\partial  \eta_1 \partial  v} F_3 + \frac{\partial  h_1}{\partial  \eta_1} \frac{\partial  F_1}{\partial  v} + \frac{\partial  h_2}{\partial  \eta_1} \frac{\partial  F_2}{\partial  v} + \frac{\partial  h_3}{\partial  \eta_1} \frac{\partial  F_3}{\partial  v}\right)
-\end{eqnarray*}
+\end{aligned}
 $$
 For the off-diagonal Jacobians we also need to multiply by $L$, the Allen-Cahn mobility.
 

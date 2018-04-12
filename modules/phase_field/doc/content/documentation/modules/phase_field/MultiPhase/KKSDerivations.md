@@ -57,19 +57,19 @@ with the $\frac{\partial c_a}{\partial u_j}\frac{\partial}{\partial c_a}=\phi_j 
 derivative.
 
 \begin{equation}
-\begin{eqnarray*}
+\begin{aligned}
 J &=& \frac{\partial R}{\partial u_j} = \phi_j \frac{\partial}{\partial c_a} \left( \frac{\partial F}{\partial c_a} - \mu \right)\\
 &=& \phi_j  \frac{\partial^2F}{\partial c_a^2} \\
-\end{eqnarray*}
+\end{aligned}
 \end{equation}
 
 For $\mu$
 
 \begin{equation}
-\begin{eqnarray*}
+\begin{aligned}
 J &=& \phi_j \frac{\partial}{\partial \mu} \left( \frac{\partial F}{\partial c_a} - \mu \right)\\
 &=& -\phi_j \\
-\end{eqnarray*}
+\end{aligned}
 \end{equation}
 
 ## KKSCHBulk
@@ -160,11 +160,11 @@ v
 Let's get back to the original residual with $\frac{dF}{dc}$. Then
 
 \begin{equation}
-\begin{eqnarray*}
+\begin{aligned}
 J &=& \phi_j \frac{d}{dc} \nabla \frac{dF}{dc}\\
 &=& \phi_j  \nabla \frac{d^2F}{dc^2} \quad,\quad \text{with (29) from KKS}\\
 &=& \phi_j  \nabla \frac{\frac{d^2F_b}{dc_b^2}\frac{d^2F_a}{dc_a^2}}{  [1-h(\eta)]\frac{d^2F_b}{dc_b^2}+h(\eta)\frac{d^2F_a}{dc_a^2} }\\
-\end{eqnarray*}
+\end{aligned}
 \end{equation}
 
 # Allen-Cahn  Kernels
@@ -172,7 +172,7 @@ J &=& \phi_j \frac{d}{dc} \nabla \frac{dF}{dc}\\
 For the bulk Allen-Cahn residual we need to calculate the term
 
 \begin{equation}
-\begin{eqnarray*}
+\begin{aligned}
 R=\frac{dF}{d\eta}&=&\frac{d}{d\eta}\left([1-h(\eta)]F_a + h(\eta)F_b+wg(\eta) \right)\\
 &=& \frac{dF_a}{d\eta}+\frac{d}{d\eta}\left(h(\eta)F_b-h(\eta)F_a + wg(\eta)\right)\\
 &=& \frac{dF_a}{d\eta}+F_b\frac{dh}{d\eta}-F_a\frac{dh}{d\eta}+h(\eta)\frac{dF_b}{d\eta}-h(\eta)\frac{dF_a}{d\eta} +w\frac{dg}{d\eta}\\
@@ -180,7 +180,7 @@ R=\frac{dF}{d\eta}&=&\frac{d}{d\eta}\left([1-h(\eta)]F_a + h(\eta)F_b+wg(\eta) \
 &=& \frac{dh}{d\eta}(F_b-F_a) + \underbrace{[1-h(\eta)]\frac{dF_a}{d\eta} + h(\eta)\frac{dF_b}{d\eta}}_{\text{chain rule term}} +w\frac{dg}{d\eta}\\
 &=& \frac{dh}{d\eta}(F_b-F_a) + [1-h(\eta)]\frac{dF_a}{dc_a}\frac{dc_a}{d\eta} + h(\eta)\frac{dF_b}{dc_b}\frac{dc_b}{d\eta} +w\frac{dg}{d\eta}\\
 &=& \frac{dh}{d\eta}(F_b-F_a) + \frac{dF_a}{dc_a}\left([1-h(\eta)]\frac{dc_a}{d\eta} + h(\eta)\frac{dc_b}{d\eta}\right) +w\frac{dg}{d\eta}
-\end{eqnarray*}
+\end{aligned}
 \end{equation}
 
 The _chain rule term_ results from the fact that $c_a$ and $c_b$ are dependent
@@ -188,18 +188,18 @@ on $\eta$ (see eqs. (25) and (26) in KKS). Setting
 $\lambda = [1-h(\eta)]\frac{d^2F_b}{dc_b^2}+h(\eta)\frac{d^2F_a}{dc_a^2}$ we get
 
 \begin{equation}
-\begin{eqnarray*}
+\begin{aligned}
 \frac{dc_a}{d\eta} &=& \frac1\lambda \frac{dh}{d\eta}(c_a-c_b)\frac{d^2F_b}{dc_b^2}\\
 \frac{dc_b}{d\eta} &=& \frac1\lambda \frac{dh}{d\eta}(c_a-c_b)\frac{d^2F_a}{dc_a^2}.
-\end{eqnarray*}
+\end{aligned}
 \end{equation}
 
 Substituting this in we get
 
 \begin{equation}
-\begin{eqnarray*}
+\begin{aligned}
 R &=& \frac{dh}{d\eta}(F_b-F_a) + \frac{dh}{d\eta}\frac{dF_a}{dc_a}(c_a-c_b)\frac1\lambda\underbrace{\left([1-h(\eta)] \frac{d^2F_b}{dc_b^2} + h(\eta)\frac{d^2F_a}{dc_a^2}\right)}_{=\lambda} +w\frac{dg}{d\eta}.
-\end{eqnarray*}
+\end{aligned}
 \end{equation}
 
 This simplifies to
@@ -231,10 +231,10 @@ with the $\frac{\partial \eta}{\partial u_j}\frac{\partial}{\partial \eta}=\phi_
 derivative.
 
 \begin{equation}
-\begin{eqnarray*}
+\begin{aligned}
 J &=& -\phi_j \frac{\partial}{\partial \eta}\left( \frac{dh}{d\eta}(F_a-F_b) \right) + w \phi_j \frac{\partial}{\partial \eta}\frac{dg}{d\eta} \\
 &=&-\frac{d^2h}{d\eta^2}\phi_j(F_a-F_b) + w\frac{d^2g}{d\eta^2}\phi_j \\
-\end{eqnarray*}
+\end{aligned}
 \end{equation}
 
 (The implicit dependence of $F_a(c_a)$ and $F_b(c_a)$ on $\eta$ through $c_a(c,\eta)$
@@ -273,10 +273,10 @@ An instance of this kernel is needed for each compnent of the problem.
 ### Residual
 
 \begin{equation}
-\begin{eqnarray*}
+\begin{aligned}
 R&=&-\frac{dh}{d\eta}\left(-\frac{dF_a}{dc_a}(c_a-c_b)\right)\\
 &=&\frac{dh}{d\eta}\frac{dF_a}{dc_a}(c_a-c_b)
-\end{eqnarray*}
+\end{aligned}
 \end{equation}
 
 ### Jacobian
@@ -289,10 +289,10 @@ with the $\frac{\partial \eta}{\partial u_j}\frac{\partial}{\partial \eta} = \ph
 derivative.
 
 \begin{equation}
-\begin{eqnarray*}
+\begin{aligned}
 J &=& \phi_j \frac{\partial}{\partial \eta} \left( \frac{dh}{d\eta}\frac{dF_a}{dc_a}(c_a-c_b) \right)\\
 &=& \frac{d^2h}{d\eta^2}\phi_j\frac{dF_a}{dc_a}(c_a-c_b)\\
-\end{eqnarray*}
+\end{aligned}
 \end{equation}
 
 #### Off-diagonal
@@ -305,27 +305,27 @@ $\frac{\partial c_a}{\partial u_j}\frac{\partial}{\partial c_a} = \phi_j \frac{\
 derivative.
 
 \begin{equation}
-\begin{eqnarray*}
+\begin{aligned}
 J &=& \phi_j \frac{\partial}{\partial c_a} \left( \frac{dh}{d\eta}\frac{dF_a}{dc_a}(c_a-c_b) \right)\\
 &=& \frac{dh}{d\eta} \phi_j \left( \frac{d^2 F_a}{dc_a^2}(c_a-c_b) + \frac{d F_a}{d c_a}\right)\\
-\end{eqnarray*}
+\end{aligned}
 \end{equation}
 
 Similarly for $c_b$,
 \begin{equation}
-\begin{eqnarray*}
+\begin{aligned}
 J &=& \phi_j \frac{\partial}{\partial c_b} \left( \frac{dh}{d\eta}\frac{dF_a}{dc_a}(c_a-c_b) \right)\\
 &=& -\frac{dh}{d\eta} \phi_j  \frac{d F_a}{d c_a}\\
-\end{eqnarray*}
+\end{aligned}
 \end{equation}
 
 For any variable other than $c_a$ or $c_b$, for example temperature $T$:
 
 \begin{equation}
-\begin{eqnarray*}
+\begin{aligned}
 J &=& \phi_j \frac{\partial}{\partial T} \left( \frac{dh}{d\eta}\frac{dF_a}{dc_a}(c_a-c_b) \right)\\
 &=& \frac{dh}{d\eta} \phi_j  \frac{\partial}{\partial T}\left(\frac{d F_a}{d c_a}\right) ( c_a - c_b)\\
-\end{eqnarray*}
+\end{aligned}
 \end{equation}
 
 
