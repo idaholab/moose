@@ -29,7 +29,7 @@
     max_time = 60 # Newer GCC + Profiling takes ~30 seconds
     compiler = 'GCC'
     method = 'OPT OPROF'
-    valgrind = 'HEAVY'
+    valgrind = 'NONE'
     # this test has unknown issue with PETSc-master
     # It is related to communcators in VTK
     # We will fix it in the new release
