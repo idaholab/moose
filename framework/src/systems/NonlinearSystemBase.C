@@ -531,6 +531,8 @@ NonlinearSystemBase::computeResidualTag(NumericVector<Number> & residual, TagID 
   associateVectorToTag(residual, residualVectorTag());
 
   computeResidualTags(_nl_vector_tags);
+
+  disassociateVectorFromTag(residual, residualVectorTag());
 }
 
 void
@@ -1311,6 +1313,8 @@ NonlinearSystemBase::computeNodalBCs(NumericVector<Number> & residual)
   associateVectorToTag(residual, residualVectorTag());
 
   computeNodalBCs(residual, _nl_vector_tags);
+
+  disassociateVectorFromTag(residual, residualVectorTag());
 }
 
 void
@@ -1319,6 +1323,8 @@ NonlinearSystemBase::computeNodalBCs(NumericVector<Number> & residual, const std
   associateVectorToTag(residual, residualVectorTag());
 
   computeNodalBCs(tags);
+
+  disassociateVectorFromTag(residual, residualVectorTag());
 }
 
 void
@@ -2208,6 +2214,8 @@ NonlinearSystemBase::computeJacobian(SparseMatrix<Number> & jacobian, const std:
   associateMatrixToTag(jacobian, systemMatrixTag());
 
   computeJacobianTags(tags);
+
+  disassociateMatrixFromTag(jacobian, systemMatrixTag());
 }
 
 void
