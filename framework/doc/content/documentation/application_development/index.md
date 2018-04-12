@@ -4,6 +4,8 @@
 
 [MooseUtils](/moose_utils.md)
 
+[Utils](utils/index.md)
+
 [Jacobian Definition](/jacobian_definition.md)
 
 [Hypre/BoomerAMG Preconditioning](hypre.md)
