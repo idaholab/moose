@@ -27,8 +27,6 @@ MOOSE-based applications, thus fostering collaborations.
 !col! class=s12 m4 l4 icon=settings
 ### Modular Design class=center style=font-weight:200;
 
-!media media/inl_blue.png style=width:30%;float:right;
-
 MOOSE includes an ever-expanding, user-developed set of physics modules including solid mechanics,
 phase-field, Navier-Stokes, and heat conduction and supports multi-scale models allowing linking of
 MOOSE-based applications, thus fostering collaborations across applications, time-scales, and spatial
@@ -43,12 +41,12 @@ development strategy.  In order to accomplish this task, a comprehensive set of 
 documentation are being developed continuously and included within the framework for use by
 application developers.
 
+!media media/inl_blue.png style=float:right;width:30%;margin-left:20px;
+
 In particular, testing of both MOOSE and MOOSE-based applications is of primary importance; changes
 are only merged into the framework once manual code review and the automated tests have ensured the
 changes are compatible with the applications. Since MOOSE is an open-source project, the testing
 process is publicly available at [www.moosebuild.org](http://www.moosebuild.org).
-
-!media media/inl_blue.png style=float:right;width:50%;
 
 MOOSE is developed by the Idaho National Laboratory (INL) by a team of computer scientists and
 engineers and is supported by various funding agencies including the
