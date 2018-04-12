@@ -88,7 +88,10 @@ public:
    */
   virtual TagName vectorTagName(TagID tag);
 
-  virtual std::map<TagName, TagID> & getVectorTag() { return _vector_tag_name_to_tag_id; }
+  /**
+   * Return all vector tags, where a tag is represented by a map from name to ID
+   */
+  virtual std::map<TagName, TagID> & getVectorTags() { return _vector_tag_name_to_tag_id; }
 
   /**
    * Check to see if a particular Tag exists
@@ -140,7 +143,10 @@ public:
    */
   virtual unsigned int numMatrixTags() { return _matrix_tag_name_to_tag_id.size(); }
 
-  virtual std::map<TagName, TagID> & getMatrixTag() { return _matrix_tag_name_to_tag_id; }
+  /**
+   * Return all matrix tags in the sytem, where a tag is represented by a map from name to ID
+   */
+  virtual std::map<TagName, TagID> & getMatrixTags() { return _matrix_tag_name_to_tag_id; }
 
   // Variables /////
   virtual bool hasVariable(const std::string & var_name) const = 0;

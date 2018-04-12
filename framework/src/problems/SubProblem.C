@@ -82,6 +82,13 @@ SubProblem::getVectorTagID(const TagName & tag_name)
 {
   auto tag_name_upper = MooseUtils::toUpper(tag_name);
 
+  if (!vectorTagExists(tag_name))
+    mooseError("Vector tag: ",
+               tag_name,
+               " does not exist. ",
+               "If this is a TimeKernel then this may have happened because you didn't "
+               "specify a Transient Executioner.");
+
   return _vector_tag_name_to_tag_id.at(tag_name_upper);
 }
 
@@ -126,6 +133,13 @@ TagID
 SubProblem::getMatrixTagID(const TagName & tag_name)
 {
   auto tag_name_upper = MooseUtils::toUpper(tag_name);
+
+  if (!matrixTagExists(tag_name))
+    mooseError("Matrix tag: ",
+               tag_name,
+               " does not exist. ",
+               "If this is a TimeKernel then this may have happened because you didn't "
+               "specify a Transient Executioner.");
 
   return _matrix_tag_name_to_tag_id.at(tag_name_upper);
 }

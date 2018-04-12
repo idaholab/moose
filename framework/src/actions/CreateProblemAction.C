@@ -51,11 +51,17 @@ validParams<CreateProblemAction>()
   MultiMooseEnum extra_tagvs(" ", " ", true);
   MultiMooseEnum extra_tagms(" ", " ", true);
 
-  params.addParam<MultiMooseEnum>(
-      "extra_tag_vectors", extra_tagvs, "The extra tag vectors will be filled by some Kernels");
+  params.addParam<MultiMooseEnum>("extra_tag_vectors",
+                                  extra_tagvs,
+                                  "Extra vectors to add to the system that can be filled by "
+                                  "objects which compute residuals and Jacobians (Kernels, "
+                                  "BCs, etc.) by setting tags on them.");
 
-  params.addParam<MultiMooseEnum>(
-      "extra_tag_matrices", extra_tagms, "The extra the matrices will be filled by some Kernels");
+  params.addParam<MultiMooseEnum>("extra_tag_matrices",
+                                  extra_tagms,
+                                  "Extra matrices to add to the system that can be filled "
+                                  "by objects which compute residuals and Jacobians "
+                                  "(Kernels, BCs, etc.) by setting tags on them.");
 
   return params;
 }

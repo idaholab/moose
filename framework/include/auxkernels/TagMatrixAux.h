@@ -19,7 +19,8 @@ template <>
 InputParameters validParams<TagMatrixAux>();
 
 /**
- * Constant auxiliary value
+ * For visualization or other purposes, the diagnal of the matrix of a tag
+ * is extracted, and nodal values are assigned by using the matrix diagnal values.
  */
 class TagMatrixAux : public AuxKernel
 {

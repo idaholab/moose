@@ -690,15 +690,6 @@ SystemBase::hasVector(TagID tag)
   return tag < _tagged_vectors.size() && _tagged_vectors[tag];
 }
 
-void
-SystemBase::clearTaggedVector(TagID tag)
-{
-  if (tag + 1 > _tagged_vectors.size())
-    _tagged_vectors.resize(tag + 1);
-
-  _tagged_vectors[tag] = nullptr;
-}
-
 /**
  * Get a raw NumericVector with the given name.
  */

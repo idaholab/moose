@@ -1011,7 +1011,7 @@ FEProblemBase::prepareAssembly(THREAD_ID tid)
 void
 FEProblemBase::addResidual(THREAD_ID tid)
 {
-  _assembly[tid]->addResidual(getVectorTag());
+  _assembly[tid]->addResidual(getVectorTags());
 
   if (_displaced_problem)
     _displaced_problem->addResidual(tid);
@@ -1020,7 +1020,7 @@ FEProblemBase::addResidual(THREAD_ID tid)
 void
 FEProblemBase::addResidualNeighbor(THREAD_ID tid)
 {
-  _assembly[tid]->addResidualNeighbor(getVectorTag());
+  _assembly[tid]->addResidualNeighbor(getVectorTags());
 
   if (_displaced_problem)
     _displaced_problem->addResidualNeighbor(tid);
@@ -1029,7 +1029,7 @@ FEProblemBase::addResidualNeighbor(THREAD_ID tid)
 void
 FEProblemBase::addResidualScalar(THREAD_ID tid /* = 0*/)
 {
-  _assembly[tid]->addResidualScalar(getVectorTag());
+  _assembly[tid]->addResidualScalar(getVectorTags());
 }
 
 void
@@ -1057,7 +1057,6 @@ FEProblemBase::addCachedResidual(THREAD_ID tid)
     _displaced_problem->addCachedResidual(tid);
 }
 
-// Hate this API
 void
 FEProblemBase::addCachedResidualDirectly(NumericVector<Number> & residual, THREAD_ID tid)
 {
@@ -4068,7 +4067,7 @@ FEProblemBase::computeResidual(NonlinearImplicitSystem & sys,
 void
 FEProblemBase::computeResidual(const NumericVector<Number> & soln, NumericVector<Number> & residual)
 {
-  auto & tags = getVectorTag();
+  auto & tags = getVectorTags();
 
   _fe_vector_tags.clear();
 
@@ -4266,7 +4265,7 @@ FEProblemBase::computeJacobian(const NumericVector<Number> & soln, SparseMatrix<
 {
   _fe_matrix_tags.clear();
 
-  auto & tags = getMatrixTag();
+  auto & tags = getMatrixTags();
   for (auto & tag : tags)
     _fe_matrix_tags.insert(tag.second);
 

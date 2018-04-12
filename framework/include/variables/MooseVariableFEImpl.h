@@ -633,7 +633,9 @@ protected:
   MooseArray<Real> _dof_values_older;
   MooseArray<Real> _dof_values_previous_nl;
 
+  // Dof values of tagged vectors
   std::vector<MooseArray<Real>> _vector_tags_dof_u;
+  // Dof values of the diagonal of tagged matrices
   std::vector<MooseArray<Real>> _matrix_tags_dof_u;
 
   /// nodal values of u_dot

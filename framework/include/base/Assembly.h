@@ -519,7 +519,9 @@ public:
   /**
    * Lets an external class cache residual at a set of nodes
    */
-  void cacheResidualNodes(DenseVector<Number> & res, std::vector<dof_id_type> & dof_index);
+  void cacheResidualNodes(DenseVector<Number> & res,
+                          std::vector<dof_id_type> & dof_index,
+                          TagID tag = 0);
 
   /**
    * Takes the values that are currently in _sub_Ke and appends them to the cached values.
@@ -1171,15 +1173,15 @@ protected:
   /// auxiliary vector for scaling residuals (optimization to avoid expensive construction/destruction)
   DenseVector<Number> _tmp_Re;
 
-  /// jacobian contributions
+  /// jacobian contributions <Tag, ivar, jvar>
   std::vector<std::vector<std::vector<DenseMatrix<Number>>>> _sub_Kee;
   std::vector<std::vector<std::vector<DenseMatrix<Number>>>> _sub_Keg;
 
-  /// jacobian contributions from the element and neighbor
+  /// jacobian contributions from the element and neighbor <Tag, ivar, jvar>
   std::vector<std::vector<std::vector<DenseMatrix<Number>>>> _sub_Ken;
-  /// jacobian contributions from the neighbor and element
+  /// jacobian contributions from the neighbor and element <Tag, ivar, jvar>
   std::vector<std::vector<std::vector<DenseMatrix<Number>>>> _sub_Kne;
-  /// jacobian contributions from the neighbor
+  /// jacobian contributions from the neighbor <Tag, ivar, jvar>
   std::vector<std::vector<std::vector<DenseMatrix<Number>>>> _sub_Knn;
 
   /// auxiliary matrix for scaling jacobians (optimization to avoid expensive construction/destruction)

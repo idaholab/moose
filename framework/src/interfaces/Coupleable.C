@@ -279,7 +279,7 @@ Coupleable::coupledVectorTagValue(const std::string & var_name, TagID tag, unsig
 {
   checkVar(var_name);
   if (!isCoupled(var_name))
-    return *getDefaultValue(var_name);
+    mooseError(var_name, ": invalid variable name for coupledVectorTagValue");
 
   coupledCallback(var_name, false);
   MooseVariable * var = getVar(var_name, comp);
@@ -294,7 +294,7 @@ Coupleable::coupledMatrixTagValue(const std::string & var_name, TagID tag, unsig
 {
   checkVar(var_name);
   if (!isCoupled(var_name))
-    return *getDefaultValue(var_name);
+    mooseError(var_name, ": invalid variable name for coupledMatrixTagValue");
 
   coupledCallback(var_name, false);
   MooseVariable * var = getVar(var_name, comp);

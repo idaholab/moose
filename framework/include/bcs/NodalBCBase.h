@@ -37,12 +37,10 @@ class NodalBCBase : public BoundaryCondition,
 public:
   NodalBCBase(const InputParameters & parameters);
 
-  virtual void computeResidual(NumericVector<Number> & /*residual*/)
-  {
-    ;
-    // This function is kept only for backward compabality
-    // We should remove it as soon as possible
-  }
+  // This function is kept only for backward compabality (for bighorn)
+  // We should remove it as soon as possible. This function will removed
+  // as soon as bighorn is fixed.
+  virtual void computeResidual(NumericVector<Number> & /*residual*/) { ; }
   virtual void computeResidual() = 0;
   virtual void computeJacobian() = 0;
   virtual void computeOffDiagJacobian(unsigned int jvar) = 0;

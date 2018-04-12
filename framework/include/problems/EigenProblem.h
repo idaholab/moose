@@ -21,8 +21,7 @@ template <>
 InputParameters validParams<EigenProblem>();
 
 /**
- * Specialization of SubProblem for solving nonlinear equations plus auxiliary equations
- *
+ * Problem for solving eigenvalue problems
  */
 class EigenProblem : public FEProblemBase
 {
@@ -51,25 +50,39 @@ public:
 #if LIBMESH_HAVE_SLEPC
   void setEigenproblemType(Moose::EigenProblemType eigen_problem_type);
 
+  /**
+   * Form a Jacobian matrix for all kernels and BCs with a given tag
+   */
   virtual void computeJacobianTag(const NumericVector<Number> & soln,
                                   SparseMatrix<Number> & jacobian,
                                   TagID tag) override;
 
-  void computeJacobianAB(const NumericVector<Number> & soln,
-                         SparseMatrix<Number> & jacobianA,
-                         SparseMatrix<Number> & jacobianB,
-                         TagID tagA,
-                         TagID tagB);
+  /**
+   * Form two Jacobian matrices, whre each is associateed with one tag, through one
+   * element-loop.
+   */
+  virtual void computeJacobianAB(const NumericVector<Number> & soln,
+                                 SparseMatrix<Number> & jacobianA,
+                                 SparseMatrix<Number> & jacobianB,
+                                 TagID tagA,
+                                 TagID tagB);
 
+  /**
+   * Form a vector for all kernels and BCs with a given tag
+   */
   virtual void computeResidualTag(const NumericVector<Number> & soln,
                                   NumericVector<Number> & residual,
                                   TagID tag) override;
 
-  void computeResidualAB(const NumericVector<Number> & soln,
-                         NumericVector<Number> & residualA,
-                         NumericVector<Number> & residualB,
-                         TagID tagA,
-                         TagID tagB);
+  /**
+   * Form two vetors, whre each is associateed with one tag, through one
+   * element-loop.
+   */
+  virtual void computeResidualAB(const NumericVector<Number> & soln,
+                                 NumericVector<Number> & residualA,
+                                 NumericVector<Number> & residualB,
+                                 TagID tagA,
+                                 TagID tagB);
 #endif
 protected:
   unsigned int _n_eigen_pairs_required;

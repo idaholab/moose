@@ -50,9 +50,7 @@ validParams<KernelBase>()
                         "the case this is true but no displacements "
                         "are provided in the Mesh block the "
                         "undisplaced mesh will still be used.");
-  params.addParamNamesToGroup("use_displaced_mesh", "Advanced");
-
-  params.addParamNamesToGroup("diag_save_in save_in", "Advanced");
+  params.addParamNamesToGroup(" diag_save_in save_in use_displaced_mesh eigen_kernel", "Advanced");
 
   params.declareControllable("enable");
   return params;

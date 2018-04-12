@@ -217,6 +217,9 @@ public:
    */
   virtual void disassociateVectorFromTag(NumericVector<Number> & vec, TagID tag);
 
+  /**
+   * Disassociate all vectors, and then hasVector() will return false.
+   */
   virtual void disassociateAllTaggedVectors();
 
   /**
@@ -255,7 +258,7 @@ public:
   virtual void deactiveAllMatrixTags();
 
   /**
-   * Close all matrices for tags
+   * Close all matrices associated the tags
    */
   void closeTaggedMatrices(const std::set<TagID> & tags);
 
@@ -584,10 +587,14 @@ public:
    */
   NumericVector<Number> & addVector(TagID tag, const bool project, const ParallelType type);
 
+  /**
+   * Close all vectors for given tags
+   */
   virtual void closeTaggedVectors(const std::set<TagID> & tags);
 
-  virtual void clearTaggedVector(TagID TagID);
-
+  /**
+   * Zero all vectors for given tags
+   */
   virtual void zeroTaggedVectors(const std::set<TagID> & tags);
 
   /**
@@ -661,9 +668,11 @@ protected:
 
   Real _du_dot_du;
 
+  /// Tagged vectors (pointer)
   std::vector<NumericVector<Number> *> _tagged_vectors;
+  /// Tagged matrices (pointer)
   std::vector<SparseMatrix<Number> *> _tagged_matrices;
-
+  /// Active flags for tagged matrices
   std::vector<bool> _matrix_tag_active_flags;
 
   NumericVector<Number> * _dummy_vec; // to satisfy the interface

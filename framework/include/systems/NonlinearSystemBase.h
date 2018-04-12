@@ -245,8 +245,14 @@ public:
    */
   void computeResidualTag(NumericVector<Number> & residual, TagID tag_id);
 
+  /**
+   * Form multiple tag-associated residual vectors for all the given tags
+   */
   void computeResidualTags(const std::set<TagID> & tags);
 
+  /**
+   * Form a residual vector for a given tag
+   */
   void computeResidual(NumericVector<Number> & residual, TagID tag_id);
 
   /**
@@ -276,13 +282,18 @@ public:
   const std::vector<dof_id_type> & getVariableGlobalDoFs() { return _var_all_dof_indices; }
 
   /**
-   * Computes Jacobian
-   * @param jacobian Jacobian is formed in here
+   * Computes multiple (tag associated) Jacobian matricese
    */
   void computeJacobianTags(const std::set<TagID> & tags);
 
+  /**
+   * Associate jacobian to systemMatrixTag, and then form a matrix for all the tags
+   */
   void computeJacobian(SparseMatrix<Number> & jacobian, const std::set<TagID> & tags);
 
+  /**
+   * Take all tags in the system, and form a matrix for all tags in the system
+   */
   void computeJacobian(SparseMatrix<Number> & jacobian);
 
   /**
@@ -339,10 +350,19 @@ public:
 
   virtual NumericVector<Number> & solutionUDot() override;
 
+  /**
+   *  Return a numeric vector that is associated with the time tag.
+   */
   NumericVector<Number> & getResidualTimeVector();
 
+  /**
+   * Return a numeric vector that is associated with the nontime tag.
+   */
   NumericVector<Number> & getResidualNonTimeVector();
 
+  /**
+   * Return a residual vector that is associated with the residual tag.
+   */
   NumericVector<Number> & residualVector(TagID tag);
 
   virtual const NumericVector<Number> *& currentSolution() override { return _current_solution; }
@@ -580,15 +600,24 @@ protected:
   void computeResidualInternal(const std::set<TagID> & tags);
 
   /**
-   * Enforces nodal boundary conditions
-   * @param residual Residual where nodal BCs are enforced (input/output)
+   * Enforces nodal boundary conditions. The boundary condition will be implemented
+   * in the residual using all the tags in the system.
    */
   void computeNodalBCs(NumericVector<Number> & residual);
 
+  /**
+   * Form a residual for BCs that at least has one of the given tags.
+   */
   void computeNodalBCs(NumericVector<Number> & residual, const std::set<TagID> & tags);
 
+  /**
+   * Form multiple tag-associated residual vectors for the given tags.
+   */
   void computeNodalBCs(const std::set<TagID> & tags);
 
+  /**
+   * Form multiple matrices for all the tags. Users should not call this func directly.
+   */
   void computeJacobianInternal(const std::set<TagID> & tags);
 
   void computeDiracContributions(bool is_jacobian);
@@ -626,8 +655,10 @@ protected:
   /// Tag for time contribution residual
   TagID _Re_time_tag;
 
+  /// Vector tags to temporarily store all tags associated with the current system.
   std::set<TagID> _nl_vector_tags;
 
+  /// Matrix tags to temporarily store all tags associated with the current system.
   std::set<TagID> _nl_matrix_tags;
 
   /// residual vector for time contributions
@@ -644,9 +675,7 @@ protected:
   /// Tag for non-time contribution Jacobian
   TagID _Ke_non_time_tag;
 
-  /// Tag for time contribution Jacobian
-  TagID _Ke_time_tag;
-
+  /// Tag for system contribution Jacobian
   TagID _Ke_system_tag;
 
   ///@{

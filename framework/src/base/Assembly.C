@@ -1600,15 +1600,17 @@ Assembly::cacheResidualNeighbor()
 }
 
 void
-Assembly::cacheResidualNodes(DenseVector<Number> & res, std::vector<dof_id_type> & dof_index)
+Assembly::cacheResidualNodes(DenseVector<Number> & res,
+                             std::vector<dof_id_type> & dof_index,
+                             TagID tag /* = 0*/)
 {
   // Add the residual value and dof_index to cached_residual_values and cached_residual_rows
   // respectively.
   // This is used by NodalConstraint.C to cache the residual calculated for master and slave node.
   for (unsigned int i = 0; i < dof_index.size(); ++i)
   {
-    _cached_residual_values[0].push_back(res(i));
-    _cached_residual_rows[0].push_back(dof_index[i]);
+    _cached_residual_values[tag].push_back(res(i));
+    _cached_residual_rows[tag].push_back(dof_index[i]);
   }
 }
 

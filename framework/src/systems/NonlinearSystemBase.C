@@ -1306,7 +1306,7 @@ NonlinearSystemBase::computeNodalBCs(NumericVector<Number> & residual)
 {
   _nl_vector_tags.clear();
 
-  auto & tags = _fe_problem.getVectorTag();
+  auto & tags = _fe_problem.getVectorTags();
   for (auto & tag : tags)
     _nl_vector_tags.insert(tag.second);
 
@@ -2200,7 +2200,7 @@ NonlinearSystemBase::computeJacobian(SparseMatrix<Number> & jacobian)
 {
   _nl_matrix_tags.clear();
 
-  auto & tags = _fe_problem.getMatrixTag();
+  auto & tags = _fe_problem.getMatrixTags();
 
   for (auto & tag : tags)
     _nl_matrix_tags.insert(tag.second);
@@ -2246,7 +2246,7 @@ NonlinearSystemBase::computeJacobianBlocks(std::vector<JacobianBlock *> & blocks
 {
   _nl_matrix_tags.clear();
 
-  auto & tags = _fe_problem.getMatrixTag();
+  auto & tags = _fe_problem.getMatrixTags();
   for (auto & tag : tags)
     _nl_matrix_tags.insert(tag.second);
 

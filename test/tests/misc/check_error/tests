@@ -506,13 +506,13 @@
   [./scalar_old_integrity_check]
     type = 'RunException'
     input = 'scalar_old_integrity_check.i'
-    expect_err = 'Kernel, td, was assigned an invalid vector_tag: \'time\'.  If this is a TimeKernel then this may have happened because you didn\'t specify a Transient Executioner.'
+    expect_err = 'Vector tag: TIME does not exist'
   [../]
 
   [./scalar_dot_integrity_check]
     type = 'RunException'
     input = 'scalar_dot_integrity_check.i'
-    expect_err = 'Kernel, td, was assigned an invalid vector_tag: \'time\'.  If this is a TimeKernel then this may have happened because you didn\'t specify a Transient Executioner.'
+    expect_err = 'Vector tag: TIME does not exist.'
   [../]
 
   [./node_value_off_block]

@@ -871,44 +871,77 @@ public:
    */
   virtual Real computeResidualL2Norm();
 
+  /**
+   * This function is called by Libmesh to form a residual.
+   */
   virtual void computeResidualSys(NonlinearImplicitSystem & sys,
                                   const NumericVector<Number> & soln,
                                   NumericVector<Number> & residual);
-
+  /**
+   * This function is called by Libmesh to form a residual. This is deprecated.
+   * We should remove this as soon as RattleSnake is fixed.
+   */
   void computeResidual(NonlinearImplicitSystem & sys,
                        const NumericVector<Number> & soln,
                        NumericVector<Number> & residual);
 
+  /**
+   * Form a residual with default tags (nontime, time, residual).
+   */
   virtual void computeResidual(const NumericVector<Number> & soln,
                                NumericVector<Number> & residual);
-
+  /**
+   * Form a residual vector for a given tag
+   */
   virtual void computeResidualTag(const NumericVector<Number> & soln,
                                   NumericVector<Number> & residual,
                                   TagID tag);
-
+  /**
+   * Form a residual vector for a given tag and "residual" tag
+   */
   virtual void computeResidualType(const NumericVector<Number> & soln,
                                    NumericVector<Number> & residual,
                                    TagID tag);
-
+  /**
+   * Form a residual vector for a set of tags. It should not be called directly
+   * by users.
+   */
   virtual void computeResidualInternal(const NumericVector<Number> & soln,
                                        NumericVector<Number> & residual,
                                        const std::set<TagID> & tags);
-
+  /**
+   * Form multiple residual vectors and each is associated with one tag
+   */
   virtual void computeResidualTags(const std::set<TagID> & tags);
 
+  /**
+   * Form a Jacobian matrix. It is called by Libmesh.
+   */
   virtual void computeJacobianSys(NonlinearImplicitSystem & sys,
                                   const NumericVector<Number> & soln,
                                   SparseMatrix<Number> & jacobian);
+  /**
+   * Form a Jacobian matrix with the default tag (system).
+   */
   virtual void computeJacobian(const NumericVector<Number> & soln, SparseMatrix<Number> & jacobian);
 
+  /**
+   * Form a Jacobian matrix for a given tag.
+   */
   virtual void computeJacobianTag(const NumericVector<Number> & soln,
                                   SparseMatrix<Number> & jacobian,
                                   TagID tag);
 
+  /**
+   * Form a Jacobian matrix for multiple tags. It should not be called directly by users.
+   */
   virtual void computeJacobianInternal(const NumericVector<Number> & soln,
                                        SparseMatrix<Number> & jacobian,
                                        const std::set<TagID> & tags);
 
+  /**
+   * Form multiple matrices, and each is associated with a tag.
+   */
   virtual void computeJacobianTags(const std::set<TagID> & tags);
 
   /**

@@ -110,12 +110,24 @@ public:
     return _eigen_values;
   }
 
+  /**
+   * Vector tag ID of right hand side
+   */
   TagID eigenVectorTag() { return _Bx_tag; }
 
+  /**
+   * Vector tag ID of left hand side
+   */
   TagID nonEigenVectorTag() { return _Ax_tag; }
 
+  /**
+   * Matrix tag ID of right hand side
+   */
   TagID eigenMatrixTag() { return _B_tag; }
 
+  /**
+   * Matrix tag ID of left hand side
+   */
   TagID nonEigenMatrixTag() { return _A_tag; }
 
 protected:

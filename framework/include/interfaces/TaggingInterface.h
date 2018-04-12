@@ -40,9 +40,9 @@ public:
   TaggingInterface(SubProblem & subproblem, const MooseObject & moose_object);
   virtual ~TaggingInterface();
 
-  void useVectorTag(TagName & tag_name);
+  void useVectorTag(const TagName & tag_name);
 
-  void useMatrixTag(TagName & tag_name);
+  void useMatrixTag(const TagName & tag_name);
 
   void useVectorTag(TagID tag_id);
 
@@ -52,45 +52,45 @@ public:
 
   bool isMatrixTagged() { return _matrix_tags.size() > 0; }
 
-  std::set<TagID> & getVectorTags() { return _vector_tags; }
+  const std::set<TagID> & getVectorTags() { return _vector_tags; }
 
-  std::set<TagID> & getMatrixTags() { return _matrix_tags; }
+  const std::set<TagID> & getMatrixTags() { return _matrix_tags; }
 
   /**
-   * Prepare data for computing element residual
-   * according to ative tags.
+   * Prepare data for computing element residual the according to active tags.
    * Residual blocks for different tags will be extracted from Assembly.
-   * A local residual variable will be zeroed
+   * A local residual will be zeroed. It should be called
+   * right before the local element vector is computed.
    */
   void prepareVectorTag(Assembly & assembly, unsigned int ivar);
 
   /**
-   * Prepare data for computing element jacobian
-   * according to ative tags.
+   * Prepare data for computing element jacobian according to the ative tags.
    * Jacobian blocks for different tags will be extracted from Assembly.
-   * A local Jacobian variable will be zeroed
+   * A local Jacobian will be zeroed. It should be called
+   * right before the local element matrix is computed.
    */
   void prepareMatrixTag(Assembly & assembly, unsigned int ivar, unsigned int jvar);
 
   /**
-   * Local residual blocks  will be appended by adding
-   * the current local kernel residual
+   * Local residual blocks  will be appended by adding the current local kernel residual.
+   * It should be called after the local element vector has been computed.
    */
   void accumulateTaggedLocalResidual();
 
   /**
-   * Local residual blocks will assigned as
-   * the current local kernel residual
+   * Local residual blocks will assigned as the current local kernel residual.
+   * It should be called after the local element vector has been computed.
    */
   void assignTaggedLocalResidual();
   /**
-   * Local Jacobian blocks  will be appended by adding
-   * the current local kernel Jacobian
+   * Local Jacobian blocks  will be appended by adding the current local kernel Jacobian.
+   * It should be called after the local element matrix has been computed.
    */
   void accumulateTaggedLocalMatrix();
   /**
-   * Local Jacobian blocks will assigned as
-   * the current local kernel Jacobian
+   * Local Jacobian blocks will assigned as the current local kernel Jacobian.
+   * It should be called after the local element matrix has been computed.
    */
   void assignTaggedLocalMatrix();
 

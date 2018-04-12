@@ -34,17 +34,14 @@ validParams<TaggingInterface>()
   params.addParam<MultiMooseEnum>(
       "matrix_tags", mtags, "The tag for the matrices this Kernel should fill");
 
-  MultiMooseEnum extra_vtags(" ", " ", true);
-  MultiMooseEnum extra_mtags(" ", " ", true);
+  params.addParam<std::vector<TagName>>("extra_vector_tags",
+                                        "The extra tags for the vectors this Kernel should fill");
 
-  params.addParam<MultiMooseEnum>(
-      "extra_vector_tags", extra_vtags, "The extra tags for the vectors this Kernel should fill");
-
-  params.addParam<MultiMooseEnum>(
-      "extra_matrix_tags", extra_mtags, "The extra tags for the matrices this Kernel should fill");
+  params.addParam<std::vector<TagName>>("extra_matrix_tags",
+                                        "The extra tags for the matrices this Kernel should fill");
 
   params.addParamNamesToGroup("vector_tags matrix_tags extra_vector_tags extra_matrix_tags",
-                              "Advanced");
+                              "Tagging");
 
   return params;
 }
@@ -59,33 +56,14 @@ TaggingInterface::TaggingInterface(SubProblem & subproblem, const MooseObject & 
     mooseError("MUST provide at least one vector_tag for Kernel: ", moose_object.name());
 
   for (auto & vector_tag_name : vector_tag_names)
-  {
-    if (!_subproblem.vectorTagExists(vector_tag_name.name()))
-      mooseError("Kernel, ",
-                 moose_object.name(),
-                 ", was assigned an invalid vector_tag: '",
-                 vector_tag_name,
-                 "'.  If this is a TimeKernel then this may have happened because you didn't "
-                 "specify a Transient Executioner.");
-
     _vector_tags.insert(_subproblem.getVectorTagID(vector_tag_name));
-  }
 
   // Add extra vector tags. These tags should be created in the System already, otherwise
   // we can not add the extra tags
-  auto & extra_vector_tags = parameters.get<MultiMooseEnum>("extra_vector_tags");
+  auto & extra_vector_tags = parameters.get<std::vector<TagName>>("extra_vector_tags");
 
   for (auto & vector_tag_name : extra_vector_tags)
-  {
-    if (!_subproblem.vectorTagExists(vector_tag_name.name()))
-      mooseError("Kernel, ",
-                 moose_object.name(),
-                 ", was assigned an invalid vector_tag: '",
-                 vector_tag_name,
-                 "'. System doesn't have this vector tag");
-
     _vector_tags.insert(_subproblem.getVectorTagID(vector_tag_name));
-  }
 
   auto & matrix_tag_names = parameters.get<MultiMooseEnum>("matrix_tags");
 
@@ -93,38 +71,19 @@ TaggingInterface::TaggingInterface(SubProblem & subproblem, const MooseObject & 
     mooseError("MUST provide at least one matrix_tag for Kernel: ", moose_object.name());
 
   for (auto & matrix_tag_name : matrix_tag_names)
-  {
-    if (!_subproblem.matrixTagExists(matrix_tag_name.name()))
-      mooseError("Kernel, ",
-                 moose_object.name(),
-                 ", was assigned an invalid matrix_tag: '",
-                 matrix_tag_name,
-                 "'.  If this is a TimeKernel then this may have happened because you didn't "
-                 "specify a Transient Executioner.");
-
     _matrix_tags.insert(_subproblem.getMatrixTagID(matrix_tag_name));
-  }
 
-  auto & extra_matrix_tags = parameters.get<MultiMooseEnum>("extra_matrix_tags");
+  auto & extra_matrix_tags = parameters.get<std::vector<TagName>>("extra_matrix_tags");
 
   for (auto & matrix_tag_name : extra_matrix_tags)
-  {
-    if (!_subproblem.matrixTagExists(matrix_tag_name.name()))
-      mooseError("Kernel, ",
-                 moose_object.name(),
-                 ", was assigned an invalid matrix_tag: '",
-                 matrix_tag_name,
-                 "'. System doesn't have this matrix tag. ");
-
     _matrix_tags.insert(_subproblem.getMatrixTagID(matrix_tag_name));
-  }
 
   _re_blocks.resize(_vector_tags.size());
   _ke_blocks.resize(_matrix_tags.size());
 }
 
 void
-TaggingInterface::useVectorTag(TagName & tag_name)
+TaggingInterface::useVectorTag(const TagName & tag_name)
 {
   if (!_subproblem.vectorTagExists(tag_name))
     mooseError("Vector tag ", tag_name, " does not exsit in system");
@@ -133,7 +92,7 @@ TaggingInterface::useVectorTag(TagName & tag_name)
 }
 
 void
-TaggingInterface::useMatrixTag(TagName & tag_name)
+TaggingInterface::useMatrixTag(const TagName & tag_name)
 {
   if (!_subproblem.matrixTagExists(tag_name))
     mooseError("Matrix tag ", tag_name, " does not exsit in system");

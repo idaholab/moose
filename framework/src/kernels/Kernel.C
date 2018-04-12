@@ -84,9 +84,6 @@ Kernel::Kernel(const InputParameters & parameters)
   }
 
   _has_diag_save_in = _diag_save_in.size() > 0;
-
-  _re_blocks.resize(_vector_tags.size());
-  _ke_blocks.resize(_matrix_tags.size());
 }
 
 void

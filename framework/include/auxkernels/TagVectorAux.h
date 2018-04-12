@@ -19,7 +19,8 @@ template <>
 InputParameters validParams<TagVectorAux>();
 
 /**
- * Constant auxiliary value
+ * The value of a tagged vector for a given node and a given variable is coupled to
+ * the current AuxVariable. TagVectorAux returns the coupled nodal value.
  */
 class TagVectorAux : public AuxKernel
 {

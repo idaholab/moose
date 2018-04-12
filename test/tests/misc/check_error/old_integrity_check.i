@@ -30,12 +30,6 @@
 []
 
 [Kernels]
-  # V equation
-#  This will generate it's own error now
-#  [./td_v]
-#    type = TimeDerivative
-#    variable = v
-#  [../]
   [./diff_v]
     type = CoefDiffusion
     variable = u

@@ -35,29 +35,53 @@ public:
    */
   virtual void updateActive(THREAD_ID tid = 0) override;
 
+  /**
+   * Retrieve a moose object warehouse in which every moose object has the given vector tag.
+   * If the warehouse is not constructed yet, it will be constructed here and returned. If
+   * the warehouse is already cached (it was queried before), we just directly return the
+   * cached warehouse.
+   */
   MooseObjectWarehouse<T> & getVectorTagObjectWarehouse(TagID tag_id, THREAD_ID tid);
 
+  /**
+   * Retrieve a moose object warehouse in which every moose object at least has one of the given
+   * vector tags.
+   * If the warehouse is not constructed yet, it will be constructed here and returned. If
+   * the warehouse is already cached (it was queried before), we just directly return the
+   * cached warehouse.
+   */
   MooseObjectWarehouse<T> & getVectorTagsObjectWarehouse(const std::set<TagID> & tags,
                                                          THREAD_ID tid);
-
+  /**
+   * Retrieve a moose object warehouse in which every moose object has the given matrix tag.
+   * If the warehouse is not constructed yet, it will be constructed here and returned. If
+   * the warehouse is already cached (it was queried before), we just directly return the
+   * cached warehouse.
+   */
   MooseObjectWarehouse<T> & getMatrixTagObjectWarehouse(TagID tag_id, THREAD_ID tid);
 
+  /**
+   * Retrieve a moose object warehouse in which every moose object has one of the given matrix tags.
+   * If the warehouse is not constructed yet, it will be constructed here and returned. If
+   * the warehouse is already cached (it was queried before), we just directly return the
+   * cached warehouse.
+   */
   MooseObjectWarehouse<T> & getMatrixTagsObjectWarehouse(const std::set<TagID> & tags,
                                                          THREAD_ID tid);
 
 protected:
   const THREAD_ID _num_threads;
 
-  /// Tag based storage. Tag to object warehouse
+  /// Tag based storage. Map from a tag to a moose object warehouse for vector tags
   std::vector<std::map<TagID, MooseObjectWarehouse<T>>> _vector_tag_to_object_warehouse;
 
-  /// Object warehouse associated with a few tags
+  /// std::set<TagID> based storage. Map from a std::set of tags to a moose object warehouse for vector tags.
   std::vector<std::map<std::set<TagID>, MooseObjectWarehouse<T>>> _vector_tags_to_object_warehouse;
 
-  /// Tag to Matrix Object
+  /// Tag based storage. Map fro a tag to moose object warehouse for matrix tags.
   std::vector<std::map<TagID, MooseObjectWarehouse<T>>> _matrix_tag_to_object_warehouse;
 
-  /// std::vector<TagID> based storage
+  /// std::set<TagID> based storage. Map from a std::set of tags to moose object warehouse for matrix tags.
   std::vector<std::map<std::set<TagID>, MooseObjectWarehouse<T>>> _matrix_tags_to_object_warehouse;
 };
 

@@ -249,9 +249,9 @@ DisplacedProblem::numVectorTags()
 }
 
 std::map<TagName, TagID> &
-DisplacedProblem::getVectorTag()
+DisplacedProblem::getVectorTags()
 {
-  return _mproblem.getVectorTag();
+  return _mproblem.getVectorTags();
 }
 
 TagID
@@ -647,13 +647,13 @@ DisplacedProblem::clearDiracInfo()
 void
 DisplacedProblem::addResidual(THREAD_ID tid)
 {
-  _assembly[tid]->addResidual(getVectorTag());
+  _assembly[tid]->addResidual(getVectorTags());
 }
 
 void
 DisplacedProblem::addResidualNeighbor(THREAD_ID tid)
 {
-  _assembly[tid]->addResidualNeighbor(getVectorTag());
+  _assembly[tid]->addResidualNeighbor(getVectorTags());
 }
 
 void
@@ -674,8 +674,6 @@ DisplacedProblem::addCachedResidual(THREAD_ID tid)
   _assembly[tid]->addCachedResiduals();
 }
 
-// This is a really bad API
-// I hate this API
 void
 DisplacedProblem::addCachedResidualDirectly(NumericVector<Number> & residual, THREAD_ID tid)
 {
