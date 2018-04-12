@@ -108,4 +108,8 @@
     input = test_WriteResults.py
     prereq = 'diff'
   [../]
+  [./CSVDiffer]
+    type = PythonUnitTest
+    input = test_CSVDiffer.py
+  [../]
 []
