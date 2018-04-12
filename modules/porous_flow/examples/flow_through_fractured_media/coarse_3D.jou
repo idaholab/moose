@@ -1,0 +1,62 @@
+reset
+
+brick x 1 y 0.3 z 1
+
+create surface ellipse major radius  0.45 minor radius  0.2 zplane
+rotate Volume 2  angle  90. about X
+rotate Volume 2  angle  170. about Z
+move Volume 2 x -0.3  y 0.03   z 0. 
+
+create surface ellipse major radius  0.45 minor radius  0.2 zplane
+rotate Volume 3  angle  90. about X
+rotate Volume 3  angle  10. about Z
+rotate Volume 3  angle  40. about Y
+move Volume 3 x  0.3  y 0.03   z 0. 
+
+#{i=1}
+#{Loop(3)}
+  #{i++}
+  intersect volume 1 body {i} keep 
+  delete body {i}
+#{EndLoop}
+compress
+
+block 1 volume 1
+block 2 surface in volume 2
+block 3 surface in volume 3
+
+block 2 element type TRISHELL3
+block 3 element type TRISHELL3
+
+Sideset 1 add curve in volume 2 with x_coord = 0.5
+Sideset 2 add curve in volume 3 with x_coord = -0.5
+
+Sideset 3 add surface in volume all with x_coord = 0.5
+Sideset 4 add surface in volume all with x_coord = -0.5
+
+#{i=1}
+#{Loop(3)}
+  #{i++}
+  webcut volume all with sheet extended from surface in volume {i}
+#{EndLoop}
+
+volume 2 size 0.02
+volume 3 size 0.02
+volume 5 size 0.02
+
+volume 1 size 0.1
+volume 4 size 0.1
+volume 6 size 0.1
+volume 8 size 0.1
+
+imprint all
+merge all
+volume all scheme tetmesh
+mesh volume all
+
+undo group begin
+set exodus netcdf4 off
+set large exodus file on
+export mesh "coarse_3D.e" overwrite 
+undo group end
+
