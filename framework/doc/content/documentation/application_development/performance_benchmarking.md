@@ -1,4 +1,3 @@
-
 # Performance Benchmarking
 
 Utilities for doing performance benchmarking of MOOSE-based applications are included in the main
