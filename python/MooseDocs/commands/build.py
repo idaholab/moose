@@ -125,6 +125,11 @@ def main(options):
     translator = common.load_config(options.config)
     translator.init(options.destination)
 
+    # Replace "home" with local server
+    if options.serve:
+        home = 'http://127.0.0.1:{}'.format(options.port)
+        translator.renderer.update(home=home)
+
     # Dump page tree
     if options.dump:
         print translator.root

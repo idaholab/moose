@@ -186,11 +186,13 @@ class MaterializeRenderer(HTMLRenderer):
         config['name'] = (None, "The name of the website (e.g., MOOSE)")
         config['home'] = ('/', "The homepage for the website.")
         config['scrollspy'] = (True, "Enable/disable the scrolling table of contents.")
+        config['search'] = (True, "Enable/disable the search bar.")
         return config
 
     def __init__(self, *args, **kwargs):
         HTMLRenderer.__init__(self, *args, **kwargs)
         self.__navigation = None # Cache for navigation pages
+        self.__index = False # page index created
 
     def update(self, **kwargs):
         """
@@ -244,6 +246,7 @@ class MaterializeRenderer(HTMLRenderer):
         self._addName(config, nav, self.translator.current)
         self._addNavigation(config, nav, self.translator.current)
         self._addBreadcrumbs(config, container, self.translator.current)
+        self._addSearch(config, nav, self.translator.current)
 
         row = html.Tag(container, 'div', class_="row")
         col = html.Tag(row, 'div', class_="moose-content")
@@ -290,6 +293,11 @@ class MaterializeRenderer(HTMLRenderer):
                  src=rel("contrib/clipboard/clipboard.min.js"))
         html.Tag(head, 'script', type="text/javascript", src=rel("contrib/prism/prism.min.js"))
         html.Tag(head, 'script', type="text/javascript", src=rel("contrib/katex/katex.min.js"))
+
+        if self.get('search', False):
+            html.Tag(head, 'script', type="text/javascript", src=rel("contrib/fuse/fuse.min.js"))
+            html.Tag(head, 'script', type="text/javascript", src=rel("js/search_index.js"))
+
         html.Tag(head, 'script', type="text/javascript", src=rel("js/init.js"))
 
     def _addContents(self, config, toc, content, root_page): #pylint: disable=unused-argument,no-self-use
@@ -351,7 +359,7 @@ class MaterializeRenderer(HTMLRenderer):
             root_page[page.PageNodeBase]: The current page being converted.
         """
 
-        # Do nothing if navigation is not probided
+        # Do nothing if navigation is not provided
         navigation = config.get('navigation', None)
         if (navigation is None) or (root_page is None):
             return
@@ -390,6 +398,48 @@ class MaterializeRenderer(HTMLRenderer):
                     href = node.relativeDestination(root_page)
                     a = html.Tag(bot_li, 'a', href=href, string=unicode(key2))
 
+    def _addSearch(self, config, nav, root_page): #pylint: disable=no-self-use
+        """
+        Add search bar to the navigation bar.
+
+        Inputs:
+            nav[html.Tag]: The <div> containing the navigation for the page being generated.
+            root_page[page.PageNodeBase]: The current page being converted.
+
+        TODO:  The content of this method and most of the other methods in this class should be
+               moved to extensions. The extension should create a SearchToken at the top level
+               of the AST (i.e., in preTokenize). The render method should inject the search in to
+               the navigation bar (which could be another but require extension). Doing this
+               would make this class much simpler and keep the overall design almost exclusively
+               plugin based. The MaterializeRender should be as close to as empty as possible.
+        """
+
+        # Do nothing if navigation is not provided
+        search = config.get('search', True)
+        if (not search) or (root_page is None):
+            return
+
+        # Search button
+        btn = html.Tag(nav, 'a', class_="modal-trigger", href="#moose-search")
+        html.Tag(btn, 'i', string=u'search', class_="material-icons")
+
+        # Search modal
+        div = html.Tag(nav.root.find('header'), 'div', id_="moose-search",
+                       class_="modal modal-fixed-footer moose-search-modal")
+        container = html.Tag(div, 'div',
+                             class_="modal-content container moose-search-modal-content")
+        row = html.Tag(container, 'div', class_="row")
+        col = html.Tag(row, 'div', class_="col l12")
+        box_div = html.Tag(col, 'div', class_="input-field")
+        box = html.Tag(box_div, 'input', type_='text', id_="moose-search-box",
+                       onkeyup="mooseSearch()", autocomplete="off")
+        html.Tag(box, 'label', for_="search", string=unicode(config['home']))
+        result_wrapper = html.Tag(row, 'div')
+        html.Tag(result_wrapper, 'div', id_="moose-search-results", class_="col s12")
+        footer = html.Tag(div, 'div', class_="modal-footer")
+        html.Tag(footer, 'a', href='#!', class_="modal-action modal-close btn-flat",
+                 string=u'Close')
+
     def _addName(self, config, nav, root_page): #pylint: disable=unused-argument
         """
         Add the page name to the left-hand side of the top bar.
@@ -400,7 +450,7 @@ class MaterializeRenderer(HTMLRenderer):
         """
         name = config.get('name', None)
         if name:
-            html.Tag(nav, 'a', class_='left', href=unicode(self.get('home', '#!')),
+            html.Tag(nav, 'a', class_='left moose-logo', href=unicode(self.get('home', '#!')),
                      string=unicode(name))
 
     def _addBreadcrumbs(self, config, container, root_page): #pylint: disable=no-self-use
@@ -460,7 +510,7 @@ class MaterializeRenderer(HTMLRenderer):
         for child in section.children:
             if child.name in ('h1', 'h2', 'h3', 'h4', 'h5', 'h6'):
                 level = int(child.name[-1])
-                current = section.get("data-section-level", 0) # get the current section lvel
+                current = section.get("data-section-level", 0) # get the current section level
 
                 if level == current:
                     section = html.Tag(section.parent, 'section')

@@ -201,6 +201,28 @@ ul {
      margin-left:1.5rem;
 }
 
+/* SEARCH RESULTS */
+.moose-search-result{
+    margin-bottom:1ex;
+}
+
+.moose-search-result-title{
+  font-size: 90%;
+  font-weight: 400;
+  margin: 0;
+}
+
+.moose-search-result-content{
+  font-size: 75%;
+  font-weight: 100;
+  margin: 0;
+}
+
+/* NAME/HOME link */
+.moose-logo{
+    margin-right:30px;
+}
+
 /* LAYOUT (ROWS/COLUMNS) */
 .moose-row{
     display:flex;

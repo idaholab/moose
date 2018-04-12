@@ -3,9 +3,11 @@ Module that defines Translator objects for converted AST from Reader to Rendered
 Renderer objects. The Translator objects exist as a place to import extensions and bridge
 between the reading and rendering content.
 """
+import os
 import logging
 import multiprocessing
 import time
+import json
 
 import anytree
 
@@ -55,6 +57,7 @@ class Translator(mixins.ConfigObject):
         self.__extensions = extensions
         self.__reader = reader
         self.__renderer = renderer
+        self.__destination = None # assigned during init()
         self.__extension_functions = dict(preRender=list(),
                                           postRender=list(),
                                           preTokenize=list(),
@@ -97,6 +100,11 @@ class Translator(mixins.ConfigObject):
         """Return a multiprocessing lock for serial operations (e.g., directory creation)."""
         return self.__lock
 
+    @property
+    def destination(self):
+        """Return the destination assigned during init()."""
+        return self.__destination
+
     def init(self, destination):
         """
         Initialize the translator with the output destination for the converted content.
@@ -113,7 +121,7 @@ class Translator(mixins.ConfigObject):
             raise MooseDocs.common.exceptions.MooseDocsException(msg, type(self))
 
         common.check_type("destination", destination, str)
-
+        self.__destination = destination
         self.__reader.init(self)
         self.__renderer.init(self)
 
@@ -196,6 +204,9 @@ class Translator(mixins.ConfigObject):
         Long term this should be looked into again, for now the current approach is working well.
         This new system is already an order of 4 times faster than the previous implementation and
         likely could be optimized further.
+
+        The multiprocessing.Manager() needs to be explored, it is working to pull the JSON index
+        information together.
         """
         common.check_type('num_threads', num_threads, int)
         self.__assertInitialize()
@@ -204,23 +215,30 @@ class Translator(mixins.ConfigObject):
         LOG.info("Building Pages...")
         start = time.time()
 
-        def target(nodes):
+        manager = multiprocessing.Manager()
+        array = manager.list()
+        def target(nodes, lock):
             """Helper for building multiple nodes (i.e., a chunk for a process)."""
             for node in nodes:
                 node.build()
+                if isinstance(node, page.MarkdownNode):
+                    node.buildIndex(self.renderer.get('home', None))
+                    with lock:
+                        for entry in node.index:
+                            array.append(entry)
 
         # Complete list of nodes
         nodes = [n for n in anytree.PreOrderIter(self.root)]
 
         # Serial
         if num_threads == 1:
-            target(nodes)
+            target(nodes, self.lock)
 
         # Multiprocessing
         else:
             jobs = []
             for chunk in mooseutils.make_chunks(nodes, num_threads):
-                p = multiprocessing.Process(target=target, args=(chunk,))
+                p = multiprocessing.Process(target=target, args=(chunk, self.lock))
                 p.start()
                 jobs.append(p)
 
@@ -230,6 +248,12 @@ class Translator(mixins.ConfigObject):
         # Done
         stop = time.time()
         LOG.info("Build time %s sec.", stop - start)
+
+        iname = os.path.join(self.destination, 'js', 'search_index.js')
+        if not os.path.isdir(os.path.dirname(iname)):
+            os.makedirs(os.path.dirname(iname))
+        items = [v for v in array if v]
+        common.write(iname, 'var index_data = {};'.format(json.dumps(items)))
 
     def __assertInitialize(self):
         """Helper for asserting initialize status."""

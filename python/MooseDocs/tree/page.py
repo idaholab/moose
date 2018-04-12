@@ -14,6 +14,8 @@ import logging
 import codecs
 import types
 
+import anytree
+
 import MooseDocs
 from MooseDocs import common
 from MooseDocs.common import exceptions, mixins
@@ -183,6 +185,7 @@ class MarkdownNode(FileNode):
 
         self._ast = None
         self._result = None
+        self._index = None
 
     @property
     def destination(self):
@@ -198,6 +201,11 @@ class MarkdownNode(FileNode):
     def result(self):
         """Return the rendered result."""
         return self._result
+
+    @property
+    def index(self):
+        """Return the index."""
+        return self._index
 
     def tokenize(self):
         """
@@ -248,6 +256,18 @@ class MarkdownNode(FileNode):
             LocationNodeBase.write(self) # Creates directories
             with codecs.open(self.destination, 'w', encoding='utf-8') as fid:
                 fid.write(self._result.write())
+
+    def buildIndex(self, home):
+        """
+        Build the search index.
+        """
+        if (self._index is None) and (self._result is not None):
+            self._index = []
+            for section in anytree.search.findall_by_attr(self._result, 'section'):
+                name = '{}:{}'.format(self.name, section['data-section-text'])
+                text = section['data-section-text']
+                location = '{}#{}'.format(self.destination.replace(self.base, home), section['id'])
+                self._index.append(dict(name=name, text=text, location=location))
 
     def build(self):
         """
