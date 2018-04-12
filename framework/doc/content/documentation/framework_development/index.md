@@ -9,3 +9,5 @@
 [Utils](utils/index.md)
 
 [Warehouses](/warehouses.md)
+
+[Code Standards](code_standards.md)
