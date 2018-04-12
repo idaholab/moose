@@ -34,6 +34,8 @@ ComputeRSphericalFiniteStrain::ComputeRSphericalFiniteStrain(const InputParamete
 void
 ComputeRSphericalFiniteStrain::initialSetup()
 {
+  ComputeIncrementalStrainBase::initialSetup();
+
   const auto & subdomainIDs = _mesh.meshSubdomains();
   for (auto subdomainID : subdomainIDs)
     if (_fe_problem.getCoordSystem(subdomainID) != Moose::COORD_RSPHERICAL)

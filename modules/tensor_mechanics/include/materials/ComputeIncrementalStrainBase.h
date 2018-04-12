@@ -27,6 +27,7 @@ public:
   virtual ~ComputeIncrementalStrainBase() {}
 
 protected:
+  void initialSetup() override;
   virtual void initQpStatefulProperties() override;
 
   void subtractEigenstrainIncrementFromStrain(RankTwoTensor & strain);

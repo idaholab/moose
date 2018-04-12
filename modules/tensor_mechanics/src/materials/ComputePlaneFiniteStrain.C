@@ -45,7 +45,7 @@ ComputePlaneFiniteStrain::ComputePlaneFiniteStrain(const InputParameters & param
 }
 
 Real
-ComputePlaneFiniteStrain::computeGradDispZZ()
+ComputePlaneFiniteStrain::computeOutOfPlaneGradDisp()
 {
   /**
    * This is consistent with the approximation of stretch rate tensor
@@ -58,7 +58,7 @@ ComputePlaneFiniteStrain::computeGradDispZZ()
 }
 
 Real
-ComputePlaneFiniteStrain::computeGradDispZZOld()
+ComputePlaneFiniteStrain::computeOutOfPlaneGradDispOld()
 {
   if (_scalar_out_of_plane_strain_coupled)
     return std::exp(_scalar_out_of_plane_strain_old[0]) - 1.0;

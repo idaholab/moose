@@ -27,8 +27,8 @@ public:
   ComputePlaneFiniteStrain(const InputParameters & parameters);
 
 protected:
-  virtual Real computeGradDispZZ();
-  virtual Real computeGradDispZZOld();
+  virtual Real computeOutOfPlaneGradDisp() override;
+  virtual Real computeOutOfPlaneGradDispOld() override;
 
   const bool _scalar_out_of_plane_strain_coupled;
   const VariableValue & _scalar_out_of_plane_strain;

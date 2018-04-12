@@ -67,7 +67,9 @@ TensorMechanicsAction::TensorMechanicsAction(const InputParameters & params)
     _subdomain_names(getParam<std::vector<SubdomainName>>("block")),
     _subdomain_ids(),
     _strain(getParam<MooseEnum>("strain").getEnum<Strain>()),
-    _planar_formulation(getParam<MooseEnum>("planar_formulation").getEnum<PlanarFormulation>())
+    _planar_formulation(getParam<MooseEnum>("planar_formulation").getEnum<PlanarFormulation>()),
+    _out_of_plane_direction(
+        getParam<MooseEnum>("out_of_plane_direction").getEnum<OutOfPlaneDirection>())
 {
   // determine if incremental strains are to be used
   if (isParamValid("incremental"))
@@ -118,8 +120,15 @@ TensorMechanicsAction::TensorMechanicsAction(const InputParameters & params)
         _ndisp);
 
   // plane strain consistency check
-  if (_planar_formulation != PlanarFormulation::None && _ndisp != 2)
-    mooseError("Plane strain only works in 2 dimensions");
+  if (_planar_formulation != PlanarFormulation::None)
+  {
+    if (_out_of_plane_direction == OutOfPlaneDirection::z && _ndisp != 2)
+      mooseError(
+          "Must specify two displacements for plane strain when the out of plane direction is z");
+    else if (_out_of_plane_direction != OutOfPlaneDirection::z && _ndisp != 3)
+      mooseError("Must specify three displacements for plane strain when the out of plane "
+                 "direction is x or y");
+  }
 
   // convert output variable names to lower case
   for (const auto & out : getParam<MultiMooseEnum>("generate_output"))
@@ -168,7 +177,6 @@ TensorMechanicsAction::act()
       action_params.set<bool>("use_displaced_mesh") = _use_displaced_mesh;
       if (isParamValid("pressure_factor"))
         action_params.set<Real>("factor") = getParam<Real>("pressure_factor");
-
       // Create and add the action to the warehouse
       auto action = MooseSharedNamespace::static_pointer_cast<MooseObjectAction>(
           _action_factory.create(type, name() + "_gps", action_params));
@@ -256,6 +264,7 @@ TensorMechanicsAction::act()
 
     params.set<std::vector<VariableName>>("displacements") = _coupled_displacements;
     params.set<bool>("use_displaced_mesh") = false;
+
     if (isParamValid("scalar_out_of_plane_strain"))
       params.set<std::vector<VariableName>>("scalar_out_of_plane_strain") = {
           getParam<NonlinearVariableName>("scalar_out_of_plane_strain")};
@@ -275,7 +284,15 @@ TensorMechanicsAction::act()
     {
       std::string kernel_name = "TM_" + name() + Moose::stringify(i);
 
+      // Set appropriate components for kernels, including in the cases where a planar model is
+      // running in planes other than the x-y plane (defined by _out_of_plane_strain_direction).
+      if (_out_of_plane_direction == OutOfPlaneDirection::x && i == 0)
+        continue;
+      else if (_out_of_plane_direction == OutOfPlaneDirection::y && i == 1)
+        continue;
+
       params.set<unsigned int>("component") = i;
+
       params.set<NonlinearVariableName>("variable") = _displacements[i];
 
       if (_save_in.size() == _ndisp)
@@ -316,6 +333,9 @@ TensorMechanicsAction::actSubdomainChecks()
         mooseError("The TensorMechanics action requires all subdomains to have the same coordinate "
                    "system.");
   }
+
+  if (_coord_system == Moose::COORD_RZ && _out_of_plane_direction != OutOfPlaneDirection::z)
+    paramError("out_of_plane_direction", "must be set to z for axisymmetric simulations.");
 }
 
 void

@@ -27,5 +27,6 @@ public:
 protected:
   std::vector<NonlinearVariableName> _displacements;
   unsigned int _ndisp;
+  const unsigned int _out_of_plane_direction;
 };
 #endif // GENERALIZEDPLANESTRAINACTION_H

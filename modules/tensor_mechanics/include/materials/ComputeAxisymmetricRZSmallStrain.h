@@ -28,7 +28,7 @@ public:
 
 protected:
   virtual void initialSetup() override;
-  virtual Real computeStrainZZ() override;
+  virtual Real computeOutOfPlaneStrain() override;
 };
 
 #endif // COMPUTEAXISYMMETRICRZSMALLSTRAIN_H
