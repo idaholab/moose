@@ -17,6 +17,8 @@
 
 #include "libmesh/string_to_enum.h"
 
+registerMooseObject("MooseApp", DumpObjectsProblem);
+
 template <>
 InputParameters
 validParams<DumpObjectsProblem>()
