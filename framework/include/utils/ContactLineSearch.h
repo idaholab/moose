@@ -24,7 +24,7 @@ using namespace libMesh;
 class FEProblemBase;
 
 /**
- * This class implements a custom line search (based on the Petsc LineSearchShell) for use with
+ * This class implements a custom line search for use with
  * mechanical contact. The line search is not fancy. It takes two parameters, set in the MOOSE
  * Executioner block: `contact_line_search_ltol` and `contact_line_search_allowed_lambda_cuts`. The
  * allowed_lambda_cuts parameter specifies the number of times the line search is allowed to cut
@@ -41,9 +41,7 @@ class FEProblemBase;
  * contact set is resolved late in the Newton solve, the linear tolerance will return to the finer
  * tolerance set through the traditional `l_tol` parameter.
  */
-class ContactLineSearch : public PetscNonlinearSolver<Real>::ComputeLineSearchObject,
-                          public ConsoleStreamInterface,
-                          public ParallelObject
+class ContactLineSearch : public ConsoleStreamInterface, public ParallelObject
 {
 public:
   ContactLineSearch(FEProblemBase & fe_problem,
@@ -52,20 +50,19 @@ public:
                     Real contact_ltol,
                     bool affect_ltol);
 
-  /**
-   * The custom linesearch implementation method
-   */
-  virtual void linesearch(SNESLineSearch linesearch) override;
+  // A dummy pure virtual destructor because this must be a base class; the derived class must
+  // implement the line searching capabilities
+  virtual ~ContactLineSearch() = 0;
 
   /**
    * The current contact state
    */
-  std::set<dof_id_type> * contact_state() { return &_current_contact_state; }
+  std::shared_ptr<std::set<dof_id_type>> contact_state() { return _current_contact_state; }
 
   /**
    * The old contact state
    */
-  std::set<dof_id_type> * old_contact_state() { return &_old_contact_state; }
+  std::set<dof_id_type> & old_contact_state() { return _old_contact_state; }
 
   /**
    * Method for printing the contact information
@@ -87,7 +84,7 @@ protected:
   FEProblemBase & _fe_problem;
 
   /// The current contact set
-  std::set<dof_id_type> _current_contact_state;
+  std::shared_ptr<std::set<dof_id_type>> _current_contact_state;
   /// The old contact set
   std::set<dof_id_type> _old_contact_state;
 

@@ -34,7 +34,6 @@ class MechanicalContactConstraint : public NodeFaceConstraint
 {
 public:
   MechanicalContactConstraint(const InputParameters & parameters);
-  virtual ~MechanicalContactConstraint();
 
   virtual void timestepSetup() override;
   virtual void jacobianSetup() override;
@@ -138,10 +137,8 @@ protected:
   /// The tolerance of the frictional force for augmented Lagrangian method
   Real _al_frictional_force_tolerance;
 
-#ifdef LIBMESH_HAVE_PETSC
   ContactLineSearch * _contact_linesearch;
-#endif
-  std::set<dof_id_type> * _current_contact_state;
+  std::shared_ptr<std::set<dof_id_type>> _current_contact_state;
   std::set<dof_id_type> _old_contact_state;
 
   const bool _print_contact_nodes;

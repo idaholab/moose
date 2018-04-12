@@ -216,7 +216,8 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
     _skip_additional_restart_data(getParam<bool>("skip_additional_restart_data")),
     _fail_next_linear_convergence_check(false),
     _started_initial_setup(false),
-    _has_internal_edge_residual_objects(false)
+    _has_internal_edge_residual_objects(false),
+    _custom_line_search(nullptr)
 {
 
   _time = 0.0;

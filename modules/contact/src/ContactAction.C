@@ -13,7 +13,6 @@
 #include "FEProblem.h"
 #include "Conversion.h"
 #include "AddVariableAction.h"
-#include "ContactLineSearch.h"
 #include "NonlinearSystemBase.h"
 #include "libmesh/petsc_nonlinear_solver.h"
 
@@ -169,13 +168,6 @@ ContactAction::act()
         params.set<unsigned int>("component") = i;
         params.set<NonlinearVariableName>("variable") = displacements[i];
         params.set<std::vector<VariableName>>("master_variable") = {coupled_displacements[i]};
-#ifdef LIBMESH_HAVE_PETSC
-        PetscNonlinearSolver<Real> & petsc_nonlinear_solver =
-            dynamic_cast<PetscNonlinearSolver<Real> &>(
-                *_problem->getNonlinearSystemBase().system().nonlinear_solver);
-        params.set<ContactLineSearch *>("contact_linesearch") =
-            dynamic_cast<ContactLineSearch *>(petsc_nonlinear_solver.linesearch_object.get());
-#endif
         _problem->addConstraint("MechanicalContactConstraint", name, params);
       }
     }

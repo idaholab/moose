@@ -112,9 +112,6 @@ validParams<MechanicalContactConstraint>()
                         "The tolerance of the frictional force for augmented Lagrangian method.");
   params.addParam<bool>(
       "print_contact_nodes", false, "Whether to print the number of nodes in contact.");
-#ifdef LIBMESH_HAVE_PETSC
-  params.addPrivateParam<ContactLineSearch *>("contact_linesearch", nullptr);
-#endif
   return params;
 }
 
@@ -144,13 +141,9 @@ MechanicalContactConstraint::MechanicalContactConstraint(const InputParameters &
     _master_slave_jacobian(getParam<bool>("master_slave_jacobian")),
     _connected_slave_nodes_jacobian(getParam<bool>("connected_slave_nodes_jacobian")),
     _non_displacement_vars_jacobian(getParam<bool>("non_displacement_variables_jacobian")),
-#ifdef LIBMESH_HAVE_PETSC
-    _contact_linesearch(getParam<ContactLineSearch *>("contact_linesearch")),
+    _contact_linesearch(_fe_problem.customLineSearch()),
     _current_contact_state(_contact_linesearch ? _contact_linesearch->contact_state()
-                                               : new std::set<dof_id_type>),
-#else
-    _current_contact_state(new std::set<dof_id_type>),
-#endif
+                                               : std::make_shared<std::set<dof_id_type>>()),
     _print_contact_nodes(getParam<bool>("print_contact_nodes"))
 {
   _overwrite_slave_residual = false;
@@ -230,16 +223,6 @@ MechanicalContactConstraint::MechanicalContactConstraint(const InputParameters &
   }
 }
 
-MechanicalContactConstraint::~MechanicalContactConstraint()
-{
-#ifdef LIBMESH_HAVE_PETSC
-  if (!_contact_linesearch)
-    delete _current_contact_state;
-#else
-  delete _current_contact_state;
-#endif
-}
-
 void
 MechanicalContactConstraint::timestepSetup()
 {
@@ -251,10 +234,8 @@ MechanicalContactConstraint::timestepSetup()
 
     _update_stateful_data = false;
 
-#ifdef LIBMESH_HAVE_PETSC
     if (_contact_linesearch)
       _contact_linesearch->nl_its() = 0;
-#endif
   }
 }
 
@@ -784,12 +765,7 @@ MechanicalContactConstraint::computeContactForce(PenetrationInfo * pinfo, bool u
 
   // Release
   if (update_contact_set && _model != CM_GLUED && pinfo->isCaptured() && !newly_captured &&
-      _tension_release >= 0.0 &&
-#ifdef LIBMESH_HAVE_PETSC
-      (_contact_linesearch ? true : pinfo->_locked_this_step < 2))
-#else
-      pinfo->_locked_this_step < 2)
-#endif
+      _tension_release >= 0.0 && (_contact_linesearch ? true : pinfo->_locked_this_step < 2))
   {
     const Real contact_pressure = -(pinfo->_normal * pinfo->_contact_force) / nodalArea(*pinfo);
     if (-contact_pressure >= _tension_release)
@@ -1823,7 +1799,7 @@ MechanicalContactConstraint::residualEnd()
 {
   if (_component == 0 && _print_contact_nodes)
   {
-    _communicator.set_union(*_current_contact_state, 0);
+    _communicator.set_union(*_current_contact_state);
     if (*_current_contact_state == _old_contact_state)
       _console << "Unchanged contact state. " << _current_contact_state->size()
                << " nodes in contact.\n";
