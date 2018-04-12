@@ -1,184 +1,118 @@
-# TensorMechanics Module
+# Tensor Mechanics Module class=center style=font-weight:500;font-size:200%;
 
-The MOOSE +Tensor Mechanics module+ is a library for simulation tools that solve
-mechanics problems. It provides a simple approach for implementing even advanced mechanics
-models.
-The tensor mechanics system can handle linear elasticity and finite strain mechanics, including
-elasticity, plasticity, creep, and damage.
+!media tensor_mechanics/lwr_3quarter_demo.png
+       id=lws_three_quarter_model
+       style=width:300px;padding-left:20px;float:right;
+       caption=Thermo-mechanical stress analysis of a reactor pressure vessel.
+
+The +Tensor Mechanics module+ is a library of simulation tools that solve
+continuum mechanics problems. It provides a simple approach for implementing
+even advanced mechanics models:
+
+- Plug-n-play design enables users to encorporate the relevant physics for specific and varied simulations
+- Tensor implementation matches mathematical theory
+- Straight-forward procedure for adding new physics
+- Complete [System Reference List](tensor_mechanics/systems.md) for the tensor mechanics code
+
+The tensor mechanics system can be used to simulation both linear and finite strain mechanics, including
+
+- Elasticity
+- Plasticity and micromechanics plasticity
+- Creep
+- Damage due to cracking and property degradation
+
+## Explore the Capabilities
+
+The +Tensor Mechanics module+ is used in a variety of pure mechanics simulations
+and in combined physics simulations with the Heat Transfer, Phase Field, Contact,
+Porous Flow, and XFEM modules; use the MOOSE combined module to perform simulations
+with multiple physics modules. The following figures show results from a few
+different simulations performed by tensor mechanics module users.
+
+!media media/bridge_demo.png
+       id=example1
+       style=width:28%;margin-right:2%;float:left;
+       caption=Continuum mechanics analysis of an arch bridge with effective stress concentrations.
+
+!media tensor_mechanics/3D_shear_failure_screen_shot.png
+       id=coal_mining_example
+       style=width:32%;margin-right:2%;float:left;
+       caption=Evolution of rock failure zone in a 300m-wide, 400m-deep panel in a coal mining application.
+
+!media tensor_mechanics/polyxtal27_temp.gif
+       style=width:35%;float:left;
+       id=demo_problem_bridge
+       caption=Evolution of the resolved shear stress on the $\mathrm{{[}112{]}(11\bar{1})}$ slip system in a polycrystalline simulation of BCC Iron under tensile loading.
 
 
-Find the [Complete System List](tensor_mechanics/systems.md) of all tensor mechanics code in this list.
+## Start Modeling
 
-In-depth descriptions of Main Components:
+Interested in performing some of these simulations yourself? Use the links below
+to learn more about the tensor mechanics module and to get started with your own
+continuum mechanics and combined physics simulations.
 
-- [Strains](tensor_mechanics/Strains.md)
-- [Stresses](tensor_mechanics/Stresses.md)
+!row!
+!col! class=s12 m4 l4 icon=device_hub
+
+### Plug-n-Play Structure Overview class=center style=font-weight:200;
+
+Familiarize yourself with the [Plug-n-Play Structure](tensor_mechanics/plug_n_play.md)
+used by tensor mechanics and then dive into the mathematical theory:
+
+- [Strain Calculations](tensor_mechanics/Strains.md)
+- [Stress Models](tensor_mechanics/Stresses.md)
 - [Stress Divergence](tensor_mechanics/StressDivergence.md)
+- [Tensor Definitions](tensor_mechanics/TensorClasses.md)
 
-Introductions to more Advanced Features:
+These classes make up the core of the tensor mechanics module.
 
-- [Volumetric Locking Correction](tensor_mechanics/VolumetricLocking.md)
-- [Fracture Integrals](tensor_mechanics/FractureIntegrals.md)
-- [Convergence Criteria](tensor_mechanics/Convergence.md)
+!col-end!
 
-Visualizing and Post Processing Simulation Results:
+!col! class=s12 m4 l4 icon=school
+
+### Examples and Tutorials class=center style=font-weight:200;
+
+Get started running your own tensor mechanics simulations by exploring the
+introductory tutorials and examples. Next browse through the information:
 
 - [Visualizing Tensors](tensor_mechanics/VisualizingTensors.md)
-- [Tensor Classes](tensor_mechanics/TensorClasses.md)
+- [System Reference List](tensor_mechanics/systems.md)
 
-## Using Materials in Tensor Mechanics
+Now you're ready to start creating your own mechanics simulations.
 
+ <!-- the guide on
+ to postprocess
+your new results. After completing these, browse through
+the complete  and start
+creating your own mechanics simulations. -->
+
+!col-end!
+
+!col! class=s12 m4 l4 icon=storage
+
+### Advanced Options and Features class=center style=font-weight:200;
+
+Explore the different ways to use the tensor mechanics module:
+
+- [Fracture Integrals](tensor_mechanics/FractureIntegrals.md)
+- Smeared Cracking
+- Crystal Plasticity
+- Multiple Inelastic Stresses
+
+Review the helpful advice on using the
+[Volumetric Locking Correction](tensor_mechanics/VolumetricLocking.md) and about
+setting appropriate [Convergence Criteria](tensor_mechanics/Convergence.md).
+!col-end!
+!row-end!
+
+The tensor mechanics module is being developed by users at national laboratories
+and universities around the world. Contact the developers through the
+[moose-users email list](help/contact_us.md).
+
+## Developing New Tensor Mechanics Code
+
+Consider becoming a developer yourself.
 The tensor mechanics module uses code syntax based on tensor forms. This approach
-allows the tensor equations to be implemented clearly and concisely.
-
-The tensor mechanics materials use a plug-and-play system where the main tensors used in the residual
-equation are defined in individual material classes in MOOSE. The plug-and-play approach used in the
-Tensor Mechanics module requires at least three separate classes to fully describe a material model.
-
-!alert note title=Three Tensors Are Required for a Mechanics Problem
-The three tensors that must be defined for any mechanics problem are the the strain
-$\mathbf{\epsilon}$ or strain increment, elasticity tensor $\mathbf{\mathcal{C}}$, and the stress
-$\mathbf{\sigma}$. Optional tensors include stress-free strain (also known as an eigenstrain)
-$\mathbf{\epsilon}_0$ and additional stress $\mathbf{\sigma}_0$.
-
-!media media/tensor_mechanics-IntroPlugNPlay.png
-       style=width:800;float:right;
-       caption=Figure 1: Tensors required to fully describe a mechanics material.
-
-At times, a user may need to define multiple mechanics properties over a single block. For this
-reason, all material properties can be prepended by a name defined by the input parameter
-`base_name`.
-
-## Strain Materials
-
-The base material class to create strains ($\mathbf{\epsilon}$) or strain increments is
-`ComputeStrainBase`; this class is a pure virtual class, requiring that all children override the
-`computeQpProperties()` method.  For all strains the base class defines the property `total_strain`.
-For incremental strains, both finite and small, the compute strain base class defines the properties
-`strain_rate`, `strain_increment`, `rotation_increment`, and `deformation_gradient`. A discussion of
-the different types of strain formulations is available on the [Strains](tensor_mechanics/Strains.md)
-page.
-
-For small strains, use [ComputeSmallStrain](/ComputeSmallStrain.md) in which $\mathbf{\epsilon} =
-(\nabla \mathbf{u} + \nabla \mathbf{u}^T)/2$. For finite strains, use
-[ComputeFiniteStrain](/ComputeFiniteStrain.md) in which an incremental form is employed such that the
-strain_increment and rotation_increment are calculated.
-
-With the TensorMechanics master action, the strain formulation can be set with the `strain= SMALL |
-FINITE` parameter, as shown below.
-
-!listing modules/tensor_mechanics/test/tests/finite_strain_elastic/finite_strain_elastic_new_test.i
-         block=Modules/TensorMechanics
-
-## Elasticity Tensor Materials
-
-The primary class for creating elasticity tensors ($\mathbf{\mathcal{C_{ijkl}}}$) is
-[ComputeElasticityTensor](/ComputeElasticityTensor.md). This class defines the property
-`_elasticity_tensor`. Given the elastic constants required for the applicable symmetry, such as
-`symmetric9`, this material calculates the elasticity tensor. If you wish to rotate the elasticity
-tensor, constant Euler angles can be provided. The elasticity tensor can also be scaled with a
-function, if desired.  `ComputeElasticityTensor` also serves as a base class for specialized
-elasticity tensors, including:
-
-- An elasticity tensor for crystal plasticity, [ComputeElasticityTensorCP](/ComputeElasticityTensorCP.md),
-- A Cosserat elasticity tensor [ComputeLayeredCosseratElasticityTensor](/ComputeLayeredCosseratElasticityTensor.md),
-- An isotropic elasticity tensor [ComputeIsotropicElasticityTensor](/ComputeIsotropicElasticityTensor.md).
-
-The input file syntax for the isotropic elasticity tensor is
-
-!listing modules/tensor_mechanics/tutorials/basics/part_1.1.i block=Materials/elasticity_tensor
-
-and for an orthotropic material, such as a metal crystal, is
-
-!listing modules/tensor_mechanics/test/tests/finite_strain_elastic/finite_strain_elastic_new_test.i
-         block=Materials/elasticity_tensor
-
-## Stress Materials
-
-The base class for constitutive equations to compute a stress ($\mathbf{\sigma}$) is
-`ComputeStressBase`. The `ComputeStressBase` class defines the properties `stress` and
-`elastic_strain`. It is a pure virtual class, requiring all children to override the method
-`computeQpStress()`.
-
-Two elastic constitutive models have been developed, one that assumes small strains
-[ComputeLinearElasticStress](/ComputeLinearElasticStress.md), and a second which assumes finite
-strains and rotations increments
-[ComputeFiniteStrainElasticStress](/ComputeFiniteStrainElasticStress.md) The input file syntax for
-these materials is
-
-!listing modules/tensor_mechanics/test/tests/finite_strain_elastic/finite_strain_elastic_new_test.i
-         block=Materials/stress
-
-There are a number of other constitutive models that have been implemented to calculate more complex
-elasticity problems, plasticity, and creep.  An overview of these different materials is available on
-the [Stresses](tensor_mechanics/Stresses.md) page.
-
-## Eigenstrain Materials
-
-Eigenstrain is the term given to a strain which does not result directly from an applied force. The
-base class for eigenstrains is `ComputeEigenstrainBase`. It computes an eigenstrain, which is
-subtracted from the total strain in the Compute Strain classes.
-\begin{equation}
-\epsilon_{mechanical} = \epsilon_{total} - \epsilon_{eigen}
-\end{equation}
-Chapter 3 of [cite:qu2006fundamentals] describes the relationship between total, elastic, and eigen- strains and
-provides examples using thermal expansion and dislocations.
-
-Eigenstrains are also referred to as residual strains, stress-free strains, or intrinsic strains;
-translated from German, [Eigen](http://dict.tu-chemnitz.de/deutsch-englisch/Eigen....html) means own
-or intrinsic in English.  The term eigenstrain was introduced by
-[cite:mura1982general]:
-
-> Eigenstrain is a generic name given to such nonelastic strains as thermal expansion, phase
-> transformation, initial strains, plastic, misfit strains. Eigenstress is a generic name given to
-> self-equilibrated internal stresses caused by one or several of these eigenstrains in bodies which
-> are free from any other external force and surface constraint.  The eigenstress fields are created
-> by the incompatibility of the eigenstrains.  This new English terminology was adapted from the
-> German "Eigenspannungen and Eigenspannungsquellen," which is the title of H. Reissner's paper
-> (1931) on residual stresses.
-
-Thermal strains are a volumetric change resulting from a change in temperature of the material.  The
-change in strains can be either a simple linear function of thermal change,
-e.g. ($\mathbf{\epsilon}_T = \alpha \Delta T$) or a more complex function of temperature.  The
-thermal expansion class, [ComputeThermalExpansionEigenstrain](/ComputeThermalExpansionEigenstrain.md)
-computes the thermal strain as a linear function of temperature.  The input file syntax is
-
-!listing modules/tensor_mechanics/test/tests/thermal_expansion/constant_expansion_coeff.i
-         block=Materials/thermal_expansion_strain
-
-The eigenstrain material block name must also be added as an input parameter, `eigenstrain_names` to
-the strain material or TensorMechanics master action block. An example of the additional parameter in
-the TensorMechanics master action is shown below.
-
-!listing modules/tensor_mechanics/test/tests/thermal_expansion/constant_expansion_coeff.i
-         block=Modules/TensorMechanics
-
-Other eigenstrains could be caused by defects such as over-sized or under-sized second phase
-particles. Such an eigenstrain material is
-[ComputeVariableEigenstrain](/ComputeVariableEigenstrain.md). This class computes a lattice mismatch
-due to a secondary phase, where the form of the tensor is defined by an input vector, and the scalar
-dependence on a phase variable is defined in another material. The input file syntax is
-
-!listing modules/combined/test/tests/eigenstrain/inclusion.i block=Materials/eigenstrain
-
-Note the `DerivativeParsedMaterial`, which evaluates an expression given in the input file, and its
-automatically generated derivatives, at each quadrature point.
-
-!listing modules/combined/test/tests/eigenstrain/inclusion.i block=Materials/var_dependence
-
-## Extra Stress Materials
-
-Extra stresses ($\mathbf{\sigma}_0$) can also be pulled into the residual calculation after the
-constitutive model calculation of the stress. The extra stress material property, `extra_stress` is
-defined in the `ComputeExtraStressBase` class and is added to the stress value.
-
-\begin{equation}
-  \sigma_{ij} = \sigma_{ij} + \sigma^{extra}_{ij}
-\end{equation}
-
-An extra stress may be a residual stress, such as in large civil engineering simulations.  An example
-of an extra stress material used in an input file is:
-
-!listing modules/combined/test/tests/linear_elasticity/extra_stress.i block=Materials/const_stress
-
-!bibtex bibliography
+allows the constitutive tensor equations to be implemented, clearly and concisely,
+in the same format as written in mathematical notation.
+Follow the MOOSE standards for [contributing code and documentation](utilities/MooseDocs/generate.md).
