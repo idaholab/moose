@@ -30,8 +30,8 @@ protected:
   virtual Real computeQpResidual(Moose::DGResidualType type);
   virtual Real computeQpJacobian(Moose::DGJacobianType type);
 
-  Real _D;
-  Real _D_neighbor;
+  const MaterialProperty<Real> & _D;
+  const MaterialProperty<Real> & _D_neighbor;
 };
 
 #endif

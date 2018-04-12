@@ -3,6 +3,10 @@
     type = 'Exodiff'
     input = 'coupled_value_coupled_flux.i'
     exodiff = 'coupled_value_coupled_flux_out.e'
+    requirement = "Interface kernels shall provide integrated conditions between subdomains,"
+                  " and shall work with boundary restricted materials with stateful properties."
+    design = 'InterfaceKernels/index.md'
+    issues = '#11258 #869'
   [../]
   # This test ensures that shape functions for the NEIGHBORING variable are used in test_neighbor
   # and phi_neighbor; this is relevant when _var and _neighbor_var use a different space of shape
