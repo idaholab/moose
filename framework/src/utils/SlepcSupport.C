@@ -366,7 +366,7 @@ setEigenSolverOptions(SolverParams & solver_params, const InputParameters & para
       break;
 
     case Moose::EST_NONLINEAR_POWER:
-#if !SLEPC_VERSION_LESS_THAN(3, 7, 3) && !PETSC_VERSION_RELEASE
+#if !SLEPC_VERSION_LESS_THAN(3, 8, 0) || !PETSC_VERSION_RELEASE
       Moose::PetscSupport::setSinglePetscOption("-eps_type", "power");
       Moose::PetscSupport::setSinglePetscOption("-eps_power_nonlinear", "1");
       Moose::PetscSupport::setSinglePetscOption("-eps_target_magnitude", "");
@@ -377,7 +377,7 @@ setEigenSolverOptions(SolverParams & solver_params, const InputParameters & para
       break;
 
     case Moose::EST_MF_NONLINEAR_POWER:
-#if !SLEPC_VERSION_LESS_THAN(3, 7, 3) && !PETSC_VERSION_RELEASE
+#if !SLEPC_VERSION_LESS_THAN(3, 8, 0) || !PETSC_VERSION_RELEASE
       Moose::PetscSupport::setSinglePetscOption("-eps_type", "power");
       Moose::PetscSupport::setSinglePetscOption("-eps_power_nonlinear", "1");
       Moose::PetscSupport::setSinglePetscOption("-eps_power_snes_mf_operator", "1");
@@ -389,7 +389,7 @@ setEigenSolverOptions(SolverParams & solver_params, const InputParameters & para
       break;
 
     case Moose::EST_MONOLITH_NEWTON:
-#if !SLEPC_VERSION_LESS_THAN(3, 7, 3) && !PETSC_VERSION_RELEASE
+#if !SLEPC_VERSION_LESS_THAN(3, 8, 0) || !PETSC_VERSION_RELEASE
       Moose::PetscSupport::setSinglePetscOption("-eps_type", "power");
       Moose::PetscSupport::setSinglePetscOption("-eps_power_nonlinear", "1");
       Moose::PetscSupport::setSinglePetscOption("-eps_power_update", "1");
@@ -405,7 +405,7 @@ setEigenSolverOptions(SolverParams & solver_params, const InputParameters & para
       break;
 
     case Moose::EST_MF_MONOLITH_NEWTON:
-#if !SLEPC_VERSION_LESS_THAN(3, 7, 3) && !PETSC_VERSION_RELEASE
+#if !SLEPC_VERSION_LESS_THAN(3, 8, 0) || !PETSC_VERSION_RELEASE
       Moose::PetscSupport::setSinglePetscOption("-eps_type", "power");
       Moose::PetscSupport::setSinglePetscOption("-eps_power_nonlinear", "1");
       Moose::PetscSupport::setSinglePetscOption("-eps_power_update", "1");
