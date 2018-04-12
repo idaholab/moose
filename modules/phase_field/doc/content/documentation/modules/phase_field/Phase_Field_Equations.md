@@ -30,8 +30,8 @@ where $c_i$ is a conserved variable and $M_i$ is the associated mobility.  The e
 nonconserved order parameters is represented with an Allen-Cahn equation, according to
 
 \begin{equation}
-\frac{\partial \eta_j}{\partial t} = - L_j \frac{\delta F}{\delta \eta_j}, \label{eq:AC}
-\end{equation}
+\frac{\partial \eta_j}{\partial t} = - L_j \frac{\delta F}{\delta \eta_j},
+\end{equation}, <!-- %\label{eq:AC} -->
 
 where $\eta_j$ is an order parameter and $L_j$ is the order parameter mobility.
 
@@ -55,7 +55,7 @@ combining the equations listed above and evaluating the functional derivatives
 ([further explanations](Derivationexplanations)), the evolution of the variables is described as
 
 \begin{equation}
-\begin{eqnarray}
+\begin{aligned}
   \frac{\partial c_i}{\partial t} = &
     \nabla \cdot M_i \nabla \left(
         \frac{\partial f_{loc}}{\partial c_i}
@@ -92,7 +92,7 @@ combining the equations listed above and evaluating the functional derivatives
           \right)
       }_{\text{for}\, \kappa(\eta)}}
     \right).
-\end{eqnarray}
+\end{aligned}
 \end{equation}
 
 !alert warning
@@ -112,9 +112,9 @@ function $\psi_m$ and applying the divergence theorem to lower the derivative or
 Allen-Cahn equation yields
 
 \begin{equation}
-\begin{eqnarray}
+\begin{aligned}
 	\boldsymbol{\mathcal{R}}_{\eta_i} &=& \left(  \frac{\partial \eta_j}{\partial t}, \psi_m \right) + \left( \nabla(\kappa_j\eta_j), \nabla (L\psi_m) \right) + L \left( \frac{\partial f_{loc}}{\partial \eta_j} + \frac{\partial E_d}{\partial \eta_j}, \psi_m \right) - \left<L\kappa_j \nabla \eta_j \cdot \vec{n}, \psi_m \right>,
-\end{eqnarray}
+\end{aligned}
 \end{equation}
 
 where the $(*,*)$ operator represents a volume integral with an inner product and the
@@ -124,11 +124,11 @@ in two ways.
 
 The first is to directly solve the equation according to
 \begin{equation}
-\begin{eqnarray}
+\begin{aligned}
 	\boldsymbol{\mathcal{R}}_{c_i} &=& \left(  \frac{\partial c_i}{\partial t}, \psi_m \right) + \left( \kappa_i \nabla^2 c_i, \nabla \cdot (M_i \nabla \psi_m ) \right) + \left( M_i  \nabla \left( \frac{\partial f_{loc} }{\partial c_i} + \frac{\partial E_d}{\partial c_i} \right), \nabla \psi_m \right)  - \\
 	&& \left< M_i \nabla \left(  \kappa_i \nabla^2 c_i  \right)  \cdot \vec{n}, \psi_m \right>
 	+ \left< M_i \nabla \left( \frac{\partial f_{loc}}{\partial c_i} + \frac{\partial E_{d}}{\partial c_i } \right)  \cdot \vec{n}, \psi_m \right> -  \left< \kappa_i \nabla^2 c_i, M_i \nabla \psi_m \cdot \vec{n} \right>.
-\end{eqnarray}
+\end{aligned}
 \end{equation}
 
 The second approach is to split the fourth order equation into two second order equations, such that
@@ -136,10 +136,10 @@ two variables are solved, the concentration $c_i$ and the chemical potential $\m
 the two residual equations are
 
 \begin{equation}
-\begin{eqnarray}
+\begin{aligned}
 	\boldsymbol{\mathcal{R}}_{\mu_i} &=& \left(  \frac{\partial c_i}{\partial t}, \psi_m \right) + \left( M_i  \nabla \mu_i, \nabla \psi_m \right) - \left< M_i  \nabla \mu_i \cdot \vec{n}, \psi_m \right>\\
   \boldsymbol{\mathcal{R}}_{c_i} &=& \left( \nabla c_i, \nabla(\kappa_i \psi_m) \right) -  \left< \nabla c_i\cdot \vec{n}, \kappa_i \psi_m \right> + \left( \left( \frac{\partial f_{loc}}{\partial c_i} + \frac{\partial E_d}{\partial c_i} - \mu_i \right), \psi_m \right)
-\end{eqnarray}
+\end{aligned}
 \end{equation}
 
 Note that we have reversed which equation is used to solve for each variable from what might be
@@ -159,9 +159,9 @@ required. If you choose not to use them, you would develop your kernels in the u
 
 The Allen-Cahn residual equation, without boundary terms, is shown here:
 \begin{equation}
-\begin{eqnarray}
+\begin{aligned}
 \boldsymbol{\mathcal{R}}_{\eta_i} &=& \left(  \frac{\partial \eta_j}{\partial t}, \psi_m \right) + \left( \nabla(\kappa_j\eta_j), \nabla (L\psi_m) \right) + L \left( \frac{\partial f_{loc}}{\partial \eta_j} + \frac{\partial E_d}{\partial \eta_j}, \psi_m \right)
-\end{eqnarray}
+\end{aligned}
 \end{equation}
 It is divided into three pieces, each implemented in their own kernel, as shown below
 
@@ -185,10 +185,10 @@ $\left(M_i \left( \nabla \frac{\partial f_{loc} }{\partial c_i} + \nabla  \frac{
 
 In the split form of the Cahn-Hilliard solution, the two residual equations are
 \begin{equation}
-\begin{eqnarray}
+\begin{aligned}
 	\boldsymbol{\mathcal{R}}_{\mu_i} &=& \left(  \frac{\partial c_i}{\partial t}, \psi_m \right) + \left( M_i  \nabla \mu_i, \nabla \psi_m \right) \\
   \boldsymbol{\mathcal{R}}_{c_i} &=& \left( \left( -\kappa_i \nabla^2 c_i +  \frac{\partial f_{loc}}{\partial c_i} + \frac{\partial E_d}{\partial c_i} - \mu_i \right), \psi_m \right)
-\end{eqnarray}
+\end{aligned}
 \end{equation}
 
 | Residual term | Variable | Parameters | Energy derivative | Kernel |
@@ -245,11 +245,11 @@ f_{loc} = \frac{1}{4}(1 + c)^2(1 - c)^2
 and its derivatives are
 
 \begin{equation}
-\begin{eqnarray}
+\begin{aligned}
   \frac{\partial f_{loc}}{\partial c} &=& c(c^2 - 1) \\
   \frac{\partial^2 f_{loc}}{\partial c^2} &=& 3 c^2 - 1 \\
   \frac{\partial^3 f_{loc}}{\partial c^3} &=& 6 c.
-\end{eqnarray}
+\end{aligned}
 \end{equation}
 
 The second and third derivatives would be required to use the direct solution method (via

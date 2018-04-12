@@ -88,11 +88,11 @@ which is given as equation (23) in KKS. Following the off-diagonal  derivation w
 Let's get back to the original residual with $\frac{dF}{dc}$. Then
 
 \begin{equation}
-\begin{eqnarray*}
+\begin{aligned}
 J &=& \phi_j \frac{d}{dc} \nabla \frac{dF}{dc}\\
 &=& \phi_j  \nabla \frac{d^2F}{dc^2} \quad,\quad \text{with (29) from KKS}\\
 &=& \phi_j  \nabla \frac{\frac{d^2F_b}{dc_b^2}\frac{d^2F_a}{dc_a^2}}{  [1-h(\eta)]\frac{d^2F_b}{dc_b^2}+h(\eta)\frac{d^2F_a}{dc_a^2} }\\
-\end{eqnarray*}
+\end{aligned}
 \end{equation}
 
 !syntax parameters /Kernels/KKSCHBulk
