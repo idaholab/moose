@@ -18,26 +18,24 @@ InputParameters
 validParams<InterfaceDiffusion>()
 {
   InputParameters params = validParams<InterfaceKernel>();
-  params.addParam<Real>("D", 1., "The diffusion coefficient.");
-  params.addParam<Real>("D_neighbor", 1., "The neighboring diffusion coefficient.");
+  params.addParam<MaterialPropertyName>("D", "D", "The diffusion coefficient.");
+  params.addParam<MaterialPropertyName>(
+      "D_neighbor", "D_neighbor", "The neighboring diffusion coefficient.");
   return params;
 }
 
 InterfaceDiffusion::InterfaceDiffusion(const InputParameters & parameters)
-  : InterfaceKernel(parameters), _D(getParam<Real>("D")), _D_neighbor(getParam<Real>("D_neighbor"))
+  : InterfaceKernel(parameters),
+    _D(getMaterialProperty<Real>("D")),
+    _D_neighbor(getMaterialProperty<Real>("D_neighbor"))
 {
-  if (!parameters.isParamValid("boundary"))
-  {
-    mooseError("In order to use the InterfaceDiffusion dgkernel, you must specify a boundary where "
-               "it will live.");
-  }
 }
 
 Real
 InterfaceDiffusion::computeQpResidual(Moose::DGResidualType type)
 {
-  Real r = 0.5 * (-_D * _grad_u[_qp] * _normals[_qp] +
-                  -_D_neighbor * _grad_neighbor_value[_qp] * _normals[_qp]);
+  Real r = 0.5 * (-_D[_qp] * _grad_u[_qp] * _normals[_qp] +
+                  -_D_neighbor[_qp] * _grad_neighbor_value[_qp] * _normals[_qp]);
 
   switch (type)
   {
@@ -62,20 +60,20 @@ InterfaceDiffusion::computeQpJacobian(Moose::DGJacobianType type)
   {
 
     case Moose::ElementElement:
-      jac -= 0.5 * _D * _grad_phi[_j][_qp] * _normals[_qp] * _test[_i][_qp];
+      jac -= 0.5 * _D[_qp] * _grad_phi[_j][_qp] * _normals[_qp] * _test[_i][_qp];
       break;
 
     case Moose::NeighborNeighbor:
-      jac +=
-          0.5 * _D_neighbor * _grad_phi_neighbor[_j][_qp] * _normals[_qp] * _test_neighbor[_i][_qp];
+      jac += 0.5 * _D_neighbor[_qp] * _grad_phi_neighbor[_j][_qp] * _normals[_qp] *
+             _test_neighbor[_i][_qp];
       break;
 
     case Moose::NeighborElement:
-      jac += 0.5 * _D * _grad_phi[_j][_qp] * _normals[_qp] * _test_neighbor[_i][_qp];
+      jac += 0.5 * _D[_qp] * _grad_phi[_j][_qp] * _normals[_qp] * _test_neighbor[_i][_qp];
       break;
 
     case Moose::ElementNeighbor:
-      jac -= 0.5 * _D_neighbor * _grad_phi_neighbor[_j][_qp] * _normals[_qp] * _test[_i][_qp];
+      jac -= 0.5 * _D_neighbor[_qp] * _grad_phi_neighbor[_j][_qp] * _normals[_qp] * _test[_i][_qp];
       break;
   }
 

@@ -191,22 +191,6 @@ ComputeMaterialsObjectThread::onInternalSide(const Elem * elem, unsigned int sid
     {
       _assembly[_tid]->reinitElemAndNeighbor(elem, side, neighbor, neighbor_side);
 
-      // Face Materials
-      if (_discrete_materials[Moose::FACE_MATERIAL_DATA].hasActiveBlockObjects(_subdomain, _tid))
-        _bnd_material_props.initStatefulProps(
-            *_bnd_material_data[_tid],
-            _discrete_materials[Moose::FACE_MATERIAL_DATA].getActiveBlockObjects(_subdomain, _tid),
-            face_n_points,
-            *elem,
-            side);
-      if (_materials[Moose::FACE_MATERIAL_DATA].hasActiveBlockObjects(_subdomain, _tid))
-        _bnd_material_props.initStatefulProps(
-            *_bnd_material_data[_tid],
-            _materials[Moose::FACE_MATERIAL_DATA].getActiveBlockObjects(_subdomain, _tid),
-            face_n_points,
-            *elem,
-            side);
-
       // Neighbor Materials
       if (_discrete_materials[Moose::NEIGHBOR_MATERIAL_DATA].hasActiveBlockObjects(
               neighbor->subdomain_id(), _tid))
