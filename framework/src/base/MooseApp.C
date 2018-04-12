@@ -53,7 +53,7 @@
 #include <fstream>
 #include <sys/types.h>
 #include <unistd.h>
-#include <stdlib.h> // for system()
+#include <cstdlib> // for system()
 #include <chrono>
 #include <thread>
 
@@ -223,7 +223,7 @@ validParams<MooseApp>()
 
   // Options for debugging
   params.addCommandLineParam<std::string>("start_in_debugger",
-                                          "--start-in-debugger [debugger]",
+                                          "--start-in-debugger <debugger>",
                                           "Start the application and attach a debugger.  This will "
                                           "launch xterm windows using the command you specify for "
                                           "'debugger'");
@@ -329,7 +329,7 @@ MooseApp::MooseApp(InputParameters parameters)
     std::string command_string = command_stream.str();
     Moose::out << "Running: " << command_string << std::endl;
 
-    system(command_string.c_str());
+    std::system(command_string.c_str());
 
     // Sleep to allow time for the debugger to attach
     std::this_thread::sleep_for(std::chrono::seconds(10));
