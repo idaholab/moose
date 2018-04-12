@@ -8,10 +8,10 @@ An instance of this kernel is needed for each solute species of the problem.
 ### Residual
 
 $$
-\begin{eqnarray*}
+\begin{aligned}
 R&=&-\frac{dh}{d\eta}\left(-\frac{dF_a}{dc_a}(c_a-c_b)\right)\\
 &=&\frac{dh}{d\eta}\frac{dF_a}{dc_a}(c_a-c_b)
-\end{eqnarray*}
+\end{aligned}
 $$
 
 ### Jacobian
@@ -24,10 +24,10 @@ with the $\frac{\partial \eta}{\partial u_j}\frac{\partial}{\partial \eta} = \ph
 derivative.
 
 $$
-\begin{eqnarray*}
+\begin{aligned}
 J &=& \phi_j \frac{\partial}{\partial \eta} \left( \frac{dh}{d\eta}\frac{dF_a}{dc_a}(c_a-c_b) \right)\\
 &=& \frac{d^2h}{d\eta^2}\phi_j\frac{dF_a}{dc_a}(c_a-c_b)\\
-\end{eqnarray*}
+\end{aligned}
 $$
 
 #### Off-diagonal
@@ -40,27 +40,27 @@ $\frac{\partial c_a}{\partial u_j}\frac{\partial}{\partial c_a} = \phi_j \frac{\
 derivative.
 
 $$
-\begin{eqnarray*}
+\begin{aligned}
 J &=& \phi_j \frac{\partial}{\partial c_a} \left( \frac{dh}{d\eta}\frac{dF_a}{dc_a}(c_a-c_b) \right)\\
 &=& \frac{dh}{d\eta} \phi_j \left( \frac{d^2 F_a}{dc_a^2}(c_a-c_b) + \frac{d F_a}{d c_a}\right)\\
-\end{eqnarray*}
+\end{aligned}
 $$
 
 Similarly for $c_b$,
 $$
-\begin{eqnarray*}
+\begin{aligned}
 J &=& \phi_j \frac{\partial}{\partial c_b} \left( \frac{dh}{d\eta}\frac{dF_a}{dc_a}(c_a-c_b) \right)\\
 &=& -\frac{dh}{d\eta} \phi_j  \frac{d F_a}{d c_a}\\
-\end{eqnarray*}
+\end{aligned}
 $$
 
 For any variable other than $c_a$ or $c_b$, for example temperature $T$:
 
 $$
-\begin{eqnarray*}
+\begin{aligned}
 J &=& \phi_j \frac{\partial}{\partial T} \left( \frac{dh}{d\eta}\frac{dF_a}{dc_a}(c_a-c_b) \right)\\
 &=& \frac{dh}{d\eta} \phi_j  \frac{\partial}{\partial T}\left(\frac{d F_a}{d c_a}\right) ( c_a - c_b)\\
-\end{eqnarray*}
+\end{aligned}
 $$
 
 

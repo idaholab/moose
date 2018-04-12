@@ -20,10 +20,10 @@ with the $\frac{\partial \eta}{\partial u_j}\frac{\partial}{\partial \eta}=\phi_
 derivative.
 
 $$
-\begin{eqnarray*}
+\begin{aligned}
 J &=& -\phi_j \frac{\partial}{\partial \eta}\left( \frac{dh}{d\eta}(F_a-F_b) \right) + w \phi_j \frac{\partial}{\partial \eta}\frac{dg}{d\eta} \\
 &=&-\frac{d^2h}{d\eta^2}\phi_j(F_a-F_b) + w\frac{d^2g}{d\eta^2}\phi_j \\
-\end{eqnarray*}
+\end{aligned}
 $$
 
 (The implicit dependence of $F_a(c_a)$ and $F_b(c_a)$ on $\eta$ through $c_a(c,\eta)$
