@@ -9,22 +9,13 @@
 
 #include "ContactLineSearch.h"
 
-#ifdef LIBMESH_HAVE_PETSC
-
-#include "FEProblemBase.h"
-#include "libmesh/petsc_solver_exception.h"
-#include "petsc/private/linesearchimpl.h"
-
 ContactLineSearch::ContactLineSearch(FEProblemBase & fe_problem,
                                      MooseApp & app,
                                      size_t allowed_lambda_cuts,
                                      Real contact_ltol,
                                      bool affect_ltol)
-  : ConsoleStreamInterface(app),
-    ParallelObject(app),
-    _fe_problem(fe_problem),
+  : LineSearch(fe_problem, app),
     _current_contact_state(std::make_shared<std::set<dof_id_type>>()),
-    _nl_its(0),
     _user_ksp_rtol_set(false),
     _allowed_lambda_cuts(allowed_lambda_cuts),
     _contact_ltol(contact_ltol),
@@ -48,5 +39,3 @@ ContactLineSearch::printContactInfo()
   else
     _console << "No nodes in contact\n";
 }
-
-#endif

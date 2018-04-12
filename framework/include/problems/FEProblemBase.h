@@ -71,7 +71,7 @@ class Distribution;
 class Sampler;
 class KernelBase;
 class IntegratedBCBase;
-class ContactLineSearch;
+class LineSearch;
 
 // libMesh forward declarations
 namespace libMesh
@@ -1385,7 +1385,7 @@ public:
   ExecuteMooseObjectWarehouse<MultiApp> & getMultiAppWarehouse() { return _multi_apps; }
 
   const VectorPostprocessorData & getVectorPostprocessorData() const;
-  ContactLineSearch *& customLineSearch() { return _custom_line_search; }
+  LineSearch *& customLineSearch() { return _custom_line_search; }
 
 protected:
   MooseMesh & _mesh;
@@ -1637,7 +1637,7 @@ private:
   /// Whether the problem has dgkernels or interface kernels
   bool _has_internal_edge_residual_objects;
 
-  ContactLineSearch * _custom_line_search;
+  LineSearch * _custom_line_search;
 
   friend class AuxiliarySystem;
   friend class NonlinearSystemBase;

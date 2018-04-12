@@ -141,7 +141,7 @@ MechanicalContactConstraint::MechanicalContactConstraint(const InputParameters &
     _master_slave_jacobian(getParam<bool>("master_slave_jacobian")),
     _connected_slave_nodes_jacobian(getParam<bool>("connected_slave_nodes_jacobian")),
     _non_displacement_vars_jacobian(getParam<bool>("non_displacement_variables_jacobian")),
-    _contact_linesearch(_fe_problem.customLineSearch()),
+    _contact_linesearch(dynamic_cast<ContactLineSearch *>(_fe_problem.customLineSearch())),
     _current_contact_state(_contact_linesearch ? _contact_linesearch->contact_state()
                                                : std::make_shared<std::set<dof_id_type>>()),
     _print_contact_nodes(getParam<bool>("print_contact_nodes"))
@@ -235,7 +235,7 @@ MechanicalContactConstraint::timestepSetup()
     _update_stateful_data = false;
 
     if (_contact_linesearch)
-      _contact_linesearch->nl_its() = 0;
+      _contact_linesearch->zero_its();
   }
 }
 

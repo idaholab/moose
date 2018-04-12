@@ -10,18 +10,7 @@
 #ifndef CONTACTLINESEARCH_H
 #define CONTACTLINESEARCH_H
 
-#include "libmesh/petsc_nonlinear_solver.h"
-
-#ifdef LIBMESH_HAVE_PETSC
-
-#include "libmesh/parallel_object.h"
-#include <petscsnes.h>
-
-#include "ConsoleStreamInterface.h"
-
-using namespace libMesh;
-
-class FEProblemBase;
+#include "LineSearch.h"
 
 /**
  * This class implements a custom line search for use with
@@ -41,7 +30,7 @@ class FEProblemBase;
  * contact set is resolved late in the Newton solve, the linear tolerance will return to the finer
  * tolerance set through the traditional `l_tol` parameter.
  */
-class ContactLineSearch : public ConsoleStreamInterface, public ParallelObject
+class ContactLineSearch : public LineSearch
 {
 public:
   ContactLineSearch(FEProblemBase & fe_problem,
@@ -69,35 +58,19 @@ public:
    */
   void printContactInfo();
 
-  /**
-   * writeable reference to number of non-linear iterations
-   */
-  size_t & nl_its() { return _nl_its; }
-
-  /**
-   * read-only reference to number of non-linear iterations
-   */
-  const size_t & nl_its() const { return _nl_its; }
-
 protected:
-  /// Reference to the finite element problem
-  FEProblemBase & _fe_problem;
-
   /// The current contact set
   std::shared_ptr<std::set<dof_id_type>> _current_contact_state;
   /// The old contact set
   std::set<dof_id_type> _old_contact_state;
 
-  /// number of non-linear iterations
-  size_t _nl_its;
-
   /// the linear tolerance set by the user in the input file
-  PetscReal _user_ksp_rtol;
+  Real _user_ksp_rtol;
   /// Whether the user linear tolerance has been set yet in this object
   bool _user_ksp_rtol_set;
 
   /// The multiplier of the newton step
-  PetscReal _contact_lambda;
+  Real _contact_lambda;
 
   /// How many times the linsearch is allowed to cut lambda
   size_t _allowed_lambda_cuts;
@@ -109,5 +82,4 @@ protected:
   bool _affect_ltol;
 };
 
-#endif
 #endif
