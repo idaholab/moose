@@ -24,6 +24,13 @@ def read(filename):
 
     return content
 
+def write(filename, content):
+    """
+    Write utf-8 file.
+    """
+    with codecs.open(filename, 'w', encoding='utf-8') as fid:
+        fid.write(content)
+
 def get_language(filename):
     """
     Auto detect the source code language, this is to allow for additions to be propagated to

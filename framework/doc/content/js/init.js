@@ -27,3 +27,51 @@
     $(".button-collapse").sideNav();
   }); // end of document ready
 })(jQuery); // end of jQuery name space
+
+var options = {
+  shouldSort: true,
+  threshold: 0.5,
+  minMatchCharLength: 2,
+  keys: [
+    {
+      name: "name",
+      weight: 0.75
+    },
+    {
+      name: "text",
+      weight: 0.5
+    }
+  ]
+};
+
+function mooseSearch() {
+    var element = document.getElementById("moose-search-results");
+    var box = document.getElementById("moose-search-box");
+
+    var fuse = new Fuse(index_data, options);
+    var results = fuse.search(box.value);
+
+    console.log(results.length);
+    if (results.length > 0)
+    {
+        element.innerHTML = '';
+        for (var item of results)
+        {
+            var div = document.createElement("div");
+            div.className = 'moose-search-result';
+            element.appendChild(div);
+
+            var title = document.createElement("div");
+            title.className = 'moose-search-result-title';
+            var a = document.createElement("a");
+            a.innerHTML = item.name;
+            a.setAttribute("href", item.location);
+            title.appendChild(a);
+            div.appendChild(title);
+        }
+    }
+    else
+    {
+        element.innerHTML = '';
+    }
+};
