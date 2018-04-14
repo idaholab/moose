@@ -2720,9 +2720,7 @@ VectorPostprocessorValue &
 FEProblemBase::getVectorPostprocessorValue(const VectorPostprocessorName & name,
                                            const std::string & vector_name)
 {
-  std::cout << "Getting: " << name << ": " << vector_name << std::endl;
   auto & val = _vpps_data.getVectorPostprocessorValue(name, vector_name);
-  std::cout << &val << std::endl;
   return val;
 }
 

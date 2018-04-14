@@ -12,7 +12,7 @@ This object is intended to let you view VectorPostprocessor vectors that are of 
 
 Note: the VectorPostprocessor must be syncing the vectors it's computing to all processors.  By default many just compute to processor 0 (because that's where output occurrs).
 
-For instance: this is the case for [WorkBalance].  By default it only syncs to processor 0, but it has a parameter (`sync_to_all_procs`) to tell it to create copies of the vectors on all processors.
+For instance: this is the case for [WorkBalance](WorkBalance.md).  By default it only syncs to processor 0, but it has a parameter (`sync_to_all_procs`) to tell it to create copies of the vectors on all processors.
 
 !syntax parameters /AuxKernels/VectorPostprocessorVisualizationAux
 

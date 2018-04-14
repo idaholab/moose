@@ -35,8 +35,6 @@ VectorPostprocessorVisualizationAux::VectorPostprocessorVisualizationAux(
     _vpp_vector(getVectorPostprocessorValue("vpp", getParam<std::string>("vector_name"))),
     _my_pid(processor_id())
 {
-  std::cout << "In Aux" << std::endl;
-  std::cout << "_vpp_vector: " << &_vpp_vector << std::endl;
 }
 
 void

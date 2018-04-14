@@ -60,8 +60,6 @@ WorkBalance::WorkBalance(const InputParameters & parameters)
     _num_partition_sides(declareVector("num_partition_sides")),
     _partition_surface_area(declareVector("partition_surface_area"))
 {
-  std::cout << "In WorkBalance" << std::endl;
-  std::cout << "num_elems: " << &_num_elems << std::endl;
 }
 
 void
