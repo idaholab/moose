@@ -2,7 +2,10 @@
 
 !syntax description /UserObjects/ConservedMaskedUniformNoise
 
-`ConservedMaskedUniformNoise` can be used for [fluctuation based nucleation](Nucleation/LangevinNoise.md)
+## See also
+
+- [ConservedLangevinNoise](/ConservedLangevinNoise.md)
+- [fluctuation based nucleation](Nucleation/LangevinNoise.md)
 
 !syntax parameters /UserObjects/ConservedMaskedUniformNoise
 
