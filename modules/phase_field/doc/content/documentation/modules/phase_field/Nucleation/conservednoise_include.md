@@ -13,6 +13,6 @@ The available user objects that provide the noise field are
 
 Here the *Uniform* stands for a uniform random number distribution, and the *Normal*
 stands for a Gaussian normal distribution. User objects with *Masked* in the name
-take a material property that is used as a spatially dependent multiplier for teh noise
+take a material property that is used as a spatially dependent multiplier for the noise
 field. This allows selective application of the noise in subregions of the sample
 (souch as grain boundaries) or a temperature dependent noise amplitude.

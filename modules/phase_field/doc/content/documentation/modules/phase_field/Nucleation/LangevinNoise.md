@@ -14,7 +14,7 @@ of the simulation.
 
 The legacy [LangevinNoise](/Kernels/LangevinNoise.md) kernel supplies a stable noise field for
 a given timestep by initializing the random number stream with a seed that is a function
-of teh timestep number at the beginning of every residual calculation. The Jacobian is
-independent of teh noise field.
+of the timestep number at the beginning of every residual calculation. The Jacobian is
+independent of the noise field.
 
 !include /Nucleation/conservednoise_include.md
