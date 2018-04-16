@@ -37,7 +37,8 @@ ChangeOverTimePostprocessor::ChangeOverTimePostprocessor(const InputParameters &
     _compute_relative_change(getParam<bool>("compute_relative_change")),
     _take_absolute_value(getParam<bool>("take_absolute_value")),
     _pps_value(getPostprocessorValue("postprocessor")),
-    _pps_value_old(getPostprocessorValueOld("postprocessor"))
+    _pps_value_old(getPostprocessorValueOld("postprocessor")),
+    _pps_value_initial(declareRestartableData<Real>("pps_value_initial"))
 {
   if (_change_with_respect_to_initial)
   {
