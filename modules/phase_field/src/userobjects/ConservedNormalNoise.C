@@ -15,5 +15,8 @@ template <>
 InputParameters
 validParams<ConservedNormalNoise>()
 {
-  return validParams<ConservedNoiseBase>();
+  auto params = validParams<ConservedNoiseBase>();
+  params.addClassDescription("Gaussian normal distributed random number noise provider for the "
+                             "ConservedLangevinNoise kernel.");
+  return params;
 }

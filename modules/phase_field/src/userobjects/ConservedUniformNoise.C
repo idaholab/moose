@@ -15,5 +15,8 @@ template <>
 InputParameters
 validParams<ConservedUniformNoise>()
 {
-  return validParams<ConservedNoiseBase>();
+  auto params = validParams<ConservedNoiseBase>();
+  params.addClassDescription(
+      "Uniformly distributed random number noise provider for the ConservedLangevinNoise kernel.");
+  return params;
 }
