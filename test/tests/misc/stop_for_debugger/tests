@@ -1,0 +1,8 @@
+[Tests]
+  [./test]
+    type = 'RunApp'
+    input = 'stop_for_debugger.i'
+    cli_args = '--stop-for-debugger=2'
+    expect_out = 'Stopping for 2 seconds to allow attachment from a debugger.'
+  [../]
+[]

@@ -92,14 +92,18 @@ void parallelBarrierNotify(const libMesh::Parallel::Communicator & comm, bool me
  * rank by rank. The section must be closed with a call to serialEnd.
  * These functions are intended for debugging use to obtain clean terminal output
  * from multiple ranks (use --keep-cout).
+ * @param comm The communicator to use
+ * @param warn Whether or not to warn that something is being serialized
  */
-void serialBegin(const libMesh::Parallel::Communicator & comm);
+void serialBegin(const libMesh::Parallel::Communicator & comm, bool warn = true);
 
 /**
  * Closes a section of code that is executed in serial rank by rank, and that was
  * opened with a call to serialBegin. No MPI communication can happen in this block.
+ * @param comm The communicator to use
+ * @param warn Whether or not to warn that something is being serialized
  */
-void serialEnd(const libMesh::Parallel::Communicator & comm);
+void serialEnd(const libMesh::Parallel::Communicator & comm, bool warn = true);
 
 /**
  * Function tests if the supplied filename as the desired extension
@@ -148,6 +152,11 @@ std::string shortName(const std::string & name);
  * Function for string the information before the final / in a parser block
  */
 std::string baseName(const std::string & name);
+
+/**
+ * Get the hostname the current process is running on
+ */
+std::string hostname();
 
 /**
  * This routine is a simple helper function for searching a map by values instead of keys
