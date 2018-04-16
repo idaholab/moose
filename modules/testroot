@@ -1,5 +1,5 @@
 app_name = combined/combined
-cli_args = '--color-first-directory'
+run_tests_args = '--color-first-directory'
 allow_warnings = false
 allow_unused = false
 allow_override = false
