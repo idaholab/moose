@@ -35,7 +35,27 @@ PorousFlowWaterNCG::PorousFlowWaterNCG(const InputParameters & parameters)
 {
   // Check that the correct FluidProperties UserObjects have been provided
   if (_water_fp.fluidName() != "water")
-    mooseError("Only a valid water FluidProperties UserObject can be provided in water_fp");
+    mooseError(name(), ": a valid water FluidProperties UserObject must be provided in water_fp");
+
+  // Set the number of phases and components, and their indexes
+  _num_phases = 2;
+  _num_components = 2;
+  _gas_phase_number = 1 - _aqueous_phase_number;
+  _gas_fluid_component = 1 - _aqueous_fluid_component;
+
+  // Check that _aqueous_phase_number is <= total number of phases
+  if (_aqueous_phase_number >= _num_phases)
+    mooseError(
+        name(),
+        ": the value provided in liquid_phase_number is larger than the possible number of phases ",
+        _num_phases);
+
+  // Check that _aqueous_fluid_component is <= total number of fluid components
+  if (_aqueous_fluid_component >= _num_components)
+    mooseError(name(),
+               ": the value provided in liquid_fluid_component is larger than the possible  number "
+               "of fluid components",
+               _num_components);
 }
 
 std::string
