@@ -30,6 +30,7 @@
 // System includes
 #include <sys/stat.h>
 #include <numeric>
+#include <unistd.h>
 
 std::string getLatestCheckpointFileHelper(const std::list<std::string> & checkpoint_files,
                                           const std::vector<std::string> extensions,
@@ -201,7 +202,7 @@ parallelBarrierNotify(const Parallel::Communicator & comm, bool messaging)
 }
 
 void
-serialBegin(const libMesh::Parallel::Communicator & comm)
+serialBegin(const libMesh::Parallel::Communicator & comm, bool warn)
 {
   // unless we are the first processor...
   if (comm.rank() > 0)
@@ -210,12 +211,12 @@ serialBegin(const libMesh::Parallel::Communicator & comm)
     int dummy = 0;
     comm.receive(comm.rank() - 1, dummy);
   }
-  else
+  else if (warn)
     mooseWarning("Entering serial execution block (use only for debugging)");
 }
 
 void
-serialEnd(const libMesh::Parallel::Communicator & comm)
+serialEnd(const libMesh::Parallel::Communicator & comm, bool warn)
 {
   // unless we are the last processor...
   if (comm.rank() + 1 < comm.size())
@@ -226,7 +227,7 @@ serialEnd(const libMesh::Parallel::Communicator & comm)
   }
 
   comm.barrier();
-  if (comm.rank() == 0)
+  if (comm.rank() == 0 && warn)
     mooseWarning("Leaving serial execution block (use only for debugging)");
 }
 
@@ -347,6 +348,21 @@ std::string
 baseName(const std::string & name)
 {
   return name.substr(0, name.find_last_of('/') != std::string::npos ? name.find_last_of('/') : 0);
+}
+
+std::string
+hostname()
+{
+  // This is from: https://stackoverflow.com/a/505546
+  char hostname[1024];
+  hostname[1023] = '\0';
+
+  auto failure = gethostname(hostname, 1023);
+
+  if (failure)
+    mooseError("Failed to retrieve hostname!");
+
+  return hostname;
 }
 
 bool

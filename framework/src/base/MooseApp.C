@@ -34,6 +34,7 @@
 #include "SONDefinitionFormatter.h"
 #include "RelationshipManager.h"
 #include "Registry.h"
+#include "SerializerGuard.h"
 
 // Regular expression includes
 #include "pcrecpp.h"
@@ -50,6 +51,11 @@
 // C++ includes
 #include <numeric> // std::accumulate
 #include <fstream>
+#include <sys/types.h>
+#include <unistd.h>
+#include <cstdlib> // for system()
+#include <chrono>
+#include <thread>
 
 #define QUOTE(macro) stringifyName(macro)
 
@@ -215,6 +221,19 @@ validParams<MooseApp>()
       false,
       "Keep standard output from all processors when running in parallel");
 
+  // Options for debugging
+  params.addCommandLineParam<std::string>("start_in_debugger",
+                                          "--start-in-debugger <debugger>",
+                                          "Start the application and attach a debugger.  This will "
+                                          "launch xterm windows using the command you specify for "
+                                          "'debugger'");
+
+  params.addCommandLineParam<unsigned int>("stop_for_debugger",
+                                           "--stop-for-debugger [seconds]",
+                                           30,
+                                           "Pauses the application during startup for the "
+                                           "specified time to allow for connection of debuggers.");
+
   params.addPrivateParam<std::string>("_app_name"); // the name passed to AppFactory::create
   params.addPrivateParam<std::string>("_type");
   params.addPrivateParam<int>("_argc");
@@ -279,6 +298,64 @@ MooseApp::MooseApp(InputParameters parameters)
 
   if (_check_input && isParamValid("recover"))
     mooseError("Cannot run --check-input with --recover. Recover files might not exist");
+
+  if (isParamValid("start_in_debugger"))
+  {
+    auto command = getParam<std::string>("start_in_debugger");
+
+    Moose::out << "Starting in debugger using: " << command << std::endl;
+
+    auto hostname = MooseUtils::hostname();
+
+    std::stringstream command_stream;
+
+    // This will start XTerm and print out some info first... then run the debugger
+    command_stream << "xterm -e \"echo 'Rank: " << processor_id() << "  Hostname: " << hostname
+                   << "  PID: " << getpid() << "'; echo ''; ";
+
+    // Figure out how to run the debugger
+    if (command.find("lldb") != std::string::npos || command.find("gdb") != std::string::npos)
+      command_stream << command << " -p " << getpid();
+    else
+      mooseError("Unknown debugger: ",
+                 command,
+                 "\nIf this is truly what you meant then contact moose-users to have a discussion "
+                 "about adding your debugger.");
+
+    // Finish up the command
+    command_stream << "\""
+                   << " & ";
+
+    std::string command_string = command_stream.str();
+    Moose::out << "Running: " << command_string << std::endl;
+
+    std::system(command_string.c_str());
+
+    // Sleep to allow time for the debugger to attach
+    std::this_thread::sleep_for(std::chrono::seconds(10));
+  }
+
+  if (!parameters.isParamSetByAddParam("stop_for_debugger"))
+  {
+    Moose::out << "\nStopping for " << getParam<unsigned int>("stop_for_debugger")
+               << " seconds to allow attachment from a debugger.\n";
+
+    Moose::out << "\nAll of the processes you can connect to:\n";
+    Moose::out << "rank - hostname - pid\n";
+
+    auto hostname = MooseUtils::hostname();
+
+    {
+      // The 'false' turns off the serialization warning
+      SerializerGuard sg(_communicator, false); // Guarantees that the processors print in order
+      Moose::err << processor_id() << " - " << hostname << " - " << getpid() << "\n";
+    }
+
+    Moose::out << "\nWaiting...\n" << std::endl;
+
+    // Sleep to allow time for the debugger to attach
+    std::this_thread::sleep_for(std::chrono::seconds(getParam<unsigned int>("stop_for_debugger")));
+  }
 }
 
 void
