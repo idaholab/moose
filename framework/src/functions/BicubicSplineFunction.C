@@ -16,6 +16,11 @@ InputParameters
 validParams<BicubicSplineFunction>()
 {
   InputParameters params = validParams<Function>();
+  MooseEnum normal_component("x=0 y=1 z=2", "z");
+  params.addParam<MooseEnum>(
+      "normal_component",
+      normal_component,
+      "The component of the geometry that is normal to the spline x1/x2 values");
   params.addRequiredParam<std::vector<Real>>("x1", "The first independent coordinate.");
   params.addRequiredParam<std::vector<Real>>("x2", "The second independent coordinate.");
   params.addRequiredParam<std::vector<Real>>("y", "The dependent values");
@@ -38,6 +43,7 @@ validParams<BicubicSplineFunction>()
 BicubicSplineFunction::BicubicSplineFunction(const InputParameters & parameters)
   : Function(parameters),
     FunctionInterface(this),
+    _normal_component(getParam<MooseEnum>("normal_component")),
     _yx1(getFunction("yx1")),
     _yx2(getFunction("yx2"))
 {
@@ -89,69 +95,148 @@ BicubicSplineFunction::BicubicSplineFunction(const InputParameters & parameters)
                "must match the length of x1.");
 
   _ipol.setData(_x1, _x2, y, _yx11, _yx1n, _yx21, _yx2n);
+
+  if (_normal_component == 0)
+  {
+    // YZ plane
+    _x1_index = 1;
+    _x2_index = 2;
+  }
+  else if (_normal_component == 1)
+  {
+    // ZX plane
+    _x1_index = 2;
+    _x2_index = 0;
+  }
+  else
+  {
+    // XY plane
+    _x1_index = 0;
+    _x2_index = 1;
+  }
 }
 
 Real
 BicubicSplineFunction::value(Real /*t*/, const Point & p)
 {
-  Point x1(_x1[0], p(1), 0);
-  Point xn(_x1.back(), p(1), 0);
+  // Call yx11/yx1n with the correctly oriented points
+  Real x1_begin = _x1[0];
+  Real x1_end = p(_x2_index);
+  Real xn_begin = _x1.back();
+  Real xn_end = p(_x2_index);
+
+  Point x1(0, 0, 0);
+  Point xn(0, 0, 0);
+
+  x1(_x1_index) = x1_begin;
+  x1(_x2_index) = x1_end;
+  xn(_x1_index) = xn_begin;
+  xn(_x2_index) = xn_end;
+
   Real yx11 = _yx1.value(0, x1);
   Real yx1n = _yx1.value(0, xn);
 
-  return _ipol.sample(p(0), p(1), yx11, yx1n);
+  return _ipol.sample(p(_x1_index), p(_x2_index), yx11, yx1n);
 }
 
 Real
 BicubicSplineFunction::derivative(const Point & p, unsigned int deriv_var)
 {
   Real yp1, ypn;
+  Point x1(0, 0, 0);
+  Point xn(0, 0, 0);
   if (deriv_var == 1)
   {
-    Point x1(_x1[0], p(1), 0);
-    Point xn(_x1.back(), p(1), 0);
+    // Call yx11/yx1n with the correctly oriented points
+    Real x1_begin = _x1[0];
+    Real x1_end = p(_x2_index);
+    Real xn_begin = _x1.back();
+    Real xn_end = p(_x2_index);
+
+    x1(_x1_index) = x1_begin;
+    x1(_x2_index) = x1_end;
+    xn(_x1_index) = xn_begin;
+    xn(_x2_index) = xn_end;
+
     yp1 = _yx1.value(0, x1);
     ypn = _yx1.value(0, xn);
   }
   else if (deriv_var == 2)
   {
-    Point x1(p(0), _x2[0], 0);
-    Point xn(p(0), _x2.back(), 0);
+    // Call yx11/yx1n with the correctly oriented points
+    Real x1_begin = p(_x1_index);
+    Real x1_end = _x2[0];
+    Real xn_begin = p(_x1_index);
+    Real xn_end = _x2.back();
+
+    x1(_x1_index) = x1_begin;
+    x1(_x2_index) = x1_end;
+    xn(_x1_index) = xn_begin;
+    xn(_x2_index) = xn_end;
+
     yp1 = _yx2.value(0, x1);
     ypn = _yx2.value(0, xn);
   }
   else
     mooseError("deriv_var must equal 1 or 2");
 
-  return _ipol.sampleDerivative(p(0), p(1), deriv_var, yp1, ypn);
+  return _ipol.sampleDerivative(p(_x1_index), p(_x2_index), deriv_var, yp1, ypn);
 }
 
 RealGradient
 BicubicSplineFunction::gradient(Real /*t*/, const Point & p)
 {
-  return RealGradient(derivative(p, 1), derivative(p, 2), 0);
+  RealGradient grad = RealGradient(0, 0, 0);
+
+  Real dF_dx1 = derivative(p, 1);
+  Real dF_dx2 = derivative(p, 2);
+
+  grad(_x1_index) = dF_dx1;
+  grad(_x2_index) = dF_dx2;
+
+  return grad;
 }
 
 Real
 BicubicSplineFunction::secondDerivative(const Point & p, unsigned int deriv_var)
 {
   Real yp1, ypn;
+  Point x1(0, 0, 0);
+  Point xn(0, 0, 0);
   if (deriv_var == 1)
   {
-    Point x1(_x1[0], p(1), 0);
-    Point xn(_x1.back(), p(1), 0);
+    // Call yx11/yx1n with the correctly oriented points
+    Real x1_begin = _x1[0];
+    Real x1_end = p(_x2_index);
+    Real xn_begin = _x1.back();
+    Real xn_end = p(_x2_index);
+
+    x1(_x1_index) = x1_begin;
+    x1(_x2_index) = x1_end;
+    xn(_x1_index) = xn_begin;
+    xn(_x2_index) = xn_end;
+
     yp1 = _yx1.value(0, x1);
     ypn = _yx1.value(0, xn);
   }
   else if (deriv_var == 2)
   {
-    Point x1(p(0), _x2[0], 0);
-    Point xn(p(0), _x2.back(), 0);
+    // Call yx11/yx1n with the correctly oriented points
+    Real x1_begin = p(_x1_index);
+    Real x1_end = _x2[0];
+    Real xn_begin = p(_x1_index);
+    Real xn_end = _x2.back();
+
+    x1(_x1_index) = x1_begin;
+    x1(_x2_index) = x1_end;
+    xn(_x1_index) = xn_begin;
+    xn(_x2_index) = xn_end;
+
     yp1 = _yx2.value(0, x1);
     ypn = _yx2.value(0, xn);
   }
   else
     mooseError("deriv_var must equal 1 or 2");
 
-  return _ipol.sample2ndDerivative(p(0), p(1), deriv_var, yp1, ypn);
+  return _ipol.sample2ndDerivative(p(_x1_index), p(_x2_index), deriv_var, yp1, ypn);
 }

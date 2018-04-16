@@ -10,4 +10,16 @@
     exodiff = 'bicubic_spline_interpolation_out.e'
     custom_cmp = 'bicubic_spline_interpolation.cmp'
   [../]
+  [./bicubic_spline_x]
+    type = 'Exodiff'
+    input = 'bicubic_spline_interpolation_x_normal.i'
+    exodiff = 'bicubic_spline_interpolation_x_normal_out.e'
+    custom_cmp = 'bicubic_spline_interpolation.cmp'
+  [../]
+  [./bicubic_spline_y]
+    type = 'Exodiff'
+    input = 'bicubic_spline_interpolation_y_normal.i'
+    exodiff = 'bicubic_spline_interpolation_y_normal_out.e'
+    custom_cmp = 'bicubic_spline_interpolation.cmp'
+  [../]
 []
