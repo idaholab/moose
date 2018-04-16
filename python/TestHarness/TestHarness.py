@@ -35,8 +35,8 @@ def findTestRoot(start=os.getcwd(), method=os.environ.get('METHOD', 'opt')):
                 data = f.read()
             root = hit.parse(fname, data)
             args = []
-            if root.find('cli_args'):
-                args = shlex.split(root.param('cli_args'))
+            if root.find('run_tests_args'):
+                args = shlex.split(root.param('run_tests_args'))
 
             hit_node = HitNode(hitnode=root)
             hit_parse(hit_node, root, '')
