@@ -21,7 +21,5 @@
     input = 'change_over_time.i'
     cli_args = "Postprocessors/change_over_time/change_with_respect_to_initial=true Outputs/file_base='change_over_time_initial'"
     csvdiff = 'change_over_time_initial.csv'
-    # This fails in recover because the initial value is lost
-    recover = false
   [../]
 []
