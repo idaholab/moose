@@ -123,8 +123,6 @@ public:
   virtual void
   addKernel(const std::string & kernel_name, const std::string & name, InputParameters parameters);
 
-  virtual void addEigenKernels(std::shared_ptr<KernelBase> /*kernel*/, THREAD_ID /*tid*/){};
-
   /**
    * Adds a NodalKernel
    * @param kernel_name The type of the nodal kernel
@@ -154,9 +152,6 @@ public:
   void addBoundaryCondition(const std::string & bc_name,
                             const std::string & name,
                             InputParameters parameters);
-
-  virtual void addEigenBoundaryCondition(std::shared_ptr<BoundaryCondition> /*bc*/,
-                                         THREAD_ID /*tid*/){};
 
   /**
    * Adds a Constraint

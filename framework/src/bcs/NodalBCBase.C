@@ -38,7 +38,6 @@ NodalBCBase::NodalBCBase(const InputParameters & parameters)
     RandomInterface(parameters, _fe_problem, _tid, true),
     CoupleableMooseVariableDependencyIntermediateInterface(this, true),
     _save_in_strings(parameters.get<std::vector<AuxVariableName>>("save_in")),
-    _diag_save_in_strings(parameters.get<std::vector<AuxVariableName>>("diag_save_in")),
-    _is_eigen(false)
+    _diag_save_in_strings(parameters.get<std::vector<AuxVariableName>>("diag_save_in"))
 {
 }

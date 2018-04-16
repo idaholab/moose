@@ -100,8 +100,6 @@ public:
    */
   SubProblem & subProblem() { return _subproblem; }
 
-  virtual bool isEigenKernel() const { return _eigen_kernel; }
-
 protected:
   /**
    * Compute this Kernel's contribution to the residual at the current quadrature point
@@ -178,8 +176,6 @@ protected:
   bool _has_diag_save_in;
   std::vector<MooseVariableFEBase *> _diag_save_in;
   std::vector<AuxVariableName> _diag_save_in_strings;
-
-  bool _eigen_kernel;
 };
 
 #endif /* KERNELBASE_H */

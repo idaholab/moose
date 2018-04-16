@@ -41,8 +41,7 @@ validParams<KernelBase>()
       "The name of auxiliary variables to save this Kernel's diagonal Jacobian "
       "contributions to. Everything about that variable must match everything "
       "about this variable (the type, what blocks it's on, etc.)");
-  params.addParam<bool>(
-      "eigen_kernel", false, "Whether or not this kernel will be used as an eigen kernel");
+
   params.addParam<bool>("use_displaced_mesh",
                         false,
                         "Whether or not this object should use the "
@@ -50,7 +49,7 @@ validParams<KernelBase>()
                         "the case this is true but no displacements "
                         "are provided in the Mesh block the "
                         "undisplaced mesh will still be used.");
-  params.addParamNamesToGroup(" diag_save_in save_in use_displaced_mesh eigen_kernel", "Advanced");
+  params.addParamNamesToGroup(" diag_save_in save_in use_displaced_mesh", "Advanced");
 
   params.declareControllable("enable");
   return params;
@@ -87,13 +86,10 @@ KernelBase::KernelBase(const InputParameters & parameters)
     _qrule(_assembly.qRule()),
     _JxW(_assembly.JxW()),
     _coord(_assembly.coordTransformation()),
-
     _has_save_in(false),
     _save_in_strings(parameters.get<std::vector<AuxVariableName>>("save_in")),
     _has_diag_save_in(false),
-    _diag_save_in_strings(parameters.get<std::vector<AuxVariableName>>("diag_save_in")),
-
-    _eigen_kernel(getParam<bool>("eigen_kernel"))
+    _diag_save_in_strings(parameters.get<std::vector<AuxVariableName>>("diag_save_in"))
 {
 }
 

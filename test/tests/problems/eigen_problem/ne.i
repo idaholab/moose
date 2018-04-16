@@ -29,7 +29,7 @@
   [./rhs]
     type = Reaction
     variable = u
-    eigen_kernel = true
+    extra_vector_tags = 'eigen'
   [../]
 []
 
@@ -41,11 +41,9 @@
     value = 0
   [../]
   [./eigen]
-    type = DirichletBC
+    type = EigenDirichletBC
     variable = u
     boundary = '0 1 2 3'
-    value = 0
-    eigen_bc = true
   [../]
 []
 

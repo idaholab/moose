@@ -39,9 +39,7 @@ VectorNodalBC::computeResidual()
   const std::vector<dof_id_type> & dof_indices = _var.dofIndices();
 
   RealVectorValue res(0, 0, 0);
-
-  if (!_is_eigen)
-    res = computeQpResidual();
+  res = computeQpResidual();
 
   for (auto tag_id : _vector_tags)
     if (_fe_problem.getNonlinearSystemBase().hasVector(tag_id))
@@ -56,9 +54,10 @@ VectorNodalBC::computeJacobian()
   const std::vector<dof_id_type> & cached_rows = _var.dofIndices();
 
   // Cache the user's computeQpJacobian() value for later use.
-  for (size_t i = 0; i < cached_rows.size(); ++i)
-    _fe_problem.assembly(0).cacheJacobianContribution(
-        cached_rows[i], cached_rows[i], cached_val(i));
+  for (auto tag : _matrix_tags)
+    for (size_t i = 0; i < cached_rows.size(); ++i)
+      _fe_problem.assembly(0).cacheJacobianContribution(
+          cached_rows[i], cached_rows[i], cached_val(i), tag);
 }
 
 void
@@ -74,8 +73,10 @@ VectorNodalBC::computeOffDiagJacobian(unsigned int jvar)
     dof_id_type cached_col = _current_node->dof_number(_sys.number(), jvar, 0);
 
     // Cache the user's computeQpJacobian() value for later use.
-    for (size_t i = 0; i < cached_rows.size(); ++i)
-      _fe_problem.assembly(0).cacheJacobianContribution(cached_rows[i], cached_col, cached_val);
+    for (auto tag : _matrix_tags)
+      for (size_t i = 0; i < cached_rows.size(); ++i)
+        _fe_problem.assembly(0).cacheJacobianContribution(
+            cached_rows[i], cached_col, cached_val, tag);
   }
 }
 

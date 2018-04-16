@@ -55,10 +55,13 @@ public:
 
   virtual NumericVector<Number> & RHS() override;
 
-  virtual void addEigenKernels(std::shared_ptr<KernelBase> kernel, THREAD_ID tid) override;
+  /**
+   * Add the eigen tag to the right kernels
+   */
+  template <typename T>
+  void addEigenTagToMooseObjects(MooseObjectTagWarehouse<T> & warehouse);
 
-  virtual void addEigenBoundaryCondition(std::shared_ptr<BoundaryCondition> bc,
-                                         THREAD_ID tid) override;
+  virtual void initialSetup() override;
 
   /**
    * Get the number of converged eigenvalues

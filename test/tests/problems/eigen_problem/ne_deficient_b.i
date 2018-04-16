@@ -35,7 +35,7 @@
     type = CoupledForce
     variable = u
     v = v
-    eigen_kernel = true
+    extra_vector_tags = 'eigen'
     coef = -1.0
   [../]
   [./src_v]
@@ -59,18 +59,14 @@
     value = 0
   [../]
   [./eigenBC_u]
-    type = DirichletBC
+    type = EigenDirichletBC
     variable = u
     boundary = '0 1 2 3'
-    value = 0
-    eigen_bc = true
   [../]
   [./eigenBC_v]
-    type = DirichletBC
+    type = EigenDirichletBC
     variable = v
     boundary = '0 1 2 3'
-    value = 0
-    eigen_bc = true
   [../]
 
 []

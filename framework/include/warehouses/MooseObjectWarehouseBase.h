@@ -155,6 +155,11 @@ public:
                          std::set<std::string> & unique_variables,
                          THREAD_ID tid = 0) const;
 
+  /**
+   * Return the number of threads.
+   */
+  THREAD_ID numThreads() { return _num_threads; }
+
 protected:
   /// Convenience member storing the number of threads used for storage (1 or libMesh::n_threads)
   const THREAD_ID _num_threads;

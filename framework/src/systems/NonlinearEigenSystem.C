@@ -11,6 +11,7 @@
 
 // MOOSE includes
 #include "DirichletBC.h"
+#include "EigenDirichletBC.h"
 #include "EigenProblem.h"
 #include "IntegratedBC.h"
 #include "KernelBase.h"
@@ -128,11 +129,47 @@ NonlinearEigenSystem::NonlinearEigenSystem(EigenProblem & eigen_problem, const s
 
   _Ax_tag = eigen_problem.addVectorTag("Ax_tag");
 
-  _Bx_tag = eigen_problem.addVectorTag("Bx_tag");
+  _Bx_tag = eigen_problem.addVectorTag("Eigen");
 
   _A_tag = eigen_problem.addMatrixTag("A_tag");
 
-  _B_tag = eigen_problem.addMatrixTag("B_tag");
+  _B_tag = eigen_problem.addMatrixTag("Eigen");
+}
+
+void
+NonlinearEigenSystem::initialSetup()
+{
+  NonlinearSystemBase::initialSetup();
+
+  addEigenTagToMooseObjects(_kernels);
+
+  addEigenTagToMooseObjects(_nodal_bcs);
+}
+
+template <typename T>
+void
+NonlinearEigenSystem::addEigenTagToMooseObjects(MooseObjectTagWarehouse<T> & warehouse)
+{
+  for (THREAD_ID tid = 0; tid < warehouse.numThreads(); tid++)
+  {
+    auto & objects = warehouse.getObjects(tid);
+
+    for (auto & object : objects)
+    {
+      auto & vtags = object->getVectorTags();
+      // If this is not an eigen kernel
+      if (vtags.find(_Bx_tag) == vtags.end())
+        object->useVectorTag(_Ax_tag);
+      else // also associate eigen matrix tag if this is a eigen kernel
+        object->useMatrixTag(_B_tag);
+
+      auto & mtags = object->getMatrixTags();
+      if (mtags.find(_B_tag) == mtags.end())
+        object->useMatrixTag(_A_tag);
+      else
+        object->useVectorTag(_Bx_tag);
+    }
+  }
 }
 
 void
@@ -213,37 +250,6 @@ NonlinearEigenSystem::nonlinearSolver()
 }
 
 void
-NonlinearEigenSystem::addEigenKernels(std::shared_ptr<KernelBase> kernel, THREAD_ID /*tid*/)
-{
-  if (kernel->isEigenKernel())
-  {
-    kernel->useVectorTag(_Bx_tag);
-    kernel->useMatrixTag(_B_tag);
-  }
-  else
-  {
-    kernel->useVectorTag(_Ax_tag);
-    kernel->useMatrixTag(_A_tag);
-  }
-}
-
-void
-NonlinearEigenSystem::addEigenBoundaryCondition(std::shared_ptr<BoundaryCondition> bc,
-                                                THREAD_ID /*tid*/)
-{
-  if (bc->isEigenBC())
-  {
-    bc->useVectorTag(_Bx_tag);
-    bc->useMatrixTag(_B_tag);
-  }
-  else
-  {
-    bc->useVectorTag(_Ax_tag);
-    bc->useMatrixTag(_A_tag);
-  }
-}
-
-void
 NonlinearEigenSystem::checkIntegrity()
 {
   if (_integrated_bcs.hasActiveObjects())
@@ -254,11 +260,12 @@ NonlinearEigenSystem::checkIntegrity()
     const auto & nodal_bcs = _nodal_bcs.getActiveObjects();
     for (const auto & nodal_bc : nodal_bcs)
     {
-      std::shared_ptr<DirichletBC> nbc = std::dynamic_pointer_cast<DirichletBC>(nodal_bc);
+      auto nbc = std::dynamic_pointer_cast<DirichletBC>(nodal_bc);
+      auto eigen_nbc = std::dynamic_pointer_cast<EigenDirichletBC>(nodal_bc);
       if (nbc && nbc->getParam<Real>("value"))
         mooseError(
             "Can't set an inhomogeneous Dirichlet boundary condition for eigenvalue problems.");
-      else if (!nbc)
+      else if (!nbc && !eigen_nbc)
         mooseError("Invalid NodalBC for eigenvalue problems, please use homogeneous Dirichlet.");
     }
   }

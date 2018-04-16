@@ -79,9 +79,7 @@ NodalBC::computeResidual()
     dof_id_type & dof_idx = _var.nodalDofIndex();
     _qp = 0;
     Real res = 0;
-
-    if (!_eigen_BC)
-      res = computeQpResidual();
+    res = computeQpResidual();
 
     for (auto tag_id : _vector_tags)
       if (_fe_problem.getNonlinearSystemBase().hasVector(tag_id))
@@ -107,8 +105,7 @@ NodalBC::computeJacobian()
   {
     _qp = 0;
     Real cached_val = 0.;
-    if (!_eigen_BC)
-      cached_val = computeQpJacobian();
+    cached_val = computeQpJacobian();
 
     dof_id_type cached_row = _var.nodalDofIndex();
 
@@ -134,15 +131,15 @@ NodalBC::computeOffDiagJacobian(unsigned int jvar)
   {
     _qp = 0;
     Real cached_val = 0.0;
-    if (!_eigen_BC)
-      cached_val = computeQpOffDiagJacobian(jvar);
+    cached_val = computeQpOffDiagJacobian(jvar);
 
     dof_id_type cached_row = _var.nodalDofIndex();
     // Note: this only works for Lagrange variables...
     dof_id_type cached_col = _current_node->dof_number(_sys.number(), jvar, 0);
 
     // Cache the user's computeQpJacobian() value for later use.
-    _fe_problem.assembly(0).cacheJacobianContribution(cached_row, cached_col, cached_val);
+    for (auto tag : _matrix_tags)
+      _fe_problem.assembly(0).cacheJacobianContribution(cached_row, cached_col, cached_val, tag);
   }
 }
 

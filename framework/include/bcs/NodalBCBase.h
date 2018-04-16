@@ -45,8 +45,6 @@ public:
   virtual void computeJacobian() = 0;
   virtual void computeOffDiagJacobian(unsigned int jvar) = 0;
 
-  void setBCOnEigen(bool iseigen) { _is_eigen = iseigen; }
-
 protected:
   /// The aux variables to save the residual contributions to
   bool _has_save_in;
@@ -57,10 +55,6 @@ protected:
   bool _has_diag_save_in;
   std::vector<MooseVariableFEBase *> _diag_save_in;
   std::vector<AuxVariableName> _diag_save_in_strings;
-
-  /// Indicate whether or not the boundary condition is applied to the right
-  /// hand side of eigenvalue problems
-  bool _is_eigen;
 };
 
 #endif /* NODALBCBASE_H */

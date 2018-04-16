@@ -83,11 +83,13 @@ public:
    * It should be called after the local element vector has been computed.
    */
   void assignTaggedLocalResidual();
+
   /**
    * Local Jacobian blocks  will be appended by adding the current local kernel Jacobian.
    * It should be called after the local element matrix has been computed.
    */
   void accumulateTaggedLocalMatrix();
+
   /**
    * Local Jacobian blocks will assigned as the current local kernel Jacobian.
    * It should be called after the local element matrix has been computed.
