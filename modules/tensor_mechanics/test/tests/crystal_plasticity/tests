@@ -46,4 +46,14 @@
     input = 'orthotropic_rotation_Cijkl.i'
     csvdiff = 'orthotropic_rotation_Cijkl_out.csv'
   [../]
+  [./test_BCC]
+    type = 'Exodiff'
+    input = 'crysp_user_object_BCC.i'
+    exodiff = 'crysp_user_object_BCC_out.e'
+  [../]
+  [./test_non0Tau0]
+    type = 'Exodiff'
+    input = 'crysp_user_object_non0Tau0.i'
+    exodiff = 'crysp_user_object_non0Tau0_out.e'
+  [../]
 []

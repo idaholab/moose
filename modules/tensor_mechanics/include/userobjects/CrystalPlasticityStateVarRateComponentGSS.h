@@ -11,6 +11,7 @@
 #define CRYSTALPLASTICITYSTATEVARRATECOMPONENTGSS_H
 
 #include "CrystalPlasticityStateVarRateComponent.h"
+#include "MooseTypes.h"
 
 class CrystalPlasticityStateVarRateComponentGSS;
 
@@ -36,6 +37,9 @@ protected:
   FileName _slip_sys_hard_prop_file_name;
 
   std::vector<Real> _hprops;
+
+  // the switching variable containing the type of crystal (i.e. FCC12 or BCC12)
+  const MooseEnum _crystal_type;
 };
 
 #endif // CRYSTALPLASTICITYSTATEVARRATECOMPONENTGSS_H
