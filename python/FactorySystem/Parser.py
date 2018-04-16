@@ -144,7 +144,7 @@ class Parser:
             for key, value in default_values.iterparams():
                 if key in params.keys():
                     if key == 'cli_args':
-                      params[key] += ' ' + value + ' '
+                      params[key].append(value)
                     else:
                       params[key] = value
 

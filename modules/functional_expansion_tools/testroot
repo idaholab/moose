@@ -1,2 +1,2 @@
 app_name = functional_expansion_tools
-cli_args = '--error'
+run_tests_args = '--error'
