@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+DIAGNOSTIC_LOG="libmesh_diagnostic.log"
+
 # Set go_fast flag if "--fast" is found in command line args.
 for i in "$@"
 do
@@ -20,6 +22,9 @@ fi
 
 
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
+# generate machine diagnostics and write it to the log
+$SCRIPT_DIR/diagnostics.sh > "$SCRIPT_DIR/$DIAGNOSTIC_LOG"
 
 if [[ -n "$LIBMESH_DIR" ]]; then
   echo "INFO: LIBMESH_DIR set - overriding default installed path"
@@ -126,3 +131,9 @@ fi
 # sh-basic-offset: 2
 # sh-indentation: 2
 # End:
+
+# Include libMesh config.log in the diagnostics log
+if [ -f "$SCRIPT_DIR/../libmesh/build/config.log" ]; then
+  echo -e "\nLIBMESH CONFIGURE LOG" >> "$SCRIPT_DIR/$DIAGNOSTIC_LOG"
+  cat "$SCRIPT_DIR/../libmesh/build/config.log" >> "$SCRIPT_DIR/$DIAGNOSTIC_LOG"
+fi
