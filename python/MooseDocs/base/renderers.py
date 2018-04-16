@@ -282,9 +282,9 @@ class MaterializeRenderer(HTMLRenderer):
                  rel="stylesheet", media="screen,projection")
         html.Tag(head, 'link', href=rel("contrib/katex/katex.min.css"), type="text/css",
                  rel="stylesheet")
-        html.Tag(head, 'link', href=rel("css/moose.css"), type="text/css", rel="stylesheet")
         html.Tag(head, 'link', href=rel("contrib/prism/prism.min.css"), type="text/css",
                  rel="stylesheet")
+        html.Tag(head, 'link', href=rel("css/moose.css"), type="text/css", rel="stylesheet")
         html.Tag(head, 'script', type="text/javascript", src=rel("contrib/jquery/jquery.min.js"))
         html.Tag(head, 'script', type="text/javascript",
                  src=rel("contrib/materialize/materialize.min.js"))

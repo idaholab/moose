@@ -11,9 +11,9 @@
 }
 
 html {
-    line-height: 2rem;
+    line-height: 1.35;
     color: rgba(0,0,0,1.0);
-    font-size: 20px;
+    font-size: 16px;
     font-weight: 300;
 }
 
@@ -75,9 +75,33 @@ html {
     max-height:85%;
 }
 
+/*
+  Inline code snippets (using backtics)
+*/
 div.moose-code-compare pre
 {
   font-size: 85%;
+}
+
+/*
+  All code blocks (the ones with black backgrounds
+*/
+code[class*="language-"],
+pre[class*="language-"]
+{
+    font-size: 85%;
+    line-height: 1.15;
+}
+
+code, kbd, pre, samp {
+    font-family: monospace, monospace;
+    font-size: 1em;
+    background-color: #9e9e9e24;
+
+    padding-top: 1px;
+    padding-right: 3px;
+    padding-bottom: 1px;
+    padding-left: 3px;
 }
 
 .moose-disabled{
