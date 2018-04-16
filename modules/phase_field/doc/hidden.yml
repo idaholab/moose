@@ -144,7 +144,6 @@
 - /Materials/ThirdPhaseSuppressionMaterial
 - /Materials/TimeStepMaterial
 - /Materials/VariableGradientMaterial
-- /Mesh/MortarPeriodicMesh
 - /Modules/PhaseField
 - /Modules/PhaseField/Conserved
 - /Modules/PhaseField/DisplacementGradients
@@ -153,8 +152,6 @@
 - /Modules/PhaseField/EulerAngles2RGB/EulerAngle2RGBAction
 - /Modules/PhaseField/GrainGrowth
 - /Modules/PhaseField/GrainGrowth/GrainGrowthAction
-- /Modules/PhaseField/MortarPeriodicity
-- /Modules/PhaseField/MortarPeriodicity/MortarPeriodicAction
 - /Modules/PhaseField/Nonconserved
 - /Postprocessors/AverageGrainVolume
 - /Postprocessors/FauxGrainTracker

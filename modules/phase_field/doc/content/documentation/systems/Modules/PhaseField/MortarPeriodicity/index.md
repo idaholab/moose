@@ -1,7 +1,7 @@
 # MortarPeriodicity System
 
 The `MortarPeriodicity` Action assists users in setting up mortar based periodicity
-constraints. Its primary application is setting up an [EqualGradientConstraint] which,
+constraints. Its primary application is setting up an [EqualGradientConstraint](/EqualGradientConstraint.md) which,
 when used on the displacement variables, implemnts a strain periodicity which is
 useful for representative volume element microstructure simulations.
 
