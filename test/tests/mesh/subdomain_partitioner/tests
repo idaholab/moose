@@ -23,4 +23,19 @@
     petsc_version_release = true
     petsc_version = '>=3.5.0'
   [../]
+  [./subdomain_partitioner_petsc380]
+    # PETSc 3.8.0 is the first release where the PETSc team started using
+    # a portable random number generator in METIS (-DUSE_GKRAND) so there
+    # is a chance that the same gold file can be used on both Linux and
+    # Mac. This test specifically tests for that, as it is not
+    # restricted by platform, only by PETSc version.
+    type = 'Exodiff'
+    input = 'subdomain_partitioner.i'
+    exodiff = 'subdomain_partitioner_out_petsc380.e'
+    cli_args = 'Outputs/file_base=subdomain_partitioner_out_petsc380'
+    dof_id_bytes = 4
+    min_parallel = 4
+    max_parallel = 4
+    petsc_version = '>=3.8.0'
+  [../]
 []
