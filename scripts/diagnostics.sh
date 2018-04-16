@@ -11,9 +11,6 @@
 ## Script which contains the diagnostics we wish to generate.
 ## This script will output all diagnostics to stdout.
 
-# Start by printing the date
-date
-
 write_to_stdout() {
   echo -e "$@"
 }
@@ -109,6 +106,7 @@ diagnose_python() {
 }
 
 # Execute the diagnostics
+date
 diagnose_root
 diagnose_arch
 diagnose_package_version
