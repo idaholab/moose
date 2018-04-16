@@ -228,9 +228,7 @@ class TestHarness:
                         if file in self._infiles \
                                and os.path.abspath(os.path.join(dirpath, file)) not in launched_tests:
 
-                            if self.prunePath(file):
-                                continue
-                            elif self.notMySpecFile(dirpath, file):
+                            if self.notMySpecFile(dirpath, file):
                                 continue
 
                             saved_cwd = os.getcwd()
@@ -309,22 +307,6 @@ class TestHarness:
             testers = self.appendRecoverableTests(testers)
 
         return testers
-
-    def prunePath(self, filename):
-        test_dir = os.path.abspath(os.path.dirname(filename))
-
-        # Filter tests that we want to run
-        # Under the new format, we will filter based on directory not filename since it is fixed
-        prune = True
-        if len(self.tests) == 0:
-            prune = False # No filter
-        else:
-            for item in self.tests:
-                if test_dir.find(item) > -1:
-                    prune = False
-
-        # Return the inverse of will_run to indicate that this path should be pruned
-        return prune
 
     def notMySpecFile(self, dirpath, filename):
         """ true if dirpath/filename does not match supplied --spec-file """
@@ -713,7 +695,6 @@ class TestHarness:
     ## Parse command line options and assign them to self.options
     def parseCLArgs(self, argv):
         parser = argparse.ArgumentParser(description='A tool used to test MOOSE based applications')
-        parser.add_argument('test_name', nargs=argparse.REMAINDER)
         parser.add_argument('--opt', action='store_const', dest='method', const='opt', help='test the app_name-opt binary')
         parser.add_argument('--dbg', action='store_const', dest='method', const='dbg', help='test the app_name-dbg binary')
         parser.add_argument('--devel', action='store_const', dest='method', const='devel', help='test the app_name-devel binary')
@@ -788,7 +769,6 @@ class TestHarness:
             del argv[argv.index(self.code.decode('hex'))]
             code = False
         self.options = parser.parse_args(argv[1:])
-        self.tests = self.options.test_name
         self.options.code = code
 
         self.options.runtags = [tag for tag in self.options.run.split(',') if tag != '']
