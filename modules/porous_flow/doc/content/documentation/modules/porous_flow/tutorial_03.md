@@ -6,9 +6,10 @@
 
 This Page adds heat conduction and advection with the fluid.  The differential equation governing the temperature evolution is
 \begin{equation}
-0 = \frac{\partial}{\partial t}\left( (1 - \phi)\rho_{R}C_{R}T + \phi\rho C_{v}T \right) - \nabla_{i}\lambda_{ij}\nabla T  -\nabla_{i} \left( C_{v} T \rho \frac{k_{ij}}{\mu} (\nabla_{j}P - \rho g_{j}) \right)\ .
 \label{eq:heat}
+0 = \frac{\partial}{\partial t}\left((1 - \phi)\rho_{R}C_{R}T + \phi\rho C_{v}T \right) - \nabla_{i}\lambda_{ij}\nabla T  -\nabla_{i} \left( C_{v} T \rho \frac{k_{ij}}{\mu} (\nabla_{j}P - \rho g_{j}) \right)\ .
 \end{equation}
+
 This equation is nonlinear since there are products of $P$ and $T$, as well as the nonlinear function $\rho$.  Most of the nomenclature was used in [Page 01](porous_flow/tutorial_01.md), and the additional symbols introduced are:
 
 - $t$ is time (units s)
@@ -27,13 +28,17 @@ This equation is nonlinear since there are products of $P$ and $T$, as well as t
   (units J.s$^{-1}$.m$^{-1}$.K$^{-1}$).  It is a tensor.
 
 Before attempting to write an input file, a rough estimate of the expected nonlinear residuals must be performed, as discussed in [convergence criteria](porous_flow/convergence.md).  The residual for the [eq:heat] is approximately
+
 \begin{equation}
 R_{T} \approx V(\lambda \epsilon_{T} + C_{\mathrm{v}}T|\kappa|\rho_{0}\epsilon_{P}/\mu) \approx V (10 \epsilon_{T} + 10^{-2}\epsilon_{P}) \ ,
 \end{equation}
+
 where the parameters $\lambda \sim 10$, $C_{\mathrm{v}} \sim 4000$, $T\sim 300$, $\kappa \sim 10^{-14}$, $\rho_{0}\sim 1000$ and $\mu \sim 10^{-3}$, have been used in the final expression.  In [Page 02](porous_flow/tutorial_02.md) the choice $\epsilon_{P}\approx 1\,$Pa.m$^{-1}$ was made.  Choosing $\epsilon_{T}\approx 10^{-3}\,$K.m$^{-1}$ yields
+
 \begin{equation}
 R_{T} \approx 10^{-2}V \ .
 \end{equation}
+
 Note that this is significantly greater than the $R_{P}\approx 10^{-10}V$ for the fluid equation.  In the main, MOOSE can handle these types of discrepancies, but it is good practise to scale the variables so that their residuals are of similar magnitude.  Therefore, a scaling factor of $10^{-8}$ is applied to the temperature variable.
 
 To model this thermo-hydro system, the `PorousFlowBasicTHM` action needs to be enhanced to read:
@@ -60,4 +65,3 @@ An animation of the results is shown in [tut03_gif_fig].  Readers are encouraged
 [Start](porous_flow/tutorial_00.md) |
 [Previous](porous_flow/tutorial_02.md) |
 [Next](porous_flow/tutorial_04.md)
-
