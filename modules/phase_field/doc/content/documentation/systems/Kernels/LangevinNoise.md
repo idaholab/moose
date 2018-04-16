@@ -13,7 +13,8 @@ amplitude factor, and $P(\vec r)$ (`multiplier`) is a material property that can
 as a location dependent mask for the source term.
 
 !alert warning
-This kernel does not produce parallel reproducible results.
+This kernel does not produce parallel reproducible results. For a parallel reproducible random
+noise system see [ConservedLangevinNoise](/ConservedLangevinNoise.md)
 
 !syntax parameters /Kernels/LangevinNoise
 

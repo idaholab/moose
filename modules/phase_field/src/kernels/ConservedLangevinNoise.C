@@ -16,9 +16,9 @@ InputParameters
 validParams<ConservedLangevinNoise>()
 {
   InputParameters params = validParams<LangevinNoise>();
-  params.addClassDescription("Source term for noise from a ConservativeNoise userobject");
+  params.addClassDescription("Source term for noise from a ConservedNoise userobject");
   params.addRequiredParam<UserObjectName>(
-      "noise", "ConservativeNoise userobject that produces the random numbers");
+      "noise", "ConservedNoise userobject that produces the random numbers");
   return params;
 }
 ConservedLangevinNoise::ConservedLangevinNoise(const InputParameters & parameters)

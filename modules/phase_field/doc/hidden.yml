@@ -80,7 +80,6 @@
 - /Kernels/CHSplitFlux
 - /Kernels/CoefCoupledTimeDerivative
 - /Kernels/CoefReaction
-- /Kernels/ConservedLangevinNoise
 - /Kernels/CoupledMaterialDerivative
 - /Kernels/CoupledSwitchingTimeDerivative
 - /Kernels/MaskedBodyForce
