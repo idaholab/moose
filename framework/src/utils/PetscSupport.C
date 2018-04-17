@@ -1041,7 +1041,8 @@ PetscContactLineSearch::linesearch(SNESLineSearch linesearch)
   }
   ierr = VecNorm(F, NORM_2, &fnorm);
   LIBMESH_CHKERR(ierr);
-  std::set<dof_id_type> contact_state_stored = std::move(_current_contact_state);
+  std::set<dof_id_type> contact_state_stored = _current_contact_state;
+  _current_contact_state.clear();
   printContactInfo(contact_state_stored);
 
   if (_affect_ltol)
@@ -1081,7 +1082,8 @@ PetscContactLineSearch::linesearch(SNESLineSearch linesearch)
       VecCopy(W1, W);
       LIBMESH_CHKERR(ierr);
       fnorm = gnorm;
-      contact_state_stored = std::move(_current_contact_state);
+      contact_state_stored.swap(_current_contact_state);
+      _current_contact_state.clear();
       printContactInfo(contact_state_stored);
       ++ls_its;
     }
@@ -1112,7 +1114,8 @@ PetscContactLineSearch::linesearch(SNESLineSearch linesearch)
       ierr = SNESLineSearchSetReason(linesearch, SNES_LINESEARCH_FAILED_DOMAIN);
       LIBMESH_CHKERR(ierr);
     }
-    contact_state_stored = std::move(_current_contact_state);
+    contact_state_stored.swap(_current_contact_state);
+    _current_contact_state.clear();
     printContactInfo(contact_state_stored);
   }
 
