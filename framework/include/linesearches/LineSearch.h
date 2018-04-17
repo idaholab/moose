@@ -32,6 +32,11 @@ public:
    */
   const size_t & nl_its() const { return _nl_its; }
 
+  /**
+   * The method that actually implements the line-search
+   */
+  virtual void linesearch() = 0;
+
 protected:
   /// Reference to the finite element problem
   FEProblemBase & _fe_problem;

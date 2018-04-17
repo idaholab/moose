@@ -983,7 +983,14 @@ PetscContactLineSearch::PetscContactLineSearch(FEProblemBase & fe_problem,
 }
 
 void
-PetscContactLineSearch::linesearch(SNESLineSearch linesearch)
+PetscContactLineSearch::linesearch(SNESLineSearch line_search_object)
+{
+  _line_search_object = line_search_object;
+  linesearch();
+}
+
+void
+PetscContactLineSearch::linesearch()
 {
   PetscBool changed_y = PETSC_FALSE, changed_w = PETSC_FALSE;
   PetscErrorCode ierr;
@@ -995,13 +1002,13 @@ PetscContactLineSearch::linesearch(SNESLineSearch linesearch)
   PetscInt ksp_maxits;
   KSP ksp;
 
-  ierr = SNESLineSearchGetVecs(linesearch, &X, &F, &Y, &W, &G);
+  ierr = SNESLineSearchGetVecs(_line_search_object, &X, &F, &Y, &W, &G);
   LIBMESH_CHKERR(ierr);
-  ierr = SNESLineSearchGetNorms(linesearch, &xnorm, &fnorm, &ynorm);
+  ierr = SNESLineSearchGetNorms(_line_search_object, &xnorm, &fnorm, &ynorm);
   LIBMESH_CHKERR(ierr);
-  ierr = SNESLineSearchGetSNES(linesearch, &snes);
+  ierr = SNESLineSearchGetSNES(_line_search_object, &snes);
   LIBMESH_CHKERR(ierr);
-  ierr = SNESLineSearchSetReason(linesearch, SNES_LINESEARCH_SUCCEEDED);
+  ierr = SNESLineSearchSetReason(_line_search_object, SNES_LINESEARCH_SUCCEEDED);
   LIBMESH_CHKERR(ierr);
   ierr = SNESGetKSP(snes, &ksp);
   LIBMESH_CHKERR(ierr);
@@ -1019,7 +1026,7 @@ PetscContactLineSearch::linesearch(SNESLineSearch linesearch)
   ++_nl_its;
 
   /* precheck */
-  ierr = SNESLineSearchPreCheck(linesearch, X, Y, &changed_y);
+  ierr = SNESLineSearchPreCheck(_line_search_object, X, Y, &changed_y);
   LIBMESH_CHKERR(ierr);
 
   /* temporary update */
@@ -1030,13 +1037,13 @@ PetscContactLineSearch::linesearch(SNESLineSearch linesearch)
   /* compute residual to determine whether contact state has changed since the last non-linear
    * residual evaluation */
   _current_contact_state.clear();
-  ierr = (*linesearch->ops->snesfunc)(snes, W, F);
+  ierr = (*_line_search_object->ops->snesfunc)(snes, W, F);
   LIBMESH_CHKERR(ierr);
   ierr = SNESGetFunctionDomainError(snes, &domainerror);
   LIBMESH_CHKERR(ierr);
   if (domainerror)
   {
-    ierr = SNESLineSearchSetReason(linesearch, SNES_LINESEARCH_FAILED_DOMAIN);
+    ierr = SNESLineSearchSetReason(_line_search_object, SNES_LINESEARCH_FAILED_DOMAIN);
     LIBMESH_CHKERR(ierr);
   }
   ierr = VecNorm(F, NORM_2, &fnorm);
@@ -1064,13 +1071,13 @@ PetscContactLineSearch::linesearch(SNESLineSearch linesearch)
     ierr = VecWAXPY(W1, -_contact_lambda, Y, X);
     LIBMESH_CHKERR(ierr);
 
-    ierr = (*linesearch->ops->snesfunc)(snes, W1, G);
+    ierr = (*_line_search_object->ops->snesfunc)(snes, W1, G);
     LIBMESH_CHKERR(ierr);
     ierr = SNESGetFunctionDomainError(snes, &domainerror);
     LIBMESH_CHKERR(ierr);
     if (domainerror)
     {
-      ierr = SNESLineSearchSetReason(linesearch, SNES_LINESEARCH_FAILED_DOMAIN);
+      ierr = SNESLineSearchSetReason(_line_search_object, SNES_LINESEARCH_FAILED_DOMAIN);
       LIBMESH_CHKERR(ierr);
     }
     ierr = VecNorm(G, NORM_2, &gnorm);
@@ -1094,7 +1101,7 @@ PetscContactLineSearch::linesearch(SNESLineSearch linesearch)
   ierr = VecScale(Y, _contact_lambda);
   LIBMESH_CHKERR(ierr);
   /* postcheck */
-  ierr = SNESLineSearchPostCheck(linesearch, X, Y, W, &changed_y, &changed_w);
+  ierr = SNESLineSearchPostCheck(_line_search_object, X, Y, W, &changed_y, &changed_w);
   LIBMESH_CHKERR(ierr);
 
   if (changed_y)
@@ -1105,13 +1112,13 @@ PetscContactLineSearch::linesearch(SNESLineSearch linesearch)
 
   if (changed_w || changed_y)
   {
-    ierr = (*linesearch->ops->snesfunc)(snes, W, F);
+    ierr = (*_line_search_object->ops->snesfunc)(snes, W, F);
     LIBMESH_CHKERR(ierr);
     ierr = SNESGetFunctionDomainError(snes, &domainerror);
     LIBMESH_CHKERR(ierr);
     if (domainerror)
     {
-      ierr = SNESLineSearchSetReason(linesearch, SNES_LINESEARCH_FAILED_DOMAIN);
+      ierr = SNESLineSearchSetReason(_line_search_object, SNES_LINESEARCH_FAILED_DOMAIN);
       LIBMESH_CHKERR(ierr);
     }
     contact_state_stored.swap(_current_contact_state);
@@ -1119,11 +1126,11 @@ PetscContactLineSearch::linesearch(SNESLineSearch linesearch)
     printContactInfo(contact_state_stored);
   }
 
-  ierr = VecNorm(Y, NORM_2, &linesearch->ynorm);
+  ierr = VecNorm(Y, NORM_2, &_line_search_object->ynorm);
   LIBMESH_CHKERR(ierr);
-  ierr = VecNorm(W, NORM_2, &linesearch->xnorm);
+  ierr = VecNorm(W, NORM_2, &_line_search_object->xnorm);
   LIBMESH_CHKERR(ierr);
-  ierr = VecNorm(F, NORM_2, &linesearch->fnorm);
+  ierr = VecNorm(F, NORM_2, &_line_search_object->fnorm);
   LIBMESH_CHKERR(ierr);
 
   /* copy the solution over */

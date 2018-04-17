@@ -154,9 +154,14 @@ public:
                          bool affect_ltol);
 
   /**
-   * The custom linesearch implementation method
+   * Shim the linesearch method coming from LibMesh to our own
    */
-  virtual void linesearch(SNESLineSearch linesearch) override;
+  virtual void linesearch(SNESLineSearch line_search_object) override;
+
+  virtual void linesearch() override;
+
+protected:
+  SNESLineSearch _line_search_object;
 };
 }
 }
