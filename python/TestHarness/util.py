@@ -354,31 +354,71 @@ def getSlepcVersion(libmesh_dir):
 
     return major_version.pop() + '.' + minor_version.pop() + '.' + subminor_version.pop()
 
+def checkLogicVersionSplits(target, splits, logic_and, package):
+    status, logic_reason, version = [],[],[]
+    for split in splits:
+        (lstatus, lreason, lversion) = checkLogicVersionSingle(target, split, package)
+        status.append(lstatus)
+        logic_reason.append(lreason)
+        version.append(lversion)
+
+    if logic_and:
+        if status[0] and status[1]:
+            return (True, None, version[0])
+        else:
+            return (False, '&&', version[0]+' '+version[1])
+    else:
+        if status[0] or status[1]:
+            return (True, None, version[0])
+        else:
+            return (True, '||', version[0]+ ' '+version[1])
+
+    return (False, None, None)
+
+def checkLogicVersionSingle(checks, iversion, package):
+    logic, version = re.search(r'(.*?)(\d\S+)', iversion).groups()
+    if logic == '' or logic == '=':
+        if version == checks[package]:
+            return (True, None, version)
+        else:
+            return (False, '!=', version)
+
+    # Logical match
+    if logic == '>' and checks[package][0:5] > version[0:5]:
+        return (True, None, version)
+    elif logic == '>=' and checks[package][0:5] >= version[0:5]:
+        return (True, None, version)
+    elif logic == '<' and checks[package][0:5] < version[0:5]:
+        return (True, None, version)
+    elif logic == '<=' and checks[package][0:5] <= version[0:5]:
+        return (True, None, version)
+
+    return (False, logic, version)
+
+def checkVersion(checks, test, package):
+    for version in test[package]:
+        logic_and = False
+        if version.find("&&") != -1:
+            logic_and = True
+        splits = re.split('[(&&) | (||)]+', version)
+        if len(splits) == 1:
+            return checkLogicVersionSingle(checks, version, package)
+        elif len(splits) == 2:
+            return checkLogicVersionSplits(checks, splits, logic_and, package)
+        else:
+            print "Invalid expression: " + version
+            exit(1)
+
+    return (False, None, None)
+
 # Break down petsc version logic in a new define
 # TODO: find a way to eval() logic instead
 def checkPetscVersion(checks, test):
     # If any version of petsc works, return true immediately
     if 'ALL' in set(test['petsc_version']):
         return (True, None, None)
-    # Iterate through petsc versions in test[PETSC_VERSION] and match it against check[PETSC_VERSION]
-    for petsc_version in test['petsc_version']:
-        logic, version = re.search(r'(.*?)(\d\S+)', petsc_version).groups()
-        # Exact match
-        if logic == '' or logic == '=':
-            if version == checks['petsc_version']:
-                return (True, None, version)
-            else:
-                return (False, '!=', version)
-        # Logical match
-        if logic == '>' and checks['petsc_version'][0:5] > version[0:5]:
-            return (True, None, version)
-        elif logic == '>=' and checks['petsc_version'][0:5] >= version[0:5]:
-            return (True, None, version)
-        elif logic == '<' and checks['petsc_version'][0:5] < version[0:5]:
-            return (True, None, version)
-        elif logic == '<=' and checks['petsc_version'][0:5] <= version[0:5]:
-            return (True, None, version)
-    return (False, logic, version)
+
+    return checkVersion(checks, test, 'petsc_version')
 
 
 # Break down slepc version logic in a new define
@@ -392,25 +432,8 @@ def checkSlepcVersion(checks, test):
     # If any version of SLEPc works, return true immediately
     if 'ALL' in set(test['slepc_version']):
         return (True, None, None)
-    # Iterate through SLEPc versions in test[SLEPC_VERSION] and match it against check[SLEPC_VERSION]
-    for slepc_version in test['slepc_version']:
-        logic, version = re.search(r'(.*?)(\d\S+)', slepc_version).groups()
-        # Exact match
-        if logic == '' or logic == '=':
-            if version == checks['slepc_version']:
-                return (True, None, version)
-            else:
-                return (False, '!=', version)
-        # Logical match
-        if logic == '>' and checks['slepc_version'][0:5] > version[0:5]:
-            return (True, None, version)
-        elif logic == '>=' and checks['slepc_version'][0:5] >= version[0:5]:
-            return (True, None, version)
-        elif logic == '<' and checks['slepc_version'][0:5] < version[0:5]:
-            return (True, None, version)
-        elif logic == '<=' and checks['slepc_version'][0:5] <= version[0:5]:
-            return (True, None, version)
-    return (False, logic, version)
+
+    return checkVersion(checks, test, 'slepc_version')
 
 def getIfAsioExists(moose_dir):
     option_set = set(['ALL'])

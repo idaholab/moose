@@ -16,7 +16,7 @@
   [./tester_fail]
     type = RunException
     input = read.i
-    cli_args = "UserObjects/tester/rank=1 UserObjects/tester/gold='1 2 3'"
+    cli_args = "UserObjects/tester/rank=1 UserObjects/tester/gold='1 2 3' Outputs/csv=false"
     min_parallel = 2
     expect_err = "The supplied gold data does not match the VPP data on the given rank."
   [../]
