@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "CrystalPlasticityStateVarRateComponentGSS.h"
+#include <cmath>
 
 registerMooseObject("TensorMechanicsApp", CrystalPlasticityStateVarRateComponentGSS);
 
@@ -61,7 +62,7 @@ CrystalPlasticityStateVarRateComponentGSS::calcStateVariableEvolutionRateCompone
 
   for (unsigned int i = 0; i < _variable_size; ++i)
     hb(i) = h0 * std::pow(std::abs(1.0 - _mat_prop_state_var[qp][i] / tau_sat), a) *
-            copysign(1.0, 1.0 - _mat_prop_state_var[qp][i] / tau_sat);
+            std::copysign(1.0, 1.0 - _mat_prop_state_var[qp][i] / tau_sat);
 
   for (unsigned int i = 0; i < _variable_size; ++i)
     for (unsigned int j = 0; j < _variable_size; ++j)
