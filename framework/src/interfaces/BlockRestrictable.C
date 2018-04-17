@@ -105,7 +105,12 @@ BlockRestrictable::initializeBlockRestrictable(const MooseObject * moose_object)
   {
     std::string variable_name = moose_object->parameters().getMooseType("variable");
     if (!variable_name.empty())
-      _blk_ids = _blk_feproblem->getVariable(_blk_tid, variable_name).activeSubdomains();
+      _blk_ids = _blk_feproblem
+                     ->getVariable(_blk_tid,
+                                   variable_name,
+                                   Moose::VarKindType::VAR_ANY,
+                                   Moose::VarFieldType::VAR_FIELD_ANY)
+                     .activeSubdomains();
   }
 
   // Produce error if the object is not allowed to be both block and boundary restricted

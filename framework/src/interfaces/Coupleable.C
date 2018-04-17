@@ -51,7 +51,11 @@ Coupleable::Coupleable(const MooseObject * moose_object, bool nodal)
       {
         if (problem.hasVariable(coupled_var_name))
         {
-          MooseVariableFEBase * moose_var = &problem.getVariable(_c_tid, coupled_var_name);
+          MooseVariableFEBase * moose_var =
+              &problem.getVariable(_c_tid,
+                                   coupled_var_name,
+                                   Moose::VarKindType::VAR_ANY,
+                                   Moose::VarFieldType::VAR_FIELD_ANY);
           _coupled_vars[name].push_back(moose_var);
           _coupled_moose_vars.push_back(moose_var);
           if (auto * tmp_var = dynamic_cast<MooseVariable *>(moose_var))

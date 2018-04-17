@@ -169,15 +169,6 @@ protected:
   /// The variable this object is acting on
   MooseVariableFE<T> * _variable;
 
-  /// The _expected_ type for this variable. For example, if we are a
-  /// base class of Kernel, this will be VAR_NONLINEAR, etc.
-  const Moose::VarKindType _expected_var_type;
-
-  /// The _expected_ "field" type for this variable. For example,
-  /// LAGRANGE variables are of type VAR_FIELD_STANDARD, LAGRANGE_VEC
-  /// variables are of type VAR_FIELD_VECTOR, etc.
-  const Moose::VarFieldType _expected_var_field_type;
-
 protected:
   Assembly * _mvi_assembly;
 };

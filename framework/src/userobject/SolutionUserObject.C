@@ -627,10 +627,15 @@ SolutionUserObject::pointValueWrapper(Real t,
   // first check if the FE type is continuous because in that case the value is
   // unique and we can take a short cut, the default weighting_type found_first also
   // shortcuts out
+  auto family =
+      _fe_problem
+          .getVariable(
+              _tid, var_name, Moose::VarKindType::VAR_ANY, Moose::VarFieldType::VAR_FIELD_STANDARD)
+          .feType()
+          .family;
+
   if (weighting_type == 1 ||
-      (_fe_problem.getVariable(_tid, var_name).feType().family != L2_LAGRANGE &&
-       _fe_problem.getVariable(_tid, var_name).feType().family != MONOMIAL &&
-       _fe_problem.getVariable(_tid, var_name).feType().family != L2_HIERARCHIC))
+      (family != L2_LAGRANGE && family != MONOMIAL && family != L2_HIERARCHIC))
     return pointValue(t, p, var_name);
 
   // the shape function is discontinuous so we need to compute a suitable unique value

@@ -50,14 +50,38 @@ NodalNormalsCorner::execute()
   {
     const Node * node = _current_side_elem->node_ptr(nd);
     if (boundary_info.has_boundary_id(node, _corner_boundary_id) &&
-        node->n_dofs(_aux.number(), _fe_problem.getVariable(_tid, "nodal_normal_x").number()) > 0)
+        node->n_dofs(_aux.number(),
+                     _fe_problem
+                         .getVariable(_tid,
+                                      "nodal_normal_x",
+                                      Moose::VarKindType::VAR_AUXILIARY,
+                                      Moose::VarFieldType::VAR_FIELD_STANDARD)
+                         .number()) > 0)
     {
-      dof_id_type dof_x = node->dof_number(
-          _aux.number(), _fe_problem.getVariable(_tid, "nodal_normal_x").number(), 0);
-      dof_id_type dof_y = node->dof_number(
-          _aux.number(), _fe_problem.getVariable(_tid, "nodal_normal_y").number(), 0);
-      dof_id_type dof_z = node->dof_number(
-          _aux.number(), _fe_problem.getVariable(_tid, "nodal_normal_z").number(), 0);
+      dof_id_type dof_x = node->dof_number(_aux.number(),
+                                           _fe_problem
+                                               .getVariable(_tid,
+                                                            "nodal_normal_x",
+                                                            Moose::VarKindType::VAR_AUXILIARY,
+                                                            Moose::VarFieldType::VAR_FIELD_STANDARD)
+                                               .number(),
+                                           0);
+      dof_id_type dof_y = node->dof_number(_aux.number(),
+                                           _fe_problem
+                                               .getVariable(_tid,
+                                                            "nodal_normal_y",
+                                                            Moose::VarKindType::VAR_AUXILIARY,
+                                                            Moose::VarFieldType::VAR_FIELD_STANDARD)
+                                               .number(),
+                                           0);
+      dof_id_type dof_z = node->dof_number(_aux.number(),
+                                           _fe_problem
+                                               .getVariable(_tid,
+                                                            "nodal_normal_z",
+                                                            Moose::VarKindType::VAR_AUXILIARY,
+                                                            Moose::VarFieldType::VAR_FIELD_STANDARD)
+                                               .number(),
+                                           0);
 
       // substitute the normal form the face, we are going to have at least one normal every time
       sln.add(dof_x, _normals[0](0));

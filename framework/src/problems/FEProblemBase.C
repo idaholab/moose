@@ -2075,7 +2075,8 @@ FEProblemBase::addInitialCondition(const std::string & ic_name,
   {
     for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
     {
-      MooseVariableFEBase & var = getVariable(tid, var_name);
+      MooseVariableFEBase & var = getVariable(
+          tid, var_name, Moose::VarKindType::VAR_ANY, Moose::VarFieldType::VAR_FIELD_ANY);
       parameters.set<SystemBase *>("_sys") = &var.sys();
       std::shared_ptr<InitialCondition> ic =
           _factory.create<InitialCondition>(ic_name, name, parameters, tid);
@@ -3433,29 +3434,25 @@ FEProblemBase::hasVariable(const std::string & var_name) const
     return false;
 }
 
-MooseVariableFEBase &
-FEProblemBase::getVariable(THREAD_ID tid, const std::string & var_name)
-{
-  if (_nl->hasVariable(var_name))
-    return _nl->getVariable(tid, var_name);
-  else if (!_aux->hasVariable(var_name))
-    mooseError("Unknown variable " + var_name);
-
-  return _aux->getVariable(tid, var_name);
-}
-
 MooseVariableFE &
-FEProblemBase::getVariableWithChecks(THREAD_ID tid,
-                                     const std::string & var_name,
-                                     Moose::VarKindType expected_var_type,
-                                     Moose::VarFieldType expected_var_field_type)
+FEProblemBase::getVariable(THREAD_ID tid,
+                           const std::string & var_name,
+                           Moose::VarKindType expected_var_type,
+                           Moose::VarFieldType expected_var_field_type)
 {
   // Eventual return value
   MooseVariableFE * var = nullptr;
 
   // First check that the variable is found on the expected system.
   if (expected_var_type == Moose::VarKindType::VAR_ANY)
-    var = &(getVariable(tid, var_name));
+  {
+    if (_nl->hasVariable(var_name))
+      var = &(_nl->getVariable(tid, var_name));
+    else if (_aux->hasVariable(var_name))
+      var = &(_aux->getVariable(tid, var_name));
+    else
+      mooseError("Unknown variable " + var_name);
+  }
   else if (expected_var_type == Moose::VarKindType::VAR_NONLINEAR && _nl->hasVariable(var_name))
     var = &(_nl->getVariable(tid, var_name));
   else if (expected_var_type == Moose::VarKindType::VAR_AUXILIARY && _aux->hasVariable(var_name))
@@ -3475,7 +3472,8 @@ FEProblemBase::getVariableWithChecks(THREAD_ID tid,
 
   // Now make sure the var found has the expected field type.
   bool var_is_vector = var->isVector();
-  if ((var_is_vector && expected_var_field_type == Moose::VarFieldType::VAR_FIELD_VECTOR) ||
+  if ((expected_var_field_type == Moose::VarFieldType::VAR_FIELD_ANY) ||
+      (var_is_vector && expected_var_field_type == Moose::VarFieldType::VAR_FIELD_VECTOR) ||
       (!var_is_vector && expected_var_field_type == Moose::VarFieldType::VAR_FIELD_STANDARD))
     return *var;
   else
@@ -3483,7 +3481,7 @@ FEProblemBase::getVariableWithChecks(THREAD_ID tid,
     std::string expected_var_field_type_string =
         (expected_var_field_type == Moose::VarFieldType::VAR_FIELD_STANDARD ? "standard"
                                                                             : "vector");
-    ;
+
     mooseError("No ",
                expected_var_field_type_string,
                " variable named ",
@@ -4966,7 +4964,11 @@ FEProblemBase::checkDisplacementOrders()
 
       for (const auto & var_name : displacement_variables)
       {
-        MooseVariableFEBase & mv = _displaced_problem->getVariable(/*tid=*/0, var_name);
+        MooseVariableFEBase & mv =
+            _displaced_problem->getVariable(/*tid=*/0,
+                                            var_name,
+                                            Moose::VarKindType::VAR_ANY,
+                                            Moose::VarFieldType::VAR_FIELD_STANDARD);
         if (mv.order() != SECOND)
           mooseError("Error: mesh has SECOND order elements, so all displacement variables must be "
                      "SECOND order.");

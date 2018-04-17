@@ -301,29 +301,25 @@ DisplacedProblem::hasVariable(const std::string & var_name) const
     return false;
 }
 
-MooseVariableFEBase &
-DisplacedProblem::getVariable(THREAD_ID tid, const std::string & var_name)
-{
-  if (_displaced_nl.hasVariable(var_name))
-    return _displaced_nl.getVariable(tid, var_name);
-  else if (!_displaced_aux.hasVariable(var_name))
-    mooseError("No variable with name '" + var_name + "'");
-
-  return _displaced_aux.getVariable(tid, var_name);
-}
-
 MooseVariableFE &
-DisplacedProblem::getVariableWithChecks(THREAD_ID tid,
-                                        const std::string & var_name,
-                                        Moose::VarKindType expected_var_type,
-                                        Moose::VarFieldType expected_var_field_type)
+DisplacedProblem::getVariable(THREAD_ID tid,
+                              const std::string & var_name,
+                              Moose::VarKindType expected_var_type,
+                              Moose::VarFieldType expected_var_field_type)
 {
   // Eventual return value
   MooseVariableFE * var = nullptr;
 
   // First check that the variable is found on the expected system.
   if (expected_var_type == Moose::VarKindType::VAR_ANY)
-    var = &(getVariable(tid, var_name));
+  {
+    if (_displaced_nl.hasVariable(var_name))
+      var = &(_displaced_nl.getVariable(tid, var_name));
+    else if (_displaced_aux.hasVariable(var_name))
+      var = &(_displaced_aux.getVariable(tid, var_name));
+    else
+      mooseError("No variable with name '" + var_name + "'");
+  }
   else if (expected_var_type == Moose::VarKindType::VAR_NONLINEAR &&
            _displaced_nl.hasVariable(var_name))
     var = &(_displaced_nl.getVariable(tid, var_name));
@@ -345,7 +341,8 @@ DisplacedProblem::getVariableWithChecks(THREAD_ID tid,
 
   // Now make sure the var found has the expected field type.
   bool var_is_vector = var->isVector();
-  if ((var_is_vector && expected_var_field_type == Moose::VarFieldType::VAR_FIELD_VECTOR) ||
+  if ((expected_var_field_type == Moose::VarFieldType::VAR_FIELD_ANY) ||
+      (var_is_vector && expected_var_field_type == Moose::VarFieldType::VAR_FIELD_VECTOR) ||
       (!var_is_vector && expected_var_field_type == Moose::VarFieldType::VAR_FIELD_STANDARD))
     return *var;
   else

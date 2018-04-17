@@ -22,9 +22,7 @@ MooseVariableInterface<T>::MooseVariableInterface(const MooseObject * moose_obje
                                                   Moose::VarKindType expected_var_type,
                                                   Moose::VarFieldType expected_var_field_type,
                                                   std::string var_param_name)
-  : _nodal(nodal),
-    _expected_var_type(expected_var_type),
-    _expected_var_field_type(expected_var_field_type)
+  : _nodal(nodal)
 {
   const InputParameters & parameters = moose_object->parameters();
 
@@ -49,8 +47,8 @@ MooseVariableInterface<T>::MooseVariableInterface(const MooseObject * moose_obje
     variable_name = vec[0];
   }
 
-  _variable = &dynamic_cast<MooseVariableFE<T> &>(problem.getVariableWithChecks(
-      tid, variable_name, expected_var_type, expected_var_field_type));
+  _variable = &dynamic_cast<MooseVariableFE<T> &>(
+      problem.getVariable(tid, variable_name, expected_var_type, expected_var_field_type));
 
   _mvi_assembly = &problem.assembly(tid);
 }
