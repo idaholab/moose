@@ -46,7 +46,7 @@ class Tests(Testing.PeacockTester):
         self.check_current_tab(tabs, self.input.tabName())
 
     def testPeacockAppWithInput(self):
-        self.create_app(["../../common/transient.i", Testing.find_moose_test_exe()])
+        self.create_app(["transient.i", Testing.find_moose_test_exe()])
         tabs = self.app.main_widget.tab_plugin
         self.check_current_tab(tabs, self.input.tabName())
         tab = tabs.currentWidget()
@@ -111,7 +111,7 @@ class Tests(Testing.PeacockTester):
 
     def testAllCommandLine(self):
         d = os.getcwd()
-        args = ["-i" , "%s/../../common/transient.i" % d,
+        args = ["-i" , "transient.i",
                 "-e", Testing.find_moose_test_exe(),
                 "-r", "%s/gold/out_transient.e" % d,
                 "-p", "%s/../gold/out_transient.csv" % d,
@@ -129,7 +129,7 @@ class Tests(Testing.PeacockTester):
         self.check_postprocessor()
 
     def testOnlyInputFileWithExeInPath(self):
-        input_file = os.path.abspath('../../common/transient.i')
+        input_file = os.path.abspath('transient.i')
         dirname = os.path.dirname(Testing.find_moose_test_exe())
         with Testing.remember_cwd():
             os.chdir(dirname)
@@ -142,7 +142,7 @@ class Tests(Testing.PeacockTester):
 
     def testWrongExe(self):
         # use the test/moose_test-opt to try to process a modules/combined input file
-        input_file = os.path.join("../../common/transient_heat_test.i")
+        input_file = "transient_heat_test.i"
         self.create_app([input_file, Testing.find_moose_test_exe()])
         tabs = self.app.main_widget.tab_plugin
         self.check_current_tab(tabs, self.input.tabName())
@@ -160,13 +160,13 @@ class Tests(Testing.PeacockTester):
 
     def testAutoRun(self):
         Testing.remove_file("out_transient.e")
-        self.create_app(["--run", "../../common/transient.i", Testing.find_moose_test_exe(), "-w", os.getcwd()])
+        self.create_app(["--run", "transient.i", Testing.find_moose_test_exe(), "-w", os.getcwd()])
         tabs = self.app.main_widget.tab_plugin
         self.check_current_tab(tabs, self.result.tabName())
         self.check_result()
 
     def testBadMesh(self):
-        self.create_app(["../../common/bad_mesh.i", Testing.find_moose_test_exe(), "-w", os.getcwd()])
+        self.create_app(["bad_mesh.i", Testing.find_moose_test_exe(), "-w", os.getcwd()])
         tabs = self.app.main_widget.tab_plugin
         t = self.input.InputFileEditorPlugin.tree
         self.check_current_tab(tabs, self.input.tabName())
@@ -202,7 +202,7 @@ class Tests(Testing.PeacockTester):
         we were seeing that the MeshPlugin wasn't getting reset properly.
         """
         cwd = os.getcwd()
-        diffusion1 = "../../common/simple_diffusion.i"
+        diffusion1 = "simple_diffusion.i"
         self.create_app([diffusion1, Testing.find_moose_test_exe(), "-w", cwd])
         tabs = self.app.main_widget.tab_plugin
         self.check_current_tab(tabs, self.input.tabName())
@@ -224,7 +224,7 @@ class Tests(Testing.PeacockTester):
         self.vtkwin.onWrite(fname)
         self.assertFalse(Testing.gold_diff(fname))
 
-        diffusion2 = "../../common/simple_diffusion2.i"
+        diffusion2 = "simple_diffusion2.i"
         self.app.main_widget.setTab(self.input.tabName())
         self.input.setInputFile(diffusion2)
         self.app.main_widget.setTab(self.exe.tabName())
