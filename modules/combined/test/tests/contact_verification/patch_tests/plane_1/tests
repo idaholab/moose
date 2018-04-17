@@ -17,6 +17,9 @@
     cli_args = 'Contact/leftright/model=glued Contact/leftright/formulation=kinematic Outputs/file_base=plane1_glued_kin_out Outputs/chkfile/file_base=plane1_glued_kin_check'
     rel_err = 1e-5
     abs_zero = 1e-8
+    override_columns = 'bot_react_y disp_x2'
+    override_rel_err = '1e-8 1e-9'
+    override_abs_zero = '1.0e-10 1.0e-10'
     max_parallel = 1
     superlu = true
   [../]
