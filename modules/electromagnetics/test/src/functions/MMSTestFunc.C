@@ -1,6 +1,8 @@
 #include "MMSTestFunc.h"
 #include <complex>
 
+registerMooseObject("ElkApp", MMSTestFunc);
+
 template <>
 InputParameters
 validParams<MMSTestFunc>()
