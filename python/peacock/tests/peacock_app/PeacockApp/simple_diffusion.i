@@ -1,0 +1,1 @@
+../../common/simple_diffusion.i
