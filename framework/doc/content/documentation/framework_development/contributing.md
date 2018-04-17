@@ -1,10 +1,8 @@
 # Contributing
 
-MOOSE is a collaborative effort and we always welcome contributions!  When contributing to MOOSE you need to keep in mind that hundreds of people are depending on this code to do their jobs every day.  Because of that we have specific policies, procedures and automated processes in place to maintain high code quality while allowing many changes to flow into the code daily.
+MOOSE is a collaborative effort and we always welcome contributions!  When contributing to MOOSE you need to keep in mind that hundreds of people are depending on this code to do their jobs every day.  Because of this we have specific policies, procedures, and automated processes to maintain high code quality while allowing many changes to the code daily.
 
 **If you are somewhat new to Git or GitHub we have worked up [a set of slides](https://mooseframework.org/static/media/uploads/docs/moose_github.pdf) to walk you through the processes of modifying MOOSE and submitting patches.**
-
-Otherwise a brief overview can be found below:
 
 ## Code Standards
 
@@ -12,17 +10,17 @@ When modifying or adding to MOOSE you need to follow the strict [MOOSE Code Stan
 
 ## Referencing Issues
 
-Every modification to MOOSE +must+ reference an issue number. This means that every PR that flows into MOOSE must have contain at least one commit that references an issue relevant to what you are working on (e.g. `refs #NNNN` (where NNNN are the numbers for an issue such as #1234). If your PR completely addresses an issue, you can automatically tell Github that you'd like to close the issue once your PR has been merged by prepending "closes" or "fixes" to your issue reference. Issue numbers are automatically checked for by our testing system.
+Every modification to MOOSE +must+ reference an issue number. This means that every [Pull Request (PR)](https://help.github.com/articles/about-pull-requests/) that flows into MOOSE must have contain at least one commit that references an issue relevant to what you are working on (e.g. `refs #<number>` (where <number> is an issue number on the [MOOSE GitHub issue](https://github.com/idaholab/moose/issues) page, such as #1234). If your PR completely addresses an issue, you can automatically close it by prepending "closes" or "fixes" to the issue reference (e.g., `closes #1234`). Issue numbers are automatically checked by our testing system.
 
 ## Work In A Fork
 
-The first step in modifying MOOSE is to create your own fork where you can commit your set of changes:
+The first step in modifying MOOSE is to create your own [fork](https://help.github.com/articles/fork-a-repo/) where you can commit your set of changes.
 
 ### 1. Fork MOOSE
 
 - Navigate to [https://github.com/idaholab/moose](https://github.com/idaholab/moose)
 
-- Click the "Fork" button in the upper right: [Fork Button](http://mooseframework.org/static/media/uploads/images/fork_button.png)
+- Click the "Fork" button in the upper right: [Fork Button](https://github.com/idaholab/moose#fork-destination-box).
 
 - Clone your fork to your local machine (replace "username" with your GitHub username).
 
@@ -45,7 +43,13 @@ git remote add upstream git@github.com:idaholab/moose.git
 
 ### 3. Make Modifications
 
-* Make your modifications and commit them to a branch (be sure to reference an Issue # in your commit messages.)
+Create a branch for your work:
+
+```bash 
+git checkout -b branch_name upstream/devel
+```
+
+Make your modifications and commit them to a branch (be sure to reference an issue number in your commit messages).
 
 ```bash
 git add your_file.h your_file.C
