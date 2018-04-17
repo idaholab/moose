@@ -10,9 +10,13 @@
 import os, re, math
 
 class CSVDiffer:
-    def __init__(self, test_dir, out_files, abs_zero=1e-11, relative_error=5.5e-6, gold_dir='gold'):
+    def __init__(self, test_dir, out_files, abs_zero=1e-11, relative_error=5.5e-6, gold_dir='gold',
+            custom_columns=[], custom_rel_err=[], custom_abs_zero=[]):
         self.abs_zero = float(abs_zero)
         self.rel_tol = float(relative_error)
+        self.custom_columns = custom_columns
+        self.custom_rel_err = custom_rel_err
+        self.custom_abs_zero = custom_abs_zero
         self.files = []
         self.msg = ''
         self.num_errors = 0
@@ -53,6 +57,16 @@ class CSVDiffer:
     # manually clear messages by calling clearDiff
     def diff(self):
 
+        # Setup data structures for holding customized relative tolerance and absolute
+        # zero values and flag for checking variable names
+        rel_err_map = {}
+        abs_zero_map = {}
+        found_column = {}
+        for i in range(0, len(self.custom_columns)):
+            rel_err_map[self.custom_columns[i]] = float(self.custom_rel_err[i])
+            abs_zero_map[self.custom_columns[i]] = float(self.custom_abs_zero[i])
+            found_column[self.custom_columns[i]] = False
+
         for fname, text1, text2 in self.files:
             # use this value to skip the rest of the tests when we've found an error
             # the order of the tests is most general to most specific, so if a general
@@ -77,6 +91,13 @@ class CSVDiffer:
             if foundError:
                 continue
 
+            # check if custom tolerances used, column name exists in one of
+            # the CSV files
+            if self.custom_columns:
+               for mykey in self.custom_columns:
+                   if mykey in small:
+                      found_column[mykey] = True
+
             # now check that each column is the same length
             for key in keys1:
                 if len(table1[key]) != len(table2[key]):
@@ -92,7 +113,13 @@ class CSVDiffer:
             rel_tol   = self.rel_tol
             for key in keys1:
                 for val1, val2 in zip( table1[key], table2[key] ):
-                    # adjust to the absolute zero
+                    # if customized tolerances specified use them otherwise
+                    # use the default
+                    if self.custom_columns:
+                        try:
+                            abs_zero = abs_zero_map[key]
+                        except:
+                            abs_zero = self.abs_zero
                     if abs(val1) < abs_zero:
                         val1 = 0
                     if abs(val2) < abs_zero:
@@ -114,10 +141,24 @@ class CSVDiffer:
                     if max( abs(val1), abs(val2) ) > 0:
                         rel_diff = abs( ( val1 - val2 ) / max( abs(val1), abs(val2) ) )
 
+                    # if customized tolerances specified use them otherwise
+                    # use the default
+                    if self.custom_columns:
+                        try:
+                            rel_tol = rel_err_map[key]
+                        except:
+                            rel_tol = self.rel_tol
                     if rel_diff > rel_tol:
                         self.addError(fname, "The values in column \"" + key.strip() + "\" don't match\n\trel diff:  " + str(val1) + " ~ " + str(val2) + " = " + str(rel_diff))
                         # assume all other vals in this column are wrong too, so don't report them
                         break
+
+        # Loop over variable names to check if any are missing from all the
+        # CSV files being compared
+        if self.custom_columns:
+           for mykey2 in self.custom_columns:
+               if not found_column[mykey2]:
+                  self.addError(fname, "Variable '" + mykey2 + "' in custom_columns is missing from all CSV files" )
 
         return self.msg
 

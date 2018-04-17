@@ -1,0 +1,10 @@
+[Tests]
+  [./test_csvdiff]
+    type = CSVDiff
+    input = csvdiff.i
+    csvdiff = csvdiff_out.csv
+    override_columns = 'abc xyz'
+    override_rel_err = '1e-2'
+    override_abs_zero = '1e-9'
+  [../]
+[]

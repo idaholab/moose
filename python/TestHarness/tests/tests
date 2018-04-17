@@ -3,6 +3,10 @@
     type = PythonUnitTest
     input = test_LongRunning.py
   [../]
+  [./csvdiffs]
+    type = PythonUnitTest
+    input = test_CSVDiffs.py
+  [../]
   [./diff]
     type = PythonUnitTest
     input = test_Diff.py

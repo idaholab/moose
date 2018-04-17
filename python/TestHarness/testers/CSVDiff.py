@@ -16,6 +16,9 @@ class CSVDiff(FileTester):
     def validParams():
         params = FileTester.validParams()
         params.addRequiredParam('csvdiff',   [], "A list of files to run CSVDiff on.")
+        params.addParam('override_columns',   [], "A list of variable names to customize the CSVDiff tolerances.")
+        params.addParam('override_rel_err',   [], "A list of customized relative error tolerances .")
+        params.addParam('override_abs_zero',   [], "A list of customized absolute zero tolerances.")
         return params
 
     def __init__(self, name, params):
@@ -23,6 +26,13 @@ class CSVDiff(FileTester):
 
     def getOutputFiles(self):
         return self.specs['csvdiff']
+
+    # Check that override parameter lists are the same length
+    def checkRunnable(self, options):
+        if (len(self.specs['override_columns']) != len(self.specs['override_rel_err'])) or (len(self.specs['override_columns']) != len(self.specs['override_abs_zero'])) or (len(self.specs['override_rel_err']) != len(self.specs['override_abs_zero'])):
+           self.setStatus('Override inputs not the same length', self.bucket_fail)
+           return False
+        return FileTester.checkRunnable(self, options)
 
     def processResults(self, moose_dir, options, output):
         FileTester.processResults(self, moose_dir, options, output)
@@ -39,7 +49,8 @@ class CSVDiff(FileTester):
             return output
 
         if len(specs['csvdiff']) > 0:
-            differ = CSVDiffer(specs['test_dir'], specs['csvdiff'], specs['abs_zero'], specs['rel_err'], specs['gold_dir'])
+            differ = CSVDiffer(specs['test_dir'], specs['csvdiff'], specs['abs_zero'], specs['rel_err'], specs['gold_dir'],
+                    specs['override_columns'], specs['override_rel_err'], specs['override_abs_zero'])
             msg = differ.diff()
             output += 'Running CSVDiffer.py\n' + msg
             if msg != '':
