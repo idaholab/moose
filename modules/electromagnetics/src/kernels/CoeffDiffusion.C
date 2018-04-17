@@ -1,6 +1,8 @@
 #include "CoeffDiffusion.h"
 #include "Function.h"
 
+registerMooseObject("ElkApp", CoeffDiffusion);
+
 template <>
 InputParameters
 validParams<CoeffDiffusion>()

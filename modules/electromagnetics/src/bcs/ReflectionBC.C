@@ -2,6 +2,8 @@
 #include "Function.h"
 #include <complex>
 
+registerMooseObject("ElkApp", ReflectionBC);
+
 template <>
 InputParameters
 validParams<ReflectionBC>()

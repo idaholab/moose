@@ -1,5 +1,7 @@
 #include "CosTheta.h"
 
+registerMooseObject("ElkApp", CosTheta);
+
 template <>
 InputParameters
 validParams<CosTheta>()

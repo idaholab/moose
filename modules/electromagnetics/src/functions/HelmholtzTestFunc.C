@@ -1,6 +1,8 @@
 #include "HelmholtzTestFunc.h"
 #include <complex>
 
+registerMooseObject("ElkApp", HelmholtzTestFunc);
+
 template <>
 InputParameters
 validParams<HelmholtzTestFunc>()

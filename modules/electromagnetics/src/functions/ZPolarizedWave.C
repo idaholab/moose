@@ -1,5 +1,7 @@
 #include "ZPolarizedWave.h"
 
+registerMooseObject("ElkApp", ZPolarizedWave);
+
 template <>
 InputParameters
 validParams<ZPolarizedWave>()

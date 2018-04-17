@@ -1,6 +1,8 @@
 #include "CoupledGradBC.h"
 #include "Function.h"
 
+registerMooseObject("ElkApp", CoupledGradBC);
+
 template <>
 InputParameters
 validParams<CoupledGradBC>()
