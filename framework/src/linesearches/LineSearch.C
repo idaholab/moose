@@ -14,5 +14,3 @@ LineSearch::LineSearch(FEProblemBase & fe_problem, MooseApp & app)
   : ConsoleStreamInterface(app), ParallelObject(app), _fe_problem(fe_problem), _nl_its(0)
 {
 }
-
-LineSearch::~LineSearch() {}

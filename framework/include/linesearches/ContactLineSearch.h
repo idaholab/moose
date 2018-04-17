@@ -39,28 +39,24 @@ public:
                     Real contact_ltol,
                     bool affect_ltol);
 
-  // A dummy pure virtual destructor because this must be a base class; the derived class must
-  // implement the line searching capabilities
-  virtual ~ContactLineSearch() = 0;
-
-  /**
-   * The current contact state
-   */
-  std::shared_ptr<std::set<dof_id_type>> contact_state() { return _current_contact_state; }
-
-  /**
-   * The old contact state
-   */
-  std::set<dof_id_type> & old_contact_state() { return _old_contact_state; }
-
   /**
    * Method for printing the contact information
    */
-  void printContactInfo();
+  void printContactInfo(const std::set<dof_id_type> & contact_set);
+
+  /**
+   * Unionize sets from different constraints
+   */
+  void insert_set(const std::set<dof_id_type> & mech_set);
+
+  /**
+   * Reset the line search data
+   */
+  virtual void reset();
 
 protected:
   /// The current contact set
-  std::shared_ptr<std::set<dof_id_type>> _current_contact_state;
+  std::set<dof_id_type> _current_contact_state;
   /// The old contact set
   std::set<dof_id_type> _old_contact_state;
 

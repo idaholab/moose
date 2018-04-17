@@ -138,7 +138,7 @@ protected:
   Real _al_frictional_force_tolerance;
 
   ContactLineSearch * _contact_linesearch;
-  std::shared_ptr<std::set<dof_id_type>> _current_contact_state;
+  std::set<dof_id_type> _current_contact_state;
   std::set<dof_id_type> _old_contact_state;
 
   const bool _print_contact_nodes;

@@ -22,10 +22,6 @@ class LineSearch : public ConsoleStreamInterface, public ParallelObject
 public:
   LineSearch(FEProblemBase & fe_problem, MooseApp & app);
 
-  // A dummy pure virtual destructor because this must be a base class; the derived class must
-  // implement the line searching capabilities
-  virtual ~LineSearch() = 0;
-
   /**
    * zeros the nonlinear iteration count
    */

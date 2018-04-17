@@ -15,7 +15,6 @@ ContactLineSearch::ContactLineSearch(FEProblemBase & fe_problem,
                                      Real contact_ltol,
                                      bool affect_ltol)
   : LineSearch(fe_problem, app),
-    _current_contact_state(std::make_shared<std::set<dof_id_type>>()),
     _user_ksp_rtol_set(false),
     _allowed_lambda_cuts(allowed_lambda_cuts),
     _contact_ltol(contact_ltol),
@@ -23,19 +22,34 @@ ContactLineSearch::ContactLineSearch(FEProblemBase & fe_problem,
 {
 }
 
-ContactLineSearch::~ContactLineSearch() {}
-
 void
-ContactLineSearch::printContactInfo()
+ContactLineSearch::printContactInfo(const std::set<dof_id_type> & contact_set)
 {
-  if (!_current_contact_state->empty())
+  if (!contact_set.empty())
   {
     // _console << "Node ids in contact: ";
-    // for (auto & node_id : _current_contact_state)
+    // for (auto & node_id : contact_set)
     //   _console << node_id << " ";
     // _console << "\n";
-    _console << _current_contact_state->size() << " nodes in contact\n";
+    _console << contact_set.size() << " nodes in contact\n";
   }
   else
     _console << "No nodes in contact\n";
+}
+
+void
+ContactLineSearch::insert_set(const std::set<dof_id_type> & mech_set)
+{
+  if (_current_contact_state.empty())
+    _current_contact_state = mech_set;
+  else
+    for (auto & node : mech_set)
+      _current_contact_state.insert(node);
+}
+
+void
+ContactLineSearch::reset()
+{
+  _current_contact_state.clear();
+  zero_its();
 }

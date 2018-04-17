@@ -1029,7 +1029,7 @@ PetscContactLineSearch::linesearch(SNESLineSearch linesearch)
 
   /* compute residual to determine whether contact state has changed since the last non-linear
    * residual evaluation */
-  _current_contact_state->clear();
+  _current_contact_state.clear();
   ierr = (*linesearch->ops->snesfunc)(snes, W, F);
   LIBMESH_CHKERR(ierr);
   ierr = SNESGetFunctionDomainError(snes, &domainerror);
@@ -1041,13 +1041,12 @@ PetscContactLineSearch::linesearch(SNESLineSearch linesearch)
   }
   ierr = VecNorm(F, NORM_2, &fnorm);
   LIBMESH_CHKERR(ierr);
-  _communicator.set_union(*_current_contact_state);
-  std::set<dof_id_type> contact_state_stored = *_current_contact_state;
-  printContactInfo();
+  std::set<dof_id_type> contact_state_stored = std::move(_current_contact_state);
+  printContactInfo(contact_state_stored);
 
   if (_affect_ltol)
   {
-    if (*_current_contact_state != _old_contact_state)
+    if (contact_state_stored != _old_contact_state)
     {
       KSPSetTolerances(ksp, _contact_ltol, ksp_abstol, ksp_dtol, ksp_maxits);
       _console << "Contact set changed since previous non-linear iteration!\n";
@@ -1064,7 +1063,6 @@ PetscContactLineSearch::linesearch(SNESLineSearch linesearch)
     ierr = VecWAXPY(W1, -_contact_lambda, Y, X);
     LIBMESH_CHKERR(ierr);
 
-    _current_contact_state->clear();
     ierr = (*linesearch->ops->snesfunc)(snes, W1, G);
     LIBMESH_CHKERR(ierr);
     ierr = SNESGetFunctionDomainError(snes, &domainerror);
@@ -1083,9 +1081,8 @@ PetscContactLineSearch::linesearch(SNESLineSearch linesearch)
       VecCopy(W1, W);
       LIBMESH_CHKERR(ierr);
       fnorm = gnorm;
-      _communicator.set_union(*_current_contact_state);
-      contact_state_stored = *_current_contact_state;
-      printContactInfo();
+      contact_state_stored = std::move(_current_contact_state);
+      printContactInfo(contact_state_stored);
       ++ls_its;
     }
     else
@@ -1106,7 +1103,6 @@ PetscContactLineSearch::linesearch(SNESLineSearch linesearch)
 
   if (changed_w || changed_y)
   {
-    _current_contact_state->clear();
     ierr = (*linesearch->ops->snesfunc)(snes, W, F);
     LIBMESH_CHKERR(ierr);
     ierr = SNESGetFunctionDomainError(snes, &domainerror);
@@ -1116,9 +1112,8 @@ PetscContactLineSearch::linesearch(SNESLineSearch linesearch)
       ierr = SNESLineSearchSetReason(linesearch, SNES_LINESEARCH_FAILED_DOMAIN);
       LIBMESH_CHKERR(ierr);
     }
-    _communicator.set_union(*_current_contact_state);
-    contact_state_stored = *_current_contact_state;
-    printContactInfo();
+    contact_state_stored = std::move(_current_contact_state);
+    printContactInfo(contact_state_stored);
   }
 
   ierr = VecNorm(Y, NORM_2, &linesearch->ynorm);
@@ -1135,7 +1130,7 @@ PetscContactLineSearch::linesearch(SNESLineSearch linesearch)
   ierr = VecDestroy(&W1);
   LIBMESH_CHKERR(ierr);
 
-  _old_contact_state = contact_state_stored;
+  _old_contact_state = std::move(contact_state_stored);
 }
 } // Namespace PetscSupport
 } // Namespace MOOSE

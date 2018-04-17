@@ -142,8 +142,6 @@ MechanicalContactConstraint::MechanicalContactConstraint(const InputParameters &
     _connected_slave_nodes_jacobian(getParam<bool>("connected_slave_nodes_jacobian")),
     _non_displacement_vars_jacobian(getParam<bool>("non_displacement_variables_jacobian")),
     _contact_linesearch(dynamic_cast<ContactLineSearch *>(_fe_problem.customLineSearch())),
-    _current_contact_state(_contact_linesearch ? _contact_linesearch->contact_state()
-                                               : std::make_shared<std::set<dof_id_type>>()),
     _print_contact_nodes(getParam<bool>("print_contact_nodes"))
 {
   _overwrite_slave_residual = false;
@@ -235,7 +233,7 @@ MechanicalContactConstraint::timestepSetup()
     _update_stateful_data = false;
 
     if (_contact_linesearch)
-      _contact_linesearch->zero_its();
+      _contact_linesearch->reset();
   }
 }
 
@@ -483,7 +481,7 @@ MechanicalContactConstraint::shouldApply()
         if (is_nonlinear)
         {
           Threads::spin_mutex::scoped_lock lock(_contact_set_mutex);
-          _current_contact_state->insert(pinfo->_node->id());
+          _current_contact_state.insert(pinfo->_node->id());
         }
       }
     }
@@ -1797,17 +1795,20 @@ MechanicalContactConstraint::getCoupledVarComponent(unsigned int var_num, unsign
 void
 MechanicalContactConstraint::residualEnd()
 {
-  if (_component == 0 && _print_contact_nodes)
+  if (_component == 0 && (_print_contact_nodes || _contact_linesearch))
   {
-    _communicator.set_union(*_current_contact_state);
-    if (*_current_contact_state == _old_contact_state)
-      _console << "Unchanged contact state. " << _current_contact_state->size()
-               << " nodes in contact.\n";
-    else
-      _console << "Changed contact state!!! " << _current_contact_state->size()
-               << " nodes in contact.\n";
-
-    _old_contact_state = *_current_contact_state;
-    _current_contact_state->clear();
+    _communicator.set_union(_current_contact_state);
+    if (_print_contact_nodes)
+    {
+      if (_current_contact_state == _old_contact_state)
+        _console << "Unchanged contact state. " << _current_contact_state.size()
+                 << " nodes in contact.\n";
+      else
+        _console << "Changed contact state!!! " << _current_contact_state.size()
+                 << " nodes in contact.\n";
+    }
+    if (_contact_linesearch)
+      _contact_linesearch->insert_set(_current_contact_state);
+    _old_contact_state = std::move(_current_contact_state);
   }
 }
