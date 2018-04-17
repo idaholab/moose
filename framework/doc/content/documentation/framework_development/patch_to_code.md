@@ -35,7 +35,7 @@ git commit --amend  # Amend the "top" commit to include these small changes
 git push --force origin branchname # Force your changes back into your branch in your Fork on GitHub
 ```
 
-The actual commands that you can use for this step can vary... the above is just to give you an idea of what's involved.  If your PR is very long-lived it may be a good idea to rebase your patches on top of any recent activity in the real MOOSE repo _before_ the `push`:
+The actual commands that you can use for this step can vary... the above is just to give you an idea of what's involved.  If your PR is very long-lived it may be a good idea to rebase your patches on top of any recent activity in the real MOOSE repo *before* the `push`:
 
 ```bash
 git fetch upstream
