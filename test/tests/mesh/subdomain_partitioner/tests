@@ -1,5 +1,9 @@
 [Tests]
   [./subdomain_partitioner]
+    # The METIS partitioner's random number generator changed (became
+    # portable) in PETSc 3.8.0, so this test is no longer valid on
+    # newer PETScs and there is no reason to have platform specific
+    # tests for new PETScs.
     type = 'Exodiff'
     input = 'subdomain_partitioner.i'
     exodiff = 'subdomain_partitioner_out.e'
@@ -10,8 +14,30 @@
     # do not run this test against development version of PETSc
     # metis and parmetis will generate different partitions
     petsc_version_release = true
+    petsc_version = '>=3.5.0&&<3.8.0'
   [../]
+
+  [./subdomain_partitioner_new_petsc]
+    # PETSc 3.8.0 is the first release where the PETSc team started
+    # using a portable random number generator in METIS (-DUSE_GKRAND)
+    # so the same gold file can be used on both Linux and Mac. This
+    # test specifically tests for that, as it is not restricted by
+    # platform, only by PETSc version.
+    type = 'Exodiff'
+    input = 'subdomain_partitioner.i'
+    exodiff = 'subdomain_partitioner_out_new_petsc.e'
+    cli_args = 'Outputs/file_base=subdomain_partitioner_out_new_petsc'
+    dof_id_bytes = 4
+    min_parallel = 4
+    max_parallel = 4
+    petsc_version = '>=3.8.0'
+  [../]
+
   [./subdomain_partitioner_linux]
+    # The METIS partitioner's random number generator changed (became
+    # portable) in PETSc 3.8.0, so this test is no longer valid on
+    # newer PETScs and there is no reason to have platform specific
+    # tests for new PETScs.
     type = 'Exodiff'
     input = 'subdomain_partitioner.i'
     exodiff = 'subdomain_partitioner_out_linux.e'
@@ -21,6 +47,6 @@
     min_parallel = 4
     max_parallel = 4
     petsc_version_release = true
-    petsc_version = '>=3.5.0'
+    petsc_version = '>=3.5.0&&<3.8.0'
   [../]
 []
