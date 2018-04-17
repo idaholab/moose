@@ -172,7 +172,7 @@ CrystalPlasticitySlipRateGSS::calcSlipRate(unsigned int qp, Real dt, std::vector
   for (unsigned int i = 0; i < _variable_size; ++i)
   {
     val[i] = _a0(i) * std::pow(std::abs(tau(i) / _mat_prop_state_var[qp][i]), 1.0 / _xm(i)) *
-             copysign(1.0, tau(i));
+             std::copysign(1.0, tau(i));
     if (std::abs(val[i] * dt) > _slip_incr_tol)
     {
 #ifdef DEBUG
