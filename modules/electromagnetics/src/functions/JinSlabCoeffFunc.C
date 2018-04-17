@@ -1,6 +1,8 @@
 #include "JinSlabCoeffFunc.h"
 #include <complex>
 
+registerMooseObject("ElkApp", JinSlabCoeffFunc);
+
 template <>
 InputParameters
 validParams<JinSlabCoeffFunc>()

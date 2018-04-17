@@ -2,6 +2,8 @@
 #include "Function.h"
 #include <complex>
 
+registerMooseObject("ElkApp", PortBC);
+
 template <>
 InputParameters
 validParams<PortBC>()

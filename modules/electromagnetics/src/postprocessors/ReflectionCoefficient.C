@@ -3,6 +3,8 @@
 #include <complex>
 #include "libmesh/quadrature.h"
 
+registerMooseObject("ElkApp", ReflectionCoefficient);
+
 template <>
 InputParameters
 validParams<ReflectionCoefficient>()

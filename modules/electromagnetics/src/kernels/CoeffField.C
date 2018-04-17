@@ -1,6 +1,8 @@
 #include "CoeffField.h"
 #include "Function.h"
 
+registerMooseObject("ElkApp", CoeffField);
+
 template <>
 InputParameters
 validParams<CoeffField>()

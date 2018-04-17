@@ -1,6 +1,8 @@
 #include "RobinTestFunc.h"
 #include <complex>
 
+registerMooseObject("ElkApp", RobinTestFunc);
+
 template <>
 InputParameters
 validParams<RobinTestFunc>()

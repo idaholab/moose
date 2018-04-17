@@ -1,5 +1,7 @@
 #include "OneDFieldCoeff.h"
 
+registerMooseObject("ElkApp", OneDFieldCoeff);
+
 template <>
 InputParameters
 validParams<OneDFieldCoeff>()
