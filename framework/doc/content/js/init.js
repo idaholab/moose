@@ -30,8 +30,8 @@
 
 var options = {
   shouldSort: true,
-  threshold: 0.5,
-  minMatchCharLength: 2,
+  threshold: 0.3,
+  minMatchCharLength: 3,
   keys: [
     {
       name: "name",
@@ -51,23 +51,34 @@ function mooseSearch() {
     var fuse = new Fuse(index_data, options);
     var results = fuse.search(box.value);
 
-    console.log(results.length);
-    if (results.length > 0)
+    console.log(results);
+    var n = results.length;
+    if (n > 0)
     {
         element.innerHTML = '';
-        for (var item of results)
+        for (var i = 0; i < n && i < 100; ++i)
         {
+            var item = results[i];
             var div = document.createElement("div");
             div.className = 'moose-search-result';
-            element.appendChild(div);
 
             var title = document.createElement("div");
             title.className = 'moose-search-result-title';
             var a = document.createElement("a");
             a.innerHTML = item.name;
             a.setAttribute("href", item.location);
+
+            if (item.name != item.text) {
+              var section = document.createElement("span");
+              section.innerHTML = ' &mdash; ' + item.text;
+              a.appendChild(section);
+            } else {
+              a.setAttribute("style", "font-weight: bold");
+            }
+
             title.appendChild(a);
             div.appendChild(title);
+            element.appendChild(div);
         }
     }
     else

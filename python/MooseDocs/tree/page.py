@@ -13,6 +13,7 @@ import shutil
 import logging
 import codecs
 import types
+import urlparse
 
 import anytree
 
@@ -264,9 +265,12 @@ class MarkdownNode(FileNode):
         if (self._index is None) and (self._result is not None):
             self._index = []
             for section in anytree.search.findall_by_attr(self._result, 'section'):
-                name = '{}:{}'.format(self.name, section['data-section-text'])
+                name = self.name
+                if name.endswith('.md'):
+                    name = name[:-3]
                 text = section['data-section-text']
-                location = '{}#{}'.format(self.destination.replace(self.base, home), section['id'])
+                location = urlparse.urlsplit(self.destination.replace(self.base, home)) \
+                    ._replace(scheme=None, netloc=None, fragment=str(section['id'])).geturl()
                 self._index.append(dict(name=name, text=text, location=location))
 
     def build(self):
