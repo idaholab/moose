@@ -251,6 +251,9 @@
     type = 'CSVDiff'
     input = 'small_deform2_update_version.i'
     csvdiff = 'small_deform2_update_version.csv'
+    override_columns = 's_xx s_xy s_zz s_yy'
+    override_rel_err = '2e-3 1e-3 1e-3 1e-3'
+    override_abs_zero = '1e-6 6e-4 1e-6 1e-6'
   [../]
   [./small_deform3_update]
     type = 'CSVDiff'

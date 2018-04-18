@@ -8,6 +8,9 @@
     type = 'CSVDiff'
     input = 'small_deform2.i'
     csvdiff = 'small_deform2.csv'
+    override_columns = 's_xx s_xy s_zz s_yy'
+    override_rel_err = '2e-3 1e-3 1e-3 1e-3'
+    override_abs_zero = '1e-6 6e-4 1e-6 1e-6'
   [../]
   [./small3]
     type = 'CSVDiff'
@@ -48,6 +51,9 @@
     type = 'CSVDiff'
     input = 'small_deform12.i'
     csvdiff = 'small_deform12.csv'
+    override_columns = 's_xx s_xy s_zz s_yy'
+    override_rel_err = '1e-3 1e-3 1e-3 2e-3'
+    override_abs_zero = '1e-6 5e-4 1e-6 1e-6'
   [../]
   [./small13]
     type = 'CSVDiff'
@@ -94,6 +100,9 @@
     type = 'CSVDiff'
     input = 'small_deform24.i'
     csvdiff = 'small_deform24.csv'
+    override_columns = 's_xx s_xy s_yy'
+    override_rel_err = '3e-3 1e-3 3e-3'
+    override_abs_zero = '1e-6 6e-2 1e-6'
   [../]
   [./small25]
     type = 'CSVDiff'

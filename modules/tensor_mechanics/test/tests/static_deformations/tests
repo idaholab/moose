@@ -40,6 +40,9 @@
     type = 'CSVDiff'
     input = 'beam_cosserat_01.i'
     csvdiff = 'beam_cosserat_01_soln_0001.csv'
+    override_columns = 'wc_y'
+    override_rel_err = '1e-5'
+    override_abs_zero = '5e-6'
   [../]
   [./beam_cosserat_01_slippery]
     type = 'CSVDiff'
