@@ -10,7 +10,7 @@ template <>
 InputParameters validParams<PressureAux>();
 
 /**
- * Compute temperature values from specific volume and internal energy
+ * Computes pressure from specific volume and specific internal energy
  */
 class PressureAux : public AuxKernel
 {
