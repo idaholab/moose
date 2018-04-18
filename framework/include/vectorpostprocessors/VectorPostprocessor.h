@@ -67,6 +67,8 @@ protected:
 private:
   THREAD_ID _vpp_tid;
 
+  const bool _complete_history;
+
   std::map<std::string, VectorPostprocessorValue> _thread_local_vectors;
 };
 

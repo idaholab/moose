@@ -18,7 +18,7 @@ VectorPostprocessorData::VectorPostprocessorData(FEProblemBase & fe_problem)
 bool
 VectorPostprocessorData::hasVectorPostprocessor(const std::string & name)
 {
-  return (_values.find(name) != _values.end());
+  return (_vpp_data.find(name) != _vpp_data.end());
 }
 
 VectorPostprocessorValue &
@@ -54,20 +54,20 @@ VectorPostprocessorData::getVectorPostprocessorHelper(const VectorPostprocessorN
                                                       bool get_current)
 {
   // Intentional use of RHS brackets on a std::map to do a retrieve or insert
-  auto & vec_storage = _values[vpp_name];
+  auto & vec_storage = _vpp_data[vpp_name];
 
-  // lambda for doing compairison on name (i.e., first item in pair)
+  // lambda for doing comparison on name (i.e., first item in pair)
   auto comp = [&vector_name](std::pair<std::string, VectorPostprocessorState> & pair) {
     return pair.first == vector_name;
   };
 
   // Search for the vector, if it is not located create the entry in the storage
-  auto iter = std::find_if(vec_storage.rbegin(), vec_storage.rend(), comp);
-  if (iter == vec_storage.rend())
+  auto iter = std::find_if(vec_storage._values.rbegin(), vec_storage._values.rend(), comp);
+  if (iter == vec_storage._values.rend())
   {
-    vec_storage.emplace_back(
+    vec_storage._values.emplace_back(
         std::pair<std::string, VectorPostprocessorState>(vector_name, VectorPostprocessorState()));
-    iter = vec_storage.rbegin();
+    iter = vec_storage._values.rbegin();
   }
 
   auto & vec_struct = iter->second;
@@ -86,22 +86,27 @@ VectorPostprocessorData::getVectorPostprocessorHelper(const VectorPostprocessorN
 bool
 VectorPostprocessorData::hasVectors(const std::string & vpp_name) const
 {
-  return _values.find(vpp_name) != _values.end();
+  auto it_pair = _vpp_data.find(vpp_name);
+  if (it_pair != _vpp_data.end())
+    return !it_pair->second._values.empty();
+
+  return false;
 }
 
 const std::vector<std::pair<std::string, VectorPostprocessorData::VectorPostprocessorState>> &
 VectorPostprocessorData::vectors(const std::string & vpp_name) const
 {
-  auto vec_pair = _values.find(vpp_name);
-  mooseAssert(vec_pair != _values.end(), "No vectors found for vpp_name: " << vpp_name);
+  auto it_pair = _vpp_data.find(vpp_name);
+  mooseAssert(it_pair != _vpp_data.end(), "No vectors found for vpp_name: " << vpp_name);
 
-  return vec_pair->second;
+  return it_pair->second._values;
 }
 
 void
 VectorPostprocessorData::copyValuesBack()
 {
-  for (const auto & it : _values)
-    for (const auto & vec_it : it.second)
-      vec_it.second.old->swap(*vec_it.second.current);
+  for (const auto & vec_pair : _vpp_data)
+    if (!vec_pair.second._contains_complete_history)
+      for (const auto & vec_it : vec_pair.second._values)
+        vec_it.second.old->swap(*vec_it.second.current);
 }

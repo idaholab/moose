@@ -26,6 +26,7 @@ public:
    */
   VectorPostprocessorData(FEProblemBase & fe_problem);
 
+  /// VectorPostprocessorState (2 containers for values (see MooseTypes.h)
   struct VectorPostprocessorState
   {
     VectorPostprocessorValue * current;
@@ -87,9 +88,20 @@ private:
   VectorPostprocessorValue & getVectorPostprocessorHelper(const VectorPostprocessorName & vpp_name,
                                                           const std::string & vector_name,
                                                           bool get_current);
+  /**
+   * Vector of pairs representing the declared vectors (vector name, vector DS)
+   * The vector DS is a data structure containing a current and old container (vector of Reals)
+   */
+  struct VectorPostprocessorVectors
+  {
+    std::vector<std::pair<std::string, VectorPostprocessorState>> _values;
 
-  /// Values of the vector post-processor
-  std::map<std::string, std::vector<std::pair<std::string, VectorPostprocessorState>>> _values;
+    /// Boolean indicating whether these vectors contain complete history (append mode)
+    bool _contains_complete_history;
+  };
+
+  /// The VPP data store in a map: VPP Name to vector storage
+  std::map<std::string, VectorPostprocessorVectors> _vpp_data;
 
   std::set<std::string> _requested_items;
   std::set<std::string> _supplied_items;
