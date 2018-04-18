@@ -7,10 +7,13 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef CONTACTLINESEARCH_H
-#define CONTACTLINESEARCH_H
+#ifndef CONTACTLINESEARCHBASE_H
+#define CONTACTLINESEARCHBASE_H
 
 #include "LineSearch.h"
+
+class InputParameters;
+class FEProblemBase;
 
 /**
  * This class implements a custom line search for use with
@@ -30,14 +33,14 @@
  * contact set is resolved late in the Newton solve, the linear tolerance will return to the finer
  * tolerance set through the traditional `l_tol` parameter.
  */
-class ContactLineSearch : public LineSearch
+class ContactLineSearchBase : public LineSearch
 {
 public:
-  ContactLineSearch(FEProblemBase & fe_problem,
-                    MooseApp & app,
-                    size_t allowed_lambda_cuts,
-                    Real contact_ltol,
-                    bool affect_ltol);
+  ContactLineSearchBase(FEProblemBase & fe_problem,
+                        MooseApp & app,
+                        size_t allowed_lambda_cuts,
+                        Real contact_ltol,
+                        bool affect_ltol);
 
   /**
    * Method for printing the contact information
@@ -53,6 +56,9 @@ public:
    * Reset the line search data
    */
   virtual void reset();
+
+  static std::shared_ptr<ContactLineSearchBase> build(const InputParameters & parameters,
+                                                      FEProblemBase & fe_problem);
 
 protected:
   /// The current contact set

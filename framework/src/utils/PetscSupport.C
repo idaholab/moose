@@ -27,7 +27,6 @@
 #include "Conversion.h"
 #include "Executioner.h"
 #include "MooseMesh.h"
-#include "ContactLineSearch.h"
 
 #include "libmesh/equation_systems.h"
 #include "libmesh/linear_implicit_system.h"
@@ -652,15 +651,8 @@ storePetscOptions(FEProblemBase & fe_problem, const InputParameters & params)
         PetscNonlinearSolver<Real> & petsc_nonlinear_solver =
             dynamic_cast<PetscNonlinearSolver<Real> &>(
                 *fe_problem.getNonlinearSystemBase().system().nonlinear_solver);
-        bool affect_ltol = params.isParamValid("contact_line_search_ltol");
-        petsc_nonlinear_solver.linesearch_object = libmesh_make_unique<PetscContactLineSearch>(
-            fe_problem,
-            fe_problem.getMooseApp(),
-            params.get<unsigned>("contact_line_search_allowed_lambda_cuts"),
-            affect_ltol ? params.get<Real>("contact_line_search_ltol") : params.get<Real>("l_tol"),
-            affect_ltol);
-        fe_problem.customLineSearch() =
-            dynamic_cast<PetscContactLineSearch *>(petsc_nonlinear_solver.linesearch_object.get());
+        petsc_nonlinear_solver.linesearch_object =
+            libmesh_make_unique<ComputeLineSearchObjectWrapper>(fe_problem);
       }
     }
   }
@@ -802,6 +794,16 @@ storePetscOptions(FEProblemBase & fe_problem, const InputParameters & params)
   po.pc_description = pc_description;
 }
 
+std::set<std::string>
+getPetscValidLineSearches()
+{
+#if PETSC_VERSION_LESS_THAN(3, 3, 0)
+  return {"default", "cubic", "quadratic", "none", "basic", "basicnonorms"};
+#else
+  return {"default", "shell", "none", "basic", "l2", "bt", "cp"};
+#endif
+}
+
 InputParameters
 getPetscValidParams()
 {
@@ -815,21 +817,6 @@ getPetscValidParams()
                              "NEWTON: Full Newton Solve "
                              "FD: Use finite differences to compute Jacobian "
                              "LINEAR: Solving a linear problem");
-
-// Line Search Options
-#ifdef LIBMESH_HAVE_PETSC
-#if PETSC_VERSION_LESS_THAN(3, 3, 0)
-  MooseEnum line_search("default cubic quadratic none basic basicnonorms", "default");
-#else
-  MooseEnum line_search("default shell none basic l2 bt cp contact", "default");
-#endif
-  std::string addtl_doc_str(" (Note: none = basic)");
-#else
-  MooseEnum line_search("default", "default");
-  std::string addtl_doc_str("");
-#endif
-  params.addParam<MooseEnum>(
-      "line_search", line_search, "Specifies the line search type" + addtl_doc_str);
 
   MooseEnum mffd_type("wp ds", "wp");
   params.addParam<MooseEnum>("mffd_type",
@@ -845,15 +832,6 @@ getPetscValidParams()
   params.addParam<std::vector<std::string>>(
       "petsc_options_value",
       "Values of PETSc name/value pairs (must correspond with \"petsc_options_iname\"");
-  params.addParam<unsigned>("contact_line_search_allowed_lambda_cuts",
-                            2,
-                            "The number of times lambda is allowed to be cut in half in the "
-                            "contact line search. We recommend this number be roughly bounded by 0 "
-                            "<= allowed_lambda_cuts <= 3");
-  params.addParam<Real>("contact_line_search_ltol",
-                        "The linear relative tolerance to be used while the contact state is "
-                        "changing between non-linear iterations. We recommend that this tolerance "
-                        "be looser than the standard linear tolerance");
   return params;
 }
 
@@ -973,42 +951,50 @@ colorAdjacencyMatrix(PetscScalar * adjacency_matrix,
   ISColoringDestroy(&iscoloring);
 }
 
-PetscContactLineSearch::PetscContactLineSearch(FEProblemBase & fe_problem,
-                                               MooseApp & app,
-                                               size_t allowed_lambda_cuts,
-                                               Real contact_ltol,
-                                               bool affect_ltol)
-  : ContactLineSearch(fe_problem, app, allowed_lambda_cuts, contact_ltol, affect_ltol)
+ComputeLineSearchObjectWrapper::ComputeLineSearchObjectWrapper(FEProblemBase & fe_problem)
+  : _fe_problem(fe_problem)
+{
+}
+
+void ComputeLineSearchObjectWrapper::linesearch(SNESLineSearch /*line_search_object*/)
+{
+  _fe_problem.linesearch();
+}
+
+ContactLineSearch::ContactLineSearch(FEProblemBase & fe_problem,
+                                     MooseApp & app,
+                                     size_t allowed_lambda_cuts,
+                                     Real contact_ltol,
+                                     bool affect_ltol)
+  : ContactLineSearchBase(fe_problem, app, allowed_lambda_cuts, contact_ltol, affect_ltol),
+    _solver(dynamic_cast<PetscNonlinearSolver<Real> &>(
+        *fe_problem.getNonlinearSystemBase().system().nonlinear_solver))
 {
 }
 
 void
-PetscContactLineSearch::linesearch(SNESLineSearch line_search_object)
-{
-  _line_search_object = line_search_object;
-  linesearch();
-}
-
-void
-PetscContactLineSearch::linesearch()
+ContactLineSearch::linesearch()
 {
   PetscBool changed_y = PETSC_FALSE, changed_w = PETSC_FALSE;
   PetscErrorCode ierr;
   Vec X, F, Y, W, G, W1;
-  SNES snes;
+  SNESLineSearch line_search;
   PetscReal fnorm, xnorm, ynorm, gnorm;
   PetscBool domainerror;
   PetscReal ksp_rtol, ksp_abstol, ksp_dtol;
   PetscInt ksp_maxits;
   KSP ksp;
+  SNES snes = _solver.snes();
 
-  ierr = SNESLineSearchGetVecs(_line_search_object, &X, &F, &Y, &W, &G);
+  ierr = SNESGETLINESEARCH(snes, &line_search);
   LIBMESH_CHKERR(ierr);
-  ierr = SNESLineSearchGetNorms(_line_search_object, &xnorm, &fnorm, &ynorm);
+  ierr = SNESLineSearchGetVecs(line_search, &X, &F, &Y, &W, &G);
   LIBMESH_CHKERR(ierr);
-  ierr = SNESLineSearchGetSNES(_line_search_object, &snes);
+  ierr = SNESLineSearchGetNorms(line_search, &xnorm, &fnorm, &ynorm);
   LIBMESH_CHKERR(ierr);
-  ierr = SNESLineSearchSetReason(_line_search_object, SNES_LINESEARCH_SUCCEEDED);
+  ierr = SNESLineSearchGetSNES(line_search, &snes);
+  LIBMESH_CHKERR(ierr);
+  ierr = SNESLineSearchSetReason(line_search, SNES_LINESEARCH_SUCCEEDED);
   LIBMESH_CHKERR(ierr);
   ierr = SNESGetKSP(snes, &ksp);
   LIBMESH_CHKERR(ierr);
@@ -1026,7 +1012,7 @@ PetscContactLineSearch::linesearch()
   ++_nl_its;
 
   /* precheck */
-  ierr = SNESLineSearchPreCheck(_line_search_object, X, Y, &changed_y);
+  ierr = SNESLineSearchPreCheck(line_search, X, Y, &changed_y);
   LIBMESH_CHKERR(ierr);
 
   /* temporary update */
@@ -1037,13 +1023,13 @@ PetscContactLineSearch::linesearch()
   /* compute residual to determine whether contact state has changed since the last non-linear
    * residual evaluation */
   _current_contact_state.clear();
-  ierr = (*_line_search_object->ops->snesfunc)(snes, W, F);
+  ierr = (*line_search->ops->snesfunc)(snes, W, F);
   LIBMESH_CHKERR(ierr);
   ierr = SNESGetFunctionDomainError(snes, &domainerror);
   LIBMESH_CHKERR(ierr);
   if (domainerror)
   {
-    ierr = SNESLineSearchSetReason(_line_search_object, SNES_LINESEARCH_FAILED_DOMAIN);
+    ierr = SNESLineSearchSetReason(line_search, SNES_LINESEARCH_FAILED_DOMAIN);
     LIBMESH_CHKERR(ierr);
   }
   ierr = VecNorm(F, NORM_2, &fnorm);
@@ -1071,13 +1057,13 @@ PetscContactLineSearch::linesearch()
     ierr = VecWAXPY(W1, -_contact_lambda, Y, X);
     LIBMESH_CHKERR(ierr);
 
-    ierr = (*_line_search_object->ops->snesfunc)(snes, W1, G);
+    ierr = (*line_search->ops->snesfunc)(snes, W1, G);
     LIBMESH_CHKERR(ierr);
     ierr = SNESGetFunctionDomainError(snes, &domainerror);
     LIBMESH_CHKERR(ierr);
     if (domainerror)
     {
-      ierr = SNESLineSearchSetReason(_line_search_object, SNES_LINESEARCH_FAILED_DOMAIN);
+      ierr = SNESLineSearchSetReason(line_search, SNES_LINESEARCH_FAILED_DOMAIN);
       LIBMESH_CHKERR(ierr);
     }
     ierr = VecNorm(G, NORM_2, &gnorm);
@@ -1101,7 +1087,7 @@ PetscContactLineSearch::linesearch()
   ierr = VecScale(Y, _contact_lambda);
   LIBMESH_CHKERR(ierr);
   /* postcheck */
-  ierr = SNESLineSearchPostCheck(_line_search_object, X, Y, W, &changed_y, &changed_w);
+  ierr = SNESLineSearchPostCheck(line_search, X, Y, W, &changed_y, &changed_w);
   LIBMESH_CHKERR(ierr);
 
   if (changed_y)
@@ -1112,13 +1098,13 @@ PetscContactLineSearch::linesearch()
 
   if (changed_w || changed_y)
   {
-    ierr = (*_line_search_object->ops->snesfunc)(snes, W, F);
+    ierr = (*line_search->ops->snesfunc)(snes, W, F);
     LIBMESH_CHKERR(ierr);
     ierr = SNESGetFunctionDomainError(snes, &domainerror);
     LIBMESH_CHKERR(ierr);
     if (domainerror)
     {
-      ierr = SNESLineSearchSetReason(_line_search_object, SNES_LINESEARCH_FAILED_DOMAIN);
+      ierr = SNESLineSearchSetReason(line_search, SNES_LINESEARCH_FAILED_DOMAIN);
       LIBMESH_CHKERR(ierr);
     }
     contact_state_stored.swap(_current_contact_state);
@@ -1126,11 +1112,11 @@ PetscContactLineSearch::linesearch()
     printContactInfo(contact_state_stored);
   }
 
-  ierr = VecNorm(Y, NORM_2, &_line_search_object->ynorm);
+  ierr = VecNorm(Y, NORM_2, &line_search->ynorm);
   LIBMESH_CHKERR(ierr);
-  ierr = VecNorm(W, NORM_2, &_line_search_object->xnorm);
+  ierr = VecNorm(W, NORM_2, &line_search->xnorm);
   LIBMESH_CHKERR(ierr);
-  ierr = VecNorm(F, NORM_2, &_line_search_object->fnorm);
+  ierr = VecNorm(F, NORM_2, &line_search->fnorm);
   LIBMESH_CHKERR(ierr);
 
   /* copy the solution over */

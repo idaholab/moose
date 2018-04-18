@@ -16,12 +16,7 @@
 
 // Forward Declarations
 class MechanicalContactConstraint;
-class ContactLineSearch;
-namespace libMesh
-{
-template <typename T>
-class PetscNonlinearSolver;
-}
+class ContactLineSearchBase;
 
 template <>
 InputParameters validParams<MechanicalContactConstraint>();
@@ -137,7 +132,7 @@ protected:
   /// The tolerance of the frictional force for augmented Lagrangian method
   Real _al_frictional_force_tolerance;
 
-  ContactLineSearch * _contact_linesearch;
+  std::shared_ptr<ContactLineSearchBase> _contact_linesearch;
   std::set<dof_id_type> _current_contact_state;
   std::set<dof_id_type> _old_contact_state;
 

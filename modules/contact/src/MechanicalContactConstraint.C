@@ -20,11 +20,10 @@
 #include "AugmentedLagrangianContactProblem.h"
 #include "Executioner.h"
 #include "AddVariableAction.h"
-#include "ContactLineSearch.h"
+#include "ContactLineSearchBase.h"
 
 #include "libmesh/string_to_enum.h"
 #include "libmesh/sparse_matrix.h"
-#include "libmesh/petsc_nonlinear_solver.h"
 
 registerMooseObject("ContactApp", MechanicalContactConstraint);
 
@@ -141,7 +140,8 @@ MechanicalContactConstraint::MechanicalContactConstraint(const InputParameters &
     _master_slave_jacobian(getParam<bool>("master_slave_jacobian")),
     _connected_slave_nodes_jacobian(getParam<bool>("connected_slave_nodes_jacobian")),
     _non_displacement_vars_jacobian(getParam<bool>("non_displacement_variables_jacobian")),
-    _contact_linesearch(dynamic_cast<ContactLineSearch *>(_fe_problem.customLineSearch())),
+    _contact_linesearch(
+        std::dynamic_pointer_cast<ContactLineSearchBase>(_fe_problem.getLineSearch())),
     _print_contact_nodes(getParam<bool>("print_contact_nodes"))
 {
   _overwrite_slave_residual = false;

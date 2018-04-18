@@ -528,7 +528,6 @@ ExecFlagEnum getDefaultExecFlagEnum();
  * @param throw_on_failure Throw an invalid_argument exception instead of mooseError.
  */
 int stringToInteger(const std::string & input, bool throw_on_failure = false);
-
 } // MooseUtils namespace
 
 #endif // MOOSEUTILS_H

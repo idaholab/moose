@@ -217,7 +217,7 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
     _fail_next_linear_convergence_check(false),
     _started_initial_setup(false),
     _has_internal_edge_residual_objects(false),
-    _custom_line_search(nullptr)
+    _line_search(nullptr)
 {
 
   _time = 0.0;
@@ -1601,6 +1601,21 @@ FEProblemBase::getFunction(const std::string & name, THREAD_ID tid)
   }
 
   return *(_functions.getActiveObject(name, tid));
+}
+
+void
+FEProblemBase::addLineSearch(const InputParameters & parameters)
+{
+  MooseEnum line_search = parameters.get<MooseEnum>("line_search");
+  Moose::LineSearchType enum_line_search = Moose::stringToEnum<Moose::LineSearchType>(line_search);
+  if (enum_line_search == Moose::LS_CONTACT)
+    _line_search = ContactLineSearchBase::build(parameters, *this);
+}
+
+void
+FEProblemBase::linesearch()
+{
+  _line_search->linesearch();
 }
 
 NonlinearSystem &

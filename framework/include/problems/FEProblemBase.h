@@ -496,6 +496,21 @@ public:
   virtual Function & getFunction(const std::string & name, THREAD_ID tid = 0);
 
   /**
+   * add a MOOSE line search
+   */
+  virtual void addLineSearch(const InputParameters & parameters);
+
+  /**
+   * execute MOOSE line search
+   */
+  virtual void linesearch();
+
+  /**
+   * getter for the MOOSE line search
+   */
+  std::shared_ptr<LineSearch> getLineSearch() { return _line_search; }
+
+  /**
    * The following functions will enable MOOSE to have the capability to import distributions
    */
   virtual void
@@ -1385,7 +1400,6 @@ public:
   ExecuteMooseObjectWarehouse<MultiApp> & getMultiAppWarehouse() { return _multi_apps; }
 
   const VectorPostprocessorData & getVectorPostprocessorData() const;
-  LineSearch *& customLineSearch() { return _custom_line_search; }
 
 protected:
   MooseMesh & _mesh;
@@ -1637,7 +1651,7 @@ private:
   /// Whether the problem has dgkernels or interface kernels
   bool _has_internal_edge_residual_objects;
 
-  LineSearch * _custom_line_search;
+  std::shared_ptr<LineSearch> _line_search;
 
   friend class AuxiliarySystem;
   friend class NonlinearSystemBase;

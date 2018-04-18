@@ -16,7 +16,7 @@
 
 // MOOSE includes
 #include "MultiMooseEnum.h"
-#include "ContactLineSearch.h"
+#include "ContactLineSearchBase.h"
 
 #include "libmesh/petsc_macro.h"
 #include "libmesh/linear_solver.h"
@@ -104,6 +104,11 @@ PetscErrorCode petscLinearMonitor(KSP /*ksp*/, PetscInt its, PetscReal rnorm, vo
 void storePetscOptions(FEProblemBase & fe_problem, const InputParameters & params);
 
 /**
+ * Returns the valid petsc line search options as a set of strings
+ */
+std::set<std::string> getPetscValidLineSearches();
+
+/**
  * Returns the PETSc options that are common between Executioners and Preconditioners
  * @return InputParameters object containing the PETSc related parameters
  *
@@ -141,28 +146,45 @@ void colorAdjacencyMatrix(PetscScalar * adjacency_matrix,
                           const char * coloring_algorithm);
 
 /**
- *  Petsc implementation of the contact line search (based on the Petsc LineSearchShell)
+ * Wrapper of the libmesh ComputeLineSearchObject
  */
-class PetscContactLineSearch : public ContactLineSearch,
-                               public PetscNonlinearSolver<Real>::ComputeLineSearchObject
+class ComputeLineSearchObjectWrapper : public PetscNonlinearSolver<Real>::ComputeLineSearchObject
 {
 public:
-  PetscContactLineSearch(FEProblemBase & fe_problem,
-                         MooseApp & app,
-                         size_t allowed_lambda_cuts,
-                         Real contact_ltol,
-                         bool affect_ltol);
+  ComputeLineSearchObjectWrapper(FEProblemBase & fe_problem);
 
   /**
-   * Shim the linesearch method coming from LibMesh to our own
+   * Shim that calls into the MOOSE line search system using FEProblemBase::linesearch
    */
-  virtual void linesearch(SNESLineSearch line_search_object) override;
+  void linesearch(SNESLineSearch line_search_object) override;
+
+protected:
+  FEProblemBase & _fe_problem;
+};
+
+/**
+ *  Petsc implementation of the contact line search (based on the Petsc LineSearchShell)
+ */
+class ContactLineSearch : public ContactLineSearchBase
+{
+public:
+  ContactLineSearch(FEProblemBase & fe_problem,
+                    MooseApp & app,
+                    size_t allowed_lambda_cuts,
+                    Real contact_ltol,
+                    bool affect_ltol);
 
   virtual void linesearch() override;
 
 protected:
-  SNESLineSearch _line_search_object;
+  PetscNonlinearSolver<Real> & _solver;
 };
+
+#if PETSC_VERSION_LESS_THAN(3, 4, 0)
+#define SNESGETLINESEARCH SNESGetSNESLineSearch
+#else
+#define SNESGETLINESEARCH SNESGetLineSearch
+#endif
 }
 }
 
