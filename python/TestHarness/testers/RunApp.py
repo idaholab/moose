@@ -170,11 +170,6 @@ class RunApp(Tester):
         ncpus = self.getProcs(options)
         nthreads = self.getThreads(options)
 
-        if options.parallel == None:
-            default_ncpus = 1
-        else:
-            default_ncpus = options.parallel
-
         if specs['redirect_output'] and ncpus > 1:
             cli_args.append('--keep-cout --redirect-output ' + self.name())
 

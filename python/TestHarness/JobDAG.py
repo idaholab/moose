@@ -130,7 +130,6 @@ class JobDAG(object):
         """ Check for race condition errors within in the DAG"""
         # Create a clone of the DAG so we can be destructive with it (we need to
         # simulate running each job to completion)
-        race_conditions_found = False
         mutable_dag = self.__job_dag.clone()
         while mutable_dag.size():
             output_files_in_dir = set()
