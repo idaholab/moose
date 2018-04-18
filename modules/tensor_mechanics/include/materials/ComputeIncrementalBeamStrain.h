@@ -33,7 +33,13 @@ protected:
   void computeQpStrain();
 
   /// Computes the stiffness matrices
-  void computeJacobian();
+  void computeStiffnessMatrix();
+
+  /// Computes the rotation matrix at time t. For small rotation scenarios, the rotation matrix at time t is same as the intiial rotation matrix
+  virtual void computeRotation();
+
+  /// Getter for initial beam configuration
+  RankTwoTensor getInitialRotation() { return _original_local_config; };
 
   /// Number of coupled rotational variables
   unsigned int _nrot;
@@ -63,7 +69,7 @@ protected:
   const VariableValue & _Iz;
 
   /// Rotational transformation from global coordinate system to initial beam local configuration
-  MaterialProperty<RankTwoTensor> & _original_local_config;
+  RankTwoTensor _original_local_config;
 
   /// Initial length of the beam
   MaterialProperty<Real> & _original_length;
@@ -133,6 +139,23 @@ protected:
 
   /// Vector of old rotational eigenstrains
   std::vector<const MaterialProperty<RealVectorValue> *> _rot_eigenstrain_old;
+
+  /// Displacement and rotations at the two nodes of the beam in the global coordinate system
+  RealVectorValue _disp0, _disp1, _rot0, _rot1;
+
+  /// Reference to the nonlinear system object
+  NonlinearSystemBase & _nonlinear_sys;
+  /// Indices of solution vector corresponding to displacement DOFs at the node 0
+  std::vector<unsigned int> _soln_disp_index_0;
+
+  /// Indices of solution vector corresponding to displacement DOFs at the node 1
+  std::vector<unsigned int> _soln_disp_index_1;
+
+  /// Indices of solution vector corresponding to rotation DOFs at the node 0
+  std::vector<unsigned int> _soln_rot_index_0;
+
+  /// Indices of solution vector corresponding to rotation DOFs at the node 1
+  std::vector<unsigned int> _soln_rot_index_1;
 };
 
 #endif // COMPUTEINCREMENTALBEAMSTRAIN_H

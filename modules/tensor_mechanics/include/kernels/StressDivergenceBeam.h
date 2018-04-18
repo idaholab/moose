@@ -20,13 +20,13 @@ class StressDivergenceBeam : public Kernel
 {
 public:
   StressDivergenceBeam(const InputParameters & parameters);
-
-protected:
   virtual void computeResidual() override;
-  virtual Real computeQpResidual() override { return 0.0; }
   virtual void computeJacobian() override;
   virtual void computeOffDiagJacobian(MooseVariableFE & jvar) override;
   using Kernel::computeOffDiagJacobian;
+
+protected:
+  virtual Real computeQpResidual() override { return 0.0; }
 
   /// Computes the force and moment due to stiffness proportional damping and HHT time integration
   void computeDynamicTerms(std::vector<RealVectorValue> & global_force_res,
@@ -55,10 +55,10 @@ protected:
   std::vector<unsigned int> _rot_var;
 
   /// Current force vector in global coordinate system
-  const MaterialProperty<RealVectorValue> * _force;
+  const MaterialProperty<RealVectorValue> & _force;
 
   /// Current moment vector in global coordinate system
-  const MaterialProperty<RealVectorValue> * _moment;
+  const MaterialProperty<RealVectorValue> & _moment;
 
   /// Stiffness matrix relating displacement DOFs of same node or across nodes
   const MaterialProperty<RankTwoTensor> & _K11;
@@ -79,13 +79,16 @@ protected:
   const MaterialProperty<Real> & _original_length;
 
   /// Rotational transformation from global to current beam local coordinate system
-  const MaterialProperty<RankTwoTensor> * _total_rotation;
+  const MaterialProperty<RankTwoTensor> & _total_rotation;
 
   /// Stiffness proportional Rayleigh damping parameter
   const MaterialProperty<Real> & _zeta;
 
   /// HHT time integration parameter
   const Real & _alpha;
+
+  /// Boolean flag to turn on Rayleigh damping or numerical damping due to HHT time integration
+  const bool _isDamped;
 
   /// Old force vector in global coordinate system
   const MaterialProperty<RealVectorValue> * _force_old;
@@ -104,6 +107,24 @@ protected:
 
   /// Rotational transformation from global to older beam local coordinate system
   const MaterialProperty<RankTwoTensor> * _total_rotation_older;
+
+  /// Residual corresponding to displacement DOFs at the nodes in global coordinate system
+  std::vector<RealVectorValue> _global_force_res;
+
+  /// Residual corresponding to rotational DOFs at the nodes in global coordinate system
+  std::vector<RealVectorValue> _global_moment_res;
+
+  /// Forces at each Qp in the beam local configuration
+  std::vector<RealVectorValue> _force_local_t;
+
+  /// Moments at each Qp in the beam local configuration
+  std::vector<RealVectorValue> _moment_local_t;
+
+  /// Residual corresponding to displacement DOFs at the nodes in beam local coordinate system
+  std::vector<RealVectorValue> _local_force_res;
+
+  /// Residual corresponding to rotational DOFs at the nodes in beam local coordinate system
+  std::vector<RealVectorValue> _local_moment_res;
 };
 
 #endif // STRESSDIVERGENCEBEAM_H

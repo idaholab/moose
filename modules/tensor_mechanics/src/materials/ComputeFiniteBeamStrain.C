@@ -33,85 +33,38 @@ ComputeFiniteBeamStrain::ComputeFiniteBeamStrain(const InputParameters & paramet
 }
 
 void
-ComputeFiniteBeamStrain::computeProperties()
-{
-  // Calculation of rotation matrix from original beam local configuration to configuration at time
-  // t
-  computeRotation();
-
-  ComputeIncrementalBeamStrain::computeProperties();
-}
-
-void
 ComputeFiniteBeamStrain::computeRotation()
 {
-  // First - calculate difference in beam displacement between node 1 and node 0 in global
-  // coordinate system
-
-  // fetch the two end nodes for _current_elem
-  std::vector<Node *> node;
-  for (unsigned int i = 0; i < 2; ++i)
-    node.push_back(_current_elem->get_node(i));
-
-  // compute original length of beam element
-  RealGradient dxyz;
-  for (unsigned int i = 0; i < _ndisp; ++i)
-    dxyz(i) = (*node[1])(i) - (*node[0])(i);
-
-  Real original_length = dxyz.norm();
-
-  // Fetch the solution for the two end nodes at the current and previous time step
-  NonlinearSystemBase & nonlinear_sys = _fe_problem.getNonlinearSystemBase();
-  const NumericVector<Number> & sol = *nonlinear_sys.currentSolution();
-  const NumericVector<Number> & sol_old = nonlinear_sys.solutionOld();
-
-  RealVectorValue disp0(3, 0.0), disp1(3, 0.0);
-  RealVectorValue rot0(3, 0.0), rot1(3, 0.0);
-  RealVectorValue delta_disp(3, 0.0);
-  for (unsigned int i = 0; i < _ndisp; ++i)
-  {
-    disp0(i) = sol(node[0]->dof_number(nonlinear_sys.number(), _disp_num[i], 0)) -
-               sol_old(node[0]->dof_number(nonlinear_sys.number(), _disp_num[i], 0));
-    disp1(i) = sol(node[1]->dof_number(nonlinear_sys.number(), _disp_num[i], 0)) -
-               sol_old(node[1]->dof_number(nonlinear_sys.number(), _disp_num[i], 0));
-    rot0(i) = sol(node[0]->dof_number(nonlinear_sys.number(), _rot_num[i], 0)) -
-              sol_old(node[0]->dof_number(nonlinear_sys.number(), _rot_num[i], 0));
-    rot1(i) = sol(node[1]->dof_number(nonlinear_sys.number(), _rot_num[i], 0)) -
-              sol_old(node[1]->dof_number(nonlinear_sys.number(), _rot_num[i], 0));
-
-    delta_disp(i) = disp1(i) - disp0(i);
-  }
-
-  // Second - convert the differential beam displacement to the beam configuration at previous time
+  // First - convert the differential beam displacement to the beam configuration at previous time
   // step
-  RealVectorValue delta_disp_local(_total_rotation_old[0] * delta_disp);
+  const RealVectorValue delta_disp_local(_total_rotation_old[0] * (_disp1 - _disp0));
 
-  // Third - calculate the incremental rotation matrix using Euler angles
-  Real intermediate_length_1 = std::sqrt(Utility::pow<2>(original_length + delta_disp_local(0)) +
-                                         Utility::pow<2>(delta_disp_local(2)));
-  Real cos_alpha = (original_length + delta_disp_local(0)) / intermediate_length_1;
-  Real sin_alpha = std::sqrt(1.0 - Utility::pow<2>(cos_alpha));
+  // Second - calculate the incremental rotation matrix using Euler angles
+  const Real intermediate_length_1 =
+      std::sqrt(Utility::pow<2>(_original_length[0] + delta_disp_local(0)) +
+                Utility::pow<2>(delta_disp_local(2)));
+  const Real cos_alpha = (_original_length[0] + delta_disp_local(0)) / intermediate_length_1;
+  const Real sin_alpha = std::sqrt(1.0 - Utility::pow<2>(cos_alpha));
 
-  Real intermediate_length_2 =
+  const Real intermediate_length_2 =
       std::sqrt(Utility::pow<2>(intermediate_length_1) + Utility::pow<2>(delta_disp_local(1)));
-  Real sin_beta = delta_disp_local(1) / intermediate_length_2;
-  Real cos_beta = std::sqrt(1.0 - Utility::pow<2>(sin_beta));
+  const Real sin_beta = delta_disp_local(1) / intermediate_length_2;
+  const Real cos_beta = std::sqrt(1.0 - Utility::pow<2>(sin_beta));
 
-  RealVectorValue rotation_d_1(cos_alpha * cos_beta, sin_beta, sin_alpha * cos_beta);
-  RealVectorValue rotation_d_2(-cos_alpha * sin_beta, cos_beta, -sin_alpha * sin_beta);
-  RealVectorValue rotation_d_3(-sin_alpha, 0.0, cos_alpha);
+  const RealVectorValue rotation_d_1(cos_alpha * cos_beta, sin_beta, sin_alpha * cos_beta);
+  const RealVectorValue rotation_d_2(-cos_alpha * sin_beta, cos_beta, -sin_alpha * sin_beta);
+  const RealVectorValue rotation_d_3(-sin_alpha, 0.0, cos_alpha);
 
-  RankTwoTensor rotation_d(rotation_d_1, rotation_d_2, rotation_d_3);
+  const RankTwoTensor rotation_d(rotation_d_1, rotation_d_2, rotation_d_3);
 
   // Convert average rotational displacement to the beam configuration at previous time step
-  RealVectorValue avg_rot_local(_total_rotation_old[0] * (rot0 + rot1));
+  const RealVectorValue avg_rot_local(_total_rotation_old[0] * (_rot0 + _rot1));
 
-  Real gamma_increment =
+  const Real gamma_increment =
       0.5 * (rotation_d_1(0) * avg_rot_local(0) + rotation_d_1(1) * avg_rot_local(1) +
              rotation_d_1(2) * avg_rot_local(2));
 
   RankTwoTensor rotation_a;
-  rotation_a.zero();
   rotation_a(0, 0) = 1.0;
   rotation_a(1, 1) = std::cos(gamma_increment);
   rotation_a(1, 2) = std::sin(gamma_increment);

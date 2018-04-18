@@ -49,7 +49,7 @@ ComputeElasticityBeam::ComputeElasticityBeam(const InputParameters & parameters)
 void
 ComputeElasticityBeam::computeQpProperties()
 {
-  Real shear_modulus = _youngs_modulus[_qp] / (2.0 * (1.0 + _poissons_ratio[_qp]));
+  const Real shear_modulus = _youngs_modulus[_qp] / (2.0 * (1.0 + _poissons_ratio[_qp]));
 
   // material_stiffness relates the translational strains to forces
   _material_stiffness[_qp](0) = _youngs_modulus[_qp];
