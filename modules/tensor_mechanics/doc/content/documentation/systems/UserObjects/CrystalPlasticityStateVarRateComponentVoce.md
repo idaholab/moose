@@ -60,6 +60,7 @@ Note that these is usually a symmetric matrix.
 If $i==j$ this value represents the latent hardening coefficient between one slip system and all the non co-planar ones belonging the the same group. For $i!=j$, this value represents the latent hardening coefficient between all the slip systems belonging to group i and j.
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 Note that this values usually this matrix is symmetric.
 \end{itemize}
 >>>>>>> Voce Hardening Law for the crystal plasticity user object based framework
@@ -71,6 +72,10 @@ Note that these values usually this matrix is symmetric.
 Note that this values usually this matrix is symmetric.
 \end{itemize}
 >>>>>>> Voce Hardening Law for the crystal plasticity user object based framework
+=======
+Note that these values usually this matrix is symmetric.
+\end{itemize}  
+>>>>>>> close #11307
 
 
 
