@@ -446,6 +446,20 @@
     difference_tol = 1e10
     cli_args = '-mat_fd_type ds'
   [../]
+  [./brineco2_twophase_2]
+    type = 'PetscJacobianTester'
+    input = 'brineco2_twophase_2.i'
+    ratio_tol = 1e-6 # Lots of chain rule derivatives
+    difference_tol = 1e10
+    cli_args = '-mat_fd_type ds'
+  [../]
+  [./brineco2_liquid_2]
+    type = 'PetscJacobianTester'
+    input = 'brineco2_liquid_2.i'
+    ratio_tol = 1e-6 # Lots of chain rule derivatives
+    difference_tol = 1e10
+    cli_args = '-mat_fd_type ds'
+  [../]
 
   [./exponential_decay]
     type = 'PetscJacobianTester'

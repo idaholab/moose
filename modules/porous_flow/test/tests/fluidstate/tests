@@ -32,6 +32,11 @@
     input = 'brineco2.i'
     csvdiff = 'brineco2.csv'
   [../]
+  [./brineco2_2]
+    type = 'CSVDiff'
+    input = 'brineco2_2.i'
+    csvdiff = 'brineco2_2.csv'
+  [../]
   [./theis_brineco2]
     type = 'CSVDiff'
     input = 'theis_brineco2.i'
