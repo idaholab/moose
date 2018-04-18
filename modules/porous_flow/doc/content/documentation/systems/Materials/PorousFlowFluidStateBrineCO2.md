@@ -1,14 +1,11 @@
-<!-- MOOSE Documentation Stub: Remove this when content is added. -->
-
 # PorousFlowFluidStateBrineCO2
 
-!alert construction title=Undocumented Class
-The PorousFlowFluidStateBrineCO2 has not been documented, if you would like to contribute to MOOSE by
-writing documentation, please see [/generate.md]. The content contained on this page explains
-the typical documentation associated with a MooseObject; however, what is contained is ultimately
-determined by what is necessary to make the documentation clear for users.
-
 !syntax description /Materials/PorousFlowFluidStateBrineCO2
+
+Material that provides all thermophysical properties of the system given a set
+of nonlinear variables using the formulation provided by the [`PorousFlowBrineCO2`](/PorousFlowBrineCO2.md) UserObject.
+
+For more details, see the documentation of the [brine and CO$_2$](brineco2.md) equation of state.
 
 !syntax parameters /Materials/PorousFlowFluidStateBrineCO2
 
