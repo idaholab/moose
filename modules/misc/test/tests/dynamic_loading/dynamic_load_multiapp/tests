@@ -6,7 +6,6 @@
     allow_warnings = true
     library_mode = 'DYNAMIC'
     recover = false # See #5207
-    queue_scheduler = false   # Relative paths do not work
   [../]
 
   [./dynamic_load_w_name]
@@ -19,7 +18,6 @@
     method = OPT # because the library name is explicitly given
     prereq = 'dynamic_load'
     recover = false # See #5207
-    queue_scheduler = false   # Relative paths do not work
   [../]
 
   [./dynamic_load_error_check]
