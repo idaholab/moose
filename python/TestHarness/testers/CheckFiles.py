@@ -64,7 +64,5 @@ class CheckFiles(FileTester):
         # populate status bucket
         if reason != '':
             self.setStatus(self.fail, reason)
-        else:
-            self.setStatus(self.success, self.success_message)
 
         return output

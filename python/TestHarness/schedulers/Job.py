@@ -44,13 +44,15 @@ class Job(object):
     The Job class is a simple container for the tester and its associated output file object, the DAG,
     the process object, the exit codes, and the start and end times.
     """
-    def __init__(self, tester, tester_dag, options):
+    def __init__(self, tester, job_dag, options):
         self.options = options
         self.__tester = tester
+        self.__job_dag = job_dag
         self.timer = Timer()
         self.__outfile = None
         self.__start_time = clock()
         self.__end_time = None
+        self.__previous_time = None
         self.__joined_out = ''
         self.report_timer = None
         self.__slots = None
@@ -66,6 +68,10 @@ class Job(object):
         self.crash = self.status.crash
         self.error = self.status.error
         self.finished = self.status.finished
+
+    def getDAG(self):
+        """ Return the DAG associated with this tester """
+        return self.__job_dag
 
     def getTester(self):
         """ Return the tester object """
@@ -98,6 +104,10 @@ class Job(object):
     def getCaveats(self):
         """ Wrapper method for getting caveats """
         return self.__tester.getCaveats()
+
+    def clearCaveats(self):
+        """ Wrapper method for clearing caveats """
+        return self.__tester.clearCaveats()
 
     def getRunnable(self):
         """ Wrapper method to return getRunnable """
@@ -145,11 +155,6 @@ class Job(object):
         if not self.__tester.shouldExecute():
             return
 
-        # Do not execute app, and do not processResults (set a success status)
-        elif self.options.dry_run:
-            self.__tester.setStatus(self.__tester.success, 'DRY RUN')
-            return
-
         self.__tester.prepare(self.options)
 
         self.__start_time = clock()
@@ -194,6 +199,13 @@ class Job(object):
         if m != None:
             return m.group().split()[5]
 
+    def setPreviousTime(self, t):
+        """
+        Allow an arbitrary time to be set. This is used by the QueueManager
+        to set the time as recorded by a previous TestHarness instance.
+        """
+        self.__previous_time = t
+
     def getTiming(self):
         """ Return active time if available, if not return a comparison of start and end time """
         if self.getActiveTime():
@@ -203,6 +215,8 @@ class Job(object):
         elif self.getStartTime() and self.isRunning():
             # If the test is still running, return current run time instead
             return max(0.0, clock() - self.getStartTime())
+        elif self.__previous_time:
+            return self.__previous_time
         else:
             return 0.0
 

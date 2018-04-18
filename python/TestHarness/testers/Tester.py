@@ -76,11 +76,6 @@ class Tester(MooseObject):
         params.addParam('timing',         True, "If True, the test will be allowed to run with the timing flag (i.e. Manually turning on performance logging).")
         params.addParam('boost',         ['ALL'], "A test that runs only if BOOT is detected ('ALL', 'TRUE', 'FALSE')")
 
-        # Queueing specific
-        params.addParam('copy_files',         [], "Additional list of files/directories to copy when performing queueing operations")
-        params.addParam('link_files',         [], "Additional list of files/directories to symlink when performing queueing operations")
-        params.addParam('queue_scheduler',  True, "A test that runs only if using queue options")
-
         # SQA
         params.addParam("requirement", None, "The SQA requirement that this test satisfies (e.g., 'The Marker system shall provide means to mark elements for refinement within a box region.')")
         params.addParam("design", [], "The list of markdown files that contain the design(s) associated with this test (e.g., '/Markers/index.md /BoxMarker.md').")
@@ -110,7 +105,6 @@ class Tester(MooseObject):
 
         ### Enumerate the statuses
         self.no_status = self.status.no_status
-        self.dryrun = self.status.dryrun
         self.skip = self.status.skip
         self.silent = self.status.silent
         self.success = self.status.success
@@ -119,7 +113,7 @@ class Tester(MooseObject):
         self.deleted = self.status.deleted
         self.finished = self.status.finished
 
-        ### Deprecated statuses
+        ### Deprecated statuses to be removed upon application fixes
         self.bucket_initialized        = self.no_status
         self.bucket_success            = self.success
         self.bucket_fail               = self.fail
@@ -132,12 +126,6 @@ class Tester(MooseObject):
         self.bucket_queued             = None
         self.bucket_waiting_processing = None
         ### END Deprecated statuses
-
-        # Set the status message
-        if self.specs['check_input']:
-            self.success_message = 'SYNTAX PASS'
-        else:
-            self.success_message = self.specs['success_message']
 
         # Set up common paramaters
         self.should_execute = self.specs['should_execute']
@@ -160,12 +148,12 @@ class Tester(MooseObject):
 
     def getStatusMessage(self):
         return self.status.getStatusMessage()
+    def createStatus(self):
+        return self.status.createStatus()
     def getColor(self):
         return self.status.getColor()
-    def isNone(self):
-        return self.status.isNone()
-    def isDryRun(self):
-        return self.status.isDryRun()
+    def isNoStatus(self):
+        return self.status.isNoStatus()
     def isSkip(self):
         return self.status.isSkip()
     def isSilent(self):
@@ -223,10 +211,6 @@ class Tester(MooseObject):
     def getOutput(self):
         """ Return the contents of stdout and stderr """
         return self.joined_out
-
-    def getSuccessMessage(self):
-        """ return the success message assigned to this tester """
-        return self.success_message
 
     def getCheckInput(self):
         return self.check_input
@@ -375,6 +359,11 @@ class Tester(MooseObject):
     def getCaveats(self):
         """ Return caveats accumalted by this tester """
         return self.__caveats
+
+    def clearCaveats(self):
+        """ Clear any caveats stored in tester """
+        self.__caveats = set([])
+        return self.getCaveats()
 
     def checkRunnableBase(self, options):
         """
@@ -561,11 +550,6 @@ class Tester(MooseObject):
         # Check for display
         if self.specs['display_required'] and not os.getenv('DISPLAY', False):
             reasons['display_required'] = 'NO DISPLAY'
-
-        # Check for queueing
-        if (not self.specs['queue_scheduler'] or not self.shouldExecute()) \
-           and options.queueing:
-            reasons['queue_scheduler'] = 'queue not supported'
 
         # Remove any matching user supplied caveats from accumulated checkRunnable caveats that
         # would normally produce a skipped test.

@@ -32,7 +32,7 @@ class RunException(RunApp):
 
     def checkRunnable(self, options):
         if options.enable_recover:
-            self.addCaveats('RunException RECOVER')
+            self.addCaveats('type=RunException')
             self.setStatus(self.skip)
             return False
         return RunApp.checkRunnable(self, options)
@@ -71,7 +71,5 @@ class RunException(RunApp):
 
         if reason != '':
             self.setStatus(self.fail, reason)
-        else:
-            self.setStatus(self.success)
 
         return output

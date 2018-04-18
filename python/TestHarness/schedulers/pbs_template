@@ -1,11 +1,11 @@
 #!/bin/bash
 #PBS -N <JOB_NAME>
 #PBS -l select=<MPI_PROCS>
-#PBS -l place=<PLACE>
 #PBS -l walltime=<WALLTIME>
-<PREREQ>
 <PBS_PROJECT>
-<COMBINE_STREAMS>
+#PBS -j oe
+#PBS -o <OUTPUT>
+#PBS -l place=free
 
 JOB_NUM=${PBS_JOBID%\.*}
 

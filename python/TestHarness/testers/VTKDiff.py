@@ -75,7 +75,4 @@ class VTKDiff(RunApp):
                         self.setStatus(self.skip)
                         break
 
-        if not self.isFinished():
-            self.setStatus(self.success)
-
         return output

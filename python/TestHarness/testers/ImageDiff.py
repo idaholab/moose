@@ -73,7 +73,4 @@ class ImageDiff(FileTester):
                     self.setStatus(self.diff, 'IMAGEDIFF')
                     break
 
-        if not self.isFinished():
-            self.setStatus(self.success)
-
         return output

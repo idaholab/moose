@@ -153,12 +153,6 @@ class Scheduler(MooseObject):
         """ Call derived run method """
         return
 
-    def postRun(self, job_container):
-        """
-        Allow derived schdulers to perform post run methods on job
-        """
-        return
-
     def notifyFinishedSchedulers(self):
         """ Notify derived schedulers we are finished """
         return
@@ -401,9 +395,6 @@ class Scheduler(MooseObject):
                 timeout_timer.start()
                 self.run(job) # Hand execution over to derived scheduler
                 timeout_timer.cancel()
-
-                # Allow derived schedulers to perform post run operations
-                self.postRun(job)
 
                 # Recover worker count before attempting to queue more jobs
                 with self.slot_lock:

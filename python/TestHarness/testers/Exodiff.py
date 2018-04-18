@@ -60,8 +60,6 @@ class Exodiff(FileTester):
 
         # Don't Run Exodiff on Scaled Tests
         if options.scaling and self.specs['scale_refine']:
-            self.success_message = "SCALED"
-            self.setStatus(self.success)
             return output
 
         # Make sure that all of the Exodiff files are actually available
@@ -83,8 +81,5 @@ class Exodiff(FileTester):
                 if ('different' in exo_output or 'ERROR' in exo_output) and not "Files are the same" in exo_output:
                     self.setStatus(self.diff, 'EXODIFF')
                     break
-
-        if not self.isFinished():
-            self.setStatus(self.success)
 
         return output

@@ -79,7 +79,5 @@ class AnalyzeJacobian(Tester):
 
         if reason != '':
             self.setStatus(self.fail, reason)
-        else:
-            self.setStatus(self.success)
 
         return output

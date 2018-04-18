@@ -27,6 +27,11 @@ class RunParallel(Scheduler):
         """ Run a tester command """
         tester = job.getTester()
 
+        # Do not execute app, and do not processResults
+        if self.options.dry_run:
+            self.setSuccessfulMessage(tester)
+            return
+
         # Launch and wait for the command to finish
         job.run()
 
@@ -36,15 +41,14 @@ class RunParallel(Scheduler):
 
         # If we are doing recover tests
         if self.options.enable_recover and tester.specs.isValid('skip_checks') and tester.specs['skip_checks']:
-            tester.setStatus(tester.success, 'PART1')
+            self.setSuccessfulMessage(tester)
             return
 
-        # Allow derived proccessResults to process the output and set a status
+        # Allow derived proccessResults to process the output and set a failing status (if it failed)
         job_output = job.getOutput()
         output = tester.processResults(tester.getMooseDir(), self.options, job_output)
 
-        # See if there's already a failing status set on this test. If there is, we shouldn't attempt to
-        # read from the redirected output files.
+        # If the tester has not yet failed, append additional information to output
         if not tester.isFail():
             # Read the output either from the temporary file or redirected files
             if tester.hasRedirectedOutput(self.options):
@@ -61,3 +65,26 @@ class RunParallel(Scheduler):
 
         # Set testers output with modifications made above so it prints the way we want it
         job.setOutput(output)
+
+        # Test has not yet failed and we are finished... therfor it is a passing test
+        if not tester.isFail():
+            self.setSuccessfulMessage(tester)
+
+    def setSuccessfulMessage(self, tester):
+        """ properly set a finished successful message for tester """
+        message = ''
+
+        # Handle 'dry run' first, because if true, job.run() never took place
+        if self.options.dry_run:
+            message = 'DRY RUN'
+
+        elif tester.specs['check_input']:
+            message = 'SYNTAX PASS'
+
+        elif self.options.scaling and tester.specs['scale_refine']:
+            message = 'SCALED'
+
+        elif self.options.enable_recover and tester.specs.isValid('skip_checks') and tester.specs['skip_checks']:
+            message = 'PART1'
+
+        tester.setStatus(tester.success, message)

@@ -58,6 +58,15 @@ class JobDAG(object):
         next_jobs.update(self.getJobs())
         return next_jobs
 
+    def removeAllDependencies(self):
+        """ Flatten current DAG so that it no longer contains any dependency information """
+        if self.__name_to_job and self.__job_dag.size():
+            tmp_job_dag = dag.DAG()
+            for job in self.__job_dag.topological_sort():
+                tmp_job_dag.add_node(job)
+            self.__job_dag = tmp_job_dag
+        return self.__job_dag
+
     def _checkDAG(self):
         """ perform some sanity checks on the current DAG """
         if self.__job_dag.size():

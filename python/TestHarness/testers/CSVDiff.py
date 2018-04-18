@@ -29,8 +29,10 @@ class CSVDiff(FileTester):
 
     # Check that override parameter lists are the same length
     def checkRunnable(self, options):
-        if (len(self.specs['override_columns']) != len(self.specs['override_rel_err'])) or (len(self.specs['override_columns']) != len(self.specs['override_abs_zero'])) or (len(self.specs['override_rel_err']) != len(self.specs['override_abs_zero'])):
-           self.setStatus('Override inputs not the same length', self.bucket_fail)
+        if ((len(self.specs['override_columns']) != len(self.specs['override_rel_err']))
+        or (len(self.specs['override_columns']) != len(self.specs['override_abs_zero']))
+        or (len(self.specs['override_rel_err']) != len(self.specs['override_abs_zero']))):
+           self.setStatus(self.fail, 'Override inputs not the same length')
            return False
         return FileTester.checkRunnable(self, options)
 
@@ -62,5 +64,4 @@ class CSVDiff(FileTester):
                     self.setStatus(self.diff, 'CSVDIFF')
                 return output
 
-        self.setStatus(self.success)
         return output

@@ -234,16 +234,15 @@ class RunApp(Tester):
         Wrapper method for testFileOutput.
 
         testFileOutput does not set a success status, while processResults does.
-        For testers that are RunApp types, they would call this method. While
-        all other tester types (like exodiff) will call testFileOutput. This is
-        to prevent derived testers from having a successful status set, before
-        actually running their derived processResults method.
-        """
-        reason = self.testFileOutput(moose_dir, options, output)
+        For testers that are RunApp types, they will call this method (processResults).
 
-        if reason != '':
-            self.setStatus(self.fail, reason)
-        else:
-            self.setStatus(self.success)
+        Other tester types (like exodiff) will call testFileOutput. This is to prevent
+        derived testers from having a successfull status set, before actually running
+        the derived processResults method.
+
+        # TODO: because RunParallel is now setting every successful status message,
+                refactor testFileOutput and processResults.
+        """
+        self.testFileOutput(moose_dir, options, output)
 
         return output

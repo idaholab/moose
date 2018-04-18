@@ -87,7 +87,5 @@ class PetscJacobianTester(RunApp):
 
         if reason != '':
             self.setStatus(self.fail, reason)
-        else:
-            self.setStatus(self.success)
 
         return output

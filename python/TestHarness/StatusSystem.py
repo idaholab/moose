@@ -10,19 +10,25 @@
 from collections import namedtuple
 
 class TestStatus(object):
-    """ Class for handling all possible test statuses """
+    """
+    Class for handling all possible test statuses.
+    Every status that is NOT 'no_status' is a Finished status.
+    """
 
     test_status = namedtuple('status', 'status color')
     no_status = test_status(status='NA', color='GREY')
-    dryrun = test_status(status='DRY RUN', color='GREEN')
     skip = test_status(status='SKIP', color='GREY')
-    running = test_status(status='RUNNING', color='CYAN')
     silent = test_status(status='SILENT', color='GREY')
     success = test_status(status='OK', color='GREEN')
     fail = test_status(status='FAIL', color='RED')
     diff = test_status(status='DIFF', color='YELLOW')
     deleted = test_status(status='DELETED', color='RED')
     finished = test_status(status='FINISHED', color='GREY')
+
+    __passing_statuses = set([success])
+    __failing_statuses = set([fail, diff, deleted])
+    __skipped_statuses = set([skip, silent, deleted])
+    __silent_statuses = set([silent, deleted])
 
     def __init__(self, status=no_status):
         self.__status = status
@@ -31,16 +37,21 @@ class TestStatus(object):
     def setStatus(self, status, message=''):
         """ Set a tester status with optional message """
 
-        # Protect a finished status (for sanity reasons)
-        if self.isFinished():
-            return self.__status
-
         self.__status = status
+
+        # Use status identifing string as the message if none supplied
+        if not message:
+            message = status.status
         self.__message = message
+
         return self.__status
 
     def getStatus(self):
         return self.__status
+
+    def createStatus(self):
+        """ return a compatible status tuple """
+        return self.test_status
 
     def getStatusMessage(self):
         """ return what ever current message is set """
@@ -54,37 +65,36 @@ class TestStatus(object):
         """ boolean initialized status """
         return self.__status == self.no_status
 
-    def isDryRun(self):
-        """ boolean dry run status """
-        return self.__status == self.dryrun
-
-    def isSkip(self):
-        """ boolean skip status """
-        return self.__status == self.skip
-
     def isSilent(self):
-        """ boolean silent status """
-        return self.__status == self.silent
+        """ boolean for statuses which can cause a test to be silent """
+        return self.__status in self.__silent_statuses
 
     def isDeleted(self):
         """ boolean deleted status """
         return self.__status == self.deleted
 
-    def isPass(self):
-        """ boolean passing status """
-        return self.__status == self.success or self.__status == self.dryrun
-
-    def isFail(self):
-        """ boolean failing status """
-        return self.__status == self.fail or self.__status == self.diff
-
     def isDiff(self):
         """ boolean failed diff status """
         return self.__status == self.diff
 
+    def isFail(self):
+        """ boolean for statuses which can cause a test to fail """
+        return self.__status in self.__failing_statuses
+
+    def isPass(self):
+        """ boolean passing status """
+        return self.__status in self.__passing_statuses
+
+    def isSkip(self):
+        """ boolean for statuses which can cause a test to be skipped """
+        return (self.__status in self.__skipped_statuses
+                and self.__status not in self.__passing_statuses.union(self.__failing_statuses))
+
     def isFinished(self):
         """ boolean finished status """
-        return self.__status == self.finished or self.__status != self.no_status
+        return (self.__status in self.__passing_statuses.union(self.__failing_statuses,
+                                                               self.__skipped_statuses,
+                                                               self.__silent_statuses))
 
 class JobStatus(object):
     """ Class for handling all possible job statuses """
@@ -121,7 +131,7 @@ class JobStatus(object):
     def setStatus(self, status, message=''):
         """ Set a job status with optional message """
 
-        # Protect a finished status (for sanity reasons)
+        # Protect a finished job status (for sanity reasons)
         if self.isFinished():
             return self.__status
 
