@@ -31,16 +31,15 @@ public:
   virtual bool calcStateVariableEvolutionRateComponent(unsigned int qp,
                                                        std::vector<Real> & val) const;
 
-// class containgn the avialbale slip systems
+  // class containgn the avialbale slip systems
   static MooseEnum crystalLatticeTypeOptions();
+
 protected:
   const MaterialProperty<std::vector<Real>> & _mat_prop_slip_rate;
   const MaterialProperty<std::vector<Real>> & _mat_prop_state_var;
 
-
   // the switching variable containing the type of crystal (i.e. FCC12 or BCC12)
   MooseEnum _crystal_lattice_type;
-
 
   // teh vectors containing the input paramters
   std::vector<unsigned int> _groups;
@@ -59,7 +58,6 @@ protected:
   // the vector associating a slip system to its groud ID
   std::vector<unsigned int> _slipSystem_GroupID;
 
-
   // method checking the input paramters
   virtual void checkHardeningParametersSize() const;
   // method assocaiting slip system to their slip plane
@@ -67,7 +65,8 @@ protected:
   // method assocaiting slip system to their group
   virtual void initSlipSystem_PlaneID(std::vector<unsigned int> & _slipSystem_PlaneID) const;
   // method retriving the appropiate self/latent hardening coefficient
-  virtual Real getHardeningCoefficient(unsigned int slipSystemIndex_i, unsigned int slipSystemIndex_j) const;
+  virtual Real getHardeningCoefficient(unsigned int slipSystemIndex_i,
+                                       unsigned int slipSystemIndex_j) const;
 };
 
 #endif // CRYSTALPLASTICITYSTATEVARRATECOMPONENTVOCE_H
