@@ -44,6 +44,10 @@
   [./test_user_object_Voce_BCC]
     type = 'Exodiff'
     input = 'crysp_user_object_Voce_BCC.i'
+<<<<<<< HEAD
     exodiff = 'crysp_user_object_Voce_BCC_out.e'
+=======
+    exodiff = 'crysp_user_object_Voce_BCC.e'
+>>>>>>> Voce Hardening Law for the crystal plasticity user object based framework
   [../]
 []
