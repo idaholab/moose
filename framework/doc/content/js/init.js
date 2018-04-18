@@ -52,11 +52,13 @@ function mooseSearch() {
     var results = fuse.search(box.value);
 
     console.log(results);
-    if (results.length > 0)
+    var n = results.length;
+    if (n > 0)
     {
         element.innerHTML = '';
-        for (var item of results)
+        for (var i = 0; i < n && i < 100; ++i)
         {
+            var item = results[i];
             var div = document.createElement("div");
             div.className = 'moose-search-result';
 
@@ -67,7 +69,7 @@ function mooseSearch() {
             a.setAttribute("href", item.location);
 
             if (item.name != item.text) {
-              section = document.createElement("span");
+              var section = document.createElement("span");
               section.innerHTML = ' &mdash; ' + item.text;
               a.appendChild(section);
             } else {
