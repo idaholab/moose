@@ -54,6 +54,7 @@ protected:
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
   /// the variable to switch crystal lattice type (i.e. FCC or BCC)
   MooseEnum _crystal_lattice_type;
 
@@ -67,8 +68,10 @@ protected:
 
   // the switching variable containing the type of crystal (i.e. FCC or BCC)
 >>>>>>> Voce Hardening Law for the crystal plasticity user object based framework
+=======
+  // the switching variable containing the type of crystal (i.e. FCC12 or BCC12)
+>>>>>>> close #11307
   MooseEnum _crystal_lattice_type;
-
 
   // teh vectors containing the input paramters
 >>>>>>> Voce Hardening Law for the crystal plasticity user object based framework
