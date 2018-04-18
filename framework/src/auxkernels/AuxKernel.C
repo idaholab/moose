@@ -62,6 +62,7 @@ AuxKernel::AuxKernel(const InputParameters & parameters)
                                      ->getVariable(parameters.get<THREAD_ID>("_tid"),
                                                    parameters.get<AuxVariableName>("variable"))
                                      .isNodal(),
+                                 "variable",
                                  Moose::VarKindType::VAR_AUXILIARY,
                                  Moose::VarFieldType::VAR_FIELD_STANDARD),
     BlockRestrictable(this),

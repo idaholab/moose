@@ -34,9 +34,9 @@ public:
   MooseVariableInterface(
       const MooseObject * moose_object,
       bool nodal,
+      std::string var_param_name = "variable",
       Moose::VarKindType expected_var_type = Moose::VarKindType::VAR_ANY,
-      Moose::VarFieldType expected_var_field_type = Moose::VarFieldType::VAR_FIELD_STANDARD,
-      std::string var_param_name = "variable");
+      Moose::VarFieldType expected_var_field_type = Moose::VarFieldType::VAR_FIELD_ANY);
 
   /**
    * Get the variable that this object is using.

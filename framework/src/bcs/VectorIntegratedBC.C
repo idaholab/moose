@@ -33,8 +33,11 @@ validParams<VectorIntegratedBC>()
 
 VectorIntegratedBC::VectorIntegratedBC(const InputParameters & parameters)
   : IntegratedBCBase(parameters),
-    MooseVariableInterface<RealVectorValue>(
-        this, false, Moose::VarKindType::VAR_NONLINEAR, Moose::VarFieldType::VAR_FIELD_VECTOR),
+    MooseVariableInterface<RealVectorValue>(this,
+                                            false,
+                                            "variable",
+                                            Moose::VarKindType::VAR_NONLINEAR,
+                                            Moose::VarFieldType::VAR_FIELD_VECTOR),
     _var(*mooseVariable()),
     _normals(_var.normals()),
     _phi(_assembly.phiFace(_var)),

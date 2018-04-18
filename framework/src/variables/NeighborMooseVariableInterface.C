@@ -22,7 +22,8 @@ NeighborMooseVariableInterface<T>::NeighborMooseVariableInterface(
     bool nodal,
     Moose::VarKindType expected_var_type,
     Moose::VarFieldType expected_var_field_type)
-  : MooseVariableInterface<T>(moose_object, nodal, expected_var_type, expected_var_field_type)
+  : MooseVariableInterface<T>(
+        moose_object, nodal, "variable", expected_var_type, expected_var_field_type)
 {
 }
 

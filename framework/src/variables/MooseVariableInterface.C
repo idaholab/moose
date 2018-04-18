@@ -19,9 +19,9 @@
 template <typename T>
 MooseVariableInterface<T>::MooseVariableInterface(const MooseObject * moose_object,
                                                   bool nodal,
+                                                  std::string var_param_name,
                                                   Moose::VarKindType expected_var_type,
-                                                  Moose::VarFieldType expected_var_field_type,
-                                                  std::string var_param_name)
+                                                  Moose::VarFieldType expected_var_field_type)
   : _nodal(nodal)
 {
   const InputParameters & parameters = moose_object->parameters();

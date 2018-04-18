@@ -24,8 +24,11 @@ validParams<SideIntegralVariablePostprocessor>()
 SideIntegralVariablePostprocessor::SideIntegralVariablePostprocessor(
     const InputParameters & parameters)
   : SideIntegralPostprocessor(parameters),
-    MooseVariableInterface<Real>(
-        this, false, Moose::VarKindType::VAR_ANY, Moose::VarFieldType::VAR_FIELD_STANDARD),
+    MooseVariableInterface<Real>(this,
+                                 false,
+                                 "variable",
+                                 Moose::VarKindType::VAR_ANY,
+                                 Moose::VarFieldType::VAR_FIELD_STANDARD),
     _u(coupledValue("variable")),
     _grad_u(coupledGradient("variable"))
 {

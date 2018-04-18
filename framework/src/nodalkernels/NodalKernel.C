@@ -73,8 +73,11 @@ NodalKernel::NodalKernel(const InputParameters & parameters)
                     parameters.get<THREAD_ID>("_tid"),
                     true),
     CoupleableMooseVariableDependencyIntermediateInterface(this, true),
-    MooseVariableInterface<Real>(
-        this, true, Moose::VarKindType::VAR_NONLINEAR, Moose::VarFieldType::VAR_FIELD_STANDARD),
+    MooseVariableInterface<Real>(this,
+                                 true,
+                                 "variable",
+                                 Moose::VarKindType::VAR_NONLINEAR,
+                                 Moose::VarFieldType::VAR_FIELD_STANDARD),
     TaggingInterface(this),
     _subproblem(*getCheckedPointerParam<SubProblem *>("_subproblem")),
     _fe_problem(*getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")),
