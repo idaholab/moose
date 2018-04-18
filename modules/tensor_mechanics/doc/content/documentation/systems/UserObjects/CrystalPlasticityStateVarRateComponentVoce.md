@@ -61,6 +61,7 @@ If $i==j$ this value represents the latent hardening coefficient between one sli
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 Note that this values usually this matrix is symmetric.
 \end{itemize}
 >>>>>>> Voce Hardening Law for the crystal plasticity user object based framework
@@ -76,6 +77,10 @@ Note that this values usually this matrix is symmetric.
 Note that these values usually this matrix is symmetric.
 \end{itemize}  
 >>>>>>> close #11307
+=======
+Note that this values usually this matrix is symmetric.
+\end{itemize}
+>>>>>>> Voce Hardening Law for the crystal plasticity user object based framework
 
 
 
