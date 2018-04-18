@@ -40,13 +40,18 @@ public:
   virtual bool calcStateVariableEvolutionRateComponent(unsigned int qp,
                                                        std::vector<Real> & val) const;
 
-// class containgn the avialbale slip systems
+  // class containgn the avialbale slip systems
   static MooseEnum crystalLatticeTypeOptions();
+<<<<<<< HEAD
 >>>>>>> Voce Hardening Law for the crystal plasticity user object based framework
+=======
+
+>>>>>>> close #11307
 protected:
   const MaterialProperty<std::vector<Real>> & _mat_prop_slip_rate;
   const MaterialProperty<std::vector<Real>> & _mat_prop_state_var;
 
+<<<<<<< HEAD
 <<<<<<< HEAD
   /// the variable to switch crystal lattice type (i.e. FCC or BCC)
   MooseEnum _crystal_lattice_type;
@@ -54,9 +59,10 @@ protected:
   /// the vectors of the input paramters
 =======
 
+=======
+>>>>>>> close #11307
   // the switching variable containing the type of crystal (i.e. FCC12 or BCC12)
   MooseEnum _crystal_lattice_type;
-
 
   // teh vectors containing the input paramters
 >>>>>>> Voce Hardening Law for the crystal plasticity user object based framework
@@ -94,7 +100,6 @@ protected:
   // the vector associating a slip system to its groud ID
   std::vector<unsigned int> _slipSystem_GroupID;
 
-
   // method checking the input paramters
   virtual void checkHardeningParametersSize() const;
   // method assocaiting slip system to their slip plane
@@ -102,8 +107,13 @@ protected:
   // method assocaiting slip system to their group
   virtual void initSlipSystem_PlaneID(std::vector<unsigned int> & _slipSystem_PlaneID) const;
   // method retriving the appropiate self/latent hardening coefficient
+<<<<<<< HEAD
   virtual Real getHardeningCoefficient(unsigned int slipSystemIndex_i, unsigned int slipSystemIndex_j) const;
 >>>>>>> Voce Hardening Law for the crystal plasticity user object based framework
+=======
+  virtual Real getHardeningCoefficient(unsigned int slipSystemIndex_i,
+                                       unsigned int slipSystemIndex_j) const;
+>>>>>>> close #11307
 };
 
 #endif // CRYSTALPLASTICITYSTATEVARRATECOMPONENTVOCE_H

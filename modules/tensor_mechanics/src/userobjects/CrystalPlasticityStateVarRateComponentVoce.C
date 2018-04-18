@@ -26,13 +26,19 @@ validParams<CrystalPlasticityStateVarRateComponentVoce>()
                                "state variable user object specified in input "
                                "file.");
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> close #11307
   params.addParam<MooseEnum>(
       "crystal_lattice_type",
       CrystalPlasticityStateVarRateComponentVoce::crystalLatticeTypeOptions(),
       "Type of crystal lattyce structure output");
+<<<<<<< HEAD
 =======
   params.addParam<MooseEnum>("crystal_lattice_type", CrystalPlasticityStateVarRateComponentVoce::crystalLatticeTypeOptions(), "Type of crystal lattyce structure output");
 >>>>>>> Voce Hardening Law for the crystal plasticity user object based framework
+=======
+>>>>>>> close #11307
   params.addParam<std::vector<unsigned int>>("groups",
                                              "To group the initial values on different "
                                              "slip systems 'format: [start end)', i.e.'0 "
@@ -48,16 +54,22 @@ validParams<CrystalPlasticityStateVarRateComponentVoce>()
                                      "12-23 = 110.0 and 24-48 = 120.0 ");
   params.addParam<std::vector<Real>>("tauSat_group_values",
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> close #11307
                                      "The saturation resolved shear stress"
                                      "correspoinding to each group"
                                      " i.e. '150.0 170.0 180.0' means 0-11 = 150.0, "
                                      "12-23 = 170.0 and 24-48 = 180.0 ");
+<<<<<<< HEAD
 =======
                                       "The saturation resolved shear stress"
                                       "correspoinding to each group"
                                       " i.e. '150.0 170.0 180.0' means 0-11 = 150.0, "
                                       "12-23 = 170.0 and 24-48 = 180.0 ");
 >>>>>>> Voce Hardening Law for the crystal plasticity user object based framework
+=======
+>>>>>>> close #11307
   params.addParam<std::vector<Real>>("hardeningExponent_group_values",
                                      "The hardening exponent m"
                                      "correspoinding to each group"
@@ -76,6 +88,9 @@ validParams<CrystalPlasticityStateVarRateComponentVoce>()
                                      "12-23 = 2.0 and 24-48 = 3.0 ");
   params.addParam<std::vector<Real>>("GroupGroup_Hardening_group_values",
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> close #11307
                                      "The group-to-group laten hardening coefficient q_ab"
                                      "This is a NxN vector"
                                      " i.e. '1.0 2.0 3.0 4.0 5.0 6.0 7.0 8.0 9.0' "
@@ -87,6 +102,7 @@ validParams<CrystalPlasticityStateVarRateComponentVoce>()
       "Phenomenological Voce constitutive model state"
       " variable evolution rate "
       "component base class.  Override this virtual functions in your class");
+<<<<<<< HEAD
   return params;
 }
 
@@ -106,6 +122,11 @@ validParams<CrystalPlasticityStateVarRateComponentVoce>()
 
 
 >>>>>>> Voce Hardening Law for the crystal plasticity user object based framework
+=======
+  return params;
+}
+
+>>>>>>> close #11307
 CrystalPlasticityStateVarRateComponentVoce::CrystalPlasticityStateVarRateComponentVoce(
     const InputParameters & parameters)
   : CrystalPlasticityStateVarRateComponent(parameters),
@@ -118,10 +139,14 @@ CrystalPlasticityStateVarRateComponentVoce::CrystalPlasticityStateVarRateCompone
     _h0_group_values(getParam<std::vector<Real>>("h0_group_values")),
     _tau0_group_values(getParam<std::vector<Real>>("tau0_group_values")),
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> close #11307
     _tauSat_group_values(getParam<std::vector<Real>>("tauSat_group_values")),
     _hardeningExponent_group_values(getParam<std::vector<Real>>("hardeningExponent_group_values")),
     _selfHardening_group_values(getParam<std::vector<Real>>("selfHardening_group_values")),
     _coplanarHardening_group_values(getParam<std::vector<Real>>("coplanarHardening_group_values")),
+<<<<<<< HEAD
     _GroupGroup_Hardening_group_values(
         getParam<std::vector<Real>>("GroupGroup_Hardening_group_values"))
 {
@@ -136,12 +161,18 @@ CrystalPlasticityStateVarRateComponentVoce::CrystalPlasticityStateVarRateCompone
       getParam<std::vector<Real>>("selfHardening_group_values")),
     _coplanarHardening_group_values(
       getParam<std::vector<Real>>("coplanarHardening_group_values")),
+=======
+>>>>>>> close #11307
     _GroupGroup_Hardening_group_values(
-      getParam<std::vector<Real>>("GroupGroup_Hardening_group_values"))
+        getParam<std::vector<Real>>("GroupGroup_Hardening_group_values"))
 {
   // perform input checks and initialize usefull variables
+<<<<<<< HEAD
   _n_groups = _groups.size() -1;
 >>>>>>> Voce Hardening Law for the crystal plasticity user object based framework
+=======
+  _n_groups = _groups.size() - 1;
+>>>>>>> close #11307
   checkHardeningParametersSize();
   initSlipSystem_PlaneID(_slipSystem_PlaneID);
   initSlipSystem_GroupID(_slipSystem_GroupID);
@@ -151,6 +182,9 @@ void
 CrystalPlasticityStateVarRateComponentVoce::checkHardeningParametersSize() const
 {
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> close #11307
   // check that at least one group exists
   if (_n_groups <= 0)
     mooseError("CrystalPlasticityStateVarRateComponentVoce: Error in reading hardening     "
@@ -172,6 +206,7 @@ CrystalPlasticityStateVarRateComponentVoce::checkHardeningParametersSize() const
     mooseError("CrystalPlasticityStateVarRateComponentVoce: "
                "The size of one or more input parameters does not match the group size");
 }
+<<<<<<< HEAD
 =======
     // check that at least one group exists
     if (_n_groups <= 0)
@@ -198,6 +233,8 @@ CrystalPlasticityStateVarRateComponentVoce::checkHardeningParametersSize() const
 
 
 >>>>>>> Voce Hardening Law for the crystal plasticity user object based framework
+=======
+>>>>>>> close #11307
 
 bool
 CrystalPlasticityStateVarRateComponentVoce::calcStateVariableEvolutionRateComponent(
@@ -214,6 +251,7 @@ CrystalPlasticityStateVarRateComponentVoce::calcStateVariableEvolutionRateCompon
 
   DenseVector<Real> hb(_variable_size);
 
+<<<<<<< HEAD
 <<<<<<< HEAD
   for (unsigned int i = 0; i < _variable_size; ++i)
   {
@@ -233,22 +271,29 @@ CrystalPlasticityStateVarRateComponentVoce::calcStateVariableEvolutionRateCompon
 =======
 
 
+=======
+>>>>>>> close #11307
   for (unsigned int i = 0; i < _variable_size; ++i)
-    {
-      group_i = _slipSystem_GroupID[i];
-      h0 = _h0_group_values[group_i];
-      tau_0 = _tau0_group_values[group_i];
-      tau_sat = _tauSat_group_values[group_i];
-      hardening_exponenet = _hardeningExponent_group_values[group_i];
+  {
+    group_i = _slipSystem_GroupID[i];
+    h0 = _h0_group_values[group_i];
+    tau_0 = _tau0_group_values[group_i];
+    tau_sat = _tauSat_group_values[group_i];
+    hardening_exponenet = _hardeningExponent_group_values[group_i];
 
-      delta_tau = tau_sat - tau_0;
+    delta_tau = tau_sat - tau_0;
 
-
-      hb(i) = h0 * std::pow(std::abs(1.0 - (_mat_prop_state_var[qp][i] - tau_0) / delta_tau), hardening_exponenet) *
+    hb(i) = h0 *
+            std::pow(std::abs(1.0 - (_mat_prop_state_var[qp][i] - tau_0) / delta_tau),
+                     hardening_exponenet) *
             std::copysign(1.0, 1.0 - (_mat_prop_state_var[qp][i] - tau_0) / delta_tau);
+<<<<<<< HEAD
 
     }
 >>>>>>> Voce Hardening Law for the crystal plasticity user object based framework
+=======
+  }
+>>>>>>> close #11307
 
   for (unsigned int i = 0; i < _variable_size; ++i)
     for (unsigned int j = 0; j < _variable_size; ++j)
@@ -271,11 +316,15 @@ CrystalPlasticityStateVarRateComponentVoce::crystalLatticeTypeOptions()
 void
 CrystalPlasticityStateVarRateComponentVoce::initSlipSystem_PlaneID(
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> close #11307
     std::vector<unsigned int> & _slipSystem_PlaneID) const
 {
   // this routine is generate a vector containing the association between
   // slip system number and slip plane
   _slipSystem_PlaneID.assign(_variable_size, 0);
+<<<<<<< HEAD
 
   for (unsigned int slipSystemIndex = 0; slipSystemIndex < _variable_size; ++slipSystemIndex)
   {
@@ -338,63 +387,69 @@ CrystalPlasticityStateVarRateComponentVoce::getHardeningCoefficient(
 // this routine is generate a vector containing the association between
 // slip system number and slip plane
       _slipSystem_PlaneID.assign(_variable_size, 0);
+=======
+>>>>>>> close #11307
 
-      for (unsigned int slipSystemIndex=0; slipSystemIndex < _variable_size;
-        ++slipSystemIndex){
+  for (unsigned int slipSystemIndex = 0; slipSystemIndex < _variable_size; ++slipSystemIndex)
+  {
 
-        switch (_crystal_lattice_type)
-        {
-          case 0: // FCC
-            if ( slipSystemIndex<12 )
-              _slipSystem_PlaneID[slipSystemIndex] =  slipSystemIndex/3;
-            else
-              mooseError("FCC with more than 12 slip planes not implemented ");
+    switch (_crystal_lattice_type)
+    {
+      case 0: // FCC
+        if (slipSystemIndex < 12)
+          _slipSystem_PlaneID[slipSystemIndex] = slipSystemIndex / 3;
+        else
+          mooseError("FCC with more than 12 slip planes not implemented ");
 
-          break;
+        break;
 
-        case 1: // BCC
-          if ( slipSystemIndex < 12)
-            _slipSystem_PlaneID[slipSystemIndex] =  slipSystemIndex/2;
+      case 1: // BCC
+        if (slipSystemIndex < 12)
+          _slipSystem_PlaneID[slipSystemIndex] = slipSystemIndex / 2;
 
-          else if ( slipSystemIndex>=12 && slipSystemIndex < 48 )
-            _slipSystem_PlaneID[slipSystemIndex] =  (slipSystemIndex-6);
+        else if (slipSystemIndex >= 12 && slipSystemIndex < 48)
+          _slipSystem_PlaneID[slipSystemIndex] = (slipSystemIndex - 6);
 
-          else
-            mooseError("BCC with more than 48 slip systems not implemented "  );
+        else
+          mooseError("BCC with more than 48 slip systems not implemented ");
 
-          break;
+        break;
 
-        default:
-          mooseError("VoceHardeningError: Pass valid crustal_structure_type " );
-        }
-      }
+      default:
+        mooseError("VoceHardeningError: Pass valid crustal_structure_type ");
     }
+  }
+}
 
 void
 CrystalPlasticityStateVarRateComponentVoce::initSlipSystem_GroupID(
-  std::vector<unsigned int> & _slipSystem_GroupID) const
+    std::vector<unsigned int> & _slipSystem_GroupID) const
 // this routine is generate a vector containing the association between
 // slip system number and provided group edges
+{
+  _slipSystem_GroupID.assign(_variable_size, 0);
+
+  for (unsigned int slipSystemIndex = 0; slipSystemIndex < _variable_size; ++slipSystemIndex)
+  {
+    for (unsigned int i = 0; i < _groups.size() - 1; i++)
     {
-      _slipSystem_GroupID.assign(_variable_size, 0);
-
-      for (unsigned int slipSystemIndex=0;slipSystemIndex < _variable_size;
-         ++slipSystemIndex){
-         for (unsigned int i=0; i<_groups.size() - 1; i++)
-         {
-           if (slipSystemIndex>= _groups[i] && slipSystemIndex < _groups[i + 1]){
-             _slipSystem_GroupID[slipSystemIndex] = i;
-            break;
-           }
-         }
-
-       }
+      if (slipSystemIndex >= _groups[i] && slipSystemIndex < _groups[i + 1])
+      {
+        _slipSystem_GroupID[slipSystemIndex] = i;
+        break;
+      }
     }
+  }
+}
 
 Real
 CrystalPlasticityStateVarRateComponentVoce::getHardeningCoefficient(
+<<<<<<< HEAD
   unsigned int slipSystemIndex_i, unsigned int slipSystemIndex_j) const
 >>>>>>> Voce Hardening Law for the crystal plasticity user object based framework
+=======
+    unsigned int slipSystemIndex_i, unsigned int slipSystemIndex_j) const
+>>>>>>> close #11307
 {
   // select the appropriate latent hardening coefficient based on the slip systems indeces
 
@@ -414,6 +469,7 @@ CrystalPlasticityStateVarRateComponentVoce::getHardeningCoefficient(
   if (same_slipSystem)
     q_ab = _selfHardening_group_values[group_i];
 <<<<<<< HEAD
+<<<<<<< HEAD
   else if (same_plane)
     q_ab = _coplanarHardening_group_values[group_i];
   else if (same_group) // here for debugging purposes this if could be removed
@@ -426,14 +482,21 @@ CrystalPlasticityStateVarRateComponentVoce::getHardeningCoefficient(
   return q_ab;
 =======
   else if ( same_plane )
+=======
+  else if (same_plane)
+>>>>>>> close #11307
     q_ab = _coplanarHardening_group_values[group_i];
-  else if ( same_group ) // here for debugging purposes this if could be removed
-    q_ab = _GroupGroup_Hardening_group_values[group_i*_n_groups+group_i];
-  else if ( !same_group )
-    q_ab = _GroupGroup_Hardening_group_values[group_i*_n_groups+group_j];
+  else if (same_group) // here for debugging purposes this if could be removed
+    q_ab = _GroupGroup_Hardening_group_values[group_i * _n_groups + group_i];
+  else if (!same_group)
+    q_ab = _GroupGroup_Hardening_group_values[group_i * _n_groups + group_j];
   else // here for debugging purposes
-    mooseError("VoceHardeningError:getHardeningCoefficient: case not listed, abort " );
+    mooseError("VoceHardeningError:getHardeningCoefficient: case not listed, abort ");
 
+<<<<<<< HEAD
 return q_ab;
 >>>>>>> Voce Hardening Law for the crystal plasticity user object based framework
+=======
+  return q_ab;
+>>>>>>> close #11307
 }
