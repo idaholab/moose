@@ -141,7 +141,6 @@ class JobDAG(object):
                 tester = job.getTester()
                 output_files = tester.getOutputFiles()
                 if len(output_files_in_dir.intersection(set(output_files))):
-                    race_conditions_found = True
                     # Break out of this loop and set every job involved as a failure
                     # for race conditions
                     for this_job in concurrent_jobs:

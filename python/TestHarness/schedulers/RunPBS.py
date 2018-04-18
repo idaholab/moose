@@ -7,7 +7,7 @@
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
-import os, sys
+import os
 from QueueManager import QueueManager
 from TestHarness import util # to execute qsub
 
@@ -31,7 +31,6 @@ class RunPBS(QueueManager):
 
     def _augmentTemplate(self, job):
         """ populate qsub script template with paramaters """
-        job_dag = job.getDAG()
         template = {}
 
         # Launch script location

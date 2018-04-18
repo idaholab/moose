@@ -359,7 +359,7 @@ class Scheduler(MooseObject):
                         with self.job_count_lock:
                             self.job_count -= 1
 
-        except Exception as e:
+        except Exception:
             print('statusWorker Exception: %s' % (traceback.format_exc()))
             self.killRemaining()
 
@@ -422,7 +422,7 @@ class Scheduler(MooseObject):
             # Job is done (or needs to re-enter the queue)
             self.queueJobs(Jobs, j_lock)
 
-        except Exception as e:
+        except Exception:
             print('runWorker Exception: %s' % (traceback.format_exc()))
             self.killRemaining()
 
