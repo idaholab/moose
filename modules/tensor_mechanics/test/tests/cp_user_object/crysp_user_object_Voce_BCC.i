@@ -149,10 +149,10 @@
     variable_size = 48
     groups = '0 12 24 48'
     group_values =  '50 51 52'
-    uo_state_var_evol_rate_comp_name = state_var_evol_rate_comp_gss
+    uo_state_var_evol_rate_comp_name = state_var_evol_rate_comp_voce
     scale_factor = 1.0
   [../]
-  [./state_var_evol_rate_comp_gss]
+  [./state_var_evol_rate_comp_voce]
     type = CrystalPlasticityStateVarRateComponentVoce
     variable_size = 48
     crystal_lattice_type = 'BCC'
@@ -180,7 +180,7 @@
     uo_slip_rates = 'slip_rate_gss'
     uo_slip_resistances = 'slip_resistance_gss'
     uo_state_vars = 'state_var_gss'
-    uo_state_var_evol_rate_comps = 'state_var_evol_rate_comp_gss'
+    uo_state_var_evol_rate_comps = 'state_var_evol_rate_comp_voce'
   [../]
   [./strain]
     type = ComputeFiniteStrain
