@@ -38,8 +38,10 @@ protected:
   const MaterialProperty<std::vector<Real>> & _mat_prop_slip_rate;
   const MaterialProperty<std::vector<Real>> & _mat_prop_state_var;
 
-  // the switching variable containing the type of crystal (i.e. FCC12 or BCC12)
+
+  // the switching variable containing the type of crystal (i.e. FCC or BCC)
   MooseEnum _crystal_lattice_type;
+
 
   // teh vectors containing the input paramters
   std::vector<unsigned int> _groups;
