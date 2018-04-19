@@ -37,7 +37,7 @@ InputParameters validParams<TaggingInterface>();
 class TaggingInterface
 {
 public:
-  TaggingInterface(SubProblem & subproblem, const MooseObject & moose_object);
+  TaggingInterface(const MooseObject * moose_object);
   virtual ~TaggingInterface();
 
   void useVectorTag(const TagName & tag_name);
@@ -103,9 +103,14 @@ protected:
   /// The matrices this Kernel will contribute to
   std::set<TagID> _matrix_tags;
 
-  SubProblem & _subproblem;
-
+  /// Moose objct this tag works on
   const MooseObject & _moose_object;
+
+  /// Parameters from moose object
+  const InputParameters & _tag_params;
+
+  /// SubProblem that contains tag info
+  SubProblem & _subproblem;
 
   /// Residual blocks Vectors For each Tag
   std::vector<DenseVector<Number> *> _re_blocks;

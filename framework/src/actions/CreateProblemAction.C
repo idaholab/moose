@@ -48,20 +48,15 @@ validParams<CreateProblemAction>()
                                        "<path>/<filebase> or <path>/LATEST to "
                                        "grab the latest file available)");
 
-  MultiMooseEnum extra_tagvs(" ", " ", true);
-  MultiMooseEnum extra_tagms(" ", " ", true);
+  params.addParam<std::vector<TagName>>("extra_tag_vectors",
+                                        "Extra vectors to add to the system that can be filled by "
+                                        "objects which compute residuals and Jacobians (Kernels, "
+                                        "BCs, etc.) by setting tags on them.");
 
-  params.addParam<MultiMooseEnum>("extra_tag_vectors",
-                                  extra_tagvs,
-                                  "Extra vectors to add to the system that can be filled by "
-                                  "objects which compute residuals and Jacobians (Kernels, "
-                                  "BCs, etc.) by setting tags on them.");
-
-  params.addParam<MultiMooseEnum>("extra_tag_matrices",
-                                  extra_tagms,
-                                  "Extra matrices to add to the system that can be filled "
-                                  "by objects which compute residuals and Jacobians "
-                                  "(Kernels, BCs, etc.) by setting tags on them.");
+  params.addParam<std::vector<TagName>>("extra_tag_matrices",
+                                        "Extra matrices to add to the system that can be filled "
+                                        "by objects which compute residuals and Jacobians "
+                                        "(Kernels, BCs, etc.) by setting tags on them.");
 
   return params;
 }
@@ -143,7 +138,7 @@ void
 CreateProblemAction::CreateTagVectors()
 {
   // add vectors and their tags to system
-  auto & vectors = getParam<MultiMooseEnum>("extra_tag_vectors");
+  auto & vectors = getParam<std::vector<TagName>>("extra_tag_vectors");
   auto & nl = _problem->getNonlinearSystemBase();
   for (auto & vector : vectors)
   {
@@ -152,7 +147,7 @@ CreateProblemAction::CreateTagVectors()
   }
 
   // add matrices and their tags
-  auto & matrices = getParam<MultiMooseEnum>("extra_tag_matrices");
+  auto & matrices = getParam<std::vector<TagName>>("extra_tag_matrices");
   for (auto & matrix : matrices)
   {
     auto tag = _problem->addMatrixTag(matrix);

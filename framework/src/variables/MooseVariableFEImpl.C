@@ -1242,7 +1242,10 @@ MooseVariableFEImpl<OutputType>::nodalVectorTagValue(TagID tag)
     if (_sys.hasVector(tag) && tag < _vector_tags_dof_u.size())
       return _vector_tags_dof_u[tag];
     else
-      mooseError("Tag is not associated with any vector or there is no any data for tag ", tag);
+      mooseError("Tag is not associated with any vector or there is no any data for tag ",
+                 tag,
+                 " for nodal variable ",
+                 name());
   }
   else
     mooseError("Nodal values can be requested only on nodal variables, variable '",
@@ -1261,7 +1264,10 @@ MooseVariableFEImpl<OutputType>::nodalMatrixTagValue(TagID tag)
     if (_sys.hasMatrix(tag) && tag < _matrix_tags_dof_u.size())
       return _matrix_tags_dof_u[tag];
     else
-      mooseError("Tag is not associated with any matrix or there is no any data for tag ", tag);
+      mooseError("Tag is not associated with any matrix or there is no any data for tag ",
+                 tag,
+                 " for nodal variable ",
+                 name());
   }
   else
     mooseError("Nodal values can be requested only on nodal variables, variable '",

@@ -49,10 +49,9 @@ ScalarKernel::ScalarKernel(const InputParameters & parameters)
     TransientInterface(this),
     MeshChangedInterface(parameters),
     VectorPostprocessorInterface(this),
-    TaggingInterface(*getCheckedPointerParam<FEProblemBase *>("_fe_problem_base"), *this),
+    TaggingInterface(this),
     _subproblem(*getCheckedPointerParam<SubProblem *>("_subproblem")),
     _sys(*getCheckedPointerParam<SystemBase *>("_sys")),
-
     _tid(parameters.get<THREAD_ID>("_tid")),
     _assembly(_subproblem.assembly(_tid)),
     _var(_sys.getScalarVariable(_tid, parameters.get<NonlinearVariableName>("variable"))),

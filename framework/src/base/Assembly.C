@@ -1505,7 +1505,7 @@ Assembly::addResidual(NumericVector<Number> & residual, TagID tag_id /* = 0 */)
 }
 
 void
-Assembly::addResidual(std::map<TagName, TagID> & tags)
+Assembly::addResidual(const std::map<TagName, TagID> & tags)
 {
   for (auto & tag : tags)
     if (_sys.hasVector(tag.second))
@@ -1522,7 +1522,7 @@ Assembly::addResidualNeighbor(NumericVector<Number> & residual, TagID tag_id /* 
 }
 
 void
-Assembly::addResidualNeighbor(std::map<TagName, TagID> & tags)
+Assembly::addResidualNeighbor(const std::map<TagName, TagID> & tags)
 {
   for (auto & tag : tags)
     if (_sys.hasVector(tag.second))
@@ -1543,7 +1543,7 @@ Assembly::addResidualScalar(TagID tag_id)
 }
 
 void
-Assembly::addResidualScalar(std::map<TagName, TagID> & tags)
+Assembly::addResidualScalar(const std::map<TagName, TagID> & tags)
 {
   for (auto & tag : tags)
     addResidualScalar(tag.second);
@@ -1574,7 +1574,7 @@ Assembly::cacheResidualContribution(dof_id_type dof, Real value, TagID tag_id)
 }
 
 void
-Assembly::cacheResidualContribution(dof_id_type dof, Real value, std::set<TagID> & tags)
+Assembly::cacheResidualContribution(dof_id_type dof, Real value, const std::set<TagID> & tags)
 {
   for (auto & tag : tags)
     cacheResidualContribution(dof, value, tag);
@@ -1600,7 +1600,7 @@ Assembly::cacheResidualNeighbor()
 }
 
 void
-Assembly::cacheResidualNodes(DenseVector<Number> & res,
+Assembly::cacheResidualNodes(const DenseVector<Number> & res,
                              std::vector<dof_id_type> & dof_index,
                              TagID tag /* = 0*/)
 {

@@ -73,7 +73,7 @@ KernelBase::KernelBase(const InputParameters & parameters)
     GeometricSearchInterface(this),
     Restartable(this, "Kernels"),
     MeshChangedInterface(parameters),
-    TaggingInterface(*getCheckedPointerParam<FEProblemBase *>("_fe_problem_base"), *this),
+    TaggingInterface(this),
     _subproblem(*getCheckedPointerParam<SubProblem *>("_subproblem")),
     _fe_problem(*parameters.get<FEProblemBase *>("_fe_problem_base")),
     _sys(*getCheckedPointerParam<SystemBase *>("_sys")),

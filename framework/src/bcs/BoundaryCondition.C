@@ -52,7 +52,7 @@ BoundaryCondition::BoundaryCondition(const InputParameters & parameters, bool no
     GeometricSearchInterface(this),
     Restartable(this, "BCs"),
     MeshChangedInterface(parameters),
-    TaggingInterface(*getCheckedPointerParam<FEProblemBase *>("_fe_problem_base"), *this),
+    TaggingInterface(this),
     _subproblem(*getCheckedPointerParam<SubProblem *>("_subproblem")),
     _fe_problem(*getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")),
     _sys(*getCheckedPointerParam<SystemBase *>("_sys")),

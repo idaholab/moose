@@ -485,11 +485,11 @@ public:
   void copyNeighborShapes(unsigned int var);
 
   void addResidual(NumericVector<Number> & residual, TagID tag_id = 0);
-  void addResidual(std::map<TagName, TagID> & tags);
+  void addResidual(const std::map<TagName, TagID> & tags);
   void addResidualNeighbor(NumericVector<Number> & residual, TagID tag_id = 0);
-  void addResidualNeighbor(std::map<TagName, TagID> & tags);
+  void addResidualNeighbor(const std::map<TagName, TagID> & tags);
   void addResidualScalar(TagID tag_id);
-  void addResidualScalar(std::map<TagName, TagID> & tags);
+  void addResidualScalar(const std::map<TagName, TagID> & tags);
 
   /**
    * Takes the values that are currently in _sub_Re and appends them to the cached values.
@@ -514,12 +514,12 @@ public:
    * @param value The value of the residual contribution.
    * @param tags the contribution should go to all tags
    */
-  void cacheResidualContribution(dof_id_type dof, Real value, std::set<TagID> & tags);
+  void cacheResidualContribution(dof_id_type dof, Real value, const std::set<TagID> & tags);
 
   /**
    * Lets an external class cache residual at a set of nodes
    */
-  void cacheResidualNodes(DenseVector<Number> & res,
+  void cacheResidualNodes(const DenseVector<Number> & res,
                           std::vector<dof_id_type> & dof_index,
                           TagID tag = 0);
 

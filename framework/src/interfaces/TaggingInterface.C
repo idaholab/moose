@@ -46,34 +46,35 @@ validParams<TaggingInterface>()
   return params;
 }
 
-TaggingInterface::TaggingInterface(SubProblem & subproblem, const MooseObject & moose_object)
-  : _subproblem(subproblem), _moose_object(moose_object)
+TaggingInterface::TaggingInterface(const MooseObject * moose_object)
+  : _moose_object(*moose_object),
+    _tag_params(_moose_object.parameters()),
+    _subproblem(*_tag_params.getCheckedPointerParam<SubProblem *>("_subproblem"))
 {
-  const InputParameters & parameters = moose_object.parameters();
-  auto & vector_tag_names = parameters.get<MultiMooseEnum>("vector_tags");
+  auto & vector_tag_names = _tag_params.get<MultiMooseEnum>("vector_tags");
 
   if (!vector_tag_names.isValid())
-    mooseError("MUST provide at least one vector_tag for Kernel: ", moose_object.name());
+    mooseError("MUST provide at least one vector_tag for Kernel: ", _moose_object.name());
 
   for (auto & vector_tag_name : vector_tag_names)
-    _vector_tags.insert(_subproblem.getVectorTagID(vector_tag_name));
+    _vector_tags.insert(_subproblem.getVectorTagID(vector_tag_name.name()));
 
   // Add extra vector tags. These tags should be created in the System already, otherwise
   // we can not add the extra tags
-  auto & extra_vector_tags = parameters.get<std::vector<TagName>>("extra_vector_tags");
+  auto & extra_vector_tags = _tag_params.get<std::vector<TagName>>("extra_vector_tags");
 
   for (auto & vector_tag_name : extra_vector_tags)
     _vector_tags.insert(_subproblem.getVectorTagID(vector_tag_name));
 
-  auto & matrix_tag_names = parameters.get<MultiMooseEnum>("matrix_tags");
+  auto & matrix_tag_names = _tag_params.get<MultiMooseEnum>("matrix_tags");
 
   if (!matrix_tag_names.isValid())
-    mooseError("MUST provide at least one matrix_tag for Kernel: ", moose_object.name());
+    mooseError("MUST provide at least one matrix_tag for Kernel: ", _moose_object.name());
 
   for (auto & matrix_tag_name : matrix_tag_names)
-    _matrix_tags.insert(_subproblem.getMatrixTagID(matrix_tag_name));
+    _matrix_tags.insert(_subproblem.getMatrixTagID(matrix_tag_name.name()));
 
-  auto & extra_matrix_tags = parameters.get<std::vector<TagName>>("extra_matrix_tags");
+  auto & extra_matrix_tags = _tag_params.get<std::vector<TagName>>("extra_matrix_tags");
 
   for (auto & matrix_tag_name : extra_matrix_tags)
     _matrix_tags.insert(_subproblem.getMatrixTagID(matrix_tag_name));

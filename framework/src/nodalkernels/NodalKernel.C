@@ -74,7 +74,7 @@ NodalKernel::NodalKernel(const InputParameters & parameters)
                     true),
     CoupleableMooseVariableDependencyIntermediateInterface(this, true),
     MooseVariableInterface<Real>(this, true),
-    TaggingInterface(*getCheckedPointerParam<FEProblemBase *>("_fe_problem_base"), *this),
+    TaggingInterface(this),
     _subproblem(*getCheckedPointerParam<SubProblem *>("_subproblem")),
     _fe_problem(*getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")),
     _sys(*getCheckedPointerParam<SystemBase *>("_sys")),
