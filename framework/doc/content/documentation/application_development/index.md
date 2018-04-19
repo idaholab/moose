@@ -1,17 +1,21 @@
-[Build System](/build_system.md)
+# Application Development
 
-[Test System](/test_system.md)
+These documentation pages are meant to be used by developers who are developing MOOSE-based applications.
 
-[Performance Benchmarking](/performance_benchmarking.md)
+[Build System](/build_system.md) - How the hierarchical `make` system functions in MOOSE
 
-[MooseUtils](/moose_utils.md)
+[Test System](/test_system.md) - How to create/maintain tests for your application
 
-[Utils](utils/index.md)
+[Performance Benchmarking](/performance_benchmarking.md) - How to perform benchmarking
 
-[Jacobian Definition](/jacobian_definition.md)
+[MooseUtils](/moose_utils.md) - General utilities used throughout the Framework and applications
 
-[Hypre/BoomerAMG Preconditioning](hypre.md)
+[Utils](utils/index.md) - General utilities used throughout the Framework and applications
 
-[Code Standards](code_standards.md)
+[Jacobian Definition](/jacobian_definition.md) - How to compute derivatives of your residual statements
 
-[Debugging](/debugging.md)
+[Hypre/BoomerAMG Preconditioning](hypre.md) - In-depth discussion of using Hypre's algebraic multigrid preconditioner: BoomerAMG
+
+[Code Standards](code_standards.md) - How we expect code to be formatted
+
+[Debugging](/debugging.md) - Tips on how to debug MOOSE-based applications
