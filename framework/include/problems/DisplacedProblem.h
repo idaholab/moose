@@ -91,6 +91,20 @@ public:
   virtual void updateMesh(const NumericVector<Number> & soln,
                           const NumericVector<Number> & aux_soln);
 
+  virtual TagID addVectorTag(TagName tag_name) override;
+  virtual TagID getVectorTagID(const TagName & tag_name) override;
+  virtual TagName vectorTagName(TagID tag) override;
+  virtual bool vectorTagExists(TagID tag) override;
+  virtual unsigned int numVectorTags() override;
+  virtual std::map<TagName, TagID> & getVectorTags() override;
+
+  virtual TagID addMatrixTag(TagName tag_name) override;
+  virtual TagID getMatrixTagID(const TagName & tag_name) override;
+  virtual TagName matrixTagName(TagID tag) override;
+  virtual bool matrixTagExists(const TagName & tag_name) override;
+  virtual bool matrixTagExists(TagID tag_id) override;
+  virtual unsigned int numMatrixTags() override;
+
   virtual bool isTransient() const override;
   virtual Moose::CoordinateSystemType getCoordSystem(SubdomainID sid) override;
 
@@ -182,9 +196,9 @@ public:
   virtual void setResidual(NumericVector<Number> & residual, THREAD_ID tid) override;
   virtual void setResidualNeighbor(NumericVector<Number> & residual, THREAD_ID tid) override;
 
-  virtual void addJacobian(SparseMatrix<Number> & jacobian, THREAD_ID tid) override;
-  virtual void addJacobianNonlocal(SparseMatrix<Number> & jacobian, THREAD_ID tid);
-  virtual void addJacobianNeighbor(SparseMatrix<Number> & jacobian, THREAD_ID tid) override;
+  virtual void addJacobian(THREAD_ID tid) override;
+  virtual void addJacobianNonlocal(THREAD_ID tid);
+  virtual void addJacobianNeighbor(THREAD_ID tid) override;
   virtual void addJacobianBlock(SparseMatrix<Number> & jacobian,
                                 unsigned int ivar,
                                 unsigned int jvar,
@@ -209,7 +223,7 @@ public:
   virtual void cacheJacobian(THREAD_ID tid) override;
   virtual void cacheJacobianNonlocal(THREAD_ID tid);
   virtual void cacheJacobianNeighbor(THREAD_ID tid) override;
-  virtual void addCachedJacobian(SparseMatrix<Number> & jacobian, THREAD_ID tid) override;
+  virtual void addCachedJacobian(THREAD_ID tid) override;
 
   virtual void prepareShapes(unsigned int var, THREAD_ID tid) override;
   virtual void prepareFaceShapes(unsigned int var, THREAD_ID tid) override;

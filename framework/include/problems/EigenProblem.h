@@ -21,8 +21,7 @@ template <>
 InputParameters validParams<EigenProblem>();
 
 /**
- * Specialization of SubProblem for solving nonlinear equations plus auxiliary equations
- *
+ * Problem for solving eigenvalue problems
  */
 class EigenProblem : public FEProblemBase
 {
@@ -42,33 +41,53 @@ public:
   }
   virtual bool isGeneralizedEigenvalueProblem() { return _generalized_eigenvalue_problem; }
   virtual bool isNonlinearEigenvalueSolver();
-
-  bool residualInitialed() { return _is_residual_initialed; }
-
   // silences warning in debug mode about the other computeJacobian signature being hidden
   using FEProblemBase::computeJacobian;
 
-  virtual void computeJacobian(const NumericVector<Number> & soln,
-                               SparseMatrix<Number> & jacobian,
-                               Moose::KernelType kernel_type) override;
-
-  void computeResidualTypeBx(const NumericVector<Number> & soln,
-                             NumericVector<Number> & residual,
-                             Moose::KernelType type);
-
-  void computeResidualType(const NumericVector<Number> & soln,
-                           NumericVector<Number> & residual,
-                           Moose::KernelType type) override;
+  NonlinearEigenSystem & getNonlinearEigenSystem() { return *_nl_eigen; }
 
   virtual void checkProblemIntegrity() override;
 #if LIBMESH_HAVE_SLEPC
   void setEigenproblemType(Moose::EigenProblemType eigen_problem_type);
+
+  /**
+   * Form a Jacobian matrix for all kernels and BCs with a given tag
+   */
+  virtual void computeJacobianTag(const NumericVector<Number> & soln,
+                                  SparseMatrix<Number> & jacobian,
+                                  TagID tag) override;
+
+  /**
+   * Form two Jacobian matrices, whre each is associateed with one tag, through one
+   * element-loop.
+   */
+  virtual void computeJacobianAB(const NumericVector<Number> & soln,
+                                 SparseMatrix<Number> & jacobianA,
+                                 SparseMatrix<Number> & jacobianB,
+                                 TagID tagA,
+                                 TagID tagB);
+
+  /**
+   * Form a vector for all kernels and BCs with a given tag
+   */
+  virtual void computeResidualTag(const NumericVector<Number> & soln,
+                                  NumericVector<Number> & residual,
+                                  TagID tag) override;
+
+  /**
+   * Form two vetors, whre each is associateed with one tag, through one
+   * element-loop.
+   */
+  virtual void computeResidualAB(const NumericVector<Number> & soln,
+                                 NumericVector<Number> & residualA,
+                                 NumericVector<Number> & residualB,
+                                 TagID tagA,
+                                 TagID tagB);
 #endif
 protected:
   unsigned int _n_eigen_pairs_required;
   bool _generalized_eigenvalue_problem;
   std::shared_ptr<NonlinearEigenSystem> _nl_eigen;
-  bool _is_residual_initialed;
 };
 
 #endif /* EIGENPROBLEM_H */

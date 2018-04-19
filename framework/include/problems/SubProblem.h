@@ -68,6 +68,86 @@ public:
 
   virtual bool isTransient() const = 0;
 
+  /**
+   * Create a Tag.  Tags can be associated with Vectors and Matrices and allow objects
+   * (such as Kernels) to arbitrarily contribute values to any set of vectors/matrics
+   *
+   * Note: If the tag is already present then this will simply return the TagID of that Tag
+   *
+   * @param tag_name The name of the tag to create, the TagID will get automatically generated
+   */
+  virtual TagID addVectorTag(TagName tag_name);
+
+  /**
+   * Get a TagID from a TagName.
+   */
+  virtual TagID getVectorTagID(const TagName & tag_name);
+
+  /**
+   * Retrieve the name associated with a TagID
+   */
+  virtual TagName vectorTagName(TagID tag);
+
+  /**
+   * Return all vector tags, where a tag is represented by a map from name to ID
+   */
+  virtual std::map<TagName, TagID> & getVectorTags() { return _vector_tag_name_to_tag_id; }
+
+  /**
+   * Check to see if a particular Tag exists
+   */
+  virtual bool vectorTagExists(TagID tag) { return tag < _vector_tag_name_to_tag_id.size(); }
+
+  /**
+   * Check to see if a particular Tag exists by using Tag name
+   */
+  bool vectorTagExists(const TagName & tag_name);
+
+  /**
+   * The total number of tags
+   */
+  virtual unsigned int numVectorTags() { return _vector_tag_name_to_tag_id.size(); }
+
+  /**
+   * Create a Tag.  Tags can be associated with Vectors and Matrices and allow objects
+   * (such as Kernels) to arbitrarily contribute values to any set of vectors/matrics
+   *
+   * Note: If the tag is already present then this will simply return the TagID of that Tag
+   *
+   * @param tag_name The name of the tag to create, the TagID will get automatically generated
+   */
+  virtual TagID addMatrixTag(TagName tag_name);
+
+  /**
+   * Get a TagID from a TagName.
+   */
+  virtual TagID getMatrixTagID(const TagName & tag_name);
+
+  /**
+   * Retrieve the name associated with a TagID
+   */
+  virtual TagName matrixTagName(TagID tag);
+
+  /**
+   * Check to see if a particular Tag exists
+   */
+  virtual bool matrixTagExists(const TagName & tag_name);
+
+  /**
+   * Check to see if a particular Tag exists
+   */
+  virtual bool matrixTagExists(TagID tag_id);
+
+  /**
+   * The total number of tags
+   */
+  virtual unsigned int numMatrixTags() { return _matrix_tag_name_to_tag_id.size(); }
+
+  /**
+   * Return all matrix tags in the sytem, where a tag is represented by a map from name to ID
+   */
+  virtual std::map<TagName, TagID> & getMatrixTags() { return _matrix_tag_name_to_tag_id; }
+
   // Variables /////
   virtual bool hasVariable(const std::string & var_name) const = 0;
 
@@ -182,8 +262,8 @@ public:
   virtual void setResidual(NumericVector<Number> & residual, THREAD_ID tid) = 0;
   virtual void setResidualNeighbor(NumericVector<Number> & residual, THREAD_ID tid) = 0;
 
-  virtual void addJacobian(SparseMatrix<Number> & jacobian, THREAD_ID tid) = 0;
-  virtual void addJacobianNeighbor(SparseMatrix<Number> & jacobian, THREAD_ID tid) = 0;
+  virtual void addJacobian(THREAD_ID tid) = 0;
+  virtual void addJacobianNeighbor(THREAD_ID tid) = 0;
   virtual void addJacobianBlock(SparseMatrix<Number> & jacobian,
                                 unsigned int ivar,
                                 unsigned int jvar,
@@ -200,7 +280,7 @@ public:
 
   virtual void cacheJacobian(THREAD_ID tid) = 0;
   virtual void cacheJacobianNeighbor(THREAD_ID tid) = 0;
-  virtual void addCachedJacobian(SparseMatrix<Number> & jacobian, THREAD_ID tid) = 0;
+  virtual void addCachedJacobian(THREAD_ID tid) = 0;
 
   virtual void prepare(const Elem * elem, THREAD_ID tid) = 0;
   virtual void prepareFace(const Elem * elem, THREAD_ID tid) = 0;
@@ -410,6 +490,18 @@ public:
   bool & computingNonlinearResid() { return _computing_nonlinear_residual; }
 
 protected:
+  /// The currently declared tags
+  std::map<TagName, TagID> _vector_tag_name_to_tag_id;
+
+  /// Reverse map
+  std::map<TagID, TagName> _vector_tag_id_to_tag_name;
+
+  /// The currently declared tags
+  std::map<TagName, TagID> _matrix_tag_name_to_tag_id;
+
+  /// Reverse map
+  std::map<TagID, TagName> _matrix_tag_id_to_tag_name;
+
   /// The Factory for building objects
   Factory & _factory;
 

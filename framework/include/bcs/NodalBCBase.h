@@ -37,11 +37,13 @@ class NodalBCBase : public BoundaryCondition,
 public:
   NodalBCBase(const InputParameters & parameters);
 
-  virtual void computeResidual(NumericVector<Number> & residual) = 0;
+  // This function is kept only for backward compabality (for bighorn)
+  // We should remove it as soon as possible. This function will removed
+  // as soon as bighorn is fixed.
+  virtual void computeResidual(NumericVector<Number> & /*residual*/) { ; }
+  virtual void computeResidual() = 0;
   virtual void computeJacobian() = 0;
   virtual void computeOffDiagJacobian(unsigned int jvar) = 0;
-
-  void setBCOnEigen(bool iseigen) { _is_eigen = iseigen; }
 
 protected:
   /// The aux variables to save the residual contributions to
@@ -53,10 +55,6 @@ protected:
   bool _has_diag_save_in;
   std::vector<MooseVariableFEBase *> _diag_save_in;
   std::vector<AuxVariableName> _diag_save_in_strings;
-
-  /// Indicate whether or not the boundary condition is applied to the right
-  /// hand side of eigenvalue problems
-  bool _is_eigen;
 };
 
 #endif /* NODALBCBASE_H */

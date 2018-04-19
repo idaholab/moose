@@ -43,28 +43,33 @@ NodalEqualValueConstraint::NodalEqualValueConstraint(const InputParameters & par
 void
 NodalEqualValueConstraint::computeResidual()
 {
-  // LM residuals
-  DenseVector<Number> & lm_re = _assembly.residualBlock(_var.number());
+  prepareVectorTag(_assembly, _var.number());
 
   for (unsigned int k = 0; k < _value.size(); k++)
-    lm_re(k) = (*_value[k])[0] - (*_value[k])[1];
+    _local_re(k) = (*_value[k])[0] - (*_value[k])[1];
+
+  assignTaggedLocalResidual();
 }
 
 void
 NodalEqualValueConstraint::computeJacobian()
 {
-  // do the diagonal block
-  DenseMatrix<Number> & ke = _assembly.jacobianBlock(_var.number(), _var.number());
+  prepareMatrixTag(_assembly, _var.number(), _var.number());
+
   // put zeroes on the diagonal (we have to do it, otherwise PETSc will complain!)
-  for (unsigned int i = 0; i < ke.m(); i++)
-    for (unsigned int j = 0; j < ke.n(); j++)
-      ke(i, j) = 0.;
+  for (unsigned int i = 0; i < _local_ke.m(); i++)
+    for (unsigned int j = 0; j < _local_ke.n(); j++)
+      _local_ke(i, j) = 0.;
+
+  assignTaggedLocalMatrix();
 
   for (unsigned int k = 0; k < _value.size(); k++)
   {
-    DenseMatrix<Number> & ken = _assembly.jacobianBlock(_var.number(), _val_number[k]);
+    prepareMatrixTag(_assembly, _var.number(), _val_number[k]);
 
-    ken(k, 0) = 1.;
-    ken(k, 1) = -1.;
+    _local_ke(k, 0) = 1.;
+    _local_ke(k, 1) = -1.;
+
+    assignTaggedLocalMatrix();
   }
 }

@@ -21,10 +21,11 @@
 
 #include "libmesh/threads.h"
 
-ComputeResidualThread::ComputeResidualThread(FEProblemBase & fe_problem, Moose::KernelType type)
+ComputeResidualThread::ComputeResidualThread(FEProblemBase & fe_problem,
+                                             const std::set<TagID> & tags)
   : ThreadedElementLoop<ConstElemRange>(fe_problem),
     _nl(fe_problem.getNonlinearSystemBase()),
-    _kernel_type(type),
+    _tags(tags),
     _num_cached(0),
     _integrated_bcs(_nl.getIntegratedBCWarehouse()),
     _dg_kernels(_nl.getDGKernelWarehouse()),
@@ -37,12 +38,13 @@ ComputeResidualThread::ComputeResidualThread(FEProblemBase & fe_problem, Moose::
 ComputeResidualThread::ComputeResidualThread(ComputeResidualThread & x, Threads::split split)
   : ThreadedElementLoop<ConstElemRange>(x, split),
     _nl(x._nl),
-    _kernel_type(x._kernel_type),
+    _tags(x._tags),
     _num_cached(0),
     _integrated_bcs(x._integrated_bcs),
     _dg_kernels(x._dg_kernels),
     _interface_kernels(x._interface_kernels),
-    _kernels(x._kernels)
+    _kernels(x._kernels),
+    _tag_kernels(x._tag_kernels)
 {
 }
 
@@ -70,6 +72,18 @@ ComputeResidualThread::subdomainChanged()
   _fe_problem.setActiveElementalMooseVariables(needed_moose_vars, _tid);
   _fe_problem.setActiveMaterialProperties(needed_mat_props, _tid);
   _fe_problem.prepareMaterials(_subdomain, _tid);
+
+  // If users pass a empty vector or a full size of vector,
+  // we take all kernels
+  if (!_tags.size() || _tags.size() == _fe_problem.numVectorTags())
+    _tag_kernels = &_kernels;
+  // If we have one tag only,
+  // We call tag based storage
+  else if (_tags.size() == 1)
+    _tag_kernels = &(_kernels.getVectorTagObjectWarehouse(*(_tags.begin()), _tid));
+  // This one may be expensive
+  else
+    _tag_kernels = &(_kernels.getVectorTagsObjectWarehouse(_tags, _tid));
 }
 
 void
@@ -84,36 +98,9 @@ ComputeResidualThread::onElement(const Elem * elem)
 
   _fe_problem.reinitMaterials(_subdomain, _tid);
 
-  const MooseObjectWarehouse<KernelBase> * warehouse;
-  switch (_kernel_type)
+  if (_tag_kernels->hasActiveBlockObjects(_subdomain, _tid))
   {
-    case Moose::KT_ALL:
-      warehouse = &_nl.getKernelWarehouse();
-      break;
-
-    case Moose::KT_TIME:
-      warehouse = &_nl.getTimeKernelWarehouse();
-      break;
-
-    case Moose::KT_NONTIME:
-      warehouse = &_nl.getNonTimeKernelWarehouse();
-      break;
-
-    case Moose::KT_EIGEN:
-      warehouse = &_nl.getEigenKernelWarehouse();
-      break;
-
-    case Moose::KT_NONEIGEN:
-      warehouse = &_nl.getNonEigenKernelWarehouse();
-      break;
-
-    default:
-      mooseError("Unknown Kernel Type \n");
-  }
-
-  if (warehouse->hasActiveBlockObjects(_subdomain, _tid))
-  {
-    const auto & kernels = warehouse->getActiveBlockObjects(_subdomain, _tid);
+    const auto & kernels = _tag_kernels->getActiveBlockObjects(_subdomain, _tid);
     for (const auto & kernel : kernels)
       kernel->computeResidual();
   }

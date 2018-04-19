@@ -19,6 +19,7 @@
 #include "TransientInterface.h"
 #include "MeshChangedInterface.h"
 #include "VectorPostprocessorInterface.h"
+#include "TaggingInterface.h"
 
 // Forward declarations
 class ScalarKernel;
@@ -40,7 +41,8 @@ class ScalarKernel : public MooseObject,
                      public PostprocessorInterface,
                      public TransientInterface,
                      public MeshChangedInterface,
-                     protected VectorPostprocessorInterface
+                     protected VectorPostprocessorInterface,
+                     public TaggingInterface
 {
 public:
   ScalarKernel(const InputParameters & parameters);

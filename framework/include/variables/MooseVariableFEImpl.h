@@ -516,6 +516,8 @@ public:
   const OutputType & nodalValuePreviousNLNeighbor();
   const OutputType & nodalValueDotNeighbor();
   const OutputType & nodalValueDuDotDuNeighbor();
+  const MooseArray<Real> & nodalVectorTagValue(TagID tag);
+  const MooseArray<Real> & nodalMatrixTagValue(TagID tag);
 
   virtual void computeNodalValues() override;
   virtual void computeNodalNeighborValues() override;
@@ -601,6 +603,9 @@ protected:
   bool _need_dof_values_dot_neighbor;
   bool _need_dof_du_dot_du_neighbor;
 
+  bool _need_vector_tag_dof_u;
+  bool _need_matrix_tag_dof_u;
+
   /// Normals at QPs on faces
   const MooseArray<Point> & _normals;
 
@@ -627,6 +632,11 @@ protected:
   MooseArray<Real> _dof_values_old;
   MooseArray<Real> _dof_values_older;
   MooseArray<Real> _dof_values_previous_nl;
+
+  // Dof values of tagged vectors
+  std::vector<MooseArray<Real>> _vector_tags_dof_u;
+  // Dof values of the diagonal of tagged matrices
+  std::vector<MooseArray<Real>> _matrix_tags_dof_u;
 
   /// nodal values of u_dot
   MooseArray<Real> _dof_values_dot;

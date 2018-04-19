@@ -20,6 +20,6 @@ ComputeResidualFunctor::residual(const NumericVector<Number> & soln,
                                  NonlinearImplicitSystem & sys)
 {
   _fe_problem.computingNonlinearResid() = true;
-  _fe_problem.computeResidual(sys, soln, residual);
+  _fe_problem.computeResidualSys(sys, soln, residual);
   _fe_problem.computingNonlinearResid() = false;
 }

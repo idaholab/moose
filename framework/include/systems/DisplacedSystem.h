@@ -29,14 +29,43 @@ public:
 
   virtual void init() override;
 
-  virtual bool hasResidualVector(Moose::KernelType type) const override
+  virtual NumericVector<Number> & getVector(TagID tag_id) override
   {
-    return _undisplaced_system.hasResidualVector(type);
+    return _undisplaced_system.getVector(tag_id);
   }
 
-  virtual NumericVector<Number> & residualVector(Moose::KernelType type) override
+  virtual TagID timeVectorTag() override { return _undisplaced_system.timeVectorTag(); }
+
+  virtual TagID nonTimeVectorTag() override { return _undisplaced_system.nonTimeVectorTag(); }
+
+  virtual void associateVectorToTag(NumericVector<Number> & vec, TagID tag) override
   {
-    return _undisplaced_system.residualVector(type);
+    _undisplaced_system.associateVectorToTag(vec, tag);
+  }
+
+  virtual void disassociateVectorFromTag(NumericVector<Number> & vec, TagID tag) override
+  {
+    _undisplaced_system.disassociateVectorFromTag(vec, tag);
+  }
+
+  virtual void disassociateAllTaggedVectors() override
+  {
+    _undisplaced_system.disassociateAllTaggedVectors();
+  }
+
+  virtual void associateMatrixToTag(SparseMatrix<Number> & matrix, TagID tag) override
+  {
+    _undisplaced_system.associateMatrixToTag(matrix, tag);
+  }
+
+  virtual void disassociateMatrixFromTag(SparseMatrix<Number> & matrix, TagID tag) override
+  {
+    _undisplaced_system.disassociateMatrixFromTag(matrix, tag);
+  }
+
+  virtual void disassociateAllTaggedMatrices() override
+  {
+    _undisplaced_system.disassociateAllTaggedMatrices();
   }
 
   virtual NumericVector<Number> & getVector(const std::string & name) override;
@@ -111,6 +140,15 @@ public:
   virtual void zeroVariables(std::vector<std::string> & vars_to_be_zeroed) override
   {
     _undisplaced_system.zeroVariables(vars_to_be_zeroed);
+  }
+
+  virtual bool hasVector(TagID tag_id) override { return _undisplaced_system.hasVector(tag_id); }
+
+  virtual bool hasMatrix(TagID tag_id) override { return _undisplaced_system.hasMatrix(tag_id); }
+
+  virtual SparseMatrix<Number> & getMatrix(TagID tag) override
+  {
+    return _undisplaced_system.getMatrix(tag);
   }
 
   virtual NumericVector<Number> & solutionOld() override { return *_sys.old_local_solution; }

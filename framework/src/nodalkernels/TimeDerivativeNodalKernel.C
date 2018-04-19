@@ -15,7 +15,7 @@ template <>
 InputParameters
 validParams<TimeDerivativeNodalKernel>()
 {
-  InputParameters params = validParams<NodalKernel>();
+  InputParameters params = validParams<TimeNodalKernel>();
   return params;
 }
 

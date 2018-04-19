@@ -71,7 +71,7 @@
     type = Reaction
     variable = u
     use_displaced_mesh = true
-    eigen_kernel = true
+    extra_vector_tags = 'eigen'
   [../]
 []
 
@@ -81,6 +81,12 @@
     variable = u
     boundary = '0 1 2 3'
     value = 0
+    use_displaced_mesh = true
+  [../]
+  [./eigen_bc]
+    type = EigenDirichletBC
+    variable = u
+    boundary = '0 1 2 3'
     use_displaced_mesh = true
   [../]
 []

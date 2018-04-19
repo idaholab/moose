@@ -11,6 +11,7 @@
 #include "Factory.h"
 #include "FEProblem.h"
 #include "EigenProblem.h"
+#include "NonlinearSystemBase.h"
 #include "MooseApp.h"
 
 registerMooseAction("MooseApp", CreateProblemAction, "create_problem");
@@ -46,6 +47,16 @@ validParams<CreateProblemAction>()
                                        "File base name used for restart (e.g. "
                                        "<path>/<filebase> or <path>/LATEST to "
                                        "grab the latest file available)");
+
+  params.addParam<std::vector<TagName>>("extra_tag_vectors",
+                                        "Extra vectors to add to the system that can be filled by "
+                                        "objects which compute residuals and Jacobians (Kernels, "
+                                        "BCs, etc.) by setting tags on them.");
+
+  params.addParam<std::vector<TagName>>("extra_tag_matrices",
+                                        "Extra matrices to add to the system that can be filled "
+                                        "by objects which compute residuals and Jacobians "
+                                        "(Kernels, BCs, etc.) by setting tags on them.");
 
   return params;
 }
@@ -117,5 +128,29 @@ CreateProblemAction::act()
       _console << "\nUsing " << restart_file_base << " for restart.\n\n";
       _problem->setRestartFile(restart_file_base);
     }
+
+    // Create etra vectors and matrices if any
+    CreateTagVectors();
+  }
+}
+
+void
+CreateProblemAction::CreateTagVectors()
+{
+  // add vectors and their tags to system
+  auto & vectors = getParam<std::vector<TagName>>("extra_tag_vectors");
+  auto & nl = _problem->getNonlinearSystemBase();
+  for (auto & vector : vectors)
+  {
+    auto tag = _problem->addVectorTag(vector);
+    nl.addVector(tag, false, GHOSTED);
+  }
+
+  // add matrices and their tags
+  auto & matrices = getParam<std::vector<TagName>>("extra_tag_matrices");
+  for (auto & matrix : matrices)
+  {
+    auto tag = _problem->addMatrixTag(matrix);
+    nl.addMatrix(tag);
   }
 }

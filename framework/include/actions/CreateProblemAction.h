@@ -26,6 +26,8 @@ public:
 
   virtual void act() override;
 
+  void CreateTagVectors();
+
 protected:
   std::vector<SubdomainName> _blocks;
   MultiMooseEnum _coord_sys;

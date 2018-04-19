@@ -109,9 +109,10 @@ NonlinearSystemBase::NonlinearSystemBase(FEProblemBase & fe_problem,
     _serialized_solution(*NumericVector<Number>::build(_communicator).release()),
     _solution_previous_nl(NULL),
     _residual_copy(*NumericVector<Number>::build(_communicator).release()),
-    _u_dot(&addVector("u_dot", true, GHOSTED)),
+    _Re_time_tag(-1),
     _Re_time(NULL),
-    _Re_non_time(&addVector("Re_non_time", false, GHOSTED)),
+    _Re_non_time_tag(-1),
+    _Re_non_time(NULL),
     _scalar_kernels(/*threaded=*/false),
     _nodal_bcs(/*threaded=*/false),
     _preset_nodal_bcs(/*threaded=*/false),
@@ -140,6 +141,12 @@ NonlinearSystemBase::NonlinearSystemBase(FEProblemBase & fe_problem,
     _has_nodalbc_save_in(false),
     _has_nodalbc_diag_save_in(false)
 {
+  getResidualNonTimeVector();
+  // Don't need to add the matrix - it already exists (for now)
+  _Ke_system_tag = _fe_problem.addMatrixTag("SYSTEM");
+  _Re_tag = _fe_problem.addVectorTag("RESIDUAL");
+
+  _u_dot = &addVector("u_dot", true, GHOSTED);
 }
 
 NonlinearSystemBase::~NonlinearSystemBase()
@@ -281,15 +288,6 @@ NonlinearSystemBase::addKernel(const std::string & kernel_name,
     std::shared_ptr<KernelBase> kernel =
         _factory.create<KernelBase>(kernel_name, name, parameters, tid);
     _kernels.addObject(kernel, tid);
-
-    // Store time/non-time kernels separately
-    std::shared_ptr<TimeKernel> t_kernel = std::dynamic_pointer_cast<TimeKernel>(kernel);
-    if (t_kernel)
-      _time_kernels.addObject(kernel, tid);
-    else
-      _non_time_kernels.addObject(kernel, tid);
-
-    addEigenKernels(kernel, tid);
   }
 
   if (parameters.get<std::vector<AuxVariableName>>("save_in").size() > 0)
@@ -517,11 +515,39 @@ NonlinearSystemBase::zeroVectorForResidual(const std::string & vector_name)
 }
 
 void
-NonlinearSystemBase::computeResidual(NumericVector<Number> & residual, Moose::KernelType type)
+NonlinearSystemBase::computeResidualTag(NumericVector<Number> & residual, TagID tag_id)
+{
+
+  _nl_vector_tags.clear();
+  _nl_vector_tags.insert(tag_id);
+  _nl_vector_tags.insert(residualVectorTag());
+
+  associateVectorToTag(residual, residualVectorTag());
+
+  computeResidualTags(_nl_vector_tags);
+
+  disassociateVectorFromTag(residual, residualVectorTag());
+}
+
+void
+NonlinearSystemBase::computeResidual(NumericVector<Number> & residual, TagID tag_id)
+{
+  mooseDeprecated(" Please use computeResidualTag");
+
+  computeResidualTag(residual, tag_id);
+}
+
+void
+NonlinearSystemBase::computeResidualTags(const std::set<TagID> & tags)
 {
   Moose::perf_log.push("compute_residual()", "Execution");
 
+  bool reuired_residual = tags.find(residualVectorTag()) == tags.end() ? false : true;
+
   _n_residual_evaluations++;
+
+  // not suppose to do anythin on matrix
+  deactiveAllMatrixTags();
 
   Moose::enableFPE();
 
@@ -535,25 +561,28 @@ NonlinearSystemBase::computeResidual(NumericVector<Number> & residual, Moose::Ke
 
   try
   {
-    residual.zero();
-    if (_Re_time)
-      _Re_time->zero();
-    _Re_non_time->zero();
-    computeResidualInternal(type);
-    if (_Re_time)
-      _Re_time->close();
-    _Re_non_time->close();
-    if (_time_integrator)
-      _time_integrator->postResidual(residual);
-    else
-      residual += *_Re_non_time;
-    residual.close();
+    zeroTaggedVectors(tags);
+    computeResidualInternal(tags);
+    closeTaggedVectors(tags);
 
-    computeNodalBCs(residual, type);
+    if (reuired_residual)
+    {
+      auto & residual = getVector(residualVectorTag());
+      if (_time_integrator)
+        _time_integrator->postResidual(residual);
+      else
+        residual += *_Re_non_time;
+      residual.close();
+    }
+
+    computeNodalBCs(tags);
+    closeTaggedVectors(tags);
 
     // If we are debugging residuals we need one more assignment to have the ghosted copy up to date
-    if (_need_residual_ghosted && _debugging_residuals)
+    if (_need_residual_ghosted && _debugging_residuals && reuired_residual)
     {
+      auto & residual = getVector(residualVectorTag());
+
       *_residual_ghosted = residual;
       _residual_ghosted->close();
     }
@@ -571,8 +600,9 @@ NonlinearSystemBase::computeResidual(NumericVector<Number> & residual, Moose::Ke
     // "diverged" reason during the next solve.
   }
 
+  // not suppose to do anythin on matrix
+  activeAllMatrixTags();
   Moose::enableFPE(false);
-
   Moose::perf_log.pop("compute_residual()", "Execution");
 }
 
@@ -588,6 +618,8 @@ NonlinearSystemBase::onTimestepBegin()
 void
 NonlinearSystemBase::setInitialSolution()
 {
+  deactiveAllMatrixTags();
+
   NumericVector<Number> & initial_solution(solution());
   if (_predictor.get() && _predictor->shouldApply())
   {
@@ -648,38 +680,41 @@ NonlinearSystemBase::solutionUDot()
 }
 
 NumericVector<Number> &
-NonlinearSystemBase::residualVector(Moose::KernelType type)
+NonlinearSystemBase::getResidualTimeVector()
 {
-  switch (type)
+  if (!_Re_time)
   {
-    case Moose::KT_TIME:
-      if (!_Re_time)
-        _Re_time = &addVector("Re_time", false, GHOSTED);
-      return *_Re_time;
-    case Moose::KT_NONTIME:
-      return *_Re_non_time;
-    case Moose::KT_ALL:
-      return *_Re_non_time;
-
-    default:
-      mooseError("Trying to get residual vector that is not available");
+    _Re_time_tag = _fe_problem.addVectorTag("TIME");
+    _Re_time = &addVector(_Re_time_tag, false, GHOSTED);
   }
+  return *_Re_time;
 }
 
-bool
-NonlinearSystemBase::hasResidualVector(Moose::KernelType type) const
+NumericVector<Number> &
+NonlinearSystemBase::getResidualNonTimeVector()
 {
-  switch (type)
+  if (!_Re_non_time)
   {
-    case Moose::KT_TIME:
-      return _Re_time;
-    case Moose::KT_NONTIME:
-      return _Re_non_time;
-    case Moose::KT_ALL:
-      return _Re_non_time;
+    _Re_non_time_tag = _fe_problem.addVectorTag("NONTIME");
+    _Re_non_time = &addVector(_Re_non_time_tag, false, GHOSTED);
+  }
+  return *_Re_non_time;
+}
+
+NumericVector<Number> &
+NonlinearSystemBase::residualVector(TagID tag)
+{
+  mooseDeprecated("Please use getVector()");
+  switch (tag)
+  {
+    case 0:
+      return getResidualNonTimeVector();
+
+    case 1:
+      return getResidualTimeVector();
 
     default:
-      mooseError("Trying to get residual vector that is not available");
+      mooseError("The required residual vector is not available");
   }
 }
 
@@ -719,8 +754,12 @@ NonlinearSystemBase::enforceNodalConstraintsResidual(NumericVector<Number> & res
 }
 
 void
-NonlinearSystemBase::enforceNodalConstraintsJacobian(SparseMatrix<Number> & jacobian)
+NonlinearSystemBase::enforceNodalConstraintsJacobian()
 {
+  if (!hasMatrix(systemMatrixTag()))
+    mooseError(" A system matrix is required");
+
+  auto & jacobian = getMatrix(systemMatrixTag());
   THREAD_ID tid = 0; // constraints are going to be done single-threaded
   jacobian.close();
   if (_constraints.hasActiveNodalConstraints())
@@ -738,7 +777,7 @@ NonlinearSystemBase::enforceNodalConstraintsJacobian(SparseMatrix<Number> & jaco
         nc->computeJacobian(jacobian);
       }
     }
-    _fe_problem.addCachedJacobian(jacobian, tid);
+    _fe_problem.addCachedJacobian(tid);
     jacobian.close();
   }
 }
@@ -1066,7 +1105,7 @@ NonlinearSystemBase::constraintResiduals(NumericVector<Number> & residual, bool 
 }
 
 void
-NonlinearSystemBase::computeResidualInternal(Moose::KernelType type)
+NonlinearSystemBase::computeResidualInternal(const std::set<TagID> & tags)
 {
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
   {
@@ -1096,7 +1135,7 @@ NonlinearSystemBase::computeResidualInternal(Moose::KernelType type)
 
     ConstElemRange & elem_range = *_mesh.getActiveLocalElementRange();
 
-    ComputeResidualThread cr(_fe_problem, type);
+    ComputeResidualThread cr(_fe_problem, tags);
 
     Threads::parallel_reduce(elem_range, cr);
 
@@ -1119,24 +1158,22 @@ NonlinearSystemBase::computeResidualInternal(Moose::KernelType type)
 
       const std::vector<std::shared_ptr<ScalarKernel>> * scalars;
 
-      // Use the right subset of ScalarKernels depending on the KernelType.
-      switch (type)
+      // This code should be refactored once we can do tags for scalar
+      // kernels
+      // Should redo this based on Warehouse
+      if (!tags.size() || tags.size() == _fe_problem.numVectorTags())
+        scalars = &(_scalar_kernels.getActiveObjects());
+      else if (tags.size() == 2)
       {
-        case Moose::KT_ALL:
-          scalars = &(_scalar_kernels.getActiveObjects());
-          break;
-
-        case Moose::KT_TIME:
+        if (tags.find(timeVectorTag()) != tags.end())
           scalars = &(_time_scalar_kernels.getActiveObjects());
-          break;
-
-        case Moose::KT_NONTIME:
+        else if (tags.find(nonTimeVectorTag()) != tags.end())
           scalars = &(_non_time_scalar_kernels.getActiveObjects());
-          break;
-
-        default:
-          mooseError("Unrecognized KernelType in computeResidualInternal().");
+        else
+          mooseError("Wrong tags for scalar kernels ");
       }
+      else
+        mooseError("Unrecognized tags for scalar kernels in computeResidualInternal().");
 
       bool have_scalar_contributions = false;
       for (const auto & scalar_kernel : *scalars)
@@ -1228,7 +1265,7 @@ NonlinearSystemBase::computeResidualInternal(Moose::KernelType type)
     _residual_ghosted->close();
   }
 
-  PARALLEL_TRY { computeDiracContributions(); }
+  PARALLEL_TRY { computeDiracContributions(false); }
   PARALLEL_CATCH;
 
   if (_fe_problem._has_constraints)
@@ -1259,8 +1296,33 @@ NonlinearSystemBase::computeResidualInternal(Moose::KernelType type)
 }
 
 void
-NonlinearSystemBase::computeNodalBCs(NumericVector<Number> & residual,
-                                     Moose::KernelType kernel_type)
+NonlinearSystemBase::computeNodalBCs(NumericVector<Number> & residual)
+{
+  _nl_vector_tags.clear();
+
+  auto & tags = _fe_problem.getVectorTags();
+  for (auto & tag : tags)
+    _nl_vector_tags.insert(tag.second);
+
+  associateVectorToTag(residual, residualVectorTag());
+
+  computeNodalBCs(residual, _nl_vector_tags);
+
+  disassociateVectorFromTag(residual, residualVectorTag());
+}
+
+void
+NonlinearSystemBase::computeNodalBCs(NumericVector<Number> & residual, const std::set<TagID> & tags)
+{
+  associateVectorToTag(residual, residualVectorTag());
+
+  computeNodalBCs(tags);
+
+  disassociateVectorFromTag(residual, residualVectorTag());
+}
+
+void
+NonlinearSystemBase::computeNodalBCs(const std::set<TagID> & tags)
 {
   // We need to close the diag_save_in variables on the aux system before NodalBCBases clear the
   // dofs on boundary nodes
@@ -1275,6 +1337,16 @@ NonlinearSystemBase::computeNodalBCs(NumericVector<Number> & residual,
     {
       Moose::perf_log.push("computeNodalBCs()", "Execution");
 
+      MooseObjectWarehouse<NodalBCBase> * nbc_warehouse;
+
+      // Select nodal kernels
+      if (tags.size() == _fe_problem.numVectorTags() || !tags.size())
+        nbc_warehouse = &_nodal_bcs;
+      else if (tags.size() == 1)
+        nbc_warehouse = &(_nodal_bcs.getVectorTagObjectWarehouse(*(tags.begin()), 0));
+      else
+        nbc_warehouse = &(_nodal_bcs.getVectorTagsObjectWarehouse(tags, 0));
+
       for (const auto & bnode : bnd_nodes)
       {
         BoundaryID boundary_id = bnode->_bnd_id;
@@ -1284,19 +1356,17 @@ NonlinearSystemBase::computeNodalBCs(NumericVector<Number> & residual,
         {
           // reinit variables in nodes
           _fe_problem.reinitNodeFace(node, boundary_id, 0);
-
-          if (_nodal_bcs.hasActiveBoundaryObjects(boundary_id))
+          if (nbc_warehouse->hasActiveBoundaryObjects(boundary_id))
           {
-            const auto & bcs = _nodal_bcs.getActiveBoundaryObjects(boundary_id);
+            const auto & bcs = nbc_warehouse->getActiveBoundaryObjects(boundary_id);
             for (const auto & nbc : bcs)
               if (nbc->shouldApply())
               {
-                if (kernel_type == Moose::KT_EIGEN)
-                  nbc->setBCOnEigen(true);
-                else
-                  nbc->setBCOnEigen(false);
-
-                nbc->computeResidual(residual);
+                nbc->computeResidual();
+                // This is used to have a backward compatibility, we should remove it
+                // as soon as possible
+                if (hasVector(residualVectorTag()))
+                  nbc->computeResidual(getVector(residualVectorTag()));
               }
           }
         }
@@ -1307,7 +1377,6 @@ NonlinearSystemBase::computeNodalBCs(NumericVector<Number> & residual,
   }
   PARALLEL_CATCH;
 
-  residual.close();
   if (_Re_time)
     _Re_time->close();
   _Re_non_time->close();
@@ -1437,9 +1506,15 @@ NonlinearSystemBase::findImplicitGeometricCouplingEntries(
 }
 
 void
-NonlinearSystemBase::addImplicitGeometricCouplingEntries(SparseMatrix<Number> & jacobian,
-                                                         GeometricSearchData & geom_search_data)
+NonlinearSystemBase::addImplicitGeometricCouplingEntries(GeometricSearchData & geom_search_data)
 {
+  if (!hasMatrix(systemMatrixTag()))
+    mooseError("Need a system matrix ");
+
+  // At this point, have no idea how to make
+  // this work with tag system
+  auto & jacobian = getMatrix(systemMatrixTag());
+
   std::map<dof_id_type, std::vector<dof_id_type>> graph;
 
   findImplicitGeometricCouplingEntries(geom_search_data, graph);
@@ -1455,8 +1530,13 @@ NonlinearSystemBase::addImplicitGeometricCouplingEntries(SparseMatrix<Number> & 
 }
 
 void
-NonlinearSystemBase::constraintJacobians(SparseMatrix<Number> & jacobian, bool displaced)
+NonlinearSystemBase::constraintJacobians(bool displaced)
 {
+  if (!hasMatrix(systemMatrixTag()))
+    mooseError("A system matrix is required");
+
+  auto & jacobian = getMatrix(systemMatrixTag());
+
 #if PETSC_VERSION_LESS_THAN(3, 3, 0)
 #else
   if (!_fe_problem.errorOnJacobianNonzeroReallocation())
@@ -1642,7 +1722,7 @@ NonlinearSystemBase::constraintJacobians(SparseMatrix<Number> & jacobian, bool d
         jacobian.close();
         jacobian.zero_rows(zero_rows, 0.0);
         jacobian.close();
-        _fe_problem.addCachedJacobian(jacobian, 0);
+        _fe_problem.addCachedJacobian(0);
         jacobian.close();
       }
     }
@@ -1673,7 +1753,7 @@ NonlinearSystemBase::constraintJacobians(SparseMatrix<Number> & jacobian, bool d
       jacobian.close();
       jacobian.zero_rows(zero_rows, 0.0);
       jacobian.close();
-      _fe_problem.addCachedJacobian(jacobian, 0);
+      _fe_problem.addCachedJacobian(0);
       jacobian.close();
     }
   }
@@ -1712,7 +1792,7 @@ NonlinearSystemBase::constraintJacobians(SparseMatrix<Number> & jacobian, bool d
           _fe_problem.cacheJacobian(tid);
         }
 
-        _fe_problem.addCachedJacobian(jacobian, tid);
+        _fe_problem.addCachedJacobian(tid);
       }
     }
   }
@@ -1771,14 +1851,14 @@ NonlinearSystemBase::constraintJacobians(SparseMatrix<Number> & jacobian, bool d
           _fe_problem.cacheJacobian(tid);
           _fe_problem.cacheJacobianNeighbor(tid);
         }
-        _fe_problem.addCachedJacobian(jacobian, tid);
+        _fe_problem.addCachedJacobian(tid);
       }
     }
   }
 }
 
 void
-NonlinearSystemBase::computeScalarKernelsJacobians(SparseMatrix<Number> & jacobian)
+NonlinearSystemBase::computeScalarKernelsJacobians()
 {
   // Compute the diagonal block for scalar variables
   if (_scalar_kernels.hasActiveObjects())
@@ -1800,7 +1880,7 @@ NonlinearSystemBase::computeScalarKernelsJacobians(SparseMatrix<Number> & jacobi
         if (dof >= first_dof && dof < end_dof)
         {
           kernel->computeJacobian();
-          _fe_problem.addJacobianOffDiagScalar(jacobian, kernel->variable().number());
+          _fe_problem.addJacobianOffDiagScalar(kernel->variable().number());
           have_scalar_contributions = true;
           break;
         }
@@ -1808,38 +1888,46 @@ NonlinearSystemBase::computeScalarKernelsJacobians(SparseMatrix<Number> & jacobi
     }
 
     if (have_scalar_contributions)
-      _fe_problem.addJacobianScalar(jacobian);
+      _fe_problem.addJacobianScalar();
   }
 }
 
 void
-NonlinearSystemBase::computeJacobianInternal(SparseMatrix<Number> & jacobian,
-                                             Moose::KernelType kernel_type)
+NonlinearSystemBase::computeJacobianInternal(const std::set<TagID> & tags)
 {
+  // Make matrice ready to use
+  activeAllMatrixTags();
+
+  for (auto tag : tags)
+  {
+    if (!hasMatrix(tag))
+      continue;
+
+    auto & jacobian = getMatrix(tag);
 #ifdef LIBMESH_HAVE_PETSC
 // Necessary for speed
 #if PETSC_VERSION_LESS_THAN(3, 0, 0)
-  MatSetOption(static_cast<PetscMatrix<Number> &>(jacobian).mat(), MAT_KEEP_ZEROED_ROWS);
+    MatSetOption(static_cast<PetscMatrix<Number> &>(jacobian).mat(), MAT_KEEP_ZEROED_ROWS);
 #elif PETSC_VERSION_LESS_THAN(3, 1, 0)
-  // In Petsc 3.0.0, MatSetOption has three args...the third arg
-  // determines whether the option is set (true) or unset (false)
-  MatSetOption(
-      static_cast<PetscMatrix<Number> &>(jacobian).mat(), MAT_KEEP_ZEROED_ROWS, PETSC_TRUE);
+    // In Petsc 3.0.0, MatSetOption has three args...the third arg
+    // determines whether the option is set (true) or unset (false)
+    MatSetOption(
+        static_cast<PetscMatrix<Number> &>(jacobian).mat(), MAT_KEEP_ZEROED_ROWS, PETSC_TRUE);
 #else
-  MatSetOption(static_cast<PetscMatrix<Number> &>(jacobian).mat(),
-               MAT_KEEP_NONZERO_PATTERN, // This is changed in 3.1
-               PETSC_TRUE);
+    MatSetOption(static_cast<PetscMatrix<Number> &>(jacobian).mat(),
+                 MAT_KEEP_NONZERO_PATTERN, // This is changed in 3.1
+                 PETSC_TRUE);
 #endif
 #if PETSC_VERSION_LESS_THAN(3, 3, 0)
 #else
-  if (!_fe_problem.errorOnJacobianNonzeroReallocation())
-    MatSetOption(static_cast<PetscMatrix<Number> &>(jacobian).mat(),
-                 MAT_NEW_NONZERO_ALLOCATION_ERR,
-                 PETSC_FALSE);
+    if (!_fe_problem.errorOnJacobianNonzeroReallocation())
+      MatSetOption(static_cast<PetscMatrix<Number> &>(jacobian).mat(),
+                   MAT_NEW_NONZERO_ALLOCATION_ERR,
+                   PETSC_FALSE);
 #endif
 
 #endif
-
+  }
   // jacobianSetup /////
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
   {
@@ -1869,38 +1957,38 @@ NonlinearSystemBase::computeJacobianInternal(SparseMatrix<Number> & jacobian,
     {
       case Moose::COUPLING_DIAG:
       {
-        ComputeJacobianThread cj(_fe_problem, jacobian, kernel_type);
+        ComputeJacobianThread cj(_fe_problem, tags);
         Threads::parallel_reduce(elem_range, cj);
 
         unsigned int n_threads = libMesh::n_threads();
         for (unsigned int i = 0; i < n_threads;
              i++) // Add any Jacobian contributions still hanging around
-          _fe_problem.addCachedJacobian(jacobian, i);
+          _fe_problem.addCachedJacobian(i);
 
         // Block restricted Nodal Kernels
         if (_nodal_kernels.hasActiveBlockObjects())
         {
-          ComputeNodalKernelJacobiansThread cnkjt(_fe_problem, _nodal_kernels, jacobian);
+          ComputeNodalKernelJacobiansThread cnkjt(_fe_problem, _nodal_kernels);
           ConstNodeRange & range = *_mesh.getLocalNodeRange();
           Threads::parallel_reduce(range, cnkjt);
 
           unsigned int n_threads = libMesh::n_threads();
           for (unsigned int i = 0; i < n_threads;
                i++) // Add any cached jacobians that might be hanging around
-            _fe_problem.assembly(i).addCachedJacobianContributions(jacobian);
+            _fe_problem.assembly(i).addCachedJacobianContributions();
         }
 
         // Boundary restricted Nodal Kernels
         if (_nodal_kernels.hasActiveBoundaryObjects())
         {
-          ComputeNodalKernelBCJacobiansThread cnkjt(_fe_problem, _nodal_kernels, jacobian);
+          ComputeNodalKernelBCJacobiansThread cnkjt(_fe_problem, _nodal_kernels);
           ConstBndNodeRange & bnd_range = *_mesh.getBoundaryNodeRange();
 
           Threads::parallel_reduce(bnd_range, cnkjt);
           unsigned int n_threads = libMesh::n_threads();
           for (unsigned int i = 0; i < n_threads;
                i++) // Add any cached jacobians that might be hanging around
-            _fe_problem.assembly(i).addCachedJacobianContributions(jacobian);
+            _fe_problem.assembly(i).addCachedJacobianContributions();
         }
       }
       break;
@@ -1908,30 +1996,30 @@ NonlinearSystemBase::computeJacobianInternal(SparseMatrix<Number> & jacobian,
       default:
       case Moose::COUPLING_CUSTOM:
       {
-        ComputeFullJacobianThread cj(_fe_problem, jacobian, kernel_type);
+        ComputeFullJacobianThread cj(_fe_problem, tags);
         Threads::parallel_reduce(elem_range, cj);
         unsigned int n_threads = libMesh::n_threads();
 
         for (unsigned int i = 0; i < n_threads; i++)
-          _fe_problem.addCachedJacobian(jacobian, i);
+          _fe_problem.addCachedJacobian(i);
 
         // Block restricted Nodal Kernels
         if (_nodal_kernels.hasActiveBlockObjects())
         {
-          ComputeNodalKernelJacobiansThread cnkjt(_fe_problem, _nodal_kernels, jacobian);
+          ComputeNodalKernelJacobiansThread cnkjt(_fe_problem, _nodal_kernels);
           ConstNodeRange & range = *_mesh.getLocalNodeRange();
           Threads::parallel_reduce(range, cnkjt);
 
           unsigned int n_threads = libMesh::n_threads();
           for (unsigned int i = 0; i < n_threads;
                i++) // Add any cached jacobians that might be hanging around
-            _fe_problem.assembly(i).addCachedJacobianContributions(jacobian);
+            _fe_problem.assembly(i).addCachedJacobianContributions();
         }
 
         // Boundary restricted Nodal Kernels
         if (_nodal_kernels.hasActiveBoundaryObjects())
         {
-          ComputeNodalKernelBCJacobiansThread cnkjt(_fe_problem, _nodal_kernels, jacobian);
+          ComputeNodalKernelBCJacobiansThread cnkjt(_fe_problem, _nodal_kernels);
           ConstBndNodeRange & bnd_range = *_mesh.getBoundaryNodeRange();
 
           Threads::parallel_reduce(bnd_range, cnkjt);
@@ -1939,14 +2027,15 @@ NonlinearSystemBase::computeJacobianInternal(SparseMatrix<Number> & jacobian,
           unsigned int n_threads = libMesh::n_threads();
           for (unsigned int i = 0; i < n_threads;
                i++) // Add any cached jacobians that might be hanging around
-            _fe_problem.assembly(i).addCachedJacobianContributions(jacobian);
+            _fe_problem.assembly(i).addCachedJacobianContributions();
         }
       }
       break;
     }
 
-    computeDiracContributions(&jacobian);
-    computeScalarKernelsJacobians(jacobian);
+    computeDiracContributions(true);
+
+    computeScalarKernelsJacobians();
 
     static bool first = true;
 
@@ -1954,34 +2043,37 @@ NonlinearSystemBase::computeJacobianInternal(SparseMatrix<Number> & jacobian,
     if (first && (_add_implicit_geometric_coupling_entries_to_jacobian))
     {
       first = false;
-      addImplicitGeometricCouplingEntries(jacobian, _fe_problem.geomSearchData());
+      addImplicitGeometricCouplingEntries(_fe_problem.geomSearchData());
 
       if (_fe_problem.getDisplacedProblem())
-        addImplicitGeometricCouplingEntries(jacobian,
-                                            _fe_problem.getDisplacedProblem()->geomSearchData());
+        addImplicitGeometricCouplingEntries(_fe_problem.getDisplacedProblem()->geomSearchData());
     }
   }
   PARALLEL_CATCH;
-  jacobian.close();
 
+  closeTaggedMatrices(tags);
+
+  // Have no idea how to have constraints work
+  // with the tag system
   PARALLEL_TRY
   {
     // Add in Jacobian contributions from Constraints
     if (_fe_problem._has_constraints)
     {
       // Nodal Constraints
-      enforceNodalConstraintsJacobian(jacobian);
+      enforceNodalConstraintsJacobian();
 
       // Undisplaced Constraints
-      constraintJacobians(jacobian, false);
+      constraintJacobians(false);
 
       // Displaced Constraints
       if (_fe_problem.getDisplacedProblem())
-        constraintJacobians(jacobian, true);
+        constraintJacobians(true);
     }
   }
   PARALLEL_CATCH;
-  jacobian.close();
+  if (_fe_problem._has_constraints)
+    closeTaggedMatrices(tags);
 
   // We need to close the save_in variables on the aux system before NodalBCBases clear the dofs on
   // boundary nodes
@@ -1990,17 +2082,26 @@ NonlinearSystemBase::computeJacobianInternal(SparseMatrix<Number> & jacobian,
 
   PARALLEL_TRY
   {
+    MooseObjectWarehouse<NodalBCBase> * nbc_warehouse;
+    // Select nodal kernels
+    if (tags.size() == _fe_problem.numMatrixTags() || !tags.size())
+      nbc_warehouse = &_nodal_bcs;
+    else if (tags.size() == 1)
+      nbc_warehouse = &(_nodal_bcs.getMatrixTagObjectWarehouse(*(tags.begin()), 0));
+    else
+      nbc_warehouse = &(_nodal_bcs.getMatrixTagsObjectWarehouse(tags, 0));
+
     // Cache the information about which BCs are coupled to which
     // variables, so we don't have to figure it out for each node.
     std::map<std::string, std::set<unsigned int>> bc_involved_vars;
     const std::set<BoundaryID> & all_boundary_ids = _mesh.getBoundaryIDs();
     for (const auto & bid : all_boundary_ids)
     {
-      // Get reference to all the NodalBCBases for this ID.  This is only
+      // Get reference to all the NodalBCs for this ID.  This is only
       // safe if there are NodalBCBases there to be gotten...
-      if (_nodal_bcs.hasActiveBoundaryObjects(bid))
+      if (nbc_warehouse->hasActiveBoundaryObjects(bid))
       {
-        const auto & bcs = _nodal_bcs.getActiveBoundaryObjects(bid);
+        const auto & bcs = nbc_warehouse->getActiveBoundaryObjects(bid);
         for (const auto & bc : bcs)
         {
           const std::vector<MooseVariableFEBase *> & coupled_moose_vars = bc->getCoupledMooseVars();
@@ -2032,12 +2133,12 @@ NonlinearSystemBase::computeJacobianInternal(SparseMatrix<Number> & jacobian,
       BoundaryID boundary_id = bnode->_bnd_id;
       Node * node = bnode->_node;
 
-      if (_nodal_bcs.hasActiveBoundaryObjects(boundary_id) &&
+      if (nbc_warehouse->hasActiveBoundaryObjects(boundary_id) &&
           node->processor_id() == processor_id())
       {
         _fe_problem.reinitNodeFace(node, boundary_id, 0);
 
-        const auto & bcs = _nodal_bcs.getActiveBoundaryObjects(boundary_id);
+        const auto & bcs = nbc_warehouse->getActiveBoundaryObjects(boundary_id);
         for (const auto & bc : bcs)
         {
           // Get the set of involved MOOSE vars for this BC
@@ -2062,16 +2163,12 @@ NonlinearSystemBase::computeJacobianInternal(SparseMatrix<Number> & jacobian,
       }
     } // end loop over boundary nodes
 
-    // For the matrix in the right side of generalized eigenvalue problems, its conresponding
-    // rows are zeroed if homogeneous Dirichlet boundary conditions are used.
-    if (kernel_type == Moose::KT_EIGEN)
-      _fe_problem.assembly(0).zeroCachedJacobianContributions(jacobian);
     // Set the cached NodalBCBase values in the Jacobian matrix
-    else
-      _fe_problem.assembly(0).setCachedJacobianContributions(jacobian);
+    _fe_problem.assembly(0).setCachedJacobianContributions();
   }
   PARALLEL_CATCH;
-  jacobian.close();
+
+  closeTaggedMatrices(tags);
 
   // We need to close the save_in variables on the aux system before NodalBCBases clear the dofs on
   // boundary nodes
@@ -2093,7 +2190,30 @@ NonlinearSystemBase::setVariableGlobalDoFs(const std::string & var_name)
 }
 
 void
-NonlinearSystemBase::computeJacobian(SparseMatrix<Number> & jacobian, Moose::KernelType kernel_type)
+NonlinearSystemBase::computeJacobian(SparseMatrix<Number> & jacobian)
+{
+  _nl_matrix_tags.clear();
+
+  auto & tags = _fe_problem.getMatrixTags();
+
+  for (auto & tag : tags)
+    _nl_matrix_tags.insert(tag.second);
+
+  computeJacobian(jacobian, _nl_matrix_tags);
+}
+
+void
+NonlinearSystemBase::computeJacobian(SparseMatrix<Number> & jacobian, const std::set<TagID> & tags)
+{
+  associateMatrixToTag(jacobian, systemMatrixTag());
+
+  computeJacobianTags(tags);
+
+  disassociateMatrixFromTag(jacobian, systemMatrixTag());
+}
+
+void
+NonlinearSystemBase::computeJacobianTags(const std::set<TagID> & tags)
 {
   Moose::perf_log.push("compute_jacobian()", "Execution");
 
@@ -2101,8 +2221,7 @@ NonlinearSystemBase::computeJacobian(SparseMatrix<Number> & jacobian, Moose::Ker
 
   try
   {
-    jacobian.zero();
-    computeJacobianInternal(jacobian, kernel_type);
+    computeJacobianInternal(tags);
   }
   catch (MooseException & e)
   {
@@ -2118,6 +2237,19 @@ NonlinearSystemBase::computeJacobian(SparseMatrix<Number> & jacobian, Moose::Ker
 
 void
 NonlinearSystemBase::computeJacobianBlocks(std::vector<JacobianBlock *> & blocks)
+{
+  _nl_matrix_tags.clear();
+
+  auto & tags = _fe_problem.getMatrixTags();
+  for (auto & tag : tags)
+    _nl_matrix_tags.insert(tag.second);
+
+  computeJacobianBlocks(blocks, _nl_matrix_tags);
+}
+
+void
+NonlinearSystemBase::computeJacobianBlocks(std::vector<JacobianBlock *> & blocks,
+                                           const std::set<TagID> & tags)
 {
   Moose::perf_log.push("compute_jacobian_block()", "Execution");
 
@@ -2160,7 +2292,7 @@ NonlinearSystemBase::computeJacobianBlocks(std::vector<JacobianBlock *> & blocks
   PARALLEL_TRY
   {
     ConstElemRange & elem_range = *_mesh.getActiveLocalElementRange();
-    ComputeJacobianBlocksThread cjb(_fe_problem, blocks);
+    ComputeJacobianBlocksThread cjb(_fe_problem, blocks, tags);
     Threads::parallel_reduce(elem_range, cjb);
   }
   PARALLEL_CATCH;
@@ -2303,7 +2435,7 @@ NonlinearSystemBase::computeDamping(const NumericVector<Number> & solution,
 }
 
 void
-NonlinearSystemBase::computeDiracContributions(SparseMatrix<Number> * jacobian)
+NonlinearSystemBase::computeDiracContributions(bool is_jacobian)
 {
   _fe_problem.clearDiracInfo();
 
@@ -2324,7 +2456,7 @@ NonlinearSystemBase::computeDiracContributions(SparseMatrix<Number> * jacobian)
       }
     }
 
-    ComputeDiracThread cd(_fe_problem, jacobian);
+    ComputeDiracThread cd(_fe_problem, is_jacobian);
 
     _fe_problem.getDiracElements(dirac_elements);
 
@@ -2337,7 +2469,7 @@ NonlinearSystemBase::computeDiracContributions(SparseMatrix<Number> * jacobian)
     Moose::perf_log.pop("computeDiracContributions()", "Execution");
   }
 
-  if (jacobian == NULL)
+  if (!is_jacobian)
     _Re_non_time->close();
 }
 
@@ -2550,7 +2682,9 @@ NonlinearSystemBase::checkKernelCoverage(const std::set<SubdomainID> & mesh_subd
 bool
 NonlinearSystemBase::containsTimeKernel()
 {
-  return _time_kernels.hasActiveObjects();
+  auto & time_kernels = _kernels.getVectorTagObjectWarehouse(timeVectorTag(), 0);
+
+  return time_kernels.hasActiveObjects();
 }
 
 void

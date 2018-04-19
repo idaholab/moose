@@ -20,6 +20,7 @@ validParams<BoundaryCondition>()
   InputParameters params = validParams<MooseObject>();
   params += validParams<TransientInterface>();
   params += validParams<BoundaryRestrictableRequired>();
+  params += validParams<TaggingInterface>();
 
   params.addRequiredParam<NonlinearVariableName>(
       "variable", "The name of the variable that this boundary condition applies to");
@@ -30,8 +31,8 @@ validParams<BoundaryCondition>()
                         "in the case this is true but no "
                         "displacements are provided in the Mesh block "
                         "the undisplaced mesh will still be used.");
-  params.addParamNamesToGroup("use_displaced_mesh", "Advanced");
 
+  params.addParamNamesToGroup("use_displaced_mesh", "Advanced");
   params.declareControllable("enable");
   params.registerBase("BoundaryCondition");
 
@@ -51,6 +52,7 @@ BoundaryCondition::BoundaryCondition(const InputParameters & parameters, bool no
     GeometricSearchInterface(this),
     Restartable(this, "BCs"),
     MeshChangedInterface(parameters),
+    TaggingInterface(this),
     _subproblem(*getCheckedPointerParam<SubProblem *>("_subproblem")),
     _fe_problem(*getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")),
     _sys(*getCheckedPointerParam<SystemBase *>("_sys")),

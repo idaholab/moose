@@ -21,41 +21,13 @@
 #include "libmesh/threads.h"
 
 ComputeFullJacobianThread::ComputeFullJacobianThread(FEProblemBase & fe_problem,
-                                                     SparseMatrix<Number> & jacobian,
-                                                     Moose::KernelType kernel_type)
-  : ComputeJacobianThread(fe_problem, jacobian),
+                                                     const std::set<TagID> & tags)
+  : ComputeJacobianThread(fe_problem, tags),
     _nl(fe_problem.getNonlinearSystemBase()),
     _integrated_bcs(_nl.getIntegratedBCWarehouse()),
     _dg_kernels(_nl.getDGKernelWarehouse()),
-    _interface_kernels(_nl.getInterfaceKernelWarehouse()),
-    _kernel_type(kernel_type),
-    _warehouse(NULL)
+    _interface_kernels(_nl.getInterfaceKernelWarehouse())
 {
-  switch (_kernel_type)
-  {
-    case Moose::KT_ALL:
-      _warehouse = &_nl.getKernelWarehouse();
-      break;
-
-    case Moose::KT_TIME:
-      _warehouse = &_nl.getTimeKernelWarehouse();
-      break;
-
-    case Moose::KT_NONTIME:
-      _warehouse = &_nl.getNonTimeKernelWarehouse();
-      break;
-
-    case Moose::KT_EIGEN:
-      _warehouse = &_nl.getEigenKernelWarehouse();
-      break;
-
-    case Moose::KT_NONEIGEN:
-      _warehouse = &_nl.getNonEigenKernelWarehouse();
-      break;
-
-    default:
-      mooseError("Unknown kernel type \n");
-  }
 }
 
 // Splitting Constructor
@@ -65,9 +37,7 @@ ComputeFullJacobianThread::ComputeFullJacobianThread(ComputeFullJacobianThread &
     _nl(x._nl),
     _integrated_bcs(x._integrated_bcs),
     _dg_kernels(x._dg_kernels),
-    _interface_kernels(x._interface_kernels),
-    _kernel_type(x._kernel_type),
-    _warehouse(x._warehouse)
+    _interface_kernels(x._interface_kernels)
 {
 }
 

@@ -20,9 +20,7 @@ class Kernel;
 class ComputeFullJacobianThread : public ComputeJacobianThread
 {
 public:
-  ComputeFullJacobianThread(FEProblemBase & fe_problem,
-                            SparseMatrix<Number> & jacobian,
-                            Moose::KernelType kernel_type = Moose::KT_ALL);
+  ComputeFullJacobianThread(FEProblemBase & fe_problem, const std::set<TagID> & tags);
 
   // Splitting Constructor
   ComputeFullJacobianThread(ComputeFullJacobianThread & x, Threads::split split);
@@ -36,7 +34,6 @@ protected:
   virtual void computeFaceJacobian(BoundaryID bnd_id) override;
   virtual void computeInternalFaceJacobian(const Elem * neighbor) override;
   virtual void computeInternalInterFaceJacobian(BoundaryID bnd_id) override;
-
   NonlinearSystemBase & _nl;
 
   // Reference to BC storage structures
@@ -47,10 +44,6 @@ protected:
 
   // Reference to interface kernel storage
   const MooseObjectWarehouse<InterfaceKernel> & _interface_kernels;
-
-  Moose::KernelType _kernel_type;
-
-  const MooseObjectWarehouse<KernelBase> * _warehouse;
 };
 
 #endif // COMPUTEFULLJACOBIANTHREAD_H

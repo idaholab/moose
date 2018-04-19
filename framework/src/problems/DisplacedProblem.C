@@ -218,6 +218,78 @@ DisplacedProblem::updateMesh(const NumericVector<Number> & soln,
   Moose::perf_log.pop("updateDisplacedMesh()", "Execution");
 }
 
+TagID
+DisplacedProblem::addVectorTag(TagName tag_name)
+{
+  return _mproblem.addVectorTag(tag_name);
+}
+
+TagID
+DisplacedProblem::getVectorTagID(const TagName & tag_name)
+{
+  return _mproblem.getVectorTagID(tag_name);
+}
+
+TagName
+DisplacedProblem::vectorTagName(TagID tag)
+{
+  return _mproblem.vectorTagName(tag);
+}
+
+bool
+DisplacedProblem::vectorTagExists(TagID tag)
+{
+  return _mproblem.vectorTagExists(tag);
+}
+
+unsigned int
+DisplacedProblem::numVectorTags()
+{
+  return _mproblem.numVectorTags();
+}
+
+std::map<TagName, TagID> &
+DisplacedProblem::getVectorTags()
+{
+  return _mproblem.getVectorTags();
+}
+
+TagID
+DisplacedProblem::addMatrixTag(TagName tag_name)
+{
+  return _mproblem.addMatrixTag(tag_name);
+}
+
+TagID
+DisplacedProblem::getMatrixTagID(const TagName & tag_name)
+{
+  return _mproblem.getMatrixTagID(tag_name);
+}
+
+TagName
+DisplacedProblem::matrixTagName(TagID tag)
+{
+  return _mproblem.matrixTagName(tag);
+}
+
+bool
+DisplacedProblem::matrixTagExists(const TagName & tag_name)
+{
+  return _mproblem.matrixTagExists(tag_name);
+}
+
+bool
+DisplacedProblem::matrixTagExists(TagID tag_id)
+{
+  return _mproblem.matrixTagExists(tag_id);
+}
+
+unsigned int
+DisplacedProblem::numMatrixTags()
+{
+  return _mproblem.numMatrixTags();
+}
+
 bool
 DisplacedProblem::hasVariable(const std::string & var_name) const
 {
@@ -575,20 +647,13 @@ DisplacedProblem::clearDiracInfo()
 void
 DisplacedProblem::addResidual(THREAD_ID tid)
 {
-  if (_mproblem.getNonlinearSystem().hasResidualVector(Moose::KT_TIME))
-    _assembly[tid]->addResidual(_mproblem.residualVector(Moose::KT_TIME), Moose::KT_TIME);
-  if (_mproblem.getNonlinearSystem().hasResidualVector(Moose::KT_NONTIME))
-    _assembly[tid]->addResidual(_mproblem.residualVector(Moose::KT_NONTIME), Moose::KT_NONTIME);
+  _assembly[tid]->addResidual(getVectorTags());
 }
 
 void
 DisplacedProblem::addResidualNeighbor(THREAD_ID tid)
 {
-  if (_mproblem.getNonlinearSystem().hasResidualVector(Moose::KT_TIME))
-    _assembly[tid]->addResidualNeighbor(_mproblem.residualVector(Moose::KT_TIME), Moose::KT_TIME);
-  if (_mproblem.getNonlinearSystem().hasResidualVector(Moose::KT_NONTIME))
-    _assembly[tid]->addResidualNeighbor(_mproblem.residualVector(Moose::KT_NONTIME),
-                                        Moose::KT_NONTIME);
+  _assembly[tid]->addResidualNeighbor(getVectorTags());
 }
 
 void
@@ -612,8 +677,9 @@ DisplacedProblem::addCachedResidual(THREAD_ID tid)
 void
 DisplacedProblem::addCachedResidualDirectly(NumericVector<Number> & residual, THREAD_ID tid)
 {
-  _assembly[tid]->addCachedResidual(residual, Moose::KT_TIME);
-  _assembly[tid]->addCachedResidual(residual, Moose::KT_NONTIME);
+
+  _assembly[tid]->addCachedResidual(residual, _displaced_nl.timeVectorTag());
+  _assembly[tid]->addCachedResidual(residual, _displaced_nl.nonTimeVectorTag());
 }
 
 void
@@ -629,21 +695,21 @@ DisplacedProblem::setResidualNeighbor(NumericVector<Number> & residual, THREAD_I
 }
 
 void
-DisplacedProblem::addJacobian(SparseMatrix<Number> & jacobian, THREAD_ID tid)
+DisplacedProblem::addJacobian(THREAD_ID tid)
 {
-  _assembly[tid]->addJacobian(jacobian);
+  _assembly[tid]->addJacobian();
 }
 
 void
-DisplacedProblem::addJacobianNonlocal(SparseMatrix<Number> & jacobian, THREAD_ID tid)
+DisplacedProblem::addJacobianNonlocal(THREAD_ID tid)
 {
-  _assembly[tid]->addJacobianNonlocal(jacobian);
+  _assembly[tid]->addJacobianNonlocal();
 }
 
 void
-DisplacedProblem::addJacobianNeighbor(SparseMatrix<Number> & jacobian, THREAD_ID tid)
+DisplacedProblem::addJacobianNeighbor(THREAD_ID tid)
 {
-  _assembly[tid]->addJacobianNeighbor(jacobian);
+  _assembly[tid]->addJacobianNeighbor();
 }
 
 void
@@ -665,9 +731,9 @@ DisplacedProblem::cacheJacobianNeighbor(THREAD_ID tid)
 }
 
 void
-DisplacedProblem::addCachedJacobian(SparseMatrix<Number> & jacobian, THREAD_ID tid)
+DisplacedProblem::addCachedJacobian(THREAD_ID tid)
 {
-  _assembly[tid]->addCachedJacobian(jacobian);
+  _assembly[tid]->addCachedJacobian();
 }
 
 void

@@ -24,6 +24,7 @@
 #include "GeometricSearchInterface.h"
 #include "Restartable.h"
 #include "MeshChangedInterface.h"
+#include "TaggingInterface.h"
 
 class MooseMesh;
 class SubProblem;
@@ -54,7 +55,8 @@ class KernelBase : public MooseObject,
                    public RandomInterface,
                    protected GeometricSearchInterface,
                    public Restartable,
-                   public MeshChangedInterface
+                   public MeshChangedInterface,
+                   public TaggingInterface
 {
 public:
   KernelBase(const InputParameters & parameters);
@@ -97,8 +99,6 @@ public:
    * Returns a reference to the SubProblem for which this Kernel is active
    */
   SubProblem & subProblem() { return _subproblem; }
-
-  virtual bool isEigenKernel() const { return _eigen_kernel; }
 
 protected:
   /**
@@ -167,12 +167,6 @@ protected:
   /// current index for the shape function
   unsigned int _j;
 
-  /// Holds residual entries as they are accumulated by this Kernel
-  DenseVector<Number> _local_re;
-
-  /// Holds residual entries as they are accumulated by this Kernel
-  DenseMatrix<Number> _local_ke;
-
   /// The aux variables to save the residual contributions to
   bool _has_save_in;
   std::vector<MooseVariableFEBase *> _save_in;
@@ -182,8 +176,6 @@ protected:
   bool _has_diag_save_in;
   std::vector<MooseVariableFEBase *> _diag_save_in;
   std::vector<AuxVariableName> _diag_save_in_strings;
-
-  bool _eigen_kernel;
 };
 
 #endif /* KERNELBASE_H */

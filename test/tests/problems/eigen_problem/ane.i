@@ -30,7 +30,7 @@
 
   [./rhs]
     type = PMassKernel
-    eigen_kernel = true
+    extra_vector_tags = 'eigen'
     variable = u
     p = 3
   [../]
@@ -42,6 +42,11 @@
     variable = u
     boundary = '0 2'
     value = 0
+  [../]
+  [./eigen]
+    type = EigenDirichletBC
+    variable = u
+    boundary = '0 2'
   [../]
 []
 

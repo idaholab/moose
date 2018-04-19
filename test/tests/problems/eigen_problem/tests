@@ -49,8 +49,7 @@
     input = 'ne.i'
     cli_args = 'Executioner/solve_type=MF_NONLINEAR_POWER Outputs/file_base=nonlinear_power'
     csvdiff = 'nonlinear_power_eigenvalues_0001.csv'
-    slepc_version = '>=3.7.4'
-    petsc_version_release = false
+    slepc_version = '>=3.8.0'
   [../]
 
   [./monolith_newton]
@@ -58,30 +57,26 @@
     input = 'ne.i'
     cli_args = 'Executioner/solve_type=MF_MONOLITH_NEWTON Outputs/file_base=monolith_newton'
     csvdiff = 'monolith_newton_eigenvalues_0001.csv'
-    slepc_version = '>=3.7.4'
-    petsc_version_release = false
+    slepc_version = '>=3.8.0'
   [../]
 
   [./ne_deficient]
     type = 'CSVDiff'
     input = 'ne_deficient_b.i'
     csvdiff = 'ne_deficient_b_eigenvalues_0001.csv'
-    slepc_version = '>=3.7.4'
-    petsc_version_release = false
+    slepc_version = '>=3.8.0'
   [../]
 
   [./nonlinear_laplace]
     type = 'CSVDiff'
     input = 'ane.i'
     csvdiff = 'ane_eigenvalues_0001.csv'
-    slepc_version = '>=3.7.4'
-    petsc_version_release = false
+    slepc_version = '>=3.8.0'
   [../]
   [./coupled_system]
     type = 'CSVDiff'
     input = 'ne_coupled.i'
     csvdiff = 'ne_coupled_eigenvalues_0001.csv'
-    slepc_version = '>=3.7.4'
-    petsc_version_release = false
+    slepc_version = '>=3.8.0'
   [../]
 []

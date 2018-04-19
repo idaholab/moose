@@ -55,7 +55,13 @@ public:
 
   virtual NumericVector<Number> & RHS() override;
 
-  virtual void addEigenKernels(std::shared_ptr<KernelBase> kernel, THREAD_ID tid) override;
+  /**
+   * Add the eigen tag to the right kernels
+   */
+  template <typename T>
+  void addEigenTagToMooseObjects(MooseObjectTagWarehouse<T> & warehouse);
+
+  virtual void initialSetup() override;
 
   /**
    * Get the number of converged eigenvalues
@@ -107,11 +113,35 @@ public:
     return _eigen_values;
   }
 
+  /**
+   * Vector tag ID of right hand side
+   */
+  TagID eigenVectorTag() { return _Bx_tag; }
+
+  /**
+   * Vector tag ID of left hand side
+   */
+  TagID nonEigenVectorTag() { return _Ax_tag; }
+
+  /**
+   * Matrix tag ID of right hand side
+   */
+  TagID eigenMatrixTag() { return _B_tag; }
+
+  /**
+   * Matrix tag ID of left hand side
+   */
+  TagID nonEigenMatrixTag() { return _A_tag; }
+
 protected:
   TransientEigenSystem & _transient_sys;
   EigenProblem & _eigen_problem;
   std::vector<std::pair<Real, Real>> _eigen_values;
   unsigned int _n_eigen_pairs_required;
+  TagID _Ax_tag;
+  TagID _Bx_tag;
+  TagID _A_tag;
+  TagID _B_tag;
 };
 
 #else

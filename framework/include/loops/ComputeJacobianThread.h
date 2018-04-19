@@ -11,6 +11,7 @@
 #define COMPUTEJACOBIANTHREAD_H
 
 #include "ThreadedElementLoop.h"
+#include "MooseObjectTagWarehouse.h"
 
 #include "libmesh/elem_range.h"
 
@@ -25,9 +26,7 @@ class Kernel;
 class ComputeJacobianThread : public ThreadedElementLoop<ConstElemRange>
 {
 public:
-  ComputeJacobianThread(FEProblemBase & fe_problem,
-                        SparseMatrix<Number> & jacobian,
-                        Moose::KernelType kernel_type = Moose::KT_ALL);
+  ComputeJacobianThread(FEProblemBase & fe_problem, const std::set<TagID> & tags);
 
   // Splitting Constructor
   ComputeJacobianThread(ComputeJacobianThread & x, Threads::split split);
@@ -45,7 +44,6 @@ public:
   void join(const ComputeJacobianThread & /*y*/);
 
 protected:
-  SparseMatrix<Number> & _jacobian;
   NonlinearSystemBase & _nl;
 
   unsigned int _num_cached;
@@ -60,9 +58,12 @@ protected:
   const MooseObjectWarehouse<InterfaceKernel> & _interface_kernels;
 
   // Reference to Kernel storage structure
-  const MooseObjectWarehouse<KernelBase> & _kernels;
+  MooseObjectTagWarehouse<KernelBase> & _kernels;
 
-  Moose::KernelType _kernel_type;
+  // A pointer to different warehouse
+  MooseObjectWarehouse<KernelBase> * _warehouse;
+
+  const std::set<TagID> & _tags;
 
   virtual void computeJacobian();
   virtual void computeFaceJacobian(BoundaryID bnd_id);

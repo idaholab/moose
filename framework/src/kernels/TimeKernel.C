@@ -21,6 +21,10 @@ InputParameters
 validParams<TimeKernel>()
 {
   InputParameters params = validParams<Kernel>();
+
+  params.set<MultiMooseEnum>("vector_tags") = "time";
+  params.set<MultiMooseEnum>("matrix_tags") = "system";
+
   return params;
 }
 
@@ -29,16 +33,14 @@ TimeKernel::TimeKernel(const InputParameters & parameters) : Kernel(parameters) 
 void
 TimeKernel::computeResidual()
 {
-  DenseVector<Number> & re = _assembly.residualBlock(_var.number(), Moose::KT_TIME);
-  _local_re.resize(re.size());
-  _local_re.zero();
+  prepareVectorTag(_assembly, _var.number());
 
   precalculateResidual();
   for (_i = 0; _i < _test.size(); _i++)
     for (_qp = 0; _qp < _qrule->n_points(); _qp++)
       _local_re(_i) += _JxW[_qp] * _coord[_qp] * computeQpResidual();
 
-  re += _local_re;
+  accumulateTaggedLocalResidual();
 
   if (_has_save_in)
   {

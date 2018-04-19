@@ -1107,6 +1107,7 @@ Parser::extractParams(const std::string & prefix, InputParameters & p)
       setscalar(MaterialName, string);
       setscalar(DistributionName, string);
       setscalar(SamplerName, string);
+      setscalar(TagName, string);
 
       setscalar(PostprocessorName, PostprocessorName);
 
@@ -1161,7 +1162,7 @@ Parser::extractParams(const std::string & prefix, InputParameters & p)
       setvector(MaterialName, string);
       setvector(DistributionName, string);
       setvector(SamplerName, string);
-
+      setvector(TagName, string);
       setvector(VariableName, VariableName);
 
       // Double indexed types

@@ -12,6 +12,7 @@
 #include "Assembly.h"
 #include "MooseVariableFEImpl.h"
 #include "SystemBase.h"
+#include "NonlinearSystemBase.h"
 
 template <>
 InputParameters
@@ -33,17 +34,17 @@ VectorNodalBC::VectorNodalBC(const InputParameters & parameters)
 }
 
 void
-VectorNodalBC::computeResidual(NumericVector<Number> & residual)
+VectorNodalBC::computeResidual()
 {
   const std::vector<dof_id_type> & dof_indices = _var.dofIndices();
 
   RealVectorValue res(0, 0, 0);
+  res = computeQpResidual();
 
-  if (!_is_eigen)
-    res = computeQpResidual();
-
-  for (size_t i = 0; i < dof_indices.size(); ++i)
-    residual.set(dof_indices[i], res(i));
+  for (auto tag_id : _vector_tags)
+    if (_fe_problem.getNonlinearSystemBase().hasVector(tag_id))
+      for (size_t i = 0; i < dof_indices.size(); ++i)
+        _fe_problem.getNonlinearSystemBase().getVector(tag_id).set(dof_indices[i], res(i));
 }
 
 void
@@ -53,9 +54,10 @@ VectorNodalBC::computeJacobian()
   const std::vector<dof_id_type> & cached_rows = _var.dofIndices();
 
   // Cache the user's computeQpJacobian() value for later use.
-  for (size_t i = 0; i < cached_rows.size(); ++i)
-    _fe_problem.assembly(0).cacheJacobianContribution(
-        cached_rows[i], cached_rows[i], cached_val(i));
+  for (auto tag : _matrix_tags)
+    for (size_t i = 0; i < cached_rows.size(); ++i)
+      _fe_problem.assembly(0).cacheJacobianContribution(
+          cached_rows[i], cached_rows[i], cached_val(i), tag);
 }
 
 void
@@ -71,8 +73,10 @@ VectorNodalBC::computeOffDiagJacobian(unsigned int jvar)
     dof_id_type cached_col = _current_node->dof_number(_sys.number(), jvar, 0);
 
     // Cache the user's computeQpJacobian() value for later use.
-    for (size_t i = 0; i < cached_rows.size(); ++i)
-      _fe_problem.assembly(0).cacheJacobianContribution(cached_rows[i], cached_col, cached_val);
+    for (auto tag : _matrix_tags)
+      for (size_t i = 0; i < cached_rows.size(); ++i)
+        _fe_problem.assembly(0).cacheJacobianContribution(
+            cached_rows[i], cached_col, cached_val, tag);
   }
 }
 
