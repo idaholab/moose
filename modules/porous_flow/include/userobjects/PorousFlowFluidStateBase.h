@@ -28,15 +28,19 @@ struct FluidStateProperties
       dsaturation_dp(0.0),
       dsaturation_dT(0.0),
       dsaturation_dz(0.0),
+      dsaturation_dx(0.0),
       ddensity_dp(0.0),
       ddensity_dT(0.0),
       ddensity_dz(0.0),
+      ddensity_dx(0.0),
       dviscosity_dp(0.0),
       dviscosity_dT(0.0),
       dviscosity_dz(0.0),
+      dviscosity_dx(0.0),
       dmass_fraction_dp(n, 0.0),
       dmass_fraction_dT(n, 0.0),
-      dmass_fraction_dz(n, 0.0){};
+      dmass_fraction_dz(n, 0.0),
+      dmass_fraction_dx(n, 0.0){};
 
   Real pressure;
   Real saturation;
@@ -46,15 +50,19 @@ struct FluidStateProperties
   Real dsaturation_dp;
   Real dsaturation_dT;
   Real dsaturation_dz;
+  Real dsaturation_dx;
   Real ddensity_dp;
   Real ddensity_dT;
   Real ddensity_dz;
+  Real ddensity_dx;
   Real dviscosity_dp;
   Real dviscosity_dT;
   Real dviscosity_dz;
+  Real dviscosity_dx;
   std::vector<Real> dmass_fraction_dp;
   std::vector<Real> dmass_fraction_dT;
   std::vector<Real> dmass_fraction_dz;
+  std::vector<Real> dmass_fraction_dx;
 };
 
 template <>
@@ -72,31 +80,37 @@ public:
    * The maximum number of phases in this model
    * @return number of phases
    */
-  unsigned int numPhases() const;
+  unsigned int numPhases() const { return _num_phases; };
+
+  /**
+   * The maximum number of components in this model
+   * @return number of components
+   */
+  unsigned int numComponents() const { return _num_components; };
 
   /**
    * The index of the aqueous phase
    * @return aqueous phase number
    */
-  unsigned int aqueousPhaseIndex() const;
+  unsigned int aqueousPhaseIndex() const { return _aqueous_phase_number; };
 
   /**
    * The index of the gas phase
    * @return gas phase number
    */
-  unsigned int gasPhaseIndex() const;
+  unsigned int gasPhaseIndex() const { return _gas_phase_number; };
 
   /**
    * The index of the aqueous fluid component
    * @return aqueous fluid component number
    */
-  unsigned int aqueousComponentIndex() const;
+  unsigned int aqueousComponentIndex() const { return _aqueous_fluid_component; };
 
   /**
    * The index of the gas fluid component
    * @return gas fluid component number
    */
-  unsigned int gasComponentIndex() const;
+  unsigned int gasComponentIndex() const { return _gas_fluid_component; };
 
   /**
    * Clears the contents of the FluidStateProperties data structure
@@ -106,17 +120,17 @@ public:
 
 protected:
   /// Number of phases
-  const unsigned int _num_phases;
+  unsigned int _num_phases;
   /// Number of components
-  const unsigned int _num_components;
+  unsigned int _num_components;
   /// Phase number of the aqueous phase
   const unsigned int _aqueous_phase_number;
   /// Phase number of the gas phase
-  const unsigned int _gas_phase_number;
+  unsigned int _gas_phase_number;
   /// Fluid component number of the aqueous component
   const unsigned int _aqueous_fluid_component;
   /// Fluid component number of the gas phase
-  const unsigned int _gas_fluid_component;
+  unsigned int _gas_fluid_component;
   /// Universal gas constant (J/mol/K)
   const Real _R;
   /// Conversion from C to K

@@ -89,23 +89,13 @@ PorousFlowFluidStateFlashBase::PorousFlowFluidStateFlashBase(const InputParamete
     _is_initqp(false),
     _pc_uo(getUserObject<PorousFlowCapillaryPressure>("capillary_pressure"))
 {
-  // Only two phases are possible in the fluidstate classes
+  // Check that the number of phases in the fluidstate class is also provided in the Dictator
   if (_fs_base.numPhases() != _num_phases)
-    mooseError("Only ",
+    mooseError(name(),
+               ": only ",
                _fs_base.numPhases(),
-               " phases are allowed in ",
-               _name,
-               ". Please check the number of phases entered in the dictator is correct");
-
-  // Check that the number of total mass fractions provided as primary variables is correct
-  if (_num_z_vars != _num_components - 1)
-    mooseError("The number of supplied mass fraction variables should be ",
-               _num_components - 1,
-               " in ",
-               _name,
-               " but ",
-               _num_z_vars,
-               " are supplied");
+               " phases are allowed. Please check the number of phases entered in the dictator is "
+               "correct");
 
   // Store all total mass fractions and associated variable numbers
   _z.resize(_num_z_vars);
@@ -206,7 +196,7 @@ PorousFlowFluidStateFlashBase::computeQpProperties()
     }
 
     // The aqueous phase porepressure is also a function of liquid saturation,
-    // which depends on both gas porepressure and z
+    // which depends on both gas porepressure, z and xnacl
     _dporepressure_dvar[_qp][_aqueous_phase_number][_pvar] +=
         -dpc * _dsaturation_dvar[_qp][_aqueous_phase_number][_pvar];
     _dporepressure_dvar[_qp][_aqueous_phase_number][_zvar[0]] =
@@ -217,12 +207,12 @@ PorousFlowFluidStateFlashBase::computeQpProperties()
   // Derivative of z wrt variables
   std::vector<Real> dz_dvar;
   dz_dvar.assign(_num_pf_vars, 0.0);
+
   if (_dictator.isPorousFlowVariable(_z_varnum[0]))
     dz_dvar[_zvar[0]] = 1.0;
 
   // Derivatives of properties wrt primary variables
   for (unsigned int v = 0; v < _num_pf_vars; ++v)
-  {
     for (unsigned int ph = 0; ph < _num_phases; ++ph)
     {
       // Derivative of density in each phase
@@ -235,20 +225,17 @@ PorousFlowFluidStateFlashBase::computeQpProperties()
       _dfluid_viscosity_dvar[_qp][ph][v] += _fsp[ph].dviscosity_dT * _dtemperature_dvar[_qp][v];
       _dfluid_viscosity_dvar[_qp][ph][v] += _fsp[ph].dviscosity_dz * dz_dvar[v];
     }
-  }
 
   // The derivative of the mass fractions for each fluid component in each phase.
   // Note: these are all calculated in terms of gas pressuse, so there is no
   // capillary pressure effect, and hence no need to multiply by _dporepressure_dvar
   for (unsigned int ph = 0; ph < _num_phases; ++ph)
-  {
     for (unsigned int comp = 0; comp < _num_components; ++comp)
     {
       _dmass_frac_dvar[_qp][ph][comp][_pvar] = _fsp[ph].dmass_fraction_dp[comp];
       _dmass_frac_dvar[_qp][ph][comp][_zvar[0]] =
           _fsp[ph].dmass_fraction_dz[comp] * dz_dvar[_zvar[0]];
     }
-  }
 
   // If the material properties are being evaluated at the qps, calculate the
   // gradients as well. Note: only nodal properties are evaluated in
