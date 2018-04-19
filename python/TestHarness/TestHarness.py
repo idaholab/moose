@@ -642,6 +642,16 @@ class TestHarness:
         if self.options.results_storage:
             with open(self.results_storage, 'w') as data_file:
                 json.dump(self.options.results_storage, data_file, indent=2)
+        if self.options.results_storage:
+            try:
+                with open(self.results_storage, 'w') as data_file:
+                    json.dump(self.options.results_storage, data_file, indent=2)
+            except UnicodeDecodeError:
+                print('\nERROR: Unable to write results due to unicode decode/encode error')
+                sys.exit(1)
+            except IOError:
+                print('\nERROR: Unable to write results due to permissions')
+                sys.exit(1)
 
         try:
             # Write one file, with verbose information (--file)
