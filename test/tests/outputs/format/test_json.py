@@ -159,7 +159,7 @@ class TestJSON(unittest.TestCase):
         self.assertIn("BadKernels", data)
         self.assertIn("Kernels", data)
         diff = data["Kernels"]["star"]["subblock_types"]["Diffusion"]
-        self.assertIn("eigen_kernel", diff["parameters"])
+        self.assertIn("use_displaced_mesh", diff["parameters"])
 
     def getInputFileFormat(self, extra=[]):
         """

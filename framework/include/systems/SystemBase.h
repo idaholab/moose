@@ -22,6 +22,7 @@
 #include "libmesh/dof_map.h"
 #include "libmesh/equation_systems.h"
 #include "libmesh/numeric_vector.h"
+#include "libmesh/sparse_matrix.h"
 
 // Forward declarations
 class Factory;
@@ -154,8 +155,6 @@ public:
 
   virtual Number & duDotDu() { return _du_dot_du; }
   virtual NumericVector<Number> & solutionUDot() { return *_dummy_vec; }
-  virtual NumericVector<Number> & residualVector(Moose::KernelType /*type*/) { return *_dummy_vec; }
-  virtual bool hasResidualVector(Moose::KernelType) const { return false; };
 
   virtual void saveOldSolutions();
   virtual void restoreOldSolutions();
@@ -163,12 +162,120 @@ public:
   /**
    * Check if the named vector exists in the system.
    */
-  virtual bool hasVector(const std::string & name) const;
+  bool hasVector(const std::string & tag_name) const;
+
+  /**
+   * Check if the tagged vector exists in the system.
+   */
+  virtual bool hasVector(TagID tag_id);
+
+  /**
+   * Ideally, we should not need this API.
+   * There exists a really bad API "addCachedResidualDirectly " in FEProblem and DisplacedProblem
+   * This API should go away once addCachedResidualDirectly is removed in the future
+   * Return Tag ID for Time
+   */
+  virtual TagID timeVectorTag();
+
+  /**
+   * Return the Matrix Tag ID for Time
+   */
+  virtual TagID timeMatrixTag();
+
+  /**
+   * Return the Matrix Tag ID for System
+   */
+  virtual TagID systemMatrixTag();
+
+  /*
+   * Return TagID for nontime
+   */
+  virtual TagID nonTimeVectorTag();
+
+  /*
+   * Return TagID for nontime
+   */
+  virtual TagID residualVectorTag();
 
   /**
    * Get a raw NumericVector
    */
   virtual NumericVector<Number> & getVector(const std::string & name);
+
+  /**
+   * Get a raw NumericVector
+   */
+  virtual NumericVector<Number> & getVector(TagID tag);
+
+  /**
+   * Associate a vector for a given tag
+   */
+  virtual void associateVectorToTag(NumericVector<Number> & vec, TagID tag);
+
+  /**
+   * Associate a vector for a given tag
+   */
+  virtual void disassociateVectorFromTag(NumericVector<Number> & vec, TagID tag);
+
+  /**
+   * Disassociate all vectors, and then hasVector() will return false.
+   */
+  virtual void disassociateAllTaggedVectors();
+
+  /**
+   * Check if the tagged matrix exists in the system.
+   */
+  virtual bool hasMatrix(TagID tag);
+
+  /**
+   * Get a raw SparseMatrix
+   */
+  virtual SparseMatrix<Number> & getMatrix(TagID tag);
+
+  /**
+   *  Make all exsiting matrices ative
+   */
+  virtual void activeAllMatrixTags();
+
+  /**
+   *  Active a matrix for tag
+   */
+  virtual void activeMatrixTag(TagID tag);
+
+  /**
+   *  If or not a matrix tag is active
+   */
+  virtual bool matrixTagActive(TagID tag);
+
+  /**
+   *  deactive a matrix for tag
+   */
+  virtual void deactiveMatrixTag(TagID tag);
+
+  /**
+   * Make matrices inactive
+   */
+  virtual void deactiveAllMatrixTags();
+
+  /**
+   * Close all matrices associated the tags
+   */
+  void closeTaggedMatrices(const std::set<TagID> & tags);
+
+  /**
+   * associate a matirx to a tag
+   */
+  virtual void associateMatrixToTag(SparseMatrix<Number> & matrix, TagID tag);
+
+  /**
+   * disassociate a matirx from a tag
+   */
+  virtual void disassociateMatrixFromTag(SparseMatrix<Number> & matrix, TagID tag);
+
+  /**
+   * Clear all tagged matrices
+   */
+  virtual void disassociateAllTaggedMatrices();
 
   /**
    * Returns a reference to a serialized version of the solution vector for this subproblem
@@ -465,6 +572,58 @@ public:
   virtual NumericVector<Number> &
   addVector(const std::string & vector_name, const bool project, const ParallelType type);
 
+  /**
+   * Adds a solution length vector to the system with the specified TagID
+   *
+   * @param tag_name The name of the tag
+   * @param project Whether or not to project this vector when doing mesh refinement.
+   *                If the vector is just going to be recomputed then there is no need to project
+   * it.
+   * @param type What type of parallel vector.  This is usually either PARALLEL or GHOSTED.
+   *                                            GHOSTED is needed if you are going to be accessing
+   * off-processor entries.
+   *                                            The ghosting pattern is the same as the solution
+   * vector.
+   */
+  NumericVector<Number> & addVector(TagID tag, const bool project, const ParallelType type);
+
+  /**
+   * Close all vectors for given tags
+   */
+  virtual void closeTaggedVectors(const std::set<TagID> & tags);
+
+  /**
+   * Zero all vectors for given tags
+   */
+  virtual void zeroTaggedVectors(const std::set<TagID> & tags);
+
+  /**
+   * Remove a solution length vector from the system with the specified TagID
+   *
+   * @param tag_id  Tag ID
+   */
+  virtual void removeVector(TagID tag_id);
+
+  /**
+   * Adds a jacobian sized vector
+   *
+   * @param tag_name The name of the tag
+   */
+  virtual SparseMatrix<Number> & addMatrix(TagID /* tag */)
+  {
+    mooseError("Adding a matrix is not supported for this type of system!");
+  }
+
+  /**
+   * Removes a jacobian sized vector
+   *
+   * @param tag_name The name of the tag
+   */
+  virtual void removeMatrix(TagID /* tag */)
+  {
+    mooseError("Removing a matrix is not supported for this type of system!");
+  }
+
   virtual const std::string & name() const { return system().name(); }
 
   /**
@@ -508,6 +667,13 @@ protected:
   std::vector<std::string> _vars_to_be_zeroed_on_jacobian;
 
   Real _du_dot_du;
+
+  /// Tagged vectors (pointer)
+  std::vector<NumericVector<Number> *> _tagged_vectors;
+  /// Tagged matrices (pointer)
+  std::vector<SparseMatrix<Number> *> _tagged_matrices;
+  /// Active flags for tagged matrices
+  std::vector<bool> _matrix_tag_active_flags;
 
   NumericVector<Number> * _dummy_vec; // to satisfy the interface
 

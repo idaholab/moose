@@ -40,7 +40,7 @@
   [./rhs]
     type = Reaction
     variable = u
-    eigen_kernel = true
+    extra_vector_tags = 'eigen'
   [../]
 
   [./diff_T]
@@ -74,11 +74,23 @@
     value = 0
   [../]
 
+  [./eigenU]
+    type = EigenDirichletBC
+    variable = u
+    boundary = '0 1 2 3'
+  [../]
+
   [./homogeneousT]
     type = DirichletBC
     variable = T
     boundary = '0 1 2 3'
     value = 0
+  [../]
+
+  [./eigenT]
+    type = EigenDirichletBC
+    variable = T
+    boundary = '0 1 2 3'
   [../]
 []
 

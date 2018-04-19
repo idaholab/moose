@@ -20,9 +20,9 @@
 
 #include "libmesh/threads.h"
 
-ComputeDiracThread::ComputeDiracThread(FEProblemBase & feproblem, SparseMatrix<Number> * jacobian)
+ComputeDiracThread::ComputeDiracThread(FEProblemBase & feproblem, bool is_jacobian)
   : ThreadedElementLoop<DistElemRange>(feproblem),
-    _jacobian(jacobian),
+    _is_jacobian(is_jacobian),
     _nl(feproblem.getNonlinearSystemBase()),
     _dirac_kernels(_nl.getDiracKernelWarehouse())
 {
@@ -31,7 +31,7 @@ ComputeDiracThread::ComputeDiracThread(FEProblemBase & feproblem, SparseMatrix<N
 // Splitting Constructor
 ComputeDiracThread::ComputeDiracThread(ComputeDiracThread & x, Threads::split split)
   : ThreadedElementLoop<DistElemRange>(x, split),
-    _jacobian(x._jacobian),
+    _is_jacobian(x._is_jacobian),
     _nl(x._nl),
     _dirac_kernels(x._dirac_kernels)
 {
@@ -92,7 +92,7 @@ ComputeDiracThread::onElement(const Elem * elem)
   {
     if (!dirac_kernel->hasPointsOnElem(elem))
       continue;
-    else if (_jacobian == NULL)
+    else if (!_is_jacobian)
     {
       dirac_kernel->computeResidual();
       continue;
@@ -132,10 +132,10 @@ void
 ComputeDiracThread::postElement(const Elem * /*elem*/)
 {
   Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
-  if (_jacobian == NULL)
+  if (!_is_jacobian)
     _fe_problem.addResidual(_tid);
   else
-    _fe_problem.addJacobian(*_jacobian, _tid);
+    _fe_problem.addJacobian(_tid);
 }
 
 void

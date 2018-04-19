@@ -13,6 +13,7 @@
 #include "SystemBase.h"
 #include "ConstraintWarehouse.h"
 #include "MooseObjectWarehouse.h"
+#include "MooseObjectTagWarehouse.h"
 
 #include "libmesh/transient_system.h"
 #include "libmesh/nonlinear_implicit_system.h"
@@ -37,6 +38,7 @@ class DiracKernel;
 class NodalKernel;
 class Split;
 class KernelBase;
+class BoundaryCondition;
 
 // libMesh forward declarations
 namespace libMesh
@@ -120,8 +122,6 @@ public:
    */
   virtual void
   addKernel(const std::string & kernel_name, const std::string & name, InputParameters parameters);
-
-  virtual void addEigenKernels(std::shared_ptr<KernelBase> /*kernel*/, THREAD_ID /*tid*/){};
 
   /**
    * Adds a NodalKernel
@@ -234,11 +234,21 @@ public:
   void constraintResiduals(NumericVector<Number> & residual, bool displaced);
 
   /**
-   * Computes residual
+   * Computes residual for a given tag
    * @param residual Residual is formed in here
-   * @param type The type of kernels for which the residual is to be computed.
+   * @param the tag of kernels for which the residual is to be computed.
    */
-  void computeResidual(NumericVector<Number> & residual, Moose::KernelType type = Moose::KT_ALL);
+  void computeResidualTag(NumericVector<Number> & residual, TagID tag_id);
+
+  /**
+   * Form multiple tag-associated residual vectors for all the given tags
+   */
+  void computeResidualTags(const std::set<TagID> & tags);
+
+  /**
+   * Form a residual vector for a given tag
+   */
+  void computeResidual(NumericVector<Number> & residual, TagID tag_id);
 
   /**
    * Finds the implicit sparsity graph between geometrically related dofs.
@@ -252,8 +262,7 @@ public:
    * coupled that
    * are related geometrically (i.e. near each other across a gap).
    */
-  void addImplicitGeometricCouplingEntries(SparseMatrix<Number> & jacobian,
-                                           GeometricSearchData & geom_search_data);
+  void addImplicitGeometricCouplingEntries(GeometricSearchData & geom_search_data);
 
   /**
    * Add jacobian contributions from Constraints
@@ -261,18 +270,26 @@ public:
    * @param jacobian reference to the Jacobian matrix
    * @param displaced Controls whether to do the displaced Constraints or non-displaced
    */
-  void constraintJacobians(SparseMatrix<Number> & jacobian, bool displaced);
+  void constraintJacobians(bool displaced);
 
   /// set all the global dof indices for a nonlinear variable
   void setVariableGlobalDoFs(const std::string & var_name);
   const std::vector<dof_id_type> & getVariableGlobalDoFs() { return _var_all_dof_indices; }
 
   /**
-   * Computes Jacobian
-   * @param jacobian Jacobian is formed in here
+   * Computes multiple (tag associated) Jacobian matricese
    */
-  void computeJacobian(SparseMatrix<Number> & jacobian,
-                       Moose::KernelType kernel_type = Moose::KT_ALL);
+  void computeJacobianTags(const std::set<TagID> & tags);
+
+  /**
+   * Associate jacobian to systemMatrixTag, and then form a matrix for all the tags
+   */
+  void computeJacobian(SparseMatrix<Number> & jacobian, const std::set<TagID> & tags);
+
+  /**
+   * Take all tags in the system, and form a matrix for all tags in the system
+   */
+  void computeJacobian(SparseMatrix<Number> & jacobian);
 
   /**
    * Computes several Jacobian blocks simultaneously, summing their contributions into smaller
@@ -283,6 +300,8 @@ public:
    * @param blocks The blocks to fill in (JacobianBlock is defined in ComputeJacobianBlocksThread)
    */
   void computeJacobianBlocks(std::vector<JacobianBlock *> & blocks);
+
+  void computeJacobianBlocks(std::vector<JacobianBlock *> & blocks, const std::set<TagID> & tags);
 
   /**
    * Compute damping
@@ -325,8 +344,21 @@ public:
   virtual void setSolutionUDot(const NumericVector<Number> & udot);
 
   virtual NumericVector<Number> & solutionUDot() override;
-  virtual NumericVector<Number> & residualVector(Moose::KernelType type) override;
-  virtual bool hasResidualVector(Moose::KernelType type) const override;
+
+  /**
+   *  Return a numeric vector that is associated with the time tag.
+   */
+  NumericVector<Number> & getResidualTimeVector();
+
+  /**
+   * Return a numeric vector that is associated with the nontime tag.
+   */
+  NumericVector<Number> & getResidualNonTimeVector();
+
+  /**
+   * Return a residual vector that is associated with the residual tag.
+   */
+  NumericVector<Number> & residualVector(TagID tag);
 
   virtual const NumericVector<Number> *& currentSolution() override { return _current_solution; }
 
@@ -487,14 +519,7 @@ public:
   /**
    * Access functions to Warehouses from outside NonlinearSystemBase
    */
-  const MooseObjectWarehouse<KernelBase> & getKernelWarehouse() { return _kernels; }
-  const MooseObjectWarehouse<KernelBase> & getTimeKernelWarehouse() { return _time_kernels; }
-  const MooseObjectWarehouse<KernelBase> & getNonTimeKernelWarehouse() { return _non_time_kernels; }
-  const MooseObjectWarehouse<KernelBase> & getEigenKernelWarehouse() { return _eigen_kernels; }
-  const MooseObjectWarehouse<KernelBase> & getNonEigenKernelWarehouse()
-  {
-    return _non_eigen_kernels;
-  }
+  MooseObjectTagWarehouse<KernelBase> & getKernelWarehouse() { return _kernels; }
   const MooseObjectWarehouse<DGKernel> & getDGKernelWarehouse() { return _dg_kernels; }
   const MooseObjectWarehouse<InterfaceKernel> & getInterfaceKernelWarehouse()
   {
@@ -541,6 +566,14 @@ public:
 
   virtual void setPreviousNewtonSolution(const NumericVector<Number> & soln);
 
+  virtual TagID timeVectorTag() override { return _Re_time_tag; }
+
+  virtual TagID nonTimeVectorTag() override { return _Re_non_time_tag; }
+
+  virtual TagID residualVectorTag() override { return _Re_tag; }
+
+  virtual TagID systemMatrixTag() override { return _Ke_system_tag; }
+
 public:
   FEProblemBase & _fe_problem;
   System & _sys;
@@ -556,28 +589,41 @@ public:
 
 protected:
   /**
-   * Compute the residual
-   * @param type The type of kernels for which the residual is to be computed.
+   * Compute the residual for a given tag
+   * @param tags The tags of kernels for which the residual is to be computed.
    */
-  void computeResidualInternal(Moose::KernelType type = Moose::KT_ALL);
+  void computeResidualInternal(const std::set<TagID> & tags);
 
   /**
-   * Enforces nodal boundary conditions
-   * @param residual Residual where nodal BCs are enforced (input/output)
+   * Enforces nodal boundary conditions. The boundary condition will be implemented
+   * in the residual using all the tags in the system.
    */
-  void computeNodalBCs(NumericVector<Number> & residual, Moose::KernelType type = Moose::KT_ALL);
+  void computeNodalBCs(NumericVector<Number> & residual);
 
-  void computeJacobianInternal(SparseMatrix<Number> & jacobian, Moose::KernelType kernel_type);
+  /**
+   * Form a residual for BCs that at least has one of the given tags.
+   */
+  void computeNodalBCs(NumericVector<Number> & residual, const std::set<TagID> & tags);
 
-  void computeDiracContributions(SparseMatrix<Number> * jacobian = NULL);
+  /**
+   * Form multiple tag-associated residual vectors for the given tags.
+   */
+  void computeNodalBCs(const std::set<TagID> & tags);
 
-  void computeScalarKernelsJacobians(SparseMatrix<Number> & jacobian);
+  /**
+   * Form multiple matrices for all the tags. Users should not call this func directly.
+   */
+  void computeJacobianInternal(const std::set<TagID> & tags);
+
+  void computeDiracContributions(bool is_jacobian);
+
+  void computeScalarKernelsJacobians();
 
   /**
    * Enforce nodal constraints
    */
   void enforceNodalConstraintsResidual(NumericVector<Number> & residual);
-  void enforceNodalConstraintsJacobian(SparseMatrix<Number> & jacobian);
+  void enforceNodalConstraintsJacobian();
 
   /// solution vector from nonlinear solver
   const NumericVector<Number> * _current_solution;
@@ -595,34 +641,53 @@ protected:
 
   /// Time integrator
   std::shared_ptr<TimeIntegrator> _time_integrator;
+
   /// solution vector for u^dot
   NumericVector<Number> * _u_dot;
   /// \f$ {du^dot}\over{du} \f$
   Number _du_dot_du;
+
+  /// Tag for time contribution residual
+  TagID _Re_time_tag;
+
+  /// Vector tags to temporarily store all tags associated with the current system.
+  std::set<TagID> _nl_vector_tags;
+
+  /// Matrix tags to temporarily store all tags associated with the current system.
+  std::set<TagID> _nl_matrix_tags;
+
   /// residual vector for time contributions
   NumericVector<Number> * _Re_time;
+
+  /// Tag for non-time contribution residual
+  TagID _Re_non_time_tag;
   /// residual vector for non-time contributions
   NumericVector<Number> * _Re_non_time;
 
+  /// Used for the residual vector from PETSc
+  TagID _Re_tag;
+
+  /// Tag for non-time contribution Jacobian
+  TagID _Ke_non_time_tag;
+
+  /// Tag for system contribution Jacobian
+  TagID _Ke_system_tag;
+
   ///@{
   /// Kernel Storage
-  MooseObjectWarehouse<KernelBase> _kernels;
+  MooseObjectTagWarehouse<KernelBase> _kernels;
   MooseObjectWarehouse<ScalarKernel> _scalar_kernels;
   MooseObjectWarehouse<ScalarKernel> _time_scalar_kernels;
   MooseObjectWarehouse<ScalarKernel> _non_time_scalar_kernels;
   MooseObjectWarehouse<DGKernel> _dg_kernels;
   MooseObjectWarehouse<InterfaceKernel> _interface_kernels;
-  MooseObjectWarehouse<KernelBase> _time_kernels;
-  MooseObjectWarehouse<KernelBase> _non_time_kernels;
-  MooseObjectWarehouse<KernelBase> _eigen_kernels;
-  MooseObjectWarehouse<KernelBase> _non_eigen_kernels;
 
   ///@}
 
   ///@{
   /// BoundaryCondition Warhouses
   MooseObjectWarehouse<IntegratedBCBase> _integrated_bcs;
-  MooseObjectWarehouse<NodalBCBase> _nodal_bcs;
+  MooseObjectTagWarehouse<NodalBCBase> _nodal_bcs;
   MooseObjectWarehouse<PresetNodalBC> _preset_nodal_bcs;
   ///@}
 

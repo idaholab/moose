@@ -261,11 +261,13 @@
     expect_err = "You cannot couple an elemental variable to a nodal variable"
   [../]
 
-  [./invalid_steady_exec_test]
-    type = 'RunException'
-    input = 'invalid_steady_exec_test.i'
-    expect_err = "You have specified time kernels in your steady state simulation"
-  [../]
+#  This will now be caught by a Tag error
+#  [./invalid_steady_exec_test]
+#    type = 'RunException'
+#    input = 'invalid_steady_exec_test.i'
+#    expect_err = "You have specified time kernels in your steady state simulation"
+#    deleted = true
+#  [../]
 
   [./missing_active_section_test]
     type = 'RunException'
@@ -504,13 +506,13 @@
   [./scalar_old_integrity_check]
     type = 'RunException'
     input = 'scalar_old_integrity_check.i'
-    expect_err = 'Calling \'coupledScalarValueOld\' on variable \S+ when using a \"Steady\" executioner is not allowed. This value is available only in transient simulations.'
+    expect_err = 'Vector tag: TIME does not exist'
   [../]
 
   [./scalar_dot_integrity_check]
     type = 'RunException'
     input = 'scalar_dot_integrity_check.i'
-    expect_err = 'Calling \'coupledScalarDot\' on variable \S+ when using a \"Steady\" executioner is not allowed. This value is available only in transient simulations.'
+    expect_err = 'Vector tag: TIME does not exist.'
   [../]
 
   [./node_value_off_block]

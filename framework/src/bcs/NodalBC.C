@@ -12,12 +12,16 @@
 #include "Assembly.h"
 #include "MooseVariableFEImpl.h"
 #include "SystemBase.h"
+#include "NonlinearSystemBase.h"
 
 template <>
 InputParameters
 validParams<NodalBC>()
 {
-  return validParams<NodalBCBase>();
+  InputParameters params = validParams<NodalBCBase>();
+  params += validParams<RandomInterface>();
+
+  return params;
 }
 
 NodalBC::NodalBC(const InputParameters & parameters)
@@ -68,18 +72,18 @@ NodalBC::NodalBC(const InputParameters & parameters)
 }
 
 void
-NodalBC::computeResidual(NumericVector<Number> & residual)
+NodalBC::computeResidual()
 {
   if (_var.isNodalDefined())
   {
     dof_id_type & dof_idx = _var.nodalDofIndex();
     _qp = 0;
     Real res = 0;
+    res = computeQpResidual();
 
-    if (!_is_eigen)
-      res = computeQpResidual();
-
-    residual.set(dof_idx, res);
+    for (auto tag_id : _vector_tags)
+      if (_fe_problem.getNonlinearSystemBase().hasVector(tag_id))
+        _fe_problem.getNonlinearSystemBase().getVector(tag_id).set(dof_idx, res);
 
     if (_has_save_in)
     {
@@ -100,11 +104,14 @@ NodalBC::computeJacobian()
   if (_var.isNodalDefined())
   {
     _qp = 0;
-    Real cached_val = computeQpJacobian();
+    Real cached_val = 0.;
+    cached_val = computeQpJacobian();
+
     dof_id_type cached_row = _var.nodalDofIndex();
 
     // Cache the user's computeQpJacobian() value for later use.
-    _fe_problem.assembly(0).cacheJacobianContribution(cached_row, cached_row, cached_val);
+    for (auto tag : _matrix_tags)
+      _fe_problem.assembly(0).cacheJacobianContribution(cached_row, cached_row, cached_val, tag);
 
     if (_has_diag_save_in)
     {
@@ -123,13 +130,16 @@ NodalBC::computeOffDiagJacobian(unsigned int jvar)
   else
   {
     _qp = 0;
-    Real cached_val = computeQpOffDiagJacobian(jvar);
+    Real cached_val = 0.0;
+    cached_val = computeQpOffDiagJacobian(jvar);
+
     dof_id_type cached_row = _var.nodalDofIndex();
     // Note: this only works for Lagrange variables...
     dof_id_type cached_col = _current_node->dof_number(_sys.number(), jvar, 0);
 
     // Cache the user's computeQpJacobian() value for later use.
-    _fe_problem.assembly(0).cacheJacobianContribution(cached_row, cached_col, cached_val);
+    for (auto tag : _matrix_tags)
+      _fe_problem.assembly(0).cacheJacobianContribution(cached_row, cached_col, cached_val, tag);
   }
 }
 

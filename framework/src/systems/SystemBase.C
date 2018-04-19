@@ -491,6 +491,67 @@ SystemBase::addVector(const std::string & vector_name, const bool project, const
   return *vec;
 }
 
+NumericVector<Number> &
+SystemBase::addVector(TagID tag, const bool project, const ParallelType type)
+{
+  if (!_subproblem.vectorTagExists(tag))
+    mooseError("Cannot add a tagged vector with vector_tag, ",
+               tag,
+               ", that tag does not exist in System ",
+               name());
+
+  if (hasVector(tag))
+    return getVector(tag);
+
+  auto vector_name = _subproblem.vectorTagName(tag);
+
+  NumericVector<Number> * vec = &system().add_vector(vector_name, project, type);
+
+  if (_tagged_vectors.size() < tag + 1)
+    _tagged_vectors.resize(tag + 1);
+
+  _tagged_vectors[tag] = vec;
+
+  return *vec;
+}
+
+void
+SystemBase::closeTaggedVectors(const std::set<TagID> & tags)
+{
+  for (auto & tag : tags)
+  {
+    mooseAssert(_subproblem.vectorTagExists(tag), "Tag: " << tag << " does not exsit");
+    getVector(tag).close();
+  }
+}
+
+void
+SystemBase::zeroTaggedVectors(const std::set<TagID> & tags)
+{
+  for (auto & tag : tags)
+  {
+    mooseAssert(_subproblem.vectorTagExists(tag), "Tag: " << tag << " does not exsit");
+    getVector(tag).zero();
+  }
+}
+
+void
+SystemBase::removeVector(TagID tag_id)
+{
+  if (!_subproblem.vectorTagExists(tag_id))
+    mooseError("Cannot remove an unexisting tag or its associated vector, ",
+               tag_id,
+               ", that tag does not exist in System ",
+               name());
+
+  if (hasVector(tag_id))
+  {
+    auto vector_name = _subproblem.vectorTagName(tag_id);
+    system().remove_vector(vector_name);
+    _tagged_vectors[tag_id] = nullptr;
+  }
+}
+
 void
 SystemBase::addVariable(const std::string & var_name,
                         const FEType & type,
@@ -588,6 +649,47 @@ SystemBase::hasVector(const std::string & name) const
   return system().have_vector(name);
 }
 
+TagID
+SystemBase::timeVectorTag()
+{
+  mooseError("Not implemented yet");
+  return 0;
+}
+
+TagID
+SystemBase::timeMatrixTag()
+{
+  mooseError("Not implemented yet");
+  return 0;
+}
+
+TagID
+SystemBase::systemMatrixTag()
+{
+  mooseError("Not implemented yet");
+  return 0;
+}
+
+TagID
+SystemBase::nonTimeVectorTag()
+{
+  mooseError("Not implemented yet");
+  return 0;
+}
+
+TagID
+SystemBase::residualVectorTag()
+{
+  mooseError("Not implemented yet");
+  return 0;
+}
+
+bool
+SystemBase::hasVector(TagID tag)
+{
+  return tag < _tagged_vectors.size() && _tagged_vectors[tag];
+}
+
 /**
  * Get a raw NumericVector with the given name.
  */
@@ -595,6 +697,159 @@ NumericVector<Number> &
 SystemBase::getVector(const std::string & name)
 {
   return system().get_vector(name);
+}
+
+NumericVector<Number> &
+SystemBase::getVector(TagID tag)
+{
+  mooseAssert(hasVector(tag), "Cannot retrieve vector with residual_tag: " << tag);
+
+  return *_tagged_vectors[tag];
+}
+
+void
+SystemBase::associateVectorToTag(NumericVector<Number> & vec, TagID tag)
+{
+  mooseAssert(_subproblem.vectorTagExists(tag),
+              "You can't associate a tag that does not exist " << tag);
+  if (_tagged_vectors.size() < tag + 1)
+    _tagged_vectors.resize(tag + 1);
+
+  _tagged_vectors[tag] = &vec;
+}
+
+void
+SystemBase::disassociateVectorFromTag(NumericVector<Number> & vec, TagID tag)
+{
+  mooseAssert(_subproblem.vectorTagExists(tag),
+              "You can't associate a tag that does not exist " << tag);
+  if (_tagged_vectors.size() < tag + 1)
+    _tagged_vectors.resize(tag + 1);
+
+  if (_tagged_vectors[tag] != &vec)
+    mooseError("You can not disassociate a vector from a tag which it was not associated to");
+
+  _tagged_vectors[tag] = nullptr;
+}
+
+void
+SystemBase::disassociateAllTaggedVectors()
+{
+  for (auto & tagged_vector : _tagged_vectors)
+    tagged_vector = nullptr;
+}
+
+bool
+SystemBase::hasMatrix(TagID tag)
+{
+  return tag < _tagged_matrices.size() && _tagged_matrices[tag];
+}
+
+SparseMatrix<Number> &
+SystemBase::getMatrix(TagID tag)
+{
+  mooseAssert(hasMatrix(tag), "Cannot retrieve matrix with matrix_tag: " << tag);
+
+  return *_tagged_matrices[tag];
+}
+
+void
+SystemBase::closeTaggedMatrices(const std::set<TagID> & tags)
+{
+  for (auto tag : tags)
+    if (hasMatrix(tag))
+      getMatrix(tag).close();
+}
+
+void
+SystemBase::associateMatrixToTag(SparseMatrix<Number> & matrix, TagID tag)
+{
+  mooseAssert(_subproblem.matrixTagExists(tag),
+              "Cannot associate Matirx with matrix_tag : " << tag << "that does not exsit");
+
+  if (_tagged_matrices.size() < tag + 1)
+    _tagged_matrices.resize(tag + 1);
+
+  _tagged_matrices[tag] = &matrix;
+}
+
+void
+SystemBase::disassociateMatrixFromTag(SparseMatrix<Number> & matrix, TagID tag)
+{
+  mooseAssert(_subproblem.matrixTagExists(tag),
+              "Cannot disassociate Matirx with matrix_tag : " << tag << "that does not exsit");
+
+  if (_tagged_matrices.size() < tag + 1)
+    _tagged_matrices.resize(tag + 1);
+
+  if (_tagged_matrices[tag] != &matrix)
+    mooseError("You can not disassociate a matrix from a tag which it was not associated to");
+
+  _tagged_matrices[tag] = nullptr;
+}
+
+void
+SystemBase::activeMatrixTag(TagID tag)
+{
+  mooseAssert(_subproblem.matrixTagExists(tag),
+              "Cannot active Matirx with matrix_tag : " << tag << "that does not exsit");
+
+  if (_matrix_tag_active_flags.size() < tag + 1)
+    _matrix_tag_active_flags.resize(tag + 1);
+
+  _matrix_tag_active_flags[tag] = true;
+}
+
+void
+SystemBase::deactiveMatrixTag(TagID tag)
+{
+  mooseAssert(_subproblem.matrixTagExists(tag),
+              "Cannot deactive Matirx with matrix_tag : " << tag << "that does not exsit");
+
+  if (_matrix_tag_active_flags.size() < tag + 1)
+    _matrix_tag_active_flags.resize(tag + 1);
+
+  _matrix_tag_active_flags[tag] = false;
+}
+
+void
+SystemBase::deactiveAllMatrixTags()
+{
+  auto num_matrix_tags = _subproblem.numMatrixTags();
+
+  _matrix_tag_active_flags.resize(num_matrix_tags);
+
+  for (unsigned int tag = 0; tag < num_matrix_tags; tag++)
+    _matrix_tag_active_flags[tag] = false;
+}
+
+void
+SystemBase::activeAllMatrixTags()
+{
+  auto num_matrix_tags = _subproblem.numMatrixTags();
+
+  _matrix_tag_active_flags.resize(num_matrix_tags);
+
+  for (unsigned int tag = 0; tag < num_matrix_tags; tag++)
+    if (hasMatrix(tag))
+      _matrix_tag_active_flags[tag] = true;
+    else
+      _matrix_tag_active_flags[tag] = false;
+}
+
+bool
+SystemBase::matrixTagActive(TagID tag)
+{
+  mooseAssert(_subproblem.matrixTagExists(tag), "Matrix tag " << tag << " does not exsit");
+
+  return tag < _matrix_tag_active_flags.size() && _matrix_tag_active_flags[tag];
+}
+
+void
+SystemBase::disassociateAllTaggedMatrices()
+{
+  for (auto & matrix : _tagged_matrices)
+    matrix = nullptr;
 }
 
 unsigned int

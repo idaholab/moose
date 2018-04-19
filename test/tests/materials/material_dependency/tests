@@ -9,5 +9,6 @@
     # newer versions of PETSc due to the changes in 3061bbd5d. This test is
     # therefore only valid with newer versions of PETSc.
     petsc_version = '>=3.5.0'
+    petsc_version_release = true
   [../]
 []

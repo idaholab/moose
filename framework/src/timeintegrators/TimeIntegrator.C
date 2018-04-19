@@ -35,8 +35,8 @@ TimeIntegrator::TimeIntegrator(const InputParameters & parameters)
     _t_step(_fe_problem.timeStep()),
     _dt(_fe_problem.dt()),
     _dt_old(_fe_problem.dtOld()),
-    _Re_time(_nl.residualVector(Moose::KT_TIME)),
-    _Re_non_time(_nl.residualVector(Moose::KT_NONTIME))
+    _Re_time(_nl.getResidualTimeVector()),
+    _Re_non_time(_nl.getResidualNonTimeVector())
 {
 }
 

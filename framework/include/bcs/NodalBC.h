@@ -34,8 +34,8 @@ public:
    * @return the variable
    */
   virtual MooseVariable & variable() override { return _var; }
-
-  virtual void computeResidual(NumericVector<Number> & residual) override;
+  using NodalBCBase::computeResidual;
+  virtual void computeResidual() override;
   virtual void computeJacobian() override;
   virtual void computeOffDiagJacobian(unsigned int jvar) override;
 
@@ -51,7 +51,6 @@ protected:
   const VariableValue & _u;
 
   virtual Real computeQpResidual() = 0;
-
   /**
    * The user can override this function to compute the "on-diagonal"
    * Jacobian contribution for this NodalBC.  If not overriden,

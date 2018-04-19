@@ -84,6 +84,7 @@
 #include "libmesh/quadrature.h"
 #include "libmesh/coupling_matrix.h"
 #include "libmesh/nonlinear_solver.h"
+#include "libmesh/sparse_matrix.h"
 
 // Anonymous namespace for helper function
 namespace
@@ -149,16 +150,13 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
     _mesh(*getCheckedPointerParam<MooseMesh *>("mesh")),
     _eq(_mesh),
     _initialized(false),
-    _kernel_type(Moose::KT_ALL),
     _solve(getParam<bool>("solve")),
-
     _transient(false),
     _time(declareRestartableData<Real>("time")),
     _time_old(declareRestartableData<Real>("time_old")),
     _t_step(declareRecoverableData<int>("t_step")),
     _dt(declareRestartableData<Real>("dt")),
     _dt_old(declareRestartableData<Real>("dt_old")),
-
     _nl(NULL),
     _aux(NULL),
     _coupling(Moose::COUPLING_DIAG),
@@ -1010,19 +1008,10 @@ FEProblemBase::prepareAssembly(THREAD_ID tid)
   }
 }
 
-NumericVector<Number> &
-FEProblemBase::residualVector(Moose::KernelType type)
-{
-  return _nl->residualVector(type);
-}
-
 void
 FEProblemBase::addResidual(THREAD_ID tid)
 {
-  if (_nl->hasResidualVector(Moose::KT_TIME))
-    _assembly[tid]->addResidual(residualVector(Moose::KT_TIME), Moose::KT_TIME);
-  if (_nl->hasResidualVector(Moose::KT_NONTIME))
-    _assembly[tid]->addResidual(residualVector(Moose::KT_NONTIME), Moose::KT_NONTIME);
+  _assembly[tid]->addResidual(getVectorTags());
 
   if (_displaced_problem)
     _displaced_problem->addResidual(tid);
@@ -1031,10 +1020,8 @@ FEProblemBase::addResidual(THREAD_ID tid)
 void
 FEProblemBase::addResidualNeighbor(THREAD_ID tid)
 {
-  if (_nl->hasResidualVector(Moose::KT_TIME))
-    _assembly[tid]->addResidualNeighbor(residualVector(Moose::KT_TIME), Moose::KT_TIME);
-  if (_nl->hasResidualVector(Moose::KT_NONTIME))
-    _assembly[tid]->addResidualNeighbor(residualVector(Moose::KT_NONTIME), Moose::KT_NONTIME);
+  _assembly[tid]->addResidualNeighbor(getVectorTags());
+
   if (_displaced_problem)
     _displaced_problem->addResidualNeighbor(tid);
 }
@@ -1042,10 +1029,7 @@ FEProblemBase::addResidualNeighbor(THREAD_ID tid)
 void
 FEProblemBase::addResidualScalar(THREAD_ID tid /* = 0*/)
 {
-  if (_nl->hasResidualVector(Moose::KT_TIME))
-    _assembly[tid]->addResidualScalar(residualVector(Moose::KT_TIME), Moose::KT_TIME);
-  if (_nl->hasResidualVector(Moose::KT_NONTIME))
-    _assembly[tid]->addResidualScalar(residualVector(Moose::KT_NONTIME), Moose::KT_NONTIME);
+  _assembly[tid]->addResidualScalar(getVectorTags());
 }
 
 void
@@ -1076,10 +1060,10 @@ FEProblemBase::addCachedResidual(THREAD_ID tid)
 void
 FEProblemBase::addCachedResidualDirectly(NumericVector<Number> & residual, THREAD_ID tid)
 {
-  if (_nl->hasResidualVector(Moose::KT_TIME))
-    _assembly[tid]->addCachedResidual(residual, Moose::KT_TIME);
-  if (_nl->hasResidualVector(Moose::KT_NONTIME))
-    _assembly[tid]->addCachedResidual(residual, Moose::KT_NONTIME);
+  if (_nl->hasVector(_nl->timeVectorTag()))
+    _assembly[tid]->addCachedResidual(residual, _nl->timeVectorTag());
+  if (_nl->hasVector(_nl->nonTimeVectorTag()))
+    _assembly[tid]->addCachedResidual(residual, _nl->nonTimeVectorTag());
 
   if (_displaced_problem)
     _displaced_problem->addCachedResidualDirectly(residual, tid);
@@ -1102,39 +1086,37 @@ FEProblemBase::setResidualNeighbor(NumericVector<Number> & residual, THREAD_ID t
 }
 
 void
-FEProblemBase::addJacobian(SparseMatrix<Number> & jacobian, THREAD_ID tid)
+FEProblemBase::addJacobian(THREAD_ID tid)
 {
-  _assembly[tid]->addJacobian(jacobian);
+  _assembly[tid]->addJacobian();
   if (_has_nonlocal_coupling)
-    _assembly[tid]->addJacobianNonlocal(jacobian);
+    _assembly[tid]->addJacobianNonlocal();
   if (_displaced_problem)
   {
-    _displaced_problem->addJacobian(jacobian, tid);
+    _displaced_problem->addJacobian(tid);
     if (_has_nonlocal_coupling)
-      _displaced_problem->addJacobianNonlocal(jacobian, tid);
+      _displaced_problem->addJacobianNonlocal(tid);
   }
 }
 
 void
-FEProblemBase::addJacobianNeighbor(SparseMatrix<Number> & jacobian, THREAD_ID tid)
+FEProblemBase::addJacobianNeighbor(THREAD_ID tid)
 {
-  _assembly[tid]->addJacobianNeighbor(jacobian);
+  _assembly[tid]->addJacobianNeighbor();
   if (_displaced_problem)
-    _displaced_problem->addJacobianNeighbor(jacobian, tid);
+    _displaced_problem->addJacobianNeighbor(tid);
 }
 
 void
-FEProblemBase::addJacobianScalar(SparseMatrix<Number> & jacobian, THREAD_ID tid /* = 0*/)
+FEProblemBase::addJacobianScalar(THREAD_ID tid /* = 0*/)
 {
-  _assembly[tid]->addJacobianScalar(jacobian);
+  _assembly[tid]->addJacobianScalar();
 }
 
 void
-FEProblemBase::addJacobianOffDiagScalar(SparseMatrix<Number> & jacobian,
-                                        unsigned int ivar,
-                                        THREAD_ID tid /* = 0*/)
+FEProblemBase::addJacobianOffDiagScalar(unsigned int ivar, THREAD_ID tid /* = 0*/)
 {
-  _assembly[tid]->addJacobianOffDiagScalar(jacobian, ivar);
+  _assembly[tid]->addJacobianOffDiagScalar(ivar);
 }
 
 void
@@ -1160,11 +1142,11 @@ FEProblemBase::cacheJacobianNeighbor(THREAD_ID tid)
 }
 
 void
-FEProblemBase::addCachedJacobian(SparseMatrix<Number> & jacobian, THREAD_ID tid)
+FEProblemBase::addCachedJacobian(THREAD_ID tid)
 {
-  _assembly[tid]->addCachedJacobian(jacobian);
+  _assembly[tid]->addCachedJacobian();
   if (_displaced_problem)
-    _displaced_problem->addCachedJacobian(jacobian, tid);
+    _displaced_problem->addCachedJacobian(tid);
 }
 
 void
@@ -4059,25 +4041,114 @@ FEProblemBase::addPredictor(const std::string & type,
 Real
 FEProblemBase::computeResidualL2Norm()
 {
-  computeResidualType(*_nl->currentSolution(), _nl->RHS());
+  computeResidual(*_nl->currentSolution(), _nl->RHS());
 
   return _nl->RHS().l2_norm();
 }
 
 void
-FEProblemBase::computeResidual(NonlinearImplicitSystem & /*sys*/,
-                               const NumericVector<Number> & soln,
-                               NumericVector<Number> & residual)
+FEProblemBase::computeResidualSys(NonlinearImplicitSystem & /*sys*/,
+                                  const NumericVector<Number> & soln,
+                                  NumericVector<Number> & residual)
 {
   computeResidual(soln, residual);
 }
 
 void
+FEProblemBase::computeResidual(NonlinearImplicitSystem & sys,
+                               const NumericVector<Number> & soln,
+                               NumericVector<Number> & residual)
+{
+  mooseDeprecated("Please use computeResidualSys");
+
+  computeResidualSys(sys, soln, residual);
+}
+
+void
 FEProblemBase::computeResidual(const NumericVector<Number> & soln, NumericVector<Number> & residual)
+{
+  auto & tags = getVectorTags();
+
+  _fe_vector_tags.clear();
+
+  for (auto & tag : tags)
+    _fe_vector_tags.insert(tag.second);
+
+  computeResidualInternal(soln, residual, _fe_vector_tags);
+}
+
+void
+FEProblemBase::computeResidualTag(const NumericVector<Number> & soln,
+                                  NumericVector<Number> & residual,
+                                  TagID tag)
 {
   try
   {
-    computeResidualType(soln, residual, _kernel_type);
+    _nl->setSolution(soln);
+
+    _nl->associateVectorToTag(residual, tag);
+
+    computeResidualTags({tag});
+
+    _nl->disassociateVectorFromTag(residual, tag);
+  }
+  catch (MooseException & e)
+  {
+    // If a MooseException propagates all the way to here, it means
+    // that it was thrown from a MOOSE system where we do not
+    // (currently) properly support the throwing of exceptions, and
+    // therefore we have no choice but to error out.  It may be
+    // *possible* to handle exceptions from other systems, but in the
+    // meantime, we don't want to silently swallow any unhandled
+    // exceptions here.
+    mooseError("An unhandled MooseException was raised during residual computation.  Please "
+               "contact the MOOSE team for assistance.");
+  }
+}
+
+void
+FEProblemBase::computeResidualInternal(const NumericVector<Number> & soln,
+                                       NumericVector<Number> & residual,
+                                       const std::set<TagID> & tags)
+{
+  try
+  {
+    _nl->setSolution(soln);
+
+    _nl->associateVectorToTag(residual, _nl->residualVectorTag());
+
+    computeResidualTags(tags);
+
+    _nl->disassociateVectorFromTag(residual, _nl->residualVectorTag());
+  }
+  catch (MooseException & e)
+  {
+    // If a MooseException propagates all the way to here, it means
+    // that it was thrown from a MOOSE system where we do not
+    // (currently) properly support the throwing of exceptions, and
+    // therefore we have no choice but to error out.  It may be
+    // *possible* to handle exceptions from other systems, but in the
+    // meantime, we don't want to silently swallow any unhandled
+    // exceptions here.
+    mooseError("An unhandled MooseException was raised during residual computation.  Please "
+               "contact the MOOSE team for assistance.");
+  }
+}
+
+void
+FEProblemBase::computeResidualType(const NumericVector<Number> & soln,
+                                   NumericVector<Number> & residual,
+                                   TagID tag)
+{
+  try
+  {
+    _nl->setSolution(soln);
+
+    _nl->associateVectorToTag(residual, _nl->residualVectorTag());
+
+    computeResidualTags({tag, _nl->residualVectorTag()});
+
+    _nl->disassociateVectorFromTag(residual, _nl->residualVectorTag());
   }
   catch (MooseException & e)
   {
@@ -4105,12 +4176,8 @@ FEProblemBase::computeTransientImplicitResidual(Real time,
 }
 
 void
-FEProblemBase::computeResidualType(const NumericVector<Number> & soln,
-                                   NumericVector<Number> & residual,
-                                   Moose::KernelType type)
+FEProblemBase::computeResidualTags(const std::set<TagID> & tags)
 {
-  _nl->setSolution(soln);
-
   _nl->zeroVariablesForResidual();
   _aux->zeroVariablesForResidual();
 
@@ -4168,25 +4235,65 @@ FEProblemBase::computeResidualType(const NumericVector<Number> & soln,
 
   _app.getOutputWarehouse().residualSetup();
 
-  _nl->computeResidual(residual, type);
+  _nl->computeResidualTags(tags);
 }
 
 void
-FEProblemBase::computeJacobian(NonlinearImplicitSystem & /*sys*/,
-                               const NumericVector<Number> & soln,
-                               SparseMatrix<Number> & jacobian)
+FEProblemBase::computeJacobianSys(NonlinearImplicitSystem & /*sys*/,
+                                  const NumericVector<Number> & soln,
+                                  SparseMatrix<Number> & jacobian)
 {
-  computeJacobian(soln, jacobian, Moose::KT_ALL);
+  computeJacobian(soln, jacobian);
 }
 
 void
-FEProblemBase::computeJacobian(const NumericVector<Number> & soln,
-                               SparseMatrix<Number> & jacobian,
-                               Moose::KernelType kernel_type)
+FEProblemBase::computeJacobianTag(const NumericVector<Number> & soln,
+                                  SparseMatrix<Number> & jacobian,
+                                  TagID tag)
+{
+  _nl->setSolution(soln);
+
+  _nl->associateMatrixToTag(jacobian, tag);
+
+  computeJacobianTags({tag});
+
+  _nl->disassociateMatrixFromTag(jacobian, tag);
+}
+
+void
+FEProblemBase::computeJacobian(const NumericVector<Number> & soln, SparseMatrix<Number> & jacobian)
+{
+  _fe_matrix_tags.clear();
+
+  auto & tags = getMatrixTags();
+  for (auto & tag : tags)
+    _fe_matrix_tags.insert(tag.second);
+
+  computeJacobianInternal(soln, jacobian, _fe_matrix_tags);
+}
+
+void
+FEProblemBase::computeJacobianInternal(const NumericVector<Number> & soln,
+                                       SparseMatrix<Number> & jacobian,
+                                       const std::set<TagID> & tags)
+{
+  _nl->setSolution(soln);
+
+  _nl->associateMatrixToTag(jacobian, _nl->systemMatrixTag());
+
+  computeJacobianTags(tags);
+
+  _nl->disassociateMatrixFromTag(jacobian, _nl->systemMatrixTag());
+}
+
+void
+FEProblemBase::computeJacobianTags(const std::set<TagID> & tags)
 {
   if (!_has_jacobian || !_const_jacobian)
   {
-    _nl->setSolution(soln);
+    for (auto tag : tags)
+      if (_nl->hasMatrix(tag))
+        _nl->getMatrix(tag).zero();
 
     _nl->zeroVariablesForJacobian();
     _aux->zeroVariablesForJacobian();
@@ -4227,7 +4334,7 @@ FEProblemBase::computeJacobian(const NumericVector<Number> & soln,
 
     _app.getOutputWarehouse().jacobianSetup();
 
-    _nl->computeJacobian(jacobian, kernel_type);
+    _nl->computeJacobianTags(tags);
 
     _current_execute_on_flag = EXEC_NONE;
     _currently_computing_jacobian = false;

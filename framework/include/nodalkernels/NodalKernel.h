@@ -26,6 +26,7 @@
 #include "RandomInterface.h"
 #include "CoupleableMooseVariableDependencyIntermediateInterface.h"
 #include "MooseVariableInterface.h"
+#include "TaggingInterface.h"
 
 // Forward declerations
 template <typename>
@@ -58,7 +59,8 @@ class NodalKernel : public MooseObject,
                     public MeshChangedInterface,
                     public RandomInterface,
                     public CoupleableMooseVariableDependencyIntermediateInterface,
-                    public MooseVariableInterface<Real>
+                    public MooseVariableInterface<Real>,
+                    public TaggingInterface
 {
 public:
   /**

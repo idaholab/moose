@@ -52,6 +52,104 @@ SubProblem::SubProblem(const InputParameters & parameters)
 
 SubProblem::~SubProblem() {}
 
+TagID
+SubProblem::addVectorTag(TagName tag_name)
+{
+  auto tag_name_upper = MooseUtils::toUpper(tag_name);
+  auto existing_tag = _vector_tag_name_to_tag_id.find(tag_name_upper);
+  if (existing_tag == _vector_tag_name_to_tag_id.end())
+  {
+    auto tag_id = _vector_tag_name_to_tag_id.size();
+
+    _vector_tag_name_to_tag_id[tag_name_upper] = tag_id;
+
+    _vector_tag_id_to_tag_name[tag_id] = tag_name_upper;
+  }
+
+  return _vector_tag_name_to_tag_id.at(tag_name_upper);
+}
+
+bool
+SubProblem::vectorTagExists(const TagName & tag_name)
+{
+  auto tag_name_upper = MooseUtils::toUpper(tag_name);
+
+  return _vector_tag_name_to_tag_id.find(tag_name_upper) != _vector_tag_name_to_tag_id.end();
+}
+
+TagID
+SubProblem::getVectorTagID(const TagName & tag_name)
+{
+  auto tag_name_upper = MooseUtils::toUpper(tag_name);
+
+  if (!vectorTagExists(tag_name))
+    mooseError("Vector tag: ",
+               tag_name,
+               " does not exist. ",
+               "If this is a TimeKernel then this may have happened because you didn't "
+               "specify a Transient Executioner.");
+
+  return _vector_tag_name_to_tag_id.at(tag_name_upper);
+}
+
+TagName
+SubProblem::vectorTagName(TagID tag)
+{
+  return _vector_tag_id_to_tag_name[tag];
+}
+
+TagID
+SubProblem::addMatrixTag(TagName tag_name)
+{
+  auto tag_name_upper = MooseUtils::toUpper(tag_name);
+  auto existing_tag = _matrix_tag_name_to_tag_id.find(tag_name_upper);
+  if (existing_tag == _matrix_tag_name_to_tag_id.end())
+  {
+    auto tag_id = _matrix_tag_name_to_tag_id.size();
+
+    _matrix_tag_name_to_tag_id[tag_name_upper] = tag_id;
+
+    _matrix_tag_id_to_tag_name[tag_id] = tag_name_upper;
+  }
+
+  return _matrix_tag_name_to_tag_id.at(tag_name_upper);
+}
+
+bool
+SubProblem::matrixTagExists(const TagName & tag_name)
+{
+  auto tag_name_upper = MooseUtils::toUpper(tag_name);
+
+  return _matrix_tag_name_to_tag_id.find(tag_name_upper) != _matrix_tag_name_to_tag_id.end();
+}
+
+bool
+SubProblem::matrixTagExists(TagID tag_id)
+{
+  return _matrix_tag_id_to_tag_name.find(tag_id) != _matrix_tag_id_to_tag_name.end();
+}
+
+TagID
+SubProblem::getMatrixTagID(const TagName & tag_name)
+{
+  auto tag_name_upper = MooseUtils::toUpper(tag_name);
+
+  if (!matrixTagExists(tag_name))
+    mooseError("Matrix tag: ",
+               tag_name,
+               " does not exist. ",
+               "If this is a TimeKernel then this may have happened because you didn't "
+               "specify a Transient Executioner.");
+
+  return _matrix_tag_name_to_tag_id.at(tag_name_upper);
+}
+
+TagName
+SubProblem::matrixTagName(TagID tag)
+{
+  return _matrix_tag_id_to_tag_name[tag];
+}
+
 void
 SubProblem::setActiveElementalMooseVariables(const std::set<MooseVariableFEBase *> & moose_vars,
                                              THREAD_ID tid)

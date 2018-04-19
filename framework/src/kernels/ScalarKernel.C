@@ -21,6 +21,7 @@ validParams<ScalarKernel>()
 {
   InputParameters params = validParams<MooseObject>();
   params += validParams<TransientInterface>();
+  params += validParams<TaggingInterface>();
   params.addRequiredParam<NonlinearVariableName>(
       "variable", "The name of the variable that this kernel operates on");
 
@@ -48,9 +49,9 @@ ScalarKernel::ScalarKernel(const InputParameters & parameters)
     TransientInterface(this),
     MeshChangedInterface(parameters),
     VectorPostprocessorInterface(this),
+    TaggingInterface(this),
     _subproblem(*getCheckedPointerParam<SubProblem *>("_subproblem")),
     _sys(*getCheckedPointerParam<SystemBase *>("_sys")),
-
     _tid(parameters.get<THREAD_ID>("_tid")),
     _assembly(_subproblem.assembly(_tid)),
     _var(_sys.getScalarVariable(_tid, parameters.get<NonlinearVariableName>("variable"))),

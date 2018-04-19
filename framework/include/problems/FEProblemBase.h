@@ -871,20 +871,79 @@ public:
    */
   virtual Real computeResidualL2Norm();
 
-  virtual void computeResidual(NonlinearImplicitSystem & sys,
-                               const NumericVector<Number> & soln,
-                               NumericVector<Number> & residual);
+  /**
+   * This function is called by Libmesh to form a residual.
+   */
+  virtual void computeResidualSys(NonlinearImplicitSystem & sys,
+                                  const NumericVector<Number> & soln,
+                                  NumericVector<Number> & residual);
+  /**
+   * This function is called by Libmesh to form a residual. This is deprecated.
+   * We should remove this as soon as RattleSnake is fixed.
+   */
+  void computeResidual(NonlinearImplicitSystem & sys,
+                       const NumericVector<Number> & soln,
+                       NumericVector<Number> & residual);
+
+  /**
+   * Form a residual with default tags (nontime, time, residual).
+   */
   virtual void computeResidual(const NumericVector<Number> & soln,
                                NumericVector<Number> & residual);
+  /**
+   * Form a residual vector for a given tag
+   */
+  virtual void computeResidualTag(const NumericVector<Number> & soln,
+                                  NumericVector<Number> & residual,
+                                  TagID tag);
+  /**
+   * Form a residual vector for a given tag and "residual" tag
+   */
   virtual void computeResidualType(const NumericVector<Number> & soln,
                                    NumericVector<Number> & residual,
-                                   Moose::KernelType type = Moose::KT_ALL);
-  virtual void computeJacobian(NonlinearImplicitSystem & sys,
-                               const NumericVector<Number> & soln,
-                               SparseMatrix<Number> & jacobian);
-  virtual void computeJacobian(const NumericVector<Number> & soln,
-                               SparseMatrix<Number> & jacobian,
-                               Moose::KernelType kernel_type = Moose::KT_ALL);
+                                   TagID tag);
+  /**
+   * Form a residual vector for a set of tags. It should not be called directly
+   * by users.
+   */
+  virtual void computeResidualInternal(const NumericVector<Number> & soln,
+                                       NumericVector<Number> & residual,
+                                       const std::set<TagID> & tags);
+  /**
+   * Form multiple residual vectors and each is associated with one tag
+   */
+  virtual void computeResidualTags(const std::set<TagID> & tags);
+
+  /**
+   * Form a Jacobian matrix. It is called by Libmesh.
+   */
+  virtual void computeJacobianSys(NonlinearImplicitSystem & sys,
+                                  const NumericVector<Number> & soln,
+                                  SparseMatrix<Number> & jacobian);
+  /**
+   * Form a Jacobian matrix with the default tag (system).
+   */
+  virtual void computeJacobian(const NumericVector<Number> & soln, SparseMatrix<Number> & jacobian);
+
+  /**
+   * Form a Jacobian matrix for a given tag.
+   */
+  virtual void computeJacobianTag(const NumericVector<Number> & soln,
+                                  SparseMatrix<Number> & jacobian,
+                                  TagID tag);
+
+  /**
+   * Form a Jacobian matrix for multiple tags. It should not be called directly by users.
+   */
+  virtual void computeJacobianInternal(const NumericVector<Number> & soln,
+                                       SparseMatrix<Number> & jacobian,
+                                       const std::set<TagID> & tags);
+
+  /**
+   * Form multiple matrices, and each is associated with a tag.
+   */
+  virtual void computeJacobianTags(const std::set<TagID> & tags);
+
   /**
    * Computes several Jacobian blocks simultaneously, summing their contributions into smaller
    * preconditioning matrices.
@@ -957,8 +1016,6 @@ public:
   virtual void computeIndicators();
   virtual void computeMarkers();
 
-  virtual NumericVector<Number> & residualVector(Moose::KernelType type);
-
   virtual void addResidual(THREAD_ID tid) override;
   virtual void addResidualNeighbor(THREAD_ID tid) override;
   virtual void addResidualScalar(THREAD_ID tid = 0);
@@ -979,8 +1036,8 @@ public:
   virtual void setResidual(NumericVector<Number> & residual, THREAD_ID tid) override;
   virtual void setResidualNeighbor(NumericVector<Number> & residual, THREAD_ID tid) override;
 
-  virtual void addJacobian(SparseMatrix<Number> & jacobian, THREAD_ID tid) override;
-  virtual void addJacobianNeighbor(SparseMatrix<Number> & jacobian, THREAD_ID tid) override;
+  virtual void addJacobian(THREAD_ID tid) override;
+  virtual void addJacobianNeighbor(THREAD_ID tid) override;
   virtual void addJacobianBlock(SparseMatrix<Number> & jacobian,
                                 unsigned int ivar,
                                 unsigned int jvar,
@@ -994,13 +1051,12 @@ public:
                                    std::vector<dof_id_type> & dof_indices,
                                    std::vector<dof_id_type> & neighbor_dof_indices,
                                    THREAD_ID tid) override;
-  virtual void addJacobianScalar(SparseMatrix<Number> & jacobian, THREAD_ID tid = 0);
-  virtual void
-  addJacobianOffDiagScalar(SparseMatrix<Number> & jacobian, unsigned int ivar, THREAD_ID tid = 0);
+  virtual void addJacobianScalar(THREAD_ID tid = 0);
+  virtual void addJacobianOffDiagScalar(unsigned int ivar, THREAD_ID tid = 0);
 
   virtual void cacheJacobian(THREAD_ID tid) override;
   virtual void cacheJacobianNeighbor(THREAD_ID tid) override;
-  virtual void addCachedJacobian(SparseMatrix<Number> & jacobian, THREAD_ID tid) override;
+  virtual void addCachedJacobian(THREAD_ID tid) override;
 
   virtual void prepareShapes(unsigned int var, THREAD_ID tid) override;
   virtual void prepareFaceShapes(unsigned int var, THREAD_ID tid) override;
@@ -1110,8 +1166,6 @@ public:
   virtual void checkProblemIntegrity();
 
   void serializeSolution();
-
-  void setKernelTypeResidual(Moose::KernelType kt) { _kernel_type = kt; }
 
   void registerRandomInterface(RandomInterface & random_interface, const std::string & name);
 
@@ -1329,7 +1383,10 @@ protected:
   MooseMesh & _mesh;
   EquationSystems _eq;
   bool _initialized;
-  Moose::KernelType _kernel_type;
+
+  std::set<TagID> _fe_vector_tags;
+
+  std::set<TagID> _fe_matrix_tags;
 
   /// Whether or not to actually solve the nonlinear system
   bool _solve;

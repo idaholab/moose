@@ -16,10 +16,11 @@
     variable = u
     coef = 0.1
   [../]
-  [./time]
-    type = TimeDerivative
-    variable = u
-  [../]
+#  The TimeDerivative existing in a Steady calculation will trigger an error itself!
+#  [./time]
+#    type = TimeDerivative
+#    variable = u
+#  [../]
 []
 
 [BCs]

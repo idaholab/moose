@@ -20,13 +20,10 @@
 #include "libmesh/sparse_matrix.h"
 
 ComputeNodalKernelJacobiansThread::ComputeNodalKernelJacobiansThread(
-    FEProblemBase & fe_problem,
-    const MooseObjectWarehouse<NodalKernel> & nodal_kernels,
-    SparseMatrix<Number> & jacobian)
+    FEProblemBase & fe_problem, const MooseObjectWarehouse<NodalKernel> & nodal_kernels)
   : ThreadedNodeLoop<ConstNodeRange, ConstNodeRange::const_iterator>(fe_problem),
     _aux_sys(fe_problem.getAuxiliarySystem()),
     _nodal_kernels(nodal_kernels),
-    _jacobian(jacobian),
     _num_cached(0)
 {
 }
@@ -37,7 +34,6 @@ ComputeNodalKernelJacobiansThread::ComputeNodalKernelJacobiansThread(
   : ThreadedNodeLoop<ConstNodeRange, ConstNodeRange::const_iterator>(x, split),
     _aux_sys(x._aux_sys),
     _nodal_kernels(x._nodal_kernels),
-    _jacobian(x._jacobian),
     _num_cached(0)
 {
 }
@@ -120,7 +116,7 @@ ComputeNodalKernelJacobiansThread::onNode(ConstNodeRange::const_iterator & node_
       {
         _num_cached = 0;
         Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
-        _fe_problem.assembly(_tid).addCachedJacobianContributions(_jacobian);
+        _fe_problem.assembly(_tid).addCachedJacobianContributions();
       }
     }
   }
