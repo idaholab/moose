@@ -70,10 +70,10 @@ class RunParallel(Scheduler):
             json.dumps(output)
 
         except UnicodeDecodeError:
-            tester.setStatus(tester.fail, 'invalid unicode detected')
+            tester.setStatus(tester.fail, 'invalid characters (highlighted)')
 
             # Fix bad unicode output so we can still save it, and display it with out breaking other things (like civet)
-            output = output.decode('utf-8','ignore').encode('utf-8', 'ignore')
+            output = output.decode('utf-8','replace').encode('utf-8', 'replace')
 
         # Set testers output with modifications made above so it prints the way we want it
         job.setOutput(output)
