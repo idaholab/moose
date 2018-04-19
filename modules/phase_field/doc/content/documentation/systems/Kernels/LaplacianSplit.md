@@ -2,15 +2,21 @@
 
 !syntax description /Kernels/LaplacianSplit
 
-Sets the kernel variable $u$ to the Laplacian of a chosen variable $c$ (`c`).
-Implements the residual
+Implements the weak form residual
+\begin{equation}
+\left(\nabla c,\nabla\psi\right)
+\end{equation}
+for the strong form
+\begin{equation}
+-\nabla^2c.
+\end{equation}
 
-$$
-u - \nabla^2c.
-$$
-
-This allows the construction of split formulations, where $u$ can be substituted
-to reduce the order of a PDE.
+Used together with a [`Reaction`](/Reaction.md) kernel $u$ this allows the construction
+of split formulations,
+\begin{equation}
+u=\nabla^2c,
+\end{equation}
+where $u$ can be substituted to reduce the order of a PDE.
 
 !syntax parameters /Kernels/LaplacianSplit
 

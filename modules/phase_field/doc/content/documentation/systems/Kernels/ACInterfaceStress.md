@@ -7,7 +7,7 @@ elastic energy contribution for the interface stress, where
 $E_{el}=\frac12\sigma_{int}:\epsilon$. Its weak form is
 
 \begin{equation}
-R=-\frac12L\left(\nabla \frac{\partial \sigma_{int}}{\partial\nabla\eta_i}:\epsilon, \psi_m \right)
+R=-\frac12L\left(\nabla \frac{\partial \sigma_{int}}{\partial\nabla\eta_i}:\epsilon, \psi_m \right),
 \end{equation}
 
 where $\eta_i$ the non-conserved non-linear order parameter variable the kernel is

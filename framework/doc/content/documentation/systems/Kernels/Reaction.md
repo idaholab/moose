@@ -4,7 +4,10 @@
 
 `Reaction` implements a simple first-order reaction term with unity rate
 coefficient where the rate of reaction is directly proportional to the governing
-variable $u$. Its weak form is given by $$(\psi_i, u_h)$$
+variable $u$. Its weak form is given by
+\begin{equation}
+(\psi_i, u_h)
+\end{equation}
 
 `Reaction` can be used to help set-up variations of advection-diffusion-reaction
 equations.

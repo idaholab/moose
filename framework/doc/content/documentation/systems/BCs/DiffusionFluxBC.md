@@ -24,7 +24,7 @@ boundary conditions:
 \begin{aligned}
   -\nabla^2 u &= f && \quad \in \Omega \\
   u &= g && \quad \in \partial \Omega_D \\
-  \frac{\partial u}{\partial n} &= h && \quad \in \partial \Omega_N
+  \frac{\partial u}{\partial n} &= h && \quad \in \partial \Omega_N,
 \end{aligned}
 \end{equation}
 where $\Omega \subset \mathbb{R}^n$ is the domain, and $\partial

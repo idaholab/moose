@@ -16,6 +16,7 @@ InputParameters
 validParams<MatGradSquareCoupled>()
 {
   InputParameters params = validParams<Kernel>();
+  params.addClassDescription("Gradient square of a coupled variable.");
   params.addCoupledVar("elec_potential", "Electric potential");
   params.addCoupledVar("args", "Vector of arguments to prefactor");
   params.addParam<MaterialPropertyName>(

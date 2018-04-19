@@ -16,11 +16,17 @@ InputParameters
 validParams<CoupledMaterialDerivative>()
 {
   InputParameters params = validParams<Kernel>();
-  params.addClassDescription(
-      "Kernel that implements (dFdv, test), where F is a property and v is a coupled variable");
-  params.addRequiredCoupledVar("v", "Variable for the parital derivatives of the free energy");
-  params.addParam<MaterialPropertyName>("f_name", "F", "The free energy material");
-  params.addCoupledVar("args", "Vector of other nonlinear variables this object depends on");
+  params.addClassDescription("Kernel that implements the first derivative of a function material "
+                             "property with respect to a coupled variable.");
+  params.addRequiredCoupledVar("v", "Variable to take the derivative with respect to");
+  params.addParam<MaterialPropertyName>("f_name",
+                                        "F",
+                                        "Function material to take the derivative of (should "
+                                        "provide derivative properties - such as a "
+                                        "DerivativeParsedMaterial)");
+  params.addCoupledVar(
+      "args",
+      "Vector of other nonlinear variables F depends on (used for computing Jacobian entries)");
   return params;
 }
 
@@ -30,15 +36,14 @@ CoupledMaterialDerivative::CoupledMaterialDerivative(const InputParameters & par
     _v_var(coupled("v")),
     _dFdv(getMaterialPropertyDerivative<Real>("f_name", _v_name)),
     _d2Fdvdu(getMaterialPropertyDerivative<Real>("f_name", _v_name, _var.name())),
-    _d2Fdv2(getMaterialPropertyDerivative<Real>("f_name", _v_name, _v_name)),
     _nvar(_coupled_moose_vars.size()),
     _d2Fdvdarg(_nvar)
 {
-  // Get free energy derivatives for other coupled variables besides v
+  // Get material property derivatives for all coupled variables
   for (unsigned int i = 0; i < _nvar; ++i)
   {
     MooseVariableFEBase * ivar = _coupled_moose_vars[i];
-    _d2Fdvdarg[i] = &getMaterialPropertyDerivative<Real>("mob_name", _v_name, ivar->name());
+    _d2Fdvdarg[i] = &getMaterialPropertyDerivative<Real>("f_name", _v_name, ivar->name());
   }
 }
 
@@ -63,12 +68,6 @@ CoupledMaterialDerivative::computeQpJacobian()
 Real
 CoupledMaterialDerivative::computeQpOffDiagJacobian(unsigned int jvar)
 {
-  // Jacobian w.r.t. v
-  if (jvar == _v_var)
-    return _d2Fdv2[_qp] * _test[_i][_qp] * _phi[_j][_qp];
-
-  //  for all other vars get the coupled variable jvar is referring to
   const unsigned int cvar = mapJvarToCvar(jvar);
-
   return (*_d2Fdvdarg[cvar])[_qp] * _test[_i][_qp] * _phi[_j][_qp];
 }
