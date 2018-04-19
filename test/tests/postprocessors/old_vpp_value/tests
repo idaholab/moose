@@ -1,0 +1,22 @@
+[Tests]
+  issues = "#11300"
+  design = "VectorPostprocessors/index.md"
+
+  [./old_no_history]
+    type = 'CSVDiff'
+    input = 'old_vpp_value.i'
+    csvdiff = 'old_vpp_value_out.csv'
+
+    requirement = "The VectorPostprocessor system shall provide a mechanism to retrieve references to old vectors."
+  [../]
+
+  [./old_with_history]
+    type = 'CSVDiff'
+    input = 'old_vpp_value.i'
+    csvdiff = 'old_vpp_value_out.csv'
+    cli_args = 'VectorPostprocessors/point_sample/contains_complete_history=true'
+    prereq = 'old_no_history'
+
+    requirement = "The VectorPostprocessor system shall provide a mechanism to retrieve references to old vectors while maintaining vector history."
+  [../]
+[]

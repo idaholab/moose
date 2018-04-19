@@ -69,6 +69,10 @@ SamplerBase::addSample(const Point & p, const Real & id, const std::vector<Real>
 void
 SamplerBase::initialize()
 {
+  // Don't reset the vectors if we want to retain history
+  if (_vpp->containsCompleteHistory() && _comm.rank() == 0)
+    return;
+
   _x.clear();
   _y.clear();
   _z.clear();
