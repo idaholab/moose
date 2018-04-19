@@ -215,10 +215,15 @@ class QueueManager(Scheduler):
         # job(s) were launched but results file does not yet exist (QUEUED)
         if (job_data.json_data.get(job_data.job_dir, {})
             and not os.path.exists(os.path.join(job_data.job_dir, self.__job_storage_file))):
+
             for job in job_data.jobs.getJobs():
                 tester = job.getTester()
-                if tester.isNoStatus():
+
+                if job_data.json_data.get(job.getTestDir(), {}).get('QUEUING', {}) and tester.isNoStatus():
                     tester.setStatus(tester.no_status, 'QUEUED')
+                else:
+                    tester.setStatus(tester.silent)
+
                 job.setStatus(job.finished)
             return False
 
@@ -328,7 +333,7 @@ class QueueManager(Scheduler):
 
                     job.setOutput(job_results['OUTPUT'])
 
-                # This is a new tester, which was not a part of original launch
+                # This is a newly added test in the spec file, which was not a part of original launch
                 else:
                     tester.addCaveats('not originally launched')
                     tester.setStatus(tester.skip)
