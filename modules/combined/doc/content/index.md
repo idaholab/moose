@@ -1,6 +1,6 @@
 !config renderer breadcrumbs=False scrollspy=False
 
-# MOOSE class=center style=font-weight:600;font-size:350%;
+# MOOSE class=center style=font-weight:600;font-size:500%;
 
 # Multiphysics Object Oriented Simulation Environment class=center light style=font-size:300%
 
