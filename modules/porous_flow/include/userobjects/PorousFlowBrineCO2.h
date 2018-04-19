@@ -60,9 +60,11 @@ public:
    * @param[out] xco2l mass fraction of CO2 in liquid (kg/kg)
    * @param[out] dxco2l_dp derivative of mass fraction of CO2 in liquid wrt pressure
    * @param[out] dxco2l_dT derivative of mass fraction of CO2 in liqiud wrt temperature
+   * @param[out] dxco2l_dx derivative of mass fraction of CO2 in liqiud wrt salt mass fraction
    * @param[out] xh2og mass fraction of H2O in gas (kg/kg)
    * @param[out] dh2ogl_dp derivative of mass fraction of H2O in gas wrt pressure
    * @param[out] dh2og_dT derivative of mass fraction of H2O in gas wrt temperature
+   * @param[out] dh2og_dx derivative of mass fraction of H2O in gas wrt salt mass fraction
    */
   void equilibriumMassFractions(Real pressure,
                                 Real temperature,
@@ -70,9 +72,11 @@ public:
                                 Real & xncgl,
                                 Real & dxncgl_dp,
                                 Real & dxncgl_dT,
+                                Real & dxncgl_dx,
                                 Real & xh2og,
                                 Real & dxh2og_dp,
-                                Real & dxh2og_dT) const;
+                                Real & dxh2og_dT,
+                                Real & dxh2og_dx) const;
 
   /**
    * Mass fractions of CO2 and H2O in both phases, as well as derivatives wrt
@@ -172,13 +176,15 @@ public:
    * @param[out] gamma activity coefficient for CO2 in brine (output)
    * @param[out] dgamma_dp derivative of activity coefficient wrt pressure
    * @param[out] dgamma_dT derivative of activity coefficient wrt temperature
+   * @param[out] dgamma_dx derivative of activity coefficient wrt salt mass fraction
    */
   void activityCoefficient(Real pressure,
                            Real temperature,
                            Real xnacl,
                            Real & gamma,
                            Real & dgamma_dp,
-                           Real & dgamma_dT) const;
+                           Real & dgamma_dT,
+                           Real & dgamma_dx) const;
 
   /**
    * Equilibrium constant for H2O from Spycher, Pruess and
@@ -228,10 +234,18 @@ public:
    */
   Real totalMassFraction(Real pressure, Real temperature, Real xnacl, Real saturation) const;
 
+  /**
+   * The index of the salt component
+   * @return salt component number
+   */
+  unsigned int saltComponentIndex() const { return _salt_component; };
+
 protected:
   /// Check the input variables
   void checkVariables(Real pressure, Real temperature) const;
 
+  /// Salt component index
+  const unsigned int _salt_component;
   /// Fluid properties UserObject for water
   const BrineFluidProperties & _brine_fp;
   /// Fluid properties UserObject for the CO2

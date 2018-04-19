@@ -34,12 +34,21 @@ public:
   PorousFlowFluidStateBrineCO2(const InputParameters & parameters);
 
 protected:
+  virtual void computeQpProperties() override;
   virtual void thermophysicalProperties() override;
 
   /// Salt mass fraction (kg/kg)
   const VariableValue & _xnacl;
+  /// Gradient of salt mass fraction (only defined at the qps)
+  const VariableGradient & _grad_xnacl_qp;
+  /// Salt mass fraction variable number
+  const unsigned int _xnacl_varnum;
+  /// Salt mass fraction PorousFlow variable number
+  const unsigned int _xvar;
   /// FluidState UserObject
   const PorousFlowBrineCO2 & _fs_uo;
+  /// Salt component index
+  const unsigned int _salt_component;
 };
 
 #endif // POROUSFLOWFLUIDSTATEBRINECO2_H
