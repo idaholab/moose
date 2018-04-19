@@ -140,9 +140,14 @@ class Tester(MooseObject):
         return self.status.getStatus()
 
     def setStatus(self, status, message=''):
-        # Assign a fail message (so I can see what applications this will break) <-Temporary
-        if message == None or type(status) != type(self.no_status):
-            return self.status.setStatus(self.fail, 'deprecated status bucket')
+        # Assign a deprecated message (so I can see what applications this will break) <-Temporary
+        if type(status) == type(''):
+            self.addCaveats('deprecated status bucket')
+            test_status = self.createStatus()
+            result_status = message.status
+            result_color = message.color
+            new_status = test_status(status=result_status, color=result_color)
+            return self.status.setStatus(new_status)
 
         return self.status.setStatus(status, message)
 
