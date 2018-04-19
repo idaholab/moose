@@ -9,6 +9,7 @@
 
 // MOOSE includes
 #include "Control.h"
+#include "InputParameterWarehouse.h"
 
 template <>
 InputParameters
@@ -40,6 +41,7 @@ Control::Control(const InputParameters & parameters)
     VectorPostprocessorInterface(this),
     _fe_problem(*getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")),
     _depends_on(getParam<std::vector<std::string>>("depends_on")),
+    _tid(getParam<THREAD_ID>("_tid")),
     _input_parameter_warehouse(_app.getInputParameterWarehouse())
 {
 }
@@ -53,4 +55,13 @@ Control::getExecuteOptions()
   ExecFlagEnum execute_on = MooseUtils::getDefaultExecFlagEnum();
   execute_on = {EXEC_INITIAL, EXEC_TIMESTEP_END};
   return execute_on;
+}
+
+ControllableParameter
+Control::getControllableParameterHelper(const MooseObjectParameterName & name)
+{
+  ControllableParameter out = _input_parameter_warehouse.getControllableParameter(name, _tid);
+  if (out.empty())
+    mooseError("The desired parameter '", name, "' was not located, it either does not exist or has not been declared as controllable.");
+  return out;
 }

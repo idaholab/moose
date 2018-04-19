@@ -3,7 +3,7 @@
     # Test non-controllable parameter error
     type = RunException
     input = 'non_controllable_error.i'
-    expect_err = "The desired parameter is not controllable: Kernels/diff/non_controllable"
+    expect_err = "The desired parameter 'Kernels/diff/non_controllable"
     match_literal = true
   [../]
 
@@ -11,7 +11,7 @@
     # Test error message when single parameter is requested, but multiple exist
     type = RunApp
     input = 'multiple_parameters_found.i'
-    expect_out = "parameters have differing values"
+    expect_out = "The following controlled parameters are being retrieved"
     allow_warnings = true
   [../]
 
@@ -19,7 +19,7 @@
     # Test that an invalid parameter name errors properly
     type = RunException
     input = 'no_parameter_found.i'
-    expect_err = "The controlled parameter was not found: unknown_param_name"
+    expect_err = "The desired parameter 'unknown_param_name' was not located"
     match_literal = true
   [../]
 
@@ -35,7 +35,7 @@
     # Test that certain objects (e.g., Executioner) may not be disabled
     type = RunException
     input = 'disable_executioner.i'
-    expect_err = "The desired parameter is not controllable: Executioner::\*/enable"
+    expect_err = "The desired parameter 'Executioner::\*/enable"
   [../]
 
   [./non_existing_dependency]

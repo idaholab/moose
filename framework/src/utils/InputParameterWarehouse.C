@@ -11,7 +11,10 @@
 #include "InputParameterWarehouse.h"
 #include "InputParameters.h"
 
-InputParameterWarehouse::InputParameterWarehouse() : _input_parameters(libMesh::n_threads()) {}
+InputParameterWarehouse::InputParameterWarehouse()
+  : _input_parameters(libMesh::n_threads()), _controllable_items(libMesh::n_threads())
+{
+}
 
 InputParameters &
 InputParameterWarehouse::addInputParameters(const std::string & name,
@@ -24,9 +27,6 @@ InputParameterWarehouse::addInputParameters(const std::string & name,
 
   // Create the actual InputParameters object that will be reference by the objects
   std::shared_ptr<InputParameters> ptr = std::make_shared<InputParameters>(parameters);
-
-  // Set the name parameter to the object being created
-  ptr->set<std::string>("_object_name") = name;
 
   // The object name defined by the base class name, this method of storing is used for
   // determining the uniqueness of the name
@@ -44,6 +44,10 @@ InputParameterWarehouse::addInputParameters(const std::string & name,
   _input_parameters[tid].insert(
       std::pair<MooseObjectName, std::shared_ptr<InputParameters>>(unique_name, ptr));
 
+  // Build a list of object names
+  std::vector<MooseObjectName> object_names;
+  object_names.push_back(unique_name);
+
   // Store the object according to the control tags
   if (ptr->isParamValid("control_tags"))
   {
@@ -51,12 +55,30 @@ InputParameterWarehouse::addInputParameters(const std::string & name,
     for (const auto & tag : tags)
     {
       if (!tag.empty())
+      {
         _input_parameters[tid].insert(std::pair<MooseObjectName, std::shared_ptr<InputParameters>>(
             MooseObjectName(tag, name), ptr));
+        object_names.emplace_back(tag, name);
+      }
     }
   }
 
+  // Store controllable parameters using all possible names
+  for (libMesh::Parameters::iterator map_iter = ptr->begin(); map_iter != ptr->end(); ++map_iter)
+  {
+    const std::string & name = map_iter->first;
+    libMesh::Parameters::Value * value = map_iter->second;
+
+    if (ptr->isControllable(name))
+      for (const auto & object_name : object_names)
+      {
+        MooseObjectParameterName param_name(object_name, name);
+        _controllable_items[tid].emplace_back(libmesh_make_unique<ControllableItem>(param_name, value));
+      }
+  }
+
   // Set the name and tid parameters
+  ptr->addPrivateParam<std::string>("_object_name", name);
   ptr->addPrivateParam<THREAD_ID>("_tid", tid);
   ptr->allowCopy(false); // no more copies allowed
 
@@ -120,7 +142,79 @@ InputParameterWarehouse::getInputParameters(THREAD_ID tid) const
 
 void
 InputParameterWarehouse::addControllableParameterConnection(const MooseObjectParameterName & master,
-                                                            const MooseObjectParameterName & slave)
+                                                            const MooseObjectParameterName & slave,
+                                                            bool error_on_empty /*=true*/)
 {
-  _input_parameter_links[master].push_back(slave);
+  for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
+  {
+    std::vector<ControllableItem*> masters = getControllableItems(master, tid);
+    if (masters.empty() && error_on_empty)
+      mooseError("Unable to located parameter with name ", master);
+    else if (masters.empty())
+      return;
+
+    std::vector<ControllableItem*> slaves = getControllableItems(slave, tid);
+    if (slaves.empty() && error_on_empty)
+      mooseError("Unable to located parameter with name ", slave);
+    else if (slaves.empty())
+      return;
+
+    for (auto master_ptr : masters)
+      for (auto slave_ptr : slaves)
+        if (master_ptr != slave_ptr)
+          master_ptr->connect(slave_ptr);
+  }
+}
+
+void
+InputParameterWarehouse::addControllableParameterAlias(const MooseObjectParameterName & alias,
+                                                       const MooseObjectParameterName & slave)
+{
+  for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
+  {
+    std::vector<ControllableItem*> slaves = getControllableItems(slave, tid);
+    if (slaves.empty())
+      mooseError("Unable to located parameter with name ", slave);
+
+    for (auto slave_ptr : slaves)
+      _controllable_items[tid].emplace_back(libmesh_make_unique<ControllableAlias>(alias, slave_ptr));
+  }
+}
+
+std::vector<ControllableItem*>
+InputParameterWarehouse::getControllableItems(const MooseObjectParameterName & input,
+                                             THREAD_ID tid /*=0*/) const
+{
+  std::vector<ControllableItem*> output;
+  for (auto & ptr : _controllable_items[tid])
+    if (ptr->name() == input)
+      output.push_back(ptr.get());
+  return output;
+}
+
+ControllableParameter
+InputParameterWarehouse::getControllableParameter(const MooseObjectParameterName & input,
+                                                  THREAD_ID tid /*=0*/) const
+{
+  ControllableParameter cparam;
+  for (auto it = _controllable_items[tid].begin(); it != _controllable_items[tid].end(); ++it)
+    if ((*it)->name() == input)
+      cparam.add(it->get());
+  return cparam;
+}
+
+std::string
+InputParameterWarehouse::dumpChangedControls(bool reset_changed) const
+{
+  std::stringstream oss;
+  oss << std::left;
+
+  for (const auto & item : _controllable_items[0])
+    if (item->isChanged())
+    {
+      oss << item->dump(4);
+      if (reset_changed)
+        item->resetChanged();
+    }
+  return oss.str();
 }

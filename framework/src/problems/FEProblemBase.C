@@ -79,6 +79,7 @@
 #include "ShapeSideUserObject.h"
 #include "MooseVariableFE.h"
 #include "MooseVariableScalar.h"
+#include "InputParameterWarehouse.h"
 
 #include "libmesh/exodusII_io.h"
 #include "libmesh/quadrature.h"
@@ -2343,14 +2344,14 @@ FEProblemBase::addMaterial(const std::string & mat_name,
       else
         _materials.addObjects(material, neighbor_material, face_material, tid);
 
-      // link enabled parameter of face and neighbor materials
-      MooseObjectParameterName name(MooseObjectName("Material", material->name()), "enabled");
+      // link parameters of face and neighbor materials
+      MooseObjectParameterName name(MooseObjectName("Material", material->name()), "*");
       MooseObjectParameterName face_name(MooseObjectName("Material", face_material->name()),
-                                         "enabled");
+                                         "*");
       MooseObjectParameterName neighbor_name(MooseObjectName("Material", neighbor_material->name()),
-                                             "enabled");
-      _app.getInputParameterWarehouse().addControllableParameterConnection(name, face_name);
-      _app.getInputParameterWarehouse().addControllableParameterConnection(name, neighbor_name);
+                                             "*");
+      _app.getInputParameterWarehouse().addControllableParameterConnection(name, face_name, false);
+      _app.getInputParameterWarehouse().addControllableParameterConnection(name, neighbor_name, false);
     }
   }
 }

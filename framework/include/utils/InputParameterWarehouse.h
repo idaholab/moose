@@ -10,10 +10,16 @@
 #ifndef INPUTPARAMETERWAREHOUSE_H
 #define INPUTPARAMETERWAREHOUSE_H
 
+// Google Test
+#include <gtest/gtest.h>
+
 // MOOSE includes
 #include "MooseObjectName.h"
 #include "MooseTypes.h"
+#include "ControllableItem.h"
 #include "ControllableParameter.h"
+#include "Factory.h"
+#include "ControlOutput.h"
 
 // Forward declarations
 class InputParameters;
@@ -24,6 +30,8 @@ class InputParameters;
  * This object is responsible for InputParameter objects, all MooseObjects should
  * contain a reference to the parameters object stored here.
  *
+ * To avoid abuse, this warehouse is also designed to restrict the ability to change the parameter
+ * to Control objects only.
  */
 class InputParameterWarehouse
 {
@@ -54,7 +62,7 @@ public:
                                                    THREAD_ID tid = 0) const;
   const InputParameters & getInputParametersObject(const MooseObjectName & object_name,
                                                    THREAD_ID tid = 0) const;
-  ///@{
+  ///@}
   /**
    * Return const reference to the map containing the InputParameter objects
    */
@@ -62,30 +70,37 @@ public:
   getInputParameters(THREAD_ID tid = 0) const;
 
   /**
-   * Returns a ControllableParameter object
-   * @see Control
-   */
-  template <typename T>
-  ControllableParameter<T> getControllableParameter(const MooseObjectParameterName & desired,
-                                                    bool mark_as_controlled = false,
-                                                    bool error_on_empty = true);
-
-  /**
    * Method for linking control parameters of different names
    */
   void addControllableParameterConnection(const MooseObjectParameterName & master,
-                                          const MooseObjectParameterName & slave);
+                                          const MooseObjectParameterName & slave,
+    bool error_on_empty = true);
+
+  /**
+   * Method for creating alias to an existing controllable parameters.
+   *
+   * @param alias The new name to serve as an alias.
+   * @param slave The name of the slave parameter to be aliased.
+   */
+  void
+  addControllableParameterAlias(const MooseObjectParameterName & alias,
+                                const MooseObjectParameterName & slave);
+
+  /***
+   * Helper method for printing controllable items.
+   */
+  std::string dumpChangedControls(bool reset_changed) const;
 
 private:
   /// Storage for the InputParameters objects
+  /// TODO: Remove multimap
   std::vector<std::multimap<MooseObjectName, std::shared_ptr<InputParameters>>> _input_parameters;
 
-  /// InputParameter links
-  std::map<MooseObjectParameterName, std::vector<MooseObjectParameterName>> _input_parameter_links;
-
-  /// A list of parameters that were controlled (only used for output)
-  std::map<std::shared_ptr<InputParameters>, std::set<MooseObjectParameterName>>
-      _controlled_parameters;
+  /// Storage for controllable parameters via ControllableItem objects, a unique_ptr is
+  /// used to avoid creating multiple copies. All access to the objects are done via
+  /// pointers. The ControllableItem objects are not designed and will not be used directly in
+  /// user code. All user level access goes through the ControllableParameter object.
+  std::vector<std::vector<std::unique_ptr<ControllableItem>>> _controllable_items;
 
   /**
    * Method for adding a new InputParameters object
@@ -97,11 +112,27 @@ private:
    * are generic until Factory::create() is called and the actual MooseObject
    * is created.
    *
-   * This method is private, because only the factories that are creating objects should be
+   * This method is private, because only the factories thatc are creating objects should be
    * able to call this method.
    */
   InputParameters &
   addInputParameters(const std::string & name, InputParameters parameters, THREAD_ID tid = 0);
+
+  /**
+   * Returns a ControllableParameter object that contains all matches to ControllableItem objects
+   * for the provided name.
+   *
+   * This is private because it should only be accessed via a Control object.
+   */
+  ControllableParameter getControllableParameter(const MooseObjectParameterName & input,
+                                                 THREAD_ID tid = 0) const;
+
+  /**
+   * Returns a ControllableItem iterator, if the name is located.
+   * @see Control
+   */
+  std::vector<ControllableItem*>
+  getControllableItems(const MooseObjectParameterName & desired, THREAD_ID tid = 0) const;
 
   ///@{
   /**
@@ -123,82 +154,22 @@ private:
                                        THREAD_ID tid = 0) const;
   ///@{
 
-  /**
-   * Return the list of controlled parameters (used for output)
-   * @see ControlOutput
-   */
-  const std::map<std::shared_ptr<InputParameters>, std::set<MooseObjectParameterName>> &
-  getControlledParameters()
-  {
-    return _controlled_parameters;
-  }
-  void clearControlledParameters() { _controlled_parameters.clear(); }
+  /// The factory is allowed to call addInputParameters.
+  friend MooseObjectPtr
+  Factory::create(const std::string &, const std::string &, InputParameters, THREAD_ID, bool);
 
-  friend class Factory;
-  friend class ActionFactory;
+  /// Only controls are allowed to call getControllableParameter. The
+  /// Control::getControllableParameterHelper is the only method that calls getControllableParameter.
+  /// However, this method cannot be made a friend explicitly because the method would need to be
+  /// public. If the method is public then it is possible to call the method by getting access to
+  /// the Control object.
   friend class Control;
-  friend class ControlOutput;
 
-  // RELAP-7 Control Logic (This will go away when the MOOSE system is created)
-  friend class Component;
+  // Allow unit test to call methods
+  FRIEND_TEST(InputParameterWarehouse, getControllableItems);
+  FRIEND_TEST(InputParameterWarehouse, getControllableParameter);
+  FRIEND_TEST(InputParameterWarehouse, addControllableParameterConnection);
+  FRIEND_TEST(InputParameterWarehouse, addControllableParameterAlias);
 };
-
-template <typename T>
-ControllableParameter<T>
-InputParameterWarehouse::getControllableParameter(const MooseObjectParameterName & input,
-                                                  bool mark_as_controlled /*=false*/,
-                                                  bool error_on_empty /*=true*/)
-{
-
-  // The ControllableParameter object to return
-  ControllableParameter<T> output;
-
-  // Vector of desired parameters
-  std::vector<MooseObjectParameterName> params(1, input);
-  const auto link_it = _input_parameter_links.find(input);
-
-  // Add connected parameters
-  if (link_it != _input_parameter_links.end())
-    params.insert(params.end(), link_it->second.begin(), link_it->second.end());
-
-  // Loop over all threads
-  for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
-  {
-    // Loop over all InputParameter objects
-    for (const auto & param_pair : _input_parameters[tid])
-    {
-      // Loop of all desired params
-      for (const auto & param : params)
-      {
-        // If the desired object name does not match the current object name, move on
-        MooseObjectParameterName desired = param;
-
-        if (desired != param_pair.first)
-          continue;
-
-        // If the parameter is valid and controllable update the output vector with a pointer to the
-        // parameter
-        if (param_pair.second->libMesh::Parameters::have_parameter<T>(desired.parameter()))
-        {
-          // Do not allow non-controllable types to be controlled
-          if (!param_pair.second->isControllable(desired.parameter()))
-            mooseError("The desired parameter is not controllable: ", desired);
-
-          // Store pointer to the writable parameter
-          output.insert(desired, param_pair.second);
-
-          if (mark_as_controlled && tid == 0)
-            _controlled_parameters[param_pair.second].insert(desired);
-        }
-      }
-    }
-  }
-
-  // Error if nothing was found
-  if (output.size() == 0 && error_on_empty)
-    mooseError("The controlled parameter was not found: ", input);
-
-  return output;
-}
 
 #endif // INPUTPARAMETERWAREHOUSE_H
