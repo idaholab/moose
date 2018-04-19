@@ -84,6 +84,13 @@ SingleVariableReturnMappingSolution::SingleVariableReturnMappingSolution(
 }
 
 Real
+SingleVariableReturnMappingSolution::minimumPermissibleValue(
+    const Real /*effective_trial_stress*/) const
+{
+  return std::numeric_limits<Real>::lowest();
+}
+
+Real
 SingleVariableReturnMappingSolution::maximumPermissibleValue(
     const Real /*effective_trial_stress*/) const
 {
@@ -103,11 +110,11 @@ SingleVariableReturnMappingSolution::returnMappingSolve(const Real effective_tri
     if (!internalSolve(effective_trial_stress, scalar, iter_output_ptr))
     {
       if (iter_output_ptr)
-        mooseError(iter_output_ptr->str());
+        throw MooseException(iter_output_ptr->str());
       else
       {
         internalSolve(effective_trial_stress, scalar, &iter_output);
-        mooseError(iter_output.str());
+        throw MooseException(iter_output.str());
       }
     }
     else if (iter_output_ptr)
@@ -135,20 +142,14 @@ SingleVariableReturnMappingSolution::internalSolve(const Real effective_trial_st
                                                    Real & scalar,
                                                    std::stringstream * iter_output)
 {
-  scalar = 0.0;
-  Real scalar_old = 0.0;
+  scalar = initialGuess(effective_trial_stress);
+  Real scalar_old = scalar;
   Real scalar_increment = 0.0;
-  const Real min_permissible_scalar = 0.0;
+  const Real min_permissible_scalar = minimumPermissibleValue(effective_trial_stress);
   const Real max_permissible_scalar = maximumPermissibleValue(effective_trial_stress);
   Real scalar_upper_bound = max_permissible_scalar;
-  Real scalar_lower_bound = 0.0;
+  Real scalar_lower_bound = min_permissible_scalar;
   unsigned int it = 0;
-
-  if (effective_trial_stress == 0.0)
-  {
-    outputIterInfo(iter_output, it, effective_trial_stress, scalar, 0.0, 1.0);
-    return true;
-  }
 
   Real residual = computeResidual(effective_trial_stress, scalar);
   Real residual_old = residual;
@@ -229,7 +230,8 @@ SingleVariableReturnMappingSolution::internalSolve(const Real effective_trial_st
         if (scalar_old + scalar_increment >= scalar_upper_bound ||
             scalar_old + scalar_increment <= scalar_lower_bound)
         {
-          if (scalar_upper_bound != max_permissible_scalar && scalar_lower_bound != 0.0)
+          if (scalar_upper_bound != max_permissible_scalar &&
+              scalar_lower_bound != min_permissible_scalar)
           {
             Real frac = 0.5;
             scalar_increment =
@@ -284,7 +286,6 @@ SingleVariableReturnMappingSolution::internalSolve(const Real effective_trial_st
     if (iter_output)
       *iter_output << "Exceeded maximum iterations in material return mapping iterations."
                    << std::endl;
-    ;
   }
 
   return has_converged;
@@ -350,7 +351,7 @@ bool
 SingleVariableReturnMappingSolution::converged(const Real residual, const Real reference)
 {
   return (std::abs(residual) <= _absolute_tolerance ||
-          (std::abs(residual) / reference) <= _relative_tolerance);
+          std::abs(residual / reference) <= _relative_tolerance);
 }
 
 bool

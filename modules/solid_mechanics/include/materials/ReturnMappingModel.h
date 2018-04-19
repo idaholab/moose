@@ -65,6 +65,11 @@ public:
    */
   Real computeTimeStepLimit();
 
+  virtual Real minimumPermissibleValue(const Real /*effective_trial_stress*/) const override
+  {
+    return 0.0;
+  }
+
 protected:
   /**
    * Perform any necessary initialization before return mapping iterations
