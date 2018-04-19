@@ -15,9 +15,10 @@ public:
   virtual void addVariables() override;
   virtual void addMooseObjects() override;
 
-public:
+protected:
   void addRDGMooseObjects();
 
+public:
   static const std::string DENSITY;
   static const std::string DRAG_COEFFICIENT;
   static const std::string DYNAMIC_VISCOSITY;
