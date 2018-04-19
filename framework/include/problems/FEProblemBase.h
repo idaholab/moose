@@ -1375,14 +1375,9 @@ public:
 
   ExecuteMooseObjectWarehouse<MultiApp> & getMultiAppWarehouse() { return _multi_apps; }
 
-protected:
-  ///@{
-  /**
-   *
-   */
-  VectorPostprocessorData & getVectorPostprocessorData();
-  ///@}
+  const VectorPostprocessorData & getVectorPostprocessorData() const;
 
+protected:
   MooseMesh & _mesh;
   EquationSystems _eq;
   bool _initialized;

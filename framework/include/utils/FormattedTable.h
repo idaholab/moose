@@ -218,6 +218,14 @@ private:
    */
   std::size_t _output_row_index;
 
+  /**
+   * Keeps track of whether the header has been output. This is separate from _output_row_index
+   * because it's possible to output the header with zero rows. We don't consider this a bug,
+   * it helps users understand that they have declared vectors properly but maybe haven't populated
+   * them correctly.
+   */
+  bool _headers_output;
+
   /// Keeps track of whether the current stream is open or not.
   bool _stream_open;
 

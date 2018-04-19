@@ -2720,8 +2720,8 @@ FEProblemBase::getPostprocessorValueOlder(const std::string & name)
   return _pps_data.getPostprocessorValueOlder(name);
 }
 
-VectorPostprocessorData &
-FEProblemBase::getVectorPostprocessorData()
+const VectorPostprocessorData &
+FEProblemBase::getVectorPostprocessorData() const
 {
   return _vpps_data;
 }

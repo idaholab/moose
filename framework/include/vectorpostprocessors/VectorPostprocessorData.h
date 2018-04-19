@@ -78,6 +78,11 @@ public:
   bool hasVectors(const std::string & vpp_name) const;
 
   /**
+   * Returns a Boolean indicating whether the specified VPP vectors contain complete history.
+   */
+  bool containsCompleteHistory(const std::string & name) const;
+
+  /**
    * Get the map of vectors for a particular VectorPostprocessor
    * @param vpp_name The name of the VectorPostprocessor
    */

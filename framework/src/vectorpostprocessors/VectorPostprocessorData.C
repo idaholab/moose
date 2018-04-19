@@ -34,6 +34,15 @@ VectorPostprocessorData::init(const std::string & name)
 }
 
 bool
+VectorPostprocessorData::containsCompleteHistory(const std::string & name) const
+{
+  auto it = _vpp_data.find(name);
+  mooseAssert(it != _vpp_data.end(), std::string("VectorPostprocessor ") + name + " not found!");
+
+  return it->second._contains_complete_history;
+}
+
+bool
 VectorPostprocessorData::hasVectorPostprocessor(const std::string & name)
 {
   return (_vpp_data.find(name) != _vpp_data.end());
