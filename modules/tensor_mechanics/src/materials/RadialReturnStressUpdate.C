@@ -79,11 +79,16 @@ RadialReturnStressUpdate::updateState(RankTwoTensor & strain_increment,
 
   // Use Newton iteration to determine the scalar effective inelastic strain increment
   Real scalar_effective_inelastic_strain = 0;
-  returnMappingSolve(effective_trial_stress, scalar_effective_inelastic_strain, _console);
-
-  if (scalar_effective_inelastic_strain != 0.0)
-    inelastic_strain_increment = deviatoric_trial_stress *
-                                 (1.5 * scalar_effective_inelastic_strain / effective_trial_stress);
+  if (!MooseUtils::absoluteFuzzyEqual(effective_trial_stress, 0.0))
+  {
+    returnMappingSolve(effective_trial_stress, scalar_effective_inelastic_strain, _console);
+    if (scalar_effective_inelastic_strain != 0.0)
+      inelastic_strain_increment =
+          deviatoric_trial_stress *
+          (1.5 * scalar_effective_inelastic_strain / effective_trial_stress);
+    else
+      inelastic_strain_increment.zero();
+  }
   else
     inelastic_strain_increment.zero();
 
