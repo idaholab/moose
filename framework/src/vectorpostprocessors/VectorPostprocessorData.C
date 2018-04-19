@@ -11,26 +11,13 @@
 #include "FEProblem.h"
 
 VectorPostprocessorData::VectorPostprocessorData(FEProblemBase & fe_problem)
-  : Restartable(fe_problem.getMooseApp(), "values", "VectorPostprocessorData", 0),
-    _fe_problem(fe_problem)
+  : Restartable(fe_problem.getMooseApp(), "values", "VectorPostprocessorData", 0)
 {
 }
 
 void
-VectorPostprocessorData::init(const std::string & name)
+VectorPostprocessorData::init(const std::string & /*name*/)
 {
-  // Retrieve or create the data structure for this VPP
-  auto vec_it_pair = _vpp_data.emplace(name, VectorPostprocessorVectors());
-  auto & vec_storage = vec_it_pair.first->second;
-
-  // Get a reference to the VPP object for the purpose of inspecting parameters. This is somewhat
-  // tricky since this object is completely disconnected from VPPs, it's only a data store.
-  const auto & vpp_object = _fe_problem.getUserObjectBase(name);
-
-  // If the VPP is declaring a vector, see if complete history is needed. Note: This parameter
-  // is constant and applies to _all_ declared vectors.
-  vec_storage._contains_complete_history =
-      vpp_object.getParam<bool>(VectorPostprocessor::completeHistoryParameterName());
 }
 
 bool
@@ -68,21 +55,27 @@ VectorPostprocessorData::getVectorPostprocessorValueOld(const VectorPostprocesso
 
 VectorPostprocessorValue &
 VectorPostprocessorData::declareVector(const std::string & vpp_name,
-                                       const std::string & vector_name)
+                                       const std::string & vector_name,
+                                       bool contains_complete_history)
 {
   _supplied_items.emplace(vpp_name + "::" + vector_name);
 
-  return getVectorPostprocessorHelper(vpp_name, vector_name);
+  return getVectorPostprocessorHelper(vpp_name, vector_name, true, contains_complete_history);
 }
 
 VectorPostprocessorValue &
 VectorPostprocessorData::getVectorPostprocessorHelper(const VectorPostprocessorName & vpp_name,
                                                       const std::string & vector_name,
-                                                      bool get_current)
+                                                      bool get_current,
+                                                      bool contains_complete_history)
 {
   // Retrieve or create the data structure for this VPP
   auto vec_it_pair = _vpp_data.emplace(vpp_name, VectorPostprocessorVectors());
   auto & vec_storage = vec_it_pair.first->second;
+
+  // If the VPP is declaring a vector, see if complete history is needed. Note: This parameter
+  // is constant and applies to _all_ declared vectors.
+  vec_storage._contains_complete_history |= contains_complete_history;
 
   // Keep track of whether an old vector is needed for copying back later.
   if (!get_current)

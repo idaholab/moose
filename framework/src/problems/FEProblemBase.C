@@ -2748,9 +2748,10 @@ FEProblemBase::getVectorPostprocessorValueOld(const std::string & name,
 
 VectorPostprocessorValue &
 FEProblemBase::declareVectorPostprocessorVector(const VectorPostprocessorName & name,
-                                                const std::string & vector_name)
+                                                const std::string & vector_name,
+                                                bool contains_complete_history)
 {
-  return _vpps_data.declareVector(name, vector_name);
+  return _vpps_data.declareVector(name, vector_name, contains_complete_history);
 }
 
 const std::vector<std::pair<std::string, VectorPostprocessorData::VectorPostprocessorState>> &

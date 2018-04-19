@@ -46,7 +46,8 @@ public:
    * @param vector_name The name of the vector
    */
   VectorPostprocessorValue & declareVector(const std::string & vpp_name,
-                                           const std::string & vector_name);
+                                           const std::string & vector_name,
+                                           bool contains_complete_history);
 
   /**
    * Returns a true value if the VectorPostprocessor exists
@@ -97,7 +98,8 @@ public:
 private:
   VectorPostprocessorValue & getVectorPostprocessorHelper(const VectorPostprocessorName & vpp_name,
                                                           const std::string & vector_name,
-                                                          bool get_current = true);
+                                                          bool get_current = true,
+                                                          bool contains_complete_history = false);
   /**
    * Vector of pairs representing the declared vectors (vector name, vector DS)
    * The vector DS is a data structure containing a current and old container (vector of Reals)
@@ -120,8 +122,6 @@ private:
 
   std::set<std::string> _requested_items;
   std::set<std::string> _supplied_items;
-
-  FEProblemBase & _fe_problem;
 };
 
 #endif // VECTORPOSTPROCESSORDATA_H

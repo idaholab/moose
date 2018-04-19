@@ -51,11 +51,6 @@ public:
   std::string PPName() { return _vpp_name; }
 
   /**
-   * Return the name of the parameter used to toggle complete history.
-   */
-  static std::string completeHistoryParameterName();
-
-  /**
    * Return whether or not this VectorPostprocessor contains complete history
    */
   bool containsCompleteHistory() const { return _contains_complete_history; }

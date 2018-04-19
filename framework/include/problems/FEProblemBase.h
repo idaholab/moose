@@ -736,7 +736,8 @@ public:
    * @return The reference to the vector declared
    */
   VectorPostprocessorValue & declareVectorPostprocessorVector(const VectorPostprocessorName & name,
-                                                              const std::string & vector_name);
+                                                              const std::string & vector_name,
+                                                              bool contains_complete_history);
 
   /**
    * Whether or not the specified VectorPostprocessor has declared any vectors
