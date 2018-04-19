@@ -398,7 +398,7 @@ class Tester(MooseObject):
             result_key = options.results_storage.get(self.getTestDir(), {})
             status = result_key.get(self.getTestName(), {}).get('FAIL', '')
             if not status:
-                self.setStatus(self.bucket_silent)
+                self.setStatus(self.silent)
                 return False
 
         # Check if we only want to run syntax tests

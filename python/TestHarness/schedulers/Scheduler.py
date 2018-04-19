@@ -406,7 +406,6 @@ class Scheduler(MooseObject):
                 # All done
                 with j_lock:
                     job.setStatus(job.finished)
-                    #print 'RUNNER FINISHED JOB: %s' % (job.getTestName())
 
                 with self.activity_lock:
                     self.__active_jobs.remove(job)

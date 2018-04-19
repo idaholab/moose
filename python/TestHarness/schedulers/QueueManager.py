@@ -212,8 +212,6 @@ class QueueManager(Scheduler):
         if not job_data.json_data:
             return False
 
-        is_ready = True
-
         # job(s) were launched but results file does not yet exist (QUEUED)
         if (job_data.json_data.get(job_data.job_dir, {})
             and not os.path.exists(os.path.join(job_data.job_dir, self.__job_storage_file))):
@@ -222,20 +220,20 @@ class QueueManager(Scheduler):
                 if tester.isNoStatus():
                     tester.setStatus(tester.no_status, 'QUEUED')
                 job.setStatus(job.finished)
-            is_ready = False
+            return False
 
         # job(s) were specifically silently skipped during initial launch
         if not job_data.json_data.get(job_data.job_dir, {}):
             self._finishAllJobs(job_data)
-            is_ready = False
+            return False
 
         # results file exists, but job was launched using a different scheduler
         if (job_data.json_data.get(job_data.job_dir, {})
             and not job_data.json_data[job_data.job_dir].get(job_data.plugin, {})):
             self._finishAllJobs(job_data)
-            is_ready = False
+            return False
 
-        return is_ready
+        return True
 
     def _finishAllJobs(self, job_data):
         """ iterate over jobs and set their status to finished """
