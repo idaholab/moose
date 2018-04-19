@@ -11,8 +11,26 @@
 #include "FEProblem.h"
 
 VectorPostprocessorData::VectorPostprocessorData(FEProblemBase & fe_problem)
-  : Restartable(fe_problem.getMooseApp(), "values", "VectorPostprocessorData", 0)
+  : Restartable(fe_problem.getMooseApp(), "values", "VectorPostprocessorData", 0),
+    _fe_problem(fe_problem)
 {
+}
+
+void
+VectorPostprocessorData::init(const std::string & name)
+{
+  // Retrieve or create the data structure for this VPP
+  auto vec_it_pair = _vpp_data.emplace(name, VectorPostprocessorVectors());
+  auto & vec_storage = vec_it_pair.first->second;
+
+  // Get a reference to the VPP object for the purpose of inspecting parameters. This is somewhat
+  // tricky since this object is completely disconnected from VPPs, it's only a data store.
+  const auto & vpp_object = _fe_problem.getUserObjectBase(name);
+
+  // If the VPP is declaring a vector, see if complete history is needed. Note: This parameter
+  // is constant and applies to _all_ declared vectors.
+  vec_storage._contains_complete_history =
+      vpp_object.getParam<bool>(VectorPostprocessor::completeHistoryParameterName());
 }
 
 bool
@@ -27,7 +45,7 @@ VectorPostprocessorData::getVectorPostprocessorValue(const VectorPostprocessorNa
 {
   _requested_items.emplace(vpp_name + "::" + vector_name);
 
-  return getVectorPostprocessorHelper(vpp_name, vector_name, true);
+  return getVectorPostprocessorHelper(vpp_name, vector_name);
 }
 
 VectorPostprocessorValue &
@@ -45,7 +63,7 @@ VectorPostprocessorData::declareVector(const std::string & vpp_name,
 {
   _supplied_items.emplace(vpp_name + "::" + vector_name);
 
-  return getVectorPostprocessorHelper(vpp_name, vector_name, true);
+  return getVectorPostprocessorHelper(vpp_name, vector_name);
 }
 
 VectorPostprocessorValue &
@@ -53,14 +71,18 @@ VectorPostprocessorData::getVectorPostprocessorHelper(const VectorPostprocessorN
                                                       const std::string & vector_name,
                                                       bool get_current)
 {
-  // Intentional use of RHS brackets on a std::map to do a retrieve or insert
-  auto & vec_storage = _vpp_data[vpp_name];
+  // Retrieve or create the data structure for this VPP
+  auto vec_it_pair = _vpp_data.emplace(vpp_name, VectorPostprocessorVectors());
+  auto & vec_storage = vec_it_pair.first->second;
+
+  // Keep track of whether an old vector is needed for copying back later.
+  if (!get_current)
+    vec_storage._needs_old = true;
 
   // lambda for doing comparison on name (i.e., first item in pair)
   auto comp = [&vector_name](std::pair<std::string, VectorPostprocessorState> & pair) {
     return pair.first == vector_name;
   };
-
   // Search for the vector, if it is not located create the entry in the storage
   auto iter = std::find_if(vec_storage._values.rbegin(), vec_storage._values.rend(), comp);
   if (iter == vec_storage._values.rend())
@@ -105,8 +127,34 @@ VectorPostprocessorData::vectors(const std::string & vpp_name) const
 void
 VectorPostprocessorData::copyValuesBack()
 {
+  /**
+   * Depending on the needs of this VPP, we'll perform
+   * different actions on the vectors as time is advanced.
+   *
+   *   Need Old | Preserve History | Action
+   *  --------------------------------------
+   *    False   |      False       |  None
+   *    False   |      True        |  None
+   *    True    |      False       |  Swap
+   *    True    |      True        |  Copy
+   */
   for (const auto & vec_pair : _vpp_data)
-    if (!vec_pair.second._contains_complete_history)
-      for (const auto & vec_it : vec_pair.second._values)
+  {
+    bool needs_old = vec_pair.second._needs_old;
+    bool preserve_history = vec_pair.second._contains_complete_history;
+
+    if (!needs_old)
+      continue;
+
+    for (const auto & vec_it : vec_pair.second._values)
+      if (preserve_history)
+        *vec_it.second.old = *vec_it.second.current;
+      else
         vec_it.second.old->swap(*vec_it.second.current);
+  }
+}
+
+VectorPostprocessorData::VectorPostprocessorVectors::VectorPostprocessorVectors()
+  : _contains_complete_history(false), _needs_old(false)
+{
 }

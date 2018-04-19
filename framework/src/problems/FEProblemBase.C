@@ -2582,6 +2582,12 @@ FEProblemBase::initPostprocessorData(const std::string & name)
 }
 
 void
+FEProblemBase::initVectorPostprocessorData(const std::string & name)
+{
+  _vpps_data.init(name);
+}
+
+void
 FEProblemBase::addPostprocessor(std::string pp_name,
                                 const std::string & name,
                                 InputParameters parameters)
@@ -2606,6 +2612,7 @@ FEProblemBase::addVectorPostprocessor(std::string pp_name,
                "\" already exists.  You may not add a VectorPostprocessor by the same name.");
 
   addUserObject(pp_name, name, parameters);
+  initVectorPostprocessorData(name);
 }
 
 void
@@ -3943,6 +3950,7 @@ FEProblemBase::advanceState()
   }
 
   _pps_data.copyValuesBack();
+  _vpps_data.copyValuesBack();
 
   if (_material_props.hasStatefulProperties())
     _material_props.shift();

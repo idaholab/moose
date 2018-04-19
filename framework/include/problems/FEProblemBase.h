@@ -613,6 +613,9 @@ public:
    */
   void initPostprocessorData(const std::string & name);
 
+  /// Initialize the VectorPostprocessor data
+  void initVectorPostprocessorData(const std::string & name);
+
   // UserObjects /////
   virtual void
   addUserObject(std::string user_object_name, const std::string & name, InputParameters parameters);

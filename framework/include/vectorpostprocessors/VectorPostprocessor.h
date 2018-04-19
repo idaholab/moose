@@ -50,6 +50,11 @@ public:
    */
   std::string PPName() { return _vpp_name; }
 
+  /**
+   * Return the name of the parameter used to toggle complete history.
+   */
+  static std::string completeHistoryParameterName();
+
 protected:
   /**
    * Register a new vector to fill up.
@@ -66,8 +71,6 @@ protected:
 
 private:
   THREAD_ID _vpp_tid;
-
-  const bool _complete_history;
 
   std::map<std::string, VectorPostprocessorValue> _thread_local_vectors;
 };

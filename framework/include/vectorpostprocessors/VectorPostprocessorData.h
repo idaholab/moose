@@ -26,6 +26,11 @@ public:
    */
   VectorPostprocessorData(FEProblemBase & fe_problem);
 
+  /**
+   * Initialization method, sets the current and old value to 0.0 for this postprocessor
+   */
+  void init(const std::string & name);
+
   /// VectorPostprocessorState (2 containers for values (see MooseTypes.h)
   struct VectorPostprocessorState
   {
@@ -80,24 +85,29 @@ public:
   vectors(const std::string & vpp_name) const;
 
   /**
-   * Copy the current post-processor values into old (i.e. shift it "back in time")
+   * Copy the current post-processor values into old (i.e. shift it "back in time") as needed
    */
   void copyValuesBack();
 
 private:
   VectorPostprocessorValue & getVectorPostprocessorHelper(const VectorPostprocessorName & vpp_name,
                                                           const std::string & vector_name,
-                                                          bool get_current);
+                                                          bool get_current = true);
   /**
    * Vector of pairs representing the declared vectors (vector name, vector DS)
    * The vector DS is a data structure containing a current and old container (vector of Reals)
    */
   struct VectorPostprocessorVectors
   {
+    VectorPostprocessorVectors();
+
     std::vector<std::pair<std::string, VectorPostprocessorState>> _values;
 
     /// Boolean indicating whether these vectors contain complete history (append mode)
     bool _contains_complete_history;
+
+    /// Boolean indicating whether any old vectors have been requested.
+    bool _needs_old;
   };
 
   /// The VPP data store in a map: VPP Name to vector storage
@@ -105,6 +115,8 @@ private:
 
   std::set<std::string> _requested_items;
   std::set<std::string> _supplied_items;
+
+  FEProblemBase & _fe_problem;
 };
 
 #endif // VECTORPOSTPROCESSORDATA_H
