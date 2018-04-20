@@ -5,7 +5,6 @@
 The Rogers-Stallybrass-Clements capillary relationship is [citep:rsc1983]
 \begin{equation}
 S_{\mathrm{eff}} = \frac{1}{\sqrt{1 + \exp((P_{c} - A)/B)}} \ ,
-\label{eqn.rsc.seff}
 \end{equation}
 when the oil viscosity is exactly twice the water viscosity.  This is
 of limited use in real simulations, and is only used in the Porous
