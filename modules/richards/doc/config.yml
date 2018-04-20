@@ -9,6 +9,10 @@ Content:
     richards:
         root_dir: modules/richards/doc/content
 
+Check:
+    groups:
+        - RichardsApp
+
 Renderer:
     type: MooseDocs.base.MaterializeRenderer
     name: MOOSE Richards Module

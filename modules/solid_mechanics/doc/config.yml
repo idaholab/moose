@@ -8,6 +8,9 @@ Content:
             - media/**
     solid_mechanics:
         root_dir: modules/solid_mechanics/doc/content
+Check:
+    groups:
+        - SolidMechanicsApp
 
 Renderer:
     type: MooseDocs.base.MaterializeRenderer

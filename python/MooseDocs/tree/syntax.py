@@ -32,37 +32,6 @@ class SyntaxNodeBase(NodeBase):
                   Property('description', ptype=unicode),
                   Property('alias', ptype=unicode)]
 
-    # Default documentation destinations for MOOSE and Modules
-    #TODO: Build this automatically from source or --registry, not sure how yet.
-    DESTINATIONS = dict()
-    DESTINATIONS['XFEM'] = '${MOOSE_DIR}/modules/xfem/doc/content/documentation/systems'
-    DESTINATIONS['NavierStokes'] = '${MOOSE_DIR}/modules/navier_stokes/doc/content/documentation/' \
-                                   'systems'
-    DESTINATIONS['TensorMechanics'] = '${MOOSE_DIR}/modules/tensor_mechanics/doc/content/' \
-                                      'documentation/systems'
-    DESTINATIONS['PhaseField'] = '${MOOSE_DIR}/modules/phase_field/doc/content/documentation/' \
-                                 'systems'
-    DESTINATIONS['Rdg'] = '${MOOSE_DIR}/modules/rdg/doc/content/documentation/systems'
-    DESTINATIONS['Contact'] = '${MOOSE_DIR}/modules/contact/doc/content/documentation/systems'
-    DESTINATIONS['SolidMechanics'] = '${MOOSE_DIR}/modules/solid_mechanics/doc/content/' \
-                                     'documentation/systems'
-    DESTINATIONS['HeatConduction'] = '${MOOSE_DIR}/modules/heat_conduction/doc/content/' \
-                                     'documentation/systems'
-    DESTINATIONS['MOOSE'] = '${MOOSE_DIR}/framework/doc/content/documentation/systems'
-    DESTINATIONS['StochasticTools'] = '${MOOSE_DIR}/modules/stochastic_tools/doc/content/' \
-                                      'documentation/systems'
-    DESTINATIONS['Misc'] = '${MOOSE_DIR}/modules/misc/doc/content/documentation/systems'
-    DESTINATIONS['FluidProperties'] = '${MOOSE_DIR}/modules/fluid_properties/doc/content/' \
-                                      'documentation/systems'
-    DESTINATIONS['ChemicalReactions'] = '${MOOSE_DIR}/modules/chemical_reactions/doc/content/' \
-                                        'documentation/systems'
-    DESTINATIONS['LevelSet'] = '${MOOSE_DIR}/modules/level_set/doc/content/documentation/systems'
-    DESTINATIONS['PorousFlow'] = '${MOOSE_DIR}/modules/porous_flow/doc/content/documentation/' \
-                                 'systems'
-    DESTINATIONS['Richards'] = '${MOOSE_DIR}/modules/richards/doc/content/documentation/systems'
-    DESTINATIONS['FunctionalExpansionTools'] = '${MOOSE_DIR}/modules/functional_expansion_tools/' \
-                                               'doc/content/documentation/systems'
-
     STUB_HEADER = '<!-- MOOSE Documentation Stub: Remove this when content is added. -->'
 
     def __init__(self, *args, **kwargs):
@@ -133,7 +102,7 @@ class SyntaxNodeBase(NodeBase):
         """
         return self.__nodeFinder(ActionNode, *args, **kwargs)
 
-    def check(self, generate=False, groups=None, update=None):
+    def check(self, generate=False, groups=None, update=None, locations=None):
         """
         Check that the expected documentation exists.
 
@@ -152,12 +121,14 @@ class SyntaxNodeBase(NodeBase):
         groups = groups if groups is not None else self.groups
         for group in groups:
 
+            # Skip if the node is not in the desired groups
+            if group not in self.groups:
+                continue
+
             # Locate all the possible locations for the markdown
             filenames = set()
-            for group in self.groups:
-                install = SyntaxNodeBase.DESTINATIONS.get(group,
-                                                          'doc/content/documentation/systems')
-                install = mooseutils.eval_path(install)
+            for location in locations:
+                install = mooseutils.eval_path(os.path.join(location, 'documentation', 'systems'))
                 if not os.path.isabs(install):
                     filename = os.path.join(MooseDocs.ROOT_DIR, install, self.markdown())
                 else:

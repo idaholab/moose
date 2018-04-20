@@ -47,7 +47,7 @@ def load_config(filename):
     renderer = _yaml_load_object('Renderer', config, DEFAULT_RENDERER)
     translator = _yaml_load_object('Translator', config, DEFAULT_TRANSLATOR,
                                    content, reader, renderer, extensions)
-    return translator
+    return translator, config
 
 def load_extensions(ext_list, ext_configs=None):
     """
