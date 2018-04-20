@@ -4,9 +4,9 @@
 
 This Material computes porosity (at the nodes or quadpoints, depending on the `at_nodes` flag):
 \begin{equation}
+\label{eq:poro_evolve}
 \phi + M = \alpha_{B} + (\phi_{0} + M_{\mathrm{ref}} - \alpha_{B})\times \exp \left( \frac{\alpha_{B}
   - 1}{K}(P_{f} - P_{f}^{\mathrm{ref}}) - \epsilon^{\mathrm{total}}_{ii} + \alpha_{T}(T - T^{\mathrm{ref}}) \right) \ ,
-\label{eq:poro_evolve}
 \end{equation}
 A full description is provided in the [porosity documentation](/porous_flow/porosity.md)
 

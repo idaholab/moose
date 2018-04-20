@@ -36,17 +36,18 @@ In this simple model, capillary pressure is constant
 This formulation is useful for testing purposes.
 
 ## van Genuchten
+
 [`PorousFlowCapillaryPressureVG`](/PorousFlowCapillaryPressureVG.md)
 
 van Genuchten's capillary-pressure relationship is [citep:vangenuchten1980]
 
 \begin{equation}
+\label{eq:vg_cap}
 S_{\mathrm{eff}} =
 \begin{cases}
 1 & \textrm{if } P \geq 0 \ , \\
 (1 + (-\alpha P)^{1/(1-m)})^{-m} & \textrm{if } P < 0 \ .
 \end{cases}
-\label{eq:vg_cap}
 \end{equation}
 or
 \begin{equation}
@@ -107,6 +108,7 @@ $S_{\mathrm{eff}}\rightarrow 1$.  Occasionally setting $r<1$ is advantageous in 
 2-phase simulations that have the two porepressures as their independent nonlinear variables.
 
 ## Brooks-Corey
+
 [`PorousFlowCapillaryPressureBC`](/PorousFlowCapillaryPressureBC.md)
 
 The Brooks-Corey capillary-pressure relationship is [citep:brookscorey1966]
@@ -124,6 +126,7 @@ porous medium. A value of $\lambda$ less than 2 was suggested for narrow distrib
 while a value of greater than 2 was suggested for broad distributions of pore sizes.
 
 ## Broadbridge-White
+
 [`PorousFlowCapillaryPressureBW`](/PorousFlowCapillaryPressureBW.md)
 
 The Broadbridge-White capillarity relationship valid for small $K_{n}$ is [citep:broadbridge1988]
@@ -150,7 +153,6 @@ Only effective saturation as a function of capillary pressure is available in
 The Rogers-Stallybrass-Clements capillary relationship is [citep:rsc1983]
 \begin{equation}
 S_{\mathrm{eff}} = \frac{1}{\sqrt{1 + \exp((P_{c} - A)/B)}} \ ,
-\label{eqn.rsc.seff}
 \end{equation}
 when the oil viscosity is exactly twice the water viscosity.  This is of limited use in real
 simulations, and is only used in the Porous Flow module for comparison with the analytical solutions

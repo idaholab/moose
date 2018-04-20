@@ -10,7 +10,6 @@ S_{\mathrm{eff}} =
 1 & \textrm{if } P \geq 0 \ , \\
 (1 + (-\alpha P)^{1/(1-m)})^{-m} & \textrm{if } P < 0 \ .
 \end{cases}
-\label{eq:vg_cap}
 \end{equation}
 or
 \begin{equation}
@@ -40,4 +39,3 @@ This can be disabled by setting `log_extension = false`.
 
 
 !bibtex bibliography
-

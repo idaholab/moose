@@ -5,8 +5,8 @@ determine the amount of each fluid phase present for the given set of persistent
 primary variables using the Rachford-Rice equation [citep:rachford-rice1952]
 
 \begin{equation}
-\sum_i \frac{z_i (K_i - 1)}{1 + V (K_i - 1)} = 0,
 \label{eq:rr}
+\sum_i \frac{z_i (K_i - 1)}{1 + V (K_i - 1)} = 0,
 \end{equation}
 where $z_i$ is the total mass fraction of fluid component $i$ summed over all fluid
 phases
