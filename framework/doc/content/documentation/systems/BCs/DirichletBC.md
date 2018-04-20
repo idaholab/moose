@@ -1,4 +1,3 @@
-
 # DirichletBC
 
 !syntax description /BCs/DirichletBC
@@ -16,7 +15,7 @@ class is appropriate to use for PDEs of the form
 \begin{aligned}
   -\nabla^2 u &= f && \quad \in \Omega \\
   u &= g && \quad \in \partial \Omega_D \\
-  \frac{\partial u}{\partial n} &= h && \quad \in \partial \Omega_N
+  \frac{\partial u}{\partial n} &= h && \quad \in \partial \Omega_N,
 \end{aligned}
 \end{equation}
 

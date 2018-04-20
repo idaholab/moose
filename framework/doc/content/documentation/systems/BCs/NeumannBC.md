@@ -1,4 +1,3 @@
-
 # NeumannBC
 
 !syntax description /BCs/NeumannBC
@@ -9,13 +8,13 @@
 imposing flux boundary conditions on systems of partial differential
 equations (PDEs). This class is appropriate to use for PDEs of the
 form
-$$
+\begin{equation}
 \begin{aligned}
   -\nabla^2 u &= f && \quad \in \Omega \\
   u &= g && \quad \in \partial \Omega_D \\
-  \frac{\partial u}{\partial n} &= h && \quad \in \partial \Omega_N
+  \frac{\partial u}{\partial n} &= h && \quad \in \partial \Omega_N,
 \end{aligned}
-$$
+\end{equation}
 where $\Omega \subset \mathbb{R}^n$ is the domain, and $\partial
 \Omega = \partial \Omega_D \cup \partial \Omega_N$ is its boundary. In
 this case, a `NeumannBC` object is used to impose the condition (3) on

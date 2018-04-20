@@ -4,11 +4,9 @@
 !syntax description /Kernels/MatDiffusion
 
 Implements the term
-
-$$
-\nabla D(c,a,b,\dots) \nabla c
-$$
-
+\begin{equation}
+\nabla D(c,a,b,\dots) \nabla c,
+\end{equation}
 where the diffusion coefficient $D$ (`D_name`) is provided by a
 [function material](FunctionMaterials.md), $c$ is either a coupled variable (`conc`)
 or - if not explicitly specified - the non-linear variable the kernel is operating on.

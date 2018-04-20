@@ -1,14 +1,16 @@
-<!-- MOOSE Documentation Stub: Remove this when content is added. -->
-
 # SimpleCoupledACInterface
 
-!alert construction title=Undocumented Class
-The SimpleCoupledACInterface has not been documented, if you would like to contribute to MOOSE by
-writing documentation, please see [/generate.md]. The content contained on this page explains
-the typical documentation associated with a MooseObject; however, what is contained is ultimately
-determined by what is necessary to make the documentation clear for users.
-
 !syntax description /Kernels/SimpleCoupledACInterface
+
+!include simple_kernels_include.md
+
+This kernel implements the weak form
+\begin{equation}
+(\kappa L \nabla \eta, \nabla\psi)
+\end{equation}
+for the gradient contribution in a coupled Allen-Cahn equation.
+For the more common case where $\eta$ is the variable the kernel is acting on see
+[`SimpleACInterface`](/SimpleACInterface.md).
 
 !syntax parameters /Kernels/SimpleCoupledACInterface
 

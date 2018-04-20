@@ -34,22 +34,20 @@ protected:
   virtual Real computeQpJacobian() override;
   virtual Real computeQpOffDiagJacobian(unsigned int jvar) override;
 
+  /// name of the coupled variable the derivative is taken with respect to
   std::string _v_name;
   unsigned int _v_var;
 
-  /// Free Energy derivative w.r.t. v
+  /// Material property derivative w.r.t. v
   const MaterialProperty<Real> & _dFdv;
 
-  /// Free energy 2nd order derivative w.r.t. v then u
+  /// 2nd order material property derivative w.r.t. v then u
   const MaterialProperty<Real> & _d2Fdvdu;
-
-  /// Free energy 2nd order derivative w.r.t. v
-  const MaterialProperty<Real> & _d2Fdv2;
 
   /// Number of coupled variables
   const unsigned int _nvar;
 
-  /// Reaction rate derivatives w.r.t. other coupled variables
+  /// 2nd order material property derivatives w.r.t. v and then all other coupled variables
   std::vector<const MaterialProperty<Real> *> _d2Fdvdarg;
 };
 
