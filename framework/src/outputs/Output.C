@@ -101,7 +101,8 @@ Output::Output(const InputParameters & parameters)
     _problem_ptr(getParam<FEProblemBase *>("_fe_problem_base")),
     _transient(_problem_ptr->isTransient()),
     _use_displaced(getParam<bool>("use_displaced")),
-    _es_ptr(_use_displaced ? &_problem_ptr->getDisplacedProblem()->es() : &_problem_ptr->es()),
+    _es_ptr(nullptr),
+    _mesh_ptr(nullptr),
     _execute_on(getParam<ExecFlagEnum>("execute_on")),
     _time(_problem_ptr->time()),
     _time_old(_problem_ptr->timeOld()),
@@ -127,6 +128,29 @@ Output::Output(const InputParameters & parameters)
     _is_advanced(false),
     _advanced_execute_on(_execute_on, parameters)
 {
+  if (_use_displaced)
+  {
+    std::shared_ptr<DisplacedProblem> dp = _problem_ptr->getDisplacedProblem();
+    if (dp != nullptr)
+    {
+      _es_ptr = &dp->es();
+      _mesh_ptr = &dp->mesh();
+    }
+    else
+    {
+      mooseWarning(
+          name(),
+          ": Parameter 'use_displaced' ignored, there is no displaced problem in your simulation.");
+      _es_ptr = &_problem_ptr->es();
+      _mesh_ptr = &_problem_ptr->mesh();
+    }
+  }
+  else
+  {
+    _es_ptr = &_problem_ptr->es();
+    _mesh_ptr = &_problem_ptr->mesh();
+  }
+
   // Apply the additional output flags
   if (isParamValid("additional_execute_on"))
   {

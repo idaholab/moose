@@ -8,4 +8,13 @@
     recover = false
     max_parallel = 1
   [../]
+
+  [./non_displaced_fallback]
+    type = 'RunException'
+    input = 'non_displaced_fallback.i'
+    expect_err = "Parameter 'use_displaced' ignored, there is no displaced problem in your simulation."
+    requirement = "If the user requested the output of a displaced problem and there is none present, the system shall fallback to using the non-displaced problem."
+    design = "Outputs/index.md"
+    issues = "#11309"
+  [../]
 []
