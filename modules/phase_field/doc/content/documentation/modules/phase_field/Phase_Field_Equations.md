@@ -200,7 +200,7 @@ In the split form of the Cahn-Hilliard solution, the two residual equations are
 ## See also
 
 - [Phase Field FAQ](FAQ) - Frequently asked questions for MOOSE phase-field models.
-- [Actions](phase_field/Actions.md) - Simplify the setup of of teh phase field equations using MOOSE actions
+- [Actions](phase_field/Actions.md) - Simplify the setup of of the phase field equations using MOOSE actions
 - [Free Energy Materials](FunctionMaterials/FreeEnergy) - The key component in the modular free energy phase field modeling approach. This page lists the available function materials and explains how to define a free energy function and combine multiple free energy contributions (including elastic energy) into a total free energy.
 - [Function Material Kernels](FunctionMaterialKernels) - Kernels which utilize free energy densities provides by Function Material. These are the recommended phase field kernels.
 - [ExpressionBuilder](ExpressionBuilder) - Use automatic differentiation with Free energies defined in the C++ code.

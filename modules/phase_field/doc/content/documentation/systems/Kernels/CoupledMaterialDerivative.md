@@ -2,7 +2,7 @@
 
 !syntax description /Kernels/CoupledMaterialDerivative
 
-This kernel addss the first derivative $\frac{\partial F}{\partial v}$ of a given
+This kernel adds the first derivative $\frac{\partial F}{\partial v}$ of a given
 [function material](/phase_field/FunctionMaterials.md) property $F$ (`F`) with respect
 to a coupled variable $v$ (`v`).
 
