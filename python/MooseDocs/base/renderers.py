@@ -252,15 +252,36 @@ class MaterializeRenderer(HTMLRenderer):
         col = html.Tag(row, 'div', class_="moose-content")
         HTMLRenderer.convert(self, col, ast, config)
 
+        # Title <head><title>...
+        self._addTitle(config, head, col, self.translator.current)
+
         # Sections
         self._addSections(config, col, self.translator.current)
-
         if config['scrollspy']:
             col.addClass('col', 's12', 'm12', 'l10')
             toc = html.Tag(row, 'div', class_="col hide-on-med-and-down l2")
             self._addContents(config, toc, col, self.translator.current)
         else:
             col.addClass('col', 's12', 'm12', 'l12')
+
+    def _addTitle(self, config, head, root, root_page): #pylint: disable=unused-argument
+        """
+        Add content to <title> tag.
+
+        Inputs:
+            head[html.Tag]: The <head> tag for the page being generated.
+            ast[tokens.Token]: The root node for the AST.
+            root_page[page.PageNodeBase]: The current page being converted.
+        """
+
+        # Locate h1 heading, if it is found extract the rendered text
+        name = root_page.name # default
+        for node in anytree.PreOrderIter(root):
+            if node.name == 'h1':
+                name = node.text()
+
+        # Add <title> tag
+        html.Tag(head, 'title', string=u'{} | {}'.format(self.get('name'), name))
 
     def _addHead(self, config, head, root_page): #pylint: disable=unused-argument,no-self-use
         """
