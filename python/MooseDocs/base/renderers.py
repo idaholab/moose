@@ -174,7 +174,7 @@ class MaterializeRenderer(HTMLRenderer):
         config = HTMLRenderer.defaultConfig()
         config['breadcrumbs'] = (True, "Toggle for the breadcrumb links at the top of page.")
         config['sections'] = (True, "Group heading content into <section> tags.")
-        config['collapsible-sections'] = ([None, 'open', None, None, None, None],
+        config['collapsible-sections'] = ([None, 'open', 'open', 'open', 'open', 'open'],
                                           "Collapsible setting for the six heading level " \
                                           "sections, possible values include None, 'open', and " \
                                           "'close'. Each indicates if the associated section " \
@@ -275,13 +275,14 @@ class MaterializeRenderer(HTMLRenderer):
         """
 
         # Locate h1 heading, if it is found extract the rendered text
-        name = root_page.name # default
+        name = root_page.name if root_page else None # default
         for node in anytree.PreOrderIter(root):
             if node.name == 'h1':
                 name = node.text()
 
         # Add <title> tag
-        html.Tag(head, 'title', string=u'{} | {}'.format(self.get('name'), name))
+        if name is not None:
+            html.Tag(head, 'title', string=u'{} | {}'.format(self.get('name'), name))
 
     def _addHead(self, config, head, root_page): #pylint: disable=unused-argument,no-self-use
         """
@@ -525,7 +526,9 @@ class MaterializeRenderer(HTMLRenderer):
         if not self.get('sections', False):
             return
 
-        collapsible = config.get('collapsible-sections', False)
+        collapsible = config.get('collapsible-sections')
+        if isinstance(collapsible, unicode):
+            collapsible = eval(collapsible)
 
         section = container
         for child in section.children:
