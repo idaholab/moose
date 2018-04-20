@@ -16,8 +16,8 @@ InputParameters
 validParams<SimpleSplitCHWRes>()
 {
   InputParameters params = validParams<Kernel>();
-  params.addClassDescription(
-      "Gradient energy for split Cahn-Hilliard equation with constant Mobility");
+  params.addClassDescription("Gradient energy for split Cahn-Hilliard equation with constant "
+                             "Mobility for a coupled order parameter variable.");
   params.addParam<MaterialPropertyName>(
       "mob_name", "M", "The mobility used with the kernel, should be a constant value");
   return params;

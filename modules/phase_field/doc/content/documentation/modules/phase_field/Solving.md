@@ -30,8 +30,9 @@ work well for phase field problems. They are summarized below:
 ### LU
 
 This uses LU decomposition to directly apply the inverse of the Jacobian matrix.  It is typically the
-most accurate approach, but is expensive and only works on one processor. It is often a good
-debugging tool. Typical options in the block are
+most accurate approach, but is expensive and does not scale well beyond tens of processors. Parallelization requires
+_SUPERLU_ to be compiled into PETSc (as provided by the [MOOSE redistributable environment package](getting_started/installation/index.md)).
+It is often a good debugging tool. Typical options in the block are
 
 ```
   petsc_options_iname = '-pc_type'
@@ -52,7 +53,8 @@ and is the only method that works well with the split Cahn-Hilliard equations. I
 #### ASM/ILU
 
 The incomplete factorization method (ILU) allows specifying a fill factor using `-pc_factor_levels`
-increasing this can improve the preconditioner.
+increasing this can improve the preconditioner. This is the default preconditioner and works well for
+elliptic problems such as the pahse field equations.
 
 ### BoomerAMG
 
