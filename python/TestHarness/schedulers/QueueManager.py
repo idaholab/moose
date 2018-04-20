@@ -142,7 +142,7 @@ class QueueManager(Scheduler):
     def cleanAndModifyArgs(self):
         """
         Filter out any arguments that will otherwise break the TestHarness when launched _within_
-        the third party queueing system (such as --pbs)
+        the third party scheduler (such as --pbs)
         """
         # return cached args if we have already produced clean args
         if not self.__clean_args:
@@ -181,7 +181,7 @@ class QueueManager(Scheduler):
         return self.__clean_args
 
     def getRunTestsCommand(self, job):
-        """ return the command necessary to launch the TestHarness within the third party queue manager """
+        """ return the command necessary to launch the TestHarness within the third party scheduler """
 
         # Build ['/path/to/run_tests', '-j', '#']
         command = [os.path.join(self.harness.run_tests_dir, 'run_tests'),
@@ -205,45 +205,44 @@ class QueueManager(Scheduler):
     def _isProcessReady(self, job_data):
         """
         Return bool on `run_tests --spec_file` submission results being available. Due to the
-        way the TestHarness writes to this results file (when the TestHarness exits), this file
+        way the TestHarness writes to this results file (when the TestHarness exits), this file,
         when available, means every test contained therein is finished in some form or another.
         """
-        # Immediate reason to return false (no session file)
+        # No session file (we are launching for the first time)
         if not job_data.json_data:
             return False
 
-        # job(s) were launched but results file does not yet exist (QUEUED)
-        if (job_data.json_data.get(job_data.job_dir, {})
-            and not os.path.exists(os.path.join(job_data.job_dir, self.__job_storage_file))):
+        # Job group exists in queue session and was apart of the queueing process
+        elif job_data.json_data and job_data.json_data.get(job_data.job_dir, {}).get('QUEUEING', {}):
 
+            # results file exists (jobs are finished)
+            if os.path.exists(os.path.join(job_data.job_dir, self.__job_storage_file)):
+                return True
+
+            # results do not yet exist
+            else:
+                for job in job_data.jobs.getJobs():
+                    tester = job.getTester()
+                    status = self._getTesterStatusFromSession(job_data.json_data, tester)
+
+                    # The only status we care to modify a bit (NA -> QUEUED)
+                    if status.status == "NA":
+                        tester.setStatus(status, 'QUEUED')
+
+                    # Align our status with previous status
+                    else:
+                        tester.setStatus(status)
+
+                    job.setStatus(job.finished)
+                return False
+
+        # Job group was not apart of initial queueing process
+        else:
             for job in job_data.jobs.getJobs():
                 tester = job.getTester()
-
-                if job_data.json_data.get(job.getTestDir(), {}).get('QUEUING', {}) and tester.isNoStatus():
-                    tester.setStatus(tester.no_status, 'QUEUED')
-                else:
-                    tester.setStatus(tester.silent)
-
+                tester.setStatus(tester.silent)
                 job.setStatus(job.finished)
             return False
-
-        # job(s) were specifically silently skipped during initial launch
-        if not job_data.json_data.get(job_data.job_dir, {}):
-            self._finishAllJobs(job_data)
-            return False
-
-        # results file exists, but job was launched using a different scheduler
-        if (job_data.json_data.get(job_data.job_dir, {})
-            and not job_data.json_data[job_data.job_dir].get(job_data.plugin, {})):
-            self._finishAllJobs(job_data)
-            return False
-
-        return True
-
-    def _finishAllJobs(self, job_data):
-        """ iterate over jobs and set their status to finished """
-        for job in job_data.jobs.getJobs():
-            job.setStatus(job.finished)
 
     def _isLaunchable(self, job_data):
         """ bool if jobs are ready to launch """
@@ -280,7 +279,6 @@ class QueueManager(Scheduler):
 
                 for job in launchable_jobs:
                     tester = job.getTester()
-                    # Preserves silent, skipped, deleted tests
                     if tester.isNoStatus():
                         tester.setStatus(tester.no_status, 'LAUNCHING')
                     job.setStatus(job.finished)
@@ -298,7 +296,7 @@ class QueueManager(Scheduler):
                 try:
                     results = json.load(f)
                 except ValueError:
-                    print('Unable to parse json file: %s' (testdir_json))
+                    print('Unable to parse json file: %s' % (testdir_json))
                     sys.exit(1)
 
             group_results = results[job_data.job_dir]
@@ -312,21 +310,16 @@ class QueueManager(Scheduler):
 
                 tester = job.getTester()
 
-                # # Perhaps the user is silencing this job (--re, --failed-tests, etc)
+                # Perhaps the user is filtering this job (--re, --failed-tests, etc)
                 if tester.isSilent():
                     continue
 
                 if group_results.get(job.getTestName(), {}):
                     job_results = group_results[job.getTestName()]
+                    status = self._getTesterStatusFromSession(results, tester)
+                    tester.setStatus(status)
 
-                    # Instance a compatible status and align our status accordingly
-                    test_status = tester.createStatus()
-                    result_status = job_results['STATUS'].encode('ascii', 'ignore')
-                    result_color = job_results['COLOR'].encode('ascii', 'ignore')
-                    new_status = test_status(status=result_status, color=result_color)
-                    tester.setStatus(new_status)
-
-                    # Recover useful job information from results storage
+                    # Recover useful job information from job results
                     job.setPreviousTime(job_results['TIMING'])
                     if job_results['CAVEATS']:
                         tester.addCaveats(' '.join(job_results['CAVEATS']))
@@ -337,6 +330,20 @@ class QueueManager(Scheduler):
                 else:
                     tester.addCaveats('not originally launched')
                     tester.setStatus(tester.skip)
+
+    def _getTesterStatusFromSession(self, session, tester):
+        """ extract status from session for tester, return a default 'no status' for testers not found """
+        status = tester.no_status
+        if session and session.get(tester.getTestDir(), {}):
+            status_type = session[tester.getTestDir()][tester.getTestName()]['STATUS'].encode('ascii', 'ignore')
+            status_color = session[tester.getTestDir()][tester.getTestName()]['COLOR'].encode('ascii', 'ignore')
+            status = self._createTesterStatus(tester, status_type, status_color)
+        return status
+
+    def _createTesterStatus(self, tester, status, color):
+        """ instance a compatible tester status """
+        test_status = tester.createStatus()
+        return test_status(status=status, color=color)
 
     def _cleanupFiles(self, Jobs):
         """ Silence all Jobs and perform cleanup operations """
@@ -349,7 +356,7 @@ class QueueManager(Scheduler):
         # Delete files generated by a job
         if job_list:
             for dirty_file in self.getDirtyFiles(job_list[0]):
-                # Safty check. Any generated queue file/dir should only exist in the tester directory
+                # Safty check. Any indigenous file generated by QueueManager should only exist in the tester directory
                 if os.path.dirname(dirty_file) == job_list[0].getTestDir():
                     try:
                         if os.path.isdir(dirty_file):
