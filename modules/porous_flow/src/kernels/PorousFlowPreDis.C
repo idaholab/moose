@@ -52,21 +52,22 @@ PorousFlowPreDis::PorousFlowPreDis(const InputParameters & parameters)
   */
 
   if (_mineral_density.size() != _dictator.numAqueousKinetic())
-    mooseError("The Dictator proclaims that the number of precipitation-dissolution secondary "
+    paramError("mineral_density",
+               "The Dictator proclaims that the number of precipitation-dissolution secondary "
                "species in this simulation is ",
                _dictator.numAqueousKinetic(),
                " whereas you have provided ",
                _mineral_density.size(),
-               " densities of the secondary species to PorousFlowPreDis.  The Dictator does not "
-               "take such mistakes lightly");
+               ". The Dictator does not take such mistakes lightly");
+
   if (_stoichiometry.size() != _dictator.numAqueousKinetic())
-    mooseError("The Dictator proclaims that the number of precipitation-dissolution secondary "
+    paramError("stoichiometry",
+               "The Dictator proclaims that the number of precipitation-dissolution secondary "
                "species in this simulation is ",
                _dictator.numAqueousKinetic(),
                " whereas you have provided ",
                _stoichiometry.size(),
-               " stoichiometric coefficients to PorousFlowPreDis.  The Dictator does not take such "
-               "mistakes lightly");
+               ". The Dictator does not take such mistakes lightly");
 }
 
 Real

@@ -12,7 +12,7 @@
   [./except3]
     type = RunException
     input = except3.i
-    expect_err = 'PorousFlowMassFraction: The number of mass_fraction_vars is 2 which must be equal to the Dictator\'s num_phases \(1\) multiplied by num_components-1 \(1\)'
+    expect_err = 'This value must be equal to the Dictator\'s num_phases \(1\) multiplied by num_components-1 \(1\)'
   [../]
   [./except5]
     type = RunException
@@ -67,12 +67,12 @@
   [./except15]
     type = RunException
     input = except15.i
-    expect_err = 'The Dictator proclaims that the number of precipitation-dissolution secondary species in this simulation is 1 whereas you have provided 2 densities of the secondary species to PorousFlowPreDis.  The Dictator does not take such mistakes lightly'
+    expect_err = 'The Dictator proclaims that the number of precipitation-dissolution secondary species in this simulation is 1 whereas you have provided 2. The Dictator does not take such mistakes lightly'
   [../]
   [./except16]
     type = RunException
     input = except16.i
-    expect_err = 'The Dictator proclaims that the number of precipitation-dissolution secondary species in this simulation is 1 whereas you have provided 2 stoichiometric coefficients to PorousFlowPreDis.  The Dictator does not take such mistakes lightly'
+    expect_err = 'The Dictator proclaims that the number of precipitation-dissolution secondary species in this simulation is 1 whereas you have provided 2. The Dictator does not take such mistakes lightly'
   [../]
   [./except17]
     type = RunException

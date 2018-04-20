@@ -45,29 +45,28 @@ PorousFlowPropertyAux::PorousFlowPropertyAux(const InputParameters & parameters)
 {
   // Check that the phase and fluid_component are valid
   if (_phase >= _dictator.numPhases())
-    mooseError("Phase number in the AuxKernel ",
-               _name,
-               " is greater than the number of phases in the problem");
+    paramError("phase",
+               "Phase number entered is greater than the number of phases specified in the "
+               "Dictator. Remember that indexing starts at 0");
 
   if (_fluid_component >= _dictator.numComponents())
-    mooseError("Fluid component number in the AuxKernel ",
-               _name,
-               " is greater than the number of phases in the problem");
+    paramError("fluid_component",
+               "Fluid component number entered is greater than the number of fluid components "
+               "specified in the Dictator. Remember that indexing starts at 0");
 
   if (_property_enum == PropertyEnum::SECONDARY_CONCENTRATION &&
       (_secondary_species >= _dictator.numAqueousEquilibrium()))
-    mooseError(
-        "Secondary species in the AuxKernel ",
-        _name,
-        " is greater than the number of aqueous equilibrium chemical reactions in the problem");
+    paramError("secondary_species",
+               "Secondary species number entered is greater than the number of aqueous equilibrium "
+               "chemical reactions specified in the Dictator. Remember that indexing starts at 0");
 
   if ((_property_enum == PropertyEnum::MINERAL_CONCENTRATION ||
        _property_enum == PropertyEnum::MINERAL_REACTION_RATE) &&
       (_mineral_species >= _dictator.numAqueousKinetic()))
-    mooseError("Mineral species in the AuxKernel ",
-               _name,
-               " is greater than the number of aqueous precipitation-dissolution chemical "
-               "reactions in the problem");
+    paramError("mineral_species",
+               "Mineral species number entered is greater than the number of aqueous "
+               "precipitation-dissolution chemical reactions specified in the Dictator. Remember "
+               "that indexing starts at 0");
 
   // Only get material properties required by this instance of the AuxKernel
   switch (_property_enum)

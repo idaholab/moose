@@ -23,12 +23,12 @@
   [./bh_except01]
     type = 'RunException'
     input = 'bh_except01.i'
-    expect_err = 'PorousFlowLineSink: The Dictator declares that the number of fluid phases is 1, but you have set the fluid_phase to 1.  You must try harder.'
+    expect_err = 'The Dictator proclaims that the maximum phase index in this simulation is 0 whereas you have used 1. Remember that indexing starts at 0. You must try harder.'
   [../]
   [./bh_except02]
     type = 'RunException'
     input = 'bh_except02.i'
-    expect_err = 'PorousFlowLineSink: The Dictator declares that the number of fluid components is 1, but you have set the mass_fraction_component to 1.  Please be assured that the Dictator has noted your error.'
+    expect_err = 'The Dictator proclaims that the maximum fluid component index in this simulation is 0 whereas you have used 1. Remember that indexing starts at 0. Please be assured that the Dictator has noted your error.'
   [../]
   [./bh_except03]
     type = 'RunException'

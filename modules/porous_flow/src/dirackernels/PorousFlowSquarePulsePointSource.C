@@ -37,9 +37,10 @@ PorousFlowSquarePulsePointSource::PorousFlowSquarePulsePointSource(
     _start_time(getParam<Real>("start_time")),
     _end_time(getParam<Real>("end_time"))
 {
-  /// Sanity check to ensure that the end_time is greater than the start_time
+  // Sanity check to ensure that the end_time is greater than the start_time
   if (_end_time <= _start_time)
-    mooseError("Start time for PorousFlowSquarePulsePointSource is ",
+    mooseError(name(),
+               ": start time for PorousFlowSquarePulsePointSource is ",
                _start_time,
                " but it must be less than end time ",
                _end_time);

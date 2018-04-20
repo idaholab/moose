@@ -52,8 +52,7 @@ PorousFlowVolumetricStrain::PorousFlowVolumetricStrain(const InputParameters & p
         declareProperty<std::vector<RealGradient>>("dPorousFlow_total_volumetric_strain_qp_dvar"))
 {
   if (_ndisp != _mesh.dimension())
-    mooseError("PorousFlowVolumetricStrain: The number of variables supplied in 'displacements' "
-               "must match the mesh dimension.");
+    paramError("displacements", "The number of variables supplied must match the mesh dimension.");
 
   // fetch coupled variables and gradients (as stateful properties if necessary)
   for (unsigned int i = 0; i < _ndisp; ++i)
@@ -98,10 +97,9 @@ PorousFlowVolumetricStrain::computeQpProperties()
   A -= Fbar; // A = grad_disp - grad_disp_old
 
   RankTwoTensor total_strain_increment = 0.5 * (A + A.transpose());
-  const Real andy = (_consistent
-                         ? 1.0 + (*_grad_disp_old[0])[_qp](0) + (*_grad_disp_old[1])[_qp](1) +
-                               (*_grad_disp_old[2])[_qp](2)
-                         : 1.0);
+  const Real andy = (_consistent ? 1.0 + (*_grad_disp_old[0])[_qp](0) +
+                                       (*_grad_disp_old[1])[_qp](1) + (*_grad_disp_old[2])[_qp](2)
+                                 : 1.0);
   _vol_strain_rate_qp[_qp] = total_strain_increment.trace() / _dt / andy;
 
   // prepare the derivatives with zeroes

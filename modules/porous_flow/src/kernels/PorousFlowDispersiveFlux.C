@@ -80,14 +80,14 @@ PorousFlowDispersiveFlux::PorousFlowDispersiveFlux(const InputParameters & param
 {
   // Check that sufficient values of the dispersion coefficients have been entered
   if (_disp_long.size() != _num_phases)
-    mooseError("The number of longitudinal dispersion coefficients disp_long in ",
-               _name,
-               " is not equal to the number of phases");
+    paramError(
+        "disp_long",
+        "The number of longitudinal dispersion coefficients is not equal to the number of phases");
 
   if (_disp_trans.size() != _num_phases)
-    mooseError("The number of transverse dispersion coefficients disp_trans in ",
-               _name,
-               " is not equal to the number of phases");
+    paramError("disp_trans",
+               "The number of transverse dispersion coefficients disp_trans in is not equal to the "
+               "number of phases");
 }
 
 Real

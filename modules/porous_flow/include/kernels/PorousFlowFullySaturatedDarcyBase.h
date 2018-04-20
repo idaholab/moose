@@ -81,7 +81,7 @@ protected:
   const MaterialProperty<std::vector<std::vector<RealGradient>>> & _dgrad_p_dvar;
 
   /// PorousFlow UserObject
-  const PorousFlowDictator & _porousflow_dictator;
+  const PorousFlowDictator & _dictator;
 
   /// Gravity pointing downwards
   const RealVectorValue _gravity;

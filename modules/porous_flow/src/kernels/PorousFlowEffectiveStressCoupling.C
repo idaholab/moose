@@ -44,8 +44,7 @@ PorousFlowEffectiveStressCoupling::PorousFlowEffectiveStressCoupling(
     _rz(getBlockCoordSystem() == Moose::COORD_RZ)
 {
   if (_component >= _mesh.dimension())
-    mooseError("PorousFlowEffectiveStressCoupling: component should not be greater than the mesh "
-               "dimension");
+    paramError("component", "The component cannot be greater than the mesh dimension");
 }
 
 Real

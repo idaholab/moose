@@ -28,7 +28,7 @@ PorousFlowFluidStateWaterNCGIC::PorousFlowFluidStateWaterNCGIC(const InputParame
 {
   // Check that a valid Water-NCG FluidState has been supplied in fluid_state
   if (_fs_uo.fluidStateName() != "water-ncg")
-    mooseError("Only a valid Water-NCG FluidState can be used in ", _name);
+    paramError("fluid_state", "Only a valid Water-NCG FluidState can be used");
 }
 
 Real
