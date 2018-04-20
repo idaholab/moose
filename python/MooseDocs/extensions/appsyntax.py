@@ -85,17 +85,17 @@ class AppSyntaxExtension(command.CommandExtension):
 
             if exe is None:
                 LOG.error("Failed to locate a valid executable in %s.", self['executable'])
-
-            try:
-                self._app_syntax = app_syntax(exe,
-                                              alias=self['alias'],
-                                              remove=self['remove'],
-                                              hide=self['hide'],
-                                              allow_test_objects=self['allow-test-objects'])
-            except Exception as e: #pylint: disable=broad-except
-                msg = "Failed to load application executable from '%s', " \
-                      "application syntax is being disabled:\n%s"
-                LOG.error(msg, self['executable'], e.message)
+            else:
+                try:
+                    self._app_syntax = app_syntax(exe,
+                                                  alias=self['alias'],
+                                                  remove=self['remove'],
+                                                  hide=self['hide'],
+                                                  allow_test_objects=self['allow-test-objects'])
+                except Exception as e: #pylint: disable=broad-except
+                    msg = "Failed to load application executable from '%s', " \
+                          "application syntax is being disabled:\n%s"
+                    LOG.error(msg, self['executable'], e.message)
 
         LOG.info("Building MOOSE class database.")
         self._database = common.build_class_database(self['includes'], self['inputs'])
