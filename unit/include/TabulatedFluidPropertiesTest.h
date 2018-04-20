@@ -57,6 +57,17 @@ protected:
     _fe_problem->addUserObject("TabulatedFluidProperties", "tab_fp", tab_uo_params);
     _tab_fp = &_fe_problem->getUserObject<TabulatedFluidProperties>("tab_fp");
 
+    InputParameters tab_gen_uo_params = _factory->getValidParams("TabulatedFluidProperties");
+    tab_gen_uo_params.set<UserObjectName>("fp") = "co2_fp";
+    tab_gen_uo_params.set<Real>("temperature_min") = 400;
+    tab_gen_uo_params.set<Real>("temperature_max") = 500;
+    tab_gen_uo_params.set<Real>("pressure_min") = 1e6;
+    tab_gen_uo_params.set<Real>("pressure_max") = 2e6;
+    tab_gen_uo_params.set<unsigned int>("num_T") = 6;
+    tab_gen_uo_params.set<unsigned int>("num_p") = 6;
+    _fe_problem->addUserObject("TabulatedFluidProperties", "tab_gen_fp", tab_gen_uo_params);
+    _tab_gen_fp = &_fe_problem->getUserObject<TabulatedFluidProperties>("tab_gen_fp");
+
     InputParameters unordered_uo_params = _factory->getValidParams("TabulatedFluidProperties");
     unordered_uo_params.set<UserObjectName>("fp") = "co2_fp";
     unordered_uo_params.set<FileName>("fluid_property_file") = "data/csv/unordered_fluid_props.csv";
@@ -102,12 +113,20 @@ protected:
     buildObjects();
   }
 
+  void TearDown()
+  {
+    // We always want to generate a new file in the generateTabulatedData test,
+    // so make sure that any existing data file is deleted after testing
+    std::remove("fluid_properties.csv");
+  }
+
   std::shared_ptr<MooseApp> _app;
   std::unique_ptr<MooseMesh> _mesh;
   std::unique_ptr<FEProblem> _fe_problem;
   Factory * _factory;
   const CO2FluidProperties * _co2_fp;
   const TabulatedFluidProperties * _tab_fp;
+  const TabulatedFluidProperties * _tab_gen_fp;
   const TabulatedFluidProperties * _unordered_fp;
   const TabulatedFluidProperties * _unequal_fp;
   const TabulatedFluidProperties * _missing_col_fp;
