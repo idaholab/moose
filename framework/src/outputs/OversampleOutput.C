@@ -55,8 +55,6 @@ validParams<OversampleOutput>()
 
 OversampleOutput::OversampleOutput(const InputParameters & parameters)
   : AdvancedOutput(parameters),
-    _mesh_ptr(getParam<bool>("use_displaced") ? &_problem_ptr->getDisplacedProblem()->mesh()
-                                              : &_problem_ptr->mesh()),
     _refinements(getParam<unsigned int>("refinements")),
     _oversample(_refinements > 0 || isParamValid("file")),
     _change_position(isParamValid("position")),
@@ -271,7 +269,7 @@ OversampleOutput::cloneMesh()
   if (isParamValid("file"))
   {
     InputParameters mesh_params = emptyInputParameters();
-    mesh_params += _problem_ptr->mesh().parameters();
+    mesh_params += _mesh_ptr->parameters();
     mesh_params.set<MeshFileName>("file") = getParam<MeshFileName>("file");
     mesh_params.set<bool>("nemesis") = false;
     mesh_params.set<bool>("skip_partitioning") = false;
@@ -290,7 +288,7 @@ OversampleOutput::cloneMesh()
       mooseWarning("Recovering or Restarting with Oversampling may not work (especially with "
                    "adapted meshes)!!  Refs #2295");
 
-    _cloned_mesh_ptr.reset(&(_problem_ptr->mesh().clone()));
+    _cloned_mesh_ptr.reset(&(_mesh_ptr->clone()));
   }
 
   // Make sure that the mesh pointer points to the newly cloned mesh
