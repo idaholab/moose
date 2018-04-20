@@ -25,13 +25,17 @@ def command_line_options(subparser, parent):
     parser.add_argument('--groups',
                         nargs='*',
                         default=None,
-                        help="Specify the groups to consider in the check, by default only the "
-                             "groups for the application is considered.")
+                        help="Specify the groups to consider in the check, by default all groups "
+                             "are considered.")
 
 def main(options):
     """./moosedocs check"""
 
-    translator = common.load_config(options.config)
+    translator, config = common.load_config(options.config)
+
+    # Use config "Check:groups" if groups not provided
+    if (options.groups is None) and ('Check' in config) and ('groups' in config['Check']):
+        options.groups = config['Check']['groups']
 
     # Extract the syntax root node
     syntax = None
@@ -50,4 +54,7 @@ def main(options):
 
     # Perform check for all the nodes
     for node in anytree.PreOrderIter(syntax):
-        node.check(generate=options.generate, update=options.update, groups=options.groups)
+        node.check(generate=options.generate,
+                   update=options.update,
+                   groups=options.groups,
+                   locations=config['Content'])

@@ -31,7 +31,7 @@ def main(options):
     """./moosedocs.py profile"""
 
     log = logging.getLogger(__name__)
-    translator = common.load_config(options.config)
+    translator, _ = common.load_config(options.config)
     translator.init(options.destination)
 
     if options.tokenize:
