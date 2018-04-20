@@ -342,7 +342,7 @@ class MaterializeRenderer(HTMLRenderer):
                              href='#{}'.format(node['id']),
                              string=node['data-section-text'],
                              class_='tooltipped')
-                a['data-delay'] = '50'
+                a['data-delay'] = '1000'
                 a['data-position'] = 'left'
                 a['data-tooltip'] = node['data-section-text']
 
