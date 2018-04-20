@@ -15,6 +15,7 @@ html {
     color: rgba(0,0,0,1.0);
     font-size: 16px;
     font-weight: 300;
+    font-family: sans-serif !important;
 }
 
 /* fallback */
