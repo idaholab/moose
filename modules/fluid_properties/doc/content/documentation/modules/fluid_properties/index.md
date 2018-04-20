@@ -153,4 +153,4 @@ used in an identical manner as all other Fluid Properties UserObjects.
 
 ## Objects, Actions, and Syntax
 
-!syntax complete group=FluidProperties level=3
+!syntax complete group=FluidProperties level=3 actions=False
