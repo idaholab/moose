@@ -174,7 +174,7 @@ class MaterializeRenderer(HTMLRenderer):
         config = HTMLRenderer.defaultConfig()
         config['breadcrumbs'] = (True, "Toggle for the breadcrumb links at the top of page.")
         config['sections'] = (True, "Group heading content into <section> tags.")
-        config['collapsible-sections'] = ([None, 'open', 'open', 'open', 'open', 'open'],
+        config['collapsible-sections'] = ([None, None, None, None, None, None],
                                           "Collapsible setting for the six heading level " \
                                           "sections, possible values include None, 'open', and " \
                                           "'close'. Each indicates if the associated section " \
@@ -279,10 +279,11 @@ class MaterializeRenderer(HTMLRenderer):
         for node in anytree.PreOrderIter(root):
             if node.name == 'h1':
                 name = node.text()
+                break
 
         # Add <title> tag
         if name is not None:
-            html.Tag(head, 'title', string=u'{} | {}'.format(self.get('name'), name))
+            html.Tag(head, 'title', string=u'{}|{}'.format(name, self.get('name')))
 
     def _addHead(self, config, head, root_page): #pylint: disable=unused-argument,no-self-use
         """
