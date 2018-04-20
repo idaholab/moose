@@ -14,8 +14,8 @@ provide a fluid property outside this phase space.
 This class is intended to be used when complicated formulations for fluid properties (such as
 density or internal energy) are required, which can be computationally expensive.  This is particularly
 the case when the fluid equation of state is based on a Helmholtz free energy that is a function of
-density and temperature, like that used in CO2FluidProperties. In this example, density must be solved
-iteratively using pressure and temperature, which increases the computational burden.
+density and temperature, like that used in [CO2FluidProperties](/CO2FluidProperties.md). In this example,
+density must be solved iteratively using pressure and temperature, which increases the computational burden.
 
 Using an interpolation of tabulated fluid properties can significantly reduce the computational time
 for computing fluid properties defined using complex equations of state, which may reduce the overall
@@ -53,9 +53,51 @@ pressure, temperature,   density, enthalpy, internal_energy
 
 and so on.
 
+## Using TabulatedFluidProperties
+
+### Reading from an existing file
+
+Consider the example where TabulatedFluidProperties is used to reduce the cost of calculating
+CO$_2$ fluid properties. In this example, a file containing the tabulated fluid properties, named
+`fluid_properties.csv` is provided. All properties listed in this file will be calculated using
+interpolation, while all remaining properties provided by the `FluidProperties` interface will be
+calculated using a [CO2FluidProperties](/CO2FluidProperties.md) UserObject.
+
+The input file syntax necessary to achieve this is
+
+!listing modules/fluid_properties/test/tests/tabulated/tabulated.i block=Modules
+
+### Writing data file
+
 If no tabulated fluid property data file exists, then data for the properties specified in the
 input file parameter *interpolated_properties* will be generated using the pressure and temperature
 ranges specified in the input file at the beginning of the simulation.
+
+For example, if we wish to generate a file containing tabulated properties for CO$_2$ density, enthalpy
+and viscosity for $300 \mathrm{K} \le T \le 400 \mathrm{K}$ and $1 \mathrm{MPa} \le p \le 10 \mathrm{MPa}$,
+divided into 50 and 100 equal points, respectively, then the input file syntax necessary is
+
+```
+[Modules]
+  [./FluidProperties]
+    [./co2]
+      type = CO2FluidProperties
+    [../]
+    [./tabulated]
+      type = TabulatedFluidProperties
+      fp = co2
+      fluid_property_file = fluid_properties.csv
+      interpolated_properties = 'density enthalpy viscosity'
+      temperature_min = 300
+      temperature_max = 400
+      pressure_min = 1e6
+      pressure_max = 10e6
+      num_T = 50
+      num_p = 100
+    [../]
+  []
+[]
+```
 
 This tabulated data will be written to file in the correct format, enabling suitable data files to be
 created for future use. There is an upfront computational expense required for this initial data
@@ -65,6 +107,7 @@ times the property members in the FluidProperties UserObject are used, the initi
 the data and the subsequent interpolation time can be much less than using the original
 FluidProperties UserObject.
 
+!alert note
 All fluid properties read from a file or specified in the input file (and their derivatives with
 respect to pressure and temperature) will be calculated using bicubic interpolation, while all
 remaining fluid properties will be calculated using the provided FluidProperties UserObject.

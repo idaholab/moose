@@ -31,7 +31,4 @@ The MethaneFluidProperties UserObject is valid for:
 
 !syntax children /Modules/FluidProperties/MethaneFluidProperties
 
-
-
-
 !bibtex bibliography

@@ -2,7 +2,6 @@
 
 !syntax description /Modules/FluidProperties/BrineFluidProperties
 
-
 A high-precision and consistent formulation for fluid properties for binary salt (NaCl) and water
 mixtures at pressures and temperatures of interest.
 
