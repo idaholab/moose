@@ -1,0 +1,114 @@
+//* This file is part of the MOOSE framework
+//* https://www.mooseframework.org
+//*
+//* All rights reserved, see COPYRIGHT for full restrictions
+//* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+//*
+//* Licensed under LGPL 2.1, please see LICENSE for details
+//* https://www.gnu.org/licenses/lgpl-2.1.html
+
+#include "GlobalStrain.h"
+
+// MOOSE includes
+#include "Assembly.h"
+#include "GlobalStrainUserObject.h"
+#include "MooseVariableScalar.h"
+#include "SystemBase.h"
+#include "RankTwoTensor.h"
+#include "RankFourTensor.h"
+
+registerMooseObject("TensorMechanicsApp", GlobalStrain);
+
+template <>
+InputParameters
+validParams<GlobalStrain>()
+{
+  InputParameters params = validParams<ScalarKernel>();
+  params.addClassDescription("Scalar Kernel to solve for the global strain");
+  params.addRequiredParam<UserObjectName>("global_strain",
+                                          "The name of the GlobalStrainUserObject");
+
+  return params;
+}
+
+GlobalStrain::GlobalStrain(const InputParameters & parameters)
+  : ScalarKernel(parameters),
+    _pst(getUserObject<GlobalStrainUserObject>("global_strain")),
+    _pst_residual(_pst.getResidual()),
+    _pst_jacobian(_pst.getJacobian()),
+    _components(_var.order()),
+    _dim(_mesh.dimension())
+{
+  if ((_dim == 1 && _var.order() != FIRST) || (_dim == 2 && _var.order() != THIRD) ||
+      (_dim == 3 && _var.order() != SIXTH))
+    mooseError("PerdiodicStrain ScalarKernel is only compatible with scalar variables of order "
+               "FIRST in 1D, THIRD in 2D, and SIXTH in 3D. Please change the order of the scalar"
+               "variable acoording to the mesh dimension.");
+
+  assignComponentIndices(_var.order());
+}
+
+void
+GlobalStrain::computeResidual()
+{
+  DenseVector<Number> & re = _assembly.residualBlock(_var.number());
+  for (_i = 0; _i < re.size(); ++_i)
+    re(_i) += _pst_residual(_components[_i].first, _components[_i].second);
+}
+
+void
+GlobalStrain::computeJacobian()
+{
+  DenseMatrix<Number> & ke = _assembly.jacobianBlock(_var.number(), _var.number());
+  for (_i = 0; _i < ke.m(); ++_i)
+    for (_j = 0; _j < ke.m(); ++_j)
+      ke(_i, _j) += _pst_jacobian(_components[_i].first,
+                                  _components[_i].second,
+                                  _components[_j].first,
+                                  _components[_j].second);
+}
+
+void
+GlobalStrain::computeOffDiagJacobian(unsigned int /*jvar*/)
+{
+}
+
+void
+GlobalStrain::assignComponentIndices(Order order)
+{
+  switch (order)
+  {
+    case 1:
+      _components[0].first = 0;
+      _components[0].second = 0;
+      break;
+
+    case 3:
+      _components[0].first = 0;
+      _components[0].second = 0;
+      _components[1].first = 1;
+      _components[1].second = 1;
+      _components[2].first = 0;
+      _components[2].second = 1;
+      break;
+
+    case 6:
+      _components[0].first = 0;
+      _components[0].second = 0;
+      _components[1].first = 1;
+      _components[1].second = 1;
+      _components[2].first = 2;
+      _components[2].second = 2;
+      _components[3].first = 1;
+      _components[3].second = 2;
+      _components[4].first = 0;
+      _components[4].second = 2;
+      _components[5].first = 0;
+      _components[5].second = 1;
+      break;
+
+    default:
+      mooseError("PerdiodicStrain ScalarKernel is only compatible with FIRST, THIRD, and SIXTH "
+                 "order scalar variables.");
+  }
+}

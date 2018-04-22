@@ -47,6 +47,8 @@ protected:
   std::vector<MaterialPropertyName> _eigenstrain_names;
   std::vector<const MaterialProperty<RankTwoTensor> *> _eigenstrains;
 
+  const MaterialProperty<RankTwoTensor> * _global_strain;
+
   bool _volumetric_locking_correction;
   const Real & _current_elem_volume;
 };
