@@ -292,3 +292,16 @@ def git_ls_files(working_dir=os.getcwd()):
     for fname in subprocess.check_output(['git', 'ls-files'], cwd=working_dir).split('\n'):
         out.add(os.path.join(working_dir, fname))
     return out
+
+def git_root_dir(working_dir=os.getcwd()):
+    """
+    Return the top-level git directory by running 'git rev-parse --show-toplevel'.
+    """
+    try:
+        return subprocess.check_output(['git', 'rev-parse', '--show-toplevel'],
+                                       cwd=working_dir,
+                                       stderr=subprocess.STDOUT).strip('\n')
+    except subprocess.CalledProcessError:
+        print("The supplied directory is not a git repository: {}".format(working_dir))
+    except OSError:
+        print("The supplied directory does not exist: {}".format(working_dir))

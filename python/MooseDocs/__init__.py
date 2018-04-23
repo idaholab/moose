@@ -21,9 +21,7 @@ INLINE = 'inline'
 LOG_LEVEL = logging.NOTSET
 
 # The repository root locatoin
-ROOT_DIR = subprocess.check_output(['git', 'rev-parse', '--show-toplevel'],
-                                   cwd=os.getcwd(),
-                                   stderr=subprocess.STDOUT).strip('\n')
+ROOT_DIR = mooseutils.git_root_dir()
 
 # File extensions to consider when building the content tree
 FILE_EXT = ('.md', '.jpg', '.jpeg', '.gif', '.png', '.svg', '.ogg', '.webm', '.mp4', '.css', \
