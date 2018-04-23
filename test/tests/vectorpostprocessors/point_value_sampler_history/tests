@@ -7,5 +7,6 @@
     requirement = "The VectorPostprocessor system takes a parameter \"contains_complete_history\" which guarentees the vector state is "
                    " left alone between invocations resulting in a single CSV output file."
     issues = "#11300"
+    design = "VectorPostprocessors/index.md"
   [../]
 []
