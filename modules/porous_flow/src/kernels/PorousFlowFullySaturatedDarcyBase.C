@@ -55,10 +55,10 @@ PorousFlowFullySaturatedDarcyBase::PorousFlowFullySaturatedDarcyBase(
         "dPorousFlow_grad_porepressure_qp_dgradvar")),
     _dgrad_p_dvar(getMaterialProperty<std::vector<std::vector<RealGradient>>>(
         "dPorousFlow_grad_porepressure_qp_dvar")),
-    _porousflow_dictator(getUserObject<PorousFlowDictator>("PorousFlowDictator")),
+    _dictator(getUserObject<PorousFlowDictator>("PorousFlowDictator")),
     _gravity(getParam<RealVectorValue>("gravity"))
 {
-  if (_porousflow_dictator.numPhases() != 1)
+  if (_dictator.numPhases() != 1)
     mooseError("PorousFlowFullySaturatedDarcyBase should not be used for multi-phase scenarios as "
                "it does no upwinding and does not include relative-permeability effects");
 }
@@ -82,11 +82,11 @@ PorousFlowFullySaturatedDarcyBase::computeQpJacobian()
 Real
 PorousFlowFullySaturatedDarcyBase::computeQpOffDiagJacobian(unsigned int jvar)
 {
-  if (_porousflow_dictator.notPorousFlowVariable(jvar))
+  if (_dictator.notPorousFlowVariable(jvar))
     return 0.0;
 
   const unsigned ph = 0;
-  const unsigned pvar = _porousflow_dictator.porousFlowVariableNum(jvar);
+  const unsigned pvar = _dictator.porousFlowVariableNum(jvar);
 
   const Real mob = mobility();
   const Real dmob = dmobility(pvar) * _phi[_j][_qp];

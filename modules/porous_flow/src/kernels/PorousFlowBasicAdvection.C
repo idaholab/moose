@@ -37,10 +37,13 @@ PorousFlowBasicAdvection::PorousFlowBasicAdvection(const InputParameters & param
             "dPorousFlow_darcy_velocity_qp_dgradvar"))
 {
   if (_ph >= _dictator.numPhases())
-    mooseError("The Dictator proclaims that the number of phases is ",
-               _dictator.numPhases(),
-               " whereas you have provided the phase number as ",
-               _ph);
+    paramError("phase",
+               "The Dictator proclaims that the maximum phase index in this simulation is ",
+               _dictator.numPhases() - 1,
+               " whereas you have used ",
+               _ph,
+               ". Remember that indexing starts at 0. The Dictator is watching you, to "
+               "ensure your wellbeing.");
 }
 
 Real

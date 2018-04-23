@@ -31,13 +31,14 @@ PorousFlowFullySaturatedDarcyFlow::PorousFlowFullySaturatedDarcyFlow(
         "dPorousFlow_mass_frac_qp_dvar")),
     _fluid_component(getParam<unsigned int>("fluid_component"))
 {
-  if (_fluid_component >= _porousflow_dictator.numComponents())
-    mooseError("PorousFlowFullySaturatedDarcyFlow: The dictator proclaims the number of fluid "
-               "components is ",
-               _porousflow_dictator.numComponents(),
-               " whereas you set the fluid_component = ",
-               _fluid_component,
-               ".  Happyness equals perfection.");
+  if (_fluid_component >= _dictator.numComponents())
+    paramError(
+        "fluid_component",
+        "The Dictator proclaims that the maximum fluid component index in this simulation is ",
+        _dictator.numComponents() - 1,
+        " whereas you have used ",
+        _fluid_component,
+        ". Remember that indexing starts at 0. Happiness equals perfection.");
 }
 
 Real

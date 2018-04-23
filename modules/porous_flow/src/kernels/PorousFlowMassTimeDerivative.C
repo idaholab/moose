@@ -72,12 +72,13 @@ PorousFlowMassTimeDerivative::PorousFlowMassTimeDerivative(const InputParameters
         "dPorousFlow_mass_frac_nodal_dvar"))
 {
   if (_fluid_component >= _dictator.numComponents())
-    mooseError(
-        "The Dictator proclaims that the number of components in this simulation is ",
-        _dictator.numComponents(),
-        " whereas you have used the Kernel PorousFlowComponetMassTimeDerivative with component = ",
+    paramError(
+        "fluid_component",
+        "The Dictator proclaims that the maximum fluid component index in this simulation is ",
+        _dictator.numComponents() - 1,
+        " whereas you have used ",
         _fluid_component,
-        ".  The Dictator does not take such mistakes lightly");
+        ". Remember that indexing starts at 0. The Dictator does not take such mistakes lightly.");
 }
 
 Real

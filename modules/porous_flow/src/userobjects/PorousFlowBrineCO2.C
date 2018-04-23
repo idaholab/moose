@@ -39,9 +39,10 @@ PorousFlowBrineCO2::PorousFlowBrineCO2(const InputParameters & parameters)
 {
   // Check that the correct FluidProperties UserObjects have been provided
   if (_co2_fp.fluidName() != "co2")
-    mooseError(name(), ": a valid CO2 FluidProperties UserObject must be provided in co2_fp");
+    paramError("co2_fp", "A valid CO2 FluidProperties UserObject must be provided");
+
   if (_brine_fp.fluidName() != "brine")
-    mooseError(name(), ": a valid brine FluidProperties UserObject must be provided in brine_fp");
+    paramError("brine_fp", "A valid Brine FluidProperties UserObject must be provided");
 
   // Set the number of phases and components, and their indexes
   _num_phases = 2;
@@ -51,29 +52,26 @@ PorousFlowBrineCO2::PorousFlowBrineCO2(const InputParameters & parameters)
 
   // Check that _aqueous_phase_number is <= total number of phases
   if (_aqueous_phase_number >= _num_phases)
-    mooseError(
-        name(),
-        ": the value provided in liquid_phase_number is larger than the possible number of phases ",
-        _num_phases);
+    paramError("liquid_phase_number",
+               "This value is larger than the possible number of phases ",
+               _num_phases);
 
   // Check that _aqueous_fluid_component is <= total number of fluid components
   if (_aqueous_fluid_component >= _num_components)
-    mooseError(name(),
-               ": the value provided in liquid_fluid_component is larger than the possible  number "
-               "of fluid components",
+    paramError("liquid_fluid_component",
+               "This value is larger than the possible number of fluid components",
                _num_components);
 
   // Check that the salt component index is not identical to the liquid fluid component
   if (_salt_component == _aqueous_fluid_component)
-    mooseError(
-        name(),
-        ": the values provided in salt_component and liquid_fluid_component must be different");
+    paramError(
+        "salt_component",
+        "The value provided must be different from the value entered in liquid_fluid_component");
 
   // Check that _salt_component is <= total number of fluid components
   if (_salt_component >= _num_components)
-    mooseError(name(),
-               ": the value provided in salt_component is larger than the possible  number "
-               "of fluid components",
+    paramError("salt_component",
+               "The value provided is larger than the possible number of fluid components",
                _num_components);
 }
 
