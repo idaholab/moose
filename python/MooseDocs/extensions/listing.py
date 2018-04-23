@@ -126,7 +126,8 @@ class FileListingCommand(LocalListingCommand):
         self.addCaption(flt)
 
         # Create code token
-        lang = self.settings.get('language', common.get_language(filename))
+        lang = self.settings.get('language')
+        lang = lang if lang else common.get_language(filename)
         tokens.Code(flt, style="max-height:{};".format(self.settings['max-height']),
                     code=self.extractContent(filename, self.settings),
                     language=lang)

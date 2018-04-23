@@ -40,6 +40,9 @@ def command_line_options(subparser, parent):
                         help="A list of file to build, this is useful for testing. The paths " \
                              "should be as complete as necessary to make the name unique, just " \
                              "as done within the markdown itself.")
+    parser.add_argument('--home', default=None, help="The 'home' URL for the hosted website. " \
+                                                     "This is mainly used by CIVET to allow " \
+                                                     "temporary sites to be functional.")
 
 class MooseDocsWatcher(livereload.watcher.Watcher):
     """
@@ -129,6 +132,8 @@ def main(options):
     if options.serve:
         home = 'http://127.0.0.1:{}'.format(options.port)
         translator.renderer.update(home=home)
+    elif options.home:
+        translator.renderer.update(home=options.home)
 
     # Dump page tree
     if options.dump:

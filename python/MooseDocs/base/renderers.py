@@ -174,7 +174,7 @@ class MaterializeRenderer(HTMLRenderer):
         config = HTMLRenderer.defaultConfig()
         config['breadcrumbs'] = (True, "Toggle for the breadcrumb links at the top of page.")
         config['sections'] = (True, "Group heading content into <section> tags.")
-        config['collapsible-sections'] = ([None, 'open', None, None, None, None],
+        config['collapsible-sections'] = ([None, None, None, None, None, None],
                                           "Collapsible setting for the six heading level " \
                                           "sections, possible values include None, 'open', and " \
                                           "'close'. Each indicates if the associated section " \
@@ -252,15 +252,38 @@ class MaterializeRenderer(HTMLRenderer):
         col = html.Tag(row, 'div', class_="moose-content")
         HTMLRenderer.convert(self, col, ast, config)
 
+        # Title <head><title>...
+        self._addTitle(config, head, col, self.translator.current)
+
         # Sections
         self._addSections(config, col, self.translator.current)
-
         if config['scrollspy']:
             col.addClass('col', 's12', 'm12', 'l10')
             toc = html.Tag(row, 'div', class_="col hide-on-med-and-down l2")
             self._addContents(config, toc, col, self.translator.current)
         else:
             col.addClass('col', 's12', 'm12', 'l12')
+
+    def _addTitle(self, config, head, root, root_page): #pylint: disable=unused-argument
+        """
+        Add content to <title> tag.
+
+        Inputs:
+            head[html.Tag]: The <head> tag for the page being generated.
+            ast[tokens.Token]: The root node for the AST.
+            root_page[page.PageNodeBase]: The current page being converted.
+        """
+
+        # Locate h1 heading, if it is found extract the rendered text
+        name = root_page.name if root_page else None # default
+        for node in anytree.PreOrderIter(root):
+            if node.name == 'h1':
+                name = node.text()
+                break
+
+        # Add <title> tag
+        if name is not None:
+            html.Tag(head, 'title', string=u'{}|{}'.format(name, self.get('name')))
 
     def _addHead(self, config, head, root_page): #pylint: disable=unused-argument,no-self-use
         """
@@ -320,7 +343,7 @@ class MaterializeRenderer(HTMLRenderer):
                              href='#{}'.format(node['id']),
                              string=node['data-section-text'],
                              class_='tooltipped')
-                a['data-delay'] = '50'
+                a['data-delay'] = '1000'
                 a['data-position'] = 'left'
                 a['data-tooltip'] = node['data-section-text']
 
@@ -504,7 +527,9 @@ class MaterializeRenderer(HTMLRenderer):
         if not self.get('sections', False):
             return
 
-        collapsible = config.get('collapsible-sections', False)
+        collapsible = config.get('collapsible-sections')
+        if isinstance(collapsible, unicode):
+            collapsible = eval(collapsible)
 
         section = container
         for child in section.children:
