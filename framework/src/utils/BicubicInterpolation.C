@@ -64,10 +64,11 @@ BicubicInterpolation::sampleDerivative(Real x1, Real x2, unsigned int deriv_var)
   findInterval(_x2, x2, x2l, x2u, u);
 
   // Take derivative along x1 axis
+  // Note: sum from i = 1 as the first term is zero
   if (deriv_var == 1)
   {
     Real sample_deriv = 0.0;
-    for (unsigned int i = 0; i < 4; ++i)
+    for (unsigned int i = 1; i < 4; ++i)
       for (unsigned int j = 0; j < 4; ++j)
         sample_deriv +=
             i * _bicubic_coeffs[x1l][x2l][i][j] * MathUtils::pow(t, i - 1) * MathUtils::pow(u, j);
@@ -80,12 +81,13 @@ BicubicInterpolation::sampleDerivative(Real x1, Real x2, unsigned int deriv_var)
     return sample_deriv;
   }
 
-  // Take derivative along x1 axis
+  // Take derivative along x2 axis
+  // Note: sum from j = 1 as the first term is zero
   else if (deriv_var == 2)
   {
     Real sample_deriv = 0.0;
     for (unsigned int i = 0; i < 4; ++i)
-      for (unsigned int j = 0; j < 4; ++j)
+      for (unsigned int j = 1; j < 4; ++j)
         sample_deriv +=
             j * _bicubic_coeffs[x1l][x2l][i][j] * MathUtils::pow(t, i) * MathUtils::pow(u, j - 1);
 
@@ -110,10 +112,11 @@ BicubicInterpolation::sample2ndDerivative(Real x1, Real x2, unsigned int deriv_v
   findInterval(_x2, x2, x2l, x2u, u);
 
   // Take derivative along x1 axis
+  // Note: sum from i = 2 as the first two terms are zero
   if (deriv_var == 1)
   {
     Real sample_deriv = 0.0;
-    for (unsigned int i = 0; i < 4; ++i)
+    for (unsigned int i = 2; i < 4; ++i)
       for (unsigned int j = 0; j < 4; ++j)
         sample_deriv += i * (i - 1) * _bicubic_coeffs[x1l][x2l][i][j] * MathUtils::pow(t, i - 2) *
                         MathUtils::pow(u, j);
@@ -126,12 +129,13 @@ BicubicInterpolation::sample2ndDerivative(Real x1, Real x2, unsigned int deriv_v
     return sample_deriv;
   }
 
-  // Take derivative along x1 axis
+  // Take derivative along x2 axis
+  // Note: sum from j = 2 as the first two terms are zero
   else if (deriv_var == 2)
   {
     Real sample_deriv = 0.0;
     for (unsigned int i = 0; i < 4; ++i)
-      for (unsigned int j = 0; j < 4; ++j)
+      for (unsigned int j = 2; j < 4; ++j)
         sample_deriv += j * (j - 1) * _bicubic_coeffs[x1l][x2l][i][j] * MathUtils::pow(t, i) *
                         MathUtils::pow(u, j - 2);
 
@@ -156,15 +160,21 @@ BicubicInterpolation::sampleValueAndDerivatives(Real x1, Real x2, Real & y, Real
   findInterval(_x2, x2, x2l, x2u, u);
 
   y = 0.0;
-  dy1 = 0.0;
-  dy2 = 0.0;
   for (unsigned int i = 0; i < 4; ++i)
     for (unsigned int j = 0; j < 4; ++j)
-    {
       y += _bicubic_coeffs[x1l][x2l][i][j] * MathUtils::pow(t, i) * MathUtils::pow(u, j);
+
+  // Note: sum from i = 1 as the first term is zero
+  dy1 = 0.0;
+  for (unsigned int i = 1; i < 4; ++i)
+    for (unsigned int j = 0; j < 4; ++j)
       dy1 += i * _bicubic_coeffs[x1l][x2l][i][j] * MathUtils::pow(t, i - 1) * MathUtils::pow(u, j);
+
+  // Note: sum from j = 1 as the first term is zero
+  dy2 = 0.0;
+  for (unsigned int i = 0; i < 4; ++i)
+    for (unsigned int j = 1; j < 4; ++j)
       dy2 += j * _bicubic_coeffs[x1l][x2l][i][j] * MathUtils::pow(t, i) * MathUtils::pow(u, j - 1);
-    }
 
   Real d1 = _x1[x1u] - _x1[x1l];
 

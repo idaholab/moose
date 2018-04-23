@@ -47,4 +47,12 @@ TEST(BicubicInterpolationTest, sample)
   EXPECT_NEAR(y2, 111.0, tol);
   EXPECT_NEAR(dy2_dx1, 9.0, tol);
   EXPECT_NEAR(dy2_dx2, 33.0, tol);
+
+  // Check that the value and derivatives are correct at grid point
+  p1 = 4, p2 = 5;
+  EXPECT_NEAR(interp.sample(p1, p2), 91.0, tol);
+  EXPECT_NEAR(interp.sampleDerivative(p1, p2, 1), 8.0, tol);
+  EXPECT_NEAR(interp.sampleDerivative(p1, p2, 2), 30.0, tol);
+  EXPECT_NEAR(interp.sample2ndDerivative(p1, p2, 1), 2.0, tol);
+  EXPECT_NEAR(interp.sample2ndDerivative(p1, p2, 2), 6.0, tol);
 }
