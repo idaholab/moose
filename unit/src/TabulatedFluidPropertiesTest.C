@@ -10,6 +10,8 @@
 #include "TabulatedFluidPropertiesTest.h"
 #include "Utils.h"
 
+#include <fstream>
+
 // Test data for unordered data
 TEST_F(TabulatedFluidPropertiesTest, unorderedData)
 {
@@ -119,4 +121,23 @@ TEST_F(TabulatedFluidPropertiesTest, fromFile)
   REL_TEST("cp", _tab_fp->cp(p, T), _co2_fp->cp(p, T), 1.0e-4);
   REL_TEST("cv", _tab_fp->cv(p, T), _co2_fp->cv(p, T), 1.0e-4);
   REL_TEST("entropy", _tab_fp->s(p, T), _co2_fp->s(p, T), 1.0e-4);
+}
+
+// Test generation of tabulated fluid properties
+TEST_F(TabulatedFluidPropertiesTest, generateTabulatedData)
+{
+  Real p = 1.5e6;
+  Real T = 450.0;
+
+  // Generate the tabulated data
+  const_cast<TabulatedFluidProperties *>(_tab_gen_fp)->initialSetup();
+
+  REL_TEST("density", _tab_gen_fp->rho(p, T), _co2_fp->rho(p, T), 1.0e-4);
+  REL_TEST("enthalpy", _tab_gen_fp->h(p, T), _co2_fp->h(p, T), 1.0e-4);
+  REL_TEST("internal_energy", _tab_gen_fp->e(p, T), _co2_fp->e(p, T), 1.0e-4);
+  REL_TEST("viscosity", _tab_gen_fp->mu(p, T), _co2_fp->mu(p, T), 1.0e-4);
+  REL_TEST("k", _tab_gen_fp->k(p, T), _co2_fp->k(p, T), 1.0e-4);
+  REL_TEST("cp", _tab_gen_fp->cp(p, T), _co2_fp->cp(p, T), 1.0e-4);
+  REL_TEST("cv", _tab_gen_fp->cv(p, T), _co2_fp->cv(p, T), 1.0e-4);
+  REL_TEST("entropy", _tab_gen_fp->s(p, T), _co2_fp->s(p, T), 1.0e-4);
 }
