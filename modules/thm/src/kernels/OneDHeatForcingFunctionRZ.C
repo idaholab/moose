@@ -7,6 +7,7 @@ InputParameters
 validParams<OneDHeatForcingFunctionRZ>()
 {
   InputParameters params = validParams<OneDHeatForcingFunction>();
+  params += validParams<RZSymmetry>();
   return params;
 }
 
