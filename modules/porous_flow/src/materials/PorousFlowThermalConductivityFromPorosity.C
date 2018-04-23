@@ -42,13 +42,15 @@ PorousFlowThermalConductivityFromPorosity::PorousFlowThermalConductivityFromPoro
         declareProperty<std::vector<RealTensorValue>>("dPorousFlow_thermal_conductivity_qp_dvar"))
 {
   if (_num_phases != 1)
-    mooseError("The Dictator proclaims that the number of phases is ",
+    paramError("fluid_phase",
+               "The Dictator proclaims that the number of phases is ",
                _dictator.numPhases(),
-               " whereas PorousFlowThermalConductivityFromPorosity can only be used for 1-phase "
-               "simulations.  Be aware "
-               "that the Dictator has noted your mistake.");
+               " whereas this material can only be used for single phase "
+               "simulations.  Be aware that the Dictator has noted your mistake.");
+
   if (_nodal_material == true)
-    mooseError("PorousFlowThermalConductivity classes are only defined for at_nodes = false");
+    paramError("at_nodes",
+               "This parameter must be false for PorousFlowThermalConductivity classes");
 }
 
 void

@@ -2,14 +2,14 @@
   [./except1]
     type = RunException
     input = except1.i
-    expect_err = 'The Dictator proclaims that the number of phases is 1 whereas you have provided the phase number as 1'
+    expect_err = 'The Dictator proclaims that the maximum phase index in this simulation is 0 whereas you have used 1. Remember that indexing starts at 0. The Dictator is watching you, to ensure your wellbeing.'
   [../]
   [./except2]
     type = RunException
     input = except2.i
     expect_err = 'PorousFlowDarcyVelocityMaterial is only defined for at_nodes = false'
   [../]
-  
+
   [./1phase]
     type = Exodiff
     input = 1phase.i

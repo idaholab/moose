@@ -26,11 +26,11 @@ PorousFlowMaterialBase::PorousFlowMaterialBase(const InputParameters & parameter
     _phase(Moose::stringify(_phase_num))
 {
   if (_phase_num >= _dictator.numPhases())
-    mooseError("PorousFlowMaterial: The Dictator proclaims that the number of fluid phases is ",
+    paramError("phase",
+               "The Dictator proclaims that the number of fluid phases is ",
                _dictator.numPhases(),
-               " while you have foolishly entered phase = ",
+               " while you have foolishly entered ",
                _phase_num,
-               " in ",
-               _name,
-               ".  Be aware that the Dictator does not tolerate mistakes.");
+               ". Remember that indexing starts at 0. Be aware that the Dictator does not tolerate "
+               "mistakes.");
 }

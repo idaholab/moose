@@ -57,7 +57,8 @@ PorousFlow1PhaseP_BW::PorousFlow1PhaseP_BW(const InputParameters & parameters)
                   "PorousFlowCapillaryPressureBW UserObject instead");
 
   if (_ss <= _sn)
-    mooseError("In BW effective saturation Sn set to ",
+    mooseError(name(),
+               ": effective saturation Sn set to ",
                _sn,
                " and Ss set to ",
                _ss,

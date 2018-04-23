@@ -43,6 +43,7 @@ PorousFlowTotalGravitationalDensityFullySaturatedFromPorosity::
                _dictator.numPhases(),
                " whereas PorousFlowThermalConductivityFromPorosity can only be used for 1-phase "
                "simulations. Be aware that the Dictator has noted your mistake.");
+
   if (_nodal_material == true)
     mooseError("PorousFlowTotalGravitationalDensityFullySaturatedFromPorosity is only defined for "
                "at_nodes = false");

@@ -65,25 +65,24 @@ PorousFlowHeatEnergy::PorousFlowHeatEnergy(const InputParameters & parameters)
 {
   if (!_phase_index.empty())
   {
-    /// Check that the phase indices entered are not greater than the number of phases
+    // Check that the phase indices entered are not greater than the number of phases
     const unsigned int max_phase_num = *std::max_element(_phase_index.begin(), _phase_index.end());
     if (max_phase_num > _num_phases - 1)
-      mooseError("The Dictator proclaims that the phase index ",
+      paramError("phase",
+                 "The Dictator proclaims that the phase index ",
                  max_phase_num,
-                 " in the Postprocessor ",
-                 _name,
                  " is greater than the largest phase index possible, which is ",
                  _num_phases - 1);
   }
 
-  /// Check that kernel_variable_number is OK
+  // Check that kernel_variable_number is OK
   if (getParam<unsigned>("kernel_variable_number") >= _dictator.numVariables())
-    mooseError("PorousFlowHeatEnergy: The dictator pronounces that the number of porous-flow "
-               "variables is ",
+    paramError("kernel_variable_number",
+               "The Dictator pronounces that the number of PorousFlow variables is ",
                _dictator.numVariables(),
-               ", however you have used kernel_variable_number = ",
+               ", however you have used ",
                getParam<unsigned>("kernel_variable_number"),
-               ".  This is an error");
+               ". This is an error");
 }
 
 Real
@@ -91,13 +90,12 @@ PorousFlowHeatEnergy::computeIntegral()
 {
   Real sum = 0;
 
-  /** The use of _test in the loops below mean that the
-   * integral is exactly the same as the one computed
-   * by the PorousFlowMassTimeDerivative Kernel.  Because that
-   * Kernel is lumped, this Postprocessor also needs to
-   * be lumped.  Hence the use of the "nodal" Material
-   * Properties
-   */
+  // The use of _test in the loops below mean that the
+  // integral is exactly the same as the one computed
+  // by the PorousFlowMassTimeDerivative Kernel.  Because that
+  // Kernel is lumped, this Postprocessor also needs to
+  // be lumped.  Hence the use of the "nodal" Material
+  // Properties
   const VariableTestValue & test = _var->phi();
 
   for (unsigned node = 0; node < test.size(); ++node)

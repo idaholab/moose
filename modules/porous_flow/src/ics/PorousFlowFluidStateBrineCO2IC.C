@@ -31,7 +31,7 @@ PorousFlowFluidStateBrineCO2IC::PorousFlowFluidStateBrineCO2IC(const InputParame
 {
   // Check that a valid brine-CO2 FluidState has been supplied in fluid_state
   if (_fs_uo.fluidStateName() != "brine-co2")
-    mooseError("Only a valid Brine-CO2 FluidState can be used in ", _name);
+    paramError("fluid_state", "Only a valid Brine-CO2 FluidState can be used");
 }
 
 Real

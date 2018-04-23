@@ -143,18 +143,15 @@ PorousFlowLineSink::PorousFlowLineSink(const InputParameters & parameters)
                               ? &getMaterialProperty<std::vector<std::vector<std::vector<Real>>>>(
                                     "dPorousFlow_mass_frac_nodal_dvar")
                               : nullptr),
-    _enthalpy(
-        _has_enthalpy
-            ? &getMaterialPropertyByName<std::vector<Real>>("PorousFlow_fluid_phase_enthalpy_nodal")
-            : nullptr),
-    _denthalpy_dvar(_has_enthalpy
-                        ? &getMaterialPropertyByName<std::vector<std::vector<Real>>>(
-                              "dPorousFlow_fluid_phase_enthalpy_nodal_dvar")
-                        : nullptr),
-    _internal_energy(_has_internal_energy
-                         ? &getMaterialPropertyByName<std::vector<Real>>(
-                               "PorousFlow_fluid_phase_internal_energy_nodal")
-                         : nullptr),
+    _enthalpy(_has_enthalpy ? &getMaterialPropertyByName<std::vector<Real>>(
+                                  "PorousFlow_fluid_phase_enthalpy_nodal")
+                            : nullptr),
+    _denthalpy_dvar(_has_enthalpy ? &getMaterialPropertyByName<std::vector<std::vector<Real>>>(
+                                        "dPorousFlow_fluid_phase_enthalpy_nodal_dvar")
+                                  : nullptr),
+    _internal_energy(_has_internal_energy ? &getMaterialPropertyByName<std::vector<Real>>(
+                                                "PorousFlow_fluid_phase_internal_energy_nodal")
+                                          : nullptr),
     _dinternal_energy_dvar(_has_internal_energy
                                ? &getMaterialPropertyByName<std::vector<std::vector<Real>>>(
                                      "dPorousFlow_fluid_phase_internal_energy_nodal_dvar")
@@ -164,35 +161,47 @@ PorousFlowLineSink::PorousFlowLineSink(const InputParameters & parameters)
   _total_outflow_mass.zero();
 
   if (_ph >= _dictator.numPhases())
-    mooseError("PorousFlowLineSink: The Dictator declares that the number of fluid phases is ",
-               _dictator.numPhases(),
-               ", but you have set the fluid_phase to ",
+    paramError("fluid_phase",
+               "The Dictator proclaims that the maximum phase index in this simulation is ",
+               _dictator.numPhases() - 1,
+               " whereas you have used ",
                _ph,
-               ".  You must try harder.");
+               ". Remember that indexing starts at 0. You must try harder.");
+
   if (_use_mass_fraction && _sp >= _dictator.numComponents())
-    mooseError("PorousFlowLineSink: The Dictator declares that the number of fluid components is ",
-               _dictator.numComponents(),
-               ", but you have set the mass_fraction_component to ",
-               _sp,
-               ".  Please be assured that the Dictator has noted your error.");
+    paramError(
+        "mass_fraction_component",
+        "The Dictator proclaims that the maximum fluid component index in this simulation is ",
+        _dictator.numComponents() - 1,
+        " whereas you have used ",
+        _sp,
+        ". Remember that indexing starts at 0. Please be assured that the Dictator has noted your "
+        "error.");
+
   if (_p_or_t == PorTchoice::pressure && !_has_porepressure)
     mooseError("PorousFlowLineSink: You have specified function_of=porepressure, but you do not "
                "have a quadpoint porepressure material");
+
   if (_p_or_t == PorTchoice::temperature && !_has_temperature)
     mooseError("PorousFlowLineSink: You have specified function_of=temperature, but you do not "
                "have a quadpoint temperature material");
+
   if (_use_mass_fraction && !_has_mass_fraction)
     mooseError("PorousFlowLineSink: You have specified a fluid component, but do not have a nodal "
                "mass-fraction material");
+
   if (_use_relative_permeability && !_has_relative_permeability)
     mooseError("PorousFlowLineSink: You have set use_relative_permeability=true, but do not have a "
                "nodal relative permeability material");
+
   if (_use_mobility && !_has_mobility)
     mooseError("PorousFlowLineSink: You have set use_mobility=true, but do not have nodal density, "
                "relative permeability or viscosity material");
+
   if (_use_enthalpy && !_has_enthalpy)
     mooseError("PorousFlowLineSink: You have set use_enthalpy=true, but do not have a nodal "
                "enthalpy material");
+
   if (_use_internal_energy && !_has_internal_energy)
     mooseError("PorousFlowLineSink: You have set use_internal_energy=true, but do not have a nodal "
                "internal-energy material");
