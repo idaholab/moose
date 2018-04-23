@@ -113,6 +113,7 @@ TEST_F(TabulatedFluidPropertiesTest, fromFile)
   // Read the data file
   const_cast<TabulatedFluidProperties *>(_tab_fp)->initialSetup();
 
+  // Fluid properties
   REL_TEST("density", _tab_fp->rho(p, T), _co2_fp->rho(p, T), 1.0e-4);
   REL_TEST("enthalpy", _tab_fp->h(p, T), _co2_fp->h(p, T), 1.0e-4);
   REL_TEST("internal_energy", _tab_fp->e(p, T), _co2_fp->e(p, T), 1.0e-4);
@@ -121,6 +122,35 @@ TEST_F(TabulatedFluidPropertiesTest, fromFile)
   REL_TEST("cp", _tab_fp->cp(p, T), _co2_fp->cp(p, T), 1.0e-4);
   REL_TEST("cv", _tab_fp->cv(p, T), _co2_fp->cv(p, T), 1.0e-4);
   REL_TEST("entropy", _tab_fp->s(p, T), _co2_fp->s(p, T), 1.0e-4);
+
+  // Fluid properties and derivatives
+  Real rho, drho_dp, drho_dT, rhoc, drhoc_dp, drhoc_dT;
+  _tab_fp->rho_dpT(p, T, rho, drho_dp, drho_dT);
+  _co2_fp->rho_dpT(p, T, rhoc, drhoc_dp, drhoc_dT);
+  REL_TEST("density", rho, rhoc, 1.0e-4);
+  REL_TEST("ddensity_dp", drho_dp, drhoc_dp, 1.0e-3);
+  REL_TEST("ddensity_dT", drho_dT, drhoc_dT, 1.0e-3);
+
+  Real h, dh_dp, dh_dT, hc, dhc_dp, dhc_dT;
+  _tab_fp->h_dpT(p, T, h, dh_dp, dh_dT);
+  _co2_fp->h_dpT(p, T, hc, dhc_dp, dhc_dT);
+  REL_TEST("enthalpy", h, hc, 1.0e-4);
+  REL_TEST("denthalpy_dp", dh_dp, dhc_dp, 1.0e-3);
+  REL_TEST("denthalpy_dT", dh_dT, dhc_dT, 1.0e-3);
+
+  Real mu, dmu_dp, dmu_dT, muc, dmuc_dp, dmuc_dT;
+  _tab_fp->mu_dpT(p, T, mu, dmu_dp, dmu_dT);
+  _co2_fp->mu_dpT(p, T, muc, dmuc_dp, dmuc_dT);
+  REL_TEST("viscosity", mu, muc, 1.0e-4);
+  REL_TEST("dviscosity_dp", dmu_dp, dmuc_dp, 1.0e-3);
+  REL_TEST("dviscosity_dT", dmu_dT, dmuc_dT, 1.0e-3);
+
+  Real e, de_dp, de_dT, ec, dec_dp, dec_dT;
+  _tab_fp->e_dpT(p, T, e, de_dp, de_dT);
+  _co2_fp->e_dpT(p, T, ec, dec_dp, dec_dT);
+  REL_TEST("internal_energy", e, ec, 1.0e-4);
+  REL_TEST("dinternal_energy_dp", de_dp, dec_dp, 1.0e-3);
+  REL_TEST("dinternal_energy_dT", de_dT, dec_dT, 1.0e-3);
 }
 
 // Test generation of tabulated fluid properties
