@@ -64,8 +64,8 @@ protected:
     tab_gen_uo_params.set<Real>("pressure_max") = 2e6;
     tab_gen_uo_params.set<unsigned int>("num_T") = 6;
     tab_gen_uo_params.set<unsigned int>("num_p") = 6;
-    _fe_problem->addUserObject("TabulatedFluidProperties", "tab_gen_fp", tab_gen_uo_params);
-    _tab_gen_fp = &_fe_problem->getUserObject<TabulatedFluidProperties>("tab_gen_fp");
+    fep->addUserObject("TabulatedFluidProperties", "tab_gen_fp", tab_gen_uo_params);
+    _tab_gen_fp = &fep->getUserObject<TabulatedFluidProperties>("tab_gen_fp");
 
     InputParameters unordered_uo_params = _factory->getValidParams("TabulatedFluidProperties");
     unordered_uo_params.set<UserObjectName>("fp") = "co2_fp";
@@ -89,8 +89,8 @@ protected:
     InputParameters unknown_col_uo_params = _factory->getValidParams("TabulatedFluidProperties");
     unknown_col_uo_params.set<UserObjectName>("fp") = "co2_fp";
     unknown_col_uo_params.set<FileName>("fluid_property_file") = "data/csv/unknown_fluid_props.csv";
-    _fe_problem->addUserObject("TabulatedFluidProperties", "unknown_col_fp", unknown_col_uo_params);
-    _unknown_col_fp = &_fe_problem->getUserObject<TabulatedFluidProperties>("unknown_col_fp");
+    fep->addUserObject("TabulatedFluidProperties", "unknown_col_fp", unknown_col_uo_params);
+    _unknown_col_fp = &fep->getUserObject<TabulatedFluidProperties>("unknown_col_fp");
 
     InputParameters missing_data_uo_params = _factory->getValidParams("TabulatedFluidProperties");
     missing_data_uo_params.set<UserObjectName>("fp") = "co2_fp";

@@ -21,8 +21,8 @@ validParams<NSVelocityAux>()
   params.addClassDescription("Velocity auxiliary value.");
   params.addRequiredCoupledVar(NS::density, "Density (conserved form)");
   params.addRequiredCoupledVar("momentum", "Momentum (conserved form)");
-  params.addRequiredParam<UserObjectName>("fluid_properties",
-                                          "The name of the user object for fluid properties");
+  params.addParam<UserObjectName>(
+      "fluid_properties", "", "The name of the user object for fluid properties");
   return params;
 }
 
