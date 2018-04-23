@@ -1,5 +1,7 @@
 !config renderer breadcrumbs=False scrollspy=False
 
+# HOME style=visibility:hidden;
+
 # MOOSE class=center style=font-weight:600;font-size:500%;
 
 # Multiphysics Object Oriented Simulation Environment class=center light style=font-size:300%
