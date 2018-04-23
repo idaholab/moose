@@ -85,6 +85,15 @@ PorousFlowFluidStateFlashBase::PorousFlowFluidStateFlashBase(const InputParamete
             ? declareProperty<std::vector<std::vector<Real>>>("dPorousFlow_viscosity_nodal_dvar")
             : declareProperty<std::vector<std::vector<Real>>>("dPorousFlow_viscosity_qp_dvar")),
 
+    _fluid_enthalpy(
+        _nodal_material
+            ? declareProperty<std::vector<Real>>("PorousFlow_fluid_phase_enthalpy_nodal")
+            : declareProperty<std::vector<Real>>("PorousFlow_fluid_phase_enthalpy_qp")),
+    _dfluid_enthalpy_dvar(_nodal_material ? declareProperty<std::vector<std::vector<Real>>>(
+                                                "dPorousFlow_fluid_phase_enthalpy_nodal_dvar")
+                                          : declareProperty<std::vector<std::vector<Real>>>(
+                                                "dPorousFlow_fluid_phase_enthalpy_qp_dvar")),
+
     _T_c2k(getParam<MooseEnum>("temperature_unit") == 0 ? 0.0 : 273.15),
     _is_initqp(false),
     _pc_uo(getUserObject<PorousFlowCapillaryPressure>("capillary_pressure"))
@@ -141,6 +150,7 @@ PorousFlowFluidStateFlashBase::initQpStatefulProperties()
       _porepressure[_qp][ph] = _fsp[ph].pressure;
       _fluid_density[_qp][ph] = _fsp[ph].density;
       _fluid_viscosity[_qp][ph] = _fsp[ph].viscosity;
+      _fluid_enthalpy[_qp][ph] = _fsp[ph].enthalpy;
       _mass_frac[_qp][ph] = _fsp[ph].mass_fraction;
     }
   }
@@ -165,6 +175,7 @@ PorousFlowFluidStateFlashBase::computeQpProperties()
     _porepressure[_qp][ph] = _fsp[ph].pressure;
     _fluid_density[_qp][ph] = _fsp[ph].density;
     _fluid_viscosity[_qp][ph] = _fsp[ph].viscosity;
+    _fluid_enthalpy[_qp][ph] = _fsp[ph].enthalpy;
     _mass_frac[_qp][ph] = _fsp[ph].mass_fraction;
   }
 
@@ -224,6 +235,11 @@ PorousFlowFluidStateFlashBase::computeQpProperties()
       _dfluid_viscosity_dvar[_qp][ph][v] = _fsp[ph].dviscosity_dp * _dporepressure_dvar[_qp][ph][v];
       _dfluid_viscosity_dvar[_qp][ph][v] += _fsp[ph].dviscosity_dT * _dtemperature_dvar[_qp][v];
       _dfluid_viscosity_dvar[_qp][ph][v] += _fsp[ph].dviscosity_dz * dz_dvar[v];
+
+      // Derivative of enthalpy in each phase
+      _dfluid_enthalpy_dvar[_qp][ph][v] = _fsp[ph].denthalpy_dp * _dporepressure_dvar[_qp][ph][v];
+      _dfluid_enthalpy_dvar[_qp][ph][v] += _fsp[ph].denthalpy_dT * _dtemperature_dvar[_qp][v];
+      _dfluid_enthalpy_dvar[_qp][ph][v] += _fsp[ph].denthalpy_dz * dz_dvar[v];
     }
 
   // The derivative of the mass fractions for each fluid component in each phase.
@@ -282,6 +298,7 @@ PorousFlowFluidStateFlashBase::setMaterialVectorSize() const
 {
   _fluid_density[_qp].assign(_num_phases, 0.0);
   _fluid_viscosity[_qp].assign(_num_phases, 0.0);
+  _fluid_enthalpy[_qp].assign(_num_phases, 0.0);
   _mass_frac[_qp].resize(_num_phases);
 
   // Derivatives and gradients are not required in initQpStatefulProperties
@@ -289,6 +306,7 @@ PorousFlowFluidStateFlashBase::setMaterialVectorSize() const
   {
     _dfluid_density_dvar[_qp].resize(_num_phases);
     _dfluid_viscosity_dvar[_qp].resize(_num_phases);
+    _dfluid_enthalpy_dvar[_qp].resize(_num_phases);
     _dmass_frac_dvar[_qp].resize(_num_phases);
 
     if (!_nodal_material)
@@ -298,6 +316,7 @@ PorousFlowFluidStateFlashBase::setMaterialVectorSize() const
     {
       _dfluid_density_dvar[_qp][ph].assign(_num_pf_vars, 0.0);
       _dfluid_viscosity_dvar[_qp][ph].assign(_num_pf_vars, 0.0);
+      _dfluid_enthalpy_dvar[_qp][ph].assign(_num_pf_vars, 0.0);
       _dmass_frac_dvar[_qp][ph].resize(_num_components);
 
       for (unsigned int comp = 0; comp < _num_components; ++comp)
