@@ -9,7 +9,7 @@
 
 #include "PorousFlow2PhasePP_RSC.h"
 
-registerMooseObject("PorousFlowApp", PorousFlow2PhasePP_RSC);
+registerMooseObjectDeprecated("PorousFlowApp", PorousFlow2PhasePP_RSC, "06/01/2018 00:00");
 
 template <>
 InputParameters

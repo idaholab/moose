@@ -12,7 +12,7 @@
 
 #include <limits>
 
-registerMooseObject("PorousFlowApp", PorousFlow2PhasePS_VG);
+registerMooseObjectDeprecated("PorousFlowApp", PorousFlow2PhasePS_VG, "06/01/2018 00:00");
 
 template <>
 InputParameters

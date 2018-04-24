@@ -24,6 +24,7 @@ struct FluidStateProperties
       saturation(0.0),
       density(0.0),
       viscosity(1.0), // to guard against division by zero
+      enthalpy(0.0),
       mass_fraction(n, 0.0),
       dsaturation_dp(0.0),
       dsaturation_dT(0.0),
@@ -37,6 +38,10 @@ struct FluidStateProperties
       dviscosity_dT(0.0),
       dviscosity_dz(0.0),
       dviscosity_dx(0.0),
+      denthalpy_dp(0.0),
+      denthalpy_dT(0.0),
+      denthalpy_dz(0.0),
+      denthalpy_dx(0.0),
       dmass_fraction_dp(n, 0.0),
       dmass_fraction_dT(n, 0.0),
       dmass_fraction_dz(n, 0.0),
@@ -46,6 +51,7 @@ struct FluidStateProperties
   Real saturation;
   Real density;
   Real viscosity;
+  Real enthalpy;
   std::vector<Real> mass_fraction;
   Real dsaturation_dp;
   Real dsaturation_dT;
@@ -59,6 +65,10 @@ struct FluidStateProperties
   Real dviscosity_dT;
   Real dviscosity_dz;
   Real dviscosity_dx;
+  Real denthalpy_dp;
+  Real denthalpy_dT;
+  Real denthalpy_dz;
+  Real denthalpy_dx;
   std::vector<Real> dmass_fraction_dp;
   std::vector<Real> dmass_fraction_dT;
   std::vector<Real> dmass_fraction_dz;
