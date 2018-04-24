@@ -169,7 +169,7 @@ TEST_F(PorousFlowWaterNCGTest, MassFraction)
 }
 
 /*
- * Verify calculation of gas density and viscosity, and derivatives
+ * Verify calculation of gas density, viscosity, enthalpy and derivatives
  */
 TEST_F(PorousFlowWaterNCGTest, gasProperties)
 {
@@ -183,16 +183,21 @@ TEST_F(PorousFlowWaterNCGTest, gasProperties)
   _fp->massFractions(p, T, z, phase_state, fsp);
   EXPECT_EQ(phase_state, FluidStatePhaseEnum::GAS);
 
-  // Verify fluid density and viscosity
+  // Verify fluid density, viscosity and enthalpy
   _fp->gasProperties(p, T, fsp);
   Real gas_density = fsp[1].density;
   Real gas_viscosity = fsp[1].viscosity;
+  Real gas_enthalpy = fsp[1].enthalpy;
+
   Real density = _ncg_fp->rho(z * p, T) + _water_fp->rho(_water_fp->vaporPressure(T), T);
   Real viscosity =
       z * _ncg_fp->mu(z * p, T) + (1.0 - z) * _water_fp->mu(_water_fp->vaporPressure(T), T);
+  Real enthalpy =
+      z * _ncg_fp->h(z * p, T) + (1.0 - z) * _water_fp->h(_water_fp->vaporPressure(T), T);
 
   ABS_TEST("gas density", gas_density, density, 1.0e-8);
   ABS_TEST("gas viscosity", gas_viscosity, viscosity, 1.0e-8);
+  ABS_TEST("gas enthalpy", gas_enthalpy, enthalpy, 1.0e-8);
 
   // Verify derivatives
   Real ddensity_dp = fsp[1].ddensity_dp;
@@ -201,29 +206,39 @@ TEST_F(PorousFlowWaterNCGTest, gasProperties)
   Real dviscosity_dp = fsp[1].dviscosity_dp;
   Real dviscosity_dT = fsp[1].dviscosity_dT;
   Real dviscosity_dz = fsp[1].dviscosity_dz;
+  Real denthalpy_dp = fsp[1].denthalpy_dp;
+  Real denthalpy_dT = fsp[1].denthalpy_dT;
+  Real denthalpy_dz = fsp[1].denthalpy_dz;
 
   const Real dp = 1.0e-1;
   _fp->gasProperties(p + dp, T, fsp);
   Real rho1 = fsp[1].density;
   Real mu1 = fsp[1].viscosity;
+  Real h1 = fsp[1].enthalpy;
 
   _fp->gasProperties(p - dp, T, fsp);
   Real rho2 = fsp[1].density;
   Real mu2 = fsp[1].viscosity;
+  Real h2 = fsp[1].enthalpy;
 
   REL_TEST("ddensity_dp", ddensity_dp, (rho1 - rho2) / (2.0 * dp), 1.0e-6);
   REL_TEST("dviscosity_dp", dviscosity_dp, (mu1 - mu2) / (2.0 * dp), 1.0e-6);
+  REL_TEST("denthalpy_dp", denthalpy_dp, (h1 - h2) / (2.0 * dp), 1.0e-6);
 
   const Real dT = 1.0e-3;
   _fp->gasProperties(p, T + dT, fsp);
   rho1 = fsp[1].density;
   mu1 = fsp[1].viscosity;
+  h1 = fsp[1].enthalpy;
+
   _fp->gasProperties(p, T - dT, fsp);
   rho2 = fsp[1].density;
   mu2 = fsp[1].viscosity;
+  h2 = fsp[1].enthalpy;
 
   REL_TEST("ddensity_dT", ddensity_dT, (rho1 - rho2) / (2.0 * dT), 1.0e-6);
   REL_TEST("dviscosity_dT", dviscosity_dT, (mu1 - mu2) / (2.0 * dT), 1.0e-6);
+  REL_TEST("denthalpy_dT", denthalpy_dT, (h1 - h2) / (2.0 * dT), 1.0e-6);
 
   // Note: mass fraction changes with z
   const Real dz = 1.0e-8;
@@ -231,14 +246,17 @@ TEST_F(PorousFlowWaterNCGTest, gasProperties)
   _fp->gasProperties(p, T, fsp);
   rho1 = fsp[1].density;
   mu1 = fsp[1].viscosity;
+  h1 = fsp[1].enthalpy;
 
   _fp->massFractions(p, T, z - dz, phase_state, fsp);
   _fp->gasProperties(p, T, fsp);
   rho2 = fsp[1].density;
   mu2 = fsp[1].viscosity;
+  h2 = fsp[1].enthalpy;
 
   REL_TEST("ddensity_dz", ddensity_dz, (rho1 - rho2) / (2.0 * dz), 1.0e-6);
   REL_TEST("dviscosity_dz", dviscosity_dz, (mu1 - mu2) / (2.0 * dz), 1.0e-6);
+  REL_TEST("denthalpy_dz", denthalpy_dz, (h1 - h2) / (2.0 * dz), 1.0e-6);
 
   // Check derivatives in the two phase region as well. Note that the mass fractions
   // vary with pressure and temperature in this region
@@ -253,51 +271,64 @@ TEST_F(PorousFlowWaterNCGTest, gasProperties)
   dviscosity_dp = fsp[1].dviscosity_dp;
   dviscosity_dT = fsp[1].dviscosity_dT;
   dviscosity_dz = fsp[1].dviscosity_dz;
+  denthalpy_dp = fsp[1].denthalpy_dp;
+  denthalpy_dT = fsp[1].denthalpy_dT;
+  denthalpy_dz = fsp[1].denthalpy_dz;
 
   _fp->massFractions(p + dp, T, z, phase_state, fsp);
   _fp->gasProperties(p + dp, T, fsp);
   rho1 = fsp[1].density;
   mu1 = fsp[1].viscosity;
+  h1 = fsp[1].enthalpy;
 
   _fp->massFractions(p - dp, T, z, phase_state, fsp);
   _fp->gasProperties(p - dp, T, fsp);
   rho2 = fsp[1].density;
   mu2 = fsp[1].viscosity;
+  h2 = fsp[1].enthalpy;
 
   REL_TEST("ddensity_dp", ddensity_dp, (rho1 - rho2) / (2.0 * dp), 1.0e-6);
   REL_TEST("dviscosity_dp", dviscosity_dp, (mu1 - mu2) / (2.0 * dp), 1.0e-6);
+  REL_TEST("denthalpy_dp", denthalpy_dp, (h1 - h2) / (2.0 * dp), 1.0e-6);
 
   _fp->massFractions(p, T + dT, z, phase_state, fsp);
   _fp->gasProperties(p, T + dT, fsp);
   rho1 = fsp[1].density;
   mu1 = fsp[1].viscosity;
+  h1 = fsp[1].enthalpy;
 
   _fp->massFractions(p, T - dT, z, phase_state, fsp);
   _fp->gasProperties(p, T - dT, fsp);
   rho2 = fsp[1].density;
   mu2 = fsp[1].viscosity;
+  h2 = fsp[1].enthalpy;
 
   REL_TEST("ddensity_dT", ddensity_dT, (rho1 - rho2) / (2.0 * dT), 1.0e-6);
   REL_TEST("dviscosity_dT", dviscosity_dT, (mu1 - mu2) / (2.0 * dT), 1.0e-6);
+  REL_TEST("denthalpy_dT", denthalpy_dT, (h1 - h2) / (2.0 * dT), 1.0e-6);
 
   _fp->massFractions(p, T, z + dz, phase_state, fsp);
   _fp->gasProperties(p, T, fsp);
   rho1 = fsp[1].density;
   mu1 = fsp[1].viscosity;
+  h1 = fsp[1].enthalpy;
 
   _fp->massFractions(p, T, z - dz, phase_state, fsp);
   _fp->gasProperties(p, T, fsp);
   rho2 = fsp[1].density;
   mu2 = fsp[1].viscosity;
+  h2 = fsp[1].enthalpy;
 
   ABS_TEST("ddensity_dz", ddensity_dz, (rho1 - rho2) / (2.0 * dz), 1.0e-6);
   ABS_TEST("dviscosity_dz", dviscosity_dT, (mu1 - mu2) / (2.0 * dz), 1.0e-6);
+  ABS_TEST("denthalpy_dz", denthalpy_dz, (h1 - h2) / (2.0 * dz), 1.0e-6);
 }
 
 /*
- * Verify calculation of liquid density and viscosity, and derivatives. Note that as
- * these properties don't depend on mass fraction, only the liquid region needs to be
- * tested (the calculations are identical in the two phase region)
+ * Verify calculation of liquid density, viscosity, enthalpy and derivatives. Note that as
+ * density and viscosity don't depend on mass fraction, only the liquid region needs to be
+ * tested (the calculations are identical in the two phase region). The enthalpy does depend
+ * on mass fraction, so should be tested in the two phase region as well as the liquid region
  */
 TEST_F(PorousFlowWaterNCGTest, liquidProperties)
 {
@@ -322,33 +353,102 @@ TEST_F(PorousFlowWaterNCGTest, liquidProperties)
   Real dviscosity_dp = fsp[0].dviscosity_dp;
   Real dviscosity_dT = fsp[0].dviscosity_dT;
   Real dviscosity_dz = fsp[0].dviscosity_dz;
+  Real denthalpy_dp = fsp[0].denthalpy_dp;
+  Real denthalpy_dT = fsp[0].denthalpy_dT;
+  Real denthalpy_dz = fsp[0].denthalpy_dz;
 
   const Real dp = 1.0;
   _fp->liquidProperties(p + dp, T, fsp);
   Real rho1 = fsp[0].density;
   Real mu1 = fsp[0].viscosity;
+  Real h1 = fsp[0].enthalpy;
 
   _fp->liquidProperties(p - dp, T, fsp);
   Real rho2 = fsp[0].density;
   Real mu2 = fsp[0].viscosity;
+  Real h2 = fsp[0].enthalpy;
 
   REL_TEST("ddensity_dp", ddensity_dp, (rho1 - rho2) / (2.0 * dp), 1.0e-6);
   REL_TEST("dviscosity_dp", dviscosity_dp, (mu1 - mu2) / (2.0 * dp), 1.0e-5);
+  REL_TEST("denthalpy_dp", denthalpy_dp, (h1 - h2) / (2.0 * dp), 1.0e-5);
 
   const Real dT = 1.0e-4;
   _fp->liquidProperties(p, T + dT, fsp);
   rho1 = fsp[0].density;
   mu1 = fsp[0].viscosity;
+  h1 = fsp[0].enthalpy;
 
   _fp->liquidProperties(p, T - dT, fsp);
   rho2 = fsp[0].density;
   mu2 = fsp[0].viscosity;
+  h2 = fsp[0].enthalpy;
 
   REL_TEST("ddensity_dT", ddensity_dT, (rho1 - rho2) / (2.0 * dT), 1.0e-6);
   REL_TEST("dviscosity_dT", dviscosity_dT, (mu1 - mu2) / (2.0 * dT), 1.0e-6);
+  REL_TEST("denthalpy_dT", denthalpy_dT, (h1 - h2) / (2.0 * dT), 1.0e-5);
 
+  Real z = 0.0001;
+  const Real dz = 1.0e-8;
+  FluidStatePhaseEnum phase_state;
+
+  _fp->massFractions(p, T, z, phase_state, fsp);
+  _fp->liquidProperties(p, T, fsp);
+  denthalpy_dp = fsp[0].denthalpy_dp;
+  denthalpy_dT = fsp[0].denthalpy_dT;
+  denthalpy_dz = fsp[0].denthalpy_dz;
+
+  _fp->massFractions(p, T, z + dz, phase_state, fsp);
+  _fp->liquidProperties(p, T, fsp);
+  h1 = fsp[0].enthalpy;
+
+  _fp->massFractions(p, T, z - dz, phase_state, fsp);
+  _fp->liquidProperties(p, T, fsp);
+  h2 = fsp[0].enthalpy;
+
+  REL_TEST("denthalpy_dz", denthalpy_dz, (h1 - h2) / (2.0 * dz), 1.0e-6);
+
+  // Density and viscosity don't depend on z, so derivatives should be 0
   ABS_TEST("ddensity_dz", ddensity_dz, 0.0, 1.0e-12);
   ABS_TEST("dviscosity_dz", dviscosity_dz, 0.0, 1.0e-12);
+
+  // Check enthalpy calculations in the two phase region as well. Note that the mass fractions
+  // vary with pressure and temperature in this region
+  z = 0.45;
+  _fp->massFractions(p, T, z, phase_state, fsp);
+  _fp->liquidProperties(p, T, fsp);
+  denthalpy_dp = fsp[0].denthalpy_dp;
+  denthalpy_dT = fsp[0].denthalpy_dT;
+  denthalpy_dz = fsp[0].denthalpy_dz;
+
+  _fp->massFractions(p + dp, T, z, phase_state, fsp);
+  _fp->liquidProperties(p + dp, T, fsp);
+  h1 = fsp[0].enthalpy;
+
+  _fp->massFractions(p - dp, T, z, phase_state, fsp);
+  _fp->liquidProperties(p - dp, T, fsp);
+  h2 = fsp[0].enthalpy;
+
+  REL_TEST("denthalpy_dp", denthalpy_dp, (h1 - h2) / (2.0 * dp), 1.0e-5);
+
+  _fp->massFractions(p, T + dT, z, phase_state, fsp);
+  _fp->liquidProperties(p, T + dT, fsp);
+  h1 = fsp[0].enthalpy;
+
+  _fp->massFractions(p, T - dT, z, phase_state, fsp);
+  _fp->liquidProperties(p, T - dT, fsp);
+  h2 = fsp[0].enthalpy;
+
+  REL_TEST("denthalpy_dT", denthalpy_dT, (h1 - h2) / (2.0 * dT), 1.0e-5);
+
+  _fp->massFractions(p, T, z + dz, phase_state, fsp);
+  _fp->liquidProperties(p, T, fsp);
+  h1 = fsp[0].enthalpy;
+
+  _fp->massFractions(p, T, z - dz, phase_state, fsp);
+  _fp->liquidProperties(p, T, fsp);
+  h2 = fsp[0].enthalpy;
+
+  ABS_TEST("denthalpy_dz", denthalpy_dz, (h1 - h2) / (2.0 * dz), 1.0e-5);
 }
 
 /*
@@ -456,4 +556,35 @@ TEST_F(PorousFlowWaterNCGTest, totalMassFraction)
   _fp->liquidProperties(liquid_pressure, T, fsp);
   _fp->saturationTwoPhase(p, T, z, fsp);
   ABS_TEST("gas saturation", fsp[1].saturation, s, 1.0e-8);
+}
+
+/*
+ * Verify calculation of enthalpy of dissolution. Note: the values calculated compare
+ * well by eye to the values presented in Figure 4 of Battistelli et al, "A fluid property
+ * module for the TOUGH2 simulator for saline brines with non-condensible gas"
+ */
+TEST_F(PorousFlowWaterNCGTest, enthalpyOfDissolution)
+{
+  // T = 50C
+  Real T = 323.15;
+
+  // Enthalpy of dissolution of NCG in water
+  Real hdis, dhdis_dT;
+  _fp->enthalpyOfDissolution(T, hdis, dhdis_dT);
+  REL_TEST("hdis", hdis, -3.45731e5, 1.0e-3);
+
+  // T = 350C
+  T = 623.15;
+
+  // Enthalpy of dissolution of NCG in water
+  _fp->enthalpyOfDissolution(T, hdis, dhdis_dT);
+  REL_TEST("hdis", hdis, 1.23423e+06, 1.0e-3);
+
+  // Test the derivative wrt temperature
+  const Real dT = 1.0e-4;
+  Real hdis2, dhdis2_dT;
+  _fp->enthalpyOfDissolution(T + dT, hdis, dhdis_dT);
+  _fp->enthalpyOfDissolution(T - dT, hdis2, dhdis2_dT);
+
+  REL_TEST("dhdis_dT", dhdis_dT, (hdis - hdis2) / (2.0 * dT), 1.0e-5);
 }

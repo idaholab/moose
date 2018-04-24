@@ -117,6 +117,10 @@ protected:
   MaterialProperty<std::vector<Real>> & _fluid_viscosity;
   /// Derivative of the fluid viscosity for each phase wrt PorousFlow variables
   MaterialProperty<std::vector<std::vector<Real>>> & _dfluid_viscosity_dvar;
+  /// Enthalpy of each phase
+  MaterialProperty<std::vector<Real>> & _fluid_enthalpy;
+  /// Derivative of the fluid enthalpy for each phase wrt PorousFlow variables
+  MaterialProperty<std::vector<std::vector<Real>>> & _dfluid_enthalpy_dvar;
 
   /// Conversion from degrees Celsius to degrees Kelvin
   const Real _T_c2k;

@@ -116,11 +116,10 @@ public:
    * in water from the freezing to the near critical point, J. Phys. Chem. 63 (1959)
    *
    * @param temperature fluid temperature (K)
-   * @param Kh Henry's constant (Pa)
-   * @param dKh_dT derivative of Henry's constant wrt temperature
-   * @return enthalpy of dissolution (kJ/kg)
+   * @param[out] hdis enthalpy of dissolution (J/kg)
+   * @param[out] dhdis_dT derivative of enthalpy of dissolution wrt temperature
    */
-  Real enthalpyOfDissolution(Real temperature, Real Kh, Real dKh_dT) const;
+  void enthalpyOfDissolution(Real temperature, Real & hdis, Real & dhdis_dT) const;
 
   /**
    * Total mass fraction of NCG summed over all phases in the two-phase state
