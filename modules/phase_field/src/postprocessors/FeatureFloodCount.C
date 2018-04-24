@@ -154,6 +154,10 @@ validParams<FeatureFloodCount>()
   params.addParam<MooseEnum>("flood_entity_type",
                              flood_type,
                              "Determines whether the flood algorithm runs on nodes or elements");
+
+  params.addClassDescription("The object is able to find and count \"connected components\" in any "
+                             "solution field or number of solution fields. A primary example would "
+                             "be to count \"bubbles\".");
   return params;
 }
 

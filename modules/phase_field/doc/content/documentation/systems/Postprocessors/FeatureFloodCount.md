@@ -2,21 +2,40 @@
 
 The FeatureFloodCount object is a utility that inspects solution fields looking for [Connected Components](https://en.wikipedia.org/wiki/Connected_component_(graph_theory)) or "topologically connected regions of a solution field sharing a similar characteristic". Typically, this means a region where the solution value is higher than some threshold. This object is designed to work efficiently on a partitioned unstructured mesh with hundreds to thousands of processors.
 
-!media media/phase_field/unstructured_1.png id=unstructured1 style=width:360px;float:left caption=The identification of a new feature.
+!row!
+!col! class=s12 m6 l6
+!media media/phase_field/unstructured_1.png id=unstructured1 caption=The identification of a new feature.
+!col-end!
 
-!media media/phase_field/unstructured_2.png id=unstructured2 style=width:360px;margin-left:380px caption=Intermediate stage of identification.
+!col! class=s12 m6 l6
+!media media/phase_field/unstructured_2.png id=unstructured2 caption=Intermediate stage of identification.
+!col-end!
+!row-end!
 
-!media media/phase_field/unstructured_3.png id=unstructured3 style=width:360px;float:left caption=Identification of the region complete.
+!row!
+!col! class=s12 m6 l6
+!media media/phase_field/unstructured_3.png id=unstructured3 caption=Identification of the region complete.
+!col-end!
 
-!media media/phase_field/unstructured_4.png id=unstructured4 style=width:360px;margin-left:380px caption=Halo extension complete.
+!col! class=s12 m6 l6
+!media media/phase_field/unstructured_4.png id=unstructured4 caption=Halo extension complete.
+!col-end!
+!row-end!
+
 
 <br/>
 The algorithm for identifying portions of connected components begins by running a [Flood Fill](https://en.wikipedia.org/wiki/Flood_fill) algorthim on each processor that recursively visits neighboring elements on the unstructured mesh while the connecting criteria is met. [unstructured1] illustrates the identification of a new region on a processor. The dark shaded element represents an element that was identified whose variable value exceeds a given threshold. The lightly shaded elements surronding the dark element represent the current "halo" markings of the region. These halo markings always extend one neighbor beyond the currently shaded region. They are used for both the connected component algorithm and for identifying potential collisions among disjoint regions.
 
 
-!media media/phase_field/grain_stitching_small_split.svg id=grain_stitch_split style=width:400px;float:left;margin-left:20px caption=Regular grid with 6 features partitioned 3 ways.
+!row!
+!col! class=s12 m6 l6
+!media media/phase_field/grain_stitching_small_split.svg id=grain_stitch_split caption=Regular grid with 6 features partitioned 3 ways.
+!col-end!
 
-!media media/phase_field/grain_stitching_small.svg id=grain_stitch style=width:350px;margin-left:480px caption=Global identification of all features.
+!col! class=s12 m6 l6
+!media media/phase_field/grain_stitching_small.svg id=grain_stitch caption=Global identification of all features.
+!col-end!
+!row-end!
 
 
 <br/>
