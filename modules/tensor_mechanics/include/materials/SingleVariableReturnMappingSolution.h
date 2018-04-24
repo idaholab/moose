@@ -59,10 +59,13 @@ protected:
   virtual Real maximumPermissibleValue(const Real effective_trial_stress) const;
 
   /**
-   * Compute the initial guessed value of the scalar.
+   * Compute an initial guess for the value of the scalar. For some cases, an
+   * intellegent starting point can provide enhanced robustness in the Newton
+   * iterations. This is also an opportunity for classes that derive from this
+   * to perform initialization tasks.
    * @param effective_trial_stress Effective trial stress
    */
-  virtual Real initialGuess(const Real /*effective_trial_stress*/) const { return 0.0; }
+  virtual Real initialGuess(const Real /*effective_trial_stress*/) { return 0.0; }
 
   /**
    * Compute the residual for a predicted value of the scalar.  This residual should be
@@ -93,6 +96,22 @@ protected:
    * @param scalar                 Inelastic strain increment magnitude being solved for
    */
   virtual void iterationFinalize(Real /*scalar*/) {}
+
+  /**
+   * Output information about convergence history of the model
+   * @param iter_output            Output stream
+   * @param it                     Current iteration count
+   * @param effective_trial_stress Effective trial stress
+   * @param scalar                 Inelastic strain increment magnitude being solved for
+   * @param residual               Current value of the residual
+   * @param reference              Current value of the reference quantity
+   */
+  virtual void outputIterInfo(std::stringstream * iter_output,
+                              const unsigned int it,
+                              const Real effective_trial_stress,
+                              const Real scalar,
+                              const Real residual,
+                              const Real reference_residual);
 
   /// Whether to use the legacy return mapping algorithm and compute residuals in the legacy
   /// manner.
@@ -173,22 +192,6 @@ private:
    * @return Whether the model converged
    */
   bool convergedAcceptable(const unsigned int it, const Real residual, const Real reference);
-
-  /**
-   * Output information about convergence history of the model
-   * @param iter_output            Output stream
-   * @param it                     Current iteration count
-   * @param effective_trial_stress Effective trial stress
-   * @param scalar                 Inelastic strain increment magnitude being solved for
-   * @param residual               Current value of the residual
-   * @param reference              Current value of the reference quantity
-   */
-  void outputIterInfo(std::stringstream * iter_output,
-                      const unsigned int it,
-                      const Real effective_trial_stress,
-                      const Real scalar,
-                      const Real residual,
-                      const Real reference_residual);
 
   /**
    * Check to see whether solution is within admissible range, and set it within that range
