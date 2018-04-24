@@ -104,6 +104,9 @@ validParams<MooseApp>()
       "registry", "--registry", "Lists all known objects and actions.");
   params.addCommandLineParam<bool>(
       "registry_hit", "--registry-hit", "Lists all known objects and actions in hit format.");
+
+  params.addCommandLineParam<bool>(
+      "apptype", "--type", false, "Return the name of the application object.");
   params.addCommandLineParam<std::string>(
       "yaml", "--yaml", "Dumps input file syntax in YAML format.");
   params.addCommandLineParam<std::string>(
@@ -705,6 +708,12 @@ MooseApp::setupOptions()
       _action_warehouse.setFinalTask("split_mesh");
     }
     _action_warehouse.build();
+  }
+  else if (getParam<bool>("apptype"))
+  {
+    Moose::perf_log.disable_logging();
+    Moose::out << type() << std::endl;
+    _ready_to_exit = true;
   }
   else
   {

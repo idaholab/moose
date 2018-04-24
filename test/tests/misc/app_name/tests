@@ -1,0 +1,12 @@
+[Tests]
+  [./test]
+    type = 'RunApp'
+    cli_args = '--type'
+    expect_out = "MooseTestApp"
+    input = 'IGNORED'
+    input_switch = ''
+    issues = #11337
+    design = MooseApp.md
+    requirement = "The compiled application shall be capable of returning the name used for registering objects."
+  [../]
+[]

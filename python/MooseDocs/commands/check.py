@@ -33,13 +33,11 @@ def main(options):
 
     translator, config = common.load_config(options.config)
 
-    # Use config "Check:groups" if groups not provided
-    if (options.groups is None) and ('Check' in config) and ('groups' in config['Check']):
-        options.groups = config['Check']['groups']
-
     # Extract the syntax root node
     syntax = None
+    extension = None
     for ext in translator.extensions:
+        extension = ext
         if isinstance(ext, MooseDocs.extensions.appsyntax.AppSyntaxExtension):
             syntax = ext.syntax
             break
@@ -47,6 +45,12 @@ def main(options):
     if syntax is None:
         msg = "Failed to locate AppSyntaxExtension for the given configuration."
         raise exceptions.MooseDocsException(msg)
+
+    # Use config.yml "Check:groups" if groups not provided
+    if (options.groups is None) and ('Check' in config) and ('groups' in config['Check']):
+        options.groups = config['Check']['groups']
+    elif options.groups is None:
+        options.groups = [extension.apptype]
 
     # Dump the complete syntax for the application
     if options.dump:
