@@ -21,6 +21,8 @@
     use_old_floor = true
     prereq = 'parallel_exception_residual_transient'
     min_parallel = 2
+    # The mesh is too small, and the number of elements on MPI rank 1 is 0 when we are uing 16 MPI processes. This happens with PETSc-3.8.3
+    max_parallel = 10 
   [../]
 
   # This example throws an exception during computeJacobian() in the
@@ -43,6 +45,8 @@
     use_old_floor = true
     prereq = 'parallel_exception_jacobian_transient'
     min_parallel = 2
+    # The mesh is too small, and the number of elements on MPI rank 1 is 0 when we are uing 16 MPI processes. This happens with PETSc-3.8.3
+    max_parallel = 10
   [../]
 
   [./parallel_exception_initial_condition]
@@ -60,6 +64,8 @@
     min_parallel = 2
     cli_args = 'Kernels/exception/rank=1 Kernels/exception/should_throw=false Outputs/exodus=false'
     expect_err = 'Intentional error triggered during residual calculation'
+    # The mesh is too small, and the number of elements on MPI rank 1 is 0 when we are uing 16 MPI processes. This happens with PETSc-3.8.3
+    max_parallel = 10
   [../]
 
   [./parallel_error_jacobian_transient_non_zero_rank]
@@ -69,5 +75,7 @@
     min_parallel = 2
     cli_args = 'Kernels/exception/rank=1 Kernels/exception/should_throw=false Outputs/exodus=false'
     expect_err = 'Intentional error triggered during residual calculation'
+    # The mesh is too small, and the number of elements on MPI rank 1 is 0 when we are uing 16 MPI processes. This happens with PETSc-3.8.3
+    max_parallel = 10
   [../]
 []
