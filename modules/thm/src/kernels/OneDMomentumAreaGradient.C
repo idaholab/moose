@@ -25,7 +25,6 @@ OneDMomentumAreaGradient::OneDMomentumAreaGradient(const InputParameters & param
     _dalpha_dbeta(isCoupled("beta") ? &getMaterialPropertyDerivativeRelap<Real>("alpha", "beta")
                                     : nullptr),
 
-    _area(coupledValue("A")),
     _area_grad(coupledGradient("A")),
     _dir(getMaterialProperty<RealVectorValue>("direction")),
     _pressure(getMaterialProperty<Real>("p")),

@@ -30,7 +30,6 @@ protected:
   const MaterialProperty<Real> & _alpha;
   const MaterialProperty<Real> * const _dalpha_dbeta;
 
-  const VariableValue & _area;
   const VariableGradient & _area_grad;
 
   /// The direction of the pipe
