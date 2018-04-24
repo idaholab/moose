@@ -9,7 +9,7 @@
 
 #include "PorousFlow2PhasePP_VG.h"
 
-registerMooseObject("PorousFlowApp", PorousFlow2PhasePP_VG);
+registerMooseObjectDeprecated("PorousFlowApp", PorousFlow2PhasePP_VG, "06/01/2018 00:00");
 
 template <>
 InputParameters
