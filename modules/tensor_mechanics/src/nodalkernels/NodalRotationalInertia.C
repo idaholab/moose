@@ -27,22 +27,28 @@ validParams<NodalRotationalInertia>()
   params.addClassDescription("Calculates the inertial torques and inertia proportional damping "
                              "corresponding to the nodal rotational inertia.");
   params.addRequiredCoupledVar("rotations", "rotational displacement variables");
-  params.addRequiredCoupledVar("rot_velocities", "rotational velocity variables");
-  params.addRequiredCoupledVar("rot_accelerations", "rotational acceleration variables");
-  params.addRequiredParam<Real>("beta", "beta parameter for Newmark Time integration");
-  params.addRequiredParam<Real>("gamma", "gamma parameter for Newmark Time integration");
-  params.addParam<Real>("eta",
-                        0.0,
-                        "Name of material property or a constant real "
-                        "number defining the eta parameter for the "
-                        "Rayleigh damping.");
-  params.addParam<Real>("alpha",
-                        0,
-                        "Alpha parameter for mass dependent numerical damping induced "
-                        "by HHT time integration scheme");
-  params.addRequiredParam<Real>("Ixx", "Moment of inertia in the x direction.");
-  params.addRequiredParam<Real>("Iyy", "Moment of inertia in the y direction.");
-  params.addRequiredParam<Real>("Izz", "Moment of inertia in the z direction.");
+  params.addRequiredCoupledVar("rotational_velocities", "rotational velocity variables");
+  params.addRequiredCoupledVar("rotational_accelerations", "rotational acceleration variables");
+  params.addRequiredRangeCheckedParam<Real>(
+      "beta", "beta>0.0", "beta parameter for Newmark Time integration");
+  params.addRequiredRangeCheckedParam<Real>(
+      "gamma", "gamma>0.0", "gamma parameter for Newmark Time integration");
+  params.addRangeCheckedParam<Real>("eta",
+                                    0.0,
+                                    "eta>=0.0",
+                                    "Constant real number defining the eta parameter for"
+                                    "Rayleigh damping.");
+  params.addRangeCheckedParam<Real>("alpha",
+                                    0.0,
+                                    "alpha >= -0.3333 & alpha <= 0.0",
+                                    "Alpha parameter for mass dependent numerical damping induced "
+                                    "by HHT time integration scheme");
+  params.addRequiredRangeCheckedParam<Real>(
+      "Ixx", "Ixx>0.0", "Moment of inertia in the x direction.");
+  params.addRequiredRangeCheckedParam<Real>(
+      "Iyy", "Iyy>0.0", "Moment of inertia in the y direction.");
+  params.addRequiredRangeCheckedParam<Real>(
+      "Izz", "Izz>0.0", "Moment of inertia in the z direction.");
   params.addParam<Real>("Ixy", 0.0, "Moment of inertia in the xy direction.");
   params.addParam<Real>("Ixz", 0.0, "Moment of inertia in the xz direction.");
   params.addParam<Real>("Iyz", 0.0, "Moment of inertia in the yz direction.");
@@ -50,10 +56,12 @@ validParams<NodalRotationalInertia>()
       "x_orientation", "Unit vector along the x direction if different from global x direction.");
   params.addParam<RealGradient>(
       "y_orientation", "Unit vector along the y direction if different from global y direction.");
-  params.addRequiredParam<unsigned int>("component",
-                                        "An integer corresponding to the direction "
-                                        "the variable this nodalkernel acts in. (0 for rot_x, "
-                                        "1 for rot_y, and 2 for rot_z).");
+  params.addRequiredRangeCheckedParam<unsigned int>(
+      "component",
+      "component<3",
+      "An integer corresponding to the direction "
+      "the variable this nodalkernel acts in. (0 for rot_x, "
+      "1 for rot_y, and 2 for rot_z).");
   return params;
 }
 
@@ -75,16 +83,17 @@ NodalRotationalInertia::NodalRotationalInertia(const InputParameters & parameter
     _alpha(getParam<Real>("alpha")),
     _component(getParam<unsigned int>("component"))
 {
-  if (coupledComponents("rot_velocities") != _nrot ||
-      coupledComponents("rot_accelerations") != _nrot)
-    mooseError("NodalRotationalInertia: rot_velocities and rot_accelerations should be same size "
+  if (coupledComponents("rotational_velocities") != _nrot ||
+      coupledComponents("rotational_accelerations") != _nrot)
+    mooseError("NodalRotationalInertia: rotational_velocities and rotational_accelerations should "
+               "be same size "
                "as rotations.");
 
   for (unsigned int i = 0; i < _nrot; ++i)
   {
     MooseVariable * rot_var = getVar("rotations", i);
-    MooseVariable * rot_vel_var = getVar("rot_velocities", i);
-    MooseVariable * rot_accel_var = getVar("rot_accelerations", i);
+    MooseVariable * rot_vel_var = getVar("rotational_velocities", i);
+    MooseVariable * rot_accel_var = getVar("rotational_accelerations", i);
 
     _rot[i] = &rot_var->dofValues();
     _rot_old[i] = &rot_var->dofValuesOld();
@@ -107,7 +116,7 @@ NodalRotationalInertia::NodalRotationalInertia(const InputParameters & parameter
   _inertia(2, 1) = _inertia(1, 2);
   _inertia(2, 2) = getParam<Real>("Izz");
 
-  // Check for positive definiteness of matrix using Slyvester's criterion.
+  // Check for positive definiteness of matrix using Sylvester's criterion.
   const Real det1 = _inertia(0, 0);
   const Real det2 = _inertia(0, 0) * _inertia(1, 1) - _inertia(0, 1) * _inertia(1, 0);
   const Real det3 = _inertia.det();
@@ -166,6 +175,8 @@ NodalRotationalInertia::computeQpResidual()
   {
     const NumericVector<Number> & aux_sol_old = _aux_sys.solutionOld();
 
+    mooseAssert(_beta > 0.0, "NodalRotationalInertia: Beta parameter should be positive.");
+
     for (unsigned int i = 0; i < _nrot; ++i)
     {
       _rot_vel_old[i] =
@@ -192,6 +203,8 @@ NodalRotationalInertia::computeQpResidual()
 Real
 NodalRotationalInertia::computeQpJacobian()
 {
+  mooseAssert(_beta > 0.0, "NodalRotationalInertia: Beta parameter should be positive.");
+
   if (_dt == 0)
     return 0.0;
   else
@@ -204,6 +217,8 @@ NodalRotationalInertia::computeQpOffDiagJacobian(unsigned int jvar)
 {
   unsigned int coupled_component = 0;
   bool rot_coupled = false;
+
+  mooseAssert(_beta > 0.0, "NodalRotationalInertia: Beta parameter should be positive.");
 
   for (unsigned int i = 0; i < _nrot; ++i)
   {

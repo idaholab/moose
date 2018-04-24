@@ -343,8 +343,8 @@
     rotations = 'rot_x rot_y rot_z'
     velocities = 'vel_x vel_y vel_z'
     accelerations = 'accel_x accel_y accel_z'
-    rot_velocities = 'rot_vel_x rot_vel_y rot_vel_z'
-    rot_accelerations = 'rot_accel_x rot_accel_y rot_accel_z'
+    rotational_velocities = 'rot_vel_x rot_vel_y rot_vel_z'
+    rotational_accelerations = 'rot_accel_x rot_accel_y rot_accel_z'
     beta = 0.25
     gamma = 0.5
     area = 1.0
@@ -362,8 +362,8 @@
     rotations = 'rot_x rot_y rot_z'
     velocities = 'vel_x vel_y vel_z'
     accelerations = 'accel_x accel_y accel_z'
-    rot_velocities = 'rot_vel_x rot_vel_y rot_vel_z'
-    rot_accelerations = 'rot_accel_x rot_accel_y rot_accel_z'
+    rotational_velocities = 'rot_vel_x rot_vel_y rot_vel_z'
+    rotational_accelerations = 'rot_accel_x rot_accel_y rot_accel_z'
     beta = 0.25
     gamma = 0.5
     area = 1.0
@@ -381,8 +381,8 @@
     rotations = 'rot_x rot_y rot_z'
     velocities = 'vel_x vel_y vel_z'
     accelerations = 'accel_x accel_y accel_z'
-    rot_velocities = 'rot_vel_x rot_vel_y rot_vel_z'
-    rot_accelerations = 'rot_accel_x rot_accel_y rot_accel_z'
+    rotational_velocities = 'rot_vel_x rot_vel_y rot_vel_z'
+    rotational_accelerations = 'rot_accel_x rot_accel_y rot_accel_z'
     beta = 0.25
     gamma = 0.5
     area = 1.0
@@ -400,8 +400,8 @@
     rotations = 'rot_x rot_y rot_z'
     velocities = 'vel_x vel_y vel_z'
     accelerations = 'accel_x accel_y accel_z'
-    rot_velocities = 'rot_vel_x rot_vel_y rot_vel_z'
-    rot_accelerations = 'rot_accel_x rot_accel_y rot_accel_z'
+    rotational_velocities = 'rot_vel_x rot_vel_y rot_vel_z'
+    rotational_accelerations = 'rot_accel_x rot_accel_y rot_accel_z'
     beta = 0.25
     gamma = 0.5
     area = 1.0
@@ -419,8 +419,8 @@
     rotations = 'rot_x rot_y rot_z'
     velocities = 'vel_x vel_y vel_z'
     accelerations = 'accel_x accel_y accel_z'
-    rot_velocities = 'rot_vel_x rot_vel_y rot_vel_z'
-    rot_accelerations = 'rot_accel_x rot_accel_y rot_accel_z'
+    rotational_velocities = 'rot_vel_x rot_vel_y rot_vel_z'
+    rotational_accelerations = 'rot_accel_x rot_accel_y rot_accel_z'
     beta = 0.25
     gamma = 0.5
     area = 1.0
@@ -438,8 +438,8 @@
     rotations = 'rot_x rot_y rot_z'
     velocities = 'vel_x vel_y vel_z'
     accelerations = 'accel_x accel_y accel_z'
-    rot_velocities = 'rot_vel_x rot_vel_y rot_vel_z'
-    rot_accelerations = 'rot_accel_x rot_accel_y rot_accel_z'
+    rotational_velocities = 'rot_vel_x rot_vel_y rot_vel_z'
+    rotational_accelerations = 'rot_accel_x rot_accel_y rot_accel_z'
     beta = 0.25
     gamma = 0.5
     area = 1.0

@@ -25,7 +25,8 @@ template <>
 InputParameters validParams<NodalRotationalInertia>();
 
 /**
- * Calculates the inertial torque and inertia proportional damping for nodal rotational inertia
+ * Calculates the inertial torque and inertia proportional damping
+ * for nodal rotational inertia
  */
 class NodalRotationalInertia : public NodalKernel
 {

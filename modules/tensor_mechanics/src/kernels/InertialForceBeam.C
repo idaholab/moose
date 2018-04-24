@@ -25,25 +25,29 @@ validParams<InertialForceBeam>()
                              "integration scheme.");
   params.set<bool>("use_displaced_mesh") = true;
   params.addRequiredCoupledVar(
-      "rotations", "The rotations appropriate for the simulation geometry and coordinate system");
+      "rotations",
+      "The rotational variables appropriate for the simulation geometry and coordinate system");
   params.addRequiredCoupledVar(
       "displacements",
-      "The displacements appropriate for the simulation geometry and coordinate system");
+      "The displacement variables appropriate for the simulation geometry and coordinate system");
   params.addRequiredCoupledVar("velocities", "Translational velocity variables");
   params.addRequiredCoupledVar("accelerations", "Translational acceleration variables");
-  params.addRequiredCoupledVar("rot_velocities", "Rotational velocity variables");
-  params.addRequiredCoupledVar("rot_accelerations", "Rotational acceleration variables");
-  params.addRequiredParam<Real>("beta", "beta parameter for Newmark Time integration");
-  params.addRequiredParam<Real>("gamma", "gamma parameter for Newmark Time integration");
+  params.addRequiredCoupledVar("rotational_velocities", "Rotational velocity variables");
+  params.addRequiredCoupledVar("rotational_accelerations", "Rotational acceleration variables");
+  params.addRequiredRangeCheckedParam<Real>(
+      "beta", "beta>0.0", "beta parameter for Newmark Time integration");
+  params.addRequiredRangeCheckedParam<Real>(
+      "gamma", "gamma>0.0", "gamma parameter for Newmark Time integration");
   params.addParam<MaterialPropertyName>("eta",
                                         0.0,
                                         "Name of material property or a constant real "
                                         "number defining the eta parameter for the "
                                         "Rayleigh damping.");
-  params.addParam<Real>("alpha",
-                        0,
-                        "Alpha parameter for mass dependent numerical damping induced "
-                        "by HHT time integration scheme");
+  params.addRangeCheckedParam<Real>("alpha",
+                                    0.0,
+                                    "alpha >= -0.3333 & alpha <= 0.0",
+                                    "Alpha parameter for mass dependent numerical damping induced "
+                                    "by HHT time integration scheme");
   params.addParam<MaterialPropertyName>(
       "density",
       "density",
@@ -53,8 +57,9 @@ validParams<InertialForceBeam>()
   params.addCoupledVar("Az", "Variable containing first moment of area about z axis");
   params.addCoupledVar("Iy", "Variable containing second moment of area about y axis");
   params.addCoupledVar("Iz", "Variable containing second moment of area about z axis");
-  params.addRequiredParam<unsigned int>(
+  params.addRequiredRangeCheckedParam<unsigned int>(
       "component",
+      "component<6",
       "An integer corresponding to the direction "
       "the variable this kernel acts in. (0 for disp_x, "
       "1 for disp_y, 2 for disp_z, 3 for rot_x, 4 for rot_y and 5 for rot_z)");
@@ -87,10 +92,18 @@ InertialForceBeam::InertialForceBeam(const InputParameters & parameters)
     _local_force(2),
     _local_moment(2)
 {
-  // Checking for consistency between mesh dimension and length of the provided displacements vector
+  // Checking for consistency between the length of the provided rotations and displacements vector
   if (_ndisp != _nrot)
     mooseError("InertialForceBeam: The number of variables supplied in 'displacements' and "
                "'rotations' must match.");
+
+  if ((coupledComponents("velocities") != _ndisp) ||
+      (coupledComponents("accelerations") != _ndisp) ||
+      (coupledComponents("rotational_velocities") != _ndisp) ||
+      (coupledComponents("rotational_accelerations") != _ndisp))
+    mooseError("InertialForceBeam: The number of variables supplied in 'velocities', "
+               "'accelerations', 'rotational_velocities' and 'rotational_accelerations' must match "
+               "the number of displacement variables.");
 
   // fetch coupled variables and gradients (as stateful properties if necessary)
   for (unsigned int i = 0; i < _ndisp; ++i)
@@ -107,10 +120,10 @@ InertialForceBeam::InertialForceBeam(const InputParameters & parameters)
     MooseVariable * accel_variable = getVar("accelerations", i);
     _accel_num[i] = accel_variable->number();
 
-    MooseVariable * rot_vel_variable = getVar("rot_velocities", i);
+    MooseVariable * rot_vel_variable = getVar("rotational_velocities", i);
     _rot_vel_num[i] = rot_vel_variable->number();
 
-    MooseVariable * rot_accel_variable = getVar("rot_accelerations", i);
+    MooseVariable * rot_accel_variable = getVar("rotational_accelerations", i);
     _rot_accel_num[i] = rot_accel_variable->number();
   }
 }
@@ -119,7 +132,7 @@ void
 InertialForceBeam::computeResidual()
 {
   DenseVector<Number> & re = _assembly.residualBlock(_var.number());
-  mooseAssert(re.size() == 2, "Beam element has and only has two nodes.");
+  mooseAssert(re.size() == 2, "Beam element only has two nodes.");
   _local_re.resize(re.size());
   _local_re.zero();
 
@@ -137,6 +150,9 @@ InertialForceBeam::computeResidual()
 
     AuxiliarySystem & aux = _fe_problem.getAuxiliarySystem();
     const NumericVector<Number> & aux_sol_old = aux.solutionOld();
+
+    mooseAssert(_beta > 0.0, "InertialForceBeam: Beta parameter should be positive.");
+    mooseAssert(_eta[0] >= 0.0, "InertialForceBeam: Eta parameter should be non-negative.");
 
     for (unsigned int i = 0; i < _ndisp; ++i)
     {
@@ -333,6 +349,8 @@ InertialForceBeam::computeJacobian()
   _local_ke.resize(ke.m(), ke.n());
   _local_ke.zero();
 
+  mooseAssert(_beta > 0.0, "InertialForceBeam: Beta parameter should be positive.");
+
   for (unsigned int i = 0; i < _test.size(); ++i)
   {
     for (unsigned int j = 0; j < _phi.size(); ++j)
@@ -375,8 +393,10 @@ InertialForceBeam::computeJacobian()
 }
 
 void
-InertialForceBeam::computeOffDiagJacobian(MooseVariableFE & jvar)
+InertialForceBeam::computeOffDiagJacobian(MooseVariableFEBase & jvar)
 {
+  mooseAssert(_beta > 0.0, "InertialForceBeam: Beta parameter should be positive.");
+
   size_t jvar_num = jvar.number();
   if (jvar_num == _var.number())
     computeJacobian();

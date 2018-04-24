@@ -294,8 +294,8 @@
     type = NodalRotationalInertia
     variable = rot_x
     rotations = 'rot_x rot_y rot_z'
-    rot_velocities = 'rot_vel_x rot_vel_y rot_vel_z'
-    rot_accelerations= 'rot_accel_x rot_accel_y rot_accel_z'
+    rotational_velocities = 'rot_vel_x rot_vel_y rot_vel_z'
+    rotational_accelerations= 'rot_accel_x rot_accel_y rot_accel_z'
     boundary = right
     beta = 0.25
     gamma = 0.5
@@ -309,8 +309,8 @@
     type = NodalRotationalInertia
     variable = rot_y
     rotations = 'rot_x rot_y rot_z'
-    rot_velocities = 'rot_vel_x rot_vel_y rot_vel_z'
-    rot_accelerations= 'rot_accel_x rot_accel_y rot_accel_z'
+    rotational_velocities = 'rot_vel_x rot_vel_y rot_vel_z'
+    rotational_accelerations= 'rot_accel_x rot_accel_y rot_accel_z'
     boundary = right
     beta = 0.25
     gamma = 0.5
@@ -324,8 +324,8 @@
     type = NodalRotationalInertia
     variable = rot_z
     rotations = 'rot_x rot_y rot_z'
-    rot_velocities = 'rot_vel_x rot_vel_y rot_vel_z'
-    rot_accelerations= 'rot_accel_x rot_accel_y rot_accel_z'
+    rotational_velocities = 'rot_vel_x rot_vel_y rot_vel_z'
+    rotational_accelerations= 'rot_accel_x rot_accel_y rot_accel_z'
     boundary = right
     beta = 0.25
     gamma = 0.5

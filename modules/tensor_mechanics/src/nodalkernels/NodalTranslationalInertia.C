@@ -27,17 +27,20 @@ validParams<NodalTranslationalInertia>()
                              "corresponding to nodal mass.");
   params.addRequiredCoupledVar("velocity", "velocity variable");
   params.addRequiredCoupledVar("acceleration", "acceleration variable");
-  params.addRequiredParam<Real>("beta", "beta parameter for Newmark Time integration");
-  params.addRequiredParam<Real>("gamma", "gamma parameter for Newmark Time integration");
-  params.addParam<Real>("eta",
-                        0.0,
-                        "Name of material property or a constant real "
-                        "number defining the eta parameter for the "
-                        "Rayleigh damping.");
-  params.addParam<Real>("alpha",
-                        0,
-                        "Alpha parameter for mass dependent numerical damping induced "
-                        "by HHT time integration scheme");
+  params.addRequiredRangeCheckedParam<Real>(
+      "beta", "beta>0.0", "beta parameter for Newmark Time integration");
+  params.addRequiredRangeCheckedParam<Real>(
+      "gamma", "gamma>0.0", "gamma parameter for Newmark Time integration");
+  params.addRangeCheckedParam<Real>("eta",
+                                    0.0,
+                                    "eta>=0.0",
+                                    "Constant real number defining the eta parameter for "
+                                    "Rayleigh damping.");
+  params.addRangeCheckedParam<Real>("alpha",
+                                    0.0,
+                                    "alpha >= -0.3333 & alpha <= 0.0",
+                                    "Alpha parameter for mass dependent numerical damping induced "
+                                    "by HHT time integration scheme");
   params.addRequiredParam<Real>("mass", "Mass associated with the node");
   return params;
 }
@@ -67,6 +70,8 @@ NodalTranslationalInertia::computeQpResidual()
   {
     const NumericVector<Number> & aux_sol_old = _aux_sys.solutionOld();
 
+    mooseAssert(_beta > 0.0, "NodalTranslationalInertia: Beta parameter should be positive.");
+
     const Real vel_old = aux_sol_old(_current_node->dof_number(_aux_sys.number(), _vel_num, 0));
     const Real accel_old = aux_sol_old(_current_node->dof_number(_aux_sys.number(), _accel_num, 0));
 
@@ -81,6 +86,8 @@ NodalTranslationalInertia::computeQpResidual()
 Real
 NodalTranslationalInertia::computeQpJacobian()
 {
+  mooseAssert(_beta > 0.0, "NodalTranslationalInertia: Beta parameter should be positive.");
+
   if (_dt == 0)
     return 0;
   else
