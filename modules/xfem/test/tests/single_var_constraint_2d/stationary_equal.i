@@ -45,6 +45,7 @@
     variable = u
     jump = 0
     jump_flux = 0
+    geometric_cut_userobject = 'line_seg_cut_uo'
   [../]
 []
 

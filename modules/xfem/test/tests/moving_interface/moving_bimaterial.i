@@ -1,7 +1,7 @@
-# This test is for a matrix-inclusion composite materials
+# This test is for two layer materials with different youngs modulus
 # The global stress is determined by switching the stress based on level set values
-# The inclusion geometry is marked by a level set function
-# The matrix and inclusion are glued together
+# The material interface is marked by a level set function
+# The two layer materials are glued together
 
 [GlobalParams]
   order = FIRST
@@ -18,20 +18,34 @@
   [./level_set_cut_uo]
     type = LevelSetCutUserObject
     level_set_var = ls
+    heal_always = true
   [../]
 []
 
 [Mesh]
   type = GeneratedMesh
   dim = 2
-  nx = 11
-  ny = 11
+  nx = 5
+  ny = 5
   xmin = 0.0
   xmax = 5.
   ymin = 0.0
   ymax = 5.
   elem_type = QUAD4
   displacements = 'disp_x disp_y'
+[]
+
+[MeshModifiers]
+  [./left_bottom]
+    type = AddExtraNodeset
+    new_boundary = 'left_bottom'
+    coord = '0.0 0.0'
+  [../]
+  [./left_top]
+    type = AddExtraNodeset
+    new_boundary = 'left_top'
+    coord = '0.0 5.'
+  [../]
 []
 
 [AuxVariables]
@@ -59,7 +73,7 @@
 [Functions]
   [./ls_func]
     type = ParsedFunction
-    value = 'sqrt((y-2.5)*(y-2.5) + (x-2.5)*(x-2.5)) - 1.5'
+    value = 'y-2.5 + t'
   [../]
 []
 
@@ -207,7 +221,7 @@
     type = FunctionPresetBC
     boundary = top
     variable = disp_x
-    function = '0.03*t'
+    function = 0.03*t
   [../]
   [./topy]
     type = FunctionPresetBC
@@ -235,7 +249,7 @@
   [./elasticity_tensor_B]
     type = ComputeIsotropicElasticityTensor
     base_name = B
-    youngs_modulus = 1e5
+    youngs_modulus = 1e7
     poissons_ratio = 0.3
   [../]
   [./strain_B]
@@ -246,7 +260,6 @@
     type = ComputeLinearElasticStress
     base_name = B
   [../]
-
   [./combined]
     type = LevelSetBiMaterialStress
     levelset_positive_base = 'A'
@@ -262,19 +275,20 @@
   petsc_options_iname = '-ksp_gmres_restart -pc_type -pc_hypre_type -pc_hypre_boomeramg_max_iter'
   petsc_options_value = '201                hypre    boomeramg      8'
 
+  line_search = 'bt'
+
 # controls for linear iterations
   l_max_its = 20
   l_tol = 1e-3
 
 # controls for nonlinear iterations
   nl_max_its = 15
-  nl_rel_tol = 1e-6
-  nl_abs_tol = 1e-5
+  nl_rel_tol = 1e-12
+  nl_abs_tol = 1e-12
 
 # time control
   start_time = 0.0
-  dt = 0.5
-  end_time = 1.0
+  dt = 0.1
   num_steps = 2
 
   max_xfem_update = 1

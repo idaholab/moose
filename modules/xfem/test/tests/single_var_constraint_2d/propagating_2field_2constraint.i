@@ -53,12 +53,14 @@
     variable = u
     jump = 0
     jump_flux = 0
+    geometric_cut_userobject = 'line_seg_cut_uo'
   [../]
   [./xfem_constraint_v]
     type = XFEMSingleVariableConstraint
     variable = v
     jump = 0
     jump_flux = 0
+    geometric_cut_userobject = 'line_seg_cut_uo'
   [../]
 []
 

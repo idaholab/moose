@@ -11,7 +11,6 @@
 
 // MOOSE includes
 #include "FEProblem.h"
-#include "DisplacedProblem.h"
 #include "NonlinearSystem.h"
 #include "Executioner.h"
 #include "MooseEnum.h"
@@ -26,7 +25,6 @@
 
 // XFEM includes
 #include "XFEM.h"
-#include "XFEMElementPairLocator.h"
 
 registerMooseAction("XFEMApp", XFEMAction, "setup_xfem");
 
@@ -144,24 +142,6 @@ XFEMAction::act()
     xfem->setXFEMQRule(_xfem_qrule);
 
     xfem->setCrackGrowthMethod(_xfem_use_crack_growth_increment, _xfem_crack_growth_increment);
-
-    std::shared_ptr<XFEMElementPairLocator> new_xfem_epl(new XFEMElementPairLocator(xfem, 0));
-    _problem->geomSearchData().addElementPairLocator(0, new_xfem_epl);
-
-    if (_problem->getDisplacedProblem() != NULL)
-    {
-      std::shared_ptr<XFEMElementPairLocator> new_xfem_epl2(
-          new XFEMElementPairLocator(xfem, 0, true));
-      _problem->getDisplacedProblem()->geomSearchData().addElementPairLocator(0, new_xfem_epl2);
-    }
-
-    // Pull in geometric cut user objects by name (getUserObjectByName)
-    // Send to XFEM and store in vector of GeometricCutUserObjects (addGeometricCut)
-    for (unsigned int i = 0; i < _geom_cut_userobjects.size(); ++i)
-    {
-      const UserObject * uo = &(_problem->getUserObjectBase(_geom_cut_userobjects[i]));
-      xfem->addGeometricCut(dynamic_cast<const GeometricCutUserObject *>(uo));
-    }
   }
   else if (_current_task == "add_variable" && _use_crack_tip_enrichment)
   {

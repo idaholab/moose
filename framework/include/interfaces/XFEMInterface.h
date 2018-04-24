@@ -25,7 +25,7 @@ namespace libMesh
 {
 class MeshBase;
 class QBase;
-}
+} // namespace libMesh
 
 /**
  * This is the XFEMInterface class.  This is an abstract base
@@ -128,6 +128,12 @@ public:
                                   QBase * qrule,
                                   const MooseArray<Point> & q_points,
                                   unsigned int side) = 0;
+
+  /**
+   * Potentially update the mesh by healing previous XFEM cuts.
+   * @return true if the mesh has been updated due to healing
+   **/
+  virtual bool updateHeal() = 0;
 
 protected:
   FEProblemBase * _fe_problem;

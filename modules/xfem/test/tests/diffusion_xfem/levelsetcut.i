@@ -5,17 +5,14 @@
 
 [Mesh]
   type = GeneratedMesh
-  dim = 3
-  nx = 5
-  ny = 5
-  nz = 2
-  xmin = 0.0
-  xmax = 1.0
-  ymin = 0.0
-  ymax = 1.0
-  zmin = 0.0
-  zmax = 0.25
-  elem_type = HEX8
+  dim = 2
+  nx = 3
+  ny = 3
+  xmin = 0
+  xmax = 1
+  ymin = 0
+  ymax = 1
+  elem_type = QUAD4
 []
 
 [XFEM]
@@ -24,17 +21,42 @@
 []
 
 [UserObjects]
-  [./square_planar_cut_uo]
-    type = RectangleCutUserObject
-    cut_data = ' 0.5 -0.001 -0.001
-                 0.5  1.001 -0.001
-                 0.5  1.001  1.001
-                 0.5 -0.001  1.001'
+  [./level_set_cut_uo]
+    type = LevelSetCutUserObject
+    level_set_var = ls
   [../]
 []
 
 [Variables]
   [./u]
+  [../]
+[]
+
+[AuxVariables]
+  [./ls]
+    order = FIRST
+    family = LAGRANGE
+  [../]
+[]
+
+[AuxKernels]
+  [./ls_function]
+    type = FunctionAux
+    variable = ls
+    function = ls_func
+  [../]
+[]
+
+[Functions]
+  [./u_left]
+    type = PiecewiseLinear
+    x = '0   2'
+    y = '3   5'
+  [../]
+  [./ls_func]
+    type = ParsedFunction
+    #value = 'sqrt((x-0.)*(x-0.) + (y-0.)*(y-0.))-0.11*t'
+    value = 'x-0.5'
   [../]
 []
 
@@ -45,31 +67,22 @@
   [../]
 []
 
-[Constraints]
-  [./xfem_constraint]
-    type = XFEMSingleVariableConstraint
-    variable = u
-    jump = 0
-    jump_flux = 1
-    geometric_cut_userobject = 'square_planar_cut_uo'
-  [../]
-[]
-
 [BCs]
 # Define boundary conditions
   [./left_u]
     type = DirichletBC
     variable = u
-    boundary = left
-    value = 1
+    boundary = 3
+    value = 3
   [../]
 
   [./right_u]
     type = DirichletBC
     variable = u
-    boundary = right
+    boundary = 1
     value = 0
   [../]
+
 []
 
 [Executioner]
@@ -85,8 +98,9 @@
   nl_abs_tol = 1e-10
 
   start_time = 0.0
-  dt = 1.0
-  end_time = 2.0
+  dt = 1
+  end_time = 5.0
+  max_xfem_update = 1
 []
 
 [Outputs]

@@ -76,7 +76,7 @@ namespace libMesh
 {
 class CouplingMatrix;
 class NonlinearImplicitSystem;
-}
+} // namespace libMesh
 
 template <>
 InputParameters validParams<FEProblemBase>();
@@ -1143,7 +1143,7 @@ public:
   std::shared_ptr<XFEMInterface> getXFEM() { return _xfem; }
 
   /// Find out whether the current analysis is using XFEM
-  bool haveXFEM() { return _xfem != NULL; }
+  bool haveXFEM() { return _xfem != nullptr; }
 
   /// Update the mesh due to changing XFEM cuts
   virtual bool updateMeshXFEM();
