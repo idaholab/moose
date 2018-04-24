@@ -1,0 +1,34 @@
+#include "VectorCoeffField.h"
+
+registerMooseObject("ElkApp", VectorCoeffField);
+
+template <>
+InputParameters
+validParams<VectorCoeffField>()
+{
+  InputParameters params = validParams<VectorKernel>();
+  params.addParam<Real>("coeff", 1.0, "Coefficient multiplier for field.");
+  params.addParam<FunctionName>("func", 1.0, "Function multiplier for field.");
+  return params;
+}
+
+VectorCoeffField::VectorCoeffField(const InputParameters & parameters)
+  : VectorKernel(parameters),
+
+    _coefficient(getParam<Real>("coeff")),
+
+    _func(getFunction("func"))
+{
+}
+
+Real
+VectorCoeffField::computeQpResidual()
+{
+  return _coefficient * _func.value(_t, _q_point[_qp]) * _u[_qp] * _test[_i][_qp];
+}
+
+Real
+VectorCoeffField::computeQpJacobian()
+{
+  return _coefficient * _func.value(_t, _q_point[_qp]) * _phi[_j][_qp] * _test[_i][_qp];
+}
