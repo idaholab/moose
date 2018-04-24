@@ -29,7 +29,7 @@ XFEMVolFracAux::XFEMVolFracAux(const InputParameters & parameters) : AuxKernel(p
   if (fe_problem == NULL)
     mooseError("Problem casting _subproblem to FEProblemBase in XFEMVolFracAux");
   _xfem = MooseSharedNamespace::dynamic_pointer_cast<XFEM>(fe_problem->getXFEM());
-  if (_xfem == NULL)
+  if (_xfem == nullptr)
     mooseError("Problem casting to XFEM in XFEMVolFracAux");
 }
 

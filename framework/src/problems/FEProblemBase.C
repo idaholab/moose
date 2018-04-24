@@ -97,7 +97,7 @@ sortMooseVariables(MooseVariableFEBase * a, MooseVariableFEBase * b)
 {
   return a->number() < b->number();
 }
-}
+} // namespace
 
 Threads::spin_mutex get_function_mutex;
 
@@ -4752,6 +4752,9 @@ FEProblemBase::updateMeshXFEM()
   bool updated = false;
   if (haveXFEM())
   {
+    if (_xfem->updateHeal())
+      meshChanged();
+
     updated = _xfem->update(_time, *_nl, *_aux);
     if (updated)
     {

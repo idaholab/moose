@@ -59,9 +59,16 @@ public:
    */
   virtual void computeJacobian();
 
+  /**
+   * Get the interface ID
+   */
+  unsigned int getInterfaceID() const { return _interface_id; };
+
 protected:
   FEProblemBase & _fe_problem;
   unsigned int _dim;
+
+  unsigned int _interface_id;
 
   const Elem *& _current_elem;
 
