@@ -27,6 +27,11 @@ validParams<BoundingBoxIC>()
 
   params.addParam<Real>("inside", 0.0, "The value of the variable inside the box");
   params.addParam<Real>("outside", 0.0, "The value of the variable outside the box");
+
+  params.addClassDescription("BoundingBoxIC allows setting the initial condition of a value inside "
+                             "and outside of a specified box. The box is aligned with the x, y, z "
+                             "axes");
+
   return params;
 }
 

@@ -36,17 +36,12 @@ InputParameters validParams<ConstantIC>();
 class ConstantIC : public InitialCondition
 {
 public:
-  /**
-   * Constructor
-   *
-   * @param parameters The parameters object holding data for the class to use.
-   */
   ConstantIC(const InputParameters & parameters);
 
   virtual Real value(const Point & p) override;
 
 protected:
-  Real _value;
+  const Real _value;
 };
 
 #endif // CONSTANTIC_H
