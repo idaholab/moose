@@ -22,7 +22,7 @@ InputParameters validParams<AlgebraicRelationshipManager>();
 
 /**
  * AlgebraicRelationshipManagers are used for describing what kinds of non-local resources are
- * needed for an objects calculations. Non-local resources include geometric element information,
+ * needed for an object's calculations. Non-local resources include geometric element information,
  * and solution information that may be more than a single side-neighbor away in a mesh. This
  * includes physically disconnected elements that might be needed for contact or mortar
  * calculations. AlgebraicRelationshipManagers should also be attached to the Mesh for full

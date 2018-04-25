@@ -19,7 +19,7 @@ InputParameters validParams<VolumeHistogram>();
 
 /**
  * Compute a histogram of volume fractions binned according to variable values.
- * This VectorPostprocessor lets you tabulate the volumes in teh simulation domain
+ * This VectorPostprocessor lets you tabulate the volumes in the simulation domain
  * where a given variable has certain values.
  */
 class VolumeHistogram : public ElementVectorPostprocessor
