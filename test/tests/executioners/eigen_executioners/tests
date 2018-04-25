@@ -4,7 +4,7 @@
     input = 'ipm.i'
     exodiff = 'ipm.e'
     abs_zero = 5e-09
-    rel_err = 5e-05
+    rel_err = 8e-05
     recover = false
     allow_warnings = true
     use_old_floor = true

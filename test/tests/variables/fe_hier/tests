@@ -3,6 +3,7 @@
     type = 'Exodiff'
     input = 'hier-2-1d.i'
     exodiff = 'hier-2-1d_out.e'
+    abs_zero = 1e-9
   [../]
 
   [./test_hier_1_1d]

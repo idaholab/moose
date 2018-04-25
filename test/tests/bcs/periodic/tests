@@ -12,6 +12,7 @@
     exodiff = 'out_auto.e'
     group = 'periodic'
     abs_zero = 1e-6
+    rel_err = 1e-5
   [../]
 
   [./auto_wrap_2d_test_non_generated]
@@ -78,6 +79,7 @@
     exodiff = 'out.e'
     group = 'periodic'
     abs_zero = 1e-6
+    rel_err = 1e-5
   [../]
 
   [./testperiodic_dp]
