@@ -15,7 +15,7 @@ validParams<ACGrGrBase>()
 {
   InputParameters params = ACBulk<Real>::validParams();
   params.addRequiredCoupledVar("v",
-                               "Array of coupled order paramter names for other order parameters");
+                               "Array of coupled order parameter names for other order parameters");
   return params;
 }
 

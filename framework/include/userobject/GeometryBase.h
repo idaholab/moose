@@ -40,7 +40,7 @@ protected:
    */
   virtual void snapNode(Node & node) = 0;
 
-  /// Reference to teh current simulation mesh
+  /// Reference to the current simulation mesh
   MooseMesh & _mesh;
 
   /// List of boundaries (or node sets) that will be snapped to a geometry

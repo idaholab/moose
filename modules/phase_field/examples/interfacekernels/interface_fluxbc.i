@@ -2,7 +2,7 @@
 # This test demonstrates an InterfaceKernel (InterfaceDiffusionFlux) that can
 # replace a pair of integrated DiffusionFluxBC boundary conditions.
 #
-# The AuxVariable 'diff' shows the difference between the BC and teh InterfaceKernel
+# The AuxVariable 'diff' shows the difference between the BC and the InterfaceKernel
 # approach.
 #
 
