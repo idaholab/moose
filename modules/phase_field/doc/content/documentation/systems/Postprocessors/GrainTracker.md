@@ -58,15 +58,19 @@ created.
 
 ## Grain Remapping
 
+!row!
+!col! class=s12 m4 l4
 !media media/phase_field/remap_red_conflict.svg
        id=remap_red_conflict
-       style=width:350px;float:left;margin-left:20px
        caption=Red feature bounding boxes intersecting (fast check).
+!col-end!
 
+!col! class=s12 m4 l4
 !media media/phase_field/remap_red_halo.svg
        id=remap_red_halo
-       style=width:350px;margin-left:380px
        caption=Red feature halos intersecting (complete check).
+!col-end!
+!row-end!
 
 Grain remapping is implemented using a recursive backtracking algorithm capable of performing several
 variable swaps to transform the improperly colored grain graph into a proper one. This backtracking
@@ -93,28 +97,38 @@ corresponding position prioritizing those variables for remapping. This ``color 
 then sorted in reverse order putting the grains furthest away near the front and leaving those with
 several overlaps near the back.
 
+!row!
+!col! class=s12 m4 l4
 !media media/phase_field/remap_red_yellow.svg
        id=remap_red_yellow
-       style=width:250px;float:left;margin-left:10px
        caption=Distance check against "B" Features.
+!col-end!
 
+!col! class=s12 m4 l4
 !media media/phase_field/remap_red_green.svg
        id=remap_red_green
-       style=width:250px;float:left;margin-left:10px
        caption=Distance check against "C" Features.
+!col-end!
 
+
+!col! class=s12 m4 l4
 !media media/phase_field/remap_red_blue.svg
        id=remap_red_blue
-       style=width:250px;margin-left:520px
        caption=Distance check against "D" Features.
+!col-end!
+!row-end!
 
-!table id=large_red style=border:4px solid black;width:350px;float:right;margin-left:20px caption=Large Red Distances
+!row!
+!col! class=s12 m12 l12
+!table id=large_red style=border:4px solid black;width:350px; caption=Large Red Distances
 | Variable | Distance |
 |----------|----------|
 | A        | $\varnothing$|
 | B        | -2.0     |
 | C        | -1.0     |
 | D        | -3.0     |
+!col-end!
+!row-end!
 
 A case with all negative distances is illustrated in [large_red]. In this example, the target grain
 is chosen as the large grain labeled $A$, centered on the right side of the image. All of the other
@@ -122,28 +136,37 @@ colors have at least one bounding box that overlaps the large $A$ grain: 2 for $
 for $D$.  The empty list ($\varnothing$) is used for the variable represented by the target grain to
 ensure that the same variable is never considered as a possible remapping option.
 
+!row!
+!col! class=s12 m4 l4
 !media media/phase_field/remap_green_red.svg
        id=remap_green_red
-       style=width:250px;float:left;margin-left:10px
        caption=Distance check against "A" Features.
+!col-end!
 
+!col! class=s12 m4 l4
 !media media/phase_field/remap_green_yellow.svg
        id=remap_green_yellow
-       style=width:250px;float:left;margin-left:10px
        caption=Distance check against "B" Features.
+!col-end!
 
+!col! class=s12 m4 l4
 !media media/phase_field/remap_green_blue.svg
        id=remap_green_blue
-       style=width:250px;margin-left:520px
        caption=Distance check against "D" Features.
+!col-end!
+!row-end!
 
-!table id=large_red style=border:4px solid black;width:350px;float:right;margin-left:20px caption=Small light blue distances
+!row!
+!col! class=s12 m12 l12
+!table id=large_red style=border:4px solid black;width:350px; caption=Small light blue distances
 | Variable | Distance |
 |----------|----------|
 | A        | 52.6     |
 | B        | 4.2      |
 | C        | $\varnothing$|
 | D        | -1.0     |
+!col-end!
+!row-end!
 
 We iterate over the array of distances looking for available variables suitable for remapping the
 target grain. If a positive value is encountered, the grain can be immediately remapped and the
@@ -164,31 +187,41 @@ exponential growth rate possible with an unlimited backtracking algorithm. Note:
 are indicated by turning on the `DIRTY` status flag in the feature's data structure. The `DIRTY`
 status uses an independent bit so it can exist simultaneously with another status.
 
+!row!
+!col! class=s12 m4 l4
 !media media/phase_field/remap_to_red_pre.svg
        id=remap_to_red_pre
-       style=width:250px;float:left;margin-left:10px
        caption=Ready to remap.
+!col-end!
 
+!col! class=s12 m4 l4
 !media media/phase_field/remap_to_red.svg
        id=remap_to_red
-       style=width:250px;float:left;margin-left:10px
        caption=Remap to "A".
+!col-end!
 
+!col! class=s12 m4 l4
 !media media/phase_field/remap_to_green.svg
        id=remap_to_green
-       style=width:250px;margin-left:520px
        caption=Remap to "C".
+!col-end!
+!row-end!
 
 ## 3D Halo Images
 
+!row!
+!col! class=s12 m6 l6
 !media media/phase_field/3D_halos_start.png
        id=3D_start
-       style=width:390px;float:left;margin-left:10px
        caption=6000 grains in 3D
+!col-end!
 
+!col! class=s12 m6 l6
 !media media/phase_field/3D_halos_end.png
-       id=3D_end style=width:390px;margin-left:400px
+       id=3D_end
        caption=grain structure after several simulation steps.
+!col-end!
+!row-end!
 
 ## Description and Syntax
 

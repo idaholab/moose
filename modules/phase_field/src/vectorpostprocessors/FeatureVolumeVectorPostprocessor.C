@@ -33,6 +33,11 @@ validParams<FeatureVolumeVectorPostprocessor>()
                         "Set this Boolean if you wish to use an element based volume where"
                         " the dominant order parameter determines the feature that accumulates the "
                         "entire element volume");
+
+  params.addClassDescription("This object is designed to pull information from the data structures "
+                             "of a \"FeatureFloodCount\" or derived object (e.g. individual "
+                             "feature volumes)");
+
   return params;
 }
 
