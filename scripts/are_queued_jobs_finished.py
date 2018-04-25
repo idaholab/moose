@@ -25,7 +25,7 @@ class Jobs:
 
 def isNotFinished(jobs):
     for path, meta in jobs.yieldJobsResultPath():
-        if meta.get('QUEUEING', {}):
+        if type(meta) == type({}) and meta.get('QUEUEING', {}):
             if not os.path.exists(os.path.join(path, '.previous_test_results.json')):
                 return True
 

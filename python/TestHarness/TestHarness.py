@@ -585,7 +585,6 @@ class TestHarness:
                                                                                        'COLOR'     : tester.getStatus().color,
                                                                                        'CAVEATS'   : list(tester.getCaveats()),
                                                                                        'OUTPUT'    : job.getOutput(),
-                                                                                       'OUTPUT_FILES' : tester.getOutputFiles(),
                                                                                        'COMMAND'   : tester.getCommand(self.options)}
 
             # Additional data to store (overwrites any previous matching keys)

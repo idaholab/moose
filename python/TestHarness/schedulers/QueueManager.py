@@ -344,7 +344,7 @@ class QueueManager(Scheduler):
 
                 # This is a newly added test in the spec file, which was not a part of original launch
                 else:
-                    job.addCaveats('not originally launched')
+                    tester.addCaveats('not originally launched')
                     tester.setStatus(tester.skip)
 
     def _getTesterStatusAndCaveatsFromSession(self, session, tester):
