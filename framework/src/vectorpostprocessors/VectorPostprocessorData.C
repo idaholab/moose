@@ -70,7 +70,8 @@ VectorPostprocessorData::getVectorPostprocessorHelper(const VectorPostprocessorN
                                                       bool contains_complete_history)
 {
   // Retrieve or create the data structure for this VPP
-  auto vec_it_pair = _vpp_data.emplace(vpp_name, VectorPostprocessorVectors());
+  auto vec_it_pair = _vpp_data.emplace(
+      std::piecewise_construct, std::forward_as_tuple(vpp_name), std::forward_as_tuple());
   auto & vec_storage = vec_it_pair.first->second;
 
   // If the VPP is declaring a vector, see if complete history is needed. Note: This parameter
@@ -90,7 +91,7 @@ VectorPostprocessorData::getVectorPostprocessorHelper(const VectorPostprocessorN
   if (iter == vec_storage._values.rend())
   {
     vec_storage._values.emplace_back(
-        std::pair<std::string, VectorPostprocessorState>(vector_name, VectorPostprocessorState()));
+        std::piecewise_construct, std::forward_as_tuple(vector_name), std::forward_as_tuple());
     iter = vec_storage._values.rbegin();
   }
 

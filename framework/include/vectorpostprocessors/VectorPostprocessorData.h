@@ -108,6 +108,12 @@ private:
   {
     VectorPostprocessorVectors();
 
+    ///@{
+    // Default move constructors
+    VectorPostprocessorVectors(VectorPostprocessorVectors &&) = default;
+    VectorPostprocessorVectors & operator=(VectorPostprocessorVectors &&) = default;
+    ///@}
+
     std::vector<std::pair<std::string, VectorPostprocessorState>> _values;
 
     /// Boolean indicating whether these vectors contain complete history (append mode)
