@@ -230,7 +230,7 @@
   # value period diffusien with a constant slope added. This should be the same,
   # but they aren't quite because the gradient constraint affects the gradient in
   # the entire elements (i.e. a larger volume is affected by the gradient constraint
-  # compared to teh nodal value periodicity)
+  # compared to the nodal value periodicity)
   [./diff_periodic]
     type = ParsedAux
     variable = diff_periodic

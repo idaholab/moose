@@ -25,7 +25,7 @@ InputParameters validParams<RelationshipManager>();
 
 /**
  * RelationshipManagers are used for describing what kinds of non-local resources are needed for an
- * objects calculations. Non-local resources include geometric element information, or solution
+ * object's calculations. Non-local resources include geometric element information, or solution
  * information that may be more than a single side-neighbor away in a mesh. This includes
  * physically disconnected elements that might be needed for contact or mortar calculations.
  */
