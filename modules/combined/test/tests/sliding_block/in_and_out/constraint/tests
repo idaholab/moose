@@ -27,6 +27,7 @@
     min_parallel = 4
     abs_zero = 1e-7
     max_time = 800
+    custom_cmp = 'frictionless_kinematic_out.cmp'
   [../]
   [./frictionless_penalty]
     type = 'Exodiff'

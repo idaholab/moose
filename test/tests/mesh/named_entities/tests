@@ -19,6 +19,7 @@
     exodiff = 'periodic_bc_names_test_out.e'
     group = 'periodic'
     abs_zero = 1e-6
+    rel_err = 1e-5
   [../]
 
   [./on_the_fly_test]
