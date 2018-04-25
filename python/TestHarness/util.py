@@ -149,12 +149,41 @@ def formatCase(format_key, message, formatted_results):
     elif message:
         formatted_results[format_key] = (message[0], message[1])
 
+def formatStatusMessage(tester, options):
+    # PASS and DRY_RUN fall into this catagory
+    if tester.isPass():
+        result = tester.getStatusMessage()
+
+        if options.extra_info:
+            for check in options._checks.keys():
+                if tester.specs.isValid(check) and not 'ALL' in tester.specs[check]:
+                    tester.addCaveats(check)
+
+    # FAIL, DIFF and DELETED fall into this catagory
+    elif tester.isFail() or (tester.isDeleted() and options.extra_info):
+        message = tester.getStatusMessage()
+        if message == '':
+            message = tester.getStatus().status
+
+        result = 'FAILED (%s)' % (message)
+
+    # Some other finished status... skipped, silent, etc
+    else:
+        result = tester.getStatusMessage()
+
+    # No one set a unique status message? In that case, use the name of
+    # the status itself as the status message.
+    if not result:
+        result = tester.getStatus().status
+
+    return result
+
 ## print an optionally colorified test result
 #
 # The test will not be colored if
 # 1) options.colored is False,
 # 2) the color parameter is False.
-def formatResult(job, result, options, color=True, **kwargs):
+def formatResult(job, options, result='', color=True, **kwargs):
     # Support only one instance of a format identifier, but obey the order
     terminal_format = list(OrderedDict.fromkeys(list(TERM_FORMAT)))
     tester = job.getTester()
@@ -184,7 +213,7 @@ def formatResult(job, result, options, color=True, **kwargs):
 
         if str(f_key).lower() == 's':
             if not result:
-                result = str(tester.getStatusMessage())
+                result = formatStatusMessage(tester, options)
 
             # refrain from printing a duplicate pre_result if it will match result
             if 'p' in [x.lower() for x in terminal_format] and result == status.status:

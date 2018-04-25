@@ -21,8 +21,8 @@ class QueueManager(Scheduler):
     pool once per group (see augmentJobs).
 
     Using this one unmodified job, the spec file involved is noted, and instructs the derived
-    scheduler how to launch this one single spec file (--spec-file), along with any supplied/allowable
-    command line arguments (--re, --cli-args).
+    scheduler how to launch this one single spec file (using --spec-file), along with any
+    supplied/allowable command line arguments (--re, --cli-args, --ignore, etc).
 
     The third-party queueing manager then executes `run_tests --spec-file /path/to/spec_file`.
 
@@ -158,8 +158,8 @@ class QueueManager(Scheduler):
                 current_args.remove(arg)
                 current_args.extend(arg.split('='))
 
-            # Note: we are removing cli-args because we need to re-encapsulate them below
-            bad_keyword_args.extend(['--spec-file', '-i', '--cli-args', '-j', '-l'])
+            # Note: we are removing cli-args/ignore because we need to re-encapsulate them below
+            bad_keyword_args.extend(['--spec-file', '-i', '--cli-args', '-j', '-l', '-o', '--output-dir', '--ignore'])
 
             # remove the key=value pair argument
             for arg in bad_keyword_args:
@@ -170,6 +170,8 @@ class QueueManager(Scheduler):
             # Special: re-encapsulate --cli-args
             if self.options.cli_args:
                 current_args.extend(['--cli-args', '"%s"' % self.options.cli_args])
+            if self.options.ignored_caveats:
+                current_args.extend(['--ignore', '"%s"' % self.options.ignored_caveats])
 
             # remove any specified positional arguments
             for arg in bad_args:
@@ -207,42 +209,60 @@ class QueueManager(Scheduler):
         Return bool on `run_tests --spec_file` submission results being available. Due to the
         way the TestHarness writes to this results file (when the TestHarness exits), this file,
         when available, means every test contained therein is finished in some form or another.
+
+        If the result file does not exist, determine if it ever will exist. Tests which can fall
+        into this group, are those which were: skipped, deleted, silent, etc during the initial
+        launch phase.
         """
-        # No session file (we are launching for the first time)
+        # No session file. Return immediately.
         if not job_data.json_data:
             return False
 
+        is_ready = True
         # Job group exists in queue session and was apart of the queueing process
-        elif job_data.json_data and job_data.json_data.get(job_data.job_dir, {}).get('QUEUEING', {}):
+        if job_data.json_data and job_data.json_data.get(job_data.job_dir, {}).get('QUEUEING', {}):
 
-            # results file exists (jobs are finished)
+            # result file exists (jobs are finished)
             if os.path.exists(os.path.join(job_data.job_dir, self.__job_storage_file)):
-                return True
+                pass
 
-            # results do not yet exist
+            # result does not yet exist but will in the future
             else:
                 for job in job_data.jobs.getJobs():
                     tester = job.getTester()
-                    status = self._getTesterStatusFromSession(job_data.json_data, tester)
+                    (status, caveats) = self._getTesterStatusAndCaveatsFromSession(job_data.json_data, tester)
 
-                    # The only status we care to modify a bit (NA -> QUEUED)
+                    # This single job will enter the runner thread pool
                     if status.status == "NA":
+                        tester.addCaveats(caveats)
                         tester.setStatus(status, 'QUEUED')
 
-                    # Align our status with previous status
+                    # This single job will be skipped for some reason
                     else:
+                        tester.addCaveats(caveats)
                         tester.setStatus(status)
+                is_ready = False
 
-                    job.setStatus(job.finished)
-                return False
-
-        # Job group was not apart of initial queueing process
+        # Job group not originally launched
         else:
             for job in job_data.jobs.getJobs():
                 tester = job.getTester()
-                tester.setStatus(tester.silent)
+                # Entire job group was skipped, deleted, silent, etc
+                if job_data.json_data and job_data.json_data.get(job_data.job_dir, {}):
+                    (status, caveats) = self._getTesterStatusAndCaveatsFromSession(job_data.json_data, tester)
+                    tester.addCaveats(caveats)
+                    tester.setStatus(status)
+
+                # Entire job group did not previously enter the Scheduler
+                else:
+                    tester.setStatus(tester.silent)
+            is_ready = False
+
+        if not is_ready:
+            for job in job_data.jobs.getJobs():
                 job.setStatus(job.finished)
-            return False
+
+        return is_ready
 
     def _isLaunchable(self, job_data):
         """ bool if jobs are ready to launch """
@@ -305,40 +325,38 @@ class QueueManager(Scheduler):
             job_list[0].addMetaData(**{job_data.plugin : self.options.results_storage[job_data.job_dir][job_data.plugin]})
 
             for job in job_list:
-                # No matter what the case may be, this job is finished.
                 job.setStatus(job.finished)
-
                 tester = job.getTester()
 
                 # Perhaps the user is filtering this job (--re, --failed-tests, etc)
-                if tester.isSilent():
+                if tester.isSilent() and not tester.isDeleted():
                     continue
 
                 if group_results.get(job.getTestName(), {}):
                     job_results = group_results[job.getTestName()]
-                    status = self._getTesterStatusFromSession(results, tester)
+                    (status, caveats) = self._getTesterStatusAndCaveatsFromSession(results, tester)
+                    tester.addCaveats(caveats)
                     tester.setStatus(status)
 
                     # Recover useful job information from job results
                     job.setPreviousTime(job_results['TIMING'])
-                    if job_results['CAVEATS']:
-                        tester.addCaveats(' '.join(job_results['CAVEATS']))
-
                     job.setOutput(job_results['OUTPUT'])
 
                 # This is a newly added test in the spec file, which was not a part of original launch
                 else:
-                    tester.addCaveats('not originally launched')
+                    job.addCaveats('not originally launched')
                     tester.setStatus(tester.skip)
 
-    def _getTesterStatusFromSession(self, session, tester):
-        """ extract status from session for tester, return a default 'no status' for testers not found """
+    def _getTesterStatusAndCaveatsFromSession(self, session, tester):
+        """ extract status and caveats from session for tester, return 'no status' for testers not found """
         status = tester.no_status
-        if session and session.get(tester.getTestDir(), {}):
+        caveats = []
+        if session and session.get(tester.getTestDir(), {}).get(tester.getTestName(), {}):
             status_type = session[tester.getTestDir()][tester.getTestName()]['STATUS'].encode('ascii', 'ignore')
             status_color = session[tester.getTestDir()][tester.getTestName()]['COLOR'].encode('ascii', 'ignore')
             status = self._createTesterStatus(tester, status_type, status_color)
-        return status
+            caveats = session[tester.getTestDir()][tester.getTestName()]['CAVEATS']
+        return (status, caveats)
 
     def _createTesterStatus(self, tester, status, color):
         """ instance a compatible tester status """

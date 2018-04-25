@@ -405,47 +405,18 @@ class TestHarness:
     def canPrint(self, job):
         """ return bool if job should be allowed to print its status """
         can_print = True
-
         tester = job.getTester()
-        if tester.isSkip() and not self.options.report_skipped:
+
+        if tester.isDeleted() and self.options.extra_info:
+            pass
+
+        elif tester.isSkip() and not self.options.report_skipped:
             can_print = False
 
-        elif tester.isDeleted() and not self.options.extra_info:
-            can_print = False
-
-        elif tester.isSilent() and not self.options.extra_info:
+        elif tester.isSilent():
             can_print = False
 
         return can_print
-
-    def formatStatusMessage(self, tester):
-        # PASS and DRY_RUN fall into this catagory
-        if tester.isPass():
-            result = tester.getStatusMessage()
-
-            if self.options.extra_info:
-                for check in self.options._checks.keys():
-                    if tester.specs.isValid(check) and not 'ALL' in tester.specs[check]:
-                        tester.addCaveats(check)
-
-        # FAIL, DIFF and DELETED fall into this catagory
-        elif tester.isFail() or (tester.isDeleted() and self.options.extra_info):
-            message = tester.getStatusMessage()
-            if message == '':
-                message = tester.getStatus().status
-
-            result = 'FAILED (%s)' % (message)
-
-        # Some other finished status... skipped, silent, etc
-        else:
-            result = tester.getStatusMessage()
-
-        # No one set a unique status message? In that case, use the name of
-        # the status itself as the status message.
-        if not result:
-            result = tester.getStatus().status
-
-        return result
 
     def printOutput(self, job):
         """ Method to print a testers output to the screen """
@@ -468,30 +439,7 @@ class TestHarness:
         return output
 
     def normalizeStatus(self, job):
-        """
-        Determine when to use a job status as opposed to tester status. There
-        are three possible job statuses that may prevent a tester from having
-        a finished status:
-
-        Failed Jobs:   jobs which failed due to a timeout, or which never
-                       entered the running queue due some scheduling error.
-
-        Skipped Jobs:  jobs which were skipped (at the job level), and never
-                       called tester.getRunnable(). eg: A parent job being
-                       skipped and thus skipping its children is a common
-                       example of child testers never calling getRunnable().
-
-        Running jobs:  jobs which are currently running, and has the literal
-                       status: no_status.
-
-        When these job statuses are encounterd, we need to adjust the unset
-        tester's status to _something_, so the TestHarness only has to deal
-        with a single status object.
-
-        The special case is the running status. Which when encountered by
-        handleJobStatus, does not trigger this method. We simply list it here
-        for completeness.
-        """
+        """ Determine when to use a job status as opposed to tester status """
         tester = job.getTester()
         message = job.getStatusMessage()
         if job.isFail():
@@ -516,13 +464,12 @@ class TestHarness:
                 self.printOutput(job)
 
                 # Print status with caveats
-                result = self.formatStatusMessage(tester)
-                print(util.formatResult(job, result, self.options, caveats=True))
+                print(util.formatResult(job, self.options, caveats=True))
 
                 timing = job.getTiming()
 
                 # Save these results for 'Final Test Result' summary
-                self.test_table.append( (job, result, timing) )
+                self.test_table.append( (job, tester.getStatus().status, timing) )
 
                 self.postRun(tester.specs, timing)
 
@@ -537,7 +484,7 @@ class TestHarness:
 
             # Just print current status without saving results
             else:
-                print(util.formatResult(job, 'RUNNING...', self.options, caveats=False))
+                print(util.formatResult(job, self.options, result='RUNNING...', caveats=False))
 
     # Print final results, close open files, and exit with the correct error code
     def cleanup(self):
@@ -559,7 +506,7 @@ class TestHarness:
         if (self.options.verbose or (self.num_failed != 0 and not self.options.quiet)) and not self.options.dry_run:
             print('\n\nFinal Test Results:\n' + ('-' * (util.TERM_COLS)))
             for (job, result, timing) in sorted(self.test_table, key=lambda x: x[1], reverse=True):
-                print(util.formatResult(job, result, self.options, caveats=True))
+                print(util.formatResult(job, self.options, caveats=True))
 
         time = clock() - self.start_time
 
@@ -617,9 +564,16 @@ class TestHarness:
         """ write test results to disc in some fashion the user has requested """
         all_jobs = self.scheduler.retrieveJobs()
 
+        # Record the input file name that was used
+        self.options.results_storage['INPUT_FILE_NAME'] = self.options.input_file_name
+
         # Write some useful data to our results_storage
         for job in all_jobs:
             tester = job.getTester()
+
+            # If queueing, do not store silent results in session file
+            if tester.isSilent() and self.options.queueing:
+                continue
 
             # Create empty key based on TestDir, or re-inialize with existing data so we can append to it
             self.options.results_storage[tester.getTestDir()] = self.options.results_storage.get(tester.getTestDir(), {})
@@ -631,6 +585,7 @@ class TestHarness:
                                                                                        'COLOR'     : tester.getStatus().color,
                                                                                        'CAVEATS'   : list(tester.getCaveats()),
                                                                                        'OUTPUT'    : job.getOutput(),
+                                                                                       'OUTPUT_FILES' : tester.getOutputFiles(),
                                                                                        'COMMAND'   : tester.getCommand(self.options)}
 
             # Additional data to store (overwrites any previous matching keys)
@@ -664,7 +619,7 @@ class TestHarness:
                         if tester.isSilent():
                             continue
 
-                        formated_results = util.formatResult( job, job.getOutput(), self.options, color=False)
+                        formated_results = util.formatResult( job, self.options, result=job.getOutput(), color=False)
                         f.write(formated_results + '\n')
 
             # Write a separate file for each test with verbose information (--sep-files, --sep-files-ok, --sep-files-fail)
@@ -684,7 +639,7 @@ class TestHarness:
                                                                      tester.getStatus().status,
                                                                      'txt']))
 
-                    formated_results = util.formatResult(job, job.getOutput(), self.options, color=False)
+                    formated_results = util.formatResult(job, self.options, result=job.getOutput(), color=False)
 
                     # Passing tests
                     if self.options.ok_files and tester.isPass():
@@ -749,6 +704,10 @@ class TestHarness:
             with open(self.results_storage, 'r') as f:
                 try:
                     self.options.results_storage = json.load(f)
+
+                    # Adhere to previous input file syntax, or set the default
+                    self.options.input_file_name = self.options.results_storage.get('INPUT_FILE_NAME', 'tests')
+
                 except ValueError:
                     # This is a hidden file, controled by the TestHarness. So we probably shouldn't error
                     # and exit. Perhaps a warning instead, and create a new file? Down the road, when
@@ -872,9 +831,6 @@ class TestHarness:
             sys.exit(1)
         if opts.failed_tests and opts.pbs:
             print('ERROR: --failed-tests and --pbs can not be used simultaneously')
-            sys.exit(1)
-        if opts.extra_info and opts.pbs:
-            print('ERROR: --extra_info and --pbs can not be used simultaneously')
             sys.exit(1)
         if opts.queue_cleanup and not opts.pbs:
             print('ERROR: --queue-cleanup can not be used without additional queue options')
