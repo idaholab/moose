@@ -323,14 +323,6 @@ NonlinearSystemBase::addScalarKernel(const std::string & kernel_name,
   std::shared_ptr<ScalarKernel> kernel =
       _factory.create<ScalarKernel>(kernel_name, name, parameters);
   _scalar_kernels.addObject(kernel);
-
-  // Store time/non-time ScalarKernels separately
-  ODETimeKernel * t_kernel = dynamic_cast<ODETimeKernel *>(kernel.get());
-
-  if (t_kernel)
-    _time_scalar_kernels.addObject(kernel);
-  else
-    _non_time_scalar_kernels.addObject(kernel);
 }
 
 void
@@ -1156,27 +1148,22 @@ NonlinearSystemBase::computeResidualInternal(const std::set<TagID> & tags)
     {
       Moose::perf_log.push("computScalarKernels()", "Execution");
 
-      const std::vector<std::shared_ptr<ScalarKernel>> * scalars;
-
+      MooseObjectWarehouse<ScalarKernel> * scalar_kernel_warehouse;
       // This code should be refactored once we can do tags for scalar
       // kernels
       // Should redo this based on Warehouse
       if (!tags.size() || tags.size() == _fe_problem.numVectorTags())
-        scalars = &(_scalar_kernels.getActiveObjects());
-      else if (tags.size() == 2)
-      {
-        if (tags.find(timeVectorTag()) != tags.end())
-          scalars = &(_time_scalar_kernels.getActiveObjects());
-        else if (tags.find(nonTimeVectorTag()) != tags.end())
-          scalars = &(_non_time_scalar_kernels.getActiveObjects());
-        else
-          mooseError("Wrong tags for scalar kernels ");
-      }
+        scalar_kernel_warehouse = &_scalar_kernels;
+      else if (tags.size() == 1)
+        scalar_kernel_warehouse =
+            &(_scalar_kernels.getVectorTagObjectWarehouse(*(tags.begin()), 0));
       else
-        mooseError("Unrecognized tags for scalar kernels in computeResidualInternal().");
+        // scalar_kernels is not threading
+        scalar_kernel_warehouse = &(_scalar_kernels.getVectorTagsObjectWarehouse(tags, 0));
 
       bool have_scalar_contributions = false;
-      for (const auto & scalar_kernel : *scalars)
+      const auto & scalars = scalar_kernel_warehouse->getActiveObjects();
+      for (const auto & scalar_kernel : scalars)
       {
         scalar_kernel->reinit();
         const std::vector<dof_id_type> & dof_indices = scalar_kernel->variable().dofIndices();
@@ -1852,12 +1839,21 @@ NonlinearSystemBase::constraintJacobians(bool displaced)
 }
 
 void
-NonlinearSystemBase::computeScalarKernelsJacobians()
+NonlinearSystemBase::computeScalarKernelsJacobians(const std::set<TagID> & tags)
 {
+  MooseObjectWarehouse<ScalarKernel> * scalar_kernel_warehouse;
+
+  if (!tags.size() || tags.size() == _fe_problem.numMatrixTags())
+    scalar_kernel_warehouse = &_scalar_kernels;
+  else if (tags.size() == 1)
+    scalar_kernel_warehouse = &(_scalar_kernels.getMatrixTagObjectWarehouse(*(tags.begin()), 0));
+  else
+    scalar_kernel_warehouse = &(_scalar_kernels.getMatrixTagsObjectWarehouse(tags, 0));
+
   // Compute the diagonal block for scalar variables
-  if (_scalar_kernels.hasActiveObjects())
+  if (scalar_kernel_warehouse->hasActiveObjects())
   {
-    const auto & scalars = _scalar_kernels.getActiveObjects();
+    const auto & scalars = scalar_kernel_warehouse->getActiveObjects();
 
     _fe_problem.reinitScalars(/*tid=*/0);
 
@@ -2029,7 +2025,7 @@ NonlinearSystemBase::computeJacobianInternal(const std::set<TagID> & tags)
 
     computeDiracContributions(true);
 
-    computeScalarKernelsJacobians();
+    computeScalarKernelsJacobians(tags);
 
     static bool first = true;
 
