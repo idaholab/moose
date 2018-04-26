@@ -620,7 +620,7 @@ protected:
 
   void computeDiracContributions(bool is_jacobian);
 
-  void computeScalarKernelsJacobians();
+  void computeScalarKernelsJacobians(const std::set<TagID> & tags);
 
   /**
    * Enforce nodal constraints
@@ -679,9 +679,7 @@ protected:
   ///@{
   /// Kernel Storage
   MooseObjectTagWarehouse<KernelBase> _kernels;
-  MooseObjectWarehouse<ScalarKernel> _scalar_kernels;
-  MooseObjectWarehouse<ScalarKernel> _time_scalar_kernels;
-  MooseObjectWarehouse<ScalarKernel> _non_time_scalar_kernels;
+  MooseObjectTagWarehouse<ScalarKernel> _scalar_kernels;
   MooseObjectWarehouse<DGKernel> _dg_kernels;
   MooseObjectWarehouse<InterfaceKernel> _interface_kernels;
 
