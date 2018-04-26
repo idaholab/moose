@@ -8,13 +8,14 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "ConstitutiveModel.h"
+#include "SolidModel.h"
 #include "Function.h"
 
 template <>
 InputParameters
 validParams<ConstitutiveModel>()
 {
-  InputParameters params = validParams<Material>();
+  InputParameters params = validParams<SolidModel>();
 
   params.addCoupledVar("temp", "Coupled Temperature");
 

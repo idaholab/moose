@@ -38,6 +38,7 @@ validParams<NSIntegratedBC>()
   params.addRequiredCoupledVar(NS::total_energy, "total energy");
   params.addRequiredParam<UserObjectName>("fluid_properties",
                                           "The name of the user object for fluid properties");
+  params.addParam<Real>("specified_pressure", 0.0, "The specified pressure for this boundary");
 
   return params;
 }

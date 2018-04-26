@@ -40,7 +40,6 @@ SetupPreconditionerAction::act()
   if (_problem.get() != NULL)
   {
     // build the preconditioner
-    _moose_object_pars.set<FEProblemBase *>("_fe_problem_base") = _problem.get();
     std::shared_ptr<MoosePreconditioner> pc =
         _factory.create<MoosePreconditioner>(_type, _name, _moose_object_pars);
 

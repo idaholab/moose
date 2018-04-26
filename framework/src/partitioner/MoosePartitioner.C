@@ -15,6 +15,7 @@ InputParameters
 validParams<MoosePartitioner>()
 {
   InputParameters params = validParams<MooseObject>();
+  params.addPrivateParam<MooseMesh *>("mesh");
   params.registerBase("MoosePartitioner");
   return params;
 }

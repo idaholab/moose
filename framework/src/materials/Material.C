@@ -51,6 +51,8 @@ validParams<Material>()
       "quadrature point, and then copy that value to the other qps. Evaluations on element qps "
       "will be skipped");
 
+  params.addPrivateParam<bool>("_neighbor", false);
+
   // Outputs
   params += validParams<OutputInterface>();
   params.set<std::vector<OutputName>>("outputs") = {"none"};

@@ -24,6 +24,7 @@ validParams<ACSEDGPoly>()
                                         "Number of OP representing deformed grains");
   params.addRequiredParam<UserObjectName>("grain_tracker",
                                           "The GrainTracker UserObject to get values from.");
+  params.addRequiredParam<unsigned int>("op_index", "The index for the current order parameter");
   return params;
 }
 

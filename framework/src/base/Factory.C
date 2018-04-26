@@ -109,10 +109,50 @@ Factory::create(const std::string & obj_name,
   // register type name as constructed
   _constructed_types.insert(obj_name);
 
-  // Actually call the function pointer.  You can do this in one line,
-  // but it's a bit more obvious what's happening if you do it in two...
+  // add FEProblem pointers to object's params object
+  if (_app.actionWarehouse().problemBase())
+    _app.actionWarehouse().problemBase()->setInputParametersFEProblem(params);
+
+  // call the function pointer to build the object
   buildPtr & func = it->second;
-  return (*func)(params);
+  auto obj = (*func)(params);
+
+  auto fep = std::dynamic_pointer_cast<FEProblemBase>(obj);
+  if (fep)
+    _app.actionWarehouse().problemBase() = fep;
+
+  // Make sure no unexpected parameters were added by the object's constructor or by the action
+  // initiating this create call.  All parameters modified by the constructor must have already
+  // been specified in the object's validParams function.
+  InputParameters orig_params = getValidParams(obj_name);
+  if (orig_params.n_parameters() != parameters.n_parameters())
+  {
+    std::set<std::string> orig, populated;
+    for (const auto & it : orig_params)
+      orig.emplace(it.first);
+    for (const auto & it : parameters)
+      populated.emplace(it.first);
+
+    std::set<std::string> diff;
+    std::set_difference(populated.begin(),
+                        populated.end(),
+                        orig.begin(),
+                        orig.end(),
+                        std::inserter(diff, diff.begin()));
+
+    if (!diff.empty())
+    {
+      std::stringstream ss;
+      for (const auto & name : diff)
+        ss << ", " << name;
+      mooseError("attempted to set unregistered parameter(s) for ",
+                 obj_name,
+                 " object:\n    ",
+                 ss.str().substr(2));
+    }
+  }
+
+  return obj;
 }
 
 void

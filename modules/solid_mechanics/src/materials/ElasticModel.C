@@ -18,6 +18,39 @@ InputParameters
 validParams<ElasticModel>()
 {
   InputParameters params = validParams<ConstitutiveModel>();
+
+  // These parameters are a hack to get around the fact that SolidModel::createConstitutiveModel
+  // function is used to create ElasticModel objects by injecting other parameters into it
+  // (which it doesn't understand).  This is an ugly hack to get around this behavior which MOOSE
+  // will no longer allow.
+  params.addCoupledVar("X_Pu", 0, "Coupled plutonium atom fraction");
+  params.addCoupledVar("X_Zr", 0, "Coupled zirconium atom fraction");
+  params.addParam<bool>("calc_youngs", true, "Flag to calculate Youngs Modulus or use given value");
+  params.addParam<bool>(
+      "calc_poissons", true, "Flag to calculate Poissons ratio or use given value");
+  params.addParam<bool>("model_creep", true, "Flag for creep model");
+  params.addParam<std::vector<std::string>>("volumetric_models", "Volumetric models to apply");
+  params.addParam<Real>("A_U", 0.2380289, "Atomic weight of uranium [kg/mol]");
+  params.addParam<Real>("A_Pu", 0.244, "Atomic weight of plutonium [kg/mol]");
+  params.addParam<Real>("A_Zr", 0.091224, "Atomic weight of zirconium [kg/mol]");
+  params.addParam<bool>("absolute_tolerance", "dummy");
+  params.addParam<bool>("acceptable_multiplier", "dummy");
+  params.addParam<bool>("compute_material_timestep_limit", "dummy");
+  params.addParam<bool>("fission_rate", "dummy");
+  params.addParam<bool>("fission_rate_material", "dummy");
+  params.addParam<bool>("gamma_transition", "dummy");
+  params.addParam<bool>("hydrostatic_stress", "dummy");
+  params.addParam<bool>("legacy_return_mapping", "dummy");
+  params.addParam<bool>("max_inelastic_increment", "dummy");
+  params.addParam<bool>("max_its", "dummy");
+  params.addParam<bool>("open_pore_compressibility_factor", "dummy");
+  params.addParam<bool>("output_iteration_info", "dummy");
+  params.addParam<bool>("output_iteration_info_on_error", "dummy");
+  params.addParam<bool>("plenum_pressure", "dummy");
+  params.addParam<bool>("porosity", "dummy");
+  params.addParam<bool>("relative_tolerance", "dummy");
+  params.addParam<bool>("use_material_fission_rate", "dummy");
+
   return params;
 }
 

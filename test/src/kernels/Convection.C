@@ -17,6 +17,7 @@ validParams<Convection>()
 {
   InputParameters params = validParams<Kernel>();
   params.addRequiredParam<RealVectorValue>("velocity", "Velocity Vector");
+  params.addPrivateParam<std::vector<std::string>>("some_variable");
   return params;
 }
 
