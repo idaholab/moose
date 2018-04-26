@@ -58,15 +58,6 @@ validParams<CreateProblemAction>()
                                         "by objects which compute residuals and Jacobians "
                                         "(Kernels, BCs, etc.) by setting tags on them.");
 
-#ifdef LIBMESH_HAVE_PETSC
-  params.addParam<MultiMooseEnum>(
-      "petsc_options", MultiMooseEnum("", "", true), "TODO: add doc message");
-  params.addParam<std::vector<std::string>>(
-      "petsc_inames", std::vector<std::string>(), "TODO: add doc message");
-  params.addParam<std::vector<std::string>>(
-      "petsc_values", std::vector<std::string>(), "TODO: add doc message");
-#endif
-
   return params;
 }
 
