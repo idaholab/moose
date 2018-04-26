@@ -2,6 +2,6 @@
   [./add_mat_and_kernel]
     type = RunException
     input = 'add_mat_and_kernel.i'
-    expect_err = '\[Kernels\]\n  \[\./kern1\]\n    type \= MatDiffusion\n    prop_name \= prop1\n    variable \= var1\n  \[\.\./\]\n\[\]\n\n\[Materials\]\n  \[\./mat1\]\n    type \= GenericConstantMaterial\n    prop_names \= prop1\n    prop_values \= 42\n  \[\.\./\]\n\[\]\n\n\[Variables\]\n  \[\./var1\]\n    family \= HERMITE\n  \[\.\./\]\n\[\]'
+    expect_err = '\[Kernels\]\n  \[\./kern1\]\n    type \= MatDiffusion\n    prop_name \= prop1\n    variable \= var1\n  \[\.\./\]\n\[\]\n\n\[Materials\]\n  \[\./mat1\]\n    type \= GenericConstantMaterial\n    prop_names \= prop1\n    prop_values \= 42\n  \[\.\./\]\n\[\]\n\n\[Variables\]\n  \[\./var1\]\n  \[\.\./\]\n\[\]'
   [../]
 []

@@ -280,6 +280,8 @@ void
 DumpObjectsProblem::initialSetup()
 {
   dumpGeneratedSyntax(getParam<std::string>("dump_path"));
+
+  Moose::out << std::flush;
   std::abort();
 }
 

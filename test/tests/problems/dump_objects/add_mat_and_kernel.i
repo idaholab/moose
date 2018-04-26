@@ -4,7 +4,6 @@
 []
 
 [AddMatAndKernel]
-  family = HERMITE
 []
 
 [Problem]
