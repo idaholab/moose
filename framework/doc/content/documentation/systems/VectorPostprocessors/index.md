@@ -1,9 +1,7 @@
 # VectorPostprocessors System
 
-The VectorPostprocessors (VPP) System is a system designed to output several related values each time on of these objects is executed.
-Unlike the AuxiliarySystem, VPPs usually aren't expected to contain complete spatial information or field values. Instead they are used
-when a subset of values are needed. For example, if you'd like to sample a solution field across a line, a VPP is a good choice
-(See [PointValueSampler](PointValueSampler.md)).
+The VectorPostprocessors (VPP) System is designed to compute multiple related values each time it is executed.  It can be thought of as a Postprocessor that outputs multiple values. For example, if you'd like to sample a solution field across a line, a VPP is a good choice
+(See [PointValueSampler](PointValueSampler.md)).  In addition to outputting the values along the line a VPP can actually output multiple vectors simultaneously.  Each vector is given a name, which is the column name.  Together, all of the vectors a VPP outputs are output in one CSV file (usually per-timestep).
 
 ## Design
 
@@ -33,7 +31,7 @@ files for each invocation. The form of the output is as follows:
 <filebase>_<vector name>_<serial number>.csv
 
 # filebase - the normal output file base
-# vector name - the name of the vector postprocessor (normally the input block name)
+# vector name - the name of the vector postprocessor (normally the input block name for that VPP)
 # serial number - a fixed-width (normally four digit) number starting from 0000 and counting up.
 ```
 
