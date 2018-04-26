@@ -26,7 +26,6 @@ class NodalNormalBC : public NodalBC
 {
 public:
   NodalNormalBC(const InputParameters & parameters);
-  using NodalBCBase::computeResidual;
   virtual void computeResidual() override;
 
 protected:

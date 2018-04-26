@@ -32,7 +32,6 @@ public:
    * @return the variable
    */
   virtual VectorMooseVariable & variable() override { return _var; }
-  using NodalBCBase::computeResidual;
   virtual void computeResidual() override;
   virtual void computeJacobian() override;
   virtual void computeOffDiagJacobian(unsigned int jvar) override;
