@@ -62,24 +62,14 @@ LumpedExplicitEuler::solve()
   _fe_problem.initPetscOutput();
 
   auto & nonlinear_system = _fe_problem.getNonlinearSystemBase();
-
   auto & libmesh_system = dynamic_cast<NonlinearImplicitSystem &>(nonlinear_system.system());
 
-  auto Re_non_time_tag = nonlinear_system.nonTimeVectorTag();
-  // auto system_matrix_tag = nonlinear_system.systemMatrixTag();
-
   auto & mass_matrix = *libmesh_system.matrix;
-
   mass_matrix.close();
 
-  // nonlinear_system.associateMatrixToTag(, _Ke_time_tag);
-
-  std::cout << "Computing Jacobian!!" << std::endl;
+  auto Re_non_time_tag = nonlinear_system.nonTimeVectorTag();
 
   _fe_problem.computeJacobianTag(*libmesh_system.solution, mass_matrix, _Ke_time_tag);
-
-  std::cout << "Finished Computing Jacobian!!" << std::endl;
-
   _fe_problem.computeResidualTag(*libmesh_system.solution, _Re_non_time, Re_non_time_tag);
 
   _Re_non_time *= -1.;
