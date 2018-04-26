@@ -50,7 +50,7 @@
 [Executioner]
   # Preconditioned JFNK (default)
   type = Transient
-  num_steps = 20000
+  num_steps = 2000
   dt = 0.001
   solve_type = LINEAR
   petsc_options_iname = '-pc_type -pc_hypre_type'
@@ -62,5 +62,7 @@
 []
 
 [Outputs]
-  exodus = true
+  exodus = false
+  console = true
+  interval = 10
 []

@@ -12,6 +12,8 @@
 
 #include "TimeIntegrator.h"
 
+#include "libmesh/petsc_vector.h"
+
 // Forward declarations
 class LumpedExplicitEuler;
 class LStableDirk4;
@@ -31,7 +33,9 @@ public:
   virtual void postResidual(NumericVector<Number> & residual) override;
 
 protected:
-  NumericVector<Real> & _explicit_euler_update;
+  PetscVector<Real> & _explicit_euler_update;
+
+  PetscVector<Real> & _mass_matrix_diag;
 
   TagID _Ke_time_tag;
 };
