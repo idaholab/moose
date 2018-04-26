@@ -20,8 +20,8 @@ class NodalDamper;
 class SubProblem;
 class SystemBase;
 template <typename>
-class MooseVariableFEImpl;
-typedef MooseVariableFEImpl<Real> MooseVariable;
+class MooseVariableFE;
+typedef MooseVariableFE<Real> MooseVariable;
 class Assembly;
 
 template <>

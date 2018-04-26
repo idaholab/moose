@@ -14,7 +14,7 @@
 #include "FEProblem.h"
 #include "Indicator.h"
 #include "InternalSideIndicator.h"
-#include "MooseVariableFEImpl.h"
+#include "MooseVariableFE.h"
 #include "Problem.h"
 #include "SwapBackSentinel.h"
 

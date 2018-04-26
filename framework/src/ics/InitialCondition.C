@@ -11,7 +11,7 @@
 #include "FEProblem.h"
 #include "SystemBase.h"
 #include "Assembly.h"
-#include "MooseVariableFEImpl.h"
+#include "MooseVariableFE.h"
 
 #include "libmesh/fe_interface.h"
 #include "libmesh/quadrature.h"

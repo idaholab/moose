@@ -8,7 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "ChannelGradientBC.h"
-#include "MooseVariableFEImpl.h"
+#include "MooseVariableFE.h"
 
 registerMooseObject("MooseTestApp", ChannelGradientBC);
 

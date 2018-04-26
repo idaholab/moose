@@ -12,7 +12,7 @@
 #include "Assembly.h"
 #include "MooseError.h" // mooseDeprecated
 #include "MooseTypes.h"
-#include "MooseVariableFEImpl.h"
+#include "MooseVariableFE.h"
 #include "Problem.h"
 #include "SubProblem.h"
 
@@ -35,7 +35,7 @@ MooseVariableInterface<T>::MooseVariableInterface(const MooseObject * moose_obje
     // interface level...
     variable_name = parameters.getVecMooseType(var_param_name)[0];
 
-  _variable = &dynamic_cast<MooseVariableFEImpl<T> &>(problem.getVariable(tid, variable_name));
+  _variable = &dynamic_cast<MooseVariableFE<T> &>(problem.getVariable(tid, variable_name));
 
   _mvi_assembly = &problem.assembly(tid);
 }
@@ -46,7 +46,7 @@ MooseVariableInterface<T>::~MooseVariableInterface()
 }
 
 template <typename T>
-MooseVariableFEImpl<T> *
+MooseVariableFE<T> *
 MooseVariableInterface<T>::mooseVariable()
 {
   return _variable;

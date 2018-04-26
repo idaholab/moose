@@ -12,7 +12,7 @@ The current class hierarchy for Moose variables is shown below:
 inherit. It includes methods for accessing the variable finite element type and
 order, degress of freedom, scaling factor, name, and associated
 `SystemBase`. Two classes inherit directly from `MooseVariableBase`:
-`MooseVariableFE` and `MooseVariableScalar`. `MooseVariableScalar` represents a
+`MooseVariableFEBase` and `MooseVariableScalar`. `MooseVariableScalar` represents a
 Moose variable that is constant over the spatial domain. It has a number of
 degrees of freedom equal to the order of the variable, e.g. the following
 variable block would declare a `MooseVariableScalar` with two associated degrees
@@ -27,14 +27,14 @@ of freedom:
 []
 ```
 
-`MooseVariableFE` is an abstract class that encompasses all finite-element type
+`MooseVariableFEBase` is an abstract class that encompasses all finite-element type
 variables; all variables that vary spatially ultimately inherit from
-`MooseVariableFE`. The class implements all the relevant variable methods other
+`MooseVariableFEBase`. The class implements all the relevant variable methods other
 than those that return the actual variable solution or variable shape functions,
 since the return type in
 the latter case depends on whether the finite-element variable is scalar-valued
 (single-component) or vector-valued (multi-component) in nature. The existence
-of the `MooseVariableFE` class allows construction of containers that hold both single- and
+of the `MooseVariableFEBase` class allows construction of containers that hold both single- and
 multi-component finite element variables. This is useful for instance in the
 `Assembly` class where we can abstract the coupling matrix entries or in
 Jacobian computing
@@ -43,9 +43,9 @@ using `coupled`. Moreoever, this design structure mirrors that of the `FE`
 design in LibMesh, where `FEAbstract` is an abstract base class that implements
 all methods independent of `FE` type and the class
 template `FEGenericBase<T>` implements the type dependent methods analogous to
-`MooseVariableFEImpl<T>`.
+`MooseVariableFE<T>`.
 
-`MooseVariableFEImpl<T>` implements methods that return the variable's solution
+`MooseVariableFE<T>` implements methods that return the variable's solution
 and its associated shape functions. Additionally, it contains the methods
 responsible for computing the variable solution at quadrature points given the
 degree of freedom values computed from the previous non-linear
@@ -59,14 +59,14 @@ electromagnetic applications or for general PDEs that involve a curl
 operation. The latter is potentially useful for tensor mechanic or Navier-Stokes
 simulations where historically displacement or velocity variables have been
 broken up component-wise. To hide the templating of the Moose variable system
-from other framework code, `MooseVariableFEImpl<Real>` and
-`MooseVariableFEImpl<RealVectorValue>` have been aliased to `MooseVariable` and
+from other framework code, `MooseVariableFE<Real>` and
+`MooseVariableFE<RealVectorValue>` have been aliased to `MooseVariable` and
 `VectorMooseVariable` respectively.
 
 Finally, `MooseVariableConstMonomial` is a class that takes advantage of its
 finite element type (constant value on an element) to optimize its solution
 computing routines. Consequently, it overrides the `computeElemValues` and
-similar methods of `MooseVariableFEImpl<Real>`.
+similar methods of `MooseVariableFE<Real>`.
 
 ## Accessors
 
@@ -80,7 +80,7 @@ member. The `_sys` member has the following variable accessor methods which take
 a `THREAD_ID` and either a `std::string` variable name or `unsigned` variable ID
 as arguments:
 
-- `getVariable`: returns a reference to a `MooseVariableFE`. Useful when access
+- `getVariable`: returns a reference to a `MooseVariableFEBase`. Useful when access
   to the variable finite element solution or shape functions is not needed
 - `getFieldVariable`: this is a templated method that takes as its template
   argument either `Real` or `RealVectorValue` and returns a reference to a
@@ -97,7 +97,7 @@ following acessors methods which take `THREAD_ID` and a `std::string` variable
 name as arguments (note that acessors through variable IDs do not exist through
 `SubProblem`):
 
-- `getVariable`: returns a reference to a `MooseVariableFE`. Useful when access
+- `getVariable`: returns a reference to a `MooseVariableFEBase`. Useful when access
   to the variable finite element solution or shape functions is not
   needed. Calls `SystemBase::getVariable`
 - `getStandardVariable`: returns a reference to a
@@ -122,7 +122,7 @@ variable objects and take as arguments the variable name and the "component"
 which is used when the user passes in multiple variables to a single
 `CoupledVar` parameter:
 
-- `getFEVar`: returns a pointer to a `MooseVariableFE`. Useful when access
+- `getFEVar`: returns a pointer to a `MooseVariableFEBase`. Useful when access
   to the variable finite element solution or shape functions is not
   needed
 - `getVar`: returns a pointer to a `MooseVariable`. Useful when the complete
@@ -136,7 +136,7 @@ call the following methods which take no arguments:
 - `getCoupledMooseVars`: returns +all+ coupled Moose variables, i.e. both
   single-component `MooseVariables` and multi-component
   `VectorMooseVariables`. Consequently the return type is
-  `std::vector<MooseVariableFE *>`
+  `std::vector<MooseVariableFEBase *>`
 - `getCoupledStandardMooseVars`: returns all coupled single-component
   `MooseVariables` as a `std::vector<MooseVariable *>`
 - `getCoupledVectorMooseVars`: returns all coupled multi-component

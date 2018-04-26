@@ -19,7 +19,7 @@
 #include "InfixIterator.h"
 #include "MooseApp.h"
 #include "MooseUtils.h"
-#include "MooseVariableFEImpl.h"
+#include "MooseVariableFE.h"
 #include "Postprocessor.h"
 #include "Restartable.h"
 #include "VectorPostprocessor.h"

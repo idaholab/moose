@@ -12,7 +12,7 @@
 #include "FEProblem.h"
 #include "MooseMesh.h"
 #include "Assembly.h"
-#include "MooseVariableFEImpl.h"
+#include "MooseVariableFE.h"
 #include "MooseEnum.h"
 #include "InputParameters.h"
 

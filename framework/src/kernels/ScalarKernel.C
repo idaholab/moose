@@ -10,7 +10,7 @@
 #include "ScalarKernel.h"
 #include "Assembly.h"
 #include "MooseVariableScalar.h"
-#include "MooseVariableFEImpl.h"
+#include "MooseVariableFE.h"
 #include "Problem.h"
 #include "SubProblem.h"
 #include "NonlinearSystem.h"

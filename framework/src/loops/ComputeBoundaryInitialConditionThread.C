@@ -12,7 +12,7 @@
 // MOOSE includes
 #include "Assembly.h"
 #include "InitialCondition.h"
-#include "MooseVariableFEImpl.h"
+#include "MooseVariableFE.h"
 #include "SystemBase.h"
 
 ComputeBoundaryInitialConditionThread::ComputeBoundaryInitialConditionThread(

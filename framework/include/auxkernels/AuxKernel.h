@@ -11,7 +11,7 @@
 #define AUXKERNEL_H
 
 #include "MooseObject.h"
-#include "MooseVariableFEImpl.h"
+#include "MooseVariableFE.h"
 #include "SetupInterface.h"
 #include "CoupleableMooseVariableDependencyIntermediateInterface.h"
 #include "MaterialPropertyInterface.h"

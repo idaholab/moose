@@ -13,7 +13,7 @@
 #include "FEProblem.h"
 #include "Material.h"
 #include "MooseMesh.h"
-#include "MooseVariableFEImpl.h"
+#include "MooseVariableFE.h"
 #include "SystemBase.h"
 #include "Conversion.h"
 

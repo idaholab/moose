@@ -14,7 +14,7 @@
 #include "FEProblem.h"
 #include "MooseMesh.h"
 #include "MooseTypes.h"
-#include "MooseVariableFEImpl.h"
+#include "MooseVariableFE.h"
 #include "MultiApp.h"
 #include "NonlinearSystem.h"
 

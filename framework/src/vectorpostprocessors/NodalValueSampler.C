@@ -10,7 +10,7 @@
 #include "NodalValueSampler.h"
 
 // MOOSE includes
-#include "MooseVariableFEImpl.h"
+#include "MooseVariableFE.h"
 
 // C++ includes
 #include <numeric>
