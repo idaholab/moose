@@ -94,57 +94,56 @@ ControlOutput::outputActiveObjects()
 void
 ControlOutput::outputControls()
 {
-    // Extract InputParameter objects from warehouse
-    InputParameterWarehouse & wh = _app.getInputParameterWarehouse();
-    const auto & params = wh.getInputParameters();
+  // Extract InputParameter objects from warehouse
+  InputParameterWarehouse & wh = _app.getInputParameterWarehouse();
+  const auto & params = wh.getInputParameters();
 
-    // The stream to build
-    std::stringstream oss;
-    oss << std::left;
+  // The stream to build
+  std::stringstream oss;
+  oss << std::left;
 
-    // Populate a map based on unique InputParameter objects
-    std::map<std::shared_ptr<InputParameters>, std::set<MooseObjectName>> objects;
-    for (const auto & iter : params)
-      objects[iter.second].insert(iter.first);
+  // Populate a map based on unique InputParameter objects
+  std::map<std::shared_ptr<InputParameters>, std::set<MooseObjectName>> objects;
+  for (const auto & iter : params)
+    objects[iter.second].insert(iter.first);
 
-    // Produce the control information
-    oss << "Controls:\n";
-    for (const auto & iter : objects)
+  // Produce the control information
+  oss << "Controls:\n";
+  for (const auto & iter : objects)
+  {
+    std::shared_ptr<InputParameters> ptr = iter.first;
+
+    const std::set<std::string> & names = ptr->getControllableParameters();
+
+    if (!names.empty())
     {
-      std::shared_ptr<InputParameters> ptr = iter.first;
+      oss << ConsoleUtils::indent(2) << COLOR_YELLOW << ptr->get<std::string>("_object_name")
+          << COLOR_DEFAULT << '\n';
 
-      const std::set<std::string> & names = ptr->getControllableParameters();
+      // Full names(s)
+      oss << ConsoleUtils::indent(4) << "Name(s): ";
+      for (const auto & obj_name : iter.second)
+        oss << obj_name << " ";
+      oss << '\n';
 
-      if (!names.empty())
+      // Tag(s)
+      const std::vector<std::string> & tags = ptr->get<std::vector<std::string>>("control_tags");
+      if (!tags.empty())
       {
-        oss << ConsoleUtils::indent(2) << COLOR_YELLOW << ptr->get<std::string>("_object_name")
-            << COLOR_DEFAULT << '\n';
-
-        // Full names(s)
-        oss << ConsoleUtils::indent(4) << "Name(s): ";
-        for (const auto & obj_name : iter.second)
-          oss << obj_name << " ";
+        oss << ConsoleUtils::indent(4) << "Tag(s): ";
+        for (const auto & tag_name : tags)
+          oss << tag_name << " ";
         oss << '\n';
-
-        // Tag(s)
-        const std::vector<std::string> & tags = ptr->get<std::vector<std::string>>("control_tags");
-        if (!tags.empty())
-        {
-          oss << ConsoleUtils::indent(4) << "Tag(s): ";
-          for (const auto & tag_name : tags)
-            oss << tag_name << " ";
-          oss << '\n';
-        }
-
-        oss << ConsoleUtils::indent(4) << "Parameter(s):\n";
-        for (const auto & param_name : names)
-          oss << ConsoleUtils::indent(6) << std::setw(ConsoleUtils::console_field_width) <<
-    param_name
-              << ptr->type(param_name) << '\n';
       }
-    }
 
-    _console << oss.str() << std::endl;
+      oss << ConsoleUtils::indent(4) << "Parameter(s):\n";
+      for (const auto & param_name : names)
+        oss << ConsoleUtils::indent(6) << std::setw(ConsoleUtils::console_field_width) << param_name
+            << ptr->type(param_name) << '\n';
+    }
+  }
+
+  _console << oss.str() << std::endl;
 }
 
 void

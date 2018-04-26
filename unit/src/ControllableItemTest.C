@@ -42,6 +42,8 @@ TEST(ControllableItem, basic)
   EXPECT_EQ(item.get<int>(), std::vector<int>(1, 1980));
   EXPECT_EQ(item.name(), name);
   EXPECT_EQ(item.type(), "int");
+  EXPECT_TRUE(item.check<int>());
+  EXPECT_FALSE(item.check<std::string>());
 }
 
 TEST(ControllableItem, multiple)
@@ -79,6 +81,50 @@ TEST(ControllableItem, multiple)
   EXPECT_NE(out.find("1980"), std::string::npos);
   EXPECT_EQ(out.find("1949"), std::string::npos);
   EXPECT_EQ(out.find("1954"), std::string::npos);
+}
+
+TEST(ControllableItem, multiple_types)
+{
+  InputParameters params = emptyInputParameters();
+  params.addParam<int>("control", 1949, "");
+  params.addParam<double>("control2", 1954, "");
+
+  libMesh::Parameters::Value * value = get_value("control", params);
+  MooseObjectParameterName name("System", "Object", "control");
+  ControllableItem item(name, value);
+
+  libMesh::Parameters::Value * value2 = get_value("control2", params);
+  MooseObjectParameterName name2("System", "Object", "control2");
+  ControllableItem item2(name2, value2);
+
+  item.connect(&item2, false);
+  EXPECT_EQ(params.get<int>("control"), 1949);
+  EXPECT_EQ(params.get<double>("control2"), 1954);
+  ASSERT_EQ(item.get<int>(false).size(), 1);
+  EXPECT_EQ(item.get<int>(false)[0], 1949);
+  ASSERT_EQ(item.get<double>(false).size(), 1);
+  EXPECT_EQ(item.get<double>(false)[0], 1954);
+
+  item.set<int>(2011, false);
+
+  EXPECT_EQ(params.get<int>("control"), 2011);
+  EXPECT_EQ(params.get<double>("control2"), 1954);
+  ASSERT_EQ(item.get<int>(false).size(), 1);
+  EXPECT_EQ(item.get<int>(false)[0], 2011);
+  ASSERT_EQ(item.get<double>(false).size(), 1);
+  EXPECT_EQ(item.get<double>(false)[0], 1954);
+
+  item.set<double>(2013, false);
+
+  EXPECT_EQ(params.get<int>("control"), 2011);
+  EXPECT_EQ(params.get<double>("control2"), 2013);
+  ASSERT_EQ(item.get<int>(false).size(), 1);
+  EXPECT_EQ(item.get<int>(false)[0], 2011);
+  ASSERT_EQ(item.get<double>(false).size(), 1);
+  EXPECT_EQ(item.get<double>(false)[0], 2013);
+
+  EXPECT_FALSE(item.check<int>());
+  EXPECT_FALSE(item.check<double>());
 }
 
 TEST(ControllableItem, errors)

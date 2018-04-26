@@ -73,7 +73,8 @@ InputParameterWarehouse::addInputParameters(const std::string & name,
       for (const auto & object_name : object_names)
       {
         MooseObjectParameterName param_name(object_name, name);
-        _controllable_items[tid].emplace_back(libmesh_make_unique<ControllableItem>(param_name, value));
+        _controllable_items[tid].emplace_back(
+            libmesh_make_unique<ControllableItem>(param_name, value));
       }
   }
 
@@ -147,13 +148,13 @@ InputParameterWarehouse::addControllableParameterConnection(const MooseObjectPar
 {
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
   {
-    std::vector<ControllableItem*> masters = getControllableItems(master, tid);
+    std::vector<ControllableItem *> masters = getControllableItems(master, tid);
     if (masters.empty() && error_on_empty)
       mooseError("Unable to located parameter with name ", master);
     else if (masters.empty())
       return;
 
-    std::vector<ControllableItem*> slaves = getControllableItems(slave, tid);
+    std::vector<ControllableItem *> slaves = getControllableItems(slave, tid);
     if (slaves.empty() && error_on_empty)
       mooseError("Unable to located parameter with name ", slave);
     else if (slaves.empty())
@@ -172,20 +173,21 @@ InputParameterWarehouse::addControllableParameterAlias(const MooseObjectParamete
 {
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
   {
-    std::vector<ControllableItem*> slaves = getControllableItems(slave, tid);
+    std::vector<ControllableItem *> slaves = getControllableItems(slave, tid);
     if (slaves.empty())
       mooseError("Unable to located parameter with name ", slave);
 
     for (auto slave_ptr : slaves)
-      _controllable_items[tid].emplace_back(libmesh_make_unique<ControllableAlias>(alias, slave_ptr));
+      _controllable_items[tid].emplace_back(
+          libmesh_make_unique<ControllableAlias>(alias, slave_ptr));
   }
 }
 
-std::vector<ControllableItem*>
+std::vector<ControllableItem *>
 InputParameterWarehouse::getControllableItems(const MooseObjectParameterName & input,
-                                             THREAD_ID tid /*=0*/) const
+                                              THREAD_ID tid /*=0*/) const
 {
-  std::vector<ControllableItem*> output;
+  std::vector<ControllableItem *> output;
   for (auto & ptr : _controllable_items[tid])
     if (ptr->name() == input)
       output.push_back(ptr.get());

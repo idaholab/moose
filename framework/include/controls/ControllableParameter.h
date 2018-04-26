@@ -61,6 +61,12 @@ public:
   std::vector<T> get(bool type_check = true, bool warn_when_values_difffer = false) const;
 
   /**
+   * Check size() and the type of the stored items, i.e., there must be items with the given type.
+   */
+  template <typename T>
+  bool check();
+
+  /**
    * Adds the supplied item with the other items within this object.
    */
   void add(ControllableItem * item);
@@ -69,7 +75,6 @@ public:
   friend std::ostream & operator<<(std::ostream & stream, const ControllableParameter & obj);
 
 private:
-
   /// Storage for the ControllableItems, these are stored as pointers to avoid copies.
   std::vector<ControllableItem *> _items;
 };
@@ -114,4 +119,16 @@ ControllableParameter::get(bool type_check /*=true*/, bool warn_when_values_diff
 
   return output;
 }
+
+template <typename T>
+bool
+ControllableParameter::check()
+{
+  bool type = std::all_of(
+      _items.begin(), _items.end(), [](ControllableItem * item) { return item->check<T>(); });
+  return type && !empty();
+}
+
+
+
 #endif // CONTROLLABLEPARAMETER_H

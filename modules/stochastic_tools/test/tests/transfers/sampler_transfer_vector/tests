@@ -12,13 +12,13 @@
   [./size_mismatch]
     type = RunException
     input = master_size_mismatch.i
-    expect_err = "The std::vector<Real> parameters beging controlled must all be the same size:"
+    expect_err = "The std::vector<Real> parameters being controlled must all be the same size:"
   [../]
   [./invalid_name]
     type = RunException
     input = master.i
     cli_args = "Transfers/sub/parameters=foo :Outputs/csv=false"
-    expect_err = "Unable to locate a Real or std::vector<Real> parameter with the name 'foo.'"
+    expect_err = "The desired parameter 'foo' was not located, it either does not exist or has not been declared as controllable."
   [../]
   [./extra_data]
     type = RunException

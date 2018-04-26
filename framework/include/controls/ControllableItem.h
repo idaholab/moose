@@ -65,6 +65,12 @@ public:
   template <typename T>
   std::vector<T> get(bool type_check = true) const;
 
+  /**
+   * Return true if the template argument is valid for ALL itemes.
+   */
+  template <typename T>
+  bool check() const;
+
   ///@{
   /**
    * Use the master name for comparison operators to allow object to work within a set/map.
@@ -94,15 +100,14 @@ public:
    * Methods for ControlOutput::outputChangedControls, these don't have meaning outside of this
    * function.
    */
-  void resetChanged(){ _changed = false; }
-  bool isChanged(){ return _changed; }
+  void resetChanged() { _changed = false; }
+  bool isChanged() { return _changed; }
   ///@}
 
   /// Allows this to be used with std:: cout
   friend std::ostream & operator<<(std::ostream & stream, const ControllableItem & obj);
 
 protected:
-
   /**
    * Constructor for creating an empty item (see ControllableAlias)
    */
@@ -157,6 +162,30 @@ ControllableItem::get(bool type_check /*=true*/) const
       output.push_back(param->get());
   }
   return output;
+}
+
+template <typename T>
+bool
+ControllableItem::check() const
+{
+  return std::all_of(_pairs.begin(),
+                     _pairs.end(),
+                     [](std::pair<MooseObjectParameterName, libMesh::Parameters::Value *> pair) {
+                       libMesh::Parameters::Parameter<T> * param =
+                           dynamic_cast<libMesh::Parameters::Parameter<T> *>(pair.second);
+                       return param != nullptr;
+                     });
+
+  /*
+  for (auto & pair : _pairs)
+  {
+    libMesh::Parameters::Parameter<T> * param =
+        dynamic_cast<libMesh::Parameters::Parameter<T> *>(pair.second);
+    if (param == nullptr)
+      return false;
+  }
+  return true;
+  */
 }
 
 /**

@@ -99,7 +99,6 @@ TEST(InputParameterWarehouse, getControllableParameter)
   EXPECT_EQ(params.get<int>("control2"), 2009);
 }
 
-
 TEST(InputParameterWarehouse, addControllableParameterConnection)
 {
   // One-to-one

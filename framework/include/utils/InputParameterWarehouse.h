@@ -74,7 +74,7 @@ public:
    */
   void addControllableParameterConnection(const MooseObjectParameterName & master,
                                           const MooseObjectParameterName & slave,
-    bool error_on_empty = true);
+                                          bool error_on_empty = true);
 
   /**
    * Method for creating alias to an existing controllable parameters.
@@ -82,9 +82,8 @@ public:
    * @param alias The new name to serve as an alias.
    * @param slave The name of the slave parameter to be aliased.
    */
-  void
-  addControllableParameterAlias(const MooseObjectParameterName & alias,
-                                const MooseObjectParameterName & slave);
+  void addControllableParameterAlias(const MooseObjectParameterName & alias,
+                                     const MooseObjectParameterName & slave);
 
   /***
    * Helper method for printing controllable items.
@@ -131,8 +130,8 @@ private:
    * Returns a ControllableItem iterator, if the name is located.
    * @see Control
    */
-  std::vector<ControllableItem*>
-  getControllableItems(const MooseObjectParameterName & desired, THREAD_ID tid = 0) const;
+  std::vector<ControllableItem *> getControllableItems(const MooseObjectParameterName & desired,
+                                                       THREAD_ID tid = 0) const;
 
   ///@{
   /**

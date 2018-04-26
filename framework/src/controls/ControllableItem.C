@@ -16,9 +16,7 @@ ControllableItem::ControllableItem(const MooseObjectParameterName & name,
   _pairs.emplace_back(name, value);
 }
 
-ControllableItem::ControllableItem()
-{
-}
+ControllableItem::ControllableItem() {}
 
 void
 ControllableItem::connect(ControllableItem * item, bool type_check)
@@ -55,7 +53,8 @@ ControllableItem::dump(unsigned int indent /*=0*/) const
     if (index == 0) // master parameter
       oss << ConsoleUtils::indent(indent) << COLOR_GREEN << pair.first << COLOR_DEFAULT << " = ";
     else // slave parameters
-      oss << ConsoleUtils::indent(indent + 2) << COLOR_YELLOW << pair.first << COLOR_DEFAULT << " = ";
+      oss << ConsoleUtils::indent(indent + 2) << COLOR_YELLOW << pair.first << COLOR_DEFAULT
+          << " = ";
 
     pair.second->print(oss);
     oss << " <" << pair.second->type() << ">" << '\n';
@@ -76,9 +75,8 @@ ControllableItem::name() const
   return _pairs[0].first;
 }
 
-ControllableAlias::ControllableAlias(const MooseObjectParameterName & name, ControllableItem * item) :
-    ControllableItem(),
-    _name(name)
+ControllableAlias::ControllableAlias(const MooseObjectParameterName & name, ControllableItem * item)
+  : ControllableItem(), _name(name)
 {
   connect(item, false);
 }

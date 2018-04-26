@@ -58,10 +58,43 @@ Control::getExecuteOptions()
 }
 
 ControllableParameter
-Control::getControllableParameterHelper(const MooseObjectParameterName & name)
+Control::getControllableParameter(const std::string & name)
+{
+  return getControllableParameterByName(getParam<std::string>(name));
+}
+
+ControllableParameter
+Control::getControllableParameterByName(const std::string & name)
+{
+  MooseObjectParameterName desired(name);
+  return getControllableParameterByName(desired);
+}
+
+ControllableParameter
+Control::getControllableParameterByName(const std::string & tag,
+                                        const std::string & object_name,
+                                        const std::string & param_name)
+{
+  MooseObjectParameterName desired(tag, object_name, param_name);
+  return getControllableParameterByName(desired);
+}
+
+ControllableParameter
+Control::getControllableParameterByName(const MooseObjectName & object_name,
+                                        const std::string & param_name)
+{
+  MooseObjectParameterName desired(object_name, param_name);
+  return getControllableParameterByName(desired);
+}
+
+ControllableParameter
+Control::getControllableParameterByName(const MooseObjectParameterName & name)
 {
   ControllableParameter out = _input_parameter_warehouse.getControllableParameter(name, _tid);
   if (out.empty())
-    mooseError("The desired parameter '", name, "' was not located, it either does not exist or has not been declared as controllable.");
+    mooseError(
+        "The desired parameter '",
+        name,
+        "' was not located, it either does not exist or has not been declared as controllable.");
   return out;
 }

@@ -36,7 +36,9 @@ TEST(ControllableParameter, basic)
   MooseObjectParameterName name("System", "Object", "control");
   ControllableItem item(name, value);
   ControllableParameter param;
+  EXPECT_FALSE(param.check<int>());
   param.add(&item);
+  EXPECT_TRUE(param.check<int>());
 
   EXPECT_EQ(params.get<int>("control"), 1949);
   EXPECT_EQ(param.get<int>(), std::vector<int>(1, 1949));
@@ -60,8 +62,10 @@ TEST(ControllableParameter, multiple)
   ControllableItem item2(name2, value2);
 
   ControllableParameter param;
+  EXPECT_FALSE(param.check<int>());
   param.add(&item);
   param.add(&item2);
+  EXPECT_TRUE(param.check<int>());
 
   EXPECT_EQ(params.get<int>("control"), 1949);
   EXPECT_EQ(params.get<int>("control2"), 1954);
@@ -89,6 +93,8 @@ TEST(ControllableParameter, multiple_types)
   ControllableItem item2(name2, value2);
 
   ControllableParameter param;
+  EXPECT_FALSE(param.check<std::string>());
+
   param.add(&item);
   param.add(&item2);
 
@@ -111,6 +117,9 @@ TEST(ControllableParameter, multiple_types)
   EXPECT_EQ(params.get<double>("control2"), 1980);
   ASSERT_EQ(param.get<double>(false).size(), 1);
   EXPECT_EQ(param.get<double>(false)[0], 1980);
+
+  EXPECT_FALSE(param.check<int>());
+  EXPECT_FALSE(param.check<double>());
 }
 
 TEST(ControllableParameter, errors)
