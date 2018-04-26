@@ -10,6 +10,7 @@
 #include "PorousFlowBrineCO2.h"
 #include "BrineFluidProperties.h"
 #include "SinglePhaseFluidPropertiesPT.h"
+#include "MathUtils.h"
 
 registerMooseObject("PorousFlowApp", PorousFlowBrineCO2);
 
@@ -265,10 +266,11 @@ PorousFlowBrineCO2::gasProperties(Real pressure,
 {
   FluidStateProperties & gas = fsp[_gas_phase_number];
 
-  // Gas density and viscosity are approximated with pure CO2 - no correction due
+  // Gas density, viscosity and enthalpy are approximated with pure CO2 - no correction due
   // to the small amount of water vapor is made
   Real co2_density, dco2_density_dp, dco2_density_dT;
   Real co2_viscosity, dco2_viscosity_dp, dco2_viscosity_dT;
+  Real co2_enthalpy, dco2_enthalpy_dp, dco2_enthalpy_dT;
   _co2_fp.rho_mu_dpT(pressure,
                      temperature,
                      co2_density,
@@ -277,6 +279,8 @@ PorousFlowBrineCO2::gasProperties(Real pressure,
                      co2_viscosity,
                      dco2_viscosity_dp,
                      dco2_viscosity_dT);
+
+  _co2_fp.h_dpT(pressure, temperature, co2_enthalpy, dco2_enthalpy_dp, dco2_enthalpy_dT);
 
   // Save the values to the FluidStateProperties object. Note that derivatives wrt z are 0
   gas.density = co2_density;
@@ -288,6 +292,11 @@ PorousFlowBrineCO2::gasProperties(Real pressure,
   gas.dviscosity_dp = dco2_viscosity_dp;
   gas.dviscosity_dT = dco2_viscosity_dT;
   gas.dviscosity_dz = 0.0;
+
+  gas.enthalpy = co2_enthalpy;
+  gas.denthalpy_dp = dco2_enthalpy_dp;
+  gas.denthalpy_dT = dco2_enthalpy_dT;
+  gas.denthalpy_dz = 0.0;
 }
 
 void
@@ -350,6 +359,34 @@ PorousFlowBrineCO2::liquidProperties(Real pressure,
                     dliquid_viscosity_dT,
                     dliquid_viscosity_dx);
 
+  // Liquid enthalpy (including contribution due to the enthalpy of dissolution)
+  Real brine_enthalpy, dbrine_enthalpy_dp, dbrine_enthalpy_dT, dbrine_enthalpy_dx;
+  _brine_fp.h_dpTx(pressure,
+                   temperature,
+                   xnacl,
+                   brine_enthalpy,
+                   dbrine_enthalpy_dp,
+                   dbrine_enthalpy_dT,
+                   dbrine_enthalpy_dx);
+
+  // Enthalpy of CO2
+  Real co2_enthalpy, dco2_enthalpy_dp, dco2_enthalpy_dT;
+  _co2_fp.h_dpT(pressure, temperature, co2_enthalpy, dco2_enthalpy_dp, dco2_enthalpy_dT);
+
+  // Enthalpy of dissolution
+  Real hdis, dhdis_dT;
+  enthalpyOfDissolution(temperature, hdis, dhdis_dT);
+
+  const Real liquid_enthalpy = (1.0 - Xco2) * brine_enthalpy + Xco2 * (co2_enthalpy + hdis);
+  const Real dliquid_enthalpy_dp = (1.0 - Xco2) * dbrine_enthalpy_dp + Xco2 * dco2_enthalpy_dp +
+                                   dXco2_dp * (co2_enthalpy + hdis - brine_enthalpy);
+  const Real dliquid_enthalpy_dT = (1.0 - Xco2) * dbrine_enthalpy_dT +
+                                   Xco2 * (dco2_enthalpy_dT + dhdis_dT) +
+                                   dXco2_dT * (co2_enthalpy + hdis - brine_enthalpy);
+  const Real dliquid_enthalpy_dz = dXco2_dz * (co2_enthalpy + hdis - brine_enthalpy);
+  const Real dliquid_enthalpy_dx =
+      (1.0 - Xco2) * dbrine_enthalpy_dx + dXco2_dx * (co2_enthalpy + hdis - brine_enthalpy);
+
   // Save the values to the FluidStateProperties object
   liquid.density = liquid_density;
   liquid.ddensity_dp = dliquid_density_dp;
@@ -362,6 +399,12 @@ PorousFlowBrineCO2::liquidProperties(Real pressure,
   liquid.dviscosity_dT = dliquid_viscosity_dT;
   liquid.dviscosity_dz = 0.0;
   liquid.dviscosity_dx = dliquid_viscosity_dx;
+
+  liquid.enthalpy = liquid_enthalpy;
+  liquid.denthalpy_dp = dliquid_enthalpy_dp;
+  liquid.denthalpy_dT = dliquid_enthalpy_dT;
+  liquid.denthalpy_dz = dliquid_enthalpy_dz;
+  liquid.denthalpy_dx = dliquid_enthalpy_dx;
 }
 
 void
@@ -840,6 +883,73 @@ PorousFlowBrineCO2::totalMassFraction(Real pressure,
                  (saturation * gas.density + liquid_saturation * liquid.density);
 
   return z;
+}
+
+void
+PorousFlowBrineCO2::henryConstant(
+    Real temperature, Real xnacl, Real & Kh, Real & dKh_dT, Real & dKh_dx) const
+{
+  // Henry's constant for dissolution in water
+  Real Kh_h2o, dKh_h2o_dT;
+  _co2_fp.henryConstant_dT(temperature, Kh_h2o, dKh_h2o_dT);
+
+  // The correction to salt is obtained through the salting out coefficient
+  const std::vector<Real> b{1.19784e-1, -7.17823e-4, 4.93854e-6, -1.03826e-8, 1.08233e-11};
+
+  // Need temperature in Celcius
+  const Real Tc = temperature - _T_c2k;
+
+  Real kb = 0.0;
+  for (unsigned int i = 0; i < b.size(); ++i)
+    kb += b[i] * MathUtils::pow(Tc, i);
+
+  Real dkb_dT = 0.0;
+  for (unsigned int i = 1; i < b.size(); ++i)
+    dkb_dT += i * b[i] * MathUtils::pow(Tc, i - 1);
+
+  // Need salt mass fraction in molality
+  const Real xmol = xnacl / (1.0 - xnacl) / _Mnacl;
+  const Real dxmol_dx = 1.0 / (1.0 - xnacl) / (1.0 - xnacl) / _Mnacl;
+  // Henry's constant and its derivative wrt temperature and salt mass fraction
+  Kh = Kh_h2o * std::pow(10.0, xmol * kb);
+  dKh_dT = (xmol * std::log(10.0) * dkb_dT + dKh_h2o_dT / Kh_h2o) * Kh;
+  dKh_dx = std::log(10.0) * kb * dxmol_dx * Kh;
+}
+
+void
+PorousFlowBrineCO2::enthalpyOfDissolutionGas(
+    Real temperature, Real xnacl, Real & hdis, Real & dhdis_dT, Real & dhdis_dx) const
+{
+  // Henry's constant
+  Real Kh, dKh_dT, dKh_dx;
+  henryConstant(temperature, xnacl, Kh, dKh_dT, dKh_dx);
+
+  hdis = -_R * temperature * temperature * dKh_dT / Kh / _Mco2;
+
+  // Derivative of enthalpy of dissolution wrt temperature and xnacl requires the second
+  // derivatives of Henry's constant. For simplicity, approximate these numerically
+  const Real dT = temperature * 1.0e-8;
+  const Real T2 = temperature + dT;
+  henryConstant(T2, xnacl, Kh, dKh_dT, dKh_dx);
+
+  dhdis_dT = (-_R * T2 * T2 * dKh_dT / Kh / _Mco2 - hdis) / dT;
+
+  const Real dx = xnacl * 1.0e-8;
+  const Real x2 = xnacl + dx;
+  henryConstant(temperature, x2, Kh, dKh_dT, dKh_dx);
+
+  dhdis_dx = (-_R * temperature * temperature * dKh_dT / Kh / _Mco2 - hdis) / dx;
+}
+
+void
+PorousFlowBrineCO2::enthalpyOfDissolution(Real temperature, Real & hdis, Real & dhdis_dT) const
+{
+  // Linear fit to model of Duan and Sun (2003) (in kJ/mol)
+  const Real delta_h = -58.3533 + 0.134519 * temperature;
+
+  // Convert to J/kg
+  hdis = delta_h * 1000.0 / _Mco2;
+  dhdis_dT = 134.519 / _Mco2;
 }
 
 void
