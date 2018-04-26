@@ -272,7 +272,6 @@ Transient::init()
   {
     InputParameters pars = _app.getFactory().getValidParams("ConstantDT");
     pars.set<SubProblem *>("_subproblem") = &_problem;
-    pars.set<FEProblemBase *>("_fe_problem_base") = &_problem;
     pars.set<Transient *>("_executioner") = this;
 
     /**

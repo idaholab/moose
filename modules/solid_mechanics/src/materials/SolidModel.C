@@ -1600,6 +1600,7 @@ SolidModel::createConstitutiveModel(const std::string & cm_name)
   params.set_attributes("absolute_tolerance", false);
   params.set_attributes("relative_tolerance", false);
   params.set_attributes("max_its", false);
+
   params += parameters();
   MooseSharedPointer<ConstitutiveModel> cm =
       factory.create<ConstitutiveModel>(cm_name, name() + "Model", params, _tid);

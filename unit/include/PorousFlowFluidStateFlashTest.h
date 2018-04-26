@@ -45,18 +45,16 @@ protected:
 
     InputParameters problem_params = _factory->getValidParams("FEProblem");
     problem_params.set<MooseMesh *>("mesh") = _mesh.get();
-    problem_params.set<std::string>("name") = "problem";
     problem_params.set<std::string>("_object_name") = "name2";
-    _fe_problem = libmesh_make_unique<FEProblem>(problem_params);
+    auto fep = _factory->create<FEProblemBase>("FEProblem", "problem", problem_params);
 
     InputParameters uo_params = _factory->getValidParams("PorousFlowFluidStateFlash");
-    _fe_problem->addUserObject("PorousFlowFluidStateFlash", "fp", uo_params);
-    _fp = &_fe_problem->getUserObject<PorousFlowFluidStateFlash>("fp");
+    fep->addUserObject("PorousFlowFluidStateFlash", "fp", uo_params);
+    _fp = &fep->getUserObject<PorousFlowFluidStateFlash>("fp");
   }
 
+  std::unique_ptr<MooseMesh> _mesh; // mesh must destruct last and so be declared first
   MooseAppPtr _app;
-  std::unique_ptr<MooseMesh> _mesh;
-  std::unique_ptr<FEProblem> _fe_problem;
   Factory * _factory;
   const PorousFlowFluidStateFlash * _fp;
 };

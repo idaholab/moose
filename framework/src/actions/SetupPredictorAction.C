@@ -39,7 +39,6 @@ SetupPredictorAction::act()
     if (transient == NULL)
       mooseError("You can setup time stepper only with executioners of transient type.");
 
-    _moose_object_pars.set<FEProblemBase *>("_fe_problem_base") = _problem.get();
     _moose_object_pars.set<Transient *>("_executioner") = transient;
     std::shared_ptr<Predictor> predictor =
         _factory.create<Predictor>(_type, "Predictor", _moose_object_pars);

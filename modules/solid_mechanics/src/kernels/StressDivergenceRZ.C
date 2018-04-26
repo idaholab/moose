@@ -33,6 +33,14 @@ validParams<StressDivergenceRZ>()
   params.addCoupledVar("disp_z", "The z displacement");
   params.addCoupledVar("temp", "The temperature");
 
+  params.addParam<Real>("zeta", 0.0, "Stiffness dependent damping parameter for Rayleigh damping");
+  params.addParam<Real>("alpha", 0.0, "alpha parameter for HHT time integration");
+  params.addParam<std::string>(
+      "appended_property_name", "", "Name appended to material properties to make them unique");
+  params.addParam<bool>("volumetric_locking_correction",
+                        true,
+                        "Set to false to turn off volumetric locking correction");
+
   params.set<bool>("use_displaced_mesh") = true;
 
   return params;

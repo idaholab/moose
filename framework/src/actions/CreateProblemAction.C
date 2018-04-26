@@ -78,12 +78,6 @@ CreateProblemAction::act()
       _moose_object_pars.set<MooseMesh *>("mesh") = _mesh.get();
       _moose_object_pars.set<bool>("use_nonlinear") = _app.useNonlinear();
 
-#ifdef LIBMESH_HAVE_PETSC
-      // put in empty arrays for PETSc options
-      _moose_object_pars.set<MultiMooseEnum>("petsc_options") = MultiMooseEnum("", "", true);
-      _moose_object_pars.set<std::vector<std::string>>("petsc_inames") = std::vector<std::string>();
-      _moose_object_pars.set<std::vector<std::string>>("petsc_values") = std::vector<std::string>();
-#endif
       _problem =
           _factory.create<FEProblemBase>(_type, getParam<std::string>("name"), _moose_object_pars);
       if (!_problem.get())

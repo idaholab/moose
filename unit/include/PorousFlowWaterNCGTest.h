@@ -54,35 +54,33 @@ protected:
 
     InputParameters problem_params = _factory->getValidParams("FEProblem");
     problem_params.set<MooseMesh *>("mesh") = _mesh.get();
-    problem_params.set<std::string>("name") = "problem";
     problem_params.set<std::string>("_object_name") = "name2";
-    _fe_problem = libmesh_make_unique<FEProblem>(problem_params);
+    auto fep = _factory->create<FEProblemBase>("FEProblem", "problem", problem_params);
 
     InputParameters pc_params = _factory->getValidParams("PorousFlowCapillaryPressureVG");
     pc_params.set<Real>("m") = 0.5;
     pc_params.set<Real>("alpha") = 0.1;
-    _fe_problem->addUserObject("PorousFlowCapillaryPressureVG", "pc", pc_params);
-    _pc = &_fe_problem->getUserObject<PorousFlowCapillaryPressureVG>("pc");
+    fep->addUserObject("PorousFlowCapillaryPressureVG", "pc", pc_params);
+    _pc = &fep->getUserObject<PorousFlowCapillaryPressureVG>("pc");
 
     InputParameters water_params = _factory->getValidParams("Water97FluidProperties");
-    _fe_problem->addUserObject("Water97FluidProperties", "water_fp", water_params);
-    _water_fp = &_fe_problem->getUserObject<Water97FluidProperties>("water_fp");
+    fep->addUserObject("Water97FluidProperties", "water_fp", water_params);
+    _water_fp = &fep->getUserObject<Water97FluidProperties>("water_fp");
 
     InputParameters ncg_params = _factory->getValidParams("CO2FluidProperties");
-    _fe_problem->addUserObject("CO2FluidProperties", "ncg_fp", ncg_params);
-    _ncg_fp = &_fe_problem->getUserObject<CO2FluidProperties>("ncg_fp");
+    fep->addUserObject("CO2FluidProperties", "ncg_fp", ncg_params);
+    _ncg_fp = &fep->getUserObject<CO2FluidProperties>("ncg_fp");
 
     InputParameters uo_params = _factory->getValidParams("PorousFlowWaterNCG");
     uo_params.set<UserObjectName>("water_fp") = "water_fp";
     uo_params.set<UserObjectName>("gas_fp") = "ncg_fp";
     uo_params.set<UserObjectName>("capillary_pressure") = "pc";
-    _fe_problem->addUserObject("PorousFlowWaterNCG", "fp", uo_params);
-    _fp = &_fe_problem->getUserObject<PorousFlowWaterNCG>("fp");
+    fep->addUserObject("PorousFlowWaterNCG", "fp", uo_params);
+    _fp = &fep->getUserObject<PorousFlowWaterNCG>("fp");
   }
 
+  std::unique_ptr<MooseMesh> _mesh; // mesh must destruct last and so be declared first
   MooseAppPtr _app;
-  std::unique_ptr<MooseMesh> _mesh;
-  std::unique_ptr<FEProblem> _fe_problem;
   Factory * _factory;
   const PorousFlowCapillaryPressureVG * _pc;
   const PorousFlowWaterNCG * _fp;

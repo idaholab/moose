@@ -44,20 +44,18 @@ protected:
 
     InputParameters problem_params = _factory->getValidParams("FEProblem");
     problem_params.set<MooseMesh *>("mesh") = _mesh.get();
-    problem_params.set<std::string>("name") = "problem";
     problem_params.set<std::string>("_object_name") = "name2";
-    _fe_problem = libmesh_make_unique<FEProblem>(problem_params);
+    auto fep = _factory->create<FEProblemBase>("FEProblem", "problem", problem_params);
 
     InputParameters uo_pars = _factory->getValidParams("IdealGasFluidProperties");
     uo_pars.set<Real>("R") = 287.04;
     uo_pars.set<Real>("gamma") = 1.41;
-    _fe_problem->addUserObject("IdealGasFluidProperties", "fp", uo_pars);
-    _fp = &_fe_problem->getUserObject<IdealGasFluidProperties>("fp");
+    fep->addUserObject("IdealGasFluidProperties", "fp", uo_pars);
+    _fp = &fep->getUserObject<IdealGasFluidProperties>("fp");
   }
 
+  std::unique_ptr<MooseMesh> _mesh; // mesh must destruct last and so be declared first
   std::shared_ptr<MooseApp> _app;
-  std::unique_ptr<MooseMesh> _mesh;
-  std::unique_ptr<FEProblem> _fe_problem;
   Factory * _factory;
   const IdealGasFluidProperties * _fp;
 };

@@ -233,7 +233,6 @@ MaterialDerivativeTestAction::act()
 
     if (_problem.get() != nullptr)
     {
-      params.set<FEProblemBase *>("_fe_problem_base") = _problem.get();
       std::shared_ptr<MoosePreconditioner> pc =
           _factory.create<MoosePreconditioner>("SMP", "material_derivative_SMP", params);
 
