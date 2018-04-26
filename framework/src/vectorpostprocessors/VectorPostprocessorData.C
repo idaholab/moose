@@ -15,10 +15,24 @@ VectorPostprocessorData::VectorPostprocessorData(FEProblemBase & fe_problem)
 {
 }
 
+void
+VectorPostprocessorData::init(const std::string & /*name*/)
+{
+}
+
+bool
+VectorPostprocessorData::containsCompleteHistory(const std::string & name) const
+{
+  auto it = _vpp_data.find(name);
+  mooseAssert(it != _vpp_data.end(), std::string("VectorPostprocessor ") + name + " not found!");
+
+  return it->second._contains_complete_history;
+}
+
 bool
 VectorPostprocessorData::hasVectorPostprocessor(const std::string & name)
 {
-  return (_values.find(name) != _values.end());
+  return (_vpp_data.find(name) != _vpp_data.end());
 }
 
 VectorPostprocessorValue &
@@ -27,7 +41,7 @@ VectorPostprocessorData::getVectorPostprocessorValue(const VectorPostprocessorNa
 {
   _requested_items.emplace(vpp_name + "::" + vector_name);
 
-  return getVectorPostprocessorHelper(vpp_name, vector_name, true);
+  return getVectorPostprocessorHelper(vpp_name, vector_name);
 }
 
 VectorPostprocessorValue &
@@ -41,33 +55,44 @@ VectorPostprocessorData::getVectorPostprocessorValueOld(const VectorPostprocesso
 
 VectorPostprocessorValue &
 VectorPostprocessorData::declareVector(const std::string & vpp_name,
-                                       const std::string & vector_name)
+                                       const std::string & vector_name,
+                                       bool contains_complete_history)
 {
   _supplied_items.emplace(vpp_name + "::" + vector_name);
 
-  return getVectorPostprocessorHelper(vpp_name, vector_name, true);
+  return getVectorPostprocessorHelper(vpp_name, vector_name, true, contains_complete_history);
 }
 
 VectorPostprocessorValue &
 VectorPostprocessorData::getVectorPostprocessorHelper(const VectorPostprocessorName & vpp_name,
                                                       const std::string & vector_name,
-                                                      bool get_current)
+                                                      bool get_current,
+                                                      bool contains_complete_history)
 {
-  // Intentional use of RHS brackets on a std::map to do a retrieve or insert
-  auto & vec_storage = _values[vpp_name];
+  // Retrieve or create the data structure for this VPP
+  auto vec_it_pair = _vpp_data.emplace(
+      std::piecewise_construct, std::forward_as_tuple(vpp_name), std::forward_as_tuple());
+  auto & vec_storage = vec_it_pair.first->second;
 
-  // lambda for doing compairison on name (i.e., first item in pair)
+  // If the VPP is declaring a vector, see if complete history is needed. Note: This parameter
+  // is constant and applies to _all_ declared vectors.
+  vec_storage._contains_complete_history |= contains_complete_history;
+
+  // Keep track of whether an old vector is needed for copying back later.
+  if (!get_current)
+    vec_storage._needs_old = true;
+
+  // lambda for doing comparison on name (i.e., first item in pair)
   auto comp = [&vector_name](std::pair<std::string, VectorPostprocessorState> & pair) {
     return pair.first == vector_name;
   };
-
   // Search for the vector, if it is not located create the entry in the storage
-  auto iter = std::find_if(vec_storage.rbegin(), vec_storage.rend(), comp);
-  if (iter == vec_storage.rend())
+  auto iter = std::find_if(vec_storage._values.rbegin(), vec_storage._values.rend(), comp);
+  if (iter == vec_storage._values.rend())
   {
-    vec_storage.emplace_back(
-        std::pair<std::string, VectorPostprocessorState>(vector_name, VectorPostprocessorState()));
-    iter = vec_storage.rbegin();
+    vec_storage._values.emplace_back(
+        std::piecewise_construct, std::forward_as_tuple(vector_name), std::forward_as_tuple());
+    iter = vec_storage._values.rbegin();
   }
 
   auto & vec_struct = iter->second;
@@ -86,22 +111,53 @@ VectorPostprocessorData::getVectorPostprocessorHelper(const VectorPostprocessorN
 bool
 VectorPostprocessorData::hasVectors(const std::string & vpp_name) const
 {
-  return _values.find(vpp_name) != _values.end();
+  auto it_pair = _vpp_data.find(vpp_name);
+  if (it_pair != _vpp_data.end())
+    return !it_pair->second._values.empty();
+
+  return false;
 }
 
 const std::vector<std::pair<std::string, VectorPostprocessorData::VectorPostprocessorState>> &
 VectorPostprocessorData::vectors(const std::string & vpp_name) const
 {
-  auto vec_pair = _values.find(vpp_name);
-  mooseAssert(vec_pair != _values.end(), "No vectors found for vpp_name: " << vpp_name);
+  auto it_pair = _vpp_data.find(vpp_name);
+  mooseAssert(it_pair != _vpp_data.end(), "No vectors found for vpp_name: " << vpp_name);
 
-  return vec_pair->second;
+  return it_pair->second._values;
 }
 
 void
 VectorPostprocessorData::copyValuesBack()
 {
-  for (const auto & it : _values)
-    for (const auto & vec_it : it.second)
-      vec_it.second.old->swap(*vec_it.second.current);
+  /**
+   * Depending on the needs of this VPP, we'll perform
+   * different actions on the vectors as time is advanced.
+   *
+   *   Need Old | Preserve History | Action
+   *  --------------------------------------
+   *    False   |      False       |  None
+   *    False   |      True        |  None
+   *    True    |      False       |  Swap
+   *    True    |      True        |  Copy
+   */
+  for (const auto & vec_pair : _vpp_data)
+  {
+    bool needs_old = vec_pair.second._needs_old;
+    bool preserve_history = vec_pair.second._contains_complete_history;
+
+    if (!needs_old)
+      continue;
+
+    for (const auto & vec_it : vec_pair.second._values)
+      if (preserve_history)
+        *vec_it.second.old = *vec_it.second.current;
+      else
+        vec_it.second.old->swap(*vec_it.second.current);
+  }
+}
+
+VectorPostprocessorData::VectorPostprocessorVectors::VectorPostprocessorVectors()
+  : _contains_complete_history(false), _needs_old(false)
+{
 }

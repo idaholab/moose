@@ -27,8 +27,7 @@ public:
   PostprocessorData(FEProblemBase & fe_problem);
 
   /**
-   * Initialization method, sets the current and old value to 0.0 for this
-   * postprocessor
+   * Initialization method, sets the current and old value to 0.0 for this postprocessor
    */
   void init(const std::string & name);
 

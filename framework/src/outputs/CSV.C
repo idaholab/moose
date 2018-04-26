@@ -110,6 +110,8 @@ CSV::output(const ExecFlagType & type)
     _all_data_table.printCSV(filename(), 1, _align);
   }
 
+  const auto & vpp_data = _problem_ptr->getVectorPostprocessorData();
+
   // Output each VectorPostprocessor's data to a file
   if (_write_vector_table && processor_id() == 0)
   {
@@ -117,8 +119,11 @@ CSV::output(const ExecFlagType & type)
     {
       std::ostringstream output;
       output << _file_base << "_" << MooseUtils::shortName(it.first);
-      output << "_" << std::setw(_padding) << std::setprecision(0) << std::setfill('0')
-             << std::right << timeStep() << ".csv";
+
+      if (!vpp_data.containsCompleteHistory(it.first))
+        output << "_" << std::setw(_padding) << std::setprecision(0) << std::setfill('0')
+               << std::right << timeStep();
+      output << ".csv";
 
       it.second.setDelimiter(_delimiter);
       it.second.setPrecision(_precision);

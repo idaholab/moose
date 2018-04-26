@@ -21,6 +21,12 @@ validParams<VectorPostprocessor>()
 {
   InputParameters params = validParams<UserObject>();
   params += validParams<OutputInterface>();
+  params.addParam<bool>("contains_complete_history",
+                        false,
+                        "Set this flag to indicate that the values in all vectors declared by this "
+                        "VPP represent a time history (e.g. with each invocation, new values are "
+                        "added and old values are never removed). This changes the output so that "
+                        "only a single file is output and updated with each invocation");
 
   params.addParamNamesToGroup("outputs", "Advanced");
   params.registerBase("VectorPostprocessor");
@@ -31,7 +37,8 @@ VectorPostprocessor::VectorPostprocessor(const InputParameters & parameters)
   : OutputInterface(parameters),
     _vpp_name(MooseUtils::shortName(parameters.get<std::string>("_object_name"))),
     _vpp_fe_problem(parameters.getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")),
-    _vpp_tid(parameters.isParamValid("_tid") ? parameters.get<THREAD_ID>("_tid") : 0)
+    _vpp_tid(parameters.isParamValid("_tid") ? parameters.get<THREAD_ID>("_tid") : 0),
+    _contains_complete_history(parameters.get<bool>("contains_complete_history"))
 {
 }
 
@@ -47,5 +54,6 @@ VectorPostprocessor::declareVector(const std::string & vector_name)
   if (_vpp_tid)
     return _thread_local_vectors.emplace(vector_name, VectorPostprocessorValue()).first->second;
   else
-    return _vpp_fe_problem->declareVectorPostprocessorVector(_vpp_name, vector_name);
+    return _vpp_fe_problem->declareVectorPostprocessorVector(
+        _vpp_name, vector_name, _contains_complete_history);
 }
