@@ -35,6 +35,7 @@ dataStore(std::ostream & stream, FormattedTable & table, void * context)
   storeHelper(stream, table._align_widths, context);
   storeHelper(stream, table._column_names, context);
   storeHelper(stream, table._output_row_index, context);
+  storeHelper(stream, table._headers_output, context);
 }
 
 template <>
@@ -45,6 +46,7 @@ dataLoad(std::istream & stream, FormattedTable & table, void * context)
   loadHelper(stream, table._align_widths, context);
   loadHelper(stream, table._column_names, context);
   loadHelper(stream, table._output_row_index, context);
+  loadHelper(stream, table._headers_output, context);
 
   // Don't assume that the stream is open if we've restored.
   table._stream_open = false;
@@ -76,6 +78,7 @@ FormattedTable::open(const std::string & file_name)
   {
     open_flags |= std::ios::trunc;
     _output_row_index = 0;
+    _headers_output = false;
   }
 
   _output_file.open(file_name.c_str(), open_flags);
@@ -84,6 +87,7 @@ FormattedTable::open(const std::string & file_name)
 
 FormattedTable::FormattedTable()
   : _output_row_index(0),
+    _headers_output(false),
     _stream_open(false),
     _append(false),
     _output_time(true),
@@ -96,6 +100,7 @@ FormattedTable::FormattedTable(const FormattedTable & o)
   : _column_names(o._column_names),
     _output_file_name(""),
     _output_row_index(o._output_row_index),
+    _headers_output(o._headers_output),
     _stream_open(o._stream_open),
     _append(o._append),
     _output_time(o._output_time),
@@ -403,28 +408,27 @@ FormattedTable::printCSV(const std::string & file_name, int interval, bool align
     }
 
     // Output Header
+    if (!_headers_output)
     {
-      bool first = true;
-
       if (_output_time)
       {
         if (align)
           _output_file << std::setw(_align_widths["time"]) << "time";
         else
           _output_file << "time";
-        first = false;
+        _headers_output = true;
       }
 
       for (const auto & col_name : _column_names)
       {
-        if (!first)
+        if (_headers_output)
           _output_file << _csv_delimiter;
 
         if (align)
           _output_file << std::right << std::setw(_align_widths[col_name]) << col_name;
         else
           _output_file << col_name;
-        first = false;
+        _headers_output = true;
       }
       _output_file << "\n";
     }

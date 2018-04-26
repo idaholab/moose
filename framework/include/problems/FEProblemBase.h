@@ -613,6 +613,9 @@ public:
    */
   void initPostprocessorData(const std::string & name);
 
+  /// Initialize the VectorPostprocessor data
+  void initVectorPostprocessorData(const std::string & name);
+
   // UserObjects /////
   virtual void
   addUserObject(std::string user_object_name, const std::string & name, InputParameters parameters);
@@ -733,7 +736,8 @@ public:
    * @return The reference to the vector declared
    */
   VectorPostprocessorValue & declareVectorPostprocessorVector(const VectorPostprocessorName & name,
-                                                              const std::string & vector_name);
+                                                              const std::string & vector_name,
+                                                              bool contains_complete_history);
 
   /**
    * Whether or not the specified VectorPostprocessor has declared any vectors
@@ -1372,14 +1376,9 @@ public:
 
   ExecuteMooseObjectWarehouse<MultiApp> & getMultiAppWarehouse() { return _multi_apps; }
 
-protected:
-  ///@{
-  /**
-   *
-   */
-  VectorPostprocessorData & getVectorPostprocessorData();
-  ///@}
+  const VectorPostprocessorData & getVectorPostprocessorData() const;
 
+protected:
   MooseMesh & _mesh;
   EquationSystems _eq;
   bool _initialized;

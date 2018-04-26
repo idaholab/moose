@@ -50,6 +50,11 @@ public:
    */
   std::string PPName() { return _vpp_name; }
 
+  /**
+   * Return whether or not this VectorPostprocessor contains complete history
+   */
+  bool containsCompleteHistory() const { return _contains_complete_history; }
+
 protected:
   /**
    * Register a new vector to fill up.
@@ -66,6 +71,8 @@ protected:
 
 private:
   THREAD_ID _vpp_tid;
+
+  const bool _contains_complete_history;
 
   std::map<std::string, VectorPostprocessorValue> _thread_local_vectors;
 };

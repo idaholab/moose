@@ -2582,6 +2582,12 @@ FEProblemBase::initPostprocessorData(const std::string & name)
 }
 
 void
+FEProblemBase::initVectorPostprocessorData(const std::string & name)
+{
+  _vpps_data.init(name);
+}
+
+void
 FEProblemBase::addPostprocessor(std::string pp_name,
                                 const std::string & name,
                                 InputParameters parameters)
@@ -2606,6 +2612,7 @@ FEProblemBase::addVectorPostprocessor(std::string pp_name,
                "\" already exists.  You may not add a VectorPostprocessor by the same name.");
 
   addUserObject(pp_name, name, parameters);
+  initVectorPostprocessorData(name);
 }
 
 void
@@ -2713,8 +2720,8 @@ FEProblemBase::getPostprocessorValueOlder(const std::string & name)
   return _pps_data.getPostprocessorValueOlder(name);
 }
 
-VectorPostprocessorData &
-FEProblemBase::getVectorPostprocessorData()
+const VectorPostprocessorData &
+FEProblemBase::getVectorPostprocessorData() const
 {
   return _vpps_data;
 }
@@ -2741,9 +2748,10 @@ FEProblemBase::getVectorPostprocessorValueOld(const std::string & name,
 
 VectorPostprocessorValue &
 FEProblemBase::declareVectorPostprocessorVector(const VectorPostprocessorName & name,
-                                                const std::string & vector_name)
+                                                const std::string & vector_name,
+                                                bool contains_complete_history)
 {
-  return _vpps_data.declareVector(name, vector_name);
+  return _vpps_data.declareVector(name, vector_name, contains_complete_history);
 }
 
 const std::vector<std::pair<std::string, VectorPostprocessorData::VectorPostprocessorState>> &
@@ -3943,6 +3951,7 @@ FEProblemBase::advanceState()
   }
 
   _pps_data.copyValuesBack();
+  _vpps_data.copyValuesBack();
 
   if (_material_props.hasStatefulProperties())
     _material_props.shift();

@@ -26,6 +26,12 @@ public:
    */
   VectorPostprocessorData(FEProblemBase & fe_problem);
 
+  /**
+   * Initialization method, sets the current and old value to 0.0 for this postprocessor
+   */
+  void init(const std::string & name);
+
+  /// VectorPostprocessorState (2 containers for values (see MooseTypes.h)
   struct VectorPostprocessorState
   {
     VectorPostprocessorValue * current;
@@ -40,7 +46,8 @@ public:
    * @param vector_name The name of the vector
    */
   VectorPostprocessorValue & declareVector(const std::string & vpp_name,
-                                           const std::string & vector_name);
+                                           const std::string & vector_name,
+                                           bool contains_complete_history);
 
   /**
    * Returns a true value if the VectorPostprocessor exists
@@ -72,6 +79,11 @@ public:
   bool hasVectors(const std::string & vpp_name) const;
 
   /**
+   * Returns a Boolean indicating whether the specified VPP vectors contain complete history.
+   */
+  bool containsCompleteHistory(const std::string & name) const;
+
+  /**
    * Get the map of vectors for a particular VectorPostprocessor
    * @param vpp_name The name of the VectorPostprocessor
    */
@@ -79,17 +91,40 @@ public:
   vectors(const std::string & vpp_name) const;
 
   /**
-   * Copy the current post-processor values into old (i.e. shift it "back in time")
+   * Copy the current post-processor values into old (i.e. shift it "back in time") as needed
    */
   void copyValuesBack();
 
 private:
   VectorPostprocessorValue & getVectorPostprocessorHelper(const VectorPostprocessorName & vpp_name,
                                                           const std::string & vector_name,
-                                                          bool get_current);
+                                                          bool get_current = true,
+                                                          bool contains_complete_history = false);
+  /**
+   * Vector of pairs representing the declared vectors (vector name, vector DS)
+   * The vector DS is a data structure containing a current and old container (vector of Reals)
+   */
+  struct VectorPostprocessorVectors
+  {
+    VectorPostprocessorVectors();
 
-  /// Values of the vector post-processor
-  std::map<std::string, std::vector<std::pair<std::string, VectorPostprocessorState>>> _values;
+    ///@{
+    // Default move constructors
+    VectorPostprocessorVectors(VectorPostprocessorVectors &&) = default;
+    VectorPostprocessorVectors & operator=(VectorPostprocessorVectors &&) = default;
+    ///@}
+
+    std::vector<std::pair<std::string, VectorPostprocessorState>> _values;
+
+    /// Boolean indicating whether these vectors contain complete history (append mode)
+    bool _contains_complete_history;
+
+    /// Boolean indicating whether any old vectors have been requested.
+    bool _needs_old;
+  };
+
+  /// The VPP data store in a map: VPP Name to vector storage
+  std::map<std::string, VectorPostprocessorVectors> _vpp_data;
 
   std::set<std::string> _requested_items;
   std::set<std::string> _supplied_items;
