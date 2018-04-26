@@ -290,7 +290,7 @@ def git_ls_files(working_dir=os.getcwd()):
     """
     out = set()
     for fname in subprocess.check_output(['git', 'ls-files'], cwd=working_dir).split('\n'):
-        out.add(os.path.join(working_dir, fname))
+        out.add(os.path.abspath(os.path.join(working_dir, fname)))
     return out
 
 def git_root_dir(working_dir=os.getcwd()):
