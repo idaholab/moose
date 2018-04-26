@@ -44,7 +44,6 @@ class Loader(yaml.Loader):
             with open(filename, 'r') as f:
                 return yaml.load(f, Loader)
         else:
-            print node.line
             msg = "Unknown include file '{}' on line {} of {}"
             raise IOError(msg.format(filename, node.line, self._filename))
 
