@@ -17,6 +17,7 @@ MOOSE_DIR = os.getenv('MOOSE_DIR', os.path.join(os.getcwd(), '..', '..', '..'))
 if not os.path.exists(MOOSE_DIR):
     print 'Failed to locate MOOSE, specify the MOOSE_DIR environment variable.'
     sys.exit(1)
+os.environ['MOOSE_DIR'] = MOOSE_DIR
 
 # Append MOOSE python directory
 MOOSE_PYTHON_DIR = os.path.join(MOOSE_DIR, 'python')
@@ -25,8 +26,5 @@ if MOOSE_PYTHON_DIR not in sys.path:
 
 # Setup required environment variables
 from MooseDocs import main
-import mooseutils
-os.environ['MOOSE_DIR'] = MOOSE_DIR
-
 if __name__ == '__main__':
     sys.exit(main.run())
