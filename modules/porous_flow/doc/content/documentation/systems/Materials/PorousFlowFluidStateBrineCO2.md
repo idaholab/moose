@@ -12,5 +12,3 @@ For more details, see the documentation of the [brine and CO$_2$](brineco2.md) e
 !syntax inputs /Materials/PorousFlowFluidStateBrineCO2
 
 !syntax children /Materials/PorousFlowFluidStateBrineCO2
-
-!bibtex bibliography

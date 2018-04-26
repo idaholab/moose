@@ -240,6 +240,52 @@ public:
    */
   unsigned int saltComponentIndex() const { return _salt_component; };
 
+  /**
+   * Henry's constant of dissolution of gas phase CO2 in brine. From
+   * Battistelli et al, A fluid property module for the TOUGH2 simulator for saline brines
+   * with non-condensible gas, Proc. Eighteenth Workshop on Geothermal Reservoir Engineering (1993)
+   *
+   * @param temperature fluid temperature (K)
+   * @param xnacl NaCl mass fraction (kg/kg)
+   * @param[out] Kh Henry's constant (Pa)
+   * @param[out] dKh_dT derivative of Henry's constant wrt temperature
+   * @param[out] dKh_dx derivative of Henry's constant wrt salt mass fraction
+   */
+  void henryConstant(Real temperature, Real xnacl, Real & Kh, Real & dKh_dT, Real & dKh_dx) const;
+
+  /**
+   * Enthalpy of dissolution of gas phase CO2 in brine calculated using Henry's constant
+   * From Himmelblau, Partial molal heats and entropies of solution for gases dissolved
+   * in water from the freezing to the near critical point, J. Phys. Chem. 63 (1959).
+   * Correction due to salinity from Battistelli et al, A fluid property module for the
+   * TOUGH2 simulator for saline brines with non-condensible gas, Proc. Eighteenth Workshop
+   * on Geothermal Reservoir Engineering (1993).
+   *
+   * @param temperature fluid temperature (K)
+   * @param xnacl NaCl mass fraction (kg/kg)
+   * @param[out] hdis enthalpy of dissolution (J/kg)
+   * @param[out] dhdis_dT derivative of enthalpy of dissolution wrt temperature
+   * @param[out] dhdis_dx derivative of enthalpy of dissolution wrt salt mass fraction
+   */
+  void enthalpyOfDissolutionGas(
+      Real temperature, Real xnacl, Real & hdis, Real & dhdis_dT, Real & dhdis_dx) const;
+
+  /**
+   * Enthalpy of dissolution of CO2 in brine calculated using linear fit to model of
+   * Duan and Sun, An improved model calculating CO2 solubility in pure water and aqueous NaCl
+   * solutions from 273 to 533 K and from 0 to 2000 bar, Chemical geology, 193, 257--271 (2003).
+   *
+   * In the region of interest, the more complicated model given in Eq. (8) of Duan and Sun
+   * is well approximated by a simple linear fit (R^2 = 0.9997).
+   *
+   * Note: as the effect of salt mass fraction is small, it is not included in this function.
+   *
+   * @param temperature fluid temperature (K)
+   * @param[out] hdis enthalpy of dissolution (J/kg)
+   * @param[out] dhdis_dT derivative of enthalpy of dissolution wrt temperature
+   */
+  void enthalpyOfDissolution(Real temperature, Real & hdis, Real & dhdis_dT) const;
+
 protected:
   /// Check the input variables
   void checkVariables(Real pressure, Real temperature) const;
