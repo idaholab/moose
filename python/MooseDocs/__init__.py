@@ -8,6 +8,7 @@
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 import os
+import sys
 import subprocess
 import logging
 
@@ -20,23 +21,18 @@ INLINE = 'inline'
 # Current logging level, used to allow for debug only type checking, etc.
 LOG_LEVEL = logging.NOTSET
 
-# The repository root locatoin
+# The repository root location
 ROOT_DIR = mooseutils.git_root_dir()
 
 # File extensions to consider when building the content tree
 FILE_EXT = ('.md', '.jpg', '.jpeg', '.gif', '.png', '.svg', '.ogg', '.webm', '.mp4', '.css', \
             '.js', '.bib', '.woff', '.woff2')
 
-# MOOSE
-MOOSE_DIR = os.getenv('MOOSE_DIR', os.path.join(os.getcwd(), '..', 'moose'))
-if not os.path.exists(MOOSE_DIR):
-    MOOSE_DIR = os.path.join(os.getenv('HOME'), 'projects', 'moose')
-
-# Add the system environment
-# TODO: Update code to use this rather than MooseDocs.MOOSE_DIR, which would avoid needing to import
-#       MooseDocs in many locations, use "MOOSEDOCS_MOOSE_DIR" and "MOOSEDOCS_ROOT_DIR".
-os.environ['MOOSE_DIR'] = MOOSE_DIR
-os.environ['ROOT_DIR'] = ROOT_DIR
+# Setup MOOSE_DIR/ROOT_DIR
+MOOSE_DIR = os.getenv('MOOSE_DIR', None)
+if MOOSE_DIR is None:
+    print "The MOOSE_DIR environment must be set, this should be set within moosedocs.py."
+    sys.exit(1)
 
 # List all files with git, this is done here to avoid running this command many times
 PROJECT_FILES = mooseutils.git_ls_files(ROOT_DIR)
