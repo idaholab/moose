@@ -82,8 +82,8 @@ NodalBC::computeResidual()
     res = computeQpResidual();
 
     for (auto tag_id : _vector_tags)
-      if (_fe_problem.getNonlinearSystemBase().hasVector(tag_id))
-        _fe_problem.getNonlinearSystemBase().getVector(tag_id).set(dof_idx, res);
+      if (_sys.hasVector(tag_id))
+        _sys.getVector(tag_id).set(dof_idx, res);
 
     if (_has_save_in)
     {
@@ -111,7 +111,8 @@ NodalBC::computeJacobian()
 
     // Cache the user's computeQpJacobian() value for later use.
     for (auto tag : _matrix_tags)
-      _fe_problem.assembly(0).cacheJacobianContribution(cached_row, cached_row, cached_val, tag);
+      if (_sys.hasMatrix(tag))
+        _fe_problem.assembly(0).cacheJacobianContribution(cached_row, cached_row, cached_val, tag);
 
     if (_has_diag_save_in)
     {
@@ -139,7 +140,8 @@ NodalBC::computeOffDiagJacobian(unsigned int jvar)
 
     // Cache the user's computeQpJacobian() value for later use.
     for (auto tag : _matrix_tags)
-      _fe_problem.assembly(0).cacheJacobianContribution(cached_row, cached_col, cached_val, tag);
+      if (_sys.hasMatrix(tag))
+        _fe_problem.assembly(0).cacheJacobianContribution(cached_row, cached_col, cached_val, tag);
   }
 }
 
