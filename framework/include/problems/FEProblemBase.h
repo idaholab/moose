@@ -24,7 +24,7 @@
 #include "ExecuteMooseObjectWarehouse.h"
 #include "AuxGroupExecuteMooseObjectWarehouse.h"
 #include "MaterialWarehouse.h"
-#include "MooseVariableFEImpl.h"
+#include "MooseVariableFE.h"
 #include "MultiAppTransfer.h"
 #include "Postprocessor.h"
 

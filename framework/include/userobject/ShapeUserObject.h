@@ -13,7 +13,7 @@
 #include "Assembly.h"
 #include "Coupleable.h"
 #include "InputParameters.h"
-#include "MooseVariableFEImpl.h"
+#include "MooseVariableFE.h"
 #include "MooseObject.h"
 
 /**

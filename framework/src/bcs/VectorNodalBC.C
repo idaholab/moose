@@ -10,7 +10,7 @@
 #include "VectorNodalBC.h"
 
 #include "Assembly.h"
-#include "MooseVariableFEImpl.h"
+#include "MooseVariableFE.h"
 #include "SystemBase.h"
 #include "NonlinearSystemBase.h"
 

@@ -11,7 +11,7 @@
 #include "AuxiliarySystem.h"
 #include "Problem.h"
 #include "FEProblem.h"
-#include "MooseVariableFEImpl.h"
+#include "MooseVariableFE.h"
 #include "MooseVariableScalar.h"
 #include "PetscSupport.h"
 #include "Factory.h"

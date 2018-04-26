@@ -21,7 +21,7 @@
 #include "TransientInterface.h"
 #include "PostprocessorInterface.h"
 #include "GeometricSearchInterface.h"
-#include "MooseVariableFEImpl.h"
+#include "MooseVariableFE.h"
 #include "Restartable.h"
 #include "MeshChangedInterface.h"
 #include "MooseVariableInterface.h"

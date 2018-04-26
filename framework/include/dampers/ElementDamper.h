@@ -20,9 +20,9 @@ class ElementDamper;
 class SubProblem;
 class SystemBase;
 template <typename>
-class MooseVariableFEImpl;
-typedef MooseVariableFEImpl<Real> MooseVariable;
-typedef MooseVariableFEImpl<VectorValue<Real>> VectorMooseVariable;
+class MooseVariableFE;
+typedef MooseVariableFE<Real> MooseVariable;
+typedef MooseVariableFE<VectorValue<Real>> VectorMooseVariable;
 class Assembly;
 
 template <>

@@ -13,7 +13,7 @@
 #include "FindContactPoint.h"
 #include "NearestNodeLocator.h"
 #include "SubProblem.h"
-#include "MooseVariableFEImpl.h"
+#include "MooseVariableFE.h"
 #include "MooseMesh.h"
 
 #include "libmesh/threads.h"

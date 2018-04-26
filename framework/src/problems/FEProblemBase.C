@@ -77,7 +77,7 @@
 #include "NonlocalIntegratedBC.h"
 #include "ShapeElementUserObject.h"
 #include "ShapeSideUserObject.h"
-#include "MooseVariableFEImpl.h"
+#include "MooseVariableFE.h"
 #include "MooseVariableScalar.h"
 
 #include "libmesh/exodusII_io.h"

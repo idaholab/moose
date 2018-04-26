@@ -16,7 +16,7 @@
 #include "Adaptivity.h"
 #include "Executioner.h"
 #include "MooseEnum.h"
-#include "MooseVariableFEImpl.h"
+#include "MooseVariableFE.h"
 
 #include "libmesh/transient_system.h"
 #include "libmesh/system_norm.h"

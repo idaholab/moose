@@ -20,9 +20,9 @@ class MooseVariableScalar;
 class MooseObject;
 class MooseVariableFEBase;
 template <typename>
-class MooseVariableFEImpl;
-typedef MooseVariableFEImpl<Real> MooseVariable;
-typedef MooseVariableFEImpl<RealVectorValue> VectorMooseVariable;
+class MooseVariableFE;
+typedef MooseVariableFE<Real> MooseVariable;
+typedef MooseVariableFE<RealVectorValue> VectorMooseVariable;
 namespace libMesh
 {
 template <typename T>

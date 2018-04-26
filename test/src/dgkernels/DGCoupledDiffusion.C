@@ -10,7 +10,7 @@
 #include "DGCoupledDiffusion.h"
 
 // MOOSE includes
-#include "MooseVariableFEImpl.h"
+#include "MooseVariableFE.h"
 
 registerMooseObject("MooseTestApp", DGCoupledDiffusion);
 

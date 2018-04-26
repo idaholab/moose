@@ -16,7 +16,7 @@
 class Assembly;
 class MooseObject;
 template <typename T>
-class MooseVariableFEImpl;
+class MooseVariableFE;
 
 /**
  * Interface for objects that need to get values of MooseVariables
@@ -39,7 +39,7 @@ public:
    * Get the variable that this object is using.
    * @return The variable this object is using.
    */
-  MooseVariableFEImpl<T> * mooseVariable();
+  MooseVariableFE<T> * mooseVariable();
 
   virtual ~MooseVariableInterface();
 
@@ -164,7 +164,7 @@ protected:
   bool _nodal;
 
   /// The variable this object is acting on
-  MooseVariableFEImpl<T> * _variable;
+  MooseVariableFE<T> * _variable;
 
 protected:
   Assembly * _mvi_assembly;

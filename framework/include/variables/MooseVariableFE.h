@@ -7,8 +7,8 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef MOOSEVARIABLEFIELD_H
-#define MOOSEVARIABLEFIELD_H
+#ifndef MOOSEVARIABLEFE_H
+#define MOOSEVARIABLEFE_H
 
 #include "MooseTypes.h"
 #include "MooseVariableFEBase.h"
@@ -31,7 +31,7 @@
  * Each variable can compute nodal or elemental (at QPs) values.
  */
 template <typename OutputType>
-class MooseVariableFEImpl : public MooseVariableFEBase
+class MooseVariableFE : public MooseVariableFEBase
 {
   typedef OutputType OutputShape;
   typedef OutputType OutputValue;
@@ -58,12 +58,12 @@ class MooseVariableFEImpl : public MooseVariableFEBase
   typedef MooseArray<std::vector<OutputDivergence>> FieldVariableTestDivergence;
 
 public:
-  MooseVariableFEImpl(unsigned int var_num,
-                      const FEType & fe_type,
-                      SystemBase & sys,
-                      Assembly & assembly,
-                      Moose::VarKindType var_kind);
-  virtual ~MooseVariableFEImpl();
+  MooseVariableFE(unsigned int var_num,
+                  const FEType & fe_type,
+                  SystemBase & sys,
+                  Assembly & assembly,
+                  Moose::VarKindType var_kind);
+  virtual ~MooseVariableFE();
 
   void clearDofIndices() override;
 
@@ -746,4 +746,4 @@ protected:
   friend class ValueRangeMarker;
 };
 
-#endif /* MOOSEVARIABLEFIELD_H */
+#endif /* MOOSEVARIABLEFE_H */

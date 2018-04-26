@@ -15,7 +15,7 @@
 #include "Executioner.h"
 #include "MooseApp.h"
 #include "MooseEigenSystem.h"
-#include "MooseVariableFEImpl.h"
+#include "MooseVariableFE.h"
 
 #include "libmesh/quadrature.h"
 

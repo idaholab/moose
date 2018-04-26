@@ -11,7 +11,7 @@
 
 #include "FEProblem.h"
 #include "MooseError.h" // mooseDeprecated
-#include "MooseVariableFEImpl.h"
+#include "MooseVariableFE.h"
 #include "Problem.h"
 #include "SubProblem.h"
 

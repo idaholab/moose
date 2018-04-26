@@ -18,7 +18,7 @@
 // Moose Includes
 #include "MooseTypes.h"
 #include "FEProblem.h"
-#include "MooseVariableFEImpl.h"
+#include "MooseVariableFE.h"
 
 registerMooseObject("MooseApp", MultiAppDTKUserObjectTransfer);
 

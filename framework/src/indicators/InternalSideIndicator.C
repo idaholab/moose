@@ -12,7 +12,7 @@
 // MOOSE includes
 #include "Assembly.h"
 #include "MooseTypes.h"
-#include "MooseVariableFEImpl.h"
+#include "MooseVariableFE.h"
 #include "Problem.h"
 #include "SubProblem.h"
 #include "SystemBase.h"

@@ -42,9 +42,9 @@ class ArbitraryQuadrature;
 class SystemBase;
 class MooseVariableFEBase;
 template <typename>
-class MooseVariableFEImpl;
-typedef MooseVariableFEImpl<Real> MooseVariable;
-typedef MooseVariableFEImpl<RealVectorValue> VectorMooseVariable;
+class MooseVariableFE;
+typedef MooseVariableFE<Real> MooseVariable;
+typedef MooseVariableFE<RealVectorValue> VectorMooseVariable;
 class XFEMInterface;
 
 /**
@@ -473,15 +473,15 @@ public:
   void prepareOffDiagScalar();
 
   template <typename T>
-  void copyShapes(MooseVariableFEImpl<T> & v);
+  void copyShapes(MooseVariableFE<T> & v);
   void copyShapes(unsigned int var);
 
   template <typename T>
-  void copyFaceShapes(MooseVariableFEImpl<T> & v);
+  void copyFaceShapes(MooseVariableFE<T> & v);
   void copyFaceShapes(unsigned int var);
 
   template <typename T>
-  void copyNeighborShapes(MooseVariableFEImpl<T> & v);
+  void copyNeighborShapes(MooseVariableFE<T> & v);
   void copyNeighborShapes(unsigned int var);
 
   void addResidual(NumericVector<Number> & residual, TagID tag_id = 0);
