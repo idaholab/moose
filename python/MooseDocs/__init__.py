@@ -23,6 +23,7 @@ LOG_LEVEL = logging.NOTSET
 
 # The repository root location
 ROOT_DIR = mooseutils.git_root_dir()
+os.environ['ROOT_DIR'] = ROOT_DIR
 
 # File extensions to consider when building the content tree
 FILE_EXT = ('.md', '.jpg', '.jpeg', '.gif', '.png', '.svg', '.ogg', '.webm', '.mp4', '.css', \
