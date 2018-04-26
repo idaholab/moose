@@ -35,8 +35,7 @@ InputParameters validParams<RadialReturnStressUpdate>();
 class RadialReturnStressUpdate : public StressUpdateBase, public SingleVariableReturnMappingSolution
 {
 public:
-  RadialReturnStressUpdate(const InputParameters & parameters,
-                           const std::string inelastic_strain_name = "");
+  RadialReturnStressUpdate(const InputParameters & parameters);
 
   /**
    * A radial return (J2) mapping method is performed with return mapping

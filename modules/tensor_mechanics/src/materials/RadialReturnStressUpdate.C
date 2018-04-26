@@ -25,17 +25,21 @@ validParams<RadialReturnStressUpdate>()
   params.addParam<Real>("max_inelastic_increment",
                         1e-4,
                         "The maximum inelastic strain increment allowed in a time step");
+  params.addRequiredParam<std::string>(
+      "effective_inelastic_strain_name",
+      "Name of the material property that stores the effective inelastic strain");
+  params.addParamNamesToGroup("effective_inelastic_strain_name", "Advanced");
+
   return params;
 }
 
-RadialReturnStressUpdate::RadialReturnStressUpdate(const InputParameters & parameters,
-                                                   const std::string inelastic_strain_name)
+RadialReturnStressUpdate::RadialReturnStressUpdate(const InputParameters & parameters)
   : StressUpdateBase(parameters),
     SingleVariableReturnMappingSolution(parameters),
-    _effective_inelastic_strain(
-        declareProperty<Real>("effective_" + inelastic_strain_name + "_strain")),
-    _effective_inelastic_strain_old(
-        getMaterialPropertyOld<Real>("effective_" + inelastic_strain_name + "_strain")),
+    _effective_inelastic_strain(declareProperty<Real>(
+        _base_name + getParam<std::string>("effective_inelastic_strain_name"))),
+    _effective_inelastic_strain_old(getMaterialPropertyOld<Real>(
+        _base_name + getParam<std::string>("effective_inelastic_strain_name"))),
     _max_inelastic_increment(parameters.get<Real>("max_inelastic_increment"))
 {
 }
