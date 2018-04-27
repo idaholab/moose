@@ -27,21 +27,21 @@ class CrystalPlasticityStateVarRateComponentVoce : public CrystalPlasticityState
 public:
   CrystalPlasticityStateVarRateComponentVoce(const InputParameters & parameters);
 
-  // computing the slip system hardening rate
+  /// computing the slip system hardening rate
   virtual bool calcStateVariableEvolutionRateComponent(unsigned int qp,
                                                        std::vector<Real> & val) const;
 
-  // class containgn the avialbale slip systems
+  /// class for switching between different crystal lattice types
   static MooseEnum crystalLatticeTypeOptions();
 
 protected:
   const MaterialProperty<std::vector<Real>> & _mat_prop_slip_rate;
   const MaterialProperty<std::vector<Real>> & _mat_prop_state_var;
 
-  // the switching variable containing the type of crystal (i.e. FCC12 or BCC12)
+  /// the variable to switch crystal lattice type (i.e. FCC or BCC)
   MooseEnum _crystal_lattice_type;
 
-  // teh vectors containing the input paramters
+  /// the vectors of the input paramters
   std::vector<unsigned int> _groups;
   std::vector<Real> _h0_group_values;
   std::vector<Real> _tau0_group_values;
@@ -51,20 +51,20 @@ protected:
   std::vector<Real> _coplanarHardening_group_values;
   std::vector<Real> _GroupGroup_Hardening_group_values;
 
-  // the number of slip system groups
+  /// the number of slip system groups
   unsigned int _n_groups;
-  // the vector associating a slip system to its slip plane ID
+  /// the vector associating a slip system to its slip plane ID
   std::vector<unsigned int> _slipSystem_PlaneID;
-  // the vector associating a slip system to its groud ID
+  /// the vector associating a slip system to its groud ID
   std::vector<unsigned int> _slipSystem_GroupID;
 
-  // method checking the input paramters
+  /// method checking the input paramters
   virtual void checkHardeningParametersSize() const;
-  // method assocaiting slip system to their slip plane
+  /// method associating slip system to their slip plane
   virtual void initSlipSystem_GroupID(std::vector<unsigned int> & _slipSystem_GroupID) const;
-  // method assocaiting slip system to their group
+  /// method associating slip system to their group
   virtual void initSlipSystem_PlaneID(std::vector<unsigned int> & _slipSystem_PlaneID) const;
-  // method retriving the appropiate self/latent hardening coefficient
+  /// method retriving the appropiate self/latent hardening coefficient
   virtual Real getHardeningCoefficient(unsigned int slipSystemIndex_i,
                                        unsigned int slipSystemIndex_j) const;
 };
