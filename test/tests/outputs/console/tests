@@ -163,4 +163,13 @@
     cli_args = Outputs/screen/fit_mode=foo
     expect_err = "Unable to convert 'foo' to type int"
   [../]
+  [./console_off]
+    type = RunApp
+    input = console_off.i
+    expect_out = '\A\s*\Z'
+    requirement = "Disabling Console objects should result in no output to the screen."
+    issues = "#5178"
+    design = "Outputs/index.md Console.md"
+    method = "opt" # dbg has libMesh stuff show up
+  [../]
 []
