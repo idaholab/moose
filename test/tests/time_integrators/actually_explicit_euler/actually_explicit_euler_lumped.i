@@ -24,7 +24,6 @@
     type = TimeDerivative
     implicit = true
     variable = u
-    extra_matrix_tags = 'time'
   [../]
 []
 
@@ -33,16 +32,12 @@
     type = DirichletBC
     variable = u
     boundary = 'left'
-    extra_matrix_tags = 'time'
-    extra_vector_tags = 'nontime'
     value = 0
   [../]
   [./right]
     type = DirichletBC
     variable = u
     boundary = 'right'
-    extra_matrix_tags = 'time'
-    extra_vector_tags = 'nontime'
     value = 1
   [../]
 []

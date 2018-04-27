@@ -144,6 +144,7 @@ NonlinearSystemBase::NonlinearSystemBase(FEProblemBase & fe_problem,
   getResidualNonTimeVector();
   // Don't need to add the matrix - it already exists (for now)
   _Ke_system_tag = _fe_problem.addMatrixTag("SYSTEM");
+  _fe_problem.addMatrixTag("TIME"); // Must exist so TIME can be an optional default
   _Re_tag = _fe_problem.addVectorTag("RESIDUAL");
 
   _u_dot = &addVector("u_dot", true, GHOSTED);

@@ -45,7 +45,7 @@ ActuallyExplicitEuler::ActuallyExplicitEuler(const InputParameters & parameters)
     _explicit_euler_update(_nl.addVector("explicit_euler_update", false, PARALLEL)),
     _mass_matrix_diag(_nl.addVector("mass_matrix_diag", false, PARALLEL))
 {
-  _Ke_time_tag = _fe_problem.addMatrixTag("TIME");
+  _Ke_time_tag = _fe_problem.getMatrixTagID("TIME");
 
   if (_solve_type == CONSISTENT)
     _linear_solver = LinearSolver<Number>::build(comm());
