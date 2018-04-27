@@ -58,6 +58,7 @@
   steady_state_detection = true
   [./TimeIntegrator]
     type = ActuallyExplicitEuler
+    solve_type = lumped
   [../]
 []
 

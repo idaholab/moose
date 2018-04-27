@@ -4,4 +4,10 @@
     input = 'actually_explicit_euler.i'
     exodiff = 'actually_explicit_euler_out.e'
   [../]
+
+  [./lumped]
+    type = 'Exodiff'
+    input = 'actually_explicit_euler_lumped.i'
+    exodiff = 'actually_explicit_euler_lumped_out.e'
+  [../]
 []
