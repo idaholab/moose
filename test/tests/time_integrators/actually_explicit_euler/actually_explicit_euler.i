@@ -24,7 +24,6 @@
     type = TimeDerivative
     implicit = true
     variable = u
-    extra_matrix_tags = 'time'
   [../]
 []
 
@@ -33,16 +32,12 @@
     type = DirichletBC
     variable = u
     boundary = 'left'
-    extra_matrix_tags = 'time'
-    extra_vector_tags = 'nontime'
     value = 0
   [../]
   [./right]
     type = DirichletBC
     variable = u
     boundary = 'right'
-    extra_matrix_tags = 'time'
-    extra_vector_tags = 'nontime'
     value = 1
   [../]
 []
@@ -52,10 +47,9 @@
   type = Transient
   num_steps = 10
   dt = 0.001
-  solve_type = LINEAR
   petsc_options_iname = '-pc_type -pc_hypre_type'
   petsc_options_value = 'hypre boomeramg'
-  steady_state_detection = true
+
   [./TimeIntegrator]
     type = ActuallyExplicitEuler
   [../]

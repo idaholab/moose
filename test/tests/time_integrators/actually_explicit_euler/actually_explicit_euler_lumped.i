@@ -47,10 +47,9 @@
   type = Transient
   num_steps = 10
   dt = 0.001
-  solve_type = LINEAR
   petsc_options_iname = '-pc_type -pc_hypre_type'
   petsc_options_value = 'hypre boomeramg'
-  steady_state_detection = true
+
   [./TimeIntegrator]
     type = ActuallyExplicitEuler
     solve_type = lumped

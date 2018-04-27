@@ -47,6 +47,9 @@ ActuallyExplicitEuler::ActuallyExplicitEuler(const InputParameters & parameters)
 {
   _Ke_time_tag = _fe_problem.getMatrixTagID("TIME");
 
+  // Try to keep MOOSE from doing any nonlinear stuff
+  _fe_problem.solverParams()._type = Moose::ST_LINEAR;
+
   if (_solve_type == CONSISTENT)
     _linear_solver = LinearSolver<Number>::build(comm());
 
