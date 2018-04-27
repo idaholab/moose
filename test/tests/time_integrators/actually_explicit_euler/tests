@@ -1,0 +1,7 @@
+[Tests]
+  [./test]
+    type = 'Exodiff'
+    input = 'actually_explicit_euler.i'
+    exodiff = 'actually_explicit_euler_out.e'
+  [../]
+[]

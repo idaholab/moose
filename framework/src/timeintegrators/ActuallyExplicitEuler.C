@@ -8,7 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 // MOOSE includes
-#include "LumpedExplicitEuler.h"
+#include "ActuallyExplicitEuler.h"
 #include "NonlinearSystem.h"
 #include "FEProblem.h"
 #include "PetscSupport.h"
@@ -20,18 +20,18 @@
 #include "libmesh/petsc_matrix.h"
 #include "libmesh/nonlinear_solver.h"
 
-registerMooseObject("MooseApp", LumpedExplicitEuler);
+registerMooseObject("MooseApp", ActuallyExplicitEuler);
 
 template <>
 InputParameters
-validParams<LumpedExplicitEuler>()
+validParams<ActuallyExplicitEuler>()
 {
   InputParameters params = validParams<TimeIntegrator>();
 
   return params;
 }
 
-LumpedExplicitEuler::LumpedExplicitEuler(const InputParameters & parameters)
+ActuallyExplicitEuler::ActuallyExplicitEuler(const InputParameters & parameters)
   : TimeIntegrator(parameters),
     _explicit_euler_update(libmesh_cast_ref<PetscVector<Real> &>(
         _nl.addVector("explicit_euler_update", false, PARALLEL))),
@@ -42,12 +42,12 @@ LumpedExplicitEuler::LumpedExplicitEuler(const InputParameters & parameters)
 }
 
 void
-LumpedExplicitEuler::preSolve()
+ActuallyExplicitEuler::preSolve()
 {
 }
 
 void
-LumpedExplicitEuler::computeTimeDerivatives()
+ActuallyExplicitEuler::computeTimeDerivatives()
 {
   _u_dot = *_solution;
   _u_dot -= _solution_old;
@@ -58,7 +58,7 @@ LumpedExplicitEuler::computeTimeDerivatives()
 }
 
 void
-LumpedExplicitEuler::solve()
+ActuallyExplicitEuler::solve()
 {
   // This ensures that all the Output objects in the OutputWarehouse
   // have had solveSetup() called, and sets the default solver
@@ -105,6 +105,6 @@ LumpedExplicitEuler::solve()
 }
 
 void
-LumpedExplicitEuler::postResidual(NumericVector<Number> & /* residual */)
+ActuallyExplicitEuler::postResidual(NumericVector<Number> & /* residual */)
 {
 }

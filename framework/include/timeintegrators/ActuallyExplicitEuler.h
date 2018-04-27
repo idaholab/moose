@@ -7,24 +7,24 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef LUMPEDEXPLICITEULER_H
-#define LUMPEDEXPLICITEULER_H
+#ifndef ACTUALLYEXPLICITEULER_H
+#define ACTUALLYEXPLICITEULER_H
 
 #include "TimeIntegrator.h"
 
 #include "libmesh/petsc_vector.h"
 
 // Forward declarations
-class LumpedExplicitEuler;
+class ActuallyExplicitEuler;
 class LStableDirk4;
 
 template <>
-InputParameters validParams<LumpedExplicitEuler>();
+InputParameters validParams<ActuallyExplicitEuler>();
 
-class LumpedExplicitEuler : public TimeIntegrator
+class ActuallyExplicitEuler : public TimeIntegrator
 {
 public:
-  LumpedExplicitEuler(const InputParameters & parameters);
+  ActuallyExplicitEuler(const InputParameters & parameters);
 
   virtual void preSolve() override;
   virtual int order() override { return 1; }
@@ -40,4 +40,4 @@ protected:
   TagID _Ke_time_tag;
 };
 
-#endif // LUMPEDEXPLICITEULER_H
+#endif // ACTUALLYEXPLICITEULER_H
