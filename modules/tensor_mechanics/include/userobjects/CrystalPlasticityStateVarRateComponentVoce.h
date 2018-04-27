@@ -28,6 +28,7 @@ public:
   CrystalPlasticityStateVarRateComponentVoce(const InputParameters & parameters);
 
 <<<<<<< HEAD
+<<<<<<< HEAD
   /// computing the slip system hardening rate
   virtual bool calcStateVariableEvolutionRateComponent(unsigned int qp,
                                                        std::vector<Real> & val) const;
@@ -37,10 +38,13 @@ public:
 
 =======
   // computing the slip system hardening rate
+=======
+  /// computing the slip system hardening rate
+>>>>>>> Update equations in the documentation. Updated comments in .h file
   virtual bool calcStateVariableEvolutionRateComponent(unsigned int qp,
                                                        std::vector<Real> & val) const;
 
-  // class containgn the avialbale slip systems
+  /// class for switching between different crystal lattice types
   static MooseEnum crystalLatticeTypeOptions();
 <<<<<<< HEAD
 >>>>>>> Voce Hardening Law for the crystal plasticity user object based framework
@@ -51,6 +55,7 @@ protected:
   const MaterialProperty<std::vector<Real>> & _mat_prop_slip_rate;
   const MaterialProperty<std::vector<Real>> & _mat_prop_state_var;
 
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
@@ -84,6 +89,12 @@ protected:
 
   // teh vectors containing the input paramters
 >>>>>>> Voce Hardening Law for the crystal plasticity user object based framework
+=======
+  /// the variable to switch crystal lattice type (i.e. FCC or BCC)
+  MooseEnum _crystal_lattice_type;
+
+  /// the vectors of the input paramters
+>>>>>>> Update equations in the documentation. Updated comments in .h file
   std::vector<unsigned int> _groups;
   std::vector<Real> _h0_group_values;
   std::vector<Real> _tau0_group_values;
@@ -93,6 +104,7 @@ protected:
   std::vector<Real> _coplanarHardening_group_values;
   std::vector<Real> _GroupGroup_Hardening_group_values;
 
+<<<<<<< HEAD
 <<<<<<< HEAD
   /// the number of slip system groups
   unsigned int _n_groups;
@@ -112,23 +124,30 @@ protected:
                                        unsigned int slipSystemIndex_j) const;
 =======
   // the number of slip system groups
+=======
+  /// the number of slip system groups
+>>>>>>> Update equations in the documentation. Updated comments in .h file
   unsigned int _n_groups;
-  // the vector associating a slip system to its slip plane ID
+  /// the vector associating a slip system to its slip plane ID
   std::vector<unsigned int> _slipSystem_PlaneID;
-  // the vector associating a slip system to its groud ID
+  /// the vector associating a slip system to its groud ID
   std::vector<unsigned int> _slipSystem_GroupID;
 
-  // method checking the input paramters
+  /// method checking the input paramters
   virtual void checkHardeningParametersSize() const;
-  // method assocaiting slip system to their slip plane
+  /// method associating slip system to their slip plane
   virtual void initSlipSystem_GroupID(std::vector<unsigned int> & _slipSystem_GroupID) const;
-  // method assocaiting slip system to their group
+  /// method associating slip system to their group
   virtual void initSlipSystem_PlaneID(std::vector<unsigned int> & _slipSystem_PlaneID) const;
+<<<<<<< HEAD
   // method retriving the appropiate self/latent hardening coefficient
 <<<<<<< HEAD
   virtual Real getHardeningCoefficient(unsigned int slipSystemIndex_i, unsigned int slipSystemIndex_j) const;
 >>>>>>> Voce Hardening Law for the crystal plasticity user object based framework
 =======
+=======
+  /// method retriving the appropiate self/latent hardening coefficient
+>>>>>>> Update equations in the documentation. Updated comments in .h file
   virtual Real getHardeningCoefficient(unsigned int slipSystemIndex_i,
                                        unsigned int slipSystemIndex_j) const;
 >>>>>>> close #11307

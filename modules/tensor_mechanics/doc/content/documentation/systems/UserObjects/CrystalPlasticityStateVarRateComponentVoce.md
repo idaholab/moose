@@ -9,18 +9,23 @@ This UserObjects, `CrystalPlasticityStateVarRateComponentVoce` is meant to be us
 \begin{equation}
 \label{eq:self_hardening_rate}
 <<<<<<< HEAD
+<<<<<<< HEAD
 h^{\alpha} = h_0^{alpha}\left(1-\frac{\tau^{\alpha}_{CRSS}-\tau_0^{\alpha}}{\tau_{Sat}^{alpha}-\tau_0^{alpha}} \right)^{m^{\alpha}}
 =======
 
 h^{\alpha} = h_0^{alpha}\left(1-\frac{\tau^{\alpha}_{CRSS}-\tau_0^{\alpha}}{\tau_{Sat}^{alpha}-\tau_0^{alpha}} \right)^m^\alpha
 
 >>>>>>> Voce Hardening Law for the crystal plasticity user object based framework
+=======
+h^{\alpha} = h_0^{alpha}\left(1-\frac{\tau^{\alpha}_{CRSS}-\tau_0^{\alpha}}{\tau_{Sat}^{alpha}-\tau_0^{alpha}} \right)^{m^{\alpha}}
+>>>>>>> Update equations in the documentation. Updated comments in .h file
 \end{equation}
 
 with
 
 \begin{equation}
 \label{eq:slip_system_hardening_rate}
+<<<<<<< HEAD
 <<<<<<< HEAD
 \dot{\tau}^{\alpha}_{CRSS} = \sum_{\beta=1}^{N} \lvert \dot{\gamma}^\beta \rvert h^\beta q^{\alpha \beta}
 \end{equation}
@@ -36,6 +41,13 @@ where: $ \tau^{\alpha}_{CRSS} $ is the current critical resolved shear stress, $
 
 where: $ \tau^{\alpha}_{CRSS} $ is the actual critical resolved shear stress, $\tau^{\alpha}_{0}$ is initial critical resolved shear stress, $\tau_{Sat}^{alpha} $ is the saturation resolved shear stress, $q^{\alpha \beta}$ is a matrix containing self and latent hardening coefficients, and $h_0^{\alpha}$ and m^\alpha are hardening parameters.
 >>>>>>> Voce Hardening Law for the crystal plasticity user object based framework
+=======
+\dot{\tau}^{\alpha}_{CRSS} = \sum_{\beta=1}^{N} \lvert \dot{\gamma}^\beta \rvert h^\beta q^{\alpha \beta}
+\end{equation}
+
+
+where: $ \tau^{\alpha}_{CRSS} $ is the current critical resolved shear stress, $\tau^{\alpha}_{0}$ is initial critical resolved shear stress, $\tau_{Sat}^{alpha} $ is the saturation resolved shear stress, $q^{\alpha \beta}$ is a matrix containing self and latent hardening coefficients, and $h_0^{\alpha}$ and m^\alpha are hardening parameters.
+>>>>>>> Update equations in the documentation. Updated comments in .h file
 
 Like for the others crystal plasticity routines values of all the parameters can be specified by groups of slip systems.
 
@@ -50,6 +62,7 @@ Seven variables need to be specified and one value is required for each group:
 \item "hardeningExponent_group_values" $m$ value for each slip system group
 \item "selfHardening_group_values" $q^{\alpha\alpha}$
 \item "coplanarHardening_group_values" $q^{\alpha\beta}$ for co-planar slip systems in the same group
+<<<<<<< HEAD
 <<<<<<< HEAD
 \item "GroupGroup_Hardening_group_values" $q^{\alpha\beta}$ This parameter requires NxN values with N being the number of groups. Values are listed as $value_ij$ (e.g. ij=11,12,21,22) with $i$ being the actual group and $j$ the secondary group.
 For $i==j$ the value represents the latent hardening coefficient between one slip system and all the non co-planar ones belonging the the same group. For $i!=j$, the value represents the latent hardening coefficient between all the slip systems belonging to group $i$ and $j$.
@@ -84,6 +97,11 @@ Note that this values usually this matrix is symmetric.
 >>>>>>> Voce Hardening Law for the crystal plasticity user object based framework
 =======
 Note that these values usually this matrix is symmetric.
+=======
+\item "GroupGroup_Hardening_group_values" $q^{\alpha\beta}$ This parameter requires NxN values with N being the number of groups. Values are listed as $value_ij$ (e.g. ij=11,12,21,22) with $i$ being the actual group and $j$ the secondary group.
+For $i==j$ the value represents the latent hardening coefficient between one slip system and all the non co-planar ones belonging the the same group. For $i!=j$, the value represents the latent hardening coefficient between all the slip systems belonging to group $i$ and $j$.
+Note that these is usually a symmetric matrix.
+>>>>>>> Update equations in the documentation. Updated comments in .h file
 \end{itemize}  
 >>>>>>> close #11307
 
