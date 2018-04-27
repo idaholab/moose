@@ -16,8 +16,6 @@
 
 // libMesh includes
 #include "libmesh/sparse_matrix.h"
-#include "libmesh/petsc_linear_solver.h"
-#include "libmesh/petsc_matrix.h"
 #include "libmesh/nonlinear_solver.h"
 
 registerMooseObject("MooseApp", ActuallyExplicitEuler);
@@ -28,17 +26,29 @@ validParams<ActuallyExplicitEuler>()
 {
   InputParameters params = validParams<TimeIntegrator>();
 
+  MooseEnum solve_type("consistent lumped lump_preconditioned", "consistent");
+
+  params.addParam<MooseEnum>(
+      "solve_type",
+      solve_type,
+      "The way to solve the system.  A 'consistent' solve uses the full mass matrix and actually "
+      "needs to use a linear solver to solve the problem.  'lumped' uses a lumped mass matrix with "
+      "a simple inversion - incredibly fast but may be less accurate.  'lump_preconditioned' uses "
+      "the lumped mass matrix as a preconditioner for the 'consistent' solve");
+
   return params;
 }
 
 ActuallyExplicitEuler::ActuallyExplicitEuler(const InputParameters & parameters)
   : TimeIntegrator(parameters),
-    _explicit_euler_update(libmesh_cast_ref<PetscVector<Real> &>(
-        _nl.addVector("explicit_euler_update", false, PARALLEL))),
-    _mass_matrix_diag(
-        libmesh_cast_ref<PetscVector<Real> &>(_nl.addVector("mass_matrix_diag", false, PARALLEL)))
+    _solve_type(getParam<MooseEnum>("solve_type")),
+    _explicit_euler_update(_nl.addVector("explicit_euler_update", false, PARALLEL)),
+    _mass_matrix_diag(_nl.addVector("mass_matrix_diag", false, PARALLEL))
 {
   _Ke_time_tag = _fe_problem.addMatrixTag("TIME");
+
+  if (_solve_type == CONSISTENT)
+    _linear_solver = LinearSolver<Number>::build(comm());
 }
 
 void
@@ -71,8 +81,6 @@ ActuallyExplicitEuler::solve()
 
   auto Re_non_time_tag = nonlinear_system.nonTimeVectorTag();
 
-  auto & petsc_mass_matrix = libmesh_cast_ref<PetscMatrix<Real> &>(*libmesh_system.matrix);
-
   auto & mass_matrix = *libmesh_system.matrix;
 
   // Must compute the residual first
@@ -83,18 +91,27 @@ ActuallyExplicitEuler::solve()
 
   _fe_problem.computeJacobianTag(*libmesh_system.current_local_solution, mass_matrix, _Ke_time_tag);
 
-  MatGetDiagonal(petsc_mass_matrix.mat(), _mass_matrix_diag.vec());
+  switch (_solve_type)
+  {
+    case CONSISTENT:
+      _linear_solver->solve(mass_matrix, _explicit_euler_update, _Re_non_time, 1e-6, 100);
+      break;
 
-  VecReciprocal(_mass_matrix_diag.vec());
+    case LUMPED:
+      mass_matrix.get_diagonal(_mass_matrix_diag);
 
-  VecPointwiseMult(_explicit_euler_update.vec(),
-                   _mass_matrix_diag.vec(),
-                   libmesh_cast_ref<PetscVector<Real> &>(_Re_non_time).vec());
+      _mass_matrix_diag.reciprocal();
 
-  /*
-  PetscLinearSolver<Real> petsc_solver(comm());
-  petsc_solver.solve(mass_matrix, _explicit_euler_update, _Re_non_time, 1e-6, 100);
-  */
+      _explicit_euler_update.pointwise_mult(_mass_matrix_diag, _Re_non_time);
+      break;
+
+    case LUMP_PRECONDITIONED:
+      mooseError("'lump_preconditioned' is not implemented yet");
+      break;
+
+    default:
+      mooseError("Unknown solve_type in ActuallyExplicitEuler ");
+  }
 
   *libmesh_system.solution = nonlinear_system.solutionOld();
   *libmesh_system.solution += _explicit_euler_update;

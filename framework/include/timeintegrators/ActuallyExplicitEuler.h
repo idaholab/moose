@@ -12,7 +12,7 @@
 
 #include "TimeIntegrator.h"
 
-#include "libmesh/petsc_vector.h"
+#include "libmesh/linear_solver.h"
 
 // Forward declarations
 class ActuallyExplicitEuler;
@@ -33,11 +33,22 @@ public:
   virtual void postResidual(NumericVector<Number> & residual) override;
 
 protected:
-  PetscVector<Real> & _explicit_euler_update;
+  enum SolveType
+  {
+    CONSISTENT,
+    LUMPED,
+    LUMP_PRECONDITIONED
+  };
 
-  PetscVector<Real> & _mass_matrix_diag;
+  MooseEnum _solve_type;
+
+  NumericVector<Real> & _explicit_euler_update;
+
+  NumericVector<Real> & _mass_matrix_diag;
 
   TagID _Ke_time_tag;
+
+  std::unique_ptr<LinearSolver<Number>> _linear_solver;
 };
 
 #endif // ACTUALLYEXPLICITEULER_H
