@@ -49,6 +49,16 @@ ActuallyExplicitEuler::ActuallyExplicitEuler(const InputParameters & parameters)
 
   if (_solve_type == CONSISTENT)
     _linear_solver = LinearSolver<Number>::build(comm());
+
+  if (_solve_type == LUMPED || _solve_type == LUMP_PRECONDITIONED)
+    _ones = &_nl.addVector("ones", false, PARALLEL);
+}
+
+void
+ActuallyExplicitEuler::init()
+{
+  if (_solve_type == LUMPED || _solve_type == LUMP_PRECONDITIONED)
+    *_ones = 1.;
 }
 
 void
@@ -98,10 +108,15 @@ ActuallyExplicitEuler::solve()
       break;
 
     case LUMPED:
-      mass_matrix.get_diagonal(_mass_matrix_diag);
+      // Computes the sum of each row (lumping)
+      // Note: This is actually how PETSc does it
+      // It's not "perfectly optimal" - but it will be fast (and universal)
+      mass_matrix.vector_mult(_mass_matrix_diag, *_ones);
 
+      // "Invert" the diagonal mass matrix
       _mass_matrix_diag.reciprocal();
 
+      // Multiply the inversion by the RHS
       _explicit_euler_update.pointwise_mult(_mass_matrix_diag, _Re_non_time);
       break;
 

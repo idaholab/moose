@@ -26,6 +26,7 @@ class ActuallyExplicitEuler : public TimeIntegrator
 public:
   ActuallyExplicitEuler(const InputParameters & parameters);
 
+  virtual void init() override;
   virtual void preSolve() override;
   virtual int order() override { return 1; }
   virtual void computeTimeDerivatives() override;
@@ -45,6 +46,8 @@ protected:
   NumericVector<Real> & _explicit_euler_update;
 
   NumericVector<Real> & _mass_matrix_diag;
+
+  NumericVector<Real> * _ones;
 
   TagID _Ke_time_tag;
 
