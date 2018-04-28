@@ -526,27 +526,17 @@ getPetscKSPNormType(Moose::MooseKSPNormType kspnorm)
 }
 
 void
-petscSetDefaultKSPNormType(FEProblemBase & problem)
+petscSetDefaultKSPNormType(FEProblemBase & problem, KSP ksp)
 {
   NonlinearSystemBase & nl = problem.getNonlinearSystemBase();
-  PetscNonlinearSolver<Number> * petsc_solver =
-      dynamic_cast<PetscNonlinearSolver<Number> *>(nl.nonlinearSolver());
-  SNES snes = petsc_solver->snes();
-  KSP ksp;
-  SNESGetKSP(snes, &ksp);
+
   KSPSetNormType(ksp, getPetscKSPNormType(nl.getMooseKSPNormType()));
 }
 
 void
-petscSetDefaultPCSide(FEProblemBase & problem)
+petscSetDefaultPCSide(FEProblemBase & problem, KSP ksp)
 {
-  // dig out Petsc solver
   NonlinearSystemBase & nl = problem.getNonlinearSystemBase();
-  PetscNonlinearSolver<Number> * petsc_solver =
-      dynamic_cast<PetscNonlinearSolver<Number> *>(nl.nonlinearSolver());
-  SNES snes = petsc_solver->snes();
-  KSP ksp;
-  SNESGetKSP(snes, &ksp);
 
 #if PETSC_VERSION_LESS_THAN(3, 2, 0)
   // pc_side is NOT set, PETSc will make the decision
@@ -558,6 +548,33 @@ petscSetDefaultPCSide(FEProblemBase & problem)
   if (nl.getPCSide() != Moose::PCS_DEFAULT)
     KSPSetPCSide(ksp, getPetscPCSide(nl.getPCSide()));
 #endif
+}
+
+void
+petscSetKSPDefaults(FEProblemBase & problem, KSP ksp)
+{
+  NonlinearSystemBase & nl = problem.getNonlinearSystemBase();
+
+#if PETSC_VERSION_LESS_THAN(3, 0, 0)
+  // PETSc 2.3.3-
+  KSPSetConvergenceTest(ksp, petscConverged, &problem);
+#else
+  // PETSc 3.0.0+
+
+  // In 3.0.0, the context pointer must actually be used, and the
+  // final argument to KSPSetConvergenceTest() is a pointer to a
+  // routine for destroying said private data context.  In this case,
+  // we use the default context provided by PETSc in addition to
+  // a few other tests.
+  {
+    PetscErrorCode ierr = KSPSetConvergenceTest(ksp, petscConverged, &problem, PETSC_NULL);
+    CHKERRABORT(nl.comm().get(), ierr);
+  }
+#endif
+
+  petscSetDefaultPCSide(problem, ksp);
+
+  petscSetDefaultKSPNormType(problem, ksp);
 }
 
 void
@@ -575,7 +592,6 @@ petscSetDefaults(FEProblemBase & problem)
 
 #if PETSC_VERSION_LESS_THAN(3, 0, 0)
   // PETSc 2.3.3-
-  KSPSetConvergenceTest(ksp, petscConverged, &problem);
   SNESSetConvergenceTest(snes, petscNonlinearConverged, &problem);
 #else
   // PETSc 3.0.0+
@@ -586,16 +602,12 @@ petscSetDefaults(FEProblemBase & problem)
   // we use the default context provided by PETSc in addition to
   // a few other tests.
   {
-    PetscErrorCode ierr = KSPSetConvergenceTest(ksp, petscConverged, &problem, PETSC_NULL);
-    CHKERRABORT(nl.comm().get(), ierr);
-    ierr = SNESSetConvergenceTest(snes, petscNonlinearConverged, &problem, PETSC_NULL);
+    auto ierr = SNESSetConvergenceTest(snes, petscNonlinearConverged, &problem, PETSC_NULL);
     CHKERRABORT(nl.comm().get(), ierr);
   }
 #endif
 
-  petscSetDefaultPCSide(problem);
-
-  petscSetDefaultKSPNormType(problem);
+  petscSetKSPDefaults(problem, ksp);
 }
 
 void

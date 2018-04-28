@@ -50,7 +50,7 @@ ActuallyExplicitEuler::ActuallyExplicitEuler(const InputParameters & parameters)
   // Try to keep MOOSE from doing any nonlinear stuff
   _fe_problem.solverParams()._type = Moose::ST_LINEAR;
 
-  if (_solve_type == CONSISTENT)
+  if (_solve_type == CONSISTENT || _solve_type == LUMP_PRECONDITIONED)
     _linear_solver = LinearSolver<Number>::build(comm());
 
   if (_solve_type == LUMPED || _solve_type == LUMP_PRECONDITIONED)
@@ -62,6 +62,9 @@ ActuallyExplicitEuler::init()
 {
   if (_solve_type == LUMPED || _solve_type == LUMP_PRECONDITIONED)
     *_ones = 1.;
+
+  if (_solve_type == CONSISTENT || _solve_type == LUMP_PRECONDITIONED)
+    Moose::PetscSupport::setLinearSolverDefaults(_fe_problem, *_linear_solver);
 }
 
 void
