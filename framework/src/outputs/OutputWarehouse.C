@@ -176,8 +176,6 @@ OutputWarehouse::mooseConsole()
   std::vector<Console *> objects = getOutputs<Console>();
   if (!objects.empty())
   {
-    std::cout << "Num objects: " << objects.size() << std::endl;
-
     for (const auto & obj : objects)
       obj->mooseConsole(_console_buffer.str());
 

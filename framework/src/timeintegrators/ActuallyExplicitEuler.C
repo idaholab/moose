@@ -17,6 +17,7 @@
 // libMesh includes
 #include "libmesh/sparse_matrix.h"
 #include "libmesh/nonlinear_solver.h"
+#include "libmesh/preconditioner.h"
 
 registerMooseObject("MooseApp", ActuallyExplicitEuler);
 
@@ -39,6 +40,33 @@ validParams<ActuallyExplicitEuler>()
   return params;
 }
 
+/**
+ * Helper class to apply preconditioner
+ */
+class LumpedPreconditioner : public Preconditioner<Real>
+{
+public:
+  LumpedPreconditioner(const NumericVector<Real> & diag_inverse)
+    : Preconditioner(diag_inverse.comm()), _diag_inverse(diag_inverse)
+  {
+  }
+
+  virtual void init() override
+  {
+    // No more initialization needed here
+    _is_initialized = true;
+  }
+
+  virtual void apply(const NumericVector<Real> & x, NumericVector<Real> & y) override
+  {
+    y.pointwise_mult(_diag_inverse, x);
+  }
+
+protected:
+  /// The inverse of the diagonal of the lumped matrix
+  const NumericVector<Real> & _diag_inverse;
+};
+
 ActuallyExplicitEuler::ActuallyExplicitEuler(const InputParameters & parameters)
   : TimeIntegrator(parameters),
     _solve_type(getParam<MooseEnum>("solve_type")),
@@ -52,6 +80,13 @@ ActuallyExplicitEuler::ActuallyExplicitEuler(const InputParameters & parameters)
 
   if (_solve_type == CONSISTENT || _solve_type == LUMP_PRECONDITIONED)
     _linear_solver = LinearSolver<Number>::build(comm());
+
+  if (_solve_type == LUMP_PRECONDITIONED)
+  {
+    _preconditioner = libmesh_make_unique<LumpedPreconditioner>(_mass_matrix_diag);
+    _linear_solver->attach_preconditioner(_preconditioner.get());
+    _linear_solver->init();
+  }
 
   if (_solve_type == LUMPED || _solve_type == LUMP_PRECONDITIONED)
     _ones = &_nl.addVector("ones", false, PARALLEL);
@@ -127,7 +162,10 @@ ActuallyExplicitEuler::solve()
       break;
 
     case LUMP_PRECONDITIONED:
-      mooseError("'lump_preconditioned' is not implemented yet");
+      mass_matrix.vector_mult(_mass_matrix_diag, *_ones);
+      _mass_matrix_diag.reciprocal();
+
+      _linear_solver->solve(mass_matrix, _explicit_euler_update, _Re_non_time, 1e-6, 100);
       break;
 
     default:

@@ -17,6 +17,7 @@
 // Forward declarations
 class ActuallyExplicitEuler;
 class LStableDirk4;
+class LumpedPreconditioner;
 
 template <>
 InputParameters validParams<ActuallyExplicitEuler>();
@@ -52,6 +53,8 @@ protected:
   TagID _Ke_time_tag;
 
   std::unique_ptr<LinearSolver<Number>> _linear_solver;
+
+  std::unique_ptr<LumpedPreconditioner> _preconditioner;
 };
 
 #endif // ACTUALLYEXPLICITEULER_H
