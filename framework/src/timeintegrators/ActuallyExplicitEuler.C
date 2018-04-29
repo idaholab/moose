@@ -37,6 +37,9 @@ validParams<ActuallyExplicitEuler>()
       "a simple inversion - incredibly fast but may be less accurate.  'lump_preconditioned' uses "
       "the lumped mass matrix as a preconditioner for the 'consistent' solve");
 
+  params.addClassDescription(
+      "Implementation of Explicit/Forward Euler without invoking any of the nonlinear solver");
+
   return params;
 }
 
