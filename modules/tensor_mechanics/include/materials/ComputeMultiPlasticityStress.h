@@ -49,14 +49,6 @@ protected:
   /// Even if the returnMap fails, return the best values found for stress and internal parameters
   bool _ignore_failures;
 
-  /// The type of tangent operator to return.  tangent operator = d(stress_rate)/d(strain_rate).
-  enum TangentOperatorEnum
-  {
-    elastic,
-    linear,
-    nonlinear
-  } _tangent_operator_type;
-
   /// Tolerance on the plastic strain increment ("direction") constraint
   Real _epp_tol;
 

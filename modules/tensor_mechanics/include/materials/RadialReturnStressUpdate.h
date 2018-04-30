@@ -47,7 +47,7 @@ public:
    * @param stress_old                    Old state of stress
    * @param elasticity_tensor             Rank 4 C_{ijkl}, must be isotropic
    * @param elastic_strain_old            Old state of total elastic strain
-   * @param compute_full_tangent_operator Flag currently unused by this class
+   * @param tangent_operator_type         Enum used to signify how to calculate the tangent operator
    * @param tangent_operator              Currently a copy of the elasticity tensor in this class
    */
   virtual void updateState(RankTwoTensor & strain_increment,
@@ -57,7 +57,7 @@ public:
                            const RankTwoTensor & stress_old,
                            const RankFourTensor & elasticity_tensor,
                            const RankTwoTensor & elastic_strain_old,
-                           bool compute_full_tangent_operator,
+                           const TangentOperatorEnum & tangent_operator_type,
                            RankFourTensor & tangent_operator) override;
 
   virtual Real computeReferenceResidual(const Real effective_trial_stress,

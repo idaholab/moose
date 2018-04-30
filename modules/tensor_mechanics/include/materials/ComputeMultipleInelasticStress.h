@@ -138,9 +138,6 @@ protected:
   /// old value of inelastic strain
   const MaterialProperty<RankTwoTensor> & _inelastic_strain_old;
 
-  /// what sort of Tangent operator to calculate
-  const enum class TangentOperatorEnum { elastic, nonlinear } _tangent_operator_type;
-
   /// number of plastic models
   const unsigned _num_models;
 

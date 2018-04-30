@@ -83,7 +83,6 @@ ComputeMultipleInelasticStress::ComputeMultipleInelasticStress(const InputParame
     _inelastic_strain(declareProperty<RankTwoTensor>(_base_name + "combined_inelastic_strain")),
     _inelastic_strain_old(
         getMaterialPropertyOld<RankTwoTensor>(_base_name + "combined_inelastic_strain")),
-    _tangent_operator_type(getParam<MooseEnum>("tangent_operator").getEnum<TangentOperatorEnum>()),
     _num_models(getParam<std::vector<MaterialName>>("inelastic_models").size()),
     _inelastic_weights(isParamValid("combined_inelastic_strain_weights")
                            ? getParam<std::vector<Real>>("combined_inelastic_strain_weights")
@@ -189,7 +188,7 @@ ComputeMultipleInelasticStress::finiteStrainRotation(const bool force_elasticity
       _rotation_increment[_qp] * _inelastic_strain[_qp] * _rotation_increment[_qp].transpose();
   if (force_elasticity_rotation ||
       !(_is_elasticity_tensor_guaranteed_isotropic &&
-        (_tangent_operator_type == TangentOperatorEnum::elastic || _num_models == 0)))
+        (_tangent_operator_type == TangentOperatorEnum::ELASTIC || _num_models == 0)))
     _Jacobian_mult[_qp].rotate(_rotation_increment[_qp]);
 }
 
@@ -323,7 +322,7 @@ ComputeMultipleInelasticStress::updateQpState(RankTwoTensor & elastic_strain_inc
 void
 ComputeMultipleInelasticStress::computeQpJacobianMult()
 {
-  if (_tangent_operator_type == TangentOperatorEnum::elastic)
+  if (_tangent_operator_type == TangentOperatorEnum::ELASTIC)
     _Jacobian_mult[_qp] = _elasticity_tensor[_qp];
   else
   {
@@ -385,6 +384,6 @@ ComputeMultipleInelasticStress::computeAdmissibleState(unsigned model_number,
                                      _stress_old[_qp],
                                      _elasticity_tensor[_qp],
                                      _elastic_strain_old[_qp],
-                                     _tangent_operator_type == TangentOperatorEnum::nonlinear,
+                                     _tangent_operator_type,
                                      consistent_tangent_operator);
 }

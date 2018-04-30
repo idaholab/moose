@@ -18,6 +18,13 @@
 
 class ComputeStressBase;
 
+enum class TangentOperatorEnum
+{
+  ELASTIC,
+  LINEAR,
+  NONLINEAR
+};
+
 template <>
 InputParameters validParams<ComputeStressBase>();
 
@@ -74,6 +81,9 @@ protected:
 
   /// Parameter which decides whether to store old stress. This is required for HHT time integration and Rayleigh damping
   const bool _store_stress_old;
+
+  /// Enum to determine calculation method for the tangent operator
+  const TangentOperatorEnum _tangent_operator_type;
 
   /// Whether initial stress was provided.  InitialStress Deprecation: remove this.
   const bool _initial_stress_provided;

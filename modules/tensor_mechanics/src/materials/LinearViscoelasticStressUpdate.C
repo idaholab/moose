@@ -62,7 +62,7 @@ LinearViscoelasticStressUpdate::updateState(RankTwoTensor & strain_increment,
                                             const RankTwoTensor & /*stress_old*/,
                                             const RankFourTensor & elasticity_tensor,
                                             const RankTwoTensor & elastic_strain_old,
-                                            bool /*compute_full_tangent_operator*/,
+                                            const TangentOperatorEnum & /*tangent_operator_type*/,
                                             RankFourTensor & tangent_operator)
 {
   RankTwoTensor current_mechanical_strain =
