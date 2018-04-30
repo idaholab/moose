@@ -18,6 +18,7 @@ validParams<WallFrictionChurchillMaterial>()
   params.addRequiredParam<MaterialPropertyName>("mu", "Dynamic viscosity material property");
 
   params.addRequiredParam<Real>("roughness", "Surface roughness");
+  params.declareControllable("roughness");
   return params;
 }
 
