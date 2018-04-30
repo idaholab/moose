@@ -41,7 +41,8 @@ validParams<StressDivergenceBeam>()
       0.0,
       "Name of material property or a constant real number defining the zeta parameter for the "
       "Rayleigh damping.");
-  params.addParam<Real>("alpha", 0.0, "alpha parameter for HHT time integration");
+  params.addRangeCheckedParam<Real>(
+      "alpha", 0.0, "alpha >= -0.3333 & alpha <= 0.0", "alpha parameter for HHT time integration");
 
   params.set<bool>("use_displaced_mesh") = true;
   return params;
@@ -99,7 +100,7 @@ void
 StressDivergenceBeam::computeResidual()
 {
   DenseVector<Number> & re = _assembly.residualBlock(_var.number());
-  mooseAssert(re.size() == 2, "Beam element must have two nodes only.");
+  mooseAssert(re.size() == 2, "StressDivergenceBeam: Beam element must have two nodes only.");
   _local_re.resize(re.size());
   _local_re.zero();
 
@@ -254,6 +255,7 @@ void
 StressDivergenceBeam::computeDynamicTerms(std::vector<RealVectorValue> & global_force_res,
                                           std::vector<RealVectorValue> & global_moment_res)
 {
+  mooseAssert(_zeta[0] >= 0.0, "StressDivergenceBeam: Zeta parameter should be non-negative.");
   std::vector<RealVectorValue> global_force_res_old(_test.size());
   std::vector<RealVectorValue> global_moment_res_old(_test.size());
   computeGlobalResidual(

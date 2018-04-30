@@ -105,7 +105,7 @@ Apart from the translational strain increments, rotational strain increments als
 \kappa_3(x) = \int_A \epsilon_{11}(x,y,z) y dA = \frac{\partial u_1(x)}{\partial x} A_y - \frac{\partial \theta_3(x)}{\partial x} I_y + \frac{\partial \theta_2(x)}{\partial x} J
 \end{equation}
 
-where, $I_y = \int_A y^2 dA$, $I_z = \int_A z^2 dA$ and $J = \int_A yz dA$. Note that $J$ is assumed to be zero for simplicity and this assumption is valid for symmetric cross-sections such as square, rectangular and circular.
+where $I_y = \int_A y^2 dA$, $I_z = \int_A z^2 dA$ and $J = \int_A yz dA$. Note that $J$ is assumed to be zero for simplicity and this assumption is valid for symmetric cross-sections such as square, rectangular and circular.
 
 The above strain increments are calculated using the small strain assumption. If the `large_strain` option in [ComputeIncrementalBeamStrain](/ComputeIncrementalBeamStrain.md) or [ComputeFiniteBeamStrain](/ComputeFiniteBeamStrain.md) is set to `true`, then the strains are calculated using the equations below:
 
@@ -146,7 +146,7 @@ The axial and shear strain increments, and the rotational strain increments (aft
 \begin{equation}
 \Delta M_3(x) = G \; \kappa_3(x)
 \end{equation}
-where, $E$ and $G$ are the Young's and shear modulus, respectively. $k$ is the shear correction factor that depends on the shape of the cross-section.
+where $E$ and $G$ are the Young's and shear modulus, respectively. $k$ is the shear correction factor that depends on the shape of the cross-section.
 
 Since the strain increments are in the beam local configuration at $t+\Delta t$, the calculated force and moment increments are also in the same configuration. To get the total force and moment at $t + \Delta t$, the force and moment increments are first transformed to the global coordinate system using ${}^{t+\Delta t}R$ and then added to the forces and moments from $t$ that are already in the global coordinate system.
 
@@ -159,5 +159,50 @@ The strain energy is calculated as:
 \end{equation}
 
 As can be seen from the equation for $\epsilon_{1}(x)$, it depends only on $\frac{\partial u_1}{\partial x}$ if $A_y$ and $A_z$ are zero. But $\epsilon_{2}(x)$ depends on both $\frac{\partial u_1}{\partial x}$ and $\theta_3$. Therefore, $F_2(x) \delta \epsilon_{2}(x)$ would contribute to the residual of both the translational DOF in y direction and rotational DOF in the z direction. Similarly, $F_3(x) \delta \epsilon_{3}(x)$ would contribute to the residual of both the translational DOF in z direction and rotational DOF in the y direction. This accounts for the coupling between the shear and bending behavior of the beam. The stress-divergence calculation is performed in [StressDivergenceBeam](/StressDivergenceBeam.md).
+
+## Dynamic beam
+
+There are two main ways to include the inertial effects for the beam. The first method is to assign a uniform density to the beam and calculate a consistent mass/inertia matrix for the beam, and the second method assumes that the mass of the beam is concentrated at the ends of the beam, and represents the mass of the beam using point mass/inertia at the nodes at the end of the beam.
+
+### Consistent mass matrix
+
+If $A_y$, $A_z$ and $J$ are zero in [InertialForceBeam](/InertialForceBeam.md), then there is no coupling between the rotational and translational DOFs. The residual for the $j^{th}$ translational degree of freedom at node $i$ can be obtained as follows:
+
+\begin{equation}
+R_j^0 = \int_{0}^{{}^0L} \rho A \left(\frac{x}{{}^0L} {\ddot{u}_j}^0 + \frac{{}^0L - x}{{}^0L} {\ddot{u}_j}^1 \right) \frac{x}{{}^0L} dx
+\end{equation}
+\begin{equation}
+R_j^1 = \int_{0}^{{}^0L} \rho A \left(\frac{x}{{}^0L} {\ddot{u}_j}^0 + \frac{{}^0L - x}{{}^0L} {\ddot{u}_j}^1 \right) \frac{{}^0L - x}{{}^0L} dx
+\end{equation}
+where $\rho$ is the density of the beam, which is assumed to be constant through the length of the beam, and ${\ddot{u}_j}^i$ is the translational acceleration at node $i$ in $j^{th}$ direction.  
+
+The residual for the $j^{th}$ rotational degree of freedom can be obtained as follows:
+\begin{equation}
+R_j^0 = \int_{0}^{{}^0L} \rho I \left(\frac{x}{{}^0L} {\ddot{\theta}_j}^0 + \frac{{}^0L - x}{{}^0L} {\ddot{\theta}_j}^1 \right) \frac{x}{{}^0L} dx
+\end{equation}
+\begin{equation}
+R_j^1 = \int_{0}^{{}^0L} \rho I \left(\frac{x}{{}^0L} {\ddot{\theta}_j}^0 + \frac{{}^0L - x}{{}^0L} {\ddot{\theta}_j}^1 \right) \frac{{}^0L - x}{{}^0L} dx
+\end{equation}
+where $I = I_y + I_z$ for $j = 1$, $I = I_z$ for $j = 2$ and $I = I_y$ for $j = 3$.
+
+If $A_y$ and $A_z$ are non-zero, then there is coupling between $u_1$, $\theta_2$ and $\theta_3$, $u_2$ and $\theta_1$, and $u_3$ and $\theta_1$.
+
+### Point mass/inertia
+
+[NodalTranslationalInertia](/NodalTranslationalInertia.md) and [NodalRotationalInertia](/NodalRotationalInertia.md) are used to apply mass/inertia at a node. The mass and inertia terms contribute only to the residual of the node at which it is applied. Mass (m) behaves isotropically in all three coordinate directions resulting in the following $j^{th}$ translational nodal residual:
+\begin{equation}
+R_j = m \ddot{u}_j
+\end{equation}
+
+[NodalRotationalInertia](/NodalRotationalInertia.md) takes 6 rotational inertia components as input ($I_{xx}$, $I_{yy}$, $I_{zz}$, $I_{xy}$, $I_{xz}$, $I_{yz}$). If the coordinate system in which the moment of inertia components are provided is different from the global coordinate system, then `x_orientation` and `y_orientation` need to be provided as input so that a transformation matrix from the local coordinate system to the global coordinate system can be calculated.
+
+Once the moment of inertia tensor in the global coordinate system is obtained, the residual for the rotational DOF in the $j^{th}$ direction is:
+\begin{equation}
+R_j = \sum_{i=1}^3 I_{ji} \; \ddot{\theta}_i
+\end{equation}
+
+### Time-integration and damping
+
+Rayleigh damping and Newmark and HHT time integration are calculated as in [Damping](http://mooseframework.org/wiki/PhysicsModules/TensorMechanics/Dynamics/) but with [StressDivergenceBeam](/StressDivergenceBeam.md) and [InertialForceBeam](/InertialForceBeam.md) while using consistent mass/inertia matrix, and [StressDivergenceBeam](/StressDivergenceBeam.md), [NodalTranslationalInertia](/NodalTranslationalInertia.md) and [NodalRotationalInertia](/NodalRotationalInertia.md) while using point mass/inertia matrix.
 
 !bibtex bibliography
