@@ -80,6 +80,7 @@ ComputeResidualThread::subdomainChanged()
     _tag_kernels = &_kernels;
     _dg_warehouse = &_dg_kernels;
     _ibc_warehouse = &_integrated_bcs;
+    _if_warehouse = &_interface_kernels;
   }
   // If we have one tag only,
   // We call tag based storage
@@ -88,6 +89,7 @@ ComputeResidualThread::subdomainChanged()
     _tag_kernels = &(_kernels.getVectorTagObjectWarehouse(*(_tags.begin()), _tid));
     _dg_warehouse = &(_dg_kernels.getVectorTagObjectWarehouse(*(_tags.begin()), _tid));
     _ibc_warehouse = &(_integrated_bcs.getVectorTagObjectWarehouse(*(_tags.begin()), _tid));
+    _if_warehouse = &(_interface_kernels.getVectorTagObjectWarehouse(*(_tags.begin()), _tid));
   }
   // This one may be expensive
   else
@@ -95,6 +97,7 @@ ComputeResidualThread::subdomainChanged()
     _tag_kernels = &(_kernels.getVectorTagsObjectWarehouse(_tags, _tid));
     _dg_warehouse = &(_dg_kernels.getVectorTagsObjectWarehouse(_tags, _tid));
     _ibc_warehouse = &(_integrated_bcs.getVectorTagsObjectWarehouse(_tags, _tid));
+    _if_warehouse = &(_interface_kernels.getVectorTagsObjectWarehouse(_tags, _tid));
   }
 }
 
@@ -145,7 +148,7 @@ ComputeResidualThread::onBoundary(const Elem * elem, unsigned int side, Boundary
 void
 ComputeResidualThread::onInterface(const Elem * elem, unsigned int side, BoundaryID bnd_id)
 {
-  if (_interface_kernels.hasActiveBoundaryObjects(bnd_id, _tid))
+  if (_if_warehouse->hasActiveBoundaryObjects(bnd_id, _tid))
   {
 
     // Pointer to the neighbor we are currently working on.
@@ -163,7 +166,7 @@ ComputeResidualThread::onInterface(const Elem * elem, unsigned int side, Boundar
       SwapBackSentinel neighbor_sentinel(_fe_problem, &FEProblem::swapBackMaterialsNeighbor, _tid);
       _fe_problem.reinitMaterialsNeighbor(neighbor->subdomain_id(), _tid);
 
-      const auto & int_ks = _interface_kernels.getActiveBoundaryObjects(bnd_id, _tid);
+      const auto & int_ks = _if_warehouse->getActiveBoundaryObjects(bnd_id, _tid);
       for (const auto & interface_kernel : int_ks)
         interface_kernel->computeResidual();
 

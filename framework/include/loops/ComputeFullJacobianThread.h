@@ -34,10 +34,6 @@ protected:
   virtual void computeFaceJacobian(BoundaryID bnd_id) override;
   virtual void computeInternalFaceJacobian(const Elem * neighbor) override;
   virtual void computeInternalInterFaceJacobian(BoundaryID bnd_id) override;
-  NonlinearSystemBase & _nl;
-
-  // Reference to interface kernel storage
-  const MooseObjectWarehouse<InterfaceKernel> & _interface_kernels;
 };
 
 #endif // COMPUTEFULLJACOBIANTHREAD_H

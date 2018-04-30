@@ -59,7 +59,9 @@ protected:
   MooseObjectWarehouse<DGKernel> * _dg_warehouse;
 
   // Reference to interface kernel storage structure
-  const MooseObjectWarehouse<InterfaceKernel> & _interface_kernels;
+  MooseObjectTagWarehouse<InterfaceKernel> & _interface_kernels;
+
+  MooseObjectWarehouse<InterfaceKernel> * _if_warehouse;
 
   // Reference to Kernel storage structure
   MooseObjectTagWarehouse<KernelBase> & _kernels;

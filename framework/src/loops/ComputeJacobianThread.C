@@ -113,8 +113,7 @@ void
 ComputeJacobianThread::computeInternalInterFaceJacobian(BoundaryID bnd_id)
 {
   // No need to call hasActiveObjects, this is done in the calling method (see onInterface)
-  const std::vector<std::shared_ptr<InterfaceKernel>> & intks =
-      _interface_kernels.getActiveBoundaryObjects(bnd_id, _tid);
+  const auto & intks = _if_warehouse->getActiveBoundaryObjects(bnd_id, _tid);
   for (const auto & intk : intks)
     if (intk->isImplicit())
     {
@@ -154,6 +153,7 @@ ComputeJacobianThread::subdomainChanged()
     _warehouse = &_kernels;
     _dg_warehouse = &_dg_kernels;
     _ibc_warehouse = &_integrated_bcs;
+    _if_warehouse = &_interface_kernels;
   }
   // If we have one tag only,
   // We call tag based storage
@@ -162,6 +162,7 @@ ComputeJacobianThread::subdomainChanged()
     _warehouse = &(_kernels.getMatrixTagObjectWarehouse(*(_tags.begin()), _tid));
     _dg_warehouse = &(_dg_kernels.getMatrixTagObjectWarehouse(*(_tags.begin()), _tid));
     _ibc_warehouse = &(_integrated_bcs.getMatrixTagObjectWarehouse(*(_tags.begin()), _tid));
+    _if_warehouse = &(_interface_kernels.getMatrixTagObjectWarehouse(*(_tags.begin()), _tid));
   }
   // This one may be expensive, and hopefully we do not use it so often
   else
@@ -169,6 +170,7 @@ ComputeJacobianThread::subdomainChanged()
     _warehouse = &(_kernels.getMatrixTagsObjectWarehouse(_tags, _tid));
     _dg_warehouse = &(_dg_kernels.getMatrixTagsObjectWarehouse(_tags, _tid));
     _ibc_warehouse = &(_integrated_bcs.getMatrixTagsObjectWarehouse(_tags, _tid));
+    _if_warehouse = &(_interface_kernels.getMatrixTagsObjectWarehouse(_tags, _tid));
   }
 }
 
@@ -245,7 +247,7 @@ ComputeJacobianThread::onInternalSide(const Elem * elem, unsigned int side)
 void
 ComputeJacobianThread::onInterface(const Elem * elem, unsigned int side, BoundaryID bnd_id)
 {
-  if (_interface_kernels.hasActiveBoundaryObjects(bnd_id, _tid))
+  if (_if_warehouse->hasActiveBoundaryObjects(bnd_id, _tid))
   {
     // Pointer to the neighbor we are currently working on.
     const Elem * neighbor = elem->neighbor_ptr(side);
