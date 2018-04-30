@@ -99,8 +99,7 @@ void
 ComputeJacobianThread::computeInternalFaceJacobian(const Elem * neighbor)
 {
   // No need to call hasActiveObjects, this is done in the calling method (see onInternalSide)
-  const std::vector<std::shared_ptr<DGKernel>> & dgks =
-      _dg_kernels.getActiveBlockObjects(_subdomain, _tid);
+  const auto & dgks = _dg_warehouse->getActiveBlockObjects(_subdomain, _tid);
   for (const auto & dg : dgks)
     if (dg->isImplicit())
     {
@@ -152,14 +151,23 @@ ComputeJacobianThread::subdomainChanged()
   // If users pass a empty vector or a full size of vector,
   // we take all kernels
   if (!_tags.size() || _tags.size() == _fe_problem.numMatrixTags())
+  {
     _warehouse = &_kernels;
+    _dg_warehouse = &_dg_kernels;
+  }
   // If we have one tag only,
   // We call tag based storage
   else if (_tags.size() == 1)
+  {
     _warehouse = &(_kernels.getMatrixTagObjectWarehouse(*(_tags.begin()), _tid));
+    _dg_warehouse = &(_dg_kernels.getMatrixTagObjectWarehouse(*(_tags.begin()), _tid));
+  }
   // This one may be expensive, and hopefully we do not use it so often
   else
+  {
     _warehouse = &(_kernels.getMatrixTagsObjectWarehouse(_tags, _tid));
+    _dg_warehouse = &(_dg_kernels.getMatrixTagsObjectWarehouse(_tags, _tid));
+  }
 }
 
 void
@@ -201,7 +209,7 @@ ComputeJacobianThread::onBoundary(const Elem * elem, unsigned int side, Boundary
 void
 ComputeJacobianThread::onInternalSide(const Elem * elem, unsigned int side)
 {
-  if (_dg_kernels.hasActiveBlockObjects(_subdomain, _tid))
+  if (_dg_warehouse->hasActiveBlockObjects(_subdomain, _tid))
   {
     // Pointer to the neighbor we are currently working on.
     const Elem * neighbor = elem->neighbor_ptr(side);

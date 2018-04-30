@@ -25,7 +25,6 @@ ComputeFullJacobianThread::ComputeFullJacobianThread(FEProblemBase & fe_problem,
   : ComputeJacobianThread(fe_problem, tags),
     _nl(fe_problem.getNonlinearSystemBase()),
     _integrated_bcs(_nl.getIntegratedBCWarehouse()),
-    _dg_kernels(_nl.getDGKernelWarehouse()),
     _interface_kernels(_nl.getInterfaceKernelWarehouse())
 {
 }
@@ -36,7 +35,6 @@ ComputeFullJacobianThread::ComputeFullJacobianThread(ComputeFullJacobianThread &
   : ComputeJacobianThread(x, split),
     _nl(x._nl),
     _integrated_bcs(x._integrated_bcs),
-    _dg_kernels(x._dg_kernels),
     _interface_kernels(x._interface_kernels)
 {
 }
@@ -220,13 +218,12 @@ ComputeFullJacobianThread::computeFaceJacobian(BoundaryID bnd_id)
 void
 ComputeFullJacobianThread::computeInternalFaceJacobian(const Elem * neighbor)
 {
-  if (_dg_kernels.hasActiveBlockObjects(_subdomain, _tid))
+  if (_dg_warehouse->hasActiveBlockObjects(_subdomain, _tid))
   {
     const auto & ce = _fe_problem.couplingEntries(_tid);
     for (const auto & it : ce)
     {
-      const std::vector<std::shared_ptr<DGKernel>> & dgks =
-          _dg_kernels.getActiveBlockObjects(_subdomain, _tid);
+      const auto & dgks = _dg_warehouse->getActiveBlockObjects(_subdomain, _tid);
       for (const auto & dg : dgks)
       {
         MooseVariableFEBase & ivariable = *(it.first);
