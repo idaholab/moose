@@ -532,10 +532,7 @@ public:
   {
     return _dirac_kernels;
   }
-  const MooseObjectWarehouse<IntegratedBCBase> & getIntegratedBCWarehouse() const
-  {
-    return _integrated_bcs;
-  }
+  MooseObjectTagWarehouse<IntegratedBCBase> & getIntegratedBCWarehouse() { return _integrated_bcs; }
   const MooseObjectWarehouse<ElementDamper> & getElementDamperWarehouse() const
   {
     return _element_dampers;
@@ -687,7 +684,7 @@ protected:
 
   ///@{
   /// BoundaryCondition Warhouses
-  MooseObjectWarehouse<IntegratedBCBase> _integrated_bcs;
+  MooseObjectTagWarehouse<IntegratedBCBase> _integrated_bcs;
   MooseObjectTagWarehouse<NodalBCBase> _nodal_bcs;
   MooseObjectWarehouse<PresetNodalBC> _preset_nodal_bcs;
   ///@}

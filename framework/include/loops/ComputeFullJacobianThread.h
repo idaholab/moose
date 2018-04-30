@@ -36,9 +36,6 @@ protected:
   virtual void computeInternalInterFaceJacobian(BoundaryID bnd_id) override;
   NonlinearSystemBase & _nl;
 
-  // Reference to BC storage structures
-  const MooseObjectWarehouse<IntegratedBCBase> & _integrated_bcs;
-
   // Reference to interface kernel storage
   const MooseObjectWarehouse<InterfaceKernel> & _interface_kernels;
 };
