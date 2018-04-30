@@ -81,11 +81,22 @@ public:
                    const std::string & name,
                    InputParameters parameters) override;
 
-  /// output data during initial setup
-  void initialSetup() override;
-
   /// output input blocks for a given action path
   void dumpGeneratedSyntax(const std::string path);
+
+  /// output data in solve
+  virtual void solve() override;
+
+  virtual void initialSetup() override { }
+  virtual void advanceState() override { }
+  virtual void timestepSetup() override { }
+  virtual void execute(const ExecFlagType & /*exec_type*/) override { }
+  virtual void outputStep(ExecFlagType /*type*/) override { }
+  virtual void updateActiveObjects() override { }
+  virtual void onTimestepEnd() override { }
+  virtual void computeIndicators() override { }
+  virtual void computeMarkers() override { }
+  virtual bool adaptMesh() override { return false; }
 
 protected:
   void dumpObjectHelper(const std::string & system,

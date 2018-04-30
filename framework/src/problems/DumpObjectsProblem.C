@@ -281,12 +281,9 @@ DumpObjectsProblem::dumpVariableHelper(const std::string & system,
 }
 
 void
-DumpObjectsProblem::initialSetup()
+DumpObjectsProblem::solve()
 {
   dumpGeneratedSyntax(getParam<std::string>("dump_path"));
-
-  Moose::out << std::flush;
-  std::abort();
 }
 
 void
