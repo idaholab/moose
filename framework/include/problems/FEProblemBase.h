@@ -1302,7 +1302,7 @@ public:
   /**
    * Convenience function for performing execution of MOOSE systems.
    */
-  void execute(const ExecFlagType & exec_type);
+  virtual void execute(const ExecFlagType & exec_type);
 
   /**
    * Call compute methods on UserObjects.
@@ -1367,7 +1367,7 @@ public:
   /**
    * Update the active objects in the warehouses
    */
-  void updateActiveObjects();
+  virtual void updateActiveObjects();
 
   /**
    * Register a MOOSE object dependency so we can either order
