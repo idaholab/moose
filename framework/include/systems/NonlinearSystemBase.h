@@ -524,7 +524,7 @@ public:
    */
   MooseObjectTagWarehouse<KernelBase> & getKernelWarehouse() { return _kernels; }
   MooseObjectTagWarehouse<DGKernel> & getDGKernelWarehouse() { return _dg_kernels; }
-  const MooseObjectWarehouse<InterfaceKernel> & getInterfaceKernelWarehouse()
+  MooseObjectTagWarehouse<InterfaceKernel> & getInterfaceKernelWarehouse()
   {
     return _interface_kernels;
   }
@@ -678,7 +678,7 @@ protected:
   MooseObjectTagWarehouse<KernelBase> _kernels;
   MooseObjectTagWarehouse<ScalarKernel> _scalar_kernels;
   MooseObjectTagWarehouse<DGKernel> _dg_kernels;
-  MooseObjectWarehouse<InterfaceKernel> _interface_kernels;
+  MooseObjectTagWarehouse<InterfaceKernel> _interface_kernels;
 
   ///@}
 
