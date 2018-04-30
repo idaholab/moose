@@ -1050,6 +1050,7 @@ Formatter::walkPatternConfig(const std::string & prefix, Node * n)
 }
 
 Formatter::Formatter(const std::string & fname, const std::string & hit_config)
+  : canonical_section_markers(true), line_length(100), indent_string("  ")
 {
   std::unique_ptr<hit::Node> root(hit::parse(fname, hit_config));
   if (root->find("format/indent_string"))
@@ -1151,7 +1152,7 @@ Formatter::sortGroup(const std::vector<Node *> & nodes,
       if (i + 1 < nodes.size())
         field = nodes[i + 1];
 
-      if (comment->type() == NodeType::Comment && field &&
+      if ((comment->type() == NodeType::Comment || comment->type() == NodeType::Blank) && field &&
           (field->type() == NodeType::Field || field->type() == NodeType::Section))
         i++;
       else if (comment->type() == NodeType::Field || comment->type() == NodeType::Section)
