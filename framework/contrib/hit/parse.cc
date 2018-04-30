@@ -1030,6 +1030,25 @@ matches(const std::string & s, const std::string & regex, bool full = true)
 
 Formatter::Formatter() : canonical_section_markers(true), line_length(100), indent_string("  ") {}
 
+void
+Formatter::walkPatternConfig(const std::string & prefix, Node * n)
+{
+  std::vector<std::string> order;
+  for (auto child : n->children())
+  {
+    order.push_back(child->path());
+    if (child->type() == NodeType::Section)
+    {
+      auto subpath = prefix + "/" + child->path();
+      if (prefix == "")
+        subpath = child->path();
+      walkPatternConfig(subpath, child);
+    }
+  }
+
+  addPattern(prefix, order);
+}
+
 Formatter::Formatter(const std::string & fname, const std::string & hit_config)
 {
   std::unique_ptr<hit::Node> root(hit::parse(fname, hit_config));
@@ -1039,21 +1058,8 @@ Formatter::Formatter(const std::string & fname, const std::string & hit_config)
     line_length = root->param<int>("format/line_length");
   if (root->find("format/canonical_section_markers"))
     canonical_section_markers = root->param<bool>("format/canonical_section_markers");
-
   if (root->find("format/sorting"))
-  {
-    for (auto child : root->find("format/sorting")->children())
-    {
-      if (child->path() != "pattern")
-        continue;
-
-      if (child->find("section") && child->find("order"))
-      {
-        addPattern(child->param<std::string>("section"),
-                   child->param<std::vector<std::string>>("order"));
-      }
-    }
-  }
+    walkPatternConfig("", root->find("format/sorting"));
 }
 
 std::string

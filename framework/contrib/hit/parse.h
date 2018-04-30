@@ -466,23 +466,20 @@ public:
   ///       canonical_section_markers = true
   ///
   ///       # This section specifies parameter/section sorgin order as provided by the formatter's
-  ///       # addPattern member function. See the docs for that function for more details.
+  ///       # addPattern member function. The content for this section mirrors the structure of
+  ///       # the hit file being formatted.  Each section name is a regex (limited to valid hit
+  ///       # identifier characters). The fields and subsections within each section specify an
+  ///       # order; any field values are ignored. See the docs for that function for more details.
   ///       [sorting]
-  ///         # specifies that all level-two sections should have the "first" field first.
-  ///         [pattern]
-  ///           # regex to match section(s) in which to order parameters.  The regex must match the
-  ///           # complete section name (including parent path sections - i.e. the regex to match bar
-  ///           # "[foo] [bar] [][]" must match "foo/bar".
-  ///           section = "[^/]+/[^/]+"
-  ///           # paramter order for matched sections (space-separated regexes). The regexes only
-  ///           # have to partial-match the field names.
-  ///           order = "first"
+  ///         [foo]        # section 'foo' goes first (before other sections)
+  ///           bar = bla  # field 'bar' (in the foo section) goes first
+  ///           ** = bla   # double glob is placeholder for unordered fields/sections
+  ///           baz = bla  # field 'baz' goes last
   ///         []
-  ///         # specifies that the "foo" section
-  ///         [pattern]
-  ///           section = "foo"
-  ///           # use "**" (at most once) to glob/represent unordered fields
-  ///           order = "bar ** hello"
+  ///         [.*]
+  ///           [.*]
+  ///             first = bla # fields named 'first' at double nested level go first
+  ///           []
   ///         []
   ///       []
   ///     []
@@ -526,6 +523,8 @@ private:
     std::string regex;
     std::vector<std::string> order;
   };
+
+  void walkPatternConfig(const std::string & prefix, Node * n);
 
   void sortGroup(const std::vector<Node *> & nodes,
                  const std::vector<std::string> & order,
