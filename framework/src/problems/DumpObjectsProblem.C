@@ -8,7 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "DumpObjectsProblem.h"
-#include "MooseMesh.h"
+#include "DumpObjectsNonlinearSystem.h"
 #include <sstream>
 
 #include "libmesh/string_to_enum.h"
@@ -19,7 +19,7 @@ template <>
 InputParameters
 validParams<DumpObjectsProblem>()
 {
-  InputParameters params = validParams<FEProblem>();
+  InputParameters params = validParams<FEProblemBase>();
   params.addClassDescription("Single purpose problem object that does not run the given input but "
                              "allows deconstructing actions into their series of underlying Moose "
                              "objects and variables.");
@@ -28,8 +28,12 @@ validParams<DumpObjectsProblem>()
   return params;
 }
 
-DumpObjectsProblem::DumpObjectsProblem(const InputParameters & parameters) : FEProblem(parameters)
+DumpObjectsProblem::DumpObjectsProblem(const InputParameters & parameters) : FEProblemBase(parameters),
+  _nl_sys(std::make_shared<DumpObjectsNonlinearSystem>(*this, "nl0"))
 {
+  _nl = _nl_sys;
+  _aux = std::make_shared<AuxiliarySystem>(*this, "aux0");
+  newAssemblyArray(*_nl_sys);
 }
 
 void
@@ -40,7 +44,7 @@ DumpObjectsProblem::addVariable(const std::string & var_name,
 {
   dumpVariableHelper(
       "Variables", var_name, type.family, type.order, scale_factor, active_subdomains);
-  FEProblem::addVariable(var_name, type, scale_factor, active_subdomains);
+  FEProblemBase::addVariable(var_name, type, scale_factor, active_subdomains);
 }
 
 void
@@ -50,7 +54,7 @@ DumpObjectsProblem::addScalarVariable(const std::string & var_name,
                                       const std::set<SubdomainID> * const active_subdomains)
 {
   dumpVariableHelper("Variables", var_name, SCALAR, order, scale_factor, active_subdomains);
-  FEProblem::addScalarVariable(var_name, order, scale_factor, active_subdomains);
+  FEProblemBase::addScalarVariable(var_name, order, scale_factor, active_subdomains);
 }
 
 void
@@ -59,7 +63,7 @@ DumpObjectsProblem::addAuxVariable(const std::string & var_name,
                                    const std::set<SubdomainID> * const active_subdomains)
 {
   dumpVariableHelper("AuxVariables", var_name, type.family, type.order, 1.0, active_subdomains);
-  FEProblem::addAuxVariable(var_name, type, active_subdomains);
+  FEProblemBase::addAuxVariable(var_name, type, active_subdomains);
 }
 
 void
@@ -69,7 +73,7 @@ DumpObjectsProblem::addAuxScalarVariable(const std::string & var_name,
                                          const std::set<SubdomainID> * const active_subdomains)
 {
   dumpVariableHelper("AuxVariables", var_name, SCALAR, order, 1.0, active_subdomains);
-  FEProblem::addScalarVariable(var_name, order, scale_factor, active_subdomains);
+  FEProblemBase::addScalarVariable(var_name, order, scale_factor, active_subdomains);
 }
 
 void
@@ -78,7 +82,7 @@ DumpObjectsProblem::addFunction(std::string type,
                                 InputParameters parameters)
 {
   dumpObjectHelper("Functions", type, name, parameters);
-  FEProblem::addFunction(type, name, parameters);
+  FEProblemBase::addFunction(type, name, parameters);
 }
 
 void
@@ -87,7 +91,7 @@ DumpObjectsProblem::addKernel(const std::string & type,
                               InputParameters parameters)
 {
   dumpObjectHelper("Kernels", type, name, parameters);
-  FEProblem::addKernel(type, name, parameters);
+  FEProblemBase::addKernel(type, name, parameters);
 }
 
 void
@@ -96,7 +100,7 @@ DumpObjectsProblem::addNodalKernel(const std::string & type,
                                    InputParameters parameters)
 {
   dumpObjectHelper("NodalKernel", type, name, parameters);
-  FEProblem::addNodalKernel(type, name, parameters);
+  FEProblemBase::addNodalKernel(type, name, parameters);
 }
 
 void
@@ -105,7 +109,7 @@ DumpObjectsProblem::addScalarKernel(const std::string & type,
                                     InputParameters parameters)
 {
   dumpObjectHelper("ScalarKernels", type, name, parameters);
-  FEProblem::addScalarKernel(type, name, parameters);
+  FEProblemBase::addScalarKernel(type, name, parameters);
 }
 
 void
@@ -114,7 +118,7 @@ DumpObjectsProblem::addBoundaryCondition(const std::string & type,
                                          InputParameters parameters)
 {
   dumpObjectHelper("BCs", type, name, parameters);
-  FEProblem::addBoundaryCondition(type, name, parameters);
+  FEProblemBase::addBoundaryCondition(type, name, parameters);
 }
 
 void
@@ -123,7 +127,7 @@ DumpObjectsProblem::addConstraint(const std::string & type,
                                   InputParameters parameters)
 {
   dumpObjectHelper("Constraints", type, name, parameters);
-  FEProblem::addConstraint(type, name, parameters);
+  FEProblemBase::addConstraint(type, name, parameters);
 }
 
 void
@@ -132,7 +136,7 @@ DumpObjectsProblem::addAuxKernel(const std::string & type,
                                  InputParameters parameters)
 {
   dumpObjectHelper("AuxKernels", type, name, parameters);
-  FEProblem::addAuxKernel(type, name, parameters);
+  FEProblemBase::addAuxKernel(type, name, parameters);
 }
 
 void
@@ -141,7 +145,7 @@ DumpObjectsProblem::addAuxScalarKernel(const std::string & type,
                                        InputParameters parameters)
 {
   dumpObjectHelper("AuxScalarKernels", type, name, parameters);
-  FEProblem::addAuxScalarKernel(type, name, parameters);
+  FEProblemBase::addAuxScalarKernel(type, name, parameters);
 }
 
 void
@@ -150,7 +154,7 @@ DumpObjectsProblem::addDiracKernel(const std::string & type,
                                    InputParameters parameters)
 {
   dumpObjectHelper("DiracKernels", type, name, parameters);
-  FEProblem::addDiracKernel(type, name, parameters);
+  FEProblemBase::addDiracKernel(type, name, parameters);
 }
 
 void
@@ -159,7 +163,7 @@ DumpObjectsProblem::addDGKernel(const std::string & type,
                                 InputParameters parameters)
 {
   dumpObjectHelper("DGKernels", type, name, parameters);
-  FEProblem::addDGKernel(type, name, parameters);
+  FEProblemBase::addDGKernel(type, name, parameters);
 }
 
 void
@@ -168,7 +172,7 @@ DumpObjectsProblem::addInterfaceKernel(const std::string & type,
                                        InputParameters parameters)
 {
   dumpObjectHelper("InterfaceKernels", type, name, parameters);
-  FEProblem::addInterfaceKernel(type, name, parameters);
+  FEProblemBase::addInterfaceKernel(type, name, parameters);
 }
 
 void
@@ -177,7 +181,7 @@ DumpObjectsProblem::addInitialCondition(const std::string & type,
                                         InputParameters parameters)
 {
   dumpObjectHelper("ICs", type, name, parameters);
-  FEProblem::addInitialCondition(type, name, parameters);
+  FEProblemBase::addInitialCondition(type, name, parameters);
 }
 
 void
@@ -186,7 +190,7 @@ DumpObjectsProblem::addMaterial(const std::string & type,
                                 InputParameters parameters)
 {
   dumpObjectHelper("Materials", type, name, parameters);
-  FEProblem::addMaterial(type, name, parameters);
+  FEProblemBase::addMaterial(type, name, parameters);
 }
 
 std::string
