@@ -572,6 +572,20 @@ petscSetKSPDefaults(FEProblemBase & problem, KSP ksp)
   }
 #endif
 
+  auto & es = problem.es();
+
+  PetscReal rtol = es.parameters.get<Real>("linear solver tolerance");
+  PetscReal atol = es.parameters.get<Real>("linear solver absolute step tolerance");
+
+  // MOOSE defaults this to -1 for some dumb reason
+  if (atol < 0)
+    atol = 1e-50;
+
+  PetscReal maxits = es.parameters.get<unsigned int>("linear solver maximum iterations");
+
+  // 1e100 is because we don't use divtol currently
+  KSPSetTolerances(ksp, rtol, atol, 1e100, maxits);
+
   petscSetDefaultPCSide(problem, ksp);
 
   petscSetDefaultKSPNormType(problem, ksp);

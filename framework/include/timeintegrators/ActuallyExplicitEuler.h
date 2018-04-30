@@ -11,6 +11,7 @@
 #define ACTUALLYEXPLICITEULER_H
 
 #include "TimeIntegrator.h"
+#include "MeshChangedInterface.h"
 
 #include "libmesh/linear_solver.h"
 
@@ -22,7 +23,7 @@ class LumpedPreconditioner;
 template <>
 InputParameters validParams<ActuallyExplicitEuler>();
 
-class ActuallyExplicitEuler : public TimeIntegrator
+class ActuallyExplicitEuler : public TimeIntegrator, public MeshChangedInterface
 {
 public:
   ActuallyExplicitEuler(const InputParameters & parameters);
@@ -34,6 +35,8 @@ public:
   virtual void solve() override;
   virtual void postResidual(NumericVector<Number> & residual) override;
 
+  virtual void meshChanged() override;
+
 protected:
   enum SolveType
   {
@@ -43,6 +46,8 @@ protected:
   };
 
   MooseEnum _solve_type;
+
+  NumericVector<Real> & _explicit_residual;
 
   NumericVector<Real> & _explicit_euler_update;
 
@@ -55,6 +60,8 @@ protected:
   std::unique_ptr<LinearSolver<Number>> _linear_solver;
 
   std::unique_ptr<LumpedPreconditioner> _preconditioner;
+
+  Real _current_time;
 };
 
 #endif // ACTUALLYEXPLICITEULER_H

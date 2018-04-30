@@ -72,24 +72,16 @@ protected:
 
 ActuallyExplicitEuler::ActuallyExplicitEuler(const InputParameters & parameters)
   : TimeIntegrator(parameters),
+    MeshChangedInterface(parameters),
     _solve_type(getParam<MooseEnum>("solve_type")),
-    _explicit_euler_update(_nl.addVector("explicit_euler_update", false, PARALLEL)),
+    _explicit_residual(_nl.addVector("explicit_residual", false, PARALLEL)),
+    _explicit_euler_update(_nl.addVector("explicit_euler_update", true, PARALLEL)),
     _mass_matrix_diag(_nl.addVector("mass_matrix_diag", false, PARALLEL))
 {
   _Ke_time_tag = _fe_problem.getMatrixTagID("TIME");
 
   // Try to keep MOOSE from doing any nonlinear stuff
   _fe_problem.solverParams()._type = Moose::ST_LINEAR;
-
-  if (_solve_type == CONSISTENT || _solve_type == LUMP_PRECONDITIONED)
-    _linear_solver = LinearSolver<Number>::build(comm());
-
-  if (_solve_type == LUMP_PRECONDITIONED)
-  {
-    _preconditioner = libmesh_make_unique<LumpedPreconditioner>(_mass_matrix_diag);
-    _linear_solver->attach_preconditioner(_preconditioner.get());
-    _linear_solver->init();
-  }
 
   if (_solve_type == LUMPED || _solve_type == LUMP_PRECONDITIONED)
     _ones = &_nl.addVector("ones", false, PARALLEL);
@@ -98,11 +90,7 @@ ActuallyExplicitEuler::ActuallyExplicitEuler(const InputParameters & parameters)
 void
 ActuallyExplicitEuler::init()
 {
-  if (_solve_type == LUMPED || _solve_type == LUMP_PRECONDITIONED)
-    *_ones = 1.;
-
-  if (_solve_type == CONSISTENT || _solve_type == LUMP_PRECONDITIONED)
-    Moose::PetscSupport::setLinearSolverDefaults(_fe_problem, *_linear_solver);
+  meshChanged();
 }
 
 void
@@ -129,26 +117,45 @@ ActuallyExplicitEuler::solve()
   // parameters for PETSc.
   _fe_problem.initPetscOutput();
 
+  auto & es = _fe_problem.es();
+
   auto & nonlinear_system = _fe_problem.getNonlinearSystemBase();
 
   auto & libmesh_system = dynamic_cast<NonlinearImplicitSystem &>(nonlinear_system.system());
 
-  auto Re_non_time_tag = nonlinear_system.nonTimeVectorTag();
-
   auto & mass_matrix = *libmesh_system.matrix;
 
+  _current_time = _fe_problem.time();
+
+  // Set time back so that we're evaluating the interior residual at the old time
+  _fe_problem.time() = _fe_problem.timeOld();
+
+  libmesh_system.update();
+
   // Must compute the residual first
-  _fe_problem.computeResidualTag(
-      *libmesh_system.current_local_solution, _Re_non_time, Re_non_time_tag);
+  _explicit_residual.zero();
+  _fe_problem.computeResidual(*libmesh_system.current_local_solution, _explicit_residual);
 
-  _Re_non_time *= -1.;
+  // The residual is on the RHS
+  _explicit_residual *= -1.;
 
+  // Compute the mass matrix
   _fe_problem.computeJacobianTag(*libmesh_system.current_local_solution, mass_matrix, _Ke_time_tag);
+
+  // Still testing whether leaving the old update is a good idea or not
+  // _explicit_euler_update = 0;
 
   switch (_solve_type)
   {
     case CONSISTENT:
-      _linear_solver->solve(mass_matrix, _explicit_euler_update, _Re_non_time, 1e-6, 100);
+      Moose::PetscSupport::setLinearSolverDefaults(_fe_problem, *_linear_solver);
+
+      _linear_solver->solve(mass_matrix,
+                            _explicit_euler_update,
+                            _explicit_residual,
+                            es.parameters.get<Real>("linear solver tolerance"),
+                            es.parameters.get<unsigned int>("linear solver maximum iterations"));
+
       break;
 
     case LUMPED:
@@ -161,14 +168,18 @@ ActuallyExplicitEuler::solve()
       _mass_matrix_diag.reciprocal();
 
       // Multiply the inversion by the RHS
-      _explicit_euler_update.pointwise_mult(_mass_matrix_diag, _Re_non_time);
+      _explicit_euler_update.pointwise_mult(_mass_matrix_diag, _explicit_residual);
       break;
 
     case LUMP_PRECONDITIONED:
       mass_matrix.vector_mult(_mass_matrix_diag, *_ones);
       _mass_matrix_diag.reciprocal();
 
-      _linear_solver->solve(mass_matrix, _explicit_euler_update, _Re_non_time, 1e-6, 100);
+      _linear_solver->solve(mass_matrix,
+                            _explicit_euler_update,
+                            _explicit_residual,
+                            es.parameters.get<Real>("linear solver tolerance"),
+                            es.parameters.get<unsigned int>("linear solver maximum iterations"));
       break;
 
     default:
@@ -178,12 +189,45 @@ ActuallyExplicitEuler::solve()
   *libmesh_system.solution = nonlinear_system.solutionOld();
   *libmesh_system.solution += _explicit_euler_update;
 
+  // Enforce contraints on the solution
+  DofMap & dof_map = libmesh_system.get_dof_map();
+  dof_map.enforce_constraints_exactly(libmesh_system, libmesh_system.solution.get());
+
   libmesh_system.update();
+
+  nonlinear_system.setSolution(*libmesh_system.current_local_solution);
 
   libmesh_system.nonlinear_solver->converged = true;
 }
 
 void
-ActuallyExplicitEuler::postResidual(NumericVector<Number> & /* residual */)
+ActuallyExplicitEuler::postResidual(NumericVector<Number> & residual)
 {
+  residual += _Re_time;
+  residual += _Re_non_time;
+  residual.close();
+
+  // Reset time - the boundary conditions (which is what comes next) are applied at the final time
+  _fe_problem.time() = _current_time;
+}
+
+void
+ActuallyExplicitEuler::meshChanged()
+{
+  // Can only be done after the system is inited
+  if (_solve_type == LUMPED || _solve_type == LUMP_PRECONDITIONED)
+    *_ones = 1.;
+
+  if (_solve_type == CONSISTENT || _solve_type == LUMP_PRECONDITIONED)
+    _linear_solver = LinearSolver<Number>::build(comm());
+
+  if (_solve_type == LUMP_PRECONDITIONED)
+  {
+    _preconditioner = libmesh_make_unique<LumpedPreconditioner>(_mass_matrix_diag);
+    _linear_solver->attach_preconditioner(_preconditioner.get());
+    _linear_solver->init();
+  }
+
+  if (_solve_type == CONSISTENT || _solve_type == LUMP_PRECONDITIONED)
+    Moose::PetscSupport::setLinearSolverDefaults(_fe_problem, *_linear_solver);
 }
