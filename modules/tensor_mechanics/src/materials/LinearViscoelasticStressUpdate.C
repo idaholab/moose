@@ -16,7 +16,6 @@ InputParameters
 validParams<LinearViscoelasticStressUpdate>()
 {
   InputParameters params = validParams<StressUpdateBase>();
-  params.addParam<std::string>("base_name", "optional string prepended to the creep strain name");
   params.addParam<std::string>(
       "apparent_creep_strain",
       "apparent_creep_strain",
@@ -34,11 +33,8 @@ validParams<LinearViscoelasticStressUpdate>()
 
 LinearViscoelasticStressUpdate::LinearViscoelasticStressUpdate(const InputParameters & parameters)
   : StressUpdateBase(parameters),
-    _base_name(isParamValid("base_name") ? getParam<std::string>("base_name") : std::string()),
-    _creep_strain(declareProperty<RankTwoTensor>(
-        isParamValid("base_name") ? _base_name + "_creep_strain" : "creep_strain")),
-    _creep_strain_old(getMaterialPropertyOld<RankTwoTensor>(
-        isParamValid("base_name") ? _base_name + "_creep_strain" : "creep_strain")),
+    _creep_strain(declareProperty<RankTwoTensor>(_base_name + "creep_strain")),
+    _creep_strain_old(getMaterialPropertyOld<RankTwoTensor>(_base_name + "creep_strain")),
     _apparent_creep_strain(getMaterialProperty<RankTwoTensor>("apparent_creep_strain")),
     _apparent_elasticity_tensor(getMaterialProperty<RankFourTensor>("apparent_elasticity_tensor")),
     _instantaneous_elasticity_tensor_inv(

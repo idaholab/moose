@@ -143,9 +143,6 @@ protected:
   /// Number of internal parameters
   const unsigned _num_intnl;
 
-  /// String prepended to various MaterialProperties that are defined by this class
-  const std::string _base_name;
-
   /// Maximum number of Newton-Raphson iterations allowed in the return-map process
   const unsigned _max_nr_its;
 
