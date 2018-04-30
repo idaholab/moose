@@ -1,8 +1,8 @@
 [Mesh]
   type = GeneratedMesh
   dim = 2
-  nx = 50
-  ny = 50
+  nx = 10
+  ny = 10
   xmin = -0.5
   xmax = 0.5
   ymin = -0.5
@@ -23,9 +23,9 @@
 []
 
 [Variables]
-  [./disp_x]
+  [./u_x]
   [../]
-  [./disp_y]
+  [./u_y]
   [../]
   [./global_strain]
     order = THIRD
@@ -33,8 +33,49 @@
   [../]
 []
 
+[AuxVariables]
+  [./ug_x]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./ug_y]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./disp_x]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./disp_y]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+[]
+
+[AuxKernels]
+  [./ug_x]
+    type = GlobalDisplacementAux
+    variable = disp_x
+  [../]
+  [./ug_y]
+    type = GlobalDisplacementAux
+    variable = disp_y
+    component = 1
+  [../]
+  [./disp_x]
+    type = TotalDisplacementAux
+    variable = disp_x
+    displacement_variables = 'u_x ug_x'
+  [../]
+  [./disp_y]
+    type = TotalDisplacementAux
+    variable = disp_y
+    displacement_variables = 'u_y ug_y'
+  [../]
+[]
+
 [GlobalParams]
-  displacements = 'disp_x disp_y'
+  displacements = 'u_x u_y'
   block = 0
 []
 
@@ -54,8 +95,8 @@
 [BCs]
   [./Periodic]
     [./left-right]
-      auto_direction = 'y'
-      variable = 'disp_x'
+      auto_direction = 'x y'
+      variable = 'u_x u_y'
     [../]
   [../]
 
@@ -63,13 +104,13 @@
   [./centerfix_x]
     type = PresetBC
     boundary = 100
-    variable = disp_x
+    variable = u_x
     value = 0
   [../]
   [./centerfix_y]
     type = PresetBC
     boundary = 100
-    variable = disp_y
+    variable = u_y
     value = 0
   [../]
 
@@ -77,22 +118,8 @@
   [./angularfix]
     type = PresetBC
     boundary = 101
-    variable = disp_x
+    variable = u_x
     value = 0
-  [../]
-
-  [./applied_disp1]
-    type = PresetBC
-    boundary = left
-    variable = disp_x
-    value = -0.2
-  [../]
-
-  [./applied_disp2]
-    type = PresetBC
-    boundary = right
-    variable = disp_x
-    value = 0.2
   [../]
 []
 
@@ -119,6 +146,7 @@
 [UserObjects]
   [./appl_stress]
     type = GlobalStrainUserObject
+    applied_stress_tensor = '0.1 0.2 0 0 0 -0.2'
     execute_on = 'Initial Timestep_begin Linear'
   [../]
 []
@@ -153,5 +181,8 @@
 []
 
 [Outputs]
-  exodus = true
+  [./exodus]
+    type = Exodus
+    elemental_as_nodal = true
+  [../]
 []

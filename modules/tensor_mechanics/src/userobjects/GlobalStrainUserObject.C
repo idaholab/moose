@@ -23,7 +23,6 @@ validParams<GlobalStrainUserObject>()
   params.addParam<std::vector<Real>>("applied_stress_tensor",
                                      "Vector of values defining the constant applied stress "
                                      "to add, in order 11, 22, 33, 23, 13, 12");
-  params.addParam<Real>("factor", 1.0, "Scale factor applied to prescribed pressure");
   params.addParam<std::string>("base_name", "Material properties base name");
   params.set<ExecFlagEnum>("execute_on") = EXEC_LINEAR;
 
@@ -34,8 +33,7 @@ GlobalStrainUserObject::GlobalStrainUserObject(const InputParameters & parameter
   : ElementUserObject(parameters),
     _base_name(isParamValid("base_name") ? getParam<std::string>("base_name") + "_" : ""),
     _Cijkl(getMaterialProperty<RankFourTensor>(_base_name + "elasticity_tensor")),
-    _stress(getMaterialProperty<RankTwoTensor>(_base_name + "stress")),
-    _factor(getParam<Real>("factor"))
+    _stress(getMaterialProperty<RankTwoTensor>(_base_name + "stress"))
 {
   if (isParamValid("applied_stress_tensor"))
     _applied_stress_tensor.fillFromInputVector(
@@ -54,10 +52,12 @@ GlobalStrainUserObject::initialize()
 void
 GlobalStrainUserObject::execute()
 {
+  computeAdditionalStress();
+
   for (unsigned int _qp = 0; _qp < _qrule->n_points(); _qp++)
   {
     // residual, integral of stress components
-    _residual += _JxW[_qp] * _coord[_qp] * (_stress[_qp] + _applied_stress_tensor * _factor);
+    _residual += _JxW[_qp] * _coord[_qp] * (_stress[_qp] + _applied_stress_tensor);
 
     // diagonal jacobian, integral of elsticity tensor components
     _jacobian += _JxW[_qp] * _coord[_qp] * _Cijkl[_qp];

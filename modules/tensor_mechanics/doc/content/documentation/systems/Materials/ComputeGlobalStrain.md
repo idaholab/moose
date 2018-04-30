@@ -1,4 +1,4 @@
-# ComputeglobalStrain
+# ComputeGlobalStrain
 
 !syntax description /Materials/ComputeGlobalStrain
 

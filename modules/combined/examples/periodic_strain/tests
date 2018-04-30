@@ -1,0 +1,10 @@
+[Tests]
+  [./strain]
+    type = RunApp
+    input = 'global_strain_pfm.i'
+    # The actual input file solves on a 50x50 mesh.  For checking the
+    # input we can run on something much smaller...
+    cli_args = 'Mesh/nx=2 Mesh/ny=2'
+    check_input = True
+  [../]
+[]

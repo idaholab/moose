@@ -2,6 +2,6 @@
   [./test]
     type = 'Exodiff'
     input = 'global_strain.i'
-    exodiff = 'global_strain_out.e'
+    exodiff = 'global_strain_exodus.e'
   [../]
 []

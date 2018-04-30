@@ -31,13 +31,17 @@ public:
   virtual const RankTwoTensor & getResidual() const;
   virtual const RankFourTensor & getJacobian() const;
 
+  /**
+   * Calculate additional applied stresses
+   */
+  virtual void computeAdditionalStress(){};
+
 protected:
   std::string _base_name;
 
   const MaterialProperty<RankFourTensor> & _Cijkl;
   const MaterialProperty<RankTwoTensor> & _stress;
 
-  const Real _factor;
   RankTwoTensor _applied_stress_tensor;
   RankTwoTensor _residual;
   RankFourTensor _jacobian;
