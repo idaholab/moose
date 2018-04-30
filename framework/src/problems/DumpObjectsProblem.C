@@ -9,6 +9,7 @@
 
 #include "DumpObjectsProblem.h"
 #include "DumpObjectsNonlinearSystem.h"
+#include "AuxiliarySystem.h"
 #include <sstream>
 
 #include "libmesh/string_to_enum.h"
@@ -28,13 +29,15 @@ validParams<DumpObjectsProblem>()
   return params;
 }
 
-DumpObjectsProblem::DumpObjectsProblem(const InputParameters & parameters) : FEProblemBase(parameters),
-  _nl_sys(std::make_shared<DumpObjectsNonlinearSystem>(*this, "nl0"))
+DumpObjectsProblem::DumpObjectsProblem(const InputParameters & parameters)
+  : FEProblemBase(parameters), _nl_sys(std::make_shared<DumpObjectsNonlinearSystem>(*this, "nl0"))
 {
   _nl = _nl_sys;
   _aux = std::make_shared<AuxiliarySystem>(*this, "aux0");
   newAssemblyArray(*_nl_sys);
 }
+
+DumpObjectsProblem::~DumpObjectsProblem() { FEProblemBase::deleteAssemblyArray(); }
 
 void
 DumpObjectsProblem::addVariable(const std::string & var_name,

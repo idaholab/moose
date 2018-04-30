@@ -28,14 +28,14 @@ public:
   DumpObjectsNonlinearSystem(FEProblemBase & problem, const std::string & name);
 
   virtual NonlinearSolver<Number> * nonlinearSolver() override { return NULL; }
-  virtual void solve() override { }
-  virtual void stopSolve() override { }
+  virtual void solve() override {}
+  virtual void stopSolve() override {}
   virtual bool converged() override { return true; }
   virtual NumericVector<Number> & RHS() override { return *_dummy; }
   virtual NumericVector<Number> & solutionOld() override { return *_dummy; }
   virtual NumericVector<Number> & solutionOlder() override { return *_dummy; }
   virtual unsigned int getCurrentNonlinearIterationNumber() override { return 0; }
-  virtual void setupFiniteDifferencedPreconditioner() override { }
+  virtual void setupFiniteDifferencedPreconditioner() override {}
 
 protected:
   NumericVector<Number> * _dummy;

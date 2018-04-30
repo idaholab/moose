@@ -25,6 +25,7 @@ class DumpObjectsProblem : public FEProblemBase
 {
 public:
   DumpObjectsProblem(const InputParameters & parameters);
+  ~DumpObjectsProblem();
 
   void addVariable(const std::string & var_name,
                    const FEType & type,
@@ -87,15 +88,15 @@ public:
   /// output data in solve
   virtual void solve() override;
 
-  virtual void initialSetup() override { }
-  virtual void advanceState() override { }
-  virtual void timestepSetup() override { }
-  virtual void execute(const ExecFlagType & /*exec_type*/) override { }
-  virtual void outputStep(ExecFlagType /*type*/) override { }
-  virtual void updateActiveObjects() override { }
-  virtual void onTimestepEnd() override { }
-  virtual void computeIndicators() override { }
-  virtual void computeMarkers() override { }
+  virtual void initialSetup() override {}
+  virtual void advanceState() override {}
+  virtual void timestepSetup() override {}
+  virtual void execute(const ExecFlagType & /*exec_type*/) override {}
+  virtual void outputStep(ExecFlagType /*type*/) override {}
+  virtual void updateActiveObjects() override {}
+  virtual void onTimestepEnd() override {}
+  virtual void computeIndicators() override {}
+  virtual void computeMarkers() override {}
   virtual bool adaptMesh() override { return false; }
 
 protected:
