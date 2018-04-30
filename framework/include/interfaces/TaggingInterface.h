@@ -64,6 +64,8 @@ public:
    */
   void prepareVectorTag(Assembly & assembly, unsigned int ivar);
 
+  void prepareVectorTagNeighbor(Assembly & assembly, unsigned int ivar);
+
   /**
    * Prepare data for computing element jacobian according to the ative tags.
    * Jacobian blocks for different tags will be extracted from Assembly.
@@ -71,6 +73,11 @@ public:
    * right before the local element matrix is computed.
    */
   void prepareMatrixTag(Assembly & assembly, unsigned int ivar, unsigned int jvar);
+
+  void prepareMatrixTagNeighbor(Assembly & assembly,
+                                unsigned int ivar,
+                                unsigned int jvar,
+                                Moose::DGJacobianType type);
 
   /**
    * Local residual blocks  will be appended by adding the current local kernel residual.

@@ -523,7 +523,7 @@ public:
    * Access functions to Warehouses from outside NonlinearSystemBase
    */
   MooseObjectTagWarehouse<KernelBase> & getKernelWarehouse() { return _kernels; }
-  const MooseObjectWarehouse<DGKernel> & getDGKernelWarehouse() { return _dg_kernels; }
+  MooseObjectTagWarehouse<DGKernel> & getDGKernelWarehouse() { return _dg_kernels; }
   const MooseObjectWarehouse<InterfaceKernel> & getInterfaceKernelWarehouse()
   {
     return _interface_kernels;
@@ -680,7 +680,7 @@ protected:
   /// Kernel Storage
   MooseObjectTagWarehouse<KernelBase> _kernels;
   MooseObjectTagWarehouse<ScalarKernel> _scalar_kernels;
-  MooseObjectWarehouse<DGKernel> _dg_kernels;
+  MooseObjectTagWarehouse<DGKernel> _dg_kernels;
   MooseObjectWarehouse<InterfaceKernel> _interface_kernels;
 
   ///@}

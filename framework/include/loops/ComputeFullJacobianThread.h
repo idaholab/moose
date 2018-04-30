@@ -39,9 +39,6 @@ protected:
   // Reference to BC storage structures
   const MooseObjectWarehouse<IntegratedBCBase> & _integrated_bcs;
 
-  // Reference to DGKernel storage
-  const MooseObjectWarehouse<DGKernel> & _dg_kernels;
-
   // Reference to interface kernel storage
   const MooseObjectWarehouse<InterfaceKernel> & _interface_kernels;
 };
