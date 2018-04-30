@@ -41,7 +41,6 @@ Control::Control(const InputParameters & parameters)
     VectorPostprocessorInterface(this),
     _fe_problem(*getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")),
     _depends_on(getParam<std::vector<std::string>>("depends_on")),
-    _tid(getParam<THREAD_ID>("_tid")),
     _input_parameter_warehouse(_app.getInputParameterWarehouse())
 {
 }
@@ -90,7 +89,7 @@ Control::getControllableParameterByName(const MooseObjectName & object_name,
 ControllableParameter
 Control::getControllableParameterByName(const MooseObjectParameterName & name)
 {
-  ControllableParameter out = _input_parameter_warehouse.getControllableParameter(name, _tid);
+  ControllableParameter out = _input_parameter_warehouse.getControllableParameter(name);
   if (out.empty())
     mooseError(
         "The desired parameter '",

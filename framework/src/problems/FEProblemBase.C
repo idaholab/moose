@@ -207,7 +207,7 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
     _has_exception(false),
     _parallel_barrier_messaging(true),
     _current_execute_on_flag(EXEC_NONE),
-    _control_warehouse(_app.getExecuteOnEnum()),
+    _control_warehouse(_app.getExecuteOnEnum(), /*threaded=*/false),
     _error_on_jacobian_nonzero_reallocation(
         getParam<bool>("error_on_jacobian_nonzero_reallocation")),
     _ignore_zeros_in_jacobian(getParam<bool>("ignore_zeros_in_jacobian")),

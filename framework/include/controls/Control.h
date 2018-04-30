@@ -78,9 +78,6 @@ protected:
   /// A list of controls that are required to run before this control may run
   std::vector<std::string> _depends_on;
 
-  /// Thread id for this object.
-  const THREAD_ID _tid;
-
   ///@{
   /**
    * Direct access to the ControllableParameter object.

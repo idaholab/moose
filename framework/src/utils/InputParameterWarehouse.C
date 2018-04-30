@@ -149,14 +149,14 @@ InputParameterWarehouse::addControllableParameterConnection(const MooseObjectPar
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
   {
     std::vector<ControllableItem *> masters = getControllableItems(master, tid);
-    if (masters.empty() && error_on_empty)
-      mooseError("Unable to located parameter with name ", master);
+    if (masters.empty() && error_on_empty && tid == 0) // some objects only exist on tid 0
+      mooseError("Unable to locate master parameter with name ", master);
     else if (masters.empty())
       return;
 
     std::vector<ControllableItem *> slaves = getControllableItems(slave, tid);
-    if (slaves.empty() && error_on_empty)
-      mooseError("Unable to located parameter with name ", slave);
+    if (slaves.empty() && error_on_empty && tid == 0) // some objects only exist on tid 0
+      mooseError("Unable to locate slave parameter with name ", slave);
     else if (slaves.empty())
       return;
 
@@ -174,7 +174,7 @@ InputParameterWarehouse::addControllableParameterAlias(const MooseObjectParamete
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
   {
     std::vector<ControllableItem *> slaves = getControllableItems(slave, tid);
-    if (slaves.empty())
+    if (slaves.empty() && tid == 0) // some objects only exist on tid 0
       mooseError("Unable to located parameter with name ", slave);
 
     for (auto slave_ptr : slaves)
@@ -195,13 +195,13 @@ InputParameterWarehouse::getControllableItems(const MooseObjectParameterName & i
 }
 
 ControllableParameter
-InputParameterWarehouse::getControllableParameter(const MooseObjectParameterName & input,
-                                                  THREAD_ID tid /*=0*/) const
+InputParameterWarehouse::getControllableParameter(const MooseObjectParameterName & input) const
 {
   ControllableParameter cparam;
-  for (auto it = _controllable_items[tid].begin(); it != _controllable_items[tid].end(); ++it)
-    if ((*it)->name() == input)
-      cparam.add(it->get());
+  for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
+    for (auto it = _controllable_items[tid].begin(); it != _controllable_items[tid].end(); ++it)
+      if ((*it)->name() == input)
+        cparam.add(it->get());
   return cparam;
 }
 

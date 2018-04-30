@@ -123,8 +123,7 @@ private:
    *
    * This is private because it should only be accessed via a Control object.
    */
-  ControllableParameter getControllableParameter(const MooseObjectParameterName & input,
-                                                 THREAD_ID tid = 0) const;
+  ControllableParameter getControllableParameter(const MooseObjectParameterName & input) const;
 
   /**
    * Returns a ControllableItem iterator, if the name is located.
