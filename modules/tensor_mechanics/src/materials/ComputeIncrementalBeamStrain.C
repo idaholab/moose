@@ -89,7 +89,8 @@ ComputeIncrementalBeamStrain::ComputeIncrementalBeamStrain(const InputParameters
     _soln_disp_index_0(_ndisp),
     _soln_disp_index_1(_ndisp),
     _soln_rot_index_0(_ndisp),
-    _soln_rot_index_1(_ndisp)
+    _soln_rot_index_1(_ndisp),
+    _initial_rotation(declareProperty<RankTwoTensor>("initial_rotation"))
 {
   // Checking for consistency between length of the provided displacements and rotations vector
   if (_ndisp != _nrot)
@@ -202,6 +203,7 @@ ComputeIncrementalBeamStrain::computeProperties()
   // global to original beam local configuration and is never updated. This method has to be
   // overriden for scenarios with finite rotation
   computeRotation();
+  _initial_rotation[0] = _original_local_config;
 
   for (_qp = 0; _qp < _qrule->n_points(); ++_qp)
     computeQpStrain();

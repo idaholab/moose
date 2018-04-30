@@ -38,9 +38,6 @@ protected:
   /// Computes the rotation matrix at time t. For small rotation scenarios, the rotation matrix at time t is same as the intiial rotation matrix
   virtual void computeRotation();
 
-  /// Getter for initial beam configuration
-  RankTwoTensor getInitialRotation() { return _original_local_config; };
-
   /// Number of coupled rotational variables
   unsigned int _nrot;
 
@@ -156,6 +153,9 @@ protected:
 
   /// Indices of solution vector corresponding to rotation DOFs at the node 1
   std::vector<unsigned int> _soln_rot_index_1;
+
+  /// Rotational transformation from global coordinate system to initial beam local configuration
+  MaterialProperty<RankTwoTensor> & _initial_rotation;
 };
 
 #endif // COMPUTEINCREMENTALBEAMSTRAIN_H
