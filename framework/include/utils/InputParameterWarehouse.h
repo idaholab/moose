@@ -90,6 +90,13 @@ public:
    */
   std::string dumpChangedControls(bool reset_changed) const;
 
+  /**
+   * Returns a copy of the current values for a controllable parameter. This method
+   * is designed to provide access to objects for monitoring the state of a controllable parameter.
+   */
+  template <typename T>
+  std::vector<T> getControllableParameterValues(const MooseObjectParameterName & input) const;
+
 private:
   /// Storage for the InputParameters objects
   /// TODO: Remove multimap
@@ -157,7 +164,7 @@ private:
   Factory::create(const std::string &, const std::string &, InputParameters, THREAD_ID, bool);
 
   /// Only controls are allowed to call getControllableParameter. The
-  /// Control::getControllableParameterHelper is the only method that calls getControllableParameter.
+  /// Control::getControllableParameter is the only method that calls getControllableParameter.
   /// However, this method cannot be made a friend explicitly because the method would need to be
   /// public. If the method is public then it is possible to call the method by getting access to
   /// the Control object.
@@ -166,8 +173,18 @@ private:
   // Allow unit test to call methods
   FRIEND_TEST(InputParameterWarehouse, getControllableItems);
   FRIEND_TEST(InputParameterWarehouse, getControllableParameter);
+  FRIEND_TEST(InputParameterWarehouse, getControllableParameterValues);
   FRIEND_TEST(InputParameterWarehouse, addControllableParameterConnection);
   FRIEND_TEST(InputParameterWarehouse, addControllableParameterAlias);
 };
+
+template <typename T>
+std::vector<T>
+InputParameterWarehouse::getControllableParameterValues(
+    const MooseObjectParameterName & input) const
+{
+  ControllableParameter param = getControllableParameter(input);
+  return param.get<T>();
+}
 
 #endif // INPUTPARAMETERWAREHOUSE_H

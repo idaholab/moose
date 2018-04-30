@@ -175,7 +175,7 @@ InputParameterWarehouse::addControllableParameterAlias(const MooseObjectParamete
   {
     std::vector<ControllableItem *> slaves = getControllableItems(slave, tid);
     if (slaves.empty() && tid == 0) // some objects only exist on tid 0
-      mooseError("Unable to located parameter with name ", slave);
+      mooseError("Unable to locate slave parameter with name ", slave);
 
     for (auto slave_ptr : slaves)
       _controllable_items[tid].emplace_back(

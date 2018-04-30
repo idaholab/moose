@@ -57,12 +57,6 @@ Control::getExecuteOptions()
 }
 
 ControllableParameter
-Control::getControllableParameter(const std::string & name)
-{
-  return getControllableParameterByName(getParam<std::string>(name));
-}
-
-ControllableParameter
 Control::getControllableParameterByName(const std::string & name)
 {
   MooseObjectParameterName desired(name);
