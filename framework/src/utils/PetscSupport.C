@@ -727,22 +727,21 @@ storePetscOptions(FEProblemBase & fe_problem, const InputParameters & params)
     pc_description += "strong_threshold: 0.7 (auto)";
   }
 
-#if !PETSC_VERSION_LESS_THAN(3, 7, 0) && PETSC_VERSION_LESS_THAN(3, 7, 5)
+#if !PETSC_VERSION_LESS_THAN(3, 7, 0)
   // In PETSc-3.7.{0--4}, there is a bug when using superlu_dist, and we have to use
   // SamePattern_SameRowPerm, otherwise we use whatever we have in PETSc
   if (superlu_dist_found && !fact_pattern_found)
   {
     po.inames.push_back("-mat_superlu_dist_fact");
+#if PETSC_VERSION_LESS_THAN(3, 7, 5)
     po.values.push_back("SamePattern_SameRowPerm");
     pc_description += "mat_superlu_dist_fact: SamePattern_SameRowPerm ";
-  }
-#elif !PETSC_VERSION_LESS_THAN(3, 7, 5)
-  if (superlu_dist_found && !fact_pattern_found)
-  {
-    po.inames.push_back("-mat_superlu_dist_fact");
+#else
     po.values.push_back("SamePattern");
     pc_description += "mat_superlu_dist_fact: SamePattern ";
+#endif
   }
+
   // restore this superlu  option
   if (superlu_dist_found && !tiny_pivot_found)
   {
