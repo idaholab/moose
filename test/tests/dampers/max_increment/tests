@@ -5,4 +5,11 @@
     expect_out = '9\s*Nonlinear'
     absent_out = '13\s*Nonlinear'
   [../]
+  [./testverifydamping_percentage]
+    type = 'RunApp'
+    input = 'max_increment_damper_test.i'
+    cli_args = 'Dampers/max_inc_damp/increment_type=fractional'
+    expect_out = '9\s*Nonlinear'
+    absent_out = '13\s*Nonlinear'
+  [../]
 []

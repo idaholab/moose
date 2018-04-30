@@ -30,8 +30,14 @@ public:
 protected:
   virtual Real computeQpDamping() override;
 
-  ///The maximum Newton increment for the variable.
+  /// The maximum Newton increment for the variable.
   Real _max_increment;
+
+  /* Enum for increment calculation type. Absolute compares the variable increment
+   * to max_increment. Fractional compares the variable increment divided by the
+   * variable value to to max_increment.
+   */
+  const enum class IncrementTypeEnum { absolute, fractional } _increment_type;
 };
 
 #endif // MAXINCREMENT_H
