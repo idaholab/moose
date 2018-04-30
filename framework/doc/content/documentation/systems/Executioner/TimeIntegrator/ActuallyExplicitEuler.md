@@ -20,7 +20,15 @@ Below is some more explanation of each of these `solve_type` options:
 
 ### `consistent`
 
-The `consistent` option builds a full ("consistent") "mass matrix" and uses it in a linear solve to get the update.  This is done by calling `FEProblem::computeJacobianTag()` and specifying the `TIME` tag which includes all of the `TimeKernel` derived Kernels and `NodalBC` derived BoundaryConditions to compute $\mathbf{M}$.  A residual computation is also completed for the `NONTIME` tag to use as the RHS creating the equation:
+The `consistent` option builds a full ("consistent") "mass matrix" and uses it in a linear solve to get the update.  This is done by calling `FEProblem::computeJacobianTag()` and specifying the `TIME` tag which includes all of the `TimeKernel` derived Kernels and `NodalBC` derived BoundaryConditions to compute $\mathbf{M}$:
+
+!listing framework/src/timeintegrators/ActuallyExplicitEuler.C line=computeJacobianTag
+
+A residual computation is also completed to use as the RHS ($R$):
+
+!listing framework/src/timeintegrators/ActuallyExplicitEuler.C line=computeResidual
+
+Creating the equation:
 
 \begin{equation}
 \mathbf{M} \delta u = -R
@@ -41,6 +49,48 @@ This means that the `lumped` option actually doesn't need to solve a system of l
 ### `lump_preconditioned`
 
 This option is the combination of the above two.  The consistent mass matrix is built and used to solve... but the preconditioner is applied as simply the inverse of the lumped mass matrix.  This means that solving the true (consistent) system can be done with simply using point-wise multiplications.  This makes it incredibly fast and memory efficient while still accurate.
+
+## Advanced Details
+
+A few notes on some of the implementation details of this object:
+
+### Update Form
+
+Note that even though we're doing an explicit solve we are currently doing it in "update form" similar to a single step Newton solve.  This gives us good partiy with the rest of MOOSE.  We may want to change this in the future to make better use of the fact that the mass-matrix can be constant for a wider class of problems if we remove `dt` from it.
+
+### `_ones`
+
+To get the sum of each row of the mass matrix for "lumping" purposes a vector consisting of all `1`s is used in a matrix-vector product:
+
+!listing framework/src/timeintegrators/ActuallyExplicitEuler.C line=mass_matrix.vector_mult
+
+This is actually the very same way `MatGetRowSum` is implemented in PETSc.  Doing it ourselves though cuts down on vector creation/destruction and a few other bookkeeping bits.
+
+In the future we might change this to use `MatGetRowSum` if a specialization for `MPI_Aij` format is created
+
+### Time
+
+Time in an explicit solve must be handled carefully.  When evaluating the weak form (the integral parts) of the residual time needs to actually be the "old" time (the time we are solving "from"):
+
+!listing framework/src/timeintegrators/ActuallyExplicitEuler.C line=timeOld
+
+However, `DirichletBC` derived boundary conditions need to use the **final** time to evaluate themselves.  Think of it this way: you're integrating forward the "forces" as if evaluated from the beginning of the step... but ultimately the value on the boundary must end up being what it is supposed to be at the final time... no matter what.  To achieve that we reset time to the `_current_time` in-between weak form evalution and `NodalBC` boundary condition application in `postResidual()`.  `postResidual()` gets called at exactly this time to allow us to combine the `time` and `nontime` residuals into a single residual.  So it's convenient to simply do:
+
+!listing framework/src/timeintegrators/ActuallyExplicitEuler.C line=_fe_problem.time() = _current_time;
+
+After `postResidual()` the `NodalBC` BCs will get applied with the time at the final time for the step.
+
+### `meshChanged()`
+
+When the mesh changes the linear solver needs to be destroyed and recreated.  This is done by simply building a new one and setting it up again.  This happens automatically just by "overwriting" the `std::unique_ptr` to the LinearSolver.
+
+### `lump_preconditioned`
+
+The `lump_preconditioned` option invokes a `LumpedPreconditioner` helper object:
+
+!listing framework/src/timeintegrators/ActuallyExplicitEuler.C line=class LumpedPreconditioner
+
+This helper object simply applies the inverse of the diagonal, lumped mass-matrix as the preconditioner for the linear solve.  This is extremely efficient.  Note that when this option is applied you shouldn't specify any other preconditioners using command-line syntax or they will override this option.  In my testing this worked well.
 
 !syntax parameters /Executioner/TimeIntegrator/ActuallyExplicitEuler
 

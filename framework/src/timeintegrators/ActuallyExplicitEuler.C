@@ -148,8 +148,6 @@ ActuallyExplicitEuler::solve()
   switch (_solve_type)
   {
     case CONSISTENT:
-      Moose::PetscSupport::setLinearSolverDefaults(_fe_problem, *_linear_solver);
-
       _linear_solver->solve(mass_matrix,
                             _explicit_euler_update,
                             _explicit_residual,

@@ -6,6 +6,10 @@
 # that the new capability works
 
 [Tests]
+  requirement = 'MOOSE shall allow efficient execution of explicit solves'
+  design = '/ActuallyExplicitEuler.md'
+  issues = '10837'
+
   [./1d-linear]
     type = 'Exodiff'
     input = 'ee-1d-linear.i'
