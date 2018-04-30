@@ -545,22 +545,19 @@ CO2FluidProperties::mu_from_rho_T(Real density, Real temperature) const
     throw MooseException("Parameters out of range in " + name() + ": mu()");
 
   Real Tstar = temperature / 251.196;
-  const std::vector<Real> a{0.235156, -0.491266, 5.211155e-2, 5.347906e-2, -1.537102e-2};
-  const std::vector<Real> d{
-      0.4071119e-2, 0.7198037e-4, 0.2411697e-16, 0.2971072e-22, -0.1627888e-22};
 
   // Viscosity in the zero-density limit
   Real sum = 0.0;
 
-  for (std::size_t i = 0; i < a.size(); ++i)
-    sum += a[i] * MathUtils::pow(std::log(Tstar), i);
+  for (std::size_t i = 0; i < _mu_a.size(); ++i)
+    sum += _mu_a[i] * MathUtils::pow(std::log(Tstar), i);
 
   Real mu0 = 1.00697 * std::sqrt(temperature) / std::exp(sum);
 
   // Excess viscosity due to finite density
-  Real mue = d[0] * density + d[1] * Utility::pow<2>(density) +
-             d[2] * Utility::pow<6>(density) / Utility::pow<3>(Tstar) +
-             d[3] * Utility::pow<8>(density) + d[4] * Utility::pow<8>(density) / Tstar;
+  Real mue = _mu_d[0] * density + _mu_d[1] * Utility::pow<2>(density) +
+             _mu_d[2] * Utility::pow<6>(density) / Utility::pow<3>(Tstar) +
+             _mu_d[3] * Utility::pow<8>(density) + _mu_d[4] * Utility::pow<8>(density) / Tstar;
 
   return (mu0 + mue) * 1.0e-6; // convert to Pa.s
 }
@@ -579,18 +576,15 @@ CO2FluidProperties::mu_drhoT_from_rho_T(Real density,
 
   Real Tstar = temperature / 251.196;
   Real dTstar_dT = 1.0 / 251.196;
-  const std::vector<Real> a{0.235156, -0.491266, 5.211155e-2, 5.347906e-2, -1.537102e-2};
-  const std::vector<Real> d{
-      0.4071119e-2, 0.7198037e-4, 0.2411697e-16, 0.2971072e-22, -0.1627888e-22};
 
   // Viscosity in the zero-density limit. Note this is only a function of T.
   // Start the sum at i = 1 so the derivative is defined
-  Real sum0 = a[0], dsum0_dTstar = 0.0;
+  Real sum0 = _mu_a[0], dsum0_dTstar = 0.0;
 
-  for (std::size_t i = 1; i < a.size(); ++i)
+  for (std::size_t i = 1; i < _mu_a.size(); ++i)
   {
-    sum0 += a[i] * MathUtils::pow(std::log(Tstar), i);
-    dsum0_dTstar += i * a[i] * MathUtils::pow(std::log(Tstar), i - 1) / Tstar;
+    sum0 += _mu_a[i] * MathUtils::pow(std::log(Tstar), i);
+    dsum0_dTstar += i * _mu_a[i] * MathUtils::pow(std::log(Tstar), i - 1) / Tstar;
   }
 
   Real mu0 = 1.00697 * std::sqrt(temperature) / std::exp(sum0);
@@ -599,16 +593,17 @@ CO2FluidProperties::mu_drhoT_from_rho_T(Real density,
                  std::exp(sum0);
 
   // Excess viscosity due to finite density
-  Real mue = d[0] * density + d[1] * Utility::pow<2>(density) +
-             d[2] * Utility::pow<6>(density) / Utility::pow<3>(Tstar) +
-             d[3] * Utility::pow<8>(density) + d[4] * Utility::pow<8>(density) / Tstar;
+  Real mue = _mu_d[0] * density + _mu_d[1] * Utility::pow<2>(density) +
+             _mu_d[2] * Utility::pow<6>(density) / Utility::pow<3>(Tstar) +
+             _mu_d[3] * Utility::pow<8>(density) + _mu_d[4] * Utility::pow<8>(density) / Tstar;
 
-  Real dmue_drho =
-      d[0] + 2.0 * d[1] * density + 6.0 * d[2] * Utility::pow<5>(density) / Utility::pow<3>(Tstar) +
-      8.0 * d[3] * Utility::pow<7>(density) + 8.0 * d[4] * Utility::pow<7>(density) / Tstar;
+  Real dmue_drho = _mu_d[0] + 2.0 * _mu_d[1] * density +
+                   6.0 * _mu_d[2] * Utility::pow<5>(density) / Utility::pow<3>(Tstar) +
+                   8.0 * _mu_d[3] * Utility::pow<7>(density) +
+                   8.0 * _mu_d[4] * Utility::pow<7>(density) / Tstar;
 
-  Real dmue_dT = (-3.0 * d[2] * Utility::pow<6>(density) / Utility::pow<4>(Tstar) -
-                  d[4] * Utility::pow<8>(density) / Tstar / Tstar) *
+  Real dmue_dT = (-3.0 * _mu_d[2] * Utility::pow<6>(density) / Utility::pow<4>(Tstar) -
+                  _mu_d[4] * Utility::pow<8>(density) / Tstar / Tstar) *
                  dTstar_dT;
 
   // Viscosity in Pa.s is
@@ -778,39 +773,31 @@ CO2FluidProperties::k_from_rho_T(Real density, Real temperature) const
     throw MooseException("Temperature " + Moose::stringify(temperature) +
                          "K out of range (200K, 1000K) in " + name() + ": k()");
 
-  const std::vector<Real> g1{0.0, 0.0, 1.5};
-  const std::vector<Real> g2{0.0, 1.0, 1.5, 1.5, 1.5, 3.5, 5.5};
-  const std::vector<unsigned int> h1{1, 5, 1};
-  const std::vector<unsigned int> h2{1, 2, 0, 5, 9, 0, 0};
-  const std::vector<Real> n1{7.69857587, 0.159885811, 1.56918621};
-  const std::vector<Real> n2{
-      -6.73400790, 16.3890156, 3.69415242, 22.3205514, 66.1420950, -0.171779133, 0.00433043347};
-  const std::vector<Real> a{
-      3.0, 6.70697, 0.94604, 0.3, 0.3, 0.39751, 0.33791, 0.77963, 0.79857, 0.9, 0.02, 0.2};
-
   // Scaled variables
   Real Tr = temperature / _critical_temperature;
   Real rhor = density / _critical_density;
 
   Real sum1 = 0.0;
-  for (std::size_t i = 0; i < n1.size(); ++i)
-    sum1 += n1[i] * std::pow(Tr, g1[i]) * MathUtils::pow(rhor, h1[i]);
+  for (std::size_t i = 0; i < _k_n1.size(); ++i)
+    sum1 += _k_n1[i] * std::pow(Tr, _k_g1[i]) * MathUtils::pow(rhor, _k_h1[i]);
 
   Real sum2 = 0.0;
-  for (std::size_t i = 0; i < n2.size(); ++i)
-    sum2 += n2[i] * std::pow(Tr, g2[i]) * MathUtils::pow(rhor, h2[i]);
+  for (std::size_t i = 0; i < _k_n2.size(); ++i)
+    sum2 += _k_n2[i] * std::pow(Tr, _k_g2[i]) * MathUtils::pow(rhor, _k_h2[i]);
 
   // Near-critical enhancement
-  Real alpha = 1.0 - a[9] * std::acosh(1.0 + a[10] * std::pow(Utility::pow<2>(1.0 - Tr), a[11]));
-  Real lambdac = rhor *
-                 std::exp(-std::pow(rhor, a[0]) / a[0] - Utility::pow<2>(a[1] * (Tr - 1.0)) -
-                          Utility::pow<2>(a[2] * (rhor - 1.0))) /
-                 std::pow(std::pow(Utility::pow<2>(1.0 - 1.0 / Tr +
-                                                   a[3] * std::pow(Utility::pow<2>(rhor - 1.0),
-                                                                   1.0 / (2.0 * a[4]))),
-                                   a[5]) +
-                              std::pow(Utility::pow<2>(a[6] * (rhor - alpha)), a[7]),
-                          a[8]);
+  Real alpha =
+      1.0 - _k_a[9] * std::acosh(1.0 + _k_a[10] * std::pow(Utility::pow<2>(1.0 - Tr), _k_a[11]));
+  Real lambdac =
+      rhor *
+      std::exp(-std::pow(rhor, _k_a[0]) / _k_a[0] - Utility::pow<2>(_k_a[1] * (Tr - 1.0)) -
+               Utility::pow<2>(_k_a[2] * (rhor - 1.0))) /
+      std::pow(std::pow(Utility::pow<2>(
+                            1.0 - 1.0 / Tr +
+                            _k_a[3] * std::pow(Utility::pow<2>(rhor - 1.0), 1.0 / (2.0 * _k_a[4]))),
+                        _k_a[5]) +
+                   std::pow(Utility::pow<2>(_k_a[6] * (rhor - alpha)), _k_a[7]),
+               _k_a[8]);
 
   return 4.81384 * (sum1 + std::exp(-5.0 * rhor * rhor) * sum2 + 0.775547504 * lambdac) / 1000.0;
 }

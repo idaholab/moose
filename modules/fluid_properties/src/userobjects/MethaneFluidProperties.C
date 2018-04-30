@@ -133,15 +133,13 @@ MethaneFluidProperties::cp(Real /*pressure*/, Real temperature) const
     throw MooseException("Temperature " + Moose::stringify(temperature) +
                          "K out of range (280K, 1080K) in " + name() + ": cp()");
 
-  std::vector<Real> a;
-  if (temperature < 755.0)
-    a = {1.9165258, -1.09269e-3, 8.696605e-6, -5.2291144e-9, 0.0, 0.0, 0.0};
-  else
-    a = {1.04356e1, -4.2025284e-2, 8.849006e-5, -8.4304566e-8, 3.9030203e-11, -7.1345169e-15, 0.0};
-
   Real specific_heat = 0.0;
-  for (std::size_t i = 0; i < a.size(); ++i)
-    specific_heat += a[i] * MathUtils::pow(temperature, i);
+  if (temperature < 755.0)
+    for (std::size_t i = 0; i < _a0.size(); ++i)
+      specific_heat += _a0[i] * MathUtils::pow(temperature, i);
+  else
+    for (std::size_t i = 0; i < _a1.size(); ++i)
+      specific_heat += _a1[i] * MathUtils::pow(temperature, i);
 
   // convert to J/kg/K by multiplying by 1000
   return specific_heat * 1000.0;
@@ -161,12 +159,9 @@ MethaneFluidProperties::mu(Real /*pressure*/, Real temperature) const
     throw MooseException("Temperature " + Moose::stringify(temperature) +
                          "K out of range (200K, 1000K) in " + name() + ": mu()");
 
-  const std::vector<Real> a{
-      2.968267e-1, 3.711201e-2, 1.218298e-5, -7.02426e-8, 7.543269e-11, -2.7237166e-14};
-
   Real viscosity = 0.0;
-  for (std::size_t i = 0; i < a.size(); ++i)
-    viscosity += a[i] * MathUtils::pow(temperature, i);
+  for (std::size_t i = 0; i < _a.size(); ++i)
+    viscosity += _a[i] * MathUtils::pow(temperature, i);
 
   return viscosity * 1.e-6;
 }
@@ -175,15 +170,13 @@ void
 MethaneFluidProperties::mu_dpT(
     Real pressure, Real temperature, Real & mu, Real & dmu_dp, Real & dmu_dT) const
 {
-  const std::vector<Real> a{
-      2.968267e-1, 3.711201e-2, 1.218298e-5, -7.02426e-8, 7.543269e-11, -2.7237166e-14};
 
   mu = this->mu(pressure, temperature);
   dmu_dp = 0.0;
 
   Real dmudt = 0.0;
-  for (std::size_t i = 0; i < a.size(); ++i)
-    dmudt += i * a[i] * MathUtils::pow(temperature, i) / temperature;
+  for (std::size_t i = 0; i < _a.size(); ++i)
+    dmudt += i * _a[i] * MathUtils::pow(temperature, i) / temperature;
   dmu_dT = dmudt * 1.e-6;
 }
 
@@ -216,17 +209,9 @@ MethaneFluidProperties::k(Real /*pressure*/, Real temperature) const
     throw MooseException("Temperature " + Moose::stringify(temperature) +
                          "K out of range (200K, 1000K) in " + name() + ": k()");
 
-  const std::vector<Real> a{-1.3401499e-2,
-                            3.663076e-4,
-                            -1.82248608e-6,
-                            5.93987998e-9,
-                            -9.1405505e-12,
-                            6.7896889e-15,
-                            -1.95048736e-18};
-
   Real kt = 0.0;
-  for (std::size_t i = 0; i < a.size(); ++i)
-    kt += a[i] * MathUtils::pow(temperature, i);
+  for (std::size_t i = 0; i < _b.size(); ++i)
+    kt += _b[i] * MathUtils::pow(temperature, i);
 
   return kt;
 }
@@ -240,21 +225,13 @@ MethaneFluidProperties::k_dpT(
     throw MooseException("Temperature " + Moose::stringify(temperature) +
                          "K out of range (200K, 1000K) in " + name() + ": k()");
 
-  const std::vector<Real> a{-1.3401499e-2,
-                            3.663076e-4,
-                            -1.82248608e-6,
-                            5.93987998e-9,
-                            -9.1405505e-12,
-                            6.7896889e-15,
-                            -1.95048736e-18};
-
   Real kt = 0.0, dkt_dT = 0.0;
 
-  for (std::size_t i = 0; i < a.size(); ++i)
-    kt += a[i] * MathUtils::pow(temperature, i);
+  for (std::size_t i = 0; i < _b.size(); ++i)
+    kt += _b[i] * MathUtils::pow(temperature, i);
 
-  for (std::size_t i = 1; i < a.size(); ++i)
-    dkt_dT += i * a[i] * MathUtils::pow(temperature, i) / temperature;
+  for (std::size_t i = 1; i < _b.size(); ++i)
+    dkt_dT += i * _b[i] * MathUtils::pow(temperature, i) / temperature;
 
   k = kt;
   dk_dp = 0.0;
@@ -269,15 +246,19 @@ MethaneFluidProperties::s(Real /*pressure*/, Real temperature) const
     throw MooseException("Temperature " + Moose::stringify(temperature) +
                          "K out of range (280K, 1080K) in " + name() + ": s()");
 
-  std::vector<Real> a;
+  Real entropy;
   if (temperature < 755.0)
-    a = {1.9165258, -1.09269e-3, 8.696605e-6, -5.2291144e-9, 0.0, 0.0, 0.0};
+  {
+    entropy = _a0[0] * std::log(temperature);
+    for (std::size_t i = 1; i < _a0.size(); ++i)
+      entropy += _a0[i] * MathUtils::pow(temperature, i) / static_cast<Real>(i);
+  }
   else
-    a = {1.04356e1, -4.2025284e-2, 8.849006e-5, -8.4304566e-8, 3.9030203e-11, -7.1345169e-15, 0.0};
-
-  Real entropy = a[0] * std::log(temperature);
-  for (std::size_t i = 1; i < a.size(); ++i)
-    entropy += a[i] * MathUtils::pow(temperature, i) / static_cast<Real>(i);
+  {
+    entropy = _a1[0] * std::log(temperature);
+    for (std::size_t i = 1; i < _a1.size(); ++i)
+      entropy += _a1[i] * MathUtils::pow(temperature, i) / static_cast<Real>(i);
+  }
 
   // convert to J/kg/K by multiplying by 1000
   return entropy * 1000.0;
@@ -291,15 +272,13 @@ MethaneFluidProperties::h(Real /*pressure*/, Real temperature) const
     throw MooseException("Temperature " + Moose::stringify(temperature) +
                          "K out of range (280K, 1080K) in " + name() + ": cp()");
 
-  std::vector<Real> a;
-  if (temperature < 755.0)
-    a = {1.9165258, -1.09269e-3, 8.696605e-6, -5.2291144e-9, 0.0, 0.0, 0.0};
-  else
-    a = {1.04356e1, -4.2025284e-2, 8.849006e-5, -8.4304566e-8, 3.9030203e-11, -7.1345169e-15, 0.0};
-
   Real enthalpy = 0.0;
-  for (std::size_t i = 0; i < a.size(); ++i)
-    enthalpy += a[i] * MathUtils::pow(temperature, i + 1) / (i + 1.0);
+  if (temperature < 755.0)
+    for (std::size_t i = 0; i < _a0.size(); ++i)
+      enthalpy += _a0[i] * MathUtils::pow(temperature, i + 1) / (i + 1.0);
+  else
+    for (std::size_t i = 0; i < _a1.size(); ++i)
+      enthalpy += _a1[i] * MathUtils::pow(temperature, i + 1) / (i + 1.0);
 
   // convert to J/kg by multiplying by 1000
   return enthalpy * 1000.0;
@@ -313,15 +292,13 @@ MethaneFluidProperties::h_dpT(
   // Enthalpy doesn't depend on pressure
   dh_dp = 0.0;
 
-  std::vector<Real> a;
-  if (temperature < 755.0)
-    a = {1.9165258, -1.09269e-3, 8.696605e-6, -5.2291144e-9, 0.0, 0.0, 0.0};
-  else
-    a = {1.04356e1, -4.2025284e-2, 8.849006e-5, -8.4304566e-8, 3.9030203e-11, -7.1345169e-15, 0.0};
-
   Real dhdt = 0.0;
-  for (std::size_t i = 0; i < a.size(); ++i)
-    dhdt += a[i] * MathUtils::pow(temperature, i);
+  if (temperature < 755.0)
+    for (std::size_t i = 0; i < _a0.size(); ++i)
+      dhdt += _a0[i] * MathUtils::pow(temperature, i);
+  else
+    for (std::size_t i = 0; i < _a1.size(); ++i)
+      dhdt += _a1[i] * MathUtils::pow(temperature, i);
 
   // convert to J/kg/K by multiplying by 1000
   dh_dT = dhdt * 1000.0;
