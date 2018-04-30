@@ -12,7 +12,7 @@ validParams<OneDHeatForcingFunction>()
   params.addRequiredParam<Real>("volume", "The total heat structure volume");
   params.addRequiredParam<FunctionName>("power_shape_function",
                                         "The name of the function that defines the power shape");
-
+  params.declareControllable("power_fraction");
   return params;
 }
 
