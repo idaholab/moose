@@ -1,0 +1,7 @@
+[Tests]
+  [./test]
+    type = 'RunException'
+    input = 'require_input_parameters.i'
+    expect_err = 'Unable to require nonexistent parameter: name'
+  [../]
+[]
