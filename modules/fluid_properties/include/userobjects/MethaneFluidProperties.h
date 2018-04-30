@@ -11,6 +11,7 @@
 #define METHANEFLUIDPROPERTIES_H
 
 #include "SinglePhaseFluidPropertiesPT.h"
+#include <array>
 
 class MethaneFluidProperties;
 
@@ -120,6 +121,23 @@ protected:
   const Real _T_critical;
   /// Critical density (kg/m^3)
   const Real _rho_critical;
+
+  /// Coefficients for enthalpy, cp etc
+  const std::array<Real, 7> _a0 = {
+      {1.9165258, -1.09269e-3, 8.696605e-6, -5.2291144e-9, 0.0, 0.0, 0.0}};
+  const std::array<Real, 7> _a1 = {
+      {1.04356e1, -4.2025284e-2, 8.849006e-5, -8.4304566e-8, 3.9030203e-11, -7.1345169e-15, 0.0}};
+  /// Coefficients for viscosity
+  const std::array<Real, 6> _a{
+      {2.968267e-1, 3.711201e-2, 1.218298e-5, -7.02426e-8, 7.543269e-11, -2.7237166e-14}};
+  /// Coefficients for thermal conductivity
+  const std::array<Real, 7> _b{{-1.3401499e-2,
+                                3.663076e-4,
+                                -1.82248608e-6,
+                                5.93987998e-9,
+                                -9.1405505e-12,
+                                6.7896889e-15,
+                                -1.95048736e-18}};
 };
 
 #endif /* METHANEFLUIDPROPERTIES_H */
