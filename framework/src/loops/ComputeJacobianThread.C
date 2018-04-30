@@ -77,8 +77,7 @@ ComputeJacobianThread::computeJacobian()
 void
 ComputeJacobianThread::computeFaceJacobian(BoundaryID bnd_id)
 {
-  const std::vector<std::shared_ptr<IntegratedBCBase>> & bcs =
-      _integrated_bcs.getActiveBoundaryObjects(bnd_id, _tid);
+  const auto & bcs = _ibc_warehouse->getActiveBoundaryObjects(bnd_id, _tid);
   for (const auto & bc : bcs)
     if (bc->shouldApply() && bc->isImplicit())
     {
@@ -154,6 +153,7 @@ ComputeJacobianThread::subdomainChanged()
   {
     _warehouse = &_kernels;
     _dg_warehouse = &_dg_kernels;
+    _ibc_warehouse = &_integrated_bcs;
   }
   // If we have one tag only,
   // We call tag based storage
@@ -161,12 +161,14 @@ ComputeJacobianThread::subdomainChanged()
   {
     _warehouse = &(_kernels.getMatrixTagObjectWarehouse(*(_tags.begin()), _tid));
     _dg_warehouse = &(_dg_kernels.getMatrixTagObjectWarehouse(*(_tags.begin()), _tid));
+    _ibc_warehouse = &(_integrated_bcs.getMatrixTagObjectWarehouse(*(_tags.begin()), _tid));
   }
   // This one may be expensive, and hopefully we do not use it so often
   else
   {
     _warehouse = &(_kernels.getMatrixTagsObjectWarehouse(_tags, _tid));
     _dg_warehouse = &(_dg_kernels.getMatrixTagsObjectWarehouse(_tags, _tid));
+    _ibc_warehouse = &(_integrated_bcs.getMatrixTagsObjectWarehouse(_tags, _tid));
   }
 }
 
@@ -191,7 +193,7 @@ ComputeJacobianThread::onElement(const Elem * elem)
 void
 ComputeJacobianThread::onBoundary(const Elem * elem, unsigned int side, BoundaryID bnd_id)
 {
-  if (_integrated_bcs.hasActiveBoundaryObjects(bnd_id, _tid))
+  if (_ibc_warehouse->hasActiveBoundaryObjects(bnd_id, _tid))
   {
     _fe_problem.reinitElemFace(elem, side, bnd_id, _tid);
 

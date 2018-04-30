@@ -79,6 +79,7 @@ ComputeResidualThread::subdomainChanged()
   {
     _tag_kernels = &_kernels;
     _dg_warehouse = &_dg_kernels;
+    _ibc_warehouse = &_integrated_bcs;
   }
   // If we have one tag only,
   // We call tag based storage
@@ -86,12 +87,14 @@ ComputeResidualThread::subdomainChanged()
   {
     _tag_kernels = &(_kernels.getVectorTagObjectWarehouse(*(_tags.begin()), _tid));
     _dg_warehouse = &(_dg_kernels.getVectorTagObjectWarehouse(*(_tags.begin()), _tid));
+    _ibc_warehouse = &(_integrated_bcs.getVectorTagObjectWarehouse(*(_tags.begin()), _tid));
   }
   // This one may be expensive
   else
   {
     _tag_kernels = &(_kernels.getVectorTagsObjectWarehouse(_tags, _tid));
     _dg_warehouse = &(_dg_kernels.getVectorTagsObjectWarehouse(_tags, _tid));
+    _ibc_warehouse = &(_integrated_bcs.getVectorTagsObjectWarehouse(_tags, _tid));
   }
 }
 
@@ -118,9 +121,9 @@ ComputeResidualThread::onElement(const Elem * elem)
 void
 ComputeResidualThread::onBoundary(const Elem * elem, unsigned int side, BoundaryID bnd_id)
 {
-  if (_integrated_bcs.hasActiveBoundaryObjects(bnd_id, _tid))
+  if (_ibc_warehouse->hasActiveBoundaryObjects(bnd_id, _tid))
   {
-    const auto & bcs = _integrated_bcs.getActiveBoundaryObjects(bnd_id, _tid);
+    const auto & bcs = _ibc_warehouse->getActiveBoundaryObjects(bnd_id, _tid);
 
     _fe_problem.reinitElemFace(elem, side, bnd_id, _tid);
 

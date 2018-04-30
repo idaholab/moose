@@ -51,7 +51,9 @@ protected:
   unsigned int _num_cached;
 
   /// Reference to BC storage structures
-  const MooseObjectWarehouse<IntegratedBCBase> & _integrated_bcs;
+  MooseObjectTagWarehouse<IntegratedBCBase> & _integrated_bcs;
+
+  MooseObjectWarehouse<IntegratedBCBase> * _ibc_warehouse;
 
   /// Reference to DGKernel storage structure
   MooseObjectTagWarehouse<DGKernel> & _dg_kernels;
