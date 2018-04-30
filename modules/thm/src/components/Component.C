@@ -157,10 +157,10 @@ Component::connectObject(const InputParameters & params,
                          const std::string & name,
                          const std::string & par_name)
 {
-  MooseObjectParameterName alias("component/" + this->name() + "/" + name);
+  MooseObjectParameterName alias("component", this->name(), name, "::");
   MooseObjectParameterName par_value(
       MooseObjectName(params.get<std::string>("_moose_base"), mooseName), par_name);
-  _app.getInputParameterWarehouse().addControllableParameterConnection(alias, par_value);
+  _app.getInputParameterWarehouse().addControllableParameterAlias(alias, par_value);
 }
 
 void
