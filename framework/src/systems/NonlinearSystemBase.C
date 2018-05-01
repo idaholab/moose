@@ -1195,7 +1195,7 @@ NonlinearSystemBase::computeResidualInternal(const std::set<TagID> & tags)
     {
       Moose::perf_log.push("computNodalKernels()", "Execution");
 
-      ComputeNodalKernelsThread cnk(_fe_problem, _nodal_kernels);
+      ComputeNodalKernelsThread cnk(_fe_problem, _nodal_kernels, tags);
 
       ConstNodeRange & range = *_mesh.getLocalNodeRange();
 
@@ -1223,7 +1223,7 @@ NonlinearSystemBase::computeResidualInternal(const std::set<TagID> & tags)
     {
       Moose::perf_log.push("computNodalKernelBCs()", "Execution");
 
-      ComputeNodalKernelBcsThread cnk(_fe_problem, _nodal_kernels);
+      ComputeNodalKernelBcsThread cnk(_fe_problem, _nodal_kernels, tags);
 
       ConstBndNodeRange & bnd_node_range = *_mesh.getBoundaryNodeRange();
 
@@ -1958,7 +1958,7 @@ NonlinearSystemBase::computeJacobianInternal(const std::set<TagID> & tags)
         // Block restricted Nodal Kernels
         if (_nodal_kernels.hasActiveBlockObjects())
         {
-          ComputeNodalKernelJacobiansThread cnkjt(_fe_problem, _nodal_kernels);
+          ComputeNodalKernelJacobiansThread cnkjt(_fe_problem, _nodal_kernels, tags);
           ConstNodeRange & range = *_mesh.getLocalNodeRange();
           Threads::parallel_reduce(range, cnkjt);
 
@@ -1971,7 +1971,7 @@ NonlinearSystemBase::computeJacobianInternal(const std::set<TagID> & tags)
         // Boundary restricted Nodal Kernels
         if (_nodal_kernels.hasActiveBoundaryObjects())
         {
-          ComputeNodalKernelBCJacobiansThread cnkjt(_fe_problem, _nodal_kernels);
+          ComputeNodalKernelBCJacobiansThread cnkjt(_fe_problem, _nodal_kernels, tags);
           ConstBndNodeRange & bnd_range = *_mesh.getBoundaryNodeRange();
 
           Threads::parallel_reduce(bnd_range, cnkjt);
@@ -1996,7 +1996,7 @@ NonlinearSystemBase::computeJacobianInternal(const std::set<TagID> & tags)
         // Block restricted Nodal Kernels
         if (_nodal_kernels.hasActiveBlockObjects())
         {
-          ComputeNodalKernelJacobiansThread cnkjt(_fe_problem, _nodal_kernels);
+          ComputeNodalKernelJacobiansThread cnkjt(_fe_problem, _nodal_kernels, tags);
           ConstNodeRange & range = *_mesh.getLocalNodeRange();
           Threads::parallel_reduce(range, cnkjt);
 
@@ -2009,7 +2009,7 @@ NonlinearSystemBase::computeJacobianInternal(const std::set<TagID> & tags)
         // Boundary restricted Nodal Kernels
         if (_nodal_kernels.hasActiveBoundaryObjects())
         {
-          ComputeNodalKernelBCJacobiansThread cnkjt(_fe_problem, _nodal_kernels);
+          ComputeNodalKernelBCJacobiansThread cnkjt(_fe_problem, _nodal_kernels, tags);
           ConstBndNodeRange & bnd_range = *_mesh.getBoundaryNodeRange();
 
           Threads::parallel_reduce(bnd_range, cnkjt);

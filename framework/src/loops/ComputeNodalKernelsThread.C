@@ -19,9 +19,13 @@
 #include "libmesh/threads.h"
 
 ComputeNodalKernelsThread::ComputeNodalKernelsThread(
-    FEProblemBase & fe_problem, const MooseObjectWarehouse<NodalKernel> & nodal_kernels)
+    FEProblemBase & fe_problem,
+    MooseObjectTagWarehouse<NodalKernel> & nodal_kernels,
+    const std::set<TagID> & tags)
   : ThreadedNodeLoop<ConstNodeRange, ConstNodeRange::const_iterator>(fe_problem),
+    _fe_problem(fe_problem),
     _aux_sys(fe_problem.getAuxiliarySystem()),
+    _tags(tags),
     _nodal_kernels(nodal_kernels),
     _num_cached(0)
 {
@@ -31,7 +35,9 @@ ComputeNodalKernelsThread::ComputeNodalKernelsThread(
 ComputeNodalKernelsThread::ComputeNodalKernelsThread(ComputeNodalKernelsThread & x,
                                                      Threads::split split)
   : ThreadedNodeLoop<ConstNodeRange, ConstNodeRange::const_iterator>(x, split),
+    _fe_problem(x._fe_problem),
     _aux_sys(x._aux_sys),
+    _tags(x._tags),
     _nodal_kernels(x._nodal_kernels),
     _num_cached(0)
 {
@@ -41,6 +47,13 @@ void
 ComputeNodalKernelsThread::pre()
 {
   _num_cached = 0;
+
+  if (!_tags.size() || _tags.size() == _fe_problem.numVectorTags())
+    _nkernel_warehouse = &_nodal_kernels;
+  else if (_tags.size() == 1)
+    _nkernel_warehouse = &(_nodal_kernels.getVectorTagObjectWarehouse(*(_tags.begin()), _tid));
+  else
+    _nkernel_warehouse = &(_nodal_kernels.getVectorTagsObjectWarehouse(_tags, _tid));
 }
 
 void
@@ -59,9 +72,9 @@ ComputeNodalKernelsThread::onNode(ConstNodeRange::const_iterator & node_it)
 
   const std::set<SubdomainID> & block_ids = _aux_sys.mesh().getNodeBlockIds(*node);
   for (const auto & block : block_ids)
-    if (_nodal_kernels.hasActiveBlockObjects(block, _tid))
+    if (_nkernel_warehouse->hasActiveBlockObjects(block, _tid))
     {
-      const auto & objects = _nodal_kernels.getActiveBlockObjects(block, _tid);
+      const auto & objects = _nkernel_warehouse->getActiveBlockObjects(block, _tid);
       for (const auto & nodal_kernel : objects)
         nodal_kernel->computeResidual();
     }

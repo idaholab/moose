@@ -2183,6 +2183,17 @@ Assembly::cacheJacobianContribution(numeric_index_type i,
 }
 
 void
+Assembly::cacheJacobianContribution(numeric_index_type i,
+                                    numeric_index_type j,
+                                    Real value,
+                                    const std::set<TagID> & tags)
+{
+  for (auto tag : tags)
+    if (_sys.hasMatrix(tag))
+      cacheJacobianContribution(i, j, value, tag);
+}
+
+void
 Assembly::setCachedJacobianContributions()
 {
   for (auto tag = beginIndex(_cached_jacobian_contribution_rows);
