@@ -55,8 +55,6 @@ public:
 protected:
   virtual void initQpStatefulProperties() override;
 
-  std::string _base_name;
-
   /// Creep strain
   MaterialProperty<RankTwoTensor> & _creep_strain;
   const MaterialProperty<RankTwoTensor> & _creep_strain_old;

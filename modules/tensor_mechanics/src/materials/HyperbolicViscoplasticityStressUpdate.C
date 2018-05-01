@@ -33,15 +33,19 @@ validParams<HyperbolicViscoplasticityStressUpdate>()
                                 "Viscoplasticity coefficient, scales the hyperbolic function");
   params.addRequiredParam<Real>("c_beta",
                                 "Viscoplasticity coefficient inside the hyperbolic sin function");
-  params.addParam<std::string>(
-      "plastic_prepend", "", "String that is prepended to the plastic_strain Material Property");
+  params.addDeprecatedParam<std::string>(
+      "plastic_prepend",
+      "",
+      "String that is prepended to the plastic_strain Material Property",
+      "This has been replaced by the 'base_name' parameter");
+  params.set<std::string>("effective_inelastic_strain_name") = "effective_plastic_strain";
 
   return params;
 }
 
 HyperbolicViscoplasticityStressUpdate::HyperbolicViscoplasticityStressUpdate(
     const InputParameters & parameters)
-  : RadialReturnStressUpdate(parameters, "plastic"),
+  : RadialReturnStressUpdate(parameters),
     _plastic_prepend(getParam<std::string>("plastic_prepend")),
     _yield_stress(parameters.get<Real>("yield_stress")),
     _hardening_constant(parameters.get<Real>("hardening_constant")),
@@ -51,8 +55,10 @@ HyperbolicViscoplasticityStressUpdate::HyperbolicViscoplasticityStressUpdate(
     _hardening_variable(declareProperty<Real>("hardening_variable")),
     _hardening_variable_old(getMaterialPropertyOld<Real>("hardening_variable")),
 
-    _plastic_strain(declareProperty<RankTwoTensor>(_plastic_prepend + "plastic_strain")),
-    _plastic_strain_old(getMaterialPropertyOld<RankTwoTensor>(_plastic_prepend + "plastic_strain"))
+    _plastic_strain(
+        declareProperty<RankTwoTensor>(_base_name + _plastic_prepend + "plastic_strain")),
+    _plastic_strain_old(
+        getMaterialPropertyOld<RankTwoTensor>(_base_name + _plastic_prepend + "plastic_strain"))
 {
 }
 

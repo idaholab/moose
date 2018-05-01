@@ -95,6 +95,10 @@ public:
   void resetQpProperties() final {}
   void resetProperties() final {}
   ///@}
+
+protected:
+  /// Name used as a prefix for all material properties related to the stress update model.
+  const std::string _base_name;
 };
 
 #endif // STRESSUPDATEBASE_H
