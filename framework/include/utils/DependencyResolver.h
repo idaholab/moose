@@ -244,24 +244,24 @@ DependencyResolver<T>::getSortedValuesSets()
   dep_multimap depends(_depends.begin(), _depends.end(), comp);
 
   // Build up a set of all keys in depends that have nothing depending on them,
-  // and put it in the nodepends set.  These are the leaves of the dependency tree.
+  // and put it in the orphans set.
   std::set<T> nodepends;
-  for (auto i : depends)
-  {
-    T key = i.first;
 
-    bool founditem = false;
-    for (auto i2 : depends)
-    {
-      if (i2.second == key)
-      {
-        founditem = true;
-        break;
-      }
-    }
-    if (!founditem)
-      nodepends.insert(key);
+  std::set<T> all;
+  std::set<T> dependees;
+  for (auto & entry : depends)
+  {
+    dependees.insert(entry.second);
+    all.insert(entry.first);
+    all.insert(entry.second);
   }
+
+  std::set<T> orphans;
+  std::set_difference(all.begin(),
+                      all.end(),
+                      dependees.begin(),
+                      dependees.end(),
+                      std::inserter(orphans, orphans.end()));
 
   // Remove items from _independent_items if they actually appear in depends
   for (auto siter = _independent_items.begin(); siter != _independent_items.end();)
@@ -327,10 +327,10 @@ DependencyResolver<T>::getSortedValuesSets()
           T key = iter->first;
           depends.erase(iter++); // post increment to maintain a valid iterator
 
-          // If the item is at the end of a dependency chain (by being in nodepends) AND
+          // If the item is at the end of a dependency chain (by being an orphan) AND
           // is not still in the depends map because it still has another unresolved link
           // insert it into the next_set
-          if (nodepends.find(key) != nodepends.end() && depends.find(key) == depends.end())
+          if (orphans.find(key) != orphans.end() && depends.find(key) == depends.end())
             next_set.push_back(key);
         }
         else
