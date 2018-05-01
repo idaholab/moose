@@ -298,42 +298,6 @@ RankThreeTensor::rotate(const RealTensorValue & R)
 }
 
 void
-RankThreeTensor::rotate(const RankTwoTensor & R)
-{
-  RankThreeTensor old = *this;
-
-  unsigned int index = 0;
-  unsigned int i1 = 0;
-  for (unsigned int i = 0; i < N; ++i)
-  {
-    unsigned int j1 = 0;
-    for (unsigned int j = 0; j < N; ++j)
-    {
-      unsigned int k1 = 0;
-      for (unsigned int k = 0; k < N; ++k)
-      {
-        Real sum = 0.0;
-        unsigned int index2 = 0;
-        for (unsigned int m = 0; m < N; ++m)
-        {
-          Real a = R._coords[i1 + m];
-          for (unsigned int n = 0; n < N; ++n)
-          {
-            Real ab = a * R._coords[j1 + n];
-            for (unsigned int o = 0; o < N; ++o)
-              sum += ab * R._coords[k1 + o] * old._vals[index2++];
-          }
-        }
-        _vals[index++] = sum;
-        k1 += N;
-      }
-      j1 += N;
-    }
-    i1 += N;
-  }
-}
-
-void
 RankThreeTensor::fillGeneralFromInputVector(const std::vector<Real> & input)
 {
   if (input.size() != 27)

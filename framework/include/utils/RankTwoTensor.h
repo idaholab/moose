@@ -104,19 +104,13 @@ public:
       Real S11, Real S21, Real S31, Real S12, Real S22, Real S32, Real S13, Real S23, Real S33);
 
   /// Copy constructor from RealTensorValue
-  RankTwoTensor(const TypeTensor<Real> & a);
+  RankTwoTensor(const RealTensorValue & a) : RealTensorValue(a) {}
+
+  /// Copy constructor from TypeTensor<Real>
+  RankTwoTensor(const TypeTensor<Real> & a) : RealTensorValue(a) {}
 
   // Named constructors
   static RankTwoTensor Identity() { return RankTwoTensor(initIdentity); }
-
-  /// Gets the value for the index specified.  Takes index = 0,1,2
-  inline Real & operator()(unsigned int i, unsigned int j) { return _coords[i * N + j]; }
-
-  /// Gets the value for the index specified.  Takes index = 0,1,2, used for const
-  inline Real operator()(unsigned int i, unsigned int j) const { return _coords[i * N + j]; }
-
-  /// zeroes all _coords components
-  void zero();
 
   /// Static method for use in validParams for getting the "fill_method"
   static MooseEnum fillMethodEnum();
@@ -135,9 +129,6 @@ public:
   void fillFromInputVector(const std::vector<Real> & input, FillMethod fill_method = autodetect);
 
 public:
-  /// returns _coords[r][i], ie, row r, with r = 0, 1, 2
-  TypeVector<Real> row(const unsigned int r) const;
-
   /// returns _coords[i][c], ie, column c, with c = 0, 1, 2
   TypeVector<Real> column(const unsigned int c) const;
 
@@ -146,14 +137,7 @@ public:
    * _coords[i][j] = R_ij * R_jl * _coords[k][l]
    * @param R rotation matrix as a RealTensorValue
    */
-  RankTwoTensor rotated(const RealTensorValue & R) const;
-
-  /**
-   * rotates the tensor data given a rank two tensor rotation tensor
-   * _coords[i][j] = R_ij * R_jl * _coords[k][l]
-   * @param R rotation matrix as a RealTensorValue
-   */
-  void rotate(const RealTensorValue & R);
+  RankTwoTensor rotated(const RankTwoTensor & R) const;
 
   /**
    * rotates the tensor data given a rank two tensor rotation tensor
@@ -207,14 +191,11 @@ public:
   /// Defines multiplication with a vector to get a vector
   TypeVector<Real> operator*(const TypeVector<Real> & a) const;
 
-  /// performs _coords *= a (component by component) and returns the result
-  RankTwoTensor & operator*=(const RankTwoTensor & a);
-
-  /// Defines multiplication with another RankTwoTensor
-  RankTwoTensor operator*(const RankTwoTensor & a) const;
-
   /// Defines multiplication with a TypeTensor<Real>
   RankTwoTensor operator*(const TypeTensor<Real> & a) const;
+
+  /// Defines multiplication with a TypeTensor<Real>
+  RankTwoTensor & operator*=(const TypeTensor<Real> & a);
 
   /// Defines logical equality with another RankTwoTensor
   bool operator==(const RankTwoTensor & a) const;
@@ -245,6 +226,9 @@ public:
 
   /// returns the trace of the tensor, ie _coords[i][i] (sum i = 0, 1, 2)
   Real trace() const;
+
+  /// retuns the inverse of the tensor
+  RankTwoTensor inverse() const;
 
   /**
    * Denote the _coords[i][j] by A_ij, then this returns
@@ -321,17 +305,11 @@ public:
    */
   RankFourTensor d2thirdInvariant() const;
 
-  /// Calculate the determinant of the tensor
-  Real det() const;
-
   /**
    * Denote the _coords[i][j] by A_ij, then this returns
    * d(det)/dA_ij
    */
   RankTwoTensor ddet() const;
-
-  /// Calculate the inverse of the tensor
-  RankTwoTensor inverse() const;
 
   /// Print the rank two tensor
   void print(std::ostream & stm = Moose::out) const;
@@ -446,8 +424,6 @@ private:
   friend class RankFourTensor;
   friend class RankThreeTensor;
 };
-
-inline RankTwoTensor operator*(Real a, const RankTwoTensor & b) { return b * a; }
 
 template <>
 void dataStore(std::ostream & stream, RankTwoTensor &, void *);

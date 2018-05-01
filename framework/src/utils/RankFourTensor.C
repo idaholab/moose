@@ -133,20 +133,6 @@ RankTwoTensor RankFourTensor::operator*(const RankTwoTensor & b) const
   return result;
 }
 
-RealTensorValue RankFourTensor::operator*(const RealTensorValue & b) const
-{
-  RealTensorValue result;
-
-  unsigned int index = 0;
-  for (unsigned int i = 0; i < N; ++i)
-    for (unsigned int j = 0; j < N; ++j)
-      for (unsigned int k = 0; k < N; ++k)
-        for (unsigned int l = 0; l < N; ++l)
-          result(i, j) += _vals[index++] * b(k, l);
-
-  return result;
-}
-
 RankFourTensor RankFourTensor::operator*(const Real b) const
 {
   RankFourTensor result;
@@ -422,51 +408,6 @@ RankFourTensor::rotate(const RealTensorValue & R)
         }
       }
     }
-  }
-}
-
-void
-RankFourTensor::rotate(const RankTwoTensor & R)
-{
-  RankFourTensor old = *this;
-
-  unsigned int index = 0;
-  unsigned int i1 = 0;
-  for (unsigned int i = 0; i < N; ++i)
-  {
-    unsigned int j1 = 0;
-    for (unsigned int j = 0; j < N; ++j)
-    {
-      unsigned int k1 = 0;
-      for (unsigned int k = 0; k < N; ++k)
-      {
-        unsigned int l1 = 0;
-        for (unsigned int l = 0; l < N; ++l)
-        {
-          unsigned int index2 = 0;
-          Real sum = 0.0;
-          for (unsigned int m = 0; m < N; ++m)
-          {
-            const Real a = R._coords[i1 + m];
-            for (unsigned int n = 0; n < N; ++n)
-            {
-              const Real ab = a * R._coords[j1 + n];
-              for (unsigned int o = 0; o < N; ++o)
-              {
-                const Real abc = ab * R._coords[k1 + o];
-                for (unsigned int p = 0; p < N; ++p)
-                  sum += abc * R._coords[l1 + p] * old._vals[index2++];
-              }
-            }
-          }
-          _vals[index++] = sum;
-          l1 += N;
-        }
-        k1 += N;
-      }
-      j1 += N;
-    }
-    i1 += N;
   }
 }
 
