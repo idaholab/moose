@@ -50,7 +50,6 @@ validParams<MultiParameterPlasticityStressUpdate>()
                                 "is set very low then precision-loss might be encountered: if the "
                                 "code detects precision loss then it also deems the return-map "
                                 "process has converged.");
-  MooseEnum tangent_operator("elastic nonlinear", "nonlinear");
   params.addParam<Real>("min_step_size",
                         1.0,
                         "In order to help the Newton-Raphson procedure, the applied strain "
@@ -148,7 +147,7 @@ MultiParameterPlasticityStressUpdate::updateState(RankTwoTensor & strain_increme
                                                   const RankTwoTensor & stress_old,
                                                   const RankFourTensor & elasticity_tensor,
                                                   const RankTwoTensor & /*elastic_strain_old*/,
-                                                  bool compute_full_tangent_operator,
+                                                  const TangentOperatorEnum & tangent_operator_type,
                                                   RankFourTensor & tangent_operator)
 {
   initializeReturnProcess();
@@ -319,7 +318,7 @@ MultiParameterPlasticityStressUpdate::updateState(RankTwoTensor & strain_increme
                  _ok_intnl,
                  smoothed_q,
                  step_size,
-                 compute_full_tangent_operator,
+                 (tangent_operator_type != TangentOperatorEnum::ELASTIC),
                  _dvar_dtrial);
       if (static_cast<Real>(step_iter) > _iter[_qp])
         _iter[_qp] = static_cast<Real>(step_iter);
@@ -364,7 +363,7 @@ MultiParameterPlasticityStressUpdate::updateState(RankTwoTensor & strain_increme
                                gaE_total,
                                smoothed_q,
                                elasticity_tensor,
-                               compute_full_tangent_operator,
+                               (tangent_operator_type != TangentOperatorEnum::ELASTIC),
                                _dvar_dtrial,
                                tangent_operator);
 }

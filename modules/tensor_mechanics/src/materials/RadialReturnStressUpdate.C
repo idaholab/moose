@@ -64,7 +64,7 @@ RadialReturnStressUpdate::updateState(RankTwoTensor & strain_increment,
                                       const RankTwoTensor & /*stress_old*/,
                                       const RankFourTensor & elasticity_tensor,
                                       const RankTwoTensor & elastic_strain_old,
-                                      bool /*compute_full_tangent_operator*/,
+                                      const TangentOperatorEnum & /*tangent_operator_type*/,
                                       RankFourTensor & tangent_operator)
 {
   // compute the deviatoric trial stress and trial strain from the current intermediate
@@ -109,7 +109,7 @@ RadialReturnStressUpdate::updateState(RankTwoTensor & strain_increment,
 
   /**
    * Note!  The tangent operator for this class, and derived class is
-   * currently just the elasticity tensor, irrespective of compute_full_tangent_operator
+   * currently just the elasticity tensor, irrespective of tangent_operator_type
    */
   tangent_operator = elasticity_tensor;
 }

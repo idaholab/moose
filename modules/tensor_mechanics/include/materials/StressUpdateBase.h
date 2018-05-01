@@ -15,6 +15,7 @@
 #include "Material.h"
 #include "RankFourTensor.h"
 #include "RankTwoTensor.h"
+#include "ComputeStressBase.h"
 
 // Forward declaration
 class StressUpdateBase;
@@ -58,9 +59,8 @@ public:
    * an elastic strain.  Upon output: the admissible stress
    * @param stress_old The old value of stress
    * @param elasticity_tensor The elasticity tensor
-   * @param compute_full_tangent_operator The calling routine would like the full consistent tangent
-   * operator to be placed in tangent_operator, if possible.  This is irrelevant if
-   * _fe_problem.currentlyComputingJacobian() = false
+   * @param tangent_operator_type Enum to determine how the tangent modulus is calculated.  This is
+   * irrelevant if _fe_problem.currentlyComputingJacobian() = false
    * @param tangent_operator d(stress)/d(strain), or some approximation to it  If
    * compute_full_tangent_operator=false, then tangent_operator=elasticity_tensor is an appropriate
    * choice.  tangent_operator is only computed if _fe_problem.currentlyComputingJacobian() = true
@@ -72,7 +72,7 @@ public:
                            const RankTwoTensor & stress_old,
                            const RankFourTensor & elasticity_tensor,
                            const RankTwoTensor & elastic_strain_old,
-                           bool compute_full_tangent_operator,
+                           const TangentOperatorEnum & tangent_operator_type,
                            RankFourTensor & tangent_operator) = 0;
 
   /// Sets the value of the global variable _qp for inheriting classes

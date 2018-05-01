@@ -64,7 +64,7 @@ ComputeMultipleInelasticCosseratStress::computeQpStress()
 void
 ComputeMultipleInelasticCosseratStress::computeQpJacobianMult()
 {
-  if (_tangent_operator_type == TangentOperatorEnum::elastic)
+  if (_tangent_operator_type == TangentOperatorEnum::ELASTIC)
     _Jacobian_mult[_qp] = _elasticity_tensor[_qp];
   else
   {

@@ -16,6 +16,7 @@ InputParameters
 validParams<ComputeStressBase>()
 {
   InputParameters params = validParams<Material>();
+
   params.addDeprecatedParam<std::vector<FunctionName>>(
       "initial_stress",
       "A list of functions describing the initial stress.  If provided, there "
@@ -35,6 +36,9 @@ validParams<ComputeStressBase>()
                         "stress state, required for the HHT time "
                         "integration scheme and Rayleigh damping, needs "
                         "to be stored");
+  MooseEnum tangent_operator("elastic linear nonlinear", "nonlinear");
+  params.addParam<MooseEnum>(
+      "tangent_operator", tangent_operator, "Type of tangent operator to return.");
   params.suppressParameter<bool>("use_displaced_mesh");
   return params;
 }
@@ -50,6 +54,7 @@ ComputeStressBase::ComputeStressBase(const InputParameters & parameters)
     _extra_stress(getDefaultMaterialProperty<RankTwoTensor>(_base_name + "extra_stress")),
     _Jacobian_mult(declareProperty<RankFourTensor>(_base_name + "Jacobian_mult")),
     _store_stress_old(getParam<bool>("store_stress_old")),
+    _tangent_operator_type(getParam<MooseEnum>("tangent_operator").getEnum<TangentOperatorEnum>()),
     // InitialStress Deprecation: remove the following
     _initial_stress_provided(getParam<std::vector<FunctionName>>("initial_stress").size() ==
                              LIBMESH_DIM * LIBMESH_DIM),

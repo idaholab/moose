@@ -103,8 +103,6 @@ ComputeMultiPlasticityStress::ComputeMultiPlasticityStress(const InputParameters
     _max_stepsize_for_dumb(getParam<Real>("max_stepsize_for_dumb")),
     _ignore_failures(getParam<bool>("ignore_failures")),
 
-    _tangent_operator_type((TangentOperatorEnum)(int)getParam<MooseEnum>("tangent_operator")),
-
     _epp_tol(getParam<Real>("ep_plastic_tolerance")),
 
     _dummy_pm(0),
@@ -434,7 +432,7 @@ ComputeMultiPlasticityStress::quickStep(const RankTwoTensor & stress_old,
     {
       if (called_from == computeQpStress_function && _f[custom_model]->useCustomCTO())
       {
-        if (_tangent_operator_type == elastic)
+        if (_tangent_operator_type == TangentOperatorEnum::ELASTIC)
           consistent_tangent_operator = E_ijkl;
         else
         {
@@ -1598,7 +1596,7 @@ ComputeMultiPlasticityStress::consistentTangentOperator(const RankTwoTensor & st
                                                         const std::vector<Real> & cumulative_pm)
 {
 
-  if (_tangent_operator_type == elastic)
+  if (_tangent_operator_type == TangentOperatorEnum::ELASTIC)
     return E_ijkl;
 
   // Typically act_at_some_step = act, but it is possible
@@ -1723,7 +1721,7 @@ ComputeMultiPlasticityStress::consistentTangentOperator(const RankTwoTensor & st
       ind1++;
     }
 
-  if (_tangent_operator_type == linear)
+  if (_tangent_operator_type == TangentOperatorEnum::LINEAR)
     return strain_coeff;
 
   RankFourTensor stress_coeff(RankFourTensor::initIdentitySymmetricFour);
