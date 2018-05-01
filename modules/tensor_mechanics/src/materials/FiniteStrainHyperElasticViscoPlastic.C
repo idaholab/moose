@@ -225,7 +225,7 @@ FiniteStrainHyperElasticViscoPlastic::computeQpStress()
 
     for (unsigned int istep = 0; istep < num_substep; ++istep)
     {
-      _dfgrd_tmp = (istep + 1) * delta_dfgrd / num_substep + _deformation_gradient_old[_qp];
+      _dfgrd_tmp = (istep + 1.0) * delta_dfgrd / num_substep + _deformation_gradient_old[_qp];
       if (!solveQp())
       {
         converge = false;

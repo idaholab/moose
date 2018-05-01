@@ -126,8 +126,8 @@ RankTwoTensor RankFourTensor::operator*(const RankTwoTensor & b) const
   {
     Real tmp = 0;
     for (unsigned int kl = 0; kl < N2; ++kl)
-      tmp += _vals[index++] * b._vals[kl];
-    result._vals[ij] = tmp;
+      tmp += _vals[index++] * b._coords[kl];
+    result._coords[ij] = tmp;
   }
 
   return result;
@@ -447,15 +447,15 @@ RankFourTensor::rotate(const RankTwoTensor & R)
           Real sum = 0.0;
           for (unsigned int m = 0; m < N; ++m)
           {
-            const Real a = R._vals[i1 + m];
+            const Real a = R._coords[i1 + m];
             for (unsigned int n = 0; n < N; ++n)
             {
-              const Real ab = a * R._vals[j1 + n];
+              const Real ab = a * R._coords[j1 + n];
               for (unsigned int o = 0; o < N; ++o)
               {
-                const Real abc = ab * R._vals[k1 + o];
+                const Real abc = ab * R._coords[k1 + o];
                 for (unsigned int p = 0; p < N; ++p)
-                  sum += abc * R._vals[l1 + p] * old._vals[index2++];
+                  sum += abc * R._coords[l1 + p] * old._vals[index2++];
               }
             }
           }
@@ -844,9 +844,9 @@ RankFourTensor::innerProductTranspose(const RankTwoTensor & b) const
   unsigned int index = 0;
   for (unsigned int ij = 0; ij < N2; ++ij)
   {
-    Real bb = b._vals[ij];
+    Real bb = b._coords[ij];
     for (unsigned int kl = 0; kl < N2; ++kl)
-      result._vals[kl] += _vals[index++] * bb;
+      result._coords[kl] += _vals[index++] * bb;
   }
 
   return result;
