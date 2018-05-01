@@ -699,7 +699,7 @@ protected:
   MooseObjectWarehouse<GeneralDamper> _general_dampers;
 
   /// NodalKernels for each thread
-  MooseObjectWarehouse<NodalKernel> _nodal_kernels;
+  MooseObjectTagWarehouse<NodalKernel> _nodal_kernels;
 
   /// Decomposition splits
   MooseObjectWarehouseBase<Split> _splits; // use base b/c there are no setup methods

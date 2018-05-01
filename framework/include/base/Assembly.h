@@ -927,6 +927,11 @@ public:
   void
   cacheJacobianContribution(numeric_index_type i, numeric_index_type j, Real value, TagID tag = 0);
 
+  void cacheJacobianContribution(numeric_index_type i,
+                                 numeric_index_type j,
+                                 Real value,
+                                 const std::set<TagID> & tags);
+
   /**
    * Sets previously-cached Jacobian values via SparseMatrix::set() calls.
    */

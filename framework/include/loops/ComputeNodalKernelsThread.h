@@ -11,6 +11,7 @@
 #define COMPUTENODALKERNELSTHREAD_H
 
 #include "ThreadedNodeLoop.h"
+#include "MooseObjectTagWarehouse.h"
 
 #include "libmesh/node_range.h"
 
@@ -24,7 +25,8 @@ class ComputeNodalKernelsThread
 {
 public:
   ComputeNodalKernelsThread(FEProblemBase & fe_problem,
-                            const MooseObjectWarehouse<NodalKernel> & nodal_kernels);
+                            MooseObjectTagWarehouse<NodalKernel> & nodal_kernels,
+                            const std::set<TagID> & tags);
 
   // Splitting Constructor
   ComputeNodalKernelsThread(ComputeNodalKernelsThread & x, Threads::split split);
@@ -36,9 +38,15 @@ public:
   void join(const ComputeNodalKernelsThread & /*y*/);
 
 protected:
+  FEProblemBase & _fe_problem;
+
   AuxiliarySystem & _aux_sys;
 
-  const MooseObjectWarehouse<NodalKernel> & _nodal_kernels;
+  const std::set<TagID> & _tags;
+
+  MooseObjectTagWarehouse<NodalKernel> & _nodal_kernels;
+
+  MooseObjectWarehouse<NodalKernel> * _nkernel_warehouse;
 
   /// Number of contributions cached up
   unsigned int _num_cached;
