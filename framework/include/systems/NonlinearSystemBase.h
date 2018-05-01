@@ -528,10 +528,7 @@ public:
   {
     return _interface_kernels;
   }
-  const MooseObjectWarehouse<DiracKernel> & getDiracKernelWarehouse() const
-  {
-    return _dirac_kernels;
-  }
+  MooseObjectTagWarehouse<DiracKernel> & getDiracKernelWarehouse() { return _dirac_kernels; }
   MooseObjectTagWarehouse<IntegratedBCBase> & getIntegratedBCWarehouse() { return _integrated_bcs; }
   const MooseObjectWarehouse<ElementDamper> & getElementDamperWarehouse() const
   {
@@ -615,7 +612,7 @@ protected:
    */
   void computeJacobianInternal(const std::set<TagID> & tags);
 
-  void computeDiracContributions(bool is_jacobian);
+  void computeDiracContributions(const std::set<TagID> & tags, bool is_jacobian);
 
   void computeScalarKernelsJacobians(const std::set<TagID> & tags);
 
@@ -690,7 +687,7 @@ protected:
   ///@}
 
   /// Dirac Kernel storage for each thread
-  MooseObjectWarehouse<DiracKernel> _dirac_kernels;
+  MooseObjectTagWarehouse<DiracKernel> _dirac_kernels;
 
   /// Element Dampers for each thread
   MooseObjectWarehouse<ElementDamper> _element_dampers;

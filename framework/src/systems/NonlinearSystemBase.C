@@ -1396,7 +1396,7 @@ NonlinearSystemBase::computeResidualInternal(const std::set<TagID> & tags)
     _residual_ghosted->close();
   }
 
-  PARALLEL_TRY { computeDiracContributions(false); }
+  PARALLEL_TRY { computeDiracContributions(tags, false); }
   PARALLEL_CATCH;
 
   if (_fe_problem._has_constraints)
@@ -2309,7 +2309,7 @@ NonlinearSystemBase::computeJacobianInternal(const std::set<TagID> & tags)
       break;
     }
 
-    computeDiracContributions(true);
+    computeDiracContributions(tags, true);
 
     computeScalarKernelsJacobians(tags);
 
@@ -2705,7 +2705,7 @@ NonlinearSystemBase::computeDamping(const NumericVector<Number> & solution,
 }
 
 void
-NonlinearSystemBase::computeDiracContributions(bool is_jacobian)
+NonlinearSystemBase::computeDiracContributions(const std::set<TagID> & tags, bool is_jacobian)
 {
   _fe_problem.clearDiracInfo();
 
@@ -2726,7 +2726,7 @@ NonlinearSystemBase::computeDiracContributions(bool is_jacobian)
       }
     }
 
-    ComputeDiracThread cd(_fe_problem, is_jacobian);
+    ComputeDiracThread cd(_fe_problem, tags, is_jacobian);
 
     _fe_problem.getDiracElements(dirac_elements);
 
@@ -2736,9 +2736,6 @@ NonlinearSystemBase::computeDiracContributions(bool is_jacobian)
 
     cd(range);
   }
-
-  if (!is_jacobian)
-    _Re_non_time->close();
 }
 
 NumericVector<Number> &
