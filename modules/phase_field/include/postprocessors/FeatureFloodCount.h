@@ -62,6 +62,7 @@ public:
 
   /// Returns a Boolean indicating whether this feature intersects _any_ boundary
   virtual bool doesFeatureIntersectBoundary(unsigned int feature_id) const;
+  virtual Point featureCentroid(unsigned int feature_id) const;
 
   /**
    * Returns a list of active unique feature ids for a particular element. The vector is indexed by

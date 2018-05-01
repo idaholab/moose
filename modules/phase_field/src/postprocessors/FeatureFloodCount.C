@@ -632,6 +632,23 @@ FeatureFloodCount::doesFeatureIntersectBoundary(unsigned int feature_id) const
   return false;
 }
 
+Point
+FeatureFloodCount::featureCentroid(unsigned int feature_id) const
+{
+  if (feature_id >= _feature_id_to_local_index.size())
+    return invalid_id;
+
+  auto local_index = _feature_id_to_local_index[feature_id];
+
+  Point p;
+  if (local_index != invalid_size_t)
+  {
+    mooseAssert(local_index < _feature_sets.size(), "local_index out of bounds");
+    p = _feature_sets[local_index]._centroid;
+  }
+  return p;
+}
+
 Real
 FeatureFloodCount::getEntityValue(dof_id_type entity_id,
                                   FieldType field_type,
