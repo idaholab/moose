@@ -74,8 +74,8 @@ protected:
   /// rDG flux user object name
   const UserObjectName _rdg_flux_name;
 
-  /// Slope limiter type for rDG
-  const FlowModel::ESlopeLimiterType _slope_limiter;
+  /// Slope reconstruction type for rDG
+  const FlowModel::ESlopeReconstructionType _rdg_slope_reconstruction;
 
   /// Use implicit time integration for rDG
   const bool _implicit_rdg;
