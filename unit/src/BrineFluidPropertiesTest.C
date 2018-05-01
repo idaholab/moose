@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "BrineFluidPropertiesTest.h"
+#include "Utils.h"
 
 /**
  * Verify calculation of brine vapor pressure using data from

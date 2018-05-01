@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "NaClFluidPropertiesTest.h"
+#include "Utils.h"
 
 /**
  * Verify calculation of the NACL properties the solid halite phase.

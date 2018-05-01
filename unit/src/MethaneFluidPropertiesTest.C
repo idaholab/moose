@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "MethaneFluidPropertiesTest.h"
+#include "Utils.h"
 
 /**
  * Verify calculation of Henry's constant using data from
