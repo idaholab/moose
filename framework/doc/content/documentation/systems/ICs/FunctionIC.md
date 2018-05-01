@@ -2,11 +2,12 @@
 
 # FunctionIC
 
-!alert construction title=Undocumented Class
-The FunctionIC has not been documented, if you would like to contribute to MOOSE by
-writing documentation, please see [/generate.md]. The content contained on this page explains
-the typical documentation associated with a MooseObject; however, what is contained is ultimately
-determined by what is necessary to make the documentation clear for users.
+The FunctionIC class "couples" to a [Function](Functions/index.md) to produce values and optionally gradients to
+initialize a spatial variable. Functions when appropriate, work well for initializing field because they can provide
+values anywhere within the domain. This means that they can be used with [initial_adaptivity](/AdaptivityAction.md) to
+create an area of refinement within the mesh before a simulation begins.
+
+## Class Description
 
 !syntax description /ICs/FunctionIC
 

@@ -22,6 +22,9 @@ validParams<RandomIC>()
   params.addParam<Real>("min", 0.0, "Lower bound of the randomly generated values");
   params.addParam<Real>("max", 1.0, "Upper bound of the randomly generated values");
   params.addParam<unsigned int>("seed", 0, "Seed value for the random number generator");
+
+  params.addClassDescription(
+      "This class produces a random field for a variable. It is not parallel agnostic.");
   return params;
 }
 

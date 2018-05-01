@@ -18,6 +18,8 @@ validParams<ConstantIC>()
 {
   InputParameters params = validParams<InitialCondition>();
   params.addRequiredParam<Real>("value", "The value to be set in IC");
+
+  params.addClassDescription("Sets a constant field value.");
   return params;
 }
 
