@@ -88,9 +88,14 @@ ActuallyExplicitEuler::ActuallyExplicitEuler(const InputParameters & parameters)
 }
 
 void
-ActuallyExplicitEuler::init()
+ActuallyExplicitEuler::initialSetup()
 {
   meshChanged();
+}
+
+void
+ActuallyExplicitEuler::init()
+{
 }
 
 void

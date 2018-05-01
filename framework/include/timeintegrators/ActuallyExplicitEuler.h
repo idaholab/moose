@@ -28,6 +28,7 @@ class ActuallyExplicitEuler : public TimeIntegrator, public MeshChangedInterface
 public:
   ActuallyExplicitEuler(const InputParameters & parameters);
 
+  virtual void initialSetup() override;
   virtual void init() override;
   virtual void preSolve() override;
   virtual int order() override { return 1; }
