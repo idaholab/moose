@@ -408,15 +408,20 @@ ComputeMultipleInelasticStress::updateQpStateSingleModel(
   computeAdmissibleState(model_number,
                          elastic_strain_increment,
                          combined_inelastic_strain_increment,
-                         _Jacobian_mult[_qp]);
+                         _consistent_tangent_operator[0]);
 
-  if (_tangent_calculation_method == TangentCalculationMethod::ELASTIC)
-    _Jacobian_mult[_qp] = _elasticity_tensor[_qp];
-  else if (_tangent_calculation_method == TangentCalculationMethod::PARTIAL)
+  if (_fe_problem.currentlyComputingJacobian())
   {
-    RankFourTensor A = _identity_symmetric_four + _Jacobian_mult[_qp];
-    mooseAssert(A.isSymmetric(), "Tangent operator isn't symmetric");
-    _Jacobian_mult[_qp] = A.invSymm() * _elasticity_tensor[_qp];
+    if (_tangent_calculation_method == TangentCalculationMethod::ELASTIC)
+      _Jacobian_mult[_qp] = _elasticity_tensor[_qp];
+    else if (_tangent_calculation_method == TangentCalculationMethod::PARTIAL)
+    {
+      RankFourTensor A = _identity_symmetric_four + _consistent_tangent_operator[0];
+      mooseAssert(A.isSymmetric(), "Tangent operator isn't symmetric");
+      _Jacobian_mult[_qp] = A.invSymm() * _elasticity_tensor[_qp];
+    }
+    else
+      _Jacobian_mult[_qp] = _consistent_tangent_operator[0];
   }
 
   _matl_timestep_limit[_qp] = _models[0]->computeTimeStepLimit();
