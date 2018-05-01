@@ -1,7 +1,12 @@
 [Tests]
-  [./test]
+  [./bad_require_input_parameters]
+    type = 'RunException'
+    input = 'bad_require_input_parameters.i'
+    expect_err = 'Unable to require nonexistent parameter: name'
+  [../]
+  [./missing_require_input_parameters]
     type = 'RunException'
     input = 'require_input_parameters.i'
-    expect_err = 'Unable to require nonexistent parameter: name'
+    expect_err = 'missing required parameter \'Kernels/diff/non_controllable\''
   [../]
 []
