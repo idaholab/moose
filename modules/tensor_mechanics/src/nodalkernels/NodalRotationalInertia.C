@@ -134,7 +134,7 @@ NodalRotationalInertia::NodalRotationalInertia(const InputParameters & parameter
     Real sum = x_orientation(0) * y_orientation(0) + x_orientation(1) * y_orientation(1) +
                x_orientation(2) * y_orientation(2);
 
-    if (abs(sum) > 1e-4)
+    if (std::abs(sum) > 1e-4)
       mooseError("NodalRotationalInertia: x_orientation and y_orientation should be perpendicular "
                  "to each other.");
 
