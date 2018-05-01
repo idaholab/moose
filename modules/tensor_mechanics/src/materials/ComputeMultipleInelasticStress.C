@@ -327,6 +327,7 @@ ComputeMultipleInelasticStress::computeQpJacobianMult()
     _Jacobian_mult[_qp] = _elasticity_tensor[_qp];
   else
   {
+    mooseError("Hey! I'm used!");
     const RankFourTensor E_inv = _elasticity_tensor[_qp].invSymm();
     _Jacobian_mult[_qp] = _consistent_tangent_operator[0];
     for (unsigned i_rmm = 1; i_rmm < _num_models; ++i_rmm)
