@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "PorousFlowBrineCO2Test.h"
+#include "Utils.h"
 
 /**
  * Verify that the correct name is supplied

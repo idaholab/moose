@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "SodiumPropertiesTest.h"
+#include "Utils.h"
 
 /**
  * Verify calculation of Sodium Properties from ANL/RE-95/2 report

@@ -8,6 +8,7 @@ import anytree
 from pybtex.plugin import find_plugin, PluginNotFound
 from pybtex.database import BibliographyData, parse_file
 from pybtex.database.input.bibtex import UndefinedMacro, Person
+from pylatexenc.latex2text import LatexNodes2Text
 
 import MooseDocs
 from MooseDocs.common import exceptions
@@ -149,13 +150,13 @@ class RenderBibtexCite(components.RenderComponent):
             n = len(a)
             if n > 2:
                 author = '{} et al.'.format(' '.join(a[0].last_names))
-                #print 'AUTHOR:', author
             elif n == 2:
                 a0 = ' '.join(a[0].last_names)
                 a1 = ' '.join(a[1].last_names)
                 author = '{} and {}'.format(a0, a1)
             else:
                 author = ' '.join(a[0].last_names)
+            author = LatexNodes2Text().latex_to_text(author)
 
             form = u'{}, {}' if citep else u'{} ({})'
             html.Tag(parent, 'a', href='#{}'.format(key),

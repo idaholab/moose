@@ -1243,6 +1243,16 @@ InputParameters::suppressParameter(const std::string & name)
 
 template <typename T>
 void
+InputParameters::makeParamRequired(const std::string & name)
+{
+  if (!this->have_parameter<T>(name))
+    mooseError("Unable to require nonexistent parameter: ", name);
+
+  _params[name]._required = true;
+}
+
+template <typename T>
+void
 InputParameters::addDeprecatedParam(const std::string & name,
                                     const T & value,
                                     const std::string & doc_string,

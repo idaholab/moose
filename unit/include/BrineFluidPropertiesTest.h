@@ -10,35 +10,24 @@
 #ifndef BRINEFLUIDPROPERTIESTEST_H
 #define BRINEFLUIDPROPERTIESTEST_H
 
-#include "gtest_include.h"
-
-#include "MooseApp.h"
-#include "Utils.h"
-#include "FEProblem.h"
-#include "AppFactory.h"
-#include "GeneratedMesh.h"
+#include "MooseObjectUnitTest.h"
 #include "BrineFluidProperties.h"
 #include "Water97FluidProperties.h"
 #include "NaClFluidProperties.h"
 
-class MooseMesh;
-class FEProblem;
 class BrineFluidProperties;
 class SinglePhaseFluidPropertiesPT;
 
-class BrineFluidPropertiesTest : public ::testing::Test
+class BrineFluidPropertiesTest : public MooseObjectUnitTest
 {
-protected:
-  void SetUp()
+public:
+  BrineFluidPropertiesTest() : MooseObjectUnitTest("MooseUnitApp")
   {
-    const char * argv[] = {"foo", NULL};
-
-    _app = AppFactory::createAppShared("MooseUnitApp", 1, (char **)argv);
-    _factory = &_app->getFactory();
-    registerObjects(*_factory);
+    registerObjects(_factory);
     buildObjects();
   }
 
+protected:
   void registerObjects(Factory & factory)
   {
     registerUserObject(BrineFluidProperties);
@@ -48,29 +37,12 @@ protected:
 
   void buildObjects()
   {
-    InputParameters mesh_params = _factory->getValidParams("GeneratedMesh");
-    mesh_params.set<MooseEnum>("dim") = "3";
-    mesh_params.set<std::string>("name") = "mesh";
-    mesh_params.set<std::string>("_object_name") = "name1";
-    _mesh = libmesh_make_unique<GeneratedMesh>(mesh_params);
-
-    InputParameters problem_params = _factory->getValidParams("FEProblem");
-    problem_params.set<MooseMesh *>("mesh") = _mesh.get();
-    problem_params.set<std::string>("_object_name") = "name2";
-    auto fep = _factory->create<FEProblemBase>("FEProblem", "problem", problem_params);
-
-    // The brine fluid properties
-    InputParameters uo_pars = _factory->getValidParams("BrineFluidProperties");
-    fep->addUserObject("BrineFluidProperties", "fp", uo_pars);
-    _fp = &fep->getUserObject<BrineFluidProperties>("fp");
-
-    // Get the water properties UserObject
+    InputParameters uo_pars = _factory.getValidParams("BrineFluidProperties");
+    _fe_problem->addUserObject("BrineFluidProperties", "fp", uo_pars);
+    _fp = &_fe_problem->getUserObject<BrineFluidProperties>("fp");
     _water_fp = &_fp->getComponent(BrineFluidProperties::WATER);
   }
 
-  std::unique_ptr<MooseMesh> _mesh; // mesh must destruct last and so be declared first
-  std::shared_ptr<MooseApp> _app;
-  Factory * _factory;
   const BrineFluidProperties * _fp;
   const SinglePhaseFluidPropertiesPT * _water_fp;
 };

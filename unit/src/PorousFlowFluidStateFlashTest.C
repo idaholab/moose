@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "PorousFlowFluidStateFlashTest.h"
+#include "Utils.h"
 
 /**
  * Verify construction of the Rachford-Rice equation

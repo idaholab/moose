@@ -119,6 +119,11 @@ protected:
 
   virtual void propagateQpStatefulProperties() override;
 
+  virtual TangentCalculationMethod getTangentCalculationMethod() override
+  {
+    return TangentCalculationMethod::FULL;
+  }
+
   /// Internal dimensionality of tensors (currently this is 3 throughout tensor_mechanics)
   constexpr static unsigned _tensor_dimensionality = 3;
 

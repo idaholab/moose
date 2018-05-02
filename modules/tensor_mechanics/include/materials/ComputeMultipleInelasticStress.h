@@ -12,7 +12,7 @@
 
 #include "ComputeFiniteStrainElasticStress.h"
 
-class StressUpdateBase;
+#include "StressUpdateBase.h"
 
 class ComputeMultipleInelasticStress;
 
@@ -144,6 +144,12 @@ protected:
   /// number of plastic models
   const unsigned _num_models;
 
+  /// Flags to compute tangent during updateState call
+  std::vector<bool> _tangent_computation_flag;
+
+  /// Calculation method for the tangent modulus
+  TangentCalculationMethod _tangent_calculation_method;
+
   /// _inelastic_strain = sum_i (_inelastic_weights_i * inelastic_strain_from_model_i)
   const std::vector<Real> _inelastic_weights;
 
@@ -154,6 +160,11 @@ protected:
   const bool _cycle_models;
 
   MaterialProperty<Real> & _matl_timestep_limit;
+
+  /**
+   * Rank four symmetric identity tensor
+   */
+  const RankFourTensor _identity_symmetric_four;
 
   /**
    * The user supplied list of inelastic models to use in the simulation

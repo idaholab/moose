@@ -1,0 +1,24 @@
+[Tests]
+  [./centroid_output_test]
+    type = 'CSVDiff'
+    input = 'feature_volume_vpp_test.i'
+    csvdiff = 'feature_volume_vpp_test_out_features_0000.csv'
+
+    issues = "#11395"
+    requirement = "The FeatureVolumeVectorPostprocessor shall output individual centroid locations when requested."
+    design = "/FeatureVolumeVectorPostprocessor.md"
+  [../]
+
+  [./centroid_output_test_parallel]
+    type = 'CSVDiff'
+    input = 'feature_volume_vpp_test.i'
+    csvdiff = 'feature_volume_vpp_test_out_features_0000.csv'
+
+    issues = "#11395"
+    requirement = "The FeatureVolumeVectorPostprocessor shall output individual centroid locations when requested."
+    design = "/FeatureVolumeVectorPostprocessor.md"
+
+    min_parallel = 2
+    prereq = 'centroid_output_test'
+  [../]
+[]
