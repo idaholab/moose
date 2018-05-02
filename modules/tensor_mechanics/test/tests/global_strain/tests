@@ -4,4 +4,19 @@
     input = 'global_strain.i'
     exodiff = 'global_strain_exodus.e'
   [../]
+  [./uniaxial]
+    type = 'Exodiff'
+    input = 'global_strain_uniaxial.i'
+    exodiff = 'global_strain_uniaxial_exodus.e'
+  [../]
+  [./hydrostat]
+    type = 'Exodiff'
+    input = 'global_strain_hydrostat.i'
+    exodiff = 'global_strain_hydrostat_exodus.e'
+  [../]
+  [./shear]
+    type = 'Exodiff'
+    input = 'global_strain_shear.i'
+    exodiff = 'global_strain_shear_exodus.e'
+  [../]
 []
