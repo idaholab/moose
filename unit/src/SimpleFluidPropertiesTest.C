@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "SimpleFluidPropertiesTest.h"
+#include "Utils.h"
 
 /**
  * Verify calculation of the fluid properties
