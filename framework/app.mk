@@ -316,8 +316,7 @@ endif
 # and https://stackoverflow.com/questions/9459980/c-global-variable-not-initialized-when-linked-through-static-libraries-but-ok#11336506
 # for more explanations/details.
 compilertype := unknown
-applibs := $(app_LIBS)
-applibs += $(app_test_LIB)
+applibs :=  $(app_test_LIB) $(app_LIBS)
 ifeq ($(libmesh_static),yes)
   ifneq (,$(findstring clang,$(CXX)))
     compilertype := clang
