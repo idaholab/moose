@@ -32,6 +32,10 @@ validParams<ElementVariablesDifferenceMax>()
   params.addParam<bool>(
       "furthest_from_zero", false, "Find the difference with the highest absolute value");
 
+  // The value from this VPP is naturally already on every processor
+  // TODO: Make this not the case!  See #11415
+  params.set<bool>("_is_broadcast") = true;
+
   return params;
 }
 

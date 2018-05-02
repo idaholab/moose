@@ -19,6 +19,10 @@ validParams<ConstantVectorPostprocessor>()
 
   params.addRequiredParam<VectorPostprocessorValue>("value",
                                                     "The vector value this object will have.");
+
+  // The value from this VPP is naturally already on every processor
+  params.set<bool>("_is_broadcast") = true;
+
   return params;
 }
 

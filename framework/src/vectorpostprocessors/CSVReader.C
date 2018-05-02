@@ -41,6 +41,11 @@ validParams<CSVReader>()
   params.addParam<bool>(
       "ignore_empty_lines", true, "When true new empty lines in the file are ignored.");
   params.set<ExecFlagEnum>("execute_on", true) = EXEC_INITIAL;
+
+  // The value from this VPP is naturally already on every processor
+  // TODO: Make this not the case!  See #11415
+  params.set<bool>("_is_broadcast") = true;
+
   return params;
 }
 
