@@ -1,5 +1,6 @@
 #include "FlowConnection.h"
 #include "GeometricalFlowComponent.h"
+#include "Pipe.h"
 #include "FlowModelTwoPhase.h"
 
 const std::map<std::string, FlowConnection::EEndType> FlowConnection::_end_type_to_enum{
