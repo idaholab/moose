@@ -280,6 +280,5 @@ ActuallyExplicitEuler::checkLinearConvergence()
       return false;
     default:
       mooseError("Unknown convergence flat in ActuallyExplicitEuler");
-      return UNKNOWN_FLAG;
   }
 }

@@ -38,7 +38,7 @@ This is solved using the default linear solver from libMesh (usually PETSc... in
 
 ### `lumped`
 
-The `lumped` option creates a "lumped mass matrix" to use in the solve.  A lumped mass matrix is a diagaonal matrix where the diagonal is the sum of all elements on the row from the original matrix.
+The `lumped` option creates a "lumped mass matrix" to use in the solve.  A lumped mass matrix is a diagonal matrix where the diagonal is the sum of all elements on the row from the original matrix.
 
 To achieve the lumping here a matrix-vector product is performed with a vector of all ones.  That creates a vector where each entry is what would be on the diagonal of the lumped mass matrix.
 
