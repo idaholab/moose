@@ -15,11 +15,6 @@
     coord = '0.0 0.0'
     new_boundary = 100
   [../]
-  [./anode]
-    type = AddExtraNodeset
-    coord = '0.0 0.5'
-    new_boundary = 101
-  [../]
 []
 
 [Variables]
@@ -113,14 +108,6 @@
     variable = u_y
     value = 0
   [../]
-
-  # fix side point x coordinate to inhibit rotation
-  [./angularfix]
-    type = PresetBC
-    boundary = 101
-    variable = u_x
-    value = 0
-  [../]
 []
 
 [Materials]
@@ -165,8 +152,8 @@
 
   line_search = basic
 
-  petsc_options_iname = '-pc_type -sub_pc_type -pc_factor_shift_type -pc_factor_shift_amount'
-  petsc_options_value = ' asm      lu              NONZERO               1e-10'
+  petsc_options_iname = '-pc_type -ksp_gmres_restart -sub_ksp_type -sub_pc_type -pc_asm_overlap'
+  petsc_options_value = 'asm         31   preonly   lu      1'
 
   l_max_its = 30
   nl_max_its = 12

@@ -28,7 +28,8 @@ validParams<ComputeStrainBase>()
   params.addParam<std::vector<MaterialPropertyName>>(
       "eigenstrain_names", "List of eigenstrains to be applied in this strain calculation");
   params.addParam<MaterialPropertyName>("global_strain",
-                                        "Material Propertyname for calculating global strain.");
+                                        "Optional material property holding a global strain "
+                                        "tensor applied to the mesh as a whole");
   params.suppressParameter<bool>("use_displaced_mesh");
   return params;
 }

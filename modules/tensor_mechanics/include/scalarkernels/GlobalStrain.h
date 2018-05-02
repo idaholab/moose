@@ -7,8 +7,8 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef GlobalSTRAIN_H
-#define GlobalSTRAIN_H
+#ifndef GLOBALSTRAIN_H
+#define GLOBALSTRAIN_H
 
 #include "ScalarKernel.h"
 
@@ -40,4 +40,4 @@ protected:
   std::vector<std::pair<unsigned int, unsigned int>> _components;
   unsigned int _dim;
 };
-#endif // GlobalSTRAIN_H
+#endif // GLOBALSTRAIN_H

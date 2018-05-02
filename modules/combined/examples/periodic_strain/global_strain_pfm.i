@@ -15,11 +15,6 @@
     coord = '0.0 0.0'
     new_boundary = 100
   [../]
-  [./anode]
-    type = AddExtraNodeset
-    coord = '0.0 0.5'
-    new_boundary = 101
-  [../]
 []
 
 [Variables]
@@ -33,9 +28,8 @@
   [../]
   [./c]
     [./InitialCondition]
-      type = RandomIC
-      min = 0.49
-      max = 0.51
+      type = FunctionIC
+      function = 'sin(2*x*pi)*sin(2*y*pi)*0.05+0.6'
     [../]
   [../]
   [./w]
@@ -63,6 +57,38 @@
     order = CONSTANT
     family = MONOMIAL
   [../]
+  [./s00]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./s01]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./s10]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./s11]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./e00]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./e01]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./e10]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./e11]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
 []
 
 [AuxKernels]
@@ -87,13 +113,67 @@
   [../]
   [./local_free_energy]
     type = TotalFreeEnergy
-    block = 0
     execute_on = 'initial LINEAR'
     variable = local_energy
     interfacial_vars = 'c'
     kappa_names = 'kappa_c'
   [../]
-
+  [./s00]
+    type = RankTwoAux
+    variable = s00
+    rank_two_tensor = stress
+    index_i = 0
+    index_j = 0
+  [../]
+  [./s01]
+    type = RankTwoAux
+    variable = s01
+    rank_two_tensor = stress
+    index_i = 0
+    index_j = 1
+  [../]
+  [./s10]
+    type = RankTwoAux
+    variable = s10
+    rank_two_tensor = stress
+    index_i = 1
+    index_j = 0
+  [../]
+  [./s11]
+    type = RankTwoAux
+    variable = s11
+    rank_two_tensor = stress
+    index_i = 1
+    index_j = 1
+  [../]
+  [./e00]
+    type = RankTwoAux
+    variable = e00
+    rank_two_tensor = total_strain
+    index_i = 0
+    index_j = 0
+  [../]
+  [./e01]
+    type = RankTwoAux
+    variable = e01
+    rank_two_tensor = total_strain
+    index_i = 0
+    index_j = 1
+  [../]
+  [./e10]
+    type = RankTwoAux
+    variable = e10
+    rank_two_tensor = total_strain
+    index_i = 1
+    index_j = 0
+  [../]
+  [./e11]
+    type = RankTwoAux
+    variable = e11
+    rank_two_tensor = total_strain
+    index_i = 1
+    index_j = 1
+  [../]
 []
 
 [GlobalParams]
@@ -140,25 +220,9 @@
 
 [BCs]
   [./Periodic]
-    [./disp1]
-      auto_direction = 'x'
-      variable = 'u_x'
-    [../]
-    [./disp2]
-      auto_direction = 'y'
-      variable = 'u_y'
-    [../]
-    [./up_down]
-      primary = top
-      secondary = bottom
-      translation = '0 -1 0'
-      variable = 'c w'
-    [../]
-    [./left_right]
-      primary = left
-      secondary = right
-      translation = '1 0 0'
-      variable = 'c w'
+    [./all]
+      auto_direction = 'x y'
+      variable = 'c w u_x u_y'
     [../]
   [../]
 
@@ -173,14 +237,6 @@
     type = PresetBC
     boundary = 100
     variable = u_y
-    value = 0
-  [../]
-
-  # fix side point x coordinate to inhibit rotation
-  [./angularfix]
-    type = PresetBC
-    boundary = 101
-    variable = u_x
     value = 0
   [../]
 []
@@ -330,8 +386,8 @@
 
   line_search = basic
 
-  petsc_options_iname = '-pc_type -sub_pc_type -pc_factor_shift_type -pc_factor_shift_amount'
-  petsc_options_value = ' asm      lu              NONZERO               1e-10'
+  petsc_options_iname = '-pc_type -ksp_gmres_restart -sub_ksp_type -sub_pc_type -pc_asm_overlap'
+  petsc_options_value = 'asm         31   preonly   lu      1'
 
   l_max_its = 30
   nl_max_its = 12
@@ -342,11 +398,15 @@
   nl_abs_tol = 1.0e-10
 
   start_time = 0.0
-  num_steps = 20
+  end_time = 2.0
 
   [./TimeStepper]
-    type = SolutionTimeAdaptiveDT
+    type = IterationAdaptiveDT
     dt = 0.01
+    growth_factor = 1.5
+    cutback_factor = 0.8
+    optimal_iterations = 9
+    iteration_window = 2
   [../]
 []
 
