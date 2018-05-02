@@ -94,11 +94,9 @@ ControlOutput::outputActiveObjects()
 void
 ControlOutput::outputControls()
 {
-  // Extract InputParameter objects from warehouse
   InputParameterWarehouse & wh = _app.getInputParameterWarehouse();
   const auto & params = wh.getInputParameters();
 
-  // The stream to build
   std::stringstream oss;
   oss << std::left;
 

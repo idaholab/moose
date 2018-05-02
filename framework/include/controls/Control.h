@@ -82,14 +82,14 @@ protected:
   /**
    * Direct access to the ControllableParameter object.
    */
-  ControllableParameter getControllableParameter(const std::string & name);
-  ControllableParameter getControllableParameterByName(const std::string & name);
+  ControllableParameter getControllableParameter(const std::string & param_name);
+  ControllableParameter getControllableParameterByName(const std::string & param_name);
   ControllableParameter getControllableParameterByName(const std::string & tag,
                                                        const std::string & object_name,
                                                        const std::string & param_name);
   ControllableParameter getControllableParameterByName(const MooseObjectName & object_name,
                                                        const std::string & param_name);
-  ControllableParameter getControllableParameterByName(const MooseObjectParameterName & name);
+  ControllableParameter getControllableParameterByName(const MooseObjectParameterName & param_name);
   ///@}
 
   ///@{
@@ -99,7 +99,7 @@ protected:
    * @param warn_when_values_diff When true, produce a warning if multiple controllable values share
    * the given name but have varying values.
    *
-   * @return A copy to the first parameter that matches the given name.
+   * @return A copy of the first parameter that matches the given name.
    */
   template <typename T>
   T getControllableValue(const std::string & name, bool warn_when_values_differ = true);

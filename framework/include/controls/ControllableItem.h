@@ -10,17 +10,14 @@
 #ifndef CONTROLLABLEITEM_H
 #define CONTROLLABLEITEM_H
 
-// libMesh includes
 #include "libmesh/parameters.h"
-
-// MOOSE includes
 #include "MooseObjectParameterName.h"
 #include "MooseError.h"
 #include "ControlOutput.h"
 
 /**
  * An intermediate object for building a "controllable item", where an "item" can refer to multiple
- * input parameter, with differing names.
+ * input parameters with different names.
  *
  * The name supplied to the constructor is considered the "master" parameter. The parameter(s) added
  * via the connect method are considered the slaves.
@@ -28,7 +25,7 @@
  * In general, an ControllableItem will have a one-to-one relationship with an input parameter
  * value, but in some instances it is desirable to connect parameters with different names together.
  * For example, within MOOSE when a material is defined in an input file multiple Material objects
- * are generated automatically. If a parameters is controlled on one of these objects it is
+ * are generated automatically. If a parameter is controlled on one of these objects it is
  * necessary to also have the values on the other controlled as well. This example is the
  * driver behind the creation of this intermediate class.
  */
@@ -50,7 +47,7 @@ public:
    */
   void connect(ControllableItem * item, bool type_check = true);
 
-  /*
+  /**
    * Set the value(s) of the controlled parameters stored in this class.
    *
    * The 'skip_type_check' flag allows this object to work with ControllableParameter that
@@ -66,7 +63,7 @@ public:
   std::vector<T> get(bool type_check = true) const;
 
   /**
-   * Return true if the template argument is valid for ALL itemes.
+   * Return true if the template argument is valid for ALL items.
    */
   template <typename T>
   bool check() const;
@@ -116,7 +113,7 @@ protected:
   /// List of names for this item
   std::vector<std::pair<MooseObjectParameterName, libMesh::Parameters::Value *>> _pairs;
 
-  /// Flag for ControlOutput
+  /// Flag for ControlOutput, allows output objects to keep track of when a parameter is altered
   bool _changed = false;
 };
 
@@ -175,17 +172,6 @@ ControllableItem::check() const
                            dynamic_cast<libMesh::Parameters::Parameter<T> *>(pair.second);
                        return param != nullptr;
                      });
-
-  /*
-  for (auto & pair : _pairs)
-  {
-    libMesh::Parameters::Parameter<T> * param =
-        dynamic_cast<libMesh::Parameters::Parameter<T> *>(pair.second);
-    if (param == nullptr)
-      return false;
-  }
-  return true;
-  */
 }
 
 /**

@@ -8,8 +8,6 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "gtest/gtest.h"
-
-// MOOSE includes
 #include "ControllableParameter.h"
 #include "ControllableItem.h"
 #include "InputParameters.h"

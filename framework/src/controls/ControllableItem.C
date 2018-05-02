@@ -28,7 +28,7 @@ ControllableItem::connect(ControllableItem * item, bool type_check)
                  name(),
                  ") has a type '",
                  type(),
-                 " 'and cannot be connected to the parameter (",
+                 "' and cannot be connected to the parameter (",
                  pair.first,
                  ") with a different type of '",
                  pair.second->type(),
@@ -45,9 +45,7 @@ ControllableItem::dump(unsigned int indent /*=0*/) const
   // Count of objects, for printing a number with the parameter
   unsigned int index = 0;
 
-  // The output stream
   std::ostringstream oss;
-
   for (const auto & pair : _pairs)
   {
     if (index == 0) // master parameter

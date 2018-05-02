@@ -10,10 +10,7 @@
 #ifndef INPUTPARAMETERWAREHOUSE_H
 #define INPUTPARAMETERWAREHOUSE_H
 
-// Google Test
 #include <gtest/gtest.h>
-
-// MOOSE includes
 #include "MooseObjectName.h"
 #include "MooseTypes.h"
 #include "ControllableItem.h"
@@ -118,7 +115,7 @@ private:
    * are generic until Factory::create() is called and the actual MooseObject
    * is created.
    *
-   * This method is private, because only the factories thatc are creating objects should be
+   * This method is private, because only the factories that are creating objects should be
    * able to call this method.
    */
   InputParameters &

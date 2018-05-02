@@ -18,7 +18,7 @@
     type = RunException
     input = master.i
     cli_args = "Transfers/sub/parameters=foo :Outputs/csv=false"
-    expect_err = "The desired parameter 'foo' was not located, it either does not exist or has not been declared as controllable."
+    expect_err = "The desired parameter 'foo' was not located for the 'stochastic' object, it either does not exist or has not been declared as controllable."
   [../]
   [./extra_data]
     type = RunException

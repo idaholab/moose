@@ -98,7 +98,7 @@ ControllableParameter::get(bool type_check /*=true*/, bool warn_when_values_diff
     output.insert(output.end(), local.begin(), local.end());
   }
 
-  // Produce a warning, if the flag is true, when multiple parameters have differing values
+  // Produce a warning, if the flag is true, when multiple parameters have different values
   if (warn_when_values_differ && _items.size() > 1)
   {
     // The first parameter to test against
