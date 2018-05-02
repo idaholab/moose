@@ -29,10 +29,4 @@
     allow_test_objects = true
     max_parallel = 1 # See #9886
   [../]
-
-  [./centroids]
-    type = 'CSVDiff'
-    input = 'output_centroids.i'
-    csvdiff = 'output_centroids_flood_var_size_0002.csv'
-  [../]
 []
