@@ -206,13 +206,12 @@ TEST(InputParameters, applyParameters)
   EXPECT_TRUE(p1.get<MultiMooseEnum>("enum").contains("foo"));
 }
 
-
 TEST(InputParameters, makeParamRequired)
 {
   InputParameters params = emptyInputParameters();
   params.addParam<Real>("good_param", "documentation");
   params.addParam<Real>("wrong_param_type", "documentation");
-  
+
   // Require existing parameter with the appropriate type
   EXPECT_FALSE(params.isParamRequired("good_param"));
   params.makeParamRequired<Real>("good_param");
@@ -227,10 +226,11 @@ TEST(InputParameters, makeParamRequired)
   catch (const std::exception & e)
   {
     std::string msg(e.what());
-    EXPECT_TRUE(msg.find("Unable to require nonexistent parameter: wrong_param_type") != std::string::npos)
+    EXPECT_TRUE(msg.find("Unable to require nonexistent parameter: wrong_param_type") !=
+                std::string::npos)
         << "failed with unexpected error: " << msg;
   }
-  
+
   // Require non-existing parameter
   try
   {
@@ -240,7 +240,8 @@ TEST(InputParameters, makeParamRequired)
   catch (const std::exception & e)
   {
     std::string msg(e.what());
-    EXPECT_TRUE(msg.find("Unable to require nonexistent parameter: wrong_param_name") != std::string::npos)
+    EXPECT_TRUE(msg.find("Unable to require nonexistent parameter: wrong_param_name") !=
+                std::string::npos)
         << "failed with unexpected error: " << msg;
   }
 }
