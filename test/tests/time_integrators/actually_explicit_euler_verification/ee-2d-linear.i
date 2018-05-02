@@ -80,6 +80,7 @@
   start_time = 0.0
   num_steps = 20
   dt = 0.00005
+  l_tol = 1e-12
 
   [./TimeIntegrator]
     type = ActuallyExplicitEuler
