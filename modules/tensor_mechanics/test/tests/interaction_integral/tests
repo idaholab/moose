@@ -44,7 +44,7 @@
    type = 'CSVDiff'
    input = 'interaction_integral_3d_rot.i'
    csvdiff = 'interaction_integral_3d_rot_out.csv interaction_integral_3d_rot_out_II_KI_1_0001.csv interaction_integral_3d_rot_out_II_KI_2_0001.csv interaction_integral_3d_rot_out_II_KII_1_0001.csv interaction_integral_3d_rot_out_II_KII_2_0001.csv interaction_integral_3d_rot_out_II_KIII_1_0001.csv interaction_integral_3d_rot_out_II_KIII_2_0001.csv'
-   abs_zero = 1e-8
+   abs_zero = 2e-8
    max_parallel = 1           # nl_its and lin_its will not be the same in parallel and serial
  [../]
  [./ii_2d_chk_q]
@@ -96,6 +96,6 @@
    exodiff = 'interaction_integral_3d_rot_out.e'
    max_parallel = 1           # nl_its and lin_its will not be the same in parallel and serial
    prereq = 'ii_3d_rot'
-   abs_zero = 1e-8
+   abs_zero = 2e-8
  [../]
 []
