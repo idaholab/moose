@@ -17,10 +17,16 @@ When using this VPP with a FeatureFloodCount object, there is no implied orderin
 - var_num - The index of which coupled variable represents this feature [0..n).
 - feature_volume - The volume of the feature, computed as an integral of the solution over each element representing this feature.
 - intersects_bounds - A Boolean indicating whether this feature intersects any boundary.
+- centroid_<x, y, z> (optional) - The coordinates of each feature centroid (Currently only supported when no periodic boundaries are used).
 
 ## Typical Output
 
 !listing grain_tracker_volume_out_grain_volumes_0000.csv
+
+## Centroid Output
+
+This VectorPosptrocessor can also output centroid information when the simulation is not using periodic boundary conditions. To enable
+centroid output, add `output_centroids = true` to the VPP block in your input file.
 
 ## Usage
 
