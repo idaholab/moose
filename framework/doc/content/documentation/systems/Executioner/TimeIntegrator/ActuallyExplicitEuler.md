@@ -8,7 +8,7 @@
 
 ## `solve_type`
 
-This object has three different ways of solving built-in.  You can switch between them by using the `solve_type` parameter.  The three methods are:
+This object has three different ways of solving.  You can switch between them by using the `solve_type` parameter.  The three methods are:
 
 1.  `consistent`: (The Default) A full mass matrix is built and used in a linear solve for the update
 2.  `lumped`: A "lumped" mass matrix is built, hand-inverted and applied to the RHS - fast, but possibly less accurate
@@ -38,7 +38,7 @@ This is solved using the default linear solver from libMesh (usually PETSc... in
 
 ### `lumped`
 
-The `lumped` option creates a "lumped mass matrix" to use in the solve.  A lumped mass matrix is a digaonal matrix where the diagonal is the sum of all elements on the row from the original matrix.
+The `lumped` option creates a "lumped mass matrix" to use in the solve.  A lumped mass matrix is a diagaonal matrix where the diagonal is the sum of all elements on the row from the original matrix.
 
 To achieve the lumping here a matrix-vector product is performed with a vector of all ones.  That creates a vector where each entry is what would be on the diagonal of the lumped mass matrix.
 
@@ -56,7 +56,7 @@ A few notes on some of the implementation details of this object:
 
 ### Update Form
 
-Note that even though we're doing an explicit solve we are currently doing it in "update form" similar to a single step Newton solve.  This gives us good partiy with the rest of MOOSE.  We may want to change this in the future to make better use of the fact that the mass-matrix can be constant for a wider class of problems if we remove `dt` from it.
+Note that even though we're doing an explicit solve we are currently doing it in "update form" similar to a single step Newton solve.  This gives us good parity with the rest of MOOSE.  We may want to change this in the future to make better use of the fact that the mass-matrix can be constant for a wider class of problems if we remove `dt` from it.
 
 ### `_ones`
 

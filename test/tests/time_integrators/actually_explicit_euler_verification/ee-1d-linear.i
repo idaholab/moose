@@ -56,8 +56,6 @@
 []
 
 [BCs]
-  active = 'all'
-
   [./all]
     type = FunctionDirichletBC
     variable = u

@@ -14,4 +14,10 @@
     input = 'actually_explicit_euler_lumped.i'
     exodiff = 'actually_explicit_euler_lumped_out.e'
   [../]
+
+  [./lump_preconditioned]
+    type = 'Exodiff'
+    input = 'actually_explicit_euler_lump_preconditioned.i'
+    exodiff = 'actually_explicit_euler_lump_preconditioned_out.e'
+  [../]
 []

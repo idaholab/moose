@@ -61,7 +61,7 @@ public:
 
   /**
    * Called _only_ before the very first timestep (t_step = 0)
-   * Never called again (not even during recover/restart
+   * Never called again (not even during recover/restart)
    */
   virtual void init() {}
   virtual void preSolve() {}

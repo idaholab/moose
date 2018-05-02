@@ -1,7 +1,3 @@
-[GlobalParams]
-  implicit = false
-[]
-
 [Mesh]
   type = GeneratedMesh
   dim = 2
@@ -22,7 +18,6 @@
   [../]
   [./time]
     type = TimeDerivative
-    implicit = true
     variable = u
   [../]
 []
@@ -43,12 +38,10 @@
 []
 
 [Executioner]
-  # Preconditioned JFNK (default)
   type = Transient
   num_steps = 10
   dt = 0.001
-  petsc_options_iname = '-pc_type -pc_hypre_type'
-  petsc_options_value = 'hypre boomeramg'
+
 
   [./TimeIntegrator]
     type = ActuallyExplicitEuler

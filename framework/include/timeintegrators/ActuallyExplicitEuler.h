@@ -17,12 +17,15 @@
 
 // Forward declarations
 class ActuallyExplicitEuler;
-class LStableDirk4;
 class LumpedPreconditioner;
 
 template <>
 InputParameters validParams<ActuallyExplicitEuler>();
 
+/**
+ * Implements a truly explicit (no nonlinear solve) first-order, forward Euler
+ * time integration scheme.
+ */
 class ActuallyExplicitEuler : public TimeIntegrator, public MeshChangedInterface
 {
 public:
@@ -48,20 +51,28 @@ protected:
 
   MooseEnum _solve_type;
 
+  /// Residual used for the RHS
   NumericVector<Real> & _explicit_residual;
 
+  /// Solution vector for the linear solve
   NumericVector<Real> & _explicit_euler_update;
 
+  /// Diagonal of the lumped mass matrix (and its inversion)
   NumericVector<Real> & _mass_matrix_diag;
 
+  /// Just a vector of 1's to help with creating the lumped mass matrix
   NumericVector<Real> * _ones;
 
+  /// For computing the mass matrix
   TagID _Ke_time_tag;
 
+  /// For solving with the consistent matrix
   std::unique_ptr<LinearSolver<Number>> _linear_solver;
 
+  /// For solving with lumped preconditioning
   std::unique_ptr<LumpedPreconditioner> _preconditioner;
 
+  /// Save off current time to reset it back and forth
   Real _current_time;
 };
 

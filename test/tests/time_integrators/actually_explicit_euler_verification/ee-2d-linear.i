@@ -43,21 +43,17 @@
   [./ie]
     type = TimeDerivative
     variable = u
-    lumping = true
-    implicit = true
   [../]
 
   [./diff]
     type = Diffusion
     variable = u
-    implicit = false
   [../]
 
   [./ffn]
     type = BodyForce
     variable = u
     function = forcing_fn
-    implicit = false
   [../]
 []
 
@@ -69,7 +65,6 @@
     variable = u
     boundary = '0 1 2 3'
     function = exact_fn
-    implicit = true
   [../]
 []
 
@@ -83,12 +78,14 @@
 
 [Executioner]
   type = Transient
-  scheme = 'explicit-euler'
-  solve_type = 'LINEAR'
 
   start_time = 0.0
   num_steps = 20
   dt = 0.00005
+
+  [./TimeIntegrator]
+    type = ActuallyExplicitEuler
+  [../]
 []
 
 [Outputs]

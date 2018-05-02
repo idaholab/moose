@@ -1,7 +1,3 @@
-[GlobalParams]
-  implicit = false
-[]
-
 [Mesh]
   type = GeneratedMesh
   dim = 2
@@ -22,7 +18,6 @@
   [../]
   [./time]
     type = TimeDerivative
-    implicit = true
     variable = u
   [../]
 []
@@ -43,10 +38,10 @@
 []
 
 [Executioner]
-  # Preconditioned JFNK (default)
   type = Transient
   num_steps = 10
   dt = 0.0001
+  l_tol = 1e-12
 
   [./TimeIntegrator]
     type = ActuallyExplicitEuler

@@ -12,7 +12,6 @@
 #include "NonlinearSystem.h"
 #include "FEProblem.h"
 #include "PetscSupport.h"
-#include "LStableDirk4.h"
 
 // libMesh includes
 #include "libmesh/sparse_matrix.h"
