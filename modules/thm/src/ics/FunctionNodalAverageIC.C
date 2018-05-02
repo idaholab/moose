@@ -1,4 +1,5 @@
 #include "FunctionNodalAverageIC.h"
+#include "Function.h"
 
 registerMooseObject("RELAP7App", FunctionNodalAverageIC);
 
