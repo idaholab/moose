@@ -20,4 +20,24 @@
     input = 'actually_explicit_euler_lump_preconditioned.i'
     exodiff = 'actually_explicit_euler_lump_preconditioned_out.e'
   [../]
+
+  [./diverged]
+    type = 'RunException'
+    input = 'diverged.i'
+    expect_err = 'Solve failed and timestep already at or below dtmin'
+  [../]
+
+  [./diverged_lumped]
+    type = 'RunException'
+    input = 'diverged.i'
+    expect_err = 'Solve failed and timestep already at or below dtmin'
+    cli_args = 'Executioner/TimeIntegrator/solve_type=lumped'
+  [../]
+
+  [./diverged_lump_prec]
+    type = 'RunException'
+    input = 'diverged.i'
+    expect_err = 'Solve failed and timestep already at or below dtmin'
+    cli_args = 'Executioner/TimeIntegrator/solve_type=lump_preconditioned'
+  [../]
 []

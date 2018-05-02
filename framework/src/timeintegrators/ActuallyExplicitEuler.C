@@ -149,18 +149,24 @@ ActuallyExplicitEuler::solve()
   // Still testing whether leaving the old update is a good idea or not
   // _explicit_euler_update = 0;
 
+  auto converged = false;
+
   switch (_solve_type)
   {
     case CONSISTENT:
+    {
       _linear_solver->solve(mass_matrix,
                             _explicit_euler_update,
                             _explicit_residual,
                             es.parameters.get<Real>("linear solver tolerance"),
                             es.parameters.get<unsigned int>("linear solver maximum iterations"));
 
-      break;
+      converged = checkLinearConvergence();
 
+      break;
+    }
     case LUMPED:
+    {
       // Computes the sum of each row (lumping)
       // Note: This is actually how PETSc does it
       // It's not "perfectly optimal" - but it will be fast (and universal)
@@ -171,9 +177,15 @@ ActuallyExplicitEuler::solve()
 
       // Multiply the inversion by the RHS
       _explicit_euler_update.pointwise_mult(_mass_matrix_diag, _explicit_residual);
-      break;
 
+      // Check for convergence by seeing if there is a nan or inf
+      auto sum = _explicit_euler_update.sum();
+      converged = std::isfinite(sum);
+
+      break;
+    }
     case LUMP_PRECONDITIONED:
+    {
       mass_matrix.vector_mult(_mass_matrix_diag, *_ones);
       _mass_matrix_diag.reciprocal();
 
@@ -182,8 +194,11 @@ ActuallyExplicitEuler::solve()
                             _explicit_residual,
                             es.parameters.get<Real>("linear solver tolerance"),
                             es.parameters.get<unsigned int>("linear solver maximum iterations"));
-      break;
 
+      converged = checkLinearConvergence();
+
+      break;
+    }
     default:
       mooseError("Unknown solve_type in ActuallyExplicitEuler ");
   }
@@ -199,7 +214,7 @@ ActuallyExplicitEuler::solve()
 
   nonlinear_system.setSolution(*libmesh_system.current_local_solution);
 
-  libmesh_system.nonlinear_solver->converged = true;
+  libmesh_system.nonlinear_solver->converged = converged;
 }
 
 void
@@ -232,4 +247,39 @@ ActuallyExplicitEuler::meshChanged()
 
   if (_solve_type == CONSISTENT || _solve_type == LUMP_PRECONDITIONED)
     Moose::PetscSupport::setLinearSolverDefaults(_fe_problem, *_linear_solver);
+}
+
+bool
+ActuallyExplicitEuler::checkLinearConvergence()
+{
+  auto reason = _linear_solver->get_converged_reason();
+
+  switch (reason)
+  {
+    case CONVERGED_RTOL_NORMAL:
+    case CONVERGED_ATOL_NORMAL:
+    case CONVERGED_RTOL:
+    case CONVERGED_ATOL:
+    case CONVERGED_ITS:
+    case CONVERGED_CG_NEG_CURVE:
+    case CONVERGED_CG_CONSTRAINED:
+    case CONVERGED_STEP_LENGTH:
+    case CONVERGED_HAPPY_BREAKDOWN:
+      return true;
+    case DIVERGED_NULL:
+    case DIVERGED_ITS:
+    case DIVERGED_DTOL:
+    case DIVERGED_BREAKDOWN:
+    case DIVERGED_BREAKDOWN_BICG:
+    case DIVERGED_NONSYMMETRIC:
+    case DIVERGED_INDEFINITE_PC:
+    case DIVERGED_NAN:
+    case DIVERGED_INDEFINITE_MAT:
+    case CONVERGED_ITERATING:
+    case DIVERGED_PCSETUP_FAILED:
+      return false;
+    default:
+      mooseError("Unknown convergence flat in ActuallyExplicitEuler");
+      return UNKNOWN_FLAG;
+  }
 }

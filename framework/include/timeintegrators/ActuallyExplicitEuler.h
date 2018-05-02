@@ -49,6 +49,11 @@ protected:
     LUMP_PRECONDITIONED
   };
 
+  /**
+   * Check for the linear solver convergence
+   */
+  bool checkLinearConvergence();
+
   MooseEnum _solve_type;
 
   /// Residual used for the RHS
