@@ -640,7 +640,8 @@ FeatureFloodCount::featureCentroid(unsigned int feature_id) const
 
   auto local_index = _feature_id_to_local_index[feature_id];
 
-  Point p;
+  Real invalid_coord = std::numeric_limits<Real>::max();
+  Point p(invalid_coord, invalid_coord, invalid_coord);
   if (local_index != invalid_size_t)
   {
     mooseAssert(local_index < _feature_sets.size(), "local_index out of bounds");
