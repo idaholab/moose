@@ -1,6 +1,8 @@
 #ifndef DIRECTIONMATERIAL_H
 #define DIRECTIONMATERIAL_H
 
+#include "Material.h"
+
 class DirectionMaterial;
 
 template <>
