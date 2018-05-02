@@ -37,37 +37,104 @@ VectorPostprocessorData::hasVectorPostprocessor(const std::string & name)
 
 VectorPostprocessorValue &
 VectorPostprocessorData::getVectorPostprocessorValue(const VectorPostprocessorName & vpp_name,
-                                                     const std::string & vector_name)
+                                                     const std::string & vector_name,
+                                                     bool needs_broadcast)
 {
   _requested_items.emplace(vpp_name + "::" + vector_name);
 
-  return getVectorPostprocessorHelper(vpp_name, vector_name);
+  // Note: the "false" parameters here are just dummies.  They will not change the value of
+  // these booleans in the structs because they are or-equaled (|=) in
+  auto & vec_struct = getVectorPostprocessorHelper(vpp_name,
+                                                   vector_name,
+                                                   /* get_current */ true,
+                                                   /* contains_complete_history */ false,
+                                                   /* is_broadcast */ false,
+                                                   /* needs_broadcast */ needs_broadcast,
+                                                   /* needs_scatter */ true);
+  return *vec_struct.current;
 }
 
 VectorPostprocessorValue &
 VectorPostprocessorData::getVectorPostprocessorValueOld(const VectorPostprocessorName & vpp_name,
-                                                        const std::string & vector_name)
+                                                        const std::string & vector_name,
+                                                        bool needs_broadcast)
 {
   _requested_items.emplace(vpp_name + "::" + vector_name);
 
-  return getVectorPostprocessorHelper(vpp_name, vector_name, false);
+  // Note: the "false" parameters here are just dummies.  They will not change the value of
+  // these booleans in the structs because they are or-equaled (|=) in
+  auto & vec_struct = getVectorPostprocessorHelper(vpp_name,
+                                                   vector_name,
+                                                   /* get_current */ false,
+                                                   /* contains_complete_history */ false,
+                                                   /* is_broadcast */ false,
+                                                   /* needs_broadcast */ needs_broadcast,
+                                                   /* needs_scatter */ true);
+  return *vec_struct.old;
+}
+
+ScatterVectorPostprocessorValue &
+VectorPostprocessorData::getScatterVectorPostprocessorValue(
+    const VectorPostprocessorName & vpp_name, const std::string & vector_name)
+{
+  _requested_items.emplace(vpp_name + "::" + vector_name);
+
+  // Note: the "false" parameters here are just dummies.  They will not change the value of
+  // these booleans in the structs because they are or-equaled (|=) in
+  // The "true" is to turn on scatter
+  auto & vec_struct = getVectorPostprocessorHelper(vpp_name,
+                                                   vector_name,
+                                                   /* get_current */ true,
+                                                   /* contains_complete_history */ false,
+                                                   /* is_broadcast */ false,
+                                                   /* needs_broadcast */ false,
+                                                   /* needs_scatter */ true);
+
+  return vec_struct.scatter_current;
+}
+
+ScatterVectorPostprocessorValue &
+VectorPostprocessorData::getScatterVectorPostprocessorValueOld(
+    const VectorPostprocessorName & vpp_name, const std::string & vector_name)
+{
+  _requested_items.emplace(vpp_name + "::" + vector_name);
+
+  // Note: the "false" parameters here are just dummies.  They will not change the value of
+  // these booleans in the structs because they are or-equaled (|=) in
+  // The "true" is to turn on scatter
+  auto & vec_struct = getVectorPostprocessorHelper(vpp_name,
+                                                   vector_name,
+                                                   /* get_current */ false,
+                                                   /* contains_complete_history */ false,
+                                                   /* is_broadcast */ false,
+                                                   /* needs_broadcast */ false,
+                                                   /* needs_scatter */ true);
+
+  return vec_struct.scatter_old;
 }
 
 VectorPostprocessorValue &
 VectorPostprocessorData::declareVector(const std::string & vpp_name,
                                        const std::string & vector_name,
-                                       bool contains_complete_history)
+                                       bool contains_complete_history,
+                                       bool is_broadcast)
 {
   _supplied_items.emplace(vpp_name + "::" + vector_name);
 
-  return getVectorPostprocessorHelper(vpp_name, vector_name, true, contains_complete_history);
+  auto & vec_struct = getVectorPostprocessorHelper(
+      vpp_name, vector_name, true, contains_complete_history, is_broadcast);
+
+  return *vec_struct.current;
 }
 
-VectorPostprocessorValue &
+VectorPostprocessorData::VectorPostprocessorState &
 VectorPostprocessorData::getVectorPostprocessorHelper(const VectorPostprocessorName & vpp_name,
                                                       const std::string & vector_name,
                                                       bool get_current,
-                                                      bool contains_complete_history)
+                                                      bool contains_complete_history,
+                                                      bool is_broadcast,
+                                                      bool needs_broadcast,
+                                                      bool needs_scatter)
 {
   // Retrieve or create the data structure for this VPP
   auto vec_it_pair = _vpp_data.emplace(
@@ -77,6 +144,16 @@ VectorPostprocessorData::getVectorPostprocessorHelper(const VectorPostprocessorN
   // If the VPP is declaring a vector, see if complete history is needed. Note: This parameter
   // is constant and applies to _all_ declared vectors.
   vec_storage._contains_complete_history |= contains_complete_history;
+
+  // If the VPP is declaring a vector, see if it will already be replicated in parallel.
+  // Note: This parameter is constant and applies to _all_ declared vectors.
+  vec_storage._is_broadcast |= is_broadcast;
+
+  // Does the VPP need to be broadcast after computing
+  vec_storage._needs_broadcast |= needs_broadcast;
+
+  // Does the VPP need to be scattered after computing
+  vec_storage._needs_scatter |= needs_scatter;
 
   // Keep track of whether an old vector is needed for copying back later.
   if (!get_current)
@@ -105,7 +182,7 @@ VectorPostprocessorData::getVectorPostprocessorHelper(const VectorPostprocessorN
         vpp_name + "_" + vector_name, "values_old");
   }
 
-  return get_current ? *vec_struct.current : *vec_struct.old;
+  return vec_struct;
 }
 
 bool
@@ -141,7 +218,7 @@ VectorPostprocessorData::copyValuesBack()
    *    True    |      False       |  Swap
    *    True    |      True        |  Copy
    */
-  for (const auto & vec_pair : _vpp_data)
+  for (auto & vec_pair : _vpp_data)
   {
     bool needs_old = vec_pair.second._needs_old;
     bool preserve_history = vec_pair.second._contains_complete_history;
@@ -149,15 +226,23 @@ VectorPostprocessorData::copyValuesBack()
     if (!needs_old)
       continue;
 
-    for (const auto & vec_it : vec_pair.second._values)
+    for (auto & vec_it : vec_pair.second._values)
+    {
       if (preserve_history)
         *vec_it.second.old = *vec_it.second.current;
       else
         vec_it.second.old->swap(*vec_it.second.current);
+
+      vec_it.second.scatter_old = vec_it.second.scatter_current;
+    }
   }
 }
 
 VectorPostprocessorData::VectorPostprocessorVectors::VectorPostprocessorVectors()
-  : _contains_complete_history(false), _needs_old(false)
+  : _contains_complete_history(false),
+    _is_broadcast(false),
+    _needs_broadcast(false),
+    _needs_scatter(false),
+    _needs_old(false)
 {
 }

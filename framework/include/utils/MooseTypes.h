@@ -80,6 +80,7 @@ class MooseArray;
  */
 typedef Real PostprocessorValue;
 typedef std::vector<Real> VectorPostprocessorValue;
+typedef Real ScatterVectorPostprocessorValue;
 typedef boundary_id_type BoundaryID;
 typedef unsigned int InterfaceID;
 typedef subdomain_id_type SubdomainID;
