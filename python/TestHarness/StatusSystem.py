@@ -30,7 +30,8 @@ class TestStatus(object):
     __skipped_statuses = set([skip, silent, deleted])
     __silent_statuses = set([silent, deleted])
 
-    def __init__(self, status=no_status):
+    def __init__(self, options, status=no_status):
+        self.options = options
         self.__status = status
         self.__message = ''
 
@@ -67,7 +68,12 @@ class TestStatus(object):
 
     def isSilent(self):
         """ boolean for statuses which can cause a test to be silent """
-        return self.__status in self.__silent_statuses
+        if self.options.extra_info and self.isDeleted():
+            pass
+        elif not self.options.report_skipped and self.isSkip():
+            return True
+        elif self.__status in self.__silent_statuses:
+            return True
 
     def isDeleted(self):
         """ boolean deleted status """
@@ -92,9 +98,7 @@ class TestStatus(object):
 
     def isFinished(self):
         """ boolean finished status """
-        return (self.__status in self.__passing_statuses.union(self.__failing_statuses,
-                                                               self.__skipped_statuses,
-                                                               self.__silent_statuses))
+        return not self.isNoStatus()
 
 class JobStatus(object):
     """ Class for handling all possible job statuses """

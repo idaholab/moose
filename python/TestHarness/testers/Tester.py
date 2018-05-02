@@ -9,7 +9,7 @@
 
 import platform, re, os
 from TestHarness import util
-from TestHarness import StatusSystem
+from TestHarness.StatusSystem import TestStatus
 from FactorySystem.MooseObject import MooseObject
 from tempfile import TemporaryFile
 import subprocess
@@ -100,8 +100,16 @@ class Tester(MooseObject):
         # Bool if test can run
         self._runnable = None
 
-        ### Initialize the status bucket class
-        self.status = StatusSystem.TestStatus()
+        # Set up common paramaters
+        self.should_execute = self.specs['should_execute']
+        self.check_input = self.specs['check_input']
+
+        if self.specs["allow_test_objects"]:
+            self.specs["cli_args"].append("--allow-test-objects")
+
+    def initStatusSystem(self, options):
+        """ Initialize the tester status system """
+        self.status = TestStatus(options)
 
         ### Enumerate the statuses
         self.no_status = self.status.no_status
@@ -113,29 +121,6 @@ class Tester(MooseObject):
         self.deleted = self.status.deleted
         self.finished = self.status.finished
 
-        ### Deprecated statuses to be removed upon application fixes
-        self.bucket_initialized        = self.no_status
-        self.bucket_success            = self.success
-        self.bucket_fail               = self.fail
-        self.bucket_diff               = self.diff
-        self.bucket_finished           = self.finished
-        self.bucket_deleted            = self.deleted
-        self.bucket_skip               = self.skip
-        self.bucket_silent             = self.silent
-        self.bucket_pending            = None
-        self.bucket_queued             = None
-        self.bucket_waiting_processing = None
-        ### END Deprecated statuses
-
-        # Set up common paramaters
-        self.should_execute = self.specs['should_execute']
-        self.check_input = self.specs['check_input']
-
-        if self.specs["allow_test_objects"]:
-            self.specs["cli_args"].append("--allow-test-objects")
-
-    ### Status System wrapper methods ###
-    ### See StatusSystem.py for more information
     def getStatus(self):
         return self.status.getStatus()
 

@@ -402,22 +402,6 @@ class TestHarness:
         else:
             return True
 
-    def canPrint(self, job):
-        """ return bool if job should be allowed to print its status """
-        can_print = True
-        tester = job.getTester()
-
-        if tester.isDeleted() and self.options.extra_info:
-            pass
-
-        elif tester.isSkip() and not self.options.report_skipped:
-            can_print = False
-
-        elif tester.isSilent():
-            can_print = False
-
-        return can_print
-
     def printOutput(self, job):
         """ Method to print a testers output to the screen """
         tester = job.getTester()
@@ -455,7 +439,8 @@ class TestHarness:
 
     def handleJobStatus(self, job):
         """ Method to handle a job status """
-        if self.canPrint(job):
+        tester = job.getTester()
+        if not tester.isSilent():
             # Print results and perform any desired post job processing
             if job.isFinished():
                 tester = self.normalizeStatus(job)

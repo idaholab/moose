@@ -69,6 +69,9 @@ class Job(object):
         self.error = self.status.error
         self.finished = self.status.finished
 
+        # Initialize the Tester statuses
+        self.__tester.initStatusSystem(self.options)
+
     def getDAG(self):
         """ Return the DAG associated with this tester """
         return self.__job_dag
