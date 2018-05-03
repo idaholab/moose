@@ -73,8 +73,8 @@ class RunParallel(Scheduler):
             # convert invalid output to something json can handle
             output = output.decode('utf-8','replace').encode('ascii', 'replace')
 
-            # Declare this test a failure
-            tester.setStatus(tester.fail, 'invalid characters in stdout')
+            # Alert the user that their test is outputing invalid characters
+            tester.addCaveats('invalid characters in stdout')
 
         # Set testers output with modifications made above so it prints the way we want it
         job.setOutput(output)
