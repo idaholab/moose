@@ -25,19 +25,20 @@
     type = 'RunException'
     input = 'diverged.i'
     expect_err = 'Solve failed and timestep already at or below dtmin'
+    cli_args = '--no-trap-fpe'
   [../]
 
   [./diverged_lumped]
     type = 'RunException'
     input = 'diverged.i'
     expect_err = 'Solve failed and timestep already at or below dtmin'
-    cli_args = 'Executioner/TimeIntegrator/solve_type=lumped'
+    cli_args = '--no-trap-fpe Executioner/TimeIntegrator/solve_type=lumped'
   [../]
 
   [./diverged_lump_prec]
     type = 'RunException'
     input = 'diverged.i'
     expect_err = 'Solve failed and timestep already at or below dtmin'
-    cli_args = 'Executioner/TimeIntegrator/solve_type=lump_preconditioned'
+    cli_args = '--no-trap-fpe Executioner/TimeIntegrator/solve_type=lump_preconditioned'
   [../]
 []
