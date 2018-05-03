@@ -617,14 +617,10 @@ DMMooseGetEmbedding_Private(DM dm, IS * embedding)
           for (const auto & bit : *(dmm->_block_ids))
           {
             subdomain_id_type b = bit.second;
-            MeshBase::const_element_iterator el =
-                dmm->_nl->system().get_mesh().active_local_subdomain_elements_begin(b);
-            MeshBase::const_element_iterator end_el =
-                dmm->_nl->system().get_mesh().active_local_subdomain_elements_end(b);
-            for (; el != end_el; ++el)
+            for (const auto & elem :
+                 as_range(dmm->_nl->system().get_mesh().active_local_subdomain_elements_begin(b),
+                          dmm->_nl->system().get_mesh().active_local_subdomain_elements_end(b)))
             {
-              const Elem * elem = *el;
-
               // Get the degree of freedom indices for the given variable off the current element.
               std::vector<dof_id_type> evindices;
               dofmap.dof_indices(elem, evindices, v);

@@ -126,13 +126,8 @@ MultiAppMeshFunctionTransfer::transferVariable(unsigned int i)
 
     if (is_nodal)
     {
-      MeshBase::const_node_iterator node_it = to_mesh->local_nodes_begin();
-      MeshBase::const_node_iterator node_end = to_mesh->local_nodes_end();
-
-      for (; node_it != node_end; ++node_it)
+      for (const auto & node : to_mesh->local_node_ptr_range())
       {
-        Node * node = *node_it;
-
         // Skip this node if the variable has no dofs at it.
         if (node->n_dofs(sys_num, var_num) < 1)
           continue;
@@ -161,13 +156,8 @@ MultiAppMeshFunctionTransfer::transferVariable(unsigned int i)
     }
     else // Elemental
     {
-      MeshBase::const_element_iterator elem_it = to_mesh->local_elements_begin();
-      MeshBase::const_element_iterator elem_end = to_mesh->local_elements_end();
-
-      for (; elem_it != elem_end; ++elem_it)
+      for (auto & elem : as_range(to_mesh->local_elements_begin(), to_mesh->local_elements_end()))
       {
-        Elem * elem = *elem_it;
-
         Point centroid = elem->centroid();
 
         // Skip this element if the variable has no dofs at it.
@@ -356,13 +346,8 @@ MultiAppMeshFunctionTransfer::transferVariable(unsigned int i)
 
     if (is_nodal)
     {
-      MeshBase::const_node_iterator node_it = to_mesh->local_nodes_begin();
-      MeshBase::const_node_iterator node_end = to_mesh->local_nodes_end();
-
-      for (; node_it != node_end; ++node_it)
+      for (const auto & node : to_mesh->local_node_ptr_range())
       {
-        Node * node = *node_it;
-
         // Skip this node if the variable has no dofs at it.
         if (node->n_dofs(sys_num, var_num) < 1)
           continue;
@@ -403,13 +388,8 @@ MultiAppMeshFunctionTransfer::transferVariable(unsigned int i)
     }
     else // Elemental
     {
-      MeshBase::const_element_iterator elem_it = to_mesh->local_elements_begin();
-      MeshBase::const_element_iterator elem_end = to_mesh->local_elements_end();
-
-      for (; elem_it != elem_end; ++elem_it)
+      for (auto & elem : as_range(to_mesh->local_elements_begin(), to_mesh->local_elements_end()))
       {
-        Elem * elem = *elem_it;
-
         // Skip this element if the variable has no dofs at it.
         if (elem->n_dofs(sys_num, var_num) < 1)
           continue;

@@ -1915,10 +1915,8 @@ XFEM::setSolution(SystemBase & sys,
     }
   }
 
-  const auto elems_end = _mesh->local_elements_end();
-  for (auto elem_it = _mesh->local_elements_begin(); elem_it != elems_end; ++elem_it)
+  for (auto & elem : as_range(_mesh->local_elements_begin(), _mesh->local_elements_end()))
   {
-    Elem * elem = *elem_it;
     auto mit = stored_solution.find(elem->unique_id());
     if (mit != stored_solution.end())
     {

@@ -134,13 +134,9 @@ MultiAppNearestNodeTransfer::execute()
         else
         {
           target_local_nodes.resize(to_mesh->n_local_nodes());
-          MeshBase::const_node_iterator nodes_begin = to_mesh->local_nodes_begin();
-          MeshBase::const_node_iterator nodes_end = to_mesh->local_nodes_end();
-
           unsigned int i = 0;
-          for (MeshBase::const_node_iterator nodes_it = nodes_begin; nodes_it != nodes_end;
-               ++nodes_it, ++i)
-            target_local_nodes[i] = *nodes_it;
+          for (auto & node : to_mesh->local_node_ptr_range())
+            target_local_nodes[i++] = node;
         }
 
         for (const auto & node : target_local_nodes)
@@ -180,13 +176,8 @@ MultiAppNearestNodeTransfer::execute()
       }
       else // Elemental
       {
-        MeshBase::const_element_iterator elem_it = to_mesh->local_elements_begin();
-        MeshBase::const_element_iterator elem_end = to_mesh->local_elements_end();
-
-        for (; elem_it != elem_end; ++elem_it)
+        for (auto & elem : as_range(to_mesh->local_elements_begin(), to_mesh->local_elements_end()))
         {
-          Elem * elem = *elem_it;
-
           Point centroid = elem->centroid();
 
           // Skip this element if the variable has no dofs at it.
@@ -416,13 +407,9 @@ MultiAppNearestNodeTransfer::execute()
       else
       {
         target_local_nodes.resize(to_mesh->n_local_nodes());
-        MeshBase::const_node_iterator nodes_begin = to_mesh->local_nodes_begin();
-        MeshBase::const_node_iterator nodes_end = to_mesh->local_nodes_end();
-
         unsigned int i = 0;
-        for (MeshBase::const_node_iterator nodes_it = nodes_begin; nodes_it != nodes_end;
-             ++nodes_it, ++i)
-          target_local_nodes[i] = *nodes_it;
+        for (auto & node : to_mesh->local_node_ptr_range())
+          target_local_nodes[i++] = node;
       }
 
       for (const auto & node : target_local_nodes)
@@ -466,13 +453,8 @@ MultiAppNearestNodeTransfer::execute()
     }
     else // Elemental
     {
-      MeshBase::const_element_iterator elem_it = to_mesh->local_elements_begin();
-      MeshBase::const_element_iterator elem_end = to_mesh->local_elements_end();
-
-      for (; elem_it != elem_end; ++elem_it)
+      for (auto & elem : as_range(to_mesh->local_elements_begin(), to_mesh->local_elements_end()))
       {
-        Elem * elem = *elem_it;
-
         // Skip this element if the variable has no dofs at it.
         if (elem->n_dofs(sys_num, var_num) < 1)
           continue;
@@ -560,11 +542,8 @@ MultiAppNearestNodeTransfer::getNearestNode(const Point & p,
   }
   else
   {
-    SimpleRange<MeshBase::const_node_iterator> range(
-        local ? mesh->localNodesBegin() : mesh->getMesh().nodes_begin(),
-        local ? mesh->localNodesEnd() : mesh->getMesh().nodes_end());
-
-    for (auto & node : range)
+    for (auto & node : as_range(local ? mesh->localNodesBegin() : mesh->getMesh().nodes_begin(),
+                                local ? mesh->localNodesEnd() : mesh->getMesh().nodes_end()))
     {
       Real current_distance = (p - *node).norm();
 
@@ -640,12 +619,8 @@ MultiAppNearestNodeTransfer::getLocalNodes(MooseMesh * mesh, std::vector<Node *>
   else
   {
     local_nodes.resize(mesh->getMesh().n_local_nodes());
-
-    MeshBase::const_node_iterator nodes_begin = mesh->localNodesBegin();
-    MeshBase::const_node_iterator nodes_end = mesh->localNodesEnd();
-
     unsigned int i = 0;
-    for (MeshBase::const_node_iterator node_it = nodes_begin; node_it != nodes_end; ++node_it, ++i)
-      local_nodes[i] = *node_it;
+    for (auto & node : as_range(mesh->localNodesBegin(), mesh->localNodesEnd()))
+      local_nodes[i++] = node;
   }
 }

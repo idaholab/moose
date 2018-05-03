@@ -237,14 +237,12 @@ OversampleOutput::updateOversample()
       }
 
       // Now loop over the nodes of the oversampled mesh setting values for each variable.
-      for (MeshBase::const_node_iterator nd = _mesh_ptr->localNodesBegin();
-           nd != _mesh_ptr->localNodesEnd();
-           ++nd)
+      for (const auto & node : as_range(_mesh_ptr->localNodesBegin(), _mesh_ptr->localNodesEnd()))
         for (unsigned int var_num = 0; var_num < _mesh_functions[sys_num].size(); ++var_num)
-          if ((*nd)->n_dofs(sys_num, var_num))
-            dest_sys.solution->set(
-                (*nd)->dof_number(sys_num, var_num, 0),
-                (*_mesh_functions[sys_num][var_num])(**nd - _position)); // 0 value is for component
+          if (node->n_dofs(sys_num, var_num))
+            dest_sys.solution->set(node->dof_number(sys_num, var_num, 0),
+                                   (*_mesh_functions[sys_num][var_num])(
+                                       *node - _position)); // 0 value is for component
 
       dest_sys.solution->close();
     }
