@@ -1,5 +1,9 @@
 [Tests]
   [./test]
+    requirement = 'MOOSE shall provide VectorPostprocessor results to all processors as scattered data'
+    design = '/VectorPostprocessors/index'
+    issues = '11408'
+
     type = 'Exodiff'
     input = 'parallel_consistency.i'
     exodiff = 'parallel_consistency_out.e'
@@ -7,6 +11,10 @@
     max_parallel = 2
   [../]
   [./broadcast]
+    requirement = 'MOOSE shall provide VectorPostprocessor results to all processors as replicated data'
+    design = '/VectorPostprocessors/index'
+    issues = '11408'
+
     type = 'Exodiff'
     input = 'parallel_consistency.i'
     exodiff = 'broadcast_out.e'
