@@ -105,7 +105,7 @@ public:
   /**
    * @returns true if this is a vector-valued element, false otherwise.
    */
-  bool isVector() const;
+  virtual bool isVector() const = 0;
 
 protected:
   /// variable number (from libMesh)

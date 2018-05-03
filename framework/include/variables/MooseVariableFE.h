@@ -131,6 +131,7 @@ public:
   bool activeOnSubdomain(SubdomainID subdomain) const override;
 
   bool isNodal() const override { return _is_nodal; }
+  bool isVector() const override;
   const Node *& node() const { return _node; }
   virtual dof_id_type & nodalDofIndex() override { return _nodal_dof_index; }
   bool isNodalDefined() const { return _has_dofs; }
