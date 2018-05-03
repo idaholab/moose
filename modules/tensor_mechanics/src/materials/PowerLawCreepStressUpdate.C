@@ -44,11 +44,11 @@ validParams<PowerLawCreepStressUpdate>()
 PowerLawCreepStressUpdate::PowerLawCreepStressUpdate(const InputParameters & parameters)
   : RadialReturnStressUpdate(parameters),
     _creep_prepend(getParam<std::string>("creep_prepend")),
-    _coefficient(parameters.get<Real>("coefficient")),
-    _n_exponent(parameters.get<Real>("n_exponent")),
-    _m_exponent(parameters.get<Real>("m_exponent")),
-    _activation_energy(parameters.get<Real>("activation_energy")),
-    _gas_constant(parameters.get<Real>("gas_constant")),
+    _coefficient(getParam<Real>("coefficient")),
+    _n_exponent(getParam<Real>("n_exponent")),
+    _m_exponent(getParam<Real>("m_exponent")),
+    _activation_energy(getParam<Real>("activation_energy")),
+    _gas_constant(getParam<Real>("gas_constant")),
     _start_time(getParam<Real>("start_time")),
     _has_temp(isCoupled("temperature")),
     _temperature(_has_temp ? coupledValue("temperature") : _zero),
@@ -103,6 +103,13 @@ PowerLawCreepStressUpdate::computeDerivative(const Real effective_trial_stress, 
                                      std::pow(stress_delta, _n_exponent - 1.0) * _exponential *
                                      _exp_time;
   return creep_rate_derivative * _dt - 1.0;
+}
+
+Real
+PowerLawCreepStressUpdate::computeStressDerivative(const Real effective_trial_stress,
+                                                   const Real scalar)
+{
+  return -(computeDerivative(effective_trial_stress, scalar) + 1.0) / _three_shear_modulus;
 }
 
 void
