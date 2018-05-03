@@ -45,6 +45,24 @@ class TimeIntegrator : public MooseObject, public Restartable
 public:
   TimeIntegrator(const InputParameters & parameters);
 
+  /**
+   * Called to setup datastructures.
+   *
+   * WILL be called during recover/restart
+   *
+   * Should NOT do any computation for initial values
+   * use init() for that
+   *
+   * Note: this doesn't inherit this from SetupInterface because
+   * I'm not sure that we need all the other setup functions for
+   * TimeIntegrator
+   */
+  virtual void initialSetup() {}
+
+  /**
+   * Called _only_ before the very first timestep (t_step = 0)
+   * Never called again (not even during recover/restart)
+   */
   virtual void init() {}
   virtual void preSolve() {}
   virtual void preStep() {}

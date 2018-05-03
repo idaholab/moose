@@ -25,18 +25,26 @@ validParams<RadialReturnStressUpdate>()
   params.addParam<Real>("max_inelastic_increment",
                         1e-4,
                         "The maximum inelastic strain increment allowed in a time step");
+  params.addRequiredParam<std::string>(
+      "effective_inelastic_strain_name",
+      "Name of the material property that stores the effective inelastic strain");
+  params.addParamNamesToGroup("effective_inelastic_strain_name", "Advanced");
+
   return params;
 }
 
-RadialReturnStressUpdate::RadialReturnStressUpdate(const InputParameters & parameters,
-                                                   const std::string inelastic_strain_name)
+RadialReturnStressUpdate::RadialReturnStressUpdate(const InputParameters & parameters)
   : StressUpdateBase(parameters),
     SingleVariableReturnMappingSolution(parameters),
-    _effective_inelastic_strain(
-        declareProperty<Real>("effective_" + inelastic_strain_name + "_strain")),
-    _effective_inelastic_strain_old(
-        getMaterialPropertyOld<Real>("effective_" + inelastic_strain_name + "_strain")),
-    _max_inelastic_increment(parameters.get<Real>("max_inelastic_increment"))
+    _effective_inelastic_strain(declareProperty<Real>(
+        _base_name + getParam<std::string>("effective_inelastic_strain_name"))),
+    _effective_inelastic_strain_old(getMaterialPropertyOld<Real>(
+        _base_name + getParam<std::string>("effective_inelastic_strain_name"))),
+    _max_inelastic_increment(parameters.get<Real>("max_inelastic_increment")),
+    _identity_two(RankTwoTensor::initIdentity),
+    _identity_symmetric_four(RankFourTensor::initIdentitySymmetricFour),
+    _deviatoric_projection_four(_identity_symmetric_four -
+                                _identity_two.outerProduct(_identity_two) / 3.0)
 {
 }
 
@@ -60,7 +68,7 @@ RadialReturnStressUpdate::updateState(RankTwoTensor & strain_increment,
                                       const RankTwoTensor & /*stress_old*/,
                                       const RankFourTensor & elasticity_tensor,
                                       const RankTwoTensor & elastic_strain_old,
-                                      bool /*compute_full_tangent_operator*/,
+                                      bool compute_full_tangent_operator,
                                       RankFourTensor & tangent_operator)
 {
   // compute the deviatoric trial stress and trial strain from the current intermediate
@@ -78,7 +86,7 @@ RadialReturnStressUpdate::updateState(RankTwoTensor & strain_increment,
   computeStressInitialize(effective_trial_stress, elasticity_tensor);
 
   // Use Newton iteration to determine the scalar effective inelastic strain increment
-  Real scalar_effective_inelastic_strain = 0;
+  Real scalar_effective_inelastic_strain = 0.0;
   if (!MooseUtils::absoluteFuzzyEqual(effective_trial_stress, 0.0))
   {
     returnMappingSolve(effective_trial_stress, scalar_effective_inelastic_strain, _console);
@@ -103,11 +111,38 @@ RadialReturnStressUpdate::updateState(RankTwoTensor & strain_increment,
 
   computeStressFinalize(inelastic_strain_increment);
 
-  /**
-   * Note!  The tangent operator for this class, and derived class is
-   * currently just the elasticity tensor, irrespective of compute_full_tangent_operator
-   */
-  tangent_operator = elasticity_tensor;
+  if (compute_full_tangent_operator &&
+      getTangentCalculationMethod() == TangentCalculationMethod::PARTIAL)
+  {
+    if (MooseUtils::absoluteFuzzyEqual(scalar_effective_inelastic_strain, 0.0))
+      tangent_operator.zero();
+    else
+    {
+      // mu = _three_shear_modulus / 3.0;
+      // norm_dev_stress = ||s_n+1||
+      // effective_trial_stress = von mises trial stress = std::sqrt(3.0 / 2.0) * ||s_n+1^trial||
+      // scalar_effective_inelastic_strain = Delta epsilon^cr_n+1
+      // deriv = derivative of scalar_effective_inelastic_strain w.r.t. von mises stress
+      // deriv = std::sqrt(3.0 / 2.0) partial Delta epsilon^cr_n+1n over partial ||s_n+1^trial||
+
+      mooseAssert(_three_shear_modulus != 0.0, "Shear modulus is zero");
+
+      const RankTwoTensor deviatoric_stress = stress_new.deviatoric();
+      const Real norm_dev_stress =
+          std::sqrt(deviatoric_stress.doubleContraction(deviatoric_stress));
+      mooseAssert(norm_dev_stress != 0.0, "Norm of the deviatoric is zero");
+
+      const RankTwoTensor flow_direction = deviatoric_stress / norm_dev_stress;
+      const RankFourTensor flow_direction_dyad = flow_direction.outerProduct(flow_direction);
+      const Real deriv =
+          computeStressDerivative(effective_trial_stress, scalar_effective_inelastic_strain);
+      const Real scalar_one = _three_shear_modulus * scalar_effective_inelastic_strain /
+                              std::sqrt(1.5) / norm_dev_stress;
+
+      tangent_operator = scalar_one * _deviatoric_projection_four +
+                         (_three_shear_modulus * deriv - scalar_one) * flow_direction_dyad;
+    }
+  }
 }
 
 Real

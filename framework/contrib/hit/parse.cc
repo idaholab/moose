@@ -6,8 +6,7 @@
 #include <set>
 #include <iterator>
 #include <memory>
-
-#include <iostream>
+#include <regex>
 
 #include "parse.h"
 
@@ -410,6 +409,9 @@ Node *
 Section::clone()
 {
   auto n = new Section(_path);
+  // Although we don't usually copy over tokens for cloned nodes, we make an exception here
+  // in order to "remember" whether or not the user used the legacy "../" section closing marker.
+  n->tokens() = tokens();
   for (auto child : children())
     n->addChild(child->clone());
   return n;
@@ -812,7 +814,7 @@ parseField(Parser * p, Node * n)
     {
       if (charIn('e', s) || charIn('E', s) || charIn('.', s))
         kind = Field::Kind::Float;
-      else if ((double)std::stoi(s) != std::stod(s))
+      else if ((double)std::stoll(s) != std::stod(s))
         kind = Field::Kind::Float;
     }
     catch (...) // integer might be too big to fit in int - use float
@@ -995,6 +997,188 @@ explode(Node * n)
   for (auto child : n->children())
     explode(child);
   return n->root();
+}
+
+// When a node tree is walked with this, it removes/clears all tokens from all nodes in the tree.
+// This can be useful to clear tokens that might otherwise cause the tree to be rendered with
+// legacy "../" section closing paths or leading "./" in section headers.
+class TokenClearer : public hit::Walker
+{
+public:
+  void
+  walk(const std::string & /*fullpath*/, const std::string & /*nodepath*/, hit::Node * n) override
+  {
+    n->tokens().clear();
+  }
+};
+
+// matches returns true if s matches the given regex pattern.
+bool
+matches(const std::string & s, const std::string & regex, bool full = true)
+{
+  try
+  {
+    if (full)
+      return std::regex_match(s, std::regex(regex));
+    return std::regex_search(s, std::regex(regex));
+  }
+  catch (...)
+  {
+    return false;
+  }
+}
+
+Formatter::Formatter() : canonical_section_markers(true), line_length(100), indent_string("  ") {}
+
+void
+Formatter::walkPatternConfig(const std::string & prefix, Node * n)
+{
+  std::vector<std::string> order;
+  for (auto child : n->children())
+  {
+    order.push_back(child->path());
+    if (child->type() == NodeType::Section)
+    {
+      auto subpath = prefix + "/" + child->path();
+      if (prefix == "")
+        subpath = child->path();
+      walkPatternConfig(subpath, child);
+    }
+  }
+
+  addPattern(prefix, order);
+}
+
+Formatter::Formatter(const std::string & fname, const std::string & hit_config)
+  : canonical_section_markers(true), line_length(100), indent_string("  ")
+{
+  std::unique_ptr<hit::Node> root(hit::parse(fname, hit_config));
+  if (root->find("format/indent_string"))
+    indent_string = root->param<std::string>("format/indent_string");
+  if (root->find("format/line_length"))
+    line_length = root->param<int>("format/line_length");
+  if (root->find("format/canonical_section_markers"))
+    canonical_section_markers = root->param<bool>("format/canonical_section_markers");
+  if (root->find("format/sorting"))
+    walkPatternConfig("", root->find("format/sorting"));
+}
+
+std::string
+Formatter::format(const std::string & fname, const std::string & input)
+{
+  std::unique_ptr<hit::Node> root(hit::parse(fname, input));
+
+  TokenClearer tc;
+  if (canonical_section_markers)
+    root->walk(&tc, hit::NodeType::Section);
+
+  root->walk(this, hit::NodeType::All);
+  return root->render(0, indent_string, line_length);
+}
+
+void
+Formatter::addPattern(const std::string & section, const std::vector<std::string> & order)
+{
+  _patterns.push_back({section, order});
+}
+
+void
+Formatter::walk(const std::string & fullpath, const std::string & /*nodepath*/, Node * n)
+{
+  for (auto & pattern : _patterns)
+  {
+    if (!matches(fullpath, pattern.regex, true))
+      continue;
+
+    std::vector<std::string> frontorder;
+    std::vector<std::string> backorder;
+    bool onfront = true;
+    for (auto & field : pattern.order)
+    {
+      if (field == "**")
+      {
+        onfront = false;
+        continue;
+      }
+      else if (onfront)
+        frontorder.push_back(field);
+      else
+        backorder.push_back(field);
+    }
+
+    auto nodes = n->children();
+    std::vector<Node *> fronthalf;
+    std::vector<Node *> unused;
+    sortGroup(nodes, frontorder, fronthalf, unused);
+
+    std::vector<Node *> backhalf;
+    nodes = unused;
+    unused.clear();
+    sortGroup(nodes, backorder, backhalf, unused);
+
+    std::vector<Node *> children;
+    children.insert(children.end(), fronthalf.begin(), fronthalf.end());
+    children.insert(children.end(), unused.begin(), unused.end());
+    children.insert(children.end(), backhalf.rbegin(), backhalf.rend());
+
+    for (unsigned int i = 0; i < children.size(); i++)
+      children[i] = children[i]->clone();
+
+    for (auto child : n->children())
+      delete child;
+
+    for (auto child : children)
+      n->addChild(child);
+  }
+}
+
+void
+Formatter::sortGroup(const std::vector<Node *> & nodes,
+                     const std::vector<std::string> & order,
+                     std::vector<Node *> & sorted,
+                     std::vector<Node *> & unused)
+{
+  std::vector<bool> skips(nodes.size(), false);
+
+  for (auto next : order)
+  {
+    for (unsigned int i = 0; i < nodes.size(); i++)
+    {
+      if (skips[i])
+        continue;
+
+      auto comment = nodes[i];
+      Node * field = nullptr;
+      if (i + 1 < nodes.size())
+        field = nodes[i + 1];
+
+      if ((comment->type() == NodeType::Comment || comment->type() == NodeType::Blank) && field &&
+          (field->type() == NodeType::Field || field->type() == NodeType::Section))
+        i++;
+      else if (comment->type() == NodeType::Field || comment->type() == NodeType::Section)
+      {
+        field = comment;
+        comment = nullptr;
+      }
+      else
+        continue;
+
+      if (matches(next, field->path(), false))
+      {
+        if (comment != nullptr)
+        {
+          sorted.push_back(comment);
+          skips[i + 1] = true;
+        }
+        skips[i] = true;
+        sorted.push_back(field);
+      }
+    }
+  }
+
+  for (unsigned int i = 0; i < skips.size(); i++)
+    if (skips[i] == false)
+      unused.push_back(nodes[i]);
 }
 
 #define EOF TMPEOF

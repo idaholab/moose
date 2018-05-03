@@ -19,6 +19,22 @@
 // Forward declaration
 class StressUpdateBase;
 
+/**
+ * TangentCalculationMethod is an enum that determines the calculation method for the tangent
+ * operator. ELASTIC uses the elasticity tensor as the tangent operator: J = C. The elasticity
+ * tensor does not need to be provided by the StressUpdateBase models in this case. FULL calculates
+ * the full tangent operator tensor in each inherited class. The full tangent operator is then
+ * combined in ComputeMultipleInelasicStress by J = J_1 * C^-1 * J_2 * C^-1 * ... J_N. PARTIAL
+ * calculates the contribution to the tangent operator if the terms need to be combined before being
+ * inverted by J = (J_1 + J_2 + ... J_N)^-1 * C.
+ */
+enum class TangentCalculationMethod
+{
+  ELASTIC,
+  FULL,
+  PARTIAL
+};
+
 template <>
 InputParameters validParams<StressUpdateBase>();
 
@@ -91,10 +107,19 @@ public:
 
   virtual Real computeTimeStepLimit();
 
+  virtual TangentCalculationMethod getTangentCalculationMethod()
+  {
+    return TangentCalculationMethod::ELASTIC;
+  }
+
   ///@{ Retained as empty methods to avoid a warning from Material.C in framework. These methods are unused in all inheriting classes and should not be overwritten.
   void resetQpProperties() final {}
   void resetProperties() final {}
   ///@}
+
+protected:
+  /// Name used as a prefix for all material properties related to the stress update model.
+  const std::string _base_name;
 };
 
 #endif // STRESSUPDATEBASE_H

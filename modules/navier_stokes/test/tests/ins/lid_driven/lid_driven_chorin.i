@@ -1,9 +1,3 @@
-[GlobalParams]
-  gravity = '0 0 0'
-[]
-
-
-
 [Mesh]
   type = GeneratedMesh
   dim = 2
@@ -19,7 +13,7 @@
 [MeshModifiers]
   [./corner_node]
     type = AddExtraNodeset
-    boundary = 99
+    new_boundary = 99
     nodes = '0'
   [../]
 []
@@ -249,7 +243,6 @@ solve_type = 'NEWTON'
   #
   dt = 1.e-3
   dtmin = 1.e-6
-  perf_log = true
   petsc_options_iname = '-ksp_gmres_restart '
   petsc_options_value = '300                '
 
@@ -260,7 +253,7 @@ solve_type = 'NEWTON'
   l_tol = 1e-6
   l_max_its = 300
   start_time = 0.0
-  num_steps = 40
+  num_steps = 5
 []
 
 

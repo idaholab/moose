@@ -11,7 +11,6 @@
 class Flags;
 std::vector<std::string> parseOpts(int argc, char ** argv, Flags & flags);
 
-int renameParam(int argc, char ** argv);
 int findParam(int argc, char ** argv);
 int validate(int argc, char ** argv);
 int format(int argc, char ** argv);
@@ -27,9 +26,7 @@ main(int argc, char ** argv)
 
   std::string subcmd(argv[1]);
 
-  if (subcmd == "rename")
-    return renameParam(argc - 2, argv + 2);
-  else if (subcmd == "find")
+  if (subcmd == "find")
     return findParam(argc - 2, argv + 2);
   else if (subcmd == "validate")
     return validate(argc - 2, argv + 2);
@@ -51,6 +48,7 @@ struct Flag
 class Flags
 {
 public:
+  Flags(const std::string & usage) : usage_msg(usage) {}
   void add(std::string name, std::string help, std::string def = "__NONE__")
   {
     if (def == "__NONE__")
@@ -61,8 +59,23 @@ public:
 
   bool have(std::string flag) { return flags.count(flag) > 0 && flags[flag].have; }
   std::string val(std::string flag) { return flags[flag].val; }
+  std::string usage()
+  {
+    std::stringstream ss;
+    ss << usage_msg << "\n";
+    for (auto & pair : flags)
+    {
+      auto flag = pair.second;
+      if (flag.arg)
+        ss << "-" << pair.first << " <arg>    " << flag.help << " (default='" << flag.val << "')\n";
+      else
+        ss << "-" << pair.first << "    " << flag.help << " (default=false)\n";
+    }
+    return ss.str();
+  }
 
   std::map<std::string, Flag> flags;
+  std::string usage_msg;
 };
 
 std::vector<std::string>
@@ -148,75 +161,15 @@ private:
 };
 
 int
-renameParam(int argc, char ** argv)
-{
-  Flags flags;
-  flags.add("i", "modify file(s) inplace");
-  auto positional = parseOpts(argc, argv, flags);
-
-  if (positional.size() < 3)
-  {
-    std::cerr << "rename expects 2 arguments: [src-path] [dst-path] [file]...";
-    return 1;
-  }
-
-  std::string src(positional[0]);
-  std::string dst(positional[1]);
-
-  int ret = 0;
-  for (int i = 2; i < positional.size(); i++)
-  {
-    std::string fname(positional[i]);
-    std::ifstream f(fname);
-    std::string input((std::istreambuf_iterator<char>(f)), std::istreambuf_iterator<char>());
-
-    hit::Node * root = nullptr;
-    try
-    {
-      root = hit::parse(fname, input);
-    }
-    catch (std::exception & err)
-    {
-      std::cerr << err.what() << "\n";
-      return 1;
-    }
-
-    auto n = root->find(src);
-    if (n)
-    {
-      auto f = dynamic_cast<hit::Field *>(n);
-      delete n;
-
-      auto dstnode = new hit::Field(dst, f->kind(), f->val());
-      auto dstnodetree = new hit::Section("");
-      dstnodetree->addChild(dstnode);
-      hit::explode(dstnodetree);
-      hit::merge(dstnodetree, root);
-
-      std::string updated = root->render();
-      if (!flags.have("i"))
-        std::cout << updated << "\n";
-      else
-      {
-        std::ofstream f(fname);
-        f << updated;
-      }
-    }
-  }
-
-  return ret;
-}
-
-int
 findParam(int argc, char ** argv)
 {
-  Flags flags;
+  Flags flags("hit find [flags] <parameter-path> <file>...");
   flags.add("f", "only show file name");
   auto positional = parseOpts(argc, argv, flags);
 
   if (positional.size() < 2)
   {
-    std::cerr << "find expects 2 or more arguments: [parameter-path] [file]...";
+    std::cerr << flags.usage();
     return 1;
   }
 
@@ -254,62 +207,92 @@ findParam(int argc, char ** argv)
   return ret;
 }
 
-class TokenClearer : public hit::Walker
-{
-public:
-  void walk(const std::string & fullpath, const std::string & /*nodepath*/, hit::Node * n) override
-  {
-    n->tokens().clear();
-  }
-};
-
+// the style file is of the format:
+//
+//     [format]
+//         indent_string = "  "
+//         line_length = 100
+//         canonical_section_markers = true
+//
+//         [sorting]
+//             [pattern]
+//                 section = "[^/]+/[^/]+"
+//                 order = "type"
+//             []
+//             [pattern]
+//                 section = ""
+//                 order = "Mesh ** Executioner Outputs"
+//             []
+//         []
+//     []
+//
+// where all fields are optional and the sorting section is also optional.  If the sorting section
+// is present, you can have as many patterns as you want, but each pattern section must have
+// 'section' and 'order' fields.
 int
 format(int argc, char ** argv)
 {
-  Flags flags;
+  Flags flags("hit format [flags] <file>...");
+  flags.add("h", "print help");
+  flags.add("help", "print help");
   flags.add("i", "modify file(s) inplace");
-  flags.add("canonical", "use canonical section open/closing tokens");
-  flags.add("maxlen", "maximum line length for strings", "100");
-  flags.add("indent", "indentation string", "  ");
+  flags.add("style", "hit style file detailing format to use", "");
+
   auto positional = parseOpts(argc, argv, flags);
+
+  if (flags.have("h") || flags.have("help"))
+  {
+    std::cout << flags.usage();
+    return 0;
+  }
 
   if (positional.size() < 1)
   {
-    std::cerr << "please pass in an input file argument\n";
+    std::cout << flags.usage();
     return 1;
   }
 
-  int maxlen = std::stoi(flags.val("maxlen"));
+  hit::Formatter fmt;
+
+  if (flags.have("style"))
+  {
+    try
+    {
+      std::string fname(flags.val("style"));
+      std::ifstream f(fname);
+      std::string input((std::istreambuf_iterator<char>(f)), std::istreambuf_iterator<char>());
+      fmt = hit::Formatter(flags.val("style"), input);
+    }
+    catch (std::exception & err)
+    {
+      std::cerr << "invalid format style " << err.what() << "\n";
+      return 1;
+    }
+  }
 
   int ret = 0;
   for (int i = 0; i < positional.size(); i++)
   {
     std::string fname(positional[i]);
     std::ifstream f(fname);
-    std::string input((std::istreambuf_iterator<char>(f)), std::istreambuf_iterator<char>());
+    std::string input(std::istreambuf_iterator<char>(f), {});
 
-    hit::Node * root = nullptr;
     try
     {
-      root = hit::parse(fname, input);
+      auto fmted = fmt.format(fname, input);
+      if (flags.have("i"))
+      {
+        std::ofstream output(fname);
+        output << fmted;
+      }
+      else
+        std::cout << fmted;
     }
     catch (std::exception & err)
     {
       std::cerr << err.what() << "\n";
       ret = 1;
       continue;
-    }
-
-    TokenClearer tc;
-    if (flags.have("canonical"))
-      root->walk(&tc, hit::NodeType::Section);
-
-    if (!flags.have("i"))
-      std::cout << root->render(0, flags.val("indent"), maxlen) << "\n";
-    else
-    {
-      std::ofstream f(fname);
-      f << root->render(0, flags.val("indent"), maxlen);
     }
   }
 
@@ -332,10 +315,10 @@ validate(int argc, char ** argv)
     std::ifstream f(fname);
     std::string input((std::istreambuf_iterator<char>(f)), std::istreambuf_iterator<char>());
 
-    hit::Node * root = nullptr;
+    std::unique_ptr<hit::Node> root;
     try
     {
-      root = hit::parse(fname, input);
+      root.reset(hit::parse(fname, input));
     }
     catch (std::exception & err)
     {

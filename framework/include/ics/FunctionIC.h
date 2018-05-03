@@ -36,7 +36,7 @@ public:
 
 protected:
   /**
-   * Evaluate the function at the current quadrature point and timestep.
+   * Evaluate the function at the current quadrature point and time step.
    */
   Real f();
 

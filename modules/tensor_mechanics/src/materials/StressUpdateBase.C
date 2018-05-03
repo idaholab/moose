@@ -20,6 +20,11 @@ validParams<StressUpdateBase>()
                              "yield surface, plastic strains, internal parameters, etc).  This "
                              "class is intended to be a parent class for classes with specific "
                              "constitutive models.");
+  params.addParam<std::string>(
+      "base_name",
+      "Optional parameter that defines a prefix for all material "
+      "properties related to this stress update model. This allows for "
+      "multiple models of the same type to be used without naming conflicts.");
   // The return stress increment classes are intended to be iterative materials, so must set compute
   // = false for all inheriting classes
   params.set<bool>("compute") = false;
@@ -27,7 +32,11 @@ validParams<StressUpdateBase>()
   return params;
 }
 
-StressUpdateBase::StressUpdateBase(const InputParameters & parameters) : Material(parameters) {}
+StressUpdateBase::StressUpdateBase(const InputParameters & parameters)
+  : Material(parameters),
+    _base_name(isParamValid("base_name") ? getParam<std::string>("base_name") + "_" : "")
+{
+}
 
 void
 StressUpdateBase::setQp(unsigned int qp)

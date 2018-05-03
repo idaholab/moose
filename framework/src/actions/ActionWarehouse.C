@@ -347,23 +347,22 @@ ActionWarehouse::executeActionsWithAction(const std::string & task)
   // Set the current task name
   _current_task = task;
 
-  for (ActionIterator act_iter = actionBlocksWithActionBegin(task);
-       act_iter != actionBlocksWithActionEnd(task);
-       ++act_iter)
+  for (_act_iter = actionBlocksWithActionBegin(task); _act_iter != actionBlocksWithActionEnd(task);
+       ++_act_iter)
   {
     if (_show_actions)
     {
       _console << "[DBG][ACT] "
                << "TASK (" << COLOR_YELLOW << std::setw(24) << task << COLOR_DEFAULT << ") "
-               << "TYPE (" << COLOR_YELLOW << std::setw(32) << (*act_iter)->type() << COLOR_DEFAULT
+               << "TYPE (" << COLOR_YELLOW << std::setw(32) << (*_act_iter)->type() << COLOR_DEFAULT
                << ") "
-               << "NAME (" << COLOR_YELLOW << std::setw(16) << (*act_iter)->name() << COLOR_DEFAULT
+               << "NAME (" << COLOR_YELLOW << std::setw(16) << (*_act_iter)->name() << COLOR_DEFAULT
                << ")" << std::endl;
 
-      (*act_iter)->act();
+      (*_act_iter)->act();
     }
     else
-      (*act_iter)->act();
+      (*_act_iter)->act();
   }
 }
 
@@ -415,4 +414,10 @@ ActionWarehouse::problem()
   mooseDeprecated(
       "ActionWarehouse::problem() is deprecated, please use ActionWarehouse::problemBase() \n");
   return std::dynamic_pointer_cast<FEProblem>(_problem);
+}
+
+std::string
+ActionWarehouse::getCurrentActionName() const
+{
+  return (*_act_iter)->parameters().blockFullpath();
 }

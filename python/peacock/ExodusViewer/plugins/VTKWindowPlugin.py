@@ -346,6 +346,7 @@ class VTKWindowPlugin(QtWidgets.QFrame, ExodusPlugin):
         else:
             self._highlight.reset()
             self.onRemoveResult(self._highlight)
+            self._highlight = None
 
         self.onWindowRequiresUpdate()
 

@@ -1,0 +1,49 @@
+# These tests originally came from explicit-euler
+# (the capability @andrsd created that did the best it could while
+# still working with the NonlinearSystem)
+# Those tests have been modified to use the new ActuallyExplicitEuler
+# TimeIntegrator... but the gold files are still the originals to prove
+# that the new capability works
+
+[Tests]
+  requirement = 'MOOSE shall allow efficient execution of explicit solves'
+  design = '/ActuallyExplicitEuler.md'
+  issues = '10837'
+
+  [./1d-linear]
+    type = 'Exodiff'
+    input = 'ee-1d-linear.i'
+    exodiff = 'ee-1d-linear_out.e'
+  [../]
+
+  [./1d-quadratic]
+    type = 'Exodiff'
+    input = 'ee-1d-quadratic.i'
+    exodiff = 'ee-1d-quadratic_out.e'
+  [../]
+
+  [./1d-quadratic-neumann]
+    type = 'Exodiff'
+    input = 'ee-1d-quadratic-neumann.i'
+    exodiff = 'ee-1d-quadratic-neumann_out.e'
+  [../]
+
+  [./2d-linear]
+    type = 'Exodiff'
+    input = 'ee-2d-linear.i'
+    exodiff = 'ee-2d-linear_out.e'
+  [../]
+
+  [./2d-linear-adapt]
+    type = 'Exodiff'
+    input = 'ee-2d-linear-adapt.i'
+    exodiff = 'ee-2d-linear-adapt_out.e ee-2d-linear-adapt_out.e-s003'
+    abs_zero = 1e-8
+  [../]
+
+  [./2d-quadratic]
+    type = 'Exodiff'
+    input = 'ee-2d-quadratic.i'
+    exodiff = 'ee-2d-quadratic_out.e'
+  [../]
+[]

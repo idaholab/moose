@@ -14,6 +14,7 @@ from peacock.Input.ExecutableInfo import ExecutableInfo
 from peacock.utils import Testing
 import argparse, os
 from mock import patch
+import vtk
 
 class BaseTests(Testing.PeacockTester):
     def setUp(self):
@@ -24,12 +25,14 @@ class BaseTests(Testing.PeacockTester):
         self.highlight_all = "meshrender_highlight_all.png"
         self.highlight_block = "meshrender_highlight_block.png"
         self.highlight_nodes = "meshrender_highlight_nodes.png"
+        self.highlight_dup = "meshrender_highlight_dup.png"
         self.basic_mesh = "meshrender_basic.png"
         Testing.remove_file(self.highlight_all)
         Testing.remove_file(self.highlight_right)
         Testing.remove_file(self.highlight_left)
         Testing.remove_file(self.highlight_block)
         Testing.remove_file(self.highlight_nodes)
+        Testing.remove_file(self.highlight_dup)
         Testing.remove_file(self.basic_mesh)
         Testing.clean_files()
         self.num_time_steps = None
@@ -261,6 +264,30 @@ class Tests(BaseTests):
         bh.NodesetSelector.Options.setCurrentText("left")
         w.vtkwin.onWrite(self.highlight_nodes)
         self.assertFalse(Testing.gold_diff(self.highlight_nodes))
+
+    def testBlockHighlightDup(self):
+        """
+        Make sure we don't regress https://github.com/idaholab/moose/issues/11404
+        """
+        main_win, w = self.newWidget()
+        tree = w.InputFileEditorPlugin.tree
+        Testing.set_window_size(w.vtkwin)
+        mesh = tree.getBlockInfo("/Mesh")
+        mesh.setBlockType("GeneratedMesh")
+        mesh.setParamValue("dim", "3")
+        mesh.included = True
+        w.blockChanged(mesh)
+        Testing.process_events(t=1)
+        w.blockChanged(mesh) # We need to do it again to trigger the original bug
+        bh = w.BlockHighlighterPlugin
+        bh.SidesetSelector.Options.setCurrentText("bottom")
+
+        camera = vtk.vtkCamera()
+        camera.SetViewUp(-0.7786, 0.2277, 0.5847)
+        camera.SetPosition(-2, -2, -1)
+        w.MeshViewerPlugin.onCameraChanged(camera)
+        w.vtkwin.onWrite(self.highlight_dup)
+        self.assertFalse(Testing.gold_diff(self.highlight_dup))
 
 if __name__ == '__main__':
     Testing.run_tests()

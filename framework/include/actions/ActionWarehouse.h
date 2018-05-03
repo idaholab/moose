@@ -192,6 +192,8 @@ public:
   MooseApp & mooseApp() { return _app; }
   const std::string & getCurrentTaskName() const { return _current_task; }
 
+  std::string getCurrentActionName() const;
+
 protected:
   /**
    * This method auto-builds all Actions that needs to be built and adds them to ActionWarehouse.
@@ -250,6 +252,8 @@ protected:
 private:
   /// Last task to run before (optional) early termination - blank means no early termination.
   std::string _final_task;
+
+  ActionIterator _act_iter;
 };
 
 #endif // ACTIONWAREHOUSE_H

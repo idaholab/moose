@@ -48,6 +48,7 @@ public:
 protected:
   /// A Boolean indicating how the volume is calculated
   const bool _single_feature_per_elem;
+  const bool _output_centroids;
 
   /// A reference to the feature flood count object
   const FeatureFloodCount & _feature_counter;

@@ -77,16 +77,12 @@ protected:
   // Parameters
   unsigned _component;
 
-  // This is the string that's actually read in from file and used to set the
-  // MooseEnum, below.  The options are:
+  // An enumeration defining which velocity vector is used on the rhs
+  // of the Chorin predictor.
   // OLD  - Use velocity from the previous timestep, leads to explicit method
   // NEW  - Use velocity from current timestep, this may not be an actual method
   // STAR - Use the "star" velocity.  According to Donea's book, this is the
   //        right way to get an implicit method...
-  std::string _predictor_type;
-
-  // An enumeration defining which velocity vector is used on the rhs
-  // of the Chorin predictor.
   MooseEnum _predictor_enum;
 
   // A C++ enumeration corresponding to the predictor enumeration.

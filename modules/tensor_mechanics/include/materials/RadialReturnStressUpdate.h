@@ -35,8 +35,7 @@ InputParameters validParams<RadialReturnStressUpdate>();
 class RadialReturnStressUpdate : public StressUpdateBase, public SingleVariableReturnMappingSolution
 {
 public:
-  RadialReturnStressUpdate(const InputParameters & parameters,
-                           const std::string inelastic_strain_name = "");
+  RadialReturnStressUpdate(const InputParameters & parameters);
 
   /**
    * A radial return (J2) mapping method is performed with return mapping
@@ -106,6 +105,16 @@ protected:
   }
 
   /**
+   * Calculate the derivative of the strain increment with respect to the updated stress.
+   * @param effective_trial_stress Effective trial stress
+   * @param scalar                 Inelastic strain increment magnitude being solved for
+   */
+  virtual Real computeStressDerivative(const Real /*effective_trial_stress*/, const Real /*scalar*/)
+  {
+    return 0.0;
+  }
+
+  /**
    * Perform any necessary steps to finalize state after return mapping iterations
    * @param inelasticStrainIncrement Inelastic strain increment
    */
@@ -117,6 +126,21 @@ protected:
   MaterialProperty<Real> & _effective_inelastic_strain;
   const MaterialProperty<Real> & _effective_inelastic_strain_old;
   Real _max_inelastic_increment;
+
+  /**
+   * Rank two identity tensor
+   */
+  const RankTwoTensor _identity_two;
+
+  /**
+   * Rank four symmetric identity tensor
+   */
+  const RankFourTensor _identity_symmetric_four;
+
+  /**
+   * Rank four deviatoric projection tensor
+   */
+  const RankFourTensor _deviatoric_projection_four;
 };
 
 #endif // RADIALRETURNSTRESSUPDATE_H

@@ -18,6 +18,9 @@ validParams<FunctionIC>()
 {
   InputParameters params = validParams<InitialCondition>();
   params.addRequiredParam<FunctionName>("function", "The initial condition function.");
+
+  params.addClassDescription("An initial condition that uses a normal function of x, y, z to "
+                             "produce values (and optionally gradients) for a field variable.");
   return params;
 }
 

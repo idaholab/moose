@@ -16,7 +16,6 @@ InputParameters
 validParams<LinearViscoelasticStressUpdate>()
 {
   InputParameters params = validParams<StressUpdateBase>();
-  params.addParam<std::string>("base_name", "optional string prepended to the creep strain name");
   params.addParam<std::string>(
       "apparent_creep_strain",
       "apparent_creep_strain",
@@ -34,11 +33,8 @@ validParams<LinearViscoelasticStressUpdate>()
 
 LinearViscoelasticStressUpdate::LinearViscoelasticStressUpdate(const InputParameters & parameters)
   : StressUpdateBase(parameters),
-    _base_name(isParamValid("base_name") ? getParam<std::string>("base_name") : std::string()),
-    _creep_strain(declareProperty<RankTwoTensor>(
-        isParamValid("base_name") ? _base_name + "_creep_strain" : "creep_strain")),
-    _creep_strain_old(getMaterialPropertyOld<RankTwoTensor>(
-        isParamValid("base_name") ? _base_name + "_creep_strain" : "creep_strain")),
+    _creep_strain(declareProperty<RankTwoTensor>(_base_name + "creep_strain")),
+    _creep_strain_old(getMaterialPropertyOld<RankTwoTensor>(_base_name + "creep_strain")),
     _apparent_creep_strain(getMaterialProperty<RankTwoTensor>("apparent_creep_strain")),
     _apparent_elasticity_tensor(getMaterialProperty<RankFourTensor>("apparent_elasticity_tensor")),
     _instantaneous_elasticity_tensor_inv(
@@ -67,7 +63,7 @@ LinearViscoelasticStressUpdate::updateState(RankTwoTensor & strain_increment,
                                             const RankFourTensor & elasticity_tensor,
                                             const RankTwoTensor & elastic_strain_old,
                                             bool /*compute_full_tangent_operator*/,
-                                            RankFourTensor & tangent_operator)
+                                            RankFourTensor & /*tangent_operator*/)
 {
   RankTwoTensor current_mechanical_strain =
       elastic_strain_old + _creep_strain_old[_qp] + strain_increment;
@@ -82,6 +78,4 @@ LinearViscoelasticStressUpdate::updateState(RankTwoTensor & strain_increment,
   strain_increment -= creep_strain_increment;
   inelastic_strain_increment += creep_strain_increment;
   stress_new -= elasticity_tensor * creep_strain_increment;
-
-  tangent_operator = elasticity_tensor;
 }

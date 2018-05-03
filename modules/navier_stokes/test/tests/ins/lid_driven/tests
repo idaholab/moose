@@ -18,4 +18,9 @@
     cli_args = 'GlobalParams/alpha=0 Outputs/exodus=false'
     method = 'OPT'
   [../]
+  [./lid_driven_chorin]
+    type = 'Exodiff'
+    input = 'lid_driven_chorin.i'
+    exodiff = 'lid_driven_chorin_out.e'
+  [../]
 []

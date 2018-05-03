@@ -1,0 +1,74 @@
+[Tests]
+  [./dyn_euler]
+    type = 'Exodiff'
+    input = 'dyn_euler_small.i'
+    exodiff = 'dyn_euler_small_out.e'
+  [../]
+  [./dyn_timoshenko]
+    type = 'Exodiff'
+    input = 'dyn_timoshenko_small.i'
+    exodiff = 'dyn_timoshenko_small_out.e'
+  [../]
+  [./dyn_euler_rayleigh_hht]
+    type = 'Exodiff'
+    input = 'dyn_euler_small_rayleigh_hht.i'
+    exodiff = 'dyn_euler_small_rayleigh_hht_out.e'
+  [../]
+  [./dyn_euler_added_mass]
+    type = 'Exodiff'
+    input = 'dyn_euler_small_added_mass.i'
+    exodiff = 'dyn_euler_small_added_mass_out.e'
+  [../]
+  [./dyn_euler_added_mass_inertia_damping]
+    type = 'Exodiff'
+    input = 'dyn_euler_small_added_mass_inertia_damping.i'
+    exodiff = 'dyn_euler_small_added_mass_inertia_damping_out.e'
+  [../]
+  [./dyn_euler_added_mass2]
+    type = 'CSVDiff'
+    input = 'dyn_euler_small_added_mass2.i'
+    csvdiff = 'dyn_euler_small_added_mass2_out.csv'
+  [../]
+  [./error_1]
+    type = 'RunException'
+    input = 'dyn_euler_small.i'
+    cli_args = "Kernels/inertial_force_x/rotations='rot_x rot_y' Outputs/csv=false Outputs/exodus=false"
+    expect_err = "InertialForceBeam: The number of variables supplied in 'displacements' and 'rotations' must match."
+  [../]
+  [./error_2]
+    type = 'RunException'
+    input = 'dyn_euler_small_added_mass_inertia_damping.i'
+    cli_args = "NodalKernels/rot_x_inertial/rotational_velocities='rot_vel_x rot_vel_y' Outputs/csv=false Outputs/exodus=false"
+    expect_err = "NodalRotationalInertia: rotational_velocities and rotational_accelerations should be same size as rotations."
+  [../]
+  [./error_3]
+    type = 'RunException'
+    input = 'dyn_euler_small_added_mass_inertia_damping.i'
+    cli_args = "NodalKernels/rot_x_inertial/Ixx=1 NodalKernels/rot_x_inertial/Iyy=1 NodalKernels/rot_x_inertial/Izz=1 NodalKernels/rot_x_inertial/Ixy=1 Outputs/csv=false Outputs/exodus=false"
+    expect_err = "NodalRotationalInertia: The moment of inertia tensor should be positive definite."
+  [../]
+  [./error_4]
+    type = 'RunException'
+    input = 'dyn_euler_small_added_mass_inertia_damping.i'
+    cli_args = "NodalKernels/rot_x_inertial/x_orientation='2 0 0' NodalKernels/rot_x_inertial/y_orientation='0 1 0' Outputs/csv=false Outputs/exodus=false"
+    expect_err = "NodalRotationalInertia: x_orientation and y_orientation must be unit vectors."
+  [../]
+  [./error_5]
+    type = 'RunException'
+    input = 'dyn_euler_small_added_mass_inertia_damping.i'
+    cli_args = "NodalKernels/rot_x_inertial/x_orientation='1 0 0' NodalKernels/rot_x_inertial/y_orientation='1 0 0' Outputs/csv=false Outputs/exodus=false"
+    expect_err = "NodalRotationalInertia: x_orientation and y_orientation should be perpendicular to each other."
+  [../]
+  [./error_6]
+    type = 'RunException'
+    input = 'dyn_euler_small_added_mass_inertia_damping.i'
+    cli_args = "NodalKernels/rot_x_inertial/x_orientation='1 0 0' Outputs/csv=false Outputs/exodus=false"
+    expect_err = "NodalRotationalInertia: Both x_orientation and y_orientation should be provided if x_orientation or y_orientation is different from global x or y direction, respectively."
+  [../]
+  [./error_7]
+    type = 'RunException'
+    input = 'dyn_euler_small.i'
+    cli_args = "Kernels/inertial_force_x/accelerations='accel_x accel_y' Outputs/csv=false Outputs/exodus=false"
+    expect_err = "InertialForceBeam: The number of variables supplied in 'velocities', 'accelerations', 'rotational_velocities' and 'rotational_accelerations' must match the number of displacement variables."
+  [../]
+[]
