@@ -34,12 +34,20 @@ validParams<WorkBalance>()
       system_enum,
       "The system(s) to retrieve the number of DOFs from (NL, AUX, ALL). Default == ALL");
 
+  params.addParam<bool>("sync_to_all_procs",
+                        false,
+                        "Whether or not to sync the vectors to all processors.  By default we only "
+                        "sync them to processor 0 so they can be written out.  Setting this to "
+                        "true will use more communication, but is necessary if you expect these "
+                        "vectors to be available on all processors");
+
   return params;
 }
 
 WorkBalance::WorkBalance(const InputParameters & parameters)
   : GeneralVectorPostprocessor(parameters),
     _system(getParam<MooseEnum>("system")),
+    _sync_to_all_procs(getParam<bool>("sync_to_all_procs")),
     _local_num_elems(0),
     _local_num_nodes(0),
     _local_num_dofs(0),
@@ -245,12 +253,24 @@ WorkBalance::execute()
 void
 WorkBalance::finalize()
 {
-  // Gather the results down to processor 0
-  _communicator.gather(0, static_cast<Real>(_local_num_elems), _num_elems);
-  _communicator.gather(0, static_cast<Real>(_local_num_nodes), _num_nodes);
-  _communicator.gather(0, static_cast<Real>(_local_num_dofs), _num_dofs);
-  _communicator.gather(0, static_cast<Real>(_local_num_partition_sides), _num_partition_sides);
-  _communicator.gather(0, _local_partition_surface_area, _partition_surface_area);
+  if (!_sync_to_all_procs)
+  {
+    // Gather the results down to processor 0
+    _communicator.gather(0, static_cast<Real>(_local_num_elems), _num_elems);
+    _communicator.gather(0, static_cast<Real>(_local_num_nodes), _num_nodes);
+    _communicator.gather(0, static_cast<Real>(_local_num_dofs), _num_dofs);
+    _communicator.gather(0, static_cast<Real>(_local_num_partition_sides), _num_partition_sides);
+    _communicator.gather(0, _local_partition_surface_area, _partition_surface_area);
+  }
+  else
+  {
+    // Gather the results down to all procs
+    _communicator.allgather(static_cast<Real>(_local_num_elems), _num_elems);
+    _communicator.allgather(static_cast<Real>(_local_num_nodes), _num_nodes);
+    _communicator.allgather(static_cast<Real>(_local_num_dofs), _num_dofs);
+    _communicator.allgather(static_cast<Real>(_local_num_partition_sides), _num_partition_sides);
+    _communicator.allgather(_local_partition_surface_area, _partition_surface_area);
+  }
 
   // Fill in the PID column - this just makes plotting easier
   _pid.resize(_num_elems.size());

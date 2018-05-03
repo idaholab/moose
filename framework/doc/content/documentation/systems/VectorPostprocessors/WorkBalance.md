@@ -12,7 +12,9 @@ Currently computes: number of local elements, nodes, dofs and partition sides.  
 
 ## Important Notes
 
-Note that this VPP only computes the complete vector on processor 0.  The vectors this VPP computes may be very large and there is no need to have a copy of them on every processor.
+Note that, by default, this VPP only computes the complete vector on processor 0.  The vectors this VPP computes may be very large and there is no need to have a copy of them on every processor.
+
+However, you can modify this behavior by setting `sync_to_all_procs = true`
 
 !syntax parameters /VectorPostprocessors/WorkBalance
 
