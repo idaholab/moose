@@ -79,6 +79,7 @@
 #include "ShapeSideUserObject.h"
 #include "MooseVariableFE.h"
 #include "MooseVariableScalar.h"
+#include "TimeIntegrator.h"
 
 #include "libmesh/exodusII_io.h"
 #include "libmesh/quadrature.h"
@@ -649,6 +650,11 @@ FEProblemBase::initialSetup()
   // Random interface objects
   for (const auto & it : _random_data_objects)
     it.second->updateSeeds(EXEC_INITIAL);
+
+  auto ti = _nl->getTimeIntegrator();
+
+  if (ti)
+    ti->initialSetup();
 
   if (_app.isRestarting() || _app.isRecovering())
   {

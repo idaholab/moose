@@ -29,7 +29,7 @@ validParams<NodalBCBase>()
   params.addParamNamesToGroup("vector_tags matrix_tags", "Tagging");
 
   params.set<MultiMooseEnum>("vector_tags") = "residual";
-  params.set<MultiMooseEnum>("matrix_tags") = "system";
+  params.set<MultiMooseEnum>("matrix_tags") = "system time";
   return params;
 }
 

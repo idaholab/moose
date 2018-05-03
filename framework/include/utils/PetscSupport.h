@@ -18,6 +18,10 @@
 #include "MultiMooseEnum.h"
 
 #include "libmesh/petsc_macro.h"
+#include "libmesh/linear_solver.h"
+#include "libmesh/petsc_linear_solver.h"
+
+#include <petscksp.h>
 
 // Forward declarations
 class FEProblemBase;
@@ -55,6 +59,23 @@ public:
  * A function for setting the PETSc options in PETSc from the options supplied to MOOSE
  */
 void petscSetOptions(FEProblemBase & problem);
+
+/**
+ * Set the default options for a KSP
+ */
+void petscSetKSPDefaults(FEProblemBase & problem, KSP ksp);
+
+/**
+ * Set the defaults for a libMesh LinearSolver
+ *
+ * Used in explicit solves
+ */
+template <typename T>
+void
+setLinearSolverDefaults(FEProblemBase & problem, LinearSolver<T> & linear_solver)
+{
+  petscSetKSPDefaults(problem, libmesh_cast_ref<PetscLinearSolver<T> &>(linear_solver).ksp());
+}
 
 /**
  * Sets the default options for PETSc
