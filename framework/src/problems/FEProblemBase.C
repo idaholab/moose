@@ -2604,6 +2604,8 @@ FEProblemBase::addUserObject(std::string user_object_name,
     // Add the object to the correct warehouse
     if (guo)
     {
+      std::cout << "Adding GUO" << std::endl;
+
       _general_user_objects.addObject(guo);
       break; // not threaded
     }
@@ -2954,6 +2956,8 @@ FEProblemBase::computeUserObjects(const ExecFlagType & type, const Moose::AuxGro
     const auto & objects = general.getActiveObjects();
     for (const auto & obj : objects)
     {
+      std::cout << "Executing " << obj->name() << std::endl;
+
       obj->initialize();
       obj->execute();
       obj->finalize();
@@ -2961,6 +2965,29 @@ FEProblemBase::computeUserObjects(const ExecFlagType & type, const Moose::AuxGro
       std::shared_ptr<Postprocessor> pp = std::dynamic_pointer_cast<Postprocessor>(obj);
       if (pp)
         _pps_data.storeValue(obj->name(), pp->getValue());
+
+      auto vpp = std::dynamic_pointer_cast<VectorPostprocessor>(obj);
+
+      if (vpp)
+      {
+        auto & vpp_vectors = _vpps_data.vectorPostprocessorVectors(vpp->PPName());
+
+        for (auto & current_pair : vpp_vectors._values)
+        {
+          std::cout << "needs_broadcast: " << vpp_vectors._needs_broadcast << std::endl;
+
+          auto & vpp_state = current_pair.second;
+
+          if (!vpp_vectors._is_broadcast && vpp_vectors._needs_broadcast)
+          {
+            std::cout << "Broadcasting: " << std::endl;
+            _communicator.broadcast(*vpp_state.current);
+          }
+
+          if (vpp_vectors._needs_scatter)
+            _communicator.scatter(*vpp_state.current, vpp_state.scatter_current);
+        }
+      }
     }
   }
 

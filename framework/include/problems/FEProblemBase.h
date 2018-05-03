@@ -28,6 +28,7 @@
 #include "MultiAppTransfer.h"
 #include "Postprocessor.h"
 #include "HashMap.h"
+#include "VectorPostprocessor.h"
 
 #include "libmesh/enum_quadrature_type.h"
 #include "libmesh/equation_systems.h"
@@ -1752,6 +1753,8 @@ template <typename T>
 void
 FEProblemBase::finalizeUserObjects(const MooseObjectWarehouse<T> & warehouse)
 {
+  std::cout << "Here!" << std::endl;
+
   if (warehouse.hasActiveObjects())
   {
     const auto & objects = warehouse.getActiveObjects(0);
@@ -1777,19 +1780,26 @@ FEProblemBase::finalizeUserObjects(const MooseObjectWarehouse<T> & warehouse)
       if (pp)
         _pps_data.storeValue(pp->PPName(), pp->getValue());
 
-      auto vpp = std::dynamic_pointer_cast<Postprocessor>(object);
+      auto vpp = std::dynamic_pointer_cast<VectorPostprocessor>(object);
 
       if (vpp)
         vpps_finalized.insert(vpp->PPName());
     }
 
+    std::cout << "Going to broadcast/scatter" << std::endl;
+
     // Broadcast/Scatter any VPPs that need it
     for (auto & vpp_name : vpps_finalized)
     {
+
+      std::cout << "vpp: " << vpp_name << std::endl;
+
       auto & vpp_vectors = _vpps_data.vectorPostprocessorVectors(vpp_name);
 
       for (auto & current_pair : vpp_vectors._values)
       {
+        std::cout << "needs_broadcast: " << vpp_vectors._needs_broadcast << std::endl;
+
         auto & vpp_state = current_pair.second;
 
         if (!vpp_vectors._is_broadcast && vpp_vectors._needs_broadcast)

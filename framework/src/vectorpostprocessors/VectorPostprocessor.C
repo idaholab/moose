@@ -43,7 +43,7 @@ VectorPostprocessor::VectorPostprocessor(const InputParameters & parameters)
     _vpp_fe_problem(parameters.getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")),
     _vpp_tid(parameters.isParamValid("_tid") ? parameters.get<THREAD_ID>("_tid") : 0),
     _contains_complete_history(parameters.get<bool>("contains_complete_history")),
-    _is_broadcast(parameters.get<bool>("is_broadcast"))
+    _is_broadcast(parameters.get<bool>("_is_broadcast"))
 {
 }
 

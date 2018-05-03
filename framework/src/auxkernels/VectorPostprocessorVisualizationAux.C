@@ -32,7 +32,7 @@ validParams<VectorPostprocessorVisualizationAux>()
 VectorPostprocessorVisualizationAux::VectorPostprocessorVisualizationAux(
     const InputParameters & parameters)
   : AuxKernel(parameters),
-    _vpp_vector(getVectorPostprocessorValue("vpp", getParam<std::string>("vector_name"))),
+    _vpp_vector(getVectorPostprocessorValue("vpp", getParam<std::string>("vector_name"), true)),
     _my_pid(processor_id())
 {
 }
@@ -40,7 +40,7 @@ VectorPostprocessorVisualizationAux::VectorPostprocessorVisualizationAux(
 void
 VectorPostprocessorVisualizationAux::timestepSetup()
 {
-  if (_vpp_vector.size() != n_processors())
+  if (_my_pid == 0 && _vpp_vector.size() != n_processors())
     mooseError("Error in VectorPostprocessor ",
                name(),
                ". Vector ",
