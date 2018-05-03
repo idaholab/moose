@@ -1,0 +1,50 @@
+[Tests]
+  [./regular_grid_const_bond]
+    type = 'Exodiff'
+    input = '2d_bond_rc.i'
+    exodiff = '2d_bond_rc.e'
+    map = false
+  [../]
+  [./regular_grid_vary_bond]
+    type = 'Exodiff'
+    input = '2d_bond_rv.i'
+    exodiff = '2d_bond_rv.e'
+    map = false
+  [../]
+  [./regular_grid_const_ordinary_state]
+    type = 'Exodiff'
+    input = '2d_ordinary_state_rc.i'
+    exodiff = '2d_ordinary_state_rc.e'
+    map = false
+  [../]
+  [./regular_grid_vary_ordinary_state]
+    type = 'Exodiff'
+    input = '2d_ordinary_state_rv.i'
+    exodiff = '2d_ordinary_state_rv.e'
+    map = false
+  [../]
+  [./irregular_grid_vary_bond]
+    type = 'Exodiff'
+    input = '2d_bond_iv.i'
+    exodiff = '2d_bond_iv.e'
+    map = false
+  [../]
+  [./irregular_grid_vary_ordinary_state]
+    type = 'Exodiff'
+    input = '2d_ordinary_state_iv.i'
+    exodiff = '2d_ordinary_state_iv.e'
+    map = false
+  [../]
+  [./non_ordinary_state_small_strain]
+    type = 'Exodiff'
+    input = '2d_non_ordinary_state_small_strain.i'
+    exodiff = '2d_non_ordinary_state_small_strain.e'
+    map = false
+  [../]
+  [./non_ordinary_state_finite_strain]
+    type = 'Exodiff'
+    input = '2d_non_ordinary_state_finite_strain.i'
+    exodiff = '2d_non_ordinary_state_finite_strain.e'
+    map = false
+  [../]
+[]
