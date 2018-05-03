@@ -41,7 +41,13 @@ MooseVariableInterface<T>::MooseVariableInterface(const MooseObject * moose_obje
     // in their input file. This could happen if e.g. something goes
     // wrong with dollar bracket expression expansion.
     if (vec.empty())
-      mooseError("Error constructing object '", moose_object->name(), "' while retrieving value for '", var_param_name, "' parameter! Did you set ", var_param_name, " = '' (empty string) by accident?");
+      mooseError("Error constructing object '",
+                 moose_object->name(),
+                 "' while retrieving value for '",
+                 var_param_name,
+                 "' parameter! Did you set ",
+                 var_param_name,
+                 " = '' (empty string) by accident?");
 
     // When using vector variables, we are only going to use the first one in the list at the
     // interface level...

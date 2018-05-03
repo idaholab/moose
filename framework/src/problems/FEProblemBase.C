@@ -3440,12 +3440,7 @@ FEProblemBase::getVariable(THREAD_ID tid,
                            Moose::VarKindType expected_var_type,
                            Moose::VarFieldType expected_var_field_type)
 {
-  return getVariableHelper(tid,
-                           var_name,
-                           expected_var_type,
-                           expected_var_field_type,
-                           *_nl,
-                           *_aux);
+  return getVariableHelper(tid, var_name, expected_var_type, expected_var_field_type, *_nl, *_aux);
 }
 
 MooseVariable &

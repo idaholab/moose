@@ -507,13 +507,12 @@ protected:
    * Helper function called by getVariable that handles the logic for
    * checking whether Variables of the requested type are available.
    */
-  MooseVariableFEBase &
-  getVariableHelper(THREAD_ID tid,
-                    const std::string & var_name,
-                    Moose::VarKindType expected_var_type,
-                    Moose::VarFieldType expected_var_field_type,
-                    SystemBase & nl,
-                    SystemBase & aux);
+  MooseVariableFEBase & getVariableHelper(THREAD_ID tid,
+                                          const std::string & var_name,
+                                          Moose::VarKindType expected_var_type,
+                                          Moose::VarFieldType expected_var_field_type,
+                                          SystemBase & nl,
+                                          SystemBase & aux);
 
   /// The currently declared tags
   std::map<TagName, TagID> _vector_tag_name_to_tag_id;
