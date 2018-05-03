@@ -120,4 +120,14 @@
     exodiff = 'auto_dir_repeated_id_out.e'
     group = 'periodic'
   [../]
+
+  [./no_add_scalar]
+    type = 'Exodiff'
+    input = 'no_add_scalar.i'
+    exodiff = 'no_add_scalar_out.e'
+
+    requirement = 'The Periodic Boundary system shall not attempt to add PBCs to Scalar Variables'
+    design = '/AddPeriodicBCAction.md'
+    issues = '#11417'
+  [../]
 []

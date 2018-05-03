@@ -1,3 +1,6 @@
+# Test to make sure that periodic boundaries
+# are not applied to scalar variables.
+
 [Mesh]
   type = GeneratedMesh
   dim = 1
