@@ -121,11 +121,25 @@ class Tester(MooseObject):
         self.deleted = self.status.deleted
         self.finished = self.status.finished
 
+        ### Deprecated statuses to be removed upon application fixes
+        self.bucket_initialized        = self.no_status
+        self.bucket_success            = self.success
+        self.bucket_fail               = self.fail
+        self.bucket_diff               = self.diff
+        self.bucket_finished           = self.finished
+        self.bucket_deleted            = self.deleted
+        self.bucket_skip               = self.skip
+        self.bucket_silent             = self.silent
+        self.bucket_pending            = None
+        self.bucket_queued             = None
+        self.bucket_waiting_processing = None
+        ### END Deprecated statuses
+
     def getStatus(self):
         return self.status.getStatus()
 
     def setStatus(self, status, message=''):
-        # Assign a deprecated message (so I can see what applications this will break) <-Temporary
+        # Support deprecated statuses, alert the user.
         if type(status) == type(''):
             self.addCaveats('deprecated status bucket')
             test_status = self.createStatus()

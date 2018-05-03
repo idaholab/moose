@@ -67,13 +67,13 @@ class TestStatus(object):
         return self.__status == self.no_status
 
     def isSilent(self):
-        """ boolean for statuses which can cause a test to be silent """
+        """ boolean for statuses which cause a test to be silent """
         if self.options.extra_info and self.isDeleted():
             pass
-        elif not self.options.report_skipped and self.isSkip():
+        elif (not self.options.report_skipped and self.isSkip()
+              or self.__status in self.__silent_statuses):
             return True
-        elif self.__status in self.__silent_statuses:
-            return True
+        return False
 
     def isDeleted(self):
         """ boolean deleted status """
@@ -84,15 +84,15 @@ class TestStatus(object):
         return self.__status == self.diff
 
     def isFail(self):
-        """ boolean for statuses which can cause a test to fail """
-        return self.__status in self.__failing_statuses
+        """ boolean for statuses which causes a test to fail """
+        return not self.isSilent() and self.__status in self.__failing_statuses
 
     def isPass(self):
         """ boolean passing status """
         return self.__status in self.__passing_statuses
 
     def isSkip(self):
-        """ boolean for statuses which can cause a test to be skipped """
+        """ boolean for statuses which cause a test to be skipped """
         return (self.__status in self.__skipped_statuses
                 and self.__status not in self.__passing_statuses.union(self.__failing_statuses))
 
