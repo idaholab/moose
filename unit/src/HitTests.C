@@ -412,3 +412,93 @@ TEST(HitTests, MergeTree)
       FAIL() << "merge case kind type is not overridden (string)";
   }
 }
+
+TEST(HitTests, Formatter)
+{
+  RenderCase cases[] = {
+      {"[format]line_length=100[]",
+       "foo='line longer than 20 characters'",
+       "foo = 'line longer than 20 characters'",
+       0},
+      {"[format]line_length=20[]",
+       "foo='line longer than 20 characters'",
+       "foo = 'line longer '\n      'than 20 '\n      'characters'",
+       0},
+      {"[format]canonical_section_markers=true[]", "[./foo][../]", "[foo]\n[]", 0},
+      {"[format]canonical_section_markers=false[]", "[./foo][../]", "[./foo]\n[../]", 0},
+      {"[format]indent_string='    '[]", "[foo]bar=42[]", "[foo]\n    bar = 42\n[]", 0},
+      {"[format]indent_string='      '[]", "[foo]bar=42[]", "[foo]\n      bar = 42\n[]", 0},
+  };
+
+  for (size_t i = 0; i < sizeof(cases) / sizeof(RenderCase); i++)
+  {
+    auto test = cases[i];
+    std::string got;
+    try
+    {
+      hit::Formatter fmter("STYLE", test.name);
+      got = fmter.format("TESTCASE", test.input);
+    }
+    catch (std::exception & err)
+    {
+      FAIL() << "case " << i + 1 << " FAIL (" << test.name << "): unexpected error: " << err.what();
+    }
+    EXPECT_EQ(test.output, got) << "case " << i + 1 << " FAIL (" << test.name << ")";
+  }
+}
+
+struct SortCase
+{
+  struct Pattern
+  {
+    std::string pattern;
+    std::vector<std::string> order;
+  };
+  std::string name;
+  std::string input;
+  std::string want;
+  std::vector<Pattern> patterns;
+};
+
+TEST(HitTests, Formatter_sorting)
+{
+  // clang-format off
+  SortCase cases[] = {
+      {
+        "name",
+        "order = bar outof = foo",
+        "outof = foo\norder = bar",
+        {
+           {"", {"outof", "order"}},
+           {"pattern2", {"param1", "param2"}}
+        }
+      }, {
+        "name",
+        "order = bar outof = foo",
+        "order = bar\noutof = foo",
+        {
+        }
+      }
+  };
+  // clang-format on
+
+  for (size_t i = 0; i < sizeof(cases) / sizeof(RenderCase); i++)
+  {
+    auto test = cases[i];
+    std::string got;
+
+    hit::Formatter fmter;
+    for (auto & pattern : test.patterns)
+      fmter.addPattern(pattern.pattern, pattern.order);
+
+    try
+    {
+      got = fmter.format("TESTCASE", test.input);
+    }
+    catch (std::exception & err)
+    {
+      FAIL() << "case " << i + 1 << " FAIL (" << test.name << "): unexpected error: " << err.what();
+    }
+    EXPECT_EQ(test.want, got) << "case " << i + 1 << " FAIL (" << test.name << ")";
+  }
+}

@@ -3,9 +3,11 @@
 
 #include <string>
 #include <vector>
+#include <map>
 #include <algorithm>
 #include <typeinfo>
 #include <cstdint>
+#include <iostream>
 
 #include "lex.h"
 
@@ -443,6 +445,94 @@ void merge(Node * from, Node * into);
 /// exist in the tree, the fields will be moved into them rather than new sections created.  The
 /// returned node is the root of the exploded tree.
 Node * explode(Node * n);
+
+// Formatter is used to automatically format hit syntax/input to be uniform in a specified style.
+// After creating a formatter object and configuring it as desired by modifying/calling its members
+// you use the "format" function to format hit text as desired.
+class Formatter : public Walker
+{
+public:
+  /// Constructs a formatter that formats hit text in a canonical default style.
+  Formatter();
+
+  /// Constructs a formatter that formats hit text according to the configuration parameters
+  /// specified in hit_config - which is the text of a hit document of the following form:
+  ///
+  ///     [format]
+  ///       # these parameters set the correspondingly named Formatter member variables.  See them
+  ///       # for detailed descriptions of what they do.
+  ///       indent_string = "  "
+  ///       line_length = 100
+  ///       canonical_section_markers = true
+  ///
+  ///       # This section specifies parameter/section sorgin order as provided by the formatter's
+  ///       # addPattern member function. The content for this section mirrors the structure of
+  ///       # the hit file being formatted.  Each section name is a regex (limited to valid hit
+  ///       # identifier characters). The fields and subsections within each section specify an
+  ///       # order; any field values are ignored. See the docs for that function for more details.
+  ///       [sorting]
+  ///         [foo]        # section 'foo' goes first (before other sections)
+  ///           bar = bla  # field 'bar' (in the foo section) goes first
+  ///           ** = bla   # double glob is placeholder for unordered fields/sections
+  ///           baz = bla  # field 'baz' goes last
+  ///         []
+  ///         [.*]
+  ///           [.*]
+  ///             first = bla # fields named 'first' at double nested level go first
+  ///           []
+  ///         []
+  ///       []
+  ///     []
+  ///
+  /// All fields are optional and the sorting section is also optional.  If the sorting section
+  /// is present, you can have as many patterns as you like, but each pattern section must have
+  /// one set of "section" and "order" fields.
+  Formatter(const std::string & fname, const std::string & hit_config);
+
+  /// Formats the given input hit text (using fname to report better syntax errors) and returns
+  /// the text formatted as specified by the formatter's configuration.
+  std::string format(const std::string & fname, const std::string & input);
+  /// Add a sorting pattern to the formatter.  section is a regex that must match a section's
+  /// full path (as returned by a section node's fullpath function). order is a list of regexes
+  /// that partial match field names identifying the order of fields for sections that match the
+  /// section regex.  Fields that don't match any order regexes are remain unmoved/ignored. You can
+  /// include a "**" entry in the order vector to indicate a glob of unordered parameters.  This
+  /// allows a specifying an ordered set of parameters for the front of the section as well as an
+  /// ordered set of parameters at the back of the section with all parameters not matching any
+  /// order regex being placed in their original order in place of the "**".
+  void addPattern(const std::string & section, const std::vector<std::string> & order);
+
+  /// walk implements the hit::Walker interface and should generally not be called.
+  virtual void walk(const std::string & fullpath, const std::string & nodepath, Node * n);
+
+  /// Indicates whether or not to convert legacy leading "[./section_name]" in section headers and
+  /// closing "[../]" in section footers to the canonical "[section_name]" and "[]" respectively.
+  /// If true, the canonical (non-legacy) format is used.
+  bool canonical_section_markers;
+  /// The maximum length of a line before it will be automatically be broken and reflowed into
+  /// multiple lines.  Note that this only currently applies to string-literals (e.g. not comments,
+  /// integers, section headers, etc.)
+  int line_length;
+  /// The text used to represent a single level of nesting indentation.  It must be comprised of
+  /// only whitespace characters.
+  std::string indent_string;
+
+private:
+  struct Pattern
+  {
+    std::string regex;
+    std::vector<std::string> order;
+  };
+
+  void walkPatternConfig(const std::string & prefix, Node * n);
+
+  void sortGroup(const std::vector<Node *> & nodes,
+                 const std::vector<std::string> & order,
+                 std::vector<Node *> & sorted,
+                 std::vector<Node *> & unused);
+
+  std::vector<Pattern> _patterns;
+};
 
 } // namespace hit
 

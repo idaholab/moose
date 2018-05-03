@@ -45,6 +45,18 @@ cdef extern from "parse.h" namespace "hit":
     Node * explode(Node * n) except +
     void merge(Node * src, Node * dst) except +
 
+cdef extern from "parse.h" namespace "hit":
+    cdef cppclass Formatter:
+        Formatter()
+        Formatter(const string & fname, const string & hit_config)
+
+        string format(const string & fname, const string & input)
+        void addPattern(const string & prefix, const vector[string] & order)
+
+        bool canonical_section_markers
+        int line_length
+        string indent_string
+
 cdef extern from "parse.h" namespace "hit::Field":
     cdef cppclass Kind:
         pass
