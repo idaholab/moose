@@ -149,12 +149,6 @@ VectorPostprocessorData::getVectorPostprocessorHelper(const VectorPostprocessorN
   // Note: This parameter is constant and applies to _all_ declared vectors.
   vec_storage._is_broadcast |= is_broadcast;
 
-  // Does the VPP need to be broadcast after computing
-  vec_storage._needs_broadcast |= needs_broadcast;
-
-  // Does the VPP need to be scattered after computing
-  vec_storage._needs_scatter |= needs_scatter;
-
   // Keep track of whether an old vector is needed for copying back later.
   if (!get_current)
     vec_storage._needs_old = true;
@@ -181,6 +175,12 @@ VectorPostprocessorData::getVectorPostprocessorHelper(const VectorPostprocessorN
     vec_struct.old = &declareRestartableDataWithObjectName<VectorPostprocessorValue>(
         vpp_name + "_" + vector_name, "values_old");
   }
+
+  // Does the VPP need to be broadcast after computing
+  vec_struct.needs_broadcast |= needs_broadcast;
+
+  // Does the VPP need to be scattered after computing
+  vec_struct.needs_scatter |= needs_scatter;
 
   return vec_struct;
 }
@@ -239,10 +239,6 @@ VectorPostprocessorData::copyValuesBack()
 }
 
 VectorPostprocessorData::VectorPostprocessorVectors::VectorPostprocessorVectors()
-  : _contains_complete_history(false),
-    _is_broadcast(false),
-    _needs_broadcast(false),
-    _needs_scatter(false),
-    _needs_old(false)
+  : _contains_complete_history(false), _is_broadcast(false), _needs_old(false)
 {
 }

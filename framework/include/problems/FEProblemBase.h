@@ -1793,10 +1793,10 @@ FEProblemBase::finalizeUserObjects(const MooseObjectWarehouse<T> & warehouse)
       {
         auto & vpp_state = current_pair.second;
 
-        if (!vpp_vectors._is_broadcast && vpp_vectors._needs_broadcast)
+        if (!vpp_vectors._is_broadcast && vpp_state.needs_broadcast)
           _communicator.broadcast(*vpp_state.current);
 
-        if (vpp_vectors._needs_scatter)
+        if (vpp_state.needs_scatter)
           _communicator.scatter(*vpp_state.current, vpp_state.scatter_current);
       }
     }

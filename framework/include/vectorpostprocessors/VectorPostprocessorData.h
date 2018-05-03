@@ -34,11 +34,17 @@ public:
   /// VectorPostprocessorState (2 containers for values (see MooseTypes.h)
   struct VectorPostprocessorState
   {
-    VectorPostprocessorValue * current;
-    VectorPostprocessorValue * old;
+    VectorPostprocessorValue * current = NULL;
+    VectorPostprocessorValue * old = NULL;
 
     ScatterVectorPostprocessorValue scatter_current;
     ScatterVectorPostprocessorValue scatter_old;
+
+    /// Whether or not this vector needs to be broadcast
+    bool needs_broadcast = false;
+
+    /// Whether or not this vector needs to be scatterd
+    bool needs_scatter = false;
   };
 
   /**
@@ -169,12 +175,6 @@ private:
 
     /// Boolean indicating whether the vector will already be replicated in parallel by the VPP
     bool _is_broadcast;
-
-    /// Boolean indicating whether the vector needs to be broadcast after being computed
-    bool _needs_broadcast;
-
-    /// Boolean indicating whether the vector needs to scattered after being computed
-    bool _needs_scatter;
 
     /// Boolean indicating whether any old vectors have been requested.
     bool _needs_old;
