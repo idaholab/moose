@@ -2604,8 +2604,6 @@ FEProblemBase::addUserObject(std::string user_object_name,
     // Add the object to the correct warehouse
     if (guo)
     {
-      std::cout << "Adding GUO" << std::endl;
-
       _general_user_objects.addObject(guo);
       break; // not threaded
     }
@@ -2956,8 +2954,6 @@ FEProblemBase::computeUserObjects(const ExecFlagType & type, const Moose::AuxGro
     const auto & objects = general.getActiveObjects();
     for (const auto & obj : objects)
     {
-      std::cout << "Executing " << obj->name() << std::endl;
-
       obj->initialize();
       obj->execute();
       obj->finalize();
@@ -2974,13 +2970,14 @@ FEProblemBase::computeUserObjects(const ExecFlagType & type, const Moose::AuxGro
 
         for (auto & current_pair : vpp_vectors._values)
         {
-          std::cout << "needs_broadcast: " << vpp_vectors._needs_broadcast << std::endl;
-
           auto & vpp_state = current_pair.second;
 
           if (!vpp_vectors._is_broadcast && vpp_vectors._needs_broadcast)
           {
-            std::cout << "Broadcasting: " << std::endl;
+            unsigned int size = vpp_state.current->size();
+
+            _communicator.broadcast(size);
+            vpp_state.current->resize(size);
             _communicator.broadcast(*vpp_state.current);
           }
 

@@ -1753,8 +1753,6 @@ template <typename T>
 void
 FEProblemBase::finalizeUserObjects(const MooseObjectWarehouse<T> & warehouse)
 {
-  std::cout << "Here!" << std::endl;
-
   if (warehouse.hasActiveObjects())
   {
     const auto & objects = warehouse.getActiveObjects(0);
@@ -1786,20 +1784,13 @@ FEProblemBase::finalizeUserObjects(const MooseObjectWarehouse<T> & warehouse)
         vpps_finalized.insert(vpp->PPName());
     }
 
-    std::cout << "Going to broadcast/scatter" << std::endl;
-
     // Broadcast/Scatter any VPPs that need it
     for (auto & vpp_name : vpps_finalized)
     {
-
-      std::cout << "vpp: " << vpp_name << std::endl;
-
       auto & vpp_vectors = _vpps_data.vectorPostprocessorVectors(vpp_name);
 
       for (auto & current_pair : vpp_vectors._values)
       {
-        std::cout << "needs_broadcast: " << vpp_vectors._needs_broadcast << std::endl;
-
         auto & vpp_state = current_pair.second;
 
         if (!vpp_vectors._is_broadcast && vpp_vectors._needs_broadcast)

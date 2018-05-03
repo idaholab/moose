@@ -1,0 +1,17 @@
+[Tests]
+  [./test]
+    type = 'Exodiff'
+    input = 'parallel_consistency.i'
+    exodiff = 'parallel_consistency_out.e'
+    min_parallel = 2
+    max_parallel = 2
+  [../]
+  [./broadcast]
+    type = 'Exodiff'
+    input = 'parallel_consistency.i'
+    exodiff = 'broadcast_out.e'
+    cli_args = 'AuxKernels/viewit/use_broadcast=true Outputs/file_base=broadcast_out'
+    min_parallel = 2
+    max_parallel = 2
+  [../]
+[]
