@@ -81,6 +81,7 @@
 #include "MooseVariableScalar.h"
 #include "InputParameterWarehouse.h"
 #include "TimeIntegrator.h"
+#include "LineSearch.h"
 
 #include "libmesh/exodusII_io.h"
 #include "libmesh/quadrature.h"
@@ -1604,9 +1605,9 @@ FEProblemBase::getFunction(const std::string & name, THREAD_ID tid)
 }
 
 void
-FEProblemBase::linesearch()
+FEProblemBase::lineSearch()
 {
-  _line_search->linesearch();
+  _line_search->lineSearch();
 }
 
 NonlinearSystem &

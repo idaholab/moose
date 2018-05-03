@@ -13,6 +13,7 @@
 #include "AuxiliarySystem.h"
 #include "MooseEigenSystem.h"
 #include "NonlinearSystem.h"
+#include "LineSearch.h"
 
 registerMooseObject("MooseApp", FEProblem);
 
@@ -57,5 +58,27 @@ FEProblem::addLineSearch(const InputParameters & parameters)
   MooseEnum line_search = parameters.get<MooseEnum>("line_search");
   Moose::LineSearchType enum_line_search = Moose::stringToEnum<Moose::LineSearchType>(line_search);
   if (enum_line_search == Moose::LS_CONTACT)
-    _line_search = ContactLineSearchBase::build(parameters, *this);
+  {
+#ifdef LIBMESH_HAVE_PETSC
+#if PETSC_VERSION_LESS_THAN(3, 3, 0)
+    mooseError("Shell line searches only became available in Petsc in version 3.3!");
+#else
+    InputParameters ls_params = _factory.getValidParams("PetscContactLineSearch");
+
+    bool affect_ltol = parameters.isParamValid("contact_line_search_ltol");
+    ls_params.set<bool>("affect_ltol") = affect_ltol;
+    ls_params.set<unsigned>("allowed_lambda_cuts") =
+        parameters.get<unsigned>("contact_line_search_allowed_lambda_cuts");
+    ls_params.set<Real>("contact_ltol") = affect_ltol
+                                              ? parameters.get<Real>("contact_line_search_ltol")
+                                              : parameters.get<Real>("l_tol");
+    ls_params.set<FEProblem *>("_fe_problem") = this;
+
+    _line_search =
+        _factory.create<LineSearch>("PetscContactLineSearch", "contact_line_search", ls_params);
+#endif
+#else
+    mooseError("Currently contact line search requires use of Petsc.");
+#endif
+  }
 }

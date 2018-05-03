@@ -104,7 +104,7 @@ Executioner::Executioner(const InputParameters & parameters)
     _restart_file_base(getParam<FileNameNoExtension>("restart_file_base")),
     _splitting(getParam<std::vector<std::string>>("splitting"))
 {
-  if (_pars.isParamValid("line_search"))
+  if (_pars.isParamSetByUser("line_search"))
     _fe_problem.addLineSearch(_pars);
 
 // Extract and store PETSc related settings on FEProblemBase

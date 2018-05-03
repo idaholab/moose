@@ -506,7 +506,7 @@ public:
   /**
    * execute MOOSE line search
    */
-  virtual void linesearch();
+  virtual void lineSearch();
 
   /**
    * getter for the MOOSE line search

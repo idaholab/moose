@@ -10,7 +10,18 @@
 #include "LineSearch.h"
 #include "MooseApp.h"
 
-LineSearch::LineSearch(FEProblem & fe_problem, MooseApp & app)
-  : ConsoleStreamInterface(app), ParallelObject(app), _fe_problem(fe_problem), _nl_its(0)
+template <>
+InputParameters
+validParams<LineSearch>()
+{
+  InputParameters params = validParams<MooseObject>();
+  params.registerBase("LineSearch");
+  return params;
+}
+
+LineSearch::LineSearch(const InputParameters & parameters)
+  : MooseObject(parameters),
+    _fe_problem(*getCheckedPointerParam<FEProblem *>("_fe_problem", "Must be using FEProblem.")),
+    _nl_its(0)
 {
 }

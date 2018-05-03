@@ -16,7 +16,6 @@
 
 // MOOSE includes
 #include "MultiMooseEnum.h"
-#include "ContactLineSearchBase.h"
 
 #include "libmesh/petsc_macro.h"
 #include "libmesh/linear_solver.h"
@@ -148,7 +147,8 @@ void colorAdjacencyMatrix(PetscScalar * adjacency_matrix,
 /**
  * Wrapper of the libmesh ComputeLineSearchObject
  */
-class ComputeLineSearchObjectWrapper : public PetscNonlinearSolver<Real>::ComputeLineSearchObject
+class ComputeLineSearchObjectWrapper
+  : public libMesh::PetscNonlinearSolver<Real>::ComputeLineSearchObject
 {
 public:
   ComputeLineSearchObjectWrapper(FEProblemBase & fe_problem);
@@ -160,24 +160,6 @@ public:
 
 protected:
   FEProblemBase & _fe_problem;
-};
-
-/**
- *  Petsc implementation of the contact line search (based on the Petsc LineSearchShell)
- */
-class ContactLineSearch : public ContactLineSearchBase
-{
-public:
-  ContactLineSearch(FEProblem & fe_problem,
-                    MooseApp & app,
-                    size_t allowed_lambda_cuts,
-                    Real contact_ltol,
-                    bool affect_ltol);
-
-  virtual void linesearch() override;
-
-protected:
-  PetscNonlinearSolver<Real> * _solver;
 };
 
 #if PETSC_VERSION_LESS_THAN(3, 4, 0)

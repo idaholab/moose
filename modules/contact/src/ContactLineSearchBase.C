@@ -12,55 +12,33 @@
 #include "InputParameters.h"
 #include "MooseEnum.h"
 #include "FEProblem.h"
+#include "MooseError.h"
 
-ContactLineSearchBase::ContactLineSearchBase(FEProblem & fe_problem,
-                                             MooseApp & app,
-                                             size_t allowed_lambda_cuts,
-                                             Real contact_ltol,
-                                             bool affect_ltol)
-  : LineSearch(fe_problem, app),
-    _user_ksp_rtol_set(false),
-    _allowed_lambda_cuts(allowed_lambda_cuts),
-    _contact_ltol(contact_ltol),
-    _affect_ltol(affect_ltol)
+registerMooseObjectAliased("ContactApp", ContactLineSearchBase, "ContactLineSearch");
+
+template <>
+InputParameters
+validParams<ContactLineSearchBase>()
 {
+  InputParameters params = validParams<LineSearch>();
+  params.addRequiredParam<unsigned>("allowed_lambda_cuts",
+                                    "The number of times lambda is allowed to get cut");
+  params.addRequiredParam<Real>("contact_ltol",
+                                "The linear tolerance to use when the contact set is changing.");
+  params.addRequiredParam<bool>("affect_ltol",
+                                "Whether to change the linear tolerance from the default value "
+                                "when the contact set is changing");
+  MooseEnum line_search_package("petsc moose");
+  return params;
 }
 
-std::shared_ptr<ContactLineSearchBase>
-ContactLineSearchBase::build(const InputParameters & parameters, FEProblem & fe_problem)
+ContactLineSearchBase::ContactLineSearchBase(const InputParameters & parameters)
+  : LineSearch(parameters),
+    _user_ksp_rtol_set(false),
+    _allowed_lambda_cuts(getParam<unsigned>("allowed_lambda_cuts")),
+    _contact_ltol(getParam<Real>("contact_ltol")),
+    _affect_ltol(getParam<bool>("affect_ltol"))
 {
-  bool affect_ltol = parameters.isParamValid("contact_line_search_ltol");
-
-  enum LSPackage
-  {
-    Petsc,
-    Moose
-  };
-
-  LSPackage ls_package = parameters.get<MooseEnum>("line_search_package").getEnum<LSPackage>();
-  switch (ls_package)
-  {
-#ifdef LIBMESH_HAVE_PETSC
-    case Petsc:
-      return std::make_shared<Moose::PetscSupport::ContactLineSearch>(
-          fe_problem,
-          fe_problem.getMooseApp(),
-          parameters.get<unsigned>("contact_line_search_allowed_lambda_cuts"),
-          affect_ltol ? parameters.get<Real>("contact_line_search_ltol")
-                      : parameters.get<Real>("l_tol"),
-          affect_ltol);
-#endif
-
-    case Moose:
-      mooseError("A MOOSE line search has not yet been implemented for contact. Please use the "
-                 "Petsc implementation, e.g. 'line_search_package = petsc'.");
-      break;
-
-    default:
-      mooseError("Invalid line search option specified. Please consider using 'line_search_package "
-                 "= petsc'");
-      break;
-  }
 }
 
 void

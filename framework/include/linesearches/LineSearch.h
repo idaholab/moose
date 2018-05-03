@@ -10,17 +10,18 @@
 #ifndef LINESEARCH_H
 #define LINESEARCH_H
 
-#include "libmesh/parallel_object.h"
-#include "ConsoleStreamInterface.h"
-
-using namespace libMesh;
+#include "MooseObject.h"
 
 class FEProblem;
+class LineSearch;
 
-class LineSearch : public ConsoleStreamInterface, public ParallelObject
+template <>
+InputParameters validParams<LineSearch>();
+
+class LineSearch : public MooseObject
 {
 public:
-  LineSearch(FEProblem & fe_problem, MooseApp & app);
+  LineSearch(const InputParameters & parameters);
 
   /**
    * zeros the nonlinear iteration count
@@ -35,7 +36,7 @@ public:
   /**
    * The method that actually implements the line-search
    */
-  virtual void linesearch() = 0;
+  virtual void lineSearch() { mooseError("You must implement a line-search method."); }
 
 protected:
   /// Reference to the finite element problem

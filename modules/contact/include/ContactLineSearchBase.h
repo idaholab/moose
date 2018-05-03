@@ -12,8 +12,11 @@
 
 #include "LineSearch.h"
 
-class InputParameters;
 class FEProblem;
+class ContactLineSearchBase;
+
+template <>
+InputParameters validParams<ContactLineSearchBase>();
 
 /**
  * This class implements a custom line search for use with
@@ -36,11 +39,7 @@ class FEProblem;
 class ContactLineSearchBase : public LineSearch
 {
 public:
-  ContactLineSearchBase(FEProblem & fe_problem,
-                        MooseApp & app,
-                        size_t allowed_lambda_cuts,
-                        Real contact_ltol,
-                        bool affect_ltol);
+  ContactLineSearchBase(const InputParameters & parameters);
 
   /**
    * Method for printing the contact information
@@ -57,9 +56,6 @@ public:
    */
   virtual void reset();
 
-  static std::shared_ptr<ContactLineSearchBase> build(const InputParameters & parameters,
-                                                      FEProblem & fe_problem);
-
 protected:
   /// The current contact set
   std::set<dof_id_type> _current_contact_state;
@@ -75,7 +71,7 @@ protected:
   Real _contact_lambda;
 
   /// How many times the linsearch is allowed to cut lambda
-  size_t _allowed_lambda_cuts;
+  unsigned _allowed_lambda_cuts;
 
   /// What the linear tolerance should be while the contact state is changing
   Real _contact_ltol;
