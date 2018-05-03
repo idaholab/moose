@@ -301,14 +301,14 @@ DisplacedProblem::hasVariable(const std::string & var_name) const
     return false;
 }
 
-MooseVariableFE &
+MooseVariableFEBase &
 DisplacedProblem::getVariable(THREAD_ID tid,
                               const std::string & var_name,
                               Moose::VarKindType expected_var_type,
                               Moose::VarFieldType expected_var_field_type)
 {
   // Eventual return value
-  MooseVariableFE * var = nullptr;
+  MooseVariableFEBase * var = nullptr;
 
   // First check that the variable is found on the expected system.
   if (expected_var_type == Moose::VarKindType::VAR_ANY)

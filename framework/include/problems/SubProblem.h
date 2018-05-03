@@ -160,7 +160,7 @@ public:
    * in question is not in the expected System or of the expected
    * type.
    */
-  virtual MooseVariableFE &
+  virtual MooseVariableFEBase &
   getVariable(THREAD_ID tid,
               const std::string & var_name,
               Moose::VarKindType expected_var_type = Moose::VarKindType::VAR_ANY,
