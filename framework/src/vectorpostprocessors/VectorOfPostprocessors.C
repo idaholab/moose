@@ -23,9 +23,6 @@ validParams<VectorOfPostprocessors>()
   params.addClassDescription("Outputs the values of an arbitrary user-specified set of "
                              "postprocessors as a vector in the order specified by the user");
 
-  // This VPP builds up the full history of PPs
-  params.set<bool>("contains_complete_history") = true;
-
   // The value from this VPP is naturally already on every processor
   // TODO: Make this not the case!  See #11415
   params.set<bool>("_is_broadcast") = true;
