@@ -1,0 +1,19 @@
+[Tests]
+  [./center_crack]
+    type = 'Exodiff'
+    input = 'center_crack.i'
+    cli_args = '--mesh-only'
+    exodiff = 'center_crack_in.e'
+    recover = false
+    map = false
+  [../]
+
+  [./double_edged_cracks]
+    type = 'Exodiff'
+    input = 'double_edged_cracks.i'
+    cli_args = '--mesh-only'
+    exodiff = 'double_edged_cracks_in.e'
+    recover = false
+    map = false
+  [../]
+[]

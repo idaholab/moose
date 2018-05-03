@@ -1,0 +1,8 @@
+[Tests]
+  [./nodal_stress_strain_aux]
+    type = 'Exodiff'
+    input = 'nodal_stress_strain_aux.i'
+    exodiff = 'nodal_stress_strain_aux.e'
+    map = false
+  [../]
+[]

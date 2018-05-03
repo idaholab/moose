@@ -11,6 +11,7 @@ application.
 - [Level Set](modules/level_set/index.md)
 - [Misc](modules/misc/index.md)
 - [Navier-Stokes](modules/navier_stokes/index.md)
+- [Peridynamics](modules/peridynamics/index.md)
 - [Phase Field](modules/phase_field/index.md)
 - [Porous Flow](modules/porous_flow/index.md)
 - [Reconstructed Discontinous Galerkin](modules/rdg/index.md)

@@ -1,0 +1,38 @@
+[Tests]
+  [./generalized_plane_strain_ordinary_state]
+    type = 'Exodiff'
+    input = 'generalized_plane_strain_ordinary_state.i'
+    exodiff = 'generalized_plane_strain_ordinary_state.e'
+    abs_zero = 1.5e-10
+    map = false
+  [../]
+
+  [./generalized_plane_strain_ordinary_state_squares]
+    type = 'Exodiff'
+    input = 'generalized_plane_strain_ordinary_state_squares.i'
+    exodiff = 'generalized_plane_strain_ordinary_state_squares.e'
+    map = false
+  [../]
+
+  [./out_of_plane_pressure_ordinary_state]
+    type = 'Exodiff'
+    input = 'out_of_plane_pressure_ordinary_state.i'
+    exodiff = 'out_of_plane_pressure_ordinary_state.e'
+    map = false
+  [../]
+
+  [./plane_strain_prescribed_ordinary_state]
+    type = 'Exodiff'
+    input = 'plane_strain_prescribed_ordinary_state.i'
+    exodiff = 'plane_strain_prescribed_ordinary_state.e'
+    map = false
+  [../]
+
+  [./generalized_plane_strain_non_ordinary_state]
+    type = 'Exodiff'
+    input = 'generalized_plane_strain_non_ordinary_state.i'
+    exodiff = 'generalized_plane_strain_non_ordinary_state.e'
+    abs_zero = 1.5e-10
+    map = false
+  [../]
+[]

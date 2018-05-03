@@ -1,0 +1,92 @@
+[Tests]
+  [./bond_heat_conduction]
+    type = 'PetscJacobianTester'
+    input = '2d_bond_heat_conduction.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+  [../]
+  [./bond_mechanics]
+    type = 'PetscJacobianTester'
+    input = '2d_bond.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+  [../]
+  [./bond_thermomechanics]
+    type = 'PetscJacobianTester'
+    input = '2d_bond_coupled.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+  [../]
+  [./ordinary_state_mechanics]
+    type = 'PetscJacobianTester'
+    input = '2d_ordinary_state.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+  [../]
+  [./ordinary_state_thermomechanics]
+    type = 'PetscJacobianTester'
+    input = '2d_ordinary_state_coupled.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+  [../]
+  [./force_stabilized_non_ordinary_state_mechanics]
+    type = 'PetscJacobianTester'
+    input = '2d_force_stabilized_non_ordinary_state.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+  [../]
+  [./force_stabilized_non_ordinary_state_thermomechanics]
+    type = 'PetscJacobianTester'
+    input = '2d_force_stabilized_non_ordinary_state_coupled.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+  [../]
+  [./2d_self_stabilized_non_ordinary_state_mechanics]
+    type = 'PetscJacobianTester'
+    input = '2d_self_stabilized_non_ordinary_state.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+  [../]
+  [./2d_self_stabilized_non_ordinary_state_thermomechanics]
+    type = 'PetscJacobianTester'
+    input = '2d_self_stabilized_non_ordinary_state_coupled.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+  [../]
+  [./3d_self_stabilized_non_ordinary_state_mechanics]
+    type = 'PetscJacobianTester'
+    input = '3d_self_stabilized_non_ordinary_state.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+  [../]
+  [./ordinary_state_gps]
+    type = 'PetscJacobianTester'
+    input = 'generalized_plane_strain_ordinary_state.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+  [../]
+  [./ordinary_state_thermomechanics_gps]
+    type = 'PetscJacobianTester'
+    input = 'generalized_plane_strain_ordinary_state_coupled.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+  [../]
+  [./non_ordinary_state_gps]
+    type = 'PetscJacobianTester'
+    input = 'generalized_plane_strain_non_ordinary_state.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+  [../]
+  [./non_ordinary_state_thermomechanics_gps]
+    type = 'PetscJacobianTester'
+    input = 'generalized_plane_strain_non_ordinary_state_coupled.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+  [../]
+  [./weak_plane_stress_snospd_coupled]
+    type = 'PetscJacobianTester'
+    input = 'weak_plane_stress_snospd_coupled.i'
+    ratio_tol = 1E-7
+    difference_tol = 1E10
+  [../]
+[]
