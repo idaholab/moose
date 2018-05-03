@@ -37,6 +37,9 @@
 #ifdef NAVIER_STOKES_ENABLED
 #include "NavierStokesApp.h"
 #endif
+#ifdef PERIDYNAMICS_ENABLED
+#include "PeridynamicsApp.h"
+#endif
 #ifdef PHASE_FIELD_ENABLED
 #include "PhaseFieldApp.h"
 #endif
@@ -136,6 +139,10 @@ ModulesApp::registerObjects(Factory & factory)
   NavierStokesApp::registerObjects(factory);
 #endif
 
+#ifdef PERIDYNAMICS_ENABLED
+  PeridynamicsApp::registerObjects(factory);
+#endif
+
 #ifdef PHASE_FIELD_ENABLED
   PhaseFieldApp::registerObjects(factory);
 #endif
@@ -207,6 +214,10 @@ ModulesApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
   NavierStokesApp::associateSyntax(syntax, action_factory);
 #endif
 
+#ifdef PERIDYNAMICS_ENABLED
+  PeridynamicsApp::associateSyntax(syntax, action_factory);
+#endif
+
 #ifdef PHASE_FIELD_ENABLED
   PhaseFieldApp::associateSyntax(syntax, action_factory);
 #endif
@@ -272,6 +283,10 @@ ModulesApp::registerExecFlags(Factory & factory)
 
 #ifdef NAVIER_STOKES_ENABLED
   NavierStokesApp::registerExecFlags(factory);
+#endif
+
+#ifdef PERIDYNAMICS_ENABLED
+  PeridynamicsApp::registerExecFlags(factory);
 #endif
 
 #ifdef PHASE_FIELD_ENABLED

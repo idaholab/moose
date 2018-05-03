@@ -1,0 +1,8 @@
+[Tests]
+  [./2d_steady_state]
+    type = 'Exodiff'
+    input = '2d_steady_state.i'
+    exodiff = '2d_steady_state.e'
+    map = false
+  [../]
+[]

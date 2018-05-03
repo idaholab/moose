@@ -1,0 +1,68 @@
+//* This file is part of the MOOSE framework
+//* https://www.mooseframework.org
+//*
+//* All rights reserved, see COPYRIGHT for full restrictions
+//* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+//*
+//* Licensed under LGPL 2.1, please see LICENSE for details
+//* https://www.gnu.org/licenses/lgpl-2.1.html
+
+#include "GeneralizedPlaneStrainUserObjectOSPD.h"
+#include "RankFourTensor.h"
+#include "Function.h"
+
+registerMooseObject("PeridynamicsApp", GeneralizedPlaneStrainUserObjectOSPD);
+
+template <>
+InputParameters
+validParams<GeneralizedPlaneStrainUserObjectOSPD>()
+{
+  InputParameters params = validParams<GeneralizedPlaneStrainUserObjectBasePD>();
+  params.addClassDescription("Class for calculating the scalar residual and diagonal Jacobian "
+                             "entry of generalized plane strain in OSPD formulation");
+  params.addRequiredParam<AuxVariableName>(
+      "out_of_plane_stress_variable",
+      "Auxiliary variable name for out-of-plane stress in GPS simulation");
+
+  return params;
+}
+
+GeneralizedPlaneStrainUserObjectOSPD::GeneralizedPlaneStrainUserObjectOSPD(
+    const InputParameters & parameters)
+  : GeneralizedPlaneStrainUserObjectBasePD(parameters),
+    _out_of_plane_stress_var(
+        _subproblem.getVariable(_tid, getParam<AuxVariableName>("out_of_plane_stress_variable")))
+{
+}
+
+void
+GeneralizedPlaneStrainUserObjectOSPD::execute()
+{
+  // dof_id_type for node i and j
+  dof_id_type node_i = _current_elem->get_node(0)->id();
+  dof_id_type node_j = _current_elem->get_node(1)->id();
+
+  // coordinates for node i and j
+  Point coord_i = _pdmesh.coord(node_i);
+  Point coord_j = _pdmesh.coord(node_j);
+
+  // nodal area for node i and j
+  Real nv_i = _pdmesh.volume(node_i);
+  Real nv_j = _pdmesh.volume(node_j);
+
+  // number of neighbors for node i and j, used to avoid repeated accounting nodal stress in
+  // element-wise loop
+  unsigned int nn_i = _pdmesh.neighbors(node_i).size();
+  unsigned int nn_j = _pdmesh.neighbors(node_j).size();
+
+  // residual
+  _residual += (_out_of_plane_stress_var.getNodalValue(*_current_elem->get_node(0)) -
+                _pressure.value(_t, coord_i) * _factor) *
+               nv_i / nn_i;
+  _residual += (_out_of_plane_stress_var.getNodalValue(*_current_elem->get_node(1)) -
+                _pressure.value(_t, coord_j) * _factor) *
+               nv_j / nn_j;
+
+  // diagonal jacobian
+  _jacobian += _Cijkl[0](2, 2, 2, 2) * nv_i / nn_i + _Cijkl[0](2, 2, 2, 2) * nv_j / nn_j;
+}

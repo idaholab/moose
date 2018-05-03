@@ -24,6 +24,7 @@ ifeq ($(ALL_MODULES),yes)
         LEVEL_SET                   := yes
         MISC                        := yes
         NAVIER_STOKES               := yes
+        PERIDYNAMICS                := yes
         PHASE_FIELD                 := yes
         POROUS_FLOW                 := yes
         RDG                         := yes
@@ -40,6 +41,10 @@ endif
 
 ifeq ($(SOLID_MECHANICS),yes)
         TENSOR_MECHANICS            := yes
+endif
+
+ifeq ($(PERIDYNAMICS),yes)
+        TENSOR_MECHANICS           := yes
 endif
 
 ifeq ($(POROUS_FLOW),yes)
@@ -60,7 +65,7 @@ ifeq ($(PHASE_FIELD),yes)
 endif
 
 # The master list of all moose modules
-MODULE_NAMES := "chemical_reactions contact fluid_properties functional_expansion_tools heat_conduction level_set misc navier_stokes phase_field porous_flow rdg richards solid_mechanics stochastic_tools tensor_mechanics xfem external_petsc_solver"
+MODULE_NAMES := "chemical_reactions contact fluid_properties functional_expansion_tools heat_conduction level_set misc navier_stokes peridynamics phase_field porous_flow rdg richards solid_mechanics stochastic_tools tensor_mechanics xfem"
 
 ################################################################################
 ########################## MODULE REGISTRATION #################################
@@ -137,6 +142,17 @@ ifeq ($(TENSOR_MECHANICS),yes)
   APPLICATION_DIR    := $(MOOSE_DIR)/modules/tensor_mechanics
   APPLICATION_NAME   := tensor_mechanics
   SUFFIX             := tm
+  include $(FRAMEWORK_DIR)/app.mk
+endif
+
+ifeq ($(PERIDYNAMICS),yes)
+  APPLICATION_DIR    := $(MOOSE_DIR)/modules/peridynamics
+  APPLICATION_NAME   := peridynamics
+
+  # Dependency on tensor mechanics
+  DEPEND_MODULES     := tensor_mechanics
+
+  SUFFIX             := pd
   include $(FRAMEWORK_DIR)/app.mk
 endif
 
