@@ -61,7 +61,10 @@ AuxKernel::AuxKernel(const InputParameters & parameters)
                                  parameters.getCheckedPointerParam<AuxiliarySystem *>("_aux_sys")
                                      ->getVariable(parameters.get<THREAD_ID>("_tid"),
                                                    parameters.get<AuxVariableName>("variable"))
-                                     .isNodal()),
+                                     .isNodal(),
+                                 "variable",
+                                 Moose::VarKindType::VAR_AUXILIARY,
+                                 Moose::VarFieldType::VAR_FIELD_STANDARD),
     BlockRestrictable(this),
     BoundaryRestrictable(this, mooseVariable()->isNodal()),
     SetupInterface(this),

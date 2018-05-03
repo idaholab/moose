@@ -8,29 +8,13 @@
 [Variables]
   [./u]
     order = FIRST
-    family = LAGRANGE
-  [../]
-[]
-
-[AuxVariables]
-  [./v]
+    family = LAGRANGE_VEC
   [../]
 []
 
 [Kernels]
   [./diff]
     type = Diffusion
-    variable = u
-  [../]
-  [./rea]
-    type = Reaction
-    variable = u
-  [../]
-[]
-
-[ScalarKernels]
-  [./nope]
-    type = ODETimeDerivative
     variable = u
   [../]
 []
@@ -52,7 +36,7 @@
 []
 
 [Executioner]
-  type = Transient
+  type = Steady
   solve_type = 'NEWTON'
 []
 

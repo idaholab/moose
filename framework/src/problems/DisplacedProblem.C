@@ -302,14 +302,13 @@ DisplacedProblem::hasVariable(const std::string & var_name) const
 }
 
 MooseVariableFEBase &
-DisplacedProblem::getVariable(THREAD_ID tid, const std::string & var_name)
+DisplacedProblem::getVariable(THREAD_ID tid,
+                              const std::string & var_name,
+                              Moose::VarKindType expected_var_type,
+                              Moose::VarFieldType expected_var_field_type)
 {
-  if (_displaced_nl.hasVariable(var_name))
-    return _displaced_nl.getVariable(tid, var_name);
-  else if (!_displaced_aux.hasVariable(var_name))
-    mooseError("No variable with name '" + var_name + "'");
-
-  return _displaced_aux.getVariable(tid, var_name);
+  return getVariableHelper(
+      tid, var_name, expected_var_type, expected_var_field_type, _displaced_nl, _displaced_aux);
 }
 
 MooseVariable &

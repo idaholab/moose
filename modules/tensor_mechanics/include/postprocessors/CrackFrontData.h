@@ -43,6 +43,7 @@ protected:
   MooseMesh & _mesh;
   std::string _var_name;
   const Real _scale_factor;
+  MooseVariableFEBase & _field_var;
 };
 
 #endif // CRACKFRONTDATA_H

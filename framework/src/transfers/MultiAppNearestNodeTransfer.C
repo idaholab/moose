@@ -292,7 +292,10 @@ MultiAppNearestNodeTransfer::execute()
              i_local_from++)
         {
           MooseVariableFEBase & from_var =
-              _from_problems[i_local_from]->getVariable(0, _from_var_name);
+              _from_problems[i_local_from]->getVariable(0,
+                                                        _from_var_name,
+                                                        Moose::VarKindType::VAR_ANY,
+                                                        Moose::VarFieldType::VAR_FIELD_STANDARD);
           System & from_sys = from_var.sys().system();
           unsigned int from_sys_num = from_sys.number();
           unsigned int from_var_num = from_sys.variable_number(from_var.name());
@@ -340,8 +343,11 @@ MultiAppNearestNodeTransfer::execute()
 
       for (unsigned int qp = 0; qp < outgoing_evals.size(); qp++)
       {
-        MooseVariableFEBase & from_var =
-            _from_problems[_cached_froms[i_proc][qp]]->getVariable(0, _from_var_name);
+        MooseVariableFEBase & from_var = _from_problems[_cached_froms[i_proc][qp]]->getVariable(
+            0,
+            _from_var_name,
+            Moose::VarKindType::VAR_ANY,
+            Moose::VarFieldType::VAR_FIELD_STANDARD);
         System & from_sys = from_var.sys().system();
         dof_id_type from_dof = _cached_dof_ids[i_proc][qp];
         // outgoing_evals[qp] = (*from_sys.solution)(_cached_dof_ids[i_proc][qp]);

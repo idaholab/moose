@@ -83,7 +83,8 @@ MultiAppInterpolationTransfer::execute()
     case TO_MULTIAPP:
     {
       FEProblemBase & from_problem = _multi_app->problemBase();
-      MooseVariableFEBase & from_var = from_problem.getVariable(0, _from_var_name);
+      MooseVariableFEBase & from_var = from_problem.getVariable(
+          0, _from_var_name, Moose::VarKindType::VAR_ANY, Moose::VarFieldType::VAR_FIELD_STANDARD);
 
       MeshBase * from_mesh = NULL;
 
@@ -259,7 +260,8 @@ MultiAppInterpolationTransfer::execute()
     case FROM_MULTIAPP:
     {
       FEProblemBase & to_problem = _multi_app->problemBase();
-      MooseVariableFEBase & to_var = to_problem.getVariable(0, _to_var_name);
+      MooseVariableFEBase & to_var = to_problem.getVariable(
+          0, _to_var_name, Moose::VarKindType::VAR_ANY, Moose::VarFieldType::VAR_FIELD_STANDARD);
       SystemBase & to_system_base = to_var.sys();
 
       System & to_sys = to_system_base.system();
@@ -317,7 +319,11 @@ MultiAppInterpolationTransfer::execute()
         Moose::ScopedCommSwapper swapper(_multi_app->comm());
 
         FEProblemBase & from_problem = _multi_app->appProblemBase(i);
-        MooseVariableFEBase & from_var = from_problem.getVariable(0, _from_var_name);
+        MooseVariableFEBase & from_var =
+            from_problem.getVariable(0,
+                                     _from_var_name,
+                                     Moose::VarKindType::VAR_ANY,
+                                     Moose::VarFieldType::VAR_FIELD_STANDARD);
         SystemBase & from_system_base = from_var.sys();
 
         System & from_sys = from_system_base.system();

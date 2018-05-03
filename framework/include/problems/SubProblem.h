@@ -28,6 +28,7 @@ class MooseVariableFE;
 typedef MooseVariableFE<Real> MooseVariable;
 typedef MooseVariableFE<RealVectorValue> VectorMooseVariable;
 class RestartableDataValue;
+class SystemBase;
 
 // libMesh forward declarations
 namespace libMesh
@@ -151,8 +152,20 @@ public:
   // Variables /////
   virtual bool hasVariable(const std::string & var_name) const = 0;
 
-  /// Returns the variable reference for requested variable which may be in any system
-  virtual MooseVariableFEBase & getVariable(THREAD_ID tid, const std::string & var_name) = 0;
+  /**
+   * Returns the variable reference for requested variable which must
+   * be of the expected_var_type (Nonlinear vs. Auxiliary) and
+   * expected_var_field_type (standard, scalar, vector). The default
+   * values of VAR_ANY and VAR_FIELD_ANY should be used when "any"
+   * type of variable is acceptable.  Throws an error if the variable
+   * in question is not in the expected System or of the expected
+   * type.
+   */
+  virtual MooseVariableFEBase &
+  getVariable(THREAD_ID tid,
+              const std::string & var_name,
+              Moose::VarKindType expected_var_type = Moose::VarKindType::VAR_ANY,
+              Moose::VarFieldType expected_var_field_type = Moose::VarFieldType::VAR_FIELD_ANY) = 0;
 
   /// Returns the variable reference for requested MooseVariable which may be in any system
   virtual MooseVariable & getStandardVariable(THREAD_ID tid, const std::string & var_name) = 0;
@@ -490,6 +503,17 @@ public:
   bool & computingNonlinearResid() { return _computing_nonlinear_residual; }
 
 protected:
+  /**
+   * Helper function called by getVariable that handles the logic for
+   * checking whether Variables of the requested type are available.
+   */
+  MooseVariableFEBase & getVariableHelper(THREAD_ID tid,
+                                          const std::string & var_name,
+                                          Moose::VarKindType expected_var_type,
+                                          Moose::VarFieldType expected_var_field_type,
+                                          SystemBase & nl,
+                                          SystemBase & aux);
+
   /// The currently declared tags
   std::map<TagName, TagID> _vector_tag_name_to_tag_id;
 

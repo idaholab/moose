@@ -302,7 +302,8 @@ MooseObjectWarehouseBase<T>::addObject(std::shared_ptr<T> object,
         // interface level...
         variable_name = parameters.getVecMooseType("variable")[0];
 
-      blk->checkVariable(problem.getVariable(tid, variable_name));
+      blk->checkVariable(problem.getVariable(
+          tid, variable_name, Moose::VarKindType::VAR_ANY, Moose::VarFieldType::VAR_FIELD_ANY));
     }
   }
 }

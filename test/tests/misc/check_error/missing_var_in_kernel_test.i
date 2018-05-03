@@ -1,8 +1,5 @@
 [Mesh]
-  type = GeneratedMesh
-  dim = 2
-  nx = 2
-  ny = 2
+  file = square.e
 []
 
 [Variables]
@@ -12,26 +9,10 @@
   [../]
 []
 
-[AuxVariables]
-  [./v]
-  [../]
-[]
-
 [Kernels]
+  # Test error message for missing variable param.
   [./diff]
     type = Diffusion
-    variable = u
-  [../]
-  [./rea]
-    type = Reaction
-    variable = u
-  [../]
-[]
-
-[ScalarKernels]
-  [./nope]
-    type = ODETimeDerivative
-    variable = u
   [../]
 []
 
@@ -52,8 +33,8 @@
 []
 
 [Executioner]
-  type = Transient
-  solve_type = 'NEWTON'
+  type = Steady
+  solve_type = 'PJFNK'
 []
 
 [Outputs]

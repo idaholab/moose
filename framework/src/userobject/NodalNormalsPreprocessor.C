@@ -112,16 +112,42 @@ NodalNormalsPreprocessor::execute()
           (!_has_corners || !boundary_info.has_boundary_id(node, _corner_boundary_id)))
       {
         // Perform the caluation of the normal
-        if (node->n_dofs(_aux.number(), _fe_problem.getVariable(_tid, "nodal_normal_x").number()) >
-            0)
+        if (node->n_dofs(_aux.number(),
+                         _fe_problem
+                             .getVariable(_tid,
+                                          "nodal_normal_x",
+                                          Moose::VarKindType::VAR_AUXILIARY,
+                                          Moose::VarFieldType::VAR_FIELD_STANDARD)
+                             .number()) > 0)
         {
           // but it is not a corner node, they will be treated differently later on
-          dof_id_type dof_x = node->dof_number(
-              _aux.number(), _fe_problem.getVariable(_tid, "nodal_normal_x").number(), 0);
-          dof_id_type dof_y = node->dof_number(
-              _aux.number(), _fe_problem.getVariable(_tid, "nodal_normal_y").number(), 0);
-          dof_id_type dof_z = node->dof_number(
-              _aux.number(), _fe_problem.getVariable(_tid, "nodal_normal_z").number(), 0);
+          dof_id_type dof_x =
+              node->dof_number(_aux.number(),
+                               _fe_problem
+                                   .getVariable(_tid,
+                                                "nodal_normal_x",
+                                                Moose::VarKindType::VAR_AUXILIARY,
+                                                Moose::VarFieldType::VAR_FIELD_STANDARD)
+                                   .number(),
+                               0);
+          dof_id_type dof_y =
+              node->dof_number(_aux.number(),
+                               _fe_problem
+                                   .getVariable(_tid,
+                                                "nodal_normal_y",
+                                                Moose::VarKindType::VAR_AUXILIARY,
+                                                Moose::VarFieldType::VAR_FIELD_STANDARD)
+                                   .number(),
+                               0);
+          dof_id_type dof_z =
+              node->dof_number(_aux.number(),
+                               _fe_problem
+                                   .getVariable(_tid,
+                                                "nodal_normal_z",
+                                                Moose::VarKindType::VAR_AUXILIARY,
+                                                Moose::VarFieldType::VAR_FIELD_STANDARD)
+                                   .number(),
+                               0);
 
           for (unsigned int qp = 0; qp < _qrule->n_points(); qp++)
           {

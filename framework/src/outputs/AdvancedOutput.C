@@ -382,7 +382,8 @@ AdvancedOutput::initAvailableLists()
   {
     if (_problem_ptr->hasVariable(var_name))
     {
-      MooseVariableFEBase & var = _problem_ptr->getVariable(0, var_name);
+      MooseVariableFEBase & var = _problem_ptr->getVariable(
+          0, var_name, Moose::VarKindType::VAR_ANY, Moose::VarFieldType::VAR_FIELD_ANY);
       const FEType type = var.feType();
       if (type.order == CONSTANT)
         _execute_data["elemental"].available.insert(var_name);
@@ -452,7 +453,8 @@ AdvancedOutput::initShowHideLists(const std::vector<VariableName> & show,
   {
     if (_problem_ptr->hasVariable(var_name))
     {
-      MooseVariableFEBase & var = _problem_ptr->getVariable(0, var_name);
+      MooseVariableFEBase & var = _problem_ptr->getVariable(
+          0, var_name, Moose::VarKindType::VAR_ANY, Moose::VarFieldType::VAR_FIELD_ANY);
       const FEType type = var.feType();
       if (type.order == CONSTANT)
         _execute_data["elemental"].show.insert(var_name);
@@ -493,7 +495,8 @@ AdvancedOutput::initShowHideLists(const std::vector<VariableName> & show,
   {
     if (_problem_ptr->hasVariable(var_name))
     {
-      MooseVariableFEBase & var = _problem_ptr->getVariable(0, var_name);
+      MooseVariableFEBase & var = _problem_ptr->getVariable(
+          0, var_name, Moose::VarKindType::VAR_ANY, Moose::VarFieldType::VAR_FIELD_ANY);
       const FEType type = var.feType();
       if (type.order == CONSTANT)
         _execute_data["elemental"].hide.insert(var_name);

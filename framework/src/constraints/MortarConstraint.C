@@ -32,7 +32,11 @@ validParams<MortarConstraint>()
 MortarConstraint::MortarConstraint(const InputParameters & parameters)
   : Constraint(parameters),
     CoupleableMooseVariableDependencyIntermediateInterface(this, true),
-    MooseVariableInterface<Real>(this, true),
+    MooseVariableInterface<Real>(this,
+                                 true,
+                                 "variable",
+                                 Moose::VarKindType::VAR_NONLINEAR,
+                                 Moose::VarFieldType::VAR_FIELD_STANDARD),
     _fe_problem(*getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")),
     _dim(_mesh.dimension()),
 

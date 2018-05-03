@@ -115,6 +115,12 @@ MooseVariableScalar::isNodal() const
   return false;
 }
 
+bool
+MooseVariableScalar::isVector() const
+{
+  return false;
+}
+
 void
 MooseVariableScalar::setValue(unsigned int i, Number value)
 {

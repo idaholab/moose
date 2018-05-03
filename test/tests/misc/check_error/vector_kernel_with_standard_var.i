@@ -12,25 +12,9 @@
   [../]
 []
 
-[AuxVariables]
-  [./v]
-  [../]
-[]
-
 [Kernels]
   [./diff]
-    type = Diffusion
-    variable = u
-  [../]
-  [./rea]
-    type = Reaction
-    variable = u
-  [../]
-[]
-
-[ScalarKernels]
-  [./nope]
-    type = ODETimeDerivative
+    type = VectorDiffusion
     variable = u
   [../]
 []
@@ -52,7 +36,7 @@
 []
 
 [Executioner]
-  type = Transient
+  type = Steady
   solve_type = 'NEWTON'
 []
 

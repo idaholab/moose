@@ -15,6 +15,7 @@
 #include "MooseApp.h"
 #include "MooseVariableFE.h"
 #include "MooseArray.h"
+#include "SystemBase.h"
 
 template <>
 InputParameters
@@ -528,4 +529,64 @@ getAnyID()
 {
   return Moose::ANY_BOUNDARY_ID;
 }
+}
+
+MooseVariableFEBase &
+SubProblem::getVariableHelper(THREAD_ID tid,
+                              const std::string & var_name,
+                              Moose::VarKindType expected_var_type,
+                              Moose::VarFieldType expected_var_field_type,
+                              SystemBase & nl,
+                              SystemBase & aux)
+{
+  // Eventual return value
+  MooseVariableFEBase * var = nullptr;
+
+  // First check that the variable is found on the expected system.
+  if (expected_var_type == Moose::VarKindType::VAR_ANY)
+  {
+    if (nl.hasVariable(var_name))
+      var = &(nl.getVariable(tid, var_name));
+    else if (aux.hasVariable(var_name))
+      var = &(aux.getVariable(tid, var_name));
+    else
+      mooseError("Unknown variable " + var_name);
+  }
+  else if (expected_var_type == Moose::VarKindType::VAR_NONLINEAR && nl.hasVariable(var_name))
+    var = &(nl.getVariable(tid, var_name));
+  else if (expected_var_type == Moose::VarKindType::VAR_AUXILIARY && aux.hasVariable(var_name))
+    var = &(aux.getVariable(tid, var_name));
+  else
+  {
+    std::string expected_var_type_string =
+        (expected_var_type == Moose::VarKindType::VAR_NONLINEAR ? "nonlinear" : "auxiliary");
+    mooseError("No ",
+               expected_var_type_string,
+               " variable named ",
+               var_name,
+               " found. "
+               "Did you specify an auxiliary variable when you meant to specify a nonlinear "
+               "variable (or vice-versa)?");
+  }
+
+  // Now make sure the var found has the expected field type.
+  bool var_is_vector = var->isVector();
+  if ((expected_var_field_type == Moose::VarFieldType::VAR_FIELD_ANY) ||
+      (var_is_vector && expected_var_field_type == Moose::VarFieldType::VAR_FIELD_VECTOR) ||
+      (!var_is_vector && expected_var_field_type == Moose::VarFieldType::VAR_FIELD_STANDARD))
+    return *var;
+  else
+  {
+    std::string expected_var_field_type_string =
+        (expected_var_field_type == Moose::VarFieldType::VAR_FIELD_STANDARD ? "standard"
+                                                                            : "vector");
+
+    mooseError("No ",
+               expected_var_field_type_string,
+               " variable named ",
+               var_name,
+               " found. "
+               "Did you specify a vector variable when you meant to specify a standard variable "
+               "(or vice-versa)?");
+  }
 }

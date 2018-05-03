@@ -50,7 +50,11 @@ ScalarCoupleable::ScalarCoupleable(const MooseObject * moose_object)
         }
         else if (problem.hasVariable(coupled_var_name))
         {
-          MooseVariableFEBase * moose_var = &problem.getVariable(_sc_tid, coupled_var_name);
+          MooseVariableFEBase * moose_var =
+              &problem.getVariable(_sc_tid,
+                                   coupled_var_name,
+                                   Moose::VarKindType::VAR_ANY,
+                                   Moose::VarFieldType::VAR_FIELD_ANY);
           _sc_coupled_vars[name].push_back(moose_var);
         }
         else

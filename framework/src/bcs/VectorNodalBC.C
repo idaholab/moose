@@ -23,7 +23,11 @@ validParams<VectorNodalBC>()
 
 VectorNodalBC::VectorNodalBC(const InputParameters & parameters)
   : NodalBCBase(parameters),
-    MooseVariableInterface<RealVectorValue>(this, true),
+    MooseVariableInterface<RealVectorValue>(this,
+                                            true,
+                                            "variable",
+                                            Moose::VarKindType::VAR_NONLINEAR,
+                                            Moose::VarFieldType::VAR_FIELD_VECTOR),
     _var(*mooseVariable()),
     _current_node(_var.node()),
     _u(_var.nodalValue())

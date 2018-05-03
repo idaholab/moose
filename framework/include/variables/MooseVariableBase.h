@@ -102,6 +102,11 @@ public:
    */
   virtual bool isNodal() const = 0;
 
+  /**
+   * @returns true if this is a vector-valued element, false otherwise.
+   */
+  virtual bool isVector() const = 0;
+
 protected:
   /// variable number (from libMesh)
   unsigned int _var_num;
