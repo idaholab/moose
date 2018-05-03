@@ -1,0 +1,7 @@
+[Tests]
+  [./scalar_var]
+    type = 'Exodiff'
+    input = 'scalar_var.i'
+    exodiff = 'scalar_var_out.e'
+  [../]
+[]
