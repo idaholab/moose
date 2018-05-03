@@ -1320,48 +1320,51 @@ MooseApp::getMeshModifierNames() const
 void
 MooseApp::executeMeshModifiers()
 {
-  DependencyResolver<std::shared_ptr<MeshModifier>> resolver;
-
-  // Add all of the dependencies into the resolver and sort them
-  for (const auto & it : _mesh_modifiers)
+  if (!_mesh_modifiers.empty())
   {
-    // Make sure an item with no dependencies comes out too!
-    resolver.addItem(it.second);
+    DependencyResolver<std::shared_ptr<MeshModifier>> resolver;
 
-    std::vector<std::string> & modifiers = it.second->getDependencies();
-    for (const auto & depend_name : modifiers)
+    // Add all of the dependencies into the resolver and sort them
+    for (const auto & it : _mesh_modifiers)
     {
-      auto depend_it = _mesh_modifiers.find(depend_name);
+      // Make sure an item with no dependencies comes out too!
+      resolver.addItem(it.second);
 
-      if (depend_it == _mesh_modifiers.end())
-        mooseError("The MeshModifier \"",
-                   depend_name,
-                   "\" was not created, did you make a "
-                   "spelling mistake or forget to include it "
-                   "in your input file?");
+      std::vector<std::string> & modifiers = it.second->getDependencies();
+      for (const auto & depend_name : modifiers)
+      {
+        auto depend_it = _mesh_modifiers.find(depend_name);
 
-      resolver.insertDependency(it.second, depend_it->second);
+        if (depend_it == _mesh_modifiers.end())
+          mooseError("The MeshModifier \"",
+                     depend_name,
+                     "\" was not created, did you make a "
+                     "spelling mistake or forget to include it "
+                     "in your input file?");
+
+        resolver.insertDependency(it.second, depend_it->second);
+      }
     }
-  }
 
-  const auto & ordered_modifiers = resolver.getSortedValues();
+    const auto & ordered_modifiers = resolver.getSortedValues();
 
-  if (ordered_modifiers.size())
-  {
-    MooseMesh * mesh = _action_warehouse.mesh().get();
-    MooseMesh * displaced_mesh = _action_warehouse.displacedMesh().get();
+    if (ordered_modifiers.size())
+    {
+      MooseMesh * mesh = _action_warehouse.mesh().get();
+      MooseMesh * displaced_mesh = _action_warehouse.displacedMesh().get();
 
-    // Run the MeshModifiers in the proper order
-    for (const auto & modifier : ordered_modifiers)
-      modifier->modifyMesh(mesh, displaced_mesh);
+      // Run the MeshModifiers in the proper order
+      for (const auto & modifier : ordered_modifiers)
+        modifier->modifyMesh(mesh, displaced_mesh);
 
-    /**
-     * Set preparation flag after modifers are run. The final preparation
-     * will be handled by the SetupMeshComplete Action.
-     */
-    mesh->prepared(false);
-    if (displaced_mesh)
-      displaced_mesh->prepared(false);
+      /**
+       * Set preparation flag after modifers are run. The final preparation
+       * will be handled by the SetupMeshComplete Action.
+       */
+      mesh->prepared(false);
+      if (displaced_mesh)
+        displaced_mesh->prepared(false);
+    }
   }
 }
 
