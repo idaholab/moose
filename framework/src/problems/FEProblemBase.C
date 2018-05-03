@@ -209,6 +209,7 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
     _parallel_barrier_messaging(true),
     _current_execute_on_flag(EXEC_NONE),
     _control_warehouse(_app.getExecuteOnEnum(), /*threaded=*/false),
+    _line_search(nullptr),
     _error_on_jacobian_nonzero_reallocation(
         getParam<bool>("error_on_jacobian_nonzero_reallocation")),
     _ignore_zeros_in_jacobian(getParam<bool>("ignore_zeros_in_jacobian")),
@@ -216,8 +217,7 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
     _skip_additional_restart_data(getParam<bool>("skip_additional_restart_data")),
     _fail_next_linear_convergence_check(false),
     _started_initial_setup(false),
-    _has_internal_edge_residual_objects(false),
-    _line_search(nullptr)
+    _has_internal_edge_residual_objects(false)
 {
 
   _time = 0.0;
@@ -1601,15 +1601,6 @@ FEProblemBase::getFunction(const std::string & name, THREAD_ID tid)
   }
 
   return *(_functions.getActiveObject(name, tid));
-}
-
-void
-FEProblemBase::addLineSearch(const InputParameters & parameters)
-{
-  MooseEnum line_search = parameters.get<MooseEnum>("line_search");
-  Moose::LineSearchType enum_line_search = Moose::stringToEnum<Moose::LineSearchType>(line_search);
-  if (enum_line_search == Moose::LS_CONTACT)
-    _line_search = ContactLineSearchBase::build(parameters, *this);
 }
 
 void

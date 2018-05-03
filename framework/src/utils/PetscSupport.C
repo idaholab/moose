@@ -648,10 +648,17 @@ storePetscOptions(FEProblemBase & fe_problem, const InputParameters & params)
       fe_problem.solverParams()._line_search = enum_line_search;
       if (enum_line_search == LS_CONTACT)
       {
-        PetscNonlinearSolver<Real> & petsc_nonlinear_solver =
-            dynamic_cast<PetscNonlinearSolver<Real> &>(
-                *fe_problem.getNonlinearSystemBase().system().nonlinear_solver);
-        petsc_nonlinear_solver.linesearch_object =
+        NonlinearImplicitSystem * nl_system =
+            dynamic_cast<NonlinearImplicitSystem *>(&fe_problem.getNonlinearSystemBase().system());
+        if (!nl_system)
+          mooseError("You've requested a line search but you must be solving an EigenProblem. "
+                     "These two things are not consistent.");
+        PetscNonlinearSolver<Real> * petsc_nonlinear_solver =
+            dynamic_cast<PetscNonlinearSolver<Real> *>(nl_system->nonlinear_solver.get());
+        if (!petsc_nonlinear_solver)
+          mooseError("Currently the contact line search is only implemented through Petsc, so you "
+                     "must use Petsc as your non-linear solver.");
+        petsc_nonlinear_solver->linesearch_object =
             libmesh_make_unique<ComputeLineSearchObjectWrapper>(fe_problem);
       }
     }
@@ -961,15 +968,18 @@ void ComputeLineSearchObjectWrapper::linesearch(SNESLineSearch /*line_search_obj
   _fe_problem.linesearch();
 }
 
-ContactLineSearch::ContactLineSearch(FEProblemBase & fe_problem,
+ContactLineSearch::ContactLineSearch(FEProblem & fe_problem,
                                      MooseApp & app,
                                      size_t allowed_lambda_cuts,
                                      Real contact_ltol,
                                      bool affect_ltol)
-  : ContactLineSearchBase(fe_problem, app, allowed_lambda_cuts, contact_ltol, affect_ltol),
-    _solver(dynamic_cast<PetscNonlinearSolver<Real> &>(
-        *fe_problem.getNonlinearSystemBase().system().nonlinear_solver))
+  : ContactLineSearchBase(fe_problem, app, allowed_lambda_cuts, contact_ltol, affect_ltol)
 {
+  _solver =
+      dynamic_cast<PetscNonlinearSolver<Real> *>(fe_problem.getNonlinearSystem().nonlinearSolver());
+  if (!_solver)
+    mooseError(
+        "This line search operates only with Petsc, so Petsc must be your nonlinear solver.");
 }
 
 void
@@ -984,7 +994,7 @@ ContactLineSearch::linesearch()
   PetscReal ksp_rtol, ksp_abstol, ksp_dtol;
   PetscInt ksp_maxits;
   KSP ksp;
-  SNES snes = _solver.snes();
+  SNES snes = _solver->snes();
 
   ierr = SNESGETLINESEARCH(snes, &line_search);
   LIBMESH_CHKERR(ierr);

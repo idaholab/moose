@@ -50,3 +50,12 @@ FEProblem::setInputParametersFEProblem(InputParameters & parameters)
   // set _fe_problem
   parameters.set<FEProblem *>("_fe_problem") = this;
 }
+
+void
+FEProblem::addLineSearch(const InputParameters & parameters)
+{
+  MooseEnum line_search = parameters.get<MooseEnum>("line_search");
+  Moose::LineSearchType enum_line_search = Moose::stringToEnum<Moose::LineSearchType>(line_search);
+  if (enum_line_search == Moose::LS_CONTACT)
+    _line_search = ContactLineSearchBase::build(parameters, *this);
+}

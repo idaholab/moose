@@ -13,7 +13,7 @@
 #include "LineSearch.h"
 
 class InputParameters;
-class FEProblemBase;
+class FEProblem;
 
 /**
  * This class implements a custom line search for use with
@@ -36,7 +36,7 @@ class FEProblemBase;
 class ContactLineSearchBase : public LineSearch
 {
 public:
-  ContactLineSearchBase(FEProblemBase & fe_problem,
+  ContactLineSearchBase(FEProblem & fe_problem,
                         MooseApp & app,
                         size_t allowed_lambda_cuts,
                         Real contact_ltol,
@@ -50,7 +50,7 @@ public:
   /**
    * Unionize sets from different constraints
    */
-  void insert_set(const std::set<dof_id_type> & mech_set);
+  void insertSet(const std::set<dof_id_type> & mech_set);
 
   /**
    * Reset the line search data
@@ -58,7 +58,7 @@ public:
   virtual void reset();
 
   static std::shared_ptr<ContactLineSearchBase> build(const InputParameters & parameters,
-                                                      FEProblemBase & fe_problem);
+                                                      FEProblem & fe_problem);
 
 protected:
   /// The current contact set

@@ -15,22 +15,22 @@
 
 using namespace libMesh;
 
-class FEProblemBase;
+class FEProblem;
 
 class LineSearch : public ConsoleStreamInterface, public ParallelObject
 {
 public:
-  LineSearch(FEProblemBase & fe_problem, MooseApp & app);
+  LineSearch(FEProblem & fe_problem, MooseApp & app);
 
   /**
    * zeros the nonlinear iteration count
    */
-  void zero_its() { _nl_its = 0; }
+  void zeroIts() { _nl_its = 0; }
 
   /**
    * read-only reference to number of non-linear iterations
    */
-  const size_t & nl_its() const { return _nl_its; }
+  const size_t & nlIts() const { return _nl_its; }
 
   /**
    * The method that actually implements the line-search
@@ -39,7 +39,7 @@ public:
 
 protected:
   /// Reference to the finite element problem
-  FEProblemBase & _fe_problem;
+  FEProblem & _fe_problem;
 
   /// number of non-linear iterations
   size_t _nl_its;

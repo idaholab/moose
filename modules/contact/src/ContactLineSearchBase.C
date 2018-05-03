@@ -11,9 +11,9 @@
 #include "PetscSupport.h"
 #include "InputParameters.h"
 #include "MooseEnum.h"
-#include "FEProblemBase.h"
+#include "FEProblem.h"
 
-ContactLineSearchBase::ContactLineSearchBase(FEProblemBase & fe_problem,
+ContactLineSearchBase::ContactLineSearchBase(FEProblem & fe_problem,
                                              MooseApp & app,
                                              size_t allowed_lambda_cuts,
                                              Real contact_ltol,
@@ -27,7 +27,7 @@ ContactLineSearchBase::ContactLineSearchBase(FEProblemBase & fe_problem,
 }
 
 std::shared_ptr<ContactLineSearchBase>
-ContactLineSearchBase::build(const InputParameters & parameters, FEProblemBase & fe_problem)
+ContactLineSearchBase::build(const InputParameters & parameters, FEProblem & fe_problem)
 {
   bool affect_ltol = parameters.isParamValid("contact_line_search_ltol");
 
@@ -67,19 +67,13 @@ void
 ContactLineSearchBase::printContactInfo(const std::set<dof_id_type> & contact_set)
 {
   if (!contact_set.empty())
-  {
-    // _console << "Node ids in contact: ";
-    // for (auto & node_id : contact_set)
-    //   _console << node_id << " ";
-    // _console << "\n";
     _console << contact_set.size() << " nodes in contact\n";
-  }
   else
     _console << "No nodes in contact\n";
 }
 
 void
-ContactLineSearchBase::insert_set(const std::set<dof_id_type> & mech_set)
+ContactLineSearchBase::insertSet(const std::set<dof_id_type> & mech_set)
 {
   if (_current_contact_state.empty())
     _current_contact_state = mech_set;
@@ -92,5 +86,5 @@ void
 ContactLineSearchBase::reset()
 {
   _current_contact_state.clear();
-  zero_its();
+  zeroIts();
 }

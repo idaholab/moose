@@ -1808,7 +1808,7 @@ MechanicalContactConstraint::residualEnd()
                  << " nodes in contact.\n";
     }
     if (_contact_linesearch)
-      _contact_linesearch->insert_set(_current_contact_state);
+      _contact_linesearch->insertSet(_current_contact_state);
     _old_contact_state.swap(_current_contact_state);
     _current_contact_state.clear();
   }

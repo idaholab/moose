@@ -168,7 +168,7 @@ protected:
 class ContactLineSearch : public ContactLineSearchBase
 {
 public:
-  ContactLineSearch(FEProblemBase & fe_problem,
+  ContactLineSearch(FEProblem & fe_problem,
                     MooseApp & app,
                     size_t allowed_lambda_cuts,
                     Real contact_ltol,
@@ -177,7 +177,7 @@ public:
   virtual void linesearch() override;
 
 protected:
-  PetscNonlinearSolver<Real> & _solver;
+  PetscNonlinearSolver<Real> * _solver;
 };
 
 #if PETSC_VERSION_LESS_THAN(3, 4, 0)

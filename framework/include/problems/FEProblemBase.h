@@ -498,7 +498,10 @@ public:
   /**
    * add a MOOSE line search
    */
-  virtual void addLineSearch(const InputParameters & parameters);
+  virtual void addLineSearch(const InputParameters & /*parameters*/)
+  {
+    mooseError("Line search not implemented for this problem type yet.");
+  }
 
   /**
    * execute MOOSE line search
@@ -1638,6 +1641,8 @@ protected:
   Moose::PetscSupport::PetscOptions _petsc_options;
 #endif // LIBMESH_HAVE_PETSC
 
+  std::shared_ptr<LineSearch> _line_search;
+
 private:
   bool _error_on_jacobian_nonzero_reallocation;
   bool _ignore_zeros_in_jacobian;
@@ -1650,8 +1655,6 @@ private:
 
   /// Whether the problem has dgkernels or interface kernels
   bool _has_internal_edge_residual_objects;
-
-  std::shared_ptr<LineSearch> _line_search;
 
   friend class AuxiliarySystem;
   friend class NonlinearSystemBase;
