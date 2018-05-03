@@ -31,7 +31,6 @@ ComputeGlobalStrain::ComputeGlobalStrain(const InputParameters & parameters)
   : Material(parameters),
     _base_name(isParamValid("base_name") ? getParam<std::string>("base_name") + "_" : ""),
     _scalar_global_strain(coupledScalarValue("scalar_global_strain")),
-    _scalar_global_strain_order(coupledScalarOrder("scalar_global_strain")),
     _global_strain(declareProperty<RankTwoTensor>(_base_name + "global_strain"))
 {
 }
@@ -46,30 +45,7 @@ void
 ComputeGlobalStrain::computeProperties()
 {
   RankTwoTensor & strain = _global_strain[0];
-  switch (_scalar_global_strain_order)
-  {
-    case 1:
-      strain = RankTwoTensor(_scalar_global_strain[0], 0, 0, 0, 0, 0);
-      break;
-
-    case 3:
-      strain = RankTwoTensor(
-          _scalar_global_strain[0], _scalar_global_strain[1], 0, 0, 0, _scalar_global_strain[2]);
-      break;
-
-    case 6:
-      strain = RankTwoTensor(_scalar_global_strain[0],
-                             _scalar_global_strain[1],
-                             _scalar_global_strain[2],
-                             _scalar_global_strain[3],
-                             _scalar_global_strain[4],
-                             _scalar_global_strain[5]);
-      break;
-
-    default:
-      mooseError("ComputePerdiodicStrain is only compatible with FIRST, THIRD, and SIXTH "
-                 "order scalar variables.");
-  }
+  strain.fillFromScalarVariable(_scalar_global_strain);
 
   for (_qp = 0; _qp < _qrule->n_points(); ++_qp)
     _global_strain[_qp] = strain;

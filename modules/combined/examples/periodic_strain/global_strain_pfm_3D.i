@@ -1,18 +1,21 @@
 [Mesh]
   type = GeneratedMesh
-  dim = 2
-  nx = 50
-  ny = 50
+  dim = 3
+  nx = 20
+  ny = 20
+  nz = 20
   xmin = -0.5
   xmax = 0.5
   ymin = -0.5
   ymax = 0.5
+  zmin = -0.5
+  zmax = 0.5
 []
 
 [MeshModifiers]
   [./cnode]
     type = AddExtraNodeset
-    coord = '0.0 0.0'
+    coord = '0.0 0.0 0.0'
     new_boundary = 100
   [../]
 []
@@ -22,14 +25,16 @@
   [../]
   [./u_y]
   [../]
+  [./u_z]
+  [../]
   [./global_strain]
-    order = THIRD
+    order = SIXTH
     family = SCALAR
   [../]
   [./c]
     [./InitialCondition]
       type = FunctionIC
-      function = 'sin(2*x*pi)*sin(2*y*pi)*0.05+0.6'
+      function = 'sin(2*x*pi)*sin(2*y*pi)*sin(2*z*pi)*0.05+0.6'
     [../]
   [../]
   [./w]
@@ -44,6 +49,8 @@
   [./disp_x]
   [../]
   [./disp_y]
+  [../]
+  [./disp_z]
   [../]
   [./s00]
     order = CONSTANT
@@ -91,6 +98,12 @@
     variable = disp_y
     scalar_global_strain = global_strain
     component = 1
+  [../]
+  [./disp_z]
+    type = GlobalDisplacementAux
+    variable = disp_z
+    scalar_global_strain = global_strain
+    component = 2
   [../]
   [./local_free_energy]
     type = TotalFreeEnergy
@@ -160,7 +173,7 @@
 [GlobalParams]
   derivative_order = 2
   enable_jit = true
-  displacements = 'u_x u_y'
+  displacements = 'u_x u_y u_z'
   block = 0
 []
 
@@ -202,8 +215,8 @@
 [BCs]
   [./Periodic]
     [./all]
-      auto_direction = 'x y'
-      variable = 'c w u_x u_y'
+      auto_direction = 'x y z'
+      variable = 'c w u_x u_y u_z'
     [../]
   [../]
 
@@ -220,6 +233,12 @@
     variable = u_y
     value = 0
   [../]
+  [./centerfix_z]
+    type = PresetBC
+    boundary = 100
+    variable = u_z
+    value = 0
+  [../]
 []
 
 [Materials]
@@ -231,17 +250,17 @@
 
   [./shear1]
     type = GenericConstantRankTwoTensor
-    tensor_values = '0 0 0 0 0 0.5'
+    tensor_values = '0 0 0 0.5 0.5 0.5'
     tensor_name = shear1
   [../]
   [./shear2]
     type = GenericConstantRankTwoTensor
-    tensor_values = '0 0 0 0 0 -0.5'
+    tensor_values = '0 0 0 -0.5 -0.5 -0.5'
     tensor_name = shear2
   [../]
   [./expand3]
     type = GenericConstantRankTwoTensor
-    tensor_values = '1 1 0 0 0 0'
+    tensor_values = '1 1 1 0 0 0'
     tensor_name = expand3
   [../]
 

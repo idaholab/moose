@@ -7,4 +7,11 @@
     cli_args = 'Mesh/nx=2 Mesh/ny=2'
     check_input = True
   [../]
+  [./strain_3D]
+    type = RunApp
+    input = 'global_strain_pfm_3D.i'
+    # Checking input on smaller mesh
+    cli_args = 'Mesh/nx=2 Mesh/ny=2 Mesh/nz=2'
+    check_input = True
+  [../]
 []

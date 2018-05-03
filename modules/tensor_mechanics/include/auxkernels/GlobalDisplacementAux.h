@@ -27,11 +27,12 @@ public:
   virtual Real computeValue() override;
 
 protected:
-  std::string _base_name;
-
-  const MaterialProperty<RankTwoTensor> & _global_strain;
+  const VariableValue & _scalar_global_strain;
   const unsigned int _component;
 
-  RealVectorValue _global_disp;
+  bool _output_total_disp;
+
+  unsigned int _ndisp;
+  std::vector<const VariableValue *> _disp;
 };
 #endif // GLOBALDISPLACEMENTAUX_H

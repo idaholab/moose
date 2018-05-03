@@ -25,7 +25,7 @@ validParams<GlobalStrain>()
 {
   InputParameters params = validParams<ScalarKernel>();
   params.addClassDescription("Scalar Kernel to solve for the global strain");
-  params.addRequiredParam<UserObjectName>("global_strain",
+  params.addRequiredParam<UserObjectName>("global_strain_uo",
                                           "The name of the GlobalStrainUserObject");
 
   return params;
@@ -33,7 +33,7 @@ validParams<GlobalStrain>()
 
 GlobalStrain::GlobalStrain(const InputParameters & parameters)
   : ScalarKernel(parameters),
-    _pst(getUserObject<GlobalStrainUserObject>("global_strain")),
+    _pst(getUserObject<GlobalStrainUserObject>("global_strain_uo")),
     _pst_residual(_pst.getResidual()),
     _pst_jacobian(_pst.getJacobian()),
     _components(_var.order()),

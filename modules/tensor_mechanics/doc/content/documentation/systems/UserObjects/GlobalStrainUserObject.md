@@ -8,10 +8,11 @@
 
 `ScalarKernel` [GlobalStrain](/ScalarKernels/GlobalStrain.md) extracts the residual and jacobian values from this `UserObject`.
 
++Note:+ Currently, this approach only works for cases with periodicity in all the directions pertaining to the problem, e.g., both x, & y in 2D or x, y, & z in 3D.
 
 ## Example Input File Syntax
 
-!listing modules/tensor_mechanics/test/tests/global_strain/global_strain.i block=UserObjects/appl_stress
+!listing modules/tensor_mechanics/test/tests/global_strain/global_strain.i block=UserObjects/global_strain_uo
 
 !syntax parameters /UserObjects/GlobalStrainUserObject
 

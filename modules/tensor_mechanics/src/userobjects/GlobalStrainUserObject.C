@@ -57,9 +57,9 @@ GlobalStrainUserObject::execute()
   for (unsigned int _qp = 0; _qp < _qrule->n_points(); _qp++)
   {
     // residual, integral of stress components
-    _residual += _JxW[_qp] * _coord[_qp] * (_stress[_qp] + _applied_stress_tensor);
+    _residual += _JxW[_qp] * _coord[_qp] * (_stress[_qp] - _applied_stress_tensor);
 
-    // diagonal jacobian, integral of elsticity tensor components
+    // diagonal jacobian, integral of elasticity tensor components
     _jacobian += _JxW[_qp] * _coord[_qp] * _Cijkl[_qp];
   }
 }
@@ -68,30 +68,24 @@ void
 GlobalStrainUserObject::threadJoin(const UserObject & uo)
 {
   const GlobalStrainUserObject & pstuo = static_cast<const GlobalStrainUserObject &>(uo);
-
-  for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
-    for (unsigned int j = 0; j < LIBMESH_DIM; ++j)
-    {
-      _residual(i, j) += pstuo._residual(i, j);
-
-      for (unsigned int k = 0; k < LIBMESH_DIM; ++k)
-        for (unsigned int l = 0; l < LIBMESH_DIM; ++l)
-          _jacobian(i, j, k, l) += pstuo._jacobian(i, j, k, l);
-    }
+  _residual += pstuo._residual;
+  _jacobian += pstuo._jacobian;
 }
 
 void
 GlobalStrainUserObject::finalize()
 {
-  for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
-    for (unsigned int j = 0; j < LIBMESH_DIM; ++j)
-    {
-      gatherSum(_residual(i, j));
+  std::vector<Real> residual(9);
+  std::vector<Real> jacobian(81);
 
-      for (unsigned int k = 0; k < LIBMESH_DIM; ++k)
-        for (unsigned int l = 0; l < LIBMESH_DIM; ++l)
-          gatherSum(_jacobian(i, j, k, l));
-    }
+  std::copy(&_residual(0, 0), &_residual(0, 0) + 9, residual.begin());
+  std::copy(&_jacobian(0, 0, 0, 0), &_jacobian(0, 0, 0, 0) + 81, jacobian.begin());
+
+  gatherSum(residual);
+  gatherSum(jacobian);
+
+  std::copy(residual.begin(), residual.end(), &_residual(0, 0));
+  std::copy(jacobian.begin(), jacobian.end(), &_jacobian(0, 0, 0, 0));
 }
 
 const RankTwoTensor &

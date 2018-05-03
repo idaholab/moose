@@ -1,9 +1,9 @@
 [Mesh]
   type = GeneratedMesh
   dim = 3
-  nx = 1
-  ny = 1
-  nz = 1
+  nx = 2
+  ny = 2
+  nz = 2
 []
 
 [MeshModifiers]
@@ -28,29 +28,11 @@
 []
 
 [AuxVariables]
-  [./ug_x]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./ug_y]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./ug_z]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
   [./disp_x]
-    order = CONSTANT
-    family = MONOMIAL
   [../]
   [./disp_y]
-    order = CONSTANT
-    family = MONOMIAL
   [../]
   [./disp_z]
-    order = CONSTANT
-    family = MONOMIAL
   [../]
   [./s00]
     order = CONSTANT
@@ -71,34 +53,23 @@
 []
 
 [AuxKernels]
-  [./ug_x]
-    type = GlobalDisplacementAux
-    variable = ug_x
-  [../]
-  [./ug_y]
-    type = GlobalDisplacementAux
-    variable = ug_y
-    component = 1
-  [../]
-  [./ug_z]
-    type = GlobalDisplacementAux
-    variable = ug_z
-    component = 2
-  [../]
   [./disp_x]
-    type = TotalDisplacementAux
+    type = GlobalDisplacementAux
     variable = disp_x
-    displacement_variables = 'u_x ug_x'
+    scalar_global_strain = global_strain
+    component = 0
   [../]
   [./disp_y]
-    type = TotalDisplacementAux
+    type = GlobalDisplacementAux
     variable = disp_y
-    displacement_variables = 'u_y ug_y'
+    scalar_global_strain = global_strain
+    component = 1
   [../]
   [./disp_z]
-    type = TotalDisplacementAux
+    type = GlobalDisplacementAux
     variable = disp_z
-    displacement_variables = 'u_z ug_z'
+    scalar_global_strain = global_strain
+    component = 2
   [../]
   [./s00]
     type = RankTwoAux
@@ -144,7 +115,7 @@
   [./global_strain]
     type = GlobalStrain
     variable = global_strain
-    global_strain = appl_stress
+    global_strain_uo = global_strain_uo
   [../]
 []
 
@@ -198,10 +169,10 @@
 []
 
 [UserObjects]
-  [./appl_stress]
+  [./global_strain_uo]
     type = GlobalStrainUserObject
     applied_stress_tensor = '5e9 0 0 0 0 0'
-    execute_on = 'Initial Timestep_begin Linear'
+    execute_on = 'Initial Linear Nonlinear'
   [../]
 []
 
@@ -209,12 +180,12 @@
   [./l2err_e00]
     type = ElementL2Error
     variable = e00
-    function = -0.07142857 #strain_xx = C1111/sigma_xx
+    function = 0.07142857 #strain_xx = C1111/sigma_xx
   [../]
   [./l2err_e11]
     type = ElementL2Error
     variable = e11
-    function = 0.07142857*0.33 #strain_yy = -nu*strain_xx
+    function = -0.07142857*0.33 #strain_yy = -nu*strain_xx
   [../]
 []
 
@@ -240,16 +211,13 @@
 
   l_tol = 1.0e-4
 
-  nl_rel_tol = 1.0e-8
+  nl_rel_tol = 1.0e-6
   nl_abs_tol = 1.0e-10
 
   start_time = 0.0
-  num_steps = 2
+  num_steps = 1
 []
 
 [Outputs]
-  [./exodus]
-    type = Exodus
-    elemental_as_nodal = true
-  [../]
+  exodus = true
 []

@@ -19,7 +19,7 @@ template <>
 InputParameters validParams<ComputeGlobalStrain>();
 
 /**
- * ComputeGlobalStrain is the base class for strain tensors using incremental formulations
+ * ComputeGlobalStrain calculates the global strain tensor from the scalar variables
  */
 class ComputeGlobalStrain : public Material
 {
@@ -32,8 +32,7 @@ protected:
 
   ///Base name prepended to material property name
   std::string _base_name;
-  VariableValue & _scalar_global_strain;
-  Order _scalar_global_strain_order;
+  const VariableValue & _scalar_global_strain;
   MaterialProperty<RankTwoTensor> & _global_strain;
 };
 
