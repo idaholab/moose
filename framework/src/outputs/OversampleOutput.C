@@ -149,15 +149,8 @@ OversampleOutput::initOversample()
   DistributedMesh * dist_mesh = dynamic_cast<DistributedMesh *>(&source_es.get_mesh());
   if (dist_mesh)
   {
-    for (MeshBase::element_iterator it = dist_mesh->active_local_elements_begin(),
-                                    end = dist_mesh->active_local_elements_end();
-         it != end;
-         ++it)
-    {
-      Elem * elem = *it;
-
+    for (auto & elem : dist_mesh->active_local_element_ptr_range())
       dist_mesh->add_extra_ghost_elem(elem);
-    }
   }
 
   // Initialize the _mesh_functions vector

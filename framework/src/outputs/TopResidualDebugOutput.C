@@ -62,18 +62,15 @@ TopResidualDebugOutput::printTopResiduals(const NumericVector<Number> & residual
   vec.resize(residual.local_size());
 
   unsigned int j = 0;
-  MeshBase::node_iterator it = mesh.local_nodes_begin();
-  const MeshBase::node_iterator end = mesh.local_nodes_end();
-  for (; it != end; ++it)
+  for (const auto & node : mesh.local_node_ptr_range())
   {
-    Node & node = *(*it);
-    dof_id_type nd = node.id();
+    dof_id_type nd = node->id();
 
-    for (unsigned int var = 0; var < node.n_vars(_sys.number()); ++var)
-      if (node.n_dofs(_sys.number(), var) >
+    for (unsigned int var = 0; var < node->n_vars(_sys.number()); ++var)
+      if (node->n_dofs(_sys.number(), var) >
           0) // this check filters scalar variables (which are clearly not a dof on every node)
       {
-        dof_id_type dof_idx = node.dof_number(_sys.number(), var, 0);
+        dof_id_type dof_idx = node->dof_number(_sys.number(), var, 0);
         vec[j] = TopResidualDebugOutputTopResidualData(var, nd, residual(dof_idx));
         j++;
       }

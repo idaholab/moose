@@ -161,10 +161,8 @@ PolycrystalICTools::buildElementalGrainAdjacencyMatrix(
   std::vector<std::set<dof_id_type>> halo_ids(n_grains);
 
   std::unique_ptr<PointLocatorBase> point_locator = mesh.getMesh().sub_point_locator();
-  const auto end = mesh.getMesh().active_elements_end();
-  for (auto el = mesh.getMesh().active_elements_begin(); el != end; ++el)
+  for (const auto & elem : mesh.getMesh().active_element_ptr_range())
   {
-    const Elem * elem = *el;
     std::map<dof_id_type, unsigned int>::const_iterator grain_it =
         element_to_grain.find(elem->id());
     mooseAssert(grain_it != element_to_grain.end(), "Element not found in map");

@@ -118,11 +118,8 @@ PolycrystalUserObjectBase::execute()
    *    the flood routine on the same entity as long as new discoveries are being made. We know
    *    this information from the return value of flood.
    */
-  const auto end = _mesh.getMesh().active_local_elements_end();
-  for (auto el = _mesh.getMesh().active_local_elements_begin(); el != end; ++el)
+  for (const auto & current_elem : _mesh.getMesh().active_local_element_ptr_range())
   {
-    const Elem * current_elem = *el;
-
     // Loop over elements or nodes
     if (_is_elemental)
       while (flood(current_elem, invalid_size_t, nullptr))

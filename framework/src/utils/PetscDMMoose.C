@@ -637,14 +637,9 @@ DMMooseGetEmbedding_Private(DM dm, IS * embedding)
 
             // Sometime, we own nodes but do not own the elements the nodes connected to
             {
-              MeshBase::const_node_iterator node_it =
-                  dmm->_nl->system().get_mesh().local_nodes_begin();
-              const MeshBase::const_node_iterator node_end =
-                  dmm->_nl->system().get_mesh().local_nodes_end();
               bool is_on_current_block = false;
-              for (; node_it != node_end; ++node_it)
+              for (auto & node : dmm->_nl->system().get_mesh().local_node_ptr_range())
               {
-                Node * node = *node_it;
                 const unsigned int n_comp = node->n_comp(dmm->_nl->system().number(), v);
 
                 // skip it if no dof
