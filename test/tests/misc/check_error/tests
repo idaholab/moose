@@ -678,7 +678,7 @@
   [./kernel_with_empty_var]
     type = 'RunException'
     input = 'kernel_with_empty_var.i'
-    expect_err = 'Error retrieving variable name'
+    expect_err = 'Error constructing object \'rea\' while retrieving value for \'variable\' parameter! Did you set variable = \'\' \(empty string\) by accident'
   [../]
   [./vector_kernel_with_standard_var]
     type = 'RunException'
