@@ -153,9 +153,9 @@ TensorMechanicsPlasticMohrCoulomb::df_dsig(const RankTwoTensor & stress, const R
     std::vector<Real> eigvals;
     std::vector<RankTwoTensor> deigvals;
     stress.dsymmetricEigenvalues(eigvals, deigvals);
-    Real tmp = eigvals[2] - eigvals[0] + (eigvals[2] + eigvals[0] - 2 * mean_stress) * sin_angle;
+    Real tmp = eigvals[2] - eigvals[0] + (eigvals[2] + eigvals[0] - 2.0 * mean_stress) * sin_angle;
     RankTwoTensor dtmp =
-        deigvals[2] - deigvals[0] + (deigvals[2] + deigvals[0] - 2 * dmean_stress) * sin_angle;
+        deigvals[2] - deigvals[0] + (deigvals[2] + deigvals[0] - 2.0 * dmean_stress) * sin_angle;
     Real denom = std::sqrt(smooth(stress) + 0.25 * Utility::pow<2>(tmp));
     return dmean_stress * sin_angle +
            (0.5 * dsmooth(stress) * dmean_stress + 0.25 * tmp * dtmp) / denom;
@@ -170,10 +170,9 @@ TensorMechanicsPlasticMohrCoulomb::df_dsig(const RankTwoTensor & stress, const R
     Real sibar2 = stress.secondInvariant();
     RankTwoTensor dsibar2 = stress.dsecondInvariant();
     Real denom = std::sqrt(smooth(stress) + sibar2 * Utility::pow<2>(kk));
-    return dmean_stress * sin_angle +
-           (0.5 * dsmooth(stress) * dmean_stress + 0.5 * dsibar2 * Utility::pow<2>(kk) +
-            sibar2 * kk * dkk) /
-               denom;
+    return dmean_stress * sin_angle + (0.5 * dsmooth(stress) * dmean_stress +
+                                       0.5 * dsibar2 * Utility::pow<2>(kk) + sibar2 * kk * dkk) /
+                                          denom;
   }
 }
 
@@ -248,9 +247,9 @@ TensorMechanicsPlasticMohrCoulomb::dflowPotential_dstress(const RankTwoTensor & 
     stress.dsymmetricEigenvalues(eigvals, deigvals);
     stress.d2symmetricEigenvalues(d2eigvals);
 
-    Real tmp = eigvals[2] - eigvals[0] + (eigvals[2] + eigvals[0] - 2 * mean_stress) * sin_angle;
+    Real tmp = eigvals[2] - eigvals[0] + (eigvals[2] + eigvals[0] - 2.0 * mean_stress) * sin_angle;
     RankTwoTensor dtmp =
-        deigvals[2] - deigvals[0] + (deigvals[2] + deigvals[0] - 2 * dmean_stress) * sin_angle;
+        deigvals[2] - deigvals[0] + (deigvals[2] + deigvals[0] - 2.0 * dmean_stress) * sin_angle;
     Real denom = std::sqrt(smooth(stress) + 0.25 * Utility::pow<2>(tmp));
     Real denom3 = Utility::pow<3>(denom);
     Real d2smooth_over_denom = d2smooth(stress) / denom;
@@ -330,12 +329,12 @@ TensorMechanicsPlasticMohrCoulomb::dflowPotential_dintnl(const RankTwoTensor & s
     std::vector<Real> eigvals;
     std::vector<RankTwoTensor> deigvals;
     stress.dsymmetricEigenvalues(eigvals, deigvals);
-    Real tmp = eigvals[2] - eigvals[0] + (eigvals[2] + eigvals[0] - 2 * mean_stress) * sin_angle;
+    Real tmp = eigvals[2] - eigvals[0] + (eigvals[2] + eigvals[0] - 2.0 * mean_stress) * sin_angle;
     Real dtmp_dintnl = (eigvals[2] + eigvals[0] - 2 * mean_stress) * dsin_angle;
     RankTwoTensor dtmp_dstress =
-        deigvals[2] - deigvals[0] + (deigvals[2] + deigvals[0] - 2 * dmean_stress) * sin_angle;
+        deigvals[2] - deigvals[0] + (deigvals[2] + deigvals[0] - 2.0 * dmean_stress) * sin_angle;
     RankTwoTensor d2tmp_dstress_dintnl =
-        (deigvals[2] + deigvals[0] - 2 * dmean_stress) * dsin_angle;
+        (deigvals[2] + deigvals[0] - 2.0 * dmean_stress) * dsin_angle;
     Real denom = std::sqrt(smooth(stress) + 0.25 * Utility::pow<2>(tmp));
     return dmean_stress * dsin_angle + 0.25 * dtmp_dintnl * dtmp_dstress / denom +
            0.25 * tmp * d2tmp_dstress_dintnl / denom -

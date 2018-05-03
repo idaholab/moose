@@ -113,9 +113,6 @@ public:
   /// C_ijkl*a_kl
   RankTwoTensor operator*(const RankTwoTensor & a) const;
 
-  /// C_ijkl*a_kl
-  RealTensorValue operator*(const RealTensorValue & a) const;
-
   /// C_ijkl*a
   RankFourTensor operator*(const Real a) const;
 
@@ -164,15 +161,9 @@ public:
 
   /**
    * Rotate the tensor using
-   * C_ijkl = R_im R_in R_ko R_lp C_mnop
-   */
-  void rotate(const RealTensorValue & R);
-
-  /**
-   * Rotate the tensor using
    * C_ijkl = R_im R_jn R_ko R_lp C_mnop
    */
-  void rotate(const RankTwoTensor & R);
+  void rotate(const RealTensorValue & R);
 
   /**
    * Transpose the tensor by swapping the first pair with the second pair of indices

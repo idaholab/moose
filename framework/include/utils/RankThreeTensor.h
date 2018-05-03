@@ -92,9 +92,6 @@ public:
   /// b_i = r_ijk * a_jk
   RealVectorValue operator*(const RankTwoTensor & a) const;
 
-  /// r_ijk*a_kl
-  // RealTensorValue operator*(const RealTensorValue & a) const;
-
   /// r_ijk*a
   RankThreeTensor operator*(const Real a) const;
 
@@ -137,12 +134,6 @@ public:
    * r_ijk = R_im R_in R_ko r_mno
    */
   void rotate(const RealTensorValue & R);
-
-  /**
-   * Rotate the tensor using
-   * r_ijk = R_im R_in R_ko R_lp r_mno
-   */
-  void rotate(const RankTwoTensor & R);
 
   /// Static method for use in validParams for getting the "fill_method"
   static MooseEnum fillMethodEnum();

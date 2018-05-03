@@ -103,7 +103,7 @@ RealVectorValue RankThreeTensor::operator*(const RankTwoTensor & a) const
     unsigned int i1 = i * N2;
     for (unsigned int j1 = 0; j1 < N2; j1 += N)
       for (unsigned int k = 0; k < N; ++k)
-        sum += _vals[i1 + j1 + k] * a._vals[j1 + k];
+        sum += _vals[i1 + j1 + k] * a._coords[j1 + k];
     result(i) = sum;
   }
 
@@ -264,7 +264,7 @@ RankThreeTensor::mixedProductRankFour(const RankTwoTensor & a) const
         {
           for (unsigned int m = 0; m < N; ++m)
             for (unsigned int n = 0; n < N; ++n)
-              result._vals[index] += (*this)(m, i, j) * a._vals[m * N + n] * (*this)(n, k, l);
+              result._vals[index] += (*this)(m, i, j) * a._coords[m * N + n] * (*this)(n, k, l);
           index++;
         }
 
@@ -298,42 +298,6 @@ RankThreeTensor::rotate(const RealTensorValue & R)
 }
 
 void
-RankThreeTensor::rotate(const RankTwoTensor & R)
-{
-  RankThreeTensor old = *this;
-
-  unsigned int index = 0;
-  unsigned int i1 = 0;
-  for (unsigned int i = 0; i < N; ++i)
-  {
-    unsigned int j1 = 0;
-    for (unsigned int j = 0; j < N; ++j)
-    {
-      unsigned int k1 = 0;
-      for (unsigned int k = 0; k < N; ++k)
-      {
-        Real sum = 0.0;
-        unsigned int index2 = 0;
-        for (unsigned int m = 0; m < N; ++m)
-        {
-          Real a = R._vals[i1 + m];
-          for (unsigned int n = 0; n < N; ++n)
-          {
-            Real ab = a * R._vals[j1 + n];
-            for (unsigned int o = 0; o < N; ++o)
-              sum += ab * R._vals[k1 + o] * old._vals[index2++];
-          }
-        }
-        _vals[index++] = sum;
-        k1 += N;
-      }
-      j1 += N;
-    }
-    i1 += N;
-  }
-}
-
-void
 RankThreeTensor::fillGeneralFromInputVector(const std::vector<Real> & input)
 {
   if (input.size() != 27)
@@ -363,7 +327,7 @@ RankThreeTensor::doubleContraction(const RankTwoTensor & b) const
 
   for (unsigned int i = 0; i < N; ++i)
     for (unsigned int j = 0; j < N2; ++j)
-      result(i) += _vals[i * N2 + j] * b._vals[j];
+      result(i) += _vals[i * N2 + j] * b._coords[j];
 
   return result;
 }
