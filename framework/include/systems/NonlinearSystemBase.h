@@ -271,7 +271,7 @@ public:
    * @param jacobian reference to the Jacobian matrix
    * @param displaced Controls whether to do the displaced Constraints or non-displaced
    */
-  void constraintJacobians(bool displaced);
+  void constraintJacobians(const std::set<TagID> & tags, bool displaced);
 
   /// set all the global dof indices for a nonlinear variable
   void setVariableGlobalDoFs(const std::string & var_name);

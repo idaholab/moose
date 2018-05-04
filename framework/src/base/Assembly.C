@@ -1753,6 +1753,18 @@ Assembly::cacheJacobianBlock(DenseMatrix<Number> & jac_block,
                              std::vector<dof_id_type> & idof_indices,
                              std::vector<dof_id_type> & jdof_indices,
                              Real scaling_factor,
+                             const std::set<TagID> & tags)
+{
+  for (auto tag : tags)
+    if (_sys.hasMatrix(tag))
+      cacheJacobianBlock(jac_block, idof_indices, jdof_indices, scaling_factor, tag);
+}
+
+void
+Assembly::cacheJacobianBlock(DenseMatrix<Number> & jac_block,
+                             std::vector<dof_id_type> & idof_indices,
+                             std::vector<dof_id_type> & jdof_indices,
+                             Real scaling_factor,
                              TagID tag /*=0*/)
 {
   // Only cache data when the matrix exists

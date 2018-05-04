@@ -146,6 +146,8 @@ NodeFaceConstraint::computeJacobian()
 
   _phi_slave.resize(_connected_dof_indices.size());
 
+  std::vector<dof_id_type> slave_dofs(1, variable().nodalDofIndex());
+
   _qp = 0;
 
   // Fill up _phi_slave so that it is 1 when j corresponds to this dof and 0 for every other dof
@@ -165,6 +167,10 @@ NodeFaceConstraint::computeJacobian()
     for (_j = 0; _j < _connected_dof_indices.size(); _j++)
       _Kee(_i, _j) += computeQpJacobian(Moose::SlaveSlave);
 
+  // Cache the jacobian block for the slave side
+  _assembly.cacheJacobianBlock(
+      _Kee, slave_dofs, _connected_dof_indices, variable().scalingFactor(), getMatrixTags());
+
   prepareMatrixTagNeighbor(_assembly, _var.number(), _var.number(), Moose::ElementNeighbor);
 
   if (_local_ke.m() && _local_ke.n())
@@ -174,10 +180,24 @@ NodeFaceConstraint::computeJacobian()
 
   accumulateTaggedLocalMatrix();
 
-  for (_i = 0; _i < _test_master.size(); _i++)
-    // Loop over the connected dof indices so we can get all the jacobian contributions
-    for (_j = 0; _j < _connected_dof_indices.size(); _j++)
-      _Kne(_i, _j) += computeQpJacobian(Moose::MasterSlave);
+  for (auto tag : getMatrixTags())
+    if (_sys.hasMatrix(tag))
+    {
+      _jacobian = &_sys.getMatrix(tag);
+      _Kne.zero();
+      for (_i = 0; _i < _test_master.size(); _i++)
+        // Loop over the connected dof indices so we can get all the jacobian contributions
+        for (_j = 0; _j < _connected_dof_indices.size(); _j++)
+          _Kne(_i, _j) += computeQpJacobian(Moose::MasterSlave);
+
+      // Cache data because the local matrix may be different from tag to tag
+      if (addCouplingEntriesToJacobian())
+        _assembly.cacheJacobianBlock(_Kne,
+                                     masterVariable().dofIndicesNeighbor(),
+                                     _connected_dof_indices,
+                                     variable().scalingFactor(),
+                                     tag);
+    }
 
   prepareMatrixTagNeighbor(_assembly, _master_var.number(), _var.number(), Moose::NeighborNeighbor);
 
@@ -199,6 +219,8 @@ NodeFaceConstraint::computeOffDiagJacobian(unsigned int jvar)
 
   _phi_slave.resize(_connected_dof_indices.size());
 
+  std::vector<dof_id_type> slave_dofs(1, variable().nodalDofIndex());
+
   _qp = 0;
 
   // Fill up _phi_slave so that it is 1 when j corresponds to this dof and 0 for every other dof
@@ -218,6 +240,10 @@ NodeFaceConstraint::computeOffDiagJacobian(unsigned int jvar)
     for (_j = 0; _j < _connected_dof_indices.size(); _j++)
       _Kee(_i, _j) += computeQpOffDiagJacobian(Moose::SlaveSlave, jvar);
 
+  // Cache the jacobian block for the slave side
+  _assembly.cacheJacobianBlock(
+      _Kee, slave_dofs, _connected_dof_indices, variable().scalingFactor(), getMatrixTags());
+
   prepareMatrixTagNeighbor(_assembly, _var.number(), jvar, Moose::ElementNeighbor);
 
   for (_i = 0; _i < _test_slave.size(); _i++)
@@ -231,6 +257,14 @@ NodeFaceConstraint::computeOffDiagJacobian(unsigned int jvar)
       // Loop over the connected dof indices so we can get all the jacobian contributions
       for (_j = 0; _j < _connected_dof_indices.size(); _j++)
         _Kne(_i, _j) += computeQpOffDiagJacobian(Moose::MasterSlave, jvar);
+
+  // Cache the jacobian block for the master side
+  if (addCouplingEntriesToJacobian())
+    _assembly.cacheJacobianBlock(_Kne,
+                                 variable().dofIndicesNeighbor(),
+                                 _connected_dof_indices,
+                                 variable().scalingFactor(),
+                                 getMatrixTags());
 
   prepareMatrixTagNeighbor(_assembly, _master_var.number(), jvar, Moose::NeighborNeighbor);
 

@@ -615,6 +615,13 @@ public:
                           std::vector<dof_id_type> & jdof_indices,
                           Real scaling_factor,
                           TagID tag = 0);
+
+  void cacheJacobianBlock(DenseMatrix<Number> & jac_block,
+                          std::vector<dof_id_type> & idof_indices,
+                          std::vector<dof_id_type> & jdof_indices,
+                          Real scaling_factor,
+                          const std::set<TagID> & tags);
+
   void cacheJacobianBlockNonlocal(DenseMatrix<Number> & jac_block,
                                   const std::vector<dof_id_type> & idof_indices,
                                   const std::vector<dof_id_type> & jdof_indices,
