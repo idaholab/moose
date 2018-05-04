@@ -79,6 +79,7 @@
 #include "ShapeSideUserObject.h"
 #include "MooseVariableFE.h"
 #include "MooseVariableScalar.h"
+#include "TimeIntegrator.h"
 
 #include "libmesh/exodusII_io.h"
 #include "libmesh/quadrature.h"
@@ -649,6 +650,11 @@ FEProblemBase::initialSetup()
   // Random interface objects
   for (const auto & it : _random_data_objects)
     it.second->updateSeeds(EXEC_INITIAL);
+
+  auto ti = _nl->getTimeIntegrator();
+
+  if (ti)
+    ti->initialSetup();
 
   if (_app.isRestarting() || _app.isRecovering())
   {
@@ -1741,13 +1747,6 @@ FEProblemBase::addKernel(const std::string & kernel_name,
     parameters.set<SystemBase *>("_sys") = _nl.get();
   }
 
-  // Check that "variable" is in the NonlinearSystem.
-  if (!_nl->hasVariable(parameters.get<NonlinearVariableName>("variable")))
-    mooseError(name,
-               ": Cannot add Kernel for variable ",
-               parameters.get<NonlinearVariableName>("variable"),
-               ", it is not a nonlinear variable!");
-
   _nl->addKernel(kernel_name, name, parameters);
 }
 
@@ -1778,13 +1777,6 @@ FEProblemBase::addNodalKernel(const std::string & kernel_name,
     parameters.set<SystemBase *>("_sys") = _nl.get();
   }
   _nl->addNodalKernel(kernel_name, name, parameters);
-
-  // Check that "variable" is in the NonlinearSystem.
-  if (!_nl->hasVariable(parameters.get<NonlinearVariableName>("variable")))
-    mooseError(name,
-               ": Cannot add NodalKernel for variable ",
-               parameters.get<NonlinearVariableName>("variable"),
-               ", it is not a nonlinear variable!");
 }
 
 void
@@ -1812,13 +1804,6 @@ FEProblemBase::addScalarKernel(const std::string & kernel_name,
     parameters.set<SubProblem *>("_subproblem") = this;
     parameters.set<SystemBase *>("_sys") = _nl.get();
   }
-
-  // Check that "variable" is a Scalar variable on the NonlinearSystem
-  if (!_nl->hasScalarVariable(parameters.get<NonlinearVariableName>("variable")))
-    mooseError(name,
-               ": Cannot add ScalarKernel for variable ",
-               parameters.get<NonlinearVariableName>("variable"),
-               ", it is not a SCALAR variable!");
 
   _nl->addScalarKernel(kernel_name, name, parameters);
 }
@@ -1849,13 +1834,6 @@ FEProblemBase::addBoundaryCondition(const std::string & bc_name,
     parameters.set<SubProblem *>("_subproblem") = this;
     parameters.set<SystemBase *>("_sys") = _nl.get();
   }
-
-  // Check that "variable" is in the NonlinearSystem.
-  if (!_nl->hasVariable(parameters.get<NonlinearVariableName>("variable")))
-    mooseError(name,
-               ": Cannot add BoundaryCondition for variable ",
-               parameters.get<NonlinearVariableName>("variable"),
-               ", it is not a nonlinear variable!");
 
   _nl->addBoundaryCondition(bc_name, name, parameters);
 }
@@ -1956,13 +1934,6 @@ FEProblemBase::addAuxKernel(const std::string & kernel_name,
     parameters.set<SystemBase *>("_nl_sys") = _nl.get();
   }
 
-  // Check that "variable" is in the AuxiliarySystem.
-  if (!_aux->hasVariable(parameters.get<AuxVariableName>("variable")))
-    mooseError(name,
-               ": Cannot add AuxKernel for variable ",
-               parameters.get<AuxVariableName>("variable"),
-               ", it is not an auxiliary variable!");
-
   _aux->addKernel(kernel_name, name, parameters);
 }
 
@@ -1991,13 +1962,6 @@ FEProblemBase::addAuxScalarKernel(const std::string & kernel_name,
     parameters.set<SubProblem *>("_subproblem") = this;
     parameters.set<SystemBase *>("_sys") = _aux.get();
   }
-
-  // Check that "variable" is in the AuxiliarySystem.
-  if (!_aux->hasScalarVariable(parameters.get<AuxVariableName>("variable")))
-    mooseError(name,
-               ": Cannot add AuxScalarKernel for variable ",
-               parameters.get<AuxVariableName>("variable"),
-               ", it is not a SCALAR auxiliary variable!");
 
   _aux->addScalarKernel(kernel_name, name, parameters);
 }
@@ -2028,13 +1992,6 @@ FEProblemBase::addDiracKernel(const std::string & kernel_name,
     parameters.set<SubProblem *>("_subproblem") = this;
     parameters.set<SystemBase *>("_sys") = _nl.get();
   }
-
-  // Check that "variable" is in the NonlinearSystem.
-  if (!_nl->hasVariable(parameters.get<NonlinearVariableName>("variable")))
-    mooseError(name,
-               ": Cannot add DiracKernel for variable ",
-               parameters.get<NonlinearVariableName>("variable"),
-               ", it is not a nonlinear variable!");
 
   _nl->addDiracKernel(kernel_name, name, parameters);
 }
@@ -2067,13 +2024,6 @@ FEProblemBase::addDGKernel(const std::string & dg_kernel_name,
     parameters.set<SubProblem *>("_subproblem") = this;
     parameters.set<SystemBase *>("_sys") = _nl.get();
   }
-
-  // Check that "variable" is in the NonlinearSystem.
-  if (!_nl->hasVariable(parameters.get<NonlinearVariableName>("variable")))
-    mooseError(name,
-               ": Cannot add DGKernel for variable ",
-               parameters.get<NonlinearVariableName>("variable"),
-               ", it is not a nonlinear variable!");
 
   _nl->addDGKernel(dg_kernel_name, name, parameters);
 
@@ -2109,13 +2059,6 @@ FEProblemBase::addInterfaceKernel(const std::string & interface_kernel_name,
     parameters.set<SystemBase *>("_sys") = _nl.get();
   }
 
-  // Check that "variable" is in the NonlinearSystem.
-  if (!_nl->hasVariable(parameters.get<NonlinearVariableName>("variable")))
-    mooseError(name,
-               ": Cannot add InterfaceKernel for variable ",
-               parameters.get<NonlinearVariableName>("variable"),
-               ", it is not a nonlinear variable!");
-
   _nl->addInterfaceKernel(interface_kernel_name, name, parameters);
 
   _has_internal_edge_residual_objects = true;
@@ -2138,7 +2081,8 @@ FEProblemBase::addInitialCondition(const std::string & ic_name,
   {
     for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
     {
-      MooseVariableFEBase & var = getVariable(tid, var_name);
+      MooseVariableFEBase & var = getVariable(
+          tid, var_name, Moose::VarKindType::VAR_ANY, Moose::VarFieldType::VAR_FIELD_ANY);
       parameters.set<SystemBase *>("_sys") = &var.sys();
       std::shared_ptr<InitialCondition> ic =
           _factory.create<InitialCondition>(ic_name, name, parameters, tid);
@@ -2720,7 +2664,8 @@ VectorPostprocessorValue &
 FEProblemBase::getVectorPostprocessorValue(const VectorPostprocessorName & name,
                                            const std::string & vector_name)
 {
-  return _vpps_data.getVectorPostprocessorValue(name, vector_name);
+  auto & val = _vpps_data.getVectorPostprocessorValue(name, vector_name);
+  return val;
 }
 
 VectorPostprocessorValue &
@@ -2976,44 +2921,47 @@ FEProblemBase::computeUserObjects(const ExecFlagType & type, const Moose::AuxGro
 void
 FEProblemBase::executeControls(const ExecFlagType & exec_type)
 {
-  DependencyResolver<std::shared_ptr<Control>> resolver;
-
-  auto controls_wh = _control_warehouse[exec_type];
-  // Add all of the dependencies into the resolver and sort them
-  for (const auto & it : controls_wh.getActiveObjects())
+  if (_control_warehouse[exec_type].hasActiveObjects())
   {
-    // Make sure an item with no dependencies comes out too!
-    resolver.addItem(it);
+    DependencyResolver<std::shared_ptr<Control>> resolver;
 
-    std::vector<std::string> & dependent_controls = it->getDependencies();
-    for (const auto & depend_name : dependent_controls)
+    auto controls_wh = _control_warehouse[exec_type];
+    // Add all of the dependencies into the resolver and sort them
+    for (const auto & it : controls_wh.getActiveObjects())
     {
-      if (controls_wh.hasActiveObject(depend_name))
+      // Make sure an item with no dependencies comes out too!
+      resolver.addItem(it);
+
+      std::vector<std::string> & dependent_controls = it->getDependencies();
+      for (const auto & depend_name : dependent_controls)
       {
-        auto dep_control = controls_wh.getActiveObject(depend_name);
-        resolver.insertDependency(it, dep_control);
+        if (controls_wh.hasActiveObject(depend_name))
+        {
+          auto dep_control = controls_wh.getActiveObject(depend_name);
+          resolver.insertDependency(it, dep_control);
+        }
+        else
+          mooseError("The Control \"",
+                     depend_name,
+                     "\" was not created, did you make a "
+                     "spelling mistake or forget to include it "
+                     "in your input file?");
       }
-      else
-        mooseError("The Control \"",
-                   depend_name,
-                   "\" was not created, did you make a "
-                   "spelling mistake or forget to include it "
-                   "in your input file?");
     }
-  }
 
-  const auto & ordered_controls = resolver.getSortedValues();
+    const auto & ordered_controls = resolver.getSortedValues();
 
-  if (!ordered_controls.empty())
-  {
-    Moose::perf_log.push("computeControls()", "Execution");
+    if (!ordered_controls.empty())
+    {
+      Moose::perf_log.push("computeControls()", "Execution");
 
-    _control_warehouse.setup(exec_type);
-    // Run the controls in the proper order
-    for (const auto & control : ordered_controls)
-      control->execute();
+      _control_warehouse.setup(exec_type);
+      // Run the controls in the proper order
+      for (const auto & control : ordered_controls)
+        control->execute();
 
-    Moose::perf_log.pop("computeControls()", "Execution");
+      Moose::perf_log.pop("computeControls()", "Execution");
+    }
   }
 }
 
@@ -3496,14 +3444,12 @@ FEProblemBase::hasVariable(const std::string & var_name) const
 }
 
 MooseVariableFEBase &
-FEProblemBase::getVariable(THREAD_ID tid, const std::string & var_name)
+FEProblemBase::getVariable(THREAD_ID tid,
+                           const std::string & var_name,
+                           Moose::VarKindType expected_var_type,
+                           Moose::VarFieldType expected_var_field_type)
 {
-  if (_nl->hasVariable(var_name))
-    return _nl->getVariable(tid, var_name);
-  else if (!_aux->hasVariable(var_name))
-    mooseError("Unknown variable " + var_name);
-
-  return _aux->getVariable(tid, var_name);
+  return getVariableHelper(tid, var_name, expected_var_type, expected_var_field_type, *_nl, *_aux);
 }
 
 MooseVariable &
@@ -4978,7 +4924,11 @@ FEProblemBase::checkDisplacementOrders()
 
       for (const auto & var_name : displacement_variables)
       {
-        MooseVariableFEBase & mv = _displaced_problem->getVariable(/*tid=*/0, var_name);
+        MooseVariableFEBase & mv =
+            _displaced_problem->getVariable(/*tid=*/0,
+                                            var_name,
+                                            Moose::VarKindType::VAR_ANY,
+                                            Moose::VarFieldType::VAR_FIELD_STANDARD);
         if (mv.order() != SECOND)
           mooseError("Error: mesh has SECOND order elements, so all displacement variables must be "
                      "SECOND order.");

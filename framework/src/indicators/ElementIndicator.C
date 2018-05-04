@@ -38,8 +38,11 @@ ElementIndicator::ElementIndicator(const InputParameters & parameters)
     PostprocessorInterface(this),
     Coupleable(this, false),
     ScalarCoupleable(this),
-    MooseVariableInterface<Real>(this, false),
-
+    MooseVariableInterface<Real>(this,
+                                 false,
+                                 "variable",
+                                 Moose::VarKindType::VAR_NONLINEAR,
+                                 Moose::VarFieldType::VAR_FIELD_STANDARD),
     _field_var(_subproblem.getStandardVariable(_tid, name())),
 
     _current_elem(_field_var.currentElem()),

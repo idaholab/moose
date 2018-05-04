@@ -43,7 +43,8 @@ LazyCoupleable::init()
     if (!_l_fe_problem->hasVariable(var_pair.first))
       mooseError("Unable to find variable ", var_pair.first);
 
-    auto & moose_var = _l_fe_problem->getVariable(0, var_pair.first);
+    auto & moose_var = _l_fe_problem->getVariable(
+        0, var_pair.first, Moose::VarKindType::VAR_ANY, Moose::VarFieldType::VAR_FIELD_ANY);
     if (moose_var.kind() == Moose::VAR_NONLINEAR)
       *(var_pair.second) = moose_var.number();
     else

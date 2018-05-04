@@ -1346,20 +1346,34 @@ CrackFrontDefinition::calculateTangentialStrainAlongFront()
   for (unsigned int i = 0; i < num_crack_front_nodes; ++i)
     _strain_along_front[i] = -std::numeric_limits<Real>::max();
 
+  MooseVariableFEBase & disp_x_var =
+      _subproblem.getVariable(_tid,
+                              _disp_x_var_name,
+                              Moose::VarKindType::VAR_NONLINEAR,
+                              Moose::VarFieldType::VAR_FIELD_STANDARD);
+  MooseVariableFEBase & disp_y_var =
+      _subproblem.getVariable(_tid,
+                              _disp_y_var_name,
+                              Moose::VarKindType::VAR_NONLINEAR,
+                              Moose::VarFieldType::VAR_FIELD_STANDARD);
+
+  MooseVariableFEBase & disp_z_var =
+      _subproblem.getVariable(_tid,
+                              _disp_z_var_name,
+                              Moose::VarKindType::VAR_NONLINEAR,
+                              Moose::VarFieldType::VAR_FIELD_STANDARD);
+
   current_node = getCrackFrontNodePtr(0);
   if (current_node->processor_id() == processor_id())
   {
-    disp_current_node(0) =
-        _subproblem.getVariable(_tid, _disp_x_var_name).getNodalValue(*current_node);
-    disp_current_node(1) =
-        _subproblem.getVariable(_tid, _disp_y_var_name).getNodalValue(*current_node);
-    disp_current_node(2) =
-        _subproblem.getVariable(_tid, _disp_z_var_name).getNodalValue(*current_node);
+    disp_current_node(0) = disp_x_var.getNodalValue(*current_node);
+    disp_current_node(1) = disp_y_var.getNodalValue(*current_node);
+    disp_current_node(2) = disp_z_var.getNodalValue(*current_node);
 
     next_node = getCrackFrontNodePtr(1);
-    disp_next_node(0) = _subproblem.getVariable(_tid, _disp_x_var_name).getNodalValue(*next_node);
-    disp_next_node(1) = _subproblem.getVariable(_tid, _disp_y_var_name).getNodalValue(*next_node);
-    disp_next_node(2) = _subproblem.getVariable(_tid, _disp_z_var_name).getNodalValue(*next_node);
+    disp_next_node(0) = disp_x_var.getNodalValue(*next_node);
+    disp_next_node(1) = disp_y_var.getNodalValue(*next_node);
+    disp_next_node(2) = disp_z_var.getNodalValue(*next_node);
 
     forward_segment0 = *next_node - *current_node;
     forward_segment0 = (forward_segment0 * _tangent_directions[0]) * _tangent_directions[0];
@@ -1377,25 +1391,19 @@ CrackFrontDefinition::calculateTangentialStrainAlongFront()
     current_node = getCrackFrontNodePtr(i);
     if (current_node->processor_id() == processor_id())
     {
-      disp_current_node(0) =
-          _subproblem.getVariable(_tid, _disp_x_var_name).getNodalValue(*current_node);
-      disp_current_node(1) =
-          _subproblem.getVariable(_tid, _disp_y_var_name).getNodalValue(*current_node);
-      disp_current_node(2) =
-          _subproblem.getVariable(_tid, _disp_z_var_name).getNodalValue(*current_node);
+      disp_current_node(0) = disp_x_var.getNodalValue(*current_node);
+      disp_current_node(1) = disp_y_var.getNodalValue(*current_node);
+      disp_current_node(2) = disp_z_var.getNodalValue(*current_node);
 
       previous_node = getCrackFrontNodePtr(i - 1);
-      disp_previous_node(0) =
-          _subproblem.getVariable(_tid, _disp_x_var_name).getNodalValue(*previous_node);
-      disp_previous_node(1) =
-          _subproblem.getVariable(_tid, _disp_y_var_name).getNodalValue(*previous_node);
-      disp_previous_node(2) =
-          _subproblem.getVariable(_tid, _disp_z_var_name).getNodalValue(*previous_node);
+      disp_previous_node(0) = disp_x_var.getNodalValue(*previous_node);
+      disp_previous_node(1) = disp_y_var.getNodalValue(*previous_node);
+      disp_previous_node(2) = disp_z_var.getNodalValue(*previous_node);
 
       next_node = getCrackFrontNodePtr(i + 1);
-      disp_next_node(0) = _subproblem.getVariable(_tid, _disp_x_var_name).getNodalValue(*next_node);
-      disp_next_node(1) = _subproblem.getVariable(_tid, _disp_y_var_name).getNodalValue(*next_node);
-      disp_next_node(2) = _subproblem.getVariable(_tid, _disp_z_var_name).getNodalValue(*next_node);
+      disp_next_node(0) = disp_x_var.getNodalValue(*next_node);
+      disp_next_node(1) = disp_y_var.getNodalValue(*next_node);
+      disp_next_node(2) = disp_z_var.getNodalValue(*next_node);
 
       back_segment0 = *current_node - *previous_node;
       back_segment0 = (back_segment0 * _tangent_directions[i]) * _tangent_directions[i];
@@ -1422,20 +1430,14 @@ CrackFrontDefinition::calculateTangentialStrainAlongFront()
   current_node = getCrackFrontNodePtr(num_crack_front_nodes - 1);
   if (current_node->processor_id() == processor_id())
   {
-    disp_current_node(0) =
-        _subproblem.getVariable(_tid, _disp_x_var_name).getNodalValue(*current_node);
-    disp_current_node(1) =
-        _subproblem.getVariable(_tid, _disp_y_var_name).getNodalValue(*current_node);
-    disp_current_node(2) =
-        _subproblem.getVariable(_tid, _disp_z_var_name).getNodalValue(*current_node);
+    disp_current_node(0) = disp_x_var.getNodalValue(*current_node);
+    disp_current_node(1) = disp_y_var.getNodalValue(*current_node);
+    disp_current_node(2) = disp_z_var.getNodalValue(*current_node);
 
     previous_node = getCrackFrontNodePtr(num_crack_front_nodes - 2);
-    disp_previous_node(0) =
-        _subproblem.getVariable(_tid, _disp_x_var_name).getNodalValue(*previous_node);
-    disp_previous_node(1) =
-        _subproblem.getVariable(_tid, _disp_y_var_name).getNodalValue(*previous_node);
-    disp_previous_node(2) =
-        _subproblem.getVariable(_tid, _disp_z_var_name).getNodalValue(*previous_node);
+    disp_previous_node(0) = disp_x_var.getNodalValue(*previous_node);
+    disp_previous_node(1) = disp_y_var.getNodalValue(*previous_node);
+    disp_previous_node(2) = disp_z_var.getNodalValue(*previous_node);
 
     back_segment0 = *current_node - *previous_node;
     back_segment0 = (back_segment0 * _tangent_directions[num_crack_front_nodes - 1]) *

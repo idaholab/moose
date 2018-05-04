@@ -187,7 +187,16 @@ enum AuxGroup
 enum VarKindType
 {
   VAR_NONLINEAR,
-  VAR_AUXILIARY
+  VAR_AUXILIARY,
+  VAR_ANY
+};
+
+enum VarFieldType
+{
+  VAR_FIELD_STANDARD,
+  VAR_FIELD_SCALAR,
+  VAR_FIELD_VECTOR,
+  VAR_FIELD_ANY
 };
 
 enum CouplingType

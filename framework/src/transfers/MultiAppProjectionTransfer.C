@@ -81,7 +81,12 @@ MultiAppProjectionTransfer::initialSetup()
     EquationSystems & to_es = to_problem.es();
 
     // Add the projection system.
-    FEType fe_type = to_problem.getVariable(0, _to_var_name).feType();
+    FEType fe_type = to_problem
+                         .getVariable(0,
+                                      _to_var_name,
+                                      Moose::VarKindType::VAR_ANY,
+                                      Moose::VarFieldType::VAR_FIELD_STANDARD)
+                         .feType();
     LinearImplicitSystem & proj_sys = to_es.add_system<LinearImplicitSystem>("proj-sys-" + name());
     _proj_var_num = proj_sys.add_variable("var", fe_type);
     proj_sys.attach_assemble_function(assemble_l2);
@@ -316,7 +321,8 @@ MultiAppProjectionTransfer::execute()
   for (unsigned int i_from = 0; i_from < _from_problems.size(); i_from++)
   {
     FEProblemBase & from_problem = *_from_problems[i_from];
-    MooseVariableFEBase & from_var = from_problem.getVariable(0, _from_var_name);
+    MooseVariableFEBase & from_var = from_problem.getVariable(
+        0, _from_var_name, Moose::VarKindType::VAR_ANY, Moose::VarFieldType::VAR_FIELD_STANDARD);
     System & from_sys = from_var.sys().system();
     unsigned int from_var_num = from_sys.variable_number(from_var.name());
 
@@ -522,7 +528,8 @@ MultiAppProjectionTransfer::projectSolution(unsigned int i_to)
   // copy projected solution into target es
   MeshBase & to_mesh = proj_es.get_mesh();
 
-  MooseVariableFEBase & to_var = to_problem.getVariable(0, _to_var_name);
+  MooseVariableFEBase & to_var = to_problem.getVariable(
+      0, _to_var_name, Moose::VarKindType::VAR_ANY, Moose::VarFieldType::VAR_FIELD_STANDARD);
   System & to_sys = to_var.sys().system();
   NumericVector<Number> * to_solution = to_sys.solution.get();
 

@@ -73,10 +73,12 @@ void
 MultiAppCopyTransfer::transfer(FEProblemBase & to_problem, FEProblemBase & from_problem)
 {
   // Populate the to/from variables needed to perform the transfer
-  MooseVariableFEBase & to_var = to_problem.getVariable(0, _to_var_name);
+  MooseVariableFEBase & to_var = to_problem.getVariable(
+      0, _to_var_name, Moose::VarKindType::VAR_ANY, Moose::VarFieldType::VAR_FIELD_STANDARD);
   MeshBase & to_mesh = to_problem.mesh().getMesh();
 
-  MooseVariableFEBase & from_var = from_problem.getVariable(0, _from_var_name);
+  MooseVariableFEBase & from_var = from_problem.getVariable(
+      0, _from_var_name, Moose::VarKindType::VAR_ANY, Moose::VarFieldType::VAR_FIELD_STANDARD);
   MeshBase & from_mesh = from_problem.mesh().getMesh();
 
   // Check integrity

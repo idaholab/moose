@@ -33,7 +33,12 @@ validParams<PointValue>()
 
 PointValue::PointValue(const InputParameters & parameters)
   : GeneralPostprocessor(parameters),
-    _var_number(_subproblem.getVariable(_tid, parameters.get<VariableName>("variable")).number()),
+    _var_number(_subproblem
+                    .getVariable(_tid,
+                                 parameters.get<VariableName>("variable"),
+                                 Moose::VarKindType::VAR_ANY,
+                                 Moose::VarFieldType::VAR_FIELD_STANDARD)
+                    .number()),
     _system(_subproblem.getSystem(getParam<VariableName>("variable"))),
     _point(getParam<Point>("point")),
     _value(0)

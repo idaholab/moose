@@ -21,7 +21,11 @@ validParams<SideIntegralVariableUserObject>()
 
 SideIntegralVariableUserObject::SideIntegralVariableUserObject(const InputParameters & parameters)
   : SideIntegralUserObject(parameters),
-    MooseVariableInterface<Real>(this, false),
+    MooseVariableInterface<Real>(this,
+                                 false,
+                                 "variable",
+                                 Moose::VarKindType::VAR_ANY,
+                                 Moose::VarFieldType::VAR_FIELD_STANDARD),
     _u(coupledValue("variable")),
     _grad_u(coupledGradient("variable"))
 {

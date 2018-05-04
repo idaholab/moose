@@ -39,16 +39,42 @@ NodalNormalsEvaluator::execute()
   if (_current_node->processor_id() == processor_id())
   {
     if (_current_node->n_dofs(_aux.number(),
-                              _fe_problem.getVariable(_tid, "nodal_normal_x").number()) > 0)
+                              _fe_problem
+                                  .getVariable(_tid,
+                                               "nodal_normal_x",
+                                               Moose::VarKindType::VAR_AUXILIARY,
+                                               Moose::VarFieldType::VAR_FIELD_STANDARD)
+                                  .number()) > 0)
     {
       Threads::spin_mutex::scoped_lock lock(nodal_normals_evaluator_mutex);
 
-      dof_id_type dof_x = _current_node->dof_number(
-          _aux.number(), _fe_problem.getVariable(_tid, "nodal_normal_x").number(), 0);
-      dof_id_type dof_y = _current_node->dof_number(
-          _aux.number(), _fe_problem.getVariable(_tid, "nodal_normal_y").number(), 0);
-      dof_id_type dof_z = _current_node->dof_number(
-          _aux.number(), _fe_problem.getVariable(_tid, "nodal_normal_z").number(), 0);
+      dof_id_type dof_x =
+          _current_node->dof_number(_aux.number(),
+                                    _fe_problem
+                                        .getVariable(_tid,
+                                                     "nodal_normal_x",
+                                                     Moose::VarKindType::VAR_AUXILIARY,
+                                                     Moose::VarFieldType::VAR_FIELD_STANDARD)
+                                        .number(),
+                                    0);
+      dof_id_type dof_y =
+          _current_node->dof_number(_aux.number(),
+                                    _fe_problem
+                                        .getVariable(_tid,
+                                                     "nodal_normal_y",
+                                                     Moose::VarKindType::VAR_AUXILIARY,
+                                                     Moose::VarFieldType::VAR_FIELD_STANDARD)
+                                        .number(),
+                                    0);
+      dof_id_type dof_z =
+          _current_node->dof_number(_aux.number(),
+                                    _fe_problem
+                                        .getVariable(_tid,
+                                                     "nodal_normal_z",
+                                                     Moose::VarKindType::VAR_AUXILIARY,
+                                                     Moose::VarFieldType::VAR_FIELD_STANDARD)
+                                        .number(),
+                                    0);
 
       NumericVector<Number> & sln = _aux.solution();
       Real nx = sln(dof_x);

@@ -52,7 +52,7 @@
 []
 
 [Executioner]
-  type = Steady
+  type = Transient
   solve_type = 'NEWTON'
 []
 

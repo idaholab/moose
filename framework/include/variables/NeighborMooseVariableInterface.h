@@ -26,7 +26,11 @@ public:
    * @param parameters Parameters that come from constructing the object
    * @param nodal true if the variable is nodal
    */
-  NeighborMooseVariableInterface(const MooseObject * moose_object, bool nodal);
+  NeighborMooseVariableInterface(
+      const MooseObject * moose_object,
+      bool nodal,
+      Moose::VarKindType expected_var_type = Moose::VarKindType::VAR_ANY,
+      Moose::VarFieldType expected_var_field_type = Moose::VarFieldType::VAR_FIELD_STANDARD);
 
   virtual ~NeighborMooseVariableInterface();
 

@@ -78,7 +78,8 @@ InterfaceKernel::InterfaceKernel(const InputParameters & parameters)
     FunctionInterface(this),
     UserObjectInterface(this),
     NeighborCoupleableMooseVariableDependencyIntermediateInterface(this, false, false),
-    NeighborMooseVariableInterface<Real>(this, false),
+    NeighborMooseVariableInterface<Real>(
+        this, false, Moose::VarKindType::VAR_NONLINEAR, Moose::VarFieldType::VAR_FIELD_STANDARD),
     Restartable(this, "InterfaceKernels"),
     MeshChangedInterface(parameters),
     TwoMaterialPropertyInterface(this, boundaryIDs()),

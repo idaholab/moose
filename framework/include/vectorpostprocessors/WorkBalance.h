@@ -40,8 +40,10 @@ public:
   virtual void finalize() override;
 
 protected:
-  // The system to count DoFs from
+  /// The system to count DoFs from
   int _system;
+
+  bool _sync_to_all_procs;
 
   dof_id_type _local_num_elems;
   dof_id_type _local_num_nodes;

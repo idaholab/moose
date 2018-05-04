@@ -27,10 +27,11 @@ validParams<VariableResidual>()
 
 VariableResidual::VariableResidual(const InputParameters & parameters)
   : GeneralPostprocessor(parameters),
-    _var(_fe_problem.getVariable(_tid, getParam<VariableName>("variable")))
+    _var(_fe_problem.getVariable(_tid,
+                                 getParam<VariableName>("variable"),
+                                 Moose::VarKindType::VAR_NONLINEAR,
+                                 Moose::VarFieldType::VAR_FIELD_STANDARD))
 {
-  if (_var.kind() != Moose::VAR_NONLINEAR)
-    mooseError(name(), ": Residual can be computed only for nonlinear variables.");
 }
 
 void

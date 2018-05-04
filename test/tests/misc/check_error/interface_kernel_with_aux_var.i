@@ -33,7 +33,7 @@
     type = InterfaceDiffusion
     variable = v
     neighbor_var = u
-    boundary = master0_interface
+    boundary = 'left'
     D = 4
     D_neighbor = 2
   [../]

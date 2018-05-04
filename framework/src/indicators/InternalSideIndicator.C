@@ -48,7 +48,8 @@ InternalSideIndicator::InternalSideIndicator(const InputParameters & parameters)
   : Indicator(parameters),
     NeighborCoupleable(this, false, false),
     ScalarCoupleable(this),
-    NeighborMooseVariableInterface(this, false),
+    NeighborMooseVariableInterface(
+        this, false, Moose::VarKindType::VAR_ANY, Moose::VarFieldType::VAR_FIELD_STANDARD),
     _field_var(_sys.getVariable(_tid, name())),
 
     _current_elem(_assembly.elem()),

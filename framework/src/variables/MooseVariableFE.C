@@ -1512,5 +1512,12 @@ MooseVariableFE<OutputType>::computeNodalNeighborValues()
   }
 }
 
+template <typename OutputType>
+bool
+MooseVariableFE<OutputType>::isVector() const
+{
+  return std::is_same<OutputType, RealVectorValue>::value;
+}
+
 template class MooseVariableFE<Real>;
 template class MooseVariableFE<RealVectorValue>;

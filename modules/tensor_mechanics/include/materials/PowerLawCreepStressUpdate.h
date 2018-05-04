@@ -44,6 +44,13 @@ protected:
 
   virtual Real computeResidual(const Real effective_trial_stress, const Real scalar) override;
   virtual Real computeDerivative(const Real effective_trial_stress, const Real scalar) override;
+  virtual Real computeStressDerivative(const Real effective_trial_stress,
+                                       const Real scalar) override;
+
+  virtual TangentCalculationMethod getTangentCalculationMethod() override
+  {
+    return TangentCalculationMethod::PARTIAL;
+  }
 
   /// String that is prepended to the creep_strain Material Property
   const std::string _creep_prepend;

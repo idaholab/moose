@@ -49,8 +49,14 @@ RichardsMultiphaseProblem::initialSetup()
 {
   // the first argument to getVariable is threadID - i hope the following always works
   unsigned int tid = 0;
-  MooseVariableFEBase & bounded = getVariable(tid, _bounded_var_name);
-  MooseVariableFEBase & lower = getVariable(tid, _lower_var_name);
+
+  // We are going to do more specific checks below, hence allowing
+  // more specific error messages to be printed in case something goes
+  // wrong. Therefore we just pass VAR_ANY here.
+  MooseVariableFEBase & bounded = getVariable(
+      tid, _bounded_var_name, Moose::VarKindType::VAR_ANY, Moose::VarFieldType::VAR_FIELD_STANDARD);
+  MooseVariableFEBase & lower = getVariable(
+      tid, _lower_var_name, Moose::VarKindType::VAR_ANY, Moose::VarFieldType::VAR_FIELD_STANDARD);
 
   // some checks
   if (!bounded.isNodal() || !lower.isNodal())

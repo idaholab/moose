@@ -22,8 +22,12 @@ validParams<LevelSetCutUserObject>()
 
 LevelSetCutUserObject::LevelSetCutUserObject(const InputParameters & parameters)
   : GeometricCutUserObject(parameters),
-    _level_set_var_number(
-        _subproblem.getVariable(_tid, parameters.get<VariableName>("level_set_var")).number()),
+    _level_set_var_number(_subproblem
+                              .getVariable(_tid,
+                                           parameters.get<VariableName>("level_set_var"),
+                                           Moose::VarKindType::VAR_ANY,
+                                           Moose::VarFieldType::VAR_FIELD_STANDARD)
+                              .number()),
     _system(_subproblem.getSystem(getParam<VariableName>("level_set_var"))),
     _solution(_system.current_local_solution.get())
 {

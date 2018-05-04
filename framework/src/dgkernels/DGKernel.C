@@ -73,7 +73,8 @@ DGKernel::DGKernel(const InputParameters & parameters)
     FunctionInterface(this),
     UserObjectInterface(this),
     NeighborCoupleableMooseVariableDependencyIntermediateInterface(this, false, false),
-    NeighborMooseVariableInterface(this, false),
+    NeighborMooseVariableInterface(
+        this, false, Moose::VarKindType::VAR_NONLINEAR, Moose::VarFieldType::VAR_FIELD_STANDARD),
     TwoMaterialPropertyInterface(this, blockIDs(), boundaryIDs()),
     Restartable(this, "DGKernels"),
     MeshChangedInterface(parameters),
@@ -129,7 +130,10 @@ DGKernel::DGKernel(const InputParameters & parameters)
 
   for (unsigned int i = 0; i < _save_in_strings.size(); i++)
   {
-    MooseVariableFEBase * var = &_subproblem.getVariable(_tid, _save_in_strings[i]);
+    MooseVariableFEBase * var = &_subproblem.getVariable(_tid,
+                                                         _save_in_strings[i],
+                                                         Moose::VarKindType::VAR_AUXILIARY,
+                                                         Moose::VarFieldType::VAR_FIELD_STANDARD);
 
     if (_sys.hasVariable(_save_in_strings[i]))
       mooseError("Trying to use solution variable " + _save_in_strings[i] +
@@ -150,7 +154,10 @@ DGKernel::DGKernel(const InputParameters & parameters)
 
   for (unsigned int i = 0; i < _diag_save_in_strings.size(); i++)
   {
-    MooseVariableFEBase * var = &_subproblem.getVariable(_tid, _diag_save_in_strings[i]);
+    MooseVariableFEBase * var = &_subproblem.getVariable(_tid,
+                                                         _diag_save_in_strings[i],
+                                                         Moose::VarKindType::VAR_NONLINEAR,
+                                                         Moose::VarFieldType::VAR_FIELD_STANDARD);
 
     if (_sys.hasVariable(_diag_save_in_strings[i]))
       mooseError("Trying to use solution variable " + _diag_save_in_strings[i] +
