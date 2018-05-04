@@ -5,19 +5,31 @@ The Porous Flow module includes a very flexible boundary condition that allows m
 scenarios to be modelled. The boundary condition is built by adding various options to a basic
 sink in the following way.
 
+## Basic sink formulation
+
 The basic sink is
 \begin{equation}
 s = f(t, x) \ ,
 \end{equation}
 where $f$ is a MOOSE Function of time and position on the boundary.
 
-If $f>0$ then the boundary condition will act as a sink, while if $f<0$ the boundary
-condition acts as a source.  If applied to a fluid-component equation, the function
-$f$ has units kg.m$^{-2}$.s$^{-1}$.  If applied to the heat equation, the function
-$f$ has units J.m$^{-2}$.s$^{-1}$.  These units are potentially modified if the extra
-building blocks enumerated below are used.
+If $f>0$ then the boundary condition will act as a sink, while if
+$f<0$ the boundary condition acts as a source.  If applied to a
+fluid-component equation, the function $f$ has units
+kg.m$^{-2}$.s$^{-1}$.  If applied to the heat equation, the function
+$f$ has units J.m$^{-2}$.s$^{-1}$.  The units of $f$ are potentially
+modified if the extra building blocks enumerated below are used (but
+the units of the final result, $s$, will always be
+kg.m$^{-2}$.s$^{-1}$ or J.m$^{-2}$.s$^{-1}$).
+
+If the fluid flow through the boundary is required, use the `save_in`
+command which will save the sink strength $s$ to an AuxVariable.  If
+the total flux (kg.s$^{-1}$ or J.s$^{-1}$) is required, integrate the
+AuxVariable over the boundary using a Postprocessor.
 
 This basic sink boundary condition is implemented in [`PorousFlowSink`](PorousFlowSink.md).
+
+## More elaborate options
 
 The basic sink may be multiplied by a MOOSE Function of the pressure
 of a fluid phase *or* the temperature:
@@ -30,13 +42,11 @@ J.m$^{-1}$.s$^{-1}$ (for heat).  $P_{\mathrm{e}}$ and $T_{\mathrm{e}}$ are refer
 may be AuxVariables to allow spatial and temporal variance.  Some commonly use forms have been
 hard-coded into the Porous Flow module for ease of use in simulations:
 
-- A piecewise linear function (for simulating fluid or heat exchange with an external
-  environment via a conductivity term, for instance), implemented in
-  [`PorousFlowPiecewiseLinearSink`](PorousFlowPiecewiseLinearSink.md)
-- A half-gaussian (for simulating evapotranspiration, for
-  instance), implemented in [`PorousFlowHalfGaussianSink`](PorousFlowHalfGaussianSink.md)
-- A half-cubic (for simulating evapotranspiration, for example), implemented in
-  [`PorousFlowHalfCubicSink`](PorousFlowHalfCubicSink.md)
+- A piecewise linear function (for simulating fluid or heat exchange with an external environment via a conductivity term, for instance), implemented in [`PorousFlowPiecewiseLinearSink`](PorousFlowPiecewiseLinearSink.md)
+
+- A half-gaussian (for simulating evapotranspiration, for instance), implemented in [`PorousFlowHalfGaussianSink`](PorousFlowHalfGaussianSink.md)
+
+- A half-cubic (for simulating evapotranspiration, for example), implemented in [`PorousFlowHalfCubicSink`](PorousFlowHalfCubicSink.md)
 
 In addition, the sink may be multiplied by any or all of the following
 quantities
@@ -47,17 +57,17 @@ quantities
 - Fluid internal energy
 - Thermal conductivity
 
-## Example: fixing fluid porepressures using the PorousFlowSink
+## Fixing fluid porepressures using the PorousFlowSink
 
 Frequently in PorousFlow simulations fixing fluid porepressures using
 Dirichlet conditions is inappropriate.
 
-  * Physically a Dirichlet condition corresponds to an environment
+- Physically a Dirichlet condition corresponds to an environment
   outside a model providing a limitless source (or sink) of fluid and
   that does not happen in reality.
-  * The Variables used may not be porepressure, so a straightforward
+- The Variables used may not be porepressure, so a straightforward
   translation to ``fixing porepressure'' is not easy.
-  * The Dirichlet condition can lead to extremely poor convergence
+- The Dirichlet condition can lead to extremely poor convergence
   as it forces areas near the boundary close to unphysical or unlikely
   regions in parameter space.
 
@@ -99,17 +109,18 @@ fluid is rapidly removed or added to the system by the environment to
 ensure $P=P_{\mathrm{e}}$).  If $L\sim\infty$ the boundary flux is
 almost zero and does nothing.
 
-Eq \eqref{eq:fix_pp_bc} may
-be implemented in a number of ways.  A
-[`PorousFlowPiecewiseLinearSink`](PorousFlowPiecewiseLinearSink.md)
+[eq:fix_pp_bc] may be implemented in a number of ways, the 2 most
+common being the following.
+
+A [`PorousFlowPiecewiseLinearSink`](PorousFlowPiecewiseLinearSink.md)
 may be constructed that models
 \begin{equation}
 f = C (P -
 P_{\mathrm{e}}) \ ,
 \end{equation}
-that is, with `pt_vals = '-1E9
-1E9'` and `multipliers = '-C C'` (the `1E9` is just an example: the
-point is that it should be much greater than any expected
+that is, with `pt_vals = '-1E9 1E9'`, `multipliers = '-1E9 1E9'`,
+`PT_shift = Pe` and `flux_function = C`.  Here the `1E9` is just an
+example: the point is that it should be much greater than any expected
 porepressure) and $P_{\mathrm{e}}$ provided by an AuxVariable (or set
 to a constant value).  The numerical value of the conductance, $C$, is
 $\rho k_{nn}k_{\mathrm{r}}/\mu/L$, must be set at an appropriate value
@@ -117,24 +128,14 @@ for the model.
 
 Alternately, a
 [`PorousFlowPiecewiseLinearSink`](PorousFlowPiecewiseLinearSink.md)
-may be constructed that has `use_mobility = true` and `use_relperm =
+may be constructed with the same `pt_vals`, `multipliers` and `PT_shift`, but with `use_mobility = true` and `use_relperm =
 true`, and then $C = 1/L$.  This has three advantages: (1) the MOOSE
 input file is simpler; (2) MOOSE automatically chooses the correct
 mobility and relative permeability to use; (3) these parameters are
 appropriate to the model so it reduces the potential for difficult
 numerical situations occuring.
 
-Finally, if $P_{\mathrm{e}}$ is varying over the boundary it must be constructed as an AuxVariable.  An alternative is to split the flux
-\begin{equation}
-f = CP - CP_{\mathrm{e}}\ .
-\end{equation}
-Two PorousFlowSinks may be used.  The first term is a
-`PorousFlowPiecewiseLinearSink` as just described (with
-$P_{\mathrm{e}} = 0$).  The second term is a plain
-[`PorousFlowSink`](PorousFlowSink.md) with a
-`flux_function` that is exactly equal to $P_{\mathrm{e}}$.
-
-## Example: injection of fluid at a fixed temperature
+## Injection of fluid at a fixed temperature
 
 A boundary condition corresponding to injection of fluid at a fixed temperature
 could involve: (1) using a Dirichlet condition for temperature; (2) using $f=-1$ without any

@@ -17,9 +17,9 @@ in the input file), while internal energy and enthalpy are given by
 \end{equation}
 and
 \begin{equation}
-  h = e + \frac{p}{\rho}
+  h = e + \gamma\frac{p}{\rho}
 \end{equation}
-respectively.
+respectively.  Here $\gamma$ is called the `porepressure_coefficient`: usually it should be set to $1$ but many analytical studies assume $\gamma=0$.
 
 !syntax parameters /Modules/FluidProperties/SimpleFluidProperties
 
