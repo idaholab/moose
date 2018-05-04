@@ -6,6 +6,14 @@
     abs_zero = 1e-09
     method = 'OPT OPROF' # Test is too big for debug, but kept as is to match the published journal soln
   [../]
+  [./combined_start_time]
+    type = 'Exodiff'
+    input = 'combined_creep_plasticity_start_time.i'
+    exodiff = 'combined_creep_plasticity_start_time_out.e'
+    abs_zero = 1e-09
+    method = 'OPT OPROF' # Test is too big for debug, but kept as is to match the published journal soln
+    custom_cmp = start_time.cmp
+  [../]
   [./stress_prescribed]
     type = 'Exodiff'
     input = 'combined_stress_prescribed.i'

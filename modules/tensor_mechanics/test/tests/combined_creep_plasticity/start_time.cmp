@@ -1,0 +1,43 @@
+
+#  *****************************************************************
+#             EXODIFF	(Version: 2.83) Modified: 2015-08-20
+#             Authors:  Richard Drake, rrdrake@sandia.gov
+#                       Greg Sjaardema, gdsjaar@sandia.gov
+#             Run on    2018/05/03   15:41:27 MDT
+#  *****************************************************************
+
+#  FILE 1: /Users/topher/projects/moose/modules/tensor_mechanics/test/tests/combined_creep_plasticity/combined_creep_plasticity_start_time_out.e
+#   Title: combined_creep_plasticity_start_time_out.e
+#          Dim = 3, Blocks = 1, Nodes = 8, Elements = 1, Nodesets = 6, Sidesets = 6
+#          Vars: Global = 0, Nodal = 3, Element = 4, Nodeset = 0, Sideset = 0, Times = 190
+
+
+# ==============================================================
+#  NOTE: All node and element ids are reported as global ids.
+
+# NOTES:  - The min/max values are reporting the min/max in absolute value.
+#         - Time values (t) are 1-offset time step numbers.
+#         - Element block numbers are the block ids.
+#         - Node(n) and element(e) numbers are 1-offset.
+
+COORDINATES absolute 1.e-6    # min separation not calculated
+
+TIME STEPS relative 1 floor 0.0     # min:              10 @ t1 max:            11.5 @ t190
+
+
+# No GLOBAL VARIABLES
+
+NODAL VARIABLES relative 1.e-6 floor 0.0
+	disp_x  # min:               0 @ t1,n1	max:       0.7928166 @ t190,n2
+	disp_y  # min:               0 @ t1,n1	max:       22.533442 @ t190,n4
+	disp_z  # min:               0 @ t1,n1	max:       0.7928166 @ t190,n8
+
+ELEMENT VARIABLES relative 1.e-6 floor 0.0
+	stress_yy          # min:               0 @ t1,b0,e1	max:              40 @ t90,b0,e1
+	elastic_strain_yy  # min:               0 @ t1,b0,e1	max:            0.04 @ t90,b0,e1
+	creep_strain_yy    # min:               0 @ t1,b0,e1	max:        2.935556 @ t190,b0,e1
+	plastic_strain_yy  # min:               0 @ t1,b0,e1	max:             0.2 @ t90,b0,e1
+
+# No NODESET VARIABLES
+
+# No SIDESET VARIABLES
