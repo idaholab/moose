@@ -11,8 +11,6 @@
 []
 
 [Variables]
-  active = 'u'
-
   [./u]
     order = FIRST
     family = LAGRANGE
@@ -20,8 +18,6 @@
 []
 
 [Kernels]
-  active = 'diff forcing dot'
-
   [./diff]
     type = Diffusion
     variable = u
@@ -39,8 +35,6 @@
 []
 
 [BCs]
-  #active = ' '
-
   [./Periodic]
     [./x]
       variable = u
@@ -70,4 +64,3 @@
   file_base = out
   exodus = true
 []
-
