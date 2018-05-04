@@ -45,7 +45,7 @@ To model this thermo-hydro system, the `PorousFlowBasicTHM` action needs to be e
 
 !listing modules/porous_flow/examples/tutorial/03.i start=[Variables] end=[BCs]
 
-and some extra properties need to be added to the `SimpleFluidProperties`:
+and some extra properties need to be added to the [`SimpleFluidProperties`](SimpleFluidProperties.md):
 
 !listing modules/porous_flow/examples/tutorial/03.i start=[Modules] end=[Materials]
 
