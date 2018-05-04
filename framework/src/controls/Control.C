@@ -9,6 +9,7 @@
 
 // MOOSE includes
 #include "Control.h"
+#include "InputParameterWarehouse.h"
 
 template <>
 InputParameters
@@ -53,4 +54,41 @@ Control::getExecuteOptions()
   ExecFlagEnum execute_on = MooseUtils::getDefaultExecFlagEnum();
   execute_on = {EXEC_INITIAL, EXEC_TIMESTEP_END};
   return execute_on;
+}
+
+ControllableParameter
+Control::getControllableParameterByName(const std::string & param_name)
+{
+  MooseObjectParameterName desired(param_name);
+  return getControllableParameterByName(desired);
+}
+
+ControllableParameter
+Control::getControllableParameterByName(const std::string & tag,
+                                        const std::string & object_name,
+                                        const std::string & param_name)
+{
+  MooseObjectParameterName desired(tag, object_name, param_name);
+  return getControllableParameterByName(desired);
+}
+
+ControllableParameter
+Control::getControllableParameterByName(const MooseObjectName & object_name,
+                                        const std::string & param_name)
+{
+  MooseObjectParameterName desired(object_name, param_name);
+  return getControllableParameterByName(desired);
+}
+
+ControllableParameter
+Control::getControllableParameterByName(const MooseObjectParameterName & param_name)
+{
+  ControllableParameter out = _input_parameter_warehouse.getControllableParameter(param_name);
+  if (out.empty())
+    mooseError("The desired parameter '",
+               param_name,
+               "' was not located for the '",
+               name(),
+               "' object, it either does not exist or has not been declared as controllable.");
+  return out;
 }

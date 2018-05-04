@@ -30,7 +30,6 @@ validParams<MooseObject>()
       "control_tags",
       "Adds user-defined labels for accessing object parameters via control logic.");
   params.addParamNamesToGroup("enable control_tags", "Advanced");
-
   params.addPrivateParam<std::string>("_object_name"); // the name passed to Factory::create
   params.addPrivateParam<FEProblem *>("_fe_problem");
   params.addPrivateParam<FEProblemBase *>("_fe_problem_base");
@@ -41,7 +40,6 @@ validParams<MooseObject>()
   params.addPrivateParam<AuxiliarySystem *>("_aux_sys");
   params.addPrivateParam<Transient *>("_executioner");
   params.addPrivateParam<THREAD_ID>("_tid");
-
   return params;
 }
 

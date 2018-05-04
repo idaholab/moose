@@ -35,8 +35,7 @@ protected:
    * Return the SamplerReceiver object and perform error checking.
    * @param app_index The global sup-app index
    */
-  SamplerReceiver * getReceiver(unsigned int app_index,
-                                const std::vector<DenseMatrix<Real>> & samples);
+  SamplerReceiver * getReceiver(unsigned int app_index);
 
   /// Storage for the list of parameters to control
   const std::vector<std::string> & _parameter_names;

@@ -14,136 +14,121 @@
 #include "InputParameters.h"
 #include "MooseObjectName.h"
 #include "MooseObjectParameterName.h"
+#include "ControllableItem.h"
 
 /**
- * A class for accessing controllable InputParameters.
+ * The ControllableParameter class is simply a set of ControllableItem objects. This object
+ * is what is used from within a Control for setting input parameter values. These objects are
+ * made on demand by the Control objects.
  *
- * This class is used within Control objects for returning sets
- * of InputParaemeters.
+ * This class is needed to allow for multiple parameters to be set with a single interface.
  */
-template <typename T>
+
 class ControllableParameter
 {
 public:
-  /**
-   * Constructor.
-   *
-   * The construct does nothing, items must be added via
-   * the insert method.
-   *
-   * @see ControlInterface
-   */
-  ControllableParameter();
+  ControllableParameter() = default;
+  virtual ~ControllableParameter() = default;
+
+  ControllableParameter(ControllableParameter &&) = default;
+  ControllableParameter(const ControllableParameter &) = delete;
+  ControllableParameter & operator=(const ControllableParameter &) = delete;
+  ControllableParameter & operator=(ControllableParameter &&) = delete;
 
   /**
-   * The number of parameters contained in the class.
+   * Return true if the container is empty.
    */
-  std::size_t size() const { return _parameter_values.size(); }
+  bool empty() { return _items.size() == 0; }
+
+  /**
+   * Return a string that lists the parameters stored by this object.
+   *
+   * This is used by ControlInterface::getControlParamByName for error reporting.
+   */
+  std::string dump() const;
 
   /**
    * Set the value(s) of the controlled parameters stored in this class.
    * @param value The value to change the parameters to.
    */
-  void set(const T & value);
+  template <typename T>
+  void set(const T & value, bool type_check = true);
 
   /**
-   * Retrieve a copy of the parameter values controlled by this class.
+   * Return a copy of the values of the given type.
    */
-  const std::vector<T *> & get() const;
+  template <typename T>
+  std::vector<T> get(bool type_check = true, bool warn_when_values_difffer = false) const;
 
   /**
-   * Return a string that lists the parameters stored by this object.
-   *
-   * This is used by ControlInterface::getControlParamByName for error
-   * reporting.
+   * Check size() and the type of the stored items, i.e., there must be items with the given type.
    */
-  std::string dump();
+  template <typename T>
+  bool check();
 
   /**
-   * Adds a parameter to the container.
-   *
-   * @see ControlInterface
+   * Adds the supplied item with the other items within this object.
    */
-  void insert(const MooseObjectParameterName & name, std::shared_ptr<InputParameters> param_object);
+  void add(ControllableItem * item);
+
+  /// Allows this to be used with std:: cout
+  friend std::ostream & operator<<(std::ostream & stream, const ControllableParameter & obj);
 
 private:
-  /// Vector of pointers to the parameters stored in this object for control.
-  std::vector<T *> _parameter_values;
-
-  /// Map of the possible names associated with the parameters stored for control.
-  std::multimap<T *, MooseObjectParameterName> _parameter_names;
+  /// Storage for the ControllableItems, these are stored as pointers to avoid copies.
+  std::vector<ControllableItem *> _items;
 };
 
 template <typename T>
-ControllableParameter<T>::ControllableParameter()
-{
-}
-
-template <typename T>
 void
-ControllableParameter<T>::insert(const MooseObjectParameterName & name,
-                                 std::shared_ptr<InputParameters> param_object)
+ControllableParameter::set(const T & value, bool type_check /*=true*/)
 {
-  // Get a pointer to the Parameter
-  T * param_ptr = &param_object->template set<T>(name.parameter());
-
-  // Search for the pointer in the existing multimap
-  typename std::multimap<T *, MooseObjectParameterName>::iterator iter =
-      _parameter_names.find(param_ptr);
-
-  // If the pointer does not exist, add it
-  if (iter == _parameter_names.end())
-    _parameter_values.push_back(param_ptr);
-
-  // Update the object names
-  _parameter_names.insert(std::pair<T *, MooseObjectParameterName>(param_ptr, name));
+  for (ControllableItem * item : _items)
+    item->set<T>(value, type_check);
 }
 
 template <typename T>
-void
-ControllableParameter<T>::set(const T & value)
+std::vector<T>
+ControllableParameter::get(bool type_check /*=true*/, bool warn_when_values_differ) const
 {
-  typename std::vector<T *>::iterator iter;
-  for (unsigned int i = 0; i < _parameter_values.size(); i++)
-    *_parameter_values[i] = value;
-}
-
-template <typename T>
-const std::vector<T *> &
-ControllableParameter<T>::get() const
-{
-  return _parameter_values;
-}
-
-template <typename T>
-std::string
-ControllableParameter<T>::dump()
-{
-  // Count of objects, for printing a number with the parameter
-  unsigned int index = 0;
-
-  // The output stream
-  std::ostringstream oss;
-
-  // Loop through each pointer
-  typename std::vector<T *>::iterator iter;
-  for (iter = _parameter_values.begin(); iter != _parameter_values.end(); iter++)
+  std::vector<T> output;
+  for (const ControllableItem * const item : _items)
   {
-    // Get the list of names associated with the parameter
-    std::pair<typename std::multimap<T *, MooseObjectParameterName>::const_iterator,
-              typename std::multimap<T *, MooseObjectParameterName>::const_iterator>
-        range = _parameter_names.equal_range(*iter);
-    typename std::multimap<T *, MooseObjectParameterName>::const_iterator jt;
-
-    // Print each parameter as a list of possible names
-    oss << "(" << index << ") ";
-    for (jt = range.first; jt != range.second; ++jt)
-      oss << jt->second << " ";
-    oss << "\n";
-    index++;
+    std::vector<T> local = item->get<T>(type_check);
+    output.insert(output.end(), local.begin(), local.end());
   }
 
-  return oss.str();
+  // Produce a warning, if the flag is true, when multiple parameters have different values
+  if (warn_when_values_differ && _items.size() > 1)
+  {
+    // The first parameter to test against
+    const T value0 = output[0];
+
+    // Loop over all other parameter values
+    for (T value : output)
+    {
+      if (value0 != value)
+      {
+        std::ostringstream oss;
+        oss << "The following controlled parameters are being retrieved, but the values differ:\n";
+        oss << dump();
+        mooseWarning(oss.str());
+      }
+    }
+  }
+
+  return output;
 }
+
+template <typename T>
+bool
+ControllableParameter::check()
+{
+  bool type = std::all_of(
+      _items.begin(), _items.end(), [](ControllableItem * item) { return item->check<T>(); });
+  return type && !empty();
+}
+
+
 
 #endif // CONTROLLABLEPARAMETER_H

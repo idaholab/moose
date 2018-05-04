@@ -22,6 +22,7 @@ validParams<GenericConstantMaterial>()
                                             "The names of the properties this material will have");
   params.addParam<std::vector<Real>>("prop_values",
                                      "The values associated with the named properties");
+  params.declareControllable("prop_values");
   return params;
 }
 
