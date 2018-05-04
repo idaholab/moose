@@ -79,6 +79,7 @@
 #include "ShapeSideUserObject.h"
 #include "MooseVariableFE.h"
 #include "MooseVariableScalar.h"
+#include "InputParameterWarehouse.h"
 #include "TimeIntegrator.h"
 
 #include "libmesh/exodusII_io.h"
@@ -207,7 +208,7 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
     _has_exception(false),
     _parallel_barrier_messaging(true),
     _current_execute_on_flag(EXEC_NONE),
-    _control_warehouse(_app.getExecuteOnEnum()),
+    _control_warehouse(_app.getExecuteOnEnum(), /*threaded=*/false),
     _error_on_jacobian_nonzero_reallocation(
         getParam<bool>("error_on_jacobian_nonzero_reallocation")),
     _ignore_zeros_in_jacobian(getParam<bool>("ignore_zeros_in_jacobian")),
@@ -2287,14 +2288,14 @@ FEProblemBase::addMaterial(const std::string & mat_name,
       else
         _materials.addObjects(material, neighbor_material, face_material, tid);
 
-      // link enabled parameter of face and neighbor materials
-      MooseObjectParameterName name(MooseObjectName("Material", material->name()), "enabled");
-      MooseObjectParameterName face_name(MooseObjectName("Material", face_material->name()),
-                                         "enabled");
+      // link parameters of face and neighbor materials
+      MooseObjectParameterName name(MooseObjectName("Material", material->name()), "*");
+      MooseObjectParameterName face_name(MooseObjectName("Material", face_material->name()), "*");
       MooseObjectParameterName neighbor_name(MooseObjectName("Material", neighbor_material->name()),
-                                             "enabled");
-      _app.getInputParameterWarehouse().addControllableParameterConnection(name, face_name);
-      _app.getInputParameterWarehouse().addControllableParameterConnection(name, neighbor_name);
+                                             "*");
+      _app.getInputParameterWarehouse().addControllableParameterConnection(name, face_name, false);
+      _app.getInputParameterWarehouse().addControllableParameterConnection(
+          name, neighbor_name, false);
     }
   }
 }

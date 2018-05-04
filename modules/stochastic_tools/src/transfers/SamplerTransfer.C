@@ -66,21 +66,22 @@ SamplerTransfer::execute()
       continue;
 
     // Get the sub-app SamplerReceiver object and perform error checking
-    SamplerReceiver * ptr = getReceiver(app_index, samples);
+    SamplerReceiver * ptr = getReceiver(app_index);
+
+    // Populate the row of data to transfer
+    std::pair<unsigned int, unsigned int> loc = _multi_app_matrix_row[app_index];
+    std::vector<Real> row;
+    row.reserve(samples[loc.first].n());
+    for (unsigned int j = 0; j < samples[loc.first].n(); ++j)
+      row.emplace_back(samples[loc.first](loc.second, j));
 
     // Perform the transfer
-    std::pair<unsigned int, unsigned int> loc = _multi_app_matrix_row[app_index];
-    ptr->reset(); // clears existing parameter settings
-    for (auto j = beginIndex(_parameter_names); j < _parameter_names.size(); ++j)
-    {
-      const Real & data = samples[loc.first](loc.second, j);
-      ptr->addControlParameter(_parameter_names[j], data);
-    }
+    ptr->transfer(_parameter_names, row);
   }
 }
 
 SamplerReceiver *
-SamplerTransfer::getReceiver(unsigned int app_index, const std::vector<DenseMatrix<Real>> & samples)
+SamplerTransfer::getReceiver(unsigned int app_index)
 {
   // Test that the sub-application has the given Control object
   FEProblemBase & to_problem = _multi_app->appProblemBase(app_index);
@@ -100,17 +101,6 @@ SamplerTransfer::getReceiver(unsigned int app_index, const std::vector<DenseMatr
         "The sub-application (",
         _multi_app->name(),
         ") Control object for the 'to_control' parameter must be of type 'SamplerReceiver'.");
-
-  // Test the size of parameter list with the number of columns in Sampler matrix
-  std::pair<unsigned int, unsigned int> loc = _multi_app_matrix_row[app_index];
-  if (_parameter_names.size() != samples[loc.first].n())
-    mooseError("The number of parameters (",
-               _parameter_names.size(),
-               ") does not match the number of columns (",
-               samples[loc.first].n(),
-               ") in the Sampler data matrix with index ",
-               loc.first,
-               ".");
 
   return ptr;
 }

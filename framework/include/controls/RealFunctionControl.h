@@ -37,9 +37,6 @@ public:
 private:
   /// The function to execute
   Function & _function;
-
-  /// Vector of parameters to change
-  ControllableParameter<Real> _parameters;
 };
 
 #endif // REALFUNCTIONCONTROL_H

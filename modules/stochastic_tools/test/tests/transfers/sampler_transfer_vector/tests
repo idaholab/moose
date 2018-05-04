@@ -1,0 +1,29 @@
+[Tests]
+  [./monte_carlo]
+    type = CSVDiff
+    input = master.i
+    csvdiff = 'master_out_sub0.csv master_out_sub1.csv master_out_sub2.csv master_out_sub3.csv master_out_sub4.csv'
+  [../]
+  [./not_enough_data]
+    type = RunException
+    input = master_not_enough_data.i
+    expect_err = "The supplied vector of Real values is not sized correctly, the std::vector<Real> parameter 'Materials/mat/prop_values requires 2 values but only 1 are available in the supplied vector."
+  [../]
+  [./size_mismatch]
+    type = RunException
+    input = master_size_mismatch.i
+    expect_err = "The std::vector<Real> parameters being controlled must all be the same size:"
+  [../]
+  [./invalid_name]
+    type = RunException
+    input = master.i
+    cli_args = "Transfers/sub/parameters=foo :Outputs/csv=false"
+    expect_err = "The desired parameter 'foo' was not located for the 'stochastic' object, it either does not exist or has not been declared as controllable."
+  [../]
+  [./extra_data]
+    type = RunException
+    input = master.i
+    cli_args = "Transfers/sub/parameters='BCs/left/value' :Outputs/csv=false"
+    expect_err = "The number of values supplied \(4\) does not match the number of values consumed by setting parameter values \(1\)."
+  [../]
+[]

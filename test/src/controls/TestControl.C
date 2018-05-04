@@ -9,6 +9,7 @@
 
 #include "TestControl.h"
 #include "FEProblem.h"
+#include "InputParameterWarehouse.h"
 
 registerMooseObject("MooseTestApp", TestControl);
 
@@ -55,7 +56,7 @@ TestControl::TestControl(const InputParameters & parameters)
   else if (_test_type == "alias")
   {
     MooseObjectParameterName slave(MooseObjectName("BCs", "left"), "value");
-    _app.getInputParameterWarehouse().addControllableParameterConnection(_alias, slave);
+    _app.getInputParameterWarehouse().addControllableParameterAlias(_alias, slave);
   }
 
   else if (_test_type == "mult")
