@@ -159,6 +159,24 @@ InputParameters::operator+=(const InputParameters & rhs)
 }
 
 void
+InputParameters::IKnowIShouldntCopyTheseParametersButImGoingToDoItAnyway(
+    InputParameters & copy_into) const
+{
+  copy_into.Parameters::operator=(*this);
+
+  copy_into._params = _params;
+
+  copy_into._buildable_types = _buildable_types;
+  copy_into._buildable_rm_types = _buildable_rm_types;
+  copy_into._collapse_nesting = _collapse_nesting;
+  copy_into._moose_object_syntax_visibility = _moose_object_syntax_visibility;
+  copy_into._coupled_vars = _coupled_vars;
+  copy_into._allow_copy = true;
+  copy_into._block_fullpath = _block_fullpath;
+  copy_into._block_location = _block_location;
+}
+
+void
 InputParameters::addCoupledVar(const std::string & name, Real value, const std::string & doc_string)
 {
   // std::vector<VariableName>(1, Moose::stringify(value)),
