@@ -21,7 +21,7 @@ TimeFunctionControl::TimeFunctionControl(const InputParameters & parameters)
   : RELAP7Control(parameters),
     _component_name(getParam<std::string>("component")),
     _param_name(getParam<std::string>("parameter")),
-    _ctrl_param_name("component/" + _component_name + "/" + _param_name),
+    _ctrl_param_name("component", _component_name, _param_name),
     _function(getFunction("function"))
 {
 }
