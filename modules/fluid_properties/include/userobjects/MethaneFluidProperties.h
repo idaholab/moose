@@ -94,23 +94,15 @@ public:
 
   virtual void henryConstant_dT(Real temperature, Real & Kh, Real & dKh_dT) const override;
 
-  /**
-   * Methane critical pressure
-   * @return critical pressure (Pa)
-   */
-  virtual Real criticalPressure() const;
+  virtual Real criticalPressure() const override;
 
-  /**
-   * Methane critical temperature
-   * @return critical temperature (K)
-   */
-  virtual Real criticalTemperature() const;
+  virtual Real criticalTemperature() const override;
 
-  /**
-   * Methane critical density
-   * @return critical density (kg/m^3)
-   */
-  virtual Real criticalDensity() const;
+  virtual Real criticalDensity() const override;
+
+  virtual Real triplePointPressure() const override;
+
+  virtual Real triplePointTemperature() const override;
 
 protected:
   /// Methane molar mass (kg/mol)
@@ -121,6 +113,10 @@ protected:
   const Real _T_critical;
   /// Critical density (kg/m^3)
   const Real _rho_critical;
+  /// Triple point pressure (Pa)
+  const Real _p_triple;
+  /// Triple point temperature (K)
+  const Real _T_triple;
 
   /// Coefficients for enthalpy, cp etc
   const std::array<Real, 7> _a0 = {

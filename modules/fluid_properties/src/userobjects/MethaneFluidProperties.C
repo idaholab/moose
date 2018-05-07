@@ -28,7 +28,9 @@ MethaneFluidProperties::MethaneFluidProperties(const InputParameters & parameter
     _Mch4(16.0425e-3),
     _p_critical(4.5992e6),
     _T_critical(190.564),
-    _rho_critical(162.66)
+    _rho_critical(162.66),
+    _p_triple(1.169e4),
+    _T_triple(90.67)
 {
 }
 
@@ -62,6 +64,18 @@ Real
 MethaneFluidProperties::criticalDensity() const
 {
   return _rho_critical;
+}
+
+Real
+MethaneFluidProperties::triplePointPressure() const
+{
+  return _p_triple;
+}
+
+Real
+MethaneFluidProperties::triplePointTemperature() const
+{
+  return _T_triple;
 }
 
 Real

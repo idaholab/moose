@@ -43,47 +43,19 @@ public:
   Water97FluidProperties(const InputParameters & parameters);
   virtual ~Water97FluidProperties();
 
-  /**
-   * Fluid name
-   * @return "water"
-   */
   virtual std::string fluidName() const override;
 
-  /**
-   * Water molar mass
-   * @return molar mass (kg/mol)
-   */
   virtual Real molarMass() const override;
 
-  /**
-   * Water critical pressure
-   * @return critical pressure (Pa)
-   */
-  virtual Real criticalPressure() const;
+  virtual Real criticalPressure() const override;
 
-  /**
-   * Water critical temperature
-   * @return critical temperature (K)
-   */
-  virtual Real criticalTemperature() const;
+  virtual Real criticalTemperature() const override;
 
-  /**
-   * Water critical density
-   * @return critical density (kg/m^3)
-   */
-  virtual Real criticalDensity() const;
+  virtual Real criticalDensity() const override;
 
-  /**
-   * Water triple point pressure
-   * @return triple point pressure (Pa)
-   */
-  virtual Real triplePointPressure() const;
+  virtual Real triplePointPressure() const override;
 
-  /**
-   * Water triple point temperature
-   * @return triple point temperature (K)
-   */
-  virtual Real triplePointTemperature() const;
+  virtual Real triplePointTemperature() const override;
 
   virtual Real rho(Real pressure, Real temperature) const override;
 
@@ -149,35 +121,9 @@ public:
   virtual void
   h_dpT(Real pressure, Real temperature, Real & h, Real & dh_dp, Real & dh_dT) const override;
 
-  /**
-   * Saturation pressure as a function of temperature
-   *
-   * Eq. (30) from Revised Release on the IAPWS Industrial
-   * Formulation 1997 for the Thermodynamic Properties of Water
-   * and Steam
-   *
-   * Valid for 273.15 K <= t <= 647.096 K
-   *
-   * @param temperature water temperature (K)
-   * @return saturation pressure (Pa)
-   */
-  Real vaporPressure(Real temperature) const;
+  virtual Real vaporPressure(Real temperature) const override;
 
-  /**
-   * Saturation pressure as a function of temperature and derivative
-   * wrt temperature
-   *
-   * Eq. (30) from Revised Release on the IAPWS Industrial
-   * Formulation 1997 for the Thermodynamic Properties of Water
-   * and Steam
-   *
-   * Valid for 273.15 K <= t <= 647.096 K
-   *
-   * @param temperature water temperature (K)
-   * @param[out] saturation pressure (Pa)
-   * @param[out] derivative of saturation pressure wrt temperature (Pa/K)
-   */
-  void vaporPressure_dT(Real temperature, Real & psat, Real & dpsat_dT) const;
+  virtual void vaporPressure_dT(Real temperature, Real & psat, Real & dpsat_dT) const override;
 
   /**
    * Saturation temperature as a function of pressure

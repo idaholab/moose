@@ -10,6 +10,25 @@
 #include "Water97FluidPropertiesTest.h"
 
 /**
+ * Verify that critical properties are correctly returned
+ */
+TEST_F(Water97FluidPropertiesTest, criticalProperties)
+{
+  ABS_TEST("critical pressure", _fp->criticalPressure(), 22.064e6, 1.0e-12);
+  ABS_TEST("critical temperature", _fp->criticalTemperature(), 647.096, 1.0e-12);
+  ABS_TEST("critical density", _fp->criticalDensity(), 322.0, 1.0e-12);
+}
+
+/**
+ * Verify that triple point properties are correctly returned
+ */
+TEST_F(Water97FluidPropertiesTest, triplePointProperties)
+{
+  ABS_TEST("triple point pressure", _fp->triplePointPressure(), 611.657, 1.0e-12);
+  ABS_TEST("triple point temperature", _fp->triplePointTemperature(), 273.16, 1.0e-12);
+}
+
+/**
  * Verify that the correct region is provided for a given pressure and
  * temperature. Also verify that an error is thrown if pressure and temperature
  * are outside the range of validity

@@ -11,6 +11,25 @@
 #include "Utils.h"
 
 /**
+ * Verify that critical properties are correctly returned
+ */
+TEST_F(NaClFluidPropertiesTest, criticalProperties)
+{
+  ABS_TEST("critical pressure", _fp->criticalPressure(), 1.82e7, 1.0e-12);
+  ABS_TEST("critical temperature", _fp->criticalTemperature(), 3841.15, 1.0e-12);
+  ABS_TEST("critical density", _fp->criticalDensity(), 108.43, 1.0e-12);
+}
+
+/**
+ * Verify that triple point properties are correctly returned
+ */
+TEST_F(NaClFluidPropertiesTest, triplePointProperties)
+{
+  ABS_TEST("triple point pressure", _fp->triplePointPressure(), 50.0, 1.0e-12);
+  ABS_TEST("triple point temperature", _fp->triplePointTemperature(), 1073.85, 1.0e-12);
+}
+
+/**
  * Verify calculation of the NACL properties the solid halite phase.
  * Density data from Brown, "The NaCl pressure standard", J. Appl. Phys., 86 (1999).
  *

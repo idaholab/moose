@@ -78,37 +78,17 @@ public:
 
   virtual std::string fluidName() const override;
 
-  Real molarMass() const override;
+  virtual Real molarMass() const override;
 
-  /**
-   * CO2 critical pressure
-   * @return critical pressure (Pa)
-   */
-  Real criticalPressure() const;
+  virtual Real criticalPressure() const override;
 
-  /**
-   * CO2 critical temperature
-   * @return critical temperature (K)
-   */
-  Real criticalTemperature() const;
+  virtual Real criticalTemperature() const override;
 
-  /**
-   * CO2 critical density
-   * @return critical density (kg/m^3)
-   */
-  Real criticalDensity() const;
+  virtual Real criticalDensity() const override;
 
-  /**
-   * CO2 triple point pressure
-   * @return triple point pressure (Pa)
-   */
-  Real triplePointPressure() const;
+  virtual Real triplePointPressure() const override;
 
-  /**
-   * CO2 triple point temperature
-   * @return triple point temperature (K)
-   */
-  Real triplePointTemperature() const;
+  virtual Real triplePointTemperature() const override;
 
   /**
    * Melting pressure. Used to delineate solid and liquid phases
@@ -132,17 +112,7 @@ public:
    */
   Real sublimationPressure(Real temperature) const;
 
-  /**
-   * Vapor pressure. Used to delineate liquid and gas phases.
-   * Valid for temperatures between the triple point temperature
-   * and the critical temperature
-   *
-   * Eq. 3.13, from Span and Wagner (reference above)
-   *
-   * @param temperature CO2 temperature (K)
-   * @return vapor pressure (Pa)
-   */
-  Real vaporPressure(Real temperature) const;
+  virtual Real vaporPressure(Real temperature) const override;
 
   /**
    * Saturated liquid density of CO2

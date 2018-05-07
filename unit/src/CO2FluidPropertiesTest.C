@@ -11,6 +11,25 @@
 #include "Utils.h"
 
 /**
+ * Verify that critical properties are correctly returned
+ */
+TEST_F(CO2FluidPropertiesTest, criticalProperties)
+{
+  ABS_TEST("critical pressure", _fp->criticalPressure(), 7.3773e6, 1.0e-12);
+  ABS_TEST("critical temperature", _fp->criticalTemperature(), 304.1282, 1.0e-12);
+  ABS_TEST("critical density", _fp->criticalDensity(), 467.6, 1.0e-12);
+}
+
+/**
+ * Verify that triple point properties are correctly returned
+ */
+TEST_F(CO2FluidPropertiesTest, triplePointProperties)
+{
+  ABS_TEST("triple point pressure", _fp->triplePointPressure(), 0.51795e6, 1.0e-12);
+  ABS_TEST("triple point temperature", _fp->triplePointTemperature(), 216.592, 1.0e-12);
+}
+
+/**
  * Verify calculation of melting pressure using experimental data from
  * Michels et al, The melting line of carbon dioxide up to 2800 atmospheres,
  * Physica 9 (1942).
