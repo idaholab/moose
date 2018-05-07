@@ -42,9 +42,9 @@ public:
   RELAP7Control & getControl() const { return *_control; }
 
   /**
-   * Set the reference to the control object that declared this control data
+   * Set the pointer to the control object that declared this control data
    */
-  void setControl(RELAP7Control & ctrl) { _control = &ctrl; }
+  void setControl(RELAP7Control * ctrl) { _control = ctrl; }
 
   /**
    * Mark the data as declared
