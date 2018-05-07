@@ -8,7 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "PorousFlowWaterNCG.h"
-#include "Water97FluidProperties.h"
+#include "SinglePhaseFluidPropertiesPT.h"
 
 registerMooseObject("PorousFlowApp", PorousFlowWaterNCG);
 
@@ -26,7 +26,7 @@ validParams<PorousFlowWaterNCG>()
 
 PorousFlowWaterNCG::PorousFlowWaterNCG(const InputParameters & parameters)
   : PorousFlowFluidStateBase(parameters),
-    _water_fp(getUserObject<Water97FluidProperties>("water_fp")),
+    _water_fp(getUserObject<SinglePhaseFluidPropertiesPT>("water_fp")),
     _ncg_fp(getUserObject<SinglePhaseFluidPropertiesPT>("gas_fp")),
     _Mh2o(_water_fp.molarMass()),
     _Mncg(_ncg_fp.molarMass()),

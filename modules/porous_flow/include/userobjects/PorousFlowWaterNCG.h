@@ -12,7 +12,6 @@
 
 #include "PorousFlowFluidStateBase.h"
 
-class Water97FluidProperties;
 class SinglePhaseFluidPropertiesPT;
 class PorousFlowWaterNCG;
 
@@ -146,7 +145,7 @@ protected:
   void checkVariables(Real temperature) const;
 
   /// Fluid properties UserObject for water
-  const Water97FluidProperties & _water_fp;
+  const SinglePhaseFluidPropertiesPT & _water_fp;
   /// Fluid properties UserObject for the NCG
   const SinglePhaseFluidPropertiesPT & _ncg_fp;
   /// Molar mass of water (kg/mol)

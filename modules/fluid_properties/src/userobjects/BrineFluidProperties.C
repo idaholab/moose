@@ -23,15 +23,6 @@ validParams<BrineFluidProperties>()
 BrineFluidProperties::BrineFluidProperties(const InputParameters & parameters)
   : MultiComponentFluidPropertiesPT(parameters), _Mnacl(58.443e-3)
 {
-  // Water97FluidProperties UserObject for water (needed to access vapor pressure)
-  std::string water97_name = name() + ":water97";
-  {
-    std::string class_name = "Water97FluidProperties";
-    InputParameters params = _app.getFactory().getValidParams(class_name);
-    _fe_problem.addUserObject(class_name, water97_name, params);
-  }
-  _water97_fp = &_fe_problem.getUserObject<Water97FluidProperties>(water97_name);
-
   // SinglePhaseFluidPropertiesPT UserObject for water to provide to getComponent
   std::string water_name = name() + ":water";
   {
@@ -384,8 +375,8 @@ BrineFluidProperties::vaporPressure(Real temperature, Real xnacl) const
   Real th20 = std::exp(std::log(temperature) / (a + b * temperature));
 
   // The brine vapour pressure is then found by evaluating the saturation pressure for pure water
-  // using this effective temperature. Note: requires _water97_fp UserObject
-  return _water97_fp->vaporPressure(th20);
+  // using this effective temperature
+  return _water_fp->vaporPressure(th20);
 }
 
 Real
