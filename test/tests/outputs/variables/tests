@@ -36,4 +36,26 @@
     input = show_hide.i
     exodiff = show_hide_out.e
   [../]
+
+  [./show_hide_nemesis]
+    type = 'Exodiff'
+    input = show_hide.i
+    cli_args = 'Outputs/out/type=Nemesis --distributed-mesh'
+    min_parallel = 2
+    max_parallel = 2
+    exodiff = 'show_hide_out.e.2.0 show_hide_out.e.2.1'
+    compiler = 'CLANG'
+    platform = 'DARWIN'
+  [../]
+
+  [./show_hide_nemesis_intel]
+    type = 'Exodiff'
+    input = show_hide.i
+    cli_args = 'Outputs/out/type=Nemesis Outputs/out/file_base=intel_show_hide_out --distributed-mesh'
+    min_parallel = 2
+    max_parallel = 2
+    exodiff = 'intel_show_hide_out.e.2.0 intel_show_hide_out.e.2.1'
+    platform = 'LINUX'
+    compiler = 'INTEL'
+  [../]
 []
