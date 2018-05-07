@@ -112,7 +112,6 @@
   [./json]
     type = 'PythonUnitTest'
     input = 'test_json.py'
-    queue_scheduler = false
   [../]
 
   [./definition_existsin_test]

@@ -14,7 +14,6 @@
     cli_args = "Functions/tif/component=5"
     expect_err = "'component' parameter must be empty or have a value of 0 to 2"
     vtk = true
-    copy_files = stack
   [../]
   [./invalid_file]
     # Test for a bad file name

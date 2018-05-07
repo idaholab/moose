@@ -309,3 +309,16 @@ class DAG(object):
 
         new_graph = self.reverse_clone()
         self.graph = new_graph.graph
+
+    # Modified by the MOOSE group
+    def delete_edge_if_exists(self, ind_node, dep_node, graph=None):
+        """ Delete an edge from the graph. """
+        if not graph:
+            graph = self.graph
+
+        # cache current graph before we delete an edge
+        self.__cacheGraph()
+
+        if dep_node not in graph.get(ind_node, []):
+            return
+        graph[ind_node].remove(dep_node)

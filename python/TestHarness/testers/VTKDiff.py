@@ -38,7 +38,7 @@ class VTKDiff(RunApp):
         # Skip
         specs = self.specs
 
-        if self.getStatus() == self.bucket_fail or specs['skip_checks']:
+        if self.isFail() or specs['skip_checks']:
             return output
 
         # Don't Run VTKDiff on Scaled Tests
@@ -51,7 +51,7 @@ class VTKDiff(RunApp):
             # Error if gold file does not exist
             if not os.path.exists(os.path.join(specs['test_dir'], specs['gold_dir'], file)):
                 output += "File Not Found: " + os.path.join(specs['test_dir'], specs['gold_dir'], file)
-                self.setStatus('MISSING GOLD FILE', self.bucket_fail)
+                self.setStatus(self.fail, 'MISSING GOLD FILE')
                 break
 
             # Perform diff
@@ -72,11 +72,7 @@ class VTKDiff(RunApp):
 
                     if differ.fail():
                         self.addCaveats('VTKDIFF')
-                        self.setStatus(self.bucket_skip.status, self.bucket_skip)
+                        self.setStatus(self.skip)
                         break
-
-        # If status is still pending, then it is a passing test
-        if self.getStatus() == self.bucket_pending:
-            self.setStatus(self.success_message, self.bucket_success)
 
         return output

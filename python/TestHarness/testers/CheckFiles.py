@@ -36,7 +36,7 @@ class CheckFiles(FileTester):
 
         specs = self.specs
 
-        if self.getStatus() == self.bucket_fail or specs['skip_checks']:
+        if self.isFail() or specs['skip_checks']:
             return output
         else:
             reason = ''
@@ -63,8 +63,6 @@ class CheckFiles(FileTester):
 
         # populate status bucket
         if reason != '':
-            self.setStatus(reason, self.bucket_fail)
-        else:
-            self.setStatus(self.success_message, self.bucket_success)
+            self.setStatus(self.fail, reason)
 
         return output

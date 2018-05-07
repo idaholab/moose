@@ -25,7 +25,7 @@ class PetscJacobianTester(RunApp):
     def checkRunnable(self, options):
         if options.enable_recover:
             self.addCaveats('PetscJacTester RECOVER')
-            self.setStatus(self.bucket_skip.status, self.bucket_skip)
+            self.setStatus(self.skip)
             return False
         return RunApp.checkRunnable(self, options)
 
@@ -85,10 +85,7 @@ class PetscJacobianTester(RunApp):
         else:
             reason = 'EXPECTED OUTPUT NOT FOUND'
 
-        # populate status bucket
         if reason != '':
-            self.setStatus(reason, self.bucket_fail)
-        else:
-            self.setStatus(self.success_message, self.bucket_success)
+            self.setStatus(self.fail, reason)
 
         return output

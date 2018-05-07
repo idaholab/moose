@@ -7,13 +7,11 @@
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
-from time import sleep
+from TestHarness.JobDAG import JobDAG
 from FactorySystem.MooseObject import MooseObject
-from Job import Job
 import os, traceback
-from contrib import dag
+from time import sleep
 from timeit import default_timer as clock
-
 from multiprocessing.pool import ThreadPool
 import threading # for thread locking and thread timers
 
@@ -32,9 +30,8 @@ class Scheduler(MooseObject):
     A list of testers will be added to a queue and begin calling their derived run method.
     You can continue to add more testers to the queue in this fashion.
 
-    Once you schedule all the testers you wish to test, call .waitFinish() to wait until
-    all testers have finished.
-
+    Once all jobs have been scheduled, call .waitFinish() to wait until all jobs have
+    finished.
     """
 
     @staticmethod
@@ -42,6 +39,7 @@ class Scheduler(MooseObject):
         params = MooseObject.validParams()
         params.addRequiredParam('average_load',  64.0, "Average load to allow")
         params.addRequiredParam('max_processes', None, "Hard limit of maxium processes to use")
+        params.addParam('min_reported_time', 10, "The minimum time elapsed before a job is reported as taking to long to run.")
 
         return params
 
@@ -67,14 +65,9 @@ class Scheduler(MooseObject):
             self.available_slots = params['max_processes'] # hard limit
             self.soft_limit = False
 
-        # Requested average load level to stay below
         self.average_load = params['average_load']
 
-        # The time the status queue reported no activity to the TestHarness
-        self.last_reported = clock()
-
-        # A set containing jobs that have been reported
-        self.jobs_reported = set([])
+        self.min_report_time = params['min_reported_time']
 
         # Initialize run_pool based on available slots
         self.run_pool = ThreadPool(processes=self.available_slots)
@@ -82,358 +75,187 @@ class Scheduler(MooseObject):
         # Initialize status_pool to only use 1 process (to prevent status messages from getting clobbered)
         self.status_pool = ThreadPool(processes=1)
 
-        # Slot Lock when processing resource allocations
+        # Slot lock when processing resource allocations and modifying slots_in_use
         self.slot_lock = threading.Lock()
 
-        # DAG Lock when processing the DAG
-        self.dag_lock = threading.Lock()
+        # Job lock when modifying a jobs status
+        self.activity_lock = threading.Lock()
 
-        # Queue Lock when processing thread pool states
-        self.queue_lock = threading.Lock()
+        # Job count lock when modifying incoming/outgoing jobs
+        self.job_count_lock = threading.Lock()
 
-        # Job Count Lock when processing job_queue_count
-        self.job_queue_lock = threading.Lock()
-
-        # Workers in use (single job might request multiple slots)
+        # A combination of processors + threads (-j/-n) currently in use, that a job requires
         self.slots_in_use = 0
 
-        # Jobs waiting to finish (includes actively running jobs)
-        self.job_queue_count = 0
+        # Count of jobs which need to complete
+        self.job_count = 0
 
         # Set containing all submitted jobs
-        self.tester_datas = set([])
+        self.__job_bank = set([])
 
-        # Allow threads to set an exception state
-        self.error_state = False
+        # Total running Job and Test failures encountered
+        self.__failures = 0
 
-    def killRemaining(self):
-        """
-        Method to kill any running subprocess started by the Scheduler. This also
-        closes the status pool to prevent further statuses from printing to the
-        screen.
-        """
-        with self.queue_lock:
-            self.error_state = True
-            self.status_pool.close()
-            self.run_pool.close()
+        # Allow threads to set a global exception
+        self.__error_state = False
 
-        for tester_data in self.tester_datas:
-            tester_data.killProcess()
+        # Private set of jobs currently running
+        self.__active_jobs = set([])
 
-        with self.job_queue_lock:
-            self.job_queue_count = 0
+        # Jobs that are taking longer to finish than the alloted time are reported back early to inform
+        # the user 'stuff' is still running. Jobs entering this set will not be reported again.
+        self.jobs_reported = set([])
+
+        # The last time the scheduler reported something
+        self.last_reported_time = clock()
+
+        # Sets of threading objects created by jobs entering and exiting the queues. When scheduler.waitFinish()
+        # is called, and both thread pools are empty, the pools shut down, and the call to waitFinish() returns.
+        self.__status_pool_lock = threading.Lock()
+        self.__runner_pool_lock = threading.Lock()
+        self.__status_pool_jobs = set([])
+        self.__runner_pool_jobs = set([])
+
+        # True when scheduler.waitFinish() is called. This alerts the scheduler, no more jobs are
+        # to be scheduled. KeyboardInterrupts are then handled by the thread pools.
+        self.__waiting = False
+
+    def triggerErrorState(self):
+        self.__error_state = True
+        self.run_pool.close()
+        self.status_pool.close()
+
+    def killRemaining(self, keyboard=False):
+        """ Method to kill running jobs """
+        with self.activity_lock:
+            for job in self.__active_jobs:
+                job.killProcess()
+        if keyboard:
+            self.triggerErrorState()
+            self.harness.keyboard_interrupt()
+        else:
+            self.triggerErrorState()
 
     def retrieveJobs(self):
         """ return all the jobs the scheduler was tasked to perform work for """
-        return self.tester_datas
+        return self.__job_bank
 
     def schedulerError(self):
-        """
-        If any runWorker, statusWorker threads caused an exception, this method
-        will admit to it.
-        """
-        return self.error_state
+        """ boolean if the scheduler prematurely exited """
+        return self.__error_state and not self.maxFailures()
 
-    def reportSkipped(self, jobs):
-        """
-        Allow derived schedulers to do something with skipped jobs
-        """
-        return
+    def maxFailures(self):
+        """ Boolean for hitting max failures """
+        return ((self.options.valgrind_mode and self.__failures >= self.options.valgrind_max_fails)
+                or self.__failures >= self.options.max_fails)
 
-    def preLaunch(self, job_dag):
-        """
-        Allow derived schedulers to modify the DAG before jobs are launched
-        """
-        return
-
-    def run(self, job_container):
+    def run(self, job):
         """ Call derived run method """
-        return
-
-    def postRun(self, job_container):
-        """
-        Allow derived schdulers to perform post run methods on job
-        """
-        return
-
-    def cleanUp(self):
-        """ Allow derived schedulers to perform cleanup operations """
         return
 
     def notifyFinishedSchedulers(self):
         """ Notify derived schedulers we are finished """
         return
 
-    def skipPrereqs(self):
+    def augmentJobs(self, Jobs):
         """
-        Method to return boolean to skip dependency prerequisites checks.
+        Allow derived schedulers to augment Jobs before they perform work.
+        Note: This occurs before we perform a job count sanity check. So
+        any additions or subtractions to the number of jobs will result in
+        an exception.
         """
-        if self.options.ignored_caveats:
-            if 'all' in self.options.ignored_caveats or 'prereq' in self.options.ignored_caveats:
-                return True
-        return False
-
-    def processDownstreamTests(self, job_container):
-        """
-        Method to discover and delete downstream jobs due to supplied job failing.
-        """
-        with self.dag_lock:
-            failed_job_containers = set([])
-            tester = job_container.getTester()
-            job_dag = job_container.getDAG()
-            if (tester.isFinished() and not tester.didPass() and not tester.isSilent() and not self.skipPrereqs()) \
-               and not tester.isQueued() \
-               or (self.options.dry_run and not tester.isSilent()):
-
-                # Ask the DAG to delete and return the downstream jobs associated with this job
-                failed_job_containers.update(job_dag.delete_downstreams(job_container))
-
-            for failed_job in failed_job_containers:
-                failed_tester = failed_job.getTester()
-                failed_tester.addCaveats('skipped dependency')
-                failed_tester.setStatus(failed_tester.bucket_skip.status, failed_tester.bucket_skip)
-
-        return failed_job_containers
-
-    def buildDAG(self, job_container_dict, job_dag):
-        """
-        Build the DAG and catch any failures.
-        """
-
-        failed_or_skipped_testers = set([])
-
-        # Create DAG independent nodes
-        for tester_name, job_container in job_container_dict.iteritems():
-            tester = job_container.getTester()
-
-            # If this tester is not runnable, continue to the next tester
-            if tester.getRunnable(self.options):
-
-                job_dag.add_node_if_not_exists(job_container)
-
-            else:
-                failed_or_skipped_testers.add(tester)
-                continue
-
-        # Create edge nodes
-        for tester_name, job_container in job_container_dict.iteritems():
-            tester = job_container.getTester()
-
-            # Add the prereq node and edges
-            for prereq in tester.getPrereqs():
-
-                try:
-                    # Try to produce a KeyError and capture an unknown dependency
-                    job_container_dict[prereq]
-
-                    # Try to produce either a cyclic or skipped dependency error using the DAG's
-                    # built-in exception methods
-                    job_dag.add_edge(job_container_dict[prereq], job_container)
-
-                # Skipped Dependencies
-                except dag.DAGEdgeIndError:
-                    if not self.skipPrereqs():
-                        if self.options.reg_exp:
-                            tester.addCaveats('dependency does not match re')
-                            tester.setStatus(tester.bucket_skip.status, tester.bucket_skip)
-                        else:
-                            tester.addCaveats('skipped dependency')
-                            tester.setStatus(tester.bucket_skip.status, tester.bucket_skip)
-                        failed_or_skipped_testers.add(tester)
-
-                    # Add the parent node / dependency edge to create a functional DAG now that we have caught
-                    # the skipped dependency (needed for discovering race conditions later on)
-                    job_dag.add_node_if_not_exists(job_container_dict[prereq])
-                    job_dag.add_edge(job_container_dict[prereq], job_container)
-
-                # Cyclic Failure
-                except dag.DAGValidationError:
-                    tester.setStatus('Cyclic or Invalid Dependency Detected!', tester.bucket_fail)
-                    failed_or_skipped_testers.add(tester)
-
-                # Unknown Dependency Failure
-                except KeyError:
-                    tester.setStatus('unknown dependency', tester.bucket_fail)
-                    failed_or_skipped_testers.add(tester)
-
-                # Skipped/Silent/Deleted Testers fall into this catagory, caused by 'job_container' being skipped
-                # during the first iteration above
-                except dag.DAGEdgeDepError:
-                    pass
-
-        # With a working DAG created above (even a partial one), discover race conditions with remaining runnable
-        # testers.
-        failed_or_skipped_testers.update(self.checkRaceConditions(job_dag))
-
-        return failed_or_skipped_testers
-
-    def checkRaceConditions(self, dag_object):
-        """
-        Return a set of failing testers exhibiting race conditions with their
-        output file.
-        """
-        failed_or_skipped_testers = set([])
-
-        # clone the dag so we can operate destructively on the cloned dag
-        dag_clone = dag_object.clone()
-
-        while dag_clone.size():
-            output_files_in_dir = set()
-
-            # Get a list of concurrent job containers
-            concurrent_jobs = dag_clone.ind_nodes()
-
-            for job_container in concurrent_jobs:
-                tester = job_container.getTester()
-                if not tester.getRunnable(self.options):
-                    continue
-                output_files = tester.getOutputFiles()
-
-                # check if we have colliding output files
-                if len(output_files_in_dir.intersection(set(output_files))):
-
-                    # Fail this concurrent group of testers
-                    for this_job in concurrent_jobs:
-                        failed_tester = this_job.getTester()
-                        failed_tester.setStatus('OUTFILE RACE CONDITION', tester.bucket_fail)
-                        failed_or_skipped_testers.add(failed_tester)
-
-                    # collisions detected, move on to the next set
-                    break
-
-                output_files_in_dir.update(output_files)
-
-            # Delete this group of job containers and allow the loop to continue
-            for job_container in concurrent_jobs:
-                dag_clone.delete_node(job_container)
-
-        return failed_or_skipped_testers
-
-    def schedule(self, testers):
-        """
-        Schedule supplied list of testers for execution.
-        """
-        # If any threads caused an exception, we have already closed down the queue and need to
-        # not schedule any more jobs
-        if self.error_state:
-            return
-
-        # Instance the DAG class so we can share it amongst all the Job containers
-        job_dag = dag.DAG()
-
-        runnable_jobs = set([])
-        non_runnable_jobs = set([])
-        name_to_job_container = {}
-
-        # Increment our simple queue count with the number of testers the scheduler received
-        with self.job_queue_lock:
-            self.job_queue_count += len(testers)
-
-        # Create a local dictionary of tester names to job containers. Add this dictionary to a
-        # set. We will use this set as a way to gain access to their methods.
-        for tester in testers:
-            if tester.getTestName() in name_to_job_container:
-                tester.addCaveats('duplicate test')
-                tester.setStatus(tester.bucket_skip.status, tester.bucket_skip)
-                non_runnable_jobs.add(Job(tester, job_dag, self.options))
-            else:
-                name_to_job_container[tester.getTestName()] = Job(tester, job_dag, self.options)
-                self.tester_datas.add(name_to_job_container[tester.getTestName()])
-
-        # Populate job_dag with testers. This method will also return any testers which caused failures
-        # while building the DAG.
-        skipped_or_failed_testers = self.buildDAG(name_to_job_container, job_dag)
-
-        # Create a set of failing job containers
-        for failed_tester in skipped_or_failed_testers:
-            non_runnable_jobs.add(name_to_job_container[failed_tester.getTestName()])
-
-        # Iterate over the jobs in our non_runnable_jobs and handle any downstream jobs affected by
-        # 'job'. These will be our 'skipped dependency' tests.
-        for job in non_runnable_jobs.copy():
-            additionally_skipped = self.processDownstreamTests(job)
-            non_runnable_jobs.update(additionally_skipped)
-            job_dag.delete_node_if_exists(job)
-
-        # Make sure we didn't drop a tester somehow
-        if len(non_runnable_jobs) + job_dag.size() != len(testers):
-            raise SchedulerError('Runnable tests in addition to Skipped tests does not match total scheduled test count!')
-
-        # Inform derived schedulers of the jobs we are skipping immediately
-        self.reportSkipped(non_runnable_jobs)
-
-        # Allow derived schedulers to modify the dag before we launch
-        # TODO: We don't like this, and this will change when we move to better DAG handling.
-        if job_dag.size():
-            self.preLaunch(job_dag)
-
-        # Build our list of runnable jobs and set the tester's status to queued
-        if job_dag.size():
-            runnable_jobs = job_dag.ind_nodes()
-            for job in runnable_jobs:
-                tester = job.getTester()
-                tester.setStatus('QUEUED', tester.bucket_pending)
-
-        # Queue generated jobs
-        self.queueJobs(run_jobs=runnable_jobs, status_jobs=non_runnable_jobs)
+        return
 
     def waitFinish(self):
         """
-        Block while the job queue is not empty. Once empty, this method will begin closing down
-        the thread pools and perform a join. Once the last thread exits, we return from this
-        method.
-
-        There are two thread pools in play; the Run pool which is executing all the testers,
-        and the Status pool which is handling the printing of tester statuses. Because the
-        Status pool will always have the last item needing to be 'printed', we close and join
-        the Run pool first, and then, we close the Status pool.
+        Inform the Scheduler there are no further jobs to schedule.
+        Return once all jobs have completed.
         """
+        self.__waiting = True
         try:
-            while self.job_queue_count > 0:
-                # One of our children died :( so exit uncleanly (do not join)
-                if self.error_state:
-                    self.killRemaining()
-                    return
-                sleep(0.5)
+            # wait until there is an error, or if all the queus are empty
+            waiting_on_status_pool = True
+            waiting_on_runner_pool = True
 
-            self.run_pool.close()
-            self.run_pool.join()
-            self.status_pool.close()
-            self.status_pool.join()
+            while (waiting_on_status_pool or waiting_on_runner_pool) and self.job_count:
 
-            # Notify derived schedulers we are exiting
+                if self.__error_state:
+                    break
+
+                with self.__status_pool_lock:
+                    waiting_on_status_pool = sum(1 for x in self.__status_pool_jobs if not x.ready())
+                with self.__runner_pool_lock:
+                    waiting_on_runner_pool = sum(1 for x in self.__runner_pool_jobs if not x.ready())
+
+                sleep(0.1)
+
+            # Reporting sanity check
+            if not self.__error_state and self.job_count:
+                raise SchedulerError('Scheduler exiting with different amount of work than what was tasked!')
+
+            if not self.__error_state:
+                self.run_pool.close()
+                self.run_pool.join()
+                self.status_pool.close()
+                self.status_pool.join()
+
+            # allow derived schedulers to perform any exit routines
             self.notifyFinishedSchedulers()
 
         except KeyboardInterrupt:
-            # This method is called by the main thread, and therefor we must print the appropriate
-            # keyboard interrupt response.
-            self.killRemaining()
-            print('\nExiting due to keyboard interrupt...')
+            self.killRemaining(keyboard=True)
 
-    def handleLongRunningJobs(self, job_container):
-        """ Handle jobs that have not reported in alotted time """
-        if job_container not in self.jobs_reported:
-            report = False
-            with self.dag_lock:
-                tester = job_container.getTester()
-                if not tester.isFinished():
-                    report = True
-                    tester.setStatus('RUNNING...', tester.bucket_pending)
-            if report:
-                self.queueJobs(status_jobs=[job_container])
+    def schedule(self, testers):
+        """
+        Generate and submit a group of testers to a thread pool queue for execution.
+        """
+        # If we are not to schedule any more jobs for some reason, return now
+        if self.__error_state:
+            return
 
-            # Restart the reporting timer for this job
-            job_container.report_timer = threading.Timer(float(tester.getMinReportTime()),
-                                                         self.handleLongRunningJobs,
-                                                         (job_container,))
+        # Instance our job DAG, create jobs, and a private lock for this group of jobs (testers)
+        Jobs = JobDAG(self.options)
+        j_dag = Jobs.createJobs(testers)
+        j_lock = threading.Lock()
 
-            job_container.report_timer.start()
+        # Allow derived schedulers access to the jobs before they launch
+        self.augmentJobs(Jobs)
 
-    def handleTimeoutJobs(self, job_container):
-        """ Handle jobs that have timed out """
-        tester = job_container.getTester()
-        tester.setStatus('TIMEOUT', tester.bucket_fail)
-        job_container.killProcess()
+        # job-count to tester-count sanity check
+        if j_dag.size() != len(testers):
+            raise SchedulerError('Scheduler was going to run a different amount of testers than what was received (something bad happened)!')
+
+        # Final reporting job-count sanity check
+        with self.job_count_lock:
+            self.job_count += j_dag.size()
+
+        # Store all processed jobs in the global job bank
+        self.__job_bank.update(j_dag.topological_sort())
+
+        # Launch these jobs to perform work
+        self.queueJobs(Jobs, j_lock)
+
+    def queueJobs(self, Jobs, j_lock):
+        """
+        Determine which queue jobs should enter. Finished jobs are placed in the status
+        pool to be printed while all others are placed in the runner pool to perform work.
+
+        A finished job will trigger a change to the Job DAG, which will allow additional
+        jobs to become available and ready to enter the runner pool (dependency jobs).
+        """
+        with j_lock:
+            concurrent_jobs = Jobs.getJobsAndAdvance()
+            for job in concurrent_jobs:
+                if job.isFinished():
+                    if not self.status_pool._state:
+                        with self.__status_pool_lock:
+                            self.__status_pool_jobs.add(self.status_pool.apply_async(self.jobStatus, (job, Jobs, j_lock)))
+
+                elif job.isHold():
+                    if not self.run_pool._state:
+                        with self.__runner_pool_lock:
+                            job.setStatus(job.queued)
+                            self.__runner_pool_jobs.add(self.run_pool.apply_async(self.runJob, (job, Jobs, j_lock)))
 
     def getLoad(self):
         """ Method to return current load average """
@@ -449,217 +271,159 @@ class Scheduler(MooseObject):
         while self.slots_in_use > 1 and self.getLoad() >= self.average_load:
             sleep(1.0)
 
-    def reserveSlots(self, job_container):
+    def reserveSlots(self, job, j_lock):
         """
         Method which allocates resources to perform the job. Returns bool if job
         should be allowed to run based on available resources.
         """
-        tester = job_container.getTester()
-
         # comply with load average
         if self.options.load:
             self.satisfyLoad()
 
         with self.slot_lock:
             can_run = False
-            if self.slots_in_use + job_container.getSlots() <= self.available_slots:
+            if self.slots_in_use + job.getSlots() <= self.available_slots:
                 can_run = True
 
             # Check for insufficient slots -soft limit
-            elif job_container.getSlots() > self.available_slots and self.soft_limit:
-                tester.addCaveats('OVERSIZED')
+            elif job.getSlots() > self.available_slots and self.soft_limit:
+                job.addCaveats('OVERSIZED')
                 can_run = True
 
             # Check for insufficient slots -hard limit (skip this job)
-            # TODO: Create a unit test for this case
-            elif job_container.getSlots() > self.available_slots and not self.soft_limit:
-                tester.addCaveats('insufficient slots')
-                tester.setStatus(tester.bucket_skip.status, tester.bucket_skip)
+            elif job.getSlots() > self.available_slots and not self.soft_limit:
+                job.addCaveats('insufficient slots')
+                with j_lock:
+                    job.setStatus(job.skip)
 
             if can_run:
-                self.slots_in_use += job_container.getSlots()
-
+                self.slots_in_use += job.getSlots()
         return can_run
 
-    def getNextJobGroup(self, job_dag):
+    def handleTimeoutJob(self, job, j_lock):
+        """ Handle jobs that have timed out """
+        with j_lock:
+            if job.isRunning():
+                job.setStatus(job.crash, 'TIMEOUT')
+                job.killProcess()
+
+    def handleLongRunningJob(self, job, Jobs, j_lock):
+        """ Handle jobs that have not reported in the alotted time """
+        with self.__status_pool_lock:
+            self.__status_pool_jobs.add(self.status_pool.apply_async(self.jobStatus, (job, Jobs, j_lock)))
+
+    def jobStatus(self, job, Jobs, j_lock):
         """
-        Prepare and return a list of concurrent runnable jobs
+        Instruct the TestHarness to print the status of job. This is a serial
+        threaded operation, so as to prevent clobbering of text being printed
+        to stdout.
         """
-        with self.dag_lock:
-            next_job_list = []
-
-            # Get concurrent available job list
-            concurrent_jobs = job_dag.ind_nodes()
-
-            for job_container in concurrent_jobs:
-                tester = job_container.getTester()
-
-                # Verify this job is not already running/pending/skipped
-                if tester.isInitialized():
-                    # Set this next new job to pending so as to prevent this job from being launched a second time
-                    tester.setStatus('QUEUED', tester.bucket_pending)
-                    next_job_list.append(job_container)
-
-        return next_job_list
-
-    def queueJobs(self, status_jobs=[], run_jobs=[]):
-        """
-        Method to control which thread pool jobs enter.
-        Syntax:
-
-           To have a job(s) display its current status to the screen:
-           .queueJobs(status_jobs=[job_container_list]
-
-           To begin running job(s):
-           .queueJobs(run_jobs=[job_container_list]
-
-        """
-
-        with self.queue_lock:
-            if (not self.error_state
-                and not self.status_pool._state
-                and not self.run_pool._state):
-
-                for job in status_jobs:
-                    self.status_pool.apply_async(self.statusWorker, (job,))
-
-                for job in run_jobs:
-                    self.run_pool.apply_async(self.runWorker, (job,))
-
-    def statusWorker(self, job_container):
-        """ Method the status_pool calls when an available thread becomes ready """
-        # Wrap entire statusWorker thread inside a try/exception to catch thread errors
-        try:
-            # There exists the possibility that jobs are still trying to empty out of the
-            # status_pool (like this job), and we wish to no longer print any statuses.
-            if self.error_state:
-                return
-
-            tester = job_container.getTester()
-
-            # If the job is still running for a long period of time and we have not reported
-            # this same job alread, report it now.
-            if tester.isPending():
-                if clock() - self.last_reported >= float(tester.getMinReportTime()) and job_container not in self.jobs_reported:
-                    # Inform the TestHarness of a long running test (RUNNING...)
-                    self.harness.handleTestStatus(job_container)
-
-                    # ...And then set the finished caveat now that the running status has printed
-                    tester.addCaveats('FINISHED')
-
-                    # Add this job to the reported container so it does not happen again
-                    self.jobs_reported.add(job_container)
-
-                # Job is 'Pending', but is under the threshold to be reported (return now so
-                # last_reported time does not get updated). This will ensure that if nothing
-                # has happened between 'now' and another occurrence of our thread timer event
-                # we do report it.
-                else:
-                    return
-
-            else:
-                # All other statuses are sent unmolested
-                self.harness.handleTestStatus(job_container)
-
-            # Record current reported time only if it is an activity the user will see
-            if not tester.isSilent() or not tester.isDeleted():
-                self.last_reported = clock()
-
-            # Do job_queue_count decrement last. If zero, the thread pools may close prematurely,
-            # preventing the last job status from printing (see waitFinish method).
-            if tester.isFinished():
-                with self.job_queue_lock:
-                    self.job_queue_count -= 1
-
-        except Exception:
-            self.error_state = True
-            print('Test: %s, statusWorker Exception: %s' % (tester.getTestName(), traceback.format_exc()))
-
-        except KeyboardInterrupt:
-            # Just set the error state. The base class will catch the KeyboardInterrupt, and will
-            # print the appropriate message.
-            self.error_state = True
-            pass
-
-    def runWorker(self, job_container):
-        """ Method the run_pool calls when an available thread becomes ready """
-        # There exists the possibility that jobs are still trying to empty out of the
-        # run_pool (like this job), and we wish to no longer run any jobs.
-        if self.error_state:
+        if self.status_pool._state:
             return
 
-        # Wrap the entire runWorker thread inside a try/exception to catch thread errors
+        # Its possible, the queue is just trying to empty
         try:
-            tester = job_container.getTester()
-            # Check if there are enough resources to run this job
-            if self.reserveSlots(job_container):
+            job_was_running = False
+            # Check if we should print due to inactivity
+            with j_lock:
+                if job.isRunning():
+                    if job in self.jobs_reported:
+                        return
 
-                # Start long running timer
-                job_container.report_timer = threading.Timer(float(tester.getMinReportTime()),
-                                                             self.handleLongRunningJobs,
-                                                             (job_container,))
-                job_container.report_timer.start()
+                    # we have not yet been inactive long enough to report
+                    elif clock() - self.last_reported_time < self.min_report_time:
+                        return
 
-                # Start timeout timer
+                    job_was_running = True
+                    job.addCaveats('FINISHED')
+
+                    with self.activity_lock:
+                        self.jobs_reported.add(job)
+
+            # Immediately following the Job lock, print the status
+            self.harness.handleJobStatus(job)
+
+            # We just reported 'something', restart the clock
+            self.last_reported_time = clock()
+
+            # Do last, to prevent premature thread pool closures
+            with j_lock:
+                if job.isFinished() and not job_was_running:
+                    tester = job.getTester()
+                    if tester.isFail():
+                        self.__failures += 1
+
+                    if self.maxFailures():
+                        self.killRemaining()
+                    else:
+                        with self.job_count_lock:
+                            self.job_count -= 1
+
+        except Exception:
+            print('statusWorker Exception: %s' % (traceback.format_exc()))
+            self.killRemaining()
+
+        except KeyboardInterrupt:
+            self.killRemaining(keyboard=True)
+
+    def runJob(self, job, Jobs, j_lock):
+        """ Method the run_pool calls when an available thread becomes ready """
+        # Its possible, the queue is just trying to empty. Allow it to do so
+        # with out generating overhead
+        if self.__error_state:
+            return
+
+        try:
+            # see if we have enough slots to start this job
+            if self.reserveSlots(job, j_lock):
+                with j_lock:
+                    job.setStatus(job.running)
+
+                with self.activity_lock:
+                    self.__active_jobs.add(job)
+
+                tester = job.getTester()
                 timeout_timer = threading.Timer(float(tester.getMaxTime()),
-                                          self.handleTimeoutJobs,
-                                          (job_container,))
+                                                self.handleTimeoutJob,
+                                                (job, j_lock,))
+
+                job.report_timer = threading.Timer(self.min_report_time,
+                                                   self.handleLongRunningJob,
+                                                   (job, Jobs, j_lock,))
+
+                job.report_timer.start()
                 timeout_timer.start()
-
-                # Call the derived run method (blocking)
-                self.run(job_container)
-
-                # Stop timers now that the job has finished on its own
-                job_container.report_timer.cancel()
+                self.run(job) # Hand execution over to derived scheduler
                 timeout_timer.cancel()
-
-                # Derived run needs to set a non-pending status of some sort.
-                if tester.isPending():
-                    raise SchedulerError('Derived Scheduler %s can not return a pending status!' % (self.__class__))
-
-                # Determin if this job creates any skipped dependencies (if it failed), and send
-                # this new list of jobs to the status queue to be printed.
-                possibly_skipped_job_containers = self.processDownstreamTests(job_container)
-                possibly_skipped_job_containers.add(job_container)
-                self.queueJobs(status_jobs=possibly_skipped_job_containers)
-
-                # Delete this job from the shared DAG while the DAG is locked
-                with self.dag_lock:
-                    job_dag = job_container.getDAG()
-                    job_dag.delete_node(job_container)
-
-                # Get next job list
-                next_job_group = self.getNextJobGroup(job_dag)
-
-                # Allow derived schedulers to perform post run operations
-                self.postRun(job_container)
 
                 # Recover worker count before attempting to queue more jobs
                 with self.slot_lock:
-                    self.slots_in_use = max(0, self.slots_in_use - job_container.getSlots())
+                    self.slots_in_use = max(0, self.slots_in_use - job.getSlots())
 
-                # Queue this new batch of runnable jobs
-                self.queueJobs(run_jobs=next_job_group)
+                # Stop the long running timer
+                job.report_timer.cancel()
 
-            # Not enough slots to run the job, currently
+                # All done
+                with j_lock:
+                    job.setStatus(job.finished)
+
+                with self.activity_lock:
+                    self.__active_jobs.remove(job)
+
+            # Not enough slots to run the job...
             else:
-                # There will never be enough slots to run this job (insufficient slots)
-                if tester.isFinished():
-                    failed_downstream = self.processDownstreamTests(job_container)
-                    failed_downstream.add(job_container)
-                    self.queueJobs(status_jobs=failed_downstream)
+                # ...currently, place back on hold before placing it back into the queue
+                if not job.isFinished():
+                    with j_lock:
+                        job.setStatus(job.hold)
+                    sleep(.1)
 
-                # There are no available slots, currently. Place back in queue, and sleep for a bit
-                else:
-                    self.queueJobs(run_jobs=[job_container])
-                    sleep(0.3)
+            # Job is done (or needs to re-enter the queue)
+            self.queueJobs(Jobs, j_lock)
 
         except Exception:
-            self.error_state = True
             print('runWorker Exception: %s' % (traceback.format_exc()))
+            self.killRemaining()
 
         except KeyboardInterrupt:
-            # Just set the error state. The base class will catch the KeyboardInterrupt, and will
-            # print the appropriate message.
-            self.error_state = True
-            pass
+            self.killRemaining(keyboard=True)

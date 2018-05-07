@@ -10,7 +10,6 @@
 import platform, os, re
 import subprocess
 from mooseutils import colorText
-from collections import namedtuple
 from collections import OrderedDict
 import json
 
@@ -150,15 +149,44 @@ def formatCase(format_key, message, formatted_results):
     elif message:
         formatted_results[format_key] = (message[0], message[1])
 
+def formatStatusMessage(tester, options):
+    # PASS and DRY_RUN fall into this catagory
+    if tester.isPass():
+        result = tester.getStatusMessage()
+
+        if options.extra_info:
+            for check in options._checks.keys():
+                if tester.specs.isValid(check) and not 'ALL' in tester.specs[check]:
+                    tester.addCaveats(check)
+
+    # FAIL, DIFF and DELETED fall into this catagory
+    elif tester.isFail() or (tester.isDeleted() and options.extra_info):
+        message = tester.getStatusMessage()
+        if message == '':
+            message = tester.getStatus().status
+
+        result = 'FAILED (%s)' % (message)
+
+    # Some other finished status... skipped, silent, etc
+    else:
+        result = tester.getStatusMessage()
+
+    # No one set a unique status message? In that case, use the name of
+    # the status itself as the status message.
+    if not result:
+        result = tester.getStatus().status
+
+    return result
+
 ## print an optionally colorified test result
 #
 # The test will not be colored if
 # 1) options.colored is False,
 # 2) the color parameter is False.
-def formatResult(tester_data, result, options, color=True):
+def formatResult(job, options, result='', color=True, **kwargs):
     # Support only one instance of a format identifier, but obey the order
     terminal_format = list(OrderedDict.fromkeys(list(TERM_FORMAT)))
-    tester = tester_data.getTester()
+    tester = job.getTester()
     status = tester.getStatus()
     color_opts = {'code' : options.code, 'colored' : options.colored}
 
@@ -185,7 +213,7 @@ def formatResult(tester_data, result, options, color=True):
 
         if str(f_key).lower() == 's':
             if not result:
-                result = str(tester.getStatusMessage())
+                result = formatStatusMessage(tester, options)
 
             # refrain from printing a duplicate pre_result if it will match result
             if 'p' in [x.lower() for x in terminal_format] and result == status.status:
@@ -199,17 +227,17 @@ def formatResult(tester_data, result, options, color=True):
         # Adjust the precision of time, so we can justify the length. The higher the
         # seconds, the lower the decimal point, ie: [0.000s] - [100.0s]. Max: [99999s]
         if str(f_key).lower() == 't' and options.timing:
-            actual = float(tester_data.getTiming())
+            actual = float(job.getTiming())
             int_len = len(str(int(actual)))
             precision = min(3, max(0,(4-int_len)))
             f_time = '[' + '{0: <6}'.format('%0.*fs' % (precision, actual)) + ']'
             formatCase(f_key, (f_time, None), formatted_results)
 
     # Decorate Caveats
-    if tester.getCaveats() and caveat_index is not None:
+    if tester.getCaveats() and caveat_index is not None and 'caveats' in kwargs and kwargs['caveats']:
         caveats = ','.join(tester.getCaveats())
         caveat_color = status.color
-        if tester.didPass() or tester.isSkipped():
+        if tester.isPass() or tester.isSkip():
             caveat_color = 'CYAN'
 
         f_caveats = '[' + caveats + ']'
@@ -255,7 +283,7 @@ def formatResult(tester_data, result, options, color=True):
 
     # Decorate debuging
     if options.debug_harness:
-        final_results += ' Start: ' + '%0.3f' % tester_data.getStartTime() + ' End: ' + '%0.3f' % tester_data.getEndTime()
+        final_results += ' Start: ' + '%0.3f' % job.getStartTime() + ' End: ' + '%0.3f' % job.getEndTime()
 
     return final_results
 
@@ -674,149 +702,3 @@ def readOutput(f, e, options, max_size=100000):
         if e:
             output += e.read()      # Do not trim errors
     return output
-
-class TestStatus(object):
-    """
-    Class for handling test statuses
-    """
-
-    ###### bucket status discriptions
-    ## The following is a list of statuses possible in the TestHarness
-    ##
-    ## INITIALIZED   =  The default tester status when it is instanced
-    ## PASS          =  Passing tests
-    ## FAIL          =  Failing tests
-    ## DIFF          =  Failing tests due to Exodiff, CSVDiff
-    ## PENDING       =  A pending status applied by the TestHarness (RUNNING...)
-    ## FINISHED      =  A status that can mean it finished in any status (like a pending queued status type)
-    ## DELETED       =  A skipped test hidden from reporting. Under normal circumstances, this sort of test
-    ##                  is placed in the SILENT bucket. It is only placed in the DELETED bucket (and therfor
-    ##                  printed to stdout) when the user has specifically asked for more information while
-    ##                  running tests (-e)
-    ## SKIP          =  Any test reported as skipped
-    ## SILENT        =  Any test reported as skipped and should not alert the user (deleted, tests not
-    ##                  matching '--re=' options, etc)
-    ######
-
-    test_status         = namedtuple('test_status', 'status color')
-    bucket_initialized  = test_status(status='INIT', color='CYAN')
-    bucket_success      = test_status(status='OK', color='GREEN')
-    bucket_fail         = test_status(status='FAIL', color='RED')
-    bucket_deleted      = test_status(status='DELETED', color='RED')
-    bucket_diff         = test_status(status='DIFF', color='YELLOW')
-    bucket_pending      = test_status(status='PENDING', color='CYAN')
-    bucket_finished     = test_status(status='FINISHED', color='CYAN')
-    bucket_skip         = test_status(status='SKIP', color='GREY')
-    bucket_silent       = test_status(status='SILENT', color='RESET')
-    bucket_queued       = test_status(status='QUEUED', color='CYAN')
-    bucket_waiting_processing = test_status(status='WAITING', color='CYAN')
-
-    # Initialize the class with a pending status
-    # TODO: don't do this? Initialize instead with None type? If we do
-    # and forget to set a status, getStatus will fail with None type errors
-    def __init__(self, status_message='initialized', status=bucket_initialized):
-        self.__status_message = status_message
-        self.__status = status
-
-    def setStatus(self, status_message, status_bucket):
-        """
-        Set bucket status
-          setStatus("reason", TestStatus.bucket_tuple)
-        """
-        self.__status_message = status_message
-        self.__status = status_bucket
-
-    def getStatus(self):
-        """
-        Return status bucket namedtuple
-        """
-        return self.__status
-
-    def getStatusMessage(self):
-        """
-        Return status message string
-        """
-        return self.__status_message
-
-    def getColor(self):
-        """
-        Return enumerated color string
-        """
-        return self.__status.color
-
-    def didPass(self):
-        """
-        Return boolean passing status (True if passed)
-        """
-        return self.getStatus() == self.bucket_success
-
-    def didFail(self):
-        """
-        Return boolean failing status (True if failed)
-        """
-        status = self.getStatus()
-        return status == self.bucket_fail or status == self.bucket_diff
-
-    def didDiff(self):
-        """
-        Return boolean diff status (True if diff'd)
-        """
-        status = self.getStatus()
-        return status == self.bucket_diff
-
-    def isInitialized(self):
-        """
-        Return boolean initialized status
-        """
-        status = self.getStatus()
-        return status == self.bucket_initialized
-
-    def isPending(self):
-        """
-        Return boolean pending status
-        """
-        status = self.getStatus()
-        return status == self.bucket_pending
-
-    def isSkipped(self):
-        """
-        Return boolean skipped status
-        """
-        status = self.getStatus()
-        return status == self.bucket_skip
-
-    def isSilent(self):
-        """
-        Return boolean silent status
-        """
-        status = self.getStatus()
-        return status == self.bucket_silent
-
-    def isDeleted(self):
-        """
-        Return boolean deleted status
-        """
-        status = self.getStatus()
-        return status == self.bucket_deleted
-
-    def isQueued(self):
-        """
-        Return boolean queued status. This is different from a pending status,
-        as this status is more of a _finished_ pending status.
-        """
-        status = self.getStatus()
-        return status == self.bucket_queued
-
-    def isWaiting(self):
-        """
-        Return boolean on tester waiting to have its results processed.
-        """
-        status = self.getStatus()
-        return status == self.bucket_waiting_processing
-
-    def isFinished(self):
-        """
-        Return boolean finished status
-        """
-        status = self.getStatus()
-        return (status == self.bucket_finished or status != self.bucket_pending and status != self.bucket_initialized)
