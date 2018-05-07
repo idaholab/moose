@@ -24,7 +24,7 @@ PIDControl::PIDControl(const InputParameters & parameters)
     _K_p(getParam<Real>("K_p")),
     _K_i(getParam<Real>("K_i")),
     _K_d(getParam<Real>("K_d")),
-    _output(declareControlData<Real>("output")),
+    _output(declareComponentControlData<Real>("output")),
     _integral(declareRestartableData<Real>("integral", getParam<Real>("initial_value"))),
     _error_old(0.)
 {

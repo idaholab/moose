@@ -15,7 +15,7 @@ validParams<GetFunctionValueControl>()
 
 GetFunctionValueControl::GetFunctionValueControl(const InputParameters & parameters)
   : RELAP7Control(parameters),
-    _value(declareControlData<Real>("value")),
+    _value(declareComponentControlData<Real>("value")),
     _function(getFunction("function"))
 {
 }

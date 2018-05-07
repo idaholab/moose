@@ -22,9 +22,17 @@ public:
 
 protected:
   /**
+   * Declare control data with name 'component:data_name'
+   *
+   * @param data_name A unique name for the control data
+   */
+  template <typename T>
+  T & declareComponentControlData(const std::string & data_name);
+
+  /**
    * Declare control data with name 'data_name'
    *
-   * @param data_name An unique name for the control data
+   * @param data_name A unique name for the control data
    */
   template <typename T>
   T & declareControlData(const std::string & data_name);
@@ -45,10 +53,18 @@ protected:
 
 template <typename T>
 T &
-RELAP7Control::declareControlData(const std::string & data_name)
+RELAP7Control::declareComponentControlData(const std::string & data_name)
 {
   std::string full_name = name() + ":" + data_name;
-  ControlData<T> * data_ptr = _sim.declareControlData<T>(full_name, *this);
+  ControlData<T> * data_ptr = _sim.declareControlData<T>(full_name, this);
+  return data_ptr->set();
+}
+
+template <typename T>
+T &
+RELAP7Control::declareControlData(const std::string & data_name)
+{
+  ControlData<T> * data_ptr = _sim.declareControlData<T>(data_name, this);
   return data_ptr->set();
 }
 
