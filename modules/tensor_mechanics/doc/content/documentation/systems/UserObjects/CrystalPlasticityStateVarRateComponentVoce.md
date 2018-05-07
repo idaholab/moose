@@ -19,7 +19,7 @@ with
 \end{equation}
 
 
-where: $ \tau^{\alpha}_{CRSS} $ is the current critical resolved shear stress, $\tau^{\alpha}_{0}$ is initial critical resolved shear stress, $\tau_{Sat}^{\alpha} $ is the saturation resolved shear stress, $q^{\alpha \beta}$ is the matrix containing self and latent hardening coefficients; $h_0^{\alpha}$ and $m^\alpha$ are hardening parameters.
+where: $\tau^{\alpha}_{CRSS}$ is the current critical resolved shear stress, $\tau^{\alpha}_{0}$ is initial critical resolved shear stress, $\tau_{Sat}^{\alpha} $ is the saturation resolved shear stress, $q^{\alpha \beta}$ is the matrix containing self and latent hardening coefficients; $h_0^{\alpha}$ and $m^\alpha$ are hardening parameters.
 
 Like for the others crystal plasticity routines values of all the parameters can be specified by groups of slip systems.
 
@@ -27,15 +27,22 @@ This userobjects assumes that slip systems are provided in a well defined order 
 
 Seven variables need to be specified and one value is required for each group:
 
-- "groups" in which groups of slip systems are listed
-- "h0_group_values" $h_0$ value for each slip system group
-- "tau0_group_values" $\tau_0$ value for each slip system group
-- "tauSat_group_values" = $\tau_{Sat}$ value for each slip system group
-- "hardeningExponent_group_values" $m$ value for each slip system group
-- "selfHardening_group_values" $q^{\alpha\alpha}$
-- "coplanarHardening_group_values" $q^{\alpha\beta}$ for co-planar slip systems in the same group
-- "GroupGroup_Hardening_group_values" $q^{\alpha\beta}$ This parameter requires NxN values with N being the number of groups. Values are listed as $value_ij$ (e.g. ij=11,12,21,22) with $i$ being the actual group and $j$ the secondary group. For $i==j$ the value represents the latent hardening coefficient between one slip system and all the non co-planar ones belonging the the same group. For $i!=j$, the value represents the latent hardening coefficient between all the slip systems belonging to group $i$ and $j$.
-Note that, usually, the matrix associated with "GroupGroup_Hardening_group_values" is symmetric.
+
+   -  "groups" in which groups of slip systems are listed
+
+   -  "h0_group_values" $h_0$ value for each slip system group
+   
+   -  "tau0_group_values" $\tau_0$ value for each slip system group
+
+   -  "tauSat_group_values" = $\tau_{Sat}$ value for each slip system group
+
+   -  "hardeningExponent_group_values" $m$ value for each slip system group
+
+   -  "selfHardening_group_values" $q^{\alpha\alpha}$
+
+   -  "coplanarHardening_group_values" $q^{\alpha\beta}$ for co-planar slip systems in the same group
+
+   -  "GroupGroup_Hardening_group_values" $q^{\alpha\beta}$ This parameter requires NxN values with N being the number of groups. Values are listed as $value_ij$ (e.g. ij=11,12,21,22) with $i$ being the actual group and $j$ the secondary group. For $i==j$ the value represents the latent hardening coefficient between one slip system and all the non co-planar ones belonging the the same group. For $i!=j$, the value represents the latent hardening coefficient between all the slip systems belonging to group $i$ and $j$. Note that, usually, the matrix associated with "GroupGroup_Hardening_group_values" is symmetric.
 
 
 
