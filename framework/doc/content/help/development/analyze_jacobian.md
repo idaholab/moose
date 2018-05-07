@@ -73,7 +73,7 @@ residual/Jacobian of any given variable.
 ## Tips
 
 - Use a `RandomIC` on each variable to make sure that the values and gradients
-  of your variables are non-zero to avoud trivial Jacobians.
+  of your variables are non-zero to avoid trivial Jacobians.
 - Reduce the mesh in size to greatly speed up the analysis. This can be done with
   the `-r` and `-s` options.
 
