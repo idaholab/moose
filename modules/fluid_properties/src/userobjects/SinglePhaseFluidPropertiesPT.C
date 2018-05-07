@@ -26,6 +26,36 @@ SinglePhaseFluidPropertiesPT::SinglePhaseFluidPropertiesPT(const InputParameters
 SinglePhaseFluidPropertiesPT::~SinglePhaseFluidPropertiesPT() {}
 
 Real
+SinglePhaseFluidPropertiesPT::criticalPressure() const
+{
+  mooseError(name(), ": criticalPressure() is not implemented");
+}
+
+Real
+SinglePhaseFluidPropertiesPT::criticalTemperature() const
+{
+  mooseError(name(), ": criticalTemperature() is not implemented");
+}
+
+Real
+SinglePhaseFluidPropertiesPT::criticalDensity() const
+{
+  mooseError(name(), ": criticalDensity() is not implemented");
+}
+
+Real
+SinglePhaseFluidPropertiesPT::triplePointPressure() const
+{
+  mooseError(name(), ": triplePointPressure() is not implemented");
+}
+
+Real
+SinglePhaseFluidPropertiesPT::triplePointTemperature() const
+{
+  mooseError(name(), ": triplePointTemperature() is not implemented");
+}
+
+Real
 SinglePhaseFluidPropertiesPT::gamma(Real pressure, Real temperature) const
 {
   return cp(pressure, temperature) / cv(pressure, temperature);
@@ -121,4 +151,17 @@ SinglePhaseFluidPropertiesPT::henryConstant_dT(Real /*temperature*/,
                                                Real & /*dKh_dT*/) const
 {
   mooseError(name(), ": henryConstant_dT() is not implemented");
+}
+
+Real SinglePhaseFluidPropertiesPT::vaporPressure(Real /*temperature*/) const
+{
+  mooseError(name(), ": vaporPressure() is not implemented");
+}
+
+void
+SinglePhaseFluidPropertiesPT::vaporPressure_dT(Real /*temperature*/,
+                                               Real & /*psat*/,
+                                               Real & /*dpsat_dT*/) const
+{
+  mooseError(name(), ": vaporPressure_dT() is not implemented");
 }

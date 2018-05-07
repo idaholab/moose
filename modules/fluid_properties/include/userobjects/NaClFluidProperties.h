@@ -33,6 +33,10 @@ InputParameters validParams<NaClFluidProperties>();
  * Int. J. Rock Mech. and Mining Sci., 78 (2015)
  * Note: The function given in this reference doesn't satisfactorily match their
  * experimental data, so the data was refitted using a third order polynomial
+ *
+ * NaCl critical properties from:
+ * From Anderko and Pitzer, Equation of state for pure sodium chloride, Fluid
+ * Phase Equil., 79 (1992)
  */
 class NaClFluidProperties : public SinglePhaseFluidPropertiesPT
 {
@@ -44,29 +48,15 @@ public:
 
   virtual Real molarMass() const override;
 
-  /**
-   * NaCl critical pressure
-   * From Anderko and Pitzer, Equation of state for pure sodium chloride, Fluid
-   * Phase Equil., 79 (1992)
-   * @return critical pressure (Pa)
-   */
-  virtual Real criticalPressure() const;
+  virtual Real criticalPressure() const override;
 
-  /**
-   * NaCl critical temperature
-   * From Anderko and Pitzer, Equation of state for pure sodium chloride, Fluid
-   * Phase Equil., 79 (1992)
-   * @return critical temperature (K)
-   */
-  virtual Real criticalTemperature() const;
+  virtual Real criticalTemperature() const override;
 
-  /**
-   * NaCl critical density
-   * From Anderko and Pitzer, Equation of state for pure sodium chloride, Fluid
-   * Phase Equil., 79 (1992)
-   * @return critical density (kg/m^3)
-   */
-  virtual Real criticalDensity() const;
+  virtual Real criticalDensity() const override;
+
+  virtual Real triplePointPressure() const override;
+
+  virtual Real triplePointTemperature() const override;
 
   virtual Real rho(Real pressure, Real temperature) const override;
 

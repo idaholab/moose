@@ -173,8 +173,6 @@ protected:
   Real massFractionToMoleFraction(Real xnacl) const;
 
   /// Water97FluidProperties UserObject
-  const Water97FluidProperties * _water97_fp;
-  /// Water97FluidProperties UserObject
   const SinglePhaseFluidPropertiesPT * _water_fp;
   /// NaClFluidProperties UserObject
   const SinglePhaseFluidPropertiesPT * _nacl_fp;

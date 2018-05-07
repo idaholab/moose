@@ -40,6 +40,36 @@ public:
   virtual Real molarMass() const = 0;
 
   /**
+   * Critical pressure
+   * @return critical pressure (Pa)
+   */
+  virtual Real criticalPressure() const;
+
+  /**
+   * Critical temperature
+   * @return critical temperature (K)
+   */
+  virtual Real criticalTemperature() const;
+
+  /**
+   * Critical density
+   * @return critical density (kg/m^3)
+   */
+  virtual Real criticalDensity() const;
+
+  /**
+   * Triple point pressure
+   * @return triple point pressure (Pa)
+   */
+  virtual Real triplePointPressure() const;
+
+  /**
+   * Triple point temperature
+   * @return triple point temperature (K)
+   */
+  virtual Real triplePointTemperature() const;
+
+  /**
    * Density
    * @param pressure fluid pressure (Pa)
    * @param temperature fluid temperature (K)
@@ -279,6 +309,27 @@ public:
    * @param[out] dKh_dT derivative of Kh wrt temperature
    */
   virtual void henryConstant_dT(Real temperature, Real & Kh, Real & dKh_dT) const;
+
+  /**
+   * Vapor pressure. Used to delineate liquid and gas phases.
+   * Valid for temperatures between the triple point temperature
+   * and the critical temperature
+   *
+   * @param temperature water temperature (K)
+   * @return saturation pressure (Pa)
+   */
+  virtual Real vaporPressure(Real temperature) const;
+
+  /**
+   * Vapor pressure. Used to delineate liquid and gas phases.
+   * Valid for temperatures between the triple point temperature
+   * and the critical temperature
+   *
+   * @param temperature water temperature (K)
+   * @param[out] saturation pressure (Pa)
+   * @param[out] derivative of saturation pressure wrt temperature (Pa/K)
+   */
+  virtual void vaporPressure_dT(Real temperature, Real & psat, Real & dpsat_dT) const;
 
 protected:
   /**
