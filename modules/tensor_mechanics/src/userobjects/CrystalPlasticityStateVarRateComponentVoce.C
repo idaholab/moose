@@ -98,6 +98,7 @@ CrystalPlasticityStateVarRateComponentVoce::CrystalPlasticityStateVarRateCompone
 {
   // perform input checks
   _n_groups = _groups.size();
+<<<<<<< HEAD
 
   if (_n_groups < 2)
     paramError("groups",
@@ -145,6 +146,47 @@ CrystalPlasticityStateVarRateComponentVoce::CrystalPlasticityStateVarRateCompone
   initSlipSystem_GroupID(_slipSystem_GroupID);
 }
 
+=======
+
+  if (_n_groups < 2)
+    paramError("groups", "the number of slip system groups provided is not "
+                         "correct. At least two values are expected");
+
+  // check the size of all the user provided parameters
+  if (_h0_group_values.size() != _n_groups - 1)
+    paramError("h0_group_values", "the number of supplied parameters does not"
+                 " match the number of ip system groups");
+
+  if (_tau0_group_values.size() != _n_groups - 1)
+    paramError("tau0_group_values", "the number of supplied parameters does "
+                 "not match the number of slip system groups");
+
+  if (_tauSat_group_values.size() != _n_groups - 1)
+    paramError("tauSat_group_values", "the number of supplied parameters does "
+             "not match the number of slip system groups");
+
+  if (_hardeningExponent_group_values.size() != _n_groups - 1)
+    paramError("hardeningExponent_group_values", "the number of supplied "
+             "parameters does not match the number of slip system groups");
+
+ if (_selfHardening_group_values.size() != _n_groups - 1)
+   paramError("selfHardening_group_values", "the number of supplied parameters "
+              "does not match the number of slip system groups");
+
+ if (_coplanarHardening_group_values.size() != _n_groups - 1)
+   paramError("coplanarHardening_group_values", "the number of supplied "
+               "parameters does not match the number of slip system groups");
+
+ if (_GroupGroup_Hardening_group_values.size() != (_n_groups - 1)*(_n_groups - 1))
+   paramError("GroupGroup_Hardening_group_values", "the number of supplied "
+               "parameters does not match the number of slip system groups");
+
+  // initialize useful variables;
+  initSlipSystem_PlaneID(_slipSystem_PlaneID);
+  initSlipSystem_GroupID(_slipSystem_GroupID);
+}
+
+>>>>>>> 3edfe2f1103674b9a7623117413db5a337f0b1bc
 bool
 CrystalPlasticityStateVarRateComponentVoce::calcStateVariableEvolutionRateComponent(
     unsigned int qp, std::vector<Real> & val) const
