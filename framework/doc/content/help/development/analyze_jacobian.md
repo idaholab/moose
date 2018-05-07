@@ -82,9 +82,9 @@ residual/Jacobian of any given variable.
 To view the available commandline options for the Jacobian Debugger run the
 script with the `--help` option
 
-`bash
+```bash
 $MOOSE_DIR/python/jacobiandebug/analyzejacobian.py --help
-`
+```
 
 Notable options are:
 
