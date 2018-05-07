@@ -20,6 +20,7 @@ Utilites:
     MooseDocs: utilities/MooseDocs/index.md
     Python: utilities/python/index.md
 Help:
+    MOOSE Newsletter: newsletter/index.md
     Frequently Asked Questions: help/faq.md
     Developer Tools: help/development/index.md
     INL HPC Connectivity: help/inlhpcconnectivity.md
