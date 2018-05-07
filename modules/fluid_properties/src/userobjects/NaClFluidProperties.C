@@ -64,6 +64,18 @@ NaClFluidProperties::criticalDensity() const
 }
 
 Real
+NaClFluidProperties::triplePointPressure() const
+{
+  return _p_triple;
+}
+
+Real
+NaClFluidProperties::triplePointTemperature() const
+{
+  return _T_triple;
+}
+
+Real
 NaClFluidProperties::rho(Real pressure, Real temperature) const
 {
   // Correlation needs pressure in bar
