@@ -11,6 +11,25 @@
 #include "Utils.h"
 
 /**
+ * Verify that critical properties are correctly returned
+ */
+TEST_F(MethaneFluidPropertiesTest, criticalProperties)
+{
+  ABS_TEST("critical pressure", _fp->criticalPressure(), 4.5992e6, 1.0e-12);
+  ABS_TEST("critical temperature", _fp->criticalTemperature(), 190.564, 1.0e-12);
+  ABS_TEST("critical density", _fp->criticalDensity(), 162.66, 1.0e-12);
+}
+
+/**
+ * Verify that triple point properties are correctly returned
+ */
+TEST_F(MethaneFluidPropertiesTest, triplePointProperties)
+{
+  ABS_TEST("triple point pressure", _fp->triplePointPressure(), 1.169e4, 1.0e-12);
+  ABS_TEST("triple point temperature", _fp->triplePointTemperature(), 90.67, 1.0e-12);
+}
+
+/**
  * Verify calculation of Henry's constant using data from
  * Guidelines on the Henry's constant and vapour liquid distribution constant
  * for gases in H20 and D20 at high temperatures, IAPWS (2004).
