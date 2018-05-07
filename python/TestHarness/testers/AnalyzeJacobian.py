@@ -9,13 +9,13 @@
 
 import os, sys
 from TestHarness import util
-from Tester import Tester
+from FileTester import FileTester
 
-class AnalyzeJacobian(Tester):
+class AnalyzeJacobian(FileTester):
 
     @staticmethod
     def validParams():
-        params = Tester.validParams()
+        params = FileTester.validParams()
         params.addRequiredParam('input',  "The input file to use for this test.")
         params.addParam('test_name',      "The name of the test - populated automatically")
         params.addParam('expect_out',     "A regular expression that must occur in the input in order for the test to be considered passing.")
@@ -25,10 +25,16 @@ class AnalyzeJacobian(Tester):
 
         return params
 
-
     def __init__(self, name, params):
-        Tester.__init__(self, name, params)
+        FileTester.__init__(self, name, params)
 
+    def getOutputFiles(self):
+        # analizejacobian.py outputs files prefixed with the input file name
+        return [self.specs['input']]
+
+    def prepare(self, options):
+        # We do not know what file(s) analizejacobian.py produces
+        return
 
     # Check if numpy is available
     def checkRunnable(self, options):

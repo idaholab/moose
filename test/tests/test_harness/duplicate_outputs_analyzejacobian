@@ -1,0 +1,10 @@
+[Tests]
+  [./a]
+    type = 'AnalyzeJacobian'
+    input = 'good.i'
+  [../]
+  [./b]
+    type = 'AnalyzeJacobian'
+    input = 'good.i'
+  [../]
+[]

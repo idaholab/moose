@@ -58,4 +58,15 @@
     cli_args = 'Outputs/exodus=true Outputs/file_base=depend_out'
     check_files = 'depend_out.e'
   [../]
+
+  [./h]
+    type = 'AnalyzeJacobian'
+    input = 'good.i'
+  [../]
+
+  [./i]
+    type = 'AnalyzeJacobian'
+    input = 'good.i'
+    prereq = h
+  [../]
 []

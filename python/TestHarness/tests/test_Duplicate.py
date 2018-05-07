@@ -22,9 +22,19 @@ class TestHarnessTester(TestHarnessTestCase):
 
         self.assertRegexpMatches(e.output, r'tests/test_harness.*?FAILED \(OUTFILE RACE CONDITION\)')
 
+        # Use a different spec file, which makes use of the AnalyzeJacobian tester. The is because
+        # a race condition, when caught, will invalidate the rest of the tests with out testing them.
+        with self.assertRaises(subprocess.CalledProcessError) as cm:
+            self.runTests('-i', 'duplicate_outputs_analyzejacobian')
+
+        e = cm.exception
+
+        self.assertRegexpMatches(e.output, r'tests/test_harness.*?FAILED \(OUTFILE RACE CONDITION\)')
+
     def testDuplicateOutputsOK(self):
         """
-        Test for duplicate output files in the same directory
+        Test for duplicate output files in the same directory that will _not_ overwrite eachother due to
+        proper prereqs set.
         """
         output = self.runTests('-i', 'duplicate_outputs_ok')
         output += self.runTests('-i', 'duplicate_outputs_ok', '--heavy')

@@ -36,15 +36,18 @@
     type = 'AnalyzeJacobian'
     input = 'creep.i'
     cli_args = 'Materials/elastic_strain/inelastic_models="creep_ten creep_zero"'
+    prereq = ten_jacobian
   [../]
   [./sum_jacobian]
     type = 'AnalyzeJacobian'
     input = 'creep.i'
     cli_args = 'Materials/elastic_strain/inelastic_models="creep_nine creep_one"'
+    prereq = zero_jacobian
   [../]
   [./cycle_jacobian]
     type = 'AnalyzeJacobian'
     input = 'creep.i'
     cli_args = 'Materials/elastic_strain/inelastic_models="creep_ten creep_ten2" Materials/elastic_strain/cycle_models=true'
+    prereq = sum_jacobian
   [../]
 []
