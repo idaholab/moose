@@ -121,11 +121,26 @@ public:
    */
   virtual Number getNodalValueOlder(const Node & node) = 0;
   /**
-   * Retrieve the Elemental DOF
-   * @param elem The element we are computing on
-   * @return The variable value
+   * Get the current value of this variable on an element
+   * @param[in] elem   Element at which to get value
+   * @param[in] idx    Local index of this variable's element DoFs
+   * @return Variable value
    */
   virtual Number getElementalValue(const Elem * elem, unsigned int idx = 0) const = 0;
+  /**
+   * Get the old value of this variable on an element
+   * @param[in] elem   Element at which to get value
+   * @param[in] idx    Local index of this variable's element DoFs
+   * @return Variable value
+   */
+  virtual Number getElementalValueOld(const Elem * elem, unsigned int idx = 0) const = 0;
+  /**
+   * Get the older value of this variable on an element
+   * @param[in] elem   Element at which to get value
+   * @param[in] idx    Local index of this variable's element DoFs
+   * @return Variable value
+   */
+  virtual Number getElementalValueOlder(const Elem * elem, unsigned int idx = 0) const = 0;
 
   virtual void getDofIndices(const Elem * elem, std::vector<dof_id_type> & dof_indices) = 0;
   /**

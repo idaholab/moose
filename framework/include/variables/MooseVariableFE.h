@@ -437,6 +437,8 @@ public:
   Number getNodalValueOld(const Node & node) override;
   Number getNodalValueOlder(const Node & node) override;
   Number getElementalValue(const Elem * elem, unsigned int idx = 0) const override;
+  Number getElementalValueOld(const Elem * elem, unsigned int idx = 0) const override;
+  Number getElementalValueOlder(const Elem * elem, unsigned int idx = 0) const override;
 
   void getDofIndices(const Elem * elem, std::vector<dof_id_type> & dof_indices) override;
   std::vector<dof_id_type> & dofIndicesNeighbor() override { return _dof_indices_neighbor; }
