@@ -13,6 +13,8 @@
 #include "FEProblem.h"
 #include "Conversion.h"
 #include "AddVariableAction.h"
+#include "NonlinearSystemBase.h"
+#include "libmesh/petsc_nonlinear_solver.h"
 
 registerMooseAction("ContactApp", ContactAction, "add_aux_kernel");
 
@@ -86,8 +88,6 @@ validParams<ContactAction>()
 
   params.addParam<Real>("al_frictional_force_tolerance",
                         "The tolerance of the frictional force for augmented Lagrangian method.");
-  params.addParam<bool>(
-      "print_contact_nodes", false, "Whether to print the number of nodes in contact.");
   return params;
 }
 
@@ -160,7 +160,6 @@ ContactAction::act()
       params.set<std::vector<VariableName>>("displacements") = coupled_displacements;
       params.set<BoundaryName>("boundary") = _master;
       params.set<bool>("use_displaced_mesh") = true;
-      params.set<bool>("print_contact_nodes") = getParam<bool>("print_contact_nodes");
 
       for (unsigned int i = 0; i < ndisp; ++i)
       {
@@ -169,7 +168,6 @@ ContactAction::act()
         params.set<unsigned int>("component") = i;
         params.set<NonlinearVariableName>("variable") = displacements[i];
         params.set<std::vector<VariableName>>("master_variable") = {coupled_displacements[i]};
-
         _problem->addConstraint("MechanicalContactConstraint", name, params);
       }
     }

@@ -81,6 +81,7 @@
 #include "MooseVariableScalar.h"
 #include "InputParameterWarehouse.h"
 #include "TimeIntegrator.h"
+#include "LineSearch.h"
 
 #include "libmesh/exodusII_io.h"
 #include "libmesh/quadrature.h"
@@ -209,6 +210,7 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
     _parallel_barrier_messaging(true),
     _current_execute_on_flag(EXEC_NONE),
     _control_warehouse(_app.getExecuteOnEnum(), /*threaded=*/false),
+    _line_search(nullptr),
     _error_on_jacobian_nonzero_reallocation(
         getParam<bool>("error_on_jacobian_nonzero_reallocation")),
     _ignore_zeros_in_jacobian(getParam<bool>("ignore_zeros_in_jacobian")),
@@ -1600,6 +1602,12 @@ FEProblemBase::getFunction(const std::string & name, THREAD_ID tid)
   }
 
   return *(_functions.getActiveObject(name, tid));
+}
+
+void
+FEProblemBase::lineSearch()
+{
+  _line_search->lineSearch();
 }
 
 NonlinearSystem &

@@ -96,6 +96,8 @@ stringify(const LineSearchType & t)
       return "bt";
     case LS_CP:
       return "cp";
+    case LS_CONTACT:
+      return "contact";
 #endif
     case LS_INVALID:
       mooseError("Invalid LineSearchType");
@@ -150,7 +152,7 @@ setSolverOptions(SolverParams & solver_params)
   if (ls_type == Moose::LS_NONE)
     ls_type = Moose::LS_BASIC;
 
-  if (ls_type != Moose::LS_DEFAULT)
+  if (ls_type != Moose::LS_DEFAULT && ls_type != Moose::LS_CONTACT)
   {
 #if PETSC_VERSION_LESS_THAN(3, 3, 0)
     setSinglePetscOption("-snes_type", "ls");
@@ -639,8 +641,26 @@ storePetscOptions(FEProblemBase & fe_problem, const InputParameters & params)
   {
     MooseEnum line_search = params.get<MooseEnum>("line_search");
     if (fe_problem.solverParams()._line_search == Moose::LS_INVALID || line_search != "default")
-      fe_problem.solverParams()._line_search =
+    {
+      Moose::LineSearchType enum_line_search =
           Moose::stringToEnum<Moose::LineSearchType>(line_search);
+      fe_problem.solverParams()._line_search = enum_line_search;
+      if (enum_line_search == LS_CONTACT)
+      {
+        NonlinearImplicitSystem * nl_system =
+            dynamic_cast<NonlinearImplicitSystem *>(&fe_problem.getNonlinearSystemBase().system());
+        if (!nl_system)
+          mooseError("You've requested a line search but you must be solving an EigenProblem. "
+                     "These two things are not consistent.");
+        PetscNonlinearSolver<Real> * petsc_nonlinear_solver =
+            dynamic_cast<PetscNonlinearSolver<Real> *>(nl_system->nonlinear_solver.get());
+        if (!petsc_nonlinear_solver)
+          mooseError("Currently the contact line search is only implemented through Petsc, so you "
+                     "must use Petsc as your non-linear solver.");
+        petsc_nonlinear_solver->linesearch_object =
+            libmesh_make_unique<ComputeLineSearchObjectWrapper>(fe_problem);
+      }
+    }
   }
 
   if (params.isParamValid("mffd_type"))
@@ -780,6 +800,16 @@ storePetscOptions(FEProblemBase & fe_problem, const InputParameters & params)
   po.pc_description = pc_description;
 }
 
+std::set<std::string>
+getPetscValidLineSearches()
+{
+#if PETSC_VERSION_LESS_THAN(3, 3, 0)
+  return {"default", "cubic", "quadratic", "none", "basic", "basicnonorms"};
+#else
+  return {"default", "shell", "none", "basic", "l2", "bt", "cp"};
+#endif
+}
+
 InputParameters
 getPetscValidParams()
 {
@@ -793,21 +823,6 @@ getPetscValidParams()
                              "NEWTON: Full Newton Solve "
                              "FD: Use finite differences to compute Jacobian "
                              "LINEAR: Solving a linear problem");
-
-// Line Search Options
-#ifdef LIBMESH_HAVE_PETSC
-#if PETSC_VERSION_LESS_THAN(3, 3, 0)
-  MooseEnum line_search("default cubic quadratic none basic basicnonorms", "default");
-#else
-  MooseEnum line_search("default shell none basic l2 bt cp", "default");
-#endif
-  std::string addtl_doc_str(" (Note: none = basic)");
-#else
-  MooseEnum line_search("default", "default");
-  std::string addtl_doc_str("");
-#endif
-  params.addParam<MooseEnum>(
-      "line_search", line_search, "Specifies the line search type" + addtl_doc_str);
 
   MooseEnum mffd_type("wp ds", "wp");
   params.addParam<MooseEnum>("mffd_type",
@@ -823,7 +838,6 @@ getPetscValidParams()
   params.addParam<std::vector<std::string>>(
       "petsc_options_value",
       "Values of PETSc name/value pairs (must correspond with \"petsc_options_iname\"");
-
   return params;
 }
 
@@ -941,6 +955,16 @@ colorAdjacencyMatrix(PetscScalar * adjacency_matrix,
   MatColoringDestroy(&mc);
 #endif
   ISColoringDestroy(&iscoloring);
+}
+
+ComputeLineSearchObjectWrapper::ComputeLineSearchObjectWrapper(FEProblemBase & fe_problem)
+  : _fe_problem(fe_problem)
+{
+}
+
+void ComputeLineSearchObjectWrapper::linesearch(SNESLineSearch /*line_search_object*/)
+{
+  _fe_problem.lineSearch();
 }
 
 } // Namespace PetscSupport

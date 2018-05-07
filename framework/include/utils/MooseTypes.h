@@ -367,6 +367,7 @@ enum LineSearchType
   LS_BASICNONORMS,
 #else
   LS_SHELL,
+  LS_CONTACT,
   LS_L2,
   LS_BT,
   LS_CP

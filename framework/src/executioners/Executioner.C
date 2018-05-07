@@ -40,6 +40,30 @@ validParams<Executioner>()
                                             "hierarchical decomposition into "
                                             "subsystems to help the solver.");
 
+  std::set<std::string> line_searches = {"contact", "default", "none", "basic"};
+#ifdef LIBMESH_HAVE_PETSC
+  std::set<std::string> petsc_line_searches = Moose::PetscSupport::getPetscValidLineSearches();
+  line_searches.insert(petsc_line_searches.begin(), petsc_line_searches.end());
+#endif // LIBMESH_HAVE_PETSC
+  std::string line_search_string = Moose::stringify(line_searches, " ");
+  MooseEnum line_search(line_search_string, "default");
+  std::string addtl_doc_str(" (Note: none = basic)");
+  params.addParam<MooseEnum>(
+      "line_search", line_search, "Specifies the line search type" + addtl_doc_str);
+  MooseEnum line_search_package("petsc moose", "petsc");
+  params.addParam<MooseEnum>("line_search_package",
+                             line_search_package,
+                             "The solver package to use to conduct the line-search");
+  params.addParam<unsigned>("contact_line_search_allowed_lambda_cuts",
+                            2,
+                            "The number of times lambda is allowed to be cut in half in the "
+                            "contact line search. We recommend this number be roughly bounded by 0 "
+                            "<= allowed_lambda_cuts <= 3");
+  params.addParam<Real>("contact_line_search_ltol",
+                        "The linear relative tolerance to be used while the contact state is "
+                        "changing between non-linear iterations. We recommend that this tolerance "
+                        "be looser than the standard linear tolerance");
+
 // Default Solver Behavior
 #ifdef LIBMESH_HAVE_PETSC
   params += Moose::PetscSupport::getPetscValidParams();
@@ -80,6 +104,9 @@ Executioner::Executioner(const InputParameters & parameters)
     _restart_file_base(getParam<FileNameNoExtension>("restart_file_base")),
     _splitting(getParam<std::vector<std::string>>("splitting"))
 {
+  if (_pars.isParamSetByUser("line_search"))
+    _fe_problem.addLineSearch(_pars);
+
 // Extract and store PETSc related settings on FEProblemBase
 #ifdef LIBMESH_HAVE_PETSC
   Moose::PetscSupport::storePetscOptions(_fe_problem, _pars);
