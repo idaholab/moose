@@ -53,7 +53,7 @@ command but just generates it in parallel.
 To use a mesh split configuration use the `--use-split` flag (which takes no arguments):
 
 ```
-$ mpiexec -n 42 moose-app-opt your_input.i --use-split
+$ mpiexec -n 42 moose-app-opt -i your_input.i --use-split
 ```
 
 This will cause MOOSE to look for a mesh split configuration with 42 chunks.  If one exists, MOOSE
@@ -64,5 +64,5 @@ not use a file-based mesh, you will need to specify a split mesh file name using
 `--split-file <file_name>` flag just as you did when splitting the mesh:
 
 ```
-$ mpiexec -n 42 moose-app-opt your_input.i --use-split --split-file foo.cpr
+$ mpiexec -n 42 moose-app-opt -i your_input.i --use-split --split-file foo.cpr
 ```
