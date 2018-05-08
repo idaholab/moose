@@ -178,3 +178,10 @@ TEST(MooseObjectParameterName, errors)
         << "MooseObjectParameterName failed with unexpected error: " << msg;
   }
 }
+
+TEST(MooseObjectParameterName, copy)
+{
+  MooseObjectParameterName name0("tag", "object", "param");
+  MooseObjectParameterName name1(name0);
+  EXPECT_EQ(name0, name1);
+}
