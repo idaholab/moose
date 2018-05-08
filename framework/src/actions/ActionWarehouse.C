@@ -352,6 +352,7 @@ ActionWarehouse::executeActionsWithAction(const std::string & task)
   {
     if (_show_actions)
     {
+      Moose::perf_log.push(task + ":" + (*_act_iter)->name(), "Setup");
       _console << "[DBG][ACT] "
                << "TASK (" << COLOR_YELLOW << std::setw(24) << task << COLOR_DEFAULT << ") "
                << "TYPE (" << COLOR_YELLOW << std::setw(32) << (*_act_iter)->type() << COLOR_DEFAULT
@@ -360,6 +361,7 @@ ActionWarehouse::executeActionsWithAction(const std::string & task)
                << ")" << std::endl;
 
       (*_act_iter)->act();
+      Moose::perf_log.pop(task + ":" + (*_act_iter)->name(), "Setup");
     }
     else
       (*_act_iter)->act();
