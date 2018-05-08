@@ -187,6 +187,7 @@ class MaterializeRenderer(HTMLRenderer):
         config['home'] = ('/', "The homepage for the website.")
         config['scrollspy'] = (True, "Enable/disable the scrolling table of contents.")
         config['search'] = (True, "Enable/disable the search bar.")
+        config['google_analytics'] = (False, "Enable Google Analytics.")
         return config
 
     def __init__(self, *args, **kwargs):
@@ -229,9 +230,9 @@ class MaterializeRenderer(HTMLRenderer):
 
     def convert(self, root, ast, config):
 
-        html.Tag(root, 'html')
-        head = html.Tag(root, 'head')
-        body = html.Tag(root, 'body')
+        html_root = html.Tag(root, 'html')
+        head = html.Tag(html_root, 'head')
+        body = html.Tag(html_root, 'body')
         wrap = html.Tag(body, 'div', class_='page-wrap')
 
         header = html.Tag(wrap, 'header')
@@ -322,6 +323,11 @@ class MaterializeRenderer(HTMLRenderer):
             html.Tag(head, 'script', type="text/javascript", src=rel("js/search_index.js"))
 
         html.Tag(head, 'script', type="text/javascript", src=rel("js/init.js"))
+
+        # Google Analytics (see https://support.google.com/analytics/answer/1008080)
+        if config.get('google_analytics', False):
+            html.Tag(head, 'script', type="text/javascript",
+                     src=rel('js/google_analytics.js'))
 
     def _addContents(self, config, toc, content, root_page): #pylint: disable=unused-argument,no-self-use
         """
