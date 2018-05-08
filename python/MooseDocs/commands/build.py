@@ -11,6 +11,7 @@ import livereload
 import MooseDocs
 from MooseDocs import common
 from MooseDocs.tree import page
+from check import check
 
 def command_line_options(subparser, parent):
     """
@@ -43,6 +44,11 @@ def command_line_options(subparser, parent):
     parser.add_argument('--home', default=None, help="The 'home' URL for the hosted website. " \
                                                      "This is mainly used by CIVET to allow " \
                                                      "temporary sites to be functional.")
+
+    parser.add_argument('--check', action='store_true',
+                        help="Run the default check command prior to build, the main purpose " \
+                             "of this command is to allow the make targets to avoid creating " \
+                             "the syntax multiple times.")
 
 class MooseDocsWatcher(livereload.watcher.Watcher):
     """
@@ -125,7 +131,7 @@ def main(options):
     _init_large_media()
 
     # Create translator
-    translator, _ = common.load_config(options.config)
+    translator, config = common.load_config(options.config)
     translator.init(options.destination)
 
     # Replace "home" with local server
@@ -142,6 +148,10 @@ def main(options):
     # Clean
     if options.clean:
         shutil.rmtree(options.destination)
+
+    # Perform check
+    if options.check:
+        check(translator, config)
 
     # Perform build
     if options.files:
