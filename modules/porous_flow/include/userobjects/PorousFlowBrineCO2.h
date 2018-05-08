@@ -21,13 +21,24 @@ InputParameters validParams<PorousFlowBrineCO2>();
 
 /**
  * Specialized class for brine and CO2 including calculation of mutual
- * solubility of the two fluids using the high-accuracy formulation of
+ * solubility of the two fluids using a high-accuracy fugacity-based formulation.
+ *
+ * For temperatures 12C <= T <= 99C, the formulation is based on
  * Spycher, Pruess and Ennis-King, CO2-H2O mixtures in the geological
  * sequestration of CO2. I. Assessment and calculation of mutual solubilities
  * from 12 to 100C and up to 600 bar, Geochimica et Cosmochimica Acta, 67, 3015-3031 (2003),
  * and Spycher and Pruess, CO2-H2O mixtures in the geological sequestration of CO2. II.
  * Partitioning in chloride brine at 12-100C and up to 600 bar, Geochimica et
- * Cosmochimica Acta, 69, 3309-3320 (2005)
+ * Cosmochimica Acta, 69, 3309-3320 (2005).
+ *
+ * For temperatures 109C <= T <= 300C, the formulation is based on
+ * Spycher and Pruess, A Phase-Partitioning Model for CO2-Brine Mixtures at Elevated
+ * Temperatures and Pressures: Application to CO2-Enhanced Geothermal Systems,
+ * Transport in Porous Media, 82, 173-196 (2010)
+ *
+ * As the two formulations do not coincide at temperatures near 100C, a cubic
+ * polynomial is used in the intermediate temperature range 99C < T < 109C to
+ * provide a smooth transition from the two formulations in this region.
  */
 class PorousFlowBrineCO2 : public PorousFlowFluidStateBase
 {
@@ -45,45 +56,57 @@ public:
                                 Real xnacl,
                                 Real z,
                                 std::vector<FluidStateProperties> & fsp) const;
+
   /**
-   * Mass fractions of CO2 and brine calculated using mutual solubilities given
-   * by Spycher, Pruess and Ennis-King, CO2-H2O mixtures in the geological
-   * sequestration of CO2. I. Assessment and calculation of mutual solubilities
-   * from 12 to 100C and up to 600 bar, Geochimica et Cosmochimica Acta, 67, 3015-3031 (2003),
-   * and Spycher and Pruess, CO2-H2O mixtures in the geological sequestration of CO2. II.
-   * Partitioning in chloride brine at 12-100C and up to 600 bar, Geochimica et
-   * Cosmochimica Acta, 69, 3309-3320 (2005)
+   * Mole fractions of CO2 in water and water vapor in CO2 at equilibrium.
+   * Note: This returns the values of xCO2 in water (no salt). This function used in
+   * equilibriumMassFractions()
+   *
+   * In the low temperature regime (T <= 99C), the mole fractions are calculated directly,
+   * while in the elevated temperature regime (T >= 109C), they are calculated iteratively.
+   * In the intermediate regime (99C < T < 109C), a cubic polynomial is used to smoothly
+   * connect the low and elevated temperature regimes.
    *
    * @param pressure phase pressure (Pa)
-   * @param temperature phase temperature (C)
+   * @param temperature phase temperature (K)
+   * @param[out] xco2 mole fraction of CO2 in liquid (-)
+   * @param[out] yh2o mole fraction of H2O in gas (kg/kg)
+   */
+  void equilibriumMoleFractions(Real pressure, Real temperature, Real & xco2, Real & yh2o) const;
+
+  /**
+   * Mass fractions of CO2 in brine and water vapor in CO2 at equilibrium
+   *
+   * @param pressure phase pressure (Pa)
+   * @param temperature phase temperature (K)
    * @param xnacl NaCl mass fraction (kg/kg)
-   * @param[out] xco2l mass fraction of CO2 in liquid (kg/kg)
-   * @param[out] dxco2l_dp derivative of mass fraction of CO2 in liquid wrt pressure
-   * @param[out] dxco2l_dT derivative of mass fraction of CO2 in liqiud wrt temperature
-   * @param[out] dxco2l_dx derivative of mass fraction of CO2 in liqiud wrt salt mass fraction
-   * @param[out] xh2og mass fraction of H2O in gas (kg/kg)
-   * @param[out] dh2ogl_dp derivative of mass fraction of H2O in gas wrt pressure
-   * @param[out] dh2og_dT derivative of mass fraction of H2O in gas wrt temperature
-   * @param[out] dh2og_dx derivative of mass fraction of H2O in gas wrt salt mass fraction
+   * @param[out] xco2 mass fraction of CO2 in liquid (kg/kg)
+   * @param[out] dxco2_dp derivative of mass fraction of CO2 in liquid wrt pressure
+   * @param[out] dxco2_dT derivative of mass fraction of CO2 in liqiud wrt temperature
+   * @param[out] dxco2_dx derivative of mass fraction of CO2 in liqiud wrt salt mass fraction
+   * @param[out] yh2o mass fraction of H2O in gas (kg/kg)
+   * @param[out] dyh2og_dp derivative of mass fraction of H2O in gas wrt pressure
+   * @param[out] dyh2o_dT derivative of mass fraction of H2O in gas wrt temperature
+   * @param[out] dyh2o_dx derivative of mass fraction of H2O in gas wrt salt mass fraction
    */
   void equilibriumMassFractions(Real pressure,
                                 Real temperature,
                                 Real xnacl,
-                                Real & xncgl,
-                                Real & dxncgl_dp,
-                                Real & dxncgl_dT,
-                                Real & dxncgl_dx,
-                                Real & xh2og,
-                                Real & dxh2og_dp,
-                                Real & dxh2og_dT,
-                                Real & dxh2og_dx) const;
+                                Real & xco2,
+                                Real & dxco2_dp,
+                                Real & dxco2_dT,
+                                Real & dxco2_dx,
+                                Real & yh2o,
+                                Real & dyh2o_dp,
+                                Real & dyh2o_dT,
+                                Real & dyh2o_dx) const;
 
   /**
    * Mass fractions of CO2 and H2O in both phases, as well as derivatives wrt
    * PorousFlow variables. Values depend on the phase state (liquid, gas or two phase)
    *
    * @param pressure phase pressure (Pa)
-   * @param temperature phase temperature (C)
+   * @param temperature phase temperature (K)
    * @param xnacl NaCl mass fraction (kg/kg)
    * @param z total mass fraction of CO2 component
    * @param[out] PhaseStateEnum current phase state
@@ -100,7 +123,7 @@ public:
    * Thermophysical properties of the gaseous state
    *
    * @param pressure gas pressure (Pa)
-   * @param temperature temperature (C)
+   * @param temperature temperature (K)
    * @param xnacl NaCl mass fraction (kg/kg)
    * @param[out] FluidStateDensity data structure
    */
@@ -111,7 +134,7 @@ public:
    * Thermophysical properties of the liquid state
    *
    * @param pressure liquid pressure (Pa)
-   * @param temperature temperature (C)
+   * @param temperature temperature (K)
    * @param xnacl NaCl mass fraction (kg/kg)
    * @param[out] FluidStateDensity data structure
    */
@@ -124,7 +147,7 @@ public:
    * Gas and liquid saturations for the two-phase region
    *
    * @param pressure gas pressure (Pa)
-   * @param temperature phase temperature (C)
+   * @param temperature phase temperature (K)
    * @param xnacl NaCl mass fraction (kg/kg)
    * @param z total mass fraction of CO2 component
    * @param[out] FluidStateSaturation data structure
@@ -136,34 +159,125 @@ public:
                           std::vector<FluidStateProperties> & fsp) const;
 
   /**
-   * Fugacity coefficient for CO2. Eq. (B7) from Spycher, Pruess and
-   * Ennis-King, CO2-H2O mixtures in the geological sequestration of CO2. I.
-   * Assessment and calculation of mutual solubilities from 12 to 100C and
-   * up to 600 bar, Geochimica et Cosmochimica Acta, 67, 3015-3031 (2003)
+   * Fugacity coefficients for H2O and CO2
+   * For T <= 99C, Eq. (B7) from Spycher, Pruess and Ennis-King (2003)
+   * For T >= 109C, Eq. (A8) from Spycher & Pruess (2010)
+   * For temperatures 99C < T < 109C, the value is calculated by smoothly joining
+   * models with cubic polynomial
+   *
+   * @param pressure gas pressure (Pa)
+   * @param temperature temperature (K)
+   * @param xco2 mole fraction of CO2 in liquid phase (-)
+   * @param yh2o mole fraction of H2O in gas phase (-)
+   * @param[out] fco2 fugacity coefficient for CO2
+   * @param[out] dfco2_dp derivative of fugacity coefficient wrt pressure
+   * @param[out] dfco2_dT derivative of fugacity coefficient wrt temperature
+   * @param[out] fh2o fugacity coefficient for H2O
+   * @param[out] dfh2o_dp derivative of fugacity coefficient wrt pressure
+   * @param[out] dfh2o_dT derivative of fugacity coefficient wrt temperature
+   */
+  void fugacityCoefficients(Real pressure,
+                            Real temperature,
+                            Real xco2,
+                            Real yh2o,
+                            Real & fco2,
+                            Real & dfco2_dp,
+                            Real & dfco2_dT,
+                            Real & fh2o,
+                            Real & dfh2o_dp,
+                            Real & dfh2o_dT) const;
+
+  /**
+   * Fugacity coefficients for H2O and CO2 for T < 99C
+   * Eq. (B7) from Spycher, Pruess and Ennis-King (2003)
    *
    * @param pressure gas pressure (Pa)
    * @param temperature temperature (K)
    * @param[out] fco2 fugacity coefficient for CO2
    * @param[out] dfco2_dp derivative of fugacity coefficient wrt pressure
    * @param[out] dfco2_dT derivative of fugacity coefficient wrt temperature
-   */
-  void fugacityCoefficientCO2(
-      Real pressure, Real temperature, Real & fco2, Real & dfco2_dp, Real & dfco2_dT) const;
-
-  /**
-   * Fugacity coefficient for H2O. Eq. (B7) from Spycher, Pruess and
-   * Ennis-King, CO2-H2O mixtures in the geological sequestration of CO2. I.
-   * Assessment and calculation of mutual solubilities from 12 to 100C and
-   * up to 600 bar, Geochimica et Cosmochimica Acta, 67, 3015-3031 (2003)
-   *
-   * @param pressure gas pressure (Pa)
-   * @param temperature temperature (K)
    * @param[out] fh2o fugacity coefficient for H2O
    * @param[out] dfh2o_dp derivative of fugacity coefficient wrt pressure
    * @param[out] dfh2o_dT derivative of fugacity coefficient wrt temperature
    */
-  void fugacityCoefficientH2O(
-      Real pressure, Real temperature, Real & fh2o, Real & dfh2o_dp, Real & dfh2o_dT) const;
+  void fugacityCoefficientsLowTemp(Real pressure,
+                                   Real temperature,
+                                   Real & fco2,
+                                   Real & dfco2_dp,
+                                   Real & dfco2_dT,
+                                   Real & fh2o,
+                                   Real & dfh2o_dp,
+                                   Real & dfh2o_dT) const;
+
+  /**
+   * Fugacity coefficients for H2O and CO2 at elevated temperatures (100C < T < 300C).
+   * Eq. (A8) from Spycher & Pruess (2010)
+   *
+   * @param pressure gas pressure (Pa)
+   * @param temperature temperature (K)
+   * @param xco2 mole fraction of CO2 in liquid phase (-)
+   * @param yh2o mole fraction of H2O in gas phase (-)
+   * @param[out] fco2 fugacity coefficient for CO2
+   * @param[out] dfco2_dp derivative of fugacity coefficient wrt pressure
+   * @param[out] dfco2_dT derivative of fugacity coefficient wrt temperature
+   * @param[out] fh2o fugacity coefficient for H2O
+   * @param[out] dfh2o_dp derivative of fugacity coefficient wrt pressure
+   * @param[out] dfh2o_dT derivative of fugacity coefficient wrt temperature
+   */
+  void fugacityCoefficientsHighTemp(Real pressure,
+                                    Real temperature,
+                                    Real xco2,
+                                    Real yh2o,
+                                    Real & fco2,
+                                    Real & dfco2_dp,
+                                    Real & dfco2_dT,
+                                    Real & fh2o,
+                                    Real & dfh2o_dp,
+                                    Real & dfh2o_dT) const;
+
+  /**
+   * Fugacity coefficient for H2O at elevated temperatures (100C < T < 300C).
+   * Eq. (A8) from Spycher & Pruess (2010)
+   *
+   * @param pressure gas pressure (Pa)
+   * @param temperature temperature (K)
+   * @param xco2 mole fraction of CO2 in liquid phase (-)
+   * @param yh2o mole fraction of H2O in gas phase (-)
+   * @return fugacity coefficient
+   */
+  Real fugacityCoefficientH2OHighTemp(Real pressure, Real temperature, Real xco2, Real yh2o) const;
+
+  /**
+   * Fugacity coefficient for CO2 at elevated temperatures (100C < T < 300C).
+   * Eq. (A8) from Spycher & Pruess (2010)
+   *
+   * @param pressure gas pressure (Pa)
+   * @param temperature temperature (K)
+   * @param xco2 mole fraction of CO2 in liquid phase (-)
+   * @param yh2o mole fraction of H2O in gas phase (-)
+   * @return fugacity coefficient
+   */
+  Real fugacityCoefficientCO2HighTemp(Real pressure, Real temperature, Real xco2, Real yh2o) const;
+
+  /**
+   * Activity coefficient of H2O
+   * Eq. (12) from Spycher & Pruess (2010)
+   *
+   * @param temperature temperature (K)
+   * @param xco2 mole fraction of CO2 in liquid phase (-)
+   * @return activity coefficient
+   */
+  Real activityCoefficientH2O(Real temperature, Real xco2) const;
+
+  /**
+   * Activity coefficient of CO2
+   * Eq. (13) from Spycher & Pruess (2010)
+   *
+   * @param temperature temperature (K)
+   * @param xco2 mole fraction of CO2 in liquid phase (-)
+   * @return activity coefficient
+   */
+  Real activityCoefficientCO2(Real temperature, Real xco2) const;
 
   /**
    * Activity coefficient for CO2 in brine. From Duan and Sun, An improved model calculating
@@ -187,26 +301,26 @@ public:
                            Real & dgamma_dx) const;
 
   /**
-   * Equilibrium constant for H2O from Spycher, Pruess and
-   * Ennis-King, CO2-H2O mixtures in the geological sequestration of CO2. I.
-   * Assessment and calculation of mutual solubilities from 12 to 100C and
-   * up to 600 bar, Geochimica et Cosmochimica Acta, 67, 3015-3031 (2003).
-   * Note: correlation uses temperature in Celcius
+   * Equilibrium constant for H2O
+   * For temperatures 12C <= T <= 99C, uses Spycher, Pruess and Ennis-King (2003)
+   * For temperatures 109C <= T <= 300C, uses Spycher and Pruess (2010)
+   * For temperatures 99C < T < 109C, the value is calculated by smoothly interpolating
+   * the two formulations
    *
-   * @param temperature temperature (C)
+   * @param temperature temperature (K)
    * @param[out] kh2o equilibrium constant for H2O
    * @param[out] dkh2o_dT derivative of equilibrium constant wrt temperature
    */
   void equilibriumConstantH2O(Real temperature, Real & kh2o, Real & dkh2o_dT) const;
 
   /**
-   * Equilibrium constant for CO2 from Spycher, Pruess and
-   * Ennis-King, CO2-H2O mixtures in the geological sequestration of CO2. I.
-   * Assessment and calculation of mutual solubilities from 12 to 100C and
-   * up to 600 bar, Geochimica et Cosmochimica Acta, 67, 3015-3031 (2003).
-   * Note: correlation uses temperature in Celcius
+   * Equilibrium constant for CO2
+   * For temperatures 12C <= T <= 99C, uses Spycher, Pruess and Ennis-King (2003)
+   * For temperatures 109C <= T <= 300C, uses Spycher and Pruess (2010)
+   * For temperatures 99C < T < 109C, the value is calculated by smoothly interpolating
+   * the two formulations
    *
-   * @param temperature temperature (C)
+   * @param temperature temperature (K)
    * @param[out] kco2 equilibrium constant for CO2
    * @param[out] dkco2_dT derivative of equilibrium constant wrt temperature
    */
@@ -286,9 +400,57 @@ public:
    */
   void enthalpyOfDissolution(Real temperature, Real & hdis, Real & dhdis_dT) const;
 
+  /**
+   * Function to solve for yH2O and xCO2 iteratively in the elevated temperature regime (T > 100C)
+   *
+   * @param pressure gas pressure (Pa)
+   * @param temperature fluid temperature (K)
+   * @param[out] xco2 mole fraction of CO2 in liquid phase (-)
+   * @param[out] yh2o mole fraction of H2O in gas phase (-)
+   */
+  void solveEquilibriumHighTemp(Real pressure, Real temperature, Real & xco2, Real & yh2o) const;
+
 protected:
   /// Check the input variables
   void checkVariables(Real pressure, Real temperature) const;
+
+  /**
+   * Cubic function to smoothly interpolate between the low temperature and elevated
+   * temperature models for 99C < T < 109C
+   *
+   * @param temperature temperature (K)
+   * @param f0 function value at T = 372K (99C)
+   * @param df0 derivative of function at T = 372K (99C)
+   * @param f1 function value at T = 382K (109C)
+   * @param df1 derivative of function at T = 382K (109C)
+   * @param[out] value value at the given temperature
+   * @param[out] deriv derivative at the given temperature
+   */
+  void smoothCubicInterpolation(
+      Real temperature, Real f0, Real df0, Real f1, Real df1, Real & value, Real & deriv) const;
+
+  /*
+   * The function A (Eq. (11) of Spycher, Pruess and Ennis-King (2003) for T <= 100C,
+   * and Eqs. (10) and (17) of Spycher and Pruess (2010) for T > 100C)
+   *
+   * @param pressure gas pressure (Pa)
+   * @param temperature fluid temperature (K)
+   * @param xco2 mole fraction of CO2 in liquid phase (-)
+   * @param yh2o mole fraction of H2O in gas phase (-)
+   * @param[out] A the function A
+   * @param[out] B the function B
+   */
+  void funcAB(Real pressure, Real temperature, Real xco2, Real yh2o, Real & A, Real & B) const;
+  void funcAB(Real pressure,
+              Real temperature,
+              Real xco2,
+              Real yh2o,
+              Real & A,
+              Real & dA_dp,
+              Real & dA_dT,
+              Real & B,
+              Real & dB_dp,
+              Real & dB_dT) const;
 
   /// Salt component index
   const unsigned int _salt_component;
@@ -308,6 +470,10 @@ protected:
   const Real _Mnacl;
   /// Molar gas constant in bar cm^3 /(K mol)
   const Real _Rbar;
+  /// Temperature below which the Spycher, Pruess & Ennis-King (2003) model is used (K)
+  const Real _Tlower;
+  /// Temperature above which the Spycher & Pruess (2010) model is used (K)
+  const Real _Tupper;
 };
 
 #endif // POROUSFLOWBRINECO2_H
