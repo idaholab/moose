@@ -68,7 +68,7 @@ TEST_F(PorousFlowBrineCO2Test, equilibriumConstants)
   dK0H2O_dT_fd = (K0H2O_2 - K0H2O) / dT;
   dK0CO2_dT_fd = (K0CO2_2 - K0CO2) / dT;
   REL_TEST("dK0H2O_dT", dK0H2O_dT, dK0H2O_dT_fd, 1.0e-6);
-  REL_TEST("dK0CO2_dT", dK0CO2_dT, dK0CO2_dT_fd, 1.0e-6);
+  REL_TEST("dK0CO2_dT", dK0CO2_dT, dK0CO2_dT_fd, 1.0e-5);
 }
 
 /*
