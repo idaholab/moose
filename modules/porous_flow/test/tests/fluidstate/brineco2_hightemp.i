@@ -1,4 +1,5 @@
-# Tests correct calculation of properties in PorousFlowBrineCO2
+# Tests correct calculation of properties in PorousFlowBrineCO2 in the elevated
+# temperature regime (T > 110C)
 
 [Mesh]
   type = GeneratedMesh
@@ -7,7 +8,7 @@
 
 [GlobalParams]
   PorousFlowDictator = dictator
-  temperature = 30
+  temperature = 250
 []
 
 [Variables]
@@ -340,7 +341,6 @@
 
 [Outputs]
   csv = true
-  file_base = brineco2
   execute_on = 'TIMESTEP_END'
   print_perf_log = false
 []

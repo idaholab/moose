@@ -4,7 +4,7 @@ The brine-CO$_2$ model available in PorousFlow is a high precision equation of s
 for brine and CO$_2$, including the mutual solubility of CO$_2$ into the liquid brine
 and water into the CO$_2$-rich gas phase. This model is suitable for simulations of
 geological storage of CO$_2$ in saline aquifers, and is valid for temperatures in the range
-$12^{\circ}C \le T \le 110^{\circ}C$ and pressures less than 60 MPa.
+$12^{\circ}C \le T \le 300^{\circ}C$ and pressures less than 60 MPa.
 
 Salt (NaCl) can be included as a nonlinear variable, allowing salt to be transported
 along with water to provide variable density brine.
@@ -12,9 +12,18 @@ along with water to provide variable density brine.
 ## Phase composition
 
 The mass fractions of CO$_2$ in the liquid phase and H$_2$O in the gas phase are calculated
-using the accurate fugacity-based formulation of [citet:spycher2003] and [citet:spycher2005].
+using the accurate fugacity-based formulation of [citet:spycher2003] and [citet:spycher2005]
+for temperatures below 100$^{\circ}$C, and the elevated temperature formulation of
+[citet:spycher2010] for temperatures above 110$^{\circ}$C.
 
-This is identical to the formulation provided in the ECO2N module of TOUGH2 [citep:pruess1999],
+As these formulations do not coincide for temperatures near 100$^{\circ}$C, a cubic
+polynomial is used to join the two curves smoothly.
+
+!alert note
+The mutual solubilities in the elevated temperature regime must be calculated iteratively,
+so an increase in computational expense can be expected.
+
+This is similar to the formulation provided in the ECO2N module of TOUGH2 [citep:pruess1999],
 see [xco2l] and [yh2og] for a comparison between the two codes.
 
 !media media/porous_flow/brineco2_xco2l.png
