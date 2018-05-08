@@ -62,14 +62,16 @@ GridPartitioner::_do_partition(MeshBase & mesh, const unsigned int /*n*/)
 {
   // First: build the GeneratedMesh
 
+  auto & factory = _app.getFactory();
+
   // Figure out the physical bounds of the given mesh
   auto bounding_box = MeshTools::create_bounding_box(mesh);
   const auto & min = bounding_box.min();
   const auto & max = bounding_box.max();
 
   // Fill up a parameters object from the parameters for this class
-  auto params = emptyInputParameters();
-  _pars.IKnowIShouldntCopyTheseParametersButImGoingToDoItAnyway(params);
+  auto params = factory.getValidParams("GeneratedMesh");
+  params.applyParameters(_pars);
 
   auto dim = mesh.mesh_dimension();
   params.set<MooseEnum>("dim") = dim;

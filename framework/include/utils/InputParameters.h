@@ -480,8 +480,6 @@ public:
   using Parameters::operator+=;
   InputParameters & operator=(const InputParameters & rhs);
   InputParameters & operator+=(const InputParameters & rhs);
-  void IKnowIShouldntCopyTheseParametersButImGoingToDoItAnyway(InputParameters & copy_into) const;
-
   ///@}
 
   /**
