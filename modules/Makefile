@@ -72,6 +72,6 @@ test_doc: all builds
 	for app in $(MODULE_DIRS); \
 	do \
 		echo ====== Testing MooseDocs in $${app} ====== ; \
-		cd $${app}/doc && ./moosedocs.py check && ./moosedocs.py build --destination=$(MOOSE_DOCS_DIR) || ret_val=1; \
+		cd $${app}/doc && ./moosedocs.py build --check --destination=$(MOOSE_DOCS_DIR) || ret_val=1; \
 	done; \
 	exit $$ret_val;)
