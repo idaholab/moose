@@ -45,6 +45,8 @@ public:
                            const std::string & param,
                            const std::string & separator = std::string("/"));
 
+  MooseObjectParameterName(const MooseObjectParameterName & rhs);
+
   /**
    * Return the parameter name.
    */

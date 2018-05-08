@@ -30,6 +30,12 @@ MooseObjectParameterName::MooseObjectParameterName(const std::string & tag,
   _combined += _parameter;
 }
 
+MooseObjectParameterName::MooseObjectParameterName(const MooseObjectParameterName & rhs)
+  : MooseObjectName(rhs._tag, rhs._name, rhs._separator), _parameter(rhs._parameter)
+{
+  _combined = _tag + _name + _parameter;
+}
+
 MooseObjectParameterName::MooseObjectParameterName(std::string name) : MooseObjectName()
 {
   // The tag precedes the :: (this is used in _moose_base::name and control_tag::name conventions)
