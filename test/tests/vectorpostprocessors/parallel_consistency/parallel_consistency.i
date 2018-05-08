@@ -3,6 +3,10 @@
   dim = 2
   nx = 10
   ny = 10
+
+  # To make this deterministic
+  partitioner = centroid
+  centroid_partitioner_direction = x
 []
 
 [Variables]
