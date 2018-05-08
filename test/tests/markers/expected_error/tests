@@ -1,0 +1,10 @@
+[Tests]
+  [./displaced_error]
+    type = 'RunException'
+    input = 'displaced_error.i'
+    expect_err = "The parameter 'Adaptivity/Markers/test/use_displaced_mesh' is a private parameter and should not be used in an input file."
+    requirement = "It shall not be possible to specify Markers to run on the displaced mesh."
+    issues = '#11430'
+    design = "Markers/index.md"
+  [../]
+[]
