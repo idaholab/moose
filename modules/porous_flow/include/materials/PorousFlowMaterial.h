@@ -20,13 +20,35 @@ class PorousFlowMaterial;
 template <>
 InputParameters validParams<PorousFlowMaterial>();
 
+/**
+ * PorousFlowMaterial is the base class for all PorousFlow Materials
+ * It allows users to specify that the Material should be a "nodal"
+ * Material, in which Material Properties will be evaluated at
+ * nodes (using the Variable's nodal values rather than their quadpoint
+ * values).  In a derived class's computeQpProperties,
+ * _qp must be recognized as a label for a quadpoint (for
+ * ordinary Materials) or a node (for nodal Materials).
+ *
+ * For the nodal Material case, the Material Properties are sized
+ * to max(number of nodes, number of quadpoints).  Only "number of nodes"
+ * of these will ever be computed and used: the remaining ones
+ * (if any) exist just to make sure that the vectors are correctly
+ * sized in MOOSE's copying operations (etc).
+ *
+ * If number of quadpoints < number of nodes (eg for boundary elements)
+ * care should be taken to store the required nodal information in
+ * the first number_of_quadpoint elements in the std::vector!
+ */
 class PorousFlowMaterial : public Material
 {
 public:
   PorousFlowMaterial(const InputParameters & parameters);
 
 protected:
+  /// correctly sizes nodal materials, then initialises using Material::initStatefulProperties
   virtual void initStatefulProperties(unsigned int n_points) override;
+
+  /// correctly sizes nodal materials, then computes using Material::computeProperties
   virtual void computeProperties() override;
 
   /// whether the derived class holds nodal values
@@ -36,14 +58,14 @@ protected:
   const PorousFlowDictator & _dictator;
 
   /**
-   * Makes property with name prop_name to be size equal to the
-   * number of nodes in the current element
+   * Makes property with name prop_name to be size equal to
+   * max(number of nodes, number of quadpoints) in the current element
    */
   void sizeNodalProperty(const std::string & prop_name);
 
   /**
    * Makes all supplied properties for this material to be size
-   * equal to the number of nodes in the current element
+   * equal to max(number of nodes, number of quadpoints) in the current element
    */
   void sizeAllSuppliedProperties();
 

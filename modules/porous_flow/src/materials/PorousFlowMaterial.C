@@ -37,7 +37,10 @@ PorousFlowMaterial::initStatefulProperties(unsigned int n_points)
 {
   if (_nodal_material)
   {
+    // size the Properties to max(number_of_nodes, number_of_quadpoints)
     sizeAllSuppliedProperties();
+
+    // compute the values only for number_of_nodes
     Material::initStatefulProperties(_current_elem->n_nodes());
   }
   else
@@ -49,7 +52,10 @@ PorousFlowMaterial::computeProperties()
 {
   if (_nodal_material)
   {
+    // size the Properties to max(number_of_nodes, number_of_quadpoints)
     sizeAllSuppliedProperties();
+
+    // compute the values only for number_of_nodes
     for (_qp = 0; _qp < _current_elem->n_nodes(); ++_qp)
       computeQpProperties();
   }
@@ -60,12 +66,22 @@ PorousFlowMaterial::computeProperties()
 void
 PorousFlowMaterial::sizeNodalProperty(const std::string & prop_name)
 {
+  /*
+   * For nodal materials, the Properties should be sized as the maximum of
+   * the number of nodes and the number of quadpoints.
+   * We only actually need "number of nodes" pieces of information, which are
+   * computed by computeProperties(), so the n_points - _current_elem->n_nodes()
+   * elements at the end of the std::vector will always be zero, but they
+   * are needed because MOOSE does copy operations (etc) that assumes that
+   * the std::vector is sized to number of quadpoints.
+   */
   mooseAssert(_material_data->getMaterialPropertyStorage().hasProperty(prop_name),
+
               "PorousFlowMaterial can not find nodal property " << prop_name);
   const unsigned prop_id =
       _material_data->getMaterialPropertyStorage().retrievePropertyId(prop_name);
   // _material_data->props() returns MaterialProperties, which is a std::vector of PropertyValue.
-  _material_data->props()[prop_id]->resize(_current_elem->n_nodes());
+  _material_data->props()[prop_id]->resize(std::max(_current_elem->n_nodes(), _qrule->n_points()));
 }
 
 void
