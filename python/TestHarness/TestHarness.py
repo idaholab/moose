@@ -290,6 +290,10 @@ class TestHarness:
 
         # Augment the Testers with additional information directly from the TestHarness
         for tester in testers:
+
+            # Initialize the status system for each tester object immediately after creation
+            tester.initStatusSystem(self.options)
+
             self.augmentParameters(file, tester)
 
         # Short circuit this loop if we've only been asked to parse Testers
