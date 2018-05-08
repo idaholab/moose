@@ -29,8 +29,10 @@ class CSVDiff(FileTester):
 
     # Check that override parameter lists are the same length
     def checkRunnable(self, options):
-        if (len(self.specs['override_columns']) != len(self.specs['override_rel_err'])) or (len(self.specs['override_columns']) != len(self.specs['override_abs_zero'])) or (len(self.specs['override_rel_err']) != len(self.specs['override_abs_zero'])):
-           self.setStatus('Override inputs not the same length', self.bucket_fail)
+        if ((len(self.specs['override_columns']) != len(self.specs['override_rel_err']))
+        or (len(self.specs['override_columns']) != len(self.specs['override_abs_zero']))
+        or (len(self.specs['override_rel_err']) != len(self.specs['override_abs_zero']))):
+           self.setStatus(self.fail, 'Override inputs not the same length')
            return False
         return FileTester.checkRunnable(self, options)
 
@@ -39,13 +41,13 @@ class CSVDiff(FileTester):
 
         specs = self.specs
 
-        if self.getStatus() == self.bucket_fail or specs['skip_checks']:
+        if self.isFail() or specs['skip_checks']:
             return output
 
         # Don't Run CSVDiff on Scaled Tests
         if options.scaling and specs['scale_refine']:
             self.addCaveats('SCALING=True')
-            self.setStatus(self.bucket_skip.status, self.bucket_skip)
+            self.setStatus(self.skip)
             return output
 
         if len(specs['csvdiff']) > 0:
@@ -55,12 +57,11 @@ class CSVDiff(FileTester):
             output += 'Running CSVDiffer.py\n' + msg
             if msg != '':
                 if msg.find("Gold file does not exist!") != -1:
-                    self.setStatus('MISSING GOLD FILE', self.bucket_fail)
+                    self.setStatus(self.fail, 'MISSING GOLD FILE')
                 elif msg.find("File does not exist!") != -1:
-                    self.setStatus('FILE DOES NOT EXIST', self.bucket_fail)
+                    self.setStatus(self.fail, 'FILE DOES NOT EXIST')
                 else:
-                    self.setStatus('CSVDIFF', self.bucket_diff)
+                    self.setStatus(self.diff, 'CSVDIFF')
                 return output
 
-        self.setStatus(self.success_message, self.bucket_success)
         return output

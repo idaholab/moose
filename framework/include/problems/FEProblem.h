@@ -36,6 +36,8 @@ public:
 
   NonlinearSystem & getNonlinearSystem() override { return *_nl_sys; }
 
+  virtual void addLineSearch(const InputParameters & parameters) override;
+
 protected:
   bool _use_nonlinear;
   std::shared_ptr<NonlinearSystem> _nl_sys;

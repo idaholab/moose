@@ -32,8 +32,8 @@ class RunException(RunApp):
 
     def checkRunnable(self, options):
         if options.enable_recover:
-            self.addCaveats('RunException RECOVER')
-            self.setStatus(self.bucket_skip.status, self.bucket_skip)
+            self.addCaveats('type=RunException')
+            self.setStatus(self.skip)
             return False
         return RunApp.checkRunnable(self, options)
 
@@ -70,8 +70,6 @@ class RunException(RunApp):
             reason = RunApp.testFileOutput(self, moose_dir, options, output)
 
         if reason != '':
-            self.setStatus(reason, self.bucket_fail)
-        else:
-            self.setStatus(self.success_message, self.bucket_success)
+            self.setStatus(self.fail, reason)
 
         return output

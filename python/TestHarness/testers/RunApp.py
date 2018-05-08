@@ -72,12 +72,12 @@ class RunApp(Tester):
         if options.enable_recover:
             if self.specs.isValid('expect_out') or self.specs.isValid('absent_out') or self.specs['should_crash'] == True:
                 self.addCaveats('expect_out RECOVER')
-                self.setStatus(self.bucket_skip.status, self.bucket_skip)
+                self.setStatus(self.skip)
                 return False
 
         if self.specs.isValid('executable_pattern') and re.search(self.specs['executable_pattern'], self.specs['executable']) == None:
             self.addCaveats('EXECUTABLE PATTERN')
-            self.setStatus(self.bucket_skip.status, self.bucket_skip)
+            self.setStatus(self.skip)
             return False
 
         return True
@@ -87,6 +87,12 @@ class RunApp(Tester):
         nthreads = max(options.nthreads, int(self.specs['min_threads']))
         #Set number of threads to be used upper bound
         nthreads = min(nthreads, int(self.specs['max_threads']))
+
+        if nthreads > options.nthreads:
+            self.addCaveats('min_threads=' + str(nthreads))
+        elif nthreads < options.nthreads:
+            self.addCaveats('max_threads=' + str(nthreads))
+
         return nthreads
 
     def getProcs(self, options):
@@ -99,6 +105,12 @@ class RunApp(Tester):
         ncpus = max(default_ncpus, int(self.specs['min_parallel']))
         # Lower the ceiling
         ncpus = min(ncpus, int(self.specs['max_parallel']))
+
+        if ncpus > default_ncpus:
+            self.addCaveats('min_cpus=' + str(ncpus))
+        elif ncpus < default_ncpus:
+            self.addCaveats('max_cpus=' + str(ncpus))
+
         return ncpus
 
     def getCommand(self, options):
@@ -113,7 +125,7 @@ class RunApp(Tester):
 
         # Check for built application
         if not options.dry_run and not os.path.exists(specs['executable']):
-            self.setStatus('Application not found', self.bucket_fail)
+            self.setStatus(self.fail, 'Application not found')
             return ''
 
         if (options.parallel_mesh or options.distributed_mesh) and ('--parallel-mesh' not in cli_args or '--distributed-mesh' not in cli_args):
@@ -158,26 +170,8 @@ class RunApp(Tester):
         ncpus = self.getProcs(options)
         nthreads = self.getThreads(options)
 
-        if options.parallel == None:
-            default_ncpus = 1
-        else:
-            default_ncpus = options.parallel
-
         if specs['redirect_output'] and ncpus > 1:
             cli_args.append('--keep-cout --redirect-output ' + self.name())
-
-        caveats = []
-        if nthreads > options.nthreads:
-            caveats.append('min_threads=' + str(nthreads))
-        elif nthreads < options.nthreads:
-            caveats.append('max_threads=' + str(nthreads))
-        # TODO: Refactor this caveats business
-        if ncpus > default_ncpus:
-            caveats.append('min_cpus=' + str(ncpus))
-        elif ncpus < default_ncpus:
-            caveats.append('max_cpus=' + str(ncpus))
-
-        self.addCaveats(*caveats)
 
         if self.force_mpi or options.parallel or ncpus > 1 or nthreads > 1:
             command = self.mpi_command + ' -n ' + str(ncpus) + ' ' + specs['executable'] + ' --n-threads=' + str(nthreads) + ' ' + specs['input_switch'] + ' ' + specs['input'] + ' ' +  ' '.join(cli_args)
@@ -226,7 +220,7 @@ class RunApp(Tester):
                 reason = 'MEMORY ERROR'
 
         if reason != '':
-            self.setStatus(reason, self.bucket_fail)
+            self.setStatus(self.fail, reason)
 
         return reason
 
@@ -235,17 +229,15 @@ class RunApp(Tester):
         Wrapper method for testFileOutput.
 
         testFileOutput does not set a success status, while processResults does.
-        For testers that are RunApp types, they would call this method. While
-        all other tester types (like exodiff) will call testFileOutput. This is
-        to prevent derived testers from having a successful status set, before
-        actually running their derived processResults method.
-        """
-        reason = self.testFileOutput(moose_dir, options, output)
+        For testers that are RunApp types, they will call this method (processResults).
 
-        # Populate the bucket
-        if reason != '':
-            self.setStatus(reason, self.bucket_fail)
-        else:
-            self.setStatus(self.success_message, self.bucket_success)
+        Other tester types (like exodiff) will call testFileOutput. This is to prevent
+        derived testers from having a successfull status set, before actually running
+        the derived processResults method.
+
+        # TODO: because RunParallel is now setting every successful status message,
+                refactor testFileOutput and processResults.
+        """
+        self.testFileOutput(moose_dir, options, output)
 
         return output

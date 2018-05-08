@@ -4,7 +4,6 @@
     input = recover.i
     exodiff = recover_out.e
     superlu = true
-    queue_scheduler = false # This test doesn't play well with PBS
   [../]
 
   [./recover_2]

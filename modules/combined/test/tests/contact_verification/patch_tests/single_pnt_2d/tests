@@ -50,6 +50,14 @@
     prereq = 'frictionless_pen_sm'
     allow_warnings = true
   [../]
+  [./frictionless_pen_contact_line_search]
+    type = 'CSVDiff'
+    input = 'single_point_2d_contact_line_search.i'
+    csvdiff = 'single_point_2d_contact_line_search_out.csv'
+    allow_warnings = true
+    abs_zero = 1e-8
+    rel_err = 5e-4
+  [../]
   [./mu_0_0_kin]
     type = 'CSVDiff'
     input = 'single_point_2d.i'

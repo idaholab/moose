@@ -161,7 +161,7 @@ class SpeedTest(Tester):
 
     # override
     def processResults(self, moose_dir, options, output):
-        self.setStatus(self.success_message, self.bucket_success)
+        self.setStatus(self.success)
         return output
 
 class Bench:

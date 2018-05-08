@@ -442,6 +442,26 @@ MooseVariableFE<OutputType>::getElementalValue(const Elem * elem, unsigned int i
 }
 
 template <typename OutputType>
+Number
+MooseVariableFE<OutputType>::getElementalValueOld(const Elem * elem, unsigned int idx) const
+{
+  std::vector<dof_id_type> dof_indices;
+  _dof_map.dof_indices(elem, dof_indices, _var_num);
+
+  return _sys.solutionOld()(dof_indices[idx]);
+}
+
+template <typename OutputType>
+Number
+MooseVariableFE<OutputType>::getElementalValueOlder(const Elem * elem, unsigned int idx) const
+{
+  std::vector<dof_id_type> dof_indices;
+  _dof_map.dof_indices(elem, dof_indices, _var_num);
+
+  return _sys.solutionOlder()(dof_indices[idx]);
+}
+
+template <typename OutputType>
 void
 MooseVariableFE<OutputType>::insert(NumericVector<Number> & residual)
 {

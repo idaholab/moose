@@ -27,6 +27,7 @@
 #include "MooseVariableFE.h"
 #include "MultiAppTransfer.h"
 #include "Postprocessor.h"
+#include "HashMap.h"
 
 #include "libmesh/enum_quadrature_type.h"
 #include "libmesh/equation_systems.h"
@@ -70,6 +71,7 @@ class Distribution;
 class Sampler;
 class KernelBase;
 class IntegratedBCBase;
+class LineSearch;
 
 // libMesh forward declarations
 namespace libMesh
@@ -492,6 +494,24 @@ public:
   virtual void addFunction(std::string type, const std::string & name, InputParameters parameters);
   virtual bool hasFunction(const std::string & name, THREAD_ID tid = 0);
   virtual Function & getFunction(const std::string & name, THREAD_ID tid = 0);
+
+  /**
+   * add a MOOSE line search
+   */
+  virtual void addLineSearch(const InputParameters & /*parameters*/)
+  {
+    mooseError("Line search not implemented for this problem type yet.");
+  }
+
+  /**
+   * execute MOOSE line search
+   */
+  virtual void lineSearch();
+
+  /**
+   * getter for the MOOSE line search
+   */
+  std::shared_ptr<LineSearch> getLineSearch() { return _line_search; }
 
   /**
    * The following functions will enable MOOSE to have the capability to import distributions
@@ -1620,6 +1640,8 @@ protected:
   /// PETSc option storage
   Moose::PetscSupport::PetscOptions _petsc_options;
 #endif // LIBMESH_HAVE_PETSC
+
+  std::shared_ptr<LineSearch> _line_search;
 
 private:
   bool _error_on_jacobian_nonzero_reallocation;

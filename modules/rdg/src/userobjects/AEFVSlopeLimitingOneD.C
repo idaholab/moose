@@ -85,7 +85,10 @@ AEFVSlopeLimitingOneD::limitElementSlope() const
   std::vector<std::vector<Real>> sigma(nsten, std::vector<Real>(nvars, 0.));
 
   // get the cell-average variable in the central cell
-  ucell[0][0] = _u->getElementalValue(elem);
+  if (_is_implicit)
+    ucell[0][0] = _u->getElementalValue(elem);
+  else
+    ucell[0][0] = _u->getElementalValueOld(elem);
 
   // a flag to indicate the boundary side of the current cell
 
@@ -106,7 +109,10 @@ AEFVSlopeLimitingOneD::limitElementSlope() const
         xc[in] = neig->centroid()(0);
 
         // get the cell-average variable in this neighbor cell
-        ucell[in][0] = _u->getElementalValue(neig);
+        if (_is_implicit)
+          ucell[in][0] = _u->getElementalValue(neig);
+        else
+          ucell[in][0] = _u->getElementalValueOld(neig);
 
         // calculate the one-sided slopes of primitive variables
 

@@ -55,23 +55,21 @@ class Exodiff(FileTester):
     def processResults(self, moose_dir, options, output):
         FileTester.processResults(self, moose_dir, options, output)
 
-        if self.getStatus() == self.bucket_fail or self.specs['skip_checks']:
+        if self.isFail() or self.specs['skip_checks']:
             return output
 
         # Don't Run Exodiff on Scaled Tests
         if options.scaling and self.specs['scale_refine']:
-            self.success_message = "SCALED"
-            self.setStatus(self.getSuccessMessage(), self.bucket_success)
             return output
 
         # Make sure that all of the Exodiff files are actually available
         for file in self.specs['exodiff']:
             if not os.path.exists(os.path.join(self.specs['test_dir'], self.specs['gold_dir'], file)):
                 output += "File Not Found: " + os.path.join(self.specs['test_dir'], self.specs['gold_dir'], file)
-                self.setStatus('MISSING GOLD FILE', self.bucket_fail)
+                self.setStatus(self.fail, 'MISSING GOLD FILE')
                 break
 
-        if self.getStatus() != self.bucket_fail:
+        if not self.isFail():
             # Retrieve the commands
             commands = self.processResultsCommand(moose_dir, options)
 
@@ -81,11 +79,7 @@ class Exodiff(FileTester):
                 output += 'Running exodiff: ' + command + '\n' + exo_output + ' ' + ' '.join(self.specs['exodiff_opts'])
 
                 if ('different' in exo_output or 'ERROR' in exo_output) and not "Files are the same" in exo_output:
-                    self.setStatus('EXODIFF', self.bucket_diff)
+                    self.setStatus(self.diff, 'EXODIFF')
                     break
-
-        # If status is still pending, then it is a passing test
-        if self.getStatus() == self.bucket_pending:
-            self.setStatus(self.success_message, self.bucket_success)
 
         return output

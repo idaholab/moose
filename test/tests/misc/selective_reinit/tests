@@ -8,6 +8,5 @@
     compiler = 'GCC CLANG'
     method = '!DBG'
     valgrind = 'NONE'
-    min_reported_time = 20
   [../]
 []

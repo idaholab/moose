@@ -9,6 +9,7 @@
 
 import platform, re, os
 from TestHarness import util
+from TestHarness.StatusSystem import TestStatus
 from FactorySystem.MooseObject import MooseObject
 from tempfile import TemporaryFile
 import subprocess
@@ -25,7 +26,6 @@ class Tester(MooseObject):
         # Common Options
         params.addRequiredParam('type', "The type of test of Tester to create for this test.")
         params.addParam('max_time',   300, "The maximum in seconds that the test will be allowed to run.")
-        params.addParam('min_reported_time', 10, "The minimum time elapsed before a test is reported as taking to long to run.")
         params.addParam('skip',     "Provide a reason this test will be skipped.")
         params.addParam('deleted',         "Tests that only show up when using the '-e' option (Permanently skipped or not implemented).")
 
@@ -76,11 +76,6 @@ class Tester(MooseObject):
         params.addParam('timing',         True, "If True, the test will be allowed to run with the timing flag (i.e. Manually turning on performance logging).")
         params.addParam('boost',         ['ALL'], "A test that runs only if BOOT is detected ('ALL', 'TRUE', 'FALSE')")
 
-        # Queueing specific
-        params.addParam('copy_files',         [], "Additional list of files/directories to copy when performing queueing operations")
-        params.addParam('link_files',         [], "Additional list of files/directories to symlink when performing queueing operations")
-        params.addParam('queue_scheduler',  True, "A test that runs only if using queue options")
-
         # SQA
         params.addParam("requirement", None, "The SQA requirement that this test satisfies (e.g., 'The Marker system shall provide means to mark elements for refinement within a box region.')")
         params.addParam("design", [], "The list of markdown files that contain the design(s) associated with this test (e.g., '/Markers/index.md /BoxMarker.md').")
@@ -105,34 +100,79 @@ class Tester(MooseObject):
         # Bool if test can run
         self._runnable = None
 
-        # Initialize the status bucket class
-        self.status = util.TestStatus()
-
-        # Enumerate the buckets here so ther are easier to work with in the tester class
-        self.bucket_initialized  = self.status.bucket_initialized
-        self.bucket_success      = self.status.bucket_success
-        self.bucket_fail         = self.status.bucket_fail
-        self.bucket_diff         = self.status.bucket_diff
-        self.bucket_pending      = self.status.bucket_pending
-        self.bucket_finished     = self.status.bucket_finished
-        self.bucket_deleted      = self.status.bucket_deleted
-        self.bucket_skip         = self.status.bucket_skip
-        self.bucket_silent       = self.status.bucket_silent
-        self.bucket_queued       = self.status.bucket_queued
-        self.bucket_waiting_processing = self.status.bucket_waiting_processing
-
-        # Set the status message
-        if self.specs['check_input']:
-            self.success_message = 'SYNTAX PASS'
-        else:
-            self.success_message = self.specs['success_message']
-
         # Set up common paramaters
         self.should_execute = self.specs['should_execute']
         self.check_input = self.specs['check_input']
 
         if self.specs["allow_test_objects"]:
             self.specs["cli_args"].append("--allow-test-objects")
+
+    def initStatusSystem(self, options):
+        """ Initialize the tester status system """
+        self.status = TestStatus(options)
+
+        ### Enumerate the statuses
+        self.no_status = self.status.no_status
+        self.skip = self.status.skip
+        self.silent = self.status.silent
+        self.success = self.status.success
+        self.fail = self.status.fail
+        self.diff = self.status.diff
+        self.deleted = self.status.deleted
+        self.finished = self.status.finished
+
+        ### Deprecated statuses to be removed upon application fixes
+        self.bucket_initialized        = self.no_status
+        self.bucket_success            = self.success
+        self.bucket_fail               = self.fail
+        self.bucket_diff               = self.diff
+        self.bucket_finished           = self.finished
+        self.bucket_deleted            = self.deleted
+        self.bucket_skip               = self.skip
+        self.bucket_silent             = self.silent
+        self.bucket_pending            = None
+        self.bucket_queued             = None
+        self.bucket_waiting_processing = None
+        ### END Deprecated statuses
+
+    def getStatus(self):
+        return self.status.getStatus()
+
+    def setStatus(self, status, message=''):
+        # Support deprecated statuses, alert the user.
+        if type(status) == type(''):
+            self.addCaveats('deprecated status bucket')
+            test_status = self.createStatus()
+            result_status = message.status
+            result_color = message.color
+            new_status = test_status(status=result_status, color=result_color)
+            return self.status.setStatus(new_status)
+
+        return self.status.setStatus(status, message)
+
+    def getStatusMessage(self):
+        return self.status.getStatusMessage()
+    def createStatus(self):
+        return self.status.createStatus()
+    def getColor(self):
+        return self.status.getColor()
+    def isNoStatus(self):
+        return self.status.isNoStatus()
+    def isSkip(self):
+        return self.status.isSkip()
+    def isSilent(self):
+        return self.status.isSilent()
+    def isPass(self):
+        return self.status.isPass()
+    def isFail(self):
+        return self.status.isFail()
+    def isDiff(self):
+        return self.status.isDiff()
+    def isDeleted(self):
+        return self.status.isDeleted()
+    def isFinished(self):
+        return self.status.isFinished()
+    ### Status System wrapper methods ###
 
     def getTestName(self):
         """ return test name """
@@ -164,10 +204,6 @@ class Tester(MooseObject):
             self._runnable = self.checkRunnableBase(options)
         return self._runnable
 
-    def getColor(self):
-        """ return print color assigned to this tester """
-        return self.status.getColor()
-
     def getInputFile(self):
         """ return the input file if applicable to this Tester """
         return None
@@ -176,117 +212,9 @@ class Tester(MooseObject):
         """ return the output files if applicable to this Tester """
         return []
 
-    def getSuccessMessage(self):
-        """ return the success message assigned to this tester """
-        return self.success_message
-
-    def getStatusMessage(self):
-        """ return the status message assigned to this tester """
-        return self.status.getStatusMessage()
-
-    def getStatus(self):
-        """ return current enumerated tester status bucket """
-        return self.status.getStatus()
-
-    def setStatus(self, reason, bucket):
-        """
-        Method to set a testers status.
-
-        Syntax:
-          .setStatus('str message', <enumerated tester status bucket>)
-        """
-        self.status.setStatus(reason, bucket)
-        return self.getStatus()
-
-    # Method to check if a test has failed. This method will return true if a
-    # tester has failed at any point during the processing of the test.
-    # Note: It's possible for a tester to report false for both didFail and
-    #       didPass. This will happen if the tester is in-progress for instance.
-    # See didPass()
-    def didFail(self):
-        """
-        return bool for tester failure
-        see util.TestStatus for more information
-        """
-        return self.status.didFail()
-
-    # Method to check for successfull test
-    # Note: This method can return False until the tester has completely finished.
-    #       For this reason it should be used only after the tester has completed.
-    #       Instead you may want to use the didFail method which returns false
-    #       only if the tester has failed at any point during the processing
-    #       of that tester (e.g. after the main command has been run but before
-    #       output has been tested).
-    # See didFail()
-    def didPass(self):
-        """
-        return boolean for tester successfulness
-        see util.TestStatus for more information
-        """
-        return self.status.didPass()
-
-    def didDiff(self):
-        """
-        return boolean for a differential tester failure
-        see util.TestStatus for more information
-        """
-        return self.status.didDiff()
-
-    def isInitialized(self):
-        """
-        return boolean for tester in an initialization status
-        see util.TestStatus for more information
-        """
-        return self.status.isInitialized()
-
-    def isPending(self):
-        """
-        return boolean for tester in a pending status
-        see util.TestStatus for more information
-        """
-        return self.status.isPending()
-
-    def isFinished(self):
-        """
-        return boolean for tester no longer pending
-        see util.TestStatus for more information
-        """
-        return self.status.isFinished()
-
-    def isSkipped(self):
-        """
-        return boolean for tester being reported as skipped
-        see util.TestStatus for more information
-        """
-        return self.status.isSkipped()
-
-    def isSilent(self):
-        """
-        return boolean for tester being skipped and not reported
-        see util.TestStatus for more information
-        """
-        return self.status.isSilent()
-
-    def isDeleted(self):
-        """
-        return boolean for tester being skipped and not reported due to
-        internal deletion status
-        see util.TestStatus for more information
-        """
-        return self.status.isDeleted()
-
-    def isQueued(self):
-        """
-        return boolean for tester in a queued status
-        see util.TestStatus for more information
-        """
-        return self.status.isQueued()
-
-    def isWaiting(self):
-        """
-        return boolean for tester awaiting process results
-        """
-        return self.status.isWaiting()
+    def getOutput(self):
+        """ Return the contents of stdout and stderr """
+        return self.joined_out
 
     def getCheckInput(self):
         return self.check_input
@@ -429,12 +357,21 @@ class Tester(MooseObject):
 
     def addCaveats(self, *kwargs):
         """ Add caveat(s) which will be displayed with the final test status """
-        self.__caveats.update(kwargs)
+        for i in [x for x in kwargs if x]:
+            if type(i) == type([]):
+                self.__caveats.update(i)
+            else:
+                self.__caveats.add(i)
         return self.getCaveats()
 
     def getCaveats(self):
         """ Return caveats accumalted by this tester """
         return self.__caveats
+
+    def clearCaveats(self):
+        """ Clear any caveats stored in tester """
+        self.__caveats = set([])
+        return self.getCaveats()
 
     def checkRunnableBase(self, options):
         """
@@ -452,44 +389,37 @@ class Tester(MooseObject):
                 tag_match = True
                 break
         if len(options.runtags) > 0 and not tag_match:
-            self.setStatus('no tag', self.bucket_silent)
+            self.setStatus(self.silent)
             return False
 
         # If something has already deemed this test a failure or is silent, return now
-        if self.didFail() or self.isSilent():
+        if self.isFail() or self.isSilent():
             return False
-
-        # If --dry-run set the test status to pass and DO NOT return.
-        # This will allow additional checks to perform and report tests
-        # that would normally be skipped (and return as False).
-        if options.dry_run:
-            self.success_message = 'DRY RUN'
-            self.setStatus(self.success_message, self.bucket_success)
 
         # Check if we only want to run failed tests
         if options.failed_tests and options.results_storage is not None:
             result_key = options.results_storage.get(self.getTestDir(), {})
             status = result_key.get(self.getTestName(), {}).get('FAIL', '')
             if not status:
-                self.setStatus('not failed', self.bucket_silent)
+                self.setStatus(self.silent)
                 return False
 
         # Check if we only want to run syntax tests
         if options.check_input and not self.specs['check_input']:
-            self.setStatus('not check_input', self.bucket_silent)
+            self.setStatus(self.silent)
             return False
 
         # Check if we want to exclude syntax tests
         if options.no_check_input and self.specs['check_input']:
-            self.setStatus('is check_input', self.bucket_silent)
+            self.setStatus(self.silent)
             return False
 
         # Are we running only tests in a specific group?
         if options.group <> 'ALL' and options.group not in self.specs['group']:
-            self.setStatus('unmatched group', self.bucket_silent)
+            self.setStatus(self.silent)
             return False
         if options.not_group <> '' and options.not_group in self.specs['group']:
-            self.setStatus('unmatched group', self.bucket_silent)
+            self.setStatus(self.silent)
             return False
 
         # Store regexp for matching tests if --re is used
@@ -500,7 +430,7 @@ class Tester(MooseObject):
         # This also needs to be in its own bucket group. We normally print skipped messages.
         # But we do not want to print tests that didn't match regex.
         if options.reg_exp and not match_regexp.search(self.specs['test_name']):
-            self.setStatus('silent', self.bucket_silent)
+            self.setStatus(self.silent)
             return False
 
         # Short circuit method and run this test if we are ignoring all caveats
@@ -513,7 +443,7 @@ class Tester(MooseObject):
             reasons['deleted'] = str(self.specs['deleted'])
 
         # Skipped by external means (example: TestHarness part2 with --check-input)
-        if self.isSkipped():
+        if self.isSkip() and self.getStatusMessage():
             reasons['skip'] = self.getStatusMessage()
         # Test is skipped
         elif self.specs.type('skip') is bool and self.specs['skip']:
@@ -523,7 +453,7 @@ class Tester(MooseObject):
             reasons['skip'] = self.specs['skip']
         # If were testing for SCALE_REFINE, then only run tests with a SCALE_REFINE set
         elif (options.scaling) and self.specs['scale_refine'] == 0:
-            self.setStatus('silent', self.bucket_silent)
+            self.setStatus(self.silent)
             return False
         # If we're testing with valgrind, then skip tests that require parallel or threads or don't meet the valgrind setting
         elif options.valgrind_mode != '':
@@ -629,11 +559,6 @@ class Tester(MooseObject):
         if self.specs['display_required'] and not os.getenv('DISPLAY', False):
             reasons['display_required'] = 'NO DISPLAY'
 
-        # Check for queueing
-        if (not self.specs['queue_scheduler'] or not self.shouldExecute()) \
-           and options.queueing:
-            reasons['queue_scheduler'] = 'queue not supported'
-
         # Remove any matching user supplied caveats from accumulated checkRunnable caveats that
         # would normally produce a skipped test.
         caveat_list = set()
@@ -651,9 +576,9 @@ class Tester(MooseObject):
             # If the test is deleted we still need to treat this differently
             self.addCaveats(flat_reason)
             if 'deleted' in reasons.keys():
-                self.setStatus(self.bucket_deleted.status, self.bucket_deleted)
+                self.setStatus(self.deleted)
             else:
-                self.setStatus(self.bucket_skip.status, self.bucket_skip)
+                self.setStatus(self.skip)
             return False
 
         # Check the return values of the derived classes

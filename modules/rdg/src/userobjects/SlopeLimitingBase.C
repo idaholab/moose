@@ -20,6 +20,8 @@ InputParameters
 validParams<SlopeLimitingBase>()
 {
   InputParameters params = validParams<ElementLoopUserObject>();
+  params += validParams<TransientInterface>();
+
   params.addClassDescription(
       "Base class for slope limiting to limit the slopes of cell average variables.");
 

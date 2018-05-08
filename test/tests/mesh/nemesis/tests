@@ -7,7 +7,6 @@
     min_parallel = 4
     recover = false
     group = 'requirements nemesis'
-    copy_files = cylinder
   [../]
 
   [./nemesis_repartitioning_test]

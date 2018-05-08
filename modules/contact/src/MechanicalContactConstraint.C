@@ -14,13 +14,13 @@
 #include "AuxiliarySystem.h"
 #include "PenetrationLocator.h"
 #include "NearestNodeLocator.h"
-
 #include "SystemBase.h"
 #include "Assembly.h"
 #include "MooseMesh.h"
 #include "AugmentedLagrangianContactProblem.h"
 #include "Executioner.h"
 #include "AddVariableAction.h"
+#include "ContactLineSearchBase.h"
 
 #include "libmesh/string_to_enum.h"
 #include "libmesh/sparse_matrix.h"
@@ -114,9 +114,12 @@ validParams<MechanicalContactConstraint>()
   return params;
 }
 
+Threads::spin_mutex MechanicalContactConstraint::_contact_set_mutex;
+
 MechanicalContactConstraint::MechanicalContactConstraint(const InputParameters & parameters)
   : NodeFaceConstraint(parameters),
     _displaced_problem(parameters.get<FEProblemBase *>("_fe_problem_base")->getDisplacedProblem()),
+    _fe_problem(*parameters.get<FEProblem *>("_fe_problem")),
     _component(getParam<unsigned int>("component")),
     _model(ContactMaster::contactModel(getParam<std::string>("model"))),
     _formulation(ContactMaster::contactFormulation(getParam<std::string>("formulation"))),
@@ -137,6 +140,8 @@ MechanicalContactConstraint::MechanicalContactConstraint(const InputParameters &
     _master_slave_jacobian(getParam<bool>("master_slave_jacobian")),
     _connected_slave_nodes_jacobian(getParam<bool>("connected_slave_nodes_jacobian")),
     _non_displacement_vars_jacobian(getParam<bool>("non_displacement_variables_jacobian")),
+    _contact_linesearch(
+        std::dynamic_pointer_cast<ContactLineSearchBase>(_fe_problem.getLineSearch())),
     _print_contact_nodes(getParam<bool>("print_contact_nodes"))
 {
   _overwrite_slave_residual = false;
@@ -226,6 +231,9 @@ MechanicalContactConstraint::timestepSetup()
       updateAugmentedLagrangianMultiplier(true);
 
     _update_stateful_data = false;
+
+    if (_contact_linesearch)
+      _contact_linesearch->reset();
   }
 }
 
@@ -460,8 +468,7 @@ MechanicalContactConstraint::shouldApply()
     PenetrationInfo * pinfo = found->second;
     if (pinfo != NULL)
     {
-      bool is_nonlinear =
-          _subproblem.getMooseApp().executioner()->feProblem().computingNonlinearResid();
+      bool is_nonlinear = _fe_problem.computingNonlinearResid();
 
       // This computes the contact force once per constraint, rather than once per quad point
       // and for both master and slave cases.
@@ -471,8 +478,11 @@ MechanicalContactConstraint::shouldApply()
       if (pinfo->isCaptured())
       {
         in_contact = true;
-        if (is_nonlinear && _print_contact_nodes)
+        if (is_nonlinear)
+        {
+          Threads::spin_mutex::scoped_lock lock(_contact_set_mutex);
           _current_contact_state.insert(pinfo->_node->id());
+        }
       }
     }
   }
@@ -753,7 +763,7 @@ MechanicalContactConstraint::computeContactForce(PenetrationInfo * pinfo, bool u
 
   // Release
   if (update_contact_set && _model != CM_GLUED && pinfo->isCaptured() && !newly_captured &&
-      _tension_release >= 0.0 && pinfo->_locked_this_step < 2)
+      _tension_release >= 0.0 && (_contact_linesearch ? true : pinfo->_locked_this_step < 2))
   {
     const Real contact_pressure = -(pinfo->_normal * pinfo->_contact_force) / nodalArea(*pinfo);
     if (-contact_pressure >= _tension_release)
@@ -1785,17 +1795,21 @@ MechanicalContactConstraint::getCoupledVarComponent(unsigned int var_num, unsign
 void
 MechanicalContactConstraint::residualEnd()
 {
-  if (_component == 0 && _print_contact_nodes)
+  if (_component == 0 && (_print_contact_nodes || _contact_linesearch))
   {
-    _communicator.set_union(_current_contact_state, 0);
-    if (_current_contact_state == _old_contact_state)
-      _console << "Unchanged contact state. " << _current_contact_state.size()
-               << " nodes in contact.\n";
-    else
-      _console << "Changed contact state!!! " << _current_contact_state.size()
-               << " nodes in contact.\n";
-
-    _old_contact_state = _current_contact_state;
+    _communicator.set_union(_current_contact_state);
+    if (_print_contact_nodes)
+    {
+      if (_current_contact_state == _old_contact_state)
+        _console << "Unchanged contact state. " << _current_contact_state.size()
+                 << " nodes in contact.\n";
+      else
+        _console << "Changed contact state!!! " << _current_contact_state.size()
+                 << " nodes in contact.\n";
+    }
+    if (_contact_linesearch)
+      _contact_linesearch->insertSet(_current_contact_state);
+    _old_contact_state.swap(_current_contact_state);
     _current_contact_state.clear();
   }
 }

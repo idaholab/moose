@@ -7,16 +7,27 @@
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
-from Scheduler import Scheduler
+import sys, os, json, shutil
 from collections import namedtuple
-import os, sys, re, json, shutil, errno
-from TestHarness import util
+from Scheduler import Scheduler
 
 class QueueManager(Scheduler):
     """
-    QueueManager is a Scheduler plugin responsible for allowing the testers to
-    be scheduled via a third party queue system (like PBS) and to handle the
-    stateful requirements associated with such a task (the session_file).
+    QueueManager is a Scheduler plugin responsible for allowing the testers to be scheduled via a
+    third-party queue system (like PBS).
+
+    The QueueManager works by intercepting and altering the statuses of all but one job contained
+    in the group to a finished state. This affords us the behavior of only using the runner thread
+    pool once per group (see augmentJobs).
+
+    Using this one unmodified job, the spec file involved is noted, and instructs the derived
+    scheduler how to launch this one single spec file (using --spec-file), along with any
+    supplied/allowable command line arguments (--re, --cli-args, --ignore, etc).
+
+    The third-party queueing manager then executes `run_tests --spec-file /path/to/spec_file`.
+
+    It is the results of this additional ./run_tests run, that is captured and presented to the user as
+    the finished result of the test.
     """
     @staticmethod
     def validParams():
@@ -25,565 +36,350 @@ class QueueManager(Scheduler):
 
     def __init__(self, harness, params):
         Scheduler.__init__(self, harness, params)
+        self.harness = harness
+        self.options = self.harness.getOptions()
+        self.__job_storage_file = self.harness.original_storage
+        self.__clean_args = None
 
-        # json storage
-        self.__session_data = {}
-
-        # Open existing session file
-        if os.path.exists(self.options.session_file):
-            self.__status_check = True
-            try:
-                self.__session_file = open(self.options.session_file, 'r+')
-                self.__session_data = json.load(self.__session_file)
-
-                # Set some important things that affect findAndRunTests (input file, --re)
-                json_args = self.getData('QUEUEMANAGER',
-                                         options_regexp=True,
-                                         options_input=True,
-                                         options_timing=True)
-                self.options.input_file_name = json_args['options_input']
-
-                # Honor any new reg_exp supplied by the user
-                if self.options.reg_exp:
-                    pass
-                else:
-                    self.options.reg_exp = json_args['options_regexp']
-
-                # Only allow timing if user is asking, and user supplied those options
-                # during initial launch phase (otherwise perflog will not be available).
-                if not json_args['options_timing'] and self.options.timing:
-                    self.options.timing = False
-
-
-            except ValueError:
-                print('Supplied session file: %s exists, but is not readable!' % (self.options.session_file))
-                sys.exit(1)
-
-        # session file does not exists. Create one instead.
-        elif not self.options.queue_cleanup:
-            self.__status_check = False
-            self.__session_file = self.__createSessionFile()
-            self.putData('QUEUEMANAGER',
-                         options_regexp=self.options.reg_exp,
-                         options_input=self.options.input_file_name,
-                         options_timing=self.options.timing)
-
-        self.params = params
-
-    def __createSessionFile(self):
+    def augmentJobs(self, Jobs):
         """
-        Private method to return a file object to store queue data in.
+        Filter through incomming jobs and figure out if we are launching them
+        or attempting to process finished results.
         """
-        if self.options.session_file == 'generate':
-            largest_serial_num = 0
-            for name in os.listdir(self.harness.base_dir):
-                m = re.search('queue_(\d{3})', name)
-                if m != None and int(m.group(1)) > largest_serial_num:
-                    largest_serial_num = int(m.group(1))
-            self.options.session_file = "queue_" +  str(largest_serial_num+1).zfill(3)
-
-        try:
-            session_file = open(self.options.session_file, 'w')
-
-        except IOError:
-            print('Can not open %s for writing!' % (self.options.session_file))
-            sys.exit(1)
-
-        return session_file
-
-    def __copyFiles(self, job, template):
-        """ Copy the necessary test files the job will need in order to execute """
-        tester = job.getTester()
-
-        # Create the job directory
-        if not os.path.exists(self.getWorkingDir(job)):
-            try:
-                os.makedirs(self.getWorkingDir(job))
-            except OSError, ex:
-                if ex.errno == errno.EEXIST: pass
-                else: raise
-
-        source_dir = os.path.dirname(self.getWorkingDir(job))
-        target_dir = self.getWorkingDir(job)
-
-        # Copy files
-        for file in os.listdir(source_dir):
-            source_file = os.path.join(source_dir, file)
-            target_file = os.path.join(target_dir, file)
-
-            if os.path.isfile(source_file) and file != self.options.input_file_name and \
-               not os.path.exists(target_file) and \
-               os.path.splitext(file)[1] != '':
-                shutil.copy(source_file, target_file)
-
-        # Copy directories
-        if 'copy_files' in template.keys():
-            for file in template['copy_files']:
-                source_file = os.path.join(source_dir, file)
-                target_file = os.path.join(target_dir, file)
-
-                if os.path.isfile(source_file):
-                    if not os.path.exists(target_file):
-                        shutil.copy(source_file, target_file)
-                elif os.path.isdir(source_file):
-                    try:
-                        shutil.copytree(source_file, target_file)
-                    except OSError, ex:
-                        if ex.errno == errno.EEXIST: pass
-                        else: raise Exception()
-
-        # Create symlinks (do last, to allow hard copy above to be default)
-        if tester.specs.isValid('link_files'):
-            for file in tester.specs['link_files']:
-                source_file = os.path.join(source_dir, file)
-                if os.path.exists(source_file):
-                    try:
-                        os.symlink(source_file, target_dir)
-                    except OSError, ex:
-                        if ex.errno == errno.EEXIST: pass
-                        else: raise Exception()
-
-    def __createQueueScript(self, template):
-        """ Create the launch script based on supplied template information """
-        # Get a list of prereq tests this test may have
-        f = open(self.params['queue_template'], 'r')
-        content = f.read()
-        f.close()
-
-        queue_script = os.path.join(template['working_dir'], template['queue_script'])
-        f = open(queue_script, 'w')
-
-        # Do all of the replacements for the valid parameters
-        for key in template.keys():
-            if key.upper() in content:
-                content = content.replace('<' + key.upper() + '>', str(template[key]))
-
-        # Make sure we strip out any string substitution parameters that were not supplied
-        for key in template.keys():
-            if key.upper() not in content:
-                content = content.replace('<' + key.upper() + '>', '')
-
-        f.write(content)
-        f.close()
-
-    def __createStatusBucket(self, json_status):
-        """
-        private method to return a compatible tester status bucket
-        """
-        caveat = json_status['status_bucket']['status']
-        caveat_color = json_status['status_bucket']['color']
-        tmp_bucket = namedtuple('test_status', json_status['status_bucket'])
-
-        return tmp_bucket(status=caveat, color=caveat_color)
-
-    def _readJobOutput(self, job):
-        """ boolean for reasons to open and read job output files """
-        tester = job.getTester()
-        return self.options.verbose \
-            or self.options.timing \
-            or tester.didFail()
-
-    def getQueueCommand(self, job):
-        """ Return derived command """
-        return
-
-    def checkStatusState(self):
-        """ Return bool if we are processing status for launched jobs """
-        return self.__status_check == True
-
-    def handleJobStatus(self, job, output):
-        """
-        Call derived methods for handling third party command output.
-        Return a dictionary of information which will be saved to our
-        session storage for later use.
-        """
-        return {}
-
-    def saveSession(self, job, **kwargs):
-        """ Populate session storage with the current status of job """
-        tester = job.getTester()
-
-        self.putData(job.getUniqueIdentifier(),
-                     caveat_message=tester.getStatusMessage(),
-                     status_bucket=dict(tester.getStatus()._asdict()),
-                     **kwargs)
-
-    def getData(self, test_unique, **kwargs):
-        """
-        Return requested information as a dictionary if available.
-
-        Syntax:
-          dict = getData(str(unique_test_name), key=True)
-
-        value = dict[key]
-        """
-        tmp_dict = {}
-        if test_unique in self.__session_data.keys():
-            for kkey in kwargs.keys():
-                try:
-                    tmp_dict[kkey] = self.__session_data[test_unique][kkey]
-                except KeyError: # Requested key not available
-                    tmp_dict[kkey] = None
-        return tmp_dict
-
-    def putData(self, test_unique, **kwargs):
-        """
-        Store requested information into the session.
-
-        Syntax:
-          putData(str(unique_test_name), **kwargs)
-
-        """
-        with self.dag_lock:
-            for key, value in kwargs.iteritems():
-                if test_unique in self.__session_data.keys():
-                    self.__session_data[test_unique][key] = value
-                else:
-                    self.__session_data[test_unique] = {key : value}
-
-    def writeSessionFile(self):
-        """ Write the contents of your session to the session file """
-        if not self.__session_file.closed:
-            self.__session_file.seek(0)
-            json.dump(self.__session_data, self.__session_file, indent=2)
-            self.__session_file.truncate()
-            self.__session_file.close()
-
-    def cleanUp(self):
-        """
-        Remove all files/directories created during supplied session file
-        """
-        # Open existing session file
-        if os.path.exists(self.options.session_file):
-            try:
-                session_file = open(self.options.queue_cleanup, 'r')
-                session_data = json.load(session_file)
-            except ValueError:
-                print("Supplied session file %s is not readable!" % (self.options.queue_cleanup))
-                sys.exit(1)
-            # Iterate over session dictionary and perform delete operations
-            for key in session_data.keys():
-                if 'working_dir' in session_data[key]:
-                    try:
-                        shutil.rmtree(session_data[key]['working_dir'])
-                    except OSError:
-                        pass
-            os.remove(self.options.queue_cleanup)
-
-        else:
-            print("%s does not exist!" % (self.options.queue_cleanup))
-            sys.exit(1)
-
-    def getWorkingDir(self, job):
-        """ Return the queue working directory for job """
-        tester = job.getTester()
-        return os.path.join(tester.getTestDir(), 'job_' + os.path.basename(self.options.session_file))
-
-    def augmentQueueParamsBase(self, job):
-        """ Build the queue execution script """
-        template = {}
-        tester = job.getTester()
-
-        for param in self.params.keys():
-            template[param] = self.params[param]
-
-        # Set CPU request count
-        # NOTE: we are calling tester.getSlots specifically, instead of through
-        # the job class here, because we have altered each job to only require 1
-        # slot.
-        template['mpi_procs'] = tester.getSlots(self.options)
-
-        # Set a path friendly job name
-        template['job_name'] = ''.join(txt for txt in tester.specs['test_name'] if txt.isalnum() or txt in ['_', '-'])
-
-        # Set working directory
-        template['working_dir'] = self.getWorkingDir(job)
-
-        # Join the actual command we will execute inside the qsub script
-        template['command'] = tester.getCommand(self.options)
-
-        # #### create a set for copy and nocopy so its easier to work with
-        no_copy_files = set([])
-        copy_files = set([])
-
-        if tester.specs.isValid('no_copy_files'):
-            no_copy_files.update(tester.specs['no_copy_files'])
-        if tester.specs.isValid('copy_files'):
-            copy_files.update(tester.specs['copy_files'])
-        if tester.specs.isValid('gold_dir'):
-            copy_files.update([tester.specs['gold_dir']])
-
-        # convert the copy and nocopy sets to flat lists
-        template['copy_files'] = list(copy_files)
-        template['no_copy'] = list(no_copy_files)
-
-        # The location of the resulting execution script
-        template['queue_script'] = template['job_name'] + '.sh'
-
-        # Call derived augmentQueueParams to fill in specifics
-        template = self.augmentQueueParams(job, template)
-
-        return template
-
-    def reserveSlots(self, job):
-        """
-        Inherited method which controls when jobs are allowed to execute,
-        depending on available resources.
-
-        QueueManager only executes third party queueing commands. So
-        modify every job to only require 1 process.
-        """
-        job.setSlots(1)
-        return Scheduler.reserveSlots(self, job)
-
-    def testOutput(self, job):
-        """
-        Adjust the Tester for a proper working directory (QueueManager creates sub-directores),
-        and allow derived Tester to perform processResults.
-
-        Return resulting output.
-        """
-        tester = job.getTester()
-        json_job = self.getData(job.getUniqueIdentifier(), std_out=True, working_dir=True)
-
-        stdout_file = ''
-        if json_job['std_out']:
-            stdout_file = os.path.join(json_job['working_dir'], json_job['std_out'])
-
-        if os.path.exists(stdout_file):
-            with open(stdout_file, 'r+') as output_file:
-                # do NOT use util.readOutput (trim output). Otherwise processResults may
-                # fail to find something it needed.
-                output = output_file.read()
-
-                # Alter test_dir to reflect working_dir creation
-                tester.specs['test_dir'] = json_job['working_dir']
-
-                if tester.hasRedirectedOutput(self.options):
-                    output += util.getOutputFromFiles(tester, self.options)
-
-                # Allow the tester to perform its test and generate some output of its own
-                output = tester.processResults(tester.specs['moose_dir'], self.options, output)
-
-                # Set job output with modifications made by the tester
-                job.setOutput(output)
-
-                # re-write the output_file with output generated by tester's processResults.
-                # Testers always append information to 'output', so the end results here is
-                # a combination of job output, and tester output.
-                output_file.seek(0)
-                output_file.write(output)
-                output_file.truncate()
-
-        else:
-            output = ''
-            with self.dag_lock:
-                tester.setStatus('NO STDOUT FILE', tester.bucket_fail)
-
-        return output
-
-    def executeAndGetJobOutput(self, job):
-        """
-        Execute derived commands and obtain the output
-        """
-        json_data = self.getData(job.getUniqueIdentifier(), working_dir=True)
-        output = util.runCommand(self.getQueueCommand(job), cwd=json_data['working_dir'])
-        return output
-
-    def getCurrentJobStatus(self, job):
-        """
-        Set a job to the most current known status.
-
-        This method will first check if job has a previous pass/fail
-        status. If so, it sets that status with out performing any
-        third party queueing commands.
-
-        If the job has a status of queued, we call derived methods to
-        determine current status as the third party queueing system
-        sees it.
-        """
-        tester = job.getTester()
-        json_status = self.getData(job.getUniqueIdentifier(),
-                                   status_bucket=True,
-                                   caveat_message=True,
-                                   std_out=True,
-                                   working_dir=True)
-        if json_status:
-            bucket = self.__createStatusBucket(json_status)
-
-        # This test was not included during the launch sequence
-        else:
-            with self.dag_lock:
-                tester.setStatus('NO LAUNCH INFORMATION', tester.bucket_silent)
+        # Flatten the DAG. We want to easily iterate over all jobs produced by the spec file
+        Jobs.removeAllDependencies()
+
+        # Perform cleanup operations and return if thats what the user wants
+        if self.options.queue_cleanup:
+            self._cleanupFiles(Jobs)
             return
 
-        with self.dag_lock:
-            tester.setStatus(json_status['caveat_message'], bucket)
+        # Create a namedtuple of frequently used information contained within Jobs, so we can
+        # more easily pass this information among our methods
+        job_list = Jobs.getJobs()
+        if job_list:
+            queue_data = namedtuple('JobData', ['jobs', 'job_dir', 'json_data', 'plugin'])
+            job_data = queue_data(jobs=Jobs,
+                                  job_dir=job_list[0].getTestDir(),
+                                  json_data=self.options.results_storage,
+                                  plugin=self.harness.scheduler.__class__.__name__)
 
-        job_information = {}
+            if self._isProcessReady(job_data):
+                self._setJobStatus(job_data)
 
-        # Job was queued previously, and we want to know if the status has changed.
-        if tester.isQueued():
-            output = self.executeAndGetJobOutput(job)
-            job_information = self.handleJobStatus(job, output)
+            elif self._isLaunchable(job_data):
+                self._prepareJobs(job_data)
 
-        # Some other finished status. Check conditionals if user wants to re-open stdout.
-        elif self._readJobOutput(job):
-            json_job = self.getData(job.getUniqueIdentifier(), std_out=True, working_dir=True)
-            if json_job['std_out']:
-                stdout_file = os.path.join(json_job['working_dir'], json_job['std_out'])
-                if os.path.exists(stdout_file):
-                    with open(stdout_file, 'r') as f:
-                        # We can use trimmed output here, now that the job has a proper
-                        # status (we are not going to run processResults again).
-                        outfile = util.readOutput(f, None, self.options)
-                    job.setOutput(outfile)
-                else:
-                    with self.dag_lock:
-                        tester.setStatus('NO STDOUT FILE', tester.bucket_fail)
+    def createQueueScript(self, job, template):
+        """ Write the launch script to disc """
+        # Get a list of prereq tests this test may have
+        try:
+            with open(self.params['queue_template'], 'r') as f:
+                content = f.read()
 
-        # Update session storage with possibly new job status information
-        self.saveSession(job, **job_information)
+                with open(template['launch_script'], 'w') as queue_script:
 
-    def checkJobStatus(self, job):
+                    # Do all of the replacements for valid parameters
+                    for key in template.keys():
+                        if key.upper() in content:
+                            content = content.replace('<' + key.upper() + '>', str(template[key]))
+
+                    # Strip out parameters that were not supplied
+                    for key in template.keys():
+                        if key.upper() not in content:
+                            content = content.replace('<' + key.upper() + '>', '')
+
+                    queue_script.write(content)
+        except IOError as e:
+            print(e)
+            sys.exit(1)
+
+    def reserveSlots(self, job, j_lock):
         """
-        Check status for job. Depending on that status, this method
-        does the following:
-
-        Waiting;         Run processResults.
-        Anything else;   Update session storage with any
-                         new information.
+        Inherited method from the Scheduler to handle slot allocation.
+        QueueManager does not need an allocation system, so this method simply returns True
         """
-        tester = job.getTester()
-        self.getCurrentJobStatus(job)
+        return True
 
-        # This job is possibly ready. But we need to make sure all downstream jobs are
-        # ready as well.
-        if tester.isWaiting():
-            job_dag = job.getOriginalDAG()
-            downstream_jobs = job_dag.all_downstreams(job)
+    def getBadArgs(self):
+        """ Arguments which should be removed from the launch script invoking ./run_tests """
+        return []
 
-            for downstream_job in downstream_jobs:
-                d_tester = downstream_job.getTester()
+    def getBadKeyArgs(self):
+        """ Key/Value arguments which should be removed from the launch script invoking ./run_tests """
+        return []
 
-                # Determine, set, and save our children's status
-                self.getCurrentJobStatus(downstream_job)
+    def getCores(self, job_data):
+        """ iterate over Jobs and collect the maximum core requirement from the group of jobs which will run """
+        slots = 1
+        for job in [x for x in job_data.jobs.getJobs() if not x.isSkip()]:
+            slots = max(slots, job.getSlots())
 
-                # A child job is still not ready. We need to adjust our status to match.
-                if d_tester.isQueued():
-                    with self.dag_lock:
-                        tester.setStatus('WAITING', tester.bucket_queued)
-                    return
+        return slots
 
-            # Everyone is ready, so adjust our status to pending, so the testers will set
-            # a status (they assume they launch in the pending state, so if they are NOT
-            # pending, they assume the worst has happened and will not set a status at all).
-            with self.dag_lock:
-                tester.setStatus('PENDING', tester.bucket_pending)
-
-            self.testOutput(job)
-
-        # Save resulting status to the session storage
-        self.saveSession(job)
-
-    def jobLaunch(self, job):
-        """ Prepare for and launch a job """
-        tester = job.getTester()
-
-        # Do once (prepare job)
-        if tester.isPending():
-            # Augment queue parameters
-            template = self.augmentQueueParamsBase(job)
-
-            # Prepare the worker directory
-            self.__copyFiles(job, template)
-
-            # Create the shell execution script
-            self.__createQueueScript(template)
-
-            # Save template information
-            self.putData(job.getUniqueIdentifier(),
-                         queue_script=template['queue_script'],
-                         working_dir=template['working_dir'],
-                         job_name=template['job_name'])
-
-        # Get derived launch command and launch this job (blocking)
-        output = self.executeAndGetJobOutput(job)
-
-        # Call derived method to set job status and obtain information
-        # the third party scheduler wishes to save to the session storage
-        job_information = self.handleJobStatus(job, output)
-        self.saveSession(job, **job_information)
-
-    def postRun(self, job):
-        """
-        Called after a job has finished running.
-
-        This method will call derived postLaunchCommand to obtain
-        a possible command to run, once this group of jobs has
-        launched.
-        """
-        tester = job.getTester()
-        launchable_jobs = []
-
-        # Check if all jobs in this group are pending (meaning they were launched)
-        if tester.isQueued() and not self.__status_check:
-            current_dag = job.getDAG()
-
-            # If current_dag is empty this is the last job to have been removed
-            if current_dag.size() == 0:
-                original_dag = job.getOriginalDAG()
-
-                for ind_job in original_dag.topological_sort():
-                    launchable_jobs.append(ind_job)
-
-        # Ask derived scheduler to build a postRun command
-        if launchable_jobs:
-            command = self.postLaunchCommand(launchable_jobs)
-            if command:
-                util.runCommand(command)
-
-    def preLaunch(self, job_dag):
-        """ Reverse the test order when we are trying to process results """
-        if self.__status_check:
-            job_dag.reverse_edges()
-
-    def notifyFinishedSchedulers(self):
-        """
-        Save session results to a file.
-        """
-        # Write session data to file
-        self.writeSessionFile()
-
-    def reportSkipped(self, jobs):
-        """
-        Save skipped job information in our session storage (so it prints
-        the same as it would if we were not using queueing options).
-        """
-        # We don't want to save silently skipped tests
-        for job in jobs:
+    def getMaxTime(self, job_data):
+        """ iterate over Jobs and increment the total allowable time needed to complete the entire group """
+        total_time = 0
+        for job in [x for x in job_data.jobs.getJobs() if not x.isSkip()]:
             tester = job.getTester()
-            if tester.isSilent():
-                return
+            total_time += int(tester.getMaxTime())
+
+        return total_time
+
+    def addDirtyFiles(self, job, file_list=[]):
+        """ append list of files which will be generated by derived scheduler """
+        job_data = job.getMetaData()
+        file_list.extend(job_data.get('QUEUE_FILES', []))
+        job.addMetaData(QUEUE_FILES=file_list)
+
+    def getDirtyFiles(self, job):
+        """ return list of files not indigenous to the repository which was created by third party schedulers """
+        dirty_files = []
+        if self.options.results_storage and self.options.results_storage.get(job.getTestDir(), {}):
+            dirty_files = self.options.results_storage[job.getTestDir()].get('QUEUE_FILES', [])
+        return dirty_files
+
+    def cleanAndModifyArgs(self):
+        """
+        Filter out any arguments that will otherwise break the TestHarness when launched _within_
+        the third party scheduler (such as --pbs)
+        """
+        # return cached args if we have already produced clean args
+        if not self.__clean_args:
+            current_args = list(sys.argv[1:])
+
+            # Ask derived schedulers for any additional args we should strip from sys.args
+            bad_args = self.getBadArgs()
+            bad_keyword_args = self.getBadKeyArgs()
+
+            # Split keyword args so we can match/remove them (the key, and its value pair)
+            key_value_args = [x for x in current_args if '=' in x]
+            for arg in key_value_args:
+                current_args.remove(arg)
+                current_args.extend(arg.split('='))
+
+            # Note: we are removing cli-args/ignore because we need to re-encapsulate them below
+            bad_keyword_args.extend(['--spec-file', '-i', '--cli-args', '-j', '-l', '-o', '--output-dir', '--ignore'])
+
+            # remove the key=value pair argument
+            for arg in bad_keyword_args:
+                if arg in current_args:
+                    key = current_args.index(arg)
+                    del current_args[key:key+2]
+
+            # Special: re-encapsulate --cli-args
+            if self.options.cli_args:
+                current_args.extend(['--cli-args', '"%s"' % self.options.cli_args])
+            if self.options.ignored_caveats:
+                current_args.extend(['--ignore', '"%s"' % self.options.ignored_caveats])
+
+            # remove any specified positional arguments
+            for arg in bad_args:
+                if arg in current_args:
+                    current_args.remove(arg)
+
+            self.__clean_args = current_args
+
+        return self.__clean_args
+
+    def getRunTestsCommand(self, job):
+        """ return the command necessary to launch the TestHarness within the third party scheduler """
+
+        # Build ['/path/to/run_tests', '-j', '#']
+        command = [os.path.join(self.harness.run_tests_dir, 'run_tests'),
+                   '-j', str(job.getMetaData().get('QUEUEING_NCPUS', 1) )]
+
+        # get current sys.args we are allowed to include when we launch run_tests
+        args = list(self.cleanAndModifyArgs())
+
+        # Build [<args>, '--spec-file' ,/path/to/tests', '-o', '/path/to']
+        args.extend(['--spec-file', os.path.join(job.getTestDir(), self.options.input_file_name),
+                     '-o', job.getTestDir()])
+
+        # Build [<command>, <args>]
+        command.extend(args)
+
+        # Add the second results file we should remove when performing cleanup operations
+        self.addDirtyFiles(job, [os.path.join(job.getTestDir(), self.__job_storage_file)])
+
+        return command
+
+    def _isProcessReady(self, job_data):
+        """
+        Return bool on `run_tests --spec_file` submission results being available. Due to the
+        way the TestHarness writes to this results file (when the TestHarness exits), this file,
+        when available, means every test contained therein is finished in some form or another.
+
+        If the result file does not exist, determine if it ever will exist. Tests which can fall
+        into this group, are those which were: skipped, deleted, silent, etc during the initial
+        launch phase.
+        """
+        # No session file. Return immediately.
+        if not job_data.json_data:
+            return False
+
+        is_ready = True
+        # Job group exists in queue session and was apart of the queueing process
+        if job_data.json_data and job_data.json_data.get(job_data.job_dir, {}).get('QUEUEING', {}):
+
+            # result file exists (jobs are finished)
+            if os.path.exists(os.path.join(job_data.job_dir, self.__job_storage_file)):
+                pass
+
+            # result does not yet exist but will in the future
             else:
-                self.saveSession(job)
+                for job in job_data.jobs.getJobs():
+                    tester = job.getTester()
+                    (status, caveats) = self._getTesterStatusAndCaveatsFromSession(job_data.json_data, tester)
 
-    def run(self, job):
-        """
-        Entry point to the QueueManager.
+                    # This single job will enter the runner thread pool
+                    if status.status == "NA":
+                        tester.addCaveats(caveats)
+                        tester.setStatus(status, 'QUEUED')
 
-        Supply a job to have that job launched into a third party queueing
-        system. Once that job launches, the results will be written to a
-        json file (called a session file through out this class), and then
-        we exit.
+                    # This single job will be skipped for some reason
+                    else:
+                        tester.addCaveats(caveats)
+                        tester.setStatus(status)
+                is_ready = False
 
-        Calling run again, supplying the same job while using the same
-        session file, will instruct this class to process the job results
-        if it is ready to do so. Those results will also be saved to the
-        session file for later use (for faster results on consecutive
-        calls).
-        """
-        if self.__status_check:
-            self.checkJobStatus(job)
+        # Job group not originally launched
         else:
-            self.jobLaunch(job)
+            for job in job_data.jobs.getJobs():
+                tester = job.getTester()
+                # Entire job group was skipped, deleted, silent, etc
+                if job_data.json_data and job_data.json_data.get(job_data.job_dir, {}):
+                    (status, caveats) = self._getTesterStatusAndCaveatsFromSession(job_data.json_data, tester)
+                    tester.addCaveats(caveats)
+                    tester.setStatus(status)
+
+                # Entire job group did not previously enter the Scheduler
+                else:
+                    tester.setStatus(tester.silent)
+            is_ready = False
+
+        if not is_ready:
+            for job in job_data.jobs.getJobs():
+                job.setStatus(job.finished)
+
+        return is_ready
+
+    def _isLaunchable(self, job_data):
+        """ bool if jobs are ready to launch """
+        # results file exists (set during scheduler plugin initialization), so do no launch again
+        if job_data.json_data:
+            return False
+
+        return True
+
+    def _prepareJobs(self, job_data):
+        """
+        Prepare jobs for launch.
+
+        Grab an arbitrary job and record any necessary information the third party
+        queueing systems requires for launch (walltime, ncpus, etc). Set all other
+        jobs to a finished state. The arbitrary job selected will be the only job
+        which enters the runner thread pool, and executes the commands neccessary
+        for job submission.
+        """
+        job_list = job_data.jobs.getJobs()
+
+        # Clear any caveats set (except skips). As they do not apply during job submission
+        for job in [x for x in job_list if not x.isSkip()]:
+            job.clearCaveats()
+
+        if job_list:
+            launchable_jobs = [x for x in job_list if not x.isFinished()]
+            if launchable_jobs:
+                executor_job = job_list.pop(job_list.index(launchable_jobs.pop(0)))
+
+                executor_job.addMetaData(QUEUEING=job_data.plugin,
+                                         QUEUEING_NCPUS=self.getCores(job_data),
+                                         QUEUEING_MAXTIME=self.getMaxTime(job_data))
+
+                for job in launchable_jobs:
+                    tester = job.getTester()
+                    if tester.isNoStatus():
+                        tester.setStatus(tester.no_status, 'LAUNCHING')
+                    job.setStatus(job.finished)
+
+    def _setJobStatus(self, job_data):
+        """
+        Read the json results file for the finished submitted job group, and match our
+        job statuses with the results found therein.
+        """
+        job_list = job_data.jobs.getJobs()
+        if job_list:
+            testdir_json = os.path.join(job_data.job_dir, self.__job_storage_file)
+
+            with open(testdir_json, 'r') as f:
+                try:
+                    results = json.load(f)
+                except ValueError:
+                    print('Unable to parse json file: %s' % (testdir_json))
+                    sys.exit(1)
+
+            group_results = results[job_data.job_dir]
+
+            # Continue to store previous third-party queueing data
+            job_list[0].addMetaData(**{job_data.plugin : self.options.results_storage[job_data.job_dir][job_data.plugin]})
+
+            for job in job_list:
+                job.setStatus(job.finished)
+                tester = job.getTester()
+
+                # Perhaps the user is filtering this job (--re, --failed-tests, etc)
+                if tester.isSilent() and not tester.isDeleted():
+                    continue
+
+                if group_results.get(job.getTestName(), {}):
+                    job_results = group_results[job.getTestName()]
+                    (status, caveats) = self._getTesterStatusAndCaveatsFromSession(results, tester)
+                    tester.addCaveats(caveats)
+                    tester.setStatus(status)
+
+                    # Recover useful job information from job results
+                    job.setPreviousTime(job_results['TIMING'])
+                    job.setOutput(job_results['OUTPUT'])
+
+                # This is a newly added test in the spec file, which was not a part of original launch
+                else:
+                    tester.addCaveats('not originally launched')
+                    tester.setStatus(tester.skip)
+
+    def _getTesterStatusAndCaveatsFromSession(self, session, tester):
+        """ extract status and caveats from session for tester, return 'no status' for testers not found """
+        status = tester.no_status
+        caveats = []
+        if session and session.get(tester.getTestDir(), {}).get(tester.getTestName(), {}):
+            status_type = session[tester.getTestDir()][tester.getTestName()]['STATUS'].encode('ascii', 'ignore')
+            status_color = session[tester.getTestDir()][tester.getTestName()]['COLOR'].encode('ascii', 'ignore')
+            status = self._createTesterStatus(tester, status_type, status_color)
+            caveats = session[tester.getTestDir()][tester.getTestName()]['CAVEATS']
+        return (status, caveats)
+
+    def _createTesterStatus(self, tester, status, color):
+        """ instance a compatible tester status """
+        test_status = tester.createStatus()
+        return test_status(status=status, color=color)
+
+    def _cleanupFiles(self, Jobs):
+        """ Silence all Jobs and perform cleanup operations """
+        job_list = Jobs.getJobs()
+        # Set each tester to be silent
+        for job in job_list:
+            tester = job.getTester()
+            tester.setStatus(tester.silent)
+            job.setStatus(job.finished)
+        # Delete files generated by a job
+        if job_list:
+            for dirty_file in self.getDirtyFiles(job_list[0]):
+                # Safty check. Any indigenous file generated by QueueManager should only exist in the tester directory
+                if os.path.dirname(dirty_file) == job_list[0].getTestDir():
+                    try:
+                        if os.path.isdir(dirty_file):
+                            shutil.rmtree(dirty_file)
+                        else:
+                            os.remove(dirty_file)
+                    except OSError:
+                        pass
