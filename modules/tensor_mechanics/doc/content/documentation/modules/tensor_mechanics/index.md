@@ -99,6 +99,7 @@ Explore the different ways to use the tensor mechanics module:
 - Crystal Plasticity
 - Multiple Inelastic Stresses
 - [C0 Timoshenko Beam](tensor_mechanics/C0TimoshenkoBeam.md)
+- [Generalized Plane Strain](tensor_mechanics/generalized_plane_strain.md)
 
 Review the helpful advice on using the
 [Volumetric Locking Correction](tensor_mechanics/VolumetricLocking.md) and about
