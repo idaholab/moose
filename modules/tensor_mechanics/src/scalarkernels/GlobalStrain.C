@@ -8,10 +8,10 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "GlobalStrain.h"
+#include "GlobalStrainUserObject.h"
 
 // MOOSE includes
 #include "Assembly.h"
-#include "GlobalStrainUserObject.h"
 #include "MooseVariableScalar.h"
 #include "SystemBase.h"
 #include "RankTwoTensor.h"
@@ -36,6 +36,7 @@ GlobalStrain::GlobalStrain(const InputParameters & parameters)
     _pst(getUserObject<GlobalStrainUserObject>("global_strain_uo")),
     _pst_residual(_pst.getResidual()),
     _pst_jacobian(_pst.getJacobian()),
+    _periodic_dir(_pst.getPeriodicDirections()),
     _components(_var.order()),
     _dim(_mesh.dimension())
 {
@@ -53,7 +54,10 @@ GlobalStrain::computeResidual()
 {
   DenseVector<Number> & re = _assembly.residualBlock(_var.number());
   for (_i = 0; _i < re.size(); ++_i)
-    re(_i) += _pst_residual(_components[_i].first, _components[_i].second);
+  {
+    if (_periodic_dir(_components[_i].first) || _periodic_dir(_components[_i].second))
+      re(_i) += _pst_residual(_components[_i].first, _components[_i].second);
+  }
 }
 
 void
@@ -62,6 +66,7 @@ GlobalStrain::computeJacobian()
   DenseMatrix<Number> & ke = _assembly.jacobianBlock(_var.number(), _var.number());
   for (_i = 0; _i < ke.m(); ++_i)
     for (_j = 0; _j < ke.m(); ++_j)
+      // periodic direction check is not done for jacobian calculations to avoid zero pivot error
       ke(_i, _j) += _pst_jacobian(_components[_i].first,
                                   _components[_i].second,
                                   _components[_j].first,

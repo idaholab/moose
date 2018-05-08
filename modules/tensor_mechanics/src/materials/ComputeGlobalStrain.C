@@ -8,6 +8,9 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "ComputeGlobalStrain.h"
+#include "GlobalStrainUserObject.h"
+
+// MOOSE includes
 #include "RankTwoTensor.h"
 
 registerMooseObject("TensorMechanicsApp", ComputeGlobalStrain);
@@ -24,6 +27,10 @@ validParams<ComputeGlobalStrain>()
                                "multiple mechanics material systems on the same "
                                "block, i.e. for multiple phases");
   params.addCoupledVar("scalar_global_strain", "Scalar variable for global strain");
+  params.addCoupledVar("displacements", "The name of the displacement variables");
+  params.addRequiredParam<UserObjectName>("global_strain_uo",
+                                          "The name of the GlobalStrainUserObject");
+
   return params;
 }
 
@@ -31,7 +38,11 @@ ComputeGlobalStrain::ComputeGlobalStrain(const InputParameters & parameters)
   : Material(parameters),
     _base_name(isParamValid("base_name") ? getParam<std::string>("base_name") + "_" : ""),
     _scalar_global_strain(coupledScalarValue("scalar_global_strain")),
-    _global_strain(declareProperty<RankTwoTensor>(_base_name + "global_strain"))
+    _global_strain(declareProperty<RankTwoTensor>(_base_name + "global_strain")),
+    _pst(getUserObject<GlobalStrainUserObject>("global_strain_uo")),
+    _periodic_dir(_pst.getPeriodicDirections()),
+    _dim(_mesh.dimension()),
+    _ndisp(coupledComponents("displacements"))
 {
 }
 
@@ -46,6 +57,11 @@ ComputeGlobalStrain::computeProperties()
 {
   RankTwoTensor & strain = _global_strain[0];
   strain.fillFromScalarVariable(_scalar_global_strain);
+
+  for (unsigned int dir = 0; dir < _dim; ++dir)
+    if (!_periodic_dir(dir))
+      for (unsigned int var = 0; var < _ndisp; ++var)
+        strain(dir, var) = 0.0;
 
   for (_qp = 0; _qp < _qrule->n_points(); ++_qp)
     _global_strain[_qp] = strain;
