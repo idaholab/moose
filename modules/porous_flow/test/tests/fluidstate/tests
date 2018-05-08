@@ -37,6 +37,11 @@
     input = 'brineco2_2.i'
     csvdiff = 'brineco2_2.csv'
   [../]
+  [./brineco2_hightemp]
+    type = 'CSVDiff'
+    input = 'brineco2_hightemp.i'
+    csvdiff = 'brineco2_hightemp_out.csv'
+  [../]
   [./theis_brineco2]
     type = 'CSVDiff'
     input = 'theis_brineco2.i'
