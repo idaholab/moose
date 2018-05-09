@@ -1,14 +1,19 @@
-<!-- MOOSE Documentation Stub: Remove this when content is added. -->
-
 # PorousFlowFullySaturatedHeatAdvection
 
-!alert construction title=Undocumented Class
-The PorousFlowFullySaturatedHeatAdvection has not been documented, if you would like to contribute to MOOSE by
-writing documentation, please see [/generate.md]. The content contained on this page explains
-the typical documentation associated with a MooseObject; however, what is contained is ultimately
-determined by what is necessary to make the documentation clear for users.
-
 !syntax description /Kernels/PorousFlowFullySaturatedHeatAdvection
+
+Describes the differential term
+\begin{equation}
+-\nabla\cdot ((\rho)h k(\nabla P - \rho \mathbf{g})/\mu) \ .
+\end{equation}
+The nomenclature is described [here](nomenclature.md).  This is fully-saturated, multi-component, single-phase Darcy flow for fluid component $\kappa$.
+
+!alert note
+Although the multiplication by $\rho$ is optional, you should almost always set `multiply_by_density=true`
+
+!alert note
+No [upwinding](upwinding.md) is performed, which means many [nodal Material properties](tutorial_09.md) are not needed and [numerical diffusion](numerical_diffusion.md) is reduced.  However, the numerics are less well controlled: the whole point of full upwinding is to prevent over-shoots and under-shoots in the temperature, etc.
+
 
 !syntax parameters /Kernels/PorousFlowFullySaturatedHeatAdvection
 

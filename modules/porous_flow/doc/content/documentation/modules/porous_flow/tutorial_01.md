@@ -13,7 +13,7 @@ equation
 \nabla_{i}\left(\frac{k_{ij}}{\mu}\left(\nabla_{j}P - \rho g_{j}\right)\right)
 \ .
 \end{equation}
-This is the simplest type of equation that PorousFlow solves.  It is often used in thermo-poro-elasticity, but PorousFlow is often employed to solve much more complex equations.  See [governing equations](/porous_flow/governing_equations.md) for further details.  In this equation:
+This is the simplest type of equation that PorousFlow solves.  It is often used in thermo-poro-elasticity, but PorousFlow is often employed to solve much more complex equations.  See [governing equations](/porous_flow/governing_equations.md) for further details, and [PorousFlowFullySaturatedMassTimeDerivative](PorousFlowFullySaturatedMassTimeDerivative.md) and [PorousFlowFullySaturatedDarcyBase](PorousFlowFullySaturatedDarcyBase.md) for the derivation of [eq:basicthm] from the general governing equations.  In this equation:
 
 - $P$ is the fluid porepressure (units of Pa)
 - an over-dot represents a time derivative
@@ -49,7 +49,7 @@ In these equations
 - $\alpha_{T}$ is the volumetric thermal expansion coefficient of the drained porous skeleton (units K$^{-1}$)
 - $\alpha_{f}$ is the volumetric thermal expansion coefficient of the fluid (units K$^{-1}$)
 
-The derivation of [eq:basicthm] from
+The [derivation](PorousFlowFullySaturatedMassTimeDerivative.md) of [eq:basicthm] from
 the [full PorousFlow equations](governing_equations.md) assumes that $M$ and $A$ are constant.
 
 In this tutorial page we will be solving fluid flow only, so the
@@ -67,7 +67,9 @@ The DE of [eq:basicthm] is implemented in the following way
 
 !listing modules/porous_flow/examples/tutorial/01.i start=[Variables] end=[BCs]
 
-There is just one variable --- the porepressure --- and there is no coupling with heat or mechanics.  Gravity is set to zero.  In this tutorial page, the only boundary condition is to fix the porepressure to 1$\,$MPa at the injection area (the other boundaries default to zero flux):
+There is just one variable --- the porepressure --- and there is no coupling with heat or mechanics.  Gravity is set to zero.  The [`PorousFlowBasicTHM`](PorousFlowBasicTHM.md) has other optional inputs that you are encouraged to explore, including setting the temperature to a non-default value, or to the value of an AuxVariable (your fluid properties may depend on temperature, even in an isothermal situation).
+
+In this tutorial page, the only boundary condition is to fix the porepressure to 1$\,$MPa at the injection area (the other boundaries default to zero flux):
 
 !listing modules/porous_flow/examples/tutorial/01.i start=[BCs] end=[Modules]
 
