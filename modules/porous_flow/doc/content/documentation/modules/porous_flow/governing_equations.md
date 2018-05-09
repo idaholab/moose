@@ -403,12 +403,16 @@ input file.
 | Equation | Kernel |
 | --- | --- |
 | $\frac{\partial}{\partial t}\left(\phi\sum_{\beta}S_{\beta}\rho_{\beta}\chi_{\beta}^{\kappa}\right)$ | [`PorousFlowMassTimeDerivative`](PorousFlowMassTimeDerivative.md) |
+| $(\rho)(\dot{P}/M - A\dot{T} + \alpha_{B}\dot{\epsilon}_{v})$ | [`PorousFlowFullySaturatedMassTimeDerivative`](PorousFlowFullySaturatedMassTimeDerivative.md) |
 | $\frac{\partial}{\partial t}\left((1 - \phi)C^{\kappa}\right)$ | [`PorousFlowDesorpedMassTimeDerivative`](PorousFlowDesorpedMassTimeDerivative.md) |
 | $-\nabla\cdot \sum_{\beta}\chi_{\beta}^{\kappa} \rho_{\beta}\frac{k\,k_{\mathrm{r,}\beta}}{\mu_{\beta}}(\nabla P_{\beta} - \rho_{\beta} \mathbf{g})$ | [`PorousFlowAdvectiveFlux`](PorousFlowAdvectiveFlux.md) |
 | $-\nabla\cdot \sum_{\beta}\rho_{\beta}{\mathcal{D}}_{\beta}^{\kappa}\nabla \chi_{\beta}^{\kappa}$ | [`PorousFlowDispersiveFlux`](PorousFlowDispersiveFlux.md) |
+| $-\nabla\cdot ((\rho)k(\nabla P - \rho \mathbf{g})/\mu)$ | [`PorousFlowFullySaturatedDarcyBase`](PorousFlowFullySaturatedDarcyBase.md) |
+| $-\nabla\cdot (\rho\chi^{\kappa} k(\nabla P - \rho \mathbf{g})/\mu)$ | [`PorousFlowFullySaturatedDarcyFlow`](PorousFlowFullySaturatedDarcyFlow.md) |
 | $\frac{\partial}{\partial t}\left((1-\phi)\rho_{R}C_{R}T + \phi\sum_{\beta}S_{\beta}\rho_{\beta}\mathcal{E}_{\beta}\right)$ | [`PorousFlowEnergyTimeDerivative`](PorousFlowEnergyTimeDerivative.md) |
 | $-\nabla\cdot \left(\lambda \nabla T\right)$ | [`PorousFlowHeatConduction`](PorousFlowHeatConduction.md) |
 | $-\nabla\cdot \sum_{\beta}h_{\beta} \rho_{\beta}\frac{k\,k_{\mathrm{r,}\beta}}{\mu_{\beta}}(\nabla P_{\beta} - \rho_{\beta} \mathbf{g})$ | [`PorousFlowHeatAdvection`](PorousFlowHeatAdvection.md) |
+| $-\nabla\cdot ((\rho)h k(\nabla P - \rho \mathbf{g})/\mu)$ | [`PorousFlowFullySaturatedHeatAdvection`](PorousFlowFullySaturatedHeatAdvection.md) |
 | $\mathcal{E}\nabla\cdot\mathbf{v}_{s}$ | [`PorousFlowHeatVolumetricExpansion`](PorousFlowHeatVolumetricExpansion.md) |
 | $-\nu (1-\phi)\sigma^{\mathrm{eff}}_{ij}\frac{\partial}{\partial t}\epsilon_{ij}^{\mathrm{plastic}}$ | [`PorousFlowPlasticHeatEnergy`](PorousFlowPlasticHeatEnergy.md) |
 | $\phi\sum_{\beta}S_{\beta}\rho_{\beta}\chi_{\beta}^{\kappa}\nabla\cdot\mathbf{v}_{s}$ | [`PorousFlowMassVolumetricExpansion`](PorousFlowMassVolumetricExpansion.md) |
