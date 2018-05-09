@@ -113,6 +113,10 @@ class Job(object):
         """ Wrapper method to return getRunnable """
         return self.__tester.getRunnable(self.options)
 
+    def getOutputFiles(self):
+        """ Wrapper method to return getOutputFiles """
+        return self.__tester.getOutputFiles()
+
     def getUniqueIdentifier(self):
         """ A unique identifier for this job object """
         return os.path.join(self.getTestDir(), self.getTestName())

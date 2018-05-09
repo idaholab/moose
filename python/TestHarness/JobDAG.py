@@ -128,26 +128,26 @@ class JobDAG(object):
 
     def _doRaceConditions(self):
         """ Check for race condition errors within in the DAG"""
-        # Create a clone of the DAG so we can be destructive with it (we need to
-        # simulate running each job to completion)
-        mutable_dag = self.__job_dag.clone()
-        while mutable_dag.size():
-            output_files_in_dir = set()
-            concurrent_jobs = mutable_dag.ind_nodes()
-            for job in concurrent_jobs:
-                if job.isFinished():
-                    continue
-                tester = job.getTester()
-                output_files = tester.getOutputFiles()
-                if len(output_files_in_dir.intersection(set(output_files))):
-                    # Break out of this loop and set every job involved as a failure
-                    # for race conditions
-                    for this_job in concurrent_jobs:
-                        this_job.setStatus(this_job.error, 'OUTFILE RACE CONDITION')
-                    break
-                output_files_in_dir.update(output_files)
-            for job in concurrent_jobs:
-                mutable_dag.delete_node(job)
+        # Build output_file in relation to job dictionary
+        output_to_job = {}
+        for job in self.__job_dag.topological_sort():
+            if job.getRunnable() and not job.isFinished():
+                for output_file in job.getOutputFiles():
+                    output_to_job[output_file] = output_to_job.get(output_file, set([]))
+                    output_to_job[output_file].add(job)
+
+        # Remove jobs which have accurate dependencies
+        for outfile, job_list in output_to_job.iteritems():
+            for job in list(job_list):
+                for match_job in self.__job_dag.all_downstreams(job):
+                    if match_job in job_list:
+                        job_list.remove(match_job)
+
+        # Any multiple jobs left with the same output files, are race conditions
+        for outfile, job_list in output_to_job.iteritems():
+            if len(job_list) > 1:
+                for job in job_list:
+                    job.setStatus(job.error, 'OUTFILE RACE CONDITION')
 
     def _haltDescent(self, job):
         """ return boolean if this job should not allow its children to run """
