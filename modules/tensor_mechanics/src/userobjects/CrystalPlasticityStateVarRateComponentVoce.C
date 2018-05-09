@@ -34,47 +34,45 @@ validParams<CrystalPlasticityStateVarRateComponentVoce>()
                                              "slip systems 'format: [start end)', i.e.'0 "
                                              "12 24 48' groups 0-11, 12-23 and 24-48 ");
   params.addParam<std::vector<Real>>("h0_group_values",
-                                     "h0 hardning constatn for each group "
+                                     "h0 hardening constant for each group "
                                      " i.e. '0.0 1.0 2.0' means 0-11 = 0.0, "
                                      "12-23 = 1.0 and 24-48 = 2.0 ");
   params.addParam<std::vector<Real>>("tau0_group_values",
                                      "The initial critical resolved shear stress"
-                                     "correspoinding to each group"
+                                     "corresponding to each group"
                                      " i.e. '100.0 110.0 120.0' means 0-11 = 100.0, "
                                      "12-23 = 110.0 and 24-48 = 120.0 ");
   params.addParam<std::vector<Real>>("tauSat_group_values",
                                      "The saturation resolved shear stress"
-                                     "correspoinding to each group"
+                                     "corresponding to each group"
                                      " i.e. '150.0 170.0 180.0' means 0-11 = 150.0, "
                                      "12-23 = 170.0 and 24-48 = 180.0 ");
   params.addParam<std::vector<Real>>("hardeningExponent_group_values",
                                      "The hardening exponent m"
-                                     "correspoinding to each group"
+                                     "corresponding to each group"
                                      " i.e. '1.0 2.0 3.0' means 0-11 = 1.0, "
                                      "12-23 = 2.0 and 24-48 = 3.0 ");
   params.addParam<std::vector<Real>>("selfHardening_group_values",
                                      "The self hardening coefficient q_aa"
-                                     "correspoinding to each group"
+                                     "corresponding to each group"
                                      " i.e. '1.0 2.0 3.0' means 0-11 = 1.0, "
                                      "12-23 = 2.0 and 24-48 = 3.0 "
                                      " usually these are all 1.");
   params.addParam<std::vector<Real>>("coplanarHardening_group_values",
-                                     "The coplanar laten hardening coefficient q_ab"
-                                     "correspoinding to each group"
+                                     "The coplanar latent hardening coefficient q_ab"
+                                     "corresponding to each group"
                                      " i.e. '1.0 2.0 3.0' means 0-11 = 1.0, "
                                      "12-23 = 2.0 and 24-48 = 3.0 ");
   params.addParam<std::vector<Real>>("GroupGroup_Hardening_group_values",
-                                     "The group-to-group laten hardening coefficient q_ab"
+                                     "The group-to-group latent hardening coefficient q_ab"
                                      "This is a NxN vector"
                                      " i.e. '1.0 2.0 3.0 4.0 5.0 6.0 7.0 8.0 9.0' "
                                      "means non-coplanar slip systems in gr_11,22,33= "
                                      "1.0, 5.0 and 9.0 respectively."
-                                     "latent ahrdening between for gr_12,13 = 2.0 3.0"
+                                     "latent hardening between for gr_12,13 = 2.0 3.0"
                                      " respectively");
-  params.addClassDescription(
-      "Phenomenological Voce constitutive model state"
-      " variable evolution rate "
-      "component base class.  Override this virtual functions in your class");
+  params.addClassDescription("Phenomenological Voce constitutive model state variable evolution "
+                             "rate component base class.");
   return params;
 }
 
@@ -94,11 +92,10 @@ CrystalPlasticityStateVarRateComponentVoce::CrystalPlasticityStateVarRateCompone
     _selfHardening_group_values(getParam<std::vector<Real>>("selfHardening_group_values")),
     _coplanarHardening_group_values(getParam<std::vector<Real>>("coplanarHardening_group_values")),
     _GroupGroup_Hardening_group_values(
-        getParam<std::vector<Real>>("GroupGroup_Hardening_group_values"))
+        getParam<std::vector<Real>>("GroupGroup_Hardening_group_values")),
+    _n_groups(_groups.size())
 {
   // perform input checks
-  _n_groups = _groups.size();
-
   if (_n_groups < 2)
     paramError("groups",
                "the number of slip system groups provided is not "
@@ -141,8 +138,8 @@ CrystalPlasticityStateVarRateComponentVoce::CrystalPlasticityStateVarRateCompone
                "parameters does not match the number of slip system groups");
 
   // initialize useful variables;
-  initSlipSystem_PlaneID(_slipSystem_PlaneID);
-  initSlipSystem_GroupID(_slipSystem_GroupID);
+  initSlipSystemPlaneID(_slipSystem_PlaneID);
+  initSlipSystemGroupID(_slipSystem_GroupID);
 }
 
 bool
@@ -179,9 +176,7 @@ CrystalPlasticityStateVarRateComponentVoce::calcStateVariableEvolutionRateCompon
   for (unsigned int i = 0; i < _variable_size; ++i)
     for (unsigned int j = 0; j < _variable_size; ++j)
     {
-
-      Real q_ab = getHardeningCoefficient(i, j);
-
+      const Real q_ab = getHardeningCoefficient(i, j);
       val[i] += std::abs(_mat_prop_slip_rate[qp][j]) * q_ab * hb(j);
     }
 
@@ -195,16 +190,12 @@ CrystalPlasticityStateVarRateComponentVoce::crystalLatticeTypeOptions()
 }
 
 void
-CrystalPlasticityStateVarRateComponentVoce::initSlipSystem_PlaneID(
+CrystalPlasticityStateVarRateComponentVoce::initSlipSystemPlaneID(
     std::vector<unsigned int> & _slipSystem_PlaneID) const
 {
-  // this routine is generate a vector containing the association between
-  // slip system number and slip plane
   _slipSystem_PlaneID.assign(_variable_size, 0);
 
   for (unsigned int slipSystemIndex = 0; slipSystemIndex < _variable_size; ++slipSystemIndex)
-  {
-
     switch (_crystal_lattice_type)
     {
       case 0: // FCC
@@ -230,49 +221,40 @@ CrystalPlasticityStateVarRateComponentVoce::initSlipSystem_PlaneID(
       default:
         mooseError("VoceHardeningError: Pass valid crustal_structure_type ");
     }
-  }
 }
 
 void
-CrystalPlasticityStateVarRateComponentVoce::initSlipSystem_GroupID(
+CrystalPlasticityStateVarRateComponentVoce::initSlipSystemGroupID(
     std::vector<unsigned int> & _slipSystem_GroupID) const
-// this routine is generate a vector containing the association between
-// slip system number and provided group edges
 {
   _slipSystem_GroupID.assign(_variable_size, 0);
 
   for (unsigned int slipSystemIndex = 0; slipSystemIndex < _variable_size; ++slipSystemIndex)
-  {
-    for (unsigned int i = 0; i < _groups.size() - 1; i++)
-    {
+    for (unsigned int i = 0; i < _n_groups - 1; ++i)
       if (slipSystemIndex >= _groups[i] && slipSystemIndex < _groups[i + 1])
       {
         _slipSystem_GroupID[slipSystemIndex] = i;
         break;
       }
-    }
-  }
 }
 
 Real
 CrystalPlasticityStateVarRateComponentVoce::getHardeningCoefficient(
     unsigned int slipSystemIndex_i, unsigned int slipSystemIndex_j) const
 {
-  // select the appropriate latent hardening coefficient based on the slip systems indeces
-
-  Real q_ab;
   // collect slip system plane and group
-  unsigned int group_i = _slipSystem_GroupID[slipSystemIndex_i];
-  unsigned int group_j = _slipSystem_GroupID[slipSystemIndex_j];
-  unsigned int plane_i = _slipSystem_PlaneID[slipSystemIndex_i];
-  unsigned int plane_j = _slipSystem_PlaneID[slipSystemIndex_j];
+  const unsigned int group_i = _slipSystem_GroupID[slipSystemIndex_i];
+  const unsigned int group_j = _slipSystem_GroupID[slipSystemIndex_j];
+  const unsigned int plane_i = _slipSystem_PlaneID[slipSystemIndex_i];
+  const unsigned int plane_j = _slipSystem_PlaneID[slipSystemIndex_j];
 
   // create check for clarity
-  bool same_slipSystem = slipSystemIndex_i == slipSystemIndex_j;
-  bool same_group = group_i == group_j;
-  bool same_plane = plane_i == plane_j;
+  const bool same_slipSystem = slipSystemIndex_i == slipSystemIndex_j;
+  const bool same_group = group_i == group_j;
+  const bool same_plane = plane_i == plane_j;
 
-  // retireve approprioate coefficient
+  // retrieve appropriate coefficient
+  Real q_ab;
   if (same_slipSystem)
     q_ab = _selfHardening_group_values[group_i];
   else if (same_plane)

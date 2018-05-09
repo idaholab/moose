@@ -23,7 +23,6 @@ InputParameters validParams<CrystalPlasticityStateVarRateComponentVoce>();
  */
 class CrystalPlasticityStateVarRateComponentVoce : public CrystalPlasticityStateVarRateComponent
 {
-
 public:
   CrystalPlasticityStateVarRateComponentVoce(const InputParameters & parameters);
 
@@ -41,7 +40,7 @@ protected:
   /// the variable to switch crystal lattice type (i.e. FCC or BCC)
   MooseEnum _crystal_lattice_type;
 
-  /// the vectors of the input paramters
+  ///@{ the vectors of the input paramters
   std::vector<unsigned int> _groups;
   std::vector<Real> _h0_group_values;
   std::vector<Real> _tau0_group_values;
@@ -50,18 +49,24 @@ protected:
   std::vector<Real> _selfHardening_group_values;
   std::vector<Real> _coplanarHardening_group_values;
   std::vector<Real> _GroupGroup_Hardening_group_values;
+  ///@}
 
   /// the number of slip system groups
-  unsigned int _n_groups;
+  const unsigned int _n_groups;
+
   /// the vector associating a slip system to its slip plane ID
   std::vector<unsigned int> _slipSystem_PlaneID;
   /// the vector associating a slip system to its groud ID
   std::vector<unsigned int> _slipSystem_GroupID;
 
-  /// method associating slip system to their slip plane
-  virtual void initSlipSystem_GroupID(std::vector<unsigned int> & _slipSystem_GroupID) const;
-  /// method associating slip system to their group
-  virtual void initSlipSystem_PlaneID(std::vector<unsigned int> & _slipSystem_PlaneID) const;
+  /// method associating slip system to their group by generating a vector
+  /// containing the association between slip system number and slip plane number
+  virtual void initSlipSystemPlaneID(std::vector<unsigned int> & _slipSystem_PlaneID) const;
+
+  /// method associating slip system to their slip plane by generating a vector
+  /// containing the association between slip system number and provided group edges
+  virtual void initSlipSystemGroupID(std::vector<unsigned int> & _slipSystem_GroupID) const;
+
   /// method retriving the appropiate self/latent hardening coefficient
   virtual Real getHardeningCoefficient(unsigned int slipSystemIndex_i,
                                        unsigned int slipSystemIndex_j) const;
