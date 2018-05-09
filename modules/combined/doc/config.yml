@@ -24,12 +24,14 @@ Renderer:
     repo: https://github.com/idaholab/moose
     home: https://www.mooseframework.org/moose
     navigation: !include modules/combined/doc/navigation.yml
+    google_analytics: True
 
 Extensions:
     appsyntax:
         type: MooseDocs.extensions.appsyntax
         executable: ${MOOSE_DIR}/modules/combined
         hide:
+
             framework: !include framework/doc/hidden.yml
             chemical_reactions: !include modules/chemical_reactions/doc/hidden.yml
             #combined: !include modules/combined/doc/hidden.yml

@@ -187,6 +187,7 @@ class MaterializeRenderer(HTMLRenderer):
         config['home'] = ('/', "The homepage for the website.")
         config['scrollspy'] = (True, "Enable/disable the scrolling table of contents.")
         config['search'] = (True, "Enable/disable the search bar.")
+        config['google_analytics'] = (False, "Enable Google Analytics.")
         return config
 
     def __init__(self, *args, **kwargs):
@@ -229,9 +230,9 @@ class MaterializeRenderer(HTMLRenderer):
 
     def convert(self, root, ast, config):
 
-        html.Tag(root, 'html')
-        head = html.Tag(root, 'head')
-        body = html.Tag(root, 'body')
+        html_root = html.Tag(root, 'html')
+        head = html.Tag(html_root, 'head')
+        body = html.Tag(html_root, 'body')
         wrap = html.Tag(body, 'div', class_='page-wrap')
 
         header = html.Tag(wrap, 'header')
@@ -323,6 +324,11 @@ class MaterializeRenderer(HTMLRenderer):
 
         html.Tag(head, 'script', type="text/javascript", src=rel("js/init.js"))
 
+        # Google Analytics (see https://support.google.com/analytics/answer/1008080)
+        if config.get('google_analytics', False):
+            html.Tag(head, 'script', type="text/javascript",
+                     src=rel('js/google_analytics.js'))
+
     def _addContents(self, config, toc, content, root_page): #pylint: disable=unused-argument,no-self-use
         """
         Add the table of contents right-side bar that used scrollspy.
@@ -351,7 +357,7 @@ class MaterializeRenderer(HTMLRenderer):
         """
         Add the repository link to the navigation bar.
 
-        Inputs:Mo
+        Inputs:
             nav[html.Tag]: The <div> containing the navigation for the page being generated.
             root_page[page.PageNodeBase]: The current page being converted.
         """
@@ -382,6 +388,17 @@ class MaterializeRenderer(HTMLRenderer):
             root_page[page.PageNodeBase]: The current page being converted.
         """
 
+        def add_to_nav(key, value, nav):
+            """Helper for building navigation page links."""
+            if value.startswith('http'):
+                nav[key] = value
+            else:
+                node = root_page.findall(value)
+                if node is None:
+                    msg = 'Failed to locate navigation item: {}.'
+                    raise exceptions.MooseDocsException(msg, value)
+                nav[key] = node[0]
+
         # Do nothing if navigation is not provided
         navigation = config.get('navigation', None)
         if (navigation is None) or (root_page is None):
@@ -391,35 +408,37 @@ class MaterializeRenderer(HTMLRenderer):
         if self.__navigation is None:
             self.__navigation = navigation
             for key1, value1 in navigation.iteritems():
-                for key2, value2 in value1.iteritems():
-                    if value2.startswith('http'):
-                        self.__navigation[key1][key2] = value2
-                    else:
-                        node = root_page.findall(value2)
-                        if node is None:
-                            msg = 'Failed to locate navigation item: {}.'
-                            raise exceptions.MooseDocsException(msg, value2)
-                        self.__navigation[key1][key2] = node[0]
+                if isinstance(value1, dict):
+                    for key2, value2 in value1.iteritems():
+                        add_to_nav(key2, value2, self.__navigation[key1])
+                else:
+                    add_to_nav(key1, value1, self.__navigation)
 
         # Build the links
         top_ul = html.Tag(nav, 'ul', id="nav-mobile", class_="right hide-on-med-and-down")
         for key1, value1 in self.__navigation.iteritems():
-            id_ = uuid.uuid4()
 
-            top_li = html.Tag(top_ul, 'li')
-            a = html.Tag(top_li, 'a', class_="dropdown-button", href="#!", string=unicode(key1))
-            a['data-activates'] = id_
-            a['data-constrainWidth'] = "false"
-            html.Tag(a, "i", class_='material-icons right', string=u'arrow_drop_down')
+            if not isinstance(value1, dict):
+                href = value1.relativeDestination(root_page)
+                top_li = html.Tag(top_ul, 'li')
+                a = html.Tag(top_li, 'a', href=href, string=unicode(key1))
 
-            bot_ul = html.Tag(nav, 'ul', id_=id_, class_='dropdown-content')
-            for key2, node in value1.iteritems():
-                bot_li = html.Tag(bot_ul, 'li')
-                if isinstance(node, str):
-                    a = html.Tag(bot_li, 'a', href=node, string=unicode(key2))
-                else:
-                    href = node.relativeDestination(root_page)
-                    a = html.Tag(bot_li, 'a', href=href, string=unicode(key2))
+            else:
+                id_ = uuid.uuid4()
+                top_li = html.Tag(top_ul, 'li')
+                a = html.Tag(top_li, 'a', class_="dropdown-button", href="#!", string=unicode(key1))
+                a['data-activates'] = id_
+                a['data-constrainWidth'] = "false"
+                html.Tag(a, "i", class_='material-icons right', string=u'arrow_drop_down')
+
+                bot_ul = html.Tag(nav, 'ul', id_=id_, class_='dropdown-content')
+                for key2, node in value1.iteritems():
+                    bot_li = html.Tag(bot_ul, 'li')
+                    if isinstance(node, str):
+                        a = html.Tag(bot_li, 'a', href=node, string=unicode(key2))
+                    else:
+                        href = node.relativeDestination(root_page)
+                        a = html.Tag(bot_li, 'a', href=href, string=unicode(key2))
 
     def _addSearch(self, config, nav, root_page): #pylint: disable=no-self-use
         """

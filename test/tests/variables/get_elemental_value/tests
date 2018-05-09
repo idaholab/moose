@@ -1,0 +1,20 @@
+[Tests]
+  [./current]
+    type = 'CSVDiff'
+    input = 'get_elemental_value.i'
+    csvdiff = 'get_elemental_value_current.csv'
+    cli_args = 'AuxKernels/test_var_aux/time_level=current Outputs/file_base=get_elemental_value_current'
+  [../]
+  [./old]
+    type = 'CSVDiff'
+    input = 'get_elemental_value.i'
+    csvdiff = 'get_elemental_value_old.csv'
+    cli_args = 'AuxKernels/test_var_aux/time_level=old Outputs/file_base=get_elemental_value_old'
+  [../]
+  [./older]
+    type = 'CSVDiff'
+    input = 'get_elemental_value.i'
+    csvdiff = 'get_elemental_value_older.csv'
+    cli_args = 'AuxKernels/test_var_aux/time_level=older Outputs/file_base=get_elemental_value_older'
+  [../]
+[]
