@@ -1,15 +1,15 @@
 # Documenting MOOSE
 
 MOOSE and MOOSE-based applications generally focus on creating C++ objects (e.g., Kernels, BCs,
-etc.), so it is important that these object are documented to allow other developers and users to
+etc.), so it is important that these objects are documented to allow other developers and users to
 understand the purpose of these objects. The [MooseDocs System](MooseDocs/index.md) aims to make
 documenting objects straightforward and natural. Moreover, accessing the object documentation is
 simple and allows for documentation to remain up-to-date as the code continues to advance.
 
-In order to ensure that MOOSE documentation continues to improve requirements exist for
+In order to ensure that MOOSE documentation continues to improve, requirements exist for
 documenting new and changing code within MOOSE:
 
-1. Any new MooseObject must have all parameters and a class description.
+1. Any new MooseObject must have descriptions for the class and all parameters.
 1. Any new MooseObject must also include an associated markdown description page.
 1. Developers who modify existing classes should update the existing markdown documentation file.
 1. All new tests must contain a 'requirement' and link to 'design' and 'issues'.
@@ -33,11 +33,11 @@ The string supplied in this function will appear in the parameter tables within 
 that is generated.  For example, see the parameter table for [/BoxMarker.md].
 
 Secondly, a short description of the class should be supplied in the `addClassDescription`
-function. For example, in the [Diffusion](/Diffusion.md) object the following class description.
+function. For example, the [Diffusion](/Diffusion.md) object has the following class description:
 
 !listing framework/src/kernels/Diffusion.C line=addClassDescription
 
-When the documentation for this object is generated this string is added to the first portion of the
+When the documentation for this object is generated, this string is added to the first portion of the
 page and the system overview table. For example, the [Kernels overview](systems/Kernels/index.md)
 includes a table with each object listed; the table includes the class description from the source
 code.
@@ -53,16 +53,16 @@ The documentation for the classes within MOOSE and the modules are located withi
 directory where the class is registered: "framework/doc" contains all core MOOSE level objects,
 "modules/tensor_mechanics/doc" contains object for the tensor mechanics modules, etc.
 
-When adding documentation the MOOSE modules executable must exist, this is accomplished by using the
-following commands.
+When adding documentation, the MOOSE modules executable must exist; this is accomplished by using the
+following commands:
 
 ```bash
 cd ~/projects/moose/modules
 make -j16 # 16 should be replaced by the number of cores on your system
 ```
 
-If you are writing a documentation for a new class with MOOSE or the modules, you can use the
-MooseDocs executable to build a documentation stub for your new class.
+If you are writing a documentation page for a new class with MOOSE or the modules, you can use the
+MooseDocs executable to build a documentation stub for your new class:
 
 ```bash
 cd ~/projects/moose/modules/doc
@@ -72,31 +72,31 @@ cd ~/projects/moose/modules/doc
 This generate command needs to be run only when you add a new object (e.g., Kernel,
 BoundaryCondition, etc.) to your application.
 
-After the stub files have been created the a local, live version of the website should
+After the stub files have been created, a local, live version of the website should
 be used to add content (see the [Live Website](#live-website) section below).
 
 ## Live Website
 
-A local website can be created and served, this is done by running the following commands.  When
+A local website can be created and served; this is done by running the following commands.  When
 this command completes, which can take several minutes, a message will be printed and the site will
-be hosted at [http://127.0.0.1:8000](http://127.0.0.1:8000).
+be hosted at [http://127.0.0.1:8000](http://127.0.0.1:8000):
 
 ```bash
 cd ~/projects/moose/modules/doc
 ./moosedocs.py build --serve
 ```
 
-Once the server is running the markdown files within the repository may be modified, when the
-changes are saved the local server will automatically update the content.
+Once the server is running, the markdown files within the repository may be modified. When
+changes are saved, the local server will automatically update the content.
 The content added or modified should follow the
 [Standards for Documentation Pages](MooseDocs/standards.md) guidelines.
 
 ## Requirement, Design, and Issues
 
-MOOSE follows strict software quality standards, to meet these standards every test within MOOSE
+MOOSE follows strict software quality standards. To meet these standards, every test within MOOSE
 must provide three items with each test of the test specification.
 
-1. +requirement+: A sort description that explains what the "requirement" that the test is
+1. +requirement+: A description of the "requirement" that the test is
    testing. The text for the requirement must be listed in the test specification file ("tests" file).
 
 1. +design+: A list of markdown files associated with the test that explain the systems, objects,
@@ -104,3 +104,20 @@ must provide three items with each test of the test specification.
 
 1. +issues+: A list of [github issues](https://github.com/idaholab/moose/issues/) that are
    associated with the test and items being tested.
+
+These items are provided in the associated "tests" file. For example,
+
+```
+[Tests]
+  [./my_test]
+    type = 'CSVDiff'
+    input = 'my_test.i'
+    csvdiff = 'my_test.csv'
+
+    requirement = "MyObject shall do some kind of thing. Maybe this description has "
+                  "multiple lines."
+    design = 'MyObject.md some_relevant_file.md'
+    issues = '#1234 #1235 #1236'
+  [../]
+[]
+```
