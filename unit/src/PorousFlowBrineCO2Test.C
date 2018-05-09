@@ -1053,8 +1053,8 @@ TEST_F(PorousFlowBrineCO2Test, equilibriumMoleFractions)
   T = 373.15;
 
   _fp->equilibriumMoleFractions(p, T, xco2, yh2o);
-  ABS_TEST("yh2o", yh2o, 0.0192345278072, 1.0e-8);
-  ABS_TEST("xco2", xco2, 0.020193674787, 1.0e-8);
+  ABS_TEST("yh2o", yh2o, 0.0194612375638, 1.0e-8);
+  ABS_TEST("xco2", xco2, 0.0201950595216, 1.0e-8);
 
   // High temperature regime
   p = 30.0e6;

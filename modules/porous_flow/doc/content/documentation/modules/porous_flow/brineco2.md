@@ -17,7 +17,14 @@ for temperatures below 100$^{\circ}$C, and the elevated temperature formulation 
 [citet:spycher2010] for temperatures above 110$^{\circ}$C.
 
 As these formulations do not coincide for temperatures near 100$^{\circ}$C, a cubic
-polynomial is used to join the two curves smoothly.
+polynomial is used to join the two curves smoothly, see [soltemp] for an example:
+
+!media media/porous_flow/solubility_temperature.png
+       id=soltemp
+       style=width:60%;margin-left:10px;
+       caption=Dissolved CO$_2$ mass fraction in brine versus temperature showing the low
+       and high temperature formulations joined smoothly by a cubic polynomial. Results for
+       pressure of 10 MPa and salt mass fraction of 0.01
 
 !alert note
 The mutual solubilities in the elevated temperature regime must be calculated iteratively,

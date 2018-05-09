@@ -1413,10 +1413,12 @@ PorousFlowBrineCO2::smoothCubicInterpolation(
     Real temperature, Real f0, Real df0, Real f1, Real df1, Real & value, Real & deriv) const
 {
   // Coefficients of cubic polynomial
+  const Real dT = _Tupper - _Tlower;
+
   const Real a = f0;
-  const Real b = df0;
-  const Real c = 3.0 * f1 - 3.0 * f0 - 2.0 * df0 - df1;
-  const Real d = 2.0 * f0 - 2.0 * f1 + df0 + df1;
+  const Real b = df0 * dT;
+  const Real c = 3.0 * (f1 - f0) - (2.0 * df0 + df1) * dT;
+  const Real d = 2.0 * (f0 - f1) + (df0 + df1) * dT;
 
   const Real t2 = temperature * temperature;
   const Real t3 = temperature * t2;
