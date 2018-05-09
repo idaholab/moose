@@ -57,45 +57,45 @@ public:
    * gas and liquid phases exist.
    *
    * @param vf vapor fraction
-   * @param zi mass fractions
+   * @param Zi mass fractions
    * @param Ki equilibrium constants
    * @return f(x)
    */
-  Real rachfordRice(Real vf, std::vector<Real> & zi, std::vector<Real> & Ki) const;
+  Real rachfordRice(Real vf, std::vector<Real> & Zi, std::vector<Real> & Ki) const;
 
   /**
    * Derivative of Rachford-Rice equation wrt vapor fraction.
    * Has the nice property that it is strictly negative in the interval [0,1]
    *
    * @param vf vapor fraction
-   * @param zi mass fractions
+   * @param Zi mass fractions
    * @param Ki equilibrium constants
    * @return f'(x)
    */
-  Real rachfordRiceDeriv(Real vf, std::vector<Real> & zi, std::vector<Real> & Ki) const;
+  Real rachfordRiceDeriv(Real vf, std::vector<Real> & Zi, std::vector<Real> & Ki) const;
 
   /**
    * Solves Rachford-Rice equation to provide vapor mass fraction. For two components,
    * the analytical solution is used, while for cases with more than two components,
    * a Newton-Raphson iterative solution is calculated.
    *
-   * @param zi total mass fraction(s)
+   * @param Zi total mass fraction(s)
    * @param Ki equilibrium constant(s)
    * @return vapor mass fraction
    */
-  Real vaporMassFraction(Real z0, Real K0, Real K1) const;
-  Real vaporMassFraction(std::vector<Real> & zi, std::vector<Real> & Ki) const;
+  Real vaporMassFraction(Real Z0, Real K0, Real K1) const;
+  Real vaporMassFraction(std::vector<Real> & Zi, std::vector<Real> & Ki) const;
 
 protected:
   /**
    * Determines the phase state gven the total mass fraction and equilibrium mass fractions
    *
-   * @param zi total mass fraction
+   * @param Zi total mass fraction
    * @param Xi equilibrium mass fraction in liquid
    * @param Yi equilibrium mass fraction in gas
    * @param[out] phase_state the phase state (gas, liquid, two phase)
    */
-  void phaseState(Real zi, Real Xi, Real Yi, FluidStatePhaseEnum & phase_state) const;
+  void phaseState(Real Zi, Real Xi, Real Yi, FluidStatePhaseEnum & phase_state) const;
 
   /// Maximum number of iterations for the Newton-Raphson routine
   const Real _nr_max_its;

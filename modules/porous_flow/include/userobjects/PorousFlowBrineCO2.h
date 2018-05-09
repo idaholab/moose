@@ -39,6 +39,14 @@ InputParameters validParams<PorousFlowBrineCO2>();
  * As the two formulations do not coincide at temperatures near 100C, a cubic
  * polynomial is used in the intermediate temperature range 99C < T < 109C to
  * provide a smooth transition from the two formulations in this region.
+ *
+ * Notation convention
+ * Throughout this class, both mole fractions and mass fractions will be used.
+ * The following notation will be used:
+ * yk: mole fraction of component k in the gas phase
+ * xk: mole fraction of component k in the liquid phase
+ * Yk: mass fraction of component k in the gas phase
+ * Xk: mass fraction of component k in the liquid phase
  */
 class PorousFlowBrineCO2 : public PorousFlowFluidStateBase
 {
@@ -51,15 +59,25 @@ public:
    */
   virtual std::string fluidStateName() const;
 
+  /**
+   * Determines the complete thermophysical state of the system for a given set outf
+   * primary variables
+   *
+   * @param pressure gas phase pressure (Pa)
+   * @param temperature fluid temperature (K)
+   * @param Xnacl mass fraction of NaCl
+   * @param Z total mass fraction of CO2 component
+   * @param[out] fsp the FluidStateProperties struct containing all properties
+   */
   void thermophysicalProperties(Real pressure,
                                 Real temperature,
-                                Real xnacl,
+                                Real Xnacl,
                                 Real z,
                                 std::vector<FluidStateProperties> & fsp) const;
 
   /**
    * Mole fractions of CO2 in water and water vapor in CO2 at equilibrium.
-   * Note: This returns the values of xCO2 in water (no salt). This function used in
+   * Note: This returns the values of xco2 in water (no salt). This function used in
    * equilibriumMassFractions()
    *
    * In the low temperature regime (T <= 99C), the mole fractions are calculated directly,
@@ -79,27 +97,27 @@ public:
    *
    * @param pressure phase pressure (Pa)
    * @param temperature phase temperature (K)
-   * @param xnacl NaCl mass fraction (kg/kg)
-   * @param[out] xco2 mass fraction of CO2 in liquid (kg/kg)
-   * @param[out] dxco2_dp derivative of mass fraction of CO2 in liquid wrt pressure
-   * @param[out] dxco2_dT derivative of mass fraction of CO2 in liqiud wrt temperature
-   * @param[out] dxco2_dx derivative of mass fraction of CO2 in liqiud wrt salt mass fraction
-   * @param[out] yh2o mass fraction of H2O in gas (kg/kg)
-   * @param[out] dyh2og_dp derivative of mass fraction of H2O in gas wrt pressure
-   * @param[out] dyh2o_dT derivative of mass fraction of H2O in gas wrt temperature
-   * @param[out] dyh2o_dx derivative of mass fraction of H2O in gas wrt salt mass fraction
+   * @param Xnacl NaCl mass fraction (kg/kg)
+   * @param[out] Xco2 mass fraction of CO2 in liquid (kg/kg)
+   * @param[out] dXco2_dp derivative of mass fraction of CO2 in liquid wrt pressure
+   * @param[out] dXco2_dT derivative of mass fraction of CO2 in liqiud wrt temperature
+   * @param[out] dXco2_dX derivative of mass fraction of CO2 in liqiud wrt salt mass fraction
+   * @param[out] Yh2o mass fraction of H2O in gas (kg/kg)
+   * @param[out] dYh2og_dp derivative of mass fraction of H2O in gas wrt pressure
+   * @param[out] dYh2o_dT derivative of mass fraction of H2O in gas wrt temperature
+   * @param[out] dYh2o_dX derivative of mass fraction of H2O in gas wrt salt mass fraction
    */
   void equilibriumMassFractions(Real pressure,
                                 Real temperature,
-                                Real xnacl,
-                                Real & xco2,
-                                Real & dxco2_dp,
-                                Real & dxco2_dT,
-                                Real & dxco2_dx,
-                                Real & yh2o,
-                                Real & dyh2o_dp,
-                                Real & dyh2o_dT,
-                                Real & dyh2o_dx) const;
+                                Real Xnacl,
+                                Real & Xco2,
+                                Real & dXco2_dp,
+                                Real & dXco2_dT,
+                                Real & dXco2_dX,
+                                Real & Yh2o,
+                                Real & dYh2o_dp,
+                                Real & dYh2o_dT,
+                                Real & dYh2o_dX) const;
 
   /**
    * Mass fractions of CO2 and H2O in both phases, as well as derivatives wrt
@@ -107,15 +125,15 @@ public:
    *
    * @param pressure phase pressure (Pa)
    * @param temperature phase temperature (K)
-   * @param xnacl NaCl mass fraction (kg/kg)
-   * @param z total mass fraction of CO2 component
+   * @param Xnacl NaCl mass fraction (kg/kg)
+   * @param Z total mass fraction of CO2 component
    * @param[out] PhaseStateEnum current phase state
    * @param[out] FluidStateMassFractions data structure
    */
   void massFractions(Real pressure,
                      Real temperature,
-                     Real xnacl,
-                     Real z,
+                     Real Xnacl,
+                     Real Z,
                      FluidStatePhaseEnum & phase_state,
                      std::vector<FluidStateProperties> & fsp) const;
 
@@ -124,7 +142,6 @@ public:
    *
    * @param pressure gas pressure (Pa)
    * @param temperature temperature (K)
-   * @param xnacl NaCl mass fraction (kg/kg)
    * @param[out] FluidStateDensity data structure
    */
   void
@@ -135,12 +152,12 @@ public:
    *
    * @param pressure liquid pressure (Pa)
    * @param temperature temperature (K)
-   * @param xnacl NaCl mass fraction (kg/kg)
+   * @param Xnacl NaCl mass fraction (kg/kg)
    * @param[out] FluidStateDensity data structure
    */
   void liquidProperties(Real pressure,
                         Real temperature,
-                        Real xnacl,
+                        Real Xnacl,
                         std::vector<FluidStateProperties> & fsp) const;
 
   /**
@@ -148,14 +165,14 @@ public:
    *
    * @param pressure gas pressure (Pa)
    * @param temperature phase temperature (K)
-   * @param xnacl NaCl mass fraction (kg/kg)
-   * @param z total mass fraction of CO2 component
+   * @param Xnacl NaCl mass fraction (kg/kg)
+   * @param Z total mass fraction of CO2 component
    * @param[out] FluidStateSaturation data structure
    */
   void saturationTwoPhase(Real pressure,
                           Real temperature,
-                          Real xnacl,
-                          Real z,
+                          Real Xnacl,
+                          Real Z,
                           std::vector<FluidStateProperties> & fsp) const;
 
   /**
@@ -286,19 +303,19 @@ public:
    *
    * @param pressure phase pressure (Pa)
    * @param temperature phase temperature (K)
-   * @param xnacl salt mass fraction (kg/kg)
+   * @param Xnacl salt mass fraction (kg/kg)
    * @param[out] gamma activity coefficient for CO2 in brine (output)
    * @param[out] dgamma_dp derivative of activity coefficient wrt pressure
    * @param[out] dgamma_dT derivative of activity coefficient wrt temperature
-   * @param[out] dgamma_dx derivative of activity coefficient wrt salt mass fraction
+   * @param[out] dgamma_dX derivative of activity coefficient wrt salt mass fraction
    */
   void activityCoefficient(Real pressure,
                            Real temperature,
-                           Real xnacl,
+                           Real Xnacl,
                            Real & gamma,
                            Real & dgamma_dp,
                            Real & dgamma_dT,
-                           Real & dgamma_dx) const;
+                           Real & dgamma_dX) const;
 
   /**
    * Equilibrium constant for H2O
@@ -342,11 +359,11 @@ public:
    *
    * @param pressure gas pressure (Pa)
    * @param temperature temperature (K)
-   * @param xnacl NaCl mass fraction (kg/kg)
+   * @param Xnacl NaCl mass fraction (kg/kg)
    * @param saturation gas saturation (-)
-   * @return total mass fraction z (-)
+   * @return total mass fraction Z (-)
    */
-  Real totalMassFraction(Real pressure, Real temperature, Real xnacl, Real saturation) const;
+  Real totalMassFraction(Real pressure, Real temperature, Real Xnacl, Real saturation) const;
 
   /**
    * The index of the salt component
@@ -360,12 +377,12 @@ public:
    * with non-condensible gas, Proc. Eighteenth Workshop on Geothermal Reservoir Engineering (1993)
    *
    * @param temperature fluid temperature (K)
-   * @param xnacl NaCl mass fraction (kg/kg)
+   * @param Xnacl NaCl mass fraction (kg/kg)
    * @param[out] Kh Henry's constant (Pa)
    * @param[out] dKh_dT derivative of Henry's constant wrt temperature
    * @param[out] dKh_dx derivative of Henry's constant wrt salt mass fraction
    */
-  void henryConstant(Real temperature, Real xnacl, Real & Kh, Real & dKh_dT, Real & dKh_dx) const;
+  void henryConstant(Real temperature, Real Xnacl, Real & Kh, Real & dKh_dT, Real & dKh_dx) const;
 
   /**
    * Enthalpy of dissolution of gas phase CO2 in brine calculated using Henry's constant
@@ -376,13 +393,13 @@ public:
    * on Geothermal Reservoir Engineering (1993).
    *
    * @param temperature fluid temperature (K)
-   * @param xnacl NaCl mass fraction (kg/kg)
+   * @param Xnacl NaCl mass fraction (kg/kg)
    * @param[out] hdis enthalpy of dissolution (J/kg)
    * @param[out] dhdis_dT derivative of enthalpy of dissolution wrt temperature
    * @param[out] dhdis_dx derivative of enthalpy of dissolution wrt salt mass fraction
    */
   void enthalpyOfDissolutionGas(
-      Real temperature, Real xnacl, Real & hdis, Real & dhdis_dT, Real & dhdis_dx) const;
+      Real temperature, Real Xnacl, Real & hdis, Real & dhdis_dT, Real & dhdis_dx) const;
 
   /**
    * Enthalpy of dissolution of CO2 in brine calculated using linear fit to model of
@@ -401,7 +418,7 @@ public:
   void enthalpyOfDissolution(Real temperature, Real & hdis, Real & dhdis_dT) const;
 
   /**
-   * Function to solve for yH2O and xCO2 iteratively in the elevated temperature regime (T > 100C)
+   * Function to solve for yh2o and xco2 iteratively in the elevated temperature regime (T > 100C)
    *
    * @param pressure gas pressure (Pa)
    * @param temperature fluid temperature (K)
