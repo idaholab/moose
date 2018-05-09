@@ -37,6 +37,9 @@ validParams<GridPartitioner>()
   params.suppressParameter<Real>("zmax");
   params.suppressParameter<MooseEnum>("dim");
 
+  params.set<MooseEnum>("parallel_type") = "REPLICATED";
+  params.set<MooseEnum>("partitioner") = "LINEAR";
+
   params.addClassDescription("Create a uniform grid that overlays the mesh to be partitioned.  "
                              "Assign all elements within each cell of the grid to the same "
                              "processor.");
