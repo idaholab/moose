@@ -1,7 +1,7 @@
 #ifndef PEC_H
 #define PEC_H
 
-#include "NodalNormalBC.h"
+#include "IntegratedBC.h"
 
 class PEC;
 
@@ -11,7 +11,7 @@ InputParameters validParams<PEC>();
 /**
  *
  */
-class PEC : public NodalNormalBC
+class PEC : public IntegratedBC
 {
 public:
   PEC(const InputParameters & parameters);
@@ -24,6 +24,8 @@ protected:
   const VariableValue & _coupled_val_2;
 
   int _component;
+
+  Real _penalty;
 };
 
 #endif // PEC_H
