@@ -4,7 +4,7 @@
 
 ## Description
 
-This model computes the eigenstrain tensor resulting from isotropic thermal expansion where the constant thermal expansion is defined by a user-supplied scalar coefficient, $\alpha$.
+This model computes the eigenstrain tensor resulting from isotropic thermal expansion where the constant thermal expansion is defined by a user-supplied scalar linear thermal-expansion coefficient, $\alpha$.
 The thermal expansion eigenstrain is then computed as
 \begin{equation}
 \boldsymbol{\epsilon}^{thermal} = \alpha \cdot \left( T - T_{stress\_free} \right) \mathbf{I}
