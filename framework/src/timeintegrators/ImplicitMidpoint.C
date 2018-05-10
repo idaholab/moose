@@ -50,12 +50,18 @@ ImplicitMidpoint::solve()
   Real time_old = _fe_problem.timeOld();
   Real time_half = (time_new + time_old) / 2.;
 
+  // Reset iteration counts
+  _n_nonlinear_iterations = 0;
+  _n_linear_iterations = 0;
+
   // Compute first stage
   _fe_problem.initPetscOutput();
   _console << "1st stage\n";
   _stage = 1;
   _fe_problem.time() = time_half;
   _fe_problem.getNonlinearSystemBase().system().solve();
+  _n_nonlinear_iterations += getNumNonlinearIterationsLastSolve();
+  _n_linear_iterations += getNumLinearIterationsLastSolve();
 
   // Compute second stage
   _fe_problem.initPetscOutput();
@@ -63,6 +69,8 @@ ImplicitMidpoint::solve()
   _stage = 2;
   _fe_problem.time() = time_new;
   _fe_problem.getNonlinearSystemBase().system().solve();
+  _n_nonlinear_iterations += getNumNonlinearIterationsLastSolve();
+  _n_linear_iterations += getNumLinearIterationsLastSolve();
 }
 
 void

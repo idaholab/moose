@@ -127,6 +127,9 @@ ComputeFiniteStrain::computeQpStrain()
       _rotation_increment[_qp] * _mechanical_strain[_qp] * _rotation_increment[_qp].transpose();
   _total_strain[_qp] =
       _rotation_increment[_qp] * _total_strain[_qp] * _rotation_increment[_qp].transpose();
+
+  if (_global_strain)
+    _total_strain[_qp] += (*_global_strain)[_qp];
 }
 
 void

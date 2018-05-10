@@ -63,6 +63,10 @@ LStableDirk4::solve()
   // Time at end of step
   Real time_old = _fe_problem.timeOld();
 
+  // Reset iteration counts
+  _n_nonlinear_iterations = 0;
+  _n_linear_iterations = 0;
+
   // A for-loop would increment _stage too far, so we use an extra
   // loop counter.
   for (unsigned int current_stage = 1; current_stage <= _n_stages; ++current_stage)
@@ -82,6 +86,10 @@ LStableDirk4::solve()
 
     // Do the solve
     _fe_problem.getNonlinearSystemBase().system().solve();
+
+    // Update the iteration counts
+    _n_nonlinear_iterations += getNumNonlinearIterationsLastSolve();
+    _n_linear_iterations += getNumLinearIterationsLastSolve();
   }
 }
 

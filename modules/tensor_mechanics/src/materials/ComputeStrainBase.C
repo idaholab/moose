@@ -27,6 +27,9 @@ validParams<ComputeStrainBase>()
       "volumetric_locking_correction", false, "Flag to correct volumetric locking");
   params.addParam<std::vector<MaterialPropertyName>>(
       "eigenstrain_names", "List of eigenstrains to be applied in this strain calculation");
+  params.addParam<MaterialPropertyName>("global_strain",
+                                        "Optional material property holding a global strain "
+                                        "tensor applied to the mesh as a whole");
   params.suppressParameter<bool>("use_displaced_mesh");
   return params;
 }
@@ -41,6 +44,9 @@ ComputeStrainBase::ComputeStrainBase(const InputParameters & parameters)
     _total_strain(declareProperty<RankTwoTensor>(_base_name + "total_strain")),
     _eigenstrain_names(getParam<std::vector<MaterialPropertyName>>("eigenstrain_names")),
     _eigenstrains(_eigenstrain_names.size()),
+    _global_strain(isParamValid("global_strain")
+                       ? &getMaterialProperty<RankTwoTensor>(_base_name + "global_strain")
+                       : NULL),
     _volumetric_locking_correction(getParam<bool>("volumetric_locking_correction")),
     _current_elem_volume(_assembly.elemVolume())
 {

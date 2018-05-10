@@ -56,12 +56,18 @@ LStableDirk2::solve()
   // Time at stage 1
   Real time_stage1 = time_old + _alpha * _dt;
 
+  // Reset iteration counts
+  _n_nonlinear_iterations = 0;
+  _n_linear_iterations = 0;
+
   // Compute first stage
   _fe_problem.initPetscOutput();
   _console << "1st stage\n";
   _stage = 1;
   _fe_problem.time() = time_stage1;
   _fe_problem.getNonlinearSystemBase().system().solve();
+  _n_nonlinear_iterations += getNumNonlinearIterationsLastSolve();
+  _n_linear_iterations += getNumLinearIterationsLastSolve();
 
   // Compute second stage
   _fe_problem.initPetscOutput();
@@ -70,6 +76,8 @@ LStableDirk2::solve()
   _fe_problem.timeOld() = time_stage1;
   _fe_problem.time() = time_new;
   _fe_problem.getNonlinearSystemBase().system().solve();
+  _n_nonlinear_iterations += getNumNonlinearIterationsLastSolve();
+  _n_linear_iterations += getNumLinearIterationsLastSolve();
 
   // Reset time at beginning of step to its original value
   _fe_problem.timeOld() = time_old;

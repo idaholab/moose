@@ -183,16 +183,22 @@ NonlinearSystem::solve()
   {
     _time_integrator->solve();
     _time_integrator->postSolve();
+    _n_iters = _time_integrator->getNumNonlinearIterations();
+    _n_linear_iters = _time_integrator->getNumLinearIterations();
   }
   else
+  {
     system().solve();
+    _n_iters = _transient_sys.n_nonlinear_iterations();
+#ifdef LIBMESH_HAVE_PETSC
+    _n_linear_iters = solver.get_total_linear_iterations();
+#endif
+  }
 
   // store info about the solve
-  _n_iters = _transient_sys.n_nonlinear_iterations();
   _final_residual = _transient_sys.final_nonlinear_residual();
 
 #ifdef LIBMESH_HAVE_PETSC
-  _n_linear_iters = solver.get_total_linear_iterations();
   if (_use_coloring_finite_difference)
 #if PETSC_VERSION_LESS_THAN(3, 2, 0)
     MatFDColoringDestroy(_fdcoloring);

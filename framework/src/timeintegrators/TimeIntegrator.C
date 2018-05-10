@@ -7,6 +7,9 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
+#include "libmesh/nonlinear_implicit_system.h"
+#include "libmesh/petsc_nonlinear_solver.h"
+
 #include "TimeIntegrator.h"
 #include "FEProblem.h"
 #include "SystemBase.h"
@@ -27,6 +30,7 @@ TimeIntegrator::TimeIntegrator(const InputParameters & parameters)
     _fe_problem(*getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")),
     _sys(*getCheckedPointerParam<SystemBase *>("_sys")),
     _nl(_fe_problem.getNonlinearSystemBase()),
+    _nonlinear_implicit_system(dynamic_cast<const NonlinearImplicitSystem *>(&_sys.system())),
     _u_dot(_sys.solutionUDot()),
     _du_dot_du(_sys.duDotDu()),
     _solution(_sys.currentSolution()),
@@ -36,7 +40,9 @@ TimeIntegrator::TimeIntegrator(const InputParameters & parameters)
     _dt(_fe_problem.dt()),
     _dt_old(_fe_problem.dtOld()),
     _Re_time(_nl.getResidualTimeVector()),
-    _Re_non_time(_nl.getResidualNonTimeVector())
+    _Re_non_time(_nl.getResidualNonTimeVector()),
+    _n_nonlinear_iterations(0),
+    _n_linear_iterations(0)
 {
 }
 
@@ -44,4 +50,22 @@ void
 TimeIntegrator::solve()
 {
   _nl.system().solve();
+
+  _n_nonlinear_iterations = getNumNonlinearIterationsLastSolve();
+  _n_linear_iterations = getNumLinearIterationsLastSolve();
+}
+
+unsigned int
+TimeIntegrator::getNumNonlinearIterationsLastSolve() const
+{
+  return _nonlinear_implicit_system->n_nonlinear_iterations();
+}
+
+unsigned int
+TimeIntegrator::getNumLinearIterationsLastSolve() const
+{
+  NonlinearSolver<Real> & nonlinear_solver =
+      static_cast<NonlinearSolver<Real> &>(*_nonlinear_implicit_system->nonlinear_solver);
+
+  return nonlinear_solver.get_total_linear_iterations();
 }

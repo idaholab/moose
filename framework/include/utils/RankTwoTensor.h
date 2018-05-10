@@ -128,6 +128,12 @@ public:
    */
   void fillFromInputVector(const std::vector<Real> & input, FillMethod fill_method = autodetect);
 
+  /**
+   * fillFromScalarVariable takes FIRST/THIRD/SIXTH order scalar variable to fill in the Rank-2
+   * tensor.
+   */
+  void fillFromScalarVariable(const VariableValue & scalar_variable);
+
 public:
   /// returns _coords[i][c], ie, column c, with c = 0, 1, 2
   TypeVector<Real> column(const unsigned int c) const;

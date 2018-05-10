@@ -70,6 +70,10 @@ ExplicitTVDRK2::solve()
   Real time_old = _fe_problem.timeOld();
   Real time_stage2 = time_old + _dt;
 
+  // Reset numbers of iterations
+  _n_nonlinear_iterations = 0;
+  _n_linear_iterations = 0;
+
   // There is no work to do for the first stage (Y_1 = y_n).  The
   // first solve therefore happens in the second stage.  Note that the
   // non-time Kernels (which should be marked implicit=false) are
@@ -80,6 +84,8 @@ ExplicitTVDRK2::solve()
   _fe_problem.timeOld() = time_old;
   _fe_problem.time() = time_stage2;
   _fe_problem.getNonlinearSystemBase().system().solve();
+  _n_nonlinear_iterations += getNumNonlinearIterationsLastSolve();
+  _n_linear_iterations += getNumLinearIterationsLastSolve();
 
   // Advance solutions old->older, current->old.  Also moves Material
   // properties and other associated state forward in time.
@@ -93,6 +99,8 @@ ExplicitTVDRK2::solve()
   _fe_problem.timeOld() = time_stage2;
   _fe_problem.time() = time_new;
   _fe_problem.getNonlinearSystemBase().system().solve();
+  _n_nonlinear_iterations += getNumNonlinearIterationsLastSolve();
+  _n_linear_iterations += getNumLinearIterationsLastSolve();
 
   // Reset time at beginning of step to its original value
   _fe_problem.timeOld() = time_old;

@@ -103,7 +103,7 @@ private:
   /// used to avoid creating multiple copies. All access to the objects are done via
   /// pointers. The ControllableItem objects are not designed and will not be used directly in
   /// user code. All user level access goes through the ControllableParameter object.
-  std::vector<std::vector<std::unique_ptr<ControllableItem>>> _controllable_items;
+  std::vector<std::vector<std::shared_ptr<ControllableItem>>> _controllable_items;
 
   /**
    * Method for adding a new InputParameters object
