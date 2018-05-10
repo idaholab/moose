@@ -8,13 +8,10 @@
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 import os
-import re
 import logging
 import copy
 
 import anytree
-
-import mooseutils
 
 import MooseDocs
 from MooseDocs import common
@@ -46,9 +43,6 @@ class SyntaxNodeBase(NodeBase):
         out = copy.copy(self._groups)
         for node in self.descendants:
             out.update(node.groups)
-        if 'Moose' in out:
-            out.remove('Moose')
-            out.add('MOOSE')
         return out
 
     @property
@@ -102,7 +96,7 @@ class SyntaxNodeBase(NodeBase):
         """
         return self.__nodeFinder(ActionNode, *args, **kwargs)
 
-    def check(self, generate=False, groups=None, update=None, locations=None):
+    def check(self, generate=False, group=None, update=None, root=None):
         """
         Check that the expected documentation exists.
 
@@ -118,91 +112,60 @@ class SyntaxNodeBase(NodeBase):
             LOG.debug("Skipping documentation check for %s, it is REMOVED.", self.fullpath)
             return
 
-        groups = groups if groups is not None else self.groups
-        for group in groups:
+        if self.hidden:
+            return
 
-            # Skip if the node is not in the desired groups
-            if group not in self.groups:
-                continue
+        # Search for nodes within the page tree
+        nodes = root.findall(os.path.join('systems', self.markdown()), exc=None)
 
-            # Locate all the possible locations for the markdown
-            filenames = set()
-            for location in locations:
-                install = mooseutils.eval_path(os.path.join(location, 'documentation', 'systems'))
-                if not os.path.isabs(install):
-                    filename = os.path.join(MooseDocs.ROOT_DIR, install, self.markdown())
-                else:
-                    filename = os.path.join(install, self.markdown())
-                filenames.add((filename, os.path.isfile(filename)))
+        # No markdown pages exist
+        if not nodes:
 
-            # Determine the number of files that exist
-            count = sum([x[1] for x in filenames])
+            # Desired filename
+            filename = os.path.join(os.getcwd(), 'content', 'documentation', 'systems',
+                                    self.markdown())
 
-            # Class description
-            if isinstance(self, ObjectNode) and not self.description and not self.hidden:
-                msg = "The class description is missing for %s, it can be added using the " \
-                      "'addClassDescription' method from within the objects validParams function."
-                LOG.error(msg, self.fullpath)
+            if generate and (group not in self.groups):
+                msg = "The %s object is not associated with the %s, it is associated with %s. "\
+                      "It is not possible to generate stub pages for this object."
+                LOG.error(msg, self.fullpath, group, ' '.join(self.groups))
 
-            # Error if multiple files exist
-            if count > 1 and not self.hidden:
-                msg = "Multiple markdown files were located for the '{}' syntax:". \
-                      format(self.fullpath)
-                for filename, exists in filenames:
-                    if exists:
-                        msg += '\n  {}'.format(filename)
-                LOG.error(msg)
+            elif generate:
+                if not os.path.exists(os.path.dirname(filename)):
+                    os.makedirs(os.path.dirname(filename))
+                LOG.info('Creating stub page for %s %s', self.fullpath, filename)
+                with open(filename, 'w') as fid:
+                    content = self._defaultContent()
+                    fid.write(content)
 
-            # Error if no files exist
-            elif count == 0:
-                if not self.hidden:
-                    msg = "No documentation for %s, documentation for this object should be " \
-                          "created in one of the following locations:"
-                    for filename, _ in filenames:
-                        msg += '\n  {}'.format(filename)
-                    msg += "\nIt is possible to generate stub pages for your documentation " \
-                           "using the './moosedocs.py check --generate' command."
+            elif group in self.groups:
+                msg = "No documentation for %s.\n"
+                msg += "The page should be located at %s\n"
+                msg += "It is possible to generate stub pages for your documentation " \
+                       "using the './moosedocs.py check --generate' command."
+                LOG.error(msg, self.fullpath, filename)
 
-                    LOG.error(msg, self.fullpath)
+            else:
+                msg = "No documentation for %s.\n"
+                msg += "The page should be created within one of the following apps: %s"
+                LOG.error(msg, self.fullpath, ','.join(self.groups))
 
-                if generate:
-                    if not os.path.exists(os.path.dirname(filename)):
-                        os.makedirs(os.path.dirname(filename))
-                    LOG.info('Creating stub page for %s %s', self.fullpath, filename)
+        # Examine existing page
+        else:
+            filename = nodes[0].source
+            with open(filename, 'r') as fid:
+                lines = fid.readlines()
+
+            if lines and self.STUB_HEADER in lines[0]:
+                if update:
+                    LOG.info("Updating stub page for %s in file %s.", self.fullpath, filename)
                     with open(filename, 'w') as fid:
                         content = self._defaultContent()
-                        if not isinstance(content, str):
-                            raise TypeError("The _defaultContent method must return a str.")
                         fid.write(content)
-            else:
-                for name, exists in filenames:
-                    if exists:
-                        filename = name
-
-                with open(filename, 'r') as fid:
-                    lines = fid.readlines()
-
-                if lines and self.STUB_HEADER in lines[0]:
-                    if not self.hidden:
-                        msg = "A MOOSE generated stub page for %s exists, but no content was " \
-                              "added. Add documentation content to %s."
-                        LOG.error(msg, self.fullpath, filename)
-
-                    if update:
-                        LOG.info("Updating stub page for %s in file %s.", self.fullpath, filename)
-                        with open(filename, 'w') as fid:
-                            content = self._defaultContent()
-                            if not isinstance(content, str):
-                                raise TypeError("The _defaultContent method must return a str.")
-                            fid.write(content)
-
-
-                elif self.hidden and isinstance(self, ObjectNode) and self.description:
-                    msg = "The MOOSE syntax %s is listed has hidden; however, a modified page " \
-                          "exists for the object, please remove the syntax from the list of " \
-                          "hidden list."
-                    LOG.error(msg, self.fullpath)
-
+                else:
+                    msg = "A MOOSE generated stub page for %s exists, but no content was " \
+                          "added. Add documentation content to %s."
+                    LOG.error(msg, self.fullpath, filename)
 
     def _defaultContent(self):
         """
@@ -302,26 +265,11 @@ class ObjectNode(SyntaxNodeBase): #pylint: disable=abstract-method
         if item['parameters']:
             self.parameters = item['parameters']
 
-        self._locateGroupNames(item)
-        if 'tasks' in item:
-            for values in item['tasks'].itervalues():
-                self._locateGroupNames(values)
-
     def markdown(self):
         """
         The expected markdown file.
         """
         return self.fullpath.lstrip('/') + '.md'
-
-    def _locateGroupNames(self, item):
-        """
-        Creates a list of groups (i.e., Apps).
-        """
-        if 'file_info' in item:
-            for info in item['file_info'].iterkeys():
-                match = re.search(r'/(?P<group>\w+)(?:App|Syntax)\.C', info)
-                if match:
-                    self._groups.add(match.group('group'))
 
 class MooseObjectNode(ObjectNode):
     """

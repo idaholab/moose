@@ -33,7 +33,7 @@ class TestSyntaxTree(unittest.TestCase):
         root = app_syntax(exe)
         node = root.findfull('/UserObjects/TestDistributionPostprocessor')
         self.assertTrue(node.removed)
-        self.assertIn('MiscTest', root.groups)
+        self.assertIn('MiscTestApp', root.groups)
 
     def testAlias(self):
         location = os.path.join(MooseDocs.MOOSE_DIR, 'test')

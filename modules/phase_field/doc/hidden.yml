@@ -30,7 +30,6 @@
 - /ICs/ClosePackIC
 - /ICs/CrossIC
 - /ICs/LatticeSmoothCircleIC
-- /ICs/MultiBoundingBoxIC
 - /ICs/MultiSmoothCircleIC
 - /ICs/MultiSmoothSuperellipsoidIC
 - /ICs/PFCFreezingIC
@@ -148,7 +147,6 @@
 - /Postprocessors/GrainBoundaryArea
 - /Postprocessors/GrainTrackerElasticity
 - /Postprocessors/PFCElementEnergyIntegral
-- /Postprocessors/FeatureFloodCount
 - /UserObjects/ComputeExternalGrainForceAndTorque
 - /UserObjects/ComputeGrainForceAndTorque
 - /UserObjects/ConstantGrainForceAndTorque

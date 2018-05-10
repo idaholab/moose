@@ -8,9 +8,6 @@ Content:
             - media/**
     solid_mechanics:
         root_dir: modules/solid_mechanics/doc/content
-Check:
-    groups:
-        - SolidMechanicsApp
 
 Renderer:
     type: MooseDocs.base.MaterializeRenderer
@@ -21,10 +18,4 @@ Renderer:
 Extensions:
     appsyntax:
         type: MooseDocs.extensions.appsyntax
-        executable: ${MOOSE_DIR}/modules/solid_mechanics
-        hide:
-            framework: !include framework/doc/hidden.yml
-            tensor_mechanics: !include modules/tensor_mechanics/doc/hidden.yml
-        remove:
-            framework: !include framework/doc/remove.yml
-            solid_mechanics: !include modules/solid_mechanics/doc/remove.yml
+        disable: True
