@@ -20,6 +20,7 @@
 #include "libmesh/edge_edge3.h"
 #include "libmesh/edge_edge4.h"
 #include "libmesh/mesh_communication.h"
+#include "libmesh/remote_elem.h"
 
 // C++ includes
 #include <cmath> // provides round, not std::round (see http://www.cplusplus.com/reference/cmath/round/)
@@ -704,8 +705,20 @@ DistributedGeneratedMesh::distributed_build_line(UnstructuredMesh & mesh,
     if (part[elem_id] == pid)
       add_element_edge(nx, elem_id, pid, type, mesh);
 
+  for (auto & elem_ptr : mesh.element_ptr_range())
+    for (unsigned int s = 0; s < elem_ptr->n_sides(); s++)
+      std::cout << "Elem neighbor: " << elem_ptr->neighbor_ptr(s) << " is remote "
+                << (elem_ptr->neighbor_ptr(s) == remote_elem) << std::endl;
+
   // Need to link up the local elements before we can know what's missing
   mesh.find_neighbors();
+
+  std::cout << "After first find_neighbors" << std::endl;
+
+  for (auto & elem_ptr : mesh.element_ptr_range())
+    for (unsigned int s = 0; s < elem_ptr->n_sides(); s++)
+      std::cout << "Elem neighbor: " << elem_ptr->neighbor_ptr(s) << " is remote "
+                << (elem_ptr->neighbor_ptr(s) == remote_elem) << std::endl;
 
   // Get the ghosts (missing face neighbors)
   std::set<dof_id_type> ghost_elems;
@@ -715,7 +728,33 @@ DistributedGeneratedMesh::distributed_build_line(UnstructuredMesh & mesh,
   for (auto & ghost_id : ghost_elems)
     add_element_edge(nx, ghost_id, part[ghost_id], type, mesh);
 
+  std::cout << "After adding ghosts" << std::endl;
+
+  for (auto & elem_ptr : mesh.element_ptr_range())
+    for (unsigned int s = 0; s < elem_ptr->n_sides(); s++)
+      std::cout << "Elem neighbor: " << elem_ptr->neighbor_ptr(s) << " is remote "
+                << (elem_ptr->neighbor_ptr(s) == remote_elem) << std::endl;
+
   mesh.find_neighbors(true);
+
+  std::cout << "After second find neighbors " << std::endl;
+
+  for (auto & elem_ptr : mesh.element_ptr_range())
+    for (unsigned int s = 0; s < elem_ptr->n_sides(); s++)
+      std::cout << "Elem neighbor: " << elem_ptr->neighbor_ptr(s) << " is remote "
+                << (elem_ptr->neighbor_ptr(s) == remote_elem) << std::endl;
+
+  for (auto & elem_ptr : mesh.element_ptr_range())
+    for (unsigned int s = 0; s < elem_ptr->n_sides(); s++)
+      if (!elem_ptr->neighbor(s) && !boundary_info.n_boundary_ids(elem_ptr, s))
+        elem_ptr->set_neighbor(s, const_cast<RemoteElem *>(remote_elem));
+
+  std::cout << "After adding remote elements" << std::endl;
+
+  for (auto & elem_ptr : mesh.element_ptr_range())
+    for (unsigned int s = 0; s < elem_ptr->n_sides(); s++)
+      std::cout << "Elem neighbor: " << elem_ptr->neighbor_ptr(s) << " is remote "
+                << (elem_ptr->neighbor_ptr(s) == remote_elem) << std::endl;
 
   boundary_info.sideset_name(0) = "left";
   boundary_info.sideset_name(1) = "right";
