@@ -19,6 +19,7 @@
 #include "libmesh/edge_edge2.h"
 #include "libmesh/edge_edge3.h"
 #include "libmesh/edge_edge4.h"
+#include "libmesh/mesh_communication.h"
 
 // C++ includes
 #include <cmath> // provides round, not std::round (see http://www.cplusplus.com/reference/cmath/round/)
@@ -342,6 +343,152 @@ get_neighbors_edge(const dof_id_type nx, const dof_id_type i, std::vector<Metis:
 }
 
 /**
+ * Find the elements and sides that need ghost elements
+ *
+ * @param nx The number of elements in the mesh
+ * @param mesh The mesh - without any ghost elements
+ * @param ghost_elems The ghost elems that need to be added
+ */
+inline void
+get_ghost_neighbors_edge(const dof_id_type nx,
+                         const MeshBase & mesh,
+                         std::set<dof_id_type> & ghost_elems)
+{
+  auto & boundary_info = mesh.boundary_info;
+
+  std::vector<Metis::idx_t> neighbors(2);
+
+  for (auto elem_ptr : mesh.element_ptr_range())
+  {
+    for (unsigned int s = 0; s < elem_ptr->n_sides(); s++)
+    {
+      // No current neighbor
+      if (!elem_ptr->neighbor_ptr(s))
+      {
+        // Not on a boundary
+        if (!boundary_info->n_boundary_ids(elem_ptr, s))
+        {
+          get_neighbors_edge(nx, elem_ptr->id(), neighbors);
+
+          ghost_elems.insert(neighbors[s]);
+        }
+      }
+    }
+  }
+}
+
+/**
+ * Adds an edge element to the mesh
+ */
+void
+add_element_edge(const dof_id_type nx,
+                 const dof_id_type elem_id,
+                 const processor_id_type pid,
+                 const ElemType type,
+                 MeshBase & mesh)
+{
+  BoundaryInfo & boundary_info = mesh.get_boundary_info();
+
+  std::cout << "Adding elem: " << elem_id << " pid: " << pid << std::endl;
+
+  switch (type)
+  {
+    case INVALID_ELEM:
+    case EDGE2:
+    {
+      auto node_offset = elem_id;
+
+      auto node0_ptr =
+          mesh.add_point(Point(static_cast<Real>(node_offset) / nx, 0, 0), node_offset);
+      auto node1_ptr =
+          mesh.add_point(Point(static_cast<Real>(node_offset + 1) / nx, 0, 0), node_offset + 1);
+
+      std::cout << "Adding elem: " << elem_id << std::endl;
+
+      Elem * elem = new Edge2;
+      elem->set_id(elem_id);
+      elem->processor_id() = pid;
+      //      elem->set_unique_id() = elem_id;
+      elem = mesh.add_elem(elem);
+      elem->set_node(0) = node0_ptr;
+      elem->set_node(1) = node1_ptr;
+
+      if (elem_id == 0)
+        boundary_info.add_side(elem, 0, 0);
+
+      if (elem_id == nx - 1)
+        boundary_info.add_side(elem, 1, 1);
+
+      break;
+    }
+
+    case EDGE3:
+    {
+      auto node_offset = 2 * elem_id;
+
+      auto node0_ptr =
+          mesh.add_point(Point(static_cast<Real>(node_offset) / (2 * nx), 0, 0), node_offset);
+      auto node1_ptr = mesh.add_point(Point(static_cast<Real>(node_offset + 1) / (2 * nx), 0, 0),
+                                      node_offset + 1);
+      auto node2_ptr = mesh.add_point(Point(static_cast<Real>(node_offset + 2) / (2 * nx), 0, 0),
+                                      node_offset + 2);
+
+      Elem * elem = new Edge3;
+      elem->set_id(elem_id);
+      elem->processor_id() = pid;
+      //      elem->set_unique_id() = elem_id;
+      elem = mesh.add_elem(elem);
+      elem->set_node(0) = node0_ptr;
+      elem->set_node(2) = node2_ptr;
+      elem->set_node(1) = node1_ptr;
+
+      if (elem_id == 0)
+        boundary_info.add_side(elem, 0, 0);
+
+      if (elem_id == nx - 1)
+        boundary_info.add_side(elem, 1, 1);
+
+      break;
+    }
+
+    case EDGE4:
+    {
+      auto node_offset = 3 * elem_id;
+
+      auto node0_ptr =
+          mesh.add_point(Point(static_cast<Real>(node_offset) / (3 * nx), 0, 0), node_offset);
+      auto node1_ptr = mesh.add_point(Point(static_cast<Real>(node_offset + 1) / (3 * nx), 0, 0),
+                                      node_offset + 1);
+      auto node2_ptr = mesh.add_point(Point(static_cast<Real>(node_offset + 2) / (3 * nx), 0, 0),
+                                      node_offset + 2);
+      auto node3_ptr = mesh.add_point(Point(static_cast<Real>(node_offset + 2) / (3 * nx), 0, 0),
+                                      node_offset + 3);
+
+      Elem * elem = new Edge3;
+      elem->set_id(elem_id);
+      elem->processor_id() = pid;
+      //      elem->set_unique_id() = elem_id;
+      elem = mesh.add_elem(elem);
+      elem->set_node(0) = node0_ptr;
+      elem->set_node(2) = node2_ptr;
+      elem->set_node(3) = node3_ptr;
+      elem->set_node(1) = node1_ptr;
+
+      if (elem_id == 0)
+        boundary_info.add_side(elem, 0, 0);
+
+      if (elem_id == nx - 1)
+        boundary_info.add_side(elem, 1, 1);
+
+      break;
+    }
+
+    default:
+      libmesh_error_msg("ERROR: Unrecognized 1D element type.");
+  }
+}
+
+/**
  * A useful inline function which replaces the macros
  * used previously.  Not private since this is a namespace,
  * but would be if this were a class.  The first one returns
@@ -552,107 +699,23 @@ DistributedGeneratedMesh::distributed_build_line(UnstructuredMesh & mesh,
 
   BoundaryInfo & boundary_info = mesh.get_boundary_info();
 
+  // Add elements this processor owns
   for (dof_id_type elem_id = 0; elem_id < num_elems; elem_id++)
-  {
-    std::cout << "proc_id: " << part[elem_id] << std::endl;
-
-    // Only add this element if we own it
     if (part[elem_id] == pid)
-    {
-      switch (type)
-      {
-        case INVALID_ELEM:
-        case EDGE2:
-        {
-          auto node_offset = elem_id;
+      add_element_edge(nx, elem_id, pid, type, mesh);
 
-          auto node0_ptr =
-              mesh.add_point(Point(static_cast<Real>(node_offset) / nx, 0, 0), node_offset);
-          auto node1_ptr =
-              mesh.add_point(Point(static_cast<Real>(node_offset + 1) / nx, 0, 0), node_offset + 1);
+  // Need to link up the local elements before we can know what's missing
+  mesh.find_neighbors();
 
-          std::cout << "Adding elem: " << elem_id << std::endl;
+  // Get the ghosts (missing face neighbors)
+  std::set<dof_id_type> ghost_elems;
+  get_ghost_neighbors_edge(nx, mesh, ghost_elems);
 
-          Elem * elem = new Edge2;
-          elem->set_id(elem_id);
-          elem->processor_id() = pid;
-          elem = mesh.add_elem(elem);
-          elem->set_node(0) = node0_ptr;
-          elem->set_node(1) = node1_ptr;
+  // Add the ghosts to the mesh
+  for (auto & ghost_id : ghost_elems)
+    add_element_edge(nx, ghost_id, part[ghost_id], type, mesh);
 
-          if (elem_id == 0)
-            boundary_info.add_side(elem, 0, 0);
-
-          if (elem_id == nx - 1)
-            boundary_info.add_side(elem, 1, 1);
-
-          break;
-        }
-
-        case EDGE3:
-        {
-          auto node_offset = 2 * elem_id;
-
-          auto node0_ptr =
-              mesh.add_point(Point(static_cast<Real>(node_offset) / (2 * nx), 0, 0), node_offset);
-          auto node1_ptr = mesh.add_point(
-              Point(static_cast<Real>(node_offset + 1) / (2 * nx), 0, 0), node_offset + 1);
-          auto node2_ptr = mesh.add_point(
-              Point(static_cast<Real>(node_offset + 2) / (2 * nx), 0, 0), node_offset + 2);
-
-          Elem * elem = new Edge3;
-          elem->set_id(elem_id);
-          elem->processor_id() = pid;
-          elem = mesh.add_elem(elem);
-          elem->set_node(0) = node0_ptr;
-          elem->set_node(2) = node2_ptr;
-          elem->set_node(1) = node1_ptr;
-
-          if (elem_id == 0)
-            boundary_info.add_side(elem, 0, 0);
-
-          if (elem_id == nx - 1)
-            boundary_info.add_side(elem, 1, 1);
-
-          break;
-        }
-
-        case EDGE4:
-        {
-          auto node_offset = 3 * elem_id;
-
-          auto node0_ptr =
-              mesh.add_point(Point(static_cast<Real>(node_offset) / (3 * nx), 0, 0), node_offset);
-          auto node1_ptr = mesh.add_point(
-              Point(static_cast<Real>(node_offset + 1) / (3 * nx), 0, 0), node_offset + 1);
-          auto node2_ptr = mesh.add_point(
-              Point(static_cast<Real>(node_offset + 2) / (3 * nx), 0, 0), node_offset + 2);
-          auto node3_ptr = mesh.add_point(
-              Point(static_cast<Real>(node_offset + 2) / (3 * nx), 0, 0), node_offset + 3);
-
-          Elem * elem = new Edge3;
-          elem->set_id(elem_id);
-          elem->processor_id() = pid;
-          elem = mesh.add_elem(elem);
-          elem->set_node(0) = node0_ptr;
-          elem->set_node(2) = node2_ptr;
-          elem->set_node(3) = node3_ptr;
-          elem->set_node(1) = node1_ptr;
-
-          if (elem_id == 0)
-            boundary_info.add_side(elem, 0, 0);
-
-          if (elem_id == nx - 1)
-            boundary_info.add_side(elem, 1, 1);
-
-          break;
-        }
-
-        default:
-          libmesh_error_msg("ERROR: Unrecognized 1D element type.");
-      }
-    }
-  }
+  mesh.find_neighbors(true);
 
   boundary_info.sideset_name(0) = "left";
   boundary_info.sideset_name(1) = "right";
@@ -666,7 +729,21 @@ DistributedGeneratedMesh::distributed_build_line(UnstructuredMesh & mesh,
 
   // Already partitioned!
   mesh.skip_partitioning(true);
-  mesh.prepare_for_use(true);
+
+  mesh.update_post_partitioning();
+  MeshCommunication().make_elems_parallel_consistent(mesh);
+  MeshCommunication().make_node_unique_ids_parallel_consistent(mesh);
+
+  /*
+    std::cout << "Getting ready to renumber" << std::endl;
+    mesh.renumber_nodes_and_elements();
+  */
+  for (auto & elem_ptr : mesh.element_ptr_range())
+    std::cout << "Elem: " << elem_ptr->id() << " pid: " << elem_ptr->processor_id()
+              << " uid: " << elem_ptr->unique_id() << std::endl;
+
+  std::cout << "Getting ready to prepare for use" << std::endl;
+  mesh.prepare_for_use(false, false); // No need to renumber or find neighbors - done did it.
 
   for (auto & elem_ptr : mesh.element_ptr_range())
     std::cout << "Elem: " << elem_ptr->id() << " pid: " << elem_ptr->processor_id() << std::endl;
