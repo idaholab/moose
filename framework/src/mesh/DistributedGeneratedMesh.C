@@ -50,6 +50,8 @@ validParams<DistributedGeneratedMesh>()
 {
   InputParameters params = validParams<MooseMesh>();
 
+  params.addParam<bool>("verbose", false, "Turn on verbose printing for the mesh generation");
+
   MooseEnum elem_types(
       "EDGE EDGE2 EDGE3 EDGE4 QUAD QUAD4 QUAD8 QUAD9 TRI3 TRI6 HEX HEX8 HEX20 HEX27 TET4 TET10 "
       "PRISM6 PRISM15 PRISM18 PYRAMID5 PYRAMID13 PYRAMID14"); // no default
@@ -329,7 +331,7 @@ num_neighbors_edge(const dof_id_type nx, const dof_id_type i)
  * is no neighbor.  THIS MUST be of size 2 BEFORE calling this function
  */
 inline void
-get_neighbors_edge(const dof_id_type nx, const dof_id_type i, std::vector<Metis::idx_t> & neighbors)
+get_neighbors_edge(const dof_id_type nx, const dof_id_type i, std::vector<dof_id_type> & neighbors)
 {
   neighbors[0] = i - 1;
   neighbors[1] = i + 1;
@@ -357,7 +359,7 @@ get_ghost_neighbors_edge(const dof_id_type nx,
 {
   auto & boundary_info = mesh.boundary_info;
 
-  std::vector<Metis::idx_t> neighbors(2);
+  std::vector<dof_id_type> neighbors(2);
 
   for (auto elem_ptr : mesh.element_ptr_range())
   {
@@ -386,11 +388,13 @@ add_element_edge(const dof_id_type nx,
                  const dof_id_type elem_id,
                  const processor_id_type pid,
                  const ElemType type,
-                 MeshBase & mesh)
+                 MeshBase & mesh,
+                 bool _verbose)
 {
   BoundaryInfo & boundary_info = mesh.get_boundary_info();
 
-  std::cout << "Adding elem: " << elem_id << " pid: " << pid << std::endl;
+  if (_verbose)
+    std::cout << "Adding elem: " << elem_id << " pid: " << pid << std::endl;
 
   switch (type)
   {
@@ -401,10 +405,14 @@ add_element_edge(const dof_id_type nx,
 
       auto node0_ptr =
           mesh.add_point(Point(static_cast<Real>(node_offset) / nx, 0, 0), node_offset);
+      node0_ptr->set_unique_id() = node_offset;
+
       auto node1_ptr =
           mesh.add_point(Point(static_cast<Real>(node_offset + 1) / nx, 0, 0), node_offset + 1);
+      node1_ptr->set_unique_id() = node_offset + 1;
 
-      std::cout << "Adding elem: " << elem_id << std::endl;
+      if (_verbose)
+        std::cout << "Adding elem: " << elem_id << std::endl;
 
       Elem * elem = new Edge2;
       elem->set_id(elem_id);
@@ -429,10 +437,15 @@ add_element_edge(const dof_id_type nx,
 
       auto node0_ptr =
           mesh.add_point(Point(static_cast<Real>(node_offset) / (2 * nx), 0, 0), node_offset);
+      node0_ptr->set_unique_id() = node_offset;
+
       auto node1_ptr = mesh.add_point(Point(static_cast<Real>(node_offset + 1) / (2 * nx), 0, 0),
                                       node_offset + 1);
+      node1_ptr->set_unique_id() = node_offset + 1;
+
       auto node2_ptr = mesh.add_point(Point(static_cast<Real>(node_offset + 2) / (2 * nx), 0, 0),
                                       node_offset + 2);
+      node2_ptr->set_unique_id() = node_offset + 2;
 
       Elem * elem = new Edge3;
       elem->set_id(elem_id);
@@ -458,12 +471,19 @@ add_element_edge(const dof_id_type nx,
 
       auto node0_ptr =
           mesh.add_point(Point(static_cast<Real>(node_offset) / (3 * nx), 0, 0), node_offset);
+      node0_ptr->set_unique_id() = node_offset;
+
       auto node1_ptr = mesh.add_point(Point(static_cast<Real>(node_offset + 1) / (3 * nx), 0, 0),
                                       node_offset + 1);
+      node1_ptr->set_unique_id() = node_offset + 1;
+
       auto node2_ptr = mesh.add_point(Point(static_cast<Real>(node_offset + 2) / (3 * nx), 0, 0),
                                       node_offset + 2);
-      auto node3_ptr = mesh.add_point(Point(static_cast<Real>(node_offset + 2) / (3 * nx), 0, 0),
+      node2_ptr->set_unique_id() = node_offset + 2;
+
+      auto node3_ptr = mesh.add_point(Point(static_cast<Real>(node_offset + 3) / (3 * nx), 0, 0),
                                       node_offset + 3);
+      node3_ptr->set_unique_id() = node_offset + 3;
 
       Elem * elem = new Edge3;
       elem->set_id(elem_id);
@@ -577,7 +597,7 @@ DistributedGeneratedMesh::distributed_build_line(UnstructuredMesh & mesh,
 
   // Will get used to find the neighbors of an element
   // MUST be of size _2_.
-  std::vector<Metis::idx_t> neighbors(2);
+  std::vector<dof_id_type> neighbors(2);
 
   // Build 1 of the element we want to build so we can query stuff about it
   switch (type)
@@ -621,15 +641,17 @@ DistributedGeneratedMesh::distributed_build_line(UnstructuredMesh & mesh,
     {
       auto num_neighbors = num_neighbors_edge(nx, elem_id);
 
-      std::cout << "num_neighbors: " << num_neighbors << std::endl;
+      if (_verbose)
+        std::cout << "num_neighbors: " << num_neighbors << std::endl;
 
       csr_graph.prep_n_nonzeros(elem_id, num_neighbors);
     }
 
     csr_graph.prepare_for_use();
 
-    for (auto offset : csr_graph.offsets)
-      std::cout << "offset: " << offset << std::endl;
+    if (_verbose)
+      for (auto offset : csr_graph.offsets)
+        std::cout << "offset: " << offset << std::endl;
 
     for (dof_id_type elem_id = 0; elem_id < num_elems; elem_id++)
     {
@@ -640,7 +662,9 @@ DistributedGeneratedMesh::distributed_build_line(UnstructuredMesh & mesh,
       for (auto neighbor : neighbors)
         if (neighbor != Elem::invalid_id)
         {
-          std::cout << elem_id << ": " << connection << " = " << neighbor << std::endl;
+          if (_verbose)
+            std::cout << elem_id << ": " << connection << " = " << neighbor << std::endl;
+
           csr_graph(elem_id, connection++) = neighbor;
         }
     }
@@ -703,22 +727,25 @@ DistributedGeneratedMesh::distributed_build_line(UnstructuredMesh & mesh,
   // Add elements this processor owns
   for (dof_id_type elem_id = 0; elem_id < num_elems; elem_id++)
     if (part[elem_id] == pid)
-      add_element_edge(nx, elem_id, pid, type, mesh);
+      add_element_edge(nx, elem_id, pid, type, mesh, _verbose);
 
-  for (auto & elem_ptr : mesh.element_ptr_range())
-    for (unsigned int s = 0; s < elem_ptr->n_sides(); s++)
-      std::cout << "Elem neighbor: " << elem_ptr->neighbor_ptr(s) << " is remote "
-                << (elem_ptr->neighbor_ptr(s) == remote_elem) << std::endl;
+  if (_verbose)
+    for (auto & elem_ptr : mesh.element_ptr_range())
+      for (unsigned int s = 0; s < elem_ptr->n_sides(); s++)
+        std::cout << "Elem neighbor: " << elem_ptr->neighbor_ptr(s) << " is remote "
+                  << (elem_ptr->neighbor_ptr(s) == remote_elem) << std::endl;
 
   // Need to link up the local elements before we can know what's missing
   mesh.find_neighbors();
 
-  std::cout << "After first find_neighbors" << std::endl;
+  if (_verbose)
+    std::cout << "After first find_neighbors" << std::endl;
 
-  for (auto & elem_ptr : mesh.element_ptr_range())
-    for (unsigned int s = 0; s < elem_ptr->n_sides(); s++)
-      std::cout << "Elem neighbor: " << elem_ptr->neighbor_ptr(s) << " is remote "
-                << (elem_ptr->neighbor_ptr(s) == remote_elem) << std::endl;
+  if (_verbose)
+    for (auto & elem_ptr : mesh.element_ptr_range())
+      for (unsigned int s = 0; s < elem_ptr->n_sides(); s++)
+        std::cout << "Elem neighbor: " << elem_ptr->neighbor_ptr(s) << " is remote "
+                  << (elem_ptr->neighbor_ptr(s) == remote_elem) << std::endl;
 
   // Get the ghosts (missing face neighbors)
   std::set<dof_id_type> ghost_elems;
@@ -726,71 +753,90 @@ DistributedGeneratedMesh::distributed_build_line(UnstructuredMesh & mesh,
 
   // Add the ghosts to the mesh
   for (auto & ghost_id : ghost_elems)
-    add_element_edge(nx, ghost_id, part[ghost_id], type, mesh);
+    add_element_edge(nx, ghost_id, part[ghost_id], type, mesh, _verbose);
 
-  std::cout << "After adding ghosts" << std::endl;
+  if (_verbose)
+    std::cout << "After adding ghosts" << std::endl;
 
-  for (auto & elem_ptr : mesh.element_ptr_range())
-    for (unsigned int s = 0; s < elem_ptr->n_sides(); s++)
-      std::cout << "Elem neighbor: " << elem_ptr->neighbor_ptr(s) << " is remote "
-                << (elem_ptr->neighbor_ptr(s) == remote_elem) << std::endl;
+  if (_verbose)
+    for (auto & elem_ptr : mesh.element_ptr_range())
+      for (unsigned int s = 0; s < elem_ptr->n_sides(); s++)
+        std::cout << "Elem neighbor: " << elem_ptr->neighbor_ptr(s) << " is remote "
+                  << (elem_ptr->neighbor_ptr(s) == remote_elem) << std::endl;
 
   mesh.find_neighbors(true);
 
-  std::cout << "After second find neighbors " << std::endl;
+  if (_verbose)
+    std::cout << "After second find neighbors " << std::endl;
 
-  for (auto & elem_ptr : mesh.element_ptr_range())
-    for (unsigned int s = 0; s < elem_ptr->n_sides(); s++)
-      std::cout << "Elem neighbor: " << elem_ptr->neighbor_ptr(s) << " is remote "
-                << (elem_ptr->neighbor_ptr(s) == remote_elem) << std::endl;
+  if (_verbose)
+    for (auto & elem_ptr : mesh.element_ptr_range())
+      for (unsigned int s = 0; s < elem_ptr->n_sides(); s++)
+        std::cout << "Elem neighbor: " << elem_ptr->neighbor_ptr(s) << " is remote "
+                  << (elem_ptr->neighbor_ptr(s) == remote_elem) << std::endl;
 
   for (auto & elem_ptr : mesh.element_ptr_range())
     for (unsigned int s = 0; s < elem_ptr->n_sides(); s++)
       if (!elem_ptr->neighbor(s) && !boundary_info.n_boundary_ids(elem_ptr, s))
         elem_ptr->set_neighbor(s, const_cast<RemoteElem *>(remote_elem));
 
-  std::cout << "After adding remote elements" << std::endl;
+  if (_verbose)
+    std::cout << "After adding remote elements" << std::endl;
 
-  for (auto & elem_ptr : mesh.element_ptr_range())
-    for (unsigned int s = 0; s < elem_ptr->n_sides(); s++)
-      std::cout << "Elem neighbor: " << elem_ptr->neighbor_ptr(s) << " is remote "
-                << (elem_ptr->neighbor_ptr(s) == remote_elem) << std::endl;
+  if (_verbose)
+    for (auto & elem_ptr : mesh.element_ptr_range())
+      for (unsigned int s = 0; s < elem_ptr->n_sides(); s++)
+        std::cout << "Elem neighbor: " << elem_ptr->neighbor_ptr(s) << " is remote "
+                  << (elem_ptr->neighbor_ptr(s) == remote_elem) << std::endl;
 
   boundary_info.sideset_name(0) = "left";
   boundary_info.sideset_name(1) = "right";
 
   Partitioner::set_node_processor_ids(mesh);
 
-  std::cout << "mesh dim: " << mesh.mesh_dimension() << std::endl;
+  if (_verbose)
+    std::cout << "mesh dim: " << mesh.mesh_dimension() << std::endl;
 
-  for (auto & node_ptr : mesh.node_ptr_range())
-    std::cout << node_ptr->id() << ":" << node_ptr->processor_id() << std::endl;
+  if (_verbose)
+    for (auto & node_ptr : mesh.node_ptr_range())
+      std::cout << node_ptr->id() << ":" << node_ptr->processor_id() << std::endl;
 
   // Already partitioned!
   mesh.skip_partitioning(true);
 
   //  mesh.update_post_partitioning();
   //  MeshCommunication().make_elems_parallel_consistent(mesh);
-  MeshCommunication().make_node_unique_ids_parallel_consistent(mesh);
+  //  MeshCommunication().make_node_unique_ids_parallel_consistent(mesh);
 
   /*
     std::cout << "Getting ready to renumber" << std::endl;
     mesh.renumber_nodes_and_elements();
   */
-  for (auto & elem_ptr : mesh.element_ptr_range())
-    std::cout << "Elem: " << elem_ptr->id() << " pid: " << elem_ptr->processor_id()
-              << " uid: " << elem_ptr->unique_id() << std::endl;
+  if (_verbose)
+    for (auto & elem_ptr : mesh.element_ptr_range())
+      std::cout << "Elem: " << elem_ptr->id() << " pid: " << elem_ptr->processor_id()
+                << " uid: " << elem_ptr->unique_id() << std::endl;
 
-  std::cout << "Getting ready to prepare for use" << std::endl;
+  if (_verbose)
+    std::cout << "Getting ready to prepare for use" << std::endl;
+
   mesh.prepare_for_use(true, true); // No need to renumber or find neighbors - done did it.
 
-  for (auto & elem_ptr : mesh.element_ptr_range())
-    std::cout << "Elem: " << elem_ptr->id() << " pid: " << elem_ptr->processor_id() << std::endl;
+  if (_verbose)
+    for (auto & elem_ptr : mesh.element_ptr_range())
+      std::cout << "Elem: " << elem_ptr->id() << " pid: " << elem_ptr->processor_id() << std::endl;
 
+  if (_verbose)
+    for (auto & node_ptr : mesh.node_ptr_range())
+      std::cout << node_ptr->id() << ":" << node_ptr->processor_id() << std::endl;
+
+  if (_verbose)
+    std::cout << "mesh dim: " << mesh.mesh_dimension() << std::endl;
+
+  // Scale the nodal positions
   for (auto & node_ptr : mesh.node_ptr_range())
-    std::cout << node_ptr->id() << ":" << node_ptr->processor_id() << std::endl;
+    (*node_ptr)(0) = (*node_ptr)(0) * (xmax - xmin) + xmin;
 
-  std::cout << "mesh dim: " << mesh.mesh_dimension() << std::endl;
-
-  mesh.print_info();
+  if (_verbose)
+    mesh.print_info();
 }

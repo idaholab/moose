@@ -1,6 +1,8 @@
 [Mesh]
   type = DistributedGeneratedMesh
-  nx = 10
+#  type = GeneratedMesh
+  nx = 100
+  xmax = 100
   dim = 1
 []
 
@@ -9,10 +11,23 @@
   []
 []
 
+[AuxVariables]
+  [x]
+  []
+[]
+
 [Kernels]
   [diff]
     type = Diffusion
     variable = u
+  []
+[]
+
+[AuxKernels]
+  [f]
+    type = FunctionAux
+    variable = x
+    function = x
   []
 []
 
@@ -31,6 +46,11 @@
   []
 []
 
+[Problem]
+  type = FEProblem
+  solve = false
+[]
+
 [Executioner]
   type = Steady
   solve_type = PJFNK
@@ -39,5 +59,6 @@
 []
 
 [Outputs]
-  exodus = true
+#  exodus = true
+  print_perf_log = true
 []

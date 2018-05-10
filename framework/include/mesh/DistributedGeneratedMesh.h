@@ -42,6 +42,9 @@ protected:
                               const ElemType type = INVALID_ELEM,
                               const bool gauss_lobatto_grid = false);
 
+  ///
+  bool _verbose;
+
   /// The dimension of the mesh
   MooseEnum _dim;
 
