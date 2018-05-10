@@ -14,6 +14,7 @@
 #include "libmesh/periodic_boundaries.h"
 #include "libmesh/periodic_boundary_base.h"
 #include "libmesh/unstructured_mesh.h"
+#include "libmesh/partitioner.h"
 #include "libmesh/metis_csr_graph.h"
 #include "libmesh/edge_edge2.h"
 #include "libmesh/edge_edge3.h"
@@ -496,40 +497,48 @@ DistributedGeneratedMesh::distributed_build_line(UnstructuredMesh & mesh,
         }
     }
 
-    Metis::idx_t ncon = 1;
-
-    // Use recursive if the number of partitions is less than or equal to 8
-    if (n_pieces <= 8)
-      Metis::METIS_PartGraphRecursive(&n,
-                                      &ncon,
-                                      &csr_graph.offsets[0],
-                                      &csr_graph.vals[0],
-                                      &vwgt[0],
-                                      libmesh_nullptr,
-                                      libmesh_nullptr,
-                                      &nparts,
-                                      libmesh_nullptr,
-                                      libmesh_nullptr,
-                                      libmesh_nullptr,
-                                      &edgecut,
-                                      &part[0]);
-
-    // Otherwise  use kway
+    if (n_pieces == 1)
+    {
+      // Just assign them all to proc 0
+      for (auto & elem_pid : part)
+        elem_pid = 0;
+    }
     else
-      Metis::METIS_PartGraphKway(&n,
-                                 &ncon,
-                                 &csr_graph.offsets[0],
-                                 &csr_graph.vals[0],
-                                 &vwgt[0],
-                                 libmesh_nullptr,
-                                 libmesh_nullptr,
-                                 &nparts,
-                                 libmesh_nullptr,
-                                 libmesh_nullptr,
-                                 libmesh_nullptr,
-                                 &edgecut,
-                                 &part[0]);
+    {
+      Metis::idx_t ncon = 1;
 
+      // Use recursive if the number of partitions is less than or equal to 8
+      if (n_pieces <= 8)
+        Metis::METIS_PartGraphRecursive(&n,
+                                        &ncon,
+                                        &csr_graph.offsets[0],
+                                        &csr_graph.vals[0],
+                                        &vwgt[0],
+                                        libmesh_nullptr,
+                                        libmesh_nullptr,
+                                        &nparts,
+                                        libmesh_nullptr,
+                                        libmesh_nullptr,
+                                        libmesh_nullptr,
+                                        &edgecut,
+                                        &part[0]);
+
+      // Otherwise  use kway
+      else
+        Metis::METIS_PartGraphKway(&n,
+                                   &ncon,
+                                   &csr_graph.offsets[0],
+                                   &csr_graph.vals[0],
+                                   &vwgt[0],
+                                   libmesh_nullptr,
+                                   libmesh_nullptr,
+                                   &nparts,
+                                   libmesh_nullptr,
+                                   libmesh_nullptr,
+                                   libmesh_nullptr,
+                                   &edgecut,
+                                   &part[0]);
+    }
   } // end processor 0 part
 
   // Broadcast the resulting partition
@@ -545,6 +554,8 @@ DistributedGeneratedMesh::distributed_build_line(UnstructuredMesh & mesh,
 
   for (dof_id_type elem_id = 0; elem_id < num_elems; elem_id++)
   {
+    std::cout << "proc_id: " << part[elem_id] << std::endl;
+
     // Only add this element if we own it
     if (part[elem_id] == pid)
     {
@@ -556,9 +567,11 @@ DistributedGeneratedMesh::distributed_build_line(UnstructuredMesh & mesh,
           auto node_offset = elem_id;
 
           auto node0_ptr =
-              mesh.add_point(Point(static_cast<Real>(node_offset) / nx, 0, 0), node_offset, pid);
+              mesh.add_point(Point(static_cast<Real>(node_offset) / nx, 0, 0), node_offset);
           auto node1_ptr =
               mesh.add_point(Point(static_cast<Real>(node_offset + 1) / nx, 0, 0), node_offset + 1);
+
+          std::cout << "Adding elem: " << elem_id << std::endl;
 
           Elem * elem = new Edge2;
           elem->set_id(elem_id);
@@ -641,11 +654,27 @@ DistributedGeneratedMesh::distributed_build_line(UnstructuredMesh & mesh,
     }
   }
 
+  boundary_info.sideset_name(0) = "left";
+  boundary_info.sideset_name(1) = "right";
+
+  Partitioner::set_node_processor_ids(mesh);
+
   std::cout << "mesh dim: " << mesh.mesh_dimension() << std::endl;
+
+  for (auto & node_ptr : mesh.node_ptr_range())
+    std::cout << node_ptr->id() << ":" << node_ptr->processor_id() << std::endl;
 
   // Already partitioned!
   mesh.skip_partitioning(true);
-  mesh.prepare_for_use();
+  mesh.prepare_for_use(true);
+
+  for (auto & elem_ptr : mesh.element_ptr_range())
+    std::cout << "Elem: " << elem_ptr->id() << " pid: " << elem_ptr->processor_id() << std::endl;
+
+  for (auto & node_ptr : mesh.node_ptr_range())
+    std::cout << node_ptr->id() << ":" << node_ptr->processor_id() << std::endl;
 
   std::cout << "mesh dim: " << mesh.mesh_dimension() << std::endl;
+
+  mesh.print_info();
 }

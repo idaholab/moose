@@ -1,6 +1,6 @@
 [Mesh]
   type = DistributedGeneratedMesh
-  nx = 4
+  nx = 10
   dim = 1
 []
 
