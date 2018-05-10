@@ -191,6 +191,38 @@ RankTwoTensor::fillFromInputVector(const std::vector<Real> & input, FillMethod f
   }
 }
 
+void
+RankTwoTensor::fillFromScalarVariable(const VariableValue & scalar_variable)
+{
+  switch (scalar_variable.size())
+  {
+    case 1:
+      zero();
+      (*this)(0, 0) = scalar_variable[0]; // S11
+      break;
+
+    case 3:
+      zero();
+      (*this)(0, 0) = scalar_variable[0];                 // S11
+      (*this)(1, 1) = scalar_variable[1];                 // S22
+      (*this)(0, 1) = (*this)(1, 0) = scalar_variable[2]; // S12
+      break;
+
+    case 6:
+      (*this)(0, 0) = scalar_variable[0];                 // S11
+      (*this)(1, 1) = scalar_variable[1];                 // S22
+      (*this)(2, 2) = scalar_variable[2];                 // S33
+      (*this)(1, 2) = (*this)(2, 1) = scalar_variable[3]; // S23
+      (*this)(0, 2) = (*this)(2, 0) = scalar_variable[4]; // S13
+      (*this)(0, 1) = (*this)(1, 0) = scalar_variable[5]; // S12
+      break;
+
+    default:
+      mooseError("Only FIRST, THIRD, or SIXTH order scalar variable can be used to build "
+                 "a RankTwoTensor.");
+  }
+}
+
 TypeVector<Real>
 RankTwoTensor::column(const unsigned int c) const
 {

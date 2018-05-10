@@ -1,0 +1,22 @@
+[Tests]
+  [./test]
+    type = 'Exodiff'
+    input = 'global_strain.i'
+    exodiff = 'global_strain_out.e'
+  [../]
+  [./uniaxial]
+    type = 'Exodiff'
+    input = 'global_strain_uniaxial.i'
+    exodiff = 'global_strain_uniaxial_out.e'
+  [../]
+  [./hydrostat]
+    type = 'Exodiff'
+    input = 'global_strain_hydrostat.i'
+    exodiff = 'global_strain_hydrostat_out.e'
+  [../]
+  [./shear]
+    type = 'Exodiff'
+    input = 'global_strain_shear.i'
+    exodiff = 'global_strain_shear_out.e'
+  [../]
+[]
