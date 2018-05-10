@@ -25,9 +25,9 @@ validParams<LinearViscoelasticStressUpdate>()
       "apparent_elasticity_tensor",
       "name of the apparent elasticity tensor (defined by a LinearViscoelasticityBase material)");
   params.addParam<std::string>(
-      "instantaneous_elasticity_tensor_inv",
-      "instantaneous_elasticity_tensor_inv",
-      "name of the apparent compliance tensor (defined by a LinearViscoelasticityBase material)");
+      "elasticity_tensor_inv",
+      "elasticity_tensor_inv",
+      "name of the real compliance tensor (defined by a LinearViscoelasticityBase material)");
   return params;
 }
 
@@ -37,8 +37,8 @@ LinearViscoelasticStressUpdate::LinearViscoelasticStressUpdate(const InputParame
     _creep_strain_old(getMaterialPropertyOld<RankTwoTensor>(_base_name + "creep_strain")),
     _apparent_creep_strain(getMaterialProperty<RankTwoTensor>("apparent_creep_strain")),
     _apparent_elasticity_tensor(getMaterialProperty<RankFourTensor>("apparent_elasticity_tensor")),
-    _instantaneous_elasticity_tensor_inv(
-        getMaterialProperty<RankFourTensor>("instantaneous_elasticity_tensor_inv"))
+    _elasticity_tensor_inv(
+        getMaterialProperty<RankFourTensor>("elasticity_tensor_inv"))
 {
 }
 
@@ -70,7 +70,7 @@ LinearViscoelasticStressUpdate::updateState(RankTwoTensor & strain_increment,
 
   _creep_strain[_qp] =
       current_mechanical_strain -
-      (_apparent_elasticity_tensor[_qp] * _instantaneous_elasticity_tensor_inv[_qp]) *
+      (_apparent_elasticity_tensor[_qp] * _elasticity_tensor_inv[_qp]) *
           (current_mechanical_strain - _apparent_creep_strain[_qp]);
 
   RankTwoTensor creep_strain_increment = _creep_strain[_qp] - _creep_strain_old[_qp];
