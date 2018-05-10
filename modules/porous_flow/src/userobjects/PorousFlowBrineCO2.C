@@ -1057,7 +1057,7 @@ PorousFlowBrineCO2::equilibriumMoleFractions(Real pressure,
 
     // Equilibrium mole fractions and derivatives at the upper temperature
     Real xco2_upper, yh2o_upper;
-    solveEquilibriumHighTemp(pressure, _Tupper, xco2_upper, yh2o_upper);
+    solveEquilibriumMoleFractionHighTemp(pressure, _Tupper, xco2_upper, yh2o_upper);
 
     funcAB(pressure, _Tupper, xco2_upper, yh2o_upper, A, dA_dp, dA_dT, B, dB_dp, dB_dT);
     const Real dyh2o_dT_upper =
@@ -1073,7 +1073,7 @@ PorousFlowBrineCO2::equilibriumMoleFractions(Real pressure,
   else
   {
     // Equilibrium mole fractions solved using iteration in this regime
-    solveEquilibriumHighTemp(pressure, temperature, xco2, yh2o);
+    solveEquilibriumMoleFractionHighTemp(pressure, temperature, xco2, yh2o);
   }
 }
 
@@ -1219,10 +1219,10 @@ PorousFlowBrineCO2::funcAB(
 }
 
 void
-PorousFlowBrineCO2::solveEquilibriumHighTemp(Real pressure,
-                                             Real temperature,
-                                             Real & xco2,
-                                             Real & yh2o) const
+PorousFlowBrineCO2::solveEquilibriumMoleFractionHighTemp(Real pressure,
+                                                         Real temperature,
+                                                         Real & xco2,
+                                                         Real & yh2o) const
 {
   // Initial guess for yh2o and xco2 (from Spycher and Pruess (2010))
   Real y = _brine_fp.vaporPressure(temperature, 0.0) / pressure;

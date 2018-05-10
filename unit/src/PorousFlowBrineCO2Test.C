@@ -106,7 +106,7 @@ TEST_F(PorousFlowBrineCO2Test, fugacityCoefficients)
   // Test the high temperature formulation
   T = 423.15;
 
-  _fp->solveEquilibriumHighTemp(p, T, xco2, yh2o);
+  _fp->solveEquilibriumMoleFractionHighTemp(p, T, xco2, yh2o);
   phiH2O = _fp->fugacityCoefficientH2OHighTemp(p, T, xco2, yh2o);
   phiCO2 = _fp->fugacityCoefficientCO2HighTemp(p, T, xco2, yh2o);
 
@@ -1015,21 +1015,21 @@ TEST_F(PorousFlowBrineCO2Test, enthalpyOfDissolution)
  * Test iterative calculation of equilibrium mass fractions in the elevated
  * temperature regime
  */
-TEST_F(PorousFlowBrineCO2Test, solveEquilibriumHighTemp)
+TEST_F(PorousFlowBrineCO2Test, solveEquilibriumMoleFractionHighTemp)
 {
   Real p = 20.0e6;
   Real T = 473.15;
 
   Real yh2o, xco2;
 
-  _fp->solveEquilibriumHighTemp(p, T, xco2, yh2o);
+  _fp->solveEquilibriumMoleFractionHighTemp(p, T, xco2, yh2o);
   ABS_TEST("yh2o", yh2o, 0.161429471353, 1.0e-10);
   ABS_TEST("xco2", xco2, 0.0236967010229, 1.0e-10);
 
   p = 30.0e6;
   T = 523.15;
 
-  _fp->solveEquilibriumHighTemp(p, T, xco2, yh2o);
+  _fp->solveEquilibriumMoleFractionHighTemp(p, T, xco2, yh2o);
   ABS_TEST("yh2o", yh2o, 0.286116587269, 1.0e-10);
   ABS_TEST("xco2", xco2, 0.0409622847096, 1.0e-10);
 }

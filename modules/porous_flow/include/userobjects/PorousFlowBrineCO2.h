@@ -425,7 +425,10 @@ public:
    * @param[out] xco2 mole fraction of CO2 in liquid phase (-)
    * @param[out] yh2o mole fraction of H2O in gas phase (-)
    */
-  void solveEquilibriumHighTemp(Real pressure, Real temperature, Real & xco2, Real & yh2o) const;
+  void solveEquilibriumMoleFractionHighTemp(Real pressure,
+                                            Real temperature,
+                                            Real & xco2,
+                                            Real & yh2o) const;
 
 protected:
   /// Check the input variables
