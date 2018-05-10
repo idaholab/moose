@@ -24,7 +24,7 @@
   [./line_seg_cut_uo]
     type = LineSegmentCutSetUserObject
     cut_data = '0.3 1.0 0.3 0.2 0 3'
-    heal_always = true
+    heal_always = false
   [../]
   [./level_set_cut_uo]
     type = LevelSetCutUserObject

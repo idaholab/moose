@@ -5,6 +5,9 @@
     exodiff = 'moving_level_set_out.e moving_level_set_out.e-s002 moving_level_set_out.e-s003'
     map = false
     unique_id = true
+    requirement = 'The XFEM module shall provide an ability to specify whether an XFEM cut surface should be healed independently for individual interfaces'
+    design = 'LineSegmentCutSetUserObject.md LevelSetCutUserObject.md'
+    issues = '#11259'
   [../]
   [./moving_bimaterials]
     type = Exodiff
@@ -12,6 +15,29 @@
     exodiff = 'moving_bimaterial_out.e moving_bimaterial_out.e-s002'
     map = false
     unique_id = true
+    requirement = 'The XFEM module shall provide an ability to solve bi-material mechanics problems where a moving material interface is defined by an XFEM surface, which is defined by a prescribed level set field.'
+    design = 'LevelSetBiMaterialRankTwo.md LevelSetBiMaterialRankFour.md XFEMSingleVariableConstraint.md'
+    issues = '#11259'
   [../]
-
+  [./moving_diffusion]
+    type = Exodiff
+    input = moving_diffusion.i
+    exodiff = 'moving_diffusion_out.e moving_diffusion_out.e-s002'
+    map = false
+    unique_id = true
+    requirement = 'The XFEM module shall provide an ability to solve bi-material diffusion problems where a moving material interface is defined by an XFEM surface, which is defined by a prescribed level set field.'
+    design = 'LevelSetBiMaterialReal.md XFEMEqualValueAtInterface.md LineSegmentLevelSetAux.md LevelSetCutUserObject.md'
+    issues = '#11749'
+  [../]
+  [./phase_transition]
+    type = Exodiff
+    input = phase_transition.i
+    exodiff = 'phase_transition_out.e  phase_transition_out.e-s002  phase_transition_out.e-s003  phase_transition_out.e-s004'
+    map = false
+    unique_id = true
+    abs_zero = 1e-8
+    requirement = 'The XFEM module shall provide an ability to solve a simple phase transition problem in which the phase boundary is defined by and XFEM surface and the interface velocity depends on the jump of variables and gradients across the interface.'
+    design = 'LevelSetBiMaterialReal.md XFEMEqualValueAtInterface.md LineSegmentLevelSetAux.md XFEMPhaseTransitionMovingInterfaceVelocity.md PointValueAtXFEMInterface.md MovingLineSegmentCutSetUserObject.md'
+    issues = '#11749'
+  [../]
 []

@@ -12,18 +12,19 @@
   [./level_set_cut_uo]
     type = LevelSetCutUserObject
     level_set_var = ls
+    heal_always = true
   [../]
 []
 
 [Mesh]
   type = GeneratedMesh
   dim = 2
-  nx = 11
-  ny = 5
+  nx = 5
+  ny = 3
   xmin = 0.0
-  xmax = 5.
+  xmax = 1
   ymin = 0.0
-  ymax = 10
+  ymax = 1
   elem_type = QUAD4
 []
 
@@ -50,14 +51,15 @@
 [Functions]
   [./ls_func]
     type = ParsedFunction
-    value = 'x-4.5'
+    value = 'x-0.76+0.21*t'
   [../]
 []
 
 [Kernels]
   [./diff]
-    type = XFEMDiffusion
+    type = MatDiffusion
     variable = u
+    D_name = 'diffusion_coefficient'
   [../]
   [./time_deriv]
     type = TimeDerivative
@@ -70,7 +72,7 @@
     type = XFEMSingleVariableConstraint
     use_displaced_mesh = false
     variable = u
-    jump = -0.3
+    jump = 0
     use_penalty = true
     alpha = 1e5
     geometric_cut_userobject = 'level_set_cut_uo'
@@ -96,20 +98,21 @@
   [./diffusivity_A]
     type = GenericConstantMaterial
     prop_names = A_diffusion_coefficient
-    prop_values = 100
+    prop_values = 5
   [../]
 
   [./diffusivity_B]
     type = GenericConstantMaterial
     prop_names = B_diffusion_coefficient
-    prop_values = 0.1
+    prop_values = 0.5
   [../]
 
   [./diff_combined]
-    type = LevelSetBiMaterialDiffusion
+    type = LevelSetBiMaterialReal
     levelset_positive_base = 'A'
     levelset_negative_base = 'B'
     level_set_var = ls
+    prop_name = diffusion_coefficient
   [../]
 []
 
@@ -120,31 +123,15 @@
   petsc_options_iname = '-ksp_gmres_restart -pc_type -pc_hypre_type -pc_hypre_boomeramg_max_iter'
   petsc_options_value = '201                hypre    boomeramg      8'
 
-
-  # petsc_options_iname = '-pc_type -pc_factor_mat_solver_package'
-  # petsc_options_value = 'lu     superlu_dist'
-
-  line_search = 'bt'
-
-  #[./Predictor]
-  #  type = SimplePredictor
-  #  scale = 1.0
-  #[../]
-
-# controls for linear iterations
   l_max_its = 20
   l_tol = 1e-3
-
-# controls for nonlinear iterations
   nl_max_its = 15
   nl_rel_tol = 1e-6
   nl_abs_tol = 1e-5
 
-# time control
   start_time = 0.0
   dt = 1
-  end_time = 20.0
-  num_steps = 5000
+  end_time = 2
 
   max_xfem_update = 1
 []
@@ -159,4 +146,3 @@
     output_linear = true
   [../]
 []
-

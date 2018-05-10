@@ -56,7 +56,7 @@ protected:
    * @param time      Current simulation time
    * @return Current fractional distance
    */
-  Real cutFraction(unsigned int cut_num, Real time) const;
+  virtual Real cutFraction(unsigned int cut_num, Real time) const;
 
   /// Vector of start/end times for each cut segment
   std::vector<std::pair<Real, Real>> _cut_time_ranges;

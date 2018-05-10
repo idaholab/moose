@@ -24,7 +24,13 @@ public:
   LineSegmentCutSetUserObject(const InputParameters & parameters);
 
   virtual const std::vector<Point>
+
   getCrackFrontPoints(unsigned int num_crack_front_points) const override;
+
+  /**
+   * Get the cut location information
+   */
+  virtual std::vector<Real> getCutData() const { return _cut_data; };
 
 protected:
   std::vector<Real> _cut_data;
