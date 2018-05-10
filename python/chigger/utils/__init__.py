@@ -145,7 +145,7 @@ def animate(pattern, output, delay=20, restart_delay=500, loop=True):
     cmd += [output]
     subprocess.call(cmd)
 
-def img2mov(pattern, output, ffmpeg='ffmpeg', duration=60, framerate=None, bitrate='10M',
+def img2mov(pattern, output, ffmpeg=None, duration=60, framerate=None, bitrate='10M',
             num_threads=1, quality=1, dry_run=False, output_framerate_increase=0):
     """
     Use ffmpeg to convert a series of images to a movie.
@@ -164,7 +164,15 @@ def img2mov(pattern, output, ffmpeg='ffmpeg', duration=60, framerate=None, bitra
                        drooped frames in ffmpeg output, increase this number.
     """
 
-    # Check ffmpeg
+    # Locate ffmpeg
+    if ffmpeg is None:
+        if os.path.exists('/usr/bin/ffmpeg'):
+            ffmpeg = '/usr/bin/ffmpeg'
+    if ffmpeg is None:
+        if os.path.exists(os.path.join(os.getenv('HOME'), 'ffmpeg')):
+            ffmpeg = os.path.join(os.getenv('HOME'), 'ffmpeg')
+
+    ffmpeg = os.path.abspath(ffmpeg)
     if not os.path.exists(ffmpeg) and not dry_run:
         msg = "The ffmpeg executable was not located: {}"
         raise mooseutils.MooseException(msg.format(ffmpeg))
