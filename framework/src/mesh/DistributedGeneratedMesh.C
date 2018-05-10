@@ -602,6 +602,62 @@ get_neighbors_quad(const dof_id_type nx,
 }
 
 /**
+ * Compute the i,j indices of a given element ID
+ *
+ * @param elem_id The ID of the element
+ * @param i Output: The index in the x direction
+ * @param j Output: The index in the y direction
+ */
+inline void
+get_indices_quad(const dof_id_type nx, const dof_id_type elem_id, dof_id_type & i, dof_id_type & j)
+{
+  i = elem_id % nx;
+  j = (elem_id - i) / nx;
+}
+
+/**
+ * Find the elements and sides that need ghost elements
+ *
+ * @param nx The number of elements in the mesh
+ * @param mesh The mesh - without any ghost elements
+ * @param ghost_elems The ghost elems that need to be added
+ */
+inline void
+get_ghost_neighbors_quad(const dof_id_type nx,
+                         const dof_id_type ny,
+                         const MeshBase & mesh,
+                         std::set<dof_id_type> & ghost_elems)
+{
+  auto & boundary_info = mesh.boundary_info;
+
+  dof_id_type i, j;
+
+  std::vector<dof_id_type> neighbors(4);
+
+  for (auto elem_ptr : mesh.element_ptr_range())
+  {
+    for (unsigned int s = 0; s < elem_ptr->n_sides(); s++)
+    {
+      // No current neighbor
+      if (!elem_ptr->neighbor_ptr(s))
+      {
+        // Not on a boundary
+        if (!boundary_info->n_boundary_ids(elem_ptr, s))
+        {
+          auto elem_id = elem_ptr->id();
+
+          get_indices_quad(nx, elem_id, i, j);
+
+          get_neighbors_quad(nx, ny, i, j, neighbors);
+
+          ghost_elems.insert(neighbors[s]);
+        }
+      }
+    }
+  }
+}
+
+/**
  * A useful inline function which replaces the macros
  * used previously.  Not private since this is a namespace,
  * but would be if this were a class.  The first one returns
@@ -1176,8 +1232,6 @@ DistributedGeneratedMesh::build_square(UnstructuredMesh & mesh,
         std::cout << "Elem neighbor: " << elem_ptr->neighbor_ptr(s) << " is remote "
                   << (elem_ptr->neighbor_ptr(s) == remote_elem) << std::endl;
 
-  /*
-
   // Need to link up the local elements before we can know what's missing
   mesh.find_neighbors();
 
@@ -1192,7 +1246,9 @@ DistributedGeneratedMesh::build_square(UnstructuredMesh & mesh,
 
   // Get the ghosts (missing face neighbors)
   std::set<dof_id_type> ghost_elems;
-  get_ghost_neighbors_edge(nx, mesh, ghost_elems);
+  get_ghost_neighbors_quad(nx, ny, mesh, ghost_elems);
+
+  /*
 
   // Add the ghosts to the mesh
   for (auto & ghost_id : ghost_elems)
