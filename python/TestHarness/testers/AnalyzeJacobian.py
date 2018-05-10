@@ -41,9 +41,10 @@ class AnalyzeJacobian(FileTester):
         try:
             import numpy
             assert numpy # silence pyflakes warning
-            return (True, '')
+            return True
         except Exception:
-            return (False, 'skipped (no numpy)')
+            self.addCaveats('skipped (no numpy)')
+            return False
 
 
     def getCommand(self, options):
