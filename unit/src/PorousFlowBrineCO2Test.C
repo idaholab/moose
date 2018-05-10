@@ -79,11 +79,22 @@ TEST_F(PorousFlowBrineCO2Test, fugacityCoefficients)
   // Test the low temperature formulation
   Real p = 40.0e6;
   Real T = 350.0;
+  Real co2_density, dco2_density_dp, dco2_density_dT;
+  _co2_fp->rho_dpT(p, T, co2_density, dco2_density_dp, dco2_density_dT);
 
   Real phiH2O, dphiH2O_dp, dphiH2O_dT;
   Real phiCO2, dphiCO2_dp, dphiCO2_dT;
-  _fp->fugacityCoefficientsLowTemp(
-      p, T, phiCO2, dphiCO2_dp, dphiCO2_dT, phiH2O, dphiH2O_dp, dphiH2O_dT);
+  _fp->fugacityCoefficientsLowTemp(p,
+                                   T,
+                                   co2_density,
+                                   dco2_density_dp,
+                                   dco2_density_dT,
+                                   phiCO2,
+                                   dphiCO2_dp,
+                                   dphiCO2_dT,
+                                   phiH2O,
+                                   dphiH2O_dp,
+                                   dphiH2O_dT);
 
   ABS_TEST("phiCO2", phiCO2, 0.401938, 1.0e-6);
   ABS_TEST("phiH2O", phiH2O, 0.0898968, 1.0e-6);
@@ -92,16 +103,18 @@ TEST_F(PorousFlowBrineCO2Test, fugacityCoefficients)
   T = 423.15;
 
   Real xco2, yh2o;
-  _fp->solveEquilibriumMoleFractionHighTemp(p, T, xco2, yh2o);
-  phiH2O = _fp->fugacityCoefficientH2OHighTemp(p, T, xco2, yh2o);
-  phiCO2 = _fp->fugacityCoefficientCO2HighTemp(p, T, xco2, yh2o);
+  co2_density = _co2_fp->rho(p, T);
+
+  _fp->solveEquilibriumMoleFractionHighTemp(p, T, co2_density, xco2, yh2o);
+  phiH2O = _fp->fugacityCoefficientH2OHighTemp(p, T, co2_density, xco2, yh2o);
+  phiCO2 = _fp->fugacityCoefficientCO2HighTemp(p, T, co2_density, xco2, yh2o);
 
   ABS_TEST("phiH2O", phiH2O, 0.156304067968, 1.0e-10);
   ABS_TEST("phiCO2", phiCO2, 0.641936764138, 1.0e-10);
 
   // Test that the same results are returned in fugacityCoefficientsHighTemp()
   Real phiCO2_2, phiH2O_2;
-  _fp->fugacityCoefficientsHighTemp(p, T, xco2, yh2o, phiCO2_2, phiH2O_2);
+  _fp->fugacityCoefficientsHighTemp(p, T, co2_density, xco2, yh2o, phiCO2_2, phiH2O_2);
 
   ABS_TEST("phiH2O", phiH2O, phiH2O_2, 1.0e-12);
   ABS_TEST("phiCO2", phiCO2, phiCO2_2, 1.0e-12);
@@ -1000,15 +1013,16 @@ TEST_F(PorousFlowBrineCO2Test, solveEquilibriumMoleFractionHighTemp)
   Real T = 473.15;
 
   Real yh2o, xco2;
-
-  _fp->solveEquilibriumMoleFractionHighTemp(p, T, xco2, yh2o);
+  Real co2_density = _co2_fp->rho(p, T);
+  _fp->solveEquilibriumMoleFractionHighTemp(p, T, co2_density, xco2, yh2o);
   ABS_TEST("yh2o", yh2o, 0.161429471353, 1.0e-10);
   ABS_TEST("xco2", xco2, 0.0236967010229, 1.0e-10);
 
   p = 30.0e6;
   T = 523.15;
 
-  _fp->solveEquilibriumMoleFractionHighTemp(p, T, xco2, yh2o);
+  co2_density = _co2_fp->rho(p, T);
+  _fp->solveEquilibriumMoleFractionHighTemp(p, T, co2_density, xco2, yh2o);
   ABS_TEST("yh2o", yh2o, 0.286116587269, 1.0e-10);
   ABS_TEST("xco2", xco2, 0.0409622847096, 1.0e-10);
 }
@@ -1032,8 +1046,8 @@ TEST_F(PorousFlowBrineCO2Test, equilibriumMoleFractions)
   T = 373.15;
 
   _fp->equilibriumMoleFractions(p, T, xco2, yh2o);
-  ABS_TEST("yh2o", yh2o, 0.0194612375638, 1.0e-8);
-  ABS_TEST("xco2", xco2, 0.0201950595216, 1.0e-8);
+  ABS_TEST("yh2o", yh2o, 0.0194363435584, 1.0e-8);
+  ABS_TEST("xco2", xco2, 0.0201949380648, 1.0e-8);
 
   // High temperature regime
   p = 30.0e6;

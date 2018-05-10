@@ -42,7 +42,7 @@ public:
   virtual std::string fluidStateName() const;
 
   /**
-   * Determines the complete thermophysical state of the system for a given set outf
+   * Determines the complete thermophysical state of the system for a given set of
    * primary variables
    *
    * @param pressure gas phase pressure (Pa)

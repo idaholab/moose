@@ -60,7 +60,7 @@ public:
   virtual std::string fluidStateName() const;
 
   /**
-   * Determines the complete thermophysical state of the system for a given set outf
+   * Determines the complete thermophysical state of the system for a given set of
    * primary variables
    *
    * @param pressure gas phase pressure (Pa)
@@ -181,6 +181,9 @@ public:
    *
    * @param pressure gas pressure (Pa)
    * @param temperature temperature (K)
+   * @param co2_density CO2 density (kg/m^3)
+   * @param dco2_density_dp derivative of CO2 density wrt pressure
+   * @param dco2_density_dT derivative of CO2 density wrt temperature
    * @param[out] fco2 fugacity coefficient for CO2
    * @param[out] dfco2_dp derivative of fugacity coefficient wrt pressure
    * @param[out] dfco2_dT derivative of fugacity coefficient wrt temperature
@@ -190,6 +193,9 @@ public:
    */
   void fugacityCoefficientsLowTemp(Real pressure,
                                    Real temperature,
+                                   Real co2_density,
+                                   Real dco2_density_dp,
+                                   Real dco2_density_dT,
                                    Real & fco2,
                                    Real & dfco2_dp,
                                    Real & dfco2_dT,
@@ -197,12 +203,14 @@ public:
                                    Real & dfh2o_dp,
                                    Real & dfh2o_dT) const;
 
+  ///@{
   /**
    * Fugacity coefficients for H2O and CO2 at elevated temperatures (100C < T <= 300C).
    * Eq. (A8) from Spycher & Pruess (2010)
    *
    * @param pressure gas pressure (Pa)
    * @param temperature temperature (K)
+   * @param co2_density CO2 density (kg/m^3)
    * @param xco2 mole fraction of CO2 in liquid phase (-)
    * @param yh2o mole fraction of H2O in gas phase (-)
    * @param[out] fco2 fugacity coefficient for CO2
@@ -212,11 +220,17 @@ public:
    * @param[out] dfh2o_dp derivative of fugacity coefficient wrt pressure
    * @param[out] dfh2o_dT derivative of fugacity coefficient wrt temperature
    */
-  void fugacityCoefficientsHighTemp(
-      Real pressure, Real temperature, Real xco2, Real yh2o, Real & fco2, Real & fh2o) const;
+  void fugacityCoefficientsHighTemp(Real pressure,
+                                    Real temperature,
+                                    Real co2_density,
+                                    Real xco2,
+                                    Real yh2o,
+                                    Real & fco2,
+                                    Real & fh2o) const;
 
   void fugacityCoefficientsHighTemp(Real pressure,
                                     Real temperature,
+                                    Real co2_density,
                                     Real xco2,
                                     Real yh2o,
                                     Real & fco2,
@@ -226,29 +240,12 @@ public:
                                     Real & dfh2o_dp,
                                     Real & dfh2o_dT) const;
 
-  /**
-   * Fugacity coefficient for H2O at elevated temperatures (100C < T <= 300C).
-   * Eq. (A8) from Spycher & Pruess (2010)
-   *
-   * @param pressure gas pressure (Pa)
-   * @param temperature temperature (K)
-   * @param xco2 mole fraction of CO2 in liquid phase (-)
-   * @param yh2o mole fraction of H2O in gas phase (-)
-   * @return fugacity coefficient
-   */
-  Real fugacityCoefficientH2OHighTemp(Real pressure, Real temperature, Real xco2, Real yh2o) const;
+  Real fugacityCoefficientH2OHighTemp(
+      Real pressure, Real temperature, Real co2_density, Real xco2, Real yh2o) const;
 
-  /**
-   * Fugacity coefficient for CO2 at elevated temperatures (100C < T <= 300C).
-   * Eq. (A8) from Spycher & Pruess (2010)
-   *
-   * @param pressure gas pressure (Pa)
-   * @param temperature temperature (K)
-   * @param xco2 mole fraction of CO2 in liquid phase (-)
-   * @param yh2o mole fraction of H2O in gas phase (-)
-   * @return fugacity coefficient
-   */
-  Real fugacityCoefficientCO2HighTemp(Real pressure, Real temperature, Real xco2, Real yh2o) const;
+  Real fugacityCoefficientCO2HighTemp(
+      Real pressure, Real temperature, Real co2_density, Real xco2, Real yh2o) const;
+  ///@}
 
   /**
    * Activity coefficient of H2O
@@ -396,13 +393,12 @@ public:
    *
    * @param pressure gas pressure (Pa)
    * @param temperature fluid temperature (K)
+   * @param co2_density CO2 density (kg/m^3)
    * @param[out] xco2 mole fraction of CO2 in liquid phase (-)
    * @param[out] yh2o mole fraction of H2O in gas phase (-)
    */
-  void solveEquilibriumMoleFractionHighTemp(Real pressure,
-                                            Real temperature,
-                                            Real & xco2,
-                                            Real & yh2o) const;
+  void solveEquilibriumMoleFractionHighTemp(
+      Real pressure, Real temperature, Real co2_density, Real & xco2, Real & yh2o) const;
 
 protected:
   /// Check the input variables
@@ -423,21 +419,30 @@ protected:
   void smoothCubicInterpolation(
       Real temperature, Real f0, Real df0, Real f1, Real df1, Real & value, Real & deriv) const;
 
-  /*
+  ///@{
+  /**
    * The function A (Eq. (11) of Spycher, Pruess and Ennis-King (2003) for T <= 100C,
    * and Eqs. (10) and (17) of Spycher and Pruess (2010) for T > 100C)
    *
    * @param pressure gas pressure (Pa)
    * @param temperature fluid temperature (K)
+   * @param co2_density CO2 density (kg/m^3)
    * @param xco2 mole fraction of CO2 in liquid phase (-)
    * @param yh2o mole fraction of H2O in gas phase (-)
    * @param[out] A the function A
    * @param[out] B the function B
    */
-  void
-  funcABHighTemp(Real pressure, Real temperature, Real xco2, Real yh2o, Real & A, Real & B) const;
   void funcABHighTemp(Real pressure,
                       Real temperature,
+                      Real co2_density,
+                      Real xco2,
+                      Real yh2o,
+                      Real & A,
+                      Real & B) const;
+
+  void funcABHighTemp(Real pressure,
+                      Real temperature,
+                      Real co2_density,
                       Real xco2,
                       Real yh2o,
                       Real & A,
@@ -449,12 +454,16 @@ protected:
 
   void funcABLowTemp(Real pressure,
                      Real temperature,
+                     Real co2_density,
+                     Real dco2_density_dp,
+                     Real dco2_density_dT,
                      Real & A,
                      Real & dA_dp,
                      Real & dA_dT,
                      Real & B,
                      Real & dB_dp,
                      Real & dB_dT) const;
+  ///@}
 
   /// Salt component index
   const unsigned int _salt_component;

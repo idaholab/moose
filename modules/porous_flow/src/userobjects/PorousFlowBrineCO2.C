@@ -531,6 +531,9 @@ PorousFlowBrineCO2::equilibriumMassFractions(Real pressure,
                                              Real & dYh2o_dT,
                                              Real & dYh2o_dX) const
 {
+  Real co2_density, dco2_density_dp, dco2_density_dT;
+  _co2_fp.rho_dpT(pressure, temperature, co2_density, dco2_density_dp, dco2_density_dT);
+
   // Mole fractions at equilibrium
   Real xco2, yh2o;
   equilibriumMoleFractions(pressure, temperature, xco2, yh2o);
@@ -545,9 +548,20 @@ PorousFlowBrineCO2::equilibriumMassFractions(Real pressure,
 
   Real A, dA_dp, dA_dT, B, dB_dp, dB_dT;
   if (temperature <= 373.15)
-    funcABLowTemp(pressure, temperature, A, dA_dp, dA_dT, B, dB_dp, dB_dT);
+    funcABLowTemp(pressure,
+                  temperature,
+                  co2_density,
+                  dco2_density_dp,
+                  dco2_density_dT,
+                  A,
+                  dA_dp,
+                  dA_dT,
+                  B,
+                  dB_dp,
+                  dB_dT);
   else
-    funcABHighTemp(pressure, temperature, xco2, yh2o, A, dA_dp, dA_dT, B, dB_dp, dB_dT);
+    funcABHighTemp(
+        pressure, temperature, co2_density, xco2, yh2o, A, dA_dp, dA_dT, B, dB_dp, dB_dT);
 
   // The molality of CO2 in the H2O-rich liquid phase is (note: no salinty effect)
   const Real mCO2 = xco2 * _invMh2o / (1.0 - xco2);
@@ -630,6 +644,9 @@ PorousFlowBrineCO2::equilibriumMassFractions(Real pressure,
 void
 PorousFlowBrineCO2::fugacityCoefficientsLowTemp(Real pressure,
                                                 Real temperature,
+                                                Real co2_density,
+                                                Real dco2_density_dp,
+                                                Real dco2_density_dT,
                                                 Real & fco2,
                                                 Real & dfco2_dp,
                                                 Real & dfco2_dT,
@@ -644,13 +661,11 @@ PorousFlowBrineCO2::fugacityCoefficientsLowTemp(Real pressure,
 
   // Need pressure in bar
   const Real pbar = pressure * 1.0e-5;
-  // CO2 density and derivatives wrt pressure and temperature
-  Real gas_density, dgas_density_dp, dgas_density_dT;
-  _co2_fp.rho_dpT(pressure, temperature, gas_density, dgas_density_dp, dgas_density_dT);
+
   // Molar volume in cm^3/mol
-  const Real V = _Mco2 / gas_density * 1.0e6;
-  const Real dV_dp = -V / gas_density * dgas_density_dp;
-  const Real dV_dT = -V / gas_density * dgas_density_dT;
+  const Real V = _Mco2 / co2_density * 1.0e6;
+  const Real dV_dp = -V / co2_density * dco2_density_dp;
+  const Real dV_dT = -V / co2_density * dco2_density_dT;
 
   // Redlich-Kwong parameters
   const Real aCO2 = 7.54e7 - 4.13e4 * temperature;
@@ -702,21 +717,27 @@ PorousFlowBrineCO2::fugacityCoefficientsLowTemp(Real pressure,
 }
 
 void
-PorousFlowBrineCO2::fugacityCoefficientsHighTemp(
-    Real pressure, Real temperature, Real xco2, Real yh2o, Real & fco2, Real & fh2o) const
+PorousFlowBrineCO2::fugacityCoefficientsHighTemp(Real pressure,
+                                                 Real temperature,
+                                                 Real co2_density,
+                                                 Real xco2,
+                                                 Real yh2o,
+                                                 Real & fco2,
+                                                 Real & fh2o) const
 {
   if (temperature <= 373.15)
     mooseError(name(),
                ": fugacityCoefficientsHighTemp() is not valid for T <= 373.15K. Use "
                "fugacityCoefficientsLowTemp() instead");
 
-  fh2o = fugacityCoefficientH2OHighTemp(pressure, temperature, xco2, yh2o);
-  fco2 = fugacityCoefficientCO2HighTemp(pressure, temperature, xco2, yh2o);
+  fh2o = fugacityCoefficientH2OHighTemp(pressure, temperature, co2_density, xco2, yh2o);
+  fco2 = fugacityCoefficientCO2HighTemp(pressure, temperature, co2_density, xco2, yh2o);
 }
 
 void
 PorousFlowBrineCO2::fugacityCoefficientsHighTemp(Real pressure,
                                                  Real temperature,
+                                                 Real co2_density,
                                                  Real xco2,
                                                  Real yh2o,
                                                  Real & fco2,
@@ -731,39 +752,34 @@ PorousFlowBrineCO2::fugacityCoefficientsHighTemp(Real pressure,
                ": fugacityCoefficientsHighTemp() is not valid for T <= 373.15K. Use "
                "fugacityCoefficientsLowTemp() instead");
 
-  fh2o = fugacityCoefficientH2OHighTemp(pressure, temperature, xco2, yh2o);
-  fco2 = fugacityCoefficientCO2HighTemp(pressure, temperature, xco2, yh2o);
+  fh2o = fugacityCoefficientH2OHighTemp(pressure, temperature, co2_density, xco2, yh2o);
+  fco2 = fugacityCoefficientCO2HighTemp(pressure, temperature, co2_density, xco2, yh2o);
 
   // Derivatives by finite difference
   const Real dp = 1.0e-2;
   const Real dT = 1.0e-4;
 
-  Real fh2o2 = fugacityCoefficientH2OHighTemp(pressure + dp, temperature, xco2, yh2o);
-  Real fco22 = fugacityCoefficientCO2HighTemp(pressure + dp, temperature, xco2, yh2o);
+  Real fh2o2 = fugacityCoefficientH2OHighTemp(pressure + dp, temperature, co2_density, xco2, yh2o);
+  Real fco22 = fugacityCoefficientCO2HighTemp(pressure + dp, temperature, xco2, co2_density, yh2o);
 
   dfh2o_dp = (fh2o2 - fh2o) / dp;
   dfco2_dp = (fco22 - fco2) / dp;
 
-  fh2o2 = fugacityCoefficientH2OHighTemp(pressure, temperature + dT, xco2, yh2o);
-  fco22 = fugacityCoefficientCO2HighTemp(pressure, temperature + dT, xco2, yh2o);
+  fh2o2 = fugacityCoefficientH2OHighTemp(pressure, temperature + dT, co2_density, xco2, yh2o);
+  fco22 = fugacityCoefficientCO2HighTemp(pressure, temperature + dT, co2_density, xco2, yh2o);
 
   dfh2o_dT = (fh2o2 - fh2o) / dT;
   dfco2_dT = (fco22 - fco2) / dT;
 }
 
 Real
-PorousFlowBrineCO2::fugacityCoefficientH2OHighTemp(Real pressure,
-                                                   Real temperature,
-                                                   Real xco2,
-                                                   Real yh2o) const
+PorousFlowBrineCO2::fugacityCoefficientH2OHighTemp(
+    Real pressure, Real temperature, Real co2_density, Real xco2, Real yh2o) const
 {
   // Need pressure in bar
   const Real pbar = pressure * 1.0e-5;
-  // CO2 density and derivatives wrt pressure and temperature
-  Real gas_density, dgas_density_dp, dgas_density_dT;
-  _co2_fp.rho_dpT(pressure, temperature, gas_density, dgas_density_dp, dgas_density_dT);
   // Molar volume in cm^3/mol
-  const Real V = _Mco2 / gas_density * 1.0e6;
+  const Real V = _Mco2 / co2_density * 1.0e6;
 
   // Redlich-Kwong parameters
   const Real yco2 = 1.0 - yh2o;
@@ -800,18 +816,13 @@ PorousFlowBrineCO2::fugacityCoefficientH2OHighTemp(Real pressure,
 }
 
 Real
-PorousFlowBrineCO2::fugacityCoefficientCO2HighTemp(Real pressure,
-                                                   Real temperature,
-                                                   Real xco2,
-                                                   Real yh2o) const
+PorousFlowBrineCO2::fugacityCoefficientCO2HighTemp(
+    Real pressure, Real temperature, Real co2_density, Real xco2, Real yh2o) const
 {
   // Need pressure in bar
   const Real pbar = pressure * 1.0e-5;
-  // CO2 density and derivatives wrt pressure and temperature
-  Real gas_density, dgas_density_dp, dgas_density_dT;
-  _co2_fp.rho_dpT(pressure, temperature, gas_density, dgas_density_dp, dgas_density_dT);
   // Molar volume in cm^3/mol
-  const Real V = _Mco2 / gas_density * 1.0e6;
+  const Real V = _Mco2 / co2_density * 1.0e6;
 
   // Redlich-Kwong parameters
   const Real yco2 = 1.0 - yh2o;
@@ -992,11 +1003,25 @@ PorousFlowBrineCO2::equilibriumMoleFractions(Real pressure,
                                              Real & xco2,
                                              Real & yh2o) const
 {
+  // CO2 density and derivatives wrt pressure and temperature
+  Real co2_density, dco2_density_dp, dco2_density_dT;
+  _co2_fp.rho_dpT(pressure, temperature, co2_density, dco2_density_dp, dco2_density_dT);
+
   if (temperature <= _Tlower)
   {
     // Assume infinite dilution (yh20 = 0 and xco2 = 0) in low temperature regime
     Real A, dA_dp, dA_dT, B, dB_dp, dB_dT;
-    funcABLowTemp(pressure, temperature, A, dA_dp, dA_dT, B, dB_dp, dB_dT);
+    funcABLowTemp(pressure,
+                  temperature,
+                  co2_density,
+                  dco2_density_dp,
+                  dco2_density_dT,
+                  A,
+                  dA_dp,
+                  dA_dT,
+                  B,
+                  dB_dp,
+                  dB_dT);
 
     yh2o = (1.0 - B) / (1.0 / A - B);
     xco2 = B * (1.0 - yh2o);
@@ -1007,8 +1032,22 @@ PorousFlowBrineCO2::equilibriumMoleFractions(Real pressure,
     const Real Tint = (temperature - _Tlower) / 10.0;
 
     // Equilibrium mole fractions and derivatives at the lower temperature
+    // CO2 density and derivatives wrt pressure and temperature
+    Real co2_density_lower, dco2_density_lower_dp, dco2_density_lower_dT;
+    _co2_fp.rho_dpT(
+        pressure, _Tlower, co2_density_lower, dco2_density_lower_dp, dco2_density_lower_dT);
     Real A, dA_dp, dA_dT, B, dB_dp, dB_dT;
-    funcABLowTemp(pressure, _Tlower, A, dA_dp, dA_dT, B, dB_dp, dB_dT);
+    funcABLowTemp(pressure,
+                  _Tlower,
+                  co2_density_lower,
+                  dco2_density_lower_dp,
+                  dco2_density_lower_dT,
+                  A,
+                  dA_dp,
+                  dA_dT,
+                  B,
+                  dB_dp,
+                  dB_dT);
 
     const Real yh2o_lower = (1.0 - B) / (1.0 / A - B);
     const Real xco2_lower = B * (1.0 - yh2o_lower);
@@ -1019,9 +1058,13 @@ PorousFlowBrineCO2::equilibriumMoleFractions(Real pressure,
 
     // Equilibrium mole fractions and derivatives at the upper temperature
     Real xco2_upper, yh2o_upper;
-    solveEquilibriumMoleFractionHighTemp(pressure, _Tupper, xco2_upper, yh2o_upper);
+    Real co2_density_upper = _co2_fp.rho(pressure, _Tupper);
 
-    funcABHighTemp(pressure, _Tupper, xco2_upper, yh2o_upper, A, dA_dp, dA_dT, B, dB_dp, dB_dT);
+    solveEquilibriumMoleFractionHighTemp(
+        pressure, _Tupper, co2_density_upper, xco2_upper, yh2o_upper);
+
+    funcABHighTemp(
+        pressure, _Tupper, co2_density, xco2_upper, yh2o_upper, A, dA_dp, dA_dT, B, dB_dp, dB_dT);
     const Real dyh2o_dT_upper =
         ((1.0 - B) * dA_dT + (A - 1.0) * A * dB_dT) / (1.0 - A * B) / (1.0 - A * B);
     const Real dxco2_dT_upper = dB_dT * (1.0 - yh2o_upper) - B * dyh2o_dT_upper;
@@ -1035,13 +1078,16 @@ PorousFlowBrineCO2::equilibriumMoleFractions(Real pressure,
   else
   {
     // Equilibrium mole fractions solved using iteration in this regime
-    solveEquilibriumMoleFractionHighTemp(pressure, temperature, xco2, yh2o);
+    solveEquilibriumMoleFractionHighTemp(pressure, temperature, co2_density, xco2, yh2o);
   }
 }
 
 void
 PorousFlowBrineCO2::funcABLowTemp(Real pressure,
                                   Real temperature,
+                                  Real co2_density,
+                                  Real dco2_density_dp,
+                                  Real dco2_density_dT,
                                   Real & A,
                                   Real & dA_dp,
                                   Real & dA_dT,
@@ -1072,8 +1118,17 @@ PorousFlowBrineCO2::funcABLowTemp(Real pressure,
   // Fugacity coefficients
   Real phiH2O, dphiH2O_dp, dphiH2O_dT;
   Real phiCO2, dphiCO2_dp, dphiCO2_dT;
-  fugacityCoefficientsLowTemp(
-      pressure, temperature, phiCO2, dphiCO2_dp, dphiCO2_dT, phiH2O, dphiH2O_dp, dphiH2O_dT);
+  fugacityCoefficientsLowTemp(pressure,
+                              temperature,
+                              co2_density,
+                              dco2_density_dp,
+                              dco2_density_dT,
+                              phiCO2,
+                              dphiCO2_dp,
+                              dphiCO2_dT,
+                              phiH2O,
+                              dphiH2O_dp,
+                              dphiH2O_dT);
 
   // Activity coefficients (note: no xco2 dependence)
   const Real gammaH2O = activityCoefficientH2O(temperature, 0.0);
@@ -1097,8 +1152,13 @@ PorousFlowBrineCO2::funcABLowTemp(Real pressure,
 }
 
 void
-PorousFlowBrineCO2::funcABHighTemp(
-    Real pressure, Real temperature, Real xco2, Real yh2o, Real & A, Real & B) const
+PorousFlowBrineCO2::funcABHighTemp(Real pressure,
+                                   Real temperature,
+                                   Real co2_density,
+                                   Real xco2,
+                                   Real yh2o,
+                                   Real & A,
+                                   Real & B) const
 {
   if (temperature <= 373.15)
     mooseError(name(),
@@ -1125,7 +1185,7 @@ PorousFlowBrineCO2::funcABHighTemp(
 
   // Fugacity coefficients
   Real phiH2O, phiCO2;
-  fugacityCoefficientsHighTemp(pressure, temperature, xco2, yh2o, phiCO2, phiH2O);
+  fugacityCoefficientsHighTemp(pressure, temperature, co2_density, xco2, yh2o, phiCO2, phiH2O);
 
   // Activity coefficients
   const Real gammaH2O = activityCoefficientH2O(temperature, xco2);
@@ -1138,6 +1198,7 @@ PorousFlowBrineCO2::funcABHighTemp(
 void
 PorousFlowBrineCO2::funcABHighTemp(Real pressure,
                                    Real temperature,
+                                   Real co2_density,
                                    Real xco2,
                                    Real yh2o,
                                    Real & A,
@@ -1147,27 +1208,25 @@ PorousFlowBrineCO2::funcABHighTemp(Real pressure,
                                    Real & dB_dp,
                                    Real & dB_dT) const
 {
-  funcABHighTemp(pressure, temperature, xco2, yh2o, A, B);
+  funcABHighTemp(pressure, temperature, co2_density, xco2, yh2o, A, B);
 
-  // Use finite differences for derivatives for the high temperature regime
+  // Use finite differences for derivatives in the high temperature regime
   const Real dp = 1.0e-2;
   const Real dT = 1.0e-6;
 
   Real A2, B2;
-  funcABHighTemp(pressure + dp, temperature, xco2, yh2o, A2, B2);
+  funcABHighTemp(pressure + dp, temperature, co2_density, xco2, yh2o, A2, B2);
   dA_dp = (A2 - A) / dp;
   dB_dp = (B2 - B) / dp;
 
-  funcABHighTemp(pressure, temperature + dT, xco2, yh2o, A2, B2);
+  funcABHighTemp(pressure, temperature + dT, co2_density, xco2, yh2o, A2, B2);
   dA_dT = (A2 - A) / dT;
   dB_dT = (B2 - B) / dT;
 }
 
 void
-PorousFlowBrineCO2::solveEquilibriumMoleFractionHighTemp(Real pressure,
-                                                         Real temperature,
-                                                         Real & xco2,
-                                                         Real & yh2o) const
+PorousFlowBrineCO2::solveEquilibriumMoleFractionHighTemp(
+    Real pressure, Real temperature, Real co2_density, Real & xco2, Real & yh2o) const
 {
   // Initial guess for yh2o and xco2 (from Spycher and Pruess (2010))
   Real y = _brine_fp.vaporPressure(temperature, 0.0) / pressure;
@@ -1181,7 +1240,7 @@ PorousFlowBrineCO2::solveEquilibriumMoleFractionHighTemp(Real pressure,
   }
   else
   {
-    // Residual function for Netwon-Raphson
+    // Residual function for Newton-Raphson
     auto fy = [](Real y, Real A, Real B) { return y - (1.0 - B) / (1.0 / A - B); };
 
     // Derivative of fy wrt y
@@ -1197,13 +1256,13 @@ PorousFlowBrineCO2::solveEquilibriumMoleFractionHighTemp(Real pressure,
     unsigned int iter = 0;
     const Real tol = 1.0e-12;
     const unsigned int max_its = 10;
-    funcABHighTemp(pressure, temperature, x, y, A, B);
+    funcABHighTemp(pressure, temperature, co2_density, x, y, A, B);
 
     while (std::abs(fy(y, A, B)) > tol)
     {
-      funcABHighTemp(pressure, temperature, x, y, A, B);
+      funcABHighTemp(pressure, temperature, co2_density, x, y, A, B);
       // Finite difference derivatives of A and B wrt y
-      funcABHighTemp(pressure, temperature, x, y + dy, dA, dB);
+      funcABHighTemp(pressure, temperature, co2_density, x, y + dy, dA, dB);
       dA = (dA - A) / dy;
       dB = (dB - B) / dy;
 
