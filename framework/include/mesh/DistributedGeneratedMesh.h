@@ -42,6 +42,16 @@ protected:
                               const ElemType type = INVALID_ELEM,
                               const bool gauss_lobatto_grid = false);
 
+  void build_square(UnstructuredMesh & mesh,
+                    const unsigned int nx,
+                    const unsigned int ny,
+                    const Real xmin = 0.,
+                    const Real xmax = 1.,
+                    const Real ymin = 0.,
+                    const Real ymax = 1.,
+                    const ElemType type = INVALID_ELEM,
+                    const bool gauss_lobatto_grid = false);
+
   ///
   bool _verbose;
 

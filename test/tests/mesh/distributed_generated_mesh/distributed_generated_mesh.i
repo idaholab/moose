@@ -1,9 +1,11 @@
 [Mesh]
   type = DistributedGeneratedMesh
 #  type = GeneratedMesh
-  nx = 100
+  nx = 2
+  ny = 2
   xmax = 100
-  dim = 1
+  dim = 2
+  verbose = true
 []
 
 [Variables]
