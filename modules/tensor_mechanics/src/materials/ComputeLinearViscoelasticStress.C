@@ -53,8 +53,8 @@ ComputeLinearViscoelasticStress::initQpStatefulProperties()
 void
 ComputeLinearViscoelasticStress::computeQpStress()
 {
-  _creep_strain[_qp] = _mechanical_strain[_qp] -
-                       (_apparent_elasticity_tensor[_qp] * _elasticity_tensor_inv[_qp]) *
+  _creep_strain[_qp] = 
+      _mechanical_strain[_qp] - (_apparent_elasticity_tensor[_qp] * _elasticity_tensor_inv[_qp]) *
                            (_mechanical_strain[_qp] - _apparent_creep_strain[_qp]);
 
   _elastic_strain[_qp] = _mechanical_strain[_qp] - _creep_strain[_qp];
