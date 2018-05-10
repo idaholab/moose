@@ -60,8 +60,8 @@ FEProblem::addLineSearch(const InputParameters & parameters)
   if (enum_line_search == Moose::LS_CONTACT)
   {
 #ifdef LIBMESH_HAVE_PETSC
-#if PETSC_VERSION_LESS_THAN(3, 3, 0)
-    mooseError("Shell line searches only became available in Petsc in version 3.3!");
+#if PETSC_VERSION_LESS_THAN(3, 6, 0)
+    mooseError("Shell line searches only became available in Petsc in version 3.6.0!");
 #else
     InputParameters ls_params = _factory.getValidParams("PetscContactLineSearch");
 

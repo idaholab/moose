@@ -48,5 +48,7 @@
     min_parallel = 4
     abs_zero = 1e-7
     max_time = 800
+    # The linesearch used by this test requires PETSc >= 3.6.0.
+    petsc_version = '>=3.6.0'
   [../]
 []
