@@ -90,9 +90,16 @@ AStableDirk4::computeTimeDerivatives()
 void
 AStableDirk4::solve()
 {
-  if (_t_step == 1 && _safe_start)
-    _bootstrap_method->solve();
+  // Reset iteration counts
+  _n_nonlinear_iterations = 0;
+  _n_linear_iterations = 0;
 
+  if (_t_step == 1 && _safe_start)
+  {
+    _bootstrap_method->solve();
+    _n_nonlinear_iterations = _bootstrap_method->getNumNonlinearIterations();
+    _n_linear_iterations = _bootstrap_method->getNumLinearIterations();
+  }
   else
   {
     // Time at end of step
@@ -124,6 +131,10 @@ AStableDirk4::solve()
 
       // Do the solve
       _fe_problem.getNonlinearSystemBase().system().solve();
+
+      // Update the iteration counts
+      _n_nonlinear_iterations += getNumNonlinearIterationsLastSolve();
+      _n_linear_iterations += getNumLinearIterationsLastSolve();
     }
   }
 }

@@ -24,7 +24,8 @@ namespace libMesh
 {
 template <typename T>
 class NumericVector;
-}
+class NonlinearImplicitSystem;
+} // namespace libMesh
 
 template <>
 InputParameters validParams<TimeIntegrator>();
@@ -66,6 +67,10 @@ public:
   virtual void init() {}
   virtual void preSolve() {}
   virtual void preStep() {}
+
+  /**
+   * Solves the time step and sets the number of nonlinear and linear iterations.
+   */
   virtual void solve();
 
   /**
@@ -95,10 +100,33 @@ public:
   virtual int order() = 0;
   virtual void computeTimeDerivatives() = 0;
 
+  /**
+   * Gets the total number of nonlinear iterations over all stages of the time step.
+   */
+  virtual unsigned int getNumNonlinearIterations() const { return _n_nonlinear_iterations; }
+
+  /**
+   * Gets the total number of linear iterations over all stages of the time step.
+   */
+  virtual unsigned int getNumLinearIterations() const { return _n_linear_iterations; }
+
 protected:
+  /**
+   * Gets the number of nonlinear iterations in the most recent solve.
+   */
+  unsigned int getNumNonlinearIterationsLastSolve() const;
+
+  /**
+   * Gets the number of linear iterations in the most recent solve.
+   */
+  unsigned int getNumLinearIterationsLastSolve() const;
+
   FEProblemBase & _fe_problem;
   SystemBase & _sys;
   NonlinearSystemBase & _nl;
+
+  /// Nonlinear implicit system, if applicable; otherwise, nullptr
+  const NonlinearImplicitSystem * _nonlinear_implicit_system;
 
   /// solution vector for u^dot
   NumericVector<Number> & _u_dot;
@@ -118,6 +146,11 @@ protected:
   NumericVector<Number> & _Re_time;
   /// residual vector for non-time contributions
   NumericVector<Number> & _Re_non_time;
+
+  /// Total number of nonlinear iterations over all stages of the time step
+  unsigned int _n_nonlinear_iterations;
+  /// Total number of linear iterations over all stages of the time step
+  unsigned int _n_linear_iterations;
 };
 
 #endif /* TIMEINTEGRATOR_H */

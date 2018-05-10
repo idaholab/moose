@@ -150,13 +150,16 @@ ActuallyExplicitEuler::solve()
   {
     case CONSISTENT:
     {
-      _linear_solver->solve(mass_matrix,
-                            _explicit_euler_update,
-                            _explicit_residual,
-                            es.parameters.get<Real>("linear solver tolerance"),
-                            es.parameters.get<unsigned int>("linear solver maximum iterations"));
+      const auto num_its_and_final_tol = _linear_solver->solve(
+          mass_matrix,
+          _explicit_euler_update,
+          _explicit_residual,
+          es.parameters.get<Real>("linear solver tolerance"),
+          es.parameters.get<unsigned int>("linear solver maximum iterations"));
 
       converged = checkLinearConvergence();
+
+      _n_linear_iterations = num_its_and_final_tol.first;
 
       break;
     }
@@ -177,6 +180,8 @@ ActuallyExplicitEuler::solve()
       auto sum = _explicit_euler_update.sum();
       converged = std::isfinite(sum);
 
+      _n_linear_iterations = 0;
+
       break;
     }
     case LUMP_PRECONDITIONED:
@@ -184,13 +189,16 @@ ActuallyExplicitEuler::solve()
       mass_matrix.vector_mult(_mass_matrix_diag, *_ones);
       _mass_matrix_diag.reciprocal();
 
-      _linear_solver->solve(mass_matrix,
-                            _explicit_euler_update,
-                            _explicit_residual,
-                            es.parameters.get<Real>("linear solver tolerance"),
-                            es.parameters.get<unsigned int>("linear solver maximum iterations"));
+      const auto num_its_and_final_tol = _linear_solver->solve(
+          mass_matrix,
+          _explicit_euler_update,
+          _explicit_residual,
+          es.parameters.get<Real>("linear solver tolerance"),
+          es.parameters.get<unsigned int>("linear solver maximum iterations"));
 
       converged = checkLinearConvergence();
+
+      _n_linear_iterations = num_its_and_final_tol.first;
 
       break;
     }
