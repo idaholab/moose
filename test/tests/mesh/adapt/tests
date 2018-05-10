@@ -2,7 +2,7 @@
   [./displaced_test]
     type = 'Exodiff'
     input = 'displaced_adapt_test.i'
-    exodiff = 'displaced_adapt_test_out.e-s002 displaced_adapt_test_out.e-s002'
+    exodiff = 'displaced_adapt_test_out.e-s002'
     group = 'adaptive'
     max_parallel = 1
   [../]
