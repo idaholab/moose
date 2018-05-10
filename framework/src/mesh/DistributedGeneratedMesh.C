@@ -408,7 +408,7 @@ add_element_edge(const dof_id_type nx,
       Elem * elem = new Edge2;
       elem->set_id(elem_id);
       elem->processor_id() = pid;
-      //      elem->set_unique_id() = elem_id;
+      elem->set_unique_id() = elem_id;
       elem = mesh.add_elem(elem);
       elem->set_node(0) = node0_ptr;
       elem->set_node(1) = node1_ptr;
@@ -730,8 +730,8 @@ DistributedGeneratedMesh::distributed_build_line(UnstructuredMesh & mesh,
   // Already partitioned!
   mesh.skip_partitioning(true);
 
-  mesh.update_post_partitioning();
-  MeshCommunication().make_elems_parallel_consistent(mesh);
+  //  mesh.update_post_partitioning();
+  //  MeshCommunication().make_elems_parallel_consistent(mesh);
   MeshCommunication().make_node_unique_ids_parallel_consistent(mesh);
 
   /*
@@ -743,7 +743,7 @@ DistributedGeneratedMesh::distributed_build_line(UnstructuredMesh & mesh,
               << " uid: " << elem_ptr->unique_id() << std::endl;
 
   std::cout << "Getting ready to prepare for use" << std::endl;
-  mesh.prepare_for_use(false, false); // No need to renumber or find neighbors - done did it.
+  mesh.prepare_for_use(true, true); // No need to renumber or find neighbors - done did it.
 
   for (auto & elem_ptr : mesh.element_ptr_range())
     std::cout << "Elem: " << elem_ptr->id() << " pid: " << elem_ptr->processor_id() << std::endl;
