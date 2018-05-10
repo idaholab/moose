@@ -88,24 +88,10 @@ TEST_F(PorousFlowBrineCO2Test, fugacityCoefficients)
   ABS_TEST("phiCO2", phiCO2, 0.401938, 1.0e-6);
   ABS_TEST("phiH2O", phiH2O, 0.0898968, 1.0e-6);
 
-  // Make sure that the method fugacityCoefficients() correctly returns the same values
-  // when infinite dilution is assumed
-  Real yh2o = 0.0, xco2 = 0.0;
-
-  Real phiCO2_2, dphiCO2_2_dp, dphiCO2_2_dT, phiH2O_2, dphiH2O_2_dp, dphiH2O_2_dT;
-  _fp->fugacityCoefficients(
-      p, T, xco2, yh2o, phiCO2_2, dphiCO2_2_dp, dphiCO2_2_dT, phiH2O_2, dphiH2O_2_dp, dphiH2O_2_dT);
-
-  ABS_TEST("phiH2O", phiH2O, phiH2O_2, 1.0e-12);
-  ABS_TEST("phiCO2", phiCO2, phiCO2_2, 1.0e-12);
-  ABS_TEST("dphiH2O_dp", dphiH2O_dp, dphiH2O_2_dp, 1.0e-12);
-  ABS_TEST("dphiH2O_dT", dphiH2O_dT, dphiH2O_2_dT, 1.0e-12);
-  ABS_TEST("dphiCO2_dp", dphiCO2_dp, dphiCO2_2_dp, 1.0e-12);
-  ABS_TEST("dphiCO2_dT", dphiCO2_dT, dphiCO2_2_dT, 1.0e-12);
-
   // Test the high temperature formulation
   T = 423.15;
 
+  Real xco2, yh2o;
   _fp->solveEquilibriumMoleFractionHighTemp(p, T, xco2, yh2o);
   phiH2O = _fp->fugacityCoefficientH2OHighTemp(p, T, xco2, yh2o);
   phiCO2 = _fp->fugacityCoefficientCO2HighTemp(p, T, xco2, yh2o);
@@ -114,15 +100,8 @@ TEST_F(PorousFlowBrineCO2Test, fugacityCoefficients)
   ABS_TEST("phiCO2", phiCO2, 0.641936764138, 1.0e-10);
 
   // Test that the same results are returned in fugacityCoefficientsHighTemp()
-  _fp->fugacityCoefficientsHighTemp(
-      p, T, xco2, yh2o, phiCO2_2, dphiCO2_dp, dphiCO2_dT, phiH2O_2, dphiH2O_dp, dphiH2O_dT);
-
-  ABS_TEST("phiH2O", phiH2O, phiH2O_2, 1.0e-12);
-  ABS_TEST("phiCO2", phiCO2, phiCO2_2, 1.0e-12);
-
-  // Test that the same results are returned in fugacityCoefficients()
-  _fp->fugacityCoefficients(
-      p, T, xco2, yh2o, phiCO2_2, dphiCO2_dp, dphiCO2_dT, phiH2O_2, dphiH2O_dp, dphiH2O_dT);
+  Real phiCO2_2, phiH2O_2;
+  _fp->fugacityCoefficientsHighTemp(p, T, xco2, yh2o, phiCO2_2, phiH2O_2);
 
   ABS_TEST("phiH2O", phiH2O, phiH2O_2, 1.0e-12);
   ABS_TEST("phiCO2", phiCO2, phiCO2_2, 1.0e-12);
