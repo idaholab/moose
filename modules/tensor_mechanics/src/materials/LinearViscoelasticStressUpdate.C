@@ -67,9 +67,9 @@ LinearViscoelasticStressUpdate::updateState(RankTwoTensor & strain_increment,
   RankTwoTensor current_mechanical_strain =
       elastic_strain_old + _creep_strain_old[_qp] + strain_increment;
 
-  _creep_strain[_qp] = current_mechanical_strain -
-                       (_apparent_elasticity_tensor[_qp] * _elasticity_tensor_inv[_qp]) *
-                           (current_mechanical_strain - _apparent_creep_strain[_qp]);
+  _creep_strain[_qp] =
+      current_mechanical_strain - (_apparent_elasticity_tensor[_qp] * _elasticity_tensor_inv[_qp]) *
+                                      (current_mechanical_strain - _apparent_creep_strain[_qp]);
 
   RankTwoTensor creep_strain_increment = _creep_strain[_qp] - _creep_strain_old[_qp];
 
