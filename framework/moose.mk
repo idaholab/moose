@@ -63,7 +63,7 @@ $(1):
 	@$$(shell mkdir -p $$@)
 endef
 
-include_files	:= $(shell find $(FRAMEWORK_DIR)/include -name "*.h" | grep -v "\.svn")
+include_files	:= $(shell find $(FRAMEWORK_DIR)/include -regex "[^\#~]*\.h")
 link_names := $(foreach i, $(include_files), $(all_header_dir)/$(notdir $(i)))
 
 # Create a rule for one symlink for one header file
@@ -88,9 +88,8 @@ $(call symlink_rules, $(all_header_dir), $(include_files))
 
 header_symlinks:: $(all_header_dir) $(link_names)
 
-
 moose_INC_DIRS := $(all_header_dir)
-moose_INC_DIRS += $(shell find $(FRAMEWORK_DIR)/contrib/*/include -type d -not -path "*/.svn*")
+moose_INC_DIRS += $(shell find $(FRAMEWORK_DIR)/contrib/*/include -type d)
 moose_INC_DIRS += "$(gtest_DIR)"
 moose_INC_DIRS += "$(hit_DIR)"
 moose_INCLUDE  := $(foreach i, $(moose_INC_DIRS), -I$(i))
@@ -101,8 +100,6 @@ moose_INCLUDE  := $(foreach i, $(moose_INC_DIRS), -I$(i))
 moose_LIB := $(FRAMEWORK_DIR)/libmoose-$(METHOD).la
 
 moose_LIBS := $(moose_LIB) $(pcre_LIB) $(hit_LIB)
-
-moose_srcfiles    := $(shell find $(moose_SRC_DIRS) -name "*.C")
 
 ### Unity Build ###
 ifeq ($(MOOSE_UNITY),true)
@@ -164,7 +161,10 @@ app_unity_srcfiles := $(foreach srcsubdir,$(unity_srcsubdirs),$(call unity_uniqu
 
 unity_srcfiles += $(app_unity_srcfiles)
 
-moose_srcfiles    := $(app_unity_srcfiles) $(shell find $(non_unity_srcsubdirs) -maxdepth 1 -name "*.C") $(shell find $(filter-out %/src,$(moose_SRC_DIRS)) -name "*.C")
+moose_srcfiles    := $(app_unity_srcfiles) $(shell find $(non_unity_srcsubdirs) -maxdepth 1 -regex "[^\#~]*\.C") $(shell find $(filter-out %/src,$(moose_SRC_DIRS)) -regex "[^\#~]*\.C")
+
+else # Non-Unity
+moose_srcfiles    := $(shell find $(moose_SRC_DIRS) -regex "[^\#~]*\.C")
 endif
 
 # source files
@@ -309,7 +309,6 @@ clean::
 # following paths from the search:
 # .) moose (ignore a possible MOOSE submodule)
 # .) .git  (don't accidentally delete any of git's metadata)
-# .) .svn  (don't accidentally delete any of svn's metadata)
 # Notes:
 # .) Be careful: running 'make -n clobber' will actually delete files!
 # .) 'make clobber' does not respect $(METHOD), it just deletes
