@@ -54,8 +54,7 @@ LinearViscoelasticityBase::LinearViscoelasticityBase(const InputParameters & par
         declareProperty<RankFourTensor>(_base_name + "apparent_elasticity_tensor")),
     _apparent_elasticity_tensor_inv(
         declareProperty<RankFourTensor>(_base_name + "apparent_elasticity_tensor_inv")),
-    _elasticity_tensor_inv(
-        declareProperty<RankFourTensor>(_elasticity_tensor_name + "_inv")),
+    _elasticity_tensor_inv(declareProperty<RankFourTensor>(_elasticity_tensor_name + "_inv")),
     _need_viscoelastic_properties_inverse(getParam<bool>("need_viscoelastic_properties_inverse")),
     _has_longterm_dashpot(false),
     _components(0),
@@ -98,7 +97,7 @@ LinearViscoelasticityBase::LinearViscoelasticityBase(const InputParameters & par
     getMaterialPropertyOld<RankFourTensor>(_base_name + "spring_elasticity_tensor_0_inv");
 }
 
-void 
+void
 LinearViscoelasticityBase::declareViscoelasticProperties()
 {
   for (unsigned int i = 0; i < _components; ++i)
@@ -107,20 +106,26 @@ LinearViscoelasticityBase::declareViscoelasticProperties()
 
     if (!_has_longterm_dashpot || (_components > 0 && i < _components - 1))
     {
-      _springs_elasticity_tensors.push_back(declareProperty<RankFourTensor>(_base_name + "spring_elasticity_tensor_" + ith));
+      _springs_elasticity_tensors.push_back(
+          declareProperty<RankFourTensor>(_base_name + "spring_elasticity_tensor_" + ith));
       getMaterialPropertyOld<RankFourTensor>(_base_name + "spring_elasticity_tensor_" + ith);
     }
 
     _dashpot_viscosities.push_back(declareProperty<Real>(_base_name + "dashpot_viscosity_" + ith));
-    _dashpot_viscosities_old.push_back(getMaterialPropertyOld<Real>(_base_name + "dashpot_viscosity_" + ith));
+    _dashpot_viscosities_old.push_back(
+        getMaterialPropertyOld<Real>(_base_name + "dashpot_viscosity_" + ith));
 
-    _viscous_strains.push_back(declareProperty<RankTwoTensor>(_base_name + "viscous_strain_" + ith));
-    _viscous_strains_old.push_back(getMaterialPropertyOld<RankTwoTensor>(_base_name + "viscous_strain_" + ith));
+    _viscous_strains.push_back(
+        declareProperty<RankTwoTensor>(_base_name + "viscous_strain_" + ith));
+    _viscous_strains_old.push_back(
+        getMaterialPropertyOld<RankTwoTensor>(_base_name + "viscous_strain_" + ith));
 
     if (_need_viscoelastic_properties_inverse)
     {
-      _springs_elasticity_tensors_inv.push_back(declareProperty<RankFourTensor>(_base_name + "spring_elasticity_tensor_" + ith + "_inv"));
-      _springs_elasticity_tensors_inv_old.push_back(getMaterialPropertyOld<RankFourTensor>(_base_name + "spring_elasticity_tensor_" + ith + "_inv"));
+      _springs_elasticity_tensors_inv.push_back(
+          declareProperty<RankFourTensor>(_base_name + "spring_elasticity_tensor_" + ith + "_inv"));
+      _springs_elasticity_tensors_inv_old.push_back(getMaterialPropertyOld<RankFourTensor>(
+          _base_name + "spring_elasticity_tensor_" + ith + "_inv"));
     }
   }
 }
@@ -129,8 +134,9 @@ void
 LinearViscoelasticityBase::initQpStatefulProperties()
 {
   if (_components != _viscous_strains.size())
-    mooseError("inconsistent numbers of dashpots and viscous strains in LinearViscoelasticityBase;"
-               " Make sure declareViscoelasticProperties has been called in the viscoelastic model");
+    mooseError(
+        "inconsistent numbers of dashpots and viscous strains in LinearViscoelasticityBase;"
+        " Make sure declareViscoelasticProperties has been called in the viscoelastic model");
 
   _apparent_creep_strain[_qp].zero();
   _apparent_elasticity_tensor[_qp].zero();
@@ -201,7 +207,8 @@ LinearViscoelasticityBase::computeQpViscoelasticPropertiesInv()
     if (MooseUtils::absoluteFuzzyEqual(_springs_elasticity_tensors[i].get()[_qp].L2norm(), 0.0))
       _springs_elasticity_tensors_inv[i].get()[_qp].zero();
     else
-      _springs_elasticity_tensors_inv[i].get()[_qp] = _springs_elasticity_tensors[i].get()[_qp].invSymm();
+      _springs_elasticity_tensors_inv[i].get()[_qp] =
+          _springs_elasticity_tensors[i].get()[_qp].invSymm();
   }
 }
 

@@ -40,8 +40,7 @@ ComputeLinearViscoelasticStress::ComputeLinearViscoelasticStress(const InputPara
         isParamValid("base_name") ? _base_name + "_creep_strain" : "creep_strain")),
     _apparent_creep_strain(getMaterialProperty<RankTwoTensor>("apparent_creep_strain")),
     _apparent_elasticity_tensor(getMaterialProperty<RankFourTensor>("apparent_elasticity_tensor")),
-    _elasticity_tensor_inv(
-        getMaterialProperty<RankFourTensor>("elasticity_tensor_inv"))
+    _elasticity_tensor_inv(getMaterialProperty<RankFourTensor>("elasticity_tensor_inv"))
 {
 }
 
@@ -54,10 +53,9 @@ ComputeLinearViscoelasticStress::initQpStatefulProperties()
 void
 ComputeLinearViscoelasticStress::computeQpStress()
 {
-  _creep_strain[_qp] =
-      _mechanical_strain[_qp] -
-      (_apparent_elasticity_tensor[_qp] * _elasticity_tensor_inv[_qp]) *
-          (_mechanical_strain[_qp] - _apparent_creep_strain[_qp]);
+  _creep_strain[_qp] = _mechanical_strain[_qp] -
+                       (_apparent_elasticity_tensor[_qp] * _elasticity_tensor_inv[_qp]) *
+                           (_mechanical_strain[_qp] - _apparent_creep_strain[_qp]);
 
   _elastic_strain[_qp] = _mechanical_strain[_qp] - _creep_strain[_qp];
 

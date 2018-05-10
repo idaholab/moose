@@ -198,7 +198,7 @@ protected:
   MaterialProperty<RankFourTensor> & _apparent_elasticity_tensor_inv;
 
   /// Instantaneous elasticity tensor. This IS the real elasticity tensor of the material
-//  MaterialProperty<RankFourTensor> & _instantaneous_elasticity_tensor;
+  //  MaterialProperty<RankFourTensor> & _instantaneous_elasticity_tensor;
   /// Inverse of the instaneous elasticity tensor
   MaterialProperty<RankFourTensor> & _elasticity_tensor_inv;
 
@@ -219,8 +219,10 @@ protected:
 
   ///@{ List of elasticity tensor of each subsequent spring in the chain
   std::vector<std::reference_wrapper<MaterialProperty<RankFourTensor>>> _springs_elasticity_tensors;
-  std::vector<std::reference_wrapper<MaterialProperty<RankFourTensor>>> _springs_elasticity_tensors_inv;
-  std::vector<std::reference_wrapper<const MaterialProperty<RankFourTensor>>> _springs_elasticity_tensors_inv_old;
+  std::vector<std::reference_wrapper<MaterialProperty<RankFourTensor>>>
+      _springs_elasticity_tensors_inv;
+  std::vector<std::reference_wrapper<const MaterialProperty<RankFourTensor>>>
+      _springs_elasticity_tensors_inv_old;
   ///@}
 
   ///@{ List of viscosities of each subsequent dashpot in the chain
