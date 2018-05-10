@@ -59,3 +59,14 @@ class TestHarnessTester(TestHarnessTestCase):
         e = cm.exception
 
         self.assertRegexpMatches(e.output, r'tests/test_harness.*?FAILED \(OUTFILE RACE CONDITION\)')
+
+    def testMultipleDuplicateOutputs(self):
+        """
+        Test for multiple duplicate outputs created by one test
+        """
+        with self.assertRaises(subprocess.CalledProcessError) as cm:
+            self.runTests('-i', 'multiple_duplicate_outputs')
+
+        e = cm.exception
+
+        self.assertRegexpMatches(e.output, r'FAILED \(DUPLICATE OUTFILES\)')

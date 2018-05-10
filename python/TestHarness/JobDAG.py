@@ -143,10 +143,17 @@ class JobDAG(object):
                     if match_job in job_list:
                         job_list.remove(match_job)
 
-        # Any multiple jobs left with the same output files, are race conditions
+        # Left over multiple items in job_list are problematic
         for outfile, job_list in output_to_job.iteritems():
-            if len(job_list) > 1:
+            # Same test has duplicate output files
+            if len(job_list) > 1 and len(set(job_list)) == 1:
+                job_list[0].setOutput('Duplicate output files:\n\t%s\n' % (outfile))
+                job_list[0].setStatus(job.error, 'DUPLICATE OUTFILES')
+
+            # Multiple tests will clobber eachothers output file
+            elif len(job_list) > 1:
                 for job in job_list:
+                    job.setOutput('Output file will over write pre-existing output file:\n\t%s\n' % (outfile))
                     job.setStatus(job.error, 'OUTFILE RACE CONDITION')
 
     def _haltDescent(self, job):
