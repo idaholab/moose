@@ -34,6 +34,7 @@
   [./duplicate]
     type = PythonUnitTest
     input = test_Duplicate.py
+    prereq = should_execute
   [../]
   [./deleted]
     type = PythonUnitTest

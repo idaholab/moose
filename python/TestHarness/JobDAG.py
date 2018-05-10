@@ -133,8 +133,8 @@ class JobDAG(object):
         for job in self.__job_dag.topological_sort():
             if job.getRunnable() and not job.isFinished():
                 for output_file in job.getOutputFiles():
-                    output_to_job[output_file] = output_to_job.get(output_file, set([]))
-                    output_to_job[output_file].add(job)
+                    output_to_job[output_file] = output_to_job.get(output_file, [])
+                    output_to_job[output_file].append(job)
 
         # Remove jobs which have accurate dependencies
         for outfile, job_list in output_to_job.iteritems():

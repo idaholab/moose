@@ -45,3 +45,17 @@ class TestHarnessTester(TestHarnessTestCase):
         self.assertNotRegexpMatches(output, 'heavy_out.e')
         # all
         self.assertNotRegexpMatches(output, 'FATAL TEST HARNESS ERROR')
+
+    def testDelayedDuplicateOutputs(self):
+        """
+        Test a more complex, delayed, race condition by running three tests. Two which launch
+        immediately, and a third, waiting on one job to finish. When it does, this third test
+        will write to the same output file, that one of the other tests which is still running
+        is writing to. Thus, causing a delayed race condition.
+        """
+        with self.assertRaises(subprocess.CalledProcessError) as cm:
+            self.runTests('-i', 'duplicate_outputs_prereqs')
+
+        e = cm.exception
+
+        self.assertRegexpMatches(e.output, r'tests/test_harness.*?FAILED \(OUTFILE RACE CONDITION\)')
