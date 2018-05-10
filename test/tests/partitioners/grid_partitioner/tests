@@ -1,0 +1,22 @@
+[Tests]
+  [./test]
+    requirement = 'MOOSE shall provide a simple regular grid-based partitioner'
+    design = '/GridPartitioner.md'
+    issues = '#11437'
+    type = 'Exodiff'
+    input = 'grid_partitioner.i'
+    exodiff = 'grid_partitioner_out.e'
+    min_parallel = 4
+    max_parallel = 4
+  [../]
+  [./error]
+    requirement = 'MOOSE shall error if the GridPartitioner is run on an incompatible number of processors'
+    design = '/GridPartitioner.md'
+    issues = '#11437'
+    type = 'RunException'
+    input = 'grid_partitioner.i'
+    min_parallel = 2
+    max_parallel = 2
+    expect_err = 'Number of cells in the GridPartitioner must match the number of MPI ranks'
+  [../]
+[]

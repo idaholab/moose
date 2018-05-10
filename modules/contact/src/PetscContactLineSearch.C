@@ -10,9 +10,7 @@
 #include "PetscContactLineSearch.h"
 
 #ifdef LIBMESH_HAVE_PETSC
-#if PETSC_VERSION_LESS_THAN(3, 3, 0)
-#else
-
+#if !PETSC_VERSION_LESS_THAN(3, 6, 0)
 #include "FEProblem.h"
 #include "NonlinearSystem.h"
 #include "libmesh/petsc_nonlinear_solver.h"
@@ -53,11 +51,7 @@ PetscContactLineSearch::lineSearch()
   KSP ksp;
   SNES snes = _solver->snes();
 
-#if PETSC_VERSION_LESS_THAN(3, 4, 0)
-  ierr = SNESGetSNESLineSearch(snes, &line_search);
-#else
   ierr = SNESGetLineSearch(snes, &line_search);
-#endif
   LIBMESH_CHKERR(ierr);
   ierr = SNESLineSearchGetVecs(line_search, &X, &F, &Y, &W, &G);
   LIBMESH_CHKERR(ierr);
@@ -200,5 +194,5 @@ PetscContactLineSearch::lineSearch()
   _old_contact_state = std::move(contact_state_stored);
 }
 
-#endif // PETSC_VERSION_LESS_THAN(3, 3, 0)
+#endif // !PETSC_VERSION_LESS_THAN(3, 3, 0)
 #endif // LIBMESH_HAVE_PETSC
