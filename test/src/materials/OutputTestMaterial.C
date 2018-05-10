@@ -8,6 +8,8 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "OutputTestMaterial.h"
+#include "RankTwoTensor.h"
+#include "RankFourTensor.h"
 
 registerMooseObject("MooseTestApp", OutputTestMaterial);
 
@@ -22,6 +24,12 @@ validParams<OutputTestMaterial>()
       "vector_property_name", "vector_property", "The name of the vector real property");
   params.addParam<std::string>(
       "tensor_property_name", "tensor_property", "The name of the tensor real property");
+  params.addParam<std::string>("ranktwotensor_property_name",
+                               "ranktwotensor_property",
+                               "The name of the rank two tensor property");
+  params.addParam<std::string>("rankfourtensor_property_name",
+                               "rankfourtensor_property",
+                               "The name of the rank four tensor property");
   params.addParam<Real>(
       "real_factor", 0, "Add this factor to all of the scalar real material property");
   params.addCoupledVar("variable",
@@ -36,6 +44,10 @@ OutputTestMaterial::OutputTestMaterial(const InputParameters & parameters)
         declareProperty<RealVectorValue>(getParam<std::string>("vector_property_name"))),
     _tensor_property(
         declareProperty<RealTensorValue>(getParam<std::string>("tensor_property_name"))),
+    _ranktwotensor_property(
+        declareProperty<RankTwoTensor>(getParam<std::string>("ranktwotensor_property_name"))),
+    _rankfourtensor_property(
+        declareProperty<RankFourTensor>(getParam<std::string>("rankfourtensor_property_name"))),
     _factor(getParam<Real>("real_factor")),
     _variable(coupledValue("variable"))
 {
@@ -58,4 +70,14 @@ OutputTestMaterial::computeQpProperties()
 
   RealTensorValue tensor(v, x * y, 0, -x * y, y * y);
   _tensor_property[_qp] = tensor;
+
+  _ranktwotensor_property[_qp] = tensor;
+
+  RankFourTensor rankfourtensor;
+  for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
+    for (unsigned int j = 0; j < LIBMESH_DIM; ++j)
+      for (unsigned int k = 0; k < LIBMESH_DIM; ++k)
+        for (unsigned int l = 0; l < LIBMESH_DIM; ++l)
+          _rankfourtensor_property[_qp](i, j, k, l) =
+              i * 1000 + j * 100 + k * 10 + l + _variable[_qp] / 10.0;
 }
