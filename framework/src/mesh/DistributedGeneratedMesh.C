@@ -766,6 +766,8 @@ add_element_quad(const dof_id_type nx,
 
       break;
     }
+    default:
+      mooseError("This element type is not supported by DistributedGeneratedMesh yet.");
   }
 }
 
@@ -1077,7 +1079,7 @@ DistributedGeneratedMesh::build_square(UnstructuredMesh & mesh,
                                        const Real ymin,
                                        const Real ymax,
                                        const ElemType type,
-                                       const bool gauss_lobatto_grid)
+                                       const bool /*gauss_lobatto_grid*/)
 {
   dof_id_type num_elems = nx * ny;
   const auto n_pieces = comm().size();
@@ -1248,11 +1250,15 @@ DistributedGeneratedMesh::build_square(UnstructuredMesh & mesh,
   std::set<dof_id_type> ghost_elems;
   get_ghost_neighbors_quad(nx, ny, mesh, ghost_elems);
 
-  /*
-
   // Add the ghosts to the mesh
   for (auto & ghost_id : ghost_elems)
-    add_element_edge(nx, ghost_id, part[ghost_id], type, mesh, _verbose);
+  {
+    dof_id_type i, j;
+
+    get_indices_quad(nx, ghost_id, i, j);
+
+    add_element_quad(nx, ny, i, j, ghost_id, part[ghost_id], type, mesh, _verbose);
+  }
 
   if (_verbose)
     std::cout << "After adding ghosts" << std::endl;
@@ -1274,6 +1280,7 @@ DistributedGeneratedMesh::build_square(UnstructuredMesh & mesh,
         std::cout << "Elem neighbor: " << elem_ptr->neighbor_ptr(s) << " is remote "
                   << (elem_ptr->neighbor_ptr(s) == remote_elem) << std::endl;
 
+  // Set RemoteElem neighbors
   for (auto & elem_ptr : mesh.element_ptr_range())
     for (unsigned int s = 0; s < elem_ptr->n_sides(); s++)
       if (!elem_ptr->neighbor(s) && !boundary_info.n_boundary_ids(elem_ptr, s))
@@ -1288,8 +1295,10 @@ DistributedGeneratedMesh::build_square(UnstructuredMesh & mesh,
         std::cout << "Elem neighbor: " << elem_ptr->neighbor_ptr(s) << " is remote "
                   << (elem_ptr->neighbor_ptr(s) == remote_elem) << std::endl;
 
-  boundary_info.sideset_name(0) = "left";
+  boundary_info.sideset_name(0) = "bottom";
   boundary_info.sideset_name(1) = "right";
+  boundary_info.sideset_name(2) = "top";
+  boundary_info.sideset_name(3) = "left";
 
   Partitioner::set_node_processor_ids(mesh);
 
@@ -1306,7 +1315,6 @@ DistributedGeneratedMesh::build_square(UnstructuredMesh & mesh,
   //  mesh.update_post_partitioning();
   //  MeshCommunication().make_elems_parallel_consistent(mesh);
   //  MeshCommunication().make_node_unique_ids_parallel_consistent(mesh);
-
 
   //  std::cout << "Getting ready to renumber" << std::endl;
   //  mesh.renumber_nodes_and_elements();
@@ -1334,9 +1342,11 @@ DistributedGeneratedMesh::build_square(UnstructuredMesh & mesh,
 
   // Scale the nodal positions
   for (auto & node_ptr : mesh.node_ptr_range())
+  {
     (*node_ptr)(0) = (*node_ptr)(0) * (xmax - xmin) + xmin;
+    (*node_ptr)(1) = (*node_ptr)(1) * (ymax - ymin) + ymin;
+  }
 
   if (_verbose)
     mesh.print_info();
-  */
 }
