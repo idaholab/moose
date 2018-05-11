@@ -218,24 +218,22 @@ protected:
   ///@}
 
   ///@{ List of elasticity tensor of each subsequent spring in the chain
-  std::vector<std::reference_wrapper<MaterialProperty<RankFourTensor>>> _springs_elasticity_tensors;
-  std::vector<std::reference_wrapper<MaterialProperty<RankFourTensor>>>
-      _springs_elasticity_tensors_inv;
-  std::vector<std::reference_wrapper<const MaterialProperty<RankFourTensor>>>
-      _springs_elasticity_tensors_inv_old;
+  std::vector<MaterialProperty<RankFourTensor> *> _springs_elasticity_tensors;
+  std::vector<MaterialProperty<RankFourTensor> *> _springs_elasticity_tensors_inv;
+  std::vector<const MaterialProperty<RankFourTensor> *> _springs_elasticity_tensors_inv_old;
   ///@}
 
   ///@{ List of viscosities of each subsequent dashpot in the chain
-  std::vector<std::reference_wrapper<MaterialProperty<Real>>> _dashpot_viscosities;
-  std::vector<std::reference_wrapper<const MaterialProperty<Real>>> _dashpot_viscosities_old;
+  std::vector<MaterialProperty<Real> *> _dashpot_viscosities;
+  std::vector<const MaterialProperty<Real> *> _dashpot_viscosities_old;
   ///@}
 
   /**@{
    * The internal strain variables required by the time-stepping procedure (must be on a
    * one-on-one basis with the number of dashpot).
    */
-  std::vector<std::reference_wrapper<MaterialProperty<RankTwoTensor>>> _viscous_strains;
-  std::vector<std::reference_wrapper<const MaterialProperty<RankTwoTensor>>> _viscous_strains_old;
+  std::vector<MaterialProperty<RankTwoTensor> *> _viscous_strains;
+  std::vector<const MaterialProperty<RankTwoTensor> *> _viscous_strains_old;
   ///@}
 
   ///@{ The apparent creep strain resulting from the internal viscous strains

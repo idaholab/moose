@@ -107,24 +107,24 @@ LinearViscoelasticityBase::declareViscoelasticProperties()
     if (!_has_longterm_dashpot || (_components > 0 && i < _components - 1))
     {
       _springs_elasticity_tensors.push_back(
-          declareProperty<RankFourTensor>(_base_name + "spring_elasticity_tensor_" + ith));
+          &declareProperty<RankFourTensor>(_base_name + "spring_elasticity_tensor_" + ith));
       getMaterialPropertyOld<RankFourTensor>(_base_name + "spring_elasticity_tensor_" + ith);
     }
 
-    _dashpot_viscosities.push_back(declareProperty<Real>(_base_name + "dashpot_viscosity_" + ith));
+    _dashpot_viscosities.push_back(&declareProperty<Real>(_base_name + "dashpot_viscosity_" + ith));
     _dashpot_viscosities_old.push_back(
-        getMaterialPropertyOld<Real>(_base_name + "dashpot_viscosity_" + ith));
+        &getMaterialPropertyOld<Real>(_base_name + "dashpot_viscosity_" + ith));
 
     _viscous_strains.push_back(
-        declareProperty<RankTwoTensor>(_base_name + "viscous_strain_" + ith));
+        &declareProperty<RankTwoTensor>(_base_name + "viscous_strain_" + ith));
     _viscous_strains_old.push_back(
-        getMaterialPropertyOld<RankTwoTensor>(_base_name + "viscous_strain_" + ith));
+        &getMaterialPropertyOld<RankTwoTensor>(_base_name + "viscous_strain_" + ith));
 
     if (_need_viscoelastic_properties_inverse)
     {
-      _springs_elasticity_tensors_inv.push_back(
-          declareProperty<RankFourTensor>(_base_name + "spring_elasticity_tensor_" + ith + "_inv"));
-      _springs_elasticity_tensors_inv_old.push_back(getMaterialPropertyOld<RankFourTensor>(
+      _springs_elasticity_tensors_inv.push_back(&declareProperty<RankFourTensor>(
+          _base_name + "spring_elasticity_tensor_" + ith + "_inv"));
+      _springs_elasticity_tensors_inv_old.push_back(&getMaterialPropertyOld<RankFourTensor>(
           _base_name + "spring_elasticity_tensor_" + ith + "_inv"));
     }
   }
@@ -150,13 +150,13 @@ LinearViscoelasticityBase::initQpStatefulProperties()
   {
     if (!_has_longterm_dashpot || (_components > 0 && i < _components - 1))
     {
-      _springs_elasticity_tensors[i].get()[_qp].zero();
+      (*_springs_elasticity_tensors[i])[_qp].zero();
       if (_need_viscoelastic_properties_inverse)
-        _springs_elasticity_tensors_inv[i].get()[_qp].zero();
+        (*_springs_elasticity_tensors_inv[i])[_qp].zero();
     }
 
-    _dashpot_viscosities[i].get()[_qp] = 0.0;
-    _viscous_strains[i].get()[_qp].zero();
+    (*_dashpot_viscosities[i])[_qp] = 0.0;
+    (*_viscous_strains[i])[_qp].zero();
   }
 }
 
@@ -204,11 +204,10 @@ LinearViscoelasticityBase::computeQpViscoelasticPropertiesInv()
 
   for (unsigned int i = 0; i < _springs_elasticity_tensors.size(); ++i)
   {
-    if (MooseUtils::absoluteFuzzyEqual(_springs_elasticity_tensors[i].get()[_qp].L2norm(), 0.0))
-      _springs_elasticity_tensors_inv[i].get()[_qp].zero();
+    if (MooseUtils::absoluteFuzzyEqual((*_springs_elasticity_tensors[i])[_qp].L2norm(), 0.0))
+      (*_springs_elasticity_tensors_inv[i])[_qp].zero();
     else
-      _springs_elasticity_tensors_inv[i].get()[_qp] =
-          _springs_elasticity_tensors[i].get()[_qp].invSymm();
+      (*_springs_elasticity_tensors_inv[i])[_qp] = (*_springs_elasticity_tensors[i])[_qp].invSymm();
   }
 }
 

@@ -89,10 +89,10 @@ GeneralizedMaxwellModel::computeQpViscoelasticProperties()
   _first_elasticity_tensor[_qp] = _C0;
 
   for (unsigned int i = 0; i < _Ci.size(); ++i)
-    _springs_elasticity_tensors[i].get()[_qp] = _Ci[i];
+    (*_springs_elasticity_tensors[i])[_qp] = _Ci[i];
 
   for (unsigned int i = 0; i < _eta_i.size(); ++i)
-    _dashpot_viscosities[i].get()[_qp] = _eta_i[i];
+    (*_dashpot_viscosities[i])[_qp] = _eta_i[i];
 }
 
 void
@@ -101,5 +101,5 @@ GeneralizedMaxwellModel::computeQpViscoelasticPropertiesInv()
   (*_first_elasticity_tensor_inv)[_qp] = _S0;
 
   for (unsigned int i = 0; i < _Si.size(); ++i)
-    _springs_elasticity_tensors_inv[i].get()[_qp] = _Si[i];
+    (*_springs_elasticity_tensors_inv[i])[_qp] = _Si[i];
 }
