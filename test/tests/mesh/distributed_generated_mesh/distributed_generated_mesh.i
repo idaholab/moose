@@ -1,11 +1,12 @@
 [Mesh]
   type = DistributedGeneratedMesh
 #  type = GeneratedMesh
-  nx = 10
-  ny = 10
+  nx = 2
+  ny = 2
+  nz = 2
   xmax = 100
-  dim = 2
-#  verbose = true
+  dim = 3
+  verbose = true
 #  parallel_type = distributed
 []
 

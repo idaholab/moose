@@ -52,6 +52,19 @@ protected:
                     const ElemType type = INVALID_ELEM,
                     const bool gauss_lobatto_grid = false);
 
+  void build_cube(UnstructuredMesh & mesh,
+                  const unsigned int nx = 0,
+                  const unsigned int ny = 0,
+                  const unsigned int nz = 0,
+                  const Real xmin = 0.,
+                  const Real xmax = 1.,
+                  const Real ymin = 0.,
+                  const Real ymax = 1.,
+                  const Real zmin = 0.,
+                  const Real zmax = 1.,
+                  const ElemType type = INVALID_ELEM,
+                  const bool gauss_lobatto_grid = false);
+
   ///
   bool _verbose;
 
