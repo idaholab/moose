@@ -585,14 +585,6 @@ protected:
                                            const std::vector<Real> & cumulative_pm);
 
 private:
-  // InitialStress Deprecation: remove _step_one parameter
-  /// True if this is the first timestep (timestep < 2). In the first timestep,
-  /// an initial stress is needed to subdivide.  This boolean variable
-  /// eliminates the use of the _app.isRestarting() in this class.
-  /// This boolean is delcared as a reference so that the variable is restartable
-  /// data:  if we restart, the code will not think it is the first timestep again.
-  bool & _step_one;
-
   RankTwoTensor rot(const RankTwoTensor & tens);
 };
 

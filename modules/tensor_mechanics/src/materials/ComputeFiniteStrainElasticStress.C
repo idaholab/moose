@@ -59,21 +59,9 @@ ComputeFiniteStrainElasticStress::computeQpStress()
   _stress[_qp] =
       _rotation_increment[_qp] * intermediate_stress * _rotation_increment[_qp].transpose();
 
-  // InitialStress Deprecation: remove the following 2 lines
-  rotateQpInitialStress();
-  addQpInitialStress();
-
   // Assign value for elastic strain, which is equal to the mechanical strain
   _elastic_strain[_qp] = _mechanical_strain[_qp];
 
   // Compute dstress_dstrain
   _Jacobian_mult[_qp] = _elasticity_tensor[_qp]; // This is NOT the exact jacobian
-}
-
-void
-ComputeFiniteStrainElasticStress::rotateQpInitialStress()
-{
-  if (_initial_stress_provided)
-    (*_initial_stress)[_qp] = _rotation_increment[_qp] * (*_initial_stress_old)[_qp] *
-                              _rotation_increment[_qp].transpose();
 }

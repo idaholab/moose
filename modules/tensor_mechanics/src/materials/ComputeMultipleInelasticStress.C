@@ -191,13 +191,7 @@ ComputeMultipleInelasticStress::computeQpStressIntermediateConfiguration()
     // If the elasticity tensor values have changed and the tensor is isotropic,
     // use the old strain to calculate the old stress
     if (_is_elasticity_tensor_guaranteed_isotropic || !_perform_finite_strain_rotations)
-    {
       _stress[_qp] = _elasticity_tensor[_qp] * (_elastic_strain_old[_qp] + _strain_increment[_qp]);
-      // InitialStress Deprecation: remove these lines
-      if (_perform_finite_strain_rotations)
-        rotateQpInitialStress();
-      addQpInitialStress();
-    }
     else
       _stress[_qp] = _stress_old[_qp] + _elasticity_tensor[_qp] * _strain_increment[_qp];
 
@@ -270,14 +264,8 @@ ComputeMultipleInelasticStress::updateQpState(RankTwoTensor & elastic_strain_inc
 
       // form the trial stress, with the check for changed elasticity constants
       if (_is_elasticity_tensor_guaranteed_isotropic || !_perform_finite_strain_rotations)
-      {
         _stress[_qp] =
             _elasticity_tensor[_qp] * (_elastic_strain_old[_qp] + elastic_strain_increment);
-        // InitialStress Deprecation: remove these lines
-        if (_perform_finite_strain_rotations)
-          rotateQpInitialStress();
-        addQpInitialStress();
-      }
       else
         _stress[_qp] = _stress_old[_qp] + _elasticity_tensor[_qp] * elastic_strain_increment;
 
@@ -395,13 +383,7 @@ ComputeMultipleInelasticStress::updateQpStateSingleModel(
   // If the elasticity tensor values have changed and the tensor is isotropic,
   // use the old strain to calculate the old stress
   if (_is_elasticity_tensor_guaranteed_isotropic || !_perform_finite_strain_rotations)
-  {
     _stress[_qp] = _elasticity_tensor[_qp] * (_elastic_strain_old[_qp] + elastic_strain_increment);
-    // InitialStress Deprecation: remove these lines
-    if (_perform_finite_strain_rotations)
-      rotateQpInitialStress();
-    addQpInitialStress();
-  }
   else
     _stress[_qp] = _stress_old[_qp] + _elasticity_tensor[_qp] * elastic_strain_increment;
 
