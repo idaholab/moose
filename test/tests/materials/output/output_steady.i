@@ -47,6 +47,7 @@
     block = 0
     outputs = all
     variable = u
+    output_properties = 'real_property vector_property tensor_property'
   [../]
 []
 
@@ -60,4 +61,3 @@
 [Outputs]
   exodus = true
 []
-

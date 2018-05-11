@@ -113,4 +113,8 @@
     type = PythonUnitTest
     input = test_CSVDiffer.py
   [../]
+  [./recover_tests]
+    type = PythonUnitTest
+    input = test_Recover.py
+  [../]
 []

@@ -15,6 +15,8 @@
 
 // Forward declarations
 class OutputTestMaterial;
+class RankTwoTensor;
+class RankFourTensor;
 
 template <>
 InputParameters validParams<OutputTestMaterial>();
@@ -45,6 +47,8 @@ protected:
   MaterialProperty<Real> & _real_property;
   MaterialProperty<RealVectorValue> & _vector_property;
   MaterialProperty<RealTensorValue> & _tensor_property;
+  MaterialProperty<RankTwoTensor> & _ranktwotensor_property;
+  MaterialProperty<RankFourTensor> & _rankfourtensor_property;
   Real _factor;
   const VariableValue & _variable;
 };
