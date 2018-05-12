@@ -1,7 +1,7 @@
+# Note: The gold files for this test were generated using GeneratedMesh
+
 [Mesh]
-  # type = GeneratedMesh
-  # xmax = 100
-  # parallel_type = distributed
+  #type = GeneratedMesh
   type = DistributedGeneratedMesh
   nx = 10
   ny = 10

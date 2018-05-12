@@ -1,7 +1,23 @@
 [Tests]
-  [./test]
+  [./d1]
     type = 'Exodiff'
+    cli_args = 'Mesh/dim=1 --mesh-only=d1.e'
     input = 'distributed_generated_mesh.i'
-    exodiff = 'distributed_generated_mesh_out.e'
+    exodiff = 'd1.e'
+    min_parallel = 2
+  [../]
+  [./d2]
+    type = 'Exodiff'
+    cli_args = 'Mesh/dim=1 --mesh-only=d2.e'
+    input = 'distributed_generated_mesh.i'
+    exodiff = 'd2.e'
+    min_parallel = 2
+  [../]
+  [./d3]
+    type = 'Exodiff'
+    cli_args = 'Mesh/dim=1 --mesh-only=d3.e'
+    input = 'distributed_generated_mesh.i'
+    exodiff = 'd3.e'
+    min_parallel = 2
   [../]
 []
