@@ -1017,8 +1017,10 @@ build_cube(UnstructuredMesh & mesh,
     std::vector<Metis::idx_t> vwgt(num_elems, canonical_elem->n_nodes());
 
     auto n = static_cast<Metis::idx_t>(num_elems), // number of "nodes" (elements) in the graph
-        // wgtflag = 2,                                // weights on vertices only, none on edges
-        // numflag = 0,                                // C-style 0-based numbering
+                                                   // wgtflag = 2,                                //
+                                                   // weights on vertices only, none on edges
+                                                   // numflag = 0,                                //
+                                                   // C-style 0-based numbering
         nparts = static_cast<Metis::idx_t>(n_pieces), // number of subdomains to create
         edgecut = 0; // the numbers of edges cut by the resulting partition
 
