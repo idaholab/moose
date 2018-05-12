@@ -1,13 +1,13 @@
 [Mesh]
+  # type = GeneratedMesh
+  # xmax = 100
+  # parallel_type = distributed
   type = DistributedGeneratedMesh
-#  type = GeneratedMesh
-  nx = 2
-  ny = 2
-  nz = 2
-  xmax = 100
+  nx = 10
+  ny = 10
+  nz = 10
   dim = 3
-  verbose = true
-#  parallel_type = distributed
+  verbose = false
 []
 
 [Variables]
@@ -51,8 +51,8 @@
 []
 
 [Problem]
-  type = FEProblem
   solve = false
+  type = FEProblem
 []
 
 [Executioner]

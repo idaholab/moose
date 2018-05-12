@@ -784,39 +784,23 @@ add_element_quad(const dof_id_type nx,
 }
 
 /**
- * Get the IDs of the neighbors of a given element
+ * Get the element ID for a given hex
  *
  * @param nx The number of elements in the x direction
- * @param nx The number of elements in the y direction
+ * @param ny The number of elements in the y direction
  * @param i The x index of this element
  * @param j The y index of this element
- * @param neighbors This will be filled with the IDs of the two neighbors or invalid_dof_id if there
- * is no neighbor.  THIS MUST be of size 6 BEFORE calling this function
+ * @param k The z index of this element
+ * @return The ID of the i,j element
  */
-inline void
-get_neighbors_hex(const dof_id_type nx,
-                  const dof_id_type ny,
-                  const dof_id_type i,
-                  const dof_id_type j,
-                  std::vector<dof_id_type> & neighbors)
+inline dof_id_type
+elem_id_hex(const dof_id_type nx,
+            const dof_id_type ny,
+            const dof_id_type i,
+            const dof_id_type j,
+            const dof_id_type k)
 {
-  std::fill(neighbors.begin(), neighbors.end(), Elem::invalid_id);
-
-  // Bottom
-  if (j != 0)
-    neighbors[0] = elem_id_quad(nx, i, j - 1);
-
-  // Right
-  if (i != nx - 1)
-    neighbors[1] = elem_id_quad(nx, i + 1, j);
-
-  // Top
-  if (j != ny - 1)
-    neighbors[2] = elem_id_quad(nx, i, j + 1);
-
-  // Left
-  if (i != 0)
-    neighbors[3] = elem_id_quad(nx, i - 1, j);
+  return i + (j * nx) + (k * nx * ny);
 }
 
 /**
@@ -862,26 +846,6 @@ num_neighbors_hex(const dof_id_type nx,
 }
 
 /**
- * Get the element ID for a given hex
- *
- * @param nx The number of elements in the x direction
- * @param ny The number of elements in the y direction
- * @param i The x index of this element
- * @param j The y index of this element
- * @param k The z index of this element
- * @return The ID of the i,j element
- */
-inline dof_id_type
-elem_id_hex(const dof_id_type nx,
-            const dof_id_type ny,
-            const dof_id_type i,
-            const dof_id_type j,
-            const dof_id_type k)
-{
-  return i + (j * nx) + (k * nx * ny);
-}
-
-/**
  * Get the IDs of the neighbors of a given element
  *
  * @param nx The number of elements in the x direction
@@ -904,25 +868,34 @@ get_neighbors_hex(const dof_id_type nx,
 {
   std::fill(neighbors.begin(), neighbors.end(), Elem::invalid_id);
 
-  // Bottom
-  if (j != 0)
-    neighbors[0] = elem_id_hex(nx, ny, i, j - 1, k);
-
-  // Right
-  if (i != nx - 1)
-    neighbors[1] = elem_id_hex(nx, ny, i + 1, j, k);
-
-  // Top
-  if (j != ny - 1)
-    neighbors[2] = elem_id_hex(nx, ny, i, j + 1, k);
-
-  // Left
-  if (i != 0)
-    neighbors[3] = elem_id_hex(nx, ny, i - 1, j, k);
+  /*
+        boundary_info.sideset_name(0) = "back";
+        boundary_info.sideset_name(1) = "bottom";
+        boundary_info.sideset_name(2) = "right";
+        boundary_info.sideset_name(3) = "top";
+        boundary_info.sideset_name(4) = "left";
+        boundary_info.sideset_name(5) = "front";
+  */
 
   // Back
   if (k != 0)
-    neighbors[4] = elem_id_hex(nx, ny, i, j, k - 1);
+    neighbors[0] = elem_id_hex(nx, ny, i, j, k - 1);
+
+  // Bottom
+  if (j != 0)
+    neighbors[1] = elem_id_hex(nx, ny, i, j - 1, k);
+
+  // Right
+  if (i != nx - 1)
+    neighbors[2] = elem_id_hex(nx, ny, i + 1, j, k);
+
+  // Top
+  if (j != ny - 1)
+    neighbors[3] = elem_id_hex(nx, ny, i, j + 1, k);
+
+  // Left
+  if (i != 0)
+    neighbors[4] = elem_id_hex(nx, ny, i - 1, j, k);
 
   // Front
   if (k != nz - 1)
@@ -1004,7 +977,10 @@ add_element_hex(const dof_id_type nx,
   BoundaryInfo & boundary_info = mesh.get_boundary_info();
 
   if (_verbose)
+  {
     std::cout << "Adding elem: " << elem_id << " pid: " << pid << std::endl;
+    std::cout << "Type: " << type << " " << HEX8 << std::endl;
+  }
 
   switch (type)
   {
@@ -1061,6 +1037,29 @@ add_element_hex(const dof_id_type nx,
 }
 
 /**
+ * Compute the i,j,k indices of a given element ID
+ *
+ * @param nx The number of elements in the x direction
+ * @param ny The number of elements in the y direction
+ * @param elem_id The ID of the element
+ * @param i Output: The index in the x direction
+ * @param j Output: The index in the y direction
+ * @param k Output: The index in the z direction
+ */
+inline void
+get_indices_hex(const dof_id_type nx,
+                const dof_id_type ny,
+                const dof_id_type elem_id,
+                dof_id_type & i,
+                dof_id_type & j,
+                dof_id_type & k)
+{
+  i = elem_id % nx;
+  j = (((elem_id - i) / nx) % ny);
+  k = ((elem_id - i) - (j * nx)) / (nx * ny);
+}
+
+/**
  * Find the elements and sides that need ghost elements
  *
  * @param nx The number of elements in the x direction
@@ -1071,6 +1070,7 @@ add_element_hex(const dof_id_type nx,
 inline void
 get_ghost_neighbors_hex(const dof_id_type nx,
                         const dof_id_type ny,
+                        const dof_id_type nz,
                         const MeshBase & mesh,
                         std::set<dof_id_type> & ghost_elems)
 {
@@ -1835,20 +1835,18 @@ DistributedGeneratedMesh::build_cube(UnstructuredMesh & mesh,
         std::cout << "Elem neighbor: " << elem_ptr->neighbor_ptr(s) << " is remote "
                   << (elem_ptr->neighbor_ptr(s) == remote_elem) << std::endl;
 
-  /*
-
   // Get the ghosts (missing face neighbors)
   std::set<dof_id_type> ghost_elems;
-  get_ghost_neighbors_quad(nx, ny, mesh, ghost_elems);
+  get_ghost_neighbors_hex(nx, ny, nz, mesh, ghost_elems);
 
   // Add the ghosts to the mesh
   for (auto & ghost_id : ghost_elems)
   {
-    dof_id_type i, j;
+    dof_id_type i, j, k;
 
-    get_indices_quad(nx, ghost_id, i, j);
+    get_indices_hex(nx, ny, ghost_id, i, j, k);
 
-    add_element_quad(nx, ny, i, j, ghost_id, part[ghost_id], type, mesh, _verbose);
+    add_element_hex(nx, ny, nz, i, j, k, ghost_id, part[ghost_id], type, mesh, _verbose);
   }
 
   if (_verbose)
@@ -1886,10 +1884,12 @@ DistributedGeneratedMesh::build_cube(UnstructuredMesh & mesh,
         std::cout << "Elem neighbor: " << elem_ptr->neighbor_ptr(s) << " is remote "
                   << (elem_ptr->neighbor_ptr(s) == remote_elem) << std::endl;
 
-  boundary_info.sideset_name(0) = "bottom";
-  boundary_info.sideset_name(1) = "right";
-  boundary_info.sideset_name(2) = "top";
-  boundary_info.sideset_name(3) = "left";
+  boundary_info.sideset_name(0) = "back";
+  boundary_info.sideset_name(1) = "bottom";
+  boundary_info.sideset_name(2) = "right";
+  boundary_info.sideset_name(3) = "top";
+  boundary_info.sideset_name(4) = "left";
+  boundary_info.sideset_name(5) = "front";
 
   Partitioner::set_node_processor_ids(mesh);
 
@@ -1936,9 +1936,9 @@ DistributedGeneratedMesh::build_cube(UnstructuredMesh & mesh,
   {
     (*node_ptr)(0) = (*node_ptr)(0) * (xmax - xmin) + xmin;
     (*node_ptr)(1) = (*node_ptr)(1) * (ymax - ymin) + ymin;
+    (*node_ptr)(2) = (*node_ptr)(2) * (zmax - zmin) + zmin;
   }
 
   if (_verbose)
     mesh.print_info();
-  */
 }
