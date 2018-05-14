@@ -97,11 +97,6 @@ code, kbd, pre, samp {
     font-family: monospace, monospace;
     font-size: 1em;
     background-color: #9e9e9e24;
-
-    padding-top: 1px;
-    padding-right: 3px;
-    padding-bottom: 1px;
-    padding-left: 3px;
 }
 
 .moose-disabled{
