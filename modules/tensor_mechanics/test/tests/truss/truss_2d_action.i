@@ -32,7 +32,6 @@
   [./area]
     order = CONSTANT
     family = MONOMIAL
-#    initial_condition = 1.0
   [../]
   [./react_x]
     order = FIRST
@@ -138,17 +137,25 @@
   end_time = 1
 []
 
-[Modules/LineElement]
+[Modules/TensorMechanics/LineElementMaster]
   [./block]
     truss = true
     add_variables = true
     displacements = 'disp_x disp_y'
 
-#    youngs_modulus = 1e6 # commented out for error checking
-    area = area
+#    area = area # commented out for error check
 
     block = 1
     save_in = 'react_x react_y'
+  [../]
+[]
+
+[Materials]
+  [./linelast]
+    type = LinearElasticTruss
+    block = 1
+    youngs_modulus = 1e6
+    displacements = 'disp_x disp_y'
   [../]
 []
 

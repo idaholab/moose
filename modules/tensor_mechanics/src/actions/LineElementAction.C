@@ -56,20 +56,10 @@ validParams<LineElementAction>()
   params.addParam<std::vector<VariableName>>(
       "displacements", "The nonlinear displacement variables for the problem");
 
-  // Common material parameters between beam and truss
-  params.addCoupledVar(
-      "youngs_modulus",
-      "Young's modulus of the material. Can be supplied as either a number or a variable name.");
-
   // Common geometry parameters between beam and truss
   params.addCoupledVar(
       "area",
       "Cross-section area of the beam. Can be supplied as either a number or a variable name.");
-
-  // Truss specific parameters
-  params.addCoupledVar("temperature", 273, "Temperature in Kelvin");
-  params.addParam<Real>("thermal_expansion_coeff", 0.0, "Thermal expansion coefficient in 1/K");
-  params.addParam<Real>("temperature_ref", 273, "Reference temperature for thermal expansion in K");
 
   // Beam Parameters
   params += LineElementAction::beamParameters();
@@ -100,29 +90,16 @@ LineElementAction::beamParameters()
   params.addParam<std::vector<VariableName>>(
       "rotations", "The rotations appropriate for the simulation geometry and coordinate system");
 
-  MooseEnum strainType("SMALL_STRAIN_AND_ROTATION FINITE_STRAIN_AND_SMALL_ROTATION "
-                       "SMALL_STRAIN_AND_FINITE_ROTATION FINITE_STRAIN_AND_ROTATION",
-                       "SMALL_STRAIN_AND_ROTATION");
-  params.addParam<MooseEnum>("strain", strainType, "Strain formulation");
+  MooseEnum strainType("SMALL FINITE", "SMALL");
+  params.addParam<MooseEnum>("strain_type", strainType, "Strain formulation");
+  params.addParam<MooseEnum>("rotation_type", strainType, "Rotation formulation");
   params.addParam<std::vector<MaterialPropertyName>>(
       "eigenstrain_names", "List of beam eigenstrains to be applied in this strain calculation.");
-
-  // Beam material parameters
-  params.addParam<FunctionName>(
-      "elasticity_prefactor",
-      "Optional function to use as a scalar prefactor on the elasticity vector for the beam.");
-  params.addCoupledVar(
-      "poissons_ratio",
-      "Poisson's ratio of the material. Can be supplied as either a number or a variable name.");
-  params.addCoupledVar(
-      "shear_coefficient",
-      1.0,
-      "Scale factor for the shear modulus. Can be supplied as either a number or a variable name.");
 
   // Beam geometry
   params.addParam<RealGradient>("y_orientation",
                                 "Orientation of the y direction along "
-                                "with Iyy is provided. This should be "
+                                "which Iyy is provided. This should be "
                                 "perpendicular to the axis of the beam.");
   params.addCoupledVar(
       "area",
@@ -227,7 +204,8 @@ LineElementAction::LineElementAction(const InputParameters & params)
     _diag_save_in(getParam<std::vector<AuxVariableName>>("diag_save_in")),
     _subdomain_names(getParam<std::vector<SubdomainName>>("block")),
     _subdomain_ids(),
-    _strain(getParam<MooseEnum>("strain").getEnum<Strain>()),
+    _strain_type(getParam<MooseEnum>("strain_type").getEnum<Strain>()),
+    _rotation_type(getParam<MooseEnum>("rotation_type").getEnum<Strain>()),
     _dynamic_consistent_inertia(getParam<bool>("dynamic_consistent_inertia")),
     _dynamic_nodal_translational_inertia(getParam<bool>("dynamic_nodal_translational_inertia")),
     _dynamic_nodal_rotational_inertia(getParam<bool>("dynamic_nodal_rotational_inertia")),
@@ -239,29 +217,35 @@ LineElementAction::LineElementAction(const InputParameters & params)
     _pars.applyParameters(action[0]->parameters());
 
   if (!isParamValid("displacements"))
-    mooseError("LineElementAction: A vector of displacement variable names should be provided as "
+    paramError("displacements",
+               "LineElementAction: A vector of displacement variable names should be provided as "
                "input using `displacements`.");
 
   _displacements = getParam<std::vector<VariableName>>("displacements");
   _ndisp = _displacements.size();
 
   // determine if displaced mesh is to be used
-  _use_displaced_mesh = (_strain != Strain::SMALL_STRAIN_AND_ROTATION);
+  _use_displaced_mesh = (_strain_type != Strain::SMALL && _rotation_type != Strain::SMALL);
   if (params.isParamSetByUser("use_displaced_mesh"))
   {
     bool use_displaced_mesh_param = getParam<bool>("use_displaced_mesh");
-    if (use_displaced_mesh_param != _use_displaced_mesh && params.isParamSetByUser("strain"))
-      mooseError("LineElementAction: Wrong combination of use displaced mesh and strain model.");
+    if (use_displaced_mesh_param != _use_displaced_mesh && params.isParamSetByUser("strain_type") &&
+        params.isParamSetByUser("rotation_type"))
+      paramError("use_displaced_mesh",
+                 "LineElementAction: Wrong combination of "
+                 "`use_displaced_mesh`, `strain_type` and `rotation_type`.");
     _use_displaced_mesh = use_displaced_mesh_param;
   }
 
   if (_save_in.size() != 0 && _save_in.size() != _ndisp)
-    mooseError("LineElementAction: Number of save_in variables should equal to the number of "
+    paramError("save_in",
+               "LineElementAction: Number of save_in variables should equal to the number of "
                "displacement variables ",
                _ndisp);
 
   if (_diag_save_in.size() != 0 && _diag_save_in.size() != _ndisp)
-    mooseError("LineElementAction: Number of diag_save_in variables should equal to the number of "
+    paramError("diag_save_in",
+               "LineElementAction: Number of diag_save_in variables should equal to the number of "
                "displacement variables ",
                _ndisp);
 
@@ -271,18 +255,16 @@ LineElementAction::LineElementAction(const InputParameters & params)
   {
     // Parameters required for static simulation using beams
     if (!isParamValid("rotations"))
-      mooseError("LineElementAction: Rotational variable names should be provided for beam "
+      paramError("rotations",
+                 "LineElementAction: Rotational variable names should be provided for beam "
                  "elements using `rotations` parameter.");
 
     _rotations = getParam<std::vector<VariableName>>("rotations");
 
     if (_rotations.size() != _ndisp)
-      mooseError("LineElementAction: Number of rotational and displacement variable names provided "
+      paramError("rotations",
+                 "LineElementAction: Number of rotational and displacement variable names provided "
                  "as input for beam should be same.");
-
-    if (!isParamValid("youngs_modulus") || !isParamValid("poissons_ratio"))
-      mooseError("LineElementAction: youngs_modulus and poissons_ratio should be provided for beam "
-                 "elements.");
 
     if (!isParamValid("y_orientation") || !isParamValid("area") || !isParamValid("Iy") ||
         !isParamValid("Iz"))
@@ -318,12 +300,14 @@ LineElementAction::LineElementAction(const InputParameters & params)
     }
 
     if (_dynamic_consistent_inertia && !isParamValid("density"))
-      mooseError("LineElementAction: Either name of the density material property or a constant "
+      paramError("density",
+                 "LineElementAction: Either name of the density material property or a constant "
                  "density value should be provided as input using `density` for creating the "
                  "consistent mass/inertia matrix required for dynamic beam simulation.");
 
     if (_dynamic_nodal_translational_inertia && !isParamValid("nodal_mass"))
-      mooseError("LineElementAction: `nodal_mass` should be provided as input to calculate "
+      paramError("nodal_mass",
+                 "LineElementAction: `nodal_mass` should be provided as input to calculate "
                  "inertial forces on beam due to nodal mass.");
 
     if (_dynamic_nodal_rotational_inertia &&
@@ -333,12 +317,14 @@ LineElementAction::LineElementAction(const InputParameters & params)
   }
   else // if truss
   {
-    if (!isParamValid("youngs_modulus") || !isParamValid("area"))
-      mooseError("LineElementAction: `youngs_modulus` and `area` should be provided as input for "
+    if (!isParamValid("area"))
+      paramError("area",
+                 "LineElementAction: `area` should be provided as input for "
                  "truss elements.");
 
     if (isParamValid("rotations"))
-      mooseError("LineElementAction: Rotational variables cannot be set for truss elements.");
+      paramError("rotations",
+                 "LineElementAction: Rotational variables cannot be set for truss elements.");
   }
 }
 
@@ -353,45 +339,53 @@ LineElementAction::act()
       _subdomain_ids.insert(_mesh->getSubdomainID(name));
   }
 
-  //
-  // Gather info from all other LineElementAction
-  //
-  actGatherActionParameters();
+  if (_current_task == "add_variable")
+  {
+    //
+    // Gather info from all other LineElementAction
+    //
+    actGatherActionParameters();
+
+    //
+    // Add variables (optional)
+    //
+    actAddVariables();
+  }
 
   //
-  // Add variables (optional)
+  // Add Materials - ComputeIncrementalBeamStrain or ComputeFiniteBeamStrain
+  // for beam elements
   //
-  actAddVariables();
-
-  //
-  // Add Materials - ComputeElasticityBeam, ComputeIncrementalBeamStrain or ComputeFiniteBeamStrain
-  // and ComputeBeamResultants for beam elements and LinearElasticTruss for truss elements
-  //
-  actAddMaterials();
+  if (_current_task == "add_material")
+    actAddMaterials();
 
   //
   // Add Kernels - StressDivergenceBeam and InertialForceBeam (if dynamic_consistent_inertia is
   // turned on) for beams and StressDivergenceTensorsTruss for truss elements
   //
-  actAddKernels();
+  if (_current_task == "add_kernel")
+    actAddKernels();
 
   //
   // Add aux variables for translational and Rotational velocities and acceleration for dynamic
   // analysis using beams
   //
-  actAddAuxVariables();
+  if (_current_task == "add_aux_variable")
+    actAddAuxVariables();
 
   //
   // Add NewmarkVelAux and NewarkAccelAux auxkernels for dynamic simulation using beams
   //
-  actAddAuxKernels();
+  if (_current_task == "add_aux_kernel")
+    actAddAuxKernels();
 
   //
   // Add NodalKernels - NodalTranslationalInertia (if dynamic_nodal_translational_inertia is turned
   // on) and NodalRotattionalInertia (if dynamic_nodal_rotational_inertia) for dynamic simulations
   // using beams
   //
-  actAddNodalKernels();
+  if (_current_task == "add_nodal_kernel")
+    actAddNodalKernels();
 }
 
 void
@@ -400,7 +394,7 @@ LineElementAction::actGatherActionParameters()
   //
   // Gather info about all other master actions when we add variables
   //
-  if (_current_task == "add_variable" && getParam<bool>("add_variables"))
+  if (getParam<bool>("add_variables"))
   {
     auto actions = _awh.getActions<LineElementAction>();
     for (const auto & action : actions)
@@ -411,11 +405,13 @@ LineElementAction::actGatherActionParameters()
       const auto size_after = _subdomain_id_union.size();
 
       if (size_after != size_before + added_size)
-        mooseError("LineElementAction: The block restrictions in the LineElement actions must be "
+        paramError("block",
+                   "LineElementAction: The block restrictions in the LineElement actions must be "
                    "non-overlapping.");
 
       if (added_size == 0 && actions.size() > 1)
-        mooseError(
+        paramError(
+            "block",
             "LineElementAction: No LineElement action can be block unrestricted if more than one "
             "LineElement action is specified.");
     }
@@ -425,7 +421,7 @@ LineElementAction::actGatherActionParameters()
 void
 LineElementAction::actAddVariables()
 {
-  if (_current_task == "add_variable" && getParam<bool>("add_variables"))
+  if (getParam<bool>("add_variables"))
   {
     // determine order of elements in mesh
     const bool second = _problem->mesh().hasSecondOrderElements();
@@ -463,62 +459,30 @@ LineElementAction::actAddVariables()
 void
 LineElementAction::actAddMaterials()
 {
-  if (_current_task == "add_material")
+  if (!_truss)
   {
-    if (!_truss)
+    // Add Strain
+    if (_rotation_type == Strain::SMALL)
     {
-      // Add ComputeElasticityBeam
-      auto params = _factory.getValidParams("ComputeElasticityBeam");
+      auto params = _factory.getValidParams("ComputeIncrementalBeamStrain");
       params.applyParameters(parameters(), {"boundary", "use_displaced_mesh"});
       params.set<bool>("use_displaced_mesh") = false;
-      _problem->addMaterial("ComputeElasticityBeam", name() + "_elasticity", params);
 
-      // Add ComputeBeamResultants
-      params = _factory.getValidParams("ComputeBeamResultants");
-      params.applyParameters(parameters(), {"boundary", "use_displaced_mesh"});
-      params.set<bool>("use_displaced_mesh") = false;
-      _problem->addMaterial("ComputeBeamResultants", name() + "_beam_resultants", params);
+      if (_strain_type == Strain::FINITE)
+        params.set<bool>("large_strain") = true;
 
-      // Add Strain
-      if (_strain == Strain::SMALL_STRAIN_AND_ROTATION ||
-          _strain == Strain::FINITE_STRAIN_AND_SMALL_ROTATION)
-      {
-        params = _factory.getValidParams("ComputeIncrementalBeamStrain");
-        params.applyParameters(parameters(), {"boundary", "use_displaced_mesh"});
-        params.set<bool>("use_displaced_mesh") = false;
-
-        if (_strain == Strain::FINITE_STRAIN_AND_SMALL_ROTATION)
-          params.set<bool>("large_strain") = true;
-
-        _problem->addMaterial("ComputeIncrementalBeamStrain", name() + "_strain", params);
-      }
-      else if (_strain == Strain::SMALL_STRAIN_AND_FINITE_ROTATION ||
-               _strain == Strain::FINITE_STRAIN_AND_ROTATION)
-      {
-        params = _factory.getValidParams("ComputeFiniteBeamStrain");
-        params.applyParameters(parameters(), {"boundary", "use_displaced_mesh"});
-        params.set<bool>("use_displaced_mesh") = false;
-
-        if (_strain == Strain::FINITE_STRAIN_AND_ROTATION)
-          params.set<bool>("large_strain") = true;
-
-        _problem->addMaterial("ComputeFiniteBeamStrain", name() + "_strain", params);
-      }
+      _problem->addMaterial("ComputeIncrementalBeamStrain", name() + "_strain", params);
     }
-    else
+    else if (_rotation_type == Strain::FINITE)
     {
-      // Add Linear Elastic Truss
-      auto params = _factory.getValidParams("LinearElasticTruss");
-      params.applyParameters(parameters(), {"boundary", "use_displaced_mesh", "displacements"});
+      auto params = _factory.getValidParams("ComputeFiniteBeamStrain");
+      params.applyParameters(parameters(), {"boundary", "use_displaced_mesh"});
       params.set<bool>("use_displaced_mesh") = false;
 
-      std::vector<NonlinearVariableName> displacements;
+      if (_strain_type == Strain::FINITE)
+        params.set<bool>("large_strain") = true;
 
-      for (unsigned int i = 0; i < _ndisp; ++i)
-        displacements.push_back(_displacements[i]);
-
-      params.set<std::vector<NonlinearVariableName>>("displacements") = displacements;
-      _problem->addMaterial("LinearElasticTruss", name() + "_truss_material", params);
+      _problem->addMaterial("ComputeFiniteBeamStrain", name() + "_strain", params);
     }
   }
 }
@@ -526,18 +490,54 @@ LineElementAction::actAddMaterials()
 void
 LineElementAction::actAddKernels()
 {
-  if (_current_task == "add_kernel")
+  if (!_truss)
   {
-    if (!_truss)
+    // add StressDivergenceBeam kernels
+    auto params = _factory.getValidParams("StressDivergenceBeam");
+    params.applyParameters(parameters(), {"use_displaced_mesh", "save_in", "diag_save_in"});
+    params.set<bool>("use_displaced_mesh") = _use_displaced_mesh;
+
+    for (unsigned int i = 0; i < 2 * _ndisp; ++i)
     {
-      // add StressDivergenceBeam kernels
-      auto params = _factory.getValidParams("StressDivergenceBeam");
+      std::string kernel_name = name() + "_stress_divergence_beam_" + Moose::stringify(i);
+
+      if (i < _ndisp)
+      {
+        params.set<unsigned int>("component") = i;
+        params.set<NonlinearVariableName>("variable") = _displacements[i];
+
+        if (_save_in.size() == 2 * _ndisp)
+          params.set<std::vector<AuxVariableName>>("save_in") = {_save_in[i]};
+        if (_diag_save_in.size() == 2 * _ndisp)
+          params.set<std::vector<AuxVariableName>>("diag_save_in") = {_diag_save_in[i]};
+
+        _problem->addKernel("StressDivergenceBeam", kernel_name, params);
+      }
+      else
+      {
+        params.set<unsigned int>("component") = i;
+        params.set<NonlinearVariableName>("variable") = _rotations[i - 3];
+
+        if (_save_in.size() == 2 * _ndisp)
+          params.set<std::vector<AuxVariableName>>("save_in") = {_save_in[i]};
+        if (_diag_save_in.size() == 2 * _ndisp)
+          params.set<std::vector<AuxVariableName>>("diag_save_in") = {_diag_save_in[i]};
+
+        _problem->addKernel("StressDivergenceBeam", kernel_name, params);
+      }
+    }
+    // Add InertialForceBeam if dynamic simulation using consistent mass/inertia matrix has to be
+    // performed
+    if (_dynamic_consistent_inertia)
+    {
+      // add InertialForceBeam
+      params = _factory.getValidParams("InertialForceBeam");
       params.applyParameters(parameters(), {"use_displaced_mesh", "save_in", "diag_save_in"});
       params.set<bool>("use_displaced_mesh") = _use_displaced_mesh;
 
       for (unsigned int i = 0; i < 2 * _ndisp; ++i)
       {
-        std::string kernel_name = name() + "_stress_divergence_beam_" + Moose::stringify(i);
+        std::string kernel_name = name() + "_inertial_force_beam_" + Moose::stringify(i);
 
         if (i < _ndisp)
         {
@@ -549,7 +549,7 @@ LineElementAction::actAddKernels()
           if (_diag_save_in.size() == 2 * _ndisp)
             params.set<std::vector<AuxVariableName>>("diag_save_in") = {_diag_save_in[i]};
 
-          _problem->addKernel("StressDivergenceBeam", kernel_name, params);
+          _problem->addKernel("InertialForceBeam", kernel_name, params);
         }
         else
         {
@@ -561,69 +561,30 @@ LineElementAction::actAddKernels()
           if (_diag_save_in.size() == 2 * _ndisp)
             params.set<std::vector<AuxVariableName>>("diag_save_in") = {_diag_save_in[i]};
 
-          _problem->addKernel("StressDivergenceBeam", kernel_name, params);
-        }
-      }
-      // Add InertialForceBeam if dynamic simulation using consistent mass/inertia matrix has to be
-      // performed
-      if (_dynamic_consistent_inertia)
-      {
-        // add InertialForceBeam
-        params = _factory.getValidParams("InertialForceBeam");
-        params.applyParameters(parameters(), {"use_displaced_mesh", "save_in", "diag_save_in"});
-        params.set<bool>("use_displaced_mesh") = _use_displaced_mesh;
-
-        for (unsigned int i = 0; i < 2 * _ndisp; ++i)
-        {
-          std::string kernel_name = name() + "_inertial_force_beam_" + Moose::stringify(i);
-
-          if (i < _ndisp)
-          {
-            params.set<unsigned int>("component") = i;
-            params.set<NonlinearVariableName>("variable") = _displacements[i];
-
-            if (_save_in.size() == 2 * _ndisp)
-              params.set<std::vector<AuxVariableName>>("save_in") = {_save_in[i]};
-            if (_diag_save_in.size() == 2 * _ndisp)
-              params.set<std::vector<AuxVariableName>>("diag_save_in") = {_diag_save_in[i]};
-
-            _problem->addKernel("InertialForceBeam", kernel_name, params);
-          }
-          else
-          {
-            params.set<unsigned int>("component") = i;
-            params.set<NonlinearVariableName>("variable") = _rotations[i - 3];
-
-            if (_save_in.size() == 2 * _ndisp)
-              params.set<std::vector<AuxVariableName>>("save_in") = {_save_in[i]};
-            if (_diag_save_in.size() == 2 * _ndisp)
-              params.set<std::vector<AuxVariableName>>("diag_save_in") = {_diag_save_in[i]};
-
-            _problem->addKernel("InertialForceBeam", kernel_name, params);
-          }
+          _problem->addKernel("InertialForceBeam", kernel_name, params);
         }
       }
     }
-    else
+  }
+  else
+  {
+    // Add StressDivergenceTensorsTruss kernels
+    auto params = _factory.getValidParams("StressDivergenceTensorsTruss");
+    params.applyParameters(parameters(), {"use_displaced_mesh", "save_in", "diag_save_in"});
+    params.set<bool>("use_displaced_mesh") = true;
+
+    for (unsigned int i = 0; i < _ndisp; ++i)
     {
-      // Add StressDivergenceTensorsTruss kernels
-      auto params = _factory.getValidParams("StressDivergenceTensorsTruss");
-      params.applyParameters(parameters(), {"use_displaced_mesh", "save_in", "diag_save_in"});
-      params.set<bool>("use_displaced_mesh") = true;
+      std::string kernel_name = name() + "_stress_divergence_truss_" + Moose::stringify(i);
+      params.set<unsigned int>("component") = i;
+      params.set<NonlinearVariableName>("variable") = _displacements[i];
 
-      for (unsigned int i = 0; i < _ndisp; ++i)
-      {
-        std::string kernel_name = name() + "_stress_divergence_truss_" + Moose::stringify(i);
-        params.set<unsigned int>("component") = i;
-        params.set<NonlinearVariableName>("variable") = _displacements[i];
+      if (_save_in.size() == _ndisp)
+        params.set<std::vector<AuxVariableName>>("save_in") = {_save_in[i]};
+      if (_diag_save_in.size() == _ndisp)
+        params.set<std::vector<AuxVariableName>>("diag_save_in") = {_diag_save_in[i]};
 
-        if (_save_in.size() == _ndisp)
-          params.set<std::vector<AuxVariableName>>("save_in") = {_save_in[i]};
-        if (_diag_save_in.size() == _ndisp)
-          params.set<std::vector<AuxVariableName>>("diag_save_in") = {_diag_save_in[i]};
-
-        _problem->addKernel("StressDivergenceTensorsTruss", kernel_name, params);
-      }
+      _problem->addKernel("StressDivergenceTensorsTruss", kernel_name, params);
     }
   }
 }
@@ -631,8 +592,7 @@ LineElementAction::actAddKernels()
 void
 LineElementAction::actAddAuxVariables()
 {
-  if (_current_task == "add_aux_variable" &&
-      (_dynamic_consistent_inertia || _dynamic_nodal_rotational_inertia ||
+  if ((_dynamic_consistent_inertia || _dynamic_nodal_rotational_inertia ||
        _dynamic_nodal_translational_inertia) &&
       !_truss)
   {
@@ -673,8 +633,7 @@ LineElementAction::actAddAuxVariables()
 void
 LineElementAction::actAddAuxKernels()
 {
-  if (_current_task == "add_aux_kernel" &&
-      (_dynamic_consistent_inertia || _dynamic_nodal_rotational_inertia ||
+  if ((_dynamic_consistent_inertia || _dynamic_nodal_rotational_inertia ||
        _dynamic_nodal_translational_inertia) &&
       !_truss)
   {
@@ -731,21 +690,17 @@ LineElementAction::actAddAuxKernels()
 void
 LineElementAction::actAddNodalKernels()
 {
-  if (_current_task == "add_nodal_kernel" && !_truss)
+  if (!_truss)
   {
     // NodalTranslationalInertia and NodalRotattionalInertia currently accept only constant real
     // numbers for eta
     Real eta = 0.0;
     if (_dynamic_nodal_rotational_inertia || _dynamic_nodal_translational_inertia)
     {
-      std::istringstream ss(getParam<MaterialPropertyName>("eta"));
-      Real real_value;
+      std::string ss(getParam<MaterialPropertyName>("eta"));
+      Real real_value = MooseUtils::convert<Real>(ss);
 
-      if (ss >> real_value && ss.eof())
-        eta = real_value;
-      else
-        mooseError("LineElementAction: When using nodal mass/inertia matrices, `eta` can currently "
-                   "only take constant real values");
+      eta = real_value;
     }
 
     if (_dynamic_nodal_translational_inertia)

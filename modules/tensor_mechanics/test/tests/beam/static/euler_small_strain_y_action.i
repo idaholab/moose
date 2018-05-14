@@ -30,16 +30,11 @@
   displacements = 'disp_x disp_y disp_z'
 []
 
-[Modules/LineElement]
+[Modules/TensorMechanics/LineElementMaster]
   [./all]
     add_variables = true
     displacements = 'disp_x disp_y disp_z'
     rotations = 'rot_x rot_y rot_z'
-
-    # Material parameters
-    youngs_modulus = 2.60072400269
-    poissons_ratio = -0.9998699638
-    shear_coefficient = 0.85
 
     # Geometry parameters
     area = 0.554256
@@ -48,6 +43,20 @@
     Iy = 0.0141889
     Iz = 0.0141889
     y_orientation = '0.0 1.0 0.0'
+  [../]
+[]
+
+[Materials]
+  [./elasticity]
+    type = ComputeElasticityBeam
+    youngs_modulus = 2.60072400269
+    poissons_ratio = -0.9998699638
+    shear_coefficient = 0.85
+    block = 0
+  [../]
+  [./stress]
+    type = ComputeBeamResultants
+    block = 0
   [../]
 []
 

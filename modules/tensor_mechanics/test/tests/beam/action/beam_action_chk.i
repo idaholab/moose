@@ -77,13 +77,9 @@
   end_time = 2
 []
 
-[Modules/LineElement]
+[Modules/TensorMechanics/LineElementMaster]
   [./block_1]
     add_variables = true
-
-    # Material parameters
-    youngs_modulus = 2.0
-    shear_coefficient = 1.0
 
     # Geometry parameters
     Iy = 0.0141889
@@ -118,16 +114,25 @@
     displacements = 'disp_x disp_y disp_z'
     rotations = 'rot_x rot_y rot_z'
 
-    # Material parameters
-    youngs_modulus = 2.0
-    poissons_ratio = 0.3
-    shear_coefficient = 1.0
-
     # Geometry parameters
     area = 0.554256
     Iy = 0.0141889
     Iz = 0.0141889
     y_orientation = '0.0 1.0 0.0'
+  [../]
+[]
+
+[Materials]
+  [./stress]
+    type = ComputeBeamResultants
+    block = '1 2'
+  [../]
+  [./elasticity_1]
+    type = ComputeElasticityBeam
+    youngs_modulus = 2.0
+    poissons_ratio = 0.3
+    shear_coefficient = 1.0
+    block = '1 2'
   [../]
 []
 

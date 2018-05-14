@@ -9,7 +9,7 @@
 # Iy = Iz = 0.16
 
 # The dimensionless parameter alpha = kAGL^2/EI = 1e6
-# Since the value of alpha ia quite high, the beam behaves like
+# Since the value of alpha is quite high, the beam behaves like
 # a thin beam where shear effects are not significant.
 
 # Beam deflection:

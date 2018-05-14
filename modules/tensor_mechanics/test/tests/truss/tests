@@ -38,19 +38,19 @@
     exodiff = 'truss_2d_out.e'
     abs_zero = 1e-7
     max_parallel = 1
-    cli_args='Modules/LineElement/block/youngs_modulus=1e6'
+    cli_args='Modules/TensorMechanics/LineElementMaster/block/area=area'
     prereq = 'truss_2d'
   [../]
   [./action_error_1]
     type = 'RunException'
     input = 'truss_2d_action.i'
     cli_args='Outputs/exodus=false Outputs/csv=false'
-    expect_err='LineElementAction: `youngs_modulus` and `area` should be provided as input for'
+    expect_err='LineElementAction: `area` should be provided as input for'
   [../]
   [./action_error_2]
     type = 'RunException'
     input = 'truss_2d_action.i'
-    cli_args='Outputs/exodus=false Outputs/csv=false Modules/LineElement/block/youngs_modulus=1e6 Modules/LineElement/block/rotations="rot_x"'
+    cli_args='Outputs/exodus=false Outputs/csv=false Modules/TensorMechanics/LineElementMaster/block/area=area Modules/TensorMechanics/LineElementMaster/block/rotations="rot_x"'
     expect_err='LineElementAction: Rotational variables cannot be set for truss elements.'
   [../]
 []

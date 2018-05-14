@@ -120,11 +120,11 @@ protected:
   /// strain formulation
   enum class Strain
   {
-    SMALL_STRAIN_AND_ROTATION,
-    FINITE_STRAIN_AND_SMALL_ROTATION,
-    SMALL_STRAIN_AND_FINITE_ROTATION,
-    FINITE_STRAIN_AND_ROTATION
-  } _strain;
+    SMALL,
+    FINITE
+  } _strain_type;
+
+  Strain _rotation_type;
 
   /// use displaced mesh (true unless _strain is SMALL_STRAIN_AND_ROTATION)
   bool _use_displaced_mesh;

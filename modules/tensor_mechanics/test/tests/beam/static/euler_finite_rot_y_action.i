@@ -8,7 +8,7 @@
 # Iy = Iz = 0.16
 
 # The non-dimensionless parameter alpha = kAGL^2/EI = 1e6
-# Since the value of alpha ia quite high, the beam behaves like
+# Since the value of alpha is quite high, the beam behaves like
 # a thin beam where shear effects are not significant.
 
 # Beam deflection:
@@ -92,39 +92,45 @@
 [Executioner]
   type = Transient
   solve_type = PJFNK
-#  petsc_options_iname = '-pc_type -ksp_gmres_restart'
-#  petsc_options_value = 'jacobi   101'
   line_search = 'none'
-#  petsc_options = '-snes_check_jacobian -snes_check_jacobian_view'
   petsc_options = '-snes_ksp_ew'
   petsc_options_iname = '_ksp_gmres_restart -pc_type -pc_hypre_type -pc_hypre_boomeramg_max_iter'
   petsc_options_value = '201                hypre     boomeramg     4'
- nl_max_its = 50
+  nl_max_its = 50
   nl_rel_tol = 1e-9
   nl_abs_tol = 1e-7
   l_max_its = 50
   dt = 0.05
- #dtmin = 1
   end_time = 2.1
 []
 
-[Modules/LineElement]
+[Modules/TensorMechanics/LineElementMaster]
   [./all]
   add_variables = true
   displacements = 'disp_x disp_y disp_z'
   rotations = 'rot_x rot_y rot_z'
-  strain = FINITE_STRAIN_AND_ROTATION
-
-  # Material parameters
-  youngs_modulus = 1e4
-  poissons_ratio = -0.99995
-  shear_coefficient = 1.0
+  strain_type = FINITE
+  rotation_type = FINITE
 
   # Geometry parameters
   area = 1.0
   Iy = 0.16
   Iz = 0.16
   y_orientation = '0.0 1.0 0.0'
+  [../]
+[]
+
+[Materials]
+  [./elasticity]
+    type = ComputeElasticityBeam
+    youngs_modulus = 1e4
+    poissons_ratio = -0.99995
+    shear_coefficient = 1.0
+    block = 1
+  [../]
+  [./stress]
+    type = ComputeBeamResultants
+    block = 1
   [../]
 []
 

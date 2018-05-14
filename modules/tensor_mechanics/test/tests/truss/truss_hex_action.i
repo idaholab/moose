@@ -1,6 +1,6 @@
 # This test is designed to check
 # whether truss element works well with other multi-dimensional element
-# e.g. the hex element in this case, by assigning different brock number
+# e.g. the hex element in this case, by assigning different block number
 # to different types of elements.
 [Mesh]
   type = FileMesh
@@ -35,7 +35,6 @@
   [./area]
     order = CONSTANT
     family = MONOMIAL
-#    initial_condition = 1.0
   [../]
   [./react_x]
     order = FIRST
@@ -188,12 +187,11 @@
   [../]
 []
 
-[Modules/LineElement]
+[Modules/TensorMechanics/LineElementMaster]
    [./block]
      truss = true
      displacements = 'disp_x disp_y disp_z'
 
-     youngs_modulus = 1e6
      area = area
 
      block = '1 2'
@@ -216,6 +214,12 @@
   [./stress]
     type = ComputeLinearElasticStress
     block = 1000
+  [../]
+  [./linelast]
+    type = LinearElasticTruss
+    block = '1 2'
+    displacements = 'disp_x disp_y disp_z'
+    youngs_modulus = 1e6
   [../]
 []
 

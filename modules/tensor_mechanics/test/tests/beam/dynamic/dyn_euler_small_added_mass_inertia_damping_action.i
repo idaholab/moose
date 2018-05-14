@@ -119,16 +119,11 @@
   timestep_tolerance = 1e-6
 []
 
-[Modules/LineElement]
+[Modules/TensorMechanics/LineElementMaster]
   [./all]
     add_variables = true
     displacements = 'disp_x disp_y disp_z'
     rotations = 'rot_x rot_y rot_z'
-
-    # Material parameters
-    youngs_modulus = 1e4
-    poissons_ratio = -0.999875
-    shear_coefficient = 1.0
 
     # Geometry parameters
     area = 0.01
@@ -157,6 +152,20 @@
 
     # optional parameters for Rayleigh damping
     eta = 0.1 # Mass proportional Rayleigh damping
+  [../]
+[]
+
+[Materials]
+  [./elasticity]
+    type = ComputeElasticityBeam
+    youngs_modulus = 1.0e4
+    poissons_ratio = -0.999875
+    shear_coefficient = 1.0
+    block = 0
+  [../]
+  [./stress]
+    type = ComputeBeamResultants
+    block = 0
   [../]
 []
 

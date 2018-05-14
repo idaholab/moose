@@ -1,14 +1,15 @@
 # Test for LineElementAction on multiple blocks by placing parameters
 # common to all blocks outside of the individual action blocks
 
-# 2 beams of length 1m are fixed at one end and a force of 0.01 N
+# 2 beams of length 1m are fixed at one end and a force of 1e-4 N
 # is applied at the other end of the beams. Beam 1 is in block 1
 # and beam 2 is in block 2. All the material properties for the two
-# beams are identical except the Young's modulus. Beam 1 has twice
-# the Young's modulus as beam 2.
+# beams are identical. The moment of inertia of beam 2 is twice that
+# of beam 1.
 
-# Therefore, the y displacement at the end of beam 2 should be twice
-# that of beam 1.
+# Since the end displacement of a cantilever beam is inversely proportional
+# to the moment of inertia, the y displacement at the end of beam 1 should be twice
+# that of beam 2.
 
 [Mesh]
   type = FileMesh
@@ -60,7 +61,7 @@
     type = ConstantRate
     variable = disp_y
     boundary = 2
-    rate = 1e-2
+    rate = 1e-4
   [../]
 []
 
@@ -84,30 +85,40 @@
   end_time = 2
 []
 
-[Modules/LineElement]
+[Modules/TensorMechanics/LineElementMaster]
   # parameters common to all blocks
 
   add_variables = true
   displacements = 'disp_x disp_y disp_z'
   rotations = 'rot_x rot_y rot_z'
 
-  # Material parameters
-  poissons_ratio = 0.3
-  shear_coefficient = 1.0
-
   # Geometry parameters
-  area = 0.554256
-  Iy = 0.0141889
-  Iz = 0.0141889
+  area = 0.5
   y_orientation = '0.0 1.0 0.0'
 
   [./block_1]
-    youngs_modulus = 2.0
+    Iy = 1e-5
+    Iz = 1e-5
     block = 1
   [../]
   [./block_2]
-    youngs_modulus = 1.0
+    Iy = 2e-5
+    Iz = 2e-5
     block = 2
+  [../]
+[]
+
+[Materials]
+  [./stress]
+    type = ComputeBeamResultants
+    block = '1 2'
+  [../]
+  [./elasticity_1]
+    type = ComputeElasticityBeam
+    youngs_modulus = 2.0
+    poissons_ratio = 0.3
+    shear_coefficient = 1.0
+    block = '1 2'
   [../]
 []
 
