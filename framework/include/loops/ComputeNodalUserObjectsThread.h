@@ -21,8 +21,7 @@ class ComputeNodalUserObjectsThread
   : public ThreadedNodeLoop<ConstNodeRange, ConstNodeRange::const_iterator>
 {
 public:
-  ComputeNodalUserObjectsThread(FEProblemBase & fe_problem,
-                                const MooseObjectWarehouse<NodalUserObject> & user_objects);
+  ComputeNodalUserObjectsThread(FEProblemBase & fe_problem, const TheWarehouse::Builder & query);
   // Splitting Constructor
   ComputeNodalUserObjectsThread(ComputeNodalUserObjectsThread & x, Threads::split split);
 
@@ -32,9 +31,8 @@ public:
 
   void join(const ComputeNodalUserObjectsThread & /*y*/);
 
-protected:
-  /// Storage for NodalUserObjects (see FEProblemBase::cmputeUserObjects)
-  const MooseObjectWarehouse<NodalUserObject> & _user_objects;
+private:
+  const TheWarehouse::Builder _query;
 };
 
 #endif // COMPUTENODALUSEROBJECTSTHREAD_H

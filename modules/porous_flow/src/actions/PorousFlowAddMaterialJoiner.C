@@ -41,9 +41,10 @@ PorousFlowAddMaterialJoiner::act()
   if (_current_task == "add_joiners")
   {
     // Get the user objects that have been added to get the name of the PorousFlowDictator
-    auto userobjects = _problem->getUserObjects().getObjects();
+    std::vector<UserObject *> userobjects;
+    _problem->theWarehouse().build().system("UserObject").thread(0).queryInto(userobjects);
     for (auto & userobject : userobjects)
-      if (dynamic_cast<PorousFlowDictator *>(userobject.get()))
+      if (dynamic_cast<PorousFlowDictator *>(userobject))
         _dictator_name = userobject->name();
 
     // Get the list of materials that have been added
