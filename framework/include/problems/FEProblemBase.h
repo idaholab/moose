@@ -22,7 +22,6 @@
 #include "PetscSupport.h"
 #include "MooseApp.h"
 #include "ExecuteMooseObjectWarehouse.h"
-#include "AuxGroupExecuteMooseObjectWarehouse.h"
 #include "MaterialWarehouse.h"
 #include "MooseVariableFE.h"
 #include "MultiAppTransfer.h"
@@ -74,6 +73,7 @@ class Sampler;
 class KernelBase;
 class IntegratedBCBase;
 class LineSearch;
+class UserObject;
 
 // libMesh forward declarations
 namespace libMesh
@@ -646,13 +646,11 @@ public:
   virtual void
   addUserObject(std::string user_object_name, const std::string & name, InputParameters parameters);
 
-  /**
-   * Return the storage of all UserObjects.
-   *
-   * @see AdvancedOutput::initPostprocessorOrVectorPostprocessorLists
-   */
+  // TODO: delete this function after apps have been updated to not call it
   const ExecuteMooseObjectWarehouse<UserObject> & getUserObjects() const
   {
+    mooseDeprecated(
+        "This function is deprecated, use theWarehouse().build() to construct a query instead");
     return _all_user_objects;
   }
 
@@ -662,16 +660,13 @@ public:
    * @return Const reference to the user object
    */
   template <class T>
-  const T & getUserObject(const std::string & name, unsigned int tid = 0) const
+  T & getUserObject(const std::string & name, unsigned int tid = 0) const
   {
-    if (_all_user_objects.hasActiveObject(name, tid))
-    {
-      auto uo_ptr = std::dynamic_pointer_cast<T>(_all_user_objects.getActiveObject(name, tid));
-      if (uo_ptr == nullptr)
-        mooseError("User object with name '" + name + "' is of wrong type");
-      return *uo_ptr;
-    }
-    mooseError("Unable to find user object with name '" + name + "'");
+    std::vector<T *> objs;
+    theWarehouse().build().thread(tid).name(name).queryInto(objs);
+    if (objs.empty())
+      mooseError("Unable to find user object with name '" + name + "'");
+    return *(objs[0]);
   }
   /**
    * Get the user object by its name
@@ -1399,10 +1394,6 @@ public:
    * Call compute methods on UserObjects.
    */
   virtual void computeUserObjects(const ExecFlagType & type, const Moose::AuxGroup & group);
-  template <typename T>
-  void initializeUserObjects(const MooseObjectWarehouse<T> & warehouse);
-  template <typename T>
-  void finalizeUserObjects(const MooseObjectWarehouse<T> & warehouse);
 
   /**
    * Call compute methods on AuxKernels
@@ -1481,6 +1472,8 @@ public:
    * the Jacobian is the same as the previous time it was computed)
    */
   bool constJacobian() const;
+
+  inline TheWarehouse & theWarehouse() const { return _app.theWarehouse(); }
 
 protected:
   MooseMesh & _mesh;
@@ -1564,16 +1557,8 @@ protected:
   // VectorPostprocessors
   VectorPostprocessorData _vpps_data;
 
-  ///@{
-  /// Storage for UserObjects
+  // TODO: delete this after apps have been updated to not call getUserObjects
   ExecuteMooseObjectWarehouse<UserObject> _all_user_objects;
-  AuxGroupExecuteMooseObjectWarehouse<GeneralUserObject> _general_user_objects;
-  AuxGroupExecuteMooseObjectWarehouse<GeneralUserObject> _threaded_general_user_objects;
-  AuxGroupExecuteMooseObjectWarehouse<NodalUserObject> _nodal_user_objects;
-  AuxGroupExecuteMooseObjectWarehouse<ElementUserObject> _elemental_user_objects;
-  AuxGroupExecuteMooseObjectWarehouse<SideUserObject> _side_user_objects;
-  AuxGroupExecuteMooseObjectWarehouse<InternalSideUserObject> _internal_side_user_objects;
-  ///@}
 
   /// MultiApp Warehouse
   ExecuteMooseObjectWarehouse<MultiApp> _multi_apps;
@@ -1724,6 +1709,8 @@ protected:
   std::shared_ptr<LineSearch> _line_search;
 
 private:
+  void joinAndFinalize(TheWarehouse::Builder query, bool isgen = false);
+
   bool _error_on_jacobian_nonzero_reallocation;
   bool _ignore_zeros_in_jacobian;
   bool _force_restart;
@@ -1797,62 +1784,6 @@ void
 FEProblemBase::allowOutput(bool state)
 {
   _app.getOutputWarehouse().allowOutput<T>(state);
-}
-
-template <typename T>
-void
-FEProblemBase::initializeUserObjects(const MooseObjectWarehouse<T> & warehouse)
-{
-  if (warehouse.hasActiveObjects())
-  {
-    for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
-    {
-      const auto & objects = warehouse.getActiveObjects(tid);
-      for (const auto & object : objects)
-        object->initialize();
-    }
-  }
-}
-
-template <typename T>
-void
-FEProblemBase::finalizeUserObjects(const MooseObjectWarehouse<T> & warehouse)
-{
-  if (warehouse.hasActiveObjects())
-  {
-    const auto & objects = warehouse.getActiveObjects(0);
-
-    // Join them down to processor 0
-    for (THREAD_ID tid = 1; tid < libMesh::n_threads(); ++tid)
-    {
-      const auto & other_objects = warehouse.getActiveObjects(tid);
-
-      for (unsigned int i = 0; i < objects.size(); ++i)
-        objects[i]->threadJoin(*(other_objects[i]));
-    }
-
-    std::set<std::string> vpps_finalized;
-
-    // Finalize them and save off PP values
-    for (auto & object : objects)
-    {
-      object->finalize();
-
-      auto pp = std::dynamic_pointer_cast<Postprocessor>(object);
-
-      if (pp)
-        _pps_data.storeValue(pp->PPName(), pp->getValue());
-
-      auto vpp = std::dynamic_pointer_cast<VectorPostprocessor>(object);
-
-      if (vpp)
-        vpps_finalized.insert(vpp->PPName());
-    }
-
-    // Broadcast/Scatter any VPPs that need it
-    for (auto & vpp_name : vpps_finalized)
-      _vpps_data.broadcastScatterVectors(vpp_name);
-  }
 }
 
 #endif /* FEPROBLEMBASE_H */

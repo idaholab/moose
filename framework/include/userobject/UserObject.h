@@ -138,6 +138,14 @@ public:
     _communicator.broadcast(proxy, rank);
   }
 
+  void setPrimaryThreadCopy(UserObject * primary)
+  {
+    if (!_primary_thread_copy && primary != this)
+      _primary_thread_copy = primary;
+  }
+
+  UserObject * primaryThreadCopy() { return _primary_thread_copy; }
+
 protected:
   /// Reference to the Subproblem for this user object
   SubProblem & _subproblem;
@@ -153,6 +161,9 @@ protected:
   const Moose::CoordinateSystemType & _coord_sys;
 
   const bool _duplicate_initial_execution;
+
+private:
+  UserObject * _primary_thread_copy = nullptr;
 };
 
 #endif /* USEROBJECT_H */
