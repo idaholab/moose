@@ -49,6 +49,7 @@ ifeq ($(wildcard $(libmesh_LIBTOOL)),)
   libmesh_LIBTOOL := $(LIBMESH_DIR)/libtool           # uninstalled version
 endif
 libmesh_shared  := $(shell $(libmesh_LIBTOOL) --config | grep build_libtool_libs | cut -d'=' -f2)
+libmesh_static  := $(shell $(libmesh_LIBTOOL) --config | grep build_old_libs | cut -d'=' -f2)
 
 # If $(libmesh_CXX) is an mpiXXX compiler script, use -show
 # to determine the base compiler
