@@ -1,0 +1,11 @@
+[Tests]
+  [./coupled_pressure]
+    type = Exodiff
+    input = 'coupled_pressure_test.i'
+    exodiff = 'coupled_pressure_test_out.e'
+    custom_cmp = 'coupled_pressure_test.exodiff'
+    requirement = "The system shall allow to apply a pressure boundary condition from a variable"
+    design = 'CoupledPressureBC.md'
+    issues = '#11558'
+  [../]
+[]

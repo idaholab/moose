@@ -82,6 +82,8 @@ TensorMechanicsApp::associateSyntax(Syntax & syntax, ActionFactory & action_fact
 
   registerSyntax("EmptyAction", "BCs/Pressure");
   registerSyntax("PressureAction", "BCs/Pressure/*");
+  registerSyntax("EmptyAction", "BCs/CoupledPressure");
+  registerSyntax("CoupledPressureAction", "BCs/CoupledPressure/*");
 
   registerSyntax("GeneralizedPlaneStrainAction",
                  "Modules/TensorMechanics/GeneralizedPlaneStrain/*");
