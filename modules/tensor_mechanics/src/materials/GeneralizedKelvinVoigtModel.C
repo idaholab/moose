@@ -75,6 +75,7 @@ GeneralizedKelvinVoigtModel::GeneralizedKelvinVoigtModel(const InputParameters &
   _has_longterm_dashpot = (_eta_i.size() == _Ci.size() + 1);
 
   issueGuarantee(_elasticity_tensor_name, Guarantee::ISOTROPIC);
+  declareViscoelasticProperties();
 }
 
 void
@@ -83,10 +84,10 @@ GeneralizedKelvinVoigtModel::computeQpViscoelasticProperties()
   _first_elasticity_tensor[_qp] = _C0;
 
   for (unsigned int i = 0; i < _Ci.size(); ++i)
-    _springs_elasticity_tensors[_qp][i] = _Ci[i];
+    (*_springs_elasticity_tensors[i])[_qp] = _Ci[i];
 
   for (unsigned int i = 0; i < _eta_i.size(); ++i)
-    _dashpot_viscosities[_qp][i] = _eta_i[i];
+    (*_dashpot_viscosities[i])[_qp] = _eta_i[i];
 }
 
 void
@@ -95,5 +96,5 @@ GeneralizedKelvinVoigtModel::computeQpViscoelasticPropertiesInv()
   (*_first_elasticity_tensor_inv)[_qp] = _S0;
 
   for (unsigned int i = 0; i < _Si.size(); ++i)
-    (*_springs_elasticity_tensors_inv)[_qp][i] = _Si[i];
+    (*_springs_elasticity_tensors_inv[i])[_qp] = _Si[i];
 }

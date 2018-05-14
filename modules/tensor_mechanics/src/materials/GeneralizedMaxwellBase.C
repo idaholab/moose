@@ -33,24 +33,26 @@ GeneralizedMaxwellBase::updateQpViscousStrains()
   if (_has_driving_eigenstrain)
     effective_strain += (*_driving_eigenstrain_old)[_qp];
 
-  for (unsigned int i = 0; i < _springs_elasticity_tensors[_qp].size(); ++i)
+  for (unsigned int i = 0; i < _springs_elasticity_tensors.size(); ++i)
   {
-    Real theta_i = computeTheta(_dt_old, _dashpot_viscosities_old[_qp][i]);
-    Real gamma = _dashpot_viscosities_old[_qp][i] / (_dt_old * theta_i);
-    _viscous_strains[_qp][i] =
-        _viscous_strains_old[_qp][i] *
-        ((_dashpot_viscosities_old[_qp][i] * gamma - _dt_old * (1. - theta_i) * gamma) /
-         (_dashpot_viscosities_old[_qp][i] * (1. + gamma)));
-    _viscous_strains[_qp][i] +=
-        effective_strain * ((_dashpot_viscosities_old[_qp][i] + _dt_old * (1. - theta_i) * gamma) /
-                            (_dashpot_viscosities_old[_qp][i] * (1. + gamma)));
+    Real theta_i = computeTheta(_dt_old, (*_dashpot_viscosities_old[i])[_qp]);
+    Real gamma = (*_dashpot_viscosities_old[i])[_qp] / (_dt_old * theta_i);
+    (*_viscous_strains[i])[_qp] =
+        (*_viscous_strains_old[i])[_qp] *
+        (((*_dashpot_viscosities_old[i])[_qp] * gamma - _dt_old * (1. - theta_i) * gamma) /
+         ((*_dashpot_viscosities_old[i])[_qp] * (1. + gamma)));
+    (*_viscous_strains[i])[_qp] +=
+        effective_strain *
+        (((*_dashpot_viscosities_old[i])[_qp] + _dt_old * (1. - theta_i) * gamma) /
+         ((*_dashpot_viscosities_old[i])[_qp] * (1. + gamma)));
   }
 
   if (_has_longterm_dashpot)
   {
-    Real theta_i = computeTheta(_dt_old, _dashpot_viscosities_old[_qp].back());
-    _viscous_strains[_qp].back() = effective_strain / theta_i;
-    _viscous_strains[_qp].back() -= _viscous_strains_old[_qp].back() * ((1. - theta_i) / theta_i);
+    Real theta_i = computeTheta(_dt_old, (*_dashpot_viscosities_old.back())[_qp]);
+    (*_viscous_strains.back())[_qp] = effective_strain / theta_i;
+    (*_viscous_strains.back())[_qp] -=
+        (*_viscous_strains_old.back())[_qp] * ((1. - theta_i) / theta_i);
   }
 }
 
@@ -58,22 +60,22 @@ void
 GeneralizedMaxwellBase::computeQpApparentElasticityTensors()
 {
 
-  _instantaneous_elasticity_tensor[_qp] = _first_elasticity_tensor[_qp];
+  _elasticity_tensor[_qp] = _first_elasticity_tensor[_qp];
   _apparent_elasticity_tensor[_qp] = _first_elasticity_tensor[_qp];
 
-  for (unsigned int i = 0; i < _springs_elasticity_tensors[_qp].size(); ++i)
+  for (unsigned int i = 0; i < _springs_elasticity_tensors.size(); ++i)
   {
-    Real theta_i = computeTheta(_dt, _dashpot_viscosities[_qp][i]);
-    Real gamma = _dashpot_viscosities[_qp][i] / (_dt * theta_i);
-    _instantaneous_elasticity_tensor[_qp] += _springs_elasticity_tensors[_qp][i];
+    Real theta_i = computeTheta(_dt, (*_dashpot_viscosities[i])[_qp]);
+    Real gamma = (*_dashpot_viscosities[i])[_qp] / (_dt * theta_i);
+    _elasticity_tensor[_qp] += (*_springs_elasticity_tensors[i])[_qp];
     _apparent_elasticity_tensor[_qp] +=
-        _springs_elasticity_tensors[_qp][i] * (gamma / (1. + gamma));
+        (*_springs_elasticity_tensors[i])[_qp] * (gamma / (1. + gamma));
   }
 
   if (_has_longterm_dashpot)
   {
-    Real theta_i = computeTheta(_dt, _dashpot_viscosities[_qp].back());
-    Real gamma = _dashpot_viscosities[_qp].back() / (_dt * theta_i);
+    Real theta_i = computeTheta(_dt, (*_dashpot_viscosities.back())[_qp]);
+    Real gamma = (*_dashpot_viscosities.back())[_qp] / (_dt * theta_i);
     _apparent_elasticity_tensor[_qp] += _first_elasticity_tensor[_qp] * gamma;
 
     mooseDoOnce(mooseWarning("Generalized Maxwell model with longterm viscosity may not converge "
@@ -81,7 +83,7 @@ GeneralizedMaxwellBase::computeQpApparentElasticityTensors()
   }
 
   _apparent_elasticity_tensor_inv[_qp] = _apparent_elasticity_tensor[_qp].invSymm();
-  _instantaneous_elasticity_tensor_inv[_qp] = _instantaneous_elasticity_tensor[_qp].invSymm();
+  _elasticity_tensor_inv[_qp] = _elasticity_tensor[_qp].invSymm();
 }
 
 void
@@ -89,20 +91,21 @@ GeneralizedMaxwellBase::computeQpApparentCreepStrain()
 {
   _apparent_creep_strain[_qp].zero();
 
-  for (unsigned int i = 0; i < _springs_elasticity_tensors[_qp].size(); ++i)
+  for (unsigned int i = 0; i < _springs_elasticity_tensors.size(); ++i)
   {
-    Real theta_i = computeTheta(_dt, _dashpot_viscosities[_qp][i]);
-    Real gamma = _dashpot_viscosities[_qp][i] / (_dt * theta_i);
+    Real theta_i = computeTheta(_dt, (*_dashpot_viscosities[i])[_qp]);
+    Real gamma = (*_dashpot_viscosities[i])[_qp] / (_dt * theta_i);
     _apparent_creep_strain[_qp] +=
-        (_springs_elasticity_tensors[_qp][i] * _viscous_strains[_qp][i]) * (gamma / (1. + gamma));
+        ((*_springs_elasticity_tensors[i])[_qp] * (*_viscous_strains[i])[_qp]) *
+        (gamma / (1. + gamma));
   }
 
   if (_has_longterm_dashpot)
   {
-    Real theta_i = computeTheta(_dt, _dashpot_viscosities[_qp].back());
-    Real gamma = _dashpot_viscosities[_qp].back() / (_dt * theta_i);
+    Real theta_i = computeTheta(_dt, (*_dashpot_viscosities.back())[_qp]);
+    Real gamma = (*_dashpot_viscosities.back())[_qp] / (_dt * theta_i);
     _apparent_creep_strain[_qp] +=
-        (_first_elasticity_tensor[_qp] * _viscous_strains[_qp].back()) * gamma;
+        (_first_elasticity_tensor[_qp] * (*_viscous_strains.back())[_qp]) * gamma;
   }
 
   _apparent_creep_strain[_qp] = _apparent_elasticity_tensor_inv[_qp] * _apparent_creep_strain[_qp];
@@ -110,7 +113,7 @@ GeneralizedMaxwellBase::computeQpApparentCreepStrain()
   if (_has_driving_eigenstrain)
   {
     _apparent_creep_strain[_qp] +=
-        (_instantaneous_elasticity_tensor[_qp] * _apparent_elasticity_tensor_inv[_qp]) *
+        (_elasticity_tensor[_qp] * _apparent_elasticity_tensor_inv[_qp]) *
         (*_driving_eigenstrain)[_qp];
     _apparent_creep_strain[_qp] -= (*_driving_eigenstrain)[_qp];
   }
