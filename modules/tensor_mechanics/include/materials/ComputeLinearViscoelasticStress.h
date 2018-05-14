@@ -37,16 +37,17 @@ protected:
   virtual void initQpStatefulProperties() override;
   virtual void computeQpStress() override;
 
-  /// Creep strain variable
+  ///@{ Creep strain variable
   MaterialProperty<RankTwoTensor> & _creep_strain;
   const MaterialProperty<RankTwoTensor> & _creep_strain_old;
+  ///@}
 
   /// Apparent creep strain (extracted from a LinearViscoelasticityBase object)
   const MaterialProperty<RankTwoTensor> & _apparent_creep_strain;
   /// Apparent elasticity tensor (extracted from a LinearViscoelasticityBase object)
   const MaterialProperty<RankFourTensor> & _apparent_elasticity_tensor;
   /// Instantaneous compliance tensor (extracted from a LinearViscoelasticityBase object)
-  const MaterialProperty<RankFourTensor> & _instantaneous_elasticity_tensor_inv;
+  const MaterialProperty<RankFourTensor> & _elasticity_tensor_inv;
 };
 
 #endif // COMPUTELINEARVISCOELASTICSTRESS_H

@@ -43,10 +43,10 @@ protected:
   virtual void computeQpApparentCreepStrain() final;
   virtual void updateQpViscousStrains() final;
 
-  // old material properties required for the update of the viscoelastic strain
+  ///@{ old material properties required for the update of the viscoelastic strain
   const MaterialProperty<RankFourTensor> & _first_elasticity_tensor_old;
   const MaterialProperty<RankFourTensor> & _first_elasticity_tensor_inv_old;
-  const MaterialProperty<std::vector<RankFourTensor>> & _springs_elasticity_tensors_inv_old;
+  ///@}
 };
 
 #endif // GENERALIZEDKELVINVOIGTBASE_H

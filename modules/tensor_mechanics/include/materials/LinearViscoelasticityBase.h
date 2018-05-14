@@ -76,7 +76,7 @@ InputParameters validParams<LinearViscoelasticityBase>();
  * time-stepping scheme.
  *
  * This class does not store the true creep strain of the material, but an equivalent creep strain
- * adapted for numerical efficiency. The true creep strain themsevelves are declared by
+ * adapted for numerical efficiency. The true creep strain itself is declared by
  * ComputeLinearViscoelasticStress or LinearViscoelasticStressUpdate.
  */
 class LinearViscoelasticityBase : public ComputeElasticityTensorBase
@@ -101,8 +101,7 @@ public:
 
   /**
    * Compute the apparent properties at a quadrature point. This initializes the internal
-   * time-stepping
-   * scheme, and must be called at the beginning of the time step.
+   * time-stepping scheme, and must be called at the beginning of the time step.
    *
    * This method is called by LinearViscoelasticityManager.
    */
@@ -178,6 +177,13 @@ protected:
    */
   virtual void updateQpViscousStrains() = 0;
 
+  /**
+   * Declare all necessary MaterialProperties for the model. This method must be called once at
+   * the end of the constructor of a final inherited class, after `_components` has been set.
+   * See GeneralizedKelvinVoigtModel or GeneralizedMaxwell model for example.
+   */
+  void declareViscoelasticProperties();
+
   /// Provides theta as a function of the time step and a viscosity
   Real computeTheta(Real dt, Real viscosity) const;
 
@@ -192,9 +198,9 @@ protected:
   MaterialProperty<RankFourTensor> & _apparent_elasticity_tensor_inv;
 
   /// Instantaneous elasticity tensor. This IS the real elasticity tensor of the material
-  MaterialProperty<RankFourTensor> & _instantaneous_elasticity_tensor;
+  //  MaterialProperty<RankFourTensor> & _instantaneous_elasticity_tensor;
   /// Inverse of the instaneous elasticity tensor
-  MaterialProperty<RankFourTensor> & _instantaneous_elasticity_tensor_inv;
+  MaterialProperty<RankFourTensor> & _elasticity_tensor_inv;
 
   /// If active, indicates that we need to call computeQpViscoelasticPropertiesInv()
   bool _need_viscoelastic_properties_inverse;
@@ -206,26 +212,34 @@ protected:
    */
   unsigned int _components;
 
-  /// Elasticity tensor of a stand-alone elastic spring in the chain
+  ///@{ Elasticity tensor of a stand-alone elastic spring in the chain
   MaterialProperty<RankFourTensor> & _first_elasticity_tensor;
   MaterialProperty<RankFourTensor> * _first_elasticity_tensor_inv;
-  /// List of elasticity tensor of each subsequent spring in the chain
-  MaterialProperty<std::vector<RankFourTensor>> & _springs_elasticity_tensors;
-  MaterialProperty<std::vector<RankFourTensor>> * _springs_elasticity_tensors_inv;
-  /// List of viscosities of each subsequent spring in the chain
-  MaterialProperty<std::vector<Real>> & _dashpot_viscosities;
-  const MaterialProperty<std::vector<Real>> & _dashpot_viscosities_old;
+  ///@}
 
-  /**
-   * The internal strain variables required by the time-stepping procedure (generally, on a
+  ///@{ List of elasticity tensor of each subsequent spring in the chain
+  std::vector<MaterialProperty<RankFourTensor> *> _springs_elasticity_tensors;
+  std::vector<MaterialProperty<RankFourTensor> *> _springs_elasticity_tensors_inv;
+  std::vector<const MaterialProperty<RankFourTensor> *> _springs_elasticity_tensors_inv_old;
+  ///@}
+
+  ///@{ List of viscosities of each subsequent dashpot in the chain
+  std::vector<MaterialProperty<Real> *> _dashpot_viscosities;
+  std::vector<const MaterialProperty<Real> *> _dashpot_viscosities_old;
+  ///@}
+
+  /**@{
+   * The internal strain variables required by the time-stepping procedure (must be on a
    * one-on-one basis with the number of dashpot).
    */
-  MaterialProperty<std::vector<RankTwoTensor>> & _viscous_strains;
-  const MaterialProperty<std::vector<RankTwoTensor>> & _viscous_strains_old;
+  std::vector<MaterialProperty<RankTwoTensor> *> _viscous_strains;
+  std::vector<const MaterialProperty<RankTwoTensor> *> _viscous_strains_old;
+  ///@}
 
-  /// The apparent creep strain resulting from the internal viscous strains
+  ///@{ The apparent creep strain resulting from the internal viscous strains
   MaterialProperty<RankTwoTensor> & _apparent_creep_strain;
   const MaterialProperty<RankTwoTensor> & _apparent_creep_strain_old;
+  ///@}
 
   /// previous value of the elastic strain for update purposes
   const MaterialProperty<RankTwoTensor> & _elastic_strain_old;
@@ -240,9 +254,10 @@ protected:
   bool _has_driving_eigenstrain;
   /// Name of the eigenstrain that drives the additional creep strain
   std::string _driving_eigenstrain_name;
-  /// Pointer to the value of the driving eigenstrain
+  ///@{ Pointer to the value of the driving eigenstrain
   const MaterialProperty<RankTwoTensor> * _driving_eigenstrain;
   const MaterialProperty<RankTwoTensor> * _driving_eigenstrain_old;
+  ///@}
 
   /**
    * If activated, the time-stepping scheme will be re-initialized at each step of the solver. This
@@ -251,6 +266,7 @@ protected:
    */
   bool _force_recompute_properties;
 
+  /// checks whether we are at the first time step
   bool & _step_zero;
 };
 
