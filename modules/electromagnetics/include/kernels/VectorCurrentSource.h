@@ -21,9 +21,17 @@ protected:
 
   Function & _func;
 
-  RealVectorValue _source_real;
+  Function & _x_real;
+  Function & _y_real;
+  Function & _z_real;
 
-  RealVectorValue _source_imaginary;
+  Function & _x_imag;
+  Function & _y_imag;
+  Function & _z_imag;
+
+  // RealVectorValue _source_real;
+  //
+  // RealVectorValue _source_imaginary;
 
   MooseEnum _component;
 };
