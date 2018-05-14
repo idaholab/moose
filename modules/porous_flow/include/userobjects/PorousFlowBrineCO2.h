@@ -72,13 +72,11 @@ public:
   void thermophysicalProperties(Real pressure,
                                 Real temperature,
                                 Real Xnacl,
-                                Real z,
+                                Real Z,
                                 std::vector<FluidStateProperties> & fsp) const;
 
   /**
-   * Mole fractions of CO2 in water and water vapor in CO2 at equilibrium.
-   * Note: This returns the values of xco2 in water (no salt). This function used in
-   * equilibriumMassFractions()
+   * Mole fractions of CO2 in brine and water vapor in CO2 at equilibrium.
    *
    * In the low temperature regime (T <= 99C), the mole fractions are calculated directly,
    * while in the elevated temperature regime (T >= 109C), they are calculated iteratively.
@@ -87,10 +85,27 @@ public:
    *
    * @param pressure phase pressure (Pa)
    * @param temperature phase temperature (K)
-   * @param[out] xco2 mole fraction of CO2 in liquid (-)
-   * @param[out] yh2o mole fraction of H2O in gas (kg/kg)
+   * @param Xnacl NaCl mass fraction (kg/kg)
+   * @param[out] xco2 mole fraction of CO2 in liquid
+   * @param[out] dxco2_dp derivative of mole fraction of CO2 in liquid wrt pressure
+   * @param[out] dxco2_dT derivative of mole fraction of CO2 in liqiud wrt temperature
+   * @param[out] dxco2_dX derivative of mole fraction of CO2 in liqiud wrt salt mass fraction
+   * @param[out] yh2o mass fraction of mole in gas
+   * @param[out] dyh2og_dp derivative of mole fraction of H2O in gas wrt pressure
+   * @param[out] dyh2o_dT derivative of mole fraction of H2O in gas wrt temperature
+   * @param[out] dyh2o_dX derivative of mole fraction of H2O in gas wrt salt mass fraction
    */
-  void equilibriumMoleFractions(Real pressure, Real temperature, Real & xco2, Real & yh2o) const;
+  void equilibriumMoleFractions(Real pressure,
+                                Real temperature,
+                                Real Xnacl,
+                                Real & xco2,
+                                Real & dxco2_dp,
+                                Real & dxco2_dT,
+                                Real & dxco2_dX,
+                                Real & yh2o,
+                                Real & dyh2o_dp,
+                                Real & dyh2o_dT,
+                                Real & dyh2o_dX) const;
 
   /**
    * Mass fractions of CO2 in brine and water vapor in CO2 at equilibrium
@@ -272,10 +287,14 @@ public:
    * CO2 solubility in pure water and aqueous NaCl solutions from 257 to 533 K and from 0 to
    * 2000 bar, Chem. Geol., 193, 257-271 (2003)
    *
+   * Note: this is not a 'true' activity coefficient, and is instead related to the molality
+   * of CO2 in water and brine. Nevertheless, Spycher and Pruess (2005) refer to it as an
+   * activity coefficient, so this notation is followed here.
+   *
    * @param pressure phase pressure (Pa)
    * @param temperature phase temperature (K)
    * @param Xnacl salt mass fraction (kg/kg)
-   * @param[out] gamma activity coefficient for CO2 in brine (output)
+   * @param[out] gamma activity coefficient for CO2 in brine
    * @param[out] dgamma_dp derivative of activity coefficient wrt pressure
    * @param[out] dgamma_dT derivative of activity coefficient wrt temperature
    * @param[out] dgamma_dX derivative of activity coefficient wrt salt mass fraction
@@ -287,6 +306,22 @@ public:
                            Real & dgamma_dp,
                            Real & dgamma_dT,
                            Real & dgamma_dX) const;
+
+  /**
+   * Activity coefficient for CO2 in brine used in the elevated temperature formulation.
+   * Eq. (18) from Spycher and Pruess (2010).
+   *
+   * Note: unlike activityCoefficient(), no pressure dependence is included in
+   * this formulation
+   *
+   * @param temperature phase temperature (K)
+   * @param Xnacl salt mass fraction (kg/kg)
+   * @param[out] gamma activity coefficient for CO2 in brine
+   * @param[out] dgamma_dT derivative of activity coefficient wrt temperature
+   * @param[out] dgamma_dX derivative of activity coefficient wrt salt mass fraction
+   */
+  void activityCoefficientHighTemp(
+      Real temperature, Real Xnacl, Real & gamma, Real & dgamma_dT, Real & dgamma_dX) const;
 
   /**
    * Equilibrium constant for H2O
@@ -389,16 +424,49 @@ public:
   void enthalpyOfDissolution(Real temperature, Real & hdis, Real & dhdis_dT) const;
 
   /**
+   * Mole fractions of CO2 in brine and water vapor in CO2 at equilibrium in the low
+   * temperature regime (T <= 99C).
+   *
+   * @param pressure phase pressure (Pa)
+   * @param temperature phase temperature (K)
+   * @param Xnacl NaCl mass fraction (kg/kg)
+   * @param[out] xco2 mole fraction of CO2 in liquid
+   * @param[out] dxco2_dp derivative of mole fraction of CO2 in liquid wrt pressure
+   * @param[out] dxco2_dT derivative of mole fraction of CO2 in liqiud wrt temperature
+   * @param[out] dxco2_dX derivative of mole fraction of CO2 in liqiud wrt salt mass fraction
+   * @param[out] yh2o mass fraction of mole in gas
+   * @param[out] dyh2og_dp derivative of mole fraction of H2O in gas wrt pressure
+   * @param[out] dyh2o_dT derivative of mole fraction of H2O in gas wrt temperature
+   * @param[out] dyh2o_dX derivative of mole fraction of H2O in gas wrt salt mass fraction
+   */
+  void equilibriumMoleFractionsLowTemp(Real pressure,
+                                       Real temperature,
+                                       Real Xnacl,
+                                       Real & xco2,
+                                       Real & dxco2_dp,
+                                       Real & dxco2_dT,
+                                       Real & dxco2_dX,
+                                       Real & yh2o,
+                                       Real & dyh2o_dp,
+                                       Real & dyh2o_dT,
+                                       Real & dyh2o_dX) const;
+
+  /**
    * Function to solve for yh2o and xco2 iteratively in the elevated temperature regime (T > 100C)
    *
    * @param pressure gas pressure (Pa)
    * @param temperature fluid temperature (K)
+   * @param Xnacl NaCl mass fraction (kg/kg)
    * @param co2_density CO2 density (kg/m^3)
    * @param[out] xco2 mole fraction of CO2 in liquid phase (-)
    * @param[out] yh2o mole fraction of H2O in gas phase (-)
    */
-  void solveEquilibriumMoleFractionHighTemp(
-      Real pressure, Real temperature, Real co2_density, Real & xco2, Real & yh2o) const;
+  void solveEquilibriumMoleFractionHighTemp(Real pressure,
+                                            Real temperature,
+                                            Real Xnacl,
+                                            Real co2_density,
+                                            Real & xco2,
+                                            Real & yh2o) const;
 
 protected:
   /// Check the input variables
@@ -426,6 +494,7 @@ protected:
    *
    * @param pressure gas pressure (Pa)
    * @param temperature fluid temperature (K)
+   * @param Xnacl NaCl mass fraction (kg/kg)
    * @param co2_density CO2 density (kg/m^3)
    * @param xco2 mole fraction of CO2 in liquid phase (-)
    * @param yh2o mole fraction of H2O in gas phase (-)
@@ -434,6 +503,7 @@ protected:
    */
   void funcABHighTemp(Real pressure,
                       Real temperature,
+                      Real Xnacl,
                       Real co2_density,
                       Real xco2,
                       Real yh2o,
@@ -442,6 +512,7 @@ protected:
 
   void funcABHighTemp(Real pressure,
                       Real temperature,
+                      Real Xnacl,
                       Real co2_density,
                       Real xco2,
                       Real yh2o,
@@ -450,7 +521,8 @@ protected:
                       Real & dA_dT,
                       Real & B,
                       Real & dB_dp,
-                      Real & dB_dT) const;
+                      Real & dB_dT,
+                      Real & dB_dX) const;
 
   void funcABLowTemp(Real pressure,
                      Real temperature,
