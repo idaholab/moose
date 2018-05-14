@@ -30,6 +30,7 @@
 #include "MooseUtils.h"
 
 #include "libmesh/mesh_communication.h"
+#include "libmesh/partitioner.h"
 
 XFEM::XFEM(const InputParameters & params) : XFEMInterface(params), _efa_mesh(Moose::out)
 {
@@ -284,6 +285,7 @@ XFEM::update(Real time, NonlinearSystemBase & nl, AuxiliarySystem & aux)
 
   if (mesh_changed)
   {
+    Partitioner::set_node_processor_ids(*_mesh);
     _mesh->update_parallel_id_counts();
     MeshCommunication().make_elems_parallel_consistent(*_mesh);
     MeshCommunication().make_nodes_parallel_consistent(*_mesh);
@@ -297,6 +299,7 @@ XFEM::update(Real time, NonlinearSystemBase & nl, AuxiliarySystem & aux)
 
     if (_displaced_mesh)
     {
+      Partitioner::set_node_processor_ids(*_mesh);
       _displaced_mesh->update_parallel_id_counts();
       MeshCommunication().make_elems_parallel_consistent(*_displaced_mesh);
       MeshCommunication().make_nodes_parallel_consistent(*_displaced_mesh);
@@ -1112,7 +1115,6 @@ XFEM::cutMeshWithEFA(NonlinearSystemBase & nl, AuxiliarySystem & aux)
 
     Node * parent_node = _mesh->node_ptr(parent_id);
     Node * new_node = Node::build(*parent_node, _mesh->n_nodes()).release();
-    new_node->processor_id() = parent_node->processor_id();
     _mesh->add_node(new_node);
 
     new_nodes_to_parents[new_node] = parent_node;
@@ -1124,7 +1126,6 @@ XFEM::cutMeshWithEFA(NonlinearSystemBase & nl, AuxiliarySystem & aux)
     {
       const Node * parent_node2 = _displaced_mesh->node_ptr(parent_id);
       Node * new_node2 = Node::build(*parent_node2, _displaced_mesh->n_nodes()).release();
-      new_node2->processor_id() = parent_node2->processor_id();
       _displaced_mesh->add_node(new_node2);
 
       new_node2->set_n_systems(parent_node2->n_systems());
