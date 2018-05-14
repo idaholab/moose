@@ -49,7 +49,7 @@ PLUGIN_DIR  := $(APPLICATION_DIR)/plugins
 
 excluded_srcfiles += main.C
 find_excludes     := $(foreach i, $(excluded_srcfiles), -not -name $(i))
-srcfiles    := $(shell find $(SRC_DIRS) -name "*.C" $(find_excludes))
+srcfiles    := $(shell find $(SRC_DIRS) -regex "[^\#~]*\.C" $(find_excludes))
 
 
 ### Unity Build ###
@@ -81,7 +81,7 @@ non_unity_srcsubdirs := $(filter $(non_unity_dirs), $(srcsubdirs))
 # Loop over the subdirectories, creating a rule to create the Unity source file
 # for each subdirectory.  To do that we need to create a unique name using the
 # full hierarchy of the path underneath src
-$(foreach srcsubdir,$(unity_srcsubdirs),$(eval $(call unity_file_rule,$(call unity_unique_name,$(unity_src_dir),$(APPLICATION_DIR),$(srcsubdir)),$(shell find $(srcsubdir) -maxdepth 1 \( -type f -o -type l \) -name "*.C"),$(srcsubdir),$(unity_src_dir))))
+$(foreach srcsubdir,$(unity_srcsubdirs),$(eval $(call unity_file_rule,$(call unity_unique_name,$(unity_src_dir),$(APPLICATION_DIR),$(srcsubdir)),$(shell find $(srcsubdir) -maxdepth 1 \( -type f -o -type l \) -regex "[^\#~]*\.C"),$(srcsubdir),$(unity_src_dir))))
 
 # This creates the whole list of Unity source files so we can use it as a dependency
 app_unity_srcfiles := $(foreach srcsubdir,$(unity_srcsubdirs),$(call unity_unique_name,$(unity_src_dir),$(APPLICATION_DIR),$(srcsubdir)))
@@ -90,7 +90,7 @@ app_unity_srcfiles := $(foreach srcsubdir,$(unity_srcsubdirs),$(call unity_uniqu
 unity_srcfiles += $(app_unity_srcfiles)
 
 # Pick up all of the additional files in the src directory since we're not unity building those
-app_non_unity_srcfiles := $(filter-out %main.C, $(shell find $(non_unity_srcsubdirs) -maxdepth 1 \( -type f -o -type l \) -name "*.C"))
+app_non_unity_srcfiles := $(filter-out %main.C, $(shell find $(non_unity_srcsubdirs) -maxdepth 1 \( -type f -o -type l \) -regex "[^\#~]*\.C"))
 
 # Override srcfiles
 srcfiles    := $(app_unity_srcfiles) $(app_non_unity_srcfiles)
@@ -114,7 +114,7 @@ f90objects  := $(patsubst %.f90, %.$(obj-suffix), $(f90srcfiles))
 
 app_objects := $(objects) $(cobjects) $(fobjects) $(f90objects) $(ADDITIONAL_APP_OBJECTS)
 
-test_srcfiles    := $(shell find $(TEST_SRC_DIRS) -name "*.C" $(find_excludes) 2>/dev/null)
+test_srcfiles    := $(shell find $(TEST_SRC_DIRS) -regex "[^\#~]*\.C" $(find_excludes) 2>/dev/null)
 test_csrcfiles   := $(shell find $(TEST_SRC_DIRS) -name "*.c" 2>/dev/null)
 test_fsrcfiles   := $(shell find $(TEST_SRC_DIRS) -name "*.f" 2>/dev/null)
 test_f90srcfiles := $(shell find $(TEST_SRC_DIRS) -name "*.f90" 2>/dev/null)
@@ -130,7 +130,7 @@ test_f90objects:= $(patsubst %.f90, %.$(obj-suffix), $(test_f90srcfiles))
 app_test_objects := $(test_objects) $(test_cobjects) $(test_fobjects) $(test_f90objects)
 
 # plugin files
-plugfiles   := $(shell find $(PLUGIN_DIR) -name "*.C" 2>/dev/null)
+plugfiles   := $(shell find $(PLUGIN_DIR) -regex "[^\#~]*\.C" 2>/dev/null)
 cplugfiles  := $(shell find $(PLUGIN_DIR) -name "*.c" 2>/dev/null)
 fplugfiles  := $(shell find $(PLUGIN_DIR) -name "*.f" 2>/dev/null)
 f90plugfiles:= $(shell find $(PLUGIN_DIR) -name "*.f90" 2>/dev/null)
@@ -161,8 +161,8 @@ ifneq ($(wildcard $(APPLICATION_DIR)/test/include/*),)
 endif
 
 # header files
-include_dirs	:= $(shell find $(depend_dirs) -type d | grep -v "\.svn")
-include_files	:= $(shell find $(depend_dirs) -name "*.[hf]" | grep -v "\.svn")
+include_dirs	:= $(shell find $(depend_dirs) -type d)
+include_files	:= $(shell find $(depend_dirs) -regex "[^\#~]*\.[hf]")
 
 # clang static analyzer files
 app_analyzer := $(patsubst %.C, %.plist.$(obj-suffix), $(srcfiles))
