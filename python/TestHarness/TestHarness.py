@@ -211,7 +211,7 @@ class TestHarness:
             self._infiles = [os.path.basename(self.options.spec_file)]
 
         else:
-            search_dir = self.base_dir
+            search_dir = os.getcwd()
 
         try:
             for dirpath, dirnames, filenames in os.walk(search_dir, followlinks=True):
