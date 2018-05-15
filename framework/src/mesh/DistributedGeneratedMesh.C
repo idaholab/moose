@@ -76,10 +76,6 @@ validParams<DistributedGeneratedMesh>()
                              "The type of element from libMesh to "
                              "generate (default: linear element for "
                              "requested dimension)");
-  params.addParam<bool>(
-      "gauss_lobatto_grid",
-      false,
-      "Grade mesh into boundaries according to Gauss-Lobatto quadrature spacing.");
   params.addRangeCheckedParam<Real>(
       "bias_x",
       1.,
@@ -120,14 +116,10 @@ DistributedGeneratedMesh::DistributedGeneratedMesh(const InputParameters & param
     _ymax(getParam<Real>("ymax")),
     _zmin(getParam<Real>("zmin")),
     _zmax(getParam<Real>("zmax")),
-    _gauss_lobatto_grid(getParam<bool>("gauss_lobatto_grid")),
     _bias_x(getParam<Real>("bias_x")),
     _bias_y(getParam<Real>("bias_y")),
     _bias_z(getParam<Real>("bias_z"))
 {
-  if (_gauss_lobatto_grid && (_bias_x != 1.0 || _bias_y != 1.0 || _bias_z != 1.0))
-    mooseError("Cannot apply both Gauss-Lobatto mesh grading and biasing at the same time.");
-
   // All generated meshes are regular orthogonal meshes
   _regular_orthogonal_mesh = true;
 }
@@ -378,6 +370,27 @@ set_boundary_names(BoundaryInfo & /*boundary_info*/)
       "set_boundary_names not implemented for this element type in DistributedGeneratedMesh");
 }
 
+/**
+ * All meshes are generated on the unit square.  This function stretches the mesh
+ * out to fill the correct area.
+ */
+template <typename T>
+void
+scale_nodal_positions(dof_id_type /*nx*/,
+                      dof_id_type /*ny*/,
+                      dof_id_type /*nz*/,
+                      Real /*xmin*/,
+                      Real /*xmax*/,
+                      Real /*ymin*/,
+                      Real /*ymax*/,
+                      Real /*zmin*/,
+                      Real /*zmax*/,
+                      MeshBase & /*mesh*/)
+{
+  mooseError(
+      "scale_nodal_positions not implemented for this element type in DistributedGeneratedMesh");
+}
+
 template <>
 inline dof_id_type
 num_neighbors<Edge2>(const dof_id_type nx,
@@ -523,6 +536,23 @@ set_boundary_names<Edge2>(BoundaryInfo & boundary_info)
 {
   boundary_info.sideset_name(0) = "left";
   boundary_info.sideset_name(1) = "right";
+}
+
+template <>
+void
+scale_nodal_positions<Edge2>(dof_id_type /*nx*/,
+                             dof_id_type /*ny*/,
+                             dof_id_type /*nz*/,
+                             Real xmin,
+                             Real xmax,
+                             Real /*ymin*/,
+                             Real /*ymax*/,
+                             Real /*zmin*/,
+                             Real /*zmax*/,
+                             MeshBase & mesh)
+{
+  for (auto & node_ptr : mesh.node_ptr_range())
+    (*node_ptr)(0) = (*node_ptr)(0) * (xmax - xmin) + xmin;
 }
 
 template <>
@@ -731,6 +761,26 @@ set_boundary_names<Quad4>(BoundaryInfo & boundary_info)
   boundary_info.sideset_name(1) = "right";
   boundary_info.sideset_name(2) = "top";
   boundary_info.sideset_name(3) = "left";
+}
+
+template <>
+void
+scale_nodal_positions<Quad4>(dof_id_type /*nx*/,
+                             dof_id_type /*ny*/,
+                             dof_id_type /*nz*/,
+                             Real xmin,
+                             Real xmax,
+                             Real ymin,
+                             Real ymax,
+                             Real /*zmin*/,
+                             Real /*zmax*/,
+                             MeshBase & mesh)
+{
+  for (auto & node_ptr : mesh.node_ptr_range())
+  {
+    (*node_ptr)(0) = (*node_ptr)(0) * (xmax - xmin) + xmin;
+    (*node_ptr)(1) = (*node_ptr)(1) * (ymax - ymin) + ymin;
+  }
 }
 
 template <>
@@ -971,6 +1021,27 @@ set_boundary_names<Hex8>(BoundaryInfo & boundary_info)
   boundary_info.sideset_name(4) = "left";
   boundary_info.sideset_name(5) = "front";
 }
+
+template <>
+void
+scale_nodal_positions<Hex8>(dof_id_type /*nx*/,
+                            dof_id_type /*ny*/,
+                            dof_id_type /*nz*/,
+                            Real xmin,
+                            Real xmax,
+                            Real ymin,
+                            Real ymax,
+                            Real zmin,
+                            Real zmax,
+                            MeshBase & mesh)
+{
+  for (auto & node_ptr : mesh.node_ptr_range())
+  {
+    (*node_ptr)(0) = (*node_ptr)(0) * (xmax - xmin) + xmin;
+    (*node_ptr)(1) = (*node_ptr)(1) * (ymax - ymin) + ymin;
+    (*node_ptr)(2) = (*node_ptr)(2) * (zmax - zmin) + zmin;
+  }
+}
 }
 
 template <typename T>
@@ -986,7 +1057,6 @@ build_cube(UnstructuredMesh & mesh,
            const Real zmin,
            const Real zmax,
            const ElemType type,
-           const bool /*gauss_lobatto_grid*/,
            bool verbose)
 {
   if (verbose)
@@ -1249,12 +1319,7 @@ build_cube(UnstructuredMesh & mesh,
     Moose::out << "mesh dim: " << mesh.mesh_dimension() << std::endl;
 
   // Scale the nodal positions
-  for (auto & node_ptr : mesh.node_ptr_range())
-  {
-    (*node_ptr)(0) = (*node_ptr)(0) * (xmax - xmin) + xmin;
-    (*node_ptr)(1) = (*node_ptr)(1) * (ymax - ymin) + ymin;
-    (*node_ptr)(2) = (*node_ptr)(2) * (zmax - zmin) + zmin;
-  }
+  scale_nodal_positions<T>(nx, ny, nz, xmin, xmax, ymin, ymax, zmin, zmax, mesh);
 
   if (verbose)
     mesh.print_info();
@@ -1307,7 +1372,6 @@ DistributedGeneratedMesh::buildMesh()
                         0,
                         0,
                         _elem_type,
-                        _gauss_lobatto_grid,
                         _verbose);
       break;
     case 2:
@@ -1322,7 +1386,6 @@ DistributedGeneratedMesh::buildMesh()
                         0,
                         0,
                         _elem_type,
-                        _gauss_lobatto_grid,
                         _verbose);
       break;
     case 3:
@@ -1337,7 +1400,6 @@ DistributedGeneratedMesh::buildMesh()
                        _zmin,
                        _zmax,
                        _elem_type,
-                       _gauss_lobatto_grid,
                        _verbose);
       break;
     default:

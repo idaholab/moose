@@ -50,13 +50,6 @@ protected:
   /// The type of element to build
   ElemType _elem_type;
 
-  /// All of the libmesh build_line/square/cube routines support an
-  /// option to grade the mesh into the boundaries according to the
-  /// spacing of the Gauss-Lobatto quadrature points.  Defaults to
-  /// false, and cannot be used in conjunction with x, y, and z
-  /// biasing.
-  bool _gauss_lobatto_grid;
-
   /// The amount by which to bias the cells in the x,y,z directions.
   /// Must be in the range 0.5 <= _bias_x <= 2.0.
   /// _bias_x < 1 implies cells are shrinking in the x-direction.

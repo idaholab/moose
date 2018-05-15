@@ -7,5 +7,6 @@
     input = 'distributed_generated_mesh_bias.i'
     cli_args = '--mesh-only=bias.e'
     exodiff = 'bias.e'
+    min_parallel = 2
   [../]
 []
