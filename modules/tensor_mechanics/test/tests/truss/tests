@@ -18,4 +18,39 @@
     abs_zero = 1e-7
     max_parallel = 1
   [../]
+  [./truss_3d_action]
+    type = 'Exodiff'
+    input = 'truss_3d_action.i'
+    exodiff = 'truss_3d_out.e'
+    abs_zero = 1e-7
+    prereq = 'truss_3d'
+  [../]
+  [./truss_hex_action]
+    type = 'Exodiff'
+    input = 'truss_hex_action.i'
+    exodiff = 'truss_hex_out.e'
+    abs_zero = 1e-7
+    prereq = 'truss_hex'
+  [../]
+  [./truss_2d_action]
+    type = 'Exodiff'
+    input = 'truss_2d_action.i'
+    exodiff = 'truss_2d_out.e'
+    abs_zero = 1e-7
+    max_parallel = 1
+    cli_args='Modules/TensorMechanics/LineElementMaster/block/area=area'
+    prereq = 'truss_2d'
+  [../]
+  [./action_error_1]
+    type = 'RunException'
+    input = 'truss_2d_action.i'
+    cli_args='Outputs/exodus=false Outputs/csv=false'
+    expect_err='LineElementAction: `area` should be provided as input for'
+  [../]
+  [./action_error_2]
+    type = 'RunException'
+    input = 'truss_2d_action.i'
+    cli_args='Outputs/exodus=false Outputs/csv=false Modules/TensorMechanics/LineElementMaster/block/area=area Modules/TensorMechanics/LineElementMaster/block/rotations="rot_x"'
+    expect_err='LineElementAction: Rotational variables cannot be set for truss elements.'
+  [../]
 []
