@@ -3,6 +3,7 @@
 !syntax description /AuxKernels/RankTwoScalarAux
 
 ## Description
+
 The AuxKernel `RankTwoScalarAux` provides methods to calculate several different scalar quantities
 for a Rank-2 tensor, described below.  In some types of calculations, the scalar quantity is
 calculated in a user-specified direction (by default set to the (0, 0, 1) axis); in other calculation

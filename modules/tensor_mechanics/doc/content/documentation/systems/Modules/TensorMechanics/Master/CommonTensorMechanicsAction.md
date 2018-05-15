@@ -1,15 +1,5 @@
-<!-- MOOSE Documentation Stub: Remove this when content is added. -->
-
 # CommonTensorMechanicsAction
 
-!alert construction title=Undocumented Class
-The CommonTensorMechanicsAction has not been documented, if you would like to contribute to MOOSE by writing
-documentation, please see [/generate.md]. The content contained on this page explains the typical
-documentation associated with an action; however, what is contained is ultimately determined by what
-is necessary to make the documentation clear for users.
+## Description
 
-!syntax description /Modules/TensorMechanics/Master/CommonTensorMechanicsAction
-
-!syntax parameters /Modules/TensorMechanics/Master/CommonTensorMechanicsAction
-
-!bibtex bibliography
+This `CommonTensorMechanicsAction` action adds the parameters supplied at the `[Modules/TensorMechanics/Master]` level as defaults for all the subblocks within the Master block. See the description, example use, and parameters on the [TensorMechanics/Master](/Master/index.md) action system page.

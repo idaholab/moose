@@ -1,8 +1,9 @@
 # Stress Divergence Tensors
+
 !syntax description /Kernels/StressDivergenceTensors
 
-
 ## Description
+
 The `StressDivergenceTensors` kernel calculates the residual of the stress divergence for 1D, 2D, and
 3D problems in the Cartesian coordinate system.  This kernel can be automatically created with the
 [TensorMechanics Master Action](/systems/Modules/TensorMechanics/Master/index.md). Use of the tensor
