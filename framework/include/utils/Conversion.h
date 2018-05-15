@@ -79,7 +79,8 @@ std::string
 stringify(const T<U...> & c, const std::string & delim = ",")
 {
   std::string str;
-  const auto begin = c.begin(), end = c.end();
+  const auto begin = c.begin();
+  const auto end = c.end();
   for (auto i = begin; i != end; ++i)
     str += (i != begin ? delim : "") + stringify(*i);
   return str;
