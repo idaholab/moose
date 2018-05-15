@@ -437,7 +437,7 @@ get_ghost_neighbors<Edge2>(const dof_id_type nx,
                            const MeshBase & mesh,
                            std::set<dof_id_type> & ghost_elems)
 {
-  auto & boundary_info = mesh.boundary_info;
+  auto & boundary_info = mesh.get_boundary_info();
 
   std::vector<dof_id_type> neighbors(2);
 
@@ -449,7 +449,7 @@ get_ghost_neighbors<Edge2>(const dof_id_type nx,
       if (!elem_ptr->neighbor_ptr(s))
       {
         // Not on a boundary
-        if (!boundary_info->n_boundary_ids(elem_ptr, s))
+        if (!boundary_info.n_boundary_ids(elem_ptr, s))
         {
           get_neighbors<Edge2>(nx, 0, 0, elem_ptr->id(), 0, 0, neighbors);
 
@@ -612,7 +612,7 @@ get_ghost_neighbors<Quad4>(const dof_id_type nx,
                            const MeshBase & mesh,
                            std::set<dof_id_type> & ghost_elems)
 {
-  auto & boundary_info = mesh.boundary_info;
+  auto & boundary_info = mesh.get_boundary_info();
 
   dof_id_type i, j, k;
 
@@ -626,7 +626,7 @@ get_ghost_neighbors<Quad4>(const dof_id_type nx,
       if (!elem_ptr->neighbor_ptr(s))
       {
         // Not on a boundary
-        if (!boundary_info->n_boundary_ids(elem_ptr, s))
+        if (!boundary_info.n_boundary_ids(elem_ptr, s))
         {
           auto elem_id = elem_ptr->id();
 
@@ -931,7 +931,7 @@ get_ghost_neighbors<Hex8>(const dof_id_type nx,
                           const MeshBase & mesh,
                           std::set<dof_id_type> & ghost_elems)
 {
-  auto & boundary_info = mesh.boundary_info;
+  auto & boundary_info = mesh.get_boundary_info();
 
   dof_id_type i, j, k;
 
@@ -945,7 +945,7 @@ get_ghost_neighbors<Hex8>(const dof_id_type nx,
       if (!elem_ptr->neighbor_ptr(s))
       {
         // Not on a boundary
-        if (!boundary_info->n_boundary_ids(elem_ptr, s))
+        if (!boundary_info.n_boundary_ids(elem_ptr, s))
         {
           auto elem_id = elem_ptr->id();
 
@@ -1340,6 +1340,9 @@ DistributedGeneratedMesh::buildMesh()
                        _gauss_lobatto_grid,
                        _verbose);
       break;
+    default:
+      mooseError(getParam<MooseEnum>("elem_type"),
+                 " is not a currently supported element type for DistributedGeneratedMesh");
   }
 
   // Apply the bias if any exists
