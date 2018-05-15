@@ -715,6 +715,32 @@ stringToInteger(const std::string & input, bool throw_on_failure)
   return convert<int>(input, throw_on_failure);
 }
 
+void
+linearPartitionItems(dof_id_type num_items,
+                     dof_id_type num_chunks,
+                     dof_id_type chunk_id,
+                     dof_id_type & num_local_items,
+                     dof_id_type & local_items_begin,
+                     dof_id_type & local_items_end)
+{
+  auto global_num_local_items = num_items / num_chunks;
+
+  num_local_items = global_num_local_items;
+
+  auto leftovers = num_items % num_chunks;
+
+  if (chunk_id < leftovers)
+  {
+    num_local_items++;
+    local_items_begin = num_local_items * chunk_id;
+  }
+  else
+    local_items_begin =
+        (global_num_local_items + 1) * leftovers + global_num_local_items * (chunk_id - leftovers);
+
+  local_items_end = local_items_begin + num_local_items;
+}
+
 } // MooseUtils namespace
 
 std::string

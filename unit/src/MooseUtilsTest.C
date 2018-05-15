@@ -208,3 +208,35 @@ TEST(MooseUtilsTests, levenshteinDist)
     EXPECT_EQ(test.dist, got) << "case " << i + 1 << " FAILED: a=" << test.a << ", b=" << test.b;
   }
 }
+
+TEST(MooseUtilsTests, linearPartitionItems)
+{
+  {
+    dof_id_type num_local_items;
+    dof_id_type local_items_begin;
+    dof_id_type local_items_end;
+
+    MooseUtils::linearPartitionItems(5, 3, 1, num_local_items, local_items_begin, local_items_end);
+
+    EXPECT_EQ(num_local_items, 2);
+    EXPECT_EQ(local_items_begin, 2);
+    EXPECT_EQ(local_items_end, 4);
+  }
+
+  {
+    dof_id_type num_local_items;
+    dof_id_type local_items_begin;
+    dof_id_type local_items_end;
+
+    unsigned int total_items = 0;
+    for (unsigned int i = 0; i < 16; i++)
+    {
+      MooseUtils::linearPartitionItems(
+          120, 16, i, num_local_items, local_items_begin, local_items_end);
+
+      total_items += num_local_items;
+    }
+
+    EXPECT_EQ(total_items, 120);
+  }
+}

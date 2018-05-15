@@ -23,6 +23,7 @@
 #include "libmesh/remote_elem.h"
 #include "libmesh/face_quad4.h"
 #include "libmesh/cell_hex8.h"
+#include "libmesh/parmetis_helper.h"
 
 // C++ includes
 #include <cmath> // provides round, not std::round (see http://www.cplusplus.com/reference/cmath/round/)
@@ -1063,12 +1064,14 @@ build_cube(UnstructuredMesh & mesh,
     Moose::out << "nx: " << nx << "\n ny: " << ny << "\n nz: " << nz << std::endl;
 
   /// Here's the plan:
-  /// 1. Create a (dual) graph of the elements
-  /// 2. Partition the graph
-  /// 3. The partitioning tells this processsor which elements to create
+  /// 1. "Partition" the element linearly (i.e. break them up into n_procs contiguous chunks
+  /// 2. Create a (dual) graph of the local elements
+  /// 3. Partition the graph using Parmetis
+  /// 4. Communicate the element IDs to the correct processors
+  /// 5. Each processor creates only the elements it needs to
 
   dof_id_type num_elems = nx * ny * nz;
-  const auto n_pieces = mesh.comm().size();
+  const auto num_procs = mesh.comm().size();
   const auto pid = mesh.comm().rank();
 
   std::unique_ptr<Elem> canonical_elem = libmesh_make_unique<T>();
@@ -1076,122 +1079,127 @@ build_cube(UnstructuredMesh & mesh,
   // Will get used to find the neighbors of an element
   std::vector<dof_id_type> neighbors(canonical_elem->n_neighbors());
 
-  // Data structure that Metis will fill up on processor 0 and broadcast.
-  std::vector<Metis::idx_t> part(num_elems);
+  // "Partition" the elements linearly across the processors
+  dof_id_type num_local_elems;
+  dof_id_type local_elems_begin;
+  dof_id_type local_elems_end;
+  MooseUtils::linearPartitionItems(
+      num_elems, num_procs, pid, num_local_elems, local_elems_begin, local_elems_end);
 
-  if (mesh.processor_id() == 0)
+  std::unique_ptr<ParmetisHelper> pmetis = libmesh_make_unique<ParmetisHelper>();
+
+  // Set parameters.
+  pmetis->wgtflag = 2;                                      // weights on vertices only
+  pmetis->ncon = 1;                                         // one weight per vertex
+  pmetis->numflag = 0;                                      // C-style 0-based numbering
+  pmetis->nparts = static_cast<Parmetis::idx_t>(num_procs); // number of subdomains to create
+  pmetis->edgecut = 0;                                      // the numbers of edges cut by the
+                                                            // partition
+  // Initialize data structures for ParMETIS
+  pmetis->xadj.assign(num_elems + 1, 0);
+  // Size this to the max it can be
+  pmetis->adjncy.assign((num_elems * canonical_elem->n_neighbors()), 0);
+  pmetis->vtxdist.assign(num_procs + 1, 0);
+  pmetis->tpwgts.assign(pmetis->nparts, 1. / pmetis->nparts);
+  pmetis->ubvec.assign(pmetis->ncon, 1.05);
+  pmetis->part.assign(num_elems, 0);
+  pmetis->options.resize(5);
+  pmetis->vwgt.assign(num_local_elems, canonical_elem->n_nodes());
+
+  // Set the options
+  pmetis->options[0] = 1;  // don't use default options
+  pmetis->options[1] = 0;  // default (level of timing)
+  pmetis->options[2] = 15; // random seed (default)
+  pmetis->options[3] = 2;  // processor distribution and subdomain distribution are decoupled
+
+  // Fill vtxdist.  These are the bin edges of the ranges current on each proc
+  // Note that this was resized to "num_procs + 1" up above
+  auto & vtxdist = pmetis->vtxdist;
+  for (processor_id_type p = 0; p < num_procs; p++)
   {
-    // Data structures and parameters needed only on processor 0 by Metis.
-    // std::vector<Metis::idx_t> options(5);
-    // Weight by the number of nodes
-    std::vector<Metis::idx_t> vwgt(num_elems, canonical_elem->n_nodes());
+    dof_id_type t_num_local_elems;
+    dof_id_type t_local_elems_begin;
+    dof_id_type t_local_elems_end;
+    MooseUtils::linearPartitionItems(
+        num_elems, num_procs, pid, t_num_local_elems, t_local_elems_begin, t_local_elems_end);
 
-    auto n = static_cast<Metis::idx_t>(num_elems), // number of "nodes" (elements) in the graph
-                                                   // wgtflag = 2,                                //
-                                                   // weights on vertices only, none on edges
-                                                   // numflag = 0,                                //
-                                                   // C-style 0-based numbering
-        nparts = static_cast<Metis::idx_t>(n_pieces), // number of subdomains to create
-        edgecut = 0; // the numbers of edges cut by the resulting partition
+    vtxdist[p] = t_local_elems_begin;
 
-    METIS_CSR_Graph<Metis::idx_t> csr_graph;
+    // The last one needs to fill in the final entry too
+    if (p == num_procs - 1)
+      vtxdist[p + 1] = t_local_elems_end;
+  }
 
-    csr_graph.offsets.resize(num_elems + 1, 0);
+  // Fill in xadj and adjncy
+  // xadj is the offset into adjncy
+  // adjncy are the face neighbors of each element on this processor
+  auto & xadj = pmetis->xadj;
+  auto & adjncy = pmetis->adjncy;
 
-    for (dof_id_type k = 0; k < nz; k++)
-    {
-      for (dof_id_type j = 0; j < ny; j++)
-      {
-        for (dof_id_type i = 0; i < nx; i++)
-        {
-          auto n_neighbors = num_neighbors<T>(nx, ny, nz, i, j, k);
+  dof_id_type local_elem = 0;
+  dof_id_type offset = 0;
 
-          auto e_id = elem_id<T>(nx, ny, i, j, k);
+  for (dof_id_type e_id = local_elems_begin; e_id < local_elems_end; e_id++)
+  {
+    xadj[local_elem] = offset;
 
-          if (verbose)
-            Moose::out << e_id << " num_neighbors: " << n_neighbors << std::endl;
+    dof_id_type i, j, k;
 
-          csr_graph.prep_n_nonzeros(e_id, n_neighbors);
-        }
-      }
-    }
+    get_indices<T>(nx, ny, e_id, i, j, k);
 
-    csr_graph.prepare_for_use();
+    get_neighbors<T>(nx, ny, nz, i, j, k, neighbors);
 
-    if (verbose)
-      for (auto offset : csr_graph.offsets)
-        Moose::out << "offset: " << offset << std::endl;
+    for (auto neighbor : neighbors)
+      if (neighbor != Elem::invalid_id)
+        adjncy[offset++] = neighbor;
 
-    for (dof_id_type k = 0; k < nz; k++)
-    {
-      for (dof_id_type j = 0; j < ny; j++)
-      {
-        for (dof_id_type i = 0; i < nx; i++)
-        {
-          auto e_id = elem_id<T>(nx, ny, i, j, k);
+    local_elem++;
+  }
 
-          dof_id_type connection = 0;
+  // Fill in the last entry
+  xadj[num_local_elems + 1] = adjncy.size() + 1;
 
-          get_neighbors<T>(nx, ny, nz, i, j, k, neighbors);
+  if (num_procs == 1)
+  {
+    // Just assign them all to proc 0
+    for (auto & elem_pid : pmetis->part)
+      elem_pid = 0;
+  }
+  else
+  {
+    std::vector<Parmetis::idx_t> vsize(pmetis->vwgt.size(), 1);
+    Parmetis::real_t itr = 1000000.0;
+    MPI_Comm mpi_comm = mesh.comm().get();
 
-          for (auto neighbor : neighbors)
-          {
-            if (neighbor != Elem::invalid_id)
-            {
-              if (verbose)
-                Moose::out << e_id << ": " << connection << " = " << neighbor << std::endl;
+    Parmetis::ParMETIS_V3_AdaptiveRepart(
+        pmetis->vtxdist.empty() ? libmesh_nullptr : &pmetis->vtxdist[0],
+        pmetis->xadj.empty() ? libmesh_nullptr : &pmetis->xadj[0],
+        pmetis->adjncy.empty() ? libmesh_nullptr : &pmetis->adjncy[0],
+        pmetis->vwgt.empty() ? libmesh_nullptr : &pmetis->vwgt[0],
+        vsize.empty() ? libmesh_nullptr : &vsize[0],
+        libmesh_nullptr,
+        &pmetis->wgtflag,
+        &pmetis->numflag,
+        &pmetis->ncon,
+        &pmetis->nparts,
+        pmetis->tpwgts.empty() ? libmesh_nullptr : &pmetis->tpwgts[0],
+        pmetis->ubvec.empty() ? libmesh_nullptr : &pmetis->ubvec[0],
+        &itr,
+        &pmetis->options[0],
+        &pmetis->edgecut,
+        pmetis->part.empty() ? libmesh_nullptr : &pmetis->part[0],
+        &mpi_comm);
+  }
 
-              csr_graph(e_id, connection++) = neighbor;
-            }
-          }
-        }
-      }
-    }
+  if (verbose)
+  {
+    std::cout << "Part: ";
+    for (auto apid : pmetis->part)
+      std::cout << apid << " ";
+    std::cout << std::endl;
+  }
 
-    if (n_pieces == 1)
-    {
-      // Just assign them all to proc 0
-      for (auto & elem_pid : part)
-        elem_pid = 0;
-    }
-    else
-    {
-      Metis::idx_t ncon = 1;
-
-      // Use recursive if the number of partitions is less than or equal to 8
-      if (n_pieces <= 8)
-        Metis::METIS_PartGraphRecursive(&n,
-                                        &ncon,
-                                        &csr_graph.offsets[0],
-                                        &csr_graph.vals[0],
-                                        &vwgt[0],
-                                        libmesh_nullptr,
-                                        libmesh_nullptr,
-                                        &nparts,
-                                        libmesh_nullptr,
-                                        libmesh_nullptr,
-                                        libmesh_nullptr,
-                                        &edgecut,
-                                        &part[0]);
-
-      // Otherwise  use kway
-      else
-        Metis::METIS_PartGraphKway(&n,
-                                   &ncon,
-                                   &csr_graph.offsets[0],
-                                   &csr_graph.vals[0],
-                                   &vwgt[0],
-                                   libmesh_nullptr,
-                                   libmesh_nullptr,
-                                   &nparts,
-                                   libmesh_nullptr,
-                                   libmesh_nullptr,
-                                   libmesh_nullptr,
-                                   &edgecut,
-                                   &part[0]);
-    }
-  } // end processor 0 part
-
+  /*
   // Broadcast the resulting partition
   mesh.comm().broadcast(part);
 
@@ -1323,6 +1331,7 @@ build_cube(UnstructuredMesh & mesh,
 
   if (verbose)
     mesh.print_info();
+  */
 }
 
 void

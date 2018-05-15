@@ -7,7 +7,7 @@
   ny = 10
   nz = 10
   dim = 3
-  verbose = false
+  verbose = true
 []
 
 [Variables]

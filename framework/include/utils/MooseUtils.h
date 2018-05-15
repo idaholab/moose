@@ -528,6 +528,25 @@ ExecFlagEnum getDefaultExecFlagEnum();
  * @param throw_on_failure Throw an invalid_argument exception instead of mooseError.
  */
 int stringToInteger(const std::string & input, bool throw_on_failure = false);
+
+/**
+ * Linearly partition a number of items
+ *
+ * @param num_items The number of items to partition
+ * @param num_chunks The number of chunks to partition into
+ * @param chunk_id The ID of the chunk you are trying to get information about (typically the
+ * current MPI rank)
+ * @param num_local_items Output: The number of items for this chunk_id
+ * @param local_items_begin Output: The first item for this chunk_id
+ * @param local_items_end Output: One past the final item for this chunk_id
+ */
+void linearPartitionItems(dof_id_type num_items,
+                          dof_id_type num_chunks,
+                          dof_id_type chunk_id,
+                          dof_id_type & num_local_items,
+                          dof_id_type & local_items_begin,
+                          dof_id_type & local_items_end);
+
 } // MooseUtils namespace
 
 #endif // MOOSEUTILS_H
