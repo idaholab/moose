@@ -285,10 +285,6 @@ XFEM::update(Real time, NonlinearSystemBase & nl, AuxiliarySystem & aux)
 
   if (mesh_changed)
   {
-    Partitioner::set_node_processor_ids(*_mesh);
-    _mesh->update_parallel_id_counts();
-    MeshCommunication().make_elems_parallel_consistent(*_mesh);
-    MeshCommunication().make_nodes_parallel_consistent(*_mesh);
     //    _mesh->find_neighbors();
     //    _mesh->contract();
     _mesh->allow_renumbering(false);
@@ -299,10 +295,6 @@ XFEM::update(Real time, NonlinearSystemBase & nl, AuxiliarySystem & aux)
 
     if (_displaced_mesh)
     {
-      Partitioner::set_node_processor_ids(*_mesh);
-      _displaced_mesh->update_parallel_id_counts();
-      MeshCommunication().make_elems_parallel_consistent(*_displaced_mesh);
-      MeshCommunication().make_nodes_parallel_consistent(*_displaced_mesh);
       _displaced_mesh->allow_renumbering(false);
       _displaced_mesh->skip_partitioning(true);
       _displaced_mesh->prepare_for_use();
@@ -1189,6 +1181,9 @@ XFEM::cutMeshWithEFA(NonlinearSystemBase & nl, AuxiliarySystem & aux)
       else
         libmesh_node = _mesh->node_ptr(node_id);
 
+      if (libmesh_node->processor_id() == DofObject::invalid_processor_id)
+        libmesh_node->processor_id() = parent_elem->processor_id();
+
       libmesh_elem->set_node(j) = libmesh_node;
 
       // Store solution for all nodes affected by XFEM (even existing nodes)
@@ -1230,6 +1225,9 @@ XFEM::cutMeshWithEFA(NonlinearSystemBase & nl, AuxiliarySystem & aux)
           libmesh_node = nit2->second;
         else
           libmesh_node = _displaced_mesh->node_ptr(node_id);
+
+        if (libmesh_node->processor_id() == DofObject::invalid_processor_id)
+          libmesh_node->processor_id() = parent_elem2->processor_id();
 
         libmesh_elem2->set_node(j) = libmesh_node;
 
