@@ -30,7 +30,7 @@ RELAP7Mesh::dimension() const
 MooseMesh &
 RELAP7Mesh::clone() const
 {
-  return *(new RELAP7Mesh(*this));
+  mooseError("CRITICAL ERROR: calling clone() is not allowed and should not happen.");
 }
 
 void

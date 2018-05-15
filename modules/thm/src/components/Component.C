@@ -93,7 +93,6 @@ Component::Component(const InputParameters & parameters)
     _app(dynamic_cast<RELAP7App &>(MooseObject::_app)),
     _factory(_app.getFactory()),
     _mesh(_sim.mesh()),
-    _phys_mesh(_sim.physicalMesh()),
     _zero(_sim._zero),
     _component_setup_status(CREATED)
 {

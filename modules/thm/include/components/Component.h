@@ -389,8 +389,6 @@ protected:
 
   /// Global mesh this component works on
   RELAP7Mesh & _mesh;
-  /// Global physical mesh this component works on
-  RELAP7Mesh *& _phys_mesh;
 
   const Real & _zero;
 
