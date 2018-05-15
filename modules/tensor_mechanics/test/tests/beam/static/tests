@@ -29,10 +29,27 @@
     input = 'euler_finite_rot_z.i'
     exodiff = 'euler_finite_rot_z_out.e'
   [../]
+  [./euler_small_y_with_action]
+    type = 'Exodiff'
+    input = 'euler_small_strain_y_action.i'
+    exodiff = 'euler_small_strain_y_out.e'
+    prereq = euler_small_strain_y
+  [../]
+  [./euler_finite_y_with_action]
+    type = 'Exodiff'
+    input = 'euler_finite_rot_y_action.i'
+    exodiff = 'euler_finite_rot_y_out.e'
+    prereq = euler_finite_rot_y
+  [../]
   [./euler_pipe_axial_disp]
     type = 'CSVDiff'
     input = 'euler_pipe_axial_disp.i'
     csvdiff = 'euler_pipe_axial_disp_out.csv'
+  [../]
+  [./euler_pipe_axial_force]
+    type = 'CSVDiff'
+    input = 'euler_pipe_axial_force.i'
+    csvdiff = 'euler_pipe_axial_force_out.csv'
   [../]
   [./euler_pipe_bend]
     type = 'CSVDiff'
@@ -42,29 +59,25 @@
   [./error_displacements1]
      type = 'RunException'
      input = 'euler_small_strain_y.i'
-     cli_args = 'Materials/strain/rotations="rot_x"'
-     prereq = euler_small_strain_y
+     cli_args = 'Materials/strain/rotations="rot_x" Outputs/exodus=false Outputs/csv=false'
      expect_err = "ComputeIncrementalBeamStrain: The number of variables supplied in 'displacements' and 'rotations' must match."
   [../]
   [./error_displacements2]
      type = 'RunException'
      input = 'euler_small_strain_y.i'
-     cli_args = 'Kernels/solid_disp_x/rotations="rot_x"'
-     prereq = error_displacements1
+     cli_args = 'Kernels/solid_disp_x/rotations="rot_x" Outputs/exodus=false Outputs/csv=false'
      expect_err = "StressDivergenceBeam: The number of displacement and rotation variables should be same."
   [../]
   [./error_large_strain]
      type = 'RunException'
      input = 'euler_small_strain_y.i'
-     cli_args = 'Materials/strain/large_strain=true Materials/strain/Ay=1.0'
-     prereq = error_displacements2
+     cli_args = 'Materials/strain/large_strain=true Materials/strain/Ay=1.0 Outputs/exodus=false Outputs/csv=false'
      expect_err = 'ComputeIncrementalBeamStrain: Large strain calculation does not currently support asymmetric beam configurations with non-zero first or third moments of area.'
   [../]
   [./error_y_orientation]
     type = 'RunException'
     input = 'euler_small_strain_y.i'
-    cli_args = 'Materials/strain/y_orientation="0.5 0.5 0.0"'
-    prereq = error_large_strain
+    cli_args = 'Materials/strain/y_orientation="0.5 0.5 0.0" Outputs/exodus=false Outputs/csv=false'
     expect_err = 'ComputeIncrementalBeamStrain: y_orientation should be perpendicular to the axis of the beam.'
   [../]
 []

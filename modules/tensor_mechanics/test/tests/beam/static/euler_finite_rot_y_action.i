@@ -1,14 +1,13 @@
-# Large strain/large rotation cantilever beam test
+# Large strain/large rotation cantilever beam tese
 
 # A 300 N point load is applied at the end of a 4 m long cantilever beam.
 # Young's modulus (E) = 1e4
 # Shear modulus (G) = 1e8
 # shear coefficient (k) = 1.0
-# Poisson's ratio (nu) = -0.99995
 # Area (A) = 1.0
 # Iy = Iz = 0.16
 
-# The dimensionless parameter alpha = kAGL^2/EI = 1e6
+# The non-dimensionless parameter alpha = kAGL^2/EI = 1e6
 # Since the value of alpha is quite high, the beam behaves like
 # a thin beam where shear effects are not significant.
 
@@ -25,33 +24,6 @@
   type = FileMesh
   file = beam_finite_rot_test_2.e
   displacements = 'disp_x disp_y disp_z'
-[]
-
-[Variables]
-  [./disp_x]
-    order = FIRST
-    family = LAGRANGE
-  [../]
-  [./disp_y]
-    order = FIRST
-    family = LAGRANGE
-  [../]
-  [./disp_z]
-    order = FIRST
-    family = LAGRANGE
-  [../]
-  [./rot_x]
-    order = FIRST
-    family = LAGRANGE
-  [../]
-  [./rot_y]
-    order = FIRST
-    family = LAGRANGE
-  [../]
-  [./rot_z]
-    order = FIRST
-    family = LAGRANGE
-  [../]
 []
 
 [BCs]
@@ -132,54 +104,19 @@
   end_time = 2.1
 []
 
-[Kernels]
-  [./solid_disp_x]
-    type = StressDivergenceBeam
-    block = '1'
-    displacements = 'disp_x disp_y disp_z'
-    rotations = 'rot_x rot_y rot_z'
-    component = 0
-    variable = disp_x
-  [../]
-  [./solid_disp_y]
-    type = StressDivergenceBeam
-    block = '1'
-    displacements = 'disp_x disp_y disp_z'
-    rotations = 'rot_x rot_y rot_z'
-    component = 1
-    variable = disp_y
-  [../]
-  [./solid_disp_z]
-    type = StressDivergenceBeam
-    block = '1'
-    displacements = 'disp_x disp_y disp_z'
-    rotations = 'rot_x rot_y rot_z'
-    component = 2
-    variable = disp_z
-  [../]
-  [./solid_rot_x]
-    type = StressDivergenceBeam
-    block = '1'
-    displacements = 'disp_x disp_y disp_z'
-    rotations = 'rot_x rot_y rot_z'
-    component = 3
-    variable = rot_x
-  [../]
-  [./solid_rot_y]
-    type = StressDivergenceBeam
-    block = '1'
-    displacements = 'disp_x disp_y disp_z'
-    rotations = 'rot_x rot_y rot_z'
-    component = 4
-    variable = rot_y
-  [../]
-  [./solid_rot_z]
-    type = StressDivergenceBeam
-    block = '1'
-    displacements = 'disp_x disp_y disp_z'
-    rotations = 'rot_x rot_y rot_z'
-    component = 5
-    variable = rot_z
+[Modules/TensorMechanics/LineElementMaster]
+  [./all]
+  add_variables = true
+  displacements = 'disp_x disp_y disp_z'
+  rotations = 'rot_x rot_y rot_z'
+  strain_type = FINITE
+  rotation_type = FINITE
+
+  # Geometry parameters
+  area = 1.0
+  Iy = 0.16
+  Iz = 0.16
+  y_orientation = '0.0 1.0 0.0'
   [../]
 []
 
@@ -190,19 +127,6 @@
     poissons_ratio = -0.99995
     shear_coefficient = 1.0
     block = 1
-  [../]
-  [./strain]
-    type = ComputeFiniteBeamStrain
-    block = '1'
-    displacements = 'disp_x disp_y disp_z'
-    rotations = 'rot_x rot_y rot_z'
-    area = 1.0
-    Ay = 0.0
-    Az = 0.0
-    Iy = 0.16
-    Iz = 0.16
-    y_orientation = '0.0 1.0 0.0'
-    large_strain = true
   [../]
   [./stress]
     type = ComputeBeamResultants
@@ -229,6 +153,7 @@
 []
 
 [Outputs]
+  file_base = 'euler_finite_rot_y_out'
   exodus = true
   print_perf_log = true
 []
