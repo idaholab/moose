@@ -24,23 +24,23 @@ PorousFlowFluidStateFlash::PorousFlowFluidStateFlash(const InputParameters & par
 }
 
 void
-PorousFlowFluidStateFlash::phaseState(Real zi,
+PorousFlowFluidStateFlash::phaseState(Real Zi,
                                       Real Xi,
                                       Real Yi,
                                       FluidStatePhaseEnum & phase_state) const
 {
-  if (zi <= Xi)
+  if (Zi <= Xi)
   {
     // In this case, there is not enough component i to form a gas phase,
     // so only a liquid phase is present
     phase_state = FluidStatePhaseEnum::LIQUID;
   }
-  else if (zi > Xi && zi < Yi)
+  else if (Zi > Xi && Zi < Yi)
   {
     // Two phases are present
     phase_state = FluidStatePhaseEnum::TWOPHASE;
   }
-  else // (zi >= Yi)
+  else // (Zi >= Yi)
   {
     // In this case, there is not enough water to form a liquid
     // phase, so only a gas phase is present
@@ -50,76 +50,76 @@ PorousFlowFluidStateFlash::phaseState(Real zi,
 
 Real
 PorousFlowFluidStateFlash::rachfordRice(Real x,
-                                        std::vector<Real> & zi,
+                                        std::vector<Real> & Zi,
                                         std::vector<Real> & Ki) const
 {
-  const std::size_t num_z = zi.size();
+  const std::size_t num_z = Zi.size();
   // Check that the sizes of the mass fractions and equilibrium constant vectors are correct
   if (Ki.size() != num_z + 1)
     mooseError("The number of mass fractions or equilibrium components passed to rachfordRice is "
                "not correct");
 
   Real f = 0.0;
-  Real z_total = 0.0;
+  Real Z_total = 0.0;
 
   for (std::size_t i = 0; i < num_z; ++i)
   {
-    f += zi[i] * (Ki[i] - 1.0) / (1.0 + x * (Ki[i] - 1.0));
-    z_total += zi[i];
+    f += Zi[i] * (Ki[i] - 1.0) / (1.0 + x * (Ki[i] - 1.0));
+    Z_total += Zi[i];
   }
 
   // Add the last component (with total mass fraction = 1 - z_total)
-  f += (1.0 - z_total) * (Ki[num_z] - 1.0) / (1.0 + x * (Ki[num_z] - 1.0));
+  f += (1.0 - Z_total) * (Ki[num_z] - 1.0) / (1.0 + x * (Ki[num_z] - 1.0));
 
   return f;
 }
 
 Real
 PorousFlowFluidStateFlash::rachfordRiceDeriv(Real x,
-                                             std::vector<Real> & zi,
+                                             std::vector<Real> & Zi,
                                              std::vector<Real> & Ki) const
 {
-  const std::size_t num_z = zi.size();
+  const std::size_t num_Z = Zi.size();
   // Check that the sizes of the mass fractions and equilibrium constant vectors are correct
-  if (Ki.size() != num_z + 1)
+  if (Ki.size() != num_Z + 1)
     mooseError("The number of mass fractions or equilibrium components passed to rachfordRice is "
                "not correct");
 
   Real df = 0.0;
-  Real z_total = 0.0;
+  Real Z_total = 0.0;
 
-  for (std::size_t i = 0; i < num_z; ++i)
+  for (std::size_t i = 0; i < num_Z; ++i)
   {
-    df -= zi[i] * (Ki[i] - 1.0) * (Ki[i] - 1.0) / (1.0 + x * (Ki[i] - 1.0)) /
+    df -= Zi[i] * (Ki[i] - 1.0) * (Ki[i] - 1.0) / (1.0 + x * (Ki[i] - 1.0)) /
           (1.0 + x * (Ki[i] - 1.0));
-    z_total += zi[i];
+    Z_total += Zi[i];
   }
 
   // Add the last component (with total mass fraction = 1 - z_total)
-  df -= (1.0 - z_total) * (Ki[num_z] - 1.0) * (Ki[num_z] - 1.0) / (1.0 + x * (Ki[num_z] - 1.0)) /
-        (1.0 + x * (Ki[num_z] - 1.0));
+  df -= (1.0 - Z_total) * (Ki[num_Z] - 1.0) * (Ki[num_Z] - 1.0) / (1.0 + x * (Ki[num_Z] - 1.0)) /
+        (1.0 + x * (Ki[num_Z] - 1.0));
 
   return df;
 }
 
 Real
-PorousFlowFluidStateFlash::vaporMassFraction(Real z0, Real K0, Real K1) const
+PorousFlowFluidStateFlash::vaporMassFraction(Real Z0, Real K0, Real K1) const
 {
-  return (z0 * (K1 - K0) - (K1 - 1.0)) / ((K0 - 1.0) * (K1 - 1.0));
+  return (Z0 * (K1 - K0) - (K1 - 1.0)) / ((K0 - 1.0) * (K1 - 1.0));
 }
 
 Real
-PorousFlowFluidStateFlash::vaporMassFraction(std::vector<Real> & zi, std::vector<Real> & Ki) const
+PorousFlowFluidStateFlash::vaporMassFraction(std::vector<Real> & Zi, std::vector<Real> & Ki) const
 {
   // Check that the sizes of the mass fractions and equilibrium constant vectors are correct
-  if (Ki.size() != zi.size() + 1)
+  if (Ki.size() != Zi.size() + 1)
     mooseError("The number of mass fractions or equilibrium components passed to rachfordRice is "
                "not correct");
   Real v;
 
   // If there are only two components, an analytical solution is possible
   if (Ki.size() == 2)
-    v = vaporMassFraction(zi[0], Ki[0], Ki[1]);
+    v = vaporMassFraction(Zi[0], Ki[0], Ki[1]);
   else
   {
     // More than two components - solve the Rachford-Rice equation using
@@ -128,9 +128,9 @@ PorousFlowFluidStateFlash::vaporMassFraction(std::vector<Real> & zi, std::vector
     Real v0 = 0.5;
     unsigned int iter = 0;
 
-    while (std::abs(rachfordRice(v0, zi, Ki)) > _nr_tol)
+    while (std::abs(rachfordRice(v0, Zi, Ki)) > _nr_tol)
     {
-      v0 = v0 - rachfordRice(v0, zi, Ki) / rachfordRiceDeriv(v0, zi, Ki);
+      v0 = v0 - rachfordRice(v0, Zi, Ki) / rachfordRiceDeriv(v0, Zi, Ki);
       iter++;
 
       if (iter > _nr_max_its)

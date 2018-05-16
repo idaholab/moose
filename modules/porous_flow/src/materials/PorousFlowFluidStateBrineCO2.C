@@ -25,11 +25,11 @@ validParams<PorousFlowFluidStateBrineCO2>()
 
 PorousFlowFluidStateBrineCO2::PorousFlowFluidStateBrineCO2(const InputParameters & parameters)
   : PorousFlowFluidStateFlashBase(parameters),
-    _xnacl(_nodal_material ? coupledNodalValue("xnacl") : coupledValue("xnacl")),
-    _grad_xnacl_qp(coupledGradient("xnacl")),
-    _xnacl_varnum(coupled("xnacl")),
-    _xvar(_dictator.isPorousFlowVariable(_xnacl_varnum)
-              ? _dictator.porousFlowVariableNum(_xnacl_varnum)
+    _Xnacl(_nodal_material ? coupledNodalValue("xnacl") : coupledValue("xnacl")),
+    _grad_Xnacl_qp(coupledGradient("xnacl")),
+    _Xnacl_varnum(coupled("xnacl")),
+    _Xvar(_dictator.isPorousFlowVariable(_Xnacl_varnum)
+              ? _dictator.porousFlowVariableNum(_Xnacl_varnum)
               : 0),
     _fs_uo(getUserObject<PorousFlowBrineCO2>("fluid_state")),
     _salt_component(_fs_uo.saltComponentIndex())
@@ -45,7 +45,7 @@ PorousFlowFluidStateBrineCO2::thermophysicalProperties()
   // The FluidProperty objects use temperature in K
   Real Tk = _temperature[_qp] + _T_c2k;
 
-  _fs_uo.thermophysicalProperties(_gas_porepressure[_qp], Tk, _xnacl[_qp], (*_z[0])[_qp], _fsp);
+  _fs_uo.thermophysicalProperties(_gas_porepressure[_qp], Tk, _Xnacl[_qp], (*_Z[0])[_qp], _fsp);
 }
 
 void
@@ -53,14 +53,14 @@ PorousFlowFluidStateBrineCO2::computeQpProperties()
 {
   PorousFlowFluidStateFlashBase::computeQpProperties();
 
-  // If xnacl is a PorousFlow variable, add contribution to material properties
-  // due to the xnacl component that are not included in
+  // If Xnacl is a PorousFlow variable, add contribution to material properties
+  // due to the Xnacl component that are not included in
   // PorousFlowFluidStateFlashBase::computeQpProperties();
-  if (_dictator.isPorousFlowVariable(_xnacl_varnum))
+  if (_dictator.isPorousFlowVariable(_Xnacl_varnum))
   {
     // Derivative of saturation wrt variables
     for (unsigned int ph = 0; ph < _num_phases; ++ph)
-      _dsaturation_dvar[_qp][ph][_xvar] = _fsp[ph].dsaturation_dx;
+      _dsaturation_dvar[_qp][ph][_Xvar] = _fsp[ph].dsaturation_dX;
 
     // Derivative of capillary pressure
     Real dpc = _pc_uo.dCapillaryPressure(_fsp[_aqueous_phase_number].saturation);
@@ -69,32 +69,32 @@ PorousFlowFluidStateBrineCO2::computeQpProperties()
     if (_dictator.isPorousFlowVariable(_gas_porepressure_varnum))
     {
       if (!_nodal_material)
-        (*_dgradp_qp_dgradv)[_qp][_aqueous_phase_number][_xvar] =
-            -dpc * _dsaturation_dvar[_qp][_aqueous_phase_number][_xvar];
+        (*_dgradp_qp_dgradv)[_qp][_aqueous_phase_number][_Xvar] =
+            -dpc * _dsaturation_dvar[_qp][_aqueous_phase_number][_Xvar];
 
       // The aqueous phase porepressure is also a function of liquid saturation,
-      // which depends on xnacl
-      _dporepressure_dvar[_qp][_aqueous_phase_number][_xvar] =
-          -dpc * _dsaturation_dvar[_qp][_aqueous_phase_number][_xvar];
+      // which depends on Xnacl
+      _dporepressure_dvar[_qp][_aqueous_phase_number][_Xvar] =
+          -dpc * _dsaturation_dvar[_qp][_aqueous_phase_number][_Xvar];
     }
 
     // Calculate derivatives of material properties wrt primary variables
-    // Derivative of xnacl wrt variables
-    std::vector<Real> dx_dvar;
-    dx_dvar.assign(_num_pf_vars, 0.0);
+    // Derivative of Xnacl wrt variables
+    std::vector<Real> dX_dvar;
+    dX_dvar.assign(_num_pf_vars, 0.0);
 
-    if (_dictator.isPorousFlowVariable(_xvar))
-      dx_dvar[_xvar] = 1.0;
+    if (_dictator.isPorousFlowVariable(_Xvar))
+      dX_dvar[_Xvar] = 1.0;
 
     // Derivatives of properties wrt primary variables
     for (unsigned int v = 0; v < _num_pf_vars; ++v)
       for (unsigned int ph = 0; ph < _num_phases; ++ph)
       {
         // Derivative of density in each phase
-        _dfluid_density_dvar[_qp][ph][v] += _fsp[ph].ddensity_dx * dx_dvar[v];
+        _dfluid_density_dvar[_qp][ph][v] += _fsp[ph].ddensity_dX * dX_dvar[v];
 
         // Derivative of viscosity in each phase
-        _dfluid_viscosity_dvar[_qp][ph][v] += _fsp[ph].dviscosity_dx * dx_dvar[v];
+        _dfluid_viscosity_dvar[_qp][ph][v] += _fsp[ph].dviscosity_dX * dX_dvar[v];
       }
 
     // The derivative of the mass fractions for each fluid component in each phase.
@@ -102,7 +102,7 @@ PorousFlowFluidStateBrineCO2::computeQpProperties()
     // capillary pressure effect, and hence no need to multiply by _dporepressure_dvar
     for (unsigned int ph = 0; ph < _num_phases; ++ph)
       for (unsigned int comp = 0; comp < _num_components; ++comp)
-        _dmass_frac_dvar[_qp][ph][comp][_xvar] = _fsp[ph].dmass_fraction_dx[comp];
+        _dmass_frac_dvar[_qp][ph][comp][_Xvar] = _fsp[ph].dmass_fraction_dX[comp];
 
     // If the material properties are being evaluated at the qps, add the contribution
     // to the gradients as well. Note: only nodal properties are evaluated in
@@ -114,29 +114,29 @@ PorousFlowFluidStateBrineCO2::computeQpProperties()
       Real d2pc = _pc_uo.d2CapillaryPressure(_fsp[_aqueous_phase_number].saturation);
 
       (*_grads_qp)[_qp][_aqueous_phase_number] +=
-          _dsaturation_dvar[_qp][_aqueous_phase_number][_xvar] * _grad_xnacl_qp[_qp];
+          _dsaturation_dvar[_qp][_aqueous_phase_number][_Xvar] * _grad_Xnacl_qp[_qp];
 
       (*_grads_qp)[_qp][_gas_phase_number] -=
-          _dsaturation_dvar[_qp][_aqueous_phase_number][_xvar] * _grad_xnacl_qp[_qp];
+          _dsaturation_dvar[_qp][_aqueous_phase_number][_Xvar] * _grad_Xnacl_qp[_qp];
 
       (*_gradp_qp)[_qp][_aqueous_phase_number] -=
-          dpc * _dsaturation_dvar[_qp][_aqueous_phase_number][_xvar] * _grad_xnacl_qp[_qp];
+          dpc * _dsaturation_dvar[_qp][_aqueous_phase_number][_Xvar] * _grad_Xnacl_qp[_qp];
 
-      (*_dgradp_qp_dv)[_qp][_aqueous_phase_number][_xvar] =
+      (*_dgradp_qp_dv)[_qp][_aqueous_phase_number][_Xvar] =
           -d2pc * (*_grads_qp)[_qp][_aqueous_phase_number] *
-          _dsaturation_dvar[_qp][_aqueous_phase_number][_xvar];
+          _dsaturation_dvar[_qp][_aqueous_phase_number][_Xvar];
 
-      (*_grad_mass_frac_qp)[_qp][_aqueous_phase_number][_salt_component] = _grad_xnacl_qp[_qp];
+      (*_grad_mass_frac_qp)[_qp][_aqueous_phase_number][_salt_component] = _grad_Xnacl_qp[_qp];
       (*_grad_mass_frac_qp)[_qp][_aqueous_phase_number][_aqueous_fluid_component] +=
-          _fsp[_aqueous_phase_number].dmass_fraction_dx[_aqueous_fluid_component] *
-          _grad_xnacl_qp[_qp];
+          _fsp[_aqueous_phase_number].dmass_fraction_dX[_aqueous_fluid_component] *
+          _grad_Xnacl_qp[_qp];
       (*_grad_mass_frac_qp)[_qp][_aqueous_phase_number][_gas_fluid_component] -=
-          _fsp[_aqueous_phase_number].dmass_fraction_dx[_aqueous_fluid_component] *
-          _grad_xnacl_qp[_qp];
+          _fsp[_aqueous_phase_number].dmass_fraction_dX[_aqueous_fluid_component] *
+          _grad_Xnacl_qp[_qp];
       (*_grad_mass_frac_qp)[_qp][_gas_phase_number][_aqueous_fluid_component] +=
-          _fsp[_gas_phase_number].dmass_fraction_dx[_aqueous_fluid_component] * _grad_xnacl_qp[_qp];
+          _fsp[_gas_phase_number].dmass_fraction_dX[_aqueous_fluid_component] * _grad_Xnacl_qp[_qp];
       (*_grad_mass_frac_qp)[_qp][_gas_phase_number][_gas_fluid_component] -=
-          _fsp[_gas_phase_number].dmass_fraction_dx[_aqueous_fluid_component] * _grad_xnacl_qp[_qp];
+          _fsp[_gas_phase_number].dmass_fraction_dX[_aqueous_fluid_component] * _grad_Xnacl_qp[_qp];
     }
   }
 }

@@ -38,13 +38,13 @@ protected:
   virtual void thermophysicalProperties() override;
 
   /// Salt mass fraction (kg/kg)
-  const VariableValue & _xnacl;
+  const VariableValue & _Xnacl;
   /// Gradient of salt mass fraction (only defined at the qps)
-  const VariableGradient & _grad_xnacl_qp;
+  const VariableGradient & _grad_Xnacl_qp;
   /// Salt mass fraction variable number
-  const unsigned int _xnacl_varnum;
+  const unsigned int _Xnacl_varnum;
   /// Salt mass fraction PorousFlow variable number
-  const unsigned int _xvar;
+  const unsigned int _Xvar;
   /// FluidState UserObject
   const PorousFlowBrineCO2 & _fs_uo;
   /// Salt component index

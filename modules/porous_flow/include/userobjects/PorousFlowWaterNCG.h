@@ -19,8 +19,16 @@ template <>
 InputParameters validParams<PorousFlowWaterNCG>();
 
 /**
- * Specialized class for water and a non-condensable gas
+ * Specialized class for water and a non-condensable gas (NCG)
  * Includes dissolution of gas in liquid water phase using Henry's law
+ *
+ * Notation convention
+ * Throughout this class, both mole fractions and mass fractions will be used.
+ * The following notation will be used:
+ * yk: mole fraction of component k in the gas phase
+ * xk: mole fraction of component k in the liquid phase
+ * Yk: mass fraction of component k in the gas phase
+ * Xk: mass fraction of component k in the liquid phase
  */
 class PorousFlowWaterNCG : public PorousFlowFluidStateBase
 {
@@ -33,9 +41,18 @@ public:
    */
   virtual std::string fluidStateName() const;
 
+  /**
+   * Determines the complete thermophysical state of the system for a given set of
+   * primary variables
+   *
+   * @param pressure gas phase pressure (Pa)
+   * @param temperature fluid temperature (K)
+   * @param Z total mass fraction of NCG component
+   * @param[out] fsp the FluidStateProperties struct containing all properties
+   */
   void thermophysicalProperties(Real pressure,
                                 Real temperature,
-                                Real z,
+                                Real Z,
                                 std::vector<FluidStateProperties> & fsp) const;
   /**
    * Mass fractions of NCG in liquid phase and H2O in gas phase at thermodynamic
@@ -44,21 +61,21 @@ public:
    *
    * @param pressure phase pressure (Pa)
    * @param temperature phase temperature (C)
-   * @param[out] xncgl mass fraction of NCG in liquid (kg/kg)
-   * @param[out] dxncgl_dp derivative of mass fraction of NCG in liquid wrt pressure
-   * @param[out] dxncgl_dT derivative of mass fraction of NCG in liqiud wrt temperature
-   * @param[out] xh2og mass fraction of H2O in gas (kg/kg)
-   * @param[out] dh2ogl_dp derivative of mass fraction of NCG in gas wrt pressure
-   * @param[out] dh2og_dT derivative of mass fraction of NCG in gas wrt temperature
+   * @param[out] Xncg mass fraction of NCG in liquid (kg/kg)
+   * @param[out] dXncg_dp derivative of mass fraction of NCG in liquid wrt pressure
+   * @param[out] dXncg_dT derivative of mass fraction of NCG in liqiud wrt temperature
+   * @param[out] Yh2o mass fraction of H2O in gas (kg/kg)
+   * @param[out] dYh2o_dp derivative of mass fraction of NCG in gas wrt pressure
+   * @param[out] dYh2o_dT derivative of mass fraction of NCG in gas wrt temperature
    */
   void equilibriumMassFractions(Real pressure,
                                 Real temperature,
-                                Real & xncgl,
-                                Real & dxncgl_dp,
-                                Real & dxncgl_dT,
-                                Real & xh2og,
-                                Real & dxh2og_dp,
-                                Real & dxh2og_dT) const;
+                                Real & Xncg,
+                                Real & dXncg_dp,
+                                Real & dXncg_dT,
+                                Real & Yh2o,
+                                Real & dYh2o_dp,
+                                Real & dYh2o_dT) const;
 
   /**
    * Mass fractions of NCG and H2O in both phases, as well as derivatives wrt
@@ -66,13 +83,13 @@ public:
    *
    * @param pressure phase pressure (Pa)
    * @param temperature phase temperature (C)
-   * @param z total mass fraction of NCG component
+   * @param Z total mass fraction of NCG component
    * @param[out] PhaseStateEnum current phase state
    * @param[out] FluidStateMassFractions data structure
    */
   void massFractions(Real pressure,
                      Real temperature,
-                     Real z,
+                     Real Z,
                      FluidStatePhaseEnum & phase_state,
                      std::vector<FluidStateProperties> & fsp) const;
 
@@ -101,12 +118,12 @@ public:
    *
    * @param pressure gas pressure (Pa)
    * @param temperature phase temperature (C)
-   * @param z total mass fraction of NCG component
+   * @param Z total mass fraction of NCG component
    * @param[out] FluidStateSaturation data structure
    */
   void saturationTwoPhase(Real pressure,
                           Real temperature,
-                          Real z,
+                          Real Z,
                           std::vector<FluidStateProperties> & fsp) const;
 
   /**
@@ -126,7 +143,7 @@ public:
    * @param pressure gas pressure (Pa)
    * @param temperature temperature (K)
    * @param saturation gas saturation (-)
-   * @return total mass fraction z (-)
+   * @return total mass fraction Z (-)
    */
   Real totalMassFraction(Real pressure, Real temperature, Real saturation) const;
 
