@@ -7,45 +7,43 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "ThrowMaterial.h"
+#include "ExceptionMaterial.h"
+#include "NonlinearSystemBase.h"
 
-registerMooseObject("MooseTestApp", ThrowMaterial);
+registerMooseObject("MooseTestApp", ExceptionMaterial);
 
 template <>
 InputParameters
-validParams<ThrowMaterial>()
+validParams<ExceptionMaterial>()
 {
   InputParameters params = validParams<Material>();
   params.addRequiredCoupledVar("coupled_var", "Name of the coupled variable");
   params.addClassDescription("Test Material that throws MooseExceptions for testing purposes");
+  params.addParam<processor_id_type>(
+      "rank", DofObject::invalid_processor_id, "Isolate an exception to a particular rank");
   return params;
 }
 
-// Must initialize class static variables outside of the class declaration.
-bool ThrowMaterial::_has_thrown = false;
-
-ThrowMaterial::ThrowMaterial(const InputParameters & parameters)
+ExceptionMaterial::ExceptionMaterial(const InputParameters & parameters)
   : Material(parameters),
     _prop_value(declareProperty<Real>("matp")),
-    _coupled_var(coupledValue("coupled_var"))
+    _coupled_var(coupledValue("coupled_var")),
+    _rank(getParam<processor_id_type>("rank")),
+    _has_thrown(false)
 {
 }
 
 void
-ThrowMaterial::residualSetup()
-{
-  this->comm().max(_has_thrown);
-}
-
-void
-ThrowMaterial::computeQpProperties()
+ExceptionMaterial::computeQpProperties()
 {
   // 1 + current value squared
   _prop_value[_qp] = 1.0 + _coupled_var[_qp] * _coupled_var[_qp];
 
   // Throw an exception if we haven't already done so, and the
   // coupled variable has reached a certain value.
-  if (_coupled_var[_qp] > 1.0 && !_has_thrown)
+  if (_fe_problem.getNonlinearSystemBase().getCurrentNonlinearIterationNumber() == 1 &&
+      _t_step == 2 && !_has_thrown &&
+      (_rank == DofObject::invalid_processor_id || _rank == processor_id()))
   {
     _has_thrown = true;
     throw MooseException("Exception thrown for test purposes.");
