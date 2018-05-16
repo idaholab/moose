@@ -27,21 +27,21 @@ InputParameters validParams<PorousFlowFluidStateFlashBase>();
  * of a component summed over all phases (and optionally temperature in a
  * non-isothermal case).
  *
- * The total mass fraction of component i summed over all phases, z_i,
+ * The total mass fraction of component i summed over all phases, Z_i,
  * is defined as (for two phases)
  *
- * z_i = (S_g rho_g y_i + S_l rho_l x_i) / (S_g rho_g + S_l rho_l)
+ * Z_i = (S_g rho_g Y_i + S_l rho_l X_i) / (S_g rho_g + S_l rho_l)
  *
  * where S is saturation, rho is density, and the subscripts correspond to gas
- * and liquid phases, respectively, and y_i and x_i are the mass fractions of
+ * and liquid phases, respectively, and Y_i and X_i are the mass fractions of
  * the ith component in the gas and liquid phase, respectively.
  *
- * Depending on the phase conditions, the primary variable z_i can represent either
+ * Depending on the phase conditions, the primary variable Z_i can represent either
  * a mass fraction (when only a single phase is present), or a saturation when
  * two phases are present, and hence it is a persistent variable.
  *
  * The PorousFlow kernels expect saturation and mass fractions (as well as pressure
- * and temperature), so these must be calculated from z_i once the state of the
+ * and temperature), so these must be calculated from Z_i once the state of the
  * system is determined.
  *
  * A compositional flash calculation using the Rachford-Rice equation is solved
@@ -75,15 +75,15 @@ protected:
   /// PorousFlow variable number of the gas porepressure
   const unsigned int _pvar;
   /// Total mass fraction(s) of the gas component(s) summed over all phases
-  std::vector<const VariableValue *> _z;
+  std::vector<const VariableValue *> _Z;
   /// Gradient(s) of total mass fraction(s) of the gas component(s) (only defined at the qps)
-  std::vector<const VariableGradient *> _gradz_qp;
-  /// Moose variable number of z
-  std::vector<unsigned int> _z_varnum;
-  /// PorousFlow variable number of z
-  std::vector<unsigned int> _zvar;
+  std::vector<const VariableGradient *> _gradZ_qp;
+  /// Moose variable number of Z
+  std::vector<unsigned int> _Z_varnum;
+  /// PorousFlow variable number of Z
+  std::vector<unsigned int> _Zvar;
   /// Number of coupled total mass fractions. Should be _num_phases - 1
-  const unsigned int _num_z_vars;
+  const unsigned int _num_Z_vars;
   /// FluidState UserObject
   const PorousFlowFluidStateBase & _fs_base;
   /// Phase number of the aqueous phase

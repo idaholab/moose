@@ -28,24 +28,24 @@ struct FluidStateProperties
       mass_fraction(n, 0.0),
       dsaturation_dp(0.0),
       dsaturation_dT(0.0),
-      dsaturation_dz(0.0),
-      dsaturation_dx(0.0),
+      dsaturation_dZ(0.0),
+      dsaturation_dX(0.0),
       ddensity_dp(0.0),
       ddensity_dT(0.0),
-      ddensity_dz(0.0),
-      ddensity_dx(0.0),
+      ddensity_dZ(0.0),
+      ddensity_dX(0.0),
       dviscosity_dp(0.0),
       dviscosity_dT(0.0),
-      dviscosity_dz(0.0),
-      dviscosity_dx(0.0),
+      dviscosity_dZ(0.0),
+      dviscosity_dX(0.0),
       denthalpy_dp(0.0),
       denthalpy_dT(0.0),
-      denthalpy_dz(0.0),
-      denthalpy_dx(0.0),
+      denthalpy_dZ(0.0),
+      denthalpy_dX(0.0),
       dmass_fraction_dp(n, 0.0),
       dmass_fraction_dT(n, 0.0),
-      dmass_fraction_dz(n, 0.0),
-      dmass_fraction_dx(n, 0.0){};
+      dmass_fraction_dZ(n, 0.0),
+      dmass_fraction_dX(n, 0.0){};
 
   Real pressure;
   Real saturation;
@@ -55,24 +55,24 @@ struct FluidStateProperties
   std::vector<Real> mass_fraction;
   Real dsaturation_dp;
   Real dsaturation_dT;
-  Real dsaturation_dz;
-  Real dsaturation_dx;
+  Real dsaturation_dZ;
+  Real dsaturation_dX;
   Real ddensity_dp;
   Real ddensity_dT;
-  Real ddensity_dz;
-  Real ddensity_dx;
+  Real ddensity_dZ;
+  Real ddensity_dX;
   Real dviscosity_dp;
   Real dviscosity_dT;
-  Real dviscosity_dz;
-  Real dviscosity_dx;
+  Real dviscosity_dZ;
+  Real dviscosity_dX;
   Real denthalpy_dp;
   Real denthalpy_dT;
-  Real denthalpy_dz;
-  Real denthalpy_dx;
+  Real denthalpy_dZ;
+  Real denthalpy_dX;
   std::vector<Real> dmass_fraction_dp;
   std::vector<Real> dmass_fraction_dT;
-  std::vector<Real> dmass_fraction_dz;
-  std::vector<Real> dmass_fraction_dx;
+  std::vector<Real> dmass_fraction_dZ;
+  std::vector<Real> dmass_fraction_dX;
 };
 
 template <>
