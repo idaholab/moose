@@ -122,8 +122,8 @@ class MooseObject;
 class Action;
 
 using paramsPtr = InputParameters (*)();
-using buildPtr = std::shared_ptr<MooseObject> (*)(const InputParameters & parameters);
-using buildActionPtr = std::shared_ptr<Action> (*)(const InputParameters & parameters);
+using buildPtr = std::unique_ptr<MooseObject> (*)(const InputParameters & parameters);
+using buildActionPtr = std::unique_ptr<Action> (*)(const InputParameters & parameters);
 
 /// Holds details and meta-data info for a particular MooseObject or Action for use in the
 /// registry.
@@ -155,17 +155,17 @@ struct RegistryEntry
 };
 
 template <class T>
-std::shared_ptr<MooseObject>
+std::unique_ptr<MooseObject>
 buildObj(const InputParameters & parameters)
 {
-  return std::make_shared<T>(parameters);
+  return libmesh_make_unique<T>(parameters);
 }
 
 template <class T>
-std::shared_ptr<Action>
+std::unique_ptr<Action>
 buildAct(const InputParameters & parameters)
 {
-  return std::make_shared<T>(parameters);
+  return libmesh_make_unique<T>(parameters);
 }
 
 /// The registry is used as a global singleton to collect information on all available MooseObject

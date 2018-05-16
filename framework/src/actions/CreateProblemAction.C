@@ -42,7 +42,7 @@ CreateProblemAction::act()
     _moose_object_pars.set<MooseMesh *>("mesh") = _mesh.get();
     _moose_object_pars.set<bool>("use_nonlinear") = _app.useNonlinear();
 
-    _problem =
-        _factory.create<FEProblemBase>(_type, getParam<std::string>("name"), _moose_object_pars);
+    _problem = _factory.createUnique<FEProblemBase>(
+        _type, getParam<std::string>("name"), _moose_object_pars);
   }
 }

@@ -167,6 +167,8 @@ private:
   Factory::create(const std::string &, const std::string &, InputParameters, THREAD_ID, bool);
   friend void Factory::releaseSharedObjects(const MooseObject &, THREAD_ID);
   ///@}
+  /// The factory is allowed to call addInputParameters.
+  friend Factory;
 
   /// Only controls are allowed to call getControllableParameter. The
   /// Control::getControllableParameter is the only method that calls getControllableParameter.

@@ -42,7 +42,7 @@ class MooseApp;
 /**
  * Typedef for function to build objects
  */
-typedef std::shared_ptr<Action> (*buildActionPtr)(const InputParameters & parameters);
+typedef std::unique_ptr<Action> (*buildActionPtr)(const InputParameters & parameters);
 
 /**
  * Typedef for validParams
@@ -53,10 +53,10 @@ typedef InputParameters (*paramsActionPtr)();
  * Build an object of type T
  */
 template <class T>
-std::shared_ptr<Action>
+std::unique_ptr<Action>
 buildAction(const InputParameters & parameters)
 {
-  return std::make_shared<T>(parameters);
+  return libmesh_make_unique<T>(parameters);
 }
 
 /**

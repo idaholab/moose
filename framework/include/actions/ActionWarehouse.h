@@ -215,8 +215,6 @@ public:
   std::shared_ptr<MooseMesh> & mesh() { return _mesh; }
   std::shared_ptr<MooseMesh> & displacedMesh() { return _displaced_mesh; }
 
-  std::shared_ptr<FEProblemBase> & problemBase() { return _problem; }
-  std::shared_ptr<FEProblem> problem();
   MooseApp & mooseApp() { return _app; }
   const std::string & getCurrentTaskName() const { return _current_task; }
 
@@ -273,9 +271,6 @@ protected:
 
   /// Possible mesh for displaced problem
   std::shared_ptr<MooseMesh> _displaced_mesh;
-
-  /// Problem class
-  std::shared_ptr<FEProblemBase> _problem;
 
 private:
   /// Last task to run before (optional) early termination - blank means no early termination.

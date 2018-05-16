@@ -87,11 +87,18 @@ MooseObjectPtr
 Factory::create(const std::string & obj_name,
                 const std::string & name,
                 InputParameters parameters,
-                THREAD_ID tid /* =0 */,
-                bool print_deprecated /* =true */)
+                THREAD_ID tid /* =0 */)
 {
-  if (print_deprecated)
-    mooseDeprecated("Factory::create() is deprecated, please use Factory::create<T>() instead");
+  mooseDeprecated("Factory::create() is deprecated, please use Factory::create<T>() instead");
+  return createRaw(obj_name, name, parameters, tid);
+}
+
+std::unique_ptr<MooseObject>
+Factory::createRaw(const std::string & obj_name,
+                   const std::string & name,
+                   InputParameters parameters,
+                   THREAD_ID tid /* =0 */)
+{
 
   // Pointer to the object constructor
   std::map<std::string, buildPtr>::iterator it = _name_to_build_pointer.find(obj_name);
@@ -117,16 +124,12 @@ Factory::create(const std::string & obj_name,
   _constructed_types.insert(obj_name);
 
   // add FEProblem pointers to object's params object
-  if (_app.actionWarehouse().problemBase())
-    _app.actionWarehouse().problemBase()->setInputParametersFEProblem(params);
+  if (_app.problemBase())
+    _app.problemBase()->setInputParametersFEProblem(params);
 
   // call the function pointer to build the object
   buildPtr & func = it->second;
   auto obj = (*func)(params);
-
-  auto fep = std::dynamic_pointer_cast<FEProblemBase>(obj);
-  if (fep)
-    _app.actionWarehouse().problemBase() = fep;
 
   // Make sure no unexpected parameters were added by the object's constructor or by the action
   // initiating this create call.  All parameters modified by the constructor must have already

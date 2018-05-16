@@ -659,6 +659,13 @@ public:
    */
   void setBackupObject(std::shared_ptr<Backup> backup);
 
+  /**
+   * This function is a legacy function that should not be used going forward.  It exists to allow
+   * actions to retroactively be able to "see" the problem object even though they were created
+   * before the problem object existed - they store a reference to this master unique pointer.
+   */
+  std::unique_ptr<FEProblemBase> & problemBaseRef() { return _problem_base; }
+
 protected:
   /**
    * Whether or not this MooseApp has cached a Backup to use for restart / recovery
@@ -852,6 +859,13 @@ private:
    * []
    */
   void createMinimalApp();
+
+  /**
+   * Action objects store a reference to this member via the problemBaseRef legacy member function.
+   * This unique pointer gets set to non-nullptr when the CreateProblemAction's _problem member
+   * variable (which is a reference to this unique pointer) gets set in its act function.
+   */
+  std::unique_ptr<FEProblemBase> _problem_base;
 
   /// Where the restartable data is held (indexed on tid)
   RestartableDatas _restartable_data;

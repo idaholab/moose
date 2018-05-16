@@ -64,7 +64,7 @@ ActionWarehouse::clear()
   // destructor) we must guarantee that ActionWarehouse::clear()
   // releases all the resources which have to be released _before_ the
   // _comm object owned by the MooseApp is destroyed.
-  _problem.reset();
+  _app.problemBaseRef().reset();
   _displaced_mesh.reset();
   _mesh.reset();
 }
@@ -402,14 +402,6 @@ ActionWarehouse::printInputFile(std::ostream & out)
   }
 
   out << tree.print("");
-}
-
-std::shared_ptr<FEProblem>
-ActionWarehouse::problem()
-{
-  mooseDeprecated(
-      "ActionWarehouse::problem() is deprecated, please use ActionWarehouse::problemBase() \n");
-  return std::dynamic_pointer_cast<FEProblem>(_problem);
 }
 
 std::string
