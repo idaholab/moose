@@ -4,4 +4,9 @@
     command = nemesis.py
     imagediff = 'nemesis.png'
   [../]
+  [./explode]
+    type = ImageDiff
+    command = explode.py
+    imagediff = 'explode.png'
+  [../]
 []

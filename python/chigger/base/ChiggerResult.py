@@ -36,6 +36,10 @@ class ChiggerResult(ChiggerResultBase):
     @staticmethod
     def getOptions():
         opt = ChiggerResultBase.getOptions()
+        opt.add('explode', None, "When multiple sources are being used (e.g., NemesisReader) "
+                                 "setting this to a value will cause the various sources to be "
+                                 "'exploded' away from the centroid of the entire object.",
+                vtype=float)
         return opt
 
     def __init__(self, *sources, **kwargs):
@@ -92,15 +96,33 @@ class ChiggerResult(ChiggerResultBase):
             see ChiggerResultBase
         """
         super(ChiggerResult, self).update(**kwargs)
+
         for src in self._sources:
             if src.needsUpdate():
                 src.update()
+
+        if self.isOptionValid('explode'):
+            factor = self.getOption('explode')
+            m = self.getCenter()
+            for src in self._sources:
+                c = src.getVTKActor().GetCenter()
+                d = ( c[0]-m[0], c[1]-m[1], c[2]-m[2] )
+                src.getVTKActor().AddPosition(d[0]*factor, d[1]*factor, d[2]*factor)
+
+
 
     def getSources(self):
         """
         Return the list of ChiggerSource objects.
         """
         return self._sources
+
+    def getCenter(self):
+        """
+        Return the center (based on the bounds) of all the objects.
+        """
+        a, b = self.getBounds()
+        return ( (b[0]-a[0])/2., (b[1]-a[1])/2., (b[2]-a[2])/2. )
 
     def getBounds(self, check=True):
         """
