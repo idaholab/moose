@@ -11,8 +11,6 @@
 import mooseutils
 from ChiggerResultBase import ChiggerResultBase
 from ChiggerSourceBase import ChiggerSourceBase
-from .. import utils
-
 
 class ChiggerResult(ChiggerResultBase):
     """
@@ -36,10 +34,6 @@ class ChiggerResult(ChiggerResultBase):
     @staticmethod
     def getOptions():
         opt = ChiggerResultBase.getOptions()
-        opt.add('explode', None, "When multiple sources are being used (e.g., NemesisReader) "
-                                 "setting this to a value will cause the various sources to be "
-                                 "'exploded' away from the centroid of the entire object.",
-                vtype=float)
         return opt
 
     def __init__(self, *sources, **kwargs):
@@ -101,59 +95,17 @@ class ChiggerResult(ChiggerResultBase):
             if src.needsUpdate():
                 src.update()
 
-        if self.isOptionValid('explode'):
-            factor = self.getOption('explode')
-            m = self.getCenter()
-            for src in self._sources:
-                c = src.getVTKActor().GetCenter()
-                d = ( c[0]-m[0], c[1]-m[1], c[2]-m[2] )
-                src.getVTKActor().AddPosition(d[0]*factor, d[1]*factor, d[2]*factor)
-
-
-
     def getSources(self):
         """
         Return the list of ChiggerSource objects.
         """
         return self._sources
 
-    def getCenter(self):
-        """
-        Return the center (based on the bounds) of all the objects.
-        """
-        a, b = self.getBounds()
-        return ( (b[0]-a[0])/2., (b[1]-a[1])/2., (b[2]-a[2])/2. )
-
-    def getBounds(self, check=True):
-        """
-        Return the bounding box of the results.
-
-        Inputs:
-            check[bool]: (Default: True) When True, perform an update check and raise an exception
-                                         if object is not up-to-date. This should not be used.
-
-        TODO: For Peacock, on linux check=False must be set, but I am not sure why.
-        """
-        if check:
-            self.checkUpdateState()
-        elif self.needsUpdate():
-            self.update()
-        return utils.get_bounds(*self._sources)
-
-    def getRange(self):
-        """
-        Return the min/max range for the selected variables and blocks/boundary/nodeset.
-
-        NOTE: For the range to be restricted by block/boundary/nodest the reader must have
-              "squeeze=True", which can be much slower.
-        """
-        rngs = [src.getRange() for src in self._sources]
-        return utils.get_min_max(*rngs)
-
     def reset(self):
         """
         Remove actors from renderer.
         """
+
         super(ChiggerResult, self).reset()
         for src in self._sources:
             self._vtkrenderer.RemoveViewProp(src.getVTKActor())

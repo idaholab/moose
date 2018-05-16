@@ -10,7 +10,6 @@
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
 import vtk
-import math
 import chigger
 
 # Create a common camera
