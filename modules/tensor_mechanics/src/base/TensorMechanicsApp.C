@@ -85,6 +85,7 @@ TensorMechanicsApp::associateSyntax(Syntax & syntax, ActionFactory & action_fact
 
   registerSyntax("GeneralizedPlaneStrainAction",
                  "Modules/TensorMechanics/GeneralizedPlaneStrain/*");
+  registerSyntax("GlobalStrainAction", "Modules/TensorMechanics/GlobalStrain/*");
   registerSyntax("CommonTensorMechanicsAction", "Modules/TensorMechanics/Master");
   registerSyntax("TensorMechanicsAction", "Modules/TensorMechanics/Master/*");
 
