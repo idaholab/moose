@@ -318,7 +318,7 @@ class ExodusSource(base.ChiggerSource):
                                   '"range" option, the "range" is being utilized, the others are '
                                   'ignored.')
 
-        rng = list(self.__getRange())
+        rng = self._parent.getRange() # Use range from all sources as the default
         if self.isOptionValid('range'):
             rng = self.getOption('range')
         else:

@@ -1,0 +1,7 @@
+[Tests]
+  [./nemesis]
+    type = ImageDiff
+    command = nemesis.py
+    imagediff = 'nemesis.png'
+  [../]
+[]

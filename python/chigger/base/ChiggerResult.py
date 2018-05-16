@@ -41,6 +41,8 @@ class ChiggerResult(ChiggerResultBase):
     def __init__(self, *sources, **kwargs):
         super(ChiggerResult, self).__init__(**kwargs)
         self._sources = sources
+        for src in self._sources:
+            src._parent = self #pylint: disable=protected-access
 
     def needsUpdate(self):
         """

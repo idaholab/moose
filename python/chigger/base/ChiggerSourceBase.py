@@ -62,6 +62,7 @@ class ChiggerSourceBase(ChiggerObject):
             self._vtkactor.SetMapper(self._vtkmapper)
 
         self._vtkrenderer = None # This is set automatically by ChiggerResult object.
+        self._parent = None # Set by ChiggerResult
 
     def getVTKActor(self):
         """
