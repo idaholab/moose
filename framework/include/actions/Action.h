@@ -109,8 +109,7 @@ public:
    * back to the normal behavior of mooseError - only printing a message using the given args.
    */
   template <typename... Args>
-  [[noreturn]] void paramError(const std::string & param, Args... args)
-  {
+  [[noreturn]] void paramError(const std::string & param, Args... args) {
     auto prefix = param + ": ";
     if (!_pars.inputLocation(param).empty())
       prefix = _pars.inputLocation(param) + ": (" + _pars.paramFullpath(param) + "):\n";
@@ -193,7 +192,7 @@ protected:
   /// Reference to ActionWarehouse where we store object build by actions
   ActionWarehouse & _awh;
 
-  /// The current action (even though we have seperate instances for each action)
+  /// The current action (even though we have separate instances for each action)
   const std::string & _current_task;
 
   std::shared_ptr<MooseMesh> & _mesh;

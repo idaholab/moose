@@ -424,7 +424,7 @@ MultiApp::getBoundingBox(unsigned int app, bool displaced_mesh)
 
   unsigned int local_app = globalAppToLocal(app);
   FEProblemBase & fe_problem_base = _apps[local_app]->getExecutioner()->feProblem();
-  MooseMesh & mesh = (displaced_mesh && fe_problem_base.getDisplacedProblem().get() != NULL)
+  MooseMesh & mesh = (displaced_mesh && fe_problem_base.getDisplacedProblem() != nullptr)
                          ? fe_problem_base.getDisplacedProblem()->mesh()
                          : fe_problem_base.mesh();
 

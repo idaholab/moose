@@ -36,7 +36,7 @@ public:
 
 protected:
   AuxiliarySystem & _aux_sys;
-  MooseSharedPointer<DisplacedProblem> _displaced_problem;
+  DisplacedProblem * _displaced_problem;
 
   /**
    * Compute the amount of damping

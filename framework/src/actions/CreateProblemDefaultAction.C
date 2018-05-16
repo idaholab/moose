@@ -80,12 +80,12 @@ CreateProblemDefaultAction::act()
       if (_pars.isParamSetByUser("_solve"))
         params.set<bool>("solve") = getParam<bool>("_solve");
 
-      _problem = _factory.create<FEProblemBase>(type, "MOOSE Problem", params);
+      _problem = _factory.createUnique<FEProblemBase>(type, "MOOSE Problem", params);
     }
     else
     {
       // otherwise perform necessary sanity checks
-      if (_app.useEigenvalue() && !(std::dynamic_pointer_cast<EigenProblem>(_problem)))
+      if (_app.useEigenvalue() && !(dynamic_cast<EigenProblem *>(_problem.get())))
         mooseError("Problem has to be of a EigenProblem (or derived subclass) type when using "
                    "eigen executioner");
     }

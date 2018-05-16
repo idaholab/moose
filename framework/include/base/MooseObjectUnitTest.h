@@ -88,7 +88,7 @@ protected:
     // tests, this doesn't happen - so we set it here.
     _app->problemBaseRef() =
         _factory.createUnique<FEProblem>("FEProblem", "problem", problem_params);
-    _fe_problem = _app->problemBase();
+    _fe_problem = _app->problemBaseRef().get();
     _fe_problem->createQRules(QGAUSS, FIRST, FIRST, FIRST);
   }
 

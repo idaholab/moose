@@ -15,8 +15,6 @@
 
 Factory::Factory(MooseApp & app) : _app(app) {}
 
-Factory::~Factory() {}
-
 void
 Factory::reg(const std::string & label,
              const std::string & obj_name,
@@ -83,16 +81,6 @@ Factory::getValidParams(const std::string & obj_name)
   return params;
 }
 
-MooseObjectPtr
-Factory::create(const std::string & obj_name,
-                const std::string & name,
-                InputParameters parameters,
-                THREAD_ID tid /* =0 */)
-{
-  mooseDeprecated("Factory::create() is deprecated, please use Factory::create<T>() instead");
-  return createRaw(obj_name, name, parameters, tid);
-}
-
 std::unique_ptr<MooseObject>
 Factory::createRaw(const std::string & obj_name,
                    const std::string & name,
@@ -124,8 +112,9 @@ Factory::createRaw(const std::string & obj_name,
   _constructed_types.insert(obj_name);
 
   // add FEProblem pointers to object's params object
-  if (_app.problemBase())
-    _app.problemBase()->setInputParametersFEProblem(params);
+  auto & problemBaseRef = _app.problemBaseRef();
+  if (problemBaseRef.get())
+    _app.problemBaseRef()->setInputParametersFEProblem(params);
 
   // call the function pointer to build the object
   buildPtr & func = it->second;

@@ -87,7 +87,7 @@ public:
   void computeContactForce(PenetrationInfo * pinfo, bool update_contact_set);
 
 protected:
-  MooseSharedPointer<DisplacedProblem> _displaced_problem;
+  DisplacedProblem * _displaced_problem;
   FEProblem & _fe_problem;
   Real nodalArea(PenetrationInfo & pinfo);
   Real getPenalty(PenetrationInfo & pinfo);

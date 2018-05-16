@@ -120,7 +120,7 @@ Output::Output(const InputParameters & parameters)
 {
   if (_use_displaced)
   {
-    std::shared_ptr<DisplacedProblem> dp = _problem_ptr->getDisplacedProblem();
+    auto dp = _problem_ptr->getDisplacedProblem();
     if (dp != nullptr)
     {
       _es_ptr = &dp->es();

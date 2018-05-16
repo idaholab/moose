@@ -119,11 +119,6 @@ class InputParameters;
 #define registerExecFlag(flag) factory.regExecFlag(flag)
 
 /**
- * alias to wrap shared pointer type
- */
-using MooseObjectPtr = std::shared_ptr<MooseObject>;
-
-/**
  * alias for validParams function
  */
 using paramsPtr = InputParameters (*)();
@@ -155,7 +150,7 @@ class Factory
 {
 public:
   Factory(MooseApp & app);
-  virtual ~Factory();
+  virtual ~Factory() = default;
 
   /**
    * Register a new object
@@ -274,20 +269,6 @@ public:
   InputParameters getValidParams(const std::string & name);
 
   /**
-   * Build an object (must be registered) - THIS METHOD IS DEPRECATED (Use create<T>())
-   * @param obj_name Type of the object being constructed
-   * @param name Name for the object
-   * @param parameters Parameters this object should have
-   * @param tid The thread id that this copy will be created for
-   * @param print_deprecated controls the deprecated message
-   * @return The created object
-   */
-  std::shared_ptr<MooseObject> create(const std::string & obj_name,
-                                      const std::string & name,
-                                      InputParameters parameters,
-                                      THREAD_ID tid = 0);
-
-  /**
    * Build an object (must be registered)
    * @param obj_name Type of the object being constructed
    * @param name Name for the object
@@ -301,7 +282,7 @@ public:
                             InputParameters parameters,
                             THREAD_ID tid = 0)
   {
-    return std::shared_ptr<T>(createUnique<T>(obj_name, name, parameters, tid).release());
+    return std::shared_ptr<T>(std::move(createUnique<T>(obj_name, name, parameters, tid)));
   }
 
   /**

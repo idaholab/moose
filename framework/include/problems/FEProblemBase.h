@@ -1197,8 +1197,8 @@ public:
   virtual void prepareNeighborShapes(unsigned int var, THREAD_ID tid) override;
 
   // Displaced problem /////
-  virtual void addDisplacedProblem(std::shared_ptr<DisplacedProblem> displaced_problem);
-  virtual std::shared_ptr<DisplacedProblem> getDisplacedProblem() { return _displaced_problem; }
+  virtual void addDisplacedProblem(std::unique_ptr<DisplacedProblem> && displaced_problem);
+  virtual DisplacedProblem * getDisplacedProblem() { return _displaced_problem.get(); }
 
   virtual void updateGeomSearch(
       GeometricSearchData::GeometricSearchType type = GeometricSearchData::ALL) override;
@@ -1771,7 +1771,7 @@ protected:
 
   // Displaced mesh /////
   MooseMesh * _displaced_mesh;
-  std::shared_ptr<DisplacedProblem> _displaced_problem;
+  std::unique_ptr<DisplacedProblem> _displaced_problem;
   GeometricSearchData _geometric_search_data;
 
   bool _reinit_displaced_elem;

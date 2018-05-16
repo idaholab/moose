@@ -4969,10 +4969,10 @@ FEProblemBase::predictorCleanup(NumericVector<Number> & /*ghosted_solution*/)
 }
 
 void
-FEProblemBase::addDisplacedProblem(std::shared_ptr<DisplacedProblem> displaced_problem)
+FEProblemBase::addDisplacedProblem(std::unique_ptr<DisplacedProblem> && displaced_problem)
 {
   _displaced_mesh = &displaced_problem->mesh();
-  _displaced_problem = displaced_problem;
+  _displaced_problem = std::move(displaced_problem);
 }
 
 void

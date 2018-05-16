@@ -11,6 +11,7 @@
 #include "MooseApp.h"
 #include "FEProblem.h"
 #include "DisplacedProblem.h"
+#include "Assembly.h"
 
 registerMooseAction("MooseApp", CreateDisplacedProblemAction, "init_displaced_problem");
 
@@ -56,10 +57,10 @@ CreateDisplacedProblemAction::act()
     object_params.set<FEProblemBase *>("_fe_problem_base") = _problem.get();
 
     // Create the object
-    std::shared_ptr<DisplacedProblem> disp_problem =
-        _factory.create<DisplacedProblem>("DisplacedProblem", "DisplacedProblem", object_params);
+    auto disp_problem = _factory.createUnique<DisplacedProblem>(
+        "DisplacedProblem", "DisplacedProblem", object_params);
 
     // Add the Displaced Problem to FEProblemBase
-    _problem->addDisplacedProblem(disp_problem);
+    _problem->addDisplacedProblem(std::move(disp_problem));
   }
 }

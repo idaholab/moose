@@ -26,7 +26,7 @@ AddExternalAuxVariableAction::AddExternalAuxVariableAction(InputParameters param
 void
 AddExternalAuxVariableAction::act()
 {
-  auto external_problem_ptr = std::dynamic_pointer_cast<ExternalProblem>(_problem);
+  auto external_problem_ptr = dynamic_cast<ExternalProblem *>(_problem.get());
 
   if (external_problem_ptr)
     external_problem_ptr->addExternalVariables();

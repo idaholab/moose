@@ -54,7 +54,7 @@ protected:
   FEProblemBase & _fe_problem;
 
   /// The displaced problem
-  MooseSharedPointer<DisplacedProblem> _displaced_problem;
+  DisplacedProblem * _displaced_problem;
 
   /// The displaced mesh
   MooseMesh * _mesh;

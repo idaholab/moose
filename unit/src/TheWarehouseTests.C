@@ -95,7 +95,7 @@ public:
   std::shared_ptr<TestObject> obj(int val1, int val2, int val3, int val4)
   {
     InputParameters p = _factory.getValidParams("TestObject");
-    p.set<SubProblem *>("_subproblem") = _fe_problem.get();
+    p.set<SubProblem *>("_subproblem") = _fe_problem;
     auto obj = _factory.create<TestObject>("TestObject", "dummy" + std::to_string(count++), p, 0);
     obj->vals = {val1, val2, val3, val4};
     return obj;

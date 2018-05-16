@@ -34,6 +34,7 @@ Adaptivity::Adaptivity(FEProblemBase & subproblem)
     _mesh(_subproblem.mesh()),
     _mesh_refinement_on(false),
     _initialized(false),
+    _displaced_problem(nullptr),
     _initial_steps(0),
     _steps(0),
     _print_mesh_changed(false),
