@@ -157,8 +157,7 @@ private:
   ///@{
 
   /// The factory is allowed to call addInputParameters.
-  friend MooseObjectPtr
-  Factory::create(const std::string &, const std::string &, InputParameters, THREAD_ID, bool);
+  friend Factory;
 
   /// Only controls are allowed to call getControllableParameter. The
   /// Control::getControllableParameter is the only method that calls getControllableParameter.

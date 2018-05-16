@@ -25,8 +25,7 @@ InitProblemAction::InitProblemAction(InputParameters params) : Action(params) {}
 void
 InitProblemAction::act()
 {
-  if (_problem.get())
-    _problem->init();
-  else
+  if (!_problem)
     mooseError("Problem doesn't exist in InitProblemAction!");
+  _problem->init();
 }

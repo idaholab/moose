@@ -131,7 +131,7 @@ using paramsPtr = InputParameters (*)();
 /**
  * alias for method to build objects
  */
-using buildPtr = MooseObjectPtr (*)(const InputParameters & parameters);
+using buildPtr = std::unique_ptr<MooseObject> (*)(const InputParameters & parameters);
 
 /**
  * alias for registered Object iterator
@@ -142,10 +142,10 @@ using registeredMooseObjectIterator = std::map<std::string, paramsPtr>::iterator
  * Build an object of type T
  */
 template <class T>
-MooseObjectPtr
+std::unique_ptr<MooseObject>
 buildObject(const InputParameters & parameters)
 {
-  return std::make_shared<T>(parameters);
+  return libmesh_make_unique<T>(parameters);
 }
 
 /**
@@ -284,8 +284,7 @@ public:
   std::shared_ptr<MooseObject> create(const std::string & obj_name,
                                       const std::string & name,
                                       InputParameters parameters,
-                                      THREAD_ID tid = 0,
-                                      bool print_deprecated = true);
+                                      THREAD_ID tid = 0);
 
   /**
    * Build an object (must be registered)
@@ -301,14 +300,26 @@ public:
                             InputParameters parameters,
                             THREAD_ID tid = 0)
   {
-    std::shared_ptr<T> new_object =
-        std::dynamic_pointer_cast<T>(create(obj_name, name, parameters, tid, false));
-    if (!new_object)
+    return std::shared_ptr<T>(createUnique<T>(obj_name, name, parameters, tid).release());
+  }
+
+  /**
+   * Creates and allocates an object.  obj_name is the c++ type of the object, name is the input
+   * file object name.  parameters contains the filled out (input file) configuration for the
+   * object, and tid is the thread ID for which this object will be created for.
+   */
+  template <typename T>
+  std::unique_ptr<T> createUnique(const std::string & obj_name,
+                                  const std::string & name,
+                                  InputParameters parameters,
+                                  THREAD_ID tid = 0)
+  {
+    T * raw = dynamic_cast<T *>(createRaw(obj_name, name, parameters, tid).release());
+    if (!raw)
       mooseError("We expected to create an object of type '" + demangle(typeid(T).name()) +
                  "'.\nInstead we received a parameters object for type '" + obj_name +
                  "'.\nDid you call the wrong \"add\" method in your Action?");
-
-    return new_object;
+    return std::unique_ptr<T>(raw);
   }
 
   /**
@@ -389,6 +400,12 @@ protected:
 
   /// Constructed Moose Object types
   std::set<std::string> _constructed_types;
+
+private:
+  std::unique_ptr<MooseObject> createRaw(const std::string & obj_name,
+                                         const std::string & name,
+                                         InputParameters parameters,
+                                         THREAD_ID tid = 0);
 };
 
 #endif /* FACTORY_H */
