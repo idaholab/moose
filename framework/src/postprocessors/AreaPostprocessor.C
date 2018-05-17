@@ -16,6 +16,9 @@ InputParameters
 validParams<AreaPostprocessor>()
 {
   InputParameters params = validParams<SideIntegralPostprocessor>();
+
+  params.addClassDescription("Computes the \"area\" or dimension - 1 \"volume\" of a given "
+                             "boundary or boundaries in your mesh.");
   return params;
 }
 

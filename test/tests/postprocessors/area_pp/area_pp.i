@@ -1,9 +1,11 @@
 [Mesh]
   type = GeneratedMesh
   dim = 2
-  nx = 10
-  ny = 10
-  ymax = 3.2
+  nx = 4
+  ny = 4
+
+  xmax = 1.2
+  ymax = 2.3
 []
 
 [Variables]
@@ -36,7 +38,19 @@
 [Postprocessors]
   [./right]
     type = AreaPostprocessor
-    boundary = 1
+    boundary = 'right'
+    execute_on = 'initial timestep_end'
+  [../]
+
+  [./bottom]
+    type = AreaPostprocessor
+    boundary = 'bottom'
+    execute_on = 'initial timestep_end'
+  [../]
+
+  [./all]
+    type = AreaPostprocessor
+    boundary = 'left right bottom top'
     execute_on = 'initial timestep_end'
   [../]
 []
@@ -51,5 +65,5 @@
 []
 
 [Outputs]
-  exodus = true
+  csv = true
 []

@@ -1,7 +1,13 @@
 [Tests]
   [./test]
-    type = 'Exodiff'
+    type = 'CSVDiff'
     input = 'area_pp.i'
-    exodiff = 'area_pp_out.e'
+    csvdiff = 'area_pp_out.csv'
+
+    requirement = 'The AreaPostprocessor shall compute the "area" or dimension - 1 "volume" of sides.'
+    issues = '#1901'
+    design = 'Postprocessors/AreaPostprocessor.md'
+
+    max_parallel = 16 # 16 element test
   [../]
 []
