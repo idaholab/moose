@@ -137,6 +137,7 @@
     [./co2]
       type = TabulatedFluidProperties
       fp = co2sw
+      fluid_property_file = fluid_properties.csv
     [../]
     [./brine]
       type = BrineFluidProperties

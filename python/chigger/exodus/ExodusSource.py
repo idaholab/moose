@@ -45,14 +45,13 @@ class ExodusSource(base.ChiggerSource):
         opt.add('block', [], "A list of subdomain (block) ids or names to display, use [] to "
                              "dislpay all blocks.", vtype=list)
 
-        # Range
+        opt.add('representation', 'surface', "View volume representation.",
+                allow=['surface', 'wireframe', 'points'])
+
         opt.add('range', "The range of data to display on the volume and colorbar; range takes "
                          "precedence of min/max.", vtype=list)
         opt.add('min', "The minimum range.", vtype=float)
         opt.add('max', "The maximum range.", vtype=float)
-
-        opt.add('representation', 'surface', "View volume representation.",
-                allow=['surface', 'wireframe', 'points'])
 
         # Colormap
         opt += base.ColorMap.getOptions()
@@ -125,7 +124,7 @@ class ExodusSource(base.ChiggerSource):
 
     def __getRange(self):
         """
-        Compute the range of visible objects for he supplied variable and component.
+        Private version of range for the update method.
         """
         component = self.getOption('component')
         pairs = []
@@ -318,7 +317,8 @@ class ExodusSource(base.ChiggerSource):
                                   '"range" option, the "range" is being utilized, the others are '
                                   'ignored.')
 
-        rng = list(self.__getRange())
+        # Range
+        rng = list(self.__getRange()) # Use range from all sources as the default
         if self.isOptionValid('range'):
             rng = self.getOption('range')
         else:
@@ -332,4 +332,4 @@ class ExodusSource(base.ChiggerSource):
                                   ", the range/min/max settings are being ignored.")
             rng = list(self.__getRange())
 
-        self._vtkmapper.SetScalarRange(rng)
+        self.getVTKMapper().SetScalarRange(rng)

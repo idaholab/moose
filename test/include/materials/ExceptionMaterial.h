@@ -7,30 +7,27 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef THROW_MATERIAL_H
-#define THROW_MATERIAL_H
+#ifndef EXCEPTIONMATERIAL_H
+#define EXCEPTIONMATERIAL_H
 
 #include "Material.h"
 
-class ThrowMaterial;
+class ExceptionMaterial;
 
 template <>
-InputParameters validParams<ThrowMaterial>();
+InputParameters validParams<ExceptionMaterial>();
 
 /**
- * ThrowMaterial throws a MooseException when certain conditions are
+ * ExceptionMaterial throws a MooseException when certain conditions are
  * met.
  */
-class ThrowMaterial : public Material
+class ExceptionMaterial : public Material
 {
 public:
-  ThrowMaterial(const InputParameters & parameters);
+  ExceptionMaterial(const InputParameters & parameters);
 
 protected:
   virtual void computeQpProperties() override;
-
-  /// Keeps _has_thrown synchronized between processors
-  virtual void residualSetup() override;
 
   /// The MaterialProperty value we are responsible for computing
   MaterialProperty<Real> & _prop_value;
@@ -38,7 +35,11 @@ protected:
   /// The value of our MaterialProperty depends on the value of a coupled variable
   const VariableValue & _coupled_var;
 
-  static bool _has_thrown;
+  // The rank to isolate the exception to if valid
+  const processor_id_type _rank;
+
+  /// throw only once
+  bool _has_thrown;
 };
 
-#endif
+#endif // EXCEPTIONMATERIAL_H

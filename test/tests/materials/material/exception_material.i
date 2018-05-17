@@ -44,8 +44,8 @@
   [./mat]
     # Sequence of events:
     # 1.) MaterialRealAux is re-evaluated every linear iteration
-    # 2.) MaterialRealAux calls ThrowMaterial::computeQpProperties()
-    # 3.) ThrowMaterial throws a MooseException.
+    # 2.) MaterialRealAux calls ExceptionMaterial::computeQpProperties()
+    # 3.) ExceptionMaterial throws a MooseException.
     # 4.) The MooseException is caught and handled by MOOSE.
     # 5.) The next solve is automatically failed.
     # 6.) Time timestep is cut and we try again.
@@ -70,8 +70,9 @@
 
 [Materials]
   [./mat]
-    type = ThrowMaterial
+    type = ExceptionMaterial
     block = 0
+    rank = 0
     coupled_var = u
   [../]
 []
@@ -80,8 +81,6 @@
   type = Transient
   dt = 0.1
   end_time = .5
-  solve_type = 'PJFNK'
-  line_search = 'none'
   petsc_options_iname = '-pc_type -pc_hypre_type'
   petsc_options_value = 'hypre boomeramg'
 []

@@ -168,7 +168,7 @@ class VTKWindowPlugin(QtWidgets.QFrame, ExodusPlugin):
 
             # Set the interaction mode (2D/3D)
             self._result.update()
-            bmin, bmax = self._result.getBounds(check=sys.platform=='darwin')
+            bmin, bmax = self._result.getBounds()
             if abs(bmax[-1] - bmin[-1]) < 1e-10:
                 self._window.setOption('style', 'interactive2D')
             else:

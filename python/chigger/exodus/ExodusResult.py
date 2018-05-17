@@ -13,6 +13,7 @@ from ExodusReader import ExodusReader
 from MultiAppExodusReader import MultiAppExodusReader
 import mooseutils
 from .. import base
+from .. import utils
 
 class ExodusResult(base.ChiggerResult):
     """
@@ -22,6 +23,11 @@ class ExodusResult(base.ChiggerResult):
     def getOptions():
         opt = base.ChiggerResult.getOptions()
         opt += ExodusSource.getOptions()
+        opt.add('explode', None, "When multiple sources are being used (e.g., NemesisReader) "
+                                 "setting this to a value will cause the various sources to be "
+                                 "'exploded' away from the center of the entire object.",
+                vtype=float)
+
         return opt
 
     def __init__(self, reader, **kwargs):
@@ -38,3 +44,63 @@ class ExodusResult(base.ChiggerResult):
 
         # Supply the sources to the base class
         super(ExodusResult, self).__init__(*sources, **kwargs)
+
+    def update(self, **kwargs):
+        super(ExodusResult, self).update(**kwargs)
+
+        # Do not mess with the range if there is a source without a variable
+        if any([src.getCurrentVariableInformation() is None for src in self._sources]):
+            return
+
+        # Re-compute ranges for all sources
+        rng = list(self.getRange()) # Use range from all sources as the default
+        if self.isOptionValid('range'):
+            rng = self.getOption('range')
+        else:
+            if self.isOptionValid('min'):
+                rng[0] = self.getOption('min')
+            if self.isOptionValid('max'):
+                rng[1] = self.getOption('max')
+
+        if rng[0] > rng[1]:
+            mooseutils.mooseDebug("Minimum range greater than maximum:", rng[0], ">", rng[1],
+                                  ", the range/min/max settings are being ignored.")
+            rng = list(self.getRange())
+
+        for src in self._sources:
+            src.getVTKMapper().SetScalarRange(rng)
+
+        # Explode
+        if self.isOptionValid('explode'):
+            factor = self.getOption('explode')
+            m = self.getCenter()
+            for src in self._sources:
+                c = src.getVTKActor().GetCenter()
+                d = (c[0]-m[0], c[1]-m[1], c[2]-m[2])
+                src.getVTKActor().AddPosition(d[0]*factor, d[1]*factor, d[2]*factor)
+
+    def getRange(self):
+        """
+        Return the min/max range for the selected variables and blocks/boundary/nodeset.
+
+        NOTE: For the range to be restricted by block/boundary/nodest the reader must have
+              "squeeze=True", which can be much slower.
+        """
+        self.checkUpdateState()
+        rngs = [src.getRange() for src in self._sources]
+        print rngs
+        return utils.get_min_max(*rngs)
+
+    def getCenter(self):
+        """
+        Return the center (based on the bounds) of all the objects.
+        """
+        a, b = self.getBounds()
+        return ((b[0]-a[0])/2., (b[1]-a[1])/2., (b[2]-a[2])/2.)
+
+    def getBounds(self):
+        """
+        Return the bounding box of the results.
+        """
+        self.checkUpdateState()
+        return utils.get_bounds(*self._sources)

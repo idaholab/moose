@@ -426,7 +426,8 @@ TabulatedFluidProperties::mu_dpT(
 void
 TabulatedFluidProperties::rho_mu(Real pressure, Real temperature, Real & rho, Real & mu) const
 {
-  _fp.rho_mu(pressure, temperature, rho, mu);
+  rho = this->rho(pressure, temperature);
+  mu = this->mu(pressure, temperature);
 }
 
 void
@@ -439,7 +440,8 @@ TabulatedFluidProperties::rho_mu_dpT(Real pressure,
                                      Real & dmu_dp,
                                      Real & dmu_dT) const
 {
-  _fp.rho_mu_dpT(pressure, temperature, rho, drho_dp, drho_dT, mu, dmu_dp, dmu_dT);
+  rho_dpT(pressure, temperature, rho, drho_dp, drho_dT);
+  mu_dpT(pressure, temperature, mu, dmu_dp, dmu_dT);
 }
 
 Real

@@ -93,6 +93,7 @@
       type = TabulatedFluidProperties
       fp = true_water
       temperature_min = 275
+      interpolated_properties = 'density viscosity enthalpy internal_energy'
       fluid_property_file = water97_tabulated.csv
     [../]
   [../]
@@ -171,4 +172,3 @@
 [Outputs]
   exodus = true
 []
-

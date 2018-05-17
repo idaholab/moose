@@ -1,7 +1,9 @@
-# Using the Fluid Properties module in PorousFlow
+# Using the Fluid Properties module
+
+## Implementation
 
 PorousFlow can use any of the UserObjects in the [Fluid Properties](/fluid_properties/index.md)
-module that use the pressure-temperature formulation. These are used in the input file by adding the
+module that use the pressure-temperature formulation. A fluid is included in the input file by adding the
 following block
 
 !listing modules/porous_flow/test/tests/fluids/h2o.i block=Modules/FluidProperties
@@ -20,9 +22,33 @@ for details).
 Multiple fluids can be included by simply adding additional fluids to the `Modules` block and
 corresponding `PorousFlowSingleComponentFluid` entries in the `Materials` block.
 
+Due to this design, it is trivial to change the fluid used by simply swapping out the
+[Fluid Properties](/fluid_properties/index.md) UserObjects.
+
 !alert note
 The fluid properties UserObjects expect temperature in Kelvin.
 
 If the input file uses temperature in Celcius, the `temperature_unit` option in
 [`PorousFlowSingleComponentFluid`](/PorousFlowSingleComponentFluid.md)
 +must+ be set to `Celcius`.
+
+## Performance
+
+Computing fluid properties such as density and viscosity can be expensive when using
+detailed fluid equations of state (such as [Water97FluidProperties](/Water97FluidProperties.md) or
+[CO2FluidProperties](/CO2FluidProperties.md)). In some cases, these computations can be a significant
+proportion of the overall time taken.
+
+In order to reduce the computational expense of using high-precision fluid formulations, the
+[Fluid Properties](/fluid_properties/index.md) module provides a general UserObject that uses
+bicubic interpolation to calculate fluid properties, see
+[TabulatedFluidProperties](/TabulatedFluidProperties.md) for details. Using interpolation to
+calculate fluid properties can significantly reduce the computational expense (particularly for
+[CO2FluidProperties](/CO2FluidProperties.md), where the density is calculated iteratively from pressure
+and temperature).
+
+In the PorousFlow module, fluid density and viscosity are typically calculated at the same time. To
+achieve the maximum benefit from [TabulatedFluidProperties](/TabulatedFluidProperties.md), users
+should ensure that both density and viscosity are calculated by interpolation, by either providing
+them in the supplied properties file, or making sure that both are specified in the
+`interpolated_properties` input parameter if no data file exists.
