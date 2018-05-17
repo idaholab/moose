@@ -20,18 +20,21 @@ validParams<NumDOFs>()
 {
   InputParameters params = validParams<GeneralPostprocessor>();
   MooseEnum system_enum("NL AUX ALL", "ALL");
-  params.addParam<MooseEnum>(
-      "system",
-      system_enum,
-      "The system(s) to retrieve the number of DOFs from (NL, AUX, ALL). Default == ALL");
+  params.addParam<MooseEnum>("system",
+                             system_enum,
+                             "The system(s) for which you want to retrieve the number of DOFs (NL, "
+                             "AUX, ALL). Default == ALL");
+
+  params.addClassDescription(
+      "Return the number of Degrees of freedom from either the NL, Aux or both systems.");
   return params;
 }
 
 NumDOFs::NumDOFs(const InputParameters & parameters)
   : GeneralPostprocessor(parameters),
     _system_enum(parameters.get<MooseEnum>("system").getEnum<SystemEnum>()),
-    _system_pointer(NULL),
-    _es_pointer(NULL)
+    _system_pointer(nullptr),
+    _es_pointer(nullptr)
 {
   switch (_system_enum)
   {

@@ -3,5 +3,12 @@
     type = 'CSVDiff'
     input = 'num_dofs.i'
     csvdiff = 'num_dofs_out.csv'
+
+    requirement = 'The NumDOFs Postprocessor shall report the number of degrees of freedom
+                   (DOFS) from one or more equations systems in the simulation.'
+    design = 'Postprocessors/NumDOFs.md'
+    issues = '#2094 #6872'
+
+    max_parallel = 16 # 16 element test (initially)
   [../]
 []
