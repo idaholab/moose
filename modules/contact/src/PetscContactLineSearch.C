@@ -16,7 +16,6 @@
 #include "libmesh/petsc_nonlinear_solver.h"
 #include "libmesh/petsc_solver_exception.h"
 #include <petscdm.h>
-#include "petsc/private/linesearchimpl.h"
 
 registerMooseObject("ContactApp", PetscContactLineSearch);
 
@@ -88,7 +87,7 @@ PetscContactLineSearch::lineSearch()
   /* compute residual to determine whether contact state has changed since the last non-linear
    * residual evaluation */
   _current_contact_state.clear();
-  ierr = (*line_search->ops->snesfunc)(snes, W, F);
+  ierr = SNESComputeFunction(snes, W, F);
   LIBMESH_CHKERR(ierr);
   ierr = SNESGetFunctionDomainError(snes, &domainerror);
   LIBMESH_CHKERR(ierr);
@@ -122,7 +121,7 @@ PetscContactLineSearch::lineSearch()
     ierr = VecWAXPY(W1, -_contact_lambda, Y, X);
     LIBMESH_CHKERR(ierr);
 
-    ierr = (*line_search->ops->snesfunc)(snes, W1, G);
+    ierr = SNESComputeFunction(snes, W1, G);
     LIBMESH_CHKERR(ierr);
     ierr = SNESGetFunctionDomainError(snes, &domainerror);
     LIBMESH_CHKERR(ierr);
@@ -163,7 +162,7 @@ PetscContactLineSearch::lineSearch()
 
   if (changed_w || changed_y)
   {
-    ierr = (*line_search->ops->snesfunc)(snes, W, F);
+    ierr = SNESComputeFunction(snes, W, F);
     LIBMESH_CHKERR(ierr);
     ierr = SNESGetFunctionDomainError(snes, &domainerror);
     LIBMESH_CHKERR(ierr);
@@ -177,15 +176,11 @@ PetscContactLineSearch::lineSearch()
     printContactInfo(contact_state_stored);
   }
 
-  ierr = VecNorm(Y, NORM_2, &line_search->ynorm);
-  LIBMESH_CHKERR(ierr);
-  ierr = VecNorm(W, NORM_2, &line_search->xnorm);
-  LIBMESH_CHKERR(ierr);
-  ierr = VecNorm(F, NORM_2, &line_search->fnorm);
-  LIBMESH_CHKERR(ierr);
-
   /* copy the solution over */
   ierr = VecCopy(W, X);
+  LIBMESH_CHKERR(ierr);
+
+  ierr = SNESLineSearchComputeNorms(line_search);
   LIBMESH_CHKERR(ierr);
 
   ierr = VecDestroy(&W1);
