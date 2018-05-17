@@ -4,7 +4,7 @@
 
 ## Prerequisites
 
-- Cmake 3.4 or greater will be needed for building PETSc. Unless your system is very old, one should
+- Cmake 3.4 or greater will be needed for building PETSc and LLVM. Unless your system is very old, one should
   be able to use their system's package manager (apt-get, yum, zypper, etc) to install a compatible
   version of Cmake. For older systems, you will need to obtain cmake source from http://www.cmake.org,
   and build it appropriately for your system.
@@ -21,7 +21,18 @@
 
 !include manual_llvm.md
 
-!include manual_mpich.md
+!alert! note
+In order to utilize our newly built LLVM-Clang compiler, we need to export some variables:
+
+```bash
+export CC=clang
+export CXX=clang++
+export PATH=$PACKAGES_DIR/llvm-5.0.1/bin:$PATH
+export LD_LIBRARY_PATH=$PACKAGES_DIR/llvm-5.0.1/lib:$LD_LIBRARY_PATH
+```
+!alert-end!
+
+!include manual_mpich_llvm.md
 
 !include manual_petsc.md
 
@@ -32,36 +43,25 @@
 Now that PETSc has been successfully installed and tested, its time to wrap all these environment
 variables up, and throw them in a bash shell profile somewhere.
 
-Append the following contents into moose-environment.sh:
+Append the following contents into a new file called `moose-environment.sh`:
 
 ```bash
 #!/bin/bash
 ### MOOSE Environment Profile
+# GCC 7.3.0
+# LLVM 5.0.1
+# MPICH 3.2
+# PETSc 3.8.3
 
-### 7-13-2016
-
-###
-### GCC 7.3.0
-
-### LLVM 5.0.1
-
-### MPICH 3.2
-
-### PETSc 3.8.3
-
-export PACKAGES_DIR=/opt/moose
+export PACKAGES_DIR=<what ever you exported initially during the Environment setup>
 
 export PATH=$PACKAGES_DIR/llvm-5.0.1/bin:$PACKAGES_DIR/gcc-7.3.0/bin:$PACKAGES_DIR/mpich-3.2/bin:$PATH
-
 export LD_LIBRARY_PATH=$PACKAGES_DIR/llvm-5.0.1/lib:$PACKAGES_DIR/gcc-7.3.0/lib64:$PACKAGES_DIR/gcc-7.3.0/lib:$PACKAGES_DIR/gcc-7.3.0/lib/gcc/x86_64-unknown-linux-gnu/7.3.0:$PACKAGES_DIR/gcc-7.3.0/libexec/gcc/x86_64-unknown-linux-gnu/7.3.0:$PACKAGES_DIR/mpich-3.2/lib:$LD_LIBRARY_PATH
-
 export C_INCLUDE_PATH=$PACKAGES_DIR/mpich-3.2/include:$C_INCLUDE_PATH
 export CPLUS_INCLUDE_PATH=$PACKAGES_DIR/mpich-3.2/include:$CPLUS_INCLUDE_PATH
 export FPATH=$PACKAGES_DIR/mpich-3.2/include:$FPATH
 export MANPATH=$PACKAGES_DIR/mpich-3.2/share/man:$MANPATH
-
 export PETSC_DIR=$PACKAGES_DIR/petsc-3.8.3
-
 export CC=mpicc
 export CXX=mpicxx
 export FC=mpif90

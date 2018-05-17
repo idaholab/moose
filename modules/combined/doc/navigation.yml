@@ -7,7 +7,8 @@ Getting Started:
     CentOS: getting_started/installation/centos.md
     Windows 10: getting_started/installation/windows10.md
     HPC Cluster: getting_started/installation/cluster.md
-    Manual Install: getting_started/installation/manual_installation.md
+    Manual Install (GCC): getting_started/installation/manual_installation_gcc.md
+    Manual Install (LLVM): getting_started/installation/manual_installation_llvm.md
 Documentation:
     Systems: documentation/systems/index.md
     Application Usage: documentation/application_usage/index.md

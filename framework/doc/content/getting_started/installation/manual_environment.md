@@ -7,11 +7,6 @@ module purge   #(may fail with command not found)
 unset LD_LIBRARY_PATH
 unset CPLUS_INCLUDE_PATH
 unset C_INCLUDE_PATH
-
-export CC=gcc
-export CXX=g++
-export FC=gfortran
-export F90=gfortran
 export PACKAGES_DIR=/opt/moose
 export STACK_SRC=/tmp/moose_stack_src
 umask 022

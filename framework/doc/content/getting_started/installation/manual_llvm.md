@@ -53,10 +53,5 @@ make install
 ```
 
 !alert! note
-In order to utilize our newly built LLVM-Clang compiler, we need to set some variables:
-
-```bash
-export PATH=$PACKAGES_DIR/llvm-5.0.1/bin:$PATH
-export LD_LIBRARY_PATH=$PACKAGES_DIR/llvm-5.0.1/lib:$LD_LIBRARY_PATH
-```
+The above configuration assumes you are also using the custom version of GCC built in the previous section (note the several gcc-7.3.0 paths). If this is not the case, you will need to provide the correct paths to your current toolchain.
 !alert-end!

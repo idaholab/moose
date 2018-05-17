@@ -19,7 +19,7 @@
 
 !include manual_gcc.md
 
-!include manual_mpich.md
+!include manual_mpich_gcc.md
 
 !include manual_petsc.md
 
@@ -30,34 +30,24 @@
 Now that PETSc has been successfully installed and tested, its time to wrap all these environment
 variables up, and throw them in a bash shell profile somewhere.
 
-Append the following contents into moose-environment.sh:
+Append the following contents into a new file called `moose-environment.sh`:
 
 ```bash
 #!/bin/bash
 ### MOOSE Environment Profile
+# GCC 7.3.0
+# MPICH 3.2
+# PETSc 3.8.3
 
-### 7-13-2016
-
-###
-### GCC 7.3.0
-
-### MPICH 3.2
-
-### PETSc 3.8.3
-
-export PACKAGES_DIR=/opt/moose
+export PACKAGES_DIR=<what ever you exported initially during the Environment setup>
 
 export PATH=$PACKAGES_DIR/gcc-7.3.0/bin:$PACKAGES_DIR/mpich-3.2/bin:$PATH
-
 export LD_LIBRARY_PATH=$PACKAGES_DIR/gcc-7.3.0/lib64:$PACKAGES_DIR/gcc-7.3.0/lib:$PACKAGES_DIR/gcc-7.3.0/lib/gcc/x86_64-unknown-linux-gnu/7.3.0:$PACKAGES_DIR/gcc-7.3.0/libexec/gcc/x86_64-unknown-linux-gnu/7.3.0:$PACKAGES_DIR/mpich-3.2/lib:$LD_LIBRARY_PATH
-
 export C_INCLUDE_PATH=$PACKAGES_DIR/mpich-3.2/include:$C_INCLUDE_PATH
 export CPLUS_INCLUDE_PATH=$PACKAGES_DIR/mpich-3.2/include:$CPLUS_INCLUDE_PATH
 export FPATH=$PACKAGES_DIR/mpich-3.2/include:$FPATH
 export MANPATH=$PACKAGES_DIR/mpich-3.2/share/man:$MANPATH
-
 export PETSC_DIR=$PACKAGES_DIR/petsc-3.8.3
-
 export CC=mpicc
 export CXX=mpicxx
 export FC=mpif90

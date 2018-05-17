@@ -1,7 +1,7 @@
 ## GCC
 
 We need a modern C++11 capable compiler. Our minimum requirements are: GCC 4.8.4, Clang 3.4.0,
-and Intel20130607. This document will focus on building a GCC 7.3.0 compiler stack.
+and Intel20130607. This section will focus on building a GCC 7.3.0 compiler stack.
 
 What version of GCC do we have?
 
@@ -15,8 +15,7 @@ warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 ```
 
 If your version is less than 4.8.4, you will need to build a newer version. If your version is at or
-greater than 4.8.4, you have the option of skipping this section, and moving on to the MPICH section
-further down.
+greater than 4.8.4, you have the option of skipping the GCC section.
 
 ```bash
 cd $STACK_SRC
