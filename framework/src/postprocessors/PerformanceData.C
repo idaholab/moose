@@ -39,6 +39,7 @@ validParams<PerformanceData>()
       "also valid events, category and column are ignored for these "
       "cases).");
 
+  params.addClassDescription("Provides programmatic access to Performance Log Data");
   return params;
 }
 
