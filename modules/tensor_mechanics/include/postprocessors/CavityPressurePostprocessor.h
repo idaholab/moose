@@ -30,7 +30,7 @@ public:
 protected:
   const CavityPressureUserObject & _cpuo;
 
-  const std::string _quantity;
+  const MooseEnum _quantity;
 };
 
 template <>

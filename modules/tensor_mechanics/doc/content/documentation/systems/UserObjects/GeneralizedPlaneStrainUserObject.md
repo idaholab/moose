@@ -8,17 +8,18 @@ For a given scalar out-of-plane strain variable, the equilibrium condition condi
 \begin{equation}
 	\int_{A}{\sigma_{zz}dA} = \bar{N}_{zz}
 \end{equation}
-
-Thus, the residual corresponding to the scalar out-of-plane strain variable is
-
+where $\bar{N}_{zz}$ is an applied force or integrated stress.  Thus, the residual corresponding to the scalar out-of-plane strain variable is
 \begin{equation}
 	R = \int_{A}{\sigma_{zz}dA} - \bar{N}_{zz}
 \end{equation}
-
 and the corresponding diagonal jacobian is
-
 \begin{equation}
 	K_{zz} = \frac{\partial R_{zz}}{\partial \epsilon_{zz}} = \int_{A}{\frac{\partial \sigma_{zz}}{\partial \epsilon_{zz}}dA} = \int_{A}{C_{2222}dA}
+\end{equation}
+
+The reference residual value used by [GeneralizedPlaneStrainReferenceResidual](/AuxScalarKernels/GeneralizedPlaneStrainReferenceResidual.md) is computed as
+\begin{equation}
+	R_{ref} = \int_{A}{|\sigma_{zz}|dA}
 \end{equation}
 
 A detailed description of generalized plane strain model can be found in the [formulation](tensor_mechanics/generalized_plane_strain.md) page.
