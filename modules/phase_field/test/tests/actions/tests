@@ -89,4 +89,10 @@
     input = 'grain_growth_with_T_grad.i'
     exodiff = 'grain_growth_with_T_grad_out.e'
   [../]
+  [./grand_potential_kernels]
+    # Test the GPMKernelAction's ability to generate kernels
+    type = Exodiff
+    input = 'gpm_kernel.i'
+    exodiff = 'gpm_kernel_out.e'
+  [../]
 []
