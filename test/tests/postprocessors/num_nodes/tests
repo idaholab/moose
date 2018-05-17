@@ -1,0 +1,28 @@
+[Tests]
+  [./test]
+    type = 'CSVDiff'
+    input = 'num_nodes.i'
+    csvdiff = 'num_nodes_out.csv'
+
+    requirement = 'The NumNodes Postprocessor shall report the number of nodes
+                   (replicated or distributed) in the simulation.'
+    design = 'Postprocessors/NumNodes.md'
+    issues = '#2094'
+  [../]
+
+  [./test_split]
+    type = 'CSVDiff'
+    input = 'num_nodes.i'
+    cli_args = '--use-split --split-file generated.cpr Outputs/file_base=num_nodes_split_out'
+
+    min_parallel = 4
+    max_parallel = 4
+
+    csvdiff = 'num_nodes_split_out.csv'
+
+    requirement = 'The NumNodes Postprocessor shall report the number of nodes
+                   in the simulation when using distributed (pre-split) mesh.'
+    design = 'Postprocessors/NumNodes.md'
+    issues = '#2094 #8421'
+  [../]
+[]

@@ -30,6 +30,9 @@ public:
    * This will return the number of nodes in the system
    */
   virtual Real getValue() override;
+
+private:
+  const MeshBase & _mesh;
 };
 
 #endif // NUMNODES_H
