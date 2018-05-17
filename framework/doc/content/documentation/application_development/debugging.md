@@ -126,6 +126,16 @@ to be able to stop if MOOSE encounters an error.
 
 Once you are ready to *continue* - you do just that.  Use the `c` command (type `c` and hit `Enter`) in each terminal window to tell it to continue.  Once you go through all of the open terminal windows you should see your application start to run in your original terminal.  If a breakpoint (or any fault) is reached on any process that terminal window will show the command-prompt again, allowing you to inspect variables, etc.
 
+##### Passing debugger commands on the command line
+
+`lldb` accepts debugger commands through the `-o` command line option that are executed as soon as the execuatble is loaded up and ready. This can be used to set breakpoints and immediately resume the execution of the app.
+
+```bash
+mpirun -n 4 ./yourapp-dbg -i inputfile.i --start-in-debugger "sudo lldb -o 'break set -E C++' -o cont"
+```
+
+The above command will set breakpoints that halt on thrown exceptions. Replace `break set -E C++` with `b MPI_Abort` to break on MOOSE errors. The `-o cont` option will automatically run the app after the breakpoints are set.
+
 #### 2. Launch your application and tell it to wait so you can manually attach a debugger
 
 This is going to be used in cases where you need to debug using LOTS of MPI processes, but you don't want a terminal window for each one.  This is also handy if you're working on a cluster that doesn't have any way of doing X-forwarding for option #1 to work.  The idea is to launch your application and have it wait during the initialization phase so you have time to attach a debugger manually to one of the processes.
