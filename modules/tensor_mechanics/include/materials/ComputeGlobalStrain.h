@@ -12,7 +12,9 @@
 
 #include "Material.h"
 
+// Forward Declarations
 class ComputeGlobalStrain;
+class GlobalStrainUserObject;
 class RankTwoTensor;
 
 template <>
@@ -34,6 +36,12 @@ protected:
   std::string _base_name;
   const VariableValue & _scalar_global_strain;
   MaterialProperty<RankTwoTensor> & _global_strain;
+
+  const GlobalStrainUserObject & _pst;
+  const VectorValue<bool> & _periodic_dir;
+
+  const unsigned int _dim;
+  const unsigned int _ndisp;
 };
 
 #endif // COMPUTEGLOBALSTRAIN_H

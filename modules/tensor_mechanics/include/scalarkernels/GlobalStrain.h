@@ -37,7 +37,9 @@ protected:
   const GlobalStrainUserObject & _pst;
   const RankTwoTensor & _pst_residual;
   const RankFourTensor & _pst_jacobian;
+  const VectorValue<bool> & _periodic_dir;
+
   std::vector<std::pair<unsigned int, unsigned int>> _components;
-  unsigned int _dim;
+  const unsigned int _dim;
 };
 #endif // GLOBALSTRAIN_H

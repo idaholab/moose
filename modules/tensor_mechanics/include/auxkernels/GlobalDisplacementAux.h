@@ -14,6 +14,7 @@
 
 // Forward Declarations
 class GlobalDisplacementAux;
+class GlobalStrainUserObject;
 class RankTwoTensor;
 
 template <>
@@ -30,9 +31,13 @@ protected:
   const VariableValue & _scalar_global_strain;
   const unsigned int _component;
 
-  bool _output_total_disp;
+  bool _output_global_disp;
 
-  unsigned int _ndisp;
+  const GlobalStrainUserObject & _pst;
+  const VectorValue<bool> & _periodic_dir;
+
+  const unsigned int _dim;
+  const unsigned int _ndisp;
   std::vector<const VariableValue *> _disp;
 };
 #endif // GLOBALDISPLACEMENTAUX_H
