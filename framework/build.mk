@@ -275,56 +275,6 @@ $(TEST): all
 	@echo ======================================================
 	@(./run_tests -j $(MOOSE_JOBS))
 
-# Build appliations up the tree
-up:
-	@echo ======================================================
-	@echo Building the following applications:
-	@for app in $(DEP_APPS); do echo \ $$app; done
-	@echo ======================================================
-	@echo
-	@for app in $(DEP_APPS); \
-	do \
-		echo ====== Making in $${app} ====== ; \
-		$(MAKE) -C $${app} || exit; \
-	done
-
-
-test_up: up
-	@echo ======================================================
-	@echo Testing the following applications:
-	@for app in $(DEP_APPS); do echo \ $$app; done
-	@echo ======================================================
-	@echo
-	@for app in $(DEP_APPS); \
-	do \
-		echo ====== Testing in $${app} ====== ; \
-		(cd $${app} && ./run_tests -q -j $(MOOSE_JOBS)) ; \
-	done
-
-test_only_up:
-	@echo ======================================================
-	@echo Testing the following applications:
-	@for app in $(DEP_APPS); do echo \ $$app; done
-	@echo ======================================================
-	@echo
-	@for app in $(DEP_APPS); \
-	do \
-		echo ====== Testing in $${app} ====== ; \
-		(cd $${app} && ./run_tests -q -j $(MOOSE_JOBS)) ; \
-	done
-
-clean_up:
-	@echo ======================================================
-	@echo Cleaning the following applications:
-	@for app in $(DEP_APPS); do echo \ $$app; done
-	@echo ======================================================
-	@echo
-	@for app in $(DEP_APPS); \
-	do \
-		echo ====== Cleaning $${app} ====== ; \
-		$(MAKE) -C $${app} clean; \
-	done
-
 libmesh_update:
 	@echo ======================================================
 	@echo Downloading and updating libMesh
@@ -334,7 +284,7 @@ libmesh_update:
 #
 # Maintenance
 #
-.PHONY: cleanall clean doc sa test up test_up test_only_up clean_up
+.PHONY: cleanall clean doc sa test
 
 #
 # Misc
