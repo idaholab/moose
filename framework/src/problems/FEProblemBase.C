@@ -3820,6 +3820,9 @@ FEProblemBase::checkExceptionAndStopSolve()
     // residual vector to let PETSc >= 3.6 return DIVERGED_NANORINF.
     _nl->stopSolve();
 
+    // and close Aux system (we MUST do this here; see #11525)
+    _aux->solution().close();
+
     // We've handled this exception, so we no longer have one.
     _has_exception = false;
 
