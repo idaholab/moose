@@ -10,6 +10,7 @@
 
 from ExodusReader import ExodusReader
 from MultiAppExodusReader import MultiAppExodusReader
+from NemesisReader import NemesisReader
 
 from ExodusSource import ExodusSource
 from ExodusColorBar import ExodusColorBar

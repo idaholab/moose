@@ -11,8 +11,6 @@
 import mooseutils
 from ChiggerResultBase import ChiggerResultBase
 from ChiggerSourceBase import ChiggerSourceBase
-from .. import utils
-
 
 class ChiggerResult(ChiggerResultBase):
     """
@@ -41,6 +39,8 @@ class ChiggerResult(ChiggerResultBase):
     def __init__(self, *sources, **kwargs):
         super(ChiggerResult, self).__init__(**kwargs)
         self._sources = sources
+        for src in self._sources:
+            src._parent = self #pylint: disable=protected-access
 
     def needsUpdate(self):
         """
@@ -90,6 +90,7 @@ class ChiggerResult(ChiggerResultBase):
             see ChiggerResultBase
         """
         super(ChiggerResult, self).update(**kwargs)
+
         for src in self._sources:
             if src.needsUpdate():
                 src.update()
@@ -100,36 +101,11 @@ class ChiggerResult(ChiggerResultBase):
         """
         return self._sources
 
-    def getBounds(self, check=True):
-        """
-        Return the bounding box of the results.
-
-        Inputs:
-            check[bool]: (Default: True) When True, perform an update check and raise an exception
-                                         if object is not up-to-date. This should not be used.
-
-        TODO: For Peacock, on linux check=False must be set, but I am not sure why.
-        """
-        if check:
-            self.checkUpdateState()
-        elif self.needsUpdate():
-            self.update()
-        return utils.get_bounds(*self._sources)
-
-    def getRange(self):
-        """
-        Return the min/max range for the selected variables and blocks/boundary/nodeset.
-
-        NOTE: For the range to be restricted by block/boundary/nodest the reader must have
-              "squeeze=True", which can be much slower.
-        """
-        rngs = [src.getRange() for src in self._sources]
-        return utils.get_min_max(*rngs)
-
     def reset(self):
         """
         Remove actors from renderer.
         """
+
         super(ChiggerResult, self).reset()
         for src in self._sources:
             self._vtkrenderer.RemoveViewProp(src.getVTKActor())
