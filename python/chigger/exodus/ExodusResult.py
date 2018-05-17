@@ -88,7 +88,6 @@ class ExodusResult(base.ChiggerResult):
         """
         self.checkUpdateState()
         rngs = [src.getRange() for src in self._sources]
-        print rngs
         return utils.get_min_max(*rngs)
 
     def getCenter(self):
