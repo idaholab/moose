@@ -15,7 +15,7 @@ application.
 - [Phase Field](modules/phase_field/index.md)
 - [Porous Flow](modules/porous_flow/index.md)
 - [Reconstructed Discontinous Galerkin](modules/rdg/index.md)
-- [Richareds](modules/richards/index.md)
+- [Richards](modules/richards/index.md)
 - [Solid Mechanics](modules/solid_mechanics/index.md)
 - [Stochastic Tools](modules/stochastic_tools/index.md)
 - [Tensor Mechanics](modules/tensor_mechanics/index.md)
