@@ -19,7 +19,6 @@ $APPLICATION_NAME$(STACK) := $(APPLICATION_NAME)
 $DEPEND_MODULES$(STACK) := $(DEPEND_MODULES)
 $GEN_REVISION$(STACK) := $(GEN_REVISION)
 $BUILD_EXEC$(STACK) := $(BUILD_EXEC)
-$DEP_APPS$(STACK) := $(DEP_APPS)
 
 -include $(APPLICATION_DIR)/$(APPLICATION_NAME).mk
 
@@ -31,7 +30,6 @@ APPLICATION_NAME := $($APPLICATION_NAME$(STACK))
 DEPEND_MODULES := $($DEPEND_MODULES$(STACK))
 GEN_REVISION := $($GEN_REVISION$(STACK))
 BUILD_EXEC := $($BUILD_EXEC$(STACK))
-DEP_APPS := $($DEP_APPS$(STACK))
 STACK := $(basename $(STACK))
 
 ifneq ($(SUFFIX),)
@@ -283,7 +281,7 @@ $(app_LIB): curr_objs := $(app_objects)
 $(app_LIB): curr_dir  := $(APPLICATION_DIR)
 $(app_LIB): curr_deps := $(depend_libs)
 $(app_LIB): curr_libs := $(depend_libs_flags)
-$(app_LIB): $(app_HEADER) $(app_plugin_deps) $(depend_libs) $(app_objects)
+$(app_LIB): $(app_HEADER) $(app_plugin_deps) $(depend_libs) $(app_objects) $(ADDITIONAL_DEPEND_LIBS)
 	@echo "Linking Library "$@"..."
 	@$(libmesh_LIBTOOL) --tag=CXX $(LIBTOOLFLAGS) --mode=link --quiet \
 	  $(libmesh_CXX) $(libmesh_CXXFLAGS) -o $@ $(curr_objs) $(libmesh_LDFLAGS) $(EXTERNAL_FLAGS) -rpath $(curr_dir)/lib $(curr_libs)
@@ -299,7 +297,7 @@ $(app_test_LIB): curr_objs := $(app_test_objects)
 $(app_test_LIB): curr_dir  := $(APPLICATION_DIR)/test
 $(app_test_LIB): curr_deps := $(depend_libs)
 $(app_test_LIB): curr_libs := $(depend_libs_flags)
-$(app_test_LIB): $(app_HEADER) $(app_plugin_deps) $(depend_libs) $(app_test_objects)
+$(app_test_LIB): $(app_HEADER) $(app_plugin_deps) $(depend_libs) $(app_test_objects) $(ADDITIONAL_DEPEND_LIBS)
 	@echo "Linking Library "$@"..."
 	@$(libmesh_LIBTOOL) --tag=CXX $(LIBTOOLFLAGS) --mode=link --quiet \
 	  $(libmesh_CXX) $(libmesh_CXXFLAGS) -o $@ $(curr_objs) $(libmesh_LDFLAGS) $(EXTERNAL_FLAGS) -rpath $(curr_dir)/lib $(curr_libs)
