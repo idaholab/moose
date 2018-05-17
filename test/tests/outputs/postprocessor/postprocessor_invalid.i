@@ -69,16 +69,17 @@
 [Postprocessors]
   [./num_vars]
     type = NumVars
+    system = 'NL'
     outputs = 'exodus2 console'
   [../]
   [./num_aux]
     type = NumVars
-    system = auxiliary
+    system = 'AUX'
     outputs = 'exodus'
   [../]
   [./num_nonlinear]
     type = NumVars
-    system = nonlinear
+    system = 'NL'
     outputs = 'all'
   [../]
   [./num_dofs]
