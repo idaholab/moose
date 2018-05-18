@@ -9,6 +9,8 @@
 
 #include "DistributedGeneratedMesh.h"
 
+#include "SerializerGuard.h"
+
 #include "libmesh/mesh_generation.h"
 #include "libmesh/string_to_enum.h"
 #include "libmesh/periodic_boundaries.h"
@@ -1096,21 +1098,23 @@ build_cube(UnstructuredMesh & mesh,
   pmetis->edgecut = 0;                                      // the numbers of edges cut by the
                                                             // partition
   // Initialize data structures for ParMETIS
-  pmetis->xadj.assign(num_elems + 1, 0);
+  pmetis->xadj.assign(num_local_elems + 1, 0);
   // Size this to the max it can be
-  pmetis->adjncy.assign((num_elems * canonical_elem->n_neighbors()), 0);
+  pmetis->adjncy.assign((num_local_elems * canonical_elem->n_neighbors()), 0);
   pmetis->vtxdist.assign(num_procs + 1, 0);
   pmetis->tpwgts.assign(pmetis->nparts, 1. / pmetis->nparts);
   pmetis->ubvec.assign(pmetis->ncon, 1.05);
-  pmetis->part.assign(num_elems, 0);
+  pmetis->part.assign(num_local_elems, 0);
   pmetis->options.resize(5);
   pmetis->vwgt.assign(num_local_elems, canonical_elem->n_nodes());
 
   // Set the options
   pmetis->options[0] = 1;  // don't use default options
   pmetis->options[1] = 0;  // default (level of timing)
-  pmetis->options[2] = 15; // random seed (default)
+  pmetis->options[2] = 15; // random seed (defaul)t
   pmetis->options[3] = 2;  // processor distribution and subdomain distribution are decoupled
+
+  MooseUtils::serialBegin(mesh.comm(), true);
 
   // Fill vtxdist.  These are the bin edges of the ranges current on each proc
   // Note that this was resized to "num_procs + 1" up above
@@ -1121,9 +1125,11 @@ build_cube(UnstructuredMesh & mesh,
     dof_id_type t_local_elems_begin;
     dof_id_type t_local_elems_end;
     MooseUtils::linearPartitionItems(
-        num_elems, num_procs, pid, t_num_local_elems, t_local_elems_begin, t_local_elems_end);
+        num_elems, num_procs, p, t_num_local_elems, t_local_elems_begin, t_local_elems_end);
 
     vtxdist[p] = t_local_elems_begin;
+
+    std::cout << "t_local_elems_begin: " << t_local_elems_begin << std::endl;
 
     // The last one needs to fill in the final entry too
     if (p == num_procs - 1)
@@ -1149,15 +1155,47 @@ build_cube(UnstructuredMesh & mesh,
 
     get_neighbors<T>(nx, ny, nz, i, j, k, neighbors);
 
+    if (verbose)
+      std::cout << "e_id: " << e_id << std::endl;
+
     for (auto neighbor : neighbors)
+    {
+      if (verbose)
+        std::cout << " neighbor: " << neighbor << std::endl;
+
       if (neighbor != Elem::invalid_id)
         adjncy[offset++] = neighbor;
+    }
 
     local_elem++;
   }
 
   // Fill in the last entry
+  xadj[local_elem] = offset;
+
+  if (verbose)
+  {
+    std::cout << "xadj: ";
+    for (auto val : xadj)
+      std::cout << val << " ";
+    std::cout << std::endl;
+
+    std::cout << "adjncy: ";
+    for (auto val : adjncy)
+      std::cout << val << " ";
+    std::cout << std::endl;
+
+    std::cout << "vtxdist: ";
+    for (auto val : vtxdist)
+      std::cout << val << " ";
+    std::cout << std::endl;
+  }
+
+  // Fill in the last entry
   xadj[num_local_elems + 1] = adjncy.size() + 1;
+
+  if (verbose)
+    MooseUtils::serialEnd(mesh.comm(), true);
 
   if (num_procs == 1)
   {
@@ -1317,7 +1355,8 @@ build_cube(UnstructuredMesh & mesh,
 
   if (verbose)
     for (auto & elem_ptr : mesh.element_ptr_range())
-      Moose::out << "Elem: " << elem_ptr->id() << " pid: " << elem_ptr->processor_id() << std::endl;
+      Moose::out << "Elem: " << elem_ptr->id() << " pid: " << elem_ptr->processor_id() <<
+  std::endl;
 
   if (verbose)
     for (auto & node_ptr : mesh.node_ptr_range())

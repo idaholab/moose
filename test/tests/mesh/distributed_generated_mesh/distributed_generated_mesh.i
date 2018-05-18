@@ -3,10 +3,10 @@
 [Mesh]
   #type = GeneratedMesh
   type = DistributedGeneratedMesh
-  nx = 10
-  ny = 10
+  nx = 4
+  ny = 2
   nz = 10
-  dim = 3
+  dim = 1
   verbose = true
 []
 
