@@ -19,12 +19,14 @@ public:
 protected:
   virtual Real computeQpResidual() override;
   virtual Real computeQpJacobian() override;
+  virtual Real computeQpOffDiagJacobian(unsigned int jvar) override;
 
   Function & _beta;
 
   MooseEnum _component;
 
   const VectorVariableValue & _coupled_val;
+  unsigned int _coupled_id;
 
   Function & _inc_real_x;
   Function & _inc_real_y;
