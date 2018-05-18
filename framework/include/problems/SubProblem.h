@@ -357,7 +357,7 @@ public:
    * @param block_id The block id for the MaterialProperty
    * @param name The name of the property
    */
-  virtual void storeMatPropName(SubdomainID block_id, const std::string & name);
+  virtual void storeSubdomainMatPropName(SubdomainID block_id, const std::string & name);
 
   /**
    * Adds the given material property to a storage map based on boundary ids
@@ -367,7 +367,7 @@ public:
    * @param boundary_id The block id for the MaterialProperty
    * @param name The name of the property
    */
-  virtual void storeMatPropName(BoundaryID boundary_id, const std::string & name);
+  virtual void storeBoundaryMatPropName(BoundaryID boundary_id, const std::string & name);
 
   /**
    * Adds to a map based on block ids of material properties for which a zero
@@ -377,7 +377,7 @@ public:
    * @param block_id The block id for the MaterialProperty
    * @param name The name of the property
    */
-  virtual void storeZeroMatProp(SubdomainID block_id, const MaterialPropertyName & name);
+  virtual void storeSubdomainZeroMatProp(SubdomainID block_id, const MaterialPropertyName & name);
 
   /**
    * Adds to a map based on boundary ids of material properties for which a zero
@@ -387,7 +387,7 @@ public:
    * @param boundary_id The block id for the MaterialProperty
    * @param name The name of the property
    */
-  virtual void storeZeroMatProp(BoundaryID boundary_id, const MaterialPropertyName & name);
+  virtual void storeBoundaryZeroMatProp(BoundaryID boundary_id, const MaterialPropertyName & name);
 
   /**
    * Adds to a map based on block ids of material properties to validate
@@ -395,9 +395,9 @@ public:
    * @param block_id The block id for the MaterialProperty
    * @param name The name of the property
    */
-  virtual void storeDelayedCheckMatProp(const std::string & requestor,
-                                        SubdomainID block_id,
-                                        const std::string & name);
+  virtual void storeSubdomainDelayedCheckMatProp(const std::string & requestor,
+                                                 SubdomainID block_id,
+                                                 const std::string & name);
 
   /**
    * Adds to a map based on boundary ids of material properties to validate
@@ -406,9 +406,9 @@ public:
    * @param boundary_id The block id for the MaterialProperty
    * @param name The name of the property
    */
-  virtual void storeDelayedCheckMatProp(const std::string & requestor,
-                                        BoundaryID boundary_id,
-                                        const std::string & name);
+  virtual void storeBoundaryDelayedCheckMatProp(const std::string & requestor,
+                                                BoundaryID boundary_id,
+                                                const std::string & name);
 
   /**
    * Checks block material properties integrity
@@ -585,24 +585,9 @@ protected:
   bool _computing_nonlinear_residual;
 
 private:
-  /**
-   * Helper method for performing material property checks
-   * @param props Reference to the map of properties known
-   * @param check_props Reference to the map of properties to check
-   * @param type - string describing the type of the material property being checked
-   * \see checkBlockMatProps
-   * \see checkBoundaryMatProps
-   */
-  template <typename T>
-  void checkMatProps(std::map<T, std::set<std::string>> & props,
-                     std::map<T, std::multimap<std::string, std::string>> & check_props,
-                     std::map<T, std::set<MaterialPropertyName>> & zero_props);
-
-  ///@{ Helper functions for checkMatProps
-  template <typename T>
-  std::string restrictionTypeName();
-  std::string restrictionCheckName(SubdomainID check_id);
-  std::string restrictionCheckName(BoundaryID check_id);
+  ///@{ Helper functions for checking MaterialProperties
+  std::string restrictionSubdomainCheckName(SubdomainID check_id);
+  std::string restrictionBoundaryCheckName(BoundaryID check_id);
   ///@}
 
   friend class Restartable;

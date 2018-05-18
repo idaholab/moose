@@ -23,7 +23,7 @@ validParams<GeneralUserObject>()
 
 GeneralUserObject::GeneralUserObject(const InputParameters & parameters)
   : UserObject(parameters),
-    MaterialPropertyInterface(this),
+    MaterialPropertyInterface(this, Moose::EMPTY_BLOCK_IDS, Moose::EMPTY_BOUNDARY_IDS),
     TransientInterface(this),
     DependencyResolverInterface(),
     UserObjectInterface(this),

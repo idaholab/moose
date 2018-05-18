@@ -1248,7 +1248,7 @@ XFEM::cutMeshWithEFA(NonlinearSystemBase & nl, AuxiliarySystem & aux)
         std::vector<boundary_id_type>::iterator it_bd = parent_elem_boundary_ids.begin();
         for (; it_bd != parent_elem_boundary_ids.end(); ++it_bd)
         {
-          if (_fe_problem->needMaterialOnSide(*it_bd, 0))
+          if (_fe_problem->needBoundaryMaterialOnSide(*it_bd, 0))
             (*_bnd_material_data)[0]->copy(*libmesh_elem, *parent_elem, side);
         }
       }

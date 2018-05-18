@@ -170,11 +170,11 @@ Material::registerPropName(std::string prop_name, bool is_get, Material::Prop_St
 
   // Store material properties for block ids
   for (const auto & block_id : blockIDs())
-    _fe_problem.storeMatPropName(block_id, prop_name);
+    _fe_problem.storeSubdomainMatPropName(block_id, prop_name);
 
   // Store material properties for the boundary ids
   for (const auto & boundary_id : boundaryIDs())
-    _fe_problem.storeMatPropName(boundary_id, prop_name);
+    _fe_problem.storeBoundaryMatPropName(boundary_id, prop_name);
 }
 
 std::set<OutputName>

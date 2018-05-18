@@ -26,16 +26,6 @@ validParams<SubProblem>()
   return params;
 }
 
-namespace
-{
-/**
- * Templated helper that returns either the any block or any boundary ID depending on the template
- * parameter.
- */
-template <typename T>
-T getAnyID();
-}
-
 // SubProblem /////
 SubProblem::SubProblem(const InputParameters & parameters)
   : Problem(parameters),
@@ -323,41 +313,41 @@ SubProblem::hasBoundaryMaterialProperty(BoundaryID bid, const std::string & prop
 }
 
 void
-SubProblem::storeMatPropName(SubdomainID block_id, const std::string & name)
+SubProblem::storeSubdomainMatPropName(SubdomainID block_id, const std::string & name)
 {
   _map_block_material_props[block_id].insert(name);
 }
 
 void
-SubProblem::storeMatPropName(BoundaryID boundary_id, const std::string & name)
+SubProblem::storeBoundaryMatPropName(BoundaryID boundary_id, const std::string & name)
 {
   _map_boundary_material_props[boundary_id].insert(name);
 }
 
 void
-SubProblem::storeZeroMatProp(SubdomainID block_id, const MaterialPropertyName & name)
+SubProblem::storeSubdomainZeroMatProp(SubdomainID block_id, const MaterialPropertyName & name)
 {
   _zero_block_material_props[block_id].insert(name);
 }
 
 void
-SubProblem::storeZeroMatProp(BoundaryID boundary_id, const MaterialPropertyName & name)
+SubProblem::storeBoundaryZeroMatProp(BoundaryID boundary_id, const MaterialPropertyName & name)
 {
   _zero_boundary_material_props[boundary_id].insert(name);
 }
 
 void
-SubProblem::storeDelayedCheckMatProp(const std::string & requestor,
-                                     SubdomainID block_id,
-                                     const std::string & name)
+SubProblem::storeSubdomainDelayedCheckMatProp(const std::string & requestor,
+                                              SubdomainID block_id,
+                                              const std::string & name)
 {
   _map_block_material_props_check[block_id].insert(std::make_pair(requestor, name));
 }
 
 void
-SubProblem::storeDelayedCheckMatProp(const std::string & requestor,
-                                     BoundaryID boundary_id,
-                                     const std::string & name)
+SubProblem::storeBoundaryDelayedCheckMatProp(const std::string & requestor,
+                                             BoundaryID boundary_id,
+                                             const std::string & name)
 {
   _map_boundary_material_props_check[boundary_id].insert(std::make_pair(requestor, name));
 }
@@ -365,16 +355,101 @@ SubProblem::storeDelayedCheckMatProp(const std::string & requestor,
 void
 SubProblem::checkBlockMatProps()
 {
-  checkMatProps(
-      _map_block_material_props, _map_block_material_props_check, _zero_block_material_props);
+  // Variable for storing the value for ANY_BLOCK_ID/ANY_BOUNDARY_ID
+  SubdomainID any_id = Moose::ANY_BLOCK_ID;
+
+  // Variable for storing all available blocks/boundaries from the mesh
+  std::set<SubdomainID> all_ids(mesh().meshSubdomains());
+
+  // Loop through the properties to check
+  for (const auto & check_it : _map_block_material_props_check)
+  {
+    // The current id for the property being checked (BoundaryID || BlockID)
+    SubdomainID check_id = check_it.first;
+
+    // In the case when the material being checked has an ID is set to ANY, then loop through all
+    // the possible ids and verify that the material property is defined.
+    std::set<SubdomainID> check_ids = {check_id};
+    if (check_id == any_id)
+      check_ids = all_ids;
+
+    // Loop through all the block/boundary ids
+    for (const auto & id : check_ids)
+    {
+      // Loop through all the stored properties
+      for (const auto & prop_it : check_it.second)
+      {
+        // Produce an error if the material property is not defined on the current block/boundary
+        // and any block/boundary
+        // and not is not a zero material property.
+        if (_map_block_material_props[id].count(prop_it.second) == 0 &&
+            _map_block_material_props[any_id].count(prop_it.second) == 0 &&
+            _zero_block_material_props[id].count(prop_it.second) == 0 &&
+            _zero_block_material_props[any_id].count(prop_it.second) == 0)
+        {
+          std::string check_name = restrictionSubdomainCheckName(id);
+          if (check_name.empty())
+            check_name = std::to_string(id);
+          mooseError("Material property '",
+                     prop_it.second,
+                     "', requested by '",
+                     prop_it.first,
+                     "' is not defined on block ",
+                     check_name);
+        }
+      }
+    }
+  }
 }
 
 void
 SubProblem::checkBoundaryMatProps()
 {
-  checkMatProps(_map_boundary_material_props,
-                _map_boundary_material_props_check,
-                _zero_boundary_material_props);
+  // Variable for storing the value for ANY_BLOCK_ID/ANY_BOUNDARY_ID
+  BoundaryID any_id = Moose::ANY_BOUNDARY_ID;
+
+  // Variable for storing all available blocks/boundaries from the mesh
+  std::set<BoundaryID> all_ids(mesh().getBoundaryIDs());
+
+  // Loop through the properties to check
+  for (const auto & check_it : _map_boundary_material_props_check)
+  {
+    // The current id for the property being checked (BoundaryID || BlockID)
+    BoundaryID check_id = check_it.first;
+
+    // In the case when the material being checked has an ID is set to ANY, then loop through all
+    // the possible ids and verify that the material property is defined.
+    std::set<BoundaryID> check_ids{check_id};
+    if (check_id == any_id)
+      check_ids = all_ids;
+
+    // Loop through all the block/boundary ids
+    for (const auto & id : check_ids)
+    {
+      // Loop through all the stored properties
+      for (const auto & prop_it : check_it.second)
+      {
+        // Produce an error if the material property is not defined on the current block/boundary
+        // and any block/boundary
+        // and not is not a zero material property.
+        if (_map_boundary_material_props[id].count(prop_it.second) == 0 &&
+            _map_boundary_material_props[any_id].count(prop_it.second) == 0 &&
+            _zero_boundary_material_props[id].count(prop_it.second) == 0 &&
+            _zero_boundary_material_props[any_id].count(prop_it.second) == 0)
+        {
+          std::string check_name = restrictionBoundaryCheckName(id);
+          if (check_name.empty())
+            check_name = std::to_string(id);
+          mooseError("Material property '",
+                     prop_it.second,
+                     "', requested by '",
+                     prop_it.first,
+                     "' is not defined on boundary ",
+                     check_name);
+        }
+      }
+    }
+  }
 }
 
 void
@@ -419,22 +494,8 @@ SubProblem::meshChanged()
   mooseError("This system does not support changing the mesh");
 }
 
-template <>
 std::string
-SubProblem::restrictionTypeName<SubdomainID>()
-{
-  return "block";
-}
-
-template <>
-std::string
-SubProblem::restrictionTypeName<BoundaryID>()
-{
-  return "boundary";
-}
-
-std::string
-SubProblem::restrictionCheckName(SubdomainID check_id)
+SubProblem::restrictionSubdomainCheckName(SubdomainID check_id)
 {
   // TODO: Put a better a interface in MOOSE
   std::map<subdomain_id_type, std::string> & name_map = mesh().getMesh().set_subdomain_name_map();
@@ -445,63 +506,9 @@ SubProblem::restrictionCheckName(SubdomainID check_id)
 }
 
 std::string
-SubProblem::restrictionCheckName(BoundaryID check_id)
+SubProblem::restrictionBoundaryCheckName(BoundaryID check_id)
 {
   return mesh().getMesh().get_boundary_info().sideset_name(check_id);
-}
-
-template <typename T>
-void
-SubProblem::checkMatProps(std::map<T, std::set<std::string>> & props,
-                          std::map<T, std::multimap<std::string, std::string>> & check_props,
-                          std::map<T, std::set<MaterialPropertyName>> & zero_props)
-{
-  // Variable for storing the value for ANY_BLOCK_ID/ANY_BOUNDARY_ID
-  T any_id = getAnyID<T>();
-
-  // Variable for storing all available blocks/boundaries from the mesh
-  std::set<T> all_ids(mesh().getBlockOrBoundaryIDs<T>());
-
-  // Loop through the properties to check
-  for (const auto & check_it : check_props)
-  {
-    // The current id for the property being checked (BoundaryID || BlockID)
-    T check_id = check_it.first;
-
-    // In the case when the material being checked has an ID is set to ANY, then loop through all
-    // the possible ids and verify that the material property is defined.
-    std::set<T> check_ids = {check_id};
-    if (check_id == any_id)
-      check_ids = all_ids;
-
-    // Loop through all the block/boundary ids
-    for (const auto & id : check_ids)
-    {
-      // Loop through all the stored properties
-      for (const auto & prop_it : check_it.second)
-      {
-        // Produce an error if the material property is not defined on the current block/boundary
-        // and any block/boundary
-        // and not is not a zero material property.
-        if (props[id].count(prop_it.second) == 0 && props[any_id].count(prop_it.second) == 0 &&
-            zero_props[id].count(prop_it.second) == 0 &&
-            zero_props[any_id].count(prop_it.second) == 0)
-        {
-          std::string check_name = restrictionCheckName(id);
-          if (check_name.empty())
-            check_name = std::to_string(id);
-          mooseError("Material property '",
-                     prop_it.second,
-                     "', requested by '",
-                     prop_it.first,
-                     "' is not defined on ",
-                     restrictionTypeName<T>(),
-                     " ",
-                     check_name);
-        }
-      }
-    }
-  }
 }
 
 unsigned int
@@ -511,24 +518,6 @@ SubProblem::getAxisymmetricRadialCoord() const
     return 1; // if the rotation axis is x (0), then the radial direction is y (1)
   else
     return 0; // otherwise the radial direction is assumed to be x, i.e., the rotation axis is y
-}
-
-// Anonymous namespace for local helper methods
-namespace
-{
-template <>
-SubdomainID
-getAnyID()
-{
-  return Moose::ANY_BLOCK_ID;
-}
-
-template <>
-BoundaryID
-getAnyID()
-{
-  return Moose::ANY_BOUNDARY_ID;
-}
 }
 
 MooseVariableFEBase &

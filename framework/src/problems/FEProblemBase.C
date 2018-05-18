@@ -5292,13 +5292,13 @@ FEProblemBase::registerRandomInterface(RandomInterface & random_interface, const
 }
 
 bool
-FEProblemBase::needMaterialOnSide(BoundaryID bnd_id, THREAD_ID tid)
+FEProblemBase::needBoundaryMaterialOnSide(BoundaryID bnd_id, THREAD_ID tid)
 {
   if (_bnd_mat_side_cache[tid].find(bnd_id) == _bnd_mat_side_cache[tid].end())
   {
     _bnd_mat_side_cache[tid][bnd_id] = false;
 
-    if (_nl->needMaterialOnSide(bnd_id, tid) || _aux->needMaterialOnSide(bnd_id))
+    if (_nl->needBoundaryMaterialOnSide(bnd_id, tid) || _aux->needMaterialOnSide(bnd_id))
       _bnd_mat_side_cache[tid][bnd_id] = true;
 
     else if (_side_user_objects.hasActiveBoundaryObjects(bnd_id, tid))
@@ -5309,13 +5309,13 @@ FEProblemBase::needMaterialOnSide(BoundaryID bnd_id, THREAD_ID tid)
 }
 
 bool
-FEProblemBase::needMaterialOnSide(SubdomainID subdomain_id, THREAD_ID tid)
+FEProblemBase::needSubdomainMaterialOnSide(SubdomainID subdomain_id, THREAD_ID tid)
 {
   if (_block_mat_side_cache[tid].find(subdomain_id) == _block_mat_side_cache[tid].end())
   {
     _block_mat_side_cache[tid][subdomain_id] = false;
 
-    if (_nl->needMaterialOnSide(subdomain_id, tid))
+    if (_nl->needSubdomainMaterialOnSide(subdomain_id, tid))
       _block_mat_side_cache[tid][subdomain_id] = true;
     else if (_internal_side_user_objects.hasActiveBlockObjects(subdomain_id, tid))
       _block_mat_side_cache[tid][subdomain_id] = true;

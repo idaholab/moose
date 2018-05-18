@@ -63,7 +63,7 @@ ProjectMaterialProperties::~ProjectMaterialProperties() {}
 void
 ProjectMaterialProperties::subdomainChanged()
 {
-  _need_internal_side_material = _fe_problem.needMaterialOnSide(_subdomain, _tid);
+  _need_internal_side_material = _fe_problem.needSubdomainMaterialOnSide(_subdomain, _tid);
 }
 
 void
@@ -105,7 +105,7 @@ ProjectMaterialProperties::onElement(const Elem * elem)
 void
 ProjectMaterialProperties::onBoundary(const Elem * elem, unsigned int side, BoundaryID bnd_id)
 {
-  if (_fe_problem.needMaterialOnSide(bnd_id, _tid))
+  if (_fe_problem.needBoundaryMaterialOnSide(bnd_id, _tid))
   {
     _assembly[_tid]->reinit(elem, side);
 
