@@ -31,6 +31,7 @@ VectorPortBC::VectorPortBC(const InputParameters & parameters)
     _component(getParam<MooseEnum>("component")),
 
     _coupled_val(coupledVectorValue("coupled")),
+    _coupled_id(coupled("coupled")),
 
     _inc_real_x(getFunction("Inc_real_x")),
     _inc_real_y(getFunction("Inc_real_y")),
@@ -70,8 +71,32 @@ VectorPortBC::computeQpResidual()
   }
 }
 
+// CURRENTLY DOESN'T SEEM TO BE CORRECT - USE PJFNK OR NEWTON PLUS FDP IF YOU
+// NEED THIS BC
 Real
 VectorPortBC::computeQpJacobian()
 {
   return 0.0;
+}
+
+Real
+VectorPortBC::computeQpOffDiagJacobian(unsigned jvar)
+{
+  if (jvar == _coupled_id)
+  {
+    if (_component == "real")
+    {
+      return -_beta.value(_t, _q_point[_qp]) * (_normals[_qp].cross(_test[_i][_qp])) *
+             (_normals[_qp].cross(_phi[_j][_qp]));
+    }
+    else
+    {
+      return _beta.value(_t, _q_point[_qp]) * (_normals[_qp].cross(_test[_i][_qp])) *
+             (_normals[_qp].cross(_phi[_j][_qp]));
+    }
+  }
+  else
+  {
+    return 0.0;
+  }
 }
