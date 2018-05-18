@@ -464,6 +464,8 @@ class Tester(MooseObject):
                 tmp_reason = 'Valgrind==HEAVY'
             elif int(self.specs['min_parallel']) > 1 or int(self.specs['min_threads']) > 1:
                 tmp_reason = 'Valgrind requires serial'
+            elif self.specs["check_input"]:
+                tmp_reason = 'check_input==True'
             if tmp_reason != '':
                 reasons['valgrind'] = tmp_reason
         # If we're running in recover mode skip tests that have recover = false

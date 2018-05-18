@@ -24,6 +24,7 @@ validParams<GlobalStrainUserObject>()
                                      "Vector of values defining the constant applied stress "
                                      "to add, in order 11, 22, 33, 23, 13, 12");
   params.addParam<std::string>("base_name", "Material properties base name");
+  params.addCoupledVar("displacements", "The name of the displacement variables");
   params.set<ExecFlagEnum>("execute_on") = EXEC_LINEAR;
 
   return params;
@@ -33,8 +34,25 @@ GlobalStrainUserObject::GlobalStrainUserObject(const InputParameters & parameter
   : ElementUserObject(parameters),
     _base_name(isParamValid("base_name") ? getParam<std::string>("base_name") + "_" : ""),
     _Cijkl(getMaterialProperty<RankFourTensor>(_base_name + "elasticity_tensor")),
-    _stress(getMaterialProperty<RankTwoTensor>(_base_name + "stress"))
+    _stress(getMaterialProperty<RankTwoTensor>(_base_name + "stress")),
+    _dim(_mesh.dimension()),
+    _ndisp(coupledComponents("displacements")),
+    _disp_var(_ndisp),
+    _periodic_dir()
 {
+  for (unsigned int i = 0; i < _ndisp; ++i)
+    _disp_var[i] = coupled("displacements", i);
+
+  for (unsigned int dir = 0; dir < _dim; ++dir)
+  {
+    _periodic_dir(dir) = _mesh.isTranslatedPeriodic(_disp_var[0], dir);
+
+    for (unsigned int i = 1; i < _ndisp; ++i)
+      if (_mesh.isTranslatedPeriodic(_disp_var[i], dir) != _periodic_dir(dir))
+        mooseError("All the displacement components in a particular direction should have same "
+                   "periodicity.");
+  }
+
   if (isParamValid("applied_stress_tensor"))
     _applied_stress_tensor.fillFromInputVector(
         getParam<std::vector<Real>>("applied_stress_tensor"));
@@ -98,4 +116,10 @@ const RankFourTensor &
 GlobalStrainUserObject::getJacobian() const
 {
   return _jacobian;
+}
+
+const VectorValue<bool> &
+GlobalStrainUserObject::getPeriodicDirections() const
+{
+  return _periodic_dir;
 }

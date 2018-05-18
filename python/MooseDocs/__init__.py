@@ -12,6 +12,17 @@ import sys
 import subprocess
 import logging
 
+try:
+    import anytree
+    from anytree import search
+except ImportError as e:
+    MSG = "MooseDocs requires anytree (http://anytree.readthedocs.io/en/latest/index.html)\n"
+    MSG += "version 2.4.0 or greater. If you are using the MOOSE environment package\n"
+    MSG += "you can upgrade by running the following command.\n"
+    MSG += "    pip install --upgrade --user anytree"
+    print MSG
+    sys.exit(1)
+
 import mooseutils
 
 # Markdown component types TODO: Move these to reader

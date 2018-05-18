@@ -153,6 +153,10 @@ Nemesis::output(const ExecFlagType & type)
   // Call the output methods
   AdvancedOutput::output(type);
 
+  // Set up the whitelist of nodal variable names to write.
+  _nemesis_io_ptr->set_output_variables(
+      std::vector<std::string>(getNodalVariableOutput().begin(), getNodalVariableOutput().end()));
+
   // Write the data
   _nemesis_io_ptr->write_timestep(
       filename(), *_es_ptr, _nemesis_num, time() + _app.getGlobalTimeOffset());

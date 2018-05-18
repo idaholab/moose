@@ -1,9 +1,9 @@
 [Mesh]
   type = GeneratedMesh
   dim = 3
-  nx = 22
-  ny = 22
-  nz = 22
+  nx = 5
+  ny = 5
+  nz = 5
   xmin = 0
   xmax = 100
   ymin = 0
@@ -38,8 +38,8 @@
     variable = c
     x_positions = '10 50 90'
     y_positions = '30 20 80'
-    z_positions = '25 45 75'
-    radii = '14 25 16'
+    z_positions = '30 50 75'
+    radii = '21 25 16'
     invalue = 1.0
     outvalue = 0.0001
     int_width = 4
@@ -84,9 +84,6 @@
   start_time = 0.0
   num_steps = 1
   dt = 100.0
-  [./Adaptivity]
-    refine_fraction = .5
-  [../]
 []
 
 [Outputs]

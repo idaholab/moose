@@ -40,12 +40,14 @@
     type = GlobalDisplacementAux
     variable = disp_x
     scalar_global_strain = global_strain
+    global_strain_uo = global_strain_uo
     component = 0
   [../]
   [./disp_y]
     type = GlobalDisplacementAux
     variable = disp_y
     scalar_global_strain = global_strain
+    global_strain_uo = global_strain_uo
     component = 1
   [../]
 []
@@ -105,6 +107,7 @@
   [./global_strain]
     type = ComputeGlobalStrain
     scalar_global_strain = global_strain
+    global_strain_uo = global_strain_uo
   [../]
   [./stress]
     type = ComputeLinearElasticStress

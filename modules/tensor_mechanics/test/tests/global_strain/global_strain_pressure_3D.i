@@ -4,12 +4,18 @@
   nx = 2
   ny = 2
   nz = 2
+  xmin = -0.5
+  xmax = 0.5
+  ymin = -0.5
+  ymax = 0.5
+  zmin = -0.5
+  zmax = 0.5
 []
 
 [MeshModifiers]
   [./cnode]
     type = AddExtraNodeset
-    coord = '0.0 0.0 0.0'
+    coord = '0 0 0'
     new_boundary = 100
   [../]
 []
@@ -125,7 +131,7 @@
 [BCs]
   [./Periodic]
     [./all]
-      auto_direction = 'x y z'
+      auto_direction = 'x z'
       variable = ' u_x u_y u_z'
     [../]
   [../]
@@ -137,7 +143,7 @@
     variable = u_x
     value = 0
   [../]
-  [./centerfix_y]
+  [./fix_y]
     type = PresetBC
     boundary = 100
     variable = u_y
@@ -149,13 +155,23 @@
     variable = u_z
     value = 0
   [../]
+  [./Pressure]
+    [./top]
+      boundary = top
+      function = 0.3
+    [../]
+    [./bottom]
+      boundary = bottom
+      function = 0.3
+    [../]
+  [../]
 []
 
 [Materials]
   [./elasticity_tensor]
     type = ComputeElasticityTensor
     block = 0
-    C_ijkl = '70e9 0.33'
+    C_ijkl = '7 0.33'
     fill_method = symmetric_isotropic_E_nu
   [../]
   [./strain]
@@ -175,21 +191,7 @@
 [UserObjects]
   [./global_strain_uo]
     type = GlobalStrainUserObject
-    applied_stress_tensor = '5e9 0 0 0 0 0'
     execute_on = 'Initial Linear Nonlinear'
-  [../]
-[]
-
-[Postprocessors]
-  [./l2err_e00]
-    type = ElementL2Error
-    variable = e00
-    function = 0.07142857 #strain_xx = C1111/sigma_xx
-  [../]
-  [./l2err_e11]
-    type = ElementL2Error
-    variable = e11
-    function = -0.07142857*0.33 #strain_yy = -nu*strain_xx
   [../]
 []
 
@@ -219,7 +221,7 @@
   nl_abs_tol = 1.0e-10
 
   start_time = 0.0
-  num_steps = 1
+  num_steps = 2
 []
 
 [Outputs]

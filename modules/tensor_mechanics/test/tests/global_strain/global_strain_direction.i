@@ -1,15 +1,18 @@
 [Mesh]
   type = GeneratedMesh
-  dim = 3
+  dim = 2
   nx = 2
   ny = 2
-  nz = 2
+  xmin = -0.5
+  xmax = 0.5
+  ymin = -0.5
+  ymax = 0.5
 []
 
 [MeshModifiers]
   [./cnode]
     type = AddExtraNodeset
-    coord = '0.0 0.0 0.0'
+    coord = '0 0'
     new_boundary = 100
   [../]
 []
@@ -19,10 +22,8 @@
   [../]
   [./u_y]
   [../]
-  [./u_z]
-  [../]
   [./global_strain]
-    order = SIXTH
+    order = THIRD
     family = SCALAR
   [../]
 []
@@ -31,24 +32,6 @@
   [./disp_x]
   [../]
   [./disp_y]
-  [../]
-  [./disp_z]
-  [../]
-  [./s00]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./s11]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./e00]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./e11]
-    order = CONSTANT
-    family = MONOMIAL
   [../]
 []
 
@@ -67,45 +50,10 @@
     global_strain_uo = global_strain_uo
     component = 1
   [../]
-  [./disp_z]
-    type = GlobalDisplacementAux
-    variable = disp_z
-    scalar_global_strain = global_strain
-    global_strain_uo = global_strain_uo
-    component = 2
-  [../]
-  [./s00]
-    type = RankTwoAux
-    variable = s00
-    rank_two_tensor = stress
-    index_i = 0
-    index_j = 0
-  [../]
-  [./s11]
-    type = RankTwoAux
-    variable = s11
-    rank_two_tensor = stress
-    index_i = 1
-    index_j = 1
-  [../]
-  [./e00]
-    type = RankTwoAux
-    variable = e00
-    rank_two_tensor = total_strain
-    index_i = 0
-    index_j = 0
-  [../]
-  [./e11]
-    type = RankTwoAux
-    variable = e11
-    rank_two_tensor = total_strain
-    index_i = 1
-    index_j = 1
-  [../]
 []
 
 [GlobalParams]
-  displacements = 'u_x u_y u_z'
+  displacements = 'u_x u_y'
   block = 0
 []
 
@@ -124,9 +72,9 @@
 
 [BCs]
   [./Periodic]
-    [./all]
-      auto_direction = 'x y z'
-      variable = ' u_x u_y u_z'
+    [./left-right]
+      auto_direction = 'x'
+      variable = 'u_x u_y'
     [../]
   [../]
 
@@ -137,17 +85,17 @@
     variable = u_x
     value = 0
   [../]
-  [./centerfix_y]
+  [./fix_y]
     type = PresetBC
-    boundary = 100
+    boundary = bottom
     variable = u_y
     value = 0
   [../]
-  [./centerfix_z]
+  [./appl_y]
     type = PresetBC
-    boundary = 100
-    variable = u_z
-    value = 0
+    boundary = top
+    variable = u_y
+    value = -0.1
   [../]
 []
 
@@ -155,8 +103,8 @@
   [./elasticity_tensor]
     type = ComputeElasticityTensor
     block = 0
-    C_ijkl = '70e9 0.33'
-    fill_method = symmetric_isotropic_E_nu
+    C_ijkl = '1 1'
+    fill_method = symmetric_isotropic
   [../]
   [./strain]
     type = ComputeSmallStrain
@@ -175,27 +123,14 @@
 [UserObjects]
   [./global_strain_uo]
     type = GlobalStrainUserObject
-    applied_stress_tensor = '5e9 0 0 0 0 0'
     execute_on = 'Initial Linear Nonlinear'
-  [../]
-[]
-
-[Postprocessors]
-  [./l2err_e00]
-    type = ElementL2Error
-    variable = e00
-    function = 0.07142857 #strain_xx = C1111/sigma_xx
-  [../]
-  [./l2err_e11]
-    type = ElementL2Error
-    variable = e11
-    function = -0.07142857*0.33 #strain_yy = -nu*strain_xx
   [../]
 []
 
 [Preconditioning]
   [./SMP]
     type = SMP
+    # coupled_groups = u_x,u_y
     full = true
   [../]
 []
@@ -206,7 +141,9 @@
   solve_type = 'PJFNK'
 
   line_search = basic
-
+  # petsc_options = '-ksp_converged_reason -snes_converged_reason'
+  # petsc_options_iname = '-pc_type -pc_factor_shift_type -pc_factor_shift_amount'
+  # petsc_options_value = '    asm        NONZERO                     1e-8'
   petsc_options_iname = '-pc_type -ksp_gmres_restart -sub_ksp_type -sub_pc_type -pc_asm_overlap'
   petsc_options_value = 'asm         31   preonly   lu      1'
 
@@ -215,13 +152,13 @@
 
   l_tol = 1.0e-4
 
-  nl_rel_tol = 1.0e-6
+  nl_rel_tol = 1.0e-8
   nl_abs_tol = 1.0e-10
 
   start_time = 0.0
-  num_steps = 1
+  num_steps = 2
 []
 
 [Outputs]
-  exodus = true
+exodus = true
 []

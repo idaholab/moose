@@ -30,3 +30,8 @@ class TestHarnessTester(TestHarnessTestCase):
         # Check that _thee_ SYNTAX test is not run
         output = self.runTests('--no-check-input', '-i', 'syntax')
         self.assertNotIn('SYNTAX PASS', output)
+
+        # Check that it is skipped when running valgrind
+        output = self.runTests('--valgrind', '-i', 'syntax')
+        self.assertIn('CHECK_INPUT==TRUE', output)
+        self.checkStatus(output, skipped=1)

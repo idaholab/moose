@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "GlobalDisplacementAux.h"
+#include "GlobalStrainUserObject.h"
 
 // MOOSE includes
 #include "Assembly.h"
@@ -28,7 +29,10 @@ validParams<GlobalDisplacementAux>()
   params.addCoupledVar("displacements", "The name of the displacement variables");
   params.addRequiredParam<unsigned int>("component",
                                         "The displacement component to consider for this kernel");
-  params.addParam<bool>("output_total_displacement", true, "Option to output total displacement");
+  params.addParam<bool>(
+      "output_global_displacement", false, "Option to output global displacement only");
+  params.addRequiredParam<UserObjectName>("global_strain_uo",
+                                          "The name of the GlobalStrainUserObject");
 
   return params;
 }
@@ -37,16 +41,15 @@ GlobalDisplacementAux::GlobalDisplacementAux(const InputParameters & parameters)
   : AuxKernel(parameters),
     _scalar_global_strain(coupledScalarValue("scalar_global_strain")),
     _component(getParam<unsigned int>("component")),
-    _output_total_disp(getParam<bool>("output_total_displacement")),
-    _ndisp(getParam<bool>("output_total_displacement") ? coupledComponents("displacements") : 0),
+    _output_global_disp(getParam<bool>("output_global_displacement")),
+    _pst(getUserObject<GlobalStrainUserObject>("global_strain_uo")),
+    _periodic_dir(_pst.getPeriodicDirections()),
+    _dim(_mesh.dimension()),
+    _ndisp(coupledComponents("displacements")),
     _disp(_ndisp)
 {
-  if (_component > _mesh.dimension())
-    mooseError("The component ",
-               _component,
-               " does not exist for ",
-               _mesh.dimension(),
-               " dimensional problems");
+  if (_component >= _dim)
+    paramError("The component ", _component, " does not exist for ", _dim, " dimensional problems");
 
   for (unsigned int i = 0; i < _ndisp; ++i)
     _disp[i] = &coupledValue("displacements", i);
@@ -58,12 +61,15 @@ GlobalDisplacementAux::computeValue()
   RankTwoTensor strain;
   strain.fillFromScalarVariable(_scalar_global_strain);
 
+  for (unsigned int dir = 0; dir < _dim; ++dir)
+    if (!_periodic_dir(dir))
+      for (unsigned int var = 0; var < _ndisp; ++var)
+        strain(dir, var) = 0.0;
+
   const RealVectorValue & global_disp = strain * (*_current_node);
 
-  Real value = global_disp(_component);
-
-  if (_output_total_disp)
-    value += (*_disp[_component])[_qp];
-
-  return value;
+  if (_output_global_disp)
+    return global_disp(_component);
+  else
+    return global_disp(_component) + (*_disp[_component])[_qp];
 }
