@@ -1072,9 +1072,13 @@ build_cube(UnstructuredMesh & mesh,
   /// 4. Communicate the element IDs to the correct processors
   /// 5. Each processor creates only the elements it needs to
 
+  auto & comm = mesh.comm();
+
   dof_id_type num_elems = nx * ny * nz;
-  const auto num_procs = mesh.comm().size();
-  const auto pid = mesh.comm().rank();
+  const auto num_procs = comm.size();
+  const auto pid = comm.rank();
+
+  auto elem_tag = comm.get_unique_tag(934);
 
   std::unique_ptr<Elem> canonical_elem = libmesh_make_unique<T>();
 
@@ -1114,7 +1118,8 @@ build_cube(UnstructuredMesh & mesh,
   pmetis->options[2] = 15; // random seed (defaul)t
   pmetis->options[3] = 2;  // processor distribution and subdomain distribution are decoupled
 
-  MooseUtils::serialBegin(mesh.comm(), true);
+  if (verbose)
+    MooseUtils::serialBegin(comm, true);
 
   // Fill vtxdist.  These are the bin edges of the ranges current on each proc
   // Note that this was resized to "num_procs + 1" up above
@@ -1195,7 +1200,7 @@ build_cube(UnstructuredMesh & mesh,
   xadj[num_local_elems + 1] = adjncy.size() + 1;
 
   if (verbose)
-    MooseUtils::serialEnd(mesh.comm(), true);
+    MooseUtils::serialEnd(comm, true);
 
   if (num_procs == 1)
   {
@@ -1207,7 +1212,7 @@ build_cube(UnstructuredMesh & mesh,
   {
     std::vector<Parmetis::idx_t> vsize(pmetis->vwgt.size(), 1);
     Parmetis::real_t itr = 1000000.0;
-    MPI_Comm mpi_comm = mesh.comm().get();
+    MPI_Comm mpi_comm = comm.get();
 
     Parmetis::ParMETIS_V3_AdaptiveRepart(
         pmetis->vtxdist.empty() ? libmesh_nullptr : &pmetis->vtxdist[0],
@@ -1231,35 +1236,133 @@ build_cube(UnstructuredMesh & mesh,
 
   if (verbose)
   {
-    std::cout << "Part: ";
+    MooseUtils::serialBegin(comm, true);
+    std::cout << "Part " << comm.rank() << ": ";
     for (auto apid : pmetis->part)
       std::cout << apid << " ";
     std::cout << std::endl;
+    MooseUtils::serialEnd(comm, true);
   }
 
-  /*
-  // Broadcast the resulting partition
-  mesh.comm().broadcast(part);
+  // Partitioning is complete.
+  // Now we need to tell each processor which elements
+  // it will be handling.  It'll go like this:
+  // 1.  AlltoAll to figure out who's sending/receiving and how many elements
+  //     Note: This AlltoAll could be removed in the future using
+  //     a super nonblocking scheme
+  // 2.  Post non-blocking sends
+  // 3.  Receive
+  // 4.  Closeup all Sends
 
-  if (verbose)
-    for (auto proc_id : part)
-      Moose::out << "Part: " << proc_id << std::endl;
+  // The complete list of elements assigned to this proc:
+  std::vector<dof_id_type> my_elems;
 
-  BoundaryInfo & boundary_info = mesh.get_boundary_info();
+  // Will hold the number of elements we're going to send to each processor
+  std::vector<dof_id_type> will_send_to(num_procs, 0);
 
-  // Add elements this processor owns
-  for (dof_id_type k = 0; k < nz; k++)
+  // Keep track of the total number of local elements
+  // This will be the number we know about in our local "part" vector
+  // plus the number other people will send to us
+  dof_id_type total_num_local_elems = 0;
+
+  // The actual vectors to be sent
+  std::map<processor_id_type, std::vector<dof_id_type>> elems_to_be_sent;
+
+  // Total number of messages we'll send
+  processor_id_type num_sends = 0;
+
+  dof_id_type current_elem_id = local_elems_begin;
+
+  for (auto proc_id : pmetis->part)
   {
-    for (dof_id_type j = 0; j < ny; j++)
+    if (static_cast<processor_id_type>(proc_id) != pid)
     {
-      for (dof_id_type i = 0; i < nx; i++)
-      {
-        auto e_id = elem_id<Hex8>(nx, ny, i, j, k);
+      // Keep track of the unique procs we're sending to
+      if (!will_send_to[proc_id])
+        num_sends++;
 
-        if (static_cast<processor_id_type>(part[e_id]) == pid)
-          add_element<T>(nx, ny, nz, i, j, k, e_id, pid, type, mesh, verbose);
-      }
+      will_send_to[proc_id]++;
+
+      // Side-effect insertion used on purpose
+      //
+      // Note: I thought about the speed here, I could
+      // find the number of elems going to each processor
+      // first so I could reserve the correct space in the
+      // vectors.  But when I went to implement that it
+      // simply wasn't worth the increase in code complexity
+      elems_to_be_sent[proc_id].push_back(current_elem_id);
     }
+    else
+    {
+      total_num_local_elems++;
+      my_elems.push_back(current_elem_id);
+    }
+
+    current_elem_id++;
+  }
+
+  // Trade data
+  comm.alltoall(will_send_to);
+
+  // will_send_to now represents who we'll receive from
+  // give it a good name
+  auto & will_receive_from = will_send_to;
+
+  // Post the sends
+  std::vector<Parallel::Request> elem_sends(num_sends);
+
+  processor_id_type current_send = 0;
+  for (auto & pid_elems_to_be_sent : elems_to_be_sent)
+  {
+    auto proc_id = pid_elems_to_be_sent.first;
+    auto & elems_to_send = pid_elems_to_be_sent.second;
+
+    comm.send(proc_id, elems_to_send, elem_sends[current_send], elem_tag);
+
+    current_send++;
+  }
+
+  // Now start receiving
+
+  // Count the number of receives and the total number of elements
+  processor_id_type num_receives = 0;
+  for (processor_id_type proc_id = 0; proc_id < num_procs; proc_id++)
+  {
+    if (will_receive_from[proc_id])
+    {
+      num_receives++;
+      total_num_local_elems += will_receive_from[proc_id];
+    }
+  }
+
+  // Note that my_elems might already have some stuff in it
+  // But let's go ahead and make sure it has enough to hold
+  // that stuff and everything that is received.
+  my_elems.reserve(total_num_local_elems);
+
+  // Post the receives
+  for (processor_id_type current_receive = 0; current_receive < num_receives; current_receive++)
+  {
+    std::vector<dof_id_type> in_elems;
+
+    // It doesn't matter what order we process the receives in
+    comm.receive(Parallel::any_source, in_elems, elem_tag);
+
+    for (auto & e_id : in_elems)
+      my_elems.push_back(e_id);
+  }
+
+  // Finish the sends
+  Parallel::wait(elem_sends);
+
+  // Add the elements this processor owns
+  for (auto & e_id : my_elems)
+  {
+    dof_id_type i, j, k;
+
+    get_indices<T>(nx, ny, e_id, i, j, k);
+
+    add_element<T>(nx, ny, nz, i, j, k, e_id, pid, type, mesh, verbose);
   }
 
   if (verbose)
@@ -1280,6 +1383,7 @@ build_cube(UnstructuredMesh & mesh,
         Moose::out << "Elem neighbor: " << elem_ptr->neighbor_ptr(s) << " is remote "
                    << (elem_ptr->neighbor_ptr(s) == remote_elem) << std::endl;
 
+  /*
   // Get the ghosts (missing face neighbors)
   std::set<dof_id_type> ghost_elems;
   get_ghost_neighbors<T>(nx, ny, nz, mesh, ghost_elems);
@@ -1355,8 +1459,7 @@ build_cube(UnstructuredMesh & mesh,
 
   if (verbose)
     for (auto & elem_ptr : mesh.element_ptr_range())
-      Moose::out << "Elem: " << elem_ptr->id() << " pid: " << elem_ptr->processor_id() <<
-  std::endl;
+      Moose::out << "Elem: " << elem_ptr->id() << " pid: " << elem_ptr->processor_id() << std::endl;
 
   if (verbose)
     for (auto & node_ptr : mesh.node_ptr_range())
