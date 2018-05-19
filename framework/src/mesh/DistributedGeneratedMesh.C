@@ -1071,6 +1071,11 @@ build_cube(UnstructuredMesh & mesh,
   /// 3. Partition the graph using Parmetis
   /// 4. Communicate the element IDs to the correct processors
   /// 5. Each processor creates only the elements it needs to
+  /// 6. Figure out the ghosts we need
+  /// 7. Request the PID of the ghosts and respond to requests for the same
+  /// 8. Add ghosts to the mesh
+  /// 9. ???
+  /// 10. Profit!!!
 
   auto & comm = mesh.comm();
 
@@ -1078,7 +1083,11 @@ build_cube(UnstructuredMesh & mesh,
   const auto num_procs = comm.size();
   const auto pid = comm.rank();
 
+  auto & boundary_info = mesh.get_boundary_info();
+
   auto elem_tag = comm.get_unique_tag(934);
+  auto ghost_request_tag = comm.get_unique_tag(832);
+  auto ghost_response_tag = comm.get_unique_tag(821);
 
   std::unique_ptr<Elem> canonical_elem = libmesh_make_unique<T>();
 
@@ -1340,11 +1349,12 @@ build_cube(UnstructuredMesh & mesh,
   // that stuff and everything that is received.
   my_elems.reserve(total_num_local_elems);
 
+  // Will hold incoming elem_ids
+  std::vector<dof_id_type> in_elems;
+
   // Post the receives
   for (processor_id_type current_receive = 0; current_receive < num_receives; current_receive++)
   {
-    std::vector<dof_id_type> in_elems;
-
     // It doesn't matter what order we process the receives in
     comm.receive(Parallel::any_source, in_elems, elem_tag);
 
@@ -1395,15 +1405,140 @@ build_cube(UnstructuredMesh & mesh,
   // 3. Receive back the place the ghosts ended up
   // 4. Add the ghosts with the correct PID
 
-  /*
-  // Add the ghosts to the mesh
+  // Who we're going to make requests of
+  std::vector<char> request_ghosts_from(num_procs, 0);
+
+  // Elements we're going to request from others
+  std::map<processor_id_type, std::vector<dof_id_type>> ghost_elems_to_request;
+
   for (auto & ghost_id : ghost_elems)
   {
-    dof_id_type i, j, k;
+    // This is the processor ID the ghost_elem was originally assigned to
+    auto proc_id = MooseUtils::linearPartitionChunk(num_elems, num_procs, ghost_id);
 
-    get_indices<T>(nx, ny, ghost_id, i, j, k);
+    request_ghosts_from[proc_id] = true;
 
-    add_element<T>(nx, ny, nz, i, j, k, ghost_id, part[ghost_id], type, mesh, verbose);
+    // Using side-effect insertion on purpose
+    ghost_elems_to_request[proc_id].push_back(ghost_id);
+  }
+
+  // Tell everyone who we're going to request from
+  comm.alltoall(request_ghosts_from);
+
+  // Now request_ghosts_from tells us who is requesting ghosts from _us_
+  auto & send_ghosts_to = request_ghosts_from;
+
+  // Five Phases:
+  // 1. Send off _my_ requests
+  // 2. Receive requests from others
+  // 3. Fill requests from others
+  // 4. Send results back
+  // 5. Receive and process _my_ requests
+
+  // 1. Send off _my_ requests
+
+  std::vector<Parallel::Request> ghost_request_sends(ghost_elems_to_request.size());
+
+  processor_id_type current_ghost_request_send = 0;
+  for (auto & proc_id_ghost_elem : ghost_elems_to_request)
+  {
+    auto proc_id = proc_id_ghost_elem.first;
+    auto & ghosts_to_send = proc_id_ghost_elem.second;
+
+    comm.send(proc_id,
+              ghosts_to_send,
+              ghost_request_sends[current_ghost_request_send],
+              ghost_request_tag);
+
+    current_ghost_request_send++;
+  }
+
+  // 2. Start receiving requests
+
+  // 2a: Figure out how many requests we'll be receiving
+  processor_id_type number_of_incoming_requests = 0;
+  for (auto val : send_ghosts_to)
+    if (val)
+      number_of_incoming_requests++;
+
+  // Will hold the PID for each requests ghost element so we can send them back
+  std::map<processor_id_type, std::vector<dof_id_type>> filled_requests_to_send_back;
+
+  // Will hold incoming ghost_ids
+  std::vector<dof_id_type> in_ghosts;
+
+  // 2b. and 3. Receive requests and process them
+  for (processor_id_type current_incoming_request = 0;
+       current_incoming_request < number_of_incoming_requests;
+       current_incoming_request++)
+  {
+    // The stat will tell where this message came from - so we'll know where to send the response to
+    auto stat = comm.receive(Parallel::any_source, in_ghosts, ghost_request_tag);
+
+    auto proc_id = stat.source();
+
+    // Side effect insertion on purpose
+    auto & proc_ids_of_ghosts = filled_requests_to_send_back[proc_id];
+
+    proc_ids_of_ghosts.reserve(in_ghosts.size());
+
+    // Fill up the vector we will send back with the PID the ghost was assigned to
+    for (auto & ghost_id : in_ghosts)
+    {
+      auto local_id = ghost_id - local_elems_begin;
+
+      mooseAssert(local_id < pmetis->part.size(),
+                  "Invalid request! Received a request for an element that "
+                  "doesn't exist on this processor in "
+                  "DistributedGeneratedMesh");
+
+      proc_ids_of_ghosts.push_back(pmetis->part[local_id]);
+    }
+  }
+
+  // 4. Send responses back
+  std::vector<Parallel::Request> ghost_response_sends(filled_requests_to_send_back.size());
+
+  processor_id_type current_response_send = 0;
+  for (auto & proc_id_response : filled_requests_to_send_back)
+  {
+    auto proc_id = proc_id_response.first;
+    auto & response_to_send = proc_id_response.second;
+
+    comm.send(proc_id, response_to_send, ghost_response_sends[current_send], ghost_response_tag);
+
+    current_response_send++;
+  }
+
+  // 5. Receive and process _my_ responses
+
+  // This will hold the PID for each ghost element that was requested from a processor
+  std::vector<dof_id_type> in_response;
+
+  for (processor_id_type current_incoming_response = 0;
+       current_incoming_response < ghost_elems_to_request.size();
+       current_incoming_response++)
+  {
+    auto stat = comm.receive(Parallel::any_source, in_response, ghost_response_tag);
+
+    auto proc_id = stat.source();
+
+    // Grab the ghost_elems we requested from this processor
+    auto & ghost_elems = ghost_elems_to_request[proc_id];
+
+    // Add the ghost elements to the mesh
+    for (dof_id_type current_ghost_elem = 0; current_ghost_elem < ghost_elems.size();
+         current_ghost_elem++)
+    {
+      auto ghost_id = ghost_elems[current_ghost_elem];
+      auto proc_id = in_response[current_ghost_elem];
+
+      dof_id_type i, j, k;
+
+      get_indices<T>(nx, ny, ghost_id, i, j, k);
+
+      add_element<T>(nx, ny, nz, i, j, k, ghost_id, proc_id, type, mesh, verbose);
+    }
   }
 
   if (verbose)
@@ -1481,7 +1616,6 @@ build_cube(UnstructuredMesh & mesh,
 
   if (verbose)
     mesh.print_info();
-  */
 }
 
 void
