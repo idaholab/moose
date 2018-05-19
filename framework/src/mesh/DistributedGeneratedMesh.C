@@ -1533,6 +1533,10 @@ build_cube(UnstructuredMesh & mesh,
     }
   }
 
+  // Tie up loose ends
+  Parallel::wait(ghost_request_sends);
+  Parallel::wait(ghost_response_sends);
+
   if (verbose)
     Moose::out << "After adding ghosts" << std::endl;
 
