@@ -196,9 +196,7 @@ struct TestCase
 TEST(MooseUtilsTests, levenshteinDist)
 {
   TestCase cases[] = {
-      {"hello", "hell", 1},
-      {"flood", "foods", 2},
-      {"fandango", "odanget", 5},
+      {"hello", "hell", 1}, {"flood", "foods", 2}, {"fandango", "odanget", 5},
   };
 
   for (size_t i = 0; i < sizeof(cases) / sizeof(TestCase); i++)
@@ -239,4 +237,46 @@ TEST(MooseUtilsTests, linearPartitionItems)
 
     EXPECT_EQ(total_items, 120);
   }
+}
+
+TEST(MooseUtilsTests, linearPartitionChunk)
+{
+  // Easy ones first
+  EXPECT_EQ(MooseUtils::linearPartitionChunk(4, 2, 0), 0);
+  EXPECT_EQ(MooseUtils::linearPartitionChunk(4, 2, 1), 0);
+  EXPECT_EQ(MooseUtils::linearPartitionChunk(4, 2, 2), 1);
+  EXPECT_EQ(MooseUtils::linearPartitionChunk(4, 2, 3), 1);
+
+  // One leftover
+  EXPECT_EQ(MooseUtils::linearPartitionChunk(4, 3, 0), 0);
+  EXPECT_EQ(MooseUtils::linearPartitionChunk(4, 3, 1), 0);
+  EXPECT_EQ(MooseUtils::linearPartitionChunk(4, 3, 2), 1);
+  EXPECT_EQ(MooseUtils::linearPartitionChunk(4, 3, 3), 2);
+
+  EXPECT_EQ(MooseUtils::linearPartitionChunk(8, 3, 0), 0);
+  EXPECT_EQ(MooseUtils::linearPartitionChunk(8, 3, 1), 0);
+  EXPECT_EQ(MooseUtils::linearPartitionChunk(8, 3, 2), 0);
+  EXPECT_EQ(MooseUtils::linearPartitionChunk(8, 3, 3), 1);
+  EXPECT_EQ(MooseUtils::linearPartitionChunk(8, 3, 4), 1);
+  EXPECT_EQ(MooseUtils::linearPartitionChunk(8, 3, 5), 1);
+  EXPECT_EQ(MooseUtils::linearPartitionChunk(8, 3, 6), 2);
+  EXPECT_EQ(MooseUtils::linearPartitionChunk(8, 3, 7), 2);
+
+  EXPECT_EQ(MooseUtils::linearPartitionChunk(17, 4, 0), 0);
+  EXPECT_EQ(MooseUtils::linearPartitionChunk(17, 4, 1), 0);
+  EXPECT_EQ(MooseUtils::linearPartitionChunk(17, 4, 2), 0);
+  EXPECT_EQ(MooseUtils::linearPartitionChunk(17, 4, 3), 0);
+  EXPECT_EQ(MooseUtils::linearPartitionChunk(17, 4, 4), 0);
+  EXPECT_EQ(MooseUtils::linearPartitionChunk(17, 4, 5), 1);
+  EXPECT_EQ(MooseUtils::linearPartitionChunk(17, 4, 6), 1);
+  EXPECT_EQ(MooseUtils::linearPartitionChunk(17, 4, 7), 1);
+  EXPECT_EQ(MooseUtils::linearPartitionChunk(17, 4, 8), 1);
+  EXPECT_EQ(MooseUtils::linearPartitionChunk(17, 4, 9), 2);
+  EXPECT_EQ(MooseUtils::linearPartitionChunk(17, 4, 10), 2);
+  EXPECT_EQ(MooseUtils::linearPartitionChunk(17, 4, 11), 2);
+  EXPECT_EQ(MooseUtils::linearPartitionChunk(17, 4, 12), 2);
+  EXPECT_EQ(MooseUtils::linearPartitionChunk(17, 4, 13), 3);
+  EXPECT_EQ(MooseUtils::linearPartitionChunk(17, 4, 14), 3);
+  EXPECT_EQ(MooseUtils::linearPartitionChunk(17, 4, 15), 3);
+  EXPECT_EQ(MooseUtils::linearPartitionChunk(17, 4, 16), 3);
 }

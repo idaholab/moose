@@ -547,6 +547,17 @@ void linearPartitionItems(dof_id_type num_items,
                           dof_id_type & local_items_begin,
                           dof_id_type & local_items_end);
 
+/**
+ * Return the chunk_id that is assigned to handle item_id
+ *
+ * @param num_items Global number of items to partition
+ * @param num_chunks Total number of chunks to split into
+ * @param item_id The item to find the chunk_id for
+ * @return The chunk_id of the chunk that contains item_id
+ */
+processor_id_type
+linearPartitionChunk(dof_id_type num_items, dof_id_type num_chunks, dof_id_type item_id);
+
 } // MooseUtils namespace
 
 #endif // MOOSEUTILS_H

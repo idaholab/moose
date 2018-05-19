@@ -1383,11 +1383,19 @@ build_cube(UnstructuredMesh & mesh,
         Moose::out << "Elem neighbor: " << elem_ptr->neighbor_ptr(s) << " is remote "
                    << (elem_ptr->neighbor_ptr(s) == remote_elem) << std::endl;
 
-  /*
   // Get the ghosts (missing face neighbors)
   std::set<dof_id_type> ghost_elems;
   get_ghost_neighbors<T>(nx, ny, nz, mesh, ghost_elems);
 
+  // Now at this point we know the ghosts we need to add but we don't know
+  // the processor ID they ended up on.  Here's what we're going to
+  // do about it:
+  // 1. Figure out which processor originally had the ghost elements
+  // 2. Send a request to each of those processors
+  // 3. Receive back the place the ghosts ended up
+  // 4. Add the ghosts with the correct PID
+
+  /*
   // Add the ghosts to the mesh
   for (auto & ghost_id : ghost_elems)
   {
