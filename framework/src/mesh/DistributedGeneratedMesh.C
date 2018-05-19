@@ -1127,9 +1127,6 @@ build_cube(UnstructuredMesh & mesh,
   pmetis->options[2] = 15; // random seed (defaul)t
   pmetis->options[3] = 2;  // processor distribution and subdomain distribution are decoupled
 
-  if (verbose)
-    MooseUtils::serialBegin(comm, true);
-
   // Fill vtxdist.  These are the bin edges of the ranges current on each proc
   // Note that this was resized to "num_procs + 1" up above
   auto & vtxdist = pmetis->vtxdist;
@@ -1143,7 +1140,7 @@ build_cube(UnstructuredMesh & mesh,
 
     vtxdist[p] = t_local_elems_begin;
 
-    std::cout << "t_local_elems_begin: " << t_local_elems_begin << std::endl;
+    Moose::out << "t_local_elems_begin: " << t_local_elems_begin << std::endl;
 
     // The last one needs to fill in the final entry too
     if (p == num_procs - 1)
@@ -1170,12 +1167,12 @@ build_cube(UnstructuredMesh & mesh,
     get_neighbors<T>(nx, ny, nz, i, j, k, neighbors);
 
     if (verbose)
-      std::cout << "e_id: " << e_id << std::endl;
+      Moose::out << "e_id: " << e_id << std::endl;
 
     for (auto neighbor : neighbors)
     {
       if (verbose)
-        std::cout << " neighbor: " << neighbor << std::endl;
+        Moose::out << " neighbor: " << neighbor << std::endl;
 
       if (neighbor != Elem::invalid_id)
         adjncy[offset++] = neighbor;
@@ -1189,27 +1186,24 @@ build_cube(UnstructuredMesh & mesh,
 
   if (verbose)
   {
-    std::cout << "xadj: ";
+    Moose::out << "xadj: ";
     for (auto val : xadj)
-      std::cout << val << " ";
-    std::cout << std::endl;
+      Moose::out << val << " ";
+    Moose::out << std::endl;
 
-    std::cout << "adjncy: ";
+    Moose::out << "adjncy: ";
     for (auto val : adjncy)
-      std::cout << val << " ";
-    std::cout << std::endl;
+      Moose::out << val << " ";
+    Moose::out << std::endl;
 
-    std::cout << "vtxdist: ";
+    Moose::out << "vtxdist: ";
     for (auto val : vtxdist)
-      std::cout << val << " ";
-    std::cout << std::endl;
+      Moose::out << val << " ";
+    Moose::out << std::endl;
   }
 
   // Fill in the last entry
   xadj[num_local_elems + 1] = adjncy.size() + 1;
-
-  if (verbose)
-    MooseUtils::serialEnd(comm, true);
 
   if (num_procs == 1)
   {
@@ -1245,12 +1239,10 @@ build_cube(UnstructuredMesh & mesh,
 
   if (verbose)
   {
-    MooseUtils::serialBegin(comm, true);
-    std::cout << "Part " << comm.rank() << ": ";
+    Moose::out << "Part " << comm.rank() << ": ";
     for (auto apid : pmetis->part)
-      std::cout << apid << " ";
-    std::cout << std::endl;
-    MooseUtils::serialEnd(comm, true);
+      Moose::out << apid << " ";
+    Moose::out << std::endl;
   }
 
   // Partitioning is complete.
