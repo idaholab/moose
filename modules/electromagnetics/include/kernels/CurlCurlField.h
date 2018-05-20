@@ -16,6 +16,8 @@ public:
 protected:
   virtual Real computeQpResidual() override;
   virtual Real computeQpJacobian() override;
+
+  Real _sign;
 };
 
 #endif // CURLCURLFIELD_H
