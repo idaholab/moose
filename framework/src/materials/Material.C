@@ -73,7 +73,7 @@ Material::Material(const InputParameters & parameters)
     BlockRestrictable(this),
     BoundaryRestrictable(this, blockIDs(), false), // false for being _not_ nodal
     SetupInterface(this),
-    Coupleable(this, false),
+    NeighborCoupleable(this, false, false),
     MooseVariableDependencyInterface(),
     ScalarCoupleable(this),
     FunctionInterface(this),

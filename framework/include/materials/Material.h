@@ -15,7 +15,7 @@
 #include "BlockRestrictable.h"
 #include "BoundaryRestrictable.h"
 #include "SetupInterface.h"
-#include "Coupleable.h"
+#include "NeighborCoupleable.h"
 #include "MooseVariableDependencyInterface.h"
 #include "ScalarCoupleable.h"
 #include "FunctionInterface.h"
@@ -48,7 +48,7 @@ class Material : public MooseObject,
                  public BlockRestrictable,
                  public BoundaryRestrictable,
                  public SetupInterface,
-                 public Coupleable,
+                 public NeighborCoupleable,
                  public MooseVariableDependencyInterface,
                  public ScalarCoupleable,
                  public FunctionInterface,
