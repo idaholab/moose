@@ -20,6 +20,7 @@ validParams<VectorPortBC>()
   params.addParam<FunctionName>("Inc_imag_x", 0.0, "Imaginary incoming field, x direction.");
   params.addParam<FunctionName>("Inc_imag_y", 0.0, "Imaginary incoming field, y direction.");
   params.addParam<FunctionName>("Inc_imag_z", 0.0, "Imaginary incoming field, z direction.");
+  params.addRequiredParam<Real>("sign", "Sign of term in weak form.");
   return params;
 }
 
@@ -39,7 +40,9 @@ VectorPortBC::VectorPortBC(const InputParameters & parameters)
 
     _inc_imag_x(getFunction("Inc_imag_x")),
     _inc_imag_y(getFunction("Inc_imag_y")),
-    _inc_imag_z(getFunction("Inc_imag_z"))
+    _inc_imag_z(getFunction("Inc_imag_z")),
+
+    _sign(getParam<Real>("sign"))
 {
 }
 
@@ -59,15 +62,15 @@ VectorPortBC::computeQpResidual()
 
   if (_component == "real")
   {
-    return Q_real * _test[_i][_qp] - _beta.value(_t, _q_point[_qp]) *
-                                         (_normals[_qp].cross(_test[_i][_qp])) *
-                                         (_normals[_qp].cross(_coupled_val[_qp]));
+    return _sign * (Q_real * _test[_i][_qp] - _beta.value(_t, _q_point[_qp]) *
+                                                  (_normals[_qp].cross(_test[_i][_qp])) *
+                                                  (_normals[_qp].cross(_coupled_val[_qp])));
   }
   else
   {
-    return Q_imag * _test[_i][_qp] + _beta.value(_t, _q_point[_qp]) *
-                                         (_normals[_qp].cross(_test[_i][_qp])) *
-                                         (_normals[_qp].cross(_coupled_val[_qp]));
+    return _sign * (Q_imag * _test[_i][_qp] + _beta.value(_t, _q_point[_qp]) *
+                                                  (_normals[_qp].cross(_test[_i][_qp])) *
+                                                  (_normals[_qp].cross(_coupled_val[_qp])));
   }
 }
 

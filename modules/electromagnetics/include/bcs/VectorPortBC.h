@@ -35,6 +35,8 @@ protected:
   Function & _inc_imag_x;
   Function & _inc_imag_y;
   Function & _inc_imag_z;
+
+  Real _sign;
 };
 
 #endif // VECTORPORTBC_H
