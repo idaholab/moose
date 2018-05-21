@@ -58,7 +58,7 @@ DiracKernel::DiracKernel(const InputParameters & parameters)
     FunctionInterface(this),
     UserObjectInterface(this),
     TransientInterface(this),
-    MaterialPropertyInterface(this),
+    MaterialPropertyInterface(this, Moose::EMPTY_BLOCK_IDS, Moose::EMPTY_BOUNDARY_IDS),
     PostprocessorInterface(this),
     GeometricSearchInterface(this),
     Restartable(this, "DiracKernels"),

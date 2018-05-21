@@ -45,7 +45,7 @@ validParams<QuadraturePointMarker>()
 QuadraturePointMarker::QuadraturePointMarker(const InputParameters & parameters)
   : Marker(parameters),
     Coupleable(this, false),
-    MaterialPropertyInterface(this, blockIDs()),
+    MaterialPropertyInterface(this, blockIDs(), Moose::EMPTY_BOUNDARY_IDS),
     _qrule(_assembly.qRule()),
     _q_point(_assembly.qPoints()),
     _qp(0)

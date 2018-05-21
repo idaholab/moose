@@ -31,7 +31,7 @@ validParams<ElementDamper>()
 
 ElementDamper::ElementDamper(const InputParameters & parameters)
   : Damper(parameters),
-    MaterialPropertyInterface(this),
+    MaterialPropertyInterface(this, Moose::EMPTY_BLOCK_IDS, Moose::EMPTY_BOUNDARY_IDS),
     _tid(parameters.get<THREAD_ID>("_tid")),
     _assembly(_subproblem.assembly(_tid)),
     _coord_sys(_assembly.coordSystem()),

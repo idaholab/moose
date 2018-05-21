@@ -129,7 +129,7 @@ AddSideSetsFromBoundingBox::modify()
       if (_bounding_box.contains_point(**node) == inside)
       {
         // read out boundary ids for nodes
-        std::vector<short int> boundary_id_list = boundary_info.boundary_ids(*node);
+        std::vector<boundary_id_type> boundary_id_list = boundary_info.boundary_ids(*node);
         std::vector<boundary_id_type> boundary_id_old_list =
             _mesh_ptr->getBoundaryIDs(_boundary_id_old);
 

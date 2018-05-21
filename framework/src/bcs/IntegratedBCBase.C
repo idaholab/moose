@@ -46,7 +46,7 @@ IntegratedBCBase::IntegratedBCBase(const InputParameters & parameters)
   : BoundaryCondition(parameters, false), // False is because this is NOT nodal
     RandomInterface(parameters, _fe_problem, _tid, false),
     CoupleableMooseVariableDependencyIntermediateInterface(this, false),
-    MaterialPropertyInterface(this, boundaryIDs()),
+    MaterialPropertyInterface(this, Moose::EMPTY_BLOCK_IDS, boundaryIDs()),
     _current_elem(_assembly.elem()),
     _current_elem_volume(_assembly.elemVolume()),
     _current_side(_assembly.side()),

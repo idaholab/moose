@@ -1962,20 +1962,6 @@ MooseMesh::getBoundaryIDs() const
   return getMesh().get_boundary_info().get_boundary_ids();
 }
 
-template <>
-const std::set<SubdomainID> &
-MooseMesh::getBlockOrBoundaryIDs() const
-{
-  return meshSubdomains();
-}
-
-template <>
-const std::set<BoundaryID> &
-MooseMesh::getBlockOrBoundaryIDs() const
-{
-  return getBoundaryIDs();
-}
-
 void
 MooseMesh::buildNodeListFromSideList()
 {
