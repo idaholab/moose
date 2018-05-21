@@ -18,8 +18,8 @@ validParams<FunctionDirichletBC>()
 {
   InputParameters params = validParams<NodalBC>();
   params.addRequiredParam<FunctionName>("function", "The forcing function.");
-  params.addParam<bool>("incremental", 
-                        false, 
+  params.addParam<bool>("incremental",
+                        false,
                         "if true, the BCs is computed incrementally"
                         "from the result of the previous time step");
   params.addClassDescription(
@@ -29,7 +29,7 @@ validParams<FunctionDirichletBC>()
 }
 
 FunctionDirichletBC::FunctionDirichletBC(const InputParameters & parameters)
-  : NodalBC(parameters), 
+  : NodalBC(parameters),
     _func(getFunction("function")),
     _incremental(getParam<bool>("incremental")),
     _u_old(_incremental ? &_var.dofValuesOld() : nullptr)
@@ -40,7 +40,8 @@ Real
 FunctionDirichletBC::f()
 {
   if (_incremental)
-    return (*_u_old)[_qp] + (_func.value(_t, *_current_node) - _func.value(_t - _dt, *_current_node));
+    return (*_u_old)[_qp] +
+           (_func.value(_t, *_current_node) - _func.value(_t - _dt, *_current_node));
 
   return _func.value(_t, *_current_node);
 }
