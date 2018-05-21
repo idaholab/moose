@@ -54,9 +54,11 @@
 [Postprocessors]
   [./var1]
     type = NumVars
+    system = 'NL'
   [../]
   [./var2]
     type = NumVars
+    system = 'NL'
     outputs = 'console'
     execute_on = 'timestep_begin timestep_end'
   [../]

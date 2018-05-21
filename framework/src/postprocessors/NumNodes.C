@@ -19,13 +19,19 @@ InputParameters
 validParams<NumNodes>()
 {
   InputParameters params = validParams<GeneralPostprocessor>();
+
+  params.addClassDescription(
+      "Returns the total number of nodes in a simulation (works with DistributedMesh)");
   return params;
 }
 
-NumNodes::NumNodes(const InputParameters & parameters) : GeneralPostprocessor(parameters) {}
+NumNodes::NumNodes(const InputParameters & parameters)
+  : GeneralPostprocessor(parameters), _mesh(_subproblem.mesh().getMesh())
+{
+}
 
 Real
 NumNodes::getValue()
 {
-  return _subproblem.mesh().nNodes();
+  return _mesh.n_nodes();
 }

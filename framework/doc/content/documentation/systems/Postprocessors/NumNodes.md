@@ -1,12 +1,9 @@
-<!-- MOOSE Documentation Stub: Remove this when content is added. -->
-
 # NumNodes
 
-!alert construction title=Undocumented Class
-The NumNodes has not been documented, if you would like to contribute to MOOSE by
-writing documentation, please see [/generate.md]. The content contained on this page explains
-the typical documentation associated with a MooseObject; however, what is contained is ultimately
-determined by what is necessary to make the documentation clear for users.
+The NumNodes Postprocessor returns the total number of nodes in the simulation. Returns the total number
+of nodes when using DistributedMesh.
+
+## Syntax and Description
 
 !syntax description /Postprocessors/NumNodes
 

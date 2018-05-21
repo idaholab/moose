@@ -1,12 +1,14 @@
-<!-- MOOSE Documentation Stub: Remove this when content is added. -->
-
 # NumElems
 
-!alert construction title=Undocumented Class
-The NumElems has not been documented, if you would like to contribute to MOOSE by
-writing documentation, please see [/generate.md]. The content contained on this page explains
-the typical documentation associated with a MooseObject; however, what is contained is ultimately
-determined by what is necessary to make the documentation clear for users.
+The NumElems Postprocessor provides information about the number of elements in the simulation. This postprocessor
+is capable of providing either the active number of elements in the simulation (i.e. only the elements that are
+being used for calculations), or the total number of elements (i.e. includes parent elements of refined elements,
+which are maintained for the purpose of coarsening).
+
+!alert note
+This postprocessor returns the aggregate number of elements when using DistributedMesh.
+
+## Syntax and Description
 
 !syntax description /Postprocessors/NumElems
 

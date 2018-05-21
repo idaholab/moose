@@ -22,28 +22,53 @@ validParams<NumVars>()
 {
   InputParameters params = validParams<GeneralPostprocessor>();
 
-  MooseEnum system_options("nonlinear auxiliary", "nonlinear");
-  params.addParam<MooseEnum>(
-      "system", system_options, "The system for which you want to print the number of variables.");
+  MooseEnum system_enum("NL AUX ALL", "ALL");
+  params.addParam<MooseEnum>("system",
+                             system_enum,
+                             "The system(s) for which you want to retrieve the number of variables "
+                             "(NL, AUX, ALL). Default == ALL");
+
+  params.addClassDescription(
+      "Return the number of variables from either the NL, Aux, or both systems.");
 
   return params;
 }
 
 NumVars::NumVars(const InputParameters & parameters)
-  : GeneralPostprocessor(parameters), _system(getParam<MooseEnum>("system"))
+  : GeneralPostprocessor(parameters),
+    _system_enum(parameters.get<MooseEnum>("system").getEnum<SystemEnum>()),
+    _system_pointer(nullptr),
+    _es_pointer(nullptr)
 {
+  switch (_system_enum)
+  {
+    case NL:
+      mooseAssert(_subproblem.es().has_system("nl0"), "No Nonlinear System found with name nl0");
+      _system_pointer = &_subproblem.es().get_system("nl0");
+      break;
+    case AUX:
+      mooseAssert(_subproblem.es().has_system("aux0"), "No Auxilary System found with name aux0");
+      _system_pointer = &_subproblem.es().get_system("aux0");
+      break;
+    case ALL:
+      _es_pointer = &_subproblem.es();
+      break;
+    default:
+      mooseError("Unhandled enum");
+  }
 }
 
 Real
 NumVars::getValue()
 {
-  switch (_system)
+  switch (_system_enum)
   {
-    case 0:
-      return _fe_problem.getNonlinearSystemBase().system().n_vars();
-    case 1:
-      return _fe_problem.getAuxiliarySystem().sys().n_vars();
+    case NL:
+    case AUX:
+      return _system_pointer->n_vars();
+    case ALL:
+      return _es_pointer->n_vars();
+    default:
+      return 0;
   }
-
-  mooseError("Unknown system type!");
 }

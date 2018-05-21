@@ -1,0 +1,28 @@
+[Tests]
+  [./test]
+    type = 'CSVDiff'
+    input = 'num_elems.i'
+    csvdiff = 'num_elems_out.csv'
+
+    requirement = 'The NumElems Postprocessor shall report the number of elements
+                   (active or total) in the simulation.'
+    design = 'Postprocessors/NumElems.md'
+    issues = '#2094 #8421'
+  [../]
+
+  [./test_split]
+    type = 'CSVDiff'
+    input = 'num_elems.i'
+    cli_args = '--use-split --split-file generated.cpr Outputs/file_base=num_elems_split_out'
+
+    min_parallel = 4
+    max_parallel = 4
+
+    csvdiff = 'num_elems_split_out.csv'
+
+    requirement = 'The NumElems Postprocessor shall report the number of elements
+                   (active or total) in the simulation when using distributed (pre-split) mesh.'
+    design = 'Postprocessors/NumElems.md'
+    issues = '#2094 #8421'
+  [../]
+[]
