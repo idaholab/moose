@@ -8,5 +8,6 @@
     cli_args = '--mesh-only=bias.e'
     exodiff = 'bias.e'
     min_parallel = 2
+    recover = false # Can't do this with --mesh-only
   [../]
 []
