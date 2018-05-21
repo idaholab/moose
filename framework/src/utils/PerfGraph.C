@@ -71,11 +71,11 @@ recursivelyPrintGraph(PerfGraph & graph, PerfNode * current_node, unsigned int c
 {
   auto & name = graph.sectionName(current_node->id());
 
-  std::cout << std::string(current_depth * 2, ' ') << name
-            << " self: " << std::chrono::duration<double>(current_node->selfTime()).count()
-            << " children: " << std::chrono::duration<double>(current_node->childrenTime()).count()
-            << " total: " << std::chrono::duration<double>(current_node->totalTime()).count()
-            << "\n";
+  Moose::out << std::string(current_depth * 2, ' ') << name
+             << " self: " << std::chrono::duration<double>(current_node->selfTime()).count()
+             << " children: " << std::chrono::duration<double>(current_node->childrenTime()).count()
+             << " total: " << std::chrono::duration<double>(current_node->totalTime()).count()
+             << "\n";
 
   for (auto & child_it : current_node->children())
     recursivelyPrintGraph(graph, child_it.second.get(), current_depth + 1);
