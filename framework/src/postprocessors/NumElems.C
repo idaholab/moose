@@ -24,12 +24,15 @@ validParams<NumElems>()
       "elem_filter",
       filt,
       "The type of elements to include in the count (active, total). Default == active");
+
+  params.addClassDescription("Return the number of active or total elements in the simulation.");
   return params;
 }
 
 NumElems::NumElems(const InputParameters & parameters)
   : GeneralPostprocessor(parameters),
-    _filt(parameters.get<MooseEnum>("elem_filter").getEnum<ElemFilter>())
+    _filt(parameters.get<MooseEnum>("elem_filter").getEnum<ElemFilter>()),
+    _mesh(_subproblem.mesh().getMesh())
 {
 }
 
@@ -37,6 +40,6 @@ Real
 NumElems::getValue()
 {
   if (_filt == ElemFilter::ACTIVE)
-    return _subproblem.mesh().getMesh().n_active_elem();
-  return _subproblem.mesh().nElem();
+    return _mesh.n_active_elem();
+  return _mesh.n_elem();
 }

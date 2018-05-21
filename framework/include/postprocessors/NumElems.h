@@ -12,7 +12,6 @@
 
 #include "GeneralPostprocessor.h"
 
-// Forward Declarations
 class NumElems;
 
 template <>
@@ -34,7 +33,10 @@ private:
     ACTIVE,
     TOTAL,
   };
+
   const ElemFilter _filt;
+
+  const MeshBase & _mesh;
 };
 
 #endif // NUMELEMS_H

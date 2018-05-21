@@ -1,12 +1,10 @@
-<!-- MOOSE Documentation Stub: Remove this when content is added. -->
-
 # NumVars
 
-!alert construction title=Undocumented Class
-The NumVars has not been documented, if you would like to contribute to MOOSE by
-writing documentation, please see [/generate.md]. The content contained on this page explains
-the typical documentation associated with a MooseObject; however, what is contained is ultimately
-determined by what is necessary to make the documentation clear for users.
+The NumVars Postprocessor provides information about the number of variables in the simulation. This postprocessor
+is capable of providing the number of variables in either the Nonlinear system (the system of PDEs you are solving),
+the Auxiliary system, the system containing only explicit calculations, or both together.
+
+## Syntax and Description
 
 !syntax description /Postprocessors/NumVars
 

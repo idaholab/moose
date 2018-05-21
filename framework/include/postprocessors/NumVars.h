@@ -30,7 +30,17 @@ public:
   virtual Real getValue() override;
 
 protected:
-  MooseEnum _system;
+  enum SystemEnum
+  {
+    NL,
+    AUX,
+    ALL
+  };
+
+  const SystemEnum _system_enum;
+
+  const System * _system_pointer;
+  const EquationSystems * _es_pointer;
 };
 
 #endif // NUMVARS_H
