@@ -107,11 +107,8 @@ void
 AverageGrainVolume::execute()
 {
   auto num_features = _feature_volumes.size();
-
-  const auto end = _mesh.getMesh().active_local_elements_end();
-  for (auto el = _mesh.getMesh().active_local_elements_begin(); el != end; ++el)
+  for (const auto & elem : _mesh.getMesh().active_local_element_ptr_range())
   {
-    const Elem * elem = *el;
     _fe_problem.prepare(elem, 0);
     _fe_problem.reinitElem(elem, 0);
 

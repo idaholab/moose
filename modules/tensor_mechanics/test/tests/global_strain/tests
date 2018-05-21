@@ -35,4 +35,10 @@
     input = 'global_strain_pressure_3D.i'
     exodiff = 'global_strain_pressure_3D_out.e'
   [../]
+  [./action_check]
+    type = 'Exodiff'
+    input = 'global_strain_action.i'
+    exodiff = 'global_strain_action_out.e'
+    abs_zero = 1e-9
+  [../]
 []

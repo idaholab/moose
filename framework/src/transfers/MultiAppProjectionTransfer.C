@@ -242,16 +242,13 @@ MultiAppProjectionTransfer::execute()
       fe->attach_quadrature_rule(&qrule);
       const std::vector<Point> & xyz = fe->get_xyz();
 
-      MeshBase::const_element_iterator el = to_mesh.local_elements_begin();
-      const MeshBase::const_element_iterator end_el = to_mesh.local_elements_end();
-
       unsigned int from0 = 0;
       for (processor_id_type i_proc = 0; i_proc < n_processors();
            from0 += froms_per_proc[i_proc], i_proc++)
       {
-        for (el = to_mesh.local_elements_begin(); el != end_el; el++)
+        for (const auto & elem :
+             as_range(to_mesh.local_elements_begin(), to_mesh.local_elements_end()))
         {
-          const Elem * elem = *el;
           fe->reinit(elem);
 
           bool qp_hit = false;
@@ -533,18 +530,13 @@ MultiAppProjectionTransfer::projectSolution(unsigned int i_to)
   System & to_sys = to_var.sys().system();
   NumericVector<Number> * to_solution = to_sys.solution.get();
 
+  for (const auto & node : to_mesh.local_node_ptr_range())
   {
-    MeshBase::const_node_iterator it = to_mesh.local_nodes_begin();
-    const MeshBase::const_node_iterator end_it = to_mesh.local_nodes_end();
-    for (; it != end_it; ++it)
+    for (unsigned int comp = 0; comp < node->n_comp(to_sys.number(), to_var.number()); comp++)
     {
-      const Node * node = *it;
-      for (unsigned int comp = 0; comp < node->n_comp(to_sys.number(), to_var.number()); comp++)
-      {
-        const dof_id_type proj_index = node->dof_number(ls.number(), _proj_var_num, comp);
-        const dof_id_type to_index = node->dof_number(to_sys.number(), to_var.number(), comp);
-        to_solution->set(to_index, (*ls.solution)(proj_index));
-      }
+      const dof_id_type proj_index = node->dof_number(ls.number(), _proj_var_num, comp);
+      const dof_id_type to_index = node->dof_number(to_sys.number(), to_var.number(), comp);
+      to_solution->set(to_index, (*ls.solution)(proj_index));
     }
   }
   for (const auto & elem : to_mesh.active_local_element_ptr_range())

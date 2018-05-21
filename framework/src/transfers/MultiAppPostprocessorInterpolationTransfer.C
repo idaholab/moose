@@ -124,13 +124,8 @@ MultiAppPostprocessorInterpolationTransfer::execute()
 
         vars.push_back(_to_var_name);
 
-        MeshBase::const_node_iterator node_it = mesh.localNodesBegin();
-        MeshBase::const_node_iterator node_end = mesh.localNodesEnd();
-
-        for (; node_it != node_end; ++node_it)
+        for (const auto & node : as_range(mesh.localNodesBegin(), mesh.localNodesEnd()))
         {
-          Node * node = *node_it;
-
           if (node->n_dofs(sys_num, var_num) > 0) // If this variable has dofs at this node
           {
             std::vector<Point> pts;

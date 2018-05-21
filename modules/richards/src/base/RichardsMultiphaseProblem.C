@@ -94,18 +94,13 @@ RichardsMultiphaseProblem::updateSolution(NumericVector<Number> & vec_solution,
   // For parallel procs i believe that i have to use local_nodes_begin, rather than just nodes_begin
   // _mesh comes from SystemBase (_mesh = getNonlinearSystemBase().subproblem().mesh(), and
   // subproblem is this object)
-  MeshBase::node_iterator nit = _mesh.getMesh().local_nodes_begin();
-  const MeshBase::node_iterator nend = _mesh.getMesh().local_nodes_end();
-
-  for (; nit != nend; ++nit)
+  for (const auto & node : _mesh.getMesh().local_node_ptr_range())
   {
-    const Node & node = *(*nit);
-
     // dofs[0] is the dof number of the bounded variable at this node
     // dofs[1] is the dof number of the lower variable at this node
     std::vector<dof_id_type> dofs(2);
-    dofs[0] = node.dof_number(sys_num, _bounded_var_num, 0);
-    dofs[1] = node.dof_number(sys_num, _lower_var_num, 0);
+    dofs[0] = node->dof_number(sys_num, _bounded_var_num, 0);
+    dofs[1] = node->dof_number(sys_num, _lower_var_num, 0);
 
     // soln[0] is the value of the bounded variable at this node
     // soln[1] is the value of the lower variable at this node

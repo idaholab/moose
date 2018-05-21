@@ -56,14 +56,9 @@ GhostUserObject::execute()
   {
     const auto & mesh = _subproblem.mesh().getMesh();
 
-    const auto end = mesh.active_elements_end();
-    for (auto el = mesh.active_elements_begin(); el != end; ++el)
-    {
-      const auto & elem = *el;
-
+    for (const auto & elem : mesh.active_element_ptr_range())
       if (elem->processor_id() != my_processor_id)
         _ghost_data.emplace(elem->id());
-    }
   }
 }
 

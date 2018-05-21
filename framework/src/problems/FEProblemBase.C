@@ -4911,13 +4911,11 @@ FEProblemBase::checkDisplacementOrders()
 {
   if (_displaced_problem)
   {
-    MeshBase::const_element_iterator it = _displaced_mesh->activeLocalElementsBegin(),
-                                     end = _displaced_mesh->activeLocalElementsEnd();
-
     bool mesh_has_second_order_elements = false;
-    for (; it != end; ++it)
+    for (const auto & elem : as_range(_displaced_mesh->activeLocalElementsBegin(),
+                                      _displaced_mesh->activeLocalElementsEnd()))
     {
-      if ((*it)->default_order() == SECOND)
+      if (elem->default_order() == SECOND)
       {
         mesh_has_second_order_elements = true;
         break;
