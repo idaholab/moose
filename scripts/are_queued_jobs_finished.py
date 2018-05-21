@@ -23,10 +23,24 @@ class Jobs:
         for k, v in self.__job_data.iteritems():
             yield k, v
 
+def hasTimedOutOrFailed(meta):
+    """
+    determine which scheduler plugin was used to launch jobs, and query that
+    system for current status on job
+    """
+    if meta.get('QUEUEING', '') == 'RunPBS':
+        job_id = meta['RunPBS']['ID'].split('.')[0]
+        qstat_process = subprocess.Popen([ 'qstat' , '-xf', job_id], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        qstat_result = qstat_process.communicate()[0]
+        job_result = re.findall(r'Exit_status = (\d+)', qstat_result)
+        if job_result and job_result[0] == "271":
+            return True
+
 def isNotFinished(jobs):
     for path, meta in jobs.yieldJobsResultPath():
         if type(meta) == type({}) and meta.get('QUEUEING', {}):
-            if not os.path.exists(os.path.join(path, '.previous_test_results.json')):
+            if (not os.path.exists(os.path.join(path, '.previous_test_results.json'))
+                and not hasTimedOutOrFailed(meta)):
                 return True
 
 def usage():

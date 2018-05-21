@@ -204,6 +204,10 @@ class QueueManager(Scheduler):
 
         return command
 
+    def hasTimedOutOrFailed(self, job_data):
+        """ return bool on exceeding walltime """
+        return False
+
     def _isProcessReady(self, job_data):
         """
         Return bool on `run_tests --spec_file` submission results being available. Due to the
@@ -225,6 +229,12 @@ class QueueManager(Scheduler):
             # result file exists (jobs are finished)
             if os.path.exists(os.path.join(job_data.job_dir, self.__job_storage_file)):
                 pass
+
+            # ask derived scheduler if this job has failed
+            elif self.hasTimedOutOrFailed(job_data):
+                for job in job_data.jobs.getJobs():
+                    job.setStatus(job.crash)
+                is_ready = False
 
             # result does not yet exist but will in the future
             else:
