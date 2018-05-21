@@ -798,6 +798,16 @@ private:
   /// Execution flags for this App
   ExecFlagEnum _execute_flags;
 
+  /// Timers
+  PerfID _setup_options_timer;
+  PerfID _run_input_file_timer;
+  PerfID _execute_executioner_timer;
+  PerfID _restore_timer;
+  PerfID _run_timer;
+  PerfID _execute_mesh_modifiers_timer;
+  PerfID _restore_cached_backup_timer;
+  PerfID _create_minimal_app_timer;
+
   // Allow FEProblemBase to set the recover/restart state, so make it a friend
   friend class FEProblemBase;
   friend class Restartable;
