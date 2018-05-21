@@ -32,7 +32,7 @@ PerfGraph::registerSection(std::string section_name)
 
   // Is it already registered?
   if (it != _section_name_to_id.lower_bound(section_name) && it->first == section_name)
-    return it->second;
+    mooseError("PerfGraph already holds a section named: ", section_name);
 
   // It's not...
   auto id = _section_name_to_id.size();
@@ -71,7 +71,7 @@ recursivelyPrintGraph(PerfGraph & graph, PerfNode * current_node, unsigned int c
 {
   auto & name = graph.sectionName(current_node->id());
 
-  std::cout << std::string(current_depth, ' ') << name
+  std::cout << std::string(current_depth * 2, ' ') << name
             << " self: " << std::chrono::duration<double>(current_node->selfTime()).count()
             << " children: " << std::chrono::duration<double>(current_node->childrenTime()).count()
             << " total: " << std::chrono::duration<double>(current_node->totalTime()).count()

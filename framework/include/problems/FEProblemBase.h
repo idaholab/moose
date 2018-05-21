@@ -29,6 +29,7 @@
 #include "Postprocessor.h"
 #include "HashMap.h"
 #include "VectorPostprocessor.h"
+#include "PerfGraphInterface.h"
 
 #include "libmesh/enum_quadrature_type.h"
 #include "libmesh/equation_systems.h"
@@ -129,7 +130,7 @@ enum MooseLinearConvergenceReason
  * Specialization of SubProblem for solving nonlinear equations plus auxiliary equations
  *
  */
-class FEProblemBase : public SubProblem, public Restartable
+class FEProblemBase : public SubProblem, public Restartable, public PerfGraphInterface
 {
 public:
   FEProblemBase(const InputParameters & parameters);
@@ -1722,6 +1723,8 @@ private:
 
   /// Whether the problem has dgkernels or interface kernels
   bool _has_internal_edge_residual_objects;
+
+  PerfID _initial_setup_timer;
 
   friend class AuxiliarySystem;
   friend class NonlinearSystemBase;

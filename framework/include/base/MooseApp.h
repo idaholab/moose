@@ -19,6 +19,7 @@
 #include "OutputWarehouse.h"
 #include "RestartableData.h"
 #include "ConsoleStreamInterface.h"
+#include "PerfGraph.h"
 
 #include "libmesh/parallel_object.h"
 
@@ -84,6 +85,11 @@ public:
    * @return The the type of the object
    */
   const std::string & type() const { return _type; }
+
+  /**
+   * Get the PerfGraph for this app
+   */
+  PerfGraph & perfGraph() { return _perf_graph; }
 
   ///@{
   /**
@@ -626,6 +632,9 @@ protected:
 
   /// The MPI communicator this App is going to use
   const std::shared_ptr<Parallel::Communicator> _comm;
+
+  /// The PerfGraph object for this applciation
+  PerfGraph _perf_graph;
 
   /// Input file name used
   std::string _input_filename;

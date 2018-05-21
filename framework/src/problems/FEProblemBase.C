@@ -151,6 +151,7 @@ validParams<FEProblemBase>()
 FEProblemBase::FEProblemBase(const InputParameters & parameters)
   : SubProblem(parameters),
     Restartable(this, "FEProblemBase"),
+    PerfGraphInterface(this, "FEProblemBase"),
     _mesh(*getCheckedPointerParam<MooseMesh *>("mesh")),
     _eq(_mesh),
     _initialized(false),
@@ -221,7 +222,8 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
     _skip_additional_restart_data(getParam<bool>("skip_additional_restart_data")),
     _fail_next_linear_convergence_check(false),
     _started_initial_setup(false),
-    _has_internal_edge_residual_objects(false)
+    _has_internal_edge_residual_objects(false),
+    _initial_setup_timer(registerTimedSection("initialSetup"))
 {
 
   _time = 0.0;
@@ -430,7 +432,7 @@ FEProblemBase::addExtraVectors()
 void
 FEProblemBase::initialSetup()
 {
-  Moose::perf_log.push("initialSetup()", "Setup");
+  TIME_SECTION(_initial_setup_timer);
 
   // set state flag indicating that we are in or beyond initialSetup.
   // This can be used to throw errors in methods that _must_ be called at construction time.
@@ -472,9 +474,7 @@ FEProblemBase::initialSetup()
     if (_has_internal_edge_residual_objects)
       mooseError("Stateful neighbor material properties do not work with mesh adaptivity");
 
-    Moose::perf_log.push("mesh.buildRefinementAndCoarseningMaps()", "Setup");
     _mesh.buildRefinementAndCoarseningMaps(_assembly[0]);
-    Moose::perf_log.pop("mesh.buildRefinementAndCoarseningMaps()", "Setup");
   }
 
   if (!_app.isRecovering())
@@ -772,8 +772,6 @@ FEProblemBase::initialSetup()
 
   // Writes all calls to _console from initialSetup() methods
   _app.getOutputWarehouse().mooseConsole();
-
-  Moose::perf_log.pop("initialSetup()", "Setup");
 
   if (_requires_nonlocal_coupling)
   {
@@ -4933,9 +4931,8 @@ FEProblemBase::checkProblemIntegrity()
                   std::ostream_iterator<unsigned int>(extra_subdomain_ids, " "));
 
         mooseError("The following blocks from your input mesh do not contain an active material: " +
-                   extra_subdomain_ids.str() +
-                   "\nWhen ANY mesh block contains a Material object, "
-                   "all blocks must contain a Material object.\n");
+                   extra_subdomain_ids.str() + "\nWhen ANY mesh block contains a Material object, "
+                                               "all blocks must contain a Material object.\n");
       }
     }
 

@@ -385,6 +385,8 @@ MooseApp::~MooseApp()
   for (const auto & it : _lib_handles)
     dlclose(it.second);
 #endif
+
+  _perf_graph.print();
 }
 
 std::string
