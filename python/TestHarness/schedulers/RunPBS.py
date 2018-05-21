@@ -7,7 +7,7 @@
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
-import os
+import os, re
 from QueueManager import QueueManager
 from TestHarness import util # to execute qsub
 
@@ -28,6 +28,32 @@ class RunPBS(QueueManager):
     def getBadKeyArgs(self):
         """ arguments we need to remove from sys.argv """
         return ['--pbs']
+
+    def hasTimedOutOrFailed(self, job_data):
+        """ use qstat and return bool on job time out (killed by PBS exit code 271) """
+        launch_id = job_data.json_data.get(job_data.job_dir,
+                                           {}).get(job_data.plugin,
+                                                   {}).get('ID', "").split('.')[0]
+
+        # We shouldn't run into a null, but just in case, lets handle it
+        if launch_id:
+            qstat_command_result = util.runCommand('qstat -xf %s' % (launch_id))
+
+            # handle a qstat execution failure for some reason
+            if qstat_command_result.find('ERROR') != -1:
+                # set error for each job contained in group
+                for job in job_data.jobs.getJobs():
+                    job.setOutput('ERROR invoking `qstat`\n%s' % (qstat_command_result))
+                    job.setStatus(job.error, 'QSTAT')
+                return True
+
+            qstat_job_result = re.findall(r'Exit_status = (\d+)', qstat_command_result)
+
+            # woops. This job was killed by PBS by exceeding walltime
+            if qstat_job_result and qstat_job_result[0] == "271":
+                for job in job_data.jobs.getJobs():
+                    job.addCaveats('Killed by PBS Exceeded Walltime')
+                return True
 
     def _augmentTemplate(self, job):
         """ populate qsub script template with paramaters """
