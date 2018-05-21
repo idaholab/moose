@@ -1,8 +1,14 @@
 CXX ?= g++
 
-PYTHONPREFIX ?= `python-config --prefix`
-PYTHONCFLAGS ?= `python-config --cflags`
-PYTHONLDFLAGS ?= `python-config --ldflags`
+# some systems have python2 but no python2-config command - fall back to python-config for them
+pyconfig := python2-config
+ifeq (, $(shell which python2-config))
+  pyconfig := python-config
+endif
+
+PYTHONPREFIX ?= `$(pyconfig) --prefix`
+PYTHONCFLAGS ?= `$(pyconfig) --cflags`
+PYTHONLDFLAGS ?= `$(pyconfig) --ldflags`
 
 hit: main.cc parse.cc lex.cc lex.h parse.h
 	$(CXX) -std=c++11 -g $(CXXFLAGS) $< parse.cc lex.cc -o $@
