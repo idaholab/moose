@@ -29,6 +29,18 @@ $g(t,\vec{x})$, and the user must define one or more sidesets
 corresponding to the boundary subset $\partial \Omega_D$ via the
 `boundary` parameter.
 
+If the parameter `incremental` is set to `true`, the boundary condition (2) will
+be incrementally applied between the instants $t_n$ and $t_{n+1}$, so that:
+
+\begin{equation}
+\begin{aligned}
+  u(t_{n+1},\vec{x}) &= u(t_n,\vec{x}) + g(t_{n+1},\vec{x}) - g(t_n,\vec{x}) && \quad \in \partial \Omega_D
+\end{aligned}
+\end{equation}
+
+where $u(t_n,\vec{x})$ is the value of the variable on that boundary computed at the
+previous time step.
+
 ## Example Input Syntax
 
 !listing test/tests/bcs/function_dirichlet_bc/function_dirichlet_bc_test.i block=BCs

@@ -38,6 +38,12 @@ protected:
 
   /// The function being used for evaluation
   Function & _func;
+
+  /// Checks if the BC is applied directly or incrementally
+  const bool _incremental;
+
+  /// Previous value of the variable for incremental evaluation
+  const VariableValue * _u_old;
 };
 
 #endif // FUNCTIONDIRICHLETBC_H
