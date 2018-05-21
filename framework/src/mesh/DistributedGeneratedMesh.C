@@ -1140,7 +1140,8 @@ build_cube(UnstructuredMesh & mesh,
 
     vtxdist[p] = t_local_elems_begin;
 
-    Moose::out << "t_local_elems_begin: " << t_local_elems_begin << std::endl;
+    if (verbose)
+      Moose::out << "t_local_elems_begin: " << t_local_elems_begin << std::endl;
 
     // The last one needs to fill in the final entry too
     if (p == num_procs - 1)

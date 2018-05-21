@@ -5,7 +5,7 @@
   type = DistributedGeneratedMesh
   nx = 10
   ny = 10
-  nz = 10
+  nz = 2
   dim = 3
   verbose = false
 []
