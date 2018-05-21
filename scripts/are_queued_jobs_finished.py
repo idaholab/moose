@@ -25,7 +25,7 @@ class Jobs:
 
 def hasTimedOutOrFailed(meta):
     """
-    determine which scheduler plugin was used to launch jobs, and queuery that
+    determine which scheduler plugin was used to launch jobs, and query that
     system for current status on job
     """
     if meta.get('QUEUEING', '') == 'RunPBS':
@@ -39,11 +39,8 @@ def hasTimedOutOrFailed(meta):
 def isNotFinished(jobs):
     for path, meta in jobs.yieldJobsResultPath():
         if type(meta) == type({}) and meta.get('QUEUEING', {}):
-            if os.path.exists(os.path.join(path, '.previous_test_results.json')):
-                pass
-            elif hasTimedOutOrFailed(meta):
-                pass
-            else:
+            if (not os.path.exists(os.path.join(path, '.previous_test_results.json'))
+                and not hasTimedOutOrFailed(meta)):
                 return True
 
 def usage():
