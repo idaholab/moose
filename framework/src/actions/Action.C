@@ -47,6 +47,10 @@ validParams<Action>()
 Action::Action(InputParameters parameters)
   : ConsoleStreamInterface(
         *parameters.getCheckedPointerParam<MooseApp *>("_moose_app", "In Action constructor")),
+    PerfGraphInterface(
+        parameters.getCheckedPointerParam<MooseApp *>("_moose_app", "In Action constructor")
+            ->perfGraph(),
+        "Action::" + parameters.get<std::string>("_action_name")),
     _pars(parameters),
     _registered_identifier(isParamValid("registered_identifier")
                                ? getParam<std::string>("registered_identifier")
@@ -61,8 +65,17 @@ Action::Action(InputParameters parameters)
     _current_task(_awh.getCurrentTaskName()),
     _mesh(_awh.mesh()),
     _displaced_mesh(_awh.displacedMesh()),
-    _problem(_awh.problemBase())
+    _problem(_awh.problemBase()),
+    _executioner(_app.executioner()),
+    _act_timer(registerTimedSection("act"))
 {
+}
+
+void
+Action::timedAct()
+{
+  TIME_SECTION(_act_timer);
+  act();
 }
 
 void Action::addRelationshipManagers(Moose::RelationshipManagerType) {}

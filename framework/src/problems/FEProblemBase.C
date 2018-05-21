@@ -534,9 +534,7 @@ FEProblemBase::initialSetup()
         mooseError(
             "Doing extra refinements when restarting is NOT supported for sub-apps of a MultiApp");
 
-      Moose::perf_log.push("Uniformly Refine Mesh", "Setup");
       adaptivity().uniformRefineWithProjection();
-      Moose::perf_log.pop("Uniformly Refine Mesh", "Setup");
     }
   }
 

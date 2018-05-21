@@ -13,6 +13,7 @@
 #include "InputParameters.h"
 #include "ConsoleStreamInterface.h"
 #include "Registry.h"
+#include "PerfGraphInterface.h"
 
 #include <string>
 #include <ostream>
@@ -32,7 +33,7 @@ InputParameters validParams<Action>();
 /**
  * Base class for actions.
  */
-class Action : public ConsoleStreamInterface
+class Action : public ConsoleStreamInterface, public PerfGraphInterface
 {
 public:
   Action(InputParameters parameters);
@@ -40,9 +41,9 @@ public:
   virtual ~Action() {}
 
   /**
-   * Method to add objects to the simulation or perform other setup tasks.
+   * The method called externally that causes the action to act()
    */
-  virtual void act() = 0;
+  void timedAct();
 
   /**
    * Method to add a relationship manager for the objects being added to the system. Relationship
@@ -148,6 +149,11 @@ public:
   }
 
 protected:
+  /**
+   * Method to add objects to the simulation or perform other setup tasks.
+   */
+  virtual void act() = 0;
+
   /// Input parameters for the action
   InputParameters _pars;
 
@@ -195,6 +201,12 @@ protected:
 
   /// Convenience reference to a problem this action works on
   std::shared_ptr<FEProblemBase> & _problem;
+
+  /// Convenience reference to an executioner
+  std::shared_ptr<Executioner> & _executioner;
+
+  /// Timers
+  PerfID _act_timer;
 };
 
 template <typename T>

@@ -12,6 +12,7 @@
 
 #include "Moose.h"
 #include "PerfGuard.h"
+#include "InputParameters.h"
 
 #define TIME_SECTION(id) PerfGuard time_guard(_perf_graph, id);
 

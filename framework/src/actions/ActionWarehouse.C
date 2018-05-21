@@ -360,11 +360,11 @@ ActionWarehouse::executeActionsWithAction(const std::string & task)
                << "NAME (" << COLOR_YELLOW << std::setw(16) << (*_act_iter)->name() << COLOR_DEFAULT
                << ")" << std::endl;
 
-      (*_act_iter)->act();
+      (*_act_iter)->timedAct();
       Moose::perf_log.pop(task + ":" + (*_act_iter)->name(), "Setup");
     }
     else
-      (*_act_iter)->act();
+      (*_act_iter)->timedAct();
   }
 }
 

@@ -29,7 +29,10 @@ validParams<SetupMeshCompleteAction>()
   return params;
 }
 
-SetupMeshCompleteAction::SetupMeshCompleteAction(InputParameters params) : Action(params) {}
+SetupMeshCompleteAction::SetupMeshCompleteAction(InputParameters params)
+  : Action(params), _uniform_refine_timer(registerTimedSection("uniformRefine"))
+{
+}
 
 bool
 SetupMeshCompleteAction::completeSetup(MooseMesh * mesh)
@@ -49,6 +52,8 @@ SetupMeshCompleteAction::completeSetup(MooseMesh * mesh)
 void
 SetupMeshCompleteAction::act()
 {
+  TIME_SECTION(_act_timer);
+
   if (!_mesh)
     mooseError("No mesh file was supplied and no generation block was provided");
 
@@ -66,6 +71,8 @@ SetupMeshCompleteAction::act()
      */
     if (_app.setFileRestart() == false && _app.isRecovering() == false)
     {
+      TIME_SECTION(_uniform_refine_timer);
+
       Adaptivity::uniformRefine(_mesh.get());
 
       if (_displaced_mesh)
