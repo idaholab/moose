@@ -5,8 +5,12 @@
   ny = 10
 
   # To make this deterministic
-  partitioner = centroid
-  centroid_partitioner_direction = x
+  [Partitioner]
+    type = GridPartitioner
+    nx = 2
+    ny = 1
+    nz = 1
+  []
 []
 
 [Variables]
