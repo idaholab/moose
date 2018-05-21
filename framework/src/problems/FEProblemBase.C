@@ -223,7 +223,51 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
     _fail_next_linear_convergence_check(false),
     _started_initial_setup(false),
     _has_internal_edge_residual_objects(false),
-    _initial_setup_timer(registerTimedSection("initialSetup"))
+    _initial_setup_timer(registerTimedSection("initialSetup")),
+    _project_solution_timer(registerTimedSection("projectSolution")),
+    _compute_indicators_timer(registerTimedSection("computeIndicators")),
+    _compute_markers_timer(registerTimedSection("computeMarkers")),
+    _compute_user_objects_timer(registerTimedSection("computeUserObjects")),
+    _execute_controls_timer(registerTimedSection("executeControls")),
+    _execute_samplers_timer(registerTimedSection("executeSamplers")),
+    _update_active_objects_timer(registerTimedSection("updateActiveObjects")),
+    _reinit_because_of_ghosting_or_new_geom_objects_timer(
+        registerTimedSection("reinitBecauseOfGhostingOrNewGeomObjects")),
+    _exec_multi_app_transfers_timer(registerTimedSection("execMultiAppTransfers")),
+    _init_timer(registerTimedSection("init")),
+    _eq_init_timer(registerTimedSection("EquationSystems::Init")),
+    _solve_timer(registerTimedSection("solve")),
+    _check_exception_and_stop_solve_timer(registerTimedSection("checkExceptionAndStopSolve")),
+    _advance_state_timer(registerTimedSection("advanceState")),
+    _restore_solutions_timer(registerTimedSection("restoreSolutions")),
+    _save_old_solutions_timer(registerTimedSection("saveOldSolutions")),
+    _restore_old_solutions_timer(registerTimedSection("restoreOldSolutions")),
+    _output_step_timer(registerTimedSection("outputStep")),
+    _on_timestep_begin_timer(registerTimedSection("onTimestepBegin")),
+    _compute_residual_l2_norm_timer(registerTimedSection("computeResidualL2Norm")),
+    _compute_residual_sys_timer(registerTimedSection("computeResidualSys")),
+    _compute_residual_internal_timer(registerTimedSection("computeResidualInternal")),
+    _compute_residual_type_timer(registerTimedSection("computeResidualType")),
+    _compute_transient_implicit_residual_timer(
+        registerTimedSection("computeTransientImplicitResidual")),
+    _compute_residual_tags_timer(registerTimedSection("computeResidualTags")),
+    _compute_jacobian_internal_timer(registerTimedSection("computeJacobianInternal")),
+    _compute_jacobian_tags_timer(registerTimedSection("computeJacobianTags")),
+    _compute_jacobian_blocks_timer(registerTimedSection("computeTransientImplicitJacobian")),
+    _compute_bounds_timer(registerTimedSection("computeBounds")),
+    _compute_post_check_timer(registerTimedSection("computePostCheck")),
+    _compute_damping_timer(registerTimedSection("computeDamping")),
+    _possibly_rebuild_geom_search_patches_timer(
+        registerTimedSection("possiblyRebuildGeomSearchPatches")),
+    _initial_adapt_mesh_timer(registerTimedSection("initialAdaptMesh")),
+    _adapt_mesh_timer(registerTimedSection("adaptMesh")),
+    _update_mesh_xfem_timer(registerTimedSection("updateMeshXFEM")),
+    _mesh_changed_timer(registerTimedSection("meshChanged")),
+    _mesh_changed_helper_timer(registerTimedSection("meshChangedHelper")),
+    _check_problem_integrity_timer(registerTimedSection("notifyWhenMeshChanges")),
+    _serialize_solution_timer(registerTimedSection("serializeSolution")),
+    _check_nonlinear_convergence_timer(registerTimedSection("checkNonlinearConvergence")),
+    _check_linear_convergence_timer(registerTimedSection("checkLinearConvergence"))
 {
 
   _time = 0.0;
@@ -2124,7 +2168,7 @@ FEProblemBase::addInitialCondition(const std::string & ic_name,
 void
 FEProblemBase::projectSolution()
 {
-  Moose::perf_log.push("projectSolution()", "Utility");
+  TIME_SECTION(_project_solution_timer)
 
   FloatingPointExceptionGuard fpe_guard(_app);
 
@@ -2173,8 +2217,6 @@ FEProblemBase::projectSolution()
 
   _aux->solution().close();
   _aux->solution().localize(*_aux->sys().current_local_solution, _aux->dofMap().get_send_list());
-
-  Moose::perf_log.pop("projectSolution()", "Utility");
 }
 
 std::shared_ptr<Material>
@@ -2767,7 +2809,7 @@ FEProblemBase::computeIndicators()
   // Initialize indicator aux variable fields
   if (_indicators.hasActiveObjects() || _internal_side_indicators.hasActiveObjects())
   {
-    Moose::perf_log.push("Adaptivity: computeIndicators()", "Execution");
+    TIME_SECTION(_compute_indicators_timer);
 
     std::vector<std::string> fields;
 
@@ -2793,8 +2835,6 @@ FEProblemBase::computeIndicators()
     Threads::parallel_reduce(*_mesh.getActiveLocalElementRange(), finalize_cit);
     _aux->solution().close();
     _aux->update();
-
-    Moose::perf_log.pop("Adaptivity: computeIndicators()", "Execution");
   }
 }
 
@@ -2803,7 +2843,7 @@ FEProblemBase::computeMarkers()
 {
   if (_markers.hasActiveObjects())
   {
-    Moose::perf_log.push("Adaptivity: computeMarkers()", "Execution");
+    TIME_SECTION(_compute_markers_timer);
 
     std::vector<std::string> fields;
 
@@ -2828,8 +2868,6 @@ FEProblemBase::computeMarkers()
 
     _aux->solution().close();
     _aux->update();
-
-    Moose::perf_log.pop("Adaptivity: computeMarkers()", "Execution");
   }
 }
 
@@ -2881,6 +2919,8 @@ FEProblemBase::computeAuxiliaryKernels(const ExecFlagType & type)
 void
 FEProblemBase::computeUserObjects(const ExecFlagType & type, const Moose::AuxGroup & group)
 {
+  TIME_SECTION(_compute_user_objects_timer);
+
   // Get convenience reference to active warehouse
   const MooseObjectWarehouse<ElementUserObject> & elemental = _elemental_user_objects[group][type];
   const MooseObjectWarehouse<SideUserObject> & side = _side_user_objects[group][type];
@@ -2896,7 +2936,6 @@ FEProblemBase::computeUserObjects(const ExecFlagType & type, const Moose::AuxGro
 
   // Start the timer here since we have at least one active user object
   std::string compute_uo_tag = "computeUserObjects(" + Moose::stringify(type) + ")";
-  Moose::perf_log.push(compute_uo_tag, "Execution");
 
   // Perform Residual/Jacobian setups
   if (type == EXEC_LINEAR)
@@ -2973,8 +3012,6 @@ FEProblemBase::computeUserObjects(const ExecFlagType & type, const Moose::AuxGro
         _vpps_data.broadcastScatterVectors(vpp->PPName());
     }
   }
-
-  Moose::perf_log.pop(compute_uo_tag, "Execution");
 }
 
 void
@@ -2982,6 +3019,8 @@ FEProblemBase::executeControls(const ExecFlagType & exec_type)
 {
   if (_control_warehouse[exec_type].hasActiveObjects())
   {
+    TIME_SECTION(_execute_controls_timer);
+
     DependencyResolver<std::shared_ptr<Control>> resolver;
 
     auto controls_wh = _control_warehouse[exec_type];
@@ -3012,14 +3051,10 @@ FEProblemBase::executeControls(const ExecFlagType & exec_type)
 
     if (!ordered_controls.empty())
     {
-      Moose::perf_log.push("computeControls()", "Execution");
-
       _control_warehouse.setup(exec_type);
       // Run the controls in the proper order
       for (const auto & control : ordered_controls)
         control->execute();
-
-      Moose::perf_log.pop("computeControls()", "Execution");
     }
   }
 }
@@ -3034,11 +3069,12 @@ FEProblemBase::executeSamplers(const ExecFlagType & exec_type)
     const auto & objects = _samplers[exec_type].getActiveObjects(tid);
     if (!objects.empty())
     {
+      TIME_SECTION(_execute_samplers_timer);
+
       Moose::perf_log.push("executeSamplers()", "Execution");
       _samplers.setup(exec_type);
       for (auto & sampler : objects)
         sampler->execute();
-      Moose::perf_log.pop("executeSamplers()", "Execution");
     }
   }
 }
@@ -3046,6 +3082,8 @@ FEProblemBase::executeSamplers(const ExecFlagType & exec_type)
 void
 FEProblemBase::updateActiveObjects()
 {
+  TIME_SECTION(_update_active_objects_timer);
+
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
   {
     _nl->updateActive(tid);
@@ -3081,6 +3119,8 @@ FEProblemBase::reportMooseObjectDependency(MooseObject * /*a*/, MooseObject * /*
 void
 FEProblemBase::reinitBecauseOfGhostingOrNewGeomObjects()
 {
+  TIME_SECTION(_reinit_because_of_ghosting_or_new_geom_objects_timer);
+
   // Need to see if _any_ processor has ghosted elems or geometry objects.
   bool needs_reinit = !_ghosted_elems.empty();
   needs_reinit = needs_reinit || !_geometric_search_data._nearest_node_locators.empty();
@@ -3250,6 +3290,8 @@ FEProblemBase::getMultiApp(const std::string & multi_app_name) const
 void
 FEProblemBase::execMultiAppTransfers(ExecFlagType type, MultiAppTransfer::DIRECTION direction)
 {
+  TIME_SECTION(_exec_multi_app_transfers_timer);
+
   bool to_multiapp = direction == MultiAppTransfer::TO_MULTIAPP;
   std::string string_direction = to_multiapp ? " To " : " From ";
   const MooseObjectWarehouse<Transfer> & wh =
@@ -3262,11 +3304,7 @@ FEProblemBase::execMultiAppTransfers(ExecFlagType type, MultiAppTransfer::DIRECT
     _console << COLOR_CYAN << "\nStarting Transfers on " << Moose::stringify(type)
              << string_direction << "MultiApps" << COLOR_DEFAULT << std::endl;
     for (const auto & transfer : transfers)
-    {
-      Moose::perf_log.push(transfer->name(), "Transfers");
       transfer->execute();
-      Moose::perf_log.pop(transfer->name(), "Transfers");
-    }
 
     _console << "Waiting For Transfers To Finish" << '\n';
     MooseUtils::parallelBarrierNotify(_communicator, _parallel_barrier_messaging);
@@ -3743,6 +3781,8 @@ FEProblemBase::init()
   if (_initialized)
     return;
 
+  TIME_SECTION(_init_timer);
+
   unsigned int n_vars = _nl->nVariables();
   switch (_coupling)
   {
@@ -3780,19 +3820,16 @@ FEProblemBase::init()
   if (solverParams()._type == Moose::ST_JFNK)
     _nl->turnOffJacobian();
 
-  Moose::perf_log.push("eq.init()", "Setup");
-  _eq.init();
-  Moose::perf_log.pop("eq.init()", "Setup");
+  {
+    TIME_SECTION(_eq_init_timer);
+    _eq.init();
+  }
 
-  Moose::perf_log.push("FEProblemBase::init::meshChanged()", "Setup");
   _mesh.meshChanged();
   if (_displaced_problem)
     _displaced_mesh->meshChanged();
-  Moose::perf_log.pop("FEProblemBase::init::meshChanged()", "Setup");
 
-  Moose::perf_log.push("NonlinearSystem::update()", "Setup");
   _nl->update();
-  Moose::perf_log.pop("NonlinearSystem::update()", "Setup");
 
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
     _assembly[tid]->init(_cm.get());
@@ -3810,7 +3847,7 @@ FEProblemBase::init()
 void
 FEProblemBase::solve()
 {
-  Moose::perf_log.push("solve()", "Execution");
+  TIME_SECTION(_solve_timer);
 
 #ifdef LIBMESH_HAVE_PETSC
   Moose::PetscSupport::petscSetOptions(*this); // Make sure the PETSc options are setup for this app
@@ -3837,8 +3874,6 @@ FEProblemBase::solve()
   // sync solutions in displaced problem
   if (_displaced_problem)
     _displaced_problem->syncSolutions();
-
-  Moose::perf_log.pop("solve()", "Execution");
 }
 
 void
@@ -3851,6 +3886,8 @@ FEProblemBase::setException(const std::string & message)
 void
 FEProblemBase::checkExceptionAndStopSolve()
 {
+  TIME_SECTION(_check_exception_and_stop_solve_timer);
+
   // See if any processor had an exception.  If it did, get back the
   // processor that the exception occurred on.
   unsigned int processor_id;
@@ -3928,6 +3965,8 @@ FEProblemBase::copySolutionsBackwards()
 void
 FEProblemBase::advanceState()
 {
+  TIME_SECTION(_advance_state_timer);
+
   _nl->copyOldSolutions();
   _aux->copyOldSolutions();
 
@@ -3953,6 +3992,8 @@ FEProblemBase::advanceState()
 void
 FEProblemBase::restoreSolutions()
 {
+  TIME_SECTION(_restore_solutions_timer);
+
   _nl->restoreSolutions();
   _aux->restoreSolutions();
 
@@ -3963,6 +4004,8 @@ FEProblemBase::restoreSolutions()
 void
 FEProblemBase::saveOldSolutions()
 {
+  TIME_SECTION(_save_old_solutions_timer);
+
   _nl->saveOldSolutions();
   _aux->saveOldSolutions();
 }
@@ -3970,6 +4013,8 @@ FEProblemBase::saveOldSolutions()
 void
 FEProblemBase::restoreOldSolutions()
 {
+  TIME_SECTION(_restore_old_solutions_timer);
+
   _nl->restoreOldSolutions();
   _aux->restoreOldSolutions();
 }
@@ -3977,6 +4022,8 @@ FEProblemBase::restoreOldSolutions()
 void
 FEProblemBase::outputStep(ExecFlagType type)
 {
+  TIME_SECTION(_output_step_timer);
+
   _nl->update();
   _aux->update();
   if (_displaced_problem != NULL)
@@ -4006,6 +4053,8 @@ FEProblemBase::initPetscOutput()
 void
 FEProblemBase::onTimestepBegin()
 {
+  TIME_SECTION(_on_timestep_begin_timer);
+
   _nl->onTimestepBegin();
 }
 
@@ -4038,6 +4087,8 @@ FEProblemBase::addPredictor(const std::string & type,
 Real
 FEProblemBase::computeResidualL2Norm()
 {
+  TIME_SECTION(_compute_residual_l2_norm_timer);
+
   computeResidual(*_nl->currentSolution(), _nl->RHS());
 
   return _nl->RHS().l2_norm();
@@ -4048,6 +4099,8 @@ FEProblemBase::computeResidualSys(NonlinearImplicitSystem & /*sys*/,
                                   const NumericVector<Number> & soln,
                                   NumericVector<Number> & residual)
 {
+  TIME_SECTION(_compute_residual_sys_timer);
+
   computeResidual(soln, residual);
 }
 
@@ -4108,6 +4161,8 @@ FEProblemBase::computeResidualInternal(const NumericVector<Number> & soln,
                                        NumericVector<Number> & residual,
                                        const std::set<TagID> & tags)
 {
+  TIME_SECTION(_compute_residual_internal_timer);
+
   try
   {
     _nl->setSolution(soln);
@@ -4137,6 +4192,8 @@ FEProblemBase::computeResidualType(const NumericVector<Number> & soln,
                                    NumericVector<Number> & residual,
                                    TagID tag)
 {
+  TIME_SECTION(_compute_residual_type_timer);
+
   try
   {
     _nl->setSolution(soln);
@@ -4167,6 +4224,8 @@ FEProblemBase::computeTransientImplicitResidual(Real time,
                                                 const NumericVector<Number> & udot,
                                                 NumericVector<Number> & residual)
 {
+  TIME_SECTION(_compute_transient_implicit_residual_timer);
+
   _nl->setSolutionUDot(udot);
   _time = time;
   computeResidual(u, residual);
@@ -4175,6 +4234,8 @@ FEProblemBase::computeTransientImplicitResidual(Real time,
 void
 FEProblemBase::computeResidualTags(const std::set<TagID> & tags)
 {
+  TIME_SECTION(_compute_residual_tags_timer);
+
   _nl->zeroVariablesForResidual();
   _aux->zeroVariablesForResidual();
 
@@ -4274,6 +4335,8 @@ FEProblemBase::computeJacobianInternal(const NumericVector<Number> & soln,
                                        SparseMatrix<Number> & jacobian,
                                        const std::set<TagID> & tags)
 {
+  TIME_SECTION(_compute_jacobian_internal_timer);
+
   _nl->setSolution(soln);
 
   _nl->associateMatrixToTag(jacobian, _nl->systemMatrixTag());
@@ -4288,6 +4351,8 @@ FEProblemBase::computeJacobianTags(const std::set<TagID> & tags)
 {
   if (!_has_jacobian || !_const_jacobian)
   {
+    TIME_SECTION(_compute_jacobian_tags_timer);
+
     for (auto tag : tags)
       if (_nl->hasMatrix(tag))
         _nl->getMatrix(tag).zero();
@@ -4359,6 +4424,8 @@ FEProblemBase::computeTransientImplicitJacobian(Real time,
 void
 FEProblemBase::computeJacobianBlocks(std::vector<JacobianBlock *> & blocks)
 {
+  TIME_SECTION(_compute_jacobian_blocks_timer);
+
   if (_displaced_problem != NULL)
     _displaced_problem->updateMesh();
 
@@ -4387,6 +4454,8 @@ FEProblemBase::computeBounds(NonlinearImplicitSystem & /*sys*/,
 {
   if (!_nl->hasVector("lower_bound") || !_nl->hasVector("upper_bound"))
     return;
+
+  TIME_SECTION(_compute_bounds_timer);
 
   NumericVector<Number> & _lower = _nl->getVector("lower_bound");
   NumericVector<Number> & _upper = _nl->getVector("upper_bound");
@@ -4459,7 +4528,8 @@ FEProblemBase::computePostCheck(NonlinearImplicitSystem & sys,
   // 3.) Recreate the code in PetscSupport::dampedCheck() to actually update
   //     the solution vector based on the damping, and set the "changed" flags
   //     appropriately.
-  Moose::perf_log.push("computePostCheck()", "Execution");
+
+  TIME_SECTION(_compute_post_check_timer);
 
   // MOOSE's FEProblemBase doesn't update the solution during the
   // postcheck, but FEProblemBase-derived classes might.
@@ -4516,15 +4586,13 @@ FEProblemBase::computePostCheck(NonlinearImplicitSystem & sys,
 
   // MOOSE doesn't change the search_direction
   changed_search_direction = false;
-
-  Moose::perf_log.pop("computePostCheck()", "Execution");
 }
 
 Real
 FEProblemBase::computeDamping(const NumericVector<Number> & soln,
                               const NumericVector<Number> & update)
 {
-  Moose::perf_log.push("compute_dampers()", "Execution");
+  TIME_SECTION(_compute_damping_timer);
 
   // Default to no damping
   Real damping = 1.0;
@@ -4590,6 +4658,8 @@ FEProblemBase::possiblyRebuildGeomSearchPatches()
 {
   if (_displaced_problem) // Only need to do this if things are moving...
   {
+    TIME_SECTION(_possibly_rebuild_geom_search_patches_timer);
+
     switch (_mesh.getPatchUpdateStrategy())
     {
       case Moose::Never:
@@ -4650,25 +4720,30 @@ FEProblemBase::initialAdaptMesh()
 {
   unsigned int n = adaptivity().getInitialSteps();
   _cycles_completed = 0;
-  for (unsigned int i = 0; i < n; i++)
+  if (n)
   {
-    _console << "Initial adaptivity step " << i + 1 << " of " << n << std::endl;
-    computeIndicators();
-    computeMarkers();
+    TIME_SECTION(_initial_adapt_mesh_timer);
 
-    if (_adaptivity.initialAdaptMesh())
+    for (unsigned int i = 0; i < n; i++)
     {
-      meshChanged();
+      _console << "Initial adaptivity step " << i + 1 << " of " << n << std::endl;
+      computeIndicators();
+      computeMarkers();
 
-      // reproject the initial condition
-      projectSolution();
+      if (_adaptivity.initialAdaptMesh())
+      {
+        meshChanged();
 
-      _cycles_completed++;
-    }
-    else
-    {
-      _console << "Mesh unchanged, skipping remaining steps..." << std::endl;
-      return;
+        // reproject the initial condition
+        projectSolution();
+
+        _cycles_completed++;
+      }
+      else
+      {
+        _console << "Mesh unchanged, skipping remaining steps..." << std::endl;
+        return;
+      }
     }
   }
 }
@@ -4682,9 +4757,9 @@ FEProblemBase::adaptMesh()
   if (!_adaptivity.isAdaptivityDue())
     return false;
 
-  unsigned int cycles_per_step = _adaptivity.getCyclesPerStep();
+  TIME_SECTION(_adapt_mesh_timer);
 
-  Moose::perf_log.push("Adaptivity: adaptMesh()", "Execution");
+  unsigned int cycles_per_step = _adaptivity.getCyclesPerStep();
 
   bool mesh_changed = false;
 
@@ -4718,8 +4793,6 @@ FEProblemBase::adaptMesh()
   if (mesh_changed)
     _eq.reinit_systems();
 
-  Moose::perf_log.pop("Adaptivity: adaptMesh()", "Execution");
-
   return mesh_changed;
 }
 #endif // LIBMESH_ENABLE_AMR
@@ -4746,6 +4819,8 @@ FEProblemBase::initXFEM(std::shared_ptr<XFEMInterface> xfem)
 bool
 FEProblemBase::updateMeshXFEM()
 {
+  TIME_SECTION(_update_mesh_xfem_timer);
+
   bool updated = false;
   if (haveXFEM())
   {
@@ -4766,12 +4841,16 @@ FEProblemBase::updateMeshXFEM()
 void
 FEProblemBase::meshChanged()
 {
+  TIME_SECTION(_mesh_changed_timer);
+
   this->meshChangedHelper();
 }
 
 void
 FEProblemBase::meshChangedHelper(bool intermediate_change)
 {
+  TIME_SECTION(_mesh_changed_helper_timer);
+
   if (_material_props.hasStatefulProperties() || _bnd_material_props.hasStatefulProperties() ||
       _neighbor_material_props.hasStatefulProperties())
     _mesh.cacheChangedLists(); // Currently only used with adaptivity and stateful material
@@ -4864,6 +4943,8 @@ FEProblemBase::notifyWhenMeshChanges(MeshChangedInterface * mci)
 void
 FEProblemBase::checkProblemIntegrity()
 {
+  TIME_SECTION(_check_problem_integrity_timer);
+
   // Check for unsatisfied actions
   const std::set<SubdomainID> & mesh_subdomains = _mesh.meshSubdomains();
 
@@ -4931,8 +5012,9 @@ FEProblemBase::checkProblemIntegrity()
                   std::ostream_iterator<unsigned int>(extra_subdomain_ids, " "));
 
         mooseError("The following blocks from your input mesh do not contain an active material: " +
-                   extra_subdomain_ids.str() + "\nWhen ANY mesh block contains a Material object, "
-                                               "all blocks must contain a Material object.\n");
+                   extra_subdomain_ids.str() +
+                   "\nWhen ANY mesh block contains a Material object, "
+                   "all blocks must contain a Material object.\n");
       }
     }
 
@@ -5173,6 +5255,8 @@ FEProblemBase::checkCoordinateSystems()
 void
 FEProblemBase::serializeSolution()
 {
+  TIME_SECTION(_serialize_solution_timer);
+
   _nl->serializeSolution();
   _aux->serializeSolution();
 }
@@ -5215,6 +5299,8 @@ FEProblemBase::checkNonlinearConvergence(std::string & msg,
                                          const Real initial_residual_before_preset_bcs,
                                          const Real div_threshold)
 {
+  TIME_SECTION(_check_nonlinear_convergence_timer);
+
   NonlinearSystemBase & system = getNonlinearSystemBase();
   MooseNonlinearConvergenceReason reason = MOOSE_NONLINEAR_ITERATING;
 
@@ -5288,6 +5374,8 @@ FEProblemBase::checkLinearConvergence(std::string & /*msg*/,
                                       const Real /*dtol*/,
                                       const PetscInt maxits)
 {
+  TIME_SECTION(_check_linear_convergence_timer);
+
   if (_fail_next_linear_convergence_check)
   {
     // Unset the flag
