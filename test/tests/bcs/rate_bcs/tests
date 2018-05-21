@@ -4,7 +4,6 @@
     input = 'bc_rate_dirichlet.i'
     exodiff = 'bc_rate_dirichlet_out.e'
   [../]
-
   [./bc_rate_preset_test]
     type = 'Exodiff'
     input = 'bc_rate_preset.i'

@@ -60,6 +60,7 @@
   [../]
 []
 
+
 [Controls]
   [./first_stage]
     type = TimePeriod
