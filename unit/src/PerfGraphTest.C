@@ -38,6 +38,12 @@ TEST(PerfGraphTest, test)
       PerfGuard guard(graph, a_id);
       for (auto & aval : a_vec)
         aval += a++;
+
+      {
+        PerfGuard guard(graph, c_id);
+        for (auto & cval : c_vec)
+          cval += c++;
+      }
     }
 
     {

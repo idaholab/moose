@@ -29,6 +29,9 @@ class PerfGuard
 public:
   /**
    * Start timing for the given ID
+   *
+   * @param graph The graph to add time into
+   * @param id The unique id of the section
    */
   PerfGuard(PerfGraph & graph, PerfID id);
 

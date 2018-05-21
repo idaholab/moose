@@ -19,6 +19,8 @@ PerfGraph::PerfGraph() : _current_position(0), _active(true)
   _root_node = libmesh_make_unique<PerfNode>(registerSection("root"));
 
   _stack[0] = _root_node.get();
+
+  _root_start = std::chrono::steady_clock::now();
 }
 
 PerfGraph::~PerfGraph() {}
@@ -71,6 +73,7 @@ recursivelyPrintGraph(PerfGraph & graph, PerfNode * current_node, unsigned int c
 
   std::cout << std::string(current_depth, ' ') << name
             << " self: " << std::chrono::duration<double>(current_node->selfTime()).count()
+            << " children: " << std::chrono::duration<double>(current_node->childrenTime()).count()
             << " total: " << std::chrono::duration<double>(current_node->totalTime()).count()
             << "\n";
 
@@ -81,6 +84,7 @@ recursivelyPrintGraph(PerfGraph & graph, PerfNode * current_node, unsigned int c
 void
 PerfGraph::print()
 {
+  updateRoot();
   recursivelyPrintGraph(*this, _root_node.get());
 }
 
@@ -90,4 +94,14 @@ PerfGraph::sectionName(PerfID id)
   auto & name = _id_to_section_name.at(id);
 
   return name;
+}
+
+void
+PerfGraph::updateRoot()
+{
+  auto now = std::chrono::steady_clock::now();
+
+  _root_node->addTime(now - _root_start);
+
+  _root_start = now;
 }

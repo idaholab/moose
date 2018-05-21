@@ -79,8 +79,16 @@ public:
   void setActive(bool active) { _active = active; }
 
 protected:
+  /**
+   * Udates the time for the root node
+   */
+  void updateRoot();
+
   /// The root node of the graph
   std::unique_ptr<PerfNode> _root_node;
+
+  /// The start time of the root
+  std::chrono::time_point<std::chrono::steady_clock> _root_start;
 
   /// The current node position in the stack
   unsigned int _current_position;
