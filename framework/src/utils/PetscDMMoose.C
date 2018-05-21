@@ -617,14 +617,10 @@ DMMooseGetEmbedding_Private(DM dm, IS * embedding)
           for (const auto & bit : *(dmm->_block_ids))
           {
             subdomain_id_type b = bit.second;
-            MeshBase::const_element_iterator el =
-                dmm->_nl->system().get_mesh().active_local_subdomain_elements_begin(b);
-            MeshBase::const_element_iterator end_el =
-                dmm->_nl->system().get_mesh().active_local_subdomain_elements_end(b);
-            for (; el != end_el; ++el)
+            for (const auto & elem :
+                 as_range(dmm->_nl->system().get_mesh().active_local_subdomain_elements_begin(b),
+                          dmm->_nl->system().get_mesh().active_local_subdomain_elements_end(b)))
             {
-              const Elem * elem = *el;
-
               // Get the degree of freedom indices for the given variable off the current element.
               std::vector<dof_id_type> evindices;
               dofmap.dof_indices(elem, evindices, v);
@@ -637,14 +633,9 @@ DMMooseGetEmbedding_Private(DM dm, IS * embedding)
 
             // Sometime, we own nodes but do not own the elements the nodes connected to
             {
-              MeshBase::const_node_iterator node_it =
-                  dmm->_nl->system().get_mesh().local_nodes_begin();
-              const MeshBase::const_node_iterator node_end =
-                  dmm->_nl->system().get_mesh().local_nodes_end();
               bool is_on_current_block = false;
-              for (; node_it != node_end; ++node_it)
+              for (auto & node : dmm->_nl->system().get_mesh().local_node_ptr_range())
               {
-                Node * node = *node_it;
                 const unsigned int n_comp = node->n_comp(dmm->_nl->system().number(), v);
 
                 // skip it if no dof

@@ -76,11 +76,8 @@ ElementJacobianDamper::computeDamping(const NumericVector<Number> & /* solution 
   std::vector<Point> point_copies;
 
   // Loop over elements in the mesh
-  const MeshBase::element_iterator end = _mesh->getMesh().active_local_elements_end();
-  for (auto el = _mesh->getMesh().active_local_elements_begin(); el != end; ++el)
+  for (auto & current_elem : _mesh->getMesh().active_local_element_ptr_range())
   {
-    Elem * current_elem = *el;
-
     point_copies.clear();
     point_copies.reserve(current_elem->n_nodes());
 

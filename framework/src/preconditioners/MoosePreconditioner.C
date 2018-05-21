@@ -55,48 +55,35 @@ MoosePreconditioner::copyVarValues(MeshBase & mesh,
                                    const unsigned int to_var,
                                    NumericVector<Number> & to_vector)
 {
+  for (auto & node : mesh.local_node_ptr_range())
   {
-    MeshBase::node_iterator it = mesh.local_nodes_begin();
-    MeshBase::node_iterator it_end = mesh.local_nodes_end();
+    unsigned int n_comp = node->n_comp(from_system, from_var);
 
-    for (; it != it_end; ++it)
+    mooseAssert(node->n_comp(from_system, from_var) == node->n_comp(to_system, to_var),
+                "Number of components does not match in each system");
+
+    for (unsigned int i = 0; i < n_comp; i++)
     {
-      Node * node = *it;
+      dof_id_type from_dof = node->dof_number(from_system, from_var, i);
+      dof_id_type to_dof = node->dof_number(to_system, to_var, i);
 
-      unsigned int n_comp = node->n_comp(from_system, from_var);
-
-      mooseAssert(node->n_comp(from_system, from_var) == node->n_comp(to_system, to_var),
-                  "Number of components does not match in each system");
-
-      for (unsigned int i = 0; i < n_comp; i++)
-      {
-        dof_id_type from_dof = node->dof_number(from_system, from_var, i);
-        dof_id_type to_dof = node->dof_number(to_system, to_var, i);
-
-        to_vector.set(to_dof, from_vector(from_dof));
-      }
+      to_vector.set(to_dof, from_vector(from_dof));
     }
   }
+
+  for (auto & elem : as_range(mesh.local_elements_begin(), mesh.local_elements_end()))
   {
-    MeshBase::element_iterator it = mesh.local_elements_begin();
-    MeshBase::element_iterator it_end = mesh.local_elements_end();
+    unsigned int n_comp = elem->n_comp(from_system, from_var);
 
-    for (; it != it_end; ++it)
+    mooseAssert(elem->n_comp(from_system, from_var) == elem->n_comp(to_system, to_var),
+                "Number of components does not match in each system");
+
+    for (unsigned int i = 0; i < n_comp; i++)
     {
-      Elem * elem = *it;
+      dof_id_type from_dof = elem->dof_number(from_system, from_var, i);
+      dof_id_type to_dof = elem->dof_number(to_system, to_var, i);
 
-      unsigned int n_comp = elem->n_comp(from_system, from_var);
-
-      mooseAssert(elem->n_comp(from_system, from_var) == elem->n_comp(to_system, to_var),
-                  "Number of components does not match in each system");
-
-      for (unsigned int i = 0; i < n_comp; i++)
-      {
-        dof_id_type from_dof = elem->dof_number(from_system, from_var, i);
-        dof_id_type to_dof = elem->dof_number(to_system, to_var, i);
-
-        to_vector.set(to_dof, from_vector(from_dof));
-      }
+      to_vector.set(to_dof, from_vector(from_dof));
     }
   }
 }

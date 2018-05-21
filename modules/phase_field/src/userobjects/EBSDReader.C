@@ -346,12 +346,10 @@ EBSDReader::buildNodeWeightMaps()
   libMesh::MeshBase & mesh = _mesh.getMesh();
 
   // Loop through each node in mesh and calculate eta values for each grain associated with the node
-  MeshBase::const_node_iterator ni = mesh.active_nodes_begin();
-  const MeshBase::const_node_iterator nend = mesh.active_nodes_end();
-  for (; ni != nend; ++ni)
+  for (const auto & node : as_range(mesh.active_nodes_begin(), mesh.active_nodes_end()))
   {
     // Get node_id
-    const dof_id_type node_id = (*ni)->id();
+    const dof_id_type node_id = node->id();
 
     // Initialize map entries for current node
     _node_to_grain_weight_map[node_id].assign(getGrainNum(), 0.0);

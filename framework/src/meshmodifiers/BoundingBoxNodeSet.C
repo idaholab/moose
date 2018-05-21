@@ -64,14 +64,12 @@ BoundingBoxNodeSet::modify()
   const bool inside = (_location == "INSIDE");
 
   // Loop over the elements and assign node set id to nodes within the bounding box
-  for (auto node = mesh.active_nodes_begin(); node != mesh.active_nodes_end(); ++node)
-  {
-    if (_bounding_box.contains_point(**node) == inside)
+  for (auto & node : as_range(mesh.active_nodes_begin(), mesh.active_nodes_end()))
+    if (_bounding_box.contains_point(*node) == inside)
     {
-      boundary_info.add_node(*node, boundary_ids[0]);
+      boundary_info.add_node(node, boundary_ids[0]);
       found_node = true;
     }
-  }
 
   // Unless at least one processor found a node in the bounding box,
   // the user probably specified it incorrectly.

@@ -131,13 +131,8 @@ MultiAppInterpolationTransfer::execute()
 
       if (from_is_nodal)
       {
-        MeshBase::const_node_iterator from_nodes_it = from_mesh->local_nodes_begin();
-        MeshBase::const_node_iterator from_nodes_end = from_mesh->local_nodes_end();
-
-        for (; from_nodes_it != from_nodes_end; ++from_nodes_it)
+        for (const auto & from_node : from_mesh->local_node_ptr_range())
         {
-          Node * from_node = *from_nodes_it;
-
           // Assuming LAGRANGE!
           dof_id_type from_dof = from_node->dof_number(from_sys_num, from_var_num, 0);
 
@@ -147,13 +142,9 @@ MultiAppInterpolationTransfer::execute()
       }
       else
       {
-        MeshBase::const_element_iterator from_elements_it = from_mesh->local_elements_begin();
-        MeshBase::const_element_iterator from_elements_end = from_mesh->local_elements_end();
-
-        for (; from_elements_it != from_elements_end; ++from_elements_it)
+        for (const auto & from_elem :
+             as_range(from_mesh->local_elements_begin(), from_mesh->local_elements_end()))
         {
-          Elem * from_elem = *from_elements_it;
-
           // Assuming CONSTANT MONOMIAL
           dof_id_type from_dof = from_elem->dof_number(from_sys_num, from_var_num, 0);
 
@@ -189,13 +180,8 @@ MultiAppInterpolationTransfer::execute()
 
           if (is_nodal)
           {
-            MeshBase::const_node_iterator node_it = mesh->local_nodes_begin();
-            MeshBase::const_node_iterator node_end = mesh->local_nodes_end();
-
-            for (; node_it != node_end; ++node_it)
+            for (const auto & node : mesh->local_node_ptr_range())
             {
-              Node * node = *node_it;
-
               Point actual_position = *node + _multi_app->position(i);
 
               if (node->n_dofs(sys_num, var_num) > 0) // If this variable has dofs at this node
@@ -219,13 +205,8 @@ MultiAppInterpolationTransfer::execute()
           }
           else // Elemental
           {
-            MeshBase::const_element_iterator elem_it = mesh->local_elements_begin();
-            MeshBase::const_element_iterator elem_end = mesh->local_elements_end();
-
-            for (; elem_it != elem_end; ++elem_it)
+            for (auto & elem : as_range(mesh->local_elements_begin(), mesh->local_elements_end()))
             {
-              Elem * elem = *elem_it;
-
               Point centroid = elem->centroid();
               Point actual_position = centroid + _multi_app->position(i);
 
@@ -348,13 +329,8 @@ MultiAppInterpolationTransfer::execute()
 
         if (from_is_nodal)
         {
-          MeshBase::const_node_iterator from_nodes_it = from_mesh->local_nodes_begin();
-          MeshBase::const_node_iterator from_nodes_end = from_mesh->local_nodes_end();
-
-          for (; from_nodes_it != from_nodes_end; ++from_nodes_it)
+          for (const auto & from_node : from_mesh->local_node_ptr_range())
           {
-            Node * from_node = *from_nodes_it;
-
             // Assuming LAGRANGE!
             dof_id_type from_dof = from_node->dof_number(from_sys_num, from_var_num, 0);
 
@@ -364,13 +340,9 @@ MultiAppInterpolationTransfer::execute()
         }
         else
         {
-          MeshBase::const_element_iterator from_elements_it = from_mesh->local_elements_begin();
-          MeshBase::const_element_iterator from_elements_end = from_mesh->local_elements_end();
-
-          for (; from_elements_it != from_elements_end; ++from_elements_it)
+          for (auto & from_element :
+               as_range(from_mesh->local_elements_begin(), from_mesh->local_elements_end()))
           {
-            Elem * from_element = *from_elements_it;
-
             // Assuming LAGRANGE!
             dof_id_type from_dof = from_element->dof_number(from_sys_num, from_var_num, 0);
 
@@ -386,13 +358,8 @@ MultiAppInterpolationTransfer::execute()
       // Now do the interpolation to the target system
       if (is_nodal)
       {
-        MeshBase::const_node_iterator node_it = to_mesh->local_nodes_begin();
-        MeshBase::const_node_iterator node_end = to_mesh->local_nodes_end();
-
-        for (; node_it != node_end; ++node_it)
+        for (auto & node : as_range(to_mesh->local_nodes_begin(), to_mesh->local_nodes_end()))
         {
-          Node * node = *node_it;
-
           if (node->n_dofs(to_sys_num, to_var_num) > 0) // If this variable has dofs at this node
           {
             std::vector<Point> pts;
@@ -414,13 +381,8 @@ MultiAppInterpolationTransfer::execute()
       }
       else // Elemental
       {
-        MeshBase::const_element_iterator elem_it = to_mesh->local_elements_begin();
-        MeshBase::const_element_iterator elem_end = to_mesh->local_elements_end();
-
-        for (; elem_it != elem_end; ++elem_it)
+        for (auto & elem : as_range(to_mesh->local_elements_begin(), to_mesh->local_elements_end()))
         {
-          Elem * elem = *elem_it;
-
           Point centroid = elem->centroid();
 
           if (elem->n_dofs(to_sys_num, to_var_num) > 0) // If this variable has dofs at this elem
@@ -463,14 +425,14 @@ MultiAppInterpolationTransfer::getNearestNode(const Point & p,
   distance = std::numeric_limits<Real>::max();
   Node * nearest = NULL;
 
-  for (MeshBase::const_node_iterator node_it = nodes_begin; node_it != nodes_end; ++node_it)
+  for (auto & node : as_range(nodes_begin, nodes_end))
   {
-    Real current_distance = (p - *(*node_it)).norm();
+    Real current_distance = (p - *node).norm();
 
     if (current_distance < distance)
     {
       distance = current_distance;
-      nearest = *node_it;
+      nearest = node;
     }
   }
 

@@ -675,13 +675,11 @@ MooseMesh::nodeToActiveSemilocalElemMap()
     Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
     if (!_node_to_active_semilocal_elem_map_built)
     {
-      MeshBase::const_element_iterator el = getMesh().semilocal_elements_begin();
-      const MeshBase::const_element_iterator end = getMesh().semilocal_elements_end();
-
-      for (; el != end; ++el)
-        if ((*el)->active())
-          for (unsigned int n = 0; n < (*el)->n_nodes(); n++)
-            _node_to_active_semilocal_elem_map[(*el)->node(n)].push_back((*el)->id());
+      for (const auto & elem :
+           as_range(getMesh().semilocal_elements_begin(), getMesh().semilocal_elements_end()))
+        if (elem->active())
+          for (unsigned int n = 0; n < elem->n_nodes(); n++)
+            _node_to_active_semilocal_elem_map[elem->node_id(n)].push_back(elem->id());
 
       _node_to_active_semilocal_elem_map_built =
           true; // MUST be set at the end for double-checked locking to work!
@@ -1305,12 +1303,8 @@ MooseMesh::detectPairedSidesets()
   BoundaryInfo & boundary_info = getMesh().get_boundary_info();
   std::vector<boundary_id_type> face_ids;
 
-  MeshBase::const_element_iterator el = getMesh().level_elements_begin(0);
-  const MeshBase::const_element_iterator end_el = getMesh().level_elements_end(0);
-  for (; el != end_el; ++el)
+  for (auto & elem : as_range(getMesh().level_elements_begin(0), getMesh().level_elements_end(0)))
   {
-    Elem * elem = *el;
-
     // dimension of the current element and its normals
     unsigned int side_dim = elem->dim() - 1;
     const std::vector<Point> & normals = fe_faces[side_dim]->get_normals();
@@ -1826,11 +1820,8 @@ MooseMesh::changeBoundaryId(const boundary_id_type old_id,
   std::vector<boundary_id_type> old_ids;
 
   // Only level-0 elements store BCs.  Loop over them.
-  MeshBase::element_iterator el = getMesh().level_elements_begin(0);
-  const MeshBase::element_iterator end_el = getMesh().level_elements_end(0);
-  for (; el != end_el; ++el)
+  for (auto & elem : as_range(getMesh().level_elements_begin(0), getMesh().level_elements_end(0)))
   {
-    Elem * elem = *el;
     unsigned int n_sides = elem->n_sides();
     for (unsigned int s = 0; s != n_sides; ++s)
     {
@@ -2569,11 +2560,8 @@ MooseMesh::addMortarInterface(const std::string & name,
   iface->_slave = slave;
   iface->_name = name;
 
-  MeshBase::element_iterator el = _mesh->level_elements_begin(0);
-  const MeshBase::element_iterator end_el = _mesh->level_elements_end(0);
-  for (; el != end_el; ++el)
+  for (auto & elem : as_range(_mesh->level_elements_begin(0), _mesh->level_elements_end(0)))
   {
-    Elem * elem = *el;
     if (elem->subdomain_id() == domain_id)
       iface->_elems.push_back(elem);
   }

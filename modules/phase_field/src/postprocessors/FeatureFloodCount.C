@@ -287,11 +287,8 @@ FeatureFloodCount::meshChanged()
 void
 FeatureFloodCount::execute()
 {
-  const auto end = _mesh.getMesh().active_local_elements_end();
-  for (auto el = _mesh.getMesh().active_local_elements_begin(); el != end; ++el)
+  for (const auto & current_elem : _mesh.getMesh().active_local_element_ptr_range())
   {
-    const Elem * current_elem = *el;
-
     // Loop over elements or nodes
     if (_is_elemental)
     {

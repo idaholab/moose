@@ -340,13 +340,9 @@ XFEM::buildEFAMesh()
 {
   _efa_mesh.reset();
 
-  MeshBase::element_iterator elem_it = _mesh->elements_begin();
-  const MeshBase::element_iterator elem_end = _mesh->elements_end();
-
   // Load all existing elements in to EFA mesh
-  for (elem_it = _mesh->elements_begin(); elem_it != elem_end; ++elem_it)
+  for (auto & elem : _mesh->element_ptr_range())
   {
-    Elem * elem = *elem_it;
     std::vector<unsigned int> quad;
     for (unsigned int i = 0; i < elem->n_nodes(); ++i)
       quad.push_back(elem->node(i));
@@ -359,9 +355,8 @@ XFEM::buildEFAMesh()
   }
 
   // Restore fragment information for elements that have been previously cut
-  for (elem_it = _mesh->elements_begin(); elem_it != elem_end; ++elem_it)
+  for (auto & elem : _mesh->element_ptr_range())
   {
-    Elem * elem = *elem_it;
     std::map<unique_id_type, XFEMCutElem *>::iterator cemit = _cut_elem_map.find(elem->unique_id());
     if (cemit != _cut_elem_map.end())
     {
@@ -781,9 +776,6 @@ XFEM::markCutEdgesByState(Real time)
         _efa_mesh.addElemEdgeIntersection(elem->id(), edge_id_keep, distance_keep);
       else
       {
-        MeshBase::element_iterator elem_it = _mesh->elements_begin();
-        const MeshBase::element_iterator elem_end = _mesh->elements_end();
-
         Point growth_direction(0.0, 0.0, 0.0);
 
         growth_direction(0) = -normal_keep(1);
@@ -799,9 +791,8 @@ XFEM::markCutEdgesByState(Real time)
 
         XFEMCrackGrowthIncrement2DCut geometric_cut(x0, y0, x1, y1, time * 0.9, time * 0.9);
 
-        for (; elem_it != elem_end; ++elem_it)
+        for (const auto & elem : _mesh->element_ptr_range())
         {
-          const Elem * elem = *elem_it;
           std::vector<CutEdgeForCrackGrowthIncr> elem_cut_edges;
           EFAElement2D * CEMElem = getEFAElem2D(elem);
 
@@ -1909,10 +1900,8 @@ XFEM::setSolution(SystemBase & sys,
                   NumericVector<Number> & old_solution,
                   NumericVector<Number> & older_solution)
 {
-  const auto nodes_end = _mesh->local_nodes_end();
-  for (auto node_it = _mesh->local_nodes_begin(); node_it != nodes_end; ++node_it)
+  for (auto & node : _mesh->local_node_ptr_range())
   {
-    Node * node = *node_it;
     auto mit = stored_solution.find(node->unique_id());
     if (mit != stored_solution.end())
     {
@@ -1926,10 +1915,8 @@ XFEM::setSolution(SystemBase & sys,
     }
   }
 
-  const auto elems_end = _mesh->local_elements_end();
-  for (auto elem_it = _mesh->local_elements_begin(); elem_it != elems_end; ++elem_it)
+  for (auto & elem : as_range(_mesh->local_elements_begin(), _mesh->local_elements_end()))
   {
-    Elem * elem = *elem_it;
     auto mit = stored_solution.find(elem->unique_id());
     if (mit != stored_solution.end())
     {

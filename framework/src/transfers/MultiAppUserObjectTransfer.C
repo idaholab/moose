@@ -96,13 +96,8 @@ MultiAppUserObjectTransfer::execute()
 
           if (is_nodal)
           {
-            MeshBase::const_node_iterator node_it = mesh->local_nodes_begin();
-            MeshBase::const_node_iterator node_end = mesh->local_nodes_end();
-
-            for (; node_it != node_end; ++node_it)
+            for (auto & node : mesh->local_node_ptr_range())
             {
-              Node * node = *node_it;
-
               if (node->n_dofs(sys_num, var_num) > 0) // If this variable has dofs at this node
               {
                 // The zero only works for LAGRANGE!
@@ -118,13 +113,8 @@ MultiAppUserObjectTransfer::execute()
           }
           else // Elemental
           {
-            MeshBase::const_element_iterator elem_it = mesh->local_elements_begin();
-            MeshBase::const_element_iterator elem_end = mesh->local_elements_end();
-
-            for (; elem_it != elem_end; ++elem_it)
+            for (auto & elem : as_range(mesh->local_elements_begin(), mesh->local_elements_end()))
             {
-              Elem * elem = *elem_it;
-
               Point centroid = elem->centroid();
 
               if (elem->n_dofs(sys_num, var_num) > 0) // If this variable has dofs at this elem
@@ -192,13 +182,8 @@ MultiAppUserObjectTransfer::execute()
 
         if (is_nodal)
         {
-          MeshBase::const_node_iterator node_it = to_mesh->nodes_begin();
-          MeshBase::const_node_iterator node_end = to_mesh->nodes_end();
-
-          for (; node_it != node_end; ++node_it)
+          for (auto & node : to_mesh->node_ptr_range())
           {
-            Node * node = *node_it;
-
             if (node->n_dofs(to_sys_num, to_var_num) > 0) // If this variable has dofs at this node
             {
               // See if this node falls in this bounding box
@@ -219,13 +204,8 @@ MultiAppUserObjectTransfer::execute()
         }
         else // Elemental
         {
-          MeshBase::const_element_iterator elem_it = to_mesh->elements_begin();
-          MeshBase::const_element_iterator elem_end = to_mesh->elements_end();
-
-          for (; elem_it != elem_end; ++elem_it)
+          for (auto & elem : as_range(to_mesh->elements_begin(), to_mesh->elements_end()))
           {
-            Elem * elem = *elem_it;
-
             if (elem->n_dofs(to_sys_num, to_var_num) > 0) // If this variable has dofs at this elem
             {
               Point centroid = elem->centroid();
