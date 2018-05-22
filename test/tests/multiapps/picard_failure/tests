@@ -9,5 +9,28 @@
     petsc_version = '>=3.6.1'
     allow_warnings = true
     petsc_version_release = true
+
+    design = '/MultiApps/index.md'
+    requirement = 'Multiapps shall be able to be restored when a subapp encounters a solve failure.'
+    issues = '#5126'
+  [../]
+
+  [./test_csv]
+    type = 'CSVDiff'
+    input = 'picard_master.i'
+    csvdiff = 'picard_master_out_sub0.csv picard_master_out.csv'
+    max_parallel = 1 # This is here because we're counting residual evaluations
+    max_threads = 1 # NanAtCountKernel changes behavior with threads
+    recover = false
+    petsc_version = '>=3.6.1'
+    allow_warnings = true
+    petsc_version_release = true
+
+    # Turn off Exodus and turn on CSV globally
+    cli_args = ':Outputs/csv=true :Outputs/exodus=false'
+
+    design = '/MultiApps/index.md'
+    requirement = 'CSV file writing should remain unaffected when a subapp encounters a solve failure.'
+    issues = '#11178'
   [../]
 []
