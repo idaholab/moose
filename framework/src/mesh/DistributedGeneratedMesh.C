@@ -125,7 +125,7 @@ DistributedGeneratedMesh::DistributedGeneratedMesh(const InputParameters & param
 }
 
 Real
-DistributedGeneratedMesh::getMinInDimension(dof_id_type component) const
+DistributedGeneratedMesh::getMinInDimension(unsigned int component) const
 {
   switch (component)
   {
@@ -141,7 +141,7 @@ DistributedGeneratedMesh::getMinInDimension(dof_id_type component) const
 }
 
 Real
-DistributedGeneratedMesh::getMaxInDimension(dof_id_type component) const
+DistributedGeneratedMesh::getMaxInDimension(unsigned int component) const
 {
   switch (component)
   {
@@ -1086,13 +1086,9 @@ build_cube(UnstructuredMesh & mesh,
     // Weight by the number of nodes
     std::vector<Metis::idx_t> vwgt(num_elems, canonical_elem->n_nodes());
 
-    auto n = static_cast<Metis::idx_t>(num_elems), // number of "nodes" (elements) in the graph
-                                                   // wgtflag = 2,                                //
-                                                   // weights on vertices only, none on edges
-                                                   // numflag = 0,                                //
-                                                   // C-style 0-based numbering
-        nparts = static_cast<Metis::idx_t>(n_pieces), // number of subdomains to create
-        edgecut = 0; // the numbers of edges cut by the resulting partition
+    Metis::idx_t n = num_elems, // number of "nodes" (elements) in the graph
+        nparts = n_pieces,      // number of subdomains to create
+        edgecut = 0;            // the numbers of edges cut by the resulting partition
 
     METIS_CSR_Graph<Metis::idx_t> csr_graph;
 
