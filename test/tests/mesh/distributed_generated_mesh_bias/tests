@@ -1,0 +1,13 @@
+[Tests]
+  [./test]
+    requirement = 'DistributedGeneratedMesh shall allow mesh biasing'
+    design = '/DistributedGeneratedMesh.md'
+    issues = '#11485 #11505'
+    type = 'Exodiff'
+    input = 'distributed_generated_mesh_bias.i'
+    cli_args = '--mesh-only=bias.e'
+    exodiff = 'bias.e'
+    min_parallel = 2
+    recover = false # Can't do this with --mesh-only
+  [../]
+[]

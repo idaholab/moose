@@ -254,6 +254,11 @@ protected:
    */
   virtual void outputSystemInformation();
 
+  /**
+   * Flags to control nodal output
+   */
+  bool _elemental_as_nodal, _scalar_as_nodal;
+
 private:
   /**
    * Initializes the available lists for each of the output types

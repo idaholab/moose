@@ -164,6 +164,9 @@ private:
 
   /// Enum for the output dimension
   MooseEnum _output_dimension;
+
+  /// Flag to output discontinuous format in Exodus
+  bool _discontinuous;
 };
 
 #endif /* EXODUS_H */
