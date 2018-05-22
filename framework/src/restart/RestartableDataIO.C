@@ -46,6 +46,8 @@ RestartableDataIO::writeRestartableData(std::string base_file_name,
 
     std::string file_name = file_name_stream.str();
     out.open(file_name.c_str(), std::ios::out | std::ios::binary);
+    if (out.fail())
+      mooseError("Unable to open file ", file_name);
 
     serializeRestartableData(restartable_datas[tid], out);
 
@@ -64,11 +66,7 @@ RestartableDataIO::serializeRestartableData(
   const unsigned int file_version = 2;
 
   { // Write out header
-    char id[2];
-
-    // header
-    id[0] = 'R';
-    id[1] = 'D';
+    char id[] = {'R', 'D'};
 
     stream.write(id, 2);
     stream.write((const char *)&file_version, sizeof(file_version));

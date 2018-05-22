@@ -84,6 +84,9 @@ DOFMapOutput::writeStreamToFile(bool /*append*/)
 
   // Open the file and write contents of file output stream and close the file
   output.open(filename().c_str(), std::ios::trunc);
+  if (output.fail())
+    mooseError("Unable to open file ", filename());
+
   output << _file_output_stream.str();
   output.close();
 

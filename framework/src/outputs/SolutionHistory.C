@@ -43,6 +43,9 @@ SolutionHistory::output(const ExecFlagType & /*type*/)
 
   std::ofstream slh_file;
   slh_file.open(filename().c_str(), std::ios::app);
+  if (slh_file.fail())
+    mooseError("Unable to open file ", filename());
+
   slh_file << nl_sys._current_nl_its;
 
   for (const auto & linear_its : nl_sys._current_l_its)

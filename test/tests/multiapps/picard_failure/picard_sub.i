@@ -47,6 +47,14 @@
   [../]
 []
 
+[Postprocessors]
+  [./elem_average_value]
+    type = ElementAverageValue
+    variable = v
+    execute_on = 'initial timestep_end'
+  [../]
+[]
+
 [Executioner]
   type = Transient
   num_steps = 2

@@ -150,6 +150,9 @@ SplineInterpolation::dumpSampleFile(std::string base_name,
   libmesh_assert(_x.size() == _y.size());
 
   out.open(filename_pts.str().c_str());
+  if (out.fail())
+    throw std::runtime_error(std::string("Unable to open file ") + filename_pts.str());
+
   /* Next dump the data points into a seperate file */
   for (unsigned int i = 0; i < _x.size(); ++i)
     out << _x[i] << " " << _y[i] << "\n";
