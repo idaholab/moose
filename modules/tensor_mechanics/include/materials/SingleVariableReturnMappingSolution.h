@@ -98,7 +98,7 @@ protected:
   virtual void iterationFinalize(Real /*scalar*/) {}
 
   /**
-   * Output information about convergence history of the model
+   * Output information for a single iteration step to build the convergence history of the model
    * @param iter_output            Output stream
    * @param it                     Current iteration count
    * @param effective_trial_stress Effective trial stress
@@ -106,12 +106,19 @@ protected:
    * @param residual               Current value of the residual
    * @param reference              Current value of the reference quantity
    */
-  virtual void outputIterInfo(std::stringstream * iter_output,
-                              const unsigned int it,
-                              const Real effective_trial_stress,
-                              const Real scalar,
-                              const Real residual,
-                              const Real reference_residual);
+  virtual void outputIterationStep(std::stringstream * iter_output,
+                                   const unsigned int it,
+                                   const Real effective_trial_stress,
+                                   const Real scalar,
+                                   const Real residual,
+                                   const Real reference_residual);
+
+  /**
+   * Output summary information for the convergence history of the model
+   * @param iter_output            Output stream
+   * @param total_it               Total iteration count
+   */
+  virtual void outputIterationSummary(std::stringstream * iter_output, const unsigned int total_it);
 
   /// Whether to use the legacy return mapping algorithm and compute residuals in the legacy
   /// manner.
@@ -121,6 +128,13 @@ protected:
   bool _check_range;
 
 private:
+  enum class DebugLevel
+  {
+    NONE,
+    ALL,
+    ERROR
+  } _debug_level;
+
   /// Maximum number of return mapping iterations (used only in legacy return mapping)
   unsigned int _max_its;
 
@@ -152,6 +166,9 @@ private:
   /// History of residuals used to check whether progress is still being made on decreasing the residual
   std::vector<Real> _residual_history;
 
+  /// iteration number
+  unsigned int _iteration;
+
   /**
    * Method called from within this class to perform the actual return mappping iterations.
    * @param effective_trial_stress Effective trial stress
@@ -159,8 +176,9 @@ private:
    * @param iter_output            Output stream -- if null, no output is produced
    * @return Whether the solution was successful
    */
-  bool
-  internalSolve(const Real effective_trial_stress, Real & scalar, std::stringstream * iter_output);
+  bool internalSolve(const Real effective_trial_stress,
+                     Real & scalar,
+                     std::stringstream * iter_output = nullptr);
 
   /**
    * Method called from within this class to perform the actual return mappping iterations.

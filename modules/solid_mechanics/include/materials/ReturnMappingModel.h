@@ -70,6 +70,10 @@ public:
     return 0.0;
   }
 
+  /// Collect info on a nested solve
+  void outputIterationSummary(std::stringstream * iter_output,
+                              const unsigned int total_it) override;
+
 protected:
   /**
    * Perform any necessary initialization before return mapping iterations

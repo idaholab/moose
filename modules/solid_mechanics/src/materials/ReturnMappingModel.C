@@ -160,3 +160,15 @@ ReturnMappingModel::computeTimeStepLimit()
 
   return _dt * _max_inelastic_increment / scalar_inelastic_strain_incr;
 }
+
+void
+ReturnMappingModel::outputIterationSummary(std::stringstream * iter_output,
+                                           const unsigned int total_it)
+{
+  if (iter_output)
+  {
+    *iter_output << "At element " << _current_elem->id() << " _qp=" << _qp << " Coordinates "
+                 << _q_point[_qp] << " block=" << _current_elem->subdomain_id() << '\n';
+  }
+  SingleVariableReturnMappingSolution::outputIterationSummary(iter_output, total_it);
+}

@@ -10,8 +10,13 @@
 #include "SingleVariableReturnMappingSolution.h"
 
 #include "InputParameters.h"
-#include <cmath>
 #include "Conversion.h"
+#include "MooseEnum.h"
+#include "Moose.h"
+
+#include <limits>
+#include <string>
+#include <cmath>
 
 template <>
 InputParameters
@@ -21,13 +26,6 @@ validParams<SingleVariableReturnMappingSolution>()
 
   // Newton iteration control parameters
   params.addParam<unsigned int>("max_its", 30, "Maximum number of Newton iterations");
-  params.addParam<bool>(
-      "output_iteration_info", false, "Set true to output Newton iteration information");
-  params.addDeprecatedParam<bool>(
-      "output_iteration_info_on_error",
-      false,
-      "Set true to output Newton iteration information when those iterations fail",
-      "This information is always output when iterations fail");
   params.addParam<Real>(
       "relative_tolerance", 1e-8, "Relative convergence tolerance for Newton iteration");
   params.addParam<Real>(
@@ -44,6 +42,20 @@ validParams<SingleVariableReturnMappingSolution>()
                         "algorithm. Also use same old defaults for relative_tolerance, "
                         "absolute_tolerance, and max_its.");
 
+  // diagnostic output parameters
+  MooseEnum debug_level_enum("none error always", "error");
+  params.addParam<MooseEnum>(
+      "debug_level", debug_level_enum, "When to output Newton solve information");
+  params.addParam<bool>(
+      "output_iteration_info", false, "Set true to output full Newton iteration history");
+  params.addDeprecatedParam<bool>(
+      "output_iteration_info_on_error",
+      false,
+      "Set true to output Newton iteration information when those iterations fail",
+      "This parameter is replaced by the 'debug_level' parameter");
+  params.addParamNamesToGroup("debug_level output_iteration_info output_iteration_info_on_error",
+                              "Debug");
+
   return params;
 }
 
@@ -51,6 +63,7 @@ SingleVariableReturnMappingSolution::SingleVariableReturnMappingSolution(
     const InputParameters & parameters)
   : _legacy_return_mapping(false),
     _check_range(false),
+    _debug_level(parameters.get<MooseEnum>("debug_level").getEnum<DebugLevel>()),
     _max_its(parameters.get<unsigned int>("max_its")),
     _fixed_max_its(1000), // Far larger than ever expected to be needed
     _output_iteration_info(parameters.get<bool>("output_iteration_info")),
@@ -60,7 +73,8 @@ SingleVariableReturnMappingSolution::SingleVariableReturnMappingSolution(
     _line_search(true),
     _bracket_solution(true),
     _num_resids(30),
-    _residual_history(_num_resids, std::numeric_limits<Real>::max())
+    _residual_history(_num_resids, std::numeric_limits<Real>::max()),
+    _iteration(0)
 {
   if (parameters.get<bool>("legacy_return_mapping") == true)
   {
@@ -80,6 +94,21 @@ SingleVariableReturnMappingSolution::SingleVariableReturnMappingSolution(
     if (parameters.isParamSetByUser("max_its"))
       mooseWarning("Please remove the parameter 'max_its', as it is no longer used in the return "
                    "mapping procedure.");
+  }
+
+  if (parameters.isParamSetByUser("output_iteration_info_on_error"))
+  {
+    if (parameters.isParamSetByUser("debug_level"))
+    {
+      // paramError is unfortunately not available here
+      std::string param = "output_iteration_info_on_error";
+      auto prefix = param + ": ";
+      if (!parameters.inputLocation(param).empty())
+        prefix = parameters.inputLocation(param) + ": (" + parameters.paramFullpath(param) + ") ";
+      mooseError(prefix, "Remove this parameter and set\ndebug_level = error\ninstead.");
+    }
+
+    _debug_level = DebugLevel::ERROR;
   }
 }
 
@@ -102,38 +131,65 @@ SingleVariableReturnMappingSolution::returnMappingSolve(const Real effective_tri
                                                         Real & scalar,
                                                         const ConsoleStream & console)
 {
-  std::stringstream iter_output;
-  std::stringstream * iter_output_ptr = (_output_iteration_info ? &iter_output : nullptr);
+  // construct the stringstream here only if the debug level is set to ALL
+  std::stringstream * iter_output =
+      (_debug_level == DebugLevel::ALL) ? new std::stringstream : nullptr;
 
   if (!_legacy_return_mapping)
   {
-    if (!internalSolve(effective_trial_stress, scalar, iter_output_ptr))
+    // do the internal solve and capture iteration info during the first round
+    // iff full history output is requested regardless of whether the solve failed or succeeded
+    if (!internalSolve(
+            effective_trial_stress, scalar, _output_iteration_info ? iter_output : nullptr))
     {
-      if (iter_output_ptr)
-        throw MooseException(iter_output_ptr->str());
+      // if full history output is only requested for failed solves we have to repeat
+      // the solve a second time
+      if (_debug_level == DebugLevel::ERROR && _output_iteration_info)
+      {
+        // construct string stream and capture iteration history in the second solve
+        iter_output = new std::stringstream;
+        internalSolve(effective_trial_stress, scalar, iter_output);
+        outputIterationSummary(iter_output, _iteration);
+        throw MooseException(iter_output->str());
+      }
+      else if (_debug_level == DebugLevel::NONE)
+        throw MooseException("");
       else
       {
-        internalSolve(effective_trial_stress, scalar, &iter_output);
-        throw MooseException(iter_output.str());
+        outputIterationSummary(iter_output, _iteration);
+        throw MooseException(iter_output->str());
       }
     }
-    else if (iter_output_ptr)
-      console << iter_output_ptr->str();
+    else if (_debug_level == DebugLevel::ALL)
+    {
+      // the solve did not fail but the user requested debug output anyways
+      outputIterationSummary(iter_output, _iteration);
+      console << iter_output->str();
+    }
   }
   else
   {
-    if (!internalSolveLegacy(effective_trial_stress, scalar, iter_output_ptr))
+    //
+    // DEPRECATED LEGACY SOLVE, please remove
+    //
+
+    if (!internalSolveLegacy(effective_trial_stress, scalar, iter_output))
     {
-      if (iter_output_ptr)
-        mooseError(iter_output_ptr->str());
+      if (iter_output)
+      {
+        outputIterationSummary(iter_output, _iteration);
+        mooseError(iter_output->str());
+      }
       else
       {
-        internalSolveLegacy(effective_trial_stress, scalar, &iter_output);
-        mooseError(iter_output.str());
+        iter_output = new std::stringstream;
+        internalSolveLegacy(effective_trial_stress, scalar, iter_output);
+        outputIterationSummary(iter_output, _iteration);
+        mooseError(iter_output->str());
       }
     }
-    else if (iter_output_ptr)
-      console << iter_output_ptr->str();
+    else if (iter_output)
+      console << iter_output->str();
   }
 }
 
@@ -149,7 +205,7 @@ SingleVariableReturnMappingSolution::internalSolve(const Real effective_trial_st
   const Real max_permissible_scalar = maximumPermissibleValue(effective_trial_stress);
   Real scalar_upper_bound = max_permissible_scalar;
   Real scalar_lower_bound = min_permissible_scalar;
-  unsigned int it = 0;
+  _iteration = 0;
 
   Real residual = computeResidual(effective_trial_stress, scalar);
   Real residual_old = residual;
@@ -164,15 +220,16 @@ SingleVariableReturnMappingSolution::internalSolve(const Real effective_trial_st
   if (converged(residual, reference_residual))
   {
     iterationFinalize(scalar);
-    outputIterInfo(iter_output, it, effective_trial_stress, scalar, residual, reference_residual);
+    outputIterationStep(
+        iter_output, _iteration, effective_trial_stress, scalar, residual, reference_residual);
     return true;
   }
 
   _residual_history.assign(_num_resids, std::numeric_limits<Real>::max());
   _residual_history[0] = residual;
 
-  while (it < _fixed_max_its && !converged(residual, reference_residual) &&
-         !convergedAcceptable(it, residual, reference_residual))
+  while (_iteration < _fixed_max_its && !converged(residual, reference_residual) &&
+         !convergedAcceptable(_iteration, residual, reference_residual))
   {
     scalar_increment = -residual / computeDerivative(effective_trial_stress, scalar);
     scalar = scalar_old + scalar_increment;
@@ -195,7 +252,8 @@ SingleVariableReturnMappingSolution::internalSolve(const Real effective_trial_st
 
     if (converged(residual, reference_residual))
     {
-      outputIterInfo(iter_output, it, effective_trial_stress, scalar, residual, reference_residual);
+      outputIterationStep(
+          iter_output, _iteration, effective_trial_stress, scalar, residual, reference_residual);
       break;
     }
     else
@@ -264,12 +322,13 @@ SingleVariableReturnMappingSolution::internalSolve(const Real effective_trial_st
       }
     }
 
-    outputIterInfo(iter_output, it, effective_trial_stress, scalar, residual, reference_residual);
+    outputIterationStep(
+        iter_output, _iteration, effective_trial_stress, scalar, residual, reference_residual);
 
-    ++it;
+    ++_iteration;
     residual_old = residual;
     scalar_old = scalar;
-    _residual_history[it % _num_resids] = residual;
+    _residual_history[_iteration % _num_resids] = residual;
   }
 
   bool has_converged = true;
@@ -280,7 +339,7 @@ SingleVariableReturnMappingSolution::internalSolve(const Real effective_trial_st
       *iter_output << "Encountered inf or nan in material return mapping iterations." << std::endl;
   }
 
-  if (it == _fixed_max_its)
+  if (_iteration == _fixed_max_its)
   {
     has_converged = false;
     if (iter_output)
@@ -378,12 +437,12 @@ SingleVariableReturnMappingSolution::convergedAcceptable(const unsigned int it,
 }
 
 void
-SingleVariableReturnMappingSolution::outputIterInfo(std::stringstream * iter_output,
-                                                    const unsigned int it,
-                                                    const Real effective_trial_stress,
-                                                    const Real scalar,
-                                                    const Real residual,
-                                                    const Real reference_residual)
+SingleVariableReturnMappingSolution::outputIterationStep(std::stringstream * iter_output,
+                                                         const unsigned int it,
+                                                         const Real effective_trial_stress,
+                                                         const Real scalar,
+                                                         const Real residual,
+                                                         const Real reference_residual)
 {
   if (iter_output)
   {
@@ -392,8 +451,16 @@ SingleVariableReturnMappingSolution::outputIterInfo(std::stringstream * iter_out
                  << " ref_res=" << reference_residual
                  << " rel_res=" << std::abs(residual) / reference_residual
                  << " rel_tol=" << _relative_tolerance << " abs_res=" << std::abs(residual)
-                 << " abs_tol=" << _absolute_tolerance << std::endl;
+                 << " abs_tol=" << _absolute_tolerance << '\n';
   }
+}
+
+void
+SingleVariableReturnMappingSolution::outputIterationSummary(std::stringstream * iter_output,
+                                                            const unsigned int total_it)
+{
+  if (iter_output)
+    *iter_output << total_it << " iterations.\n";
 }
 
 void

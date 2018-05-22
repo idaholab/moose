@@ -120,6 +120,10 @@ protected:
    */
   virtual void computeStressFinalize(const RankTwoTensor & /*inelasticStrainIncrement*/) {}
 
+  /// Collect info on a nested solve
+  void outputIterationSummary(std::stringstream * iter_output,
+                              const unsigned int total_it) override;
+
   /// 3 * shear modulus
   Real _three_shear_modulus;
 
