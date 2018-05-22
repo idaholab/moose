@@ -120,11 +120,9 @@ fi
 LIBMESH_JOBS=${MOOSE_JOBS:-1}
 
 if [ -z "${MOOSE_MAKE}" ]; then
-  make -j ${JOBS:-$LIBMESH_JOBS} && \
-    make install
+  (make -j ${JOBS:-$LIBMESH_JOBS} && make install) || exit 1
 else
-  ${MOOSE_MAKE} && \
-    ${MOOSE_MAKE} install
+  (${MOOSE_MAKE} && ${MOOSE_MAKE} install) || exit 1
 fi
 
 # Local Variables:
