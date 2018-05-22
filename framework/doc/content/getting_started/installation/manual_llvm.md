@@ -34,18 +34,19 @@ And now we configure, build, and install Clang:
 ```bash
 mkdir -p $STACK_SRC/llvm-src/build
 cd $STACK_SRC/llvm-src/build
-cmake -DCMAKE_INSTALL_RPATH:STRING=$PACKAGES_DIR/llvm-5.0.1/lib \
+cmake ../llvm -G 'Unix Makefiles' \
+-DCMAKE_INSTALL_PREFIX=$PACKAGES_DIR/llvm-5.0.1 \
+-DCMAKE_INSTALL_RPATH:STRING=$PACKAGES_DIR/llvm-5.0.1/lib \
+-DCMAKE_INSTALL_NAME_DIR:STRING=$PACKAGES_DIR/llvm-5.0.1/lib \
+-DCMAKE_BUILD_WITH_INSTALL_RPATH=1 \
+-DLLVM_TARGETS_TO_BUILD="X86" \
+-DCMAKE_BUILD_TYPE=Release \
+-DCMAKE_MACOSX_RPATH:BOOL=OFF \
+-DPYTHON_EXECUTABLE=`which python2.7` \
 -DCMAKE_CXX_LINK_FLAGS="-L$PACKAGES_DIR/gcc-7.3.0/lib64 -Wl,-rpath,$PACKAGES_DIR/gcc-7.3.0/lib64" \
 -DGCC_INSTALL_PREFIX=$PACKAGES_DIR/gcc-7.3.0 \
 -DCMAKE_CXX_COMPILER=$PACKAGES_DIR/gcc-7.3.0/bin/g++ \
--DCMAKE_C_COMPILER=$PACKAGES_DIR/gcc-7.3.0/bin/gcc \
--DCMAKE_BUILD_TYPE=Release \
--DCMAKE_INSTALL_PREFIX=$PACKAGES_DIR/llvm-5.0.1 \
--DCMAKE_INSTALL_NAME_DIR:STRING=$PACKAGES_DIR/llvm-5.0.1/lib \
--DCMAKE_MACOSX_RPATH:BOOL=OFF \
--DPYTHON_EXECUTABLE=`which python2.7` \
--DLLVM_TARGETS_TO_BUILD="X86" \
--G 'Unix Makefiles' ../llvm
+-DCMAKE_C_COMPILER=$PACKAGES_DIR/gcc-7.3.0/bin/gcc
 
 make -j # (where # is the number of cores available)
 
@@ -53,5 +54,5 @@ make install
 ```
 
 !alert! note
-The above configuration assumes you are also using the custom version of GCC built in the previous section (note the several gcc-7.3.0 paths). If this is not the case, you will need to provide the correct paths to your current toolchain.
+The above configuration assumes you are using the custom version of GCC built in the previous section (note the several gcc-7.3.0 paths). If this is not the case, you will need to provide the correct paths to your current toolchain. It is also possible LLVM may build successfully if you omit the -D lines referencing gcc-7.3.0 entirely.
 !alert-end!

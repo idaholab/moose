@@ -16,7 +16,7 @@ cd $STACK_SRC/mpich-3.2/llvm-build
 
 ../configure --prefix=$PACKAGES_DIR/mpich-3.2 \
 --enable-shared \
---enable-sharedlibs=gcc \
+--enable-sharedlibs=clang \
 --enable-fast=03 \
 --enable-debuginfo \
 --enable-totalview \

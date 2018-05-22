@@ -1,6 +1,6 @@
 ## PETSc
 
-Download PETSc 3.6.4
+Download PETSc 3.8.3
 
 ```bash
 cd $STACK_SRC
@@ -35,8 +35,7 @@ cd $STACK_SRC/petsc-3.8.3
 --FFLAGS='-fPIC -fopenmp' \
 --FCFLAGS='-fPIC -fopenmp' \
 --F90FLAGS='-fPIC -fopenmp' \
---F77FLAGS='-fPIC -fopenmp' \
---LDFLAGS='-L$PACKAGES_DIR/gcc-7.3.0/lib64'
+--F77FLAGS='-fPIC -fopenmp'
 ```
 
 Once configure is done, we build PETSc
