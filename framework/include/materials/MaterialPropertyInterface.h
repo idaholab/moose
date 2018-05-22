@@ -40,11 +40,6 @@ InputParameters validParams<MaterialPropertyInterface>();
 class MaterialPropertyInterface
 {
 public:
-  MaterialPropertyInterface(const MooseObject * moose_object);
-  MaterialPropertyInterface(const MooseObject * moose_object,
-                            const std::set<SubdomainID> & block_ids);
-  MaterialPropertyInterface(const MooseObject * moose_object,
-                            const std::set<BoundaryID> & boundary_ids);
   MaterialPropertyInterface(const MooseObject * moose_object,
                             const std::set<SubdomainID> & block_ids,
                             const std::set<BoundaryID> & boundary_ids);

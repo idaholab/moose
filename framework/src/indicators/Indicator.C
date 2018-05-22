@@ -48,7 +48,7 @@ Indicator::Indicator(const InputParameters & parameters)
     UserObjectInterface(this),
     Restartable(this, "Indicators"),
     OutputInterface(parameters),
-    MaterialPropertyInterface(this, blockIDs()),
+    MaterialPropertyInterface(this, blockIDs(), Moose::EMPTY_BOUNDARY_IDS),
     _subproblem(*getCheckedPointerParam<SubProblem *>("_subproblem")),
     _fe_problem(*getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")),
     _sys(*getCheckedPointerParam<SystemBase *>("_sys")),

@@ -82,7 +82,7 @@ InterfaceKernel::InterfaceKernel(const InputParameters & parameters)
         this, false, Moose::VarKindType::VAR_NONLINEAR, Moose::VarFieldType::VAR_FIELD_STANDARD),
     Restartable(this, "InterfaceKernels"),
     MeshChangedInterface(parameters),
-    TwoMaterialPropertyInterface(this, boundaryIDs()),
+    TwoMaterialPropertyInterface(this, Moose::EMPTY_BLOCK_IDS, boundaryIDs()),
     _subproblem(*getCheckedPointerParam<SubProblem *>("_subproblem")),
     _sys(*getCheckedPointerParam<SystemBase *>("_sys")),
     _tid(parameters.get<THREAD_ID>("_tid")),

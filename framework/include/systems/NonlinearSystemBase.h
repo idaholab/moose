@@ -502,13 +502,13 @@ public:
    * Indicated whether this system needs material properties on boundaries.
    * @return Boolean if IntegratedBCs are active
    */
-  bool needMaterialOnSide(BoundaryID bnd_id, THREAD_ID tid) const;
+  bool needBoundaryMaterialOnSide(BoundaryID bnd_id, THREAD_ID tid) const;
 
   /**
    * Indicates whether this system needs material properties on internal sides.
    * @return Boolean if DGKernels are active
    */
-  bool needMaterialOnSide(SubdomainID subdomain_id, THREAD_ID tid) const;
+  bool needSubdomainMaterialOnSide(SubdomainID subdomain_id, THREAD_ID tid) const;
 
   /**
    * Getter for _doing_dg

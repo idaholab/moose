@@ -274,7 +274,7 @@ protected:
   std::map<std::string, int> _props_to_flags;
 
 private:
-  /// Small helper function to call storeMatPropName
+  /// Small helper function to call store{Subdomain,Boundary}MatPropName
   void registerPropName(std::string prop_name, bool is_get, Prop_State state);
 
   /// Check and throw an error if the execution has progerssed past the construction stage
@@ -402,10 +402,10 @@ Material::getZeroMaterialProperty(const std::string & prop_name)
   // Register this material on these blocks and boundaries as a zero property with relaxed
   // consistency checking
   for (std::set<SubdomainID>::const_iterator it = blockIDs().begin(); it != blockIDs().end(); ++it)
-    _fe_problem.storeZeroMatProp(*it, prop_name);
+    _fe_problem.storeSubdomainZeroMatProp(*it, prop_name);
   for (std::set<BoundaryID>::const_iterator it = boundaryIDs().begin(); it != boundaryIDs().end();
        ++it)
-    _fe_problem.storeZeroMatProp(*it, prop_name);
+    _fe_problem.storeBoundaryZeroMatProp(*it, prop_name);
 
   // set values for all qpoints to zero
   // (in multiapp scenarios getMaxQps can return different values in each app; we need the max)

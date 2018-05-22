@@ -37,9 +37,15 @@ hit_deps      := $(patsubst %.cc, %.$(obj-suffix).d, $(hit_srcfiles))
 pyhit_srcfiles  := $(hit_DIR)/hit.cpp $(hit_DIR)/lex.cc $(hit_DIR)/parse.cc
 pyhit_LIB       := $(FRAMEWORK_DIR)/../python/hit.so
 
+# some systems have python2 but no python2-config command - fall back to python-config for them
+pyconfig := python2-config
+ifeq (, $(shell which python2-config))
+  pyconfig := python-config
+endif
+
 hit $(pyhit_LIB): $(pyhit_srcfiles)
 	@echo "Building and linking "$@"..."
-	@bash -c '(cd "$(hit_DIR)" && $(libmesh_CXX) -std=c++11 -w -fPIC -lstdc++ -shared -L`python-config --prefix`/lib `python-config --includes` `python-config --ldflags` $^ -o $(pyhit_LIB))'
+	@bash -c '(cd "$(hit_DIR)" && $(libmesh_CXX) -std=c++11 -w -fPIC -lstdc++ -shared -L`$(pyconfig) --prefix`/lib `$(pyconfig) --includes` `$(pyconfig) --ldflags` $^ -o $(pyhit_LIB))'
 
 #
 # gtest

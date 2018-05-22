@@ -29,7 +29,7 @@ validParams<ElementUserObject>()
 ElementUserObject::ElementUserObject(const InputParameters & parameters)
   : UserObject(parameters),
     BlockRestrictable(this),
-    MaterialPropertyInterface(this, blockIDs()),
+    MaterialPropertyInterface(this, blockIDs(), Moose::EMPTY_BOUNDARY_IDS),
     UserObjectInterface(this),
     Coupleable(this, false),
     MooseVariableDependencyInterface(),
