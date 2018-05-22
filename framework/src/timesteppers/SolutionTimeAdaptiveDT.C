@@ -42,7 +42,10 @@ SolutionTimeAdaptiveDT::SolutionTimeAdaptiveDT(const InputParameters & parameter
 {
   if ((_adapt_log) && (processor_id() == 0))
   {
-    _adaptive_log.open("adaptive_log");
+    static const std::string log("adaptive_log");
+    _adaptive_log.open(log);
+    if (_adaptive_log.fail())
+      mooseError("Unable to open file ", log);
     _adaptive_log << "Adaptive Times Step Log" << std::endl;
   }
 }

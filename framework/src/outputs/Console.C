@@ -374,6 +374,9 @@ Console::writeStreamToFile(bool append)
   else
     output.open(filename().c_str(), std::ios::trunc);
 
+  if (output.fail())
+    mooseError("Unable to open file ", filename());
+
   std::string s = _file_output_stream.str();
   // Write contents of file output stream and close the file
   output << MooseUtils::removeColor(s);
