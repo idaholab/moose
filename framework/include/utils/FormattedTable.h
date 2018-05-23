@@ -226,9 +226,6 @@ private:
    */
   bool _headers_output;
 
-  /// Keeps track of whether the current stream is open or not.
-  bool _stream_open;
-
   /// Keeps track of whether we want to open an existing file for appending or overwriting.
   bool _append;
 
