@@ -128,6 +128,27 @@ Real dvel_darhoA(Real arhoA, Real arhouA);
 Real dvel_darhouA(Real arhoA);
 
 /**
+ * Computes specific volume and its derivatives from rho*A, and area.
+ *
+ * @param[in] rhoA        rho*A
+ * @param[in] A           area
+ * @param[out] dv_drhoA   derivative of specific volume w.r.t. rho*A
+ */
+void v_from_rhoA_A(Real rhoA, Real A, Real & v, Real & dv_drhoA);
+
+/**
+ * Computes specific volume and its derivatives from alpha*rho*A, volume fraction, and area.
+ *
+ * @param[in] arhoA        alpha*rho*A
+ * @param[in] alpha        volume fraction
+ * @param[in] A            area
+ * @param[out] dv_darhoA   derivative of specific volume w.r.t. alpha*rho*A
+ * @param[out] dv_dalpha   derivative of specific volume w.r.t. volume fraction
+ */
+void
+v_from_arhoA_alpha_A(Real arhoA, Real alpha, Real A, Real & v, Real & dv_darhoA, Real & dv_dalpha);
+
+/**
  * Computes specific volume and its derivative with respect to density
  *
  * @param[in] rho       density
@@ -153,6 +174,26 @@ Real dv_dalpha_liquid(Real area, Real arhoA, bool is_liquid);
  * @param arhoA - density equation solution variable: alpha*rho*A
  */
 Real dv_darhoA(Real area, Real arhoA);
+
+/**
+ * Computes specific internal energy and its derivatives from alpha*rho*A, alpha*rho*u*A, and
+ * alpha*rho*E*A
+ *
+ * @param[in] arhoA         alpha*rho*A
+ * @param[in] arhouA        alpha*rho*u*A
+ * @param[in] arhoEA        alpha*rho*E*A
+ * @param[out] e            specific internal energy
+ * @param[out] de_darhoA    derivative of specific internal energy w.r.t. alpha*rho*A
+ * @param[out] de_darhouA   derivative of specific internal energy w.r.t. alpha*rho*u*A
+ * @param[out] de_darhoEA   derivative of specific internal energy w.r.t. alpha*rho*E*A
+ */
+void e_from_arhoA_arhouA_arhoEA(Real arhoA,
+                                Real arhouA,
+                                Real arhoEA,
+                                Real & e,
+                                Real & de_darhoA,
+                                Real & de_darhouA,
+                                Real & de_darhoEA);
 
 /**
  * Computes specific internal energy and its derivatives from specific total energy and velocity
@@ -228,6 +269,6 @@ bool isInlet(Real vel, Real normal);
  * @param normal Outward normal vector
  */
 bool isOutlet(Real vel, Real normal);
-}
+} // namespace RELAP7
 
 #endif // NUMERICS_H

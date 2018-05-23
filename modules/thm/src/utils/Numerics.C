@@ -65,6 +65,21 @@ dvel_darhouA(Real arhoA)
 }
 
 void
+v_from_rhoA_A(Real rhoA, Real A, Real & v, Real & dv_drhoA)
+{
+  v = A / rhoA;
+  dv_drhoA = -A / (rhoA * rhoA);
+}
+
+void
+v_from_arhoA_alpha_A(Real arhoA, Real alpha, Real A, Real & v, Real & dv_darhoA, Real & dv_dalpha)
+{
+  v = (alpha * A) / arhoA;
+  dv_darhoA = -(alpha * A) / (arhoA * arhoA);
+  dv_dalpha = A / arhoA;
+}
+
+void
 v_from_rho(Real rho, Real & v, Real & dv_drho)
 {
   v = 1.0 / rho;
@@ -82,6 +97,21 @@ Real
 dv_darhoA(Real area, Real arhoA)
 {
   return -area / arhoA / arhoA;
+}
+
+void
+e_from_arhoA_arhouA_arhoEA(Real arhoA,
+                           Real arhouA,
+                           Real arhoEA,
+                           Real & e,
+                           Real & de_darhoA_val,
+                           Real & de_darhouA_val,
+                           Real & de_darhoEA_val)
+{
+  e = arhoEA / arhoA - 0.5 * arhouA * arhouA / (arhoA * arhoA);
+  de_darhoA_val = de_darhoA(arhoA, arhouA, arhoEA);
+  de_darhouA_val = de_darhouA(arhoA, arhouA);
+  de_darhoEA_val = de_darhoEA(arhoA);
 }
 
 void
@@ -137,4 +167,4 @@ isOutlet(Real vel, Real normal)
 {
   return (vel * normal) >= 0;
 }
-}
+} // namespace RELAP7
