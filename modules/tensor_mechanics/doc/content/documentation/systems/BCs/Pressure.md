@@ -8,7 +8,7 @@ The boundary condition is always applied to the displaced mesh.
 
 The magnitude of the `Pressure` boundary condition can be specified as either a scalar (use the input parameter `factor`), a `function` parameter, or a `Postprocessor` name.
 
-A set of `Pressure` boundary conditions applied to multiple variables in multiple components can be defined with the [PressureAction](/BCs/Pressure/PressureAction.md).
+A set of `Pressure` boundary conditions applied to multiple variables in multiple components can be defined with the [PressureAction](/BCs/Pressure/index.md).
 
 ## Example Input File Syntax
 

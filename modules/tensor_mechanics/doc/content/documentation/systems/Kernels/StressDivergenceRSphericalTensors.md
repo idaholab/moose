@@ -3,6 +3,7 @@
 !syntax description /Kernels/StressDivergenceRSphericalTensors
 
 ## Description
+
 The kernel `StressDivergenceRSphericalTensors` solves the stress divergence equation for a
 spherically symmetric system on a 1D mesh.
 

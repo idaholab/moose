@@ -1,8 +1,8 @@
-# GeneralizedPlaneStrainOffDiag
+# Generalized Plane Strain Off Diagonal
 
 !syntax description /Kernels/GeneralizedPlaneStrainOffDiag
 
-Kernel `GeneralizedPlaneStrainOffDiag` computes the off-diagonal Jacobian entries to couple the in-plane displacement degree of freedoms with the out-of-plane strain degree of freedom. This object is usually set up by the [GeneralizedPlaneStrainAction](/GeneralizedPlaneStrainAction.md).
+Kernel `GeneralizedPlaneStrainOffDiag` computes the off-diagonal Jacobian entries to couple the in-plane displacement degree of freedoms with the out-of-plane strain degree of freedom. This object is usually set up by the [GeneralizedPlaneStrainAction](/GeneralizedPlaneStrain/index.md).
 
 !syntax parameters /Kernels/GeneralizedPlaneStrainOffDiag
 

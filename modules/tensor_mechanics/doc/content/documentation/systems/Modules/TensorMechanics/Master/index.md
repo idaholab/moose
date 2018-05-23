@@ -1,4 +1,6 @@
-# Master Action
+# Tensor Mechanics Master Action System
+
+!syntax description /Modules/TensorMechanics/Master/TensorMechanicsAction
 
 The TensorMechanics Master Action is a convenience object that simplifies part of the
 mechanics system setup. It performs
@@ -7,44 +9,46 @@ mechanics system setup. It performs
 - Add Strain calculation material (for the chosen strain model)
 - Correctly set use of displaced mesh
 - Optional: Setup of displacement variables (with the correct order for the current mesh)
-- Optional: Add AuxVariables and AuxKernels for various tensor comonent and quantity outputs
+- Optional: Add AuxVariables and AuxKernels for various tensor components and quantity outputs
 - Optional: Set up out-of-plane stress/strain consistently
+
+## Constructed MooseObjects
+
+The Tensor Mechanics `Master` Action is used to construct the kernels, displacement variables, and strain materials in a consistent manner as required for a continuum mechanics simulation simulation. Optionally it generates aux variables and auxkernels to aid in the output of tensor components and scalar quantities.
+
+!table id=tmMaster_action_table caption=Correspondence Among Action Functionality and MooseObjects for the Tensor Mechanics `Master` Action
+| Functionality     | Replaced Classes   | Associated Parameters   |
+|-------------------|--------------------|-------------------------|
+| Calculate stress divergence equilibrium for the given coordinate system | [StressDivergenceTensors](/Kernels/StressDivergenceTensors.md) or [StressDivergenceRZTensors](/Kernels/StressDivergenceRZTensors.md) or [StressDivergenceRSphericalTensors](/Kernels/StressDivergenceRSphericalTensors.md) | `displacements` : a string of the displacement field variables |
+| Add the displacement variables | [Variables](systems/Variables/index.md) | `add_variables`: boolean |
+| Calculation of strain for the given coordinate system | [ComputeFiniteStrain](/Materials/ComputeFiniteStrain.md) or [ComputePlaneFiniteStrain](/Materials/ComputePlaneFiniteStrain.md) or [ComputeAxisymmetric1DFiniteStrain](/Materials/ComputeAxisymmetric1DFiniteStrain.md) or [ComputeAxisymmetricRZFiniteStrain](/Materials/ComputeAxisymmetricRZFiniteStrain.md) | `strain`: MooseEnum to select finite or strain formulations |
+| | [ComputeSmallStrain](/Materials/ComputeSmallStrain.md) or [ComputePlaneSmallStrain](/Materials/ComputePlaneSmallStrain.md) or[ComputeAxisymmetric1DSmallStrain](/Materials/ComputeAxisymmetric1DSmallStrain.md) or [ComputeAxisymmetricRZSmallStrain](/Materials/ComputeAxisymmetricRZSmallStrain.md) | |
+| | [ComputeIncrementalSmallStrain](/Materials/ComputeIncrementalSmallStrain.md) or [ComputePlaneIncrementalStrain](/Materials/ComputePlaneIncrementalStrain.md) or [ComputeAxisymmetric1DIncrementalStrain](/Materials/ComputeAxisymmetric1DIncrementalStrain.md) or [ComputeAxisymmetricRZIncrementalStrain](/Materials/ComputeAxisymmetricRZIncrementalStrain.md) |`incremental` : boolean for using a incremental strain formulation |
+| Add AuxVariables and AuxKernels for various tensor component and quantity outputs | [AuxVariables](/systems/AuxVariables/index.md) and [RankTwoAux](/AuxKernels/RankTwoAux.md) or [RankTwoScalarAux](/AuxKernels/RankTwoScalarAux.md) or [RankFourAux](/AuxKernels/RankFourAux.md) | `generate_output`: a string of the quantities to add |
+
+Note that there are many variations for the calculation of the stress divergence and the strain measure. Review the theoretical introduction for the [Stress Divergence](tensor_mechanics/StressDivergence.md) and the [Strain Formulations](tensor_mechanics/Strains.md) for more information.
 
 ## Example Input File Syntax
 
-!listing modules/tensor_mechanics/test/tests/action/two_block_new.i block=Modules/TensorMechanics/Master
 
-## Subblocks
+### Subblocks
 
 The subblocks of the Master action are what triggers MOOSE objects to be built.
-If none of the mechanics is subdomain restricted a single subblock will be used
+If none of the mechanics is subdomain restricted a single subblock can be used
 
-```
-[Modules/TensorMechanics/Master]
-  [./all]
-    ...
-  [../]
-[]
-```
+!listing modules/tensor_mechanics/test/tests/finite_strain_elastic/finite_strain_elastic_new_test.i block=Modules/TensorMechanics/Master
 
 if different mechanics models are needed, multiple subblocks with subdomain restrictions
 can be used.
 
-```
-[Modules/TensorMechanics/Master]
-  [./block_a]
-    ...
-  [../]
-  [./block_b]
-    ...
-  [../]
-[]
-```
-
-## Toplevel parameters
+!listing modules/tensor_mechanics/test/tests/action/two_block_new.i block=Modules/TensorMechanics/Master
 
 Parameters supplied at the `[Modules/TensorMechanics/Master]` level act as
 defaults for the Master action subblocks.
+
+!syntax parameters /Modules/TensorMechanics/Master/TensorMechanicsAction
+
+## Associated Actions
 
 !syntax list /Modules/TensorMechanics/Master objects=True actions=False subsystems=False
 
