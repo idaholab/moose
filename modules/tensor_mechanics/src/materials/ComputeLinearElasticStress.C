@@ -40,7 +40,6 @@ ComputeLinearElasticStress::computeQpStress()
 {
   // stress = C * e
   _stress[_qp] = _elasticity_tensor[_qp] * _mechanical_strain[_qp];
-  addQpInitialStress(); // InitialStress Deprecation: remove this line
 
   // Assign value for elastic strain, which is equal to the mechanical strain
   _elastic_strain[_qp] = _mechanical_strain[_qp];

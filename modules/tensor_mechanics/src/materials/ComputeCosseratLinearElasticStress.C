@@ -38,7 +38,6 @@ void
 ComputeCosseratLinearElasticStress::computeQpStress()
 {
   _stress[_qp] = _elasticity_tensor[_qp] * _mechanical_strain[_qp];
-  addQpInitialStress(); // InitialStress Deprecation: remove this line
   _stress_couple[_qp] = _elastic_flexural_rigidity_tensor[_qp] * _curvature[_qp];
 
   _elastic_strain[_qp] = _mechanical_strain[_qp];

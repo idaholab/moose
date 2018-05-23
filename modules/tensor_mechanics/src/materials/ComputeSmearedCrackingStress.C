@@ -268,10 +268,6 @@ ComputeSmearedCrackingStress::computeQpStress()
 
     // Calculate stress in intermediate configuration
     _stress[_qp] = _local_elasticity_tensor * _elastic_strain[_qp];
-    // InitialStress Deprecation: remove these lines
-    if (_perform_finite_strain_rotations)
-      rotateQpInitialStress();
-    addQpInitialStress();
 
     _Jacobian_mult[_qp] = _local_elasticity_tensor;
     force_elasticity_rotation = true;
