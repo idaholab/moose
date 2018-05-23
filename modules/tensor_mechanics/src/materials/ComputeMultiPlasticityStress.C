@@ -164,9 +164,7 @@ ComputeMultiPlasticityStress::ComputeMultiPlasticityStress(const InputParameters
     _my_elasticity_tensor(RankFourTensor()),
     _my_strain_increment(RankTwoTensor()),
     _my_flexural_rigidity_tensor(RankFourTensor()),
-    _my_curvature(RankTwoTensor()),
-    _step_one(
-        declareRestartableData<bool>("step_one", true)) // InitialStress Deprecation: remove this
+    _my_curvature(RankTwoTensor())
 {
   if (_epp_tol <= 0)
     mooseError("ComputeMultiPlasticityStress: ep_plastic_tolerance must be positive");
@@ -501,10 +499,6 @@ ComputeMultiPlasticityStress::plasticStep(const RankTwoTensor & stress_old,
   Real step_size = 1.0;
   Real time_simulated = 0.0;
 
-  // InitialStress Deprecation: remove the following 2 lines
-  if (_t_step >= 2)
-    _step_one = false;
-
   // the "good" variables hold the latest admissible stress
   // and internal parameters.
   RankTwoTensor stress_good = stress_old;
@@ -517,13 +511,6 @@ ComputeMultiPlasticityStress::plasticStep(const RankTwoTensor & stress_old,
   // Following is necessary because I want strain_increment to be "const"
   // but I also want to be able to subdivide an initial_stress
   RankTwoTensor this_strain_increment = strain_increment;
-  // InitialStress Deprecation: remove following 6 lines
-  if (isParamValid("initial_stress") && _step_one)
-  {
-    RankFourTensor E_inv = E_ijkl.invSymm();
-    this_strain_increment += E_inv * stress_old;
-    stress_good = RankTwoTensor();
-  }
 
   RankTwoTensor dep = step_size * this_strain_increment;
 
