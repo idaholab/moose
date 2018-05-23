@@ -12,7 +12,7 @@
 
 #include "MooseObjectUnitTest.h"
 #include "Water97FluidProperties.h"
-#include "Utils.h"
+#include "SinglePhaseFluidPropertiesPTUtils.h"
 
 class Water97FluidPropertiesTest : public MooseObjectUnitTest
 {
@@ -31,43 +31,6 @@ protected:
     InputParameters uo_pars = _factory.getValidParams("Water97FluidProperties");
     _fe_problem->addUserObject("Water97FluidProperties", "fp", uo_pars);
     _fp = &_fe_problem->getUserObject<Water97FluidProperties>("fp");
-  }
-
-  void regionDerivatives(Real p, Real T, Real tol)
-  {
-    // Finite differencing parameters
-    Real dp = 1.0e1;
-    Real dT = 1.0e-4;
-
-    // density
-    Real drho_dp_fd = (_fp->rho(p + dp, T) - _fp->rho(p - dp, T)) / (2.0 * dp);
-    Real drho_dT_fd = (_fp->rho(p, T + dT) - _fp->rho(p, T - dT)) / (2.0 * dT);
-    Real rho = 0.0, drho_dp = 0.0, drho_dT = 0.0;
-    _fp->rho_dpT(p, T, rho, drho_dp, drho_dT);
-
-    ABS_TEST("rho", rho, _fp->rho(p, T), 1.0e-15);
-    REL_TEST("drho_dp", drho_dp, drho_dp_fd, tol);
-    REL_TEST("drho_dT", drho_dT, drho_dT_fd, tol);
-
-    // enthalpy
-    Real dh_dp_fd = (_fp->h(p + dp, T) - _fp->h(p - dp, T)) / (2.0 * dp);
-    Real dh_dT_fd = (_fp->h(p, T + dT) - _fp->h(p, T - dT)) / (2.0 * dT);
-    Real h = 0.0, dh_dp = 0.0, dh_dT = 0.0;
-    _fp->h_dpT(p, T, h, dh_dp, dh_dT);
-
-    ABS_TEST("h", h, _fp->h(p, T), 1.0e-15);
-    REL_TEST("dh_dp", dh_dp, dh_dp_fd, tol);
-    REL_TEST("dh_dT", dh_dT, dh_dT_fd, tol);
-
-    // internal energy
-    Real de_dp_fd = (_fp->e(p + dp, T) - _fp->e(p - dp, T)) / (2.0 * dp);
-    Real de_dT_fd = (_fp->e(p, T + dT) - _fp->e(p, T - dT)) / (2.0 * dT);
-    Real e = 0.0, de_dp = 0.0, de_dT = 0.0;
-    _fp->e_dpT(p, T, e, de_dp, de_dT);
-
-    ABS_TEST("e", e, _fp->e(p, T), 1.0e-15);
-    REL_TEST("de_dp", de_dp, de_dp_fd, tol);
-    REL_TEST("de_dT", de_dT, de_dT_fd, tol);
   }
 
   const Water97FluidProperties * _fp;

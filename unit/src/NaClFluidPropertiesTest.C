@@ -8,16 +8,16 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "NaClFluidPropertiesTest.h"
-#include "Utils.h"
+#include "SinglePhaseFluidPropertiesPTUtils.h"
 
 /**
  * Verify that critical properties are correctly returned
  */
 TEST_F(NaClFluidPropertiesTest, criticalProperties)
 {
-  ABS_TEST("critical pressure", _fp->criticalPressure(), 1.82e7, 1.0e-12);
-  ABS_TEST("critical temperature", _fp->criticalTemperature(), 3841.15, 1.0e-12);
-  ABS_TEST("critical density", _fp->criticalDensity(), 108.43, 1.0e-12);
+  ABS_TEST(_fp->criticalPressure(), 1.82e7, REL_TOL_SAVED_VALUE);
+  ABS_TEST(_fp->criticalTemperature(), 3841.15, REL_TOL_SAVED_VALUE);
+  ABS_TEST(_fp->criticalDensity(), 108.43, REL_TOL_SAVED_VALUE);
 }
 
 /**
@@ -25,8 +25,21 @@ TEST_F(NaClFluidPropertiesTest, criticalProperties)
  */
 TEST_F(NaClFluidPropertiesTest, triplePointProperties)
 {
-  ABS_TEST("triple point pressure", _fp->triplePointPressure(), 50.0, 1.0e-12);
-  ABS_TEST("triple point temperature", _fp->triplePointTemperature(), 1073.85, 1.0e-12);
+  ABS_TEST(_fp->triplePointPressure(), 50.0, REL_TOL_SAVED_VALUE);
+  ABS_TEST(_fp->triplePointTemperature(), 1073.85, REL_TOL_SAVED_VALUE);
+}
+
+/**
+ * Test that the fluid name is correctly returned
+ */
+TEST_F(NaClFluidPropertiesTest, fluidName) { EXPECT_EQ(_fp->fluidName(), "nacl"); }
+
+/**
+ * Test that the molar mass is correctly returned
+ */
+TEST_F(NaClFluidPropertiesTest, molarMass)
+{
+  ABS_TEST(_fp->molarMass(), 58.443e-3, REL_TOL_SAVED_VALUE);
 }
 
 /**
@@ -47,6 +60,8 @@ TEST_F(NaClFluidPropertiesTest, halite)
   // Density and cp
   Real p0, p1, p2, T0, T1, T2;
 
+  const Real tol = REL_TOL_EXTERNAL_VALUE;
+
   p0 = 30.0e6;
   p1 = 60.0e6;
   p2 = 80.0e6;
@@ -54,24 +69,24 @@ TEST_F(NaClFluidPropertiesTest, halite)
   T1 = 500.0;
   T2 = 700.0;
 
-  REL_TEST("rho", _fp->rho(p0, T0), 2167.88, 1.0e-3);
-  REL_TEST("rho", _fp->rho(p1, T1), 2116.0, 1.0e-3);
-  REL_TEST("rho", _fp->rho(p2, T2), 2056.8, 1.0e-3);
-  REL_TEST("cp", _fp->cp(p0, T0), 0.865e3, 4.0e-2);
-  REL_TEST("cp", _fp->cp(p1, T1), 0.922e3, 4.0e-2);
-  REL_TEST("cp", _fp->cp(p2, T2), 0.979e3, 4.0e-2);
+  REL_TEST(_fp->rho(p0, T0), 2167.88, tol);
+  REL_TEST(_fp->rho(p1, T1), 2116.0, tol);
+  REL_TEST(_fp->rho(p2, T2), 2056.8, tol);
+  REL_TEST(_fp->cp(p0, T0), 0.865e3, 40.0 * tol);
+  REL_TEST(_fp->cp(p1, T1), 0.922e3, 40.0 * tol);
+  REL_TEST(_fp->cp(p2, T2), 0.979e3, 40.0 * tol);
 
   // Test enthalpy at the triple point pressure of water
   Real pt = 611.657;
 
-  ABS_TEST("enthalpy", _fp->h(pt, 273.16), 0.0, 1.0e-3);
-  REL_TEST("enthalpy", _fp->h(pt, 573.15), 271.13e3, 1.0e-3);
-  REL_TEST("enthalpy", _fp->h(pt, 673.15), 366.55e3, 1.0e-3);
+  ABS_TEST(_fp->h(pt, 273.16), 0.0, tol);
+  REL_TEST(_fp->h(pt, 573.15), 271.13e3, tol);
+  REL_TEST(_fp->h(pt, 673.15), 366.55e3, tol);
 
   // Thermal conductivity (function of T only)
-  REL_TEST("k", _fp->k(p0, 323.15), 5.488, 1.0e-2);
-  REL_TEST("k", _fp->k(p0, 423.15), 3.911, 1.0e-2);
-  REL_TEST("k", _fp->k(p0, 523.15), 3.024, 2.0e-2);
+  REL_TEST(_fp->k(p0, 323.15), 5.488, 10.0 * tol);
+  REL_TEST(_fp->k(p0, 423.15), 3.911, 10.0 * tol);
+  REL_TEST(_fp->k(p0, 523.15), 3.024, 20.0 * tol);
 }
 
 /**
@@ -80,40 +95,40 @@ TEST_F(NaClFluidPropertiesTest, halite)
  */
 TEST_F(NaClFluidPropertiesTest, derivatives)
 {
-  Real p = 30.0e6;
-  Real T = 300.0;
+  const Real tol = REL_TOL_DERIVATIVE;
 
-  // Finite differencing parameters
-  Real dp = 1.0e1;
-  Real dT = 1.0e-4;
+  const Real p = 30.0e6;
+  const Real T = 300.0;
 
-  // density
-  Real drho_dp_fd = (_fp->rho(p + dp, T) - _fp->rho(p - dp, T)) / (2.0 * dp);
-  Real drho_dT_fd = (_fp->rho(p, T + dT) - _fp->rho(p, T - dT)) / (2.0 * dT);
-  Real rho = 0.0, drho_dp = 0.0, drho_dT = 0.0;
+  DERIV_TEST(_fp->rho, _fp->rho_dpT, p, T, tol);
+  DERIV_TEST(_fp->e, _fp->e_dpT, p, T, tol);
+  DERIV_TEST(_fp->h, _fp->h_dpT, p, T, tol);
+  DERIV_TEST(_fp->k, _fp->k_dpT, p, T, tol);
+}
+
+/**
+ * Verify that the methods that return multiple properties in one call return identical
+ * values as the individual methods
+ */
+TEST_F(NaClFluidPropertiesTest, combined)
+{
+  const Real tol = REL_TOL_SAVED_VALUE;
+  const Real p = 1.0e6;
+  const Real T = 300.0;
+
+  // Single property methods
+  Real rho, drho_dp, drho_dT;
   _fp->rho_dpT(p, T, rho, drho_dp, drho_dT);
-
-  ABS_TEST("rho", rho, _fp->rho(p, T), 1.0e-15);
-  REL_TEST("drho_dp", drho_dp, drho_dp_fd, 1.0e-6);
-  REL_TEST("drho_dT", drho_dT, drho_dT_fd, 1.0e-6);
-
-  // enthalpy
-  Real dh_dp_fd = (_fp->h(p + dp, T) - _fp->h(p - dp, T)) / (2.0 * dp);
-  Real dh_dT_fd = (_fp->h(p, T + dT) - _fp->h(p, T - dT)) / (2.0 * dT);
-  Real h = 0.0, dh_dp = 0.0, dh_dT = 0.0;
-  _fp->h_dpT(p, T, h, dh_dp, dh_dT);
-
-  ABS_TEST("h", h, _fp->h(p, T), 1.0e-15);
-  REL_TEST("dh_dp", dh_dp, dh_dp_fd, 1.0e-6);
-  REL_TEST("dh_dT", dh_dT, dh_dT_fd, 1.0e-6);
-
-  // internal energy
-  Real de_dp_fd = (_fp->e(p + dp, T) - _fp->e(p - dp, T)) / (2.0 * dp);
-  Real de_dT_fd = (_fp->e(p, T + dT) - _fp->e(p, T - dT)) / (2.0 * dT);
-  Real e = 0.0, de_dp = 0.0, de_dT = 0.0;
+  Real e, de_dp, de_dT;
   _fp->e_dpT(p, T, e, de_dp, de_dT);
 
-  ABS_TEST("e", e, _fp->e(p, T), 1.0e-15);
-  REL_TEST("de_dp", de_dp, de_dp_fd, 1.0e-6);
-  REL_TEST("de_dT", de_dT, de_dT_fd, 1.0e-6);
+  // Combined property methods
+  Real rho2, drho2_dp, drho2_dT, e2, de2_dp, de2_dT;
+  _fp->rho_e_dpT(p, T, rho2, drho2_dp, drho2_dT, e2, de2_dp, de2_dT);
+  ABS_TEST(rho, rho2, tol);
+  ABS_TEST(drho_dp, drho2_dp, tol);
+  ABS_TEST(drho_dT, drho2_dT, tol);
+  ABS_TEST(e, e2, tol);
+  ABS_TEST(de_dp, de2_dp, tol);
+  ABS_TEST(de_dT, de2_dT, tol);
 }

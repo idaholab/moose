@@ -8,7 +8,20 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "IdealGasFluidPropertiesPTTest.h"
-#include "Utils.h"
+#include "SinglePhaseFluidPropertiesPTUtils.h"
+
+/**
+ * Verify that the fluid name is correctly returned
+ */
+TEST_F(IdealGasFluidPropertiesPTTest, fluidName) { EXPECT_EQ(_fp->fluidName(), "ideal_gas"); }
+
+/**
+ * Verify that the default molar mass is correctly returned
+ */
+TEST_F(IdealGasFluidPropertiesPTTest, molarMass)
+{
+  ABS_TEST(_fp->molarMass(), 2.9e-2, REL_TOL_SAVED_VALUE);
+}
 
 /**
  * Verify calculation of the fluid properties
@@ -24,25 +37,25 @@ TEST_F(IdealGasFluidPropertiesPTTest, properties)
   const Real henry = 0.0;
   const Real R = 8.3144598;
 
-  const Real tol = 1.0e-8;
+  const Real tol = REL_TOL_CONSISTENCY;
 
   Real p, T;
 
   p = 1.0e6;
   T = 300.0;
-  REL_TEST("beta", _fp->beta(p, T), 1.0 / T, tol);
-  REL_TEST("cp", _fp->cp(p, T), cp, tol);
-  REL_TEST("cv", _fp->cv(p, T), cv, tol);
-  REL_TEST("c", _fp->c(p, T), std::sqrt(cp * R * T / (cv * molar_mass)), tol);
-  REL_TEST("k", _fp->k(p, T), thermal_conductivity, tol);
-  REL_TEST("k", _fp->k(p, T), thermal_conductivity, tol);
-  REL_TEST("s", _fp->s(p, T), entropy, tol);
-  REL_TEST("rho", _fp->rho(p, T), p * molar_mass / (R * T), tol);
-  REL_TEST("e", _fp->e(p, T), cv * T, tol);
-  REL_TEST("mu", _fp->mu(p, T), viscosity, tol);
-  REL_TEST("mu", _fp->mu(p, T), viscosity, tol);
-  REL_TEST("h", _fp->h(p, T), cp * T, tol);
-  ABS_TEST("henry", _fp->henryConstant(T), henry, tol);
+  REL_TEST(_fp->beta(p, T), 1.0 / T, tol);
+  REL_TEST(_fp->cp(p, T), cp, tol);
+  REL_TEST(_fp->cv(p, T), cv, tol);
+  REL_TEST(_fp->c(p, T), std::sqrt(cp * R * T / (cv * molar_mass)), tol);
+  REL_TEST(_fp->k(p, T), thermal_conductivity, tol);
+  REL_TEST(_fp->k(p, T), thermal_conductivity, tol);
+  REL_TEST(_fp->s(p, T), entropy, tol);
+  REL_TEST(_fp->rho(p, T), p * molar_mass / (R * T), tol);
+  REL_TEST(_fp->e(p, T), cv * T, tol);
+  REL_TEST(_fp->mu(p, T), viscosity, tol);
+  REL_TEST(_fp->mu(p, T), viscosity, tol);
+  REL_TEST(_fp->h(p, T), cp * T, tol);
+  ABS_TEST(_fp->henryConstant(T), henry, tol);
 }
 
 /**
@@ -51,39 +64,30 @@ TEST_F(IdealGasFluidPropertiesPTTest, properties)
  */
 TEST_F(IdealGasFluidPropertiesPTTest, derivatives)
 {
-  const Real dp = 1.0e1;
-  const Real dT = 1.0e-4;
+  const Real tol = REL_TOL_DERIVATIVE;
 
-  const Real tol = 1.0e-8;
+  const Real p = 1.0e6;
+  const Real T = 300.0;
 
-  Real fd;
+  DERIV_TEST(_fp->rho, _fp->rho_dpT, p, T, tol);
+  DERIV_TEST(_fp->mu, _fp->mu_dpT, p, T, tol);
+  DERIV_TEST(_fp->e, _fp->e_dpT, p, T, tol);
+  DERIV_TEST(_fp->h, _fp->h_dpT, p, T, tol);
+  DERIV_TEST(_fp->k, _fp->k_dpT, p, T, tol);
 
-  Real p = 1.0e6;
-  Real T = 300.0;
+  Real henry, dhenry_dT;
+  _fp->henryConstant_dT(T, henry, dhenry_dT);
+  ABS_TEST(dhenry_dT, 0.0, tol);
+}
 
-  Real rho, drho_dp, drho_dT;
-  _fp->rho_dpT(p, T, rho, drho_dp, drho_dT);
-  fd = (_fp->rho(p + dp, T) - _fp->rho(p - dp, T)) / (2.0 * dp);
-  REL_TEST("drho_dp", drho_dp, fd, tol);
-  fd = (_fp->rho(p, T + dT) - _fp->rho(p, T - dT)) / (2.0 * dT);
-  REL_TEST("drho_dT", drho_dT, fd, tol);
+/**
+ * Verify that the methods that return multiple properties in one call return identical
+ * values as the individual methods
+ */
+TEST_F(IdealGasFluidPropertiesPTTest, combined)
+{
+  const Real p = 1.0e6;
+  const Real T = 300.0;
 
-  Real e, de_dp, de_dT;
-  _fp->e_dpT(p, T, e, de_dp, de_dT);
-  ABS_TEST("de_dp", de_dp, 0.0, tol);
-  fd = (_fp->e(p, T + dT) - _fp->e(p, T - dT)) / (2.0 * dT);
-  REL_TEST("de_dT", de_dT, fd, tol);
-
-  Real h, dh_dp, dh_dT;
-  _fp->h_dpT(p, T, h, dh_dp, dh_dT);
-  ABS_TEST("dh_dp", dh_dp, 0.0, tol);
-  fd = (_fp->h(p, T + dT) - _fp->h(p, T - dT)) / (2.0 * dT);
-  REL_TEST("dh_dT", dh_dT, fd, tol);
-
-  Real mu, dmu_dp, dmu_dT;
-  _fp->mu_dpT(p, T, mu, dmu_dp, dmu_dT);
-  fd = (_fp->mu(p + dp, T) - _fp->mu(p - dp, T)) / (2.0 * dp);
-  ABS_TEST("dmu_dp", dmu_dp, fd, tol);
-  fd = (_fp->mu(p, T + dT) - _fp->mu(p, T - dT)) / (2.0 * dT);
-  ABS_TEST("dh_dT", dmu_dT, fd, tol);
+  combinedProperties(_fp, p, T, REL_TOL_SAVED_VALUE);
 }
