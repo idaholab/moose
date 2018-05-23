@@ -48,13 +48,7 @@ validParams<SingleVariableReturnMappingSolution>()
       "debug_level", debug_level_enum, "When to output Newton solve information");
   params.addParam<bool>(
       "output_iteration_info", false, "Set true to output full Newton iteration history");
-  params.addDeprecatedParam<bool>(
-      "output_iteration_info_on_error",
-      false,
-      "Set true to output Newton iteration information when those iterations fail",
-      "This parameter is replaced by the 'debug_level' parameter");
-  params.addParamNamesToGroup("debug_level output_iteration_info output_iteration_info_on_error",
-                              "Debug");
+  params.addParamNamesToGroup("debug_level output_iteration_info", "Debug");
 
   return params;
 }
