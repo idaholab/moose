@@ -17,12 +17,12 @@
  */
 TEST_F(SodiumPropertiesTest, testSodium)
 {
-  double T = 500; // K
-  REL_TEST("thermal_conductivity", _fp->k(T), 80.09125, 1.0E-5);
-  REL_TEST("enthalpy", _fp->h(T), 381886.450000, 1.0E-5);
-  REL_TEST("heat_capacity", _fp->heatCapacity(T), 1345.578559, 1.0E-2);
-  REL_TEST("temperature", _fp->temperature(_fp->h(T)), T, 1.0E-5);
-  REL_TEST("density", _fp->rho(T), 896.9929544, 1E-05);
-  REL_TEST("drhodT", _fp->drho_dT(T), -0.224167872, 1E-05);
-  REL_TEST("drhodh", _fp->drho_dh(_fp->h(T)), -0.00016659590, 1E-2);
+  Real T = 500; // K
+  REL_TEST(_fp->k(T), 80.09125, 1.0E-5);
+  REL_TEST(_fp->h(T), 381886.450000, 1.0E-5);
+  REL_TEST(_fp->heatCapacity(T), 1345.578559, 1.0E-2);
+  REL_TEST(_fp->temperature(_fp->h(T)), T, 1.0E-5);
+  REL_TEST(_fp->rho(T), 896.9929544, 1E-05);
+  REL_TEST(_fp->drho_dT(T), -0.224167872, 1E-05);
+  REL_TEST(_fp->drho_dh(_fp->h(T)), -0.00016659590, 1E-2);
 }

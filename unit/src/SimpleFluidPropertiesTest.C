@@ -8,7 +8,20 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "SimpleFluidPropertiesTest.h"
-#include "Utils.h"
+#include "SinglePhaseFluidPropertiesPTUtils.h"
+
+/**
+ * Test that the fluid name is correctly returned
+ */
+TEST_F(SimpleFluidPropertiesTest, fluidName) { EXPECT_EQ(_fp->fluidName(), "simple_fluid"); }
+
+/**
+ * Test that the default molar mass is correctly returned
+ */
+TEST_F(SimpleFluidPropertiesTest, molarMass)
+{
+  ABS_TEST(_fp->molarMass(), 1.8e-2, REL_TOL_SAVED_VALUE);
+}
 
 /**
  * Verify calculation of the fluid properties
@@ -26,41 +39,42 @@ TEST_F(SimpleFluidPropertiesTest, properties)
   const Real henry = 0.0;
   const Real pp_coef = 0.0;
 
-  Real P, T;
+  const Real tol = REL_TOL_CONSISTENCY;
 
-  P = 1E3;
-  T = 200;
-  REL_TEST("beta", _fp->beta(P, T), thermal_exp, 1.0E-8);
-  REL_TEST("cp", _fp->cp(P, T), cp, 1.0E-8);
-  REL_TEST("cv", _fp->cv(P, T), cv, 1.0E-8);
-  REL_TEST("c", _fp->c(P, T), std::sqrt(bulk_modulus / _fp->rho(P, T)), 1.0E-8);
-  REL_TEST("k", _fp->k(P, T), thermal_cond, 1.0E-8);
-  REL_TEST("k", _fp->k(P, T), thermal_cond, 1.0E-8);
-  REL_TEST("s", _fp->s(P, T), entropy, 1.0E-8);
-  REL_TEST("rho", _fp->rho(P, T), density0 * std::exp(P / bulk_modulus - thermal_exp * T), 1.0E-8);
-  REL_TEST("e", _fp->e(P, T), cv * T, 1.0E-8);
-  REL_TEST("mu", _fp->mu(P, T), visc, 1.0E-8);
-  REL_TEST("mu", _fp->mu(P, T), visc, 1.0E-8);
-  REL_TEST("h", _fp->h(P, T), cv * T + P / _fp->rho(P, T), 1.0E-8);
-  REL_TEST("h2", _fp2->h(P, T), cv * T + P * pp_coef / _fp2->rho(P, T), 1.0E-8);
-  ABS_TEST("henry", _fp->henryConstant(T), henry, 1.0E-8);
+  Real p = 1.0E3;
+  Real T = 200.0;
 
-  P = 1E7;
-  T = 300;
-  REL_TEST("beta", _fp->beta(P, T), thermal_exp, 1.0E-8);
-  REL_TEST("cp", _fp->cp(P, T), cp, 1.0E-8);
-  REL_TEST("cv", _fp->cv(P, T), cv, 1.0E-8);
-  REL_TEST("c", _fp->c(P, T), std::sqrt(bulk_modulus / _fp->rho(P, T)), 1.0E-8);
-  REL_TEST("k", _fp->k(P, T), thermal_cond, 1.0E-8);
-  REL_TEST("k", _fp->k(P, T), thermal_cond, 1.0E-8);
-  REL_TEST("s", _fp->s(P, T), entropy, 1.0E-8);
-  REL_TEST("rho", _fp->rho(P, T), density0 * std::exp(P / bulk_modulus - thermal_exp * T), 1.0E-8);
-  REL_TEST("e", _fp->e(P, T), cv * T, 1.0E-8);
-  REL_TEST("mu", _fp->mu(P, T), visc, 1.0E-8);
-  REL_TEST("mu", _fp->mu(P, T), visc, 1.0E-8);
-  REL_TEST("h", _fp->h(P, T), cv * T + P / _fp->rho(P, T), 1.0E-8);
-  REL_TEST("h2", _fp2->h(P, T), cv * T + P * pp_coef / _fp2->rho(P, T), 1.0E-8);
-  ABS_TEST("henry", _fp->henryConstant(T), henry, 1.0E-8);
+  ABS_TEST(_fp->beta(p, T), thermal_exp, tol);
+  ABS_TEST(_fp->cp(p, T), cp, tol);
+  ABS_TEST(_fp->cv(p, T), cv, tol);
+  ABS_TEST(_fp->c(p, T), std::sqrt(bulk_modulus / _fp->rho(p, T)), tol);
+  ABS_TEST(_fp->k(p, T), thermal_cond, tol);
+  ABS_TEST(_fp->k(p, T), thermal_cond, tol);
+  ABS_TEST(_fp->s(p, T), entropy, tol);
+  ABS_TEST(_fp->rho(p, T), density0 * std::exp(p / bulk_modulus - thermal_exp * T), tol);
+  ABS_TEST(_fp->e(p, T), cv * T, tol);
+  ABS_TEST(_fp->mu(p, T), visc, tol);
+  ABS_TEST(_fp->mu(p, T), visc, tol);
+  ABS_TEST(_fp->h(p, T), cv * T + p / _fp->rho(p, T), tol);
+  ABS_TEST(_fp2->h(p, T), cv * T + p * pp_coef / _fp2->rho(p, T), tol);
+  ABS_TEST(_fp->henryConstant(T), henry, tol);
+
+  p = 1.0E7;
+  T = 300.0;
+  ABS_TEST(_fp->beta(p, T), thermal_exp, tol);
+  ABS_TEST(_fp->cp(p, T), cp, tol);
+  ABS_TEST(_fp->cv(p, T), cv, tol);
+  ABS_TEST(_fp->c(p, T), std::sqrt(bulk_modulus / _fp->rho(p, T)), tol);
+  ABS_TEST(_fp->k(p, T), thermal_cond, tol);
+  ABS_TEST(_fp->k(p, T), thermal_cond, tol);
+  ABS_TEST(_fp->s(p, T), entropy, tol);
+  ABS_TEST(_fp->rho(p, T), density0 * std::exp(p / bulk_modulus - thermal_exp * T), tol);
+  ABS_TEST(_fp->e(p, T), cv * T, tol);
+  ABS_TEST(_fp->mu(p, T), visc, tol);
+  ABS_TEST(_fp->mu(p, T), visc, tol);
+  ABS_TEST(_fp->h(p, T), cv * T + p / _fp->rho(p, T), tol);
+  ABS_TEST(_fp2->h(p, T), cv * T + p * pp_coef / _fp2->rho(p, T), tol);
+  ABS_TEST(_fp->henryConstant(T), henry, tol);
 }
 
 /**
@@ -69,100 +83,39 @@ TEST_F(SimpleFluidPropertiesTest, properties)
  */
 TEST_F(SimpleFluidPropertiesTest, derivatives)
 {
-  const Real dP = 1.0E1;
-  const Real dT = 1.0E-4;
+  const Real tol = REL_TOL_DERIVATIVE;
 
-  Real fd;
-  Real P, T;
+  Real p = 1.0E7;
+  Real T = 10.0;
 
-  Real rho, drho_dp, drho_dT;
-  P = 1E7;
-  T = 10;
-  _fp->rho_dpT(P, T, rho, drho_dp, drho_dT);
-  fd = (_fp->rho(P + dP, T) - _fp->rho(P - dP, T)) / (2.0 * dP);
-  REL_TEST("drho_dP", drho_dp, fd, 1.0E-8);
-  fd = (_fp->rho(P, T + dT) - _fp->rho(P, T - dT)) / (2.0 * dT);
-  REL_TEST("drho_dT", drho_dT, fd, 1.0E-8);
+  DERIV_TEST(_fp->rho, _fp->rho_dpT, p, T, tol);
+  DERIV_TEST(_fp->mu, _fp->mu_dpT, p, T, tol);
+  DERIV_TEST(_fp->e, _fp->e_dpT, p, T, tol);
+  DERIV_TEST(_fp->h, _fp->h_dpT, p, T, tol);
+  DERIV_TEST(_fp->k, _fp->k_dpT, p, T, tol);
 
-  P = 5E7;
-  T = 90;
-  _fp->rho_dpT(P, T, rho, drho_dp, drho_dT);
-  fd = (_fp->rho(P + dP, T) - _fp->rho(P - dP, T)) / (2.0 * dP);
-  REL_TEST("drho_dP", drho_dp, fd, 1.0E-8);
-  fd = (_fp->rho(P, T + dT) - _fp->rho(P, T - dT)) / (2.0 * dT);
-  REL_TEST("drho_dT", drho_dT, fd, 1.0E-8);
+  p = 5.0E7;
+  T = 90.0;
 
-  Real e, de_dp, de_dT;
-  P = 1E6;
-  T = 20;
-  _fp->e_dpT(P, T, e, de_dp, de_dT);
-  fd = (_fp->e(P + dP, T) - _fp->e(P - dP, T)) / (2.0 * dP);
-  ABS_TEST("de_dP", de_dp, fd, 1.0E-8);
-  fd = (_fp->e(P, T + dT) - _fp->e(P, T - dT)) / (2.0 * dT);
-  REL_TEST("de_dT", de_dT, fd, 1.0E-8);
+  DERIV_TEST(_fp->rho, _fp->rho_dpT, p, T, tol);
+  DERIV_TEST(_fp->mu, _fp->mu_dpT, p, T, tol);
+  DERIV_TEST(_fp->e, _fp->e_dpT, p, T, tol);
+  DERIV_TEST(_fp->h, _fp->h_dpT, p, T, tol);
+  DERIV_TEST(_fp->k, _fp->k_dpT, p, T, tol);
 
-  P = 5E6;
-  T = 90;
-  _fp->e_dpT(P, T, e, de_dp, de_dT);
-  fd = (_fp->e(P + dP, T) - _fp->e(P - dP, T)) / (2.0 * dP);
-  ABS_TEST("de_dP", de_dp, fd, 1.0E-8);
-  fd = (_fp->e(P, T + dT) - _fp->e(P, T - dT)) / (2.0 * dT);
-  REL_TEST("de_dT", de_dT, fd, 1.0E-8);
+  Real henry, dhenry_dT;
+  _fp->henryConstant_dT(T, henry, dhenry_dT);
+  ABS_TEST(dhenry_dT, 0.0, tol);
+}
 
-  Real mu, dmu_dp, dmu_dT;
-  P = 1E6;
-  T = 10;
-  _fp->mu_dpT(P, T, mu, dmu_dp, dmu_dT);
-  fd = (_fp->mu(P + dP, T) - _fp->mu(P - dP, T)) / (2.0 * dP);
-  ABS_TEST("dmu_dp", dmu_dp, fd, 1.0E-8);
-  fd = (_fp->mu(P, T + dT) - _fp->mu(P, T - dT)) / (2.0 * dT);
-  ABS_TEST("dmu_dT", dmu_dT, fd, 1.0E-8);
+/**
+ * Verify that the methods that return multiple properties in one call return identical
+ * values as the individual methods
+ */
+TEST_F(SimpleFluidPropertiesTest, combined)
+{
+  const Real p = 1.0e6;
+  const Real T = 300.0;
 
-  Real k, dk_dp, dk_dT;
-  _fp->k_dpT(P, T, k, dk_dp, dk_dT);
-  fd = (_fp->k(P + dP, T) - _fp->k(P - dP, T)) / (2.0 * dP);
-  ABS_TEST("dk_dp", dk_dp, fd, 1.0E-8);
-  fd = (_fp->k(P, T + dT) - _fp->k(P, T - dT)) / (2.0 * dT);
-  ABS_TEST("dk_dT", dk_dT, fd, 1.0E-8);
-
-  P = 2E6;
-  T = 80;
-  _fp->mu_dpT(P, T, mu, dmu_dp, dmu_dT);
-  fd = (_fp->mu(P + dP, T) - _fp->mu(P - dP, T)) / (2.0 * dP);
-  ABS_TEST("dmu_dp", dmu_dp, fd, 1.0E-8);
-  fd = (_fp->mu(P, T + dT) - _fp->mu(P, T - dT)) / (2.0 * dT);
-  ABS_TEST("dmu_dT", dmu_dT, fd, 1.0E-8);
-
-  _fp->k_dpT(P, T, k, dk_dp, dk_dT);
-  fd = (_fp->k(P + dP, T) - _fp->k(P - dP, T)) / (2.0 * dP);
-  ABS_TEST("dk_dp", dk_dp, fd, 1.0E-8);
-  fd = (_fp->k(P, T + dT) - _fp->k(P, T - dT)) / (2.0 * dT);
-  ABS_TEST("dk_dT", dk_dT, fd, 1.0E-8);
-
-  Real h, dh_dp, dh_dT;
-  P = 1E6;
-  T = 10;
-  _fp->h_dpT(P, T, h, dh_dp, dh_dT);
-  fd = (_fp->h(P + dP, T) - _fp->h(P - dP, T)) / (2.0 * dP);
-  REL_TEST("dh_dP", dh_dp, fd, 1.0E-8);
-  fd = (_fp->h(P, T + dT) - _fp->h(P, T - dT)) / (2.0 * dT);
-  REL_TEST("dh_dT", dh_dT, fd, 1.0E-8);
-  _fp2->h_dpT(P, T, h, dh_dp, dh_dT);
-  fd = (_fp2->h(P + dP, T) - _fp2->h(P - dP, T)) / (2.0 * dP);
-  ABS_TEST("dh_dP", dh_dp, fd, 1.0E-8);
-  fd = (_fp2->h(P, T + dT) - _fp2->h(P, T - dT)) / (2.0 * dT);
-  REL_TEST("dh_dT", dh_dT, fd, 1.0E-8);
-
-  P = 4E6;
-  T = 90;
-  _fp->h_dpT(P, T, h, dh_dp, dh_dT);
-  fd = (_fp->h(P + dP, T) - _fp->h(P - dP, T)) / (2.0 * dP);
-  REL_TEST("dh_dP", dh_dp, fd, 1.0E-8);
-  fd = (_fp->h(P, T + dT) - _fp->h(P, T - dT)) / (2.0 * dT);
-  REL_TEST("dh_dT", dh_dT, fd, 1.0E-8);
-  _fp2->h_dpT(P, T, h, dh_dp, dh_dT);
-  fd = (_fp2->h(P + dP, T) - _fp2->h(P - dP, T)) / (2.0 * dP);
-  ABS_TEST("dh_dP", dh_dp, fd, 1.0E-8);
-  fd = (_fp2->h(P, T + dT) - _fp2->h(P, T - dT)) / (2.0 * dT);
-  REL_TEST("dh_dT", dh_dT, fd, 1.0E-8);
+  combinedProperties(_fp, p, T, REL_TOL_SAVED_VALUE);
 }
