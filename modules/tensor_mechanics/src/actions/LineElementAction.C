@@ -47,7 +47,7 @@ validParams<LineElementAction>()
   params.addParam<bool>(
       "truss",
       false,
-      "Set to true if the line elements are truss elemrnts instead of the default beam elements.");
+      "Set to true if the line elements are truss elements instead of the default beam elements.");
   params.addParam<bool>("add_variables",
                         false,
                         "Add the displacement variables for truss elements "

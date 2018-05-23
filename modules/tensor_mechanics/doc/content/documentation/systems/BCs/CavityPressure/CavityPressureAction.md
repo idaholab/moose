@@ -1,28 +1,8 @@
 # Cavity Pressure Action
 
-!syntax description /BCs/CavityPressure/CavityPressureAction
-
 ## Description
 
-The `CavityPressureAction` is one of three actions in the Cavity Pressure Action system which are
-intended to be used concurrently.  The intention of the Cavity Pressure Action system is to reduce
+The `CavityPressureAction` is one of three actions in the [CavityPressure](/CavityPressure/index.md) action system which are
+intended to be used concurrently.  The intention of the `CavityPressure` action system is to reduce
 the number of input file blocks required to compute the pressure exerted by a gas contained in an
 internal volume.
-
-## Constructed MooseObjects
-
-!include /cavity_pressure.md
-
-## Example Input File Syntax
-
-!listing modules/combined/test/tests/cavity_pressure/cavity_pressure.i block=BCs/CavityPressure
-
-Postprocessors for both the average temperature and the internal volume are also required for the
-Cavity Pressure Action system. Note that the name of the postprocessors correspond to the arguments
-for the parameters `temperature` and `internal_volume` in the `CavityPressure` block.
-
-!listing modules/combined/test/tests/cavity_pressure/cavity_pressure.i block=Postprocessors/aveTempInterior
-
-!listing modules/combined/test/tests/cavity_pressure/cavity_pressure.i block=Postprocessors/internalVolume
-
-!syntax parameters /BCs/CavityPressure/CavityPressureAction

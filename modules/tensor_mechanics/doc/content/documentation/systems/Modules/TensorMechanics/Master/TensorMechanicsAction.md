@@ -1,15 +1,5 @@
-<!-- MOOSE Documentation Stub: Remove this when content is added. -->
+# Tensor Mechanics Action
 
-# TensorMechanicsAction
+## Description
 
-!alert construction title=Undocumented Class
-The TensorMechanicsAction has not been documented, if you would like to contribute to MOOSE by writing
-documentation, please see [/generate.md]. The content contained on this page explains the typical
-documentation associated with an action; however, what is contained is ultimately determined by what
-is necessary to make the documentation clear for users.
-
-!syntax description /Modules/TensorMechanics/Master/TensorMechanicsAction
-
-!syntax parameters /Modules/TensorMechanics/Master/TensorMechanicsAction
-
-!bibtex bibliography
+The tensor mechanics `Master` action simplifies the input file syntax for creating a tensor mechanics model. See the description, example use, and parameters on the [TensorMechanics/Master](/Master/index.md) action system page.
