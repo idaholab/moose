@@ -19,16 +19,13 @@ validParams<RateDirichletBC>()
   InputParameters params = validParams<NodalBC>();
   params.addRequiredParam<Real>("rate", "Value of the rate.");
   params.declareControllable("rate");
-  params.addClassDescription(
-      "Imposes the incremental boundary condition $du = g * dt$"
-      "where $g$ is a controllable constant.");
+  params.addClassDescription("Imposes the incremental boundary condition $du = g * dt$"
+                             "where $g$ is a controllable constant.");
   return params;
 }
 
 RateDirichletBC::RateDirichletBC(const InputParameters & parameters)
-  : NodalBC(parameters),
-    _rate(getParam<Real>("rate")),
-    _u_old(_var.dofValuesOld())
+  : NodalBC(parameters), _rate(getParam<Real>("rate")), _u_old(_var.dofValuesOld())
 {
 }
 

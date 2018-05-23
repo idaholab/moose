@@ -20,7 +20,7 @@ template <>
 InputParameters validParams<RateDirichletBC>();
 
 /**
- * Defines a boundary condition that imposes the value to increase 
+ * Defines a boundary condition that imposes the value to increase
  * according to a user-specified rate at the boundary.
  */
 class RateDirichletBC : public NodalBC

@@ -25,9 +25,7 @@ validParams<RatePresetBC>()
 }
 
 RatePresetBC::RatePresetBC(const InputParameters & parameters)
-  : PresetNodalBC(parameters),
-    _rate(getParam<Real>("rate")),
-    _u_old(_var.dofValuesOld())
+  : PresetNodalBC(parameters), _rate(getParam<Real>("rate")), _u_old(_var.dofValuesOld())
 {
 }
 
