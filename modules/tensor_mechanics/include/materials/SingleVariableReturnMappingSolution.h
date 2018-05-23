@@ -128,12 +128,19 @@ protected:
   bool _check_range;
 
 private:
-  enum class DebugLevel
+  enum class InternalSolveOutput
   {
-    NONE,
-    ALL,
-    ERROR
-  } _debug_level;
+    NEVER,
+    ON_ERROR,
+    ALWAYS
+  } _internal_solve_output;
+
+  enum class SolveState
+  {
+    SUCCESS,
+    NAN_INF,
+    EXCEEDED_ITERATIONS
+  };
 
   /// Maximum number of return mapping iterations (used only in legacy return mapping)
   unsigned int _max_its;
@@ -169,6 +176,14 @@ private:
   /// iteration number
   unsigned int _iteration;
 
+  ///@{ Residual values, kept as members to retain solver state for summary outputting
+  Real _initial_residual;
+  Real _residual;
+  ///@}
+
+  /// MOOSE input name of the object performing the solve
+  const std::string _svrms_name;
+
   /**
    * Method called from within this class to perform the actual return mappping iterations.
    * @param effective_trial_stress Effective trial stress
@@ -176,9 +191,9 @@ private:
    * @param iter_output            Output stream -- if null, no output is produced
    * @return Whether the solution was successful
    */
-  bool internalSolve(const Real effective_trial_stress,
-                     Real & scalar,
-                     std::stringstream * iter_output = nullptr);
+  SolveState internalSolve(const Real effective_trial_stress,
+                           Real & scalar,
+                           std::stringstream * iter_output = nullptr);
 
   /**
    * Method called from within this class to perform the actual return mappping iterations.

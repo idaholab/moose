@@ -120,7 +120,6 @@ protected:
    */
   virtual void computeStressFinalize(const RankTwoTensor & /*inelasticStrainIncrement*/) {}
 
-  /// Collect info on a nested solve
   void outputIterationSummary(std::stringstream * iter_output,
                               const unsigned int total_it) override;
 
