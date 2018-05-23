@@ -10,11 +10,31 @@
 #ifndef UTILS_H
 #define UTILS_H
 
-#define REL_TEST(name, value, ref_value, tol)                                                      \
-  EXPECT_LE(std::abs(((value) - (ref_value)) / (ref_value)), (tol)) << "    - failed " << name     \
-                                                                    << " check"
+// Relative tolerance to be used when comparing to a value from external fluid
+// property packages, which might be using different underlying models
+#define REL_TOL_EXTERNAL_VALUE 1e-3
 
-#define ABS_TEST(name, value, ref_value, tol)                                                      \
-  EXPECT_LE(std::abs(((value) - (ref_value))), (tol)) << "    - failed " << name << " check"
+// Relative tolerance to be used when comparing to a value computed directly
+// from the code at an earlier date, to ensure that implementations are not
+// inadvertently changed
+#define REL_TOL_SAVED_VALUE 1e-12
+
+// Relative tolerance to be used for consistency checks - computing properties
+// in different ways at the same state
+#define REL_TOL_CONSISTENCY 1e-10
+
+// Relative tolerance to be used when comparing a derivative value to a finite
+// difference approximation
+#define REL_TOL_DERIVATIVE 1e-6
+
+// Macro for computing relative error
+#define REL_TEST(value, ref_value, tol)                                                            \
+  if (std::abs(ref_value) < 1e-15)                                                                 \
+    ABS_TEST(value, ref_value, tol);                                                               \
+  else                                                                                             \
+    EXPECT_LE(std::abs((value) - (ref_value)) / (ref_value), (tol));
+
+// Macro for computing absolute error
+#define ABS_TEST(value, ref_value, tol) EXPECT_LE(std::abs(((value) - (ref_value))), (tol))
 
 #endif // UTILS_H

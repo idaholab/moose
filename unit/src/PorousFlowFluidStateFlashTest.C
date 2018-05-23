@@ -19,13 +19,13 @@ TEST_F(PorousFlowFluidStateFlashTest, rachfordRice)
   Real vmf = 0.2316623869599;
   std::vector<Real> zi = {0.6};
   std::vector<Real> Ki = {1.338, 0.576};
-  ABS_TEST("rachfordRice", _fp->rachfordRice(vmf, zi, Ki), 0.0, 1.0e-8);
+  ABS_TEST(_fp->rachfordRice(vmf, zi, Ki), 0.0, 1.0e-8);
 
   // Four fluid components
   vmf = 0.20329862165314910428;
   zi = {0.6, 0.01, 0.01};
   Ki = {1.338, 0.613, 0.222, 0.576};
-  ABS_TEST("rachfordRice", _fp->rachfordRice(vmf, zi, Ki), 0.0, 1.0e-8);
+  ABS_TEST(_fp->rachfordRice(vmf, zi, Ki), 0.0, 1.0e-8);
 }
 
 /**
@@ -37,12 +37,12 @@ TEST_F(PorousFlowFluidStateFlashTest, vaporMassFraction)
   // Test calculation using example data
   std::vector<Real> zi = {0.6};
   std::vector<Real> Ki = {1.338, 0.576};
-  ABS_TEST("vaporMassFraction", _fp->vaporMassFraction(zi, Ki), 0.2316623869599, 1.0e-8);
+  ABS_TEST(_fp->vaporMassFraction(zi, Ki), 0.2316623869599, 1.0e-8);
 
   // Four fluid components
   zi = {0.6, 0.01, 0.01};
   Ki = {1.338, 0.613, 0.222, 0.576};
-  ABS_TEST("rachfordRice", _fp->vaporMassFraction(zi, Ki), 0.20329862165314910428, 1.0e-8);
+  ABS_TEST(_fp->vaporMassFraction(zi, Ki), 0.20329862165314910428, 1.0e-8);
 }
 
 /**
@@ -60,7 +60,7 @@ TEST_F(PorousFlowFluidStateFlashTest, rachfordRiceDeriv)
   Real rr2 = _fp->rachfordRice(vmf + dvmf, zi, Ki);
   Real fd = (rr2 - rr1) / (2.0 * dvmf);
 
-  ABS_TEST("rachfordRiceDeriv", _fp->rachfordRiceDeriv(vmf, zi, Ki), fd, 1.0e-8);
+  ABS_TEST(_fp->rachfordRiceDeriv(vmf, zi, Ki), fd, 1.0e-8);
 
   // Four fluid components
   vmf = 0.6;
@@ -71,5 +71,5 @@ TEST_F(PorousFlowFluidStateFlashTest, rachfordRiceDeriv)
   rr2 = _fp->rachfordRice(vmf + dvmf, zi, Ki);
   fd = (rr2 - rr1) / (2.0 * dvmf);
 
-  ABS_TEST("rachfordRiceDeriv", _fp->rachfordRiceDeriv(vmf, zi, Ki), fd, 1.0e-8);
+  ABS_TEST(_fp->rachfordRiceDeriv(vmf, zi, Ki), fd, 1.0e-8);
 }
