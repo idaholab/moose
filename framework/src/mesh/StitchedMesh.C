@@ -85,6 +85,12 @@ StitchedMesh::clone() const
   return *(new StitchedMesh(*this));
 }
 
+std::unique_ptr<MooseMesh>
+StitchedMesh::safeClone() const
+{
+  return libmesh_make_unique<StitchedMesh>(*this);
+}
+
 void
 StitchedMesh::buildMesh()
 {

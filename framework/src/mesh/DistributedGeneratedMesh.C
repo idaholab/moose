@@ -162,6 +162,12 @@ DistributedGeneratedMesh::clone() const
   return *(new DistributedGeneratedMesh(*this));
 }
 
+std::unique_ptr<MooseMesh>
+DistributedGeneratedMesh::safeClone() const
+{
+  return libmesh_make_unique<DistributedGeneratedMesh>(*this);
+}
+
 namespace
 {
 

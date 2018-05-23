@@ -48,6 +48,12 @@ FileMesh::clone() const
   return *(new FileMesh(*this));
 }
 
+std::unique_ptr<MooseMesh>
+FileMesh::safeClone() const
+{
+  return libmesh_make_unique<FileMesh>(*this);
+}
+
 void
 FileMesh::buildMesh()
 {

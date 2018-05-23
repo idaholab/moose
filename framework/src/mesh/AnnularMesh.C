@@ -119,6 +119,12 @@ AnnularMesh::clone() const
   return *(new AnnularMesh(*this));
 }
 
+std::unique_ptr<MooseMesh>
+AnnularMesh::safeClone() const
+{
+  return libmesh_make_unique<AnnularMesh>(*this);
+}
+
 void
 AnnularMesh::buildMesh()
 {

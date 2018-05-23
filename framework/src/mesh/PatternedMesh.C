@@ -103,6 +103,12 @@ PatternedMesh::clone() const
   return *(new PatternedMesh(*this));
 }
 
+std::unique_ptr<MooseMesh>
+PatternedMesh::safeClone() const
+{
+  return libmesh_make_unique<PatternedMesh>(*this);
+}
+
 void
 PatternedMesh::buildMesh()
 {

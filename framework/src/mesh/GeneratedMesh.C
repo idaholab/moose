@@ -137,6 +137,12 @@ GeneratedMesh::clone() const
   return *(new GeneratedMesh(*this));
 }
 
+std::unique_ptr<MooseMesh>
+GeneratedMesh::safeClone() const
+{
+  return libmesh_make_unique<GeneratedMesh>(*this);
+}
+
 void
 GeneratedMesh::buildMesh()
 {

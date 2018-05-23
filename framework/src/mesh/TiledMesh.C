@@ -83,6 +83,12 @@ TiledMesh::clone() const
   return *(new TiledMesh(*this));
 }
 
+std::unique_ptr<MooseMesh>
+TiledMesh::safeClone() const
+{
+  return libmesh_make_unique<TiledMesh>(*this);
+}
+
 std::string
 TiledMesh::getFileName() const
 {
