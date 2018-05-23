@@ -19,6 +19,7 @@
 #include "GeometricSearchInterface.h"
 #include "Restartable.h"
 #include "MeshChangedInterface.h"
+#include "TaggingInterface.h"
 
 // Forward Declarations
 class Assembly;
@@ -43,7 +44,8 @@ class Constraint : public MooseObject,
                    public TransientInterface,
                    protected GeometricSearchInterface,
                    public Restartable,
-                   public MeshChangedInterface
+                   public MeshChangedInterface,
+                   public TaggingInterface
 {
 public:
   Constraint(const InputParameters & parameters);

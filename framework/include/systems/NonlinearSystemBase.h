@@ -11,9 +11,10 @@
 #define NONLINEARSYSTEMBASE_H
 
 #include "SystemBase.h"
-#include "ConstraintWarehouse.h"
+#include "ConstraintTagWarehouse.h"
 #include "MooseObjectWarehouse.h"
 #include "MooseObjectTagWarehouse.h"
+#include "ConstraintTagWarehouse.h"
 
 #include "libmesh/transient_system.h"
 #include "libmesh/nonlinear_implicit_system.h"
@@ -231,7 +232,7 @@ public:
    * computed
    * @param displaced Controls whether to do the displaced Constraints or non-displaced
    */
-  void constraintResiduals(NumericVector<Number> & residual, bool displaced);
+  void constraintResiduals(const std::set<TagID> & tags, bool displaced);
 
   /**
    * Computes residual for a given tag
@@ -535,7 +536,7 @@ public:
   {
     return _nodal_dampers;
   }
-  const ConstraintWarehouse & getConstraintWarehouse() const { return _constraints; };
+  const ConstraintTagWarehouse & getConstraintWarehouse() const { return _constraints; };
   //@}
 
   /**
@@ -702,7 +703,7 @@ protected:
   MooseObjectWarehouseBase<Split> _splits; // use base b/c there are no setup methods
 
   /// Constraints storage object
-  ConstraintWarehouse _constraints;
+  ConstraintTagWarehouse _constraints;
 
 protected:
   /// increment vector

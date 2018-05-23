@@ -856,10 +856,9 @@ NonlinearSystemBase::setConstraintSlaveValues(NumericVector<Number> & solution, 
 }
 
 void
-NonlinearSystemBase::constraintResiduals(NumericVector<Number> & residual, bool displaced)
+NonlinearSystemBase::constraintResiduals(const std::set<TagID> & tags, bool displaced)
 {
-  // Make sure the residual is in a good state
-  residual.close();
+  closeTaggedVectors(tags);
 
   std::map<std::pair<unsigned int, unsigned int>, PenetrationLocator *> * penetration_locators =
       NULL;
@@ -880,6 +879,16 @@ NonlinearSystemBase::constraintResiduals(NumericVector<Number> & residual, bool 
   bool residual_has_inserted_values = false;
   if (!_assemble_constraints_separately)
     constraints_applied = false;
+
+  ConstraintWarehouse * constraint_warehouse = nullptr;
+
+  if (!tags.size() || tags.size() == _fe_problem.numVectorTags())
+    constraint_warehouse = &_constraints;
+  else if (tags.size() == 1)
+    constraint_warehouse = &(_constraints.getVectorTagObjectWarehouse(*(tags.begin()), 0));
+  else
+    constraint_warehouse = &(_constraints.getVectorTagsObjectWarehouse(tags, 0));
+
   for (const auto & it : *penetration_locators)
   {
     if (_assemble_constraints_separately)
@@ -894,10 +903,10 @@ NonlinearSystemBase::constraintResiduals(NumericVector<Number> & residual, bool 
 
     BoundaryID slave_boundary = pen_loc._slave_boundary;
 
-    if (_constraints.hasActiveNodeFaceConstraints(slave_boundary, displaced))
+    if (constraint_warehouse->hasActiveNodeFaceConstraints(slave_boundary, displaced))
     {
       const auto & constraints =
-          _constraints.getActiveNodeFaceConstraints(slave_boundary, displaced);
+          constraint_warehouse->getActiveNodeFaceConstraints(slave_boundary, displaced);
 
       for (unsigned int i = 0; i < slave_nodes.size(); i++)
       {
@@ -937,7 +946,7 @@ NonlinearSystemBase::constraintResiduals(NumericVector<Number> & residual, bool 
 
                 if (nfc->overwriteSlaveResidual())
                 {
-                  _fe_problem.setResidual(residual, 0);
+                  _fe_problem.setResidual(tags, 0);
                   residual_has_inserted_values = true;
                 }
                 else
@@ -964,14 +973,16 @@ NonlinearSystemBase::constraintResiduals(NumericVector<Number> & residual, bool 
         _communicator.max(residual_has_inserted_values);
         if (residual_has_inserted_values)
         {
-          residual.close();
+          closeTaggedVectors(tags);
           residual_has_inserted_values = false;
         }
-        _fe_problem.addCachedResidualDirectly(residual, 0);
-        residual.close();
-
-        if (_need_residual_ghosted)
-          *_residual_ghosted = residual;
+        if (hasVector(residualVectorTag()))
+        {
+          _fe_problem.addCachedResidualDirectly(getVector(residualVectorTag()), 0);
+          getVector(residualVectorTag()).close();
+        }
+        if (_need_residual_ghosted && hasVector(residualVectorTag()))
+          *_residual_ghosted = getVector(residualVectorTag());
       }
     }
   }
@@ -985,13 +996,16 @@ NonlinearSystemBase::constraintResiduals(NumericVector<Number> & residual, bool 
       // before adding the cached residuals below.
       _communicator.max(residual_has_inserted_values);
       if (residual_has_inserted_values)
-        residual.close();
+        closeTaggedVectors(tags);
 
-      _fe_problem.addCachedResidualDirectly(residual, 0);
-      residual.close();
+      if (hasVector(residualVectorTag()))
+      {
+        _fe_problem.addCachedResidualDirectly(getVector(residualVectorTag()), 0);
+        getVector(residualVectorTag()).close();
+      }
 
-      if (_need_residual_ghosted)
-        *_residual_ghosted = residual;
+      if (_need_residual_ghosted && hasVector(residualVectorTag()))
+        *_residual_ghosted = getVector(residualVectorTag());
     }
   }
 
@@ -1000,9 +1014,10 @@ NonlinearSystemBase::constraintResiduals(NumericVector<Number> & residual, bool 
   auto & ifaces = _mesh.getMortarInterfaces();
   for (const auto & iface : ifaces)
   {
-    if (_constraints.hasActiveMortarConstraints(iface->_name))
+    if (constraint_warehouse->hasActiveMortarConstraints(iface->_name))
     {
-      const auto & face_constraints = _constraints.getActiveMortarConstraints(iface->_name);
+      const auto & face_constraints =
+          constraint_warehouse->getActiveMortarConstraints(iface->_name);
 
       // go over elements on that interface
       const std::vector<Elem *> & elems = iface->_elems;
@@ -1055,11 +1070,11 @@ NonlinearSystemBase::constraintResiduals(NumericVector<Number> & residual, bool 
   {
     ElementPairLocator & elem_pair_loc = *(it.second);
 
-    if (_constraints.hasActiveElemElemConstraints(it.first, displaced))
+    if (constraint_warehouse->hasActiveElemElemConstraints(it.first, displaced))
     {
       // ElemElemConstraint objects
       const auto & _element_constraints =
-          _constraints.getActiveElemElemConstraints(it.first, displaced);
+          constraint_warehouse->getActiveElemElemConstraints(it.first, displaced);
 
       // go over pair elements
       const std::list<std::pair<const Elem *, const Elem *>> & elem_pairs =
@@ -1268,17 +1283,18 @@ NonlinearSystemBase::computeResidualInternal(const std::set<TagID> & tags)
     PARALLEL_TRY
     {
       // Undisplaced Constraints
-      constraintResiduals(*_Re_non_time, false);
+      constraintResiduals(tags, false);
 
       // Displaced Constraints
       if (_fe_problem.getDisplacedProblem())
-        constraintResiduals(*_Re_non_time, true);
+        constraintResiduals(tags, true);
 
       if (_fe_problem.computingNonlinearResid())
         _constraints.residualEnd();
     }
     PARALLEL_CATCH;
-    _Re_non_time->close();
+
+    closeTaggedVectors(tags);
   }
 }
 

@@ -682,9 +682,9 @@ DisplacedProblem::addCachedResidualDirectly(NumericVector<Number> & residual, TH
 }
 
 void
-DisplacedProblem::setResidual(NumericVector<Number> & residual, THREAD_ID tid)
+DisplacedProblem::setResidual(const std::set<TagID> & tags, THREAD_ID tid)
 {
-  _assembly[tid]->setResidual(residual);
+  _assembly[tid]->setResidual(tags);
 }
 
 void

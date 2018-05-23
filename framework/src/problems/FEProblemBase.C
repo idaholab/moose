@@ -1079,11 +1079,11 @@ FEProblemBase::addCachedResidualDirectly(NumericVector<Number> & residual, THREA
 }
 
 void
-FEProblemBase::setResidual(NumericVector<Number> & residual, THREAD_ID tid)
+FEProblemBase::setResidual(const std::set<TagID> & tags, THREAD_ID tid)
 {
-  _assembly[tid]->setResidual(residual);
+  _assembly[tid]->setResidual(tags);
   if (_displaced_problem)
-    _displaced_problem->setResidual(residual, tid);
+    _displaced_problem->setResidual(tags, tid);
 }
 
 void
