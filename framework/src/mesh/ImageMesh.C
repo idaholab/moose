@@ -59,6 +59,7 @@ ImageMesh::ImageMesh(const ImageMesh & other_mesh)
 MooseMesh &
 ImageMesh::clone() const
 {
+  mooseDeprecated("MooseMesh::clone() is deprecated, call MooseMesh::safeClone() instead.");
   return *(new ImageMesh(*this));
 }
 

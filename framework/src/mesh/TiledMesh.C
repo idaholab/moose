@@ -80,6 +80,7 @@ TiledMesh::TiledMesh(const TiledMesh & other_mesh)
 MooseMesh &
 TiledMesh::clone() const
 {
+  mooseDeprecated("MooseMesh::clone() is deprecated, call MooseMesh::safeClone() instead.");
   return *(new TiledMesh(*this));
 }
 

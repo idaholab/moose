@@ -45,6 +45,7 @@ FileMesh::~FileMesh() {}
 MooseMesh &
 FileMesh::clone() const
 {
+  mooseDeprecated("MooseMesh::clone() is deprecated, call MooseMesh::safeClone() instead.");
   return *(new FileMesh(*this));
 }
 

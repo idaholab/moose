@@ -82,6 +82,7 @@ StitchedMesh::~StitchedMesh() {}
 MooseMesh &
 StitchedMesh::clone() const
 {
+  mooseDeprecated("MooseMesh::clone() is deprecated, call MooseMesh::safeClone() instead.");
   return *(new StitchedMesh(*this));
 }
 

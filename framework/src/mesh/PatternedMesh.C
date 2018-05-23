@@ -100,6 +100,7 @@ PatternedMesh::~PatternedMesh() {}
 MooseMesh &
 PatternedMesh::clone() const
 {
+  mooseDeprecated("MooseMesh::clone() is deprecated, call MooseMesh::safeClone() instead.");
   return *(new PatternedMesh(*this));
 }
 

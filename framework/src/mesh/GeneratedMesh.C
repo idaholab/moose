@@ -134,6 +134,7 @@ GeneratedMesh::getMaxInDimension(unsigned int component) const
 MooseMesh &
 GeneratedMesh::clone() const
 {
+  mooseDeprecated("MooseMesh::clone() is deprecated, call MooseMesh::safeClone() instead.");
   return *(new GeneratedMesh(*this));
 }
 
