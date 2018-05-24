@@ -6,6 +6,7 @@
     # input we can run on something much smaller...
     cli_args = 'Mesh/nx=2 Mesh/ny=2'
     check_input = True
+    fparser_jit = True
   [../]
   [./mortar_gradient]
     type = RunApp

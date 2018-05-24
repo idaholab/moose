@@ -88,7 +88,7 @@
     type = PythonUnitTest
     input = test_Allocations.py
   [../]
-  [./exra_info]
+  [./extra_info]
     type = PythonUnitTest
     input = test_ExtraInfo.py
   [../]

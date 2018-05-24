@@ -23,5 +23,6 @@
     cxx11 = true
     asio = true
     boost = true
+    fparser_jit = true
   [../]
 []
