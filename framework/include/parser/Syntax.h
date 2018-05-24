@@ -85,13 +85,13 @@ public:
   /**
    * Returns a Boolean indicating whether or not a task is registered with the syntax object.
    */
-  bool hasTask(const std::string & task);
+  bool hasTask(const std::string & task) const;
 
   /**
    * Returns a Boolean indicating whether the specified task is required.
    * DEPRECATED (use shouldAutoBuild).
    */
-  bool isActionRequired(const std::string & task);
+  bool isActionRequired(const std::string & task) const;
 
   /**
    * Returns a Boolean indicating whether MOOSE should attempt to automatically create an Action
@@ -154,7 +154,7 @@ public:
    * Method for determining whether a piece of syntax is associated with an Action
    * TODO: I need a better name
    */
-  std::string isAssociated(const std::string & real_id, bool * is_parent);
+  std::string isAssociated(const std::string & real_id, bool * is_parent) const;
 
   /**
    * Returns a pair of multimap iterators to all the ActionInfo objects associated with a given
