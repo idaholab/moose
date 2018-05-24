@@ -37,7 +37,7 @@ class TestHarnessTestCase(unittest.TestCase):
         """
         # We need to be sure to match any of the terminal codes in the line
         status_re = r'(?P<passed>\d+) passed.*, .*(?P<skipped>\d+) skipped.*, .*(?P<failed>\d+) failed'
-        match = re.search(status_re, output)
+        match = re.search(status_re, output, re.IGNORECASE)
         self.assertNotEqual(match, None)
         self.assertEqual(match.group("passed"), str(passed))
         self.assertEqual(match.group("failed"), str(failed))
