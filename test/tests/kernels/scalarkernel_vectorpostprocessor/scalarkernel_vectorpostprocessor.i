@@ -40,6 +40,7 @@
   [./constant]
     type = ConstantVectorPostprocessor
     value = '1.7 2.3 4.7'
+    execute_on = 'initial'
   [../]
 []
 
@@ -62,4 +63,3 @@
     vpp = constant
   [../]
 []
-
