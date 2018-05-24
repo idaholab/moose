@@ -1,15 +1,15 @@
 # C0 Timoshenko Beam Element
 
-!media media/tensor_mechanics_beam_representation.png
-       style=width:40%;margin-left:30px;float=right;
-       id=fig_beam
-       caption=Beam element with 2 nodes and 3 translational and 3 rotational degrees of freedom at each node.
-
 A beam element [fig_beam] is used to model the response of a structural element that is long in one dimension compared to its cross-section. There are two popular formulation of beam elements:
 
-- Euler-Bernoulli beam element: used to model bending deformation in long and slender beams. The two main assumptions in this beam theory are that: (i) the beam cross-section is rigid and does not deform under the application of transverse or lateral loads, and (ii) the cross-section of the beam remains planar and normal to the deformed axis of the beam.
+!media media/tensor_mechanics_beam_representation.png
+      style=width:50%;margin-left:2%;float:right
+      id=fig_beam
+      caption=Beam element with 2 nodes and 3 translational and 3 rotational degrees of freedom at each node.
 
-- Timoshenko beam element [citep:timoshenko_correction_1921, timoshenko_transverse_1922]: used to model both shear and bending deformation in short and thick beams. The beam cross-section does not deform in this beam theory as well and it remains planar. But the cross-section need not be normal to the deformed axis of the beam. The Euler-Bernoulli beam element can be derived as a special case of the Timoshenko beam element.
+1. +Euler-Bernoulli beam element+: used to model bending deformation in long and slender beams. The two main assumptions in this beam theory are that: (i) the beam cross-section is rigid and does not deform under the application of transverse or lateral loads, and (ii) the cross-section of the beam remains planar and normal to the deformed axis of the beam.
+
+1. +Timoshenko beam element+ [citep:timoshenko_correction_1921, timoshenko_transverse_1922]: used to model both shear and bending deformation in short and thick beams. The beam cross-section does not deform in this beam theory as well and it remains planar. But the cross-section need not be normal to the deformed axis of the beam. The Euler-Bernoulli beam element can be derived as a special case of the Timoshenko beam element.
 
 Therefore, a C0 Timoshenko beam element is implemented in MOOSE. This element has two nodes and each node has 6 degrees of freedom (DOFs) - 3 translational and 3 rotational displacements. All the 12 DOFs are considered to be independent and the variation of both translational and rotational displacements along the length of the beam are modeled using first order Lagrange shape functions. The independent rotational DOFs at the nodes makes it easier to model the shear deformation which results in non-perpendicular cross-sections with respect to the beam axis.
 
@@ -174,7 +174,7 @@ R_j^0 = \int_{0}^{{}^0L} \rho A \left(\frac{x}{{}^0L} {\ddot{u}_j}^0 + \frac{{}^
 \begin{equation}
 R_j^1 = \int_{0}^{{}^0L} \rho A \left(\frac{x}{{}^0L} {\ddot{u}_j}^0 + \frac{{}^0L - x}{{}^0L} {\ddot{u}_j}^1 \right) \frac{{}^0L - x}{{}^0L} dx
 \end{equation}
-where $\rho$ is the density of the beam, which is assumed to be constant through the length of the beam, and ${\ddot{u}_j}^i$ is the translational acceleration at node $i$ in $j^{th}$ direction.  
+where $\rho$ is the density of the beam, which is assumed to be constant through the length of the beam, and ${\ddot{u}_j}^i$ is the translational acceleration at node $i$ in $j^{th}$ direction.
 
 The residual for the $j^{th}$ rotational degree of freedom can be obtained as follows:
 \begin{equation}
