@@ -98,7 +98,7 @@ public:
   virtual void rho_mu(Real pressure, Real temperature, Real xmass, Real & rho, Real & mu) const = 0;
 
   /**
-   * Density and viscosity and their derivatives wrt pressure and temperature
+   * Density and viscosity and their derivatives wrt pressure, temperature and mass fraction
    * @param pressure fluid pressure (Pa)
    * @param temperature fluid temperature (K)
    * @param xmass mass fraction (-)
@@ -111,17 +111,17 @@ public:
    * @param[out] dmu_dT derivative of viscosity wrt temperature
    * @param[out] dmu_dx derivative of viscosity wrt mass fraction
    */
-  virtual void rho_mu_dpT(Real pressure,
-                          Real temperature,
-                          Real xmass,
-                          Real & rho,
-                          Real & drho_dp,
-                          Real & drho_dT,
-                          Real & drho_dx,
-                          Real & mu,
-                          Real & dmu_dp,
-                          Real & dmu_dT,
-                          Real dmu_dx) const = 0;
+  virtual void rho_mu_dpTx(Real pressure,
+                           Real temperature,
+                           Real xmass,
+                           Real & rho,
+                           Real & drho_dp,
+                           Real & drho_dT,
+                           Real & drho_dx,
+                           Real & mu,
+                           Real & dmu_dp,
+                           Real & dmu_dT,
+                           Real & dmu_dx) const = 0;
 
   /**
    * Enthalpy

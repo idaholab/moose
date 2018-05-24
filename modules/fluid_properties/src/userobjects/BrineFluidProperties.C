@@ -207,17 +207,17 @@ BrineFluidProperties::rho_mu(
 }
 
 void
-BrineFluidProperties::rho_mu_dpT(Real pressure,
-                                 Real temperature,
-                                 Real xnacl,
-                                 Real & rho,
-                                 Real & drho_dp,
-                                 Real & drho_dT,
-                                 Real & drho_dx,
-                                 Real & mu,
-                                 Real & dmu_dp,
-                                 Real & dmu_dT,
-                                 Real dmu_dx) const
+BrineFluidProperties::rho_mu_dpTx(Real pressure,
+                                  Real temperature,
+                                  Real xnacl,
+                                  Real & rho,
+                                  Real & drho_dp,
+                                  Real & drho_dT,
+                                  Real & drho_dx,
+                                  Real & mu,
+                                  Real & dmu_dp,
+                                  Real & dmu_dT,
+                                  Real & dmu_dx) const
 {
   this->rho_dpTx(pressure, temperature, xnacl, rho, drho_dp, drho_dT, drho_dx);
   this->mu_dpTx(pressure, temperature, xnacl, mu, dmu_dp, dmu_dT, dmu_dx);

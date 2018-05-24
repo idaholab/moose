@@ -77,6 +77,14 @@ TEST_F(MethaneFluidPropertiesTest, properties)
   REL_TEST(_fp->c(p, T), 481.7, tol);
   REL_TEST(_fp->mu(p, T), 0.01276e-3, tol);
   REL_TEST(_fp->k(p, T), 0.04113, tol);
+
+  // Test s, h and cp for temperatures > 755K as well as these methods have a
+  // different formulation in this regime
+  T = 800.0;
+
+  REL_TEST(_fp->h(p, T), 2132.0e3, tol);
+  REL_TEST(_fp->s(p, T), 13.83e3, tol);
+  REL_TEST(_fp->cp(p, T), 3.934e3, tol);
 }
 
 /**
@@ -88,7 +96,7 @@ TEST_F(MethaneFluidPropertiesTest, derivatives)
   const Real tol = REL_TOL_DERIVATIVE;
 
   const Real p = 10.0e6;
-  const Real T = 350.0;
+  Real T = 350.0;
 
   DERIV_TEST(_fp->rho, _fp->rho_dpT, p, T, tol);
   DERIV_TEST(_fp->mu, _fp->mu_dpT, p, T, tol);
@@ -96,13 +104,18 @@ TEST_F(MethaneFluidPropertiesTest, derivatives)
   DERIV_TEST(_fp->h, _fp->h_dpT, p, T, tol);
   DERIV_TEST(_fp->k, _fp->k_dpT, p, T, tol);
 
+  // Test derivative of enthalpy for T > 755 as well as it has a different formulation
+  T = 800.0;
+  DERIV_TEST(_fp->h, _fp->h_dpT, p, T, tol);
+
   // Henry's constant
+  T = 350.0;
   const Real dT = 1.0e-4;
 
   Real dKh_dT_fd = (_fp->henryConstant(T + dT) - _fp->henryConstant(T - dT)) / (2.0 * dT);
   Real Kh = 0.0, dKh_dT = 0.0;
   _fp->henryConstant_dT(T, Kh, dKh_dT);
-  REL_TEST(Kh, _fp->henryConstant(T), REL_TOL_DERIVATIVE);
+  REL_TEST(Kh, _fp->henryConstant(T), REL_TOL_SAVED_VALUE);
   REL_TEST(dKh_dT_fd, dKh_dT, REL_TOL_DERIVATIVE);
 }
 

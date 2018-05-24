@@ -221,3 +221,41 @@ TEST_F(BrineFluidPropertiesTest, derivatives)
 
   REL_TEST(dmu_dx, dmu_dx_fd, 1.0e-3);
 }
+
+/**
+ * Verify that the methods that return multiple properties in one call return identical
+ * values as the individual methods
+ */
+TEST_F(BrineFluidPropertiesTest, combined)
+{
+  const Real tol = REL_TOL_SAVED_VALUE;
+  const Real p = 1.0e6;
+  const Real T = 350.0;
+  const Real x = 0.1047;
+
+  // Single property methods
+  Real rho, drho_dp, drho_dT, drho_dx, mu, dmu_dp, dmu_dT, dmu_dx;
+  _fp->rho_dpTx(p, T, x, rho, drho_dp, drho_dT, drho_dx);
+  _fp->mu_dpTx(p, T, x, mu, dmu_dp, dmu_dT, dmu_dx);
+
+  // Combined property methods
+  Real rho2, mu2;
+  _fp->rho_mu(p, T, x, rho2, mu2);
+
+  ABS_TEST(rho, rho2, tol);
+  ABS_TEST(mu, mu2, tol);
+
+  // Combined property method with derivatives
+  Real drho2_dp, drho2_dT, drho2_dx, dmu2_dp, dmu2_dT, dmu2_dx;
+  _fp->rho_mu_dpTx(p, T, x, rho2, drho2_dp, drho2_dT, drho2_dx, mu2, dmu2_dp, dmu2_dT, dmu2_dx);
+
+  ABS_TEST(rho, rho2, tol);
+  ABS_TEST(mu, mu2, tol);
+  ABS_TEST(drho_dp, drho2_dp, tol);
+  ABS_TEST(drho_dT, drho2_dT, tol);
+  ABS_TEST(drho_dx, drho2_dx, tol);
+  ABS_TEST(mu, mu2, tol);
+  ABS_TEST(dmu_dp, dmu2_dp, tol);
+  ABS_TEST(dmu_dT, dmu2_dT, tol);
+  ABS_TEST(dmu_dx, dmu2_dx, tol);
+}
