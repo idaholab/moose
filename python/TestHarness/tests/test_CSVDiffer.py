@@ -74,7 +74,7 @@ class TestHarnessTester(TestHarnessTestCase):
         d.addCSVPair('out1.csv', 'col1,col2\n1,2\n1,2',' col1,col2\n1,2\n1,2')
         msg = d.diff()
         self.assertEqual(d.getNumErrors(), 1)
-        self.assertIn("In out1.csv: Variable 'col3' in custom_columns is missing from all CSV files", msg)
+        self.assertIn("In all CSV files: Variable 'col3' in custom_columns is missing", msg)
 
 if __name__ == '__main__':
     unittest.main(verbosity=2)
