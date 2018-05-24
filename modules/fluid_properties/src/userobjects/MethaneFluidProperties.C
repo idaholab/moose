@@ -272,6 +272,10 @@ MethaneFluidProperties::s(Real /*pressure*/, Real temperature) const
     entropy = _a1[0] * std::log(temperature);
     for (std::size_t i = 1; i < _a1.size(); ++i)
       entropy += _a1[i] * MathUtils::pow(temperature, i) / static_cast<Real>(i);
+
+    // As entropy is obtained from cp by integration in this formulation, a zero
+    // shift is required in this regime, see Irvine and Liley (1984)
+    entropy -= 39.768;
   }
 
   // convert to J/kg/K by multiplying by 1000
@@ -291,8 +295,14 @@ MethaneFluidProperties::h(Real /*pressure*/, Real temperature) const
     for (std::size_t i = 0; i < _a0.size(); ++i)
       enthalpy += _a0[i] * MathUtils::pow(temperature, i + 1) / (i + 1.0);
   else
+  {
     for (std::size_t i = 0; i < _a1.size(); ++i)
       enthalpy += _a1[i] * MathUtils::pow(temperature, i + 1) / (i + 1.0);
+
+    // As enthalpy is obtained from cp by integration in this formulation, a zero
+    // shift is required in this regime, see Irvine and Liley (1984)
+    enthalpy -= 1.4837e3;
+  }
 
   // convert to J/kg by multiplying by 1000
   return enthalpy * 1000.0;

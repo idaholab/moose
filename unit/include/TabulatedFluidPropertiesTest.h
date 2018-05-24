@@ -53,6 +53,8 @@ protected:
     tab_gen_uo_params.set<Real>("pressure_max") = 2e6;
     tab_gen_uo_params.set<unsigned int>("num_T") = 6;
     tab_gen_uo_params.set<unsigned int>("num_p") = 6;
+    MultiMooseEnum properties("density enthalpy internal_energy viscosity k cv cp entropy");
+    tab_gen_uo_params.set<MultiMooseEnum>("interpolated_properties") = properties;
     _fe_problem->addUserObject("TabulatedFluidProperties", "tab_gen_fp", tab_gen_uo_params);
     _tab_gen_fp = &_fe_problem->getUserObject<TabulatedFluidProperties>("tab_gen_fp");
 

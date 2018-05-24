@@ -227,6 +227,7 @@ TEST_F(CO2FluidPropertiesTest, derivatives)
   DERIV_TEST(_fp->mu, _fp->mu_dpT, p, T, tol);
   DERIV_TEST(_fp->e, _fp->e_dpT, p, T, tol);
   DERIV_TEST(_fp->h, _fp->h_dpT, p, T, tol);
+  DERIV_TEST(_fp->k, _fp->k_dpT, p, T, tol);
 
   // Viscosity from density and temperature
   T = 360.0;

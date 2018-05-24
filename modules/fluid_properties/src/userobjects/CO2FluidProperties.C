@@ -760,9 +760,17 @@ CO2FluidProperties::k(Real pressure, Real temperature) const
 
 void
 CO2FluidProperties::k_dpT(
-    Real /*pressure*/, Real /*temperature*/, Real & /*k*/, Real & /*dk_dp*/, Real & /*dk_dT*/) const
+    Real pressure, Real temperature, Real & k, Real & dk_dp, Real & dk_dT) const
 {
-  mooseError(name(), ": k_dpT() is not implemented");
+  k = this->k(pressure, temperature);
+  // Calculate derivatives using finite differences. Note: this will be slow as
+  // multiple calculations of density are required
+  const Real eps = 1.0e-6;
+  const Real peps = pressure * eps;
+  const Real Teps = temperature * eps;
+
+  dk_dp = (this->k(pressure + peps, temperature) - k) / peps;
+  dk_dT = (this->k(pressure, temperature + Teps) - k) / Teps;
 }
 
 Real

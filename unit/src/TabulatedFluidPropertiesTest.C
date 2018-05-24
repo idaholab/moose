@@ -172,6 +172,27 @@ TEST_F(TabulatedFluidPropertiesTest, generateTabulatedData)
   REL_TEST(_tab_gen_fp->s(p, T), _co2_fp->s(p, T), 1.0e-4);
 }
 
+// Test that all fluid properties are properly passed back to the given user object
+// if they are not tabulated
+TEST_F(TabulatedFluidPropertiesTest, passthrough)
+{
+  Real p = 1.5e6;
+  Real T = 450.0;
+  const Real tol = REL_TOL_SAVED_VALUE;
+
+  // As the flags for interpolation in TabulatedFluidProperties default to false,
+  // properties will be passed through to the given userobject
+  ABS_TEST(_tab_fp->rho(p, T), _co2_fp->rho(p, T), tol);
+  ABS_TEST(_tab_fp->h(p, T), _co2_fp->h(p, T), tol);
+  ABS_TEST(_tab_fp->e(p, T), _co2_fp->e(p, T), tol);
+  ABS_TEST(_tab_fp->mu(p, T), _co2_fp->mu(p, T), tol);
+  ABS_TEST(_tab_fp->k(p, T), _co2_fp->k(p, T), tol);
+  ABS_TEST(_tab_fp->cp(p, T), _co2_fp->cp(p, T), tol);
+  ABS_TEST(_tab_fp->cv(p, T), _co2_fp->cv(p, T), tol);
+  ABS_TEST(_tab_fp->s(p, T), _co2_fp->s(p, T), tol);
+  ABS_TEST(_tab_fp->henryConstant(T), _co2_fp->henryConstant(T), tol);
+}
+
 /**
  * Test that the fluid name is correctly returned
  */
