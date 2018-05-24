@@ -6,6 +6,7 @@
     # input we can run on something much smaller...
     cli_args = 'Mesh/nx=2 Mesh/ny=2'
     check_input = True
+    fparser_jit = True
   [../]
   [./strain_3D]
     type = RunApp
@@ -13,5 +14,6 @@
     # Checking input on smaller mesh
     cli_args = 'Mesh/nx=2 Mesh/ny=2 Mesh/nz=2'
     check_input = True
+    fparser_jit = True
   [../]
 []

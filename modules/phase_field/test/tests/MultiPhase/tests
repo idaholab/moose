@@ -3,6 +3,7 @@
     type = 'Exodiff'
     input = 'derivativetwophasematerial.i'
     exodiff = 'derivativetwophasematerial_out.e'
+    fparser_jit = True
   [../]
   [./orderparameterfunctionmaterial]
     type = 'Exodiff'
@@ -34,6 +35,7 @@
     type = 'Exodiff'
     input = 'lagrangemult.i'
     exodiff = 'lagrangemult_out.e'
+    fparser_jit = True
   [../]
   [./penalty]
     type = 'Exodiff'

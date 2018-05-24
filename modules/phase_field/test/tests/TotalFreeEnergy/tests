@@ -9,5 +9,6 @@
     type = 'Exodiff'
     input = 'TotalFreeEnergy_2var_test.i'
     exodiff = 'TotalFreeEnergy_2var_test_out.e-s004'
+    fparser_jit = True
   [../]
 []
