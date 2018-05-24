@@ -158,7 +158,7 @@ class CSVDiffer:
         if self.custom_columns:
            for mykey2 in self.custom_columns:
                if not found_column[mykey2]:
-                  self.addError(fname, "Variable '" + mykey2 + "' in custom_columns is missing from all CSV files" )
+                  self.addError("all CSV files", "Variable '" + mykey2 + "' in custom_columns is missing" )
 
         return self.msg
 
