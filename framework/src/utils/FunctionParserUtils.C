@@ -18,13 +18,15 @@ validParams<FunctionParserUtils>()
 {
   InputParameters params = emptyInputParameters();
 
-#ifdef LIBMESH_HAVE_FPARSER_JIT
   params.addParam<bool>(
       "enable_jit",
+#ifdef LIBMESH_HAVE_FPARSER_JIT
       true,
+#else
+      false,
+#endif
       "Enable just-in-time compilation of function expressions for faster evaluation");
   params.addParamNamesToGroup("enable_jit", "Advanced");
-#endif
   params.addParam<bool>(
       "enable_ad_cache", true, "Enable cacheing of function derivatives for faster startup time");
   params.addParam<bool>(
@@ -59,6 +61,13 @@ FunctionParserUtils::FunctionParserUtils(const InputParameters & parameters)
     _fail_on_evalerror(parameters.get<bool>("fail_on_evalerror")),
     _nan(std::numeric_limits<Real>::quiet_NaN())
 {
+#ifndef LIBMESH_HAVE_FPARSER_JIT
+  if (_enable_jit)
+  {
+    mooseWarning("Tried to enable FParser JIT but libmesh does not have it compiled in.");
+    _enable_jit = false;
+  }
+#endif
 }
 
 void
