@@ -43,13 +43,17 @@ validParams<SingleVariableReturnMappingSolution>()
                         "absolute_tolerance, and max_its.");
 
   // diagnostic output parameters
-  MooseEnum internal_solve_output_enum("never on_error always", "on_error");
-  params.addParam<MooseEnum>("internal_solve_output",
-                             internal_solve_output_enum,
-                             "When to output Newton solve information");
-  params.addParam<bool>(
-      "output_iteration_info", false, "Set true to output full Newton iteration history");
-  params.addParamNamesToGroup("internal_solve_output output_iteration_info", "Debug");
+  MooseEnum internal_solve_output_on_enum("never on_error always", "on_error");
+  params.addParam<MooseEnum>("internal_solve_output_on",
+                             internal_solve_output_on_enum,
+                             "When to output internal Newton solve information");
+  params.addParam<bool>("internal_solve_full_iteration_history",
+                        false,
+                        "Set true to output full internal Newton iteration history at times "
+                        "determined by `internal_solve_output_on`. If false, only a summary is "
+                        "output.");
+  params.addParamNamesToGroup("internal_solve_output_on internal_solve_full_iteration_history",
+                              "Debug");
 
   return params;
 }
@@ -58,11 +62,12 @@ SingleVariableReturnMappingSolution::SingleVariableReturnMappingSolution(
     const InputParameters & parameters)
   : _legacy_return_mapping(false),
     _check_range(false),
-    _internal_solve_output(
-        parameters.get<MooseEnum>("internal_solve_output").getEnum<InternalSolveOutput>()),
+    _internal_solve_output_on(
+        parameters.get<MooseEnum>("internal_solve_output_on").getEnum<InternalSolveOutput>()),
     _max_its(parameters.get<unsigned int>("max_its")),
     _fixed_max_its(1000), // Far larger than ever expected to be needed
-    _output_iteration_info(parameters.get<bool>("output_iteration_info")),
+    _internal_solve_full_iteration_history(
+        parameters.get<bool>("internal_solve_full_iteration_history")),
     _relative_tolerance(parameters.get<Real>("relative_tolerance")),
     _absolute_tolerance(parameters.get<Real>("absolute_tolerance")),
     _acceptable_multiplier(parameters.get<Real>("acceptable_multiplier")),
@@ -117,18 +122,21 @@ SingleVariableReturnMappingSolution::returnMappingSolve(const Real effective_tri
 {
   // construct the stringstream here only if the debug level is set to ALL
   std::stringstream * iter_output =
-      (_internal_solve_output == InternalSolveOutput::ALWAYS) ? new std::stringstream : nullptr;
+      (_internal_solve_output_on == InternalSolveOutput::ALWAYS) ? new std::stringstream : nullptr;
 
   if (!_legacy_return_mapping)
   {
     // do the internal solve and capture iteration info during the first round
     // iff full history output is requested regardless of whether the solve failed or succeeded
-    auto solve_state = internalSolve(
-        effective_trial_stress, scalar, _output_iteration_info ? iter_output : nullptr);
-    if (solve_state != SolveState::SUCCESS)
+    auto solve_state =
+        internalSolve(effective_trial_stress,
+                      scalar,
+                      _internal_solve_full_iteration_history ? iter_output : nullptr);
+    if (solve_state != SolveState::SUCCESS &&
+        _internal_solve_output_on != InternalSolveOutput::ALWAYS)
     {
       // output suppressed by user, throw immediately
-      if (_internal_solve_output == InternalSolveOutput::NEVER)
+      if (_internal_solve_output_on == InternalSolveOutput::NEVER)
         throw MooseException("");
 
       // user expects some kind of output, if necessary setup output stream now
@@ -152,14 +160,15 @@ SingleVariableReturnMappingSolution::returnMappingSolve(const Real effective_tri
 
       // if full history output is only requested for failed solves we have to repeat
       // the solve a second time
-      if (_output_iteration_info)
+      if (_internal_solve_full_iteration_history)
         internalSolve(effective_trial_stress, scalar, iter_output);
 
       // Append summary and throw exception
       outputIterationSummary(iter_output, _iteration);
       throw MooseException(iter_output->str());
     }
-    else if (_internal_solve_output == InternalSolveOutput::ALWAYS)
+
+    if (_internal_solve_output_on == InternalSolveOutput::ALWAYS)
     {
       // the solve did not fail but the user requested debug output anyways
       outputIterationSummary(iter_output, _iteration);

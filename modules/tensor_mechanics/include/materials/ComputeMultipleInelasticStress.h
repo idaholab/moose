@@ -120,7 +120,7 @@ protected:
   const unsigned int _max_iterations;
   const Real _relative_tolerance;
   const Real _absolute_tolerance;
-  const bool _output_iteration_info;
+  const bool _internal_solve_full_iteration_history;
   ///@}
 
   /// after updateQpState, rotate the stress, elastic_strain, inelastic_strain and Jacobian_mult using _rotation_increment

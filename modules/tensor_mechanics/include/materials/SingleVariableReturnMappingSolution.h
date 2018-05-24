@@ -133,7 +133,7 @@ private:
     NEVER,
     ON_ERROR,
     ALWAYS
-  } _internal_solve_output;
+  } _internal_solve_output_on;
 
   enum class SolveState
   {
@@ -149,7 +149,7 @@ private:
   const unsigned int _fixed_max_its;
 
   /// Whether to output iteration information all the time (regardless of whether iterations converge)
-  const bool _output_iteration_info;
+  const bool _internal_solve_full_iteration_history;
 
   /// Relative convergence tolerance
   Real _relative_tolerance;

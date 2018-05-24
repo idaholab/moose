@@ -38,7 +38,7 @@ validParams<ComputeMultipleInelasticStress>()
                         "update iterations over the stress change "
                         "after all update materials are called");
   params.addParam<bool>(
-      "output_iteration_info",
+      "internal_solve_full_iteration_history",
       false,
       "Set to true to output stress update iteration information over the stress change");
   params.addParam<bool>("perform_finite_strain_rotations",
@@ -75,7 +75,7 @@ ComputeMultipleInelasticStress::ComputeMultipleInelasticStress(const InputParame
     _max_iterations(parameters.get<unsigned int>("max_iterations")),
     _relative_tolerance(parameters.get<Real>("relative_tolerance")),
     _absolute_tolerance(parameters.get<Real>("absolute_tolerance")),
-    _output_iteration_info(getParam<bool>("output_iteration_info")),
+    _internal_solve_full_iteration_history(getParam<bool>("internal_solve_full_iteration_history")),
     _perform_finite_strain_rotations(getParam<bool>("perform_finite_strain_rotations")),
     _elasticity_tensor(getMaterialPropertyByName<RankFourTensor>(_base_name + "elasticity_tensor")),
     _elastic_strain_old(getMaterialPropertyOld<RankTwoTensor>(_base_name + "elastic_strain")),
@@ -236,7 +236,7 @@ void
 ComputeMultipleInelasticStress::updateQpState(RankTwoTensor & elastic_strain_increment,
                                               RankTwoTensor & combined_inelastic_strain_increment)
 {
-  if (_output_iteration_info == true)
+  if (_internal_solve_full_iteration_history == true)
   {
     _console << std::endl
              << "iteration output for ComputeMultipleInelasticStress solve:"
@@ -317,7 +317,7 @@ ComputeMultipleInelasticStress::updateQpState(RankTwoTensor & elastic_strain_inc
     if (counter == 0 && l2norm_delta_stress > 0.0)
       first_l2norm_delta_stress = l2norm_delta_stress;
 
-    if (_output_iteration_info == true)
+    if (_internal_solve_full_iteration_history == true)
     {
       _console << "stress iteration number = " << counter << "\n"
                << " relative l2 norm delta stress = "

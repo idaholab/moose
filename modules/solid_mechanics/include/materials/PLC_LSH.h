@@ -41,7 +41,7 @@ protected:
   Real _hardening_constant;
 
   unsigned int _max_its;
-  bool _output_iteration_info;
+  bool _internal_solve_full_iteration_history;
   Real _relative_tolerance;
   Real _absolute_tolerance;
 
