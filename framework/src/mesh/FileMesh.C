@@ -45,7 +45,14 @@ FileMesh::~FileMesh() {}
 MooseMesh &
 FileMesh::clone() const
 {
+  mooseDeprecated("MooseMesh::clone() is deprecated, call MooseMesh::safeClone() instead.");
   return *(new FileMesh(*this));
+}
+
+std::unique_ptr<MooseMesh>
+FileMesh::safeClone() const
+{
+  return libmesh_make_unique<FileMesh>(*this);
 }
 
 void

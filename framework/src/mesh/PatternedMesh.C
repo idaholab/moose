@@ -100,7 +100,14 @@ PatternedMesh::~PatternedMesh() {}
 MooseMesh &
 PatternedMesh::clone() const
 {
+  mooseDeprecated("MooseMesh::clone() is deprecated, call MooseMesh::safeClone() instead.");
   return *(new PatternedMesh(*this));
+}
+
+std::unique_ptr<MooseMesh>
+PatternedMesh::safeClone() const
+{
+  return libmesh_make_unique<PatternedMesh>(*this);
 }
 
 void
