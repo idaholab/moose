@@ -30,7 +30,7 @@ class RunPBS(QueueManager):
         return ['--pbs']
 
     def hasTimedOutOrFailed(self, job_data):
-        """ use qstat and return bool on job time out (killed by PBS exit code 271) """
+        """ use qstat and return bool on job failures outside of the TestHarness's control """
         launch_id = job_data.json_data.get(job_data.job_dir,
                                            {}).get(job_data.plugin,
                                                    {}).get('ID', "").split('.')[0]
@@ -53,6 +53,21 @@ class RunPBS(QueueManager):
             if qstat_job_result and qstat_job_result[0] == "271":
                 for job in job_data.jobs.getJobs():
                     job.addCaveats('Killed by PBS Exceeded Walltime')
+                return True
+
+            # Capture TestHarness exceptions
+            elif qstat_job_result and qstat_job_result[0] != "0":
+
+                # Try and gather some useful output we can tack on to one of the job objects
+                output_file = job_data.json_data.get(job_data.job_dir, {}).get(job_data.plugin, {}).get('QSUB_OUTPUT', "")
+                if os.path.exists(output_file):
+                    with open(output_file, 'r') as f:
+                        output_string = util.readOutput(f, None, self.options)
+                    job_data.jobs.getJobs()[0].setOutput(output_string)
+
+                # Add a caveat to each job, explaining that one of the jobs caused a TestHarness exception
+                for job in job_data.jobs.getJobs():
+                    job.addCaveats('TESTHARNESS EXCEPTION')
                 return True
 
     def _augmentTemplate(self, job):
@@ -124,5 +139,5 @@ class RunPBS(QueueManager):
                                     'QSUB_COMMAND' : command,
                                     'NCPUS' : template['mpi_procs'],
                                     'WALLTIME' : template['walltime'],
-                                    'QSUB_OUTOUT' : template['output']})
+                                    'QSUB_OUTPUT' : template['output']})
             tester.setStatus(tester.no_status, 'LAUNCHING')
