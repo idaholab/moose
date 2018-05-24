@@ -148,6 +148,7 @@ class TestHarness:
             checks['cxx11'] = set(['ALL'])
             checks['asio'] =  set(['ALL'])
             checks['boost'] = set(['ALL'])
+            checks['fparser_jit'] = set(['ALL'])
         else:
             checks['compiler'] = util.getCompilers(self.libmesh_dir)
             checks['petsc_version'] = util.getPetscVersion(self.libmesh_dir)
@@ -169,6 +170,7 @@ class TestHarness:
             checks['cxx11'] =  util.getLibMeshConfigOption(self.libmesh_dir, 'cxx11')
             checks['asio'] =  util.getIfAsioExists(self.moose_dir)
             checks['boost'] =  util.getLibMeshConfigOption(self.libmesh_dir, 'boost')
+            checks['fparser_jit'] =  util.getLibMeshConfigOption(self.libmesh_dir, 'fparser_jit')
 
         # Override the MESH_MODE option if using the '--distributed-mesh'
         # or (deprecated) '--parallel-mesh' option.
