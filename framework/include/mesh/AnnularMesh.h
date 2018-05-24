@@ -29,7 +29,6 @@ public:
   // No copy
   AnnularMesh & operator=(const AnnularMesh & other_mesh) = delete;
 
-  virtual MooseMesh & clone() const override;
   virtual std::unique_ptr<MooseMesh> safeClone() const override;
 
   virtual void buildMesh() override;

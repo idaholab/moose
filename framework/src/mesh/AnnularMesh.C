@@ -113,13 +113,6 @@ AnnularMesh::getMaxInDimension(unsigned int component) const
   }
 }
 
-MooseMesh &
-AnnularMesh::clone() const
-{
-  mooseDeprecated("MooseMesh::clone() is deprecated, call MooseMesh::safeClone() instead.");
-  return *(new AnnularMesh(*this));
-}
-
 std::unique_ptr<MooseMesh>
 AnnularMesh::safeClone() const
 {

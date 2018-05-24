@@ -40,7 +40,6 @@ public:
   PatternedMesh(const PatternedMesh & other_mesh);
   virtual ~PatternedMesh();
 
-  virtual MooseMesh & clone() const override;
   virtual std::unique_ptr<MooseMesh> safeClone() const override;
 
   virtual void buildMesh() override;
