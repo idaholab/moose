@@ -21,7 +21,13 @@ class MooseObject;
 class VectorPostprocessorInterface
 {
 public:
-  VectorPostprocessorInterface(const MooseObject * moose_object);
+  /**
+   * Constructor
+   *
+   * @param broadcast_by_default Set to true if the system inheriting from this interface always
+   * needs the VPPs to be broadcast
+   */
+  VectorPostprocessorInterface(const MooseObject * moose_object, bool broadcast_by_default = false);
 
   /**
    * This class has virtual methods, so it needs a virtual dtor.
@@ -249,6 +255,9 @@ public:
   bool hasVectorPostprocessorByName(const VectorPostprocessorName & name) const;
 
 private:
+  /// Whether or not to force broadcasting by default
+  bool _broadcast_by_default;
+
   /// VectorPostprocessorInterface Parameters
   const InputParameters & _vpi_params;
 

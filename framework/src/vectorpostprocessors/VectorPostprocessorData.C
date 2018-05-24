@@ -50,7 +50,7 @@ VectorPostprocessorData::getVectorPostprocessorValue(const VectorPostprocessorNa
                                                    /* contains_complete_history */ false,
                                                    /* is_broadcast */ false,
                                                    /* needs_broadcast */ needs_broadcast,
-                                                   /* needs_scatter */ true);
+                                                   /* needs_scatter */ false);
   return *vec_struct.current;
 }
 
@@ -69,7 +69,7 @@ VectorPostprocessorData::getVectorPostprocessorValueOld(const VectorPostprocesso
                                                    /* contains_complete_history */ false,
                                                    /* is_broadcast */ false,
                                                    /* needs_broadcast */ needs_broadcast,
-                                                   /* needs_scatter */ true);
+                                                   /* needs_scatter */ false);
   return *vec_struct.old;
 }
 
