@@ -234,16 +234,12 @@ public:
   /**
    * Retrieve the Executioner for this App
    */
-  Executioner * getExecutioner() const
-  {
-    mooseAssert(_executioner, "Executioner is nullptr");
-    return _executioner.get();
-  }
+  Executioner * getExecutioner() const { return _executioner.get(); }
 
   /**
-   * Retrieve the Executioner shared pointer for this App
+   * Set the Executioner for this App
    */
-  std::shared_ptr<Executioner> & executioner() { return _executioner; }
+  void setExecutioner(std::shared_ptr<Executioner> && executioner) { _executioner = executioner; }
 
   /**
    * Set a Boolean indicating whether this app will use a Nonlinear or Eigen System.

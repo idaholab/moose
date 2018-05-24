@@ -48,5 +48,5 @@ CreateExecutionerAction::act()
     mooseError("Executioner is not consistent with each other; EigenExecutioner needs an "
                "EigenProblem, and Steady and Transient need a FEProblem");
 
-  _app.executioner() = executioner;
+  _app.setExecutioner(std::move(executioner));
 }

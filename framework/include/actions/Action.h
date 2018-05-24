@@ -195,9 +195,6 @@ protected:
 
   /// Convenience reference to a problem this action works on
   std::shared_ptr<FEProblemBase> & _problem;
-
-  /// Convenience reference to an executioner
-  std::shared_ptr<Executioner> & _executioner;
 };
 
 template <typename T>

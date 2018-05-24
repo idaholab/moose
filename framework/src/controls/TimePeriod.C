@@ -58,7 +58,7 @@ TimePeriod::TimePeriod(const InputParameters & parameters)
   if (isParamValid("start_time"))
     _start_time = getParam<std::vector<Real>>("start_time");
   else
-    _start_time = {_app.executioner()->getParam<Real>("start_time")};
+    _start_time = {_app.getExecutioner()->getParam<Real>("start_time")};
 
   // Set end time
   if (isParamValid("end_time"))

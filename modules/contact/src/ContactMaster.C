@@ -183,7 +183,7 @@ ContactMaster::addPoints()
       continue;
 
     bool is_nonlinear =
-        _subproblem.getMooseApp().executioner()->feProblem().computingNonlinearResid();
+        _subproblem.getMooseApp().getExecutioner()->feProblem().computingNonlinearResid();
 
     if (_component == 0)
       computeContactForce(pinfo, is_nonlinear);

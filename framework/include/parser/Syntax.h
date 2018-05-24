@@ -33,9 +33,10 @@ public:
    * Method to register a new task. Tasks are short verbs (strings) that describe a particular point
    * in the simulation setup phase.
    * @param task The task (verb) to be registered with MOOSE.
-   * @param is_required indicates whether the task is required for a sucessful simulation.
+   * @param should_autobuild indicates whether the task should be autobuilt if not supplied
+   * elsewhere.
    */
-  void registerTaskName(const std::string & task, bool is_required);
+  void registerTaskName(const std::string & task, bool should_auto_build = false);
 
   /**
    * Method to register a new task (see overload method with same name). This version also accepts
@@ -45,7 +46,7 @@ public:
    */
   void registerTaskName(const std::string & task,
                         const std::string & moose_object_type,
-                        bool is_required);
+                        bool should_auto_build = false);
 
   /**
    * Method to associate another "allowed" pluggable MOOSE system to an existing registered task.
@@ -88,8 +89,15 @@ public:
 
   /**
    * Returns a Boolean indicating whether the specified task is required.
+   * DEPRECATED (use shouldAutoBuild).
    */
   bool isActionRequired(const std::string & task);
+
+  /**
+   * Returns a Boolean indicating whether MOOSE should attempt to automatically create an Action
+   * to satisfy a task if an Action doesn't already exist to service that task.
+   */
+  bool shouldAutoBuild(const std::string & task) const;
 
   /**
    * Registration function for associating Moose Actions with syntax.
@@ -180,7 +188,7 @@ public:
                            const std::string & task) const;
 
 protected:
-  /// The list of registered tasks and a flag indicating whether or not they are required
+  /// The list of registered tasks and a flag indicating whether or not they should be auto-built.
   std::map<std::string, bool> _registered_tasks;
 
   /// The list of Moose system objects to tasks.  This map indicates which tasks are allowed to build certain MooseObjects.

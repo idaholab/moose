@@ -71,9 +71,9 @@ CreateProblemAction::CreateProblemAction(InputParameters parameters)
 void
 CreateProblemAction::act()
 {
+  // build the problem only if we have mesh
   if (_mesh.get() != NULL)
   {
-    // build the problem only if we have mesh
     {
       _moose_object_pars.set<MooseMesh *>("mesh") = _mesh.get();
       _moose_object_pars.set<bool>("use_nonlinear") = _app.useNonlinear();
