@@ -90,8 +90,13 @@ public:
    * A safer version of the clone() method that hands back an
    * allocated object wrapped in a smart pointer. This makes it much
    * less likely that the caller will leak the memory in question.
+   *
+   * TODO: this currently has a base class mooseError implementation
+   * for forwards compatibility purposes, but eventually it will be
+   * transistioned to a pure virtual, replacing the original non-safe
+   * clone() function above.
    */
-  virtual std::unique_ptr<MooseMesh> safeClone() const = 0;
+  virtual std::unique_ptr<MooseMesh> safeClone() const;
 
   /**
    * Initialize the Mesh object.  Most of the time this will turn around
