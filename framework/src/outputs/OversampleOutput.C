@@ -279,7 +279,7 @@ OversampleOutput::cloneMesh()
       mooseWarning("Recovering or Restarting with Oversampling may not work (especially with "
                    "adapted meshes)!!  Refs #2295");
 
-    _cloned_mesh_ptr.reset(&(_mesh_ptr->clone()));
+    _cloned_mesh_ptr = _mesh_ptr->safeClone();
   }
 
   // Make sure that the mesh pointer points to the newly cloned mesh

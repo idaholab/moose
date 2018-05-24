@@ -28,6 +28,7 @@ public:
   ImageMesh(const ImageMesh & other_mesh);
 
   virtual MooseMesh & clone() const override;
+  virtual std::unique_ptr<MooseMesh> safeClone() const override;
 
   virtual void buildMesh() override;
 

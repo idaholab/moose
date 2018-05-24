@@ -82,7 +82,14 @@ StitchedMesh::~StitchedMesh() {}
 MooseMesh &
 StitchedMesh::clone() const
 {
+  mooseDeprecated("MooseMesh::clone() is deprecated, call MooseMesh::safeClone() instead.");
   return *(new StitchedMesh(*this));
+}
+
+std::unique_ptr<MooseMesh>
+StitchedMesh::safeClone() const
+{
+  return libmesh_make_unique<StitchedMesh>(*this);
 }
 
 void

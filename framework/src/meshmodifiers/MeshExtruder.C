@@ -66,9 +66,7 @@ MeshExtruder::MeshExtruder(const InputParameters & parameters)
 void
 MeshExtruder::modify()
 {
-  // When we clone, we're responsible to clean up after ourselves!
-  // TODO: traditionally clone() methods return pointers...
-  MooseMesh * source_mesh = &(_mesh_ptr->clone());
+  std::unique_ptr<MooseMesh> source_mesh = _mesh_ptr->safeClone();
 
   if (source_mesh->getMesh().mesh_dimension() == 3)
     mooseError("You cannot extrude a 3D mesh!");
@@ -110,9 +108,6 @@ MeshExtruder::modify()
 
   // Update the dimension
   _mesh_ptr->getMesh().set_mesh_dimension(source_mesh->getMesh().mesh_dimension() + 1);
-
-  // Clean up the source mesh we allocated
-  delete source_mesh;
 }
 
 void
