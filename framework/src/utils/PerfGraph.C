@@ -26,12 +26,12 @@ PerfGraph::PerfGraph() : _current_position(0), _active(true)
 PerfGraph::~PerfGraph() {}
 
 unsigned int
-PerfGraph::registerSection(std::string section_name)
+PerfGraph::registerSection(const std::string & section_name)
 {
   auto it = _section_name_to_id.lower_bound(section_name);
 
   // Is it already registered?
-  if (it != _section_name_to_id.lower_bound(section_name) && it->first == section_name)
+  if (it != _section_name_to_id.end() && it->first == section_name)
     mooseError("PerfGraph already holds a section named: ", section_name);
 
   // It's not...
@@ -42,8 +42,19 @@ PerfGraph::registerSection(std::string section_name)
   return id;
 }
 
+const std::string &
+PerfGraph::sectionName(const PerfID id) const
+{
+  auto find_it = _id_to_section_name.find(id);
+
+  if (find_it == _id_to_section_name.end())
+    mooseError("PerfGraph cannot find a section name associated with id: ", id);
+
+  return find_it->second;
+}
+
 void
-PerfGraph::push(PerfID id)
+PerfGraph::push(const PerfID id)
 {
   auto new_node = _stack[_current_position]->getChild(id);
 
@@ -56,44 +67,11 @@ PerfGraph::push(PerfID id)
 }
 
 void
-PerfGraph::pop(std::chrono::steady_clock::duration duration)
+PerfGraph::pop(const std::chrono::steady_clock::duration duration)
 {
   _stack[_current_position]->addTime(duration);
 
   _current_position--;
-}
-
-/**
- * Helper function to recursively print out the graph
- */
-void
-recursivelyPrintGraph(PerfGraph & graph, PerfNode * current_node, unsigned int current_depth = 0)
-{
-  auto & name = graph.sectionName(current_node->id());
-
-  Moose::out << std::string(current_depth * 2, ' ') << name
-             << " self: " << std::chrono::duration<double>(current_node->selfTime()).count()
-             << " children: " << std::chrono::duration<double>(current_node->childrenTime()).count()
-             << " total: " << std::chrono::duration<double>(current_node->totalTime()).count()
-             << "\n";
-
-  for (auto & child_it : current_node->children())
-    recursivelyPrintGraph(graph, child_it.second.get(), current_depth + 1);
-}
-
-void
-PerfGraph::print()
-{
-  updateRoot();
-  recursivelyPrintGraph(*this, _root_node.get());
-}
-
-std::string &
-PerfGraph::sectionName(PerfID id)
-{
-  auto & name = _id_to_section_name.at(id);
-
-  return name;
 }
 
 void

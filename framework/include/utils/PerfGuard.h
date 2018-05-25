@@ -11,9 +11,7 @@
 #define PERFGUARD_H
 
 #include "MooseTypes.h"
-
-// Forward Declarations
-class PerfGraph;
+#include "PerfGraph.h"
 
 /**
  * Scope guard for starting and stopping timing for a node
@@ -33,12 +31,23 @@ public:
    * @param graph The graph to add time into
    * @param id The unique id of the section
    */
-  PerfGuard(PerfGraph & graph, PerfID id);
+  PerfGuard(PerfGraph & graph, const PerfID id) : _graph(graph)
+  {
+    if (_graph.active())
+    {
+      _graph.push(id);
+      _start = std::chrono::steady_clock::now();
+    }
+  }
 
   /**
    * Stop timing
    */
-  ~PerfGuard();
+  ~PerfGuard()
+  {
+    if (_graph.active())
+      _graph.pop(std::chrono::steady_clock::now() - _start);
+  }
 
 protected:
   ///The graph we're working on

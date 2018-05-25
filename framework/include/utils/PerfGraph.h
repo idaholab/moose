@@ -13,10 +13,11 @@
 // MOOSE Includes
 #include "MooseTypes.h"
 #include "PerfNode.h"
-#include "PerfGuard.h"
 
 // System Includes
 #include <array>
+
+class PerfGuard;
 
 #define MAX_STACK_SIZE 100
 
@@ -42,36 +43,25 @@ public:
    *
    * @return The unique ID to use for that section
    */
-  PerfID registerSection(std::string section_name);
-
-  /**
-   * Add a Node onto the end of the end of the current callstack
-   */
-  void push(PerfID id);
-
-  /**
-   * Remove a Node from the end of the current scope
-   *
-   * @duration The amount of time the Node took
-   */
-  void pop(std::chrono::steady_clock::duration duration);
+  PerfID registerSection(const std::string & section_name);
 
   /**
    * Print the tree out
    */
-  void print();
+  template <typename StreamType>
+  void print(StreamType & console);
 
   /**
    * Grab the name of a section
    */
-  std::string & sectionName(PerfID id);
+  const std::string & sectionName(const PerfID id) const;
 
   /**
    * Whether or not timing is active
    *
    * When not active no timing information will be kept
    */
-  bool active() { return _active; }
+  bool active() const { return _active; }
 
   /**
    * Turn on or off timing
@@ -79,6 +69,18 @@ public:
   void setActive(bool active) { _active = active; }
 
 protected:
+  /**
+   * Add a Node onto the end of the end of the current callstack
+   */
+  void push(const PerfID id);
+
+  /**
+   * Remove a Node from the end of the current scope
+   *
+   * @duration The amount of time the Node took
+   */
+  void pop(const std::chrono::steady_clock::duration duration);
+
   /**
    * Udates the time for the root node
    */
@@ -104,6 +106,38 @@ protected:
 
   /// Whether or not timing is active
   bool _active;
+
+  // Here so PerfGuard is the only thing that can call push/pop
+  friend class PerfGuard;
 };
+
+/**
+ * Helper function to recursively print out the graph
+ */
+template <typename StreamType>
+void
+recursivelyPrintGraph(PerfGraph & graph,
+                      PerfNode * current_node,
+                      StreamType & console,
+                      unsigned int current_depth = 0)
+{
+  auto & name = graph.sectionName(current_node->id());
+
+  console << std::string(current_depth * 2, ' ') << name
+          << " self: " << std::chrono::duration<double>(current_node->selfTime()).count()
+          << " children: " << std::chrono::duration<double>(current_node->childrenTime()).count()
+          << " total: " << std::chrono::duration<double>(current_node->totalTime()).count() << "\n";
+
+  for (auto & child_it : current_node->children())
+    recursivelyPrintGraph(graph, child_it.second.get(), console, current_depth + 1);
+}
+
+template <typename StreamType>
+void
+PerfGraph::print(StreamType & console)
+{
+  updateRoot();
+  recursivelyPrintGraph(*this, _root_node.get(), console);
+}
 
 #endif

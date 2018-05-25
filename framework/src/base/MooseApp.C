@@ -395,7 +395,7 @@ MooseApp::~MooseApp()
     dlclose(it.second);
 #endif
 
-  _perf_graph.print();
+  _perf_graph.print(_console);
 }
 
 std::string

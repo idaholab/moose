@@ -14,7 +14,11 @@
 #include "PerfGuard.h"
 #include "InputParameters.h"
 
+#ifndef MOOSE_NO_PERF_GRAPH
 #define TIME_SECTION(id) PerfGuard time_guard(_perf_graph, id);
+#else
+#define TIME_SECTION(id)
+#endif
 
 // Forward declarations
 class PerfGraphInterface;
@@ -31,14 +35,14 @@ public:
   /**
    * For objects that _are_ MooseObjects
    */
-  PerfGraphInterface(const MooseObject * moose_object, std::string prefix = "");
+  PerfGraphInterface(const MooseObject * moose_object, const std::string prefix = "");
 
   /**
    * For objects that aren't MooseObjects
    */
-  PerfGraphInterface(PerfGraph & perf_graph, std::string prefix = "");
+  PerfGraphInterface(PerfGraph & perf_graph, const std::string prefix = "");
 
-  virtual ~PerfGraphInterface();
+  virtual ~PerfGraphInterface() = default;
 
 protected:
   /**
@@ -46,7 +50,7 @@ protected:
    *
    * @return The ID of the section - use when starting timing
    */
-  PerfID registerTimedSection(std::string section_name);
+  PerfID registerTimedSection(const std::string & section_name);
 
   /// Params
   const InputParameters * _pg_params;

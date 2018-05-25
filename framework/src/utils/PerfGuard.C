@@ -8,19 +8,3 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "PerfGuard.h"
-#include "PerfGraph.h"
-
-PerfGuard::PerfGuard(PerfGraph & graph, PerfID id) : _graph(graph)
-{
-  if (_graph.active())
-  {
-    _graph.push(id);
-    _start = std::chrono::steady_clock::now();
-  }
-}
-
-PerfGuard::~PerfGuard()
-{
-  if (_graph.active())
-    _graph.pop(std::chrono::steady_clock::now() - _start);
-}

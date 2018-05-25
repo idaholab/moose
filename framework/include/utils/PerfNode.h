@@ -27,17 +27,17 @@ public:
   /**
    * Create a PerfNode with the given ID
    */
-  PerfNode(PerfID id);
+  PerfNode(const PerfID id);
 
   /**
    * Get the ID of this Node
    */
-  PerfID id() { return _id; }
+  PerfID id() const { return _id; }
 
   /**
    * Add some time into this Node
    */
-  void addTime(std::chrono::steady_clock::duration time) { _total_time += time; }
+  void addTime(const std::chrono::steady_clock::duration time) { _total_time += time; }
 
   /**
    * Get a child node with the unique id given
@@ -47,27 +47,27 @@ public:
    * @param id The unique ID of the child node
    * @return The pointer to the child node
    */
-  PerfNode * getChild(PerfID id);
+  PerfNode * getChild(const PerfID id);
 
   /**
    * Get the children
    */
-  std::map<PerfID, std::unique_ptr<PerfNode>> & children() { return _children; }
+  const std::map<PerfID, std::unique_ptr<PerfNode>> & children() const { return _children; }
 
   /**
    * Get the time this node took
    */
-  std::chrono::steady_clock::duration selfTime();
+  std::chrono::steady_clock::duration selfTime() const;
 
   /**
    * The time this Node plus all of it's children took
    */
-  std::chrono::steady_clock::duration totalTime();
+  std::chrono::steady_clock::duration totalTime() const;
 
   /**
    * Get the time this nodes children took
    */
-  std::chrono::steady_clock::duration childrenTime();
+  std::chrono::steady_clock::duration childrenTime() const;
 
 protected:
   /// The unique ID for the section this Node corresponds to

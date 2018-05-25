@@ -19,22 +19,24 @@ validParams<PerfGraphInterface>()
   return params;
 }
 
-PerfGraphInterface::PerfGraphInterface(const MooseObject * moose_object, std::string prefix)
+PerfGraphInterface::PerfGraphInterface(const MooseObject * moose_object, const std::string prefix)
   : _pg_params(&moose_object->parameters()),
-    _perf_graph(_pg_params->get<MooseApp *>("_moose_app")->perfGraph()),
+    _perf_graph(
+        _pg_params
+            ->getCheckedPointerParam<MooseApp *>(
+                "_moose_app", "PerfGraphInterface is unable to retrieve the MooseApp pointer!")
+            ->perfGraph()),
     _prefix(prefix)
 {
 }
 
-PerfGraphInterface::PerfGraphInterface(PerfGraph & perf_graph, std::string prefix)
+PerfGraphInterface::PerfGraphInterface(PerfGraph & perf_graph, const std::string prefix)
   : _perf_graph(perf_graph), _prefix(prefix)
 {
 }
 
-PerfGraphInterface::~PerfGraphInterface() {}
-
 PerfID
-PerfGraphInterface::registerTimedSection(std::string section_name)
+PerfGraphInterface::registerTimedSection(const std::string & section_name)
 {
   if (_prefix != "")
     return _perf_graph.registerSection(_prefix + "::" + section_name);

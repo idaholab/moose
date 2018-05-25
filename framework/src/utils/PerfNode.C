@@ -9,10 +9,10 @@
 
 #include "PerfNode.h"
 
-PerfNode::PerfNode(unsigned int id) : _id(id), _total_time(0) {}
+PerfNode::PerfNode(const PerfID id) : _id(id), _total_time(0) {}
 
 PerfNode *
-PerfNode::getChild(unsigned int id)
+PerfNode::getChild(const PerfID id)
 {
   auto & child_node = _children[id];
 
@@ -23,13 +23,13 @@ PerfNode::getChild(unsigned int id)
 }
 
 std::chrono::steady_clock::duration
-PerfNode::selfTime()
+PerfNode::selfTime() const
 {
   return _total_time - childrenTime();
 }
 
 std::chrono::steady_clock::duration
-PerfNode::totalTime()
+PerfNode::totalTime() const
 {
   // Note that all of the children's time is already
   // accounte for in the total time
@@ -37,7 +37,7 @@ PerfNode::totalTime()
 }
 
 std::chrono::steady_clock::duration
-PerfNode::childrenTime()
+PerfNode::childrenTime() const
 {
   std::chrono::steady_clock::duration children_time(0);
 
