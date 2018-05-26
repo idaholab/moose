@@ -27,6 +27,8 @@ validParams<PerfGraphOutput>()
   params.addParam<unsigned int>(
       "level", 1, "The level of detail to output.  Higher levels will yield more detail.");
 
+  params.addClassDescription("Controls output of the PerfGraph: the performance log for MOOSE");
+
   // Return the InputParameters
   return params;
 }

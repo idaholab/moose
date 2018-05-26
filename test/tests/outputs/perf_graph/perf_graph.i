@@ -40,5 +40,7 @@
 []
 
 [Outputs]
-  perf_graph = true
+  [./pgraph]
+    type = PerfGraphOutput
+  [../]
 []
