@@ -103,6 +103,10 @@ validParams<CommonOutputAction>()
   // Add special Console flags
   params.addParam<bool>(
       "print_perf_log", false, "Enable printing of the performance log to the screen (Console)");
+
+  params.addParam<bool>(
+      "perf_graph", false, "Enable printing of the performance graph to the screen (Console)");
+
   params.addParam<bool>("print_mesh_changed_info",
                         false,
                         "When true, each time the mesh is changed the mesh information is printed");
@@ -185,6 +189,9 @@ CommonOutputAction::act()
 
   if (getParam<bool>("controls") || _app.getParam<bool>("show_controls"))
     create("ControlOutput");
+
+  if (getParam<bool>("perf_graph"))
+    create("PerfGraphOutput");
 
   if (!getParam<bool>("color"))
     Moose::setColorConsole(false);
