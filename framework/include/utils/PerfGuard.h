@@ -31,30 +31,16 @@ public:
    * @param graph The graph to add time into
    * @param id The unique id of the section
    */
-  PerfGuard(PerfGraph & graph, const PerfID id) : _graph(graph)
-  {
-    if (_graph.active())
-    {
-      _graph.push(id);
-      _start = std::chrono::steady_clock::now();
-    }
-  }
+  PerfGuard(PerfGraph & graph, const PerfID id) : _graph(graph) { _graph.push(id); }
 
   /**
    * Stop timing
    */
-  ~PerfGuard()
-  {
-    if (_graph.active())
-      _graph.pop(std::chrono::steady_clock::now() - _start);
-  }
+  ~PerfGuard() { _graph.pop(); }
 
 protected:
   ///The graph we're working on
   PerfGraph & _graph;
-
-  /// The beginning time of the section
-  std::chrono::time_point<std::chrono::steady_clock> _start;
 };
 
 #endif

@@ -18,9 +18,10 @@ PerfGraph::PerfGraph() : _current_position(0), _active(true)
   // Not done in the initialization list on purpose because this object needs to be complete first
   _root_node = libmesh_make_unique<PerfNode>(registerSection("Root", 0));
 
-  _stack[0] = _root_node.get();
+  // Set the initial time
+  _root_node->setStartTime(std::chrono::steady_clock::now());
 
-  _root_start = std::chrono::steady_clock::now();
+  _stack[0] = _root_node.get();
 }
 
 PerfGraph::~PerfGraph() {}
@@ -57,7 +58,13 @@ PerfGraph::sectionName(const PerfID id) const
 void
 PerfGraph::push(const PerfID id)
 {
+  if (!_active)
+    return;
+
   auto new_node = _stack[_current_position]->getChild(id);
+
+  // Set the start time
+  new_node->setStartTime(std::chrono::steady_clock::now());
 
   _current_position++;
 
@@ -68,19 +75,25 @@ PerfGraph::push(const PerfID id)
 }
 
 void
-PerfGraph::pop(const std::chrono::steady_clock::duration duration)
+PerfGraph::pop()
 {
-  _stack[_current_position]->addTime(duration);
+  if (!_active)
+    return;
+
+  _stack[_current_position]->addTime(std::chrono::steady_clock::now());
 
   _current_position--;
 }
 
 void
-PerfGraph::updateRoot()
+PerfGraph::updateCurrentlyRunning()
 {
   auto now = std::chrono::steady_clock::now();
 
-  _root_node->addTime(now - _root_start);
-
-  _root_start = now;
+  for (unsigned int i = 0; i <= _current_position; i++)
+  {
+    auto node = _stack[i];
+    node->addTime(now);
+    node->setStartTime(now);
+  }
 }

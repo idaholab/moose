@@ -74,20 +74,22 @@ public:
 protected:
   /**
    * Add a Node onto the end of the end of the current callstack
+   *
+   * Note: only accessible by using PerfGuard!
    */
   void push(const PerfID id);
 
   /**
    * Remove a Node from the end of the current scope
    *
-   * @duration The amount of time the Node took
+   * Note: only accessible by using PerfGuard!
    */
-  void pop(const std::chrono::steady_clock::duration duration);
+  void pop();
 
   /**
-   * Udates the time for the root node
+   * Udates the time for all currently running nodes
    */
-  void updateRoot();
+  void updateCurrentlyRunning();
 
   /**
    * Helper for printing out the graph
@@ -100,9 +102,6 @@ protected:
 
   /// The root node of the graph
   std::unique_ptr<PerfNode> _root_node;
-
-  /// The start time of the root
-  std::chrono::time_point<std::chrono::steady_clock> _root_start;
 
   /// The current node position in the stack
   unsigned int _current_position;
@@ -158,7 +157,7 @@ template <typename StreamType>
 void
 PerfGraph::print(StreamType & console, unsigned int level)
 {
-  updateRoot();
+  updateCurrentlyRunning();
   recursivelyPrintGraph(_root_node.get(), console, level);
 }
 

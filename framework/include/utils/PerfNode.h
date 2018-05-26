@@ -35,6 +35,22 @@ public:
   PerfID id() const { return _id; }
 
   /**
+   * Set the current start time
+   */
+  void setStartTime(const std::chrono::time_point<std::chrono::steady_clock> time)
+  {
+    _start_time = time;
+  }
+
+  /**
+   * Add some time into this Node by taking the difference with the time passed in
+   */
+  void addTime(const std::chrono::time_point<std::chrono::steady_clock> time)
+  {
+    _total_time += time - _start_time;
+  }
+
+  /**
    * Add some time into this Node
    */
   void addTime(const std::chrono::steady_clock::duration time) { _total_time += time; }
@@ -72,6 +88,9 @@ public:
 protected:
   /// The unique ID for the section this Node corresponds to
   PerfID _id;
+
+  /// The current start_time for this node (if it's on the stack)
+  std::chrono::time_point<std::chrono::steady_clock> _start_time;
 
   /// The total elapsed time for this node
   std::chrono::steady_clock::duration _total_time;
