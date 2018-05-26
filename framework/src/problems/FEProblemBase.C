@@ -223,51 +223,51 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
     _fail_next_linear_convergence_check(false),
     _started_initial_setup(false),
     _has_internal_edge_residual_objects(false),
-    _initial_setup_timer(registerTimedSection("initialSetup")),
-    _project_solution_timer(registerTimedSection("projectSolution")),
-    _compute_indicators_timer(registerTimedSection("computeIndicators")),
-    _compute_markers_timer(registerTimedSection("computeMarkers")),
-    _compute_user_objects_timer(registerTimedSection("computeUserObjects")),
-    _execute_controls_timer(registerTimedSection("executeControls")),
-    _execute_samplers_timer(registerTimedSection("executeSamplers")),
-    _update_active_objects_timer(registerTimedSection("updateActiveObjects")),
+    _initial_setup_timer(registerTimedSection("initialSetup", 2)),
+    _project_solution_timer(registerTimedSection("projectSolution", 2)),
+    _compute_indicators_timer(registerTimedSection("computeIndicators", 1)),
+    _compute_markers_timer(registerTimedSection("computeMarkers", 1)),
+    _compute_user_objects_timer(registerTimedSection("computeUserObjects", 1)),
+    _execute_controls_timer(registerTimedSection("executeControls", 1)),
+    _execute_samplers_timer(registerTimedSection("executeSamplers", 1)),
+    _update_active_objects_timer(registerTimedSection("updateActiveObjects", 5)),
     _reinit_because_of_ghosting_or_new_geom_objects_timer(
-        registerTimedSection("reinitBecauseOfGhostingOrNewGeomObjects")),
-    _exec_multi_app_transfers_timer(registerTimedSection("execMultiAppTransfers")),
-    _init_timer(registerTimedSection("init")),
-    _eq_init_timer(registerTimedSection("EquationSystems::Init")),
-    _solve_timer(registerTimedSection("solve")),
-    _check_exception_and_stop_solve_timer(registerTimedSection("checkExceptionAndStopSolve")),
-    _advance_state_timer(registerTimedSection("advanceState")),
-    _restore_solutions_timer(registerTimedSection("restoreSolutions")),
-    _save_old_solutions_timer(registerTimedSection("saveOldSolutions")),
-    _restore_old_solutions_timer(registerTimedSection("restoreOldSolutions")),
-    _output_step_timer(registerTimedSection("outputStep")),
-    _on_timestep_begin_timer(registerTimedSection("onTimestepBegin")),
-    _compute_residual_l2_norm_timer(registerTimedSection("computeResidualL2Norm")),
-    _compute_residual_sys_timer(registerTimedSection("computeResidualSys")),
-    _compute_residual_internal_timer(registerTimedSection("computeResidualInternal")),
-    _compute_residual_type_timer(registerTimedSection("computeResidualType")),
+        registerTimedSection("reinitBecauseOfGhostingOrNewGeomObjects", 3)),
+    _exec_multi_app_transfers_timer(registerTimedSection("execMultiAppTransfers", 1)),
+    _init_timer(registerTimedSection("init", 2)),
+    _eq_init_timer(registerTimedSection("EquationSystems::Init", 2)),
+    _solve_timer(registerTimedSection("solve", 1)),
+    _check_exception_and_stop_solve_timer(registerTimedSection("checkExceptionAndStopSolve", 5)),
+    _advance_state_timer(registerTimedSection("advanceState", 5)),
+    _restore_solutions_timer(registerTimedSection("restoreSolutions", 5)),
+    _save_old_solutions_timer(registerTimedSection("saveOldSolutions", 5)),
+    _restore_old_solutions_timer(registerTimedSection("restoreOldSolutions", 5)),
+    _output_step_timer(registerTimedSection("outputStep", 1)),
+    _on_timestep_begin_timer(registerTimedSection("onTimestepBegin", 2)),
+    _compute_residual_l2_norm_timer(registerTimedSection("computeResidualL2Norm", 2)),
+    _compute_residual_sys_timer(registerTimedSection("computeResidualSys", 2)),
+    _compute_residual_internal_timer(registerTimedSection("computeResidualInternal", 1)),
+    _compute_residual_type_timer(registerTimedSection("computeResidualType", 2)),
     _compute_transient_implicit_residual_timer(
-        registerTimedSection("computeTransientImplicitResidual")),
-    _compute_residual_tags_timer(registerTimedSection("computeResidualTags")),
-    _compute_jacobian_internal_timer(registerTimedSection("computeJacobianInternal")),
-    _compute_jacobian_tags_timer(registerTimedSection("computeJacobianTags")),
-    _compute_jacobian_blocks_timer(registerTimedSection("computeTransientImplicitJacobian")),
-    _compute_bounds_timer(registerTimedSection("computeBounds")),
-    _compute_post_check_timer(registerTimedSection("computePostCheck")),
-    _compute_damping_timer(registerTimedSection("computeDamping")),
+        registerTimedSection("computeTransientImplicitResidual", 2)),
+    _compute_residual_tags_timer(registerTimedSection("computeResidualTags", 2)),
+    _compute_jacobian_internal_timer(registerTimedSection("computeJacobianInternal", 1)),
+    _compute_jacobian_tags_timer(registerTimedSection("computeJacobianTags", 2)),
+    _compute_jacobian_blocks_timer(registerTimedSection("computeTransientImplicitJacobian", 2)),
+    _compute_bounds_timer(registerTimedSection("computeBounds", 1)),
+    _compute_post_check_timer(registerTimedSection("computePostCheck", 2)),
+    _compute_damping_timer(registerTimedSection("computeDamping", 1)),
     _possibly_rebuild_geom_search_patches_timer(
-        registerTimedSection("possiblyRebuildGeomSearchPatches")),
-    _initial_adapt_mesh_timer(registerTimedSection("initialAdaptMesh")),
-    _adapt_mesh_timer(registerTimedSection("adaptMesh")),
-    _update_mesh_xfem_timer(registerTimedSection("updateMeshXFEM")),
-    _mesh_changed_timer(registerTimedSection("meshChanged")),
-    _mesh_changed_helper_timer(registerTimedSection("meshChangedHelper")),
-    _check_problem_integrity_timer(registerTimedSection("notifyWhenMeshChanges")),
-    _serialize_solution_timer(registerTimedSection("serializeSolution")),
-    _check_nonlinear_convergence_timer(registerTimedSection("checkNonlinearConvergence")),
-    _check_linear_convergence_timer(registerTimedSection("checkLinearConvergence"))
+        registerTimedSection("possiblyRebuildGeomSearchPatches", 5)),
+    _initial_adapt_mesh_timer(registerTimedSection("initialAdaptMesh", 2)),
+    _adapt_mesh_timer(registerTimedSection("adaptMesh", 3)),
+    _update_mesh_xfem_timer(registerTimedSection("updateMeshXFEM", 5)),
+    _mesh_changed_timer(registerTimedSection("meshChanged", 3)),
+    _mesh_changed_helper_timer(registerTimedSection("meshChangedHelper", 5)),
+    _check_problem_integrity_timer(registerTimedSection("notifyWhenMeshChanges", 5)),
+    _serialize_solution_timer(registerTimedSection("serializeSolution", 3)),
+    _check_nonlinear_convergence_timer(registerTimedSection("checkNonlinearConvergence", 5)),
+    _check_linear_convergence_timer(registerTimedSection("checkLinearConvergence", 5))
 {
 
   _time = 0.0;
@@ -2917,8 +2917,6 @@ FEProblemBase::computeAuxiliaryKernels(const ExecFlagType & type)
 void
 FEProblemBase::computeUserObjects(const ExecFlagType & type, const Moose::AuxGroup & group)
 {
-  TIME_SECTION(_compute_user_objects_timer);
-
   // Get convenience reference to active warehouse
   const MooseObjectWarehouse<ElementUserObject> & elemental = _elemental_user_objects[group][type];
   const MooseObjectWarehouse<SideUserObject> & side = _side_user_objects[group][type];
@@ -2931,6 +2929,8 @@ FEProblemBase::computeUserObjects(const ExecFlagType & type, const Moose::AuxGro
       !internal_side.hasActiveObjects() && !nodal.hasActiveObjects() && !general.hasActiveObjects())
     // Nothing to do, return early
     return;
+
+  TIME_SECTION(_compute_user_objects_timer);
 
   // Start the timer here since we have at least one active user object
   std::string compute_uo_tag = "computeUserObjects(" + Moose::stringify(type) + ")";
@@ -3288,8 +3288,6 @@ FEProblemBase::getMultiApp(const std::string & multi_app_name) const
 void
 FEProblemBase::execMultiAppTransfers(ExecFlagType type, MultiAppTransfer::DIRECTION direction)
 {
-  TIME_SECTION(_exec_multi_app_transfers_timer);
-
   bool to_multiapp = direction == MultiAppTransfer::TO_MULTIAPP;
   std::string string_direction = to_multiapp ? " To " : " From ";
   const MooseObjectWarehouse<Transfer> & wh =
@@ -3297,6 +3295,8 @@ FEProblemBase::execMultiAppTransfers(ExecFlagType type, MultiAppTransfer::DIRECT
 
   if (wh.hasActiveObjects())
   {
+    TIME_SECTION(_exec_multi_app_transfers_timer);
+
     const auto & transfers = wh.getActiveObjects();
 
     _console << COLOR_CYAN << "\nStarting Transfers on " << Moose::stringify(type)
@@ -5010,9 +5010,8 @@ FEProblemBase::checkProblemIntegrity()
                   std::ostream_iterator<unsigned int>(extra_subdomain_ids, " "));
 
         mooseError("The following blocks from your input mesh do not contain an active material: " +
-                   extra_subdomain_ids.str() +
-                   "\nWhen ANY mesh block contains a Material object, "
-                   "all blocks must contain a Material object.\n");
+                   extra_subdomain_ids.str() + "\nWhen ANY mesh block contains a Material object, "
+                                               "all blocks must contain a Material object.\n");
       }
     }
 

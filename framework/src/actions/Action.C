@@ -50,7 +50,15 @@ Action::Action(InputParameters parameters)
     PerfGraphInterface(
         parameters.getCheckedPointerParam<MooseApp *>("_moose_app", "In Action constructor")
             ->perfGraph(),
-        "Action::" + parameters.get<std::string>("_action_name")),
+        "Action" + (parameters.get<std::string>("action_type") != ""
+                        ? std::string("::") + parameters.get<std::string>("action_type")
+                        : "") +
+            (parameters.get<std::string>("_action_name") != ""
+                 ? std::string("::") + parameters.get<std::string>("_action_name")
+                 : "") +
+            (parameters.isParamValid("task") && parameters.get<std::string>("task") != ""
+                 ? std::string("::") + parameters.get<std::string>("task")
+                 : "")),
     _pars(parameters),
     _registered_identifier(isParamValid("registered_identifier")
                                ? getParam<std::string>("registered_identifier")
@@ -67,7 +75,7 @@ Action::Action(InputParameters parameters)
     _displaced_mesh(_awh.displacedMesh()),
     _problem(_awh.problemBase()),
     _executioner(_app.executioner()),
-    _act_timer(registerTimedSection("act"))
+    _act_timer(registerTimedSection("act", 4))
 {
 }
 

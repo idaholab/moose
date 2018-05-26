@@ -16,7 +16,7 @@
 PerfGraph::PerfGraph() : _current_position(0), _active(true)
 {
   // Not done in the initialization list on purpose because this object needs to be complete first
-  _root_node = libmesh_make_unique<PerfNode>(registerSection("root"));
+  _root_node = libmesh_make_unique<PerfNode>(registerSection("Root", 0));
 
   _stack[0] = _root_node.get();
 
@@ -26,7 +26,7 @@ PerfGraph::PerfGraph() : _current_position(0), _active(true)
 PerfGraph::~PerfGraph() {}
 
 unsigned int
-PerfGraph::registerSection(const std::string & section_name)
+PerfGraph::registerSection(const std::string & section_name, unsigned int level)
 {
   auto it = _section_name_to_id.lower_bound(section_name);
 
@@ -38,6 +38,7 @@ PerfGraph::registerSection(const std::string & section_name)
   auto id = _section_name_to_id.size();
   _section_name_to_id.emplace_hint(it, section_name, id);
   _id_to_section_name[id] = section_name;
+  _id_to_level[id] = level;
 
   return id;
 }

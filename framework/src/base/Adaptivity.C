@@ -46,10 +46,10 @@ Adaptivity::Adaptivity(FEProblemBase & subproblem)
     _use_new_system(false),
     _max_h_level(0),
     _recompute_markers_during_cycles(false),
-    _adapt_mesh_timer(registerTimedSection("adaptMesh")),
-    _uniform_refine_timer(registerTimedSection("uniformRefine")),
-    _uniform_refine_with_projection(registerTimedSection("uniformRefineWithProjection")),
-    _update_error_vectors(registerTimedSection("updateErrorVectors"))
+    _adapt_mesh_timer(registerTimedSection("adaptMesh", 3)),
+    _uniform_refine_timer(registerTimedSection("uniformRefine", 2)),
+    _uniform_refine_with_projection(registerTimedSection("uniformRefineWithProjection", 2)),
+    _update_error_vectors(registerTimedSection("updateErrorVectors", 5))
 {
 }
 

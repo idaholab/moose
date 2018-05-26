@@ -48,9 +48,11 @@ protected:
   /**
    * Call to register a named section for timing.
    *
+   * @param section_name The name of the code section to be timed
+   * @param level The importance of the timer - lower is more important (0 will always come out)
    * @return The ID of the section - use when starting timing
    */
-  PerfID registerTimedSection(const std::string & section_name);
+  PerfID registerTimedSection(const std::string & section_name, const unsigned int level);
 
   /// Params
   const InputParameters * _pg_params;

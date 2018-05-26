@@ -291,14 +291,14 @@ MooseApp::MooseApp(InputParameters parameters)
         isParamValid("_multiapp_level") ? parameters.get<unsigned int>("_multiapp_level") : 0),
     _multiapp_number(
         isParamValid("_multiapp_number") ? parameters.get<unsigned int>("_multiapp_number") : 0),
-    _setup_options_timer(_perf_graph.registerSection("MooseApp::setupOptions")),
-    _run_input_file_timer(_perf_graph.registerSection("MooseApp::runInputFile")),
-    _execute_executioner_timer(_perf_graph.registerSection("MooseApp::executeExecutioner")),
-    _restore_timer(_perf_graph.registerSection("MooseApp::restore")),
-    _run_timer(_perf_graph.registerSection("MooseApp::run")),
-    _execute_mesh_modifiers_timer(_perf_graph.registerSection("MooseApp::executeMeshModifiers")),
-    _restore_cached_backup_timer(_perf_graph.registerSection("MooseApp::restoreCachedBackup")),
-    _create_minimal_app_timer(_perf_graph.registerSection("MooseApp::createMinimalApp"))
+    _setup_options_timer(_perf_graph.registerSection("MooseApp::setupOptions", 5)),
+    _run_input_file_timer(_perf_graph.registerSection("MooseApp::runInputFile", 3)),
+    _execute_executioner_timer(_perf_graph.registerSection("MooseApp::executeExecutioner", 3)),
+    _restore_timer(_perf_graph.registerSection("MooseApp::restore", 2)),
+    _run_timer(_perf_graph.registerSection("MooseApp::run", 3)),
+    _execute_mesh_modifiers_timer(_perf_graph.registerSection("MooseApp::executeMeshModifiers", 1)),
+    _restore_cached_backup_timer(_perf_graph.registerSection("MooseApp::restoreCachedBackup", 2)),
+    _create_minimal_app_timer(_perf_graph.registerSection("MooseApp::createMinimalApp", 3))
 {
   Registry::addKnownLabel(_type);
 
@@ -395,7 +395,7 @@ MooseApp::~MooseApp()
     dlclose(it.second);
 #endif
 
-  _perf_graph.print(_console);
+  _perf_graph.print(_console, 3);
 }
 
 std::string

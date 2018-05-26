@@ -43,13 +43,16 @@ public:
    *
    * @return The unique ID to use for that section
    */
-  PerfID registerSection(const std::string & section_name);
+  PerfID registerSection(const std::string & section_name, unsigned int level);
 
   /**
    * Print the tree out
+   *
+   * @param console The output stream to output to
+   * @param level The log level, the higher the number the more output you get
    */
   template <typename StreamType>
-  void print(StreamType & console);
+  void print(StreamType & console, unsigned int level);
 
   /**
    * Grab the name of a section
@@ -86,6 +89,15 @@ protected:
    */
   void updateRoot();
 
+  /**
+   * Helper for printing out the graph
+   */
+  template <typename StreamType>
+  void recursivelyPrintGraph(PerfNode * current_node,
+                             StreamType & console,
+                             unsigned int level,
+                             unsigned int current_depth = 0);
+
   /// The root node of the graph
   std::unique_ptr<PerfNode> _root_node;
 
@@ -104,6 +116,9 @@ protected:
   /// Map of IDs to section names
   std::map<PerfID, std::string> _id_to_section_name;
 
+  /// Map of IDs to level
+  std::map<PerfID, unsigned int> _id_to_level;
+
   /// Whether or not timing is active
   bool _active;
 
@@ -116,28 +131,35 @@ protected:
  */
 template <typename StreamType>
 void
-recursivelyPrintGraph(PerfGraph & graph,
-                      PerfNode * current_node,
-                      StreamType & console,
-                      unsigned int current_depth = 0)
+PerfGraph::recursivelyPrintGraph(PerfNode * current_node,
+                                 StreamType & console,
+                                 unsigned int level,
+                                 unsigned int current_depth)
 {
-  auto & name = graph.sectionName(current_node->id());
+  auto & name = _id_to_section_name[current_node->id()];
+  auto & node_level = _id_to_level[current_node->id()];
 
-  console << std::string(current_depth * 2, ' ') << name
-          << " self: " << std::chrono::duration<double>(current_node->selfTime()).count()
-          << " children: " << std::chrono::duration<double>(current_node->childrenTime()).count()
-          << " total: " << std::chrono::duration<double>(current_node->totalTime()).count() << "\n";
+  if (node_level <= level)
+  {
+    console << std::string(current_depth * 2, ' ') << name
+            << " self: " << std::chrono::duration<double>(current_node->selfTime()).count()
+            << " children: " << std::chrono::duration<double>(current_node->childrenTime()).count()
+            << " total: " << std::chrono::duration<double>(current_node->totalTime()).count()
+            << "\n";
+
+    current_depth++;
+  }
 
   for (auto & child_it : current_node->children())
-    recursivelyPrintGraph(graph, child_it.second.get(), console, current_depth + 1);
+    recursivelyPrintGraph(child_it.second.get(), console, level, current_depth);
 }
 
 template <typename StreamType>
 void
-PerfGraph::print(StreamType & console)
+PerfGraph::print(StreamType & console, unsigned int level)
 {
   updateRoot();
-  recursivelyPrintGraph(*this, _root_node.get(), console);
+  recursivelyPrintGraph(_root_node.get(), console, level);
 }
 
 #endif
