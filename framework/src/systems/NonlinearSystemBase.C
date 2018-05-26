@@ -96,6 +96,7 @@ NonlinearSystemBase::NonlinearSystemBase(FEProblemBase & fe_problem,
                                          const std::string & name)
   : SystemBase(fe_problem, name, Moose::VAR_NONLINEAR),
     ConsoleStreamInterface(fe_problem.getMooseApp()),
+    PerfGraphInterface(fe_problem.getMooseApp().perfGraph(), "NonlinearSystemBase"),
     _fe_problem(fe_problem),
     _sys(sys),
     _last_rnorm(0.),
@@ -140,7 +141,18 @@ NonlinearSystemBase::NonlinearSystemBase(FEProblemBase & fe_problem,
     _has_save_in(false),
     _has_diag_save_in(false),
     _has_nodalbc_save_in(false),
-    _has_nodalbc_diag_save_in(false)
+    _has_nodalbc_diag_save_in(false),
+    _compute_residual_tags_timer(registerTimedSection("computeResidualTags", 3)),
+    _compute_residual_internal_timer(registerTimedSection("computeResidualInternal", 3)),
+    _kernels_timer(registerTimedSection("Kernels", 3)),
+    _scalar_kernels_timer(registerTimedSection("ScalarKernels", 3)),
+    _nodal_kernels_timer(registerTimedSection("NodalKernels", 3)),
+    _nodal_kernel_bcs_timer(registerTimedSection("NodalKernelBCs", 3)),
+    _nodal_bcs_timer(registerTimedSection("NodalBCs", 3)),
+    _compute_jacobian_tags_timer(registerTimedSection("computeJacobianTags", 3)),
+    _compute_jacobian_blocks_timer(registerTimedSection("computeJacobianBlocks", 3)),
+    _compute_dampers_timer(registerTimedSection("computeDampers", 3)),
+    _compute_dirac_timer(registerTimedSection("computeDirac", 3))
 {
   getResidualNonTimeVector();
   // Don't need to add the matrix - it already exists (for now)
@@ -539,7 +551,7 @@ NonlinearSystemBase::computeResidual(NumericVector<Number> & residual, TagID tag
 void
 NonlinearSystemBase::computeResidualTags(const std::set<TagID> & tags)
 {
-  Moose::perf_log.push("compute_residual()", "Execution");
+  TIME_SECTION(_compute_residual_tags_timer);
 
   bool required_residual = tags.find(residualVectorTag()) == tags.end() ? false : true;
 
@@ -601,7 +613,6 @@ NonlinearSystemBase::computeResidualTags(const std::set<TagID> & tags)
 
   // not supposed to do anything on matrix
   activeAllMatrixTags();
-  Moose::perf_log.pop("compute_residual()", "Execution");
 }
 
 void
@@ -1105,6 +1116,8 @@ NonlinearSystemBase::constraintResiduals(NumericVector<Number> & residual, bool 
 void
 NonlinearSystemBase::computeResidualInternal(const std::set<TagID> & tags)
 {
+  TIME_SECTION(_compute_residual_internal_timer);
+
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
   {
     _kernels.residualSetup(tid);
@@ -1129,7 +1142,7 @@ NonlinearSystemBase::computeResidualInternal(const std::set<TagID> & tags)
   // residual contributions from the domain
   PARALLEL_TRY
   {
-    Moose::perf_log.push("computeKernels()", "Execution");
+    TIME_SECTION(_kernels_timer);
 
     ConstElemRange & elem_range = *_mesh.getActiveLocalElementRange();
 
@@ -1141,8 +1154,6 @@ NonlinearSystemBase::computeResidualInternal(const std::set<TagID> & tags)
     for (unsigned int i = 0; i < n_threads;
          i++) // Add any cached residuals that might be hanging around
       _fe_problem.addCachedResidual(i);
-
-    Moose::perf_log.pop("computeKernels()", "Execution");
   }
   PARALLEL_CATCH;
 
@@ -1152,7 +1163,7 @@ NonlinearSystemBase::computeResidualInternal(const std::set<TagID> & tags)
     // do scalar kernels (not sure how to thread this)
     if (_scalar_kernels.hasActiveObjects())
     {
-      Moose::perf_log.push("computScalarKernels()", "Execution");
+      TIME_SECTION(_scalar_kernels_timer);
 
       const std::vector<std::shared_ptr<ScalarKernel>> * scalars;
 
@@ -1193,8 +1204,6 @@ NonlinearSystemBase::computeResidualInternal(const std::set<TagID> & tags)
       }
       if (have_scalar_contributions)
         _fe_problem.addResidualScalar();
-
-      Moose::perf_log.pop("computScalarKernels()", "Execution");
     }
   }
   PARALLEL_CATCH;
@@ -1204,7 +1213,7 @@ NonlinearSystemBase::computeResidualInternal(const std::set<TagID> & tags)
   {
     if (_nodal_kernels.hasActiveBlockObjects())
     {
-      Moose::perf_log.push("computNodalKernels()", "Execution");
+      TIME_SECTION(_nodal_kernels_timer);
 
       ComputeNodalKernelsThread cnk(_fe_problem, _nodal_kernels);
 
@@ -1221,8 +1230,6 @@ NonlinearSystemBase::computeResidualInternal(const std::set<TagID> & tags)
              i++) // Add any cached residuals that might be hanging around
           _fe_problem.addCachedResidual(i);
       }
-
-      Moose::perf_log.pop("computNodalKernels()", "Execution");
     }
   }
   PARALLEL_CATCH;
@@ -1232,7 +1239,7 @@ NonlinearSystemBase::computeResidualInternal(const std::set<TagID> & tags)
   {
     if (_nodal_kernels.hasActiveBoundaryObjects())
     {
-      Moose::perf_log.push("computNodalKernelBCs()", "Execution");
+      TIME_SECTION(_nodal_kernel_bcs_timer);
 
       ComputeNodalKernelBcsThread cnk(_fe_problem, _nodal_kernels);
 
@@ -1244,8 +1251,6 @@ NonlinearSystemBase::computeResidualInternal(const std::set<TagID> & tags)
       for (unsigned int i = 0; i < n_threads;
            i++) // Add any cached residuals that might be hanging around
         _fe_problem.addCachedResidual(i);
-
-      Moose::perf_log.pop("computNodalKernelBCs()", "Execution");
     }
   }
   PARALLEL_CATCH;
@@ -1333,7 +1338,7 @@ NonlinearSystemBase::computeNodalBCs(const std::set<TagID> & tags)
 
     if (!bnd_nodes.empty())
     {
-      Moose::perf_log.push("computeNodalBCs()", "Execution");
+      TIME_SECTION(_nodal_bcs_timer);
 
       MooseObjectWarehouse<NodalBCBase> * nbc_warehouse;
 
@@ -1363,8 +1368,6 @@ NonlinearSystemBase::computeNodalBCs(const std::set<TagID> & tags)
           }
         }
       }
-
-      Moose::perf_log.pop("computeNodalBCs()", "Execution");
     }
   }
   PARALLEL_CATCH;
@@ -2207,7 +2210,7 @@ NonlinearSystemBase::computeJacobian(SparseMatrix<Number> & jacobian, const std:
 void
 NonlinearSystemBase::computeJacobianTags(const std::set<TagID> & tags)
 {
-  Moose::perf_log.push("compute_jacobian()", "Execution");
+  TIME_SECTION(_compute_jacobian_tags_timer);
 
   FloatingPointExceptionGuard fpe_guard(_app);
 
@@ -2221,8 +2224,6 @@ NonlinearSystemBase::computeJacobianTags(const std::set<TagID> & tags)
     // calling stopSolve(), it is now up to PETSc to return a
     // "diverged" reason during the next solve.
   }
-
-  Moose::perf_log.pop("compute_jacobian()", "Execution");
 }
 
 void
@@ -2241,7 +2242,7 @@ void
 NonlinearSystemBase::computeJacobianBlocks(std::vector<JacobianBlock *> & blocks,
                                            const std::set<TagID> & tags)
 {
-  Moose::perf_log.push("compute_jacobian_block()", "Execution");
+  TIME_SECTION(_compute_jacobian_blocks_timer);
 
   FloatingPointExceptionGuard fpe_guard(_app);
 
@@ -2340,8 +2341,6 @@ NonlinearSystemBase::computeJacobianBlocks(std::vector<JacobianBlock *> & blocks
 
     jacobian.close();
   }
-
-  Moose::perf_log.pop("compute_jacobian_block()", "Execution");
 }
 
 void
@@ -2369,14 +2368,14 @@ Real
 NonlinearSystemBase::computeDamping(const NumericVector<Number> & solution,
                                     const NumericVector<Number> & update)
 {
-  Moose::perf_log.push("compute_dampers()", "Execution");
-
   // Default to no damping
   Real damping = 1.0;
   bool has_active_dampers = false;
 
   if (_element_dampers.hasActiveObjects())
   {
+    TIME_SECTION(_compute_dampers_timer);
+
     has_active_dampers = true;
     *_increment_vec = update;
     ComputeElemDampingThread cid(_fe_problem);
@@ -2386,6 +2385,8 @@ NonlinearSystemBase::computeDamping(const NumericVector<Number> & solution,
 
   if (_nodal_dampers.hasActiveObjects())
   {
+    TIME_SECTION(_compute_dampers_timer);
+
     has_active_dampers = true;
     *_increment_vec = update;
     ComputeNodalDampingThread cndt(_fe_problem);
@@ -2395,6 +2396,8 @@ NonlinearSystemBase::computeDamping(const NumericVector<Number> & solution,
 
   if (_general_dampers.hasActiveObjects())
   {
+    TIME_SECTION(_compute_dampers_timer);
+
     has_active_dampers = true;
     const auto & gdampers = _general_dampers.getActiveObjects();
     for (const auto & damper : gdampers)
@@ -2417,8 +2420,6 @@ NonlinearSystemBase::computeDamping(const NumericVector<Number> & solution,
   if (has_active_dampers && damping < 1.0)
     _console << " Damping factor: " << damping << "\n";
 
-  Moose::perf_log.pop("compute_dampers()", "Execution");
-
   return damping;
 }
 
@@ -2431,7 +2432,7 @@ NonlinearSystemBase::computeDiracContributions(bool is_jacobian)
 
   if (_dirac_kernels.hasActiveObjects())
   {
-    Moose::perf_log.push("computeDiracContributions()", "Execution");
+    TIME_SECTION(_compute_dirac_timer);
 
     // TODO: Need a threading fix... but it's complicated!
     for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
@@ -2453,8 +2454,6 @@ NonlinearSystemBase::computeDiracContributions(bool is_jacobian)
     // Threads::parallel_reduce(range, cd);
 
     cd(range);
-
-    Moose::perf_log.pop("computeDiracContributions()", "Execution");
   }
 
   if (!is_jacobian)

@@ -130,7 +130,7 @@ enum MooseLinearConvergenceReason
  * Specialization of SubProblem for solving nonlinear equations plus auxiliary equations
  *
  */
-class FEProblemBase : public SubProblem, public Restartable, public PerfGraphInterface
+class FEProblemBase : public SubProblem, public Restartable
 {
 public:
   FEProblemBase(const InputParameters & parameters);
@@ -1767,6 +1767,9 @@ private:
   PerfID _serialize_solution_timer;
   PerfID _check_nonlinear_convergence_timer;
   PerfID _check_linear_convergence_timer;
+  PerfID _update_geometric_search_timer;
+  PerfID _exec_multi_apps_timer;
+  PerfID _backup_multi_apps_timer;
 
   friend class AuxiliarySystem;
   friend class NonlinearSystemBase;

@@ -5,6 +5,6 @@
     issues = '#11551'
     type = 'RunApp'
     input = 'perf_graph.i'
-    expect_out = 'FEProblemBase::computeResidualInternal'
+    expect_out = 'FEProblem::computeResidualInternal'
   [../]
 []

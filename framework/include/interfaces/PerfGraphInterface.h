@@ -33,9 +33,14 @@ class PerfGraphInterface
 {
 public:
   /**
+   * For objects that _are_ MooseObjects with a default prefix of type()
+   */
+  PerfGraphInterface(const MooseObject * moose_object);
+
+  /**
    * For objects that _are_ MooseObjects
    */
-  PerfGraphInterface(const MooseObject * moose_object, const std::string prefix = "");
+  PerfGraphInterface(const MooseObject * moose_object, const std::string prefix);
 
   /**
    * For objects that aren't MooseObjects

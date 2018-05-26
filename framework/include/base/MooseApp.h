@@ -799,8 +799,10 @@ private:
   ExecFlagEnum _execute_flags;
 
   /// Timers
+  PerfID _setup_timer;
   PerfID _setup_options_timer;
   PerfID _run_input_file_timer;
+  PerfID _execute_timer;
   PerfID _execute_executioner_timer;
   PerfID _restore_timer;
   PerfID _run_timer;

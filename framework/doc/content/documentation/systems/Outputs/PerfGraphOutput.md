@@ -51,6 +51,17 @@ Root self: 0.064171 children: 0 total: 0.064171
       FEProblemBase::outputStep self: 0.000176 children: 0 total: 0.000176
 ```
 
+## Levels
+
+The following are the current level "recommendations"... note that Apps are free to add code sections to whatever level they wish... so this is just a suggestion!
+
+- 0: Just the "root" - the whole application time
+- 1: Minimal set of the most important routines (residual/jacobian computation, etc.)
+- 2: Important initialization routines (setting up the mesh, initializing the systems, etc.)
+- 3: More detailed information from levels `1` and `2`
+- 4: This is where the Actions will start to print
+- 5: Fairly unimportant, or less used routines
+- 6: Routines that rarely take up much time
 
 !syntax parameters /Outputs/PerfGraphOutput
 

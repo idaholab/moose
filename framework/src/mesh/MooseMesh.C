@@ -150,7 +150,7 @@ validParams<MooseMesh>()
 MooseMesh::MooseMesh(const InputParameters & parameters)
   : MooseObject(parameters),
     Restartable(this, "Mesh"),
-    PerfGraphInterface(this, "Mesh"),
+    PerfGraphInterface(this),
     _mesh_parallel_type(getParam<MooseEnum>("parallel_type")),
     _use_distributed_mesh(false),
     _distribution_overridden(false),
@@ -265,7 +265,7 @@ MooseMesh::MooseMesh(const InputParameters & parameters)
 MooseMesh::MooseMesh(const MooseMesh & other_mesh)
   : MooseObject(other_mesh._pars),
     Restartable(this, "Mesh"),
-    PerfGraphInterface(this, "Mesh"),
+    PerfGraphInterface(this),
     _mesh_parallel_type(other_mesh._mesh_parallel_type),
     _use_distributed_mesh(other_mesh._use_distributed_mesh),
     _distribution_overridden(other_mesh._distribution_overridden),
@@ -733,10 +733,10 @@ MooseMesh::nodeToElemMap()
   {
     Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
 
-    TIME_SECTION(_node_to_elem_map_timer);
-
     if (!_node_to_elem_map_built)
     {
+      TIME_SECTION(_node_to_elem_map_timer);
+
       for (const auto & elem : getMesh().active_element_ptr_range())
         for (unsigned int n = 0; n < elem->n_nodes(); n++)
           _node_to_elem_map[elem->node(n)].push_back(elem->id());

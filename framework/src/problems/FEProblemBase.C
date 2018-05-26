@@ -151,7 +151,6 @@ validParams<FEProblemBase>()
 FEProblemBase::FEProblemBase(const InputParameters & parameters)
   : SubProblem(parameters),
     Restartable(this, "FEProblemBase"),
-    PerfGraphInterface(this, "FEProblemBase"),
     _mesh(*getCheckedPointerParam<MooseMesh *>("mesh")),
     _eq(_mesh),
     _initialized(false),
@@ -267,7 +266,10 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
     _check_problem_integrity_timer(registerTimedSection("notifyWhenMeshChanges", 5)),
     _serialize_solution_timer(registerTimedSection("serializeSolution", 3)),
     _check_nonlinear_convergence_timer(registerTimedSection("checkNonlinearConvergence", 5)),
-    _check_linear_convergence_timer(registerTimedSection("checkLinearConvergence", 5))
+    _check_linear_convergence_timer(registerTimedSection("checkLinearConvergence", 5)),
+    _update_geometric_search_timer(registerTimedSection("updateGeometricSearch", 3)),
+    _exec_multi_apps_timer(registerTimedSection("execMultiApps", 3)),
+    _backup_multi_apps_timer(registerTimedSection("backupMultiApps", 5))
 {
 
   _time = 0.0;
@@ -642,14 +644,11 @@ FEProblemBase::initialSetup()
 
   if (!_app.isRecovering())
   {
-    Moose::perf_log.push("initial adaptivity", "Setup");
-
     unsigned int n = adaptivity().getInitialSteps();
     if (n && !_app.isUltimateMaster() && _app.isRestarting())
       mooseError("Cannot perform initial adaptivity during restart on sub-apps of a MultiApp!");
 
     initialAdaptMesh();
-    Moose::perf_log.pop("initial adaptivity", "Setup");
   }
 
 #endif // LIBMESH_ENABLE_AMR
@@ -674,29 +673,21 @@ FEProblemBase::initialSetup()
 
   _nl->setSolution(*(_nl->system().current_local_solution.get()));
 
-  Moose::perf_log.push("Initial updateGeomSearch()", "Setup");
   // Update the nearest node searches (has to be called after the problem is all set up)
   // We do this here because this sets up the Element's DoFs to ghost
   updateGeomSearch(GeometricSearchData::NEAREST_NODE);
-  Moose::perf_log.pop("Initial updateGeomSearch()", "Setup");
 
-  Moose::perf_log.push("Initial updateActiveSemiLocalNodeRange()", "Setup");
   _mesh.updateActiveSemiLocalNodeRange(_ghosted_elems);
   if (_displaced_mesh)
     _displaced_mesh->updateActiveSemiLocalNodeRange(_ghosted_elems);
-  Moose::perf_log.pop("Initial updateActiveSemiLocalNodeRange()", "Setup");
 
-  Moose::perf_log.push("reinit() after updateGeomSearch()", "Setup");
   // Possibly reinit one more time to get ghosting correct
   reinitBecauseOfGhostingOrNewGeomObjects();
-  Moose::perf_log.pop("reinit() after updateGeomSearch()", "Setup");
 
   if (_displaced_mesh)
     _displaced_problem->updateMesh();
 
-  Moose::perf_log.push("Initial updateGeomSearch()", "Setup");
   updateGeomSearch(); // Call all of the rest of the geometric searches
-  Moose::perf_log.pop("Initial updateGeomSearch()", "Setup");
 
   // Random interface objects
   for (const auto & it : _random_data_objects)
@@ -747,18 +738,14 @@ FEProblemBase::initialSetup()
   {
     _current_execute_on_flag = EXEC_INITIAL;
 
-    Moose::perf_log.push("execTransfers()", "Setup");
     execTransfers(EXEC_INITIAL);
-    Moose::perf_log.pop("execTransfers()", "Setup");
 
-    Moose::perf_log.push("execMultiApps()", "Setup");
     bool converged = execMultiApps(EXEC_INITIAL);
     if (!converged)
       mooseError("failed to converge initial MultiApp");
 
     // We'll backup the Multiapp here
     backupMultiApps(EXEC_INITIAL);
-    Moose::perf_log.pop("execMultiApps()", "Setup");
 
     for (THREAD_ID tid = 0; tid < n_threads; tid++)
       reinitScalars(tid);
@@ -3069,7 +3056,6 @@ FEProblemBase::executeSamplers(const ExecFlagType & exec_type)
     {
       TIME_SECTION(_execute_samplers_timer);
 
-      Moose::perf_log.push("executeSamplers()", "Execution");
       _samplers.setup(exec_type);
       for (auto & sampler : objects)
         sampler->execute();
@@ -3341,6 +3327,8 @@ FEProblemBase::execMultiApps(ExecFlagType type, bool auto_advance)
   // Execute MultiApps
   if (multi_apps.size())
   {
+    TIME_SECTION(_exec_multi_apps_timer);
+
     _console << COLOR_CYAN << "\nExecuting MultiApps on " << Moose::stringify(type) << COLOR_DEFAULT
              << std::endl;
 
@@ -3415,6 +3403,8 @@ FEProblemBase::backupMultiApps(ExecFlagType type)
 
   if (multi_apps.size())
   {
+    TIME_SECTION(_backup_multi_apps_timer);
+
     _console << COLOR_CYAN << "\nBacking Up MultiApps" << COLOR_DEFAULT << std::endl;
 
     for (const auto & multi_app : multi_apps)
@@ -4590,13 +4580,13 @@ Real
 FEProblemBase::computeDamping(const NumericVector<Number> & soln,
                               const NumericVector<Number> & update)
 {
-  TIME_SECTION(_compute_damping_timer);
-
   // Default to no damping
   Real damping = 1.0;
 
   if (_has_dampers)
   {
+    TIME_SECTION(_compute_damping_timer);
+
     // Save pointer to the current solution
     const NumericVector<Number> * _saved_current_solution = _nl->currentSolution();
 
@@ -4611,8 +4601,6 @@ FEProblemBase::computeDamping(const NumericVector<Number> & soln,
     // restore saved solution
     _nl->setSolution(*_saved_current_solution);
   }
-
-  Moose::perf_log.pop("compute_dampers()", "Execution");
 
   return damping;
 }
@@ -4645,6 +4633,8 @@ FEProblemBase::addDisplacedProblem(std::shared_ptr<DisplacedProblem> displaced_p
 void
 FEProblemBase::updateGeomSearch(GeometricSearchData::GeometricSearchType type)
 {
+  TIME_SECTION(_update_geometric_search_timer);
+
   _geometric_search_data.update(type);
 
   if (_displaced_problem)

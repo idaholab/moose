@@ -291,8 +291,10 @@ MooseApp::MooseApp(InputParameters parameters)
         isParamValid("_multiapp_level") ? parameters.get<unsigned int>("_multiapp_level") : 0),
     _multiapp_number(
         isParamValid("_multiapp_number") ? parameters.get<unsigned int>("_multiapp_number") : 0),
+    _setup_timer(_perf_graph.registerSection("MooseApp::setup", 2)),
     _setup_options_timer(_perf_graph.registerSection("MooseApp::setupOptions", 5)),
     _run_input_file_timer(_perf_graph.registerSection("MooseApp::runInputFile", 3)),
+    _execute_timer(_perf_graph.registerSection("MooseApp::execute", 2)),
     _execute_executioner_timer(_perf_graph.registerSection("MooseApp::executeExecutioner", 3)),
     _restore_timer(_perf_graph.registerSection("MooseApp::restore", 2)),
     _run_timer(_perf_graph.registerSection("MooseApp::run", 3)),
@@ -913,11 +915,9 @@ MooseApp::run()
 {
   TIME_SECTION(_run_timer);
 
-  Moose::perf_log.push("Full Runtime", "Application");
-
-  Moose::perf_log.push("Application Setup", "Setup");
   try
   {
+    TIME_SECTION(_setup_timer);
     setupOptions();
     runInputFile();
   }
@@ -925,18 +925,18 @@ MooseApp::run()
   {
     mooseError(err.what());
   }
-  Moose::perf_log.pop("Application Setup", "Setup");
 
   if (!_check_input)
+  {
+    TIME_SECTION(_execute_timer);
     executeExecutioner();
+  }
   else
   {
     errorCheck();
     // Output to stderr, so it is easier for peacock to get the result
     Moose::err << "Syntax OK" << std::endl;
   }
-
-  Moose::perf_log.pop("Full Runtime", "Application");
 }
 
 void

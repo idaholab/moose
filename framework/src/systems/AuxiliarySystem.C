@@ -31,6 +31,7 @@
 
 AuxiliarySystem::AuxiliarySystem(FEProblemBase & subproblem, const std::string & name)
   : SystemBase(subproblem, name, Moose::VAR_AUXILIARY),
+    PerfGraphInterface(subproblem.getMooseApp().perfGraph(), "AuxiliarySystem"),
     _fe_problem(subproblem),
     _sys(subproblem.es().add_system<TransientExplicitSystem>(name)),
     _current_solution(NULL),
@@ -40,8 +41,10 @@ AuxiliarySystem::AuxiliarySystem(FEProblemBase & subproblem, const std::string &
     _need_serialized_solution(false),
     _aux_scalar_storage(_app.getExecuteOnEnum()),
     _nodal_aux_storage(_app.getExecuteOnEnum()),
-    _elemental_aux_storage(_app.getExecuteOnEnum())
-
+    _elemental_aux_storage(_app.getExecuteOnEnum()),
+    _compute_scalar_vars_timer(registerTimedSection("computeScalarVars", 1)),
+    _compute_nodal_vars_timer(registerTimedSection("computeNodalVars", 1)),
+    _compute_elemental_vars_timer(registerTimedSection("computeElementalVars", 1))
 {
   _nodal_vars.resize(libMesh::n_threads());
   _elem_vars.resize(libMesh::n_threads());
@@ -379,8 +382,7 @@ AuxiliarySystem::computeScalarVars(ExecFlagType type)
 
   if (storage.hasActiveObjects())
   {
-    std::string compute_aux_tag = "computeScalarAux(" + Moose::stringify(type) + ")";
-    Moose::perf_log.push(compute_aux_tag, "Execution");
+    TIME_SECTION(_compute_scalar_vars_timer);
 
     PARALLEL_TRY
     {
@@ -403,8 +405,6 @@ AuxiliarySystem::computeScalarVars(ExecFlagType type)
     }
     PARALLEL_CATCH;
 
-    Moose::perf_log.pop(compute_aux_tag, "Execution");
-
     solution().close();
     _sys.update();
   }
@@ -418,8 +418,7 @@ AuxiliarySystem::computeNodalVars(ExecFlagType type)
 
   if (nodal.hasActiveBlockObjects())
   {
-    std::string compute_aux_tag = "computeNodalAux(" + Moose::stringify(type) + ")";
-    Moose::perf_log.push(compute_aux_tag, "Execution");
+    TIME_SECTION(_compute_nodal_vars_timer);
 
     // Block Nodal AuxKernels
     PARALLEL_TRY
@@ -432,13 +431,11 @@ AuxiliarySystem::computeNodalVars(ExecFlagType type)
       _sys.update();
     }
     PARALLEL_CATCH;
-    Moose::perf_log.pop(compute_aux_tag, "Execution");
   }
 
   if (nodal.hasActiveBoundaryObjects())
   {
-    std::string compute_aux_tag = "computeNodalAuxBCs(" + Moose::stringify(type) + ")";
-    Moose::perf_log.push(compute_aux_tag, "Execution");
+    TIME_SECTION(_compute_nodal_vars_timer);
 
     // Boundary Nodal AuxKernels
     PARALLEL_TRY
@@ -451,7 +448,6 @@ AuxiliarySystem::computeNodalVars(ExecFlagType type)
       _sys.update();
     }
     PARALLEL_CATCH;
-    Moose::perf_log.pop(compute_aux_tag, "Execution");
   }
 }
 
@@ -463,8 +459,7 @@ AuxiliarySystem::computeElementalVars(ExecFlagType type)
 
   if (elemental.hasActiveBlockObjects())
   {
-    std::string compute_aux_tag = "computeElemAux(" + Moose::stringify(type) + ")";
-    Moose::perf_log.push(compute_aux_tag, "Execution");
+    TIME_SECTION(_compute_elemental_vars_timer);
 
     // Block Elemental AuxKernels
     PARALLEL_TRY
@@ -477,14 +472,12 @@ AuxiliarySystem::computeElementalVars(ExecFlagType type)
       _sys.update();
     }
     PARALLEL_CATCH;
-    Moose::perf_log.pop(compute_aux_tag, "Execution");
   }
 
   // Boundary Elemental AuxKernels
   if (elemental.hasActiveBoundaryObjects())
   {
-    std::string compute_aux_tag = "computeElemAuxBCs(" + Moose::stringify(type) + ")";
-    Moose::perf_log.push(compute_aux_tag, "Execution");
+    TIME_SECTION(_compute_elemental_vars_timer);
 
     PARALLEL_TRY
     {
@@ -496,7 +489,6 @@ AuxiliarySystem::computeElementalVars(ExecFlagType type)
       _sys.update();
     }
     PARALLEL_CATCH;
-    Moose::perf_log.pop(compute_aux_tag, "Execution");
   }
 }
 
