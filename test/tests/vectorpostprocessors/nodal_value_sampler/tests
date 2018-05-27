@@ -5,4 +5,11 @@
     csvdiff = 'nodal_value_sampler_out_nodal_sample_0001.csv'
     mesh_mode = REPLICATED
   [../]
+  [./not_nodal]
+    type = 'RunException'
+    input = 'nodal_value_sampler.i'
+    cli_args = 'Variables/u/family=MONOMIAL Variables/u/order=CONSTANT'
+    expect_err = "The variable 'u' is not nodal"
+    mesh_mode = REPLICATED
+  [../]
 []

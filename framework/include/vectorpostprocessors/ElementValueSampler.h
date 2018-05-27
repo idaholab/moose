@@ -7,25 +7,24 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef NODALVALUESAMPLER_H
-#define NODALVALUESAMPLER_H
+#ifndef ELEMENTVALUESAMPLER_H
+#define ELEMENTVALUESAMPLER_H
 
-#include "NodalVariableVectorPostprocessor.h"
+#include "ElementVariableVectorPostprocessor.h"
 #include "SamplerBase.h"
 
-// Forward Declarations
-class NodalValueSampler;
+class ElementValueSampler;
 
 template <>
-InputParameters validParams<NodalValueSampler>();
+InputParameters validParams<ElementValueSampler>();
 
 /**
- * Samples values of nodal variable(s).
+ * Samples values of elemental variable(s).
  */
-class NodalValueSampler : public NodalVariableVectorPostprocessor, protected SamplerBase
+class ElementValueSampler : public ElementVariableVectorPostprocessor, protected SamplerBase
 {
 public:
-  NodalValueSampler(const InputParameters & parameters);
+  ElementValueSampler(const InputParameters & parameters);
 
   virtual void initialize() override;
   virtual void execute() override;
@@ -41,9 +40,6 @@ public:
 protected:
   /// So we don't have to create and destroy this vector over and over again
   std::vector<Real> _values;
-
-  /// Vector of 0 and 1 values which records whether values are present at the current node.
-  std::vector<unsigned int> _has_values;
 };
 
 #endif

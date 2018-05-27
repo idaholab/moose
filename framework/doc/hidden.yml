@@ -340,7 +340,6 @@
 - /VectorPostprocessors/LineMaterialRealSampler
 - /VectorPostprocessors/LineValueSampler
 - /VectorPostprocessors/MaterialVectorPostprocessor
-- /VectorPostprocessors/NodalValueSampler
 - /VectorPostprocessors/PointValueSampler
 - /VectorPostprocessors/SideValueSampler
 - /VectorPostprocessors/SphericalAverage
