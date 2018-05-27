@@ -97,3 +97,17 @@ PerfGraph::updateCurrentlyRunning()
     node->setStartTime(now);
   }
 }
+
+void
+PerfGraph::recursivelyFillTotalSelfTime(PerfNode * current_node,
+                                        std::vector<Real> & section_self_time)
+{
+  auto id = current_node->id();
+
+  auto time = std::chrono::duration<double>(current_node->selfTime()).count();
+
+  section_self_time[id] += time;
+
+  for (auto & child_it : current_node->children())
+    recursivelyFillTotalSelfTime(child_it.second.get(), section_self_time);
+}

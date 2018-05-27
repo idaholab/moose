@@ -76,4 +76,8 @@
 
 [Outputs]
   exodus = true
+   [./pgraph]
+    type = PerfGraphOutput
+    level = 2
+  [../]
 []

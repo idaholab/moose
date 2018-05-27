@@ -13,6 +13,7 @@
 // MOOSE Includes
 #include "MooseTypes.h"
 #include "PerfNode.h"
+#include "IndirectSort.h"
 
 // System Includes
 #include <array>
@@ -93,12 +94,45 @@ protected:
 
   /**
    * Helper for printing out the graph
+   *
+   * @param current_node The node to be working on right now
+   * @param console Where to print to
+   * @param level The level to print out below (<=)
+   * @param current_depth - Used in the recursion
    */
   template <typename StreamType>
   void recursivelyPrintGraph(PerfNode * current_node,
                              StreamType & console,
                              unsigned int level,
                              unsigned int current_depth = 0);
+
+  /**
+   * Helper for printing out the trace that has taken the most time
+   *
+   * @param current_node The node to be working on right now
+   * @param console Where to print to
+   * @param current_depth - Used in the recursion
+   */
+  template <typename StreamType>
+  void recursivelyPrintHeaviestGraph(PerfNode * current_node,
+                                     StreamType & console,
+                                     unsigned int current_depth = 0);
+
+  /**
+   * Small helper function to fill in a vector with the total self time for each timer ID
+   *
+   * @param current_node The current node to work on
+   * @param section_self_time A vector of num_ids size to sum self time into
+   */
+  void recursivelyFillTotalSelfTime(PerfNode * current_node, std::vector<Real> & section_self_time);
+
+  /**
+   * Helper for printing out the heaviest sections
+   *
+   * @param console Where to print to
+   */
+  template <typename StreamType>
+  void printHeaviestSections(StreamType & console);
 
   /// The root node of the graph
   std::unique_ptr<PerfNode> _root_node;
@@ -125,9 +159,6 @@ protected:
   friend class PerfGuard;
 };
 
-/**
- * Helper function to recursively print out the graph
- */
 template <typename StreamType>
 void
 PerfGraph::recursivelyPrintGraph(PerfNode * current_node,
@@ -155,10 +186,73 @@ PerfGraph::recursivelyPrintGraph(PerfNode * current_node,
 
 template <typename StreamType>
 void
+PerfGraph::recursivelyPrintHeaviestGraph(PerfNode * current_node,
+                                         StreamType & console,
+                                         unsigned int current_depth)
+{
+  auto & name = _id_to_section_name[current_node->id()];
+
+  console << std::string(current_depth * 2, ' ') << name
+          << " self: " << std::chrono::duration<double>(current_node->selfTime()).count()
+          << " children: " << std::chrono::duration<double>(current_node->childrenTime()).count()
+          << " total: " << std::chrono::duration<double>(current_node->totalTime()).count() << "\n";
+
+  current_depth++;
+
+  if (!current_node->children().empty())
+  {
+    PerfNode * heaviest_child = nullptr;
+
+    for (auto & child_it : current_node->children())
+    {
+      auto current_child = child_it.second.get();
+
+      if (!heaviest_child || (current_child->totalTime() > heaviest_child->totalTime()))
+        heaviest_child = current_child;
+    }
+
+    recursivelyPrintHeaviestGraph(heaviest_child, console, current_depth);
+  }
+}
+
+template <typename StreamType>
+void
+PerfGraph::printHeaviestSections(StreamType & console)
+{
+  // First - accumulate the time for each section
+  std::vector<Real> section_self_time(_section_name_to_id.size(), 0.);
+  recursivelyFillTotalSelfTime(_root_node.get(), section_self_time);
+
+  // Now indirect sort them
+  std::vector<size_t> sorted;
+  Moose::indirectSort(section_self_time.begin(),
+                      section_self_time.end(),
+                      sorted,
+                      [](double lhs, double rhs) { return lhs > rhs; });
+
+  // Now print out the largest ones
+  for (unsigned int i = 0; i < 5; i++)
+  {
+    auto id = sorted[i];
+
+    console << _id_to_section_name[id] << " Total Self Time: " << section_self_time[id] << "\n";
+  }
+}
+
+template <typename StreamType>
+void
 PerfGraph::print(StreamType & console, unsigned int level)
 {
   updateCurrentlyRunning();
+
+  console << "\nPerformance Graph:\n";
   recursivelyPrintGraph(_root_node.get(), console, level);
+
+  console << "\nHeaviest Branch:\n";
+  recursivelyPrintHeaviestGraph(_root_node.get(), console);
+
+  console << "\nHeaviest Sections:\n";
+  printHeaviestSections(console);
 }
 
 #endif
