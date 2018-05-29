@@ -62,12 +62,6 @@ class Plugin(MooseWidget):
                     mooseutils.mooseDebug('{}.{} --> {}.{}'.format(self.__class__.__name__, name, other.__class__.__name__, slot_name))
                     signal.connect(getattr(other, slot_name))
 
-    #def initialize(self, *args, **kwargs):
-    #    """
-    #    This method is called by the Manager after all plugins have been created.
-    #    """
-    #    self.setEnabled(True)
-
     def setMainLayoutName(self, name):
         """
         Method for changing the name of the main layout that this plugin will be added.
@@ -116,6 +110,9 @@ class Plugin(MooseWidget):
         Clears any recently used items
         """
 
+    def addToMenu(self, menu):
+        pass
+
     def addToMainMenu(self, menubar):
         """
         This allows the plugin to add menu items to the main menu.
@@ -143,3 +140,6 @@ class Plugin(MooseWidget):
 
     def preferenceWidgets(self):
         return self._preferences.widgets()
+
+    def setupMenu(self, menu):
+        pass
