@@ -17,10 +17,7 @@ The `StressDivergenceRZTensors` kernel can be automatically created with the
 mechanics master action is recommended to ensure the consistent setting of the `use_displaced_mesh`
 parameter for the strain formulation selected.  For a detailed explanation of the settings for
 _use_displaced_mesh_ in mechanics problems and the TensorMechanics Master Action usage, see the
-[Introduction/StressDivergence](auto::/introduction/StressDivergence) page.
-
-!alert note prefix=False
-The `COORD_TYPE` in the Problem block of the input file must be set to RZ.
+[Introduction/Stress Divergence](/tensor_mechanics/StressDivergence.md) page.
 
 
 ## Residual Calculation
@@ -48,7 +45,11 @@ The axisymmetric system changes the order of the displacement vector from $(u_r,
 usually seen in textbooks, to $(u_r, u_z, u_{\theta})$. Take care to follow this convention in your
 input files and when adding extra stresses.
 
-## Example Input File syntax
+## Example Input File
+
+!alert note title=Use RZ Coordinate Type
+The coordinate type in the Problem block of the input file must be set to
++`COORD_TYPE = RZ`+.
 
 Using the tensor mechanics master action, as shown
 
