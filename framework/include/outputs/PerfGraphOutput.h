@@ -38,6 +38,10 @@ protected:
 
   // Detail level
   unsigned int _level;
+
+  bool _heaviest_branch;
+
+  unsigned int _heaviest_sections;
 };
 
 #endif /* PERFGRAPHOUTPUT_H */

@@ -174,8 +174,36 @@ PerfGraph::recursivelyPrintHeaviestGraph(PerfNode * current_node,
 }
 
 void
-PerfGraph::printHeaviestSections(const ConsoleStream & console)
+PerfGraph::print(const ConsoleStream & console, unsigned int level)
 {
+  updateCurrentlyRunning();
+
+  console << "\nPerformance Graph:\n";
+  VariadicTable<std::string, Real, Real, Real> vtable(
+      {"Section", "Self(s)", "Children(s)", "Total(s)"}, 13);
+  recursivelyPrintGraph(_root_node.get(), vtable, level);
+  vtable.print(console);
+}
+
+void
+PerfGraph::printHeaviestBranch(const ConsoleStream & console)
+{
+  updateCurrentlyRunning();
+
+  console << "\nHeaviest Branch:\n";
+  VariadicTable<std::string, Real, Real, Real> vtable(
+      {"Section", "Self(s)", "Children(s)", "Total(s)"}, 13);
+  recursivelyPrintHeaviestGraph(_root_node.get(), vtable);
+  vtable.print(console);
+}
+
+void
+PerfGraph::printHeaviestSections(const ConsoleStream & console, const unsigned int num_sections)
+{
+  updateCurrentlyRunning();
+
+  console << "\nHeaviest Sections:\n";
+
   // First - accumulate the time for each section
   std::vector<Real> section_self_time(_section_name_to_id.size(), 0.);
   recursivelyFillTotalSelfTime(_root_node.get(), section_self_time);
@@ -190,7 +218,7 @@ PerfGraph::printHeaviestSections(const ConsoleStream & console)
   VariadicTable<std::string, Real> vtable({"Section", "Total Time(s)"}, 13);
 
   // Now print out the largest ones
-  for (unsigned int i = 0; i < 5; i++)
+  for (unsigned int i = 0; i < num_sections; i++)
   {
     auto id = sorted[i];
 
@@ -198,31 +226,4 @@ PerfGraph::printHeaviestSections(const ConsoleStream & console)
   }
 
   vtable.print(console);
-}
-
-void
-PerfGraph::print(const ConsoleStream & console, unsigned int level)
-{
-  updateCurrentlyRunning();
-
-  {
-    console << "\nPerformance Graph:\n";
-    VariadicTable<std::string, Real, Real, Real> vtable(
-        {"Section", "Self(s)", "Children(s)", "Total(s)"}, 13);
-    recursivelyPrintGraph(_root_node.get(), vtable, level);
-    vtable.print(console);
-  }
-
-  {
-    console << "\nHeaviest Branch:\n";
-    VariadicTable<std::string, Real, Real, Real> vtable(
-        {"Section", "Self(s)", "Children(s)", "Total(s)"}, 13);
-    recursivelyPrintHeaviestGraph(_root_node.get(), vtable);
-    vtable.print(console);
-  }
-
-  {
-    console << "\nHeaviest Sections:\n";
-    printHeaviestSections(console);
-  }
 }

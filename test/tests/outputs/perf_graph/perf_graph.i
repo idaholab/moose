@@ -33,6 +33,12 @@
   [../]
 []
 
+[Postprocessors]
+  [./num_dofs]
+    type = NumElems
+  [../]
+[../]
+
 [Executioner]
   type = Steady
   solve_type = 'PJFNK'
@@ -41,5 +47,11 @@
 []
 
 [Outputs]
-  perf_graph = true
+#  perf_graph = true
+  [./pgraph]
+    type = PerfGraphOutput
+    level = 1
+    heaviest_branch = true
+    heaviest_sections = 10
+  []
 []

@@ -60,6 +60,20 @@ public:
   void print(const ConsoleStream & console, unsigned int level);
 
   /**
+   * Print out the heaviest branch through the tree
+   *
+   * @param console The output stream to output to
+   */
+  void printHeaviestBranch(const ConsoleStream & console);
+
+  /**
+   * Print out the heaviest sections that were timed
+   *
+   * @param console The output stream to output to
+   */
+  void printHeaviestSections(const ConsoleStream & console, const unsigned int num_sections);
+
+  /**
    * Grab the name of a section
    */
   const std::string & sectionName(const PerfID id) const;

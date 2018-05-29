@@ -101,8 +101,8 @@ validParams<CommonOutputAction>()
   params.addParam<ExecFlagEnum>("execute_on", exec_enum, exec_enum.getDocString());
 
   // Add special Console flags
-  params.addParam<bool>(
-      "print_perf_log", false, "Enable printing of the performance log to the screen (Console)");
+  params.addDeprecatedParam<bool>(
+      "print_perf_log", false, "Use perf_graph instead!", "Use perf_graph instead!");
 
   params.addParam<bool>(
       "perf_graph", false, "Enable printing of the performance graph to the screen (Console)");
@@ -190,7 +190,7 @@ CommonOutputAction::act()
   if (getParam<bool>("controls") || _app.getParam<bool>("show_controls"))
     create("ControlOutput");
 
-  if (getParam<bool>("perf_graph"))
+  if (getParam<bool>("perf_graph") || getParam<bool>("print_perf_log"))
     create("PerfGraphOutput");
 
   if (!getParam<bool>("color"))

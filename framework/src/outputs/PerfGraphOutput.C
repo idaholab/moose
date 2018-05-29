@@ -27,6 +27,16 @@ validParams<PerfGraphOutput>()
   params.addParam<unsigned int>(
       "level", 1, "The level of detail to output.  Higher levels will yield more detail.");
 
+  params.addParam<bool>("heaviest_branch",
+                        false,
+                        "Whether or not to print out the trace through the code that took the "
+                        "longest amount of time");
+
+  params.addParam<unsigned int>("heaviest_sections",
+                                0,
+                                "The number of sections to print out showing the parts of the code "
+                                "that take the most time.  When '0' it won't print at all.");
+
   params.addClassDescription("Controls output of the PerfGraph: the performance log for MOOSE");
 
   // Return the InputParameters
@@ -34,7 +44,10 @@ validParams<PerfGraphOutput>()
 }
 
 PerfGraphOutput::PerfGraphOutput(const InputParameters & parameters)
-  : Output(parameters), _level(getParam<unsigned int>("level"))
+  : Output(parameters),
+    _level(getParam<unsigned int>("level")),
+    _heaviest_branch(getParam<bool>("heaviest_branch")),
+    _heaviest_sections(getParam<unsigned int>("heaviest_sections"))
 {
 }
 
@@ -42,4 +55,10 @@ void
 PerfGraphOutput::output(const ExecFlagType & /*type*/)
 {
   _app.perfGraph().print(_console, _level);
+
+  if (_heaviest_branch)
+    _app.perfGraph().printHeaviestBranch(_console);
+
+  if (_heaviest_sections)
+    _app.perfGraph().printHeaviestSections(_console, _heaviest_sections);
 }
