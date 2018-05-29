@@ -29,6 +29,8 @@ quantities through the `optional parameters` list.
 - Fluid internal energy
 - Thermal conductivity
 
+See [boundary conditions](boundaries.md) for many more details and discussion.
+
 !syntax parameters /BCs/PorousFlowHalfCubicSink
 
 !syntax inputs /BCs/PorousFlowHalfCubicSink

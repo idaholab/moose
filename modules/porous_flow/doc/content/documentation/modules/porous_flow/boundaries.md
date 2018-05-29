@@ -23,9 +23,13 @@ the units of the final result, $s$, will always be
 kg.m$^{-2}$.s$^{-1}$ or J.m$^{-2}$.s$^{-1}$).
 
 If the fluid flow through the boundary is required, use the `save_in`
-command which will save the sink strength $s$ to an AuxVariable.  If
-the total flux (kg.s$^{-1}$ or J.s$^{-1}$) is required, integrate the
-AuxVariable over the boundary using a Postprocessor.
+command which will save the sink strength to an AuxVariable.  This
+AuxVariable will be the flux (kg.s$^{-1}$ or J.s$^{-1}$) from each
+node on the boundary, which is the product of $s$ and the area
+attributed to that node.  If the total flux (kg.s$^{-1}$ or
+J.s$^{-1}$) through the boundary is required, integrate the
+AuxVariable over the boundary using a [`NodalSum`](NodalSum.md)
+Postprocessor.
 
 This basic sink boundary condition is implemented in [`PorousFlowSink`](PorousFlowSink.md).
 
