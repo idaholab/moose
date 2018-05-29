@@ -17,10 +17,10 @@ public:
   RELAP7Mesh(const InputParameters & parameters);
   RELAP7Mesh(const RELAP7Mesh & other_mesh);
 
-  virtual unsigned int dimension() const;
-  virtual MooseMesh & clone() const;
-  virtual std::unique_ptr<MooseMesh> safeClone() const;
-  virtual void buildMesh();
+  virtual unsigned int dimension() const override;
+  virtual MooseMesh & clone() const override;
+  virtual std::unique_ptr<MooseMesh> safeClone() const override;
+  virtual void buildMesh() override;
   virtual void prep();
 
 protected:
