@@ -14,11 +14,16 @@
 #include "MooseTypes.h"
 #include "PerfNode.h"
 #include "IndirectSort.h"
+#include "ConsoleStream.h"
 
 // System Includes
 #include <array>
 
+// Forward Declarations
 class PerfGuard;
+
+template <class... Ts>
+class VariadicTable;
 
 #define MAX_STACK_SIZE 100
 
@@ -52,8 +57,7 @@ public:
    * @param console The output stream to output to
    * @param level The log level, the higher the number the more output you get
    */
-  template <typename StreamType>
-  void print(StreamType & console, unsigned int level);
+  void print(const ConsoleStream & console, unsigned int level);
 
   /**
    * Grab the name of a section
@@ -100,9 +104,8 @@ protected:
    * @param level The level to print out below (<=)
    * @param current_depth - Used in the recursion
    */
-  template <typename StreamType>
   void recursivelyPrintGraph(PerfNode * current_node,
-                             StreamType & console,
+                             VariadicTable<std::string, Real, Real, Real> & vtable,
                              unsigned int level,
                              unsigned int current_depth = 0);
 
@@ -113,9 +116,8 @@ protected:
    * @param console Where to print to
    * @param current_depth - Used in the recursion
    */
-  template <typename StreamType>
   void recursivelyPrintHeaviestGraph(PerfNode * current_node,
-                                     StreamType & console,
+                                     VariadicTable<std::string, Real, Real, Real> & vtable,
                                      unsigned int current_depth = 0);
 
   /**
@@ -131,8 +133,7 @@ protected:
    *
    * @param console Where to print to
    */
-  template <typename StreamType>
-  void printHeaviestSections(StreamType & console);
+  void printHeaviestSections(const ConsoleStream & console);
 
   /// The root node of the graph
   std::unique_ptr<PerfNode> _root_node;
@@ -158,101 +159,5 @@ protected:
   // Here so PerfGuard is the only thing that can call push/pop
   friend class PerfGuard;
 };
-
-template <typename StreamType>
-void
-PerfGraph::recursivelyPrintGraph(PerfNode * current_node,
-                                 StreamType & console,
-                                 unsigned int level,
-                                 unsigned int current_depth)
-{
-  auto & name = _id_to_section_name[current_node->id()];
-  auto & node_level = _id_to_level[current_node->id()];
-
-  if (node_level <= level)
-  {
-    console << std::string(current_depth * 2, ' ') << name
-            << " self: " << std::chrono::duration<double>(current_node->selfTime()).count()
-            << " children: " << std::chrono::duration<double>(current_node->childrenTime()).count()
-            << " total: " << std::chrono::duration<double>(current_node->totalTime()).count()
-            << "\n";
-
-    current_depth++;
-  }
-
-  for (auto & child_it : current_node->children())
-    recursivelyPrintGraph(child_it.second.get(), console, level, current_depth);
-}
-
-template <typename StreamType>
-void
-PerfGraph::recursivelyPrintHeaviestGraph(PerfNode * current_node,
-                                         StreamType & console,
-                                         unsigned int current_depth)
-{
-  auto & name = _id_to_section_name[current_node->id()];
-
-  console << std::string(current_depth * 2, ' ') << name
-          << " self: " << std::chrono::duration<double>(current_node->selfTime()).count()
-          << " children: " << std::chrono::duration<double>(current_node->childrenTime()).count()
-          << " total: " << std::chrono::duration<double>(current_node->totalTime()).count() << "\n";
-
-  current_depth++;
-
-  if (!current_node->children().empty())
-  {
-    PerfNode * heaviest_child = nullptr;
-
-    for (auto & child_it : current_node->children())
-    {
-      auto current_child = child_it.second.get();
-
-      if (!heaviest_child || (current_child->totalTime() > heaviest_child->totalTime()))
-        heaviest_child = current_child;
-    }
-
-    recursivelyPrintHeaviestGraph(heaviest_child, console, current_depth);
-  }
-}
-
-template <typename StreamType>
-void
-PerfGraph::printHeaviestSections(StreamType & console)
-{
-  // First - accumulate the time for each section
-  std::vector<Real> section_self_time(_section_name_to_id.size(), 0.);
-  recursivelyFillTotalSelfTime(_root_node.get(), section_self_time);
-
-  // Now indirect sort them
-  std::vector<size_t> sorted;
-  Moose::indirectSort(section_self_time.begin(),
-                      section_self_time.end(),
-                      sorted,
-                      [](double lhs, double rhs) { return lhs > rhs; });
-
-  // Now print out the largest ones
-  for (unsigned int i = 0; i < 5; i++)
-  {
-    auto id = sorted[i];
-
-    console << _id_to_section_name[id] << " Total Self Time: " << section_self_time[id] << "\n";
-  }
-}
-
-template <typename StreamType>
-void
-PerfGraph::print(StreamType & console, unsigned int level)
-{
-  updateCurrentlyRunning();
-
-  console << "\nPerformance Graph:\n";
-  recursivelyPrintGraph(_root_node.get(), console, level);
-
-  console << "\nHeaviest Branch:\n";
-  recursivelyPrintHeaviestGraph(_root_node.get(), console);
-
-  console << "\nHeaviest Sections:\n";
-  printHeaviestSections(console);
-}
 
 #endif

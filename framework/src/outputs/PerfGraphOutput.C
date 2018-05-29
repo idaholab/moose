@@ -22,7 +22,7 @@ validParams<PerfGraphOutput>()
 {
   // Get the base class parameters
   InputParameters params = validParams<Output>();
-  params.set<ExecFlagEnum>("execute_on", true) = {EXEC_FINAL};
+  params.set<ExecFlagEnum>("execute_on") = {EXEC_FINAL};
 
   params.addParam<unsigned int>(
       "level", 1, "The level of detail to output.  Higher levels will yield more detail.");

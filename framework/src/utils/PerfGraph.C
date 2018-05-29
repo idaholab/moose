@@ -13,10 +13,15 @@
 #include "PerfGuard.h"
 #include "MooseError.h"
 
+// Note: do everything we can to make sure this only gets #included
+// in the .C file... this is a heavily templated header that we
+// don't want to expose to EVERY file in MOOSE...
+#include "VariadicTable.h"
+
 PerfGraph::PerfGraph() : _current_position(0), _active(true)
 {
   // Not done in the initialization list on purpose because this object needs to be complete first
-  _root_node = libmesh_make_unique<PerfNode>(registerSection("Root", 0));
+  _root_node = libmesh_make_unique<PerfNode>(registerSection("App", 0));
 
   // Set the initial time
   _root_node->setStartTime(std::chrono::steady_clock::now());
@@ -110,4 +115,114 @@ PerfGraph::recursivelyFillTotalSelfTime(PerfNode * current_node,
 
   for (auto & child_it : current_node->children())
     recursivelyFillTotalSelfTime(child_it.second.get(), section_self_time);
+}
+
+void
+PerfGraph::recursivelyPrintGraph(PerfNode * current_node,
+                                 VariadicTable<std::string, Real, Real, Real> & vtable,
+                                 unsigned int level,
+                                 unsigned int current_depth)
+{
+  auto & name = _id_to_section_name[current_node->id()];
+  auto & node_level = _id_to_level[current_node->id()];
+
+  if (node_level <= level)
+  {
+    auto section = std::string(current_depth * 2, ' ') + name;
+    vtable.addRow({section,
+                   std::chrono::duration<double>(current_node->selfTime()).count(),
+                   std::chrono::duration<double>(current_node->childrenTime()).count(),
+                   std::chrono::duration<double>(current_node->totalTime()).count()});
+
+    current_depth++;
+  }
+
+  for (auto & child_it : current_node->children())
+    recursivelyPrintGraph(child_it.second.get(), vtable, level, current_depth);
+}
+
+void
+PerfGraph::recursivelyPrintHeaviestGraph(PerfNode * current_node,
+                                         VariadicTable<std::string, Real, Real, Real> & vtable,
+                                         unsigned int current_depth)
+{
+  auto & name = _id_to_section_name[current_node->id()];
+
+  auto section = std::string(current_depth * 2, ' ') + name;
+
+  vtable.addRow({section,
+                 std::chrono::duration<double>(current_node->selfTime()).count(),
+                 std::chrono::duration<double>(current_node->childrenTime()).count(),
+                 std::chrono::duration<double>(current_node->totalTime()).count()});
+
+  current_depth++;
+
+  if (!current_node->children().empty())
+  {
+    PerfNode * heaviest_child = nullptr;
+
+    for (auto & child_it : current_node->children())
+    {
+      auto current_child = child_it.second.get();
+
+      if (!heaviest_child || (current_child->totalTime() > heaviest_child->totalTime()))
+        heaviest_child = current_child;
+    }
+
+    recursivelyPrintHeaviestGraph(heaviest_child, vtable, current_depth);
+  }
+}
+
+void
+PerfGraph::printHeaviestSections(const ConsoleStream & console)
+{
+  // First - accumulate the time for each section
+  std::vector<Real> section_self_time(_section_name_to_id.size(), 0.);
+  recursivelyFillTotalSelfTime(_root_node.get(), section_self_time);
+
+  // Now indirect sort them
+  std::vector<size_t> sorted;
+  Moose::indirectSort(section_self_time.begin(),
+                      section_self_time.end(),
+                      sorted,
+                      [](double lhs, double rhs) { return lhs > rhs; });
+
+  VariadicTable<std::string, Real> vtable({"Section", "Total Time(s)"}, 13);
+
+  // Now print out the largest ones
+  for (unsigned int i = 0; i < 5; i++)
+  {
+    auto id = sorted[i];
+
+    vtable.addRow({_id_to_section_name[id], section_self_time[id]});
+  }
+
+  vtable.print(console);
+}
+
+void
+PerfGraph::print(const ConsoleStream & console, unsigned int level)
+{
+  updateCurrentlyRunning();
+
+  {
+    console << "\nPerformance Graph:\n";
+    VariadicTable<std::string, Real, Real, Real> vtable(
+        {"Section", "Self(s)", "Children(s)", "Total(s)"}, 13);
+    recursivelyPrintGraph(_root_node.get(), vtable, level);
+    vtable.print(console);
+  }
+
+  {
+    console << "\nHeaviest Branch:\n";
+    VariadicTable<std::string, Real, Real, Real> vtable(
+        {"Section", "Self(s)", "Children(s)", "Total(s)"}, 13);
+    recursivelyPrintHeaviestGraph(_root_node.get(), vtable);
+    vtable.print(console);
+  }
+
+  {
+    console << "\nHeaviest Sections:\n";
+    printHeaviestSections(console);
+  }
 }

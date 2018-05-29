@@ -1,8 +1,9 @@
 [Mesh]
   type = GeneratedMesh
-  dim = 2
-  nx = 10
-  ny = 10
+  dim = 3
+  nx = 20
+  ny = 20
+  nz = 20
 []
 
 [Variables]
@@ -40,7 +41,5 @@
 []
 
 [Outputs]
-  [./pgraph]
-    type = PerfGraphOutput
-  [../]
+  perf_graph = true
 []

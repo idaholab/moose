@@ -110,6 +110,7 @@ Steady::execute()
 #endif
 
   _problem.execute(EXEC_FINAL);
+  _problem.outputStep(EXEC_FINAL);
 
   postExecute();
 }
