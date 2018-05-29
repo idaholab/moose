@@ -38,8 +38,8 @@ public:
   /// VectorPostprocessorState (2 containers for values (see MooseTypes.h)
   struct VectorPostprocessorState
   {
-    VectorPostprocessorValue * current = NULL;
-    VectorPostprocessorValue * old = NULL;
+    VectorPostprocessorValue * current = nullptr;
+    VectorPostprocessorValue * old = nullptr;
 
     ScatterVectorPostprocessorValue scatter_current;
     ScatterVectorPostprocessorValue scatter_old;

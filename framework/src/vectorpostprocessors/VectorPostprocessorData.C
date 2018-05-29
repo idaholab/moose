@@ -221,7 +221,7 @@ VectorPostprocessorData::broadcastScatterVectors(const std::string & vpp_name)
 
     if (!vpp_vectors._is_broadcast && vpp_state.needs_broadcast)
     {
-      unsigned int size = vpp_state.current->size();
+      auto size = vpp_state.current->size();
 
       _communicator.broadcast(size);
       vpp_state.current->resize(size);

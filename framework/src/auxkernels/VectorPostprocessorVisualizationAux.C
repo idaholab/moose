@@ -66,7 +66,12 @@ Real
 VectorPostprocessorVisualizationAux::computeValue()
 {
   if (_use_broadcast)
+  {
+    mooseAssert(_vpp_vector.size() > _my_pid,
+                "Vector does not contain enough entries in VectorPostprocessorVisualization named "
+                    << name());
     return _vpp_vector[_my_pid];
+  }
   else
     return _vpp_scatter;
 }

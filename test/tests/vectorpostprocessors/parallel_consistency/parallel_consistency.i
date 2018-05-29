@@ -44,7 +44,7 @@
   [constant]
     type = ConstantVectorPostprocessor
     value = '3 4'
-    execute_on = 'TIMESTEP_BEGIN'
+    execute_on = 'TIMESTEP_END'
   []
 []
 
@@ -57,7 +57,6 @@
 
 [Outputs]
   execute_on = 'timestep_end'
-  csv = true
   exodus = true
 []
 
