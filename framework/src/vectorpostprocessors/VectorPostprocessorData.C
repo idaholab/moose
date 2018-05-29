@@ -11,7 +11,8 @@
 #include "FEProblem.h"
 
 VectorPostprocessorData::VectorPostprocessorData(FEProblemBase & fe_problem)
-  : Restartable(fe_problem.getMooseApp(), "values", "VectorPostprocessorData", 0)
+  : Restartable(fe_problem.getMooseApp(), "values", "VectorPostprocessorData", 0),
+    ParallelObject(fe_problem)
 {
 }
 
@@ -202,6 +203,34 @@ VectorPostprocessorData::vectors(const std::string & vpp_name) const
   mooseAssert(it_pair != _vpp_data.end(), "No vectors found for vpp_name: " << vpp_name);
 
   return it_pair->second._values;
+}
+
+void
+VectorPostprocessorData::broadcastScatterVectors(const std::string & vpp_name)
+{
+  auto vpp_data_it = _vpp_data.find(vpp_name);
+
+  if (vpp_data_it == _vpp_data.end())
+    mooseError("Unable to find VPP Data for ", vpp_name);
+
+  auto & vpp_vectors = vpp_data_it->second;
+
+  for (auto & current_pair : vpp_vectors._values)
+  {
+    auto & vpp_state = current_pair.second;
+
+    if (!vpp_vectors._is_broadcast && vpp_state.needs_broadcast)
+    {
+      unsigned int size = vpp_state.current->size();
+
+      _communicator.broadcast(size);
+      vpp_state.current->resize(size);
+      _communicator.broadcast(*vpp_state.current);
+    }
+
+    if (vpp_state.needs_scatter)
+      _communicator.scatter(*vpp_state.current, vpp_state.scatter_current);
+  }
 }
 
 void

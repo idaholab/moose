@@ -14,11 +14,15 @@
 #include "MooseTypes.h"
 #include "Restartable.h"
 
+// libMesh includes
+#include "libmesh/parallel_object.h"
+
 #include <map>
 
+// Forwad declarations
 class FEProblemBase;
 
-class VectorPostprocessorData : public Restartable
+class VectorPostprocessorData : public Restartable, public libMesh::ParallelObject
 {
 public:
   /**
@@ -128,18 +132,12 @@ public:
   const std::vector<std::pair<std::string, VectorPostprocessorState>> &
   vectors(const std::string & vpp_name) const;
 
-private:
-  // Forwad declaration
-  struct VectorPostprocessorVectors;
-
-public:
   /**
-   * Get the map to VectorPostprocessorVectors for a particular VPP
+   * Broadcast and scatter vectors associated with vpp_name
+   *
+   * @param vpp_name The name of the vector to broadcast/scatter vectors for
    */
-  VectorPostprocessorVectors & vectorPostprocessorVectors(const std::string & vpp_name)
-  {
-    return _vpp_data[vpp_name];
-  }
+  void broadcastScatterVectors(const std::string & vpp_name);
 
   /**
    * Copy the current post-processor values into old (i.e. shift it "back in time") as needed
