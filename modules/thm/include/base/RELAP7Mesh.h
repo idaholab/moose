@@ -19,6 +19,7 @@ public:
 
   virtual unsigned int dimension() const;
   virtual MooseMesh & clone() const;
+  virtual std::unique_ptr<MooseMesh> safeClone() const;
   virtual void buildMesh();
   virtual void prep();
 

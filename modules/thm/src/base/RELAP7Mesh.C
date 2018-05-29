@@ -33,6 +33,12 @@ RELAP7Mesh::clone() const
   mooseError("CRITICAL ERROR: calling clone() is not allowed and should not happen.");
 }
 
+std::unique_ptr<MooseMesh>
+RELAP7Mesh::safeClone() const
+{
+  return libmesh_make_unique<RELAP7Mesh>(*this);
+}
+
 void
 RELAP7Mesh::buildMesh()
 {
