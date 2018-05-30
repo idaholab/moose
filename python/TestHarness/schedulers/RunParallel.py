@@ -7,7 +7,6 @@
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
-import json
 from TestHarness.schedulers.Scheduler import Scheduler
 from TestHarness import util
 
@@ -63,18 +62,6 @@ class RunParallel(Scheduler):
 
         else:
             output += '\n' + "#"*80 + '\nTester failed, reason: ' + tester.getStatusMessage() + '\n'
-
-
-        # Check for invalid unicode in application output
-        try:
-            json.dumps(output)
-
-        except UnicodeDecodeError:
-            # convert invalid output to something json can handle
-            output = output.decode('utf-8','replace').encode('ascii', 'replace')
-
-            # Alert the user that their test is outputing invalid characters
-            tester.addCaveats('invalid characters in stdout')
 
         # Set testers output with modifications made above so it prints the way we want it
         job.setOutput(output)
