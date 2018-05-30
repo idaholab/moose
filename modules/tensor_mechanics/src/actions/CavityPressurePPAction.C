@@ -18,6 +18,7 @@ InputParameters
 validParams<CavityPressurePPAction>()
 {
   InputParameters params = validParams<Action>();
+  params.addClassDescription("This Action creates a CavityPressurePostprocessor.");
   params.addParam<std::string>("output", "The name to use for the cavity pressure value");
   params.addParam<std::string>("output_initial_moles",
                                "The name to use when reporting the initial moles of gas");
@@ -34,7 +35,7 @@ CavityPressurePPAction::act()
   InputParameters params = _factory.getValidParams("CavityPressurePostprocessor");
   params.set<ExecFlagEnum>("execute_on") = {EXEC_INITIAL, EXEC_LINEAR};
   params.set<UserObjectName>("cavity_pressure_uo") = uo_name;
-  params.set<std::string>("quantity") = "cavity_pressure";
+  params.set<MooseEnum>("quantity") = "cavity_pressure";
 
   _problem->addPostprocessor("CavityPressurePostprocessor",
                              isParamValid("output") ? getParam<std::string>("output") : _name,
@@ -42,7 +43,7 @@ CavityPressurePPAction::act()
 
   if (isParamValid("output_initial_moles"))
   {
-    params.set<std::string>("quantity") = "initial_moles";
+    params.set<MooseEnum>("quantity") = "initial_moles";
     _problem->addPostprocessor(
         "CavityPressurePostprocessor", getParam<std::string>("output_initial_moles"), params);
   }

@@ -18,12 +18,14 @@ InputParameters
 validParams<CavityPressurePostprocessor>()
 {
   InputParameters params = validParams<GeneralPostprocessor>();
-  params.addClassDescription("Interfaces with the CavityPressureUserObject to store"
-                             "the initial number of moles of a gas contained within"
-                             "an internal volume");
+  params.addClassDescription("Interfaces with the CavityPressureUserObject to store "
+                             "the initial number of moles of a gas contained within "
+                             "an internal volume.");
   params.addRequiredParam<UserObjectName>(
       "cavity_pressure_uo", "The CavityPressureUserObject that computes the initial moles");
-  params.addRequiredParam<std::string>("quantity", "The quantity to report");
+  MooseEnum quantity("initial_moles cavity_pressure");
+  params.addRequiredParam<MooseEnum>(
+      "quantity", quantity, "The quantity to report: " + quantity.getRawNames());
   params.set<bool>("use_displaced_mesh") = true;
   return params;
 }
@@ -31,7 +33,7 @@ validParams<CavityPressurePostprocessor>()
 CavityPressurePostprocessor::CavityPressurePostprocessor(const InputParameters & params)
   : GeneralPostprocessor(params),
     _cpuo(getUserObject<CavityPressureUserObject>("cavity_pressure_uo")),
-    _quantity(getParam<std::string>("quantity"))
+    _quantity(getParam<MooseEnum>("quantity"))
 {
 }
 

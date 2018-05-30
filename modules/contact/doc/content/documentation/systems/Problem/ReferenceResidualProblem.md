@@ -1,4 +1,4 @@
-# ReferenceResidualProblem
+# Reference Residual Problem
 
 !syntax description /Problem/ReferenceResidualProblem
 

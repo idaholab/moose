@@ -4,7 +4,9 @@
 
 ## Description
 
-The `CavityPressurePostprocessor` is used to store the value of the initial moles and the current pressure for an internal value; these quantities are calculated by the [CavityPressureUserObject](/UserObjects/CavityPressureUserObject.md).
+The `CavityPressurePostprocessor` is used to store the value of the initial moles or the current pressure for an internal volume.
+
+These quantities are calculated by the [CavityPressureUserObject](/UserObjects/CavityPressureUserObject.md). `CavityPressurePostprocessor` is built by [CavityPressurePPAction](/BCs/CavityPressure/index.md).
 
 !syntax parameters /Postprocessors/CavityPressurePostprocessor
 
