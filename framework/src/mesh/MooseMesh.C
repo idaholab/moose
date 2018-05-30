@@ -1858,10 +1858,10 @@ MooseMesh::getNormalByBoundaryID(BoundaryID id) const
   return (*_boundary_to_normal_map)[id];
 }
 
-std::unique_ptr<MooseMesh>
-MooseMesh::safeClone() const
+MooseMesh &
+MooseMesh::clone() const
 {
-  mooseError("The safeClone() functionality must be implemented in derived classes!");
+  mooseError("MooseMesh::clone() is no longer supported, use MooseMesh::safeClone() instead.");
 }
 
 void

@@ -156,13 +156,6 @@ DistributedGeneratedMesh::getMaxInDimension(unsigned int component) const
   }
 }
 
-MooseMesh &
-DistributedGeneratedMesh::clone() const
-{
-  mooseDeprecated("MooseMesh::clone() is deprecated, call MooseMesh::safeClone() instead.");
-  return *(new DistributedGeneratedMesh(*this));
-}
-
 std::unique_ptr<MooseMesh>
 DistributedGeneratedMesh::safeClone() const
 {
