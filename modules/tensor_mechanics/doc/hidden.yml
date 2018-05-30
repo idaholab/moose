@@ -15,7 +15,6 @@
 - /DomainIntegral/DomainIntegralAction
 - /Kernels/CosseratStressDivergenceTensors
 - /Kernels/DynamicStressDivergenceTensors
-- /Kernels/GeneralizedPlaneStrainOffDiag
 - /Kernels/InertialForce
 - /Kernels/MomentBalancing
 - /Kernels/OutOfPlanePressure
@@ -37,9 +36,6 @@
 - /Materials/CappedWeakInclinedPlaneStressUpdate
 - /Materials/CappedWeakPlaneCosseratStressUpdate
 - /Materials/CappedWeakPlaneStressUpdate
-- /Materials/ComputeAxisymmetric1DFiniteStrain
-- /Materials/ComputeAxisymmetric1DIncrementalStrain
-- /Materials/ComputeAxisymmetric1DSmallStrain
 - /Materials/ComputeConcentrationDependentElasticityTensor
 - /Materials/ComputeCosseratElasticityTensor
 - /Materials/ComputeCosseratIncrementalSmallStrain
@@ -52,9 +48,6 @@
 - /Materials/ComputeMultiPlasticityStress
 - /Materials/ComputeMultipleInelasticCosseratStress
 - /Materials/ComputeMultipleInelasticStress
-- /Materials/ComputePlaneFiniteStrain
-- /Materials/ComputePlaneIncrementalStrain
-- /Materials/ComputePlaneSmallStrain
 - /Materials/ComputePlasticHeatEnergy
 - /Materials/ComputeStrainIncrementBasedStress
 - /Materials/ComputeVariableBaseEigenStrain
@@ -93,7 +86,6 @@
 - /UserObjects/CrystalPlasticityStateVariable
 - /UserObjects/ElementPropertyReadFile
 - /UserObjects/EulerAngleFileReader
-- /UserObjects/GeneralizedPlaneStrainUserObject
 - /UserObjects/HEVPEqvPlasticStrain
 - /UserObjects/HEVPEqvPlasticStrainRate
 - /UserObjects/HEVPFlowRatePowerLawJ2

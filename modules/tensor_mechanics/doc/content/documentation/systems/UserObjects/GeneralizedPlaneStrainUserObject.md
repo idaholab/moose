@@ -1,4 +1,4 @@
-# GeneralizedPlaneStrainUserObject
+# Generalized Plane Strain User Object
 
 !syntax description /UserObjects/GeneralizedPlaneStrainUserObject
 

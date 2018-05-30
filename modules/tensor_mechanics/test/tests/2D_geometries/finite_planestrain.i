@@ -146,7 +146,7 @@
 []
 
 [Materials]
-  [./small_strain]
+  [./strain]
     type = ComputePlaneFiniteStrain
     block = 0
   [../]
