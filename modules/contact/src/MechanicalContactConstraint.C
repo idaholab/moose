@@ -134,6 +134,7 @@ MechanicalContactConstraint::MechanicalContactConstraint(const InputParameters &
     _residual_copy(_sys.residualGhosted()),
     _mesh_dimension(_mesh.dimension()),
     _vars(3, libMesh::invalid_uint),
+    _var_objects(3, nullptr),
     _nodal_area_var(getVar("nodal_area", 0)),
     _aux_system(_nodal_area_var->sys()),
     _aux_solution(_aux_system.currentSolution()),
@@ -150,17 +151,29 @@ MechanicalContactConstraint::MechanicalContactConstraint(const InputParameters &
   {
     // modern parameter scheme for displacements
     for (unsigned int i = 0; i < coupledComponents("displacements"); ++i)
+    {
       _vars[i] = coupled("displacements", i);
+      _var_objects[i] = getVar("displacements", i);
+    }
   }
   else
   {
     // Legacy parameter scheme for displacements
     if (isParamValid("disp_x"))
+    {
       _vars[0] = coupled("disp_x");
+      _var_objects[0] = getVar("disp_x", 0);
+    }
     if (isParamValid("disp_y"))
+    {
       _vars[1] = coupled("disp_y");
+      _var_objects[1] = getVar("disp_y", 0);
+    }
     if (isParamValid("disp_z"))
+    {
       _vars[2] = coupled("disp_z");
+      _var_objects[2] = getVar("disp_z", 0);
+    }
 
     mooseDeprecated("use the `displacements` parameter rather than the `disp_*` parameters (those "
                     "will go away with the deprecation of the Solid Mechanics module).");
@@ -500,7 +513,7 @@ MechanicalContactConstraint::computeContactForce(PenetrationInfo * pinfo, bool u
   for (unsigned int i = 0; i < _mesh_dimension; ++i)
   {
     dof_id_type dof_number = node->dof_number(0, _vars[i], 0);
-    res_vec(i) = _residual_copy(dof_number);
+    res_vec(i) = _residual_copy(dof_number) / _var_objects[i]->scalingFactor();
   }
 
   RealVectorValue distance_vec(_mesh.nodeRef(node->id()) - pinfo->_closest_point);

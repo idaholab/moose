@@ -113,6 +113,7 @@ protected:
   const unsigned int _mesh_dimension;
 
   std::vector<unsigned int> _vars;
+  std::vector<MooseVariable *> _var_objects;
 
   MooseVariable * _nodal_area_var;
   SystemBase & _aux_system;
