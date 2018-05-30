@@ -339,22 +339,6 @@ swapLibMeshComm(MPI_Comm new_comm)
 #endif // LIBMESH_HAVE_PETSC
 }
 
-void
-enableFPE(bool on)
-{
-  if (_trap_fpe)
-    libMesh::enableFPE(on);
-}
-
-/**
- * Initialize global variables
- */
-#ifdef DEBUG
-bool _trap_fpe = true;
-#else
-bool _trap_fpe = false;
-#endif
-
 static bool _color_console = isatty(fileno(stdout));
 
 bool

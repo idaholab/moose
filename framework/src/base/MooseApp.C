@@ -276,6 +276,11 @@ MooseApp::MooseApp(InputParameters parameters)
     _distributed_mesh_on_command_line(false),
     _recover(false),
     _restart(false),
+#ifdef DEBUG
+    _trap_fpe(true),
+#else
+    _trap_fpe(false),
+#endif
     _recover_suffix("cpr"),
     _half_transient(false),
     _check_input(getParam<bool>("check_input")),
@@ -435,9 +440,9 @@ MooseApp::setupOptions()
   if (isParamValid("trap_fpe") && isParamValid("no_trap_fpe"))
     mooseError("Cannot use both \"--trap-fpe\" and \"--no-trap-fpe\" flags.");
   if (isParamValid("trap_fpe"))
-    Moose::_trap_fpe = true;
+    _trap_fpe = true;
   else if (isParamValid("no_trap_fpe"))
-    Moose::_trap_fpe = false;
+    _trap_fpe = false;
 
   // Turn all warnings in MOOSE to errors (almost see next logic block)
   Moose::_warnings_are_errors = getParam<bool>("error");
