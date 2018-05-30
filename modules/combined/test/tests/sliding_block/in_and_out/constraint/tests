@@ -29,6 +29,22 @@
     max_time = 800
     custom_cmp = 'frictionless_kinematic_out.cmp'
   [../]
+  [./frictionless_kinematic_scaled]
+    type = 'Exodiff'
+    input = 'frictionless_kinematic.i'
+    exodiff = 'frictionless_kinematic_out.e'
+    heavy = true
+    min_parallel = 4
+    abs_zero = 1e-7
+    max_time = 800
+    cli_args = 'Variables/disp_x/scaling=1e-6 Variables/disp_y/scaling=1e-6'
+    prereq = 'frictionless_kinematic'
+    custom_cmp = 'frictionless_kinematic_out.cmp'
+    requirement = "Kinematic contact shall produce the same results regardless of whether
+                   variable scaling is used or not"
+    design = 'MechanicalContactConstraint.md'
+    issues = '#11601'
+  [../]
   [./frictionless_penalty]
     type = 'Exodiff'
     input = 'frictionless_penalty.i'
