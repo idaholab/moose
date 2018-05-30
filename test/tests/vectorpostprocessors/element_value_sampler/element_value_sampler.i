@@ -47,7 +47,7 @@
   [./element_value_sampler]
     type = ElementValueSampler
     variable = 'u v'
-    sort_by = x
+    sort_by = id
     execute_on = 'initial'
   [../]
 []
