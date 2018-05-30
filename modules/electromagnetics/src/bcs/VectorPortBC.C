@@ -57,20 +57,20 @@ VectorPortBC::computeQpResidual()
                                 _inc_imag_y.value(_t, _q_point[_qp]),
                                 _inc_imag_z.value(_t, _q_point[_qp]));
 
-  RealVectorValue Q_real = 2 * incoming_imag * _beta.value(_t, _q_point[_qp]);
-  RealVectorValue Q_imag = -2 * incoming_real * _beta.value(_t, _q_point[_qp]);
+  RealVectorValue Q_real = -2 * _beta.value(_t, _q_point[_qp]) * _normals[_qp].cross(incoming_imag);
+  RealVectorValue Q_imag = 2 * _beta.value(_t, _q_point[_qp]) * _normals[_qp].cross(incoming_real);
 
   if (_component == "real")
   {
-    return _sign * (Q_real * _test[_i][_qp] - _beta.value(_t, _q_point[_qp]) *
-                                                  (_normals[_qp].cross(_test[_i][_qp])) *
-                                                  (_normals[_qp].cross(_coupled_val[_qp])));
+    return _sign * (Q_real * _normals[_qp].cross(_test[_i][_qp]) -
+                    _beta.value(_t, _q_point[_qp]) * (_normals[_qp].cross(_test[_i][_qp])) *
+                        (_normals[_qp].cross(_coupled_val[_qp])));
   }
   else
   {
-    return _sign * (Q_imag * _test[_i][_qp] + _beta.value(_t, _q_point[_qp]) *
-                                                  (_normals[_qp].cross(_test[_i][_qp])) *
-                                                  (_normals[_qp].cross(_coupled_val[_qp])));
+    return _sign * (Q_imag * _normals[_qp].cross(_test[_i][_qp]) +
+                    _beta.value(_t, _q_point[_qp]) * (_normals[_qp].cross(_test[_i][_qp])) *
+                        (_normals[_qp].cross(_coupled_val[_qp])));
   }
 }
 
