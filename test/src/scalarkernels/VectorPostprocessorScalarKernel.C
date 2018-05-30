@@ -28,7 +28,8 @@ validParams<VectorPostprocessorScalarKernel>()
 }
 
 VectorPostprocessorScalarKernel::VectorPostprocessorScalarKernel(const InputParameters & parameters)
-  : ODEKernel(parameters), _vpp(getVectorPostprocessorValue("vpp", getParam<std::string>("vector")))
+  : ODEKernel(parameters),
+    _vpp(getVectorPostprocessorValue("vpp", getParam<std::string>("vector"), true))
 {
 }
 

@@ -62,6 +62,14 @@ public:
   virtual const VectorPostprocessorValue &
   getVectorPostprocessorValueByName(const VectorPostprocessorName & name,
                                     const std::string & vector_name) override;
+
+  virtual const VectorPostprocessorValue & getVectorPostprocessorValue(
+      const std::string & name, const std::string & vector_name, bool use_broadcast) override;
+  virtual const VectorPostprocessorValue &
+  getVectorPostprocessorValueByName(const VectorPostprocessorName & name,
+                                    const std::string & vector_name,
+                                    bool use_broadcast) override;
+
   ///@}
 
 protected:

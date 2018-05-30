@@ -75,6 +75,26 @@ GeneralUserObject::getVectorPostprocessorValueByName(const VectorPostprocessorNa
   return VectorPostprocessorInterface::getVectorPostprocessorValueByName(name, vector_name);
 }
 
+const VectorPostprocessorValue &
+GeneralUserObject::getVectorPostprocessorValue(const std::string & name,
+                                               const std::string & vector_name,
+                                               bool use_broadcast)
+{
+  _depend_vars.insert(_pars.get<VectorPostprocessorName>(name));
+  return VectorPostprocessorInterface::getVectorPostprocessorValue(
+      name, vector_name, use_broadcast);
+}
+
+const VectorPostprocessorValue &
+GeneralUserObject::getVectorPostprocessorValueByName(const VectorPostprocessorName & name,
+                                                     const std::string & vector_name,
+                                                     bool use_broadcast)
+{
+  _depend_vars.insert(name);
+  return VectorPostprocessorInterface::getVectorPostprocessorValueByName(
+      name, vector_name, use_broadcast);
+}
+
 void
 GeneralUserObject::threadJoin(const UserObject &)
 {

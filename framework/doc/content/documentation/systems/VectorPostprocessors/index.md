@@ -21,7 +21,7 @@ This method returns a writable reference to a VectorPostprocessorValue that must
 Developers are responsible for sizing these vectors as needed.
 !alert-end!
 
-### Output
+## Output
 
 VPP data can vary depending on the type of data being output. Again, the the "sample over line" example mentioned in the introduction,
 a complete set of values will be generated each time the VPP is executed. The VPP system handles this scenario by creating seperate output
@@ -51,14 +51,38 @@ rows in each vector postprocessor.
 
 ### Parallel Assumptions
 
-At the current time MOOSE makes no assumptions about the parallel integrity of VPP vectors. Developers are free to choose whether inforamtion
-is gathered only on the root processors (required since output occurs on rank zero), or if information is replicated across all processors.
-Replicating information across all processors may limit scalability of larger jobs and may also just be unecessary and wasteful. However, when
-VPP vectors are used in conjuction with the "Transfers" system, in particular [MultiAppVectorPostprocessorTransfer](MultiAppVectorPostprocessorTransfer.md),
-replicating information may be the most straightforward way to avoid missing data.
+VectorPostprocessors are required to create their complete vectors on processor zero (rank 0).  They should use the `_communicator` to reduce their values to processor zero.  Objects that use VPPs must specify how they need the data by calling the `getVectorPostprocessorValue()` or `getScatterVectorPostprocessorValue()` functions with the correct arguments.
 
-Design is ongoing on having MOOSE assist with replicating information for the user based on usage and necessity. Watch for future developments
-in this area.
+If the object needing VPP values only needs those values on processor zero it should call:
+
+```c++
+getVectorPostprocessorValue('the_vpp_parameter_name', 'the_vector_name', false)
+```
+
+The `false` in that call tells MOOSE that this object does NOT need the vector to be "broadcast" (i.e. "replicated).
+
+If this object does indeed need the VPP data to be broadcast (replicated on all processors) it should make this call:
+
+```c++
+getVectorPostprocessorValue('the_vpp_parameter_name', 'the_vector_name', true)
+```
+
+In the very special case that a VPP is producing vectors that are `num_procs` length an object can ask for the value of a VPP to be "scattered" - which means that each processor will receive only the value that corresponds to it's rank (i.e. `_values[rank]`).  This is accomplished by calling:
+
+```c++
+getScatterVectorPostprocessorValue('the_vpp_parameter_name', 'the_vector_name')
+```
+
+`getScatterVectorPostprocessorValue()` returns a `const ScatterVectorPostprocessorValue &`... which is a single scalar value that you don't index into.  Each process receives the "correct" value and can just directly use it.
+
+
+If the data in a VPP is naturally replicated on all processors a VectorPostprocessor should set `_is_broadcast = true` in its `validParams()` like so:
+
+```c++
+params.set<bool>("_is_broadcast") = true;
+```
+
+This tells MOOSE that the data is already replicated and there is no need to broadcast it if another object is asking for it to be broadcast.
 
 # VectorPostprocessor List
 

@@ -75,6 +75,7 @@
   [./constant]
     type = ConstantVectorPostprocessor
     value = '1.2 3.4 9.6'
+    execute_on = initial
   [../]
 []
 
@@ -88,4 +89,3 @@
 [Outputs]
   exodus = true
 []
-

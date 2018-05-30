@@ -2673,23 +2673,63 @@ VectorPostprocessorValue &
 FEProblemBase::getVectorPostprocessorValue(const VectorPostprocessorName & name,
                                            const std::string & vector_name)
 {
-  auto & val = _vpps_data.getVectorPostprocessorValue(name, vector_name);
-  return val;
+  mooseDeprecated("getVectorPostprocessorValue() is DEPRECATED: Use the new version where you need "
+                  "to specify whether or not the vector must be broadcast");
+
+  // The false means that we're not going to ask for this value to be broadcast
+  // This mimics the old behavior - but is unsafe
+  return _vpps_data.getVectorPostprocessorValue(name, vector_name, false);
 }
 
 VectorPostprocessorValue &
 FEProblemBase::getVectorPostprocessorValueOld(const std::string & name,
                                               const std::string & vector_name)
 {
-  return _vpps_data.getVectorPostprocessorValueOld(name, vector_name);
+  mooseDeprecated("getVectorPostprocessorValue() is DEPRECATED: Use the new version where you need "
+                  "to specify whether or not the vector must be broadcast");
+
+  // The false means that we're not going to ask for this value to be broadcast
+  // This mimics the old behavior - but is unsafe
+  return _vpps_data.getVectorPostprocessorValueOld(name, vector_name, false);
+}
+
+VectorPostprocessorValue &
+FEProblemBase::getVectorPostprocessorValue(const VectorPostprocessorName & name,
+                                           const std::string & vector_name,
+                                           bool needs_broadcast)
+{
+  return _vpps_data.getVectorPostprocessorValue(name, vector_name, needs_broadcast);
+}
+
+VectorPostprocessorValue &
+FEProblemBase::getVectorPostprocessorValueOld(const std::string & name,
+                                              const std::string & vector_name,
+                                              bool needs_broadcast)
+{
+  return _vpps_data.getVectorPostprocessorValueOld(name, vector_name, needs_broadcast);
+}
+
+ScatterVectorPostprocessorValue &
+FEProblemBase::getScatterVectorPostprocessorValue(const VectorPostprocessorName & name,
+                                                  const std::string & vector_name)
+{
+  return _vpps_data.getScatterVectorPostprocessorValue(name, vector_name);
+}
+
+ScatterVectorPostprocessorValue &
+FEProblemBase::getScatterVectorPostprocessorValueOld(const VectorPostprocessorName & name,
+                                                     const std::string & vector_name)
+{
+  return _vpps_data.getScatterVectorPostprocessorValueOld(name, vector_name);
 }
 
 VectorPostprocessorValue &
 FEProblemBase::declareVectorPostprocessorVector(const VectorPostprocessorName & name,
                                                 const std::string & vector_name,
-                                                bool contains_complete_history)
+                                                bool contains_complete_history,
+                                                bool is_broadcast)
 {
-  return _vpps_data.declareVector(name, vector_name, contains_complete_history);
+  return _vpps_data.declareVector(name, vector_name, contains_complete_history, is_broadcast);
 }
 
 const std::vector<std::pair<std::string, VectorPostprocessorData::VectorPostprocessorState>> &
@@ -2921,6 +2961,11 @@ FEProblemBase::computeUserObjects(const ExecFlagType & type, const Moose::AuxGro
       std::shared_ptr<Postprocessor> pp = std::dynamic_pointer_cast<Postprocessor>(obj);
       if (pp)
         _pps_data.storeValue(obj->name(), pp->getValue());
+
+      auto vpp = std::dynamic_pointer_cast<VectorPostprocessor>(obj);
+
+      if (vpp)
+        _vpps_data.broadcastScatterVectors(vpp->PPName());
     }
   }
 

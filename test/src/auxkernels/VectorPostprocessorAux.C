@@ -27,7 +27,7 @@ validParams<VectorPostprocessorAux>()
 
 VectorPostprocessorAux::VectorPostprocessorAux(const InputParameters & parameters)
   : AuxKernel(parameters),
-    _vpp(getVectorPostprocessorValue("vpp", getParam<std::string>("vector"))),
+    _vpp(getVectorPostprocessorValue("vpp", getParam<std::string>("vector"), true)),
     _index(getParam<unsigned int>("index"))
 {
 }

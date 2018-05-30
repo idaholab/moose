@@ -48,7 +48,9 @@ ScalarKernel::ScalarKernel(const InputParameters & parameters)
     PostprocessorInterface(this),
     TransientInterface(this),
     MeshChangedInterface(parameters),
-    VectorPostprocessorInterface(this),
+    // VPPs used by ScalarKernels must be broadcast because we don't know where the
+    // ScalarKernel will end up being evaluated
+    VectorPostprocessorInterface(this, /*broadcast_by_default=*/true),
     TaggingInterface(this),
     _subproblem(*getCheckedPointerParam<SubProblem *>("_subproblem")),
     _sys(*getCheckedPointerParam<SystemBase *>("_sys")),

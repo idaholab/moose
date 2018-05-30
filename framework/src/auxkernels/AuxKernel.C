@@ -174,6 +174,42 @@ AuxKernel::getVectorPostprocessorValueByName(const VectorPostprocessorName & nam
   return VectorPostprocessorInterface::getVectorPostprocessorValueByName(name, vector_name);
 }
 
+const VectorPostprocessorValue &
+AuxKernel::getVectorPostprocessorValue(const std::string & name,
+                                       const std::string & vector_name,
+                                       bool needs_broadcast)
+{
+  _depend_uo.insert(_pars.get<VectorPostprocessorName>(name));
+  return VectorPostprocessorInterface::getVectorPostprocessorValue(
+      name, vector_name, needs_broadcast);
+}
+
+const VectorPostprocessorValue &
+AuxKernel::getVectorPostprocessorValueByName(const VectorPostprocessorName & name,
+                                             const std::string & vector_name,
+                                             bool needs_broadcast)
+{
+  _depend_uo.insert(name);
+  return VectorPostprocessorInterface::getVectorPostprocessorValueByName(
+      name, vector_name, needs_broadcast);
+}
+
+const ScatterVectorPostprocessorValue &
+AuxKernel::getScatterVectorPostprocessorValue(const std::string & name,
+                                              const std::string & vector_name)
+{
+  _depend_uo.insert(_pars.get<VectorPostprocessorName>(name));
+  return VectorPostprocessorInterface::getScatterVectorPostprocessorValue(name, vector_name);
+}
+
+const ScatterVectorPostprocessorValue &
+AuxKernel::getScatterVectorPostprocessorValueByName(const std::string & name,
+                                                    const std::string & vector_name)
+{
+  _depend_uo.insert(name);
+  return VectorPostprocessorInterface::getScatterVectorPostprocessorValueByName(name, vector_name);
+}
+
 void
 AuxKernel::coupledCallback(const std::string & var_name, bool is_old)
 {
