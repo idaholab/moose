@@ -632,18 +632,19 @@ MooseMesh::buildBndElemList()
 {
   freeBndElems();
 
-  /// Boundary node list (node ids and corresponding side-set ids, arrays always have the same length)
-  std::vector<dof_id_type> elems;
-  std::vector<unsigned short int> sides;
-  std::vector<boundary_id_type> ids;
-  getMesh().get_boundary_info().build_active_side_list(elems, sides, ids);
+  auto bc_tuples = getMesh().get_boundary_info().build_active_side_list();
 
-  int n = elems.size();
-  _bnd_elems.resize(n);
-  for (int i = 0; i < n; i++)
+  int n = bc_tuples.size();
+  _bnd_elems.clear();
+  _bnd_elems.reserve(n);
+  for (const auto & t : bc_tuples)
   {
-    _bnd_elems[i] = new BndElement(getMesh().elem_ptr(elems[i]), sides[i], ids[i]);
-    _bnd_elem_ids[ids[i]].insert(elems[i]);
+    auto elem_id = std::get<0>(t);
+    auto side_id = std::get<1>(t);
+    auto bc_id = std::get<2>(t);
+
+    _bnd_elems.push_back(new BndElement(getMesh().elem_ptr(elem_id), side_id, bc_id));
+    _bnd_elem_ids[bc_id].insert(elem_id);
   }
 }
 
