@@ -1166,22 +1166,20 @@ MooseMesh::buildPeriodicNodeSets(std::map<BoundaryID, std::set<dof_id_type>> & p
 {
   periodic_node_sets.clear();
 
-  std::vector<dof_id_type> nl;
-  std::vector<boundary_id_type> il;
-
-  getMesh().get_boundary_info().build_node_list(nl, il);
-
   // Loop over all the boundary nodes adding the periodic nodes to the appropriate set
-  for (unsigned int i = 0; i < nl.size(); ++i)
+  for (const auto & t : getMesh().get_boundary_info().build_node_list())
   {
+    auto node_id = std::get<0>(t);
+    auto bc_id = std::get<1>(t);
+
     // Is this current node on a known periodic boundary?
-    if (periodic_node_sets.find(il[i]) != periodic_node_sets.end())
-      periodic_node_sets[il[i]].insert(nl[i]);
+    if (periodic_node_sets.find(bc_id) != periodic_node_sets.end())
+      periodic_node_sets[bc_id].insert(node_id);
     else // This still might be a periodic node but we just haven't seen this boundary_id yet
     {
-      const PeriodicBoundaryBase * periodic = pbs->boundary(il[i]);
+      const PeriodicBoundaryBase * periodic = pbs->boundary(bc_id);
       if (periodic && periodic->is_my_variable(var_number))
-        periodic_node_sets[il[i]].insert(nl[i]);
+        periodic_node_sets[bc_id].insert(node_id);
     }
   }
 }
