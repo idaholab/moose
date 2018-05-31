@@ -185,10 +185,17 @@ public:
   /**
    * Calls BoundaryInfo::build_side_list().
    * Fills in the three passed vectors with list logical (element, side, id) tuples.
+   * This function will eventually be deprecated in favor of the one below, which
+   * returns a single std::vector of (elem-id, side-id, bc-id) tuples instead.
    */
   void buildSideList(std::vector<dof_id_type> & el,
                      std::vector<unsigned short int> & sl,
                      std::vector<boundary_id_type> & il);
+  /**
+   * As above, but uses the non-deprecated std::tuple interface.
+   */
+  std::vector<std::tuple<dof_id_type, unsigned short int, boundary_id_type>>
+  buildSideList();
 
   /**
    * Calls BoundaryInfo::side_with_boundary_id().

@@ -1978,7 +1978,16 @@ MooseMesh::buildSideList(std::vector<dof_id_type> & el,
                          std::vector<unsigned short int> & sl,
                          std::vector<boundary_id_type> & il)
 {
+  // TODO: Officially deprecate this routine when it is no longer being used by PenetrationLocator.
+  // mooseDeprecated("The version of MooseMesh::buildSideList() taking three arguments is deprecated, call "
+  //                 " the version that returns a vector of tuples instead.");
   getMesh().get_boundary_info().build_side_list(el, sl, il);
+}
+
+std::vector<std::tuple<dof_id_type, unsigned short int, boundary_id_type>>
+MooseMesh::buildSideList()
+{
+  return getMesh().get_boundary_info().build_side_list();
 }
 
 unsigned int
