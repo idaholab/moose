@@ -158,6 +158,7 @@
   [./strain]
     type = ComputeAxisymmetric1DSmallStrain
     eigenstrain_names = eigenstrain
+    scalar_out_of_plane_strain = scalar_strain_yy
   [../]
 
   [./thermal_strain]

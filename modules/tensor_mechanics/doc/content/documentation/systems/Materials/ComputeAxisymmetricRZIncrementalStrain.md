@@ -13,7 +13,7 @@ Once the deformation gradient is calculated for the specific 2D geometry, the de
 passed to the strain and rotation methods used by default 3D Cartesian simulations, as described in
 the [Incremental Finite Strain Class](ComputeIncrementalSmallStrain.md) page.
 
-## Example Input File Syntax
+## Example Input File
 
 !listing modules/combined/test/tests/contact_verification/patch_tests/cyl_1/cyl1_mu_0_2_pen.i
          block=Materials/bot_strain

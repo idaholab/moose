@@ -2,7 +2,7 @@
 
 !syntax description /UserObjects/GeneralizedPlaneStrainUserObject
 
-The `GeneralizedPlaneStrainUserObject` calculates the values of residual and diagonal jacobian components for each given scalar out-of-plane strain variable. This object is usually set up by the [GeneralizedPlaneStrainAction](/GeneralizedPlaneStrain/index.md).
+The `GeneralizedPlaneStrainUserObject` calculates the values of residual and diagonal jacobian components for each given scalar out-of-plane strain variable. This object is usually set up by the [GeneralizedPlaneStrainAction](TensorMechanics/GeneralizedPlaneStrain/index.md).
 
 For a given scalar out-of-plane strain variable, the equilibrium condition condition in the out-of-plane direction (e.g. $z$-direction) is given as
 \begin{equation}
