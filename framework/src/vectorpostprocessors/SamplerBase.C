@@ -25,6 +25,10 @@ validParams<SamplerBase>()
   MooseEnum sort_options("x y z id");
   params.addRequiredParam<MooseEnum>("sort_by", sort_options, "What to sort the samples by");
 
+  // The value from this VPP is naturally already on every processor
+  // TODO: Make this not the case!  See #11415
+  params.set<bool>("_is_broadcast") = true;
+
   return params;
 }
 

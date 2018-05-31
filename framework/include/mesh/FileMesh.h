@@ -25,7 +25,6 @@ public:
   FileMesh(const FileMesh & other_mesh);
   virtual ~FileMesh(); // empty dtor required for unique_ptr with forward declarations
 
-  virtual MooseMesh & clone() const override;
   virtual std::unique_ptr<MooseMesh> safeClone() const override;
 
   virtual void buildMesh() override;

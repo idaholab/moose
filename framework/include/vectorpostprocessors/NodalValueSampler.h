@@ -19,6 +19,9 @@ class NodalValueSampler;
 template <>
 InputParameters validParams<NodalValueSampler>();
 
+/**
+ * Samples values of nodal variable(s).
+ */
 class NodalValueSampler : public NodalVariableVectorPostprocessor, protected SamplerBase
 {
 public:

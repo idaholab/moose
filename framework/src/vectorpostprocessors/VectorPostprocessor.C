@@ -28,6 +28,10 @@ validParams<VectorPostprocessor>()
                         "added and old values are never removed). This changes the output so that "
                         "only a single file is output and updated with each invocation");
 
+  // VPPs can set this to true if their resulting vectors are naturally replicated in parallel
+  // setting this to true will keep MOOSE from unnecesarily broadcasting those vectors
+  params.addPrivateParam<bool>("_is_broadcast", false);
+
   params.addParamNamesToGroup("outputs", "Advanced");
   params.registerBase("VectorPostprocessor");
   return params;
@@ -38,7 +42,8 @@ VectorPostprocessor::VectorPostprocessor(const InputParameters & parameters)
     _vpp_name(MooseUtils::shortName(parameters.get<std::string>("_object_name"))),
     _vpp_fe_problem(parameters.getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")),
     _vpp_tid(parameters.isParamValid("_tid") ? parameters.get<THREAD_ID>("_tid") : 0),
-    _contains_complete_history(parameters.get<bool>("contains_complete_history"))
+    _contains_complete_history(parameters.get<bool>("contains_complete_history")),
+    _is_broadcast(parameters.get<bool>("_is_broadcast"))
 {
 }
 
@@ -55,5 +60,5 @@ VectorPostprocessor::declareVector(const std::string & vector_name)
     return _thread_local_vectors.emplace(vector_name, VectorPostprocessorValue()).first->second;
   else
     return _vpp_fe_problem->declareVectorPostprocessorVector(
-        _vpp_name, vector_name, _contains_complete_history);
+        _vpp_name, vector_name, _contains_complete_history, _is_broadcast);
 }

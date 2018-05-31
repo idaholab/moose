@@ -7,7 +7,7 @@
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
-import re, os
+import re, os, json
 from timeit import default_timer as clock
 from TestHarness import StatusSystem
 
@@ -189,6 +189,18 @@ class Job(object):
         if (not self.__tester.outfile is None and not self.__tester.outfile.closed
            and not self.__tester.errfile is None and not self.__tester.errfile.closed):
             return
+
+        # Check for invalid unicode in output
+        try:
+            json.dumps(output)
+
+        except UnicodeDecodeError:
+            # convert invalid output to something json can handle
+            output = output.decode('utf-8','replace').encode('ascii', 'replace')
+
+            # Alert the user that output has invalid characters
+            self.addCaveats('invalid characters in stdout')
+
         self.__joined_out = output
 
     def getActiveTime(self):

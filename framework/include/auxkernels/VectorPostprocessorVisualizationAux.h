@@ -39,6 +39,12 @@ protected:
    */
   virtual Real computeValue() override;
 
+  /// Whether or not we're using a broadcast (replicated) vector
+  bool _use_broadcast;
+
+  /// Holds the values we want to display
+  const ScatterVectorPostprocessorValue & _vpp_scatter;
+
   /// Holds the values we want to display
   const VectorPostprocessorValue & _vpp_vector;
 

@@ -74,6 +74,8 @@ private:
 
   const bool _contains_complete_history;
 
+  const bool _is_broadcast;
+
   std::map<std::string, VectorPostprocessorValue> _thread_local_vectors;
 };
 

@@ -16,8 +16,8 @@ InputParameters
 validParams<CavityPressureUserObject>()
 {
   InputParameters params = validParams<GeneralUserObject>();
-  params.addClassDescription("Uses the ideal gas law to compute internal pressure"
-                             "and an initial moles of gas quantity");
+  params.addClassDescription("Uses the ideal gas law to compute internal pressure "
+                             "and an initial moles of gas quantity.");
   params.addParam<Real>(
       "initial_pressure",
       0,
@@ -67,17 +67,17 @@ CavityPressureUserObject::CavityPressureUserObject(const InputParameters & param
 }
 
 Real
-CavityPressureUserObject::getValue(const std::string & quantity) const
+CavityPressureUserObject::getValue(const MooseEnum & quantity) const
 {
   Real value = 0;
-  if ("initial_moles" == quantity)
+  if (quantity == INITIAL_MOLES)
   {
     if (_n0 < 0.0)
       mooseError("Negative number of moles calculated as an input for the cavity pressure");
 
     value = _n0;
   }
-  else if ("cavity_pressure" == quantity)
+  else if (quantity == CAVITY_PRESSURE)
     value = _cavity_pressure;
   else
     mooseError("Unknown quantity in " + name());

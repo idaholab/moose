@@ -30,9 +30,15 @@ public:
   virtual void initialize();
   virtual void finalize() {}
 
-  Real getValue(const std::string & quantity) const;
+  Real getValue(const MooseEnum & quantity) const;
 
 protected:
+  enum CAVITY_PRESSURE_USEROBJECT_QUANTITY
+  {
+    INITIAL_MOLES,
+    CAVITY_PRESSURE
+  };
+
   Real & _cavity_pressure;
   Real & _n0; // The initial number of moles of gas.
 

@@ -23,7 +23,7 @@ validParams<GeneralizedPlaneStrainUserObject>()
 {
   InputParameters params = validParams<ElementUserObject>();
   params.addClassDescription(
-      "Generalized Plane Strain UserObject to provide Residual and diagonal Jacobian entry");
+      "Generalized plane strain UserObject to provide residual and diagonal jacobian entries.");
   params.addParam<UserObjectName>("subblock_index_provider",
                                   "SubblockIndexProvider user object name");
   params.addParam<FunctionName>(
@@ -76,21 +76,21 @@ GeneralizedPlaneStrainUserObject::execute()
   for (unsigned int _qp = 0; _qp < _qrule->n_points(); _qp++)
   {
     // residual, integral of stress_zz for COORD_XYZ
-    _residual[subblock_id] +=
-        _JxW[_qp] * _coord[_qp] * (_stress[_qp](_scalar_out_of_plane_strain_direction,
-                                                _scalar_out_of_plane_strain_direction) +
-                                   _out_of_plane_pressure.value(_t, _q_point[_qp]) * _factor);
+    _residual[subblock_id] += _JxW[_qp] * _coord[_qp] *
+                              (_stress[_qp](_scalar_out_of_plane_strain_direction,
+                                            _scalar_out_of_plane_strain_direction) +
+                               _out_of_plane_pressure.value(_t, _q_point[_qp]) * _factor);
 
     _reference_residual[subblock_id] += std::abs(
         _JxW[_qp] * _coord[_qp] *
         _stress[_qp](_scalar_out_of_plane_strain_direction, _scalar_out_of_plane_strain_direction));
 
     // diagonal jacobian, integral of C(2, 2, 2, 2) for COORD_XYZ
-    _jacobian[subblock_id] +=
-        _JxW[_qp] * _coord[_qp] * _Cijkl[_qp](_scalar_out_of_plane_strain_direction,
-                                              _scalar_out_of_plane_strain_direction,
-                                              _scalar_out_of_plane_strain_direction,
-                                              _scalar_out_of_plane_strain_direction);
+    _jacobian[subblock_id] += _JxW[_qp] * _coord[_qp] *
+                              _Cijkl[_qp](_scalar_out_of_plane_strain_direction,
+                                          _scalar_out_of_plane_strain_direction,
+                                          _scalar_out_of_plane_strain_direction,
+                                          _scalar_out_of_plane_strain_direction);
   }
 }
 

@@ -26,13 +26,22 @@ validParams<VectorPostprocessorVisualizationAux>()
   params.addRequiredParam<std::string>(
       "vector_name", "The name of the vector to use from the VectorPostprocessor");
 
+  params.addParam<bool>("use_broadcast",
+                        false,
+                        "Causes this AuxKernel to use a broadcasted version of the vector instead "
+                        "of a scattered version of the vector (the default).  This is slower - but "
+                        "is useful for debugging and testing");
+
   return params;
 }
 
 VectorPostprocessorVisualizationAux::VectorPostprocessorVisualizationAux(
     const InputParameters & parameters)
   : AuxKernel(parameters),
-    _vpp_vector(getVectorPostprocessorValue("vpp", getParam<std::string>("vector_name"))),
+    _use_broadcast(getParam<bool>("use_broadcast")),
+    _vpp_scatter(getScatterVectorPostprocessorValue("vpp", getParam<std::string>("vector_name"))),
+    _vpp_vector(
+        getVectorPostprocessorValue("vpp", getParam<std::string>("vector_name"), _use_broadcast)),
     _my_pid(processor_id())
 {
 }
@@ -40,8 +49,8 @@ VectorPostprocessorVisualizationAux::VectorPostprocessorVisualizationAux(
 void
 VectorPostprocessorVisualizationAux::timestepSetup()
 {
-  if (_vpp_vector.size() != n_processors())
-    mooseError("Error in VectorPostprocessor ",
+  if (_my_pid == 0 && _vpp_vector.size() != n_processors())
+    mooseError("Error in AuxKernel ",
                name(),
                ". Vector ",
                getParam<std::string>("vector_name"),
@@ -56,5 +65,13 @@ VectorPostprocessorVisualizationAux::timestepSetup()
 Real
 VectorPostprocessorVisualizationAux::computeValue()
 {
-  return _vpp_vector[_my_pid];
+  if (_use_broadcast)
+  {
+    mooseAssert(_vpp_vector.size() > _my_pid,
+                "Vector does not contain enough entries in VectorPostprocessorVisualization named "
+                    << name());
+    return _vpp_vector[_my_pid];
+  }
+  else
+    return _vpp_scatter;
 }

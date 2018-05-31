@@ -28,6 +28,7 @@
 #include "MultiAppTransfer.h"
 #include "Postprocessor.h"
 #include "HashMap.h"
+#include "VectorPostprocessor.h"
 
 #include "libmesh/enum_quadrature_type.h"
 #include "libmesh/equation_systems.h"
@@ -736,6 +737,9 @@ public:
   bool hasVectorPostprocessor(const std::string & name);
 
   /**
+   * DEPRECATED: Use the new version where you need to specify whether or
+   * not the vector must be broadcast
+   *
    * Get a reference to the value associated with the VectorPostprocessor.
    * @param name The name of the post-processor
    * @param vector_name The name of the post-processor
@@ -745,6 +749,9 @@ public:
                                                          const std::string & vector_name);
 
   /**
+   * DEPRECATED: Use the new version where you need to specify whether or
+   * not the vector must be broadcast
+   *
    * Get the reference to the old value of a post-processor
    * @param name The name of the post-processor
    * @param vector_name The name of the post-processor
@@ -754,14 +761,69 @@ public:
                                                             const std::string & vector_name);
 
   /**
+   * Get a reference to the value associated with the VectorPostprocessor.
+   * @param name The name of the post-processor
+   * @param vector_name The name of the post-processor
+   * @return The reference to the current value
+   */
+  VectorPostprocessorValue & getVectorPostprocessorValue(const VectorPostprocessorName & name,
+                                                         const std::string & vector_name,
+                                                         bool needs_broadcast);
+
+  /**
+   * Get the reference to the old value of a post-processor
+   * @param name The name of the post-processor
+   * @param vector_name The name of the post-processor
+   * @return The reference to the old value
+   */
+  VectorPostprocessorValue & getVectorPostprocessorValueOld(const std::string & name,
+                                                            const std::string & vector_name,
+                                                            bool needs_broadcast);
+
+  /**
+   * Return the scatter value for the post processor
+   *
+   * This is only valid when you expec the vector to be of lenghth "num_procs"
+   * In that case - this will return a reference to a value that will be _this_ processor's value
+   * from that vector
+   *
+   * @param vpp_name The name of the VectorPostprocessor
+   * @param vector_name The name of the vector
+   * @return The reference to the current scatter value
+   */
+  ScatterVectorPostprocessorValue &
+  getScatterVectorPostprocessorValue(const VectorPostprocessorName & vpp_name,
+                                     const std::string & vector_name);
+
+  /**
+   * Return the scatter value for the post processor
+   *
+   * This is only valid when you expec the vector to be of lenghth "num_procs"
+   * In that case - this will return a reference to a value that will be _this_ processor's value
+   * from that vector
+   *
+   * @param vpp_name The name of the VectorPostprocessor
+   * @param vector_name The name of the vector
+   * @return The reference to the old scatter value
+   */
+  ScatterVectorPostprocessorValue &
+  getScatterVectorPostprocessorValueOld(const VectorPostprocessorName & vpp_name,
+                                        const std::string & vector_name);
+
+  /**
    * Declare a new VectorPostprocessor vector
    * @param name The name of the post-processor
    * @param vector_name The name of the post-processor
+   * @param contains_complete_history True if the vector will naturally contain the complete time
+   * history of the values
+   * @param is_broadcast True if the vector will already be replicated by the VPP.  This prevents
+   * unnecessary broadcasting by MOOSE.
    * @return The reference to the vector declared
    */
   VectorPostprocessorValue & declareVectorPostprocessorVector(const VectorPostprocessorName & name,
                                                               const std::string & vector_name,
-                                                              bool contains_complete_history);
+                                                              bool contains_complete_history,
+                                                              bool is_broadcast);
 
   /**
    * Whether or not the specified VectorPostprocessor has declared any vectors
@@ -1704,6 +1766,8 @@ FEProblemBase::finalizeUserObjects(const MooseObjectWarehouse<T> & warehouse)
         objects[i]->threadJoin(*(other_objects[i]));
     }
 
+    std::set<std::string> vpps_finalized;
+
     // Finalize them and save off PP values
     for (auto & object : objects)
     {
@@ -1713,7 +1777,16 @@ FEProblemBase::finalizeUserObjects(const MooseObjectWarehouse<T> & warehouse)
 
       if (pp)
         _pps_data.storeValue(pp->PPName(), pp->getValue());
+
+      auto vpp = std::dynamic_pointer_cast<VectorPostprocessor>(object);
+
+      if (vpp)
+        vpps_finalized.insert(vpp->PPName());
     }
+
+    // Broadcast/Scatter any VPPs that need it
+    for (auto & vpp_name : vpps_finalized)
+      _vpps_data.broadcastScatterVectors(vpp_name);
   }
 }
 
