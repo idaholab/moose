@@ -600,18 +600,19 @@ MooseMesh::buildNodeList()
 {
   freeBndNodes();
 
-  /// Boundary node list (node ids and corresponding side-set ids, arrays always have the same length)
-  std::vector<dof_id_type> nodes;
-  std::vector<boundary_id_type> ids;
-  getMesh().get_boundary_info().build_node_list(nodes, ids);
+  auto bc_tuples = getMesh().get_boundary_info().build_node_list();
 
-  int n = nodes.size();
-  _bnd_nodes.resize(n);
-  for (int i = 0; i < n; i++)
+  int n = bc_tuples.size();
+  _bnd_nodes.clear();
+  _bnd_nodes.reserve(n);
+  for (const auto & t : bc_tuples)
   {
-    _bnd_nodes[i] = new BndNode(getMesh().node_ptr(nodes[i]), ids[i]);
-    _node_set_nodes[ids[i]].push_back(nodes[i]);
-    _bnd_node_ids[ids[i]].insert(nodes[i]);
+    auto node_id = std::get<0>(t);
+    auto bc_id = std::get<1>(t);
+
+    _bnd_nodes.push_back(new BndNode(getMesh().node_ptr(node_id), bc_id));
+    _node_set_nodes[bc_id].push_back(node_id);
+    _bnd_node_ids[bc_id].insert(node_id);
   }
 
   _bnd_nodes.reserve(_bnd_nodes.size() + _extra_bnd_nodes.size());
@@ -619,13 +620,11 @@ MooseMesh::buildNodeList()
   {
     BndNode * bnode = new BndNode(_extra_bnd_nodes[i]._node, _extra_bnd_nodes[i]._bnd_id);
     _bnd_nodes.push_back(bnode);
-    _bnd_node_ids[ids[i]].insert(_extra_bnd_nodes[i]._node->id());
+    _bnd_node_ids[std::get<1>(bc_tuples[i])].insert(_extra_bnd_nodes[i]._node->id());
   }
 
-  BndNodeCompare mein_kompfare;
-
   // This sort is here so that boundary conditions are always applied in the same order
-  std::sort(_bnd_nodes.begin(), _bnd_nodes.end(), mein_kompfare);
+  std::sort(_bnd_nodes.begin(), _bnd_nodes.end(), BndNodeCompare());
 }
 
 void
