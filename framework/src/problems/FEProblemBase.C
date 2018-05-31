@@ -82,6 +82,7 @@
 #include "InputParameterWarehouse.h"
 #include "TimeIntegrator.h"
 #include "LineSearch.h"
+#include "FloatingPointExceptionGuard.h"
 
 #include "libmesh/exodusII_io.h"
 #include "libmesh/quadrature.h"
@@ -2119,7 +2120,7 @@ FEProblemBase::projectSolution()
 {
   Moose::perf_log.push("projectSolution()", "Utility");
 
-  Moose::enableFPE();
+  FloatingPointExceptionGuard fpe_guard(_app);
 
   ConstElemRange & elem_range = *_mesh.getActiveLocalElementRange();
   ComputeInitialConditionThread cic(*this);
@@ -2160,8 +2161,6 @@ FEProblemBase::projectSolution()
       }
     }
   }
-
-  Moose::enableFPE(false);
 
   _nl->solution().close();
   _nl->solution().localize(*_nl->system().current_local_solution, _nl->dofMap().get_send_list());
