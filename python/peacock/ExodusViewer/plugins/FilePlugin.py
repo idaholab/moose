@@ -107,6 +107,7 @@ class FilePlugin(QtWidgets.QGroupBox, ExodusPlugin):
         self.BottomLayout.setSpacing(10)
 
         self.setup()
+        self._reader = None
 
     def getFilenames(self):
         """
@@ -140,7 +141,30 @@ class FilePlugin(QtWidgets.QGroupBox, ExodusPlugin):
         """
         This is called after the ExodusReader is first created, see VTKWindowPlugin.
         """
-        # Update the variable list
+        self._reader = reader
+        self._initVariableList(reader)
+
+    def onWindowReset(self):
+        """
+        Remove the stored reader.
+        """
+        self._reader = None
+
+    def onWindowUpdated(self):
+        """
+        Check that the variable names have not changed, update if they have.
+        """
+        if self._reader is not None:
+            variables = self._reader.getVariableInformation(var_types=[self._reader.NODAL, self._reader.ELEMENTAL])
+            names = [var.name for var in variables.itervalues()]
+            current = [self.VariableList.itemText(i) for i in range(self.VariableList.count())]
+            if names != current:
+                self._initVariableList(self._reader)
+
+    def _initVariableList(self, reader):
+        """
+        Initialize the variable list from the supplied reader.
+        """
         variables = reader.getVariableInformation(var_types=[reader.NODAL, reader.ELEMENTAL])
         self.VariableList.blockSignals(True)
         self.VariableList.clear()
@@ -309,8 +333,8 @@ def main(size=None):
 if __name__ == '__main__':
     from peacock.utils import Testing
     app = QtWidgets.QApplication(sys.argv)
-    #filenames = Testing.get_chigger_input_list('mug_blocks_out.e', 'vector_out.e', 'displace.e', 'foo.e')
-    filenames = Testing.get_chigger_input_list('diffusion_1.e', 'diffusion_2.e')
+    filenames = Testing.get_chigger_input_list('mug_blocks_out.e', 'vector_out.e', 'displace.e', 'foo.e')
+    #filenames = Testing.get_chigger_input_list('diffusion_1.e', 'diffusion_2.e')
     widget, _ = main(size=[600,600])
     widget.FilePlugin.onSetFilenames(filenames)
     sys.exit(app.exec_())

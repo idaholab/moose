@@ -24,8 +24,8 @@ class BackgroundPlugin(QtWidgets.QWidget, ExodusPlugin):
     #: pyqtSignal: Emitted when the chigger objects options are changed
     windowOptionsChanged = QtCore.pyqtSignal(dict)
 
-    def __init__(self):
-        super(BackgroundPlugin, self).__init__()
+    def __init__(self, **kwargs):
+        super(BackgroundPlugin, self).__init__(**kwargs)
 
         self._preferences.addBool("exodus/backgroundGradient",
                 "Use background gradient",

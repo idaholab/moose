@@ -87,15 +87,6 @@ class TestVTKWindowPlugin(Testing.PeacockImageTestCase):
         self.assertEqual('viridis', self._window._result.getOption('cmap'))
         self.assertImage('testResult.png')
 
-    def testHighlight(self):
-        """
-        Test the highlighting is working.
-        """
-        self._window.onHighlight(block=['76'])
-        self.assertImage('testHighlightOn.png')
-
-        self._window.onHighlight()
-        self.assertImage('testHighlightOff.png')
 
     def testFilename(self):
         """

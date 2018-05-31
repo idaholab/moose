@@ -23,8 +23,6 @@ class InputFileEditorPlugin(InputFileEditor, Plugin):
     In addition to InputFileEditor, this class adds menus and
     is available as a Plugin.
     """
-    highlightBC = pyqtSignal(list, list, list)
-
     def __init__(self, **kwds):
         super(InputFileEditorPlugin, self).__init__(**kwds)
         self.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
@@ -92,7 +90,7 @@ class InputFileEditorPlugin(InputFileEditor, Plugin):
         """
         Ask the user what input file to open.
         """
-        input_name, other = QFileDialog.getOpenFileName(self, "Chooose input file", os.getcwd(), "Input File (*.i)")
+        input_name, other = QFileDialog.getOpenFileName(self, "Choose input file", os.getcwd(), "Input File (*.i)")
         if input_name:
             input_name = os.path.abspath(input_name)
             success = self.setInputFile(input_name)
@@ -112,7 +110,7 @@ class InputFileEditorPlugin(InputFileEditor, Plugin):
         """
         Ask the user what file to save the input tree to.
         """
-        input_name, other = QFileDialog.getSaveFileName(self, "Chooose input file", os.getcwd(), "Input File (*.i)")
+        input_name, other = QFileDialog.getSaveFileName(self, "Choose input file", os.getcwd(), "Input File (*.i)")
         if input_name:
             input_name = os.path.abspath(input_name)
             self.writeInputFile(input_name)

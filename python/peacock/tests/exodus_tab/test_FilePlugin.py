@@ -76,16 +76,12 @@ class TestFilePlugin(Testing.PeacockImageTestCase):
         """
         self._widget.FilePlugin.onSetFilenames(self._filenames)
 
-        # Setup a camera
-        camera = vtk.vtkCamera()
-        camera.SetViewUp(-0.7786, 0.2277, 0.5847)
-        camera.SetPosition(9.2960, -0.4218, 12.6685)
-        camera.SetFocalPoint(0.0000, 0.0000, 0.1250)
-
         # The current view
         self._widget.FilePlugin.VariableList.setCurrentIndex(2)
         self._widget.FilePlugin.VariableList.currentIndexChanged.emit(2)
-        self._window.onCameraChanged(camera.GetViewUp(), camera.GetPosition(), camera.GetFocalPoint())
+        self._window.onCameraChanged((-0.7786, 0.2277, 0.5847),
+                                     (9.2960, -0.4218, 12.6685),
+                                     (0.0000, 0.0000, 0.1250))
         self._window.onWindowRequiresUpdate()
         self.assertImage('testChangeFiles0.png')
 
@@ -96,7 +92,8 @@ class TestFilePlugin(Testing.PeacockImageTestCase):
         self._widget.FilePlugin.VariableList.currentIndexChanged.emit(1)
         self._window.onWindowRequiresUpdate()
         self.assertImage('testChangeFiles1.png')
-        self.assertNotEqual(camera.GetViewUp(), self._window._result.getVTKRenderer().GetActiveCamera().GetViewUp())
+        self.assertNotEqual((-0.7786, 0.2277, 0.5847),
+                            self._window._result.getVTKRenderer().GetActiveCamera().GetViewUp())
 
         # Switch back to initial (using same file name as before)
         self._widget.FilePlugin.FileList.setCurrentIndex(0)
@@ -242,7 +239,6 @@ class TestFilePlugin(Testing.PeacockImageTestCase):
         self.assertEqual(self._widget.FilePlugin.ComponentList.currentData(), -1)
         self.assertImage('testConvected.png')
 
-
     def testState2(self):
         """
         Additional state checking.
@@ -296,6 +292,48 @@ class TestFilePlugin(Testing.PeacockImageTestCase):
         self.assertEqual(self._widget.FilePlugin.VariableList.currentText(), 'convected')
         self.assertEqual(self._widget.FilePlugin.ComponentList.currentText(), "Magnitude")
         self.assertFalse(self._widget.FilePlugin.ComponentList.isEnabled())
+
+class TestFilePluginNewVariable(Testing.PeacockImageTestCase):
+    """
+    Testing for FileControl widget when a new variable is added.
+    """
+
+    qapp = QtWidgets.QApplication(sys.argv)
+
+    temp_file = 'TestFilePluginNewVariable_test.e'
+
+    @classmethod
+    def setUpClass(cls):
+        super(TestFilePluginNewVariable, cls).setUpClass()
+        if os.path.exists(cls.temp_file):
+            os.remove(cls.temp_file)
+
+    def setUp(self):
+        """
+        Creates a window attached to FilePlugin widget.
+        """
+        self._filenames = Testing.get_chigger_input_list('simple_diffusion_out.e',
+                                                         'simple_diffusion_new_var_out.e')
+        self._widget, self._window = main(size=[600,600])
+
+    def testInitial(self):
+        shutil.copy(self._filenames[0], self.temp_file)
+        self._widget.FilePlugin.onSetFilenames([self.temp_file])
+        self.assertEqual(self._widget.FilePlugin.VariableList.count(), 2)
+        self.assertEqual(self._widget.FilePlugin.VariableList.itemText(0), 'aux')
+        self.assertEqual(self._widget.FilePlugin.VariableList.itemText(1), 'u')
+        self.assertEqual(self._widget.FilePlugin.VariableList.currentText(), 'aux')
+
+        Testing.process_events(2)
+        shutil.copy(self._filenames[1], self.temp_file)
+        self._window.onWindowRequiresUpdate()
+        print self._window._reader
+        Testing.process_events(2)
+        self.assertEqual(self._widget.FilePlugin.VariableList.count(), 3)
+        self.assertEqual(self._widget.FilePlugin.VariableList.itemText(0), 'aux')
+        self.assertEqual(self._widget.FilePlugin.VariableList.itemText(1), 'New_0')
+        self.assertEqual(self._widget.FilePlugin.VariableList.itemText(2), 'u')
+        self.assertEqual(self._widget.FilePlugin.VariableList.currentText(), 'aux')
 
 if __name__ == '__main__':
     unittest.main(module=__name__, verbosity=2)

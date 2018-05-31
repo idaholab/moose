@@ -36,8 +36,8 @@ class MeshPlugin(QtWidgets.QGroupBox, ExodusPlugin):
     #: pyqtSignal: Emitted when removing a filter
     removeFilter = QtCore.pyqtSignal(chigger.filters.ChiggerFilterBase)
 
-    def __init__(self):
-        super(MeshPlugin, self).__init__()
+    def __init__(self, **kwargs):
+        super(MeshPlugin, self).__init__(**kwargs)
 
         self._preferences.addBool("exodus/viewMesh",
                 "View the mesh",

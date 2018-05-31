@@ -49,6 +49,7 @@ class BlockPlugin(QtWidgets.QGroupBox, ExodusPlugin):
         self.setup()
 
         # Current variable names
+        self._reader = None
         self._varinfo = None
 
     def onSetVariable(self, *args):
@@ -72,6 +73,7 @@ class BlockPlugin(QtWidgets.QGroupBox, ExodusPlugin):
         Remove variable information when the window is reset.
         """
         self._varinfo = None
+        self._reader = None
 
     def onWindowReader(self, reader):
         """
@@ -80,6 +82,7 @@ class BlockPlugin(QtWidgets.QGroupBox, ExodusPlugin):
         self.BlockSelector.updateBlocks(reader)
         self.SidesetSelector.updateBlocks(reader)
         self.NodesetSelector.updateBlocks(reader)
+        self._reader = reader
         self._varinfo = reader.getVariableInformation([chigger.exodus.ExodusReader.NODAL])
 
     def onWindowResult(self, *args):
@@ -88,6 +91,17 @@ class BlockPlugin(QtWidgets.QGroupBox, ExodusPlugin):
         """
         self._loadPlugin()
         self.updateOptions()
+
+    def onWindowUpdated(self):
+        """
+        Update the blocks if needed.
+        """
+        blocks = self._blocksChanged(self.BlockSelector, chigger.exodus.ExodusReader.BLOCK)
+        sideset = self._blocksChanged(self.SidesetSelector, chigger.exodus.ExodusReader.SIDESET)
+        nodeset = self._blocksChanged(self.NodesetSelector, chigger.exodus.ExodusReader.NODESET)
+        if any([blocks, sideset, nodeset]):
+            print 'reset...', [blocks, sideset, nodeset]
+            self.onWindowReader(self._reader)
 
     def updateOptions(self):
         """
@@ -142,6 +156,17 @@ class BlockPlugin(QtWidgets.QGroupBox, ExodusPlugin):
         if not self.NodesetSelector.hasState(self.stateKey()):
             self.NodesetSelector.StandardItemModel.item(0).setCheckState(QtCore.Qt.Unchecked)
             self.NodesetSelector.itemsChanged.emit()
+
+    def _blocksChanged(self, qobject, btype):
+        """
+        Check if current blocks on the widget are the same as exist on the reader.
+        """
+        if self._reader:
+            blk_info = self._reader.getBlockInformation()[btype]
+            blocks = [blk.name for blk in blk_info.itervalues()]
+            current = [qobject.StandardItemModel.item(i).data(QtCore.Qt.UserRole) for i in range(1, qobject.StandardItemModel.rowCount())]
+            return set(blocks) != set(current)
+        return False
 
     def _setupBlockSelector(self, qobject):
         qobject.itemsChanged.connect(self._callbackBlockSelector)

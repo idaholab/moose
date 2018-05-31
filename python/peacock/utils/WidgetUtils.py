@@ -93,14 +93,15 @@ def addShortcut(parent, keys, callback, shortcut_app_level=False, shortcut_with_
 Global settings grouping for storing/loading GUI state.
 """
 WIDGET_SETTINGS_CACHE = dict()
-WIDGET_SETTINGS_CACHE[QtWidgets.QTextEdit] = [('width', 'setWidth'), ('height', 'setHeight')]
-WIDGET_SETTINGS_CACHE[QtWidgets.QLineEdit] = [('text', 'setText'), ('styleSheet', 'setStyleSheet')]
-WIDGET_SETTINGS_CACHE[QtWidgets.QCheckBox] = [('isChecked', 'setChecked')]
-WIDGET_SETTINGS_CACHE[QtWidgets.QComboBox] = [('currentIndex', 'setCurrentIndex')]
-WIDGET_SETTINGS_CACHE[QtWidgets.QSlider] = [('sliderPosition', 'setSliderPosition')]
-WIDGET_SETTINGS_CACHE[QtWidgets.QGroupBox] = [('isChecked', 'setChecked')]
-WIDGET_SETTINGS_CACHE[QtWidgets.QSpinBox] = [('value', 'setValue')]
-WIDGET_SETTINGS_CACHE[QtWidgets.QDoubleSpinBox] = [('value', 'setValue')]
+WIDGET_SETTINGS_CACHE[QtWidgets.QLineEdit] = [(QtWidgets.QLineEdit.text, QtWidgets.QLineEdit.setText),
+                                              (QtWidgets.QLineEdit.styleSheet, QtWidgets.QLineEdit.setStyleSheet)]
+WIDGET_SETTINGS_CACHE[QtWidgets.QCheckBox] = [(QtWidgets.QCheckBox.isChecked, QtWidgets.QCheckBox.setChecked)]
+WIDGET_SETTINGS_CACHE[QtWidgets.QComboBox] = [(QtWidgets.QComboBox.currentText,
+                                               lambda s, t: QtWidgets.QComboBox.setCurrentIndex(s, QtWidgets.QComboBox.findText(s, t)))]
+WIDGET_SETTINGS_CACHE[QtWidgets.QSlider] = [(QtWidgets.QSlider.sliderPosition, QtWidgets.QSlider.setSliderPosition)]
+WIDGET_SETTINGS_CACHE[QtWidgets.QGroupBox] = [(QtWidgets.QGroupBox.isChecked, QtWidgets.QGroupBox.setChecked)]
+WIDGET_SETTINGS_CACHE[QtWidgets.QSpinBox] = [(QtWidgets.QSpinBox.value, QtWidgets.QSpinBox.setValue)]
+WIDGET_SETTINGS_CACHE[QtWidgets.QDoubleSpinBox] = [(QtWidgets.QDoubleSpinBox.value, QtWidgets.QDoubleSpinBox.setValue)]
 
 def dumpQObjectTree(qobject, level=0):
     """
@@ -174,9 +175,9 @@ def storeWidget(widget, key, **kwargs):
 
             # Loop through the values to store
             for s in methods:
-                attr = getattr(widget, s[0])
-                state[key].append((s[1], attr()))
-                msg += [' '*4 + s[1] + '(' + str(attr()) + ')']
+                attr = s[0]
+                state[key].append((s[1], attr(widget)))
+                msg += ['    {} ({})'.format(s[1], attr)]
 
             # Print debug message
             message.mooseDebug('\n'.join(msg), color='GREEN', debug=debug)
@@ -225,7 +226,7 @@ def loadWidget(widget, key, **kwargs):
 
     for func in state[key]:
         msg += [' '*4 + str(func[0]) + '(' + str(func[1]) + ')']
-        getattr(widget, func[0])(func[1])
+        func[0](widget, func[1])
 
     # Print debug message
     message.mooseDebug('\n'.join(msg), debug=debug, color='YELLOW')

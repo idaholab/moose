@@ -285,7 +285,7 @@ class Tests(BaseTests):
         camera = vtk.vtkCamera()
         camera.SetViewUp(-0.7786, 0.2277, 0.5847)
         camera.SetPosition(-2, -2, -1)
-        w.MeshViewerPlugin.onCameraChanged(camera)
+        w.MeshViewerPlugin.onCameraChanged((-0.7786, 0.2277, 0.5847),(-2, -2, -1),(0,0,0))
         w.vtkwin.onWrite(self.highlight_dup)
         self.assertFalse(Testing.gold_diff(self.highlight_dup))
 

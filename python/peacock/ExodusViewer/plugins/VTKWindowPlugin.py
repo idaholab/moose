@@ -73,7 +73,6 @@ class VTKWindowPlugin(QtWidgets.QFrame, ExodusPlugin):
         # Setup widget
         self.setSizePolicy(QtWidgets.QSizePolicy.MinimumExpanding,
                            QtWidgets.QSizePolicy.MinimumExpanding)
-        self.setMainLayoutName('RightLayout')
 
         # Create the QVTK interactor
         if self.devicePixelRatio() > 1:
@@ -84,6 +83,7 @@ class VTKWindowPlugin(QtWidgets.QFrame, ExodusPlugin):
         # Member variables
         self._highlight = None
         self._initialized = False
+        self._run_start_time = -1
         self._reader_options = dict()
         self._result_options = dict()
         self._reader = None
@@ -119,6 +119,7 @@ class VTKWindowPlugin(QtWidgets.QFrame, ExodusPlugin):
         self._peacock_logo = chigger.annotations.ImageAnnotation(filename='peacock.png', opacity=0.33)
         self._peacock_text = chigger.annotations.TextAnnotation(justification='center', font_size=18)
 
+        self.setMainLayoutName('RightLayout')
         self.setup()
 
     def onSetFilename(self, filename):
@@ -128,6 +129,7 @@ class VTKWindowPlugin(QtWidgets.QFrame, ExodusPlugin):
         # Variable and component are stored in the result options, thus are not needed
         if filename != self._filename:
             self._filename = filename
+            self._run_start_time = -1
             self._reset()
 
     def onSetVariable(self, variable):
@@ -173,12 +175,22 @@ class VTKWindowPlugin(QtWidgets.QFrame, ExodusPlugin):
         """
         Updates the VTK render window, if needed.
 
-        This is what should be called after changes to this plugin have been made. This is the only slot that
-        actually causes a render to happen. The other slots should be used to setup the window, then
-        this called to actually preform the update. This avoids performing multiple updates to the window.
+        This is what should be called after changes to this plugin have been made.
+
+        This is the only slot that actually causes a render to
+        happen. The other slots should be used to setup the window,
+        then this called to actually preform the update. This avoids
+        performing multiple updates to the window.
         """
+
         file_exists = os.path.exists(self._filename) if self._filename else False
-        if (not self._initialized) and file_exists and (os.path.getsize(self._filename) > 0):
+        if file_exists and (os.path.getmtime(self._filename) < self._run_start_time):
+            self._reset()
+            msg = '{} is currently out of date.\nIt will load automatically when it is updated.'
+            self._setLoadingMessage(msg.format(self._filename))
+
+        if (not self._initialized) and file_exists and (os.path.getsize(self._filename) > 0) and \
+           (os.path.getmtime(self._filename) >= self._run_start_time):
             self._renderResult()
 
         elif (self._filename is not None) and (not file_exists):
@@ -230,9 +242,7 @@ class VTKWindowPlugin(QtWidgets.QFrame, ExodusPlugin):
         """
         Update the 'run' time to avoid loading old data.
         """
-        if file_exists and self._run_start_time:
-            if os.path.getmtime(self._filename) < t:
-                self._reset()
+        self._run_start_time = t
         self.onWindowRequiresUpdate()
 
     def onAppendResult(self, result):
@@ -269,23 +279,6 @@ class VTKWindowPlugin(QtWidgets.QFrame, ExodusPlugin):
                 filters.remove(filter_)
                 self.onResultOptionsChanged({'filters':filters})
 
-
-    #def resizeEvent(self, event):
-    #    """
-    #    Reset the camera for the colorbar so it positioned correctly.
-
-    #    This is QWidget method that is called when the window is resized.
-
-    #    Args:
-    #        event[QResizeEvent]: Not used
-    #    """
-    #    super(VTKWindowPlugin, self).resizeEvent(event)
-    #    if self._result and not self._window.needsInitialize():
-    #        try:
-    #            self._result.update()
-    #        except OSError:
-    #            pass # no file exists0
-
     def onCurrentChanged(self, index):
         """
         Called when the tab is changed.
@@ -306,35 +299,6 @@ class VTKWindowPlugin(QtWidgets.QFrame, ExodusPlugin):
         # Turn off times if the tab is not active
         else:
             self._adjustTimers(stop=['initialize', 'update'])
-
-    def onHighlight(self, block=None, boundary=None, nodeset=None):
-        """
-        Highlight the desired block/boundary/nodeset.
-
-        To remove highlight call this function without the inputs set.
-
-        Args:
-            block[list]: List of block ids to highlight.
-            boundary[list]: List of boundary ids to highlight.
-            nodeset[list]: List of nodeset ids to highlight.
-        """
-        if not self._initialized:
-            return
-
-        if not self._highlight:
-            self._highlight = chigger.exodus.ExodusResult(self._reader,
-                                                          renderer=self._result.getVTKRenderer(), color=[1,0,0])
-
-        if block or boundary or nodeset:
-            self._highlight.setOptions(block=block, boundary=boundary, nodeset=nodeset)
-            self._highlight.setOptions(edges=True, edge_width=3, edge_color=[1,0,0], point_size=5)
-            self.onAppendResult(self._highlight)
-        else:
-            self._highlight.reset()
-            self.onRemoveResult(self._highlight)
-            self._highlight = None
-
-        self.onWindowRequiresUpdate()
 
     def onWrite(self, filename):
         """
@@ -389,7 +353,7 @@ class VTKWindowPlugin(QtWidgets.QFrame, ExodusPlugin):
 
         # Set the interaction mode (2D/3D)
         self._result.update()
-        bmin, bmax = self._result.getBounds(check=sys.platform=='darwin')
+        bmin, bmax = self._result.getBounds()
         if abs(bmax[-1] - bmin[-1]) < 1e-10:
             self._window.setOption('style', 'interactive2D')
         else:
@@ -433,12 +397,6 @@ class VTKWindowPlugin(QtWidgets.QFrame, ExodusPlugin):
             self._timers[s].start()
         for s in stop:
             self._timers[s].stop()
-
-    #def showEvent(self, *args):
-    #    """
-    #    Override the widgets showEvent to load or update the window when it becomes visible
-    #    """
-    #    self.onWindowRequiresUpdate()
 
     def repr(self):
         """

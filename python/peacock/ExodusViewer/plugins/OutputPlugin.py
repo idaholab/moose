@@ -62,7 +62,7 @@ class OutputPlugin(QtWidgets.QGroupBox, ExodusPlugin):
         """
         Updates the chigger script live view.
         """
-        if self.LiveScript and self.LiveScript.isVisible() and hasattr(self, "_plugin_manager"):
+        if self.LiveScriptWindow.isVisible() and hasattr(self, "_plugin_manager"):
             # don't reset the text if it is the same. This allows for easier select/copy
             s = self._plugin_manager.repr()
             if s != self.LiveScriptWindow.toPlainText():
@@ -76,6 +76,7 @@ class OutputPlugin(QtWidgets.QGroupBox, ExodusPlugin):
 
     def _setupLiveScriptWindow(self, qobject):
         qobject.setReadOnly(True)
+        qobject.hide()
         qobject.windowClosed.connect(self._callbackCloseLiveScriptWindow)
 
     def _callbackLiveScript(self, *args):

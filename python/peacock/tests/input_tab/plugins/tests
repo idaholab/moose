@@ -1,0 +1,6 @@
+[Tests]
+  [MeshViewerPlugin]
+    type = PythonUnitTest
+    input = test_MeshViewerPlugin.py
+  []
+[]

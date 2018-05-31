@@ -6,12 +6,11 @@
 #*
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
-import os
 import chigger
 from peacock.ExodusViewer.plugins.VTKWindowPlugin import VTKWindowPlugin
 from peacock.utils import ExeLauncher
-from PyQt5 import QtCore, QtWidgets
-import mooseutils
+from PyQt5 import QtCore
+import os
 
 class MeshViewerPlugin(VTKWindowPlugin):
     """
@@ -118,14 +117,6 @@ class MeshViewerPlugin(VTKWindowPlugin):
                 args.append("--allow-test-objects")
             ExeLauncher.runExe(exe_path, args, print_errors=False)
             self.meshEnabled.emit(True)
-<<<<<<< HEAD
-            self.onFileChanged(self.current_temp_mesh_file)
-        except Exception as e:
-            self.meshEnabled.emit(False)
-            self.onFileChanged()
-            mooseutils.mooseWarning("Error producing mesh: %s" % e)
-            self.setLoadingMessage("Error producing mesh")
-=======
             self.onSetFilename(self.current_temp_mesh_file)
             self.onWindowRequiresUpdate()
         except Exception:
@@ -133,7 +124,6 @@ class MeshViewerPlugin(VTKWindowPlugin):
             self._reset()
             self._setLoadingMessage("Error producing mesh")
             self.onWindowRequiresUpdate()
->>>>>>> Update peacock for changes to ExodusViewer
             self._removeFileNoError(self.current_temp_mesh_file)
 
         self._removeFileNoError(input_file) # we need the mesh file since it is in use but not the input file
@@ -146,14 +136,17 @@ def main(size=None):
     """
     Run the VTKWindowPlugin all by its lonesome.
     """
-    from PyQt5 import QtCore, QtWidgets
     from peacock.ExodusViewer.ExodusPluginManager import ExodusPluginManager
-    widget = ExodusPluginManager(plugins=[lambda: MeshViewerPlugin(size=size)])
+    plugin = MeshViewerPlugin(size=size)
+    plugin.setMainLayoutName('RightLayout')
+    widget = ExodusPluginManager(plugins=[lambda: plugin])
     widget.show()
-    return widget, widget.VTKWindowPlugin
+    return widget, widget.MeshViewerPlugin
 
 if __name__ == "__main__":
+    import sys
     from peacock.utils import Testing
+    from PyQt5 import QtWidgets
     app = QtWidgets.QApplication(sys.argv)
     filename = Testing.get_chigger_input('mug_blocks_out.e')
     #filename = 'none.e'

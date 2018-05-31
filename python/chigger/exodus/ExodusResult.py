@@ -79,7 +79,7 @@ class ExodusResult(base.ChiggerResult):
                 d = (c[0]-m[0], c[1]-m[1], c[2]-m[2])
                 src.getVTKActor().AddPosition(d[0]*factor, d[1]*factor, d[2]*factor)
 
-    def getRange(self):
+    def getRange(self, **kwargs):
         """
         Return the min/max range for the selected variables and blocks/boundary/nodeset.
 
@@ -87,7 +87,7 @@ class ExodusResult(base.ChiggerResult):
               "squeeze=True", which can be much slower.
         """
         self.checkUpdateState()
-        rngs = [src.getRange() for src in self._sources]
+        rngs = [src.getRange(**kwargs) for src in self._sources]
         return utils.get_min_max(*rngs)
 
     def getCenter(self):
