@@ -15,8 +15,21 @@
 #include <vector>
 #include <tuple>
 #include <type_traits>
+#include <cassert>
 
-/* A class for "pretty printing" a table of data.
+/**
+ * Used to specify the column format
+ */
+enum class VariadicTableColumnFormat
+{
+  AUTO,
+  SCIENTIFIC,
+  FIXED,
+  PERCENT
+};
+
+/**
+ * A class for "pretty printing" a table of data.
  *
  * Requries C++11 (and nothing more)
  *
@@ -53,11 +66,7 @@ public:
       _num_columns(std::tuple_size<DataTuple>::value),
       _static_column_size(static_column_size)
   {
-    if (headers.size() != _num_columns)
-    {
-      Moose::out << "Number of headers must match number of columns!" << std::endl;
-      std::abort();
-    }
+    assert(headers.size() == _num_columns);
   }
 
   /**
@@ -118,6 +127,33 @@ public:
     stream << std::string(total_width, '-') << "\n";
   }
 
+  /**
+   * Set how to format numbers for each column
+   *
+   * Note: this is ignored for std::string columns
+   *
+   * @column_format The format for each column: MUST be the same length as the number of columns.
+   */
+  void setColumnFormat(const std::vector<VariadicTableColumnFormat> & column_format)
+  {
+    assert(column_format.size() == std::tuple_size<DataTuple>::value);
+
+    _column_format = column_format;
+  }
+
+  /**
+   * Set how many digits of precision to show for floating point numbers
+   *
+   * Note: this is ignored for std::string columns
+   *
+   * @column_format The precision for each column: MUST be the same length as the number of columns.
+   */
+  void setColumnPrecision(const std::vector<int> & precision)
+  {
+    assert(precision.size() == std::tuple_size<DataTuple>::value);
+    _precision = precision;
+  }
+
 protected:
   // Just some handy typedefs for the following two functions
   typedef decltype(&std::right) right_type;
@@ -174,7 +210,36 @@ protected:
   {
     auto & val = std::get<I>(t);
 
+    // Set the precision
+    if (!_precision.empty())
+    {
+      assert(_precision.size() ==
+             std::tuple_size<typename std::remove_reference<TupleType>::type>::value);
+
+      stream << std::setprecision(_precision[I]);
+    }
+
+    // Set the format
+    if (!_column_format.empty())
+    {
+      assert(_column_format.size() ==
+             std::tuple_size<typename std::remove_reference<TupleType>::type>::value);
+
+      if (_column_format[I] == VariadicTableColumnFormat::SCIENTIFIC)
+        stream << std::scientific;
+
+      if (_column_format[I] == VariadicTableColumnFormat::FIXED)
+        stream << std::fixed;
+
+      if (_column_format[I] == VariadicTableColumnFormat::PERCENT)
+        stream << std::fixed << std::setprecision(2);
+    }
+
     stream << std::setw(_column_sizes[I]) << justify<decltype(val)>(0) << val << "|";
+
+    // Unset the format
+    if (!_column_format.empty())
+      stream << std::defaultfloat;
 
     // Recursive call to print the next item
     print_each(std::forward<TupleType>(t), stream, std::integral_constant<size_t, I + 1>());
@@ -285,6 +350,12 @@ protected:
 
   /// Holds the printable width of each column
   std::vector<unsigned int> _column_sizes;
+
+  /// Column Format
+  std::vector<VariadicTableColumnFormat> _column_format;
+
+  /// Precision For each column
+  std::vector<int> _precision;
 };
 
 #endif

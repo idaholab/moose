@@ -91,35 +91,50 @@ PerfGraph::pop()
 }
 
 void
-PerfGraph::updateCurrentlyRunning()
+PerfGraph::updateTiming()
 {
+  // First update all of the currently running nodes
   auto now = std::chrono::steady_clock::now();
-
   for (unsigned int i = 0; i <= _current_position; i++)
   {
     auto node = _stack[i];
     node->addTime(now);
     node->setStartTime(now);
   }
+
+  // Next - Update the aggregate time for each timer
+  _section_self_time.resize(_section_name_to_id.size());
+  std::fill(_section_self_time.begin(), _section_self_time.end(), 0);
+
+  _section_children_time.resize(_section_name_to_id.size());
+  std::fill(_section_children_time.begin(), _section_children_time.end(), 0);
+
+  _section_total_time.resize(_section_name_to_id.size());
+  std::fill(_section_total_time.begin(), _section_total_time.end(), 0);
+
+  recursivelyFillTime(_root_node.get());
 }
 
 void
-PerfGraph::recursivelyFillTotalSelfTime(PerfNode * current_node,
-                                        std::vector<Real> & section_self_time)
+PerfGraph::recursivelyFillTime(PerfNode * current_node)
 {
   auto id = current_node->id();
 
-  auto time = std::chrono::duration<double>(current_node->selfTime()).count();
+  auto self = std::chrono::duration<double>(current_node->selfTime()).count();
+  auto children = std::chrono::duration<double>(current_node->childrenTime()).count();
+  auto total = std::chrono::duration<double>(current_node->totalTime()).count();
 
-  section_self_time[id] += time;
+  _section_self_time[id] += self;
+  _section_children_time[id] += children;
+  _section_total_time[id] += total;
 
   for (auto & child_it : current_node->children())
-    recursivelyFillTotalSelfTime(child_it.second.get(), section_self_time);
+    recursivelyFillTime(child_it.second.get());
 }
 
 void
 PerfGraph::recursivelyPrintGraph(PerfNode * current_node,
-                                 VariadicTable<std::string, Real, Real, Real> & vtable,
+                                 VariadicTable<std::string, Real, Real, Real, Real> & vtable,
                                  unsigned int level,
                                  unsigned int current_depth)
 {
@@ -128,11 +143,16 @@ PerfGraph::recursivelyPrintGraph(PerfNode * current_node,
 
   if (node_level <= level)
   {
+    mooseAssert(!_section_total_time.empty(),
+                "updateTiming() must be run before recursivelyPrintGraph!");
+
     auto section = std::string(current_depth * 2, ' ') + name;
     vtable.addRow({section,
                    std::chrono::duration<double>(current_node->selfTime()).count(),
                    std::chrono::duration<double>(current_node->childrenTime()).count(),
-                   std::chrono::duration<double>(current_node->totalTime()).count()});
+                   std::chrono::duration<double>(current_node->totalTime()).count(),
+                   100. * std::chrono::duration<double>(current_node->totalTime()).count() /
+                       _section_total_time[0]});
 
     current_depth++;
   }
@@ -142,9 +162,10 @@ PerfGraph::recursivelyPrintGraph(PerfNode * current_node,
 }
 
 void
-PerfGraph::recursivelyPrintHeaviestGraph(PerfNode * current_node,
-                                         VariadicTable<std::string, Real, Real, Real> & vtable,
-                                         unsigned int current_depth)
+PerfGraph::recursivelyPrintHeaviestGraph(
+    PerfNode * current_node,
+    VariadicTable<std::string, Real, Real, Real, Real> & vtable,
+    unsigned int current_depth)
 {
   auto & name = _id_to_section_name[current_node->id()];
 
@@ -153,7 +174,9 @@ PerfGraph::recursivelyPrintHeaviestGraph(PerfNode * current_node,
   vtable.addRow({section,
                  std::chrono::duration<double>(current_node->selfTime()).count(),
                  std::chrono::duration<double>(current_node->childrenTime()).count(),
-                 std::chrono::duration<double>(current_node->totalTime()).count()});
+                 std::chrono::duration<double>(current_node->totalTime()).count(),
+                 100. * std::chrono::duration<double>(current_node->totalTime()).count() /
+                     _section_total_time[0]});
 
   current_depth++;
 
@@ -176,11 +199,20 @@ PerfGraph::recursivelyPrintHeaviestGraph(PerfNode * current_node,
 void
 PerfGraph::print(const ConsoleStream & console, unsigned int level)
 {
-  updateCurrentlyRunning();
+  updateTiming();
 
   console << "\nPerformance Graph:\n";
-  VariadicTable<std::string, Real, Real, Real> vtable(
-      {"Section", "Self(s)", "Children(s)", "Total(s)"}, 13);
+  VariadicTable<std::string, Real, Real, Real, Real> vtable(
+      {"Section", "Self(s)", "Children(s)", "Total(s)", "Total %"}, 13);
+
+  vtable.setColumnFormat({VariadicTableColumnFormat::AUTO, // Doesn't matter
+                          VariadicTableColumnFormat::FIXED,
+                          VariadicTableColumnFormat::FIXED,
+                          VariadicTableColumnFormat::FIXED,
+                          VariadicTableColumnFormat::PERCENT});
+
+  vtable.setColumnPrecision({1, 3, 3, 3, 2});
+
   recursivelyPrintGraph(_root_node.get(), vtable, level);
   vtable.print(console);
 }
@@ -188,11 +220,20 @@ PerfGraph::print(const ConsoleStream & console, unsigned int level)
 void
 PerfGraph::printHeaviestBranch(const ConsoleStream & console)
 {
-  updateCurrentlyRunning();
+  updateTiming();
 
   console << "\nHeaviest Branch:\n";
-  VariadicTable<std::string, Real, Real, Real> vtable(
-      {"Section", "Self(s)", "Children(s)", "Total(s)"}, 13);
+  VariadicTable<std::string, Real, Real, Real, Real> vtable(
+      {"Section", "Self(s)", "Children(s)", "Total(s)", "Total %"}, 13);
+
+  vtable.setColumnFormat({VariadicTableColumnFormat::AUTO, // Doesn't matter
+                          VariadicTableColumnFormat::FIXED,
+                          VariadicTableColumnFormat::FIXED,
+                          VariadicTableColumnFormat::FIXED,
+                          VariadicTableColumnFormat::PERCENT});
+
+  vtable.setColumnPrecision({1, 3, 3, 3, 2});
+
   recursivelyPrintHeaviestGraph(_root_node.get(), vtable);
   vtable.print(console);
 }
@@ -200,18 +241,14 @@ PerfGraph::printHeaviestBranch(const ConsoleStream & console)
 void
 PerfGraph::printHeaviestSections(const ConsoleStream & console, const unsigned int num_sections)
 {
-  updateCurrentlyRunning();
+  updateTiming();
 
   console << "\nHeaviest Sections:\n";
 
-  // First - accumulate the time for each section
-  std::vector<Real> section_self_time(_section_name_to_id.size(), 0.);
-  recursivelyFillTotalSelfTime(_root_node.get(), section_self_time);
-
-  // Now indirect sort them
+  // Indirect Sort The Self Time
   std::vector<size_t> sorted;
-  Moose::indirectSort(section_self_time.begin(),
-                      section_self_time.end(),
+  Moose::indirectSort(_section_self_time.begin(),
+                      _section_self_time.end(),
                       sorted,
                       [](double lhs, double rhs) { return lhs > rhs; });
 
@@ -222,7 +259,7 @@ PerfGraph::printHeaviestSections(const ConsoleStream & console, const unsigned i
   {
     auto id = sorted[i];
 
-    vtable.addRow({_id_to_section_name[id], section_self_time[id]});
+    vtable.addRow({_id_to_section_name[id], _section_self_time[id]});
   }
 
   vtable.print(console);

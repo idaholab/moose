@@ -108,7 +108,7 @@ protected:
   /**
    * Udates the time for all currently running nodes
    */
-  void updateCurrentlyRunning();
+  void updateTiming();
 
   /**
    * Helper for printing out the graph
@@ -119,7 +119,7 @@ protected:
    * @param current_depth - Used in the recursion
    */
   void recursivelyPrintGraph(PerfNode * current_node,
-                             VariadicTable<std::string, Real, Real, Real> & vtable,
+                             VariadicTable<std::string, Real, Real, Real, Real> & vtable,
                              unsigned int level,
                              unsigned int current_depth = 0);
 
@@ -131,16 +131,17 @@ protected:
    * @param current_depth - Used in the recursion
    */
   void recursivelyPrintHeaviestGraph(PerfNode * current_node,
-                                     VariadicTable<std::string, Real, Real, Real> & vtable,
+                                     VariadicTable<std::string, Real, Real, Real, Real> & vtable,
                                      unsigned int current_depth = 0);
 
   /**
-   * Small helper function to fill in a vector with the total self time for each timer ID
+   * Updates the cumulative self/children/total time
+   *
+   * Note: requires that self/children/total time are resized and zeroed before calling.
    *
    * @param current_node The current node to work on
-   * @param section_self_time A vector of num_ids size to sum self time into
    */
-  void recursivelyFillTotalSelfTime(PerfNode * current_node, std::vector<Real> & section_self_time);
+  void recursivelyFillTime(PerfNode * current_node);
 
   /**
    * Helper for printing out the heaviest sections
@@ -160,6 +161,11 @@ protected:
 
   /// Map of section names to IDs
   std::map<std::string, PerfID> _section_name_to_id;
+
+  /// The self time for each section.  This is updated on updateTiming()
+  std::vector<Real> _section_self_time;
+  std::vector<Real> _section_children_time;
+  std::vector<Real> _section_total_time;
 
   /// Map of IDs to section names
   std::map<PerfID, std::string> _id_to_section_name;
