@@ -197,8 +197,6 @@ private:
   MPI_Comm _orig;
 };
 
-void enableFPE(bool on = true);
-
 // MOOSE Requires PETSc to run, this CPP check will cause a compile error if PETSc is not found
 #ifndef LIBMESH_HAVE_PETSC
 #error PETSc has not been detected, please ensure your environment is set up properly then rerun the libmesh build script and try to compile MOOSE again.

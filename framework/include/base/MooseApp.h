@@ -533,6 +533,9 @@ public:
   /// Returns whether the Application is running in check input mode
   bool checkInput() const { return _check_input; }
 
+  /// Returns whether FPE trapping is turned on (either because of debug or user requested)
+  inline bool getFPTrapFlag() const { return _trap_fpe; }
+
   /**
    * WARNING: This is an internal method for MOOSE, if you need the add new ExecFlagTypes then
    * use the registerExecFlag macro as done in Moose.C/h.
@@ -691,6 +694,9 @@ protected:
 
   /// Whether or not this is a restart run
   bool _restart;
+
+  /// Whether or not FPE trapping should be turned on.
+  bool _trap_fpe;
 
   /// The base name to recover from.  If blank then we will find the newest recovery file.
   std::string _recover_base;

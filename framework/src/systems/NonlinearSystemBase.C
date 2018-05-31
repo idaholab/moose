@@ -62,6 +62,7 @@
 #include "ElementPairLocator.h"
 #include "ODETimeKernel.h"
 #include "AllLocalDofIndicesThread.h"
+#include "FloatingPointExceptionGuard.h"
 
 // libMesh
 #include "libmesh/nonlinear_solver.h"
@@ -549,7 +550,7 @@ NonlinearSystemBase::computeResidualTags(const std::set<TagID> & tags)
   // not suppose to do anythin on matrix
   deactiveAllMatrixTags();
 
-  Moose::enableFPE();
+  FloatingPointExceptionGuard fpe_guard(_app);
 
   for (const auto & numeric_vec : _vecs_to_zero_for_residual)
     if (hasVector(numeric_vec))
@@ -602,7 +603,6 @@ NonlinearSystemBase::computeResidualTags(const std::set<TagID> & tags)
 
   // not supposed to do anything on matrix
   activeAllMatrixTags();
-  Moose::enableFPE(false);
   Moose::perf_log.pop("compute_residual()", "Execution");
 }
 
@@ -2211,7 +2211,7 @@ NonlinearSystemBase::computeJacobianTags(const std::set<TagID> & tags)
 {
   Moose::perf_log.push("compute_jacobian()", "Execution");
 
-  Moose::enableFPE();
+  FloatingPointExceptionGuard fpe_guard(_app);
 
   try
   {
@@ -2223,8 +2223,6 @@ NonlinearSystemBase::computeJacobianTags(const std::set<TagID> & tags)
     // calling stopSolve(), it is now up to PETSc to return a
     // "diverged" reason during the next solve.
   }
-
-  Moose::enableFPE(false);
 
   Moose::perf_log.pop("compute_jacobian()", "Execution");
 }
@@ -2247,7 +2245,7 @@ NonlinearSystemBase::computeJacobianBlocks(std::vector<JacobianBlock *> & blocks
 {
   Moose::perf_log.push("compute_jacobian_block()", "Execution");
 
-  Moose::enableFPE();
+  FloatingPointExceptionGuard fpe_guard(_app);
 
   for (unsigned int i = 0; i < blocks.size(); i++)
   {
@@ -2344,8 +2342,6 @@ NonlinearSystemBase::computeJacobianBlocks(std::vector<JacobianBlock *> & blocks
 
     jacobian.close();
   }
-
-  Moose::enableFPE(false);
 
   Moose::perf_log.pop("compute_jacobian_block()", "Execution");
 }
