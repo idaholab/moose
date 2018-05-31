@@ -133,10 +133,11 @@ PerfGraph::recursivelyFillTime(PerfNode * current_node)
 }
 
 void
-PerfGraph::recursivelyPrintGraph(PerfNode * current_node,
-                                 VariadicTable<std::string, Real, Real, Real, Real> & vtable,
-                                 unsigned int level,
-                                 unsigned int current_depth)
+PerfGraph::recursivelyPrintGraph(
+    PerfNode * current_node,
+    VariadicTable<std::string, Real, Real, Real, Real, Real, Real> & vtable,
+    unsigned int level,
+    unsigned int current_depth)
 {
   auto & name = _id_to_section_name[current_node->id()];
   auto & node_level = _id_to_level[current_node->id()];
@@ -149,7 +150,11 @@ PerfGraph::recursivelyPrintGraph(PerfNode * current_node,
     auto section = std::string(current_depth * 2, ' ') + name;
     vtable.addRow({section,
                    std::chrono::duration<double>(current_node->selfTime()).count(),
+                   100. * std::chrono::duration<double>(current_node->selfTime()).count() /
+                       _section_total_time[0],
                    std::chrono::duration<double>(current_node->childrenTime()).count(),
+                   100. * std::chrono::duration<double>(current_node->childrenTime()).count() /
+                       _section_total_time[0],
                    std::chrono::duration<double>(current_node->totalTime()).count(),
                    100. * std::chrono::duration<double>(current_node->totalTime()).count() /
                        _section_total_time[0]});
@@ -164,7 +169,7 @@ PerfGraph::recursivelyPrintGraph(PerfNode * current_node,
 void
 PerfGraph::recursivelyPrintHeaviestGraph(
     PerfNode * current_node,
-    VariadicTable<std::string, Real, Real, Real, Real> & vtable,
+    VariadicTable<std::string, Real, Real, Real, Real, Real, Real> & vtable,
     unsigned int current_depth)
 {
   mooseAssert(!_section_total_time.empty(),
@@ -176,7 +181,11 @@ PerfGraph::recursivelyPrintHeaviestGraph(
 
   vtable.addRow({section,
                  std::chrono::duration<double>(current_node->selfTime()).count(),
+                 100. * std::chrono::duration<double>(current_node->selfTime()).count() /
+                     _section_total_time[0],
                  std::chrono::duration<double>(current_node->childrenTime()).count(),
+                 100. * std::chrono::duration<double>(current_node->childrenTime()).count() /
+                     _section_total_time[0],
                  std::chrono::duration<double>(current_node->totalTime()).count(),
                  100. * std::chrono::duration<double>(current_node->totalTime()).count() /
                      _section_total_time[0]});
@@ -205,16 +214,18 @@ PerfGraph::print(const ConsoleStream & console, unsigned int level)
   updateTiming();
 
   console << "\nPerformance Graph:\n";
-  VariadicTable<std::string, Real, Real, Real, Real> vtable(
-      {"Section", "Self(s)", "Children(s)", "Total(s)", "Total %"}, 13);
+  VariadicTable<std::string, Real, Real, Real, Real, Real, Real> vtable(
+      {"Section", "Self(s)", "%", "Children(s)", "%", "Total(s)", "%"}, 10);
 
   vtable.setColumnFormat({VariadicTableColumnFormat::AUTO, // Doesn't matter
                           VariadicTableColumnFormat::FIXED,
+                          VariadicTableColumnFormat::PERCENT,
                           VariadicTableColumnFormat::FIXED,
+                          VariadicTableColumnFormat::PERCENT,
                           VariadicTableColumnFormat::FIXED,
                           VariadicTableColumnFormat::PERCENT});
 
-  vtable.setColumnPrecision({1, 3, 3, 3, 2});
+  vtable.setColumnPrecision({1, 3, 2, 3, 2, 3, 2});
 
   recursivelyPrintGraph(_root_node.get(), vtable, level);
   vtable.print(console);
@@ -226,16 +237,18 @@ PerfGraph::printHeaviestBranch(const ConsoleStream & console)
   updateTiming();
 
   console << "\nHeaviest Branch:\n";
-  VariadicTable<std::string, Real, Real, Real, Real> vtable(
-      {"Section", "Self(s)", "Children(s)", "Total(s)", "Total %"}, 13);
+  VariadicTable<std::string, Real, Real, Real, Real, Real, Real> vtable(
+      {"Section", "Self(s)", "%", "Children(s)", "%", "Total(s)", "%"}, 10);
 
   vtable.setColumnFormat({VariadicTableColumnFormat::AUTO, // Doesn't matter
                           VariadicTableColumnFormat::FIXED,
+                          VariadicTableColumnFormat::PERCENT,
                           VariadicTableColumnFormat::FIXED,
+                          VariadicTableColumnFormat::PERCENT,
                           VariadicTableColumnFormat::FIXED,
                           VariadicTableColumnFormat::PERCENT});
 
-  vtable.setColumnPrecision({1, 3, 3, 3, 2});
+  vtable.setColumnPrecision({1, 3, 2, 3, 2, 3, 2});
 
   recursivelyPrintHeaviestGraph(_root_node.get(), vtable);
   vtable.print(console);
@@ -255,7 +268,7 @@ PerfGraph::printHeaviestSections(const ConsoleStream & console, const unsigned i
                       sorted,
                       [](double lhs, double rhs) { return lhs > rhs; });
 
-  VariadicTable<std::string, Real, Real> vtable({"Section", "Self(s)", "Self %"}, 13);
+  VariadicTable<std::string, Real, Real> vtable({"Section", "Self(s)", "%"}, 10);
 
   vtable.setColumnFormat({VariadicTableColumnFormat::AUTO, // Doesn't matter
                           VariadicTableColumnFormat::FIXED,

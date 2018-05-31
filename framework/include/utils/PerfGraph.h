@@ -118,10 +118,11 @@ protected:
    * @param level The level to print out below (<=)
    * @param current_depth - Used in the recursion
    */
-  void recursivelyPrintGraph(PerfNode * current_node,
-                             VariadicTable<std::string, Real, Real, Real, Real> & vtable,
-                             unsigned int level,
-                             unsigned int current_depth = 0);
+  void
+  recursivelyPrintGraph(PerfNode * current_node,
+                        VariadicTable<std::string, Real, Real, Real, Real, Real, Real> & vtable,
+                        unsigned int level,
+                        unsigned int current_depth = 0);
 
   /**
    * Helper for printing out the trace that has taken the most time
@@ -130,9 +131,10 @@ protected:
    * @param console Where to print to
    * @param current_depth - Used in the recursion
    */
-  void recursivelyPrintHeaviestGraph(PerfNode * current_node,
-                                     VariadicTable<std::string, Real, Real, Real, Real> & vtable,
-                                     unsigned int current_depth = 0);
+  void recursivelyPrintHeaviestGraph(
+      PerfNode * current_node,
+      VariadicTable<std::string, Real, Real, Real, Real, Real, Real> & vtable,
+      unsigned int current_depth = 0);
 
   /**
    * Updates the cumulative self/children/total time
