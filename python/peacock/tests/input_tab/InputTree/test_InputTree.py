@@ -123,7 +123,7 @@ class Tests(Testing.PeacockTester):
         self.assertEqual(c.paramValue("foo"), "bar")
         self.assertIn(c.path, t.path_map)
 
-        self.assertEqual(c.parent.children_list.index(c.name), 5)
+        self.assertEqual(c.parent.children_list.index(c.name), 6)
         t.moveBlock("/NoExist", 0)
         t.moveBlock(c.path, 0)
         self.assertEqual(c.parent.children_list.index(c.name), 0)
