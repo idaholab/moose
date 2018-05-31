@@ -93,10 +93,10 @@ class RunPBS(QueueManager):
     def _optimizeSelect(self, job):
         """ Determine the optimal select statement for PBS """
 
-        slots = str(job.getMetaData().get('QUEUEING_NCPUS', 1))
+        slots = int(job.getMetaData().get('QUEUEING_NCPUS', 1))
         procs_per_node = int(self._getPBSResources())
-        num_full_chunks = int(slots) / procs_per_node
-        remaining_ranks = int(slots) % procs_per_node
+        num_full_chunks = slots / procs_per_node
+        remaining_ranks = slots % procs_per_node
 
         # slots > procs_per_node
         if num_full_chunks and remaining_ranks:

@@ -691,10 +691,10 @@ class TestHarness:
                 else: raise
 
         # If queueing is enabled, we need to use only one spec_file type (not tests _and_ speedtests)
-        if self.options.queueing:
-            if self.options.spec_file:
+        if self.options.queueing and self.options.spec_file:
                 self.options.input_file_name = os.path.basename(self.options.spec_file)
-            elif not self.options.input_file_name:
+
+        elif self.options.queueing and not self.options.input_file_name:
                 self.options.input_file_name = 'tests'
 
         # Use a previous results file, or declare the variable
