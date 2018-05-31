@@ -167,6 +167,9 @@ PerfGraph::recursivelyPrintHeaviestGraph(
     VariadicTable<std::string, Real, Real, Real, Real> & vtable,
     unsigned int current_depth)
 {
+  mooseAssert(!_section_total_time.empty(),
+              "updateTiming() must be run before recursivelyPrintHeaviestGraph!");
+
   auto & name = _id_to_section_name[current_node->id()];
 
   auto section = std::string(current_depth * 2, ' ') + name;
@@ -252,14 +255,25 @@ PerfGraph::printHeaviestSections(const ConsoleStream & console, const unsigned i
                       sorted,
                       [](double lhs, double rhs) { return lhs > rhs; });
 
-  VariadicTable<std::string, Real> vtable({"Section", "Total Time(s)"}, 13);
+  VariadicTable<std::string, Real, Real> vtable({"Section", "Self(s)", "Self %"}, 13);
+
+  vtable.setColumnFormat({VariadicTableColumnFormat::AUTO, // Doesn't matter
+                          VariadicTableColumnFormat::FIXED,
+                          VariadicTableColumnFormat::PERCENT});
+
+  vtable.setColumnPrecision({1, 3, 2});
+
+  mooseAssert(!_section_total_time.empty(),
+              "updateTiming() must be run before printHeaviestSections()!");
 
   // Now print out the largest ones
   for (unsigned int i = 0; i < num_sections; i++)
   {
     auto id = sorted[i];
 
-    vtable.addRow({_id_to_section_name[id], _section_self_time[id]});
+    vtable.addRow({_id_to_section_name[id],
+                   _section_self_time[id],
+                   _section_self_time[id] / _section_total_time[0]});
   }
 
   vtable.print(console);
