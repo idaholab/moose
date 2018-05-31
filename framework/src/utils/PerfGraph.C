@@ -102,17 +102,29 @@ PerfGraph::updateTiming()
     node->setStartTime(now);
   }
 
-  // Next - Update the aggregate time for each timer
-  _section_self_time.resize(_section_name_to_id.size());
-  std::fill(_section_self_time.begin(), _section_self_time.end(), 0);
+  // Zero out the entries
+  for (auto & section_time_it : _section_time)
+  {
+    auto & section_time = section_time_it.second;
 
-  _section_children_time.resize(_section_name_to_id.size());
-  std::fill(_section_children_time.begin(), _section_children_time.end(), 0);
-
-  _section_total_time.resize(_section_name_to_id.size());
-  std::fill(_section_total_time.begin(), _section_total_time.end(), 0);
+    section_time._self = 0.;
+    section_time._children = 0.;
+    section_time._total = 0.;
+  }
 
   recursivelyFillTime(_root_node.get());
+
+  // Update vector pointing to section times
+  // Note: we are doing this _after_ recursively filling
+  // because new entries may have been created
+  _section_time_ptrs.resize(_id_to_section_name.size());
+
+  for (auto & section_time_it : _section_time)
+  {
+    auto id = _section_name_to_id[section_time_it.first];
+
+    _section_time_ptrs[id] = &section_time_it.second;
+  }
 }
 
 void
@@ -124,9 +136,12 @@ PerfGraph::recursivelyFillTime(PerfNode * current_node)
   auto children = std::chrono::duration<double>(current_node->childrenTime()).count();
   auto total = std::chrono::duration<double>(current_node->totalTime()).count();
 
-  _section_self_time[id] += self;
-  _section_children_time[id] += children;
-  _section_total_time[id] += total;
+  // RHS insertion on purpose
+  auto & section_time = _section_time[_id_to_section_name[id]];
+
+  section_time._self += self;
+  section_time._children += children;
+  section_time._total += total;
 
   for (auto & child_it : current_node->children())
     recursivelyFillTime(child_it.second.get());
@@ -144,20 +159,24 @@ PerfGraph::recursivelyPrintGraph(
 
   if (node_level <= level)
   {
-    mooseAssert(!_section_total_time.empty(),
+    mooseAssert(!_section_time_ptrs.empty(),
                 "updateTiming() must be run before recursivelyPrintGraph!");
 
     auto section = std::string(current_depth * 2, ' ') + name;
-    vtable.addRow({section,
-                   std::chrono::duration<double>(current_node->selfTime()).count(),
-                   100. * std::chrono::duration<double>(current_node->selfTime()).count() /
-                       _section_total_time[0],
-                   std::chrono::duration<double>(current_node->childrenTime()).count(),
-                   100. * std::chrono::duration<double>(current_node->childrenTime()).count() /
-                       _section_total_time[0],
-                   std::chrono::duration<double>(current_node->totalTime()).count(),
-                   100. * std::chrono::duration<double>(current_node->totalTime()).count() /
-                       _section_total_time[0]});
+
+    // The total time of the root node
+    auto total_root_time = _section_time_ptrs[0]->_total;
+
+    vtable.addRow(
+        {section,
+         std::chrono::duration<double>(current_node->selfTime()).count(),
+         100. * std::chrono::duration<double>(current_node->selfTime()).count() / total_root_time,
+         std::chrono::duration<double>(current_node->childrenTime()).count(),
+         100. * std::chrono::duration<double>(current_node->childrenTime()).count() /
+             total_root_time,
+         std::chrono::duration<double>(current_node->totalTime()).count(),
+         100. * std::chrono::duration<double>(current_node->totalTime()).count() /
+             total_root_time});
 
     current_depth++;
   }
@@ -172,23 +191,24 @@ PerfGraph::recursivelyPrintHeaviestGraph(
     VariadicTable<std::string, Real, Real, Real, Real, Real, Real> & vtable,
     unsigned int current_depth)
 {
-  mooseAssert(!_section_total_time.empty(),
-              "updateTiming() must be run before recursivelyPrintHeaviestGraph!");
+  mooseAssert(!_section_time_ptrs.empty(),
+              "updateTiming() must be run before recursivelyPrintGraph!");
 
   auto & name = _id_to_section_name[current_node->id()];
 
   auto section = std::string(current_depth * 2, ' ') + name;
 
-  vtable.addRow({section,
-                 std::chrono::duration<double>(current_node->selfTime()).count(),
-                 100. * std::chrono::duration<double>(current_node->selfTime()).count() /
-                     _section_total_time[0],
-                 std::chrono::duration<double>(current_node->childrenTime()).count(),
-                 100. * std::chrono::duration<double>(current_node->childrenTime()).count() /
-                     _section_total_time[0],
-                 std::chrono::duration<double>(current_node->totalTime()).count(),
-                 100. * std::chrono::duration<double>(current_node->totalTime()).count() /
-                     _section_total_time[0]});
+  // The total time of the root node
+  auto total_root_time = _section_time_ptrs[0]->_total;
+
+  vtable.addRow(
+      {section,
+       std::chrono::duration<double>(current_node->selfTime()).count(),
+       100. * std::chrono::duration<double>(current_node->selfTime()).count() / total_root_time,
+       std::chrono::duration<double>(current_node->childrenTime()).count(),
+       100. * std::chrono::duration<double>(current_node->childrenTime()).count() / total_root_time,
+       std::chrono::duration<double>(current_node->totalTime()).count(),
+       100. * std::chrono::duration<double>(current_node->totalTime()).count() / total_root_time});
 
   current_depth++;
 
@@ -263,10 +283,21 @@ PerfGraph::printHeaviestSections(const ConsoleStream & console, const unsigned i
 
   // Indirect Sort The Self Time
   std::vector<size_t> sorted;
-  Moose::indirectSort(_section_self_time.begin(),
-                      _section_self_time.end(),
+  Moose::indirectSort(_section_time_ptrs.begin(),
+                      _section_time_ptrs.end(),
                       sorted,
-                      [](double lhs, double rhs) { return lhs > rhs; });
+                      [](SectionTime * lhs, SectionTime * rhs) {
+
+                        if (lhs && rhs)
+                          return lhs->_self > rhs->_self;
+
+                        // If the LHS exists - it's definitely bigger than a non-existant RHS
+                        if (lhs)
+                          return true;
+
+                        // Both don't exist - so it doesn't matter how we sort them
+                        return false;
+                      });
 
   VariadicTable<std::string, Real, Real> vtable({"Section", "Self(s)", "%"}, 10);
 
@@ -276,8 +307,11 @@ PerfGraph::printHeaviestSections(const ConsoleStream & console, const unsigned i
 
   vtable.setColumnPrecision({1, 3, 2});
 
-  mooseAssert(!_section_total_time.empty(),
+  mooseAssert(!_section_time_ptrs.empty(),
               "updateTiming() must be run before printHeaviestSections()!");
+
+  // The total time of the root node
+  auto total_root_time = _section_time_ptrs[0]->_total;
 
   // Now print out the largest ones
   for (unsigned int i = 0; i < num_sections; i++)
@@ -285,8 +319,8 @@ PerfGraph::printHeaviestSections(const ConsoleStream & console, const unsigned i
     auto id = sorted[i];
 
     vtable.addRow({_id_to_section_name[id],
-                   _section_self_time[id],
-                   _section_self_time[id] / _section_total_time[0]});
+                   _section_time_ptrs[id]->_self,
+                   100 * _section_time_ptrs[id]->_self / total_root_time});
   }
 
   vtable.print(console);

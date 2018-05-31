@@ -92,6 +92,18 @@ public:
 
 protected:
   /**
+   * Use to hold the time for each section
+   *
+   * These will be filled by updateTiming()
+   */
+  struct SectionTime
+  {
+    Real _self = 0.;
+    Real _children = 0.;
+    Real _total = 0.;
+  };
+
+  /**
    * Add a Node onto the end of the end of the current callstack
    *
    * Note: only accessible by using PerfGuard!
@@ -164,16 +176,28 @@ protected:
   /// Map of section names to IDs
   std::map<std::string, PerfID> _section_name_to_id;
 
-  /// The self time for each section.  This is updated on updateTiming()
-  std::vector<Real> _section_self_time;
-  std::vector<Real> _section_children_time;
-  std::vector<Real> _section_total_time;
-
   /// Map of IDs to section names
   std::map<PerfID, std::string> _id_to_section_name;
 
   /// Map of IDs to level
   std::map<PerfID, unsigned int> _id_to_level;
+
+  /// The time for each section.  This is updated on updateTiming()
+  /// Note that this is _total_ cumulative time across every place
+  /// that section is in the graph
+  ///
+  /// I'm making this a map so that we can give out references to the values
+  /// The three values are: self, children
+  /// The map is on std::string because we might need to be able to retrieve
+  /// timing values in a "late binding" situation _before_ the section
+  /// has been registered.
+  std::map<std::string, SectionTime> _section_time;
+
+  /// Pointers into _section_time indexed on PerfID
+  /// This is here for convenience and speed so we don't need
+  /// to iterate over the above map much - and it makes it
+  /// easier to sort
+  std::vector<SectionTime *> _section_time_ptrs;
 
   /// Whether or not timing is active
   bool _active;
