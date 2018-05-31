@@ -64,8 +64,6 @@
     variable = u
     neighbor_var = v
     boundary = master0_interface
-    D = 4
-    D_neighbor = 2
   [../]
 []
 
@@ -87,6 +85,26 @@
     variable = v
     boundary = 'master0_interface'
     v = u
+  [../]
+[]
+
+[Materials]
+  [./stateful]
+    type = StatefulMaterial
+    initial_diffusivity = 1
+    boundary = master0_interface
+  [../]
+  [./general]
+    type = GenericConstantMaterial
+    block = '0 1'
+    prop_names = 'dummy'
+    prop_values = '1'
+  [../]
+  [./boundary]
+    type = GenericConstantMaterial
+    boundary = 'master0_interface'
+    prop_names = 'D D_neighbor'
+    prop_values = '4 2'
   [../]
 []
 

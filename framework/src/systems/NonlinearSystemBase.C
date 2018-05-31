@@ -458,8 +458,6 @@ NonlinearSystemBase::addInterfaceKernel(std::string interface_kernel_name,
     _interface_kernels.addObject(interface_kernel, tid);
     _vars[tid].addBoundaryVars(boundary_ids, interface_kernel->getCoupledVars());
   }
-
-  _doing_dg = true;
 }
 
 void
