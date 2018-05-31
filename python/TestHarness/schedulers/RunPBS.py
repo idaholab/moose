@@ -7,10 +7,10 @@
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
-import os, re
+import os, re, sys
 from QueueManager import QueueManager
 from TestHarness import util # to execute qsub
-from itertools import groupby # to get most common ncpus from `pbsnode -a`
+from itertools import groupby # to get most common ncpus from `pbsnodes -a`
 
 ## This Class is responsible for maintaining an interface to the PBS scheduling syntax
 class RunPBS(QueueManager):
