@@ -194,8 +194,7 @@ public:
   /**
    * As above, but uses the non-deprecated std::tuple interface.
    */
-  std::vector<std::tuple<dof_id_type, unsigned short int, boundary_id_type>>
-  buildSideList();
+  std::vector<std::tuple<dof_id_type, unsigned short int, boundary_id_type>> buildSideList();
 
   /**
    * Calls BoundaryInfo::side_with_boundary_id().
