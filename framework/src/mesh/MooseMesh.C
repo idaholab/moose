@@ -2237,10 +2237,6 @@ MooseMesh::ghostGhostedBoundaries()
   if (!_use_distributed_mesh)
     return;
 
-  std::vector<dof_id_type> elems;
-  std::vector<unsigned short int> sides;
-  std::vector<boundary_id_type> ids;
-
   DistributedMesh & mesh = dynamic_cast<DistributedMesh &>(getMesh());
 
   // We would like to clear ghosted elements that were added by
@@ -2251,18 +2247,19 @@ MooseMesh::ghostGhostedBoundaries()
   // elements ghosted after AMR.
   //  mesh.clear_extra_ghost_elems();
 
-  mesh.get_boundary_info().build_side_list(elems, sides, ids);
-
   std::set<const Elem *, CompareElemsByLevel> boundary_elems_to_ghost;
   std::set<Node *> connected_nodes_to_ghost;
 
   std::vector<const Elem *> family_tree;
 
-  for (unsigned int i = 0; i < elems.size(); ++i)
+  for (const auto & t : mesh.get_boundary_info().build_side_list())
   {
-    if (_ghosted_boundaries.find(ids[i]) != _ghosted_boundaries.end())
+    auto elem_id = std::get<0>(t);
+    auto bc_id = std::get<2>(t);
+
+    if (_ghosted_boundaries.find(bc_id) != _ghosted_boundaries.end())
     {
-      Elem * elem = mesh.elem_ptr(elems[i]);
+      Elem * elem = mesh.elem_ptr(elem_id);
 
 #ifdef LIBMESH_ENABLE_AMR
       elem->family_tree(family_tree);
