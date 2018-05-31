@@ -33,7 +33,7 @@ class RunApp(Tester):
         params.addParam('command',            "The command line to execute for this test.")
 
         # Parallel/Thread testing
-        params.addParam('max_parallel', 1000, "Maximum number of MPI processes this test can be run with      (Default: 1000)")
+        params.addParam('max_parallel', 1000000, "Maximum number of MPI processes this test can be run with      (Default: 1000000)")
         params.addParam('min_parallel',    1, "Minimum number of MPI processes that this test can be run with (Default: 1)")
         params.addParam('max_threads',    16, "Max number of threads (Default: 16)")
         params.addParam('min_threads',     1, "Min number of threads (Default: 1)")

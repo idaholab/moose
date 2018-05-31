@@ -10,6 +10,7 @@
 import os, re
 from QueueManager import QueueManager
 from TestHarness import util # to execute qsub
+from itertools import groupby # to get most common ncpus from `pbsnode -a`
 
 ## This Class is responsible for maintaining an interface to the PBS scheduling syntax
 class RunPBS(QueueManager):
@@ -24,6 +25,25 @@ class RunPBS(QueueManager):
         self.params = params
         self.harness = harness
         self.options = self.harness.getOptions()
+        self.pbs_resources = None
+
+    def _getPBSResources(self):
+        """
+        Call `pbsnodes -a` and determine the most common core count per node available.
+        This is to support heterogeneous clusters.
+        """
+        # Do only once and store the results in a global
+        if not self.pbs_resources:
+            pbsnode_output = util.runCommand('pbsnodes -a')
+            core_nodes = re.findall(r'resources_available.ncpus = (\d+)', pbsnode_output)
+            if core_nodes:
+                # https://stackoverflow.com/questions/1518522/find-the-most-common-element-in-a-list
+                self.pbs_resources = max(groupby(sorted(core_nodes)), key=lambda(x, v):(len(list(v)),-core_nodes.index(x)))[0]
+            else:
+                print('`pbsnodes -a` returned unexpected output')
+                sys.exit(1)
+
+        return self.pbs_resources
 
     def getBadKeyArgs(self):
         """ arguments we need to remove from sys.argv """
@@ -70,6 +90,28 @@ class RunPBS(QueueManager):
                     job.addCaveats('TESTHARNESS EXCEPTION')
                 return True
 
+    def _optimizeSelect(self, job):
+        """ Determine the optimal select statement for PBS """
+
+        slots = str(job.getMetaData().get('QUEUEING_NCPUS', 1))
+        procs_per_node = int(self._getPBSResources())
+        num_full_chunks = int(slots) / procs_per_node
+        remaining_ranks = int(slots) % procs_per_node
+
+        # slots > procs_per_node
+        if num_full_chunks and remaining_ranks:
+            select_ncpus = 'ncpus=%d+%d:ncpus=%d' % (remaining_ranks, num_full_chunks, procs_per_node)
+
+        # slots < procs_per_node
+        elif remaining_ranks:
+            select_ncpus = 'ncpus=%d' % (remaining_ranks)
+
+        # slots = procs_per_node
+        else:
+            select_ncpus = 'ncpus=%d' % (procs_per_node)
+
+        return select_ncpus
+
     def _augmentTemplate(self, job):
         """ populate qsub script template with paramaters """
         template = {}
@@ -77,8 +119,8 @@ class RunPBS(QueueManager):
         # Launch script location
         template['launch_script'] = os.path.join(job.getTestDir(), job.getTestNameShort() + '.qsub')
 
-        # NCPUS
-        template['mpi_procs'] = job.getMetaData().get('QUEUEING_NCPUS', 1)
+        # Get an optimized select statement
+        template['ncpus'] = self._optimizeSelect(job)
 
         # Convert MAX_TIME to hours:minutes for walltime use
         max_time = job.getMetaData().get('QUEUEING_MAXTIME', 1)
@@ -137,7 +179,7 @@ class RunPBS(QueueManager):
         else:
             job.addMetaData(RunPBS={'ID' : launch_results,
                                     'QSUB_COMMAND' : command,
-                                    'NCPUS' : template['mpi_procs'],
+                                    'NCPUS' : template['ncpus'],
                                     'WALLTIME' : template['walltime'],
                                     'QSUB_OUTPUT' : template['output']})
             tester.setStatus(tester.no_status, 'LAUNCHING')

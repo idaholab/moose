@@ -690,6 +690,13 @@ class TestHarness:
                 if ex.errno == errno.EEXIST: pass
                 else: raise
 
+        # If queueing is enabled, we need to use only one spec_file type (not tests _and_ speedtests)
+        if self.options.queueing:
+            if self.options.spec_file:
+                self.options.input_file_name = os.path.basename(self.options.spec_file)
+            elif not self.options.input_file_name:
+                self.options.input_file_name = 'tests'
+
         # Use a previous results file, or declare the variable
         self.options.results_storage = {}
         if self.useExistingStorage():
@@ -827,15 +834,6 @@ class TestHarness:
         if opts.queue_cleanup and not opts.pbs:
             print('ERROR: --queue-cleanup can not be used without additional queue options')
             sys.exit(1)
-
-        # Flatten input_file_name from ['tests', 'speedtests'] to just tests if none supplied
-        # We can not support running two spec files during one launch into a third party queue manager.
-        # This is because Jobs created by spec files, have no way of accessing other jobs created by
-        # other spec files. They only know about the jobs a single spec file generates.
-        # NOTE: Which means, tests and speedtests running simultaneously currently have a chance to
-        # clobber each others output during normal operation!?
-        if opts.pbs and not opts.input_file_name:
-            self.options.input_file_name = 'tests'
 
         # Update any keys from the environment as necessary
         if not self.options.method:

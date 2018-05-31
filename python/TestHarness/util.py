@@ -7,11 +7,9 @@
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
-import platform, os, re
-import subprocess
+import platform, os, re, subprocess, tempfile, time, json
 from mooseutils import colorText
 from collections import OrderedDict
-import json
 
 TERM_COLS = int(os.getenv('MOOSE_TERM_COLS', '110'))
 TERM_FORMAT = os.getenv('MOOSE_TERM_FORMAT', 'njcst')
@@ -129,8 +127,13 @@ LIBMESH_OPTIONS = {
 def runCommand(cmd, cwd=None):
     # On Windows it is not allowed to close fds while redirecting output
     should_close = platform.system() != "Windows"
-    p = subprocess.Popen([cmd], cwd=cwd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, close_fds=should_close, shell=True)
-    output = p.communicate()[0]
+    with tempfile.TemporaryFile() as t:
+        p = subprocess.Popen([cmd], cwd=cwd, stdout=t, stderr=t, close_fds=should_close, shell=True)
+        while p.poll() is None:
+            time.sleep(0.3)
+        t.seek(0)
+        output = t.read()
+
     if (p.returncode != 0):
         output = 'ERROR: ' + output
     return output
