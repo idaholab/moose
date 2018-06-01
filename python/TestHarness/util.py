@@ -191,7 +191,10 @@ def formatResult(job, options, result='', color=True, **kwargs):
     # Support only one instance of a format identifier, but obey the order
     terminal_format = list(OrderedDict.fromkeys(list(TERM_FORMAT)))
     tester = job.getTester()
-    status = tester.getStatus()
+    if tester.isNoStatus():
+        status = job.getStatus()
+    else:
+        status = tester.getStatus()
     color_opts = {'code' : options.code, 'colored' : options.colored}
 
     # container for every printable item

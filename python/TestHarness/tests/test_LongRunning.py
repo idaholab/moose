@@ -15,5 +15,5 @@ class TestHarnessTester(TestHarnessTestCase):
         Test for RUNNING status in the TestHarness
         """
         output = self.runTests('-i', 'long_running')
-        self.assertIn('RUNNING...', output)
+        self.assertIn('RUNNING', output)
         self.assertIn('[FINISHED]', output)
