@@ -332,10 +332,10 @@ TensorMechanicsAction::actSubdomainChecks()
       if (_problem->getCoordSystem(subdomain) != _coord_system)
         mooseError("The TensorMechanics action requires all subdomains to have the same coordinate "
                    "system.");
-  }
 
-  if (_coord_system == Moose::COORD_RZ && _out_of_plane_direction != OutOfPlaneDirection::z)
-    paramError("out_of_plane_direction", "must be set to z for axisymmetric simulations.");
+    if (_coord_system == Moose::COORD_RZ && _out_of_plane_direction != OutOfPlaneDirection::z)
+      paramError("out_of_plane_direction", "must be set to z for axisymmetric simulations.");
+  }
 }
 
 void

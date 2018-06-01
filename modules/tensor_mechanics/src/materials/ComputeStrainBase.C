@@ -57,10 +57,10 @@ ComputeStrainBase::ComputeStrainBase(const InputParameters & parameters)
   }
 
   if (_ndisp == 1 && _volumetric_locking_correction)
-    mooseError("Volumetric locking correction has to be set to false for 1-D problems.");
+    paramError("volumetric_locking_correction", "has to be set to false for 1-D problems.");
 
   if (getParam<bool>("use_displaced_mesh"))
-    mooseError("The strain calculator needs to run on the undisplaced mesh.");
+    paramError("use_displaced_mesh", "The strain calculator needs to run on the undisplaced mesh.");
 }
 
 void
@@ -87,7 +87,8 @@ ComputeStrainBase::displacementIntegrityCheck()
 {
   // Checking for consistency between mesh size and length of the provided displacements vector
   if (_ndisp != _mesh.dimension())
-    mooseError(
+    paramError(
+        "displacements",
         "The number of variables supplied in 'displacements' must match the mesh dimension.");
 }
 
