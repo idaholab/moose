@@ -475,7 +475,7 @@ class TestHarness:
 
             # Just print current status without saving results
             else:
-                print(util.formatResult(job, self.options, result='RUNNING...', caveats=False))
+                print(util.formatResult(job, self.options, result='RUNNING', caveats=False))
 
     # Print final results, close open files, and exit with the correct error code
     def cleanup(self):
