@@ -2,31 +2,31 @@
   [./PermFromPoro01]
     type = 'CSVDiff'
     input = 'PermFromPoro01.i'
-    csvdiff = 'PermFromPoro01.csv'
+    csvdiff = 'PermFromPoro01_out.csv'
     rel_err = 1.0E-5
   [../]
   [./PermFromPoro02]
     type = 'CSVDiff'
     input = 'PermFromPoro02.i'
-    csvdiff = 'PermFromPoro02.csv'
+    csvdiff = 'PermFromPoro02_out.csv'
     rel_err = 1.0E-5
   [../]
   [./PermFromPoro03]
     type = 'CSVDiff'
     input = 'PermFromPoro03.i'
-    csvdiff = 'PermFromPoro03.csv'
+    csvdiff = 'PermFromPoro03_out.csv'
     rel_err = 1.0E-5
   [../]
   [./PermFromPoro04]
     type = 'CSVDiff'
     input = 'PermFromPoro04.i'
-    csvdiff = 'PermFromPoro04.csv'
+    csvdiff = 'PermFromPoro04_out.csv'
     rel_err = 1.0E-5
   [../]
   [./PermFromPoro05]
     type = 'CSVDiff'
     input = 'PermFromPoro05.i'
-    csvdiff = 'PermFromPoro05.csv'
+    csvdiff = 'PermFromPoro05_out.csv'
     rel_err = 1.0E-5
   [../]
 
@@ -57,4 +57,22 @@
     expect_err = 'PorousFlowPorosity: When fluid=true you must provide a solid_bulk'
   [../]
 
+  [./PermTensorFromVar01]
+    type = 'CSVDiff'
+    input = 'PermTensorFromVar01.i'
+    csvdiff = 'PermTensorFromVar01_out.csv'
+    rel_err = 1.0E-5
+  [../]
+  [./PermTensorFromVar02]
+    type = 'CSVDiff'
+    input = 'PermTensorFromVar02.i'
+    csvdiff = 'PermTensorFromVar02_out.csv'
+    rel_err = 1.0E-5
+  [../]
+  [./PermTensorFromVar03]
+    type = 'CSVDiff'
+    input = 'PermTensorFromVar03.i'
+    csvdiff = 'PermTensorFromVar03_out.csv'
+    rel_err = 1.0E-5
+  [../]
 []

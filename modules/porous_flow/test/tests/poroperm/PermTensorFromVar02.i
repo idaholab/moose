@@ -1,6 +1,7 @@
-# Testing permeability from porosity
+# Testing permeability calculated from scalar and tensor
 # Trivial test, checking calculated permeability is correct
-# k = k_anisotropic * B * exp(A * phi)
+# when scalar is a FunctionAux.
+# k = k_anisotropy * perm
 
 [Mesh]
   type = GeneratedMesh
@@ -47,8 +48,15 @@
   [../]
 []
 
+[Functions]
+  [./perm_fn]
+    type = ParsedFunction
+    value = '2*(x+1)'
+  [../]
+[]
+
 [AuxVariables]
-  [./poro]
+  [./perm_var]
     order = CONSTANT
     family = MONOMIAL
   [../]
@@ -67,10 +75,10 @@
 []
 
 [AuxKernels]
-  [./poro]
-    type = MaterialRealAux
-    property = PorousFlow_porosity_qp
-    variable = poro
+  [./perm_var]
+    type = FunctionAux
+    function = perm_fn
+    variable = perm_var
   [../]
   [./perm_x]
     type = MaterialRealTensorValueAux
@@ -96,35 +104,35 @@
 []
 
 [Postprocessors]
-  [./perm_x_bottom]
+  [./perm_x_left]
     type = PointValue
     variable = perm_x
-    point = '0 0 0'
+    point = '0.5 0 0'
   [../]
-  [./perm_y_bottom]
+  [./perm_y_left]
     type = PointValue
     variable = perm_y
-    point = '0 0 0'
+    point = '0.5 0 0'
   [../]
-  [./perm_z_bottom]
+  [./perm_z_left]
     type = PointValue
     variable = perm_z
-    point = '0 0 0'
+    point = '0.5 0 0'
   [../]
-  [./perm_x_top]
+  [./perm_x_right]
     type = PointValue
     variable = perm_x
-    point = '3 0 0'
+    point = '2.5 0 0'
   [../]
-  [./perm_y_top]
+  [./perm_y_right]
     type = PointValue
     variable = perm_y
-    point = '3 0 0'
+    point = '2.5 0 0'
   [../]
-  [./perm_z_top]
+  [./perm_z_right]
     type = PointValue
     variable = perm_z
-    point = '3 0 0'
+    point = '2.5 0 0'
   [../]
 []
 
@@ -147,10 +155,6 @@
   [./FluidProperties]
     [./simple_fluid]
       type = SimpleFluidProperties
-      bulk_modulus = 2.2e9
-      viscosity = 1e-3
-      density0 = 1000
-      thermal_expansion = 0
     [../]
   [../]
 []
@@ -158,11 +162,9 @@
 [Materials]
   # Permeability
   [./permeability]
-    type = PorousFlowPermeabilityExponential
+    type = PorousFlowPermeabilityTensorFromVar
     k_anisotropy = '1 0 0  0 2 0  0 0 0.1'
-    poroperm_function = exp_k
-    A = 10
-    B = 1e-8
+    perm = perm_var
   [../]
   [./temperature]
     type = PorousFlowTemperature

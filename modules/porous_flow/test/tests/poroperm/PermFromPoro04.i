@@ -261,7 +261,6 @@
 []
 
 [Outputs]
-  file_base = PermFromPoro04
   csv = true
   execute_on = 'timestep_end'
 []
