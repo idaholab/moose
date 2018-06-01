@@ -35,6 +35,16 @@ class PerfGraph
 {
 public:
   /**
+   * For retrieving values
+   */
+  enum TimeType : char
+  {
+    SELF,
+    CHILDREN,
+    TOTAL
+  };
+
+  /**
    * Create a new PerfGraph
    */
   PerfGraph();
@@ -90,6 +100,60 @@ public:
    */
   void setActive(bool active) { _active = active; }
 
+  /**
+   * Get a reference to the time for a section
+   */
+  const Real & getTime(const TimeType type, const std::string & section_name)
+  {
+    switch (type)
+    {
+      case SELF:
+        return _section_time[section_name]._self;
+      case CHILDREN:
+        return _section_time[section_name]._children;
+      case TOTAL:
+        return _section_time[section_name]._total;
+    }
+  }
+
+  /**
+   * Get a reference to the self time for a section
+   *
+   * This reference can be held onto and the value
+   * will be updated anytime updateTiming() is called.
+   */
+  const Real & getSelfTime(const std::string & section_name)
+  {
+    return _section_time[section_name]._self;
+  }
+
+  /**
+   * Get a reference to the children time for a section
+   *
+   * This reference can be held onto and the value
+   * will be updated anytime updateTiming() is called.
+   */
+  const Real & getChildrenTime(const std::string & section_name)
+  {
+    return _section_time[section_name]._children;
+  }
+
+  /**
+   * Get a reference to the total time for a section
+   *
+   * This reference can be held onto and the value
+   * will be updated anytime updateTiming() is called.
+   */
+  const Real & getTotalTime(const std::string & section_name)
+  {
+    return _section_time[section_name]._total;
+  }
+
+  /**
+   * Udates the time section_time and time for all currently running nodes
+   */
+  void updateTiming();
+
 protected:
   /**
    * Use to hold the time for each section
@@ -116,11 +180,6 @@ protected:
    * Note: only accessible by using PerfGuard!
    */
   void pop();
-
-  /**
-   * Udates the time for all currently running nodes
-   */
-  void updateTiming();
 
   /**
    * Helper for printing out the graph
