@@ -62,7 +62,7 @@
   csv = true
   [pgraph]
     type = PerfGraphOutput
-    level = 1
+    level = 3
     heaviest_branch = true
     heaviest_sections = 10
   []
