@@ -20,7 +20,7 @@ InputParameters validParams<Compute2DIncrementalStrain>();
 /**
  * Compute2DIncrementalStrain defines a strain increment only for
  * incremental strains in 2D geometries, handling the out of plane strains.
- * Compute2DIncrementalStrain contains a virtual method to define the strain_zz
+ * Compute2DIncrementalStrain contains a virtual method to define the out-of-plane strain
  * as a general nonzero value in the inherited classes ComputePlaneIncrementalStrain
  * and ComputeAxisymmetricRZIncrementalStrain.
  */
@@ -30,18 +30,22 @@ public:
   Compute2DIncrementalStrain(const InputParameters & parameters);
 
 protected:
+  void initialSetup() override;
+  virtual void displacementIntegrityCheck() override;
   /// Computes the current and old deformation gradients with the assumptions for
   /// 2D geometries, including plane strain, generalized plane strain, and axisymmetric,
   /// and returns the total strain increment tensor
   virtual void computeTotalStrainIncrement(RankTwoTensor & total_strain_increment) override;
 
-  /// Computes the current out-of-plane displacement gradient; as a virtual function, this function is
+  /// Computes the current out-of-plane component of the displacement gradient; as a virtual function, this function is
   /// overwritten for the specific geometries defined by inheriting classes
-  virtual Real computeGradDispZZ() = 0;
+  virtual Real computeOutOfPlaneGradDisp() = 0;
 
-  /// Computes the old out-of-plane displacement gradient; as a virtual function, this function is
+  /// Computes the old out-of-plane component of the displacement gradient; as a virtual function, this function is
   /// overwritten for the specific geometries defined by inheriting classes
-  virtual Real computeGradDispZZOld() = 0;
+  virtual Real computeOutOfPlaneGradDispOld() = 0;
+
+  const unsigned int _out_of_plane_direction;
 };
 
 #endif // COMPUTE2DINCREMENTALSTRAIN_H

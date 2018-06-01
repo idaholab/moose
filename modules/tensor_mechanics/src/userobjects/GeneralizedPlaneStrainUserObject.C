@@ -30,6 +30,9 @@ validParams<GeneralizedPlaneStrainUserObject>()
       "out_of_plane_pressure",
       "0",
       "Function used to prescribe pressure in the out-of-plane direction");
+  MooseEnum outOfPlaneDirection("x y z", "z");
+  params.addParam<MooseEnum>(
+      "out_of_plane_direction", outOfPlaneDirection, "The direction of the out-of-plane strain.");
   params.addParam<Real>("factor", 1.0, "Scale factor applied to prescribed pressure");
   params.addParam<std::string>("base_name", "Material properties base name");
   params.set<ExecFlagEnum>("execute_on") = EXEC_LINEAR;
@@ -55,7 +58,7 @@ GeneralizedPlaneStrainUserObject::initialize()
   if (isParamValid("subblock_index_provider"))
     _subblock_id_provider = &getUserObject<SubblockIndexProvider>("subblock_index_provider");
   if (_assembly.coordSystem() == Moose::COORD_XYZ)
-    _scalar_out_of_plane_strain_direction = 2;
+    _scalar_out_of_plane_strain_direction = getParam<MooseEnum>("out_of_plane_direction");
   else if (_assembly.coordSystem() == Moose::COORD_RZ)
     _scalar_out_of_plane_strain_direction = 1;
   else

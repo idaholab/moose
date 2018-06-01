@@ -59,6 +59,8 @@ ComputeAxisymmetric1DSmallStrain::ComputeAxisymmetric1DSmallStrain(
 void
 ComputeAxisymmetric1DSmallStrain::initialSetup()
 {
+  ComputeStrainBase::initialSetup();
+
   if (getBlockCoordSystem() != Moose::COORD_RZ)
     mooseError("The coordinate system must be set to RZ for Axisymmetric geometries.");
 }

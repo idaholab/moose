@@ -44,10 +44,10 @@ validParams<StressDivergenceTensors>()
                        "The name of the out_of_plane_strain variable used in the "
                        "WeakPlaneStress kernel. Required only if want to provide off-diagonal "
                        "Jacobian in plane stress analysis using weak formulation.");
-  MooseEnum out_of_plane_strain_direction("x y z", "z");
+  MooseEnum out_of_plane_direction("x y z", "z");
   params.addParam<MooseEnum>(
-      "out_of_plane_strain_direction",
-      out_of_plane_strain_direction,
+      "out_of_plane_direction",
+      out_of_plane_direction,
       "The direction of the out_of_plane_strain variable used in the WeakPlaneStress kernel.");
   params.addParam<std::string>("base_name", "Material property base name");
   params.set<bool>("use_displaced_mesh") = false;
@@ -76,7 +76,7 @@ StressDivergenceTensors::StressDivergenceTensors(const InputParameters & paramet
                                    : nullptr),
     _out_of_plane_strain_coupled(isCoupled("out_of_plane_strain")),
     _out_of_plane_strain_var(_out_of_plane_strain_coupled ? coupled("out_of_plane_strain") : 0),
-    _out_of_plane_strain_direction(getParam<MooseEnum>("out_of_plane_strain_direction")),
+    _out_of_plane_direction(getParam<MooseEnum>("out_of_plane_direction")),
     _avg_grad_test(_test.size(), std::vector<Real>(3, 0.0)),
     _avg_grad_phi(_phi.size(), std::vector<Real>(3, 0.0)),
     _volumetric_locking_correction(getParam<bool>("volumetric_locking_correction"))
@@ -85,8 +85,11 @@ StressDivergenceTensors::StressDivergenceTensors(const InputParameters & paramet
     _disp_var[i] = coupled("displacements", i);
 
   // Checking for consistency between mesh size and length of the provided displacements vector
-  if (_ndisp != _mesh.dimension())
-    mooseError("The number of displacement variables supplied must match the mesh dimension.");
+  if (_out_of_plane_direction != 2 && _ndisp != 3)
+    mooseError("For 2D simulations where the out-of-plane direction is x or y coordinate "
+               "directions the number of supplied displacements must be three.");
+  else if (_out_of_plane_direction == 2 && _ndisp != _mesh.dimension())
+    mooseError("The number of displacement variables supplied must match the mesh dimension");
 
   if (_use_finite_deform_jacobian)
   {
@@ -258,6 +261,12 @@ StressDivergenceTensors::computeQpOffDiagJacobian(unsigned int jvar)
   for (unsigned int coupled_component = 0; coupled_component < _ndisp; ++coupled_component)
     if (jvar == _disp_var[coupled_component])
     {
+      if (_out_of_plane_direction != 2)
+      {
+        if (coupled_component == _out_of_plane_direction)
+          continue;
+      }
+
       if (_use_finite_deform_jacobian)
         return ElasticityTensorTools::elasticJacobian(_finite_deform_Jacobian_mult[_qp],
                                                       _component,
@@ -306,10 +315,8 @@ StressDivergenceTensors::computeQpOffDiagJacobian(unsigned int jvar)
 
   // off-diagonal Jacobian with respect to a coupled out_of_plane_strain variable
   if (_out_of_plane_strain_coupled && jvar == _out_of_plane_strain_var)
-    return _Jacobian_mult[_qp](_component,
-                               _component,
-                               _out_of_plane_strain_direction,
-                               _out_of_plane_strain_direction) *
+    return _Jacobian_mult[_qp](
+               _component, _component, _out_of_plane_direction, _out_of_plane_direction) *
            _grad_test[_i][_qp](_component) * _phi[_j][_qp];
 
   // off-diagonal Jacobian with respect to a coupled temperature variable

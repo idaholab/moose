@@ -67,6 +67,8 @@ ComputeAxisymmetric1DIncrementalStrain::ComputeAxisymmetric1DIncrementalStrain(
 void
 ComputeAxisymmetric1DIncrementalStrain::initialSetup()
 {
+  ComputeIncrementalStrainBase::initialSetup();
+
   if (getBlockCoordSystem() != Moose::COORD_RZ)
     mooseError("The coordinate system must be set to RZ for Axisymmetric 1D simulations");
 }

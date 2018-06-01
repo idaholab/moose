@@ -45,7 +45,7 @@ ComputePlaneIncrementalStrain::ComputePlaneIncrementalStrain(const InputParamete
 }
 
 Real
-ComputePlaneIncrementalStrain::computeGradDispZZ()
+ComputePlaneIncrementalStrain::computeOutOfPlaneGradDisp()
 {
   if (_scalar_out_of_plane_strain_coupled)
     return _scalar_out_of_plane_strain[0];
@@ -54,7 +54,7 @@ ComputePlaneIncrementalStrain::computeGradDispZZ()
 }
 
 Real
-ComputePlaneIncrementalStrain::computeGradDispZZOld()
+ComputePlaneIncrementalStrain::computeOutOfPlaneGradDispOld()
 {
   if (_scalar_out_of_plane_strain_coupled)
     return _scalar_out_of_plane_strain_old[0];

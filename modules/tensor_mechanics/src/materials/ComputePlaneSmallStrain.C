@@ -39,7 +39,7 @@ ComputePlaneSmallStrain::ComputePlaneSmallStrain(const InputParameters & paramet
 }
 
 Real
-ComputePlaneSmallStrain::computeStrainZZ()
+ComputePlaneSmallStrain::computeOutOfPlaneStrain()
 {
   if (_scalar_out_of_plane_strain_coupled)
     return _scalar_out_of_plane_strain[0];

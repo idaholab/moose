@@ -31,8 +31,12 @@ ComputeIncrementalStrainBase::ComputeIncrementalStrainBase(const InputParameters
 {
   for (unsigned int i = 0; i < _eigenstrains_old.size(); ++i)
     _eigenstrains_old[i] = &getMaterialPropertyOld<RankTwoTensor>(_eigenstrain_names[i]);
+}
 
-  // fetch coupled old displacement gradient, setting components for unused dimensions to zero
+void
+ComputeIncrementalStrainBase::initialSetup()
+{
+  ComputeStrainBase::initialSetup();
   for (unsigned int i = 0; i < 3; ++i)
   {
     if (_fe_problem.isTransient() && i < _ndisp)

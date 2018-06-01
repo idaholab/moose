@@ -33,6 +33,9 @@ validParams<GeneralizedPlaneStrainAction>()
                                                  "y direction for 1D Axisymmetric or in z "
                                                  "direction for 2D Cartesian problems)");
   params.addParam<NonlinearVariableName>("temperature", "The temperature variable");
+  MooseEnum outOfPlaneDirection("x y z", "z");
+  params.addParam<MooseEnum>(
+      "out_of_plane_direction", outOfPlaneDirection, "The direction of the out-of-plane strain.");
   params.addParam<FunctionName>("out_of_plane_pressure",
                                 "0",
                                 "Function used to prescribe pressure "
@@ -53,11 +56,9 @@ validParams<GeneralizedPlaneStrainAction>()
 GeneralizedPlaneStrainAction::GeneralizedPlaneStrainAction(const InputParameters & params)
   : Action(params),
     _displacements(getParam<std::vector<NonlinearVariableName>>("displacements")),
-    _ndisp(_displacements.size())
+    _ndisp(_displacements.size()),
+    _out_of_plane_direction(getParam<MooseEnum>("out_of_plane_direction"))
 {
-  if (_ndisp > 2)
-    mooseError("GeneralizedPlaneStrain only works for 1D axisymmetric or 2D generalized plane "
-               "strain cases!");
 }
 
 void
@@ -81,6 +82,9 @@ GeneralizedPlaneStrainAction::act()
     // add off-diagonal jacobian kernels for the displacements
     for (unsigned int i = 0; i < _ndisp; ++i)
     {
+      if (_out_of_plane_direction == i)
+        continue;
+
       std::string k_name = _name + "GeneralizedPlaneStrainOffDiag_disp" + Moose::stringify(i);
       params.set<NonlinearVariableName>("variable") = _displacements[i];
 

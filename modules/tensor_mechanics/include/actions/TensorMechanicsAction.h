@@ -79,6 +79,15 @@ protected:
     /* PlaneStress */
   } _planar_formulation;
 
+  enum class OutOfPlaneDirection
+  {
+    x,
+    y,
+    z
+  };
+
+  const OutOfPlaneDirection _out_of_plane_direction;
+
   /// use displaced mesh (true unless _strain is SMALL)
   bool _use_displaced_mesh;
 
