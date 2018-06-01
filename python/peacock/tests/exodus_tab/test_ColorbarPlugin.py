@@ -202,5 +202,41 @@ class TestColorbarPlugin(Testing.PeacockImageTestCase):
         self.assertFalse(self._widget.ColorbarPlugin.ColorBarToggle.isChecked())
         self.assertTrue(self._widget.ColorbarPlugin.ColorMapReverse.isChecked())
 
+    def testMinMaxState(self):
+        """
+        Test state change with changing min/max toggles.
+        """
+        self.assertEqual(self._widget.ColorbarPlugin.RangeMinimum.text(), '0.0')
+        self.assertEqual(self._widget.ColorbarPlugin.RangeMaximum.text(), '2.0')
+
+        self._widget.ColorbarPlugin.RangeMinimumMode.setChecked(QtCore.Qt.Checked)
+        self._widget.ColorbarPlugin.RangeMinimumMode.clicked.emit(QtCore.Qt.Checked)
+        self._widget.ColorbarPlugin.RangeMaximumMode.setChecked(QtCore.Qt.Checked)
+        self._widget.ColorbarPlugin.RangeMaximumMode.clicked.emit(QtCore.Qt.Checked)
+
+        self._widget.ColorbarPlugin.RangeMinimum.setText(str(0.5))
+        self._widget.ColorbarPlugin.RangeMinimum.editingFinished.emit()
+        self._widget.ColorbarPlugin.RangeMaximum.setText(str(1.5))
+        self._widget.ColorbarPlugin.RangeMaximum.editingFinished.emit()
+
+        self.assertEqual(self._widget.ColorbarPlugin.RangeMinimum.text(), '0.5')
+        self.assertEqual(self._widget.ColorbarPlugin.RangeMaximum.text(), '1.5')
+
+        self._widget.ColorbarPlugin.RangeMinimumMode.setChecked(QtCore.Qt.Unchecked)
+        self._widget.ColorbarPlugin.RangeMinimumMode.clicked.emit(QtCore.Qt.Unchecked)
+        self._widget.ColorbarPlugin.RangeMaximumMode.setChecked(QtCore.Qt.Unchecked)
+        self._widget.ColorbarPlugin.RangeMaximumMode.clicked.emit(QtCore.Qt.Unchecked)
+
+        self.assertEqual(self._widget.ColorbarPlugin.RangeMinimum.text(), '0.0')
+        self.assertEqual(self._widget.ColorbarPlugin.RangeMaximum.text(), '2.0')
+
+        self._widget.ColorbarPlugin.RangeMinimumMode.setChecked(QtCore.Qt.Checked)
+        self._widget.ColorbarPlugin.RangeMinimumMode.clicked.emit(QtCore.Qt.Checked)
+        self._widget.ColorbarPlugin.RangeMaximumMode.setChecked(QtCore.Qt.Checked)
+        self._widget.ColorbarPlugin.RangeMaximumMode.clicked.emit(QtCore.Qt.Checked)
+
+        self.assertEqual(self._widget.ColorbarPlugin.RangeMinimum.text(), '0.5')
+        self.assertEqual(self._widget.ColorbarPlugin.RangeMaximum.text(), '1.5')
+
 if __name__ == '__main__':
     unittest.main(module=__name__, verbosity=2)

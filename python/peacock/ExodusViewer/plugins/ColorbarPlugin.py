@@ -245,7 +245,8 @@ class ColorbarPlugin(QtWidgets.QGroupBox, ExodusPlugin):
         """
         Callback for min. range mode toggle.
         """
-        self.load(self.RangeMinimum)
+        if self.RangeMinimumMode.isChecked():
+            self.load(self.RangeMinimum)
         self.store(self.RangeMinimumMode)
         self.updateOptions()
         self.windowRequiresUpdate.emit()
@@ -257,7 +258,8 @@ class ColorbarPlugin(QtWidgets.QGroupBox, ExodusPlugin):
         qobject.editingFinished.connect(self._callbackRangeMinimum)
 
     def _callbackRangeMinimum(self):
-        self.store(self.RangeMinimum)
+        if self.RangeMinimumMode.isChecked():
+            self.store(self.RangeMinimum)
         self.updateOptions()
         self.windowRequiresUpdate.emit()
 
@@ -271,7 +273,8 @@ class ColorbarPlugin(QtWidgets.QGroupBox, ExodusPlugin):
         """
         Callback for max. range mode toggle.
         """
-        self.load(self.RangeMaximum)
+        if self.RangeMaximumMode.isChecked():
+            self.load(self.RangeMaximum)
         self.store(self.RangeMaximumMode)
         self.updateOptions()
         self.windowRequiresUpdate.emit()
@@ -283,7 +286,8 @@ class ColorbarPlugin(QtWidgets.QGroupBox, ExodusPlugin):
         qobject.editingFinished.connect(self._callbackRangeMaximum)
 
     def _callbackRangeMaximum(self):
-        self.store(self.RangeMaximum)
+        if self.RangeMaximumMode.isChecked():
+            self.store(self.RangeMaximum)
         self.updateOptions()
         self.windowRequiresUpdate.emit()
 
