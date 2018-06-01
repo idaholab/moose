@@ -18,12 +18,40 @@ validParams<Compute2DFiniteStrain>()
   InputParameters params = validParams<ComputeFiniteStrain>();
   params.addClassDescription(
       "Compute a strain increment and rotation increment for finite strains in 2D geometries.");
+
+  MooseEnum outOfPlaneDirection("x y z", "z");
+  params.addParam<MooseEnum>(
+      "out_of_plane_direction", outOfPlaneDirection, "The direction of the out-of-plane strain.");
   return params;
 }
 
 Compute2DFiniteStrain::Compute2DFiniteStrain(const InputParameters & parameters)
-  : ComputeFiniteStrain(parameters)
+  : ComputeFiniteStrain(parameters),
+    _out_of_plane_direction(getParam<MooseEnum>("out_of_plane_direction"))
 {
+}
+
+void
+Compute2DFiniteStrain::initialSetup()
+{
+  for (unsigned int i = 0; i < 3; ++i)
+  {
+    if (_out_of_plane_direction == i)
+    {
+      _disp[i] = &_zero;
+      _grad_disp[i] = &_grad_zero;
+    }
+    else
+    {
+      _disp[i] = &coupledValue("displacements", i);
+      _grad_disp[i] = &coupledGradient("displacements", i);
+    }
+
+    if (_fe_problem.isTransient() && i != _out_of_plane_direction)
+      _grad_disp_old[i] = &coupledGradientOld("displacements", i);
+    else
+      _grad_disp_old[i] = &_grad_zero;
+  }
 }
 
 void
@@ -34,8 +62,8 @@ Compute2DFiniteStrain::computeProperties()
 
   for (_qp = 0; _qp < _qrule->n_points(); ++_qp)
   {
+
     // Deformation gradient calculation for 2D problems
-    // Note: x_disp is the radial displacement, y_disp is the axial displacement
     RankTwoTensor A((*_grad_disp[0])[_qp],
                     (*_grad_disp[1])[_qp],
                     (*_grad_disp[2])[_qp]); // Deformation gradient
@@ -43,16 +71,17 @@ Compute2DFiniteStrain::computeProperties()
                        (*_grad_disp_old[1])[_qp],
                        (*_grad_disp_old[2])[_qp]); // Old Deformation gradient
 
-    // Compute the displacement gradient (2,2) value for plane strain, generalized plane strain, or
-    // axisymmetric problems
-    A(2, 2) = computeGradDispZZ();
-    Fbar(2, 2) = computeGradDispZZOld();
+    // Compute the displacement gradient for the out of plane direction for plane strain,
+    // generalized plane strain, or axisymmetric problems
+
+    A(_out_of_plane_direction, _out_of_plane_direction) = computeOutOfPlaneGradDisp();
+    Fbar(_out_of_plane_direction, _out_of_plane_direction) = computeOutOfPlaneGradDispOld();
 
     // Gauss point deformation gradient
     _deformation_gradient[_qp] = A;
     _deformation_gradient[_qp].addIa(1.0);
 
-    A -= Fbar; // very nearly A = gradU - gradUold, adapted to cylindrical coords
+    A -= Fbar; // very nearly A = gradU - gradUold
 
     Fbar.addIa(1.0); // Fbar = ( I + gradUold)
 
@@ -88,4 +117,15 @@ Compute2DFiniteStrain::computeProperties()
 
     computeQpStrain();
   }
+}
+
+void
+Compute2DFiniteStrain::displacementIntegrityCheck()
+{
+  if (_out_of_plane_direction != 2 && _ndisp != 3)
+    mooseError("For 2D simulations where the out-of-plane direction is x or y the number of "
+               "supplied displacements must be three.");
+  else if (_out_of_plane_direction == 2 && _ndisp != 2)
+    mooseError("For 2D simulations where the out-of-plane direction is z the number of supplied "
+               "displacements must be two.");
 }

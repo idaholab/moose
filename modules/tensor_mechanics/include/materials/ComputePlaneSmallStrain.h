@@ -28,7 +28,7 @@ public:
   ComputePlaneSmallStrain(const InputParameters & parameters);
 
 protected:
-  virtual Real computeStrainZZ();
+  virtual Real computeOutOfPlaneStrain();
 
 private:
   const bool _scalar_out_of_plane_strain_coupled;

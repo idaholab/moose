@@ -30,13 +30,9 @@ public:
 protected:
   void initialSetup() override;
 
-  /// Computes the current dUz/dz for axisymmetric problems, where
-  /// \f$ \epsilon_{\theta} = \frac{u_r}{r} \f$
-  Real computeGradDispZZ() override;
+  Real computeOutOfPlaneGradDisp() override;
 
-  /// Computes the old dUz/dz for axisymmetric problems, where
-  /// \f$ \epsilon_{\theta-old} = \frac{u_{r-old}}{r_{old}} \f$
-  Real computeGradDispZZOld() override;
+  Real computeOutOfPlaneGradDispOld() override;
 
   /// the old value of the first component of the displacements vector
   const VariableValue & _disp_old_0;

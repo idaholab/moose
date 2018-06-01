@@ -31,7 +31,9 @@ public:
   virtual ~ComputeStrainBase() {}
 
 protected:
+  void initialSetup() override;
   virtual void initQpStatefulProperties() override;
+  virtual void displacementIntegrityCheck();
 
   /// Coupled displacement variables
   unsigned int _ndisp;

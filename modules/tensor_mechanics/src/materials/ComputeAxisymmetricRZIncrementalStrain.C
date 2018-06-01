@@ -33,12 +33,18 @@ ComputeAxisymmetricRZIncrementalStrain::ComputeAxisymmetricRZIncrementalStrain(
 void
 ComputeAxisymmetricRZIncrementalStrain::initialSetup()
 {
+  ComputeIncrementalStrainBase::initialSetup();
+
   if (getBlockCoordSystem() != Moose::COORD_RZ)
     mooseError("The coordinate system must be set to RZ for Axisymmetric geometries.");
+
+  if (_out_of_plane_direction != 2)
+    paramError("out_of_plane_direction",
+               "The out-of-plane direction for axisymmetric systems is currently restricted to z");
 }
 
 Real
-ComputeAxisymmetricRZIncrementalStrain::computeGradDispZZ()
+ComputeAxisymmetricRZIncrementalStrain::computeOutOfPlaneGradDisp()
 {
   if (!MooseUtils::absoluteFuzzyEqual(_q_point[_qp](0), 0.0))
     return (*_disp[0])[_qp] / _q_point[_qp](0);
@@ -47,7 +53,7 @@ ComputeAxisymmetricRZIncrementalStrain::computeGradDispZZ()
 }
 
 Real
-ComputeAxisymmetricRZIncrementalStrain::computeGradDispZZOld()
+ComputeAxisymmetricRZIncrementalStrain::computeOutOfPlaneGradDispOld()
 {
   if (!MooseUtils::absoluteFuzzyEqual(_q_point[_qp](0), 0.0))
     return _disp_old_0[_qp] / _q_point[_qp](0);

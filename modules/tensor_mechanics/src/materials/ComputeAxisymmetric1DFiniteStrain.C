@@ -67,6 +67,8 @@ ComputeAxisymmetric1DFiniteStrain::ComputeAxisymmetric1DFiniteStrain(
 void
 ComputeAxisymmetric1DFiniteStrain::initialSetup()
 {
+  ComputeIncrementalStrainBase::initialSetup();
+
   if (getBlockCoordSystem() != Moose::COORD_RZ)
     mooseError("The coordinate system must be set to RZ for Axisymmetric geometries.");
 }
