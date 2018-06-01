@@ -192,6 +192,5 @@
   file_base = planestrain_xy_small_out
   [./exodus]
     type = Exodus
-    # output_dimension = 3
   [../]
 []

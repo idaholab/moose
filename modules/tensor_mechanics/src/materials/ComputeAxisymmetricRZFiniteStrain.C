@@ -39,7 +39,8 @@ ComputeAxisymmetricRZFiniteStrain::initialSetup()
     mooseError("The coordinate system must be set to RZ for Axisymmetric geometries.");
 
   if (_out_of_plane_direction != 2)
-    mooseError("The out-of-plane direction for axisymmetric systems is currently restricted to z");
+    paramError("out_of_plane_direction",
+               "The out-of-plane direction for axisymmetric systems is currently restricted to z");
 }
 
 Real

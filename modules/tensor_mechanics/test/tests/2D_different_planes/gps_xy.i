@@ -207,6 +207,5 @@
   file_base = gps_xy_small_out
   [./exodus]
     type = Exodus
-    # output_dimension = 3
   [../]
 []
