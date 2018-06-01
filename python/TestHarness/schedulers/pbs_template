@@ -1,6 +1,6 @@
 #!/bin/bash
 #PBS -N <JOB_NAME>
-#PBS -l select=1:<NCPUS>
+#PBS -l <NCPUS>
 #PBS -l walltime=<WALLTIME>
 <PBS_PROJECT>
 #PBS -j oe

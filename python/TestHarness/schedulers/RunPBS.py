@@ -37,8 +37,7 @@ class RunPBS(QueueManager):
             pbsnode_output = util.runCommand('pbsnodes -a')
             core_nodes = re.findall(r'resources_available.ncpus = (\d+)', pbsnode_output)
             if core_nodes:
-                # https://stackoverflow.com/questions/1518522/find-the-most-common-element-in-a-list
-                self.pbs_resources = max(groupby(sorted(core_nodes)), key=lambda(x, v):(len(list(v)),-core_nodes.index(x)))[0]
+                self.pbs_resources = core_nodes
             else:
                 print('`pbsnodes -a` returned unexpected output')
                 sys.exit(1)
@@ -94,21 +93,30 @@ class RunPBS(QueueManager):
         """ Determine the optimal select statement for PBS """
 
         slots = int(job.getMetaData().get('QUEUEING_NCPUS', 1))
-        procs_per_node = int(self._getPBSResources())
+        all_nodes = self._getPBSResources()
+        total_cores = sum([int(cores) for cores in all_nodes])
+
+        # Is this job to big for this cluster?
+        if slots > total_cores:
+            job.addCaveats('insufficient slots')
+            job.setStatus(job.skip)
+            # continue and allow the qsub script to be created
+
+        procs_per_node = int(max(groupby(sorted(all_nodes)), key=lambda(x, v):(len(list(v)),-all_nodes.index(x)))[0])
         num_full_chunks = slots / procs_per_node
         remaining_ranks = slots % procs_per_node
 
-        # slots > procs_per_node
+        # slots > procs_per_node and is not evenly distributable (both non-zero)
         if num_full_chunks and remaining_ranks:
-            select_ncpus = 'ncpus=%d+%d:ncpus=%d' % (remaining_ranks, num_full_chunks, procs_per_node)
+            select_ncpus = 'select=%d:ncpus=%d+%d' % (num_full_chunks, procs_per_node, remaining_ranks)
 
         # slots < procs_per_node
         elif remaining_ranks:
-            select_ncpus = 'ncpus=%d' % (remaining_ranks)
+            select_ncpus = 'select=1:ncpus=%d' % (remaining_ranks)
 
-        # slots = procs_per_node
+        # slots evenly distributable
         else:
-            select_ncpus = 'ncpus=%d' % (procs_per_node)
+            select_ncpus = 'select=%d:ncpus=%d' % (num_full_chunks, procs_per_node)
 
         return select_ncpus
 
@@ -149,11 +157,14 @@ class RunPBS(QueueManager):
         """ execute qsub and return the launch id """
         template = self._augmentTemplate(job)
         tester = job.getTester()
+        launch_results = ""
 
         self.createQueueScript(job, template)
 
         command = ' '.join(['qsub', template['launch_script']])
-        launch_results = util.runCommand(command, job.getTestDir())
+
+        if not job.isSkip():
+            launch_results = util.runCommand(command, job.getTestDir())
 
         # List of files we need to clean up when we are done
         dirty_files = [template['launch_script'],
