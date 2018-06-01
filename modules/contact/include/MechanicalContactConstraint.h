@@ -86,6 +86,15 @@ public:
   bool shouldApply() override;
   void computeContactForce(PenetrationInfo * pinfo, bool update_contact_set);
 
+  Real onDiagNormalsJacContrib(PenetrationInfo * pinfo);
+  Real offDiagNormalsJacContrib(PenetrationInfo * pinfo);
+  Real testPerturbations(PenetrationInfo * pinfo, bool on_diagonal, bool slave);
+  bool signAndABar(PenetrationInfo * pinfo, Real & sign, RealVectorValue & abar);
+  Real computeLMOnDiagJacobian(Moose::ConstraintJacobianType type, PenetrationInfo *& pinfo);
+  Real computeLMOffDiagJacobian(Moose::ConstraintJacobianType type,
+                                unsigned int jvar,
+                                PenetrationInfo *& pinfo);
+
 protected:
   MooseSharedPointer<DisplacedProblem> _displaced_problem;
   FEProblem & _fe_problem;
@@ -139,6 +148,19 @@ protected:
 
   const bool _print_contact_nodes;
   static Threads::spin_mutex _contact_set_mutex;
+  const VariableValue & _lm;
+  const unsigned _lm_id;
+  const VariableValue & _tangent_lm;
+  const unsigned _tangent_lm_id;
+  const VariableValue & _vel_x;
+  const unsigned _vel_x_id;
+  const VariableValue & _vel_y;
+  const unsigned _vel_y_id;
+  const VariableValue & _vel_z;
+  const unsigned _vel_z_id;
+
+  const Real _eps;
+  const Real _regularization;
 };
 
 #endif

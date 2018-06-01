@@ -1,0 +1,4 @@
+reset
+import mesh geometry "sliding_elastic_blocks_2d.e"
+block 30 curve 3
+export mesh "sliding_elastic_blocks_2d_with_lagrange.e" overwrite

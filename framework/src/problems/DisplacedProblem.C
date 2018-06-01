@@ -740,6 +740,12 @@ DisplacedProblem::addCachedJacobian(THREAD_ID tid)
 }
 
 void
+DisplacedProblem::addCachedJacobianContributions(THREAD_ID tid)
+{
+  _assembly[tid]->addCachedJacobianContributions();
+}
+
+void
 DisplacedProblem::addJacobianBlock(SparseMatrix<Number> & jacobian,
                                    unsigned int ivar,
                                    unsigned int jvar,

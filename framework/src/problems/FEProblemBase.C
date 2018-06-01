@@ -1289,6 +1289,14 @@ FEProblemBase::addCachedJacobian(THREAD_ID tid)
 }
 
 void
+FEProblemBase::addCachedJacobianContributions(THREAD_ID tid)
+{
+  _assembly[tid]->addCachedJacobianContributions();
+  if (_displaced_problem)
+    _displaced_problem->addCachedJacobianContributions(tid);
+}
+
+void
 FEProblemBase::addJacobianBlock(SparseMatrix<Number> & jacobian,
                                 unsigned int ivar,
                                 unsigned int jvar,
@@ -1956,6 +1964,7 @@ FEProblemBase::addBoundaryCondition(const std::string & bc_name,
   {
     parameters.set<SubProblem *>("_subproblem") = _displaced_problem.get();
     parameters.set<SystemBase *>("_sys") = &_displaced_problem->nlSys();
+    parameters.set<SystemBase *>("_nl_sys") = _nl.get();
     _reinit_displaced_face = true;
   }
   else
@@ -1998,6 +2007,7 @@ FEProblemBase::addConstraint(const std::string & c_name,
 
     parameters.set<SubProblem *>("_subproblem") = this;
     parameters.set<SystemBase *>("_sys") = _nl.get();
+    parameters.set<SystemBase *>("_nl_sys") = _nl.get();
   }
 
   // Check that "variable" is in the NonlinearSystem.
@@ -4478,8 +4488,22 @@ FEProblemBase::computeResidualTags(const std::set<TagID> & tags)
 
   computeUserObjects(EXEC_LINEAR, Moose::PRE_AUX);
 
-  if (_displaced_problem != NULL)
-    _displaced_problem->updateMesh();
+  try
+  {
+    try
+    {
+      if (_displaced_problem != NULL)
+        _displaced_problem->updateMesh();
+    }
+    catch (MooseException & e)
+    {
+      checkExceptionAndStopSolve();
+    }
+  }
+  catch (MooseException & e)
+  {
+    return;
+  }
 
   for (THREAD_ID tid = 0; tid < n_threads; tid++)
   {

@@ -9,6 +9,9 @@
 
 #include "NearestNodeThread.h"
 #include "MooseMesh.h"
+#include "MooseApp.h"
+#include "Executioner.h"
+#include "FEProblemBase.h"
 
 #include "libmesh/threads.h"
 
@@ -37,54 +40,65 @@ NearestNodeThread::NearestNodeThread(NearestNodeThread & x, Threads::split /*spl
 void
 NearestNodeThread::operator()(const NodeIdRange & range)
 {
-  for (const auto & node_id : range)
+  try
   {
-    const Node & node = _mesh.nodeRef(node_id);
-
-    const Node * closest_node = NULL;
-    Real closest_distance = std::numeric_limits<Real>::max();
-
-    const std::vector<dof_id_type> & neighbor_nodes = _neighbor_nodes[node_id];
-
-    unsigned int n_neighbor_nodes = neighbor_nodes.size();
-
-    for (unsigned int k = 0; k < n_neighbor_nodes; k++)
+    for (const auto & node_id : range)
     {
-      const Node * cur_node = &_mesh.nodeRef(neighbor_nodes[k]);
-      Real distance = ((*cur_node) - node).norm();
+      const Node & node = _mesh.nodeRef(node_id);
 
-      if (distance < closest_distance)
-      {
-        Real patch_percentage = static_cast<Real>(k) / static_cast<Real>(n_neighbor_nodes);
+      const Node * closest_node = NULL;
+      Real closest_distance = std::numeric_limits<Real>::max();
 
-        // Save off the maximum we had to go through the patch to find the closes node
-        if (patch_percentage > _max_patch_percentage)
-          _max_patch_percentage = patch_percentage;
+      const std::vector<dof_id_type> & neighbor_nodes = _neighbor_nodes[node_id];
 
-        closest_distance = distance;
-        closest_node = cur_node;
-      }
-    }
+      unsigned int n_neighbor_nodes = neighbor_nodes.size();
 
-    if (closest_distance == std::numeric_limits<Real>::max())
-    {
       for (unsigned int k = 0; k < n_neighbor_nodes; k++)
       {
         const Node * cur_node = &_mesh.nodeRef(neighbor_nodes[k]);
-        if (std::isnan((*cur_node)(0)) || std::isinf((*cur_node)(0)) ||
-            std::isnan((*cur_node)(1)) || std::isinf((*cur_node)(1)) ||
-            std::isnan((*cur_node)(2)) || std::isinf((*cur_node)(2)))
-          mooseError("Failure in NearestNodeThread because solution contains inf or not-a-number "
-                     "entries.  This is likely due to a failed factorization of the Jacobian "
-                     "matrix.");
+        Real distance = ((*cur_node) - node).norm();
+
+        if (distance < closest_distance)
+        {
+          Real patch_percentage = static_cast<Real>(k) / static_cast<Real>(n_neighbor_nodes);
+
+          // Save off the maximum we had to go through the patch to find the closes node
+          if (patch_percentage > _max_patch_percentage)
+            _max_patch_percentage = patch_percentage;
+
+          closest_distance = distance;
+          closest_node = cur_node;
+        }
       }
-      mooseError("Unable to find nearest node!");
+
+      if (closest_distance == std::numeric_limits<Real>::max())
+      {
+        for (unsigned int k = 0; k < n_neighbor_nodes; k++)
+        {
+          const Node * cur_node = &_mesh.nodeRef(neighbor_nodes[k]);
+          if (std::isnan((*cur_node)(0)) || std::isinf((*cur_node)(0)) ||
+              std::isnan((*cur_node)(1)) || std::isinf((*cur_node)(1)) ||
+              std::isnan((*cur_node)(2)) || std::isinf((*cur_node)(2)))
+            throw MooseException(
+                "Failure in NearestNodeThread because solution contains inf or not-a-number "
+                "entries.  This is likely due to a failed factorization of the Jacobian "
+                "matrix.");
+        }
+        mooseError("Unable to find nearest node!");
+      }
+
+      NearestNodeLocator::NearestNodeInfo & info = _nearest_node_info[node.id()];
+
+      info._nearest_node = closest_node;
+      info._distance = closest_distance;
     }
-
-    NearestNodeLocator::NearestNodeInfo & info = _nearest_node_info[node.id()];
-
-    info._nearest_node = closest_node;
-    info._distance = closest_distance;
+  }
+  catch (MooseException & e)
+  {
+    std::string what(e.what());
+    _mesh.getMooseApp().getExecutioner()->feProblem().setException(what);
+    // Propagate the exception
+    throw MooseException("");
   }
 }
 

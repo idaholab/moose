@@ -449,6 +449,9 @@ ContactMaster::contactFormulation(std::string name)
   else if ("tangential_penalty" == name)
     formulation = CF_TANGENTIAL_PENALTY;
 
+  else if ("lagrange" == name)
+    formulation = CF_LAGRANGE;
+
   if (formulation == CF_INVALID)
     ::mooseError("Invalid formulation found: ", name);
 

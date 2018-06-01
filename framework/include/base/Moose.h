@@ -19,6 +19,14 @@
 
 using namespace libMesh;
 
+namespace libMesh
+{
+template <typename>
+class NumericVector;
+template <typename>
+class SparseMatrix;
+}
+
 class ActionFactory;
 class Factory;
 class MooseEnumItem;
@@ -95,6 +103,20 @@ extern const ExecFlagType EXEC_FAILED;
 extern const ExecFlagType EXEC_CUSTOM;
 extern const ExecFlagType EXEC_SUBDOMAIN;
 extern const ExecFlagType EXEC_SAME_AS_MULTIAPP;
+
+// MOOSE Requires PETSc to run, this CPP check will cause a compile error if PETSc is not found
+#ifndef LIBMESH_HAVE_PETSC
+#error PETSc has not been detected, please ensure your environment is set up properly then rerun the libmesh build script and try to compile MOOSE again.
+#endif
+
+#ifdef LIBMESH_HAVE_PETSC
+void moose_vec_view(NumericVector<Real> & vec);
+void moose_mat_view(SparseMatrix<Real> & mat);
+Real moose_vec_entry(NumericVector<Real> & vec, const unsigned i);
+
+#include <petscsnes.h>
+PetscScalar moose_petsc_vec_entry(Vec x, const unsigned i);
+#endif
 
 namespace Moose
 {
@@ -200,11 +222,6 @@ public:
 private:
   MPI_Comm _orig;
 };
-
-// MOOSE Requires PETSc to run, this CPP check will cause a compile error if PETSc is not found
-#ifndef LIBMESH_HAVE_PETSC
-#error PETSc has not been detected, please ensure your environment is set up properly then rerun the libmesh build script and try to compile MOOSE again.
-#endif
 
 } // namespace Moose
 

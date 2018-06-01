@@ -1,0 +1,235 @@
+[Tests]
+  [./jac_no_rot]
+    type = 'PetscJacobianTester'
+    group = 'contact_lagrange'
+    input = 'two-body-dirichlet.i'
+    ratio_tol = 1e-7
+    difference_tol = 1e-6
+    cli_args = "Outputs/file_base=0"
+    run_sim = True
+  [../]
+  [./jac_45_rot]
+    type = 'PetscJacobianTester'
+    group = 'contact_lagrange'
+    input = 'two-body-dirichlet.i'
+    ratio_tol = 1e-7
+    difference_tol = 1e-6
+    cli_args = "Mesh/file='two-body-45.e' ICs/block2x/value=0.7071067811865475 ICs/block2y/value=-0.7071067811865475 BCs/topx/value=1.0606601717798212 BCs/topy/value=-1.0606601717798212 Outputs/file_base=45"
+    run_sim = True
+  [../]
+  [./jac_90_rot]
+    type = 'PetscJacobianTester'
+    group = 'contact_lagrange'
+    input = 'two-body-dirichlet.i'
+    ratio_tol = 1e-7
+    difference_tol = 1e-6
+    cli_args = "Mesh/file='two-body-90.e' ICs/block2x/value=1 ICs/block2y/value=0 BCs/topx/value=1.5 BCs/topy/value=0 Outputs/file_base=90"
+    run_sim = True
+  [../]
+  [./jac_135_rot]
+    type = 'PetscJacobianTester'
+    group = 'contact_lagrange'
+    input = 'two-body-dirichlet.i'
+    ratio_tol = 1e-7
+    difference_tol = 1e-6
+    cli_args = "Mesh/file='two-body-135.e' ICs/block2x/value=0.7071067811865475 ICs/block2y/value=0.7071067811865475 BCs/topx/value=1.0606601717798212 BCs/topy/value=1.0606601717798212 Outputs/file_base=135"
+    run_sim = True
+  [../]
+  [./jac_180_rot]
+    type = 'PetscJacobianTester'
+    group = 'contact_lagrange'
+    input = 'two-body-dirichlet.i'
+    ratio_tol = 1e-7
+    difference_tol = 1e-6
+    cli_args = "Mesh/file='two-body-180.e' ICs/block2x/value=0 ICs/block2y/value=1 BCs/topx/value=0 BCs/topy/value=1.5 Outputs/file_base=180"
+    run_sim = True
+  [../]
+  [./jac_225_rot]
+    type = 'PetscJacobianTester'
+    group = 'contact_lagrange'
+    input = 'two-body-dirichlet.i'
+    ratio_tol = 1e-7
+    difference_tol = 1e-6
+    cli_args = "Mesh/file='two-body-225.e' ICs/block2x/value=-0.7071067811865475 ICs/block2y/value=0.7071067811865475 BCs/topx/value=-1.0606601717798212 BCs/topy/value=1.0606601717798212 Outputs/file_base=225"
+    run_sim = True
+  [../]
+  [./jac_270_rot]
+    type = 'PetscJacobianTester'
+    group = 'contact_lagrange'
+    input = 'two-body-dirichlet.i'
+    ratio_tol = 1e-7
+    difference_tol = 1e-6
+    cli_args = "Mesh/file='two-body-270.e' ICs/block2x/value=-1 ICs/block2y/value=0 BCs/topx/value=-1.5 BCs/topy/value=0 Outputs/file_base=270"
+    run_sim = True
+  [../]
+  [./jac_315_rot]
+    type = 'PetscJacobianTester'
+    group = 'contact_lagrange'
+    input = 'two-body-dirichlet.i'
+    ratio_tol = 1e-7
+    difference_tol = 1e-6
+    cli_args = "Mesh/file='two-body-315.e' ICs/block2x/value=-0.7071067811865475 ICs/block2y/value=-0.7071067811865475 BCs/topx/value=-1.0606601717798212 BCs/topy/value=-1.0606601717798212 Outputs/file_base=315"
+    run_sim = True
+  [../]
+  [./res_no_rot]
+    type = 'Exodiff'
+    group = 'contact_lagrange'
+    exodiff = '0.e'
+    input = 'two-body-dirichlet.i'
+    should_execute = false
+    delete_output_before_running = false
+    prereq = 'jac_no_rot'
+  [../]
+  [./res_45_rot]
+    type = 'Exodiff'
+    group = 'contact_lagrange'
+    exodiff = '45.e'
+    input = 'two-body-dirichlet.i'
+    should_execute = false
+    delete_output_before_running = false
+    prereq = 'jac_45_rot'
+  [../]
+  [./res_90_rot]
+    type = 'Exodiff'
+    group = 'contact_lagrange'
+    exodiff = '90.e'
+    input = 'two-body-dirichlet.i'
+    should_execute = false
+    delete_output_before_running = false
+    prereq = 'jac_90_rot'
+  [../]
+  [./res_135_rot]
+    type = 'Exodiff'
+    group = 'contact_lagrange'
+    exodiff = '135.e'
+    input = 'two-body-dirichlet.i'
+    should_execute = false
+    delete_output_before_running = false
+    prereq = 'jac_135_rot'
+  [../]
+  [./res_180_rot]
+    type = 'Exodiff'
+    group = 'contact_lagrange'
+    exodiff = '180.e'
+    input = 'two-body-dirichlet.i'
+    should_execute = false
+    delete_output_before_running = false
+    prereq = 'jac_180_rot'
+  [../]
+  [./res_225_rot]
+    type = 'Exodiff'
+    group = 'contact_lagrange'
+    exodiff = '225.e'
+    input = 'two-body-dirichlet.i'
+    should_execute = false
+    delete_output_before_running = false
+    prereq = 'jac_225_rot'
+  [../]
+  [./res_270_rot]
+    type = 'Exodiff'
+    group = 'contact_lagrange'
+    exodiff = '270.e'
+    input = 'two-body-dirichlet.i'
+    should_execute = false
+    delete_output_before_running = false
+    prereq = 'jac_270_rot'
+  [../]
+  [./res_315_rot]
+    type = 'Exodiff'
+    group = 'contact_lagrange'
+    exodiff = '315.e'
+    input = 'two-body-dirichlet.i'
+    should_execute = false
+    delete_output_before_running = false
+    prereq = 'jac_315_rot'
+  [../]
+
+  [./jac_pressure]
+    type = 'PetscJacobianTester'
+    group = 'contact_lagrange'
+    input = 'two-body-pressure.i'
+    ratio_tol = 1e-8
+    difference_tol = 1e-2
+    run_sim = True
+  [../]
+  [./res_pressure]
+    type = 'Exodiff'
+    group = 'contact_lagrange'
+    exodiff = 'two-body-pressure_out.e'
+    input = 'two-body-pressure.i'
+    should_execute = false
+    delete_output_before_running = false
+    prereq = 'jac_pressure'
+  [../]
+
+  [./jac_tan_contact_slip]
+    type = 'PetscJacobianTester'
+    group = 'contact_lagrange'
+    input = 'frictional-two-body-slip.i'
+    ratio_tol = 3e-5
+    difference_tol = 1
+    run_sim = True
+    cli_args = 'Executioner/num_steps=1 Outputs/exodus=false'
+  [../]
+  [./res_tan_contact_slip]
+    type = 'Exodiff'
+    group = 'contact_lagrange'
+    exodiff = 'frictional-two-body-slip_out.e'
+    input = 'frictional-two-body-slip.i'
+  [../]
+  [./jac_tan_contact_stuck]
+    type = 'PetscJacobianTester'
+    group = 'contact_lagrange'
+    input = 'frictional-two-body-stuck.i'
+    ratio_tol = 3e-5
+    difference_tol = 1
+    run_sim = True
+    cli_args = 'Executioner/num_steps=1 Outputs/exodus=false'
+  [../]
+  [./res_tan_contact_stuck]
+    type = 'Exodiff'
+    group = 'contact_lagrange'
+    exodiff = 'frictional-two-body-stuck_out.e'
+    input = 'frictional-two-body-stuck.i'
+  [../]
+
+  [./second_lagrange_err]
+    type = 'RunException'
+    group = 'contact_lagrange'
+    input = 'error-input.i'
+    cli_args = 'Variables/disp_x/order=SECOND Outputs/exodus=false Mesh/second_order=true Contact/leftright/lm=lm'
+    expect_err = "The current lagrange multiplier implementation currently relies on first-order "
+              "Lagrange shape functions for the displacements in order to generate the best "
+              "preconditioner."
+  [../]
+  [./not_coulomb_err]
+    type = 'RunException'
+    group = 'contact_lagrange'
+    input = 'frictional-two-body-slip.i'
+    cli_args = 'Contact/leftright/model=frictionless Outputs/exodus=false'
+    expect_err = "The current tangential lagrange multiplier implementation only supports the "
+                   "Coulomb frictional model."
+  [../]
+  [./not_frictionless_err]
+    type = 'RunException'
+    group = 'contact_lagrange'
+    input = 'two-body-dirichlet.i'
+    cli_args = 'Contact/leftright/model=coulomb Outputs/exodus=false'
+    expect_err = "The model options for lagrange multiplier options are frictionless or Coulomb "
+                 "with coupled tangential lagrange multipliers."
+  [../]
+  [./lm_not_coupled_err]
+    type = 'RunException'
+    group = 'contact_lagrange'
+    input = 'error-input.i'
+    cli_args = 'Outputs/exodus=false'
+    expect_err = "If using the Lagrange formulation, you must couple in a lagrange multiplier variable"
+  [../]
+  [./wrong_dim_err]
+    type = 'RunException'
+    group = 'contact_lagrange'
+    input = 'error-input.i'
+    cli_args = "Contact/leftright/lm=lm Mesh/dim=1 Outputs/exodus=false GlobalParams/displacements='disp_x'"
+    expect_err = "The current lagrange multiplier implementation only works in two dimensions."
+  [../]
+[]

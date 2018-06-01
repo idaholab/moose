@@ -14,7 +14,7 @@
 #include "AuxiliarySystem.h"
 #include "PenetrationLocator.h"
 #include "NearestNodeLocator.h"
-#include "SystemBase.h"
+#include "NonlinearSystemBase.h"
 #include "Assembly.h"
 #include "MooseMesh.h"
 #include "AugmentedLagrangianContactProblem.h"
@@ -44,6 +44,11 @@ validParams<MechanicalContactConstraint>()
   params.addCoupledVar("disp_x", "The x displacement");
   params.addCoupledVar("disp_y", "The y displacement");
   params.addCoupledVar("disp_z", "The z displacement");
+  params.addCoupledVar("lm", "The lagrange multiplier");
+  params.addCoupledVar("tangent_lm", "The tangential lagrange multiplier");
+  params.addCoupledVar("vel_x", "The x velocity");
+  params.addCoupledVar("vel_y", "The y velocity");
+  params.addCoupledVar("vel_z", "The z velocity");
 
   params.addCoupledVar(
       "displacements",
@@ -111,7 +116,17 @@ validParams<MechanicalContactConstraint>()
                         "The tolerance of the frictional force for augmented Lagrangian method.");
   params.addParam<bool>(
       "print_contact_nodes", false, "Whether to print the number of nodes in contact.");
+  params.addParam<Real>("regularization",
+                        1e-6,
+                        "The regularization parameter controlling transition from stick to slip.");
   return params;
+}
+
+template <typename T>
+int
+sgn(T val)
+{
+  return (T(0) < val) - (val < T(0));
 }
 
 Threads::spin_mutex MechanicalContactConstraint::_contact_set_mutex;
@@ -131,7 +146,8 @@ MechanicalContactConstraint::MechanicalContactConstraint(const InputParameters &
     _stick_lock_iterations(getParam<unsigned int>("stick_lock_iterations")),
     _stick_unlock_factor(getParam<Real>("stick_unlock_factor")),
     _update_stateful_data(true),
-    _residual_copy(_sys.residualGhosted()),
+    _residual_copy(static_cast<NonlinearSystemBase &>(*getParam<SystemBase *>("_nl_sys"))
+                       .getResidualNonTimeVector()),
     _mesh_dimension(_mesh.dimension()),
     _vars(3, libMesh::invalid_uint),
     _var_objects(3, nullptr),
@@ -143,7 +159,19 @@ MechanicalContactConstraint::MechanicalContactConstraint(const InputParameters &
     _non_displacement_vars_jacobian(getParam<bool>("non_displacement_variables_jacobian")),
     _contact_linesearch(
         std::dynamic_pointer_cast<ContactLineSearchBase>(_fe_problem.getLineSearch())),
-    _print_contact_nodes(getParam<bool>("print_contact_nodes"))
+    _print_contact_nodes(getParam<bool>("print_contact_nodes")),
+    _lm(isCoupled("lm") ? coupledValue("lm") : _zero),
+    _lm_id(isCoupled("lm") ? coupled("lm") : libMesh::invalid_uint),
+    _tangent_lm(isCoupled("tangent_lm") ? coupledValue("tangent_lm") : _zero),
+    _tangent_lm_id(isCoupled("tangent_lm") ? coupled("tangent_lm") : libMesh::invalid_uint),
+    _vel_x(isCoupled("vel_x") ? coupledValue("vel_x") : _zero),
+    _vel_x_id(isCoupled("vel_x") ? coupled("vel_x") : libMesh::invalid_uint),
+    _vel_y(isCoupled("vel_y") ? coupledValue("vel_y") : _zero),
+    _vel_y_id(isCoupled("vel_y") ? coupled("vel_y") : libMesh::invalid_uint),
+    _vel_z(isCoupled("vel_z") ? coupledValue("vel_z") : _zero),
+    _vel_z_id(isCoupled("vel_z") ? coupled("vel_z") : libMesh::invalid_uint),
+    _eps(std::numeric_limits<Real>::epsilon()),
+    _regularization(getParam<Real>("regularization"))
 {
   _overwrite_slave_residual = false;
 
@@ -231,6 +259,35 @@ MechanicalContactConstraint::MechanicalContactConstraint(const InputParameters &
         _al_frictional_force_tolerance = parameters.get<Real>("al_frictional_force_tolerance");
       }
     }
+  }
+  else if (_formulation == CF_LAGRANGE)
+  {
+    if (!isCoupled("lm"))
+      mooseError(
+          "If using the Lagrange formulation, you must couple in a lagrange multiplier variable");
+    if (_mesh.dimension() != 2)
+      mooseError("The current lagrange multiplier implementation only works in two dimensions.");
+    for (auto && var : _var_objects)
+    {
+      if (var)
+      {
+        const FEType & fe_family = var->feType();
+        if (fe_family.order != FIRST || fe_family.family != LAGRANGE)
+          mooseError(
+              "The current lagrange multiplier implementation currently relies on first-order "
+              "Lagrange shape functions for the displacements in order to generate the best "
+              "preconditioner.");
+      }
+    }
+    if (isCoupled("tangent_lm"))
+    {
+      if (_model != CM_COULOMB)
+        mooseError("The current tangential lagrange multiplier implementation only supports the "
+                   "Coulomb frictional model.");
+    }
+    else if (_model != CM_FRICTIONLESS)
+      mooseError("The model options for lagrange multiplier options are frictionless or Coulomb "
+                 "with coupled tangential lagrange multipliers.");
   }
 }
 
@@ -481,6 +538,9 @@ MechanicalContactConstraint::shouldApply()
     PenetrationInfo * pinfo = found->second;
     if (pinfo != NULL)
     {
+      if (_formulation == CF_LAGRANGE)
+        return true;
+
       bool is_nonlinear = _fe_problem.computingNonlinearResid();
 
       // This computes the contact force once per constraint, rather than once per quad point
@@ -797,7 +857,23 @@ Real
 MechanicalContactConstraint::computeQpResidual(Moose::ConstraintType type)
 {
   PenetrationInfo * pinfo = _penetration_locator._penetration_info[_current_node->id()];
-  Real resid = pinfo->_contact_force(_component);
+  Real resid;
+  if (_formulation == CF_LAGRANGE)
+  {
+    resid = _lm[_qp] * nodalArea(*pinfo) * -pinfo->_normal(_component);
+
+    if (_lm[_qp] > 0)
+    {
+      RealVectorValue tangent_vec(pinfo->_normal(1), -pinfo->_normal(0), 0);
+      Real contact_tangential_force_comp =
+          _tangent_lm[_qp] * tangent_vec(_component) * nodalArea(*pinfo);
+
+      resid -= contact_tangential_force_comp;
+    }
+  }
+  else
+    resid = pinfo->_contact_force(_component);
+
   switch (type)
   {
     case Moose::Slave:
@@ -846,6 +922,9 @@ MechanicalContactConstraint::computeQpJacobian(Moose::ConstraintJacobianType typ
 
   const Real penalty = getPenalty(*pinfo);
   const Real penalty_slip = getTangentialPenalty(*pinfo);
+
+  if (_formulation == CF_LAGRANGE)
+    return computeLMOnDiagJacobian(type, pinfo);
 
   switch (type)
   {
@@ -1301,6 +1380,9 @@ MechanicalContactConstraint::computeQpOffDiagJacobian(Moose::ConstraintJacobianT
   if (getCoupledVarComponent(jvar, coupled_component))
     normal_component_in_coupled_var_dir = pinfo->_normal(coupled_component);
 
+  if (_formulation == CF_LAGRANGE)
+    return computeLMOffDiagJacobian(type, jvar, pinfo);
+
   switch (type)
   {
     case Moose::SlaveSlave:
@@ -1326,7 +1408,6 @@ MechanicalContactConstraint::computeQpOffDiagJacobian(Moose::ConstraintJacobianT
             case CF_AUGMENTED_LAGRANGE:
               return _phi_slave[_j][_qp] * penalty * _test_slave[_i][_qp] *
                      pinfo->_normal(_component) * normal_component_in_coupled_var_dir;
-
             default:
               mooseError("Invalid contact formulation");
           }
@@ -1734,11 +1815,14 @@ MechanicalContactConstraint::computeOffDiagJacobian(unsigned int jvar)
 
   if (_master_slave_jacobian)
   {
-    DenseMatrix<Number> & Ken =
-        _assembly.jacobianBlockNeighbor(Moose::ElementNeighbor, _var.number(), jvar);
-    for (_i = 0; _i < _test_slave.size(); _i++)
-      for (_j = 0; _j < _phi_master.size(); _j++)
-        Ken(_i, _j) += computeQpOffDiagJacobian(Moose::SlaveMaster, jvar);
+    if (std::find(_vars.begin(), _vars.end(), jvar) != _vars.end())
+    {
+      DenseMatrix<Number> & Ken =
+          _assembly.jacobianBlockNeighbor(Moose::ElementNeighbor, _var.number(), jvar);
+      for (_i = 0; _i < _test_slave.size(); _i++)
+        for (_j = 0; _j < _phi_master.size(); _j++)
+          Ken(_i, _j) += computeQpOffDiagJacobian(Moose::SlaveMaster, jvar);
+    }
 
     _Kne.resize(_test_master.size(), _connected_dof_indices.size());
     if (_Kne.m() && _Kne.n())
@@ -1748,9 +1832,12 @@ MechanicalContactConstraint::computeOffDiagJacobian(unsigned int jvar)
           _Kne(_i, _j) += computeQpOffDiagJacobian(Moose::MasterSlave, jvar);
   }
 
-  for (_i = 0; _i < _test_master.size(); _i++)
-    for (_j = 0; _j < _phi_master.size(); _j++)
-      Knn(_i, _j) += computeQpOffDiagJacobian(Moose::MasterMaster, jvar);
+  if (std::find(_vars.begin(), _vars.end(), jvar) != _vars.end())
+  {
+    for (_i = 0; _i < _test_master.size(); _i++)
+      for (_j = 0; _j < _phi_master.size(); _j++)
+        Knn(_i, _j) += computeQpOffDiagJacobian(Moose::MasterMaster, jvar);
+  }
 }
 
 void
@@ -1824,5 +1911,232 @@ MechanicalContactConstraint::residualEnd()
       _contact_linesearch->insertSet(_current_contact_state);
     _old_contact_state.swap(_current_contact_state);
     _current_contact_state.clear();
+  }
+}
+
+Real
+MechanicalContactConstraint::onDiagNormalsJacContrib(PenetrationInfo * pinfo)
+{
+  Real sign;
+  RealVectorValue abar;
+  if (!signAndABar(pinfo, sign, abar))
+    return 0;
+
+  Real abar_x = abar(0);
+  Real abar_y = abar(1);
+  return -_lm[_qp] * nodalArea(*pinfo) * sign * abar_y * abar_x /
+         (abar.norm() * abar.norm() * abar.norm());
+}
+
+Real
+MechanicalContactConstraint::offDiagNormalsJacContrib(PenetrationInfo * pinfo)
+{
+  Real sign;
+  RealVectorValue abar;
+  if (!signAndABar(pinfo, sign, abar))
+    return 0;
+
+  Real abar_comp = _component == 0 ? abar(1) : abar(0);
+
+  return -_lm[_qp] * nodalArea(*pinfo) * sign *
+         (abar_comp * abar_comp / std::pow(abar.norm(), 3) - 1. / abar.norm());
+}
+
+Real
+MechanicalContactConstraint::testPerturbations(PenetrationInfo * pinfo,
+                                               bool on_diagonal,
+                                               bool slave)
+{
+  const Elem & master_elem = *pinfo->_elem;
+
+  if (!slave && !master_elem.is_node_on_side(_j, pinfo->_side_num))
+    return 0;
+
+  unsigned comp;
+  if (on_diagonal)
+    comp = _component;
+  else
+    comp = _component == 0 ? 1 : 0;
+
+  std::vector<unsigned> volume_nodes = master_elem.nodes_on_side(pinfo->_side_num);
+  std::map<unsigned, unsigned> volume_node_to_side_node;
+  std::map<unsigned, unsigned> side_node_to_volume_node;
+  unsigned side_node = 0;
+  for (auto & volume_node : volume_nodes)
+  {
+    side_node_to_volume_node[side_node] = volume_node;
+    volume_node_to_side_node[volume_node] = side_node++;
+  }
+
+  if (volume_node_to_side_node.find(_i) == volume_node_to_side_node.end())
+    return 0;
+
+  Node & node0 = *master_elem.get_node(side_node_to_volume_node[0]);
+  Node & node1 = *master_elem.get_node(side_node_to_volume_node[1]);
+  RealVectorValue abar = node1 - node0;
+  Real l2 = abar * abar;
+  RealVectorValue slave_to_m0 = *pinfo->_node - node0;
+
+  RealVectorValue dabar_duj(0, 0, 0);
+  if (!slave)
+    dabar_duj(comp) = volume_node_to_side_node[_j] == 1 ? 1. : -1.;
+  RealVectorValue dslave_to_m0_duj(0, 0, 0);
+  if (slave)
+    dslave_to_m0_duj(comp) = 1.;
+  else if (volume_node_to_side_node[_j] == 0)
+    dslave_to_m0_duj(comp) = -1.;
+
+  Real numerator1 = l2 * (slave_to_m0 * dabar_duj + abar * dslave_to_m0_duj);
+  Real numerator2 = -(slave_to_m0 * abar) * 2. * (abar * dabar_duj);
+  Real denominator = l2 * l2;
+  Real deta_duj = (numerator1 + numerator2) / denominator;
+
+  Real dtest_duj = volume_node_to_side_node[_i] == 1 ? deta_duj : -deta_duj;
+
+  Real resid = _lm[_qp] * nodalArea(*pinfo) * -pinfo->_normal(_component) * -dtest_duj;
+
+  if (_lm[_qp] > 0)
+  {
+    RealVectorValue tangent_vec(pinfo->_normal(1), -pinfo->_normal(0), 0);
+    Real contact_tangential_force_comp =
+        _tangent_lm[_qp] * tangent_vec(_component) * nodalArea(*pinfo);
+
+    Real tangential_resid = -contact_tangential_force_comp;
+    tangential_resid *= -dtest_duj;
+    resid += tangential_resid;
+  }
+
+  return resid;
+}
+
+bool
+MechanicalContactConstraint::signAndABar(PenetrationInfo * pinfo,
+                                         Real & sign,
+                                         RealVectorValue & abar)
+{
+  const Elem & master_elem = *pinfo->_elem;
+  bool node_on_contact_side = master_elem.is_node_on_side(_j, pinfo->_side_num);
+  if (!node_on_contact_side)
+    return false;
+
+  std::vector<unsigned> volume_nodes = master_elem.nodes_on_side(pinfo->_side_num);
+  std::map<unsigned, unsigned> volume_node_to_side_node;
+  std::map<unsigned, unsigned> side_node_to_volume_node;
+  unsigned side_node = 0;
+  for (auto & volume_node : volume_nodes)
+  {
+    side_node_to_volume_node[side_node] = volume_node;
+    volume_node_to_side_node[volume_node] = side_node++;
+  }
+
+  if (volume_node_to_side_node[_j] == 1)
+    sign = -1.;
+  else
+    sign = 1.;
+  if (_component == 1)
+    sign *= -1.;
+
+  Node & master_node0 = *master_elem.get_node(side_node_to_volume_node[0]);
+  Node & master_node1 = *master_elem.get_node(side_node_to_volume_node[1]);
+
+  abar = master_node1 - master_node0;
+
+  return true;
+}
+
+Real
+MechanicalContactConstraint::computeLMOnDiagJacobian(Moose::ConstraintJacobianType type,
+                                                     PenetrationInfo *& pinfo)
+{
+  switch (type)
+  {
+    case Moose::SlaveSlave:
+      return 0.;
+
+    case Moose::SlaveMaster:
+      return onDiagNormalsJacContrib(pinfo);
+
+    case Moose::MasterSlave:
+      if (_connected_dof_indices[_j] != _current_node->dof_number(0, _var.number(), 0) ||
+          !pinfo->_elem->is_node_on_side(_i, pinfo->_side_num))
+        return 0;
+      else
+        return testPerturbations(pinfo, true, true);
+
+    case Moose::MasterMaster:
+    {
+      Real resid = onDiagNormalsJacContrib(pinfo) * -_test_master[_i][_qp];
+      resid += testPerturbations(pinfo, true, false);
+      return resid;
+    }
+
+    default:
+      return 0;
+  }
+}
+
+Real
+MechanicalContactConstraint::computeLMOffDiagJacobian(Moose::ConstraintJacobianType type,
+                                                      unsigned int jvar,
+                                                      PenetrationInfo *& pinfo)
+{
+  switch (type)
+  {
+    case Moose::SlaveSlave:
+      if (jvar == _lm_id)
+        return _phi_slave[_j][_qp] * nodalArea(*pinfo) * -pinfo->_normal(_component) *
+               _test_slave[_i][_qp];
+      else if (jvar == _tangent_lm_id)
+      {
+        if (_lm[_qp] <= 0 || _current_node->dof_number(0, jvar, 0) != _connected_dof_indices[_j])
+          return 0;
+
+        RealVectorValue tangent_vec(pinfo->_normal(1), -pinfo->_normal(0), 0);
+        Real d_contact_tangential_force_comp_d_tangent_lm =
+            tangent_vec(_component) * nodalArea(*pinfo);
+
+        return -d_contact_tangential_force_comp_d_tangent_lm * _test_slave[_i][_qp];
+      }
+      else
+        return 0;
+
+    case Moose::SlaveMaster:
+      return offDiagNormalsJacContrib(pinfo);
+
+    case Moose::MasterSlave:
+      if (jvar == _lm_id)
+        return _phi_slave[_j][_qp] * nodalArea(*pinfo) * -pinfo->_normal(_component) *
+               -_test_master[_i][_qp];
+      else if (jvar == _tangent_lm_id)
+      {
+        if (_lm[_qp] <= 0 || _current_node->dof_number(0, jvar, 0) != _connected_dof_indices[_j])
+          return 0;
+
+        RealVectorValue tangent_vec(pinfo->_normal(1), -pinfo->_normal(0), 0);
+        Real d_contact_tangential_force_comp_d_tangent_lm =
+            tangent_vec(_component) * nodalArea(*pinfo);
+
+        return -d_contact_tangential_force_comp_d_tangent_lm * -_test_master[_i][_qp];
+      }
+      else if (jvar == _vel_x_id || jvar == _vel_y_id || jvar == _vel_z_id)
+        return 0;
+      else // displacements
+      {
+        if (_connected_dof_indices[_j] != _current_node->dof_number(0, jvar, 0) ||
+            !pinfo->_elem->is_node_on_side(_i, pinfo->_side_num))
+          return 0;
+        else
+          return testPerturbations(pinfo, false, true);
+      }
+
+    case Moose::MasterMaster:
+    {
+      Real resid = offDiagNormalsJacContrib(pinfo) * -_test_master[_i][_qp];
+      resid += testPerturbations(pinfo, false, false);
+      return resid;
+    }
+
+    default:
+      return 0;
   }
 }

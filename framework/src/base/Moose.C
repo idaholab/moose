@@ -9,6 +9,8 @@
 
 #include "libmesh/petsc_macro.h"
 #include "libmesh/libmesh_config.h"
+#include "libmesh/petsc_vector.h"
+#include "libmesh/petsc_matrix.h"
 
 #include "Moose.h"
 #include "MooseApp.h"
@@ -551,3 +553,37 @@ bool _deprecated_is_error = false;
 bool _throw_on_error = false;
 
 } // namespace Moose
+
+#ifdef LIBMESH_HAVE_PETSC
+void
+moose_vec_view(NumericVector<Real> & vec)
+{
+  PetscVector<Real> & petsc_vec = dynamic_cast<PetscVector<Real> &>(vec);
+
+  VecView(petsc_vec.vec(), 0);
+}
+
+void
+moose_mat_view(SparseMatrix<Real> & mat)
+{
+  PetscMatrix<Real> & petsc_mat = dynamic_cast<PetscMatrix<Real> &>(mat);
+
+  MatView(petsc_mat.mat(), 0);
+}
+
+Real
+moose_vec_entry(NumericVector<Real> & vec, const unsigned i)
+{
+  PetscVector<Real> & petsc_vec = dynamic_cast<PetscVector<Real> &>(vec);
+
+  return petsc_vec(i);
+}
+
+PetscScalar
+moose_petsc_vec_entry(Vec x, const unsigned i)
+{
+  const PetscScalar * read_only_values;
+  VecGetArrayRead(x, &read_only_values);
+  return read_only_values[i];
+}
+#endif

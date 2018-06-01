@@ -29,7 +29,7 @@ InputParameters
 validParams<ContactAction>()
 {
   MooseEnum orders(AddVariableAction::getNonlinearVariableOrders());
-  MooseEnum formulation("DEFAULT KINEMATIC PENALTY AUGMENTED_LAGRANGE TANGENTIAL_PENALTY",
+  MooseEnum formulation("DEFAULT KINEMATIC PENALTY AUGMENTED_LAGRANGE TANGENTIAL_PENALTY LAGRANGE",
                         "DEFAULT");
   MooseEnum system("DiracKernel Constraint", "DiracKernel");
 
@@ -41,6 +41,11 @@ validParams<ContactAction>()
   params.addParam<NonlinearVariableName>("disp_x", "The x displacement");
   params.addParam<NonlinearVariableName>("disp_y", "The y displacement");
   params.addParam<NonlinearVariableName>("disp_z", "The z displacement");
+  params.addCoupledVar("lm", "The lagrange multiplier variable");
+  params.addCoupledVar("tangent_lm", "The tangential lagrange multiplier variable");
+  params.addCoupledVar("vel_x", "The x velocity");
+  params.addCoupledVar("vel_y", "The y velocity");
+  params.addCoupledVar("vel_z", "The z velocity");
 
   params.addParam<std::vector<NonlinearVariableName>>(
       "displacements",
@@ -88,6 +93,10 @@ validParams<ContactAction>()
 
   params.addParam<Real>("al_frictional_force_tolerance",
                         "The tolerance of the frictional force for augmented Lagrangian method.");
+  params.addParam<Real>(
+      "regularization",
+      1e-6,
+      "The regularization parameter controlling transition from sticking to slipping.");
   return params;
 }
 
@@ -160,6 +169,8 @@ ContactAction::act()
       params.set<std::vector<VariableName>>("displacements") = coupled_displacements;
       params.set<BoundaryName>("boundary") = _master;
       params.set<bool>("use_displaced_mesh") = true;
+      if (isParamValid("regularization"))
+        params.set<Real>("regularization") = getParam<Real>("regularization");
 
       for (unsigned int i = 0; i < ndisp; ++i)
       {
@@ -168,6 +179,31 @@ ContactAction::act()
         params.set<unsigned int>("component") = i;
         params.set<NonlinearVariableName>("variable") = displacements[i];
         params.set<std::vector<VariableName>>("master_variable") = {coupled_displacements[i]};
+        if (isParamValid("lm"))
+        {
+          std::vector<std::string> lm = {"lm"};
+          params.applySpecificParameters(parameters(), lm);
+        }
+        if (isParamValid("tangent_lm"))
+        {
+          std::vector<std::string> tangent_lm = {"tangent_lm"};
+          params.applySpecificParameters(parameters(), tangent_lm);
+        }
+        if (isParamValid("vel_x"))
+        {
+          std::vector<std::string> vel_x = {"vel_x"};
+          params.applySpecificParameters(parameters(), vel_x);
+        }
+        if (isParamValid("vel_y"))
+        {
+          std::vector<std::string> vel_y = {"vel_y"};
+          params.applySpecificParameters(parameters(), vel_y);
+        }
+        if (isParamValid("vel_z"))
+        {
+          std::vector<std::string> vel_z = {"vel_z"};
+          params.applySpecificParameters(parameters(), vel_z);
+        }
         _problem->addConstraint("MechanicalContactConstraint", name, params);
       }
     }
