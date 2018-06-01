@@ -28,17 +28,16 @@ class ColorbarPlugin(QtWidgets.QGroupBox, ExodusPlugin):
     #: pyqtSignal: Emitted when the chigger objects options are changed
     readerOptionsChanged = QtCore.pyqtSignal(dict)
     resultOptionsChanged = QtCore.pyqtSignal(dict)
+    colorbarOptionsChanged = QtCore.pyqtSignal(dict)
 
     #: pyqtSignal: Emitted when colorbar is added/removed
-    appendResult = QtCore.pyqtSignal(chigger.exodus.ExodusColorBar)
-    removeResult = QtCore.pyqtSignal(chigger.exodus.ExodusColorBar)
+    setColorbarVisible = QtCore.pyqtSignal(bool)
 
     def __init__(self):
         super(ColorbarPlugin, self).__init__()
 
         # Cache for auto limits
         self._auto = [True, True]
-        self._colorbar = None
 
         self._preferences.addCombo("exodus/defaultColorMap",
                 "Default colormap",
@@ -96,6 +95,7 @@ class ColorbarPlugin(QtWidgets.QGroupBox, ExodusPlugin):
 
         # Call widget setup methods
         self.setup()
+        self._result = None
 
     def onSetVariable(self, *args):
         super(ColorbarPlugin, self).onSetVariable(*args)
@@ -111,10 +111,15 @@ class ColorbarPlugin(QtWidgets.QGroupBox, ExodusPlugin):
         """
         Creates the color bar for the current ExodusResult object.
         """
-        self._colorbar = chigger.exodus.ExodusColorBar(result)
-        self._colorbar.setOptions(font_size=12*self.devicePixelRatio())
+        self._result = result
         self._loadPlugin()
         self.updateOptions()
+
+    def onWindowReset(self):
+        """
+        Remove the stored ExodusResult object.
+        """
+        self._result = None
 
     def _loadPlugin(self):
         self.load(self.ColorMapList)
@@ -147,12 +152,6 @@ class ColorbarPlugin(QtWidgets.QGroupBox, ExodusPlugin):
         if self.RangeMaximumMode.isChecked():
             self.load(self.RangeMaximum)
 
-    def onWindowReset(self):
-        """
-        Delete the ExodusColorBar object when the window is destroyed.
-        """
-        self._colorbar = None
-
     def onWindowUpdated(self):
         """
         Whenever the window is update the default ranges must be recalculated.
@@ -164,7 +163,7 @@ class ColorbarPlugin(QtWidgets.QGroupBox, ExodusPlugin):
         Update result/reader options for this widget.
         """
 
-        if (self._variable is None) or (self._colorbar is None):
+        if (self._variable is None) or (self._result is None):
             self.setEnabled(False)
             return
         else:
@@ -174,7 +173,7 @@ class ColorbarPlugin(QtWidgets.QGroupBox, ExodusPlugin):
         result_options = dict()
 
         # Min./Max. range
-        rng = self._colorbar.getResult().getRange(local=self.ColorBarRangeType.isChecked())
+        rng = self._result.getRange(local=self.ColorBarRangeType.isChecked())
         self._setLimitHelper(self.RangeMinimumMode, self.RangeMinimum, rng[0], 'min', result_options)
         self._setLimitHelper(self.RangeMaximumMode, self.RangeMaximum, rng[1], 'max', result_options)
 
@@ -185,25 +184,9 @@ class ColorbarPlugin(QtWidgets.QGroupBox, ExodusPlugin):
         # Components
         result_options['component'] = self._component
 
-        # Colorbar toggle (Note, the onAppend/RemoveResult performs an existence check).
-        if self.ColorBarToggle.isChecked():
-            self.appendResult.emit(self._colorbar)
-        else:
-            self.removeResult.emit(self._colorbar)
-
-        if result_options:
-            self.resultOptionsChanged.emit(result_options)
-
-    def repr(self):
-        output = dict()
-        if self._colorbar is not None:
-            options, sub_options = self._colorbar.options().toScriptString()
-            output['colorbar'] = ['cbar = chigger.exodus.ExodusColorBar(result)']
-            output['colorbar'] += ['cbar.setOptions({})'.format(', '.join(options))]
-            for key, value in sub_options.iteritems():
-                output['colorbar'] += ['cbar.setOptions({}, {})'.format(repr(key), ', '.join(value))]
-
-        return output
+        # Colorbar options
+        self.setColorbarVisible.emit(self.ColorBarToggle.isChecked())
+        self.resultOptionsChanged.emit(result_options)
 
     @staticmethod
     def _setLimitHelper(mode, qobject, default, name, options):
@@ -351,6 +334,7 @@ class ColorbarPlugin(QtWidgets.QGroupBox, ExodusPlugin):
         Setup the colorbar toggle.
         """
         qobject.setChecked(True)
+        self.setColorbarVisible.emit(True)
         qobject.stateChanged.connect(self._callbackColorBarToggle)
 
     def _callbackColorBarToggle(self, value):

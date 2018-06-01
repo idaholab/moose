@@ -327,7 +327,6 @@ class TestFilePluginNewVariable(Testing.PeacockImageTestCase):
         Testing.process_events(2)
         shutil.copy(self._filenames[1], self.temp_file)
         self._window.onWindowRequiresUpdate()
-        print self._window._reader
         Testing.process_events(2)
         self.assertEqual(self._widget.FilePlugin.VariableList.count(), 3)
         self.assertEqual(self._widget.FilePlugin.VariableList.itemText(0), 'aux')

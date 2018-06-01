@@ -86,6 +86,7 @@ class MeshViewerPlugin(VTKWindowPlugin):
         if reset:
             self._reset()
 
+        self.onSetColorbarVisible(False)
         self.meshEnabled.emit(False)
         if not tree.app_info.valid():
             return

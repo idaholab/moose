@@ -86,8 +86,10 @@ class VTKWindowPlugin(QtWidgets.QFrame, ExodusPlugin):
         self._run_start_time = -1
         self._reader_options = dict()
         self._result_options = dict()
+        self._colorbar_options = dict()
         self._reader = None
         self._result = None
+        self._colorbar = None
         self._window = chigger.RenderWindow(vtkwindow=self.__qvtkinteractor.GetRenderWindow(),
                                             vtkinteractor=self.__qvtkinteractor.GetRenderWindow().GetInteractor(),
                                             size=size)
@@ -170,6 +172,15 @@ class VTKWindowPlugin(QtWidgets.QFrame, ExodusPlugin):
         Update the options for RenderWindow object.
         """
         self.__setOptionsHelper(self._window, options)
+
+    def onColorbarOptionsChanged(self, options=dict()):
+        """
+        Update the options for ExodusColorbar object.
+        """
+        if self._colorbar:
+            self.__setOptionsHelper(self._colorbar, options)
+        else:
+            self._colorbar_options.update(options)
 
     def onWindowRequiresUpdate(self):
         """
@@ -315,6 +326,17 @@ class VTKWindowPlugin(QtWidgets.QFrame, ExodusPlugin):
         """
         vtkid = self._window.getVTKInteractor().AddObserver(event, callback)
 
+    def onSetColorbarVisible(self, value):
+        """
+        Toggle the colorbar existence.
+        """
+        title = self._result[0].getVTKMapper().GetArrayName() if value else ''
+        colorbar_options = dict()
+        colorbar_options['visible'] = value
+        colorbar_options['primary'] = dict(labels_visible=value, title=title)
+        colorbar_options['font_size'] = 12*self.devicePixelRatio()
+        self.onColorbarOptionsChanged(colorbar_options)
+
     def _reset(self):
         """
         Clears the VTK windows and restarts the initialize timer.
@@ -351,6 +373,9 @@ class VTKWindowPlugin(QtWidgets.QFrame, ExodusPlugin):
         self._result = chigger.exodus.ExodusResult(self._reader, **self._result_options)
         self._result_options.clear()
 
+        self._colorbar = chigger.exodus.ExodusColorBar(self._result, **self._colorbar_options)
+        self._colorbar_options.clear()
+
         # Set the interaction mode (2D/3D)
         self._result.update()
         bmin, bmax = self._result.getBounds()
@@ -360,7 +385,7 @@ class VTKWindowPlugin(QtWidgets.QFrame, ExodusPlugin):
             self._window.setOption('style', 'interactive')
 
         # Add results
-        self._window.append(self._result)
+        self._window.append(self._result, self._colorbar)
 
         # Load saved cameras
         camera = self._cameras.get(self._filename, None)
@@ -416,6 +441,7 @@ class VTKWindowPlugin(QtWidgets.QFrame, ExodusPlugin):
         # Get the reader and result options
         reader_options, reader_sub_options = self._reader.options().toScriptString()
         result_options, result_sub_options = self._result.options().toScriptString()
+        colorbar_options, colorbar_sub_options = self._colorbar.options().toScriptString()
 
         # Remove filters (this is handled by the ExodusPluginManager)
         for opt in result_options:
@@ -441,6 +467,11 @@ class VTKWindowPlugin(QtWidgets.QFrame, ExodusPlugin):
             output['result'] += ['result.setOptions({})'.format(', '.join(result_options))]
         for key, value in result_sub_options.iteritems():
             output['result'] += ['result.setOptions({}, {})'.format(repr(key), ', '.join(value))]
+
+        output['colorbar'] = ['cbar = chigger.exodus.ExodusColorBar(result)']
+        output['colorbar'] += ['cbar.setOptions({})'.format(', '.join(colorbar_options))]
+        for key, value in colorbar_sub_options.iteritems():
+            output['colorbar'] += ['cbar.setOptions({}, {})'.format(repr(key), ', '.join(value))]
 
         return output
 
