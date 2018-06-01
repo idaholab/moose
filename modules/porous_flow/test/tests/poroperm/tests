@@ -57,4 +57,22 @@
     expect_err = 'PorousFlowPorosity: When fluid=true you must provide a solid_bulk'
   [../]
 
+  [./PermTensorFromVar01]
+    type = 'CSVDiff'
+    input = 'PermTensorFromVar01.i'
+    csvdiff = 'PermTensorFromVar01.csv'
+    rel_err = 1.0E-5
+  [../]
+  [./PermTensorFromVar02]
+    type = 'CSVDiff'
+    input = 'PermTensorFromVar02.i'
+    csvdiff = 'PermTensorFromVar02.csv'
+    rel_err = 1.0E-5
+  [../]
+  [./PermTensorFromVar03]
+    type = 'CSVDiff'
+    input = 'PermTensorFromVar03.i'
+    csvdiff = 'PermTensorFromVar03.csv'
+    rel_err = 1.0E-5
+  [../]
 []
