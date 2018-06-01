@@ -15,6 +15,7 @@
 #include "PerfNode.h"
 #include "IndirectSort.h"
 #include "ConsoleStream.h"
+#include "MooseError.h"
 
 // System Includes
 #include <array>
@@ -113,6 +114,8 @@ public:
         return _section_time[section_name]._children;
       case TOTAL:
         return _section_time[section_name]._total;
+      default:
+        ::mooseError("Unknown TimeType");
     }
   }
 
