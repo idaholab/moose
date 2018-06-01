@@ -20,6 +20,9 @@
 #include "FormattedTable.h"
 #include "NonlinearSystem.h"
 
+// libMesh includes
+#include "libmesh/enum_norm_type.h"
+
 registerMooseObject("MooseApp", Console);
 
 template <>

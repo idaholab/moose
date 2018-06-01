@@ -10,7 +10,6 @@
 #include "libmesh/libmesh_config.h"
 
 #include "EigenProblem.h"
-
 #include "Assembly.h"
 #include "AuxiliarySystem.h"
 #include "DisplacedProblem.h"
@@ -20,8 +19,10 @@
 #include "OutputWarehouse.h"
 #include "Function.h"
 
+// libMesh includes
 #include "libmesh/system.h"
 #include "libmesh/eigen_solver.h"
+#include "libmesh/enum_eigen_solver_type.h"
 
 registerMooseObject("MooseApp", EigenProblem);
 

@@ -18,8 +18,10 @@
 #include "MooseEnum.h"
 #include "MooseVariableFE.h"
 
+// libMesh includes
 #include "libmesh/transient_system.h"
 #include "libmesh/system_norm.h"
+#include "libmesh/enum_norm_type.h"
 
 registerMooseAction("MooseApp", AdaptivityAction, "setup_adaptivity");
 

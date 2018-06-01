@@ -13,6 +13,7 @@
 // LibMesh
 #include "libmesh/point_locator_base.h"
 #include "libmesh/elem.h"
+#include "libmesh/enum_point_locator_type.h"
 
 DiracKernelInfo::DiracKernelInfo()
   : _point_locator(), _point_equal_distance_sq(libMesh::TOLERANCE * libMesh::TOLERANCE)

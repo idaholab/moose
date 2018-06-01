@@ -14,7 +14,9 @@
 #include "Material.h"
 #include "NonlinearSystemBase.h"
 
+// libMesh includes
 #include "libmesh/transient_system.h"
+#include "libmesh/enum_norm_type.h"
 
 registerMooseObject("MooseApp", VariableResidualNormsDebugOutput);
 
