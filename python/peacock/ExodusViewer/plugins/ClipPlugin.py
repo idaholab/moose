@@ -10,9 +10,7 @@
 import sys
 from PyQt5 import QtCore, QtWidgets
 import chigger
-import peacock
 from ExodusPlugin import ExodusPlugin
-from peacock.utils import WidgetUtils
 
 class ClipPlugin(QtWidgets.QGroupBox, ExodusPlugin):
     """

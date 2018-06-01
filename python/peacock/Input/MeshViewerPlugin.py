@@ -118,22 +118,13 @@ class MeshViewerPlugin(VTKWindowPlugin):
                 args.append("--allow-test-objects")
             ExeLauncher.runExe(exe_path, args, print_errors=False)
             self.meshEnabled.emit(True)
-<<<<<<< HEAD
-            self.onFileChanged(self.current_temp_mesh_file)
-        except Exception as e:
-            self.meshEnabled.emit(False)
-            self.onFileChanged()
-            mooseutils.mooseWarning("Error producing mesh: %s" % e)
-            self.setLoadingMessage("Error producing mesh")
-=======
             self.onSetFilename(self.current_temp_mesh_file)
             self.onWindowRequiresUpdate()
-        except Exception:
+        except Exception as e:
             self.meshEnabled.emit(False)
             self._reset()
-            self._setLoadingMessage("Error producing mesh")
+            mooseutils.mooseWarning("Error producing mesh: %s" % e)
             self.onWindowRequiresUpdate()
->>>>>>> Update peacock for changes to ExodusViewer
             self._removeFileNoError(self.current_temp_mesh_file)
 
         self._removeFileNoError(input_file) # we need the mesh file since it is in use but not the input file

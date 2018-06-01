@@ -9,7 +9,6 @@
 
 from PyQt5 import QtCore, QtWidgets
 import chigger
-import peacock
 from peacock.ExodusViewer.plugins.ExodusPlugin import ExodusPlugin
 from MeshBlockSelectorWidget import MeshBlockSelectorWidget
 

@@ -12,7 +12,6 @@ import peacock
 
 
 class BlockQStyledItemDelegate(QtWidgets.QStyledItemDelegate):
-
     def paint(self, painter, option, index):
         self.showDecorationSelected = False;
         super(BlockQStyledItemDelegate, self).paint(painter, option, index)
@@ -95,7 +94,6 @@ class BlockSelectorWidget(peacock.base.MooseWidget, QtWidgets.QWidget):
             self.StandardItemModel.setItem(i+1, item)
 
         self.ListWidget.setModel(self.StandardItemModel)
-        delegate = BlockQStyledItemDelegate()
         self.ListWidget.setItemDelegate(BlockQStyledItemDelegate())
         self.StandardItemModel.blockSignals(False)
 

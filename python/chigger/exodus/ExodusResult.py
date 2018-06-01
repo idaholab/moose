@@ -96,10 +96,3 @@ class ExodusResult(base.ChiggerResult):
         """
         a, b = self.getBounds()
         return ((b[0]-a[0])/2., (b[1]-a[1])/2., (b[2]-a[2])/2.)
-
-    def getBounds(self):
-        """
-        Return the bounding box of the results.
-        """
-        self.checkUpdateState()
-        return utils.get_bounds(*self._sources)

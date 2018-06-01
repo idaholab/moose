@@ -12,7 +12,6 @@ import sys
 import os
 import unittest
 import subprocess
-import vtk
 from PyQt5 import QtCore, QtWidgets
 
 from peacock.ExodusViewer.ExodusPluginManager import main

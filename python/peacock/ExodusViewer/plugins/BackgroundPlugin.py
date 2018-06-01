@@ -10,7 +10,6 @@
 import sys
 import chigger
 from PyQt5 import QtCore, QtGui, QtWidgets
-import peacock
 from ExodusPlugin import ExodusPlugin
 
 class BackgroundPlugin(QtWidgets.QWidget, ExodusPlugin):

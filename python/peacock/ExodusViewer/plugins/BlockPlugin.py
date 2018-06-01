@@ -10,7 +10,6 @@
 from PyQt5 import QtCore, QtWidgets
 import sys
 import chigger
-import peacock
 from ExodusPlugin import ExodusPlugin
 from BlockSelectorWidget import BlockSelectorWidget
 

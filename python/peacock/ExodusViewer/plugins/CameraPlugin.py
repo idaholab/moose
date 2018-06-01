@@ -10,9 +10,6 @@
 import sys
 import math
 from PyQt5 import QtCore, QtWidgets
-
-import chigger
-import peacock
 from ExodusPlugin import ExodusPlugin
 
 class CameraPlugin(QtWidgets.QGroupBox, ExodusPlugin):

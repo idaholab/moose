@@ -148,7 +148,6 @@ class TestColorbarPlugin(Testing.PeacockImageTestCase):
         """
         Test changing files and making sure the state is saved/restored
         """
-        cp = self._widget.ColorbarPlugin
         fp = self._widget.FilePlugin
 
         # Change state of everything

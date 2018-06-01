@@ -10,7 +10,6 @@
 
 import sys
 import unittest
-import vtk
 from PyQt5 import QtCore, QtWidgets
 from peacock.ExodusViewer.plugins.MeshPlugin import main
 from peacock.utils import Testing

@@ -11,7 +11,6 @@ import sys
 import types
 import vtk
 
-import peacock
 from PyQt5 import QtWidgets, QtCore
 from ExodusPlugin import ExodusPlugin
 

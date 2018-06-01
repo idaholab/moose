@@ -10,11 +10,7 @@
 import os
 import sys
 from PyQt5 import QtCore, QtWidgets, QtGui
-import mooseutils
 import glob
-import chigger
-import peacock
-from peacock.utils import WidgetUtils
 from ExodusPlugin import ExodusPlugin
 
 class ColorbarPlugin(QtWidgets.QGroupBox, ExodusPlugin):

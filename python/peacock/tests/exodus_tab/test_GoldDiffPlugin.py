@@ -12,7 +12,6 @@ import os
 import sys
 import unittest
 from PyQt5 import QtCore, QtWidgets
-import vtk
 
 from peacock.ExodusViewer.plugins.GoldDiffPlugin import main
 from peacock.utils import Testing

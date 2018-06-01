@@ -256,20 +256,6 @@ class VTKWindowPlugin(QtWidgets.QFrame, ExodusPlugin):
         self._run_start_time = t
         self.onWindowRequiresUpdate()
 
-    def onAppendResult(self, result):
-        """
-        Appends a result object (e.g., ColorBar) to the ExodusWindow object
-        """
-        if result not in self._window:
-            self._window.append(result)
-
-    def onRemoveResult(self, result):
-        """
-        Removes a result object (e.g., ColorBar) to the ExodusWindow object
-        """
-        if result in self._window:
-            self._window.remove(result)
-
     def onAddFilter(self, filter_):
         """
         Adds supplied filter to the result object.
@@ -324,7 +310,7 @@ class VTKWindowPlugin(QtWidgets.QFrame, ExodusPlugin):
         """
         Add a VTK observer callback.
         """
-        vtkid = self._window.getVTKInteractor().AddObserver(event, callback)
+        self._window.getVTKInteractor().AddObserver(event, callback)
 
     def onSetColorbarVisible(self, value):
         """

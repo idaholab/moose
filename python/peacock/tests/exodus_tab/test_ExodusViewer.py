@@ -10,7 +10,6 @@
 
 import sys
 import unittest
-import vtk
 from PyQt5 import QtWidgets, QtCore
 
 from peacock.ExodusViewer.ExodusViewer import main

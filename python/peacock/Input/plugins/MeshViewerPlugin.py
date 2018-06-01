@@ -6,11 +6,11 @@
 #*
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
+import os
 import chigger
 from peacock.ExodusViewer.plugins.VTKWindowPlugin import VTKWindowPlugin
 from peacock.utils import ExeLauncher
 from PyQt5 import QtCore
-import os
 
 class MeshViewerPlugin(VTKWindowPlugin):
     """

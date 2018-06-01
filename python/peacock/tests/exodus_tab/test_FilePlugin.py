@@ -13,7 +13,6 @@ import sys
 import unittest
 import shutil
 from PyQt5 import QtWidgets
-import vtk
 import mock
 
 from peacock.ExodusViewer.plugins.FilePlugin import main

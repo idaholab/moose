@@ -10,7 +10,6 @@
 
 import sys
 import unittest
-import vtk
 from PyQt5 import QtWidgets
 from peacock.ExodusViewer.plugins.MediaControlPlugin import main
 from peacock.utils import Testing

@@ -8,7 +8,7 @@
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
 import re
-from PyQt5 import QtWidgets, QtCore
+from PyQt5 import QtWidgets
 import peacock
 import mooseutils
 from plugins.ExodusPlugin import ExodusPlugin

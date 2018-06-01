@@ -10,9 +10,7 @@
 import re
 import sys
 from PyQt5 import QtCore, QtWidgets
-import mooseutils
 import chigger
-import peacock
 from ExodusPlugin import ExodusPlugin
 
 class ContourPlugin(QtWidgets.QGroupBox, ExodusPlugin):

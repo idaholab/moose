@@ -11,8 +11,6 @@ import sys
 from PyQt5 import QtCore, QtWidgets
 import chigger
 from ExodusPlugin import ExodusPlugin
-import peacock
-from peacock.utils import WidgetUtils
 
 class MeshPlugin(QtWidgets.QGroupBox, ExodusPlugin):
     """

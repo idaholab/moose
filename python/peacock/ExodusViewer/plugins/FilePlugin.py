@@ -10,10 +10,8 @@
 import os
 import sys
 import glob
-import vtk
 from PyQt5 import QtCore, QtWidgets
 import peacock
-import chigger
 from ExodusPlugin import ExodusPlugin
 from peacock.ExodusViewer.plugins.ExodusFilterProxyModel import ExodusFilterProxyModel
 
