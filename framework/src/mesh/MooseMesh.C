@@ -265,7 +265,7 @@ MooseMesh::MooseMesh(const InputParameters & parameters)
 MooseMesh::MooseMesh(const MooseMesh & other_mesh)
   : MooseObject(other_mesh._pars),
     Restartable(this, "Mesh"),
-    PerfGraphInterface(this),
+    PerfGraphInterface(this, "CopiedMesh"),
     _mesh_parallel_type(other_mesh._mesh_parallel_type),
     _use_distributed_mesh(other_mesh._use_distributed_mesh),
     _distribution_overridden(other_mesh._distribution_overridden),
