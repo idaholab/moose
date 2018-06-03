@@ -16,7 +16,11 @@ InputParameters
 validParams<PorousFlowPorosityConst>()
 {
   InputParameters params = validParams<PorousFlowPorosityBase>();
-  params.addRequiredCoupledVar("porosity", "The porosity (assumed constant for this material)");
+  params.addRequiredCoupledVar(
+      "porosity",
+      "The porosity (assumed indepenent of porepressure, temperature, "
+      "strain, etc, for this material).  This should be a real number, or "
+      "a constant monomial variable (not a linear lagrange or other kind of variable).");
   params.addClassDescription("This Material calculates the porosity assuming it is constant");
   return params;
 }
@@ -29,7 +33,8 @@ PorousFlowPorosityConst::PorousFlowPorosityConst(const InputParameters & paramet
 void
 PorousFlowPorosityConst::initQpStatefulProperties()
 {
-  _porosity[_qp] = _input_porosity[_qp];
+  // note the [0] below: _phi0 is a constant monomial and we use [0] regardless of _nodal_material
+  _porosity[_qp] = _input_porosity[0];
 }
 
 void
