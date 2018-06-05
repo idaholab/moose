@@ -38,7 +38,7 @@ PerfGraph::registerSection(const std::string & section_name, unsigned int level)
 
   // Is it already registered?
   if (it != _section_name_to_id.end() && it->first == section_name)
-    mooseError("PerfGraph already holds a section named: ", section_name);
+    return it->second;
 
   // It's not...
   auto id = _section_name_to_id.size();

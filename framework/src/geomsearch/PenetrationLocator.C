@@ -17,6 +17,7 @@
 #include "NearestNodeLocator.h"
 #include "PenetrationThread.h"
 #include "SubProblem.h"
+#include "MooseApp.h"
 
 PenetrationLocator::PenetrationLocator(SubProblem & subproblem,
                                        GeometricSearchData & /*geom_search_data*/,
