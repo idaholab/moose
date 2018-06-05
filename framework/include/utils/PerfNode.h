@@ -27,7 +27,7 @@ public:
   /**
    * Create a PerfNode with the given ID
    */
-  PerfNode(const PerfID id);
+  PerfNode(const PerfID id) : _id(id), _total_time(0), _num_calls(0) {}
 
   /**
    * Get the ID of this Node
@@ -51,6 +51,11 @@ public:
   }
 
   /**
+   * Increments the number of calls
+   */
+  void incrementNumCalls() { _num_calls++; }
+
+  /**
    * Add some time into this Node
    */
   void addTime(const std::chrono::steady_clock::duration time) { _total_time += time; }
@@ -60,10 +65,21 @@ public:
    *
    * Note: this will automatically create the Node internally if it needs to.
    *
+   * Implemented in header to allow for more optimization
+   *
    * @param id The unique ID of the child node
    * @return The pointer to the child node
    */
-  PerfNode * getChild(const PerfID id);
+  PerfNode * getChild(const PerfID id)
+  {
+    // RHS insertion on purpose
+    auto & child_node = _children[id];
+
+    if (!child_node)
+      child_node.reset(new PerfNode(id));
+
+    return child_node.get();
+  }
 
   /**
    * Get the children
@@ -85,6 +101,11 @@ public:
    */
   std::chrono::steady_clock::duration childrenTime() const;
 
+  /**
+   * Get the number of times this node was called
+   */
+  unsigned long int numCalls() { return _num_calls; }
+
 protected:
   /// The unique ID for the section this Node corresponds to
   PerfID _id;
@@ -94,6 +115,9 @@ protected:
 
   /// The total elapsed time for this node
   std::chrono::steady_clock::duration _total_time;
+
+  /// Number of times this node has been called
+  long unsigned int _num_calls;
 
   /// Timers that are directly underneath this node
   std::map<PerfID, std::unique_ptr<PerfNode>> _children;

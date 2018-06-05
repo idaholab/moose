@@ -9,19 +9,6 @@
 
 #include "PerfNode.h"
 
-PerfNode::PerfNode(const PerfID id) : _id(id), _total_time(0) {}
-
-PerfNode *
-PerfNode::getChild(const PerfID id)
-{
-  auto & child_node = _children[id];
-
-  if (!child_node)
-    child_node.reset(new PerfNode(id));
-
-  return child_node.get();
-}
-
 std::chrono::steady_clock::duration
 PerfNode::selfTime() const
 {

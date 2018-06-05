@@ -16,6 +16,7 @@
 #include <tuple>
 #include <type_traits>
 #include <cassert>
+#include <cmath>
 
 /**
  * Used to specify the column format
@@ -263,10 +264,25 @@ protected:
    *
    * If the datatype has a size() member... let's call it
    */
-  template <class T, class size_type = decltype(((T *)nullptr)->size())>
-  size_t sizeOfData(const T & data)
+  template <class T>
+  size_t sizeOfData(const T & data, decltype(((T *)nullptr)->size()) * /*dummy*/ = nullptr)
   {
     return data.size();
+  }
+
+  /**
+   * Try to find the size the column will take up
+   *
+   * If the datatype is an integer - let's get it's length
+   */
+  template <class T>
+  size_t sizeOfData(const T & data,
+                    typename std::enable_if<std::is_integral<T>::value>::type * /*dummy*/ = nullptr)
+  {
+    if (data == 0)
+      return 1;
+
+    return std::log10(data) + 1;
   }
 
   /**
