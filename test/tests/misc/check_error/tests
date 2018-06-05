@@ -690,4 +690,31 @@
     input = 'kernel_with_vector_var.i'
     expect_err = 'No standard variable named u found. Did you specify a vector variable when you meant to specify a standard variable'
   [../]
+
+  [./coupled_nodal_for_non_nodal_variable]
+    type = 'RunException'
+    input = 'coupled_nodal_for_non_nodal_variable.i'
+    expect_err = 'm: Trying to get nodal values of variable \'v\', but it is not nodal.'
+    requirement = "The system shall report an error if users try to get nodal values of non-nodal variables."
+    design = 'Coupleable.md'
+    issues = '#11623'
+  [../]
+  [./coupled_nodal_for_non_nodal_variable_old]
+    type = 'RunException'
+    input = 'coupled_nodal_for_non_nodal_variable.i'
+    cli_args = 'Materials/m/lag=OLD'
+    expect_err = 'm: Trying to get old nodal values of variable \'v\', but it is not nodal.'
+    requirement = "The system shall report an error if users try to get old nodal values of non-nodal variables."
+    design = 'Coupleable.md'
+    issues = '#11623'
+  [../]
+  [./coupled_nodal_for_non_nodal_variable_older]
+    type = 'RunException'
+    input = 'coupled_nodal_for_non_nodal_variable.i'
+    cli_args = 'Materials/m/lag=OLDER'
+    expect_err = 'm: Trying to get older nodal values of variable \'v\', but it is not nodal.'
+    requirement = "The system shall report an error if users try to get older nodal values of non-nodal variables."
+    design = 'Coupleable.md'
+    issues = '#11623'
+  [../]
 []
