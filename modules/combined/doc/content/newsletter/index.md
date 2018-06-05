@@ -5,3 +5,5 @@ major changes to the project monthly highlights will be produced. These highligh
 monthly to the [MOOSE users](contact_us.md) as well as provided below.
 
 ## [May 08, 2018](2018_05_08.md)
+
+## [June 07, 2018](2018_06_07.md)
