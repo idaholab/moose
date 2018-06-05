@@ -225,7 +225,8 @@ public:
   RankFourTensor mixedProductIlJk(const RankTwoTensor & a) const;
 
   /// return positive projection tensor of eigen-decomposition
-  RankFourTensor positveProjectionEigenDecomposition() const;
+  RankFourTensor positiveProjectionEigenDecomposition(std::vector<Real> & eigval,
+                                                      RankTwoTensor & eigvec) const;
 
   /// returns A_ij - de_ij*tr(A)/3, where A are the _coords
   RankTwoTensor deviatoric() const;
