@@ -1713,7 +1713,16 @@ may be used.
 \label{perm.sec}
 
 The porous-material's insitu permeability tensor can be constant, or
-it can take one of the following forms
+it can take one of the following forms in which $k_{ij}^{0}$ is the
+$i,j$ component of a user-defined tensor:
+
+\subsection{Tensor multiplied by scalar variable}
+
+\begin{equation}
+k_{ij} = k_{ij}^{0} k_0 \ ,
+\end{equation}
+where $k_0$ is a scalar variable that could be a function of depth,
+for example.
 
 \subsection{Exponential}
 
