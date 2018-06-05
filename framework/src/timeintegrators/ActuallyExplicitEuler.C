@@ -17,6 +17,7 @@
 #include "libmesh/sparse_matrix.h"
 #include "libmesh/nonlinear_solver.h"
 #include "libmesh/preconditioner.h"
+#include "libmesh/enum_convergence_flags.h"
 
 registerMooseObject("MooseApp", ActuallyExplicitEuler);
 

@@ -16,6 +16,7 @@
 #include "MooseVariableFE.h"
 #include "RotationMatrix.h"
 
+// libMesh includes
 #include "libmesh/equation_systems.h"
 #include "libmesh/mesh_function.h"
 #include "libmesh/numeric_vector.h"
@@ -24,6 +25,7 @@
 #include "libmesh/parallel_mesh.h"
 #include "libmesh/serial_mesh.h"
 #include "libmesh/exodusII_io.h"
+#include "libmesh/enum_xdr_mode.h"
 
 registerMooseObject("MooseApp", SolutionUserObject);
 
