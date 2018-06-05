@@ -119,18 +119,18 @@ StatisticsVectorPostprocessor::computeStatValue(int stat_id, const std::vector<R
     case 1: // max
       return *std::max_element(stat_vector.begin(), stat_vector.end());
     case 2: // sum
-      return std::accumulate(stat_vector.begin(), stat_vector.end(), 0);
+      return std::accumulate(stat_vector.begin(), stat_vector.end(), 0.);
     case 3: // average
-      return std::accumulate(stat_vector.begin(), stat_vector.end(), 0) /
+      return std::accumulate(stat_vector.begin(), stat_vector.end(), 0.) /
              static_cast<Real>(stat_vector.size());
     case 4: // stddev
     {
-      auto mean = std::accumulate(stat_vector.begin(), stat_vector.end(), 0) /
+      auto mean = std::accumulate(stat_vector.begin(), stat_vector.end(), 0.) /
                   static_cast<Real>(stat_vector.size());
 
       auto the_sum = std::accumulate(stat_vector.begin(),
                                      stat_vector.end(),
-                                     0,
+                                     0.,
                                      [&mean](Real running_value, Real current_value) {
                                        return running_value + std::pow(current_value - mean, 2);
                                      });
@@ -139,7 +139,7 @@ StatisticsVectorPostprocessor::computeStatValue(int stat_id, const std::vector<R
     }
     case 5: // norm2
       return std::sqrt(std::accumulate(
-          stat_vector.begin(), stat_vector.end(), 0, [](Real running_value, Real current_value) {
+          stat_vector.begin(), stat_vector.end(), 0., [](Real running_value, Real current_value) {
             return running_value + std::pow(current_value, 2);
 
           }));
