@@ -1,7 +1,0 @@
-[Tests]
-  [./test]
-    type = 'Exodiff'
-    input = 'coupled_convective_flux.i'
-    exodiff = 'coupled_convective_flux_out.e'
-  [../]
-[]

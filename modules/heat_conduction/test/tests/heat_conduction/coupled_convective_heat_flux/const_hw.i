@@ -38,10 +38,10 @@
 
 [BCs]
   [./right]
-    type = CoupledConvectiveFlux
+    type = CoupledConvectiveHeatFluxBC
     variable = u
     boundary = right
-    coefficient = 10
+    htc = 10
     T_infinity = t_infinity
   [../]
 []
@@ -61,4 +61,3 @@
 [Outputs]
   exodus = true
 []
-

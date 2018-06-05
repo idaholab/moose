@@ -29,6 +29,10 @@ CoupledConvectiveFlux::CoupledConvectiveFlux(const InputParameters & parameters)
     _T_infinity(coupledValue("T_infinity")),
     _coefficient(getParam<Real>("coefficient"))
 {
+  mooseDeprecated(
+      "CoupledConvectiveFlux boundary condition is deprecated, use CoupledConvectiveHeatFluxBC "
+      "instead. To update your input file:\n  1. change type from `CoupledConvectiveFlux` to "
+      "`CoupledConvectiveHeatFluxBC`\n  2. change `coefficient` parameter to `htc`.");
 }
 
 Real
