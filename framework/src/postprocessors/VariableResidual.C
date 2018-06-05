@@ -13,6 +13,9 @@
 #include "MooseVariable.h"
 #include "NonlinearSystemBase.h"
 
+// libMesh includes
+#include "libmesh/enum_norm_type.h"
+
 registerMooseObject("MooseApp", VariableResidual);
 
 template <>

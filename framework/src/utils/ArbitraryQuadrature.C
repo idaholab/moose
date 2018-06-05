@@ -9,6 +9,9 @@
 
 #include "ArbitraryQuadrature.h"
 
+// libMesh includes
+#include "libmesh/enum_quadrature_type.h"
+
 ArbitraryQuadrature::ArbitraryQuadrature(const unsigned int d, const Order o) : QBase(d, o) {}
 
 QuadratureType

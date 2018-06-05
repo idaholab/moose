@@ -259,9 +259,7 @@
   petsc_options_value = ' asm      2              lu            gmres     200'
 []
 
-
 [Outputs]
-  file_base = PermFromPoro05
   csv = true
   execute_on = 'timestep_end'
 []
