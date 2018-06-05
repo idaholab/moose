@@ -25,7 +25,9 @@ validParams<PorousFlowPorosity>()
   params.addRequiredCoupledVar("porosity_zero",
                                "The porosity at zero volumetric strain and "
                                "reference temperature and reference effective "
-                               "porepressure and reference chemistry");
+                               "porepressure and reference chemistry.  This must be a real number "
+                               "or a constant monomial variable (not a linear lagrange or other "
+                               "type of variable)");
   params.addParam<Real>("thermal_expansion_coeff",
                         "Volumetric thermal expansion coefficient of the drained porous solid "
                         "skeleton (only used if thermal=true)");
@@ -62,7 +64,7 @@ PorousFlowPorosity::PorousFlowPorosity(const InputParameters & parameters)
     _fluid(getParam<bool>("fluid")),
     _thermal(getParam<bool>("thermal")),
     _chemical(getParam<bool>("chemical")),
-    _phi0(_nodal_material ? coupledNodalValue("porosity_zero") : coupledValue("porosity_zero")),
+    _phi0(coupledValue("porosity_zero")),
     _biot(getParam<Real>("biot_coefficient")),
     _exp_coeff(isParamValid("thermal_expansion_coeff") ? getParam<Real>("thermal_expansion_coeff")
                                                        : 0.0),
@@ -214,7 +216,8 @@ PorousFlowPorosity::datNegInfinityQp(unsigned pvar) const
 Real
 PorousFlowPorosity::atZeroQp() const
 {
-  Real result = _phi0[_qp];
+  // note the [0] below: _phi0 is a constant monomial and we use [0] regardless of _nodal_material
+  Real result = _phi0[0];
   if (_chemical)
   {
     if (_t_step == 0 && !_app.isRestarting())
