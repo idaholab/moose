@@ -133,7 +133,15 @@ Coupleable::isCoupled(const std::string & var_name, unsigned int i)
 unsigned int
 Coupleable::coupledComponents(const std::string & var_name)
 {
-  return _coupled_vars[var_name].size();
+  if (isCoupled(var_name))
+    return _coupled_vars[var_name].size();
+  else
+  {
+    if (_c_parameters.hasDefaultCoupledValue(var_name))
+      return 1;
+    else
+      return 0;
+  }
 }
 
 void

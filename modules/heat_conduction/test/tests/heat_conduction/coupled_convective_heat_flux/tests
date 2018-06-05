@@ -1,0 +1,39 @@
+[Tests]
+  [./const_hw]
+    type = 'Exodiff'
+    input = 'const_hw.i'
+    exodiff = 'const_hw_out.e'
+  [../]
+
+  [./coupled_convective_heat_flux]
+    type = 'Exodiff'
+    input = 'coupled_convective_heat_flux.i'
+    exodiff = 'coupled_convective_heat_flux_out.e'
+    requirement = 'The system shall provide convective heat flux boundary condition where far-field temperature and convective heat transfer coefficient are given as spatially varying variables'
+    design = 'CoupledConvectiveHeatFluxBC.md'
+    issues = '#11631'
+  [../]
+
+  [./coupled_convective_heat_flux_two_phase]
+    type = 'Exodiff'
+    input = 'coupled_convective_heat_flux_two_phase.i'
+    exodiff = 'coupled_convective_heat_flux_two_phase_out.e'
+    requirement = 'The system shall provide convective heat flux boundary condition for multi-phase fluids where far-field temperatures and convective heat transfer coefficients are given as spatially varying variables'
+    design = 'CoupledConvectiveHeatFluxBC.md'
+    issues = '#11631'
+  [../]
+
+  [./not_enough_alpha]
+    type = RunException
+    input = 'coupled_convective_heat_flux_two_phase.i'
+    cli_args = "BCs/right/alpha='alpha_liquid'"
+    expect_err = '\(BCs/right/alpha\) The number of coupled components does not match the number of `T_infinity` components.'
+  [../]
+
+  [./not_enough_htc]
+    type = RunException
+    input = 'coupled_convective_heat_flux_two_phase.i'
+    cli_args = "BCs/right/htc='Hw_liquid'"
+    expect_err = '\(BCs/right/htc\) The number of coupled components does not match the number of `T_infinity` components.'
+  [../]
+[]
