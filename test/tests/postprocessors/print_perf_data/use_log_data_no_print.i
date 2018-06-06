@@ -38,9 +38,10 @@
 []
 
 [Postprocessors]
-  [./elapsed_active]
-    type = PerformanceData
-    event = 'ACTIVE'
+  [./elapsed]
+    type = PerfGraphTime
+    section_name = "App"
+    time_type = total
   [../]
 []
 

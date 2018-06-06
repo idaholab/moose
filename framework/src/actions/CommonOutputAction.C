@@ -190,7 +190,9 @@ CommonOutputAction::act()
   if (getParam<bool>("controls") || _app.getParam<bool>("show_controls"))
     create("ControlOutput");
 
-  if (getParam<bool>("perf_graph") || getParam<bool>("print_perf_log"))
+  if (!_app.getParam<bool>("no_timing") &&
+      (getParam<bool>("perf_graph") || getParam<bool>("print_perf_log") ||
+       _app.getParam<bool>("timing")))
     create("PerfGraphOutput");
 
   if (!getParam<bool>("color"))

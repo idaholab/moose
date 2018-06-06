@@ -54,11 +54,14 @@ PerfGraphOutput::PerfGraphOutput(const InputParameters & parameters)
 void
 PerfGraphOutput::output(const ExecFlagType & /*type*/)
 {
-  _app.perfGraph().print(_console, _level);
+  if (!_app.getParam<bool>("no_timing"))
+  {
+    _app.perfGraph().print(_console, _level);
 
-  if (_heaviest_branch)
-    _app.perfGraph().printHeaviestBranch(_console);
+    if (_heaviest_branch)
+      _app.perfGraph().printHeaviestBranch(_console);
 
-  if (_heaviest_sections)
-    _app.perfGraph().printHeaviestSections(_console, _heaviest_sections);
+    if (_heaviest_sections)
+      _app.perfGraph().printHeaviestSections(_console, _heaviest_sections);
+  }
 }

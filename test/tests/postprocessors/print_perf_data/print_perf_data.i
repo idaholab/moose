@@ -33,13 +33,10 @@
 []
 
 [Postprocessors]
-  [./elapsed_alive]
-    type = PerformanceData
-    event = 'ALIVE'
-  [../]
-  [./elapsed_active]
-    type = PerformanceData
-    event = 'ACTIVE'
+  [./elapsed]
+    type = PerfGraphTime
+    section_name = "App"
+    time_type = total
   [../]
   [./res_calls]
     type = PerformanceData
