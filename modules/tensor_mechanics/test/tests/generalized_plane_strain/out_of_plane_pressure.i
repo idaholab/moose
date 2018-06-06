@@ -86,7 +86,7 @@
 
 [Kernels]
   [./TensorMechanics]
-    use_displaced_mesh = true
+    use_displaced_mesh = false
     displacements = 'disp_x disp_y'
     save_in = 'saved_x saved_y'
   [../]
