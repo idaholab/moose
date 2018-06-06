@@ -50,6 +50,10 @@ FlowConnection::setupMesh()
         _mesh.getMesh().boundary_info->add_node(conn._node, RELAP7::bnd_nodeset_id);
       }
     }
+    else
+      logError("Trying to connect to a component '",
+               comp_name,
+               "', but there is no such component in the simulation. Please check your spelling.");
   }
 }
 
@@ -67,41 +71,47 @@ FlowConnection::init()
     for (const auto & connection : _connections)
     {
       const std::string comp_name = connection._geometrical_component_name;
-      const GeometricalFlowComponent & comp =
-          _sim.getComponentByName<GeometricalFlowComponent>(comp_name);
+      if (hasComponentByName<GeometricalFlowComponent>(comp_name))
+      {
+        const GeometricalFlowComponent & comp =
+            _sim.getComponentByName<GeometricalFlowComponent>(comp_name);
 
-      // add to list of subdomain IDs
-      const std::vector<unsigned int> & ids = comp.getSubdomainIds();
-      _connected_subdomain_ids.insert(_connected_subdomain_ids.end(), ids.begin(), ids.end());
+        // add to list of subdomain IDs
+        const std::vector<unsigned int> & ids = comp.getSubdomainIds();
+        _connected_subdomain_ids.insert(_connected_subdomain_ids.end(), ids.begin(), ids.end());
 
-      fp_names.push_back(comp.getFluidPropertiesName());
-      flow_model_ids.push_back(comp.getFlowModelID());
-      _rdg_flux_names.push_back(comp.getRDGFluxUserObjectName());
-      implicit_rdg_flags.push_back(comp.getImplicitRDGFlag());
-      spatial_discretizations.push_back(comp.getSpatialDiscretizationType());
+        fp_names.push_back(comp.getFluidPropertiesName());
+        flow_model_ids.push_back(comp.getFlowModelID());
+        _rdg_flux_names.push_back(comp.getRDGFluxUserObjectName());
+        implicit_rdg_flags.push_back(comp.getImplicitRDGFlag());
+        spatial_discretizations.push_back(comp.getSpatialDiscretizationType());
+      }
     }
 
-    checkAllConnectionsHaveSame<UserObjectName>(fp_names, "fluid properties object");
-    _fp_name = fp_names[0];
-
-    checkAllConnectionsHaveSame<RELAP7::FlowModelID>(flow_model_ids, "flow model ID");
-    _flow_model_id = flow_model_ids[0];
-
-    checkAllConnectionsHaveSame<bool>(implicit_rdg_flags, "implicit rDG flag");
-    _implicit_rdg = implicit_rdg_flags[0];
-
-    checkAllConnectionsHaveSame<FlowModel::ESpatialDiscretizationType>(spatial_discretizations,
-                                                                       "spatial discretization");
-    _spatial_discretization = spatial_discretizations[0];
-
-    if (hasComponentByName<Pipe>(_connections[0]._geometrical_component_name))
+    if (fp_names.size() > 0)
     {
-      const Pipe & pipe = getComponentByName<Pipe>(_connections[0]._geometrical_component_name);
-      if (_flow_model_id == RELAP7::FM_TWO_PHASE)
+      checkAllConnectionsHaveSame<UserObjectName>(fp_names, "fluid properties object");
+      _fp_name = fp_names[0];
+
+      checkAllConnectionsHaveSame<RELAP7::FlowModelID>(flow_model_ids, "flow model ID");
+      _flow_model_id = flow_model_ids[0];
+
+      checkAllConnectionsHaveSame<bool>(implicit_rdg_flags, "implicit rDG flag");
+      _implicit_rdg = implicit_rdg_flags[0];
+
+      checkAllConnectionsHaveSame<FlowModel::ESpatialDiscretizationType>(spatial_discretizations,
+                                                                         "spatial discretization");
+      _spatial_discretization = spatial_discretizations[0];
+
+      if (hasComponentByName<Pipe>(_connections[0]._geometrical_component_name))
       {
-        auto flow_model = pipe.getFlowModel();
-        auto flow_model_2phase = dynamic_cast<const FlowModelTwoPhase &>(*flow_model);
-        _phase_interaction = flow_model_2phase.getPhaseInteraction();
+        const Pipe & pipe = getComponentByName<Pipe>(_connections[0]._geometrical_component_name);
+        if (_flow_model_id == RELAP7::FM_TWO_PHASE)
+        {
+          auto flow_model = pipe.getFlowModel();
+          auto flow_model_2phase = dynamic_cast<const FlowModelTwoPhase &>(*flow_model);
+          _phase_interaction = flow_model_2phase.getPhaseInteraction();
+        }
       }
     }
   }
