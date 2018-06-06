@@ -42,9 +42,9 @@ the stress and strain calculations are performed on the correct material configu
 !table id=strain_formulations caption=Consistent Strain and Stress Formulations
 | Theoretical Formulation                           | Tensor Mechanics Classes    |
 |---------------------------------------------------|-----------------------------|
-| Linearized elasticity total small strain problems | [ComputeLinearElasticStress](/ComputeLinearElasticStress.md) and [ComputeSmallStrain](/ComputeSmallStrain.md) (in the Tensor Mechanics master action use the argument `strain = SMALL`) |
-| Linearized elasticity incremental small strain    | [ComputeFiniteStrainElasticStress](/ComputeFiniteStrainElasticStress.md) and [ComputeIncrementalSmallStrain](/ComputeIncrementalSmallStrain.md) (in the Tensor Mechanics master action `strain = SMALL` and `incremental = true` )|
-| Large deformation problems, including elasticity and/or plasticity | [ComputeFiniteStrainElasticStress](/ComputeFiniteStrainElasticStress.md), or other inelastic stress material class, and [ComputeFiniteStrain](/ComputeFiniteStrain.md) (in the Tensor Mechanics master action use `strain = FINITE`) |
+| Linearized elasticity total small strain problems | [ComputeLinearElasticStress](/ComputeLinearElasticStress.md) and [ComputeSmallStrain](/ComputeSmallStrain.md) (in the [TensorMechanics/MasterAction](/Master/index.md) use the argument `strain = SMALL`) |
+| Linearized elasticity incremental small strain    | [ComputeFiniteStrainElasticStress](/ComputeFiniteStrainElasticStress.md) and [ComputeIncrementalSmallStrain](/ComputeIncrementalSmallStrain.md) (in the [TensorMechanics/MasterAction](/Master/index.md) `strain = SMALL` and `incremental = true` )|
+| Large deformation problems, including elasticity and/or plasticity | [ComputeFiniteStrainElasticStress](/ComputeFiniteStrainElasticStress.md), or other inelastic stress material class, and [ComputeFiniteStrain](/ComputeFiniteStrain.md) (in the [TensorMechanics/MasterAction](/Master/index.md) use `strain = FINITE`) |
 
 ### Linearized Elasticity Problems
 
@@ -65,7 +65,7 @@ is rotated to the deformed mesh.  Newer material models, such as crystal plastic
 models, also rotate the strain and stress to the deformed mesh.  In these large deformation classes,
 the stress passed to the stress divergence kernel is calculated with respect to the deformed mesh, $\sigma(x)$.
 
-!alert warning prefix=False
+!alert warning title=Ensure Consistency in Stress and Strain Formulations
 As users and developers, we must take care to ensure consistency in the mesh used to calculate the
 strain and the mesh used to calculate the residual from the stress divergence equation.
 
@@ -90,21 +90,21 @@ calculations of the stress divergence kernel.
 
 The `use_displaced_mesh` parameter must be set correcting to ensure consistency in the equilibrium
 equation: if the stress is calculated with respect to the deformed mesh, the test function gradients
-must also be calculated with respect to the deformed mesh. The +Tensor Mechanics MasterAction+ is
+must also be calculated with respect to the deformed mesh. The [TensorMechanics/MasterAction](/Master/index.md) is
 designed to automatically determine and set the flag for the `use_displaced_mesh` parameter correctly
-for the selected strain formulation.  
+for the selected strain formulation.
 
 !alert note title=Use of the Tensor Mechanics MasterAction Recommended
-We recommend that users employ the Tensor Mechanics master action whenever
-possible to ensure consistency between the test function gradients and the strain
-formulation selected.
+We recommend that users employ the +[TensorMechanics/MasterAction](/Master/index.md)+
+whenever possible to ensure consistency between the test function gradients and
+the strain formulation selected.
 
 ### Linearized Elasticity Problems
 
 Small strain linearized elasticity problems should be run with the parameter `use_displaced_mesh =
 false` in the kernel to ensure all calculations across all three classes (strain, stress, and kernel)
 are computed with respect to the reference mesh. These settings are automatically
-handled with the master action use.
+handled with the [TensorMechanics/MasterAction](/Master/index.md) use.
 
 !listing modules/tensor_mechanics/tutorials/basics/part_1.1.i block=Modules/TensorMechanics/Master
 
@@ -114,7 +114,7 @@ Large deformation problems should be run with the parameter setting `use_displac
 the kernel so that the kernel and the materials all compute variables with respect to the deformed
 mesh; however, the setting of `use_displaced_mesh` should not be changed from the default
 in the materials.
-The tensor mechanics master action automatically creates the appropriate settings for all classes.
+The [TensorMechanics/MasterAction](/Master/index.md) automatically creates the appropriate settings for all classes.
 The input file syntax to set the Stress Divergence kernel for finite strain problems is:
 
 !listing modules/tensor_mechanics/test/tests/finite_strain_elastic/finite_strain_elastic_new_test.i

@@ -1,15 +1,14 @@
-<!-- MOOSE Documentation Stub: Remove this when content is added. -->
+# Legacy Kernel-Only Tensor Mechanics Action
 
-# LegacyTensorMechanicsAction
+!alert warning title=Deprecated Action
+This legacy action will soon be deprecated in favor of the more inclusive
++[TensorMechanics/Master](/Master/index.md)+.
+See the description, example use, and parameters on the
++[TensorMechanics/Master](/Master/index.md)+ action system page.
 
-!alert construction title=Undocumented Class
-The LegacyTensorMechanicsAction has not been documented, if you would like to contribute to MOOSE by writing
-documentation, please see [/generate.md]. The content contained on this page explains the typical
-documentation associated with an action; however, what is contained is ultimately determined by what
-is necessary to make the documentation clear for users.
+## Description
 
-!syntax description /Kernels/TensorMechanics/LegacyTensorMechanicsAction
-
-!syntax parameters /Kernels/TensorMechanics/LegacyTensorMechanicsAction
-
-!bibtex bibliography
+The legacy kernel only tensor mechanics action simplifies the input file syntax
+for creating a tensor mechanics model by reducing the number of kernels required.
+See a description of the action and parameters on the
+[LegacyTensorMechanicsAction](/Kernels/TensorMechanics/index.md) action system page.
