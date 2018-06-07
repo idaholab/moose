@@ -19,7 +19,7 @@ validParams<SolidWall>()
 SolidWall::SolidWall(const InputParameters & params) : FlowBoundary(params) {}
 
 void
-SolidWall::check()
+SolidWall::check() const
 {
   if ((_spatial_discretization == FlowModel::rDG) && (_flow_model_id == RELAP7::FM_TWO_PHASE))
     logSpatialDiscretizationNotImplementedError(_spatial_discretization);
