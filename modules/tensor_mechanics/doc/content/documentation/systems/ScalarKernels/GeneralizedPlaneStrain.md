@@ -1,4 +1,4 @@
-# GeneralizedPlaneStrain
+# Generalized Plane Strain Scalar Kernel
 
 !syntax description /ScalarKernels/GeneralizedPlaneStrain
 

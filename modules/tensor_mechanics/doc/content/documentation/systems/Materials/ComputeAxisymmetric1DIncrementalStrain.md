@@ -4,7 +4,7 @@
 
 ## Description
 
-The material `ComputeAxisymmetric1DIncrementalStrain` calculates the small total
+The material `ComputeAxisymmetric1DIncrementalStrain` calculates the small
 incremental strain for 1D Axisymmetric systems and is intended for use with
 [Generalized Plane Strain](tensor_mechanics/generalized_plane_strain.md) simulations.
 This material assumes symmetry about the $z$-axis.

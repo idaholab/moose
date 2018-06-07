@@ -33,7 +33,7 @@ The `GeneralizedPlaneStrain` Action is used to construct the kernels, user objec
 The subblocks of the GeneralizedPlaneStrain action are what triggers MOOSE objects to be built.
 If a generalized plane strain model is applied for the whole simulation domain, a single subblock should be used
 
-!listing modules/tensor_mechanics/test/tests/generalized_plane_strain/generalized_plane_strain_finite.i block=Modules/TensorMechanics/GeneralizedPlaneStrain
+!listing modules/tensor_mechanics/test/tests/generalized_plane_strain/out_of_plane_pressure.i block=Modules/TensorMechanics/GeneralizedPlaneStrain
 
 if different mesh subdomain has different generalized plane strain model, multiple subblocks with subdomain restrictions can be used.
 

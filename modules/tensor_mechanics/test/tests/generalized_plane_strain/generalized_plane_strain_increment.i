@@ -35,12 +35,13 @@
 
 [Modules/TensorMechanics/Master]
   [./all]
-    strain = FINITE
+    strain = SMALL
     incremental = true
     add_variables = true
     generate_output = 'stress_xx stress_xy stress_yy stress_zz strain_xx strain_xy strain_yy strain_zz'
     planar_formulation = GENERALIZED_PLANE_STRAIN
     eigenstrain_names = eigenstrain
+    scalar_out_of_plane_strain = scalar_strain_zz
     temperature = temp
     save_in = 'saved_x saved_y'
   [../]
@@ -93,10 +94,6 @@
   [./stress]
     type = ComputeStrainIncrementBasedStress
   [../]
-[]
-
-[Problem]
-  kernel_coverage_check = false
 []
 
 [Executioner]
