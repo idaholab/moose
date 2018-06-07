@@ -36,6 +36,7 @@ InputParameters
 validParams<InteractionIntegral>()
 {
   InputParameters params = validParams<ElementIntegralPostprocessor>();
+  params.addClassDescription("Computes the interaction integral for fracture");
   params.addRequiredCoupledVar(
       "displacements",
       "The displacements appropriate for the simulation geometry and coordinate system");
