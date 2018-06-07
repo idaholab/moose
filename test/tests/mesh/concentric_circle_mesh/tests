@@ -1,0 +1,7 @@
+[Tests]
+  [./test]
+    type = 'Exodiff'
+    input = 'concentric_circle_mesh.i'
+    exodiff = 'concentric_circle_mesh_out.e'
+  [../]
+[]
