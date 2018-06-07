@@ -11,6 +11,7 @@
 #define SPLITMESHACTION_H
 
 #include "Action.h"
+#include "libmesh/default_coupling.h"
 
 #include <string>
 
@@ -25,6 +26,9 @@ public:
   SplitMeshAction(InputParameters params);
 
   virtual void act() override;
+
+private:
+  std::unique_ptr<DefaultCoupling> _default_coupling;
 };
 
 #endif // SPLITMESHACTION_H
