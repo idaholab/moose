@@ -206,7 +206,7 @@ HyperElasticPhaseFieldIsoDamage::computeQpJacobian()
   // 2nd derivative wrt c and strain = 0.0 if we used the previous step's history varible
   if (_use_current_hist)
     _d2Fdcdstrain[_qp] =
-        -_df_dstretch_inc.innerProductTranspose(dG0_df) * (1.0 - _c[_qp]) * (1 - _kdamage);
+        -_df_dstretch_inc.innerProductTranspose(dG0_df) * 2.0 * (1.0 - _c[_qp]) * (1 - _kdamage);
 
   _dstress_dc[_qp] = _fe.mixedProductIkJl(_fe) * _dpk2_dc;
 }
