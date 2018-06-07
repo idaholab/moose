@@ -19,7 +19,7 @@ template <>
 InputParameters validParams<TwoPhaseFluidProperties>();
 
 /**
- * Base class for fluid properties used with two phase flow
+ * Base class for fluid properties used with two-phase flow
  */
 class TwoPhaseFluidProperties : public FluidProperties
 {
@@ -65,9 +65,9 @@ public:
 
 protected:
   /// The name of the user object that provides liquid phase fluid properties
-  UserObjectName _liquid_name;
+  const UserObjectName _liquid_name;
   /// The name of the user object that provides vapor phase fluid properties
-  UserObjectName _vapor_name;
+  const UserObjectName _vapor_name;
 
   /// The user object that provides liquid phase fluid properties
   const SinglePhaseFluidProperties * _fp_liquid;
