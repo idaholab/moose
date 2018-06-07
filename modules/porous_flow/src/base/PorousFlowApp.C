@@ -112,6 +112,12 @@ PorousFlowApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
   syntax.registerActionSyntax("PorousFlowBasicTHM", "PorousFlowBasicTHM", "add_material");
   syntax.registerActionSyntax("PorousFlowBasicTHM", "PorousFlowBasicTHM", "add_aux_variable");
   syntax.registerActionSyntax("PorousFlowBasicTHM", "PorousFlowBasicTHM", "add_aux_kernel");
+
+  registerTask("add_joiners", /*is_required=*/false);
+  addTaskDependency("add_joiners", "add_material");
+  addTaskDependency("add_joiners", "add_user_object");
+
+  syntax.registerActionSyntax("PorousFlowAddMaterialJoiner", "Materials", "add_joiners");
 }
 
 // External entry point for dynamic execute flag registration
