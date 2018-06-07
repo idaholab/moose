@@ -64,10 +64,13 @@ ComputeIsotropicLinearElasticPFFractureStress::computeQpStress()
   const Real lambda = _elasticity_tensor[_qp](0, 0, 1, 1);
   const Real mu = _elasticity_tensor[_qp](0, 1, 0, 1);
 
-  // Compute eigenvectors and eigenvalues of mechanical strain
+  // Compute eigenvectors and eigenvalues of mechanical strain and projection tensor
   RankTwoTensor eigvec;
   std::vector<Real> eigval(LIBMESH_DIM);
-  _mechanical_strain[_qp].symmetricEigenvaluesEigenvectors(eigval, eigvec);
+  RankFourTensor proj_pos =
+      _mechanical_strain[_qp].positiveProjectionEigenDecomposition(eigval, eigvec);
+  RankFourTensor I4sym(RankFourTensor::initIdentitySymmetricFour);
+  RankFourTensor proj_neg = I4sym - proj_pos;
 
   // Calculate tensors of outerproduct of eigen vectors
   std::vector<RankTwoTensor> etens(LIBMESH_DIM);
@@ -153,10 +156,6 @@ ComputeIsotropicLinearElasticPFFractureStress::computeQpStress()
   // d trace(A) / dA
   RankTwoTensor I(RankTwoTensor::initIdentity);
   RankFourTensor dtraceAdA = I.outerProduct(I);
-  // projection tensor
-  RankFourTensor proj_pos = _mechanical_strain[_qp].positveProjectionEigenDecomposition();
-  RankFourTensor I4sym(RankFourTensor::initIdentitySymmetricFour);
-  RankFourTensor proj_neg = I4sym - proj_pos;
 
   _Jacobian_mult[_qp] = ((1.0 - c) * (1.0 - c) * (1 - _kdamage) + _kdamage) *
                             (lambda * dtraceAdA * MathUtils::heavyside(etr) + 2 * mu * proj_pos) +
