@@ -94,7 +94,7 @@ GeometricalComponent::setupMesh()
 }
 
 void
-GeometricalComponent::check()
+GeometricalComponent::check() const
 {
   Component::check();
 

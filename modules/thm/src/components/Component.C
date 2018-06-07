@@ -113,7 +113,7 @@ Component::executeInitSecondary()
 }
 
 void
-Component::executeCheck()
+Component::executeCheck() const
 {
   check();
   _component_setup_status = CHECKED;

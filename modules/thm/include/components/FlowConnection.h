@@ -97,7 +97,7 @@ public:
 protected:
   virtual void setupMesh() override;
   virtual void init() override;
-  virtual void check() override;
+  virtual void check() const override;
 
   /**
    * Adds a connection for this component

@@ -120,7 +120,7 @@ FlowConnection::init()
 }
 
 void
-FlowConnection::check()
+FlowConnection::check() const
 {
   Component::check();
 

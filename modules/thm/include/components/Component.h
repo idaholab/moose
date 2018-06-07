@@ -63,7 +63,7 @@ public:
   /**
    * Wrapper function for \c check() that marks the function as being called
    */
-  void executeCheck();
+  void executeCheck() const;
 
   /**
    * Wrapper function for \c setupMesh() that marks the function as being called
@@ -167,7 +167,7 @@ protected:
   /**
    * Check the component integrity
    */
-  virtual void check() {}
+  virtual void check() const {}
 
   /**
    * Performs mesh setup such as creating mesh or naming mesh sets
@@ -429,7 +429,7 @@ private:
   static unsigned int bc_ids;
 
   /// Component setup status
-  EComponentSetupStatus _component_setup_status;
+  mutable EComponentSetupStatus _component_setup_status;
 
   /// List of names of components that this component depends upon
   std::vector<std::string> _dependencies;

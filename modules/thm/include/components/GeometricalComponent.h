@@ -65,7 +65,7 @@ public:
   }
 
 protected:
-  virtual void check() override;
+  virtual void check() const override;
   virtual void computeMeshTransformation();
   virtual void setupMesh() override;
 
