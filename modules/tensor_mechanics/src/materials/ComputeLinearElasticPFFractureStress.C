@@ -100,7 +100,7 @@ ComputeLinearElasticPFFractureStress::computeQpStress()
   _d2Fdc2[_qp] = cfactor * G0_pos * 2.0;
 
   // 2nd derivative wrt c and strain
-  _d2Fdcdstrain[_qp] = -cfactor * stress0pos * (1.0 - c);
+  _d2Fdcdstrain[_qp] = -cfactor * stress0pos * 2.0 * (1.0 - c);
 
   // Used in StressDivergencePFFracTensors off-diagonal Jacobian
   _dstress_dc[_qp] = -cfactor * stress0pos * 2.0 * (1.0 - c);
