@@ -20,4 +20,14 @@
     input = 'fullsat_brine_except3.i'
     expect_err = 'You need to specify fp if use_brine is false'
   [../]
+  [./addjoiner]
+    type = RunApp
+    input = addjoiner.i
+  [../]
+  [./addjoiner_exception]
+    type = RunException
+    input = addjoiner_exception.i
+    expect_err = 'PorousFlowJoiner materials are no longer required in the input file'
+    cli_args = --error-deprecated
+  [../]
 []

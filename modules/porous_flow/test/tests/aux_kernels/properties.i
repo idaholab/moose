@@ -317,25 +317,6 @@
     fp = simple_fluid1
     phase = 1
   [../]
-  [./dens_all]
-    type = PorousFlowJoiner
-    at_nodes = true
-    material_property = PorousFlow_fluid_phase_density_nodal
-  [../]
-  [./dens_qp_all]
-    type = PorousFlowJoiner
-    material_property = PorousFlow_fluid_phase_density_qp
-    at_nodes = false
-  [../]
-  [./visc_all_nodal]
-    type = PorousFlowJoiner
-    at_nodes = true
-    material_property = PorousFlow_viscosity_nodal
-  [../]
-  [./visc_all]
-    type = PorousFlowJoiner
-    material_property = PorousFlow_viscosity_qp
-  [../]
   [./permeability]
     type = PorousFlowPermeabilityConst
     permeability = '1e-12 0 0 0 1e-12 0 0 0 1e-12'
@@ -352,11 +333,6 @@
     n = 3
     phase = 1
   [../]
-  [./relperm_all]
-    type = PorousFlowJoiner
-    at_nodes = true
-    material_property = PorousFlow_relative_permeability_nodal
-  [../]
   [./relperm0_qp]
     type = PorousFlowRelativePermeabilityCorey
     at_nodes = false
@@ -368,11 +344,6 @@
     at_nodes = false
     n = 3
     phase = 1
-  [../]
-  [./relperm_all_qp]
-    type = PorousFlowJoiner
-    at_nodes = false
-    material_property = PorousFlow_relative_permeability_qp
   [../]
   [./porosity_nodal]
     type = PorousFlowPorosityConst
@@ -388,24 +359,6 @@
     at_nodes = true
     specific_heat_capacity = 1.0
     density = 125
-  [../]
-  [./energy_all]
-    type = PorousFlowJoiner
-    at_nodes = true
-    material_property = PorousFlow_fluid_phase_internal_energy_nodal
-  [../]
-  [./energy_all_qp]
-    type = PorousFlowJoiner
-    material_property = PorousFlow_fluid_phase_internal_energy_qp
-  [../]
-  [./enthalpy_all]
-    type = PorousFlowJoiner
-    at_nodes = true
-    material_property = PorousFlow_fluid_phase_enthalpy_nodal
-  [../]
-  [./enthalpy_all_qp]
-    type = PorousFlowJoiner
-    material_property = PorousFlow_fluid_phase_enthalpy_qp
   [../]
 []
 

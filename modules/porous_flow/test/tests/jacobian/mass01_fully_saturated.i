@@ -167,10 +167,6 @@
     fp = the_simple_fluid
     phase = 0
   [../]
-  [./dens_all]
-    type = PorousFlowJoiner
-    material_property = PorousFlow_fluid_phase_density_qp
-  [../]
   [./porosity]
     type = PorousFlowPorosityConst  # only the initial vaue of this is ever used
     porosity = 0.1
