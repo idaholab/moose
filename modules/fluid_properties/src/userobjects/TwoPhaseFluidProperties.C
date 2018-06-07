@@ -15,30 +15,44 @@ InputParameters
 validParams<TwoPhaseFluidProperties>()
 {
   InputParameters params = validParams<FluidProperties>();
+
+  params.addParam<UserObjectName>("fp_liquid",
+                                  "Liquid single-phase fluid properties user object name");
+  params.addParam<UserObjectName>("fp_vapor",
+                                  "Vapor single-phase fluid properties user object name");
+
   return params;
 }
 
 TwoPhaseFluidProperties::TwoPhaseFluidProperties(const InputParameters & parameters)
-  : FluidProperties(parameters)
-{
-  _liquid_name = name() + ":liquid";
-  _vapor_name = name() + ":vapor";
+  : FluidProperties(parameters),
 
-  // check that the user has not already created these single-phase properties
-  if (_fe_problem.hasUserObject(_liquid_name))
-    mooseError("The two-phase fluid properties object '" + name() + "' is ",
-               "trying to create a single-phase fluid properties object with ",
-               "name '",
-               _liquid_name,
-               "', but a single-phase fluid properties ",
-               "object with this name already exists.");
-  if (_fe_problem.hasUserObject(_vapor_name))
-    mooseError("The two-phase fluid properties object '" + name() + "' is ",
-               "trying to create a single-phase fluid properties object with ",
-               "name '",
-               _vapor_name,
-               "', but a single-phase fluid properties ",
-               "object with this name already exists.");
+    _liquid_name(isParamValid("fp_liquid") ? getParam<UserObjectName>("fp_liquid")
+                                           : UserObjectName(name() + ":liquid")),
+    _vapor_name(isParamValid("fp_vapor") ? getParam<UserObjectName>("fp_vapor")
+                                         : UserObjectName(name() + ":vapor"))
+{
+  // If the single-phase fluid properties user object names are not provided, it
+  // is implied that these objects will be created by a derived class. In this
+  // case, we need to check that these user objects do not already exist.
+  if (!isParamValid("fp_liquid"))
+    if (_fe_problem.hasUserObject(_liquid_name))
+      paramError("fp_liquid",
+                 "The two-phase fluid properties object '" + name() + "' is ",
+                 "trying to create a single-phase fluid properties object with ",
+                 "name '",
+                 _liquid_name,
+                 "', but a single-phase fluid properties ",
+                 "object with this name already exists.");
+  if (!isParamValid("fp_vapor"))
+    if (_fe_problem.hasUserObject(_vapor_name))
+      paramError("fp_vapor",
+                 "The two-phase fluid properties object '" + name() + "' is ",
+                 "trying to create a single-phase fluid properties object with ",
+                 "name '",
+                 _vapor_name,
+                 "', but a single-phase fluid properties ",
+                 "object with this name already exists.");
 }
 
 const UserObjectName &
