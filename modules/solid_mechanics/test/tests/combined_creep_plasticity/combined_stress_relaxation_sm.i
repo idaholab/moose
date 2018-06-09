@@ -158,7 +158,6 @@
     disp_x = disp_x
     disp_y = disp_y
     disp_z = disp_z
-    output_iteration_info = false
     relative_tolerance = 1e-14
     absolute_tolerance = 1e-14
     formulation = Nonlinear3D

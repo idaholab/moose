@@ -166,7 +166,6 @@
     disp_y = disp_y
     disp_z = disp_z
     temp = temp
-    output_iteration_info = false
     formulation = Nonlinear3D
   [../]
 
