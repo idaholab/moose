@@ -6,12 +6,12 @@
 
 !include documentation/modules/tensor_mechanics/common/supplementalRadialReturnStressUpdate.md
 
-In isotropic linear hardening plasticity, with the hardening function $ r = hp$, the effective
+In isotropic linear hardening plasticity, with the hardening function $r = hp$, the effective
 plastic strain increment has the form:
 \begin{equation}
  d \Delta p = \frac{\sigma^{trial}_{effective} - 3 G \Delta p - r - \sigma_{yield}}{3G + h}
 \end{equation}
-where G is the isotropic shear modulus, and $\sigma^{trial}_{effective}$ is the scalar von Mises
+where $G$ is the isotropic shear modulus, and $\sigma^{trial}_{effective}$ is the scalar von Mises
 trial stress.
 
 This class calculates an effective trial stress, an effective scalar plastic strain increment, and

@@ -17,6 +17,9 @@ InputParameters
 validParams<MaterialTensorIntegral>()
 {
   InputParameters params = validParams<ElementIntegralPostprocessor>();
+  params.addClassDescription("This postprocessor computes an element integral of "
+                             "a component of a material tensor as specified by "
+                             "the user-supplied indices");
   params.addRequiredParam<MaterialPropertyName>("rank_two_tensor",
                                                 "The rank two material tensor name");
   params.addRequiredRangeCheckedParam<unsigned int>(
