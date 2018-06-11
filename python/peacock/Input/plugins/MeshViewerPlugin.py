@@ -61,13 +61,13 @@ class MeshViewerPlugin(VTKWindowPlugin):
             self._highlight = chigger.exodus.ExodusResult(self._reader,
                                                           renderer=self._result.getVTKRenderer(), color=[1,0,0])
 
-        if block or boundary or nodeset:
+        if (block or boundary or nodeset):
             self._highlight.setOptions(block=block, boundary=boundary, nodeset=nodeset)
             self._highlight.setOptions(edges=True, edge_width=3, edge_color=[1,0,0], point_size=5)
-            self.onAppendResult(self._highlight)
+            self._window.append(self._highlight)
         else:
             self._highlight.reset()
-            self.onRemoveResult(self._highlight)
+            self._window.remove(self._highlight)
             self._highlight = None
 
         self.onWindowRequiresUpdate()
