@@ -174,11 +174,6 @@
     n = 2
     phase = 1
   [../]
-  [./relperm_all]
-    type = PorousFlowJoiner
-    at_nodes = true
-    material_property = PorousFlow_relative_permeability_nodal
-  [../]
 []
 
 [BCs]

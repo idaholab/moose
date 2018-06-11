@@ -305,20 +305,6 @@
     phase = 0
     at_nodes = true
   [../]
-  [./dens_all]
-    type = PorousFlowJoiner
-    at_nodes = true
-    material_property = PorousFlow_fluid_phase_density_nodal
-  [../]
-  [./visc_all]
-    type = PorousFlowJoiner
-    material_property = PorousFlow_viscosity_nodal
-  [../]
-  [./internal_energy_fluids]
-    type = PorousFlowJoiner
-    at_nodes = true
-    material_property = PorousFlow_fluid_phase_internal_energy_nodal
-  [../]
   [./permeability]
     type = PorousFlowPermeabilityConst
     permeability = '0.5 0 0   0 0.5 0   0 0 0.5'
@@ -328,11 +314,6 @@
     at_nodes = true
     n = 0 # unimportant in this fully-saturated situation
     phase = 0
-  [../]
-  [./relperm_all]
-    type = PorousFlowJoiner
-    at_nodes = true
-    material_property = PorousFlow_relative_permeability_nodal
   [../]
 []
 

@@ -142,16 +142,6 @@
     at_nodes = true
     phase = 1
   [../]
-  [./dens_all]
-    type = PorousFlowJoiner
-    at_nodes = true
-    material_property = PorousFlow_fluid_phase_density_nodal
-  [../]
-  [./visc_all]
-    type = PorousFlowJoiner
-    at_nodes = true
-    material_property = PorousFlow_viscosity_nodal
-  [../]
   [./permeability]
     type = PorousFlowPermeabilityConst
     permeability = '1 0 0 0 2 0 0 0 3'
@@ -167,11 +157,6 @@
     at_nodes = true
     n = 3
     phase = 1
-  [../]
-  [./relperm_all]
-    type = PorousFlowJoiner
-    at_nodes = true
-    material_property = PorousFlow_relative_permeability_nodal
   [../]
 []
 

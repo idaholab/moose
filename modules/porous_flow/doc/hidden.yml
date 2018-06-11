@@ -5,6 +5,7 @@
 - /Kernels/PorousFlowFullySaturatedDarcyFlow
 - /Kernels/PorousFlowFullySaturatedHeatAdvection
 - /Kernels/PorousFlowFullySaturatedMassTimeDerivative
+- /Materials/PorousFlowAddMaterialJoiner
 - /PorousFlowBasicTHM
 - /PorousFlowBasicTHM/PorousFlowBasicTHM
 - /PorousFlowFullySaturated
