@@ -320,13 +320,18 @@ class BlockTree(QTreeWidget, MooseWidget):
     def includeBlock(self, block, include=True):
         item = self._path_item_map.get(block.path)
         if item:
+            changed = block.included != include
             block.included = include
             if include:
-                item.setCheckState(0, Qt.Checked)
+                if item.checkState(0) == Qt.Unchecked:
+                    item.setCheckState(0, Qt.Checked)
+                    changed = True
                 self._includeParents(block)
-            else:
+            elif item.checkState(0) == Qt.Checked:
                 item.setCheckState(0, Qt.Unchecked)
-            self.changed.emit(block)
+                changed = True
+            if changed:
+                self.changed.emit(block)
 
     def _treeContextMenu(self, point):
         """
