@@ -45,7 +45,8 @@ ScalarMaterialDamage::ScalarMaterialDamage(const InputParameters & parameters)
   : DamageBase(parameters),
     _use_old_damage(getParam<bool>("use_old_damage")),
     _damage_index(getMaterialPropertyByName<Real>(getParam<MaterialPropertyName>("damage_index"))),
-    _damage_index_old(getMaterialPropertyOldByName<Real>(getParam<MaterialPropertyName>("damage_index"))),
+    _damage_index_old(
+        getMaterialPropertyOldByName<Real>(getParam<MaterialPropertyName>("damage_index"))),
     _residual_stiffness_fraction(getParam<Real>("residual_stiffness_fraction")),
     _maximum_damage_increment(getParam<Real>("maximum_damage_increment"))
 {
@@ -64,13 +65,15 @@ ScalarMaterialDamage::updateStressForDamage(RankTwoTensor & stress_new)
 {
   // Avoid multiplying by a small negative number, which could occur if damage_index
   // is slightly greater than 1.0
-  stress_new *= std::max((1.0 - (_use_old_damage ? _damage_index_old[_qp] : _damage_index[_qp])), 0.0);
+  stress_new *=
+      std::max((1.0 - (_use_old_damage ? _damage_index_old[_qp] : _damage_index[_qp])), 0.0);
 }
 
 void
 ScalarMaterialDamage::updateJacobianMultForDamage(RankFourTensor & jacobian_mult)
 {
-  jacobian_mult *= std::max((1.0 - (_use_old_damage ? _damage_index_old[_qp] : _damage_index[_qp])), _residual_stiffness_fraction);
+  jacobian_mult *= std::max((1.0 - (_use_old_damage ? _damage_index_old[_qp] : _damage_index[_qp])),
+                            _residual_stiffness_fraction);
 }
 
 Real

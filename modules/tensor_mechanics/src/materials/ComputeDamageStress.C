@@ -24,7 +24,7 @@ validParams<ComputeDamageStress>()
 }
 
 ComputeDamageStress::ComputeDamageStress(const InputParameters & parameters)
-  : ComputeFiniteStrainElasticStress(parameters), 
+  : ComputeFiniteStrainElasticStress(parameters),
     _matl_timestep_limit(declareProperty<Real>("matl_timestep_limit")),
     _damage_model(nullptr)
 {
