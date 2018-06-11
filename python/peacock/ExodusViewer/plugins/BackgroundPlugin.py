@@ -23,6 +23,9 @@ class BackgroundPlugin(QtWidgets.QWidget, ExodusPlugin):
     #: pyqtSignal: Emitted when the chigger objects options are changed
     windowOptionsChanged = QtCore.pyqtSignal(dict)
 
+    #: pyqtSignal: Emitted when the colorbar options are changed
+    colorbarOptionsChanged = QtCore.pyqtSignal(dict)
+
     def __init__(self, **kwargs):
         super(BackgroundPlugin, self).__init__(**kwargs)
 
@@ -52,8 +55,15 @@ class BackgroundPlugin(QtWidgets.QWidget, ExodusPlugin):
 
         # Background Toggle action (see addToMenu)
         self.GradientToggle = None
-        self.setVisible(False)
-        self.hide() # this widget only contains menu items
+        self.ColorbarBlackFontToggle = None
+
+        # Dropdown with standard background setup
+        self.MainLayout = QtWidgets.QHBoxLayout(self)
+        self.BackgroundSelectLabel = QtWidgets.QLabel("Background:")
+        self.BackgroundSelect = QtWidgets.QComboBox()
+        self.MainLayout.addWidget(self.BackgroundSelectLabel)
+        self.MainLayout.addWidget(self.BackgroundSelect)
+        self.MainLayout.addStretch(1)
 
         # Default colors
         self._top = QtGui.QColor(self._preferences.value("exodus/gradientTopColor"))
@@ -79,6 +89,12 @@ class BackgroundPlugin(QtWidgets.QWidget, ExodusPlugin):
         self.GradientToggle.setCheckable(True)
         self.GradientToggle.setChecked(True)
         self.GradientToggle.toggled.connect(self._callbackGradientToggle)
+
+        self.ColorbarBlackFontToggle = menu.addAction("Black colorbar font")
+        self.ColorbarBlackFontToggle.setCheckable(True)
+        self.ColorbarBlackFontToggle.setChecked(False)
+        self.ColorbarBlackFontToggle.toggled.connect(self._callbackColorbarBlackFontToggle)
+
         self.updateOptions()
 
     def updateOptions(self):
@@ -94,17 +110,63 @@ class BackgroundPlugin(QtWidgets.QWidget, ExodusPlugin):
             background = [bottom[0]/255., bottom[1]/255., bottom[2]/255.]
             background2 = [top[0]/255., top[1]/255., top[2]/255.]
         else:
-            top = self._solid.getRgb()
-            background = [top[0]/255., top[1]/255., top[2]/255.]
+            solid = self._solid.getRgb()
+            background = [solid[0]/255., solid[1]/255., solid[2]/255.]
             background2 = None
+
+        if self.ColorbarBlackFontToggle.isChecked():
+            self.colorbarOptionsChanged.emit({'primary':dict(font_color=[0,0,0])})
+        else:
+            self.colorbarOptionsChanged.emit({'primary':dict(font_color=[1,1,1])})
 
         self.windowOptionsChanged.emit({'background':background,
                                         'background2':background2,
                                         'gradient_background':self.GradientToggle.isChecked()})
 
+    def _setupBackgroundSelect(self, qobject):
+        """
+        Setup the background toggle options.
+        """
+        qobject.addItem('Gradient')
+        qobject.addItem('Black')
+        qobject.addItem('White')
+        qobject.currentIndexChanged.connect(self._callbackBackgroundSelect)
+
+    def _callbackBackgroundSelect(self, index):
+        """
+        Called when the background style is altered.
+        """
+
+        # Gradient
+        if index == 0:
+            self.GradientToggle.setChecked(True)
+            self.ColorbarBlackFontToggle.setChecked(False)
+
+        # Black
+        elif index == 1:
+            self.GradientToggle.setChecked(False)
+            self.ColorbarBlackFontToggle.setChecked(False)
+            self._solid.setRgb(0, 0, 0)
+
+        # White
+        elif index == 2:
+            self.GradientToggle.setChecked(False)
+            self.ColorbarBlackFontToggle.setChecked(True)
+            self._solid.setRgb(255, 255, 255)
+
+        self.updateOptions()
+
+
     def _callbackGradientToggle(self, value):
         """
         Called when the gradient toggle is checked/Unchecked.
+        """
+        self.updateOptions()
+        self.windowRequiresUpdate.emit()
+
+    def _callbackColorbarBlackFontToggle(self, value):
+        """
+        Called when the drop down black font option is toggled.
         """
         self.updateOptions()
         self.windowRequiresUpdate.emit()

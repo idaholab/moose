@@ -12,6 +12,8 @@ from peacock.ExodusViewer.plugins.VTKWindowPlugin import VTKWindowPlugin
 from peacock.utils import ExeLauncher
 from PyQt5 import QtCore
 
+import mooseutils
+
 class MeshViewerPlugin(VTKWindowPlugin):
     """
     A VTKWindowPlugin that shows the mesh of the input file as given
@@ -120,9 +122,10 @@ class MeshViewerPlugin(VTKWindowPlugin):
             self.meshEnabled.emit(True)
             self.onSetFilename(self.current_temp_mesh_file)
             self.onWindowRequiresUpdate()
-        except Exception:
+        except Exception as e:
             self.meshEnabled.emit(False)
             self._reset()
+            mooseutils.mooseWarning("Error producing mesh: %s" % e)
             self._setLoadingMessage("Error producing mesh")
             self.onWindowRequiresUpdate()
             self._removeFileNoError(self.current_temp_mesh_file)

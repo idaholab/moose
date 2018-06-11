@@ -125,5 +125,27 @@ class TestBackgroundPlugin(Testing.PeacockImageTestCase):
         self._widget.BackgroundPlugin.windowRequiresUpdate.emit()
         self.assertImage('testSolidColor.png')
 
+    def testBackgroundSelect(self):
+        self.createWidget()
+        self._widget.BackgroundPlugin.BackgroundSelect.setCurrentIndex(1)
+        self._widget.BackgroundPlugin.BackgroundSelect.currentIndexChanged.emit(1)
+        self.assertImage('testBlackToggle.png')
+
+        self._widget.BackgroundPlugin.BackgroundSelect.setCurrentIndex(2)
+        self._widget.BackgroundPlugin.BackgroundSelect.currentIndexChanged.emit(2)
+        self.assertImage('testWhiteToggle.png')
+
+        self._widget.BackgroundPlugin.BackgroundSelect.setCurrentIndex(0)
+        self._widget.BackgroundPlugin.BackgroundSelect.currentIndexChanged.emit(0)
+        self.assertImage('testInitial.png')
+
+    def testBlackFontToggle(self):
+        self.createWidget()
+        self._widget.BackgroundPlugin.ColorbarBlackFontToggle.setChecked(True)
+        self._widget.BackgroundPlugin.ColorbarBlackFontToggle.toggled.emit(True)
+        self.assertImage('testBlackFont.png')
+
+
+
 if __name__ == '__main__':
     unittest.main(module=__name__, verbosity=2)
