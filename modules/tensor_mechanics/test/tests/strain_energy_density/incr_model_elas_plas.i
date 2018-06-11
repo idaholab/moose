@@ -75,12 +75,6 @@
     boundary = 'top'
     function = ramp_disp_y
   [../]
-#  [./Pressure]
-#    [./top]
-#      boundary = 'top'
-#      function = rampConstantUp
-#    [../]
-#  [../]
 []
 
 [Materials]

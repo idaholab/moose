@@ -17,7 +17,7 @@ This class calculates an effective trial stress, an effective creep strain rate 
 
 This class is based on the implicit integration algorithm in [cite:dunne2005introduction] pg. 146 - 149.
 
-## Example Input File Syntax
+## Example Input File
 
 !listing modules/tensor_mechanics/test/tests/material_limit_time_step/creep/nafems_test5a_lim.i block=Materials/powerlawcrp
 
@@ -30,7 +30,6 @@ This class is based on the implicit integration algorithm in [cite:dunne2005intr
 !syntax inputs /Materials/PowerLawCreepStressUpdate
 
 !syntax children /Materials/PowerLawCreepStressUpdate
-
 
 
 !bibtex bibliography
