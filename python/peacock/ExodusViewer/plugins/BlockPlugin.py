@@ -99,7 +99,6 @@ class BlockPlugin(QtWidgets.QGroupBox, ExodusPlugin):
         sideset = self._blocksChanged(self.SidesetSelector, chigger.exodus.ExodusReader.SIDESET)
         nodeset = self._blocksChanged(self.NodesetSelector, chigger.exodus.ExodusReader.NODESET)
         if any([blocks, sideset, nodeset]):
-            print 'reset...', [blocks, sideset, nodeset]
             self.onWindowReader(self._reader)
 
     def updateOptions(self):

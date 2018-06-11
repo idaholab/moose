@@ -21,7 +21,6 @@ class ExodusPluginManager(QtWidgets.QWidget, peacock.base.PluginManager):
         self.setSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Preferred)
         self.MainLayout = QtWidgets.QHBoxLayout(self)
         self.LeftLayout = QtWidgets.QVBoxLayout()
-        #self.LeftLayout.setSpacing(10)
         self.RightLayout = QtWidgets.QVBoxLayout()
         self.MainLayout.addLayout(self.LeftLayout)
         self.MainLayout.addLayout(self.RightLayout)
