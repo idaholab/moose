@@ -99,16 +99,6 @@
     at_nodes = false
     phase = 0
   [../]
-  [./dens_qp_all]
-    type = PorousFlowJoiner
-    material_property = PorousFlow_fluid_phase_density_qp
-    at_nodes = false
-  [../]
-  [./visc_all]
-    type = PorousFlowJoiner
-    at_nodes = false
-    material_property = PorousFlow_viscosity_qp
-  [../]
   [./poro]
     type = PorousFlowPorosityConst
     at_nodes = false
@@ -128,11 +118,6 @@
   [./relperm]
     type = PorousFlowRelativePermeabilityConst
     phase = 0
-    at_nodes = false
-  [../]
-  [./relperm_all]
-    type = PorousFlowJoiner
-    material_property = PorousFlow_relative_permeability_qp
     at_nodes = false
   [../]
 []

@@ -110,42 +110,14 @@
     fp = simple_fluid
     phase = 0
   [../]
-  [./dens_qp_all]
-    type = PorousFlowJoiner
-    material_property = PorousFlow_fluid_phase_density_qp
-    at_nodes = false
-  [../]
-  [./dens_nodal_all]
-    type = PorousFlowJoiner
-    material_property = PorousFlow_fluid_phase_density_nodal
-    at_nodes = true
-  [../]
-  [./visc_all]
-    type = PorousFlowJoiner
-    material_property = PorousFlow_viscosity_qp
-  [../]
-  [./visc_all_nodal]
-    type = PorousFlowJoiner
-    at_nodes = true
-    material_property = PorousFlow_viscosity_nodal
-  [../]
   [./relp]
     type = PorousFlowRelativePermeabilityConst
     phase = 0
-  [../]
-  [./relp_all]
-    type = PorousFlowJoiner
-    material_property = PorousFlow_relative_permeability_qp
   [../]
   [./relp_nodal]
     type = PorousFlowRelativePermeabilityConst
     at_nodes = true
     phase = 0
-  [../]
-  [./relp_all_nodal]
-    type = PorousFlowJoiner
-    at_nodes = true
-    material_property = PorousFlow_relative_permeability_nodal
   [../]
   [./permeability1]
     type = PorousFlowPermeabilityConst

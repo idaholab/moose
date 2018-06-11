@@ -89,22 +89,6 @@
     fp = simple_fluid
     phase = 0
   [../]
-  [./dens_all]
-    type = PorousFlowJoiner
-    material_property = PorousFlow_fluid_phase_density_qp
-  [../]
-  [./energy_all]
-    type = PorousFlowJoiner
-    material_property = PorousFlow_fluid_phase_internal_energy_qp
-  [../]
-  [./enthalpy_all]
-    type = PorousFlowJoiner
-    material_property = PorousFlow_fluid_phase_enthalpy_qp
-  [../]
-  [./visc_all]
-    type = PorousFlowJoiner
-    material_property = PorousFlow_viscosity_qp
-  [../]
 []
 
 [Preconditioning]

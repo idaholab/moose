@@ -127,10 +127,6 @@
     phase = 1
     n = 2
   [../]
-  [./kr_all]
-    type = PorousFlowJoiner
-    material_property = PorousFlow_relative_permeability_qp
-  [../]
 []
 
 [VectorPostprocessors]

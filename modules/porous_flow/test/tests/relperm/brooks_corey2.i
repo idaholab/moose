@@ -131,10 +131,6 @@
     s_res = 0.3
     sum_s_res = 0.5
   [../]
-  [./kr_all]
-    type = PorousFlowJoiner
-    material_property = PorousFlow_relative_permeability_qp
-  [../]
 []
 
 [VectorPostprocessors]

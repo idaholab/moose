@@ -92,11 +92,6 @@
     at_nodes = true
     phase = 0
   [../]
-  [./dens_all]
-    type = PorousFlowJoiner
-    at_nodes = true
-    material_property = PorousFlow_fluid_phase_density_nodal
-  [../]
   [./porosity]
     type = PorousFlowPorosityConst
     at_nodes = true

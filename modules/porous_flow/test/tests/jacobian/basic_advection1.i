@@ -77,14 +77,6 @@
     fp = simple_fluid
     phase = 0
   [../]
-  [./dens_qp_all]
-    type = PorousFlowJoiner
-    material_property = PorousFlow_fluid_phase_density_qp
-  [../]
-  [./visc_qp_all]
-    type = PorousFlowJoiner
-    material_property = PorousFlow_viscosity_qp
-  [../]
   [./permeability]
     type = PorousFlowPermeabilityConst
     permeability = '5 0 0 0 5 0 0 0 5'
@@ -93,10 +85,6 @@
     type = PorousFlowRelativePermeabilityCorey
     n = 0
     phase = 0
-  [../]
-  [./relperm_qp_all]
-    type = PorousFlowJoiner
-    material_property = PorousFlow_relative_permeability_qp
   [../]
   [./darcy_velocity_qp]
     type = PorousFlowDarcyVelocityMaterial

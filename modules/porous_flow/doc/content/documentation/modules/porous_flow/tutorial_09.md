@@ -42,15 +42,8 @@ Almost all PorousFlow `Materials` compute derivatives, and most of them retrieve
 
 ### Joiners
 
-In the input file, you specify things like densities, relative permeabilities, etc, for each phase or component.  But most PorousFlow `Materials`, `Kernels`, etc, require these to be formatted into C++ `std::vectors`.  This is what the [`PorousFlowJoiner`](PorousFlowJoiner.md) does.  Even single-phase, single-component simulations need Joiners: they just create `std::vectors` with length 1 (so far in this tutorial you haven't seen any `PorousFlowJoiners` because the `Actions` have created them for you: lucky you!).
-
-For example:
-
-!listing modules/porous_flow/test/tests/pressure_pulse/pressure_pulse_1d_2phase.i start=[./relperm_water] end=[]
-
-The `material_property` is the `std::vector` property created (in this case `PorousFlow_relative_permeability_nodal`), that can be fed into subsequent `Kernels` and `Materials`, etc.  In this case, the `PorousFlowJoiner` joins together `PorousFlow_relative_permeability_nodal0` (created by `[./relperm_water]`) and `PorousFlow_relative_permeability_nodal1` (created by `[./relperm_gas]`).
-
-It is sometimes really difficult to know the `material_property` names to use!  This is related to knowing which `Material` to use, mentioned at the start of this Page.
+In the input file, you specify things like densities, relative permeabilities, etc, for each phase or component.  But most PorousFlow `Materials`, `Kernels`, etc, require these to be formatted into C++ `std::vectors`.  This is what the [`PorousFlowJoiner`](PorousFlowJoiner.md) does.  Even single-phase, single-component simulations need Joiners: they just create `std::vectors` with length 1. These are
+added automatically by the action system.
 
 ### What Material do I need?
 

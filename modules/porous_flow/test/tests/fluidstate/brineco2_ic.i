@@ -147,11 +147,6 @@
     phase = 1
     at_nodes = true
   [../]
-  [./relperm_all]
-    type = PorousFlowJoiner
-    material_property = PorousFlow_relative_permeability_nodal
-    at_nodes = true
-  [../]
   [./porosity]
     type = PorousFlowPorosityConst
     porosity = 0.1
