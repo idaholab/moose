@@ -248,7 +248,6 @@
     activation_energy = 3.0e5
     max_its = 100
     temp = temp
-    output_iteration_info = false
     legacy_return_mapping = true
   [../]
 

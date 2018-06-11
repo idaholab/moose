@@ -128,7 +128,6 @@
     strain_hardening_exponent = 0.5 #n
     relative_tolerance = 1e-10
     absolute_tolerance = 1e-12
-#    output_iteration_info = true
   [../]
 
 []

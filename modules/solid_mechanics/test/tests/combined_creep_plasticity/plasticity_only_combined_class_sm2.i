@@ -163,7 +163,6 @@
     hardening_constant = 1206.
     relative_tolerance = 1e-8
     absolute_tolerance = 1e-12
-#    output_iteration_info = true
   [../]
 []
 
