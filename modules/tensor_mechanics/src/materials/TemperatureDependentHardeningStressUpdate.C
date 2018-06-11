@@ -19,7 +19,11 @@ InputParameters
 validParams<TemperatureDependentHardeningStressUpdate>()
 {
   InputParameters params = validParams<IsotropicPlasticityStressUpdate>();
-
+  params.addClassDescription("Computes the stress as a function of temperature "
+                             "and plastic strain from user-supplied hardening "
+                             "functions. This class can be used in conjunction "
+                             "with other creep and plasticity materials for "
+                             "more complex simulations");
   params.set<Real>("yield_stress") = 1.0;
   params.set<Real>("hardening_constant") = 1.0;
 
@@ -83,6 +87,7 @@ TemperatureDependentHardeningStressUpdate::computeStressInitialize(
 {
   initializeHardeningFunctions();
   computeYieldStress(elasticity_tensor);
+
   _yield_condition = effectiveTrialStress - _hardening_variable_old[_qp] - _yield_stress;
   _hardening_variable[_qp] = _hardening_variable_old[_qp];
   _plastic_strain[_qp] = _plastic_strain_old[_qp];
@@ -100,20 +105,17 @@ TemperatureDependentHardeningStressUpdate::initializeHardeningFunctions()
       {
         _hf_index_lo = i;
         _hf_index_hi = i + 1;
-        Real temp_lo = _hf_temperatures[i];
-        Real temp_hi = _hf_temperatures[i + 1];
-        _hf_fraction = (temp - temp_lo) / (temp_hi - temp_lo);
+        _hf_fraction =
+            (temp - _hf_temperatures[i]) / (_hf_temperatures[i + 1] - _hf_temperatures[i]);
       }
     }
   }
-
   else if (temp <= _hf_temperatures[0])
   {
     _hf_index_lo = 0;
     _hf_index_hi = _hf_index_lo;
     _hf_fraction = 0.0;
   }
-
   else if (temp >= _hf_temperatures.back())
   {
     _hf_index_lo = _hf_temperatures.size() - 1;

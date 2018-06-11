@@ -10,6 +10,7 @@
 from peacock.ExodusViewer.plugins.VTKWindowPlugin import VTKWindowPlugin
 from peacock.utils import ExeLauncher
 from PyQt5.QtCore import pyqtSignal
+import mooseutils
 import os
 
 class MeshViewerPlugin(VTKWindowPlugin):
@@ -86,9 +87,10 @@ class MeshViewerPlugin(VTKWindowPlugin):
             ExeLauncher.runExe(exe_path, args, print_errors=False)
             self.meshEnabled.emit(True)
             self.onFileChanged(self.current_temp_mesh_file)
-        except Exception:
+        except Exception as e:
             self.meshEnabled.emit(False)
             self.onFileChanged()
+            mooseutils.mooseWarning("Error producing mesh: %s" % e)
             self.setLoadingMessage("Error producing mesh")
             self._removeFileNoError(self.current_temp_mesh_file)
 

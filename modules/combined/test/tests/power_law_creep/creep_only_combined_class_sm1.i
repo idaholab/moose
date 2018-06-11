@@ -244,7 +244,6 @@
     disp_y = y_disp
     disp_z = z_disp
     temp = temp
-    output_iteration_info = false
   [../]
 
   [./thermal]
