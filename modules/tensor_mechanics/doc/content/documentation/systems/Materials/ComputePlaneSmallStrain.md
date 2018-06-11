@@ -37,7 +37,9 @@ the direction of the out-of-plane strain and $\epsilon|^{op}$ is a
 prescribed out-of-plane strain value: this strain value can be
 given either as a scalar variable or a nonlinear variable.
 The [Generalized Plane Strain](tensor_mechanics/generalized_plane_strain.md)
-problems use scalar variables.
+problems use scalar variables. Multiple scalar variables can be provided such
+that one strain calculator is needed for multiple generalized plane strain
+models on different subdomains.
 
 
 ## Strain and Deformation Gradient Formulation

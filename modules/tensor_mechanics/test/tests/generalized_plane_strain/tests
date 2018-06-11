@@ -41,4 +41,12 @@
    exodiff = 'out_of_plane_pressure_out.e'
    abs_zero = 1e-9
  [../]
+ [./generalized_plane_strain_scalar_vector]
+   type = 'Exodiff'
+   input = 'generalized_plane_strain_scalar_vector.i'
+   exodiff = 'generalized_plane_strain_scalar_vector_out.e'
+   prereq = 'generalized_plane_strain_squares'
+   abs_zero = 1e-7
+   allow_test_objects = true
+ [../]
 []

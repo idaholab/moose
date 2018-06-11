@@ -38,4 +38,4 @@ public:
   virtual unsigned int getMaxSubblockIndex() const = 0;
 };
 
-#endif /* SCALARVARIABLEINDEXPROVIDER_H */
+#endif // SUBBLOCKINDEXPROVIDER_H

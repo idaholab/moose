@@ -11,6 +11,7 @@
 #define COMPUTEPLANESMALLSTRAIN_H
 
 #include "Compute2DSmallStrain.h"
+#include "SubblockIndexProvider.h"
 
 class ComputePlaneSmallStrain;
 
@@ -30,12 +31,21 @@ public:
 protected:
   virtual Real computeOutOfPlaneStrain();
 
+  /// gets its subblock index for current element
+  unsigned int getCurrentSubblockIndex() const
+  {
+    return _subblock_id_provider ? _subblock_id_provider->getSubblockIndex(*_current_elem) : 0;
+  };
+
+  const SubblockIndexProvider * _subblock_id_provider;
+
 private:
   const bool _scalar_out_of_plane_strain_coupled;
-  const VariableValue & _scalar_out_of_plane_strain;
 
   const bool _out_of_plane_strain_coupled;
   const VariableValue & _out_of_plane_strain;
+  unsigned int _nscalar_strains;
+  std::vector<const VariableValue *> _scalar_out_of_plane_strain;
 };
 
 #endif // COMPUTEPLANESMALLSTRAIN_H
