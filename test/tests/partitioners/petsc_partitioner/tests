@@ -1,0 +1,21 @@
+[Tests]
+  [./test]
+    requirement = 'MOOSE need more partitioning options'
+    issues = '##11628'
+    type = 'Exodiff'
+    input = 'petsc_partitioner.i'
+    exodiff = 'petsc_partitioner_out.e'
+    min_parallel = 4
+    max_parallel = 4
+  [../]
+  [./parmetis]
+    requirement = 'MOOSE need more partitioning options'
+    issues = '##11628'
+    type = 'Exodiff'
+    input = 'petsc_partitioner.i'
+    exodiff = 'petsc_partitioner_parmetis_out.e'
+    cli_args = 'Mesh/Partitioner/part_package=parmetis Outputs/file_base=petsc_partitioner_parmetis_out'
+    min_parallel = 4
+    max_parallel = 4
+  [../]
+[]
