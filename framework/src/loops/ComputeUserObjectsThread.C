@@ -13,6 +13,7 @@
 #include "ElementUserObject.h"
 #include "ShapeElementUserObject.h"
 #include "SideUserObject.h"
+#include "InterfaceUserObject.h"
 #include "ShapeSideUserObject.h"
 #include "InternalSideUserObject.h"
 #include "NodalUserObject.h"
@@ -80,6 +81,7 @@ ComputeUserObjectsThread::subdomainChanged()
   querySubdomain(Interfaces::InternalSideUserObject, _internal_side_objs);
   querySubdomain(Interfaces::ElementUserObject, _element_objs);
   querySubdomain(Interfaces::ShapeElementUserObject, _shape_element_objs);
+  querySubdomain(Interfaces::InterfaceUserObject, _interface_user_objects);
 }
 
 void
@@ -183,6 +185,45 @@ ComputeUserObjectsThread::onInternalSide(const Elem * elem, unsigned int side)
   for (const auto & uo : _internal_side_objs)
     if (!uo->blockRestricted() || uo->hasBlocks(neighbor->subdomain_id()))
       uo->execute();
+}
+
+void
+ComputeUserObjectsThread::onInterface(const Elem * elem, unsigned int side, BoundaryID bnd_id)
+{
+  std::cout << "ComputeUserObjectsThread::onInterface" << std::endl;
+  // Pointer to the neighbor we are currently working on.
+  const Elem * neighbor = elem->neighbor_ptr(side);
+
+  // Get the global id of the element and the neighbor
+  const dof_id_type elem_id = elem->id(), neighbor_id = neighbor->id();
+
+  std::vector<UserObject *> userobjs;
+  queryBoundary(Interfaces::InterfaceUserObject, bnd_id, userobjs);
+  if (userobjs.size() == 0)
+    return;
+
+  if (!((neighbor->active() && (neighbor->level() == elem->level()) && (elem_id < neighbor_id)) ||
+        (neighbor->level() < elem->level())))
+    return;
+
+  _fe_problem.prepareFace(elem, _tid);
+  _fe_problem.reinitNeighbor(elem, side, _tid);
+
+  // Set up Sentinels so that, even if one of the reinitMaterialsXXX() calls throws, we
+  // still remember to swap back during stack unwinding.
+  SwapBackSentinel face_sentinel(_fe_problem, &FEProblem::swapBackMaterialsFace, _tid);
+  _fe_problem.reinitMaterialsFace(elem->subdomain_id(), _tid);
+
+  SwapBackSentinel neighbor_sentinel(_fe_problem, &FEProblem::swapBackMaterialsNeighbor, _tid);
+  _fe_problem.reinitMaterialsNeighbor(neighbor->subdomain_id(), _tid);
+
+  for (const auto & uo : userobjs)
+  {
+    std::cout << "ComputeUserObjectsThread::onInterface->execute " << std::endl;
+    uo->execute();
+  }
+
+  // _fe_problem.reinitMaterialsBoundary(bnd_id, _tid);
 }
 
 void

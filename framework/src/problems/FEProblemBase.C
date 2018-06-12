@@ -48,6 +48,7 @@
 #include "ElementPostprocessor.h"
 #include "NodalPostprocessor.h"
 #include "SidePostprocessor.h"
+#include "InterfaceUOPostprocessor.h"
 #include "InternalSidePostprocessor.h"
 #include "GeneralPostprocessor.h"
 #include "ElementVectorPostprocessor.h"
@@ -64,6 +65,7 @@
 #include "NodalUserObject.h"
 #include "SideUserObject.h"
 #include "InternalSideUserObject.h"
+#include "InterfaceUserObject.h"
 #include "GeneralUserObject.h"
 #include "ThreadedGeneralUserObject.h"
 #include "InternalSideIndicator.h"
@@ -351,6 +353,7 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
 
   _block_mat_side_cache.resize(n_threads);
   _bnd_mat_side_cache.resize(n_threads);
+  // _bnd_mat_interface_cache.resize(n_threads);
 
   _resurrector = libmesh_make_unique<Resurrector>(*this);
 
@@ -2771,6 +2774,7 @@ FEProblemBase::addUserObject(std::string user_object_name,
     // Attempt to create all the possible UserObject types
     auto euo = std::dynamic_pointer_cast<ElementUserObject>(user_object);
     auto suo = std::dynamic_pointer_cast<SideUserObject>(user_object);
+    auto iuo = std::dynamic_pointer_cast<InterfaceUserObject>(user_object);
     auto isuo = std::dynamic_pointer_cast<InternalSideUserObject>(user_object);
     auto nuo = std::dynamic_pointer_cast<NodalUserObject>(user_object);
     auto guo = std::dynamic_pointer_cast<GeneralUserObject>(user_object);
@@ -2783,6 +2787,7 @@ FEProblemBase::addUserObject(std::string user_object_name,
         _reinit_displaced_elem = true;
       else if (suo)
         _reinit_displaced_face = true;
+      /// don't we need to reinit also isup an iuo
     }
 
     if (guo && !tguo)
@@ -3109,7 +3114,8 @@ FEProblemBase::computeUserObjects(const ExecFlagType & type, const Moose::AuxGro
   std::vector<UserObject *> userobjs;
   query.clone()
       .condition<AttribInterfaces>(Interfaces::ElementUserObject | Interfaces::SideUserObject |
-                                   Interfaces::InternalSideUserObject)
+                                   Interfaces::InternalSideUserObject |
+                                   Interfaces::InterfaceUserObject)
       .queryInto(userobjs);
 
   std::vector<UserObject *> tgobjs;
@@ -3155,9 +3161,10 @@ FEProblemBase::computeUserObjects(const ExecFlagType & type, const Moose::AuxGro
   for (auto obj : userobjs)
     obj->initialize();
 
-  // Execute Elemental/Side/InternalSideUserObjects
+  // Execute Elemental/Side/InternalSide/InterfaceUserObjects
   if (!userobjs.empty())
   {
+    std::cout << "there is one user object" << std::endl;
     // non-nodal user objects have to be run separately before the nodal user objects run
     // because some nodal user objects (NodalNormal related) depend on elemental user objects :-(
     ComputeUserObjectsThread cppt(*this, getNonlinearSystemBase(), query);
@@ -3168,6 +3175,11 @@ FEProblemBase::computeUserObjects(const ExecFlagType & type, const Moose::AuxGro
     joinAndFinalize(query.clone().condition<AttribInterfaces>(Interfaces::SideUserObject));
     joinAndFinalize(query.clone().condition<AttribInterfaces>(Interfaces::InternalSideUserObject));
     joinAndFinalize(query.clone().condition<AttribInterfaces>(Interfaces::ElementUserObject));
+    joinAndFinalize(query.clone().condition<AttribInterfaces>(Interfaces::InterfaceUserObject));
+  }
+  else
+  {
+    std::cout << "there is NOT an user object" << std::endl;
   }
 
   // Execute NodalUserObjects
@@ -5762,6 +5774,29 @@ FEProblemBase::needBoundaryMaterialOnSide(BoundaryID bnd_id, THREAD_ID tid)
 
   return _bnd_mat_side_cache[tid][bnd_id];
 }
+
+// bool
+// FEProblemBase::needBoundaryMaterialOnInterface(BoundaryID bnd_id, THREAD_ID tid)
+// {
+//   if (_bnd_mat_interface_cache[tid].find(bnd_id) == _bnd_mat_interface_cache[tid].end())
+//   {
+//     _bnd_mat_interface_cache[tid][bnd_id] = false;
+//
+//     // if (_nl->needBoundaryMaterialOnInterface(bnd_id, tid))
+//     //   _bnd_mat_interface_cache[tid][bnd_id] = true;
+//     // else if (_interface_user_objects.hasActiveBoundaryObjects(bnd_id, tid))
+//     //   _bnd_mat_interface_cache[tid][bnd_id] = true;
+//     if (theWarehouse() // THIS DOES NOT WORK AND I CAN'T FIGURE OUT WHY
+//             .query()
+//             .condition<AttribThread>(tid)
+//             .condition<AttribInterfaces>(Interfaces::InterfaceUserObject)
+//             .condition<AttribBoundaries>(bnd_id)
+//             .count() > 0)
+//       _bnd_mat_interface_cache[tid][bnd_id] = true;
+//   }
+//
+//   return _bnd_mat_interface_cache[tid][bnd_id];
+// }
 
 bool
 FEProblemBase::needSubdomainMaterialOnSide(SubdomainID subdomain_id, THREAD_ID tid)

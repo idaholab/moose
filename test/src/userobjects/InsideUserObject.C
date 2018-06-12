@@ -53,6 +53,7 @@ InsideUserObject::initialize()
 void
 InsideUserObject::execute()
 {
+  std::cout << "InsideUserObject::execute" << std::endl;
   for (unsigned int qp = 0; qp < _q_point.size(); ++qp)
     _value += std::pow(_u[qp] - _u_neighbor[qp], 2) +
               (_diffusivity_prop[qp] + _neighbor_diffusivity_prop[qp]) / 2;
