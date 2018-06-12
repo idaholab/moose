@@ -3,6 +3,15 @@
   dim = 2
   nx = 10
   ny = 10
+  block_id = '0 1'
+  block_name = 'block_zero block_one'
+[]
+
+[MeshModifiers]
+  [./subdomain_id]
+    type = AssignSubdomainID
+    subdomain_id = 1
+  [../]
 []
 
 [Variables]
