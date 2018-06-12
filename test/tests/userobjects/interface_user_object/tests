@@ -1,0 +1,34 @@
+[Tests]
+  [./interface_UO_test]
+    type = 'Exodiff'
+    input = 'interface_user_object.i'
+    exodiff = 'interface_user_object_out.e'
+    requirement = "Testing the implementation of the InterfaceUO."
+               "It make sure that the average material property jump accross"
+               "the interface is 7 and the average jump of the field variable u"
+               "accross the interface is 0."
+    design = 'InterfaceUserObject.md InterfaceUO.md'
+    issues = '#11647'
+  [../]
+  [./interface_UO_QP_test]
+    type = 'Exodiff'
+    input = 'interface_user_object_QP.i'
+    exodiff = 'interface_user_object_QP_out.e'
+    requirement = "Testing the implementation of the InterfaceUO."
+              "It make sure that the average material property jump accross"
+              "the interface is 7/12 between blocks 0 and 1/2 ,respectviely,"
+              " and the average jump of the field variable u"
+              "accross the interface is 0."
+    design = 'InterfaceUserObject.md InterfaceUO.md'
+    issues = '#11647'
+  [../]
+  [./interface_UO_QP_stateful_test]
+    type = 'Exodiff'
+    input = 'interface_user_object_QP_stateful.i'
+    exodiff = 'interface_user_object_QP_stateful_out.e'
+    requirement = "same as interface_UO_QP_test but test the ability of the "
+                  "interface UO to work with a stateful material property"
+    design = 'InterfaceUserObject.md InterfaceUO.md'
+    issues = '#11647'
+  [../]
+[]

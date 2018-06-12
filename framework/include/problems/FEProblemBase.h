@@ -66,6 +66,7 @@ class SideUserObject;
 class NodalUserObject;
 class ElementUserObject;
 class InternalSideUserObject;
+class InterfaceUserObject;
 class GeneralUserObject;
 class Function;
 class Distribution;
@@ -1298,8 +1299,9 @@ public:
   ///@{
   /**
    * These methods are used to determine whether stateful material properties need to be stored on
-   * internal sides.  There are four situations where this may be the case: 1) DGKernels
-   * 2) IntegratedBCs 3)InternalSideUserObjects 4)ElementalAuxBCs
+   * internal sides.  There are five situations where this may be the case: 1) DGKernels
+   * 2) IntegratedBCs 3)InternalSideUserObjects 4)ElementalAuxBCs 5)InterfaceUserObject
+   * 6)InterfaceKernel
    *
    * Method 1:
    * @param bnd_id the boundary id for which to see if stateful material properties need to be
@@ -1307,13 +1309,20 @@ public:
    * @param tid the THREAD_ID of the caller
    * @return Boolean indicating whether material properties need to be stored
    *
-   * Method 2:
+   * Method 2: (different from 1 because material property need to be computed on both sides)
+   * @param subdomain_id the subdomain id for which to see if stateful material properties need to
+   * be stored
+   * @param tid the THREAD_ID of the caller
+   * @return Boolean indicating whether material properties need to be stored
+   *
+   * Method 3:
    * @param subdomain_id the subdomain id for which to see if stateful material properties need to
    * be stored
    * @param tid the THREAD_ID of the caller
    * @return Boolean indicating whether material properties need to be stored
    */
   bool needBoundaryMaterialOnSide(BoundaryID bnd_id, THREAD_ID tid);
+  bool needBoundaryMaterialOnInterface(BoundaryID bnd_id, THREAD_ID tid);
   bool needSubdomainMaterialOnSide(SubdomainID subdomain_id, THREAD_ID tid);
   ///@}
 
@@ -1559,6 +1568,7 @@ protected:
   AuxGroupExecuteMooseObjectWarehouse<NodalUserObject> _nodal_user_objects;
   AuxGroupExecuteMooseObjectWarehouse<ElementUserObject> _elemental_user_objects;
   AuxGroupExecuteMooseObjectWarehouse<SideUserObject> _side_user_objects;
+  AuxGroupExecuteMooseObjectWarehouse<InterfaceUserObject> _interface_user_objects;
   AuxGroupExecuteMooseObjectWarehouse<InternalSideUserObject> _internal_side_user_objects;
   ///@}
 
@@ -1585,6 +1595,9 @@ protected:
 
   /// Cache for calculating materials on side
   std::vector<std::unordered_map<BoundaryID, bool>> _bnd_mat_side_cache;
+
+  /// Cache for calculating materials on interface
+  std::vector<std::unordered_map<BoundaryID, bool>> _bnd_mat_interface_cache;
 
   /// Objects to be notified when the mesh changes
   std::vector<MeshChangedInterface *> _notify_when_mesh_changes;
