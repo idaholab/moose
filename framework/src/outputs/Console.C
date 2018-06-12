@@ -398,15 +398,8 @@ Console::writeTimestepInformation()
   // Write timestep data for transient executioners
   if (_transient)
   {
-    // Get the length of the time step string
-    std::ostringstream time_step_string;
-    time_step_string << timeStep();
-    unsigned int n = time_step_string.str().size();
-    if (n < 2)
-      n = 2;
-
     // Write time step and time information
-    oss << std::endl << "Time Step " << std::setw(n) << timeStep();
+    oss << "\nTime Step " << timeStep();
 
     // Set precision
     if (_precision > 0)
@@ -418,7 +411,7 @@ Console::writeTimestepInformation()
       oss << std::scientific;
 
     // Print the time
-    oss << ", time = " << time() << std::endl;
+    oss << ", time = " << time() << '\n';
 
     // Show old time information, if desired
     if (_verbose)
@@ -434,7 +427,7 @@ Console::writeTimestepInformation()
   }
 
   // Output to the screen
-  _console << oss.str();
+  _console << oss.str() << std::flush;
 }
 
 void
