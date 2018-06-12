@@ -10,14 +10,14 @@ reduced stiffness softens the tensile response of the material once the principl
 stress applied to a material exceeds the cracking stress threshold of the material.
 
 As with the other smeared cracking softening models, which all follow the
-nomenclature convention of using the `Softening` suffix, this model is indended
+nomenclature convention of using the `Softening` suffix, this model is intended
 to be used with the [ComputeSmearedCrackingStress](/ComputeSmearedCrackingStress.md)
 material.
 
 ### Softening Model
 
 The tensile stress response to cracking is calculated as a function of the number
-cracks, where the presence of cracks reduces the stress reponse of the cracked material.
+cracks, where the number of cracks reduces the stress reponse of the cracked material.
 The calculated stress is the principle stress in the single direction of the crack.
 \begin{equation}
   \label{eqn:power_law_softening_stress}

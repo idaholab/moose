@@ -10,7 +10,7 @@ cracked stiffness ratio softens the tensile response of the material once the
 principle stress exceeds the cracking stress threshold of the material.
 
 As with the other smeared cracking softening models, which all follow the
-nomenclature convention of using the `Softening` suffix, this model is indended
+nomenclature convention of using the `Softening` suffix, this model is intended
 to be used with the [ComputeSmearedCrackingStress](/ComputeSmearedCrackingStress.md)
 material.
 
@@ -21,7 +21,6 @@ of the material and instantly drops the stiffness of the material in response to
 cracking.
 The tensile stress response to cracking is based on the value of the residual
 stress retained after softening, $\sigma_{res}$, and is given as
-crack is completed
 \begin{equation}
   \label{eqn:abrupt_crack_stress}
   \sigma = \begin{cases}
