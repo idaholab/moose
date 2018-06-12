@@ -85,20 +85,21 @@ class MeshViewerPlugin(VTKWindowPlugin):
         The parameters of the mesh has changed.
         We need to update the view of the mesh by generating a new mesh file.
         """
+
         if reset:
             self._reset()
 
-        self.onSetColorbarVisible(False)
         self.meshEnabled.emit(False)
         if not tree.app_info.valid():
             return
         # if we aren't writing out the mesh node then don't show it
         mesh_node = tree.getBlockInfo("/Mesh")
         if not mesh_node or not mesh_node.included:
-            self._reset()
-            self._setLoadingMessage("Mesh block not included")
+            self.onSetFilename(None)
             self.onWindowRequiresUpdate()
+            self._setLoadingMessage("Mesh block not included")
             return
+
         exe_path = tree.app_info.path
         self._removeFileNoError(self.current_temp_mesh_file)
         self.current_temp_mesh_file = os.path.abspath(self.temp_mesh_file)
@@ -109,11 +110,10 @@ class MeshViewerPlugin(VTKWindowPlugin):
 
         if not os.path.exists(input_file):
             self.meshEnabled.emit(False)
-            self._reset()
-            self._setLoadingMessage("Error reading temporary input file")
+            self.onSetFilename(None)
             self.onWindowRequiresUpdate()
+            self._setLoadingMessage("Error reading temporary input file")
             return
-
         try:
             args = ["-i", input_file, "--mesh-only", self.current_temp_mesh_file]
             if self._use_test_objects:
@@ -121,13 +121,15 @@ class MeshViewerPlugin(VTKWindowPlugin):
             ExeLauncher.runExe(exe_path, args, print_errors=False)
             self.meshEnabled.emit(True)
             self.onSetFilename(self.current_temp_mesh_file)
+            self.onSetColorbarVisible(False)
             self.onWindowRequiresUpdate()
+
         except Exception as e:
             self.meshEnabled.emit(False)
-            self._reset()
+            self.onSetFilename(None)
+            self.onWindowRequiresUpdate()
             mooseutils.mooseWarning("Error producing mesh: %s" % e)
             self._setLoadingMessage("Error producing mesh")
-            self.onWindowRequiresUpdate()
             self._removeFileNoError(self.current_temp_mesh_file)
 
         self._removeFileNoError(input_file) # we need the mesh file since it is in use but not the input file

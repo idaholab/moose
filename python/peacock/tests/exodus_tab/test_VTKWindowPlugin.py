@@ -153,5 +153,20 @@ class TestVTKWindowPlugin(Testing.PeacockImageTestCase):
         self._window.onWindowRequiresUpdate()
         self.assertImage('testPeacockMessage.png')
 
+    def testLoadingMessage(self):
+        """
+        Test that the load message can be toggled.
+        """
+        self._window.onResultOptionsChanged(dict(cmap='viridis'))
+        self._window.onWindowRequiresUpdate()
+        self.assertEqual('viridis', self._window._result.getOption('cmap'))
+        self.assertImage('testResult.png')
+
+        self._window.onSetFilename(None)
+        self._window.onWindowRequiresUpdate()
+        self._window._setLoadingMessage("Testing...")
+        self.assertImage('testLoadingMessage.png')
+
+
 if __name__ == '__main__':
     unittest.main(module=__name__, verbosity=2)

@@ -333,10 +333,12 @@ class VTKWindowPlugin(QtWidgets.QFrame, ExodusPlugin):
             self._adjustTimers(start=['initialize'], stop=['update'])
             self._result = None
             self._reader = None
+            self._colorbar = None
             self._initialized = False
             self._highlight = None
             self._reader_options.clear()
             self._result_options.clear()
+            self._colorbar_options.clear()
             self.setEnabled(False)
             self.windowReset.emit()
             self.setEnableWidget.emit(False)
@@ -353,14 +355,11 @@ class VTKWindowPlugin(QtWidgets.QFrame, ExodusPlugin):
         # Create the reader and result chigger objects
         self._reader = chigger.exodus.ExodusReader(self._filename, **self._reader_options)
         self._reader.update(**self._reader_options)
-        self._reader_options.clear()
         self.windowReader.emit(self._reader)
 
         self._result = chigger.exodus.ExodusResult(self._reader, **self._result_options)
-        self._result_options.clear()
 
         self._colorbar = chigger.exodus.ExodusColorBar(self._result, **self._colorbar_options)
-        self._colorbar_options.clear()
 
         # Set the interaction mode (2D/3D)
         self._result.update()
