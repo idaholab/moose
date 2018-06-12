@@ -182,7 +182,7 @@ class GoldDiffPlugin(QtWidgets.QGroupBox, ExodusPlugin):
             self.GoldVTKWindow.hide()
 
         # Diff Window toggle
-        diff = self.DiffToggle.isChecked()
+        diff = self.DiffToggle.isChecked() if self._exodiff else False
         if diff and (not self.DiffVTKWindow.isVisible()):
 
             diffname = self._filename + '.diff'
