@@ -26,6 +26,7 @@ validParams<PorousFlowRelativePermeabilityBase>()
       0,
       "sum_s_res >= 0 & sum_s_res < 1",
       "Sum of residual saturations over all phases.  Must be between 0 and 1");
+  params.addPrivateParam<std::string>("pf_material_type", "relative_permeability");
   params.addClassDescription("Base class for PorousFlow relative permeability materials");
   return params;
 }
