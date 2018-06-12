@@ -89,9 +89,9 @@ protected:
   const bool _use_time_ipol;
 
   /// grow the timestep by this factor
-  const Real _growth_factor;
+  const Real & _growth_factor;
   /// cut the timestep by by this factor
-  const Real _cutback_factor;
+  const Real & _cutback_factor;
 
   /// Number of nonlinear iterations in previous solve
   unsigned int & _nl_its;
