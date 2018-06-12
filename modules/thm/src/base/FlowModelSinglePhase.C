@@ -47,6 +47,7 @@ FlowModelSinglePhase::addVariables()
   _sim.addVariable(true, RHOEA, _fe_type, subdomain_id, scaling_factor[2]);
 
   _solution_vars = {RHOA, RHOUA, RHOEA};
+  _derivative_vars = _solution_vars;
 
   // Auxiliary
   _sim.addVariable(false, DENSITY, _fe_type, subdomain_id);
