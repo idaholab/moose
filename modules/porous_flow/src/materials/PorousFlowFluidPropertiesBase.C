@@ -17,6 +17,7 @@ validParams<PorousFlowFluidPropertiesBase>()
   MooseEnum unit_choice("Kelvin=0 Celsius=1", "Kelvin");
   params.addParam<MooseEnum>(
       "temperature_unit", unit_choice, "The unit of the temperature variable");
+  params.addPrivateParam<std::string>("pf_material_type", "fluid_properties");
   params.addClassDescription("Base class for PorousFlow fluid materials");
   return params;
 }

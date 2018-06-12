@@ -41,7 +41,7 @@ class MediaExtension(command.CommandExtension):
         renderer.add(Video, RenderVideo())
 
 class MediaCommandBase(command.CommandComponent):
-    """Base class for imgage and video tag creation."""
+    """Base class for image and video tag creation."""
     @staticmethod
     def defaultSettings():
         settings = command.CommandComponent.defaultSettings()

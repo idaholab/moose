@@ -64,99 +64,99 @@ PorousFlowAddMaterialJoiner::act()
     {
       AddMaterialAction * material = const_cast<AddMaterialAction *>(action);
 
-      // Add joiner material for PorousFlowSingleComponentFluid materials
-      if (material->getMooseObjectType() == "PorousFlowSingleComponentFluid")
+      // Input parameters for the material that is being added
+      InputParameters & pars = material->getObjectParams();
+
+      // Only check PorousFlowMaterial's
+      if (pars.isParamValid("pf_material_type"))
       {
-        // Input parameters for the material that is being added
-        InputParameters & pars = material->getObjectParams();
+        const std::string pf_material_type = pars.get<std::string>("pf_material_type");
+
         // Check if the material is evaluated at the nodes or qps
         const bool at_nodes = pars.get<bool>("at_nodes");
 
-        // Key the addition of the joiner off the phase 0 fluid so it is only added once
-        if (pars.get<unsigned int>("phase") == 0)
+        // Add joiner material for fluid properties materials
+        if (pf_material_type == "fluid_properties")
         {
-          // Join density and viscosity if they are calculated
-          if (pars.get<bool>("compute_density_and_viscosity"))
+          // Key the addition of the joiner off the phase 0 fluid so it is only added once
+          if (pars.get<unsigned int>("phase") == 0)
           {
-            if (at_nodes)
+            // Join density and viscosity if they are calculated
+            if (pars.get<bool>("compute_density_and_viscosity"))
             {
-              addJoiner(at_nodes,
-                        "PorousFlow_fluid_phase_density_nodal",
-                        "PorousFlow_density_nodal_all",
-                        _density_nodal);
-              addJoiner(at_nodes,
-                        "PorousFlow_viscosity_nodal",
-                        "PorousFlow_viscosity_nodal_all",
-                        _viscosity_nodal);
+              if (at_nodes)
+              {
+                addJoiner(at_nodes,
+                          "PorousFlow_fluid_phase_density_nodal",
+                          "PorousFlow_density_nodal_all",
+                          _density_nodal);
+                addJoiner(at_nodes,
+                          "PorousFlow_viscosity_nodal",
+                          "PorousFlow_viscosity_nodal_all",
+                          _viscosity_nodal);
+              }
+              else
+              {
+                addJoiner(at_nodes,
+                          "PorousFlow_fluid_phase_density_qp",
+                          "PorousFlow_density_qp_all",
+                          _density_qp);
+                addJoiner(at_nodes,
+                          "PorousFlow_viscosity_qp",
+                          "PorousFlow_viscosity_qp_all",
+                          _viscosity_qp);
+              }
             }
-            else
+
+            // Join enthalpy if it is calculated
+            if (pars.get<bool>("compute_enthalpy"))
             {
-              addJoiner(at_nodes,
-                        "PorousFlow_fluid_phase_density_qp",
-                        "PorousFlow_density_qp_all",
-                        _density_qp);
-              addJoiner(at_nodes,
-                        "PorousFlow_viscosity_qp",
-                        "PorousFlow_viscosity_qp_all",
-                        _viscosity_qp);
+              if (at_nodes)
+                addJoiner(at_nodes,
+                          "PorousFlow_fluid_phase_enthalpy_nodal",
+                          "PorousFlow_enthalpy_nodal_all",
+                          _enthalpy_nodal);
+              else
+                addJoiner(at_nodes,
+                          "PorousFlow_fluid_phase_enthalpy_qp",
+                          "PorousFlow_enthalpy_qp_all",
+                          _enthalpy_qp);
             }
-          }
 
-          // Join enthalpy if it is calculated
-          if (pars.get<bool>("compute_enthalpy"))
-          {
-            if (at_nodes)
-              addJoiner(at_nodes,
-                        "PorousFlow_fluid_phase_enthalpy_nodal",
-                        "PorousFlow_enthalpy_nodal_all",
-                        _enthalpy_nodal);
-            else
-              addJoiner(at_nodes,
-                        "PorousFlow_fluid_phase_enthalpy_qp",
-                        "PorousFlow_enthalpy_qp_all",
-                        _enthalpy_qp);
-          }
-
-          // Join internal energy if it is calculated
-          if (pars.get<bool>("compute_internal_energy"))
-          {
-            if (at_nodes)
-              addJoiner(at_nodes,
-                        "PorousFlow_fluid_phase_internal_energy_nodal",
-                        "PorousFlow_internal_energy_nodal_all",
-                        _internal_energy_nodal);
-            else
-              addJoiner(at_nodes,
-                        "PorousFlow_fluid_phase_internal_energy_qp",
-                        "PorousFlow_internal_energy_qp_all",
-                        _internal_energy_qp);
+            // Join internal energy if it is calculated
+            if (pars.get<bool>("compute_internal_energy"))
+            {
+              if (at_nodes)
+                addJoiner(at_nodes,
+                          "PorousFlow_fluid_phase_internal_energy_nodal",
+                          "PorousFlow_internal_energy_nodal_all",
+                          _internal_energy_nodal);
+              else
+                addJoiner(at_nodes,
+                          "PorousFlow_fluid_phase_internal_energy_qp",
+                          "PorousFlow_internal_energy_qp_all",
+                          _internal_energy_qp);
+            }
           }
         }
-      }
 
-      // Add joiner materials for relative permeability materials
-      // Note: this relies on the relative permeability class starting
-      // with PorousFlowRelativePermeability
-      if (material->getMooseObjectType().find("PorousFlowRelativePermeability") == 0)
-      {
-        // Input parameters for the material that is being added
-        InputParameters & pars = material->getObjectParams();
-        // Check if the material is evaluated at the nodes or qps
-        const bool at_nodes = pars.get<bool>("at_nodes");
-
-        // Key the addition of the joiner off the phase 0 fluid so it is only added once
-        if (pars.get<unsigned int>("phase") == 0)
+        // Add joiner materials for relative permeability materials
+        if (pf_material_type == "relative_permeability")
         {
-          if (at_nodes)
-            addJoiner(at_nodes,
-                      "PorousFlow_relative_permeability_nodal",
-                      "PorousFlow_relative_permeability_nodal_all",
-                      _relperm_nodal);
-          else
-            addJoiner(at_nodes,
-                      "PorousFlow_relative_permeability_qp",
-                      "PorousFlow_relative_permeability_qp_all",
-                      _relperm_qp);
+          // Key the addition of the joiner off the phase 0 fluid so it is only added once
+          if (pars.get<unsigned int>("phase") == 0)
+          {
+            if (at_nodes)
+              addJoiner(at_nodes,
+                        "PorousFlow_relative_permeability_nodal",
+                        "PorousFlow_relative_permeability_nodal_all",
+                        _relperm_nodal);
+            else
+              addJoiner(at_nodes,
+                        "PorousFlow_relative_permeability_qp",
+                        "PorousFlow_relative_permeability_qp_all",
+                        _relperm_qp);
+          }
         }
       }
     }

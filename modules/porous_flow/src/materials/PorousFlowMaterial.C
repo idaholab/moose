@@ -20,6 +20,7 @@ validParams<PorousFlowMaterial>()
       "PorousFlowDictator", "The UserObject that holds the list of Porous-Flow variable names");
   params.addParam<bool>(
       "at_nodes", false, "Evaluate Material properties at nodes instead of quadpoints");
+  params.addPrivateParam<std::string>("pf_material_type", "pf_material");
   params.addClassDescription("This generalises MOOSE's Material class to allow for Materials that "
                              "hold information related to the nodes in the finite element");
   return params;

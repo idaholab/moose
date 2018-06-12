@@ -61,6 +61,9 @@ validParams<IterationAdaptiveDT>()
                         "Factor to apply to timestep if difficult "
                         "convergence (if 'optimal_iterations' is specified) "
                         "or if solution failed");
+
+  params.declareControllable("growth_factor cutback_factor");
+
   return params;
 }
 
