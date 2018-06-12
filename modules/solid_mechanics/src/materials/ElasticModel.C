@@ -44,8 +44,8 @@ validParams<ElasticModel>()
   params.addParam<bool>("max_inelastic_increment", "dummy");
   params.addParam<bool>("max_its", "dummy");
   params.addParam<bool>("open_pore_compressibility_factor", "dummy");
-  params.addParam<bool>("output_iteration_info", "dummy");
-  params.addParam<bool>("output_iteration_info_on_error", "dummy");
+  params.addParam<MooseEnum>("internal_solve_output_on", MooseEnum("dummy"), "dummy");
+  params.addParam<bool>("internal_solve_full_iteration_history", "dummy");
   params.addParam<bool>("plenum_pressure", "dummy");
   params.addParam<bool>("porosity", "dummy");
   params.addParam<bool>("relative_tolerance", "dummy");
