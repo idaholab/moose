@@ -19,7 +19,6 @@ application.
 - [Solid Mechanics](modules/solid_mechanics/index.md)
 - [Stochastic Tools](modules/stochastic_tools/index.md)
 - [Tensor Mechanics](modules/tensor_mechanics/index.md)
-- [Water Steam EOS](modules/water_steam_eos/index.md)
 - [XFEM](modules/xfem/index.md)
 
 The purpose of the modules is to encapsulate common kernels, boundary conditions, etc. to prevent
