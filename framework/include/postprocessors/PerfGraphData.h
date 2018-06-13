@@ -7,13 +7,13 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef PERFGRAPHTIME_H
-#define PERFGRAPHTIME_H
+#ifndef PERFGRAPHDATA_H
+#define PERFGRAPHDATA_H
 
 #include "GeneralPostprocessor.h"
 
 // Forward Declarations
-class PerfGraphTime;
+class PerfGraphData;
 
 // libMesh forward declarations
 namespace libMesh
@@ -23,19 +23,21 @@ class EquationSystems;
 }
 
 template <>
-InputParameters validParams<PerfGraphTime>();
+InputParameters validParams<PerfGraphData>();
 
-class PerfGraphTime : public GeneralPostprocessor
+class PerfGraphData : public GeneralPostprocessor
 {
 public:
-  PerfGraphTime(const InputParameters & parameters);
+  PerfGraphData(const InputParameters & parameters);
 
   virtual void initialize() override {}
   virtual void execute() override {}
   virtual Real getValue() override;
 
 protected:
-  const Real & _time;
+  const int _data_type;
+
+  const std::string & _section_name;
 };
 
-#endif // PERFGRAPHTIME_H
+#endif // PERFGRAPHDATA_H

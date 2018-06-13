@@ -63,6 +63,42 @@ PerfGraph::sectionName(const PerfID id) const
   return find_it->second;
 }
 
+unsigned long int
+PerfGraph::getNumCalls(const std::string & section_name)
+{
+  updateTiming();
+
+  auto section_it = _section_time.find(section_name);
+
+  if (section_it == _section_time.end())
+    mooseError("Unknown section_name: ", section_name, " in PerfGraph::getNumCalls() ");
+
+  return section_it->second._num_calls;
+}
+
+Real
+PerfGraph::getTime(const TimeType type, const std::string & section_name)
+{
+  updateTiming();
+
+  auto section_it = _section_time.find(section_name);
+
+  if (section_it == _section_time.end())
+    mooseError("Unknown section_name: ", section_name, " in PerfGraph::getTime() ");
+
+  switch (type)
+  {
+    case SELF:
+      return section_it->second._self;
+    case CHILDREN:
+      return section_it->second._children;
+    case TOTAL:
+      return section_it->second._total;
+    default:
+      ::mooseError("Unknown TimeType");
+  }
+}
+
 void
 PerfGraph::push(const PerfID id)
 {
@@ -113,6 +149,7 @@ PerfGraph::updateTiming()
   {
     auto & section_time = section_time_it.second;
 
+    section_time._num_calls = 0;
     section_time._self = 0.;
     section_time._children = 0.;
     section_time._total = 0.;
@@ -156,11 +193,10 @@ PerfGraph::recursivelyFillTime(PerfNode * current_node)
 }
 
 void
-PerfGraph::recursivelyPrintGraph(
-    PerfNode * current_node,
-    VariadicTable<std::string, unsigned long int, Real, Real, Real, Real, Real, Real> & vtable,
-    unsigned int level,
-    unsigned int current_depth)
+PerfGraph::recursivelyPrintGraph(PerfNode * current_node,
+                                 FullTable & vtable,
+                                 unsigned int level,
+                                 unsigned int current_depth)
 {
   auto & name = _id_to_section_name[current_node->id()];
   auto & node_level = _id_to_level[current_node->id()];
@@ -175,17 +211,30 @@ PerfGraph::recursivelyPrintGraph(
     // The total time of the root node
     auto total_root_time = _section_time_ptrs[0]->_total;
 
-    vtable.addRow(
-        {section,
-         current_node->numCalls(),
-         std::chrono::duration<double>(current_node->selfTime()).count(),
-         100. * std::chrono::duration<double>(current_node->selfTime()).count() / total_root_time,
-         std::chrono::duration<double>(current_node->childrenTime()).count(),
-         100. * std::chrono::duration<double>(current_node->childrenTime()).count() /
-             total_root_time,
-         std::chrono::duration<double>(current_node->totalTime()).count(),
-         100. * std::chrono::duration<double>(current_node->totalTime()).count() /
-             total_root_time});
+    auto num_calls = current_node->numCalls();
+    auto self = std::chrono::duration<double>(current_node->selfTime()).count();
+    auto self_avg = self / static_cast<Real>(num_calls);
+    auto self_percent = 100. * self / total_root_time;
+
+    auto children = std::chrono::duration<double>(current_node->childrenTime()).count();
+    auto children_avg = children / static_cast<Real>(num_calls);
+    auto children_percent = 100. * children / total_root_time;
+
+    auto total = std::chrono::duration<double>(current_node->totalTime()).count();
+    auto total_avg = total / static_cast<Real>(num_calls);
+    auto total_percent = 100. * total / total_root_time;
+
+    vtable.addRow({section,
+                   num_calls,
+                   self,
+                   self_avg,
+                   self_percent,
+                   children,
+                   children_avg,
+                   children_percent,
+                   total,
+                   total_avg,
+                   total_percent});
 
     current_depth++;
   }
@@ -195,10 +244,9 @@ PerfGraph::recursivelyPrintGraph(
 }
 
 void
-PerfGraph::recursivelyPrintHeaviestGraph(
-    PerfNode * current_node,
-    VariadicTable<std::string, unsigned long int, Real, Real, Real, Real, Real, Real> & vtable,
-    unsigned int current_depth)
+PerfGraph::recursivelyPrintHeaviestGraph(PerfNode * current_node,
+                                         FullTable & vtable,
+                                         unsigned int current_depth)
 {
   mooseAssert(!_section_time_ptrs.empty(),
               "updateTiming() must be run before recursivelyPrintGraph!");
@@ -210,15 +258,30 @@ PerfGraph::recursivelyPrintHeaviestGraph(
   // The total time of the root node
   auto total_root_time = _section_time_ptrs[0]->_total;
 
-  vtable.addRow(
-      {section,
-       current_node->numCalls(),
-       std::chrono::duration<double>(current_node->selfTime()).count(),
-       100. * std::chrono::duration<double>(current_node->selfTime()).count() / total_root_time,
-       std::chrono::duration<double>(current_node->childrenTime()).count(),
-       100. * std::chrono::duration<double>(current_node->childrenTime()).count() / total_root_time,
-       std::chrono::duration<double>(current_node->totalTime()).count(),
-       100. * std::chrono::duration<double>(current_node->totalTime()).count() / total_root_time});
+  auto num_calls = current_node->numCalls();
+  auto self = std::chrono::duration<double>(current_node->selfTime()).count();
+  auto self_avg = self / static_cast<Real>(num_calls);
+  auto self_percent = 100. * self / total_root_time;
+
+  auto children = std::chrono::duration<double>(current_node->childrenTime()).count();
+  auto children_avg = children / static_cast<Real>(num_calls);
+  auto children_percent = 100. * children / total_root_time;
+
+  auto total = std::chrono::duration<double>(current_node->totalTime()).count();
+  auto total_avg = total / static_cast<Real>(num_calls);
+  auto total_percent = 100. * total / total_root_time;
+
+  vtable.addRow({section,
+                 num_calls,
+                 self,
+                 self_avg,
+                 self_percent,
+                 children,
+                 children_avg,
+                 children_percent,
+                 total,
+                 total_avg,
+                 total_percent});
 
   current_depth++;
 
@@ -244,19 +307,32 @@ PerfGraph::print(const ConsoleStream & console, unsigned int level)
   updateTiming();
 
   console << "\nPerformance Graph:\n";
-  VariadicTable<std::string, unsigned long int, Real, Real, Real, Real, Real, Real> vtable(
-      {"Section", "Calls", "Self(s)", "%", "Children(s)", "%", "Total(s)", "%"}, 10);
+  FullTable vtable({"Section",
+                    "Calls",
+                    "Self(s)",
+                    "Avg(s)",
+                    "%",
+                    "Children(s)",
+                    "Avg(s)",
+                    "%",
+                    "Total(s)",
+                    "Avg(s)",
+                    "%"},
+                   10);
 
-  vtable.setColumnFormat({VariadicTableColumnFormat::AUTO, // Doesn't matter
-                          VariadicTableColumnFormat::AUTO,
-                          VariadicTableColumnFormat::FIXED,
-                          VariadicTableColumnFormat::PERCENT,
-                          VariadicTableColumnFormat::FIXED,
-                          VariadicTableColumnFormat::PERCENT,
-                          VariadicTableColumnFormat::FIXED,
-                          VariadicTableColumnFormat::PERCENT});
+  vtable.setColumnFormat({VariadicTableColumnFormat::AUTO,      // Section Name
+                          VariadicTableColumnFormat::AUTO,      // Calls
+                          VariadicTableColumnFormat::FIXED,     // Self
+                          VariadicTableColumnFormat::FIXED,     // Avg.
+                          VariadicTableColumnFormat::PERCENT,   // %
+                          VariadicTableColumnFormat::FIXED,     // Children
+                          VariadicTableColumnFormat::FIXED,     // Avg.
+                          VariadicTableColumnFormat::PERCENT,   // %
+                          VariadicTableColumnFormat::FIXED,     // Total
+                          VariadicTableColumnFormat::FIXED,     // Avg.
+                          VariadicTableColumnFormat::PERCENT}); // %
 
-  vtable.setColumnPrecision({1, 3, 2, 3, 2, 3, 2});
+  vtable.setColumnPrecision({1, 0, 3, 3, 2, 3, 3, 2, 3, 3, 2});
 
   recursivelyPrintGraph(_root_node.get(), vtable, level);
   vtable.print(console);
@@ -268,19 +344,32 @@ PerfGraph::printHeaviestBranch(const ConsoleStream & console)
   updateTiming();
 
   console << "\nHeaviest Branch:\n";
-  VariadicTable<std::string, unsigned long int, Real, Real, Real, Real, Real, Real> vtable(
-      {"Section", "Calls", "Self(s)", "%", "Children(s)", "%", "Total(s)", "%"}, 10);
+  FullTable vtable({"Section",
+                    "Calls",
+                    "Self(s)",
+                    "Avg(s)",
+                    "%",
+                    "Children(s)",
+                    "Avg(s)",
+                    "%",
+                    "Total(s)",
+                    "Avg(s)",
+                    "%"},
+                   10);
 
-  vtable.setColumnFormat({VariadicTableColumnFormat::AUTO, // Doesn't matter
-                          VariadicTableColumnFormat::AUTO,
-                          VariadicTableColumnFormat::FIXED,
-                          VariadicTableColumnFormat::PERCENT,
-                          VariadicTableColumnFormat::FIXED,
-                          VariadicTableColumnFormat::PERCENT,
-                          VariadicTableColumnFormat::FIXED,
-                          VariadicTableColumnFormat::PERCENT});
+  vtable.setColumnFormat({VariadicTableColumnFormat::AUTO,      // Section Name
+                          VariadicTableColumnFormat::AUTO,      // Calls
+                          VariadicTableColumnFormat::FIXED,     // Self
+                          VariadicTableColumnFormat::FIXED,     // Avg.
+                          VariadicTableColumnFormat::PERCENT,   // %
+                          VariadicTableColumnFormat::FIXED,     // Children
+                          VariadicTableColumnFormat::FIXED,     // Avg.
+                          VariadicTableColumnFormat::PERCENT,   // %
+                          VariadicTableColumnFormat::FIXED,     // Total
+                          VariadicTableColumnFormat::FIXED,     // Avg.
+                          VariadicTableColumnFormat::PERCENT}); // %
 
-  vtable.setColumnPrecision({1, 3, 2, 3, 2, 3, 2});
+  vtable.setColumnPrecision({1, 0, 3, 3, 2, 3, 3, 2, 3, 3, 2});
 
   recursivelyPrintHeaviestGraph(_root_node.get(), vtable);
   vtable.print(console);
@@ -311,15 +400,15 @@ PerfGraph::printHeaviestSections(const ConsoleStream & console, const unsigned i
                         return false;
                       });
 
-  VariadicTable<std::string, unsigned long int, Real, Real> vtable(
-      {"Section", "Calls", "Self(s)", "%"}, 10);
+  HeaviestTable vtable({"Section", "Calls", "Self(s)", "Avg.", "%"}, 10);
 
   vtable.setColumnFormat({VariadicTableColumnFormat::AUTO, // Doesn't matter
                           VariadicTableColumnFormat::AUTO,
                           VariadicTableColumnFormat::FIXED,
+                          VariadicTableColumnFormat::FIXED,
                           VariadicTableColumnFormat::PERCENT});
 
-  vtable.setColumnPrecision({1, 3, 2});
+  vtable.setColumnPrecision({1, 1, 3, 3, 2});
 
   mooseAssert(!_section_time_ptrs.empty(),
               "updateTiming() must be run before printHeaviestSections()!");
@@ -332,10 +421,12 @@ PerfGraph::printHeaviestSections(const ConsoleStream & console, const unsigned i
   {
     auto id = sorted[i];
 
-    vtable.addRow({_id_to_section_name[id],
-                   _section_time_ptrs[id]->_num_calls,
-                   _section_time_ptrs[id]->_self,
-                   100 * _section_time_ptrs[id]->_self / total_root_time});
+    vtable.addRow(
+        {_id_to_section_name[id],
+         _section_time_ptrs[id]->_num_calls,
+         _section_time_ptrs[id]->_self,
+         _section_time_ptrs[id]->_self / static_cast<Real>(_section_time_ptrs[id]->_num_calls),
+         100 * _section_time_ptrs[id]->_self / total_root_time});
   }
 
   vtable.print(console);

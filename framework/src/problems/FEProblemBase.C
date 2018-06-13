@@ -244,14 +244,14 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
     _output_step_timer(registerTimedSection("outputStep", 1)),
     _on_timestep_begin_timer(registerTimedSection("onTimestepBegin", 2)),
     _compute_residual_l2_norm_timer(registerTimedSection("computeResidualL2Norm", 2)),
-    _compute_residual_sys_timer(registerTimedSection("computeResidualSys", 2)),
+    _compute_residual_sys_timer(registerTimedSection("computeResidualSys", 5)),
     _compute_residual_internal_timer(registerTimedSection("computeResidualInternal", 1)),
-    _compute_residual_type_timer(registerTimedSection("computeResidualType", 2)),
+    _compute_residual_type_timer(registerTimedSection("computeResidualType", 5)),
     _compute_transient_implicit_residual_timer(
         registerTimedSection("computeTransientImplicitResidual", 2)),
-    _compute_residual_tags_timer(registerTimedSection("computeResidualTags", 2)),
+    _compute_residual_tags_timer(registerTimedSection("computeResidualTags", 5)),
     _compute_jacobian_internal_timer(registerTimedSection("computeJacobianInternal", 1)),
-    _compute_jacobian_tags_timer(registerTimedSection("computeJacobianTags", 2)),
+    _compute_jacobian_tags_timer(registerTimedSection("computeJacobianTags", 5)),
     _compute_jacobian_blocks_timer(registerTimedSection("computeTransientImplicitJacobian", 2)),
     _compute_bounds_timer(registerTimedSection("computeBounds", 1)),
     _compute_post_check_timer(registerTimedSection("computePostCheck", 2)),
@@ -5000,9 +5000,8 @@ FEProblemBase::checkProblemIntegrity()
                   std::ostream_iterator<unsigned int>(extra_subdomain_ids, " "));
 
         mooseError("The following blocks from your input mesh do not contain an active material: " +
-                   extra_subdomain_ids.str() +
-                   "\nWhen ANY mesh block contains a Material object, "
-                   "all blocks must contain a Material object.\n");
+                   extra_subdomain_ids.str() + "\nWhen ANY mesh block contains a Material object, "
+                                               "all blocks must contain a Material object.\n");
       }
     }
 

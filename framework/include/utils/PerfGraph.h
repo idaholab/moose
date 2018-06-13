@@ -102,22 +102,14 @@ public:
   void setActive(bool active) { _active = active; }
 
   /**
+   * Get the number of calls for a section
+   */
+  unsigned long int getNumCalls(const std::string & section_name);
+
+  /**
    * Get a reference to the time for a section
    */
-  const Real & getTime(const TimeType type, const std::string & section_name)
-  {
-    switch (type)
-    {
-      case SELF:
-        return _section_time[section_name]._self;
-      case CHILDREN:
-        return _section_time[section_name]._children;
-      case TOTAL:
-        return _section_time[section_name]._total;
-      default:
-        ::mooseError("Unknown TimeType");
-    }
-  }
+  Real getTime(const TimeType type, const std::string & section_name);
 
   /**
    * Get a reference to the self time for a section
@@ -158,6 +150,21 @@ public:
   void updateTiming();
 
 protected:
+  typedef VariadicTable<std::string,
+                        unsigned long int,
+                        Real,
+                        Real,
+                        Real,
+                        Real,
+                        Real,
+                        Real,
+                        Real,
+                        Real,
+                        Real>
+      FullTable;
+
+  typedef VariadicTable<std::string, unsigned long int, Real, Real, Real> HeaviestTable;
+
   /**
    * Use to hold the time for each section
    *
@@ -193,11 +200,10 @@ protected:
    * @param level The level to print out below (<=)
    * @param current_depth - Used in the recursion
    */
-  void recursivelyPrintGraph(
-      PerfNode * current_node,
-      VariadicTable<std::string, unsigned long int, Real, Real, Real, Real, Real, Real> & vtable,
-      unsigned int level,
-      unsigned int current_depth = 0);
+  void recursivelyPrintGraph(PerfNode * current_node,
+                             FullTable & vtable,
+                             unsigned int level,
+                             unsigned int current_depth = 0);
 
   /**
    * Helper for printing out the trace that has taken the most time
@@ -206,10 +212,9 @@ protected:
    * @param console Where to print to
    * @param current_depth - Used in the recursion
    */
-  void recursivelyPrintHeaviestGraph(
-      PerfNode * current_node,
-      VariadicTable<std::string, unsigned long int, Real, Real, Real, Real, Real, Real> & vtable,
-      unsigned int current_depth = 0);
+  void recursivelyPrintHeaviestGraph(PerfNode * current_node,
+                                     FullTable & vtable,
+                                     unsigned int current_depth = 0);
 
   /**
    * Updates the cumulative self/children/total time

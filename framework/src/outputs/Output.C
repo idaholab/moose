@@ -128,7 +128,7 @@ Output::Output(const InputParameters & parameters)
     _allow_output(true),
     _is_advanced(false),
     _advanced_execute_on(_execute_on, parameters),
-    _output_step_timer(registerTimedSection("outputStep", 1))
+    _output_step_timer(registerTimedSection("outputStep", 2))
 {
   if (_use_displaced)
   {

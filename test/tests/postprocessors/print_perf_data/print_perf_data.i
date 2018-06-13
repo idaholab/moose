@@ -33,20 +33,21 @@
 []
 
 [Postprocessors]
+  active = ''
   [./elapsed]
-    type = PerfGraphTime
+    type = PerfGraphData
     section_name = "App"
-    time_type = total
+    data_type = total
   [../]
   [./res_calls]
-    type = PerformanceData
-    column = n_calls
-    event = compute_residual()
+    type = PerfGraphData
+    section_name = "FEProblem::computeResidualInternal"
+    data_type = calls
   [../]
   [./jac_calls]
-    type = PerformanceData
-    column = n_calls
-    event = compute_jacobian()
+    type = PerfGraphData
+    section_name = "FEProblem::computeJacobianInternal"
+    data_type = calls
   [../]
   [./jac_total_time]
     type = PerformanceData
@@ -92,5 +93,5 @@
 [Outputs]
   exodus = true
   csv = true
-  print_perf_log = true
+  perf_graph = true
 []

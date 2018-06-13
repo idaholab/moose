@@ -34,20 +34,26 @@
 []
 
 [Postprocessors]
-  [self]
-    type = PerfGraphTime
+#  active = ''
+  [calls]
+    type = PerfGraphData
     section_name = FEProblem::computeResidualInternal
-    time_type = SELF
+    data_type = CALLS
+  []
+  [self]
+    type = PerfGraphData
+    section_name = FEProblem::computeResidualInternal
+    data_type = SELF
   []
   [children]
-    type = PerfGraphTime
+    type = PerfGraphData
     section_name = FEProblem::computeResidualInternal
-    time_type = CHILDREN
+    data_type = CHILDREN
   []
   [total]
-    type = PerfGraphTime
+    type = PerfGraphData
     section_name = FEProblem::computeResidualInternal
-    time_type = TOTAL
+    data_type = TOTAL
   []
 []
 
@@ -62,7 +68,7 @@
   csv = true
   [pgraph]
     type = PerfGraphOutput
-    level = 3
+    level = 1
     heaviest_branch = true
     heaviest_sections = 10
   []
