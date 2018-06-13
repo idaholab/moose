@@ -19,6 +19,7 @@ Extensions:
         includes:
             - framework/include
             - modules/fluid_properties/include
+        allow-test-objects: True
     globals:
         type: MooseDocs.extensions.panoptic
         shortcuts: !include framework/doc/globals.yml
