@@ -25,7 +25,6 @@
 #include "SolidMechanicsTestApp.h"
 #include "StochasticToolsTestApp.h"
 #include "TensorMechanicsTestApp.h"
-#include "WaterSteamEOSTestApp.h"
 #include "XFEMTestApp.h"
 #include "PorousFlowTestApp.h"
 #include "RdgTestApp.h"
@@ -96,7 +95,6 @@ CombinedTestApp::registerObjects(Factory & factory)
   SolidMechanicsTestApp::registerObjects(factory);
   StochasticToolsTestApp::registerObjects(factory);
   TensorMechanicsTestApp::registerObjects(factory);
-  WaterSteamEOSTestApp::registerObjects(factory);
   XFEMTestApp::registerObjects(factory);
   PorousFlowTestApp::registerObjects(factory);
   RdgTestApp::registerObjects(factory);
@@ -123,7 +121,6 @@ CombinedTestApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory
   SolidMechanicsTestApp::associateSyntax(syntax, action_factory);
   StochasticToolsTestApp::associateSyntax(syntax, action_factory);
   TensorMechanicsTestApp::associateSyntax(syntax, action_factory);
-  WaterSteamEOSTestApp::associateSyntax(syntax, action_factory);
   XFEMTestApp::associateSyntax(syntax, action_factory);
   PorousFlowTestApp::associateSyntax(syntax, action_factory);
   RdgTestApp::associateSyntax(syntax, action_factory);
@@ -150,7 +147,6 @@ CombinedTestApp::registerExecFlags(Factory & factory)
   SolidMechanicsTestApp::registerExecFlags(factory);
   StochasticToolsTestApp::registerExecFlags(factory);
   TensorMechanicsTestApp::registerExecFlags(factory);
-  WaterSteamEOSTestApp::registerExecFlags(factory);
   XFEMTestApp::registerExecFlags(factory);
   PorousFlowTestApp::registerExecFlags(factory);
   RdgTestApp::registerExecFlags(factory);
