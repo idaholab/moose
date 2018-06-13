@@ -39,7 +39,6 @@ RICHARDS                    := no
 SOLID_MECHANICS             := no
 STOCHASTIC_TOOLS            := no
 TENSOR_MECHANICS            := no
-WATER_STEAM_EOS             := no
 XFEM                        := no
 POROUS_FLOW                 := no
 LEVEL_SET                   := no

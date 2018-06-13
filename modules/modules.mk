@@ -18,7 +18,6 @@ ifeq ($(ALL_MODULES),yes)
         SOLID_MECHANICS             := yes
         STOCHASTIC_TOOLS            := yes
         TENSOR_MECHANICS            := yes
-        WATER_STEAM_EOS             := yes
         XFEM                        := yes
 endif
 
@@ -46,7 +45,7 @@ ifeq ($(PHASE_FIELD),yes)
 endif
 
 # The master list of all moose modules
-MODULE_NAMES := "chemical_reactions contact fluid_properties functional_expansion_tools heat_conduction level_set misc navier_stokes phase_field porous_flow rdg richards solid_mechanics stochastic_tools tensor_mechanics water_steam_eos xfem"
+MODULE_NAMES := "chemical_reactions contact fluid_properties functional_expansion_tools heat_conduction level_set misc navier_stokes phase_field porous_flow rdg richards solid_mechanics stochastic_tools tensor_mechanics xfem"
 
 ###############################################################################
 ########################## MODULE REGISTRATION ################################
@@ -168,13 +167,6 @@ ifeq ($(STOCHASTIC_TOOLS),yes)
   APPLICATION_DIR    := $(MOOSE_DIR)/modules/stochastic_tools
   APPLICATION_NAME   := stochastic_tools
   SUFFIX             := st
-  include $(FRAMEWORK_DIR)/app.mk
-endif
-
-ifeq ($(WATER_STEAM_EOS),yes)
-  APPLICATION_DIR    := $(MOOSE_DIR)/modules/water_steam_eos
-  APPLICATION_NAME   := water_steam_eos
-  SUFFIX             := ws
   include $(FRAMEWORK_DIR)/app.mk
 endif
 

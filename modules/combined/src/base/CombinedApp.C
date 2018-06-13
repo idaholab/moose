@@ -28,7 +28,6 @@
 #include "SolidMechanicsApp.h"
 #include "StochasticToolsApp.h"
 #include "TensorMechanicsApp.h"
-#include "WaterSteamEOSApp.h"
 #include "XFEMApp.h"
 
 template <>
@@ -91,7 +90,6 @@ CombinedApp::registerObjects(Factory & factory)
   SolidMechanicsApp::registerObjects(factory);
   StochasticToolsApp::registerObjects(factory);
   TensorMechanicsApp::registerObjects(factory);
-  WaterSteamEOSApp::registerObjects(factory);
   XFEMApp::registerObjects(factory);
 }
 
@@ -119,7 +117,6 @@ CombinedApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
   SolidMechanicsApp::associateSyntax(syntax, action_factory);
   StochasticToolsApp::associateSyntax(syntax, action_factory);
   TensorMechanicsApp::associateSyntax(syntax, action_factory);
-  WaterSteamEOSApp::associateSyntax(syntax, action_factory);
   XFEMApp::associateSyntax(syntax, action_factory);
 }
 
@@ -143,7 +140,6 @@ CombinedApp::registerExecFlags(Factory & factory)
   SolidMechanicsApp::registerExecFlags(factory);
   StochasticToolsApp::registerExecFlags(factory);
   TensorMechanicsApp::registerExecFlags(factory);
-  WaterSteamEOSApp::registerExecFlags(factory);
   XFEMApp::registerExecFlags(factory);
   PorousFlowApp::registerExecFlags(factory);
   RdgApp::registerExecFlags(factory);

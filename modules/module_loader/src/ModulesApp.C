@@ -58,9 +58,6 @@
 #ifdef TENSOR_MECHANICS_ENABLED
 #include "TensorMechanicsApp.h"
 #endif
-#ifdef WATER_STEAM_EOS_ENABLED
-#include "WaterSteamEOSApp.h"
-#endif
 #ifdef XFEM_ENABLED
 #include "XFEMApp.h"
 #endif
@@ -182,10 +179,6 @@ ModulesApp::registerObjects(Factory & factory)
   TensorMechanicsApp::registerObjects(factory);
 #endif
 
-#ifdef WATER_STEAM_EOS_ENABLED
-  WaterSteamEOSApp::registerObjects(factory);
-#endif
-
 #ifdef XFEM_ENABLED
   XFEMApp::registerObjects(factory);
 #endif
@@ -262,10 +255,6 @@ ModulesApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
   TensorMechanicsApp::associateSyntax(syntax, action_factory);
 #endif
 
-#ifdef WATER_STEAM_EOS_ENABLED
-  WaterSteamEOSApp::associateSyntax(syntax, action_factory);
-#endif
-
 #ifdef XFEM_ENABLED
   XFEMApp::associateSyntax(syntax, action_factory);
 #endif
@@ -336,10 +325,6 @@ ModulesApp::registerExecFlags(Factory & factory)
 
 #ifdef TENSOR_MECHANICS_ENABLED
   TensorMechanicsApp::registerExecFlags(factory);
-#endif
-
-#ifdef WATER_STEAM_EOS_ENABLED
-  WaterSteamEOSApp::registerExecFlags(factory);
 #endif
 
 #ifdef XFEM_ENABLED
