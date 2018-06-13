@@ -9,10 +9,11 @@ using namespace libMesh;
 namespace RELAP7
 {
 
-// gravitational acceleration, or gravity constant
+// Default value for magnitude of acceleration due to gravity
 static const Real gravity_const = 9.81;
 
-static VectorValue<Real> default_gravity_vector = VectorValue<Real>(0.0, 0.0, -9.8);
+// Default value for gravitational acceleration vector
+static VectorValue<Real> default_gravity_vector = VectorValue<Real>(0.0, 0.0, -gravity_const);
 
 // Stefan-Boltzman constant, in [W/m^2-K]
 static const Real Stefan_Boltzman_const = 5.670e-8;
