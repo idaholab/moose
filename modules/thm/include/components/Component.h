@@ -374,6 +374,13 @@ protected:
   void logSpatialDiscretizationNotImplementedError(
       const FlowModel::ESpatialDiscretizationType & spatial_discretization) const;
 
+  /// Gravitational acceleration vector
+  const RealVectorValue & _gravity_vector;
+  /// Gravitational acceleration magnitude
+  const Real _gravity_magnitude;
+  /// Gravitational acceleration unit direction
+  const RealVectorValue _gravity_direction;
+
   /// Unique ID of this component
   unsigned int _id;
   /// Pointer to a parent component (used in composed components)
