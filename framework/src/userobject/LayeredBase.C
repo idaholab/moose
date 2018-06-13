@@ -55,16 +55,32 @@ validParams<LayeredBase>()
 }
 
 LayeredBase::LayeredBase(const InputParameters & parameters)
-  : _layered_base_name(parameters.get<std::string>("_object_name")),
+  : Restartable(parameters.getCheckedPointerParam<SubProblem *>("_subproblem")->getMooseApp(),
+                parameters.get<std::string>("_object_name") + "_layered_base",
+                "LayeredBase",
+                parameters.get<THREAD_ID>("_tid")),
+    _layered_base_name(parameters.get<std::string>("_object_name")),
     _layered_base_params(parameters),
     _direction_enum(parameters.get<MooseEnum>("direction")),
     _direction(_direction_enum),
     _sample_type(parameters.get<MooseEnum>("sample_type")),
     _average_radius(parameters.get<unsigned int>("average_radius")),
     _using_displaced_mesh(_layered_base_params.get<bool>("use_displaced_mesh")),
+    _layer_values(declareRestartableData<std::vector<Real>>("layer_values")),
+    _layer_has_value(declareRestartableData<std::vector<unsigned int>>("layer_has_value")),
     _layered_base_subproblem(*parameters.getCheckedPointerParam<SubProblem *>("_subproblem")),
     _cumulative(parameters.get<bool>("cumulative"))
 {
+  parameters.dump();
+  SystemBase * sb = nullptr;
+  if (parameters.isParamValid("_aux_sys"))
+    sb = parameters.get<SystemBase *>("_aux_sys");
+  if (sb)
+    std::cout << "JDH DEBUG: aux_sys: " << sb->name() << std::endl;
+  if (parameters.isParamValid("_nl_sys"))
+    sb = parameters.get<SystemBase *>("_nl_sys");
+  if (sb)
+    std::cout << "JDH DEBUG: _nl_sys: " << sb->name() << std::endl;
   if (_layered_base_params.isParamValid("num_layers") &&
       _layered_base_params.isParamValid("bounds"))
     mooseError("'bounds' and 'num_layers' cannot both be set in ", _layered_base_name);
@@ -97,6 +113,7 @@ LayeredBase::LayeredBase(const InputParameters & parameters)
 
   _direction_min = bounding_box.min()(_direction);
   _direction_max = bounding_box.max()(_direction);
+  std::cout << "JDH DEBUG: exiting LayeredBase constructor" << std::endl;
 }
 
 Real
@@ -306,5 +323,5 @@ void
 LayeredBase::setLayerValue(unsigned int layer, Real value)
 {
   _layer_values[layer] = value;
-  _layer_has_value[layer] = true;
+  _layer_has_value[layer] = 1;
 }

@@ -115,7 +115,9 @@ Factory::create(const std::string & obj_name,
 
   // call the function pointer to build the object
   buildPtr & func = it->second;
+  std::cout << "JDH DEBUG: beg create with func..." << obj_name << std::endl;
   auto obj = (*func)(params);
+  std::cout << "JDH DEBUG: end create with func" << std::endl;
 
   auto fep = std::dynamic_pointer_cast<FEProblemBase>(obj);
   if (fep)

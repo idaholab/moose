@@ -1030,6 +1030,7 @@ MooseApp::registerRestartableData(std::string name,
                                   std::unique_ptr<RestartableDataValue> data,
                                   THREAD_ID tid)
 {
+  print_trace();
   auto & restartable_data = _restartable_data[tid];
   auto insert_pair = moose_try_emplace(restartable_data, name, std::move(data));
 

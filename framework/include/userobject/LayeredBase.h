@@ -36,7 +36,7 @@ InputParameters validParams<LayeredBase>();
  * partial sums for the specified number of intervals in a direction
  * (x,y,z).
  */
-class LayeredBase
+class LayeredBase : private Restartable
 {
 public:
   LayeredBase(const InputParameters & parameters);
@@ -114,10 +114,10 @@ protected:
 
 private:
   /// Value of the integral for each layer
-  std::vector<Real> _layer_values;
+  std::vector<Real> & _layer_values;
 
   /// Whether or not each layer has had any value summed into it
-  std::vector<bool> _layer_has_value;
+  std::vector<unsigned int> & _layer_has_value;
 
   /// Subproblem for the child object
   SubProblem & _layered_base_subproblem;

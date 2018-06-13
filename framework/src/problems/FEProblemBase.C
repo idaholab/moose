@@ -2557,6 +2557,9 @@ FEProblemBase::addUserObject(std::string user_object_name,
                              const std::string & name,
                              InputParameters parameters)
 {
+  std::cout << "\nJDH DEBUG: aUO: " << user_object_name << ", " << name << ", "
+            << _displaced_problem << ", " << libMesh::n_threads() << std::endl
+            << std::endl;
   if (_displaced_problem != NULL && parameters.get<bool>("use_displaced_mesh"))
     parameters.set<SubProblem *>("_subproblem") = _displaced_problem.get();
   else
@@ -2576,9 +2579,11 @@ FEProblemBase::addUserObject(std::string user_object_name,
 
   for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
   {
+    std::cout << "JDH DEBUG: in loop: " << tid << ", " << name << std::endl;
     // Create the UserObject
     std::shared_ptr<UserObject> user_object =
         _factory.create<UserObject>(user_object_name, name, parameters, tid);
+    std::cout << "JDH DEBUG: exited create" << std::endl;
     _all_user_objects.addObject(user_object, tid);
 
     // Attempt to create all the possible UserObject types

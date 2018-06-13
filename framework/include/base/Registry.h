@@ -130,6 +130,7 @@ template <class T>
 std::shared_ptr<MooseObject>
 buildObj(const InputParameters & parameters)
 {
+  std::cout << "JDH DEBUG: Registry buildObj" << std::endl;
   return std::make_shared<T>(parameters);
 }
 
