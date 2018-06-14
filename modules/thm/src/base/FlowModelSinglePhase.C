@@ -72,7 +72,7 @@ FlowModelSinglePhase::addMooseObjects()
 
   const InputParameters & pars = _pipe.parameters();
   const std::string fp_name = pars.get<UserObjectName>("fp");
-  const RealVectorValue gravity_vector = pars.get<RealVectorValue>("gravity");
+  const RealVectorValue & gravity_vector = pars.get<RealVectorValue>("gravity");
 
   // coupling vectors
   std::vector<VariableName> cv_rho(1, DENSITY);
