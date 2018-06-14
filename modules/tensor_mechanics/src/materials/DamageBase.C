@@ -46,7 +46,7 @@ DamageBase::updateDamage()
 {
 }
 
-void
+Real
 DamageBase::computeTimeStepLimit()
 {
   return std::numeric_limits<Real>::max();
