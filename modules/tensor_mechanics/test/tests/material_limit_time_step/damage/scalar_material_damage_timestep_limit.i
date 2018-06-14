@@ -115,6 +115,9 @@
     type = ElementAverageValue
     variable = damage_index
   []
+  [time_step_limit]
+    type = MaterialTimeStepPostprocessor
+  []
 []
 
 [Executioner]
@@ -127,8 +130,15 @@
   nl_abs_tol = 1e-8
 
   dt = 0.1
-  dtmin = 0.1
+  dtmin = 0.001
   end_time = 1.1
+  [TimeStepper]
+    type = IterationAdaptiveDT
+    dt = 0.1
+    growth_factor = 2.0
+    cutback_factor = 0.5
+    postprocessor_dtlim = time_step_limit
+  []
 []
 
 [Outputs]
