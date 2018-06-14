@@ -51,6 +51,9 @@ validParams<LayeredBase>()
       false,
       "When true the value in each layer is the sum of the values up to and including that layer");
 
+  params.addParam<std::vector<SubdomainName>>(
+      "block", "The list of block ids (SubdomainID) that this object will be applied");
+
   return params;
 }
 
@@ -63,7 +66,8 @@ LayeredBase::LayeredBase(const InputParameters & parameters)
     _average_radius(parameters.get<unsigned int>("average_radius")),
     _using_displaced_mesh(_layered_base_params.get<bool>("use_displaced_mesh")),
     _layered_base_subproblem(*parameters.getCheckedPointerParam<SubProblem *>("_subproblem")),
-    _cumulative(parameters.get<bool>("cumulative"))
+    _cumulative(parameters.get<bool>("cumulative")),
+    _blocks()
 {
   if (_layered_base_params.isParamValid("num_layers") &&
       _layered_base_params.isParamValid("bounds"))
@@ -91,12 +95,14 @@ LayeredBase::LayeredBase(const InputParameters & parameters)
   if (!_interval_based && _sample_type == 1)
     mooseError("'sample_type = interpolate' not supported with 'bounds' in ", _layered_base_name);
 
-  BoundingBox bounding_box = MeshTools::create_bounding_box(_layered_base_subproblem.mesh());
+  if (_layered_base_params.isParamValid("block"))
+    _blocks = _layered_base_subproblem.mesh().getSubdomainIDs(
+        _layered_base_params.get<std::vector<SubdomainName>>("block"));
+
   _layer_values.resize(_num_layers);
   _layer_has_value.resize(_num_layers);
 
-  _direction_min = bounding_box.min()(_direction);
-  _direction_max = bounding_box.max()(_direction);
+  getBounds();
 }
 
 Real
@@ -223,9 +229,7 @@ LayeredBase::initialize()
 {
   if (_using_displaced_mesh)
   {
-    BoundingBox bounding_box = MeshTools::create_bounding_box(_layered_base_subproblem.mesh());
-    _direction_min = bounding_box.min()(_direction);
-    _direction_max = bounding_box.max()(_direction);
+    getBounds();
   }
 
   for (unsigned int i = 0; i < _layer_values.size(); i++)
@@ -307,4 +311,37 @@ LayeredBase::setLayerValue(unsigned int layer, Real value)
 {
   _layer_values[layer] = value;
   _layer_has_value[layer] = true;
+}
+
+void
+LayeredBase::getBounds()
+{
+  if (_blocks.size() == 0)
+  {
+    BoundingBox bounding_box = MeshTools::create_bounding_box(_layered_base_subproblem.mesh());
+    _direction_min = bounding_box.min()(_direction);
+    _direction_max = bounding_box.max()(_direction);
+  }
+  else
+  {
+    _direction_min = std::numeric_limits<Real>::infinity();
+    _direction_max = -std::numeric_limits<Real>::infinity();
+    MooseMesh & mesh = _layered_base_subproblem.mesh();
+
+    for (auto it = mesh.bndNodesBegin(); it != mesh.bndNodesEnd(); ++it)
+    {
+      const Node & node = *(*it)->_node;
+      const std::set<SubdomainID> & node_blocks = mesh.getNodeBlockIds(node);
+      for (auto b = _blocks.begin(); b != _blocks.end(); ++b)
+        if (node_blocks.find(*b) != node_blocks.end())
+        {
+          if (_direction_min > node(_direction))
+            _direction_min = node(_direction);
+          if (_direction_max < node(_direction))
+            _direction_max = node(_direction);
+        }
+    }
+    mesh.comm().min(_direction_min);
+    mesh.comm().max(_direction_max);
+  }
 }

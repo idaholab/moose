@@ -13,6 +13,7 @@
 // MOOSE includes
 #include "Moose.h"
 #include "MooseEnum.h"
+#include "MooseTypes.h"
 
 // Forward Declarations
 class InputParameters;
@@ -79,6 +80,11 @@ protected:
    */
   bool layerHasValue(unsigned int layer) const { return _layer_has_value[layer]; }
 
+  /**
+   * Compute bounds, restricted to blocks if given
+   */
+  void getBounds();
+
   /// Name of this object
   std::string _layered_base_name;
 
@@ -124,6 +130,9 @@ private:
 
   /// Whether the values are cumulative over the layers
   bool _cumulative;
+
+  /// List of SubdomainIDs, if given
+  std::vector<SubdomainID> _blocks;
 };
 
 #endif
