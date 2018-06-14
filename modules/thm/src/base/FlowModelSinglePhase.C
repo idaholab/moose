@@ -72,7 +72,6 @@ FlowModelSinglePhase::addMooseObjects()
 
   const InputParameters & pars = _pipe.parameters();
   const std::string fp_name = pars.get<UserObjectName>("fp");
-  const RealVectorValue & gravity_vector = pars.get<RealVectorValue>("gravity");
 
   // coupling vectors
   std::vector<VariableName> cv_rho(1, DENSITY);
@@ -195,7 +194,7 @@ FlowModelSinglePhase::addMooseObjects()
     params.set<MaterialPropertyName>("direction") = DIRECTION;
     params.set<MaterialPropertyName>("alpha") = UNITY;
     params.set<MaterialPropertyName>("rho") = DENSITY;
-    params.set<RealVectorValue>("gravity_vector") = gravity_vector;
+    params.set<RealVectorValue>("gravity_vector") = _gravity_vector;
     _sim.addKernel(class_name, Component::genName(_comp_name, "rhou_gravity"), params);
   }
 
@@ -240,7 +239,7 @@ FlowModelSinglePhase::addMooseObjects()
     params.set<MaterialPropertyName>("alpha") = UNITY;
     params.set<MaterialPropertyName>("rho") = DENSITY;
     params.set<MaterialPropertyName>("vel") = VELOCITY;
-    params.set<RealVectorValue>("gravity_vector") = gravity_vector;
+    params.set<RealVectorValue>("gravity_vector") = _gravity_vector;
     _sim.addKernel(class_name, Component::genName(_comp_name, "rhoE_gravity"), params);
   }
 
