@@ -29,7 +29,6 @@ public:
   virtual std::shared_ptr<const FlowModel> getFlowModel() const;
   virtual unsigned int getSubdomainID() const = 0;
   virtual bool isHorizontal() const = 0;
-  virtual Real getInclinedAngle() const = 0;
 
 protected:
   virtual void init() override;

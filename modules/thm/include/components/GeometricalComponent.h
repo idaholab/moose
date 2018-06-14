@@ -91,6 +91,9 @@ protected:
   /// Direction this pipe is going to
   const RealVectorValue & _dir;
 
+  /// Angle between orientation vector and gravity vector, in degrees
+  const Real _gravity_angle;
+
   /// Rotation of the component around x-axis in non-displaced space
   const Real & _rotation;
 

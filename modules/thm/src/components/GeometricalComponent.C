@@ -27,6 +27,10 @@ GeometricalComponent::GeometricalComponent(const InputParameters & parameters)
   : Component(parameters),
     _position(getParam<Point>("position")),
     _dir(getParam<RealVectorValue>("orientation")),
+    _gravity_angle(MooseUtils::absoluteFuzzyEqual(_gravity_magnitude, 0.0)
+                       ? 0.0
+                       : std::acos(_dir * _gravity_vector / (_dir.norm() * _gravity_magnitude)) *
+                             180 / M_PI),
     _rotation(getParam<Real>("rotation")),
     _lengths(getParam<std::vector<Real>>("length")),
     _length(std::accumulate(_lengths.begin(), _lengths.end(), 0.0)),
