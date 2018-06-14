@@ -35,8 +35,8 @@ protected:
 
   /// The direction of the pipe
   const MaterialProperty<RealVectorValue> & _dir;
-  /// The global gravity vector
-  RealVectorValue _gravity_vector;
+  /// Gravitational acceleration vector
+  const RealVectorValue & _gravity_vector;
 
   const unsigned int _beta_var_number;
   const unsigned int _arhoA_var_number;

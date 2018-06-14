@@ -18,7 +18,7 @@ validParams<OneDMomentumGravity>()
   params.addRequiredParam<MaterialPropertyName>("alpha", "Volume fraction property");
   params.addRequiredParam<MaterialPropertyName>("rho", "Density property");
 
-  params.addRequiredParam<RealVectorValue>("gravity_vector", "Gravity vector");
+  params.addRequiredParam<RealVectorValue>("gravity_vector", "Gravitational acceleration vector");
 
   return params;
 }
