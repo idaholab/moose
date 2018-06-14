@@ -112,6 +112,9 @@ LineElementAction::beamParameters()
                        0.0,
                        "First moment of area of the beam about z asix. Can be supplied "
                        "as either a number or a variable name.");
+  params.addCoupledVar("Ix",
+                       "Second moment of area of the beam about x axis. Can be supplied as "
+                       "either a number or a variable name.");
   params.addCoupledVar("Iy",
                        "Second moment of area of the beam about y axis. Can be supplied as "
                        "either a number or a variable name.");
@@ -200,21 +203,23 @@ LineElementAction::LineElementAction(const InputParameters & params)
     _accelerations(0),
     _rot_velocities(0),
     _rot_accelerations(0),
-    _save_in(getParam<std::vector<AuxVariableName>>("save_in")),
-    _diag_save_in(getParam<std::vector<AuxVariableName>>("diag_save_in")),
     _subdomain_names(getParam<std::vector<SubdomainName>>("block")),
-    _subdomain_ids(),
-    _strain_type(getParam<MooseEnum>("strain_type").getEnum<Strain>()),
-    _rotation_type(getParam<MooseEnum>("rotation_type").getEnum<Strain>()),
-    _dynamic_consistent_inertia(getParam<bool>("dynamic_consistent_inertia")),
-    _dynamic_nodal_translational_inertia(getParam<bool>("dynamic_nodal_translational_inertia")),
-    _dynamic_nodal_rotational_inertia(getParam<bool>("dynamic_nodal_rotational_inertia")),
-    _truss(getParam<bool>("truss"))
+    _subdomain_ids()
 {
   // check if a container block with common parameters is found
   auto action = _awh.getActions<CommonLineElementAction>();
   if (action.size() == 1)
     _pars.applyParameters(action[0]->parameters());
+
+  // Set values to variables after common parameters are applied
+  _save_in = getParam<std::vector<AuxVariableName>>("save_in");
+  _diag_save_in = getParam<std::vector<AuxVariableName>>("diag_save_in");
+  _strain_type = getParam<MooseEnum>("strain_type").getEnum<Strain>();
+  _rotation_type = getParam<MooseEnum>("rotation_type").getEnum<Strain>();
+  _dynamic_consistent_inertia = getParam<bool>("dynamic_consistent_inertia");
+  _dynamic_nodal_translational_inertia = getParam<bool>("dynamic_nodal_translational_inertia");
+  _dynamic_nodal_rotational_inertia = getParam<bool>("dynamic_nodal_rotational_inertia");
+  _truss = getParam<bool>("truss");
 
   if (!isParamValid("displacements"))
     paramError("displacements",

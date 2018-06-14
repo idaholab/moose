@@ -52,11 +52,13 @@ validParams<InertialForceBeam>()
       "density",
       "density",
       "Name of Material Property  or a constant real number defining the density of the beam.");
-  params.addCoupledVar("area", "Variable containing cross-section area");
-  params.addCoupledVar("Ay", "Variable containing first moment of area about y axis");
-  params.addCoupledVar("Az", "Variable containing first moment of area about z axis");
-  params.addCoupledVar("Iy", "Variable containing second moment of area about y axis");
-  params.addCoupledVar("Iz", "Variable containing second moment of area about z axis");
+  params.addRequiredCoupledVar("area", "Variable containing cross-section area");
+  params.addCoupledVar("Ay", 0.0, "Variable containing first moment of area about y axis");
+  params.addCoupledVar("Az", 0.0, "Variable containing first moment of area about z axis");
+  params.addCoupledVar("Ix",
+                       "Variable containing second moment of area about x axis. Defaults to Iy+Iz");
+  params.addRequiredCoupledVar("Iy", "Variable containing second moment of area about y axis");
+  params.addRequiredCoupledVar("Iz", "Variable containing second moment of area about z axis");
   params.addRequiredRangeCheckedParam<unsigned int>(
       "component",
       "component<6",
@@ -80,6 +82,7 @@ InertialForceBeam::InertialForceBeam(const InputParameters & parameters)
     _area(coupledValue("area")),
     _Ay(coupledValue("Ay")),
     _Az(coupledValue("Az")),
+    _Ix(isParamValid("Ix") ? coupledValue("Ix") : _zero),
     _Iy(coupledValue("Iy")),
     _Iz(coupledValue("Iz")),
     _beta(getParam<Real>("beta")),
@@ -234,6 +237,8 @@ InertialForceBeam::computeResidual()
       if (_component > 2)
       {
         Real I = _Iy[0] + _Iz[0];
+        if (isParamValid("Ix") && (i == 0))
+          I = _Ix[0];
         if (i == 1)
           I = _Iz[0];
         else if (i == 2)
@@ -362,7 +367,10 @@ InertialForceBeam::computeJacobian()
       else if (_component > 2)
       {
         RankTwoTensor I;
-        I(0, 0) = _Iy[0] + _Iz[0];
+        if (isParamValid("Ix"))
+          I(0, 0) = _Ix[0];
+        else
+          I(0, 0) = _Iy[0] + _Iz[0];
         I(1, 1) = _Iz[0];
         I(2, 2) = _Iy[0];
 
@@ -469,7 +477,10 @@ InertialForceBeam::computeOffDiagJacobian(MooseVariableFEBase & jvar)
           else if (_component > 2 && coupled_component > 2)
           {
             RankTwoTensor I;
-            I(0, 0) = _Iy[0] + _Iz[0];
+            if (isParamValid("Ix"))
+              I(0, 0) = _Ix[0];
+            else
+              I(0, 0) = _Iy[0] + _Iz[0];
             I(1, 1) = _Iz[0];
             I(2, 2) = _Iy[0];
 
