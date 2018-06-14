@@ -18,38 +18,6 @@
   [../]
   [./disp_y]
   [../]
-  [./stress_xx]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./stress_xz]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./stress_yy]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./stress_zz]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./strain_xx]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./strain_xz]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./strain_yy]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./strain_zz]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
 []
 
 [Modules/TensorMechanics/Master]
@@ -59,6 +27,7 @@
     out_of_plane_direction = y
     planar_formulation = PLANE_STRAIN
     eigenstrain_names = 'eigenstrain'
+    generate_output = 'stress_xx stress_xz stress_yy stress_zz strain_xx strain_xz strain_yy strain_zz'
   [../]
 []
 
@@ -67,63 +36,6 @@
     type = FunctionAux
     variable = temp
     function = tempfunc
-  [../]
-  [./stress_xx]
-    type = RankTwoAux
-    rank_two_tensor = stress
-    variable = stress_xx
-    index_j = 0
-    index_i = 0
-  [../]
-  [./stress_xz]
-    type = RankTwoAux
-    rank_two_tensor = stress
-    variable = stress_xz
-    index_j = 2
-    index_i = 0
-  [../]
-  [./stress_yy]
-    type = RankTwoAux
-    rank_two_tensor = stress
-    variable = stress_yy
-    index_j = 1
-    index_i = 1
-  [../]
-  [./stress_zz]
-    type = RankTwoAux
-    rank_two_tensor = stress
-    variable = stress_zz
-    index_j = 2
-    index_i = 2
-  [../]
-
-  [./strain_xx]
-    type = RankTwoAux
-    rank_two_tensor = total_strain
-    variable = strain_xx
-    index_j = 0
-    index_i = 0
-  [../]
-  [./strain_xz]
-    type = RankTwoAux
-    rank_two_tensor = total_strain
-    variable = strain_xz
-    index_j = 2
-    index_i = 0
-  [../]
-  [./strain_yy]
-    type = RankTwoAux
-    rank_two_tensor = total_strain
-    variable = strain_yy
-    index_j = 1
-    index_i = 1
-  [../]
-  [./strain_zz]
-    type = RankTwoAux
-    rank_two_tensor = total_strain
-    variable = strain_zz
-    index_j = 2
-    index_i = 2
   [../]
 []
 

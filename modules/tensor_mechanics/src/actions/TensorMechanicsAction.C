@@ -344,7 +344,7 @@ TensorMechanicsAction::actOutputGeneration()
   //
   // Add variables (optional)
   //
-  if (_current_task == "add_aux_variable" && getParam<bool>("add_variables"))
+  if (_current_task == "add_aux_variable")
   {
     // Loop through output aux variables
     for (auto out : _generate_output)
