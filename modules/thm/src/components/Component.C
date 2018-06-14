@@ -13,7 +13,7 @@ validParams<Component>()
 {
   InputParameters params = validParams<RELAP7Object>();
   params.addParam<RealVectorValue>(
-      "gravity", RELAP7::default_gravity_vector, "Gravitational acceleration vector");
+      "gravity_vector", RELAP7::default_gravity_vector, "Gravitational acceleration vector");
   params.addPrivateParam<Simulation *>("_sim");
   params.addPrivateParam<Component *>("_parent", nullptr);
   params.addPrivateParam<std::string>("built_by_action", "add_component");
@@ -89,7 +89,7 @@ Component::split(const std::string & rname)
 Component::Component(const InputParameters & parameters)
   : RELAP7Object(parameters),
 
-    _gravity_vector(getParam<RealVectorValue>("gravity")),
+    _gravity_vector(getParam<RealVectorValue>("gravity_vector")),
     _gravity_magnitude(_gravity_vector.norm()),
     _gravity_direction(MooseUtils::absoluteFuzzyEqual(_gravity_magnitude, 0.0)
                            ? RealVectorValue(0.0, 0.0, 0.0)
