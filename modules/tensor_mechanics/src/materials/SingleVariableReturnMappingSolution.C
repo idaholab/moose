@@ -62,6 +62,8 @@ SingleVariableReturnMappingSolution::SingleVariableReturnMappingSolution(
     const InputParameters & parameters)
   : _legacy_return_mapping(false),
     _check_range(false),
+    _line_search(true),
+    _bracket_solution(true),
     _internal_solve_output_on(
         parameters.get<MooseEnum>("internal_solve_output_on").getEnum<InternalSolveOutput>()),
     _max_its(parameters.get<unsigned int>("max_its")),
@@ -71,8 +73,6 @@ SingleVariableReturnMappingSolution::SingleVariableReturnMappingSolution(
     _relative_tolerance(parameters.get<Real>("relative_tolerance")),
     _absolute_tolerance(parameters.get<Real>("absolute_tolerance")),
     _acceptable_multiplier(parameters.get<Real>("acceptable_multiplier")),
-    _line_search(true),
-    _bracket_solution(true),
     _num_resids(30),
     _residual_history(_num_resids, std::numeric_limits<Real>::max()),
     _iteration(0),
