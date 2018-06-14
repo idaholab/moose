@@ -378,6 +378,8 @@ protected:
   const RealVectorValue & _gravity_vector;
   /// Gravitational acceleration magnitude
   const Real _gravity_magnitude;
+  /// Gravitational acceleration magnitude is zero?
+  const bool _gravity_is_zero;
   /// Gravitational acceleration unit direction
   const RealVectorValue _gravity_direction;
 

@@ -91,9 +91,8 @@ Component::Component(const InputParameters & parameters)
 
     _gravity_vector(getParam<RealVectorValue>("gravity_vector")),
     _gravity_magnitude(_gravity_vector.norm()),
-    _gravity_direction(MooseUtils::absoluteFuzzyEqual(_gravity_magnitude, 0.0)
-                           ? RealVectorValue(0.0, 0.0, 0.0)
-                           : _gravity_vector.unit()),
+    _gravity_is_zero(MooseUtils::absoluteFuzzyEqual(_gravity_magnitude, 0.0)),
+    _gravity_direction(_gravity_is_zero ? RealVectorValue(0.0, 0.0, 0.0) : _gravity_vector.unit()),
 
     _id(comp_id++),
     _parent(getParam<Component *>("_parent")),
