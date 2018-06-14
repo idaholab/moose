@@ -52,32 +52,42 @@ Real Prandtl(Real cp, Real mu, Real k);
 
 /**
  * Compute Grashof number
+ *
  * @param beta Thermal expansion coefficient
  * @param dT |T_w - T|
  * @param D_h Hydraulic diameter
  * @param rho_l Density of liquid
  * @param visc_l Viscosity of liquid
+ * @param gravity_magnitude   Gravitational acceleration magnitude
+ *
  * @return Grashof number
  */
-Real Grashof(Real beta, Real dT, Real D_h, Real rho_l, Real visc_l);
+Real Grashof(Real beta, Real dT, Real D_h, Real rho_l, Real visc_l, Real gravity_magnitude);
 
 /**
  * Compute Laplace number (or coefficient)
+ *
  * @param surf_tension Surface tension
  * @param delta_rho Difference in density of phases
+ * @param gravity_magnitude   Gravitational acceleration magnitude
+ *
  * @return Laplace number
  */
-Real Laplace(Real surf_tension, Real delta_rho);
+Real Laplace(Real surf_tension, Real delta_rho, Real gravity_magnitude);
 
 /**
  * Compute viscosity number (or coefficient)
+ *
  * @param viscosity Viscosity
  * @param surf_tension Surface tension
  * @param rho_k Density of k-th phase of interest
  * @param delta_rho Density difference
+ * @param gravity_magnitude   Gravitational acceleration magnitude
+ *
  * @return viscosity number
  */
-Real viscosityNumber(Real viscosity, Real surf_tension, Real rho_k, Real delta_rho);
+Real viscosityNumber(
+    Real viscosity, Real surf_tension, Real rho_k, Real delta_rho, Real gravity_magnitude);
 
 /**
  * Compute wall heat transfer coefficient

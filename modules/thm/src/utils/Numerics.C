@@ -16,21 +16,22 @@ Prandtl(Real cp, Real mu, Real k)
 }
 
 Real
-Grashof(Real beta, Real dT, Real Dh, Real rho_l, Real visc_l)
+Grashof(Real beta, Real dT, Real Dh, Real rho_l, Real visc_l, Real /*gravity_magnitude*/)
 {
   // Eq. 6-17
   return gravity_const * beta * dT * std::pow(Dh, 3) * (rho_l * rho_l) / (visc_l * visc_l);
 }
 
 Real
-Laplace(Real surf_tension, Real delta_rho)
+Laplace(Real surf_tension, Real delta_rho, Real /*gravity_magnitude*/)
 {
   // Eq. 4-119; 5-13.
   return std::sqrt(surf_tension / (gravity_const * delta_rho));
 }
 
 Real
-viscosityNumber(Real viscosity, Real surf_tension, Real rho_k, Real delta_rho)
+viscosityNumber(
+    Real viscosity, Real surf_tension, Real rho_k, Real delta_rho, Real /*gravity_magnitude*/)
 {
   // Equation (4-23), page 129. See also its definition on page 120.
   return viscosity /
