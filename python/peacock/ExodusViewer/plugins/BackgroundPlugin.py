@@ -8,7 +8,6 @@
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
 import sys
-import chigger
 from PyQt5 import QtCore, QtGui, QtWidgets
 from ExodusPlugin import ExodusPlugin
 
@@ -25,6 +24,9 @@ class BackgroundPlugin(QtWidgets.QWidget, ExodusPlugin):
 
     #: pyqtSignal: Emitted when the colorbar options are changed
     colorbarOptionsChanged = QtCore.pyqtSignal(dict)
+
+    #: pyqtSignal: Emitted when the result options are changed
+    resultOptionsChanged = QtCore.pyqtSignal(dict)
 
     def __init__(self, **kwargs):
         super(BackgroundPlugin, self).__init__(**kwargs)
@@ -54,16 +56,13 @@ class BackgroundPlugin(QtWidgets.QWidget, ExodusPlugin):
                 )
 
         # Background Toggle action (see addToMenu)
+        self.hide()
         self.GradientToggle = None
-        self.ColorbarBlackFontToggle = None
-
-        # Dropdown with standard background setup
-        self.MainLayout = QtWidgets.QHBoxLayout(self)
-        self.BackgroundSelectLabel = QtWidgets.QLabel("Background:")
-        self.BackgroundSelect = QtWidgets.QComboBox()
-        self.MainLayout.addWidget(self.BackgroundSelectLabel)
-        self.MainLayout.addWidget(self.BackgroundSelect)
-        self.MainLayout.addStretch(1)
+        self.BlackPreset = None
+        self.WhitePreset = None
+        self._set_result_color = kwargs.pop('set_result_color', False)
+        self._gradient_state = True
+        self._black_font_state = False
 
         # Default colors
         self._top = QtGui.QColor(self._preferences.value("exodus/gradientTopColor"))
@@ -73,7 +72,38 @@ class BackgroundPlugin(QtWidgets.QWidget, ExodusPlugin):
         # Setup this widget
         self.setup()
 
-    @QtCore.pyqtSlot(chigger.exodus.ExodusResult)
+    def _prefCallbackGradientTopColor(self, value):
+        """
+        Updates top color when preference saved.
+        """
+        self._top = QtGui.QColor(value)
+        self.updateOptions()
+        self.windowRequiresUpdate.emit()
+
+    def _prefCallbackGradientBottomColor(self, value):
+        """
+        Updates bottom color when preference saved.
+        """
+        self._bottom = QtGui.QColor(value)
+        self.updateOptions()
+        self.windowRequiresUpdate.emit()
+
+    def _prefCallbackGradientSolidColor(self, value):
+        """
+        Updates solid color when preference saved.
+        """
+        self._solid = QtGui.QColor(value)
+        self.updateOptions()
+        self.windowRequiresUpdate.emit()
+
+    def _prefCallbackBackgroundGradient(self, value):
+        """
+        Updates top color when preference saved.
+        """
+        self.GradientToggle.setChecked(value)
+        self.updateOptions()
+        self.windowRequiresUpdate.emit()
+
     def onWindowResult(self, *args):
         """
         When the result is created apply the color to the RenderWindow object.
@@ -81,16 +111,35 @@ class BackgroundPlugin(QtWidgets.QWidget, ExodusPlugin):
         self.updateOptions()
         self.windowRequiresUpdate.emit()
 
+    def onWindowColorbar(self, colorbar):
+        """
+        Called when colorbar is created.
+        """
+        self.ColorbarBlackFontToggle.setVisible(colorbar[0].getOption('visible'))
+
     def addToMenu(self, menu):
         """
         Create a toggle for the background color.
         """
-        self.GradientToggle = menu.addAction("Gradient Background")
-        self.GradientToggle.setCheckable(True)
-        self.GradientToggle.setChecked(True)
+        submenu = menu.addMenu('Background')
+
+        toggle = self._preferences.value("exodus/backgroundGradient")
+        self.GradientToggle = submenu.addAction("Gradient")
+        self.GradientToggle.setCheckable(toggle)
+        self.GradientToggle.setChecked(toggle)
         self.GradientToggle.toggled.connect(self._callbackGradientToggle)
 
-        self.ColorbarBlackFontToggle = menu.addAction("Black colorbar font")
+        self.BlackPreset = submenu.addAction('Black (preset)')
+        self.BlackPreset.setCheckable(True)
+        self.BlackPreset.setChecked(False)
+        self.BlackPreset.toggled.connect(self._callbackBlackPreset)
+
+        self.WhitePreset = submenu.addAction('White (preset)')
+        self.WhitePreset.setCheckable(True)
+        self.WhitePreset.setChecked(False)
+        self.WhitePreset.toggled.connect(self._callbackWhitePreset)
+
+        self.ColorbarBlackFontToggle = submenu.addAction("Black Font/Mesh")
         self.ColorbarBlackFontToggle.setCheckable(True)
         self.ColorbarBlackFontToggle.setChecked(False)
         self.ColorbarBlackFontToggle.toggled.connect(self._callbackColorbarBlackFontToggle)
@@ -101,14 +150,19 @@ class BackgroundPlugin(QtWidgets.QWidget, ExodusPlugin):
         """
         Apply the supplied colors to the window.
         """
-        if self.GradientToggle is None:
-            return
-
         if self.GradientToggle.isChecked():
             top = self._top.getRgb()
             bottom = self._bottom.getRgb()
             background = [bottom[0]/255., bottom[1]/255., bottom[2]/255.]
             background2 = [top[0]/255., top[1]/255., top[2]/255.]
+        elif self.BlackPreset.isChecked():
+            background = [0, 0, 0]
+            background2 = None
+
+        elif self.WhitePreset.isChecked():
+            background = [1, 1, 1]
+            background2 = None
+
         else:
             solid = self._solid.getRgb()
             background = [solid[0]/255., solid[1]/255., solid[2]/255.]
@@ -116,8 +170,12 @@ class BackgroundPlugin(QtWidgets.QWidget, ExodusPlugin):
 
         if self.ColorbarBlackFontToggle.isChecked():
             self.colorbarOptionsChanged.emit({'primary':dict(font_color=[0,0,0])})
+            if self._set_result_color:
+                self.resultOptionsChanged.emit({'color':[0,0,0]})
         else:
             self.colorbarOptionsChanged.emit({'primary':dict(font_color=[1,1,1])})
+            if self._set_result_color:
+                self.resultOptionsChanged.emit({'color':[1,1,1]})
 
         self.windowOptionsChanged.emit({'background':background,
                                         'background2':background2,
@@ -130,37 +188,88 @@ class BackgroundPlugin(QtWidgets.QWidget, ExodusPlugin):
         qobject.addItem('Gradient')
         qobject.addItem('Black')
         qobject.addItem('White')
+        qobject.addItem('Solid (custom)')
         qobject.currentIndexChanged.connect(self._callbackBackgroundSelect)
-
-    def _callbackBackgroundSelect(self, index):
-        """
-        Called when the background style is altered.
-        """
-
-        # Gradient
-        if index == 0:
-            self.GradientToggle.setChecked(True)
-            self.ColorbarBlackFontToggle.setChecked(False)
-
-        # Black
-        elif index == 1:
-            self.GradientToggle.setChecked(False)
-            self.ColorbarBlackFontToggle.setChecked(False)
-            self._solid.setRgb(0, 0, 0)
-
-        # White
-        elif index == 2:
-            self.GradientToggle.setChecked(False)
-            self.ColorbarBlackFontToggle.setChecked(True)
-            self._solid.setRgb(255, 255, 255)
-
-        self.updateOptions()
-
 
     def _callbackGradientToggle(self, value):
         """
         Called when the gradient toggle is checked/Unchecked.
         """
+        self.GradientToggle.setChecked(value)
+        self._gradient_state = value
+        if value:
+            self.BlackPreset.blockSignals(True)
+            self.BlackPreset.setChecked(False)
+            self.BlackPreset.blockSignals(False)
+
+            self.WhitePreset.blockSignals(True)
+            self.WhitePreset.setChecked(False)
+            self.WhitePreset.blockSignals(False)
+
+            self.ColorbarBlackFontToggle.blockSignals(True)
+            self.ColorbarBlackFontToggle.setChecked(False)
+            self.ColorbarBlackFontToggle.blockSignals(False)
+
+        self.updateOptions()
+        self.windowRequiresUpdate.emit()
+
+    def _callbackBlackPreset(self, value):
+        """
+        Called when the black preset is toggled.
+        """
+        self.BlackPreset.setChecked(value)
+        if value:
+            self.GradientToggle.blockSignals(True)
+            self.GradientToggle.setChecked(False)
+            self.GradientToggle.blockSignals(False)
+
+            self.WhitePreset.blockSignals(True)
+            self.WhitePreset.setChecked(False)
+            self.WhitePreset.blockSignals(False)
+
+            self.ColorbarBlackFontToggle.blockSignals(True)
+            self.ColorbarBlackFontToggle.setChecked(False)
+            self.ColorbarBlackFontToggle.blockSignals(False)
+
+        else:
+            self.GradientToggle.blockSignals(True)
+            self.GradientToggle.setChecked(self._gradient_state)
+            self.GradientToggle.blockSignals(False)
+
+            self.ColorbarBlackFontToggle.blockSignals(True)
+            self.ColorbarBlackFontToggle.setChecked(self._black_font_state)
+            self.ColorbarBlackFontToggle.blockSignals(False)
+
+        self.updateOptions()
+        self.windowRequiresUpdate.emit()
+
+    def _callbackWhitePreset(self, value):
+        """
+        Called when the white preset is toggled.
+        """
+        self.WhitePreset.setChecked(value)
+        if value:
+            self.GradientToggle.blockSignals(True)
+            self.GradientToggle.setChecked(False)
+            self.GradientToggle.blockSignals(False)
+
+            self.BlackPreset.blockSignals(True)
+            self.BlackPreset.setChecked(False)
+            self.BlackPreset.blockSignals(False)
+
+            self.ColorbarBlackFontToggle.blockSignals(True)
+            self.ColorbarBlackFontToggle.setChecked(True)
+            self.ColorbarBlackFontToggle.blockSignals(False)
+
+        else:
+            self.GradientToggle.blockSignals(True)
+            self.GradientToggle.setChecked(self._gradient_state)
+            self.GradientToggle.blockSignals(False)
+
+            self.ColorbarBlackFontToggle.blockSignals(True)
+            self.ColorbarBlackFontToggle.setChecked(self._black_font_state)
+            self.ColorbarBlackFontToggle.blockSignals(False)
+
         self.updateOptions()
         self.windowRequiresUpdate.emit()
 
@@ -168,6 +277,8 @@ class BackgroundPlugin(QtWidgets.QWidget, ExodusPlugin):
         """
         Called when the drop down black font option is toggled.
         """
+        self._black_font_state = value
+        self.ColorbarBlackFontToggle.setChecked(value)
         self.updateOptions()
         self.windowRequiresUpdate.emit()
 
@@ -184,7 +295,6 @@ def main(size=None):
     menubar.setNativeMenuBar(False)
     widget.addToMainMenu(menubar)
     main_window.show()
-
     return widget, widget.VTKWindowPlugin, main_window
 
 if __name__ == '__main__':

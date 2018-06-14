@@ -35,7 +35,7 @@ class OutputPlugin(QtWidgets.QGroupBox, ExodusPlugin):
 
         self.LiveScript = None
         self.ExportPNG = None
-        self.ExportPDF = None
+        self.ExportPython = None
 
         self.setup()
         self._observer = None
@@ -47,15 +47,18 @@ class OutputPlugin(QtWidgets.QGroupBox, ExodusPlugin):
         self.LiveScript = menu.addAction('Show live script')
         self.LiveScript.setCheckable(True)
         self.LiveScript.setChecked(False)
+        self.LiveScript.setEnabled(False)
         self.LiveScript.toggled.connect(self._callbackLiveScript)
 
         export = menu.addMenu('Export')
 
         self.ExportPNG = export.addAction('PNG')
         self.ExportPNG.triggered.connect(self._callbackExportPNG)
+        self.ExportPNG.setEnabled(False)
 
         self.ExportPython = export.addAction('Python')
         self.ExportPython.triggered.connect(self._callbackExportPython)
+        self.ExportPython.setEnabled(False)
 
     def updateLiveScriptWindow(self, *args):
         """
@@ -67,11 +70,22 @@ class OutputPlugin(QtWidgets.QGroupBox, ExodusPlugin):
             if s != self.LiveScriptWindow.toPlainText():
                 self.LiveScriptWindow.setText(s)
 
+    def onWindowReset(self):
+        """
+        Disable the live view when there are no results.
+        """
+        self.LiveScript.setEnabled(False)
+        self.ExportPNG.setEnabled(False)
+        self.ExportPython.setEnabled(False)
+
     def onWindowResult(self, *args):
         """
         Adds an observer for the live window update to the VTK renderer.
         """
         self.addObserver.emit(vtk.vtkCommand.RenderEvent, self.updateLiveScriptWindow)
+        self.LiveScript.setEnabled(True)
+        self.ExportPNG.setEnabled(True)
+        self.ExportPython.setEnabled(True)
 
     def _setupLiveScriptWindow(self, qobject):
         qobject.setReadOnly(True)

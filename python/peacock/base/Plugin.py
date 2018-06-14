@@ -23,7 +23,7 @@ class Plugin(MooseWidget):
     see Manager.py
     """
 
-    def __init__(self, layout='MainLayout', settings_key=""):
+    def __init__(self, layout='MainLayout', settings_key="", **kwargs):
         super(Plugin, self).__init__()
 
         # Name of layout that this plugin should be added (see PluginManager.py)
@@ -48,6 +48,19 @@ class Plugin(MooseWidget):
         Allows the plugin to add command line options to the parser.
         """
 
+    def setup(self):
+        """
+        Adds automatic Preference callback connection to the setup method.
+        """
+        super(Plugin, self).setup()
+
+        for key, widget in self._preferences._widgets.iteritems():
+            name = key.split('/')[-1]
+            name = '_prefCallback{}{}'.format(name[0].upper(), name[1:])
+            callback = getattr(self, name, None)
+            if callback:
+                widget.valueSaved.connect(callback)
+
     def connect(self, other):
         """
         Connect the slots of supplied plugin (other) to the signals emited by this (self) plugin.
@@ -59,7 +72,8 @@ class Plugin(MooseWidget):
             for name, signal in self.signals().iteritems():
                 slot_name = 'on' + name[0].upper() + name[1:]
                 if hasattr(other, slot_name):
-                    mooseutils.mooseDebug('{}.{} --> {}.{}'.format(self.__class__.__name__, name, other.__class__.__name__, slot_name))
+                    mooseutils.mooseDebug('{}.{} --> {}.{}'.format(self.__class__.__name__, name,
+                                                                   other.__class__.__name__, slot_name))
                     signal.connect(getattr(other, slot_name))
 
     def setMainLayoutName(self, name):

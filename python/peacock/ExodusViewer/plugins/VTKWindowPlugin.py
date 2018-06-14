@@ -55,6 +55,9 @@ class VTKWindowPlugin(QtWidgets.QFrame, ExodusPlugin):
     #: pyqtSignal: Emitted when the reader has been update, prior to creating result
     windowReader = QtCore.pyqtSignal(chigger.exodus.ExodusReader)
 
+    #: pyqtSignal: Emitted when the colorbar has been created
+    windowColorbar = QtCore.pyqtSignal(chigger.exodus.ExodusColorBar)
+
     #: pyqtSignal: Emitted with the window has been updated
     windowUpdated = QtCore.pyqtSignal()
 
@@ -354,15 +357,16 @@ class VTKWindowPlugin(QtWidgets.QFrame, ExodusPlugin):
 
         # Create the reader and result chigger objects
         self._reader = chigger.exodus.ExodusReader(self._filename, **self._reader_options)
-        self._reader.update(**self._reader_options)
+        self._reader.update()
         self.windowReader.emit(self._reader)
 
         self._result = chigger.exodus.ExodusResult(self._reader, **self._result_options)
+        self._result.update()
 
         self._colorbar = chigger.exodus.ExodusColorBar(self._result, **self._colorbar_options)
+        #self._colorbar.update()
 
         # Set the interaction mode (2D/3D)
-        self._result.update()
         bmin, bmax = self._result.getBounds()
         if abs(bmax[-1] - bmin[-1]) < 1e-10:
             self._window.setOption('style', 'interactive2D')
@@ -384,6 +388,7 @@ class VTKWindowPlugin(QtWidgets.QFrame, ExodusPlugin):
         self._initialized = True
         self.windowResult.emit(self._result)
         self._window.update()
+        self.windowColorbar.emit(self._colorbar)
         if camera is None:
             self._callbackRenderEvent() # store initial camera
         self._adjustTimers(start=['update'], stop=['initialize'])
@@ -412,7 +417,6 @@ class VTKWindowPlugin(QtWidgets.QFrame, ExodusPlugin):
         """
         Produce a script for reproducing the VTK figure.
         """
-
         # The content to return
         output = dict()
 

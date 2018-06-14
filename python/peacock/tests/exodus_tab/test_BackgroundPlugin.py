@@ -19,7 +19,6 @@ class TestBackgroundPlugin(Testing.PeacockImageTestCase):
     """
     Testing for MeshControl widget.
     """
-
     qapp = QtWidgets.QApplication(sys.argv)
 
     def setUp(self):
@@ -125,18 +124,18 @@ class TestBackgroundPlugin(Testing.PeacockImageTestCase):
         self._widget.BackgroundPlugin.windowRequiresUpdate.emit()
         self.assertImage('testSolidColor.png')
 
-    def testBackgroundSelect(self):
+    def testPreset(self):
         self.createWidget()
-        self._widget.BackgroundPlugin.BackgroundSelect.setCurrentIndex(1)
-        self._widget.BackgroundPlugin.BackgroundSelect.currentIndexChanged.emit(1)
+        self._widget.BackgroundPlugin.BlackPreset.setChecked(True)
+        self._widget.BackgroundPlugin.BlackPreset.toggled.emit(True)
         self.assertImage('testBlackToggle.png')
 
-        self._widget.BackgroundPlugin.BackgroundSelect.setCurrentIndex(2)
-        self._widget.BackgroundPlugin.BackgroundSelect.currentIndexChanged.emit(2)
+        self._widget.BackgroundPlugin.WhitePreset.setChecked(True)
+        self._widget.BackgroundPlugin.WhitePreset.toggled.emit(True)
         self.assertImage('testWhiteToggle.png')
 
-        self._widget.BackgroundPlugin.BackgroundSelect.setCurrentIndex(0)
-        self._widget.BackgroundPlugin.BackgroundSelect.currentIndexChanged.emit(0)
+        self._widget.BackgroundPlugin.WhitePreset.setChecked(False)
+        self._widget.BackgroundPlugin.WhitePreset.toggled.emit(False)
         self.assertImage('testInitial.png')
 
     def testBlackFontToggle(self):
