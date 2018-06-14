@@ -31,6 +31,7 @@ GeometricalComponent::GeometricalComponent(const InputParameters & parameters)
                        ? 0.0
                        : std::acos(_dir * _gravity_vector / (_dir.norm() * _gravity_magnitude)) *
                              180 / M_PI),
+    _gravity_angle_type(getGravityAngleType(_gravity_angle)),
     _rotation(getParam<Real>("rotation")),
     _lengths(getParam<std::vector<Real>>("length")),
     _length(std::accumulate(_lengths.begin(), _lengths.end(), 0.0)),
@@ -219,4 +220,19 @@ GeometricalComponent::setSubdomainInfo(unsigned int subdomain_id,
     gc->_coord_sys.push_back(coord_system);
   }
   _mesh.setSubdomainName(subdomain_id, subdomain_name);
+}
+
+GeometricalComponent::EGravityAngleType
+GeometricalComponent::getGravityAngleType(const Real & gravity_angle) const
+{
+  if (MooseUtils::absoluteFuzzyEqual(_gravity_magnitude, 0.0))
+    return ZERO_GRAVITY;
+  else if (MooseUtils::absoluteFuzzyEqual(gravity_angle, 90.0))
+    return HORIZONTAL;
+  else if (MooseUtils::absoluteFuzzyEqual(std::abs(gravity_angle - 90.0), 90.0))
+    return VERTICAL;
+  else if (std::abs(gravity_angle - 90.0) < 45.0)
+    return MOSTLY_HORIZONTAL;
+  else
+    return MOSTLY_VERTICAL;
 }
