@@ -53,7 +53,7 @@ public:
    * Compute the limiting value of the time step for this material
    * @return Limiting time step
    */
-  virtual Real computeTimeStepLimit() = 0;
+  virtual Real computeTimeStepLimit();
 
   /**
    * Perform any necessary rotation of internal variables for finite
