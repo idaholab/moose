@@ -145,6 +145,7 @@ template <class T>
 MooseObjectPtr
 buildObject(const InputParameters & parameters)
 {
+  std::cout << "JDH DEBUG: Factory buildObject..." << std::endl;
   return std::make_shared<T>(parameters);
 }
 
@@ -301,13 +302,17 @@ public:
                             InputParameters parameters,
                             THREAD_ID tid = 0)
   {
-    std::shared_ptr<T> new_object =
-        std::dynamic_pointer_cast<T>(create(obj_name, name, parameters, tid, false));
+    std::cout << "JDH DEBUG: beg Factory::create..." << obj_name << std::endl;
+    std::shared_ptr<MooseObject> ptr = create(obj_name, name, parameters, tid, false);
+    std::cout << "JDH DEBUG: after create" << std::endl;
+    std::shared_ptr<T> new_object = std::dynamic_pointer_cast<T>(ptr);
+    std::cout << "JDH DEBUG: after cast" << std::endl;
     if (!new_object)
       mooseError("We expected to create an object of type '" + demangle(typeid(T).name()) +
                  "'.\nInstead we received a parameters object for type '" + obj_name +
                  "'.\nDid you call the wrong \"add\" method in your Action?");
 
+    std::cout << "JDH DEBUG: end Factory::create..." << std::endl;
     return new_object;
   }
 

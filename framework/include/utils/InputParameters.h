@@ -668,6 +668,11 @@ public:
         controllable.insert(it->first);
     return controllable;
   }
+  void dump() const
+  {
+    for (auto it = _params.begin(); it != _params.end(); ++it)
+      std::cout << "JDH DEBUG: " << it->first << std::endl;
+  }
 
   /**
    * Provide a set of reserved values for a parameter. These are values that are in addition
