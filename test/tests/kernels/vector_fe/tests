@@ -40,7 +40,7 @@
     state = 'const_positive'
     ratio_tol = 1e-7
     difference_tol = 5e-6
-    cli_args = 'BCs/active="" Mesh/nx=4 Mesh/ny=4 Outputs/exodus=false'
+    cli_args = 'BCs/active="" Mesh/nx=4 Mesh/ny=4 Outputs/exodus=false Executioner/num_steps=1'
   [../]
   [./coupled_vector_gradient]
     type = Exodiff
