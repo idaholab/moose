@@ -27,6 +27,7 @@ validParams<PorousFlowConstantBiotModulus>()
                                     "skeleton.  If strain = C * stress, then solid_bulk_compliance "
                                     "= de_ij de_kl C_ijkl.  If the grain bulk modulus is Kg then "
                                     "1/Kg = (1 - biot_coefficient) * solid_bulk_compliance.");
+  params.addPrivateParam<std::string>("pf_material_type", "biot_modulus");
   params.addClassDescription("Computes the Biot Modulus, which is assumed to be constant for all "
                              "time.  Sometimes 1 / BiotModulus is called storativity");
   return params;

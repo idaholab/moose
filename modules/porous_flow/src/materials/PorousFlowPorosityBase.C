@@ -14,6 +14,7 @@ InputParameters
 validParams<PorousFlowPorosityBase>()
 {
   InputParameters params = validParams<PorousFlowMaterialVectorBase>();
+  params.addPrivateParam<std::string>("pf_material_type", "porosity");
   params.addClassDescription("Base class Material for porosity");
   return params;
 }

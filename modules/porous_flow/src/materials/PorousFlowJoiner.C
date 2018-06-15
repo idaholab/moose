@@ -19,6 +19,7 @@ validParams<PorousFlowJoiner>()
   InputParameters params = validParams<PorousFlowMaterialVectorBase>();
   params.addRequiredParam<std::string>("material_property",
                                        "The property that you want joined into a std::vector");
+  params.set<std::string>("pf_material_type") = "joiner";
   params.addClassDescription("This Material forms a std::vector of properties, old properties "
                              "(optionally), and derivatives, out of the individual phase "
                              "properties");

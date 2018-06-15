@@ -30,6 +30,7 @@ validParams<PorousFlowVolumetricStrain>()
                         "displaced mesh");
   params.addClassDescription(
       "Compute volumetric strain and the volumetric_strain rate, for use in PorousFlow.");
+  params.set<std::string>("pf_material_type") = "volumetric_strain";
   params.set<bool>("stateful_displacements") = true;
   params.set<bool>("at_nodes") = false;
   return params;

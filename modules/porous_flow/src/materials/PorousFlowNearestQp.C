@@ -17,6 +17,7 @@ validParams<PorousFlowNearestQp>()
 {
   InputParameters params = validParams<PorousFlowMaterial>();
   params.set<bool>("nodal_material") = true;
+  params.addPrivateParam<std::string>("pf_material_type", "nearest_qp");
   params.addClassDescription("Provides the nearest quadpoint to a node in each element");
   return params;
 }

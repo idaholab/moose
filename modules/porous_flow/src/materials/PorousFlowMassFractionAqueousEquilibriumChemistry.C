@@ -52,6 +52,7 @@ validParams<PorousFlowMassFractionAqueousEquilibriumChemistry>()
   params.addRequiredParam<std::vector<Real>>(
       "secondary_activity_coefficients",
       "Activity coefficients for the secondary species (dimensionless) (one for each reaction)");
+  params.addPrivateParam<std::string>("pf_material_type", "mass_fraction");
   params.addClassDescription(
       "This Material forms a std::vector<std::vector ...> of mass-fractions "
       "(total concentrations of primary species (m^{3}(primary species)/m^{3}(solution)) and since "
