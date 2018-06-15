@@ -127,6 +127,13 @@ protected:
   /// Whether to check to see whether iterative solution is within admissible range, and set within that range if outside
   bool _check_range;
 
+  /// Whether to use line searches to improve convergence
+  bool _line_search;
+
+  /// Whether to save upper and lower bounds of root for scalar, and set solution to the midpoint between
+  /// those bounds if outside them
+  bool _bracket_solution;
+
 private:
   enum class InternalSolveOutput
   {
@@ -159,13 +166,6 @@ private:
 
   /// Multiplier applied to relative and absolute tolerances for acceptable convergence
   Real _acceptable_multiplier;
-
-  /// Whether to use line searches to improve convergence
-  bool _line_search;
-
-  /// Whether to save upper and lower bounds of root for scalar, and set solution to the midpoint between
-  /// those bounds if outside them
-  bool _bracket_solution;
 
   /// Number of residuals to be stored in history
   const std::size_t _num_resids;

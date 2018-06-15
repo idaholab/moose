@@ -32,16 +32,22 @@ public:
 
   virtual void updateJacobianMultForDamage(RankFourTensor & jacobian_mult) override;
 
+  virtual Real computeTimeStepLimit() override;
+
 protected:
   /// If true, use the damage index from the old state (rather than the current state)
   const bool _use_old_damage;
 
-  /// Material property that provides the damage index. This is either the new or old
-  /// value depending on _use_old_damage
+  ///@{ Material property that provides the damage index
   const MaterialProperty<Real> & _damage_index;
+  const MaterialProperty<Real> & _damage_index_old;
+  ///@}
 
   /// Residual fraction of stiffness used for material that is fully damaged
   const Real & _residual_stiffness_fraction;
+
+  /// Maximum damage increment allowed for the time step
+  const Real & _maximum_damage_increment;
 };
 
 #endif // SCALARMATERIALDAMAGE_H

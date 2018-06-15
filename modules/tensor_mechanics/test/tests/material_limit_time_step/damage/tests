@@ -1,0 +1,8 @@
+[Tests]
+  [./scalar_damage_material]
+    type = 'CSVDiff'
+    input = 'scalar_material_damage_timestep_limit.i'
+    csvdiff = 'scalar_material_damage_timestep_limit_out.csv'
+    abs_zero = 1.e-6
+  [../]
+[]

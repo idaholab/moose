@@ -50,6 +50,12 @@ public:
   virtual void updateJacobianMultForDamage(RankFourTensor & jacobian_mult) = 0;
 
   /**
+   * Compute the limiting value of the time step for this material
+   * @return Limiting time step
+   */
+  virtual Real computeTimeStepLimit();
+
+  /**
    * Perform any necessary rotation of internal variables for finite
    * strain.
    * @param rotation_increment The finite-strain rotation increment

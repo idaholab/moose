@@ -24,7 +24,9 @@ validParams<ComputeDamageStress>()
 }
 
 ComputeDamageStress::ComputeDamageStress(const InputParameters & parameters)
-  : ComputeFiniteStrainElasticStress(parameters), _damage_model(nullptr)
+  : ComputeFiniteStrainElasticStress(parameters),
+    _matl_timestep_limit(declareProperty<Real>("matl_timestep_limit")),
+    _damage_model(nullptr)
 {
 }
 
@@ -50,4 +52,6 @@ ComputeDamageStress::computeQpStress()
   _damage_model->updateStressForDamage(_stress[_qp]);
   _damage_model->finiteStrainRotation(_rotation_increment[_qp]);
   _damage_model->updateJacobianMultForDamage(_Jacobian_mult[_qp]);
+
+  _matl_timestep_limit[_qp] = _damage_model->computeTimeStepLimit();
 }

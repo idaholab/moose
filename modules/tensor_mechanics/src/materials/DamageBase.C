@@ -46,6 +46,12 @@ DamageBase::updateDamage()
 {
 }
 
+Real
+DamageBase::computeTimeStepLimit()
+{
+  return std::numeric_limits<Real>::max();
+}
+
 void
 DamageBase::finiteStrainRotation(const RankTwoTensor & /*rotation_increment*/)
 {
