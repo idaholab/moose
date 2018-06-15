@@ -237,30 +237,6 @@ PorousFlowSinglePhaseBase::act()
           true, 0, compute_rho_mu_nodal, compute_e_nodal, compute_h_nodal, _fp);
   }
 
-  if (compute_rho_mu_qp)
-  {
-    joinDensity(false);
-    joinViscosity(false);
-  }
-  if (compute_rho_mu_nodal)
-  {
-    joinDensity(true);
-    joinViscosity(true);
-  }
-  if (compute_e_qp)
-    joinInternalEnergy(false);
-  if (compute_e_nodal)
-    joinInternalEnergy(true);
-  if (compute_h_qp)
-    joinEnthalpy(false);
-  if (compute_h_nodal)
-    joinEnthalpy(true);
-
-  if (_deps.dependsOn(_objects_to_add, "PorousFlowRelativePermeability_qp"))
-    joinRelativePermeability(false);
-  if (_deps.dependsOn(_objects_to_add, "PorousFlowRelativePermeability_nodal"))
-    joinRelativePermeability(true);
-
   if (_deps.dependsOn(_objects_to_add, "PorousFlowEffectiveFluidPressure_qp"))
     addEffectiveFluidPressureMaterial(false);
   if (_deps.dependsOn(_objects_to_add, "PorousFlowEffectiveFluidPressure_nodal"))

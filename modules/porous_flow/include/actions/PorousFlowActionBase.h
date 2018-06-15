@@ -181,51 +181,6 @@ protected:
    * @param userobject_name name of the user object
    */
   void addCapillaryPressureVG(Real m, Real alpha, std::string userobject_name);
-
-  /**
-   * Adds a PorousFlowJoiner for the material_property Material
-   * @param at_nodes if true: the Joiner should produce a nodal material, otherwise: produce a QP
-   * material
-   * @param material_property Join this PorousFlow Material
-   * @param output_name The name given to this PorousFlowJoiner in the input file
-   */
-  void
-  addJoiner(bool at_nodes, const std::string & material_property, const std::string & output_name);
-
-  /**
-   * Adds a PorousFlowJoiner for the fluid density
-   * @param at_nodes if true: the Joiner should produce a nodal material, otherwise: produce a QP
-   * material
-   */
-  void joinDensity(bool at_nodes);
-
-  /**
-   * Adds a PorousFlowJoiner for the fluid viscosity
-   * @param at_nodes if true: the Joiner should produce a nodal material, otherwise: produce a QP
-   * material
-   */
-  void joinViscosity(bool at_nodes);
-
-  /**
-   * Adds a PorousFlowJoiner for the fluid relative permeability
-   * @param at_nodes if true: the Joiner should produce a nodal material, otherwise: produce a QP
-   * material
-   */
-  void joinRelativePermeability(bool at_nodes);
-
-  /**
-   * Adds a PorousFlowJoiner for the fluid internal energy
-   * @param at_nodes if true: the Joiner should produce a nodal material, otherwise: produce a QP
-   * material
-   */
-  void joinInternalEnergy(bool at_nodes);
-
-  /**
-   * Adds a PorousFlowJoiner for the fluid enthalpy
-   * @param at_nodes if true: the Joiner should produce a nodal material, otherwise: produce a QP
-   * material
-   */
-  void joinEnthalpy(bool at_nodes);
 };
 
 #endif // POROUSFLOWACTIONBASE_H
