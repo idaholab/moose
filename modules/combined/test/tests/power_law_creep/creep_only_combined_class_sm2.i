@@ -246,9 +246,7 @@
     n_exponent = 4
     m_exponent = 0
     activation_energy = 3.0e5
-    max_its = 100
     temp = temp
-    legacy_return_mapping = true
   [../]
 
   [./thermal]
