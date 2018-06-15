@@ -111,6 +111,10 @@ public:
   /// offset by one.
   char next();
 
+  /// rewind resets the current position and start offsets backward to the first character
+  /// following the last emitted token.
+  void rewind();
+
   /// accept conditionally accepts the next byte of input if it is one of the characters in the
   /// valid set.  It returns true if a character was consumed and false otherwise.
   bool accept(const std::string & valid);

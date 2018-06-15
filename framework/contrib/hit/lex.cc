@@ -98,6 +98,19 @@ Lexer::run(LexFunc start)
 }
 
 void
+Lexer::rewind()
+{
+  if (!peek()) // don't do anything if we are at EOF
+    return;
+  auto tmp = lastToken();
+  // subtract newlines that may have been ignored
+  _line_count -= lineCount(_input.substr(tmp, _start));
+  _pos = tmp;
+  if (_pos < _start)
+    _start = _pos;
+}
+
+void
 Lexer::emit(TokType type)
 {
   auto substr = _input.substr(_start, _pos - _start);
@@ -177,9 +190,7 @@ Lexer::peek()
 void
 Lexer::backup()
 {
-  _pos -= _width;
-  if (_pos < _start)
-    _start = _pos;
+  _pos = std::max(_start, _pos - _width);
 }
 
 std::string
@@ -344,6 +355,7 @@ lexString(Lexer * l)
   else if (l->peek() == '\'')
     quote = "'";
 
+  // this is a loop in order to enable consecutive string literals to be parsed
   while (l->accept(quote))
   {
     char c = l->input()[l->start()];
@@ -361,9 +373,10 @@ lexString(Lexer * l)
     consumeWhitespace(l);
   }
 
-  // the peek condition is to prevent infinite loop if we have reached EOF
-  while (l->peek() && l->lastToken() < l->pos())
-    l->backup();
+  // unlex the last run of whitespace - we need to skip whitespace between consecutive string
+  // literals, but not the final run of whitespace.  Carefully tracking/handling whitespace
+  // is is important for determining how to place/format comment tokens.
+  l->rewind();
 
   return lexHit;
 }
