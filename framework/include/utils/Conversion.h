@@ -73,16 +73,35 @@ stringify(const std::pair<T, U> & p)
   return stringify(p.first) + ':' + stringify(p.second);
 }
 
-/// Convert a container to a flat comma (or otherwise) separated string
+/**
+ * Convert a container to a string with elements separated by delimiter of user's choice
+ *
+ * Optionally, the container elements can be enclosed by curly braces and can
+ * enclose elements in quotations (or other characters) to make the separation
+ * of elements more clear.
+ *
+ * @param[in] c           Container to stringify
+ * @param[in] delim       String to print between elements
+ * @param[in] elem_encl   String to use at the beginning and end of each element,
+ *                        typically quotation marks
+ * @param[in] enclose_list_in_curly_braces   Enclose the list string in curly braces?
+ */
 template <template <typename...> class T, typename... U>
 std::string
-stringify(const T<U...> & c, const std::string & delim = ",")
+stringify(const T<U...> & c,
+          const std::string & delim = ",",
+          const std::string & elem_encl = "",
+          bool enclose_list_in_curly_braces = false)
 {
   std::string str;
+  if (enclose_list_in_curly_braces)
+    str += "{";
   const auto begin = c.begin();
   const auto end = c.end();
   for (auto i = begin; i != end; ++i)
-    str += (i != begin ? delim : "") + stringify(*i);
+    str += (i != begin ? delim : "") + elem_encl + stringify(*i) + elem_encl;
+  if (enclose_list_in_curly_braces)
+    str += "}";
   return str;
 }
 

@@ -28,17 +28,29 @@ InputParameters validParams<TopResidualDebugOutput>();
 struct TopResidualDebugOutputTopResidualData
 {
   unsigned int _var;
+  std::set<SubdomainID> _subdomain_ids;
   dof_id_type _nd;
+  Point _point;
   Real _residual;
   bool _is_scalar;
 
-  TopResidualDebugOutputTopResidualData() : _var(0), _nd(0), _residual(0.), _is_scalar(false) {}
+  TopResidualDebugOutputTopResidualData()
+    : _var(0), _subdomain_ids(), _nd(0), _point(Point()), _residual(0.), _is_scalar(false)
+  {
+  }
 
   TopResidualDebugOutputTopResidualData(unsigned int var,
+                                        std::set<SubdomainID> subdomain_ids,
                                         dof_id_type nd,
+                                        Point point,
                                         Real residual,
                                         bool is_scalar = false)
-    : _var(var), _nd(nd), _residual(residual), _is_scalar(is_scalar)
+    : _var(var),
+      _subdomain_ids(subdomain_ids),
+      _nd(nd),
+      _point(point),
+      _residual(residual),
+      _is_scalar(is_scalar)
   {
   }
 };

@@ -39,7 +39,7 @@
      # Test that top residuals are displayed using DebugOutput object via Debug block
      type = RunApp
      input = show_top_residuals_debug.i
-     expect_out = "\[DBG\]\[\d+\].*'u'.*at node"
+     expect_out = "\[DBG\]\[\d+\].*'u' in subdomain\(s\) {'block_zero', 'block_one'}.*at node"
      max_parallel = 1
    [../]
 

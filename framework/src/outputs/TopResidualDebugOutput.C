@@ -55,14 +55,13 @@ TopResidualDebugOutput::output(const ExecFlagType & /*type*/)
 void
 TopResidualDebugOutput::printTopResiduals(const NumericVector<Number> & residual, unsigned int n)
 {
-  // Need a reference to the libMesh mesh object
-  MeshBase & mesh = _problem_ptr->mesh().getMesh();
+  MooseMesh & mesh = _problem_ptr->mesh();
 
   std::vector<TopResidualDebugOutputTopResidualData> vec;
   vec.resize(residual.local_size());
 
   unsigned int j = 0;
-  for (const auto & node : mesh.local_node_ptr_range())
+  for (const auto & node : as_range(mesh.localNodesBegin(), mesh.localNodesEnd()))
   {
     dof_id_type nd = node->id();
 
@@ -70,8 +69,10 @@ TopResidualDebugOutput::printTopResiduals(const NumericVector<Number> & residual
       if (node->n_dofs(_sys.number(), var) >
           0) // this check filters scalar variables (which are clearly not a dof on every node)
       {
+        const auto & subdomain_ids = mesh.getNodeBlockIds(*node);
         dof_id_type dof_idx = node->dof_number(_sys.number(), var, 0);
-        vec[j] = TopResidualDebugOutputTopResidualData(var, nd, residual(dof_idx));
+        vec[j] =
+            TopResidualDebugOutputTopResidualData(var, subdomain_ids, nd, *node, residual(dof_idx));
         j++;
       }
   }
@@ -89,7 +90,8 @@ TopResidualDebugOutput::printTopResiduals(const NumericVector<Number> & residual
       for (const auto & dof : dof_indices)
         if (dof >= dof_map.first_dof() && dof < dof_map.end_dof())
         {
-          vec[j] = TopResidualDebugOutputTopResidualData(var_num, 0, residual(dof), true);
+          vec[j] =
+              TopResidualDebugOutputTopResidualData(var_num, {}, 0, Point(), residual(dof), true);
           j++;
         }
     }
@@ -113,6 +115,20 @@ TopResidualDebugOutput::printTopResiduals(const NumericVector<Number> & residual
     if (vec[i]._is_scalar)
       Moose::err << "(SCALAR)\n";
     else
-      Moose::err << "at node " << vec[i]._nd << '\n';
+    {
+      // Create subdomain list string for node
+      const unsigned int n_subdomains = vec[i]._subdomain_ids.size();
+      std::vector<SubdomainName> subdomain_names(n_subdomains);
+      unsigned int i_block = 0;
+      for (const auto & subdomain_id : vec[i]._subdomain_ids)
+      {
+        subdomain_names[i_block] = mesh.getSubdomainName(subdomain_id);
+        i_block++;
+      }
+      const std::string subdomains_string = Moose::stringify(subdomain_names, ", ", "'", true);
+
+      Moose::err << "in subdomain(s) " << subdomains_string << " at node " << vec[i]._nd << ": "
+                 << vec[i]._point << '\n';
+    }
   }
 }
