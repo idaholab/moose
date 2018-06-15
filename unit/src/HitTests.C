@@ -63,6 +63,57 @@ TEST(HitTests, FailCases)
   }
 }
 
+struct LineCase
+{
+  std::string input;
+  std::vector<int> line_nums;
+};
+
+class LineWalker : public hit::Walker
+{
+public:
+  LineWalker(int i, const std::vector<int> & want_lines) : _case(i), _want(want_lines){};
+  virtual void
+  walk(const std::string & fullpath, const std::string & /*nodepath*/, hit::Node * n) override
+  {
+    if (n->type() == hit::NodeType::Blank || fullpath == "")
+      return;
+
+    if (_count >= _want.size())
+      FAIL() << "case " << _case + 1 << " has more nodes than expected";
+    EXPECT_EQ(_want[_count], n->line())
+        << "case " << _case + 1 << " node " << _count + 1 << " (" << fullpath
+        << ") has wrong line: want " << _want[_count] << ", got " << n->line();
+    _count++;
+  }
+
+private:
+  int _case;
+  std::vector<int> _want;
+  size_t _count = 0;
+};
+
+TEST(HitTests, LineNumbers)
+{
+  LineCase cases[] = {{"[hello] foo='bar'\n\n\n boo='far'\n\n[]", {1, 1, 2, 4, 5, 6}}};
+
+  for (size_t i = 0; i < sizeof(cases) / sizeof(LineCase); i++)
+  {
+    auto test = cases[i];
+    try
+    {
+      std::unique_ptr<hit::Node> root(hit::parse("TESTCASE", test.input));
+      LineWalker w(i, test.line_nums);
+      root->walk(&w, hit::NodeType::All);
+    }
+    catch (hit::Error & err)
+    {
+      FAIL() << "case " << i + 1 << " FAIL: unexpected parser error on valid input '" << test.input
+             << "': " << err.what();
+    }
+  }
+}
+
 TEST(HitTests, PassCases)
 {
   PassFailCase cases[] = {
