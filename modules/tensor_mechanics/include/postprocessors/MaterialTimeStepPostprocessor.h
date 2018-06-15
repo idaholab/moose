@@ -37,7 +37,7 @@ protected:
   /// Pointer to the material property containing the time step limit
   const MaterialProperty<Real> * _matl_time_step;
 
-  /// Current time step limit from the material properties 
+  /// Current time step limit from the material properties
   Real _matl_value;
 
   /// Flag to limit the time step based on the number of elements changed
