@@ -38,7 +38,6 @@ RICHARDS                  := no
 SOLID_MECHANICS           := no
 # tensor_mechanics is required by Steps 9-10.
 TENSOR_MECHANICS          := yes
-WATER_STEAM_EOS           := no
 XFEM                      := no
 include $(MOOSE_DIR)/modules/modules.mk
 ###############################################################################
