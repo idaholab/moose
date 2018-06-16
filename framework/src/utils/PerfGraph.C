@@ -86,6 +86,8 @@ PerfGraph::getTime(const TimeType type, const std::string & section_name)
   if (section_it == _section_time.end())
     mooseError("Unknown section_name: ", section_name, " in PerfGraph::getTime() ");
 
+  auto app_time = _section_time_ptrs[0]->_total;
+
   switch (type)
   {
     case SELF:
@@ -94,6 +96,18 @@ PerfGraph::getTime(const TimeType type, const std::string & section_name)
       return section_it->second._children;
     case TOTAL:
       return section_it->second._total;
+    case SELF_AVG:
+      return section_it->second._self / static_cast<Real>(section_it->second._num_calls);
+    case CHILDREN_AVG:
+      return section_it->second._children / static_cast<Real>(section_it->second._num_calls);
+    case TOTAL_AVG:
+      return section_it->second._total / static_cast<Real>(section_it->second._num_calls);
+    case SELF_PERCENT:
+      return 100. * (section_it->second._self / app_time);
+    case CHILDREN_PERCENT:
+      return 100. * (section_it->second._children / app_time);
+    case TOTAL_PERCENT:
+      return 100. * (section_it->second._total / app_time);
     default:
       ::mooseError("Unknown TimeType");
   }

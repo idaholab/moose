@@ -42,7 +42,13 @@ public:
   {
     SELF,
     CHILDREN,
-    TOTAL
+    TOTAL,
+    SELF_AVG,
+    CHILDREN_AVG,
+    TOTAL_AVG,
+    SELF_PERCENT,
+    CHILDREN_PERCENT,
+    TOTAL_PERCENT
   };
 
   /**

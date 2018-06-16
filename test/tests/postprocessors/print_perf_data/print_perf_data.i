@@ -33,7 +33,6 @@
 []
 
 [Postprocessors]
-  active = ''
   [./elapsed]
     type = PerfGraphData
     section_name = "App"
@@ -50,34 +49,34 @@
     data_type = calls
   [../]
   [./jac_total_time]
-    type = PerformanceData
-    column = total_time
-    event = compute_jacobian()
+    type = PerfGraphData
+    section_name = "FEProblem::computeJacobianInternal"
+    data_type = self
   [../]
   [./jac_average_time]
-    type = PerformanceData
-    column = average_time
-    event = compute_jacobian()
+    type = PerfGraphData
+    section_name = "FEProblem::computeJacobianInternal"
+    data_type = total_avg
   [../]
   [./jac_total_time_with_sub]
-    type = PerformanceData
-    column = total_time_with_sub
-    event = compute_jacobian()
+    type = PerfGraphData
+    section_name = "FEProblem::computeJacobianInternal"
+    data_type = total
   [../]
   [./jac_average_time_with_sub]
-    type = PerformanceData
-    column = average_time_with_sub
-    event = compute_jacobian()
+    type = PerfGraphData
+    section_name = "FEProblem::computeJacobianInternal"
+    data_type = total_avg
   [../]
   [./jac_percent_of_active_time]
-    type = PerformanceData
-    column = percent_of_active_time
-    event = compute_jacobian()
+    type = PerfGraphData
+    section_name = "FEProblem::computeJacobianInternal"
+    data_type = self_percent
   [../]
   [./jac_percent_of_active_time_with_sub]
-    type = PerformanceData
-    column = percent_of_active_time_with_sub
-    event = compute_jacobian()
+    type = PerfGraphData
+    section_name = "FEProblem::computeJacobianInternal"
+    data_type = total_percent
   [../]
 []
 

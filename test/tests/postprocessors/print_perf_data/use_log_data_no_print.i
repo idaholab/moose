@@ -39,9 +39,9 @@
 
 [Postprocessors]
   [./elapsed]
-    type = PerfGraphTime
+    type = PerfGraphData
     section_name = "App"
-    time_type = total
+    data_type = total
   [../]
 []
 

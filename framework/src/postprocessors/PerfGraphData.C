@@ -20,7 +20,8 @@ validParams<PerfGraphData>()
 {
   InputParameters params = validParams<GeneralPostprocessor>();
 
-  MooseEnum data_type("SELF CHILDREN TOTAL CALLS");
+  MooseEnum data_type("SELF CHILDREN TOTAL SELF_AVG CHILDREN_AVG TOTAL_AVG SELF_PERCENT "
+                      "CHILDREN_PERCENT TOTAL_PERCENT CALLS");
 
   params.addRequiredParam<std::string>("section_name", "The name of the section to get data for");
 
@@ -46,8 +47,14 @@ PerfGraphData::getValue()
     case 0:
     case 1:
     case 2:
-      return _perf_graph.getTime(static_cast<PerfGraph::TimeType>(_data_type), _section_name);
     case 3:
+    case 4:
+    case 5:
+    case 6:
+    case 7:
+    case 8:
+      return _perf_graph.getTime(static_cast<PerfGraph::TimeType>(_data_type), _section_name);
+    case 9:
       return _perf_graph.getNumCalls(_section_name);
   }
 
