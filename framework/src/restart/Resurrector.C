@@ -66,7 +66,6 @@ Resurrector::restartFromFile()
   _fe_problem.es().read(file_name, read_flags, renumber);
 
   _fe_problem.getNonlinearSystemBase().update();
-  Moose::perf_log.pop("restartFromFile()", "Setup");
 }
 
 void
