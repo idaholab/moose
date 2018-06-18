@@ -159,7 +159,7 @@ class QueueManager(Scheduler):
                 current_args.extend(arg.split('='))
 
             # Note: we are removing cli-args/ignore because we need to re-encapsulate them below
-            bad_keyword_args.extend(['--spec-file', '-i', '--cli-args', '-j', '-l', '-o', '--output-dir', '--ignore'])
+            bad_keyword_args.extend(['--spec-file', '-i', '--cli-args', '-j', '-l', '-o', '--output-dir', '--ignore', '--re'])
 
             # remove the key=value pair argument
             for arg in bad_keyword_args:
@@ -172,6 +172,8 @@ class QueueManager(Scheduler):
                 current_args.extend(['--cli-args', '"%s"' % self.options.cli_args])
             if self.options.ignored_caveats:
                 current_args.extend(['--ignore', '"%s"' % self.options.ignored_caveats])
+            if self.options.reg_exp:
+                current_args.extend(['--re', '"%s"' % self.options.reg_exp])
 
             # remove any specified positional arguments
             for arg in bad_args:
