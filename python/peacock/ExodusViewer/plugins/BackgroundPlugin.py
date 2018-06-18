@@ -149,7 +149,7 @@ class BackgroundPlugin(QtWidgets.QWidget, ExodusPlugin):
 
         toggle = self._preferences.value("exodus/backgroundGradient")
         self.GradientToggle = submenu.addAction("Gradient")
-        self.GradientToggle.setCheckable(toggle)
+        self.GradientToggle.setCheckable(True)
         self.GradientToggle.setChecked(toggle)
         self.GradientToggle.toggled.connect(self._callbackGradientToggle)
 
