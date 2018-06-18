@@ -237,7 +237,7 @@
     n_exponent = 4
     m_exponent = 0
     activation_energy = 3.0e5
-    relative_tolerance = 1.e-5
+    relative_tolerance = 1.e-8
     formulation = nonlinear3d
     max_its = 100
     disp_x = x_disp

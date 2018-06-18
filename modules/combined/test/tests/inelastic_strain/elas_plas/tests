@@ -19,6 +19,7 @@
     type = 'Exodiff'
     input = 'elas_plas_nl1_sm.i'
     exodiff = 'elas_plas_nl1_out.e'
+    abs_zero = 6e-5
   [../]
   [./elastic_plastic_cycle_sm]
     type = 'Exodiff'

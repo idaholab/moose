@@ -254,9 +254,6 @@
     block = 1
     yield_stress = 5e6
     hardening_constant = 0.0
-    relative_tolerance = 1e-20
-    absolute_tolerance = 1e-8
-    legacy_return_mapping = true
   [../]
 [] # Materials
 
