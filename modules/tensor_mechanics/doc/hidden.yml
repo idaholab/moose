@@ -47,7 +47,6 @@
 - /Materials/ComputeLinearElasticPFFractureStress
 - /Materials/ComputeMultiPlasticityStress
 - /Materials/ComputeMultipleInelasticCosseratStress
-- /Materials/ComputeMultipleInelasticStress
 - /Materials/ComputePlasticHeatEnergy
 - /Materials/ComputeStrainIncrementBasedStress
 - /Materials/ComputeVariableBaseEigenStrain
@@ -77,7 +76,6 @@
 - /Materials/StrainEnergyDensity
 - /Postprocessors/Mass
 - /Postprocessors/MaterialTensorIntegral
-- /Postprocessors/MaterialTimeStepPostprocessor
 - /Postprocessors/CrackFrontData
 - /Postprocessors/InteractionIntegral
 - /UserObjects/CrystalPlasticitySlipRateGSS
