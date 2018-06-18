@@ -319,7 +319,11 @@ class Tester(MooseObject):
         if self.process is not None:
             try:
                 if platform.system() == "Windows":
-                    self.process.terminate()
+                    from distutils import spawn
+                    if spawn.find_executable("taskkill"):
+                        subprocess.call(['taskkill', '/F', '/T', '/PID', str(self.process.pid)])
+                    else:
+                        self.process.terminate()
                 else:
                     pgid = os.getpgid(self.process.pid)
                     os.killpg(pgid, SIGTERM)

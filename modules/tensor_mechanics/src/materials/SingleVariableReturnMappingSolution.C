@@ -35,12 +35,15 @@ validParams<SingleVariableReturnMappingSolution>()
                         "Factor applied to relative and absolute "
                         "tolerance for acceptable convergence if "
                         "iterations are no longer making progress");
-  params.addParam<bool>("legacy_return_mapping",
-                        false,
-                        "Perform iterations and compute residual "
-                        "the same way as the previous "
-                        "algorithm. Also use same old defaults for relative_tolerance, "
-                        "absolute_tolerance, and max_its.");
+  params.addDeprecatedParam<bool>("legacy_return_mapping",
+                                  false,
+                                  "Perform iterations and compute residual "
+                                  "the same way as the previous "
+                                  "algorithm. Also use same old defaults for relative_tolerance, "
+                                  "absolute_tolerance, and max_its.",
+                                  "The 'legacy_return_mapping' option is being removed because the "
+                                  "new return mapping algorithm has been shown to work better in "
+                                  "all cases tested");
 
   // diagnostic output parameters
   MooseEnum internal_solve_output_on_enum("never on_error always", "on_error");
