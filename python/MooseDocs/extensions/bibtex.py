@@ -84,7 +84,7 @@ class BibtexBibliography(tokens.Token):
 
 class BibtexReferenceComponent(components.TokenComponent):
     RE = re.compile(r'\['                          # open
-                    r'(?P<cite>cite|citet|citep):' # cite prefix
+                    r'(?P<cite>cite|citet|citep|nocite):' # cite prefix
                     r'(?P<keys>.*?)'               # list of keys
                     r'\]',                         # closing ]
                     flags=re.UNICODE)
@@ -116,6 +116,9 @@ class BibtexCommand(command.CommandComponent):
 class RenderBibtexCite(components.RenderComponent):
 
     def createHTML(self, token, parent):
+
+        if token.cite == 'nocite':
+            return parent
 
         citep = token.cite == 'citep'
         if citep:
