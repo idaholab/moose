@@ -79,6 +79,8 @@ protected:
 
   std::vector<Point> _points;
   std::vector<std::shared_ptr<UserObjectType>> _user_objects;
+
+  std::list<InputParameters> _sub_params;
 };
 
 template <typename UserObjectType>
@@ -89,7 +91,17 @@ NearestPointBase<UserObjectType>::NearestPointBase(const InputParameters & param
 
   // Build each of the UserObject objects:
   for (unsigned int i = 0; i < _points.size(); i++)
-    _user_objects.push_back(std::make_shared<UserObjectType>(parameters));
+  {
+    _sub_params.push_back(emptyInputParameters());
+
+    auto sub_params = _sub_params.back();
+
+    sub_params += parameters;
+
+    sub_params.template set<std::string>("_object_name") = name() + "_sub" + std::to_string(i);
+
+    _user_objects.push_back(std::make_shared<UserObjectType>(sub_params));
+  }
 }
 
 template <typename UserObjectType>
