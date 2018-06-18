@@ -85,13 +85,9 @@ PenetrationLocator::detectPenetration()
 {
   Moose::perf_log.push("detectPenetration()", "Execution");
 
-  // Data structures to hold the element boundary information
-  std::vector<dof_id_type> elem_list;
-  std::vector<unsigned short int> side_list;
-  std::vector<boundary_id_type> id_list;
-
-  // Retrieve the Element Boundary data structures from the mesh
-  _mesh.buildSideList(elem_list, side_list, id_list);
+  // Get list of boundary (elem, side, id) tuples.
+  std::vector<std::tuple<dof_id_type, unsigned short int, boundary_id_type>> bc_tuples =
+      _mesh.buildSideList();
 
   // Grab the slave nodes we need to worry about from the NearestNodeLocator
   NodeIdRange & slave_node_range = _nearest_node.slaveNodeRange();
@@ -111,9 +107,7 @@ PenetrationLocator::detectPenetration()
                        _fe_type,
                        _nearest_node,
                        _mesh.nodeToElemMap(),
-                       elem_list,
-                       side_list,
-                       id_list);
+                       bc_tuples);
 
   Threads::parallel_reduce(slave_node_range, pt);
 
