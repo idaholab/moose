@@ -1,10 +1,10 @@
 #!/bin/bash
 
 # This script installs a clang-format git pre-commit hook for MOOSE, which
-# formats all staged files with clang-format prior to a commit. either for a
-# stand-alone MOOSE git repository, or it can be used if MOOSE is a submodule of
-# another git repository. This script can be run from any directory. If the hook
-# file already exists, an error message will be printed.
+# formats all staged files with clang-format prior to a commit, either for a
+# stand-alone MOOSE git repository, or for MOOSE as a submodule of another git
+# repository. This script can be run from any directory. If the hook file
+# already exists, an error message will be printed.
 
 script_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
