@@ -1070,10 +1070,8 @@ FEProblemBase::addCachedResidual(THREAD_ID tid)
 void
 FEProblemBase::addCachedResidualDirectly(NumericVector<Number> & residual, THREAD_ID tid)
 {
-  if (_nl->hasVector(_nl->timeVectorTag()))
-    _assembly[tid]->addCachedResidual(residual, _nl->timeVectorTag());
-  if (_nl->hasVector(_nl->nonTimeVectorTag()))
-    _assembly[tid]->addCachedResidual(residual, _nl->nonTimeVectorTag());
+  _assembly[tid]->addCachedResidual(residual, _nl->timeVectorTag());
+  _assembly[tid]->addCachedResidual(residual, _nl->nonTimeVectorTag());
 
   if (_displaced_problem)
     _displaced_problem->addCachedResidualDirectly(residual, tid);
