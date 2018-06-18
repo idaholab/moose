@@ -1,6 +1,6 @@
 osx10.13: moose-environment-39_highsierra-10.13_x86_64.pkg
 osx10.12: moose-environment-92_sierra-10.12_x86_64.pkg
-ubuntu16.04: moose-environment-74_Ubuntu-14.04_x86_64.deb
+ubuntu16.04: moose-environment-74_Ubuntu-16.04_x86_64.deb
 ubuntu18.04: moose-environment-2_Ubuntu-18.04_x86_64.deb
 mint18: moose-environment-70_LinuxMint-18_x86_64.deb
 opensuseleap: moose-environment-66_openSUSE-42.2_x86_64.rpm
