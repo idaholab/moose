@@ -7,7 +7,6 @@
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
-import inspect
 import subprocess
 import os
 from PyQt5 import QtCore, QtWidgets
@@ -80,10 +79,11 @@ class GoldDiffPlugin(QtWidgets.QGroupBox, ExodusPlugin):
         self.MainLayout.addWidget(self.LinkToggle)
 
         self.GoldVTKWindow = ExternalVTKWindowPlugin(self.GoldToggle, size=size, text='GOLD')
+        self.DiffVTKWindow = None
 
         # Locate MOOSE exodiff program
         self._exodiff = None
-        moose_dir = os.path.abspath(os.path.join(os.path.realpath(inspect.getfile(self.__class__)), '..', '..', '..'))
+        moose_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..', '..'))
         exodiff = os.path.join(os.getenv('MOOSE_DIR', moose_dir), 'framework', 'contrib', 'exodiff', 'exodiff')
         if os.path.isfile(exodiff):
             self.DiffVTKWindow = ExternalVTKWindowPlugin(self.DiffToggle, size=size, text='EXODIFF')
@@ -198,7 +198,7 @@ class GoldDiffPlugin(QtWidgets.QGroupBox, ExodusPlugin):
             self.DiffVTKWindow.onSetComponent(self._component)
             self.DiffVTKWindow.onWindowRequiresUpdate()
 
-        elif (not diff) and self.DiffVTKWindow.isVisible():
+        elif (not diff) and (self.DiffVTKWindow is not None) and self.DiffVTKWindow.isVisible():
             self.DiffVTKWindow.hide()
 
         # Camera linkage
@@ -246,7 +246,8 @@ class GoldDiffPlugin(QtWidgets.QGroupBox, ExodusPlugin):
         Args:
             qobject: The widget being setup.
         """
-        qobject.clicked.connect(self._callbackDiffToggle)
+        if self._exodiff:
+            qobject.clicked.connect(self._callbackDiffToggle)
 
     def _callbackDiffToggle(self, value):
         """
@@ -284,7 +285,7 @@ class GoldDiffPlugin(QtWidgets.QGroupBox, ExodusPlugin):
         link = self.LinkToggle.isChecked()
         if link and self.GoldVTKWindow.isVisible():
             self.GoldVTKWindow.onCameraChanged(*args)
-        if link and self.DiffVTKWindow.isVisible():
+        if link and self._exodiff and self.DiffVTKWindow.isVisible():
             self.DiffVTKWindow.onCameraChanged(*args)
 
     def _callbackGoldRenderEvent(self, *args):
@@ -295,7 +296,7 @@ class GoldDiffPlugin(QtWidgets.QGroupBox, ExodusPlugin):
         view, position, focal = camera.GetViewUp(), camera.GetPosition(), camera.GetFocalPoint()
         self.cameraChanged.emit(view, position, focal)
 
-        if self.DiffVTKWindow.isVisible():
+        if self._exodiff and self.DiffVTKWindow.isVisible():
             self.DiffVTKWindow.onCameraChanged(view, position, focal)
 
     def _callbackDiffRenderEvent(self, *args):
