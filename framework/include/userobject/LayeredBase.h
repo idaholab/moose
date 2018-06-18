@@ -14,6 +14,7 @@
 #include "Moose.h"
 #include "MooseEnum.h"
 #include "MooseTypes.h"
+#include "Restartable.h"
 
 // Forward Declarations
 class InputParameters;
