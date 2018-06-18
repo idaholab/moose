@@ -60,6 +60,9 @@ class BackgroundPlugin(QtWidgets.QWidget, ExodusPlugin):
         self.GradientToggle = None
         self.BlackPreset = None
         self.WhitePreset = None
+        self.GradientTopColor = None
+        self.GradientBottomColor = None
+        self.SolidColor = None
         self._set_result_color = kwargs.pop('set_result_color', False)
         self._gradient_state = True
         self._black_font_state = False
@@ -72,6 +75,13 @@ class BackgroundPlugin(QtWidgets.QWidget, ExodusPlugin):
         # Setup this widget
         self.setup()
 
+    def _callbackGradientTopColor(self):
+        dialog = QtWidgets.QColorDialog()
+        c = dialog.getColor(initial=self._top, title='Select top gradient color')
+        if c.isValid():
+            self._top = c
+            self.updateOptions()
+
     def _prefCallbackGradientTopColor(self, value):
         """
         Updates top color when preference saved.
@@ -80,6 +90,13 @@ class BackgroundPlugin(QtWidgets.QWidget, ExodusPlugin):
         self.updateOptions()
         self.windowRequiresUpdate.emit()
 
+    def _callbackGradientBottomColor(self):
+        dialog = QtWidgets.QColorDialog()
+        c = dialog.getColor(initial=self._bottom, title='Select bottom gradient color')
+        if c.isValid():
+            self._bottom = c
+            self.updateOptions()
+
     def _prefCallbackGradientBottomColor(self, value):
         """
         Updates bottom color when preference saved.
@@ -87,6 +104,13 @@ class BackgroundPlugin(QtWidgets.QWidget, ExodusPlugin):
         self._bottom = QtGui.QColor(value)
         self.updateOptions()
         self.windowRequiresUpdate.emit()
+
+    def _callbackSolidColor(self):
+        dialog = QtWidgets.QColorDialog()
+        c = dialog.getColor(initial=self._solid, title='Select solid color')
+        if c.isValid():
+            self._solid = c
+            self.updateOptions()
 
     def _prefCallbackGradientSolidColor(self, value):
         """
@@ -143,6 +167,15 @@ class BackgroundPlugin(QtWidgets.QWidget, ExodusPlugin):
         self.ColorbarBlackFontToggle.setCheckable(True)
         self.ColorbarBlackFontToggle.setChecked(False)
         self.ColorbarBlackFontToggle.toggled.connect(self._callbackColorbarBlackFontToggle)
+
+        self.TopGradientColor = submenu.addAction("Top Gradient Color")
+        self.TopGradientColor.triggered.connect(self._callbackGradientTopColor)
+
+        self.BottomGradientColor = submenu.addAction("Bottom Gradient Color")
+        self.BottomGradientColor.triggered.connect(self._callbackGradientBottomColor)
+
+        self.SolidGradientColor = submenu.addAction("Solid Color")
+        self.SolidGradientColor.triggered.connect(self._callbackSolidColor)
 
         self.updateOptions()
 
