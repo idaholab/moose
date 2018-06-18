@@ -26,7 +26,7 @@ validParams<MaterialTimeStepPostprocessor>()
   InputParameters params = validParams<ElementPostprocessor>();
 
   params.addClassDescription("This postprocessor estimates a timestep that reduces the increment "
-                             "change in a aux variable below a given threshold.");
+                             "change in a material property below a given threshold.");
 
   return params;
 }

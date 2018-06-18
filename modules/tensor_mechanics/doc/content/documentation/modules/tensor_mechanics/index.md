@@ -82,13 +82,14 @@ Now you're ready to start creating your own mechanics simulations.
 Explore the different ways to use the tensor mechanics module by browsing the
 introductory theory pages on the various models:
 
+- [Volumetric Locking Correction](tensor_mechanics/VolumetricLocking.md)
+- [Smeared Cracking](Materials/ComputeSmearedCrackingStress.md)
+- [Multiple Inelastic Stresses](Materials/ComputeMultipleInelasticStress.md)
 - [Generalized Plane Strain](tensor_mechanics/generalized_plane_strain.md)
 - [Fracture Integrals](tensor_mechanics/FractureIntegrals.md)
-- Smeared Cracking
 - Crystal Plasticity
-- Multiple Inelastic Stresses
 - [C0 Timoshenko Beam](tensor_mechanics/C0TimoshenkoBeam.md)
-- [Volumetric Locking Correction](tensor_mechanics/VolumetricLocking.md)
+
 
 !col-end!
 !row-end!

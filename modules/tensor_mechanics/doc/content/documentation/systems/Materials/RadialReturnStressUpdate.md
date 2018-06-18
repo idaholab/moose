@@ -14,9 +14,8 @@ surface.  Because the von Mises yield surface in the deviatoric stress space has
 circle, the _plastic correction stress_ is always directed towards the center of the yield surface
 circle.
 
-In addition to the Sumo and Hughes textbook [cite:simo2006computational], *Introduction to
-Computational Plasticity* by Dunnu and Petrinic (2004) is an excellent reference for users working
-with the Radial Return Stress Update materials; several of the isotropic plasticity and creep
+In addition to the [cite:simo2006computational] textbook, [cite:dunne2005introduction] is an excellent reference for users working
+with the `RadialReturnStressUpdate` materials; several of the isotropic plasticity and creep
 effective plastic strain increment algorithms are taken from [cite:dunne2005introduction].
 
 ### The Radial Return Stress Update Description
@@ -30,7 +29,7 @@ as is required to achieve convergence.
 ## Radial Return Algorithm Overview
 
 !media media/tensor_mechanics-RadialReturnStressSpace.png
-       style=width:350;float:right;
+       style=width:30%;margin-left:2%;float:right
        caption=A trial stress is shown outside of the deviatoric yield surface and the radial return
                  stress which is normal to the yield surface.
 
@@ -71,7 +70,7 @@ Creep and Linear Strain Hardening, `ComputeMultipleInelasticStress` will iterate
 the calculated stress until the return stress has reached a stable value.
 
 Users can print out any of these strains and stresses using the `RankTwoAux` as described on the
-[Introduction/Visualizing Tensors](auto::/introduction/VisualizingTensors) page.
+[Visualizing Tensors](/tensor_mechanics/VisualizingTensors.md) page.
 
 ## Writing a New Stress Update Material
 New radial return models must inherit from `RadialReturnStressUpdate` and must overwrite the six
@@ -94,10 +93,12 @@ virtual methods.
 Additionally, new radial return methods must also overwrite a single method from the MOOSE `Material`
 class.
 
-- +resetQpProperties+: Set the material property used in the iteration, usually $ \Delta p $, to zero
+- +resetQpProperties+: Set the material property used in the iteration, usually $\Delta p$, to zero
   at the start the iteration.  This method is necessary to avoid incorrect material property values.
 
 More details on how to write the equivalent yield surface equation for a creep model are given in
 Dunne and Petrinic.
+
+<!-- !syntax children /Materials/RadialReturnStressUpdate -->
 
 !bibtex bibliography

@@ -21,7 +21,7 @@ validParams<ComputeMultipleInelasticStress>()
   InputParameters params = validParams<ComputeFiniteStrainElasticStress>();
   params.addClassDescription("Compute state (stress and internal parameters such as plastic "
                              "strains and internal parameters) using an iterative process.  "
-                             "Combinations of creep models and plastic models may be used");
+                             "Combinations of creep models and plastic models may be used.");
   params.addParam<unsigned int>("max_iterations",
                                 30,
                                 "Maximum number of the stress update "
