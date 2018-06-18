@@ -134,8 +134,6 @@ class TestExodusViewer(Testing.PeacockImageTestCase):
 
         fp._callbackFileList(0)
         self.assertEqual(mesh.isEnabled(), True)
-        self.assertEqual(mesh.ViewMeshToggle.isEnabled(), False) # not enabled for wireframe
-        self.assertEqual(mesh.ViewMeshToggle.isChecked(), False)
         self.assertEqual(mesh.ScaleX.value(), .9)
         self.assertEqual(mesh.ScaleY.value(), .8)
         self.assertEqual(mesh.ScaleZ.value(), .7)
@@ -145,8 +143,6 @@ class TestExodusViewer(Testing.PeacockImageTestCase):
 
         fp._callbackFileList(1)
         self.assertEqual(mesh.isEnabled(), True)
-        self.assertEqual(mesh.ViewMeshToggle.isEnabled(), True)
-        self.assertEqual(mesh.ViewMeshToggle.isChecked(), True)
         self.assertEqual(mesh.ScaleX.value(), .7)
         self.assertEqual(mesh.ScaleY.value(), .9)
         self.assertEqual(mesh.ScaleZ.value(), .8)

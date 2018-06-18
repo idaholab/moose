@@ -60,14 +60,10 @@ class TestMeshPlugin(Testing.PeacockImageTestCase):
         # Test that toggling representation disable/enables mesh view
         self._widget.MeshPlugin.Representation.setCurrentIndex(1)
         self._widget.MeshPlugin.Representation.currentIndexChanged.emit(1)
-        self.assertFalse(self._widget.MeshPlugin.ViewMeshToggle.isChecked())
-        self.assertFalse(self._widget.MeshPlugin.ViewMeshToggle.isEnabled())
 
         # Return the index back, it should be re-enabled
         self._widget.MeshPlugin.Representation.setCurrentIndex(0)
         self._widget.MeshPlugin.Representation.currentIndexChanged.emit(0)
-        self.assertTrue(self._widget.MeshPlugin.ViewMeshToggle.isChecked())
-        self.assertTrue(self._widget.MeshPlugin.ViewMeshToggle.isEnabled())
         self.assertImage('testViewMeshToggle.png', allowed=0.95) # lines are slightly different across platforms
 
     def testRepresentation(self):
@@ -78,19 +74,16 @@ class TestMeshPlugin(Testing.PeacockImageTestCase):
         # Wirefreme
         self._widget.MeshPlugin.Representation.setCurrentIndex(1)
         self._widget.MeshPlugin.Representation.currentIndexChanged.emit(1)
-        self.assertFalse(self._widget.MeshPlugin.ViewMeshToggle.isEnabled())
         self.assertImage('testRepresentationWireframe.png', allowed=0.90) # lines are different across platforms
 
         # Points
         self._widget.MeshPlugin.Representation.setCurrentIndex(2)
         self._widget.MeshPlugin.Representation.currentIndexChanged.emit(2)
-        self.assertFalse(self._widget.MeshPlugin.ViewMeshToggle.isEnabled())
         self.assertImage('testRepresentationPoints.png', allowed=0.91)
 
         # Surface
         self._widget.MeshPlugin.Representation.setCurrentIndex(0)
         self._widget.MeshPlugin.Representation.currentIndexChanged.emit(0)
-        self.assertTrue(self._widget.MeshPlugin.ViewMeshToggle.isEnabled())
         self.assertImage('testInitial.png') # same as initial load
 
     def testScale(self):
