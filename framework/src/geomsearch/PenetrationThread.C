@@ -39,9 +39,7 @@ PenetrationThread::PenetrationThread(
     FEType & fe_type,
     NearestNodeLocator & nearest_node,
     const std::map<dof_id_type, std::vector<dof_id_type>> & node_to_elem_map,
-    std::vector<dof_id_type> & elem_list,
-    std::vector<unsigned short int> & side_list,
-    std::vector<boundary_id_type> & id_list)
+    const std::vector<std::tuple<dof_id_type, unsigned short int, boundary_id_type>> & bc_tuples)
   : _subproblem(subproblem),
     _mesh(mesh),
     _master_boundary(master_boundary),
@@ -60,10 +58,7 @@ PenetrationThread::PenetrationThread(
     _fe_type(fe_type),
     _nearest_node(nearest_node),
     _node_to_elem_map(node_to_elem_map),
-    _elem_list(elem_list),
-    _side_list(side_list),
-    _id_list(id_list),
-    _n_elems(elem_list.size())
+    _bc_tuples(bc_tuples)
 {
 }
 
@@ -84,10 +79,7 @@ PenetrationThread::PenetrationThread(PenetrationThread & x, Threads::split /*spl
     _fe_type(x._fe_type),
     _nearest_node(x._nearest_node),
     _node_to_elem_map(x._node_to_elem_map),
-    _elem_list(x._elem_list),
-    _side_list(x._side_list),
-    _id_list(x._id_list),
-    _n_elems(x._n_elems)
+    _bc_tuples(x._bc_tuples)
 {
 }
 
@@ -1768,9 +1760,10 @@ void
 PenetrationThread::getSidesOnMasterBoundary(std::vector<unsigned int> & sides,
                                             const Elem * const elem)
 {
+  // For each tuple, the fields are (0=elem_id, 1=side_id, 2=bc_id)
   sides.clear();
-  for (unsigned int m = 0; m < _n_elems; ++m)
-    if (_elem_list[m] == elem->id())
-      if (_id_list[m] == static_cast<short>(_master_boundary))
-        sides.push_back(_side_list[m]);
+  for (const auto & t : _bc_tuples)
+    if (std::get<0>(t) == elem->id() &&
+        std::get<2>(t) == static_cast<boundary_id_type>(_master_boundary))
+      sides.push_back(std::get<1>(t));
 }

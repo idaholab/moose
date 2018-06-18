@@ -23,24 +23,23 @@ typedef MooseVariableFE<VectorValue<Real>> VectorMooseVariable;
 class PenetrationThread
 {
 public:
-  PenetrationThread(SubProblem & subproblem,
-                    const MooseMesh & mesh,
-                    BoundaryID master_boundary,
-                    BoundaryID slave_boundary,
-                    std::map<dof_id_type, PenetrationInfo *> & penetration_info,
-                    bool check_whether_reasonable,
-                    bool update_location,
-                    Real tangential_tolerance,
-                    bool do_normal_smoothing,
-                    Real normal_smoothing_distance,
-                    PenetrationLocator::NORMAL_SMOOTHING_METHOD normal_smoothing_method,
-                    std::vector<std::vector<FEBase *>> & fes,
-                    FEType & fe_type,
-                    NearestNodeLocator & nearest_node,
-                    const std::map<dof_id_type, std::vector<dof_id_type>> & node_to_elem_map,
-                    std::vector<dof_id_type> & elem_list,
-                    std::vector<unsigned short int> & side_list,
-                    std::vector<boundary_id_type> & id_list);
+  PenetrationThread(
+      SubProblem & subproblem,
+      const MooseMesh & mesh,
+      BoundaryID master_boundary,
+      BoundaryID slave_boundary,
+      std::map<dof_id_type, PenetrationInfo *> & penetration_info,
+      bool check_whether_reasonable,
+      bool update_location,
+      Real tangential_tolerance,
+      bool do_normal_smoothing,
+      Real normal_smoothing_distance,
+      PenetrationLocator::NORMAL_SMOOTHING_METHOD normal_smoothing_method,
+      std::vector<std::vector<FEBase *>> & fes,
+      FEType & fe_type,
+      NearestNodeLocator & nearest_node,
+      const std::map<dof_id_type, std::vector<dof_id_type>> & node_to_elem_map,
+      const std::vector<std::tuple<dof_id_type, unsigned short int, boundary_id_type>> & bc_tuples);
 
   // Splitting Constructor
   PenetrationThread(PenetrationThread & x, Threads::split split);
@@ -80,11 +79,8 @@ protected:
 
   const std::map<dof_id_type, std::vector<dof_id_type>> & _node_to_elem_map;
 
-  std::vector<dof_id_type> & _elem_list;
-  std::vector<unsigned short int> & _side_list;
-  std::vector<boundary_id_type> & _id_list;
-
-  unsigned int _n_elems;
+  // Each boundary condition tuple has three entries, (0=elem-id, 1=side-id, 2=bc-id)
+  const std::vector<std::tuple<dof_id_type, unsigned short int, boundary_id_type>> & _bc_tuples;
 
   THREAD_ID _tid;
 
