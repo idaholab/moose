@@ -174,7 +174,7 @@ class MeshPlugin(QtWidgets.QGroupBox, ExodusPlugin):
 
         self.load(self.ViewMeshToggle)
         if not self.hasState(self.ViewMeshToggle):
-            self.ViewMeshToggle.setChecked(False)
+            self.ViewMeshToggle.setChecked(self._preferences.value("exodus/viewMesh"))
 
         self.load(self.ScaleX)
         if not self.hasState(self.ScaleX):
@@ -206,12 +206,6 @@ class MeshPlugin(QtWidgets.QGroupBox, ExodusPlugin):
 
         # Representation
         result_options['representation'] = str(self.Representation.currentText()).lower()
-        index = self.Representation.currentIndex()
-        if index == 0:
-            self.ViewMeshToggle.setEnabled(True)
-        else:
-            self.ViewMeshToggle.setEnabled(False)
-            self.ViewMeshToggle.setChecked(QtCore.Qt.Unchecked)
 
         # Mesh Toggle
         result_options['edges'] = self.ViewMeshToggle.isChecked()
@@ -276,8 +270,6 @@ class MeshPlugin(QtWidgets.QGroupBox, ExodusPlugin):
         Callback for Representation widget. (protected)
         """
         self.store(self.Representation)
-        self.load(self.ViewMeshToggle,
-                   key=(self._filename, self._variable, self._component, self.Representation.currentIndex()))
         self.updateOptions()
         self.windowRequiresUpdate.emit()
 
@@ -285,16 +277,20 @@ class MeshPlugin(QtWidgets.QGroupBox, ExodusPlugin):
         """
         Setup for showing the ViewMeshToggle widget. (protected)
         """
-        qobject.stateChanged.connect(lambda value: self._callbackViewMeshToggle())
         qobject.setChecked(self._preferences.value("exodus/viewMesh"))
+        qobject.stateChanged.connect(lambda value: self._callbackViewMeshToggle())
 
     def _callbackViewMeshToggle(self):
         """
         Callback for ViewMeshToggle widget. (protected)
         """
         self.store(self.ViewMeshToggle)
-        self.store(self.ViewMeshToggle,
-                   key=(self._filename, self._variable, self._component, self.Representation.currentIndex()))
+        self.updateOptions()
+        self.windowRequiresUpdate.emit()
+
+    def _prefCallbackViewMesh(self, value):
+        self.ViewMeshToggle.setChecked(value)
+        self.store(self.ViewMeshToggle)
         self.updateOptions()
         self.windowRequiresUpdate.emit()
 
