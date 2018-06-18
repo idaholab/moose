@@ -33,7 +33,7 @@ validParams<GlobalStrainUserObject>()
 GlobalStrainUserObject::GlobalStrainUserObject(const InputParameters & parameters)
   : ElementUserObject(parameters),
     _base_name(isParamValid("base_name") ? getParam<std::string>("base_name") + "_" : ""),
-    _Cijkl(getMaterialProperty<RankFourTensor>(_base_name + "elasticity_tensor")),
+    _dstress_dstrain(getMaterialProperty<RankFourTensor>(_base_name + "Jacobian_mult")),
     _stress(getMaterialProperty<RankTwoTensor>(_base_name + "stress")),
     _dim(_mesh.dimension()),
     _ndisp(coupledComponents("displacements")),
@@ -78,7 +78,7 @@ GlobalStrainUserObject::execute()
     _residual += _JxW[_qp] * _coord[_qp] * (_stress[_qp] - _applied_stress_tensor);
 
     // diagonal jacobian, integral of elasticity tensor components
-    _jacobian += _JxW[_qp] * _coord[_qp] * _Cijkl[_qp];
+    _jacobian += _JxW[_qp] * _coord[_qp] * _dstress_dstrain[_qp];
   }
 }
 
