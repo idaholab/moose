@@ -1,0 +1,47 @@
+
+#  *****************************************************************
+#             EXODIFF	(Version: 2.83) Modified: 2015-08-20
+#             Authors:  Richard Drake, rrdrake@sandia.gov
+#                       Greg Sjaardema, gdsjaar@sandia.gov
+#             Run on    2018/04/23   15:43:52 MDT
+#  *****************************************************************
+
+
+
+# ==============================================================
+#  NOTE: All node and element ids are reported as global ids.
+
+# NOTES:  - The min/max values are reporting the min/max in absolute value.
+#         - Time values (t) are 1-offset time step numbers.
+#         - Element block numbers are the block ids.
+#         - Node(n) and element(e) numbers are 1-offset.
+
+COORDINATES absolute 1.e-6
+
+TIME STEPS relative 1.e-6 floor 0.0
+
+GLOBAL VARIABLES absolute 1e-6 floor 0.0
+	sxx_3G
+	syy_3G
+	szz_3G
+	syz_3G
+	sxz_3G
+	sxy_3G
+
+NODAL VARIABLES absolute 1.e-6 floor 0.0
+	disp_x
+	disp_y
+	disp_z
+
+ELEMENT VARIABLES absolute 1.e-6 floor 0.0
+	sxx
+	syy
+	szz
+	syz
+	sxz
+	sxy
+
+
+# No NODESET VARIABLES
+
+# No SIDESET VARIABLES

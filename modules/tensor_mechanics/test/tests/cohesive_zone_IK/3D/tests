@@ -1,0 +1,67 @@
+[Tests]
+### single interface tests
+[./3D3BlocksMeshSplitManual_test]
+  ###  compare manual mesh split to gold
+  type = 'Exodiff'
+  input = 'czmTestSplitMesh_3D_3Block_Manual.i'
+  cli_args = '--mesh-only czmTestSplitMesh_3D_3Block_Manual_in.e'
+  exodiff = 'czmTestSplitMesh_3D_3Block_Manual_in.e'
+[../]
+
+[./3D3BlocksMeshSplitAuto_test]
+  ###  compare automatic mesh split to gold
+  type = 'Exodiff'
+  input = 'czmTestSplitMesh_3D_3Block_Auto.i'
+  cli_args = '--mesh-only czmTestSplitMesh_3D_3Block_Auto_in.e'
+  exodiff = 'czmTestSplitMesh_3D_3Block_Auto_in.e'
+[../]
+
+[./3D3BlocksMeshSplittingCompare_test]
+  ###  compare manual vs automatic mesh split
+  type = 'Exodiff'
+  input = 'czmTestSplitMesh_3D_3Block_Auto.i'
+  cli_args = '--mesh-only czmTestSplitMesh_3D_3Block_ManualAuto_Comparison.e'
+  exodiff = 'czmTestSplitMesh_3D_3Block_ManualAuto_Comparison.e'
+[../]
+
+[./3D_3DC_CohesiveLaw_test]
+  ###  compare results for single cohesive interface to gold
+  type = 'Exodiff'
+  input = 'czmTest3DC_CohesiveLaw3D.i'
+  exodiff = 'czmTest3DC_CohesiveLaw3D_out.e'
+  custom_cmp = 'cohesive_zone_IK_3D.cmp'
+[../]
+
+### multiple interface tests
+[./3D3BlocksMeshSplitManualSplitInterface_test]
+  ###  compare manual mesh split to gold
+  type = 'Exodiff'
+  input = 'czmTestSplitMesh_3D_3Block_splitTrue_Manual.i'
+  cli_args = '--mesh-only czmTestSplitMesh_3D_3Block_splitTrue_Manual_in.e'
+  exodiff = 'czmTestSplitMesh_3D_3Block_splitTrue_Manual_in.e'
+[../]
+
+[./3D3BlocksMeshSplitAutoSplitInterface_test]
+  ###  compare automatic mesh split to gold
+  type = 'Exodiff'
+  input = 'czmTestSplitMesh_3D_3Block_splitTrue_Auto.i'
+  cli_args = '--mesh-only czmTestSplitMesh_3D_3Block_splitTrue_Auto_in.e'
+  exodiff = 'czmTestSplitMesh_3D_3Block_splitTrue_Auto_in.e'
+[../]
+
+[./3D3BlocksMeshSplittingSplitInterfaceCompare_test]
+  ###  compare manual vs automatic mesh split
+  type = 'Exodiff'
+  input = 'czmTestSplitMesh_3D_3Block_splitTrue_Auto.i'
+  cli_args = '--mesh-only czmTestSplitMesh_3D_3Block_splitTrue_ManualAuto_Comparison.e'
+  exodiff = 'czmTestSplitMesh_3D_3Block_splitTrue_ManualAuto_Comparison.e'
+[../]
+
+[./3D_3DC_CohesiveLaw_SplitInterface_test]
+  ###  compare results for single cohesive interface to gold
+  type = 'Exodiff'
+  input = 'czmTest3DC_CohesiveLaw3D_splitInterface.i'
+  exodiff = 'czmTest3DC_CohesiveLaw3D_splitInterface_out.e'
+    custom_cmp = 'cohesive_zone_IK_3D.cmp'
+[../]
+[]
