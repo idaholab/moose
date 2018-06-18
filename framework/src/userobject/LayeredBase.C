@@ -58,13 +58,19 @@ validParams<LayeredBase>()
 }
 
 LayeredBase::LayeredBase(const InputParameters & parameters)
-  : _layered_base_name(parameters.get<std::string>("_object_name")),
+  : Restartable(parameters.getCheckedPointerParam<SubProblem *>("_subproblem")->getMooseApp(),
+                parameters.get<std::string>("_object_name") + "_layered_base",
+                "LayeredBase",
+                parameters.get<THREAD_ID>("_tid")),
+    _layered_base_name(parameters.get<std::string>("_object_name")),
     _layered_base_params(parameters),
     _direction_enum(parameters.get<MooseEnum>("direction")),
     _direction(_direction_enum),
     _sample_type(parameters.get<MooseEnum>("sample_type")),
     _average_radius(parameters.get<unsigned int>("average_radius")),
     _using_displaced_mesh(_layered_base_params.get<bool>("use_displaced_mesh")),
+    _layer_values(declareRestartableData<std::vector<Real>>("layer_values")),
+    _layer_has_value(declareRestartableData<std::vector<int>>("layer_has_value")),
     _layered_base_subproblem(*parameters.getCheckedPointerParam<SubProblem *>("_subproblem")),
     _cumulative(parameters.get<bool>("cumulative")),
     _blocks()
