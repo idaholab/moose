@@ -1634,8 +1634,12 @@ Assembly::addCachedResidual(NumericVector<Number> & residual, TagID tag_id)
 {
   if (!_sys.hasVector(tag_id))
   {
-    _cached_residual_values[tag_id].clear();
-    _cached_residual_rows[tag_id].clear();
+    // Only clean up things when tag exists
+    if (_sys.subproblem().vectorTagExists(tag_id))
+    {
+      _cached_residual_values[tag_id].clear();
+      _cached_residual_rows[tag_id].clear();
+    }
     return;
   }
 

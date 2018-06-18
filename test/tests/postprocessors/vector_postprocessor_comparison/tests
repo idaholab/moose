@@ -1,0 +1,34 @@
+[Tests]
+  [./greater_than_equals]
+    type = 'CSVDiff'
+    input = 'vector_postprocessor_comparison.i'
+    csvdiff = 'greater_than_equals.csv'
+  [../]
+  [./greater_than]
+    type = 'CSVDiff'
+    input = 'vector_postprocessor_comparison.i'
+    cli_args = '
+      Postprocessors/vpp_comparison/comparison_type=greater_than
+      Outputs/file_base=greater_than'
+    csvdiff = 'greater_than.csv'
+  [../]
+  [./less_than_equals]
+    type = 'CSVDiff'
+    input = 'vector_postprocessor_comparison.i'
+    cli_args = '
+      Functions/a_fn/value=0
+      Postprocessors/vpp_comparison/comparison_type=less_than_equals
+      Outputs/file_base=less_than_equals'
+    csvdiff = 'less_than_equals.csv'
+  [../]
+  [./equals]
+    type = 'CSVDiff'
+    input = 'vector_postprocessor_comparison.i'
+    cli_args = '
+      Functions/b_fn/type=ConstantFunction
+      Functions/b_fn/value=2
+      Postprocessors/vpp_comparison/comparison_type=equals
+      Outputs/file_base=equals'
+    csvdiff = 'equals.csv'
+  [../]
+[]

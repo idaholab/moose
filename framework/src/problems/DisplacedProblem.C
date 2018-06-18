@@ -676,7 +676,6 @@ DisplacedProblem::addCachedResidual(THREAD_ID tid)
 void
 DisplacedProblem::addCachedResidualDirectly(NumericVector<Number> & residual, THREAD_ID tid)
 {
-
   _assembly[tid]->addCachedResidual(residual, _displaced_nl.timeVectorTag());
   _assembly[tid]->addCachedResidual(residual, _displaced_nl.nonTimeVectorTag());
 }
