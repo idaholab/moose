@@ -95,6 +95,10 @@ LStableDirk3::solve()
     // Update the iteration counts
     _n_nonlinear_iterations += getNumNonlinearIterationsLastSolve();
     _n_linear_iterations += getNumLinearIterationsLastSolve();
+
+    // Abort time step immediately on stage failure - see TimeIntegrator doc page
+    if (!_fe_problem.converged())
+      return;
   }
 }
 
